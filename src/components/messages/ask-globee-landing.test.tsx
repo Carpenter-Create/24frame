@@ -117,7 +117,10 @@ describe("AskGlobeeLanding", () => {
     );
     expect(html).toContain("data-ask-globee-clock");
     expect(html).toContain("size-4");
-    expect(src).toContain("<Clock className=\"size-4\" strokeWidth={1.33} />");
+    expect(html).toContain("size-[44px]");
+    expect(src).toContain("ASK_GLOBEE_CLOCK_BUTTON_CLASS");
+    expect(src).toContain("MOBILE_CHROME_ICON_CLASS");
+    expect(src).toContain("MOBILE_CHROME_ICON_STROKE");
     expect(src).toContain("text-ink-3");
     expect(html).not.toContain("data-ask-globee-new");
     expect(html).not.toContain(ASK_GLOBEE.newConversationLabel);
@@ -281,8 +284,9 @@ describe("AskGlobeeLanding", () => {
     expect(html).toContain("h-14");
     expect(html).toContain("rounded-[28px]");
     expect(html).toContain('data-ask-globee-clock=""');
-    expect(src).toContain("<Clock className=\"size-4\" strokeWidth={1.33} />");
-    expect(src).toContain("absolute left-0 top-0");
+    expect(src).toContain("MOBILE_CHROME_ICON_CLASS");
+    expect(src).toContain("MOBILE_CHROME_CLOCK_DOCK_CLASS");
+    expect(src).not.toContain("absolute left-0 top-0");
     expect(src).not.toContain("Plus");
     expect(html).not.toContain("data-ask-globee-new");
     expect(html).not.toContain("Beta");

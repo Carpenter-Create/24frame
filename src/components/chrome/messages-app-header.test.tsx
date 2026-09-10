@@ -264,7 +264,8 @@ describe("MessagesAppHeader", () => {
     expect(shell).not.toContain("MessagesThreadOverflow");
     expect(shell).toContain("<UserMenu email={email} name={name} />");
     expect(shell).toContain("justify-end gap-4");
-    expect(shell).toContain("px-[var(--space-6)] md:px-[var(--content-inset)]");
+    expect(shell).toContain("MOBILE_CHROME_LEAD_PAD_CLASS");
+    expect(shell).toContain("md:px-[var(--content-inset)]");
     expect(shell).toContain("gap-3");
     expect(landing).not.toContain("MessagesThreadOverflow");
     expect(landing).not.toContain("data-ask-globee-title-cluster");
