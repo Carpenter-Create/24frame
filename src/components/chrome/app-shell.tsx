@@ -14,6 +14,7 @@ import { TitlesHeaderSearch } from "@/components/titles/titles-header-search";
 import { AskGlobeeChromeProvider } from "@/components/messages/ask-globee-chrome";
 import { cn } from "@/lib/cn";
 import type { MessagesSurface } from "@/lib/ask-globee";
+import { MOBILE_CHROME_LEAD_PAD_CLASS } from "@/lib/mobile-chrome";
 import {
   RAIL_COLLAPSE_RL_CHEVRON,
   RAIL_COLLAPSE_RL_CHEVRON_CLASS,
@@ -152,7 +153,11 @@ export function AppShell({
           (528:542). Desktop 1:3, `/` 1:2, and `/titles/[id]` 1:4 stay avatar-only.
           Phone avatar opens 544:561. Hamburger stays the nav sheet. */}
       <header
-        className="sticky top-0 z-40 flex items-center justify-end gap-4 border-b border-hairline bg-surface/85 px-[var(--space-6)] md:px-[var(--content-inset)] backdrop-blur"
+        className={cn(
+          "sticky top-0 z-40 flex items-center justify-end gap-4 border-b border-hairline bg-surface/85 backdrop-blur",
+          MOBILE_CHROME_LEAD_PAD_CLASS,
+          "md:px-[var(--content-inset)]",
+        )}
         data-app-header=""
         style={{ height: "var(--header-height)", marginLeft: "var(--sidebar-width)" }}
       >

@@ -8,9 +8,15 @@ import { Menu } from "lucide-react";
 
 import { GC_NAV, MOBILE_NAV, NAV, isClientNavActive, type NavItem } from "@/lib/nav";
 import { cn } from "@/lib/cn";
+import {
+  MOBILE_CHROME_HAMBURGER_BUTTON_CLASS,
+  MOBILE_CHROME_ICON_CLASS,
+  MOBILE_CHROME_ICON_STROKE,
+} from "@/lib/mobile-chrome";
 import { AppSheetHead, AppSheetSurface, Close44 } from "./house";
 
-// Phone menu: lucide Menu 16 / 1.33 / tertiary opens an opaque full-bleed
+// Phone menu: lucide Menu 16 / 1.33 / tertiary in the shared 44 hit
+// (same object as the Ask Globee clock). Opens an opaque full-bleed
 // portal. The sheet surface is 543:576 app-sheet chrome — same object as
 // the account sheet, different body. Header is one row: large "Menu" on the
 // list edge, Close/44 at top-right. Rows use the same Lucide
@@ -47,9 +53,9 @@ export function MobileNav({ isGcStaff = false }: { isGcStaff?: boolean }) {
         aria-expanded={open}
         aria-controls="mobile-nav-sheet"
         onClick={() => setOpenedOn(pathname)}
-        className="flex size-4 shrink-0 items-center justify-center text-ink-3 md:hidden"
+        className={MOBILE_CHROME_HAMBURGER_BUTTON_CLASS}
       >
-        <Menu className="size-4" strokeWidth={1.33} />
+        <Menu className={MOBILE_CHROME_ICON_CLASS} strokeWidth={MOBILE_CHROME_ICON_STROKE} />
       </button>
       {sheet && typeof document !== "undefined" ? createPortal(sheet, document.body) : sheet}
     </>

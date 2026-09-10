@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
+import { MOBILE_CHROME_LEAD_PAD_CLASS } from "@/lib/mobile-chrome";
 import {
   SETTINGS,
   SETTINGS_HEADER_BACK_CLASS,
@@ -44,6 +45,7 @@ describe("SettingsHeaderBack", () => {
     expect(SETTINGS_HEADER_BACK_CLASS).toContain("t-body");
     expect(SETTINGS_HEADER_BACK_CLASS).toContain("font-normal");
     expect(SETTINGS_HEADER_BACK_CLASS).toContain("md:hidden");
+    expect(SETTINGS_HEADER_PAD_CLASS).toBe(MOBILE_CHROME_LEAD_PAD_CLASS);
     expect(SETTINGS_HEADER_PAD_CLASS).toBe("px-[var(--space-6)]");
     expect(SETTINGS_RAIL_CHEVRON_CLASS).toBe("size-4 shrink-0");
     expect(src).toContain("ChevronLeft");
@@ -67,7 +69,8 @@ describe("SettingsHeaderBack", () => {
     expect(src).not.toContain("/settings/refer");
     expect(src).not.toContain("Appearance");
     expect(shellSrc).toContain("<SettingsHeaderBack />");
-    expect(shellSrc).toContain(SETTINGS_HEADER_PAD_CLASS);
+    expect(shellSrc).toContain("MOBILE_CHROME_LEAD_PAD_CLASS");
+    expect(SETTINGS_HEADER_PAD_CLASS).toBe(MOBILE_CHROME_LEAD_PAD_CLASS);
     expect(shellSrc).toContain("settingsPage ? <SettingsHeaderBack /> : <MobileNav isGcStaff={isGcStaff} />");
     expect(accountSrc).toContain("flex h-8 w-8 items-center justify-center rounded-full");
     expect(accountSrc).toContain("md:hidden");

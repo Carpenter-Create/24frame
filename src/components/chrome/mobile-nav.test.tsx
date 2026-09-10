@@ -29,10 +29,13 @@ describe("MobileNav trigger", () => {
     expect(html).toContain("text-ink-3");
     expect(html).toContain("md:hidden");
     expect(html).toContain("size-4");
+    expect(html).toContain("size-[44px]");
     expect(html).toContain("stroke-width=\"1.33\"");
     expect(html).not.toContain("data-mobile-nav-sheet");
     expect(src).toContain("import { Menu } from \"lucide-react\"");
-    expect(src).toContain("<Menu className=\"size-4\" strokeWidth={1.33} />");
+    expect(src).toContain("MOBILE_CHROME_HAMBURGER_BUTTON_CLASS");
+    expect(src).toContain("MOBILE_CHROME_ICON_CLASS");
+    expect(src).toContain("MOBILE_CHROME_ICON_STROKE");
     expect(src).toContain("Close44");
     expect(src).not.toContain("strokeWidth={1.5}");
     expect(src).not.toContain("size-5");

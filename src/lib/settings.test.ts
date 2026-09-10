@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { MOBILE_CHROME_LEAD_PAD_CLASS } from "./mobile-chrome";
 import { USER_MENU, USER_MENU_ACTIONS } from "./user-menu";
 import {
   SETTINGS,
@@ -105,6 +106,7 @@ describe("settings lock", () => {
     expect(SETTINGS_HEADER_BACK_CLASS).toBe(
       "flex items-center gap-[var(--space-2)] t-body font-normal md:hidden",
     );
+    expect(SETTINGS_HEADER_PAD_CLASS).toBe(MOBILE_CHROME_LEAD_PAD_CLASS);
     expect(SETTINGS_HEADER_PAD_CLASS).toBe("px-[var(--space-6)]");
     expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("t-body-sm");
     expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("t-title");

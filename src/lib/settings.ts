@@ -15,6 +15,7 @@
 // 16 chevron + 15 Regular, gap 8, pad 24, href /. No hamburger.
 // Avatar 32 stays. Not a new IA. Appearance stays in-menu.
 
+import { MOBILE_CHROME_LEAD_PAD_CLASS } from "@/lib/mobile-chrome";
 import { USER_MENU } from "@/lib/user-menu";
 
 export const SETTINGS = {
@@ -66,7 +67,7 @@ export const SETTINGS_RAIL_CHEVRON_CLASS = "size-4 shrink-0";
 // 623:785 — phone header left slot. Same 16 + 15 Regular + gap 8
 // as the 600:881 rail Dashboard row. Pad 24 is the existing header
 // inset. Hidden at md, where the rail stays.
-export const SETTINGS_HEADER_PAD_CLASS = "px-[var(--space-6)]";
+export const SETTINGS_HEADER_PAD_CLASS = MOBILE_CHROME_LEAD_PAD_CLASS;
 export const SETTINGS_HEADER_BACK_CLASS =
   "flex items-center gap-[var(--space-2)] t-body font-normal md:hidden";
 

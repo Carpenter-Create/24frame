@@ -15,6 +15,12 @@ import {
 } from "@/lib/ask-globee";
 import { type AskGlobeeHistoryRow } from "@/lib/ask-globee-conversations";
 import { startAskGlobeeConversation } from "@/app/(app)/messages/ask-globee-actions";
+import {
+  ASK_GLOBEE_CLOCK_BUTTON_CLASS,
+  MOBILE_CHROME_CLOCK_DOCK_CLASS,
+  MOBILE_CHROME_ICON_CLASS,
+  MOBILE_CHROME_ICON_STROKE,
+} from "@/lib/mobile-chrome";
 import { AskGlobeeHistoryPopover } from "./ask-globee-history";
 
 const CHIP_MARK_ICON: Record<AskGlobeeChipMark, LucideIcon> = {
@@ -28,6 +34,8 @@ const CHIP_MARK_ICON: Record<AskGlobeeChipMark, LucideIcon> = {
 // headline / composer / chips on desktop. Chip click fills, selects, and sends
 // the same prompt as free text. Submit persists the user turn, then navigates
 // to the thread. Quiet clock 16 (top-left, tertiary) opens past conversations.
+// Mobile shares the hamburger's 44 hit and --space-6 lead so the glyphs
+// optically align. Desktop stays size-4 at left-0.
 // No plus on this empty home. No HISTORY list. No invented titles. Well pad
 // and ask stack use house 48 (--space-12). Composer is 640×56 r28 pad 16 —
 // not a full pill. Thinking chrome (427:352 empty lead + fetching…) is on
@@ -68,7 +76,7 @@ export function AskGlobeeLanding({
       data-ask-globee-landing=""
       className="relative flex min-h-[min(36rem,calc(100dvh-var(--header-height)-var(--content-inset)*2))] flex-col items-center p-[var(--space-12)] max-md:px-[var(--space-4)]"
     >
-      <div className="absolute left-0 top-0">
+      <div className={MOBILE_CHROME_CLOCK_DOCK_CLASS}>
         <AskGlobeeHistoryPopover
           conversations={conversations}
           open={historyOpen}
@@ -80,9 +88,9 @@ export function AskGlobeeLanding({
             aria-label={ASK_GLOBEE.pastConversationsLabel}
             aria-expanded={historyOpen}
             onClick={() => setHistoryOpen((open) => !open)}
-            className="flex size-4 items-center justify-center text-ink-3"
+            className={ASK_GLOBEE_CLOCK_BUTTON_CLASS}
           >
-            <Clock className="size-4" strokeWidth={1.33} />
+            <Clock className={MOBILE_CHROME_ICON_CLASS} strokeWidth={MOBILE_CHROME_ICON_STROKE} />
           </button>
         </AskGlobeeHistoryPopover>
       </div>
