@@ -338,6 +338,8 @@ describe("AppShell RL rail-collapse chevron", () => {
     const html = renderShell();
     expect(html).toContain("Collapse sidebar");
     expect(html).toContain(`title="Collapse sidebar"`);
+    expect(html).toContain("lucide-chevrons-left");
+    expect(html).not.toContain("lucide-chevrons-right");
     expect(html).toContain(`data-rail-collapse="${RAIL_COLLAPSE_RL_CHEVRON}"`);
     expect(html).toContain(RAIL_COLLAPSE_RL_CHEVRON_CLASS);
     expect(html).toContain(RAIL_COLLAPSE_RL_CHEVRON_ICON_CLASS);
@@ -358,6 +360,8 @@ describe("AppShell RL rail-collapse chevron", () => {
     const html = renderShell(undefined, undefined, true);
     expect(html).toContain("Expand sidebar");
     expect(html).toContain(`title="Expand sidebar"`);
+    expect(html).toContain("lucide-chevrons-right");
+    expect(html).not.toContain("lucide-chevrons-left");
     expect(html).toContain(`data-rail-collapse="${RAIL_COLLAPSE_RL_CHEVRON}"`);
     expect(html).toContain(RAIL_COLLAPSE_RL_CHEVRON_EXPAND_ROW_CLASS);
     expect(html).toContain(RAIL_COLLAPSE_RL_CHEVRON_CLASS);
