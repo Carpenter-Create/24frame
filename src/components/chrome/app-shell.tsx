@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { ChevronsLeft, ChevronsRight } from "lucide-react";
 
 import { UserMenu } from "./user-menu";
 import { SideNav } from "./side-nav";
@@ -14,6 +14,13 @@ import { TitlesHeaderSearch } from "@/components/titles/titles-header-search";
 import { AskGlobeeChromeProvider } from "@/components/messages/ask-globee-chrome";
 import { cn } from "@/lib/cn";
 import type { MessagesSurface } from "@/lib/ask-globee";
+import {
+  RAIL_COLLAPSE_RL_CHEVRON,
+  RAIL_COLLAPSE_RL_CHEVRON_CLASS,
+  RAIL_COLLAPSE_RL_CHEVRON_EXPAND_ROW_CLASS,
+  RAIL_COLLAPSE_RL_CHEVRON_ICON_CLASS,
+  RAIL_COLLAPSE_RL_CHEVRON_ICON_STROKE,
+} from "@/lib/rail-collapse";
 import { isSettingsPath, SETTINGS_RAIL_PAD_CLASS } from "@/lib/settings";
 
 type Org = { id: string; name: string };
@@ -94,22 +101,41 @@ export function AppShell({
           {settingsPage || !collapsed ? (
             <span className="flex-1 truncate t-body font-medium text-ink">Global Content</span>
           ) : null}
-          {settingsPage ? null : (
+          {settingsPage || collapsed ? null : (
             <button
               type="button"
               onClick={toggle}
-              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-              aria-pressed={collapsed}
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--radius-sm)] text-ink-3 transition-colors hover:bg-surface-muted hover:text-ink-2"
+              aria-label="Collapse sidebar"
+              title="Collapse sidebar"
+              aria-pressed={false}
+              data-rail-collapse={RAIL_COLLAPSE_RL_CHEVRON}
+              className={RAIL_COLLAPSE_RL_CHEVRON_CLASS}
             >
-              {collapsed ? (
-                <PanelLeftOpen className="size-4" strokeWidth={1.33} />
-              ) : (
-                <PanelLeftClose className="size-4" strokeWidth={1.33} />
-              )}
+              <ChevronsLeft
+                className={RAIL_COLLAPSE_RL_CHEVRON_ICON_CLASS}
+                strokeWidth={RAIL_COLLAPSE_RL_CHEVRON_ICON_STROKE}
+              />
             </button>
           )}
         </div>
+        {settingsPage || !collapsed ? null : (
+          <div className={RAIL_COLLAPSE_RL_CHEVRON_EXPAND_ROW_CLASS}>
+            <button
+              type="button"
+              onClick={toggle}
+              aria-label="Expand sidebar"
+              title="Expand sidebar"
+              aria-pressed={true}
+              data-rail-collapse={RAIL_COLLAPSE_RL_CHEVRON}
+              className={RAIL_COLLAPSE_RL_CHEVRON_CLASS}
+            >
+              <ChevronsRight
+                className={RAIL_COLLAPSE_RL_CHEVRON_ICON_CLASS}
+                strokeWidth={RAIL_COLLAPSE_RL_CHEVRON_ICON_STROKE}
+              />
+            </button>
+          </div>
+        )}
         <div
           className={cn("flex-1 overflow-y-auto", settingsPage ? SETTINGS_RAIL_PAD_CLASS : "pt-1")}
         >

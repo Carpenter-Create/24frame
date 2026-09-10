@@ -38,10 +38,21 @@ vi.mock("./user-menu", () => ({
 
 import { AppShell } from "./app-shell";
 import type { MessagesSurface } from "@/lib/ask-globee";
+import {
+  RAIL_COLLAPSE_RL_CHEVRON,
+  RAIL_COLLAPSE_RL_CHEVRON_CLASS,
+  RAIL_COLLAPSE_RL_CHEVRON_EXPAND_ROW_CLASS,
+  RAIL_COLLAPSE_RL_CHEVRON_ICON_CLASS,
+  RAIL_COLLAPSE_RL_CHEVRON_ICON_STROKE,
+} from "@/lib/rail-collapse";
 
 const shellSrc = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "app-shell.tsx"), "utf8");
 
-function renderShell(messagesSurface?: MessagesSurface, name?: string | null): string {
+function renderShell(
+  messagesSurface?: MessagesSurface,
+  name?: string | null,
+  defaultCollapsed = false,
+): string {
   return renderToStaticMarkup(
     <AppShell
       email="ada@example.com"
@@ -50,6 +61,7 @@ function renderShell(messagesSurface?: MessagesSurface, name?: string | null): s
       activeOrgId="org-1"
       messagesUnread={Promise.resolve(0)}
       messagesSurface={messagesSurface}
+      defaultCollapsed={defaultCollapsed}
     >
       page
     </AppShell>,
@@ -287,6 +299,7 @@ describe("AppShell /settings rail", () => {
     expect(shellSrc).toContain("collapsed && !settingsPage");
     expect(shellSrc).not.toContain("SettingsLocalNav");
     expect(shellSrc).not.toContain("md:w-[220px]");
+    expect(html).not.toContain(`data-rail-collapse="${RAIL_COLLAPSE_RL_CHEVRON}"`);
   });
 
   it("keeps the Access rail on neighboring routes", () => {
@@ -314,6 +327,63 @@ describe("AppShell /settings rail", () => {
       expect(html).toContain("data-settings-header-back");
       expect(html).toContain('href="/"');
       expect(html).not.toContain("Collapse sidebar");
+      expect(html).not.toContain(`data-rail-collapse="${RAIL_COLLAPSE_RL_CHEVRON}"`);
     }
+  });
+});
+
+describe("AppShell RL rail-collapse chevron", () => {
+  it("uses ChevronsLeft in the expanded header row with RL tokens", () => {
+    navigation.pathname = "/";
+    const html = renderShell();
+    expect(html).toContain("Collapse sidebar");
+    expect(html).toContain(`title="Collapse sidebar"`);
+    expect(html).toContain("lucide-chevrons-left");
+    expect(html).not.toContain("lucide-chevrons-right");
+    expect(html).toContain(`data-rail-collapse="${RAIL_COLLAPSE_RL_CHEVRON}"`);
+    expect(html).toContain(RAIL_COLLAPSE_RL_CHEVRON_CLASS);
+    expect(html).toContain(RAIL_COLLAPSE_RL_CHEVRON_ICON_CLASS);
+    expect(html).toContain(`stroke-width="${RAIL_COLLAPSE_RL_CHEVRON_ICON_STROKE}"`);
+    expect(html).not.toContain("Expand sidebar");
+    expect(html).not.toContain(RAIL_COLLAPSE_RL_CHEVRON_EXPAND_ROW_CLASS);
+    expect(html).toContain("Global Content");
+    expect(shellSrc).toContain("ChevronsLeft");
+    expect(shellSrc).toContain("ChevronsRight");
+    expect(shellSrc).toContain("RAIL_COLLAPSE_RL_CHEVRON");
+    expect(shellSrc).not.toContain("PanelLeftOpen");
+    expect(shellSrc).not.toContain("PanelLeftClose");
+    expect(shellSrc).not.toContain("PanelLeft");
+  });
+
+  it("puts ChevronsRight on a separate expand row when collapsed", () => {
+    navigation.pathname = "/";
+    const html = renderShell(undefined, undefined, true);
+    expect(html).toContain("Expand sidebar");
+    expect(html).toContain(`title="Expand sidebar"`);
+    expect(html).toContain("lucide-chevrons-right");
+    expect(html).not.toContain("lucide-chevrons-left");
+    expect(html).toContain(`data-rail-collapse="${RAIL_COLLAPSE_RL_CHEVRON}"`);
+    expect(html).toContain(RAIL_COLLAPSE_RL_CHEVRON_EXPAND_ROW_CLASS);
+    expect(html).toContain(RAIL_COLLAPSE_RL_CHEVRON_CLASS);
+    expect(html).toContain(RAIL_COLLAPSE_RL_CHEVRON_ICON_CLASS);
+    expect(html).not.toContain("Collapse sidebar");
+    const expandIdx = html.indexOf(RAIL_COLLAPSE_RL_CHEVRON_EXPAND_ROW_CLASS);
+    const navIdx = html.indexOf("data-side-nav");
+    expect(expandIdx).toBeGreaterThan(-1);
+    expect(navIdx).toBeGreaterThan(expandIdx);
+    const expandSlice = html.slice(expandIdx, navIdx);
+    expect(expandSlice).not.toContain("bg-hairline");
+    expect(expandSlice).not.toContain("border-hairline");
+  });
+
+  it("keeps collapse off on settings and persistence on the Access cookie", () => {
+    expect(shellSrc).toContain("gc_sidebar_collapsed");
+    expect(shellSrc).toContain("defaultCollapsed");
+    expect(shellSrc).toContain("<MobileNav isGcStaff={isGcStaff} />");
+    navigation.pathname = "/settings";
+    expect(renderShell(undefined, undefined, true)).not.toContain("Expand sidebar");
+    expect(renderShell(undefined, undefined, true)).not.toContain(
+      RAIL_COLLAPSE_RL_CHEVRON_EXPAND_ROW_CLASS,
+    );
   });
 });
