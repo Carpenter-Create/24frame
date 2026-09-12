@@ -5,7 +5,7 @@
 -- stays unchanged. Social tables must not privilege-bridge via is_gc_staff.
 
 begin;
-select plan(51);
+select plan(49);
 
 select set_config('t.org',      gen_random_uuid()::text, false);
 select set_config('t.owner',    gen_random_uuid()::text, false);
@@ -367,10 +367,13 @@ select throws_ok(
   null,
   'gc_staff cannot create a group without create_group');
 
--- privileged columns stay locked for the client
+-- privileged columns stay locked when auth.role() is not service_role.
+-- Clear the transaction-local refresh GUC that member inserts left on
+-- (one HTTP request = one transaction; this file is a single transaction).
+reset role;
+select set_config('app.refreshing_group_member_count', '', true);
 select set_config('request.jwt.claims',
-  json_build_object('sub', current_setting('t.admin'), 'role', 'authenticated')::text,
-  true);
+  json_build_object('role', 'authenticated')::text, true);
 
 select throws_ok(
   format($sql$
@@ -380,10 +383,6 @@ select throws_ok(
   'P0001',
   'privileged group columns are not client-writable',
   'client cannot write privileged group columns');
-
-select set_config('request.jwt.claims',
-  json_build_object('sub', current_setting('t.creator'), 'role', 'authenticated')::text,
-  true);
 
 select throws_ok(
   format($sql$
