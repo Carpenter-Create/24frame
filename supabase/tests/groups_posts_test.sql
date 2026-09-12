@@ -29,7 +29,7 @@ insert into auth.users (id) values
 select ok(to_regclass('public.groups') is not null, 'groups table exists');
 select ok(to_regclass('public.group_members') is not null, 'group_members table exists');
 select ok(to_regclass('public.posts') is not null, 'posts table exists');
-select ok(to_regclass('public.likes') is null, 'likes table not created (Pack 3)');
+select ok(to_regclass('public.likes') is not null, 'likes table exists');
 select ok(
   to_regclass('public.conversations') is null,
   'donor conversations (DMs) not created');

@@ -55,8 +55,8 @@ select ok(
   ),
   'donor org_status value churned is absent');
 
--- ---- Packs 3–4 / donor DM collisions stay absent ---------------------------
-select ok(to_regclass('public.likes') is null, 'likes table not created');
+-- ---- Pack 3 likes present; Pack 4 / donor DM collisions stay absent --------
+select ok(to_regclass('public.likes') is not null, 'likes table exists');
 select ok(
   to_regclass('public.conversations') is null,
   'donor conversations (DMs) not created');

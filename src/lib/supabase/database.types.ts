@@ -707,6 +707,35 @@ export type Database = {
           },
         ]
       }
+      likes: {
+        Row: {
+          created_at: string
+          target_id: string
+          target_type: Database["public"]["Enums"]["like_target"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          target_id: string
+          target_type: Database["public"]["Enums"]["like_target"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          target_id?: string
+          target_type?: Database["public"]["Enums"]["like_target"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deliveries: {
         Row: {
           created_at: string
@@ -2247,6 +2276,7 @@ export type Database = {
         | "gc_delivery_ops"
         | "gc_viewer"
       group_visibility: "public" | "private" | "secret"
+      like_target: "post" | "comment"
       membership_status: "invited" | "active" | "removed"
       notification_kind: "title_rejected" | "delivery_update"
       notification_sender: "gc_support" | "globee"
@@ -2495,6 +2525,7 @@ export const Constants = {
         "gc_viewer",
       ],
       group_visibility: ["public", "private", "secret"],
+      like_target: ["post", "comment"],
       membership_status: ["invited", "active", "removed"],
       notification_kind: ["title_rejected", "delivery_update"],
       notification_sender: ["gc_support", "globee"],
