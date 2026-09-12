@@ -255,7 +255,9 @@ $$;
 create or replace function public.protect_profile_privileged_columns()
 returns trigger
 language plpgsql
-set search_path to 'public'
+-- extensions must stay on the path: embedding is vector(1536) and
+-- `IS DISTINCT FROM` needs extensions.= . public-only search_path 42883s.
+set search_path to 'public', 'extensions'
 as $$
 begin
   if current_setting('24frame.refreshing_profile_points', true) = 'on' then
@@ -567,7 +569,7 @@ begin
     raise exception 'has_capability missing';
   end if;
 
-  select string_agg(pol.policyname, ', ' order by pol.policyname) into v_bad_pol
+  select string_agg(pol.polname, ', ' order by pol.polname) into v_bad_pol
   from pg_policy pol
   join pg_class c on c.oid = pol.polrelid
   join pg_namespace n on n.oid = c.relnamespace
