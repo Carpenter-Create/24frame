@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { PORTAL_COPY } from "@/lib/portal";
 import type { BuyerActions } from "@/lib/buyer-page";
+import { PORTAL_TURNSTILE_OPTIONS } from "@/lib/turnstile-widget";
 import { TitlePage } from "./title-page";
 
 type Stage = "identity" | "code" | "ready";
@@ -182,6 +183,7 @@ export function PortalFlow({
             <Turnstile
               ref={turnstileRef}
               siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+              options={PORTAL_TURNSTILE_OPTIONS}
               onSuccess={setTurnstileToken}
               onExpire={() => setTurnstileToken("")}
               onError={() => setTurnstileToken("")}
