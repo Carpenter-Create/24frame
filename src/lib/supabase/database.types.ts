@@ -330,6 +330,234 @@ export type Database = {
           },
         ]
       }
+      app_settings: {
+        Row: {
+          gamification_enabled: boolean
+          heatmap_public: boolean
+          id: boolean
+          leaderboard_public: boolean
+          signup_mode: string
+          updated_at: string
+        }
+        Insert: {
+          gamification_enabled?: boolean
+          heatmap_public?: boolean
+          id?: boolean
+          leaderboard_public?: boolean
+          signup_mode?: string
+          updated_at?: string
+        }
+        Update: {
+          gamification_enabled?: boolean
+          heatmap_public?: boolean
+          id?: boolean
+          leaderboard_public?: boolean
+          signup_mode?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      capabilities: {
+        Row: {
+          key: string
+          label: string
+          min_level: number | null
+          min_tier_rank: number
+          staff_only: boolean
+        }
+        Insert: {
+          key: string
+          label: string
+          min_level?: number | null
+          min_tier_rank?: number
+          staff_only?: boolean
+        }
+        Update: {
+          key?: string
+          label?: string
+          min_level?: number | null
+          min_tier_rank?: number
+          staff_only?: boolean
+        }
+        Relationships: []
+      }
+      levels: {
+        Row: {
+          level: number
+          min_points: number
+          title: string | null
+        }
+        Insert: {
+          level: number
+          min_points: number
+          title?: string | null
+        }
+        Update: {
+          level?: number
+          min_points?: number
+          title?: string | null
+        }
+        Relationships: []
+      }
+      point_events: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          delta: number
+          id: string
+          reason: Database["public"]["Enums"]["point_reason"]
+          source_id: string | null
+          source_type: string | null
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          delta: number
+          id?: string
+          reason: Database["public"]["Enums"]["point_reason"]
+          source_id?: string | null
+          source_type?: string | null
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          delta?: number
+          id?: string
+          reason?: Database["public"]["Enums"]["point_reason"]
+          source_id?: string | null
+          source_type?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "point_events_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "point_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          app_role: Database["public"]["Enums"]["app_role"]
+          avatar_key: string | null
+          bio: string | null
+          birth_date: string
+          crafts: string[]
+          created_at: string
+          credits: Json
+          deactivated_at: string | null
+          deletion_due_at: string | null
+          deletion_requested_at: string | null
+          discoverable: boolean
+          display_name: string
+          email_verified_at: string | null
+          embedding: string | null
+          erased_at: string | null
+          field_visibility: Json
+          follower_count: number
+          handle: string
+          id: string
+          imdb_url: string | null
+          is_high_fanout: boolean
+          last_active_at: string | null
+          legal_hold: boolean
+          level: number
+          location_city: string | null
+          location_country: string | null
+          location_region: string | null
+          markets: string[]
+          points_total: number
+          primary_role: string | null
+          status: Database["public"]["Enums"]["account_status"]
+          timezone: string
+          trust_state: Database["public"]["Enums"]["trust_state"]
+          website_url: string | null
+        }
+        Insert: {
+          app_role?: Database["public"]["Enums"]["app_role"]
+          avatar_key?: string | null
+          bio?: string | null
+          birth_date: string
+          crafts?: string[]
+          created_at?: string
+          credits?: Json
+          deactivated_at?: string | null
+          deletion_due_at?: string | null
+          deletion_requested_at?: string | null
+          discoverable?: boolean
+          display_name: string
+          email_verified_at?: string | null
+          embedding?: string | null
+          erased_at?: string | null
+          field_visibility?: Json
+          follower_count?: number
+          handle: string
+          id: string
+          imdb_url?: string | null
+          is_high_fanout?: boolean
+          last_active_at?: string | null
+          legal_hold?: boolean
+          level?: number
+          location_city?: string | null
+          location_country?: string | null
+          location_region?: string | null
+          markets?: string[]
+          points_total?: number
+          primary_role?: string | null
+          status?: Database["public"]["Enums"]["account_status"]
+          timezone?: string
+          trust_state?: Database["public"]["Enums"]["trust_state"]
+          website_url?: string | null
+        }
+        Update: {
+          app_role?: Database["public"]["Enums"]["app_role"]
+          avatar_key?: string | null
+          bio?: string | null
+          birth_date?: string
+          crafts?: string[]
+          created_at?: string
+          credits?: Json
+          deactivated_at?: string | null
+          deletion_due_at?: string | null
+          deletion_requested_at?: string | null
+          discoverable?: boolean
+          display_name?: string
+          email_verified_at?: string | null
+          embedding?: string | null
+          erased_at?: string | null
+          field_visibility?: Json
+          follower_count?: number
+          handle?: string
+          id?: string
+          imdb_url?: string | null
+          is_high_fanout?: boolean
+          last_active_at?: string | null
+          legal_hold?: boolean
+          level?: number
+          location_city?: string | null
+          location_country?: string | null
+          location_region?: string | null
+          markets?: string[]
+          points_total?: number
+          primary_role?: string | null
+          status?: Database["public"]["Enums"]["account_status"]
+          timezone?: string
+          trust_state?: Database["public"]["Enums"]["trust_state"]
+          website_url?: string | null
+        }
+        Relationships: []
+      }
       deliveries: {
         Row: {
           created_at: string
@@ -1597,6 +1825,10 @@ export type Database = {
           user_id: string
         }[]
       }
+      has_capability: {
+        Args: { p_cap: string; p_user: string }
+        Returns: boolean
+      }
       is_gc_staff: { Args: { p_uid: string }; Returns: boolean }
       lapse_org: {
         Args: { p_first_failure: string; p_org: string }
@@ -1611,6 +1843,7 @@ export type Database = {
         Args: { p_capability: string; p_org: string; p_uid: string }
         Returns: boolean
       }
+      member_tier_rank: { Args: { p_user: string }; Returns: number }
       my_deliveries: {
         Args: never
         Returns: {
@@ -1814,6 +2047,8 @@ export type Database = {
       }
     }
     Enums: {
+      account_status: "active" | "deactivated" | "pending_deletion" | "erased"
+      app_role: "member" | "moderator" | "admin"
       asset_kind:
         | "master"
         | "caption"
@@ -1861,6 +2096,17 @@ export type Database = {
         | "otp_verified"
         | "download"
         | "restore_requested"
+      point_reason:
+        | "post_liked"
+        | "comment_liked"
+        | "answer_accepted"
+        | "course_completed"
+        | "event_attended"
+        | "streak_milestone"
+        | "referral"
+        | "onboarding"
+        | "manual"
+        | "post_created"
       portal_link_purpose: "master_download" | "screener_view"
       release_type: "new_release" | "re_release"
       review_decision: "approve" | "reject"
@@ -1911,6 +2157,7 @@ export type Database = {
         | "complete"
         | "failed"
         | "submit_failed"
+      trust_state: "new" | "verified" | "trusted" | "restricted"
       vendor_mode: "portal_upload" | "email"
     }
     CompositeTypes: {
@@ -2042,6 +2289,8 @@ export const Constants = {
   },
   public: {
     Enums: {
+      account_status: ["active", "deactivated", "pending_deletion", "erased"],
+      app_role: ["member", "moderator", "admin"],
       asset_kind: [
         "master",
         "caption",
@@ -2087,6 +2336,18 @@ export const Constants = {
         "active",
         "payment_lapsed",
         "closed",
+      ],
+      point_reason: [
+        "post_liked",
+        "comment_liked",
+        "answer_accepted",
+        "course_completed",
+        "event_attended",
+        "streak_milestone",
+        "referral",
+        "onboarding",
+        "manual",
+        "post_created",
       ],
       portal_event: [
         "room_viewed",
@@ -2149,6 +2410,7 @@ export const Constants = {
         "failed",
         "submit_failed",
       ],
+      trust_state: ["new", "verified", "trusted", "restricted"],
       vendor_mode: ["portal_upload", "email"],
     },
   },
