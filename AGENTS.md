@@ -42,7 +42,7 @@ Merge policy:
 - Codex comments do not block glance merges (isolation green, no reserved gate).
 - Codex findings block reserved-gate PRs only: SQL/RLS, auth, financial, legal, secrets, infrastructure.
 
-This file governs Carpenter-Create/globalcontent-dashboard only. Do not apply these rules to Watershed, E8, personal, or any other repository. Do not request org-wide GitHub access.
+This file governs Carpenter-Create/24frame only. Do not apply these rules to Watershed, E8, personal, or any other repository. Do not request org-wide GitHub access.
 
 Codex reviews the exact diff. It does not implement on the same tree. Cursor Bugbot may also comment; Codex is the independent review gate. Do not recommend CodeRabbit or a third AI reviewer.
 
@@ -122,7 +122,7 @@ This is the authenticated client dashboard for **24Frame** (aggregation workspac
 Rights holders sign a licensing agreement, submit titles and **platform-ready** assets, track delivery
 across vendors, and (later) receive revenue statements and payouts.
 
-Repo remains Carpenter-Create/globalcontent-dashboard. Product language is 24Frame. Parent corp is
+Repo is Carpenter-Create/24frame. Product language is 24Frame. Parent corp is
 Global Content Holdings LLC.
 
 **Not** the public site (`globalcontent-web`, separate repo).

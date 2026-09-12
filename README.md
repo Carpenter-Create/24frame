@@ -2,7 +2,7 @@
 
 Authenticated client dashboard for **24Frame**. This chrome is the aggregation workspace (catalog, titles, rights, delivery). Rights holders sign a licensing agreement, submit titles and platform-ready assets, track delivery across vendors, and (later) receive revenue statements and payouts.
 
-Repo remains `Carpenter-Create/globalcontent-dashboard`. Product language is 24Frame. Parent corp is Global Content Holdings LLC.
+Repo is `Carpenter-Create/24frame`. Product language is 24Frame. Parent corp is Global Content Holdings LLC.
 
 This is **not** the public site (`globalcontent-web`, separate repo).
 
