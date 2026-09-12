@@ -5,6 +5,7 @@ import { PRODUCT_NAME, SOCIAL_WORKSPACE } from "@/lib/product";
 // Group DMs reuse Pack 4 conversations.kind=group. Gated community
 // groups.min_level spaces stay a different surface.
 // /messages is Ask 24Frame AI. DMs are /social/dms only.
+// Courses are company/admin publish only. Members browse placeholders.
 
 export const SOCIAL_ROUTES = {
   home: "/social",
@@ -12,6 +13,7 @@ export const SOCIAL_ROUTES = {
   members: "/social/members",
   groups: "/social/groups",
   groupsNew: "/social/groups/new",
+  courses: "/social/courses",
   leaderboard: "/social/leaderboard",
   dms: "/social/dms",
 } as const;
@@ -30,6 +32,10 @@ export function socialPostHref(slug: string, postId: string): string {
 
 export function socialDmHref(id: string): string {
   return `${SOCIAL_ROUTES.dms}/${encodeURIComponent(id)}`;
+}
+
+export function socialCourseHref(slug: string): string {
+  return `${SOCIAL_ROUTES.courses}/${encodeURIComponent(slug)}`;
 }
 
 export const SOCIAL = {
@@ -127,6 +133,15 @@ export const SOCIAL = {
     points: "points",
     members: "members",
     empty: "No ranks yet.",
+  },
+  courses: {
+    title: "Courses",
+    subtitle: `Placeholder courses in the ${PRODUCT_NAME} Social+Education workspace.`,
+    empty: "No courses yet.",
+    missing: "That course is not visible.",
+    denied: "This course is not available.",
+    preview: "Preview",
+    modules: "Modules",
   },
   cta: {
     needProfile: "Create a creator profile to post, like, or message.",

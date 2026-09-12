@@ -30,7 +30,9 @@ describe("social copy lock", () => {
     expect(SOCIAL.dms.addPeople).toBe("Add people");
     expect(SOCIAL_ROUTES.dms).toBe("/social/dms");
     expect(SOCIAL_ROUTES.leaderboard).toBe("/social/leaderboard");
+    expect(SOCIAL_ROUTES.courses).toBe("/social/courses");
     expect(SOCIAL_ROUTES.home).toBe("/social");
+    expect(SOCIAL.courses.subtitle).toContain("Social+Education");
     expect(SOCIAL.leaderboard.private).toBe("The leaderboard is private.");
     expect(SOCIAL.leaderboard.subtitle).toContain(PRODUCT_NAME);
     for (const banned of SOCIAL_BANNED_PRODUCT_NAMES) {
@@ -121,6 +123,8 @@ describe("social writes stay on the live spine", () => {
     expect(board).toContain("createClient");
     expect(board).not.toContain("createAdminClient");
     expect(board).not.toContain("rebuild_leaderboards");
+    expect(actions).not.toContain("from(\"courses\")");
+    expect(actions).not.toContain("createSocialCourse");
   });
 
   it("labels rooms from participants first and quiets add-people errors", () => {

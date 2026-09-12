@@ -16,6 +16,10 @@ describe("social isolation lock", () => {
     expect(b3).not.toContain("open_or_get_direct_conversation");
     expect(b3).not.toContain("add_conversation_participants");
     expect(b3).not.toContain("set_group_conversation_title");
+    expect(b3).not.toContain("from(\"courses\")");
+    expect(b3).not.toContain("from(\"modules\")");
+    expect(b3).not.toContain("from(\"lessons\")");
+    expect(b3).not.toContain("has_course_access");
   });
 
   it("keeps Social writes on the user-scoped client", () => {
@@ -28,5 +32,12 @@ describe("social isolation lock", () => {
     expect(board).toContain('from "@/lib/supabase/server"');
     expect(board).not.toContain("@/lib/supabase/admin");
     expect(board).not.toContain("rebuild_leaderboards");
+    const list = readFileSync("src/app/(app)/social/courses/page.tsx", "utf8");
+    const detail = readFileSync("src/app/(app)/social/courses/[slug]/page.tsx", "utf8");
+    expect(list).toContain('from "@/lib/supabase/server"');
+    expect(detail).toContain('from "@/lib/supabase/server"');
+    expect(list).not.toContain("@/lib/supabase/admin");
+    expect(detail).not.toContain("@/lib/supabase/admin");
+    expect(actions).not.toContain("from(\"courses\")");
   });
 });

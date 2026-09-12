@@ -23,6 +23,8 @@ describe("workspace mode", () => {
     expect(resolveWorkspaceMode("/social", "aggregation")).toBe("social");
     expect(resolveWorkspaceMode("/social/dms/abc", "aggregation")).toBe("social");
     expect(resolveWorkspaceMode("/social/leaderboard", "aggregation")).toBe("social");
+    expect(resolveWorkspaceMode("/social/courses", "aggregation")).toBe("social");
+    expect(resolveWorkspaceMode("/social/courses/welcome-to-24frame", "aggregation")).toBe("social");
     expect(resolveWorkspaceMode("/messages", "social")).toBe("aggregation");
     expect(resolveWorkspaceMode("/titles/1", "social")).toBe("aggregation");
     expect(resolveWorkspaceMode("/", "social")).toBe("aggregation");

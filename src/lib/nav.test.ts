@@ -131,6 +131,7 @@ describe("mobileNavDestinations", () => {
       "/social",
       "/social/profile",
       "/social/groups",
+      "/social/courses",
       "/social/leaderboard",
       "/social/dms",
     ]);
@@ -138,6 +139,7 @@ describe("mobileNavDestinations", () => {
       "/social",
       "/social/profile",
       "/social/groups",
+      "/social/courses",
       "/social/leaderboard",
       "/social/dms",
     ]);
@@ -147,6 +149,7 @@ describe("mobileNavDestinations", () => {
       "Home",
       "Profile",
       "Groups",
+      "Courses",
       "Leaderboard",
       "Messages",
     ]);
