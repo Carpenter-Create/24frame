@@ -5,7 +5,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { IDENTITY_AVATAR_CLASS } from "@/lib/house-sheet";
-import { SocialAvatar, SocialPostCard } from "./social-ui";
+import { SocialAvatar, SocialConversationFaces, SocialPostCard } from "./social-ui";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const uiSrc = readFileSync(join(here, "social-ui.tsx"), "utf8");
@@ -28,6 +28,22 @@ describe("SocialAvatar", () => {
     expect(html).toContain("AL");
     expect(html).not.toContain("<img");
     expect(html).not.toContain("overflow-hidden");
+  });
+});
+
+describe("SocialConversationFaces", () => {
+  it("stacks two initials for a group room", () => {
+    const html = renderToStaticMarkup(
+      <SocialConversationFaces
+        people={[
+          { name: "Bob One", photoUrl: null },
+          { name: "Carol One", photoUrl: null },
+        ]}
+      />,
+    );
+    expect(html).toContain("data-social-conversation-faces");
+    expect(html).toContain("BO");
+    expect(html).toContain("CO");
   });
 });
 

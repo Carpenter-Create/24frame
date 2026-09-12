@@ -1,9 +1,10 @@
 import { PRODUCT_NAME, SOCIAL_WORKSPACE } from "@/lib/product";
 
 // Social workspace copy and input rules. Lives in lib/, not JSX.
-// Text-only v0. Account faces reuse signedAvatarUrl. Post media, title
-// S3, and group chat stay HOLD.
-// /messages is Ask 24Frame AI — DMs are /social/dms only.
+// Account faces reuse signedAvatarUrl. Post media and title S3 stay HOLD.
+// Group DMs reuse Pack 4 conversations.kind=group. Gated community
+// groups.min_level spaces stay a different surface.
+// /messages is Ask 24Frame AI. DMs are /social/dms only.
 
 export const SOCIAL_ROUTES = {
   home: "/social",
@@ -96,13 +97,23 @@ export const SOCIAL = {
   },
   dms: {
     title: "Messages",
-    subtitle: "Direct messages.",
+    subtitle: `One-to-one and group conversations in ${PRODUCT_NAME}.`,
     empty: "No conversations yet.",
     thread: "Conversation",
     compose: "Write a message",
     submit: "Send",
     missing: "That conversation is not visible.",
     noProfileCta: "Create a creator profile to use messages.",
+    addPeople: "Add people",
+    addHandle: "Handle",
+    addSubmit: "Add",
+    addSelf: "You are already in this conversation.",
+    addMissing: "No profile for that handle.",
+    addBlocked: "That person cannot be added.",
+    titleLabel: "Title",
+    titleHint: "Optional. Names stay first.",
+    titleSave: "Save title",
+    titleInvalid: "Enter a shorter title.",
   },
   leaderboard: {
     title: "Leaderboard",
@@ -131,6 +142,7 @@ export const MESSAGE_BODY_MAX = 2000;
 export const GROUP_NAME_MAX = 80;
 export const GROUP_SLUG_MAX = 40;
 export const GROUP_DESCRIPTION_MAX = 400;
+export const CONVERSATION_TITLE_MAX = 80;
 export const SOCIAL_MIN_AGE_YEARS = 13;
 
 const HANDLE_RE = /^[a-z0-9_]+$/;
@@ -179,6 +191,43 @@ export function normalizeGroupDescription(raw: string): string | null {
   if (description.length === 0) return null;
   if (description.length > GROUP_DESCRIPTION_MAX) return null;
   return description;
+}
+
+export function normalizeConversationTitle(raw: string): { title: string | null } | null {
+  const title = raw.trim().replace(/\s+/g, " ");
+  if (title.length === 0) return { title: null };
+  if (title.length > CONVERSATION_TITLE_MAX) return null;
+  return { title };
+}
+
+export function conversationRoomLabel(
+  title: string | null | undefined,
+  participantNames: readonly string[],
+): string {
+  const trimmed = title?.trim();
+  if (trimmed) return trimmed;
+  const names = participantNames.map((name) => name.trim()).filter(Boolean);
+  if (names.length === 0) return SOCIAL.dms.thread;
+  return names.join(", ");
+}
+
+export function inboxPeerIds(row: {
+  peer_id: string | null;
+  participant_ids?: string[] | null;
+}): string[] {
+  if (row.participant_ids && row.participant_ids.length > 0) {
+    return [...new Set(row.participant_ids.filter(Boolean))];
+  }
+  return row.peer_id ? [row.peer_id] : [];
+}
+
+export function quietDmAddError(message: string): string {
+  const text = message.toLowerCase();
+  if (text.includes("yourself")) return SOCIAL.dms.addSelf;
+  if (text.includes("blocked")) return SOCIAL.dms.addBlocked;
+  if (text.includes("not found") || text.includes("inactive")) return SOCIAL.dms.addMissing;
+  if (text.includes("not a participant")) return SOCIAL.dms.missing;
+  return SOCIAL.dms.addBlocked;
 }
 
 export function isEligibleBirthDate(iso: string, today = new Date()): boolean {

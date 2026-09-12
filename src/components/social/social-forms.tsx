@@ -9,12 +9,14 @@ import { InlineNotice } from "@/components/ui/inline-notice";
 import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import { SOCIAL } from "@/lib/social";
 import {
+  addSocialDmPeople,
   createSocialGroup,
   createSocialPost,
   createSocialProfile,
   joinSocialGroup,
   openSocialDm,
   sendSocialDm,
+  setSocialDmTitle,
   toggleSocialLike,
 } from "@/app/(app)/social/actions";
 
@@ -239,6 +241,74 @@ export function SocialDmCompose({ conversationId }: { conversationId: string }) 
       />
       <FormError error={error} />
       <Button type="submit">{SOCIAL.dms.submit}</Button>
+    </form>
+  );
+}
+
+export function SocialAddPeopleForm({ conversationId }: { conversationId: string }) {
+  const [error, setError] = useState("");
+  return (
+    <form
+      data-social-add-people=""
+      className="flex max-w-md flex-col gap-[var(--space-3)]"
+      action={async (formData) => {
+        setError("");
+        const result = await addSocialDmPeople(formData);
+        if (result.error) setError(result.error);
+      }}
+    >
+      <input type="hidden" name="conversation_id" value={conversationId} />
+      <div className="flex flex-col gap-1">
+        <Label htmlFor="social-add-handles">{SOCIAL.dms.addPeople}</Label>
+        <Input
+          id="social-add-handles"
+          name="handles"
+          autoComplete="off"
+          required
+          placeholder={SOCIAL.dms.addHandle}
+        />
+      </div>
+      <FormError error={error} />
+      <Button type="submit" variant="secondary">
+        {SOCIAL.dms.addSubmit}
+      </Button>
+    </form>
+  );
+}
+
+export function SocialGroupTitleForm({
+  conversationId,
+  title,
+}: {
+  conversationId: string;
+  title: string | null;
+}) {
+  const [error, setError] = useState("");
+  return (
+    <form
+      data-social-group-title=""
+      className="flex max-w-md flex-col gap-[var(--space-3)]"
+      action={async (formData) => {
+        setError("");
+        const result = await setSocialDmTitle(formData);
+        if (result.error) setError(result.error);
+      }}
+    >
+      <input type="hidden" name="conversation_id" value={conversationId} />
+      <div className="flex flex-col gap-1">
+        <Label htmlFor="social-dm-title">{SOCIAL.dms.titleLabel}</Label>
+        <Input
+          id="social-dm-title"
+          name="title"
+          defaultValue={title ?? ""}
+          autoComplete="off"
+        />
+        <p className="t-body-sm text-ink-3">{SOCIAL.dms.titleHint}</p>
+      </div>
+      <FormError error={error} />
+      <Button type="submit" variant="secondary">
+        {SOCIAL.dms.titleSave}
+      </Button>
     </form>
   );
 }

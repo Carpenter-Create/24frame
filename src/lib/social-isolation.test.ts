@@ -14,6 +14,8 @@ describe("social isolation lock", () => {
     expect(b3).not.toContain("rebuild_leaderboards");
     expect(b3).not.toContain("get_dm_inbox");
     expect(b3).not.toContain("open_or_get_direct_conversation");
+    expect(b3).not.toContain("add_conversation_participants");
+    expect(b3).not.toContain("set_group_conversation_title");
   });
 
   it("keeps Social writes on the user-scoped client", () => {

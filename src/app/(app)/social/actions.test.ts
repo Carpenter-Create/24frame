@@ -4,6 +4,7 @@ import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 import { likeInsertRow, profileInsertRow, SOCIAL } from "@/lib/social";
 import {
+  addSocialDmPeople,
   createSocialPost,
   createSocialProfile,
   openSocialDm,
@@ -119,5 +120,59 @@ describe("social actions", () => {
     expect(rpc).toHaveBeenCalledWith("open_or_get_direct_conversation", { p_peer: "u2" });
     expect(from).not.toHaveBeenCalledWith("conversations");
     expect(from).not.toHaveBeenCalledWith("conversation_participants");
+  });
+
+  it("adds people through the RPC and never inserts participants", async () => {
+    const from = vi.fn((table: string) => {
+      const chain = {
+        select: vi.fn(() => chain),
+        eq: vi.fn(() => chain),
+        in: vi.fn(() => chain),
+        maybeSingle: vi.fn(async () => ({ data: { id: "u1" }, error: null })),
+        then: (resolve: (value: unknown) => unknown) =>
+          Promise.resolve({
+            data: table === "profiles" ? [{ id: "u3", handle: "carol" }] : { id: "u1" },
+            error: null,
+          }).then(resolve),
+      };
+      return chain;
+    });
+    const rpc = vi.fn(async () => ({ data: "conv-1", error: null }));
+    vi.mocked(createClient).mockResolvedValue({ from, rpc } as never);
+
+    const form = new FormData();
+    form.set("conversation_id", "conv-1");
+    form.set("handles", "carol");
+    expect(await addSocialDmPeople(form)).toEqual({});
+    expect(rpc).toHaveBeenCalledWith("add_conversation_participants", {
+      p_conversation: "conv-1",
+      p_peers: ["u3"],
+    });
+    expect(from).not.toHaveBeenCalledWith("conversations");
+    expect(from).not.toHaveBeenCalledWith("conversation_participants");
+  });
+
+  it("quiets a blocked add-people RPC error", async () => {
+    const from = vi.fn((table: string) => {
+      const chain = {
+        select: vi.fn(() => chain),
+        eq: vi.fn(() => chain),
+        in: vi.fn(() => chain),
+        maybeSingle: vi.fn(async () => ({ data: { id: "u1" }, error: null })),
+        then: (resolve: (value: unknown) => unknown) =>
+          Promise.resolve({
+            data: table === "profiles" ? [{ id: "u3", handle: "carol" }] : { id: "u1" },
+            error: null,
+          }).then(resolve),
+      };
+      return chain;
+    });
+    const rpc = vi.fn(async () => ({ data: null, error: { message: "blocked" } }));
+    vi.mocked(createClient).mockResolvedValue({ from, rpc } as never);
+
+    const form = new FormData();
+    form.set("conversation_id", "conv-1");
+    form.set("handles", "carol");
+    expect(await addSocialDmPeople(form)).toEqual({ error: SOCIAL.dms.addBlocked });
   });
 });
