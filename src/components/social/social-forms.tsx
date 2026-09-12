@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
+import { SOCIAL_MEDIA_ACCEPT, SOCIAL_MEDIA_MAX_ITEMS, type SocialMediaItem } from "@/lib/social-media";
 import { SOCIAL } from "@/lib/social";
 import {
   addSocialDmPeople,
@@ -15,6 +16,7 @@ import {
   createSocialProfile,
   joinSocialGroup,
   openSocialDm,
+  presignSocialMediaUpload,
   sendSocialDm,
   setSocialDmTitle,
   toggleSocialLike,
@@ -70,6 +72,54 @@ export function SocialPostCompose({
   groupSlug?: string;
 }) {
   const [error, setError] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [body, setBody] = useState("");
+  const [media, setMedia] = useState<SocialMediaItem[]>([]);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  async function onPick(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    setError("");
+    const remaining = SOCIAL_MEDIA_MAX_ITEMS - media.length;
+    if (remaining <= 0) {
+      setError(SOCIAL.home.mediaLimit);
+      return;
+    }
+    const chosen = Array.from(files).slice(0, remaining);
+    setUploading(true);
+    const next: SocialMediaItem[] = [];
+    for (const file of chosen) {
+      const body = new FormData();
+      body.set("content_type", file.type);
+      body.set("byte_length", String(file.size));
+      const signed = await presignSocialMediaUpload(body);
+      if (signed.error || !signed.url || !signed.key || !signed.kind || !signed.contentType) {
+        setUploading(false);
+        if (fileRef.current) fileRef.current.value = "";
+        setError(signed.error ?? SOCIAL.home.uploadFailed);
+        return;
+      }
+      const put = await fetch(signed.url, {
+        method: "PUT",
+        headers: { "Content-Type": signed.contentType },
+        body: file,
+      });
+      if (!put.ok) {
+        setUploading(false);
+        if (fileRef.current) fileRef.current.value = "";
+        setError(SOCIAL.home.uploadFailed);
+        return;
+      }
+      next.push({
+        kind: signed.kind as SocialMediaItem["kind"],
+        key: signed.key,
+        contentType: signed.contentType as SocialMediaItem["contentType"],
+      });
+    }
+    setMedia((current) => [...current, ...next]);
+    setUploading(false);
+    if (fileRef.current) fileRef.current.value = "";
+  }
 
   return (
     <form
@@ -77,8 +127,14 @@ export function SocialPostCompose({
       className="flex flex-col gap-[var(--space-3)]"
       action={async (formData) => {
         setError("");
+        formData.set("media", JSON.stringify(media));
         const result = await createSocialPost(formData);
-        if (result.error) setError(result.error);
+        if (result.error) {
+          setError(result.error);
+          return;
+        }
+        setBody("");
+        setMedia([]);
       }}
     >
       {groupId ? <input type="hidden" name="group_id" value={groupId} /> : null}
@@ -90,12 +146,51 @@ export function SocialPostCompose({
         id="social-post-body"
         name="body"
         rows={3}
-        required
+        value={body}
+        onChange={(e) => setBody(e.target.value)}
         placeholder={SOCIAL.home.compose}
         className="w-full rounded-[var(--radius)] border border-hairline bg-surface px-3 py-2 t-body text-ink outline-none placeholder:text-ink-3 focus:border-accent"
       />
+      {media.length > 0 ? (
+        <ul data-social-post-attachments="" className="flex flex-col gap-1">
+          {media.map((item) => (
+            <li key={item.key} className="flex items-center gap-[var(--space-2)] t-body-sm text-ink-2">
+              <span>{item.kind === "video" ? SOCIAL.home.videoKind : SOCIAL.home.photoKind}</span>
+              <button
+                type="button"
+                className={TEXT_ACTION_CLASS}
+                onClick={() => setMedia((current) => current.filter((row) => row.key !== item.key))}
+              >
+                {SOCIAL.home.removeAttach}
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      <div className="flex items-center gap-[var(--space-3)]">
+        <button
+          type="button"
+          className={TEXT_ACTION_CLASS}
+          disabled={uploading || media.length >= SOCIAL_MEDIA_MAX_ITEMS}
+          onClick={() => fileRef.current?.click()}
+        >
+          {uploading ? SOCIAL.home.attaching : SOCIAL.home.attach}
+        </button>
+        <input
+          ref={fileRef}
+          id="social-post-media"
+          type="file"
+          accept={SOCIAL_MEDIA_ACCEPT}
+          multiple
+          className="sr-only"
+          aria-label={SOCIAL.home.attach}
+          onChange={(e) => void onPick(e.target.files)}
+        />
+        <Button type="submit" disabled={uploading}>
+          {SOCIAL.home.submit}
+        </Button>
+      </div>
       <FormError error={error} />
-      <Button type="submit">{SOCIAL.home.submit}</Button>
     </form>
   );
 }

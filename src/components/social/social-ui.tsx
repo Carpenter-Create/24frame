@@ -60,6 +60,11 @@ export function SocialConversationFaces({
   );
 }
 
+export type SocialPostMediaItem = {
+  kind: "image" | "video";
+  url: string;
+};
+
 export type SocialPostCardModel = {
   id: string;
   body: string | null;
@@ -73,7 +78,37 @@ export type SocialPostCardModel = {
   groupSlug: string | null;
   groupName: string | null;
   canLike: boolean;
+  media: SocialPostMediaItem[];
 };
+
+export function SocialPostMedia({ items }: { items: readonly SocialPostMediaItem[] }) {
+  if (items.length === 0) return null;
+  return (
+    <div data-social-post-media="" className="flex flex-col gap-[var(--space-2)]">
+      {items.map((item) =>
+        item.kind === "video" ? (
+          <video
+            key={item.url}
+            data-social-post-video=""
+            controls
+            preload="metadata"
+            src={item.url}
+            className="w-full rounded-[var(--radius)] bg-surface-muted"
+          />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the member media lane
+          <img
+            key={item.url}
+            data-social-post-image=""
+            src={item.url}
+            alt=""
+            className="w-full rounded-[var(--radius)] object-cover"
+          />
+        ),
+      )}
+    </div>
+  );
+}
 
 export function SocialPostCard({ post }: { post: SocialPostCardModel }) {
   return (
@@ -98,7 +133,8 @@ export function SocialPostCard({ post }: { post: SocialPostCardModel }) {
           ) : null}
         </div>
       </div>
-      <p className="t-body text-ink whitespace-pre-wrap">{post.body}</p>
+      {post.body ? <p className="t-body text-ink whitespace-pre-wrap">{post.body}</p> : null}
+      <SocialPostMedia items={post.media} />
       {post.canLike ? (
         <SocialLikeButton
           postId={post.id}

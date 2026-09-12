@@ -17,6 +17,7 @@ export type SocialPostRow = {
   group_id: string | null;
   like_count: number;
   created_at: string;
+  media: unknown;
 };
 
 export async function loadOwnProfile(
@@ -37,7 +38,7 @@ export async function loadVisiblePosts(
 ): Promise<SocialPostRow[]> {
   let query = supabase
     .from("posts")
-    .select("id, body, author_id, group_id, like_count, created_at")
+    .select("id, body, author_id, group_id, like_count, created_at, media")
     .eq("status", "active");
   if (groupId) query = query.eq("group_id", groupId);
   const { data } = await query

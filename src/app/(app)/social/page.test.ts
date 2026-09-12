@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
+import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
 import { ASK_GLOBEE } from "@/lib/ask-globee";
 import { SOCIAL } from "@/lib/social";
 import SocialHomePage from "./page";
@@ -20,9 +21,14 @@ vi.mock("@/lib/s3-avatars", () => ({
   signedAvatarUrl: vi.fn().mockResolvedValue(null),
   signedAvatarUrls: vi.fn().mockResolvedValue(new Map()),
 }));
+vi.mock("@/lib/s3-social-media", () => ({
+  signedSocialMediaItems: vi.fn().mockResolvedValue([]),
+  signedSocialMediaByPostId: vi.fn().mockResolvedValue(new Map()),
+}));
 vi.mock("@/app/(app)/social/actions", () => ({
   createSocialProfile: vi.fn(),
   createSocialPost: vi.fn(),
+  presignSocialMediaUpload: vi.fn(),
   toggleSocialLike: vi.fn(),
   createSocialGroup: vi.fn(),
   joinSocialGroup: vi.fn(),
@@ -76,6 +82,7 @@ function stubClient({
     group_id: string | null;
     like_count: number;
     created_at: string;
+    media?: unknown;
   }[];
 } = {}) {
   const from = vi.fn((table: string) => {
@@ -93,6 +100,7 @@ describe("Social home", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(signedAvatarUrls).mockResolvedValue(new Map());
+    vi.mocked(signedSocialMediaByPostId).mockResolvedValue(new Map());
   });
 
   it("renders for a signed-in user without an org", async () => {
@@ -147,6 +155,36 @@ describe("Social home", () => {
     expect(html).toContain("Ada Lovelace");
     expect(html).toContain('src="https://s3.example/signed-avatar"');
     expect(html).not.toContain("AL");
+  });
+
+  it("renders signed post media from posts.media keys", async () => {
+    stubClient({
+      profile: { id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" },
+      posts: [
+        {
+          id: "p1",
+          body: "hello",
+          author_id: "u1",
+          group_id: null,
+          like_count: 0,
+          created_at: "2026-09-12T14:00:00.000Z",
+          media: [{ kind: "image", key: "posts/u1/a.jpg", contentType: "image/jpeg" }],
+        },
+      ],
+    });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+    vi.mocked(signedSocialMediaByPostId).mockResolvedValue(
+      new Map([
+        [
+          "p1",
+          [{ kind: "image", url: "https://cf.example/signed-image", contentType: "image/jpeg" }],
+        ],
+      ]),
+    );
+
+    const html = renderToStaticMarkup(await SocialHomePage());
+    expect(html).toContain("data-social-post-image");
+    expect(html).toContain('src="https://cf.example/signed-image"');
   });
 
   it("sends an unauthenticated visitor to login", async () => {

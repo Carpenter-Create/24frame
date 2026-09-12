@@ -64,6 +64,7 @@ describe("SocialPostCard faces", () => {
           groupSlug: null,
           groupName: null,
           canLike: false,
+          media: [],
         }}
       />,
     );
@@ -88,6 +89,7 @@ describe("SocialPostCard faces", () => {
           groupSlug: null,
           groupName: null,
           canLike: false,
+          media: [],
         }}
       />,
     );
@@ -104,5 +106,37 @@ describe("SocialPostCard faces", () => {
     expect(uiSrc).not.toContain("type=\"file\"");
     expect(uiSrc).not.toContain("S3_BUCKET");
     expect(uiSrc).not.toContain("24frame-media");
+  });
+});
+
+describe("SocialPostCard media", () => {
+  it("renders signed image and video URLs", () => {
+    const html = renderToStaticMarkup(
+      <SocialPostCard
+        post={{
+          id: "p1",
+          body: "hello",
+          likeCount: 0,
+          liked: false,
+          createdAt: "2026-09-12T14:00:00.000Z",
+          authorId: "u1",
+          authorHandle: "ada",
+          authorName: "Ada Lovelace",
+          authorPhotoUrl: null,
+          groupSlug: null,
+          groupName: null,
+          canLike: false,
+          media: [
+            { kind: "image", url: "https://cf.example/signed-image" },
+            { kind: "video", url: "https://cf.example/signed-video" },
+          ],
+        }}
+      />,
+    );
+    expect(html).toContain("data-social-post-media");
+    expect(html).toContain('data-social-post-image=""');
+    expect(html).toContain('src="https://cf.example/signed-image"');
+    expect(html).toContain("data-social-post-video");
+    expect(html).toContain('src="https://cf.example/signed-video"');
   });
 });

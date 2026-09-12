@@ -1,7 +1,9 @@
 import { PRODUCT_NAME, SOCIAL_WORKSPACE } from "@/lib/product";
+import type { SocialMediaItem, SocialMediaRuleError } from "@/lib/social-media";
 
 // Social workspace copy and input rules. Lives in lib/, not JSX.
-// Account faces reuse signedAvatarUrl. Post media and title S3 stay HOLD.
+// Account faces reuse signedAvatarUrl. Post media uses 24frame-media
+// keys on posts.media. Title S3 / S3_BUCKET stay film-only.
 // Group DMs reuse Pack 4 conversations.kind=group. Gated community
 // groups.min_level spaces stay a different surface.
 // /messages is Ask 24Frame AI. DMs are /social/dms only.
@@ -46,6 +48,19 @@ export const SOCIAL = {
     empty: "No posts yet.",
     compose: "Write a post",
     submit: "Post",
+    attach: "Add photo or video",
+    attaching: "Adding",
+    removeAttach: "Remove",
+    photoKind: "Photo",
+    videoKind: "Video",
+    emptyPost: "Write a post or attach a photo or video.",
+    mediaType: "Use a photo (JPEG, PNG, WebP, GIF) or a video (MP4, QuickTime, WebM).",
+    mediaTooLarge: "That file is too large.",
+    mediaMissing: "Choose a photo or video first.",
+    mediaInvalid: "Those attachments could not be stored.",
+    mediaForbidden: "That file cannot be attached.",
+    mediaLimit: "Attach up to four photos or videos.",
+    uploadFailed: "The file could not be stored.",
   },
   profile: {
     title: "Profile",
@@ -285,15 +300,26 @@ export function profileInsertRow(input: {
   };
 }
 
+export function socialMediaRuleMessage(error: SocialMediaRuleError): string {
+  if (error === "type") return SOCIAL.home.mediaType;
+  if (error === "tooLarge") return SOCIAL.home.mediaTooLarge;
+  if (error === "missing") return SOCIAL.home.mediaMissing;
+  if (error === "limit") return SOCIAL.home.mediaLimit;
+  if (error === "forbidden") return SOCIAL.home.mediaForbidden;
+  return SOCIAL.home.mediaInvalid;
+}
+
 export function postInsertRow(input: {
   authorId: string;
-  body: string;
+  body: string | null;
   groupId?: string | null;
+  media?: SocialMediaItem[];
 }) {
   return {
     author_id: input.authorId,
     body: input.body,
     group_id: input.groupId ?? null,
+    media: input.media ?? [],
     status: "active" as const,
     like_count: 0,
     comment_count: 0,
