@@ -190,8 +190,8 @@ create policy level_distribution_select on public.level_distribution
     )
   );
 
-revoke all on public.leaderboard_entries from public, anon;
-revoke all on public.level_distribution from public, anon;
+revoke all on public.leaderboard_entries from public, anon, authenticated;
+revoke all on public.level_distribution from public, anon, authenticated;
 
 grant select on public.leaderboard_entries to authenticated;
 grant select on public.level_distribution to authenticated;

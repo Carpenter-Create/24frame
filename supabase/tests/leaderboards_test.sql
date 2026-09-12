@@ -5,7 +5,7 @@
 -- ai_* stay. Person-scoped tables are not catalog-org scoped.
 
 begin;
-select plan(38);
+select plan(37);
 
 select set_config('t.alpha',    gen_random_uuid()::text, false);
 select set_config('t.bravo',    gen_random_uuid()::text, false);
