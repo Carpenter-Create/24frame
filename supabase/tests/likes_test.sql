@@ -7,7 +7,7 @@
 -- unchanged. Social policies must not privilege-bridge via is_gc_staff.
 
 begin;
-select plan(48);
+select plan(50);
 
 select set_config('t.org',      gen_random_uuid()::text, false);
 select set_config('t.owner',    gen_random_uuid()::text, false);
@@ -65,14 +65,20 @@ select ok(
   'donor org_status value churned is absent');
 
 select ok(
-  to_regclass('public.conversations') is null,
-  'donor conversations (DMs) not created');
+  to_regclass('public.conversations') is not null,
+  'donor conversations (DMs) exist');
 select ok(
-  to_regclass('public.messages') is null,
-  'donor messages (DMs) not created');
+  to_regclass('public.messages') is not null,
+  'donor messages (DMs) exist');
 select ok(
-  to_regclass('public.blocks') is null,
-  'blocks table not created (Pack 4)');
+  to_regclass('public.blocks') is not null,
+  'blocks table exists');
+select ok(
+  to_regclass('public.ai_conversations') is not null,
+  'ai_conversations still present (Ask Globee not renamed back)');
+select ok(
+  to_regclass('public.ai_conversation_messages') is not null,
+  'ai_conversation_messages still present');
 
 select ok(
   not exists (

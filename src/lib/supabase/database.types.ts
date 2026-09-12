@@ -736,6 +736,167 @@ export type Database = {
           },
         ]
       }
+      blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blocks_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blocks_blocker_id_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          dm_key: string | null
+          id: string
+          kind: Database["public"]["Enums"]["conversation_kind"]
+          last_message_at: string | null
+          title: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          dm_key?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["conversation_kind"]
+          last_message_at?: string | null
+          title?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          dm_key?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["conversation_kind"]
+          last_message_at?: string | null
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversation_participants: {
+        Row: {
+          conversation_id: string
+          joined_at: string
+          last_read_at: string | null
+          left_at: string | null
+          muted: boolean
+          unread_count: number
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          joined_at?: string
+          last_read_at?: string | null
+          left_at?: string | null
+          muted?: boolean
+          unread_count?: number
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          joined_at?: string
+          last_read_at?: string | null
+          left_at?: string | null
+          muted?: boolean
+          unread_count?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_participants_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversation_participants_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          body: string | null
+          conversation_id: string
+          created_at: string
+          id: string
+          media: Json | null
+          sender_id: string | null
+          status: Database["public"]["Enums"]["post_status"]
+        }
+        Insert: {
+          body?: string | null
+          conversation_id: string
+          created_at?: string
+          id?: string
+          media?: Json | null
+          sender_id?: string | null
+          status?: Database["public"]["Enums"]["post_status"]
+        }
+        Update: {
+          body?: string | null
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          media?: Json | null
+          sender_id?: string | null
+          status?: Database["public"]["Enums"]["post_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deliveries: {
         Row: {
           created_at: string
@@ -1886,6 +2047,11 @@ export type Database = {
         Args: { p_force?: boolean; p_link_id: string; p_vendor_id?: string }
         Returns: undefined
       }
+      caller_may_inspect: { Args: { p_user: string }; Returns: boolean }
+      can_access_conversation: {
+        Args: { p_conversation: string; p_user: string }
+        Returns: boolean
+      }
       can_access_group_content: {
         Args: { p_group: string; p_user: string }
         Returns: boolean
@@ -1968,6 +2134,10 @@ export type Database = {
         }
         Returns: string
       }
+      conversation_has_block: {
+        Args: { p_conversation: string; p_user: string }
+        Returns: boolean
+      }
       create_transcode_job: {
         Args: {
           p_expected_output_key: string
@@ -1978,6 +2148,7 @@ export type Database = {
         }
         Returns: string
       }
+      direct_dm_key: { Args: { p_a: string; p_b: string }; Returns: string }
       fail_transcode_job: {
         Args: { p_job_id: string; p_reason?: string }
         Returns: undefined
@@ -2015,11 +2186,29 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_dm_inbox: {
+        Args: { p_limit?: number }
+        Returns: {
+          conversation_id: string
+          last_message_at: string | null
+          muted: boolean
+          peer_id: string | null
+          unread_count: number
+        }[]
+      }
       has_capability: {
         Args: { p_cap: string; p_user: string }
         Returns: boolean
       }
+      is_active_conversation_participant: {
+        Args: { p_conversation: string; p_user: string }
+        Returns: boolean
+      }
       is_active_profile: { Args: { p_user: string }; Returns: boolean }
+      is_blocked_either_way: {
+        Args: { p_a: string; p_b: string }
+        Returns: boolean
+      }
       is_gc_staff: { Args: { p_uid: string }; Returns: boolean }
       is_group_member: {
         Args: { p_group: string; p_user: string }
@@ -2032,6 +2221,10 @@ export type Database = {
       link_title_to_work_of: {
         Args: { p_target_title_id: string; p_title_id: string }
         Returns: string
+      }
+      mark_direct_conversation_read: {
+        Args: { p_conversation: string; p_seen_at: string }
+        Returns: undefined
       }
       mark_notifications_read: { Args: { p_ids: string[] }; Returns: undefined }
       member_can: {
@@ -2095,6 +2288,10 @@ export type Database = {
         }[]
       }
       my_unread_count: { Args: never; Returns: number }
+      open_or_get_direct_conversation: {
+        Args: { p_peer: string }
+        Returns: string
+      }
       org_notification_recipients: {
         Args: { p_org_id: string }
         Returns: string[]
@@ -2210,6 +2407,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      shares_direct_conversation: {
+        Args: { p_a: string; p_b: string }
+        Returns: boolean
+      }
       shares_group: { Args: { p_a: string; p_b: string }; Returns: boolean }
       submit_title: {
         Args: { p_org_id: string; p_title_id: string }
@@ -2257,6 +2458,7 @@ export type Database = {
         | "poster"
         | "banner"
         | "trailer"
+      conversation_kind: "direct" | "group"
       conversation_role: "user" | "globee"
       conversation_thumb: "up" | "down"
       delivery_status:
@@ -2504,6 +2706,7 @@ export const Constants = {
         "banner",
         "trailer",
       ],
+      conversation_kind: ["direct", "group"],
       conversation_role: ["user", "globee"],
       conversation_thumb: ["up", "down"],
       delivery_status: [
