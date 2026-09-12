@@ -108,7 +108,7 @@ function stubWriteClient({
   };
   const from = vi.fn((table: string) => {
     if (table === "titles") return titlesChain;
-    if (table === "conversations") {
+    if (table === "ai_conversations") {
       return {
         insert: (row: Record<string, unknown>) => {
           inserted.push({ table, row });
@@ -119,7 +119,7 @@ function stubWriteClient({
         maybeSingle: conversationsRead.maybeSingle,
       };
     }
-    if (table === "conversation_messages") {
+    if (table === "ai_conversation_messages") {
       return {
         insert: async (row: Record<string, unknown>) => {
           inserted.push({ table, row });
@@ -173,7 +173,7 @@ describe("startAskGlobeeConversation", () => {
     expect(rpc).not.toHaveBeenCalled();
     expect(fetchMock).not.toHaveBeenCalled();
     expect(inserted).toHaveLength(2);
-    expect(inserted[0]?.table).toBe("conversations");
+    expect(inserted[0]?.table).toBe("ai_conversations");
     expect(inserted[0]?.row).toMatchObject({
       org_id: "org-1",
       title: "What is blocking a title",
@@ -420,7 +420,7 @@ describe("appendAskGlobeeTurn", () => {
     });
 
     await expect(appendAskGlobeeTurn(THREAD, "What is blocking a title")).resolves.toEqual({});
-    expect(inserted.some((row) => row.table === "conversations")).toBe(false);
+    expect(inserted.some((row) => row.table === "ai_conversations")).toBe(false);
     expect(inserted.map((row) => row.row.role)).toEqual(["user", "globee"]);
     expect(inserted[0]?.row).toMatchObject({
       conversation_id: THREAD,

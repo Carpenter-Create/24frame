@@ -8,7 +8,7 @@ import { USER_MENU } from "@/lib/user-menu";
 // the operator runs. In-flight sequence: empty lead + fetching relevant
 // skills…, then finding the signal… (optional live catalog lead as the ink
 // line). Time advances the verb — do not wait for a lead that never arrives.
-// Never a hardcoded Winter Line fact, never a conversation_messages row.
+// Never a hardcoded Winter Line fact, never an ai_conversation_messages row.
 // Tools may still use the findings lookup internally. Winter Line fixture
 // strings stay here as a do-not-render lock. No checkout.
 

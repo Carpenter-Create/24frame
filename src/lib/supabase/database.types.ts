@@ -241,7 +241,7 @@ export type Database = {
           },
         ]
       }
-      conversation_messages: {
+      ai_conversation_messages: {
         Row: {
           body: string
           conversation_id: string
@@ -277,14 +277,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "conversation_messages_conversation_id_fkey"
+            foreignKeyName: "ai_conversation_messages_conversation_id_fkey"
             columns: ["conversation_id"]
             isOneToOne: false
-            referencedRelation: "conversations"
+            referencedRelation: "ai_conversations"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "conversation_messages_org_id_fkey"
+            foreignKeyName: "ai_conversation_messages_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -292,7 +292,7 @@ export type Database = {
           },
         ]
       }
-      conversations: {
+      ai_conversations: {
         Row: {
           created_at: string
           created_by: string | null
@@ -322,7 +322,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "conversations_org_id_fkey"
+            foreignKeyName: "ai_conversations_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"

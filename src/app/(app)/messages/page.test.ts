@@ -106,8 +106,8 @@ function stubClient({
     range: vi.fn(async () => ({ data: messages, error: null })),
   };
   const from = vi.fn((table: string) => {
-    if (table === "conversations") return conversationsChain;
-    if (table === "conversation_messages") return messagesChain;
+    if (table === "ai_conversations") return conversationsChain;
+    if (table === "ai_conversation_messages") return messagesChain;
     throw new Error(`unexpected from(${table})`);
   });
   const rpc = vi.fn(async (name: string) => {
@@ -251,7 +251,7 @@ describe("MessagesPage surfaces", () => {
     expect(html).not.toContain(ASK_GLOBEE.included);
     expect(html).not.toContain(ASK_GLOBEE.headerSearchHint);
     expectNoThreadFixture(html);
-    expect(from).toHaveBeenCalledWith("conversations");
+    expect(from).toHaveBeenCalledWith("ai_conversations");
     expect(from).not.toHaveBeenCalledWith("titles");
     expect(rpc).not.toHaveBeenCalledWith("my_findings");
   });
@@ -310,7 +310,7 @@ describe("MessagesPage surfaces", () => {
     expect(vi.mocked(getActiveOrgTier)).not.toHaveBeenCalled();
     expect(rpc).toHaveBeenCalledWith("my_notifications");
     expect(rpc).not.toHaveBeenCalledWith("my_findings");
-    expect(from).not.toHaveBeenCalledWith("conversations");
+    expect(from).not.toHaveBeenCalledWith("ai_conversations");
   });
 
   it("treats staff with an active client org by that org's tier", async () => {
@@ -371,8 +371,8 @@ describe("MessagesPage Ask Globee persist", () => {
 
     const html = await renderPage({ thread: THREAD });
 
-    expect(from).toHaveBeenCalledWith("conversations");
-    expect(from).toHaveBeenCalledWith("conversation_messages");
+    expect(from).toHaveBeenCalledWith("ai_conversations");
+    expect(from).toHaveBeenCalledWith("ai_conversation_messages");
     expect(eq).toHaveBeenCalledWith("org_id", "org-1");
     expect(rpc).not.toHaveBeenCalledWith("my_findings");
     expect(html).toContain("data-ask-globee-thread");

@@ -53,7 +53,7 @@ export default async function MessagesPage({
 
     if (threadId) {
       const { data: conversationRow } = await supabase
-        .from("conversations")
+        .from("ai_conversations")
         .select("id, title, pinned_at, created_at, updated_at")
         .eq("id", threadId)
         .eq("org_id", org.id)
@@ -61,14 +61,14 @@ export default async function MessagesPage({
       const conversation = conversationRow as AskGlobeeHistoryRow | null;
       if (conversation) {
         const { data: messageRows } = await supabase
-          .from("conversation_messages")
+          .from("ai_conversation_messages")
           .select("id, role, body, lead, follow, thumbs, created_at")
           .eq("conversation_id", conversation.id)
           .eq("org_id", org.id)
           .order("created_at", { ascending: true })
           .range(...rangeFor(UNPAGINATED_MAX));
         const { data: historyRows } = await supabase
-          .from("conversations")
+          .from("ai_conversations")
           .select("id, title, pinned_at, created_at, updated_at")
           .eq("org_id", org.id)
           .range(...rangeFor(UNPAGINATED_MAX));
@@ -84,7 +84,7 @@ export default async function MessagesPage({
     }
 
     const { data: historyRows } = await supabase
-      .from("conversations")
+      .from("ai_conversations")
       .select("id, title, pinned_at, created_at, updated_at")
       .eq("org_id", org.id)
       .range(...rangeFor(UNPAGINATED_MAX));

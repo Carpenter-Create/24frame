@@ -1,5 +1,5 @@
 -- ask_globee_conversations_test.sql
--- Cross-org isolation for Ask Globee conversations + messages.
+-- Cross-org isolation for Ask Globee ai_conversations + ai_conversation_messages.
 -- Org B must not SELECT / INSERT / UPDATE / DELETE org A's rows.
 -- Access UI gating is an app test; this file is RLS only.
 
@@ -34,30 +34,30 @@ select set_config('request.jwt.claims',
 
 select lives_ok(
   format($sql$
-    insert into public.conversations (id, org_id, title, created_by)
+    insert into public.ai_conversations (id, org_id, title, created_by)
     values (%L, %L, 'What needs attention', %L)
   $sql$, current_setting('t.cidA'), current_setting('t.orgA'), current_setting('t.ownerA')),
   'org A owner can insert a conversation into own org');
 
 select lives_ok(
   format($sql$
-    insert into public.conversation_messages (id, org_id, conversation_id, role, body)
+    insert into public.ai_conversation_messages (id, org_id, conversation_id, role, body)
     values (%L, %L, %L, 'user', 'What needs attention')
   $sql$, current_setting('t.midA'), current_setting('t.orgA'), current_setting('t.cidA')),
   'org A owner can insert a user turn on own conversation');
 
 select lives_ok(
   format($sql$
-    insert into public.conversation_messages (id, org_id, conversation_id, role, body, lead, follow)
+    insert into public.ai_conversation_messages (id, org_id, conversation_id, role, body, lead, follow)
     values (%L, %L, %L, 'globee', 'Nothing needs attention.', 'Nothing needs attention.', null)
   $sql$, current_setting('t.gidA'), current_setting('t.orgA'), current_setting('t.cidA')),
   'org A owner can insert a globee turn on own conversation');
 
 select is(
-  (select count(*) from public.conversations where org_id = current_setting('t.orgA')::uuid)::int,
+  (select count(*) from public.ai_conversations where org_id = current_setting('t.orgA')::uuid)::int,
   1, 'org A owner sees own conversation');
 select is(
-  (select count(*) from public.conversation_messages where org_id = current_setting('t.orgA')::uuid)::int,
+  (select count(*) from public.ai_conversation_messages where org_id = current_setting('t.orgA')::uuid)::int,
   2, 'org A owner sees own messages');
 
 -- viewer of A uses the same 'view' write capability (not operate)
@@ -65,7 +65,7 @@ select set_config('request.jwt.claims',
   json_build_object('sub', current_setting('t.viewA'), 'role', 'authenticated')::text, true);
 select lives_ok(
   format($sql$
-    update public.conversation_messages
+    update public.ai_conversation_messages
        set thumbs = 'up'
      where id = %L
   $sql$, current_setting('t.gidA')),
@@ -76,22 +76,22 @@ select set_config('request.jwt.claims',
   json_build_object('sub', current_setting('t.ownerB'), 'role', 'authenticated')::text, true);
 
 select is(
-  (select count(*) from public.conversations where org_id = current_setting('t.orgA')::uuid)::int,
+  (select count(*) from public.ai_conversations where org_id = current_setting('t.orgA')::uuid)::int,
   0, 'org B cannot SELECT org A conversations');
 select is(
-  (select count(*) from public.conversation_messages where org_id = current_setting('t.orgA')::uuid)::int,
+  (select count(*) from public.ai_conversation_messages where org_id = current_setting('t.orgA')::uuid)::int,
   0, 'org B cannot SELECT org A messages');
 
 select throws_ok(
   format($sql$
-    insert into public.conversations (org_id, title)
+    insert into public.ai_conversations (org_id, title)
     values (%L, 'cross-org')
   $sql$, current_setting('t.orgA')),
   '42501', null, 'org B cannot INSERT a conversation into org A');
 
 select throws_ok(
   format($sql$
-    insert into public.conversation_messages (org_id, conversation_id, role, body)
+    insert into public.ai_conversation_messages (org_id, conversation_id, role, body)
     values (%L, %L, 'user', 'cross-org')
   $sql$, current_setting('t.orgA'), current_setting('t.cidA')),
   '42501', null, 'org B cannot INSERT a message onto an org A conversation');
@@ -99,32 +99,32 @@ select throws_ok(
 -- RLS hides the row, so UPDATE/DELETE affect 0 rows rather than 42501.
 select lives_ok(
   format($sql$
-    update public.conversations set title = 'hacked' where id = %L
+    update public.ai_conversations set title = 'hacked' where id = %L
   $sql$, current_setting('t.cidA')),
   'org B UPDATE of an org A conversation is a no-op under RLS');
 select lives_ok(
   format($sql$
-    update public.conversation_messages set body = 'hacked' where id = %L
+    update public.ai_conversation_messages set body = 'hacked' where id = %L
   $sql$, current_setting('t.midA')),
   'org B UPDATE of an org A message is a no-op under RLS');
 select lives_ok(
   format($sql$
-    delete from public.conversations where id = %L
+    delete from public.ai_conversations where id = %L
   $sql$, current_setting('t.cidA')),
   'org B DELETE of an org A conversation is a no-op under RLS');
 select lives_ok(
   format($sql$
-    delete from public.conversation_messages where id = %L
+    delete from public.ai_conversation_messages where id = %L
   $sql$, current_setting('t.midA')),
   'org B DELETE of an org A message is a no-op under RLS');
 
 reset role;
 select is(
-  (select title from public.conversations where id = current_setting('t.cidA')::uuid),
+  (select title from public.ai_conversations where id = current_setting('t.cidA')::uuid),
   'What needs attention',
   'org A conversation title unchanged after org B write attempts');
 select is(
-  (select count(*) from public.conversation_messages where conversation_id = current_setting('t.cidA')::uuid)::int,
+  (select count(*) from public.ai_conversation_messages where conversation_id = current_setting('t.cidA')::uuid)::int,
   2, 'org A messages still present after org B write attempts');
 
 select * from finish();
