@@ -1,6 +1,13 @@
 import "server-only";
 import { Resend } from "resend";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import {
+  EMAIL_BODY,
+  EMAIL_INK,
+  EMAIL_SECONDARY,
+  housePrimaryLink,
+  wrapHouseEmail,
+} from "@/lib/email-house";
 import { PORTAL } from "@/lib/portal";
 import { PRODUCT_NAME } from "@/lib/product";
 import type { Database } from "@/lib/supabase/database.types";
@@ -23,10 +30,11 @@ export function buildOtpEmail(code: string): { subject: string; text: string; ht
   const text =
     `Your verification code is ${code}.\n\n` +
     `It expires in ${PORTAL.otpTtlMinutes} minutes. If you didn't request this, you can ignore this message.`;
-  const html =
-    `<p>Your verification code is</p>` +
-    `<p style="font-size:24px;font-weight:600;letter-spacing:2px">${code}</p>` +
-    `<p>It expires in ${PORTAL.otpTtlMinutes} minutes. If you didn't request this, you can ignore this message.</p>`;
+  const html = wrapHouseEmail(
+    `<p style="margin:0 0 12px;color:${EMAIL_BODY}">Your verification code is</p>` +
+      `<p style="margin:0 0 16px;font-size:24px;font-weight:600;letter-spacing:2px;color:${EMAIL_INK}">${code}</p>` +
+      `<p style="margin:0;color:${EMAIL_SECONDARY}">It expires in ${PORTAL.otpTtlMinutes} minutes. If you didn't request this, you can ignore this message.</p>`,
+  );
   return { subject, text, html };
 }
 
@@ -51,10 +59,10 @@ export function buildNotificationEmail(args: {
 }): { subject: string; text: string; html: string } {
   const { subject, body, ctaLabel, ctaUrl } = args;
   const text = `${body}\n\n${ctaLabel}: ${ctaUrl}\n\n${PRODUCT_NAME}`;
-  const html =
-    `<p>${escapeHtml(body)}</p>` +
-    `<p><a href="${ctaUrl}">${escapeHtml(ctaLabel)}</a></p>` +
-    `<p style="color:#6b7280">${PRODUCT_NAME}</p>`;
+  const html = wrapHouseEmail(
+    `<p style="margin:0 0 16px;color:${EMAIL_BODY}">${escapeHtml(body)}</p>` +
+      housePrimaryLink(ctaUrl, escapeHtml(ctaLabel)),
+  );
   return { subject, text, html };
 }
 
