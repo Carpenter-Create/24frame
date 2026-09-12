@@ -5,6 +5,7 @@ import {
   EMAIL_BODY,
   EMAIL_INK,
   EMAIL_SECONDARY,
+  houseOtpCode,
   housePrimaryLink,
   wrapHouseEmail,
 } from "@/lib/email-house";
@@ -32,7 +33,7 @@ export function buildOtpEmail(code: string): { subject: string; text: string; ht
     `It expires in ${PORTAL.otpTtlMinutes} minutes. If you didn't request this, you can ignore this message.`;
   const html = wrapHouseEmail(
     `<p style="margin:0 0 12px;color:${EMAIL_BODY}">Your verification code is</p>` +
-      `<p style="margin:0 0 16px;font-size:24px;font-weight:600;letter-spacing:2px;color:${EMAIL_INK}">${code}</p>` +
+      `<div style="margin:0 0 16px">${houseOtpCode(code)}</div>` +
       `<p style="margin:0;color:${EMAIL_SECONDARY}">It expires in ${PORTAL.otpTtlMinutes} minutes. If you didn't request this, you can ignore this message.</p>`,
   );
   return { subject, text, html };

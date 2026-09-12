@@ -24,8 +24,39 @@ export const EMAIL_COPYRIGHT = `© 2026 ${PARENT_ENTITY}. All rights reserved.`;
 export const EMAIL_ADDRESS = "3839 McKinney Ave, Suite 155 #2276, Dallas, TX 75204";
 export const EMAIL_GEIST_HREF =
   "https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap";
+export const EMAIL_FORMAT_DETECTION = "telephone=no, date=no, address=no, email=no";
 
 const FONT = "Geist,ui-sans-serif,-apple-system,system-ui,sans-serif";
+const ZWSP = "&#8203;";
+
+// Apple Mail still wraps bare digit runs (OTP / portal codes) as tel: links
+// even when the ink is already #14171A. Meta + detector CSS + ZWSP bookends
+// keep the code near-black and un-underlined. Sporty Blue stays on <a> only.
+const APPLE_DETECTOR_STYLE =
+  `<style type="text/css">` +
+  `a[x-apple-data-detectors],a[x-apple-data-detectors]:hover,a[x-apple-data-detectors]:focus,` +
+  `a[x-apple-data-detectors]:visited,a[x-apple-data-detectors]:active` +
+  `{color:inherit!important;text-decoration:none!important;font-size:inherit!important;` +
+  `font-family:inherit!important;font-weight:inherit!important;line-height:inherit!important}` +
+  `.otp::before,.otp::after{content:"\\200B"}` +
+  `</style>`;
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+export function houseOtpCode(code: string): string {
+  return (
+    `<table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse">` +
+    `<tr><td x-apple-data-detectors="false" style="font-size:24px;font-weight:600;letter-spacing:2px;color:${EMAIL_INK};text-decoration:none">` +
+    `<span class="otp" x-apple-data-detectors="false" style="color:${EMAIL_INK};text-decoration:none;font-weight:600;font-size:24px;letter-spacing:2px">${ZWSP}${escapeHtml(code)}${ZWSP}</span>` +
+    `</td></tr></table>`
+  );
+}
 
 function hairline(): string {
   return (
@@ -46,9 +77,12 @@ export function wrapHouseEmail(innerHtml: string): string {
     `<head>` +
     `<meta charset="utf-8" />` +
     `<meta name="viewport" content="width=device-width, initial-scale=1" />` +
+    `<meta name="format-detection" content="${EMAIL_FORMAT_DETECTION}" />` +
+    `<meta name="x-apple-disable-message-reformatting" />` +
     `<link rel="preconnect" href="https://fonts.googleapis.com" />` +
     `<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />` +
     `<link href="${EMAIL_GEIST_HREF}" rel="stylesheet" />` +
+    APPLE_DETECTOR_STYLE +
     `</head>` +
     `<body style="margin:0;padding:0;background:${EMAIL_BG}">` +
     `<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:${EMAIL_BG}">` +
