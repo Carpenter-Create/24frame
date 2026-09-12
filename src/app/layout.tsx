@@ -3,11 +3,12 @@ import { GeistSans } from "geist/font/sans";
 import "./globals.css";
 
 import { ThemeSync } from "@/components/theme-toggle";
+import { AGGREGATION_WORKSPACE, PRODUCT_NAME } from "@/lib/product";
 import { NO_FLASH_THEME_SCRIPT } from "@/lib/theme";
 
 export const metadata: Metadata = {
-  title: "Global Content",
-  description: "Global Content dashboard.",
+  title: PRODUCT_NAME,
+  description: `${PRODUCT_NAME} ${AGGREGATION_WORKSPACE}.`,
 };
 
 // Applied before paint to prevent a flash. Light is the guaranteed default;

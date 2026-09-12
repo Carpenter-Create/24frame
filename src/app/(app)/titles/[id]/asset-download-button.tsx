@@ -5,6 +5,7 @@ import { Download, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { isClientViewableAssetKind } from "@/lib/assets";
+import { PRODUCT_NAME } from "@/lib/product";
 
 // View & download an asset. Fetches a fresh signed URL from /api/assets/url (RLS-checked,
 // server-signed) and opens it in a new tab. Handles the Glacier "restoring" (202) case.
@@ -21,7 +22,7 @@ export function AssetDownloadButton({ assetId, kind }: { assetId: string; kind: 
     return (
       <span className="t-body-sm text-ink-3">
         {kind === "master" || kind === "screener"
-          ? "Delivered to platforms by Global Content — not downloadable here."
+          ? `Delivered to platforms by ${PRODUCT_NAME}. Not downloadable here.`
           : "Not available for download."}
       </span>
     );

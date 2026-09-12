@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { ASK_GLOBEE } from "@/lib/ask-globee";
+import { PRODUCT_NAME } from "@/lib/product";
 
 export type NavItem = { label: string; href: string; icon: LucideIcon; exact?: boolean };
 
@@ -28,7 +29,7 @@ export const NAV: NavItem[] = [
 // the (operator) layout remains the authorization gate for these hrefs.
 export const GC_NAV: NavItem[] = [
   { label: "Queue", href: "/queue", icon: Inbox },
-  { label: "GC Deliveries", href: "/gc/deliveries", icon: Send },
+  { label: `${PRODUCT_NAME} Deliveries`, href: "/gc/deliveries", icon: Send },
   { label: "Vendors", href: "/vendors", icon: Store },
   { label: "Clients", href: "/gc/clients", icon: Users },
 ];

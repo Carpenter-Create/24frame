@@ -1,3 +1,5 @@
+import { PRODUCT_NAME } from "@/lib/product";
+
 // Notification copy + labels (§20 GC-Support in-app push). Copy in lib/, not JSX.
 
 export const NOTIFICATION_KIND_LABEL: Record<"title_rejected" | "delivery_update", string> = {
@@ -74,4 +76,4 @@ export const DELIVERY_STATUS_LABELS: Record<
 };
 
 export const MESSAGES_EMPTY = "No messages yet.";
-export const MESSAGES_SUBTITLE = "Updates from Global Content.";
+export const MESSAGES_SUBTITLE = `Updates from ${PRODUCT_NAME}.`;

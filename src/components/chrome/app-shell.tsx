@@ -22,6 +22,7 @@ import {
   RAIL_COLLAPSE_RL_CHEVRON_ICON_CLASS,
   RAIL_COLLAPSE_RL_CHEVRON_ICON_STROKE,
 } from "@/lib/rail-collapse";
+import { PRODUCT_NAME } from "@/lib/product";
 import { isSettingsPath, SETTINGS_RAIL_PAD_CLASS } from "@/lib/settings";
 
 type Org = { id: string; name: string };
@@ -100,7 +101,7 @@ export function AppShell({
           style={{ height: "var(--header-height)" }}
         >
           {settingsPage || !collapsed ? (
-            <span className="flex-1 truncate t-body font-medium text-ink">Global Content</span>
+            <span className="flex-1 truncate t-body font-medium text-ink">{PRODUCT_NAME}</span>
           ) : null}
           {settingsPage || collapsed ? null : (
             <button

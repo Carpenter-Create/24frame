@@ -1,4 +1,4 @@
-# AGENTS.md — Global Content Dashboard
+# AGENTS.md — 24Frame
 
 > Shared repository authority for **Global Content Dev**, **Cursor**, and **Codex** (independent reviewer).
 > `CLAUDE.md` is a compatibility shim that includes this file — do not maintain separate governance.
@@ -118,13 +118,14 @@ Spec beats reference repos and older code.
 **Tier 3.** Real external users, PII, signed contracts, rights-holder revenue data, payouts.
 Full spec, blast-radius review, security rigor.
 
-This is the authenticated client dashboard for **Global Content's Content Distribution pillar**.
+This is the authenticated client dashboard for **24Frame** (aggregation workspace).
 Rights holders sign a licensing agreement, submit titles and **platform-ready** assets, track delivery
 across vendors, and (later) receive revenue statements and payouts.
 
-**Not** the public site (`globalcontent-web`, separate repo). **Not** 24Frame — separate product,
-separate repo, and a **separate Supabase account** (never create 24Frame under the Global Content
-Supabase account).
+Repo remains Carpenter-Create/globalcontent-dashboard. Product language is 24Frame. Parent corp is
+Global Content Holdings LLC.
+
+**Not** the public site (`globalcontent-web`, separate repo).
 
 Single Next.js App Router app on Vercel. No monorepo. Its own Supabase project.
 

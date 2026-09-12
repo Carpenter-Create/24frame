@@ -28,17 +28,17 @@ function pdfVisibleText(bytes: Uint8Array): string {
 
 describe("askGlobeeDownloadFilename", () => {
   it("names the file globee-{slug}.pdf from the live title, not .txt", () => {
-    expect(askGlobeeDownloadFilename("What needs attention")).toBe("globee-what-needs-attention.pdf");
+    expect(askGlobeeDownloadFilename("What needs attention")).toBe("24Frame-what-needs-attention.pdf");
     expect(askGlobeeDownloadFilename("What needs attention")).not.toMatch(/\.txt$/);
-    expect(askGlobeeDownloadFilename("   ")).toBe("globee-conversation.pdf");
+    expect(askGlobeeDownloadFilename("   ")).toBe("24Frame-conversation.pdf");
   });
 
   it("slugs the Winter Line fixture title as a filename example only", () => {
     expect(askGlobeeDownloadFilename(ASK_GLOBEE.threadTitle)).toBe(
-      "globee-whats-blocking-the-winter-line.pdf",
+      "24Frame-whats-blocking-the-winter-line.pdf",
     );
     expect(askGlobeeDownloadFilename("Harbor Cut needs a synopsis")).toBe(
-      "globee-harbor-cut-needs-a-synopsis.pdf",
+      "24Frame-harbor-cut-needs-a-synopsis.pdf",
     );
     expect(src).not.toContain("Winter Line");
     expect(src).not.toContain("whats-blocking-the-winter-line");
@@ -66,7 +66,7 @@ describe("askGlobee download ink", () => {
 });
 
 describe("buildAskGlobeeDownloadPdf", () => {
-  it("writes a Global Content letter PDF from the live turn, never Mercury", () => {
+  it("writes a 24Frame letter PDF from the live turn, never Mercury", () => {
     const bytes = buildAskGlobeeDownloadPdf({
       title: "What needs attention",
       userPrompt: "What needs attention",
@@ -89,8 +89,8 @@ describe("buildAskGlobeeDownloadPdf", () => {
     expect(bytes[0]).toBe(0x25);
     expect(raw.startsWith("%PDF-")).toBe(true);
     expect(raw).toContain(`/MediaBox [0 0 ${ASK_GLOBEE_DOWNLOAD.pageWidth} ${ASK_GLOBEE_DOWNLOAD.pageHeight}]`);
-    expect(text).toContain("Global Content");
-    expect(text).toContain("Globee AI");
+    expect(text).toContain("24Frame");
+    expect(text).toContain("24Frame AI");
     expect(text).toContain("What needs attention");
     expect(text).toContain("Harbor Cut is missing Genre.");
     expect(text).toContain("Genre is required before it can go live.");
@@ -131,8 +131,8 @@ describe("buildAskGlobeeDownloadPdf", () => {
     });
     const text = pdfVisibleText(bytes);
 
-    expect(text).toContain("Global Content");
-    expect(text).toContain("Globee AI");
+    expect(text).toContain("24Frame");
+    expect(text).toContain("24Frame AI");
     expect(text).toContain("What needs attention");
     expect(text).toContain("What is blocking a title");
     expect(text).toContain("Harbor Cut is missing Genre.");
@@ -162,8 +162,8 @@ describe("buildAskGlobeeDownloadPdf", () => {
     const raw = pdfString(bytes);
     const text = pdfVisibleText(bytes);
 
-    expect(text).toContain("Global Content");
-    expect(text).toContain("Globee AI");
+    expect(text).toContain("24Frame");
+    expect(text).toContain("24Frame AI");
     expect(text).toContain("User turn 0 asks about Harbor Cut.");
     expect(text).toContain("Globee turn 0 answers about Harbor Cut.");
     expect(text).toContain("User turn 15 asks about Harbor Cut.");
@@ -187,7 +187,7 @@ describe("buildAskGlobeeDownloadPdf", () => {
     expect(text).toContain("Synopsis");
     expect(text).toContain("Runtime");
     expect(text).toContain("Director");
-    expect(text).toContain("Globee AI");
+    expect(text).toContain("24Frame AI");
     expect(text).not.toContain("**");
     expect(text).not.toContain("Mercury");
   });

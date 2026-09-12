@@ -1,4 +1,5 @@
 import { ASK_GLOBEE, askGlobeeConversationTitle } from "@/lib/ask-globee";
+import { PRODUCT_NAME } from "@/lib/product";
 import {
   parseAskGlobeeDownloadInk,
   stackAskGlobeeDownloadFacts,
@@ -20,7 +21,7 @@ export const ASK_GLOBEE_DOWNLOAD_CONTENT_TYPE = "application/pdf";
 
 export const ASK_GLOBEE_DOWNLOAD = {
   contentType: ASK_GLOBEE_DOWNLOAD_CONTENT_TYPE,
-  brandName: "Global Content",
+  brandName: PRODUCT_NAME,
   attributionName: ASK_GLOBEE.attributionName,
   mark: ASK_GLOBEE.globeeMark,
   pageWidth: 768,
@@ -76,7 +77,7 @@ export function askGlobeeDownloadFilename(title: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 48);
-  return `globee-${slug || "conversation"}.pdf`;
+  return `${PRODUCT_NAME}-${slug || "conversation"}.pdf`;
 }
 
 export function askGlobeeDownloadBlob(input: AskGlobeeDownloadInput): Blob {

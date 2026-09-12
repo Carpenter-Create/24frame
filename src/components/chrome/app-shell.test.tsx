@@ -280,7 +280,7 @@ describe("AppShell /settings rail", () => {
     expect(html).not.toContain("Titles");
     expect(html).not.toContain("Deliveries");
     expect(html).not.toContain("Catalog Health");
-    expect(html).not.toContain("Ask Globee");
+    expect(html).not.toContain("Ask 24Frame AI");
     expect(html).not.toContain("Queue");
     expect(html).not.toContain("Expand sidebar");
     expect(html).not.toContain("Collapse sidebar");
@@ -346,7 +346,7 @@ describe("AppShell RL rail-collapse chevron", () => {
     expect(html).toContain(`stroke-width="${RAIL_COLLAPSE_RL_CHEVRON_ICON_STROKE}"`);
     expect(html).not.toContain("Expand sidebar");
     expect(html).not.toContain(RAIL_COLLAPSE_RL_CHEVRON_EXPAND_ROW_CLASS);
-    expect(html).toContain("Global Content");
+    expect(html).toContain("24Frame");
     expect(shellSrc).toContain("ChevronsLeft");
     expect(shellSrc).toContain("ChevronsRight");
     expect(shellSrc).toContain("RAIL_COLLAPSE_RL_CHEVRON");

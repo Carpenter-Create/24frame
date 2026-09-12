@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { createOrg } from "@/app/actions";
+import { ONBOARDING_ORGANIZATION } from "@/lib/onboarding";
 
 // First-run onboarding: name the organization → create_org_and_membership RPC.
 // Controlled input + manual validation + inline notice (house form pattern).
@@ -18,7 +19,7 @@ export function OnboardingForm() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) {
-      setError("Organization name is required.");
+      setError(ONBOARDING_ORGANIZATION.nameRequired);
       return;
     }
     setSaving(true);
@@ -34,7 +35,7 @@ export function OnboardingForm() {
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
-        <Label htmlFor="org-name">Organization name</Label>
+        <Label htmlFor="org-name">{ONBOARDING_ORGANIZATION.nameLabel}</Label>
         <Input
           id="org-name"
           value={name}
@@ -43,7 +44,7 @@ export function OnboardingForm() {
         />
       </div>
       <Button type="submit" disabled={saving || !name.trim()} className="self-start">
-        {saving ? "Creating…" : "Create organization"}
+        {saving ? ONBOARDING_ORGANIZATION.creating : ONBOARDING_ORGANIZATION.submit}
       </Button>
       {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
     </form>

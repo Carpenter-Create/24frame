@@ -5,6 +5,7 @@ import { getAuthUser } from "@/lib/supabase/auth";
 import { renderAgreement, TIER_META, TIERS, type Tier } from "@/lib/agreements";
 import { Card } from "@/components/ui/card";
 import { AcceptForm } from "@/app/agreement/accept-form";
+import { PRODUCT_NAME } from "@/lib/product";
 import { WizardFrame } from "../wizard-frame";
 
 // Step 3 — Choose plan + accept agreement. Tier cards, then the conspicuous scrollable
@@ -35,7 +36,7 @@ export default async function PlanStep({
   return (
     <WizardFrame
       step={3}
-      eyebrow={`Global Content · ${org.name}`}
+      eyebrow={`${PRODUCT_NAME} · ${org.name}`}
       title="Choose your plan"
       subtitle={tier ? undefined : "You can change tier later; a downgrade is free."}
       back={tier ? "/onboarding/plan" : "/onboarding/organization"}

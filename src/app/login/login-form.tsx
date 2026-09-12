@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InlineNotice } from "@/components/ui/inline-notice";
+import { PRODUCT_NAME } from "@/lib/product";
 import { requestMagicLink, type LoginState } from "./actions";
 
 const INITIAL: LoginState = { ok: false, message: "" };
@@ -17,7 +18,7 @@ export function LoginForm({ authError }: { authError: string | null }) {
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-8 px-6 py-16">
       <div className="flex flex-col gap-2">
-        <span className="t-label text-ink-3">Global Content</span>
+        <span className="t-label text-ink-3">{PRODUCT_NAME}</span>
         <h1 className="t-subhead text-ink">Sign in</h1>
         <p className="t-body-sm text-body">
           We&rsquo;ll email you a secure sign-in link. No password to remember.

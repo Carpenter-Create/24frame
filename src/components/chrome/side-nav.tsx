@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Suspense, use, useRef } from "react";
 import { GC_NAV, NAV, type NavItem } from "@/lib/nav";
 import { cn } from "@/lib/cn";
+import { PRODUCT_NAME } from "@/lib/product";
 
 // Access rail: 13px labels (--text-sm / t-body-sm), 16px Lucide at 1.33, muted grey wash when active.
 // Collapsed mode is icon-only (labels/badges hidden; title tooltips; unread → accent dot).
@@ -83,7 +84,7 @@ export function SideNav({
         <>
           <div className="mx-1 my-2 border-t border-hairline" />
           {!collapsed ? (
-            <span className="px-2.5 pb-1 t-label text-ink-3">Global Content</span>
+            <span className="px-2.5 pb-1 t-label text-ink-3">{PRODUCT_NAME}</span>
           ) : null}
           {GC_NAV.map((item) => row(item))}
         </>

@@ -15,6 +15,7 @@
 // 16 chevron + 15 Regular, gap 8, pad 24, href /. No hamburger.
 // Avatar 32 stays. Not a new IA. Appearance stays in-menu.
 
+import { ASK_ASSISTANT } from "@/lib/product";
 import { MOBILE_CHROME_LEAD_PAD_CLASS } from "@/lib/mobile-chrome";
 import { USER_MENU } from "@/lib/user-menu";
 
@@ -75,7 +76,7 @@ export const SETTINGS_RAIL_ABSENT = [
   "Titles",
   "Deliveries",
   "Catalog Health",
-  "Ask Globee",
+  ASK_ASSISTANT,
   "Queue",
   "Vendors",
   "Clients",
