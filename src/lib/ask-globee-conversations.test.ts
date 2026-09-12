@@ -50,9 +50,9 @@ describe("askGlobee answer chrome helpers", () => {
   });
 
   it("names the download globee-{slug}.pdf from the conversation title", () => {
-    expect(askGlobeeDownloadFilename("What needs attention")).toBe("globee-what-needs-attention.pdf");
+    expect(askGlobeeDownloadFilename("What needs attention")).toBe("24Frame-what-needs-attention.pdf");
     expect(askGlobeeDownloadFilename(ASK_GLOBEE.threadTitle)).toBe(
-      "globee-whats-blocking-the-winter-line.pdf",
+      "24Frame-whats-blocking-the-winter-line.pdf",
     );
     expect(askGlobeeDownloadFilename("What needs attention")).not.toMatch(/\.txt$/);
   });

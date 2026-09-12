@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { NOTIFICATION_EMAIL } from "./notifications";
+import { MESSAGES_SUBTITLE, NOTIFICATION_EMAIL } from "./notifications";
 
 const TITLE_ID = "aaaaaaaa-1111-4111-8111-111111111111";
 
@@ -67,5 +67,11 @@ describe("NOTIFICATION_EMAIL.title_rejected.link (sender-facing API)", () => {
   it("keeps path() identical to link().path", () => {
     expect(path({ titleId: TITLE_ID })).toBe(link({ titleId: TITLE_ID }).path);
     expect(path({})).toBe(link({}).path);
+  });
+});
+
+describe("MESSAGES_SUBTITLE", () => {
+  it("names 24Frame, not Global Content", () => {
+    expect(MESSAGES_SUBTITLE).toBe("Updates from 24Frame.");
   });
 });

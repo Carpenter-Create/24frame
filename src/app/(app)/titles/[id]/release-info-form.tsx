@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InlineNotice } from "@/components/ui/inline-notice";
+import { PRODUCT_NAME } from "@/lib/product";
 import { RELEASE_TYPE_LABEL, formatReleaseDate, type ReleaseType } from "@/lib/releases";
 import { setTitleReleaseInfo } from "./actions";
 
@@ -89,7 +90,7 @@ export function ReleaseInfoForm({
         <div className="flex items-baseline justify-between gap-4 t-body-sm">
           <span className="text-ink-3">Release date</span>
           <span className="text-ink-2">
-            {releaseDate ? formatReleaseDate(releaseDate) : "Set by Global Content"}
+            {releaseDate ? formatReleaseDate(releaseDate) : `Set by ${PRODUCT_NAME}`}
           </span>
         </div>
       </div>

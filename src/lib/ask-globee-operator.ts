@@ -1,6 +1,7 @@
 import "server-only";
 
 import { ASK_GLOBEE } from "@/lib/ask-globee";
+import { ASSISTANT_NAME, PRODUCT_NAME } from "@/lib/product";
 import type { AskGlobeeAnswer } from "@/lib/ask-globee-answer";
 import {
   ASK_GLOBEE_TOOLS,
@@ -20,7 +21,7 @@ const ANTHROPIC_MESSAGES_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_VERSION = "2023-06-01";
 
 export const ASK_GLOBEE_SYSTEM = [
-  "You are Globee, a catalog operator for this signed-in client's Global Content catalog only.",
+  `You are ${ASSISTANT_NAME}, a catalog operator for this signed-in client's ${PRODUCT_NAME} catalog only.`,
   "Use tools to read this catalog before stating counts, titles, blockers, or what to submit next.",
   "Answer only from tool results. If the tools do not have the fact, say you do not have it.",
   "Never invent a title, count, finding, or commercial term.",

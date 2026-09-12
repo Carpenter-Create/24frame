@@ -164,7 +164,7 @@ describe("MobileNavSheet", () => {
       "Titles",
       "Deliveries",
       "Catalog Health",
-      "Ask Globee",
+      "Ask 24Frame AI",
     ]);
     for (const item of NAV) {
       expect(dest).toContain(item.label);
@@ -288,7 +288,7 @@ describe("MobileNavSheet", () => {
     expect(html).not.toContain("Global Content");
     expect(html).not.toContain("Staff");
     expect(html).not.toContain("t-label");
-    expect(dest.indexOf("Ask Globee")).toBeLessThan(dest.indexOf("data-mobile-nav-group-rule"));
+    expect(dest.indexOf("Ask 24Frame AI")).toBeLessThan(dest.indexOf("data-mobile-nav-group-rule"));
     expect(dest.indexOf("data-mobile-nav-group-rule")).toBeLessThan(dest.indexOf("Queue"));
   });
 

@@ -14,7 +14,7 @@ describe("SideNav Access rail", () => {
       "Titles",
       "Deliveries",
       "Catalog Health",
-      "Ask Globee",
+      "Ask 24Frame AI",
     ]);
     expect(NAV.map((item) => item.href)).toEqual([
       "/",

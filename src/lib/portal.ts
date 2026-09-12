@@ -1,5 +1,7 @@
 import { createHash, randomBytes, randomInt, timingSafeEqual } from "node:crypto";
 
+import { PRODUCT_NAME } from "@/lib/product";
+
 export const PORTAL = {
   linkTtlDays: 14,
   otpTtlMinutes: 10,
@@ -72,7 +74,7 @@ export const PORTAL_COPY = {
   codeSubmit: "Verify",
   downloadPrompt: "Your file is ready.",
   downloadButton: "Download",
-  errorExpired: "This link has expired or been withdrawn. Contact your Global Content representative.",
+  errorExpired: `This link has expired or been withdrawn. Contact your ${PRODUCT_NAME} representative.`,
   errorBadCode: "That code is incorrect or has expired. Request a new one.",
   errorTooMany: "Too many attempts. Request a new code.",
   errorChallenge: "Verification failed. Please complete the challenge and try again.",
@@ -108,7 +110,7 @@ export const PORTAL_COPY = {
   // must say why rather than leave a dead player, same "show the work" reasoning as the
   // download notice above it.
   screenerStreamUnavailableNotice:
-    "This screener isn't available for this link yet. Contact your Global Content representative.",
+    `This screener isn't available for this link yet. Contact your ${PRODUCT_NAME} representative.`,
   downloadMetadataButton: "Download metadata",
   downloadMasterHeading: "Licensed master",
   downloadMasterButton: "Download master",

@@ -43,6 +43,17 @@ describe("portal crypto", () => {
   });
 });
 
+describe("portal product chrome", () => {
+  it("names 24Frame in support copy", () => {
+    expect(PORTAL_COPY.errorExpired).toBe(
+      "This link has expired or been withdrawn. Contact your 24Frame representative.",
+    );
+    expect(PORTAL_COPY.screenerStreamUnavailableNotice).toBe(
+      "This screener isn't available for this link yet. Contact your 24Frame representative.",
+    );
+  });
+});
+
 // Fix round 2, item 2: title-page.tsx used to tell every non-409 failure "this link has
 // expired or been withdrawn" — false for a 403 refusal and false for a 5xx server fault.
 describe("downloadFailureMessage", () => {

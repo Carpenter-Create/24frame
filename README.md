@@ -1,8 +1,10 @@
-# Global Content Dashboard
+# 24Frame
 
-Authenticated client dashboard for **Global Content's Content Distribution** pillar. Rights holders sign a licensing agreement, submit titles and platform-ready assets, track delivery across vendors, and (later) receive revenue statements and payouts.
+Authenticated client dashboard for **24Frame**. Rights holders sign a licensing agreement, submit titles and platform-ready assets, track delivery across vendors, and (later) receive revenue statements and payouts.
 
-This is **not** the public site (`globalcontent-web`) and **not** 24Frame (separate product, separate Supabase account).
+Repo remains `Carpenter-Create/globalcontent-dashboard`. Product language is 24Frame. Parent corp is Global Content Holdings LLC.
+
+This is **not** the public site (`globalcontent-web`, separate repo).
 
 **Tier 3** — real users, PII, contracts, rights-holder revenue data. Treat accordingly.
 

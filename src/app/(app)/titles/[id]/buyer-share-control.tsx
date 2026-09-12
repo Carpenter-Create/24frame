@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InlineNotice } from "@/components/ui/inline-notice";
+import { PRODUCT_NAME } from "@/lib/product";
 import { createBuyerScreenerLink, revokeBuyerScreenerLink } from "./actions";
 
 export type BuyerLink = {
@@ -117,7 +118,7 @@ export function BuyerShareControl({
             // no particular buyer" isn't a coherent action, so there is nothing to gate it
             // against; the row gets Copy and Stop sharing only.
             const recipientName = link.recipientName;
-            const displayName = recipientName ?? "Shared by Global Content";
+            const displayName = recipientName ?? `Shared by ${PRODUCT_NAME}`;
             return (
               <div key={link.linkId} className="rounded-[var(--radius-sm)] border border-hairline p-3">
                 <p className="t-body-sm font-medium text-ink">{displayName}</p>

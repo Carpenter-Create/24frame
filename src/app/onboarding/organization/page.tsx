@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { OnboardingForm } from "@/components/onboarding-form";
+import { PRODUCT_NAME } from "@/lib/product";
 import { WizardFrame } from "../wizard-frame";
 
 // Step 2 — Organization. Creates the org (status `registered`) via create_org_and_membership,
@@ -28,7 +29,7 @@ export default async function OrganizationStep() {
   return (
     <WizardFrame
       step={2}
-      eyebrow="Global Content"
+      eyebrow={PRODUCT_NAME}
       title="Name your organization"
       subtitle="This is the account that holds your titles, rights, and deliveries."
       back="/onboarding"

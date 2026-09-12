@@ -2,12 +2,13 @@ import "server-only";
 import { Resend } from "resend";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { PORTAL } from "@/lib/portal";
+import { PRODUCT_NAME } from "@/lib/product";
 import type { Database } from "@/lib/supabase/database.types";
 
 // Asset-related + GC-Support emails send from a dedicated identity (founder: "anything asset
 // related should come from assets@globalcontent.co"). Override via ASSETS_EMAIL_FROM; defaults
 // to the verified assets@ address on the globalcontent.co Resend domain (no extra setup needed).
-const EMAIL_FROM = process.env.ASSETS_EMAIL_FROM ?? "Global Content <assets@globalcontent.co>";
+const EMAIL_FROM = process.env.ASSETS_EMAIL_FROM ?? `${PRODUCT_NAME} <assets@globalcontent.co>`;
 
 function escapeHtml(s: string): string {
   return s
@@ -18,7 +19,7 @@ function escapeHtml(s: string): string {
 }
 
 export function buildOtpEmail(code: string): { subject: string; text: string; html: string } {
-  const subject = "Your Global Content access code";
+  const subject = `Your ${PRODUCT_NAME} access code`;
   const text =
     `Your verification code is ${code}.\n\n` +
     `It expires in ${PORTAL.otpTtlMinutes} minutes. If you didn't request this, you can ignore this message.`;
@@ -49,11 +50,11 @@ export function buildNotificationEmail(args: {
   ctaUrl: string;
 }): { subject: string; text: string; html: string } {
   const { subject, body, ctaLabel, ctaUrl } = args;
-  const text = `${body}\n\n${ctaLabel}: ${ctaUrl}\n\nGlobal Content`;
+  const text = `${body}\n\n${ctaLabel}: ${ctaUrl}\n\n${PRODUCT_NAME}`;
   const html =
     `<p>${escapeHtml(body)}</p>` +
     `<p><a href="${ctaUrl}">${escapeHtml(ctaLabel)}</a></p>` +
-    `<p style="color:#6b7280">Global Content</p>`;
+    `<p style="color:#6b7280">${PRODUCT_NAME}</p>`;
   return { subject, text, html };
 }
 

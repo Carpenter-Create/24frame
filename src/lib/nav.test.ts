@@ -30,7 +30,7 @@ describe("client NAV", () => {
     expect(isClientNavActive("/titles", NAV[0])).toBe(false);
     expect(clientNavCurrent("/titles").label).toBe("Titles");
     expect(clientNavCurrent("/titles/abc").label).toBe("Titles");
-    expect(clientNavCurrent("/messages").label).toBe("Ask Globee");
+    expect(clientNavCurrent("/messages").label).toBe("Ask 24Frame AI");
     expect(clientNavCurrent("/messages").label).toBe(ASK_GLOBEE.headline);
     expect(clientNavCurrent("/queue").label).toBe("Dashboard");
   });
@@ -38,7 +38,7 @@ describe("client NAV", () => {
   it("keeps /messages as Ask Globee with Lucide Sparkles, not Messages or the bee", () => {
     const dest = NAV.find((item) => item.href === "/messages");
     expect(dest).toBeDefined();
-    expect(dest?.label).toBe("Ask Globee");
+    expect(dest?.label).toBe("Ask 24Frame AI");
     expect(dest?.href).toBe("/messages");
     expect(dest?.icon).toBe(Sparkles);
     expect(dest?.icon).not.toBe(Sparkle);
@@ -68,7 +68,7 @@ describe("GC_NAV", () => {
   it("adds staff-only GC Deliveries between Queue and Vendors, with Clients last", () => {
     expect(GC_NAV.map((item) => ({ label: item.label, href: item.href }))).toEqual([
       { label: "Queue", href: "/queue" },
-      { label: "GC Deliveries", href: "/gc/deliveries" },
+      { label: "24Frame Deliveries", href: "/gc/deliveries" },
       { label: "Vendors", href: "/vendors" },
       { label: "Clients", href: "/gc/clients" },
     ]);
@@ -80,9 +80,9 @@ describe("GC_NAV", () => {
       "Titles",
       "Deliveries",
       "Catalog Health",
-      "Ask Globee",
+      "Ask 24Frame AI",
       "Queue",
-      "GC Deliveries",
+      "24Frame Deliveries",
       "Vendors",
       "Clients",
     ]);
@@ -100,7 +100,7 @@ describe("mobileNavDestinations", () => {
       "Titles",
       "Deliveries",
       "Catalog Health",
-      "Ask Globee",
+      "Ask 24Frame AI",
     ]);
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/queue");
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/vendors");
@@ -113,9 +113,9 @@ describe("mobileNavDestinations", () => {
       "Titles",
       "Deliveries",
       "Catalog Health",
-      "Ask Globee",
+      "Ask 24Frame AI",
       "Queue",
-      "GC Deliveries",
+      "24Frame Deliveries",
       "Vendors",
       "Clients",
     ]);

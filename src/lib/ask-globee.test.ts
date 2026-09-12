@@ -31,7 +31,7 @@ const THREAD = "2f1c8b6a-4d3e-4a11-9c22-7b8e1d0a5f44";
 
 describe("Ask Globee copy lock", () => {
   it("keeps the Access gate lines and Upgrade path", () => {
-    expect(ASK_GLOBEE.headline).toBe("Ask Globee");
+    expect(ASK_GLOBEE.headline).toBe("Ask 24Frame AI");
     expect(ASK_GLOBEE.analyze).toBe("Analyze anything about your catalog.");
     expect(ASK_GLOBEE.included).toBe("Included with Pro and Premium.");
     expect(ASK_GLOBEE.upgrade).toBe("Upgrade");
@@ -78,9 +78,9 @@ describe("Ask Globee copy lock", () => {
     expect(ASK_GLOBEE.stopHint).toBe("Esc");
     expect(ASK_GLOBEE.escToCancel).toBe("Esc to cancel");
     expect(ASK_GLOBEE.unavailable).toBe(
-      "Globee is unavailable right now. Try again, or ask what needs attention.",
+      "24Frame AI is unavailable right now. Try again, or ask what needs attention.",
     );
-    expect(ASK_GLOBEE.attributionName).toBe("Globee AI");
+    expect(ASK_GLOBEE.attributionName).toBe("24Frame AI");
     expect(ASK_GLOBEE.downloadLabel).toBe("Download");
     expect(ASK_GLOBEE.downloadPdfLabel).toBe("Download PDF");
     expect(ASK_GLOBEE.renameLabel).toBe("Rename");
@@ -105,7 +105,7 @@ describe("Ask Globee copy lock", () => {
     expect(ASK_GLOBEE.answerFollow).toBe(
       "Synopsis and Runtime are also required. Director is recommended.",
     );
-    expect(ASK_GLOBEE.attribution).toBe("Globee AI · 7:10 AM");
+    expect(ASK_GLOBEE.attribution).toBe("24Frame AI · 7:10 AM");
     expect(ASK_GLOBEE.composerPlaceholder).toBe("Ask a question or give a command.");
   });
 });

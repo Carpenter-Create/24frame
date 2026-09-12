@@ -126,7 +126,7 @@ describe("settings lock", () => {
       "Titles",
       "Deliveries",
       "Catalog Health",
-      "Ask Globee",
+      "Ask 24Frame AI",
       "Queue",
       "Vendors",
       "Clients",

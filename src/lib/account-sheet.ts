@@ -27,6 +27,7 @@
 // stay one source.
 
 import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
+import { ASK_ASSISTANT } from "@/lib/product";
 import { USER_MENU_ACTIONS, userMenuAvatarInitial, userMenuName } from "@/lib/user-menu";
 
 export const ACCOUNT_SHEET = {
@@ -39,7 +40,7 @@ export const ACCOUNT_SHEET_ABSENT = [
   "Titles",
   "Deliveries",
   "Catalog Health",
-  "Ask Globee",
+  ASK_ASSISTANT,
   "Queue",
   "Manage account",
   "ACCOUNT",

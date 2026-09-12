@@ -1,3 +1,4 @@
+import { ASK_ASSISTANT, ASSISTANT_NAME } from "@/lib/product";
 import { USER_MENU } from "@/lib/user-menu";
 
 // Ask Globee copy and gating. Lives in lib/, not JSX.
@@ -43,7 +44,7 @@ export function askGlobeeChipMark(index: number): AskGlobeeChipMark | null {
 
 export const ASK_GLOBEE = {
   pageTitle: "Messages",
-  headline: "Ask Globee",
+  headline: ASK_ASSISTANT,
   // Leftover 7:73 greeting — do not render on landing. Do not invent a replacement.
   need: "What do you need?",
   tryLabel: "Try one of these",
@@ -64,7 +65,7 @@ export const ASK_GLOBEE = {
   userPrompt: "What's blocking The Winter Line?",
   answerLead: "The Winter Line is missing Genre. Genre is required before it can go live.",
   answerFollow: "Synopsis and Runtime are also required. Director is recommended.",
-  attribution: "Globee AI · 7:10 AM",
+  attribution: `${ASSISTANT_NAME} · 7:10 AM`,
   composerPlaceholder: "Ask a question or give a command.",
   // Landing 7:73 + 462:502 — same line, no period. Thread 247:295 keeps the period.
   composerPlaceholderMobile: "Ask a question or give a command",
@@ -77,7 +78,7 @@ export const ASK_GLOBEE = {
   moreLabel: "More",
   backLabel: "Back",
   sendLabel: "Send",
-  attributionName: "Globee AI",
+  attributionName: ASSISTANT_NAME,
   renameLabel: "Rename",
   pinLabel: "Pin",
   unpinLabel: "Unpin",
@@ -98,7 +99,7 @@ export const ASK_GLOBEE = {
   stop: "Stop",
   stopHint: "Esc",
   escToCancel: "Esc to cancel",
-  unavailable: "Globee is unavailable right now. Try again, or ask what needs attention.",
+  unavailable: `${ASSISTANT_NAME} is unavailable right now. Try again, or ask what needs attention.`,
 } as const;
 
 export const ASK_GLOBEE_QUERY = "q";

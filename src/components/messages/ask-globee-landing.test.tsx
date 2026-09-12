@@ -261,7 +261,7 @@ describe("AskGlobeeLanding", () => {
   it("locks 462:502 mobile stack, quiet chip marks, and unchanged copy", () => {
     const html = visible(renderToStaticMarkup(<AskGlobeeLanding />));
 
-    expect(ASK_GLOBEE.headline).toBe("Ask Globee");
+    expect(ASK_GLOBEE.headline).toBe("Ask 24Frame AI");
     expect(ASK_GLOBEE.need).toBe("What do you need?");
     expect(ASK_GLOBEE.tryLabel).toBe("Try one of these");
     expect(ASK_GLOBEE.tryPrompts).toEqual([
