@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { PRODUCT_NAME } from "@/lib/product";
+import { LOGIN_TURNSTILE_OPTIONS } from "@/lib/turnstile-widget";
 import { requestMagicLink, type LoginState } from "./actions";
 
 const INITIAL: LoginState = { ok: false, message: "" };
@@ -46,10 +47,11 @@ export function LoginForm({ authError }: { authError: string | null }) {
 
           {/* Invisible/managed: the widget only surfaces if a challenge is actually
               required. Set the sitekey's widget mode to "Invisible" (or "Managed")
-              in the Cloudflare dashboard to match. */}
+              in the Cloudflare dashboard to match. Explicit size is required —
+              omitting it makes marsidev emit style={}, which Safari paints as {}. */}
           <Turnstile
             siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-            options={{ appearance: "interaction-only" }}
+            options={LOGIN_TURNSTILE_OPTIONS}
           />
 
           <Button type="submit" disabled={pending} className="w-full">
