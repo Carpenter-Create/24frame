@@ -736,6 +736,67 @@ export type Database = {
           },
         ]
       }
+      leaderboard_entries: {
+        Row: {
+          computed_at: string
+          points: number
+          rank: number
+          user_id: string
+          window: string
+        }
+        Insert: {
+          computed_at: string
+          points: number
+          rank: number
+          user_id: string
+          window: string
+        }
+        Update: {
+          computed_at?: string
+          points?: number
+          rank?: number
+          user_id?: string
+          window?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leaderboard_entries_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      level_distribution: {
+        Row: {
+          computed_at: string
+          level: number
+          member_count: number
+          pct: number
+        }
+        Insert: {
+          computed_at: string
+          level: number
+          member_count: number
+          pct: number
+        }
+        Update: {
+          computed_at?: string
+          level?: number
+          member_count?: number
+          pct?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "level_distribution_level_fkey"
+            columns: ["level"]
+            isOneToOne: true
+            referencedRelation: "levels"
+            referencedColumns: ["level"]
+          },
+        ]
+      }
       blocks: {
         Row: {
           blocked_id: string
@@ -2314,6 +2375,7 @@ export type Database = {
           title_id: string
         }[]
       }
+      rebuild_leaderboards: { Args: never; Returns: undefined }
       reconcile_title_findings: {
         Args: {
           p_findings: Json

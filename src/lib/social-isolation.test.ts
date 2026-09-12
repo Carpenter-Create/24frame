@@ -9,6 +9,9 @@ describe("social isolation lock", () => {
     expect(b3).not.toContain("from(\"groups\")");
     expect(b3).not.toContain("from(\"posts\")");
     expect(b3).not.toContain("from(\"likes\")");
+    expect(b3).not.toContain("from(\"leaderboard_entries\")");
+    expect(b3).not.toContain("from(\"level_distribution\")");
+    expect(b3).not.toContain("rebuild_leaderboards");
     expect(b3).not.toContain("get_dm_inbox");
     expect(b3).not.toContain("open_or_get_direct_conversation");
   });
@@ -19,5 +22,9 @@ describe("social isolation lock", () => {
     expect(actions).not.toContain("@/lib/supabase/admin");
     expect(actions).not.toContain("SERVICE_ROLE");
     expect(actions).not.toContain("ai_conversations");
+    const board = readFileSync("src/app/(app)/social/leaderboard/page.tsx", "utf8");
+    expect(board).toContain('from "@/lib/supabase/server"');
+    expect(board).not.toContain("@/lib/supabase/admin");
+    expect(board).not.toContain("rebuild_leaderboards");
   });
 });

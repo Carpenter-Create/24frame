@@ -1,7 +1,7 @@
 import { PRODUCT_NAME, SOCIAL_WORKSPACE } from "@/lib/product";
 
 // Social workspace copy and input rules. Lives in lib/, not JSX.
-// Text-only v0. Avatars, media, S3, group chat, and leaderboards stay HOLD.
+// Text-only v0. Avatars, media, S3, and group chat stay HOLD.
 // /messages is Ask 24Frame AI — DMs are /social/dms only.
 
 export const SOCIAL_ROUTES = {
@@ -10,6 +10,7 @@ export const SOCIAL_ROUTES = {
   members: "/social/members",
   groups: "/social/groups",
   groupsNew: "/social/groups/new",
+  leaderboard: "/social/leaderboard",
   dms: "/social/dms",
 } as const;
 
@@ -101,6 +102,19 @@ export const SOCIAL = {
     submit: "Send",
     missing: "That conversation is not visible.",
     noProfileCta: "Create a creator profile to use messages.",
+  },
+  leaderboard: {
+    title: "Leaderboard",
+    subtitle: `How members rank in ${PRODUCT_NAME}.`,
+    private: "The leaderboard is private.",
+    top: "Top 10",
+    yourRank: "Your rank",
+    yourRankEmpty: "Your rank appears after you create a creator profile.",
+    computed: "Last computed",
+    levels: "Level distribution",
+    points: "points",
+    members: "members",
+    empty: "No ranks yet.",
   },
   cta: {
     needProfile: "Create a creator profile to post, like, or message.",

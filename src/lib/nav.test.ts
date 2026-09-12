@@ -131,17 +131,25 @@ describe("mobileNavDestinations", () => {
       "/social",
       "/social/profile",
       "/social/groups",
+      "/social/leaderboard",
       "/social/dms",
     ]);
     expect(mobileNavDestinations(true, "social").map((item) => item.href)).toEqual([
       "/social",
       "/social/profile",
       "/social/groups",
+      "/social/leaderboard",
       "/social/dms",
     ]);
     expect(mobileNavDestinations(true, "social").map((item) => item.href)).not.toContain("/messages");
     expect(mobileNavDestinations(true, "social").map((item) => item.href)).not.toContain("/queue");
-    expect(SOCIAL_NAV.map((item) => item.label)).toEqual(["Home", "Profile", "Groups", "Messages"]);
+    expect(SOCIAL_NAV.map((item) => item.label)).toEqual([
+      "Home",
+      "Profile",
+      "Groups",
+      "Leaderboard",
+      "Messages",
+    ]);
     expect(railDestinations(true, "social").staffItems).toEqual([]);
     expect(railDestinations(true, "aggregation").staffItems.map((item) => item.href)).toContain(
       "/queue",
