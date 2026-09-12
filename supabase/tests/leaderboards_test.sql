@@ -159,7 +159,7 @@ values (
 
 select throws_ok(
   format($sql$
-    insert into public.leaderboard_entries (window, user_id, rank, points, computed_at)
+    insert into public.leaderboard_entries ("window", user_id, rank, points, computed_at)
     values ('week', %L, 1, 0, now())
   $sql$, current_setting('t.alpha')),
   '23514',
@@ -174,7 +174,7 @@ select set_config('request.jwt.claims',
 
 select throws_ok(
   format($sql$
-    insert into public.leaderboard_entries (window, user_id, rank, points, computed_at)
+    insert into public.leaderboard_entries ("window", user_id, rank, points, computed_at)
     values ('7d', %L, 1, 0, now())
   $sql$, current_setting('t.alpha')),
   '42501',
@@ -215,7 +215,7 @@ values (
 select public.rebuild_leaderboards();
 
 select is(
-  (select count(*) from public.leaderboard_entries where window = '7d')::int,
+  (select count(*) from public.leaderboard_entries where "window" = '7d')::int,
   4,
   '7d has a row for every active profile');
 select ok(
@@ -226,33 +226,33 @@ select ok(
   'inactive profiles are omitted');
 select is(
   (select rank from public.leaderboard_entries
-    where window = '7d' and user_id = current_setting('t.alpha')::uuid),
+    where "window" = '7d' and user_id = current_setting('t.alpha')::uuid),
   (select rank from public.leaderboard_entries
-    where window = '7d' and user_id = current_setting('t.bravo')::uuid),
+    where "window" = '7d' and user_id = current_setting('t.bravo')::uuid),
   'tied 7d scores share rank()');
 select is(
   (select rank from public.leaderboard_entries
-    where window = '7d' and user_id = current_setting('t.charlie')::uuid),
+    where "window" = '7d' and user_id = current_setting('t.charlie')::uuid),
   3,
   'rank() after a two-way tie is 3');
 select is(
   (select points from public.leaderboard_entries
-    where window = '7d' and user_id = current_setting('t.delta')::uuid),
+    where "window" = '7d' and user_id = current_setting('t.delta')::uuid),
   0,
   'active member with no events still has a 0-point row');
 select is(
   (select points from public.leaderboard_entries
-    where window = '7d' and user_id = current_setting('t.alpha')::uuid),
+    where "window" = '7d' and user_id = current_setting('t.alpha')::uuid),
   10,
   '7d sums only events inside the window');
 select is(
   (select points from public.leaderboard_entries
-    where window = '30d' and user_id = current_setting('t.alpha')::uuid),
+    where "window" = '30d' and user_id = current_setting('t.alpha')::uuid),
   13,
   '30d includes the older event');
 select is(
   (select points from public.leaderboard_entries
-    where window = 'all' and user_id = current_setting('t.alpha')::uuid),
+    where "window" = 'all' and user_id = current_setting('t.alpha')::uuid),
   (select points_total from public.profiles
     where id = current_setting('t.alpha')::uuid),
   'all-time uses profiles.points_total');
@@ -272,7 +272,7 @@ select set_config('request.jwt.claims',
   true);
 
 select isnt_empty(
-  $$ select 1 from public.leaderboard_entries where window = '7d' $$,
+  $$ select 1 from public.leaderboard_entries where "window" = '7d' $$,
   'no-profile user can SELECT when both kill switches are on');
 
 reset role;
@@ -318,7 +318,7 @@ select set_config('request.jwt.claims',
   true);
 
 select isnt_empty(
-  $$ select 1 from public.leaderboard_entries where window = '7d' $$,
+  $$ select 1 from public.leaderboard_entries where "window" = '7d' $$,
   'SELECT returns rows when both kill switches are on');
 
 reset role;

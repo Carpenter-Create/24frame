@@ -43,18 +43,19 @@
 
 -- ----------------------------------------------------------------------------
 -- 1. Tables (exact columns; FKs to profiles / levels; no org_id)
+--    "window" is quoted: WINDOW is reserved in Postgres (not a blind paste).
 -- ----------------------------------------------------------------------------
 create table if not exists public.leaderboard_entries (
-  window      text not null check (window in ('7d', '30d', 'all')),
+  "window"    text not null check ("window" in ('7d', '30d', 'all')),
   user_id     uuid not null references public.profiles(id) on delete cascade,
   rank        integer not null check (rank >= 1),
   points      integer not null,
   computed_at timestamptz not null,
-  primary key (window, user_id)
+  primary key ("window", user_id)
 );
 
 create index if not exists leaderboard_entries_window_rank_idx
-  on public.leaderboard_entries (window, rank);
+  on public.leaderboard_entries ("window", rank);
 
 create table if not exists public.level_distribution (
   level        integer primary key references public.levels(level),
@@ -85,7 +86,7 @@ declare
 begin
   delete from public.leaderboard_entries;
 
-  insert into public.leaderboard_entries (window, user_id, rank, points, computed_at)
+  insert into public.leaderboard_entries ("window", user_id, rank, points, computed_at)
   select
     '7d',
     p.id,
@@ -101,7 +102,7 @@ begin
   ) w on w.user_id = p.id
   where p.status = 'active';
 
-  insert into public.leaderboard_entries (window, user_id, rank, points, computed_at)
+  insert into public.leaderboard_entries ("window", user_id, rank, points, computed_at)
   select
     '30d',
     p.id,
@@ -117,7 +118,7 @@ begin
   ) w on w.user_id = p.id
   where p.status = 'active';
 
-  insert into public.leaderboard_entries (window, user_id, rank, points, computed_at)
+  insert into public.leaderboard_entries ("window", user_id, rank, points, computed_at)
   select
     'all',
     p.id,
