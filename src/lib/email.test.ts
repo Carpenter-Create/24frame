@@ -78,7 +78,7 @@ describe("buildNotificationEmail", () => {
 });
 
 describe("Auth magic-link template", () => {
-  it("is the house Auth mail HTML with a Sporty Blue text link, not a filled pill", () => {
+  it("is magic-link only: house shell, Sporty Blue text link, no OTP code", () => {
     const html = readFileSync(AUTH_TEMPLATE, "utf8");
     expect(AUTH_CONFIG).toContain("[auth.email.template.magic_link]");
     expect(AUTH_CONFIG).toContain('subject = "Your 24Frame sign-in link"');
@@ -87,8 +87,8 @@ describe("Auth magic-link template", () => {
     expect(html).toContain("Sign in");
     expect(html).toContain("Sign in to 24Frame");
     expect(html).toContain("{{ .ConfirmationURL }}");
-    expect(html).toContain("{{ .Token }}");
-    expect(html).toContain('font-size:24px;font-weight:600;letter-spacing:2px');
+    expect(html).not.toContain("{{ .Token }}");
+    expect(html).not.toMatch(/enter this code/i);
     expect(html).toContain(SPORTY_BLUE);
     expect(html).toContain(`color:${SPORTY_BLUE}`);
     expect(html).toContain(EMAIL_LOGO_URL);
