@@ -45,9 +45,11 @@
                 <p style="margin:0 0 24px;font-size:15px;line-height:22px;color:#3F4650">
                   Use this link to sign in. If you didn't request this, you can ignore this message.
                 </p>
-                <p style="margin:0;font-family:Geist,ui-sans-serif,-apple-system,system-ui,sans-serif">
+                <p style="margin:0 0 24px;font-family:Geist,ui-sans-serif,-apple-system,system-ui,sans-serif">
                   <a href="{{ .ConfirmationURL }}" style="color:#1769FF;text-decoration:none">Sign in to 24Frame</a>
                 </p>
+                <p style="margin:0 0 8px;font-size:15px;line-height:22px;color:#3F4650">Or enter this code:</p>
+                <p style="margin:0;font-size:24px;font-weight:600;letter-spacing:2px;color:#14171A">{{ .Token }}</p>
               </td>
             </tr>
             <tr>

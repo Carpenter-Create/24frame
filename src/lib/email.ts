@@ -47,6 +47,32 @@ export async function sendOtpEmail(to: string, code: string): Promise<void> {
   if (error) throw new Error(`Email send failed: ${error.message}`);
 }
 
+// Dashboard login only. Mints happen in auth-magic-link.ts; this is the link-only house
+// mail so web never receives the hosted dual-purpose template (link + {{ .Token }}).
+export function buildMagicLinkEmail(signInUrl: string): { subject: string; text: string; html: string } {
+  const subject = `Your ${PRODUCT_NAME} sign-in link`;
+  const text =
+    `Use this link to sign in. If you didn't request this, you can ignore this message.\n\n` +
+    `Sign in to ${PRODUCT_NAME}: ${signInUrl}\n`;
+  const html = wrapHouseEmail(
+    `<p style="margin:0 0 12px;font-size:23px;line-height:28px;font-weight:600;color:${EMAIL_INK}">Sign in</p>` +
+      `<p style="margin:0 0 24px;font-size:15px;line-height:22px;color:${EMAIL_BODY}">` +
+      `Use this link to sign in. If you didn't request this, you can ignore this message.` +
+      `</p>` +
+      housePrimaryLink(escapeHtml(signInUrl), `Sign in to ${PRODUCT_NAME}`),
+  );
+  return { subject, text, html };
+}
+
+export async function sendMagicLinkEmail(to: string, signInUrl: string): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) throw new Error("Missing RESEND_API_KEY");
+  const { subject, text, html } = buildMagicLinkEmail(signInUrl);
+  const resend = new Resend(apiKey);
+  const { error } = await resend.emails.send({ from: EMAIL_FROM, to, subject, text, html });
+  if (error) throw new Error(`Email send failed: ${error.message}`);
+}
+
 // GC-Support notification email (§20). Body is the same voice-approved line shown in-app;
 // this frames it with a CTA back into the dashboard and the sign-off. Copy lives in
 // lib/notifications.ts (subject/CTA per kind) — this is just the template. body is escaped
