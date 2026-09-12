@@ -2,11 +2,11 @@ import { redirect } from "next/navigation";
 
 import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
-import { SocialDmCompose } from "@/components/social/social-forms";
+import { SocialAddPeopleForm, SocialDmCompose, SocialGroupTitleForm } from "@/components/social/social-forms";
 import { SocialAvatar, SocialNeedProfile } from "@/components/social/social-ui";
 import { DETAIL_LIST, rangeFor } from "@/lib/list-bounds";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
-import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
+import { conversationRoomLabel, SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { loadOwnProfile, loadProfilesByIds } from "@/lib/social-feed";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
@@ -26,11 +26,11 @@ export default async function SocialDmThreadPage({
 
   const { data: conversation } = await supabase
     .from("conversations")
-    .select("id, kind")
+    .select("id, kind, title")
     .eq("id", id)
     .maybeSingle();
 
-  if (!conversation || conversation.kind !== "direct") {
+  if (!conversation) {
     return (
       <div data-social-dm-missing="">
         <PageHeader title={SOCIAL.dms.thread} backLink={{ href: SOCIAL_ROUTES.dms }} />
@@ -51,12 +51,15 @@ export default async function SocialDmThreadPage({
 
   const { data: participants } = await supabase
     .from("conversation_participants")
-    .select("user_id")
+    .select("user_id, left_at")
     .eq("conversation_id", conversation.id);
 
+  const activeIds = (participants ?? [])
+    .filter((row) => row.left_at == null)
+    .map((row) => row.user_id);
   const peopleIds = [
     ...new Set([
-      ...(participants ?? []).map((row) => row.user_id),
+      ...activeIds,
       ...(messages ?? []).map((row) => row.sender_id).filter((id): id is string => !!id),
     ]),
   ];
@@ -64,16 +67,31 @@ export default async function SocialDmThreadPage({
     loadProfilesByIds(supabase, peopleIds),
     signedAvatarUrls(peopleIds),
   ]);
-  const peer = [...people.values()].find((person) => person.id !== ctx.user.id) ?? null;
+  const others = activeIds
+    .filter((userId) => userId !== ctx.user.id)
+    .map((userId) => people.get(userId))
+    .filter((person): person is NonNullable<typeof person> => !!person);
+  const title = conversationRoomLabel(
+    conversation.title,
+    others.map((person) => person.display_name),
+  );
+  const subtitle =
+    others.length === 1
+      ? `@${others[0].handle}`
+      : others.map((person) => `@${person.handle}`).join(", ") || undefined;
 
   return (
-    <div data-social-dm-thread="">
+    <div data-social-dm-thread="" data-social-dm-kind={conversation.kind}>
       <PageHeader
-        title={peer?.display_name ?? SOCIAL.dms.thread}
-        subtitle={peer ? `@${peer.handle}` : undefined}
+        title={title}
+        subtitle={subtitle}
         backLink={{ href: SOCIAL_ROUTES.dms, label: SOCIAL.dms.title }}
       />
       {!profile ? <SocialNeedProfile /> : null}
+      {profile ? <SocialAddPeopleForm conversationId={conversation.id} /> : null}
+      {profile && conversation.kind === "group" ? (
+        <SocialGroupTitleForm conversationId={conversation.id} title={conversation.title} />
+      ) : null}
       <ol className="flex flex-col gap-[var(--space-4)]">
         {(messages ?? []).map((message) => {
           const sender = message.sender_id ? people.get(message.sender_id) : null;

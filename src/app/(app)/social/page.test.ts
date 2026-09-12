@@ -28,6 +28,8 @@ vi.mock("@/app/(app)/social/actions", () => ({
   joinSocialGroup: vi.fn(),
   openSocialDm: vi.fn(),
   sendSocialDm: vi.fn(),
+  addSocialDmPeople: vi.fn(),
+  setSocialDmTitle: vi.fn(),
   markSocialDmRead: vi.fn(),
 }));
 

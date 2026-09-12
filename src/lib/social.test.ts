@@ -4,12 +4,16 @@ import { describe, expect, it } from "vitest";
 import { ASK_GLOBEE } from "@/lib/ask-globee";
 import { PRODUCT_NAME, SOCIAL_WORKSPACE } from "@/lib/product";
 import {
+  conversationRoomLabel,
+  inboxPeerIds,
   isEligibleBirthDate,
   likeInsertRow,
   messageInsertRow,
+  normalizeConversationTitle,
   normalizeHandle,
   postInsertRow,
   profileInsertRow,
+  quietDmAddError,
   SOCIAL,
   SOCIAL_BANNED_PRODUCT_NAMES,
   SOCIAL_ROUTES,
@@ -22,6 +26,8 @@ describe("social copy lock", () => {
     expect(blob).toContain(PRODUCT_NAME);
     expect(blob).toContain(SOCIAL_WORKSPACE);
     expect(SOCIAL.home.subtitle).toContain(PRODUCT_NAME);
+    expect(SOCIAL.dms.subtitle).toContain(PRODUCT_NAME);
+    expect(SOCIAL.dms.addPeople).toBe("Add people");
     expect(SOCIAL_ROUTES.dms).toBe("/social/dms");
     expect(SOCIAL_ROUTES.leaderboard).toBe("/social/leaderboard");
     expect(SOCIAL_ROUTES.home).toBe("/social");
@@ -97,7 +103,10 @@ describe("social writes stay on the live spine", () => {
     expect(actions).toContain('from("posts")');
     expect(actions).toContain('from("likes")');
     expect(actions).toContain("open_or_get_direct_conversation");
+    expect(actions).toContain("add_conversation_participants");
+    expect(actions).toContain("set_group_conversation_title");
     expect(actions).toContain("mark_direct_conversation_read");
+    expect(actions).not.toContain("min_level");
     expect(actions).toContain("createClient");
     expect(actions).not.toContain("createAdminClient");
     expect(actions).not.toContain("service_role");
@@ -112,6 +121,20 @@ describe("social writes stay on the live spine", () => {
     expect(board).toContain("createClient");
     expect(board).not.toContain("createAdminClient");
     expect(board).not.toContain("rebuild_leaderboards");
+  });
+
+  it("labels rooms from participants first and quiets add-people errors", () => {
+    expect(conversationRoomLabel(null, ["Ada Lovelace", "Bob One"])).toBe("Ada Lovelace, Bob One");
+    expect(conversationRoomLabel("Desk room", ["Ada Lovelace"])).toBe("Desk room");
+    expect(conversationRoomLabel("  ", [])).toBe(SOCIAL.dms.thread);
+    expect(inboxPeerIds({ peer_id: "u2", participant_ids: ["u2", "u3"] })).toEqual(["u2", "u3"]);
+    expect(inboxPeerIds({ peer_id: "u2", participant_ids: [] })).toEqual(["u2"]);
+    expect(normalizeConversationTitle("")).toEqual({ title: null });
+    expect(normalizeConversationTitle("Desk room")).toEqual({ title: "Desk room" });
+    expect(normalizeConversationTitle("x".repeat(81))).toBeNull();
+    expect(quietDmAddError("blocked")).toBe(SOCIAL.dms.addBlocked);
+    expect(quietDmAddError("cannot add yourself")).toBe(SOCIAL.dms.addSelf);
+    expect(quietDmAddError("peer not found")).toBe(SOCIAL.dms.addMissing);
   });
 
   it("reuses signed account faces and does not add a second upload or title bucket", () => {

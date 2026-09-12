@@ -13,12 +13,14 @@ import {
   normalizeDisplayName,
   normalizeGroupDescription,
   normalizeGroupName,
+  normalizeConversationTitle,
   normalizeGroupSlug,
   normalizeHandle,
   normalizeMessageBody,
   normalizePostBody,
   postInsertRow,
   profileInsertRow,
+  quietDmAddError,
   SOCIAL,
   SOCIAL_ROUTES,
   socialDmHref,
@@ -234,4 +236,64 @@ export async function markSocialDmRead(conversationId: string): Promise<void> {
     p_conversation: conversationId,
     p_seen_at: new Date().toISOString(),
   });
+}
+
+export async function addSocialDmPeople(formData: FormData): Promise<ActionResult> {
+  const { user, supabase, profileId } = await ownProfileId();
+  if (!profileId) return { error: SOCIAL.cta.needProfile };
+
+  const conversationId = String(formData.get("conversation_id") ?? "").trim();
+  if (!conversationId) return { error: SOCIAL.dms.missing };
+
+  const handles = String(formData.get("handles") ?? "")
+    .split(/[\s,]+/)
+    .map((part) => normalizeHandle(part))
+    .filter((handle): handle is string => !!handle);
+  if (handles.length === 0) return { error: SOCIAL.dms.addMissing };
+
+  const { data: peers } = await supabase
+    .from("profiles")
+    .select("id, handle")
+    .in("handle", handles);
+  const found = peers ?? [];
+  if (found.length === 0) return { error: SOCIAL.dms.addMissing };
+
+  const foundHandles = new Set(found.map((peer) => peer.handle));
+  if (handles.some((handle) => !foundHandles.has(handle))) {
+    return { error: SOCIAL.dms.addMissing };
+  }
+
+  const ids = [...new Set(found.map((peer) => peer.id))];
+  if (ids.includes(user.id)) return { error: SOCIAL.dms.addSelf };
+
+  const { error } = await supabase.rpc("add_conversation_participants", {
+    p_conversation: conversationId,
+    p_peers: ids,
+  });
+  if (error) return { error: quietDmAddError(error.message) };
+
+  revalidatePath(socialDmHref(conversationId));
+  revalidatePath(SOCIAL_ROUTES.dms);
+  return {};
+}
+
+export async function setSocialDmTitle(formData: FormData): Promise<ActionResult> {
+  const { supabase, profileId } = await ownProfileId();
+  if (!profileId) return { error: SOCIAL.cta.needProfile };
+
+  const conversationId = String(formData.get("conversation_id") ?? "").trim();
+  if (!conversationId) return { error: SOCIAL.dms.missing };
+
+  const parsed = normalizeConversationTitle(String(formData.get("title") ?? ""));
+  if (!parsed) return { error: SOCIAL.dms.titleInvalid };
+
+  const { error } = await supabase.rpc("set_group_conversation_title", {
+    p_conversation: conversationId,
+    p_title: parsed.title,
+  });
+  if (error) return { error: quietDmAddError(error.message) };
+
+  revalidatePath(socialDmHref(conversationId));
+  revalidatePath(SOCIAL_ROUTES.dms);
+  return {};
 }
