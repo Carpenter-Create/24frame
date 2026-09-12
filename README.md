@@ -55,6 +55,7 @@ Do not print or commit `.env`, `.env.*`, or anything under `secrets/`.
 | Agentic Engineering architecture | [`docs/agentic-engineering/`](docs/agentic-engineering/) |
 | Historical handoff (evidence only) | [`docs/HANDOFF.md`](docs/HANDOFF.md) |
 | Auth cutover Pack A (inventory + plan only) | [`docs/auth-cutover-pack-a.md`](docs/auth-cutover-pack-a.md) |
+| Auth cutover Pack B (record only; path (c) held) | [`docs/auth-cutover-pack-b.md`](docs/auth-cutover-pack-b.md) |
 
 ## Validation
 

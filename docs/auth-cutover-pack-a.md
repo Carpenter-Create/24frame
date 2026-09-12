@@ -14,6 +14,7 @@
 
 Repo remains `Carpenter-Create/globalcontent-dashboard`. Product language is
 24Frame. Start point for this plan: `main` tip `1f081874` (Social UI v0).
+Pack B record: [`auth-cutover-pack-b.md`](auth-cutover-pack-b.md).
 
 ---
 
