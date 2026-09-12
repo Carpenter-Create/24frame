@@ -251,7 +251,9 @@ language plpgsql
 set search_path to 'public'
 as $$
 begin
-  if current_setting('24frame.refreshing_group_member_count', true) = 'on' then
+  -- Donor used `24frame.refreshing_group_member_count`. That first identifier
+  -- starts with a digit and 42602s on set_config. `app.*` is the valid form.
+  if current_setting('app.refreshing_group_member_count', true) = 'on' then
     return new;
   end if;
 
@@ -275,7 +277,8 @@ language plpgsql
 set search_path to 'public', 'extensions'
 as $$
 begin
-  if current_setting('24frame.refreshing_post_like_count', true) = 'on' then
+  -- Same identifier rule as the group-count GUC. Pack 3 can set this later.
+  if current_setting('app.refreshing_post_like_count', true) = 'on' then
     return new;
   end if;
 
@@ -311,7 +314,7 @@ as $$
 declare
   target_group uuid;
 begin
-  perform set_config('24frame.refreshing_group_member_count', 'on', true);
+  perform set_config('app.refreshing_group_member_count', 'on', true);
   target_group := coalesce(new.group_id, old.group_id);
 
   update public.groups

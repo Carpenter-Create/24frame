@@ -316,7 +316,7 @@ select throws_ok(
 -- ---- gc_staff is not a social admin backdoor -------------------------------
 reset role;
 insert into public.gc_staff (user_id, role)
-values (current_setting('t.staff')::uuid, 'gc_viewer');
+values (current_setting('t.staff')::uuid, 'gc_delivery_ops');
 
 set local role authenticated;
 select set_config('request.jwt.claims',
