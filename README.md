@@ -54,6 +54,7 @@ Do not print or commit `.env`, `.env.*`, or anything under `secrets/`.
 | Operational gotchas (conditional) | [`docs/engineering/operational-gotchas.md`](docs/engineering/operational-gotchas.md) |
 | Agentic Engineering architecture | [`docs/agentic-engineering/`](docs/agentic-engineering/) |
 | Historical handoff (evidence only) | [`docs/HANDOFF.md`](docs/HANDOFF.md) |
+| Auth cutover Pack A (inventory + plan only) | [`docs/auth-cutover-pack-a.md`](docs/auth-cutover-pack-a.md) |
 
 ## Validation
 
