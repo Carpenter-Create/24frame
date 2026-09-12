@@ -7,7 +7,7 @@ import {
 
 // 427:352 empty-lead fetching, then 427:440 finding-the-signal chrome.
 // A live catalog lead is optional ink on step 2 — never a Winter Line fixture.
-// Catalog verbs are chrome, not persisted conversation_messages rows.
+// Catalog verbs are chrome, not persisted ai_conversation_messages rows.
 export function AskGlobeeThinking({
   lead = null,
   phase = "fetching",

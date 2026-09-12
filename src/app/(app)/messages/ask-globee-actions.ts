@@ -85,7 +85,7 @@ export async function startAskGlobeeConversation(
   const supabase = await createClient();
   const orgId = gate.ctx.activeOrg.id;
   const { data: conversation, error: conversationError } = await supabase
-    .from("conversations")
+    .from("ai_conversations")
     .insert({
       org_id: orgId,
       title: askGlobeeConversationTitle(next),
@@ -97,7 +97,7 @@ export async function startAskGlobeeConversation(
     return { error: conversationError?.message ?? "Could not start the conversation." };
   }
 
-  const { error: userError } = await supabase.from("conversation_messages").insert({
+  const { error: userError } = await supabase.from("ai_conversation_messages").insert({
     org_id: orgId,
     conversation_id: conversation.id,
     role: "user",
@@ -119,7 +119,7 @@ export async function completeAskGlobeeTurn(
   const supabase = await createClient();
   const orgId = gate.ctx.activeOrg.id;
   const { data: conversation } = await supabase
-    .from("conversations")
+    .from("ai_conversations")
     .select("id")
     .eq("id", conversationId)
     .eq("org_id", orgId)
@@ -127,7 +127,7 @@ export async function completeAskGlobeeTurn(
   if (!conversation) return { error: "Conversation not found." };
 
   const { data: priorRows } = await supabase
-    .from("conversation_messages")
+    .from("ai_conversation_messages")
     .select("role, body, lead")
     .eq("conversation_id", conversationId)
     .eq("org_id", orgId)
@@ -148,7 +148,7 @@ export async function completeAskGlobeeTurn(
   const answer = await loadOrgAnswer(supabase, orgId, next, gate.tier, history);
   if ("error" in answer) return { error: answer.error };
 
-  const { error: globeeError } = await supabase.from("conversation_messages").insert({
+  const { error: globeeError } = await supabase.from("ai_conversation_messages").insert({
     org_id: orgId,
     conversation_id: conversationId,
     role: "globee",
@@ -175,7 +175,7 @@ export async function appendAskGlobeeTurn(
   const supabase = await createClient();
   const orgId = gate.ctx.activeOrg.id;
   const { data: conversation } = await supabase
-    .from("conversations")
+    .from("ai_conversations")
     .select("id")
     .eq("id", conversationId)
     .eq("org_id", orgId)
@@ -183,7 +183,7 @@ export async function appendAskGlobeeTurn(
   if (!conversation) return { error: "Conversation not found." };
 
   const { data: priorRows } = await supabase
-    .from("conversation_messages")
+    .from("ai_conversation_messages")
     .select("role, body, lead")
     .eq("conversation_id", conversationId)
     .eq("org_id", orgId)
@@ -197,7 +197,7 @@ export async function appendAskGlobeeTurn(
 
   const answer = await loadOrgAnswer(supabase, orgId, next, gate.tier, history);
   if ("error" in answer) return { error: answer.error };
-  const { error: userError } = await supabase.from("conversation_messages").insert({
+  const { error: userError } = await supabase.from("ai_conversation_messages").insert({
     org_id: orgId,
     conversation_id: conversationId,
     role: "user",
@@ -205,7 +205,7 @@ export async function appendAskGlobeeTurn(
   });
   if (userError) return { error: userError.message };
 
-  const { error: globeeError } = await supabase.from("conversation_messages").insert({
+  const { error: globeeError } = await supabase.from("ai_conversation_messages").insert({
     org_id: orgId,
     conversation_id: conversationId,
     role: "globee",
@@ -229,7 +229,7 @@ export async function setAskGlobeeThumb(
 
   const supabase = await createClient();
   const { data: message } = await supabase
-    .from("conversation_messages")
+    .from("ai_conversation_messages")
     .select("id, role, thumbs, org_id")
     .eq("id", messageId)
     .eq("org_id", gate.ctx.activeOrg.id)
@@ -238,7 +238,7 @@ export async function setAskGlobeeThumb(
 
   const thumbs = nextAskGlobeeThumb(message.thumbs, clicked);
   const { error } = await supabase
-    .from("conversation_messages")
+    .from("ai_conversation_messages")
     .update({ thumbs })
     .eq("id", messageId)
     .eq("org_id", gate.ctx.activeOrg.id);
@@ -259,7 +259,7 @@ export async function renameAskGlobeeConversation(
 
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from("conversations")
+    .from("ai_conversations")
     .update({ title: next })
     .eq("id", conversationId)
     .eq("org_id", gate.ctx.activeOrg.id)
@@ -282,7 +282,7 @@ export async function pinAskGlobeeConversation(
   const pinnedAt = pinned ? new Date().toISOString() : null;
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from("conversations")
+    .from("ai_conversations")
     .update({ pinned_at: pinnedAt })
     .eq("id", conversationId)
     .eq("org_id", gate.ctx.activeOrg.id)
@@ -303,7 +303,7 @@ export async function deleteAskGlobeeConversation(
 
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from("conversations")
+    .from("ai_conversations")
     .delete()
     .eq("id", conversationId)
     .eq("org_id", gate.ctx.activeOrg.id)
