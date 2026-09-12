@@ -1,7 +1,8 @@
 import { PRODUCT_NAME, SOCIAL_WORKSPACE } from "@/lib/product";
 
 // Social workspace copy and input rules. Lives in lib/, not JSX.
-// Text-only v0. Avatars, media, S3, and group chat stay HOLD.
+// Text-only v0. Account faces reuse signedAvatarUrl. Post media, title
+// S3, and group chat stay HOLD.
 // /messages is Ask 24Frame AI — DMs are /social/dms only.
 
 export const SOCIAL_ROUTES = {

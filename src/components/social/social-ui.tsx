@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { HouseEmpty, TextAction } from "@/components/chrome/house";
+import { cn } from "@/lib/cn";
 import { IDENTITY_AVATAR_CLASS } from "@/lib/house-sheet";
 import { SOCIAL, SOCIAL_ROUTES, socialGroupHref, socialMemberHref, socialInitials } from "@/lib/social";
 import { SocialLikeButton } from "./social-forms";
@@ -14,10 +15,24 @@ export function SocialNeedProfile() {
   );
 }
 
-export function SocialAvatar({ name }: { name: string }) {
+export function SocialAvatar({
+  name,
+  photoUrl,
+}: {
+  name: string;
+  photoUrl?: string | null;
+}) {
   return (
-    <div data-social-avatar="" className={IDENTITY_AVATAR_CLASS}>
-      {socialInitials(name)}
+    <div
+      data-social-avatar=""
+      className={cn(IDENTITY_AVATAR_CLASS, photoUrl ? "overflow-hidden" : null)}
+    >
+      {photoUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the private avatars bucket
+        <img src={photoUrl} alt="" className="size-full object-cover" />
+      ) : (
+        socialInitials(name)
+      )}
     </div>
   );
 }
@@ -31,6 +46,7 @@ export type SocialPostCardModel = {
   authorId: string;
   authorHandle: string | null;
   authorName: string;
+  authorPhotoUrl: string | null;
   groupSlug: string | null;
   groupName: string | null;
   canLike: boolean;
@@ -43,7 +59,7 @@ export function SocialPostCard({ post }: { post: SocialPostCardModel }) {
       className="flex flex-col gap-[var(--space-3)] border-b border-hairline py-[var(--space-4)]"
     >
       <div className="flex items-center gap-[var(--space-3)]">
-        <SocialAvatar name={post.authorName} />
+        <SocialAvatar name={post.authorName} photoUrl={post.authorPhotoUrl} />
         <div className="min-w-0">
           {post.authorHandle ? (
             <Link href={socialMemberHref(post.authorHandle)} className="t-body font-medium text-ink">

@@ -4,6 +4,7 @@ import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { SocialJoinGroupButton, SocialPostCompose } from "@/components/social/social-forms";
 import { SocialNeedProfile, SocialPostCard } from "@/components/social/social-ui";
+import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import {
   loadLikedPostIds,
@@ -54,10 +55,11 @@ export default async function SocialGroupPage({
     : { data: false };
 
   const posts = await loadVisiblePosts(supabase, group.id);
-  const authors = await loadProfilesByIds(
-    supabase,
-    [...new Set(posts.map((post) => post.author_id))],
-  );
+  const authorIds = [...new Set(posts.map((post) => post.author_id))];
+  const [authors, faces] = await Promise.all([
+    loadProfilesByIds(supabase, authorIds),
+    signedAvatarUrls(authorIds),
+  ]);
   const liked = profile
     ? await loadLikedPostIds(supabase, ctx.user.id, posts.map((post) => post.id))
     : new Set<string>();
@@ -95,6 +97,7 @@ export default async function SocialGroupPage({
                 authorId: post.author_id,
                 authorHandle: author?.handle ?? null,
                 authorName: author?.display_name ?? "Member",
+                authorPhotoUrl: faces.get(post.author_id) ?? null,
                 groupSlug: group.slug,
                 groupName: group.name,
                 canLike: !!profile,

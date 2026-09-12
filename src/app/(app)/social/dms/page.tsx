@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { SocialAvatar, SocialNeedProfile } from "@/components/social/social-ui";
+import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { SOCIAL, socialDmHref } from "@/lib/social";
 import { loadOwnProfile, loadProfilesByIds } from "@/lib/social-feed";
 import { getOrgContext } from "@/lib/supabase/context";
@@ -20,10 +21,11 @@ export default async function SocialDmsPage() {
     : { data: [] as never[] };
 
   const rows = inbox ?? [];
-  const peers = await loadProfilesByIds(
-    supabase,
-    [...new Set(rows.map((row) => row.peer_id).filter((id): id is string => !!id))],
-  );
+  const peerIds = [...new Set(rows.map((row) => row.peer_id).filter((id): id is string => !!id))];
+  const [peers, faces] = await Promise.all([
+    loadProfilesByIds(supabase, peerIds),
+    signedAvatarUrls(peerIds),
+  ]);
 
   return (
     <div data-social-dms="">
@@ -40,7 +42,10 @@ export default async function SocialDmsPage() {
                 href={socialDmHref(row.conversation_id)}
                 className="flex items-center gap-[var(--space-3)]"
               >
-                <SocialAvatar name={name} />
+                <SocialAvatar
+                  name={name}
+                  photoUrl={row.peer_id ? faces.get(row.peer_id) ?? null : null}
+                />
                 <div className="min-w-0">
                   <p className="t-body font-medium text-ink">{name}</p>
                   {row.unread_count > 0 ? (

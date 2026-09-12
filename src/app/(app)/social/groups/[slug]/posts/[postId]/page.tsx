@@ -5,6 +5,7 @@ import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { SocialLikeButton } from "@/components/social/social-forms";
 import { SocialAvatar, SocialNeedProfile } from "@/components/social/social-ui";
+import { signedAvatarUrl } from "@/lib/s3-avatars";
 import { SOCIAL, socialGroupHref, socialMemberHref } from "@/lib/social";
 import { loadLikedPostIds, loadOwnProfile } from "@/lib/social-feed";
 import { getOrgContext } from "@/lib/supabase/context";
@@ -46,9 +47,10 @@ export default async function SocialPostPage({
     .select("id, handle, display_name")
     .eq("id", post.author_id)
     .maybeSingle();
-  const liked = profile
-    ? await loadLikedPostIds(supabase, ctx.user.id, [post.id])
-    : new Set<string>();
+  const [liked, photoUrl] = await Promise.all([
+    profile ? loadLikedPostIds(supabase, ctx.user.id, [post.id]) : Promise.resolve(new Set<string>()),
+    signedAvatarUrl(post.author_id),
+  ]);
 
   return (
     <div data-social-post-detail="">
@@ -58,7 +60,7 @@ export default async function SocialPostPage({
       />
       <article className="flex flex-col gap-[var(--space-4)]">
         <div className="flex items-center gap-[var(--space-3)]">
-          <SocialAvatar name={author?.display_name ?? "Member"} />
+          <SocialAvatar name={author?.display_name ?? "Member"} photoUrl={photoUrl} />
           {author ? (
             <Link href={socialMemberHref(author.handle)} className="t-body font-medium text-ink">
               {author.display_name}

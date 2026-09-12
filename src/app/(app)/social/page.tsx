@@ -4,6 +4,7 @@ import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { SocialPostCompose } from "@/components/social/social-forms";
 import { SocialNeedProfile, SocialPostCard } from "@/components/social/social-ui";
+import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { SOCIAL } from "@/lib/social";
 import {
   loadGroupsByIds,
@@ -22,10 +23,11 @@ export default async function SocialHomePage() {
   const supabase = await createClient();
   const profile = await loadOwnProfile(supabase, ctx.user.id);
   const posts = await loadVisiblePosts(supabase);
-  const authors = await loadProfilesByIds(
-    supabase,
-    [...new Set(posts.map((post) => post.author_id))],
-  );
+  const authorIds = [...new Set(posts.map((post) => post.author_id))];
+  const [authors, faces] = await Promise.all([
+    loadProfilesByIds(supabase, authorIds),
+    signedAvatarUrls(authorIds),
+  ]);
   const groups = await loadGroupsByIds(
     supabase,
     [...new Set(posts.map((post) => post.group_id).filter((id): id is string => !!id))],
@@ -57,6 +59,7 @@ export default async function SocialHomePage() {
                   authorId: post.author_id,
                   authorHandle: author?.handle ?? null,
                   authorName: author?.display_name ?? "Member",
+                  authorPhotoUrl: faces.get(post.author_id) ?? null,
                   groupSlug: group?.slug ?? null,
                   groupName: group?.name ?? null,
                   canLike: !!profile,

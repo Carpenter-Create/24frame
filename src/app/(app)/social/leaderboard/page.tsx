@@ -11,6 +11,7 @@ import {
   LEADERBOARD_WINDOWS,
   loadLeaderboardBoard,
 } from "@/lib/leaderboard";
+import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { SOCIAL } from "@/lib/social";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
@@ -26,6 +27,10 @@ export default async function SocialLeaderboardPage({
   const supabase = await createClient();
   const board = await loadLeaderboardBoard(supabase, (await searchParams).window, ctx.user.id);
   const computed = formatLeaderboardComputedAt(board.computedAt);
+  const faces = await signedAvatarUrls([
+    ...board.top.map((row) => row.user_id),
+    ...(board.you ? [board.you.user_id] : []),
+  ]);
 
   return (
     <div data-social-leaderboard="">
@@ -68,6 +73,7 @@ export default async function SocialLeaderboardPage({
                 rank={board.you.rank}
                 points={board.you.points}
                 name={board.profiles.get(board.you.user_id)?.display_name ?? "Member"}
+                photoUrl={faces.get(board.you.user_id) ?? null}
                 you
               />
             ) : (
@@ -86,6 +92,7 @@ export default async function SocialLeaderboardPage({
                       rank={row.rank}
                       points={row.points}
                       name={board.profiles.get(row.user_id)?.display_name ?? "Member"}
+                      photoUrl={faces.get(row.user_id) ?? null}
                       you={row.user_id === ctx.user.id}
                     />
                   </li>
@@ -116,11 +123,13 @@ function LeaderboardRow({
   rank,
   points,
   name,
+  photoUrl,
   you,
 }: {
   rank: number;
   points: number;
   name: string;
+  photoUrl: string | null;
   you?: boolean;
 }) {
   return (
@@ -129,7 +138,7 @@ function LeaderboardRow({
       className="flex items-center gap-[var(--space-3)] py-[var(--space-3)] border-b border-hairline"
     >
       <span className="t-body tabular-nums text-ink-3 w-8">{rank}</span>
-      <SocialAvatar name={name} />
+      <SocialAvatar name={name} photoUrl={photoUrl} />
       <div className="min-w-0 flex-1">
         <p className="t-body font-medium text-ink">
           {name}

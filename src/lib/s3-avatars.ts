@@ -85,3 +85,14 @@ export async function signedAvatarUrl(userId: string): Promise<string | null> {
     return null;
   }
 }
+
+/** Mapping C: sign by `profiles.id` = `auth.users.id`. Missing stays null. */
+export async function signedAvatarUrls(
+  userIds: readonly string[],
+): Promise<Map<string, string | null>> {
+  const unique = [...new Set(userIds.filter(Boolean))];
+  const entries = await Promise.all(
+    unique.map(async (userId) => [userId, await signedAvatarUrl(userId)] as const),
+  );
+  return new Map(entries);
+}
