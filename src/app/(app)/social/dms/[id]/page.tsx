@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { SocialDmCompose } from "@/components/social/social-forms";
 import { SocialAvatar, SocialNeedProfile } from "@/components/social/social-ui";
 import { DETAIL_LIST, rangeFor } from "@/lib/list-bounds";
+import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { loadOwnProfile, loadProfilesByIds } from "@/lib/social-feed";
 import { getOrgContext } from "@/lib/supabase/context";
@@ -53,10 +54,16 @@ export default async function SocialDmThreadPage({
     .select("user_id")
     .eq("conversation_id", conversation.id);
 
-  const people = await loadProfilesByIds(
-    supabase,
-    [...new Set((participants ?? []).map((row) => row.user_id))],
-  );
+  const peopleIds = [
+    ...new Set([
+      ...(participants ?? []).map((row) => row.user_id),
+      ...(messages ?? []).map((row) => row.sender_id).filter((id): id is string => !!id),
+    ]),
+  ];
+  const [people, faces] = await Promise.all([
+    loadProfilesByIds(supabase, peopleIds),
+    signedAvatarUrls(peopleIds),
+  ]);
   const peer = [...people.values()].find((person) => person.id !== ctx.user.id) ?? null;
 
   return (
@@ -73,7 +80,10 @@ export default async function SocialDmThreadPage({
           const name = sender?.display_name ?? "Member";
           return (
             <li key={message.id} className="flex gap-[var(--space-3)]">
-              <SocialAvatar name={name} />
+              <SocialAvatar
+                name={name}
+                photoUrl={message.sender_id ? faces.get(message.sender_id) ?? null : null}
+              />
               <div>
                 <p className="t-body-sm text-ink-3">{name}</p>
                 <p className="t-body text-ink whitespace-pre-wrap">{message.body}</p>

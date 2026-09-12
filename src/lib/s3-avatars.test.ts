@@ -21,7 +21,13 @@ vi.mock("@aws-sdk/s3-request-presigner", () => ({
 
 import { HeadObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 
-import { headAvatarObject, presignAvatarGet, putAvatarObject, signedAvatarUrl } from "./s3-avatars";
+import {
+  headAvatarObject,
+  presignAvatarGet,
+  putAvatarObject,
+  signedAvatarUrl,
+  signedAvatarUrls,
+} from "./s3-avatars";
 
 const UID = "11111111-1111-4111-8111-111111111111";
 const KEY = `avatars/${UID}/avatar`;
@@ -85,5 +91,29 @@ describe("s3-avatars dedicated bucket", () => {
     );
     await expect(signedAvatarUrl(UID)).resolves.toBeNull();
     expect(mockGetSignedUrl).not.toHaveBeenCalled();
+  });
+
+  it("deduplicates ids and signs missing objects as null in parallel", async () => {
+    const other = "22222222-2222-4222-8222-222222222222";
+    mockSend.mockImplementation(async (cmd: { input?: { Key?: string } }) => {
+      if (cmd.input?.Key === `avatars/${other}/avatar`) return {};
+      throw Object.assign(new Error("NotFound"), {
+        name: "NotFound",
+        $metadata: { httpStatusCode: 404 },
+      });
+    });
+    mockGetSignedUrl.mockResolvedValue("https://s3.example/other-face");
+
+    const faces = await signedAvatarUrls([UID, other, UID, ""]);
+    expect(faces.size).toBe(2);
+    expect(faces.get(UID)).toBeNull();
+    expect(faces.get(other)).toBe("https://s3.example/other-face");
+    expect(mockSend).toHaveBeenCalledTimes(2);
+    expect(mockGetSignedUrl).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns an empty map when no ids are passed", async () => {
+    await expect(signedAvatarUrls([])).resolves.toEqual(new Map());
+    expect(mockSend).not.toHaveBeenCalled();
   });
 });

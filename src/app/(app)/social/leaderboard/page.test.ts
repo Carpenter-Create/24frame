@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
+import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { ASK_GLOBEE } from "@/lib/ask-globee";
 import { SOCIAL } from "@/lib/social";
 import SocialLeaderboardPage from "./page";
@@ -15,6 +16,10 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
+vi.mock("@/lib/s3-avatars", () => ({
+  signedAvatarUrl: vi.fn().mockResolvedValue(null),
+  signedAvatarUrls: vi.fn().mockResolvedValue(new Map()),
+}));
 
 function ctx({ hasOrg = false }: { hasOrg?: boolean } = {}) {
   const org = hasOrg ? { id: "org-1", name: "Acme", status: "active" } : null;
@@ -102,7 +107,10 @@ async function renderPage(search?: Record<string, string | string[] | undefined>
 }
 
 describe("Social leaderboard", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(signedAvatarUrls).mockResolvedValue(new Map());
+  });
 
   it("renders for a signed-in user without an org or profile when the board is public", async () => {
     const { from } = stubClient({
@@ -182,6 +190,44 @@ describe("Social leaderboard", () => {
     expect(html).toContain("(you)");
     expect(html).toContain("17");
     expect(html).toContain("2 points");
+  });
+
+  it("shows a signed face on a leaderboard row and keeps initials when missing", async () => {
+    stubClient({
+      top: [
+        {
+          window: "7d",
+          user_id: "u2",
+          rank: 1,
+          points: 12,
+          computed_at: "2026-09-12T14:00:00.000Z",
+        },
+      ],
+      you: {
+        window: "7d",
+        user_id: "u1",
+        rank: 2,
+        points: 3,
+        computed_at: "2026-09-12T14:00:00.000Z",
+      },
+      profiles: [
+        { id: "u1", handle: "ada", display_name: "Ada", status: "active" },
+        { id: "u2", handle: "other", display_name: "Other", status: "active" },
+      ],
+    });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+    vi.mocked(signedAvatarUrls).mockResolvedValue(
+      new Map([
+        ["u2", "https://s3.example/other-face"],
+        ["u1", null],
+      ]),
+    );
+
+    const html = await renderPage();
+    expect(html).toContain('src="https://s3.example/other-face"');
+    expect(html).toContain("Other");
+    expect(html).toContain("Ada");
+    expect(html).toContain(">A<");
   });
 
   it("sends an unauthenticated visitor to login", async () => {

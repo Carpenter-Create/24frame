@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
+import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { ASK_GLOBEE } from "@/lib/ask-globee";
 import { SOCIAL } from "@/lib/social";
 import SocialHomePage from "./page";
@@ -15,6 +16,10 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
+vi.mock("@/lib/s3-avatars", () => ({
+  signedAvatarUrl: vi.fn().mockResolvedValue(null),
+  signedAvatarUrls: vi.fn().mockResolvedValue(new Map()),
+}));
 vi.mock("@/app/(app)/social/actions", () => ({
   createSocialProfile: vi.fn(),
   createSocialPost: vi.fn(),
@@ -83,7 +88,10 @@ function stubClient({
 }
 
 describe("Social home", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(signedAvatarUrls).mockResolvedValue(new Map());
+  });
 
   it("renders for a signed-in user without an org", async () => {
     stubClient();
@@ -111,6 +119,32 @@ describe("Social home", () => {
     expect(html).toContain(SOCIAL.cta.profileHrefLabel);
     expect(html).not.toContain("data-social-post-form");
     expect(html).not.toContain("data-social-like");
+  });
+
+  it("shows a signed author face on a feed post", async () => {
+    stubClient({
+      profile: { id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" },
+      posts: [
+        {
+          id: "p1",
+          body: "hello",
+          author_id: "u1",
+          group_id: null,
+          like_count: 0,
+          created_at: "2026-09-12T14:00:00.000Z",
+        },
+      ],
+    });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+    vi.mocked(signedAvatarUrls).mockResolvedValue(
+      new Map([["u1", "https://s3.example/signed-avatar"]]),
+    );
+
+    const html = renderToStaticMarkup(await SocialHomePage());
+    expect(html).toContain('data-social-post="p1"');
+    expect(html).toContain("Ada Lovelace");
+    expect(html).toContain('src="https://s3.example/signed-avatar"');
+    expect(html).not.toContain("AL");
   });
 
   it("sends an unauthenticated visitor to login", async () => {

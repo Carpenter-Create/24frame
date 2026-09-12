@@ -113,4 +113,26 @@ describe("social writes stay on the live spine", () => {
     expect(board).not.toContain("createAdminClient");
     expect(board).not.toContain("rebuild_leaderboards");
   });
+
+  it("reuses signed account faces and does not add a second upload or title bucket", () => {
+    const surfaces = [
+      "src/app/(app)/social/page.tsx",
+      "src/app/(app)/social/profile/page.tsx",
+      "src/app/(app)/social/members/[handle]/page.tsx",
+      "src/app/(app)/social/dms/page.tsx",
+      "src/app/(app)/social/dms/[id]/page.tsx",
+      "src/app/(app)/social/leaderboard/page.tsx",
+      "src/app/(app)/social/groups/[slug]/page.tsx",
+      "src/app/(app)/social/groups/[slug]/posts/[postId]/page.tsx",
+    ];
+    for (const file of surfaces) {
+      const src = readFileSync(file, "utf8");
+      expect(src).toMatch(/signedAvatarUrls?/);
+      expect(src).not.toContain("putAvatarObject");
+      expect(src).not.toContain("uploadAccountPhoto");
+      expect(src).not.toContain("S3_BUCKET");
+      expect(src).not.toContain("S3_AVATARS_BUCKET");
+      expect(src).not.toContain("24frame-media");
+    }
+  });
 });
