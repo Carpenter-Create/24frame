@@ -5,7 +5,7 @@
 -- cascade-delete a profile; dashboard org_status stays unchanged.
 
 begin;
-select plan(28);
+select plan(26);
 
 select set_config('t.org',      gen_random_uuid()::text, false);
 select set_config('t.owner',    gen_random_uuid()::text, false);
@@ -55,9 +55,7 @@ select ok(
   ),
   'donor org_status value churned is absent');
 
--- ---- Packs 2–4 / donor collisions stay absent ------------------------------
-select ok(to_regclass('public.groups') is null, 'groups table not created');
-select ok(to_regclass('public.posts') is null, 'posts table not created');
+-- ---- Packs 3–4 / donor DM collisions stay absent ---------------------------
 select ok(to_regclass('public.likes') is null, 'likes table not created');
 select ok(
   to_regclass('public.conversations') is null,
