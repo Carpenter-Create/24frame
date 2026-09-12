@@ -10,7 +10,7 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["src/**/*.test.{ts,tsx}"],
+    include: ["src/**/*.test.{ts,tsx}", "apps/mobile/src/lib/**/*.test.ts"],
     // src/lib/s3.ts validates these at module load now — a hard failure on an unset bucket/
     // region is the whole point (fix round 1, item 2: an unset S3_BUCKET must never silently
     // become `Bucket: undefined` and get misread as "object absent"). Any test that imports
