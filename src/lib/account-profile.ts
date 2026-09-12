@@ -9,6 +9,7 @@
 
 import { z } from "zod";
 
+import { COMPANY_AGGREGATION_WORKSPACE } from "@/lib/product";
 import { USER_MENU, userMenuName } from "@/lib/user-menu";
 
 // Settings section title is Profile. The Identity menu label is Profile.
@@ -50,7 +51,7 @@ export const ACCOUNT_PROFILE = {
 export const COMPANY_PROFILE = {
   title: "Company",
   href: "/account/company",
-  subtitle: "Name of the organization on this account.",
+  subtitle: `Name of the ${COMPANY_AGGREGATION_WORKSPACE} on this account.`,
   nameLabel: "Company name",
   nameRequired: "Company name is required.",
   save: "Save",

@@ -45,6 +45,9 @@ describe("client NAV", () => {
     expect(dest?.icon).not.toBe(MessageSquare);
     expect(dest?.icon).not.toBe(Bot);
     expect(NAV.map((item) => item.label)).not.toContain("Messages");
+    expect(NAV.map((item) => item.label)).not.toContain("Groups");
+    expect(NAV.map((item) => item.label)).not.toContain("Casting");
+    expect(NAV.map((item) => item.label)).not.toContain("Social");
     expect(navSrc).toContain("icon: Sparkles");
     expect(navSrc).not.toContain("markSrc");
     expect(navSrc).not.toContain("ASK_GLOBEE_NAV_MARK");

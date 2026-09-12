@@ -35,6 +35,9 @@ describe("account profile copy", () => {
     expect(ACCOUNT_PROFILE.href).toBe("/settings/profile");
     expect(ACCOUNT_PROFILE.href).not.toBe("/account/profile");
     expect(COMPANY_PROFILE.title).toBe("Company");
+    expect(COMPANY_PROFILE.subtitle).toBe(
+      "Name of the company aggregation workspace on this account.",
+    );
     expect(COMPANY_PROFILE.href).toBe("/account/company");
     expect(ACCOUNT_PROFILE.href).toBe(USER_MENU.profileHref);
     expect(COMPANY_PROFILE.href).toBe("/account/company");

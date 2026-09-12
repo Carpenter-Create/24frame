@@ -118,7 +118,7 @@ Spec beats reference repos and older code.
 **Tier 3.** Real external users, PII, signed contracts, rights-holder revenue data, payouts.
 Full spec, blast-radius review, security rigor.
 
-This is the authenticated client dashboard for **24Frame**.
+This is the authenticated client dashboard for **24Frame** (aggregation workspace).
 Rights holders sign a licensing agreement, submit titles and **platform-ready** assets, track delivery
 across vendors, and (later) receive revenue statements and payouts.
 
