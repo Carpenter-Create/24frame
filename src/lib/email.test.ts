@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { buildNotificationEmail, buildOtpEmail } from "./email";
+import { buildMagicLinkEmail, buildNotificationEmail, buildOtpEmail } from "./email";
 import {
   EMAIL_ACCENT,
   EMAIL_ADDRESS,
@@ -77,6 +77,33 @@ describe("buildNotificationEmail", () => {
   });
 });
 
+describe("buildMagicLinkEmail", () => {
+  const signInUrl =
+    "https://app.24frame.co/auth/callback?token_hash=test-token&type=email";
+
+  it("is link-only house mail: Sporty Blue text link, no OTP code", () => {
+    const { subject, text, html } = buildMagicLinkEmail(signInUrl);
+    expect(subject).toBe("Your 24Frame sign-in link");
+    expect(text).toContain(signInUrl);
+    expect(text).not.toMatch(/enter this code/i);
+    expect(html).toContain("Sign in");
+    expect(html).toContain("Sign in to 24Frame");
+    expect(html).toContain(`href="${signInUrl.replaceAll("&", "&amp;")}"`);
+    expect(html).toContain(`color:${SPORTY_BLUE}`);
+    expect(html).toContain(EMAIL_LOGO_URL);
+    expect(html).toContain(EMAIL_SITE_LABEL);
+    expect(html).toContain(EMAIL_COPYRIGHT);
+    expect(html).toContain(EMAIL_ADDRESS);
+    expect(html).not.toContain("{{ .Token }}");
+    expect(html).not.toMatch(/enter this code/i);
+    expect(html).not.toMatch(/letter-spacing:2px/);
+    assertNoFilledPill(html);
+    expect(subject).not.toMatch(/Global Content|\bGC\b|globalcontent/i);
+    expect(productResidue(html)).not.toMatch(/\bGC\b|globalcontent/i);
+    expect(html.toLowerCase()).not.toMatch(/seamless|frictionless|elevate|amplify/);
+  });
+});
+
 describe("Auth magic-link template", () => {
   it("is the house Auth mail HTML with a Sporty Blue text link, not a filled pill", () => {
     const html = readFileSync(AUTH_TEMPLATE, "utf8");
@@ -88,6 +115,7 @@ describe("Auth magic-link template", () => {
     expect(html).toContain("Sign in to 24Frame");
     expect(html).toContain("{{ .ConfirmationURL }}");
     expect(html).toContain("{{ .Token }}");
+    expect(html).toContain("Or enter this code:");
     expect(html).toContain('font-size:24px;font-weight:600;letter-spacing:2px');
     expect(html).toContain(SPORTY_BLUE);
     expect(html).toContain(`color:${SPORTY_BLUE}`);

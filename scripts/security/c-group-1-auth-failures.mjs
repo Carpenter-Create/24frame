@@ -61,11 +61,11 @@ async function main() {
         : `DIFFER.\n          known:   ${shape(rKnown)}\n          unknown: ${shape(rUnknown)}`);
 
     // The app layer must not reintroduce the difference either.
-    rec("C2b", "app layer returns one fixed string regardless (login/actions.ts:32,37)",
+    rec("C2b", "app layer returns one fixed string regardless (login/actions.ts)",
       "PASS",
-      `requestMagicLink returns "Check your email for a secure sign-in link." on success for both. ` +
-      `Caveat already logged as B9: line 36 returns error.message verbatim, so a future Supabase ` +
-      `error string could become a disclosure channel.`);
+      `requestMagicLink returns "Check your email for a secure sign-in link." on success. ` +
+      `Mint/send failures return the generic "Could not send the sign-in link. Please try again." ` +
+      `— the dashboard path no longer forwards Supabase error.message (B9 closed on this action).`);
   }
 
   // ── C3 ────────────────────────────────────────────────────────────────────

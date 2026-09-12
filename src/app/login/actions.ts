@@ -2,13 +2,19 @@
 
 import { headers } from "next/headers";
 
-import { createClient } from "@/lib/supabase/server";
+import {
+  DASHBOARD_SIGN_IN_SEND_FAILED,
+  DASHBOARD_SIGN_IN_SENT,
+  issueDashboardSignInLink,
+} from "@/lib/auth-magic-link";
 import { verifyTurnstile } from "@/lib/turnstile";
 
 export type LoginState = { ok: boolean; message: string };
 
 // Magic-link only (domain-spec §21 decision): no passwords, no OAuth. Turnstile is
-// verified server-side BEFORE we ask Supabase to send the link.
+// verified server-side BEFORE we mint a link. Dashboard send uses generateLink +
+// Resend (link-only house mail). It does not call signInWithOtp — that would fire
+// the hosted dual-purpose magic_link template (link + code) that mobile still needs.
 export async function requestMagicLink(
   _prev: LoginState,
   formData: FormData,
@@ -22,17 +28,11 @@ export async function requestMagicLink(
     return { ok: false, message: "Verification failed — please try again." };
   }
 
-  const origin =
-    (await headers()).get("origin") ?? "http://127.0.0.1:3000";
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: {
-      emailRedirectTo: `${origin}/auth/callback`,
-      shouldCreateUser: true, // open free-tier signup (§3: creates a 'registered' org after onboarding)
-    },
-  });
-
-  if (error) return { ok: false, message: error.message };
-  return { ok: true, message: "Check your email for a secure sign-in link." };
+  const origin = (await headers()).get("origin");
+  try {
+    await issueDashboardSignInLink({ email, requestOrigin: origin });
+  } catch {
+    return { ok: false, message: DASHBOARD_SIGN_IN_SEND_FAILED };
+  }
+  return { ok: true, message: DASHBOARD_SIGN_IN_SENT };
 }

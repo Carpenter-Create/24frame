@@ -54,13 +54,17 @@ reintroduce.
 
 Local dev has **two email paths** and only one is fake:
 
-- **Supabase Auth** (magic link / login) → the local stack's own SMTP → **Mailpit at
-  <http://127.0.0.1:54324>**. Never reaches a real inbox.
-- **App email** (portal OTP, GC Support notifications — `src/lib/email.ts`) → **Resend**, from
-  `assets@globalcontent.co` → **a real inbox, even from localhost.**
+- **Supabase Auth** (hosted `magic_link.html` — mobile `signInWithOtp`) → the local stack's
+  own SMTP → **Mailpit at <http://127.0.0.1:54324>**. Never reaches a real inbox. The hosted
+  template still includes both `{{ .ConfirmationURL }}` and `{{ .Token }}` because mobile
+  types the code.
+- **App email** (dashboard login magic link, portal OTP, GC Support — `src/lib/email.ts`) →
+  **Resend**, from `assets@globalcontent.co` → **a real inbox, even from localhost.**
 
-Auth mail is deliberately not routed through Resend: `supabase/config.toml` sets
-`auth.rate_limit.email_sent = 2` per hour, which throttles dev logins almost immediately.
+Dashboard login does not call `signInWithOtp`. It mints a hashed token with service-role
+`generateLink` (no GoTrue mail) and sends a **link-only** house email via Resend. GoTrue's
+`auth.rate_limit.email_sent = 2` per hour still applies to mobile OTP sends, not dashboard
+login.
 
 ---
 
