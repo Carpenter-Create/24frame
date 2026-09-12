@@ -2086,6 +2086,10 @@ export type Database = {
         }
         Returns: Json
       }
+      add_conversation_participants: {
+        Args: { p_conversation: string; p_peers: string[] }
+        Returns: string
+      }
       add_rights_grant: {
         Args: {
           p_effective_from?: string
@@ -2251,9 +2255,12 @@ export type Database = {
         Args: { p_limit?: number }
         Returns: {
           conversation_id: string
+          kind: Database["public"]["Enums"]["conversation_kind"]
           last_message_at: string | null
           muted: boolean
+          participant_ids: string[]
           peer_id: string | null
+          title: string | null
           unread_count: number
         }[]
       }
@@ -2458,6 +2465,10 @@ export type Database = {
       }
       set_title_metadata: {
         Args: { p_data: Json; p_org_id: string; p_title_id: string }
+        Returns: undefined
+      }
+      set_group_conversation_title: {
+        Args: { p_conversation: string; p_title: string | null }
         Returns: undefined
       }
       set_title_release_info: {
