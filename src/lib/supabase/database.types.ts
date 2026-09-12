@@ -558,6 +558,155 @@ export type Database = {
         }
         Relationships: []
       }
+      groups: {
+        Row: {
+          cover_key: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          member_count: number
+          min_level: number | null
+          min_tier_rank: number
+          name: string
+          slug: string
+          visibility: Database["public"]["Enums"]["group_visibility"]
+        }
+        Insert: {
+          cover_key?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          member_count?: number
+          min_level?: number | null
+          min_tier_rank?: number
+          name: string
+          slug: string
+          visibility?: Database["public"]["Enums"]["group_visibility"]
+        }
+        Update: {
+          cover_key?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          member_count?: number
+          min_level?: number | null
+          min_tier_rank?: number
+          name?: string
+          slug?: string
+          visibility?: Database["public"]["Enums"]["group_visibility"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "groups_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_members: {
+        Row: {
+          group_id: string
+          joined_at: string
+          role: Database["public"]["Enums"]["user_role_in_group"]
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          joined_at?: string
+          role?: Database["public"]["Enums"]["user_role_in_group"]
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          joined_at?: string
+          role?: Database["public"]["Enums"]["user_role_in_group"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          author_id: string
+          body: string | null
+          comment_count: number
+          created_at: string
+          edited_at: string | null
+          embedding: string | null
+          group_id: string | null
+          id: string
+          like_count: number
+          media: Json | null
+          pinned: boolean
+          required_entitlement_key: string | null
+          status: Database["public"]["Enums"]["post_status"]
+        }
+        Insert: {
+          author_id: string
+          body?: string | null
+          comment_count?: number
+          created_at?: string
+          edited_at?: string | null
+          embedding?: string | null
+          group_id?: string | null
+          id?: string
+          like_count?: number
+          media?: Json | null
+          pinned?: boolean
+          required_entitlement_key?: string | null
+          status?: Database["public"]["Enums"]["post_status"]
+        }
+        Update: {
+          author_id?: string
+          body?: string | null
+          comment_count?: number
+          created_at?: string
+          edited_at?: string | null
+          embedding?: string | null
+          group_id?: string | null
+          id?: string
+          like_count?: number
+          media?: Json | null
+          pinned?: boolean
+          required_entitlement_key?: string | null
+          status?: Database["public"]["Enums"]["post_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deliveries: {
         Row: {
           created_at: string
@@ -1708,6 +1857,10 @@ export type Database = {
         Args: { p_force?: boolean; p_link_id: string; p_vendor_id?: string }
         Returns: undefined
       }
+      can_access_group_content: {
+        Args: { p_group: string; p_user: string }
+        Returns: boolean
+      }
       can_deliver: {
         Args: {
           p_at: string
@@ -1715,6 +1868,14 @@ export type Database = {
           p_territory: string
           p_title_id: string
         }
+        Returns: boolean
+      }
+      can_see_group: {
+        Args: { p_group: string; p_user: string }
+        Returns: boolean
+      }
+      can_self_join_group: {
+        Args: { p_group: string; p_user: string }
         Returns: boolean
       }
       create_asset: {
@@ -1829,7 +1990,12 @@ export type Database = {
         Args: { p_cap: string; p_user: string }
         Returns: boolean
       }
+      is_active_profile: { Args: { p_user: string }; Returns: boolean }
       is_gc_staff: { Args: { p_uid: string }; Returns: boolean }
+      is_group_member: {
+        Args: { p_group: string; p_user: string }
+        Returns: boolean
+      }
       lapse_org: {
         Args: { p_first_failure: string; p_org: string }
         Returns: string
@@ -1844,6 +2010,10 @@ export type Database = {
         Returns: boolean
       }
       member_tier_rank: { Args: { p_user: string }; Returns: number }
+      meets_group_access: {
+        Args: { p_group: string; p_user: string }
+        Returns: boolean
+      }
       my_deliveries: {
         Args: never
         Returns: {
@@ -2011,6 +2181,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      shares_group: { Args: { p_a: string; p_b: string }; Returns: boolean }
       submit_title: {
         Args: { p_org_id: string; p_title_id: string }
         Returns: undefined
@@ -2075,6 +2246,7 @@ export type Database = {
         | "gc_legal"
         | "gc_delivery_ops"
         | "gc_viewer"
+      group_visibility: "public" | "private" | "secret"
       membership_status: "invited" | "active" | "removed"
       notification_kind: "title_rejected" | "delivery_update"
       notification_sender: "gc_support" | "globee"
@@ -2108,6 +2280,7 @@ export type Database = {
         | "manual"
         | "post_created"
       portal_link_purpose: "master_download" | "screener_view"
+      post_status: "active" | "hidden" | "removed"
       release_type: "new_release" | "re_release"
       review_decision: "approve" | "reject"
       rights_type:
@@ -2158,6 +2331,7 @@ export type Database = {
         | "failed"
         | "submit_failed"
       trust_state: "new" | "verified" | "trusted" | "restricted"
+      user_role_in_group: "owner" | "admin" | "member"
       vendor_mode: "portal_upload" | "email"
     }
     CompositeTypes: {
@@ -2320,6 +2494,7 @@ export const Constants = {
         "gc_delivery_ops",
         "gc_viewer",
       ],
+      group_visibility: ["public", "private", "secret"],
       membership_status: ["invited", "active", "removed"],
       notification_kind: ["title_rejected", "delivery_update"],
       notification_sender: ["gc_support", "globee"],
@@ -2357,6 +2532,7 @@ export const Constants = {
         "restore_requested",
       ],
       portal_link_purpose: ["master_download", "screener_view"],
+      post_status: ["active", "hidden", "removed"],
       release_type: ["new_release", "re_release"],
       review_decision: ["approve", "reject"],
       rights_type: [
@@ -2411,6 +2587,7 @@ export const Constants = {
         "submit_failed",
       ],
       trust_state: ["new", "verified", "trusted", "restricted"],
+      user_role_in_group: ["owner", "admin", "member"],
       vendor_mode: ["portal_upload", "email"],
     },
   },
