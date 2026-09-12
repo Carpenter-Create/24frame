@@ -5,7 +5,7 @@
 -- cascade-delete a profile; dashboard org_status stays unchanged.
 
 begin;
-select plan(29);
+select plan(31);
 
 select set_config('t.org',      gen_random_uuid()::text, false);
 select set_config('t.owner',    gen_random_uuid()::text, false);
@@ -70,6 +70,12 @@ select ok(
 select ok(
   to_regclass('public.ai_conversation_messages') is not null,
   'ai_conversation_messages still present');
+select ok(
+  to_regclass('public.leaderboard_entries') is not null,
+  'leaderboard_entries exist');
+select ok(
+  to_regclass('public.level_distribution') is not null,
+  'level_distribution exists');
 
 -- ---- catalog auth functions survive; has_capability is additive ------------
 select ok(

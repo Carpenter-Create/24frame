@@ -10,6 +10,7 @@ import {
   House,
   UserRound,
   UsersRound,
+  Trophy,
   MessageCircle,
   type LucideIcon,
 } from "lucide-react";
@@ -36,6 +37,7 @@ export const SOCIAL_NAV: NavItem[] = [
   { label: "Home", href: SOCIAL_ROUTES.home, icon: House, exact: true },
   { label: "Profile", href: SOCIAL_ROUTES.profile, icon: UserRound },
   { label: "Groups", href: SOCIAL_ROUTES.groups, icon: UsersRound },
+  { label: "Leaderboard", href: SOCIAL_ROUTES.leaderboard, icon: Trophy },
   { label: "Messages", href: SOCIAL_ROUTES.dms, icon: MessageCircle },
 ];
 
@@ -65,8 +67,8 @@ export function clientNavCurrent(pathname: string): NavItem {
 
 // Client phone sheet stays the five NAV destinations. Staff already use those
 // plus the operator set — do not leave them on a client-only menu.
-// Social mode is Home / Profile / Groups / DMs. Ask 24Frame AI and GC_NAV
-// stay Aggregation-only.
+// Social mode is Home / Profile / Groups / Leaderboard / DMs. Ask 24Frame AI
+// and GC_NAV stay Aggregation-only.
 export function mobileNavDestinations(
   isGcStaff: boolean,
   workspace: WorkspaceMode = "aggregation",

@@ -23,7 +23,10 @@ describe("social copy lock", () => {
     expect(blob).toContain(SOCIAL_WORKSPACE);
     expect(SOCIAL.home.subtitle).toContain(PRODUCT_NAME);
     expect(SOCIAL_ROUTES.dms).toBe("/social/dms");
+    expect(SOCIAL_ROUTES.leaderboard).toBe("/social/leaderboard");
     expect(SOCIAL_ROUTES.home).toBe("/social");
+    expect(SOCIAL.leaderboard.private).toBe("The leaderboard is private.");
+    expect(SOCIAL.leaderboard.subtitle).toContain(PRODUCT_NAME);
     for (const banned of SOCIAL_BANNED_PRODUCT_NAMES) {
       expect(blob).not.toContain(banned);
     }
@@ -89,6 +92,7 @@ describe("social writes stay on the live spine", () => {
   it("does not invent a cousin catalog feed table or cascade-delete memberships", () => {
     const actions = readFileSync("src/app/(app)/social/actions.ts", "utf8");
     const pages = readFileSync("src/app/(app)/social/page.tsx", "utf8");
+    const board = readFileSync("src/app/(app)/social/leaderboard/page.tsx", "utf8");
     expect(actions).toContain('from("profiles")');
     expect(actions).toContain('from("posts")');
     expect(actions).toContain('from("likes")');
@@ -104,5 +108,9 @@ describe("social writes stay on the live spine", () => {
     expect(actions).not.toContain("from(\"organizations\")");
     expect(pages).toContain("loadVisiblePosts");
     expect(pages).not.toContain("from(\"titles\")");
+    expect(board).toContain("loadLeaderboardBoard");
+    expect(board).toContain("createClient");
+    expect(board).not.toContain("createAdminClient");
+    expect(board).not.toContain("rebuild_leaderboards");
   });
 });
