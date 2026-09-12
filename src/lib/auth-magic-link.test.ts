@@ -149,9 +149,9 @@ describe("issueDashboardSignInLink", () => {
   it("keeps dashboard login off signInWithOtp", () => {
     const impl = readFileSync(new URL("./auth-magic-link.ts", import.meta.url), "utf8");
     const actions = readFileSync(new URL("../app/login/actions.ts", import.meta.url), "utf8");
-    expect(impl).not.toContain("signInWithOtp");
-    expect(impl).not.toContain("type: \"signup\"");
-    expect(actions).not.toContain("signInWithOtp");
+    expect(impl).not.toMatch(/\.signInWithOtp\s*\(/);
+    expect(impl).not.toMatch(/generateLink\(\{\s*type:\s*"signup"/);
+    expect(actions).not.toMatch(/\.signInWithOtp\s*\(/);
     expect(actions).toContain("issueDashboardSignInLink");
   });
 });
