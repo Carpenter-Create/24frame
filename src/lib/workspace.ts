@@ -45,3 +45,7 @@ export function resolveWorkspaceMode(pathname: string, cookie: WorkspaceMode): W
 export function workspaceCookieWrite(mode: WorkspaceMode): string {
   return `${WORKSPACE_COOKIE}=${mode}; path=/; max-age=31536000; samesite=lax`;
 }
+
+export function persistWorkspaceCookie(mode: WorkspaceMode): void {
+  document.cookie = workspaceCookieWrite(mode);
+}

@@ -112,7 +112,12 @@ export function SocialLikeButton({
   disabled?: boolean;
 }) {
   return (
-    <form action={toggleSocialLike} className="inline">
+    <form
+      action={async (formData) => {
+        await toggleSocialLike(formData);
+      }}
+      className="inline"
+    >
       <input type="hidden" name="post_id" value={postId} />
       <input type="hidden" name="liked" value={liked ? "1" : "0"} />
       {groupSlug ? <input type="hidden" name="group_slug" value={groupSlug} /> : null}

@@ -64,11 +64,11 @@ describe("Social profile opt-in", () => {
   });
 
   it("renders an existing creator profile without a second create form", async () => {
-    stubProfile({ id: "u1", handle: "ada", display_name: "Ada", status: "active" });
+    stubProfile({ id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" });
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
     const html = renderToStaticMarkup(await SocialProfilePage());
-    expect(html).toContain("Ada");
+    expect(html).toContain("Ada Lovelace");
     expect(html).toContain("@ada");
     expect(html).toContain("AL");
     expect(html).not.toContain("data-social-profile-form");

@@ -5,8 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/cn";
 import { WORKSPACE_AGGREGATION_LABEL, WORKSPACE_SOCIAL_LABEL } from "@/lib/product";
 import {
+  persistWorkspaceCookie,
   resolveWorkspaceMode,
-  workspaceCookieWrite,
   workspaceHome,
   type WorkspaceMode,
 } from "@/lib/workspace";
@@ -26,7 +26,7 @@ export function WorkspaceSwitcher({
   const current = resolveWorkspaceMode(pathname, defaultWorkspace);
 
   const select = (mode: WorkspaceMode) => {
-    document.cookie = workspaceCookieWrite(mode);
+    persistWorkspaceCookie(mode);
     if (current !== mode) router.push(workspaceHome(mode));
   };
 
