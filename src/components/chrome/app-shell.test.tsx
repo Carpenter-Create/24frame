@@ -93,7 +93,7 @@ describe("AppShell header", () => {
     expect(renderShell(undefined, "Ada Lovelace")).toContain('data-name="Ada Lovelace"');
     expect(shellSrc).toContain("<UserMenu email={email} name={name} />");
     expect(shellSrc).toContain("Phone avatar opens 544:561");
-    expect(shellSrc).toContain("<MobileNav isGcStaff={isGcStaff} />");
+    expect(shellSrc).toContain("<MobileNav isGcStaff={isGcStaff} workspace={workspace} />");
     expect(shellSrc).not.toContain("AccountOverlay");
     expect(shellSrc).not.toContain("AccountSheet");
   });
@@ -226,7 +226,7 @@ describe("AppShell client mobile chrome", () => {
     expect(html).not.toContain("data-tab-bar");
     expect(shellSrc).toContain("hidden h-dvh flex-col");
     expect(shellSrc).toContain("md:flex");
-    expect(shellSrc).toContain("<MobileNav isGcStaff={isGcStaff} />");
+    expect(shellSrc).toContain("<MobileNav isGcStaff={isGcStaff} workspace={workspace} />");
     expect(shellSrc).not.toContain("GC_NAV");
     expect(shellSrc).not.toMatch(/key=\{pathname\}/);
 
@@ -379,7 +379,7 @@ describe("AppShell RL rail-collapse chevron", () => {
   it("keeps collapse off on settings and persistence on the Access cookie", () => {
     expect(shellSrc).toContain("gc_sidebar_collapsed");
     expect(shellSrc).toContain("defaultCollapsed");
-    expect(shellSrc).toContain("<MobileNav isGcStaff={isGcStaff} />");
+    expect(shellSrc).toContain("<MobileNav isGcStaff={isGcStaff} workspace={workspace} />");
     navigation.pathname = "/settings";
     expect(renderShell(undefined, undefined, true)).not.toContain("Expand sidebar");
     expect(renderShell(undefined, undefined, true)).not.toContain(

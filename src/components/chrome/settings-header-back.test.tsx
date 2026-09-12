@@ -71,7 +71,9 @@ describe("SettingsHeaderBack", () => {
     expect(shellSrc).toContain("<SettingsHeaderBack />");
     expect(shellSrc).toContain("MOBILE_CHROME_LEAD_PAD_CLASS");
     expect(SETTINGS_HEADER_PAD_CLASS).toBe(MOBILE_CHROME_LEAD_PAD_CLASS);
-    expect(shellSrc).toContain("settingsPage ? <SettingsHeaderBack /> : <MobileNav isGcStaff={isGcStaff} />");
+    expect(shellSrc).toContain(
+      "{settingsPage ? <SettingsHeaderBack /> : <MobileNav isGcStaff={isGcStaff} workspace={workspace} />}",
+    );
     expect(accountSrc).toContain("flex h-8 w-8 items-center justify-center rounded-full");
     expect(accountSrc).toContain("md:hidden");
     expect(railSrc).toContain("600:881");

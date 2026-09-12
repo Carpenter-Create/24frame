@@ -24,6 +24,8 @@ import {
 } from "@/lib/rail-collapse";
 import { PRODUCT_NAME } from "@/lib/product";
 import { isSettingsPath, SETTINGS_RAIL_PAD_CLASS } from "@/lib/settings";
+import { resolveWorkspaceMode, type WorkspaceMode } from "@/lib/workspace";
+import { WorkspaceSwitcher } from "./workspace-switcher";
 
 type Org = { id: string; name: string };
 
@@ -45,6 +47,7 @@ export function AppShell({
   isGcStaff = false,
   defaultCollapsed = false,
   messagesSurface = "staff-inbox",
+  defaultWorkspace = "aggregation",
   children,
 }: {
   email: string;
@@ -57,10 +60,12 @@ export function AppShell({
   isGcStaff?: boolean;
   defaultCollapsed?: boolean;
   messagesSurface?: MessagesSurface;
+  defaultWorkspace?: WorkspaceMode;
   children: React.ReactNode;
 }) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const pathname = usePathname();
+  const workspace = resolveWorkspaceMode(pathname, defaultWorkspace);
   // The catalog opts out of the centered width cap so its hero can bleed full-width
   // (edge of sidebar → right edge). That page then manages its own content max-width.
   // Client `/` uses the locked Access frame (48 / 32) without restyling other pages.
@@ -144,7 +149,12 @@ export function AppShell({
           {settingsPage ? (
             <SettingsRail />
           ) : (
-            <SideNav messagesUnread={messagesUnread} isGcStaff={isGcStaff} collapsed={collapsed} />
+            <SideNav
+              messagesUnread={messagesUnread}
+              isGcStaff={isGcStaff}
+              collapsed={collapsed}
+              workspace={workspace}
+            />
           )}
         </div>
       </aside>
@@ -163,7 +173,8 @@ export function AppShell({
         style={{ height: "var(--header-height)", marginLeft: "var(--sidebar-width)" }}
       >
         <div data-app-header-leading="" className="mr-auto flex min-w-0 flex-1 items-center gap-2">
-          {settingsPage ? <SettingsHeaderBack /> : <MobileNav isGcStaff={isGcStaff} />}
+          {settingsPage ? <SettingsHeaderBack /> : <MobileNav isGcStaff={isGcStaff} workspace={workspace} />}
+          {settingsPage ? null : <WorkspaceSwitcher defaultWorkspace={defaultWorkspace} />}
           {messagesPage ? <MessagesAppHeader surface={messagesSurface} /> : null}
           {titlesBleed ? <TitlesHeaderSearch /> : null}
         </div>

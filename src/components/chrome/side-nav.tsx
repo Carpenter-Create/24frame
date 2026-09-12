@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Suspense, use, useRef } from "react";
-import { GC_NAV, NAV, type NavItem } from "@/lib/nav";
+import { railDestinations, type NavItem } from "@/lib/nav";
 import { cn } from "@/lib/cn";
 import { PRODUCT_NAME } from "@/lib/product";
+import type { WorkspaceMode } from "@/lib/workspace";
 
 // Access rail: 13px labels (--text-sm / t-body-sm), 16px Lucide at 1.33, muted grey wash when active.
 // Collapsed mode is icon-only (labels/badges hidden; title tooltips; unread → accent dot).
@@ -13,10 +14,12 @@ export function SideNav({
   messagesUnread,
   isGcStaff = false,
   collapsed = false,
+  workspace = "aggregation",
 }: {
   messagesUnread: Promise<number>;
   isGcStaff?: boolean;
   collapsed?: boolean;
+  workspace?: WorkspaceMode;
 }) {
   const pathname = usePathname();
 
@@ -65,9 +68,11 @@ export function SideNav({
     );
   };
 
+  const { items, staffItems } = railDestinations(isGcStaff, workspace);
+
   return (
     <nav className={cn("flex flex-col gap-2", collapsed ? "px-1.5" : "px-3")} data-side-nav="">
-      {NAV.map((item) =>
+      {items.map((item) =>
         row(
           item,
           item.href === "/messages" ? (
@@ -80,13 +85,13 @@ export function SideNav({
           ) : null,
         ),
       )}
-      {isGcStaff ? (
+      {staffItems.length > 0 ? (
         <>
           <div className="mx-1 my-2 border-t border-hairline" />
           {!collapsed ? (
             <span className="px-2.5 pb-1 t-label text-ink-3">{PRODUCT_NAME}</span>
           ) : null}
-          {GC_NAV.map((item) => row(item))}
+          {staffItems.map((item) => row(item))}
         </>
       ) : null}
     </nav>

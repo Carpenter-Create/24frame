@@ -2,8 +2,9 @@
 // and download brand hang off these. Identifiers stay (ask-globee,
 // /messages, is_gc_staff). Parent entity is Holdings LLC only.
 //
-// One 24Frame account. This chrome is the aggregation workspace.
-// Social workspace is Phase 1B HOLD. No switcher. No new nav.
+// One 24Frame account. Two workspaces: Aggregation (catalog) and Social
+// (creator profile, groups, posts, DMs). /messages stays Ask 24Frame AI.
+// Social destinations live under /social/*. Org invite stays Aggregation.
 
 export const PRODUCT_NAME = "24Frame";
 export const ASSISTANT_NAME = "24Frame AI";
@@ -11,3 +12,6 @@ export const ASK_ASSISTANT = `Ask ${ASSISTANT_NAME}`;
 export const PARENT_ENTITY = "Global Content Holdings LLC";
 export const AGGREGATION_WORKSPACE = "aggregation workspace";
 export const COMPANY_AGGREGATION_WORKSPACE = "company aggregation workspace";
+export const SOCIAL_WORKSPACE = "Social workspace";
+export const WORKSPACE_AGGREGATION_LABEL = "Aggregation";
+export const WORKSPACE_SOCIAL_LABEL = "Social";

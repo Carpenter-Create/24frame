@@ -7,11 +7,17 @@ import {
   Inbox,
   Store,
   Users,
+  House,
+  UserRound,
+  UsersRound,
+  MessageCircle,
   type LucideIcon,
 } from "lucide-react";
 
 import { ASK_GLOBEE } from "@/lib/ask-globee";
 import { PRODUCT_NAME } from "@/lib/product";
+import type { WorkspaceMode } from "@/lib/workspace";
+import { SOCIAL_ROUTES } from "@/lib/social";
 
 export type NavItem = { label: string; href: string; icon: LucideIcon; exact?: boolean };
 
@@ -23,6 +29,14 @@ export const NAV: NavItem[] = [
   { label: "Deliveries", href: "/deliveries", icon: Send },
   { label: "Catalog Health", href: "/catalog-health", icon: Activity },
   { label: ASK_GLOBEE.headline, href: "/messages", icon: Sparkles },
+];
+
+// Social workspace rail. Messages here is DMs — never /messages.
+export const SOCIAL_NAV: NavItem[] = [
+  { label: "Home", href: SOCIAL_ROUTES.home, icon: House, exact: true },
+  { label: "Profile", href: SOCIAL_ROUTES.profile, icon: UserRound },
+  { label: "Groups", href: SOCIAL_ROUTES.groups, icon: UsersRound },
+  { label: "Messages", href: SOCIAL_ROUTES.dms, icon: MessageCircle },
 ];
 
 // Staff-only operator surfaces. Rendered by SideNav only when isGcStaff is true;
@@ -51,6 +65,20 @@ export function clientNavCurrent(pathname: string): NavItem {
 
 // Client phone sheet stays the five NAV destinations. Staff already use those
 // plus the operator set — do not leave them on a client-only menu.
-export function mobileNavDestinations(isGcStaff: boolean): NavItem[] {
+// Social mode is Home / Profile / Groups / DMs. Ask 24Frame AI and GC_NAV
+// stay Aggregation-only.
+export function mobileNavDestinations(
+  isGcStaff: boolean,
+  workspace: WorkspaceMode = "aggregation",
+): NavItem[] {
+  if (workspace === "social") return SOCIAL_NAV;
   return isGcStaff ? [...NAV, ...GC_NAV] : NAV;
+}
+
+export function railDestinations(
+  isGcStaff: boolean,
+  workspace: WorkspaceMode = "aggregation",
+): { items: NavItem[]; staffItems: NavItem[] } {
+  if (workspace === "social") return { items: SOCIAL_NAV, staffItems: [] };
+  return { items: NAV, staffItems: isGcStaff ? GC_NAV : [] };
 }

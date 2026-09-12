@@ -6,8 +6,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 
-import { GC_NAV, MOBILE_NAV, NAV, isClientNavActive, type NavItem } from "@/lib/nav";
+import { MOBILE_NAV, isClientNavActive, railDestinations, type NavItem } from "@/lib/nav";
 import { cn } from "@/lib/cn";
+import type { WorkspaceMode } from "@/lib/workspace";
 import {
   MOBILE_CHROME_HAMBURGER_BUTTON_CLASS,
   MOBILE_CHROME_ICON_CLASS,
@@ -28,7 +29,13 @@ import { AppSheetHead, AppSheetSurface, Close44 } from "./house";
 // a blank canvas. Same-href clicks still dismiss immediately. Portal to
 // document.body so the header's backdrop-blur does not become the fixed
 // containing block (that left the page showing through).
-export function MobileNav({ isGcStaff = false }: { isGcStaff?: boolean }) {
+export function MobileNav({
+  isGcStaff = false,
+  workspace = "aggregation",
+}: {
+  isGcStaff?: boolean;
+  workspace?: WorkspaceMode;
+}) {
   const pathname = usePathname();
   const [openedOn, setOpenedOn] = useState<string | null>(null);
   // Open only while we are still on the path the sheet was opened from.
@@ -41,6 +48,7 @@ export function MobileNav({ isGcStaff = false }: { isGcStaff?: boolean }) {
       pathname={pathname}
       onClose={() => setOpenedOn(null)}
       isGcStaff={isGcStaff}
+      workspace={workspace}
     />
   ) : null;
 
@@ -71,10 +79,12 @@ export function MobileNavSheet({
   pathname,
   onClose,
   isGcStaff = false,
+  workspace = "aggregation",
 }: {
   pathname: string;
   onClose: () => void;
   isGcStaff?: boolean;
+  workspace?: WorkspaceMode;
 }) {
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -88,6 +98,8 @@ export function MobileNavSheet({
       document.body.style.overflow = previous;
     };
   }, [onClose]);
+
+  const { items, staffItems } = railDestinations(isGcStaff, workspace);
 
   const link = (item: NavItem) => {
     const active = isClientNavActive(pathname, item);
@@ -140,14 +152,14 @@ export function MobileNavSheet({
           data-mobile-nav-destinations=""
           style={{ WebkitOverflowScrolling: "touch" }}
         >
-          <div className="flex flex-col gap-[var(--space-2)]">{NAV.map(link)}</div>
-          {isGcStaff ? (
+          <div className="flex flex-col gap-[var(--space-2)]">{items.map(link)}</div>
+          {staffItems.length > 0 ? (
             <>
               <div
                 data-mobile-nav-group-rule=""
                 className="my-[var(--space-6)] border-t border-hairline"
               />
-              <div className="flex flex-col gap-[var(--space-2)]">{GC_NAV.map(link)}</div>
+              <div className="flex flex-col gap-[var(--space-2)]">{staffItems.map(link)}</div>
             </>
           ) : null}
         </nav>

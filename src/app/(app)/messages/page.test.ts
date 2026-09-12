@@ -327,6 +327,22 @@ describe("MessagesPage surfaces", () => {
     vi.mocked(getOrgContext).mockResolvedValue(null as never);
     await expect(MessagesPage()).rejects.toThrow("REDIRECT:/login");
   });
+
+  it("keeps /messages as Ask 24Frame AI for a signed-in user without an org", async () => {
+    const { from, rpc } = stubClient();
+    vi.mocked(getOrgContext).mockResolvedValue(ctx({ hasOrg: false }) as never);
+
+    const html = await renderPage();
+    expect(html).toContain("data-ask-globee-gate");
+    expect(html).toContain(ASK_GLOBEE.headline);
+    expect(html).toContain("Ask 24Frame AI");
+    expect(html).not.toContain("data-social-dms");
+    expect(html).not.toContain("data-messages-inbox");
+    expectNoLanding(html);
+    expect(from).not.toHaveBeenCalledWith("messages");
+    expect(from).not.toHaveBeenCalledWith("conversations");
+    expect(rpc).not.toHaveBeenCalledWith("get_dm_inbox");
+  });
 });
 
 describe("MessagesPage Ask Globee persist", () => {
