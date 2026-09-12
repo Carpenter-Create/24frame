@@ -45,7 +45,7 @@ export function courseHref(slug: string): string {
 }
 
 // Mirrors has_course_access while member_tier_rank is the Pack 1 stub (0).
-// Do not call has_entitlement. Do not invent a buy path.
+// Do not invent an entitlements lookup or a buy path.
 export function courseAccessGranted(
   isFlagshipFree: boolean,
   memberTierRank: number,

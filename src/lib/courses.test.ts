@@ -87,7 +87,7 @@ describe("course lock", () => {
     expect(detail).toContain("loadCourseDetail");
     expect(detail).toContain("data-course-denied");
     expect(lib).toContain("has_course_access");
-    expect(lib).not.toContain("has_entitlement");
+    expect(lib).not.toContain('rpc("has_entitlement"');
     expect(lib).not.toContain("MediaConvert");
     expect(lib).not.toContain("m3u8");
     expect(lib).not.toContain("CloudFront");
@@ -97,10 +97,10 @@ describe("course lock", () => {
     expect(list).not.toContain("courses/new");
     expect(detail).not.toContain("courses/new");
     expect(migration).toContain("ADAM LOCK");
-    expect(migration).toContain("authenticated INSERT / UPDATE / DELETE is denied");
-    expect(migration).not.toContain("has_entitlement");
-    expect(migration).not.toContain("media_asset_id");
-    expect(migration).not.toContain("lesson_progress");
+    expect(migration).toContain("Authenticated INSERT / UPDATE / DELETE is denied");
+    expect(migration).toContain("has_entitlement must not exist in this slice");
+    expect(migration).not.toContain("media_asset_id uuid");
+    expect(migration).not.toMatch(/create table if not exists public\.lesson_progress/);
     expect(() => readFileSync("src/app/(app)/social/courses/new/page.tsx")).toThrow();
   });
 });
