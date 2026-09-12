@@ -958,6 +958,103 @@ export type Database = {
           },
         ]
       }
+      courses: {
+        Row: {
+          cover_key: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_flagship_free: boolean
+          price_cents: number | null
+          slug: string
+          title: string
+        }
+        Insert: {
+          cover_key?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_flagship_free?: boolean
+          price_cents?: number | null
+          slug: string
+          title: string
+        }
+        Update: {
+          cover_key?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_flagship_free?: boolean
+          price_cents?: number | null
+          slug?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      modules: {
+        Row: {
+          course_id: string
+          id: string
+          position: number
+          title: string
+        }
+        Insert: {
+          course_id: string
+          id?: string
+          position: number
+          title: string
+        }
+        Update: {
+          course_id?: string
+          id?: string
+          position?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modules_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lessons: {
+        Row: {
+          duration_seconds: number | null
+          free_preview: boolean
+          id: string
+          module_id: string
+          position: number
+          title: string
+        }
+        Insert: {
+          duration_seconds?: number | null
+          free_preview?: boolean
+          id?: string
+          module_id: string
+          position: number
+          title: string
+        }
+        Update: {
+          duration_seconds?: number | null
+          free_preview?: boolean
+          id?: string
+          module_id?: string
+          position?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lessons_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deliveries: {
         Row: {
           created_at: string
@@ -2266,6 +2363,10 @@ export type Database = {
       }
       has_capability: {
         Args: { p_cap: string; p_user: string }
+        Returns: boolean
+      }
+      has_course_access: {
+        Args: { p_course: string; p_user: string }
         Returns: boolean
       }
       is_active_conversation_participant: {
