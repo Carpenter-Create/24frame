@@ -3,6 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
+    <meta name="x-apple-disable-message-reformatting" />
     <title>Sign in to 24Frame</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -10,6 +12,24 @@
       href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
+    <style type="text/css">
+      a[x-apple-data-detectors],
+      a[x-apple-data-detectors]:hover,
+      a[x-apple-data-detectors]:focus,
+      a[x-apple-data-detectors]:visited,
+      a[x-apple-data-detectors]:active {
+        color: inherit !important;
+        text-decoration: none !important;
+        font-size: inherit !important;
+        font-family: inherit !important;
+        font-weight: inherit !important;
+        line-height: inherit !important;
+      }
+      .otp::before,
+      .otp::after {
+        content: "\200B";
+      }
+    </style>
   </head>
   <body style="margin:0;padding:0;background:#FAFAFB">
     <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#FAFAFB">
@@ -49,7 +69,20 @@
                   <a href="{{ .ConfirmationURL }}" style="color:#1769FF;text-decoration:none">Sign in to 24Frame</a>
                 </p>
                 <p style="margin:0 0 8px;font-size:15px;line-height:22px;color:#3F4650">Or enter this code:</p>
-                <p style="margin:0;font-size:24px;font-weight:600;letter-spacing:2px;color:#14171A">{{ .Token }}</p>
+                <table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse">
+                  <tr>
+                    <td
+                      x-apple-data-detectors="false"
+                      style="font-size:24px;font-weight:600;letter-spacing:2px;color:#14171A;text-decoration:none"
+                    >
+                      <span
+                        class="otp"
+                        x-apple-data-detectors="false"
+                        style="color:#14171A;text-decoration:none;font-weight:600;font-size:24px;letter-spacing:2px"
+                      >&#8203;{{ .Token }}&#8203;</span>
+                    </td>
+                  </tr>
+                </table>
               </td>
             </tr>
             <tr>

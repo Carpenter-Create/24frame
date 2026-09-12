@@ -7,6 +7,8 @@ import {
   EMAIL_ACCENT,
   EMAIL_ADDRESS,
   EMAIL_COPYRIGHT,
+  EMAIL_FORMAT_DETECTION,
+  EMAIL_INK,
   EMAIL_LOGO_URL,
   EMAIL_SITE_LABEL,
   EMAIL_SITE_URL,
@@ -25,6 +27,24 @@ function assertNoFilledPill(html: string) {
   expect(html).not.toMatch(/background:\s*#1769FF/i);
   expect(html).not.toMatch(/border-radius:\s*999px/);
   expect(html).not.toMatch(/height:4px;background:#1769FF/);
+}
+
+function withoutAnchors(html: string): string {
+  return html.replace(/<a\b[^>]*>[\s\S]*?<\/a>/gi, "");
+}
+
+function assertOtpNotLinkified(html: string, code: string) {
+  expect(html).toContain(code);
+  expect(html).toContain(`color:${EMAIL_INK}`);
+  expect(html).toContain("text-decoration:none");
+  expect(html).toContain('x-apple-data-detectors="false"');
+  expect(html).toContain(`content="${EMAIL_FORMAT_DETECTION}"`);
+  expect(html).toContain("a[x-apple-data-detectors]");
+  const codeIdx = html.indexOf(code);
+  const region = html.slice(Math.max(0, codeIdx - 280), codeIdx + code.length + 40);
+  expect(region).not.toMatch(/color:\s*#1769FF/i);
+  expect(region).not.toMatch(/text-decoration:\s*underline/);
+  expect(withoutAnchors(html)).not.toMatch(/#1769FF/i);
 }
 
 describe("buildOtpEmail", () => {
@@ -48,6 +68,7 @@ describe("buildOtpEmail", () => {
     expect(html).toContain(EMAIL_COPYRIGHT);
     expect(html).toContain(EMAIL_ADDRESS);
     assertNoFilledPill(html);
+    assertOtpNotLinkified(html, "012345");
     expect(subject).not.toMatch(/Global Content|\bGC\b|globalcontent/i);
     expect(productResidue(html)).not.toMatch(/\bGC\b|globalcontent/i);
   });
@@ -117,9 +138,23 @@ describe("Auth magic-link template", () => {
     expect(html).toContain("{{ .Token }}");
     expect(html).toContain("Or enter this code:");
     expect(html).toContain('font-size:24px;font-weight:600;letter-spacing:2px');
+    expect(html).toContain(`content="${EMAIL_FORMAT_DETECTION}"`);
+    expect(html).toContain("x-apple-disable-message-reformatting");
+    expect(html).toContain("a[x-apple-data-detectors]");
+    expect(html).toContain('x-apple-data-detectors="false"');
+    expect(html).toContain("&#8203;{{ .Token }}&#8203;");
+    expect(html).toContain('class="otp"');
+    const tokenIdx = html.indexOf("{{ .Token }}");
+    const otpRegion = html.slice(Math.max(0, tokenIdx - 400), tokenIdx + 40);
+    expect(otpRegion).toContain("color:#14171A");
+    expect(otpRegion).toContain("text-decoration:none");
+    expect(otpRegion).not.toMatch(/color:\s*#1769FF/i);
+    expect(otpRegion).not.toMatch(/text-decoration:\s*underline/);
+    expect(withoutAnchors(html)).not.toMatch(/#1769FF/i);
     expect(html).toContain(SPORTY_BLUE);
     expect(html).toContain(`color:${SPORTY_BLUE}`);
     expect(html).toContain(EMAIL_LOGO_URL);
+    expect(EMAIL_LOGO_URL).toBe("https://app.24frame.co/email-logo.png");
     expect(html).toContain('alt="24Frame"');
     expect(html).toContain("Radically different film distribution.");
     expect(html).toContain("https://24frame.co");
