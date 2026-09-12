@@ -5,6 +5,8 @@ import { describe, expect, it } from "vitest";
 import { buildNotificationEmail, buildOtpEmail } from "./email";
 import { EMAIL_ACCENT } from "./email-house";
 
+const SPORTY_BLUE = "#1769FF";
+
 const PRODUCT_RESIDUE = /Global Content|\bGC\b|globalcontent/i;
 const AUTH_TEMPLATE = resolve(__dirname, "../../supabase/templates/magic_link.html");
 const AUTH_CONFIG = readFileSync(resolve(__dirname, "../../supabase/config.toml"), "utf8");
@@ -22,7 +24,8 @@ describe("buildOtpEmail", () => {
   it("uses 24Frame house chrome and Sporty Blue, not Global Content", () => {
     const { subject, html } = buildOtpEmail("012345");
     expect(html).toContain("24Frame");
-    expect(html).toContain(`background:${EMAIL_ACCENT}`);
+    expect(EMAIL_ACCENT).toBe(SPORTY_BLUE);
+    expect(html).toContain(`background:${SPORTY_BLUE}`);
     expect(subject).not.toMatch(PRODUCT_RESIDUE);
     expect(html).not.toMatch(PRODUCT_RESIDUE);
   });
@@ -39,10 +42,10 @@ describe("buildNotificationEmail", () => {
     expect(text).toContain("24Frame");
     expect(text).not.toMatch(PRODUCT_RESIDUE);
     expect(html).toContain("24Frame");
-    expect(html).toContain(EMAIL_ACCENT);
+    expect(html).toContain(SPORTY_BLUE);
     expect(html).toContain('href="https://app.example/titles/1"');
     expect(html).toContain("Review and resubmit");
-    expect(html).toContain(`style="color:${EMAIL_ACCENT}"`);
+    expect(html).toContain(`style="color:${SPORTY_BLUE}"`);
     expect(html).not.toMatch(PRODUCT_RESIDUE);
     expect(html).toContain("North Wind was returned for revision.");
   });
@@ -58,8 +61,8 @@ describe("Auth magic-link template", () => {
     expect(html).toContain("Sign in");
     expect(html).toContain("{{ .ConfirmationURL }}");
     expect(html).toContain("{{ .Token }}");
-    expect(html).toContain(EMAIL_ACCENT);
-    expect(html).toContain(`background:${EMAIL_ACCENT}`);
+    expect(html).toContain(SPORTY_BLUE);
+    expect(html).toContain(`background:${SPORTY_BLUE}`);
     expect(html).not.toMatch(PRODUCT_RESIDUE);
     expect(html.toLowerCase()).not.toMatch(/seamless|frictionless|elevate|amplify/);
   });
