@@ -74,15 +74,26 @@ describe("profile opt-in", () => {
 });
 
 describe("social writes stay on the live spine", () => {
-  it("posts text only and likes target posts", () => {
+  it("posts text and optional media keys and likes target posts", () => {
     expect(postInsertRow({ authorId: "u1", body: "hello" })).toEqual({
       author_id: "u1",
       body: "hello",
       group_id: null,
+      media: [],
       status: "active",
       like_count: 0,
       comment_count: 0,
       pinned: false,
+    });
+    expect(
+      postInsertRow({
+        authorId: "u1",
+        body: null,
+        media: [{ kind: "image", key: "posts/u1/a.jpg", contentType: "image/jpeg" }],
+      }),
+    ).toMatchObject({
+      body: null,
+      media: [{ kind: "image", key: "posts/u1/a.jpg", contentType: "image/jpeg" }],
     });
     expect(likeInsertRow("u1", "p1")).toEqual({
       user_id: "u1",
@@ -103,7 +114,11 @@ describe("social writes stay on the live spine", () => {
     const board = readFileSync("src/app/(app)/social/leaderboard/page.tsx", "utf8");
     expect(actions).toContain('from("profiles")');
     expect(actions).toContain('from("posts")');
+    expect(actions).toContain("presignSocialMediaPut");
     expect(actions).toContain('from("likes")');
+    expect(actions).not.toContain("from \"@/lib/s3\"");
+    expect(actions).not.toContain("from \"@/lib/cloudfront\"");
+    expect(actions).not.toContain("from \"@/lib/mediaconvert\"");
     expect(actions).toContain("open_or_get_direct_conversation");
     expect(actions).toContain("add_conversation_participants");
     expect(actions).toContain("set_group_conversation_title");
@@ -160,6 +175,23 @@ describe("social writes stay on the live spine", () => {
       expect(src).not.toContain("S3_BUCKET");
       expect(src).not.toContain("S3_AVATARS_BUCKET");
       expect(src).not.toContain("24frame-media");
+      expect(src).not.toContain("@/lib/s3\"");
+      expect(src).not.toContain("@/lib/cloudfront");
+      expect(src).not.toContain("@/lib/mediaconvert");
     }
+    const feed = [
+      "src/app/(app)/social/page.tsx",
+      "src/app/(app)/social/groups/[slug]/page.tsx",
+      "src/app/(app)/social/groups/[slug]/posts/[postId]/page.tsx",
+    ];
+    for (const file of feed) {
+      expect(readFileSync(file, "utf8")).toMatch(/signedSocialMedia/);
+    }
+    const forms = readFileSync("src/components/social/social-forms.tsx", "utf8");
+    expect(forms).toContain("presignSocialMediaUpload");
+    expect(forms).toContain("type=\"file\"");
+    expect(forms).not.toContain("S3_BUCKET");
+    expect(forms).not.toContain("from \"@/lib/s3\"");
+    expect(forms).not.toContain("from \"@/lib/cloudfront\"");
   });
 });

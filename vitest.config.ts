@@ -21,6 +21,8 @@ export default defineConfig({
       AWS_REGION: "us-east-1",
       S3_BUCKET: "test-bucket",
       S3_AVATARS_BUCKET: "test-avatars-bucket",
+      S3_MEDIA_SOURCE_BUCKET: "test-media-source-bucket",
+      S3_MEDIA_OUTPUT_BUCKET: "test-media-output-bucket",
     },
   },
 });

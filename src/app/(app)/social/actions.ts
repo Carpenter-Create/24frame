@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
+import { mediaItemsForInsert, socialMediaObjectKey, validateMediaUpload } from "@/lib/social-media";
+import { presignSocialMediaPut } from "@/lib/s3-social-media";
 import {
   groupInsertRow,
   isEligibleBirthDate,
@@ -25,6 +27,7 @@ import {
   SOCIAL_ROUTES,
   socialDmHref,
   socialGroupHref,
+  socialMediaRuleMessage,
 } from "@/lib/social";
 
 type ActionResult = { error?: string };
@@ -84,17 +87,44 @@ export async function createSocialProfile(formData: FormData): Promise<ActionRes
   return {};
 }
 
+export async function presignSocialMediaUpload(formData: FormData): Promise<{
+  error?: string;
+  key?: string;
+  url?: string;
+  kind?: string;
+  contentType?: string;
+}> {
+  const { user, profileId } = await ownProfileId();
+  if (!profileId) return { error: SOCIAL.cta.needProfile };
+
+  const checked = validateMediaUpload({
+    contentType: String(formData.get("content_type") ?? ""),
+    byteLength: Number(formData.get("byte_length") ?? 0),
+  });
+  if (!checked.ok) return { error: socialMediaRuleMessage(checked.error) };
+
+  const key = socialMediaObjectKey(user.id, crypto.randomUUID(), checked.contentType);
+  try {
+    const url = await presignSocialMediaPut(key, checked.contentType);
+    return { key, url, kind: checked.kind, contentType: checked.contentType };
+  } catch {
+    return { error: SOCIAL.home.uploadFailed };
+  }
+}
+
 export async function createSocialPost(formData: FormData): Promise<ActionResult> {
   const { user, supabase, profileId } = await ownProfileId();
   if (!profileId) return { error: SOCIAL.cta.needProfile };
 
   const body = normalizePostBody(String(formData.get("body") ?? ""));
+  const media = mediaItemsForInsert(formData.get("media"), user.id);
   const groupIdRaw = String(formData.get("group_id") ?? "").trim();
   const groupId = groupIdRaw.length > 0 ? groupIdRaw : null;
-  if (!body) return { error: "Write a post first." };
+  if (!media.ok) return { error: socialMediaRuleMessage(media.error) };
+  if (!body && media.items.length === 0) return { error: SOCIAL.home.emptyPost };
 
   const { error } = await supabase.from("posts").insert(
-    postInsertRow({ authorId: user.id, body, groupId }),
+    postInsertRow({ authorId: user.id, body, groupId, media: media.items }),
   );
   if (error) return { error: error.message };
 

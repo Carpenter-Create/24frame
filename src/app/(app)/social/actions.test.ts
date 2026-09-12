@@ -2,14 +2,21 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
-import { likeInsertRow, profileInsertRow, SOCIAL } from "@/lib/social";
+import { likeInsertRow, postInsertRow, profileInsertRow, SOCIAL } from "@/lib/social";
 import {
   addSocialDmPeople,
   createSocialPost,
   createSocialProfile,
   openSocialDm,
+  presignSocialMediaUpload,
   toggleSocialLike,
 } from "./actions";
+
+vi.mock("@/lib/s3-social-media", () => ({
+  presignSocialMediaPut: vi.fn(),
+}));
+
+import { presignSocialMediaPut } from "@/lib/s3-social-media";
 
 vi.mock("next/navigation", () => ({
   redirect: vi.fn((to: string) => {
@@ -174,5 +181,66 @@ describe("social actions", () => {
     form.set("conversation_id", "conv-1");
     form.set("handles", "carol");
     expect(await addSocialDmPeople(form)).toEqual({ error: SOCIAL.dms.addBlocked });
+  });
+
+  it("persists image and video keys on posts.media", async () => {
+    const author = "11111111-1111-4111-8111-111111111111";
+    const object = "22222222-2222-4222-8222-222222222222";
+    vi.mocked(getAuthUser).mockResolvedValue({ id: author, email: "ada@example.com" } as never);
+    const { inserts } = stub({ profile: { id: author } });
+    const media = [
+      { kind: "image" as const, key: `posts/${author}/${object}.jpg`, contentType: "image/jpeg" as const },
+      { kind: "video" as const, key: `posts/${author}/${object}.mp4`, contentType: "video/mp4" as const },
+    ];
+    const form = new FormData();
+    form.set("body", "with media");
+    form.set("media", JSON.stringify(media));
+    expect(await createSocialPost(form)).toEqual({});
+    expect(inserts).toEqual([
+      {
+        table: "posts",
+        row: postInsertRow({ authorId: author, body: "with media", media }),
+      },
+    ]);
+  });
+
+  it("rejects title-bucket keys on create", async () => {
+    const author = "11111111-1111-4111-8111-111111111111";
+    const object = "22222222-2222-4222-8222-222222222222";
+    vi.mocked(getAuthUser).mockResolvedValue({ id: author, email: "ada@example.com" } as never);
+    const { inserts } = stub({ profile: { id: author } });
+    const form = new FormData();
+    form.set("body", "nope");
+    form.set(
+      "media",
+      JSON.stringify([
+        {
+          kind: "video",
+          key: `orgs/${author}/titles/${object}/master/clip.mp4`,
+          contentType: "video/mp4",
+        },
+      ]),
+    );
+    expect(await createSocialPost(form)).toEqual({ error: SOCIAL.home.mediaForbidden });
+    expect(inserts).toEqual([]);
+  });
+
+  it("presigns a member media PUT and never uses a title key", async () => {
+    const author = "11111111-1111-4111-8111-111111111111";
+    const object = "22222222-2222-4222-8222-222222222222";
+    vi.mocked(getAuthUser).mockResolvedValue({ id: author, email: "ada@example.com" } as never);
+    stub({ profile: { id: author } });
+    vi.spyOn(crypto, "randomUUID").mockReturnValue(object);
+    vi.mocked(presignSocialMediaPut).mockResolvedValue("https://s3.example/put");
+    const form = new FormData();
+    form.set("content_type", "image/jpeg");
+    form.set("byte_length", "1200");
+    expect(await presignSocialMediaUpload(form)).toEqual({
+      key: `posts/${author}/${object}.jpg`,
+      url: "https://s3.example/put",
+      kind: "image",
+      contentType: "image/jpeg",
+    });
+    expect(presignSocialMediaPut).toHaveBeenCalledWith(`posts/${author}/${object}.jpg`, "image/jpeg");
   });
 });

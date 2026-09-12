@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { SocialPostCompose } from "@/components/social/social-forms";
 import { SocialNeedProfile, SocialPostCard } from "@/components/social/social-ui";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
+import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
 import { SOCIAL } from "@/lib/social";
 import {
   loadGroupsByIds,
@@ -24,9 +25,10 @@ export default async function SocialHomePage() {
   const profile = await loadOwnProfile(supabase, ctx.user.id);
   const posts = await loadVisiblePosts(supabase);
   const authorIds = [...new Set(posts.map((post) => post.author_id))];
-  const [authors, faces] = await Promise.all([
+  const [authors, faces, media] = await Promise.all([
     loadProfilesByIds(supabase, authorIds),
     signedAvatarUrls(authorIds),
+    signedSocialMediaByPostId(posts),
   ]);
   const groups = await loadGroupsByIds(
     supabase,
@@ -63,6 +65,7 @@ export default async function SocialHomePage() {
                   groupSlug: group?.slug ?? null,
                   groupName: group?.name ?? null,
                   canLike: !!profile,
+                  media: media.get(post.id) ?? [],
                 }}
               />
             );

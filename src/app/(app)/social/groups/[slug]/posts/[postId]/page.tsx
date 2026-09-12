@@ -4,8 +4,9 @@ import { redirect } from "next/navigation";
 import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { SocialLikeButton } from "@/components/social/social-forms";
-import { SocialAvatar, SocialNeedProfile } from "@/components/social/social-ui";
+import { SocialAvatar, SocialNeedProfile, SocialPostMedia } from "@/components/social/social-ui";
 import { signedAvatarUrl } from "@/lib/s3-avatars";
+import { signedSocialMediaItems } from "@/lib/s3-social-media";
 import { SOCIAL, socialGroupHref, socialMemberHref } from "@/lib/social";
 import { loadLikedPostIds, loadOwnProfile } from "@/lib/social-feed";
 import { getOrgContext } from "@/lib/supabase/context";
@@ -28,7 +29,7 @@ export default async function SocialPostPage({
     .maybeSingle();
   const { data: post } = await supabase
     .from("posts")
-    .select("id, body, author_id, group_id, like_count, created_at, status")
+    .select("id, body, author_id, group_id, like_count, created_at, status, media")
     .eq("id", postId)
     .maybeSingle();
 
@@ -47,9 +48,10 @@ export default async function SocialPostPage({
     .select("id, handle, display_name")
     .eq("id", post.author_id)
     .maybeSingle();
-  const [liked, photoUrl] = await Promise.all([
+  const [liked, photoUrl, media] = await Promise.all([
     profile ? loadLikedPostIds(supabase, ctx.user.id, [post.id]) : Promise.resolve(new Set<string>()),
     signedAvatarUrl(post.author_id),
+    signedSocialMediaItems(post.media),
   ]);
 
   return (
@@ -69,7 +71,8 @@ export default async function SocialPostPage({
             <p className="t-body font-medium text-ink">Member</p>
           )}
         </div>
-        <p className="t-body text-ink whitespace-pre-wrap">{post.body}</p>
+        {post.body ? <p className="t-body text-ink whitespace-pre-wrap">{post.body}</p> : null}
+        <SocialPostMedia items={media} />
         {profile ? (
           <SocialLikeButton
             postId={post.id}
