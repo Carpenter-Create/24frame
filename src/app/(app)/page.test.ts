@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getOrgContext } from "@/lib/supabase/context";
 import { CLIENTS_PAGE, ORG_ROLE_LABELS, ORG_STATUS_LABELS } from "@/lib/clients";
 import { DASHBOARD_HOME, dashboardJustInDate } from "@/lib/dashboard-home";
+import { AGGREGATION_EMPTY } from "@/lib/aggregation-empty";
 import { DASHBOARD_ATTENTION_CLEAR, dashboardAttentionSummary } from "@/lib/findings";
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
 import { TITLE_STATUS_LABELS } from "@/lib/titles";
@@ -216,12 +217,17 @@ describe("DashboardPage modes", () => {
     await expect(DashboardPage()).resolves.toBeTruthy();
   });
 
-  it("still sends a non-GC user with no org to onboarding", async () => {
+  it("shows the empty company workspace for a non-GC user with no org", async () => {
     stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(
       ctx({ isGcStaff: false, orgStatus: null }) as never,
     );
-    await expect(DashboardPage()).rejects.toThrow("REDIRECT:/onboarding");
+    const html = renderToStaticMarkup(await DashboardPage());
+    expect(html).toContain("data-aggregation-empty");
+    expect(html).toContain(AGGREGATION_EMPTY.title);
+    expect(html).toContain(AGGREGATION_EMPTY.create);
+    expect(html).toContain("/onboarding");
+    expect(html).not.toContain("data-dashboard-home");
   });
 
   it("sends an unauthenticated visitor to login", async () => {

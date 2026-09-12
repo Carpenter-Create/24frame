@@ -143,12 +143,12 @@ describe("CatalogHealthPage modes", () => {
     expect(html).not.toContain("Other Film");
   });
 
-  it("still sends a non-GC user with no org to onboarding", async () => {
+  it("sends a non-GC user with no org to the Aggregation empty home", async () => {
     stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(
       ctx({ isGcStaff: false, orgStatus: null }) as never,
     );
-    await expect(CatalogHealthPage()).rejects.toThrow("REDIRECT:/onboarding");
+    await expect(CatalogHealthPage()).rejects.toThrow("REDIRECT:/");
   });
 
   it("sends an unauthenticated visitor to login", async () => {

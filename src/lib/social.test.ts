@@ -1,0 +1,108 @@
+import { readFileSync } from "node:fs";
+import { describe, expect, it } from "vitest";
+
+import { ASK_GLOBEE } from "@/lib/ask-globee";
+import { PRODUCT_NAME, SOCIAL_WORKSPACE } from "@/lib/product";
+import {
+  isEligibleBirthDate,
+  likeInsertRow,
+  messageInsertRow,
+  normalizeHandle,
+  postInsertRow,
+  profileInsertRow,
+  SOCIAL,
+  SOCIAL_BANNED_PRODUCT_NAMES,
+  SOCIAL_ROUTES,
+  socialInitials,
+} from "./social";
+
+describe("social copy lock", () => {
+  it("uses 24Frame workspace language and never names Globee as the product", () => {
+    const blob = JSON.stringify({ SOCIAL, SOCIAL_ROUTES, SOCIAL_WORKSPACE });
+    expect(blob).toContain(PRODUCT_NAME);
+    expect(blob).toContain(SOCIAL_WORKSPACE);
+    expect(SOCIAL.home.subtitle).toContain(PRODUCT_NAME);
+    expect(SOCIAL_ROUTES.dms).toBe("/social/dms");
+    expect(SOCIAL_ROUTES.home).toBe("/social");
+    for (const banned of SOCIAL_BANNED_PRODUCT_NAMES) {
+      expect(blob).not.toContain(banned);
+    }
+    expect(blob).not.toContain("Globee");
+    expect(ASK_GLOBEE.headline).toBe("Ask 24Frame AI");
+  });
+});
+
+describe("profile opt-in", () => {
+  it("builds a self insert with required donor columns only", () => {
+    const row = profileInsertRow({
+      userId: "u1",
+      handle: "ada",
+      displayName: "Ada",
+      birthDate: "1990-01-02",
+    });
+    expect(row.id).toBe("u1");
+    expect(row.handle).toBe("ada");
+    expect(row.display_name).toBe("Ada");
+    expect(row.birth_date).toBe("1990-01-02");
+    expect(row.app_role).toBe("member");
+    expect(row.points_total).toBe(0);
+    expect(row.level).toBe(1);
+    expect(row.status).toBe("active");
+    expect(row.trust_state).toBe("new");
+    expect(row).not.toHaveProperty("avatar_key");
+    expect(row).not.toHaveProperty("org_id");
+  });
+
+  it("rejects short handles and under-13 birth dates", () => {
+    expect(normalizeHandle("ab")).toBeNull();
+    expect(normalizeHandle("Ada_Lovelace")).toBe("ada_lovelace");
+    expect(isEligibleBirthDate("2014-01-01", new Date("2026-09-12T00:00:00.000Z"))).toBe(false);
+    expect(isEligibleBirthDate("2013-09-12", new Date("2026-09-12T00:00:00.000Z"))).toBe(true);
+    expect(socialInitials("Ada Lovelace")).toBe("AL");
+  });
+});
+
+describe("social writes stay on the live spine", () => {
+  it("posts text only and likes target posts", () => {
+    expect(postInsertRow({ authorId: "u1", body: "hello" })).toEqual({
+      author_id: "u1",
+      body: "hello",
+      group_id: null,
+      status: "active",
+      like_count: 0,
+      comment_count: 0,
+      pinned: false,
+    });
+    expect(likeInsertRow("u1", "p1")).toEqual({
+      user_id: "u1",
+      target_type: "post",
+      target_id: "p1",
+    });
+    expect(messageInsertRow({ senderId: "u1", conversationId: "c1", body: "hi" })).toEqual({
+      sender_id: "u1",
+      conversation_id: "c1",
+      body: "hi",
+      status: "active",
+    });
+  });
+
+  it("does not invent a cousin catalog feed table or cascade-delete memberships", () => {
+    const actions = readFileSync("src/app/(app)/social/actions.ts", "utf8");
+    const pages = readFileSync("src/app/(app)/social/page.tsx", "utf8");
+    expect(actions).toContain('from("profiles")');
+    expect(actions).toContain('from("posts")');
+    expect(actions).toContain('from("likes")');
+    expect(actions).toContain("open_or_get_direct_conversation");
+    expect(actions).toContain("mark_direct_conversation_read");
+    expect(actions).toContain("createClient");
+    expect(actions).not.toContain("createAdminClient");
+    expect(actions).not.toContain("service_role");
+    expect(actions).not.toContain('from("titles")');
+    expect(actions).not.toContain("ai_conversations");
+    expect(actions).not.toContain("memberships");
+    expect(actions).not.toContain(".from(\"profiles\").delete");
+    expect(actions).not.toContain("from(\"organizations\")");
+    expect(pages).toContain("loadVisiblePosts");
+    expect(pages).not.toContain("from(\"titles\")");
+  });
+});

@@ -1,0 +1,134 @@
+import { readFileSync } from "node:fs";
+import { renderToStaticMarkup } from "react-dom/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { getOrgContext } from "@/lib/supabase/context";
+import { createClient } from "@/lib/supabase/server";
+import { ASK_GLOBEE } from "@/lib/ask-globee";
+import { SOCIAL } from "@/lib/social";
+import SocialHomePage from "./page";
+
+vi.mock("next/navigation", () => ({
+  redirect: vi.fn((to: string) => {
+    throw new Error(`REDIRECT:${to}`);
+  }),
+}));
+vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
+vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
+vi.mock("@/app/(app)/social/actions", () => ({
+  createSocialProfile: vi.fn(),
+  createSocialPost: vi.fn(),
+  toggleSocialLike: vi.fn(),
+  createSocialGroup: vi.fn(),
+  joinSocialGroup: vi.fn(),
+  openSocialDm: vi.fn(),
+  sendSocialDm: vi.fn(),
+  markSocialDmRead: vi.fn(),
+}));
+
+function ctx({ hasOrg = false }: { hasOrg?: boolean } = {}) {
+  const org = hasOrg ? { id: "org-1", name: "Acme", status: "active" } : null;
+  return {
+    user: { id: "u1", email: "ada@example.com" },
+    rows: org ? [{ role: "account_owner", organizations: org }] : [],
+    orgs: org ? [{ id: org.id, name: org.name }] : [],
+    activeOrg: org,
+    activeRole: org ? "account_owner" : null,
+    canOperate: !!org,
+    isGcStaff: false,
+    unread: Promise.resolve(0),
+  };
+}
+
+function chain(result: unknown) {
+  const c: Record<string, unknown> = {};
+  const self = () => c;
+  c.select = vi.fn(self);
+  c.eq = vi.fn(self);
+  c.in = vi.fn(self);
+  c.order = vi.fn(self);
+  c.range = vi.fn(async () => ({ data: result, error: null }));
+  c.maybeSingle = vi.fn(async () => ({
+    data: Array.isArray(result) ? (result[0] ?? null) : result,
+    error: null,
+  }));
+  c.then = (resolve: (value: unknown) => unknown) =>
+    Promise.resolve({ data: result, error: null }).then(resolve);
+  return c;
+}
+
+function stubClient({
+  profile = null,
+  posts = [],
+}: {
+  profile?: { id: string; handle: string; display_name: string; status: string } | null;
+  posts?: {
+    id: string;
+    body: string;
+    author_id: string;
+    group_id: string | null;
+    like_count: number;
+    created_at: string;
+  }[];
+} = {}) {
+  const from = vi.fn((table: string) => {
+    if (table === "profiles") return chain(profile ? [profile] : []);
+    if (table === "posts") return chain(posts);
+    if (table === "groups") return chain([]);
+    if (table === "likes") return chain([]);
+    throw new Error(`unexpected from(${table})`);
+  });
+  vi.mocked(createClient).mockResolvedValue({ from, rpc: vi.fn() } as never);
+  return { from };
+}
+
+describe("Social home", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("renders for a signed-in user without an org", async () => {
+    stubClient();
+    vi.mocked(getOrgContext).mockResolvedValue(ctx({ hasOrg: false }) as never);
+
+    const html = renderToStaticMarkup(await SocialHomePage());
+    expect(html).toContain("data-social-home");
+    expect(html).toContain(SOCIAL.home.title);
+    expect(html).toContain("24Frame");
+    expect(html).toContain("data-social-need-profile");
+    expect(html).toContain(SOCIAL.cta.needProfile);
+    expect(html).toContain("/social/profile");
+    expect(html).not.toContain("Globee");
+    expect(html).not.toContain(ASK_GLOBEE.headline);
+  });
+
+  it("does not auto-create a profile when none exists", async () => {
+    const { from } = stubClient();
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const html = renderToStaticMarkup(await SocialHomePage());
+    expect(from).toHaveBeenCalledWith("profiles");
+    expect(from).toHaveBeenCalledWith("posts");
+    expect(html).toContain("data-social-need-profile");
+    expect(html).toContain(SOCIAL.cta.profileHrefLabel);
+    expect(html).not.toContain("data-social-post-form");
+    expect(html).not.toContain("data-social-like");
+  });
+
+  it("sends an unauthenticated visitor to login", async () => {
+    stubClient();
+    vi.mocked(getOrgContext).mockResolvedValue(null as never);
+    await expect(SocialHomePage()).rejects.toThrow("REDIRECT:/login");
+  });
+});
+
+describe("messages clash lock", () => {
+  it("does not steal /messages for DMs", () => {
+    const home = readFileSync("src/app/(app)/social/page.tsx", "utf8");
+    const dms = readFileSync("src/app/(app)/social/dms/page.tsx", "utf8");
+    const messages = readFileSync("src/app/(app)/messages/page.tsx", "utf8");
+    expect(home).not.toContain('"/messages"');
+    expect(dms).toContain("get_dm_inbox");
+    expect(messages).toContain("AskGlobeeLanding");
+    expect(messages).not.toContain("get_dm_inbox");
+    expect(messages).not.toContain("open_or_get_direct_conversation");
+  });
+});

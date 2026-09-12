@@ -32,9 +32,9 @@ function ctx({ isGcStaff, orgStatus }: { isGcStaff: boolean; orgStatus: Status |
 }
 
 /**
- * Both onboarding redirects must exempt GC staff. The no-org branch always did; the
- * mid-onboarding branch did not, so a GC operator holding a non-active client org was
- * bounced to a wizard that has no exit for staff — a loop, not a detour.
+ * Mid-onboarding still bounces non-staff clients. Mapping C: a signed-in account
+ * with zero orgs keeps the shell so Social is reachable. Staff with no client org
+ * already used this shell. Mid-onboarding still must not loop staff into the wizard.
  */
 describe("AppLayout onboarding gates", () => {
   beforeEach(() => vi.clearAllMocks());
@@ -60,11 +60,11 @@ describe("AppLayout onboarding gates", () => {
     await expect(AppLayout({ children: "page" })).resolves.toBeTruthy();
   });
 
-  it("still bounces a non-GC user with no org", async () => {
+  it("renders the shell for a signed-in user with no org so Social is reachable", async () => {
     vi.mocked(getOrgContext).mockResolvedValue(
       ctx({ isGcStaff: false, orgStatus: null }) as never,
     );
-    await expect(AppLayout({ children: "page" })).rejects.toThrow("REDIRECT:/onboarding");
+    await expect(AppLayout({ children: "page" })).resolves.toBeTruthy();
   });
 
   it("renders for an ordinary client whose org is active", async () => {

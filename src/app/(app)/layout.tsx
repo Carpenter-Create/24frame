@@ -5,6 +5,7 @@ import { getOrgContext } from "@/lib/supabase/context";
 import { AppShell } from "@/components/chrome/app-shell";
 import { resolveMessagesSurface } from "@/lib/ask-globee";
 import { getActiveOrgTier } from "@/lib/org-tier";
+import { parseWorkspaceCookie, WORKSPACE_COOKIE } from "@/lib/workspace";
 
 // Server layout for all authenticated routes: resolves the session + the user's orgs
 // (RLS-scoped) and the active org, then renders the client shell around the page.
@@ -20,22 +21,18 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // impersonation exists (#64) — until then a dual-role account keeps client-shell access
   // (with a link to the GC Queue) so the home dashboard stays reachable.
 
-  // Client onboarding gate: a NON-GC user with no org (or an org mid-onboarding) goes to the
-  // full-screen wizard. A GC operator is not a client — one with no client org still renders
-  // this shell and uses the operator surfaces (Queue/Vendors now live INSIDE it, under the
-  // (operator) group). We must not bounce them to onboarding, and must not redirect them to
-  // /queue either — /queue now lives under this same layout, so that would loop.
-  if (ctx.rows.length === 0 && !ctx.isGcStaff) redirect("/onboarding");
-  // Same exemption on the mid-onboarding branch. Without it, a GC operator who also holds a
-  // non-active client org is bounced to the wizard on every request — and because the wizard
-  // itself has no way back for staff, that is a loop with no exit. Observed 2026-08-15 while
-  // provisioning a gc_delivery_ops account.
+  // Mapping C: a signed-in account with zero orgs may still use this shell and Social.
+  // Do not force a creator-only account through company onboarding. Aggregation pages
+  // render an empty company-workspace state (or keep a path into /onboarding).
+  // Mid-onboarding (an org exists but is not active) still belongs to Aggregation.
   if (ctx.activeOrg && ctx.activeOrg.status !== "active" && !ctx.isGcStaff) {
     redirect("/onboarding");
   }
 
-  // Sidebar collapse state persists in a cookie; read here so there's no expand→collapse flash.
-  const sidebarCollapsed = (await cookies()).get("gc_sidebar_collapsed")?.value === "1";
+  // Sidebar collapse + workspace mode persist in cookies; read here so there's no flash.
+  const jar = await cookies();
+  const sidebarCollapsed = jar.get("gc_sidebar_collapsed")?.value === "1";
+  const defaultWorkspace = parseWorkspaceCookie(jar.get(WORKSPACE_COOKIE)?.value);
   const messagesSurface = resolveMessagesSurface({
     isGcStaff: ctx.isGcStaff,
     hasActiveOrg: !!ctx.activeOrg,
@@ -52,6 +49,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       isGcStaff={ctx.isGcStaff}
       defaultCollapsed={sidebarCollapsed}
       messagesSurface={messagesSurface}
+      defaultWorkspace={defaultWorkspace}
     >
       {children}
     </AppShell>

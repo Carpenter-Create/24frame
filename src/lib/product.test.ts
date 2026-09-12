@@ -7,6 +7,9 @@ import {
   COMPANY_AGGREGATION_WORKSPACE,
   PARENT_ENTITY,
   PRODUCT_NAME,
+  SOCIAL_WORKSPACE,
+  WORKSPACE_AGGREGATION_LABEL,
+  WORKSPACE_SOCIAL_LABEL,
 } from "./product";
 
 describe("product chrome lock", () => {
@@ -17,6 +20,9 @@ describe("product chrome lock", () => {
     expect(PARENT_ENTITY).toBe("Global Content Holdings LLC");
     expect(AGGREGATION_WORKSPACE).toBe("aggregation workspace");
     expect(COMPANY_AGGREGATION_WORKSPACE).toBe("company aggregation workspace");
+    expect(SOCIAL_WORKSPACE).toBe("Social workspace");
+    expect(WORKSPACE_AGGREGATION_LABEL).toBe("Aggregation");
+    expect(WORKSPACE_SOCIAL_LABEL).toBe("Social");
     expect(PRODUCT_NAME).not.toBe("24frame");
     expect(PRODUCT_NAME).not.toBe("24-Frame");
     expect(PRODUCT_NAME).not.toBe("24FRAME");

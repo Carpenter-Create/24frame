@@ -6,9 +6,11 @@ import { ASK_GLOBEE } from "@/lib/ask-globee";
 import {
   GC_NAV,
   NAV,
+  SOCIAL_NAV,
   clientNavCurrent,
   isClientNavActive,
   mobileNavDestinations,
+  railDestinations,
 } from "./nav";
 
 const navSrc = readFileSync("src/lib/nav.ts", "utf8");
@@ -122,5 +124,27 @@ describe("mobileNavDestinations", () => {
       "Vendors",
       "Clients",
     ]);
+  });
+
+  it("shows Social destinations only in Social mode — DMs are not /messages", () => {
+    expect(mobileNavDestinations(false, "social").map((item) => item.href)).toEqual([
+      "/social",
+      "/social/profile",
+      "/social/groups",
+      "/social/dms",
+    ]);
+    expect(mobileNavDestinations(true, "social").map((item) => item.href)).toEqual([
+      "/social",
+      "/social/profile",
+      "/social/groups",
+      "/social/dms",
+    ]);
+    expect(mobileNavDestinations(true, "social").map((item) => item.href)).not.toContain("/messages");
+    expect(mobileNavDestinations(true, "social").map((item) => item.href)).not.toContain("/queue");
+    expect(SOCIAL_NAV.map((item) => item.label)).toEqual(["Home", "Profile", "Groups", "Messages"]);
+    expect(railDestinations(true, "social").staffItems).toEqual([]);
+    expect(railDestinations(true, "aggregation").staffItems.map((item) => item.href)).toContain(
+      "/queue",
+    );
   });
 });

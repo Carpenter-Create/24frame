@@ -16,6 +16,8 @@ import {
 } from "@/lib/dashboard-home";
 import { UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
 import { GcClientsDirectory } from "@/app/(app)/(operator)/gc/clients/clients-directory";
+import { HouseEmpty, TextAction } from "@/components/chrome/house";
+import { AGGREGATION_EMPTY } from "@/lib/aggregation-empty";
 
 // Client `/` is the organization-scoped portfolio: identity, three live numbers,
 // what to do next (findings + drafts), and Recent. No chart, no revenue seam, no
@@ -31,9 +33,19 @@ export default async function DashboardPage() {
   // Client dashboard needs an org. A GC operator is not a client and must not be
   // given a manufactured one. Staff without a client org stay on `/` and see the
   // existing GC-wide clients roster. Queue stays the focused work queue at /queue.
-  // Non-staff without an org still go to the client wizard.
+  // Mapping C: a non-staff account with no org stays in the shell — empty
+  // Aggregation with a path into existing onboarding. Do not bounce them to
+  // company onboarding just to reach Social.
   if (ctx.rows.length === 0 || !ctx.activeOrg) {
-    if (!ctx.isGcStaff) redirect("/onboarding");
+    if (!ctx.isGcStaff) {
+      return (
+        <div data-aggregation-empty="" className="flex flex-col gap-[var(--space-4)]">
+          <h1 className="t-section text-ink">{AGGREGATION_EMPTY.title}</h1>
+          <HouseEmpty>{AGGREGATION_EMPTY.body}</HouseEmpty>
+          <TextAction href={AGGREGATION_EMPTY.createHref}>{AGGREGATION_EMPTY.create}</TextAction>
+        </div>
+      );
+    }
     return GcClientsDirectory();
   }
   const org = ctx.activeOrg;

@@ -19,7 +19,7 @@ export default async function CatalogHealthPage() {
   // Resolved once per request and shared with the layout above (React cache()).
   const ctx = await getOrgContext();
   if (!ctx) redirect("/login");
-  if (!ctx.activeOrg && !ctx.isGcStaff) redirect("/onboarding");
+  if (!ctx.activeOrg && !ctx.isGcStaff) redirect("/");
 
   const activeOrgId = ctx.activeOrg?.id ?? null;
   const gcWide = ctx.isGcStaff && !activeOrgId;
