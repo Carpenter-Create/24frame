@@ -20,13 +20,31 @@ import {
 // Isolated 24frame-media S3 client. Ideas from donor #9 s3.ts + actions.ts.
 // Never import @/lib/s3 / @/lib/cloudfront / @/lib/mediaconvert.
 // Source bucket is the only write target in v0 (progressive playback).
+// Credentials and region are MEDIA_AWS_* only — title AWS_* is a different
+// account (gc-content-assets, us-east-1). No default-chain fallback.
 
 export const MEDIA_S3_ENV = ["S3_MEDIA_SOURCE_BUCKET", "S3_MEDIA_OUTPUT_BUCKET"] as const;
+export const MEDIA_AWS_ENV = [
+  "MEDIA_AWS_ACCESS_KEY_ID",
+  "MEDIA_AWS_SECRET_ACCESS_KEY",
+  "MEDIA_AWS_REGION",
+] as const;
+
+function requireMediaAwsEnv(name: (typeof MEDIA_AWS_ENV)[number]): string {
+  const value = process.env[name];
+  if (!value) throw new Error(`${name} environment variable is not set`);
+  return value;
+}
 
 function mediaRegion(): string {
-  const region = process.env.AWS_REGION;
-  if (!region) throw new Error("AWS_REGION environment variable is not set");
-  return region;
+  return requireMediaAwsEnv("MEDIA_AWS_REGION");
+}
+
+function mediaAwsCredentials(): { accessKeyId: string; secretAccessKey: string } {
+  return {
+    accessKeyId: requireMediaAwsEnv("MEDIA_AWS_ACCESS_KEY_ID"),
+    secretAccessKey: requireMediaAwsEnv("MEDIA_AWS_SECRET_ACCESS_KEY"),
+  };
 }
 
 function assertMediaBucket(bucket: string, envName: (typeof MEDIA_S3_ENV)[number]): string {
@@ -46,7 +64,13 @@ export function mediaOutputBucket(): string {
 }
 
 function mediaClient(): { bucket: string; s3: S3Client } {
-  return { bucket: mediaSourceBucket(), s3: new S3Client({ region: mediaRegion() }) };
+  return {
+    bucket: mediaSourceBucket(),
+    s3: new S3Client({
+      region: mediaRegion(),
+      credentials: mediaAwsCredentials(),
+    }),
+  };
 }
 
 export async function presignSocialMediaPut(

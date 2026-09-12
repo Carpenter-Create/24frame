@@ -25,10 +25,11 @@ vi.mock("@/lib/social-media-cloudfront", () => ({
   signSocialMediaCloudfrontUrl: vi.fn(),
 }));
 
-import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 import { isMediaCloudfrontConfigured, signSocialMediaCloudfrontUrl } from "@/lib/social-media-cloudfront";
 import {
+  MEDIA_AWS_ENV,
   mediaOutputBucket,
   mediaSourceBucket,
   presignSocialMediaGet,
@@ -41,16 +42,55 @@ const USER = "11111111-1111-4111-8111-111111111111";
 const OBJECT = "22222222-2222-4222-8222-222222222222";
 const KEY = `posts/${USER}/${OBJECT}.jpg`;
 
+const MEDIA_AWS = {
+  MEDIA_AWS_ACCESS_KEY_ID: "media-access-key",
+  MEDIA_AWS_SECRET_ACCESS_KEY: "media-secret-key",
+  MEDIA_AWS_REGION: "us-west-2",
+} as const;
+
+const TITLE_AWS = {
+  AWS_ACCESS_KEY_ID: "title-access-key",
+  AWS_SECRET_ACCESS_KEY: "title-secret-key",
+  AWS_REGION: "us-east-1",
+} as const;
+
+function setMediaAwsEnv() {
+  process.env.MEDIA_AWS_ACCESS_KEY_ID = MEDIA_AWS.MEDIA_AWS_ACCESS_KEY_ID;
+  process.env.MEDIA_AWS_SECRET_ACCESS_KEY = MEDIA_AWS.MEDIA_AWS_SECRET_ACCESS_KEY;
+  process.env.MEDIA_AWS_REGION = MEDIA_AWS.MEDIA_AWS_REGION;
+}
+
+function unsetMediaAwsEnv() {
+  delete process.env.MEDIA_AWS_ACCESS_KEY_ID;
+  delete process.env.MEDIA_AWS_SECRET_ACCESS_KEY;
+  delete process.env.MEDIA_AWS_REGION;
+}
+
+function expectedMediaClientConfig() {
+  return {
+    region: MEDIA_AWS.MEDIA_AWS_REGION,
+    credentials: {
+      accessKeyId: MEDIA_AWS.MEDIA_AWS_ACCESS_KEY_ID,
+      secretAccessKey: MEDIA_AWS.MEDIA_AWS_SECRET_ACCESS_KEY,
+    },
+  };
+}
+
 describe("s3-social-media isolated lane", () => {
   beforeEach(() => {
     mockSend.mockReset();
     mockGetSignedUrl.mockReset();
+    vi.mocked(S3Client).mockClear();
     vi.mocked(isMediaCloudfrontConfigured).mockReturnValue(false);
     vi.mocked(signSocialMediaCloudfrontUrl).mockReset();
     process.env.S3_MEDIA_SOURCE_BUCKET = "test-media-source-bucket";
     process.env.S3_MEDIA_OUTPUT_BUCKET = "test-media-output-bucket";
     process.env.S3_BUCKET = "test-bucket";
     process.env.S3_AVATARS_BUCKET = "test-avatars-bucket";
+    process.env.AWS_ACCESS_KEY_ID = TITLE_AWS.AWS_ACCESS_KEY_ID;
+    process.env.AWS_SECRET_ACCESS_KEY = TITLE_AWS.AWS_SECRET_ACCESS_KEY;
+    process.env.AWS_REGION = TITLE_AWS.AWS_REGION;
+    setMediaAwsEnv();
   });
 
   it("presigns PUT/GET on the media source bucket, never S3_BUCKET", async () => {
@@ -115,9 +155,61 @@ describe("s3-social-media isolated lane", () => {
     const src = readFileSync("src/lib/s3-social-media.ts", "utf8");
     expect(src).toContain("S3_MEDIA_SOURCE_BUCKET");
     expect(src).toContain("24frame-media");
+    expect(src).toContain("MEDIA_AWS_ACCESS_KEY_ID");
+    expect(src).toContain("MEDIA_AWS_SECRET_ACCESS_KEY");
+    expect(src).toContain("MEDIA_AWS_REGION");
     expect(src).not.toContain("from \"@/lib/s3\"");
     expect(src).not.toContain("from \"@/lib/cloudfront\"");
     expect(src).not.toContain("from \"@/lib/mediaconvert\"");
     expect(src).not.toContain("process.env.S3_BUCKET)");
+    expect(src).not.toContain("process.env.AWS_REGION");
+    expect(src).not.toContain("process.env.AWS_ACCESS_KEY_ID");
+    expect(src).not.toContain("process.env.AWS_SECRET_ACCESS_KEY");
+  });
+});
+
+describe("s3-social-media MEDIA_AWS env selection", () => {
+  beforeEach(() => {
+    mockSend.mockReset();
+    mockGetSignedUrl.mockReset();
+    vi.mocked(S3Client).mockClear();
+    process.env.S3_MEDIA_SOURCE_BUCKET = "test-media-source-bucket";
+    process.env.S3_MEDIA_OUTPUT_BUCKET = "test-media-output-bucket";
+    process.env.S3_BUCKET = "test-bucket";
+    process.env.S3_AVATARS_BUCKET = "test-avatars-bucket";
+    process.env.AWS_ACCESS_KEY_ID = TITLE_AWS.AWS_ACCESS_KEY_ID;
+    process.env.AWS_SECRET_ACCESS_KEY = TITLE_AWS.AWS_SECRET_ACCESS_KEY;
+    process.env.AWS_REGION = TITLE_AWS.AWS_REGION;
+    setMediaAwsEnv();
+  });
+
+  it("constructs S3Client from MEDIA_AWS_* even when title AWS_* is present", async () => {
+    mockGetSignedUrl.mockResolvedValueOnce("https://s3.example/put");
+    await presignSocialMediaPut(KEY, "image/jpeg");
+    expect(S3Client).toHaveBeenCalledTimes(1);
+    expect(S3Client).toHaveBeenCalledWith(expectedMediaClientConfig());
+    const config = vi.mocked(S3Client).mock.calls[0]?.[0] as {
+      region?: string;
+      credentials?: { accessKeyId?: string; secretAccessKey?: string };
+    };
+    expect(config.region).not.toBe(TITLE_AWS.AWS_REGION);
+    expect(config.credentials?.accessKeyId).not.toBe(TITLE_AWS.AWS_ACCESS_KEY_ID);
+    expect(config.credentials?.secretAccessKey).not.toBe(TITLE_AWS.AWS_SECRET_ACCESS_KEY);
+  });
+
+  it.each([...MEDIA_AWS_ENV])("refuses when %s is missing and does not use title AWS_*", async (name) => {
+    delete process.env[name];
+    await expect(presignSocialMediaPut(KEY, "image/jpeg")).rejects.toThrow(
+      new RegExp(`${name} environment variable is not set`),
+    );
+    expect(S3Client).not.toHaveBeenCalled();
+    expect(mockGetSignedUrl).not.toHaveBeenCalled();
+  });
+
+  it("does not fall back to AWS_* when every MEDIA_AWS_* var is missing", async () => {
+    unsetMediaAwsEnv();
+    await expect(presignSocialMediaGet(KEY)).rejects.toThrow(/MEDIA_AWS_/);
+    expect(S3Client).not.toHaveBeenCalled();
+    expect(mockGetSignedUrl).not.toHaveBeenCalled();
   });
 });
