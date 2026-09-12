@@ -10,7 +10,8 @@ This is **not** the public site (`globalcontent-web`, separate repo).
 
 ## Stack
 
-- Next.js App Router (Vercel)
+- Next.js App Router (Vercel) — `@24frame/dashboard` at repo root
+- Expo iOS app — `@24frame/mobile` in `apps/mobile` (same 24Frame product: Aggregation / Social+Education)
 - Supabase (Postgres + Auth + RLS)
 - AWS S3 / CloudFront / MediaConvert
 - Stripe (money in) · Trolley (money out, later)
@@ -27,6 +28,7 @@ pnpm install
 cp .env.example .env.local   # fill values locally; never commit secrets
 pnpm exec supabase start     # local Supabase when needed
 pnpm dev
+pnpm --filter @24frame/mobile start   # Expo Go, iOS-first; same NEXT_PUBLIC_ Supabase keys
 ```
 
 Do not print or commit `.env`, `.env.*`, or anything under `secrets/`.
@@ -38,6 +40,7 @@ Do not print or commit `.env`, `.env.*`, or anything under `secrets/`.
 | `src/app/` | Next.js App Router routes |
 | `src/components/` | UI |
 | `src/lib/` | Domain logic, data access, shared modules |
+| `apps/mobile/` | Expo iOS client for the same 24Frame product (Aggregation / Social+Education). This slice: survivor Auth + Social home only. |
 | `supabase/` | Migrations, config, pgTAP |
 | `docs/` | Specs, plans, ledgers, status |
 | `scripts/` | Repo tooling (including Agentic Engineering dry-run) |

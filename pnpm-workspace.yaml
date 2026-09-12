@@ -1,5 +1,12 @@
-# Single-package repo — this file holds pnpm settings (pnpm 11 moved them here
-# out of package.json).
+# Workspace root remains @24frame/dashboard (Vercel / root scripts).
+# Mobile is a second package so Expo can live here without moving the Next app.
+#
+# packages:
+#   apps/mobile = @24frame/mobile (Expo, iOS-first). Same 24Frame product.
+#
+# pnpm 11 keeps settings in this file (moved out of package.json).
+packages:
+  - "apps/mobile"
 #
 # Trusted native deps allowed to run install scripts:
 # sharp = image processing (Next.js image optimization),

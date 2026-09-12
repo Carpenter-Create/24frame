@@ -13,6 +13,11 @@ out/
 next-env.d.ts
 *.tsbuildinfo
 
+# Expo / native (apps/mobile). No EAS artifacts are committed.
+.expo/
+apps/mobile/.expo/
+apps/mobile/dist/
+
 # Local scratch / reference data — kept locally, never committed.
 # Screenshots live at repo root (real image assets go in public/ or src/).
 # vod_titles.* is a client catalog export (Tier-3 data): add a fixture

@@ -54,6 +54,10 @@ jobs:
       - name: Tests
         run: pnpm test
 
+      # Lib-only. Must not replace or widen the dashboard typecheck above.
+      - name: Mobile typecheck
+        run: pnpm --filter @24frame/mobile typecheck
+
       # Gated at `high`, not at the default. The one surviving advisory is uuid<11.1.1
       # via exceljs (moderate) — a three-major jump on a transitive dependency of the
       # export engine, deliberately not forced. Raise this to `moderate` once that is
