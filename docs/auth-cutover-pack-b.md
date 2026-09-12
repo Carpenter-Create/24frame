@@ -13,8 +13,8 @@
 >
 > Emails and email domains are omitted on purpose.
 
-Repo remains `Carpenter-Create/globalcontent-dashboard`. Product language is
-24Frame. Start point: `main` tip `ed433823` (Pack A [#232](https://github.com/Carpenter-Create/globalcontent-dashboard/pull/232) MERGED). Plan:
+Repo is `Carpenter-Create/24frame`. Product language is
+24Frame. Start point: `main` tip `ed433823` (Pack A [#232](https://github.com/Carpenter-Create/24frame/pull/232) MERGED). Plan:
 [`docs/auth-cutover-pack-a.md`](auth-cutover-pack-a.md).
 
 ---
@@ -194,7 +194,7 @@ Out of this pack. Do not pull them in.
 | **media / avatars** | S3 / `avatar_key` / Social photos. Separate infra track. |
 | **Expo** | Native client. Not this dashboard. |
 | **group-chat** | Productization is HOLD. |
-| **repo rename** | Repo stays `Carpenter-Create/globalcontent-dashboard`. |
+| **repo rename** | Live write repo is `Carpenter-Create/24frame`. |
 | **Cognito / Aurora** | Auth stays Supabase Auth. No platform cutover. |
 
 Also still out: Social Figma visual/copy checkpoint; donor

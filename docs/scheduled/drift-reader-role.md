@@ -170,7 +170,7 @@ psql "postgresql://postgres.uevsculwzwlhxeamagwg@aws-1-us-west-2.pooler.supabase
 Then set the one secret — `gh secret set` reads stdin, so the value stays out of history:
 
 ```sh
-gh secret set SUPABASE_DB_PASSWORD --repo Carpenter-Create/globalcontent-dashboard
+gh secret set SUPABASE_DB_PASSWORD --repo Carpenter-Create/24frame
 ```
 
 And update `DB_USER` in `migration-drift.yml` from `postgres.<ref>` to `drift_reader.<ref>`.

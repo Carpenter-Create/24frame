@@ -12,7 +12,7 @@
 > live projects. Counts below are those results, copied verbatim. This Pack A
 > draft did **not** re-query. Emails and email domains are omitted on purpose.
 
-Repo remains `Carpenter-Create/globalcontent-dashboard`. Product language is
+Repo is `Carpenter-Create/24frame`. Product language is
 24Frame. Start point for this plan: `main` tip `1f081874` (Social UI v0).
 Pack B record: [`auth-cutover-pack-b.md`](auth-cutover-pack-b.md).
 
@@ -404,7 +404,7 @@ Out of this pack and out of Pack B execute. Do not pull them in.
 | **media / avatars** | S3 / `avatar_key` / Social photos. Account-photo bucket is a separate infra track. |
 | **Expo** | Native client. Not this dashboard. |
 | **group-chat** | `conversation_kind` may include `group`; productization is HOLD. |
-| **repo rename** | Repo stays `Carpenter-Create/globalcontent-dashboard`. |
+| **repo rename** | Live write repo is `Carpenter-Create/24frame`. |
 | **Social Figma** | Visual / copy checkpoint. Not this file. |
 | **Cognito / Aurora** | Auth stays Supabase Auth. No platform cutover. |
 
