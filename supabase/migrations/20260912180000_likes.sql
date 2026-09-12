@@ -92,8 +92,8 @@ language plpgsql
 set search_path to 'public', 'extensions'
 as $$
 begin
-  -- Donor used `24frame.refreshing_profile_points`. That first identifier
-  -- starts with a digit and 42602s on set_config. `app.*` is the valid form.
+  -- Session flag for the engagement loop. Custom GUC must use app.*, not a
+  -- digit-leading schema name (set_config 42602).
   if current_setting('app.refreshing_profile_points', true) = 'on' then
     return new;
   end if;
@@ -192,7 +192,7 @@ language plpgsql
 set search_path to 'public', 'extensions'
 as $$
 begin
-  -- Pack 2 already adapted this GUC. Do not revert to 24frame.*.
+  -- Pack 2 already adapted this GUC. Keep app.refreshing_post_like_count.
   if current_setting('app.refreshing_post_like_count', true) = 'on' then
     return new;
   end if;
@@ -480,7 +480,10 @@ begin
       'protect_post_privileged_columns',
       'refresh_like_engagement'
     )
-    and p.prosrc like '%24frame.%';
+    and (
+      p.prosrc like '%set_config(''24frame.%'
+      or p.prosrc like '%current_setting(''24frame.%'
+    );
   if v_guc is not null then
     raise exception 'replaced functions still use 24frame.* GUCs: %', v_guc;
   end if;

@@ -124,7 +124,10 @@ select ok(
         'protect_post_privileged_columns',
         'refresh_like_engagement'
       )
-      and p.prosrc like '%24frame.%'
+      and (
+        p.prosrc like '%set_config(''24frame.%'
+        or p.prosrc like '%current_setting(''24frame.%'
+      )
   ),
   'replaced functions use app.* GUCs, not 24frame.*');
 
