@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { buildPeriodStatement } from "./finance-statement";
 import { processFinanceJob, type FinanceWorkerDeps } from "./finance-worker-run";
 
+
 const ORG = "11111111-1111-4111-8111-111111111111";
 const PERIOD = "33333333-3333-4333-8333-333333333333";
 const IMPORT = "44444444-4444-4444-8444-444444444444";
@@ -115,8 +116,8 @@ describe("finance worker", () => {
   });
 
   it("export jobs write org-scoped statement keys and apply both formats", async () => {
-    const putObject = vi.fn(async () => undefined);
-    const applyExport = vi.fn(async () => undefined);
+    const putObject = vi.fn<FinanceWorkerDeps["putObject"]>(async () => undefined);
+    const applyExport = vi.fn<FinanceWorkerDeps["applyExport"]>(async () => undefined);
     await processFinanceJob(
       deps({
         getJob: async () => ({
@@ -134,10 +135,9 @@ describe("finance worker", () => {
     );
     expect(putObject).toHaveBeenCalledTimes(2);
     expect(applyExport).toHaveBeenCalledTimes(2);
-    expect(putObject.mock.calls[0]?.[0].key).toBe(
-      `orgs/${ORG}/statements/${PERIOD}/24frame-statement.pdf`,
-    );
-    expect(applyExport.mock.calls.map((call) => call[0].format)).toEqual(["pdf", "csv"]);
+    const firstPut = putObject.mock.calls[0]?.[0];
+    expect(firstPut?.key).toBe(`orgs/${ORG}/statements/${PERIOD}/24frame-statement.pdf`);
+    expect(applyExport.mock.calls.map((call) => call[0]?.format)).toEqual(["pdf", "csv"]);
   });
 
   it("marks the job failed when ingest has no s3_key", async () => {

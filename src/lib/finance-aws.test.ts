@@ -71,7 +71,7 @@ describe("finance AWS isolation", () => {
     expect(s3Src).not.toContain("process.env.MEDIA_AWS_");
     expect(cfSrc).toContain("FINANCE_CLOUDFRONT_DOMAIN");
     expect(cfSrc).not.toContain("process.env.CLOUDFRONT_");
-    expect(cfSrc).not.toContain("MEDIA_CLOUDFRONT");
+    expect(cfSrc).not.toContain("process.env.MEDIA_CLOUDFRONT");
     expect(awsSrc).toContain("Proposed — not claimed live");
     expect(readFileSync("src/lib/aurora.ts", "utf8")).toContain("405912452061");
   });

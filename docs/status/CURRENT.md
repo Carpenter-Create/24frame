@@ -63,11 +63,11 @@ Full doctrine: [`AGENTS.md`](../../AGENTS.md). Domain truth: [`docs/domain-spec.
 
 ## Finance AWS spine (authorized Slice 2)
 
-Adam lock 2026-09-13. In the Slice 2 PR — not production-applied.
+In the Slice 2 pull request — not production-applied.
 
-- AWS owns finance files + worker compute. Proposed relational SoT is Aurora PostgreSQL on E8 `405912452061` / `us-west-2`. Auth stays Supabase Auth. Cluster is not created here.
-- Migrations (in-repo, founder apply after merge): `20260913130000_finance_ops_slice_1.sql`, `20260913220000_finance_ops_slice_2_suspense.sql`, `20260913230000_finance_ops_slice_2_aws_spine.sql`.
-- Proposed buckets only: `24frame-finance-dev` / `24frame-finance-prod`. Adam still creates IAM, bucket, OIDC worker role, Aurora cluster, and `FINANCE_AWS_*` / `S3_FINANCE_*` / `AURORA_DATABASE_URL`.
+- AWS owns finance files + worker compute. Proposed relational SoT is Aurora PostgreSQL in the E8 account, us-west-2. Auth stays Supabase Auth. Cluster is not created here.
+- Founder applies the Slice 2 finance migrations after merge. Filenames live under `supabase/migrations`.
+- Proposed finance buckets and Aurora cluster stay proposals until Adam creates IAM, bucket, worker role, and the finance/Aurora env names.
 - Production mutation table above is unchanged until founder applies.
 
 ---

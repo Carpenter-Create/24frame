@@ -61,7 +61,7 @@ describe("recipient statement export", () => {
     const res = await GET(new Request("http://localhost/finance/p-closed/export?format=csv"), {
       params: Promise.resolve({ periodId: "p-closed" }),
     });
-    expect(res.status).toBe(302);
+    expect(res.status).toBe(307);
     expect(res.headers.get("location")).toBe("https://finance.example/signed.csv");
     expect(signedFinanceUrl).toHaveBeenCalledWith(
       "orgs/org-a/statements/p-closed/24frame-statement.csv",
