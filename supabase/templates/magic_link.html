@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
-    <meta name="x-apple-disable-message-reformatting" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
+    <meta name="x-apple-disable-message-reformatting">
     <title>Sign in to 24Frame</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
       href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap"
       rel="stylesheet"
-    />
+    >
     <style type="text/css">
       a[x-apple-data-detectors],
       a[x-apple-data-detectors]:hover,
@@ -34,7 +34,7 @@
   <body style="margin:0;padding:0;background:#FAFAFB">
     <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#FAFAFB">
       <tr>
-        <td align="center" style="padding:32px 16px">
+        <td align="center" style="padding:40px 20px">
           <table
             role="presentation"
             cellpadding="0"
@@ -43,32 +43,39 @@
             style="width:600px;max-width:600px;background:#ffffff;border:1px solid #E6E8EB;border-radius:14px"
           >
             <tr>
-              <td style="padding:40px 40px 32px;font-family:Geist,ui-sans-serif,-apple-system,system-ui,sans-serif">
+              <td style="padding:48px 48px 40px;font-family:Geist,ui-sans-serif,-apple-system,system-ui,sans-serif">
                 <img
                   src="https://app.24frame.co/email-logo.png"
-                  width="48"
-                  height="48"
+                  width="64"
+                  height="64"
                   alt="24Frame"
-                  style="display:block;border:0;width:48px;height:48px"
+                  style="display:block;border:0;width:64px;height:64px"
                 />
-                <p style="margin:12px 0 0;font-size:10px;line-height:14px;letter-spacing:0.16em;text-transform:uppercase;color:#9AA0A9">
+                <p style="margin:16px 0 0;font-size:11px;line-height:16px;letter-spacing:0.16em;text-transform:uppercase;color:#9AA0A9">
                   Radically different film distribution.
                 </p>
-                <div style="margin:24px 0">
+                <div style="margin:32px 0">
                   <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse">
                     <tr>
                       <td style="height:1px;background:#E6E8EB;font-size:0;line-height:0">&nbsp;</td>
                     </tr>
                   </table>
                 </div>
-                <p style="margin:0 0 12px;font-size:23px;line-height:28px;font-weight:600;color:#14171A">Sign in</p>
-                <p style="margin:0 0 24px;font-size:15px;line-height:22px;color:#3F4650">
+                <p style="margin:0 0 12px;font-size:28px;line-height:34px;font-weight:600;color:#14171A">Sign in</p>
+                <p style="margin:0 0 28px;font-size:17px;line-height:26px;color:#3F4650">
                   Use this link to sign in. If you didn't request this, you can ignore this message.
                 </p>
-                <p style="margin:0 0 24px;font-family:Geist,ui-sans-serif,-apple-system,system-ui,sans-serif">
-                  <a href="{{ .ConfirmationURL }}" style="color:#1769FF;text-decoration:none">Sign in to 24Frame</a>
-                </p>
-                <p style="margin:0 0 8px;font-size:15px;line-height:22px;color:#3F4650">Or enter this code:</p>
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin:0 0 28px">
+                  <tr>
+                    <td bgcolor="#1769FF" style="background:#1769FF;border-radius:8px">
+                      <a
+                        href="{{ .ConfirmationURL }}"
+                        style="display:inline-block;padding:16px 32px;font-family:Geist,ui-sans-serif,-apple-system,system-ui,sans-serif;font-size:16px;line-height:20px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:8px"
+                      >Sign in</a>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:0 0 8px;font-size:17px;line-height:26px;color:#3F4650">Or enter this code:</p>
                 <table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse">
                   <tr>
                     <td
@@ -86,24 +93,24 @@
               </td>
             </tr>
             <tr>
-              <td style="padding:0 40px 40px;font-family:Geist,ui-sans-serif,-apple-system,system-ui,sans-serif">
-                <p style="margin:8px 0 20px;font-size:14px">
+              <td style="padding:0 48px 48px;font-family:Geist,ui-sans-serif,-apple-system,system-ui,sans-serif">
+                <p style="margin:8px 0 24px;font-size:15px">
                   <a href="https://24frame.co" style="color:#1769FF;text-decoration:none">24frame.co</a>
                 </p>
-                <div style="margin:0 0 20px">
+                <div style="margin:0 0 24px">
                   <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse">
                     <tr>
                       <td style="height:1px;background:#E6E8EB;font-size:0;line-height:0">&nbsp;</td>
                     </tr>
                   </table>
                 </div>
-                <p style="margin:0 0 4px;font-size:12px;line-height:18px;color:#9AA0A9">
+                <p style="margin:0 0 6px;font-size:13px;line-height:20px;color:#9AA0A9">
                   © 2026 Global Content Holdings LLC. All rights reserved.
                 </p>
-                <p style="margin:0 0 12px;font-size:12px;line-height:18px;color:#9AA0A9">
+                <p style="margin:0 0 16px;font-size:13px;line-height:20px;color:#9AA0A9">
                   3839 McKinney Ave, Suite 155 #2276, Dallas, TX 75204
                 </p>
-                <p style="margin:0;font-size:12px;line-height:18px">
+                <p style="margin:0;font-size:13px;line-height:20px">
                   <a href="https://24frame.co/legal" style="color:#9AA0A9;text-decoration:none">Legal</a>
                 </p>
               </td>

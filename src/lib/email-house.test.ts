@@ -6,19 +6,24 @@ import {
   EMAIL_ACCENT,
   EMAIL_ADDRESS,
   EMAIL_BG,
+  EMAIL_BODY_SIZE,
   EMAIL_BORDER,
+  EMAIL_BUTTON_RADIUS,
   EMAIL_CARD_RADIUS,
   EMAIL_CARD_WIDTH,
   EMAIL_COPYRIGHT,
   EMAIL_FORMAT_DETECTION,
   EMAIL_GEIST_HREF,
+  EMAIL_HEADLINE_SIZE,
   EMAIL_INK,
   EMAIL_LEGAL_URL,
+  EMAIL_LOGO_DISPLAY,
   EMAIL_LOGO_URL,
   EMAIL_SITE_LABEL,
   EMAIL_SITE_URL,
   EMAIL_SLOGAN,
   houseOtpCode,
+  housePrimaryButton,
   housePrimaryLink,
   wrapHouseEmail,
 } from "./email-house";
@@ -28,6 +33,16 @@ const LOGO_PNG = resolve(__dirname, "../../public/email-logo.png");
 
 function productResidue(html: string): string {
   return html.replaceAll("Global Content Holdings LLC", "");
+}
+
+function assertFormatDetectionWellFormed(html: string) {
+  const fd = html.indexOf('name="format-detection"');
+  const geist = html.indexOf(EMAIL_GEIST_HREF);
+  expect(fd).toBeGreaterThan(-1);
+  expect(geist).toBeGreaterThan(fd);
+  const between = html.slice(fd, geist);
+  expect(between).toMatch(/content="[^"]+"\s*\/?>/);
+  expect(html).toContain(`content="${EMAIL_FORMAT_DETECTION}">`);
 }
 
 function assertHouseChrome(html: string) {
@@ -47,34 +62,50 @@ function assertHouseChrome(html: string) {
   expect(html).toContain(EMAIL_LEGAL_URL);
   expect(html).toContain(EMAIL_GEIST_HREF);
   expect(html).toContain("24Frame");
-  expect(html).not.toMatch(/background:\s*#1769FF/i);
   expect(html).not.toMatch(/border-radius:\s*999px/);
   expect(html).not.toMatch(/height:4px;background:#1769FF/);
+  expect(html).not.toMatch(/<img[^>]*#1769FF/i);
   expect(productResidue(html)).not.toMatch(/\bGC\b|globalcontent/i);
   expect(productResidue(html)).not.toMatch(/Global Content(?! Holdings LLC)/);
-  expect(html.replace(/<a\b[^>]*>[\s\S]*?<\/a>/gi, "")).not.toMatch(/#1769FF/i);
+  assertFormatDetectionWellFormed(html);
 }
 
 describe("wrapHouseEmail", () => {
-  it("uses the house shell with Sporty Blue as a link accent only", () => {
+  it("uses the Coinbase-scale house shell with a navy mark and well-formed format-detection", () => {
     const html = wrapHouseEmail(`<p style="color:${EMAIL_INK}">Inner</p>`);
     assertHouseChrome(html);
     expect(html).toContain("Inner");
-    expect(html).toContain("width:48px;height:48px");
-    expect(html).toMatch(/font-size:10px[\s\S]*text-transform:uppercase/);
-    expect(html).toContain(`content="${EMAIL_FORMAT_DETECTION}"`);
+    expect(html).toContain(`width:${EMAIL_LOGO_DISPLAY}px;height:${EMAIL_LOGO_DISPLAY}px`);
+    expect(EMAIL_LOGO_DISPLAY).toBeGreaterThanOrEqual(56);
+    expect(EMAIL_LOGO_DISPLAY).toBeLessThanOrEqual(64);
+    expect(EMAIL_HEADLINE_SIZE).toBeGreaterThan(23);
+    expect(EMAIL_BODY_SIZE).toBeGreaterThan(15);
+    expect(html).toMatch(/font-size:11px[\s\S]*text-transform:uppercase/);
     expect(html).toContain("x-apple-disable-message-reformatting");
     expect(html).toContain("a[x-apple-data-detectors]");
     expect(EMAIL_LOGO_URL).toBe("https://app.24frame.co/email-logo.png");
+    expect(html).not.toMatch(/background:\s*#1769FF/i);
   });
 
-  it("keeps primary CTAs as Sporty Blue text links, not filled pills", () => {
+  it("keeps notification CTAs as Sporty Blue text links, not 999px pills", () => {
     const html = wrapHouseEmail(housePrimaryLink("https://app.example/titles/1", "Review and resubmit"));
     expect(html).toContain(`href="https://app.example/titles/1"`);
     expect(html).toContain("Review and resubmit");
     expect(html).toContain(`style="color:${SPORTY_BLUE};text-decoration:none"`);
     expect(html).not.toMatch(/background:\s*#1769FF/i);
     expect(html).not.toMatch(/border-radius:\s*999px/);
+  });
+
+  it("renders the Sign in CTA as a filled Sporty Blue table button", () => {
+    const html = wrapHouseEmail(housePrimaryButton("https://app.example/auth", "Sign in"));
+    expect(html).toContain(`href="https://app.example/auth"`);
+    expect(html).toContain(">Sign in</a>");
+    expect(html).toContain(`background:${SPORTY_BLUE}`);
+    expect(html).toContain(`bgcolor="${SPORTY_BLUE}"`);
+    expect(html).toContain(`border-radius:${EMAIL_BUTTON_RADIUS}`);
+    expect(html).not.toContain("Sign in to 24Frame");
+    expect(html).not.toMatch(/border-radius:\s*999px/);
+    expect(html).not.toMatch(/<img[^>]*#1769FF/i);
   });
 });
 
@@ -95,7 +126,7 @@ describe("houseOtpCode", () => {
 });
 
 describe("email-logo.png", () => {
-  it("is committed under public/ for app.24frame.co/email-logo.png", () => {
+  it("is a padded navy Asset 10 square at app.24frame.co/email-logo.png", () => {
     expect(existsSync(LOGO_PNG)).toBe(true);
     const bytes = statSync(LOGO_PNG).size;
     expect(bytes).toBeGreaterThan(200);
@@ -105,6 +136,77 @@ describe("email-logo.png", () => {
     const width = png.readUInt32BE(16);
     const height = png.readUInt32BE(20);
     expect(width).toBe(height);
-    expect(width).toBe(128);
+    expect(width).toBe(160);
+
+    const decoded = decodePngRgb(png);
+    const corner = decoded.pixel(2, 2);
+    expect(corner[0]).toBeGreaterThan(240);
+    expect(corner[1]).toBeGreaterThan(240);
+    expect(corner[2]).toBeGreaterThan(240);
+    const field = decoded.pixel(Math.floor(width * 0.35), Math.floor(height * 0.22));
+    expect(field[0] + field[1] + field[2]).toBeLessThan(80);
+    expect(field[2]).toBeGreaterThanOrEqual(field[0]);
   });
 });
+
+function decodePngRgb(png: Buffer): { pixel: (x: number, y: number) => [number, number, number] } {
+  // Minimal IHDR + IDAT decoder for 8-bit RGB/RGBA (no interlace).
+  const zlib = require("node:zlib") as typeof import("node:zlib");
+  const width = png.readUInt32BE(16);
+  const height = png.readUInt32BE(20);
+  const bitDepth = png[24];
+  const colorType = png[25];
+  expect(bitDepth).toBe(8);
+  expect([2, 6]).toContain(colorType);
+  const channels = colorType === 6 ? 4 : 3;
+  const chunks: Buffer[] = [];
+  let offset = 8;
+  while (offset < png.length) {
+    const len = png.readUInt32BE(offset);
+    const type = png.subarray(offset + 4, offset + 8).toString("ascii");
+    if (type === "IDAT") chunks.push(png.subarray(offset + 8, offset + 8 + len));
+    offset += 12 + len;
+  }
+  const raw = zlib.inflateSync(Buffer.concat(chunks));
+  const stride = width * channels;
+  const rows: Buffer[] = [];
+  let i = 0;
+  for (let y = 0; y < height; y++) {
+    const filter = raw[i];
+    const row = Buffer.from(raw.subarray(i + 1, i + 1 + stride));
+    if (filter === 1) {
+      for (let x = channels; x < stride; x++) row[x] = (row[x] + row[x - channels]) & 255;
+    } else if (filter === 2 && y > 0) {
+      for (let x = 0; x < stride; x++) row[x] = (row[x] + rows[y - 1][x]) & 255;
+    } else if (filter === 3) {
+      for (let x = 0; x < stride; x++) {
+        const a = x >= channels ? row[x - channels] : 0;
+        const b = y > 0 ? rows[y - 1][x] : 0;
+        row[x] = (row[x] + Math.floor((a + b) / 2)) & 255;
+      }
+    } else if (filter === 4) {
+      for (let x = 0; x < stride; x++) {
+        const a = x >= channels ? row[x - channels] : 0;
+        const b = y > 0 ? rows[y - 1][x] : 0;
+        const c = y > 0 && x >= channels ? rows[y - 1][x - channels] : 0;
+        const p = a + b - c;
+        const pa = Math.abs(p - a);
+        const pb = Math.abs(p - b);
+        const pc = Math.abs(p - c);
+        const pr = pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
+        row[x] = (row[x] + pr) & 255;
+      }
+    } else if (filter !== 0) {
+      throw new Error(`unsupported PNG filter ${filter}`);
+    }
+    rows.push(row);
+    i += 1 + stride;
+  }
+  return {
+    pixel(x: number, y: number) {
+      const row = rows[y];
+      const o = x * channels;
+      return [row[o], row[o + 1], row[o + 2]];
+    },
+  };
+}
