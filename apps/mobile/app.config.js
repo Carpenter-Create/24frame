@@ -19,6 +19,7 @@ function readRepoPublicEnvFile() {
 const survivor = resolveSurvivorPublicEnv({
   processUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
   processAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  processAppOrigin: process.env.EXPO_PUBLIC_APP_ORIGIN ?? process.env.PORTAL_BASE_URL,
   fileText: readRepoPublicEnvFile(),
 });
 
@@ -36,5 +37,6 @@ module.exports = {
     productName: "24Frame",
     supabaseUrl: survivor.url,
     supabaseAnonKey: survivor.anonKey,
+    appOrigin: survivor.appOrigin,
   },
 };

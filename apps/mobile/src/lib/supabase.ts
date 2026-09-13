@@ -5,11 +5,16 @@ import Constants from "expo-constants";
 import { assertSurvivorSupabaseUrl, type SurvivorPublicEnv } from "./survivor-env";
 
 export function extraSurvivorEnv(
-  extra: { supabaseUrl?: unknown; supabaseAnonKey?: unknown } | undefined,
+  extra: {
+    supabaseUrl?: unknown;
+    supabaseAnonKey?: unknown;
+    appOrigin?: unknown;
+  } | undefined,
 ): SurvivorPublicEnv {
   return {
     url: typeof extra?.supabaseUrl === "string" ? extra.supabaseUrl : "",
     anonKey: typeof extra?.supabaseAnonKey === "string" ? extra.supabaseAnonKey : "",
+    appOrigin: typeof extra?.appOrigin === "string" ? extra.appOrigin : "",
   };
 }
 
@@ -29,5 +34,11 @@ export function createMobileClient(env: SurvivorPublicEnv): SupabaseClient {
 }
 
 export function readExpoSurvivorEnv(): SurvivorPublicEnv {
-  return extraSurvivorEnv(Constants.expoConfig?.extra as { supabaseUrl?: unknown; supabaseAnonKey?: unknown });
+  return extraSurvivorEnv(
+    Constants.expoConfig?.extra as {
+      supabaseUrl?: unknown;
+      supabaseAnonKey?: unknown;
+      appOrigin?: unknown;
+    },
+  );
 }

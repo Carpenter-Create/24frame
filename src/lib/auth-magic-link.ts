@@ -2,12 +2,16 @@ import "server-only";
 
 import type { EmailOtpType } from "@supabase/supabase-js";
 
-import { sendMagicLinkEmail } from "@/lib/email";
+import { sendMagicLinkEmail, sendSignInWithCodeEmail } from "@/lib/email";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const DASHBOARD_SIGN_IN_SENT = "Check your email for a secure sign-in link.";
 export const DASHBOARD_SIGN_IN_SEND_FAILED = "Could not send the sign-in link. Please try again.";
 export const DASHBOARD_SIGN_IN_RATE_LIMITED = "Too many requests. Please try again later.";
+
+export const MOBILE_SIGN_IN_SENT = "Check your email for a one-time code.";
+export const MOBILE_SIGN_IN_SEND_FAILED = "Could not send the sign-in code. Please try again.";
+export const MOBILE_SIGN_IN_RATE_LIMITED = "Too many requests. Please try again later.";
 
 const LOCAL_ORIGINS = ["http://127.0.0.1:3000", "http://localhost:3000"] as const;
 const PRODUCTION_ORIGIN = "https://app.24frame.co";
@@ -70,36 +74,39 @@ function isAlreadyRegistered(error: { message?: string; status?: number } | null
   return /already registered|already exists|email address is already/i.test(error.message ?? "");
 }
 
-async function generateHashedToken(
+async function mintSignInGrant(
   admin: AdminClient,
   email: string,
   redirectTo: string,
-): Promise<{ hashedToken: string } | { error: { message?: string; status?: number } }> {
+): Promise<
+  | { hashedToken: string; emailOtp: string }
+  | { error: { message?: string; status?: number } }
+> {
   const { data, error } = await admin.auth.admin.generateLink({
     type: "magiclink",
     email,
     options: { redirectTo },
   });
   const hashedToken = data?.properties?.hashed_token;
-  if (error || !hashedToken) return { error: error ?? { message: "missing-token" } };
-  return { hashedToken };
+  const emailOtp = data?.properties?.email_otp;
+  if (error || !hashedToken || !emailOtp) {
+    return { error: error ?? { message: "missing-token" } };
+  }
+  return { hashedToken, emailOtp };
 }
 
-// Mint a hashed token (generateLink does not send GoTrue mail) and deliver a
-// link-only house email via Resend. Never call signInWithOtp from this path —
-// that fires the hosted template that still includes {{ .Token }} for mobile.
-// Signup generateLink is not used: the JS types require a password, and this
-// product is magic-link only. Unknown addresses get createUser (no password)
-// then a magiclink token — same shouldCreateUser: true outcome.
-export async function issueDashboardSignInLink(args: {
+// Shared mint: generateLink does not send GoTrue mail. Unknown addresses get
+// createUser (no password) then a magiclink grant — same shouldCreateUser: true
+// outcome. Never call signInWithOtp from these paths.
+async function mintDashboardSignInGrant(args: {
   email: string;
   requestOrigin: string | null;
-}): Promise<void> {
+}): Promise<{ origin: string; hashedToken: string; emailOtp: string; signInUrl: string }> {
   const origin = resolveDashboardOrigin(args.requestOrigin);
   const redirectTo = `${origin}/auth/callback`;
   const admin = createAdminClient();
 
-  let minted = await generateHashedToken(admin, args.email, redirectTo);
+  let minted = await mintSignInGrant(admin, args.email, redirectTo);
   if ("error" in minted && isNotFound(minted.error)) {
     const { error: createError } = await admin.auth.admin.createUser({
       email: args.email,
@@ -108,13 +115,40 @@ export async function issueDashboardSignInLink(args: {
     if (createError && !isAlreadyRegistered(createError)) {
       throw new Error("mint-failed");
     }
-    minted = await generateHashedToken(admin, args.email, redirectTo);
+    minted = await mintSignInGrant(admin, args.email, redirectTo);
   }
 
   if ("error" in minted) {
     throw new Error("mint-failed");
   }
 
-  const signInUrl = buildDashboardCallbackUrl(origin, minted.hashedToken, "email");
-  await sendMagicLinkEmail(args.email, signInUrl);
+  return {
+    origin,
+    hashedToken: minted.hashedToken,
+    emailOtp: minted.emailOtp,
+    signInUrl: buildDashboardCallbackUrl(origin, minted.hashedToken, "email"),
+  };
+}
+
+// Web dashboard: link-only house mail via Resend.
+export async function issueDashboardSignInLink(args: {
+  email: string;
+  requestOrigin: string | null;
+}): Promise<void> {
+  const grant = await mintDashboardSignInGrant(args);
+  await sendMagicLinkEmail(args.email, grant.signInUrl);
+}
+
+// Mobile: same mint + house mail that includes the enterable OTP (hosted Auth
+// template is parked for this product sign-in flow).
+export async function issueMobileSignInCode(args: {
+  email: string;
+}): Promise<void> {
+  // Mobile clients do not supply a trustworthy Origin. Pin the grant callback
+  // to the configured dashboard origin (PORTAL_BASE_URL / production).
+  const grant = await mintDashboardSignInGrant({
+    email: args.email,
+    requestOrigin: null,
+  });
+  await sendSignInWithCodeEmail(args.email, grant.signInUrl, grant.emailOtp);
 }

@@ -28,7 +28,9 @@ describe("mobile product chrome", () => {
   it("does not invent password auth or member course publish", () => {
     const auth = readFileSync(new URL("./auth.ts", import.meta.url), "utf8");
     const feed = readFileSync(new URL("./feed.ts", import.meta.url), "utf8");
-    expect(auth).toContain("signInWithOtp");
+    expect(auth).toContain("requestEmailCodeViaHousePipe");
+    expect(auth).toContain("/api/mobile/request-sign-in");
+    expect(auth).not.toMatch(/\.signInWithOtp\s*\(/);
     expect(auth).toContain('type: "email"');
     expect(auth).not.toContain("signInWithPassword");
     expect(feed).toContain('from("posts")');
