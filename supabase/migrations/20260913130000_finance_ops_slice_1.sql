@@ -20,8 +20,8 @@
 -- but MUST include endpoint-sourced input — source name, their ids, reported
 -- amount if distinct, bank-receipt gross. Input preserved; output is ours.
 -- Keep those fields on sales_imports / sales_lines (filename/hash, endpoint,
--- external_id, reported_cents, bank_receipt_cents, raw). Do not collapse
--- imports into ledger-only rows.
+-- external_id, reported_cents, bank_receipt_cents, raw).
+-- Do not collapse imports into ledger-only rows.
 --
 -- Titles stay org-scoped. No global works table. 24Frame id is titles.catalog_id.
 -- title_external_ids is endpoint + external_id, unique per pair, org-checked.

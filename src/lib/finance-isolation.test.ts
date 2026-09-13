@@ -105,7 +105,7 @@ describe("mapping C — finance stays Aggregation", () => {
     expect(migration).toContain("content_hash");
     expect(migration).toContain("endpoint");
     expect(migration).toContain("external_id");
-    expect(migration).toContain("do not collapse imports into ledger-only rows");
+    expect(migration).toContain("Do not collapse imports into ledger-only rows");
     expect(migration).toContain("Input preserved; output is ours");
   });
 
