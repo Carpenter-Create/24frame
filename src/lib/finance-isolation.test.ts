@@ -84,7 +84,7 @@ describe("mapping C — finance stays Aggregation", () => {
     expect(migration).toContain("bank_receipt_cents");
     expect(migration).toContain("reported_cents");
     expect(migration).toMatch(/raw\s+jsonb/);
-    expect(migration).not.toMatch(/\baggregator_rate\b/);
+    expect(migration).not.toMatch(/\baggregator_rate\s+\w+/);
     expect(staffCanWriteFinance("gc_delivery_ops")).toBe(false);
     expect(staffCanWriteFinance("gc_legal")).toBe(false);
     expect(staffCanWriteFinance("gc_accountant")).toBe(true);

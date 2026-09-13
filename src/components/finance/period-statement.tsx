@@ -29,12 +29,10 @@ function ItemizedList({ items }: { items: readonly StatementPostedItem[] }) {
 }
 
 export function PeriodStatementView({ statement }: { statement: PeriodStatement }) {
-  const closeLabel =
-    statement.org?.close.kind === "payable" ? FINANCE_PAGE.payable : FINANCE_PAGE.carryForward;
+  const org = statement.org;
+  const closeLabel = org?.close.kind === "payable" ? FINANCE_PAGE.payable : FINANCE_PAGE.carryForward;
   const closeAmount =
-    statement.org?.close.kind === "payable"
-      ? statement.org.netCents
-      : (statement.org?.close.closingBalanceCents ?? 0);
+    org?.close.kind === "payable" ? org.netCents : (org?.close.closingBalanceCents ?? 0);
 
   return (
     <div data-finance-statement="" className="flex flex-col gap-[var(--space-8)]">
@@ -83,7 +81,7 @@ export function PeriodStatementView({ statement }: { statement: PeriodStatement 
         )}
       </section>
 
-      {statement.org ? (
+      {org ? (
         <>
           <section className="flex flex-col gap-3">
             <h2 className="t-body font-medium text-ink">{FINANCE_PAGE.byTitle}</h2>
@@ -99,7 +97,7 @@ export function PeriodStatementView({ statement }: { statement: PeriodStatement 
                       value={formatUsdCents(title.bankReceiptCents)}
                     />
                     <MoneyRow
-                      label={`${FINANCE_PAGE.clientRate} ${statement.org.clientRateBp / 100}%`}
+                      label={`${FINANCE_PAGE.clientRate} ${org.clientRateBp / 100}%`}
                       value={`${FINANCE_PAGE.clientShare} ${formatUsdCents(title.clientShareCents)}`}
                     />
                     <MoneyRow
@@ -119,46 +117,44 @@ export function PeriodStatementView({ statement }: { statement: PeriodStatement 
               <CardBody className="flex flex-col gap-2" data-finance-rollup="">
                 <MoneyRow
                   label={FINANCE_PAGE.bankReceipt}
-                  value={formatUsdCents(statement.org.bankReceiptCents)}
+                  value={formatUsdCents(org.bankReceiptCents)}
                 />
                 <MoneyRow
-                  label={`${FINANCE_PAGE.clientRate} ${statement.org.clientRateBp / 100}%`}
-                  value={`${FINANCE_PAGE.clientShare} ${formatUsdCents(statement.org.clientShareCents)}`}
+                  label={`${FINANCE_PAGE.clientRate} ${org.clientRateBp / 100}%`}
+                  value={`${FINANCE_PAGE.clientShare} ${formatUsdCents(org.clientShareCents)}`}
                 />
                 <MoneyRow
                   label={FINANCE_PAGE.aggregatorKeep}
-                  value={formatUsdCents(statement.org.aggregatorKeepCents)}
+                  value={formatUsdCents(org.aggregatorKeepCents)}
                 />
                 <MoneyRow
                   label={FINANCE_PAGE.opening}
-                  value={formatUsdCents(statement.org.openingCents)}
+                  value={formatUsdCents(org.openingCents)}
                 />
-                <MoneyRow label={FINANCE_PAGE.recoup} value={formatUsdCents(statement.org.recoupCents)} />
+                <MoneyRow label={FINANCE_PAGE.recoup} value={formatUsdCents(org.recoupCents)} />
                 <ItemizedList items={statement.recoupItems} />
                 <MoneyRow
                   label={FINANCE_PAGE.adjustments}
-                  value={formatUsdCents(statement.org.adjustmentCents)}
+                  value={formatUsdCents(org.adjustmentCents)}
                 />
                 <ItemizedList items={statement.adjustmentItems} />
                 {statement.staffSaleItems.length > 0 ? (
                   <>
                     <MoneyRow
                       label={FINANCE_PAGE.staffSale}
-                      value={formatUsdCents(statement.org.staffSaleCents)}
+                      value={formatUsdCents(org.staffSaleCents)}
                     />
                     <ItemizedList items={statement.staffSaleItems} />
                   </>
                 ) : null}
                 <MoneyRow
                   label={FINANCE_PAGE.periodNet}
-                  value={formatUsdCents(statement.org.netCents)}
+                  value={formatUsdCents(org.netCents)}
                 />
                 <MoneyRow
                   label={FINANCE_PAGE.thresholdCheck}
                   value={
-                    statement.org.thresholdCents === null
-                      ? "—"
-                      : formatUsdCents(statement.org.thresholdCents)
+                    org.thresholdCents === null ? "—" : formatUsdCents(org.thresholdCents)
                   }
                 />
                 <MoneyRow label={closeLabel} value={formatUsdCents(closeAmount)} />
