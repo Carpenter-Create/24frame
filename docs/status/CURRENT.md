@@ -67,7 +67,7 @@ In the Slice 2 pull request — not production-applied.
 
 - AWS owns finance files + worker compute. Live relational SoT clusters are frame-aurora-dev and frame-aurora-prod in us-west-2. Auth stays Supabase Auth. The app still reads survivor Postgres until Secure Compute and cutover.
 - Founder applies the Slice 2 finance migrations after merge. Filenames live under `supabase/migrations`.
-- Live finance buckets and IAM exist. CloudFront, EventBridge, ECS deploy, and SQL apply are still founder-gated.
+- Live finance buckets, IAM, ECS cluster, ECR, and the disabled EventBridge rule exist. Worker code polls `finance_jobs` against the current SoT (`FINANCE_DATABASE_URL` interim; `AURORA_DATABASE_URL` when valid). CloudFront, EventBridge enablement, image push, and a digest task-def revision stay founder-gated.
 - Production mutation table above is unchanged until founder applies.
 
 ---

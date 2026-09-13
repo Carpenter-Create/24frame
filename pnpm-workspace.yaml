@@ -10,8 +10,10 @@ packages:
 #
 # Trusted native deps allowed to run install scripts:
 # sharp = image processing (Next.js image optimization),
-# unrs-resolver = eslint import resolver.
+# unrs-resolver = eslint import resolver,
+# esbuild = tsx binary for the finance worker (workers/finance/Dockerfile).
 allowBuilds:
+  esbuild: true
   sharp: true
   unrs-resolver: true
 

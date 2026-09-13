@@ -56,12 +56,14 @@ Server-only. Never `NEXT_PUBLIC_`. Never reuse title `AWS_*` or
 
 ```
 AURORA_DATABASE_URL=
+FINANCE_DATABASE_URL=
 ```
 
 Live Secrets Manager: `24frame/aurora/dev` and `24frame/aurora/prod`.
 `src/lib/aurora.ts` refuses survivor pooler hosts and Royalogic/Watershed
-markers. The worker may read those secrets; the app does not use Aurora
-until Secure Compute + cutover.
+markers as `AURORA_DATABASE_URL`. Until cutover the finance worker uses
+`FINANCE_DATABASE_URL` (survivor). The app does not use Aurora until
+Secure Compute + cutover.
 
 ## Auth shim
 
