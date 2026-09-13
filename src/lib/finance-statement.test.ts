@@ -101,7 +101,7 @@ describe("buildPeriodStatement", () => {
     expect(statement.org?.netCents).toBe(500 + 1700 - 200 + 25);
     expect(statement.org?.close.kind).toBe("payable");
     expect(statement.org?.thresholdMet).toBe(true);
-    expect(statement.org && transparentMathPresent(statement.org)).toBe(true);
+    expect(transparentMathPresent(statement)).toBe(true);
   });
 
   it("keeps a title in the breakdown when it has recoup and no sales line", () => {
@@ -189,7 +189,7 @@ describe("buildPeriodStatement", () => {
     expect(statement.sourceLines[0]?.reportedCents).toBe(3000);
     expect(statement.org?.aggregatorKeepCents).toBe(375);
     expect(statement.recoupItems).toHaveLength(1);
-    expect(statement.org && transparentMathPresent(statement.org)).toBe(true);
+    expect(transparentMathPresent(statement)).toBe(true);
   });
 
   it("does not invent client share when no contract term is present", () => {

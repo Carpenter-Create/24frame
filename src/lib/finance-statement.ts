@@ -16,8 +16,8 @@ export const STATEMENT_TRANSPARENCY_LINES = [
   "clientRateBp",
   "clientShareCents",
   "aggregatorKeepCents",
-  "recoupItems",
-  "adjustmentItems",
+  "recoupCents",
+  "adjustmentCents",
   "openingCents",
   "netCents",
   "thresholdCents",
@@ -159,8 +159,12 @@ export function postedSaleFromRefs(
   };
 }
 
-export function transparentMathPresent(org: OrgStatementSlice): boolean {
-  return STATEMENT_TRANSPARENCY_LINES.every((key) => org[key] !== undefined);
+export function transparentMathPresent(statement: PeriodStatement): boolean {
+  if (!statement.org) return false;
+  if (!Array.isArray(statement.recoupItems) || !Array.isArray(statement.adjustmentItems)) {
+    return false;
+  }
+  return STATEMENT_TRANSPARENCY_LINES.every((key) => statement.org?.[key] !== undefined);
 }
 
 export function buildPeriodStatement(input: {
