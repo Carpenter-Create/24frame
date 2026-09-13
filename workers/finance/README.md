@@ -30,6 +30,9 @@ AURORA_DATABASE_URL=                # prefer when set; refused if it looks like 
 ## CoS: build, push digest, smoke on **dev**
 
 Do this after merge. Do not push images from an unauthenticated cloud agent.
+The Dockerfile copies `pnpm-workspace.yaml` (so `allowBuilds.esbuild` / `tsx`
+run) and `apps/mobile/package.json` only to satisfy the lockfile importer.
+Expo is not installed (`--filter @24frame/dashboard`).
 
 ```bash
 # From repo root, after aws sso / ecr login to 405912452061 us-west-2

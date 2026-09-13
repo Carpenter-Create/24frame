@@ -14,6 +14,9 @@ describe("finance worker live wiring", () => {
   it("copies tsconfig and src/lib so @/ imports resolve, and ships tsx + pg", () => {
     expect(dockerfile).toContain("COPY tsconfig.json");
     expect(dockerfile).toContain("COPY src/lib");
+    expect(dockerfile).toContain("pnpm-workspace.yaml");
+    expect(dockerfile).toContain("apps/mobile/package.json");
+    expect(dockerfile).toContain("--filter @24frame/dashboard");
     expect(dockerfile).toContain("tsx");
     expect(dockerfile).toContain("workers/finance/run.ts");
     expect(pkg).toContain("\"tsx\"");

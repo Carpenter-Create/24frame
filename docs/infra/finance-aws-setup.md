@@ -70,7 +70,10 @@ Agents do not set values.
 
 ## Worker image (code is runnable; schedule is not)
 
-Build from repo root. `tsx` + `tsconfig.json` resolve `@/` imports.
+Build from repo root. The image copies `pnpm-workspace.yaml` so
+`allowBuilds.esbuild` / `tsx` run, plus `apps/mobile/package.json` only
+to satisfy the lockfile importer (`--filter @24frame/dashboard` keeps
+Expo out). `tsx` + `tsconfig.json` resolve `@/` imports.
 `pg` talks to the current relational SoT.
 
 ```bash
