@@ -57,6 +57,7 @@ describe("client Finance period", () => {
     expect(html).not.toContain(FINANCE_CLIENT.pdf);
     expect(html).not.toContain("Import sales");
     expect(html).not.toContain("Close period");
+    expect(html).not.toContain(FINANCE_PAGE.suspense);
     expect(loadRecipientStatement).not.toHaveBeenCalled();
   });
 
@@ -114,5 +115,7 @@ describe("client Finance period", () => {
     expect(html).not.toContain("Import sales");
     expect(html).not.toContain("Close period");
     expect(html).not.toContain("Post ledger");
+    expect(html).not.toContain(FINANCE_PAGE.suspense);
+    expect(html).not.toContain(FINANCE_PAGE.toSuspense);
   });
 });

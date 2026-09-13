@@ -89,6 +89,8 @@ describe("client Finance list", () => {
     expect(html).not.toContain("Import sales");
     expect(html).not.toContain("Close period");
     expect(html).not.toContain("Post ledger");
+    expect(html).not.toContain(FINANCE_PAGE.suspense);
+    expect(html).not.toContain(FINANCE_PAGE.toSuspense);
   });
 
   it("drops a leaked Client B period from the list", async () => {

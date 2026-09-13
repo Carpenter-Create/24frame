@@ -20,6 +20,7 @@ import {
   ImportSalesForm,
   MapImportForm,
   MapLineForm,
+  MoveToSuspenseForm,
   PostLedgerForm,
   ThresholdForm,
 } from "../finance-forms";
@@ -169,6 +170,14 @@ export default async function GcFinancePeriodPage({
                       </CardBody>
                     </Card>
                   ))}
+                  <MoveToSuspenseForm
+                    periodId={periodId}
+                    lines={unmapped.map((line) => ({
+                      id: line.id,
+                      endpoint: line.endpoint,
+                      external_id: line.external_id,
+                    }))}
+                  />
                 </div>
               ) : null}
             </section>

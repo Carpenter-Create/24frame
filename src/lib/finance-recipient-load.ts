@@ -3,7 +3,7 @@ import "server-only";
 import { notFound } from "next/navigation";
 
 import { DETAIL_LIST, rangeFor } from "@/lib/list-bounds";
-import { assertRecipientOrgIsolation } from "@/lib/finance";
+import { assertRecipientOrgIsolation, recipientVisibleSalesLines } from "@/lib/finance";
 import { assemblePeriodStatement, type PeriodStatement } from "@/lib/finance-statement";
 import { createClient } from "@/lib/supabase/server";
 
@@ -60,10 +60,11 @@ export async function loadRecipientStatement(
       supabase
         .from("sales_lines")
         .select(
-          "id, import_id, line_no, endpoint, external_id, title_id, bank_receipt_cents, reported_cents, transaction_date, raw",
+          "id, import_id, period_id, line_no, endpoint, external_id, title_id, bank_receipt_cents, reported_cents, transaction_date, raw",
         )
         .eq("period_id", period.id)
         .eq("org_id", orgId)
+        .not("period_id", "is", null)
         .order("line_no")
         .range(...rangeFor(DETAIL_LIST)),
       supabase
@@ -93,7 +94,7 @@ export async function loadRecipientStatement(
       filename: imp.filename,
       content_hash: imp.content_hash,
     })),
-    lines: lineRows ?? [],
+    lines: recipientVisibleSalesLines(lineRows ?? []),
     ledger: ledgerRows ?? [],
   });
 }

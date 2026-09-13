@@ -6,13 +6,15 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { FINANCE_HREF, FINANCE_PAGE, LEDGER_POST_KINDS } from "@/lib/finance";
+import { FINANCE_HREF, FINANCE_PAGE, LEDGER_POST_KINDS, openPeriodsForOrg } from "@/lib/finance";
 import {
+  assignSuspenseLinesToPeriod,
   closeFinancePeriod,
   createFinancePeriod,
   importSalesFile,
   mapSalesImport,
   mapSalesLine,
+  moveSalesLinesToSuspense,
   postLedgerEntry,
   setFinancePeriodThreshold,
   upsertTitleExternalId,
@@ -351,6 +353,108 @@ export function ThresholdForm({
       </label>
       <Button type="submit" variant="secondary" disabled={saving}>
         Save threshold
+      </Button>
+    </form>
+  );
+}
+
+export function MoveToSuspenseForm({
+  periodId,
+  lines,
+}: {
+  periodId: string;
+  lines: { id: string; endpoint: string; external_id: string }[];
+}) {
+  const router = useRouter();
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const lineIds = new FormData(e.currentTarget).getAll("lineIds").map(String);
+    setSaving(true);
+    setError("");
+    const res = await moveSalesLinesToSuspense({ lineIds, periodId });
+    setSaving(false);
+    if (res.error) return setError(res.error);
+    router.refresh();
+  }
+
+  if (lines.length === 0) return null;
+
+  return (
+    <form onSubmit={onSubmit} className="flex flex-col gap-3">
+      {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
+      {lines.map((line) => (
+        <label key={line.id} className="flex items-center gap-2 t-body-sm text-ink-2">
+          <input type="checkbox" name="lineIds" value={line.id} />
+          <span>
+            {line.endpoint} · {line.external_id}
+          </span>
+        </label>
+      ))}
+      <Button type="submit" variant="secondary" disabled={saving}>
+        {FINANCE_PAGE.toSuspense}
+      </Button>
+    </form>
+  );
+}
+
+export function AssignSuspenseForm({
+  lines,
+  openPeriods,
+}: {
+  lines: {
+    id: string;
+    org_id: string;
+    summary: string;
+  }[];
+  openPeriods: { id: string; org_id: string; status: "open" | "closed"; label: string }[];
+}) {
+  const router = useRouter();
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const orgId = lines[0]?.org_id;
+  const periods = orgId ? openPeriodsForOrg(orgId, openPeriods) : [];
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    const lineIds = form.getAll("lineIds").map(String);
+    setSaving(true);
+    setError("");
+    const res = await assignSuspenseLinesToPeriod({
+      lineIds,
+      periodId: String(form.get("periodId") ?? ""),
+    });
+    setSaving(false);
+    if (res.error) return setError(res.error);
+    router.refresh();
+  }
+
+  if (lines.length === 0) return null;
+
+  return (
+    <form onSubmit={onSubmit} className="flex flex-col gap-3">
+      {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
+      {lines.map((line) => (
+        <label key={line.id} className="flex items-start gap-2 t-body-sm text-ink">
+          <input type="checkbox" name="lineIds" value={line.id} defaultChecked className="mt-1" />
+          <span>{line.summary}</span>
+        </label>
+      ))}
+      <label className={field}>
+        <span className={label}>{FINANCE_PAGE.assignPeriod}</span>
+        <select name="periodId" required className={selectClass} defaultValue={periods[0]?.id ?? ""}>
+          {periods.map((period) => (
+            <option key={period.id} value={period.id}>
+              {period.label}
+            </option>
+          ))}
+        </select>
+      </label>
+      <Button type="submit" variant="secondary" disabled={saving || periods.length === 0}>
+        {FINANCE_PAGE.assignPeriod}
       </Button>
     </form>
   );

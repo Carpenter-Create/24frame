@@ -4,7 +4,7 @@
 -- no profile privilege bridge. Close applies contract_terms client share.
 
 begin;
-select plan(35);
+select plan(36);
 
 select set_config('t.org_a', gen_random_uuid()::text, false);
 select set_config('t.org_b', gen_random_uuid()::text, false);
@@ -172,6 +172,12 @@ select is((select title_id from public.sales_lines
            where endpoint = 'fast' and external_id = 'A-1')::text,
           current_setting('t.title_a'),
           'org A line maps to org A title');
+
+select lives_ok(
+  $$ select public.move_sales_lines_to_suspense(array[(
+       select id from public.sales_lines where external_id = 'EXT-1'
+     )]) $$,
+  'park remaining unmapped line before close');
 
 select lives_ok(
   $$ select public.close_finance_period(current_setting('t.period_a')::uuid) $$,

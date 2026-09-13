@@ -18,6 +18,10 @@ const migration = readFileSync(
   "supabase/migrations/20260913130000_finance_ops_slice_1.sql",
   "utf8",
 );
+const suspenseMigration = readFileSync(
+  "supabase/migrations/20260913220000_finance_ops_slice_2_suspense.sql",
+  "utf8",
+);
 const compute = readFileSync("src/lib/finance-compute.ts", "utf8");
 
 describe("title isolation", () => {
@@ -155,6 +159,10 @@ describe("mapping C — finance stays Aggregation", () => {
     expect(FINANCE_WRITE_RPCS).toContain("close_finance_period");
     expect(FINANCE_WRITE_RPCS).toContain("post_ledger_entry");
     expect(FINANCE_WRITE_RPCS).toContain("set_finance_period_threshold");
+    expect(FINANCE_WRITE_RPCS).toContain("move_sales_lines_to_suspense");
+    expect(FINANCE_WRITE_RPCS).toContain("assign_suspense_lines_to_period");
     expect(FINANCE_CLIENT_HREF).toBe("/finance");
+    expect(suspenseMigration).toContain("sales_lines SELECT must hide suspense from recipients");
+    expect(suspenseMigration).toContain("do not invent a parallel suspense money table");
   });
 });

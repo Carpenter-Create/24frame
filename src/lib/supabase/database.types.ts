@@ -1437,7 +1437,8 @@ export type Database = {
           line_no: number
           mapped_at: string | null
           org_id: string
-          period_id: string
+          origin_period_id: string | null
+          period_id: string | null
           raw: Json
           title_id: string | null
           transaction_date: string | null
@@ -1454,7 +1455,8 @@ export type Database = {
           line_no: number
           mapped_at?: string | null
           org_id: string
-          period_id: string
+          origin_period_id?: string | null
+          period_id?: string | null
           raw?: Json
           title_id?: string | null
           transaction_date?: string | null
@@ -1471,17 +1473,39 @@ export type Database = {
           line_no?: number
           mapped_at?: string | null
           org_id?: string
-          period_id?: string
+          origin_period_id?: string | null
+          period_id?: string | null
           raw?: Json
           title_id?: string | null
           transaction_date?: string | null
         }
         Relationships: [
           {
+            foreignKeyName: "sales_lines_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "sales_imports"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "sales_lines_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_lines_origin_period_id_fkey"
+            columns: ["origin_period_id"]
+            isOneToOne: false
+            referencedRelation: "finance_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_lines_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: false
+            referencedRelation: "finance_periods"
             referencedColumns: ["id"]
           },
           {
@@ -2642,6 +2666,14 @@ export type Database = {
       map_sales_line: {
         Args: { p_line_id: string; p_title_id: string }
         Returns: undefined
+      }
+      move_sales_lines_to_suspense: {
+        Args: { p_line_ids: string[] }
+        Returns: number
+      }
+      assign_suspense_lines_to_period: {
+        Args: { p_line_ids: string[]; p_period_id: string }
+        Returns: number
       }
       post_ledger_entry: {
         Args: {

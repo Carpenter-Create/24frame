@@ -180,6 +180,55 @@ export async function postLedgerEntry(raw: unknown): Promise<{ error?: string }>
   return {};
 }
 
+export async function moveSalesLinesToSuspense(
+  raw: unknown,
+): Promise<{ error?: string }> {
+  const parsed = z
+    .object({
+      lineIds: z.array(z.string().uuid()).min(1),
+      periodId: z.string().uuid(),
+    })
+    .safeParse(raw);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Select lines." };
+
+  const supabase = await createClient();
+  const user = await getAuthUser();
+  if (!user) return { error: "Not authenticated." };
+
+  const { error } = await supabase.rpc("move_sales_lines_to_suspense", {
+    p_line_ids: parsed.data.lineIds,
+  });
+  if (error) return rpcError(error.message);
+  revalidatePath(FINANCE_HREF);
+  revalidatePath(`${FINANCE_HREF}/${parsed.data.periodId}`);
+  return {};
+}
+
+export async function assignSuspenseLinesToPeriod(
+  raw: unknown,
+): Promise<{ error?: string }> {
+  const parsed = z
+    .object({
+      lineIds: z.array(z.string().uuid()).min(1),
+      periodId: z.string().uuid(),
+    })
+    .safeParse(raw);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Select lines." };
+
+  const supabase = await createClient();
+  const user = await getAuthUser();
+  if (!user) return { error: "Not authenticated." };
+
+  const { error } = await supabase.rpc("assign_suspense_lines_to_period", {
+    p_line_ids: parsed.data.lineIds,
+    p_period_id: parsed.data.periodId,
+  });
+  if (error) return rpcError(error.message);
+  revalidatePath(FINANCE_HREF);
+  revalidatePath(`${FINANCE_HREF}/${parsed.data.periodId}`);
+  return {};
+}
+
 export async function closeFinancePeriod(raw: unknown): Promise<{ error?: string }> {
   const parsed = z.object({ periodId: z.string().uuid() }).safeParse(raw);
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid period." };

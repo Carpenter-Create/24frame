@@ -16,6 +16,8 @@ export const FINANCE_WRITE_RPCS = [
   "map_sales_import",
   "map_sales_line",
   "upsert_title_external_id",
+  "move_sales_lines_to_suspense",
+  "assign_suspense_lines_to_period",
 ] as const;
 
 export const FINANCE_PAGE = {
@@ -43,7 +45,15 @@ export const FINANCE_PAGE = {
   postHint: "Recoup, adjustment, or sale. Amounts are signed cents as entered.",
   close: "Close period",
   closeHint:
-    "Applies the org’s current contract client share to bank-receipt gross, then recoup and close.",
+    "Applies the org’s current contract client share to bank-receipt gross, then recoup and close. Map remaining lines or move them to Suspense first.",
+  suspense: "Suspense",
+  suspenseHint:
+    "Parked unmapped lines. Assign to an open period for that organization, then map.",
+  suspenseEmpty: "No parked lines.",
+  toSuspense: "Move to Suspense",
+  assignPeriod: "Assign to period",
+  originPeriod: "Original period",
+  imported: "Imported",
   statement: "Period math",
   source: "Endpoint input",
   sourceHint: "As received. Bank receipt is the compute gross.",
@@ -159,6 +169,88 @@ export function assertOrgTitleIsolation(lineOrgId: string, titleOrgId: string): 
   if (lineOrgId !== titleOrgId) {
     throw new Error("Client A title never receives Client B import");
   }
+}
+
+export function isSuspenseLine(periodId: string | null | undefined): boolean {
+  return periodId == null;
+}
+
+export function assertSuspenseOrgIsolation(lineOrgId: string, targetOrgId: string): void {
+  if (lineOrgId !== targetOrgId) {
+    throw new Error("Client A lines never enter Client B suspense");
+  }
+}
+
+/** Unmapped lines still attached to an open period may move to the org pool. */
+export function decideSuspenseMove(input: {
+  titleId: string | null;
+  periodId: string | null;
+  periodStatus: FinancePeriodStatus;
+}): { ok: true } | { ok: false; reason: "mapped" | "already_suspense" | "closed_period" } {
+  if (input.titleId != null) return { ok: false, reason: "mapped" };
+  if (isSuspenseLine(input.periodId)) return { ok: false, reason: "already_suspense" };
+  if (input.periodStatus !== "open") return { ok: false, reason: "closed_period" };
+  return { ok: true };
+}
+
+/** Staff chooses an open period on the same org. No date-based guess. */
+export function decideSuspenseAssign(input: {
+  linePeriodId: string | null;
+  lineOrgId: string;
+  targetOrgId: string;
+  targetStatus: FinancePeriodStatus;
+}): { ok: true } | { ok: false; reason: "not_suspense" | "closed_period" | "cross_org" } {
+  if (!isSuspenseLine(input.linePeriodId)) return { ok: false, reason: "not_suspense" };
+  if (input.targetStatus !== "open") return { ok: false, reason: "closed_period" };
+  if (input.lineOrgId !== input.targetOrgId) return { ok: false, reason: "cross_org" };
+  return { ok: true };
+}
+
+export function openPeriodsForOrg<T extends { id: string; org_id: string; status: string }>(
+  orgId: string,
+  periods: readonly T[],
+): T[] {
+  return periods.filter((period) => period.org_id === orgId && period.status === "open");
+}
+
+export function periodLinesForMath<T extends { period_id: string | null }>(
+  periodId: string,
+  lines: readonly T[],
+): T[] {
+  return lines.filter((line) => line.period_id === periodId);
+}
+
+/** Attached unmapped lines still block close. Parked (null period) lines do not. */
+export function unmappedLinesBlockClose<T extends { period_id: string | null; title_id: string | null }>(
+  periodId: string,
+  lines: readonly T[],
+): boolean {
+  return periodLinesForMath(periodId, lines).some((line) => line.title_id == null);
+}
+
+export function recipientVisibleSalesLines<T extends { period_id: string | null }>(
+  lines: readonly T[],
+): T[] {
+  return lines.filter((line) => !isSuspenseLine(line.period_id));
+}
+
+export function suspenseLineSummary(input: {
+  endpoint: string;
+  externalId: string;
+  bankReceiptCents: number;
+  reportedCents: number | null;
+  filename: string | null;
+  originLabel: string | null;
+  transactionDate: string | null;
+  importedAt: string | null;
+}): string {
+  const reported =
+    input.reportedCents === null ? "" : ` · ${FINANCE_PAGE.reported} ${formatUsdCents(input.reportedCents)}`;
+  const origin = input.originLabel ? ` · ${FINANCE_PAGE.originPeriod} ${input.originLabel}` : "";
+  const file = input.filename ? ` · ${input.filename}` : "";
+  const when = input.transactionDate ?? input.importedAt ?? "";
+  const date = when ? ` · ${when}` : "";
+  return `${input.endpoint} · ${input.externalId} · ${FINANCE_PAGE.bankReceipt} ${formatUsdCents(input.bankReceiptCents)}${reported}${file}${origin}${date}`;
 }
 
 export function resolveMappedTitleId(input: {
