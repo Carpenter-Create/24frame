@@ -203,7 +203,7 @@ describe("Auth magic-link template", () => {
     expect(html).toContain(`bgcolor="${SPORTY_BLUE}"`);
     expect(html).toContain(">Sign in</a>");
     expect(html).toContain(EMAIL_LOGO_URL);
-    expect(EMAIL_LOGO_URL).toBe("https://app.24frame.co/email-mark.png");
+    expect(EMAIL_LOGO_URL).toBe("https://app.24frame.co/email-mark-v2.png");
     expect(html).toContain('alt="24Frame"');
     expect(html).not.toMatch(/<img[^>]*#1769FF/i);
     expect(html).toContain("Radically different film distribution.");
@@ -219,7 +219,7 @@ describe("Auth magic-link template", () => {
     expect(html).toContain("fonts.googleapis.com/css2?family=Geist");
     expect(html).toContain("font-size:28px");
     expect(html).toContain("font-size:17px");
-    expect(html).toContain("width:64px;height:64px");
+    expect(html).toContain("width:88px;height:88px");
     expect(html).not.toMatch(/border-radius:\s*999px/);
     expect(productResidue(html)).not.toMatch(/\bGC\b|globalcontent/i);
     expect(html.toLowerCase()).not.toMatch(/seamless|frictionless|elevate|amplify/);

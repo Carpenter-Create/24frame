@@ -5,11 +5,12 @@ import { PARENT_ENTITY, PRODUCT_NAME } from "@/lib/product";
 // these values; email tests lock the pair.
 // One-accent lock (Adam 2026-09-13): Sporty Blue is the Sign in button fill
 // and the 24frame.co footer link only. The mark is the Asset 11 frame mark
-// (crop-mark corners + 24) — all-black ink on a white field, with ≥25%
-// white pad on every side of the ink bbox (aim ~28%) so crop marks float
-// inside the field and do not read as cut off in Mail. Never put Sporty
-// Blue on the numeral. Cache-busted path: /email-mark.png — Apple Mail
-// cached the #252 PNG at /email-logo.png.
+// (crop-mark corners + 24) — all-black ink on a white field, with ~15%
+// white pad on every side of the ink bbox (tight-axis lock; the mark is
+// wider than tall so vertical pad is larger). Display at 88px so the 24
+// stays readable in Mail. Never put Sporty Blue on the numeral.
+// Cache-busted path: /email-mark-v2.png — Apple Mail cached /email-mark.png
+// from #253.
 
 export const EMAIL_ACCENT = "#1769FF";
 export const EMAIL_BG = "#FAFAFB";
@@ -21,8 +22,8 @@ export const EMAIL_SECONDARY = "#3F4650";
 export const EMAIL_TERTIARY = "#9AA0A9";
 export const EMAIL_CARD_WIDTH = 600;
 export const EMAIL_CARD_RADIUS = "14px";
-export const EMAIL_LOGO_URL = "https://app.24frame.co/email-mark.png";
-export const EMAIL_LOGO_DISPLAY = 64;
+export const EMAIL_LOGO_URL = "https://app.24frame.co/email-mark-v2.png";
+export const EMAIL_LOGO_DISPLAY = 88;
 export const EMAIL_HEADLINE_SIZE = 28;
 export const EMAIL_HEADLINE_LINE = 34;
 export const EMAIL_BODY_SIZE = 17;

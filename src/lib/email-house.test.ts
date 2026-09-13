@@ -30,7 +30,7 @@ import {
 } from "./email-house";
 
 const SPORTY_BLUE = "#1769FF";
-const LOGO_PNG = resolve(__dirname, "../../public/email-mark.png");
+const LOGO_PNG = resolve(__dirname, "../../public/email-mark-v2.png");
 
 function productResidue(html: string): string {
   return html.replaceAll("Global Content Holdings LLC", "");
@@ -77,14 +77,13 @@ describe("wrapHouseEmail", () => {
     assertHouseChrome(html);
     expect(html).toContain("Inner");
     expect(html).toContain(`width:${EMAIL_LOGO_DISPLAY}px;height:${EMAIL_LOGO_DISPLAY}px`);
-    expect(EMAIL_LOGO_DISPLAY).toBeGreaterThanOrEqual(56);
-    expect(EMAIL_LOGO_DISPLAY).toBeLessThanOrEqual(64);
+    expect(EMAIL_LOGO_DISPLAY).toBe(88);
     expect(EMAIL_HEADLINE_SIZE).toBeGreaterThan(23);
     expect(EMAIL_BODY_SIZE).toBeGreaterThan(15);
     expect(html).toMatch(/font-size:11px[\s\S]*text-transform:uppercase/);
     expect(html).toContain("x-apple-disable-message-reformatting");
     expect(html).toContain("a[x-apple-data-detectors]");
-    expect(EMAIL_LOGO_URL).toBe("https://app.24frame.co/email-mark.png");
+    expect(EMAIL_LOGO_URL).toBe("https://app.24frame.co/email-mark-v2.png");
     expect(html).not.toMatch(/background:\s*#1769FF/i);
   });
 
@@ -126,8 +125,8 @@ describe("houseOtpCode", () => {
   });
 });
 
-describe("email-mark.png", () => {
-  it("is a heavy-padded all-black Asset 11 frame mark at app.24frame.co/email-mark.png", () => {
+describe("email-mark-v2.png", () => {
+  it("is a ~15%-padded all-black Asset 11 frame mark at app.24frame.co/email-mark-v2.png", () => {
     expect(existsSync(LOGO_PNG)).toBe(true);
     const bytes = statSync(LOGO_PNG).size;
     expect(bytes).toBeGreaterThan(200);
@@ -207,15 +206,19 @@ describe("email-mark.png", () => {
     expect(fraction).toBeGreaterThan(0.03);
     expect(fraction).toBeLessThan(0.3);
 
-    // ≥25% pad on every side of the ink bbox (aim ~28%) so crop marks float.
+    // ~15% pad on every side of the ink bbox (tight-axis lock). The mark is
+    // wider than tall, so vertical pad is larger; min pad stays in 0.14–0.18.
     const padL = minX / width;
     const padT = minY / height;
     const padR = (width - 1 - maxX) / width;
     const padB = (height - 1 - maxY) / height;
-    expect(padL).toBeGreaterThanOrEqual(0.25);
-    expect(padT).toBeGreaterThanOrEqual(0.25);
-    expect(padR).toBeGreaterThanOrEqual(0.25);
-    expect(padB).toBeGreaterThanOrEqual(0.25);
+    expect(padL).toBeGreaterThanOrEqual(0.13);
+    expect(padT).toBeGreaterThanOrEqual(0.13);
+    expect(padR).toBeGreaterThanOrEqual(0.13);
+    expect(padB).toBeGreaterThanOrEqual(0.13);
+    const minPad = Math.min(padL, padT, padR, padB);
+    expect(minPad).toBeGreaterThanOrEqual(0.14);
+    expect(minPad).toBeLessThanOrEqual(0.18);
 
     // Asset 11: crop marks occupy the ink-bbox TL and BR; TR and BL stay open.
     // Asset 9 (24-only) inks the TR of its bbox.
