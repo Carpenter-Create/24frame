@@ -84,5 +84,8 @@ describe("finance AWS isolation", () => {
     expect(exportRoute).toContain("signedFinanceUrl");
     expect(exportRoute).not.toContain("exportStatement");
     expect(exportRoute).not.toContain("loadRecipientStatement");
+    const dockerfile = readFileSync("workers/finance/Dockerfile", "utf8");
+    expect(dockerfile).toContain("export-filename.ts");
+    expect(dockerfile).toContain("tsconfig.json");
   });
 });

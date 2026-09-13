@@ -176,6 +176,13 @@ describe("mapping C — finance stays Aggregation", () => {
     expect(awsMigration).toContain("finance_worker_only");
     expect(awsMigration).toContain("Import parse runs on the finance worker");
     expect(awsMigration).toContain("close_finance_period is thin");
+    expect(awsMigration).toContain("kind = 'ingest' and status in ('queued', 'running')");
+    expect(awsMigration).toContain("Wait for queued imports to finish before close");
+    expect(awsMigration).toContain("if v_status <> 'open' then raise exception 'Period is closed'");
+    expect(awsMigration).toContain("count(distinct format)");
+    expect(awsMigration).toMatch(
+      /kind = 'export'\s+and status in \('queued', 'running'\)\s+order by created_at/,
+    );
     expect(awsMigration).not.toContain("references auth.users");
   });
 });

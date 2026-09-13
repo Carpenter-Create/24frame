@@ -173,6 +173,7 @@ as $$
 declare
   v_org uuid;
   v_period uuid;
+  v_status public.finance_period_status;
   v_line jsonb;
   v_n integer := 0;
 begin
@@ -181,8 +182,14 @@ begin
     raise exception 'Import must include at least one line';
   end if;
 
-  select org_id, period_id into v_org, v_period from public.sales_imports where id = p_import_id;
+  select si.org_id, si.period_id, fp.status
+    into v_org, v_period, v_status
+    from public.sales_imports si
+    join public.finance_periods fp on fp.id = si.period_id
+   where si.id = p_import_id
+   for update of fp;
   if v_org is null then raise exception 'Import not found'; end if;
+  if v_status <> 'open' then raise exception 'Period is closed'; end if;
 
   for v_line in select * from jsonb_array_elements(p_lines) loop
     v_n := v_n + 1;
@@ -220,7 +227,7 @@ begin
   update public.sales_imports set status = 'received' where id = p_import_id;
   update public.finance_jobs
      set status = 'succeeded', finished_at = now()
-   where import_id = p_import_id and kind = 'ingest' and status = 'queued';
+   where import_id = p_import_id and kind = 'ingest' and status in ('queued', 'running');
   return v_n;
 end;
 $$;
@@ -260,6 +267,19 @@ begin
   from public.finance_periods where id = p_period_id;
   if not found then raise exception 'Period not found'; end if;
   if v_status <> 'open' then raise exception 'Period is already closed'; end if;
+
+  if exists (
+    select 1 from public.finance_jobs
+    where period_id = p_period_id
+      and kind = 'ingest'
+      and status in ('queued', 'running')
+  ) or exists (
+    select 1 from public.sales_imports
+    where period_id = p_period_id
+      and status = 'queued'
+  ) then
+    raise exception 'Wait for queued imports to finish before close';
+  end if;
 
   if exists (
     select 1 from public.sales_lines
@@ -305,9 +325,23 @@ begin
 
   select org_id, status, threshold_cents
     into v_org, v_status, v_threshold
-  from public.finance_periods where id = p_period_id;
+  from public.finance_periods where id = p_period_id
+  for update;
   if not found then raise exception 'Period not found'; end if;
   if v_status <> 'open' then raise exception 'Period is already closed'; end if;
+
+  if exists (
+    select 1 from public.finance_jobs
+    where period_id = p_period_id
+      and kind = 'ingest'
+      and status in ('queued', 'running')
+  ) or exists (
+    select 1 from public.sales_imports
+    where period_id = p_period_id
+      and status = 'queued'
+  ) then
+    raise exception 'Wait for queued imports to finish before close';
+  end if;
 
   if exists (
     select 1 from public.sales_lines
@@ -415,6 +449,7 @@ as $$
 declare
   v_org uuid;
   v_status public.finance_period_status;
+  v_job uuid;
 begin
   if auth.uid() is null then raise exception 'Not authenticated'; end if;
   if not (
@@ -430,6 +465,17 @@ begin
   from public.finance_periods where id = p_period_id;
   if not found then raise exception 'Period not found'; end if;
   if v_status <> 'closed' then raise exception 'Period is not closed'; end if;
+
+  select id into v_job
+    from public.finance_jobs
+   where period_id = p_period_id
+     and kind = 'export'
+     and status in ('queued', 'running')
+   order by created_at
+   limit 1;
+  if v_job is not null then
+    return v_job;
+  end if;
   return public.enqueue_finance_job(v_org, 'export', p_period_id, null);
 end;
 $$;
@@ -465,9 +511,14 @@ begin
         generated_at = now()
   returning id into v_id;
 
-  update public.finance_jobs
-     set status = 'succeeded', finished_at = now()
-   where period_id = p_period_id and kind = 'export' and status in ('queued', 'running');
+  if (
+    select count(distinct format) from public.finance_statement_exports
+    where period_id = p_period_id and format in ('pdf', 'csv')
+  ) = 2 then
+    update public.finance_jobs
+       set status = 'succeeded', finished_at = now()
+     where period_id = p_period_id and kind = 'export' and status in ('queued', 'running');
+  end if;
   return v_id;
 end;
 $$;
