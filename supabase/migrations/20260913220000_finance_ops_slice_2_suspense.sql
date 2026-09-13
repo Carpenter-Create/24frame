@@ -452,7 +452,7 @@ begin
   from pg_policies
   where schemaname = 'public' and tablename = 'sales_lines'
     and policyname = 'sales_lines_select';
-  if v_bad is null or v_bad not like '%period_id is not null%' then
+  if v_bad is null or lower(v_bad) not like '%period_id is not null%' then
     raise exception 'sales_lines SELECT must hide suspense from recipients';
   end if;
   raise notice 'finance ops slice 2 suspense applied';
