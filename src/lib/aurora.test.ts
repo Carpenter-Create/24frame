@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 
 import {
-  AURORA_CLUSTER_PROPOSAL,
+  AURORA_CLUSTERS,
   AURORA_ENV,
   assertAuroraDatabaseUrl,
   auroraDatabaseUrl,
@@ -22,10 +22,13 @@ describe("Aurora SoT contract", () => {
     delete process.env.AURORA_DATABASE_URL;
   });
 
-  it("proposes Aurora PostgreSQL on E8 us-west-2 and does not invent Cognito", () => {
-    expect(AURORA_CLUSTER_PROPOSAL.account).toBe("405912452061");
-    expect(AURORA_CLUSTER_PROPOSAL.region).toBe("us-west-2");
-    expect(AURORA_CLUSTER_PROPOSAL.engine).toBe("aurora-postgresql");
+  it("records live Aurora PostgreSQL on E8 us-west-2 and does not invent Cognito", () => {
+    expect(AURORA_CLUSTERS.account).toBe("405912452061");
+    expect(AURORA_CLUSTERS.region).toBe("us-west-2");
+    expect(AURORA_CLUSTERS.engine).toBe("aurora-postgresql");
+    expect(AURORA_CLUSTERS.dev).toBe("frame-aurora-dev");
+    expect(AURORA_CLUSTERS.prod).toBe("frame-aurora-prod");
+    expect(src).not.toContain("24frame-aurora-");
     expect(AURORA_ENV).toEqual(["AURORA_DATABASE_URL"]);
     expect(src).not.toContain("cognito");
     expect(src).not.toContain("Cognito");
@@ -42,7 +45,7 @@ describe("Aurora SoT contract", () => {
     expect(isForbiddenAuroraDatabaseUrl("postgresql://x@royalogic.example/db")).toBe(true);
     expect(
       isForbiddenAuroraDatabaseUrl(
-        "postgresql://app@24frame-aurora-dev.cluster-abc.us-west-2.rds.amazonaws.com:5432/24frame",
+        "postgresql://app@frame-aurora-dev.cluster-abc.us-west-2.rds.amazonaws.com:5432/24frame",
       ),
     ).toBe(false);
     expect(() =>

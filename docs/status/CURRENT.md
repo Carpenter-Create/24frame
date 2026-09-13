@@ -65,9 +65,9 @@ Full doctrine: [`AGENTS.md`](../../AGENTS.md). Domain truth: [`docs/domain-spec.
 
 In the Slice 2 pull request — not production-applied.
 
-- AWS owns finance files + worker compute. Proposed relational SoT is Aurora PostgreSQL in the E8 account, us-west-2. Auth stays Supabase Auth. Cluster is not created here.
+- AWS owns finance files + worker compute. Live relational SoT clusters are frame-aurora-dev and frame-aurora-prod in us-west-2. Auth stays Supabase Auth. The app still reads survivor Postgres until Secure Compute and cutover.
 - Founder applies the Slice 2 finance migrations after merge. Filenames live under `supabase/migrations`.
-- Proposed finance buckets and Aurora cluster stay proposals until Adam creates IAM, bucket, worker role, and the finance/Aurora env names.
+- Live finance buckets and IAM exist. CloudFront, EventBridge, ECS deploy, and SQL apply are still founder-gated.
 - Production mutation table above is unchanged until founder applies.
 
 ---

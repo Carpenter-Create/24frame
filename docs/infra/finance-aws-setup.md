@@ -1,63 +1,56 @@
 # 24Frame finance AWS setup — founder-executed
 
-Dedicated **private** finance namespace. AWS owns files, compute, and later
-schedules. Auth stays Supabase Auth. Relational SoT is proposed Aurora
-PostgreSQL (see [`aurora-postgres-setup.md`](aurora-postgres-setup.md)).
-Not Supabase Storage. Not a Royalogic cluster.
+Dedicated **private** finance namespace. AWS owns files and compute.
+Auth stays Supabase Auth. Relational SoT is Aurora PostgreSQL (see
+[`aurora-postgres-setup.md`](aurora-postgres-setup.md)). Not Supabase
+Storage. Not a Royalogic cluster.
 
-Do **not** apply from CI. Do **not** touch Royalogic / Watershed buckets,
-roles, repos, or accounts. Do **not** reuse title, media, or avatar
-credentials.
+Do **not** apply SQL from CI. Do **not** touch Royalogic / Watershed
+buckets, roles, repos, or accounts. Do **not** reuse title, media, or
+avatar credentials.
 
-Names below are **proposals**. They are not live until Adam applies them.
+Buckets, IAM, and Vercel finance env below are **live** (account
+`405912452061` / `us-west-2`). CloudFront, EventBridge, ECS deploy, and
+Slice 2 SQL apply are **not yet**.
 
-## Proposed resources
+## Live resources
 
-| Item | Proposal | Notes |
+| Item | Live | Notes |
 | --- | --- | --- |
 | Account | `405912452061` (E8) | Entity-isolated from RL/Watershed |
-| Region | `us-west-2` (with Aurora). Title-asset S3 stays `us-east-1` — existing split. | |
-| Prod bucket | `24frame-finance-prod` | Never `24frame-media-*`, `gc-content-assets*`, `gc-avatars*`, `S3_BUCKET` |
+| Region | `us-west-2`. Title-asset S3 stays `us-east-1` — existing split. | |
+| Prod bucket | `24frame-finance-prod` | Private, AES256, tagged. Never media/title/avatar buckets |
 | Dev bucket | `24frame-finance-dev` | Same isolation |
-| Object prefix | `orgs/{org_id}/imports/{sha256}/{filename}` and `orgs/{org_id}/statements/{period_id}/24frame-statement.{pdf,csv}` | Org isolation in the key |
-| App IAM user | `24frame-finance-app` | `FINANCE_AWS_*` for Next signed GET / staff PUT only |
-| Worker OIDC / task role | `24frame-finance-worker` | Fargate preferred; Lambda OK for export |
-| CloudFront | Dedicated finance distribution if needed | `FINANCE_CLOUDFRONT_*` only — never `CLOUDFRONT_*` or `MEDIA_CLOUDFRONT_*` |
+| Object prefix | `orgs/{org_id}/imports/{sha256}/{filename}` and `orgs/{org_id}/statements/{period_id}/24frame-statement.{pdf,csv}` | Policy `24frame-finance-s3-orgs` is Get/Put `orgs/*` only |
+| App IAM user | `24frame-finance-app` | `FINANCE_AWS_*` for Next signed GET / staff PUT |
+| Worker IAM role | `24frame-finance-worker` | `ecs-tasks` trust + same S3 + Secrets `24frame/aurora/*` and `24frame/finance/*` |
+| Vercel Production | `FINANCE_AWS_*` + `S3_FINANCE_BUCKET=24frame-finance-prod` | Server-only. Values stay out of the repo |
+| Vercel Preview | `FINANCE_*` + `S3_FINANCE_BUCKET=24frame-finance-dev` | Server-only |
+| CloudFront | **Not yet** | Optional. `FINANCE_CLOUDFRONT_*` only if created |
 
 ## Env names (server-only)
 
 Never fall back to `AWS_*` (titles) or `MEDIA_AWS_*` (social). Never
-`NEXT_PUBLIC_`.
+`NEXT_PUBLIC_`. Do not commit secret values.
 
 ```
 FINANCE_AWS_REGION=
 FINANCE_AWS_ACCESS_KEY_ID=
 FINANCE_AWS_SECRET_ACCESS_KEY=
-S3_FINANCE_BUCKET=          # proposed 24frame-finance-dev / 24frame-finance-prod
+S3_FINANCE_BUCKET=          # live: 24frame-finance-dev / 24frame-finance-prod
 FINANCE_CLOUDFRONT_DOMAIN=
 FINANCE_CLOUDFRONT_KEY_PAIR_ID=
 FINANCE_CLOUDFRONT_PRIVATE_KEY=
 ```
 
-Add the **names** to `.env.example`. Agents do not set values.
+Names live in `.env.example`. Agents do not set values.
 
-## Adam / CoS hand steps
+## Still founder-gated
 
-1. Confirm account + region. Create the two buckets. Block all public access.
-   No website. No public policy. Versioning optional.
-2. Bucket policy / IAM: `s3:GetObject` + `s3:PutObject` on
-   `arn:aws:s3:::24frame-finance-*/orgs/*` only. No `DeleteObject`. No `/*`
-   on any other bucket. Explicitly omit `gc-content-assets*`,
-   `24frame-media-*`, `gc-avatars*`, and the title `S3_BUCKET`.
-3. Create `24frame-finance-app` access keys. Set `FINANCE_AWS_*` +
-   `S3_FINANCE_BUCKET` in Vercel (server-only) and local `.env.local`.
-4. Create Fargate task role / OIDC `24frame-finance-worker` with the same
-   bucket prefix plus `service_role` access to survivor Supabase (worker
-   calls `apply_sales_import`, `apply_finance_close`, `apply_finance_export`
-   only). Worker secrets must also be `FINANCE_AWS_*` / `S3_FINANCE_*`.
-5. Optional: dedicated CloudFront + signing key → `FINANCE_CLOUDFRONT_*`.
-6. EventBridge schedule for `finance_jobs` (`status = queued`) — after the
-   worker image is wired. Not required to merge the schema/app contracts.
+1. Optional dedicated CloudFront + signing key → `FINANCE_CLOUDFRONT_*`.
+2. EventBridge schedule + ECS service deploy for `finance_jobs`
+   (`status = queued`). Worker image is scaffolded, not scheduled.
+3. Slice 2 SQL apply after merge + Adam yes. Not from this runbook.
 
 ## App / worker contracts already in-repo
 
@@ -68,5 +61,3 @@ Add the **names** to `.env.example`. Agents do not set values.
 - Recipient export serves a signed finance URL, or `202` +
   `request_finance_export`. Next does not generate CSV/PDF.
 - Worker scaffold: `src/lib/finance-worker-run.ts`, `workers/finance/`.
-
-Production SQL apply remains founder-only after merge.

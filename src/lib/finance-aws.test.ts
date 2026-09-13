@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 
 import {
-  FINANCE_BUCKET_PROPOSAL,
+  FINANCE_BUCKETS,
   FORBIDDEN_FINANCE_BUCKET_MARKERS,
   assertFinanceBucketName,
   financeImportObjectKey,
@@ -25,9 +25,9 @@ describe("finance AWS isolation", () => {
     delete process.env.S3_MEDIA_OUTPUT_BUCKET;
   });
 
-  it("proposes dedicated buckets and refuses title/media/avatar names", () => {
-    expect(FINANCE_BUCKET_PROPOSAL.prod).toBe("24frame-finance-prod");
-    expect(FINANCE_BUCKET_PROPOSAL.dev).toBe("24frame-finance-dev");
+  it("uses live dedicated buckets and refuses title/media/avatar names", () => {
+    expect(FINANCE_BUCKETS.prod).toBe("24frame-finance-prod");
+    expect(FINANCE_BUCKETS.dev).toBe("24frame-finance-dev");
     expect(FORBIDDEN_FINANCE_BUCKET_MARKERS).toEqual(
       expect.arrayContaining(["24frame-media", "gc-content-assets", "gc-avatars"]),
     );
@@ -72,8 +72,9 @@ describe("finance AWS isolation", () => {
     expect(cfSrc).toContain("FINANCE_CLOUDFRONT_DOMAIN");
     expect(cfSrc).not.toContain("process.env.CLOUDFRONT_");
     expect(cfSrc).not.toContain("process.env.MEDIA_CLOUDFRONT");
-    expect(awsSrc).toContain("Proposed — not claimed live");
-    expect(readFileSync("src/lib/aurora.ts", "utf8")).toContain("405912452061");
+    expect(awsSrc).toContain("Live finance buckets");
+    expect(readFileSync("src/lib/aurora.ts", "utf8")).toContain("frame-aurora-dev");
+    expect(readFileSync("src/lib/aurora.ts", "utf8")).not.toContain("24frame-aurora-");
   });
 
   it("keeps Next off parse and statement generation", () => {

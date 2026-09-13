@@ -3,7 +3,7 @@ import { PRODUCT_NAME } from "@/lib/product";
 // 24Frame finance AWS contracts. Dedicated namespace — never title film,
 // never 24frame-media, never avatars. Credentials are FINANCE_AWS_* /
 // S3_FINANCE_* only. No fallback to AWS_* or MEDIA_AWS_*.
-// Bucket names below are proposals until Adam applies them.
+// Live buckets: 24frame-finance-dev / 24frame-finance-prod (E8 us-west-2).
 
 export const FINANCE_AWS_ENV = [
   "FINANCE_AWS_REGION",
@@ -19,8 +19,8 @@ export const FINANCE_CLOUDFRONT_ENV = [
   "FINANCE_CLOUDFRONT_PRIVATE_KEY",
 ] as const;
 
-/** Proposed — not claimed live. Adam/CoS apply. */
-export const FINANCE_BUCKET_PROPOSAL = {
+/** Live finance buckets (E8 us-west-2). CloudFront is not yet. */
+export const FINANCE_BUCKETS = {
   prod: "24frame-finance-prod",
   dev: "24frame-finance-dev",
 } as const;

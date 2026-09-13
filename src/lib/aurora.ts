@@ -1,10 +1,10 @@
-// Proposed 24Frame Aurora PostgreSQL SoT. Auth stays Supabase Auth.
+// Live 24Frame Aurora PostgreSQL SoT. Auth stays Supabase Auth.
 // Do not fall back to survivor pooler URLs, title AWS_*, or any Royalogic host.
-// Cluster is not created in this slice — CoS/Adam apply.
+// App still uses survivor Postgres until Vercel Secure Compute + cutover.
 
 export const AURORA_ENV = ["AURORA_DATABASE_URL"] as const;
 
-export const AURORA_CLUSTER_PROPOSAL = {
+export const AURORA_CLUSTERS = {
   account: "405912452061",
   region: "us-west-2",
   engine: "aurora-postgresql",
@@ -13,8 +13,15 @@ export const AURORA_CLUSTER_PROPOSAL = {
     "Aurora PostgreSQL keeps existing RLS/SQL portable, adds a reader endpoint, and autoscales storage. No RDS-only reason.",
   regionReason:
     "Survivor Postgres already lives in us-west-2. Title-asset S3/MediaConvert stay us-east-1 — that split already exists.",
-  dev: "24frame-aurora-dev",
-  prod: "24frame-aurora-prod",
+  vpc: "vpc-07f0141dafa80a408",
+  cidr: "10.24.0.0/16",
+  // Cluster IDs cannot start with a digit.
+  dev: "frame-aurora-dev",
+  prod: "frame-aurora-prod",
+  secrets: {
+    dev: "24frame/aurora/dev",
+    prod: "24frame/aurora/prod",
+  },
 } as const;
 
 const FORBIDDEN_AURORA_HOST_MARKERS = [

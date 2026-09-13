@@ -1,6 +1,6 @@
 -- finance_ops_slice_2_aws_spine.sql
 -- AWS owns finance files + compute. Relational SoT is portable Postgres
--- (survivor today; proposed Aurora on E8 405912452061 — not created here).
+-- (survivor today; live Aurora frame-aurora-dev / frame-aurora-prod — SQL apply not yet).
 -- close_finance_period is thin (enqueue). apply_finance_close is worker-only.
 -- Do not invent a second money authority. No Supabase Storage.
 -- Standard Postgres only: no pg_cron, realtime, or vault.
