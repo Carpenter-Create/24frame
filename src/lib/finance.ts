@@ -1,7 +1,7 @@
 import { PRODUCT_NAME } from "@/lib/product";
 
 // Staff finance-ops copy and helpers. Aggregation only. No client recipient UI.
-// Do not invent aggregator or tier-plan percent math here.
+// Official complementary-split lock: display client % and remainder only.
 
 export const FINANCE_HREF = "/gc/finance";
 
@@ -32,11 +32,26 @@ export const FINANCE_PAGE = {
   closeHint:
     "Applies the org’s current contract client share to bank-receipt gross, then recoup and close.",
   statement: "Period math",
+  source: "Endpoint input",
+  sourceHint: "As received. Bank receipt is the compute gross.",
+  sourceEmpty: "No sales lines.",
+  endpoint: "Endpoint",
+  externalId: "Endpoint id",
+  reported: "Reported",
+  mappedTitle: "Title",
+  byTitle: "By title",
+  orgRollup: "Organization",
   bankReceipt: "Bank receipt",
+  clientRate: "Client share rate",
   clientShare: "Client share",
   aggregatorKeep: "Aggregator keep",
   recoup: "Recoup",
   adjustments: "Adjustments",
+  staffSale: "Posted sale",
+  periodNet: "Period net",
+  thresholdCheck: "Threshold",
+  carryForward: "Carry-forward",
+  noTerm: "No current contract term. Client share is not invented.",
   unmapped: "Unmapped lines",
   ledger: "Ledger",
   glance: `Finance periods live on the ${PRODUCT_NAME} Finance rail.`,

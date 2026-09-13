@@ -4,7 +4,7 @@
 -- no profile privilege bridge. Close applies contract_terms client share.
 
 begin;
-select plan(33);
+select plan(35);
 
 select set_config('t.org_a', gen_random_uuid()::text, false);
 select set_config('t.org_b', gen_random_uuid()::text, false);
@@ -49,6 +49,20 @@ insert into public.contract_terms
   (org_id, tier, revenue_share_rate_bp, effective_from, term_length_months, expires_at, trigger)
   values
   (current_setting('t.org_a')::uuid, 'premium', 8500, '2026-01-01', 36, '2029-01-01', 'signup');
+
+-- Source fields stay on the import so statements can show endpoint input later.
+select is((select count(*)::int from information_schema.columns
+           where table_schema='public' and table_name='sales_lines'
+             and column_name in
+               ('endpoint','external_id','bank_receipt_cents','reported_cents','raw')),
+          5, 'sales_lines keeps endpoint-sourced input fields');
+select is((select count(*)::int from information_schema.columns
+           where table_schema='public'
+             and table_name in
+               ('finance_periods','sales_imports','sales_lines','ledger_entries','title_external_ids')
+             and column_name in
+               ('aggregator_rate','client_tier_percent','aggregator_keep_bp')),
+          0, 'no second independent fee field');
 
 -- Mapping C: finance tables are org-owned, not Social profiles.
 select is((select count(*)::int from information_schema.columns

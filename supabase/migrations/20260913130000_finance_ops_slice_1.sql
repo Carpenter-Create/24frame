@@ -5,15 +5,20 @@
 -- Schema must support org rollup + per-title breakdown. UI in this slice is
 -- staff-only. ledger_entries is the source of truth.
 --
--- LOCKED compute (CoS / Adam 2026-09-13):
+-- OFFICIAL compute lock (CoS 2026-09-13; supersedes A/B/C/D). Not a draft:
 --   1. Gross = bank-receipt cents from the endpoint (amount that hit the bank).
 --   2. Client share = contract_terms.revenue_share_rate_bp of that receipt
---      (existing SoT — do not invent a second % column).
---   3. Aggregator keep = remainder (complementary split; store client % only).
+--      (existing SoT — do not invent a second independent fee field).
+--   3. Aggregator keep = remainder (complementary split; store client % only;
+--      aggregator = 100 − client).
 --   4. Then recoup/adjustments on the ledger.
 --   5. Net ≥ staff threshold → payable, else closing carry-forward.
 -- Transaction date selects the term when present; otherwise the current term.
 -- Day-pro-ration of undated lump sums is not in this close path.
+--
+-- Statement shape: keep endpoint-sourced input on sales_imports / sales_lines
+-- (filename/hash, endpoint, external_id, reported_cents, bank_receipt_cents, raw).
+-- House math is derived; do not collapse imports into ledger-only rows.
 --
 -- Titles stay org-scoped. No global works table. 24Frame id is titles.catalog_id.
 -- title_external_ids is endpoint + external_id, unique per pair, org-checked.
@@ -110,9 +115,10 @@ create table if not exists public.sales_imports (
 create index if not exists sales_imports_period_idx on public.sales_imports (period_id);
 create index if not exists sales_imports_org_idx on public.sales_imports (org_id);
 
--- Parsed source lines. bank_receipt_cents is the compute gross (amount that
--- hit the bank). reported_cents is an optional platform figure when the file
--- carried both. title_id stays null until mapped to an org-scoped title.
+-- Parsed source lines. Preserved for statement output (export later).
+-- bank_receipt_cents is the compute gross (amount that hit the bank).
+-- reported_cents is an optional platform figure when the file carried both.
+-- title_id stays null until mapped to an org-scoped title.
 create table if not exists public.sales_lines (
   id                uuid primary key default gen_random_uuid(),
   org_id            uuid not null references public.organizations(id) on delete restrict,

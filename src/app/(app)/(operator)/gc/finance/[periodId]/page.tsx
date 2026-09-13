@@ -12,7 +12,8 @@ import {
   formatUsdCents,
   staffCanWriteFinance,
 } from "@/lib/finance";
-import { statementSlice } from "@/lib/finance-compute";
+import { PeriodStatementView } from "@/components/finance/period-statement";
+import { buildPeriodStatement } from "@/lib/finance-statement";
 import {
   ClosePeriodForm,
   ExternalIdForm,
@@ -72,7 +73,7 @@ export default async function GcFinancePeriodPage({
         .range(...rangeFor(DETAIL_LIST)),
       supabase
         .from("ledger_entries")
-        .select("id, kind, amount_cents, title_id, note, posted_at, source_refs")
+        .select("id, kind, amount_cents, title_id, note, posted_at, sales_line_id, source_refs")
         .eq("period_id", periodId)
         .order("posted_at")
         .range(...rangeFor(DETAIL_LIST)),
@@ -96,21 +97,48 @@ export default async function GcFinancePeriodPage({
     ? period.organizations[0]?.name
     : period.organizations?.name;
   const titleById = new Map((titleRows ?? []).map((t) => [t.id, t.title]));
+  const importById = new Map((importRows ?? []).map((imp) => [imp.id, imp.filename]));
   const ledger = ledgerRows ?? [];
-  const recoupCents = ledger.filter((r) => r.kind === "recoup").reduce((s, r) => s + r.amount_cents, 0);
-  const adjustmentCents = ledger
-    .filter((r) => r.kind === "adjustment")
-    .reduce((s, r) => s + r.amount_cents, 0);
-  const math = term
-    ? statementSlice({
-        bankReceiptCents: (lineRows ?? []).reduce((s, line) => s + line.bank_receipt_cents, 0),
-        clientRateBp: term.revenue_share_rate_bp,
-        recoupCents,
-        adjustmentCents,
-        openingCents: period.opening_balance_cents,
-        thresholdCents: period.threshold_cents,
-      })
-    : null;
+  const postedItem = (kind: "recoup" | "adjustment" | "sale") =>
+    ledger
+      .filter((row) => row.kind === kind)
+      .map((row) => ({
+        id: row.id,
+        kind,
+        amountCents: row.amount_cents,
+        titleId: row.title_id,
+        titleName: row.title_id ? (titleById.get(row.title_id) ?? row.title_id) : null,
+        note: row.note,
+      }));
+  const statement = buildPeriodStatement({
+    clientRateBp: term?.revenue_share_rate_bp ?? null,
+    openingCents: period.opening_balance_cents,
+    thresholdCents: period.threshold_cents,
+    sourceLines: (lineRows ?? []).map((line) => ({
+      id: line.id,
+      importId: line.import_id,
+      importFilename: importById.get(line.import_id) ?? null,
+      lineNo: line.line_no,
+      endpoint: line.endpoint,
+      externalId: line.external_id,
+      titleId: line.title_id,
+      titleName: line.title_id ? (titleById.get(line.title_id) ?? line.title_id) : null,
+      bankReceiptCents: line.bank_receipt_cents,
+      reportedCents: line.reported_cents,
+    })),
+    recoupItems: postedItem("recoup"),
+    adjustmentItems: postedItem("adjustment"),
+    staffSaleItems: ledger
+      .filter((row) => row.kind === "sale" && !row.sales_line_id)
+      .map((row) => ({
+        id: row.id,
+        kind: "sale" as const,
+        amountCents: row.amount_cents,
+        titleId: row.title_id,
+        titleName: row.title_id ? (titleById.get(row.title_id) ?? row.title_id) : null,
+        note: row.note,
+      })),
+  });
 
   return (
     <>
@@ -189,39 +217,10 @@ export default async function GcFinancePeriodPage({
           <p className="t-body-sm text-ink-3">{FINANCE_PAGE.writeDenied}</p>
         ) : null}
 
-        {math ? (
-          <section className="flex flex-col gap-3">
-            <h2 className="t-body font-medium text-ink">{FINANCE_PAGE.statement}</h2>
-            <Card>
-              <CardBody className="grid gap-2 sm:grid-cols-2">
-                <p className="t-body-sm text-ink-2">
-                  {FINANCE_PAGE.bankReceipt} {formatUsdCents(math.bankReceiptCents)}
-                </p>
-                <p className="t-body-sm text-ink-2">
-                  Client {math.clientRateBp / 100}% · {FINANCE_PAGE.clientShare}{" "}
-                  {formatUsdCents(math.clientShareCents)}
-                </p>
-                <p className="t-body-sm text-ink-2">
-                  {FINANCE_PAGE.aggregatorKeep} {formatUsdCents(math.aggregatorKeepCents)}
-                </p>
-                <p className="t-body-sm text-ink-2">
-                  {FINANCE_PAGE.recoup} {formatUsdCents(math.recoupCents)} · {FINANCE_PAGE.adjustments}{" "}
-                  {formatUsdCents(math.adjustmentCents)}
-                </p>
-                <p className="t-body-sm text-ink">
-                  {FINANCE_PAGE.opening} {formatUsdCents(math.openingCents)} · Net{" "}
-                  {formatUsdCents(math.netCents)}
-                </p>
-                <p className="t-body-sm text-ink">
-                  {math.close.kind === "payable" ? FINANCE_PAGE.payable : FINANCE_PAGE.closing}{" "}
-                  {formatUsdCents(
-                    math.close.kind === "payable" ? math.netCents : math.close.closingBalanceCents,
-                  )}
-                </p>
-              </CardBody>
-            </Card>
-          </section>
-        ) : null}
+        <section className="flex flex-col gap-3">
+          <h2 className="t-body font-medium text-ink">{FINANCE_PAGE.statement}</h2>
+          <PeriodStatementView statement={statement} />
+        </section>
 
         <section className="flex flex-col gap-3">
           <h2 className="t-body font-medium text-ink">{FINANCE_PAGE.ledger}</h2>

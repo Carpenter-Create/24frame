@@ -74,13 +74,27 @@ describe("mapping C — finance stays Aggregation", () => {
   it("uses the complementary client-tier split and does not invent a second fee field", () => {
     expect(compute).toContain("clientShareCents");
     expect(compute).toContain("aggregatorKeepCents");
+    expect(compute).toContain("supersedes A/B/C/D");
     expect(compute).not.toContain("aggregator_rate");
     expect(compute).not.toContain("tier_revenue_share");
+    expect(compute).not.toContain("client_tier_percent");
     expect(migration).toContain("revenue_share_rate_bp");
     expect(migration).toContain("must not invent a second fee field");
+    expect(migration).toContain("supersedes A/B/C/D");
     expect(migration).toContain("bank_receipt_cents");
+    expect(migration).toContain("reported_cents");
+    expect(migration).toMatch(/raw\s+jsonb/);
+    expect(migration).not.toMatch(/\baggregator_rate\b/);
     expect(staffCanWriteFinance("gc_delivery_ops")).toBe(false);
     expect(staffCanWriteFinance("gc_legal")).toBe(false);
     expect(staffCanWriteFinance("gc_accountant")).toBe(true);
+  });
+
+  it("keeps endpoint-sourced input on sales_imports and sales_lines", () => {
+    expect(migration).toContain("filename");
+    expect(migration).toContain("content_hash");
+    expect(migration).toContain("endpoint");
+    expect(migration).toContain("external_id");
+    expect(migration).toContain("do not collapse imports into ledger-only rows");
   });
 });

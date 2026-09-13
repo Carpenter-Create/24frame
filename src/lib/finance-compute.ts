@@ -1,9 +1,12 @@
 import { FINANCE_LOGIC_VERSION } from "@/lib/finance";
 
-// Locked compute (CoS / Adam 2026-09-13).
-// Gross = bank-receipt cents. Client share = contract_terms.revenue_share_rate_bp
-// of that receipt. Aggregator keep = remainder. Then recoup/adjustments.
-// Do not invent a second independent aggregator % field.
+// Official compute lock (CoS 2026-09-13; supersedes A/B/C/D). Not a draft.
+// 1. Gross = bank-receipt cents from the endpoint.
+// 2. Client share = contract_terms.revenue_share_rate_bp of that receipt.
+// 3. Aggregator keep = remainder. Store client % only. Aggregator = 100 − client.
+// 4. Recoup / deductions on the ledger.
+// 5. Net ≥ threshold → payable, else carry-forward.
+// Do not invent a second independent fee field.
 
 export type CloseKind = "payable" | "closing";
 
