@@ -106,5 +106,18 @@ describe("mapping C — finance stays Aggregation", () => {
     expect(migration).toContain("endpoint");
     expect(migration).toContain("external_id");
     expect(migration).toContain("do not collapse imports into ledger-only rows");
+    expect(migration).toContain("Input preserved; output is ours");
+  });
+
+  it("defines a 24Frame statement output that keeps source input for later export", () => {
+    const statement = readFileSync("src/lib/finance-statement.ts", "utf8");
+    const page = readFileSync("src/app/(app)/(operator)/gc/finance/[periodId]/page.tsx", "utf8");
+    expect(statement).toContain("toStatementOutput");
+    expect(statement).toContain("STATEMENT_OUTPUT_FORMAT");
+    expect(statement).toContain("24frame-statement-v1");
+    expect(page).toContain("reported_cents, transaction_date, raw");
+    expect(page).toContain("content_hash");
+    expect(page).not.toContain("application/pdf");
+    expect(page).not.toContain("text/csv");
   });
 });

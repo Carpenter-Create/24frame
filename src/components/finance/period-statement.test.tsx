@@ -16,6 +16,7 @@ describe("PeriodStatementView", () => {
           id: "l1",
           importId: "imp-1",
           importFilename: "aug.csv",
+          importContentHash: "abc",
           lineNo: 1,
           endpoint: "avod",
           externalId: "ext-99",
@@ -23,6 +24,8 @@ describe("PeriodStatementView", () => {
           titleName: "Title A",
           bankReceiptCents: 2500,
           reportedCents: 3000,
+          transactionDate: null,
+          raw: { endpoint: "avod", external_id: "ext-99" },
         },
       ],
       recoupItems: [

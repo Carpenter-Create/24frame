@@ -3,8 +3,11 @@ import { describe, expect, it } from "vitest";
 import { FINANCE_LOGIC_VERSION } from "./finance";
 import { aggregatorKeepCents, clientShareCents } from "./finance-compute";
 import {
+  STATEMENT_OUTPUT_FORMAT,
   assemblePeriodStatement,
   buildPeriodStatement,
+  sourceInputPreserved,
+  toStatementOutput,
   transparentMathPresent,
   type StatementSourceLine,
 } from "./finance-statement";
@@ -13,6 +16,7 @@ function line(partial: Partial<StatementSourceLine> & Pick<StatementSourceLine, 
   return {
     importId: "imp-1",
     importFilename: "aug.csv",
+    importContentHash: "abc",
     lineNo: 1,
     endpoint: "avod",
     externalId: "ext-1",
@@ -20,6 +24,8 @@ function line(partial: Partial<StatementSourceLine> & Pick<StatementSourceLine, 
     titleName: "Title A",
     bankReceiptCents: 1000,
     reportedCents: null,
+    transactionDate: null,
+    raw: { endpoint: "avod", external_id: "ext-1" },
     ...partial,
   };
 }
@@ -159,7 +165,7 @@ describe("buildPeriodStatement", () => {
       openingCents: 100,
       thresholdCents: 50,
       titles: [{ id: "title-a", title: "Title A" }],
-      imports: [{ id: "imp-1", filename: "aug.csv" }],
+      imports: [{ id: "imp-1", filename: "aug.csv", content_hash: "hash-1" }],
       lines: [
         {
           id: "l1",
@@ -170,6 +176,8 @@ describe("buildPeriodStatement", () => {
           title_id: "title-a",
           bank_receipt_cents: 2500,
           reported_cents: 3000,
+          transaction_date: "2026-08-01",
+          raw: { endpoint: "avod", external_id: "ext-1", bank_receipt: "25.00", reported: "30.00" },
         },
       ],
       ledger: [
@@ -190,6 +198,18 @@ describe("buildPeriodStatement", () => {
     expect(statement.org?.aggregatorKeepCents).toBe(375);
     expect(statement.recoupItems).toHaveLength(1);
     expect(transparentMathPresent(statement)).toBe(true);
+    const output = toStatementOutput(statement);
+    expect(output.format).toBe(STATEMENT_OUTPUT_FORMAT);
+    expect(output.input.lines[0]).toMatchObject({
+      endpoint: "avod",
+      externalId: "ext-1",
+      reportedCents: 3000,
+      bankReceiptCents: 2500,
+      importFilename: "aug.csv",
+      importContentHash: "hash-1",
+    });
+    expect(output.compute.org?.aggregatorKeepCents).toBe(375);
+    expect(sourceInputPreserved(statement, output)).toBe(true);
   });
 
   it("does not invent client share when no contract term is present", () => {
@@ -205,6 +225,35 @@ describe("buildPeriodStatement", () => {
     expect(statement.titles).toEqual([]);
     expect(statement.org).toBeNull();
     expect(statement.sourceLines[0]?.bankReceiptCents).toBe(2500);
+  });
+
+  it("does not emit a house output that drops endpoint-sourced input", () => {
+    const statement = buildPeriodStatement({
+      clientRateBp: 8500,
+      openingCents: 0,
+      thresholdCents: null,
+      sourceLines: [
+        line({
+          id: "l1",
+          bankReceiptCents: 2500,
+          reportedCents: 3000,
+          raw: { endpoint: "avod", external_id: "ext-1", reported: "30.00" },
+        }),
+      ],
+      recoupItems: [],
+      adjustmentItems: [],
+      staffSaleItems: [],
+    });
+    const dropped = {
+      ...toStatementOutput(statement),
+      input: { lines: [] },
+    };
+    expect(sourceInputPreserved(statement, dropped)).toBe(false);
+    expect(toStatementOutput(statement).input.lines[0]?.raw).toEqual({
+      endpoint: "avod",
+      external_id: "ext-1",
+      reported: "30.00",
+    });
   });
 
   it("carries forward when net is under the staff threshold", () => {

@@ -61,13 +61,15 @@ export default async function GcFinancePeriodPage({
         .range(...rangeFor(DETAIL_LIST)),
       supabase
         .from("sales_imports")
-        .select("id, filename, status, imported_at")
+        .select("id, filename, content_hash, status, imported_at")
         .eq("period_id", periodId)
         .order("imported_at", { ascending: false })
         .range(...rangeFor(DETAIL_LIST)),
       supabase
         .from("sales_lines")
-        .select("id, import_id, line_no, endpoint, external_id, title_id, bank_receipt_cents, reported_cents")
+        .select(
+          "id, import_id, line_no, endpoint, external_id, title_id, bank_receipt_cents, reported_cents, transaction_date, raw",
+        )
         .eq("period_id", periodId)
         .order("line_no")
         .range(...rangeFor(DETAIL_LIST)),
@@ -103,7 +105,11 @@ export default async function GcFinancePeriodPage({
     openingCents: period.opening_balance_cents,
     thresholdCents: period.threshold_cents,
     titles: (titleRows ?? []).map((t) => ({ id: t.id, title: t.title })),
-    imports: (importRows ?? []).map((imp) => ({ id: imp.id, filename: imp.filename })),
+    imports: (importRows ?? []).map((imp) => ({
+      id: imp.id,
+      filename: imp.filename,
+      content_hash: imp.content_hash,
+    })),
     lines: lineRows ?? [],
     ledger,
   });

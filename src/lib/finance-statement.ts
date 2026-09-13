@@ -9,7 +9,8 @@ import {
 // Official statement shape (CoS 2026-09-13). Ops and a later recipient view
 // both call assemblePeriodStatement — same numbers, recipient read-only.
 // ledger_entries is posted SoT. Source lines stay on the statement.
-// Do not collapse to a single net. No second fee field.
+// toStatementOutput is the 24Frame payload for a later PDF/CSV — input first,
+// then house compute. Do not drop source data. No second fee field.
 
 export const STATEMENT_TRANSPARENCY_LINES = [
   "bankReceiptCents",
@@ -25,10 +26,13 @@ export const STATEMENT_TRANSPARENCY_LINES = [
   "close",
 ] as const;
 
+export const STATEMENT_OUTPUT_FORMAT = "24frame-statement-v1";
+
 export type StatementSourceLine = {
   id: string;
   importId: string;
   importFilename: string | null;
+  importContentHash: string | null;
   lineNo: number;
   endpoint: string;
   externalId: string;
@@ -36,6 +40,8 @@ export type StatementSourceLine = {
   titleName: string | null;
   bankReceiptCents: number;
   reportedCents: number | null;
+  transactionDate: string | null;
+  raw: Record<string, unknown>;
 };
 
 export type StatementPostedItem = {
@@ -106,6 +112,8 @@ export type StatementLineRow = {
   title_id: string | null;
   bank_receipt_cents: number;
   reported_cents: number | null;
+  transaction_date?: string | null;
+  raw?: unknown;
 };
 
 export type StatementLedgerRow = {
@@ -140,6 +148,78 @@ function emptyTitle(titleId: string, titleName: string): TitleStatementSlice {
 function asRecord(value: unknown): Record<string, unknown> | null {
   if (value === null || typeof value !== "object" || Array.isArray(value)) return null;
   return value as Record<string, unknown>;
+}
+
+export function sourceRaw(value: unknown): Record<string, unknown> {
+  return asRecord(value) ?? {};
+}
+
+export type StatementOutputInputLine = {
+  endpoint: string;
+  externalId: string;
+  reportedCents: number | null;
+  bankReceiptCents: number;
+  raw: Record<string, unknown>;
+  transactionDate: string | null;
+  importFilename: string | null;
+  importContentHash: string | null;
+};
+
+export type StatementOutput = {
+  format: typeof STATEMENT_OUTPUT_FORMAT;
+  logicVersion: typeof FINANCE_LOGIC_VERSION;
+  complementarySplit: true;
+  input: { lines: StatementOutputInputLine[] };
+  compute: {
+    clientRateBp: number | null;
+    titles: TitleStatementSlice[];
+    recoupItems: StatementPostedItem[];
+    adjustmentItems: StatementPostedItem[];
+    staffSaleItems: StatementPostedItem[];
+    org: OrgStatementSlice | null;
+  };
+};
+
+export function toStatementOutput(statement: PeriodStatement): StatementOutput {
+  return {
+    format: STATEMENT_OUTPUT_FORMAT,
+    logicVersion: statement.logicVersion,
+    complementarySplit: true,
+    input: {
+      lines: statement.sourceLines.map((line) => ({
+        endpoint: line.endpoint,
+        externalId: line.externalId,
+        reportedCents: line.reportedCents,
+        bankReceiptCents: line.bankReceiptCents,
+        raw: line.raw,
+        transactionDate: line.transactionDate,
+        importFilename: line.importFilename,
+        importContentHash: line.importContentHash,
+      })),
+    },
+    compute: {
+      clientRateBp: statement.clientRateBp,
+      titles: statement.titles,
+      recoupItems: statement.recoupItems,
+      adjustmentItems: statement.adjustmentItems,
+      staffSaleItems: statement.staffSaleItems,
+      org: statement.org,
+    },
+  };
+}
+
+export function sourceInputPreserved(statement: PeriodStatement, output: StatementOutput): boolean {
+  if (output.input.lines.length !== statement.sourceLines.length) return false;
+  return statement.sourceLines.every((line, index) => {
+    const row = output.input.lines[index];
+    return (
+      row !== undefined &&
+      row.endpoint === line.endpoint &&
+      row.externalId === line.externalId &&
+      row.bankReceiptCents === line.bankReceiptCents &&
+      row.reportedCents === line.reportedCents
+    );
+  });
 }
 
 export function postedSaleFromRefs(
@@ -281,12 +361,13 @@ export function assemblePeriodStatement(input: {
   openingCents: number;
   thresholdCents: number | null;
   titles: ReadonlyArray<{ id: string; title: string }>;
-  imports: ReadonlyArray<{ id: string; filename: string }>;
+  imports: ReadonlyArray<{ id: string; filename: string; content_hash?: string | null }>;
   lines: readonly StatementLineRow[];
   ledger: readonly StatementLedgerRow[];
 }): PeriodStatement {
   const titleById = new Map(input.titles.map((title) => [title.id, title.title]));
   const importById = new Map(input.imports.map((imp) => [imp.id, imp.filename]));
+  const hashById = new Map(input.imports.map((imp) => [imp.id, imp.content_hash ?? null]));
   const named = (titleId: string | null) =>
     titleId ? (titleById.get(titleId) ?? titleId) : null;
 
@@ -310,6 +391,7 @@ export function assemblePeriodStatement(input: {
       id: line.id,
       importId: line.import_id,
       importFilename: importById.get(line.import_id) ?? null,
+      importContentHash: hashById.get(line.import_id) ?? null,
       lineNo: line.line_no,
       endpoint: line.endpoint,
       externalId: line.external_id,
@@ -317,6 +399,8 @@ export function assemblePeriodStatement(input: {
       titleName: named(line.title_id),
       bankReceiptCents: line.bank_receipt_cents,
       reportedCents: line.reported_cents,
+      transactionDate: line.transaction_date ?? null,
+      raw: sourceRaw(line.raw),
     })),
     recoupItems: posted("recoup"),
     adjustmentItems: posted("adjustment"),

@@ -16,9 +16,12 @@
 -- Transaction date selects the term when present; otherwise the current term.
 -- Day-pro-ration of undated lump sums is not in this close path.
 --
--- Statement shape: keep endpoint-sourced input on sales_imports / sales_lines
--- (filename/hash, endpoint, external_id, reported_cents, bank_receipt_cents, raw).
--- House math is derived; do not collapse imports into ledger-only rows.
+-- Statement output shape (official): later PDF/CSV uses a 24Frame house format
+-- but MUST include endpoint-sourced input — source name, their ids, reported
+-- amount if distinct, bank-receipt gross. Input preserved; output is ours.
+-- Keep those fields on sales_imports / sales_lines (filename/hash, endpoint,
+-- external_id, reported_cents, bank_receipt_cents, raw). Do not collapse
+-- imports into ledger-only rows.
 --
 -- Titles stay org-scoped. No global works table. 24Frame id is titles.catalog_id.
 -- title_external_ids is endpoint + external_id, unique per pair, org-checked.

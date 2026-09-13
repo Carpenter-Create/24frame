@@ -4,7 +4,7 @@
 -- no profile privilege bridge. Close applies contract_terms client share.
 
 begin;
-select plan(35);
+select plan(36);
 
 select set_config('t.org_a', gen_random_uuid()::text, false);
 select set_config('t.org_b', gen_random_uuid()::text, false);
@@ -56,6 +56,10 @@ select is((select count(*)::int from information_schema.columns
              and column_name in
                ('endpoint','external_id','bank_receipt_cents','reported_cents','raw')),
           5, 'sales_lines keeps endpoint-sourced input fields');
+select is((select count(*)::int from information_schema.columns
+           where table_schema='public' and table_name='sales_imports'
+             and column_name in ('filename','content_hash')),
+          2, 'sales_imports keeps received-file source fields');
 select is((select count(*)::int from information_schema.columns
            where table_schema='public'
              and table_name in
