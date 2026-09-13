@@ -52,7 +52,7 @@ Paths below are relative to that origin. Example: check 1 is `PRODUCTION_APP_ORI
 
 ## Client checks (Access-tier org)
 
-Use the Access client mailbox. Magic-link + Turnstile. No live card.
+Use the Access client mailbox. Magic-link only. No live card.
 
 ### 1. Magic-link sign-in
 
@@ -60,9 +60,9 @@ Use the Access client mailbox. Magic-link + Turnstile. No live card.
 | --- | --- |
 | **Path** | `/login` → `/auth/callback` |
 | **Role** | client Access |
-| **Action** | Open `/login`. Request a magic link with Turnstile completed. Open the link from mail in this same desktop browser so `/auth/callback` can establish the session. Do not paste the link or token into the repository. |
+| **Action** | Open `/login`. Request a magic link. Open the link from mail in this same desktop browser so `/auth/callback` can establish the session. Do not paste the link or token into the repository. |
 | **Expected** | After callback, an authenticated session exists (app chrome or onboarding, not the signed-out login form). |
-| **Fail** | Login error, Turnstile failure, callback returns to `/login?error=auth`, or no session after a completed link. |
+| **Fail** | Login error, callback returns to `/login?error=auth`, or no session after a completed link. |
 
 ### 2. Organization (only if none)
 
@@ -176,7 +176,7 @@ Use the staff mailbox. Do not use this session for check 16.
 | --- | --- |
 | **Path** | `/login` → `/auth/callback` |
 | **Role** | `gc_staff` |
-| **Action** | Open `/login`. Request a magic link with Turnstile. Complete `/auth/callback` in this desktop browser. Do not paste the link or token into the repository. |
+| **Action** | Open `/login`. Request a magic link. Complete `/auth/callback` in this desktop browser. Do not paste the link or token into the repository. |
 | **Expected** | Authenticated staff session. |
 | **Fail** | Login error, callback failure, or no session. |
 

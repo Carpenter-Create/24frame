@@ -7,6 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 export const DASHBOARD_SIGN_IN_SENT = "Check your email for a secure sign-in link.";
 export const DASHBOARD_SIGN_IN_SEND_FAILED = "Could not send the sign-in link. Please try again.";
+export const DASHBOARD_SIGN_IN_RATE_LIMITED = "Too many requests. Please try again later.";
 
 const LOCAL_ORIGINS = ["http://127.0.0.1:3000", "http://localhost:3000"] as const;
 const PRODUCTION_ORIGIN = "https://app.24frame.co";

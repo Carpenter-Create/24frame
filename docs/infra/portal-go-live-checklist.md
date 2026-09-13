@@ -12,9 +12,9 @@ Do them in order — later steps depend on values from earlier ones.
 ---
 
 ## 0. Already done — nothing to do
-- **Cloudflare Turnstile** is already live (the login page uses it). `NEXT_PUBLIC_TURNSTILE_SITE_KEY` and
-  `TURNSTILE_SECRET_KEY` already exist in your envs — **no action.** The portal's OTP form and the abuse
-  caps use these same keys.
+- **Cloudflare Turnstile** is already live on the portal OTP form. `NEXT_PUBLIC_TURNSTILE_SITE_KEY` and
+  `TURNSTILE_SECRET_KEY` already exist in your envs — **no action.** Dashboard `/login` no longer reads
+  these keys; leave them in place for portal.
 
 ---
 

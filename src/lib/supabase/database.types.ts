@@ -1055,6 +1055,27 @@ export type Database = {
           },
         ]
       }
+      dashboard_sign_in_requests: {
+        Row: {
+          created_at: string
+          email_normalized: string
+          id: string
+          ip: unknown
+        }
+        Insert: {
+          created_at?: string
+          email_normalized: string
+          id?: string
+          ip?: unknown
+        }
+        Update: {
+          created_at?: string
+          email_normalized?: string
+          id?: string
+          ip?: unknown
+        }
+        Relationships: []
+      }
       deliveries: {
         Row: {
           created_at: string

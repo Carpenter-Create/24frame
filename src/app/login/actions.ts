@@ -3,35 +3,47 @@
 import { headers } from "next/headers";
 
 import {
+  DASHBOARD_SIGN_IN_RATE_LIMITED,
   DASHBOARD_SIGN_IN_SEND_FAILED,
   DASHBOARD_SIGN_IN_SENT,
   issueDashboardSignInLink,
 } from "@/lib/auth-magic-link";
-import { verifyTurnstile } from "@/lib/turnstile";
+import {
+  assertDashboardSignInAllowed,
+  clientIpFromForwarded,
+  DashboardSignInRateLimitError,
+} from "@/lib/dashboard-sign-in-rate-limit";
 
 export type LoginState = { ok: boolean; message: string };
 
-// Magic-link only (domain-spec §21 decision): no passwords, no OAuth. Turnstile is
-// verified server-side BEFORE we mint a link. Dashboard send uses generateLink +
-// Resend (link-only house mail). It does not call signInWithOtp — that would fire
-// the hosted dual-purpose magic_link template (link + code) that mobile still needs.
+// Magic-link only (domain-spec §21 decision): no passwords, no OAuth.
+// Dashboard send uses generateLink + Resend (link-only house mail). It does
+// not call signInWithOtp — that would fire the hosted dual-purpose magic_link
+// template (link + code) that mobile still needs. Abuse hygiene is app-layer
+// rate limits on this path (per-email + IP/global). Turnstile is not used on
+// dashboard login; portal OTP still verifies Turnstile.
 export async function requestMagicLink(
   _prev: LoginState,
   formData: FormData,
 ): Promise<LoginState> {
   const email = String(formData.get("email") ?? "").trim();
-  const token = String(formData.get("cf-turnstile-response") ?? "");
-
   if (!email) return { ok: false, message: "Enter your email address." };
 
-  if (!(await verifyTurnstile(token))) {
-    return { ok: false, message: "Verification failed — please try again." };
-  }
+  const hdrs = await headers();
+  const origin = hdrs.get("origin");
+  const ip = clientIpFromForwarded(hdrs.get("x-forwarded-for"));
 
-  const origin = (await headers()).get("origin");
   try {
+    await assertDashboardSignInAllowed({ email, ip });
     await issueDashboardSignInLink({ email, requestOrigin: origin });
-  } catch {
+  } catch (err) {
+    if (err instanceof DashboardSignInRateLimitError) {
+      return { ok: false, message: DASHBOARD_SIGN_IN_RATE_LIMITED };
+    }
+    console.error(
+      "[dashboard-sign-in] mint/send failed",
+      err instanceof Error ? err.message : err,
+    );
     return { ok: false, message: DASHBOARD_SIGN_IN_SEND_FAILED };
   }
   return { ok: true, message: DASHBOARD_SIGN_IN_SENT };
