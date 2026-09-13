@@ -1303,6 +1303,97 @@ export type Database = {
           },
         ]
       }
+      finance_jobs: {
+        Row: {
+          created_at: string
+          error: string | null
+          finished_at: string | null
+          id: string
+          import_id: string | null
+          kind: Database["public"]["Enums"]["finance_job_kind"]
+          org_id: string
+          payload: Json
+          period_id: string | null
+          requested_by: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["finance_job_status"]
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          import_id?: string | null
+          kind: Database["public"]["Enums"]["finance_job_kind"]
+          org_id: string
+          payload?: Json
+          period_id?: string | null
+          requested_by?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["finance_job_status"]
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          import_id?: string | null
+          kind?: Database["public"]["Enums"]["finance_job_kind"]
+          org_id?: string
+          payload?: Json
+          period_id?: string | null
+          requested_by?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["finance_job_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finance_jobs_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      finance_statement_exports: {
+        Row: {
+          content_hash: string
+          format: string
+          generated_at: string
+          id: string
+          org_id: string
+          period_id: string
+          s3_key: string
+        }
+        Insert: {
+          content_hash: string
+          format: string
+          generated_at?: string
+          id?: string
+          org_id: string
+          period_id: string
+          s3_key: string
+        }
+        Update: {
+          content_hash?: string
+          format?: string
+          generated_at?: string
+          id?: string
+          org_id?: string
+          period_id?: string
+          s3_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finance_statement_exports_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ledger_entries: {
         Row: {
           amount_cents: number
@@ -1385,6 +1476,7 @@ export type Database = {
           imported_by: string | null
           org_id: string
           period_id: string
+          s3_key: string | null
           status: Database["public"]["Enums"]["sales_import_status"]
         }
         Insert: {
@@ -1395,6 +1487,7 @@ export type Database = {
           imported_by?: string | null
           org_id: string
           period_id: string
+          s3_key?: string | null
           status?: Database["public"]["Enums"]["sales_import_status"]
         }
         Update: {
@@ -1405,6 +1498,7 @@ export type Database = {
           imported_by?: string | null
           org_id?: string
           period_id?: string
+          s3_key?: string | null
           status?: Database["public"]["Enums"]["sales_import_status"]
         }
         Relationships: [
@@ -2638,6 +2732,20 @@ export type Database = {
         }
         Returns: string
       }
+      apply_finance_close: { Args: { p_period_id: string }; Returns: undefined }
+      apply_finance_export: {
+        Args: {
+          p_content_hash: string
+          p_format: string
+          p_period_id: string
+          p_s3_key: string
+        }
+        Returns: string
+      }
+      apply_sales_import: {
+        Args: { p_import_id: string; p_lines: Json }
+        Returns: number
+      }
       close_finance_period: { Args: { p_period_id: string }; Returns: undefined }
       create_finance_period: {
         Args: {
@@ -2648,17 +2756,38 @@ export type Database = {
         }
         Returns: string
       }
+      enqueue_finance_job: {
+        Args: {
+          p_import_id?: string | null
+          p_kind: Database["public"]["Enums"]["finance_job_kind"]
+          p_org_id: string
+          p_payload?: Json
+          p_period_id?: string | null
+        }
+        Returns: string
+      }
       finance_client_share_cents: {
         Args: { p_gross: number; p_rate_bp: number }
         Returns: number
       }
       finance_logic_version: { Args: Record<PropertyKey, never>; Returns: string }
+      finance_worker_only: { Args: Record<PropertyKey, never>; Returns: undefined }
       import_sales: {
         Args: {
           p_content_hash: string
           p_filename: string
           p_lines: Json
           p_period_id: string
+        }
+        Returns: string
+      }
+      request_finance_export: { Args: { p_period_id: string }; Returns: string }
+      request_sales_import: {
+        Args: {
+          p_content_hash: string
+          p_filename: string
+          p_period_id: string
+          p_s3_key: string
         }
         Returns: string
       }
@@ -3043,6 +3172,8 @@ export type Database = {
       finding_severity: "high" | "low"
       finding_source: "validator" | "ai"
       finding_status: "open" | "resolved"
+      finance_job_kind: "ingest" | "map" | "close" | "export"
+      finance_job_status: "queued" | "running" | "succeeded" | "failed"
       finance_period_status: "open" | "closed"
       gc_role:
         | "gc_account_owner"
@@ -3095,7 +3226,7 @@ export type Database = {
       post_status: "active" | "hidden" | "removed"
       release_type: "new_release" | "re_release"
       review_decision: "approve" | "reject"
-      sales_import_status: "received" | "mapped"
+      sales_import_status: "queued" | "received" | "mapped"
       rights_type:
         | "theatrical"
         | "fta"
@@ -3301,6 +3432,8 @@ export const Constants = {
       finding_severity: ["high", "low"],
       finding_source: ["validator", "ai"],
       finding_status: ["open", "resolved"],
+      finance_job_kind: ["ingest", "map", "close", "export"],
+      finance_job_status: ["queued", "running", "succeeded", "failed"],
       finance_period_status: ["open", "closed"],
       gc_role: [
         "gc_account_owner",
@@ -3359,7 +3492,7 @@ export const Constants = {
       post_status: ["active", "hidden", "removed"],
       release_type: ["new_release", "re_release"],
       review_decision: ["approve", "reject"],
-      sales_import_status: ["received", "mapped"],
+      sales_import_status: ["queued", "received", "mapped"],
       rights_type: [
         "theatrical",
         "fta",

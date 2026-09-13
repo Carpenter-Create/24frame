@@ -10,7 +10,11 @@ export const FINANCE_CLIENT_HREF = "/finance";
 export const FINANCE_WRITE_RPCS = [
   "create_finance_period",
   "import_sales",
+  "request_sales_import",
+  "apply_sales_import",
   "close_finance_period",
+  "apply_finance_close",
+  "apply_finance_export",
   "post_ledger_entry",
   "set_finance_period_threshold",
   "map_sales_import",
@@ -37,7 +41,9 @@ export const FINANCE_PAGE = {
   statusOpen: "Open",
   statusClosed: "Closed",
   import: "Import sales",
-  importHint: "Excel or CSV. USD only. The amount column is bank-receipt cents used for compute.",
+  importHint:
+    "Excel or CSV. USD only. Bytes go to the finance bucket. The worker parses; this screen does not recompute money.",
+  importQueued: "Import queued for the finance worker.",
   map: "Map endpoint ids",
   mapHint: "Resolve vendor ids onto this organization’s titles only.",
   mapImport: "Apply mappings",
@@ -45,7 +51,8 @@ export const FINANCE_PAGE = {
   postHint: "Recoup, adjustment, or sale. Amounts are signed cents as entered.",
   close: "Close period",
   closeHint:
-    "Applies the org’s current contract client share to bank-receipt gross, then recoup and close. Map remaining lines or move them to Suspense first.",
+    "Queues close for the finance worker. The worker applies client share, recoup, and threshold. Map remaining lines or move them to Suspense first.",
+  closeQueued: "Close queued. The worker posts ledger entries; this screen does not recompute money.",
   suspense: "Suspense",
   suspenseHint:
     "Parked unmapped lines. Assign to an open period for that organization, then map.",
@@ -93,6 +100,7 @@ export const FINANCE_CLIENT = {
   pack: "Download pack",
   pdf: "Branded PDF",
   csv: "Raw CSV",
+  exportQueued: "Export queued. Refresh shortly.",
   overview: "Overview",
   history: "Statement history",
   contribution: "Title contribution",

@@ -8,8 +8,8 @@ import {
 } from "@/lib/finance";
 import type { PeriodStatement, TitleStatementSlice } from "@/lib/finance-statement";
 
-// Recipient dashboard model. Same numbers as assemblePeriodStatement /
-// periodNetCents. No compute change. Org purse only.
+// Recipient dashboard model. Reads posted ledger / postedOnly statements.
+// periodNetCents sums posted rows. Next does not recompute client share.
 
 export type DashboardPeriodRow = {
   id: string;

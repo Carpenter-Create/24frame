@@ -85,6 +85,7 @@ export async function loadRecipientStatement(
     ]);
 
   return assemblePeriodStatement({
+    postedOnly: true,
     clientRateBp: term?.revenue_share_rate_bp ?? null,
     openingCents: period.opening_balance_cents,
     thresholdCents: period.threshold_cents,

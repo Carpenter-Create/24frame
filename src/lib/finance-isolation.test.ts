@@ -22,6 +22,10 @@ const suspenseMigration = readFileSync(
   "supabase/migrations/20260913220000_finance_ops_slice_2_suspense.sql",
   "utf8",
 );
+const awsMigration = readFileSync(
+  "supabase/migrations/20260913230000_finance_ops_slice_2_aws_spine.sql",
+  "utf8",
+);
 const compute = readFileSync("src/lib/finance-compute.ts", "utf8");
 
 describe("title isolation", () => {
@@ -109,7 +113,9 @@ describe("mapping C — finance stays Aggregation", () => {
     const page = readFileSync("src/app/(app)/(operator)/gc/finance/[periodId]/page.tsx", "utf8");
     expect(statement).toContain("assemblePeriodStatement");
     expect(statement).toContain("STATEMENT_TRANSPARENCY_LINES");
+    expect(statement).toContain("postedOnly");
     expect(page).toContain("assemblePeriodStatement");
+    expect(page).toContain("postedOnly: true");
     expect(page).not.toContain("Statements");
     expect(NAV.map((item) => item.label)).not.toContain("Statements");
   });
@@ -156,6 +162,8 @@ describe("mapping C — finance stays Aggregation", () => {
       recipientMayExportPeriod({ periodOrgId: "org-a", activeOrgId: "org-a", status: "closed" }),
     ).toBe(true);
     expect(FINANCE_WRITE_RPCS).toContain("import_sales");
+    expect(FINANCE_WRITE_RPCS).toContain("request_sales_import");
+    expect(FINANCE_WRITE_RPCS).toContain("apply_finance_close");
     expect(FINANCE_WRITE_RPCS).toContain("close_finance_period");
     expect(FINANCE_WRITE_RPCS).toContain("post_ledger_entry");
     expect(FINANCE_WRITE_RPCS).toContain("set_finance_period_threshold");
@@ -164,5 +172,9 @@ describe("mapping C — finance stays Aggregation", () => {
     expect(FINANCE_CLIENT_HREF).toBe("/finance");
     expect(suspenseMigration).toContain("sales_lines SELECT must hide suspense from recipients");
     expect(suspenseMigration).toContain("do not invent a parallel suspense money table");
+    expect(awsMigration).toContain("apply_finance_close");
+    expect(awsMigration).toContain("finance_worker_only");
+    expect(awsMigration).toContain("Import parse runs on the finance worker");
+    expect(awsMigration).toContain("close_finance_period is thin");
   });
 });

@@ -4,7 +4,7 @@
 -- no profile privilege bridge. Close applies contract_terms client share.
 
 begin;
-select plan(36);
+select plan(39);
 
 select set_config('t.org_a', gen_random_uuid()::text, false);
 select set_config('t.org_b', gen_random_uuid()::text, false);
@@ -58,8 +58,8 @@ select is((select count(*)::int from information_schema.columns
           5, 'sales_lines keeps endpoint-sourced input fields');
 select is((select count(*)::int from information_schema.columns
            where table_schema='public' and table_name='sales_imports'
-             and column_name in ('filename','content_hash')),
-          2, 'sales_imports keeps received-file source fields');
+             and column_name in ('filename','content_hash','s3_key')),
+          3, 'sales_imports keeps received-file source fields and s3_key');
 select is((select count(*)::int from information_schema.columns
            where table_schema='public'
              and table_name in
@@ -116,13 +116,27 @@ select lives_ok(
   'gc_accountant: create_finance_period for org B');
 
 select lives_ok(
-  $$ select set_config('t.import_a', public.import_sales(
+  $$ select set_config('t.import_a', public.request_sales_import(
        current_setting('t.period_a')::uuid,
        'a.csv',
        'hash-a',
-       '[{"endpoint":"tubi","external_id":"EXT-1","bank_receipt_cents":1000,"currency":"USD"}]'::jsonb
+       'orgs/' || current_setting('t.org_a') || '/imports/hash-a/a.csv'
      )::text, false) $$,
-  'gc_accountant: import_sales for org A');
+  'gc_accountant: request_sales_import for org A');
+
+reset role;
+set local role service_role;
+select set_config('request.jwt.claims', json_build_object('role', 'service_role')::text, true);
+select lives_ok(
+  $$ select public.apply_sales_import(
+       current_setting('t.import_a')::uuid,
+       '[{"endpoint":"tubi","external_id":"EXT-1","bank_receipt_cents":1000,"currency":"USD"}]'::jsonb
+     ) $$,
+  'worker: apply_sales_import for org A');
+reset role;
+set local role authenticated;
+select set_config('request.jwt.claims',
+  json_build_object('sub', current_setting('t.acct'), 'role', 'authenticated')::text, true);
 
 -- Client B mapping must not attach to Client A import.
 select lives_ok(
@@ -158,12 +172,25 @@ select lives_ok(
   $$ select public.upsert_title_external_id(current_setting('t.title_a')::uuid, 'fast', 'A-1') $$,
   'upsert_title_external_id on org A title');
 select lives_ok(
-  $$ select public.import_sales(
+  $$ select set_config('t.import_a2', public.request_sales_import(
        current_setting('t.period_a')::uuid,
        'a2.csv',
        'hash-a2',
+       'orgs/' || current_setting('t.org_a') || '/imports/hash-a2/a2.csv'
+     )::text, false) $$,
+  'second import enqueue for org A');
+reset role;
+set local role service_role;
+select set_config('request.jwt.claims', json_build_object('role', 'service_role')::text, true);
+select lives_ok(
+  $$ select public.apply_sales_import(
+       current_setting('t.import_a2')::uuid,
        '[{"endpoint":"fast","external_id":"A-1","bank_receipt_cents":2500,"currency":"USD"}]'::jsonb) $$,
-  'second import for org A');
+  'worker: second apply_sales_import for org A');
+reset role;
+set local role authenticated;
+select set_config('request.jwt.claims',
+  json_build_object('sub', current_setting('t.acct'), 'role', 'authenticated')::text, true);
 select is(
   (select public.map_sales_import(id) from public.sales_imports where filename = 'a2.csv'),
   1,
@@ -182,6 +209,16 @@ select lives_ok(
 select lives_ok(
   $$ select public.close_finance_period(current_setting('t.period_a')::uuid) $$,
   'close_finance_period permitted for accountant');
+reset role;
+set local role service_role;
+select set_config('request.jwt.claims', json_build_object('role', 'service_role')::text, true);
+select lives_ok(
+  $$ select public.apply_finance_close(current_setting('t.period_a')::uuid) $$,
+  'worker: apply_finance_close is the sole close compute path');
+reset role;
+set local role authenticated;
+select set_config('request.jwt.claims',
+  json_build_object('sub', current_setting('t.acct'), 'role', 'authenticated')::text, true);
 
 select is((select amount_cents from public.ledger_entries
            where period_id = current_setting('t.period_a')::uuid and kind = 'sale'
@@ -226,12 +263,12 @@ select is((select count(*)::int from public.finance_periods
            where org_id = current_setting('t.org_a')::uuid),
           0, 'viewer A: finance_periods BLOCKED (no view_financial)');
 select throws_ok(
-  $$ select public.import_sales(
+  $$ select public.request_sales_import(
        current_setting('t.period_b')::uuid,
        'evil.csv', 'h',
-       '[{"endpoint":"x","external_id":"y","bank_receipt_cents":1}]'::jsonb) $$,
+       'orgs/' || current_setting('t.org_b') || '/imports/h/evil.csv') $$,
   'P0001', 'Not authorized',
-  'viewer A: import_sales BLOCKED');
+  'viewer A: request_sales_import BLOCKED');
 
 select set_config('request.jwt.claims',
   json_build_object('sub', current_setting('t.ops'), 'role', 'authenticated')::text, true);

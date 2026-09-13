@@ -4,8 +4,9 @@ import { createHash } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { parseSalesFile } from "@/lib/finance-import";
+import { financeImportObjectKey } from "@/lib/finance-aws";
 import { FINANCE_HREF, LEDGER_POST_KINDS } from "@/lib/finance";
+import { isFinanceAwsConfigured, putFinanceObject } from "@/lib/s3-finance";
 import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/supabase/auth";
 
@@ -70,18 +71,42 @@ export async function importSalesFile(formData: FormData): Promise<{ error?: str
   if (!(file instanceof File) || file.size === 0) return { error: "Choose an Excel or CSV file." };
 
   const bytes = new Uint8Array(await file.arrayBuffer());
-  const parsed = await parseSalesFile({ filename: file.name, bytes });
-  if (!parsed.ok) return { error: parsed.error };
+  const contentHash = createHash("sha256").update(bytes).digest("hex");
 
   const supabase = await createClient();
   const user = await getAuthUser();
   if (!user) return { error: "Not authenticated." };
 
-  const { error } = await supabase.rpc("import_sales", {
+  const { data: period } = await supabase
+    .from("finance_periods")
+    .select("id, org_id")
+    .eq("id", periodId.data)
+    .maybeSingle();
+  if (!period) return { error: "Period not found." };
+
+  const s3Key = financeImportObjectKey({
+    orgId: period.org_id,
+    contentHash,
+    filename: file.name,
+  });
+  if (isFinanceAwsConfigured()) {
+    try {
+      await putFinanceObject({
+        key: s3Key,
+        orgId: period.org_id,
+        body: bytes,
+        contentType: file.type || "application/octet-stream",
+      });
+    } catch (err) {
+      return rpcError(err instanceof Error ? err.message : "Finance upload failed.");
+    }
+  }
+
+  const { error } = await supabase.rpc("request_sales_import", {
     p_period_id: periodId.data,
     p_filename: file.name,
-    p_content_hash: createHash("sha256").update(bytes).digest("hex"),
-    p_lines: parsed.lines,
+    p_content_hash: contentHash,
+    p_s3_key: s3Key,
   });
   if (error) return rpcError(error.message);
   revalidatePath(`${FINANCE_HREF}/${periodId.data}`);

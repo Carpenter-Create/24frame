@@ -61,6 +61,17 @@ Full doctrine: [`AGENTS.md`](../../AGENTS.md). Domain truth: [`docs/domain-spec.
 
 ---
 
+## Finance AWS spine (authorized Slice 2)
+
+Adam lock 2026-09-13. In the Slice 2 PR — not production-applied.
+
+- AWS owns finance files + worker compute. Survivor Supabase remains relational SoT. Not an RDS lift.
+- Migrations (in-repo, founder apply after merge): `20260913130000_finance_ops_slice_1.sql`, `20260913220000_finance_ops_slice_2_suspense.sql`, `20260913230000_finance_ops_slice_2_aws_spine.sql`.
+- Proposed buckets only: `24frame-finance-dev` / `24frame-finance-prod`. Adam still creates IAM, bucket, OIDC worker role, and `FINANCE_AWS_*` / `S3_FINANCE_*`.
+- Production mutation table above is unchanged until founder applies.
+
+---
+
 ## Not authority
 
 - [`docs/HANDOFF.md`](../HANDOFF.md) — historical handoff; preserve as evidence; do not act on its branch, SHA, production, or task statements without fresh verification.

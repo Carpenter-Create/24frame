@@ -50,6 +50,7 @@ export default async function GcFinancePeriodPage({
     { data: lineRows },
     { data: ledgerRows },
     { data: term },
+    { data: jobRows },
   ] = await Promise.all([
       user
         ? supabase.from("gc_staff").select("role").eq("user_id", user.id).maybeSingle()
@@ -62,7 +63,7 @@ export default async function GcFinancePeriodPage({
         .range(...rangeFor(DETAIL_LIST)),
       supabase
         .from("sales_imports")
-        .select("id, filename, content_hash, status, imported_at")
+        .select("id, filename, content_hash, s3_key, status, imported_at")
         .eq("period_id", periodId)
         .order("imported_at", { ascending: false })
         .range(...rangeFor(DETAIL_LIST)),
@@ -88,6 +89,13 @@ export default async function GcFinancePeriodPage({
         .order("effective_from", { ascending: false })
         .limit(1)
         .maybeSingle(),
+      supabase
+        .from("finance_jobs")
+        .select("id, kind, status")
+        .eq("period_id", periodId)
+        .eq("org_id", period.org_id)
+        .in("status", ["queued", "running"])
+        .range(...rangeFor(DETAIL_LIST)),
     ]);
 
   const canWrite = staffCanWriteFinance(staff?.role) && period.status === "open";
@@ -101,7 +109,11 @@ export default async function GcFinancePeriodPage({
     : period.organizations?.name;
   const titleById = new Map((titleRows ?? []).map((t) => [t.id, t.title]));
   const ledger = ledgerRows ?? [];
+  const closeQueued = (jobRows ?? []).some(
+    (job) => job.kind === "close" && (job.status === "queued" || job.status === "running"),
+  );
   const statement = assemblePeriodStatement({
+    postedOnly: true,
     clientRateBp: term?.revenue_share_rate_bp ?? null,
     openingCents: period.opening_balance_cents,
     thresholdCents: period.threshold_cents,
@@ -193,7 +205,11 @@ export default async function GcFinancePeriodPage({
 
             <section className="flex flex-col gap-3">
               <h2 className="t-body font-medium text-ink">{FINANCE_PAGE.close}</h2>
-              <ClosePeriodForm periodId={periodId} />
+              {closeQueued ? (
+                <p className="t-body-sm text-ink-2">{FINANCE_PAGE.closeQueued}</p>
+              ) : (
+                <ClosePeriodForm periodId={periodId} />
+              )}
             </section>
           </>
         ) : period.status === "open" ? (

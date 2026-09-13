@@ -4,7 +4,7 @@
 -- Client A lines never enter Client B suspense. Compute unchanged.
 
 begin;
-select plan(17);
+select plan(19);
 
 select set_config('t.org_a', gen_random_uuid()::text, false);
 select set_config('t.org_b', gen_random_uuid()::text, false);
@@ -49,11 +49,24 @@ select lives_ok(
   'open org B period');
 
 select lives_ok(
-  $$ select public.import_sales(
+  $$ select set_config('t.import_park', public.request_sales_import(
        current_setting('t.period_a')::uuid,
        'park.csv', 'hash-park',
+       'orgs/' || current_setting('t.org_a') || '/imports/hash-park/park.csv'
+     )::text, false) $$,
+  'enqueue unmapped import on Aug');
+reset role;
+set local role service_role;
+select set_config('request.jwt.claims', json_build_object('role', 'service_role')::text, true);
+select lives_ok(
+  $$ select public.apply_sales_import(
+       current_setting('t.import_park')::uuid,
        '[{"endpoint":"avod","external_id":"U-1","bank_receipt_cents":4000,"reported_cents":4100,"currency":"USD"}]'::jsonb) $$,
-  'import unmapped line on Aug');
+  'worker: apply unmapped import on Aug');
+reset role;
+set local role authenticated;
+select set_config('request.jwt.claims',
+  json_build_object('sub', current_setting('t.acct'), 'role', 'authenticated')::text, true);
 
 select lives_ok(
   $$ select set_config('t.line_u', (
@@ -79,6 +92,16 @@ select is((select origin_period_id from public.sales_lines where id = current_se
 select lives_ok(
   $$ select public.close_finance_period(current_setting('t.period_a')::uuid) $$,
   'close allowed after unmapped lines move to suspense');
+reset role;
+set local role service_role;
+select set_config('request.jwt.claims', json_build_object('role', 'service_role')::text, true);
+select lives_ok(
+  $$ select public.apply_finance_close(current_setting('t.period_a')::uuid) $$,
+  'worker close after suspense posts no parked sale');
+reset role;
+set local role authenticated;
+select set_config('request.jwt.claims',
+  json_build_object('sub', current_setting('t.acct'), 'role', 'authenticated')::text, true);
 
 select is((select count(*)::int from public.ledger_entries
            where period_id = current_setting('t.period_a')::uuid and kind = 'sale'),

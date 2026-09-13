@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 
+import { FINANCE_CLIENT, orgRoleCanViewFinancial, recipientMayExportPeriod } from "@/lib/finance";
+import { loadRecipientPeriod } from "@/lib/finance-recipient-load";
+import { signedFinanceUrl } from "@/lib/s3-finance";
 import { getOrgContext } from "@/lib/supabase/context";
-import { orgRoleCanViewFinancial, recipientMayExportPeriod } from "@/lib/finance";
-import { exportStatement } from "@/lib/finance-export";
-import { loadRecipientPeriod, loadRecipientStatement } from "@/lib/finance-recipient-load";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET(
   req: Request,
@@ -32,22 +33,24 @@ export async function GET(
     return NextResponse.json({ error: "not found" }, { status: 404 });
   }
 
-  const statement = await loadRecipientStatement(period, ctx.activeOrg.id);
-  const file = exportStatement(
-    statement,
-    {
-      orgName: ctx.activeOrg.name,
-      periodYear: period.period_year,
-      periodMonth: period.period_month,
-      status: "closed",
-    },
-    format,
-  );
+  const supabase = await createClient();
+  const { data: exported } = await supabase
+    .from("finance_statement_exports")
+    .select("s3_key, format")
+    .eq("period_id", period.id)
+    .eq("org_id", ctx.activeOrg.id)
+    .eq("format", format)
+    .maybeSingle();
 
-  return new NextResponse(Buffer.from(file.body), {
-    headers: {
-      "Content-Type": file.contentType,
-      "Content-Disposition": `attachment; filename="${file.filename}"`,
-    },
-  });
+  if (exported?.s3_key) {
+    const url = await signedFinanceUrl(exported.s3_key, ctx.activeOrg.id);
+    if (!url) {
+      return NextResponse.json({ error: "Finance download is not configured." }, { status: 503 });
+    }
+    return NextResponse.redirect(url);
+  }
+
+  const { error } = await supabase.rpc("request_finance_export", { p_period_id: period.id });
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  return NextResponse.json({ status: "queued", message: FINANCE_CLIENT.exportQueued }, { status: 202 });
 }
