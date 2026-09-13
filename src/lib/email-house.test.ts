@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
+import { inflateSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -151,7 +152,6 @@ describe("email-logo.png", () => {
 
 function decodePngRgb(png: Buffer): { pixel: (x: number, y: number) => [number, number, number] } {
   // Minimal IHDR + IDAT decoder for 8-bit RGB/RGBA (no interlace).
-  const zlib = require("node:zlib") as typeof import("node:zlib");
   const width = png.readUInt32BE(16);
   const height = png.readUInt32BE(20);
   const bitDepth = png[24];
@@ -167,7 +167,7 @@ function decodePngRgb(png: Buffer): { pixel: (x: number, y: number) => [number, 
     if (type === "IDAT") chunks.push(png.subarray(offset + 8, offset + 8 + len));
     offset += 12 + len;
   }
-  const raw = zlib.inflateSync(Buffer.concat(chunks));
+  const raw = inflateSync(Buffer.concat(chunks));
   const stride = width * channels;
   const rows: Buffer[] = [];
   let i = 0;
