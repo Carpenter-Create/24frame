@@ -58,7 +58,8 @@ select throws_ok(
        current_setting('t.period_a')::uuid,
        'soft.csv', 'hash-soft',
        '[{"endpoint":"avod","external_id":"S-1","bank_receipt_cents":1000}]'::jsonb) $$,
-  'P0001', 'Import parse runs on the finance worker; use request_sales_import',
+  '42501',
+  null,
   'soft-path import_sales is retired');
 
 select throws_ok(
@@ -73,12 +74,14 @@ select throws_ok(
   $$ select public.apply_sales_import(
        gen_random_uuid(),
        '[{"endpoint":"avod","external_id":"X-1","bank_receipt_cents":1}]'::jsonb) $$,
-  'P0001', 'Finance compute is AWS-worker only',
+  '42501',
+  null,
   'authenticated cannot apply an import');
 
 select throws_ok(
   $$ select public.apply_finance_close(current_setting('t.period_a')::uuid) $$,
-  'P0001', 'Finance compute is AWS-worker only',
+  '42501',
+  null,
   'authenticated cannot apply close');
 
 select lives_ok(
