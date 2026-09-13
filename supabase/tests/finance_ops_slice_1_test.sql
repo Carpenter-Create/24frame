@@ -4,7 +4,7 @@
 -- no profile privilege bridge. Close applies contract_terms client share.
 
 begin;
-select plan(36);
+select plan(35);
 
 select set_config('t.org_a', gen_random_uuid()::text, false);
 select set_config('t.org_b', gen_random_uuid()::text, false);
