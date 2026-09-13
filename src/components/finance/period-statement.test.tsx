@@ -52,6 +52,15 @@ describe("PeriodStatementView", () => {
     expect(html).toContain(FINANCE_PAGE.orgRollup);
     expect(html).toContain(FINANCE_PAGE.thresholdCheck);
     expect(html).toContain(FINANCE_PAGE.payable);
+    expect(html).toContain(FINANCE_PAGE.opening);
+    expect(html).toContain(FINANCE_PAGE.periodNet);
+    expect(html).toContain('data-finance-line="bank-receipt"');
+    expect(html).toContain('data-finance-line="client-share"');
+    expect(html).toContain('data-finance-line="aggregator-keep"');
+    expect(html).toContain('data-finance-line="opening"');
+    expect(html).toContain('data-finance-line="period-net"');
+    expect(html).toContain('data-finance-line="threshold"');
+    expect(html).toContain('data-finance-line="payable"');
     expect(html).not.toContain("aggregator_rate");
   });
 });

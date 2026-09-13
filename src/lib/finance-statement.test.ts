@@ -2,7 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import { FINANCE_LOGIC_VERSION } from "./finance";
 import { aggregatorKeepCents, clientShareCents } from "./finance-compute";
-import { buildPeriodStatement, type StatementSourceLine } from "./finance-statement";
+import {
+  assemblePeriodStatement,
+  buildPeriodStatement,
+  transparentMathPresent,
+  type StatementSourceLine,
+} from "./finance-statement";
 
 function line(partial: Partial<StatementSourceLine> & Pick<StatementSourceLine, "id">): StatementSourceLine {
   return {
@@ -95,6 +100,96 @@ describe("buildPeriodStatement", () => {
     expect(statement.org?.unmappedBankReceiptCents).toBe(400);
     expect(statement.org?.netCents).toBe(500 + 1700 - 200 + 25);
     expect(statement.org?.close.kind).toBe("payable");
+    expect(statement.org?.thresholdMet).toBe(true);
+    expect(statement.org && transparentMathPresent(statement.org)).toBe(true);
+  });
+
+  it("keeps a title in the breakdown when it has recoup and no sales line", () => {
+    const statement = buildPeriodStatement({
+      clientRateBp: 8500,
+      openingCents: 0,
+      thresholdCents: null,
+      sourceLines: [],
+      recoupItems: [
+        {
+          id: "r1",
+          kind: "recoup",
+          amountCents: -75,
+          titleId: "title-c",
+          titleName: "Title C",
+          note: "Advance",
+        },
+      ],
+      adjustmentItems: [],
+      staffSaleItems: [],
+    });
+    expect(statement.titles).toHaveLength(1);
+    expect(statement.titles[0]?.titleId).toBe("title-c");
+    expect(statement.titles[0]?.recoupItems).toHaveLength(1);
+    expect(statement.org?.clientShareCents).toBe(0);
+    expect(statement.org?.netCents).toBe(-75);
+  });
+
+  it("uses posted ledger shares when present instead of recomputing", () => {
+    const statement = buildPeriodStatement({
+      clientRateBp: 8500,
+      openingCents: 0,
+      thresholdCents: null,
+      sourceLines: [line({ id: "l1", bankReceiptCents: 1001 })],
+      recoupItems: [],
+      adjustmentItems: [],
+      staffSaleItems: [],
+      postedSales: [
+        {
+          salesLineId: "l1",
+          clientShareCents: 800,
+          aggregatorKeepCents: 201,
+          clientRateBp: 8500,
+        },
+      ],
+    });
+    expect(statement.org?.clientShareCents).toBe(800);
+    expect(statement.org?.aggregatorKeepCents).toBe(201);
+    expect(statement.org?.clientShareCents).not.toBe(clientShareCents(1001, 8500));
+  });
+
+  it("assembles the same statement for ops and a later recipient from the same records", () => {
+    const records = {
+      clientRateBp: 8500,
+      openingCents: 100,
+      thresholdCents: 50,
+      titles: [{ id: "title-a", title: "Title A" }],
+      imports: [{ id: "imp-1", filename: "aug.csv" }],
+      lines: [
+        {
+          id: "l1",
+          import_id: "imp-1",
+          line_no: 1,
+          endpoint: "avod",
+          external_id: "ext-1",
+          title_id: "title-a",
+          bank_receipt_cents: 2500,
+          reported_cents: 3000,
+        },
+      ],
+      ledger: [
+        {
+          id: "r1",
+          kind: "recoup",
+          amount_cents: -150,
+          title_id: "title-a",
+          note: "Advance",
+          sales_line_id: null,
+          source_refs: {},
+        },
+      ],
+    };
+    expect(assemblePeriodStatement(records)).toEqual(assemblePeriodStatement(records));
+    const statement = assemblePeriodStatement(records);
+    expect(statement.sourceLines[0]?.reportedCents).toBe(3000);
+    expect(statement.org?.aggregatorKeepCents).toBe(375);
+    expect(statement.recoupItems).toHaveLength(1);
+    expect(statement.org && transparentMathPresent(statement.org)).toBe(true);
   });
 
   it("does not invent client share when no contract term is present", () => {
@@ -124,5 +219,6 @@ describe("buildPeriodStatement", () => {
     });
     expect(statement.org?.close.kind).toBe("closing");
     expect(statement.org?.close.closingBalanceCents).toBe(850);
+    expect(statement.org?.thresholdMet).toBe(false);
   });
 });

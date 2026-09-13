@@ -90,6 +90,16 @@ describe("mapping C — finance stays Aggregation", () => {
     expect(staffCanWriteFinance("gc_accountant")).toBe(true);
   });
 
+  it("builds ops and recipient math from one statement assembler", () => {
+    const statement = readFileSync("src/lib/finance-statement.ts", "utf8");
+    const page = readFileSync("src/app/(app)/(operator)/gc/finance/[periodId]/page.tsx", "utf8");
+    expect(statement).toContain("assemblePeriodStatement");
+    expect(statement).toContain("STATEMENT_TRANSPARENCY_LINES");
+    expect(page).toContain("assemblePeriodStatement");
+    expect(page).not.toContain("Statements");
+    expect(NAV.map((item) => item.label)).not.toContain("Statements");
+  });
+
   it("keeps endpoint-sourced input on sales_imports and sales_lines", () => {
     expect(migration).toContain("filename");
     expect(migration).toContain("content_hash");

@@ -2,13 +2,25 @@ import { Card, CardBody } from "@/components/ui/card";
 import { FINANCE_PAGE, formatUsdCents } from "@/lib/finance";
 import type { PeriodStatement, StatementPostedItem } from "@/lib/finance-statement";
 
-function MoneyRow({ label, value }: { label: string; value: string }) {
+function MoneyRow({
+  label,
+  value,
+  line,
+}: {
+  label: string;
+  value: string;
+  line?: string;
+}) {
   return (
-    <p className="flex justify-between gap-4 t-body-sm text-ink-2">
+    <p className="flex justify-between gap-4 t-body-sm text-ink-2" data-finance-line={line}>
       <span>{label}</span>
       <span className="text-ink">{value}</span>
     </p>
   );
+}
+
+function clientRateLabel(rateBp: number | null): string {
+  return rateBp === null ? FINANCE_PAGE.clientShare : `${FINANCE_PAGE.clientRate} ${rateBp / 100}%`;
 }
 
 function ItemizedList({ items }: { items: readonly StatementPostedItem[] }) {
@@ -93,14 +105,17 @@ export function PeriodStatementView({ statement }: { statement: PeriodStatement 
                   <CardBody className="flex flex-col gap-2" data-finance-title={title.titleId}>
                     <p className="t-body-sm font-medium text-ink">{title.titleName}</p>
                     <MoneyRow
+                      line="bank-receipt"
                       label={FINANCE_PAGE.bankReceipt}
                       value={formatUsdCents(title.bankReceiptCents)}
                     />
                     <MoneyRow
-                      label={`${FINANCE_PAGE.clientRate} ${org.clientRateBp / 100}%`}
+                      line="client-share"
+                      label={clientRateLabel(org.clientRateBp)}
                       value={`${FINANCE_PAGE.clientShare} ${formatUsdCents(title.clientShareCents)}`}
                     />
                     <MoneyRow
+                      line="aggregator-keep"
                       label={FINANCE_PAGE.aggregatorKeep}
                       value={formatUsdCents(title.aggregatorKeepCents)}
                     />
@@ -116,24 +131,33 @@ export function PeriodStatementView({ statement }: { statement: PeriodStatement 
             <Card>
               <CardBody className="flex flex-col gap-2" data-finance-rollup="">
                 <MoneyRow
+                  line="bank-receipt"
                   label={FINANCE_PAGE.bankReceipt}
                   value={formatUsdCents(org.bankReceiptCents)}
                 />
                 <MoneyRow
-                  label={`${FINANCE_PAGE.clientRate} ${org.clientRateBp / 100}%`}
+                  line="client-share"
+                  label={clientRateLabel(org.clientRateBp)}
                   value={`${FINANCE_PAGE.clientShare} ${formatUsdCents(org.clientShareCents)}`}
                 />
                 <MoneyRow
+                  line="aggregator-keep"
                   label={FINANCE_PAGE.aggregatorKeep}
                   value={formatUsdCents(org.aggregatorKeepCents)}
                 />
                 <MoneyRow
+                  line="opening"
                   label={FINANCE_PAGE.opening}
                   value={formatUsdCents(org.openingCents)}
                 />
-                <MoneyRow label={FINANCE_PAGE.recoup} value={formatUsdCents(org.recoupCents)} />
+                <MoneyRow
+                  line="recoup"
+                  label={FINANCE_PAGE.recoup}
+                  value={formatUsdCents(org.recoupCents)}
+                />
                 <ItemizedList items={statement.recoupItems} />
                 <MoneyRow
+                  line="adjustments"
                   label={FINANCE_PAGE.adjustments}
                   value={formatUsdCents(org.adjustmentCents)}
                 />
@@ -141,6 +165,7 @@ export function PeriodStatementView({ statement }: { statement: PeriodStatement 
                 {statement.staffSaleItems.length > 0 ? (
                   <>
                     <MoneyRow
+                      line="posted-sale"
                       label={FINANCE_PAGE.staffSale}
                       value={formatUsdCents(org.staffSaleCents)}
                     />
@@ -148,22 +173,31 @@ export function PeriodStatementView({ statement }: { statement: PeriodStatement 
                   </>
                 ) : null}
                 <MoneyRow
+                  line="period-net"
                   label={FINANCE_PAGE.periodNet}
                   value={formatUsdCents(org.netCents)}
                 />
                 <MoneyRow
+                  line="threshold"
                   label={FINANCE_PAGE.thresholdCheck}
                   value={
                     org.thresholdCents === null ? "—" : formatUsdCents(org.thresholdCents)
                   }
                 />
-                <MoneyRow label={closeLabel} value={formatUsdCents(closeAmount)} />
+                <MoneyRow
+                  line={org.close.kind === "payable" ? "payable" : "carry-forward"}
+                  label={closeLabel}
+                  value={formatUsdCents(closeAmount)}
+                />
               </CardBody>
             </Card>
           </section>
         </>
       ) : (
-        <p className="t-body-sm text-ink-3">{FINANCE_PAGE.noTerm}</p>
+        <section className="flex flex-col gap-3">
+          <p className="t-body-sm text-ink-3">{FINANCE_PAGE.noTerm}</p>
+          <ItemizedList items={[...statement.recoupItems, ...statement.adjustmentItems]} />
+        </section>
       )}
     </div>
   );

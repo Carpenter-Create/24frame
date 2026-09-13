@@ -13,7 +13,7 @@ import {
   staffCanWriteFinance,
 } from "@/lib/finance";
 import { PeriodStatementView } from "@/components/finance/period-statement";
-import { buildPeriodStatement } from "@/lib/finance-statement";
+import { assemblePeriodStatement } from "@/lib/finance-statement";
 import {
   ClosePeriodForm,
   ExternalIdForm,
@@ -97,47 +97,15 @@ export default async function GcFinancePeriodPage({
     ? period.organizations[0]?.name
     : period.organizations?.name;
   const titleById = new Map((titleRows ?? []).map((t) => [t.id, t.title]));
-  const importById = new Map((importRows ?? []).map((imp) => [imp.id, imp.filename]));
   const ledger = ledgerRows ?? [];
-  const postedItem = (kind: "recoup" | "adjustment" | "sale") =>
-    ledger
-      .filter((row) => row.kind === kind)
-      .map((row) => ({
-        id: row.id,
-        kind,
-        amountCents: row.amount_cents,
-        titleId: row.title_id,
-        titleName: row.title_id ? (titleById.get(row.title_id) ?? row.title_id) : null,
-        note: row.note,
-      }));
-  const statement = buildPeriodStatement({
+  const statement = assemblePeriodStatement({
     clientRateBp: term?.revenue_share_rate_bp ?? null,
     openingCents: period.opening_balance_cents,
     thresholdCents: period.threshold_cents,
-    sourceLines: (lineRows ?? []).map((line) => ({
-      id: line.id,
-      importId: line.import_id,
-      importFilename: importById.get(line.import_id) ?? null,
-      lineNo: line.line_no,
-      endpoint: line.endpoint,
-      externalId: line.external_id,
-      titleId: line.title_id,
-      titleName: line.title_id ? (titleById.get(line.title_id) ?? line.title_id) : null,
-      bankReceiptCents: line.bank_receipt_cents,
-      reportedCents: line.reported_cents,
-    })),
-    recoupItems: postedItem("recoup"),
-    adjustmentItems: postedItem("adjustment"),
-    staffSaleItems: ledger
-      .filter((row) => row.kind === "sale" && !row.sales_line_id)
-      .map((row) => ({
-        id: row.id,
-        kind: "sale" as const,
-        amountCents: row.amount_cents,
-        titleId: row.title_id,
-        titleName: row.title_id ? (titleById.get(row.title_id) ?? row.title_id) : null,
-        note: row.note,
-      })),
+    titles: (titleRows ?? []).map((t) => ({ id: t.id, title: t.title })),
+    imports: (importRows ?? []).map((imp) => ({ id: imp.id, filename: imp.filename })),
+    lines: lineRows ?? [],
+    ledger,
   });
 
   return (
