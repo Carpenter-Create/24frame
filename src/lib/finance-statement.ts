@@ -6,11 +6,11 @@ import {
   type CloseDecision,
 } from "@/lib/finance-compute";
 
-// Official statement shape (CoS 2026-09-13). Ops and a later recipient view
+// Official statement shape (CoS 2026-09-13). Ops and recipient views
 // both call assemblePeriodStatement — same numbers, recipient read-only.
-// ledger_entries is posted SoT. Source lines stay on the statement.
-// toStatementOutput is the 24Frame payload for a later PDF/CSV — input first,
-// then house compute. Do not drop source data. No second fee field.
+// App surfaces pass postedOnly: ledger_entries is the money SoT. Next.js
+// must not recompute client share. Worker/unit tests may omit postedOnly
+// to exercise finance-compute.ts. No second fee field.
 
 export const STATEMENT_TRANSPARENCY_LINES = [
   "bankReceiptCents",
@@ -163,6 +163,9 @@ export type StatementOutputInputLine = {
   transactionDate: string | null;
   importFilename: string | null;
   importContentHash: string | null;
+  lineNo: number;
+  titleId: string | null;
+  titleName: string | null;
 };
 
 export type StatementOutput = {
@@ -195,6 +198,9 @@ export function toStatementOutput(statement: PeriodStatement): StatementOutput {
         transactionDate: line.transactionDate,
         importFilename: line.importFilename,
         importContentHash: line.importContentHash,
+        lineNo: line.lineNo,
+        titleId: line.titleId,
+        titleName: line.titleName,
       })),
     },
     compute: {
@@ -256,6 +262,7 @@ export function buildPeriodStatement(input: {
   adjustmentItems: readonly StatementPostedItem[];
   staffSaleItems: readonly StatementPostedItem[];
   postedSales?: readonly PostedSaleRef[];
+  postedOnly?: boolean;
 }): PeriodStatement {
   const sourceLines = [...input.sourceLines];
   const unmappedLines = sourceLines.filter((line) => !line.titleId);
@@ -281,10 +288,12 @@ export function buildPeriodStatement(input: {
       const posted = postedByLine.get(line.id);
       const share =
         posted?.clientShareCents ??
-        (input.clientRateBp === null ? 0 : clientShareCents(line.bankReceiptCents, input.clientRateBp));
+        (input.postedOnly || input.clientRateBp === null
+          ? 0
+          : clientShareCents(line.bankReceiptCents, input.clientRateBp));
       const keep =
         posted?.aggregatorKeepCents ??
-        (input.clientRateBp === null
+        (input.postedOnly || input.clientRateBp === null
           ? 0
           : aggregatorKeepCents(line.bankReceiptCents, input.clientRateBp));
       title.bankReceiptCents += line.bankReceiptCents;
@@ -364,6 +373,7 @@ export function assemblePeriodStatement(input: {
   imports: ReadonlyArray<{ id: string; filename: string; content_hash?: string | null }>;
   lines: readonly StatementLineRow[];
   ledger: readonly StatementLedgerRow[];
+  postedOnly?: boolean;
 }): PeriodStatement {
   const titleById = new Map(input.titles.map((title) => [title.id, title.title]));
   const importById = new Map(input.imports.map((imp) => [imp.id, imp.filename]));
@@ -418,5 +428,6 @@ export function assemblePeriodStatement(input: {
       .filter((row) => row.kind === "sale")
       .map((row) => postedSaleFromRefs(row.sales_line_id, row.source_refs))
       .filter((sale): sale is PostedSaleRef => sale !== null),
+    postedOnly: input.postedOnly,
   });
 }

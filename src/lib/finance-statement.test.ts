@@ -270,4 +270,42 @@ describe("buildPeriodStatement", () => {
     expect(statement.org?.close.closingBalanceCents).toBe(850);
     expect(statement.org?.thresholdMet).toBe(false);
   });
+
+  it("postedOnly uses ledger refs and does not recompute client share", () => {
+    const computed = buildPeriodStatement({
+      clientRateBp: 8500,
+      openingCents: 0,
+      thresholdCents: 1000,
+      sourceLines: [line({ id: "l1", bankReceiptCents: 2500 })],
+      recoupItems: [],
+      adjustmentItems: [],
+      staffSaleItems: [],
+    });
+    const posted = buildPeriodStatement({
+      postedOnly: true,
+      clientRateBp: 8500,
+      openingCents: 0,
+      thresholdCents: 1000,
+      sourceLines: [line({ id: "l1", bankReceiptCents: 2500 })],
+      recoupItems: [],
+      adjustmentItems: [],
+      staffSaleItems: [],
+      postedSales: [
+        { salesLineId: "l1", clientShareCents: 2125, aggregatorKeepCents: 375, clientRateBp: 8500 },
+      ],
+    });
+    const unposted = buildPeriodStatement({
+      postedOnly: true,
+      clientRateBp: 8500,
+      openingCents: 0,
+      thresholdCents: 1000,
+      sourceLines: [line({ id: "l1", bankReceiptCents: 2500 })],
+      recoupItems: [],
+      adjustmentItems: [],
+      staffSaleItems: [],
+    });
+    expect(computed.org?.clientShareCents).toBe(2125);
+    expect(posted.org?.clientShareCents).toBe(2125);
+    expect(unposted.org?.clientShareCents).toBe(0);
+  });
 });

@@ -61,6 +61,17 @@ Full doctrine: [`AGENTS.md`](../../AGENTS.md). Domain truth: [`docs/domain-spec.
 
 ---
 
+## Finance AWS spine (authorized Slice 2)
+
+In the Slice 2 pull request — not production-applied.
+
+- AWS owns finance files + worker compute. Live relational SoT clusters are frame-aurora-dev and frame-aurora-prod in us-west-2. Auth stays Supabase Auth. The app still reads survivor Postgres until Secure Compute and cutover.
+- Founder applies the Slice 2 finance migrations after merge. Filenames live under `supabase/migrations`.
+- Live finance buckets and IAM exist. CloudFront, EventBridge, ECS deploy, and SQL apply are still founder-gated.
+- Production mutation table above is unchanged until founder applies.
+
+---
+
 ## Not authority
 
 - [`docs/HANDOFF.md`](../HANDOFF.md) — historical handoff; preserve as evidence; do not act on its branch, SHA, production, or task statements without fresh verification.

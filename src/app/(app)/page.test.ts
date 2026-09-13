@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getOrgContext } from "@/lib/supabase/context";
 import { CLIENTS_PAGE, ORG_ROLE_LABELS, ORG_STATUS_LABELS } from "@/lib/clients";
 import { DASHBOARD_HOME, dashboardJustInDate } from "@/lib/dashboard-home";
-import { FINANCE_PAGE } from "@/lib/finance";
+import { FINANCE_CLIENT, FINANCE_PAGE } from "@/lib/finance";
 import { AGGREGATION_EMPTY } from "@/lib/aggregation-empty";
 import { DASHBOARD_ATTENTION_CLEAR, dashboardAttentionSummary } from "@/lib/findings";
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
@@ -60,8 +60,18 @@ function stubClient(
     order: vi.fn(() => titlesChain),
     range: vi.fn(async () => ({ data: titles, error: null })),
   };
+  const financeChain = {
+    select: vi.fn(() => financeChain),
+    eq: vi.fn(() => financeChain),
+    is: vi.fn(() => financeChain),
+    order: vi.fn(() => financeChain),
+    limit: vi.fn(() => financeChain),
+    range: vi.fn(async () => ({ data: [], error: null })),
+    maybeSingle: vi.fn(async () => ({ data: null, error: null })),
+  };
   const from = vi.fn((table: string) => {
     if (table === "titles") return titlesChain;
+    if (table === "finance_periods" || table === "contract_terms") return financeChain;
     throw new Error(`unexpected from(${table})`);
   });
   const rpc = vi.fn(async (name: string) => {
@@ -444,6 +454,22 @@ describe("client home copy lock", () => {
     expect(row).toContain("Artwork missing");
     expect(html.split("Artwork missing").length - 1).toBe(1);
     expect(html).not.toContain("Metadata incomplete");
+  });
+
+  it("shows the client finance glance for a view_financial seat", async () => {
+    stubClient();
+    vi.mocked(getOrgContext).mockResolvedValue(
+      ctx({ isGcStaff: false, orgStatus: "active" }) as never,
+    );
+    const html = renderToStaticMarkup(await DashboardPage());
+    expect(html).toContain("data-finance-glance");
+    expect(html).toContain(FINANCE_CLIENT.glanceRate);
+    expect(html).toContain(FINANCE_CLIENT.glanceBalance);
+    expect(html).toContain(FINANCE_CLIENT.glanceThreshold);
+    expect(html).toContain(FINANCE_CLIENT.glanceLatest);
+    expect(html).toContain('href="/finance"');
+    expect(html).not.toContain("data-finance-glance-stub");
+    expect(html).not.toContain("Revenue");
   });
 
   it("hides Add Title on an empty catalog when the viewer cannot operate", async () => {
