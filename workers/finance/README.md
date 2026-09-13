@@ -32,7 +32,8 @@ AURORA_DATABASE_URL=                # prefer when set; refused if it looks like 
 Do this after merge. Do not push images from an unauthenticated cloud agent.
 
 ```bash
-# From repo root, after aws sso / ecr login to 405912452061 us-west-2
+# From repo root, after aws sso / ecr login to 405912452061 us-west-2.
+# Install COPYs pnpm-workspace.yaml so pnpm 11 overrides/allowBuilds match the lockfile.
 REPO=405912452061.dkr.ecr.us-west-2.amazonaws.com/24frame-finance-worker
 aws ecr get-login-password --region us-west-2 \
   | docker login --username AWS --password-stdin 405912452061.dkr.ecr.us-west-2.amazonaws.com
