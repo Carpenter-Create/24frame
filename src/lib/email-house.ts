@@ -3,10 +3,11 @@ import { PARENT_ENTITY, PRODUCT_NAME } from "@/lib/product";
 // House email chrome — Coinbase-scale type and air (Adam lock 2026-09-13).
 // Light-only. White card on #FAFAFB. Auth HTML in supabase/templates copies
 // these values; email tests lock the pair.
-// One-accent lock (Adam 2026-09-13, supersedes #250 navy): Sporty Blue is
-// the Sign in button fill and the 24frame.co footer link only. The mark is
-// black/charcoal Asset 10 geometry — white crop marks and white 24. Never
-// put Sporty Blue on the numeral.
+// One-accent lock (Adam 2026-09-13, supersedes Asset 10 square / #250 navy /
+// #251 charcoal square): Sporty Blue is the Sign in button fill and the
+// 24frame.co footer link only. The mark is the circle emblem — all-black /
+// near-black #14171A ink on a white field, with generous white padding so
+// the circle and crop marks never clip. Never put Sporty Blue on the numeral.
 
 export const EMAIL_ACCENT = "#1769FF";
 export const EMAIL_BG = "#FAFAFB";

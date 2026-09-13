@@ -72,7 +72,7 @@ function assertHouseChrome(html: string) {
 }
 
 describe("wrapHouseEmail", () => {
-  it("uses the Coinbase-scale house shell with a black/charcoal mark and well-formed format-detection", () => {
+  it("uses the Coinbase-scale house shell with a black circle emblem and well-formed format-detection", () => {
     const html = wrapHouseEmail(`<p style="color:${EMAIL_INK}">Inner</p>`);
     assertHouseChrome(html);
     expect(html).toContain("Inner");
@@ -127,7 +127,7 @@ describe("houseOtpCode", () => {
 });
 
 describe("email-logo.png", () => {
-  it("is a padded black/charcoal Asset 10 square at app.24frame.co/email-logo.png", () => {
+  it("is a padded all-black circle emblem at app.24frame.co/email-logo.png", () => {
     expect(existsSync(LOGO_PNG)).toBe(true);
     const bytes = statSync(LOGO_PNG).size;
     expect(bytes).toBeGreaterThan(200);
@@ -140,23 +140,65 @@ describe("email-logo.png", () => {
     expect(width).toBe(160);
 
     const decoded = decodePngRgb(png);
-    const corner = decoded.pixel(2, 2);
-    expect(corner[0]).toBeGreaterThan(240);
-    expect(corner[1]).toBeGreaterThan(240);
-    expect(corner[2]).toBeGreaterThan(240);
-    const field = decoded.pixel(Math.floor(width * 0.35), Math.floor(height * 0.22));
-    expect(field[0] + field[1] + field[2]).toBeLessThan(80);
-    expect(Math.abs(field[2] - field[0])).toBeLessThan(16);
-    expect(Math.abs(field[1] - field[0])).toBeLessThan(16);
-    const numeral = decoded.pixel(70, 70);
-    expect(Math.min(numeral[0], numeral[1], numeral[2])).toBeGreaterThan(240);
-    for (let y = 0; y < height; y += 4) {
-      for (let x = 0; x < width; x += 4) {
+    const white = (p: [number, number, number]) => {
+      expect(p[0]).toBeGreaterThan(240);
+      expect(p[1]).toBeGreaterThan(240);
+      expect(p[2]).toBeGreaterThan(240);
+    };
+    const nearBlack = (p: [number, number, number]) => {
+      expect(Math.max(p[0], p[1], p[2])).toBeLessThan(40);
+      expect(Math.abs(p[2] - p[0])).toBeLessThan(16);
+      expect(Math.abs(p[1] - p[0])).toBeLessThan(16);
+    };
+
+    // White field + pad — not a filled navy/charcoal Asset 10 square.
+    white(decoded.pixel(2, 2));
+    white(decoded.pixel(width - 3, 2));
+    white(decoded.pixel(2, height - 3));
+    white(decoded.pixel(width - 3, height - 3));
+    white(decoded.pixel(Math.floor(width / 2), Math.floor(height / 2)));
+    white(decoded.pixel(Math.floor(width * 0.35), Math.floor(height * 0.22)));
+
+    // Numeral is near-black ink on white (not a white 24 on a dark square).
+    nearBlack(decoded.pixel(45, 87));
+    nearBlack(decoded.pixel(90, 87));
+
+    let ink = 0;
+    let minX = width;
+    let minY = height;
+    let maxX = 0;
+    let maxY = 0;
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
         const [r, g, b] = decoded.pixel(x, y);
         const sporty = Math.abs(r - 0x17) + Math.abs(g - 0x69) + Math.abs(b - 0xff);
         expect(sporty).toBeGreaterThan(80);
+        expect(b > r + 24 && b > g + 16).toBe(false);
+        if (Math.min(r, g, b) < 240) {
+          ink += 1;
+          if (x < minX) minX = x;
+          if (y < minY) minY = y;
+          if (x > maxX) maxX = x;
+          if (y > maxY) maxY = y;
+          expect(Math.abs(r - g)).toBeLessThan(20);
+          expect(Math.abs(g - b)).toBeLessThan(20);
+        }
       }
     }
+
+    // Line-art circle emblem, not a filled rounded square (~50% dark).
+    const fraction = ink / (width * height);
+    expect(fraction).toBeGreaterThan(0.04);
+    expect(fraction).toBeLessThan(0.3);
+
+    const padL = minX / width;
+    const padT = minY / height;
+    const padR = (width - 1 - maxX) / width;
+    const padB = (height - 1 - maxY) / height;
+    expect(padL).toBeGreaterThanOrEqual(0.12);
+    expect(padT).toBeGreaterThanOrEqual(0.12);
+    expect(padR).toBeGreaterThanOrEqual(0.12);
+    expect(padB).toBeGreaterThanOrEqual(0.12);
   });
 });
 
