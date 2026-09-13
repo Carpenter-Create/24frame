@@ -3,9 +3,14 @@ import { Resend } from "resend";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   EMAIL_BODY,
+  EMAIL_BODY_LINE,
+  EMAIL_BODY_SIZE,
+  EMAIL_HEADLINE_LINE,
+  EMAIL_HEADLINE_SIZE,
   EMAIL_INK,
   EMAIL_SECONDARY,
   houseOtpCode,
+  housePrimaryButton,
   housePrimaryLink,
   wrapHouseEmail,
 } from "@/lib/email-house";
@@ -66,11 +71,11 @@ export function buildMagicLinkEmail(signInUrl: string): { subject: string; text:
     `Use this link to sign in. If you didn't request this, you can ignore this message.\n\n` +
     `Sign in to ${PRODUCT_NAME}: ${signInUrl}\n`;
   const html = wrapHouseEmail(
-    `<p style="margin:0 0 12px;font-size:23px;line-height:28px;font-weight:600;color:${EMAIL_INK}">Sign in</p>` +
-      `<p style="margin:0 0 24px;font-size:15px;line-height:22px;color:${EMAIL_BODY}">` +
+    `<p style="margin:0 0 12px;font-size:${EMAIL_HEADLINE_SIZE}px;line-height:${EMAIL_HEADLINE_LINE}px;font-weight:600;color:${EMAIL_INK}">Sign in</p>` +
+      `<p style="margin:0 0 28px;font-size:${EMAIL_BODY_SIZE}px;line-height:${EMAIL_BODY_LINE}px;color:${EMAIL_BODY}">` +
       `Use this link to sign in. If you didn't request this, you can ignore this message.` +
       `</p>` +
-      housePrimaryLink(escapeHtml(signInUrl), `Sign in to ${PRODUCT_NAME}`),
+      housePrimaryButton(escapeHtml(signInUrl), "Sign in"),
   );
   return { subject, text, html };
 }
@@ -102,12 +107,12 @@ export function buildSignInWithCodeEmail(
     `Sign in to ${PRODUCT_NAME}: ${signInUrl}\n\n` +
     `Or enter this code: ${code}\n`;
   const html = wrapHouseEmail(
-    `<p style="margin:0 0 12px;font-size:23px;line-height:28px;font-weight:600;color:${EMAIL_INK}">Sign in</p>` +
-      `<p style="margin:0 0 24px;font-size:15px;line-height:22px;color:${EMAIL_BODY}">` +
+    `<p style="margin:0 0 12px;font-size:${EMAIL_HEADLINE_SIZE}px;line-height:${EMAIL_HEADLINE_LINE}px;font-weight:600;color:${EMAIL_INK}">Sign in</p>` +
+      `<p style="margin:0 0 28px;font-size:${EMAIL_BODY_SIZE}px;line-height:${EMAIL_BODY_LINE}px;color:${EMAIL_BODY}">` +
       `Use this link to sign in. If you didn't request this, you can ignore this message.` +
       `</p>` +
-      housePrimaryLink(escapeHtml(signInUrl), `Sign in to ${PRODUCT_NAME}`) +
-      `<p style="margin:0 0 8px;font-size:15px;line-height:22px;color:${EMAIL_BODY}">Or enter this code:</p>` +
+      housePrimaryButton(escapeHtml(signInUrl), "Sign in") +
+      `<p style="margin:0 0 8px;font-size:${EMAIL_BODY_SIZE}px;line-height:${EMAIL_BODY_LINE}px;color:${EMAIL_BODY}">Or enter this code:</p>` +
       `<div style="margin:0">${houseOtpCode(code)}</div>`,
   );
   return { subject, text, html };

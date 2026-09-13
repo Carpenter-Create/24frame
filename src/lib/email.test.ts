@@ -6,9 +6,13 @@ import { buildMagicLinkEmail, buildNotificationEmail, buildOtpEmail, buildSignIn
 import {
   EMAIL_ACCENT,
   EMAIL_ADDRESS,
+  EMAIL_BODY_SIZE,
   EMAIL_COPYRIGHT,
   EMAIL_FORMAT_DETECTION,
+  EMAIL_GEIST_HREF,
+  EMAIL_HEADLINE_SIZE,
   EMAIL_INK,
+  EMAIL_LOGO_DISPLAY,
   EMAIL_LOGO_URL,
   EMAIL_SITE_LABEL,
   EMAIL_SITE_URL,
@@ -23,14 +27,34 @@ function productResidue(html: string): string {
   return html.replaceAll("Global Content Holdings LLC", "");
 }
 
-function assertNoFilledPill(html: string) {
-  expect(html).not.toMatch(/background:\s*#1769FF/i);
-  expect(html).not.toMatch(/border-radius:\s*999px/);
-  expect(html).not.toMatch(/height:4px;background:#1769FF/);
-}
-
 function withoutAnchors(html: string): string {
   return html.replace(/<a\b[^>]*>[\s\S]*?<\/a>/gi, "");
+}
+
+function assertFormatDetectionWellFormed(html: string) {
+  const fd = html.indexOf('name="format-detection"');
+  const geist = html.indexOf(EMAIL_GEIST_HREF) !== -1 ? html.indexOf(EMAIL_GEIST_HREF) : html.indexOf("fonts.googleapis.com/css2?family=Geist");
+  expect(fd).toBeGreaterThan(-1);
+  expect(geist).toBeGreaterThan(fd);
+  expect(html.slice(fd, geist)).toMatch(/content="[^"]+"\s*\/?>/);
+  expect(html).toContain(`content="${EMAIL_FORMAT_DETECTION}">`);
+}
+
+function assertCoinbaseScale(html: string) {
+  expect(EMAIL_HEADLINE_SIZE).toBeGreaterThan(23);
+  expect(EMAIL_BODY_SIZE).toBeGreaterThan(15);
+  expect(html).toContain(`font-size:${EMAIL_HEADLINE_SIZE}px`);
+  expect(html).toContain(`font-size:${EMAIL_BODY_SIZE}px`);
+  expect(html).toContain(`width:${EMAIL_LOGO_DISPLAY}px;height:${EMAIL_LOGO_DISPLAY}px`);
+}
+
+function assertSignInButton(html: string) {
+  expect(html).toContain(">Sign in</a>");
+  expect(html).toContain(`background:${SPORTY_BLUE}`);
+  expect(html).toContain(`bgcolor="${SPORTY_BLUE}"`);
+  expect(html).not.toContain("Sign in to 24Frame");
+  expect(html).not.toMatch(/border-radius:\s*999px/);
+  expect(html).not.toMatch(/<img[^>]*#1769FF/i);
 }
 
 function assertOtpNotLinkified(html: string, code: string) {
@@ -38,13 +62,13 @@ function assertOtpNotLinkified(html: string, code: string) {
   expect(html).toContain(`color:${EMAIL_INK}`);
   expect(html).toContain("text-decoration:none");
   expect(html).toContain('x-apple-data-detectors="false"');
-  expect(html).toContain(`content="${EMAIL_FORMAT_DETECTION}"`);
+  assertFormatDetectionWellFormed(html);
   expect(html).toContain("a[x-apple-data-detectors]");
   const codeIdx = html.indexOf(code);
   const region = html.slice(Math.max(0, codeIdx - 280), codeIdx + code.length + 40);
   expect(region).not.toMatch(/color:\s*#1769FF/i);
   expect(region).not.toMatch(/text-decoration:\s*underline/);
-  expect(withoutAnchors(html)).not.toMatch(/#1769FF/i);
+  expect(region).not.toMatch(/background:\s*#1769FF/i);
 }
 
 describe("buildOtpEmail", () => {
@@ -57,7 +81,7 @@ describe("buildOtpEmail", () => {
     expect(text).toMatch(/10 minutes/);
   });
 
-  it("uses the rematched house shell with Sporty Blue as a link accent", () => {
+  it("uses the rematched house shell; OTP stays near-black", () => {
     const { subject, html } = buildOtpEmail("012345");
     expect(html).toContain("24Frame");
     expect(EMAIL_ACCENT).toBe(SPORTY_BLUE);
@@ -67,7 +91,8 @@ describe("buildOtpEmail", () => {
     expect(html).toContain(`color:${SPORTY_BLUE}`);
     expect(html).toContain(EMAIL_COPYRIGHT);
     expect(html).toContain(EMAIL_ADDRESS);
-    assertNoFilledPill(html);
+    expect(html).not.toMatch(/background:\s*#1769FF/i);
+    expect(html).not.toMatch(/border-radius:\s*999px/);
     assertOtpNotLinkified(html, "012345");
     expect(subject).not.toMatch(/Global Content|\bGC\b|globalcontent/i);
     expect(productResidue(html)).not.toMatch(/\bGC\b|globalcontent/i);
@@ -92,7 +117,8 @@ describe("buildNotificationEmail", () => {
     expect(html).toContain(EMAIL_LOGO_URL);
     expect(html).toContain(EMAIL_SITE_LABEL);
     expect(html).toContain(EMAIL_COPYRIGHT);
-    assertNoFilledPill(html);
+    expect(html).not.toMatch(/background:\s*#1769FF/i);
+    expect(html).not.toMatch(/border-radius:\s*999px/);
     expect(productResidue(html)).not.toMatch(/\bGC\b|globalcontent/i);
     expect(html).toContain("North Wind was returned for revision.");
   });
@@ -102,15 +128,13 @@ describe("buildMagicLinkEmail", () => {
   const signInUrl =
     "https://app.24frame.co/auth/callback?token_hash=test-token&type=email";
 
-  it("is link-only house mail: Sporty Blue text link, no OTP code", () => {
+  it("is link-only house mail: filled Sign in button, no OTP code", () => {
     const { subject, text, html } = buildMagicLinkEmail(signInUrl);
     expect(subject).toBe("Your 24Frame sign-in link");
     expect(text).toContain(signInUrl);
     expect(text).not.toMatch(/enter this code/i);
     expect(html).toContain("Sign in");
-    expect(html).toContain("Sign in to 24Frame");
     expect(html).toContain(`href="${signInUrl.replaceAll("&", "&amp;")}"`);
-    expect(html).toContain(`color:${SPORTY_BLUE}`);
     expect(html).toContain(EMAIL_LOGO_URL);
     expect(html).toContain(EMAIL_SITE_LABEL);
     expect(html).toContain(EMAIL_COPYRIGHT);
@@ -118,7 +142,9 @@ describe("buildMagicLinkEmail", () => {
     expect(html).not.toContain("{{ .Token }}");
     expect(html).not.toMatch(/enter this code/i);
     expect(html).not.toMatch(/letter-spacing:2px/);
-    assertNoFilledPill(html);
+    assertSignInButton(html);
+    assertCoinbaseScale(html);
+    assertFormatDetectionWellFormed(html);
     expect(subject).not.toMatch(/Global Content|\bGC\b|globalcontent/i);
     expect(productResidue(html)).not.toMatch(/\bGC\b|globalcontent/i);
     expect(html.toLowerCase()).not.toMatch(/seamless|frictionless|elevate|amplify/);
@@ -134,32 +160,33 @@ describe("buildSignInWithCodeEmail", () => {
     expect(subject).toBe("Your 24Frame sign-in link");
     expect(text).toContain(signInUrl);
     expect(text).toContain("Or enter this code: 847291");
-    expect(html).toContain("Sign in to 24Frame");
     expect(html).toContain(`href="${signInUrl.replaceAll("&", "&amp;")}"`);
     expect(html).toContain("Or enter this code:");
     expect(html).toContain("847291");
     expect(html).not.toContain("{{ .Token }}");
+    assertSignInButton(html);
+    assertCoinbaseScale(html);
     assertOtpNotLinkified(html, "847291");
-    assertNoFilledPill(html);
+    expect(withoutAnchors(html)).toContain(`background:${SPORTY_BLUE}`);
     expect(subject).not.toMatch(/Global Content|\bGC\b|globalcontent/i);
     expect(productResidue(html)).not.toMatch(/\bGC\b|globalcontent/i);
   });
 });
 
 describe("Auth magic-link template", () => {
-  it("is the house Auth mail HTML with a Sporty Blue text link, not a filled pill", () => {
+  it("is the house Auth mail HTML with a filled Sign in button, not a text-link-only CTA", () => {
     const html = readFileSync(AUTH_TEMPLATE, "utf8");
     expect(AUTH_CONFIG).toContain("[auth.email.template.magic_link]");
     expect(AUTH_CONFIG).toContain('subject = "Your 24Frame sign-in link"');
     expect(AUTH_CONFIG).toContain('content_path = "./supabase/templates/magic_link.html"');
     expect(html).toContain("24Frame");
     expect(html).toContain("Sign in");
-    expect(html).toContain("Sign in to 24Frame");
+    expect(html).not.toContain("Sign in to 24Frame</a>");
     expect(html).toContain("{{ .ConfirmationURL }}");
     expect(html).toContain("{{ .Token }}");
     expect(html).toContain("Or enter this code:");
     expect(html).toContain('font-size:24px;font-weight:600;letter-spacing:2px');
-    expect(html).toContain(`content="${EMAIL_FORMAT_DETECTION}"`);
+    assertFormatDetectionWellFormed(html);
     expect(html).toContain("x-apple-disable-message-reformatting");
     expect(html).toContain("a[x-apple-data-detectors]");
     expect(html).toContain('x-apple-data-detectors="false"');
@@ -171,12 +198,14 @@ describe("Auth magic-link template", () => {
     expect(otpRegion).toContain("text-decoration:none");
     expect(otpRegion).not.toMatch(/color:\s*#1769FF/i);
     expect(otpRegion).not.toMatch(/text-decoration:\s*underline/);
-    expect(withoutAnchors(html)).not.toMatch(/#1769FF/i);
     expect(html).toContain(SPORTY_BLUE);
-    expect(html).toContain(`color:${SPORTY_BLUE}`);
+    expect(html).toContain(`background:${SPORTY_BLUE}`);
+    expect(html).toContain(`bgcolor="${SPORTY_BLUE}"`);
+    expect(html).toContain(">Sign in</a>");
     expect(html).toContain(EMAIL_LOGO_URL);
     expect(EMAIL_LOGO_URL).toBe("https://app.24frame.co/email-logo.png");
     expect(html).toContain('alt="24Frame"');
+    expect(html).not.toMatch(/<img[^>]*#1769FF/i);
     expect(html).toContain("Radically different film distribution.");
     expect(html).toContain("https://24frame.co");
     expect(html).toContain("24frame.co");
@@ -188,7 +217,10 @@ describe("Auth magic-link template", () => {
     expect(html).toContain("border-radius:14px");
     expect(html).toContain("#E6E8EB");
     expect(html).toContain("fonts.googleapis.com/css2?family=Geist");
-    assertNoFilledPill(html);
+    expect(html).toContain("font-size:28px");
+    expect(html).toContain("font-size:17px");
+    expect(html).toContain("width:64px;height:64px");
+    expect(html).not.toMatch(/border-radius:\s*999px/);
     expect(productResidue(html)).not.toMatch(/\bGC\b|globalcontent/i);
     expect(html.toLowerCase()).not.toMatch(/seamless|frictionless|elevate|amplify/);
   });
