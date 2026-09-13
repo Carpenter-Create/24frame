@@ -11,6 +11,7 @@ import {
   APP_ERROR,
   APP_NOT_FOUND,
   LOGIN_AUTH_ERROR,
+  LOGIN_VERIFICATION_FAILED,
   loginAuthErrorNotice,
 } from "./app-states";
 
@@ -22,6 +23,7 @@ describe("loginAuthErrorNotice", () => {
     expect(LOGIN_AUTH_ERROR).toBe(
       "That sign-in link is no longer valid. Request a new one.",
     );
+    expect(LOGIN_VERIFICATION_FAILED).toBe("Verification failed — please try again.");
   });
 
   it("stays silent for missing, empty, or any other query value", () => {

@@ -1,6 +1,8 @@
 export const LOGIN_AUTH_ERROR =
   "That sign-in link is no longer valid. Request a new one.";
 
+export const LOGIN_VERIFICATION_FAILED = "Verification failed — please try again.";
+
 /** Exact `error=auth` from /auth/callback — never echo or interpret any other value. */
 export function loginAuthErrorNotice(error: unknown): string | null {
   return error === "auth" ? LOGIN_AUTH_ERROR : null;

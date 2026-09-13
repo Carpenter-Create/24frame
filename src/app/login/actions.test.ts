@@ -11,6 +11,7 @@ vi.mock("@/lib/auth-magic-link", () => ({
 import { headers } from "next/headers";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { issueDashboardSignInLink } from "@/lib/auth-magic-link";
+import { LOGIN_VERIFICATION_FAILED } from "@/lib/app-states";
 import { requestMagicLink } from "./actions";
 
 function form(fields: Record<string, string>): FormData {
@@ -47,7 +48,7 @@ describe("requestMagicLink", () => {
       ),
     ).resolves.toEqual({
       ok: false,
-      message: "Verification failed — please try again.",
+      message: LOGIN_VERIFICATION_FAILED,
     });
     expect(issueDashboardSignInLink).not.toHaveBeenCalled();
   });

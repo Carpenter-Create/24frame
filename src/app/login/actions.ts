@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 
+import { LOGIN_VERIFICATION_FAILED } from "@/lib/app-states";
 import {
   DASHBOARD_SIGN_IN_SEND_FAILED,
   DASHBOARD_SIGN_IN_SENT,
@@ -25,7 +26,7 @@ export async function requestMagicLink(
   if (!email) return { ok: false, message: "Enter your email address." };
 
   if (!(await verifyTurnstile(token))) {
-    return { ok: false, message: "Verification failed — please try again." };
+    return { ok: false, message: LOGIN_VERIFICATION_FAILED };
   }
 
   const origin = (await headers()).get("origin");

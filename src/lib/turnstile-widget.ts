@@ -6,10 +6,19 @@
 
 export const TURNSTILE_WIDGET_SIZE = "flexible" as const;
 
+// Login is interaction-only. `flexible` is a visible-widget size (min 300px) and
+// must not be forwarded to Cloudflare here — Safari will submit before a token
+// exists if the widget is still settling. `normal` is a valid CF size; marsidev
+// still emits real container dimensions so Safari does not paint style={}.
+export const LOGIN_TURNSTILE_SIZE = "normal" as const;
+
 /** Login magic-link: managed/invisible until a challenge is actually required. */
 export const LOGIN_TURNSTILE_OPTIONS = {
   appearance: "interaction-only",
-  size: TURNSTILE_WIDGET_SIZE,
+  size: LOGIN_TURNSTILE_SIZE,
+  // We own the hidden field from onSuccess. CF's injected input is easy for
+  // Safari to submit empty on the first tap.
+  responseField: false,
 } as const;
 
 /** Portal OTP: visible challenge (submit waits on the token). Same size lock. */
