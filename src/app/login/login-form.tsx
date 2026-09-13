@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
 import { Button } from "@/components/ui/button";
@@ -15,18 +15,22 @@ import { requestMagicLink, type LoginState } from "./actions";
 const INITIAL: LoginState = { ok: false, message: "" };
 
 export function LoginForm({ authError }: { authError: string | null }) {
-  const [state, action, pending] = useActionState(requestMagicLink, INITIAL);
   const [token, setToken] = useState("");
   const [challengeError, setChallengeError] = useState(false);
   const turnstileRef = useRef<TurnstileInstance | null>(null);
 
-  // Tokens are single-use. A failed action (empty Safari submit, Siteverify reject,
-  // or send failure) must mint a fresh challenge or the retry reuses a dead token.
-  useEffect(() => {
-    if (pending || state.ok || !state.message) return;
-    turnstileRef.current?.reset();
-    setToken("");
-  }, [pending, state.ok, state.message]);
+  // Tokens are single-use. Reset in this wrapper (not an effect) after a failed
+  // action so a retry does not resubmit a spent or empty Safari token.
+  async function submit(prev: LoginState, formData: FormData): Promise<LoginState> {
+    const next = await requestMagicLink(prev, formData);
+    if (!next.ok) {
+      turnstileRef.current?.reset();
+      setToken("");
+    }
+    return next;
+  }
+
+  const [state, action, pending] = useActionState(submit, INITIAL);
 
   function markReady(next: string) {
     setChallengeError(false);

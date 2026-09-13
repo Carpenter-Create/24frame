@@ -28,6 +28,7 @@ describe("Turnstile widget size lock", () => {
     expect(loginSrc).toContain('name="cf-turnstile-response"');
     expect(loginSrc).toContain("disabled={pending || !token}");
     expect(loginSrc).toContain("if (!token) event.preventDefault()");
+    expect(loginSrc).toContain("turnstileRef.current?.reset()");
     expect(loginSrc).not.toMatch(/options=\{\{\s*appearance:\s*"interaction-only"\s*\}\}/);
 
     expect(portalSrc).toContain("PORTAL_TURNSTILE_OPTIONS");
