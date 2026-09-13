@@ -1244,6 +1244,303 @@ export type Database = {
           },
         ]
       }
+      finance_periods: {
+        Row: {
+          closed_at: string | null
+          closed_by: string | null
+          closing_balance_cents: number | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          id: string
+          opening_balance_cents: number
+          org_id: string
+          period_month: number
+          period_year: number
+          status: Database["public"]["Enums"]["finance_period_status"]
+          threshold_cents: number | null
+          updated_at: string
+        }
+        Insert: {
+          closed_at?: string | null
+          closed_by?: string | null
+          closing_balance_cents?: number | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          opening_balance_cents?: number
+          org_id: string
+          period_month: number
+          period_year: number
+          status?: Database["public"]["Enums"]["finance_period_status"]
+          threshold_cents?: number | null
+          updated_at?: string
+        }
+        Update: {
+          closed_at?: string | null
+          closed_by?: string | null
+          closing_balance_cents?: number | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          opening_balance_cents?: number
+          org_id?: string
+          period_month?: number
+          period_year?: number
+          status?: Database["public"]["Enums"]["finance_period_status"]
+          threshold_cents?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finance_periods_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ledger_entries: {
+        Row: {
+          amount_cents: number
+          currency: string
+          derived_at: string
+          id: string
+          kind: Database["public"]["Enums"]["ledger_entry_kind"]
+          logic_version: string
+          note: string | null
+          org_id: string
+          period_id: string
+          posted_at: string
+          posted_by: string | null
+          sales_line_id: string | null
+          source_refs: Json
+          title_id: string | null
+        }
+        Insert: {
+          amount_cents: number
+          currency?: string
+          derived_at?: string
+          id?: string
+          kind: Database["public"]["Enums"]["ledger_entry_kind"]
+          logic_version?: string
+          note?: string | null
+          org_id: string
+          period_id: string
+          posted_at?: string
+          posted_by?: string | null
+          sales_line_id?: string | null
+          source_refs?: Json
+          title_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          currency?: string
+          derived_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["ledger_entry_kind"]
+          logic_version?: string
+          note?: string | null
+          org_id?: string
+          period_id?: string
+          posted_at?: string
+          posted_by?: string | null
+          sales_line_id?: string | null
+          source_refs?: Json
+          title_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ledger_entries_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ledger_entries_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: false
+            referencedRelation: "finance_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ledger_entries_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_imports: {
+        Row: {
+          content_hash: string
+          filename: string
+          id: string
+          imported_at: string
+          imported_by: string | null
+          org_id: string
+          period_id: string
+          status: Database["public"]["Enums"]["sales_import_status"]
+        }
+        Insert: {
+          content_hash: string
+          filename: string
+          id?: string
+          imported_at?: string
+          imported_by?: string | null
+          org_id: string
+          period_id: string
+          status?: Database["public"]["Enums"]["sales_import_status"]
+        }
+        Update: {
+          content_hash?: string
+          filename?: string
+          id?: string
+          imported_at?: string
+          imported_by?: string | null
+          org_id?: string
+          period_id?: string
+          status?: Database["public"]["Enums"]["sales_import_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_imports_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_imports_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: false
+            referencedRelation: "finance_periods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_lines: {
+        Row: {
+          created_at: string
+          currency: string
+          endpoint: string
+          external_id: string
+          bank_receipt_cents: number
+          reported_cents: number | null
+          id: string
+          import_id: string
+          line_no: number
+          mapped_at: string | null
+          org_id: string
+          period_id: string
+          raw: Json
+          title_id: string | null
+          transaction_date: string | null
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          endpoint: string
+          external_id: string
+          bank_receipt_cents: number
+          reported_cents?: number | null
+          id?: string
+          import_id: string
+          line_no: number
+          mapped_at?: string | null
+          org_id: string
+          period_id: string
+          raw?: Json
+          title_id?: string | null
+          transaction_date?: string | null
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          endpoint?: string
+          external_id?: string
+          bank_receipt_cents?: number
+          reported_cents?: number | null
+          id?: string
+          import_id?: string
+          line_no?: number
+          mapped_at?: string | null
+          org_id?: string
+          period_id?: string
+          raw?: Json
+          title_id?: string | null
+          transaction_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_lines_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_lines_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      title_external_ids: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          endpoint: string
+          external_id: string
+          id: string
+          org_id: string
+          title_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          endpoint: string
+          external_id: string
+          id?: string
+          org_id: string
+          title_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          endpoint?: string
+          external_id?: string
+          id?: string
+          org_id?: string
+          title_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "title_external_ids_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "title_external_ids_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gc_staff: {
         Row: {
           created_at: string
@@ -2317,6 +2614,54 @@ export type Database = {
         }
         Returns: string
       }
+      close_finance_period: { Args: { p_period_id: string }; Returns: undefined }
+      create_finance_period: {
+        Args: {
+          p_month: number
+          p_org_id: string
+          p_threshold_cents?: number | null
+          p_year: number
+        }
+        Returns: string
+      }
+      finance_client_share_cents: {
+        Args: { p_gross: number; p_rate_bp: number }
+        Returns: number
+      }
+      finance_logic_version: { Args: Record<PropertyKey, never>; Returns: string }
+      import_sales: {
+        Args: {
+          p_content_hash: string
+          p_filename: string
+          p_lines: Json
+          p_period_id: string
+        }
+        Returns: string
+      }
+      map_sales_import: { Args: { p_import_id: string }; Returns: number }
+      map_sales_line: {
+        Args: { p_line_id: string; p_title_id: string }
+        Returns: undefined
+      }
+      post_ledger_entry: {
+        Args: {
+          p_amount_cents: number
+          p_kind: Database["public"]["Enums"]["ledger_entry_kind"]
+          p_note?: string | null
+          p_period_id: string
+          p_sales_line_id?: string | null
+          p_title_id?: string | null
+        }
+        Returns: string
+      }
+      set_finance_period_threshold: {
+        Args: { p_period_id: string; p_threshold_cents: number | null }
+        Returns: undefined
+      }
+      upsert_title_external_id: {
+        Args: { p_endpoint: string; p_external_id: string; p_title_id: string }
+        Returns: string
+      }
       conversation_has_block: {
         Args: { p_conversation: string; p_user: string }
         Returns: boolean
@@ -2666,6 +3011,7 @@ export type Database = {
       finding_severity: "high" | "low"
       finding_source: "validator" | "ai"
       finding_status: "open" | "resolved"
+      finance_period_status: "open" | "closed"
       gc_role:
         | "gc_account_owner"
         | "gc_accountant"
@@ -2673,6 +3019,13 @@ export type Database = {
         | "gc_delivery_ops"
         | "gc_viewer"
       group_visibility: "public" | "private" | "secret"
+      ledger_entry_kind:
+        | "opening"
+        | "recoup"
+        | "adjustment"
+        | "sale"
+        | "payable"
+        | "closing"
       like_target: "post" | "comment"
       membership_status: "invited" | "active" | "removed"
       notification_kind: "title_rejected" | "delivery_update"
@@ -2710,6 +3063,7 @@ export type Database = {
       post_status: "active" | "hidden" | "removed"
       release_type: "new_release" | "re_release"
       review_decision: "approve" | "reject"
+      sales_import_status: "received" | "mapped"
       rights_type:
         | "theatrical"
         | "fta"
@@ -2915,6 +3269,7 @@ export const Constants = {
       finding_severity: ["high", "low"],
       finding_source: ["validator", "ai"],
       finding_status: ["open", "resolved"],
+      finance_period_status: ["open", "closed"],
       gc_role: [
         "gc_account_owner",
         "gc_accountant",
@@ -2923,6 +3278,14 @@ export const Constants = {
         "gc_viewer",
       ],
       group_visibility: ["public", "private", "secret"],
+      ledger_entry_kind: [
+        "opening",
+        "recoup",
+        "adjustment",
+        "sale",
+        "payable",
+        "closing",
+      ],
       like_target: ["post", "comment"],
       membership_status: ["invited", "active", "removed"],
       notification_kind: ["title_rejected", "delivery_update"],
@@ -2964,6 +3327,7 @@ export const Constants = {
       post_status: ["active", "hidden", "removed"],
       release_type: ["new_release", "re_release"],
       review_decision: ["approve", "reject"],
+      sales_import_status: ["received", "mapped"],
       rights_type: [
         "theatrical",
         "fta",

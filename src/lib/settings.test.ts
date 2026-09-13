@@ -129,6 +129,7 @@ describe("settings lock", () => {
       "Ask 24Frame AI",
       "Queue",
       "Vendors",
+      "Finance",
       "Clients",
       "Account",
       "Users",

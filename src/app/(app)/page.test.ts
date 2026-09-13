@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getOrgContext } from "@/lib/supabase/context";
 import { CLIENTS_PAGE, ORG_ROLE_LABELS, ORG_STATUS_LABELS } from "@/lib/clients";
 import { DASHBOARD_HOME, dashboardJustInDate } from "@/lib/dashboard-home";
+import { FINANCE_PAGE } from "@/lib/finance";
 import { AGGREGATION_EMPTY } from "@/lib/aggregation-empty";
 import { DASHBOARD_ATTENTION_CLEAR, dashboardAttentionSummary } from "@/lib/findings";
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
@@ -107,6 +108,7 @@ describe("DashboardPage modes", () => {
     expect(html).toContain(DASHBOARD_ATTENTION_CLEAR);
     expect(html).toContain("/catalog-health");
     expect(html).toContain("data-dashboard-home");
+    expect(html).not.toContain("data-finance-glance-stub");
     expect(html).toContain("dashboard-home-pill");
     expect(html).toContain('href="/catalog-health"');
     expect(html).toContain("h-9");
@@ -179,6 +181,8 @@ describe("DashboardPage modes", () => {
     expect(rpc).not.toHaveBeenCalledWith("gc_client_directory", expect.anything());
     expect(html).toContain("Acme");
     expect(html).toContain("data-dashboard-snapshot");
+    expect(html).toContain("data-finance-glance-stub");
+    expect(html).toContain(FINANCE_PAGE.glance);
     expect(html).not.toContain(CLIENTS_PAGE.subtitle);
   });
 
@@ -196,6 +200,8 @@ describe("DashboardPage modes", () => {
     expect(html).toContain(CLIENTS_PAGE.title);
     expect(html).toContain(CLIENTS_PAGE.subtitle);
     expect(html).toContain(CLIENTS_PAGE.empty);
+    expect(html).toContain("data-finance-glance-stub");
+    expect(html).toContain(FINANCE_PAGE.glance);
     expect(html).not.toContain("Dashboard —");
     expect(html).not.toContain("/catalog-health");
     expect(html).not.toContain("data-dashboard-home");

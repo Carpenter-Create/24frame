@@ -17,6 +17,7 @@ import {
 import { UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
 import { GcClientsDirectory } from "@/app/(app)/(operator)/gc/clients/clients-directory";
 import { HouseEmpty, TextAction } from "@/components/chrome/house";
+import { DashboardFinanceGlance } from "@/components/dashboard/dashboard-finance-glance";
 import { AGGREGATION_EMPTY } from "@/lib/aggregation-empty";
 
 // Client `/` is the organization-scoped portfolio: identity, three live numbers,
@@ -46,7 +47,13 @@ export default async function DashboardPage() {
         </div>
       );
     }
-    return GcClientsDirectory();
+    const roster = await GcClientsDirectory();
+    return (
+      <div className="flex flex-col gap-[var(--space-6)]">
+        <DashboardFinanceGlance />
+        {roster}
+      </div>
+    );
   }
   const org = ctx.activeOrg;
 
@@ -95,6 +102,7 @@ export default async function DashboardPage() {
           catalogEmpty={snapshot.catalog === 0}
           canAddTitle={ctx.canOperate}
         />
+        {ctx.isGcStaff ? <DashboardFinanceGlance /> : null}
       </div>
     </div>
   );
