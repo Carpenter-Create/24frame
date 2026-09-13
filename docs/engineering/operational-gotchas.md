@@ -54,17 +54,18 @@ reintroduce.
 
 Local dev has **two email paths** and only one is fake:
 
-- **Supabase Auth** (hosted `magic_link.html` — mobile `signInWithOtp`) → the local stack's
-  own SMTP → **Mailpit at <http://127.0.0.1:54324>**. Never reaches a real inbox. The hosted
-  template still includes both `{{ .ConfirmationURL }}` and `{{ .Token }}` because mobile
-  types the code.
-- **App email** (dashboard login magic link, portal OTP, GC Support — `src/lib/email.ts`) →
-  **Resend**, from `assets@globalcontent.co` → **a real inbox, even from localhost.**
+- **Supabase Auth** (hosted `magic_link.html` — parked for product sign-in; still
+  reachable if something calls `signInWithOtp`) → the local stack's own SMTP →
+  **Mailpit at <http://127.0.0.1:54324>**. Never reaches a real inbox. The hosted
+  template still includes both `{{ .ConfirmationURL }}` and `{{ .Token }}`.
+- **App email** (dashboard + mobile sign-in, portal OTP, GC Support — `src/lib/email.ts`) →
+  **Resend**, from `PORTAL_EMAIL_FROM` / `assets@globalcontent.co` → **a real inbox, even from localhost.**
 
-Dashboard login does not call `signInWithOtp`. It mints a hashed token with service-role
-`generateLink` (no GoTrue mail) and sends a **link-only** house email via Resend. GoTrue's
-`auth.rate_limit.email_sent = 2` per hour still applies to mobile OTP sends, not dashboard
-login.
+Dashboard `/login` and mobile `/api/mobile/request-sign-in` do not call `signInWithOtp`.
+They mint with service-role `generateLink` (no GoTrue mail) and send house email via
+Resend — web is link-only; mobile includes the enterable OTP in the same house shell.
+GoTrue's `auth.rate_limit.email_sent` no longer applies to normal product sign-in;
+app-layer `dashboard_sign_in_requests` caps both surfaces.
 
 ---
 

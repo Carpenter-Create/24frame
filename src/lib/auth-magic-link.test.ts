@@ -2,32 +2,43 @@ import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: vi.fn() }));
-vi.mock("@/lib/email", () => ({ sendMagicLinkEmail: vi.fn() }));
+vi.mock("@/lib/email", () => ({
+  sendMagicLinkEmail: vi.fn(),
+  sendSignInWithCodeEmail: vi.fn(),
+}));
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sendMagicLinkEmail } from "@/lib/email";
+import { sendMagicLinkEmail, sendSignInWithCodeEmail } from "@/lib/email";
 import {
   buildDashboardCallbackUrl,
   issueDashboardSignInLink,
+  issueMobileSignInCode,
   resolveDashboardOrigin,
 } from "./auth-magic-link";
 
 const EMAIL = "jane@acmefilms.com";
 const HASH = "hashed-token-value";
+const OTP = "847291";
 const EVIL = "https://evil.example";
 
 function fakeAdmin(opts: {
   generate?: Array<{
     hashed_token?: string;
+    email_otp?: string;
     error?: { message?: string; status?: number } | null;
   }>;
   createError?: { message?: string; status?: number } | null;
 } = {}) {
-  const queue = [...(opts.generate ?? [{ hashed_token: HASH, error: null }])];
+  const queue = [
+    ...(opts.generate ?? [{ hashed_token: HASH, email_otp: OTP, error: null }]),
+  ];
   const generateLink = vi.fn(async () => {
-    const next = queue.shift() ?? { hashed_token: HASH, error: null };
+    const next = queue.shift() ?? { hashed_token: HASH, email_otp: OTP, error: null };
     return {
-      data: next.hashed_token ? { properties: { hashed_token: next.hashed_token } } : { properties: {} },
+      data:
+        next.hashed_token && next.email_otp
+          ? { properties: { hashed_token: next.hashed_token, email_otp: next.email_otp } }
+          : { properties: {} },
       error: next.error ?? null,
     };
   });
@@ -79,6 +90,7 @@ describe("issueDashboardSignInLink", () => {
     vi.unstubAllEnvs();
     vi.stubEnv("PORTAL_BASE_URL", "https://app.24frame.co");
     vi.mocked(sendMagicLinkEmail).mockResolvedValue(undefined);
+    vi.mocked(sendSignInWithCodeEmail).mockResolvedValue(undefined);
   });
 
   it("mints a magiclink token for an existing user and sends link-only mail", async () => {
@@ -95,13 +107,14 @@ describe("issueDashboardSignInLink", () => {
       EMAIL,
       `https://app.24frame.co/auth/callback?token_hash=${HASH}&type=email`,
     );
+    expect(sendSignInWithCodeEmail).not.toHaveBeenCalled();
   });
 
   it("creates an unconfirmed user with no password when the address is unknown", async () => {
     const { generateLink, createUser } = fakeAdmin({
       generate: [
         { error: { message: "User not found", status: 404 } },
-        { hashed_token: HASH, error: null },
+        { hashed_token: HASH, email_otp: OTP, error: null },
       ],
     });
     await issueDashboardSignInLink({ email: EMAIL, requestOrigin: "https://app.24frame.co" });
@@ -117,7 +130,7 @@ describe("issueDashboardSignInLink", () => {
     const { generateLink, createUser } = fakeAdmin({
       generate: [
         { error: { message: "User not found", status: 404 } },
-        { hashed_token: HASH, error: null },
+        { hashed_token: HASH, email_otp: OTP, error: null },
       ],
       createError: { message: "User already registered", status: 422 },
     });
@@ -153,5 +166,39 @@ describe("issueDashboardSignInLink", () => {
     expect(impl).not.toMatch(/generateLink\(\{\s*type:\s*"signup"/);
     expect(actions).not.toMatch(/\.signInWithOtp\s*\(/);
     expect(actions).toContain("issueDashboardSignInLink");
+  });
+});
+
+describe("issueMobileSignInCode", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.unstubAllEnvs();
+    vi.stubEnv("PORTAL_BASE_URL", "https://app.24frame.co");
+    vi.mocked(sendMagicLinkEmail).mockResolvedValue(undefined);
+    vi.mocked(sendSignInWithCodeEmail).mockResolvedValue(undefined);
+  });
+
+  it("mints via generateLink and sends house mail with the enterable OTP", async () => {
+    const { generateLink } = fakeAdmin();
+    await issueMobileSignInCode({ email: EMAIL });
+    expect(generateLink).toHaveBeenCalledWith({
+      type: "magiclink",
+      email: EMAIL,
+      options: { redirectTo: "https://app.24frame.co/auth/callback" },
+    });
+    expect(sendSignInWithCodeEmail).toHaveBeenCalledWith(
+      EMAIL,
+      `https://app.24frame.co/auth/callback?token_hash=${HASH}&type=email`,
+      OTP,
+    );
+    expect(sendMagicLinkEmail).not.toHaveBeenCalled();
+  });
+
+  it("fails closed when generateLink omits email_otp", async () => {
+    fakeAdmin({
+      generate: [{ hashed_token: HASH, error: null }],
+    });
+    await expect(issueMobileSignInCode({ email: EMAIL })).rejects.toThrow("mint-failed");
+    expect(sendSignInWithCodeEmail).not.toHaveBeenCalled();
   });
 });

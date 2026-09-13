@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -11,13 +11,26 @@ import {
 import {
   normalizeEmail,
   requestEmailCode,
+  requestEmailCodeViaHousePipe,
   verifyEmailCode,
   type EmailAuthClient,
 } from "../lib/auth";
 import { MOBILE_COPY, PRODUCT_NAME, PRODUCT_WORKSPACES } from "../lib/product";
 import { tokens } from "../lib/tokens";
 
-export function SignInScreen({ client }: { client: EmailAuthClient }) {
+export function SignInScreen({
+  client,
+  appOrigin,
+}: {
+  client: EmailAuthClient;
+  appOrigin: string;
+}) {
+  const transport = useMemo(
+    () => ({
+      requestSignInCode: (email: string) => requestEmailCodeViaHousePipe(appOrigin, email),
+    }),
+    [appOrigin],
+  );
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [awaitingCode, setAwaitingCode] = useState(false);
@@ -27,7 +40,7 @@ export function SignInScreen({ client }: { client: EmailAuthClient }) {
   async function onSendCode() {
     setPending(true);
     setMessage(null);
-    const result = await requestEmailCode(client, email);
+    const result = await requestEmailCode(transport, email);
     setPending(false);
     if (!result.ok) {
       setMessage(result.message);

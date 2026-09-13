@@ -18,10 +18,11 @@ export type LoginState = { ok: boolean; message: string };
 
 // Magic-link only (domain-spec §21 decision): no passwords, no OAuth.
 // Dashboard send uses generateLink + Resend (link-only house mail). It does
-// not call signInWithOtp — that would fire the hosted dual-purpose magic_link
-// template (link + code) that mobile still needs. Abuse hygiene is app-layer
-// rate limits on this path (per-email + IP/global). Turnstile is not used on
-// dashboard login; portal OTP still verifies Turnstile.
+// not call signInWithOtp — that fires GoTrue/hosted Auth mail. Mobile uses the
+// same mint helper via /api/mobile/request-sign-in with house mail that includes
+// the enterable OTP. Abuse hygiene is app-layer rate limits on this path
+// (per-email + IP/global). Turnstile is not used on dashboard login; portal OTP
+// still verifies Turnstile.
 export async function requestMagicLink(
   _prev: LoginState,
   formData: FormData,

@@ -66,7 +66,7 @@ export default function App() {
           userId={session.user.id}
         />
       ) : (
-        <SignInScreen client={client} />
+        <SignInScreen appOrigin={env.appOrigin} client={client} />
       )}
       <StatusBar style="dark" />
     </View>

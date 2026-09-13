@@ -40,6 +40,7 @@ export async function updateSession(request: NextRequest) {
     path.startsWith("/auth") ||
     path.startsWith("/portal") ||       // account-less asset-access portal (token-gated)
     path.startsWith("/api/portal") ||   // portal route handlers (token/OTP/session gated in-handler)
+    path.startsWith("/api/mobile") ||   // mobile sign-in mint/send (rate-limited in-handler)
     // Stripe webhook authenticates by signature, not a user session — must not be
     // redirected to /login (it has no cookies).
     path === "/api/stripe/webhook";

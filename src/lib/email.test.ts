@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { buildMagicLinkEmail, buildNotificationEmail, buildOtpEmail } from "./email";
+import { buildMagicLinkEmail, buildNotificationEmail, buildOtpEmail, buildSignInWithCodeEmail } from "./email";
 import {
   EMAIL_ACCENT,
   EMAIL_ADDRESS,
@@ -122,6 +122,27 @@ describe("buildMagicLinkEmail", () => {
     expect(subject).not.toMatch(/Global Content|\bGC\b|globalcontent/i);
     expect(productResidue(html)).not.toMatch(/\bGC\b|globalcontent/i);
     expect(html.toLowerCase()).not.toMatch(/seamless|frictionless|elevate|amplify/);
+  });
+});
+
+describe("buildSignInWithCodeEmail", () => {
+  const signInUrl =
+    "https://app.24frame.co/auth/callback?token_hash=test-token&type=email";
+
+  it("uses the same subject and house shell with an enterable OTP", () => {
+    const { subject, text, html } = buildSignInWithCodeEmail(signInUrl, "847291");
+    expect(subject).toBe("Your 24Frame sign-in link");
+    expect(text).toContain(signInUrl);
+    expect(text).toContain("Or enter this code: 847291");
+    expect(html).toContain("Sign in to 24Frame");
+    expect(html).toContain(`href="${signInUrl.replaceAll("&", "&amp;")}"`);
+    expect(html).toContain("Or enter this code:");
+    expect(html).toContain("847291");
+    expect(html).not.toContain("{{ .Token }}");
+    assertOtpNotLinkified(html, "847291");
+    assertNoFilledPill(html);
+    expect(subject).not.toMatch(/Global Content|\bGC\b|globalcontent/i);
+    expect(productResidue(html)).not.toMatch(/\bGC\b|globalcontent/i);
   });
 });
 
