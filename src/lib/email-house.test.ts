@@ -72,7 +72,7 @@ function assertHouseChrome(html: string) {
 }
 
 describe("wrapHouseEmail", () => {
-  it("uses the Coinbase-scale house shell with a navy mark and well-formed format-detection", () => {
+  it("uses the Coinbase-scale house shell with a black/charcoal mark and well-formed format-detection", () => {
     const html = wrapHouseEmail(`<p style="color:${EMAIL_INK}">Inner</p>`);
     assertHouseChrome(html);
     expect(html).toContain("Inner");
@@ -127,7 +127,7 @@ describe("houseOtpCode", () => {
 });
 
 describe("email-logo.png", () => {
-  it("is a padded navy Asset 10 square at app.24frame.co/email-logo.png", () => {
+  it("is a padded black/charcoal Asset 10 square at app.24frame.co/email-logo.png", () => {
     expect(existsSync(LOGO_PNG)).toBe(true);
     const bytes = statSync(LOGO_PNG).size;
     expect(bytes).toBeGreaterThan(200);
@@ -146,7 +146,17 @@ describe("email-logo.png", () => {
     expect(corner[2]).toBeGreaterThan(240);
     const field = decoded.pixel(Math.floor(width * 0.35), Math.floor(height * 0.22));
     expect(field[0] + field[1] + field[2]).toBeLessThan(80);
-    expect(field[2]).toBeGreaterThanOrEqual(field[0]);
+    expect(Math.abs(field[2] - field[0])).toBeLessThan(16);
+    expect(Math.abs(field[1] - field[0])).toBeLessThan(16);
+    const numeral = decoded.pixel(70, 70);
+    expect(Math.min(numeral[0], numeral[1], numeral[2])).toBeGreaterThan(240);
+    for (let y = 0; y < height; y += 4) {
+      for (let x = 0; x < width; x += 4) {
+        const [r, g, b] = decoded.pixel(x, y);
+        const sporty = Math.abs(r - 0x17) + Math.abs(g - 0x69) + Math.abs(b - 0xff);
+        expect(sporty).toBeGreaterThan(80);
+      }
+    }
   });
 });
 
