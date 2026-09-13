@@ -3,14 +3,13 @@ import { redirect } from "next/navigation";
 import { getOrgContext } from "@/lib/supabase/context";
 import { PageHeader } from "@/components/ui/page-header";
 import { HouseEmpty } from "@/components/chrome/house";
-import { PeriodStatementView } from "@/components/finance/period-statement";
+import { ClientPeriodDashboard } from "@/components/finance/client-period-dashboard";
 import {
   FINANCE_CLIENT,
   FINANCE_CLIENT_HREF,
   FINANCE_PAGE,
   financeExportHref,
   financePeriodLabel,
-  formatUsdCents,
   orgRoleCanViewFinancial,
 } from "@/lib/finance";
 import { loadRecipientPeriod, loadRecipientStatement } from "@/lib/finance-recipient-load";
@@ -65,6 +64,7 @@ export default async function ClientFinancePeriodPage({
         backLink={{ href: FINANCE_CLIENT_HREF, label: FINANCE_CLIENT.title }}
         actions={
           <div className="flex flex-col items-end gap-2">
+            <p className="t-label text-ink-3">{FINANCE_CLIENT.pack}</p>
             <a href={financeExportHref(period.id, "pdf")} className="t-body-sm font-normal text-accent">
               {FINANCE_CLIENT.pdf}
             </a>
@@ -74,23 +74,7 @@ export default async function ClientFinancePeriodPage({
           </div>
         }
       />
-
-      <div className="mb-[var(--space-6)] flex flex-wrap gap-x-6 gap-y-2 t-body-sm text-ink-2">
-        <span>
-          {FINANCE_PAGE.opening} {formatUsdCents(period.opening_balance_cents)}
-        </span>
-        {period.closing_balance_cents !== null ? (
-          <span>
-            {FINANCE_PAGE.closing} {formatUsdCents(period.closing_balance_cents)}
-          </span>
-        ) : null}
-        <span>
-          {FINANCE_PAGE.threshold}{" "}
-          {period.threshold_cents === null ? FINANCE_CLIENT.glanceNoThreshold : formatUsdCents(period.threshold_cents)}
-        </span>
-      </div>
-
-      <PeriodStatementView statement={statement} />
+      <ClientPeriodDashboard statement={statement} />
     </>
   );
 }

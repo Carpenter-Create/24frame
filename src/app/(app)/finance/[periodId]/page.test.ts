@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getOrgContext } from "@/lib/supabase/context";
 import { FINANCE_CLIENT, FINANCE_PAGE } from "@/lib/finance";
+import { PARENT_ENTITY } from "@/lib/product";
 import { loadRecipientPeriod, loadRecipientStatement } from "@/lib/finance-recipient-load";
 import { buildPeriodStatement } from "@/lib/finance-statement";
 import ClientFinancePeriodPage from "./page";
@@ -95,7 +96,16 @@ describe("client Finance period", () => {
             raw: {},
           },
         ],
-        recoupItems: [],
+        recoupItems: [
+          {
+            id: "r1",
+            kind: "recoup",
+            amountCents: -150,
+            titleId: "title-a",
+            titleName: "Title A",
+            note: "Advance",
+          },
+        ],
         adjustmentItems: [],
         staffSaleItems: [],
       }),
@@ -106,16 +116,23 @@ describe("client Finance period", () => {
     );
     expect(html).toContain(FINANCE_CLIENT.pdf);
     expect(html).toContain(FINANCE_CLIENT.csv);
+    expect(html).toContain(FINANCE_CLIENT.pack);
     expect(html).toContain("/finance/p-closed/export?format=pdf");
     expect(html).toContain("/finance/p-closed/export?format=csv");
+    expect(html).toContain("data-finance-dashboard");
     expect(html).toContain("avod");
     expect(html).toContain("ext-99");
     expect(html).toContain(FINANCE_PAGE.aggregatorKeep);
     expect(html).toContain(FINANCE_PAGE.orgRollup);
+    expect(html).toContain(FINANCE_CLIENT.recoupVisible);
+    expect(html).toContain("Advance");
+    expect(html).toContain(FINANCE_CLIENT.contribution);
+    expect(html).toContain(FINANCE_CLIENT.amountDue);
     expect(html).not.toContain("Import sales");
     expect(html).not.toContain("Close period");
     expect(html).not.toContain("Post ledger");
     expect(html).not.toContain(FINANCE_PAGE.suspense);
     expect(html).not.toContain(FINANCE_PAGE.toSuspense);
+    expect(html).not.toContain(PARENT_ENTITY);
   });
 });

@@ -163,6 +163,9 @@ export type StatementOutputInputLine = {
   transactionDate: string | null;
   importFilename: string | null;
   importContentHash: string | null;
+  lineNo: number;
+  titleId: string | null;
+  titleName: string | null;
 };
 
 export type StatementOutput = {
@@ -195,6 +198,9 @@ export function toStatementOutput(statement: PeriodStatement): StatementOutput {
         transactionDate: line.transactionDate,
         importFilename: line.importFilename,
         importContentHash: line.importContentHash,
+        lineNo: line.lineNo,
+        titleId: line.titleId,
+        titleName: line.titleName,
       })),
     },
     compute: {

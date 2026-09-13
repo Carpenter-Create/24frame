@@ -1,13 +1,16 @@
 import { describe, expect, it } from "vitest";
 
-import { FINANCE_LOGIC_VERSION } from "./finance";
+import { FINANCE_CLIENT, FINANCE_LOGIC_VERSION } from "./finance";
 import {
+  exportContainsRequiredInvoiceFields,
+  exportContainsRequiredLedgerFields,
   exportContainsRequiredMath,
   exportContainsRequiredSourceFields,
   exportStatement,
   statementCsv,
   statementPdf,
 } from "./finance-export";
+import { PARENT_ENTITY } from "./product";
 import {
   STATEMENT_OUTPUT_FORMAT,
   buildPeriodStatement,
@@ -96,7 +99,17 @@ describe("statement export", () => {
     expect(csv).toContain("375");
     expect(csv).toContain("-150");
     expect(csv).toContain("payable");
+    expect(csv).toContain("amountDueCents");
+    expect(csv).toContain("carryCents");
+    expect(csv).toContain("closeKind");
+    expect(csv).toContain("ledger");
+    expect(csv).toContain("Advance");
+    expect(csv).toContain("Correction");
+    expect(csv).toContain("title-a");
+    expect(exportContainsRequiredLedgerFields(csv)).toBe(true);
+    expect(exportContainsRequiredInvoiceFields(csv)).toBe(true);
     expect(csv).not.toContain("aggregator_rate");
+    expect(csv).not.toContain(PARENT_ENTITY);
   });
 
   it("PDF keeps transparent math and endpoint source fields", () => {
@@ -106,17 +119,25 @@ describe("statement export", () => {
 
     expect(pdf.startsWith("%PDF-1.4")).toBe(true);
     expect(pdf).toContain("24Frame");
-    expect(pdf).toContain("Global Content Holdings LLC");
+    expect(pdf).not.toContain(PARENT_ENTITY);
     expect(pdf).toContain("24frame-statement-v1");
     expect(pdf).toContain(FINANCE_LOGIC_VERSION);
     expect(exportContainsRequiredMath(pdf)).toBe(true);
     expect(exportContainsRequiredSourceFields(pdf)).toBe(true);
+    expect(exportContainsRequiredInvoiceFields(pdf)).toBe(true);
     expect(pdf).toContain("avod");
     expect(pdf).toContain("ext-99");
     expect(pdf).toContain("$30.00");
     expect(pdf).toContain("$25.00");
     expect(pdf).toContain("Aggregator keep");
     expect(pdf).toContain("payable");
+    expect(pdf).toContain(FINANCE_CLIENT.overview);
+    expect(pdf).toContain(FINANCE_CLIENT.recoupVisible);
+    expect(pdf).toContain(FINANCE_CLIENT.adjustmentVisible);
+    expect(pdf).toContain(FINANCE_CLIENT.invoice);
+    expect(pdf).toContain(FINANCE_CLIENT.amountDue);
+    expect(pdf).toContain("Advance");
+    expect(pdf).toContain("Correction");
   });
 
   it("exportStatement emits CSV and PDF from the Slice 1 payload", () => {

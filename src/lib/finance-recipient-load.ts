@@ -2,7 +2,7 @@ import "server-only";
 
 import { notFound } from "next/navigation";
 
-import { DETAIL_LIST, rangeFor } from "@/lib/list-bounds";
+import { DETAIL_LIST, LIST_PAGE, rangeFor } from "@/lib/list-bounds";
 import { assertRecipientOrgIsolation, recipientVisibleSalesLines } from "@/lib/finance";
 import { assemblePeriodStatement, type PeriodStatement } from "@/lib/finance-statement";
 import { createClient } from "@/lib/supabase/server";
@@ -97,4 +97,58 @@ export async function loadRecipientStatement(
     lines: recipientVisibleSalesLines(lineRows ?? []),
     ledger: ledgerRows ?? [],
   });
+}
+
+export async function loadRecipientDashboard(orgId: string): Promise<{
+  periods: RecipientPeriod[];
+  latestClosed: RecipientPeriod | null;
+  latestStatement: PeriodStatement | null;
+  ledger: Array<{ period_id: string; kind: string; amount_cents: number }>;
+  clientRateBp: number | null;
+}> {
+  assertRecipientOrgIsolation(orgId, orgId);
+  const supabase = await createClient();
+  const [{ data: periodRows }, { data: term }] = await Promise.all([
+    supabase
+      .from("finance_periods")
+      .select(
+        "id, org_id, period_year, period_month, status, opening_balance_cents, closing_balance_cents, threshold_cents",
+      )
+      .eq("org_id", orgId)
+      .order("period_year", { ascending: false })
+      .order("period_month", { ascending: false })
+      .range(...rangeFor(LIST_PAGE)),
+    supabase
+      .from("contract_terms")
+      .select("revenue_share_rate_bp")
+      .eq("org_id", orgId)
+      .is("effective_to", null)
+      .order("effective_from", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
+
+  const periods = (periodRows ?? []).filter((period) => period.org_id === orgId);
+  const latestClosed = periods.find((period) => period.status === "closed") ?? null;
+  const periodIds = periods.map((period) => period.id);
+  const { data: ledgerRows } =
+    periodIds.length === 0
+      ? { data: [] }
+      : await supabase
+          .from("ledger_entries")
+          .select("period_id, kind, amount_cents")
+          .eq("org_id", orgId)
+          .in("period_id", periodIds)
+          .range(...rangeFor(DETAIL_LIST));
+
+  const ledger = (ledgerRows ?? []).filter((row) => periodIds.includes(row.period_id));
+  const latestStatement = latestClosed ? await loadRecipientStatement(latestClosed, orgId) : null;
+
+  return {
+    periods,
+    latestClosed,
+    latestStatement,
+    ledger,
+    clientRateBp: term?.revenue_share_rate_bp ?? null,
+  };
 }

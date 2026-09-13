@@ -1,10 +1,12 @@
-import { PARENT_ENTITY, PRODUCT_NAME } from "@/lib/product";
+import { PRODUCT_NAME } from "@/lib/product";
 import {
+  FINANCE_CLIENT,
   FINANCE_LOGIC_VERSION,
   FINANCE_PAGE,
   financePeriodLabel,
   formatClientRateBp,
 } from "@/lib/finance";
+import { selfBillingInvoice } from "@/lib/finance-dashboard";
 import { slugSegment } from "@/lib/export-filename";
 import {
   STATEMENT_OUTPUT_FORMAT,
@@ -46,6 +48,19 @@ export const STATEMENT_EXPORT_SOURCE_FIELDS = [
   "bankReceiptCents",
 ] as const;
 
+export const STATEMENT_EXPORT_LEDGER_FIELDS = [
+  "kind",
+  "amountCents",
+  "note",
+  "titleId",
+] as const;
+
+export const STATEMENT_EXPORT_INVOICE_FIELDS = [
+  "amountDueCents",
+  "carryCents",
+  "closeKind",
+] as const;
+
 function csvEscape(value: string): string {
   if (/[",\n]/.test(value)) return `"${value.replace(/"/g, '""')}"`;
   return value;
@@ -75,12 +90,17 @@ export function statementExportFilename(
 
 export function statementCsv(output: StatementOutput, meta: StatementExportMeta): string {
   const org = output.compute.org;
+  const invoice = selfBillingInvoice(org);
+  const posted = [
+    ...output.compute.recoupItems,
+    ...output.compute.adjustmentItems,
+    ...output.compute.staffSaleItems,
+  ];
   const lines = [
     row(["format", output.format]),
     row(["logicVersion", output.logicVersion]),
     row(["complementarySplit", output.complementarySplit]),
     row(["product", PRODUCT_NAME]),
-    row(["parent", PARENT_ENTITY]),
     row(["org", meta.orgName]),
     row(["period", financePeriodLabel(meta.periodYear, meta.periodMonth)]),
     row(["currency", FINANCE_PAGE.usd]),
@@ -98,6 +118,9 @@ export function statementCsv(output: StatementOutput, meta: StatementExportMeta)
     row(["org", "thresholdCents", org?.thresholdCents ?? "", org?.thresholdCents === null || org?.thresholdCents === undefined ? "" : asciiUsd(org.thresholdCents)]),
     row(["org", "thresholdMet", org?.thresholdMet ?? "", ""]),
     row(["org", "close", org?.close.kind ?? "", org ? asciiUsd(org.close.kind === "payable" ? org.netCents : org.close.closingBalanceCents) : ""]),
+    row(["invoice", "amountDueCents", invoice.amountDueCents, asciiUsd(invoice.amountDueCents)]),
+    row(["invoice", "carryCents", invoice.carryCents, asciiUsd(invoice.carryCents)]),
+    row(["invoice", "closeKind", invoice.closeKind ?? "", ""]),
     "",
     row([
       "section",
@@ -105,6 +128,8 @@ export function statementCsv(output: StatementOutput, meta: StatementExportMeta)
       "externalId",
       "reportedCents",
       "bankReceiptCents",
+      "lineNo",
+      "titleId",
       "titleName",
       "importFilename",
       "importContentHash",
@@ -117,11 +142,18 @@ export function statementCsv(output: StatementOutput, meta: StatementExportMeta)
         line.externalId,
         line.reportedCents,
         line.bankReceiptCents,
-        "",
+        line.lineNo,
+        line.titleId,
+        line.titleName,
         line.importFilename,
         line.importContentHash,
         line.transactionDate,
       ]),
+    ),
+    "",
+    row(["section", "kind", "amountCents", "titleId", "titleName", "note"]),
+    ...posted.map((item) =>
+      row(["ledger", item.kind, item.amountCents, item.titleId, item.titleName, item.note]),
     ),
     "",
     row([
@@ -187,22 +219,29 @@ function wrapLine(text: string, max = 92): string[] {
 
 export function statementPdf(output: StatementOutput, meta: StatementExportMeta): Uint8Array {
   const org = output.compute.org;
+  const invoice = selfBillingInvoice(org);
   const period = financePeriodLabel(meta.periodYear, meta.periodMonth);
+  const postedLines = (items: typeof output.compute.recoupItems) =>
+    items.length === 0
+      ? [FINANCE_CLIENT.nonePosted]
+      : items.map(
+          (item) =>
+            `${item.titleName ?? FINANCE_PAGE.orgRollup}  ${asciiUsd(item.amountCents)}${
+              item.note ? `  ${item.note}` : ""
+            }`,
+        );
   const body: string[] = [
     PRODUCT_NAME,
     "Finance statement",
     meta.orgName,
     `${period}  ${FINANCE_PAGE.statusClosed}  ${FINANCE_PAGE.usd}`,
     `${output.format}  ${output.logicVersion}`,
-    PARENT_ENTITY,
     "",
-    FINANCE_PAGE.orgRollup,
+    FINANCE_CLIENT.overview,
     `${FINANCE_PAGE.bankReceipt}  ${org ? asciiUsd(org.bankReceiptCents) : ""}`,
     `${FINANCE_PAGE.clientRate}  ${formatClientRateBp(org?.clientRateBp ?? null)}`,
     `${FINANCE_PAGE.clientShare}  ${org ? asciiUsd(org.clientShareCents) : ""}`,
     `${FINANCE_PAGE.aggregatorKeep}  ${org ? asciiUsd(org.aggregatorKeepCents) : ""}`,
-    `${FINANCE_PAGE.recoup}  ${org ? asciiUsd(org.recoupCents ?? 0) : ""}`,
-    `${FINANCE_PAGE.adjustments}  ${org ? asciiUsd(org.adjustmentCents ?? 0) : ""}`,
     `${FINANCE_PAGE.opening}  ${org ? asciiUsd(org.openingCents) : ""}`,
     `${FINANCE_PAGE.periodNet}  ${org ? asciiUsd(org.netCents) : ""}`,
     `${FINANCE_PAGE.thresholdCheck}  ${org?.thresholdCents === null || org?.thresholdCents === undefined ? FINANCE_PAGE.threshold : asciiUsd(org.thresholdCents)}`,
@@ -221,6 +260,14 @@ export function statementPdf(output: StatementOutput, meta: StatementExportMeta)
     `thresholdCents  ${org?.thresholdCents ?? ""}`,
     `close  ${org?.close.kind ?? ""}`,
     "",
+    FINANCE_CLIENT.recoupVisible,
+    `${FINANCE_PAGE.recoup}  ${org ? asciiUsd(org.recoupCents ?? 0) : ""}`,
+    ...postedLines(output.compute.recoupItems),
+    "",
+    FINANCE_CLIENT.adjustmentVisible,
+    `${FINANCE_PAGE.adjustments}  ${org ? asciiUsd(org.adjustmentCents ?? 0) : ""}`,
+    ...postedLines(output.compute.adjustmentItems),
+    "",
     FINANCE_PAGE.byTitle,
     ...output.compute.titles.flatMap((title) => [
       title.titleName,
@@ -230,6 +277,14 @@ export function statementPdf(output: StatementOutput, meta: StatementExportMeta)
       `${FINANCE_PAGE.recoup}  ${asciiUsd(title.recoupCents)}`,
       `${FINANCE_PAGE.adjustments}  ${asciiUsd(title.adjustmentCents)}`,
     ]),
+    "",
+    FINANCE_CLIENT.invoice,
+    FINANCE_CLIENT.invoiceHint,
+    `${FINANCE_CLIENT.amountDue}  ${asciiUsd(invoice.amountDueCents)}`,
+    `${FINANCE_CLIENT.settlementCarry}  ${asciiUsd(invoice.carryCents)}`,
+    `amountDueCents  ${invoice.amountDueCents}`,
+    `carryCents  ${invoice.carryCents}`,
+    `closeKind  ${invoice.closeKind ?? ""}`,
     "",
     FINANCE_PAGE.source,
     "endpoint  externalId  reportedCents  bankReceiptCents",
@@ -339,4 +394,12 @@ export function exportContainsRequiredMath(text: string): boolean {
 
 export function exportContainsRequiredSourceFields(text: string): boolean {
   return STATEMENT_EXPORT_SOURCE_FIELDS.every((field) => text.includes(field));
+}
+
+export function exportContainsRequiredLedgerFields(text: string): boolean {
+  return STATEMENT_EXPORT_LEDGER_FIELDS.every((field) => text.includes(field));
+}
+
+export function exportContainsRequiredInvoiceFields(text: string): boolean {
+  return STATEMENT_EXPORT_INVOICE_FIELDS.every((field) => text.includes(field));
 }
