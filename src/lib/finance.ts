@@ -1,0 +1,82 @@
+import { PRODUCT_NAME } from "@/lib/product";
+
+// Staff finance-ops copy and helpers. Aggregation only. No client recipient UI.
+// Do not invent aggregator or tier-plan percent math here.
+
+export const FINANCE_HREF = "/gc/finance";
+
+export const FINANCE_PAGE = {
+  title: "Finance",
+  subtitle: "Monthly periods. Import, map, post, close.",
+  empty: "No periods yet.",
+  create: "Open period",
+  org: "Organization",
+  period: "Period",
+  year: "Year",
+  month: "Month",
+  threshold: "Payable threshold (cents)",
+  thresholdHint: "Staff-set. Blank means close always carries the balance.",
+  opening: "Opening",
+  closing: "Closing",
+  payable: "Payable",
+  statusOpen: "Open",
+  statusClosed: "Closed",
+  import: "Import sales",
+  importHint: "Excel or CSV. USD only. Gross is stored as cents. No percent is applied.",
+  map: "Map endpoint ids",
+  mapHint: "Resolve vendor ids onto this organization’s titles only.",
+  mapImport: "Apply mappings",
+  post: "Post ledger",
+  postHint: "Recoup, adjustment, or sale. Amounts are signed cents as entered.",
+  close: "Close period",
+  closeHint:
+    "Sums posted ledger rows. Does not apply a client tier-plan percent or an aggregator percent.",
+  unmapped: "Unmapped lines",
+  ledger: "Ledger",
+  glance: `Finance periods live on the ${PRODUCT_NAME} Finance rail.`,
+  glanceCta: "Finance",
+  writeDenied: "Import, post, and close are limited to owner and accountant seats.",
+  usd: "USD",
+} as const;
+
+export const FINANCE_LOGIC_VERSION = "finance-ops-slice-1.0-no-tier-percent";
+
+export const LEDGER_POST_KINDS = ["recoup", "adjustment", "sale"] as const;
+export type LedgerPostKind = (typeof LEDGER_POST_KINDS)[number];
+
+export type FinancePeriodStatus = "open" | "closed";
+
+export function financePeriodLabel(year: number, month: number): string {
+  return `${year}-${String(month).padStart(2, "0")}`;
+}
+
+export function formatUsdCents(cents: number): string {
+  const sign = cents < 0 ? "−" : "";
+  const abs = Math.abs(cents);
+  return `${sign}$${(abs / 100).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+export function staffCanWriteFinance(role: string | null | undefined): boolean {
+  return role === "gc_account_owner" || role === "gc_accountant";
+}
+
+/** Hard isolation: a title from another org must never attach to this org's import. */
+export function assertOrgTitleIsolation(lineOrgId: string, titleOrgId: string): void {
+  if (lineOrgId !== titleOrgId) {
+    throw new Error("Client A title never receives Client B import");
+  }
+}
+
+export function resolveMappedTitleId(input: {
+  lineOrgId: string;
+  mappingOrgId: string;
+  titleOrgId: string;
+  titleId: string;
+}): string | null {
+  if (input.lineOrgId !== input.mappingOrgId) return null;
+  if (input.lineOrgId !== input.titleOrgId) return null;
+  return input.titleId;
+}

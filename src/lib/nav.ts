@@ -7,6 +7,7 @@ import {
   Inbox,
   Store,
   Users,
+  Wallet,
   House,
   UserRound,
   UsersRound,
@@ -49,6 +50,7 @@ export const GC_NAV: NavItem[] = [
   { label: "Queue", href: "/queue", icon: Inbox },
   { label: `${PRODUCT_NAME} Deliveries`, href: "/gc/deliveries", icon: Send },
   { label: "Vendors", href: "/vendors", icon: Store },
+  { label: "Finance", href: "/gc/finance", icon: Wallet },
   { label: "Clients", href: "/gc/clients", icon: Users },
 ];
 

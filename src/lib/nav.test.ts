@@ -75,6 +75,7 @@ describe("GC_NAV", () => {
       { label: "Queue", href: "/queue" },
       { label: "24Frame Deliveries", href: "/gc/deliveries" },
       { label: "Vendors", href: "/vendors" },
+      { label: "Finance", href: "/gc/finance" },
       { label: "Clients", href: "/gc/clients" },
     ]);
   });
@@ -89,6 +90,7 @@ describe("GC_NAV", () => {
       "Queue",
       "24Frame Deliveries",
       "Vendors",
+      "Finance",
       "Clients",
     ]);
   });
@@ -122,6 +124,7 @@ describe("mobileNavDestinations", () => {
       "Queue",
       "24Frame Deliveries",
       "Vendors",
+      "Finance",
       "Clients",
     ]);
   });
