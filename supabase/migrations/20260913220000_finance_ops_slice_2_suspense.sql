@@ -3,6 +3,7 @@
 -- Same sales_lines row. period_id nullable = parked. org_id always required.
 -- No new money table. No compute change. Recipients never see suspense.
 -- Mapping C: org-scoped. Do not invent a period from transaction_date.
+-- Standard Postgres (portable to Aurora). No pg_cron / realtime / vault.
 
 -- ----------------------------------------------------------------------------
 -- 1. Location: suspense is a null period_id on the existing line

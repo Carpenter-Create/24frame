@@ -73,6 +73,7 @@ describe("finance AWS isolation", () => {
     expect(cfSrc).not.toContain("process.env.CLOUDFRONT_");
     expect(cfSrc).not.toContain("MEDIA_CLOUDFRONT");
     expect(awsSrc).toContain("Proposed — not claimed live");
+    expect(readFileSync("src/lib/aurora.ts", "utf8")).toContain("405912452061");
   });
 
   it("keeps Next off parse and statement generation", () => {

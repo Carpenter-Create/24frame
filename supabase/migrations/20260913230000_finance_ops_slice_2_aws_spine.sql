@@ -1,7 +1,11 @@
 -- finance_ops_slice_2_aws_spine.sql
--- AWS owns finance files + compute. Postgres remains relational SoT.
+-- AWS owns finance files + compute. Relational SoT is portable Postgres
+-- (survivor today; proposed Aurora on E8 405912452061 — not created here).
 -- close_finance_period is thin (enqueue). apply_finance_close is worker-only.
--- Do not invent a second money authority. No Supabase Storage. No RDS lift.
+-- Do not invent a second money authority. No Supabase Storage.
+-- Standard Postgres only: no pg_cron, realtime, or vault.
+-- requested_by is a JWT sub UUID — no FK to auth.users (Aurora-portable).
+-- Auth stays Supabase Auth. Cutover shim: docs/infra/aurora-auth-shim.sql.
 
 do $$ begin
   create type public.finance_job_kind as enum ('ingest', 'map', 'close', 'export');
@@ -36,7 +40,7 @@ create table if not exists public.finance_jobs (
   status        public.finance_job_status not null default 'queued',
   payload       jsonb not null default '{}'::jsonb,
   error         text,
-  requested_by  uuid references auth.users(id) on delete set null,
+  requested_by  uuid,
   created_at    timestamptz not null default now(),
   started_at    timestamptz,
   finished_at   timestamptz

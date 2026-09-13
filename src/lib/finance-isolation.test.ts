@@ -176,5 +176,6 @@ describe("mapping C — finance stays Aggregation", () => {
     expect(awsMigration).toContain("finance_worker_only");
     expect(awsMigration).toContain("Import parse runs on the finance worker");
     expect(awsMigration).toContain("close_finance_period is thin");
+    expect(awsMigration).not.toContain("references auth.users");
   });
 });

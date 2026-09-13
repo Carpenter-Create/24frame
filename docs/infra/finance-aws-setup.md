@@ -1,9 +1,9 @@
 # 24Frame finance AWS setup — founder-executed
 
 Dedicated **private** finance namespace. AWS owns files, compute, and later
-schedules. Auth and Postgres stay on survivor Supabase
-`uevsculwzwlhxeamagwg`. This is **not** an RDS lift and **not** Supabase
-Storage.
+schedules. Auth stays Supabase Auth. Relational SoT is proposed Aurora
+PostgreSQL (see [`aurora-postgres-setup.md`](aurora-postgres-setup.md)).
+Not Supabase Storage. Not a Royalogic cluster.
 
 Do **not** apply from CI. Do **not** touch Royalogic / Watershed buckets,
 roles, repos, or accounts. Do **not** reuse title, media, or avatar
@@ -15,8 +15,8 @@ Names below are **proposals**. They are not live until Adam applies them.
 
 | Item | Proposal | Notes |
 | --- | --- | --- |
-| Account | Existing GC AWS account (Adam confirms) | Entity-isolated from RL/Watershed |
-| Region | Same as other 24Frame AWS (`us-east-1` unless Adam says otherwise) | |
+| Account | `405912452061` (E8) | Entity-isolated from RL/Watershed |
+| Region | `us-west-2` (with Aurora). Title-asset S3 stays `us-east-1` — existing split. | |
 | Prod bucket | `24frame-finance-prod` | Never `24frame-media-*`, `gc-content-assets*`, `gc-avatars*`, `S3_BUCKET` |
 | Dev bucket | `24frame-finance-dev` | Same isolation |
 | Object prefix | `orgs/{org_id}/imports/{sha256}/{filename}` and `orgs/{org_id}/statements/{period_id}/24frame-statement.{pdf,csv}` | Org isolation in the key |

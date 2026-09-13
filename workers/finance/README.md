@@ -6,7 +6,7 @@ Isolated AWS compute for finance ingest, close apply, and statement export.
 - Proposed buckets: `24frame-finance-dev`, `24frame-finance-prod` (not live until applied).
 - Credentials: `FINANCE_AWS_*` / `S3_FINANCE_*` only. Fargate task role via OIDC preferred.
 - IAM must not allow write to title, media, or avatar buckets.
-- Postgres stays on survivor Supabase `uevsculwzwlhxeamagwg`. No RDS lift.
+- Relational SoT: proposed Aurora PostgreSQL on E8 `405912452061` / `us-west-2` (`AURORA_DATABASE_URL`). Auth stays Supabase Auth. Cluster is not created in this slice.
 
 Entry: `processFinanceJob` in `src/lib/finance-worker-run.ts`.
 
