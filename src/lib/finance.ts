@@ -1,9 +1,22 @@
 import { PRODUCT_NAME } from "@/lib/product";
 
-// Staff finance-ops copy and helpers. Aggregation only. No client recipient UI.
-// Official complementary-split lock: display client % and remainder only.
+// Staff ops copy + client recipient copy. Ops write path stays /gc/finance.
+// Recipient read path is /finance. Official complementary-split lock: display
+// client % and remainder only. Do not invent a second fee field.
 
 export const FINANCE_HREF = "/gc/finance";
+export const FINANCE_CLIENT_HREF = "/finance";
+
+export const FINANCE_WRITE_RPCS = [
+  "create_finance_period",
+  "import_sales",
+  "close_finance_period",
+  "post_ledger_entry",
+  "set_finance_period_threshold",
+  "map_sales_import",
+  "map_sales_line",
+  "upsert_title_external_id",
+] as const;
 
 export const FINANCE_PAGE = {
   title: "Finance",
@@ -60,6 +73,25 @@ export const FINANCE_PAGE = {
   usd: "USD",
 } as const;
 
+export const FINANCE_CLIENT = {
+  title: "Finance",
+  subtitle: "Monthly statements. USD.",
+  empty: "No statements yet.",
+  notYet: "This period is not closed yet.",
+  noAccess: "Finance is not available on this seat.",
+  noOrg: "Choose an organization to read statements.",
+  pdf: "Download PDF",
+  csv: "Download CSV",
+  glanceRate: "Client share",
+  glanceBalance: "Balance",
+  glanceThreshold: "Threshold",
+  glanceLatest: "Latest statement",
+  glanceNone: "No closed statement yet.",
+  glanceNoTerm: "No current term",
+  glanceNoThreshold: "No threshold",
+  glanceCta: "Finance",
+} as const;
+
 export const FINANCE_LOGIC_VERSION = "finance-ops-slice-1.1-client-tier-remainder";
 
 export const LEDGER_POST_KINDS = ["recoup", "adjustment", "sale"] as const;
@@ -82,6 +114,44 @@ export function formatUsdCents(cents: number): string {
 
 export function staffCanWriteFinance(role: string | null | undefined): boolean {
   return role === "gc_account_owner" || role === "gc_accountant";
+}
+
+/** Existing member_can view_financial seats. Viewer and delivery_ops stay out. */
+export function orgRoleCanViewFinancial(role: string | null | undefined): boolean {
+  return role === "account_owner" || role === "accountant" || role === "legal";
+}
+
+/** Recipients never import, close, post, or write threshold. */
+export function recipientCanWriteFinance(): false {
+  return false;
+}
+
+/** Hard isolation: Client A never reads Client B money. */
+export function assertRecipientOrgIsolation(periodOrgId: string, activeOrgId: string): void {
+  if (periodOrgId !== activeOrgId) {
+    throw new Error("Client A never reads Client B money");
+  }
+}
+
+export function recipientMayReadPeriod(periodOrgId: string, activeOrgId: string): boolean {
+  return periodOrgId === activeOrgId;
+}
+
+export function recipientMayExportPeriod(input: {
+  periodOrgId: string;
+  activeOrgId: string;
+  status: string;
+}): boolean {
+  return input.status === "closed" && recipientMayReadPeriod(input.periodOrgId, input.activeOrgId);
+}
+
+export function financeExportHref(periodId: string, format: "pdf" | "csv"): string {
+  return `${FINANCE_CLIENT_HREF}/${periodId}/export?format=${format}`;
+}
+
+export function formatClientRateBp(rateBp: number | null): string {
+  if (rateBp === null) return FINANCE_CLIENT.glanceNoTerm;
+  return `${rateBp / 100}%`;
 }
 
 /** Hard isolation: a title from another org must never attach to this org's import. */

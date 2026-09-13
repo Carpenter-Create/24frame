@@ -154,7 +154,7 @@ describe("MobileNavSheet", () => {
     expect(src).not.toContain("Chevron");
   });
 
-  it("keeps the client sheet on the five client destinations and none of the staff rail", () => {
+  it("keeps the client sheet on Aggregation NAV and none of the staff rail hrefs", () => {
     const html = renderToStaticMarkup(<MobileNavSheet pathname="/" onClose={() => undefined} />);
     const destStart = html.indexOf("data-mobile-nav-destinations");
     const dest = html.slice(destStart);
@@ -164,6 +164,7 @@ describe("MobileNavSheet", () => {
       "Titles",
       "Deliveries",
       "Catalog Health",
+      "Finance",
       "Ask 24Frame AI",
     ]);
     for (const item of NAV) {
@@ -171,7 +172,6 @@ describe("MobileNavSheet", () => {
       expect(dest).toContain(`href="${item.href}"`);
     }
     for (const item of GC_NAV) {
-      expect(html).not.toContain(item.label);
       expect(html).not.toContain(`href="${item.href}"`);
     }
     expect(html).not.toContain("data-mobile-nav-group-rule");
@@ -263,7 +263,7 @@ describe("MobileNavSheet", () => {
     }
   });
 
-  it("gives staff /vendors the operator set plus the client five, with Vendors current", () => {
+  it("gives staff /vendors the operator set plus Aggregation NAV, with Vendors current", () => {
     const html = renderToStaticMarkup(
       <MobileNavSheet pathname="/vendors" onClose={() => undefined} isGcStaff />,
     );

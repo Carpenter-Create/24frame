@@ -32,6 +32,8 @@ describe("client NAV", () => {
     expect(isClientNavActive("/titles", NAV[0])).toBe(false);
     expect(clientNavCurrent("/titles").label).toBe("Titles");
     expect(clientNavCurrent("/titles/abc").label).toBe("Titles");
+    expect(clientNavCurrent("/finance").label).toBe("Finance");
+    expect(clientNavCurrent("/finance/abc").label).toBe("Finance");
     expect(clientNavCurrent("/messages").label).toBe("Ask 24Frame AI");
     expect(clientNavCurrent("/messages").label).toBe(ASK_GLOBEE.headline);
     expect(clientNavCurrent("/queue").label).toBe("Dashboard");
@@ -86,6 +88,7 @@ describe("GC_NAV", () => {
       "Titles",
       "Deliveries",
       "Catalog Health",
+      "Finance",
       "Ask 24Frame AI",
       "Queue",
       "24Frame Deliveries",
@@ -101,12 +104,13 @@ describe("GC_NAV", () => {
 });
 
 describe("mobileNavDestinations", () => {
-  it("keeps the client sheet on the five NAV destinations", () => {
+  it("keeps the client sheet on the Aggregation NAV destinations", () => {
     expect(mobileNavDestinations(false).map((item) => item.label)).toEqual([
       "Dashboard",
       "Titles",
       "Deliveries",
       "Catalog Health",
+      "Finance",
       "Ask 24Frame AI",
     ]);
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/queue");
@@ -120,6 +124,7 @@ describe("mobileNavDestinations", () => {
       "Titles",
       "Deliveries",
       "Catalog Health",
+      "Finance",
       "Ask 24Frame AI",
       "Queue",
       "24Frame Deliveries",

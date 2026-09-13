@@ -2,7 +2,13 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import {
+  FINANCE_CLIENT_HREF,
+  FINANCE_WRITE_RPCS,
   assertOrgTitleIsolation,
+  assertRecipientOrgIsolation,
+  orgRoleCanViewFinancial,
+  recipientCanWriteFinance,
+  recipientMayExportPeriod,
   resolveMappedTitleId,
   staffCanWriteFinance,
 } from "./finance";
@@ -51,10 +57,13 @@ describe("title isolation", () => {
 });
 
 describe("mapping C — finance stays Aggregation", () => {
-  it("does not put Finance on client NAV or Social", () => {
+  it("puts recipient Finance on client Aggregation NAV and keeps ops on GC_NAV", () => {
+    expect(NAV.map((item) => item.href)).toContain("/finance");
     expect(NAV.map((item) => item.href)).not.toContain("/gc/finance");
+    expect(SOCIAL_NAV.map((item) => item.href)).not.toContain("/finance");
     expect(SOCIAL_NAV.map((item) => item.href)).not.toContain("/gc/finance");
     expect(GC_NAV.map((item) => item.href)).toContain("/gc/finance");
+    expect(GC_NAV.map((item) => item.href)).not.toContain("/finance");
   });
 
   it("keeps finance tables on org_id and off profiles", () => {
@@ -64,10 +73,11 @@ describe("mapping C — finance stays Aggregation", () => {
     expect(migration).toContain("must not have profile_id");
   });
 
-  it("stubs home glance for staff only and keeps Finance off client NAV", () => {
+  it("wires client home glance for recipients and keeps the staff stub on staff home", () => {
     const home = readFileSync("src/app/(app)/page.tsx", "utf8");
     expect(home).toContain("DashboardFinanceGlance");
-    expect(home).toContain("ctx.isGcStaff ? <DashboardFinanceGlance");
+    expect(home).toContain("DashboardClientFinanceGlance");
+    expect(home).toContain("ctx.isGcStaff ? (");
     expect(home).not.toContain("Statements");
   });
 
@@ -119,5 +129,32 @@ describe("mapping C — finance stays Aggregation", () => {
     expect(page).toContain("content_hash");
     expect(page).not.toContain("application/pdf");
     expect(page).not.toContain("text/csv");
+  });
+
+  it("refuses recipient writes and Client B reads", () => {
+    expect(recipientCanWriteFinance()).toBe(false);
+    expect(orgRoleCanViewFinancial("account_owner")).toBe(true);
+    expect(orgRoleCanViewFinancial("accountant")).toBe(true);
+    expect(orgRoleCanViewFinancial("legal")).toBe(true);
+    expect(orgRoleCanViewFinancial("viewer")).toBe(false);
+    expect(orgRoleCanViewFinancial("delivery_ops")).toBe(false);
+    expect(() => assertRecipientOrgIsolation("org-a", "org-b")).toThrow(
+      "Client A never reads Client B money",
+    );
+    expect(assertRecipientOrgIsolation("org-a", "org-a")).toBeUndefined();
+    expect(
+      recipientMayExportPeriod({ periodOrgId: "org-a", activeOrgId: "org-b", status: "closed" }),
+    ).toBe(false);
+    expect(
+      recipientMayExportPeriod({ periodOrgId: "org-a", activeOrgId: "org-a", status: "open" }),
+    ).toBe(false);
+    expect(
+      recipientMayExportPeriod({ periodOrgId: "org-a", activeOrgId: "org-a", status: "closed" }),
+    ).toBe(true);
+    expect(FINANCE_WRITE_RPCS).toContain("import_sales");
+    expect(FINANCE_WRITE_RPCS).toContain("close_finance_period");
+    expect(FINANCE_WRITE_RPCS).toContain("post_ledger_entry");
+    expect(FINANCE_WRITE_RPCS).toContain("set_finance_period_threshold");
+    expect(FINANCE_CLIENT_HREF).toBe("/finance");
   });
 });

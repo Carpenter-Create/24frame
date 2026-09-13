@@ -14,11 +14,16 @@ import {
   clientHomeSnapshot,
   dashboardCatalogValue,
 } from "@/lib/dashboard-home";
-import { UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
+import { LIST_PAGE, UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
 import { GcClientsDirectory } from "@/app/(app)/(operator)/gc/clients/clients-directory";
 import { HouseEmpty, TextAction } from "@/components/chrome/house";
-import { DashboardFinanceGlance } from "@/components/dashboard/dashboard-finance-glance";
+import {
+  DashboardClientFinanceGlance,
+  DashboardFinanceGlance,
+} from "@/components/dashboard/dashboard-finance-glance";
 import { AGGREGATION_EMPTY } from "@/lib/aggregation-empty";
+import { FINANCE_CLIENT_HREF, orgRoleCanViewFinancial } from "@/lib/finance";
+import { buildClientFinanceGlance } from "@/lib/finance-glance";
 
 // Client `/` is the organization-scoped portfolio: identity, three live numbers,
 // what to do next (findings + drafts), and Recent. No chart, no revenue seam, no
@@ -77,6 +82,38 @@ export default async function DashboardPage() {
     now: new Date(),
     bound: UNPAGINATED_MAX,
   });
+  const showClientGlance = !ctx.isGcStaff && orgRoleCanViewFinancial(ctx.activeRole);
+  const [{ data: term }, { data: financePeriods }] = showClientGlance
+    ? await Promise.all([
+        supabase
+          .from("contract_terms")
+          .select("revenue_share_rate_bp")
+          .eq("org_id", org.id)
+          .is("effective_to", null)
+          .order("effective_from", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        supabase
+          .from("finance_periods")
+          .select(
+            "id, period_year, period_month, status, opening_balance_cents, closing_balance_cents, threshold_cents",
+          )
+          .eq("org_id", org.id)
+          .order("period_year", { ascending: false })
+          .order("period_month", { ascending: false })
+          .range(...rangeFor(LIST_PAGE)),
+      ])
+    : [
+        { data: null },
+        { data: [] as never },
+      ];
+  const clientGlance = showClientGlance
+    ? buildClientFinanceGlance({
+        clientRateBp: term?.revenue_share_rate_bp ?? null,
+        periods: financePeriods ?? [],
+        financeHref: FINANCE_CLIENT_HREF,
+      })
+    : null;
 
   return (
     <div className="dashboard-home flex flex-col gap-[var(--space-6)]" data-dashboard-home="">
@@ -102,7 +139,11 @@ export default async function DashboardPage() {
           catalogEmpty={snapshot.catalog === 0}
           canAddTitle={ctx.canOperate}
         />
-        {ctx.isGcStaff ? <DashboardFinanceGlance /> : null}
+        {ctx.isGcStaff ? (
+          <DashboardFinanceGlance />
+        ) : clientGlance ? (
+          <DashboardClientFinanceGlance glance={clientGlance} />
+        ) : null}
       </div>
     </div>
   );

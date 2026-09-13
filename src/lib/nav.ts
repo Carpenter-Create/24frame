@@ -24,13 +24,15 @@ import { SOCIAL_ROUTES } from "@/lib/social";
 
 export type NavItem = { label: string; href: string; icon: LucideIcon; exact?: boolean };
 
-// GC's flat nav — only what exists or is v1-scoped. Deferred until their slices land:
-// Statements, Settings. Ask Globee is the /messages destination (href unchanged).
+// GC's flat nav — only what exists or is v1-scoped. Settings stays deferred.
+// Ask Globee is the /messages destination (href unchanged). Finance is the
+// client recipient door. Staff ops stays on GC_NAV at /gc/finance.
 export const NAV: NavItem[] = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard, exact: true },
   { label: "Titles", href: "/titles", icon: Clapperboard },
   { label: "Deliveries", href: "/deliveries", icon: Send },
   { label: "Catalog Health", href: "/catalog-health", icon: Activity },
+  { label: "Finance", href: "/finance", icon: Wallet },
   { label: ASK_GLOBEE.headline, href: "/messages", icon: Sparkles },
 ];
 
@@ -69,8 +71,8 @@ export function clientNavCurrent(pathname: string): NavItem {
   return NAV.find((item) => isClientNavActive(pathname, item)) ?? NAV[0];
 }
 
-// Client phone sheet stays the five NAV destinations. Staff already use those
-// plus the operator set — do not leave them on a client-only menu.
+// Client phone sheet stays the Aggregation NAV destinations. Staff already use
+// those plus the operator set — do not leave them on a client-only menu.
 // Social mode is Home / Profile / Groups / Courses / Leaderboard / DMs.
 // Ask 24Frame AI and GC_NAV stay Aggregation-only.
 export function mobileNavDestinations(
