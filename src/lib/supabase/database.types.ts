@@ -1430,7 +1430,8 @@ export type Database = {
           currency: string
           endpoint: string
           external_id: string
-          gross_cents: number
+          bank_receipt_cents: number
+          reported_cents: number | null
           id: string
           import_id: string
           line_no: number
@@ -1446,7 +1447,8 @@ export type Database = {
           currency?: string
           endpoint: string
           external_id: string
-          gross_cents: number
+          bank_receipt_cents: number
+          reported_cents?: number | null
           id?: string
           import_id: string
           line_no: number
@@ -1462,7 +1464,8 @@ export type Database = {
           currency?: string
           endpoint?: string
           external_id?: string
-          gross_cents?: number
+          bank_receipt_cents?: number
+          reported_cents?: number | null
           id?: string
           import_id?: string
           line_no?: number
@@ -2620,6 +2623,10 @@ export type Database = {
           p_year: number
         }
         Returns: string
+      }
+      finance_client_share_cents: {
+        Args: { p_gross: number; p_rate_bp: number }
+        Returns: number
       }
       finance_logic_version: { Args: Record<PropertyKey, never>; Returns: string }
       import_sales: {

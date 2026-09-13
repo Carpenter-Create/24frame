@@ -5,11 +5,15 @@
 -- Schema must support org rollup + per-title breakdown. UI in this slice is
 -- staff-only. ledger_entries is the source of truth.
 --
--- LOCKED compute: aggregator % on gross, then recoup/adjustments.
--- OPEN (do not invent): where client tier-plan % applies vs aggregator %.
--- This migration therefore does NOT read contract_terms.revenue_share_rate_bp
--- and does NOT apply any percentage when posting or closing. Close sums
--- already-posted ledger rows, then payable-vs-closing from staff-set threshold.
+-- LOCKED compute (CoS / Adam 2026-09-13):
+--   1. Gross = bank-receipt cents from the endpoint (amount that hit the bank).
+--   2. Client share = contract_terms.revenue_share_rate_bp of that receipt
+--      (existing SoT — do not invent a second % column).
+--   3. Aggregator keep = remainder (complementary split; store client % only).
+--   4. Then recoup/adjustments on the ledger.
+--   5. Net ≥ staff threshold → payable, else closing carry-forward.
+-- Transaction date selects the term when present; otherwise the current term.
+-- Day-pro-ration of undated lump sums is not in this close path.
 --
 -- Titles stay org-scoped. No global works table. 24Frame id is titles.catalog_id.
 -- title_external_ids is endpoint + external_id, unique per pair, org-checked.
@@ -46,11 +50,19 @@ do $$ begin
     ('opening', 'recoup', 'adjustment', 'sale', 'payable', 'closing');
 exception when duplicate_object then null; end $$;
 
--- Slice-1 lineage. Bump when close/post math changes. Never a tier %.
+-- Slice-1 lineage. Bump when close/post math changes.
 create or replace function public.finance_logic_version()
   returns text
   language sql immutable
-as $$ select 'finance-ops-slice-1.0-no-tier-percent'::text $$;
+as $$ select 'finance-ops-slice-1.1-client-tier-remainder'::text $$;
+
+-- Integer cents. Client share first; aggregator keep is the remainder.
+create or replace function public.finance_client_share_cents(p_gross integer, p_rate_bp integer)
+  returns integer
+  language sql immutable
+as $$
+  select trunc((p_gross::numeric * p_rate_bp) / 10000)::integer;
+$$;
 
 -- ----------------------------------------------------------------------------
 -- 2. TABLES
@@ -98,8 +110,9 @@ create table if not exists public.sales_imports (
 create index if not exists sales_imports_period_idx on public.sales_imports (period_id);
 create index if not exists sales_imports_org_idx on public.sales_imports (org_id);
 
--- Parsed source lines. Gross is integer cents. title_id stays null until mapped
--- to an org-scoped title. Endpoint + external_id are the vendor keys.
+-- Parsed source lines. bank_receipt_cents is the compute gross (amount that
+-- hit the bank). reported_cents is an optional platform figure when the file
+-- carried both. title_id stays null until mapped to an org-scoped title.
 create table if not exists public.sales_lines (
   id                uuid primary key default gen_random_uuid(),
   org_id            uuid not null references public.organizations(id) on delete restrict,
@@ -109,7 +122,8 @@ create table if not exists public.sales_lines (
   endpoint          text not null,
   external_id       text not null,
   title_id          uuid references public.titles(id) on delete restrict,
-  gross_cents       integer not null,
+  bank_receipt_cents integer not null,
+  reported_cents    integer,
   currency          text not null default 'USD',
   transaction_date  date,
   raw               jsonb not null default '{}'::jsonb,
@@ -328,7 +342,8 @@ begin
      or new.line_no is distinct from old.line_no
      or new.endpoint is distinct from old.endpoint
      or new.external_id is distinct from old.external_id
-     or new.gross_cents is distinct from old.gross_cents
+     or new.bank_receipt_cents is distinct from old.bank_receipt_cents
+     or new.reported_cents is distinct from old.reported_cents
      or new.currency is distinct from old.currency
      or new.transaction_date is distinct from old.transaction_date
      or new.raw is distinct from old.raw then
@@ -589,18 +604,24 @@ begin
     if coalesce(v_line->>'currency', 'USD') <> 'USD' then
       raise exception 'USD only (line %)', v_n;
     end if;
-    if (v_line->>'gross_cents') is null or (v_line->>'gross_cents') !~ '^-?[0-9]+$' then
-      raise exception 'Line % requires integer gross_cents', v_n;
+    if (v_line->>'bank_receipt_cents') is null or (v_line->>'bank_receipt_cents') !~ '^-?[0-9]+$' then
+      raise exception 'Line % requires integer bank_receipt_cents', v_n;
+    end if;
+    if (v_line->>'reported_cents') is not null
+       and (v_line->>'reported_cents') <> ''
+       and (v_line->>'reported_cents') !~ '^-?[0-9]+$' then
+      raise exception 'Line % reported_cents must be integer cents', v_n;
     end if;
 
     insert into public.sales_lines (
       org_id, period_id, import_id, line_no, endpoint, external_id,
-      gross_cents, currency, transaction_date, raw
+      bank_receipt_cents, reported_cents, currency, transaction_date, raw
     ) values (
       v_org, p_period_id, v_import, v_n,
       lower(btrim(v_line->>'endpoint')),
       btrim(v_line->>'external_id'),
-      (v_line->>'gross_cents')::integer,
+      (v_line->>'bank_receipt_cents')::integer,
+      nullif(v_line->>'reported_cents', '')::integer,
       'USD',
       nullif(v_line->>'transaction_date', '')::date,
       coalesce(v_line->'raw', v_line)
@@ -786,7 +807,7 @@ begin
 end;
 $$;
 
--- Close does NOT apply tier-plan % or aggregator %. It sums posted ledger rows.
+-- Post mapped sales using contract_terms.revenue_share_rate_bp, then close.
 create or replace function public.close_finance_period(p_period_id uuid)
 returns void
 language plpgsql
@@ -800,6 +821,12 @@ declare
   v_net integer;
   v_kind public.ledger_entry_kind;
   v_closing integer;
+  v_line record;
+  v_at timestamptz;
+  v_rate integer;
+  v_term uuid;
+  v_client integer;
+  v_keep integer;
 begin
   if auth.uid() is null then raise exception 'Not authenticated'; end if;
   if not public.gc_can(auth.uid(), 'manage_tax_banking') then
@@ -811,6 +838,54 @@ begin
   from public.finance_periods where id = p_period_id;
   if not found then raise exception 'Period not found'; end if;
   if v_status <> 'open' then raise exception 'Period is already closed'; end if;
+
+  for v_line in
+    select sl.id, sl.title_id, sl.bank_receipt_cents, sl.transaction_date, sl.endpoint, sl.external_id
+    from public.sales_lines sl
+    where sl.period_id = p_period_id
+      and sl.title_id is not null
+      and not exists (
+        select 1 from public.ledger_entries le
+        where le.sales_line_id = sl.id and le.kind = 'sale'
+      )
+  loop
+    v_at := coalesce(v_line.transaction_date::timestamptz, now());
+    select ct.id, ct.revenue_share_rate_bp
+      into v_term, v_rate
+    from public.contract_terms ct
+    where ct.org_id = v_org
+      and ct.effective_from <= v_at
+      and (ct.effective_to is null or ct.effective_to > v_at)
+    order by ct.effective_from desc
+    limit 1;
+    if v_rate is null then
+      raise exception 'No contract term covers this sale; cannot invent a client tier percent';
+    end if;
+
+    v_client := public.finance_client_share_cents(v_line.bank_receipt_cents, v_rate);
+    v_keep := v_line.bank_receipt_cents - v_client;
+
+    insert into public.ledger_entries (
+      org_id, period_id, title_id, kind, amount_cents, sales_line_id,
+      source_refs, logic_version, posted_by
+    ) values (
+      v_org, p_period_id, v_line.title_id, 'sale', v_client, v_line.id,
+      jsonb_build_object(
+        'kind', 'sale_from_import',
+        'sales_line_id', v_line.id,
+        'endpoint', v_line.endpoint,
+        'external_id', v_line.external_id,
+        'bank_receipt_cents', v_line.bank_receipt_cents,
+        'contract_term_id', v_term,
+        'client_rate_bp', v_rate,
+        'client_share_cents', v_client,
+        'aggregator_keep_cents', v_keep,
+        'complementary_split', true
+      ),
+      public.finance_logic_version(),
+      auth.uid()
+    );
+  end loop;
 
   select coalesce(sum(amount_cents), 0) into v_net
   from public.ledger_entries
@@ -833,8 +908,7 @@ begin
       'kind', 'period_close',
       'net_cents', v_net,
       'threshold_cents', v_threshold,
-      'applied_tier_percent', false,
-      'applied_aggregator_percent', false
+      'complementary_split', true
     ),
     public.finance_logic_version(),
     auth.uid()
@@ -851,6 +925,9 @@ $$;
 
 revoke execute on function public.finance_logic_version() from public;
 grant execute on function public.finance_logic_version() to anon, authenticated, service_role;
+
+revoke execute on function public.finance_client_share_cents(integer, integer) from public;
+grant execute on function public.finance_client_share_cents(integer, integer) to anon, authenticated, service_role;
 
 revoke execute on function public.create_finance_period(uuid, integer, integer, integer) from public, anon;
 grant execute on function public.create_finance_period(uuid, integer, integer, integer) to authenticated, service_role;
@@ -924,18 +1001,15 @@ begin
     select 1 from pg_proc p
     join pg_namespace n on n.oid = p.pronamespace
     where n.nspname = 'public'
-      and p.proname in (
-        'create_finance_period','import_sales','upsert_title_external_id',
-        'map_sales_import','map_sales_line','post_ledger_entry','close_finance_period'
-      )
+      and p.proname = 'close_finance_period'
       and (
-        p.prosrc like '%revenue_share_rate_bp%'
-        or p.prosrc like '%tier_revenue_share%'
+        p.prosrc not like '%revenue_share_rate_bp%'
+        or p.prosrc like '%tier_revenue_share_bp%'
         or p.prosrc like '%aggregator_rate%'
       )
   ) then
-    raise exception 'finance write RPCs must not invent tier or aggregator percent math';
+    raise exception 'close must use contract_terms.revenue_share_rate_bp and must not invent a second fee field';
   end if;
 
-  raise notice 'finance ops slice 1 applied; no tier-plan percent compute';
+  raise notice 'finance ops slice 1 applied; client tier remainder compute';
 end $$;

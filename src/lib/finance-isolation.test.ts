@@ -71,10 +71,14 @@ describe("mapping C — finance stays Aggregation", () => {
     expect(home).not.toContain("Statements");
   });
 
-  it("does not invent tier-plan percent compute", () => {
-    expect(compute).not.toContain("revenue_share_rate_bp");
+  it("uses the complementary client-tier split and does not invent a second fee field", () => {
+    expect(compute).toContain("clientShareCents");
+    expect(compute).toContain("aggregatorKeepCents");
+    expect(compute).not.toContain("aggregator_rate");
     expect(compute).not.toContain("tier_revenue_share");
-    expect(migration).toContain("must not invent tier or aggregator percent math");
+    expect(migration).toContain("revenue_share_rate_bp");
+    expect(migration).toContain("must not invent a second fee field");
+    expect(migration).toContain("bank_receipt_cents");
     expect(staffCanWriteFinance("gc_delivery_ops")).toBe(false);
     expect(staffCanWriteFinance("gc_legal")).toBe(false);
     expect(staffCanWriteFinance("gc_accountant")).toBe(true);

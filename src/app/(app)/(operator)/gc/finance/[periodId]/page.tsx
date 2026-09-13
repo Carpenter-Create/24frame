@@ -12,6 +12,7 @@ import {
   formatUsdCents,
   staffCanWriteFinance,
 } from "@/lib/finance";
+import { statementSlice } from "@/lib/finance-compute";
 import {
   ClosePeriodForm,
   ExternalIdForm,
@@ -40,8 +41,14 @@ export default async function GcFinancePeriodPage({
     .maybeSingle();
   if (!period) notFound();
 
-  const [{ data: staff }, { data: titleRows }, { data: importRows }, { data: lineRows }, { data: ledgerRows }] =
-    await Promise.all([
+  const [
+    { data: staff },
+    { data: titleRows },
+    { data: importRows },
+    { data: lineRows },
+    { data: ledgerRows },
+    { data: term },
+  ] = await Promise.all([
       user
         ? supabase.from("gc_staff").select("role").eq("user_id", user.id).maybeSingle()
         : Promise.resolve({ data: null }),
@@ -59,16 +66,24 @@ export default async function GcFinancePeriodPage({
         .range(...rangeFor(DETAIL_LIST)),
       supabase
         .from("sales_lines")
-        .select("id, import_id, line_no, endpoint, external_id, title_id, gross_cents")
+        .select("id, import_id, line_no, endpoint, external_id, title_id, bank_receipt_cents, reported_cents")
         .eq("period_id", periodId)
         .order("line_no")
         .range(...rangeFor(DETAIL_LIST)),
       supabase
         .from("ledger_entries")
-        .select("id, kind, amount_cents, title_id, note, posted_at")
+        .select("id, kind, amount_cents, title_id, note, posted_at, source_refs")
         .eq("period_id", periodId)
         .order("posted_at")
         .range(...rangeFor(DETAIL_LIST)),
+      supabase
+        .from("contract_terms")
+        .select("revenue_share_rate_bp")
+        .eq("org_id", period.org_id)
+        .is("effective_to", null)
+        .order("effective_from", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
     ]);
 
   const canWrite = staffCanWriteFinance(staff?.role) && period.status === "open";
@@ -81,6 +96,21 @@ export default async function GcFinancePeriodPage({
     ? period.organizations[0]?.name
     : period.organizations?.name;
   const titleById = new Map((titleRows ?? []).map((t) => [t.id, t.title]));
+  const ledger = ledgerRows ?? [];
+  const recoupCents = ledger.filter((r) => r.kind === "recoup").reduce((s, r) => s + r.amount_cents, 0);
+  const adjustmentCents = ledger
+    .filter((r) => r.kind === "adjustment")
+    .reduce((s, r) => s + r.amount_cents, 0);
+  const math = term
+    ? statementSlice({
+        bankReceiptCents: (lineRows ?? []).reduce((s, line) => s + line.bank_receipt_cents, 0),
+        clientRateBp: term.revenue_share_rate_bp,
+        recoupCents,
+        adjustmentCents,
+        openingCents: period.opening_balance_cents,
+        thresholdCents: period.threshold_cents,
+      })
+    : null;
 
   return (
     <>
@@ -131,7 +161,7 @@ export default async function GcFinancePeriodPage({
                     <Card key={line.id}>
                       <CardBody className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <span className="t-body-sm text-ink">
-                          {line.endpoint} · {line.external_id} · {formatUsdCents(line.gross_cents)}
+                          {line.endpoint} · {line.external_id} · {formatUsdCents(line.bank_receipt_cents)}
                         </span>
                         <MapLineForm lineId={line.id} periodId={periodId} titles={titles} />
                       </CardBody>
@@ -157,6 +187,40 @@ export default async function GcFinancePeriodPage({
           </>
         ) : period.status === "open" ? (
           <p className="t-body-sm text-ink-3">{FINANCE_PAGE.writeDenied}</p>
+        ) : null}
+
+        {math ? (
+          <section className="flex flex-col gap-3">
+            <h2 className="t-body font-medium text-ink">{FINANCE_PAGE.statement}</h2>
+            <Card>
+              <CardBody className="grid gap-2 sm:grid-cols-2">
+                <p className="t-body-sm text-ink-2">
+                  {FINANCE_PAGE.bankReceipt} {formatUsdCents(math.bankReceiptCents)}
+                </p>
+                <p className="t-body-sm text-ink-2">
+                  Client {math.clientRateBp / 100}% · {FINANCE_PAGE.clientShare}{" "}
+                  {formatUsdCents(math.clientShareCents)}
+                </p>
+                <p className="t-body-sm text-ink-2">
+                  {FINANCE_PAGE.aggregatorKeep} {formatUsdCents(math.aggregatorKeepCents)}
+                </p>
+                <p className="t-body-sm text-ink-2">
+                  {FINANCE_PAGE.recoup} {formatUsdCents(math.recoupCents)} · {FINANCE_PAGE.adjustments}{" "}
+                  {formatUsdCents(math.adjustmentCents)}
+                </p>
+                <p className="t-body-sm text-ink">
+                  {FINANCE_PAGE.opening} {formatUsdCents(math.openingCents)} · Net{" "}
+                  {formatUsdCents(math.netCents)}
+                </p>
+                <p className="t-body-sm text-ink">
+                  {math.close.kind === "payable" ? FINANCE_PAGE.payable : FINANCE_PAGE.closing}{" "}
+                  {formatUsdCents(
+                    math.close.kind === "payable" ? math.netCents : math.close.closingBalanceCents,
+                  )}
+                </p>
+              </CardBody>
+            </Card>
+          </section>
         ) : null}
 
         <section className="flex flex-col gap-3">

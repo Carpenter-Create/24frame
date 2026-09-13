@@ -22,7 +22,7 @@ export const FINANCE_PAGE = {
   statusOpen: "Open",
   statusClosed: "Closed",
   import: "Import sales",
-  importHint: "Excel or CSV. USD only. Gross is stored as cents. No percent is applied.",
+  importHint: "Excel or CSV. USD only. The amount column is bank-receipt cents used for compute.",
   map: "Map endpoint ids",
   mapHint: "Resolve vendor ids onto this organization’s titles only.",
   mapImport: "Apply mappings",
@@ -30,7 +30,13 @@ export const FINANCE_PAGE = {
   postHint: "Recoup, adjustment, or sale. Amounts are signed cents as entered.",
   close: "Close period",
   closeHint:
-    "Sums posted ledger rows. Does not apply a client tier-plan percent or an aggregator percent.",
+    "Applies the org’s current contract client share to bank-receipt gross, then recoup and close.",
+  statement: "Period math",
+  bankReceipt: "Bank receipt",
+  clientShare: "Client share",
+  aggregatorKeep: "Aggregator keep",
+  recoup: "Recoup",
+  adjustments: "Adjustments",
   unmapped: "Unmapped lines",
   ledger: "Ledger",
   glance: `Finance periods live on the ${PRODUCT_NAME} Finance rail.`,
@@ -39,7 +45,7 @@ export const FINANCE_PAGE = {
   usd: "USD",
 } as const;
 
-export const FINANCE_LOGIC_VERSION = "finance-ops-slice-1.0-no-tier-percent";
+export const FINANCE_LOGIC_VERSION = "finance-ops-slice-1.1-client-tier-remainder";
 
 export const LEDGER_POST_KINDS = ["recoup", "adjustment", "sale"] as const;
 export type LedgerPostKind = (typeof LEDGER_POST_KINDS)[number];

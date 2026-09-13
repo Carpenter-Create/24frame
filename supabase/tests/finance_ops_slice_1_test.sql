@@ -1,10 +1,10 @@
 -- finance_ops_slice_1_test.sql
 -- Staff monthly finance. Isolation: Client A title never receives Client B import.
 -- RLS: view_financial reads; manage_tax_banking writes. Mapping C: org-scoped,
--- no profile privilege bridge. Close does not apply tier-plan %.
+-- no profile privilege bridge. Close applies contract_terms client share.
 
 begin;
-select plan(30);
+select plan(33);
 
 select set_config('t.org_a', gen_random_uuid()::text, false);
 select set_config('t.org_b', gen_random_uuid()::text, false);
@@ -44,6 +44,11 @@ insert into public.gc_staff (user_id, role) values
 insert into public.titles (id, org_id, title) values
   (current_setting('t.title_a')::uuid, current_setting('t.org_a')::uuid, 'Title A'),
   (current_setting('t.title_b')::uuid, current_setting('t.org_b')::uuid, 'Title B');
+
+insert into public.contract_terms
+  (org_id, tier, revenue_share_rate_bp, effective_from, term_length_months, expires_at, trigger)
+  values
+  (current_setting('t.org_a')::uuid, 'premium', 8500, '2026-01-01', 36, '2029-01-01', 'signup');
 
 -- Mapping C: finance tables are org-owned, not Social profiles.
 select is((select count(*)::int from information_schema.columns
@@ -97,7 +102,7 @@ select lives_ok(
        current_setting('t.period_a')::uuid,
        'a.csv',
        'hash-a',
-       '[{"endpoint":"tubi","external_id":"EXT-1","gross_cents":1000,"currency":"USD"}]'::jsonb
+       '[{"endpoint":"tubi","external_id":"EXT-1","bank_receipt_cents":1000,"currency":"USD"}]'::jsonb
      )::text, false) $$,
   'gc_accountant: import_sales for org A');
 
@@ -139,7 +144,7 @@ select lives_ok(
        current_setting('t.period_a')::uuid,
        'a2.csv',
        'hash-a2',
-       '[{"endpoint":"fast","external_id":"A-1","gross_cents":2500,"currency":"USD"}]'::jsonb) $$,
+       '[{"endpoint":"fast","external_id":"A-1","bank_receipt_cents":2500,"currency":"USD"}]'::jsonb) $$,
   'second import for org A');
 select is(
   (select public.map_sales_import(id) from public.sales_imports where filename = 'a2.csv'),
@@ -151,25 +156,32 @@ select is((select title_id from public.sales_lines
           'org A line maps to org A title');
 
 select lives_ok(
-  $$ select public.post_ledger_entry(
-       current_setting('t.period_a')::uuid, 'sale', 2500,
-       current_setting('t.title_a')::uuid, 'staff-entered sale', null) $$,
-  'staff posts a sale amount without applying a percent');
-
-select lives_ok(
   $$ select public.close_finance_period(current_setting('t.period_a')::uuid) $$,
   'close_finance_period permitted for accountant');
 
+select is((select amount_cents from public.ledger_entries
+           where period_id = current_setting('t.period_a')::uuid and kind = 'sale'
+           limit 1),
+          2125,
+          'close posts client share of bank receipt (8500bp of 2500)');
+select is((select (source_refs->>'aggregator_keep_cents')::int from public.ledger_entries
+           where period_id = current_setting('t.period_a')::uuid and kind = 'sale'
+           limit 1),
+          375,
+          'aggregator keep is the remainder, shown on the sale lineage');
 select is((select logic_version from public.ledger_entries
            where period_id = current_setting('t.period_a')::uuid and kind = 'payable'
            limit 1),
-          'finance-ops-slice-1.0-no-tier-percent',
-          'close lineage states no tier percent');
-select is((select (source_refs->>'applied_tier_percent')::boolean from public.ledger_entries
-           where period_id = current_setting('t.period_a')::uuid and kind in ('payable','closing')
+          'finance-ops-slice-1.1-client-tier-remainder',
+          'close lineage is the complementary-split version');
+select is((select (source_refs->>'complementary_split')::boolean from public.ledger_entries
+           where period_id = current_setting('t.period_a')::uuid and kind = 'sale'
            limit 1),
-          false,
-          'close did not apply tier-plan percent');
+          true,
+          'sale lineage records the complementary split');
+select is((select endpoint from public.sales_lines where external_id = 'A-1'),
+          'fast',
+          'import source endpoint is preserved after close');
 
 -- RLS reads
 select set_config('request.jwt.claims',
@@ -193,7 +205,7 @@ select throws_ok(
   $$ select public.import_sales(
        current_setting('t.period_b')::uuid,
        'evil.csv', 'h',
-       '[{"endpoint":"x","external_id":"y","gross_cents":1}]'::jsonb) $$,
+       '[{"endpoint":"x","external_id":"y","bank_receipt_cents":1}]'::jsonb) $$,
   'P0001', 'Not authorized',
   'viewer A: import_sales BLOCKED');
 

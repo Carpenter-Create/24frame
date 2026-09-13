@@ -6,7 +6,8 @@ import ExcelJS from "exceljs";
 export type ParsedSalesLine = {
   endpoint: string;
   external_id: string;
-  gross_cents: number;
+  bank_receipt_cents: number;
+  reported_cents: number | null;
   transaction_date: string | null;
   currency: "USD";
   raw: Record<string, string>;
@@ -18,7 +19,18 @@ export type ParseSalesResult =
 
 const ENDPOINT_HEADERS = ["endpoint", "vendor", "platform", "platform_id"];
 const EXTERNAL_HEADERS = ["external_id", "external id", "sku", "vendor_title_id", "id"];
-const GROSS_HEADERS = ["gross_cents", "gross", "amount", "revenue", "gross_amount", "gross_usd"];
+const BANK_HEADERS = [
+  "bank_receipt_cents",
+  "bank_receipt",
+  "bank",
+  "settled",
+  "received",
+  "gross_cents",
+  "gross",
+  "amount",
+  "revenue",
+];
+const REPORTED_HEADERS = ["reported_cents", "reported", "platform_gross", "reported_amount"];
 const DATE_HEADERS = ["transaction_date", "date", "sale_date"];
 const CURRENCY_HEADERS = ["currency"];
 
@@ -38,7 +50,7 @@ function parseGross(raw: string, headerUsed: string | undefined): number | null 
   if (cleaned === "" || cleaned === "-") return null;
   const n = Number(cleaned);
   if (!Number.isFinite(n)) return null;
-  if (headerUsed === "gross_cents") {
+  if (headerUsed === "gross_cents" || headerUsed === "bank_receipt_cents" || headerUsed === "reported_cents") {
     if (!Number.isInteger(n)) return null;
     return n;
   }
@@ -57,9 +69,9 @@ export function parseSalesRows(headers: string[], rows: string[][]): ParseSalesR
   const normalized = headers.map(normHeader);
   const hasEndpoint = normalized.some((h) => ENDPOINT_HEADERS.includes(h));
   const hasExternal = normalized.some((h) => EXTERNAL_HEADERS.includes(h));
-  const hasGross = normalized.some((h) => GROSS_HEADERS.includes(h));
-  if (!hasEndpoint || !hasExternal || !hasGross) {
-    return { ok: false, error: "File needs endpoint, external_id, and gross columns." };
+  const hasBank = normalized.some((h) => BANK_HEADERS.includes(h));
+  if (!hasEndpoint || !hasExternal || !hasBank) {
+    return { ok: false, error: "File needs endpoint, external_id, and a bank-receipt amount." };
   }
 
   const lines: ParsedSalesLine[] = [];
@@ -69,8 +81,10 @@ export function parseSalesRows(headers: string[], rows: string[][]): ParseSalesR
 
     const endpoint = pick(raw, ENDPOINT_HEADERS);
     const external = pick(raw, EXTERNAL_HEADERS);
-    const grossHeader = GROSS_HEADERS.find((h) => raw[h] !== undefined && raw[h] !== "");
-    const grossRaw = grossHeader ? raw[grossHeader] : undefined;
+    const bankHeader = BANK_HEADERS.find((h) => raw[h] !== undefined && raw[h] !== "");
+    const bankRaw = bankHeader ? raw[bankHeader] : undefined;
+    const reportedHeader = REPORTED_HEADERS.find((h) => raw[h] !== undefined && raw[h] !== "");
+    const reportedRaw = reportedHeader ? raw[reportedHeader] : undefined;
     const currency = (pick(raw, CURRENCY_HEADERS) ?? "USD").toUpperCase();
     const date = pick(raw, DATE_HEADERS) ?? null;
 
@@ -80,18 +94,26 @@ export function parseSalesRows(headers: string[], rows: string[][]): ParseSalesR
     if (currency !== "USD") {
       return { ok: false, error: `USD only (line ${i + 1}).` };
     }
-    if (grossRaw === undefined) {
-      return { ok: false, error: `Line ${i + 1} is missing gross.` };
+    if (bankRaw === undefined) {
+      return { ok: false, error: `Line ${i + 1} is missing a bank-receipt amount.` };
     }
-    const gross = parseGross(grossRaw, grossHeader);
-    if (gross === null) {
-      return { ok: false, error: `Line ${i + 1} has an unreadable gross amount.` };
+    const bank = parseGross(bankRaw, bankHeader);
+    if (bank === null) {
+      return { ok: false, error: `Line ${i + 1} has an unreadable bank-receipt amount.` };
+    }
+    let reported: number | null = null;
+    if (reportedRaw !== undefined) {
+      reported = parseGross(reportedRaw, reportedHeader);
+      if (reported === null) {
+        return { ok: false, error: `Line ${i + 1} has an unreadable reported amount.` };
+      }
     }
 
     lines.push({
       endpoint: endpoint.trim().toLowerCase(),
       external_id: external.trim(),
-      gross_cents: gross,
+      bank_receipt_cents: bank,
+      reported_cents: reported,
       transaction_date: date,
       currency: "USD",
       raw,
