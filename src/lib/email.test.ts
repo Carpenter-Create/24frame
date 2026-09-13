@@ -203,7 +203,7 @@ describe("Auth magic-link template", () => {
     expect(html).toContain(`bgcolor="${SPORTY_BLUE}"`);
     expect(html).toContain(">Sign in</a>");
     expect(html).toContain(EMAIL_LOGO_URL);
-    expect(EMAIL_LOGO_URL).toBe("https://app.24frame.co/email-logo.png");
+    expect(EMAIL_LOGO_URL).toBe("https://app.24frame.co/email-mark.png");
     expect(html).toContain('alt="24Frame"');
     expect(html).not.toMatch(/<img[^>]*#1769FF/i);
     expect(html).toContain("Radically different film distribution.");

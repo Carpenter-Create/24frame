@@ -3,11 +3,13 @@ import { PARENT_ENTITY, PRODUCT_NAME } from "@/lib/product";
 // House email chrome — Coinbase-scale type and air (Adam lock 2026-09-13).
 // Light-only. White card on #FAFAFB. Auth HTML in supabase/templates copies
 // these values; email tests lock the pair.
-// One-accent lock (Adam 2026-09-13, supersedes Asset 10 square / #250 navy /
-// #251 charcoal square): Sporty Blue is the Sign in button fill and the
-// 24frame.co footer link only. The mark is the circle emblem — all-black /
-// near-black #14171A ink on a white field, with generous white padding so
-// the circle and crop marks never clip. Never put Sporty Blue on the numeral.
+// One-accent lock (Adam 2026-09-13): Sporty Blue is the Sign in button fill
+// and the 24frame.co footer link only. The mark is the Asset 11 frame mark
+// (crop-mark corners + 24) — all-black ink on a white field, with ≥25%
+// white pad on every side of the ink bbox (aim ~28%) so crop marks float
+// inside the field and do not read as cut off in Mail. Never put Sporty
+// Blue on the numeral. Cache-busted path: /email-mark.png — Apple Mail
+// cached the #252 PNG at /email-logo.png.
 
 export const EMAIL_ACCENT = "#1769FF";
 export const EMAIL_BG = "#FAFAFB";
@@ -19,7 +21,7 @@ export const EMAIL_SECONDARY = "#3F4650";
 export const EMAIL_TERTIARY = "#9AA0A9";
 export const EMAIL_CARD_WIDTH = 600;
 export const EMAIL_CARD_RADIUS = "14px";
-export const EMAIL_LOGO_URL = "https://app.24frame.co/email-logo.png";
+export const EMAIL_LOGO_URL = "https://app.24frame.co/email-mark.png";
 export const EMAIL_LOGO_DISPLAY = 64;
 export const EMAIL_HEADLINE_SIZE = 28;
 export const EMAIL_HEADLINE_LINE = 34;

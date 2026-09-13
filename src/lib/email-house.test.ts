@@ -30,7 +30,7 @@ import {
 } from "./email-house";
 
 const SPORTY_BLUE = "#1769FF";
-const LOGO_PNG = resolve(__dirname, "../../public/email-logo.png");
+const LOGO_PNG = resolve(__dirname, "../../public/email-mark.png");
 
 function productResidue(html: string): string {
   return html.replaceAll("Global Content Holdings LLC", "");
@@ -72,7 +72,7 @@ function assertHouseChrome(html: string) {
 }
 
 describe("wrapHouseEmail", () => {
-  it("uses the Coinbase-scale house shell with a black circle emblem and well-formed format-detection", () => {
+  it("uses the Coinbase-scale house shell with a black frame mark and well-formed format-detection", () => {
     const html = wrapHouseEmail(`<p style="color:${EMAIL_INK}">Inner</p>`);
     assertHouseChrome(html);
     expect(html).toContain("Inner");
@@ -84,7 +84,7 @@ describe("wrapHouseEmail", () => {
     expect(html).toMatch(/font-size:11px[\s\S]*text-transform:uppercase/);
     expect(html).toContain("x-apple-disable-message-reformatting");
     expect(html).toContain("a[x-apple-data-detectors]");
-    expect(EMAIL_LOGO_URL).toBe("https://app.24frame.co/email-logo.png");
+    expect(EMAIL_LOGO_URL).toBe("https://app.24frame.co/email-mark.png");
     expect(html).not.toMatch(/background:\s*#1769FF/i);
   });
 
@@ -126,8 +126,8 @@ describe("houseOtpCode", () => {
   });
 });
 
-describe("email-logo.png", () => {
-  it("is a padded all-black circle emblem at app.24frame.co/email-logo.png", () => {
+describe("email-mark.png", () => {
+  it("is a heavy-padded all-black Asset 11 frame mark at app.24frame.co/email-mark.png", () => {
     expect(existsSync(LOGO_PNG)).toBe(true);
     const bytes = statSync(LOGO_PNG).size;
     expect(bytes).toBeGreaterThan(200);
@@ -137,7 +137,7 @@ describe("email-logo.png", () => {
     const width = png.readUInt32BE(16);
     const height = png.readUInt32BE(20);
     expect(width).toBe(height);
-    expect(width).toBe(160);
+    expect(width).toBe(256);
 
     const decoded = decodePngRgb(png);
     const white = (p: [number, number, number]) => {
@@ -158,10 +158,6 @@ describe("email-logo.png", () => {
     white(decoded.pixel(width - 3, height - 3));
     white(decoded.pixel(Math.floor(width / 2), Math.floor(height / 2)));
     white(decoded.pixel(Math.floor(width * 0.35), Math.floor(height * 0.22)));
-
-    // Numeral is near-black ink on white (not a white 24 on a dark square).
-    nearBlack(decoded.pixel(45, 87));
-    nearBlack(decoded.pixel(90, 87));
 
     let ink = 0;
     let minX = width;
@@ -186,19 +182,57 @@ describe("email-logo.png", () => {
       }
     }
 
-    // Line-art circle emblem, not a filled rounded square (~50% dark).
+    // Numeral is near-black ink on white (not a white 24 on a dark square).
+    const midX = Math.floor((minX + maxX) / 2);
+    const darkestIn = (x0: number, x1: number): [number, number, number] => {
+      let best: [number, number, number] = [255, 255, 255];
+      let bestV = 255;
+      for (let y = minY; y <= maxY; y++) {
+        for (let x = x0; x <= x1; x++) {
+          const p = decoded.pixel(x, y);
+          const v = Math.min(p[0], p[1], p[2]);
+          if (v < bestV) {
+            bestV = v;
+            best = p;
+          }
+        }
+      }
+      return best;
+    };
+    nearBlack(darkestIn(minX, midX));
+    nearBlack(darkestIn(midX, maxX));
+
+    // Line-art frame mark, not a filled rounded square (~50% dark).
     const fraction = ink / (width * height);
-    expect(fraction).toBeGreaterThan(0.04);
+    expect(fraction).toBeGreaterThan(0.03);
     expect(fraction).toBeLessThan(0.3);
 
+    // ≥25% pad on every side of the ink bbox (aim ~28%) so crop marks float.
     const padL = minX / width;
     const padT = minY / height;
     const padR = (width - 1 - maxX) / width;
     const padB = (height - 1 - maxY) / height;
-    expect(padL).toBeGreaterThanOrEqual(0.12);
-    expect(padT).toBeGreaterThanOrEqual(0.12);
-    expect(padR).toBeGreaterThanOrEqual(0.12);
-    expect(padB).toBeGreaterThanOrEqual(0.12);
+    expect(padL).toBeGreaterThanOrEqual(0.25);
+    expect(padT).toBeGreaterThanOrEqual(0.25);
+    expect(padR).toBeGreaterThanOrEqual(0.25);
+    expect(padB).toBeGreaterThanOrEqual(0.25);
+
+    // Asset 11: crop marks occupy the ink-bbox TL and BR; TR and BL stay open.
+    // Asset 9 (24-only) inks the TR of its bbox.
+    const probe = Math.max(4, Math.floor(Math.min(maxX - minX + 1, maxY - minY + 1) / 10));
+    const regionInk = (x0: number, y0: number, x1: number, y1: number) => {
+      let n = 0;
+      for (let y = y0; y <= y1; y++) {
+        for (let x = x0; x <= x1; x++) {
+          if (Math.min(...decoded.pixel(x, y)) < 240) n += 1;
+        }
+      }
+      return n;
+    };
+    expect(regionInk(minX, minY, minX + probe, minY + probe)).toBeGreaterThan(0);
+    expect(regionInk(maxX - probe, maxY - probe, maxX, maxY)).toBeGreaterThan(0);
+    expect(regionInk(maxX - probe, minY, maxX, minY + probe)).toBe(0);
+    expect(regionInk(minX, maxY - probe, minX + probe, maxY)).toBe(0);
   });
 });
 
