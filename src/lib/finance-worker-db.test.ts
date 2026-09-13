@@ -48,10 +48,10 @@ describe("finance worker db ops", () => {
       emptyResult(),
       emptyResult(),
     ];
-    const query: FinanceSql["query"] = async (text) => {
+    const query = (async (text: string) => {
       texts.push(text);
       return results.shift() ?? emptyResult();
-    };
+    }) as FinanceSql["query"];
     const ops = createFinanceWorkerDbOps({ query });
     await expect(ops.claimNextQueuedJob()).resolves.toBe("job-1");
     expect(texts[0]).toMatch(/for update skip locked/i);
@@ -81,7 +81,7 @@ describe("finance worker db ops", () => {
   });
 
   it("returns null when no queued job is available", async () => {
-    const query: FinanceSql["query"] = async () => emptyResult();
+    const query = (async () => emptyResult()) as FinanceSql["query"];
     const ops = createFinanceWorkerDbOps({ query });
     await expect(ops.claimNextQueuedJob()).resolves.toBeNull();
   });
