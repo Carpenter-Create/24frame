@@ -255,7 +255,7 @@ Expedited tier — all build on the same `s3.ts` helpers.
 
 `/api/portal/request-otp` is public + unauthenticated and sends real Resend email to a
 self-supplied address. App-layer defenses (in code): **Cloudflare Turnstile** on the
-portal identity form + server-side verify (reuses the `/login` keys — no new provisioning);
+portal identity form + server-side verify (existing Turnstile env keys — no new provisioning);
 a per-`(link,email)` cap (5/hr) and a per-`link` cap (20/hr) counted from `portal_otps`.
 
 **Required pre-go-live infra layer (network, not app code):** add **Vercel Firewall / WAF

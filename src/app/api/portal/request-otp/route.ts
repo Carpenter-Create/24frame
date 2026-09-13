@@ -21,7 +21,8 @@ export async function POST(req: Request) {
   const email = parsed.data.email.trim().toLowerCase();
 
   // Layer 1 — Turnstile: this endpoint sends real email to a self-supplied address, so require a
-  // human challenge before any DB work (same pattern as /login's magic-link send).
+  // human challenge before any DB work. Dashboard /login does not use Turnstile;
+  // it rate-limits magic-link sends in app code instead.
   if (!(await verifyTurnstile(parsed.data.turnstileToken))) {
     return NextResponse.json({ error: "Verification failed" }, { status: 403 });
   }
