@@ -47,10 +47,11 @@ export default async function DashboardPage() {
         </div>
       );
     }
+    const roster = await GcClientsDirectory();
     return (
       <div className="flex flex-col gap-[var(--space-6)]">
         <DashboardFinanceGlance />
-        <GcClientsDirectory />
+        {roster}
       </div>
     );
   }

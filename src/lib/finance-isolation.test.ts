@@ -59,7 +59,7 @@ describe("mapping C — finance stays Aggregation", () => {
 
   it("keeps finance tables on org_id and off profiles", () => {
     expect(migration).toContain("org_id");
-    expect(migration).not.toContain("profile_id");
+    expect(migration).not.toMatch(/\bprofile_id\s+uuid\b/);
     expect(migration).toContain("mapping C");
     expect(migration).toContain("must not have profile_id");
   });
