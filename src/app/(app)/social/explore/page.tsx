@@ -14,10 +14,8 @@ export default async function SocialExplorePage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const ctx = await getOrgContext();
+  const [ctx, sp] = await Promise.all([getOrgContext(), searchParams]);
   if (!ctx) redirect("/login");
-
-  const sp = await searchParams;
   const raw = sp.q;
   const q = (Array.isArray(raw) ? raw[0] : raw)?.trim() ?? "";
   const supabase = await createClient();

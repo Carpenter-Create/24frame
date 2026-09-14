@@ -45,32 +45,14 @@ export default async function SocialProfilePage({
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 } = {}) {
-  const ctx = await getOrgContext();
+  const [ctx, sp] = await Promise.all([
+    getOrgContext(),
+    searchParams ? searchParams : Promise.resolve({} as Record<string, string | string[] | undefined>),
+  ]);
   if (!ctx) redirect("/login");
-
-  const sp = searchParams ? await searchParams : {};
   const tab = parseSocialProfileTab(sp[SOCIAL_PROFILE_TAB_PARAM]);
   const supabase = await createClient();
   const { profile, error: ensureError } = await ensureOwnSocialProfileResult(supabase, ctx.user);
-  const photoUrl = profile ? await signedAvatarUrl(profile.id) : null;
-  const liveStories = profile ? (await loadLiveStories(supabase, [profile.id])).stories : [];
-  const history = profile ? await loadAuthorPosts(supabase, profile.id) : { posts: [], truncated: false };
-  const media = profile ? await signedSocialMediaByPostId(history.posts) : new Map();
-  const liked = profile
-    ? await loadLikedPostIds(
-        supabase,
-        ctx.user.id,
-        history.posts.map((post) => post.id),
-      )
-    : new Set<string>();
-  const counts = profile ? await loadProfileSocialCounts(supabase, profile.id) : null;
-  const followees = profile
-    ? await loadFolloweeIds(supabase, ctx.user.id)
-    : { ids: [] as string[], truncated: false };
-  const suggested = profile
-    ? await loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids])
-    : [];
-  const faces = suggested.length > 0 ? await signedAvatarUrls(suggested.map((person) => person.id)) : new Map();
 
   if (!profile) {
     return (
@@ -83,6 +65,26 @@ export default async function SocialProfilePage({
       </div>
     );
   }
+
+  const [photoUrl, liveStoriesPage, history, counts, followees] = await Promise.all([
+    signedAvatarUrl(profile.id),
+    loadLiveStories(supabase, [profile.id]),
+    loadAuthorPosts(supabase, profile.id),
+    loadProfileSocialCounts(supabase, profile.id),
+    loadFolloweeIds(supabase, ctx.user.id),
+  ]);
+  const liveStories = liveStoriesPage.stories;
+  const [media, liked, suggested] = await Promise.all([
+    signedSocialMediaByPostId(history.posts),
+    loadLikedPostIds(
+      supabase,
+      ctx.user.id,
+      history.posts.map((post) => post.id),
+    ),
+    loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids]),
+  ]);
+  const faces =
+    suggested.length > 0 ? await signedAvatarUrls(suggested.map((person) => person.id)) : new Map();
 
   const highlightCards = liveStories.map((story) => ({
     id: story.id,

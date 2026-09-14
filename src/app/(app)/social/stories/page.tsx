@@ -34,21 +34,25 @@ export default async function SocialStoriesPage() {
     loadLiveStories(supabase, authorIds),
     loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids]),
   ]);
-  const viewed = profile
-    ? await loadViewedStoryIds(
-        supabase,
-        ctx.user.id,
-        storiesPage.stories.map((story) => story.id),
-      )
-    : new Set<string>();
-  const rail = groupStoryRail(storiesPage.stories, viewed);
   const peopleIds = [
-    ...new Set([ctx.user.id, ...rail.map((card) => card.authorId), ...suggested.map((person) => person.id)]),
+    ...new Set([
+      ctx.user.id,
+      ...storiesPage.stories.map((story) => story.author_id),
+      ...suggested.map((person) => person.id),
+    ]),
   ];
-  const [authors, faces] = await Promise.all([
+  const [viewed, authors, faces] = await Promise.all([
+    profile
+      ? loadViewedStoryIds(
+          supabase,
+          ctx.user.id,
+          storiesPage.stories.map((story) => story.id),
+        )
+      : Promise.resolve(new Set<string>()),
     loadProfilesByIds(supabase, peopleIds),
     signedAvatarUrls(peopleIds),
   ]);
+  const rail = groupStoryRail(storiesPage.stories, viewed);
 
   return (
     <div data-social-stories-index="" className={SOCIAL_HOME_LAYOUT_CLASS}>

@@ -15,17 +15,20 @@ export default async function SocialCreatePage({
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 } = {}) {
-  const ctx = await getOrgContext();
+  const [ctx, sp] = await Promise.all([
+    getOrgContext(),
+    searchParams ? searchParams : Promise.resolve({} as Record<string, string | string[] | undefined>),
+  ]);
   if (!ctx) redirect("/login");
-
-  const sp = searchParams ? await searchParams : {};
   const initialKind = parseSocialCreateKind(sp.kind);
   const supabase = await createClient();
   const profile = await ensureOwnSocialProfile(supabase, ctx.user);
-  const photoUrl = profile ? await signedAvatarUrl(profile.id) : null;
-  const followees = profile
-    ? await loadFolloweeIds(supabase, ctx.user.id)
-    : { ids: [] as string[], truncated: false };
+  const [photoUrl, followees] = await Promise.all([
+    profile ? signedAvatarUrl(profile.id) : Promise.resolve(null),
+    profile
+      ? loadFolloweeIds(supabase, ctx.user.id)
+      : Promise.resolve({ ids: [] as string[], truncated: false }),
+  ]);
   const suggested = await loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids]);
   const faces = suggested.length > 0 ? await signedAvatarUrls(suggested.map((person) => person.id)) : new Map();
 

@@ -41,10 +41,8 @@ export default async function SocialHomePage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const ctx = await getOrgContext();
+  const [ctx, sp] = await Promise.all([getOrgContext(), searchParams]);
   if (!ctx) redirect("/login");
-
-  const sp = await searchParams;
   const topic = parseSocialCategoryParam(sp[SOCIAL_CATEGORY_PARAM]);
   const category = topic === SOCIAL_CATEGORY_ALL ? null : topic;
   const cursor = parseFollowingWallCursorParam(sp[SOCIAL_FOLLOWING_WALL_CURSOR_PARAM]);
@@ -56,40 +54,40 @@ export default async function SocialHomePage({
     ? await loadFolloweeIds(supabase, ctx.user.id)
     : { ids: [] as string[], truncated: false };
   const authorIds = followingAuthorIds(ctx.user.id, followees.ids);
-  const [wall, storiesPage, suggested] = await Promise.all([
+  const [wall, storiesPage, suggested, facts] = await Promise.all([
     profile
       ? loadFollowingPosts(supabase, authorIds, { category, cursor })
       : Promise.resolve({ posts: [], truncated: false, nextCursor: null }),
     loadLiveStories(supabase, authorIds),
     loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids]),
+    profile ? loadOwnPostFacts(supabase, ctx.user.id) : Promise.resolve(null),
   ]);
   const posts = wall.posts;
   const stories = storiesPage.stories;
   const storyIds = stories.map((story) => story.id);
-  const viewed = profile ? await loadViewedStoryIds(supabase, ctx.user.id, storyIds) : new Set<string>();
-  const rail = groupStoryRail(stories, viewed);
   const peopleIds = [
     ...new Set([
       ctx.user.id,
       ...posts.map((post) => post.author_id),
-      ...rail.map((card) => card.authorId),
+      ...stories.map((story) => story.author_id),
       ...suggested.map((person) => person.id),
     ]),
   ];
-  const [authors, faces, media] = await Promise.all([
+  const [viewed, authors, faces, media, groups, liked] = await Promise.all([
+    profile ? loadViewedStoryIds(supabase, ctx.user.id, storyIds) : Promise.resolve(new Set<string>()),
     loadProfilesByIds(supabase, peopleIds),
     signedAvatarUrls(peopleIds),
     signedSocialMediaByPostId(posts),
+    loadGroupsByIds(
+      supabase,
+      [...new Set(posts.map((post) => post.group_id).filter((id): id is string => !!id))],
+    ),
+    profile
+      ? loadLikedPostIds(supabase, ctx.user.id, posts.map((post) => post.id))
+      : Promise.resolve(new Set<string>()),
   ]);
-  const groups = await loadGroupsByIds(
-    supabase,
-    [...new Set(posts.map((post) => post.group_id).filter((id): id is string => !!id))],
-  );
-  const liked = profile
-    ? await loadLikedPostIds(supabase, ctx.user.id, posts.map((post) => post.id))
-    : new Set<string>();
+  const rail = groupStoryRail(stories, viewed);
   const photoUrl = faces.get(ctx.user.id) ?? null;
-  const facts = profile ? await loadOwnPostFacts(supabase, ctx.user.id) : null;
   const checklist = profile
     ? socialChecklistItems({
         hasPhoto: !!photoUrl,
