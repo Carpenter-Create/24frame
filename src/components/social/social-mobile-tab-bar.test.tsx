@@ -50,6 +50,7 @@ describe("Social floating pill tab bar (Figma 157:1297 / 158:461)", () => {
     expect(SOCIAL_TAB_PILL_CLASS).toContain("border-hairline");
     expect(SOCIAL_TAB_PILL_CLASS).toContain("h-14");
     expect(SOCIAL_TAB_BAR_CLASS).toContain("md:hidden");
+    expect(SOCIAL_TAB_BAR_CLASS).toContain("env(safe-area-inset-bottom)");
     expect(html).not.toContain("data-social-create-fab");
     expect(html).not.toContain("data-social-mobile-pill");
     expect(html).not.toContain("data-social-mobile-dock");

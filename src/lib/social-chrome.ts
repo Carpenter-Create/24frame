@@ -161,13 +161,12 @@ export const SOCIAL_ACCOUNT_CHIP_CLASS =
 // Floating pill — 157:1297 visible / 158:461 hidden on scroll-down.
 // Desktop left Aggregation rail is unchanged; pill is md:hidden.
 export const SOCIAL_TAB_BAR_CLASS =
-  "fixed inset-x-0 bottom-0 z-40 flex justify-center pb-[max(12px,env(safe-area-inset-bottom))] md:hidden";
+  "fixed inset-x-0 bottom-0 z-40 flex justify-center pb-[max(12px,env(safe-area-inset-bottom))] transition-transform duration-200 ease-out md:hidden";
 
 export const SOCIAL_TAB_PILL_CLASS =
-  "flex h-14 w-[min(358px,calc(100%-32px))] items-center rounded-[28px] border border-hairline bg-surface px-2 transition-transform duration-200 ease-out";
+  "flex h-14 w-[min(358px,calc(100%-32px))] items-center rounded-[28px] border border-hairline bg-surface px-2";
 
-export const SOCIAL_TAB_PILL_HIDDEN_CLASS =
-  "pointer-events-none translate-y-[calc(100%+24px)]";
+export const SOCIAL_TAB_PILL_HIDDEN_CLASS = "pointer-events-none translate-y-full";
 
 export const SOCIAL_TAB_BAR_ROW_CLASS = "flex h-12 w-full items-center";
 

@@ -231,7 +231,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(tabBar).toContain("data-social-tab-bar");
     expect(tabBar).toContain("data-social-tab-pill");
     expect(tabBar).toContain("data-social-tab-bar-hidden");
-    expect(tabBar).toContain("nextSocialTabBarVisibility");
+    expect(tabBar).toContain("stepSocialTabBarScroll");
+    expect(tabBar).toContain("createSocialTabBarScrollTracker");
     expect(tabBar).toContain("SOCIAL_NAV");
     expect(tabBar).toContain("SOCIAL_ICON_SIZE_TAB");
     expect(tabBar).toContain("isSocialTabActive");
@@ -243,6 +244,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).toContain("SOCIAL_TAB_BAR_CLASS");
     expect(chrome).toContain("SOCIAL_TAB_PILL_CLASS");
     expect(chrome).toContain("SOCIAL_TAB_PILL_HIDDEN_CLASS");
+    expect(chrome).toContain("translate-y-full");
+    expect(chrome).toContain("env(safe-area-inset-bottom)");
     expect(chrome).toContain("rounded-[28px]");
     expect(chrome).toContain("h-14");
     expect(SOCIAL_NAV.map((item) => item.label)).toEqual([

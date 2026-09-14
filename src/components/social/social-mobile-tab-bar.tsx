@@ -14,8 +14,8 @@ import {
 } from "@/lib/social-chrome";
 import { SOCIAL_ICON_SIZE_TAB, socialNavIconName } from "@/lib/social-icons";
 import {
-  nextSocialTabBarVisibility,
-  type SocialTabBarScrollState,
+  createSocialTabBarScrollTracker,
+  stepSocialTabBarScroll,
 } from "@/lib/social-tab-bar-scroll";
 import { SocialIcon } from "./social-icon";
 import { SocialNavPendingProbe, useSocialNavPending } from "./use-social-nav-pending";
@@ -28,16 +28,13 @@ function useSocialTabBarHidden() {
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
-    let lastY = window.scrollY;
-    let current: SocialTabBarScrollState = "visible";
+    let tracker = createSocialTabBarScrollTracker(window.scrollY);
 
     const onScroll = () => {
-      const y = window.scrollY;
-      const next = nextSocialTabBarVisibility(current, y - lastY, y);
-      lastY = y;
-      if (next === current) return;
-      current = next;
-      setHidden(next === "hidden");
+      const next = stepSocialTabBarScroll(tracker, window.scrollY);
+      const changed = next.state !== tracker.state;
+      tracker = next;
+      if (changed) setHidden(next.state === "hidden");
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -56,11 +53,11 @@ export function SocialMobileTabBar() {
       data-social-tab-bar=""
       data-social-tab-pill=""
       data-social-tab-bar-hidden={hidden ? "" : undefined}
-      className={SOCIAL_TAB_BAR_CLASS}
+      className={cn(SOCIAL_TAB_BAR_CLASS, hidden && SOCIAL_TAB_PILL_HIDDEN_CLASS)}
       aria-label="Social"
       aria-hidden={hidden || undefined}
     >
-      <div className={cn(SOCIAL_TAB_PILL_CLASS, hidden && SOCIAL_TAB_PILL_HIDDEN_CLASS)}>
+      <div className={SOCIAL_TAB_PILL_CLASS}>
         <div className={SOCIAL_TAB_BAR_ROW_CLASS}>
           {SOCIAL_NAV.map((item) => {
             const active = isSocialTabActive(activePath, item);
