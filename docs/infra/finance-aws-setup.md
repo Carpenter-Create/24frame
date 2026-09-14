@@ -10,10 +10,11 @@ Do **not** apply SQL from CI. Do **not** touch Royalogic / Watershed
 buckets, roles, repos, or accounts. Do **not** reuse title, media, or
 avatar credentials.
 
-Buckets, IAM, ECS/ECR/log group, and Vercel finance env below are
-**live** (account `405912452061` / `us-west-2`). CloudFront, EventBridge
-enablement, a digest-tagged task-def revision, and image push are
-**founder-gated**.
+Buckets, IAM, ECS/ECR/log group, CloudFront, EventBridge poll, worker
+task-def `:3`, and Vercel finance env below are **live** (account
+`405912452061` / `us-west-2`). New image revisions and Aurora cutover
+stay founder-gated. SES lineup exists; DNS is pending — not Auth
+cutover.
 
 ## Live resources
 
@@ -28,13 +29,18 @@ enablement, a digest-tagged task-def revision, and image push are
 | Worker IAM role | `24frame-finance-worker` | `ecs-tasks` trust + same S3 + Secrets `24frame/aurora/*` and `24frame/finance/*` |
 | Execution role | `24frame-finance-worker-execution` | Pull ECR + write `/ecs/24frame-finance` |
 | ECS cluster | `24frame-finance` (Fargate) | Worker SG `sg-001080a8a798d5cb6`, private subnets in `vpc-07f0141dafa80a408` |
-| ECR | `405912452061.dkr.ecr.us-west-2.amazonaws.com/24frame-finance-worker` | Push a digest tag after merge; `:pending` is not a runnable image |
-| Task def | `24frame-finance-worker:1` | Points at nonexistent `:pending` until CoS registers a digest revision |
-| EventBridge | `24frame-finance-poll` **DISABLED**, no targets | Founder adds the RunTask target and enables after **dev** smoke |
+| ECR | `405912452061.dkr.ecr.us-west-2.amazonaws.com/24frame-finance-worker` | Live digest image is what `:3` runs. `:pending` is not the live tag |
+| Task def | `24frame-finance-worker:3` | **Live.** Digest-pinned. New revisions stay founder-executed |
+| EventBridge | `24frame-finance-poll` **LIVE** | RunTask target already on `:3`. Do not disable from CI |
 | Log group | `/ecs/24frame-finance` | |
-| Vercel Production | `FINANCE_AWS_*` + `S3_FINANCE_BUCKET=24frame-finance-prod` | Server-only. Values stay out of the repo |
-| Vercel Preview | `FINANCE_*` + `S3_FINANCE_BUCKET=24frame-finance-dev` | Server-only |
-| CloudFront | **Not yet** | Optional. `FINANCE_CLOUDFRONT_*` only if created |
+| Vercel Production | `FINANCE_AWS_*` + `S3_FINANCE_BUCKET=24frame-finance-prod` + `FINANCE_CLOUDFRONT_*` | Server-only. Values stay out of the repo |
+| Vercel Preview | `FINANCE_*` + `S3_FINANCE_BUCKET=24frame-finance-dev` | `FINANCE_CLOUDFRONT_*` empty — `signedFinanceUrl` uses S3 presign |
+| CloudFront distro | `E2IZO8ROQV9AOI` | Domain `dnsdpkqx4wx3p.cloudfront.net` (`https://dnsdpkqx4wx3p.cloudfront.net`). Dedicated finance — not title/media |
+| CloudFront OAC | `FrameFinanceProdS3OAC` | Origin is `24frame-finance-prod` only |
+| CloudFront public key | `FrameFinanceSign-20260913` / `K3I3XBSSXSZVPM` | Dedicated finance signing key. Not the media key |
+| CloudFront key group | `99f2211c-605d-404a-8864-946e955c99ae` | Trusted key group on the finance distro |
+| Secrets Manager | `24frame/finance/cloudfront-private-key` | `us-west-2`. Name only — never the PEM |
+| SES | Lineup exists | DNS pending. Do **not** claim SES Auth cutover |
 
 ## Env names (server-only)
 
@@ -53,22 +59,24 @@ FINANCE_DATABASE_URL=       # interim survivor Postgres for the worker
 AURORA_DATABASE_URL=        # prefer when set; never a survivor pooler URL
 ```
 
+Production has `FINANCE_CLOUDFRONT_*` set against the live finance
+distro. Preview leaves those names empty so export signing stays S3
+presign. Names live in `.env.example`. Agents do not set values.
+
 `src/lib/aurora.ts` refuses survivor pooler / Royalogic / Watershed hosts
 as `AURORA_DATABASE_URL`. The worker uses that guard, then falls back to
-`FINANCE_DATABASE_URL` until Aurora cutover. Names live in `.env.example`.
-Agents do not set values.
+`FINANCE_DATABASE_URL` until Aurora cutover.
 
 ## Still founder-gated
 
-1. Optional dedicated CloudFront + signing key → `FINANCE_CLOUDFRONT_*`.
-2. Image build/push of `24frame-finance-worker` to ECR, new task-def
-   revision pinned to an image **digest**, EventBridge target role +
-   target on `24frame-finance-poll`. **Do not enable** the rule until
-   a **dev** bucket + survivor `FINANCE_DATABASE_URL` smoke exits 0.
-3. Slice 2 SQL apply is already live on survivor. Aurora SQL apply and
+1. New `24frame-finance-worker` image digest and task-def revision.
+   EventBridge `24frame-finance-poll` is already live on `:3` — do not
+   disable it from CI.
+2. Slice 2 SQL apply is already live on survivor. Aurora SQL apply and
    app cutover stay founder-only.
+3. SES DNS. Lineup exists. This is **not** Auth cutover.
 
-## Worker image (code is runnable; schedule is not)
+## Worker image (schedule live; new revisions founder-executed)
 
 Build from repo root. `tsx` + `tsconfig.json` resolve `@/` imports.
 `pg` talks to the current relational SoT.
@@ -83,15 +91,14 @@ DIGEST=$(aws ecr describe-images --region us-west-2 \
   --repository-name 24frame-finance-worker \
   --image-ids imageTag=candidate \
   --query 'imageDetails[0].imageDigest' --output text)
-# Register a new 24frame-finance-worker revision with image $REPO@$DIGEST
-# First smoke: S3_FINANCE_BUCKET=24frame-finance-dev and FINANCE_DATABASE_URL
-# (survivor). Then add the EventBridge RunTask target. Leave the rule disabled
-# until that smoke is clean. Founder enables 24frame-finance-poll after.
+# Live task-def is 24frame-finance-worker:3 on 24frame-finance-poll.
+# Register a new revision with image $REPO@$DIGEST when shipping a new image.
+# Do not disable 24frame-finance-poll from CI.
 ```
 
-Worker SG, subnets, log group, and IAM already exist. Do not recreate
-them. Do not push images unless this environment already has AWS/ECR
-auth.
+Worker SG, subnets, log group, IAM, CloudFront, and the EventBridge
+target already exist. Do not recreate them. Do not push images unless
+this environment already has AWS/ECR auth.
 
 ## App / worker contracts already in-repo
 
@@ -100,7 +107,8 @@ auth.
 - `close_finance_period` only enqueues. `apply_finance_close` is
   service_role / worker-only and is the sole close compute path.
 - Recipient export serves a signed finance URL, or `202` +
-  `request_finance_export`. Next does not generate CSV/PDF.
+  `request_finance_export`. Next does not generate CSV/PDF. Production
+  signs through dedicated finance CloudFront; Preview/dev presign S3.
 - Worker: `src/lib/finance-worker-run.ts` + `workers/finance/run.ts`.
   Poll claims `finance_jobs` (`status = queued`, `SKIP LOCKED`), builds
   S3 + RPC deps, calls `processFinanceJob`. Idle exits 0.

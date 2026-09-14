@@ -9,5 +9,5 @@ COPY tsconfig.json ./
 COPY src/lib ./src/lib
 COPY workers/finance ./workers/finance
 # tsx runs TypeScript in-place. pg is the worker Postgres client.
-# EventBridge rule 24frame-finance-poll stays DISABLED until founder enables it.
+# EventBridge rule 24frame-finance-poll is live on 24frame-finance-worker:3.
 CMD ["node", "--import", "tsx", "workers/finance/run.ts"]

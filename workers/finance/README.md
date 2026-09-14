@@ -10,7 +10,7 @@ Isolated AWS compute for finance ingest, close apply, and statement export.
 
 Entry: `workers/finance/run.ts` polls `finance_jobs` (`status = queued`), builds deps, and calls `processFinanceJob` in `src/lib/finance-worker-run.ts`. Idle (no jobs) exits 0.
 
-EventBridge rule `24frame-finance-poll` exists and stays **DISABLED** until founder enables it. Do not enable from CI or this image.
+EventBridge rule `24frame-finance-poll` is **live** and runs task-def `24frame-finance-worker:3`. Do not disable from CI or this image.
 
 Founder-executed apply: [`docs/infra/finance-aws-setup.md`](../../docs/infra/finance-aws-setup.md).
 
@@ -27,9 +27,9 @@ FINANCE_DATABASE_URL=               # interim survivor Postgres (sslmode=require
 AURORA_DATABASE_URL=                # prefer when set; refused if it looks like survivor/RL
 ```
 
-## CoS: build, push digest, smoke on **dev**
+## CoS: build, push digest, register a new revision
 
-Do this after merge. Do not push images from an unauthenticated cloud agent.
+Live schedule is already on `:3`. Do this when shipping a new image. Do not push images from an unauthenticated cloud agent.
 
 ```bash
 # From repo root, after aws sso / ecr login to 405912452061 us-west-2.
@@ -48,8 +48,8 @@ DIGEST=$(aws ecr describe-images --region us-west-2 \
 echo "$REPO@$DIGEST"
 ```
 
-Register a **new** task-definition revision of `24frame-finance-worker` whose image is that digest (not `:pending`). First smoke: `S3_FINANCE_BUCKET=24frame-finance-dev` + `FINANCE_DATABASE_URL` (survivor). Cluster `24frame-finance`, worker SG `sg-001080a8a798d5cb6`, private subnets in `vpc-07f0141dafa80a408`. Log group `/ecs/24frame-finance`.
+Live task-def is `24frame-finance-worker:3` (digest image, not `:pending`). To ship a new image, register a **new** revision pinned to that digest. Cluster `24frame-finance`, worker SG `sg-001080a8a798d5cb6`, private subnets in `vpc-07f0141dafa80a408`. Log group `/ecs/24frame-finance`.
 
-EventBridge target: add an ECS RunTask target on `24frame-finance-poll` with a role that can `ecs:RunTask` + `iam:PassRole` for `24frame-finance-worker` and `24frame-finance-worker-execution`. **Leave the rule disabled** until the digest task runs clean on **dev**. Founder enables the schedule after that smoke.
+EventBridge `24frame-finance-poll` already has the RunTask target. Do not disable it from CI. Point a new revision at the same rule after founder smoke.
 
 Do not invent a second money path. Close / export / ingest compute stays in this worker + `apply_sales_import` / `apply_finance_close` / `apply_finance_export`.
