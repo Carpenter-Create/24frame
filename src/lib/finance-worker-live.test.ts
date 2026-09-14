@@ -42,7 +42,7 @@ describe("finance worker live wiring", () => {
     expect(readme).toContain("24frame-finance-dev");
     expect(setup).toContain("FINANCE_DATABASE_URL");
     expect(setup).toContain("digest");
-    expect(setup).toContain("Do not enable");
+    expect(setup).toContain("Do not disable");
     expect(readme).not.toContain("Cognito");
     expect(setup).not.toContain("Cognito");
   });
