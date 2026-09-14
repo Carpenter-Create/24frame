@@ -113,4 +113,31 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).not.toContain("Reels");
     expect(explore).not.toContain("Reels");
   });
+
+  it("keeps Social Figma and Settings Mercury on separate registers", () => {
+    const settingsProfile = readFileSync("src/app/(app)/settings/profile/page.tsx", "utf8");
+    const accountSheet = readFileSync("src/components/chrome/account-sheet.tsx", "utf8");
+    const userMenu = readFileSync("src/components/chrome/user-menu.tsx", "utf8");
+    const settingsRail = readFileSync("src/components/chrome/settings-rail.tsx", "utf8");
+    const sideNav = readFileSync("src/components/chrome/side-nav.tsx", "utf8");
+    const publicProfile = readFileSync("src/app/(app)/social/u/[handle]/page.tsx", "utf8");
+    const socialStories = readFileSync("src/app/(app)/social/stories/page.tsx", "utf8");
+    for (const src of [settingsProfile, accountSheet, userMenu, settingsRail]) {
+      expect(src).not.toContain("SocialIcon");
+      expect(src).not.toContain("@phosphor-icons");
+      expect(src).not.toContain("social-chrome");
+    }
+    expect(settingsProfile).toContain("AccountProfileForm");
+    expect(settingsProfile).toContain("CompanyProfileForm");
+    expect(settingsRail).toContain("ChevronLeft");
+    expect(settingsRail).toContain("strokeWidth={1.33}");
+    expect(sideNav).toContain('<Icon className="size-4 shrink-0" strokeWidth={1.33} />');
+    expect(home).not.toContain("PageHeader");
+    expect(create).not.toContain("PageHeader");
+    expect(profile).not.toContain("PageHeader");
+    expect(profile).not.toContain("AccountProfileForm");
+    expect(profile).toContain("SocialProfileIdentity");
+    expect(publicProfile).not.toContain("PageHeader");
+    expect(socialStories).not.toContain("PageHeader");
+  });
 });
