@@ -37,6 +37,8 @@ import {
   socialProfilePublicUrl,
   socialProfileRewriteTarget,
   socialProfileTabHref,
+  socialProfileTabLabel,
+  SOCIAL_PROFILE_TABS,
   socialShareHint,
   socialVanityInternalPath,
   stripHandleDecorators,
@@ -204,12 +206,19 @@ describe("profile opt-in", () => {
     expect(SOCIAL.create.caption).toBe("Caption");
     expect(parseSocialHomeLane("for-you")).toBe("for-you");
     expect(socialHomeLaneHref("following")).toBe("/social");
+    expect(SOCIAL_PROFILE_TABS).toEqual(["posts", "highlights", "credits"]);
     expect(parseSocialProfileTab("highlights")).toBe("highlights");
+    expect(parseSocialProfileTab("credits")).toBe("credits");
     expect(parseSocialProfileTab("reels")).toBe("posts");
     expect(socialProfileTabHref("/social/u/ada", "highlights")).toBe("/social/u/ada?tab=highlights");
+    expect(socialProfileTabHref("/social/u/ada", "credits")).toBe("/social/u/ada?tab=credits");
+    expect(socialProfileTabHref("/social/profile", "posts")).toBe("/social/profile");
+    expect(socialProfileTabLabel("credits")).toBe("Credits");
     expect(socialComposerPrompt("Ada Lovelace")).toBe("What's on your mind Ada?");
     expect(SOCIAL.profile.postsTab).toBe("Posts");
     expect(SOCIAL.profile.highlightsTab).toBe("Highlights");
+    expect(SOCIAL.profile.creditsTab).toBe("Credits");
+    expect(SOCIAL.profile.creditsEmpty).toBe("No credits yet");
     expect(parseProfileHandleParam("%40ada")).toBe("ada");
     expect(parseProfileHandleParam("@ada")).toBe("ada");
     expect(parseProfileHandleParam("ada")).toBe("ada");

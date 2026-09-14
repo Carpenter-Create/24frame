@@ -165,6 +165,9 @@ describe("Social public profile", () => {
     expect(html).toContain("data-social-profile-tabs");
     expect(html).toContain(SOCIAL.profile.postsTab);
     expect(html).toContain(SOCIAL.profile.highlightsTab);
+    expect(html).toContain(SOCIAL.profile.creditsTab);
+    expect(html).toContain('data-social-profile-tab="credits"');
+    expect(html).toContain("overflow-x-auto");
     expect(html).toContain("24frame.co/@ada");
     expect(html).toContain("Copies https://24frame.co/@ada");
     expect(html).toContain("data-social-for-you");
@@ -212,6 +215,33 @@ describe("Social public profile", () => {
     expect(html).toContain("data-social-author-empty");
     expect(html).toContain(SOCIAL.profile.postsEmpty);
     expect(html).not.toContain("data-social-author-posts");
+  });
+
+  it("shows the locked Credits blank empty state on a public profile", async () => {
+    stubClient({
+      posts: [
+        {
+          id: "p9",
+          body: "Public engine note",
+          author_id: "u2",
+          group_id: null,
+          like_count: 1,
+          created_at: "2026-09-13T12:00:00.000Z",
+        },
+      ],
+    });
+    const html = renderToStaticMarkup(
+      await SocialPublicProfilePage({
+        params: Promise.resolve({ handle: "@ada" }),
+        searchParams: Promise.resolve({ tab: "credits" }),
+      }),
+    );
+    expect(html).toContain('data-social-profile-tab="credits"');
+    expect(html).toContain('data-social-icon="film-slate"');
+    expect(html).toContain(SOCIAL.profile.creditsEmpty);
+    expect(html).not.toContain("Public engine note");
+    expect(html).not.toContain("data-social-author-history");
+    expect(html).not.toContain(SOCIAL.profile.highlightsEmpty);
   });
 
   it("does not show follow or edit on the viewer's own public route", async () => {

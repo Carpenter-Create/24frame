@@ -166,7 +166,7 @@ export const SOCIAL_HANDLE_PILL_CLASS =
   "inline-flex items-center rounded-[8px] bg-surface-muted px-[10px] py-[6px] t-body-sm font-medium text-ink-2";
 
 export const SOCIAL_PROFILE_TAB_CLASS =
-  "flex flex-col items-center gap-2 px-4 py-2.5 t-body md:gap-2 md:px-4";
+  "flex shrink-0 flex-col items-center gap-2 whitespace-nowrap px-4 py-2.5 t-body md:gap-2 md:px-4";
 
 export const SOCIAL_PROFILE_GRID_CLASS =
   "grid grid-cols-3 gap-1.5 md:gap-2";
