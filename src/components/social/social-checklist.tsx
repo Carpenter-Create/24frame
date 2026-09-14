@@ -5,7 +5,12 @@ import { useState } from "react";
 
 import { socialChecklistIncomplete, type SocialChecklistItem } from "@/lib/social-home";
 import { SOCIAL } from "@/lib/social";
-import { SOCIAL_ACTION_QUIET_CLASS } from "@/lib/social-chrome";
+import {
+  SOCIAL_ACTION_QUIET_CLASS,
+  SOCIAL_CHECKLIST_CLASS,
+  SOCIAL_CHECKLIST_ROW_CLASS,
+  SOCIAL_CHECKLIST_ROW_LAST_CLASS,
+} from "@/lib/social-chrome";
 import { SOCIAL_ICON_SIZE_NAV } from "@/lib/social-icons";
 import { SocialIcon } from "./social-icon";
 
@@ -18,7 +23,7 @@ export function SocialOnboardingChecklist({ items }: { items: readonly SocialChe
   return (
     <section
       data-social-checklist=""
-      className="flex flex-col gap-[var(--space-4)] rounded-[8px] border border-hairline bg-surface p-[var(--space-4)]"
+      className={SOCIAL_CHECKLIST_CLASS}
     >
       <div className="flex items-center justify-between gap-[var(--space-4)]">
         <div className="flex flex-col gap-1">
@@ -47,11 +52,7 @@ export function SocialOnboardingChecklist({ items }: { items: readonly SocialChe
         {items.map((item, index) => (
           <li
             key={item.id}
-            className={
-              index < items.length - 1
-                ? "border-b border-hairline py-[var(--space-4)]"
-                : "pt-[var(--space-4)]"
-            }
+            className={index < items.length - 1 ? SOCIAL_CHECKLIST_ROW_CLASS : SOCIAL_CHECKLIST_ROW_LAST_CLASS}
           >
             <Link
               href={item.href}

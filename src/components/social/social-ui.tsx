@@ -365,6 +365,7 @@ export function SocialPostCard({ post }: { post: SocialPostCardModel }) {
       data-social-post={post.id}
       className={media ? SOCIAL_CARD_CLASS : SOCIAL_CARD_MUTED_CLASS}
     >
+      {media ? <SocialPostMedia items={post.media} /> : null}
       <div className="flex items-center gap-[var(--space-3)]">
         <SocialAvatar name={post.authorName} photoUrl={post.authorPhotoUrl} size="sm" />
         <div className="min-w-0">
@@ -390,7 +391,6 @@ export function SocialPostCard({ post }: { post: SocialPostCardModel }) {
           </p>
         </div>
       </div>
-      {media ? <SocialPostMedia items={post.media} /> : null}
       {post.body ? <p className="t-body text-ink whitespace-pre-wrap">{post.body}</p> : null}
       <div className="flex items-center gap-[var(--space-4)] t-body-sm text-ink-2">
         {post.canLike ? (

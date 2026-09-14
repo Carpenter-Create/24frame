@@ -161,6 +161,7 @@ describe("Social home", () => {
     expect(html).toContain("data-social-lenses");
     expect(html).toContain("data-social-stories");
     expect(html).toContain("data-social-following-empty");
+    expect(html).toContain('data-social-icon="users"');
     expect(html).toContain("Cinematography");
     expect(html).toContain("Music");
     expect(html).not.toContain("data-social-need-profile");

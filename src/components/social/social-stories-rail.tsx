@@ -5,7 +5,9 @@ import { cn } from "@/lib/cn";
 import {
   SOCIAL_STORY_CARD_CLASS,
   SOCIAL_STORY_FACE_CLASS,
+  SOCIAL_STORY_MEDIA_CLASS,
 } from "@/lib/social-chrome";
+import { SOCIAL_ICON_SIZE_STORY_CREATE } from "@/lib/social-icons";
 import type { SocialStoryRailCard } from "@/lib/social-feed";
 import { SOCIAL, SOCIAL_ROUTES, socialStoryHref } from "@/lib/social";
 
@@ -34,7 +36,7 @@ export function SocialStoriesRail({
           >
             <div className={cn(SOCIAL_STORY_CARD_CLASS, "bg-hairline")}>
               <div className={cn(SOCIAL_STORY_FACE_CLASS, "bg-surface")}>
-                <SocialIcon name="plus" size={28} className="text-accent" />
+                <SocialIcon name="plus" size={SOCIAL_ICON_SIZE_STORY_CREATE} className="text-accent" />
                 <p className="t-body-sm font-medium text-ink">{SOCIAL.stories.create}</p>
               </div>
             </div>
@@ -54,14 +56,11 @@ export function SocialStoriesRail({
               className="flex w-[112px] shrink-0 flex-col items-center gap-[var(--space-2)]"
             >
               <div className={cn(SOCIAL_STORY_CARD_CLASS, card.unseen ? "bg-accent" : "bg-hairline")}>
-                <div className={cn(SOCIAL_STORY_FACE_CLASS, "bg-surface-muted")}>
+                <div data-social-story-media="" className={SOCIAL_STORY_MEDIA_CLASS}>
                   {photo ? (
                     // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the private avatars bucket
-                    <img src={photo} alt="" className="size-10 rounded-[8px] object-cover" />
-                  ) : (
-                    <div className="size-10 rounded-[8px] bg-hairline" />
-                  )}
-                  <p className="truncate t-label font-medium text-ink-2">{name}</p>
+                    <img src={photo} alt="" className="absolute inset-0 size-full object-cover" />
+                  ) : null}
                 </div>
               </div>
               <p className="w-full truncate text-center t-body-sm text-ink">{name}</p>

@@ -12,6 +12,7 @@ export const SOCIAL_PHOSPHOR_ICONS = [
   "user",
   "check",
   "image",
+  "users",
   "warning-circle",
   "camera",
   "caret-left",
@@ -37,3 +38,4 @@ export function socialNavIconName(href: string): SocialPhosphorIconName {
 export const SOCIAL_ICON_SIZE_NAV = 20;
 export const SOCIAL_ICON_SIZE_DOCK = 22;
 export const SOCIAL_ICON_SIZE_EMPTY = 40;
+export const SOCIAL_ICON_SIZE_STORY_CREATE = 36;

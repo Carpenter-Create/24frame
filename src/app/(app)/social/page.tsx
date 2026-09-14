@@ -120,7 +120,7 @@ export default async function SocialHomePage({
       {posts.length === 0 ? (
         <div data-social-following-empty="">
           <SocialEmpty
-            icon="image"
+            icon="users"
             title={SOCIAL.home.empty}
             hint={SOCIAL.home.emptyHint}
             action={{ href: SOCIAL_ROUTES.explore, label: SOCIAL.home.goExplore }}
