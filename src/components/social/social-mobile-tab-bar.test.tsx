@@ -8,6 +8,26 @@ vi.mock("next/navigation", () => ({
   usePathname: () => navigation.pathname,
 }));
 
+vi.mock("next/link", async () => {
+  const React = await import("react");
+  function MockLink({
+    href,
+    children,
+    ...props
+  }: {
+    href: string;
+    children?: React.ReactNode;
+    prefetch?: boolean;
+  }) {
+    return React.createElement("a", { href, ...props }, children);
+  }
+  return {
+    __esModule: true,
+    default: MockLink,
+    useLinkStatus: () => ({ pending: false }),
+  };
+});
+
 import { SOCIAL_NAV } from "@/lib/nav";
 import { SOCIAL_TAB_BAR_CLASS, SOCIAL_TAB_BAR_ROW_CLASS } from "@/lib/social-chrome";
 import { SOCIAL_ICON_SIZE_TAB } from "@/lib/social-icons";

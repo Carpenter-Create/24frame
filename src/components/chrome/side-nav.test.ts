@@ -58,6 +58,16 @@ describe("SideNav Access rail", () => {
     expect(navSrc).not.toContain("strokeWidth={1.33}");
   });
 
+  it("turns Social viewport prefetch on and keeps Aggregation hover-only", () => {
+    expect(navSrc).toContain("prefetch={social}");
+    expect(navSrc).toContain("Aggregation: VIEWPORT prefetch off, HOVER prefetch on");
+    expect(navSrc).toContain("Social: VIEWPORT prefetch on");
+    expect(navSrc).toContain("useSocialNavPending");
+    expect(navSrc).toContain("SocialNavPendingProbe");
+    expect(navSrc).toContain("data-social-rail-pending");
+    expect(navSrc).not.toContain("prefetch={false}");
+  });
+
   it("marks the active item with a muted grey wash, not faded blue", () => {
     expect(navSrc).toContain("bg-surface-muted font-medium text-ink");
     expect(navSrc).toContain("font-normal text-ink-2 hover:bg-surface-muted hover:text-ink");

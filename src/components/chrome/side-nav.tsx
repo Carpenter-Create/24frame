@@ -7,6 +7,10 @@ import { railDestinations, STAFF_RAIL_EYEBROW, type NavItem } from "@/lib/nav";
 import { cn } from "@/lib/cn";
 import type { WorkspaceMode } from "@/lib/workspace";
 import { SocialIcon } from "@/components/social/social-icon";
+import {
+  SocialNavPendingProbe,
+  useSocialNavPending,
+} from "@/components/social/use-social-nav-pending";
 import { SOCIAL_ICON_SIZE_NAV, socialNavIconName } from "@/lib/social-icons";
 import { NavGlyph } from "./nav-glyph";
 
@@ -26,11 +30,14 @@ export function SideNav({
   workspace?: WorkspaceMode;
 }) {
   const pathname = usePathname();
+  const social = workspace === "social";
+  const { activePath, markPending, pendingHref } = useSocialNavPending();
+  const pathForActive = social ? activePath : pathname;
 
   const router = useRouter();
   const warmed = useRef<Set<string>>(new Set());
   const warm = (href: string) => {
-    if (warmed.current.has(href)) return;
+    if (social || warmed.current.has(href)) return;
     warmed.current.add(href);
     router.prefetch(href);
   };
@@ -39,24 +46,25 @@ export function SideNav({
     item: NavItem,
     badge: React.ReactNode = null,
   ) => {
-    const active = item.exact ? pathname === item.href : pathname.startsWith(item.href);
-    const social = workspace === "social";
+    const active = item.exact ? pathForActive === item.href : pathForActive.startsWith(item.href);
     return (
       <Link
         key={item.href}
         href={item.href}
-        // VIEWPORT prefetch off, HOVER prefetch on. The sidebar renders on every page, so
-        // viewport prefetch fired a full uncached render of EVERY destination on EVERY
-        // navigation — ~400 invocations in one short session, all contending with the
-        // navigation actually in flight. Hovering is a statement of intent: it warms the one
-        // destination you are about to click, so the click lands on data already fetched
-        // instead of paying ~360ms (network + render) with a skeleton in the meantime.
-        // Deduped per href so re-hovering does not re-fire.
-        prefetch={false}
-        onMouseEnter={() => warm(item.href)}
-        onFocus={() => warm(item.href)}
+        // Aggregation: VIEWPORT prefetch off, HOVER prefetch on. The sidebar
+        // renders on every page, so viewport prefetch fired a full uncached
+        // render of EVERY destination on EVERY navigation — ~400 invocations
+        // in one short session. Hovering warms the one destination you are
+        // about to click. Deduped per href so re-hovering does not re-fire.
+        // Social: VIEWPORT prefetch on. Five destinations plus local
+        // loading.tsx — not Aggregation DashboardSkeleton.
+        prefetch={social}
+        onMouseEnter={social ? undefined : () => warm(item.href)}
+        onFocus={social ? undefined : () => warm(item.href)}
+        onClick={social ? (event) => markPending(item.href, event) : undefined}
         title={collapsed ? item.label : undefined}
         aria-label={collapsed ? item.label : undefined}
+        data-social-rail-pending={social && pendingHref === item.href ? "" : undefined}
         className={cn(
           "relative flex items-center rounded-[var(--radius)] t-body-sm leading-4 transition-colors",
           collapsed ? "justify-center px-0 py-2" : "gap-2 px-2 py-2",
@@ -65,6 +73,7 @@ export function SideNav({
             : "font-normal text-ink-2 hover:bg-surface-muted hover:text-ink",
         )}
       >
+        {social ? <SocialNavPendingProbe href={item.href} onPending={markPending} /> : null}
         {social ? (
           <SocialIcon
             name={socialNavIconName(item.href)}

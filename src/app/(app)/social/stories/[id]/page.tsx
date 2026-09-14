@@ -29,10 +29,8 @@ export default async function SocialStoryPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const ctx = await getOrgContext();
+  const [ctx, { id }] = await Promise.all([getOrgContext(), params]);
   if (!ctx) redirect("/login");
-
-  const { id } = await params;
   const supabase = await createClient();
   const story = await loadStoryById(supabase, id);
   if (!story) {
@@ -61,11 +59,13 @@ export default async function SocialStoryPage({
   }
 
   const profile = await ensureOwnSocialProfile(supabase, ctx.user);
-  if (profile) await markSocialStoryViewed(story.id);
-
-  const followees = profile
-    ? await loadFolloweeIds(supabase, ctx.user.id)
-    : { ids: [] as string[] };
+  const followeesPromise = profile
+    ? loadFolloweeIds(supabase, ctx.user.id)
+    : Promise.resolve({ ids: [] as string[] });
+  const [followees] = await Promise.all([
+    followeesPromise,
+    profile ? markSocialStoryViewed(story.id) : Promise.resolve(),
+  ]);
   const authorIds = followingAuthorIds(ctx.user.id, followees.ids);
   const [authorStoriesPage, railPage, suggested] = await Promise.all([
     loadLiveStories(supabase, [story.author_id]),
@@ -78,28 +78,28 @@ export default async function SocialStoryPage({
   const index = Math.max(0, sequence.findIndex((row) => row.id === story.id));
   const prevId = sequence[index - 1]?.id ?? null;
   const nextId = sequence[index + 1]?.id ?? null;
-  const viewed = profile
-    ? await loadViewedStoryIds(
-        supabase,
-        ctx.user.id,
-        railPage.stories.map((row) => row.id),
-      )
-    : new Set<string>();
-  const rail = groupStoryRail(railPage.stories, viewed);
   const peopleIds = [
     ...new Set([
       story.author_id,
       ctx.user.id,
-      ...rail.map((card) => card.authorId),
+      ...railPage.stories.map((row) => row.author_id),
       ...suggested.map((person) => person.id),
     ]),
   ];
-  const [authors, photoUrl, media, faces] = await Promise.all([
+  const [viewed, authors, photoUrl, media, faces] = await Promise.all([
+    profile
+      ? loadViewedStoryIds(
+          supabase,
+          ctx.user.id,
+          railPage.stories.map((row) => row.id),
+        )
+      : Promise.resolve(new Set<string>()),
     loadProfilesByIds(supabase, peopleIds),
     signedAvatarUrl(story.author_id),
     signedSocialMediaItems(story.media, story.author_id, "stories"),
     signedAvatarUrls(peopleIds),
   ]);
+  const rail = groupStoryRail(railPage.stories, viewed);
   const author = authors.get(story.author_id);
   const name = author?.display_name ?? "Member";
 

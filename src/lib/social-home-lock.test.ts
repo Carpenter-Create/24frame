@@ -217,6 +217,9 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(tabBar).toContain("SOCIAL_NAV");
     expect(tabBar).toContain("SOCIAL_ICON_SIZE_TAB");
     expect(tabBar).toContain("isSocialTabActive");
+    expect(tabBar).toContain("useSocialNavPending");
+    expect(tabBar).toContain("prefetch");
+    expect(tabBar).not.toContain("prefetch={false}");
     expect(tabBar).not.toContain("data-social-create-fab");
     expect(tabBar).not.toContain("rounded-full");
     expect(chrome).toContain("SOCIAL_TAB_BAR_CLASS");
@@ -229,6 +232,30 @@ describe("Social Home miss list v1 P0 lock", () => {
       "Messages",
       "Profile",
     ]);
+  });
+
+  it("keeps Social nav prefetch on and destination pages parallel", () => {
+    const sideNav = readFileSync("src/components/chrome/side-nav.tsx", "utf8");
+    const tabBar = readFileSync("src/components/social/social-mobile-tab-bar.tsx", "utf8");
+    expect(existsSync("src/app/(app)/social/loading.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/social/profile/loading.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/social/create/loading.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/social/explore/loading.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/social/dms/loading.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/social/stories/loading.tsx")).toBe(true);
+    expect(readFileSync("src/app/(app)/social/loading.tsx", "utf8")).toContain("SocialHomeSkeleton");
+    expect(readFileSync("src/app/(app)/social/loading.tsx", "utf8")).not.toContain("DashboardSkeleton");
+    expect(sideNav).toContain("prefetch={social}");
+    expect(sideNav).toContain("useSocialNavPending");
+    expect(tabBar).toContain("prefetch");
+    expect(tabBar).toContain("useSocialNavPending");
+    expect(home).toContain("loadOwnPostFacts");
+    expect(home).toContain("Promise.all");
+    expect(profile).toContain("Promise.all");
+    expect(create).toContain("Promise.all");
+    expect(stories).toContain("Promise.all");
+    expect(explore).toContain("Promise.all");
+    expect(messages).toContain("Promise.all");
   });
 
   it("keeps first-win primary and the checklist demoted on empty desktop 133:816", () => {
