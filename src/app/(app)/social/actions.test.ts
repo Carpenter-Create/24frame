@@ -195,7 +195,7 @@ describe("social actions", () => {
     const form = new FormData();
     form.set("body", "with media");
     form.set("media", JSON.stringify(media));
-    expect(await createSocialPost(form)).toEqual({});
+    await expect(createSocialPost(form)).rejects.toThrow("REDIRECT:/social");
     expect(inserts).toEqual([
       {
         table: "posts",

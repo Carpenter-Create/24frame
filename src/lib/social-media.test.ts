@@ -22,6 +22,11 @@ describe("social media keys", () => {
       `posts/${USER}/${OBJECT}.mp4`,
     );
     expect(isOwnedSocialMediaKey(`posts/${USER}/${OBJECT}.jpg`, USER)).toBe(true);
+    expect(socialMediaObjectKey(USER, OBJECT, "image/jpeg", "stories")).toBe(
+      `stories/${USER}/${OBJECT}.jpg`,
+    );
+    expect(isOwnedSocialMediaKey(`stories/${USER}/${OBJECT}.jpg`, USER, "stories")).toBe(true);
+    expect(isOwnedSocialMediaKey(`stories/${USER}/${OBJECT}.jpg`, USER)).toBe(false);
   });
 
   it("rejects title-bucket keys, traversal, and avatar prefixes", () => {

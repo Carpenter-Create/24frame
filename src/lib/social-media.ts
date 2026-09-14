@@ -14,7 +14,10 @@ export type SocialMediaRuleError =
   | "tooLarge";
 
 export const SOCIAL_MEDIA_KEY_PREFIX = "posts";
+export const SOCIAL_MEDIA_LANES = ["posts", "stories"] as const;
+export type SocialMediaLane = (typeof SOCIAL_MEDIA_LANES)[number];
 export const SOCIAL_MEDIA_MAX_ITEMS = 4;
+export const SOCIAL_STORY_MAX_ITEMS = 1;
 export const SOCIAL_IMAGE_MAX_BYTES = 10 * 1024 * 1024;
 export const SOCIAL_VIDEO_MAX_BYTES = 100 * 1024 * 1024;
 export const SOCIAL_MEDIA_SIGNED_URL_TTL_SECONDS = 300;
@@ -105,10 +108,15 @@ export function isForbiddenMediaBucket(bucket: string): boolean {
   return false;
 }
 
+export function parseSocialMediaLane(raw: string | null | undefined): SocialMediaLane {
+  return raw === "stories" ? "stories" : "posts";
+}
+
 export function socialMediaObjectKey(
   userId: string,
   objectId: string,
   contentType: string,
+  lane: SocialMediaLane = "posts",
 ): string {
   const user = uuidSchema.safeParse(userId);
   const object = uuidSchema.safeParse(objectId);
@@ -118,17 +126,21 @@ export function socialMediaObjectKey(
   if (!isSocialMediaContentType(contentType)) {
     throw new Error("Unsupported media content type");
   }
-  return `${SOCIAL_MEDIA_KEY_PREFIX}/${user.data}/${object.data}.${EXT_BY_TYPE[contentType]}`;
+  return `${lane}/${user.data}/${object.data}.${EXT_BY_TYPE[contentType]}`;
 }
 
-export function isOwnedSocialMediaKey(key: string, userId: string): boolean {
+export function isOwnedSocialMediaKey(
+  key: string,
+  userId: string,
+  lane: SocialMediaLane = "posts",
+): boolean {
   if (isForbiddenMediaKey(key)) return false;
   const user = uuidSchema.safeParse(userId);
   if (!user.success) return false;
   const match = key.match(
-    /^posts\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})\.(jpg|jpeg|png|webp|gif|mp4|mov|webm)$/i,
+    /^(posts|stories)\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})\.(jpg|jpeg|png|webp|gif|mp4|mov|webm)$/i,
   );
-  return !!match && match[1] === user.data;
+  return !!match && match[1] === lane && match[2] === user.data;
 }
 
 export function parsePostMedia(value: unknown): SocialMediaItem[] {
@@ -147,6 +159,7 @@ export function parsePostMedia(value: unknown): SocialMediaItem[] {
 export function mediaItemsForInsert(
   raw: unknown,
   userId: string,
+  lane: SocialMediaLane = "posts",
 ): { ok: true; items: SocialMediaItem[] } | { ok: false; error: SocialMediaRuleError } {
   if (raw == null || raw === "") return { ok: true, items: [] };
   let parsed: unknown = raw;
@@ -158,7 +171,8 @@ export function mediaItemsForInsert(
     }
   }
   if (!Array.isArray(parsed)) return { ok: false, error: "invalid" };
-  if (parsed.length > SOCIAL_MEDIA_MAX_ITEMS) {
+  const max = lane === "stories" ? SOCIAL_STORY_MAX_ITEMS : SOCIAL_MEDIA_MAX_ITEMS;
+  if (parsed.length > max) {
     return { ok: false, error: "limit" };
   }
 
@@ -166,7 +180,7 @@ export function mediaItemsForInsert(
   for (const rawItem of parsed) {
     const item = itemSchema.safeParse(rawItem);
     if (!item.success) return { ok: false, error: "invalid" };
-    if (isForbiddenMediaKey(item.data.key) || !isOwnedSocialMediaKey(item.data.key, userId)) {
+    if (isForbiddenMediaKey(item.data.key) || !isOwnedSocialMediaKey(item.data.key, userId, lane)) {
       return { ok: false, error: "forbidden" };
     }
     if (socialMediaKindFor(item.data.contentType) !== item.data.kind) {

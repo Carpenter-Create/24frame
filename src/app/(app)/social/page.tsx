@@ -2,32 +2,59 @@ import { redirect } from "next/navigation";
 
 import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
-import { SocialPostCompose } from "@/components/social/social-forms";
+import { SocialOnboardingChecklist } from "@/components/social/social-checklist";
+import { SocialLensRow } from "@/components/social/social-lenses";
+import { SocialStoriesRail } from "@/components/social/social-stories-rail";
 import { SocialNeedProfile, SocialPostCard } from "@/components/social/social-ui";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
+import { parseSocialCategoryParam, SOCIAL_CATEGORY_ALL, SOCIAL_CATEGORY_PARAM } from "@/lib/social-categories";
+import { followingAuthorIds, socialChecklistItems } from "@/lib/social-home";
 import { SOCIAL } from "@/lib/social";
 import {
+  groupStoryRail,
+  loadFolloweeIds,
+  loadFollowingPosts,
   loadGroupsByIds,
   loadLikedPostIds,
+  loadLiveStories,
+  loadOwnPostFacts,
   loadOwnProfile,
   loadProfilesByIds,
-  loadVisiblePosts,
+  loadViewedStoryIds,
 } from "@/lib/social-feed";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function SocialHomePage() {
+export default async function SocialHomePage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const ctx = await getOrgContext();
   if (!ctx) redirect("/login");
 
+  const sp = await searchParams;
+  const topic = parseSocialCategoryParam(sp[SOCIAL_CATEGORY_PARAM]);
+  const category = topic === SOCIAL_CATEGORY_ALL ? null : topic;
+
   const supabase = await createClient();
   const profile = await loadOwnProfile(supabase, ctx.user.id);
-  const posts = await loadVisiblePosts(supabase);
-  const authorIds = [...new Set(posts.map((post) => post.author_id))];
+  const followeeIds = profile ? await loadFolloweeIds(supabase, ctx.user.id) : [];
+  const authorIds = followingAuthorIds(ctx.user.id, followeeIds);
+  const [posts, stories] = await Promise.all([
+    profile ? loadFollowingPosts(supabase, ctx.user.id, category) : Promise.resolve([]),
+    loadLiveStories(supabase, authorIds),
+  ]);
+  const storyIds = stories.map((story) => story.id);
+  const viewed = profile ? await loadViewedStoryIds(supabase, ctx.user.id, storyIds) : new Set<string>();
+  const rail = groupStoryRail(stories, viewed);
+  const peopleIds = [
+    ...new Set([ctx.user.id, ...posts.map((post) => post.author_id), ...rail.map((card) => card.authorId)]),
+  ];
   const [authors, faces, media] = await Promise.all([
-    loadProfilesByIds(supabase, authorIds),
-    signedAvatarUrls(authorIds),
+    loadProfilesByIds(supabase, peopleIds),
+    signedAvatarUrls(peopleIds),
     signedSocialMediaByPostId(posts),
   ]);
   const groups = await loadGroupsByIds(
@@ -37,13 +64,28 @@ export default async function SocialHomePage() {
   const liked = profile
     ? await loadLikedPostIds(supabase, ctx.user.id, posts.map((post) => post.id))
     : new Set<string>();
+  const facts = profile ? await loadOwnPostFacts(supabase, ctx.user.id) : null;
+  const photoUrl = faces.get(ctx.user.id) ?? null;
+  const checklist = profile
+    ? socialChecklistItems({
+        hasPhoto: !!photoUrl,
+        hasBio: !!profile.bio?.trim(),
+        hasIntro: facts?.hasIntro ?? false,
+        hasPost: facts?.hasPost ?? false,
+        hasStory: facts?.hasStory ?? false,
+      })
+    : [];
 
   return (
     <div data-social-home="">
       <PageHeader title={SOCIAL.home.title} subtitle={SOCIAL.home.subtitle} />
-      {profile ? <SocialPostCompose /> : <SocialNeedProfile />}
+      <SocialStoriesRail cards={rail} authors={authors} faces={faces} canCreate={!!profile} />
+      {profile ? <SocialOnboardingChecklist items={checklist} /> : <SocialNeedProfile />}
+      <SocialLensRow active={topic} />
       {posts.length === 0 ? (
-        <HouseEmpty>{SOCIAL.home.empty}</HouseEmpty>
+        <div data-social-following-empty="">
+          <HouseEmpty>{SOCIAL.home.empty}</HouseEmpty>
+        </div>
       ) : (
         <div data-social-feed="">
           {posts.map((post) => {

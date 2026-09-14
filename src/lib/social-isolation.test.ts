@@ -20,6 +20,9 @@ describe("social isolation lock", () => {
     expect(b3).not.toContain("from(\"modules\")");
     expect(b3).not.toContain("from(\"lessons\")");
     expect(b3).not.toContain("has_course_access");
+    expect(b3).not.toContain("from(\"follows\")");
+    expect(b3).not.toContain("from(\"stories\")");
+    expect(b3).not.toContain("from(\"story_views\")");
   });
 
   it("keeps Social writes on the user-scoped client", () => {
@@ -39,5 +42,8 @@ describe("social isolation lock", () => {
     expect(list).not.toContain("@/lib/supabase/admin");
     expect(detail).not.toContain("@/lib/supabase/admin");
     expect(actions).not.toContain("from(\"courses\")");
+    expect(actions).toContain('from("follows")');
+    expect(actions).toContain('from("stories")');
+    expect(actions).not.toContain("from(\"reels\")");
   });
 });

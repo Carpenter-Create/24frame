@@ -59,6 +59,10 @@ function chain(result: unknown) {
   c.select = vi.fn(self);
   c.eq = vi.fn(self);
   c.in = vi.fn(self);
+  c.is = vi.fn(self);
+  c.gt = vi.fn(self);
+  c.or = vi.fn(self);
+  c.ilike = vi.fn(self);
   c.order = vi.fn(self);
   c.range = vi.fn(async () => ({ data: result, error: null }));
   c.maybeSingle = vi.fn(async () => ({
@@ -70,11 +74,21 @@ function chain(result: unknown) {
   return c;
 }
 
+async function renderHome(topic?: string) {
+  return renderToStaticMarkup(
+    await SocialHomePage({
+      searchParams: Promise.resolve(topic ? { topic } : {}),
+    }),
+  );
+}
+
 function stubClient({
   profile = null,
   posts = [],
+  follows = [],
+  stories = [],
 }: {
-  profile?: { id: string; handle: string; display_name: string; status: string } | null;
+  profile?: { id: string; handle: string; display_name: string; status: string; bio?: string | null } | null;
   posts?: {
     id: string;
     body: string;
@@ -83,6 +97,16 @@ function stubClient({
     like_count: number;
     created_at: string;
     media?: unknown;
+    category?: string | null;
+  }[];
+  follows?: { followee_id: string }[];
+  stories?: {
+    id: string;
+    author_id: string;
+    body: string | null;
+    media: unknown;
+    expires_at: string;
+    created_at: string;
   }[];
 } = {}) {
   const from = vi.fn((table: string) => {
@@ -90,6 +114,9 @@ function stubClient({
     if (table === "posts") return chain(posts);
     if (table === "groups") return chain([]);
     if (table === "likes") return chain([]);
+    if (table === "follows") return chain(follows);
+    if (table === "stories") return chain(stories);
+    if (table === "story_views") return chain([]);
     throw new Error(`unexpected from(${table})`);
   });
   vi.mocked(createClient).mockResolvedValue({ from, rpc: vi.fn() } as never);
@@ -107,13 +134,21 @@ describe("Social home", () => {
     stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(ctx({ hasOrg: false }) as never);
 
-    const html = renderToStaticMarkup(await SocialHomePage());
+    const html = await renderHome();
     expect(html).toContain("data-social-home");
     expect(html).toContain(SOCIAL.home.title);
     expect(html).toContain("24Frame");
     expect(html).toContain("data-social-need-profile");
     expect(html).toContain(SOCIAL.cta.needProfile);
     expect(html).toContain("/social/profile");
+    expect(html).toContain("data-social-lenses");
+    expect(html).toContain("data-social-stories");
+    expect(html).toContain("data-social-following-empty");
+    expect(html).toContain("Cinematography");
+    expect(html).toContain("Music");
+    expect(html).not.toContain("Cinematographers");
+    expect(html).not.toContain("Composers");
+    expect(html).not.toContain("data-social-post-form");
     expect(html).not.toContain("Globee");
     expect(html).not.toContain(ASK_GLOBEE.headline);
   });
@@ -122,9 +157,10 @@ describe("Social home", () => {
     const { from } = stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
-    const html = renderToStaticMarkup(await SocialHomePage());
+    const html = await renderHome();
     expect(from).toHaveBeenCalledWith("profiles");
-    expect(from).toHaveBeenCalledWith("posts");
+    expect(from).toHaveBeenCalledWith("stories");
+    expect(from).not.toHaveBeenCalledWith("posts");
     expect(html).toContain("data-social-need-profile");
     expect(html).toContain(SOCIAL.cta.profileHrefLabel);
     expect(html).not.toContain("data-social-post-form");
@@ -150,11 +186,13 @@ describe("Social home", () => {
       new Map([["u1", "https://s3.example/signed-avatar"]]),
     );
 
-    const html = renderToStaticMarkup(await SocialHomePage());
+    const html = await renderHome();
     expect(html).toContain('data-social-post="p1"');
     expect(html).toContain("Ada Lovelace");
     expect(html).toContain('src="https://s3.example/signed-avatar"');
+    expect(html).toContain("data-social-checklist");
     expect(html).not.toContain("AL");
+    expect(html).not.toContain("data-social-avatar-ring");
   });
 
   it("renders signed post media from posts.media keys", async () => {
@@ -182,7 +220,7 @@ describe("Social home", () => {
       ]),
     );
 
-    const html = renderToStaticMarkup(await SocialHomePage());
+    const html = await renderHome();
     expect(html).toContain("data-social-post-image");
     expect(html).toContain('src="https://cf.example/signed-image"');
   });
@@ -190,7 +228,7 @@ describe("Social home", () => {
   it("sends an unauthenticated visitor to login", async () => {
     stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(null as never);
-    await expect(SocialHomePage()).rejects.toThrow("REDIRECT:/login");
+    await expect(SocialHomePage({ searchParams: Promise.resolve({}) })).rejects.toThrow("REDIRECT:/login");
   });
 });
 

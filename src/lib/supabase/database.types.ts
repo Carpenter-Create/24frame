@@ -657,6 +657,7 @@ export type Database = {
           like_count: number
           media: Json | null
           pinned: boolean
+          category: string | null
           required_entitlement_key: string | null
           status: Database["public"]["Enums"]["post_status"]
         }
@@ -672,6 +673,7 @@ export type Database = {
           like_count?: number
           media?: Json | null
           pinned?: boolean
+          category?: string | null
           required_entitlement_key?: string | null
           status?: Database["public"]["Enums"]["post_status"]
         }
@@ -687,6 +689,7 @@ export type Database = {
           like_count?: number
           media?: Json | null
           pinned?: boolean
+          category?: string | null
           required_entitlement_key?: string | null
           status?: Database["public"]["Enums"]["post_status"]
         }
@@ -703,6 +706,110 @@ export type Database = {
             columns: ["group_id"]
             isOneToOne: false
             referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      follows: {
+        Row: {
+          created_at: string
+          followee_id: string
+          follower_id: string
+        }
+        Insert: {
+          created_at?: string
+          followee_id: string
+          follower_id: string
+        }
+        Update: {
+          created_at?: string
+          followee_id?: string
+          follower_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "follows_followee_id_fkey"
+            columns: ["followee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follows_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stories: {
+        Row: {
+          author_id: string
+          body: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          media: Json
+          status: Database["public"]["Enums"]["post_status"]
+        }
+        Insert: {
+          author_id: string
+          body?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          media?: Json
+          status?: Database["public"]["Enums"]["post_status"]
+        }
+        Update: {
+          author_id?: string
+          body?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          media?: Json
+          status?: Database["public"]["Enums"]["post_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stories_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_views: {
+        Row: {
+          story_id: string
+          viewed_at: string
+          viewer_id: string
+        }
+        Insert: {
+          story_id: string
+          viewed_at?: string
+          viewer_id: string
+        }
+        Update: {
+          story_id?: string
+          viewed_at?: string
+          viewer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_views_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_views_viewer_id_fkey"
+            columns: ["viewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]

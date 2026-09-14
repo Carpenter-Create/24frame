@@ -6,6 +6,7 @@ import { ASK_GLOBEE } from "@/lib/ask-globee";
 import {
   GC_NAV,
   NAV,
+  SOCIAL_MOBILE_PILL,
   SOCIAL_NAV,
   STAFF_RAIL_EYEBROW,
   clientNavCurrent,
@@ -141,29 +142,33 @@ describe("mobileNavDestinations", () => {
   it("shows Social destinations only in Social mode — DMs are not /messages", () => {
     expect(mobileNavDestinations(false, "social").map((item) => item.href)).toEqual([
       "/social",
-      "/social/profile",
-      "/social/groups",
-      "/social/courses",
-      "/social/leaderboard",
+      "/social/explore",
+      "/social/create",
       "/social/dms",
+      "/social/profile",
     ]);
     expect(mobileNavDestinations(true, "social").map((item) => item.href)).toEqual([
       "/social",
-      "/social/profile",
-      "/social/groups",
-      "/social/courses",
-      "/social/leaderboard",
+      "/social/explore",
+      "/social/create",
       "/social/dms",
+      "/social/profile",
     ]);
     expect(mobileNavDestinations(true, "social").map((item) => item.href)).not.toContain("/messages");
     expect(mobileNavDestinations(true, "social").map((item) => item.href)).not.toContain("/queue");
+    expect(mobileNavDestinations(true, "social").map((item) => item.href)).not.toContain("/social/groups");
     expect(SOCIAL_NAV.map((item) => item.label)).toEqual([
       "Home",
-      "Profile",
-      "Groups",
-      "Courses",
-      "Leaderboard",
+      "Explore",
+      "Create",
       "Messages",
+      "Profile",
+    ]);
+    expect(SOCIAL_MOBILE_PILL.map((item) => item.label)).toEqual([
+      "Home",
+      "Explore",
+      "Messages",
+      "Profile",
     ]);
     expect(railDestinations(true, "social").staffItems).toEqual([]);
     expect(railDestinations(true, "aggregation").staffItems.map((item) => item.href)).toContain(

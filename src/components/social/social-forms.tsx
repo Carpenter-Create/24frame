@@ -7,19 +7,31 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
-import { SOCIAL_MEDIA_ACCEPT, SOCIAL_MEDIA_MAX_ITEMS, type SocialMediaItem } from "@/lib/social-media";
+import { SOCIAL_CATEGORY_TOPICS } from "@/lib/social-categories";
+import {
+  SOCIAL_IMAGE_CONTENT_TYPES,
+  SOCIAL_MEDIA_ACCEPT,
+  SOCIAL_MEDIA_MAX_ITEMS,
+  SOCIAL_STORY_MAX_ITEMS,
+  SOCIAL_VIDEO_CONTENT_TYPES,
+  type SocialMediaItem,
+  type SocialMediaLane,
+} from "@/lib/social-media";
 import { SOCIAL } from "@/lib/social";
 import {
   addSocialDmPeople,
   createSocialGroup,
   createSocialPost,
   createSocialProfile,
+  createSocialStory,
   joinSocialGroup,
   openSocialDm,
   presignSocialMediaUpload,
   sendSocialDm,
   setSocialDmTitle,
+  toggleSocialFollow,
   toggleSocialLike,
+  updateSocialBio,
 } from "@/app/(app)/social/actions";
 
 function FormError({ error }: { error: string }) {
@@ -64,6 +76,43 @@ export function SocialProfileCreateForm() {
   );
 }
 
+type ComposeKind = "text" | "photo" | "video";
+
+async function uploadSocialMedia(
+  files: FileList | null,
+  current: SocialMediaItem[],
+  max: number,
+  lane: SocialMediaLane,
+): Promise<{ items?: SocialMediaItem[]; error?: string }> {
+  if (!files || files.length === 0) return {};
+  const remaining = max - current.length;
+  if (remaining <= 0) return { error: SOCIAL.home.mediaLimit };
+  const chosen = Array.from(files).slice(0, remaining);
+  const next: SocialMediaItem[] = [];
+  for (const file of chosen) {
+    const body = new FormData();
+    body.set("content_type", file.type);
+    body.set("byte_length", String(file.size));
+    body.set("lane", lane);
+    const signed = await presignSocialMediaUpload(body);
+    if (signed.error || !signed.url || !signed.key || !signed.kind || !signed.contentType) {
+      return { error: signed.error ?? SOCIAL.home.uploadFailed };
+    }
+    const put = await fetch(signed.url, {
+      method: "PUT",
+      headers: { "Content-Type": signed.contentType },
+      body: file,
+    });
+    if (!put.ok) return { error: SOCIAL.home.uploadFailed };
+    next.push({
+      kind: signed.kind as SocialMediaItem["kind"],
+      key: signed.key,
+      contentType: signed.contentType as SocialMediaItem["contentType"],
+    });
+  }
+  return { items: next };
+}
+
 export function SocialPostCompose({
   groupId,
   groupSlug,
@@ -80,45 +129,15 @@ export function SocialPostCompose({
   async function onPick(files: FileList | null) {
     if (!files || files.length === 0) return;
     setError("");
-    const remaining = SOCIAL_MEDIA_MAX_ITEMS - media.length;
-    if (remaining <= 0) {
-      setError(SOCIAL.home.mediaLimit);
-      return;
-    }
-    const chosen = Array.from(files).slice(0, remaining);
     setUploading(true);
-    const next: SocialMediaItem[] = [];
-    for (const file of chosen) {
-      const body = new FormData();
-      body.set("content_type", file.type);
-      body.set("byte_length", String(file.size));
-      const signed = await presignSocialMediaUpload(body);
-      if (signed.error || !signed.url || !signed.key || !signed.kind || !signed.contentType) {
-        setUploading(false);
-        if (fileRef.current) fileRef.current.value = "";
-        setError(signed.error ?? SOCIAL.home.uploadFailed);
-        return;
-      }
-      const put = await fetch(signed.url, {
-        method: "PUT",
-        headers: { "Content-Type": signed.contentType },
-        body: file,
-      });
-      if (!put.ok) {
-        setUploading(false);
-        if (fileRef.current) fileRef.current.value = "";
-        setError(SOCIAL.home.uploadFailed);
-        return;
-      }
-      next.push({
-        kind: signed.kind as SocialMediaItem["kind"],
-        key: signed.key,
-        contentType: signed.contentType as SocialMediaItem["contentType"],
-      });
-    }
-    setMedia((current) => [...current, ...next]);
+    const result = await uploadSocialMedia(files, media, SOCIAL_MEDIA_MAX_ITEMS, "posts");
     setUploading(false);
     if (fileRef.current) fileRef.current.value = "";
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+    if (result.items) setMedia((current) => [...current, ...result.items!]);
   }
 
   return (
@@ -191,6 +210,259 @@ export function SocialPostCompose({
         </Button>
       </div>
       <FormError error={error} />
+    </form>
+  );
+}
+
+export function SocialCreateCompose() {
+  const [error, setError] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [kind, setKind] = useState<ComposeKind>("text");
+  const [body, setBody] = useState("");
+  const [media, setMedia] = useState<SocialMediaItem[]>([]);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const accept =
+    kind === "photo"
+      ? SOCIAL_IMAGE_CONTENT_TYPES.join(",")
+      : kind === "video"
+        ? SOCIAL_VIDEO_CONTENT_TYPES.join(",")
+        : SOCIAL_MEDIA_ACCEPT;
+
+  async function onPick(files: FileList | null) {
+    setError("");
+    setUploading(true);
+    const result = await uploadSocialMedia(files, media, SOCIAL_MEDIA_MAX_ITEMS, "posts");
+    setUploading(false);
+    if (fileRef.current) fileRef.current.value = "";
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+    if (result.items) setMedia((current) => [...current, ...result.items!]);
+  }
+
+  return (
+    <form
+      data-social-create-form=""
+      className="flex flex-col gap-[var(--space-3)]"
+      action={async (formData) => {
+        setError("");
+        formData.set("media", JSON.stringify(media));
+        const result = await createSocialPost(formData);
+        if (result?.error) setError(result.error);
+      }}
+    >
+      <div className="flex gap-[var(--space-2)]" data-social-create-kinds="">
+        {(["text", "photo", "video"] as const).map((value) => (
+          <button
+            key={value}
+            type="button"
+            data-social-create-kind={value}
+            data-social-create-kind-active={kind === value ? "" : undefined}
+            className={kind === value ? "t-body-sm font-medium text-ink" : TEXT_ACTION_CLASS}
+            onClick={() => setKind(value)}
+          >
+            {value === "text" ? SOCIAL.create.text : value === "photo" ? SOCIAL.create.photo : SOCIAL.create.video}
+          </button>
+        ))}
+      </div>
+      <label className="sr-only" htmlFor="social-create-body">
+        {SOCIAL.home.compose}
+      </label>
+      <textarea
+        id="social-create-body"
+        name="body"
+        rows={4}
+        value={body}
+        onChange={(e) => setBody(e.target.value)}
+        placeholder={SOCIAL.home.compose}
+        className="w-full rounded-[var(--radius)] border border-hairline bg-surface px-3 py-2 t-body text-ink outline-none placeholder:text-ink-3 focus:border-accent"
+      />
+      <div className="flex flex-col gap-1">
+        <Label htmlFor="social-create-category">{SOCIAL.home.topic}</Label>
+        <select
+          id="social-create-category"
+          name="category"
+          defaultValue=""
+          className="w-full rounded-[var(--radius)] border border-hairline bg-surface px-3 py-2 t-body text-ink"
+        >
+          <option value=""></option>
+          {SOCIAL_CATEGORY_TOPICS.map((label) => (
+            <option key={label} value={label}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </div>
+      {media.length > 0 ? (
+        <ul data-social-post-attachments="" className="flex flex-col gap-1">
+          {media.map((item) => (
+            <li key={item.key} className="flex items-center gap-[var(--space-2)] t-body-sm text-ink-2">
+              <span>{item.kind === "video" ? SOCIAL.home.videoKind : SOCIAL.home.photoKind}</span>
+              <button
+                type="button"
+                className={TEXT_ACTION_CLASS}
+                onClick={() => setMedia((current) => current.filter((row) => row.key !== item.key))}
+              >
+                {SOCIAL.home.removeAttach}
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {kind === "text" ? null : (
+        <>
+          <button
+            type="button"
+            className={TEXT_ACTION_CLASS}
+            disabled={uploading || media.length >= SOCIAL_MEDIA_MAX_ITEMS}
+            onClick={() => fileRef.current?.click()}
+          >
+            {uploading ? SOCIAL.home.attaching : SOCIAL.home.attach}
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept={accept}
+            multiple
+            className="sr-only"
+            aria-label={SOCIAL.home.attach}
+            onChange={(e) => void onPick(e.target.files)}
+          />
+        </>
+      )}
+      <Button type="submit" disabled={uploading}>
+        {SOCIAL.home.submit}
+      </Button>
+      <FormError error={error} />
+    </form>
+  );
+}
+
+export function SocialStoryCompose() {
+  const [error, setError] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [body, setBody] = useState("");
+  const [media, setMedia] = useState<SocialMediaItem[]>([]);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  async function onPick(files: FileList | null) {
+    setError("");
+    setUploading(true);
+    const result = await uploadSocialMedia(files, [], SOCIAL_STORY_MAX_ITEMS, "stories");
+    setUploading(false);
+    if (fileRef.current) fileRef.current.value = "";
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+    if (result.items) setMedia(result.items);
+  }
+
+  return (
+    <form
+      data-social-story-form=""
+      className="flex flex-col gap-[var(--space-3)]"
+      action={async (formData) => {
+        setError("");
+        formData.set("media", JSON.stringify(media));
+        const result = await createSocialStory(formData);
+        if (result?.error) setError(result.error);
+      }}
+    >
+      <label className="sr-only" htmlFor="social-story-body">
+        {SOCIAL.stories.title}
+      </label>
+      <textarea
+        id="social-story-body"
+        name="body"
+        rows={3}
+        value={body}
+        onChange={(e) => setBody(e.target.value)}
+        placeholder={SOCIAL.home.compose}
+        className="w-full rounded-[var(--radius)] border border-hairline bg-surface px-3 py-2 t-body text-ink outline-none placeholder:text-ink-3 focus:border-accent"
+      />
+      {media.length > 0 ? (
+        <p className="t-body-sm text-ink-2">
+          {media[0].kind === "video" ? SOCIAL.home.videoKind : SOCIAL.home.photoKind}
+        </p>
+      ) : null}
+      <button
+        type="button"
+        className={TEXT_ACTION_CLASS}
+        disabled={uploading}
+        onClick={() => fileRef.current?.click()}
+      >
+        {uploading ? SOCIAL.home.attaching : SOCIAL.home.attach}
+      </button>
+      <input
+        ref={fileRef}
+        type="file"
+        accept={SOCIAL_MEDIA_ACCEPT}
+        className="sr-only"
+        aria-label={SOCIAL.home.attach}
+        onChange={(e) => void onPick(e.target.files)}
+      />
+      <Button type="submit" disabled={uploading}>
+        {SOCIAL.stories.submit}
+      </Button>
+      <FormError error={error} />
+    </form>
+  );
+}
+
+export function SocialBioForm({ bio }: { bio: string }) {
+  const [error, setError] = useState("");
+  return (
+    <form
+      data-social-bio-form=""
+      className="flex max-w-md flex-col gap-[var(--space-3)]"
+      action={async (formData) => {
+        setError("");
+        const result = await updateSocialBio(formData);
+        if (result.error) setError(result.error);
+      }}
+    >
+      <div className="flex flex-col gap-1">
+        <Label htmlFor="social-bio">{SOCIAL.profile.bio}</Label>
+        <textarea
+          id="social-bio"
+          name="bio"
+          rows={3}
+          defaultValue={bio}
+          className="w-full rounded-[var(--radius)] border border-hairline bg-surface px-3 py-2 t-body text-ink outline-none placeholder:text-ink-3 focus:border-accent"
+        />
+      </div>
+      <FormError error={error} />
+      <Button type="submit" variant="secondary">
+        {SOCIAL.profile.bioSubmit}
+      </Button>
+    </form>
+  );
+}
+
+export function SocialFollowButton({
+  followeeId,
+  handle,
+  following,
+}: {
+  followeeId: string;
+  handle: string;
+  following: boolean;
+}) {
+  return (
+    <form
+      data-social-follow=""
+      action={async (formData) => {
+        await toggleSocialFollow(formData);
+      }}
+    >
+      <input type="hidden" name="followee_id" value={followeeId} />
+      <input type="hidden" name="handle" value={handle} />
+      <input type="hidden" name="following" value={following ? "1" : "0"} />
+      <Button type="submit" variant={following ? "secondary" : "primary"}>
+        {following ? SOCIAL.follow.following : SOCIAL.follow.follow}
+      </Button>
     </form>
   );
 }

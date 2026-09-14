@@ -25,7 +25,12 @@ describe("social copy lock", () => {
     const blob = JSON.stringify({ SOCIAL, SOCIAL_ROUTES, SOCIAL_WORKSPACE });
     expect(blob).toContain(PRODUCT_NAME);
     expect(blob).toContain(SOCIAL_WORKSPACE);
+    expect(SOCIAL.home.subtitle).toContain("follow");
     expect(SOCIAL.home.subtitle).toContain(PRODUCT_NAME);
+    expect(SOCIAL.explore.subtitle).toContain(PRODUCT_NAME);
+    expect(SOCIAL_ROUTES.explore).toBe("/social/explore");
+    expect(SOCIAL_ROUTES.create).toBe("/social/create");
+    expect(SOCIAL_ROUTES.storiesNew).toBe("/social/stories/new");
     expect(SOCIAL.dms.subtitle).toContain(PRODUCT_NAME);
     expect(SOCIAL.dms.addPeople).toBe("Add people");
     expect(SOCIAL_ROUTES.dms).toBe("/social/dms");
@@ -80,6 +85,7 @@ describe("social writes stay on the live spine", () => {
       body: "hello",
       group_id: null,
       media: [],
+      category: null,
       status: "active",
       like_count: 0,
       comment_count: 0,
@@ -132,7 +138,10 @@ describe("social writes stay on the live spine", () => {
     expect(actions).not.toContain("memberships");
     expect(actions).not.toContain(".from(\"profiles\").delete");
     expect(actions).not.toContain("from(\"organizations\")");
-    expect(pages).toContain("loadVisiblePosts");
+    expect(pages).toContain("loadFollowingPosts");
+    expect(pages).not.toContain("SocialPostCompose");
+    expect(pages).toContain("SocialLensRow");
+    expect(pages).toContain("SocialStoriesRail");
     expect(pages).not.toContain("from(\"titles\")");
     expect(board).toContain("loadLeaderboardBoard");
     expect(board).toContain("createClient");
@@ -166,6 +175,7 @@ describe("social writes stay on the live spine", () => {
       "src/app/(app)/social/leaderboard/page.tsx",
       "src/app/(app)/social/groups/[slug]/page.tsx",
       "src/app/(app)/social/groups/[slug]/posts/[postId]/page.tsx",
+      "src/app/(app)/social/stories/[id]/page.tsx",
     ];
     for (const file of surfaces) {
       const src = readFileSync(file, "utf8");
@@ -183,6 +193,7 @@ describe("social writes stay on the live spine", () => {
       "src/app/(app)/social/page.tsx",
       "src/app/(app)/social/groups/[slug]/page.tsx",
       "src/app/(app)/social/groups/[slug]/posts/[postId]/page.tsx",
+      "src/app/(app)/social/stories/[id]/page.tsx",
     ];
     for (const file of feed) {
       expect(readFileSync(file, "utf8")).toMatch(/signedSocialMedia/);
