@@ -1,7 +1,7 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-import { SOCIAL_MOBILE_PILL, SOCIAL_NAV } from "./nav";
+import { SOCIAL_NAV } from "./nav";
 import { SOCIAL_CATEGORY_LABELS } from "./social-categories";
 import { SOCIAL, SOCIAL_ROUTES } from "./social";
 
@@ -11,7 +11,6 @@ const create = readFileSync("src/app/(app)/social/create/page.tsx", "utf8");
 const stories = readFileSync("src/app/(app)/social/stories/page.tsx", "utf8");
 const messages = readFileSync("src/app/(app)/social/dms/page.tsx", "utf8");
 const profile = readFileSync("src/app/(app)/social/profile/page.tsx", "utf8");
-const dock = readFileSync("src/components/social/social-mobile-dock.tsx", "utf8");
 const card = readFileSync("src/components/social/social-ui.tsx", "utf8");
 const rail = readFileSync("src/components/social/social-stories-rail.tsx", "utf8");
 const empty = readFileSync("src/components/social/social-empty.tsx", "utf8");
@@ -38,12 +37,6 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(SOCIAL_NAV.map((item) => item.href)).not.toContain(SOCIAL_ROUTES.groups);
     expect(SOCIAL_NAV.map((item) => item.href)).not.toContain(SOCIAL_ROUTES.courses);
     expect(SOCIAL_NAV.map((item) => item.href)).not.toContain(SOCIAL_ROUTES.leaderboard);
-    expect(SOCIAL_MOBILE_PILL.map((item) => item.label)).toEqual([
-      "Home",
-      "Explore",
-      "Messages",
-      "Profile",
-    ]);
   });
 
   it("keeps Home on the following wall with stories, composer, and Following | For you tabs", () => {
@@ -114,13 +107,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(card).toContain("ring?:");
     expect(card.slice(card.indexOf("export function SocialPostCard"))).not.toContain("ring=");
     expect(pkg).toContain('"next": "16.3.5"');
-    expect(dock).toContain("data-social-mobile-pill");
-    expect(dock).toContain("data-social-create-fab");
-    expect(dock).toContain("SocialIcon");
-    expect(dock).toContain('name="plus"');
-    expect(dock).toContain("bg-surface");
-    expect(dock).not.toContain("backdrop-blur");
-    expect(dock).not.toContain("bg-surface/95");
+    expect(existsSync("src/components/social/social-mobile-dock.tsx")).toBe(false);
     expect(home).not.toContain("Reels");
     expect(explore).not.toContain("Reels");
   });
@@ -181,6 +168,45 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(create).not.toContain("Riley Okonkwo");
     expect(create).not.toContain("MicroDramaPilot");
     expect(create).not.toContain("education");
+    expect(chrome).toContain("138:163");
+    expect(chrome).toContain("138:889");
+    expect(chrome).toContain("138:943");
+    expect(stories).toContain('surface="stories"');
+    expect(stories).toContain("SocialForYouRail");
+    expect(stories).toContain("SocialStoriesEmpty");
+    expect(stories).not.toContain("education");
+    expect(SOCIAL.stories.emptyHint).toBe(
+      "When people you follow share stories, they show up here. Start with your own.",
+    );
+    expect(SOCIAL.stories.createCta).toBe("Create a story");
+    expect(empty).toContain("SocialStoriesEmpty");
+    expect(empty).toContain('name="image"');
+    expect(empty).toContain("SOCIAL_STORIES_EMPTY_ACTION_CLASS");
+    expect(rail).toContain('surface = "home"');
+    expect(rail).toContain("w-[112px]");
+    expect(rail).toContain("h-[168px]");
+    expect(rail).toContain("SOCIAL_STORIES_PLUS_WELL_CLASS");
+    expect(icons).toContain("SOCIAL_ICON_SIZE_STORY_PLUS = 20");
+    expect(icons).not.toContain("SOCIAL_ICON_SIZE_DOCK");
+  });
+
+  it("strips the Mercury floating dock from Social", () => {
+    const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
+    const topBar = readFileSync("src/components/social/social-top-bar.tsx", "utf8");
+    const storyViewer = readFileSync("src/app/(app)/social/stories/[id]/page.tsx", "utf8");
+    expect(existsSync("src/components/social/social-mobile-dock.tsx")).toBe(false);
+    expect(shell).not.toContain("SocialMobileDock");
+    expect(shell).not.toContain("data-social-mobile-pill");
+    expect(shell).not.toContain("data-social-create-fab");
+    expect(home).not.toContain("SocialMobileDock");
+    expect(create).not.toContain("SocialMobileDock");
+    expect(profile).not.toContain("SocialMobileDock");
+    expect(stories).not.toContain("SocialMobileDock");
+    expect(storyViewer).not.toContain("SocialMobileDock");
+    expect(topBar).toContain("data-social-header-tray");
+    expect(topBar).toContain("data-social-header-search");
+    expect(topBar).not.toContain("data-social-mobile-pill");
+    expect(readFileSync("src/lib/nav.ts", "utf8")).not.toContain("SOCIAL_MOBILE_PILL");
   });
 
   it("keeps Social Figma and Settings Mercury on separate registers", () => {

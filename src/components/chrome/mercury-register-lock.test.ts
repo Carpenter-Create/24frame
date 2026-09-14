@@ -129,8 +129,8 @@ describe("Adam Mercury register lock", () => {
     expect(nav).toContain("SOCIAL_NAV");
     // Social chrome rematch is Social Figma V1 SocialIcon — this PR
     // does not rewrite Social interiors; it only swaps Aggregation glyphs.
-    expect(src("src/components/social/social-mobile-dock.tsx")).toContain("SocialIcon");
-    expect(src("src/components/social/social-mobile-dock.tsx")).not.toContain("lucide-react");
+    expect(src("src/components/social/social-top-bar.tsx")).toContain("SocialIcon");
+    expect(src("src/components/social/social-top-bar.tsx")).not.toContain("lucide-react");
     expect(src("src/app/(app)/social/profile/page.tsx")).not.toContain("AccountProfileForm");
   });
 });

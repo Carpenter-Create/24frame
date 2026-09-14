@@ -380,7 +380,7 @@ describe("AppShell rail-collapse chevron", () => {
     expect(shellSrc).not.toMatch(/\brl-/);
     expect(shellSrc).not.toContain("AskGlobeeChromeProvider");
     expect(shellSrc).toContain("AskAssistantChromeProvider");
-    expect(shellSrc).toContain("SocialMobileDock");
+    expect(shellSrc).not.toContain("SocialMobileDock");
     expect(shellSrc).toContain('workspace === "social" && !settingsPage');
     expect(shellSrc).not.toContain("PanelLeftOpen");
     expect(shellSrc).not.toContain("PanelLeftClose");
@@ -458,8 +458,10 @@ describe("AppShell rail-collapse chevron", () => {
     expect(html).toContain("data-social-rail-create");
     expect(html).toContain("data-social-rail-account");
     expect(html).toContain("Ada Lovelace");
-    expect(html).toContain("data-social-mobile-pill");
-    expect(html).toContain("data-social-create-fab");
+    expect(html).not.toContain("data-social-mobile-pill");
+    expect(html).not.toContain("data-social-create-fab");
+    expect(html).not.toContain("data-social-mobile-dock");
+    expect(html).toContain("data-social-header-tray");
     expect(html).not.toContain("data-rail-collapse");
     expect(html).not.toContain("data-mobile-nav-trigger");
     expect(html).toContain("24Frame");

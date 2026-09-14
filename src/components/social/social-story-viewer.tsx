@@ -3,7 +3,13 @@ import Link from "next/link";
 import { SocialStoryReply } from "@/components/social/social-forms";
 import { SocialAvatar, SocialPostMedia, type SocialPostMediaItem } from "@/components/social/social-ui";
 import { SocialIcon } from "@/components/social/social-icon";
+import {
+  SOCIAL_STORY_CARET_CLASS,
+  SOCIAL_STORY_PROGRESS_BAR_CLASS,
+  SOCIAL_STORY_VIEWER_CLASS,
+} from "@/lib/social-chrome";
 import { SOCIAL_ROUTES, socialRelativeTime, socialStoryHref } from "@/lib/social";
+import { cn } from "@/lib/cn";
 
 export function SocialStoryViewer({
   storyId,
@@ -35,19 +41,15 @@ export function SocialStoryViewer({
   const bars = Math.max(total, 1);
 
   return (
-    <article
-      data-social-story-viewer={storyId}
-      className="mx-auto flex w-full max-w-[420px] flex-col gap-[var(--space-4)] rounded-[16px] border border-hairline bg-surface p-[var(--space-4)]"
-    >
+    <article data-social-story-viewer={storyId} className={SOCIAL_STORY_VIEWER_CLASS}>
       <div className="flex gap-1" data-social-story-progress="">
         {Array.from({ length: bars }, (_, i) => (
           <span
             key={i}
-            className={
-              i <= index
-                ? "h-0.5 flex-1 rounded-full bg-accent"
-                : "h-0.5 flex-1 rounded-full bg-hairline"
-            }
+            className={cn(
+              SOCIAL_STORY_PROGRESS_BAR_CLASS,
+              i <= index ? "bg-accent" : "bg-hairline",
+            )}
           />
         ))}
       </div>
@@ -70,25 +72,24 @@ export function SocialStoryViewer({
           <Link
             href={socialStoryHref(prevId)}
             aria-label="Previous story"
-            className="absolute left-0 top-1/2 z-10 flex size-10 -translate-y-1/2 items-center justify-center text-ink-2"
+            className={cn(SOCIAL_STORY_CARET_CLASS, "left-2")}
           >
-            <SocialIcon name="caret-left" size={28} />
+            <SocialIcon name="caret-left" size={20} />
           </Link>
         ) : null}
         {nextId ? (
           <Link
             href={socialStoryHref(nextId)}
             aria-label="Next story"
-            className="absolute right-0 top-1/2 z-10 flex size-10 -translate-y-1/2 items-center justify-center text-ink-2"
+            className={cn(SOCIAL_STORY_CARET_CLASS, "right-2")}
           >
-            <SocialIcon name="caret-right" size={28} />
+            <SocialIcon name="caret-right" size={20} />
           </Link>
         ) : null}
         {media.length > 0 ? (
           <SocialPostMedia items={media} />
         ) : (
           <div className="flex flex-col items-center gap-[var(--space-2)] px-[var(--space-6)] text-center">
-            <span className="size-10 rounded-[8px] bg-hairline" />
             {body ? <p className="t-body text-ink whitespace-pre-wrap">{body}</p> : null}
           </div>
         )}
@@ -99,7 +100,7 @@ export function SocialStoryViewer({
       <div className="flex items-center gap-[var(--space-3)]">
         {canReply ? <SocialStoryReply peerId={authorId} /> : <div className="flex-1" />}
         <span data-social-story-heart="" className="flex size-10 items-center justify-center text-ink-2">
-          <SocialIcon name="heart" size={22} />
+          <SocialIcon name="heart" size={20} />
         </span>
       </div>
     </article>

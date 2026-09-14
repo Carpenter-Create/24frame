@@ -54,6 +54,9 @@ describe("social copy lock", () => {
     expect(SOCIAL_ROUTES.create).toBe("/social/create");
       expect(SOCIAL_ROUTES.stories).toBe("/social/stories");
       expect(SOCIAL_ROUTES.storiesNew).toBe("/social/stories/new");
+    expect(SOCIAL.stories.emptyHint).toContain("share stories");
+    expect(SOCIAL.stories.createCta).toBe("Create a story");
+    expect(SOCIAL.stories.reply).toBe("Reply quietly…");
     expect(SOCIAL.dms.subtitle).toContain(PRODUCT_NAME);
     expect(SOCIAL.dms.addPeople).toBe("Add people");
     expect(SOCIAL_ROUTES.dms).toBe("/social/dms");

@@ -31,7 +31,6 @@ import { isSettingsPath, SETTINGS_RAIL_PAD_CLASS } from "@/lib/settings";
 import { SOCIAL_RAIL } from "@/lib/nav";
 import { SOCIAL_RAIL_MAIN_OFFSET_CLASS, SOCIAL_RAIL_WIDTH_CLASS } from "@/lib/social-chrome";
 import { resolveWorkspaceMode, workspaceHome, type WorkspaceMode } from "@/lib/workspace";
-import { SocialMobileDock } from "@/components/social/social-mobile-dock";
 import { SocialRailAccountChip, SocialRailCreateCta } from "@/components/social/social-rail-extras";
 import { SocialTopBar } from "@/components/social/social-top-bar";
 
@@ -124,7 +123,6 @@ export function AppShell({
           >
             <div className="w-full px-4 py-4">{children}</div>
           </main>
-          <SocialMobileDock />
         </div>
       </AskAssistantChromeProvider>
     );
@@ -280,7 +278,6 @@ export function AppShell({
           </div>
         )}
       </main>
-      {workspace === "social" && !settingsPage ? <SocialMobileDock /> : null}
     </div>
     </AskAssistantChromeProvider>
   );

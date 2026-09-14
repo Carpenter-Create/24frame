@@ -61,7 +61,7 @@ export function SocialTopBar({
           href={SOCIAL_ROUTES.dms}
           aria-label={SOCIAL.dms.title}
           data-social-header-tray=""
-          className="hidden items-center justify-center text-ink md:flex"
+          className="flex items-center justify-center text-ink"
         >
           <SocialIcon name="tray" size={SOCIAL_ICON_SIZE_HEADER} />
         </Link>

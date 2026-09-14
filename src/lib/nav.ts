@@ -71,11 +71,6 @@ export const SOCIAL_NAV: LucideNavItem[] = [
   { label: "Profile", href: SOCIAL_ROUTES.profile, family: "lucide", icon: UserRound },
 ];
 
-// Phone Social jobs. Create is the FAB, not a pill destination.
-export const SOCIAL_MOBILE_PILL: LucideNavItem[] = SOCIAL_NAV.filter(
-  (item) => item.href !== SOCIAL_ROUTES.create,
-);
-
 export const SOCIAL_RAIL = {
   workspace: "Social",
   destinations: "Destinations",

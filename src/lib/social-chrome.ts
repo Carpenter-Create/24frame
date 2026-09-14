@@ -2,6 +2,7 @@
 // Home ship: Figma 130:215 / 133:816 / 133:1078.
 // Profile ship: Figma 129:215 / 129:415 / 129:615.
 // Create ship: Figma 135:585 / 135:1037 / 135:1214.
+// Stories ship: Figma 138:163 / 138:889 / 138:943.
 // No glass, no drop shadow. Aggregation / Settings Mercury stays elsewhere.
 
 export const SOCIAL_FIGMA_HOME = "130:215";
@@ -9,6 +10,7 @@ export const SOCIAL_FIGMA_HOME_EMPTY = "133:816";
 export const SOCIAL_FIGMA_HOME_MOBILE = "133:1078";
 export const SOCIAL_FIGMA_PROFILE = ["129:215", "129:415", "129:615"] as const;
 export const SOCIAL_FIGMA_CREATE = ["135:585", "135:1037", "135:1214"] as const;
+export const SOCIAL_FIGMA_STORIES = ["138:163", "138:889", "138:943"] as const;
 
 export const SOCIAL_RAIL_WIDTH_CLASS = "w-[240px]";
 export const SOCIAL_RAIL_MAIN_OFFSET_CLASS = "md:ml-[240px]";
@@ -70,6 +72,29 @@ export const SOCIAL_STORY_FACE_CLASS =
 
 export const SOCIAL_STORY_MEDIA_CLASS =
   "relative size-full overflow-hidden rounded-[9px] bg-surface-muted";
+
+export const SOCIAL_STORIES_CARD_CLASS =
+  "flex h-[168px] w-[112px] shrink-0 items-center justify-center rounded-[16px] p-[3px]";
+
+export const SOCIAL_STORIES_FACE_CLASS =
+  "flex size-full flex-col items-center justify-center gap-[var(--space-2)] rounded-[13px] px-[var(--space-2)] py-[var(--space-4)]";
+
+export const SOCIAL_STORIES_MEDIA_CLASS =
+  "relative size-full overflow-hidden rounded-[13px] bg-surface-muted";
+
+export const SOCIAL_STORIES_PLUS_WELL_CLASS =
+  "flex size-9 items-center justify-center rounded-full bg-accent text-accent-contrast";
+
+export const SOCIAL_STORIES_EMPTY_ACTION_CLASS =
+  "inline-flex items-center justify-center gap-2 rounded-full bg-accent px-[var(--space-4)] py-[10px] t-body-sm font-medium text-accent-contrast";
+
+export const SOCIAL_STORY_VIEWER_CLASS =
+  "mx-auto flex w-full max-w-[420px] flex-col gap-[var(--space-4)] rounded-[16px] border border-hairline bg-surface p-[var(--space-4)] md:max-w-[420px]";
+
+export const SOCIAL_STORY_PROGRESS_BAR_CLASS = "h-[3px] flex-1 rounded-full";
+
+export const SOCIAL_STORY_CARET_CLASS =
+  "absolute top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-surface-muted text-ink-2";
 
 export const SOCIAL_COMPOSER_CLASS =
   "flex flex-col gap-2 border border-hairline bg-surface px-3 pb-2 pt-2.5";

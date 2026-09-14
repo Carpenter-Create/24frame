@@ -17,7 +17,6 @@ import { ASK_GLOBEE } from "@/lib/ask-globee";
 import {
   GC_NAV,
   NAV,
-  SOCIAL_MOBILE_PILL,
   SOCIAL_NAV,
   STAFF_RAIL_EYEBROW,
   clientNavCurrent,
@@ -203,12 +202,7 @@ describe("mobileNavDestinations", () => {
       "Messages",
       "Profile",
     ]);
-    expect(SOCIAL_MOBILE_PILL.map((item) => item.label)).toEqual([
-      "Home",
-      "Explore",
-      "Messages",
-      "Profile",
-    ]);
+    expect(navSrc).not.toContain("SOCIAL_MOBILE_PILL");
     expect(railDestinations(true, "social").staffItems).toEqual([]);
     expect(railDestinations(true, "aggregation").staffItems.map((item) => item.href)).toContain(
       "/queue",
