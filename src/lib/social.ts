@@ -47,7 +47,7 @@ export function displayHandle(handle: string): string {
 }
 
 export function handleFieldValue(handle: string): string {
-  return displayHandle(handle);
+  return `@${bareHandle(handle)}`;
 }
 
 export function socialProfileHref(handle: string): string {
@@ -159,7 +159,7 @@ export const SOCIAL = {
       "A profile is created for this signed-in account. Company aggregation and org invite do not create one for anyone else.",
     handle: "Handle",
     handlePlaceholder: "Set your handle",
-    handleRequired: "Handle is required.",
+    handleRequired: "Add a handle to continue.",
     handleInvalid: "Enter a handle of 3–30 letters, numbers, or underscores.",
     displayName: "Display name",
     defaultDisplayName: "Member",
@@ -279,6 +279,10 @@ export function normalizeHandle(raw: string): string | null {
   if (handle.length < HANDLE_MIN || handle.length > HANDLE_MAX) return null;
   if (!HANDLE_RE.test(handle)) return null;
   return handle;
+}
+
+export function socialHandleRequiredError(raw: string): string | null {
+  return bareHandle(raw) ? null : SOCIAL.profile.handleRequired;
 }
 
 /** Bare unique-ish seed from the sign-in email local-part. Not a display name. */

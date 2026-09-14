@@ -18,6 +18,11 @@ export type SocialEnsureUser = {
   name?: string | null;
 };
 
+export type EnsureOwnSocialProfileResult = {
+  profile: SocialProfileRow | null;
+  error: string | null;
+};
+
 // Mapping C: stories.author_id → profiles.id. A signed-in account may post
 // once this row exists. Only the session user is inserted — never an invitee
 // or any other auth.users.id. Org invite / membership writes must not call this.
@@ -29,54 +34,99 @@ export function nextHandleCandidate(seed: string, userId: string, attempt: numbe
   return `${base}${suffix}`.slice(0, HANDLE_MAX);
 }
 
-function isUniqueViolation(error: { message: string; code?: string } | null): boolean {
+export function isProfileUniqueViolation(error: { message: string; code?: string } | null): boolean {
   if (!error) return false;
   return error.code === "23505" || error.message.toLowerCase().includes("duplicate");
+}
+
+function rowFromInsert(userId: string, handle: string, displayName: string): SocialProfileRow {
+  return {
+    id: userId,
+    handle,
+    display_name: displayName,
+    status: "active",
+    bio: null,
+  };
 }
 
 export async function ensureOwnSocialProfile(
   supabase: ServerClient,
   user: SocialEnsureUser,
 ): Promise<SocialProfileRow | null> {
+  const { profile } = await ensureOwnSocialProfileResult(supabase, user);
+  return profile;
+}
+
+export async function ensureOwnSocialProfileResult(
+  supabase: ServerClient,
+  user: SocialEnsureUser,
+): Promise<EnsureOwnSocialProfileResult> {
   const { data: existing } = await supabase
     .from("profiles")
     .select("id, handle, display_name, status, bio")
     .eq("id", user.id)
     .maybeSingle();
-  if (existing) return existing;
+  if (existing) return { profile: existing, error: null };
 
   const displayName = normalizeDisplayName(user.name ?? "") ?? SOCIAL.profile.defaultDisplayName;
   const seed = suggestedHandleSeed(user.email, user.id);
   let handle = seed;
 
   for (let attempt = 0; attempt < 8; attempt += 1) {
-    const { error } = await supabase.from("profiles").insert(
-      profileInsertRow({
-        userId: user.id,
-        handle,
-        displayName,
-      }),
-    );
-    if (!error) {
-      return {
-        id: user.id,
-        handle,
-        display_name: displayName,
-        status: "active",
-        bio: null,
-      };
+    const inserted = await insertOwnProfile(supabase, user.id, handle, displayName);
+    if (inserted.profile) return inserted;
+    if (inserted.raced) return { profile: inserted.raced, error: null };
+    if (inserted.unique) {
+      handle = nextHandleCandidate(seed, user.id, attempt);
+      continue;
     }
-    if (!isUniqueViolation(error)) return null;
 
+    const retried = await insertOwnProfile(supabase, user.id, handle, displayName);
+    if (retried.profile) return retried;
+    if (retried.raced) return { profile: retried.raced, error: null };
+    if (retried.unique) {
+      handle = nextHandleCandidate(seed, user.id, attempt);
+      continue;
+    }
+    return { profile: null, error: retried.error };
+  }
+
+  return { profile: null, error: SOCIAL.profile.handleTaken };
+}
+
+async function insertOwnProfile(
+  supabase: ServerClient,
+  userId: string,
+  handle: string,
+  displayName: string,
+): Promise<{
+  profile: SocialProfileRow | null;
+  raced: SocialProfileRow | null;
+  unique: boolean;
+  error: string | null;
+}> {
+  const { error } = await supabase.from("profiles").insert(
+    profileInsertRow({
+      userId,
+      handle,
+      displayName,
+    }),
+  );
+  if (!error) {
+    return {
+      profile: rowFromInsert(userId, handle, displayName),
+      raced: null,
+      unique: false,
+      error: null,
+    };
+  }
+  if (isProfileUniqueViolation(error)) {
     const { data: raced } = await supabase
       .from("profiles")
       .select("id, handle, display_name, status, bio")
-      .eq("id", user.id)
+      .eq("id", userId)
       .maybeSingle();
-    if (raced) return raced;
-
-    handle = nextHandleCandidate(seed, user.id, attempt);
+    return { profile: null, raced: raced ?? null, unique: true, error: error.message };
   }
-
-  return null;
+  return { profile: null, raced: null, unique: false, error: error.message };
 }

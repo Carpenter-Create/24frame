@@ -35,18 +35,21 @@ function user() {
 function stub({
   profile = null,
   insertError = null,
+  insertErrors = [],
   updateError = null,
   rpcError = null,
   rpcData = null,
 }: {
   profile?: { id: string; handle?: string; display_name?: string; status?: string; bio?: string | null } | null;
   insertError?: { message: string; code?: string } | null;
+  insertErrors?: Array<{ message: string; code?: string } | null>;
   updateError?: { message: string; code?: string } | null;
   rpcError?: { message: string } | null;
   rpcData?: unknown;
 } = {}) {
   const inserts: { table: string; row: unknown }[] = [];
   const updates: { table: string; row: unknown }[] = [];
+  let insertIndex = 0;
   const from = vi.fn((table: string) => {
     const chain: Record<string, unknown> = {};
     chain.select = vi.fn(() => chain);
@@ -55,7 +58,9 @@ function stub({
     chain.maybeSingle = vi.fn(async () => ({ data: profile, error: null }));
     chain.insert = vi.fn(async (row: unknown) => {
       inserts.push({ table, row });
-      return { data: null, error: insertError };
+      const error = insertErrors[insertIndex] ?? insertError ?? null;
+      insertIndex += 1;
+      return { data: null, error };
     });
     chain.update = vi.fn((row: unknown) => {
       updates.push({ table, row });
@@ -111,6 +116,43 @@ describe("social actions", () => {
     const form = new FormData();
     form.set("handle", "@@@");
     expect(await createSocialProfile(form)).toEqual({ error: SOCIAL.profile.handleRequired });
+    expect(SOCIAL.profile.handleRequired).toBe("Add a handle to continue.");
+  });
+
+  it("rejects a blank handle when ensure cannot insert a row", async () => {
+    const { inserts } = stub({
+      insertError: { message: "null value in column birth_date", code: "23502" },
+    });
+    const form = new FormData();
+    form.set("handle", "@");
+    expect(await createSocialProfile(form)).toEqual({ error: SOCIAL.profile.handleRequired });
+    expect(inserts).toEqual([]);
+  });
+
+  it("inserts the submitted handle when ensure cannot create the row", async () => {
+    const { inserts, updates } = stub({
+      insertErrors: [
+        { message: "null value in column birth_date", code: "23502" },
+        { message: "null value in column birth_date", code: "23502" },
+        null,
+      ],
+    });
+    const form = new FormData();
+    form.set("handle", "@Ada_Lovelace");
+    form.set("display_name", "Ada Lovelace");
+    expect(await createSocialProfile(form)).toEqual({});
+    expect(inserts).toHaveLength(3);
+    expect(inserts[2]).toEqual({
+      table: "profiles",
+      row: profileInsertRow({
+        userId: "u1",
+        handle: "ada_lovelace",
+        displayName: "Ada Lovelace",
+      }),
+    });
+    expect(inserts[0].row).not.toHaveProperty("birth_date");
+    expect(inserts[2].row).not.toHaveProperty("birth_date");
+    expect(updates).toEqual([]);
   });
 
   it("ensures a self profile on the first Social write and then posts", async () => {

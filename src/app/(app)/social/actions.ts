@@ -14,9 +14,8 @@ import {
 import { presignSocialMediaPut } from "@/lib/s3-social-media";
 import { normalizeSocialCategory } from "@/lib/social-categories";
 import { storyInsertRow, storyViewInsertRow } from "@/lib/social-stories";
-import { ensureOwnSocialProfile } from "@/lib/social-profile";
+import { ensureOwnSocialProfile, isProfileUniqueViolation } from "@/lib/social-profile";
 import {
-  bareHandle,
   followInsertRow,
   groupInsertRow,
   likeInsertRow,
@@ -31,11 +30,13 @@ import {
   normalizeMessageBody,
   normalizePostBody,
   postInsertRow,
+  profileInsertRow,
   quietDmAddError,
   SOCIAL,
   SOCIAL_ROUTES,
   socialDmHref,
   socialGroupHref,
+  socialHandleRequiredError,
   socialMediaRuleMessage,
   socialProfileHref,
 } from "@/lib/social";
@@ -56,26 +57,52 @@ async function ownProfile() {
 }
 
 export async function createSocialProfile(formData: FormData): Promise<ActionResult> {
-  const { user, supabase, profile } = await ownProfile();
-  if (!profile) return { error: SOCIAL.cta.needProfile };
+  const user = await requireUser();
+  const supabase = await createClient();
 
   const raw = String(formData.get("handle") ?? "");
-  if (!bareHandle(raw)) return { error: SOCIAL.profile.handleRequired };
+  const required = socialHandleRequiredError(raw);
+  if (required) return { error: required };
   const handle = normalizeHandle(raw);
   if (!handle) return { error: SOCIAL.profile.handleInvalid };
 
+  const profile = await ensureOwnSocialProfile(supabase, user);
   const displayName =
-    normalizeDisplayName(String(formData.get("display_name") ?? "")) ?? profile.display_name;
+    normalizeDisplayName(String(formData.get("display_name") ?? "")) ??
+    profile?.display_name ??
+    SOCIAL.profile.defaultDisplayName;
 
-  const { error } = await supabase
-    .from("profiles")
-    .update({ handle, display_name: displayName })
-    .eq("id", user.id);
-  if (error) {
-    if (error.message.toLowerCase().includes("duplicate") || error.code === "23505") {
-      return { error: SOCIAL.profile.handleTaken };
+  if (profile) {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ handle, display_name: displayName })
+      .eq("id", user.id);
+    if (error) {
+      if (isProfileUniqueViolation(error)) return { error: SOCIAL.profile.handleTaken };
+      return { error: error.message };
     }
-    return { error: error.message };
+  } else {
+    const { error } = await supabase.from("profiles").insert(
+      profileInsertRow({
+        userId: user.id,
+        handle,
+        displayName,
+      }),
+    );
+    if (error) {
+      if (isProfileUniqueViolation(error)) {
+        const { error: updateError } = await supabase
+          .from("profiles")
+          .update({ handle, display_name: displayName })
+          .eq("id", user.id);
+        if (updateError) {
+          if (isProfileUniqueViolation(updateError)) return { error: SOCIAL.profile.handleTaken };
+          return { error: updateError.message };
+        }
+      } else {
+        return { error: error.message };
+      }
+    }
   }
 
   revalidatePath(SOCIAL_ROUTES.profile);

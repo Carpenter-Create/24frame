@@ -17,7 +17,7 @@ import {
   type SocialMediaItem,
   type SocialMediaLane,
 } from "@/lib/social-media";
-import { SOCIAL } from "@/lib/social";
+import { SOCIAL, socialHandleRequiredError } from "@/lib/social";
 import { SocialHandleField } from "./social-handle-field";
 import {
   addSocialDmPeople,
@@ -57,6 +57,12 @@ export function SocialProfileCreateForm({
       action={async (formData) => {
         setPending(true);
         setError("");
+        const required = socialHandleRequiredError(String(formData.get("handle") ?? ""));
+        if (required) {
+          setPending(false);
+          setError(required);
+          return;
+        }
         const result = await createSocialProfile(formData);
         setPending(false);
         if (result.error) setError(result.error);

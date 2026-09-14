@@ -1,12 +1,13 @@
 import { redirect } from "next/navigation";
 
 import { PageHeader } from "@/components/ui/page-header";
+import { InlineNotice } from "@/components/ui/inline-notice";
 import { SocialBioForm, SocialProfileCreateForm } from "@/components/social/social-forms";
 import { SocialAvatar } from "@/components/social/social-ui";
 import { signedAvatarUrl } from "@/lib/s3-avatars";
 import { displayHandle, SOCIAL } from "@/lib/social";
 import { loadLiveStories } from "@/lib/social-feed";
-import { ensureOwnSocialProfile } from "@/lib/social-profile";
+import { ensureOwnSocialProfileResult } from "@/lib/social-profile";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 
@@ -15,7 +16,7 @@ export default async function SocialProfilePage() {
   if (!ctx) redirect("/login");
 
   const supabase = await createClient();
-  const profile = await ensureOwnSocialProfile(supabase, ctx.user);
+  const { profile, error: ensureError } = await ensureOwnSocialProfileResult(supabase, ctx.user);
   const photoUrl = profile ? await signedAvatarUrl(profile.id) : null;
   const liveStories = profile ? await loadLiveStories(supabase, [profile.id]) : [];
 
@@ -39,7 +40,10 @@ export default async function SocialProfilePage() {
           <SocialBioForm bio={profile.bio ?? ""} />
         </div>
       ) : (
-        <SocialProfileCreateForm />
+        <div className="flex flex-col gap-[var(--space-4)]">
+          {ensureError ? <InlineNotice tone="error">{ensureError}</InlineNotice> : null}
+          <SocialProfileCreateForm />
+        </div>
       )}
     </div>
   );
