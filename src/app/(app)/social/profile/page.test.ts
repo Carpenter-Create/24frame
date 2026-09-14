@@ -263,7 +263,7 @@ describe("Social profile public face", () => {
     expect(html).not.toContain("data-social-author-history");
     expect(html).not.toContain(SOCIAL.profile.highlightsEmpty);
     expect(html).not.toContain("Analytics");
-    expect(html).not.toContain("Director");
+    expect(html).not.toContain("Your credits will appear");
   });
 
   it("shows @handle after ensure, not an empty create form", async () => {
