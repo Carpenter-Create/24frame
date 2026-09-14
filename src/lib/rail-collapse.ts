@@ -8,7 +8,7 @@ export const RAIL_COLLAPSE_CHEVRON_CLASS =
 
 export const RAIL_COLLAPSE_CHEVRON_ICON_CLASS = "h-4 w-4";
 
-export const RAIL_COLLAPSE_CHEVRON_ICON_STROKE = 1.33;
+export const RAIL_COLLAPSE_CHEVRON_ICON_WEIGHT = "bold" as const;
 
 export const RAIL_COLLAPSE_EXPAND_ROW_CLASS = "flex h-8 items-center justify-center";
 

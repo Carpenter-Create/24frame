@@ -10,7 +10,9 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
-import { ChevronLeft, ChevronRight, LogOut } from "lucide-react";
+import { CaretLeft, CaretRight, SignOut } from "@phosphor-icons/react";
+
+import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
 import { AppearanceCheck } from "./appearance-check";
 import { useThemePreference } from "@/components/theme-toggle";
@@ -77,7 +79,7 @@ import { USER_MENU, userMenuAvatarInitial, userMenuVersion } from "@/lib/user-me
 import { MenuSurfaceAccent } from "./menu-surface";
 
 function AccountRowChevron() {
-  return <ChevronRight className={SHEET_GROUP_CHEVRON_CLASS} strokeWidth={1.33} />;
+  return <CaretRight className={SHEET_GROUP_CHEVRON_CLASS} weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />;
 }
 
 function AccountAppearanceChevron() {
@@ -92,7 +94,7 @@ function AccountAppearanceChevron() {
 }
 
 function AccountBackChevron() {
-  return <ChevronLeft className={SHEET_GROUP_CHEVRON_CLASS} strokeWidth={1.33} />;
+  return <CaretLeft className={SHEET_GROUP_CHEVRON_CLASS} weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />;
 }
 
 function AccountMenuTrigger({
@@ -210,7 +212,7 @@ function AccountMenuLogOut({ onClose }: { onClose: () => void }) {
           void signOut();
         }}
       >
-        <LogOut className="size-4 shrink-0" strokeWidth={1.33} />
+        <SignOut className="size-4 shrink-0" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
         {USER_MENU.logOut}
       </button>
     </div>

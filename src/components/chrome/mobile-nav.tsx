@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu } from "lucide-react";
+import { List } from "@phosphor-icons/react";
 
 import { MOBILE_NAV, isClientNavActive, railDestinations, type NavItem } from "@/lib/nav";
 import { cn } from "@/lib/cn";
@@ -14,13 +14,13 @@ import { SOCIAL_ICON_SIZE_NAV, socialNavIconName } from "@/lib/social-icons";
 import {
   MOBILE_CHROME_HAMBURGER_BUTTON_CLASS,
   MOBILE_CHROME_ICON_CLASS,
-  MOBILE_CHROME_ICON_STROKE,
 } from "@/lib/mobile-chrome";
+import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import { AppSheetHead, AppSheetSurface, Close44 } from "./house";
 import { NavGlyph } from "./nav-glyph";
 
-// Phone menu: lucide Menu 16 / 1.33 / tertiary in the shared 44 hit
-// (Design miss list — List rematch waits on a measured frame).
+// Phone menu: Phosphor List Bold 16 / tertiary in the shared 44 hit
+// (84:240 / 82:13). Density stays the house 16 / 44 — not a 20px invent.
 // (same object as the Ask Globee clock). Opens an opaque full-bleed
 // portal. The sheet surface is 543:576 app-sheet chrome — same object as
 // the account sheet, different body. Header is one row: large "Menu" on the
@@ -68,7 +68,7 @@ export function MobileNav({
         onClick={() => setOpenedOn(pathname)}
         className={MOBILE_CHROME_HAMBURGER_BUTTON_CLASS}
       >
-        <Menu className={MOBILE_CHROME_ICON_CLASS} strokeWidth={MOBILE_CHROME_ICON_STROKE} />
+        <List className={MOBILE_CHROME_ICON_CLASS} weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
       </button>
       {sheet && typeof document !== "undefined" ? createPortal(sheet, document.body) : sheet}
     </>

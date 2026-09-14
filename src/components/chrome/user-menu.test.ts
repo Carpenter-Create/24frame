@@ -221,7 +221,8 @@ describe("UserMenu actions", () => {
     expect(sheetSrc).toContain("AppearanceCheck");
     expect(sheetSrc).toContain("applyDocumentThemePreference");
     expect(sheetSrc).toContain("accountMenuAppearanceFlyoutAlign");
-    expect(sheetSrc).toContain("ChevronLeft");
+    expect(sheetSrc).toContain("CaretLeft");
+    expect(sheetSrc).not.toContain("ChevronLeft");
     expect(sheetSrc).toContain("AccountBackChevron");
     expect(sheetSrc).toContain("APPEARANCE.back");
     expect(sheetSrc).not.toContain("APPEARANCE_OPTIONS.map");

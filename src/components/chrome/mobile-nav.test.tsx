@@ -20,7 +20,7 @@ const src = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "mobile-n
 const houseSrc = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "house.tsx"), "utf8");
 
 describe("MobileNav trigger", () => {
-  it("renders a 16px lucide Menu at stroke 1.33 in tertiary ink, phone-only", () => {
+  it("renders a 16px Phosphor List Bold in tertiary ink, phone-only", () => {
     navigation.pathname = "/";
     const html = renderToStaticMarkup(<MobileNav />);
 
@@ -31,12 +31,16 @@ describe("MobileNav trigger", () => {
     expect(html).toContain("md:hidden");
     expect(html).toContain("size-4");
     expect(html).toContain("size-[44px]");
-    expect(html).toContain("stroke-width=\"1.33\"");
+    expect(html).toContain('fill="currentColor"');
+    expect(html).toContain('viewBox="0 0 256 256"');
+    expect(html).not.toContain("stroke-width");
+    expect(html).not.toContain("lucide-");
     expect(html).not.toContain("data-mobile-nav-sheet");
-    expect(src).toContain("import { Menu } from \"lucide-react\"");
+    expect(src).toContain('import { List } from "@phosphor-icons/react"');
+    expect(src).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
     expect(src).toContain("MOBILE_CHROME_HAMBURGER_BUTTON_CLASS");
     expect(src).toContain("MOBILE_CHROME_ICON_CLASS");
-    expect(src).toContain("MOBILE_CHROME_ICON_STROKE");
+    expect(src).not.toContain("MOBILE_CHROME_ICON_STROKE");
     expect(src).toContain("Close44");
     expect(src).not.toContain("strokeWidth={1.5}");
     expect(src).not.toContain("size-5");
@@ -211,8 +215,10 @@ describe("MobileNavSheet", () => {
     expect(src).toContain("<Close44");
     expect(src).not.toContain("<X className=\"size-5\"");
     expect(src).not.toContain("<X className=\"size-6\"");
-    expect(houseSrc).toContain('<X className="size-4" strokeWidth={1.33} />');
-    expect(html).toContain("stroke-width=\"1.33\"");
+    expect(houseSrc).toContain('<X className="size-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />');
+    expect(html).toContain('viewBox="0 0 256 256"');
+    expect(html).not.toContain("stroke-width");
+    expect(html).not.toContain("lucide-");
     expect(closeClass).toContain("text-ink-3");
     expect(closeClass).toContain("rounded-full");
     expect(closeClass).toContain("bg-surface-muted");

@@ -1,11 +1,10 @@
 import type { Icon, IconWeight } from "@phosphor-icons/react";
 
-// Shared Phosphor primitive. Measured Aggregation chrome is the first
-// consumer (75:5 rail, 75:132 settings caret-left). Social interiors stay
-// on their own PR. Same SSOT (`_Icons / Phosphor Bold`, 61:2): Bold idle,
-// Fill active. 16px house glyph.
-// Design miss list — do not rematch until frames land: rail collapse
-// caret-double, account-sheet carets + sign-out, Close/44 X, mobile List.
+// Shared Phosphor primitive. Measured Aggregation + shared shell chrome:
+// 75:5 rail, 75:132 settings caret-left, 84:46 account sheet, 84:176
+// collapsed rail, 84:240 mobile menu. Social interiors stay on their own
+// PR. Same SSOT (`_Icons / Phosphor Bold`, 61:2): Bold idle, Fill active.
+// 16px house glyph.
 
 export type PhosphorIcon = Icon;
 

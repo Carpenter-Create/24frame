@@ -1,5 +1,7 @@
 // Shared mobile chrome for the header hamburger and the Ask Globee
-// history clock. One lead pad, one 44 hit, one 16 / 1.33 tertiary glyph.
+// history clock. One lead pad, one 44 hit, one 16 tertiary glyph.
+// Hamburger (84:240 / 82:13) is Phosphor List Bold. The Ask Globee
+// clock stays Lucide 1.33 until a measured rematch.
 // Measured 2026-09-10 from app-shell / mobile-nav / ask-globee-landing:
 //
 //   Header pad (max-md)     --space-6          24px

@@ -12,7 +12,7 @@ const messages = readFileSync("src/components/chrome/messages-app-header.tsx", "
 const socialDock = readFileSync("src/components/social/social-mobile-dock.tsx", "utf8");
 
 describe("Aggregation chrome Phosphor lock + Design miss list", () => {
-  it("ships measured 75:5 / 75:132 Phosphor and leaves the miss list on Lucide", () => {
+  it("ships measured 75:5 / 75:132 / 84:46 / 84:176 / 84:240 Phosphor; leaves unmeasured chrome on Lucide", () => {
     expect(rail).toContain('family: "phosphor"');
     expect(rail).toContain("SquaresFour");
     expect(rail).toContain("FilmSlate");
@@ -22,15 +22,34 @@ describe("Aggregation chrome Phosphor lock + Design miss list", () => {
     expect(settingsRail).not.toContain("lucide-react");
     expect(settingsBack).not.toContain("lucide-react");
 
-    expect(collapse).toContain('from "lucide-react"');
-    expect(collapse).toContain("ChevronsLeft");
-    expect(collapse).toContain("ChevronsRight");
-    expect(account).toContain("ChevronLeft");
-    expect(account).toContain("ChevronRight");
-    expect(account).toContain("LogOut");
-    expect(house).toContain('from "lucide-react"');
-    expect(house).toContain("strokeWidth={1.33}");
-    expect(mobile).toContain('import { Menu } from "lucide-react"');
+    expect(collapse).toContain('from "@phosphor-icons/react"');
+    expect(collapse).toContain("CaretDoubleLeft");
+    expect(collapse).toContain("CaretDoubleRight");
+    expect(collapse).toContain("RAIL_COLLAPSE_CHEVRON_ICON_WEIGHT");
+    expect(collapse).not.toContain("lucide-react");
+    expect(collapse).not.toContain("ChevronsLeft");
+    expect(collapse).not.toContain("ChevronsRight");
+
+    expect(account).toContain("CaretLeft");
+    expect(account).toContain("CaretRight");
+    expect(account).toContain("SignOut");
+    expect(account).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
+    expect(account).not.toContain("lucide-react");
+    expect(account).not.toContain("ChevronLeft");
+    expect(account).not.toContain("ChevronRight");
+    expect(account).not.toContain("<LogOut");
+
+    expect(house).toContain('from "@phosphor-icons/react"');
+    expect(house).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
+    expect(house).toContain('<X className="size-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />');
+    expect(house).not.toContain("lucide-react");
+    expect(house).not.toContain("strokeWidth={1.33}");
+
+    expect(mobile).toContain('import { List } from "@phosphor-icons/react"');
+    expect(mobile).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
+    expect(mobile).not.toContain("lucide-react");
+    expect(mobile).not.toContain("import { Menu }");
+
     expect(messages).toContain('from "lucide-react"');
   });
 

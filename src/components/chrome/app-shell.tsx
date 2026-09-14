@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { ChevronsLeft, ChevronsRight } from "lucide-react";
+import { CaretDoubleLeft, CaretDoubleRight } from "@phosphor-icons/react";
 
 import { UserMenu } from "./user-menu";
 import { SideNav } from "./side-nav";
@@ -20,7 +20,7 @@ import {
   RAIL_COLLAPSE_CHEVRON_CLASS,
   RAIL_COLLAPSE_EXPAND_ROW_CLASS,
   RAIL_COLLAPSE_CHEVRON_ICON_CLASS,
-  RAIL_COLLAPSE_CHEVRON_ICON_STROKE,
+  RAIL_COLLAPSE_CHEVRON_ICON_WEIGHT,
   migrateSidebarCollapsedCookie,
   persistSidebarCollapsed,
 } from "@/lib/rail-collapse";
@@ -127,9 +127,9 @@ export function AppShell({
               data-rail-collapse={RAIL_COLLAPSE_CHEVRON}
               className={RAIL_COLLAPSE_CHEVRON_CLASS}
             >
-              <ChevronsLeft
+              <CaretDoubleLeft
                 className={RAIL_COLLAPSE_CHEVRON_ICON_CLASS}
-                strokeWidth={RAIL_COLLAPSE_CHEVRON_ICON_STROKE}
+                weight={RAIL_COLLAPSE_CHEVRON_ICON_WEIGHT}
               />
             </button>
           )}
@@ -145,9 +145,9 @@ export function AppShell({
               data-rail-collapse={RAIL_COLLAPSE_CHEVRON}
               className={RAIL_COLLAPSE_CHEVRON_CLASS}
             >
-              <ChevronsRight
+              <CaretDoubleRight
                 className={RAIL_COLLAPSE_CHEVRON_ICON_CLASS}
-                strokeWidth={RAIL_COLLAPSE_CHEVRON_ICON_STROKE}
+                weight={RAIL_COLLAPSE_CHEVRON_ICON_WEIGHT}
               />
             </button>
           </div>

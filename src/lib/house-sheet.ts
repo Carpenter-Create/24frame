@@ -13,7 +13,7 @@ export const TEXT_ACTION_CLASS = "t-body-sm font-normal text-accent";
 // Do not invent product copy in the primitive.
 export const HOUSE_EMPTY_CLASS = "t-body text-ink-2";
 
-// 544:561 row chevron — 16 / 1.33, tertiary. Same stroke as Close/44.
+// 544:561 row chevron — 16 Phosphor Bold, tertiary. Same register as Close/44.
 export const SHEET_GROUP_CHEVRON_CLASS = "size-4 shrink-0 text-ink-3";
 
 export const IDENTITY_BLOCK_CLASS = "flex min-w-0 items-center gap-[var(--space-4)]";

@@ -74,7 +74,8 @@ describe("mobile chrome hamburger / clock lock", () => {
 
     expect(navSrc).toContain("MOBILE_CHROME_HAMBURGER_BUTTON_CLASS");
     expect(navSrc).toContain("MOBILE_CHROME_ICON_CLASS");
-    expect(navSrc).toContain("MOBILE_CHROME_ICON_STROKE");
+    expect(navSrc).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
+    expect(navSrc).not.toContain("MOBILE_CHROME_ICON_STROKE");
     expect(navSrc).toContain("data-mobile-nav-trigger");
     expect(navSrc).not.toContain("flex size-4 shrink-0 items-center justify-center text-ink-3 md:hidden");
 
