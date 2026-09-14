@@ -51,7 +51,8 @@ export const SOCIAL_PROFILE_POSTS_PAGE = LIST_PAGE;
 
 // Public profile URL (locked): https://24frame.co/@{bareHandle}
 // Example: https://24frame.co/@acarpcreate
-// Profile chrome does not print this URL. Share copies it.
+// Profile chrome prints one quiet host line under the handle
+// (24frame.co/@{bare}). Share copies the canonical https URL.
 // In-app route is /social/u/{bareHandle}. Persist the bare handle
 // in profiles.handle (no @). Display as @handle.
 // /social/members/{handle} redirects to the in-app route.
