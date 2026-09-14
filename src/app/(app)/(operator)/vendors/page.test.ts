@@ -168,7 +168,7 @@ describe("staff /vendors address book", () => {
 describe("staff rail and neighboring locks", () => {
   it("keeps the full staff rail", () => {
     expect([...NAV, ...GC_NAV].map((item) => item.label)).toEqual([
-      "Dashboard",
+      "Home",
       "Titles",
       "Deliveries",
       "Catalog Health",

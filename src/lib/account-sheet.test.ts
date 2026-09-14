@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import { USER_MENU, USER_MENU_ACTIONS } from "@/lib/user-menu";
 import * as accountSheet from "./account-sheet";
 import {
@@ -36,7 +35,6 @@ import {
   ACCOUNT_SHEET_HEAD_CLASS,
   ACCOUNT_SHEET_HOST_CLASS,
   ACCOUNT_SHEET_ITEMS,
-  ACCOUNT_SHEET_LEGAL_CLASS,
   ACCOUNT_SHEET_LOGOUT_CLASS,
   ACCOUNT_SHEET_LOGOUT_STACK_CLASS,
   ACCOUNT_SHEET_PIN_CLASS,
@@ -82,6 +80,7 @@ describe("account sheet lock", () => {
     expect(hrefs).toContain("/settings/agreements");
     expect(hrefs).toContain("/settings/refer");
     expect(hrefs).not.toContain("/account/profile");
+    expect(hrefs.join(" ")).not.toContain("globalcontent.co");
   });
 
   it("does not dump the rail, Company, Phone, Job, or Adobe leftovers into the sheet", () => {
@@ -150,6 +149,8 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("w-[384px]");
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("rounded-[12px]");
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("border-hairline");
+    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("shadow-none");
+    expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toMatch(/shadow-(?:sm|md|lg)|elevation/);
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("px-[var(--space-6)]");
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("pb-[var(--space-6)]");
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).toContain("pt-[calc(4px+var(--space-6))]");
@@ -210,6 +211,8 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS).toContain("w-[264px]");
     expect(ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS).toContain("rounded-[12px]");
     expect(ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS).toContain("border-hairline");
+    expect(ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS).toContain("shadow-none");
+    expect(ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS).not.toMatch(/shadow-(?:sm|md|lg)|elevation/);
     expect(ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS).toContain("gap-[var(--space-2)]");
     expect(ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS).toContain("py-[var(--space-2)]");
     expect(ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS).not.toContain("purple");
@@ -254,16 +257,14 @@ describe("account sheet lock", () => {
     expect(align.right).not.toContain("--content-inset");
   });
 
-  it("locks the footer on both menus to 13 Regular / 16 — version tertiary, Legal Sporty Blue", () => {
+  it("locks the footer on both menus to 13 Regular / 16 — version tertiary, Legal parked", () => {
     expect(ACCOUNT_SHEET_FOOTER_CLASS).toContain("h-4");
     expect(ACCOUNT_SHEET_VERSION_CLASS).toContain("t-body-sm");
     expect(ACCOUNT_SHEET_VERSION_CLASS).toContain("font-normal");
     expect(ACCOUNT_SHEET_VERSION_CLASS).toContain("leading-4");
     expect(ACCOUNT_SHEET_VERSION_CLASS).toContain("text-ink-3");
-    expect(ACCOUNT_SHEET_LEGAL_CLASS).toContain(TEXT_ACTION_CLASS);
-    expect(ACCOUNT_SHEET_LEGAL_CLASS).toContain("leading-4");
-    expect(ACCOUNT_SHEET_LEGAL_CLASS).toContain("text-accent");
-    expect(ACCOUNT_SHEET_LEGAL_CLASS).not.toContain("text-ink-3");
+    expect(accountSheet).not.toHaveProperty("ACCOUNT_SHEET_LEGAL_CLASS");
+    expect(ACCOUNT_SHEET_ABSENT).toContain("Legal");
   });
 });
 

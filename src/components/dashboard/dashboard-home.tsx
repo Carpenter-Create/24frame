@@ -42,7 +42,7 @@ export function DashboardHomePillLink({
     <Link
       href={href}
       className={cn(
-        "dashboard-home-pill inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-full bg-accent px-3.5 t-body-sm font-medium text-accent-contrast transition hover:-translate-y-px hover:opacity-90 active:translate-y-0",
+        "dashboard-home-pill inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-full bg-accent px-3.5 t-body-sm font-medium text-accent-contrast transition hover:opacity-90",
         className,
       )}
     >

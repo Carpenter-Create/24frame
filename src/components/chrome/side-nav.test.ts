@@ -10,7 +10,7 @@ const navSrc = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "side-
 describe("SideNav Access rail", () => {
   it("keeps the locked client destinations", () => {
     expect(NAV.map((item) => item.label)).toEqual([
-      "Dashboard",
+      "Home",
       "Titles",
       "Deliveries",
       "Catalog Health",
@@ -46,8 +46,13 @@ describe("SideNav Access rail", () => {
     expect(navSrc).not.toContain("markSrc");
     expect(navSrc).not.toContain("ask-globee-16.png");
     expect(navSrc).not.toContain("size-6");
-    expect(navSrc).toContain('flex flex-col gap-2');
-    expect(navSrc).toContain('collapsed ? "px-1.5" : "px-3"');
+    expect(navSrc).toContain("flex flex-col gap-2 px-2");
+    expect(navSrc).toContain("gap-2 px-2 py-2");
+    expect(navSrc).not.toContain("px-1.5");
+    expect(navSrc).not.toContain("px-3");
+    expect(navSrc).not.toContain("gap-2.5");
+    expect(navSrc).toContain("STAFF_RAIL_EYEBROW");
+    expect(navSrc).not.toContain("PRODUCT_NAME");
     expect(navSrc).not.toContain("strokeWidth={1.5}");
   });
 

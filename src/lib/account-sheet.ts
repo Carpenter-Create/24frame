@@ -7,7 +7,7 @@
 // Appearance is 613:888 beside — not a page. Mobile Appearance is a
 // same-sheet drill-in that replaces the list face. Destinations use
 // existing routes only — not /account/appearance. Company stays off
-// this menu. Log out + version/Legal are the footer group — not a
+// this menu. Log out + version are the footer group — not a
 // packed list row. Hairline only under Log out. No hairline above
 // Log out. #209 #210 #211 hug / hairline-sandwich stay void on
 // mobile. Desktop hugs the stack. 384 is void. 618:785 overlay
@@ -26,7 +26,6 @@
 // bottom 24. 613:888 top is the Appearance row, offset 0. Labels
 // stay one source.
 
-import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import { ASK_ASSISTANT } from "@/lib/product";
 import { USER_MENU_ACTIONS, userMenuAvatarInitial, userMenuName } from "@/lib/user-menu";
 
@@ -51,6 +50,7 @@ export const ACCOUNT_SHEET_ABSENT = [
   "Company Profile",
   "Phone",
   "Job",
+  "Legal",
 ] as const;
 
 // One source, both instances. Sheet chrome may differ; labels may not.
@@ -89,13 +89,11 @@ export const ACCOUNT_SHEET_PIN_CLASS =
 // Log out only. Hairline is the next pin sibling — do not hug the rule.
 export const ACCOUNT_SHEET_LOGOUT_STACK_CLASS = "flex w-full shrink-0 flex-col";
 
-// Footer on both menus — 13 Regular / 16. Version tertiary. Legal Sporty Blue.
+// Footer on both menus — 13 Regular / 16. Version tertiary. Legal is parked.
 export const ACCOUNT_SHEET_FOOTER_CLASS =
   "flex h-4 w-full shrink-0 items-center justify-between";
 
 export const ACCOUNT_SHEET_VERSION_CLASS = "t-body-sm font-normal leading-4 text-ink-3";
-
-export const ACCOUNT_SHEET_LEGAL_CLASS = `${TEXT_ACTION_CLASS} leading-4`;
 
 // 629:795 — 264. Height is relative to the stack (h-auto hug).
 // Leftover last-item → Log out is 48 (house --space-12). The
@@ -125,7 +123,7 @@ export const ACCOUNT_MENU_DROPDOWN_ALIGN = "end" as const;
 export const ACCOUNT_MENU_DROPDOWN_GAP = "var(--space-2)" as const;
 
 export const ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS =
-  "absolute z-10 flex h-auto w-[264px] flex-col overflow-hidden rounded-[12px] border border-hairline bg-surface px-[var(--space-6)] pb-[var(--space-6)] pt-[calc(4px+var(--space-6))]";
+  "absolute z-10 flex h-auto w-[264px] flex-col overflow-hidden rounded-[12px] border border-hairline bg-surface px-[var(--space-6)] pb-[var(--space-6)] pt-[calc(4px+var(--space-6))] shadow-none";
 
 export type AccountMenuDropdownAlign = {
   top: string;
@@ -193,7 +191,7 @@ export const ACCOUNT_MENU_APPEARANCE_FLYOUT_GAP = "var(--space-2)" as const;
 export const ACCOUNT_MENU_APPEARANCE_FLYOUT_OFFSET = 0;
 
 export const ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS =
-  "flex w-[264px] max-w-full flex-col gap-[var(--space-2)] overflow-hidden rounded-[12px] border border-hairline bg-surface py-[var(--space-2)]";
+  "flex w-[264px] max-w-full flex-col gap-[var(--space-2)] overflow-hidden rounded-[12px] border border-hairline bg-surface py-[var(--space-2)] shadow-none";
 
 export const ACCOUNT_MENU_APPEARANCE_FLYOUT_ROW_CLASS =
   "flex w-full items-start gap-[var(--space-2)] p-[var(--space-4)] text-left text-[length:var(--text-base)] font-normal leading-5 text-ink";

@@ -24,7 +24,7 @@ import { SettingsRail } from "./settings-rail";
 const src = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "settings-rail.tsx"), "utf8");
 
 describe("SettingsRail", () => {
-  it("is ← Dashboard / Profile / Agreements / Refer a friend — 16 chevron + 15 Regular", () => {
+  it("is ← Home / Profile / Agreements / Refer a friend — 16 chevron + 15 Regular", () => {
     navigation.pathname = "/settings/profile";
     const html = renderToStaticMarkup(<SettingsRail />);
     expect(html).toContain('data-settings-rail-nav=""');

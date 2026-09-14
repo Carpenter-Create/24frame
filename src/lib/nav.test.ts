@@ -7,6 +7,7 @@ import {
   GC_NAV,
   NAV,
   SOCIAL_NAV,
+  STAFF_RAIL_EYEBROW,
   clientNavCurrent,
   isClientNavActive,
   mobileNavDestinations,
@@ -16,7 +17,7 @@ import {
 const navSrc = readFileSync("src/lib/nav.ts", "utf8");
 
 describe("client NAV", () => {
-  it("keeps Dashboard at / and never exposes operator routes", () => {
+  it("keeps Home at / and never exposes operator routes", () => {
     const hrefs = NAV.map((item) => item.href);
     expect(hrefs[0]).toBe("/");
     expect(hrefs).toContain("/deliveries");
@@ -26,8 +27,8 @@ describe("client NAV", () => {
     expect(hrefs).not.toContain("/gc/clients");
   });
 
-  it("marks Dashboard current on `/` and Titles on a title path", () => {
-    expect(clientNavCurrent("/").label).toBe("Dashboard");
+  it("marks Home current on `/` and Titles on a title path", () => {
+    expect(clientNavCurrent("/").label).toBe("Home");
     expect(isClientNavActive("/", NAV[0])).toBe(true);
     expect(isClientNavActive("/titles", NAV[0])).toBe(false);
     expect(clientNavCurrent("/titles").label).toBe("Titles");
@@ -36,7 +37,7 @@ describe("client NAV", () => {
     expect(clientNavCurrent("/finance/abc").label).toBe("Finance");
     expect(clientNavCurrent("/messages").label).toBe("Ask 24Frame AI");
     expect(clientNavCurrent("/messages").label).toBe(ASK_GLOBEE.headline);
-    expect(clientNavCurrent("/queue").label).toBe("Dashboard");
+    expect(clientNavCurrent("/queue").label).toBe("Home");
   });
 
   it("keeps /messages as Ask Globee with Lucide Sparkles, not Messages or the bee", () => {
@@ -84,7 +85,7 @@ describe("GC_NAV", () => {
 
   it("keeps the full staff rail — client destinations then the operator set", () => {
     expect([...NAV, ...GC_NAV].map((item) => item.label)).toEqual([
-      "Dashboard",
+      "Home",
       "Titles",
       "Deliveries",
       "Catalog Health",
@@ -96,6 +97,9 @@ describe("GC_NAV", () => {
       "Finance",
       "Clients",
     ]);
+    expect(STAFF_RAIL_EYEBROW).toBe("Staff");
+    expect(STAFF_RAIL_EYEBROW).not.toBe("24Frame");
+    expect(STAFF_RAIL_EYEBROW).not.toBe("24FRAME");
   });
 
   it("does not include the client deliveries path", () => {
@@ -106,7 +110,7 @@ describe("GC_NAV", () => {
 describe("mobileNavDestinations", () => {
   it("keeps the client sheet on the Aggregation NAV destinations", () => {
     expect(mobileNavDestinations(false).map((item) => item.label)).toEqual([
-      "Dashboard",
+      "Home",
       "Titles",
       "Deliveries",
       "Catalog Health",
@@ -120,7 +124,7 @@ describe("mobileNavDestinations", () => {
 
   it("gives staff the operator destinations plus the client five", () => {
     expect(mobileNavDestinations(true).map((item) => item.label)).toEqual([
-      "Dashboard",
+      "Home",
       "Titles",
       "Deliveries",
       "Catalog Health",

@@ -31,7 +31,7 @@ const railSrc = readFileSync(
 );
 
 describe("SettingsHeaderBack", () => {
-  it("is 16 chevron-left + Dashboard 15 Regular, gap 8, href /", () => {
+  it("is 16 chevron-left + Home 15 Regular, gap 8, href /", () => {
     const html = renderToStaticMarkup(<SettingsHeaderBack />);
     expect(html).toContain('data-settings-header-back=""');
     expect(html).toContain(`href="${SETTINGS.dashboardHref}"`);

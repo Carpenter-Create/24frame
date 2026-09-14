@@ -7,11 +7,11 @@
 // product, Phone, or Job. Appearance stays in-menu. Help stays /help.
 //
 // 600:881 shell — one 220 rail occupies the Access slot on every
-// /settings path. Pad 16. ← Dashboard is 16 chevron + 15 Regular.
+// /settings path. Pad 16. ← Home is 16 chevron + 15 Regular.
 // Active wash follows the path. Not a second column. Header avatar
 // stays. Company is not a rail row.
 //
-// 623:785 phone header — same ← Dashboard back in the left slot.
+// 623:785 phone header — same ← Home back in the left slot.
 // 16 chevron + 15 Regular, gap 8, pad 24, href /. No hamburger.
 // Avatar 32 stays. Not a new IA. Appearance stays in-menu.
 
@@ -29,7 +29,7 @@ export const SETTINGS = {
   agreementsEmpty: "No agreements on this account.",
   refer: USER_MENU.refer,
   referHref: USER_MENU.referHref,
-  dashboard: "Dashboard",
+  dashboard: "Home",
   dashboardHref: "/",
 } as const;
 
@@ -53,7 +53,7 @@ export const SETTINGS_LOCAL_NAV = [
   { kind: "refer" as const, label: SETTINGS.refer, href: SETTINGS.referHref },
 ] as const;
 
-// Rail chrome — 220 slot, pad 16, 8 between rows. Dashboard is 15
+// Rail chrome — 220 slot, pad 16, 8 between rows. Home is 15
 // Regular. Do not put Titles, Appearance, Account, Users, or API here.
 export const SETTINGS_RAIL_PAD_CLASS = "p-[var(--space-4)]";
 export const SETTINGS_RAIL_NAV_CLASS = "flex flex-col gap-[var(--space-2)]";
@@ -66,7 +66,7 @@ export const SETTINGS_RAIL_IDLE_CLASS =
 export const SETTINGS_RAIL_CHEVRON_CLASS = "size-4 shrink-0";
 
 // 623:785 — phone header left slot. Same 16 + 15 Regular + gap 8
-// as the 600:881 rail Dashboard row. Pad 24 is the existing header
+// as the 600:881 rail Home row. Pad 24 is the existing header
 // inset. Hidden at md, where the rail stays.
 export const SETTINGS_HEADER_PAD_CLASS = MOBILE_CHROME_LEAD_PAD_CLASS;
 export const SETTINGS_HEADER_BACK_CLASS =
@@ -99,7 +99,7 @@ export function settingsSection(pathname: string | null | undefined): SettingsSe
   return "profile";
 }
 
-/** Dashboard is a back door — never the wash. Active follows the path. */
+/** Home is a back door — never the wash. Active follows the path. */
 export function settingsRailActive(kind: SettingsRailKind, section: SettingsSection): boolean {
   return kind !== "dashboard" && kind === section;
 }

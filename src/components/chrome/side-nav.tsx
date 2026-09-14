@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Suspense, use, useRef } from "react";
-import { railDestinations, type NavItem } from "@/lib/nav";
+import { railDestinations, STAFF_RAIL_EYEBROW, type NavItem } from "@/lib/nav";
 import { cn } from "@/lib/cn";
-import { PRODUCT_NAME } from "@/lib/product";
 import type { WorkspaceMode } from "@/lib/workspace";
 
 // Access rail: 13px labels (--text-sm / t-body-sm), 16px Lucide at 1.33, muted grey wash when active.
@@ -55,7 +54,7 @@ export function SideNav({
         aria-label={collapsed ? item.label : undefined}
         className={cn(
           "relative flex items-center rounded-[var(--radius)] t-body-sm leading-4 transition-colors",
-          collapsed ? "justify-center px-0 py-2" : "gap-2.5 px-3 py-2",
+          collapsed ? "justify-center px-0 py-2" : "gap-2 px-2 py-2",
           active
             ? "bg-surface-muted font-medium text-ink"
             : "font-normal text-ink-2 hover:bg-surface-muted hover:text-ink",
@@ -71,7 +70,7 @@ export function SideNav({
   const { items, staffItems } = railDestinations(isGcStaff, workspace);
 
   return (
-    <nav className={cn("flex flex-col gap-2", collapsed ? "px-1.5" : "px-3")} data-side-nav="">
+    <nav className="flex flex-col gap-2 px-2" data-side-nav="">
       {items.map((item) =>
         row(
           item,
@@ -89,7 +88,7 @@ export function SideNav({
         <>
           <div className="mx-1 my-2 border-t border-hairline" />
           {!collapsed ? (
-            <span className="px-2.5 pb-1 t-label text-ink-3">{PRODUCT_NAME}</span>
+            <span className="px-2 pb-1 t-label text-ink-3">{STAFF_RAIL_EYEBROW}</span>
           ) : null}
           {staffItems.map((item) => row(item))}
         </>

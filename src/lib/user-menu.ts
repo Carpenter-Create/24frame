@@ -7,7 +7,8 @@
 // Desktop Appearance is 613:888
 // beside. Mobile Appearance is a same-sheet drill-in. Not a page —
 // do not invent /account/appearance or /settings/appearance.
-// Help stays /help. Legal is the public site. Do not invent
+// Help stays /help. Legal is parked — no product hop, no invented
+// /legal page, no marketing-domain link. Do not invent
 // /account/profile, Phone, Job, Notifications, Privacy, Manage account,
 // or a name derived from the email local-part.
 
@@ -24,8 +25,6 @@ export const USER_MENU = {
   refer: "Refer a friend",
   referHref: "/settings/refer",
   logOut: "Log out",
-  legal: "Legal",
-  legalHref: "https://globalcontent.co/legal",
   versionPrefix: "v",
 } as const;
 
@@ -38,6 +37,7 @@ export const USER_MENU_ABSENT = [
   "Company Profile",
   "Phone",
   "Job",
+  "Legal",
 ] as const;
 
 export type UserMenuLinkAction =

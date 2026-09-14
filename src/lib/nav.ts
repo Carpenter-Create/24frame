@@ -28,7 +28,7 @@ export type NavItem = { label: string; href: string; icon: LucideIcon; exact?: b
 // Ask Globee is the /messages destination (href unchanged). Finance is the
 // client recipient door. Staff ops stays on GC_NAV at /gc/finance.
 export const NAV: NavItem[] = [
-  { label: "Dashboard", href: "/", icon: LayoutDashboard, exact: true },
+  { label: "Home", href: "/", icon: LayoutDashboard, exact: true },
   { label: "Titles", href: "/titles", icon: Clapperboard },
   { label: "Deliveries", href: "/deliveries", icon: Send },
   { label: "Catalog Health", href: "/catalog-health", icon: Activity },
@@ -45,6 +45,9 @@ export const SOCIAL_NAV: NavItem[] = [
   { label: "Leaderboard", href: SOCIAL_ROUTES.leaderboard, icon: Trophy },
   { label: "Messages", href: SOCIAL_ROUTES.dms, icon: MessageCircle },
 ];
+
+// Staff rail eyebrow. Not a 24Frame product wordmark.
+export const STAFF_RAIL_EYEBROW = "Staff";
 
 // Staff-only operator surfaces. Rendered by SideNav only when isGcStaff is true;
 // the (operator) layout remains the authorization gate for these hrefs.

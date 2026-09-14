@@ -72,7 +72,6 @@ import {
   IdentityBlock,
   SheetGroup,
   SheetGroupItem,
-  TextAction,
 } from "./house";
 
 function AccountRowChevron() {
@@ -189,9 +188,6 @@ function AccountMenuFooter() {
       <p data-account-sheet-version="" className={ACCOUNT_SHEET_VERSION_CLASS}>
         {userMenuVersion()}
       </p>
-      <TextAction href={USER_MENU.legalHref} target="_blank" rel="noopener" data-account-sheet-legal="" className="leading-4">
-        {USER_MENU.legal}
-      </TextAction>
     </div>
   );
 }

@@ -29,7 +29,6 @@ import {
   ACCOUNT_SHEET_HEAD_CLASS,
   ACCOUNT_SHEET_HOST_CLASS,
   ACCOUNT_SHEET_ITEMS,
-  ACCOUNT_SHEET_LEGAL_CLASS,
   ACCOUNT_SHEET_LOGOUT_CLASS,
   ACCOUNT_SHEET_PIN_CLASS,
   ACCOUNT_SHEET_SURFACE_CLASS,
@@ -42,7 +41,6 @@ import {
   CLOSE_44_CLASS,
   SHEET_GROUP_CHEVRON_CLASS,
   SHEET_GROUP_ITEM_CLASS,
-  TEXT_ACTION_CLASS,
 } from "@/lib/house-sheet";
 import { APPEARANCE } from "@/lib/appearance";
 import { USER_MENU, userMenuVersion } from "@/lib/user-menu";
@@ -199,6 +197,8 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(accent).not.toContain("#1769");
     expect(dropdownSurface).toContain("px-[var(--space-6)]");
     expect(dropdownSurface).toContain("pb-[var(--space-6)]");
+    expect(dropdownSurface).toContain("shadow-none");
+    expect(dropdownSurface).not.toMatch(/shadow-(?:sm|md|lg)|elevation/);
     expect(dropdownSurface).toContain("h-auto");
     expect(dropdownSurface).not.toMatch(/h-\[\d+px\]/);
     expect(dropdownSurface).not.toContain("min-h");
@@ -355,7 +355,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(src).toContain('from "@/app/actions"');
     expect(src).toContain("void signOut()");
     expect(src).toContain("<SheetGroupItem");
-    expect(src).toContain("<TextAction");
+    expect(src).not.toContain("<TextAction");
     expect(profileClass).toBe(agreementsClass);
     expect(profileClass).toBe(helpClass);
     expect(profileClass).toBe(referClass);
@@ -401,7 +401,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(footerRule).toBeGreaterThan(logout);
     expect(footer).toBeGreaterThan(footerRule);
     expect(version).toBeGreaterThan(footer);
-    expect(legal).toBeGreaterThan(version);
+    expect(legal).toBe(-1);
     expect(groupEnd).toBeGreaterThan(-1);
     expect(groupEnd).toBeLessThan(logout);
     expect(html.slice(html.indexOf("data-account-sheet-scroll"), logout)).not.toContain("Log out");
@@ -455,21 +455,13 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(src).not.toContain("Footer → bottom 48");
     expect(html).toContain(userMenuVersion());
     expect(html).toContain(">v0.1.0<");
-    expect(html).toContain(USER_MENU.legal);
-    expect(html).toContain(`href="${USER_MENU.legalHref}"`);
-    const legalTag = tagWith(html, "data-account-sheet-legal");
-    expect(legalTag).toContain(`href="${USER_MENU.legalHref}"`);
-    expect(legalTag).toContain('target="_blank"');
-    expect(legalTag).toContain('rel="noopener"');
-    expect(tagWith(html, `href="${USER_MENU.profileHref}"`)).not.toContain('target="_blank"');
-    expect(tagWith(html, `href="${USER_MENU.helpHref}"`)).not.toContain('target="_blank"');
-    expect(src.match(/target="_blank"/g)?.length).toBe(1);
-    expect(src).toContain("<TextAction href={USER_MENU.legalHref}");
-    expect(src).toContain('rel="noopener"');
-    expect(src).toContain('className="leading-4"');
-    expect(attrClass(html, "data-account-sheet-legal")).toContain(TEXT_ACTION_CLASS);
-    expect(attrClass(html, "data-account-sheet-legal")).toBe(ACCOUNT_SHEET_LEGAL_CLASS);
-    expect(attrClass(html, "data-account-sheet-legal")).toContain("leading-4");
+    expect(html).not.toContain("Legal");
+    expect(html).not.toContain("globalcontent.co");
+    expect(html).not.toContain("data-account-sheet-legal");
+    expect(src).not.toContain("USER_MENU.legal");
+    expect(src).not.toContain("globalcontent.co");
+    expect(src).not.toContain("<TextAction");
+    expect(src.match(/target="_blank"/g)?.length ?? 0).toBe(0);
     expect(attrClass(html, "data-account-sheet-version")).toBe(ACCOUNT_SHEET_VERSION_CLASS);
     expect(attrClass(html, "data-account-sheet-version")).toContain("leading-4");
     expect(attrClass(html, "data-account-sheet-version")).toContain("text-ink-3");
@@ -772,7 +764,6 @@ describe("AccountMenuDropdown 629:795", () => {
 
   it("keeps the same SSOT items, Sporty Blue Log out, and pinned 13/16 footer", () => {
     const html = renderDropdown();
-    const legalTag = tagWith(html, "data-account-sheet-legal");
 
     expect(html).toContain("Profile");
     expect(html).toContain("Agreements");
@@ -781,16 +772,13 @@ describe("AccountMenuDropdown 629:795", () => {
     expect(html).toContain("Refer a friend");
     expect(html).toContain("Log out");
     expect(html).toContain(">v0.1.0<");
-    expect(html).toContain(USER_MENU.legal);
+    expect(html).not.toContain("Legal");
+    expect(html).not.toContain("globalcontent.co");
+    expect(html).not.toContain("data-account-sheet-legal");
     expect(html).toContain('data-user-menu-item="logOut"');
     expect(attrClass(html, 'data-sheet-group-item="logOut"')).toContain("text-accent");
     expect(attrClass(html, "data-account-sheet-version")).toBe(ACCOUNT_SHEET_VERSION_CLASS);
     expect(attrClass(html, "data-account-sheet-version")).toContain("leading-4");
-    expect(attrClass(html, "data-account-sheet-legal")).toBe(ACCOUNT_SHEET_LEGAL_CLASS);
-    expect(attrClass(html, "data-account-sheet-legal")).toContain("leading-4");
-    expect(legalTag).toContain(`href="${USER_MENU.legalHref}"`);
-    expect(legalTag).toContain('target="_blank"');
-    expect(legalTag).toContain('rel="noopener"');
     expect(html).toContain("data-account-menu-appearance-mode");
     expect(html).toContain("Light");
     expect(html).not.toContain("data-account-menu-appearance-flyout");

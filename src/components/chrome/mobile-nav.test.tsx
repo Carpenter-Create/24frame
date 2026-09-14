@@ -160,7 +160,7 @@ describe("MobileNavSheet", () => {
     const dest = html.slice(destStart);
 
     expect(NAV.map((item) => item.label)).toEqual([
-      "Dashboard",
+      "Home",
       "Titles",
       "Deliveries",
       "Catalog Health",

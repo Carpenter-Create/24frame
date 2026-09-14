@@ -20,7 +20,7 @@ export function AccessUpgradeGate() {
           <Link
             href={ASK_GLOBEE.upgradeHref}
             data-ask-globee-upgrade=""
-            className="inline-flex h-9 items-center justify-center rounded-full bg-accent px-3.5 t-body-sm font-medium text-accent-contrast transition hover:-translate-y-px hover:opacity-90 active:translate-y-0"
+            className="inline-flex h-9 items-center justify-center rounded-full bg-accent px-3.5 t-body-sm font-medium text-accent-contrast transition hover:opacity-90"
           >
             {ASK_GLOBEE.upgrade}
           </Link>

@@ -28,7 +28,7 @@ describe("settings lock", () => {
     expect(SETTINGS.agreementsEmpty).toBe("No agreements on this account.");
     expect(SETTINGS.refer).toBe("Refer a friend");
     expect(SETTINGS.referHref).toBe("/settings/refer");
-    expect(SETTINGS.dashboard).toBe("Dashboard");
+    expect(SETTINGS.dashboard).toBe("Home");
     expect(SETTINGS.dashboardHref).toBe("/");
     expect(SETTINGS.company).toBe("Company");
     expect(SETTINGS).not.toHaveProperty("companyHref");
@@ -48,9 +48,9 @@ describe("settings lock", () => {
     expect(settingsSection(null)).toBe("profile");
   });
 
-  it("keeps local nav to Dashboard / Profile / Agreements / Refer a friend", () => {
+  it("keeps local nav to Home / Profile / Agreements / Refer a friend", () => {
     expect(SETTINGS_LOCAL_NAV.map((item) => item.label)).toEqual([
-      "Dashboard",
+      "Home",
       "Profile",
       "Agreements",
       "Refer a friend",
@@ -91,7 +91,7 @@ describe("settings lock", () => {
     expect(isSettingsPath("/refer")).toBe(false);
   });
 
-  it("washes the current path and never marks Dashboard current", () => {
+  it("washes the current path and never marks Home current", () => {
     expect(settingsRailActive("profile", "profile")).toBe(true);
     expect(settingsRailActive("agreements", "agreements")).toBe(true);
     expect(settingsRailActive("refer", "refer")).toBe(true);
@@ -111,7 +111,7 @@ describe("settings lock", () => {
     expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("t-body-sm");
     expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("t-title");
     expect(SETTINGS.dashboardHref).toBe("/");
-    expect(SETTINGS.dashboard).toBe("Dashboard");
+    expect(SETTINGS.dashboard).toBe("Home");
   });
 
   it("locks the settings rail on 220 pad 16, 15 Regular, and 16 chevron", () => {
