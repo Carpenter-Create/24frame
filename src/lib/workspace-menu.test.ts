@@ -10,6 +10,8 @@ import {
   WORKSPACE_EDUCATION_LABEL,
   WORKSPACE_FLYOUT_OPTIONS,
   WORKSPACE_MENU,
+  WORKSPACE_MENU_CANDIDATES,
+  workspaceCandidateAccessible,
   workspaceModeLabel,
 } from "./workspace-menu";
 
@@ -21,6 +23,19 @@ describe("workspace menu copy", () => {
     expect(WORKSPACE_MENU.title).toBe(USER_MENU.workspace);
     expect(WORKSPACE_MENU.back).toBe("Back");
     expect(WORKSPACE_MENU.back).not.toBe("Back to main menu");
+    expect(WORKSPACE_MENU_CANDIDATES.map((option) => option.id)).toEqual([
+      "aggregation",
+      "social",
+      "education",
+    ]);
+    expect(WORKSPACE_MENU_CANDIDATES.map((option) => option.label)).toEqual([
+      "Aggregation",
+      "Social",
+      "Education",
+    ]);
+    expect(workspaceCandidateAccessible("aggregation")).toBe(true);
+    expect(workspaceCandidateAccessible("social")).toBe(true);
+    expect(workspaceCandidateAccessible("education")).toBe(false);
     expect(WORKSPACE_FLYOUT_OPTIONS.map((option) => option.mode)).toEqual([
       "aggregation",
       "social",

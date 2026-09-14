@@ -2,10 +2,12 @@
 // Desktop: second 264 surface, gap 8 left of the parent — same
 // geometry as Appearance 613:888. Mobile is a same-sheet drill-in.
 // Open Workspace replaces the list face; house 16 tertiary Back
-// returns to main. Not a page. Not a route. Not a header chip.
-// Education product is HOLD — list it only when an Education
-// destination already exists. Do not invent /education,
-// /account/workspace, or /settings/workspace.
+// returns to main. Desktop flyout has no Back. Not a page. Not a
+// route. Not a header chip.
+// Miss-list is Aggregation | Social | Education. Education product
+// is HOLD — list it only when an Education destination already
+// exists. Do not invent /education, /account/workspace, or
+// /settings/workspace.
 
 import { USER_MENU } from "@/lib/user-menu";
 import {
@@ -19,15 +21,23 @@ export const WORKSPACE_MENU = {
   back: "Back",
 } as const;
 
-export const WORKSPACE_FLYOUT_OPTIONS = [
-  { mode: "aggregation" as const, label: WORKSPACE_AGGREGATION_LABEL },
-  { mode: "social" as const, label: WORKSPACE_SOCIAL_LABEL },
-] as const;
-
 export const WORKSPACE_EDUCATION_LABEL = "Education";
 
 /** Existing Education destination only. Null while the product is HOLD. */
 export const WORKSPACE_EDUCATION_HREF: string | null = null;
+
+export type WorkspaceMenuCandidateId = "aggregation" | "social" | "education";
+
+export const WORKSPACE_MENU_CANDIDATES = [
+  { id: "aggregation" as const, label: WORKSPACE_AGGREGATION_LABEL },
+  { id: "social" as const, label: WORKSPACE_SOCIAL_LABEL },
+  { id: "education" as const, label: WORKSPACE_EDUCATION_LABEL },
+] as const;
+
+export const WORKSPACE_FLYOUT_OPTIONS = [
+  { mode: "aggregation" as const, label: WORKSPACE_AGGREGATION_LABEL },
+  { mode: "social" as const, label: WORKSPACE_SOCIAL_LABEL },
+] as const;
 
 export type WorkspaceMenuOption = {
   mode: WorkspaceMode;
@@ -35,14 +45,24 @@ export type WorkspaceMenuOption = {
   href: string;
 };
 
+export function workspaceCandidateAccessible(id: WorkspaceMenuCandidateId): boolean {
+  if (id === "education") return WORKSPACE_EDUCATION_HREF !== null;
+  return true;
+}
+
 export function availableWorkspaceOptions(): readonly WorkspaceMenuOption[] {
-  // Education stays off until WORKSPACE_EDUCATION_HREF points at a
-  // real existing route. Do not invent a third workspace product.
-  return WORKSPACE_FLYOUT_OPTIONS.map((option) => ({
-    mode: option.mode,
-    label: option.label,
-    href: workspaceHome(option.mode),
-  }));
+  return WORKSPACE_MENU_CANDIDATES.flatMap((candidate) => {
+    if (!workspaceCandidateAccessible(candidate.id) || candidate.id === "education") {
+      return [];
+    }
+    return [
+      {
+        mode: candidate.id,
+        label: candidate.label,
+        href: workspaceHome(candidate.id),
+      },
+    ];
+  });
 }
 
 export function workspaceModeLabel(mode: WorkspaceMode): string {

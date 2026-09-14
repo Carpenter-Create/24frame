@@ -991,12 +991,26 @@ describe("AccountMenuDropdown 629:795", () => {
     expect(workspace).toContain('data-sheet-group-item="profile"');
     expect(workspace.indexOf("Workspace")).toBeLessThan(workspace.indexOf("Profile"));
     expect(workspace).toContain("data-account-menu-workspace-flyout");
+    expect(workspace).toContain("data-identity-block");
     expect(workspace).toContain("Aggregation");
     expect(workspace).toContain("Social");
     expect(workspace).not.toContain("Education");
     expect(workspace).not.toContain("/education");
     expect(workspace).not.toContain("/account/workspace");
     expect(workspace).not.toContain("data-account-menu-appearance-flyout");
+    const flyout = workspace.slice(workspace.indexOf("data-account-menu-workspace-flyout"));
+    expect(flyout).not.toContain("Back");
+    expect(flyout).not.toContain('data-sheet-group-item="back"');
+    expect(flyout).toContain('data-account-menu-workspace-option="aggregation"');
+    expect(flyout).toContain('data-account-menu-workspace-option="social"');
+    expect(flyout).toContain('aria-pressed="true"');
+    expect(flyout).toContain("data-appearance-check");
+    expect(tagWith(workspace, 'data-account-menu-workspace-option="aggregation"')).toContain(
+      'aria-pressed="true"',
+    );
+    expect(tagWith(workspace, 'data-account-menu-workspace-option="social"')).toContain(
+      'aria-pressed="false"',
+    );
     expect(flyoutClass).toBe(ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS);
     expect(flyoutClass).toContain("w-[264px]");
     expect(flyoutHost).toContain("calc(16px + 264px + var(--space-2))");
