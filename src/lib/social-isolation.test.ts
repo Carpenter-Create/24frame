@@ -87,7 +87,9 @@ describe("social isolation lock", () => {
     const nextConfig = readFileSync("next.config.ts", "utf8");
     expect(social).toContain("socialVanityInternalPath");
     expect(social).toContain("socialProfileHref");
-    expect(nextConfig).toContain('source: "/@:handle"');
+    expect(nextConfig).toContain(
+      'source: "/@:handle((?!(?:admin|api|www|login|legal|auth|app|portal|social)$)[A-Za-z0-9_]{3,30})"',
+    );
     expect(nextConfig).toContain('destination: "/social/u/@:handle"');
     expect(middleware).toContain("socialVanityInternalPath");
     expect(middleware).toContain("NextResponse.rewrite");

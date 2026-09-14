@@ -61,12 +61,15 @@ const nextConfig: NextConfig = {
   // Apex vanity: /@handle → in-app /social/u/@handle. URL bar can stay
   // 24frame.co/@handle when this project serves that host. Middleware
   // applies the same rewrite (@ is a parallel-route marker in the app
-  // tree, so there is no src/app/@[handle] page).
+  // tree, so there is no src/app/@[handle] page). Reserved and invalid
+  // handles are excluded here too — middleware runs first and leaves
+  // those paths alone, so an unfiltered beforeFiles rewrite would still
+  // resolve /@login and /@admin as profiles.
   async rewrites() {
     return {
       beforeFiles: [
         {
-          source: "/@:handle",
+          source: "/@:handle((?!(?:admin|api|www|login|legal|auth|app|portal|social)$)[A-Za-z0-9_]{3,30})",
           destination: "/social/u/@:handle",
         },
       ],
