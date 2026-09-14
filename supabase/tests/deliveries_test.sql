@@ -3,7 +3,7 @@
 -- tenant isolation; my_deliveries scoping.
 
 begin;
-select plan(15);
+select plan(17);
 
 select set_config('t.tdraft', gen_random_uuid()::text, false);
 select set_config('t.dlv_bad', gen_random_uuid()::text, false);  -- never reviewed, for the gate's negative case
@@ -147,6 +147,10 @@ select throws_ok(
   'P0001', 'Not authorized', 'client: set_delivery_status denied');
 select is((select count(*) from public.my_deliveries() where vendor_name = 'Endpoint One')::int, 2,
   'client: my_deliveries returns own deliveries + vendor name');
+select is((select count(*) from public.my_deliveries(1))::int, 1,
+  'p_limit bounds my_deliveries');
+select is((select count(*) from public.my_deliveries(500, current_setting('t.tb')::uuid))::int, 0,
+  'p_title_id scopes away titles the caller cannot see');
 
 -- Placed last on purpose: it inserts a delivery row, and the client-read assertions
 -- above count rows in org A.

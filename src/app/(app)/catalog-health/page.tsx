@@ -6,8 +6,14 @@ import { getOrgContext } from "@/lib/supabase/context";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardBody } from "@/components/ui/card";
 import { FindingRows } from "@/components/findings/findings-card";
-import { CATALOG_HEALTH_EMPTY, CATALOG_HEALTH_SUBTITLE } from "@/lib/findings";
+import { InlineNotice } from "@/components/ui/inline-notice";
+import {
+  CATALOG_HEALTH_EMPTY,
+  CATALOG_HEALTH_SUBTITLE,
+  CATALOG_HEALTH_TRUNCATED,
+} from "@/lib/findings";
 import { UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
+import { loadMyFindings } from "@/lib/my-lists";
 
 // Catalog Health = findings/health overview (§19). A client org stays org-scoped.
 // GC staff with no client org see the same findings UI across every org — my_findings
@@ -24,10 +30,11 @@ export default async function CatalogHealthPage() {
   const activeOrgId = ctx.activeOrg?.id ?? null;
   const gcWide = ctx.isGcStaff && !activeOrgId;
 
-  const { data: allFindings } = await supabase.rpc("my_findings");
-  const findings = activeOrgId
-    ? (allFindings ?? []).filter((f) => f.org_id === activeOrgId)
-    : (allFindings ?? []);
+  const loaded = await loadMyFindings(
+    supabase,
+    activeOrgId ? { orgId: activeOrgId } : undefined,
+  );
+  const findings = loaded.rows;
 
   const titleIds = [...new Set(findings.map((f) => f.entity_id))];
   const { data: titleRows } = titleIds.length
@@ -45,6 +52,12 @@ export default async function CatalogHealthPage() {
   return (
     <>
       <PageHeader title="Catalog Health" subtitle={CATALOG_HEALTH_SUBTITLE} />
+
+      {loaded.truncated ? (
+        <InlineNotice tone="info" className="mb-4" data-my-list-truncated="findings">
+          {CATALOG_HEALTH_TRUNCATED}
+        </InlineNotice>
+      ) : null}
 
       {findings.length === 0 ? (
         <Card>

@@ -1,3 +1,4 @@
+import { UNPAGINATED_MAX } from "@/lib/list-bounds";
 import { PRODUCT_NAME } from "@/lib/product";
 
 // Notification copy + labels (§20 GC-Support in-app push). Copy in lib/, not JSX.
@@ -77,3 +78,4 @@ export const DELIVERY_STATUS_LABELS: Record<
 
 export const MESSAGES_EMPTY = "No messages yet.";
 export const MESSAGES_SUBTITLE = `Updates from ${PRODUCT_NAME}.`;
+export const MESSAGES_TRUNCATED = `Showing the first ${UNPAGINATED_MAX} messages. More exist — this list is not complete.`;

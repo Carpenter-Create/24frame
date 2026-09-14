@@ -8,7 +8,8 @@ import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveOrgTier } from "@/lib/org-tier";
 import { ASK_GLOBEE } from "@/lib/ask-globee";
-import { MESSAGES_EMPTY } from "@/lib/notifications";
+import { UNPAGINATED_MAX } from "@/lib/list-bounds";
+import { MESSAGES_EMPTY, MESSAGES_TRUNCATED } from "@/lib/notifications";
 import MessagesPage from "./page";
 
 vi.mock("next/navigation", () => ({
@@ -253,7 +254,7 @@ describe("MessagesPage surfaces", () => {
     expectNoThreadFixture(html);
     expect(from).toHaveBeenCalledWith("ai_conversations");
     expect(from).not.toHaveBeenCalledWith("titles");
-    expect(rpc).not.toHaveBeenCalledWith("my_findings");
+    expect(rpc).not.toHaveBeenCalledWith("my_findings", expect.anything());
   });
 
   it("does not list HISTORY rows on landing even when the org has threads", async () => {
@@ -308,9 +309,30 @@ describe("MessagesPage surfaces", () => {
     expectNoThreadFixture(html);
     expectNoCatalogLeak(html);
     expect(vi.mocked(getActiveOrgTier)).not.toHaveBeenCalled();
-    expect(rpc).toHaveBeenCalledWith("my_notifications");
-    expect(rpc).not.toHaveBeenCalledWith("my_findings");
+    expect(rpc).toHaveBeenCalledWith("my_notifications", { p_limit: UNPAGINATED_MAX + 1 });
+    expect(rpc).not.toHaveBeenCalledWith("my_findings", expect.anything());
     expect(from).not.toHaveBeenCalledWith("ai_conversations");
+  });
+
+  it("does not offer Mark all read when the inbox probe overflowed", async () => {
+    stubClient({
+      notifications: Array.from({ length: UNPAGINATED_MAX + 1 }, (_, i) => ({
+        id: `aaaaaaaa-aaaa-4aaa-8aaa-${String(i).padStart(12, "0")}`,
+        org_id: "org-1",
+        kind: "title_rejected",
+        title: "Returned",
+        body: "fix chain of title",
+        source_refs: {},
+        created_at: "2026-09-01T00:00:00.000Z",
+        unread: true,
+      })),
+    });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx({ isGcStaff: true, hasOrg: false }) as never);
+
+    const html = await renderPage();
+    expect(html).toContain('data-my-list-truncated="notifications"');
+    expect(html).toContain(MESSAGES_TRUNCATED);
+    expect(html).not.toContain("Mark all read");
   });
 
   it("treats staff with an active client org by that org's tier", async () => {
@@ -390,7 +412,7 @@ describe("MessagesPage Ask Globee persist", () => {
     expect(from).toHaveBeenCalledWith("ai_conversations");
     expect(from).toHaveBeenCalledWith("ai_conversation_messages");
     expect(eq).toHaveBeenCalledWith("org_id", "org-1");
-    expect(rpc).not.toHaveBeenCalledWith("my_findings");
+    expect(rpc).not.toHaveBeenCalledWith("my_findings", expect.anything());
     expect(html).toContain("data-ask-globee-thread");
     expect(html).toContain("What needs attention");
     expect(html.replace(/<[^>]+>/g, "")).toContain("Harbor Cut — Synopsis is required.");
@@ -447,7 +469,7 @@ describe("MessagesPage Ask Globee persist", () => {
     expect(html).not.toContain("data-ask-globee-landing");
     expect(html).not.toContain(ASK_GLOBEE.emptyBlocking);
     expect(html).not.toContain("Winter Line");
-    expect(rpc).not.toHaveBeenCalledWith("my_findings");
+    expect(rpc).not.toHaveBeenCalledWith("my_findings", expect.anything());
   });
 
   it("ignores a leftover ?q= rewrite and stays on landing", async () => {
@@ -458,6 +480,6 @@ describe("MessagesPage Ask Globee persist", () => {
     const html = await renderPage({ q: "What needs attention" });
     expect(html).toContain("data-ask-globee-landing");
     expect(html).not.toContain("data-ask-globee-thread");
-    expect(rpc).not.toHaveBeenCalledWith("my_findings");
+    expect(rpc).not.toHaveBeenCalledWith("my_findings", expect.anything());
   });
 });

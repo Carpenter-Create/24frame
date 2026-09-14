@@ -3043,7 +3043,7 @@ export type Database = {
         Returns: boolean
       }
       my_deliveries: {
-        Args: never
+        Args: { p_limit?: number; p_title_id?: string }
         Returns: {
           delivery_id: string
           status: Database["public"]["Enums"]["delivery_status"]
@@ -3055,7 +3055,7 @@ export type Database = {
         }[]
       }
       my_findings: {
-        Args: never
+        Args: { p_limit?: number; p_org_id?: string }
         Returns: {
           code: string
           created_at: string
@@ -3081,7 +3081,7 @@ export type Database = {
         }
       }
       my_notifications: {
-        Args: never
+        Args: { p_limit?: number }
         Returns: {
           body: string
           created_at: string

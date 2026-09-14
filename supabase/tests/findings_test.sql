@@ -3,7 +3,7 @@
 -- my_findings + RLS (own-org only) for the findings store (§19).
 
 begin;
-select plan(11);
+select plan(14);
 
 select set_config('t.orgA',   gen_random_uuid()::text, false);
 select set_config('t.orgB',   gen_random_uuid()::text, false);
@@ -85,6 +85,12 @@ select is((select count(*) from public.findings where entity_id=current_setting(
 select set_config('request.jwt.claims', json_build_object('sub', current_setting('t.ownerA'),'role','authenticated')::text, true);
 select ok((select count(*) from public.my_findings()) >= 1,
   'owner A my_findings returns own open findings');
+select is((select count(*) from public.my_findings(0))::int, 0,
+  'p_limit 0 returns no findings');
+select is((select count(*) from public.my_findings(1))::int, 1,
+  'p_limit bounds my_findings');
+select is((select count(*) from public.my_findings(500, current_setting('t.orgB')::uuid))::int, 0,
+  'p_org_id scopes away orgs the caller cannot see');
 
 reset role;
 select * from finish();

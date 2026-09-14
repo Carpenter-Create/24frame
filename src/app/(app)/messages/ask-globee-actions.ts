@@ -20,6 +20,7 @@ import {
   type AskGlobeeThumb,
 } from "@/lib/ask-globee-conversations";
 import { UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
+import { loadMyFindings } from "@/lib/my-lists";
 import { getActiveOrgTier } from "@/lib/org-tier";
 import { getOrgContext, type OrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
@@ -59,13 +60,14 @@ async function loadOrgAnswer(
     .eq("org_id", orgId)
     .order("created_at", { ascending: false })
     .range(...rangeFor(UNPAGINATED_MAX));
-  const { data: allFindings } = await supabase.rpc("my_findings");
+  const findings = await loadMyFindings(supabase, { orgId });
   return answerAskGlobeePrompt({
     prompt,
     corpus: {
       orgId,
       titles: titleRows ?? [],
-      findings: allFindings ?? [],
+      findings: findings.rows,
+      findingsIsPartial: findings.truncated,
       tier,
       now: new Date(),
       bound: UNPAGINATED_MAX,

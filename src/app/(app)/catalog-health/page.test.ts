@@ -3,7 +3,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createClient } from "@/lib/supabase/server";
 import { getOrgContext } from "@/lib/supabase/context";
-import { CATALOG_HEALTH_EMPTY, CATALOG_HEALTH_SUBTITLE } from "@/lib/findings";
+import {
+  CATALOG_HEALTH_EMPTY,
+  CATALOG_HEALTH_SUBTITLE,
+  CATALOG_HEALTH_TRUNCATED,
+} from "@/lib/findings";
+import { UNPAGINATED_MAX } from "@/lib/list-bounds";
 import CatalogHealthPage from "./page";
 
 vi.mock("next/navigation", () => ({
@@ -72,8 +77,13 @@ function stubClient() {
     if (table === "titles") return titlesChain;
     throw new Error(`unexpected from(${table})`);
   });
-  const rpc = vi.fn(async (name: string) => {
-    if (name === "my_findings") return { data: CROSS_ORG_FINDINGS, error: null };
+  const rpc = vi.fn(async (name: string, args?: { p_org_id?: string }) => {
+    if (name === "my_findings") {
+      const rows = args?.p_org_id
+        ? CROSS_ORG_FINDINGS.filter((f) => f.org_id === args.p_org_id)
+        : CROSS_ORG_FINDINGS;
+      return { data: rows, error: null };
+    }
     throw new Error(`unexpected rpc(${name})`);
   });
   vi.mocked(createClient).mockResolvedValue({ from, rpc } as never);
@@ -96,7 +106,7 @@ describe("CatalogHealthPage modes", () => {
 
     const html = renderToStaticMarkup(await CatalogHealthPage());
 
-    expect(rpc).toHaveBeenCalledWith("my_findings");
+    expect(rpc).toHaveBeenCalledWith("my_findings", { p_limit: UNPAGINATED_MAX + 1 });
     expect(html).toContain("Catalog Health");
     expect(html).toContain(CATALOG_HEALTH_SUBTITLE);
     expect(html).toContain("Acme Film");
@@ -117,13 +127,17 @@ describe("CatalogHealthPage modes", () => {
   });
 
   it("keeps the org-scoped catalog for a user with a client org", async () => {
-    stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(
       ctx({ isGcStaff: false, orgStatus: "active" }) as never,
     );
 
+    const { rpc } = stubClient();
     const html = renderToStaticMarkup(await CatalogHealthPage());
 
+    expect(rpc).toHaveBeenCalledWith("my_findings", {
+      p_limit: UNPAGINATED_MAX + 1,
+      p_org_id: "org-1",
+    });
     expect(html).toContain("Acme Film");
     expect(html).toContain("/titles/title-acme/metadata");
     expect(html).not.toContain("Other Film");
@@ -141,6 +155,38 @@ describe("CatalogHealthPage modes", () => {
     expect(html).toContain("Acme Film");
     expect(html).toContain("/titles/title-acme/metadata");
     expect(html).not.toContain("Other Film");
+  });
+
+  it("surfaces an honest notice when the findings probe overflows", async () => {
+    const overflow = Array.from({ length: UNPAGINATED_MAX + 1 }, (_, i) => ({
+      id: `f-${i}`,
+      org_id: "org-1",
+      entity_id: "title-acme",
+      message: "Synopsis is required.",
+      severity: "high",
+    }));
+    const titlesChain = {
+      select: vi.fn(() => titlesChain),
+      in: vi.fn(() => titlesChain),
+      range: vi.fn(async () => ({ data: TITLE_ROWS, error: null })),
+    };
+    const rpc = vi.fn(async () => ({ data: overflow, error: null }));
+    vi.mocked(createClient).mockResolvedValue({
+      from: vi.fn(() => titlesChain),
+      rpc,
+    } as never);
+    vi.mocked(getOrgContext).mockResolvedValue(
+      ctx({ isGcStaff: false, orgStatus: "active" }) as never,
+    );
+
+    const html = renderToStaticMarkup(await CatalogHealthPage());
+
+    expect(rpc).toHaveBeenCalledWith("my_findings", {
+      p_limit: UNPAGINATED_MAX + 1,
+      p_org_id: "org-1",
+    });
+    expect(html).toContain('data-my-list-truncated="findings"');
+    expect(html).toContain(CATALOG_HEALTH_TRUNCATED);
   });
 
   it("sends a non-GC user with no org to the Aggregation empty home", async () => {

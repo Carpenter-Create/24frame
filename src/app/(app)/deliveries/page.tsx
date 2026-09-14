@@ -7,9 +7,12 @@ import { DataTable, type Column } from "@/components/layout/data-table";
 import { EmptyState } from "@/components/layout/empty-state";
 import { StatusChip } from "@/components/layout/status-chip";
 import { StatusFilter } from "@/components/layout/status-filter";
+import { InlineNotice } from "@/components/ui/inline-notice";
+import { loadMyDeliveries } from "@/lib/my-lists";
 import {
   DELIVERIES_FILTER_MISS,
   DELIVERIES_NO_DATA,
+  DELIVERIES_TRUNCATED,
   DELIVERY_STATUS_FILTERS,
   deliveriesShowAllHref,
   deliveriesSortHref,
@@ -17,7 +20,6 @@ import {
   deliveryStatusDisplay,
   deliveryTitleHref,
   filterDeliveries,
-  normalizeMyDeliveries,
   parseDeliverySort,
   parseDeliveryStatusFilter,
   sortDeliveries,
@@ -43,9 +45,8 @@ export default async function DeliveriesPage({
   const sort = parseDeliverySort(sp.sort, sp.dir);
 
   const supabase = await createClient();
-  const { data } = await supabase.rpc("my_deliveries");
-  // Untrusted RPC payload — only validated rows may render or produce links.
-  const rows = normalizeMyDeliveries(data);
+  // Untrusted RPC payload — loader validates rows and probes one past the cap.
+  const { rows, truncated } = await loadMyDeliveries(supabase);
   const filtered = filterDeliveries(rows, statusFilter);
   const sorted = sortDeliveries(filtered, sort);
 
@@ -93,6 +94,12 @@ export default async function DeliveriesPage({
   return (
     <>
       <PageHeader title="Deliveries" subtitle="Where your titles are placed and their status." />
+
+      {truncated ? (
+        <InlineNotice tone="info" className="mb-4" data-my-list-truncated="deliveries">
+          {DELIVERIES_TRUNCATED}
+        </InlineNotice>
+      ) : null}
 
       {rows.length === 0 ? (
         <EmptyState

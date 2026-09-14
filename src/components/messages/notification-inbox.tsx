@@ -1,7 +1,14 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardBody } from "@/components/ui/card";
+import { InlineNotice } from "@/components/ui/inline-notice";
 import { cn } from "@/lib/cn";
-import { NOTIFICATION_KIND_LABEL, NOTIFICATION_EMAIL, MESSAGES_EMPTY, MESSAGES_SUBTITLE } from "@/lib/notifications";
+import {
+  NOTIFICATION_KIND_LABEL,
+  NOTIFICATION_EMAIL,
+  MESSAGES_EMPTY,
+  MESSAGES_SUBTITLE,
+  MESSAGES_TRUNCATED,
+} from "@/lib/notifications";
 import type { Database } from "@/lib/supabase/database.types";
 import { MarkAllRead } from "@/app/(app)/messages/mark-all-read";
 import { MarkRead } from "@/app/(app)/messages/mark-read";
@@ -10,14 +17,29 @@ import { MessageLink } from "@/app/(app)/messages/message-link";
 type InboxNotification = Database["public"]["Functions"]["my_notifications"]["Returns"][number];
 
 // Existing GC-Support notification inbox. Kept for staff without a client org.
-export function NotificationInbox({ notifications }: { notifications: InboxNotification[] }) {
+export function NotificationInbox({
+  notifications,
+  truncated = false,
+}: {
+  notifications: InboxNotification[];
+  truncated?: boolean;
+}) {
   const unreadIds = notifications.filter((n) => n.unread).map((n) => n.id);
 
   return (
     <div data-messages-inbox="">
       <PageHeader title="Messages" subtitle={MESSAGES_SUBTITLE} />
 
-      {unreadIds.length > 0 ? (
+      {truncated ? (
+        <InlineNotice tone="info" className="mb-4" data-my-list-truncated="notifications">
+          {MESSAGES_TRUNCATED}
+        </InlineNotice>
+      ) : null}
+
+      {/* Mark all only when the page is complete. A truncated list plus the
+          unbounded my_unread_count badge would otherwise claim every notice
+          was read while hidden rows stayed unread. Per-row Mark as read stays. */}
+      {unreadIds.length > 0 && !truncated ? (
         <div className="pb-4">
           <MarkAllRead ids={unreadIds} />
         </div>

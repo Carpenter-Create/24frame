@@ -15,6 +15,7 @@ import {
   dashboardCatalogValue,
 } from "@/lib/dashboard-home";
 import { LIST_PAGE, UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
+import { loadMyFindings } from "@/lib/my-lists";
 import { GcClientsDirectory } from "@/app/(app)/(operator)/gc/clients/clients-directory";
 import { HouseEmpty, TextAction } from "@/components/chrome/house";
 import {
@@ -74,13 +75,14 @@ export default async function DashboardPage() {
     .range(...rangeFor(UNPAGINATED_MAX));
   const titles = titleRows ?? [];
 
-  const { data: allFindings } = await supabase.rpc("my_findings");
+  const findings = await loadMyFindings(supabase, { orgId: org.id });
   const snapshot = clientHomeSnapshot({
     titles,
-    findings: allFindings ?? [],
+    findings: findings.rows,
     orgId: org.id,
     now: new Date(),
     bound: UNPAGINATED_MAX,
+    findingsIsPartial: findings.truncated,
   });
   const showClientGlance = !ctx.isGcStaff && orgRoleCanViewFinancial(ctx.activeRole);
   const [{ data: term }, { data: financePeriods }] = showClientGlance
@@ -127,7 +129,10 @@ export default async function DashboardPage() {
 
         <DashboardSnapshot
           catalog={dashboardCatalogValue(snapshot.catalog, snapshot.catalogIsPartial)}
-          needsAttention={snapshot.needsAttention}
+          needsAttention={dashboardCatalogValue(
+            snapshot.needsAttention,
+            snapshot.findingsIsPartial,
+          )}
           live={dashboardCatalogValue(snapshot.live, snapshot.catalogIsPartial)}
         />
       </div>

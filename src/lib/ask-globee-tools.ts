@@ -30,6 +30,7 @@ export type AskGlobeeCorpus = {
   tier: AskGlobeeTier | null;
   now?: Date;
   bound?: number;
+  findingsIsPartial?: boolean;
 };
 
 export type AskGlobeeTool = {
@@ -112,6 +113,7 @@ export function executeAskGlobeeTool(name: string, corpus: AskGlobeeCorpus): Rec
       orgId: corpus.orgId,
       now: corpus.now ?? new Date(),
       bound: corpus.bound ?? UNPAGINATED_MAX,
+      findingsIsPartial: corpus.findingsIsPartial ?? false,
     });
     return {
       catalog: snapshot.catalog,
@@ -119,6 +121,11 @@ export function executeAskGlobeeTool(name: string, corpus: AskGlobeeCorpus): Rec
       catalogIsPartial: snapshot.catalogIsPartial,
       live: snapshot.live,
       needsAttention: snapshot.needsAttention,
+      needsAttentionLabel: dashboardCatalogValue(
+        snapshot.needsAttention,
+        snapshot.findingsIsPartial,
+      ),
+      needsAttentionIsPartial: snapshot.findingsIsPartial,
     };
   }
 
