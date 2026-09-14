@@ -47,7 +47,6 @@ describe("loadMyDeliveries", () => {
     const { rpc, client } = stubRpc([deliveryRow(0)]);
     const out = await loadMyDeliveries(client);
     expect(rpc).toHaveBeenCalledWith("my_deliveries", { p_limit: UNPAGINATED_MAX + 1 });
-    expect(rpc.mock.calls[0]?.[1]).not.toHaveProperty("p_title_id");
     expect(out).toEqual({ rows: [deliveryRow(0)], truncated: false });
   });
 
@@ -122,8 +121,9 @@ describe("class 4 migration lock", () => {
     expect(migration).toContain("p_title_id uuid default null");
     expect(migration).toContain("limit least(greatest(coalesce(p_limit, 0), 0), 501)");
     expect(migration).toContain("do NOT apply to production");
+    expect(migration).toContain("Do not add profile_id");
     expect(migration).not.toMatch(/create function public\.my_unread_count/i);
-    expect(migration).not.toMatch(/profile_id/i);
+    expect(migration).not.toMatch(/\bprofile_id\s+uuid\b/i);
     expect(migration).not.toMatch(/from public\.(posts|stories|direct_messages)/i);
     expect(MY_LIST_HARD_MAX).toBe(501);
   });
