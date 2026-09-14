@@ -41,7 +41,7 @@ export function socialProfileQrModules(url: string): boolean[][] {
   for (let y = 0; y < size; y += 1) {
     const row: boolean[] = [];
     for (let x = 0; x < size; x += 1) {
-      row.push(Boolean(qr.modules.get(x, y)));
+      row.push(Boolean(qr.modules.get(y, x)));
     }
     rows.push(row);
   }
