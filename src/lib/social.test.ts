@@ -25,6 +25,7 @@ import {
   socialInitials,
   socialProfileHref,
   socialProfilePublicUrl,
+  socialVanityInternalPath,
   stripHandleDecorators,
   suggestedHandleSeed,
 } from "./social";
@@ -121,6 +122,22 @@ describe("profile opt-in", () => {
     expect(parseProfileHandleParam("%40ada")).toBe("ada");
     expect(parseProfileHandleParam("@ada")).toBe("ada");
     expect(suggestedHandleSeed("Ada.Carp@example.com", "u1")).toBe("adacarp");
+  });
+
+  it("rewrites only /@handle to the in-app /social/u/@handle profile", () => {
+    expect(socialVanityInternalPath("/@ada")).toBe("/social/u/@ada");
+    expect(socialVanityInternalPath("/@Ada_Lovelace")).toBe("/social/u/@ada_lovelace");
+    expect(socialVanityInternalPath("/@ada/extra")).toBeNull();
+    expect(socialVanityInternalPath("/legal")).toBeNull();
+    expect(socialVanityInternalPath("/login")).toBeNull();
+    expect(socialVanityInternalPath("/admin")).toBeNull();
+    expect(socialVanityInternalPath("/api")).toBeNull();
+    expect(socialVanityInternalPath("/www")).toBeNull();
+    expect(socialVanityInternalPath("/@login")).toBeNull();
+    expect(socialVanityInternalPath("/@legal")).toBeNull();
+    expect(socialVanityInternalPath("/@admin")).toBeNull();
+    expect(socialVanityInternalPath("/@api")).toBeNull();
+    expect(socialVanityInternalPath("/@www")).toBeNull();
   });
 });
 

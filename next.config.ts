@@ -57,6 +57,21 @@ const nextConfig: NextConfig = {
     // holding a derivative longer than its source URL stays valid.
     minimumCacheTTL: 3600,
   },
+
+  // Apex vanity: /@handle → in-app /social/u/@handle. URL bar can stay
+  // 24frame.co/@handle when this project serves that host. Middleware
+  // applies the same rewrite (@ is a parallel-route marker in the app
+  // tree, so there is no src/app/@[handle] page).
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: "/@:handle",
+          destination: "/social/u/@:handle",
+        },
+      ],
+    };
+  },
 };
 
 export default nextConfig;

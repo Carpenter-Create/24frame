@@ -80,4 +80,17 @@ describe("social isolation lock", () => {
     expect(migration).toContain("revoke delete on public.groups from authenticated");
     expect(migration).toContain("no org_id");
   });
+
+  it("rewrites apex /@handle to /social/u/@handle and does not make vanity public", () => {
+    const social = readFileSync("src/lib/social.ts", "utf8");
+    const middleware = readFileSync("src/lib/supabase/middleware.ts", "utf8");
+    const nextConfig = readFileSync("next.config.ts", "utf8");
+    expect(social).toContain("socialVanityInternalPath");
+    expect(social).toContain("socialProfileHref");
+    expect(nextConfig).toContain('source: "/@:handle"');
+    expect(nextConfig).toContain('destination: "/social/u/@:handle"');
+    expect(middleware).toContain("socialVanityInternalPath");
+    expect(middleware).toContain("NextResponse.rewrite");
+    expect(middleware).not.toContain('path.startsWith("/@")');
+  });
 });
