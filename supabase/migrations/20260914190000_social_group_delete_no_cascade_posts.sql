@@ -1,5 +1,5 @@
 -- ============================================================================
--- 20260914180000_social_group_delete_no_cascade_posts.sql
+-- 20260914190000_social_group_delete_no_cascade_posts.sql
 --
 -- INTENT: Remediation class 1. Data Access invariant #13 — Social group
 -- deletion must never cascade-destroy independently owned member posts.

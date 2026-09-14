@@ -63,7 +63,7 @@ describe("social isolation lock", () => {
 
   it("locks posts.group_id off ON DELETE CASCADE", () => {
     const migration = readFileSync(
-      "supabase/migrations/20260914180000_social_group_delete_no_cascade_posts.sql",
+      "supabase/migrations/20260914190000_social_group_delete_no_cascade_posts.sql",
       "utf8",
     );
     const fkSql = migration.match(
