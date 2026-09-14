@@ -659,7 +659,7 @@ export function SocialDmCompose({ conversationId }: { conversationId: string }) 
       action={async (formData) => {
         setError("");
         const result = await sendSocialDm(formData);
-        if (result.error) setError(result.error);
+        if (result?.error) setError(result.error);
       }}
     >
       <input type="hidden" name="conversation_id" value={conversationId} />

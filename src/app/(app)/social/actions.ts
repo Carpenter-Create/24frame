@@ -350,7 +350,7 @@ export async function sendSocialDm(formData: FormData): Promise<ActionResult> {
 
   revalidatePath(socialDmHref(conversationId));
   revalidatePath(SOCIAL_ROUTES.dms);
-  return {};
+  redirect(socialDmHref(conversationId));
 }
 
 export async function markSocialDmRead(conversationId: string): Promise<void> {

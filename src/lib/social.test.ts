@@ -61,6 +61,8 @@ describe("social copy lock", () => {
     expect(SOCIAL.dms.truncatedThread).toContain("50");
     expect(SOCIAL.dms.roomFull).toContain("32");
     expect(SOCIAL.dms.addBatch).toContain("32");
+    expect(SOCIAL.dms.olderPage).toContain("older");
+    expect(SOCIAL.dms.latestMessages).toBe("Latest messages");
     expect(SOCIAL.profile.uploadPhoto).toBe("Upload photo");
     expect(SOCIAL.courses.subtitle).toContain("Social+Education");
     expect(SOCIAL.leaderboard.private).toBe("The leaderboard is private.");

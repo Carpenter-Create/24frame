@@ -191,6 +191,8 @@ describe("social DMs", () => {
     expect(html).not.toContain("data-social-dm-missing");
     expect(html).not.toContain("min_level");
     expect(html).not.toContain("data-social-dm-thread-truncated");
+    expect(html).toContain("data-social-dm-form");
+    expect(html).not.toContain("data-social-dm-older-page");
   });
 
   it("names the thread bound and offers older messages", async () => {
@@ -226,6 +228,53 @@ describe("social DMs", () => {
     expect(html).toContain(encodeURIComponent(encodeDmThreadCursor(messages[SOCIAL_DM_THREAD_LIMIT - 1]!)));
     expect(html).toContain("m0");
     expect(html).not.toContain(">m50<");
+    expect(html).toContain("data-social-dm-form");
+  });
+
+  it("names an older page that is not truncated and does not mount compose", async () => {
+    const { encodeDmThreadCursor } = await import("@/lib/social-dm-bounds");
+    const older = {
+      id: "11111111-1111-4111-8111-000000000001",
+      created_at: "2026-09-01T12:00:00.000Z",
+    };
+    const from = vi.fn((table: string) => {
+      if (table === "profiles") {
+        return chain([{ id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" }]);
+      }
+      if (table === "conversations") {
+        return chain({ id: "c-group", kind: "group", title: null });
+      }
+      if (table === "messages") {
+        return chain([
+          {
+            id: older.id,
+            body: "ancient hello",
+            sender_id: "u1",
+            created_at: older.created_at,
+            status: "active",
+          },
+        ]);
+      }
+      if (table === "conversation_participants") {
+        return chain([{ user_id: "u1", left_at: null }]);
+      }
+      throw new Error(`unexpected from(${table})`);
+    });
+    vi.mocked(createClient).mockResolvedValue({ from, rpc: vi.fn() } as never);
+
+    const html = renderToStaticMarkup(
+      await SocialDmThreadPage({
+        params: Promise.resolve({ id: "c-group" }),
+        searchParams: Promise.resolve({ before: encodeDmThreadCursor(older) }),
+      }),
+    );
+    expect(html).toContain("data-social-dm-older-page");
+    expect(html).toContain(SOCIAL.dms.olderPage);
+    expect(html).toContain("data-social-dm-latest");
+    expect(html).toContain(SOCIAL.dms.latestMessages);
+    expect(html).toContain("ancient hello");
+    expect(html).not.toContain("data-social-dm-form");
+    expect(html).not.toContain("data-social-dm-thread-truncated");
   });
 
   it("does not touch gated community group create fields", () => {

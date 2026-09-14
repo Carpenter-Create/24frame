@@ -79,6 +79,7 @@ export default async function SocialDmThreadPage({
     others.length === 1
       ? displayHandle(others[0].handle)
       : others.map((person) => displayHandle(person.handle)).join(", ") || undefined;
+  const historical = cursor !== null;
 
   return (
     <div data-social-dm-thread="" data-social-dm-kind={conversation.kind}>
@@ -91,13 +92,24 @@ export default async function SocialDmThreadPage({
       {profile && conversation.kind === "group" ? (
         <SocialGroupTitleForm conversationId={conversation.id} title={conversation.title} />
       ) : null}
-      {thread.truncated || members.truncated ? (
-        <div data-social-dm-thread-truncated="" className="mb-[var(--space-4)] flex flex-col gap-[var(--space-3)]">
-          {thread.truncated ? (
+      {thread.truncated || members.truncated || historical ? (
+        <div
+          data-social-dm-thread-truncated={thread.truncated || members.truncated ? "" : undefined}
+          data-social-dm-older-page={historical ? "" : undefined}
+          className="mb-[var(--space-4)] flex flex-col gap-[var(--space-3)]"
+        >
+          {historical ? (
+            <InlineNotice tone="info">{SOCIAL.dms.olderPage}</InlineNotice>
+          ) : thread.truncated ? (
             <InlineNotice tone="info">{SOCIAL.dms.truncatedThread}</InlineNotice>
           ) : null}
           {members.truncated ? (
             <InlineNotice tone="info">{SOCIAL.dms.roomFull}</InlineNotice>
+          ) : null}
+          {historical ? (
+            <TextAction href={socialDmThreadHref(conversation.id)} data-social-dm-latest="">
+              {SOCIAL.dms.latestMessages}
+            </TextAction>
           ) : null}
           {thread.nextCursor ? (
             <TextAction
@@ -128,7 +140,7 @@ export default async function SocialDmThreadPage({
         })}
       </ol>
       {messages.length === 0 ? <HouseEmpty>{SOCIAL.dms.empty}</HouseEmpty> : null}
-      {profile ? <SocialDmCompose conversationId={conversation.id} /> : null}
+      {profile && !historical ? <SocialDmCompose conversationId={conversation.id} /> : null}
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { likeInsertRow, postInsertRow, profileInsertRow, SOCIAL } from "@/lib/so
 import {
   addSocialDmPeople,
   createSocialPost,
+  sendSocialDm,
   createSocialProfile,
   createSocialStory,
   openSocialDm,
@@ -226,6 +227,14 @@ describe("social actions", () => {
     expect(rpc).toHaveBeenCalledWith("open_or_get_direct_conversation", { p_peer: "u2" });
     expect(from).not.toHaveBeenCalledWith("conversations");
     expect(from).not.toHaveBeenCalledWith("conversation_participants");
+  });
+
+  it("sends a DM and returns to the latest thread path", async () => {
+    stub({ profile: { id: "u1" } });
+    const form = new FormData();
+    form.set("conversation_id", "conv-1");
+    form.set("body", "hello");
+    await expect(sendSocialDm(form)).rejects.toThrow("REDIRECT:/social/dms/conv-1");
   });
 
   it("adds people through the RPC and never inserts participants", async () => {

@@ -130,6 +130,8 @@ describe("social isolation lock", () => {
     expect(inbox).toContain("data-social-dms-truncated");
     expect(thread).toContain("loadDmThreadMessages");
     expect(thread).toContain("data-social-dm-thread-truncated");
+    expect(thread).toContain("data-social-dm-older-page");
+    expect(thread).toContain("!historical");
     expect(thread).not.toContain("ascending: true");
     expect(thread).not.toContain("DETAIL_LIST");
     expect(thread).not.toContain("rangeFor");
