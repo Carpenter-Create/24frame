@@ -1,21 +1,24 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
-import { PageHeader } from "@/components/ui/page-header";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import {
   SocialBioForm,
   SocialProfileCreateForm,
   SocialProfilePhotoForm,
 } from "@/components/social/social-forms";
+import { SocialShareButton } from "@/components/social/social-share-button";
 import {
   SocialAuthorHistory,
+  SocialHighlights,
   SocialProfileIdentity,
   socialAuthorPostCard,
 } from "@/components/social/social-ui";
+import { SOCIAL_ACTION_CLASS, SOCIAL_PAGE_CLASS } from "@/lib/social-chrome";
 import { signedAvatarUrl } from "@/lib/s3-avatars";
 import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
-import { SOCIAL } from "@/lib/social";
-import { loadAuthorPosts, loadLikedPostIds, loadLiveStories } from "@/lib/social-feed";
+import { SOCIAL, SOCIAL_ROUTES, socialRelativeTime, socialStoryHref } from "@/lib/social";
+import { loadAuthorPosts, loadLikedPostIds, loadLiveStories, loadProfileSocialCounts } from "@/lib/social-feed";
 import { ensureOwnSocialProfileResult } from "@/lib/social-profile";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
@@ -37,24 +40,41 @@ export default async function SocialProfilePage() {
         history.posts.map((post) => post.id),
       )
     : new Set<string>();
+  const counts = profile ? await loadProfileSocialCounts(supabase, profile.id) : null;
 
   return (
-    <div data-social-profile="">
-      <PageHeader title={SOCIAL.profile.title} subtitle={SOCIAL.profile.subtitle} />
+    <div data-social-profile="" className={SOCIAL_PAGE_CLASS}>
+      <h1 className="sr-only">{SOCIAL.profile.title}</h1>
       {profile ? (
-        <div className="flex flex-col gap-[var(--space-4)]">
+        <div className="flex flex-col gap-[var(--space-6)]">
           <SocialProfileIdentity
             name={profile.display_name}
             handle={profile.handle}
             photoUrl={photoUrl}
-            bio={profile.bio}
+            bio={profile.bio?.trim() ? profile.bio : SOCIAL.profile.ownFace}
             ring={liveStories.length > 0 ? "live" : null}
-            photoAction={<SocialProfilePhotoForm />}
+            stats={counts ?? undefined}
+            actions={
+              <>
+                <Link href="#social-profile-edit" className={SOCIAL_ACTION_CLASS}>
+                  {SOCIAL.profile.edit}
+                </Link>
+                <SocialShareButton handle={profile.handle} />
+              </>
+            }
           />
-          <SocialProfileCreateForm handle={profile.handle} displayName={profile.display_name} />
-          <SocialBioForm bio={profile.bio ?? ""} />
+          <SocialHighlights
+            cards={liveStories.map((story) => ({
+              id: story.id,
+              href: socialStoryHref(story.id),
+              label: socialRelativeTime(story.created_at),
+              photoUrl,
+            }))}
+          />
           <SocialAuthorHistory
             truncated={history.truncated}
+            emptyHint={SOCIAL.profile.postsEmptyOwnHint}
+            emptyAction={{ href: SOCIAL_ROUTES.create, label: SOCIAL.profile.sharePost }}
             posts={history.posts.map((post) =>
               socialAuthorPostCard({
                 post,
@@ -67,6 +87,12 @@ export default async function SocialProfilePage() {
               }),
             )}
           />
+          <details id="social-profile-edit" className="flex flex-col gap-[var(--space-4)]">
+            <summary className="t-body-sm text-ink-2">{SOCIAL.profile.edit}</summary>
+            <SocialProfilePhotoForm />
+            <SocialProfileCreateForm handle={profile.handle} displayName={profile.display_name} />
+            <SocialBioForm bio={profile.bio ?? ""} />
+          </details>
         </div>
       ) : (
         <div className="flex flex-col gap-[var(--space-4)]">

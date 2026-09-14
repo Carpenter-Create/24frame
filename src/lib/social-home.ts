@@ -18,6 +18,7 @@ export type SocialChecklistItem = {
   id: SocialChecklistId;
   label: string;
   href: string;
+  cta: string;
   done: boolean;
 };
 
@@ -29,24 +30,39 @@ export function socialChecklistItems(input: {
   hasStory: boolean;
 }): SocialChecklistItem[] {
   return [
-    { id: "photo", label: SOCIAL.checklist.photo, href: SETTINGS.profileHref, done: input.hasPhoto },
-    { id: "bio", label: SOCIAL.checklist.bio, href: SOCIAL_ROUTES.profile, done: input.hasBio },
+    {
+      id: "photo",
+      label: SOCIAL.checklist.photo,
+      href: SETTINGS.profileHref,
+      cta: SOCIAL.checklist.photoCta,
+      done: input.hasPhoto,
+    },
+    {
+      id: "bio",
+      label: SOCIAL.checklist.bio,
+      href: SOCIAL_ROUTES.profile,
+      cta: SOCIAL.checklist.bioCta,
+      done: input.hasBio,
+    },
     {
       id: "introduce",
       label: SOCIAL.checklist.introduce,
       href: SOCIAL_ROUTES.create,
+      cta: SOCIAL.checklist.introduceCta,
       done: input.hasIntro,
     },
     {
       id: "firstPost",
       label: SOCIAL.checklist.firstPost,
       href: SOCIAL_ROUTES.create,
+      cta: SOCIAL.checklist.firstPostCta,
       done: input.hasPost,
     },
     {
       id: "firstStory",
       label: SOCIAL.checklist.firstStory,
       href: SOCIAL_ROUTES.storiesNew,
+      cta: SOCIAL.checklist.firstStoryCta,
       done: input.hasStory,
     },
   ];

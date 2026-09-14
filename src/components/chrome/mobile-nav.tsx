@@ -9,6 +9,8 @@ import { Menu } from "lucide-react";
 import { MOBILE_NAV, isClientNavActive, railDestinations, type NavItem } from "@/lib/nav";
 import { cn } from "@/lib/cn";
 import type { WorkspaceMode } from "@/lib/workspace";
+import { SocialIcon } from "@/components/social/social-icon";
+import { SOCIAL_ICON_SIZE_NAV, socialNavIconName } from "@/lib/social-icons";
 import {
   MOBILE_CHROME_HAMBURGER_BUTTON_CLASS,
   MOBILE_CHROME_ICON_CLASS,
@@ -114,7 +116,16 @@ export function MobileNavSheet({
           active ? "bg-surface-muted" : "hover:bg-surface-muted",
         )}
       >
-        <Icon className="size-4 shrink-0" strokeWidth={1.33} />
+        {workspace === "social" ? (
+          <SocialIcon
+            name={socialNavIconName(item.href)}
+            active={active}
+            size={SOCIAL_ICON_SIZE_NAV}
+            className="shrink-0"
+          />
+        ) : (
+          <Icon className="size-4 shrink-0" strokeWidth={1.33} />
+        )}
         {item.label}
       </Link>
     );

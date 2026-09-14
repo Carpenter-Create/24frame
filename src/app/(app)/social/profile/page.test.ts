@@ -66,7 +66,11 @@ function chain(result: unknown) {
     error: null,
   }));
   c.then = (resolve: (value: unknown) => unknown) =>
-    Promise.resolve({ data: result, error: null }).then(resolve);
+    Promise.resolve({
+      data: result,
+      error: null,
+      count: Array.isArray(result) ? result.length : 0,
+    }).then(resolve);
   return c;
 }
 
@@ -89,6 +93,7 @@ function stubClient({
     if (table === "profiles") return chain(profile ? [profile] : []);
     if (table === "posts") return chain(posts);
     if (table === "likes") return chain([]);
+    if (table === "follows") return chain([]);
     if (table === "stories") return chain([]);
     throw new Error(`unexpected from(${table})`);
   });

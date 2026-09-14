@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 
-import { PageHeader } from "@/components/ui/page-header";
 import { SocialCreateCompose } from "@/components/social/social-forms";
+import { SOCIAL_PAGE_CLASS } from "@/lib/social-chrome";
+import { signedAvatarUrl } from "@/lib/s3-avatars";
 import { SOCIAL } from "@/lib/social";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { getOrgContext } from "@/lib/supabase/context";
@@ -12,12 +13,16 @@ export default async function SocialCreatePage() {
   if (!ctx) redirect("/login");
 
   const supabase = await createClient();
-  await ensureOwnSocialProfile(supabase, ctx.user);
+  const profile = await ensureOwnSocialProfile(supabase, ctx.user);
+  const photoUrl = profile ? await signedAvatarUrl(profile.id) : null;
 
   return (
-    <div data-social-create="">
-      <PageHeader title={SOCIAL.create.title} subtitle={SOCIAL.create.subtitle} />
-      <SocialCreateCompose />
+    <div data-social-create="" className={SOCIAL_PAGE_CLASS}>
+      <h1 className="sr-only">{SOCIAL.create.title}</h1>
+      <SocialCreateCompose
+        authorName={profile?.display_name ?? SOCIAL.home.you}
+        authorPhotoUrl={photoUrl}
+      />
     </div>
   );
 }

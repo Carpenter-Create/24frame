@@ -6,6 +6,7 @@ import {
   socialHomeLensHref,
   type SocialCategoryLabel,
 } from "@/lib/social-categories";
+import { SOCIAL_PILL_ACTIVE_CLASS, SOCIAL_PILL_CLASS, SOCIAL_PILL_IDLE_CLASS } from "@/lib/social-chrome";
 
 // Home-only topic row. Re-tap of the active pill returns All.
 // Explore / Create / Messages / Profile must not mount this.
@@ -22,12 +23,7 @@ export function SocialLensRow({ active }: { active: SocialCategoryLabel }) {
               href={socialHomeLensHref(label, active)}
               data-social-lens={label}
               data-social-lens-active={current ? "" : undefined}
-              className={cn(
-                "rounded-full px-[var(--space-3)] py-[var(--space-2)] t-body-sm whitespace-nowrap",
-                current
-                  ? "bg-surface-muted font-medium text-ink"
-                  : "text-ink-2 hover:bg-surface-muted hover:text-ink",
-              )}
+              className={cn(SOCIAL_PILL_CLASS, current ? SOCIAL_PILL_ACTIVE_CLASS : SOCIAL_PILL_IDLE_CLASS)}
             >
               {label}
             </Link>

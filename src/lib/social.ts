@@ -31,6 +31,7 @@ export const SOCIAL_ROUTES = {
   home: "/social",
   explore: "/social/explore",
   create: "/social/create",
+  stories: "/social/stories",
   storiesNew: "/social/stories/new",
   profile: "/social/profile",
   members: "/social/members",
@@ -160,7 +161,36 @@ export function socialCourseHref(slug: string): string {
 }
 
 export function socialStoryHref(id: string): string {
-  return `${SOCIAL_ROUTES.home}/stories/${encodeURIComponent(id)}`;
+  return `${SOCIAL_ROUTES.stories}/${encodeURIComponent(id)}`;
+}
+
+export function socialProfilePublicHost(handle: string): string {
+  const bare = bareHandle(handle);
+  return bare ? `24frame.co/@${bare}` : "24frame.co/@";
+}
+
+export function formatSocialCount(n: number): string {
+  if (n < 1000) return String(n);
+  if (n < 10_000) {
+    const tenths = Math.round(n / 100) / 10;
+    return `${tenths % 1 === 0 ? tenths.toFixed(0) : tenths.toFixed(1)}k`;
+  }
+  return `${Math.round(n / 1000)}k`;
+}
+
+export function socialRelativeTime(iso: string, now = Date.now()): string {
+  const then = Date.parse(iso);
+  if (Number.isNaN(then)) return "";
+  const delta = Math.max(0, now - then);
+  const minute = 60_000;
+  const hour = 60 * minute;
+  const day = 24 * hour;
+  if (delta < minute) return "Just now";
+  if (delta < hour) return `${Math.floor(delta / minute)}m`;
+  if (delta < day) return `${Math.floor(delta / hour)}h`;
+  if (delta < 2 * day) return "Yesterday";
+  if (delta < 7 * day) return `${Math.floor(delta / day)}d`;
+  return new Date(then).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
 export const SOCIAL = {
@@ -169,8 +199,17 @@ export const SOCIAL = {
     title: "Home",
     subtitle: `Posts from people you follow in ${PRODUCT_NAME}.`,
     empty: "No posts from people you follow yet.",
+    emptyHint: "Explore to find creators and start your following wall.",
+    goExplore: "Go to Explore",
     compose: "Write a post",
     submit: "Post",
+    captionPlaceholder: "Write a caption…",
+    dropPhoto: "Drop a still · or choose from library",
+    dropVideo: "Drop a clip · or choose from library",
+    dropText: "Nothing drafted yet. Choose Photo, Video, or Text to start.",
+    audience: "Audience",
+    audienceFollowing: "Following",
+    you: "You",
     attach: "Add photo or video",
     attaching: "Adding",
     removeAttach: "Remove",
@@ -211,17 +250,28 @@ export const SOCIAL = {
     title: "Story",
     subtitle: "Add a photo or video. It stays visible for 24 hours.",
     empty: "Add a photo or video.",
+    emptyRail: "No stories yet",
+    emptyHint: "When people you follow post stories, they appear here. Start with your own.",
     missing: "That story is not visible.",
     expired: "That story is no longer available.",
     submit: "Share",
+    you: "You",
+    reply: "Reply quietly…",
   },
   checklist: {
-    title: "Get started",
-    photo: "Photo",
-    bio: "Bio",
+    title: "Finish setting up",
+    progress: "complete",
+    dismiss: "Dismiss",
+    photo: "Add a profile photo",
+    photoCta: "Add photo",
+    bio: "Write a short bio",
+    bioCta: "Add bio",
     introduce: "Introduce yourself",
-    firstPost: "First post",
-    firstStory: "First story",
+    introduceCta: "Introduce",
+    firstPost: "Share your first post",
+    firstPostCta: "Create post",
+    firstStory: "Create your first story",
+    firstStoryCta: "Create story",
   },
   follow: {
     follow: "Follow",
@@ -247,13 +297,27 @@ export const SOCIAL = {
     handleTaken: "That handle is already taken.",
     created: "Profile created.",
     postsEmpty: "No posts yet.",
+    postsEmptyHint: "When they share stills, clips, or notes, they will land here.",
+    postsEmptyOwnHint: "Share a still, clip, or note. It will land here.",
+    sharePost: "Share a post",
     postsTruncated: `Showing the latest ${LIST_PAGE} posts.`,
     uploadPhoto: "Upload photo",
     uploadingPhoto: "Uploading…",
+    edit: "Edit profile",
+    share: "Share",
+    postsStat: "posts",
+    followersStat: "followers",
+    followingStat: "following",
+    ownFace: "Your public face. Edit anytime.",
   },
   member: {
     title: "Member",
     missing: "No public profile for that handle.",
+    notFound: "Profile not found",
+    notFoundCode: "404",
+    notFoundHint: "This handle is not on 24Frame Social — or the profile is private.",
+    goHome: "Go to Home",
+    goExplore: "Go to Explore",
     message: "Message",
     noProfileCta: "Create a creator profile to send a message.",
   },
@@ -290,6 +354,7 @@ export const SOCIAL = {
     like: "Like",
     unlike: "Unlike",
     likes: "likes",
+    comments: "comments",
   },
   dms: {
     title: "Messages",

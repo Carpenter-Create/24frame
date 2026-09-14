@@ -97,6 +97,37 @@ export async function loadIsFollowing(
   return !!data;
 }
 
+export type SocialProfileCounts = {
+  posts: number;
+  followers: number;
+  following: number;
+};
+
+export async function loadProfileSocialCounts(
+  supabase: ServerClient,
+  profileId: string,
+): Promise<SocialProfileCounts> {
+  const [profile, following, posts] = await Promise.all([
+    supabase.from("profiles").select("follower_count").eq("id", profileId).maybeSingle(),
+    supabase
+      .from("follows")
+      .select("id", { count: "exact", head: true })
+      .eq("follower_id", profileId),
+    supabase
+      .from("posts")
+      .select("id", { count: "exact", head: true })
+      .eq("author_id", profileId)
+      .eq("status", "active")
+      .is("group_id", null),
+  ]);
+
+  return {
+    posts: posts.count ?? 0,
+    followers: profile.data?.follower_count ?? 0,
+    following: following.count ?? 0,
+  };
+}
+
 export type SocialFollowingWallPage = {
   posts: SocialPostRow[];
   truncated: boolean;

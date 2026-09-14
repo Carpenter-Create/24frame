@@ -11,6 +11,14 @@ import { uploadAccountPhoto } from "@/app/(app)/account/actions";
 import { ACCOUNT_PROFILE } from "@/lib/account-profile";
 import { AVATAR_ACCEPT, AVATAR_MAX_BYTES, isAvatarContentType } from "@/lib/account-avatar";
 import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
+import {
+  SOCIAL_ACTION_CLASS,
+  SOCIAL_ACTION_SECONDARY_CLASS,
+  SOCIAL_AVATAR_SM_CLASS,
+  SOCIAL_PILL_ACTIVE_CLASS,
+  SOCIAL_PILL_CLASS,
+  SOCIAL_PILL_IDLE_CLASS,
+} from "@/lib/social-chrome";
 import { SOCIAL_CATEGORY_TOPICS } from "@/lib/social-categories";
 import {
   SOCIAL_IMAGE_CONTENT_TYPES,
@@ -21,8 +29,10 @@ import {
   type SocialMediaItem,
   type SocialMediaLane,
 } from "@/lib/social-media";
-import { SOCIAL, socialHandleRequiredError } from "@/lib/social";
+import { SOCIAL, socialHandleRequiredError, socialInitials } from "@/lib/social";
+import { cn } from "@/lib/cn";
 import { SocialHandleField } from "./social-handle-field";
+import { SocialIcon } from "./social-icon";
 import {
   addSocialDmPeople,
   createSocialGroup,
@@ -228,10 +238,16 @@ export function SocialPostCompose({
   );
 }
 
-export function SocialCreateCompose() {
+export function SocialCreateCompose({
+  authorName = SOCIAL.home.you,
+  authorPhotoUrl = null,
+}: {
+  authorName?: string;
+  authorPhotoUrl?: string | null;
+}) {
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
-  const [kind, setKind] = useState<ComposeKind>("text");
+  const [kind, setKind] = useState<ComposeKind | null>(null);
   const [body, setBody] = useState("");
   const [media, setMedia] = useState<SocialMediaItem[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -241,8 +257,15 @@ export function SocialCreateCompose() {
       : kind === "video"
         ? SOCIAL_VIDEO_CONTENT_TYPES.join(",")
         : SOCIAL_MEDIA_ACCEPT;
+  const wellHint =
+    kind === "photo"
+      ? SOCIAL.home.dropPhoto
+      : kind === "video"
+        ? SOCIAL.home.dropVideo
+        : SOCIAL.home.dropText;
 
   async function onPick(files: FileList | null) {
+    if (!files || files.length === 0 || kind === "text" || kind === null) return;
     setError("");
     setUploading(true);
     const result = await uploadSocialMedia(files, media, SOCIAL_MEDIA_MAX_ITEMS, "posts");
@@ -258,7 +281,7 @@ export function SocialCreateCompose() {
   return (
     <form
       data-social-create-form=""
-      className="flex flex-col gap-[var(--space-3)]"
+      className="flex flex-col gap-[var(--space-6)] rounded-[16px] bg-surface-muted p-[var(--space-6)]"
       action={async (formData) => {
         setError("");
         formData.set("media", JSON.stringify(media));
@@ -266,48 +289,60 @@ export function SocialCreateCompose() {
         if (result?.error) setError(result.error);
       }}
     >
-      <div className="flex gap-[var(--space-2)]" data-social-create-kinds="">
-        {(["text", "photo", "video"] as const).map((value) => (
+      <div className="flex items-center gap-[var(--space-3)]" data-social-create-author="">
+        <span className={cn(SOCIAL_AVATAR_SM_CLASS, authorPhotoUrl ? "overflow-hidden" : null)}>
+          {authorPhotoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the private avatars bucket
+            <img src={authorPhotoUrl} alt="" className="size-full object-cover" />
+          ) : (
+            socialInitials(authorName)
+          )}
+        </span>
+        <p className="t-body font-medium text-ink">{SOCIAL.home.you}</p>
+      </div>
+      <div className="flex flex-wrap gap-[var(--space-2)]" data-social-create-kinds="">
+        {(["photo", "video", "text"] as const).map((value) => (
           <button
             key={value}
             type="button"
             data-social-create-kind={value}
             data-social-create-kind-active={kind === value ? "" : undefined}
-            className={kind === value ? "t-body-sm font-medium text-ink" : TEXT_ACTION_CLASS}
+            className={cn(SOCIAL_PILL_CLASS, kind === value ? SOCIAL_PILL_ACTIVE_CLASS : SOCIAL_PILL_IDLE_CLASS)}
             onClick={() => setKind(value)}
           >
             {value === "text" ? SOCIAL.create.text : value === "photo" ? SOCIAL.create.photo : SOCIAL.create.video}
           </button>
         ))}
       </div>
-      <label className="sr-only" htmlFor="social-create-body">
-        {SOCIAL.home.compose}
-      </label>
-      <textarea
-        id="social-create-body"
-        name="body"
-        rows={4}
-        value={body}
-        onChange={(e) => setBody(e.target.value)}
-        placeholder={SOCIAL.home.compose}
-        className="w-full rounded-[var(--radius)] border border-hairline bg-surface px-3 py-2 t-body text-ink outline-none placeholder:text-ink-3 focus:border-accent"
-      />
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="social-create-category">{SOCIAL.home.topic}</Label>
-        <select
-          id="social-create-category"
-          name="category"
-          defaultValue=""
-          className="w-full rounded-[var(--radius)] border border-hairline bg-surface px-3 py-2 t-body text-ink"
-        >
-          <option value=""></option>
-          {SOCIAL_CATEGORY_TOPICS.map((label) => (
-            <option key={label} value={label}>
-              {label}
-            </option>
-          ))}
-        </select>
-      </div>
+      <button
+        type="button"
+        data-social-create-well=""
+        disabled={kind === "text" || kind === null || uploading || media.length >= SOCIAL_MEDIA_MAX_ITEMS}
+        onClick={() => fileRef.current?.click()}
+        onDragOver={(event) => {
+          if (kind === "photo" || kind === "video") event.preventDefault();
+        }}
+        onDrop={(event) => {
+          if (kind !== "photo" && kind !== "video") return;
+          event.preventDefault();
+          void onPick(event.dataTransfer.files);
+        }}
+        className="flex min-h-[220px] w-full flex-col items-center justify-center gap-[var(--space-3)] rounded-[8px] bg-surface px-[var(--space-6)] py-[var(--space-12)] text-center"
+      >
+        <span className="size-10 rounded-[8px] bg-surface-muted" />
+        <span className="t-body-sm text-ink-2">{uploading ? SOCIAL.home.attaching : wellHint}</span>
+      </button>
+      {kind === "text" || kind === null ? null : (
+        <input
+          ref={fileRef}
+          type="file"
+          accept={accept}
+          multiple
+          className="sr-only"
+          aria-label={SOCIAL.home.attach}
+          onChange={(e) => void onPick(e.target.files)}
+        />
+      )}
       {media.length > 0 ? (
         <ul data-social-post-attachments="" className="flex flex-col gap-1">
           {media.map((item) => (
@@ -324,30 +359,38 @@ export function SocialCreateCompose() {
           ))}
         </ul>
       ) : null}
-      {kind === "text" ? null : (
-        <>
-          <button
-            type="button"
-            className={TEXT_ACTION_CLASS}
-            disabled={uploading || media.length >= SOCIAL_MEDIA_MAX_ITEMS}
-            onClick={() => fileRef.current?.click()}
-          >
-            {uploading ? SOCIAL.home.attaching : SOCIAL.home.attach}
-          </button>
-          <input
-            ref={fileRef}
-            type="file"
-            accept={accept}
-            multiple
-            className="sr-only"
-            aria-label={SOCIAL.home.attach}
-            onChange={(e) => void onPick(e.target.files)}
-          />
-        </>
-      )}
-      <Button type="submit" disabled={uploading}>
-        {SOCIAL.home.submit}
-      </Button>
+      <label className="sr-only" htmlFor="social-create-body">
+        {SOCIAL.home.compose}
+      </label>
+      <textarea
+        id="social-create-body"
+        name="body"
+        rows={3}
+        value={body}
+        onChange={(e) => setBody(e.target.value)}
+        placeholder={SOCIAL.home.captionPlaceholder}
+        className="w-full rounded-[8px] border border-hairline bg-surface px-[var(--space-4)] py-[var(--space-3)] t-body text-ink outline-none placeholder:text-ink-3 focus:border-accent"
+      />
+      <div className="sr-only">
+        <Label htmlFor="social-create-category">{SOCIAL.home.topic}</Label>
+        <select id="social-create-category" name="category" defaultValue="">
+          <option value=""></option>
+          {SOCIAL_CATEGORY_TOPICS.map((label) => (
+            <option key={label} value={label}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+        <p className="flex items-center gap-[var(--space-2)] t-body-sm text-ink-2">
+          {SOCIAL.home.audience}
+          <span className={cn(SOCIAL_PILL_CLASS, SOCIAL_PILL_IDLE_CLASS)}>{SOCIAL.home.audienceFollowing}</span>
+        </p>
+        <button type="submit" disabled={uploading} className={SOCIAL_ACTION_CLASS}>
+          {SOCIAL.home.submit}
+        </button>
+      </div>
       <FormError error={error} />
     </form>
   );
@@ -376,7 +419,7 @@ export function SocialStoryCompose() {
   return (
     <form
       data-social-story-form=""
-      className="flex flex-col gap-[var(--space-3)]"
+      className="flex flex-col gap-[var(--space-6)] rounded-[16px] bg-surface-muted p-[var(--space-6)]"
       action={async (formData) => {
         setError("");
         formData.set("media", JSON.stringify(media));
@@ -384,30 +427,22 @@ export function SocialStoryCompose() {
         if (result?.error) setError(result.error);
       }}
     >
-      <label className="sr-only" htmlFor="social-story-body">
-        {SOCIAL.stories.title}
-      </label>
-      <textarea
-        id="social-story-body"
-        name="body"
-        rows={3}
-        value={body}
-        onChange={(e) => setBody(e.target.value)}
-        placeholder={SOCIAL.home.compose}
-        className="w-full rounded-[var(--radius)] border border-hairline bg-surface px-3 py-2 t-body text-ink outline-none placeholder:text-ink-3 focus:border-accent"
-      />
-      {media.length > 0 ? (
-        <p className="t-body-sm text-ink-2">
-          {media[0].kind === "video" ? SOCIAL.home.videoKind : SOCIAL.home.photoKind}
-        </p>
-      ) : null}
       <button
         type="button"
-        className={TEXT_ACTION_CLASS}
+        data-social-story-well=""
         disabled={uploading}
         onClick={() => fileRef.current?.click()}
+        onDragOver={(event) => event.preventDefault()}
+        onDrop={(event) => {
+          event.preventDefault();
+          void onPick(event.dataTransfer.files);
+        }}
+        className="flex min-h-[220px] w-full flex-col items-center justify-center gap-[var(--space-3)] rounded-[8px] bg-surface px-[var(--space-6)] py-[var(--space-12)] text-center"
       >
-        {uploading ? SOCIAL.home.attaching : SOCIAL.home.attach}
+        <SocialIcon name="camera" size={40} className="text-ink-2" />
+        <span className="t-body-sm text-ink-2">
+          {uploading ? SOCIAL.home.attaching : media[0] ? (media[0].kind === "video" ? SOCIAL.home.videoKind : SOCIAL.home.photoKind) : SOCIAL.stories.empty}
+        </span>
       </button>
       <input
         ref={fileRef}
@@ -417,9 +452,23 @@ export function SocialStoryCompose() {
         aria-label={SOCIAL.home.attach}
         onChange={(e) => void onPick(e.target.files)}
       />
-      <Button type="submit" disabled={uploading}>
-        {SOCIAL.stories.submit}
-      </Button>
+      <label className="sr-only" htmlFor="social-story-body">
+        {SOCIAL.stories.title}
+      </label>
+      <textarea
+        id="social-story-body"
+        name="body"
+        rows={3}
+        value={body}
+        onChange={(e) => setBody(e.target.value)}
+        placeholder={SOCIAL.home.captionPlaceholder}
+        className="w-full rounded-[8px] border border-hairline bg-surface px-[var(--space-4)] py-[var(--space-3)] t-body text-ink outline-none placeholder:text-ink-3 focus:border-accent"
+      />
+      <div className="flex justify-end">
+        <button type="submit" disabled={uploading} className={SOCIAL_ACTION_CLASS}>
+          {SOCIAL.stories.submit}
+        </button>
+      </div>
       <FormError error={error} />
     </form>
   );
@@ -528,9 +577,12 @@ export function SocialFollowButton({
       <input type="hidden" name="followee_id" value={followeeId} />
       <input type="hidden" name="handle" value={handle} />
       <input type="hidden" name="following" value={following ? "1" : "0"} />
-      <Button type="submit" variant={following ? "secondary" : "primary"}>
+      <button
+        type="submit"
+        className={following ? SOCIAL_ACTION_SECONDARY_CLASS : SOCIAL_ACTION_CLASS}
+      >
         {following ? SOCIAL.follow.following : SOCIAL.follow.follow}
-      </Button>
+      </button>
     </form>
   );
 }
@@ -562,10 +614,10 @@ export function SocialLikeButton({
         type="submit"
         disabled={disabled}
         data-social-like=""
-        className={TEXT_ACTION_CLASS}
+        aria-label={liked ? SOCIAL.post.unlike : SOCIAL.post.like}
+        className="t-body-sm text-ink-2"
       >
-        {liked ? SOCIAL.post.unlike : SOCIAL.post.like}
-        {likeCount > 0 ? ` · ${likeCount}` : ""}
+        {likeCount} {SOCIAL.post.likes}
       </button>
     </form>
   );
@@ -628,6 +680,30 @@ export function SocialGroupCreateForm() {
       </div>
       <FormError error={error} />
       <Button type="submit">{SOCIAL.groupNew.submit}</Button>
+    </form>
+  );
+}
+
+export function SocialStoryReply({ peerId }: { peerId: string }) {
+  const [error, setError] = useState("");
+  return (
+    <form
+      data-social-story-reply=""
+      className="flex min-w-0 flex-1 flex-col gap-1"
+      action={async (formData) => {
+        setError("");
+        const result = await openSocialDm(formData);
+        if (result?.error) setError(result.error);
+      }}
+    >
+      <input type="hidden" name="peer_id" value={peerId} />
+      <button
+        type="submit"
+        className="w-full rounded-full border border-hairline bg-surface px-[var(--space-4)] py-[var(--space-2)] text-left t-body-sm text-ink-3"
+      >
+        {SOCIAL.stories.reply}
+      </button>
+      <FormError error={error} />
     </form>
   );
 }
