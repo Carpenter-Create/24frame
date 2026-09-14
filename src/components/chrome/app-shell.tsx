@@ -28,6 +28,7 @@ import { PRODUCT_NAME } from "@/lib/product";
 import { isSettingsPath, SETTINGS_RAIL_PAD_CLASS } from "@/lib/settings";
 import { resolveWorkspaceMode, type WorkspaceMode } from "@/lib/workspace";
 import { WorkspaceSwitcher } from "./workspace-switcher";
+import { SocialMobileDock } from "@/components/social/social-mobile-dock";
 
 type Org = { id: string; name: string };
 
@@ -217,6 +218,7 @@ export function AppShell({
           </div>
         )}
       </main>
+      {workspace === "social" && !settingsPage ? <SocialMobileDock /> : null}
     </div>
     </AskAssistantChromeProvider>
   );

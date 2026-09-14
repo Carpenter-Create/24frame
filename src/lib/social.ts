@@ -11,6 +11,9 @@ import type { SocialMediaItem, SocialMediaRuleError } from "@/lib/social-media";
 
 export const SOCIAL_ROUTES = {
   home: "/social",
+  explore: "/social/explore",
+  create: "/social/create",
+  storiesNew: "/social/stories/new",
   profile: "/social/profile",
   members: "/social/members",
   groups: "/social/groups",
@@ -40,12 +43,16 @@ export function socialCourseHref(slug: string): string {
   return `${SOCIAL_ROUTES.courses}/${encodeURIComponent(slug)}`;
 }
 
+export function socialStoryHref(id: string): string {
+  return `${SOCIAL_ROUTES.home}/stories/${encodeURIComponent(id)}`;
+}
+
 export const SOCIAL = {
   workspace: SOCIAL_WORKSPACE,
   home: {
     title: "Home",
-    subtitle: `Posts you can see in ${PRODUCT_NAME}.`,
-    empty: "No posts yet.",
+    subtitle: `Posts from people you follow in ${PRODUCT_NAME}.`,
+    empty: "No posts from people you follow yet.",
     compose: "Write a post",
     submit: "Post",
     attach: "Add photo or video",
@@ -61,6 +68,43 @@ export const SOCIAL = {
     mediaForbidden: "That file cannot be attached.",
     mediaLimit: "Attach up to four photos or videos.",
     uploadFailed: "The file could not be stored.",
+    topic: "Topic",
+  },
+  explore: {
+    title: "Explore",
+    subtitle: `Find what is moving in ${PRODUCT_NAME}.`,
+    search: "Search",
+    searchPlaceholder: "Search people and posts",
+    empty: "No trending topics yet.",
+    noResults: "No matching people or posts.",
+  },
+  create: {
+    title: "Create",
+    subtitle: "Write a post, or add a photo or video.",
+    text: "Text",
+    photo: "Photo",
+    video: "Video",
+  },
+  stories: {
+    create: "Create story",
+    title: "Story",
+    subtitle: "Add a photo or video. It stays visible for 24 hours.",
+    empty: "Add a photo or video.",
+    missing: "That story is not visible.",
+    expired: "That story is no longer available.",
+    submit: "Share",
+  },
+  checklist: {
+    title: "Get started",
+    photo: "Photo",
+    bio: "Bio",
+    introduce: "Introduce yourself",
+    firstPost: "First post",
+    firstStory: "First story",
+  },
+  follow: {
+    follow: "Follow",
+    following: "Following",
   },
   profile: {
     title: "Profile",
@@ -70,6 +114,8 @@ export const SOCIAL = {
       "A profile is optional. Company aggregation does not create one. Handle and display name only — photos stay later.",
     handle: "Handle",
     displayName: "Display name",
+    bio: "Bio",
+    bioSubmit: "Save bio",
     birthDate: "Date of birth",
     birthDateHint: "Required. You must be 13 or older.",
     submit: "Create profile",
@@ -168,6 +214,7 @@ export const HANDLE_MIN = 3;
 export const HANDLE_MAX = 30;
 export const DISPLAY_NAME_MAX = 80;
 export const POST_BODY_MAX = 2000;
+export const BIO_MAX = 280;
 export const MESSAGE_BODY_MAX = 2000;
 export const GROUP_NAME_MAX = 80;
 export const GROUP_SLUG_MAX = 40;
@@ -195,6 +242,13 @@ export function normalizePostBody(raw: string): string | null {
   const body = raw.trim();
   if (body.length === 0 || body.length > POST_BODY_MAX) return null;
   return body;
+}
+
+export function normalizeBio(raw: string): string | null {
+  const bio = raw.trim().replace(/\s+/g, " ");
+  if (bio.length === 0) return "";
+  if (bio.length > BIO_MAX) return null;
+  return bio;
 }
 
 export function normalizeMessageBody(raw: string): string | null {
@@ -314,16 +368,25 @@ export function postInsertRow(input: {
   body: string | null;
   groupId?: string | null;
   media?: SocialMediaItem[];
+  category?: string | null;
 }) {
   return {
     author_id: input.authorId,
     body: input.body,
     group_id: input.groupId ?? null,
     media: input.media ?? [],
+    category: input.category ?? null,
     status: "active" as const,
     like_count: 0,
     comment_count: 0,
     pinned: false,
+  };
+}
+
+export function followInsertRow(followerId: string, followeeId: string) {
+  return {
+    follower_id: followerId,
+    followee_id: followeeId,
   };
 }
 

@@ -228,6 +228,8 @@ describe("AppShell client mobile chrome", () => {
     expect(html).toContain("Open menu");
     expect(html).not.toContain("data-mobile-nav-sheet");
     expect(html).not.toContain("data-tab-bar");
+    expect(html).not.toContain("data-social-mobile-pill");
+    expect(html).not.toContain("data-social-create-fab");
     expect(shellSrc).toContain("hidden h-dvh flex-col");
     expect(shellSrc).toContain("md:flex");
     expect(shellSrc).toContain("<MobileNav isGcStaff={isGcStaff} workspace={workspace} />");
@@ -358,6 +360,8 @@ describe("AppShell rail-collapse chevron", () => {
     expect(shellSrc).not.toMatch(/\brl-/);
     expect(shellSrc).not.toContain("AskGlobeeChromeProvider");
     expect(shellSrc).toContain("AskAssistantChromeProvider");
+    expect(shellSrc).toContain("SocialMobileDock");
+    expect(shellSrc).toContain('workspace === "social" && !settingsPage');
     expect(shellSrc).not.toContain("PanelLeftOpen");
     expect(shellSrc).not.toContain("PanelLeftClose");
     expect(shellSrc).not.toContain("PanelLeft");
@@ -394,5 +398,20 @@ describe("AppShell rail-collapse chevron", () => {
     navigation.pathname = "/settings";
     expect(renderShell(undefined, undefined, true)).not.toContain("Expand sidebar");
     expect(renderShell(undefined, undefined, true)).not.toContain(RAIL_COLLAPSE_EXPAND_ROW_CLASS);
+  });
+
+  it("adds the Social phone pill and Create FAB without reopening Access chrome", () => {
+    navigation.pathname = "/social";
+    const html = renderShell();
+    expect(html).toContain("data-social-mobile-pill");
+    expect(html).toContain("data-social-create-fab");
+    expect(html).toContain(`data-rail-collapse="${RAIL_COLLAPSE_CHEVRON}"`);
+    expect(html).toContain("data-mobile-nav-trigger");
+    expect(html).toContain("24Frame");
+    expect(shellSrc).toContain("AskAssistantChromeProvider");
+    expect(shellSrc).toContain("RAIL_COLLAPSE_CHEVRON");
+    expect(shellSrc).toContain("persistSidebarCollapsed");
+    expect(shellSrc).not.toContain("AskGlobeeChromeProvider");
+    expect(shellSrc).not.toContain("RAIL_COLLAPSE_RL");
   });
 });

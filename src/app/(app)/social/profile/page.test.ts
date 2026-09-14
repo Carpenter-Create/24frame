@@ -21,6 +21,7 @@ vi.mock("@/lib/s3-avatars", () => ({
 }));
 vi.mock("@/app/(app)/social/actions", () => ({
   createSocialProfile: vi.fn(),
+  updateSocialBio: vi.fn(),
 }));
 
 function ctx() {
@@ -36,15 +37,22 @@ function ctx() {
   };
 }
 
-function stubProfile(profile: { id: string; handle: string; display_name: string; status: string } | null) {
+function stubProfile(profile: { id: string; handle: string; display_name: string; status: string; bio?: string | null } | null) {
   const maybeSingle = vi.fn(async () => ({ data: profile, error: null }));
   const chain = {
     select: vi.fn(() => chain),
     eq: vi.fn(() => chain),
+    in: vi.fn(() => chain),
+    gt: vi.fn(() => chain),
+    order: vi.fn(() => chain),
+    range: vi.fn(async () => ({ data: [], error: null })),
     maybeSingle,
+    then: (resolve: (value: unknown) => unknown) =>
+      Promise.resolve({ data: [], error: null }).then(resolve),
   };
   const from = vi.fn((table: string) => {
     if (table === "profiles") return chain;
+    if (table === "stories") return chain;
     throw new Error(`unexpected from(${table})`);
   });
   vi.mocked(createClient).mockResolvedValue({ from } as never);

@@ -5,13 +5,22 @@ import { redirect } from "next/navigation";
 
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
-import { mediaItemsForInsert, socialMediaObjectKey, validateMediaUpload } from "@/lib/social-media";
-import { presignSocialMediaPut } from "@/lib/s3-social-media";
 import {
+  mediaItemsForInsert,
+  parseSocialMediaLane,
+  socialMediaObjectKey,
+  validateMediaUpload,
+} from "@/lib/social-media";
+import { presignSocialMediaPut } from "@/lib/s3-social-media";
+import { normalizeSocialCategory } from "@/lib/social-categories";
+import { storyInsertRow, storyViewInsertRow } from "@/lib/social-stories";
+import {
+  followInsertRow,
   groupInsertRow,
   isEligibleBirthDate,
   likeInsertRow,
   messageInsertRow,
+  normalizeBio,
   normalizeDisplayName,
   normalizeGroupDescription,
   normalizeGroupName,
@@ -103,7 +112,8 @@ export async function presignSocialMediaUpload(formData: FormData): Promise<{
   });
   if (!checked.ok) return { error: socialMediaRuleMessage(checked.error) };
 
-  const key = socialMediaObjectKey(user.id, crypto.randomUUID(), checked.contentType);
+  const lane = parseSocialMediaLane(String(formData.get("lane") ?? ""));
+  const key = socialMediaObjectKey(user.id, crypto.randomUUID(), checked.contentType, lane);
   try {
     const url = await presignSocialMediaPut(key, checked.contentType);
     return { key, url, kind: checked.kind, contentType: checked.contentType };
@@ -120,17 +130,86 @@ export async function createSocialPost(formData: FormData): Promise<ActionResult
   const media = mediaItemsForInsert(formData.get("media"), user.id);
   const groupIdRaw = String(formData.get("group_id") ?? "").trim();
   const groupId = groupIdRaw.length > 0 ? groupIdRaw : null;
+  const category = groupId ? null : normalizeSocialCategory(String(formData.get("category") ?? ""));
   if (!media.ok) return { error: socialMediaRuleMessage(media.error) };
   if (!body && media.items.length === 0) return { error: SOCIAL.home.emptyPost };
 
   const { error } = await supabase.from("posts").insert(
-    postInsertRow({ authorId: user.id, body, groupId, media: media.items }),
+    postInsertRow({ authorId: user.id, body, groupId, media: media.items, category }),
   );
   if (error) return { error: error.message };
 
   const slug = String(formData.get("group_slug") ?? "").trim();
   revalidatePath(SOCIAL_ROUTES.home);
+  revalidatePath(SOCIAL_ROUTES.create);
   if (slug) revalidatePath(socialGroupHref(slug));
+  if (!groupId) redirect(SOCIAL_ROUTES.home);
+  return {};
+}
+
+export async function createSocialStory(formData: FormData): Promise<ActionResult> {
+  const { user, supabase, profileId } = await ownProfileId();
+  if (!profileId) return { error: SOCIAL.cta.needProfile };
+
+  const body = normalizePostBody(String(formData.get("body") ?? "")) ?? null;
+  const media = mediaItemsForInsert(formData.get("media"), user.id, "stories");
+  if (!media.ok) return { error: socialMediaRuleMessage(media.error) };
+  if (media.items.length === 0) return { error: SOCIAL.stories.empty };
+
+  const { error } = await supabase.from("stories").insert(
+    storyInsertRow({ authorId: user.id, body, media: media.items }),
+  );
+  if (error) return { error: error.message };
+
+  revalidatePath(SOCIAL_ROUTES.home);
+  revalidatePath(SOCIAL_ROUTES.storiesNew);
+  redirect(SOCIAL_ROUTES.home);
+}
+
+export async function markSocialStoryViewed(storyId: string): Promise<void> {
+  const { user, supabase, profileId } = await ownProfileId();
+  if (!profileId || !storyId) return;
+  await supabase.from("story_views").insert(storyViewInsertRow(storyId, user.id));
+}
+
+export async function updateSocialBio(formData: FormData): Promise<ActionResult> {
+  const { supabase, profileId } = await ownProfileId();
+  if (!profileId) return { error: SOCIAL.cta.needProfile };
+
+  const bio = normalizeBio(String(formData.get("bio") ?? ""));
+  if (bio == null) return { error: SOCIAL.profile.bio };
+
+  const { error } = await supabase.from("profiles").update({ bio: bio || null }).eq("id", profileId);
+  if (error) return { error: error.message };
+
+  revalidatePath(SOCIAL_ROUTES.profile);
+  revalidatePath(SOCIAL_ROUTES.home);
+  return {};
+}
+
+export async function toggleSocialFollow(formData: FormData): Promise<ActionResult> {
+  const { user, supabase, profileId } = await ownProfileId();
+  if (!profileId) return { error: SOCIAL.cta.needProfile };
+
+  const followeeId = String(formData.get("followee_id") ?? "").trim();
+  const following = String(formData.get("following") ?? "") === "1";
+  if (!followeeId || followeeId === user.id) return { error: SOCIAL.member.missing };
+
+  if (following) {
+    const { error } = await supabase
+      .from("follows")
+      .delete()
+      .eq("follower_id", user.id)
+      .eq("followee_id", followeeId);
+    if (error) return { error: error.message };
+  } else {
+    const { error } = await supabase.from("follows").insert(followInsertRow(user.id, followeeId));
+    if (error) return { error: error.message };
+  }
+
+  revalidatePath(SOCIAL_ROUTES.home);
+  const handle = String(formData.get("handle") ?? "").trim();
+  if (handle) revalidatePath(`${SOCIAL_ROUTES.members}/${encodeURIComponent(handle)}`);
   return {};
 }
 

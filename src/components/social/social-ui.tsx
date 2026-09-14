@@ -18,14 +18,21 @@ export function SocialNeedProfile() {
 export function SocialAvatar({
   name,
   photoUrl,
+  ring = null,
 }: {
   name: string;
   photoUrl?: string | null;
+  ring?: "unseen" | "live" | null;
 }) {
   return (
     <div
       data-social-avatar=""
-      className={cn(IDENTITY_AVATAR_CLASS, photoUrl ? "overflow-hidden" : null)}
+      data-social-avatar-ring={ring ?? undefined}
+      className={cn(
+        IDENTITY_AVATAR_CLASS,
+        photoUrl ? "overflow-hidden" : null,
+        ring ? "ring-2 ring-accent ring-offset-2 ring-offset-[var(--bg)]" : null,
+      )}
     >
       {photoUrl ? (
         // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the private avatars bucket
