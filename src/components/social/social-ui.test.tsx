@@ -176,6 +176,31 @@ describe("Social profile public face", () => {
 });
 
 describe("SocialPostCard media", () => {
+  it("leads photo and video cards with media, then author and copy", () => {
+    const html = renderToStaticMarkup(
+      <SocialPostCard
+        post={{
+          id: "p1",
+          body: "hello",
+          likeCount: 0,
+          liked: false,
+          createdAt: "2026-09-12T14:00:00.000Z",
+          authorId: "u1",
+          authorHandle: "ada",
+          authorName: "Ada Lovelace",
+          authorPhotoUrl: null,
+          groupSlug: null,
+          groupName: null,
+          canLike: false,
+          media: [{ kind: "image", url: "https://cf.example/signed-image" }],
+        }}
+      />,
+    );
+    expect(html.indexOf("data-social-post-media")).toBeGreaterThan(-1);
+    expect(html.indexOf("data-social-post-media")).toBeLessThan(html.indexOf("Ada Lovelace"));
+    expect(html.indexOf("Ada Lovelace")).toBeLessThan(html.indexOf("hello"));
+  });
+
   it("renders signed image and video URLs", () => {
     const html = renderToStaticMarkup(
       <SocialPostCard

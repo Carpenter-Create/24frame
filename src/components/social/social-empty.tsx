@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { SOCIAL_ACTION_CLASS, SOCIAL_ACTION_SECONDARY_CLASS, SOCIAL_EMPTY_PANEL_CLASS } from "@/lib/social-chrome";
+import { SOCIAL_EMPTY_ACTION_CLASS, SOCIAL_ACTION_SECONDARY_CLASS, SOCIAL_EMPTY_PANEL_CLASS } from "@/lib/social-chrome";
 import { SOCIAL_ICON_SIZE_EMPTY, type SocialPhosphorIconName } from "@/lib/social-icons";
 import { SocialIcon } from "./social-icon";
 
@@ -35,7 +35,7 @@ export function SocialEmpty({
       {action || secondary ? (
         <div className="flex flex-wrap items-center justify-center gap-[var(--space-2)]">
           {action ? (
-            <Link href={action.href} className={SOCIAL_ACTION_CLASS}>
+            <Link href={action.href} className={SOCIAL_EMPTY_ACTION_CLASS}>
               {action.label}
             </Link>
           ) : null}

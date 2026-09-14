@@ -14,6 +14,10 @@ const profile = readFileSync("src/app/(app)/social/profile/page.tsx", "utf8");
 const dock = readFileSync("src/components/social/social-mobile-dock.tsx", "utf8");
 const card = readFileSync("src/components/social/social-ui.tsx", "utf8");
 const rail = readFileSync("src/components/social/social-stories-rail.tsx", "utf8");
+const empty = readFileSync("src/components/social/social-empty.tsx", "utf8");
+const checklist = readFileSync("src/components/social/social-checklist.tsx", "utf8");
+const chrome = readFileSync("src/lib/social-chrome.ts", "utf8");
+const icons = readFileSync("src/lib/social-icons.ts", "utf8");
 const pkg = readFileSync("package.json", "utf8");
 
 describe("Social Home miss list v1 P0 lock", () => {
@@ -53,6 +57,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).not.toContain("SocialNeedProfile");
     expect(home).not.toContain("SocialPostCompose");
     expect(home).not.toContain("SocialCreateCompose");
+    expect(home).not.toContain("What's on your mind");
+    expect(home).not.toContain("Whats on your mind");
     expect(home).not.toContain("loadVisiblePosts");
     expect(SOCIAL.checklist.photo).toBe("Add a profile photo");
     expect(SOCIAL.checklist.bio).toBe("Write a short bio");
@@ -115,6 +121,34 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(dock).not.toContain("bg-surface/95");
     expect(home).not.toContain("Reels");
     expect(explore).not.toContain("Reels");
+  });
+
+  it("locks Home craft-raise finish against Figma 1:9 / 1:21", () => {
+    expect(rail).toContain("SOCIAL_ICON_SIZE_STORY_CREATE");
+    expect(rail).toContain("SOCIAL_STORY_MEDIA_CLASS");
+    expect(rail).toContain("data-social-story-media");
+    expect(rail).toContain("bg-accent");
+    expect(rail).toContain("bg-hairline");
+    expect(rail).not.toContain("size-10");
+    expect(rail).not.toContain("size={28}");
+    expect(card.slice(card.indexOf("export function SocialPostCard")).indexOf("SocialPostMedia")).toBeLessThan(
+      card.slice(card.indexOf("export function SocialPostCard")).indexOf("SocialAvatar"),
+    );
+    expect(home).toContain('icon="users"');
+    expect(rail).toContain("px-[var(--content-inset)]");
+    expect(empty).toContain("SOCIAL_EMPTY_ACTION_CLASS");
+    expect(empty).toContain("SOCIAL_ICON_SIZE_EMPTY");
+    expect(checklist).toContain("SOCIAL_CHECKLIST_CLASS");
+    expect(chrome).toContain('rounded-[8px] bg-surface-muted');
+    expect(chrome).toContain("gap-[var(--space-2)]");
+    expect(chrome).toContain("p-[var(--space-4)]");
+    expect(chrome).toContain("p-[3px]");
+    expect(icons).toContain("SOCIAL_ICON_SIZE_STORY_CREATE = 36");
+    expect(icons).toContain('"users"');
+    expect(home).not.toContain("WorkspaceSwitcher");
+    expect(home).not.toContain("SocialPostCompose");
+    expect(home).not.toContain("SocialCreateCompose");
+    expect(home).not.toContain("What's on your mind");
   });
 
   it("keeps Social Figma and Settings Mercury on separate registers", () => {
