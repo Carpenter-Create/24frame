@@ -16,7 +16,7 @@ export default async function SocialStoryCreatePage() {
   return (
     <div
       data-social-story-new=""
-      className="flex min-h-[70vh] flex-col justify-end md:min-h-[640px] md:items-center md:justify-center"
+      className="flex min-h-[70vh] flex-col items-center justify-end md:min-h-[640px] md:justify-center"
     >
       <h1 className="sr-only">{SOCIAL.stories.title}</h1>
       <SocialStoryCompose />

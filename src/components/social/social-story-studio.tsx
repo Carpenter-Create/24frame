@@ -96,6 +96,7 @@ export function SocialStoryCompose() {
   const clockTimerRef = useRef<number | null>(null);
   const mimeRef = useRef<SocialVideoContentType>("video/webm");
   const recordingRef = useRef(false);
+  const clipUrlRef = useRef<string | null>(null);
 
   const [phase, setPhase] = useState<StudioPhase>("picker");
   const [facing, setFacing] = useState<Facing>("user");
@@ -133,7 +134,8 @@ export function SocialStoryCompose() {
   }
 
   function releaseClip() {
-    if (clip) URL.revokeObjectURL(clip.url);
+    if (clipUrlRef.current) URL.revokeObjectURL(clipUrlRef.current);
+    clipUrlRef.current = null;
     setClip(null);
     setPlaying(false);
   }
@@ -141,7 +143,7 @@ export function SocialStoryCompose() {
   useEffect(() => {
     return () => {
       releasePreview();
-      if (clip) URL.revokeObjectURL(clip.url);
+      if (clipUrlRef.current) URL.revokeObjectURL(clipUrlRef.current);
     };
     // Unmount-only teardown. Live refs hold the current stream / recorder.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -264,8 +266,10 @@ export function SocialStoryCompose() {
         return;
       }
       const file = new File([blob], storyRecorderFileName(contentType), { type: contentType });
-      if (clip) URL.revokeObjectURL(clip.url);
-      setClip({ file, url: URL.createObjectURL(file), contentType });
+      if (clipUrlRef.current) URL.revokeObjectURL(clipUrlRef.current);
+      const url = URL.createObjectURL(file);
+      clipUrlRef.current = url;
+      setClip({ file, url, contentType });
       setPlaying(false);
       setPhase("review");
     };
@@ -342,8 +346,10 @@ export function SocialStoryCompose() {
       return;
     }
     releasePreview();
-    if (clip) URL.revokeObjectURL(clip.url);
-    setClip({ file, url: URL.createObjectURL(file), contentType: type });
+    if (clipUrlRef.current) URL.revokeObjectURL(clipUrlRef.current);
+    const url = URL.createObjectURL(file);
+    clipUrlRef.current = url;
+    setClip({ file, url, contentType: type });
     setPlaying(false);
     setPhase("review");
   }
@@ -375,75 +381,73 @@ export function SocialStoryCompose() {
 
   return (
     <div data-social-story-compose="">
-      {phase === "picker" || phase === "posted" ? (
+      {phase === "picker" ? (
         <div
           data-social-story-form=""
           data-social-story-picker=""
           className={SOCIAL_STORY_PICKER_CLASS}
         >
-          {phase === "picker" ? (
-            <>
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <h2 className="t-body font-semibold text-ink">{SOCIAL.stories.createCta}</h2>
-                  <p className="t-body-sm text-ink-2">{SOCIAL.stories.pickerHint}</p>
-                </div>
-                <Link
-                  href={SOCIAL_ROUTES.stories}
-                  data-social-story-picker-close=""
-                  aria-label={SOCIAL.stories.close}
-                  className="flex size-8 items-center justify-center rounded-full bg-surface-muted text-ink-2"
-                >
-                  <SocialIcon name="x" size={SOCIAL_ICON_SIZE_STORY_PICKER_CLOSE} />
-                </Link>
-              </div>
-              <button
-                type="button"
-                data-social-story-record=""
-                className={SOCIAL_STORY_PICKER_ROW_CLASS}
-                onClick={() => void openStudio()}
-              >
-                <span className={SOCIAL_STORY_PICKER_WELL_CLASS}>
-                  <SocialIcon name="camera" size={SOCIAL_ICON_SIZE_STORY_PICKER} />
-                </span>
-                <span className="min-w-0">
-                  <span className="block t-body font-semibold text-ink">{SOCIAL.stories.record}</span>
-                  <span className="block t-body-sm text-ink-2">{SOCIAL.stories.recordHint}</span>
-                </span>
-              </button>
-              <button
-                type="button"
-                data-social-story-upload=""
-                className={SOCIAL_STORY_PICKER_ROW_CLASS}
-                onClick={() => fileRef.current?.click()}
-              >
-                <span className={SOCIAL_STORY_PICKER_WELL_CLASS}>
-                  <SocialIcon name="upload-simple" size={SOCIAL_ICON_SIZE_STORY_PICKER} />
-                </span>
-                <span className="min-w-0">
-                  <span className="block t-body font-semibold text-ink">{SOCIAL.stories.upload}</span>
-                  <span className="block t-body-sm text-ink-2">{SOCIAL.stories.uploadHint}</span>
-                </span>
-              </button>
-              <p className="flex items-center justify-center gap-1.5 t-label text-ink-3">
-                <SocialIcon name="warning-circle" size={SOCIAL_ICON_SIZE_STORY_FOOTNOTE} />
-                {SOCIAL.stories.footnote}
-              </p>
-            </>
-          ) : (
-            <div data-social-story-posted="" className={SOCIAL_STORY_POSTED_CLASS}>
-              <SocialIcon name="check-circle" size={SOCIAL_ICON_SIZE_STORY_POSTED} className="text-accent" />
-              <p className="t-title font-semibold text-ink">{SOCIAL.stories.posted}</p>
-              <p className="t-body-sm text-ink-2">{SOCIAL.stories.postedHint}</p>
-              <Link
-                href={SOCIAL_ROUTES.stories}
-                className="inline-flex items-center justify-center rounded-full bg-accent px-6 py-3 t-body-sm font-semibold text-accent-contrast"
-              >
-                {SOCIAL.stories.viewStories}
-              </Link>
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <h2 className="t-body font-semibold text-ink">{SOCIAL.stories.createCta}</h2>
+              <p className="t-body-sm text-ink-2">{SOCIAL.stories.pickerHint}</p>
             </div>
-          )}
+            <Link
+              href={SOCIAL_ROUTES.stories}
+              data-social-story-picker-close=""
+              aria-label={SOCIAL.stories.close}
+              className="flex size-8 items-center justify-center rounded-full bg-surface-muted text-ink-2"
+            >
+              <SocialIcon name="x" size={SOCIAL_ICON_SIZE_STORY_PICKER_CLOSE} />
+            </Link>
+          </div>
+          <button
+            type="button"
+            data-social-story-record=""
+            className={SOCIAL_STORY_PICKER_ROW_CLASS}
+            onClick={() => void openStudio()}
+          >
+            <span className={SOCIAL_STORY_PICKER_WELL_CLASS}>
+              <SocialIcon name="camera" size={SOCIAL_ICON_SIZE_STORY_PICKER} />
+            </span>
+            <span className="min-w-0">
+              <span className="block t-body font-semibold text-ink">{SOCIAL.stories.record}</span>
+              <span className="block t-body-sm text-ink-2">{SOCIAL.stories.recordHint}</span>
+            </span>
+          </button>
+          <button
+            type="button"
+            data-social-story-upload=""
+            className={SOCIAL_STORY_PICKER_ROW_CLASS}
+            onClick={() => fileRef.current?.click()}
+          >
+            <span className={SOCIAL_STORY_PICKER_WELL_CLASS}>
+              <SocialIcon name="upload-simple" size={SOCIAL_ICON_SIZE_STORY_PICKER} />
+            </span>
+            <span className="min-w-0">
+              <span className="block t-body font-semibold text-ink">{SOCIAL.stories.upload}</span>
+              <span className="block t-body-sm text-ink-2">{SOCIAL.stories.uploadHint}</span>
+            </span>
+          </button>
+          <p className="flex items-center justify-center gap-1.5 t-label text-ink-3">
+            <SocialIcon name="warning-circle" size={SOCIAL_ICON_SIZE_STORY_FOOTNOTE} />
+            {SOCIAL.stories.footnote}
+          </p>
           {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
+        </div>
+      ) : null}
+
+      {phase === "posted" ? (
+        <div data-social-story-posted="" className={SOCIAL_STORY_POSTED_CLASS}>
+          <SocialIcon name="check-circle" size={SOCIAL_ICON_SIZE_STORY_POSTED} className="text-accent" />
+          <p className="t-title font-semibold text-ink">{SOCIAL.stories.posted}</p>
+          <p className="t-body-sm text-ink-2">{SOCIAL.stories.postedHint}</p>
+          <Link
+            href={SOCIAL_ROUTES.stories}
+            className="inline-flex items-center justify-center rounded-full bg-accent px-6 py-3 t-body-sm font-semibold text-accent-contrast"
+          >
+            {SOCIAL.stories.viewStories}
+          </Link>
         </div>
       ) : null}
 
