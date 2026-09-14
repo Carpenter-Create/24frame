@@ -93,6 +93,7 @@ export default async function SocialHomePage({
   return (
     <div data-social-home="" className={SOCIAL_PAGE_CLASS}>
       <h1 className="sr-only">{SOCIAL.home.title}</h1>
+      <p className="sr-only">{SOCIAL.home.subtitle}</p>
       <SocialStoriesRail cards={rail} authors={authors} faces={faces} canCreate={!!profile} />
       {storiesPage.truncated ? (
         <InlineNotice tone="info" data-social-stories-truncated="">
