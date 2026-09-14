@@ -30,6 +30,7 @@ import {
   socialHandleRequiredError,
   socialHomeLaneHref,
   socialInitials,
+  socialMediaRuleMessage,
   formatSocialCount,
   socialProfileHref,
   socialProfilePublicHost,
@@ -57,6 +58,34 @@ describe("social copy lock", () => {
     expect(SOCIAL.stories.emptyHint).toContain("share stories");
     expect(SOCIAL.stories.createCta).toBe("Create a story");
     expect(SOCIAL.stories.reply).toBe("Reply quietly…");
+    expect(SOCIAL.stories.subtitle).toBe("Add a video. It stays visible for 24 hours.");
+    expect(SOCIAL.stories.empty).toBe("Add a video.");
+    expect(SOCIAL.stories.attach).toBe("Add video");
+    expect(SOCIAL.stories.mediaType).toBe("Use a video (MP4, QuickTime, WebM).");
+    expect(SOCIAL.stories.mediaMissing).toBe("Choose a video first.");
+    expect(SOCIAL.stories.pickerHint).toBe("Video only");
+    expect(SOCIAL.stories.record).toBe("Record a video");
+    expect(SOCIAL.stories.recordHint).toBe("Open in-app studio");
+    expect(SOCIAL.stories.upload).toBe("Upload a video");
+    expect(SOCIAL.stories.footnote).toBe("No photo story · No text story");
+    expect(SOCIAL.stories.studioTitle).toBe("Story studio");
+    expect(SOCIAL.stories.holdOrTap).toBe("Hold or tap to record");
+    expect(SOCIAL.stories.post).toBe("Post");
+    expect(SOCIAL.stories.posted).toBe("Story posted");
+    expect(JSON.stringify(SOCIAL.stories)).not.toMatch(/photo or video/i);
+    expect(JSON.stringify(SOCIAL.stories)).not.toMatch(/15 second/i);
+    expect(socialMediaRuleMessage("type", "stories")).toBe(SOCIAL.stories.mediaType);
+    expect(socialMediaRuleMessage("type")).toBe(SOCIAL.home.mediaType);
+    const storyCompose = readFileSync("src/components/social/social-story-studio.tsx", "utf8");
+    expect(storyCompose).toContain("SOCIAL_VIDEO_CONTENT_TYPES.join(\",\")");
+    expect(storyCompose).toContain("getUserMedia");
+    expect(storyCompose).toContain("MediaRecorder");
+    expect(storyCompose).toContain("probeStoryRecorderMimeType");
+    expect(storyCompose).toContain("data-social-story-record");
+    expect(storyCompose).toContain("data-social-story-upload");
+    expect(storyCompose).toContain("data-social-story-studio");
+    expect(storyCompose).not.toContain("capture=\"user\"");
+    expect(storyCompose).not.toContain("SOCIAL_MEDIA_ACCEPT");
     expect(SOCIAL.dms.subtitle).toContain(PRODUCT_NAME);
     expect(SOCIAL.dms.addPeople).toBe("Add people");
     expect(SOCIAL_ROUTES.dms).toBe("/social/dms");

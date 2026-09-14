@@ -3,6 +3,9 @@
 // Profile ship: Figma 129:215 / 129:415 / 129:615.
 // Create ship: Figma 135:585 / 135:1037 / 135:1214.
 // Stories ship: Figma 138:163 / 138:889 / 138:943.
+// Stories studio: Figma 146:230 / 146:1050 / 146:1072 / 146:1099
+//   desktop 146:1125 / 146:1147 / 146:1173 / 147:251.
+// Stories picker: Figma 144:1218 / 144:1444.
 // No glass, no drop shadow. Aggregation / Settings Mercury stays elsewhere.
 
 export const SOCIAL_FIGMA_HOME = "130:215";
@@ -11,6 +14,17 @@ export const SOCIAL_FIGMA_HOME_MOBILE = "133:1078";
 export const SOCIAL_FIGMA_PROFILE = ["129:215", "129:415", "129:615"] as const;
 export const SOCIAL_FIGMA_CREATE = ["135:585", "135:1037", "135:1214"] as const;
 export const SOCIAL_FIGMA_STORIES = ["138:163", "138:889", "138:943"] as const;
+export const SOCIAL_FIGMA_STORY_STUDIO = [
+  "146:230",
+  "146:1050",
+  "146:1072",
+  "146:1099",
+  "146:1125",
+  "146:1147",
+  "146:1173",
+  "147:251",
+] as const;
+export const SOCIAL_FIGMA_STORY_PICKER = ["144:1218", "144:1444"] as const;
 
 export const SOCIAL_RAIL_WIDTH_CLASS = "w-[240px]";
 export const SOCIAL_RAIL_MAIN_OFFSET_CLASS = "md:ml-[240px]";
@@ -177,3 +191,39 @@ export const SOCIAL_CREATE_KIND_CLASS =
 
 export const SOCIAL_CREATE_AVATAR_CLASS =
   "flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted text-[12px] font-semibold text-ink-2 md:size-10 md:text-[14px]";
+
+export const SOCIAL_STORY_PICKER_CLASS =
+  "flex w-full max-w-[420px] flex-col gap-4 rounded-[24px] border border-hairline bg-surface p-6";
+
+export const SOCIAL_STORY_PICKER_ROW_CLASS =
+  "flex w-full items-center gap-4 rounded-[16px] border border-hairline bg-surface p-4 text-left";
+
+export const SOCIAL_STORY_PICKER_WELL_CLASS =
+  "flex size-12 shrink-0 items-center justify-center rounded-full bg-surface-muted text-ink";
+
+export const SOCIAL_STORY_STUDIO_CLASS =
+  "fixed inset-0 z-50 flex bg-band text-band-ink md:items-center md:justify-center";
+
+export const SOCIAL_STORY_STUDIO_STAGE_CLASS =
+  "relative flex h-full w-full flex-col overflow-hidden bg-band md:h-[746px] md:max-h-[90dvh] md:w-[420px] md:rounded-[16px] md:border md:border-band-ink/20";
+
+export const SOCIAL_STORY_STUDIO_CHROME_CLASS =
+  "absolute inset-x-0 top-0 z-10 flex h-14 items-center justify-between bg-band/35 p-4";
+
+export const SOCIAL_STORY_STUDIO_ICON_CLASS =
+  "flex size-10 items-center justify-center rounded-full bg-band-ink/12 text-band-ink";
+
+export const SOCIAL_STORY_STUDIO_RING_CLASS =
+  "pointer-events-none absolute left-1/2 top-[calc(50%-40px)] size-[280px] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-band-ink/25 border-t-accent md:size-[240px]";
+
+export const SOCIAL_STORY_RECORD_CLASS =
+  "flex size-20 items-center justify-center rounded-full border-[3px] border-band-ink bg-accent text-accent-contrast";
+
+export const SOCIAL_STORY_STOP_CLASS =
+  "size-6 rounded-[4px] bg-accent-contrast";
+
+export const SOCIAL_STORY_REC_PILL_CLASS =
+  "absolute left-1/2 top-[72px] z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-accent px-2.5 py-1.5 t-label font-semibold text-accent-contrast";
+
+export const SOCIAL_STORY_POSTED_CLASS =
+  "flex w-full max-w-[326px] flex-col items-center gap-4 rounded-[16px] border border-hairline bg-surface px-6 py-8 text-center";

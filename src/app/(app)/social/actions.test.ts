@@ -183,11 +183,11 @@ describe("social actions", () => {
     const { inserts } = stub({ profile: null });
     const object = "22222222-2222-4222-8222-222222222222";
     const media = [
-      { kind: "image" as const, key: `stories/${author}/${object}.jpg`, contentType: "image/jpeg" as const },
+      { kind: "video" as const, key: `stories/${author}/${object}.mp4`, contentType: "video/mp4" as const },
     ];
     const form = new FormData();
     form.set("media", JSON.stringify(media));
-    await expect(createSocialStory(form)).rejects.toThrow("REDIRECT:/social");
+    expect(await createSocialStory(form)).toEqual({});
     expect(inserts[0]).toEqual({
       table: "profiles",
       row: profileInsertRow({
@@ -353,7 +353,7 @@ describe("social actions", () => {
     const storyForm = new FormData();
     storyForm.set(
       "media",
-      JSON.stringify([{ kind: "image", key: `stories/${other}/${object}.jpg`, contentType: "image/jpeg" }]),
+      JSON.stringify([{ kind: "video", key: `stories/${other}/${object}.mp4`, contentType: "video/mp4" }]),
     );
     expect(await createSocialStory(storyForm)).toEqual({ error: SOCIAL.home.mediaForbidden });
     expect(inserts).toEqual([]);
@@ -397,5 +397,42 @@ describe("social actions", () => {
       contentType: "image/jpeg",
     });
     expect(presignSocialMediaPut).toHaveBeenCalledWith(`posts/${author}/${object}.jpg`, "image/jpeg");
+  });
+
+  it("rejects image kinds on story create and stories-lane presign", async () => {
+    const author = "11111111-1111-4111-8111-111111111111";
+    const object = "22222222-2222-4222-8222-222222222222";
+    vi.mocked(getAuthUser).mockResolvedValue({ id: author, email: "ada@example.com" } as never);
+    const { inserts } = stub({ profile: { id: author } });
+    const form = new FormData();
+    form.set(
+      "media",
+      JSON.stringify([
+        { kind: "image", key: `stories/${author}/${object}.jpg`, contentType: "image/jpeg" },
+      ]),
+    );
+    expect(await createSocialStory(form)).toEqual({ error: SOCIAL.stories.mediaType });
+    expect(inserts).toEqual([]);
+
+    vi.spyOn(crypto, "randomUUID").mockReturnValue(object);
+    const imageSign = new FormData();
+    imageSign.set("content_type", "image/jpeg");
+    imageSign.set("byte_length", "1200");
+    imageSign.set("lane", "stories");
+    expect(await presignSocialMediaUpload(imageSign)).toEqual({ error: SOCIAL.stories.mediaType });
+    expect(presignSocialMediaPut).not.toHaveBeenCalled();
+
+    vi.mocked(presignSocialMediaPut).mockResolvedValue("https://s3.example/put");
+    const videoSign = new FormData();
+    videoSign.set("content_type", "video/mp4");
+    videoSign.set("byte_length", "1200");
+    videoSign.set("lane", "stories");
+    expect(await presignSocialMediaUpload(videoSign)).toEqual({
+      key: `stories/${author}/${object}.mp4`,
+      url: "https://s3.example/put",
+      kind: "video",
+      contentType: "video/mp4",
+    });
+    expect(presignSocialMediaPut).toHaveBeenCalledWith(`stories/${author}/${object}.mp4`, "video/mp4");
   });
 });
