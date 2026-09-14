@@ -15,18 +15,16 @@ import {
   BRAND_EMBLEM_SRC,
   BRAND_EMBLEM_TWO_PATH,
   BRAND_EMBLEM_VIEWBOX,
-  BRAND_ICON_SIZE,
   BRAND_ICON_SRC,
   BRAND_ICON_TILE_FILL,
-  BRAND_ICON_TYPE,
   BRAND_ICON_VIEWBOX,
   BRAND_MARK_FILL,
 } from "./brand";
 
 const emblemSvg = readFileSync("public/brand/24frame-emblem.svg", "utf8");
-const faviconPng = readFileSync("public/brand/24frame-favicon.png");
-const appIconPng = readFileSync("src/app/icon.png");
-const appleIconPng = readFileSync("src/app/apple-icon.png");
+const iconSvg = readFileSync("public/brand/24frame-icon.svg", "utf8");
+const appIconSvg = readFileSync("src/app/icon.svg", "utf8");
+const appleIconSvg = readFileSync("src/app/apple-icon.svg", "utf8");
 const layoutSrc = readFileSync("src/app/layout.tsx", "utf8");
 const manifestSrc = readFileSync("src/app/manifest.ts", "utf8");
 const shellSrc = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
@@ -47,14 +45,16 @@ describe("Asset 8 emblem + Asset 10 icon lock", () => {
     expect(BRAND_EMBLEM_SRC).toBe("/brand/24frame-emblem.svg");
   });
 
-  it("commits Adam favicon PNG bytes — 1080 source wired to apple/PWA, Asset 8 emblem unchanged", () => {
-    expect(faviconPng.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))).toBe(true);
-    expect(faviconPng.equals(appIconPng)).toBe(true);
-    expect(faviconPng.equals(appleIconPng)).toBe(true);
-    expect(BRAND_ICON_SRC).toBe("/brand/24frame-favicon.png");
-    expect(BRAND_ICON_TYPE).toBe("image/png");
-    expect(BRAND_ICON_SIZE).toBe("1080x1080");
-    expect(emblemSvg).not.toContain(BRAND_ICON_TILE_FILL);
+  it("commits Asset 10 bytes — rounded square tile, blue mark, white corners", () => {
+    expect(iconSvg).toContain(`viewBox="${BRAND_ICON_VIEWBOX}"`);
+    expect(iconSvg).toContain(`fill: ${BRAND_ICON_TILE_FILL}`);
+    expect(iconSvg).toContain("fill: #1769ff");
+    expect(iconSvg).toContain("fill: #fff");
+    expect(iconSvg).toContain('rx="92.12"');
+    expect(iconSvg).toContain('ry="92.12"');
+    expect(iconSvg).toBe(appIconSvg);
+    expect(iconSvg).toBe(appleIconSvg);
+    expect(BRAND_ICON_SRC).toBe("/brand/24frame-icon.svg");
   });
 
   it("inlines Asset 8 with currentColor corners and locked 24–28px height", () => {
@@ -78,7 +78,7 @@ describe("Asset 8 emblem + Asset 10 icon lock", () => {
     expect(emblemSrc).not.toContain("rounded-[");
   });
 
-  it("wires the rail chip to emblem-only home and PNG favicon/apple/PWA", () => {
+  it("wires the rail chip to emblem-only home and Asset 10 favicon/apple/PWA", () => {
     expect(shellSrc).toContain("<BrandEmblem />");
     expect(shellSrc).toContain("data-brand-emblem");
     expect(shellSrc).toContain("workspaceHome(workspace)");
@@ -89,7 +89,6 @@ describe("Asset 8 emblem + Asset 10 icon lock", () => {
     expect(layoutSrc).toContain("BRAND_ICON_SRC");
     expect(layoutSrc).toContain("icons:");
     expect(manifestSrc).toContain("BRAND_ICON_SRC");
-    expect(manifestSrc).toContain("BRAND_ICON_TYPE");
-    expect(layoutSrc).toContain("BRAND_ICON_TYPE");
+    expect(manifestSrc).toContain('type: "image/svg+xml"');
   });
 });

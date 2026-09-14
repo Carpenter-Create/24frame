@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-import { BRAND_ICON_SIZE, BRAND_ICON_SRC, BRAND_ICON_TYPE } from "@/lib/brand";
+import { BRAND_ICON_SRC } from "@/lib/brand";
 import { PRODUCT_NAME } from "@/lib/product";
 
 export default function manifest(): MetadataRoute.Manifest {
@@ -12,8 +12,8 @@ export default function manifest(): MetadataRoute.Manifest {
     icons: [
       {
         src: BRAND_ICON_SRC,
-        sizes: BRAND_ICON_SIZE,
-        type: BRAND_ICON_TYPE,
+        sizes: "any",
+        type: "image/svg+xml",
         purpose: "any",
       },
     ],
