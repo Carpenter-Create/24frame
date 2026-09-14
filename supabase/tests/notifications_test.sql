@@ -3,7 +3,7 @@
 -- (mark_notifications_read / my_notifications.unread / my_unread_count).
 
 begin;
-select plan(15);
+select plan(16);
 
 select set_config('t.orgA',    gen_random_uuid()::text, false);
 select set_config('t.orgB',    gen_random_uuid()::text, false);
@@ -60,6 +60,8 @@ select is((select count(*) from public.notifications where org_id=current_settin
 select set_config('request.jwt.claims', json_build_object('sub', current_setting('t.ownerA'),'role','authenticated')::text, true);
 select is((select unread from public.my_notifications() where id=current_setting('t.nid')::uuid), true,
   'ownerA sees the notification unread');
+select is((select count(*) from public.my_notifications(0))::int, 0,
+  'p_limit 0 returns no notifications');
 select is(public.my_unread_count(), 1, 'ownerA unread count = 1');
 select lives_ok(
   format($$ select public.mark_notifications_read(array[%L]::uuid[]) $$, current_setting('t.nid')),

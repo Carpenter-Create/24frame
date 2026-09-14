@@ -87,6 +87,7 @@ describe("executeAskGlobeeTool", () => {
       catalogLabel: "2",
       catalogIsPartial: false,
       live: 1,
+      needsAttentionIsPartial: false,
     });
     expectIsolated(result);
   });

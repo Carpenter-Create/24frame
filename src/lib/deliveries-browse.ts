@@ -10,6 +10,7 @@ import {
   type Sort,
   type SortDir,
 } from "@/lib/catalog-view";
+import { DETAIL_LIST, UNPAGINATED_MAX } from "@/lib/list-bounds";
 import { DELIVERY_STATUS_ROW_LABELS, type DeliveryStatus } from "@/lib/titles";
 
 export type DeliveryBrowseRow = {
@@ -149,6 +150,10 @@ export const DELIVERIES_FILTER_MISS = {
   description: "Try another status, or clear the filter.",
   actionLabel: "Show all",
 } as const;
+
+export const DELIVERIES_TRUNCATED = `Showing the first ${UNPAGINATED_MAX} deliveries. More exist — this list is not complete.`;
+
+export const TITLE_DELIVERIES_TRUNCATED = `Showing the first ${DETAIL_LIST} placements for this title. Live counts may be a floor.`;
 
 type QueryValue = string | string[] | undefined;
 

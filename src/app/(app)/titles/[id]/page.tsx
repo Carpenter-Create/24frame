@@ -24,7 +24,9 @@ import { ScreenerWatchButton } from "./screener-watch-button";
 import { AssetDownloadButton } from "./asset-download-button";
 import { SubmitButton } from "./submit-button";
 import { titleDisplayStatus, DELIVERY_STATUS_ROW_LABELS, type TitleStatus } from "@/lib/titles";
+import { TITLE_DELIVERIES_TRUNCATED } from "@/lib/deliveries-browse";
 import { DETAIL_LIST, rangeFor } from "@/lib/list-bounds";
+import { loadMyDeliveries } from "@/lib/my-lists";
 
 const ASSET_KIND_LABELS: Record<
   "master" | "caption" | "artwork" | "poster" | "banner" | "screener" | "trailer",
@@ -108,8 +110,11 @@ export default async function TitleDetailPage({ params }: { params: Promise<{ id
   const showRejection =
     title.status === "draft" && latestReview?.decision === "reject" && !!latestReview.reason;
 
-  const { data: allDlv } = await supabase.rpc("my_deliveries");
-  const titleDlv = (allDlv ?? []).filter((d) => d.title_id === id);
+  const titleDeliveries = await loadMyDeliveries(supabase, {
+    titleId: id,
+    limit: DETAIL_LIST,
+  });
+  const titleDlv = titleDeliveries.rows;
   const liveCount = titleDlv.filter((d) => d.status === "live").length;
   const totalCount = titleDlv.length;
 
@@ -207,6 +212,11 @@ export default async function TitleDetailPage({ params }: { params: Promise<{ id
 
       <div className="mt-6 flex flex-col gap-6">
         {/* Attention — surfaced only when there's something to act on */}
+        {titleDeliveries.truncated ? (
+          <InlineNotice tone="info" data-my-list-truncated="title-deliveries">
+            {TITLE_DELIVERIES_TRUNCATED}
+          </InlineNotice>
+        ) : null}
         {(findings ?? []).length > 0 ? <FindingsCard findings={findings ?? []} /> : null}
         {showRejection ? (
           <InlineNotice tone="error">Returned for revision: {latestReview!.reason}</InlineNotice>

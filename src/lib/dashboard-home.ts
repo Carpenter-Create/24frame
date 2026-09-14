@@ -62,6 +62,7 @@ export type ClientHomeSnapshot = {
   catalog: number;
   catalogIsPartial: boolean;
   needsAttention: number;
+  findingsIsPartial: boolean;
   live: number;
   doNext: ClientHomeDoNextItem[];
   justIn: ClientHomeJustInItem[];
@@ -110,12 +111,14 @@ export function clientHomeSnapshot({
   orgId,
   now,
   bound,
+  findingsIsPartial = false,
 }: {
   titles: ClientHomeTitle[];
   findings: ClientHomeFinding[];
   orgId: string;
   now: Date;
   bound: number;
+  findingsIsPartial?: boolean;
 }): ClientHomeSnapshot {
   const newestFirst = [...titles].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
   const titleById = new Map(newestFirst.map((t) => [t.id, t]));
@@ -163,6 +166,7 @@ export function clientHomeSnapshot({
     catalog: titles.length,
     catalogIsPartial: titles.length >= bound,
     needsAttention: new Set(orgFindings.map((f) => f.entity_id)).size,
+    findingsIsPartial,
     live: titles.filter((t) => t.status === "live").length,
     doNext,
     justIn: newestFirst

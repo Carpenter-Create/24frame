@@ -14,6 +14,7 @@ import {
   type AskGlobeeStoredMessage,
 } from "@/lib/ask-globee-conversations";
 import { UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
+import { loadMyNotifications } from "@/lib/my-lists";
 import { userMenuAvatarInitial } from "@/lib/user-menu";
 import { AccessUpgradeGate } from "@/components/messages/access-upgrade-gate";
 import { AskGlobeeLanding } from "@/components/messages/ask-globee-landing";
@@ -42,8 +43,13 @@ export default async function MessagesPage({
 
   if (surface === "staff-inbox") {
     const supabase = await createClient();
-    const { data: notifications } = await supabase.rpc("my_notifications");
-    return <NotificationInbox notifications={notifications ?? []} />;
+    const notifications = await loadMyNotifications(supabase);
+    return (
+      <NotificationInbox
+        notifications={notifications.rows}
+        truncated={notifications.truncated}
+      />
+    );
   }
 
   if (canRenderAskGlobeeLanding(surface) && ctx.activeOrg) {

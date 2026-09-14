@@ -4,6 +4,7 @@ import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveOrgTier } from "@/lib/org-tier";
 import { ASK_GLOBEE } from "@/lib/ask-globee";
+import { UNPAGINATED_MAX } from "@/lib/list-bounds";
 import { ASK_GLOBEE_MODEL_ID } from "@/lib/ask-globee-operator";
 import {
   appendAskGlobeeTurn,
@@ -243,7 +244,7 @@ describe("completeAskGlobeeTurn", () => {
       });
 
     await expect(completeAskGlobeeTurn(THREAD)).resolves.toEqual({});
-    expect(rpc).toHaveBeenCalledWith("my_findings");
+    expect(rpc).toHaveBeenCalledWith("my_findings", { p_limit: UNPAGINATED_MAX + 1 });
     expect(fetchMock).toHaveBeenCalled();
     expect(inserted).toHaveLength(1);
     expect(inserted[0]?.row).toMatchObject({

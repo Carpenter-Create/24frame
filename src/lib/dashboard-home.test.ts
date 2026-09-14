@@ -60,6 +60,7 @@ describe("clientHomeSnapshot", () => {
 
     expect(snap.catalog).toBe(3);
     expect(snap.catalogIsPartial).toBe(false);
+    expect(snap.findingsIsPartial).toBe(false);
     expect(snap.live).toBe(2);
     expect(snap.needsAttention).toBe(1);
     expect(snap.doNext.map((d) => d.id)).toEqual(["live-1", "draft-1"]);
@@ -87,6 +88,20 @@ describe("clientHomeSnapshot", () => {
     expect(dashboardCatalogValue(snap.catalog, snap.catalogIsPartial)).toBe(`${UNPAGINATED_MAX}+`);
     expect(dashboardCatalogValue(snap.live, snap.catalogIsPartial)).toBe(`${UNPAGINATED_MAX - 3}+`);
     expect(dashboardCatalogValue(2, false)).toBe("2");
+  });
+
+  it("marks a bounded findings count as a floor, not a claimed total", () => {
+    const snap = clientHomeSnapshot({
+      titles: [title({ id: "live-1", status: "live" })],
+      findings: [{ org_id: "org-1", entity_id: "live-1", message: "Synopsis is required." }],
+      orgId: "org-1",
+      now: NOW,
+      bound: UNPAGINATED_MAX,
+      findingsIsPartial: true,
+    });
+    expect(snap.findingsIsPartial).toBe(true);
+    expect(snap.needsAttention).toBe(1);
+    expect(dashboardCatalogValue(snap.needsAttention, snap.findingsIsPartial)).toBe("1+");
   });
 
   it("lists finding rows before leftover drafts and ignores other lifecycle states as drafts", () => {
@@ -276,7 +291,7 @@ describe("client home type locks", () => {
     const snapshot = renderToStaticMarkup(
       createElement(DashboardSnapshot, {
         catalog: "2",
-        needsAttention: 1,
+        needsAttention: "1",
         live: "1",
       }),
     );
@@ -306,7 +321,7 @@ describe("client home type locks", () => {
     const snapshot = renderToStaticMarkup(
       createElement(DashboardSnapshot, {
         catalog: "0",
-        needsAttention: 0,
+        needsAttention: "0",
         live: "0",
       }),
     );

@@ -1,3 +1,5 @@
+import { UNPAGINATED_MAX } from "@/lib/list-bounds";
+
 // Findings copy + labels (§19 attention queue). Copy lives in lib/, not JSX.
 
 export const FINDING_SEVERITY_LABEL: Record<"high" | "low", string> = {
@@ -8,6 +10,7 @@ export const FINDING_SEVERITY_LABEL: Record<"high" | "low", string> = {
 // Catalog Health = the single client-side findings/health overview.
 export const CATALOG_HEALTH_SUBTITLE = "What needs your attention across your catalog.";
 export const CATALOG_HEALTH_EMPTY = "Nothing needs your attention right now.";
+export const CATALOG_HEALTH_TRUNCATED = `Showing the first ${UNPAGINATED_MAX} open findings. More exist — this list is not complete.`;
 
 // Home Do next lists finding + draft rows; Catalog Health owns the full queue.
 export const DASHBOARD_ATTENTION_CLEAR = "Your catalog is in good standing.";

@@ -107,7 +107,7 @@ describe("DashboardPage modes", () => {
 
     expect(from).toHaveBeenCalledWith("titles");
     expect(eq).toHaveBeenCalledWith("org_id", "org-1");
-    expect(rpc).toHaveBeenCalledWith("my_findings");
+    expect(rpc).toHaveBeenCalledWith("my_findings", { p_limit: UNPAGINATED_MAX + 1 });
     expect(rpc).not.toHaveBeenCalledWith("gc_client_directory", expect.anything());
     expect(html).toContain("Acme");
     expect(html).toMatch(/<h1 class="t-section text-ink">Acme<\/h1>/);
@@ -187,7 +187,7 @@ describe("DashboardPage modes", () => {
 
     const html = renderToStaticMarkup(await DashboardPage());
 
-    expect(rpc).toHaveBeenCalledWith("my_findings");
+    expect(rpc).toHaveBeenCalledWith("my_findings", { p_limit: UNPAGINATED_MAX + 1 });
     expect(rpc).not.toHaveBeenCalledWith("gc_client_directory", expect.anything());
     expect(html).toContain("Acme");
     expect(html).toContain("data-dashboard-snapshot");
@@ -355,6 +355,32 @@ describe("client home information model", () => {
     expect(statValue(html, "needsAttention")).toBe("0");
     expect(statValue(html, "catalog")).not.toBe(String(UNPAGINATED_MAX));
     expect(statValue(html, "live")).not.toBe(String(UNPAGINATED_MAX - 1));
+  });
+
+  it("shows needs attention as a floor when the findings probe overflows", async () => {
+    stubClient(
+      [
+        {
+          id: "title-1",
+          title: "Winter Light",
+          status: "live",
+          created_at: "2026-08-12T00:00:00.000Z",
+        },
+      ],
+      Array.from({ length: UNPAGINATED_MAX + 1 }, () => ({
+        org_id: "org-1",
+        entity_id: "title-1",
+        message: "Synopsis is required.",
+      })),
+    );
+    vi.mocked(getOrgContext).mockResolvedValue(
+      ctx({ isGcStaff: false, orgStatus: "active" }) as never,
+    );
+
+    const html = renderToStaticMarkup(await DashboardPage());
+
+    expect(statValue(html, "needsAttention")).toBe("1+");
+    expect(statValue(html, "needsAttention")).not.toBe("1");
   });
 
   it("does not invent a stuck-too-long metric for drafts", async () => {

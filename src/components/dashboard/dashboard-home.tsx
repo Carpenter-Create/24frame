@@ -92,7 +92,7 @@ export function DashboardSnapshot({
   live,
 }: {
   catalog: string;
-  needsAttention: number;
+  needsAttention: string;
   live: string;
 }) {
   const stats = [
@@ -100,7 +100,7 @@ export function DashboardSnapshot({
     {
       key: "needsAttention",
       label: DASHBOARD_HOME.needsAttention,
-      value: String(needsAttention),
+      value: needsAttention,
       highlight: true,
     },
     { key: "live", label: DASHBOARD_HOME.live, value: live, highlight: false },
