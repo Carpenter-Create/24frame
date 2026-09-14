@@ -31,11 +31,6 @@ const mercuryLayout = [
   "src/components/chrome/user-menu.tsx",
 ] as const;
 
-const socialLane = [
-  "src/components/social/social-mobile-dock.tsx",
-  "src/app/(app)/social/profile/page.tsx",
-] as const;
-
 function src(path: string): string {
   return readFileSync(path, "utf8");
 }
@@ -125,10 +120,10 @@ describe("Adam Mercury register lock", () => {
     const nav = src("src/lib/nav.ts");
     expect(nav).toContain('family: "lucide"');
     expect(nav).toContain("SOCIAL_NAV");
-    expect(src("src/components/social/social-mobile-dock.tsx")).toContain("lucide-react");
-    expect(src("src/components/social/social-mobile-dock.tsx")).toContain("strokeWidth={1.33}");
-    for (const path of socialLane) {
-      expect(src(path)).not.toContain("@phosphor-icons/react");
-    }
+    // Social chrome rematch is Social Figma V1 SocialIcon — this PR
+    // does not rewrite Social interiors; it only swaps Aggregation glyphs.
+    expect(src("src/components/social/social-mobile-dock.tsx")).toContain("SocialIcon");
+    expect(src("src/components/social/social-mobile-dock.tsx")).not.toContain("lucide-react");
+    expect(src("src/app/(app)/social/profile/page.tsx")).not.toContain("AccountProfileForm");
   });
 });

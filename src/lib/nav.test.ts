@@ -76,7 +76,7 @@ describe("client NAV", () => {
     expect(navSrc).not.toContain("NavImageItem");
   });
 
-  it("locks Aggregation rail glyphs to Phosphor 75:5 / 61:2 — Social stays Lucide", () => {
+  it("locks Aggregation rail glyphs to Phosphor 75:5 / 61:2 — SOCIAL_NAV family stays Lucide", () => {
     expect(NAV.map((item) => item.icon)).toEqual([
       SquaresFour,
       FilmSlate,

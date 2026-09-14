@@ -61,7 +61,8 @@ export const NAV: PhosphorNavItem[] = [
 
 // Social workspace rail. Five primary jobs. Messages here is DMs — never
 // /messages. Groups / Courses / Leaderboard stay parked off this rail.
-// Lucide stays until the Social V1 sole-writer PR rematches this set.
+// SOCIAL_NAV family stays Lucide for NavGlyph fallback. Social chrome
+// rematch is SocialIcon (Social Figma V1).
 export const SOCIAL_NAV: LucideNavItem[] = [
   { label: "Home", href: SOCIAL_ROUTES.home, family: "lucide", icon: House, exact: true },
   { label: "Explore", href: SOCIAL_ROUTES.explore, family: "lucide", icon: Compass },

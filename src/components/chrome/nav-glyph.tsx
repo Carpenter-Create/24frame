@@ -1,7 +1,8 @@
 import type { NavItem } from "@/lib/nav";
 import { PhosphorChromeIcon } from "@/lib/phosphor-icon";
 
-// Aggregation: Phosphor Bold idle / Fill active. Social: Lucide until V1.
+// Aggregation: Phosphor Bold idle / Fill active. SOCIAL_NAV family
+// stays Lucide fallback; Social chrome rematch is SocialIcon.
 export function NavGlyph({ item, active }: { item: NavItem; active: boolean }) {
   if (item.family === "lucide") {
     const Icon = item.icon;

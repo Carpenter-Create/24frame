@@ -1,6 +1,7 @@
 import { SOCIAL_ROUTES } from "@/lib/social";
 
-// Social workspace Phosphor lock (Adam). Aggregation stays Lucide.
+// Social workspace Phosphor lock (Adam). Aggregation chrome uses
+// NavGlyph / phosphor-icon.
 // Bold for idle. Fill for the active job.
 
 export const SOCIAL_PHOSPHOR_ICONS = [

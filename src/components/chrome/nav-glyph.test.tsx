@@ -21,7 +21,7 @@ describe("NavGlyph", () => {
     expect(src).toContain('item.family === "lucide"');
   });
 
-  it("leaves Social destinations on Lucide until Social V1", () => {
+  it("falls back to Lucide for SOCIAL_NAV family items", () => {
     const html = renderToStaticMarkup(<NavGlyph item={SOCIAL_NAV[0]} active />);
     expect(html).toContain("lucide-");
     expect(html).toContain('stroke-width="1.33"');

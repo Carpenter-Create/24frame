@@ -53,9 +53,9 @@ describe("Aggregation chrome Phosphor lock + Design miss list", () => {
     expect(messages).toContain('from "lucide-react"');
   });
 
-  it("does not rewrite Social interiors", () => {
-    expect(socialDock).toContain('from "lucide-react"');
-    expect(socialDock).toContain("strokeWidth={1.33}");
+  it("leaves Social interiors on Social V1 SocialIcon; SOCIAL_NAV family stays Lucide fallback", () => {
+    expect(socialDock).toContain("SocialIcon");
+    expect(socialDock).not.toContain('from "lucide-react"');
     expect(rail).toContain('family: "lucide"');
     expect(rail).toContain("SOCIAL_NAV");
   });
