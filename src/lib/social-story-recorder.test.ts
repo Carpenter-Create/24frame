@@ -10,7 +10,9 @@ import {
   storyRecorderFileName,
   storyRecorderHoldMs,
   nextStoryStudioLive,
+  storyRecorderVideoConstraints,
   storyStudioIsLive,
+  storyStudioMirrorsPreview,
 } from "./social-story-recorder";
 
 describe("story MediaRecorder mime probe", () => {
@@ -64,6 +66,21 @@ describe("story MediaRecorder mime probe", () => {
     expect(formatStoryRecorderClock(72_000)).toBe("1:12");
     expect(storyRecorderHoldMs()).toBeLessThan(1000);
     expect(JSON.stringify({ SOCIAL_STORY_RECORDER_CANDIDATES })).not.toMatch(/15/);
+  });
+
+  it("mirrors front-camera preview only and does not crop the capture stream", () => {
+    expect(storyStudioMirrorsPreview("user")).toBe(true);
+    expect(storyStudioMirrorsPreview("environment")).toBe(false);
+    expect(storyRecorderVideoConstraints("user")).toEqual({
+      facingMode: { ideal: "user" },
+    });
+    expect(storyRecorderVideoConstraints("environment")).toEqual({
+      facingMode: { ideal: "environment" },
+    });
+    expect(JSON.stringify(storyRecorderVideoConstraints("user"))).not.toMatch(/720|1280/);
+    expect(JSON.stringify(storyRecorderVideoConstraints("environment"))).not.toMatch(
+      /width|height|aspectRatio/,
+    );
   });
 
   it("invalidates in-flight studio work after teardown or cancel", () => {

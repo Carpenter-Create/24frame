@@ -20,8 +20,10 @@ import {
   SOCIAL_STORY_STUDIO_CHROME_CLASS,
   SOCIAL_STORY_STUDIO_CLASS,
   SOCIAL_STORY_STUDIO_ICON_CLASS,
+  SOCIAL_STORY_STUDIO_REVIEW_CLASS,
   SOCIAL_STORY_STUDIO_RING_CLASS,
   SOCIAL_STORY_STUDIO_STAGE_CLASS,
+  socialStoryStudioPreviewClass,
 } from "@/lib/social-chrome";
 import {
   SOCIAL_ICON_SIZE_STORY_FOOTNOTE,
@@ -45,11 +47,13 @@ import {
   resolveStoryRecorderBlobType,
   storyRecorderFileName,
   storyRecorderHoldMs,
+  storyRecorderVideoConstraints,
   storyStudioIsLive,
+  storyStudioMirrorsPreview,
+  type StoryStudioFacing,
 } from "@/lib/social-story-recorder";
 
 type StudioPhase = "picker" | "preview" | "recording" | "review" | "posted";
-type Facing = "user" | "environment";
 
 type ReviewClip = {
   file: File;
@@ -103,7 +107,7 @@ export function SocialStoryCompose() {
   const postRef = useRef(0);
 
   const [phase, setPhase] = useState<StudioPhase>("picker");
-  const [facing, setFacing] = useState<Facing>("user");
+  const [facing, setFacing] = useState<StoryStudioFacing>("user");
   const [error, setError] = useState("");
   const [clock, setClock] = useState("0:00");
   const [clip, setClip] = useState<ReviewClip | null>(null);
@@ -175,15 +179,11 @@ export function SocialStoryCompose() {
     void node.play().catch(() => undefined);
   }, [phase]);
 
-  async function acquireStream(nextFacing: Facing): Promise<MediaStream> {
+  async function acquireStream(nextFacing: StoryStudioFacing): Promise<MediaStream> {
     if (!navigator.mediaDevices?.getUserMedia) {
       throw new Error(SOCIAL.stories.unavailable);
     }
-    const video: MediaTrackConstraints = {
-      facingMode: { ideal: nextFacing },
-      width: { ideal: 720 },
-      height: { ideal: 1280 },
-    };
+    const video = storyRecorderVideoConstraints(nextFacing);
     try {
       return await navigator.mediaDevices.getUserMedia({ video, audio: true });
     } catch {
@@ -191,7 +191,7 @@ export function SocialStoryCompose() {
     }
   }
 
-  async function attachPreview(nextFacing: Facing, live: number) {
+  async function attachPreview(nextFacing: StoryStudioFacing, live: number) {
     stopStream(streamRef.current);
     streamRef.current = null;
     if (videoRef.current) videoRef.current.srcObject = null;
@@ -509,7 +509,7 @@ export function SocialStoryCompose() {
                 data-social-story-video=""
                 src={clip.url}
                 playsInline
-                className="absolute inset-0 size-full object-cover"
+                className={SOCIAL_STORY_STUDIO_REVIEW_CLASS}
                 onPlay={() => setPlaying(true)}
                 onPause={() => setPlaying(false)}
                 onEnded={() => setPlaying(false)}
@@ -518,10 +518,11 @@ export function SocialStoryCompose() {
               <video
                 ref={videoRef}
                 data-social-story-preview=""
+                data-social-story-preview-facing={facing}
                 autoPlay
                 muted
                 playsInline
-                className="absolute inset-0 size-full object-cover"
+                className={socialStoryStudioPreviewClass(storyStudioMirrorsPreview(facing))}
               />
             )}
             {phase !== "review" ? <div className={SOCIAL_STORY_STUDIO_RING_CLASS} aria-hidden /> : null}

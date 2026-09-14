@@ -84,6 +84,8 @@ describe("social copy lock", () => {
     expect(storyCompose).toContain("data-social-story-record");
     expect(storyCompose).toContain("data-social-story-upload");
     expect(storyCompose).toContain("data-social-story-studio");
+    expect(storyCompose).toContain("storyStudioMirrorsPreview");
+    expect(storyCompose).toContain("storyRecorderVideoConstraints");
     expect(storyCompose).not.toContain("capture=\"user\"");
     expect(storyCompose).not.toContain("SOCIAL_MEDIA_ACCEPT");
     expect(SOCIAL.dms.subtitle).toContain(PRODUCT_NAME);

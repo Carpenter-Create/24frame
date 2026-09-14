@@ -8,6 +8,10 @@ import {
   SOCIAL_FIGMA_STORY_PICKER,
   SOCIAL_FIGMA_STORY_STUDIO,
   SOCIAL_STORY_PICKER_CLASS,
+  SOCIAL_STORY_STUDIO_PREVIEW_CLASS,
+  SOCIAL_STORY_STUDIO_PREVIEW_MIRROR_CLASS,
+  SOCIAL_STORY_STUDIO_REVIEW_CLASS,
+  socialStoryStudioPreviewClass,
 } from "@/lib/social-chrome";
 
 describe("SocialStoryCompose picker", () => {
@@ -39,6 +43,24 @@ describe("SocialStoryCompose picker", () => {
     expect(src).not.toContain("15");
     expect(src).toContain('data-social-story-studio={phase}');
     expect(src).toContain("storyStudioIsLive");
+    expect(src).toContain("storyStudioMirrorsPreview");
+    expect(src).toContain("storyRecorderVideoConstraints");
+    expect(src).toContain("socialStoryStudioPreviewClass");
+    expect(src).toContain("SOCIAL_STORY_STUDIO_REVIEW_CLASS");
+    expect(src).toContain("new MediaRecorder(stream");
+    expect(src).not.toContain("width: { ideal: 720 }");
+    expect(src).not.toContain("height: { ideal: 1280 }");
+    expect(src).not.toContain("captureStream");
+    expect(src).not.toContain("getContext");
+    expect(socialStoryStudioPreviewClass(true)).toBe(
+      `${SOCIAL_STORY_STUDIO_PREVIEW_CLASS} ${SOCIAL_STORY_STUDIO_PREVIEW_MIRROR_CLASS}`,
+    );
+    expect(socialStoryStudioPreviewClass(false)).toBe(SOCIAL_STORY_STUDIO_PREVIEW_CLASS);
+    expect(SOCIAL_STORY_STUDIO_PREVIEW_CLASS).toContain("object-contain");
+    expect(SOCIAL_STORY_STUDIO_PREVIEW_CLASS).not.toContain("object-cover");
+    expect(SOCIAL_STORY_STUDIO_PREVIEW_MIRROR_CLASS).toBe("-scale-x-100");
+    expect(SOCIAL_STORY_STUDIO_REVIEW_CLASS).toContain("object-cover");
+    expect(SOCIAL_STORY_STUDIO_REVIEW_CLASS).not.toContain("scale-x");
     expect(SOCIAL_FIGMA_STORY_STUDIO).toEqual([
       "146:230",
       "146:1050",
