@@ -458,7 +458,7 @@ export function SocialPostCard({ post }: { post: SocialPostCardModel }) {
       </div>
       <div data-social-post-mobile="" className="flex flex-col bg-surface md:hidden">
         <div className="flex items-center gap-2 px-3 py-2">
-          <SocialAvatar name={post.authorName} photoUrl={post.authorPhotoUrl} size="sm" ring={media ? "unseen" : null} />
+          <SocialAvatar name={post.authorName} photoUrl={post.authorPhotoUrl} size="sm" />
           {post.authorHandle ? (
             <Link href={socialMemberHref(post.authorHandle)} className="t-body-sm font-semibold text-ink">
               {handle}

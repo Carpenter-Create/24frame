@@ -43,12 +43,12 @@ describe("Social Home craft (Figma 130:215)", () => {
     expect(html).toContain("data-social-story-unseen");
     expect(html).toContain("data-social-story-media");
     expect(html).toContain('src="https://s3.example/signed-avatar"');
-    expect(html).toContain("Maya Chen");
+    expect(html).toContain("Maya C.");
     expect(html).toContain("w-[96px]");
     expect(html).toContain("h-[144px]");
     expect(html).toContain("p-[3px]");
     expect(html).toContain("bg-accent");
-    expect(html.indexOf("Maya Chen")).toBeGreaterThan(html.indexOf("data-social-story-media"));
+    expect(html.indexOf("Maya C.")).toBeGreaterThan(html.indexOf("data-social-story-media"));
   });
 
   it("uses Phosphor users, 8px empty panel, and Sporty Blue empty CTA", () => {
