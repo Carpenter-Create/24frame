@@ -1,10 +1,12 @@
 import type { Icon, IconWeight } from "@phosphor-icons/react";
 
-// Shared Phosphor primitive. Measured Aggregation + shared shell chrome:
-// 75:5 rail, 75:132 settings caret-left, 84:46 account sheet, 84:176
-// collapsed rail, 84:240 mobile menu. Social interiors stay on their own
-// PR. Same SSOT (`_Icons / Phosphor Bold`, 61:2): Bold idle, Fill active.
-// 16px house glyph.
+// Shared Phosphor primitive — glyph-only. Live Mercury structure,
+// spacing, IA, and chrome stay. Do not escalate past current premium.
+// 75:5 rail, 75:132 settings caret-left (text-led), 84:46 account
+// *icons* (not a sheet rewrite), 84:176 collapse icons, 84:240 mobile
+// menu icons, shelf 82:5 / 82:9 / 82:13. Social interiors stay Lucide
+// (Social V1). Same SSOT (`_Icons / Phosphor Bold`, 61:2): Bold idle,
+// Fill active. 16px house glyph.
 
 export type PhosphorIcon = Icon;
 

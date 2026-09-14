@@ -78,6 +78,8 @@ import { applyDocumentThemePreference } from "@/lib/theme";
 import { USER_MENU, userMenuAvatarInitial, userMenuVersion } from "@/lib/user-menu";
 import { MenuSurfaceAccent } from "./menu-surface";
 
+// Glyph-only. Live sheet/dropdown layout, IA, and chrome stay.
+// 84:46 is icon SSOT — not a restyle, not a Mercury escalation.
 function AccountRowChevron() {
   return <CaretRight className={SHEET_GROUP_CHEVRON_CLASS} weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />;
 }

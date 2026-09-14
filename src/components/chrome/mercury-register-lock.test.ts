@@ -1,0 +1,104 @@
+import { readFileSync } from "node:fs";
+import { describe, expect, it } from "vitest";
+
+import {
+  PHOSPHOR_CHROME_ACTIVE_WEIGHT,
+  PHOSPHOR_CHROME_IDLE_WEIGHT,
+  PHOSPHOR_CHROME_ICON_CLASS,
+} from "@/lib/phosphor-icon";
+import {
+  SETTINGS_HEADER_BACK_CLASS,
+  SETTINGS_LOCAL_NAV,
+  SETTINGS_RAIL_CHEVRON_CLASS,
+  SETTINGS_RAIL_ITEM_CLASS,
+} from "@/lib/settings";
+import { ACCOUNT_SHEET_ITEMS } from "@/lib/account-sheet";
+import { SHEET_GROUP_CHEVRON_CLASS } from "@/lib/house-sheet";
+import { RAIL_COLLAPSE_CHEVRON_ICON_CLASS } from "@/lib/rail-collapse";
+import { USER_MENU_ACTIONS } from "@/lib/user-menu";
+
+const settingsPages = [
+  "src/app/(app)/settings/page.tsx",
+  "src/app/(app)/settings/loading.tsx",
+  "src/app/(app)/settings/profile/page.tsx",
+  "src/app/(app)/settings/agreements/page.tsx",
+  "src/app/(app)/settings/refer/page.tsx",
+] as const;
+
+const mercuryLayout = [
+  "src/lib/account-sheet.ts",
+  "src/lib/user-menu.ts",
+  "src/components/chrome/user-menu.tsx",
+] as const;
+
+const socialLane = [
+  "src/components/social/social-mobile-dock.tsx",
+  "src/app/(app)/social/profile/page.tsx",
+] as const;
+
+function src(path: string): string {
+  return readFileSync(path, "utf8");
+}
+
+describe("Adam Mercury register lock", () => {
+  it("does not rewrite Settings/Profile page interiors — live Mercury stays", () => {
+    for (const path of settingsPages) {
+      const file = src(path);
+      expect(file).not.toContain("@phosphor-icons/react");
+      expect(file).not.toContain("84:46");
+      expect(file).not.toContain("Education");
+    }
+    expect(ACCOUNT_SHEET_ITEMS).toBe(USER_MENU_ACTIONS);
+    expect(SETTINGS_LOCAL_NAV.map((item) => item.label)).toEqual([
+      "Home",
+      "Profile",
+      "Agreements",
+      "Refer a friend",
+    ]);
+  });
+
+  it("keeps shared account/settings layout tokens — Phosphor is glyph-only", () => {
+    for (const path of mercuryLayout) {
+      expect(src(path)).not.toContain("@phosphor-icons/react");
+    }
+    expect(SHEET_GROUP_CHEVRON_CLASS).toBe("size-4 shrink-0 text-ink-3");
+    expect(SETTINGS_RAIL_CHEVRON_CLASS).toBe("size-4 shrink-0");
+    expect(SETTINGS_RAIL_ITEM_CLASS).toContain("t-body");
+    expect(SETTINGS_HEADER_BACK_CLASS).toContain("md:hidden");
+    expect(RAIL_COLLAPSE_CHEVRON_ICON_CLASS).toBe("h-4 w-4");
+    expect(src("src/components/chrome/account-sheet.tsx")).toContain(
+      "className={SHEET_GROUP_CHEVRON_CLASS}",
+    );
+    expect(src("src/components/chrome/account-sheet.tsx")).toContain(
+      'className="size-4 shrink-0"',
+    );
+    expect(src("src/components/chrome/settings-rail.tsx")).toContain(
+      "className={SETTINGS_RAIL_CHEVRON_CLASS}",
+    );
+  });
+
+  it("does not escalate Mercury past current — 16 Bold idle, no Social bleed", () => {
+    expect(PHOSPHOR_CHROME_IDLE_WEIGHT).toBe("bold");
+    expect(PHOSPHOR_CHROME_ACTIVE_WEIGHT).toBe("fill");
+    expect(PHOSPHOR_CHROME_ICON_CLASS).toBe("size-4 shrink-0");
+
+    const account = src("src/components/chrome/account-sheet.tsx");
+    const settingsRail = src("src/components/chrome/settings-rail.tsx");
+    const settingsBack = src("src/components/chrome/settings-header-back.tsx");
+    for (const file of [account, settingsRail, settingsBack]) {
+      expect(file).not.toContain("size-5");
+      expect(file).not.toContain("size-6");
+      expect(file).not.toContain("weight=\"fill\"");
+      expect(file).not.toContain("#");
+    }
+
+    const nav = src("src/lib/nav.ts");
+    expect(nav).toContain('family: "lucide"');
+    expect(nav).toContain("SOCIAL_NAV");
+    expect(src("src/components/social/social-mobile-dock.tsx")).toContain("lucide-react");
+    expect(src("src/components/social/social-mobile-dock.tsx")).toContain("strokeWidth={1.33}");
+    for (const path of socialLane) {
+      expect(src(path)).not.toContain("@phosphor-icons/react");
+    }
+  });
+});

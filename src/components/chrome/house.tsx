@@ -24,7 +24,7 @@ import {
   TEXT_ACTION_CLASS,
 } from "@/lib/house-sheet";
 
-// 543:562 Close/44 — muted 44 circle, Phosphor X Bold 16 tertiary (84:46 / 61:2).
+// 543:562 Close/44 — live muted 44 circle. Glyph only: Phosphor X Bold 16.
 export function Close44({
   label,
   className,

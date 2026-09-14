@@ -12,7 +12,7 @@ const messages = readFileSync("src/components/chrome/messages-app-header.tsx", "
 const socialDock = readFileSync("src/components/social/social-mobile-dock.tsx", "utf8");
 
 describe("Aggregation chrome Phosphor lock + Design miss list", () => {
-  it("ships measured 75:5 / 75:132 / 84:46 / 84:176 / 84:240 Phosphor; leaves unmeasured chrome on Lucide", () => {
+  it("ships measured Phosphor glyphs only; leaves unmeasured chrome on Lucide", () => {
     expect(rail).toContain('family: "phosphor"');
     expect(rail).toContain("SquaresFour");
     expect(rail).toContain("FilmSlate");
