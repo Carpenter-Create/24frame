@@ -35,8 +35,20 @@ describe("SocialStoryCompose picker", () => {
     expect(src).toContain('lane", "stories"');
     expect(src).toContain("createSocialStory");
     expect(src).not.toContain("capture=");
+    expect(src).not.toContain('capture="user"');
     expect(src).not.toContain("15");
-    expect(SOCIAL_FIGMA_STORY_STUDIO).toContain("146:230");
+    expect(src).toContain('data-social-story-studio={phase}');
+    expect(src).toContain("storyStudioIsLive");
+    expect(SOCIAL_FIGMA_STORY_STUDIO).toEqual([
+      "146:230",
+      "146:1050",
+      "146:1072",
+      "146:1099",
+      "146:1125",
+      "146:1147",
+      "146:1173",
+      "147:251",
+    ]);
     expect(SOCIAL_FIGMA_STORY_PICKER).toEqual(["144:1218", "144:1444"]);
   });
 });

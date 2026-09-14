@@ -9,6 +9,8 @@ import {
   storyRecorderContentType,
   storyRecorderFileName,
   storyRecorderHoldMs,
+  nextStoryStudioLive,
+  storyStudioIsLive,
 } from "./social-story-recorder";
 
 describe("story MediaRecorder mime probe", () => {
@@ -62,5 +64,13 @@ describe("story MediaRecorder mime probe", () => {
     expect(formatStoryRecorderClock(72_000)).toBe("1:12");
     expect(storyRecorderHoldMs()).toBeLessThan(1000);
     expect(JSON.stringify({ SOCIAL_STORY_RECORDER_CANDIDATES })).not.toMatch(/15/);
+  });
+
+  it("invalidates in-flight studio work after teardown or cancel", () => {
+    const opened = nextStoryStudioLive(0);
+    expect(storyStudioIsLive(opened, opened)).toBe(true);
+    const closed = nextStoryStudioLive(opened);
+    expect(storyStudioIsLive(closed, opened)).toBe(false);
+    expect(storyStudioIsLive(closed, closed)).toBe(true);
   });
 });

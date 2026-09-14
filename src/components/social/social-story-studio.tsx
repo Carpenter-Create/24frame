@@ -40,10 +40,12 @@ import {
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import {
   formatStoryRecorderClock,
+  nextStoryStudioLive,
   probeStoryRecorderMimeType,
   resolveStoryRecorderBlobType,
   storyRecorderFileName,
   storyRecorderHoldMs,
+  storyStudioIsLive,
 } from "@/lib/social-story-recorder";
 
 type StudioPhase = "picker" | "preview" | "recording" | "review" | "posted";
@@ -97,6 +99,8 @@ export function SocialStoryCompose() {
   const mimeRef = useRef<SocialVideoContentType>("video/webm");
   const recordingRef = useRef(false);
   const clipUrlRef = useRef<string | null>(null);
+  const liveRef = useRef(0);
+  const postRef = useRef(0);
 
   const [phase, setPhase] = useState<StudioPhase>("picker");
   const [facing, setFacing] = useState<Facing>("user");
@@ -122,10 +126,21 @@ export function SocialStoryCompose() {
   }
 
   function releasePreview() {
+    liveRef.current = nextStoryStudioLive(liveRef.current);
+    recordingRef.current = false;
     clearHold();
     clearClock();
-    if (recorderRef.current && recorderRef.current.state !== "inactive") {
-      recorderRef.current.stop();
+    const recorder = recorderRef.current;
+    if (recorder) {
+      recorder.ondataavailable = null;
+      recorder.onstop = null;
+      if (recorder.state !== "inactive") {
+        try {
+          recorder.stop();
+        } catch {
+          // already stopped
+        }
+      }
     }
     recorderRef.current = null;
     stopStream(streamRef.current);
@@ -176,9 +191,15 @@ export function SocialStoryCompose() {
     }
   }
 
-  async function attachPreview(nextFacing: Facing) {
-    const stream = await acquireStream(nextFacing);
+  async function attachPreview(nextFacing: Facing, live: number) {
     stopStream(streamRef.current);
+    streamRef.current = null;
+    if (videoRef.current) videoRef.current.srcObject = null;
+    const stream = await acquireStream(nextFacing);
+    if (!storyStudioIsLive(liveRef.current, live)) {
+      stopStream(stream);
+      return false;
+    }
     streamRef.current = stream;
     const node = videoRef.current;
     if (node) {
@@ -187,6 +208,7 @@ export function SocialStoryCompose() {
       node.playsInline = true;
       await node.play().catch(() => undefined);
     }
+    return true;
   }
 
   async function openStudio() {
@@ -199,10 +221,16 @@ export function SocialStoryCompose() {
       return;
     }
     mimeRef.current = probed.mimeType;
+    const live = nextStoryStudioLive(liveRef.current);
+    liveRef.current = live;
     setPhase("preview");
     try {
-      await attachPreview(facing);
+      const opened = await attachPreview(facing, live);
+      if (!opened && storyStudioIsLive(liveRef.current, live)) {
+        setPhase("picker");
+      }
     } catch {
+      if (!storyStudioIsLive(liveRef.current, live)) return;
       releasePreview();
       setPhase("picker");
       setError(SOCIAL.stories.permission);
@@ -210,13 +238,19 @@ export function SocialStoryCompose() {
   }
 
   async function flipCamera() {
-    if (phase !== "preview") return;
+    if (phase !== "preview" || recordingRef.current) return;
     const next = facing === "user" ? "environment" : "user";
-    setFacing(next);
+    const live = liveRef.current;
     try {
-      await attachPreview(next);
+      const flipped = await attachPreview(next, live);
+      if (flipped) setFacing(next);
     } catch {
-      setError(SOCIAL.stories.permission);
+      if (!storyStudioIsLive(liveRef.current, live)) return;
+      try {
+        await attachPreview(facing, live);
+      } catch {
+        setError(SOCIAL.stories.permission);
+      }
     }
   }
 
@@ -240,6 +274,7 @@ export function SocialStoryCompose() {
     }
     mimeRef.current = probed.mimeType;
     chunksRef.current = [];
+    const live = liveRef.current;
     let recorder: MediaRecorder;
     try {
       recorder = new MediaRecorder(stream, { mimeType: probed.raw });
@@ -255,6 +290,7 @@ export function SocialStoryCompose() {
       if (event.data.size > 0) chunksRef.current.push(event.data);
     };
     recorder.onstop = () => {
+      if (!storyStudioIsLive(liveRef.current, live)) return;
       const contentType = resolveStoryRecorderBlobType(
         chunksRef.current[0] instanceof Blob ? chunksRef.current[0].type : recorder.mimeType,
         mimeRef.current,
@@ -311,17 +347,23 @@ export function SocialStoryCompose() {
   }
 
   function closeStudio() {
+    postRef.current = nextStoryStudioLive(postRef.current);
+    setPosting(false);
     releasePreview();
     releaseClip();
     setPhase("picker");
   }
 
   function retake() {
+    if (posting) return;
+    postRef.current = nextStoryStudioLive(postRef.current);
     releaseClip();
     setError("");
     setPhase("preview");
     if (streamRef.current) return;
-    void attachPreview(facing).catch(() => {
+    const live = liveRef.current;
+    void attachPreview(facing, live).catch(() => {
+      if (!storyStudioIsLive(liveRef.current, live)) return;
       setError(SOCIAL.stories.permission);
       setPhase("picker");
     });
@@ -356,9 +398,12 @@ export function SocialStoryCompose() {
 
   async function postClip() {
     if (!clip || posting) return;
+    const postId = nextStoryStudioLive(postRef.current);
+    postRef.current = postId;
     setError("");
     setPosting(true);
     const uploaded = await uploadStoryVideo(clip.file);
+    if (!storyStudioIsLive(postRef.current, postId)) return;
     if (uploaded.error || !uploaded.item) {
       setPosting(false);
       setError(uploaded.error ?? SOCIAL.home.uploadFailed);
@@ -367,6 +412,7 @@ export function SocialStoryCompose() {
     const form = new FormData();
     form.set("media", JSON.stringify([uploaded.item]));
     const result = await createSocialStory(form);
+    if (!storyStudioIsLive(postRef.current, postId)) return;
     setPosting(false);
     if (result?.error) {
       setError(result.error);
@@ -485,6 +531,7 @@ export function SocialStoryCompose() {
                 type="button"
                 aria-label={SOCIAL.stories.close}
                 className={SOCIAL_STORY_STUDIO_ICON_CLASS}
+                disabled={posting}
                 onClick={closeStudio}
               >
                 <SocialIcon name="x" size={SOCIAL_ICON_SIZE_STORY_STUDIO} />
@@ -534,6 +581,7 @@ export function SocialStoryCompose() {
                     <button
                       type="button"
                       data-social-story-retake=""
+                      disabled={posting}
                       className="inline-flex items-center justify-center rounded-full border border-band-ink/35 bg-band-ink/12 px-6 py-3.5 t-body-sm font-semibold text-band-ink"
                       onClick={retake}
                     >

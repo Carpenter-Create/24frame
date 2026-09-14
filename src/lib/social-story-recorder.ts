@@ -13,6 +13,7 @@ import {
 //   tries audio+video, then video-only.
 // - Older iOS Safari has no MediaRecorder — Record shows unavailable; Upload
 //   stays. getUserMedia still needs HTTPS, a user gesture, and playsInline.
+//   Flip stops the live stream before the next getUserMedia (iOS one-stream).
 // - Empty blob.type on some Safari versions — persist the probed house type.
 // - Chrome-recorded webm may not play in Safari’s story viewer. No browser
 //   remux / AWS IVS / Elemental in this PR.
@@ -80,4 +81,12 @@ export function formatStoryRecorderClock(ms: number): string {
 
 export function storyRecorderHoldMs(): number {
   return 220;
+}
+
+export function nextStoryStudioLive(current: number): number {
+  return current + 1;
+}
+
+export function storyStudioIsLive(current: number, started: number): boolean {
+  return current === started;
 }
