@@ -31,6 +31,7 @@ import {
   ACCOUNT_SHEET_ITEMS,
   ACCOUNT_SHEET_LOGOUT_CLASS,
   ACCOUNT_SHEET_PIN_CLASS,
+  ACCOUNT_SHEET_SCROLL_CLASS,
   ACCOUNT_SHEET_SURFACE_CLASS,
   ACCOUNT_SHEET_VERSION_CLASS,
 } from "@/lib/account-sheet";
@@ -475,8 +476,10 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(scrollClass).toContain("flex-1");
     expect(scrollClass).toContain("min-h-0");
     expect(scrollClass).not.toContain("min-h-[var(--space-12)]");
-    expect(scrollClass).not.toContain("overflow-y-auto");
-    expect(attrClass(html, "data-account-sheet-surface")).toContain("overflow-y-auto");
+    expect(scrollClass).toContain("overflow-y-auto");
+    expect(scrollClass).toContain("overscroll-contain");
+    expect(attrClass(html, "data-account-sheet-surface")).toContain("overflow-hidden");
+    expect(attrClass(html, "data-account-sheet-surface")).not.toContain("overflow-y-auto");
     expect(attrClass(html, "data-account-sheet-surface")).toContain("h-[90dvh]");
     expect(attrClass(html, "data-account-sheet-surface")).not.toContain("h-auto");
     expect(attrClass(html, "data-account-sheet-surface")).not.toContain("max-h-[90dvh]");
@@ -517,6 +520,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(src).toContain("Log out → hairline 24");
     expect(src).toContain("Hairline → footer 24");
     expect(src).toContain("Footer → bottom 32");
+    expect(src).toContain("Refer cannot paint over Log out");
     expect(src).not.toContain("Log out → hairline 48");
     expect(src).not.toContain("Footer → bottom 48");
     expect(html).toContain(userMenuVersion());
@@ -531,6 +535,34 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(attrClass(html, "data-account-sheet-version")).toBe(ACCOUNT_SHEET_VERSION_CLASS);
     expect(attrClass(html, "data-account-sheet-version")).toContain("leading-4");
     expect(attrClass(html, "data-account-sheet-version")).toContain("text-ink-3");
+  });
+
+  it("keeps Refer and Log out as separate rows — leftover pane scrolls, pin does not stack on Refer", () => {
+    const html = renderSheet();
+    const scrollClass = attrClass(html, "data-account-sheet-scroll");
+    const surfaceClass = attrClass(html, "data-account-sheet-surface");
+    const pinClass = attrClass(html, "data-account-sheet-pin");
+    const refer = html.indexOf('data-sheet-group-item="refer"');
+    const logout = html.indexOf('data-sheet-group-item="logOut"');
+    const scroll = html.indexOf("data-account-sheet-scroll");
+    const pin = html.indexOf("data-account-sheet-pin");
+    const betweenReferAndLogout = html.slice(refer, logout);
+
+    expect(refer).toBeGreaterThan(-1);
+    expect(logout).toBeGreaterThan(refer);
+    expect(pin).toBeGreaterThan(scroll);
+    expect(html.slice(scroll, logout)).toContain("Refer a friend");
+    expect(html.slice(scroll, pin)).not.toContain("Log out");
+    expect(html.slice(pin)).toContain("Log out");
+    expect(betweenReferAndLogout).not.toContain("data-account-sheet-footer-rule");
+    expect(scrollClass).toBe(ACCOUNT_SHEET_SCROLL_CLASS);
+    expect(scrollClass).toContain("overflow-y-auto");
+    expect(surfaceClass).toContain("overflow-hidden");
+    expect(surfaceClass).not.toContain("overflow-y-auto");
+    expect(pinClass).toBe(ACCOUNT_SHEET_PIN_CLASS);
+    expect(pinClass).toContain("shrink-0");
+    expect(src).toContain("house nav destinations");
+    expect(src).toContain("Refer cannot paint over Log out");
   });
 
   it("does not dump the rail, Ask Globee chrome, or Adobe leftovers", () => {
