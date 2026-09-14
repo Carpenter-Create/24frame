@@ -122,13 +122,13 @@ export async function presignSocialMediaUpload(formData: FormData): Promise<{
   const { user, profileId } = await ownProfile();
   if (!profileId) return { error: SOCIAL.cta.needProfile };
 
+  const lane = parseSocialMediaLane(String(formData.get("lane") ?? ""));
   const checked = validateMediaUpload({
     contentType: String(formData.get("content_type") ?? ""),
     byteLength: Number(formData.get("byte_length") ?? 0),
+    lane,
   });
-  if (!checked.ok) return { error: socialMediaRuleMessage(checked.error) };
-
-  const lane = parseSocialMediaLane(String(formData.get("lane") ?? ""));
+  if (!checked.ok) return { error: socialMediaRuleMessage(checked.error, lane) };
   const key = socialMediaObjectKey(user.id, crypto.randomUUID(), checked.contentType, lane);
   try {
     const url = await presignSocialMediaPut(key, checked.contentType);
@@ -169,8 +169,11 @@ export async function createSocialStory(formData: FormData): Promise<ActionResul
 
   const body = normalizePostBody(String(formData.get("body") ?? "")) ?? null;
   const media = mediaItemsForInsert(formData.get("media"), user.id, "stories");
-  if (!media.ok) return { error: socialMediaRuleMessage(media.error) };
+  if (!media.ok) return { error: socialMediaRuleMessage(media.error, "stories") };
   if (media.items.length === 0) return { error: SOCIAL.stories.empty };
+  if (media.items.some((item) => item.kind !== "video")) {
+    return { error: SOCIAL.stories.mediaType };
+  }
 
   const { error } = await supabase.from("stories").insert(
     storyInsertRow({ authorId: user.id, body, media: media.items }),

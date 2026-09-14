@@ -3,7 +3,8 @@ import { z } from "zod";
 // Member post media rules. Keys live in posts.media (Pack 2 jsonb).
 // Objects go to 24frame-media-source-prod. Never title film keys,
 // never S3_BUCKET / gc-content-assets, never avatars/.
-// Copy for these codes lives in SOCIAL.home.
+// Stories stay on the 24frame-media-* stories lane; create is video-only.
+// Copy for these codes lives in SOCIAL.home / SOCIAL.stories.
 
 export type SocialMediaRuleError =
   | "invalid"
@@ -194,6 +195,10 @@ export function mediaItemsForInsert(
     if (socialMediaKindFor(item.data.contentType) !== item.data.kind) {
       return { ok: false, error: "invalid" };
     }
+    // Stories create is video-only (interim). Posts still accept stills.
+    if (lane === "stories" && item.data.kind !== "video") {
+      return { ok: false, error: "type" };
+    }
     items.push(item.data);
   }
   return { ok: true, items };
@@ -202,6 +207,7 @@ export function mediaItemsForInsert(
 export function validateMediaUpload(input: {
   contentType: string;
   byteLength: number;
+  lane?: SocialMediaLane;
 }):
   | { ok: true; kind: SocialMediaKind; contentType: SocialMediaContentType }
   | { ok: false; error: SocialMediaRuleError } {
@@ -210,6 +216,9 @@ export function validateMediaUpload(input: {
   }
   const kind = socialMediaKindFor(input.contentType);
   if (!kind) return { ok: false, error: "type" };
+  if (input.lane === "stories" && kind !== "video") {
+    return { ok: false, error: "type" };
+  }
   if (!Number.isFinite(input.byteLength) || input.byteLength <= 0) {
     return { ok: false, error: "missing" };
   }

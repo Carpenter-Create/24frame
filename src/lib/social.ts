@@ -13,7 +13,7 @@ import {
   SOCIAL_FOLLOWING_WALL_LIMIT,
   SOCIAL_STORIES_RAIL_LIMIT,
 } from "@/lib/social-home-bounds";
-import type { SocialMediaItem, SocialMediaRuleError } from "@/lib/social-media";
+import type { SocialMediaItem, SocialMediaLane, SocialMediaRuleError } from "@/lib/social-media";
 
 // Social workspace copy and input rules. Lives in lib/, not JSX.
 // Public share / preview URL is https://24frame.co/@{bareHandle}.
@@ -313,8 +313,11 @@ export const SOCIAL = {
   stories: {
     create: "Create story",
     title: "Story",
-    subtitle: "Add a photo or video. It stays visible for 24 hours.",
-    empty: "Add a photo or video.",
+    subtitle: "Add a video. It stays visible for 24 hours.",
+    empty: "Add a video.",
+    attach: "Add video",
+    mediaType: "Use a video (MP4, QuickTime, WebM).",
+    mediaMissing: "Choose a video first.",
     emptyRail: "No stories yet",
     emptyHint: "When people you follow share stories, they show up here. Start with your own.",
     missing: "That story is not visible.",
@@ -684,10 +687,15 @@ export function profileInsertRow(input: {
   };
 }
 
-export function socialMediaRuleMessage(error: SocialMediaRuleError): string {
-  if (error === "type") return SOCIAL.home.mediaType;
+export function socialMediaRuleMessage(
+  error: SocialMediaRuleError,
+  lane: SocialMediaLane = "posts",
+): string {
+  if (error === "type") return lane === "stories" ? SOCIAL.stories.mediaType : SOCIAL.home.mediaType;
   if (error === "tooLarge") return SOCIAL.home.mediaTooLarge;
-  if (error === "missing") return SOCIAL.home.mediaMissing;
+  if (error === "missing") {
+    return lane === "stories" ? SOCIAL.stories.mediaMissing : SOCIAL.home.mediaMissing;
+  }
   if (error === "limit") return SOCIAL.home.mediaLimit;
   if (error === "forbidden") return SOCIAL.home.mediaForbidden;
   return SOCIAL.home.mediaInvalid;

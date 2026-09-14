@@ -484,15 +484,15 @@ export function SocialStoryCompose() {
       >
         <SocialIcon name="camera" size={40} className="text-ink-2" />
         <span className="t-body-sm text-ink-2">
-          {uploading ? SOCIAL.home.attaching : media[0] ? (media[0].kind === "video" ? SOCIAL.home.videoKind : SOCIAL.home.photoKind) : SOCIAL.stories.empty}
+          {uploading ? SOCIAL.home.attaching : media[0] ? SOCIAL.home.videoKind : SOCIAL.stories.empty}
         </span>
       </button>
       <input
         ref={fileRef}
         type="file"
-        accept={SOCIAL_MEDIA_ACCEPT}
+        accept={SOCIAL_VIDEO_CONTENT_TYPES.join(",")}
         className="sr-only"
-        aria-label={SOCIAL.home.attach}
+        aria-label={SOCIAL.stories.attach}
         onChange={(e) => void onPick(e.target.files)}
       />
       <label className="sr-only" htmlFor="social-story-body">

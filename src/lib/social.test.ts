@@ -57,6 +57,19 @@ describe("social copy lock", () => {
     expect(SOCIAL.stories.emptyHint).toContain("share stories");
     expect(SOCIAL.stories.createCta).toBe("Create a story");
     expect(SOCIAL.stories.reply).toBe("Reply quietly…");
+    expect(SOCIAL.stories.subtitle).toBe("Add a video. It stays visible for 24 hours.");
+    expect(SOCIAL.stories.empty).toBe("Add a video.");
+    expect(SOCIAL.stories.attach).toBe("Add video");
+    expect(SOCIAL.stories.mediaType).toBe("Use a video (MP4, QuickTime, WebM).");
+    expect(SOCIAL.stories.mediaMissing).toBe("Choose a video first.");
+    expect(JSON.stringify(SOCIAL.stories)).not.toMatch(/photo or video/i);
+    const storyCompose = readFileSync("src/components/social/social-forms.tsx", "utf8").split(
+      "export function SocialStoryCompose()",
+    )[1];
+    expect(storyCompose).toContain('accept={SOCIAL_VIDEO_CONTENT_TYPES.join(",")}');
+    expect(storyCompose.slice(0, storyCompose.indexOf("export function"))).not.toContain(
+      "SOCIAL_MEDIA_ACCEPT",
+    );
     expect(SOCIAL.dms.subtitle).toContain(PRODUCT_NAME);
     expect(SOCIAL.dms.addPeople).toBe("Add people");
     expect(SOCIAL_ROUTES.dms).toBe("/social/dms");
