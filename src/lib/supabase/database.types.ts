@@ -3223,6 +3223,10 @@ export type Database = {
         Returns: boolean
       }
       shares_group: { Args: { p_a: string; p_b: string }; Returns: boolean }
+      social_media_keys_owned: {
+        Args: { p_media: Json; p_author: string; p_lane: string }
+        Returns: boolean
+      }
       submit_title: {
         Args: { p_org_id: string; p_title_id: string }
         Returns: undefined

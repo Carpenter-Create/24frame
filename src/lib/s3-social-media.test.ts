@@ -39,6 +39,7 @@ import {
 } from "./s3-social-media";
 
 const USER = "11111111-1111-4111-8111-111111111111";
+const OTHER = "33333333-3333-4333-8333-333333333333";
 const OBJECT = "22222222-2222-4222-8222-222222222222";
 const KEY = `posts/${USER}/${OBJECT}.jpg`;
 
@@ -142,13 +143,28 @@ describe("s3-social-media isolated lane", () => {
 
   it("signs stored posts.media keys for display", async () => {
     mockGetSignedUrl.mockResolvedValue("https://s3.example/signed-image");
-    const items = await signedSocialMediaItems([
-      { kind: "image", key: KEY, contentType: "image/jpeg" },
-      { kind: "video", key: `orgs/${USER}/titles/x`, contentType: "video/mp4" },
-    ]);
+    const items = await signedSocialMediaItems(
+      [
+        { kind: "image", key: KEY, contentType: "image/jpeg" },
+        { kind: "video", key: `orgs/${USER}/titles/x`, contentType: "video/mp4" },
+      ],
+      USER,
+    );
     expect(items).toEqual([
       { kind: "image", url: "https://s3.example/signed-image", contentType: "image/jpeg" },
     ]);
+  });
+
+  it("does not sign another author's stored media key", async () => {
+    const items = await signedSocialMediaItems(
+      [
+        { kind: "image", key: `posts/${OTHER}/${OBJECT}.jpg`, contentType: "image/jpeg" },
+        { kind: "image", key: `stories/${USER}/${OBJECT}.jpg`, contentType: "image/jpeg" },
+      ],
+      USER,
+    );
+    expect(items).toEqual([]);
+    expect(mockGetSignedUrl).not.toHaveBeenCalled();
   });
 
   it("never imports title s3, cloudfront, or mediaconvert", () => {

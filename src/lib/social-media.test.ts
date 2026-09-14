@@ -5,12 +5,14 @@ import {
   isForbiddenMediaKey,
   isOwnedSocialMediaKey,
   mediaItemsForInsert,
+  ownedMediaItems,
   parsePostMedia,
   socialMediaObjectKey,
   validateMediaUpload,
 } from "./social-media";
 
 const USER = "11111111-1111-4111-8111-111111111111";
+const OTHER = "33333333-3333-4333-8333-333333333333";
 const OBJECT = "22222222-2222-4222-8222-222222222222";
 
 describe("social media keys", () => {
@@ -63,6 +65,27 @@ describe("posts.media persist shape", () => {
       { kind: "image", key, contentType: "image/jpeg" },
       { kind: "video", key: video, contentType: "video/mp4" },
     ]);
+  });
+
+  it("rejects another author's key on insert and on read", () => {
+    const foreign = {
+      kind: "image" as const,
+      key: `posts/${OTHER}/${OBJECT}.jpg`,
+      contentType: "image/jpeg" as const,
+    };
+    const owned = {
+      kind: "image" as const,
+      key: `posts/${USER}/${OBJECT}.jpg`,
+      contentType: "image/jpeg" as const,
+    };
+    expect(mediaItemsForInsert([foreign], USER)).toEqual({ ok: false, error: "forbidden" });
+    expect(mediaItemsForInsert([foreign], USER, "stories")).toEqual({ ok: false, error: "forbidden" });
+    expect(mediaItemsForInsert([{ ...foreign, key: `stories/${OTHER}/${OBJECT}.jpg` }], USER, "stories")).toEqual({
+      ok: false,
+      error: "forbidden",
+    });
+    expect(ownedMediaItems([owned, foreign], USER)).toEqual([owned]);
+    expect(ownedMediaItems([{ ...foreign, key: `stories/${OTHER}/${OBJECT}.jpg` }], USER, "stories")).toEqual([]);
   });
 
   it("rejects title keys on insert even when the rest is valid", () => {

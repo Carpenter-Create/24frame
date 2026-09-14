@@ -6,11 +6,12 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import {
   isForbiddenMediaBucket,
   isForbiddenMediaKey,
-  parsePostMedia,
+  ownedMediaItems,
   SOCIAL_MEDIA_PUT_TTL_SECONDS,
   SOCIAL_MEDIA_SIGNED_URL_TTL_SECONDS,
   type SocialMediaContentType,
   type SocialMediaKind,
+  type SocialMediaLane,
 } from "@/lib/social-media";
 import {
   isMediaCloudfrontConfigured,
@@ -121,8 +122,12 @@ export type SignedSocialMedia = {
   contentType: SocialMediaContentType;
 };
 
-export async function signedSocialMediaItems(media: unknown): Promise<SignedSocialMedia[]> {
-  const items = parsePostMedia(media);
+export async function signedSocialMediaItems(
+  media: unknown,
+  authorId: string,
+  lane: SocialMediaLane = "posts",
+): Promise<SignedSocialMedia[]> {
+  const items = ownedMediaItems(media, authorId, lane);
   const signed = await Promise.all(
     items.map(async (item) => {
       const url = await signedSocialMediaUrl(item.key);
@@ -133,10 +138,13 @@ export async function signedSocialMediaItems(media: unknown): Promise<SignedSoci
 }
 
 export async function signedSocialMediaByPostId(
-  posts: readonly { id: string; media: unknown }[],
+  posts: readonly { id: string; author_id: string; media: unknown }[],
 ): Promise<Map<string, SignedSocialMedia[]>> {
   const entries = await Promise.all(
-    posts.map(async (post) => [post.id, await signedSocialMediaItems(post.media)] as const),
+    posts.map(
+      async (post) =>
+        [post.id, await signedSocialMediaItems(post.media, post.author_id)] as const,
+    ),
   );
   return new Map(entries);
 }

@@ -156,6 +156,14 @@ export function parsePostMedia(value: unknown): SocialMediaItem[] {
   return items;
 }
 
+export function ownedMediaItems(
+  value: unknown,
+  authorId: string,
+  lane: SocialMediaLane = "posts",
+): SocialMediaItem[] {
+  return parsePostMedia(value).filter((item) => isOwnedSocialMediaKey(item.key, authorId, lane));
+}
+
 export function mediaItemsForInsert(
   raw: unknown,
   userId: string,
