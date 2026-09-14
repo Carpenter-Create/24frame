@@ -105,6 +105,38 @@ describe("social isolation lock", () => {
     expect(sign).toContain("signedSocialMediaItems(post.media, post.author_id)");
   });
 
+  it("caps DM fan-out and names inbox/thread honesty bounds", () => {
+    const migration = readFileSync(
+      "supabase/migrations/20260914420000_dm_fanout_caps.sql",
+      "utf8",
+    );
+    const bounds = readFileSync("src/lib/social-dm-bounds.ts", "utf8");
+    const loaders = readFileSync("src/lib/social-dms.ts", "utf8");
+    const inbox = readFileSync("src/app/(app)/social/dms/page.tsx", "utf8");
+    const thread = readFileSync("src/app/(app)/social/dms/[id]/page.tsx", "utf8");
+    expect(migration).toContain("INTENT: Remediation class 6");
+    expect(migration).toContain("ACCESS PATH");
+    expect(migration).toContain("limit 32");
+    expect(migration).toContain(", 51)");
+    expect(migration).toContain("room is full");
+    expect(migration).not.toMatch(/org_id uuid/i);
+    expect(migration).not.toMatch(/is_gc_staff\s*\(/);
+    expect(bounds).toContain("SOCIAL_DM_FANOUT_BATCH");
+    expect(bounds).toContain("created_at+id keyset");
+    expect(loaders).toContain("get_dm_inbox");
+    expect(loaders).toContain("splitProbe");
+    expect(loaders).toContain("ascending: false");
+    expect(inbox).toContain("loadDmInbox");
+    expect(inbox).toContain("data-social-dms-truncated");
+    expect(thread).toContain("loadDmThreadMessages");
+    expect(thread).toContain("data-social-dm-thread-truncated");
+    expect(thread).toContain("data-social-dm-older-page");
+    expect(thread).toContain("!historical");
+    expect(thread).not.toContain("ascending: true");
+    expect(thread).not.toContain("DETAIL_LIST");
+    expect(thread).not.toContain("rangeFor");
+  });
+
   it("lets authenticated members select active public handles", () => {
     const migration = readFileSync(
       "supabase/migrations/20260914210000_profiles_select_active_public.sql",

@@ -15,6 +15,7 @@ import { presignSocialMediaPut } from "@/lib/s3-social-media";
 import { normalizeSocialCategory } from "@/lib/social-categories";
 import { storyInsertRow, storyViewInsertRow } from "@/lib/social-stories";
 import { ensureOwnSocialProfile, isProfileUniqueViolation } from "@/lib/social-profile";
+import { SOCIAL_DM_ADD_BATCH_LIMIT } from "@/lib/social-dm-bounds";
 import {
   followInsertRow,
   groupInsertRow,
@@ -349,7 +350,7 @@ export async function sendSocialDm(formData: FormData): Promise<ActionResult> {
 
   revalidatePath(socialDmHref(conversationId));
   revalidatePath(SOCIAL_ROUTES.dms);
-  return {};
+  redirect(socialDmHref(conversationId));
 }
 
 export async function markSocialDmRead(conversationId: string): Promise<void> {
@@ -374,6 +375,7 @@ export async function addSocialDmPeople(formData: FormData): Promise<ActionResul
     .map((part) => normalizeHandle(part))
     .filter((handle): handle is string => !!handle);
   if (handles.length === 0) return { error: SOCIAL.dms.addMissing };
+  if (handles.length > SOCIAL_DM_ADD_BATCH_LIMIT) return { error: SOCIAL.dms.addBatch };
 
   const { data: peers } = await supabase
     .from("profiles")

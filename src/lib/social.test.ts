@@ -57,6 +57,12 @@ describe("social copy lock", () => {
     expect(SOCIAL.home.truncatedFollowees).toContain("500");
     expect(SOCIAL.home.truncatedStories).toContain("80");
     expect(SOCIAL.explore.truncated).toContain("20");
+    expect(SOCIAL.dms.truncatedInbox).toContain("50");
+    expect(SOCIAL.dms.truncatedThread).toContain("50");
+    expect(SOCIAL.dms.roomFull).toContain("32");
+    expect(SOCIAL.dms.addBatch).toContain("32");
+    expect(SOCIAL.dms.olderPage).toContain("older");
+    expect(SOCIAL.dms.latestMessages).toBe("Latest messages");
     expect(SOCIAL.profile.uploadPhoto).toBe("Upload photo");
     expect(SOCIAL.courses.subtitle).toContain("Social+Education");
     expect(SOCIAL.leaderboard.private).toBe("The leaderboard is private.");
@@ -254,6 +260,8 @@ describe("social writes stay on the live spine", () => {
     expect(quietDmAddError("blocked")).toBe(SOCIAL.dms.addBlocked);
     expect(quietDmAddError("cannot add yourself")).toBe(SOCIAL.dms.addSelf);
     expect(quietDmAddError("peer not found")).toBe(SOCIAL.dms.addMissing);
+    expect(quietDmAddError("room is full")).toBe(SOCIAL.dms.roomFull);
+    expect(quietDmAddError("too many participants in one add")).toBe(SOCIAL.dms.addBatch);
   });
 
   it("reuses signed account faces and does not add a second upload or title bucket", () => {

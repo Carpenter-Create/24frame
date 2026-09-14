@@ -52,6 +52,8 @@ function chain(result: unknown) {
   c.select = vi.fn(self);
   c.eq = vi.fn(self);
   c.in = vi.fn(self);
+  c.is = vi.fn(self);
+  c.or = vi.fn(self);
   c.order = vi.fn(self);
   c.range = vi.fn(async () => ({ data: result, error: null }));
   c.maybeSingle = vi.fn(async () => ({
@@ -108,7 +110,39 @@ describe("social DMs", () => {
     expect(html).toContain("1 unread");
     expect(html).toContain(SOCIAL.dms.subtitle);
     expect(html).toContain("24Frame");
-    expect(rpc).toHaveBeenCalledWith("get_dm_inbox", { p_limit: 50 });
+    expect(rpc).toHaveBeenCalledWith("get_dm_inbox", { p_limit: 51 });
+    expect(html).not.toContain("data-social-dms-truncated");
+  });
+
+  it("names the inbox bound when the probe row comes back", async () => {
+    const rpc = vi.fn(async () => ({
+      data: Array.from({ length: 51 }, (_, i) => ({
+        conversation_id: `c${i}`,
+        last_message_at: "2026-09-14T14:00:00.000Z",
+        unread_count: 0,
+        muted: false,
+        peer_id: "u2",
+        kind: "direct",
+        title: null,
+        participant_ids: ["u2"],
+      })),
+      error: null,
+    }));
+    vi.mocked(createClient).mockResolvedValue({
+      from: vi.fn((table: string) => {
+        if (table === "profiles") {
+          return chain([{ id: "u2", handle: "bob", display_name: "Bob One", status: "active" }]);
+        }
+        throw new Error(`unexpected from(${table})`);
+      }),
+      rpc,
+    } as never);
+
+    const html = renderToStaticMarkup(await SocialDmsPage());
+    expect(html).toContain("data-social-dms-truncated");
+    expect(html).toContain(SOCIAL.dms.truncatedInbox);
+    expect(html).toContain("c49");
+    expect(html).not.toContain('href="/social/dms/c50"');
   });
 
   it("opens a group thread and shows add-people, not a missing room", async () => {
@@ -156,6 +190,91 @@ describe("social DMs", () => {
     expect(html).toContain("AL");
     expect(html).not.toContain("data-social-dm-missing");
     expect(html).not.toContain("min_level");
+    expect(html).not.toContain("data-social-dm-thread-truncated");
+    expect(html).toContain("data-social-dm-form");
+    expect(html).not.toContain("data-social-dm-older-page");
+  });
+
+  it("names the thread bound and offers older messages", async () => {
+    const { SOCIAL_DM_THREAD_LIMIT, encodeDmThreadCursor } = await import("@/lib/social-dm-bounds");
+    const messages = Array.from({ length: SOCIAL_DM_THREAD_LIMIT + 1 }, (_, i) => ({
+      id: `11111111-1111-4111-8111-${String(i).padStart(12, "0")}`,
+      body: `m${i}`,
+      sender_id: "u1",
+      created_at: `2026-09-14T14:00:${String(i).padStart(2, "0")}.000Z`,
+      status: "active",
+    }));
+    const from = vi.fn((table: string) => {
+      if (table === "profiles") {
+        return chain([{ id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" }]);
+      }
+      if (table === "conversations") {
+        return chain({ id: "c-group", kind: "group", title: null });
+      }
+      if (table === "messages") return chain(messages);
+      if (table === "conversation_participants") {
+        return chain([{ user_id: "u1", left_at: null }]);
+      }
+      throw new Error(`unexpected from(${table})`);
+    });
+    vi.mocked(createClient).mockResolvedValue({ from, rpc: vi.fn() } as never);
+
+    const html = renderToStaticMarkup(await SocialDmThreadPage({ params: Promise.resolve({ id: "c-group" }) }));
+    expect(html).toContain("data-social-dm-thread-truncated");
+    expect(html).toContain(SOCIAL.dms.truncatedThread);
+    expect(html).toContain("data-social-dm-older");
+    expect(html).toContain(SOCIAL.dms.olderMessages);
+    expect(html).toContain("before=");
+    expect(html).toContain(encodeURIComponent(encodeDmThreadCursor(messages[SOCIAL_DM_THREAD_LIMIT - 1]!)));
+    expect(html).toContain("m0");
+    expect(html).not.toContain(">m50<");
+    expect(html).toContain("data-social-dm-form");
+  });
+
+  it("names an older page that is not truncated and does not mount compose", async () => {
+    const { encodeDmThreadCursor } = await import("@/lib/social-dm-bounds");
+    const older = {
+      id: "11111111-1111-4111-8111-000000000001",
+      created_at: "2026-09-01T12:00:00.000Z",
+    };
+    const from = vi.fn((table: string) => {
+      if (table === "profiles") {
+        return chain([{ id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" }]);
+      }
+      if (table === "conversations") {
+        return chain({ id: "c-group", kind: "group", title: null });
+      }
+      if (table === "messages") {
+        return chain([
+          {
+            id: older.id,
+            body: "ancient hello",
+            sender_id: "u1",
+            created_at: older.created_at,
+            status: "active",
+          },
+        ]);
+      }
+      if (table === "conversation_participants") {
+        return chain([{ user_id: "u1", left_at: null }]);
+      }
+      throw new Error(`unexpected from(${table})`);
+    });
+    vi.mocked(createClient).mockResolvedValue({ from, rpc: vi.fn() } as never);
+
+    const html = renderToStaticMarkup(
+      await SocialDmThreadPage({
+        params: Promise.resolve({ id: "c-group" }),
+        searchParams: Promise.resolve({ before: encodeDmThreadCursor(older) }),
+      }),
+    );
+    expect(html).toContain("data-social-dm-older-page");
+    expect(html).toContain(SOCIAL.dms.olderPage);
+    expect(html).toContain("data-social-dm-latest");
+    expect(html).toContain(SOCIAL.dms.latestMessages);
+    expect(html).toContain("ancient hello");
+    expect(html).not.toContain("data-social-dm-form");
+    expect(html).not.toContain("data-social-dm-thread-truncated");
   });
 
   it("does not touch gated community group create fields", () => {
