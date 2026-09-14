@@ -57,6 +57,36 @@ export function socialProfileHref(handle: string): string {
   return bare ? `${SOCIAL_ROUTES.profileByHandle}/@${bare}` : SOCIAL_ROUTES.profileByHandle;
 }
 
+// Apex /@handle → in-app /social/u/@handle. Bare /legal and friends are not
+// rewritten. Reserved names skip the vanity rewrite so they cannot collide
+// with marketing/infra paths if the apex host hits this project.
+export const SOCIAL_VANITY_RESERVED_HANDLES = [
+  "admin",
+  "api",
+  "www",
+  "login",
+  "legal",
+  "auth",
+  "app",
+  "portal",
+  "social",
+] as const;
+
+export function matchSocialVanityPath(pathname: string): string | null {
+  if (!pathname.startsWith("/@")) return null;
+  if (pathname.includes("/", 2)) return null;
+  const handle = normalizeHandle(pathname.slice(2));
+  if (!handle) return null;
+  if ((SOCIAL_VANITY_RESERVED_HANDLES as readonly string[]).includes(handle)) return null;
+  return handle;
+}
+
+export function socialVanityInternalPath(pathname: string): string | null {
+  const handle = matchSocialVanityPath(pathname);
+  if (!handle) return null;
+  return socialProfileHref(handle);
+}
+
 export function socialProfilePublicUrl(handle: string): string {
   const bare = bareHandle(handle);
   return `${SOCIAL_PROFILE_ORIGIN}/@${bare}`;

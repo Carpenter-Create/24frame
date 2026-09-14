@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { socialVanityInternalPath } from "@/lib/social";
+
 import type { Database } from "./database.types";
 
 // Refreshes the auth session on every request and gates protected routes.
@@ -50,5 +52,17 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  return response;
+  return applySocialVanityRewrite(request, response);
+}
+
+function applySocialVanityRewrite(request: NextRequest, response: NextResponse): NextResponse {
+  const internal = socialVanityInternalPath(request.nextUrl.pathname);
+  if (!internal) return response;
+  const url = request.nextUrl.clone();
+  url.pathname = internal;
+  const rewritten = NextResponse.rewrite(url, { request });
+  for (const cookie of response.cookies.getAll()) {
+    rewritten.cookies.set(cookie);
+  }
+  return rewritten;
 }
