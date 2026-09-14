@@ -49,7 +49,7 @@ export default async function SocialStoryPage({
   const name = author?.display_name ?? "Member";
   const [photoUrl, media] = await Promise.all([
     signedAvatarUrl(story.author_id),
-    signedSocialMediaItems(story.media),
+    signedSocialMediaItems(story.media, story.author_id, "stories"),
   ]);
 
   return (

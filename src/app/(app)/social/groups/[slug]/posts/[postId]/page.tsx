@@ -52,7 +52,7 @@ export default async function SocialPostPage({
   const [liked, photoUrl, media] = await Promise.all([
     profile ? loadLikedPostIds(supabase, ctx.user.id, [post.id]) : Promise.resolve(new Set<string>()),
     signedAvatarUrl(post.author_id),
-    signedSocialMediaItems(post.media),
+    signedSocialMediaItems(post.media, post.author_id),
   ]);
 
   return (

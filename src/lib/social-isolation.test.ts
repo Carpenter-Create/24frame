@@ -81,6 +81,30 @@ describe("social isolation lock", () => {
     expect(migration).toContain("no org_id");
   });
 
+  it("binds posts/stories media keys to the author in the database", () => {
+    const migration = readFileSync(
+      "supabase/migrations/20260914200000_social_media_author_bound.sql",
+      "utf8",
+    );
+    expect(migration).toContain("INTENT: Remediation class 3");
+    expect(migration).toContain("ACCESS PATH");
+    expect(migration).toContain("NO ORG_ID ON SOCIAL");
+    expect(migration).toContain("create or replace function public.social_media_keys_owned");
+    expect(migration).toContain("add constraint posts_media_author_bound");
+    expect(migration).toContain("add constraint stories_media_author_bound");
+    expect(migration).toContain("social_media_keys_owned(media, author_id, 'posts')");
+    expect(migration).toContain("social_media_keys_owned(media, author_id, 'stories')");
+    expect(migration).not.toMatch(/org_id uuid/i);
+    expect(migration).toContain("Do not add org_id or is_gc_staff");
+    expect(migration).not.toMatch(/is_gc_staff\s*\(/);
+    const actions = readFileSync("src/app/(app)/social/actions.ts", "utf8");
+    expect(actions).toContain("mediaItemsForInsert(formData.get(\"media\"), user.id)");
+    expect(actions).toContain("mediaItemsForInsert(formData.get(\"media\"), user.id, \"stories\")");
+    const sign = readFileSync("src/lib/s3-social-media.ts", "utf8");
+    expect(sign).toContain("ownedMediaItems(media, authorId, lane)");
+    expect(sign).toContain("signedSocialMediaItems(post.media, post.author_id)");
+  });
+
   it("rewrites apex /@handle to /social/u/@handle and does not make vanity public", () => {
     const social = readFileSync("src/lib/social.ts", "utf8");
     const middleware = readFileSync("src/lib/supabase/middleware.ts", "utf8");

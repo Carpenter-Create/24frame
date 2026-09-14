@@ -303,6 +303,28 @@ describe("social actions", () => {
     ]);
   });
 
+  it("rejects another author's media key on create", async () => {
+    const author = "11111111-1111-4111-8111-111111111111";
+    const other = "33333333-3333-4333-8333-333333333333";
+    const object = "22222222-2222-4222-8222-222222222222";
+    vi.mocked(getAuthUser).mockResolvedValue({ id: author, email: "ada@example.com" } as never);
+    const { inserts } = stub({ profile: { id: author } });
+    const postForm = new FormData();
+    postForm.set("body", "nope");
+    postForm.set(
+      "media",
+      JSON.stringify([{ kind: "image", key: `posts/${other}/${object}.jpg`, contentType: "image/jpeg" }]),
+    );
+    expect(await createSocialPost(postForm)).toEqual({ error: SOCIAL.home.mediaForbidden });
+    const storyForm = new FormData();
+    storyForm.set(
+      "media",
+      JSON.stringify([{ kind: "image", key: `stories/${other}/${object}.jpg`, contentType: "image/jpeg" }]),
+    );
+    expect(await createSocialStory(storyForm)).toEqual({ error: SOCIAL.home.mediaForbidden });
+    expect(inserts).toEqual([]);
+  });
+
   it("rejects title-bucket keys on create", async () => {
     const author = "11111111-1111-4111-8111-111111111111";
     const object = "22222222-2222-4222-8222-222222222222";
