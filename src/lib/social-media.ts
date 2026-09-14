@@ -21,6 +21,8 @@ export const SOCIAL_MEDIA_MAX_ITEMS = 4;
 export const SOCIAL_STORY_MAX_ITEMS = 1;
 export const SOCIAL_IMAGE_MAX_BYTES = 10 * 1024 * 1024;
 export const SOCIAL_VIDEO_MAX_BYTES = 100 * 1024 * 1024;
+// Design 144:1218 copy mentions “up to 15 seconds”. Not an Adam lock.
+// Do not add a story duration cap. Size/type bounds stay.
 export const SOCIAL_MEDIA_SIGNED_URL_TTL_SECONDS = 300;
 export const SOCIAL_MEDIA_PUT_TTL_SECONDS = 900;
 

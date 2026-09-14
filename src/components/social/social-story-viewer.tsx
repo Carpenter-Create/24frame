@@ -1,3 +1,6 @@
+"use client";
+
+import { useRef, useState } from "react";
 import Link from "next/link";
 
 import { SocialStoryReply } from "@/components/social/social-forms";
@@ -5,11 +8,44 @@ import { SocialAvatar, SocialPostMedia, type SocialPostMediaItem } from "@/compo
 import { SocialIcon } from "@/components/social/social-icon";
 import {
   SOCIAL_STORY_CARET_CLASS,
+  SOCIAL_STORY_PLAY_CLASS,
   SOCIAL_STORY_PROGRESS_BAR_CLASS,
   SOCIAL_STORY_VIEWER_CLASS,
 } from "@/lib/social-chrome";
 import { SOCIAL_ROUTES, socialRelativeTime, socialStoryHref } from "@/lib/social";
 import { cn } from "@/lib/cn";
+
+function SocialStoryPlayWell({ url }: { url: string }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
+
+  return (
+    <div className="relative flex min-h-[360px] w-full items-center justify-center">
+      <video
+        ref={ref}
+        data-social-story-video=""
+        src={url}
+        playsInline
+        preload="metadata"
+        className="h-[360px] w-full rounded-[8px] bg-surface-muted object-cover"
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        onEnded={() => setPlaying(false)}
+      />
+      {playing ? null : (
+        <button
+          type="button"
+          data-social-story-play=""
+          aria-label="Play"
+          className={cn(SOCIAL_STORY_PLAY_CLASS, "absolute")}
+          onClick={() => void ref.current?.play()}
+        >
+          <SocialIcon name="play" active size={24} className="text-accent-contrast" />
+        </button>
+      )}
+    </div>
+  );
+}
 
 export function SocialStoryViewer({
   storyId,
@@ -86,7 +122,9 @@ export function SocialStoryViewer({
             <SocialIcon name="caret-right" size={20} />
           </Link>
         ) : null}
-        {media.length > 0 ? (
+        {media[0]?.kind === "video" ? (
+          <SocialStoryPlayWell url={media[0].url} />
+        ) : media.length > 0 ? (
           <SocialPostMedia items={media} />
         ) : (
           <div className="flex flex-col items-center gap-[var(--space-2)] px-[var(--space-6)] text-center">

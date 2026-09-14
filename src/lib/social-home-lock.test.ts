@@ -9,6 +9,7 @@ const home = readFileSync("src/app/(app)/social/page.tsx", "utf8");
 const explore = readFileSync("src/app/(app)/social/explore/page.tsx", "utf8");
 const create = readFileSync("src/app/(app)/social/create/page.tsx", "utf8");
 const stories = readFileSync("src/app/(app)/social/stories/page.tsx", "utf8");
+const storiesNew = readFileSync("src/app/(app)/social/stories/new/page.tsx", "utf8");
 const messages = readFileSync("src/app/(app)/social/dms/page.tsx", "utf8");
 const profile = readFileSync("src/app/(app)/social/profile/page.tsx", "utf8");
 const card = readFileSync("src/components/social/social-ui.tsx", "utf8");
@@ -172,10 +173,18 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).toContain("138:163");
     expect(chrome).toContain("138:889");
     expect(chrome).toContain("138:943");
+    expect(chrome).toContain("144:1218");
+    expect(chrome).toContain("144:1444");
+    expect(chrome).toContain("SOCIAL_STORY_PICKER_CLASS");
+    expect(chrome).toContain("SOCIAL_STORY_PLAY_CLASS");
+    expect(icons).toContain("upload-simple");
     expect(stories).toContain('surface="stories"');
     expect(stories).toContain("SocialForYouRail");
     expect(stories).toContain("SocialStoriesEmpty");
     expect(stories).not.toContain("education");
+    expect(storiesNew).toContain("SocialStoryCompose");
+    expect(storiesNew).not.toContain("15 second");
+    expect(storiesNew).not.toContain("education");
     expect(SOCIAL.stories.emptyHint).toBe(
       "When people you follow share stories, they show up here. Start with your own.",
     );

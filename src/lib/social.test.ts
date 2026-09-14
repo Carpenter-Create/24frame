@@ -62,11 +62,19 @@ describe("social copy lock", () => {
     expect(SOCIAL.stories.attach).toBe("Add video");
     expect(SOCIAL.stories.mediaType).toBe("Use a video (MP4, QuickTime, WebM).");
     expect(SOCIAL.stories.mediaMissing).toBe("Choose a video first.");
+    expect(SOCIAL.stories.pickerHint).toBe("Video only");
+    expect(SOCIAL.stories.record).toBe("Record a video");
+    expect(SOCIAL.stories.upload).toBe("Upload a video");
+    expect(SOCIAL.stories.footnote).toBe("No photo story · No text story");
     expect(JSON.stringify(SOCIAL.stories)).not.toMatch(/photo or video/i);
+    expect(JSON.stringify(SOCIAL.stories)).not.toMatch(/15 second/i);
     const storyCompose = readFileSync("src/components/social/social-forms.tsx", "utf8").split(
       "export function SocialStoryCompose()",
     )[1];
-    expect(storyCompose).toContain('accept={SOCIAL_VIDEO_CONTENT_TYPES.join(",")}');
+    expect(storyCompose).toContain("SOCIAL_VIDEO_CONTENT_TYPES.join(\",\")");
+    expect(storyCompose).toContain('capture="user"');
+    expect(storyCompose).toContain("data-social-story-record");
+    expect(storyCompose).toContain("data-social-story-upload");
     expect(storyCompose.slice(0, storyCompose.indexOf("export function"))).not.toContain(
       "SOCIAL_MEDIA_ACCEPT",
     );

@@ -318,6 +318,14 @@ export const SOCIAL = {
     attach: "Add video",
     mediaType: "Use a video (MP4, QuickTime, WebM).",
     mediaMissing: "Choose a video first.",
+    // Design 144:1218/144:1444 also shows “up to 15 seconds”. Not an Adam lock.
+    // Do not treat that note as a duration cap.
+    pickerHint: "Video only",
+    record: "Record a video",
+    recordHint: "Use your camera",
+    upload: "Upload a video",
+    uploadHint: "Choose from camera roll",
+    footnote: "No photo story · No text story",
     emptyRail: "No stories yet",
     emptyHint: "When people you follow share stories, they show up here. Start with your own.",
     missing: "That story is not visible.",

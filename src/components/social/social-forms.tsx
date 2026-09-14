@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -21,7 +22,17 @@ import {
   SOCIAL_FOLLOW_COMPACT_CLASS,
   SOCIAL_PILL_CLASS,
   SOCIAL_PILL_IDLE_CLASS,
+  SOCIAL_STORY_PICKER_CLASS,
+  SOCIAL_STORY_PICKER_CLOSE_CLASS,
+  SOCIAL_STORY_PICKER_HANDLE_CLASS,
+  SOCIAL_STORY_PICKER_ICON_WELL_CLASS,
+  SOCIAL_STORY_PICKER_OPTION_CLASS,
 } from "@/lib/social-chrome";
+import {
+  SOCIAL_ICON_SIZE_STORY_FOOTNOTE,
+  SOCIAL_ICON_SIZE_STORY_PICKER,
+  SOCIAL_ICON_SIZE_STORY_PICKER_CLOSE,
+} from "@/lib/social-icons";
 import { SOCIAL_CATEGORY_TOPICS } from "@/lib/social-categories";
 import {
   SOCIAL_IMAGE_CONTENT_TYPES,
@@ -35,6 +46,7 @@ import {
 import {
   displayHandle,
   SOCIAL,
+  SOCIAL_ROUTES,
   socialCreateWellCopy,
   socialHandleRequiredError,
   socialInitials,
@@ -444,14 +456,16 @@ export function SocialStoryCompose() {
   const [uploading, setUploading] = useState(false);
   const [body, setBody] = useState("");
   const [media, setMedia] = useState<SocialMediaItem[]>([]);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const recordRef = useRef<HTMLInputElement>(null);
+  const uploadRef = useRef<HTMLInputElement>(null);
+  const accept = SOCIAL_VIDEO_CONTENT_TYPES.join(",");
 
-  async function onPick(files: FileList | null) {
+  async function onPick(files: FileList | null, input: HTMLInputElement | null) {
     setError("");
     setUploading(true);
     const result = await uploadSocialMedia(files, [], SOCIAL_STORY_MAX_ITEMS, "stories");
     setUploading(false);
-    if (fileRef.current) fileRef.current.value = "";
+    if (input) input.value = "";
     if (result.error) {
       setError(result.error);
       return;
@@ -462,7 +476,8 @@ export function SocialStoryCompose() {
   return (
     <form
       data-social-story-form=""
-      className="flex flex-col gap-[var(--space-6)] rounded-[16px] bg-surface-muted p-[var(--space-6)]"
+      data-social-story-picker=""
+      className={SOCIAL_STORY_PICKER_CLASS}
       action={async (formData) => {
         setError("");
         formData.set("media", JSON.stringify(media));
@@ -470,48 +485,100 @@ export function SocialStoryCompose() {
         if (result?.error) setError(result.error);
       }}
     >
-      <button
-        type="button"
-        data-social-story-well=""
-        disabled={uploading}
-        onClick={() => fileRef.current?.click()}
-        onDragOver={(event) => event.preventDefault()}
-        onDrop={(event) => {
-          event.preventDefault();
-          void onPick(event.dataTransfer.files);
-        }}
-        className="flex min-h-[220px] w-full flex-col items-center justify-center gap-[var(--space-3)] rounded-[8px] bg-surface px-[var(--space-6)] py-[var(--space-12)] text-center"
-      >
-        <SocialIcon name="camera" size={40} className="text-ink-2" />
-        <span className="t-body-sm text-ink-2">
-          {uploading ? SOCIAL.home.attaching : media[0] ? SOCIAL.home.videoKind : SOCIAL.stories.empty}
-        </span>
-      </button>
-      <input
-        ref={fileRef}
-        type="file"
-        accept={SOCIAL_VIDEO_CONTENT_TYPES.join(",")}
-        className="sr-only"
-        aria-label={SOCIAL.stories.attach}
-        onChange={(e) => void onPick(e.target.files)}
-      />
-      <label className="sr-only" htmlFor="social-story-body">
-        {SOCIAL.stories.title}
-      </label>
-      <textarea
-        id="social-story-body"
-        name="body"
-        rows={3}
-        value={body}
-        onChange={(e) => setBody(e.target.value)}
-        placeholder={SOCIAL.home.captionPlaceholder}
-        className="w-full rounded-[8px] border border-hairline bg-surface px-[var(--space-4)] py-[var(--space-3)] t-body text-ink outline-none placeholder:text-ink-3 focus:border-accent"
-      />
-      <div className="flex justify-end">
-        <button type="submit" disabled={uploading} className={SOCIAL_ACTION_CLASS}>
-          {SOCIAL.stories.submit}
+      <span className={SOCIAL_STORY_PICKER_HANDLE_CLASS} aria-hidden="true" />
+      <div className="flex items-start gap-2">
+        <div className="min-w-0 flex-1">
+          <h2 className="text-[18px] font-semibold text-ink">{SOCIAL.stories.createCta}</h2>
+          <p className="t-body-sm text-ink-2">{SOCIAL.stories.pickerHint}</p>
+        </div>
+        <Link
+          href={SOCIAL_ROUTES.stories}
+          data-social-story-picker-close=""
+          aria-label="Close"
+          className={SOCIAL_STORY_PICKER_CLOSE_CLASS}
+        >
+          <SocialIcon name="x" size={SOCIAL_ICON_SIZE_STORY_PICKER_CLOSE} className="text-ink-2" />
+        </Link>
+      </div>
+      <div className="flex flex-col gap-3">
+        <button
+          type="button"
+          data-social-story-record=""
+          disabled={uploading}
+          onClick={() => recordRef.current?.click()}
+          className={SOCIAL_STORY_PICKER_OPTION_CLASS}
+        >
+          <span className={SOCIAL_STORY_PICKER_ICON_WELL_CLASS}>
+            <SocialIcon name="camera" size={SOCIAL_ICON_SIZE_STORY_PICKER} className="text-ink-2" />
+          </span>
+          <span className="min-w-0">
+            <span className="block text-[16px] font-semibold text-ink">{SOCIAL.stories.record}</span>
+            <span className="block t-body-sm text-ink-2">{SOCIAL.stories.recordHint}</span>
+          </span>
+        </button>
+        <button
+          type="button"
+          data-social-story-upload=""
+          disabled={uploading}
+          onClick={() => uploadRef.current?.click()}
+          className={SOCIAL_STORY_PICKER_OPTION_CLASS}
+        >
+          <span className={SOCIAL_STORY_PICKER_ICON_WELL_CLASS}>
+            <SocialIcon name="upload-simple" size={SOCIAL_ICON_SIZE_STORY_PICKER} className="text-ink-2" />
+          </span>
+          <span className="min-w-0">
+            <span className="block text-[16px] font-semibold text-ink">{SOCIAL.stories.upload}</span>
+            <span className="block t-body-sm text-ink-2">{SOCIAL.stories.uploadHint}</span>
+          </span>
         </button>
       </div>
+      <p className="flex items-center justify-center gap-2 text-[12px] text-ink-2">
+        <SocialIcon name="film-strip" size={SOCIAL_ICON_SIZE_STORY_FOOTNOTE} className="text-ink-2" />
+        {SOCIAL.stories.footnote}
+      </p>
+      <input
+        ref={recordRef}
+        type="file"
+        accept={accept}
+        capture="user"
+        className="sr-only"
+        aria-label={SOCIAL.stories.record}
+        onChange={(e) => void onPick(e.target.files, e.target)}
+      />
+      <input
+        ref={uploadRef}
+        type="file"
+        accept={accept}
+        className="sr-only"
+        aria-label={SOCIAL.stories.upload}
+        onChange={(e) => void onPick(e.target.files, e.target)}
+      />
+      {media[0] || uploading ? (
+        <p className="t-body-sm text-ink-2">
+          {uploading ? SOCIAL.home.attaching : SOCIAL.home.videoKind}
+        </p>
+      ) : null}
+      {media[0] ? (
+        <>
+          <label className="sr-only" htmlFor="social-story-body">
+            {SOCIAL.stories.title}
+          </label>
+          <textarea
+            id="social-story-body"
+            name="body"
+            rows={3}
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            placeholder={SOCIAL.home.captionPlaceholder}
+            className="w-full rounded-[8px] border border-hairline bg-surface px-[var(--space-4)] py-[var(--space-3)] t-body text-ink outline-none placeholder:text-ink-3 focus:border-accent"
+          />
+          <div className="flex justify-end">
+            <button type="submit" disabled={uploading} className={SOCIAL_ACTION_CLASS}>
+              {SOCIAL.stories.submit}
+            </button>
+          </div>
+        </>
+      ) : null}
       <FormError error={error} />
     </form>
   );

@@ -3,6 +3,7 @@
 // Profile ship: Figma 129:215 / 129:415 / 129:615.
 // Create ship: Figma 135:585 / 135:1037 / 135:1214.
 // Stories ship: Figma 138:163 / 138:889 / 138:943.
+// Stories picker: Figma 144:1218 / 144:1444.
 // No glass, no drop shadow. Aggregation / Settings Mercury stays elsewhere.
 
 export const SOCIAL_FIGMA_HOME = "130:215";
@@ -11,6 +12,7 @@ export const SOCIAL_FIGMA_HOME_MOBILE = "133:1078";
 export const SOCIAL_FIGMA_PROFILE = ["129:215", "129:415", "129:615"] as const;
 export const SOCIAL_FIGMA_CREATE = ["135:585", "135:1037", "135:1214"] as const;
 export const SOCIAL_FIGMA_STORIES = ["138:163", "138:889", "138:943"] as const;
+export const SOCIAL_FIGMA_STORY_PICKER = ["144:1218", "144:1444"] as const;
 
 export const SOCIAL_RAIL_WIDTH_CLASS = "w-[240px]";
 export const SOCIAL_RAIL_MAIN_OFFSET_CLASS = "md:ml-[240px]";
@@ -177,3 +179,21 @@ export const SOCIAL_CREATE_KIND_CLASS =
 
 export const SOCIAL_CREATE_AVATAR_CLASS =
   "flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted text-[12px] font-semibold text-ink-2 md:size-10 md:text-[14px]";
+
+export const SOCIAL_STORY_PICKER_CLASS =
+  "flex w-full max-w-[420px] flex-col gap-4 rounded-t-[24px] border border-hairline bg-surface px-6 pb-6 pt-3 md:rounded-[24px] md:p-6";
+
+export const SOCIAL_STORY_PICKER_HANDLE_CLASS =
+  "mx-auto h-1 w-10 rounded-full bg-hairline md:hidden";
+
+export const SOCIAL_STORY_PICKER_CLOSE_CLASS =
+  "flex size-8 shrink-0 items-center justify-center rounded-full bg-surface-muted text-ink-2";
+
+export const SOCIAL_STORY_PICKER_OPTION_CLASS =
+  "flex w-full items-center gap-4 rounded-[16px] border border-hairline bg-surface p-4 text-left";
+
+export const SOCIAL_STORY_PICKER_ICON_WELL_CLASS =
+  "flex size-12 shrink-0 items-center justify-center rounded-full bg-surface-muted";
+
+export const SOCIAL_STORY_PLAY_CLASS =
+  "flex size-14 items-center justify-center rounded-full bg-accent text-accent-contrast";
