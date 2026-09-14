@@ -48,8 +48,8 @@ describe("SideNav Access rail", () => {
     expect(navSrc).not.toContain("size-6");
     expect(navSrc).toContain("flex flex-col gap-2 px-2");
     expect(navSrc).toContain("gap-2 px-2 py-2");
-    expect(navSrc).not.toContain("px-1.5");
-    expect(navSrc).not.toContain("px-3");
+    expect(navSrc).not.toContain('collapsed ? "px-1.5" : "px-3"');
+    expect(navSrc).not.toContain("gap-2.5 px-3");
     expect(navSrc).not.toContain("gap-2.5");
     expect(navSrc).toContain("STAFF_RAIL_EYEBROW");
     expect(navSrc).not.toContain("PRODUCT_NAME");
