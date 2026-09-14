@@ -133,8 +133,14 @@ describe("Social profile public face", () => {
     expect(identity).toContain("data-social-profile-identity");
     expect(identity).toContain("Ada Lovelace");
     expect(identity).toContain("@ada");
+    expect(identity).toContain("data-social-profile-url");
+    expect(identity.match(/data-social-profile-url/g)?.length).toBe(1);
     expect(identity).toContain("24frame.co/@ada");
-    expect(identity).toContain("Copies https://24frame.co/@ada");
+    expect(identity).not.toContain("https://24frame.co/@ada");
+    expect(identity).not.toContain("Copies ");
+    expect(identity).not.toContain("data-social-share-hint");
+    expect(uiSrc).toContain("socialProfilePublicHost");
+    expect(uiSrc).not.toContain("socialShareHint");
     expect(identity).toContain("Writes engines.");
     expect(identity).toContain('src="https://s3.example/signed-avatar"');
 

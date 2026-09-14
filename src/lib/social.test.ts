@@ -37,7 +37,8 @@ import {
   socialProfilePublicUrl,
   socialProfileRewriteTarget,
   socialProfileTabHref,
-  socialShareHint,
+  socialProfileTabLabel,
+  SOCIAL_PROFILE_TABS,
   socialVanityInternalPath,
   stripHandleDecorators,
   suggestedHandleSeed,
@@ -189,7 +190,6 @@ describe("profile opt-in", () => {
     expect(SOCIAL_PROFILE_ORIGIN).toBe("https://24frame.co");
     expect(socialProfilePublicUrl("acarpcreate")).not.toContain("app.24frame.co");
     expect(socialProfilePublicUrl("acarpcreate")).not.toContain("/social/u/");
-    expect(socialShareHint("ada")).toBe("Copies https://24frame.co/@ada");
     expect(parseSocialCreateKind("photo")).toBe("photo");
     expect(parseSocialCreateKind("clip")).toBeNull();
     expect(socialCreateHref("video")).toBe("/social/create?kind=video");
@@ -204,12 +204,19 @@ describe("profile opt-in", () => {
     expect(SOCIAL.create.caption).toBe("Caption");
     expect(parseSocialHomeLane("for-you")).toBe("for-you");
     expect(socialHomeLaneHref("following")).toBe("/social");
+    expect(SOCIAL_PROFILE_TABS).toEqual(["posts", "highlights", "credits"]);
     expect(parseSocialProfileTab("highlights")).toBe("highlights");
+    expect(parseSocialProfileTab("credits")).toBe("credits");
     expect(parseSocialProfileTab("reels")).toBe("posts");
     expect(socialProfileTabHref("/social/u/ada", "highlights")).toBe("/social/u/ada?tab=highlights");
+    expect(socialProfileTabHref("/social/u/ada", "credits")).toBe("/social/u/ada?tab=credits");
+    expect(socialProfileTabHref("/social/profile", "posts")).toBe("/social/profile");
+    expect(socialProfileTabLabel("credits")).toBe("Credits");
     expect(socialComposerPrompt("Ada Lovelace")).toBe("What's on your mind Ada?");
     expect(SOCIAL.profile.postsTab).toBe("Posts");
     expect(SOCIAL.profile.highlightsTab).toBe("Highlights");
+    expect(SOCIAL.profile.creditsTab).toBe("Credits");
+    expect(SOCIAL.profile.creditsEmpty).toBe("No credits yet");
     expect(parseProfileHandleParam("%40ada")).toBe("ada");
     expect(parseProfileHandleParam("@ada")).toBe("ada");
     expect(parseProfileHandleParam("ada")).toBe("ada");

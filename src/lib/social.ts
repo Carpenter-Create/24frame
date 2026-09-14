@@ -51,6 +51,8 @@ export const SOCIAL_PROFILE_POSTS_PAGE = LIST_PAGE;
 
 // Public profile URL (locked): https://24frame.co/@{bareHandle}
 // Example: https://24frame.co/@acarpcreate
+// Profile chrome prints one quiet host line under the handle
+// (24frame.co/@{bare}). Share copies the canonical https URL.
 // In-app route is /social/u/{bareHandle}. Persist the bare handle
 // in profiles.handle (no @). Display as @handle.
 // /social/members/{handle} redirects to the in-app route.
@@ -197,20 +199,27 @@ export function socialHomeLaneHref(lane: SocialHomeLane): string {
 }
 
 export const SOCIAL_PROFILE_TAB_PARAM = "tab";
-export const SOCIAL_PROFILE_TABS = ["posts", "highlights"] as const;
+export const SOCIAL_PROFILE_TABS = ["posts", "highlights", "credits"] as const;
 export type SocialProfileTab = (typeof SOCIAL_PROFILE_TABS)[number];
 
 export function parseSocialProfileTab(raw: string | string[] | undefined | null): SocialProfileTab {
   const value = Array.isArray(raw) ? raw[0] : raw;
-  return value === "highlights" ? "highlights" : "posts";
+  return value === "highlights" || value === "credits" ? value : "posts";
 }
 
 export function socialProfileTabHref(base: string, tab: SocialProfileTab): string {
-  return tab === "highlights" ? `${base}?${SOCIAL_PROFILE_TAB_PARAM}=highlights` : base;
+  return tab === "posts" ? base : `${base}?${SOCIAL_PROFILE_TAB_PARAM}=${tab}`;
 }
 
-export function socialShareHint(handle: string): string {
-  return `${SOCIAL.profile.shareCopies} ${socialProfilePublicUrl(handle)}`;
+export function socialProfileTabLabel(tab: SocialProfileTab): string {
+  switch (tab) {
+    case "highlights":
+      return SOCIAL.profile.highlightsTab;
+    case "credits":
+      return SOCIAL.profile.creditsTab;
+    default:
+      return SOCIAL.profile.postsTab;
+  }
 }
 
 export function socialFirstName(displayName: string | null | undefined): string {
@@ -411,11 +420,12 @@ export const SOCIAL = {
     edit: "Edit profile",
     share: "Share",
     shareCopied: "Copied",
-    shareCopies: "Copies",
     postsTab: "Posts",
     highlightsTab: "Highlights",
     highlightsEmpty: "No highlights yet.",
     highlightsEmptyHint: "Live stories appear here for 24 hours.",
+    creditsTab: "Credits",
+    creditsEmpty: "No credits yet",
     postsStat: "posts",
     followersStat: "followers",
     followingStat: "following",

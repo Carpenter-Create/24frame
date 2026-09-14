@@ -20,6 +20,7 @@ export const SOCIAL_PHOSPHOR_ICONS = [
   "x",
   "heart",
   "film-strip",
+  "film-slate",
   "squares-four",
   "magnifying-glass",
   "tray",

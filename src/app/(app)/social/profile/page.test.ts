@@ -130,11 +130,18 @@ describe("Social profile public face", () => {
     expect(html).toContain("data-social-handle-field");
     expect(html).toContain(SOCIAL.profile.handlePlaceholder);
     expect(html).toContain("https://24frame.co/@ada");
-    expect(html).toContain("24frame.co/@ada");
+    expect(html).toContain('data-social-share-url="https://24frame.co/@ada"');
+    expect(html).toContain("data-social-profile-url");
+    expect(html).toContain(">24frame.co/@ada<");
+    expect(html).not.toContain("Copies ");
+    expect(html).not.toContain("data-social-share-hint");
     expect(html).toContain("@ada");
     expect(html).toContain("data-social-profile-tabs");
     expect(html).toContain(SOCIAL.profile.postsTab);
     expect(html).toContain(SOCIAL.profile.highlightsTab);
+    expect(html).toContain(SOCIAL.profile.creditsTab);
+    expect(html).toContain('data-social-profile-tab="credits"');
+    expect(html).toContain("overflow-x-auto");
     expect(html).toContain("data-social-for-you");
     expect(html).toContain("data-social-share");
     expect(html).not.toContain("Education");
@@ -231,6 +238,36 @@ describe("Social profile public face", () => {
     expect(html).toContain(SOCIAL.profile.postsTruncated);
     expect(html).toContain('data-social-post="p0"');
     expect(html).not.toContain(`data-social-post="p${SOCIAL_PROFILE_POSTS_PAGE}"`);
+  });
+
+  it("shows the locked Credits blank empty state and no invented credits", async () => {
+    stubClient({
+      profile: ensured,
+      posts: [
+        {
+          id: "p1",
+          body: "First engine note",
+          author_id: "u1",
+          group_id: null,
+          like_count: 2,
+          created_at: "2026-09-13T12:00:00.000Z",
+        },
+      ],
+    });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const html = renderToStaticMarkup(
+      await SocialProfilePage({ searchParams: Promise.resolve({ tab: "credits" }) }),
+    );
+    expect(html).toContain('data-social-profile-tab="credits"');
+    expect(html).toContain('data-social-profile-tab-active=""');
+    expect(html).toContain('data-social-icon="film-slate"');
+    expect(html).toContain(SOCIAL.profile.creditsEmpty);
+    expect(html).not.toContain("First engine note");
+    expect(html).not.toContain("data-social-author-history");
+    expect(html).not.toContain(SOCIAL.profile.highlightsEmpty);
+    expect(html).not.toContain("Analytics");
+    expect(html).not.toContain("Your credits will appear");
   });
 
   it("shows @handle after ensure, not an empty create form", async () => {

@@ -27,7 +27,6 @@ import {
   socialInitials,
   socialProfilePublicHost,
   socialRelativeTime,
-  socialShareHint,
 } from "@/lib/social";
 import { SocialLikeButton } from "./social-forms";
 import { SocialEmpty } from "./social-empty";
@@ -194,7 +193,9 @@ export function SocialProfileIdentity({
             <div className="min-w-0">
               <p className="text-[18px] font-semibold text-ink md:text-[22px]">{name}</p>
               <p className={cn(SOCIAL_HANDLE_PILL_CLASS, "mt-1")}>{displayHandle(handle)}</p>
-              <p className="mt-1 t-label text-ink-2">{socialProfilePublicHost(handle)}</p>
+              <p data-social-profile-url="" className="mt-1 t-label text-ink-2">
+                {socialProfilePublicHost(handle)}
+              </p>
             </div>
             {actionRow ? <div className="hidden shrink-0 md:flex">{actionRow}</div> : null}
           </div>
@@ -243,9 +244,6 @@ export function SocialProfileIdentity({
         </div>
       ) : null}
       {actionRow ? <div className="flex md:hidden">{actionRow}</div> : null}
-      <p data-social-share-hint="" className="t-label text-ink-2">
-        {socialShareHint(handle)}
-      </p>
       {children}
     </div>
   );
