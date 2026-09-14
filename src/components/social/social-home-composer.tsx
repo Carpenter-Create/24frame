@@ -50,7 +50,7 @@ export function SocialHomeComposer({
           <span className="hidden md:inline">{socialComposerPrompt(authorName)}</span>
         </Link>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between gap-2 md:justify-start">
         {ACTIONS.map((action) => (
           <Link
             key={action.kind}

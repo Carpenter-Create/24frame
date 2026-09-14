@@ -103,6 +103,9 @@ export default async function SocialHomePage({
       <div className={SOCIAL_HOME_CENTER_CLASS}>
         <h1 className="sr-only">{SOCIAL.home.title}</h1>
         <p className="sr-only">{SOCIAL.home.subtitle}</p>
+        {profile ? (
+          <SocialHomeComposer authorName={profile.display_name} authorPhotoUrl={photoUrl} />
+        ) : null}
         <SocialStoriesRail cards={rail} authors={authors} faces={faces} canCreate={!!profile} />
         {storiesPage.truncated ? (
           <InlineNotice tone="info" data-social-stories-truncated="">
@@ -113,9 +116,6 @@ export default async function SocialHomePage({
           <InlineNotice tone="info" data-social-followees-truncated="">
             {SOCIAL.home.truncatedFollowees}
           </InlineNotice>
-        ) : null}
-        {profile ? (
-          <SocialHomeComposer authorName={profile.display_name} authorPhotoUrl={photoUrl} />
         ) : null}
         <SocialHomeTabs active={lane} />
         {lane === "for-you" ? (
