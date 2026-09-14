@@ -2,7 +2,13 @@ import Link from "next/link";
 
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardBody } from "@/components/ui/card";
-import { GC_DELIVERIES_EMPTY } from "@/lib/gc-deliveries";
+import { InlineNotice } from "@/components/ui/inline-notice";
+import { GC_DELIVERIES_EMPTY, GC_DELIVERIES_TRUNCATED } from "@/lib/gc-deliveries";
+import {
+  loadGcDeliveryCompanions,
+  portalCompanionsTruncated,
+  uniqueIds,
+} from "@/lib/gc-deliveries-companions";
 import { DeliveryControls } from "./delivery-controls";
 import { NewDeliveryForm } from "./new-delivery-form";
 import { ExportPanel } from "./export-panel";
@@ -37,66 +43,57 @@ export default async function GcDeliveriesPage() {
     .from("titles").select("id, title, catalog_id").in("status", ["in_delivery", "live"]).order("title").range(...rangeFor(UNPAGINATED_MAX));
   const { data: vendorRows } = await supabase
     .from("vendors").select("id, name").eq("active", true).order("name").range(...rangeFor(UNPAGINATED_MAX));
-  const { data: grantRows } = await supabase
-    .from("rights_grants").select("id, title_id, rights_type, territory_mode, territories").is("effective_to", null);
+  // Companions were unbounded: PostgREST max_rows=1000 returned a short list that
+  // looked finished. Class 2: IN the page/picker ids (already ≤200 / ≤500) + probe
+  // so truncation is visible. Class 1 deliveries/titles/vendors bounds stay as-is.
+  const companions = await loadGcDeliveryCompanions(supabase, {
+    formTitleIds: uniqueIds((titleRows ?? []).map((t) => t.id)),
+    pageTitleIds: uniqueIds(list.map((d) => d.title_id)),
+    pageDeliveryIds: uniqueIds(list.map((d) => d.id)),
+  });
   const titleOpts = (titleRows ?? []).map((t) => ({ id: t.id, label: `${t.catalog_id} · ${t.title}` }));
   const vendorOpts = (vendorRows ?? []).map((v) => ({ id: v.id, name: v.name }));
   const grantsByTitle: Record<string, { id: string; label: string }[]> = {};
-  for (const g of grantRows ?? []) {
+  for (const g of companions.grants.rows) {
     (grantsByTitle[g.title_id] ??= []).push({
       id: g.id,
       label: `${g.rights_type} · ${g.territory_mode}${g.territories?.length ? " " + g.territories.join(",") : ""}`,
     });
   }
 
-  // Portal-link management (Task 10): master assets to link, this delivery's
-  // links, and the access-event log for those links. GC RLS (is_gc_staff) permits
-  // these SELECTs across all orgs — see 20260720000100_portal_gate.sql.
-  const { data: masterRows } = await supabase
-    .from("assets")
-    .select("id, title_id, original_filename, bytes")
-    .eq("kind", "master");
   const mastersByTitle: Record<string, Master[]> = {};
-  for (const a of masterRows ?? []) {
+  for (const a of companions.masters.rows) {
     (mastersByTitle[a.title_id] ??= []).push({
       id: a.id, original_filename: a.original_filename, bytes: a.bytes,
     });
   }
 
-  const { data: linkRows } = await supabase
-    .from("portal_links")
-    .select("id, delivery_id, asset_id, expires_at, revoked_at, created_at")
-    .eq("purpose", "master_download") // deliveries queue shows only delivery-scoped master links
-    .order("created_at", { ascending: false });
   const linksByDelivery: Record<string, PortalLink[]> = {};
-  for (const l of linkRows ?? []) {
+  for (const l of companions.links.rows) {
     if (!l.delivery_id || !l.asset_id) continue; // master_download rows always set both
     (linksByDelivery[l.delivery_id] ??= []).push({
       id: l.id, asset_id: l.asset_id, expires_at: l.expires_at, revoked_at: l.revoked_at,
     });
   }
 
-  // Recipient sessions, so staff can cut one recipient without cutting the link. RLS on
-  // portal_sessions is gc_staff-only, so this returns nothing for anyone else.
-  const { data: sessionRows } = await supabase
-    .from("portal_sessions")
-    .select("id, link_id, name, company, email, expires_at, revoked_at")
-    .order("created_at", { ascending: false });
-  const sessions: PortalSession[] = sessionRows ?? [];
-
-  const { data: eventRows } = await supabase
-    .from("portal_access_events")
-    .select("link_id, event_type, email, company, occurred_at")
-    .order("occurred_at", { ascending: false });
+  const sessions: PortalSession[] = companions.sessions.rows;
   const eventsByLink: Record<string, PortalAccessEvent[]> = {};
-  for (const e of eventRows ?? []) {
+  for (const e of companions.events.rows) {
     (eventsByLink[e.link_id] ??= []).push(e);
   }
+  const grantsTruncated = companions.grants.truncated;
+  const portalTruncated = portalCompanionsTruncated(companions);
 
   return (
     <>
       <h1 className="t-subhead text-ink pb-1">Deliveries</h1>
       <p className="t-body-sm text-ink-3 pb-6">Placements across all clients. Status is set by hand.</p>
+
+      {grantsTruncated ? (
+        <InlineNotice tone="info" className="mb-4" data-gc-deliveries-truncated="grants">
+          {GC_DELIVERIES_TRUNCATED.grants}
+        </InlineNotice>
+      ) : null}
 
       <div className="mb-8 max-w-xl">
         <NewDeliveryForm titles={titleOpts} vendors={vendorOpts} grantsByTitle={grantsByTitle} />
@@ -105,6 +102,12 @@ export default async function GcDeliveriesPage() {
       <div className="mb-8 max-w-xl">
         <ExportPanel vendors={exportVendors} />
       </div>
+
+      {portalTruncated ? (
+        <InlineNotice tone="info" className="mb-4" data-gc-deliveries-truncated="companions">
+          {GC_DELIVERIES_TRUNCATED.companions}
+        </InlineNotice>
+      ) : null}
 
       {list.length === 0 ? (
         <Card>
