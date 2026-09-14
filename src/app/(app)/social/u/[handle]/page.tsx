@@ -28,6 +28,7 @@ export default async function SocialPublicProfilePage({
   const handle = parseProfileHandleParam(raw);
   const supabase = await createClient();
   const own = await ensureOwnSocialProfile(supabase, ctx.user);
+  // Null is a missing handle or an RLS-hidden row — same empty state.
   const { data: member } = handle
     ? await supabase
         .from("profiles")

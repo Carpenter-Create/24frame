@@ -11,7 +11,9 @@ import type { SocialMediaItem, SocialMediaRuleError } from "@/lib/social-media";
 
 // Social workspace copy and input rules. Lives in lib/, not JSX.
 // Public share / preview URL is https://24frame.co/@{bareHandle}.
-// In-app navigation stays /social/u/@{bareHandle} (see socialProfileHref).
+// In-app navigation is /social/u/{bareHandle} (see socialProfileHref).
+// A path segment starting with @ is a Next.js App Router parallel-route
+// slot, so the in-app segment must stay bare. Display stays @handle.
 // Account faces reuse signedAvatarUrl. Post media uses 24frame-media
 // keys on posts.media. Title S3 / S3_BUCKET stay film-only.
 // Group DMs reuse Pack 4 conversations.kind=group. Gated community
@@ -42,7 +44,7 @@ export const SOCIAL_PROFILE_POSTS_PAGE = LIST_PAGE;
 
 // Public profile URL (locked): https://24frame.co/@{bareHandle}
 // Example: https://24frame.co/@acarpcreate
-// In-app route remains /social/u/@{bareHandle}. Persist the bare handle
+// In-app route is /social/u/{bareHandle}. Persist the bare handle
 // in profiles.handle (no @). Display as @handle.
 // /social/members/{handle} redirects to the in-app route.
 
@@ -65,11 +67,11 @@ export function handleFieldValue(handle: string): string {
 
 export function socialProfileHref(handle: string): string {
   const bare = bareHandle(handle);
-  return bare ? `${SOCIAL_ROUTES.profileByHandle}/@${bare}` : SOCIAL_ROUTES.profileByHandle;
+  return bare ? `${SOCIAL_ROUTES.profileByHandle}/${bare}` : SOCIAL_ROUTES.profileByHandle;
 }
 
-// Apex /@handle → in-app /social/u/@handle. Bare /legal and friends are not
-// rewritten. Reserved names skip the vanity rewrite so they cannot collide
+// Apex /@handle → in-app /social/u/{bareHandle}. Bare /legal and friends are
+// not rewritten. Reserved names skip the vanity rewrite so they cannot collide
 // with marketing/infra paths if the apex host hits this project.
 export const SOCIAL_VANITY_RESERVED_HANDLES = [
   "admin",
@@ -96,6 +98,26 @@ export function socialVanityInternalPath(pathname: string): string | null {
   const handle = matchSocialVanityPath(pathname);
   if (!handle) return null;
   return socialProfileHref(handle);
+}
+
+// Leftover /social/u/@handle bookmarks. Next.js treats an @ segment as a
+// parallel-route slot, so those URLs never reach u/[handle]/page.tsx.
+export function matchDecoratedInAppProfilePath(pathname: string): string | null {
+  const prefix = `${SOCIAL_ROUTES.profileByHandle}/`;
+  if (!pathname.startsWith(prefix)) return null;
+  let segment = pathname.slice(prefix.length);
+  try {
+    segment = decodeURIComponent(segment);
+  } catch {
+    // keep the raw segment
+  }
+  if (!segment.startsWith("@") || segment.includes("/")) return null;
+  return normalizeHandle(segment);
+}
+
+export function socialProfileRewriteTarget(pathname: string): string | null {
+  const handle = matchSocialVanityPath(pathname) ?? matchDecoratedInAppProfilePath(pathname);
+  return handle ? socialProfileHref(handle) : null;
 }
 
 export function socialProfilePublicUrl(handle: string): string {
@@ -470,6 +492,7 @@ export function profileInsertRow(input: {
   level: number;
   status: "active";
   trust_state: "new";
+  discoverable: true;
 } {
   return {
     id: input.userId,
@@ -480,6 +503,7 @@ export function profileInsertRow(input: {
     level: 1,
     status: "active",
     trust_state: "new",
+    discoverable: true,
     ...(input.birthDate ? { birth_date: input.birthDate } : {}),
   };
 }
