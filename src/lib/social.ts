@@ -1,3 +1,4 @@
+import { LIST_PAGE } from "@/lib/list-bounds";
 import { PRODUCT_NAME, SOCIAL_WORKSPACE } from "@/lib/product";
 import type { SocialMediaItem, SocialMediaRuleError } from "@/lib/social-media";
 
@@ -28,6 +29,9 @@ export const SOCIAL_ROUTES = {
 
 /** Apex origin for the public profile URL preview and share string. */
 export const SOCIAL_PROFILE_ORIGIN = "https://24frame.co";
+
+/** Author history page. Same catalog bound as Home; probe for honest truncation. */
+export const SOCIAL_PROFILE_POSTS_PAGE = LIST_PAGE;
 
 // Public profile URL (locked): https://24frame.co/@{bareHandle}
 // Example: https://24frame.co/@acarpcreate
@@ -202,6 +206,10 @@ export const SOCIAL = {
     submit: "Save handle",
     handleTaken: "That handle is already taken.",
     created: "Profile created.",
+    postsEmpty: "No posts yet.",
+    postsTruncated: `Showing the latest ${LIST_PAGE} posts.`,
+    uploadPhoto: "Upload photo",
+    uploadingPhoto: "Uploading…",
   },
   member: {
     title: "Member",

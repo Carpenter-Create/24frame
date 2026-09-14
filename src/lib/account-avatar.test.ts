@@ -26,6 +26,7 @@ const layoutSrc = readFileSync(join(here, "../app/(app)/layout.tsx"), "utf8");
 const settingsSrc = readFileSync(join(here, "../app/(app)/settings/profile/page.tsx"), "utf8");
 const formSrc = readFileSync(join(here, "../app/(app)/account/account-profile-form.tsx"), "utf8");
 const socialProfileSrc = readFileSync(join(here, "../app/(app)/social/profile/page.tsx"), "utf8");
+const socialFormsSrc = readFileSync(join(here, "../components/social/social-forms.tsx"), "utf8");
 const uploadSrc = readFileSync(join(here, "../app/(app)/account/actions.ts"), "utf8");
 
 describe("avatarObjectKey", () => {
@@ -83,8 +84,14 @@ describe("one face across chrome, Settings, and Social", () => {
     expect(settingsSrc).toContain("signedAvatarUrl(ctx.user.id)");
     expect(formSrc).toContain("uploadAccountPhoto");
     expect(socialProfileSrc).toContain("signedAvatarUrl(profile.id)");
+    expect(socialProfileSrc).toContain("SocialProfilePhotoForm");
     expect(socialProfileSrc).not.toContain("uploadAccountPhoto");
     expect(socialProfileSrc).not.toContain("putAvatarObject");
+    expect(socialFormsSrc).toContain("uploadAccountPhoto");
+    expect(socialFormsSrc).toContain('body.set("photo", file)');
+    expect(socialFormsSrc).not.toContain("putAvatarObject");
+    expect(socialFormsSrc).not.toContain("avatarObjectKey");
+    expect(socialFormsSrc).not.toContain("S3_MEDIA");
     expect(uploadSrc).toContain("putAvatarObject(ctx.user.id");
     expect(uploadSrc).toContain('revalidatePath("/", "layout")');
     expect(layoutSrc).not.toContain("putAvatarObject");
