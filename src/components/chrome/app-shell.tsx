@@ -29,8 +29,13 @@ import {
 import { PRODUCT_NAME } from "@/lib/product";
 import { isSettingsPath, SETTINGS_RAIL_PAD_CLASS } from "@/lib/settings";
 import { SOCIAL_RAIL } from "@/lib/nav";
-import { SOCIAL_RAIL_MAIN_OFFSET_CLASS, SOCIAL_RAIL_WIDTH_CLASS } from "@/lib/social-chrome";
+import {
+  SOCIAL_RAIL_MAIN_OFFSET_CLASS,
+  SOCIAL_RAIL_WIDTH_CLASS,
+  SOCIAL_TAB_BAR_MAIN_PAD_CLASS,
+} from "@/lib/social-chrome";
 import { resolveWorkspaceMode, workspaceHome, type WorkspaceMode } from "@/lib/workspace";
+import { SocialMobileTabBar } from "@/components/social/social-mobile-tab-bar";
 import { SocialRailAccountChip, SocialRailCreateCta } from "@/components/social/social-rail-extras";
 import { SocialTopBar } from "@/components/social/social-top-bar";
 
@@ -121,8 +126,9 @@ export function AppShell({
             className={cn("min-h-[calc(100dvh-var(--header-height))]", SOCIAL_RAIL_MAIN_OFFSET_CLASS)}
             data-app-social-frame=""
           >
-            <div className="w-full px-4 py-4">{children}</div>
+            <div className={cn("w-full px-4 py-4", SOCIAL_TAB_BAR_MAIN_PAD_CLASS)}>{children}</div>
           </main>
+          <SocialMobileTabBar />
         </div>
       </AskAssistantChromeProvider>
     );

@@ -189,15 +189,18 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).toContain("h-[168px]");
     expect(chrome).toContain("w-[112px]");
     expect(icons).toContain("SOCIAL_ICON_SIZE_STORY_PLUS = 20");
+    expect(icons).toContain("SOCIAL_ICON_SIZE_TAB = 22");
     expect(icons).not.toContain("SOCIAL_ICON_SIZE_DOCK");
   });
 
-  it("strips the Mercury floating dock from Social", () => {
+  it("ships a flush sticky tab bar and keeps the Mercury floating dock gone", () => {
     const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
     const topBar = readFileSync("src/components/social/social-top-bar.tsx", "utf8");
+    const tabBar = readFileSync("src/components/social/social-mobile-tab-bar.tsx", "utf8");
     const storyViewer = readFileSync("src/app/(app)/social/stories/[id]/page.tsx", "utf8");
     expect(existsSync("src/components/social/social-mobile-dock.tsx")).toBe(false);
     expect(shell).not.toContain("SocialMobileDock");
+    expect(shell).toContain("SocialMobileTabBar");
     expect(shell).not.toContain("data-social-mobile-pill");
     expect(shell).not.toContain("data-social-create-fab");
     expect(home).not.toContain("SocialMobileDock");
@@ -209,6 +212,22 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(topBar).toContain("data-social-header-search");
     expect(topBar).not.toContain("data-social-mobile-pill");
     expect(readFileSync("src/lib/nav.ts", "utf8")).not.toContain("SOCIAL_MOBILE_PILL");
+    expect(tabBar).toContain("data-social-tab-bar");
+    expect(tabBar).toContain("SOCIAL_NAV");
+    expect(tabBar).toContain("SOCIAL_ICON_SIZE_TAB");
+    expect(tabBar).toContain("isSocialTabActive");
+    expect(tabBar).not.toContain("data-social-create-fab");
+    expect(tabBar).not.toContain("rounded-full");
+    expect(chrome).toContain("SOCIAL_TAB_BAR_CLASS");
+    expect(chrome).toContain("border-t border-hairline");
+    expect(chrome).toContain("h-14");
+    expect(SOCIAL_NAV.map((item) => item.label)).toEqual([
+      "Home",
+      "Explore",
+      "Create",
+      "Messages",
+      "Profile",
+    ]);
   });
 
   it("keeps Social Figma and Settings Mercury on separate registers", () => {

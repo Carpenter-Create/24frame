@@ -44,6 +44,7 @@ export function socialNavIconName(href: string): SocialPhosphorIconName {
 }
 
 export const SOCIAL_ICON_SIZE_NAV = 20;
+export const SOCIAL_ICON_SIZE_TAB = 22;
 export const SOCIAL_ICON_SIZE_EMPTY = 40;
 export const SOCIAL_ICON_SIZE_STORY_CREATE = 28;
 export const SOCIAL_ICON_SIZE_STORY_PLUS = 20;

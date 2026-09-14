@@ -120,6 +120,16 @@ export const SOCIAL_CREATE_CTA_CLASS =
 export const SOCIAL_ACCOUNT_CHIP_CLASS =
   "flex w-full items-center gap-2.5 rounded-[12px] border border-hairline bg-surface-muted p-2.5";
 
+export const SOCIAL_TAB_BAR_CLASS =
+  "fixed inset-x-0 bottom-0 z-40 border-t border-hairline bg-surface pb-[max(12px,env(safe-area-inset-bottom))] md:hidden";
+
+export const SOCIAL_TAB_BAR_ROW_CLASS = "flex h-14 w-full items-center";
+
+export const SOCIAL_TAB_ITEM_CLASS =
+  "flex h-full flex-1 items-center justify-center px-2 py-3";
+
+export const SOCIAL_TAB_BAR_MAIN_PAD_CLASS = "pb-20 md:pb-4";
+
 export const SOCIAL_HOME_TAB_CLASS =
   "flex flex-1 flex-col items-center gap-2.5 px-4 pt-3 t-body";
 

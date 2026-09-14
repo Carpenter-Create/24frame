@@ -461,6 +461,8 @@ describe("AppShell rail-collapse chevron", () => {
     expect(html).not.toContain("data-social-mobile-pill");
     expect(html).not.toContain("data-social-create-fab");
     expect(html).not.toContain("data-social-mobile-dock");
+    expect(html).toContain("data-social-tab-bar");
+    expect(html).toContain("data-social-tab-item");
     expect(html).toContain("data-social-header-tray");
     expect(html).not.toContain("data-rail-collapse");
     expect(html).not.toContain("data-mobile-nav-trigger");
