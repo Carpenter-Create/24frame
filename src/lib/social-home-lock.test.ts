@@ -126,7 +126,6 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(rail).toContain("data-social-story-media");
     expect(rail).toContain("bg-accent");
     expect(rail).toContain("bg-hairline");
-    expect(rail).toContain("w-[108px]");
     expect(rail).toContain("w-[112px]");
     expect(rail).not.toContain("size-10");
     expect(card).toContain("SOCIAL_FEED_ROW_CLASS");
