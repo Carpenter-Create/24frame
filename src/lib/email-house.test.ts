@@ -7,6 +7,7 @@ import {
   EMAIL_ACCENT,
   EMAIL_ADDRESS,
   EMAIL_BG,
+  EMAIL_BODY,
   EMAIL_BODY_SIZE,
   EMAIL_BORDER,
   EMAIL_BUTTON_RADIUS,
@@ -23,6 +24,7 @@ import {
   EMAIL_SITE_LABEL,
   EMAIL_SITE_URL,
   EMAIL_SLOGAN,
+  EMAIL_TERTIARY,
   houseOtpCode,
   housePrimaryButton,
   housePrimaryLink,
@@ -50,7 +52,14 @@ function assertHouseChrome(html: string) {
   expect(EMAIL_ACCENT).toBe(SPORTY_BLUE);
   expect(html).toContain(EMAIL_LOGO_URL);
   expect(html).toContain('alt="24Frame"');
+  expect(EMAIL_SLOGAN).toBe("Built for the creator class.");
   expect(html).toContain(EMAIL_SLOGAN);
+  expect(html).not.toContain("Radically different film distribution.");
+  expect(html).toContain(`color:${EMAIL_BODY}">${EMAIL_SLOGAN}`);
+  expect(html).not.toContain(`color:${EMAIL_TERTIARY}">${EMAIL_SLOGAN}`);
+  expect(html).toContain(`color:${EMAIL_TERTIARY}">${EMAIL_COPYRIGHT}`);
+  expect(EMAIL_BODY).toBe("#3F4650");
+  expect(EMAIL_TERTIARY).toBe("#9AA0A9");
   expect(html).toContain(EMAIL_SITE_URL);
   expect(html).toContain(EMAIL_SITE_LABEL);
   expect(html).toContain(`color:${SPORTY_BLUE}`);
