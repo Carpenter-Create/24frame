@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ComponentProps, type ReactNode } from "react";
+import { useState, type ComponentProps, type ReactNode } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
 
@@ -74,16 +74,18 @@ export function IdentityPhoto({
   photoUrl?: string | null;
 }) {
   const face = accountPhotoSrc(photoUrl);
-  const [broken, setBroken] = useState(false);
-
-  useEffect(() => {
-    setBroken(false);
-  }, [face]);
+  const [brokenSrc, setBrokenSrc] = useState<string | null>(null);
+  const broken = Boolean(face && brokenSrc === face);
 
   if (!face || broken) return avatarInitial;
   return (
     // eslint-disable-next-line @next/next/no-img-element -- same-origin face route; handler signs a short-lived GET
-    <img src={face} alt="" className="size-full object-cover" onError={() => setBroken(true)} />
+    <img
+      src={face}
+      alt=""
+      className="size-full object-cover"
+      onError={() => setBrokenSrc(face)}
+    />
   );
 }
 
