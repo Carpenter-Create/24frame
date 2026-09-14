@@ -107,8 +107,10 @@ describe("AppShell header", () => {
     expect(renderShell(undefined, "Ada Lovelace", false, "https://s3.example/signed-avatar")).toContain(
       'data-photo="https://s3.example/signed-avatar"',
     );
-    expect(shellSrc).toContain("<UserMenu email={email} name={name} photoUrl={photoUrl} />");
+    expect(shellSrc).toContain("defaultWorkspace={defaultWorkspace}");
     expect(shellSrc).toContain("Phone avatar opens 544:561");
+    expect(shellSrc).toContain("Workspace switcher lives in the account menu");
+    expect(shellSrc).not.toContain("WorkspaceSwitcher");
     expect(shellSrc).toContain("<MobileNav isGcStaff={isGcStaff} workspace={workspace} />");
     expect(shellSrc).not.toContain("AccountOverlay");
     expect(shellSrc).not.toContain("AccountSheet");
@@ -117,7 +119,7 @@ describe("AppShell header", () => {
   it("is avatar-only on every Access route — no org switcher", () => {
     expect(shellSrc).not.toContain("OrganizationSwitcher");
     expect(shellSrc).toContain("justify-end");
-    expect(shellSrc).toContain("<UserMenu email={email} name={name} photoUrl={photoUrl} />");
+    expect(shellSrc).toContain("defaultWorkspace={defaultWorkspace}");
 
     for (const path of ["/", "/titles", "/deliveries", "/catalog-health", "/messages"]) {
       navigation.pathname = path;

@@ -44,12 +44,19 @@ describe("Adam Mercury register lock", () => {
       expect(file).not.toContain("Education");
     }
     expect(ACCOUNT_SHEET_ITEMS).toBe(USER_MENU_ACTIONS);
+    expect(USER_MENU_ACTIONS.map((item) => item.kind)[0]).toBe("workspace");
+    expect(USER_MENU_ACTIONS.map((item) => item.kind)[1]).toBe("profile");
     expect(SETTINGS_LOCAL_NAV.map((item) => item.label)).toEqual([
       "Home",
       "Profile",
       "Agreements",
       "Refer a friend",
     ]);
+    expect(src("src/components/chrome/app-shell.tsx")).not.toContain("WorkspaceSwitcher");
+    expect(src("src/components/chrome/account-sheet.tsx")).toContain(
+      'data-user-menu-item="workspace"',
+    );
+    expect(src("src/components/chrome/account-sheet.tsx")).toContain("AccountWorkspaceRow");
   });
 
   it("keeps shared account/settings layout tokens — Phosphor is glyph-only", () => {

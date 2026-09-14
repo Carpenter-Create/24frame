@@ -110,8 +110,7 @@ describe("UserMenu close control", () => {
   it("opens the mobile 544:561 / 537:557 sheet and the desktop 629:795 dropdown from the avatar", () => {
     expect(menuSrc).toContain("MobileAccountMenu");
     expect(menuSrc).toContain("DesktopAccountMenu");
-    expect(menuSrc).toContain("<MobileAccountMenu email={email} name={name} photoUrl={photoUrl} />");
-    expect(menuSrc).toContain("<DesktopAccountMenu email={email} name={name} photoUrl={photoUrl} />");
+    expect(menuSrc).toContain("defaultWorkspace={defaultWorkspace}");
     expect(sheetSrc).toContain('data-user-menu-desktop=""');
     expect(sheetSrc).toContain("hidden md:block");
     expect(sheetSrc).toContain("ACCOUNT_SHEET_ITEMS");
@@ -152,12 +151,17 @@ describe("UserMenu item lock (source)", () => {
     expect(sheetSrc).toContain("MobileAccountMenu");
     expect(sheetSrc).toContain('data-user-menu-item="logOut"');
     expect(sheetSrc).toContain('setFace(face === "appearance" ? "main" : "appearance")');
+    expect(sheetSrc).toContain('setFace(face === "workspace" ? "main" : "workspace")');
     expect(sheetSrc).toContain('setFace("appearance")');
+    expect(sheetSrc).toContain('setFace("workspace")');
     expect(sheetSrc).toContain('onBack={() => setFace("main")}');
     expect(sheetSrc).not.toContain("onUserMenuAppearance");
     expect(sheetSrc).not.toContain("toggleDocumentTheme");
     expect(sheetSrc).not.toContain("ThemeGlyph");
     expect(sheetSrc).not.toContain("/account/appearance");
+    expect(sheetSrc).not.toContain("/account/workspace");
+    expect(sheetSrc).toContain("AccountWorkspaceRow");
+    expect(sheetSrc).toContain("AccountWorkspaceFlyout");
     expect(sheetSrc).not.toContain("type=\"radio\"");
     for (const absent of USER_MENU_ABSENT) {
       expect(sheetSrc).not.toContain(absent);
@@ -173,14 +177,17 @@ describe("UserMenu item lock (source)", () => {
     expect(USER_MENU.helpHref).toBe("/help");
     expect(USER_MENU.referHref).toBe("/settings/refer");
     expect(USER_MENU).not.toHaveProperty("appearanceHref");
+    expect(USER_MENU).not.toHaveProperty("workspaceHref");
     expect(USER_MENU).not.toHaveProperty("companyProfileHref");
     expect(USER_MENU.appearance).toBe("Appearance");
+    expect(USER_MENU.workspace).toBe("Workspace");
     expect(APPEARANCE.back).toBe("Back");
     expect(APPEARANCE.back).not.toBe("Back to main menu");
   });
 
   it("desktop panel items are the same list as mobile", () => {
     expect(USER_MENU_ACTIONS.map((item) => item.label)).toEqual([
+      "Workspace",
       "Profile",
       "Agreements",
       "Appearance",

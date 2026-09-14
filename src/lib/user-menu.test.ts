@@ -11,8 +11,9 @@ import {
 } from "./user-menu";
 
 describe("user menu lock", () => {
-  it("keeps the same Identity rows on mobile and desktop: Profile, Agreements, Appearance, Help, Refer a friend", () => {
+  it("keeps the same Identity rows on mobile and desktop: Workspace, Profile, Agreements, Appearance, Help, Refer a friend", () => {
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).toEqual([
+      "workspace",
       "profile",
       "agreements",
       "appearance",
@@ -20,12 +21,16 @@ describe("user menu lock", () => {
       "refer",
     ]);
     expect(USER_MENU_ACTIONS.map((item) => item.label)).toEqual([
+      "Workspace",
       "Profile",
       "Agreements",
       "Appearance",
       "Help",
       "Refer a friend",
     ]);
+    expect(USER_MENU_ACTIONS.map((item) => item.kind).indexOf("workspace")).toBeLessThan(
+      USER_MENU_ACTIONS.map((item) => item.kind).indexOf("profile"),
+    );
   });
 
   it("points each door at its existing route — Appearance is not a page", () => {
@@ -36,29 +41,35 @@ describe("user menu lock", () => {
     expect(USER_MENU).not.toHaveProperty("legal");
     expect(USER_MENU).not.toHaveProperty("legalHref");
     expect(USER_MENU).not.toHaveProperty("appearanceHref");
+    expect(USER_MENU).not.toHaveProperty("workspaceHref");
     expect(USER_MENU).not.toHaveProperty("companyProfile");
     expect(USER_MENU).not.toHaveProperty("companyProfileHref");
     expect(USER_MENU.appearance).toBe("Appearance");
+    expect(USER_MENU.workspace).toBe("Workspace");
     expect(USER_MENU_ACTIONS[0]).toEqual({
+      kind: "workspace",
+      label: "Workspace",
+    });
+    expect(USER_MENU_ACTIONS[1]).toEqual({
       kind: "profile",
       label: "Profile",
       href: "/settings/profile",
     });
-    expect(USER_MENU_ACTIONS[1]).toEqual({
+    expect(USER_MENU_ACTIONS[2]).toEqual({
       kind: "agreements",
       label: "Agreements",
       href: "/settings/agreements",
     });
-    expect(USER_MENU_ACTIONS[2]).toEqual({
+    expect(USER_MENU_ACTIONS[3]).toEqual({
       kind: "appearance",
       label: "Appearance",
     });
-    expect(USER_MENU_ACTIONS[3]).toEqual({
+    expect(USER_MENU_ACTIONS[4]).toEqual({
       kind: "help",
       label: "Help",
       href: "/help",
     });
-    expect(USER_MENU_ACTIONS[4]).toEqual({
+    expect(USER_MENU_ACTIONS[5]).toEqual({
       kind: "refer",
       label: "Refer a friend",
       href: "/settings/refer",
