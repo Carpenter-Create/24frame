@@ -281,7 +281,7 @@ describe("Social home", () => {
     expect(html).toContain("data-social-wall-older");
     expect(html).toContain(SOCIAL.home.olderPosts);
     const lastKept = posts[SOCIAL_FOLLOWING_WALL_LIMIT - 1]!;
-    expect(html).toContain(encodeFollowingWallCursor(lastKept));
+    expect(html).toContain(`after=${encodeURIComponent(encodeFollowingWallCursor(lastKept))}`);
     expect(html).toContain(`data-social-post="${posts[0]!.id}"`);
     expect(html).not.toContain(`data-social-post="${posts[SOCIAL_FOLLOWING_WALL_LIMIT]!.id}"`);
   });
