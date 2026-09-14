@@ -25,7 +25,6 @@ import {
   socialGroupHref,
   socialMemberHref,
   socialInitials,
-  socialProfilePublicHost,
   socialRelativeTime,
 } from "@/lib/social";
 import { SocialLikeButton } from "./social-forms";
@@ -193,9 +192,6 @@ export function SocialProfileIdentity({
             <div className="min-w-0">
               <p className="text-[18px] font-semibold text-ink md:text-[22px]">{name}</p>
               <p className={cn(SOCIAL_HANDLE_PILL_CLASS, "mt-1")}>{displayHandle(handle)}</p>
-              <p data-social-profile-url="" className="mt-1 t-label text-ink-2">
-                {socialProfilePublicHost(handle)}
-              </p>
             </div>
             {actionRow ? <div className="hidden shrink-0 md:flex">{actionRow}</div> : null}
           </div>
