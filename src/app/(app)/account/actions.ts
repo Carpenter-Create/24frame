@@ -64,6 +64,8 @@ export async function uploadAccountPhoto(formData: FormData): Promise<{ error?: 
 
   revalidatePath("/settings");
   revalidatePath("/settings/profile");
+  revalidatePath("/social");
+  revalidatePath("/social/profile");
   revalidatePath("/");
   revalidatePath("/", "layout");
   return {};

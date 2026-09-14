@@ -158,6 +158,8 @@ describe("uploadAccountPhoto", () => {
     expect(body).toBeInstanceOf(Uint8Array);
     expect(revalidatePath).toHaveBeenCalledWith("/settings");
     expect(revalidatePath).toHaveBeenCalledWith("/settings/profile");
+    expect(revalidatePath).toHaveBeenCalledWith("/social");
+    expect(revalidatePath).toHaveBeenCalledWith("/social/profile");
     expect(revalidatePath).toHaveBeenCalledWith("/");
     expect(revalidatePath).toHaveBeenCalledWith("/", "layout");
   });

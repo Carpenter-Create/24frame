@@ -1,8 +1,8 @@
 import type { createClient } from "@/lib/supabase/server";
-import { LIST_PAGE, rangeFor } from "@/lib/list-bounds";
+import { LIST_PAGE, probeRange, rangeFor, splitProbe } from "@/lib/list-bounds";
 import { followingAuthorIds } from "@/lib/social-home";
 import type { SocialCategoryTopic } from "@/lib/social-categories";
-import { displayHandle, socialProfileHref } from "@/lib/social";
+import { displayHandle, SOCIAL_PROFILE_POSTS_PAGE, socialProfileHref } from "@/lib/social";
 import { isStoryLive, storyRailUnseen } from "@/lib/social-stories";
 
 type ServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -98,6 +98,31 @@ export async function loadFollowingPosts(
     .order("created_at", { ascending: false })
     .range(...rangeFor(LIST_PAGE));
   return data ?? [];
+}
+
+export type SocialAuthorPostsPage = {
+  posts: SocialPostRow[];
+  truncated: boolean;
+};
+
+/**
+ * One author's public wall posts. Mapping C: `posts.author_id` = `profiles.id`.
+ * Group walls stay on the group route. Probe so a cap is visible, not silent.
+ */
+export async function loadAuthorPosts(
+  supabase: ServerClient,
+  authorId: string,
+): Promise<SocialAuthorPostsPage> {
+  const { data } = await supabase
+    .from("posts")
+    .select("id, body, author_id, group_id, like_count, created_at, media, category")
+    .eq("status", "active")
+    .is("group_id", null)
+    .eq("author_id", authorId)
+    .order("created_at", { ascending: false })
+    .range(...probeRange(SOCIAL_PROFILE_POSTS_PAGE));
+  const { rows, truncated } = splitProbe(data, SOCIAL_PROFILE_POSTS_PAGE);
+  return { posts: rows, truncated };
 }
 
 export async function loadVisiblePosts(

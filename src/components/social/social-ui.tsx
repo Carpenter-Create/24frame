@@ -1,9 +1,18 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 
 import { HouseEmpty, TextAction } from "@/components/chrome/house";
+import { InlineNotice } from "@/components/ui/inline-notice";
 import { cn } from "@/lib/cn";
 import { IDENTITY_AVATAR_CLASS } from "@/lib/house-sheet";
-import { SOCIAL, SOCIAL_ROUTES, socialGroupHref, socialMemberHref, socialInitials } from "@/lib/social";
+import {
+  displayHandle,
+  SOCIAL,
+  SOCIAL_ROUTES,
+  socialGroupHref,
+  socialMemberHref,
+  socialInitials,
+} from "@/lib/social";
 import { SocialLikeButton } from "./social-forms";
 
 export function SocialNeedProfile() {
@@ -115,6 +124,102 @@ export function SocialPostMedia({ items }: { items: readonly SocialPostMediaItem
       )}
     </div>
   );
+}
+
+export function SocialProfileIdentity({
+  name,
+  handle,
+  photoUrl,
+  bio,
+  ring = null,
+  photoAction,
+  children,
+}: {
+  name: string;
+  handle: string;
+  photoUrl?: string | null;
+  bio?: string | null;
+  ring?: "unseen" | "live" | null;
+  photoAction?: ReactNode;
+  children?: ReactNode;
+}) {
+  return (
+    <div data-social-profile-identity="" className="flex flex-col gap-[var(--space-4)]">
+      <div className="flex items-center gap-[var(--space-4)]">
+        <SocialAvatar name={name} photoUrl={photoUrl} ring={ring} />
+        <div className="min-w-0">
+          <p className="t-body font-medium text-ink">{name}</p>
+          <p className="t-body-sm text-ink-3">{displayHandle(handle)}</p>
+        </div>
+        {photoAction}
+      </div>
+      {bio?.trim() ? (
+        <p data-social-profile-bio="" className="t-body text-ink whitespace-pre-wrap">
+          {bio}
+        </p>
+      ) : null}
+      {children}
+    </div>
+  );
+}
+
+export function SocialAuthorHistory({
+  posts,
+  truncated,
+}: {
+  posts: readonly SocialPostCardModel[];
+  truncated: boolean;
+}) {
+  return (
+    <div data-social-author-history="">
+      {posts.length === 0 ? (
+        <div data-social-author-empty="">
+          <HouseEmpty>{SOCIAL.profile.postsEmpty}</HouseEmpty>
+        </div>
+      ) : (
+        <div data-social-author-posts="">
+          {posts.map((post) => (
+            <SocialPostCard key={post.id} post={post} />
+          ))}
+        </div>
+      )}
+      {truncated ? (
+        <InlineNotice data-social-author-truncated="">{SOCIAL.profile.postsTruncated}</InlineNotice>
+      ) : null}
+    </div>
+  );
+}
+
+export function socialAuthorPostCard(input: {
+  post: {
+    id: string;
+    body: string | null;
+    author_id: string;
+    like_count: number;
+    created_at: string;
+  };
+  authorHandle: string;
+  authorName: string;
+  authorPhotoUrl: string | null;
+  liked: boolean;
+  canLike: boolean;
+  media: SocialPostMediaItem[];
+}): SocialPostCardModel {
+  return {
+    id: input.post.id,
+    body: input.post.body,
+    likeCount: input.post.like_count,
+    liked: input.liked,
+    createdAt: input.post.created_at,
+    authorId: input.post.author_id,
+    authorHandle: input.authorHandle,
+    authorName: input.authorName,
+    authorPhotoUrl: input.authorPhotoUrl,
+    groupSlug: null,
+    groupName: null,
+    canLike: input.canLike,
+    media: input.media,
+  };
 }
 
 export function SocialPostCard({ post }: { post: SocialPostCardModel }) {

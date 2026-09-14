@@ -50,6 +50,9 @@ describe("social copy lock", () => {
     expect(SOCIAL_ROUTES.profileByHandle).toBe("/social/u");
     expect(SOCIAL.profile.handlePlaceholder).toBe("Set your handle");
     expect(SOCIAL.profile.handleRequired).toBe("Add a handle to continue.");
+    expect(SOCIAL.profile.postsEmpty).toBe("No posts yet.");
+    expect(SOCIAL.profile.postsTruncated).toContain("200");
+    expect(SOCIAL.profile.uploadPhoto).toBe("Upload photo");
     expect(SOCIAL.courses.subtitle).toContain("Social+Education");
     expect(SOCIAL.leaderboard.private).toBe("The leaderboard is private.");
     expect(SOCIAL.leaderboard.subtitle).toContain(PRODUCT_NAME);
@@ -254,6 +257,8 @@ describe("social writes stay on the live spine", () => {
     }
     const feed = [
       "src/app/(app)/social/page.tsx",
+      "src/app/(app)/social/profile/page.tsx",
+      "src/app/(app)/social/u/[handle]/page.tsx",
       "src/app/(app)/social/groups/[slug]/page.tsx",
       "src/app/(app)/social/groups/[slug]/posts/[postId]/page.tsx",
       "src/app/(app)/social/stories/[id]/page.tsx",
@@ -261,10 +266,19 @@ describe("social writes stay on the live spine", () => {
     for (const file of feed) {
       expect(readFileSync(file, "utf8")).toMatch(/signedSocialMedia/);
     }
+    const own = readFileSync("src/app/(app)/social/profile/page.tsx", "utf8");
+    const pub = readFileSync("src/app/(app)/social/u/[handle]/page.tsx", "utf8");
+    expect(own).toContain("loadAuthorPosts");
+    expect(own).toContain("SocialAuthorHistory");
+    expect(pub).toContain("loadAuthorPosts");
+    expect(pub).toContain("SocialAuthorHistory");
     const forms = readFileSync("src/components/social/social-forms.tsx", "utf8");
     expect(forms).toContain("presignSocialMediaUpload");
+    expect(forms).toContain("uploadAccountPhoto");
     expect(forms).toContain("type=\"file\"");
+    expect(forms).not.toContain("putAvatarObject");
     expect(forms).not.toContain("S3_BUCKET");
+    expect(forms).not.toContain("S3_AVATARS_BUCKET");
     expect(forms).not.toContain("from \"@/lib/s3\"");
     expect(forms).not.toContain("from \"@/lib/cloudfront\"");
   });

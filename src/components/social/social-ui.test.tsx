@@ -5,7 +5,14 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { IDENTITY_AVATAR_CLASS } from "@/lib/house-sheet";
-import { SocialAvatar, SocialConversationFaces, SocialPostCard } from "./social-ui";
+import {
+  SocialAuthorHistory,
+  SocialAvatar,
+  SocialConversationFaces,
+  SocialPostCard,
+  SocialProfileIdentity,
+} from "./social-ui";
+import { SOCIAL } from "@/lib/social";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const uiSrc = readFileSync(join(here, "social-ui.tsx"), "utf8");
@@ -108,6 +115,61 @@ describe("SocialPostCard faces", () => {
     expect(uiSrc).not.toContain("type=\"file\"");
     expect(uiSrc).not.toContain("S3_BUCKET");
     expect(uiSrc).not.toContain("24frame-media");
+  });
+});
+
+describe("Social profile public face", () => {
+  it("renders identity, bio, and author history through PostCard", () => {
+    const identity = renderToStaticMarkup(
+      <SocialProfileIdentity
+        name="Ada Lovelace"
+        handle="ada"
+        photoUrl="https://s3.example/signed-avatar"
+        bio="Writes engines."
+      />,
+    );
+    expect(identity).toContain("data-social-profile-identity");
+    expect(identity).toContain("Ada Lovelace");
+    expect(identity).toContain("@ada");
+    expect(identity).toContain("Writes engines.");
+    expect(identity).toContain('src="https://s3.example/signed-avatar"');
+
+    const history = renderToStaticMarkup(
+      <SocialAuthorHistory
+        truncated={false}
+        posts={[
+          {
+            id: "p1",
+            body: "hello",
+            likeCount: 0,
+            liked: false,
+            createdAt: "2026-09-13T12:00:00.000Z",
+            authorId: "u1",
+            authorHandle: "ada",
+            authorName: "Ada Lovelace",
+            authorPhotoUrl: null,
+            groupSlug: null,
+            groupName: null,
+            canLike: false,
+            media: [],
+          },
+        ]}
+      />,
+    );
+    expect(history).toContain("data-social-author-history");
+    expect(history).toContain("data-social-author-posts");
+    expect(history).toContain('data-social-post="p1"');
+    expect(history).toContain("hello");
+  });
+
+  it("shows an honest empty state and names the bound when truncated", () => {
+    const empty = renderToStaticMarkup(<SocialAuthorHistory posts={[]} truncated={false} />);
+    expect(empty).toContain("data-social-author-empty");
+    expect(empty).toContain(SOCIAL.profile.postsEmpty);
+
+    const truncated = renderToStaticMarkup(<SocialAuthorHistory posts={[]} truncated />);
+    expect(truncated).toContain("data-social-author-truncated");
+    expect(truncated).toContain(SOCIAL.profile.postsTruncated);
   });
 });
 
