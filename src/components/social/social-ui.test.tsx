@@ -133,6 +133,8 @@ describe("Social profile public face", () => {
     expect(identity).toContain("data-social-profile-identity");
     expect(identity).toContain("Ada Lovelace");
     expect(identity).toContain("@ada");
+    expect(identity).toContain("24frame.co/@ada");
+    expect(identity).toContain("Copies https://24frame.co/@ada");
     expect(identity).toContain("Writes engines.");
     expect(identity).toContain('src="https://s3.example/signed-avatar"');
 
@@ -176,7 +178,7 @@ describe("Social profile public face", () => {
 });
 
 describe("SocialPostCard media", () => {
-  it("leads photo and video cards with media, then author and copy", () => {
+  it("leads hairline rows with author, then media and copy", () => {
     const html = renderToStaticMarkup(
       <SocialPostCard
         post={{
@@ -196,9 +198,9 @@ describe("SocialPostCard media", () => {
         }}
       />,
     );
-    expect(html.indexOf("data-social-post-media")).toBeGreaterThan(-1);
-    expect(html.indexOf("data-social-post-media")).toBeLessThan(html.indexOf("Ada Lovelace"));
-    expect(html.indexOf("Ada Lovelace")).toBeLessThan(html.indexOf("hello"));
+    expect(html.indexOf("Ada Lovelace")).toBeGreaterThan(-1);
+    expect(html.indexOf("Ada Lovelace")).toBeLessThan(html.indexOf("data-social-post-media"));
+    expect(html.indexOf("data-social-post-media")).toBeLessThan(html.indexOf("hello"));
   });
 
   it("renders signed image and video URLs", () => {

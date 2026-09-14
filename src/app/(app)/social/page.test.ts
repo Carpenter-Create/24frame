@@ -84,10 +84,10 @@ function chain(result: unknown) {
   return c;
 }
 
-async function renderHome(topic?: string) {
+async function renderHome(query: Record<string, string> = {}) {
   return renderToStaticMarkup(
     await SocialHomePage({
-      searchParams: Promise.resolve(topic ? { topic } : {}),
+      searchParams: Promise.resolve(query),
     }),
   );
 }
@@ -157,13 +157,21 @@ describe("Social home", () => {
     expect(html).toContain("data-social-home");
     expect(html).toContain(SOCIAL.home.title);
     expect(html).toContain("24Frame");
-    expect(html).toContain("data-social-checklist");
-    expect(html).toContain("data-social-lenses");
+    expect(html).toContain("data-social-home-composer");
+    expect(html).toContain("data-social-home-tabs");
+    expect(html).toContain(SOCIAL.home.followingTab);
+    expect(html).toContain(SOCIAL.home.forYouTab);
     expect(html).toContain("data-social-stories");
     expect(html).toContain("data-social-following-empty");
+    expect(html).toContain("data-social-for-you");
     expect(html).toContain('data-social-icon="users"');
     expect(html).toContain("Cinematography");
     expect(html).toContain("Music");
+    expect(html).toContain("data-social-first-win");
+    expect(html).toContain(SOCIAL.checklist.firstPost);
+    expect(html).toContain("data-social-empty-lenses");
+    expect(html).not.toContain("data-social-lenses");
+    expect(html).not.toContain("Education");
     expect(html).not.toContain("data-social-need-profile");
     expect(html).not.toContain("Cinematographers");
     expect(html).not.toContain("Composers");
@@ -179,8 +187,10 @@ describe("Social home", () => {
     const html = await renderHome();
     expect(ensureOwnSocialProfile).toHaveBeenCalled();
     expect(from).toHaveBeenCalledWith("stories");
-    expect(html).toContain("data-social-checklist");
+    expect(html).toContain("data-social-home-composer");
     expect(html).toContain("data-social-story-create");
+    expect(html).toContain("data-social-first-win");
+    expect(html).toContain("data-social-checklist");
     expect(html).not.toContain("data-social-need-profile");
     expect(html).not.toContain("data-social-post-form");
   });
@@ -208,7 +218,7 @@ describe("Social home", () => {
     expect(html).toContain('data-social-post="p1"');
     expect(html).toContain("Ada Lovelace");
     expect(html).toContain('src="https://s3.example/signed-avatar"');
-    expect(html).toContain("data-social-checklist");
+    expect(html).toContain("data-social-home-composer");
     expect(html).not.toContain("AL");
     expect(html).not.toContain("data-social-avatar-ring");
   });
@@ -285,6 +295,20 @@ describe("Social home", () => {
     expect(html).toContain(`after=${encodeURIComponent(encodeFollowingWallCursor(lastKept))}`);
     expect(html).toContain(`data-social-post="${posts[0]!.id}"`);
     expect(html).not.toContain(`data-social-post="${posts[SOCIAL_FOLLOWING_WALL_LIMIT]!.id}"`);
+  });
+
+  it("opens For you as suggested people and locked topics, not an invented feed", async () => {
+    stubClient({ profile: ensured });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+    const html = await renderHome({ lane: "for-you" });
+    expect(html).toContain("data-social-for-you-lane");
+    expect(html).toContain(SOCIAL.forYou.people);
+    expect(html).toContain(SOCIAL.forYou.topics);
+    expect(html).toContain("Cinematography");
+    expect(html).not.toContain("Education");
+    expect(html).not.toContain("Riley Okonkwo");
+    expect(html).not.toContain("#MicroDramaPilot");
+    expect(html).not.toContain("data-social-feed");
   });
 });
 

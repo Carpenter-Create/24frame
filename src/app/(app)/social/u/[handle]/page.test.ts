@@ -162,6 +162,13 @@ describe("Social public profile", () => {
     expect(html).toContain("data-social-author-history");
     expect(html).toContain("data-social-follow");
     expect(html).toContain("data-social-share");
+    expect(html).toContain("data-social-profile-tabs");
+    expect(html).toContain(SOCIAL.profile.postsTab);
+    expect(html).toContain(SOCIAL.profile.highlightsTab);
+    expect(html).toContain("24frame.co/@ada");
+    expect(html).toContain("Copies https://24frame.co/@ada");
+    expect(html).toContain("data-social-for-you");
+    expect(html).not.toContain("Education");
     expect(html).not.toContain("data-social-open-dm");
     expect(html).not.toContain("data-social-profile-form");
     expect(html).not.toContain("data-social-bio-form");

@@ -71,10 +71,10 @@ export const SOCIAL_NAV: LucideNavItem[] = [
   { label: "Profile", href: SOCIAL_ROUTES.profile, family: "lucide", icon: UserRound },
 ];
 
-// Phone Social jobs. Create is the FAB, not a pill destination.
-export const SOCIAL_MOBILE_PILL: LucideNavItem[] = SOCIAL_NAV.filter(
-  (item) => item.href !== SOCIAL_ROUTES.create,
-);
+export const SOCIAL_RAIL = {
+  workspace: "Social",
+  destinations: "Destinations",
+} as const;
 
 // Staff rail eyebrow. Not a 24Frame product wordmark.
 export const STAFF_RAIL_EYEBROW = "Staff";
@@ -98,6 +98,20 @@ export const MOBILE_NAV = {
 
 export function isClientNavActive(pathname: string, item: NavItem): boolean {
   return item.exact ? pathname === item.href : pathname.startsWith(item.href);
+}
+
+/** Flush Social tab bar. Stories sit under Home. Public profiles sit under Profile. */
+export function isSocialTabActive(pathname: string, item: NavItem): boolean {
+  if (item.href === SOCIAL_ROUTES.home) {
+    return pathname === SOCIAL_ROUTES.home || pathname.startsWith(SOCIAL_ROUTES.stories);
+  }
+  if (item.href === SOCIAL_ROUTES.profile) {
+    return (
+      pathname === SOCIAL_ROUTES.profile ||
+      pathname.startsWith(`${SOCIAL_ROUTES.profileByHandle}/`)
+    );
+  }
+  return isClientNavActive(pathname, item);
 }
 
 export function clientNavCurrent(pathname: string): NavItem {

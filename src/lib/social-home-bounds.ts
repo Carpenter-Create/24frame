@@ -37,6 +37,9 @@ export const SOCIAL_EXPLORE_PEOPLE_LIMIT = 20;
 /** Explore post hits. Independent of Explore people. */
 export const SOCIAL_EXPLORE_POSTS_LIMIT = 20;
 
+/** Home For you suggested people. Filtered from the Explore people probe. */
+export const SOCIAL_FOR_YOU_PEOPLE_LIMIT = 3;
+
 export const SOCIAL_FOLLOWING_WALL_CURSOR_PARAM = "after";
 
 export type FollowingWallCursor = {

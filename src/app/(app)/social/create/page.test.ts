@@ -16,6 +16,11 @@ vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/s3-avatars", () => ({
   signedAvatarUrl: vi.fn().mockResolvedValue(null),
+  signedAvatarUrls: vi.fn().mockResolvedValue(new Map()),
+}));
+vi.mock("@/lib/social-feed", () => ({
+  loadFolloweeIds: vi.fn().mockResolvedValue({ ids: [], truncated: false }),
+  loadSuggestedPeople: vi.fn().mockResolvedValue([]),
 }));
 vi.mock("@/lib/social-profile", () => ({
   ensureOwnSocialProfile: vi.fn().mockResolvedValue({
@@ -67,6 +72,13 @@ describe("Social Create", () => {
     expect(html).toContain(SOCIAL.create.text);
     expect(html).toContain(SOCIAL.create.photo);
     expect(html).toContain(SOCIAL.create.video);
+    expect(html).toContain(SOCIAL.create.dropEmpty);
+    expect(html).toContain("data-social-for-you");
+    expect(html).toContain('data-social-icon="image"');
+    expect(html).toContain('data-social-icon="film-strip"');
+    expect(html).toContain('data-social-icon="text-t"');
+    expect(html).not.toContain("Riley Okonkwo");
+    expect(html).not.toContain("MicroDramaPilot");
     expect(html).not.toContain("data-social-lenses");
     expect(readFileSync("src/app/(app)/social/page.tsx", "utf8")).not.toContain("SocialCreateCompose");
     expect(readFileSync("src/app/(app)/social/page.tsx", "utf8")).not.toContain("SocialPostCompose");

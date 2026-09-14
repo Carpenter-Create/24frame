@@ -1,8 +1,14 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { SOCIAL_EMPTY_ACTION_CLASS, SOCIAL_ACTION_SECONDARY_CLASS, SOCIAL_EMPTY_PANEL_CLASS } from "@/lib/social-chrome";
+import {
+  SOCIAL_ACTION_SECONDARY_CLASS,
+  SOCIAL_EMPTY_ACTION_CLASS,
+  SOCIAL_EMPTY_PANEL_CLASS,
+  SOCIAL_STORIES_EMPTY_ACTION_CLASS,
+} from "@/lib/social-chrome";
 import { SOCIAL_ICON_SIZE_EMPTY, type SocialPhosphorIconName } from "@/lib/social-icons";
+import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { SocialIcon } from "./social-icon";
 
 export function SocialEmpty({
@@ -47,6 +53,22 @@ export function SocialEmpty({
         </div>
       ) : null}
       {children}
+    </div>
+  );
+}
+
+export function SocialStoriesEmpty() {
+  return (
+    <div data-social-stories-empty="" className={SOCIAL_EMPTY_PANEL_CLASS}>
+      <SocialIcon name="image" size={SOCIAL_ICON_SIZE_EMPTY} className="text-ink-2" />
+      <div className="flex flex-col items-center gap-[var(--space-2)]">
+        <p className="t-body font-semibold text-ink">{SOCIAL.stories.emptyRail}</p>
+        <p className="t-body-sm text-ink-2">{SOCIAL.stories.emptyHint}</p>
+      </div>
+      <Link href={SOCIAL_ROUTES.storiesNew} className={SOCIAL_STORIES_EMPTY_ACTION_CLASS}>
+        <SocialIcon name="plus" active size={16} className="text-accent-contrast" />
+        {SOCIAL.stories.createCta}
+      </Link>
     </div>
   );
 }

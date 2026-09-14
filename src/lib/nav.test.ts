@@ -17,11 +17,11 @@ import { ASK_GLOBEE } from "@/lib/ask-globee";
 import {
   GC_NAV,
   NAV,
-  SOCIAL_MOBILE_PILL,
   SOCIAL_NAV,
   STAFF_RAIL_EYEBROW,
   clientNavCurrent,
   isClientNavActive,
+  isSocialTabActive,
   mobileNavDestinations,
   railDestinations,
 } from "./nav";
@@ -203,12 +203,12 @@ describe("mobileNavDestinations", () => {
       "Messages",
       "Profile",
     ]);
-    expect(SOCIAL_MOBILE_PILL.map((item) => item.label)).toEqual([
-      "Home",
-      "Explore",
-      "Messages",
-      "Profile",
-    ]);
+    expect(navSrc).not.toContain("SOCIAL_MOBILE_PILL");
+    expect(isSocialTabActive("/social", SOCIAL_NAV[0])).toBe(true);
+    expect(isSocialTabActive("/social/stories", SOCIAL_NAV[0])).toBe(true);
+    expect(isSocialTabActive("/social/create", SOCIAL_NAV[2])).toBe(true);
+    expect(isSocialTabActive("/social/u/maya", SOCIAL_NAV[4])).toBe(true);
+    expect(isSocialTabActive("/social/explore", SOCIAL_NAV[0])).toBe(false);
     expect(railDestinations(true, "social").staffItems).toEqual([]);
     expect(railDestinations(true, "aggregation").staffItems.map((item) => item.href)).toContain(
       "/queue",

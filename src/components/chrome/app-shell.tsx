@@ -28,8 +28,16 @@ import {
 } from "@/lib/rail-collapse";
 import { PRODUCT_NAME } from "@/lib/product";
 import { isSettingsPath, SETTINGS_RAIL_PAD_CLASS } from "@/lib/settings";
+import { SOCIAL_RAIL } from "@/lib/nav";
+import {
+  SOCIAL_RAIL_MAIN_OFFSET_CLASS,
+  SOCIAL_RAIL_WIDTH_CLASS,
+  SOCIAL_TAB_BAR_MAIN_PAD_CLASS,
+} from "@/lib/social-chrome";
 import { resolveWorkspaceMode, workspaceHome, type WorkspaceMode } from "@/lib/workspace";
-import { SocialMobileDock } from "@/components/social/social-mobile-dock";
+import { SocialMobileTabBar } from "@/components/social/social-mobile-tab-bar";
+import { SocialRailAccountChip, SocialRailCreateCta } from "@/components/social/social-rail-extras";
+import { SocialTopBar } from "@/components/social/social-top-bar";
 
 type Org = { id: string; name: string };
 
@@ -79,10 +87,52 @@ export function AppShell({
   const homePage = pathname === "/";
   const messagesPage = pathname === "/messages";
   const settingsPage = isSettingsPath(pathname);
+  const socialChrome = workspace === "social" && !settingsPage;
 
   useEffect(() => {
     migrateSidebarCollapsedCookie(collapsed);
   }, [collapsed]);
+
+  if (socialChrome) {
+    return (
+      <AskAssistantChromeProvider>
+        <div className="min-h-dvh bg-bg" data-social-workspace="">
+          <SocialTopBar email={email} name={name} photoUrl={photoUrl} />
+          <aside
+            className={cn(
+              "fixed left-0 top-[var(--header-height)] z-30 hidden h-[calc(100dvh-var(--header-height))] flex-col border-r border-hairline bg-surface md:flex",
+              SOCIAL_RAIL_WIDTH_CLASS,
+            )}
+            data-app-rail=""
+            data-social-rail=""
+          >
+            <div className="flex h-full flex-col gap-3 p-4">
+              <p className="text-[12px] font-semibold leading-4 text-ink-2">{SOCIAL_RAIL.workspace}</p>
+              <p className="text-[10px] font-medium leading-[14px] text-ink-3">{SOCIAL_RAIL.destinations}</p>
+              <div className="min-h-0 overflow-y-auto">
+                <SideNav
+                  messagesUnread={messagesUnread}
+                  isGcStaff={false}
+                  collapsed={false}
+                  workspace="social"
+                />
+              </div>
+              <SocialRailCreateCta />
+              <div className="min-h-0 flex-1" />
+              <SocialRailAccountChip name={name} photoUrl={photoUrl} />
+            </div>
+          </aside>
+          <main
+            className={cn("min-h-[calc(100dvh-var(--header-height))]", SOCIAL_RAIL_MAIN_OFFSET_CLASS)}
+            data-app-social-frame=""
+          >
+            <div className={cn("w-full px-4 py-4", SOCIAL_TAB_BAR_MAIN_PAD_CLASS)}>{children}</div>
+          </main>
+          <SocialMobileTabBar />
+        </div>
+      </AskAssistantChromeProvider>
+    );
+  }
 
   const toggle = () => {
     setCollapsed((c) => {
@@ -234,7 +284,6 @@ export function AppShell({
           </div>
         )}
       </main>
-      {workspace === "social" && !settingsPage ? <SocialMobileDock /> : null}
     </div>
     </AskAssistantChromeProvider>
   );

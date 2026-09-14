@@ -14,8 +14,11 @@ import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import {
   SOCIAL_ACTION_CLASS,
   SOCIAL_ACTION_SECONDARY_CLASS,
-  SOCIAL_AVATAR_SM_CLASS,
-  SOCIAL_PILL_ACTIVE_CLASS,
+  SOCIAL_CREATE_AVATAR_CLASS,
+  SOCIAL_CREATE_CARD_CLASS,
+  SOCIAL_CREATE_KIND_CLASS,
+  SOCIAL_CREATE_WELL_CLASS,
+  SOCIAL_FOLLOW_COMPACT_CLASS,
   SOCIAL_PILL_CLASS,
   SOCIAL_PILL_IDLE_CLASS,
 } from "@/lib/social-chrome";
@@ -29,7 +32,13 @@ import {
   type SocialMediaItem,
   type SocialMediaLane,
 } from "@/lib/social-media";
-import { SOCIAL, socialHandleRequiredError, socialInitials } from "@/lib/social";
+import {
+  displayHandle,
+  SOCIAL,
+  socialCreateWellCopy,
+  socialHandleRequiredError,
+  socialInitials,
+} from "@/lib/social";
 import { cn } from "@/lib/cn";
 import { SocialHandleField } from "./social-handle-field";
 import { SocialIcon } from "./social-icon";
@@ -238,16 +247,26 @@ export function SocialPostCompose({
   );
 }
 
+const CREATE_KIND_ICONS = {
+  photo: "image",
+  video: "film-strip",
+  text: "text-t",
+} as const;
+
 export function SocialCreateCompose({
   authorName = SOCIAL.home.you,
+  authorHandle = null,
   authorPhotoUrl = null,
+  initialKind = null,
 }: {
   authorName?: string;
+  authorHandle?: string | null;
   authorPhotoUrl?: string | null;
+  initialKind?: ComposeKind | null;
 }) {
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
-  const [kind, setKind] = useState<ComposeKind | null>(null);
+  const [kind, setKind] = useState<ComposeKind>(initialKind ?? "photo");
   const [body, setBody] = useState("");
   const [media, setMedia] = useState<SocialMediaItem[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -257,15 +276,10 @@ export function SocialCreateCompose({
       : kind === "video"
         ? SOCIAL_VIDEO_CONTENT_TYPES.join(",")
         : SOCIAL_MEDIA_ACCEPT;
-  const wellHint =
-    kind === "photo"
-      ? SOCIAL.home.dropPhoto
-      : kind === "video"
-        ? SOCIAL.home.dropVideo
-        : SOCIAL.home.dropText;
+  const well = socialCreateWellCopy(kind, media.length > 0);
 
   async function onPick(files: FileList | null) {
-    if (!files || files.length === 0 || kind === "text" || kind === null) return;
+    if (!files || files.length === 0 || kind === "text") return;
     setError("");
     setUploading(true);
     const result = await uploadSocialMedia(files, media, SOCIAL_MEDIA_MAX_ITEMS, "posts");
@@ -281,7 +295,7 @@ export function SocialCreateCompose({
   return (
     <form
       data-social-create-form=""
-      className="flex flex-col gap-[var(--space-6)] rounded-[16px] bg-surface-muted p-[var(--space-6)]"
+      className={SOCIAL_CREATE_CARD_CLASS}
       action={async (formData) => {
         setError("");
         formData.set("media", JSON.stringify(media));
@@ -289,8 +303,8 @@ export function SocialCreateCompose({
         if (result?.error) setError(result.error);
       }}
     >
-      <div className="flex items-center gap-[var(--space-3)]" data-social-create-author="">
-        <span className={cn(SOCIAL_AVATAR_SM_CLASS, authorPhotoUrl ? "overflow-hidden" : null)}>
+      <div className="flex items-center gap-3" data-social-create-author="">
+        <span className={SOCIAL_CREATE_AVATAR_CLASS}>
           {authorPhotoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the private avatars bucket
             <img src={authorPhotoUrl} alt="" className="size-full object-cover" />
@@ -298,41 +312,65 @@ export function SocialCreateCompose({
             socialInitials(authorName)
           )}
         </span>
-        <p className="t-body font-medium text-ink">{SOCIAL.home.you}</p>
+        <span className="min-w-0">
+          <span className="block truncate t-body-sm font-semibold text-ink md:t-body">{authorName}</span>
+          {authorHandle ? (
+            <span className="block truncate text-[11px] text-ink-2 md:text-[12px]">{displayHandle(authorHandle)}</span>
+          ) : null}
+        </span>
       </div>
-      <div className="flex flex-wrap gap-[var(--space-2)]" data-social-create-kinds="">
-        {(["photo", "video", "text"] as const).map((value) => (
-          <button
-            key={value}
-            type="button"
-            data-social-create-kind={value}
-            data-social-create-kind-active={kind === value ? "" : undefined}
-            className={cn(SOCIAL_PILL_CLASS, kind === value ? SOCIAL_PILL_ACTIVE_CLASS : SOCIAL_PILL_IDLE_CLASS)}
-            onClick={() => setKind(value)}
-          >
-            {value === "text" ? SOCIAL.create.text : value === "photo" ? SOCIAL.create.photo : SOCIAL.create.video}
-          </button>
-        ))}
+      <div className="flex flex-wrap gap-1.5 md:gap-2" data-social-create-kinds="">
+        {(["photo", "video", "text"] as const).map((value) => {
+          const active = kind === value;
+          return (
+            <button
+              key={value}
+              type="button"
+              data-social-create-kind={value}
+              data-social-create-kind-active={active ? "" : undefined}
+              className={cn(
+                SOCIAL_CREATE_KIND_CLASS,
+                active ? "bg-accent font-semibold text-accent-contrast" : "bg-surface-muted font-medium text-ink",
+              )}
+              onClick={() => setKind(value)}
+            >
+              <SocialIcon
+                name={CREATE_KIND_ICONS[value]}
+                size={16}
+                className={active ? "text-accent-contrast" : "text-ink-2"}
+              />
+              {value === "text" ? SOCIAL.create.text : value === "photo" ? SOCIAL.create.photo : SOCIAL.create.video}
+            </button>
+          );
+        })}
       </div>
-      <button
-        type="button"
-        data-social-create-well=""
-        disabled={kind === "text" || kind === null || uploading || media.length >= SOCIAL_MEDIA_MAX_ITEMS}
-        onClick={() => fileRef.current?.click()}
-        onDragOver={(event) => {
-          if (kind === "photo" || kind === "video") event.preventDefault();
-        }}
-        onDrop={(event) => {
-          if (kind !== "photo" && kind !== "video") return;
-          event.preventDefault();
-          void onPick(event.dataTransfer.files);
-        }}
-        className="flex min-h-[220px] w-full flex-col items-center justify-center gap-[var(--space-3)] rounded-[8px] bg-surface px-[var(--space-6)] py-[var(--space-12)] text-center"
-      >
-        <span className="size-10 rounded-[8px] bg-surface-muted" />
-        <span className="t-body-sm text-ink-2">{uploading ? SOCIAL.home.attaching : wellHint}</span>
-      </button>
-      {kind === "text" || kind === null ? null : (
+      {well ? (
+        <button
+          type="button"
+          data-social-create-well=""
+          disabled={uploading || media.length >= SOCIAL_MEDIA_MAX_ITEMS}
+          onClick={() => fileRef.current?.click()}
+          onDragOver={(event) => {
+            event.preventDefault();
+          }}
+          onDrop={(event) => {
+            event.preventDefault();
+            void onPick(event.dataTransfer.files);
+          }}
+          className={SOCIAL_CREATE_WELL_CLASS}
+        >
+          <SocialIcon
+            name={kind === "video" ? "film-strip" : "image"}
+            size={40}
+            className="text-ink-2"
+          />
+          <span className="t-body-sm font-semibold text-ink md:t-body">
+            {uploading ? SOCIAL.home.attaching : well.title}
+          </span>
+          <span className="t-label text-ink-2 md:t-body-sm">{well.hint}</span>
+        </button>
+      ) : null}
+      {kind === "text" ? null : (
         <input
           ref={fileRef}
           type="file"
@@ -359,18 +397,20 @@ export function SocialCreateCompose({
           ))}
         </ul>
       ) : null}
-      <label className="sr-only" htmlFor="social-create-body">
-        {SOCIAL.home.compose}
-      </label>
-      <textarea
-        id="social-create-body"
-        name="body"
-        rows={3}
-        value={body}
-        onChange={(e) => setBody(e.target.value)}
-        placeholder={SOCIAL.home.captionPlaceholder}
-        className="w-full rounded-[8px] border border-hairline bg-surface px-[var(--space-4)] py-[var(--space-3)] t-body text-ink outline-none placeholder:text-ink-3 focus:border-accent"
-      />
+      <div className="flex flex-col gap-1.5 md:gap-2">
+        <label className="t-label font-medium text-ink-2 md:t-body-sm" htmlFor="social-create-body">
+          {SOCIAL.create.caption}
+        </label>
+        <textarea
+          id="social-create-body"
+          name="body"
+          rows={3}
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          placeholder={SOCIAL.home.captionPlaceholder}
+          className="h-20 w-full rounded-[8px] border border-hairline bg-surface px-3 py-3 t-body-sm text-ink outline-none placeholder:text-ink-2 focus:border-accent md:h-24 md:px-[14px] md:t-body"
+        />
+      </div>
       <div className="sr-only">
         <Label htmlFor="social-create-category">{SOCIAL.home.topic}</Label>
         <select id="social-create-category" name="category" defaultValue="">
@@ -382,10 +422,13 @@ export function SocialCreateCompose({
           ))}
         </select>
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <p className="flex items-center gap-[var(--space-2)] t-body-sm text-ink-2">
-          {SOCIAL.home.audience}
-          <span className={cn(SOCIAL_PILL_CLASS, SOCIAL_PILL_IDLE_CLASS)}>{SOCIAL.home.audienceFollowing}</span>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="flex items-center gap-2 t-body-sm text-ink-2">
+          <span className="hidden md:inline">{SOCIAL.home.audience}</span>
+          <span className={cn(SOCIAL_PILL_CLASS, SOCIAL_PILL_IDLE_CLASS, "inline-flex items-center gap-1.5")}>
+            <SocialIcon name="users" size={14} className="text-ink-2" />
+            {SOCIAL.home.audienceFollowing}
+          </span>
         </p>
         <button type="submit" disabled={uploading} className={SOCIAL_ACTION_CLASS}>
           {SOCIAL.home.submit}
@@ -562,14 +605,19 @@ export function SocialFollowButton({
   followeeId,
   handle,
   following,
+  compact = false,
+  stretch = false,
 }: {
   followeeId: string;
   handle: string;
   following: boolean;
+  compact?: boolean;
+  stretch?: boolean;
 }) {
   return (
     <form
       data-social-follow=""
+      className={stretch ? "min-w-0 flex-1 md:flex-none" : undefined}
       action={async (formData) => {
         await toggleSocialFollow(formData);
       }}
@@ -579,7 +627,14 @@ export function SocialFollowButton({
       <input type="hidden" name="following" value={following ? "1" : "0"} />
       <button
         type="submit"
-        className={following ? SOCIAL_ACTION_SECONDARY_CLASS : SOCIAL_ACTION_CLASS}
+        className={
+          compact
+            ? SOCIAL_FOLLOW_COMPACT_CLASS
+            : cn(
+                following ? SOCIAL_ACTION_SECONDARY_CLASS : SOCIAL_ACTION_CLASS,
+                stretch && "w-full",
+              )
+        }
       >
         {following ? SOCIAL.follow.following : SOCIAL.follow.follow}
       </button>
@@ -593,12 +648,14 @@ export function SocialLikeButton({
   likeCount,
   groupSlug,
   disabled,
+  icon = false,
 }: {
   postId: string;
   liked: boolean;
   likeCount: number;
   groupSlug?: string;
   disabled?: boolean;
+  icon?: boolean;
 }) {
   return (
     <form
@@ -615,9 +672,15 @@ export function SocialLikeButton({
         disabled={disabled}
         data-social-like=""
         aria-label={liked ? SOCIAL.post.unlike : SOCIAL.post.like}
-        className="t-body-sm text-ink-2"
+        className={icon ? "text-ink" : "t-body-sm text-ink-2"}
       >
-        {likeCount} {SOCIAL.post.likes}
+        {icon ? (
+          <SocialIcon name="heart" active={liked} size={22} />
+        ) : (
+          <>
+            {likeCount} {SOCIAL.post.likes}
+          </>
+        )}
       </button>
     </form>
   );
