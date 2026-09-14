@@ -74,10 +74,18 @@ export function SocialShareSheet({
   const [copied, setCopied] = useState(false);
   const url = socialProfilePublicUrl(handle);
 
+  function dismiss() {
+    setCopied(false);
+    onClose();
+  }
+
   useEffect(() => {
     if (!open) return undefined;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") {
+        setCopied(false);
+        onClose();
+      }
     };
     window.addEventListener("keydown", onKey);
     const previous = document.body.style.overflow;
@@ -87,10 +95,6 @@ export function SocialShareSheet({
       document.body.style.overflow = previous;
     };
   }, [open, onClose]);
-
-  useEffect(() => {
-    if (!open) setCopied(false);
-  }, [open]);
 
   if (!open) return null;
 
@@ -110,7 +114,7 @@ export function SocialShareSheet({
           data-social-share-close=""
           aria-label={SOCIAL.profile.shareClose}
           className={SOCIAL_SHARE_SHEET_CLOSE_CLASS}
-          onClick={onClose}
+          onClick={dismiss}
         >
           <SocialIcon name="x" size={SOCIAL_ICON_SIZE_SHARE_SHEET_CLOSE} />
         </button>
