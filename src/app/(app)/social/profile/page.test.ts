@@ -130,7 +130,10 @@ describe("Social profile public face", () => {
     expect(html).toContain("data-social-handle-field");
     expect(html).toContain(SOCIAL.profile.handlePlaceholder);
     expect(html).toContain("https://24frame.co/@ada");
-    expect(html).toContain("24frame.co/@ada");
+    expect(html).toContain('data-social-share-url="https://24frame.co/@ada"');
+    expect(html).not.toContain("Copies ");
+    expect(html).not.toContain("data-social-share-hint");
+    expect(html).not.toContain(">24frame.co/@ada<");
     expect(html).toContain("@ada");
     expect(html).toContain("data-social-profile-tabs");
     expect(html).toContain(SOCIAL.profile.postsTab);

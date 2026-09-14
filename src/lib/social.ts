@@ -51,6 +51,7 @@ export const SOCIAL_PROFILE_POSTS_PAGE = LIST_PAGE;
 
 // Public profile URL (locked): https://24frame.co/@{bareHandle}
 // Example: https://24frame.co/@acarpcreate
+// Profile chrome does not print this URL. Share copies it.
 // In-app route is /social/u/{bareHandle}. Persist the bare handle
 // in profiles.handle (no @). Display as @handle.
 // /social/members/{handle} redirects to the in-app route.
@@ -218,10 +219,6 @@ export function socialProfileTabLabel(tab: SocialProfileTab): string {
     default:
       return SOCIAL.profile.postsTab;
   }
-}
-
-export function socialShareHint(handle: string): string {
-  return `${SOCIAL.profile.shareCopies} ${socialProfilePublicUrl(handle)}`;
 }
 
 export function socialFirstName(displayName: string | null | undefined): string {
@@ -422,7 +419,6 @@ export const SOCIAL = {
     edit: "Edit profile",
     share: "Share",
     shareCopied: "Copied",
-    shareCopies: "Copies",
     postsTab: "Posts",
     highlightsTab: "Highlights",
     highlightsEmpty: "No highlights yet.",

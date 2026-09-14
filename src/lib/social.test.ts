@@ -39,7 +39,6 @@ import {
   socialProfileTabHref,
   socialProfileTabLabel,
   SOCIAL_PROFILE_TABS,
-  socialShareHint,
   socialVanityInternalPath,
   stripHandleDecorators,
   suggestedHandleSeed,
@@ -191,7 +190,6 @@ describe("profile opt-in", () => {
     expect(SOCIAL_PROFILE_ORIGIN).toBe("https://24frame.co");
     expect(socialProfilePublicUrl("acarpcreate")).not.toContain("app.24frame.co");
     expect(socialProfilePublicUrl("acarpcreate")).not.toContain("/social/u/");
-    expect(socialShareHint("ada")).toBe("Copies https://24frame.co/@ada");
     expect(parseSocialCreateKind("photo")).toBe("photo");
     expect(parseSocialCreateKind("clip")).toBeNull();
     expect(socialCreateHref("video")).toBe("/social/create?kind=video");
