@@ -570,6 +570,7 @@ export type Database = {
           min_tier_rank: number
           name: string
           slug: string
+          status: Database["public"]["Enums"]["group_status"]
           visibility: Database["public"]["Enums"]["group_visibility"]
         }
         Insert: {
@@ -583,6 +584,7 @@ export type Database = {
           min_tier_rank?: number
           name: string
           slug: string
+          status?: Database["public"]["Enums"]["group_status"]
           visibility?: Database["public"]["Enums"]["group_visibility"]
         }
         Update: {
@@ -596,6 +598,7 @@ export type Database = {
           min_tier_rank?: number
           name?: string
           slug?: string
+          status?: Database["public"]["Enums"]["group_status"]
           visibility?: Database["public"]["Enums"]["group_visibility"]
         }
         Relationships: [
@@ -3288,6 +3291,7 @@ export type Database = {
         | "gc_legal"
         | "gc_delivery_ops"
         | "gc_viewer"
+      group_status: "active" | "hidden" | "closed"
       group_visibility: "public" | "private" | "secret"
       ledger_entry_kind:
         | "opening"
@@ -3549,6 +3553,7 @@ export const Constants = {
         "gc_delivery_ops",
         "gc_viewer",
       ],
+      group_status: ["active", "hidden", "closed"],
       group_visibility: ["public", "private", "secret"],
       ledger_entry_kind: [
         "opening",
