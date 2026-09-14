@@ -8,7 +8,7 @@ Reserved vanity names (`admin`, `api`, `www`, `login`, `legal`, plus `auth` / `a
 
 ## What this repo does
 
-- Next.js rewrite + middleware: `/@handle` → `/social/u/@handle`. The URL bar can stay `24frame.co/@handle` when **this** Vercel project serves the request.
+- Middleware rewrite: `/@handle` → `/social/u/@handle` (reserved names skipped). The URL bar can stay `24frame.co/@handle` when **this** Vercel project serves the request. Next.js `rewrites()` is not used — a config rewrite cannot honor the reserved list and would map `/@login` after middleware left it alone.
 - `/@handle` still requires a session (same as the in-app profile). It is not added to the public-path list.
 
 ## Manual steps (CoS / Adam) — founder-executed
