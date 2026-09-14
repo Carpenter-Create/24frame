@@ -1,7 +1,8 @@
 // Mobile 544:561 / 537:557 and desktop 629:795 Identity menu.
 // Copy lives here, not in JSX.
 // Identity is avatar + name + email from the same values /settings/profile
-// would show. Always render both fields. No dashes, no invented
+// would show. Photo is the signed avatars/{user-id}/avatar face, or the
+// email initial when empty. Always render both fields. No dashes, no invented
 // local-part name. Items after the Identity hairline are
 // USER_MENU_ACTIONS — the same list on mobile and desktop. Desktop
 // Appearance is 613:888 beside — not a page. Mobile Appearance is a
@@ -26,6 +27,7 @@
 // bottom 24. 613:888 top is the Appearance row, offset 0. Labels
 // stay one source.
 
+import { accountPhotoSrc } from "@/lib/account-avatar";
 import { ASK_ASSISTANT } from "@/lib/product";
 import { USER_MENU_ACTIONS, userMenuAvatarInitial, userMenuName } from "@/lib/user-menu";
 
@@ -227,6 +229,7 @@ export function accountMenuAppearanceFlyoutRight(
 
 export type AccountSheetIdentity = {
   avatarInitial: string;
+  photoUrl: string | null;
   name: string;
   email: string;
 };
@@ -239,9 +242,11 @@ function accountSheetEmail(value: string | null | undefined): string {
 export function accountSheetIdentity(
   email: string,
   name?: string | null,
+  photoUrl?: string | null,
 ): AccountSheetIdentity {
   return {
     avatarInitial: userMenuAvatarInitial(email),
+    photoUrl: accountPhotoSrc(photoUrl),
     name: userMenuName(name) ?? "",
     email: accountSheetEmail(email),
   };

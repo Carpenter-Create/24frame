@@ -211,6 +211,7 @@ describe("SettingsProfilePage", () => {
     expect(actionSrc).toContain("putAvatarObject");
     expect(actionSrc).toContain('revalidatePath("/settings")');
     expect(actionSrc).toContain('revalidatePath("/settings/profile")');
+    expect(actionSrc).toContain('revalidatePath("/", "layout")');
     expect(actionSrc).not.toContain("S3_BUCKET");
     expect(pageSrc).not.toContain("Adam Carpenter");
     expect(pageSrc).not.toContain("admin@ccbfg.com");

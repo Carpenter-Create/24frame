@@ -57,6 +57,9 @@ describe("house primitives", () => {
     expect(identity).toContain("data-identity-avatar");
     expect(identity).toContain("data-identity-name");
     expect(identity).toContain("ada@example.com");
+    expect(identity).toContain(">A<");
+    expect(identity).not.toContain("<img");
+    expect(identity).not.toContain("data-identity-photo");
     expect(identity).not.toContain("—");
     expect(group).toContain("ACCOUNT");
     expect(group).toContain("Agreements");
@@ -95,5 +98,36 @@ describe("house primitives", () => {
     expect(navSrc).not.toContain(`${APP_SHEET_MOTION_DURATION_MS}`);
     expect(accountSrc).not.toContain(APP_SHEET_MOTION_EASING);
     expect(navSrc).not.toContain(APP_SHEET_MOTION_EASING);
+  });
+
+  it("shows the signed face when one exists and keeps the initial when empty", () => {
+    const withFace = renderToStaticMarkup(
+      <IdentityBlock
+        avatarInitial="A"
+        photoUrl="https://s3.example/signed-avatar"
+        name="Ada Lovelace"
+        email="ada@example.com"
+      />,
+    );
+    const empty = renderToStaticMarkup(
+      <IdentityBlock avatarInitial="A" photoUrl={null} name="" email="ada@example.com" />,
+    );
+    const blank = renderToStaticMarkup(
+      <IdentityBlock avatarInitial="A" photoUrl="   " name="" email="ada@example.com" />,
+    );
+
+    expect(withFace).toContain('src="https://s3.example/signed-avatar"');
+    expect(withFace).toContain("data-identity-photo");
+    expect(withFace).toContain("overflow-hidden");
+    expect(withFace).toContain("object-cover");
+    expect(withFace).not.toContain(">A<");
+    expect(empty).toContain(">A<");
+    expect(empty).not.toContain("<img");
+    expect(empty).not.toContain("data-identity-photo");
+    expect(blank).toContain(">A<");
+    expect(blank).not.toContain("<img");
+    expect(houseSrc).toContain("accountPhotoSrc");
+    expect(houseSrc).not.toContain("signedAvatarUrl");
+    expect(houseSrc).not.toContain("uploadAccountPhoto");
   });
 });

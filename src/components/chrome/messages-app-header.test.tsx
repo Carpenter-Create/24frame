@@ -262,7 +262,7 @@ describe("MessagesAppHeader", () => {
     expect(src).not.toContain("strokeWidth={2}");
     expect((src.match(/<MoreHorizontal/g) ?? []).length).toBe(1);
     expect(shell).not.toContain("MessagesThreadOverflow");
-    expect(shell).toContain("<UserMenu email={email} name={name} />");
+    expect(shell).toContain("<UserMenu email={email} name={name} photoUrl={photoUrl} />");
     expect(shell).toContain("justify-end gap-4");
     expect(shell).toContain("MOBILE_CHROME_LEAD_PAD_CLASS");
     expect(shell).toContain("md:px-[var(--content-inset)]");
@@ -332,7 +332,7 @@ describe("MessagesAppHeader", () => {
     expect(src.indexOf("data-ask-globee-download")).toBeLessThan(src.indexOf("<MoreHorizontal"));
     expect(shell).toContain("justify-end gap-4");
     expect(shell).toContain('data-app-header-leading="" className="mr-auto flex min-w-0 flex-1 items-center gap-2"');
-    expect(shell).toContain("<UserMenu email={email} name={name} />");
+    expect(shell).toContain("<UserMenu email={email} name={name} photoUrl={photoUrl} />");
     expect(shell.indexOf("<MessagesAppHeader")).toBeLessThan(shell.indexOf("<UserMenu"));
     expect(tokens).toMatch(/--space-4:\s*1rem;/);
     expect(userMenu).not.toContain("data-ask-globee-title-cluster");

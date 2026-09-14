@@ -39,3 +39,10 @@ export function isAvatarObjectKey(key: string, userId: string): boolean {
     return false;
   }
 }
+
+/** Signed GET, or null when empty so chrome never mounts a broken img. */
+export function accountPhotoSrc(photoUrl?: string | null): string | null {
+  if (typeof photoUrl !== "string") return null;
+  const trimmed = photoUrl.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}

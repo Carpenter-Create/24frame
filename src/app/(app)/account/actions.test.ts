@@ -158,6 +158,8 @@ describe("uploadAccountPhoto", () => {
     expect(body).toBeInstanceOf(Uint8Array);
     expect(revalidatePath).toHaveBeenCalledWith("/settings");
     expect(revalidatePath).toHaveBeenCalledWith("/settings/profile");
+    expect(revalidatePath).toHaveBeenCalledWith("/");
+    expect(revalidatePath).toHaveBeenCalledWith("/", "layout");
   });
 
   it("rejects a missing file, a gif, and an oversized file before S3", async () => {

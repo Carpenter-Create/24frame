@@ -15,6 +15,7 @@ import { ChevronLeft, ChevronRight, LogOut } from "lucide-react";
 import { AppearanceCheck } from "./appearance-check";
 import { useThemePreference } from "@/components/theme-toggle";
 import { signOut } from "@/app/actions";
+import { accountPhotoSrc } from "@/lib/account-avatar";
 import {
   ACCOUNT_MENU_APPEARANCE_CHEVRON_CLASS,
   ACCOUNT_MENU_APPEARANCE_COPY_CLASS,
@@ -95,6 +96,7 @@ function AccountBackChevron() {
 
 function AccountMenuTrigger({
   email,
+  photoUrl,
   open,
   onOpen,
   className,
@@ -103,6 +105,7 @@ function AccountMenuTrigger({
   triggerRef,
 }: {
   email: string;
+  photoUrl?: string | null;
   open: boolean;
   onOpen: () => void;
   className: string;
@@ -111,6 +114,7 @@ function AccountMenuTrigger({
   triggerRef?: Ref<HTMLButtonElement>;
 }) {
   const initial = userMenuAvatarInitial(email);
+  const face = accountPhotoSrc(photoUrl);
   const attrs = { [triggerAttr]: "" } as Record<string, string>;
 
   return (
@@ -122,9 +126,14 @@ function AccountMenuTrigger({
       aria-expanded={open}
       aria-controls={controlsId}
       onClick={onOpen}
-      className={className}
+      className={face ? `${className} overflow-hidden` : className}
     >
-      {initial}
+      {face ? (
+        // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the private avatars bucket
+        <img src={face} alt="" className="size-full object-cover" />
+      ) : (
+        initial
+      )}
     </button>
   );
 }
@@ -384,6 +393,7 @@ function AccountMenuItems({
 function AccountMenuBody({
   email,
   name,
+  photoUrl,
   pathname,
   onClose,
   face,
@@ -393,6 +403,7 @@ function AccountMenuBody({
 }: {
   email: string;
   name?: string | null;
+  photoUrl?: string | null;
   pathname: string;
   onClose: () => void;
   face: AccountMenuFace;
@@ -400,7 +411,7 @@ function AccountMenuBody({
   variant: "sheet" | "dropdown";
   appearanceRowRef?: Ref<HTMLButtonElement>;
 }) {
-  const identity = accountSheetIdentity(email, name);
+  const identity = accountSheetIdentity(email, name, photoUrl);
   const stacked = variant === "dropdown";
   const items = (
     <AccountMenuItems
@@ -424,6 +435,7 @@ function AccountMenuBody({
           <div data-account-sheet-head="" className={ACCOUNT_MENU_DROPDOWN_HEAD_CLASS}>
             <IdentityBlock
               avatarInitial={identity.avatarInitial}
+              photoUrl={identity.photoUrl}
               name={identity.name}
               email={identity.email}
               className={ACCOUNT_MENU_DROPDOWN_IDENTITY_CLASS}
@@ -446,6 +458,7 @@ function AccountMenuBody({
       <div data-account-sheet-head="" className={ACCOUNT_SHEET_HEAD_CLASS}>
         <IdentityBlock
           avatarInitial={identity.avatarInitial}
+          photoUrl={identity.photoUrl}
           name={identity.name}
           email={identity.email}
         />
@@ -485,20 +498,23 @@ function AccountMenuBody({
 export function MobileAccountMenu({
   email,
   name,
+  photoUrl,
 }: {
   email: string;
   name?: string | null;
+  photoUrl?: string | null;
 }) {
   const { pathname, open, openMenu, closeMenu } = useAccountMenuOpen();
 
   const sheet = open ? (
-    <AccountSheet email={email} name={name} pathname={pathname} onClose={closeMenu} />
+    <AccountSheet email={email} name={name} photoUrl={photoUrl} pathname={pathname} onClose={closeMenu} />
   ) : null;
 
   return (
     <>
       <AccountMenuTrigger
         email={email}
+        photoUrl={photoUrl}
         open={open}
         onOpen={openMenu}
         triggerAttr="data-account-sheet-trigger"
@@ -526,9 +542,11 @@ export function MobileAccountMenu({
 export function DesktopAccountMenu({
   email,
   name,
+  photoUrl,
 }: {
   email: string;
   name?: string | null;
+  photoUrl?: string | null;
 }) {
   const { pathname, open, openMenu, closeMenu } = useAccountMenuOpen();
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -538,6 +556,7 @@ export function DesktopAccountMenu({
     <AccountMenuDropdown
       email={email}
       name={name}
+      photoUrl={photoUrl}
       pathname={pathname}
       onClose={closeMenu}
       alignEnd={alignEnd}
@@ -548,6 +567,7 @@ export function DesktopAccountMenu({
     <div className="hidden md:block" data-user-menu-desktop="">
       <AccountMenuTrigger
         email={email}
+        photoUrl={photoUrl}
         open={open}
         onOpen={open ? closeMenu : openMenu}
         triggerRef={triggerRef}
@@ -565,12 +585,14 @@ export function DesktopAccountMenu({
 export function AccountSheet({
   email,
   name,
+  photoUrl,
   pathname,
   onClose,
   face: initialFace = "main",
 }: {
   email: string;
   name?: string | null;
+  photoUrl?: string | null;
   pathname: string;
   onClose: () => void;
   face?: AccountMenuFace;
@@ -599,6 +621,7 @@ export function AccountSheet({
         <AccountMenuBody
           email={email}
           name={name}
+          photoUrl={photoUrl}
           pathname={pathname}
           onClose={onClose}
           face={face}
@@ -613,6 +636,7 @@ export function AccountSheet({
 export function AccountMenuDropdown({
   email,
   name,
+  photoUrl,
   pathname,
   onClose,
   face: initialFace = "main",
@@ -620,6 +644,7 @@ export function AccountMenuDropdown({
 }: {
   email: string;
   name?: string | null;
+  photoUrl?: string | null;
   pathname: string;
   onClose: () => void;
   face?: AccountMenuFace;
@@ -674,6 +699,7 @@ export function AccountMenuDropdown({
         <AccountMenuBody
           email={email}
           name={name}
+          photoUrl={photoUrl}
           pathname={pathname}
           onClose={onClose}
           face={face}
