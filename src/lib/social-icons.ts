@@ -27,6 +27,8 @@ export const SOCIAL_PHOSPHOR_ICONS = [
   "paper-plane-tilt",
   "play",
   "share-network",
+  "link",
+  "download-simple",
   "text-t",
   "upload-simple",
   "camera-rotate",
@@ -56,6 +58,8 @@ export const SOCIAL_ICON_SIZE_COMPOSER = 16;
 export const SOCIAL_ICON_SIZE_SEARCH = 16;
 export const SOCIAL_ICON_SIZE_HEADER = 20;
 export const SOCIAL_ICON_SIZE_SHARE = 16;
+export const SOCIAL_ICON_SIZE_SHARE_SHEET_CLOSE = 18;
+export const SOCIAL_ICON_SIZE_SHARE_SHEET_ACTION = 22;
 export const SOCIAL_ICON_SIZE_STORY_PICKER = 24;
 export const SOCIAL_ICON_SIZE_STORY_PICKER_CLOSE = 18;
 export const SOCIAL_ICON_SIZE_STORY_FOOTNOTE = 14;

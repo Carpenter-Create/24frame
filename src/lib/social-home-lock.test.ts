@@ -147,6 +147,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(icons).toContain("SOCIAL_ICON_SIZE_STORY_CREATE = 28");
     expect(icons).toContain('"users"');
     expect(icons).toContain('"share-network"');
+    expect(icons).toContain('"link"');
+    expect(icons).toContain('"download-simple"');
     expect(icons).toContain('"text-t"');
     expect(home).not.toContain("WorkspaceSwitcher");
     expect(home).not.toContain("SocialPostCompose");
@@ -163,6 +165,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).toContain("129:215");
     expect(chrome).toContain("129:415");
     expect(chrome).toContain("129:615");
+    expect(chrome).toContain("155:194");
+    expect(chrome).toContain("155:372");
     expect(chrome).toContain("135:585");
     expect(chrome).toContain("135:1037");
     expect(chrome).toContain("135:1214");
