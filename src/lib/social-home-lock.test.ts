@@ -110,6 +110,9 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(dock).toContain("data-social-create-fab");
     expect(dock).toContain("SocialIcon");
     expect(dock).toContain('name="plus"');
+    expect(dock).toContain("bg-surface");
+    expect(dock).not.toContain("backdrop-blur");
+    expect(dock).not.toContain("bg-surface/95");
     expect(home).not.toContain("Reels");
     expect(explore).not.toContain("Reels");
   });

@@ -1,5 +1,6 @@
 // Social Figma V1 measured chrome. Tokens only — no hex.
-// 8 · 16 · 24 · 48 rhythm. Aggregation chrome stays elsewhere.
+// 8 · 16 · 24 · 48 rhythm. IG-leaning IA, professional-clean craft.
+// No glass, no drop shadow. Aggregation / Settings Mercury stays elsewhere.
 
 export const SOCIAL_PAGE_CLASS =
   "flex flex-col gap-[var(--space-6)] pb-[var(--space-12)]";

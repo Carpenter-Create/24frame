@@ -27,7 +27,7 @@ export function SocialMobileDock() {
       <div className="pointer-events-auto flex items-end justify-center px-[var(--space-4)] pb-[var(--space-4)]">
         <nav
           data-social-mobile-pill=""
-          className="flex items-center gap-[var(--space-2)] rounded-full border border-hairline bg-surface/95 px-[var(--space-3)] py-[var(--space-2)] backdrop-blur"
+          className="flex items-center gap-[var(--space-2)] rounded-full border border-hairline bg-surface px-[var(--space-3)] py-[var(--space-2)]"
         >
           {SOCIAL_MOBILE_PILL.map((item) => {
             const active = isClientNavActive(pathname, item);

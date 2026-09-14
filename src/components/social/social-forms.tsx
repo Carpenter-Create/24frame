@@ -615,7 +615,7 @@ export function SocialLikeButton({
         disabled={disabled}
         data-social-like=""
         aria-label={liked ? SOCIAL.post.unlike : SOCIAL.post.like}
-        className={TEXT_ACTION_CLASS}
+        className="t-body-sm text-ink-2"
       >
         {likeCount} {SOCIAL.post.likes}
       </button>
