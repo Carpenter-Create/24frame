@@ -3,7 +3,7 @@ import Link from "next/link";
 import { SocialStoryReply } from "@/components/social/social-forms";
 import { SocialAvatar, SocialPostMedia, type SocialPostMediaItem } from "@/components/social/social-ui";
 import { SocialIcon } from "@/components/social/social-icon";
-import { SOCIAL, SOCIAL_ROUTES, socialRelativeTime, socialStoryHref } from "@/lib/social";
+import { SOCIAL_ROUTES, socialRelativeTime, socialStoryHref } from "@/lib/social";
 
 export function SocialStoryViewer({
   storyId,

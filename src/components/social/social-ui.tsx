@@ -26,7 +26,6 @@ import {
 } from "@/lib/social";
 import { SocialLikeButton } from "./social-forms";
 import { SocialEmpty } from "./social-empty";
-import { SocialIcon } from "./social-icon";
 
 export function SocialNeedProfile() {
   return (
