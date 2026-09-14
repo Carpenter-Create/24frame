@@ -3,16 +3,16 @@ import { redirect } from "next/navigation";
 import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { SocialJoinGroupButton, SocialPostCompose } from "@/components/social/social-forms";
-import { SocialNeedProfile, SocialPostCard } from "@/components/social/social-ui";
+import { SocialPostCard } from "@/components/social/social-ui";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import {
   loadLikedPostIds,
-  loadOwnProfile,
   loadProfilesByIds,
   loadVisiblePosts,
 } from "@/lib/social-feed";
+import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 
@@ -41,7 +41,7 @@ export default async function SocialGroupPage({
     );
   }
 
-  const profile = await loadOwnProfile(supabase, ctx.user.id);
+  const profile = await ensureOwnSocialProfile(supabase, ctx.user);
   const { data: membership } = profile
     ? await supabase
         .from("group_members")
@@ -73,7 +73,6 @@ export default async function SocialGroupPage({
         subtitle={group.description ?? `${group.member_count} ${SOCIAL.groups.members}`}
         backLink={{ href: SOCIAL_ROUTES.groups, label: SOCIAL.groups.title }}
       />
-      {!profile ? <SocialNeedProfile /> : null}
       {profile && !membership && canJoin === true ? (
         <SocialJoinGroupButton groupId={group.id} groupSlug={group.slug} />
       ) : null}

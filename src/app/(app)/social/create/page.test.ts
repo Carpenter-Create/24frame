@@ -14,6 +14,14 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
+vi.mock("@/lib/social-profile", () => ({
+  ensureOwnSocialProfile: vi.fn().mockResolvedValue({
+    id: "u1",
+    handle: "ada",
+    display_name: "Ada Lovelace",
+    status: "active",
+  }),
+}));
 vi.mock("@/app/(app)/social/actions", () => ({
   createSocialPost: vi.fn(),
   presignSocialMediaUpload: vi.fn(),

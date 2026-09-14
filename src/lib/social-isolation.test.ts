@@ -45,5 +45,19 @@ describe("social isolation lock", () => {
     expect(actions).toContain('from("follows")');
     expect(actions).toContain('from("stories")');
     expect(actions).not.toContain("from(\"reels\")");
+    expect(actions).toContain("ensureOwnSocialProfile");
+  });
+
+  it("does not create another person's Social profile from org invite or membership", () => {
+    const orgCreate = readFileSync("src/app/actions.ts", "utf8");
+    const identity = readFileSync("supabase/migrations/20260912033234_identity_spine.sql", "utf8");
+    const profile = readFileSync("src/lib/social-profile.ts", "utf8");
+    expect(orgCreate).toContain("create_org_and_membership");
+    expect(orgCreate).not.toContain("from(\"profiles\")");
+    expect(orgCreate).not.toContain("ensureOwnSocialProfile");
+    expect(identity).toContain("do not auto-create    profiles on org invite or membership insert");
+    expect(identity).toContain("Mapping C: no trigger on auth.users, memberships, or organizations that");
+    expect(profile).toContain("never an invitee");
+    expect(profile).toContain("user.id");
   });
 });

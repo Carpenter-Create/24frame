@@ -18,6 +18,7 @@ import {
   type SocialMediaLane,
 } from "@/lib/social-media";
 import { SOCIAL } from "@/lib/social";
+import { SocialHandleField } from "./social-handle-field";
 import {
   addSocialDmPeople,
   createSocialGroup,
@@ -39,7 +40,13 @@ function FormError({ error }: { error: string }) {
   return <InlineNotice tone="error">{error}</InlineNotice>;
 }
 
-export function SocialProfileCreateForm() {
+export function SocialProfileCreateForm({
+  handle = "",
+  displayName = "",
+}: {
+  handle?: string;
+  displayName?: string;
+}) {
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
 
@@ -55,18 +62,15 @@ export function SocialProfileCreateForm() {
         if (result.error) setError(result.error);
       }}
     >
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="social-handle">{SOCIAL.profile.handle}</Label>
-        <Input id="social-handle" name="handle" autoComplete="username" required />
-      </div>
+      <SocialHandleField id="social-handle" name="handle" defaultHandle={handle} />
       <div className="flex flex-col gap-1">
         <Label htmlFor="social-display-name">{SOCIAL.profile.displayName}</Label>
-        <Input id="social-display-name" name="display_name" autoComplete="nickname" required />
-      </div>
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="social-birth-date">{SOCIAL.profile.birthDate}</Label>
-        <Input id="social-birth-date" name="birth_date" type="date" required />
-        <p className="t-body-sm text-ink-3">{SOCIAL.profile.birthDateHint}</p>
+        <Input
+          id="social-display-name"
+          name="display_name"
+          autoComplete="nickname"
+          defaultValue={displayName}
+        />
       </div>
       <FormError error={error} />
       <Button type="submit" disabled={pending}>

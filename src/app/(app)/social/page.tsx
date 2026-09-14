@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { SocialOnboardingChecklist } from "@/components/social/social-checklist";
 import { SocialLensRow } from "@/components/social/social-lenses";
 import { SocialStoriesRail } from "@/components/social/social-stories-rail";
-import { SocialNeedProfile, SocialPostCard } from "@/components/social/social-ui";
+import { SocialPostCard } from "@/components/social/social-ui";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
 import { parseSocialCategoryParam, SOCIAL_CATEGORY_ALL, SOCIAL_CATEGORY_PARAM } from "@/lib/social-categories";
@@ -19,10 +19,10 @@ import {
   loadLikedPostIds,
   loadLiveStories,
   loadOwnPostFacts,
-  loadOwnProfile,
   loadProfilesByIds,
   loadViewedStoryIds,
 } from "@/lib/social-feed";
+import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 
@@ -39,7 +39,7 @@ export default async function SocialHomePage({
   const category = topic === SOCIAL_CATEGORY_ALL ? null : topic;
 
   const supabase = await createClient();
-  const profile = await loadOwnProfile(supabase, ctx.user.id);
+  const profile = await ensureOwnSocialProfile(supabase, ctx.user);
   const followeeIds = profile ? await loadFolloweeIds(supabase, ctx.user.id) : [];
   const authorIds = followingAuthorIds(ctx.user.id, followeeIds);
   const [posts, stories] = await Promise.all([
@@ -80,7 +80,7 @@ export default async function SocialHomePage({
     <div data-social-home="">
       <PageHeader title={SOCIAL.home.title} subtitle={SOCIAL.home.subtitle} />
       <SocialStoriesRail cards={rail} authors={authors} faces={faces} canCreate={!!profile} />
-      {profile ? <SocialOnboardingChecklist items={checklist} /> : <SocialNeedProfile />}
+      {profile ? <SocialOnboardingChecklist items={checklist} /> : null}
       <SocialLensRow active={topic} />
       {posts.length === 0 ? (
         <div data-social-following-empty="">

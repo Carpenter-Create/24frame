@@ -47,7 +47,9 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).toContain("SocialStoriesRail");
     expect(home).toContain("SocialLensRow");
     expect(home).toContain("SocialOnboardingChecklist");
+    expect(home).toContain("ensureOwnSocialProfile");
     expect(home).toContain("data-social-following-empty");
+    expect(home).not.toContain("SocialNeedProfile");
     expect(home).not.toContain("SocialPostCompose");
     expect(home).not.toContain("SocialCreateCompose");
     expect(home).not.toContain("loadVisiblePosts");

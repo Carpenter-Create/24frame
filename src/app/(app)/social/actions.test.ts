@@ -7,6 +7,7 @@ import {
   addSocialDmPeople,
   createSocialPost,
   createSocialProfile,
+  createSocialStory,
   openSocialDm,
   presignSocialMediaUpload,
   toggleSocialLike,
@@ -34,31 +35,39 @@ function user() {
 function stub({
   profile = null,
   insertError = null,
+  updateError = null,
   rpcError = null,
   rpcData = null,
 }: {
-  profile?: { id: string } | null;
+  profile?: { id: string; handle?: string; display_name?: string; status?: string; bio?: string | null } | null;
   insertError?: { message: string; code?: string } | null;
+  updateError?: { message: string; code?: string } | null;
   rpcError?: { message: string } | null;
   rpcData?: unknown;
 } = {}) {
   const inserts: { table: string; row: unknown }[] = [];
+  const updates: { table: string; row: unknown }[] = [];
   const from = vi.fn((table: string) => {
-    const chain = {
-      select: vi.fn(() => chain),
-      eq: vi.fn(() => chain),
-      delete: vi.fn(() => chain),
-      maybeSingle: vi.fn(async () => ({ data: profile, error: null })),
-      insert: vi.fn(async (row: unknown) => {
-        inserts.push({ table, row });
-        return { data: null, error: insertError };
-      }),
-    };
+    const chain: Record<string, unknown> = {};
+    chain.select = vi.fn(() => chain);
+    chain.eq = vi.fn(() => chain);
+    chain.delete = vi.fn(() => chain);
+    chain.maybeSingle = vi.fn(async () => ({ data: profile, error: null }));
+    chain.insert = vi.fn(async (row: unknown) => {
+      inserts.push({ table, row });
+      return { data: null, error: insertError };
+    });
+    chain.update = vi.fn((row: unknown) => {
+      updates.push({ table, row });
+      return chain;
+    });
+    chain.then = (resolve: (value: unknown) => unknown) =>
+      Promise.resolve({ data: null, error: updateError }).then(resolve);
     return chain;
   });
   const rpc = vi.fn(async () => ({ data: rpcData, error: rpcError }));
   vi.mocked(createClient).mockResolvedValue({ from, rpc } as never);
-  return { from, rpc, inserts };
+  return { from, rpc, inserts, updates };
 }
 
 describe("social actions", () => {
@@ -67,12 +76,11 @@ describe("social actions", () => {
     vi.mocked(getAuthUser).mockResolvedValue(user() as never);
   });
 
-  it("inserts a self profile and does not invent an org row", async () => {
-    const { inserts, from } = stub();
+  it("saves a bare handle on the ensured self row and does not invent an org row", async () => {
+    const { inserts, updates, from } = stub();
     const form = new FormData();
-    form.set("handle", "Ada_Lovelace");
+    form.set("handle", "@Ada_Lovelace");
     form.set("display_name", "Ada Lovelace");
-    form.set("birth_date", "1990-01-02");
 
     const result = await createSocialProfile(form);
     expect(result).toEqual({});
@@ -81,30 +89,79 @@ describe("social actions", () => {
         table: "profiles",
         row: profileInsertRow({
           userId: "u1",
-          handle: "ada_lovelace",
-          displayName: "Ada Lovelace",
-          birthDate: "1990-01-02",
+          handle: "ada",
+          displayName: "Member",
         }),
+      },
+    ]);
+    expect(updates).toEqual([
+      {
+        table: "profiles",
+        row: { handle: "ada_lovelace", display_name: "Ada Lovelace" },
       },
     ]);
     expect(from).not.toHaveBeenCalledWith("organizations");
     expect(from).not.toHaveBeenCalledWith("memberships");
   });
 
-  it("does not auto-create a profile on a later write", async () => {
+  it("rejects a blank handle after stripping @", async () => {
+    stub({
+      profile: { id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" },
+    });
+    const form = new FormData();
+    form.set("handle", "@@@");
+    expect(await createSocialProfile(form)).toEqual({ error: SOCIAL.profile.handleRequired });
+  });
+
+  it("ensures a self profile on the first Social write and then posts", async () => {
     const { inserts } = stub({ profile: null });
     const form = new FormData();
     form.set("body", "hello");
-    expect(await createSocialPost(form)).toEqual({ error: SOCIAL.cta.needProfile });
+    await expect(createSocialPost(form)).rejects.toThrow("REDIRECT:/social");
+    expect(inserts).toEqual([
+      {
+        table: "profiles",
+        row: profileInsertRow({
+          userId: "u1",
+          handle: "ada",
+          displayName: "Member",
+        }),
+      },
+      {
+        table: "posts",
+        row: postInsertRow({ authorId: "u1", body: "hello" }),
+      },
+    ]);
+  });
 
-    const like = new FormData();
-    like.set("post_id", "p1");
-    expect(await toggleSocialLike(like)).toEqual({ error: SOCIAL.cta.needProfile });
-
-    const dm = new FormData();
-    dm.set("peer_id", "u2");
-    expect(await openSocialDm(dm)).toEqual({ error: SOCIAL.cta.needProfile });
-    expect(inserts).toEqual([]);
+  it("ensures a self profile before a story write", async () => {
+    const author = "11111111-1111-4111-8111-111111111111";
+    vi.mocked(getAuthUser).mockResolvedValue({ id: author, email: "ada@example.com" } as never);
+    const { inserts } = stub({ profile: null });
+    const object = "22222222-2222-4222-8222-222222222222";
+    const media = [
+      { kind: "image" as const, key: `stories/${author}/${object}.jpg`, contentType: "image/jpeg" as const },
+    ];
+    const form = new FormData();
+    form.set("media", JSON.stringify(media));
+    await expect(createSocialStory(form)).rejects.toThrow("REDIRECT:/social");
+    expect(inserts[0]).toEqual({
+      table: "profiles",
+      row: profileInsertRow({
+        userId: author,
+        handle: "ada",
+        displayName: "Member",
+      }),
+    });
+    expect(inserts[1]).toMatchObject({
+      table: "stories",
+      row: {
+        author_id: author,
+        body: null,
+        media,
+        status: "active",
+      },
+    });
   });
 
   it("likes a post for self when a profile exists", async () => {
