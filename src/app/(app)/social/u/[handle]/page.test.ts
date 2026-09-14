@@ -67,7 +67,15 @@ function chain(result: unknown) {
   return c;
 }
 
-const ada = {
+type PublicProfile = {
+  id: string;
+  handle: string;
+  display_name: string;
+  status: string;
+  bio: string | null;
+};
+
+const ada: PublicProfile = {
   id: "u2",
   handle: "ada",
   display_name: "Ada Lovelace",
@@ -75,7 +83,7 @@ const ada = {
   bio: "Writes engines.",
 };
 
-const viewer = {
+const viewer: PublicProfile = {
   id: "u1",
   handle: "bob",
   display_name: "Bob One",
@@ -87,7 +95,7 @@ function stubClient({
   member = ada,
   posts = [],
 }: {
-  member?: typeof ada | null;
+  member?: PublicProfile | null;
   posts?: {
     id: string;
     body: string;
