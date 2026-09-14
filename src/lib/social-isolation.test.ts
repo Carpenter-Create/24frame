@@ -52,10 +52,15 @@ describe("social isolation lock", () => {
       "supabase/migrations/20260914180000_social_group_delete_no_cascade_posts.sql",
       "utf8",
     );
+    const fkSql = migration.match(
+      /add constraint posts_group_id_fkey[\s\S]*?;/,
+    )?.[0];
+    expect(fkSql).toBeTruthy();
+    expect(fkSql).toMatch(/on delete restrict/i);
+    expect(fkSql).not.toMatch(/on delete cascade/i);
     expect(migration).toContain("LIFECYCLE CLASS");
     expect(migration).toContain("ACCESS PATH");
     expect(migration).toContain("NO ORG_ID ON SOCIAL");
-    expect(migration).toMatch(/on delete restrict/i);
     expect(migration).toContain("drop policy if exists groups_delete_staff");
     expect(migration).not.toMatch(/create policy groups_delete_staff/i);
     expect(migration).toContain("revoke delete on public.groups from authenticated");
