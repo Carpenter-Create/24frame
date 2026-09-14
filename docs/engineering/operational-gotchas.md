@@ -190,3 +190,20 @@ Do not add `24frame.co` to Vercel project `24frame` without a marketing fallback
 **When:** Changing Home following wall, stories rail, followee IN() set, or Explore search.
 
 Named paths and independent caps live in `src/lib/social-home-bounds.ts`. Each loader probes `limit+1` and `splitProbe`. The following wall is `created_at+id` keyset (`after=`), never page-N OFFSET. Mapping C: `profiles.id`, no `org_id`. Do not reuse one silent PostgREST `max_rows` across followees, posts, and stories.
+
+---
+
+## Trigger: Stories MediaRecorder (Safari / iOS)
+
+**When:** Changing the Stories studio, `createSocialStory` media types, or story playback.
+
+Record is in-app `getUserMedia` + `MediaRecorder`. Probe `MediaRecorder.isTypeSupported` and persist the house type that actually recorded (`video/mp4`, `video/webm`, `video/quicktime`). Do not label a webm blob as mp4. There is no invented duration cap.
+
+Residual, not a pretend-mp4 path:
+
+- Safari / iOS 14.3+ typically records **mp4 / H.264**. `video/webm` is not available there. Chrome / Firefox typically record **webm**.
+- Some Safari builds accept video-only and reject audio+video. The studio tries audio+video, then video-only.
+- Older iOS Safari has no MediaRecorder — Record shows unavailable; Upload stays. Camera still needs HTTPS, a user gesture, and `playsInline`.
+- Empty `blob.type` on some Safari versions — persist the probed house type.
+- A Chrome-recorded webm story may not play in Safari’s viewer. This slice does not remux and does not use AWS IVS / Chime / Elemental.
+

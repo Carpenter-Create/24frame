@@ -27,7 +27,6 @@ import {
   SOCIAL_IMAGE_CONTENT_TYPES,
   SOCIAL_MEDIA_ACCEPT,
   SOCIAL_MEDIA_MAX_ITEMS,
-  SOCIAL_STORY_MAX_ITEMS,
   SOCIAL_VIDEO_CONTENT_TYPES,
   type SocialMediaItem,
   type SocialMediaLane,
@@ -47,7 +46,6 @@ import {
   createSocialGroup,
   createSocialPost,
   createSocialProfile,
-  createSocialStory,
   joinSocialGroup,
   openSocialDm,
   presignSocialMediaUpload,
@@ -439,83 +437,7 @@ export function SocialCreateCompose({
   );
 }
 
-export function SocialStoryCompose() {
-  const [error, setError] = useState("");
-  const [uploading, setUploading] = useState(false);
-  const [body, setBody] = useState("");
-  const [media, setMedia] = useState<SocialMediaItem[]>([]);
-  const fileRef = useRef<HTMLInputElement>(null);
-
-  async function onPick(files: FileList | null) {
-    setError("");
-    setUploading(true);
-    const result = await uploadSocialMedia(files, [], SOCIAL_STORY_MAX_ITEMS, "stories");
-    setUploading(false);
-    if (fileRef.current) fileRef.current.value = "";
-    if (result.error) {
-      setError(result.error);
-      return;
-    }
-    if (result.items) setMedia(result.items);
-  }
-
-  return (
-    <form
-      data-social-story-form=""
-      className="flex flex-col gap-[var(--space-6)] rounded-[16px] bg-surface-muted p-[var(--space-6)]"
-      action={async (formData) => {
-        setError("");
-        formData.set("media", JSON.stringify(media));
-        const result = await createSocialStory(formData);
-        if (result?.error) setError(result.error);
-      }}
-    >
-      <button
-        type="button"
-        data-social-story-well=""
-        disabled={uploading}
-        onClick={() => fileRef.current?.click()}
-        onDragOver={(event) => event.preventDefault()}
-        onDrop={(event) => {
-          event.preventDefault();
-          void onPick(event.dataTransfer.files);
-        }}
-        className="flex min-h-[220px] w-full flex-col items-center justify-center gap-[var(--space-3)] rounded-[8px] bg-surface px-[var(--space-6)] py-[var(--space-12)] text-center"
-      >
-        <SocialIcon name="camera" size={40} className="text-ink-2" />
-        <span className="t-body-sm text-ink-2">
-          {uploading ? SOCIAL.home.attaching : media[0] ? (media[0].kind === "video" ? SOCIAL.home.videoKind : SOCIAL.home.photoKind) : SOCIAL.stories.empty}
-        </span>
-      </button>
-      <input
-        ref={fileRef}
-        type="file"
-        accept={SOCIAL_MEDIA_ACCEPT}
-        className="sr-only"
-        aria-label={SOCIAL.home.attach}
-        onChange={(e) => void onPick(e.target.files)}
-      />
-      <label className="sr-only" htmlFor="social-story-body">
-        {SOCIAL.stories.title}
-      </label>
-      <textarea
-        id="social-story-body"
-        name="body"
-        rows={3}
-        value={body}
-        onChange={(e) => setBody(e.target.value)}
-        placeholder={SOCIAL.home.captionPlaceholder}
-        className="w-full rounded-[8px] border border-hairline bg-surface px-[var(--space-4)] py-[var(--space-3)] t-body text-ink outline-none placeholder:text-ink-3 focus:border-accent"
-      />
-      <div className="flex justify-end">
-        <button type="submit" disabled={uploading} className={SOCIAL_ACTION_CLASS}>
-          {SOCIAL.stories.submit}
-        </button>
-      </div>
-      <FormError error={error} />
-    </form>
-  );
-}
+export { SocialStoryCompose } from "./social-story-studio";
 
 export function SocialProfilePhotoForm() {
   const router = useRouter();

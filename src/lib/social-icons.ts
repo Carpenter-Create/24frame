@@ -27,6 +27,9 @@ export const SOCIAL_PHOSPHOR_ICONS = [
   "play",
   "share-network",
   "text-t",
+  "upload-simple",
+  "camera-rotate",
+  "check-circle",
 ] as const;
 
 export type SocialPhosphorIconName = (typeof SOCIAL_PHOSPHOR_ICONS)[number];
@@ -52,3 +55,9 @@ export const SOCIAL_ICON_SIZE_COMPOSER = 16;
 export const SOCIAL_ICON_SIZE_SEARCH = 16;
 export const SOCIAL_ICON_SIZE_HEADER = 20;
 export const SOCIAL_ICON_SIZE_SHARE = 16;
+export const SOCIAL_ICON_SIZE_STORY_PICKER = 24;
+export const SOCIAL_ICON_SIZE_STORY_PICKER_CLOSE = 18;
+export const SOCIAL_ICON_SIZE_STORY_FOOTNOTE = 14;
+export const SOCIAL_ICON_SIZE_STORY_STUDIO = 20;
+export const SOCIAL_ICON_SIZE_STORY_PLAY = 28;
+export const SOCIAL_ICON_SIZE_STORY_POSTED = 48;

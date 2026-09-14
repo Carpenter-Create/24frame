@@ -1,0 +1,83 @@
+import {
+  SOCIAL_VIDEO_CONTENT_TYPES,
+  type SocialVideoContentType,
+} from "@/lib/social-media";
+
+// In-app Stories studio. Probe MediaRecorder.isTypeSupported and persist
+// the house type that actually recorded. Never label a webm blob as mp4.
+//
+// Safari residual (ship a working path; do not remux in this slice):
+// - Safari / iOS 14.3+ typically records video/mp4 (H.264). video/webm is
+//   not supported there. Chrome / Firefox typically record video/webm.
+// - Some Safari builds accept video-only and reject audio+video. The studio
+//   tries audio+video, then video-only.
+// - Older iOS Safari has no MediaRecorder — Record shows unavailable; Upload
+//   stays. getUserMedia still needs HTTPS, a user gesture, and playsInline.
+// - Empty blob.type on some Safari versions — persist the probed house type.
+// - Chrome-recorded webm may not play in Safari’s story viewer. No browser
+//   remux / AWS IVS / Elemental in this PR.
+// - No invented duration cap.
+
+export const SOCIAL_STORY_RECORDER_TYPES = SOCIAL_VIDEO_CONTENT_TYPES;
+
+export const SOCIAL_STORY_RECORDER_CANDIDATES = [
+  "video/mp4;codecs=avc1.424028,mp4a.40.2",
+  "video/mp4;codecs=avc1.42001E,mp4a.40.2",
+  "video/mp4",
+  "video/webm;codecs=vp9,opus",
+  "video/webm;codecs=vp8,opus",
+  "video/webm",
+  "video/quicktime",
+] as const;
+
+export type StoryRecorderMime = {
+  mimeType: SocialVideoContentType;
+  raw: string;
+};
+
+export function storyRecorderContentType(raw: string): SocialVideoContentType | null {
+  const base = raw.split(";")[0]?.trim().toLowerCase() ?? "";
+  return (SOCIAL_STORY_RECORDER_TYPES as readonly string[]).includes(base)
+    ? (base as SocialVideoContentType)
+    : null;
+}
+
+export function probeStoryRecorderMimeType(
+  isTypeSupported: ((type: string) => boolean) | undefined,
+): StoryRecorderMime | null {
+  if (!isTypeSupported) return null;
+  for (const raw of SOCIAL_STORY_RECORDER_CANDIDATES) {
+    try {
+      if (!isTypeSupported(raw)) continue;
+    } catch {
+      continue;
+    }
+    const mimeType = storyRecorderContentType(raw);
+    if (mimeType) return { mimeType, raw };
+  }
+  return null;
+}
+
+export function resolveStoryRecorderBlobType(
+  blobType: string,
+  probed: SocialVideoContentType,
+): SocialVideoContentType {
+  return storyRecorderContentType(blobType) ?? probed;
+}
+
+export function storyRecorderFileName(contentType: SocialVideoContentType): string {
+  if (contentType === "video/mp4") return "story.mp4";
+  if (contentType === "video/quicktime") return "story.mov";
+  return "story.webm";
+}
+
+export function formatStoryRecorderClock(ms: number): string {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const minutes = Math.floor(total / 60);
+  const seconds = total % 60;
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+}
+
+export function storyRecorderHoldMs(): number {
+  return 220;
+}

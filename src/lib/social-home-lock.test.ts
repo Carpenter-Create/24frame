@@ -180,6 +180,12 @@ describe("Social Home miss list v1 P0 lock", () => {
       "When people you follow share stories, they show up here. Start with your own.",
     );
     expect(SOCIAL.stories.createCta).toBe("Create a story");
+    expect(SOCIAL.stories.pickerHint).toBe("Video only");
+    expect(SOCIAL.stories.recordHint).toBe("Open in-app studio");
+    expect(SOCIAL.stories.studioTitle).toBe("Story studio");
+    expect(chrome).toContain("146:230");
+    expect(chrome).toContain("146:1125");
+    expect(chrome).toContain("144:1218");
     expect(empty).toContain("SocialStoriesEmpty");
     expect(empty).toContain('name="image"');
     expect(empty).toContain("SOCIAL_STORIES_EMPTY_ACTION_CLASS");
