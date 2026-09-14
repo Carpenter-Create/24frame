@@ -57,13 +57,7 @@ export function SideNav({
         aria-label={collapsed ? item.label : undefined}
         className={cn(
           "relative flex items-center rounded-[var(--radius)] t-body-sm leading-4 transition-colors",
-          social
-            ? collapsed
-              ? "justify-center px-0 py-2"
-              : "gap-3 px-3 py-2"
-            : collapsed
-              ? "justify-center px-0 py-2"
-              : "gap-2 px-2 py-2",
+          collapsed ? "justify-center px-0 py-2" : "gap-2 px-2 py-2",
           active
             ? "bg-surface-muted font-medium text-ink"
             : "font-normal text-ink-2 hover:bg-surface-muted hover:text-ink",
