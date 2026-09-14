@@ -3,11 +3,12 @@ import { redirect } from "next/navigation";
 import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { SocialAddPeopleForm, SocialDmCompose, SocialGroupTitleForm } from "@/components/social/social-forms";
-import { SocialAvatar, SocialNeedProfile } from "@/components/social/social-ui";
+import { SocialAvatar } from "@/components/social/social-ui";
 import { DETAIL_LIST, rangeFor } from "@/lib/list-bounds";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
-import { conversationRoomLabel, SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
-import { loadOwnProfile, loadProfilesByIds } from "@/lib/social-feed";
+import { conversationRoomLabel, displayHandle, SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
+import { loadProfilesByIds } from "@/lib/social-feed";
+import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 import { markSocialDmRead } from "../../actions";
@@ -22,7 +23,7 @@ export default async function SocialDmThreadPage({
 
   const { id } = await params;
   const supabase = await createClient();
-  const profile = await loadOwnProfile(supabase, ctx.user.id);
+  const profile = await ensureOwnSocialProfile(supabase, ctx.user);
 
   const { data: conversation } = await supabase
     .from("conversations")
@@ -77,8 +78,8 @@ export default async function SocialDmThreadPage({
   );
   const subtitle =
     others.length === 1
-      ? `@${others[0].handle}`
-      : others.map((person) => `@${person.handle}`).join(", ") || undefined;
+      ? displayHandle(others[0].handle)
+      : others.map((person) => displayHandle(person.handle)).join(", ") || undefined;
 
   return (
     <div data-social-dm-thread="" data-social-dm-kind={conversation.kind}>
@@ -87,7 +88,6 @@ export default async function SocialDmThreadPage({
         subtitle={subtitle}
         backLink={{ href: SOCIAL_ROUTES.dms, label: SOCIAL.dms.title }}
       />
-      {!profile ? <SocialNeedProfile /> : null}
       {profile ? <SocialAddPeopleForm conversationId={conversation.id} /> : null}
       {profile && conversation.kind === "group" ? (
         <SocialGroupTitleForm conversationId={conversation.id} title={conversation.title} />

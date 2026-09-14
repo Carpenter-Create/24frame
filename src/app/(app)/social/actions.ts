@@ -14,10 +14,11 @@ import {
 import { presignSocialMediaPut } from "@/lib/s3-social-media";
 import { normalizeSocialCategory } from "@/lib/social-categories";
 import { storyInsertRow, storyViewInsertRow } from "@/lib/social-stories";
+import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import {
+  bareHandle,
   followInsertRow,
   groupInsertRow,
-  isEligibleBirthDate,
   likeInsertRow,
   messageInsertRow,
   normalizeBio,
@@ -30,13 +31,13 @@ import {
   normalizeMessageBody,
   normalizePostBody,
   postInsertRow,
-  profileInsertRow,
   quietDmAddError,
   SOCIAL,
   SOCIAL_ROUTES,
   socialDmHref,
   socialGroupHref,
   socialMediaRuleMessage,
+  socialProfileHref,
 } from "@/lib/social";
 
 type ActionResult = { error?: string };
@@ -47,43 +48,29 @@ async function requireUser() {
   return user;
 }
 
-async function ownProfileId() {
+async function ownProfile() {
   const user = await requireUser();
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("id", user.id)
-    .maybeSingle();
-  return { user, supabase, profileId: data?.id ?? null };
+  const profile = await ensureOwnSocialProfile(supabase, user);
+  return { user, supabase, profile, profileId: profile?.id ?? null };
 }
 
 export async function createSocialProfile(formData: FormData): Promise<ActionResult> {
-  const user = await requireUser();
-  const handle = normalizeHandle(String(formData.get("handle") ?? ""));
-  const displayName = normalizeDisplayName(String(formData.get("display_name") ?? ""));
-  const birthDate = String(formData.get("birth_date") ?? "");
+  const { user, supabase, profile } = await ownProfile();
+  if (!profile) return { error: SOCIAL.cta.needProfile };
 
-  if (!handle) return { error: "Enter a handle of 3–30 letters, numbers, or underscores." };
-  if (!displayName) return { error: "Enter a display name." };
-  if (!isEligibleBirthDate(birthDate)) return { error: SOCIAL.profile.birthDateHint };
+  const raw = String(formData.get("handle") ?? "");
+  if (!bareHandle(raw)) return { error: SOCIAL.profile.handleRequired };
+  const handle = normalizeHandle(raw);
+  if (!handle) return { error: SOCIAL.profile.handleInvalid };
 
-  const supabase = await createClient();
-  const { data: existing } = await supabase
+  const displayName =
+    normalizeDisplayName(String(formData.get("display_name") ?? "")) ?? profile.display_name;
+
+  const { error } = await supabase
     .from("profiles")
-    .select("id")
-    .eq("id", user.id)
-    .maybeSingle();
-  if (existing) return { error: "A creator profile already exists." };
-
-  const { error } = await supabase.from("profiles").insert(
-    profileInsertRow({
-      userId: user.id,
-      handle,
-      displayName,
-      birthDate,
-    }),
-  );
+    .update({ handle, display_name: displayName })
+    .eq("id", user.id);
   if (error) {
     if (error.message.toLowerCase().includes("duplicate") || error.code === "23505") {
       return { error: SOCIAL.profile.handleTaken };
@@ -93,6 +80,7 @@ export async function createSocialProfile(formData: FormData): Promise<ActionRes
 
   revalidatePath(SOCIAL_ROUTES.profile);
   revalidatePath(SOCIAL_ROUTES.home);
+  revalidatePath(socialProfileHref(handle));
   return {};
 }
 
@@ -103,7 +91,7 @@ export async function presignSocialMediaUpload(formData: FormData): Promise<{
   kind?: string;
   contentType?: string;
 }> {
-  const { user, profileId } = await ownProfileId();
+  const { user, profileId } = await ownProfile();
   if (!profileId) return { error: SOCIAL.cta.needProfile };
 
   const checked = validateMediaUpload({
@@ -123,7 +111,7 @@ export async function presignSocialMediaUpload(formData: FormData): Promise<{
 }
 
 export async function createSocialPost(formData: FormData): Promise<ActionResult> {
-  const { user, supabase, profileId } = await ownProfileId();
+  const { user, supabase, profileId } = await ownProfile();
   if (!profileId) return { error: SOCIAL.cta.needProfile };
 
   const body = normalizePostBody(String(formData.get("body") ?? ""));
@@ -148,7 +136,7 @@ export async function createSocialPost(formData: FormData): Promise<ActionResult
 }
 
 export async function createSocialStory(formData: FormData): Promise<ActionResult> {
-  const { user, supabase, profileId } = await ownProfileId();
+  const { user, supabase, profileId } = await ownProfile();
   if (!profileId) return { error: SOCIAL.cta.needProfile };
 
   const body = normalizePostBody(String(formData.get("body") ?? "")) ?? null;
@@ -167,13 +155,13 @@ export async function createSocialStory(formData: FormData): Promise<ActionResul
 }
 
 export async function markSocialStoryViewed(storyId: string): Promise<void> {
-  const { user, supabase, profileId } = await ownProfileId();
+  const { user, supabase, profileId } = await ownProfile();
   if (!profileId || !storyId) return;
   await supabase.from("story_views").insert(storyViewInsertRow(storyId, user.id));
 }
 
 export async function updateSocialBio(formData: FormData): Promise<ActionResult> {
-  const { supabase, profileId } = await ownProfileId();
+  const { supabase, profileId } = await ownProfile();
   if (!profileId) return { error: SOCIAL.cta.needProfile };
 
   const bio = normalizeBio(String(formData.get("bio") ?? ""));
@@ -188,7 +176,7 @@ export async function updateSocialBio(formData: FormData): Promise<ActionResult>
 }
 
 export async function toggleSocialFollow(formData: FormData): Promise<ActionResult> {
-  const { user, supabase, profileId } = await ownProfileId();
+  const { user, supabase, profileId } = await ownProfile();
   if (!profileId) return { error: SOCIAL.cta.needProfile };
 
   const followeeId = String(formData.get("followee_id") ?? "").trim();
@@ -214,7 +202,7 @@ export async function toggleSocialFollow(formData: FormData): Promise<ActionResu
 }
 
 export async function toggleSocialLike(formData: FormData): Promise<ActionResult> {
-  const { user, supabase, profileId } = await ownProfileId();
+  const { user, supabase, profileId } = await ownProfile();
   if (!profileId) return { error: SOCIAL.cta.needProfile };
 
   const postId = String(formData.get("post_id") ?? "").trim();
@@ -244,7 +232,7 @@ export async function toggleSocialLike(formData: FormData): Promise<ActionResult
 }
 
 export async function createSocialGroup(formData: FormData): Promise<ActionResult> {
-  const { user, supabase, profileId } = await ownProfileId();
+  const { user, supabase, profileId } = await ownProfile();
   if (!profileId) return { error: SOCIAL.cta.needProfile };
 
   const { data: canCreate } = await supabase.rpc("has_capability", {
@@ -280,7 +268,7 @@ export async function createSocialGroup(formData: FormData): Promise<ActionResul
 }
 
 export async function joinSocialGroup(formData: FormData): Promise<ActionResult> {
-  const { user, supabase, profileId } = await ownProfileId();
+  const { user, supabase, profileId } = await ownProfile();
   if (!profileId) return { error: SOCIAL.cta.needProfile };
 
   const groupId = String(formData.get("group_id") ?? "").trim();
@@ -300,7 +288,7 @@ export async function joinSocialGroup(formData: FormData): Promise<ActionResult>
 }
 
 export async function openSocialDm(formData: FormData): Promise<ActionResult> {
-  const { supabase, profileId } = await ownProfileId();
+  const { supabase, profileId } = await ownProfile();
   if (!profileId) return { error: SOCIAL.cta.needProfile };
 
   const peer = String(formData.get("peer_id") ?? "").trim();
@@ -315,7 +303,7 @@ export async function openSocialDm(formData: FormData): Promise<ActionResult> {
 }
 
 export async function sendSocialDm(formData: FormData): Promise<ActionResult> {
-  const { user, supabase, profileId } = await ownProfileId();
+  const { user, supabase, profileId } = await ownProfile();
   if (!profileId) return { error: SOCIAL.cta.needProfile };
 
   const conversationId = String(formData.get("conversation_id") ?? "").trim();
@@ -348,7 +336,7 @@ export async function markSocialDmRead(conversationId: string): Promise<void> {
 }
 
 export async function addSocialDmPeople(formData: FormData): Promise<ActionResult> {
-  const { user, supabase, profileId } = await ownProfileId();
+  const { user, supabase, profileId } = await ownProfile();
   if (!profileId) return { error: SOCIAL.cta.needProfile };
 
   const conversationId = String(formData.get("conversation_id") ?? "").trim();
@@ -387,7 +375,7 @@ export async function addSocialDmPeople(formData: FormData): Promise<ActionResul
 }
 
 export async function setSocialDmTitle(formData: FormData): Promise<ActionResult> {
-  const { supabase, profileId } = await ownProfileId();
+  const { supabase, profileId } = await ownProfile();
   if (!profileId) return { error: SOCIAL.cta.needProfile };
 
   const conversationId = String(formData.get("conversation_id") ?? "").trim();

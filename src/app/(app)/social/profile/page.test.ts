@@ -6,6 +6,7 @@ import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 import { signedAvatarUrl } from "@/lib/s3-avatars";
 import { SOCIAL } from "@/lib/social";
+import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import SocialProfilePage from "./page";
 
 vi.mock("next/navigation", () => ({
@@ -18,6 +19,9 @@ vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/s3-avatars", () => ({
   signedAvatarUrl: vi.fn().mockResolvedValue(null),
   signedAvatarUrls: vi.fn().mockResolvedValue(new Map()),
+}));
+vi.mock("@/lib/social-profile", () => ({
+  ensureOwnSocialProfile: vi.fn(),
 }));
 vi.mock("@/app/(app)/social/actions", () => ({
   createSocialProfile: vi.fn(),
@@ -63,24 +67,36 @@ describe("Social profile opt-in", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(signedAvatarUrl).mockResolvedValue(null);
+    vi.mocked(ensureOwnSocialProfile).mockResolvedValue({
+      id: "u1",
+      handle: "ada",
+      display_name: "Ada Lovelace",
+      status: "active",
+      bio: null,
+    });
   });
 
-  it("shows the create form and does not insert on render", async () => {
-    const { from } = stubProfile(null);
+  it("shows the handle field after ensure and does not insert on render", async () => {
+    const { from } = stubProfile({
+      id: "u1",
+      handle: "ada",
+      display_name: "Ada Lovelace",
+      status: "active",
+    });
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
     const html = renderToStaticMarkup(await SocialProfilePage());
     expect(html).toContain("data-social-profile");
     expect(html).toContain("data-social-profile-form");
-    expect(html).toContain(SOCIAL.profile.handle);
-    expect(html).toContain(SOCIAL.profile.displayName);
-    expect(html).toContain(SOCIAL.profile.emptyBody);
+    expect(html).toContain("data-social-handle-field");
+    expect(html).toContain(SOCIAL.profile.handlePlaceholder);
+    expect(html).toContain("https://app.24frame.co/social/u/@ada");
+    expect(html).toContain("@ada");
     expect(html).not.toContain("Globee");
-    expect(from).toHaveBeenCalledWith("profiles");
     expect(from).not.toHaveBeenCalledWith("memberships");
   });
 
-  it("renders an existing creator profile without a second create form", async () => {
+  it("renders the ensured creator profile with the handle editor", async () => {
     stubProfile({ id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" });
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
@@ -88,7 +104,7 @@ describe("Social profile opt-in", () => {
     expect(html).toContain("Ada Lovelace");
     expect(html).toContain("@ada");
     expect(html).toContain("AL");
-    expect(html).not.toContain("data-social-profile-form");
+    expect(html).toContain("data-social-profile-form");
     expect(html).not.toContain("<img");
   });
 
@@ -102,7 +118,7 @@ describe("Social profile opt-in", () => {
     expect(html).toContain("Ada Lovelace");
     expect(html).not.toContain("AL");
     expect(html).not.toContain("type=\"file\"");
-    expect(html).not.toContain("data-social-profile-form");
+    expect(html).toContain("data-social-profile-form");
 
     const src = readFileSync("src/app/(app)/social/profile/page.tsx", "utf8");
     expect(src).toContain("signedAvatarUrl");

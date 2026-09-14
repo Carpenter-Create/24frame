@@ -452,7 +452,7 @@ export type Database = {
           app_role: Database["public"]["Enums"]["app_role"]
           avatar_key: string | null
           bio: string | null
-          birth_date: string
+          birth_date: string | null
           crafts: string[]
           created_at: string
           credits: Json
@@ -488,7 +488,7 @@ export type Database = {
           app_role?: Database["public"]["Enums"]["app_role"]
           avatar_key?: string | null
           bio?: string | null
-          birth_date: string
+          birth_date?: string | null
           crafts?: string[]
           created_at?: string
           credits?: Json

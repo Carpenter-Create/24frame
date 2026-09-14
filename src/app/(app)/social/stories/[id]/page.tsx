@@ -7,7 +7,8 @@ import { signedAvatarUrl } from "@/lib/s3-avatars";
 import { signedSocialMediaItems } from "@/lib/s3-social-media";
 import { isStoryLive } from "@/lib/social-stories";
 import { SOCIAL } from "@/lib/social";
-import { loadOwnProfile, loadProfilesByIds, loadStoryById } from "@/lib/social-feed";
+import { loadProfilesByIds, loadStoryById } from "@/lib/social-feed";
+import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { markSocialStoryViewed } from "@/app/(app)/social/actions";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
@@ -40,7 +41,7 @@ export default async function SocialStoryPage({
     );
   }
 
-  const profile = await loadOwnProfile(supabase, ctx.user.id);
+  const profile = await ensureOwnSocialProfile(supabase, ctx.user);
   if (profile) await markSocialStoryViewed(story.id);
 
   const authors = await loadProfilesByIds(supabase, [story.author_id]);

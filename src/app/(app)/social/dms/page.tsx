@@ -3,10 +3,11 @@ import { redirect } from "next/navigation";
 
 import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
-import { SocialConversationFaces, SocialNeedProfile } from "@/components/social/social-ui";
+import { SocialConversationFaces } from "@/components/social/social-ui";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { conversationRoomLabel, inboxPeerIds, SOCIAL, socialDmHref } from "@/lib/social";
-import { loadOwnProfile, loadProfilesByIds } from "@/lib/social-feed";
+import { loadProfilesByIds } from "@/lib/social-feed";
+import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 
@@ -15,7 +16,7 @@ export default async function SocialDmsPage() {
   if (!ctx) redirect("/login");
 
   const supabase = await createClient();
-  const profile = await loadOwnProfile(supabase, ctx.user.id);
+  const profile = await ensureOwnSocialProfile(supabase, ctx.user);
   const { data: inbox } = profile
     ? await supabase.rpc("get_dm_inbox", { p_limit: 50 })
     : { data: [] as never[] };
@@ -30,7 +31,6 @@ export default async function SocialDmsPage() {
   return (
     <div data-social-dms="">
       <PageHeader title={SOCIAL.dms.title} subtitle={SOCIAL.dms.subtitle} />
-      {!profile ? <SocialNeedProfile /> : null}
       {profile && rows.length === 0 ? <HouseEmpty>{SOCIAL.dms.empty}</HouseEmpty> : null}
       <ul className="flex flex-col">
         {rows.map((row) => {
