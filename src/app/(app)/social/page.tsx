@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 
-import { HouseEmpty } from "@/components/chrome/house";
+import { HouseEmpty, TextAction } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
+import { InlineNotice } from "@/components/ui/inline-notice";
 import { SocialOnboardingChecklist } from "@/components/social/social-checklist";
 import { SocialLensRow } from "@/components/social/social-lenses";
 import { SocialStoriesRail } from "@/components/social/social-stories-rail";
@@ -10,6 +11,11 @@ import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
 import { parseSocialCategoryParam, SOCIAL_CATEGORY_ALL, SOCIAL_CATEGORY_PARAM } from "@/lib/social-categories";
 import { followingAuthorIds, socialChecklistItems } from "@/lib/social-home";
+import {
+  SOCIAL_FOLLOWING_WALL_CURSOR_PARAM,
+  parseFollowingWallCursorParam,
+  socialFollowingWallHref,
+} from "@/lib/social-home-bounds";
 import { SOCIAL } from "@/lib/social";
 import {
   groupStoryRail,
@@ -37,15 +43,22 @@ export default async function SocialHomePage({
   const sp = await searchParams;
   const topic = parseSocialCategoryParam(sp[SOCIAL_CATEGORY_PARAM]);
   const category = topic === SOCIAL_CATEGORY_ALL ? null : topic;
+  const cursor = parseFollowingWallCursorParam(sp[SOCIAL_FOLLOWING_WALL_CURSOR_PARAM]);
 
   const supabase = await createClient();
   const profile = await ensureOwnSocialProfile(supabase, ctx.user);
-  const followeeIds = profile ? await loadFolloweeIds(supabase, ctx.user.id) : [];
-  const authorIds = followingAuthorIds(ctx.user.id, followeeIds);
-  const [posts, stories] = await Promise.all([
-    profile ? loadFollowingPosts(supabase, ctx.user.id, category) : Promise.resolve([]),
+  const followees = profile
+    ? await loadFolloweeIds(supabase, ctx.user.id)
+    : { ids: [] as string[], truncated: false };
+  const authorIds = followingAuthorIds(ctx.user.id, followees.ids);
+  const [wall, storiesPage] = await Promise.all([
+    profile
+      ? loadFollowingPosts(supabase, authorIds, { category, cursor })
+      : Promise.resolve({ posts: [], truncated: false, nextCursor: null }),
     loadLiveStories(supabase, authorIds),
   ]);
+  const posts = wall.posts;
+  const stories = storiesPage.stories;
   const storyIds = stories.map((story) => story.id);
   const viewed = profile ? await loadViewedStoryIds(supabase, ctx.user.id, storyIds) : new Set<string>();
   const rail = groupStoryRail(stories, viewed);
@@ -80,8 +93,28 @@ export default async function SocialHomePage({
     <div data-social-home="">
       <PageHeader title={SOCIAL.home.title} subtitle={SOCIAL.home.subtitle} />
       <SocialStoriesRail cards={rail} authors={authors} faces={faces} canCreate={!!profile} />
+      {storiesPage.truncated ? (
+        <InlineNotice tone="info" className="mb-[var(--space-4)]" data-social-stories-truncated="">
+          {SOCIAL.home.truncatedStories}
+        </InlineNotice>
+      ) : null}
+      {followees.truncated ? (
+        <InlineNotice tone="info" className="mb-[var(--space-4)]" data-social-followees-truncated="">
+          {SOCIAL.home.truncatedFollowees}
+        </InlineNotice>
+      ) : null}
       {profile ? <SocialOnboardingChecklist items={checklist} /> : null}
       <SocialLensRow active={topic} />
+      {wall.truncated ? (
+        <div data-social-wall-truncated="" className="mb-[var(--space-4)] flex flex-col gap-[var(--space-3)]">
+          <InlineNotice tone="info">{SOCIAL.home.truncatedWall}</InlineNotice>
+          {wall.nextCursor ? (
+            <TextAction href={socialFollowingWallHref({ topic, after: wall.nextCursor })} data-social-wall-older="">
+              {SOCIAL.home.olderPosts}
+            </TextAction>
+          ) : null}
+        </div>
+      ) : null}
       {posts.length === 0 ? (
         <div data-social-following-empty="">
           <HouseEmpty>{SOCIAL.home.empty}</HouseEmpty>

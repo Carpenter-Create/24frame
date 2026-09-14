@@ -27,7 +27,7 @@ export default async function SocialProfilePage() {
   const supabase = await createClient();
   const { profile, error: ensureError } = await ensureOwnSocialProfileResult(supabase, ctx.user);
   const photoUrl = profile ? await signedAvatarUrl(profile.id) : null;
-  const liveStories = profile ? await loadLiveStories(supabase, [profile.id]) : [];
+  const liveStories = profile ? (await loadLiveStories(supabase, [profile.id])).stories : [];
   const history = profile ? await loadAuthorPosts(supabase, profile.id) : { posts: [], truncated: false };
   const media = profile ? await signedSocialMediaByPostId(history.posts) : new Map();
   const liked = profile

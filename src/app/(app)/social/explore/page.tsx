@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
+import { InlineNotice } from "@/components/ui/inline-notice";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { loadExploreSearch } from "@/lib/social-feed";
 import { getOrgContext } from "@/lib/supabase/context";
@@ -20,7 +21,10 @@ export default async function SocialExplorePage({
   const raw = sp.q;
   const q = (Array.isArray(raw) ? raw[0] : raw)?.trim() ?? "";
   const supabase = await createClient();
-  const hits = q ? await loadExploreSearch(supabase, q) : [];
+  const results = q
+    ? await loadExploreSearch(supabase, q)
+    : { hits: [], truncated: false, peopleTruncated: false, postsTruncated: false };
+  const hits = results.hits;
 
   return (
     <div data-social-explore="">
@@ -41,16 +45,23 @@ export default async function SocialExplorePage({
         hits.length === 0 ? (
           <HouseEmpty>{SOCIAL.explore.noResults}</HouseEmpty>
         ) : (
-          <ul data-social-explore-results="" className="flex flex-col gap-[var(--space-3)]">
-            {hits.map((hit) => (
-              <li key={`${hit.kind}-${hit.id}`}>
-                <Link href={hit.href} className="flex flex-col gap-1">
-                  <span className="t-body font-medium text-ink">{hit.title}</span>
-                  {hit.subtitle ? <span className="t-body-sm text-ink-3">{hit.subtitle}</span> : null}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <>
+            {results.truncated ? (
+              <InlineNotice tone="info" className="mb-[var(--space-4)]" data-social-explore-truncated="">
+                {SOCIAL.explore.truncated}
+              </InlineNotice>
+            ) : null}
+            <ul data-social-explore-results="" className="flex flex-col gap-[var(--space-3)]">
+              {hits.map((hit) => (
+                <li key={`${hit.kind}-${hit.id}`}>
+                  <Link href={hit.href} className="flex flex-col gap-1">
+                    <span className="t-body font-medium text-ink">{hit.title}</span>
+                    {hit.subtitle ? <span className="t-body-sm text-ink-3">{hit.subtitle}</span> : null}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </>
         )
       ) : (
         <div data-social-explore-trending="">

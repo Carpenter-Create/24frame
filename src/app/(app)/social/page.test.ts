@@ -8,6 +8,12 @@ import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
 import { ASK_GLOBEE } from "@/lib/ask-globee";
 import { SOCIAL } from "@/lib/social";
+import {
+  SOCIAL_FOLLOWEES_LIMIT,
+  SOCIAL_FOLLOWING_WALL_LIMIT,
+  SOCIAL_STORIES_RAIL_LIMIT,
+  encodeFollowingWallCursor,
+} from "@/lib/social-home-bounds";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import SocialHomePage from "./page";
 
@@ -240,6 +246,44 @@ describe("Social home", () => {
     stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(null as never);
     await expect(SocialHomePage({ searchParams: Promise.resolve({}) })).rejects.toThrow("REDIRECT:/login");
+  });
+
+  it("exposes followee, story, and wall truncation instead of a silent max", async () => {
+    const follows = Array.from({ length: SOCIAL_FOLLOWEES_LIMIT + 1 }, (_, i) => ({
+      followee_id: `u${i + 2}`,
+    }));
+    const posts = Array.from({ length: SOCIAL_FOLLOWING_WALL_LIMIT + 1 }, (_, i) => ({
+      id: `11111111-1111-4111-8111-${String(i).padStart(12, "0")}`,
+      body: `hello ${i}`,
+      author_id: "u1",
+      group_id: null,
+      like_count: 0,
+      created_at: `2026-09-14T12:00:${String(i).padStart(2, "0")}.000Z`,
+    }));
+    const stories = Array.from({ length: SOCIAL_STORIES_RAIL_LIMIT + 1 }, (_, i) => ({
+      id: `s${i}`,
+      author_id: "u1",
+      body: null,
+      media: [],
+      expires_at: "2099-01-01T00:00:00.000Z",
+      created_at: "2026-09-14T12:00:00.000Z",
+    }));
+    stubClient({ profile: ensured, posts, follows, stories });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const html = await renderHome();
+    expect(html).toContain("data-social-followees-truncated");
+    expect(html).toContain(SOCIAL.home.truncatedFollowees);
+    expect(html).toContain("data-social-stories-truncated");
+    expect(html).toContain(SOCIAL.home.truncatedStories);
+    expect(html).toContain("data-social-wall-truncated");
+    expect(html).toContain(SOCIAL.home.truncatedWall);
+    expect(html).toContain("data-social-wall-older");
+    expect(html).toContain(SOCIAL.home.olderPosts);
+    const lastKept = posts[SOCIAL_FOLLOWING_WALL_LIMIT - 1]!;
+    expect(html).toContain(`after=${encodeURIComponent(encodeFollowingWallCursor(lastKept))}`);
+    expect(html).toContain(`data-social-post="${posts[0]!.id}"`);
+    expect(html).not.toContain(`data-social-post="${posts[SOCIAL_FOLLOWING_WALL_LIMIT]!.id}"`);
   });
 });
 

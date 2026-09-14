@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 import { SOCIAL } from "@/lib/social";
+import { SOCIAL_EXPLORE_PEOPLE_LIMIT } from "@/lib/social-home-bounds";
 import SocialExplorePage from "./page";
 
 vi.mock("next/navigation", () => ({
@@ -67,5 +68,36 @@ describe("Social Explore", () => {
     await expect(SocialExplorePage({ searchParams: Promise.resolve({}) })).rejects.toThrow(
       "REDIRECT:/login",
     );
+  });
+
+  it("names the Explore search bound when either side overflows", async () => {
+    const people = Array.from({ length: SOCIAL_EXPLORE_PEOPLE_LIMIT + 1 }, (_, i) => ({
+      id: `p${i}`,
+      handle: `h${i}`,
+      display_name: `Name ${i}`,
+    }));
+    const peopleChain: Record<string, unknown> = {};
+    const postsChain: Record<string, unknown> = {};
+    const self = (chain: Record<string, unknown>) => () => chain;
+    for (const chain of [peopleChain, postsChain]) {
+      chain.select = vi.fn(self(chain));
+      chain.eq = vi.fn(self(chain));
+      chain.is = vi.fn(self(chain));
+      chain.or = vi.fn(self(chain));
+      chain.ilike = vi.fn(self(chain));
+    }
+    peopleChain.range = vi.fn(async () => ({ data: people, error: null }));
+    postsChain.range = vi.fn(async () => ({ data: [], error: null }));
+    vi.mocked(createClient).mockResolvedValue({
+      from: vi.fn((table: string) => (table === "profiles" ? peopleChain : postsChain)),
+    } as never);
+
+    const html = renderToStaticMarkup(
+      await SocialExplorePage({ searchParams: Promise.resolve({ q: "ada" }) }),
+    );
+    expect(html).toContain("data-social-explore-truncated");
+    expect(html).toContain(SOCIAL.explore.truncated);
+    expect(html).toContain("Name 0");
+    expect(html).not.toContain(`Name ${SOCIAL_EXPLORE_PEOPLE_LIMIT}`);
   });
 });

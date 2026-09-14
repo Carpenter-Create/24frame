@@ -1,5 +1,12 @@
 import { LIST_PAGE } from "@/lib/list-bounds";
 import { PRODUCT_NAME, SOCIAL_WORKSPACE } from "@/lib/product";
+import {
+  SOCIAL_EXPLORE_PEOPLE_LIMIT,
+  SOCIAL_EXPLORE_POSTS_LIMIT,
+  SOCIAL_FOLLOWEES_LIMIT,
+  SOCIAL_FOLLOWING_WALL_LIMIT,
+  SOCIAL_STORIES_RAIL_LIMIT,
+} from "@/lib/social-home-bounds";
 import type { SocialMediaItem, SocialMediaRuleError } from "@/lib/social-media";
 
 // Social workspace copy and input rules. Lives in lib/, not JSX.
@@ -30,7 +37,7 @@ export const SOCIAL_ROUTES = {
 /** Apex origin for the public profile URL preview and share string. */
 export const SOCIAL_PROFILE_ORIGIN = "https://24frame.co";
 
-/** Author history page. Same catalog bound as Home; probe for honest truncation. */
+/** Author history page. Independent of Home following-wall / followee / story caps. */
 export const SOCIAL_PROFILE_POSTS_PAGE = LIST_PAGE;
 
 // Public profile URL (locked): https://24frame.co/@{bareHandle}
@@ -150,6 +157,10 @@ export const SOCIAL = {
     mediaLimit: "Attach up to four photos or videos.",
     uploadFailed: "The file could not be stored.",
     topic: "Topic",
+    truncatedWall: `Showing the latest ${SOCIAL_FOLLOWING_WALL_LIMIT} posts. More exist — this list is not complete.`,
+    olderPosts: "Older posts",
+    truncatedFollowees: `Showing posts from the first ${SOCIAL_FOLLOWEES_LIMIT} people you follow. More exist — this list is not complete.`,
+    truncatedStories: `Showing the latest ${SOCIAL_STORIES_RAIL_LIMIT} stories. More exist — this list is not complete.`,
   },
   explore: {
     title: "Explore",
@@ -158,6 +169,7 @@ export const SOCIAL = {
     searchPlaceholder: "Search people and posts",
     empty: "No trending topics yet.",
     noResults: "No matching people or posts.",
+    truncated: `Showing the first ${SOCIAL_EXPLORE_PEOPLE_LIMIT} matching people and the first ${SOCIAL_EXPLORE_POSTS_LIMIT} matching posts. More exist — this list is not complete.`,
   },
   create: {
     title: "Create",
