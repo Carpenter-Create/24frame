@@ -16,6 +16,7 @@ import {
   EMAIL_LOGO_URL,
   EMAIL_SITE_LABEL,
   EMAIL_SITE_URL,
+  EMAIL_SLOGAN,
 } from "./email-house";
 
 const SPORTY_BLUE = "#1769FF";
@@ -206,7 +207,11 @@ describe("Auth magic-link template", () => {
     expect(EMAIL_LOGO_URL).toBe("https://app.24frame.co/email-mark-v2.png");
     expect(html).toContain('alt="24Frame"');
     expect(html).not.toMatch(/<img[^>]*#1769FF/i);
-    expect(html).toContain("Radically different film distribution.");
+    expect(html).toContain(EMAIL_SLOGAN);
+    expect(html).toContain("Built for the creator class.");
+    expect(html).toMatch(/color:#3F4650[\s\S]{0,80}Built for the creator class\./);
+    expect(html).not.toMatch(/color:#9AA0A9[\s\S]{0,80}Built for the creator class\./);
+    expect(html).not.toContain("Radically different film distribution.");
     expect(html).toContain("https://24frame.co");
     expect(html).toContain("24frame.co");
     expect(html).toContain("https://24frame.co/legal");
