@@ -112,11 +112,12 @@ describe("profile opt-in", () => {
     expect(socialHandleRequiredError("@ada")).toBeNull();
     expect(socialProfileHref("Ada")).toBe("/social/u/@ada");
     expect(socialProfileHref("@acarpcreate")).toBe("/social/u/@acarpcreate");
-    expect(socialProfilePublicUrl("acarpcreate")).toBe(
-      "https://app.24frame.co/social/u/@acarpcreate",
-    );
-    expect(socialProfilePublicUrl("")).toBe("https://app.24frame.co/social/u/@");
-    expect(SOCIAL_PROFILE_ORIGIN).toBe("https://app.24frame.co");
+    expect(socialProfilePublicUrl("acarpcreate")).toBe("https://24frame.co/@acarpcreate");
+    expect(socialProfilePublicUrl("")).toBe("https://24frame.co/@");
+    expect(socialProfilePublicUrl("@Ada")).toBe("https://24frame.co/@ada");
+    expect(SOCIAL_PROFILE_ORIGIN).toBe("https://24frame.co");
+    expect(socialProfilePublicUrl("acarpcreate")).not.toContain("app.24frame.co");
+    expect(socialProfilePublicUrl("acarpcreate")).not.toContain("/social/u/");
     expect(parseProfileHandleParam("%40ada")).toBe("ada");
     expect(parseProfileHandleParam("@ada")).toBe("ada");
     expect(suggestedHandleSeed("Ada.Carp@example.com", "u1")).toBe("adacarp");

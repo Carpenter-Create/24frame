@@ -15,7 +15,9 @@ describe("SocialHandleField", () => {
     expect(html).toContain(`placeholder="${SOCIAL.profile.handlePlaceholder}"`);
     expect(html).toContain("data-social-handle-url");
     expect(html).toContain(socialProfilePublicUrl("acarpcreate"));
-    expect(html).toContain("https://app.24frame.co/social/u/@acarpcreate");
+    expect(html).toContain("https://24frame.co/@acarpcreate");
+    expect(html).not.toContain("app.24frame.co");
+    expect(html).not.toContain("/social/u/");
   });
 
   it("keeps @ in an empty field and always shows the live URL preview", () => {
@@ -25,8 +27,10 @@ describe("SocialHandleField", () => {
     expect(html).toContain('value="@"');
     expect(html).toContain(`placeholder="${SOCIAL.profile.handlePlaceholder}"`);
     expect(html).toContain("data-social-handle-url");
-    expect(html).toContain("https://app.24frame.co/social/u/@");
+    expect(html).toContain("https://24frame.co/@");
     expect(html).toContain(socialProfilePublicUrl(""));
+    expect(html).not.toContain("app.24frame.co");
+    expect(html).not.toContain("/social/u/");
   });
 
   it("keeps the required-handle check on the profile submit path", () => {

@@ -93,9 +93,10 @@ describe("Social profile opt-in", () => {
     expect(html).toContain("data-social-profile-form");
     expect(html).toContain("data-social-handle-field");
     expect(html).toContain(SOCIAL.profile.handlePlaceholder);
-    expect(html).toContain("https://app.24frame.co/social/u/@ada");
+    expect(html).toContain("https://24frame.co/@ada");
     expect(html).toContain("@ada");
     expect(html).not.toContain("Globee");
+    expect(html).not.toContain("app.24frame.co");
     expect(from).not.toHaveBeenCalledWith("memberships");
   });
 
@@ -136,7 +137,7 @@ describe("Social profile opt-in", () => {
 
     const html = renderToStaticMarkup(await SocialProfilePage());
     expect(html).toContain("@ada");
-    expect(html).toContain("https://app.24frame.co/social/u/@ada");
+    expect(html).toContain("https://24frame.co/@ada");
     expect(html).toContain('value="@ada"');
     expect(html).toContain("Ada Lovelace");
   });
@@ -153,7 +154,7 @@ describe("Social profile opt-in", () => {
     expect(html).toContain("data-social-handle-field");
     expect(html).toContain('value="@"');
     expect(html).toContain("data-social-handle-url");
-    expect(html).toContain("https://app.24frame.co/social/u/@");
+    expect(html).toContain("https://24frame.co/@");
     expect(html).toContain(SOCIAL.profile.handlePlaceholder);
     expect(html).toContain("null value in column birth_date");
     expect(html).not.toContain("Ada Lovelace");
