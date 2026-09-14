@@ -18,8 +18,24 @@ import {
 // - Chrome-recorded webm may not play in Safari’s story viewer. No browser
 //   remux / AWS IVS / Elemental in this PR.
 // - No invented duration cap.
+// - Front-camera live preview is mirrored in CSS only. MediaRecorder records
+//   the unmirrored stream so viewers see a standard selfie, not a baked flip.
+// - Do not request 720x1280. That crops many sensors (especially user-facing)
+//   before the preview element paints.
+
+export type StoryStudioFacing = "user" | "environment";
 
 export const SOCIAL_STORY_RECORDER_TYPES = SOCIAL_VIDEO_CONTENT_TYPES;
+
+export function storyStudioMirrorsPreview(facing: StoryStudioFacing): boolean {
+  return facing === "user";
+}
+
+export function storyRecorderVideoConstraints(
+  facing: StoryStudioFacing,
+): MediaTrackConstraints {
+  return { facingMode: { ideal: facing } };
+}
 
 export const SOCIAL_STORY_RECORDER_CANDIDATES = [
   "video/mp4;codecs=avc1.424028,mp4a.40.2",

@@ -207,6 +207,22 @@ export const SOCIAL_STORY_STUDIO_CLASS =
 export const SOCIAL_STORY_STUDIO_STAGE_CLASS =
   "relative flex h-full w-full flex-col overflow-hidden bg-band md:h-[746px] md:max-h-[90dvh] md:w-[420px] md:rounded-[16px] md:border md:border-band-ink/20";
 
+// Live preview: contain, not cover. Cover on a tall stage + landscape camera
+// stream crops to a center strip (extreme zoom). Review/viewer stay cover.
+export const SOCIAL_STORY_STUDIO_PREVIEW_CLASS =
+  "absolute inset-0 size-full object-contain";
+
+export const SOCIAL_STORY_STUDIO_PREVIEW_MIRROR_CLASS = "-scale-x-100";
+
+export const SOCIAL_STORY_STUDIO_REVIEW_CLASS =
+  "absolute inset-0 size-full object-cover";
+
+export function socialStoryStudioPreviewClass(mirrored: boolean): string {
+  return mirrored
+    ? `${SOCIAL_STORY_STUDIO_PREVIEW_CLASS} ${SOCIAL_STORY_STUDIO_PREVIEW_MIRROR_CLASS}`
+    : SOCIAL_STORY_STUDIO_PREVIEW_CLASS;
+}
+
 export const SOCIAL_STORY_STUDIO_CHROME_CLASS =
   "absolute inset-x-0 top-0 z-10 flex h-14 items-center justify-between bg-band/35 p-4";
 
