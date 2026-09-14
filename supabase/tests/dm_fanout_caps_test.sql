@@ -4,7 +4,7 @@
 -- for 1:1 and small-room paths.
 
 begin;
-select plan(16);
+select plan(18);
 
 select set_config('t.alice', gen_random_uuid()::text, false);
 select set_config('t.bob',   gen_random_uuid()::text, false);
