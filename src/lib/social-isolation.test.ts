@@ -95,7 +95,8 @@ describe("social isolation lock", () => {
     expect(migration).toContain("social_media_keys_owned(media, author_id, 'posts')");
     expect(migration).toContain("social_media_keys_owned(media, author_id, 'stories')");
     expect(migration).not.toMatch(/org_id uuid/i);
-    expect(migration).not.toContain("is_gc_staff");
+    expect(migration).toContain("Do not add org_id or is_gc_staff");
+    expect(migration).not.toMatch(/is_gc_staff\s*\(/);
     const actions = readFileSync("src/app/(app)/social/actions.ts", "utf8");
     expect(actions).toContain("mediaItemsForInsert(formData.get(\"media\"), user.id)");
     expect(actions).toContain("mediaItemsForInsert(formData.get(\"media\"), user.id, \"stories\")");
