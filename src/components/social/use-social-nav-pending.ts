@@ -2,7 +2,7 @@
 
 import { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 import {
   socialNavActivePath,
@@ -13,27 +13,24 @@ import {
 
 // Instant Social chrome: click paints the destination before the RSC page
 // resolves. useLinkStatus covers the in-flight Link; onClick covers the
-// same tick. Pathname settlement clears the optimistic href.
+// same tick. A settled pathname drops the optimistic href without an effect.
 
 export function useSocialNavPending() {
   const pathname = usePathname();
   const [pendingHref, setPendingHref] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (pendingHref && socialNavPendingSettled(pathname, pendingHref)) {
-      setPendingHref(null);
-    }
-  }, [pathname, pendingHref]);
 
   const markPending = useCallback((href: string, event?: SocialNavClickLike) => {
     if (event && socialNavIgnorePendingClick(event)) return;
     setPendingHref(href);
   }, []);
 
+  const livePending =
+    pendingHref && socialNavPendingSettled(pathname, pendingHref) ? null : pendingHref;
+
   return {
-    activePath: socialNavActivePath(pathname, pendingHref),
+    activePath: socialNavActivePath(pathname, livePending),
     markPending,
-    pendingHref,
+    pendingHref: livePending,
   };
 }
 
@@ -45,10 +42,6 @@ export function SocialNavPendingProbe({
   onPending: (href: string) => void;
 }) {
   const { pending } = useLinkStatus();
-
-  useEffect(() => {
-    if (pending) onPending(href);
-  }, [href, onPending, pending]);
-
+  if (pending) onPending(href);
   return null;
 }
