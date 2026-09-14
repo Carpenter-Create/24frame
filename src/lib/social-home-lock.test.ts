@@ -155,6 +155,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).toContain('SOCIAL_FIGMA_HOME_EMPTY = "133:816"');
     expect(chrome).toContain('SOCIAL_FIGMA_HOME_MOBILE = "133:1078"');
     expect(home).toContain("SocialFirstWin");
+    expect(home).not.toContain("SocialOnboardingChecklist");
     expect(home).toContain("data-social-empty-lenses");
     expect(rail).toContain("data-social-stories-mobile");
     expect(chrome).toContain("129:215");
@@ -228,6 +229,21 @@ describe("Social Home miss list v1 P0 lock", () => {
       "Messages",
       "Profile",
     ]);
+  });
+
+  it("keeps first-win primary and the checklist demoted on empty desktop 133:816", () => {
+    const firstWin = readFileSync("src/components/social/social-first-win.tsx", "utf8");
+    expect(chrome).toContain('SOCIAL_FIGMA_HOME_EMPTY = "133:816"');
+    expect(home).toContain("SocialFirstWin");
+    expect(home).not.toContain("SocialOnboardingChecklist");
+    expect(firstWin).toContain("hidden md:flex");
+    expect(firstWin).toContain("data-social-first-win-setup");
+    const firstWinBody = firstWin.slice(firstWin.indexOf("export function SocialFirstWin"));
+    expect(firstWinBody.indexOf("SOCIAL.checklist.firstPost")).toBeLessThan(firstWinBody.indexOf("<details"));
+    expect(firstWinBody.indexOf("<details")).toBeLessThan(firstWinBody.indexOf("<SocialOnboardingChecklist"));
+    expect(firstWin).not.toContain("119:670");
+    expect(chrome).not.toContain("119:112");
+    expect(chrome).not.toContain("120:174");
   });
 
   it("keeps Social Figma and Settings Mercury on separate registers", () => {
