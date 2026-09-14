@@ -155,7 +155,8 @@ describe("loadFollowingPosts", () => {
     await loadFollowingPosts({ from: vi.fn(() => chain) } as never, ["u1"], { cursor });
     expect(chain.or).toHaveBeenCalledWith(followingWallKeysetOrFilter(cursor));
     expect(chain.range).toHaveBeenCalledWith(...probeRange(SOCIAL_FOLLOWING_WALL_LIMIT));
-    const [from] = chain.range.mock.calls[0] as [number, number];
+    const range = chain.range as ReturnType<typeof vi.fn>;
+    const [from] = range.mock.calls[0] as [number, number];
     expect(from).toBe(0);
   });
 
