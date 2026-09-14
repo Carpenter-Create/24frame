@@ -52,6 +52,10 @@ describe("social copy lock", () => {
     expect(SOCIAL.profile.handleRequired).toBe("Add a handle to continue.");
     expect(SOCIAL.profile.postsEmpty).toBe("No posts yet.");
     expect(SOCIAL.profile.postsTruncated).toContain("200");
+    expect(SOCIAL.home.truncatedWall).toContain("50");
+    expect(SOCIAL.home.truncatedFollowees).toContain("500");
+    expect(SOCIAL.home.truncatedStories).toContain("80");
+    expect(SOCIAL.explore.truncated).toContain("20");
     expect(SOCIAL.profile.uploadPhoto).toBe("Upload photo");
     expect(SOCIAL.courses.subtitle).toContain("Social+Education");
     expect(SOCIAL.leaderboard.private).toBe("The leaderboard is private.");

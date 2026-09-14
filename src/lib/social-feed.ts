@@ -1,7 +1,16 @@
 import type { createClient } from "@/lib/supabase/server";
 import { LIST_PAGE, probeRange, rangeFor, splitProbe } from "@/lib/list-bounds";
-import { followingAuthorIds } from "@/lib/social-home";
 import type { SocialCategoryTopic } from "@/lib/social-categories";
+import {
+  SOCIAL_EXPLORE_PEOPLE_LIMIT,
+  SOCIAL_EXPLORE_POSTS_LIMIT,
+  SOCIAL_FOLLOWEES_LIMIT,
+  SOCIAL_FOLLOWING_WALL_LIMIT,
+  SOCIAL_STORIES_RAIL_LIMIT,
+  followingWallKeysetOrFilter,
+  encodeFollowingWallCursor,
+  type FollowingWallCursor,
+} from "@/lib/social-home-bounds";
 import { displayHandle, SOCIAL_PROFILE_POSTS_PAGE, socialProfileHref } from "@/lib/social";
 import { isStoryLive, storyRailUnseen } from "@/lib/social-stories";
 
@@ -54,16 +63,24 @@ export async function loadOwnProfile(
   return data;
 }
 
+export type SocialFolloweePage = {
+  ids: string[];
+  truncated: boolean;
+};
+
 export async function loadFolloweeIds(
   supabase: ServerClient,
   followerId: string,
-): Promise<string[]> {
+): Promise<SocialFolloweePage> {
   const { data } = await supabase
     .from("follows")
     .select("followee_id")
     .eq("follower_id", followerId)
-    .range(...rangeFor(LIST_PAGE));
-  return (data ?? []).map((row) => row.followee_id);
+    .order("created_at", { ascending: false })
+    .order("followee_id", { ascending: true })
+    .range(...probeRange(SOCIAL_FOLLOWEES_LIMIT));
+  const { rows, truncated } = splitProbe(data, SOCIAL_FOLLOWEES_LIMIT);
+  return { ids: rows.map((row) => row.followee_id), truncated };
 }
 
 export async function loadIsFollowing(
@@ -80,24 +97,43 @@ export async function loadIsFollowing(
   return !!data;
 }
 
+export type SocialFollowingWallPage = {
+  posts: SocialPostRow[];
+  truncated: boolean;
+  nextCursor: string | null;
+};
+
+/**
+ * Home following wall. Mapping C: posts.author_id = profiles.id.
+ * created_at+id keyset; probe so the page cannot look finished.
+ * Caller supplies the followee IN() set so followee truncation stays a
+ * separate, named path.
+ */
 export async function loadFollowingPosts(
   supabase: ServerClient,
-  userId: string,
-  category?: SocialCategoryTopic | null,
-): Promise<SocialPostRow[]> {
-  const followeeIds = await loadFolloweeIds(supabase, userId);
-  const authorIds = followingAuthorIds(userId, followeeIds);
+  authorIds: readonly string[],
+  opts?: { category?: SocialCategoryTopic | null; cursor?: FollowingWallCursor | null },
+): Promise<SocialFollowingWallPage> {
+  if (authorIds.length === 0) return { posts: [], truncated: false, nextCursor: null };
   let query = supabase
     .from("posts")
     .select("id, body, author_id, group_id, like_count, created_at, media, category")
     .eq("status", "active")
     .is("group_id", null)
     .in("author_id", authorIds);
-  if (category) query = query.eq("category", category);
+  if (opts?.category) query = query.eq("category", opts.category);
+  if (opts?.cursor) query = query.or(followingWallKeysetOrFilter(opts.cursor));
   const { data } = await query
     .order("created_at", { ascending: false })
-    .range(...rangeFor(LIST_PAGE));
-  return data ?? [];
+    .order("id", { ascending: false })
+    .range(...probeRange(SOCIAL_FOLLOWING_WALL_LIMIT));
+  const { rows, truncated } = splitProbe(data, SOCIAL_FOLLOWING_WALL_LIMIT);
+  const last = rows[rows.length - 1];
+  return {
+    posts: rows,
+    truncated,
+    nextCursor: truncated && last ? encodeFollowingWallCursor(last) : null,
+  };
 }
 
 export type SocialAuthorPostsPage = {
@@ -140,12 +176,17 @@ export async function loadVisiblePosts(
   return data ?? [];
 }
 
+export type SocialStoriesPage = {
+  stories: SocialStoryRow[];
+  truncated: boolean;
+};
+
 export async function loadLiveStories(
   supabase: ServerClient,
   authorIds: readonly string[],
   now = new Date(),
-): Promise<SocialStoryRow[]> {
-  if (authorIds.length === 0) return [];
+): Promise<SocialStoriesPage> {
+  if (authorIds.length === 0) return { stories: [], truncated: false };
   const { data } = await supabase
     .from("stories")
     .select("id, author_id, body, media, expires_at, created_at")
@@ -153,8 +194,11 @@ export async function loadLiveStories(
     .gt("expires_at", now.toISOString())
     .in("author_id", authorIds)
     .order("created_at", { ascending: false })
-    .range(...rangeFor(LIST_PAGE));
-  return (data ?? []).filter((row) => isStoryLive(row.expires_at, now));
+    .order("id", { ascending: false })
+    .range(...probeRange(SOCIAL_STORIES_RAIL_LIMIT));
+  const live = (data ?? []).filter((row) => isStoryLive(row.expires_at, now));
+  const { rows, truncated } = splitProbe(live, SOCIAL_STORIES_RAIL_LIMIT);
+  return { stories: rows, truncated };
 }
 
 export async function loadViewedStoryIds(
@@ -236,12 +280,21 @@ export type SocialExploreHit = {
   href: string;
 };
 
+export type SocialExplorePage = {
+  hits: SocialExploreHit[];
+  truncated: boolean;
+  peopleTruncated: boolean;
+  postsTruncated: boolean;
+};
+
 export async function loadExploreSearch(
   supabase: ServerClient,
   query: string,
-): Promise<SocialExploreHit[]> {
+): Promise<SocialExplorePage> {
   const needle = query.trim();
-  if (!needle) return [];
+  if (!needle) {
+    return { hits: [], truncated: false, peopleTruncated: false, postsTruncated: false };
+  }
   const like = `%${needle.replace(/[%_]/g, "")}%`;
   const [{ data: people }, { data: posts }] = await Promise.all([
     supabase
@@ -249,17 +302,19 @@ export async function loadExploreSearch(
       .select("id, handle, display_name")
       .eq("status", "active")
       .or(`handle.ilike.${like},display_name.ilike.${like}`)
-      .range(...rangeFor(20)),
+      .range(...probeRange(SOCIAL_EXPLORE_PEOPLE_LIMIT)),
     supabase
       .from("posts")
       .select("id, body, author_id")
       .eq("status", "active")
       .is("group_id", null)
       .ilike("body", like)
-      .range(...rangeFor(20)),
+      .range(...probeRange(SOCIAL_EXPLORE_POSTS_LIMIT)),
   ]);
+  const peoplePage = splitProbe(people, SOCIAL_EXPLORE_PEOPLE_LIMIT);
+  const postsPage = splitProbe(posts, SOCIAL_EXPLORE_POSTS_LIMIT);
   const hits: SocialExploreHit[] = [];
-  for (const person of people ?? []) {
+  for (const person of peoplePage.rows) {
     hits.push({
       kind: "person",
       id: person.id,
@@ -268,7 +323,7 @@ export async function loadExploreSearch(
       href: socialProfileHref(person.handle),
     });
   }
-  for (const post of posts ?? []) {
+  for (const post of postsPage.rows) {
     hits.push({
       kind: "post",
       id: post.id,
@@ -277,7 +332,12 @@ export async function loadExploreSearch(
       href: "/social/explore",
     });
   }
-  return hits;
+  return {
+    hits,
+    peopleTruncated: peoplePage.truncated,
+    postsTruncated: postsPage.truncated,
+    truncated: peoplePage.truncated || postsPage.truncated,
+  };
 }
 
 export async function loadProfilesByIds(

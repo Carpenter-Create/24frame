@@ -47,7 +47,7 @@ export default async function SocialPublicProfilePage({
 
   const isSelf = member.id === ctx.user.id;
   const photoUrl = await signedAvatarUrl(member.id);
-  const liveStories = await loadLiveStories(supabase, [member.id]);
+  const liveStories = (await loadLiveStories(supabase, [member.id])).stories;
   const following = own && !isSelf ? await loadIsFollowing(supabase, ctx.user.id, member.id) : false;
   const history = await loadAuthorPosts(supabase, member.id);
   const media = await signedSocialMediaByPostId(history.posts);
