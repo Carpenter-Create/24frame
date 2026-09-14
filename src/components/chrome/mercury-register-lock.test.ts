@@ -77,6 +77,25 @@ describe("Adam Mercury register lock", () => {
     );
   });
 
+  it("measures node ids 75:5 / 75:132 / 75:2 / 61:2 — not discarded frame names", () => {
+    const phosphor = src("src/lib/phosphor-icon.tsx");
+    const nav = src("src/lib/nav.ts");
+    const settingsRail = src("src/components/chrome/settings-rail.tsx");
+    const sideNav = src("src/components/chrome/side-nav.tsx");
+    expect(phosphor).toContain("75:5");
+    expect(phosphor).toContain("75:132");
+    expect(phosphor).toContain("75:2");
+    expect(phosphor).toContain("61:2");
+    expect(nav).toContain("75:5");
+    expect(nav).toContain("61:2");
+    expect(settingsRail).toContain("75:132");
+    expect(sideNav).toContain("75:5");
+    for (const file of [phosphor, nav, settingsRail, sideNav]) {
+      expect(file).not.toContain("6:2");
+      expect(file).not.toContain("6:3");
+    }
+  });
+
   it("does not escalate Mercury past current — 16 Bold idle, no Social bleed", () => {
     expect(PHOSPHOR_CHROME_IDLE_WEIGHT).toBe("bold");
     expect(PHOSPHOR_CHROME_ACTIVE_WEIGHT).toBe("fill");

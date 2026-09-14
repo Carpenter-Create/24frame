@@ -49,7 +49,7 @@ export function isPhosphorNavItem(item: NavItem): item is PhosphorNavItem {
 // GC's flat nav — only what exists or is v1-scoped. Settings stays deferred.
 // Ask Globee is the /messages destination (href unchanged). Finance is the
 // client recipient door. Staff ops stays on GC_NAV at /gc/finance.
-// Glyphs: Figma 75:5 / 61:2 Phosphor Bold idle, Fill active.
+// Glyphs: Figma 75:5 / 75:2 / 61:2 Phosphor Bold idle, Fill active.
 export const NAV: PhosphorNavItem[] = [
   { label: "Home", href: "/", family: "phosphor", icon: SquaresFour, exact: true },
   { label: "Titles", href: "/titles", family: "phosphor", icon: FilmSlate },
