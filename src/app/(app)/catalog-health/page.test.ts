@@ -77,8 +77,13 @@ function stubClient() {
     if (table === "titles") return titlesChain;
     throw new Error(`unexpected from(${table})`);
   });
-  const rpc = vi.fn(async (name: string) => {
-    if (name === "my_findings") return { data: CROSS_ORG_FINDINGS, error: null };
+  const rpc = vi.fn(async (name: string, args?: { p_org_id?: string }) => {
+    if (name === "my_findings") {
+      const rows = args?.p_org_id
+        ? CROSS_ORG_FINDINGS.filter((f) => f.org_id === args.p_org_id)
+        : CROSS_ORG_FINDINGS;
+      return { data: rows, error: null };
+    }
     throw new Error(`unexpected rpc(${name})`);
   });
   vi.mocked(createClient).mockResolvedValue({ from, rpc } as never);
@@ -122,13 +127,17 @@ describe("CatalogHealthPage modes", () => {
   });
 
   it("keeps the org-scoped catalog for a user with a client org", async () => {
-    stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(
       ctx({ isGcStaff: false, orgStatus: "active" }) as never,
     );
 
+    const { rpc } = stubClient();
     const html = renderToStaticMarkup(await CatalogHealthPage());
 
+    expect(rpc).toHaveBeenCalledWith("my_findings", {
+      p_limit: UNPAGINATED_MAX + 1,
+      p_org_id: "org-1",
+    });
     expect(html).toContain("Acme Film");
     expect(html).toContain("/titles/title-acme/metadata");
     expect(html).not.toContain("Other Film");
@@ -172,7 +181,10 @@ describe("CatalogHealthPage modes", () => {
 
     const html = renderToStaticMarkup(await CatalogHealthPage());
 
-    expect(rpc).toHaveBeenCalledWith("my_findings", { p_limit: UNPAGINATED_MAX + 1 });
+    expect(rpc).toHaveBeenCalledWith("my_findings", {
+      p_limit: UNPAGINATED_MAX + 1,
+      p_org_id: "org-1",
+    });
     expect(html).toContain('data-my-list-truncated="findings"');
     expect(html).toContain(CATALOG_HEALTH_TRUNCATED);
   });

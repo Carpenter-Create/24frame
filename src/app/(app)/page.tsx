@@ -75,7 +75,7 @@ export default async function DashboardPage() {
     .range(...rangeFor(UNPAGINATED_MAX));
   const titles = titleRows ?? [];
 
-  const findings = await loadMyFindings(supabase);
+  const findings = await loadMyFindings(supabase, { orgId: org.id });
   const snapshot = clientHomeSnapshot({
     titles,
     findings: findings.rows,

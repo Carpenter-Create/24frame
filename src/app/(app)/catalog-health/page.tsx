@@ -30,10 +30,11 @@ export default async function CatalogHealthPage() {
   const activeOrgId = ctx.activeOrg?.id ?? null;
   const gcWide = ctx.isGcStaff && !activeOrgId;
 
-  const loaded = await loadMyFindings(supabase);
-  const findings = activeOrgId
-    ? loaded.rows.filter((f) => f.org_id === activeOrgId)
-    : loaded.rows;
+  const loaded = await loadMyFindings(
+    supabase,
+    activeOrgId ? { orgId: activeOrgId } : undefined,
+  );
+  const findings = loaded.rows;
 
   const titleIds = [...new Set(findings.map((f) => f.entity_id))];
   const { data: titleRows } = titleIds.length

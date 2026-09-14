@@ -107,7 +107,10 @@ describe("DashboardPage modes", () => {
 
     expect(from).toHaveBeenCalledWith("titles");
     expect(eq).toHaveBeenCalledWith("org_id", "org-1");
-    expect(rpc).toHaveBeenCalledWith("my_findings", { p_limit: UNPAGINATED_MAX + 1 });
+    expect(rpc).toHaveBeenCalledWith("my_findings", {
+      p_limit: UNPAGINATED_MAX + 1,
+      p_org_id: "org-1",
+    });
     expect(rpc).not.toHaveBeenCalledWith("gc_client_directory", expect.anything());
     expect(html).toContain("Acme");
     expect(html).toMatch(/<h1 class="t-section text-ink">Acme<\/h1>/);
@@ -187,7 +190,10 @@ describe("DashboardPage modes", () => {
 
     const html = renderToStaticMarkup(await DashboardPage());
 
-    expect(rpc).toHaveBeenCalledWith("my_findings", { p_limit: UNPAGINATED_MAX + 1 });
+    expect(rpc).toHaveBeenCalledWith("my_findings", {
+      p_limit: UNPAGINATED_MAX + 1,
+      p_org_id: "org-1",
+    });
     expect(rpc).not.toHaveBeenCalledWith("gc_client_directory", expect.anything());
     expect(html).toContain("Acme");
     expect(html).toContain("data-dashboard-snapshot");

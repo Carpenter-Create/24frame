@@ -3055,7 +3055,7 @@ export type Database = {
         }[]
       }
       my_findings: {
-        Args: { p_limit?: number }
+        Args: { p_limit?: number; p_org_id?: string }
         Returns: {
           code: string
           created_at: string

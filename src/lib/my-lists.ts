@@ -40,10 +40,12 @@ export async function loadMyDeliveries(
 
 export async function loadMyFindings(
   supabase: ServerClient,
-  opts?: { limit?: number },
+  opts?: { orgId?: string; limit?: number },
 ): Promise<BoundedList<MyFindingRow>> {
   const limit = opts?.limit ?? MY_LIST_LIMIT;
-  const { data } = await supabase.rpc("my_findings", { p_limit: limit + 1 });
+  const args: { p_limit: number; p_org_id?: string } = { p_limit: limit + 1 };
+  if (opts?.orgId) args.p_org_id = opts.orgId;
+  const { data } = await supabase.rpc("my_findings", args);
   return splitProbe(data as MyFindingRow[] | null, limit);
 }
 

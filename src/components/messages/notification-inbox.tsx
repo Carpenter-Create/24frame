@@ -36,7 +36,10 @@ export function NotificationInbox({
         </InlineNotice>
       ) : null}
 
-      {unreadIds.length > 0 ? (
+      {/* Mark all only when the page is complete. A truncated list plus the
+          unbounded my_unread_count badge would otherwise claim every notice
+          was read while hidden rows stayed unread. Per-row Mark as read stays. */}
+      {unreadIds.length > 0 && !truncated ? (
         <div className="pb-4">
           <MarkAllRead ids={unreadIds} />
         </div>

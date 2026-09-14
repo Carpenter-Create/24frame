@@ -9,8 +9,9 @@
 -- ACCESS PATH:
 --   my_deliveries(p_limit, p_title_id)  — org-scoped via member_can;
 --     optional title scope for /titles/:id. Cardinality ≤ 501.
---   my_findings(p_limit)                — open findings, member_can.
---     Cardinality ≤ 501.
+--   my_findings(p_limit, p_org_id)      — open findings, member_can;
+--     optional org scope so a client/home page is not capped by
+--     other orgs GC can see. Cardinality ≤ 501.
 --   my_notifications(p_limit)           — caller inbox, member_can.
 --     Cardinality ≤ 501.
 -- App probes UNPAGINATED_MAX+1 (501) and splitProbe(500). Hard max 501 so a
@@ -77,7 +78,10 @@ comment on function public.my_deliveries(integer, uuid) is
 
 drop function if exists public.my_findings();
 
-create function public.my_findings(p_limit integer default 500)
+create function public.my_findings(
+  p_limit integer default 500,
+  p_org_id uuid default null
+)
   returns setof public.findings
   language sql
   stable
@@ -88,15 +92,16 @@ as $$
   from public.findings
   where status = 'open'
     and public.member_can(auth.uid(), org_id, 'view')
+    and (p_org_id is null or org_id = p_org_id)
   order by severity, created_at
   limit least(greatest(coalesce(p_limit, 0), 0), 501);
 $$;
 
-revoke execute on function public.my_findings(integer) from public, anon;
-grant  execute on function public.my_findings(integer) to authenticated;
+revoke execute on function public.my_findings(integer, uuid) from public, anon;
+grant  execute on function public.my_findings(integer, uuid) to authenticated;
 
-comment on function public.my_findings(integer) is
-  'Caller open findings. Bounded (≤501). Not an authorization input.';
+comment on function public.my_findings(integer, uuid) is
+  'Caller open findings. Bounded (≤501). Optional org scope. Not an authorization input.';
 
 drop function if exists public.my_notifications();
 
