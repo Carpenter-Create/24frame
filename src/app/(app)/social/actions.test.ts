@@ -258,6 +258,31 @@ describe("social actions", () => {
     expect(from).not.toHaveBeenCalledWith("conversation_participants");
   });
 
+  it("refuses an oversized add-people batch before the RPC", async () => {
+    const rpc = vi.fn();
+    const from = vi.fn((table: string) => {
+      const chain = {
+        select: vi.fn(() => chain),
+        eq: vi.fn(() => chain),
+        in: vi.fn(() => chain),
+        maybeSingle: vi.fn(async () => ({ data: { id: "u1" }, error: null })),
+        then: (resolve: (value: unknown) => unknown) =>
+          Promise.resolve({
+            data: table === "profiles" ? [{ id: "u1" }] : { id: "u1" },
+            error: null,
+          }).then(resolve),
+      };
+      return chain;
+    });
+    vi.mocked(createClient).mockResolvedValue({ from, rpc } as never);
+
+    const form = new FormData();
+    form.set("conversation_id", "conv-1");
+    form.set("handles", Array.from({ length: 33 }, (_, i) => `peer${i}`).join(" "));
+    expect(await addSocialDmPeople(form)).toEqual({ error: SOCIAL.dms.addBatch });
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
   it("quiets a blocked add-people RPC error", async () => {
     const from = vi.fn((table: string) => {
       const chain = {

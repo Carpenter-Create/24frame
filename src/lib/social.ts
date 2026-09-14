@@ -1,6 +1,12 @@
 import { LIST_PAGE } from "@/lib/list-bounds";
 import { PRODUCT_NAME, SOCIAL_WORKSPACE } from "@/lib/product";
 import {
+  SOCIAL_DM_ADD_BATCH_LIMIT,
+  SOCIAL_DM_INBOX_LIMIT,
+  SOCIAL_DM_ROOM_LIMIT,
+  SOCIAL_DM_THREAD_LIMIT,
+} from "@/lib/social-dm-bounds";
+import {
   SOCIAL_EXPLORE_PEOPLE_LIMIT,
   SOCIAL_EXPLORE_POSTS_LIMIT,
   SOCIAL_FOLLOWEES_LIMIT,
@@ -300,6 +306,11 @@ export const SOCIAL = {
     addSelf: "You are already in this conversation.",
     addMissing: "No profile for that handle.",
     addBlocked: "That person cannot be added.",
+    addBatch: `Add up to ${SOCIAL_DM_ADD_BATCH_LIMIT} people at a time.`,
+    roomFull: `This conversation already has ${SOCIAL_DM_ROOM_LIMIT} people.`,
+    truncatedInbox: `Showing the latest ${SOCIAL_DM_INBOX_LIMIT} conversations. More exist — this list is not complete.`,
+    truncatedThread: `Showing the latest ${SOCIAL_DM_THREAD_LIMIT} messages. More exist — this list is not complete.`,
+    olderMessages: "Older messages",
     titleLabel: "Title",
     titleHint: "Optional. Names stay first.",
     titleSave: "Save title",
@@ -450,6 +461,8 @@ export function inboxPeerIds(row: {
 export function quietDmAddError(message: string): string {
   const text = message.toLowerCase();
   if (text.includes("yourself")) return SOCIAL.dms.addSelf;
+  if (text.includes("room is full")) return SOCIAL.dms.roomFull;
+  if (text.includes("too many participants")) return SOCIAL.dms.addBatch;
   if (text.includes("blocked")) return SOCIAL.dms.addBlocked;
   if (text.includes("not found") || text.includes("inactive")) return SOCIAL.dms.addMissing;
   if (text.includes("not a participant")) return SOCIAL.dms.missing;

@@ -291,9 +291,11 @@ describe("messages clash lock", () => {
   it("does not steal /messages for DMs", () => {
     const home = readFileSync("src/app/(app)/social/page.tsx", "utf8");
     const dms = readFileSync("src/app/(app)/social/dms/page.tsx", "utf8");
+    const dmLoaders = readFileSync("src/lib/social-dms.ts", "utf8");
     const messages = readFileSync("src/app/(app)/messages/page.tsx", "utf8");
     expect(home).not.toContain('"/messages"');
-    expect(dms).toContain("get_dm_inbox");
+    expect(dms).toContain("loadDmInbox");
+    expect(dmLoaders).toContain("get_dm_inbox");
     expect(messages).toContain("AskGlobeeLanding");
     expect(messages).not.toContain("get_dm_inbox");
     expect(messages).not.toContain("open_or_get_direct_conversation");

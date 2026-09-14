@@ -3,9 +3,11 @@ import { redirect } from "next/navigation";
 
 import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
+import { InlineNotice } from "@/components/ui/inline-notice";
 import { SocialConversationFaces } from "@/components/social/social-ui";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { conversationRoomLabel, inboxPeerIds, SOCIAL, socialDmHref } from "@/lib/social";
+import { loadDmInbox, type DmInboxRow } from "@/lib/social-dms";
 import { loadProfilesByIds } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { getOrgContext } from "@/lib/supabase/context";
@@ -17,11 +19,11 @@ export default async function SocialDmsPage() {
 
   const supabase = await createClient();
   const profile = await ensureOwnSocialProfile(supabase, ctx.user);
-  const { data: inbox } = profile
-    ? await supabase.rpc("get_dm_inbox", { p_limit: 50 })
-    : { data: [] as never[] };
+  const inbox = profile
+    ? await loadDmInbox(supabase)
+    : { rows: [] as DmInboxRow[], truncated: false };
 
-  const rows = inbox ?? [];
+  const rows = inbox.rows;
   const peopleIds = [...new Set(rows.flatMap((row) => inboxPeerIds(row)))];
   const [peers, faces] = await Promise.all([
     loadProfilesByIds(supabase, peopleIds),
@@ -31,6 +33,11 @@ export default async function SocialDmsPage() {
   return (
     <div data-social-dms="">
       <PageHeader title={SOCIAL.dms.title} subtitle={SOCIAL.dms.subtitle} />
+      {inbox.truncated ? (
+        <InlineNotice tone="info" className="mb-[var(--space-4)]" data-social-dms-truncated="">
+          {SOCIAL.dms.truncatedInbox}
+        </InlineNotice>
+      ) : null}
       {profile && rows.length === 0 ? <HouseEmpty>{SOCIAL.dms.empty}</HouseEmpty> : null}
       <ul className="flex flex-col">
         {rows.map((row) => {
