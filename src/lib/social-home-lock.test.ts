@@ -43,6 +43,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).toContain("loadFollowingPosts");
     expect(home).toContain("SocialStoriesRail");
     expect(home).toContain("SocialHomeComposer");
+    expect(home.indexOf("SocialHomeComposer")).toBeLessThan(home.indexOf("SocialStoriesRail"));
     expect(home).toContain("SocialHomeTabs");
     expect(home).not.toContain("SocialProfileTabs");
     expect(home).not.toContain("creditsEmpty");
@@ -114,17 +115,18 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(explore).not.toContain("Reels");
   });
 
-  it("locks Home chrome against Figma 130:215 X-lane gravity", () => {
+  it("locks Home chrome against Figma 157:328 composer-top tall Stories", () => {
     const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
     const composer = readFileSync("src/components/social/social-home-composer.tsx", "utf8");
     const forYou = readFileSync("src/components/social/social-for-you.tsx", "utf8");
     const extras = readFileSync("src/components/social/social-rail-extras.tsx", "utf8");
-    expect(rail).toContain("SOCIAL_ICON_SIZE_STORY_CREATE");
-    expect(rail).toContain("SOCIAL_STORY_MEDIA_CLASS");
+    expect(rail).toContain("SOCIAL_ICON_SIZE_STORY_PLUS");
+    expect(rail).toContain("SOCIAL_HOME_STORY_CARD_CLASS");
+    expect(rail).toContain("data-social-stories-tall");
     expect(rail).toContain("data-social-story-media");
     expect(rail).toContain("bg-accent");
     expect(rail).toContain("bg-hairline");
-    expect(rail).toContain("w-[96px]");
+    expect(rail).toContain("w-[112px]");
     expect(rail).not.toContain("size-10");
     expect(card).toContain("SOCIAL_FEED_ROW_CLASS");
     expect(card.slice(card.indexOf("export function SocialPostCard")).indexOf("SocialAvatar")).toBeLessThan(
@@ -155,9 +157,10 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).not.toContain("SocialCreateCompose");
     expect(shell).toContain("data-social-workspace");
     expect(shell).not.toContain("Aggregation|Social");
-    expect(chrome).toContain('SOCIAL_FIGMA_HOME = "130:215"');
-    expect(chrome).toContain('SOCIAL_FIGMA_HOME_EMPTY = "133:816"');
-    expect(chrome).toContain('SOCIAL_FIGMA_HOME_MOBILE = "133:1078"');
+    expect(chrome).toContain('SOCIAL_FIGMA_HOME = "157:328"');
+    expect(chrome).toContain('SOCIAL_FIGMA_HOME_EMPTY = "157:1078"');
+    expect(chrome).toContain('SOCIAL_FIGMA_HOME_MOBILE = "157:1297"');
+    expect(chrome).toContain('SOCIAL_FIGMA_HOME_MOBILE_SCROLL = "158:461"');
     expect(home).toContain("SocialFirstWin");
     expect(home).not.toContain("SocialOnboardingChecklist");
     expect(home).toContain("data-social-empty-lenses");
@@ -199,14 +202,18 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(rail).toContain("w-[112px]");
     expect(rail).toContain("SOCIAL_STORIES_CARD_CLASS");
     expect(rail).toContain("SOCIAL_STORIES_PLUS_WELL_CLASS");
+    expect(rail).toContain("SOCIAL_HOME_STORY_NAME_CLASS");
     expect(chrome).toContain("h-[168px]");
+    expect(chrome).toContain("h-[192px]");
+    expect(chrome).toContain("h-[200px]");
     expect(chrome).toContain("w-[112px]");
+    expect(chrome).toContain("w-[108px]");
     expect(icons).toContain("SOCIAL_ICON_SIZE_STORY_PLUS = 20");
     expect(icons).toContain("SOCIAL_ICON_SIZE_TAB = 22");
     expect(icons).not.toContain("SOCIAL_ICON_SIZE_DOCK");
   });
 
-  it("ships a flush sticky tab bar and keeps the Mercury floating dock gone", () => {
+  it("ships a floating pill tab bar and keeps the Mercury floating dock gone", () => {
     const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
     const topBar = readFileSync("src/components/social/social-top-bar.tsx", "utf8");
     const tabBar = readFileSync("src/components/social/social-mobile-tab-bar.tsx", "utf8");
@@ -226,6 +233,10 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(topBar).not.toContain("data-social-mobile-pill");
     expect(readFileSync("src/lib/nav.ts", "utf8")).not.toContain("SOCIAL_MOBILE_PILL");
     expect(tabBar).toContain("data-social-tab-bar");
+    expect(tabBar).toContain("data-social-tab-pill");
+    expect(tabBar).toContain("data-social-tab-bar-hidden");
+    expect(tabBar).toContain("stepSocialTabBarScroll");
+    expect(tabBar).toContain("createSocialTabBarScrollTracker");
     expect(tabBar).toContain("SOCIAL_NAV");
     expect(tabBar).toContain("SOCIAL_ICON_SIZE_TAB");
     expect(tabBar).toContain("isSocialTabActive");
@@ -233,9 +244,13 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(tabBar).toContain("prefetch");
     expect(tabBar).not.toContain("prefetch={false}");
     expect(tabBar).not.toContain("data-social-create-fab");
-    expect(tabBar).not.toContain("rounded-full");
+    expect(tabBar).not.toContain("data-social-mobile-pill");
     expect(chrome).toContain("SOCIAL_TAB_BAR_CLASS");
-    expect(chrome).toContain("border-t border-hairline");
+    expect(chrome).toContain("SOCIAL_TAB_PILL_CLASS");
+    expect(chrome).toContain("SOCIAL_TAB_PILL_HIDDEN_CLASS");
+    expect(chrome).toContain("translate-y-full");
+    expect(chrome).toContain("env(safe-area-inset-bottom)");
+    expect(chrome).toContain("rounded-[28px]");
     expect(chrome).toContain("h-14");
     expect(SOCIAL_NAV.map((item) => item.label)).toEqual([
       "Home",
@@ -270,9 +285,9 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(messages).toContain("Promise.all");
   });
 
-  it("keeps first-win primary and the checklist demoted on empty desktop 133:816", () => {
+  it("keeps first-win primary and the checklist demoted on empty desktop 157:1078", () => {
     const firstWin = readFileSync("src/components/social/social-first-win.tsx", "utf8");
-    expect(chrome).toContain('SOCIAL_FIGMA_HOME_EMPTY = "133:816"');
+    expect(chrome).toContain('SOCIAL_FIGMA_HOME_EMPTY = "157:1078"');
     expect(home).toContain("SocialFirstWin");
     expect(home).not.toContain("SocialOnboardingChecklist");
     expect(firstWin).toContain("hidden md:flex");

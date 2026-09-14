@@ -158,6 +158,8 @@ describe("Social home", () => {
     expect(html).toContain(SOCIAL.home.title);
     expect(html).toContain("24Frame");
     expect(html).toContain("data-social-home-composer");
+    expect(html.indexOf("data-social-home-composer")).toBeLessThan(html.indexOf("data-social-stories"));
+    expect(html).toContain("data-social-stories-tall");
     expect(html).toContain("data-social-home-tabs");
     expect(html).toContain(SOCIAL.home.followingTab);
     expect(html).toContain(SOCIAL.home.forYouTab);

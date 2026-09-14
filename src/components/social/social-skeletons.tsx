@@ -10,6 +10,7 @@ import {
   SOCIAL_FOR_YOU_RAIL_CLASS,
   SOCIAL_HOME_CENTER_CLASS,
   SOCIAL_HOME_LAYOUT_CLASS,
+  SOCIAL_HOME_STORY_CARD_CLASS,
   SOCIAL_PROFILE_GRID_CLASS,
   SOCIAL_PROFILE_TILE_CLASS,
   SOCIAL_STORY_CARD_CLASS,
@@ -28,11 +29,17 @@ function SocialForYouSkeleton() {
   );
 }
 
-function SocialStoriesRailSkeleton({ count = 5 }: { count?: number }) {
+function SocialStoriesRailSkeleton({
+  count = 5,
+  tall = false,
+}: {
+  count?: number;
+  tall?: boolean;
+}) {
   return (
     <div data-social-stories-skeleton="" className="flex gap-2 overflow-hidden">
       {Array.from({ length: count }).map((_, i) => (
-        <Skeleton key={i} className={SOCIAL_STORY_CARD_CLASS} />
+        <Skeleton key={i} className={tall ? SOCIAL_HOME_STORY_CARD_CLASS : SOCIAL_STORY_CARD_CLASS} />
       ))}
     </div>
   );
@@ -42,13 +49,13 @@ export function SocialHomeSkeleton() {
   return (
     <div data-social-home-skeleton="" className={SOCIAL_HOME_LAYOUT_CLASS}>
       <div className={SOCIAL_HOME_CENTER_CLASS}>
-        <SocialStoriesRailSkeleton />
         <div className={SOCIAL_COMPOSER_CLASS}>
           <div className="flex items-center gap-2.5">
             <Skeleton className={SOCIAL_AVATAR_SM_CLASS} />
             <Skeleton className="h-10 min-w-0 flex-1 rounded-[20px]" />
           </div>
         </div>
+        <SocialStoriesRailSkeleton tall />
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className={SOCIAL_FEED_ROW_CLASS}>
             <div className="flex gap-2">

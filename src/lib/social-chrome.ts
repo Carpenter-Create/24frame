@@ -1,5 +1,6 @@
 // Social measured chrome. Tokens only — no hex.
-// Home ship: Figma 130:215 / 133:816 / 133:1078.
+// Home pack: Figma 157:328 / 157:1078 / 157:1297 / 158:461
+//   (supersedes 130:215 / 133:816 / 133:1078 for this pack).
 // Profile ship: Figma 129:215 / 129:415 / 129:615.
 // Profile share sheet: Figma 155:194 / 155:372.
 // Create ship: Figma 135:585 / 135:1037 / 135:1214.
@@ -9,9 +10,10 @@
 // Stories picker: Figma 144:1218 / 144:1444.
 // No glass, no drop shadow. Aggregation / Settings Mercury stays elsewhere.
 
-export const SOCIAL_FIGMA_HOME = "130:215";
-export const SOCIAL_FIGMA_HOME_EMPTY = "133:816";
-export const SOCIAL_FIGMA_HOME_MOBILE = "133:1078";
+export const SOCIAL_FIGMA_HOME = "157:328";
+export const SOCIAL_FIGMA_HOME_EMPTY = "157:1078";
+export const SOCIAL_FIGMA_HOME_MOBILE = "157:1297";
+export const SOCIAL_FIGMA_HOME_MOBILE_SCROLL = "158:461";
 export const SOCIAL_FIGMA_PROFILE = ["129:215", "129:415", "129:615"] as const;
 export const SOCIAL_FIGMA_PROFILE_SHARE = ["155:194", "155:372"] as const;
 export const SOCIAL_FIGMA_CREATE = ["135:585", "135:1037", "135:1214"] as const;
@@ -89,6 +91,28 @@ export const SOCIAL_STORY_FACE_CLASS =
 export const SOCIAL_STORY_MEDIA_CLASS =
   "relative size-full overflow-hidden rounded-[9px] bg-surface-muted";
 
+// Home tall FB-style cards — 157:328 / 157:1297. Circular rings superseded.
+export const SOCIAL_HOME_STORY_CARD_CLASS =
+  "relative h-[192px] w-[108px] shrink-0 overflow-hidden rounded-[16px] border border-hairline bg-surface-muted md:h-[200px] md:w-[112px]";
+
+export const SOCIAL_HOME_STORY_CREATE_FACE_CLASS =
+  "absolute inset-x-0 top-0 h-[134px] bg-surface-muted md:h-[140px]";
+
+export const SOCIAL_HOME_STORY_PLUS_CLASS =
+  "absolute left-1/2 top-[115px] z-10 flex size-9 -translate-x-1/2 items-center justify-center rounded-full border-[3px] border-surface bg-accent text-accent-contrast md:top-[117px]";
+
+export const SOCIAL_HOME_STORY_CREATE_LABEL_CLASS =
+  "absolute inset-x-0 bottom-0 flex h-12 items-center justify-center bg-surface t-label font-medium text-ink";
+
+export const SOCIAL_HOME_STORY_FACE_RING_CLASS =
+  "absolute left-2 top-2 z-10 flex size-8 items-center justify-center overflow-hidden rounded-full border-2 bg-surface p-[2px] md:left-[9px] md:top-[9px] md:size-9";
+
+export const SOCIAL_HOME_STORY_FACE_CLASS =
+  "flex size-full items-center justify-center overflow-hidden rounded-full bg-surface t-label font-semibold text-ink";
+
+export const SOCIAL_HOME_STORY_NAME_CLASS =
+  "absolute inset-x-0 bottom-0 flex h-10 items-center bg-band/55 px-2 t-label font-medium text-band-ink md:h-12 md:px-2.5";
+
 export const SOCIAL_STORIES_CARD_CLASS =
   "flex h-[168px] w-[112px] shrink-0 items-center justify-center rounded-[16px] p-[3px]";
 
@@ -136,10 +160,17 @@ export const SOCIAL_CREATE_CTA_CLASS =
 export const SOCIAL_ACCOUNT_CHIP_CLASS =
   "flex w-full items-center gap-2.5 rounded-[12px] border border-hairline bg-surface-muted p-2.5";
 
+// Floating pill — 157:1297 visible / 158:461 hidden on scroll-down.
+// Desktop left Aggregation rail is unchanged; pill is md:hidden.
 export const SOCIAL_TAB_BAR_CLASS =
-  "fixed inset-x-0 bottom-0 z-40 border-t border-hairline bg-surface pb-[max(12px,env(safe-area-inset-bottom))] md:hidden";
+  "fixed inset-x-0 bottom-0 z-40 flex justify-center pb-[max(12px,env(safe-area-inset-bottom))] transition-transform duration-200 ease-out md:hidden";
 
-export const SOCIAL_TAB_BAR_ROW_CLASS = "flex h-14 w-full items-center";
+export const SOCIAL_TAB_PILL_CLASS =
+  "flex h-14 w-[min(358px,calc(100%-32px))] items-center rounded-[28px] border border-hairline bg-surface px-2";
+
+export const SOCIAL_TAB_PILL_HIDDEN_CLASS = "pointer-events-none translate-y-full";
+
+export const SOCIAL_TAB_BAR_ROW_CLASS = "flex h-12 w-full items-center";
 
 export const SOCIAL_TAB_ITEM_CLASS =
   "flex h-full flex-1 items-center justify-center px-2 py-3";
