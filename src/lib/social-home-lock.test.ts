@@ -74,7 +74,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(create).not.toContain("SocialLensRow");
     expect(create).toContain("SocialCreateCompose");
     expect(stories).toContain("SocialStoriesRail");
-    expect(stories).toContain("data-social-stories-empty");
+    expect(stories).toContain("SocialStoriesEmpty");
     expect(stories).not.toContain("SocialLensRow");
   });
 
@@ -184,8 +184,10 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(empty).toContain("SOCIAL_STORIES_EMPTY_ACTION_CLASS");
     expect(rail).toContain('surface = "home"');
     expect(rail).toContain("w-[112px]");
-    expect(rail).toContain("h-[168px]");
+    expect(rail).toContain("SOCIAL_STORIES_CARD_CLASS");
     expect(rail).toContain("SOCIAL_STORIES_PLUS_WELL_CLASS");
+    expect(chrome).toContain("h-[168px]");
+    expect(chrome).toContain("w-[112px]");
     expect(icons).toContain("SOCIAL_ICON_SIZE_STORY_PLUS = 20");
     expect(icons).not.toContain("SOCIAL_ICON_SIZE_DOCK");
   });
