@@ -49,6 +49,7 @@ describe("account sheet lock", () => {
   it("uses the same USER_MENU_ACTIONS list as the desktop menu", () => {
     expect(ACCOUNT_SHEET_ITEMS).toBe(USER_MENU_ACTIONS);
     expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).toEqual([
+      "workspace",
       "profile",
       "agreements",
       "appearance",
@@ -56,12 +57,15 @@ describe("account sheet lock", () => {
       "refer",
     ]);
     expect(ACCOUNT_SHEET_ITEMS.map((item) => item.label)).toEqual([
+      "Workspace",
       "Profile",
       "Agreements",
       "Appearance",
       "Help",
       "Refer a friend",
     ]);
+    expect(ACCOUNT_SHEET_ITEMS[0]?.kind).toBe("workspace");
+    expect(ACCOUNT_SHEET_ITEMS[1]?.kind).toBe("profile");
   });
 
   it("wires only existing routes — Appearance is not a page", () => {

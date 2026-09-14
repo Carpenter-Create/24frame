@@ -54,7 +54,7 @@ export const SETTINGS_LOCAL_NAV = [
 ] as const;
 
 // Rail chrome — 220 slot, pad 16, 8 between rows. Home is 15
-// Regular. Do not put Titles, Appearance, Account, Users, or API here.
+// Regular. Do not put Titles, Appearance, Workspace, Account, Users, or API here.
 export const SETTINGS_RAIL_PAD_CLASS = "p-[var(--space-4)]";
 export const SETTINGS_RAIL_NAV_CLASS = "flex flex-col gap-[var(--space-2)]";
 export const SETTINGS_RAIL_ITEM_CLASS =
@@ -85,6 +85,7 @@ export const SETTINGS_RAIL_ABSENT = [
   "Users",
   "API",
   "Appearance",
+  "Workspace",
   "Company",
 ] as const;
 

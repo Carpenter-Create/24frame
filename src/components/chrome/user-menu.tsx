@@ -3,6 +3,7 @@
 import { signOut } from "@/app/actions";
 import { accountPhotoSrc } from "@/lib/account-avatar";
 import { userMenuAvatarInitial, userMenuName } from "@/lib/user-menu";
+import type { WorkspaceMode } from "@/lib/workspace";
 import { DesktopAccountMenu, MobileAccountMenu } from "./account-sheet";
 import { IdentityPhoto } from "./house";
 
@@ -53,15 +54,27 @@ export function UserMenu({
   email,
   name,
   photoUrl,
+  defaultWorkspace = "aggregation",
 }: {
   email: string;
   name?: string | null;
   photoUrl?: string | null;
+  defaultWorkspace?: WorkspaceMode;
 }) {
   return (
     <>
-      <MobileAccountMenu email={email} name={name} photoUrl={photoUrl} />
-      <DesktopAccountMenu email={email} name={name} photoUrl={photoUrl} />
+      <MobileAccountMenu
+        email={email}
+        name={name}
+        photoUrl={photoUrl}
+        defaultWorkspace={defaultWorkspace}
+      />
+      <DesktopAccountMenu
+        email={email}
+        name={name}
+        photoUrl={photoUrl}
+        defaultWorkspace={defaultWorkspace}
+      />
     </>
   );
 }

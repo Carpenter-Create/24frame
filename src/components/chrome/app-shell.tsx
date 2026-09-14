@@ -27,7 +27,6 @@ import {
 import { PRODUCT_NAME } from "@/lib/product";
 import { isSettingsPath, SETTINGS_RAIL_PAD_CLASS } from "@/lib/settings";
 import { resolveWorkspaceMode, type WorkspaceMode } from "@/lib/workspace";
-import { WorkspaceSwitcher } from "./workspace-switcher";
 import { SocialMobileDock } from "@/components/social/social-mobile-dock";
 
 type Org = { id: string; name: string };
@@ -169,6 +168,7 @@ export function AppShell({
       </aside>
 
       {/* Access header is avatar / account menu only — no org switcher on any route.
+          Workspace switcher lives in the account menu, above Profile.
           Search mounts on the Access `/messages` gate, and on mobile `/titles`
           (528:542). Desktop 1:3, `/` 1:2, and `/titles/[id]` 1:4 stay avatar-only.
           Phone avatar opens 544:561. Hamburger stays the nav sheet. */}
@@ -183,12 +183,16 @@ export function AppShell({
       >
         <div data-app-header-leading="" className="mr-auto flex min-w-0 flex-1 items-center gap-2">
           {settingsPage ? <SettingsHeaderBack /> : <MobileNav isGcStaff={isGcStaff} workspace={workspace} />}
-          {settingsPage ? null : <WorkspaceSwitcher defaultWorkspace={defaultWorkspace} />}
           {messagesPage ? <MessagesAppHeader surface={messagesSurface} /> : null}
           {titlesBleed ? <TitlesHeaderSearch /> : null}
         </div>
         <div className="flex items-center gap-3">
-          <UserMenu email={email} name={name} photoUrl={photoUrl} />
+          <UserMenu
+            email={email}
+            name={name}
+            photoUrl={photoUrl}
+            defaultWorkspace={defaultWorkspace}
+          />
         </div>
       </header>
 

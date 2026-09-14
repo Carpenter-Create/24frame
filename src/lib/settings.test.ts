@@ -135,6 +135,7 @@ describe("settings lock", () => {
       "Users",
       "API",
       "Appearance",
+      "Workspace",
       "Company",
     ]);
   });

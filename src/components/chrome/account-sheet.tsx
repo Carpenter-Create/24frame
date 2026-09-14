@@ -9,7 +9,7 @@ import {
   type RefObject,
 } from "react";
 import { createPortal } from "react-dom";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { CaretLeft, CaretRight, SignOut } from "@phosphor-icons/react";
 
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
@@ -76,6 +76,17 @@ import {
 import { APP_SHEET_SCRIM_CLASS, SHEET_GROUP_CHEVRON_CLASS } from "@/lib/house-sheet";
 import { applyDocumentThemePreference } from "@/lib/theme";
 import { USER_MENU, userMenuAvatarInitial, userMenuVersion } from "@/lib/user-menu";
+import {
+  persistWorkspaceCookie,
+  resolveWorkspaceMode,
+  workspaceHome,
+  type WorkspaceMode,
+} from "@/lib/workspace";
+import {
+  availableWorkspaceOptions,
+  WORKSPACE_MENU,
+  workspaceModeLabel,
+} from "@/lib/workspace-menu";
 import { MenuSurfaceAccent } from "./menu-surface";
 
 // Glyph-only. Live sheet/dropdown layout, IA, and chrome stay.
@@ -237,6 +248,122 @@ function AccountMenuPin({
   );
 }
 
+function AccountWorkspaceRow({
+  open,
+  current,
+  onClick,
+  rowRef,
+}: {
+  open: boolean;
+  current: WorkspaceMode;
+  onClick: () => void;
+  rowRef?: Ref<HTMLButtonElement>;
+}) {
+  return (
+    <button
+      type="button"
+      ref={rowRef}
+      data-sheet-group-item="workspace"
+      data-user-menu-item="workspace"
+      aria-expanded={open}
+      onClick={onClick}
+      className={ACCOUNT_MENU_APPEARANCE_ROW_CLASS}
+    >
+      {open ? (
+        <span data-account-menu-workspace-wash="" className={ACCOUNT_MENU_APPEARANCE_WASH_CLASS} />
+      ) : null}
+      <span className={ACCOUNT_MENU_APPEARANCE_COPY_CLASS}>
+        <span>{USER_MENU.workspace}</span>
+        <span data-account-menu-workspace-mode="" className={ACCOUNT_MENU_APPEARANCE_MODE_CLASS}>
+          {workspaceModeLabel(current)}
+        </span>
+      </span>
+      <span
+        data-account-menu-workspace-chevron=""
+        className={ACCOUNT_MENU_APPEARANCE_CHEVRON_CLASS}
+      >
+        <AccountRowChevron />
+      </span>
+    </button>
+  );
+}
+
+export function AccountWorkspaceFlyout({
+  current,
+  className = ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS,
+  checkClassName,
+}: {
+  current: WorkspaceMode;
+  className?: string;
+  checkClassName?: string;
+}) {
+  const router = useRouter();
+
+  return (
+    <div data-account-menu-workspace-flyout="" className={className}>
+      {availableWorkspaceOptions().map((option) => (
+        <button
+          key={option.mode}
+          type="button"
+          data-sheet-group-item={option.mode}
+          data-account-menu-workspace-option={option.mode}
+          aria-pressed={current === option.mode}
+          className={ACCOUNT_MENU_APPEARANCE_FLYOUT_ROW_CLASS}
+          onClick={() => {
+            persistWorkspaceCookie(option.mode);
+            if (current !== option.mode) router.push(workspaceHome(option.mode));
+          }}
+        >
+          <span className={ACCOUNT_MENU_APPEARANCE_FLYOUT_MARK_CLASS}>
+            <AppearanceCheck
+              selected={current === option.mode}
+              className={checkClassName}
+            />
+          </span>
+          <span className={ACCOUNT_MENU_APPEARANCE_COPY_CLASS}>
+            <span>{option.label}</span>
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Same-sheet drill-in. Replaces the list face. 618:785 overlay is void. */
+export function AccountSheetWorkspace({
+  current,
+  onBack,
+}: {
+  current: WorkspaceMode;
+  onBack: () => void;
+}) {
+  const router = useRouter();
+
+  return (
+    <SheetGroup>
+      <SheetGroupItem item="back" onClick={onBack} label={WORKSPACE_MENU.back}>
+        <AccountBackChevron />
+      </SheetGroupItem>
+      {availableWorkspaceOptions().map((option) => (
+        <SheetGroupItem
+          key={option.mode}
+          item={option.mode}
+          pressed={current === option.mode}
+          onClick={() => {
+            persistWorkspaceCookie(option.mode);
+            if (current !== option.mode) router.push(workspaceHome(option.mode));
+          }}
+        >
+          <span className={ACCOUNT_SHEET_APPEARANCE_COPY_CLASS}>
+            <span>{option.label}</span>
+          </span>
+          <AppearanceCheck selected={current === option.mode} />
+        </SheetGroupItem>
+      ))}
+    </SheetGroup>
+  );
+}
+
 function AccountAppearanceRow({
   open,
   onClick,
@@ -352,18 +479,35 @@ function AccountMenuItems({
   pathname,
   onClose,
   face,
+  currentWorkspace,
+  onWorkspace,
   onAppearance,
+  workspaceRowRef,
   appearanceRowRef,
 }: {
   pathname: string;
   onClose: () => void;
   face: AccountMenuFace;
+  currentWorkspace: WorkspaceMode;
+  onWorkspace: () => void;
   onAppearance: () => void;
+  workspaceRowRef?: Ref<HTMLButtonElement>;
   appearanceRowRef?: Ref<HTMLButtonElement>;
 }) {
   return (
     <>
       {ACCOUNT_SHEET_ITEMS.map((item) => {
+        if (item.kind === "workspace") {
+          return (
+            <AccountWorkspaceRow
+              key={item.kind}
+              open={face === "workspace"}
+              current={currentWorkspace}
+              onClick={onWorkspace}
+              rowRef={workspaceRowRef}
+            />
+          );
+        }
         if (item.kind === "appearance") {
           return (
             <AccountAppearanceRow
@@ -399,6 +543,8 @@ function AccountMenuBody({
   face,
   setFace,
   variant,
+  defaultWorkspace = "aggregation",
+  workspaceRowRef,
   appearanceRowRef,
 }: {
   email: string;
@@ -409,20 +555,30 @@ function AccountMenuBody({
   face: AccountMenuFace;
   setFace: (face: AccountMenuFace) => void;
   variant: "sheet" | "dropdown";
+  defaultWorkspace?: WorkspaceMode;
+  workspaceRowRef?: Ref<HTMLButtonElement>;
   appearanceRowRef?: Ref<HTMLButtonElement>;
 }) {
   const identity = accountSheetIdentity(email, name, photoUrl);
   const stacked = variant === "dropdown";
+  const currentWorkspace = resolveWorkspaceMode(pathname, defaultWorkspace);
   const items = (
     <AccountMenuItems
       pathname={pathname}
       onClose={onClose}
       face={face}
+      currentWorkspace={currentWorkspace}
+      onWorkspace={
+        stacked
+          ? () => setFace(face === "workspace" ? "main" : "workspace")
+          : () => setFace("workspace")
+      }
       onAppearance={
         stacked
           ? () => setFace(face === "appearance" ? "main" : "appearance")
           : () => setFace("appearance")
       }
+      workspaceRowRef={stacked ? workspaceRowRef : undefined}
       appearanceRowRef={stacked ? appearanceRowRef : undefined}
     />
   );
@@ -470,6 +626,11 @@ function AccountMenuBody({
       </div>
       {face === "appearance" ? (
         <AccountSheetAppearance onBack={() => setFace("main")} />
+      ) : face === "workspace" ? (
+        <AccountSheetWorkspace
+          current={currentWorkspace}
+          onBack={() => setFace("main")}
+        />
       ) : (
         <>
           <AppSheetHairline data-account-sheet-rule="" />
@@ -487,9 +648,10 @@ function AccountMenuBody({
 // Quiet scrim; page stays under. 90% viewport, slides up. Hug is void.
 // Do not restyle to the desktop leftover dropdown.
 // One top row: Identity 48 + Close/44. Hairline — USER_MENU_ACTIONS.
-// Open Appearance replaces the list face on the same sheet. Back is
-// the house 16 tertiary chevron — Close stays Close. 618:785 overlay
-// is void. Closed sheet stays 544:561 / 537:557.
+// Workspace sits above Profile. Open Workspace / Appearance replaces
+// the list face on the same sheet. Back is the house 16 tertiary
+// chevron — Close stays Close. 618:785 overlay is void. Closed
+// sheet stays 544:561 / 537:557.
 // Leftover under the last item is the 90% grow (open white). Log out,
 // hairline, footer are pin siblings. Hairline only under Log out.
 // Do not add a hairline above Log out. 571:911 stays off.
@@ -499,15 +661,24 @@ export function MobileAccountMenu({
   email,
   name,
   photoUrl,
+  defaultWorkspace = "aggregation",
 }: {
   email: string;
   name?: string | null;
   photoUrl?: string | null;
+  defaultWorkspace?: WorkspaceMode;
 }) {
   const { pathname, open, openMenu, closeMenu } = useAccountMenuOpen();
 
   const sheet = open ? (
-    <AccountSheet email={email} name={name} photoUrl={photoUrl} pathname={pathname} onClose={closeMenu} />
+    <AccountSheet
+      email={email}
+      name={name}
+      photoUrl={photoUrl}
+      pathname={pathname}
+      onClose={closeMenu}
+      defaultWorkspace={defaultWorkspace}
+    />
   ) : null;
 
   return (
@@ -532,21 +703,23 @@ export function MobileAccountMenu({
 // Not 0. Not 134. No h-[Npx]. No min-h. No 522 / 570 / 672
 // floor. Align-end to the avatar (right edge flush). 8px under
 // the trigger. Close killed. Stacked identity. 24 pad. 24
-// between Profile / Agreements / Appearance / Help / Refer. No
-// leftover grow. Pin Log out, hairline, footer as siblings.
+// between Workspace / Profile / Agreements / Appearance / Help /
+// Refer. No leftover grow. Pin Log out, hairline, footer as siblings.
 // Hairline only under Log out. Log out → hairline 24. Hairline →
 // footer 24. Do not hug the rule. Footer → bottom 24. Not a 90%
 // sheet. Not a tall right takeover.
-// Appearance 613:888 sits as a second 264 surface, gap 8 left of
-// this parent. Flyout top = Appearance row top, offset 0.
+// Workspace / Appearance 613:888 sit as a second 264 surface, gap
+// 8 left of this parent. Flyout top = the open row top, offset 0.
 export function DesktopAccountMenu({
   email,
   name,
   photoUrl,
+  defaultWorkspace = "aggregation",
 }: {
   email: string;
   name?: string | null;
   photoUrl?: string | null;
+  defaultWorkspace?: WorkspaceMode;
 }) {
   const { pathname, open, openMenu, closeMenu } = useAccountMenuOpen();
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -560,6 +733,7 @@ export function DesktopAccountMenu({
       pathname={pathname}
       onClose={closeMenu}
       alignEnd={alignEnd}
+      defaultWorkspace={defaultWorkspace}
     />
   ) : null;
 
@@ -589,6 +763,7 @@ export function AccountSheet({
   pathname,
   onClose,
   face: initialFace = "main",
+  defaultWorkspace = "aggregation",
 }: {
   email: string;
   name?: string | null;
@@ -596,6 +771,7 @@ export function AccountSheet({
   pathname: string;
   onClose: () => void;
   face?: AccountMenuFace;
+  defaultWorkspace?: WorkspaceMode;
 }) {
   const [face, setFace] = useState<AccountMenuFace>(initialFace);
   useAccountMenuDismiss(onClose, true);
@@ -627,6 +803,7 @@ export function AccountSheet({
           face={face}
           setFace={setFace}
           variant="sheet"
+          defaultWorkspace={defaultWorkspace}
         />
       </div>
     </div>
@@ -641,6 +818,7 @@ export function AccountMenuDropdown({
   onClose,
   face: initialFace = "main",
   alignEnd,
+  defaultWorkspace = "aggregation",
 }: {
   email: string;
   name?: string | null;
@@ -649,16 +827,20 @@ export function AccountMenuDropdown({
   onClose: () => void;
   face?: AccountMenuFace;
   alignEnd?: AccountMenuDropdownAlign;
+  defaultWorkspace?: WorkspaceMode;
 }) {
   const [face, setFace] = useState<AccountMenuFace>(initialFace);
   useAccountMenuDismiss(onClose, false);
+  const workspaceRowRef = useRef<HTMLButtonElement>(null);
   const appearanceRowRef = useRef<HTMLButtonElement>(null);
   const flyoutHostRef = useRef<HTMLDivElement>(null);
+  const currentWorkspace = resolveWorkspaceMode(pathname, defaultWorkspace);
+  const submenuOpen = face === "appearance" || face === "workspace";
 
   useLayoutEffect(() => {
-    if (face !== "appearance" || !alignEnd) return undefined;
+    if (!submenuOpen || !alignEnd) return undefined;
     const sync = () => {
-      const row = appearanceRowRef.current;
+      const row = (face === "workspace" ? workspaceRowRef : appearanceRowRef).current;
       const host = flyoutHostRef.current;
       if (!row || !host) return;
       const align = accountMenuAppearanceFlyoutAlign(alignEnd, row.getBoundingClientRect());
@@ -667,7 +849,7 @@ export function AccountMenuDropdown({
     sync();
     window.addEventListener("resize", sync);
     return () => window.removeEventListener("resize", sync);
-  }, [face, alignEnd]);
+  }, [face, alignEnd, submenuOpen]);
 
   const flyoutRight = alignEnd
     ? { right: accountMenuAppearanceFlyoutRight(alignEnd) }
@@ -705,17 +887,24 @@ export function AccountMenuDropdown({
           face={face}
           setFace={setFace}
           variant="dropdown"
+          defaultWorkspace={defaultWorkspace}
+          workspaceRowRef={workspaceRowRef}
           appearanceRowRef={appearanceRowRef}
         />
       </div>
-      {face === "appearance" ? (
+      {submenuOpen ? (
         <div
           ref={flyoutHostRef}
-          data-user-menu-appearance-flyout-host=""
+          data-user-menu-appearance-flyout-host={face === "appearance" ? "" : undefined}
+          data-user-menu-workspace-flyout-host={face === "workspace" ? "" : undefined}
           className={ACCOUNT_MENU_APPEARANCE_FLYOUT_HOST_CLASS}
           style={flyoutRight}
         >
-          <AccountAppearanceFlyout />
+          {face === "appearance" ? (
+            <AccountAppearanceFlyout />
+          ) : (
+            <AccountWorkspaceFlyout current={currentWorkspace} />
+          )}
         </div>
       ) : null}
     </div>

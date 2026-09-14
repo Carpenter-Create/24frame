@@ -48,6 +48,7 @@ import {
   AccountMenuDropdown,
   AccountSheet,
   AccountSheetAppearance,
+  AccountSheetWorkspace,
   DesktopAccountMenu,
   MobileAccountMenu,
 } from "./account-sheet";
@@ -367,9 +368,10 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(empty).not.toContain("<img");
   });
 
-  it("lists Profile, Agreements, Appearance, Help, Refer a friend — then Log out with the footer", () => {
+  it("lists Workspace above Profile, then Agreements, Appearance, Help, Refer a friend — then Log out with the footer", () => {
     const html = renderSheet();
     const group = html.slice(html.indexOf("data-sheet-group"));
+    const workspaceClass = attrClass(html, 'data-sheet-group-item="workspace"');
     const profileClass = attrClass(html, 'data-sheet-group-item="profile"');
     const agreementsClass = attrClass(html, 'data-sheet-group-item="agreements"');
     const appearanceClass = attrClass(html, 'data-sheet-group-item="appearance"');
@@ -384,11 +386,13 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(html).not.toContain("Job");
     expect(html).not.toContain("data-sheet-group-label");
     expect(html).not.toContain(">ACCOUNT<");
+    expect(group.indexOf("Workspace")).toBeLessThan(group.indexOf("Profile"));
     expect(group.indexOf("Profile")).toBeLessThan(group.indexOf("Agreements"));
     expect(group.indexOf("Agreements")).toBeLessThan(group.indexOf("Appearance"));
     expect(group.indexOf("Appearance")).toBeLessThan(group.indexOf("Help"));
     expect(group.indexOf("Help")).toBeLessThan(group.indexOf("Refer a friend"));
     expect(html.indexOf("Refer a friend")).toBeLessThan(html.indexOf("Log out"));
+    expect(html).toContain('data-sheet-group-item="workspace"');
     expect(html).toContain('data-sheet-group-item="profile"');
     expect(html).toContain('data-sheet-group-item="agreements"');
     expect(html).toContain('data-sheet-group-item="appearance"');
@@ -414,8 +418,13 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(profileClass).toBe(helpClass);
     expect(profileClass).toBe(referClass);
     expect(profileClass).toBe(SHEET_GROUP_ITEM_CLASS);
+    expect(workspaceClass).toBe(ACCOUNT_MENU_APPEARANCE_ROW_CLASS);
     expect(appearanceClass).toBe(ACCOUNT_MENU_APPEARANCE_ROW_CLASS);
     expect(appearanceClass).toContain("py-[var(--space-4)]");
+    expect(html).toContain("data-account-menu-workspace-mode");
+    expect(html).toContain("Aggregation");
+    expect(html).not.toContain("data-account-menu-workspace-flyout");
+    expect(html).not.toContain("Education");
     expect(appearanceClass).not.toContain("rounded");
     expect(profileClass).toContain("text-[length:var(--text-base)]");
     expect(profileClass).toContain("font-normal");
@@ -612,6 +621,44 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(src).not.toContain("Back to main menu");
     expect(src).toContain("618:785 overlay is void");
     expect(src).not.toContain("w-[342px]");
+  });
+
+  it("opens Workspace as a same-sheet drill-in — Back 16 tertiary, Aggregation / Social, no Education product", () => {
+    const html = renderToStaticMarkup(
+      <AccountSheetWorkspace current="aggregation" onBack={() => undefined} />,
+    );
+    const sheet = renderToStaticMarkup(
+      <AccountSheet
+        email="ada@example.com"
+        pathname="/"
+        onClose={() => undefined}
+        face="workspace"
+      />,
+    );
+    const backClass = attrClass(html, 'data-sheet-group-item="back"');
+    const aggregationClass = attrClass(html, 'data-sheet-group-item="aggregation"');
+    const socialClass = attrClass(html, 'data-sheet-group-item="social"');
+
+    expect(html).toContain("Aggregation");
+    expect(html).toContain("Social");
+    expect(html).not.toContain("Education");
+    expect(html).not.toContain("/education");
+    expect(html).not.toContain("/account/workspace");
+    expect(html).toContain("data-appearance-check");
+    expect(html).not.toContain('type="radio"');
+    expect(backClass).toBe(SHEET_GROUP_ITEM_CLASS);
+    expect(aggregationClass).toBe(SHEET_GROUP_ITEM_CLASS);
+    expect(socialClass).toBe(SHEET_GROUP_ITEM_CLASS);
+    expect(sheet).toContain("data-identity-block");
+    expect(sheet).toContain("data-account-sheet-close");
+    expect(sheet).toContain('data-sheet-group-item="back"');
+    expect(sheet).not.toContain('data-sheet-group-item="profile"');
+    expect(sheet).not.toContain('data-sheet-group-item="workspace"');
+    expect(sheet).not.toContain("data-account-menu-workspace-flyout");
+    expect(src).toContain("AccountSheetWorkspace");
+    expect(src).toContain("AccountWorkspaceFlyout");
+    expect(src).toContain("availableWorkspaceOptions");
+    expect(src).toContain("persistWorkspaceCookie");
   });
 
   it("does not restyle Ask Globee landing or merge account into the hamburger sheet", () => {
@@ -841,6 +888,7 @@ describe("AccountMenuDropdown 629:795", () => {
   it("keeps the same SSOT items, Sporty Blue Log out, and pinned 13/16 footer", () => {
     const html = renderDropdown();
 
+    expect(html).toContain("Workspace");
     expect(html).toContain("Profile");
     expect(html).toContain("Agreements");
     expect(html).toContain("Appearance");
@@ -856,7 +904,11 @@ describe("AccountMenuDropdown 629:795", () => {
     expect(attrClass(html, "data-account-sheet-version")).toBe(ACCOUNT_SHEET_VERSION_CLASS);
     expect(attrClass(html, "data-account-sheet-version")).toContain("leading-4");
     expect(html).toContain("data-account-menu-appearance-mode");
+    expect(html).toContain("data-account-menu-workspace-mode");
     expect(html).toContain("Light");
+    expect(html).toContain("Aggregation");
+    expect(html).not.toContain("data-account-menu-workspace-flyout");
+    expect(html).not.toContain("Education");
     expect(html).not.toContain("data-account-menu-appearance-flyout");
     expect(html).not.toContain("data-account-sheet-appearance-stack");
     expect(html).not.toContain("data-account-sheet-appearance-flyout-host");
@@ -919,6 +971,56 @@ describe("AccountMenuDropdown 629:795", () => {
       ACCOUNT_MENU_APPEARANCE_CHEVRON_CLASS,
     );
     expect(attrClass(appearance, "data-account-menu-appearance-chevron")).toContain("z-10");
+  });
+
+  it("opens Workspace 613:888 as a second 264 surface — Aggregation / Social above Profile", () => {
+    const workspace = renderToStaticMarkup(
+      <AccountMenuDropdown
+        email="ada@example.com"
+        pathname="/"
+        onClose={() => undefined}
+        face="workspace"
+        alignEnd={{ top: "calc(44px + var(--space-2))", right: "16px" }}
+      />,
+    );
+    const flyoutHost = tagWith(workspace, "data-user-menu-workspace-flyout-host");
+    const flyoutClass = attrClass(workspace, "data-account-menu-workspace-flyout");
+    const washClass = attrClass(workspace, "data-account-menu-workspace-wash");
+
+    expect(workspace).toContain('data-sheet-group-item="workspace"');
+    expect(workspace).toContain('data-sheet-group-item="profile"');
+    expect(workspace.indexOf("Workspace")).toBeLessThan(workspace.indexOf("Profile"));
+    expect(workspace).toContain("data-account-menu-workspace-flyout");
+    expect(workspace).toContain("data-identity-block");
+    expect(workspace).toContain("Aggregation");
+    expect(workspace).toContain("Social");
+    expect(workspace).not.toContain("Education");
+    expect(workspace).not.toContain("/education");
+    expect(workspace).not.toContain("/account/workspace");
+    expect(workspace).not.toContain("data-account-menu-appearance-flyout");
+    const flyout = workspace.slice(workspace.indexOf("data-account-menu-workspace-flyout"));
+    expect(flyout).not.toContain("Back");
+    expect(flyout).not.toContain('data-sheet-group-item="back"');
+    expect(flyout).toContain('data-account-menu-workspace-option="aggregation"');
+    expect(flyout).toContain('data-account-menu-workspace-option="social"');
+    expect(flyout).toContain('aria-pressed="true"');
+    expect(flyout).toContain("data-appearance-check");
+    expect(tagWith(workspace, 'data-account-menu-workspace-option="aggregation"')).toContain(
+      'aria-pressed="true"',
+    );
+    expect(tagWith(workspace, 'data-account-menu-workspace-option="social"')).toContain(
+      'aria-pressed="false"',
+    );
+    expect(flyoutClass).toBe(ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS);
+    expect(flyoutClass).toContain("w-[264px]");
+    expect(flyoutHost).toContain("calc(16px + 264px + var(--space-2))");
+    expect(src).toContain("workspaceRowRef");
+    expect(src).toContain("AccountWorkspaceFlyout");
+    expect(washClass).toContain("-left-[var(--space-6)]");
+    expect(washClass).toContain("z-0");
+    expect(attrClass(workspace, "data-account-menu-workspace-chevron")).toBe(
+      ACCOUNT_MENU_APPEARANCE_CHEVRON_CLASS,
+    );
   });
 
   it("opens from the desktop avatar and does not reuse the 90% sheet", () => {

@@ -4,9 +4,11 @@
 // Profile is /settings/profile. Agreements is /settings/agreements.
 // Refer a friend is /settings/refer. Company stays off this menu
 // and the settings rail — the block lives on /settings/profile.
-// Desktop Appearance is 613:888
-// beside. Mobile Appearance is a same-sheet drill-in. Not a page —
-// do not invent /account/appearance or /settings/appearance.
+// Workspace is first — Appearance-style submenu, not a page.
+// Desktop Workspace / Appearance are 613:888 beside. Mobile is a
+// same-sheet drill-in. Not a page — do not invent
+// /account/workspace, /settings/workspace, /account/appearance,
+// or /settings/appearance.
 // Help stays /help. Legal is parked — no product hop, no invented
 // /legal page, no marketing-domain link. Do not invent
 // /account/profile, Phone, Job, Notifications, Privacy, Manage account,
@@ -15,6 +17,7 @@
 import { version as APP_VERSION } from "../../package.json";
 
 export const USER_MENU = {
+  workspace: "Workspace",
   profile: "Profile",
   profileHref: "/settings/profile",
   agreements: "Agreements",
@@ -64,9 +67,11 @@ export type UserMenuLinkAction =
 
 export type UserMenuAction =
   | UserMenuLinkAction
+  | { kind: "workspace"; label: typeof USER_MENU.workspace }
   | { kind: "appearance"; label: typeof USER_MENU.appearance };
 
 export const USER_MENU_ACTIONS: readonly UserMenuAction[] = [
+  { kind: "workspace", label: USER_MENU.workspace },
   { kind: "profile", label: USER_MENU.profile, href: USER_MENU.profileHref },
   { kind: "agreements", label: USER_MENU.agreements, href: USER_MENU.agreementsHref },
   { kind: "appearance", label: USER_MENU.appearance },
