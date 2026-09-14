@@ -17,13 +17,16 @@ import {
   MOBILE_CHROME_ICON_STROKE,
 } from "@/lib/mobile-chrome";
 import { AppSheetHead, AppSheetSurface, Close44 } from "./house";
+import { NavGlyph } from "./nav-glyph";
 
 // Phone menu: lucide Menu 16 / 1.33 / tertiary in the shared 44 hit
+// (Design miss list — List rematch waits on a measured frame).
 // (same object as the Ask Globee clock). Opens an opaque full-bleed
 // portal. The sheet surface is 543:576 app-sheet chrome — same object as
 // the account sheet, different body. Header is one row: large "Menu" on the
-// list edge, Close/44 at top-right. Rows use the same Lucide
-// marks as the rail (item.icon, 16 / 1.33, stroke only). Client destinations
+// list edge, Close/44 at top-right. Aggregation rows use the same
+// Phosphor marks as the rail (Bold idle / Fill active). Social rows
+// use Social Figma V1 Phosphor via SocialIcon. Client destinations
 // only unless isGcStaff — staff get NAV, then a hairline + 24 gap, then
 // GC_NAV. Hidden at md, where the desktop rail stays.
 // Destination clicks keep the opaque portal mounted until the next route
@@ -105,7 +108,6 @@ export function MobileNavSheet({
 
   const link = (item: NavItem) => {
     const active = isClientNavActive(pathname, item);
-    const Icon = item.icon;
     return (
       <Link
         key={item.href}
@@ -124,7 +126,7 @@ export function MobileNavSheet({
             className="shrink-0"
           />
         ) : (
-          <Icon className="size-4 shrink-0" strokeWidth={1.33} />
+          <NavGlyph item={item} active={active} />
         )}
         {item.label}
       </Link>

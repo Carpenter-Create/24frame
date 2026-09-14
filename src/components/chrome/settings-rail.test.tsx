@@ -36,7 +36,8 @@ describe("SettingsRail", () => {
     }
     expect(html).toContain(SETTINGS_RAIL_ITEM_CLASS);
     expect(html).toContain(SETTINGS_RAIL_CHEVRON_CLASS);
-    expect(html).toContain('stroke-width="1.33"');
+    expect(html).not.toContain('stroke-width="1.33"');
+    expect(html).not.toContain("lucide-");
     expect(html).toContain(SETTINGS.dashboard);
     expect(html).toContain(SETTINGS.profile);
     expect(html).toContain(SETTINGS.agreements);
@@ -47,7 +48,10 @@ describe("SettingsRail", () => {
     expect(html).toContain('aria-current="page"');
     expect(html).toContain(SETTINGS_RAIL_ACTIVE_CLASS);
     expect(src).toContain("settingsSection(usePathname())");
-    expect(src).toContain("ChevronLeft");
+    expect(src).toContain("CaretLeft");
+    expect(src).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
+    expect(src).not.toContain("ChevronLeft");
+    expect(src).not.toContain("lucide-react");
     expect(src).not.toContain("t-body-sm");
     expect(src).not.toContain("SettingsLocalNav");
   });

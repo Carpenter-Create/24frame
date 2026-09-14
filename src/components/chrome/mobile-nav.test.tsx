@@ -14,6 +14,7 @@ vi.mock("next/navigation", () => ({
 import { APP_SHEET_RISE_CLASS } from "@/lib/house-sheet";
 import { GC_NAV, MOBILE_NAV, NAV, type NavItem } from "@/lib/nav";
 import { destinationClickClosesSheet, MobileNav, MobileNavSheet } from "./mobile-nav";
+import { NavGlyph } from "./nav-glyph";
 
 const src = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "mobile-nav.tsx"), "utf8");
 const houseSrc = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "house.tsx"), "utf8");
@@ -192,10 +193,9 @@ describe("MobileNavSheet", () => {
     expect(currentClass).toContain("t-body text-ink bg-surface-muted");
     expect(currentClass).toContain("p-[var(--space-4)]");
     expect(tokens).toMatch(/--space-4:\s*1rem/);
-    expect(current).toContain('fill="none"');
-    expect(current).toContain('stroke-width="1.33"');
-    expect(current).not.toContain('fill="currentColor"');
-    expect(current).not.toContain("fill-ink");
+    expect(current).toContain('fill="currentColor"');
+    expect(current).not.toContain('stroke-width="1.33"');
+    expect(current).not.toContain("lucide-");
     expect(html).not.toContain(`t-section text-ink">${NAV[0].label}`);
     expect(html).not.toContain(`t-title text-ink">${NAV[0].label}`);
     expect(html).toContain(MOBILE_NAV.close);
@@ -221,46 +221,48 @@ describe("MobileNavSheet", () => {
     expect(minBoxPx(closeClass, "min-w")).toBeGreaterThanOrEqual(44);
   });
 
-  it("uses the desktop rail Lucide marks, 16 / 1.33 stroke, no fill, no section word", () => {
+  it("uses the desktop rail Phosphor marks, 16 Bold idle / Fill active, no section word", () => {
     const html = renderToStaticMarkup(
       <MobileNavSheet pathname="/" onClose={() => undefined} isGcStaff />,
     );
     const destStart = html.indexOf("data-mobile-nav-destinations");
     const dest = html.slice(destStart);
 
-    expect(src).toContain("const Icon = item.icon");
-    expect(src).toContain('<Icon className="size-4 shrink-0" strokeWidth={1.33} />');
+    expect(src).toContain("<NavGlyph item={item} active={active} />");
     expect(src).toContain("flex w-full items-center");
     expect(src).not.toContain("NavMark");
-    expect(src).not.toContain("fill=");
     expect(src).not.toContain("fill-current");
     expect(src).not.toContain("strokeWidth={2}");
     expect(html).not.toContain("Global Content");
     expect(html).not.toContain("Staff");
     expect(html).not.toContain("t-label");
-    expect(html).not.toContain("lucide-chevron");
+    expect(dest).not.toContain("lucide-");
+    expect(dest).not.toContain('stroke-width="1.33"');
     expect(src).not.toContain("Chevron");
 
     for (const item of [...NAV, ...GC_NAV]) {
-      const mark = iconMark(item);
+      const active = item.href === "/";
+      const mark = iconMark(item, active);
       const row = linkHtml(html, item.href);
       expect(dest).toContain(item.label);
-      expect(mark.lucide).not.toBe("");
-      expect(row).toContain(mark.lucide);
+      expect(mark.lucide).toBe("");
       expect(row).toContain(mark.svg);
       expect(row).toContain("size-4");
       expect(row).toContain("shrink-0");
-      expect(row).toContain('stroke-width="1.33"');
-      expect(row).toContain('fill="none"');
-      expect(row).not.toContain('fill="currentColor"');
+      expect(row).toContain('fill="currentColor"');
+      expect(row).not.toContain('stroke-width="1.33"');
       if (item.href === "/messages") {
-        expect(mark.lucide).toBe("lucide-sparkles");
-        expect(row).toContain("lucide-sparkles");
-        expect(row).not.toContain("lucide-sparkle ");
+        expect(row).not.toContain("lucide-sparkles");
         expect(row).not.toContain("ask-globee-16.png");
         expect(row).not.toContain("data-ask-globee-nav-mark");
       }
     }
+
+    const homeFill = iconMark(NAV[0], true).svg;
+    const homeIdle = iconMark(NAV[0], false).svg;
+    expect(homeFill).not.toBe(homeIdle);
+    expect(linkHtml(html, "/")).toContain(homeFill);
+    expect(linkHtml(html, "/titles")).toContain(iconMark(NAV[1], false).svg);
   });
 
   it("gives staff /vendors the operator set plus Aggregation NAV, with Vendors current", () => {
@@ -348,9 +350,8 @@ function linkHtml(html: string, href: string): string {
   return start >= 0 && end >= 0 ? html.slice(start, end + 4) : "";
 }
 
-function iconMark(item: NavItem): { lucide: string; svg: string } {
-  const Icon = item.icon;
-  const html = renderToStaticMarkup(<Icon className="size-4 shrink-0" strokeWidth={1.33} />);
+function iconMark(item: NavItem, active = false): { lucide: string; svg: string } {
+  const html = renderToStaticMarkup(<NavGlyph item={item} active={active} />);
   return {
     lucide: html.match(/\blucide-[a-z0-9-]+\b/)?.[0] ?? "",
     svg: html,

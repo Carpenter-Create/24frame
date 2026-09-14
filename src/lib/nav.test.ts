@@ -1,6 +1,17 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { Bot, MessageSquare, Sparkle, Sparkles } from "lucide-react";
+import { Bot, MessageSquare, Sparkle as LucideSparkle, Sparkles } from "lucide-react";
+import {
+  FilmSlate,
+  PaperPlaneTilt,
+  Pulse,
+  Sparkle,
+  SquaresFour,
+  Storefront,
+  Tray,
+  Users,
+  Wallet,
+} from "@phosphor-icons/react";
 
 import { ASK_GLOBEE } from "@/lib/ask-globee";
 import {
@@ -41,25 +52,53 @@ describe("client NAV", () => {
     expect(clientNavCurrent("/queue").label).toBe("Home");
   });
 
-  it("keeps /messages as Ask Globee with Lucide Sparkles, not Messages or the bee", () => {
+  it("keeps /messages as Ask Globee with Phosphor Sparkle, not Messages or the bee", () => {
     const dest = NAV.find((item) => item.href === "/messages");
     expect(dest).toBeDefined();
     expect(dest?.label).toBe("Ask 24Frame AI");
     expect(dest?.href).toBe("/messages");
-    expect(dest?.icon).toBe(Sparkles);
-    expect(dest?.icon).not.toBe(Sparkle);
+    expect(dest?.family).toBe("phosphor");
+    expect(dest?.icon).toBe(Sparkle);
+    expect(dest?.icon).not.toBe(LucideSparkle);
+    expect(dest?.icon).not.toBe(Sparkles);
     expect(dest?.icon).not.toBe(MessageSquare);
     expect(dest?.icon).not.toBe(Bot);
     expect(NAV.map((item) => item.label)).not.toContain("Messages");
     expect(NAV.map((item) => item.label)).not.toContain("Groups");
     expect(NAV.map((item) => item.label)).not.toContain("Casting");
     expect(NAV.map((item) => item.label)).not.toContain("Social");
-    expect(navSrc).toContain("icon: Sparkles");
+    expect(navSrc).toContain("icon: Sparkle");
+    expect(navSrc).not.toContain("icon: Sparkles");
     expect(navSrc).not.toContain("markSrc");
     expect(navSrc).not.toContain("ASK_GLOBEE_NAV_MARK");
     expect(navSrc).not.toContain("isNavImageItem");
     expect(navSrc).not.toContain("MessageSquare");
     expect(navSrc).not.toContain("NavImageItem");
+  });
+
+  it("locks Aggregation rail glyphs to Phosphor 75:5 / 61:2 — Social stays Lucide", () => {
+    expect(NAV.map((item) => item.icon)).toEqual([
+      SquaresFour,
+      FilmSlate,
+      PaperPlaneTilt,
+      Pulse,
+      Wallet,
+      Sparkle,
+    ]);
+    expect(GC_NAV.map((item) => item.icon)).toEqual([
+      Tray,
+      PaperPlaneTilt,
+      Storefront,
+      Wallet,
+      Users,
+    ]);
+    expect(NAV.every((item) => item.family === "phosphor")).toBe(true);
+    expect(GC_NAV.every((item) => item.family === "phosphor")).toBe(true);
+    expect(SOCIAL_NAV.every((item) => item.family === "lucide")).toBe(true);
+    expect(navSrc).not.toContain("LayoutDashboard");
+    expect(navSrc).not.toContain("Clapperboard");
+    expect(navSrc).toContain("family: \"phosphor\"");
+    expect(navSrc).toContain("family: \"lucide\"");
   });
 });
 

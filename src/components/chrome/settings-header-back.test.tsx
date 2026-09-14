@@ -38,8 +38,9 @@ describe("SettingsHeaderBack", () => {
     expect(html).toContain(SETTINGS.dashboard);
     expect(html).toContain(SETTINGS_HEADER_BACK_CLASS);
     expect(html).toContain(SETTINGS_RAIL_CHEVRON_CLASS);
-    expect(html).toContain('stroke-width="1.33"');
-    expect(html).toContain("lucide-chevron-left");
+    expect(html).not.toContain('stroke-width="1.33"');
+    expect(html).not.toContain("lucide-chevron-left");
+    expect(html).not.toContain("lucide-");
     expect(SETTINGS.dashboardHref).toBe("/");
     expect(SETTINGS_HEADER_BACK_CLASS).toContain("gap-[var(--space-2)]");
     expect(SETTINGS_HEADER_BACK_CLASS).toContain("t-body");
@@ -48,7 +49,10 @@ describe("SettingsHeaderBack", () => {
     expect(SETTINGS_HEADER_PAD_CLASS).toBe(MOBILE_CHROME_LEAD_PAD_CLASS);
     expect(SETTINGS_HEADER_PAD_CLASS).toBe("px-[var(--space-6)]");
     expect(SETTINGS_RAIL_CHEVRON_CLASS).toBe("size-4 shrink-0");
-    expect(src).toContain("ChevronLeft");
+    expect(src).toContain("CaretLeft");
+    expect(src).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
+    expect(src).not.toContain("ChevronLeft");
+    expect(src).not.toContain("lucide-react");
     expect(src).toContain("SETTINGS.dashboardHref");
     expect(src).toContain("SETTINGS.dashboard");
     expect(src).not.toContain("Menu");

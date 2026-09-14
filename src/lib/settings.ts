@@ -7,12 +7,12 @@
 // product, Phone, or Job. Appearance stays in-menu. Help stays /help.
 //
 // 600:881 shell — one 220 rail occupies the Access slot on every
-// /settings path. Pad 16. ← Home is 16 chevron + 15 Regular.
+// /settings path. Pad 16. ← Home is 16 Phosphor caret-left Bold + 15 Regular.
 // Active wash follows the path. Not a second column. Header avatar
 // stays. Company is not a rail row.
 //
 // 623:785 phone header — same ← Home back in the left slot.
-// 16 chevron + 15 Regular, gap 8, pad 24, href /. No hamburger.
+// 16 Phosphor caret-left Bold + 15 Regular, gap 8, pad 24, href /. No hamburger.
 // Avatar 32 stays. Not a new IA. Appearance stays in-menu.
 
 import { ASK_ASSISTANT } from "@/lib/product";
