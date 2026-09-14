@@ -76,6 +76,15 @@ export async function presignAvatarGet(userId: string): Promise<string> {
   });
 }
 
+/** True when the face object exists. Missing / unconfigured is false — never throw. */
+export async function hasAvatarObject(userId: string): Promise<boolean> {
+  try {
+    return await headAvatarObject(userId);
+  } catch {
+    return false;
+  }
+}
+
 /** Signed GET for the card, or null when empty / bucket not applied yet. */
 export async function signedAvatarUrl(userId: string): Promise<string | null> {
   try {

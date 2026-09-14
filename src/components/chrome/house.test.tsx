@@ -13,6 +13,7 @@ import {
   HOUSE_EMPTY_CLASS,
   TEXT_ACTION_CLASS,
 } from "@/lib/house-sheet";
+import { ACCOUNT_PHOTO_HREF } from "@/lib/account-avatar";
 import {
   AppSheetSurface,
   Close44,
@@ -127,7 +128,20 @@ describe("house primitives", () => {
     expect(blank).toContain(">A<");
     expect(blank).not.toContain("<img");
     expect(houseSrc).toContain("accountPhotoSrc");
+    expect(houseSrc).toContain("IdentityPhoto");
+    expect(houseSrc).toContain("onError");
     expect(houseSrc).not.toContain("signedAvatarUrl");
     expect(houseSrc).not.toContain("uploadAccountPhoto");
+
+    const sameOrigin = renderToStaticMarkup(
+      <IdentityBlock
+        avatarInitial="A"
+        photoUrl={ACCOUNT_PHOTO_HREF}
+        name="Ada Lovelace"
+        email="ada@example.com"
+      />,
+    );
+    expect(sameOrigin).toContain(`src="${ACCOUNT_PHOTO_HREF}"`);
+    expect(sameOrigin).not.toContain(">A<");
   });
 });

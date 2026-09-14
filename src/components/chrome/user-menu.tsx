@@ -4,6 +4,7 @@ import { signOut } from "@/app/actions";
 import { accountPhotoSrc } from "@/lib/account-avatar";
 import { userMenuAvatarInitial, userMenuName } from "@/lib/user-menu";
 import { DesktopAccountMenu, MobileAccountMenu } from "./account-sheet";
+import { IdentityPhoto } from "./house";
 
 export function onUserMenuLogOut(): void {
   void signOut();
@@ -32,12 +33,7 @@ export function UserMenuIdentity({
         data-identity-photo={face ? "" : undefined}
         className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted t-body font-normal text-ink-2"
       >
-        {face ? (
-          // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the private avatars bucket
-          <img src={face} alt="" className="size-full object-cover" />
-        ) : (
-          initial
-        )}
+        <IdentityPhoto avatarInitial={initial} photoUrl={photoUrl} />
       </div>
       <div className="min-w-0">
         {displayName ? (

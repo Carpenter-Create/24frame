@@ -130,7 +130,9 @@ describe("UserMenu identity source lock", () => {
     expect(layoutSrc).toContain("email={ctx.user.email}");
     expect(layoutSrc).toContain("name={ctx.user.name}");
     expect(layoutSrc).toContain("photoUrl={photoUrl}");
-    expect(layoutSrc).toContain("signedAvatarUrl(ctx.user.id)");
+    expect(layoutSrc).toContain("hasAvatarObject(ctx.user.id)");
+    expect(layoutSrc).toContain("ACCOUNT_PHOTO_HREF");
+    expect(layoutSrc).not.toContain("signedAvatarUrl");
     expect(layoutSrc).not.toContain("signedAvatarUrl(ctx.activeOrg");
     expect(layoutSrc).not.toContain("display_name");
     expect(layoutSrc).not.toContain("user_metadata");

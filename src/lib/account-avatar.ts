@@ -13,6 +13,9 @@ export type AvatarContentType = (typeof AVATAR_CONTENT_TYPES)[number];
 
 export const AVATAR_ACCEPT = AVATAR_CONTENT_TYPES.join(",");
 
+/** Same-origin chrome face. The route re-signs on each GET so a 5-minute S3 URL is never held in the client shell. */
+export const ACCOUNT_PHOTO_HREF = "/api/account/photo";
+
 const userIdSchema = z.string().uuid();
 
 export function isAvatarContentType(value: string): value is AvatarContentType {
