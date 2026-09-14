@@ -1,6 +1,7 @@
 // Social measured chrome. Tokens only — no hex.
 // Home ship: Figma 130:215 / 133:816 / 133:1078.
 // Profile ship: Figma 129:215 / 129:415 / 129:615.
+// Profile share sheet: Figma 155:194 / 155:372.
 // Create ship: Figma 135:585 / 135:1037 / 135:1214.
 // Stories ship: Figma 138:163 / 138:889 / 138:943.
 // Stories studio: Figma 146:230 / 146:1050 / 146:1072 / 146:1099
@@ -12,6 +13,7 @@ export const SOCIAL_FIGMA_HOME = "130:215";
 export const SOCIAL_FIGMA_HOME_EMPTY = "133:816";
 export const SOCIAL_FIGMA_HOME_MOBILE = "133:1078";
 export const SOCIAL_FIGMA_PROFILE = ["129:215", "129:415", "129:615"] as const;
+export const SOCIAL_FIGMA_PROFILE_SHARE = ["155:194", "155:372"] as const;
 export const SOCIAL_FIGMA_CREATE = ["135:585", "135:1037", "135:1214"] as const;
 export const SOCIAL_FIGMA_STORIES = ["138:163", "138:889", "138:943"] as const;
 export const SOCIAL_FIGMA_STORY_STUDIO = [
@@ -180,9 +182,39 @@ export const SOCIAL_HIGHLIGHT_RING_CLASS =
 export const SOCIAL_SHARE_CLASS =
   "inline-flex items-center justify-center gap-1.5 rounded-[8px] border border-hairline bg-surface px-[14px] py-[var(--space-2)] t-body-sm font-medium text-ink";
 
-// House InlineNotice as a snackbar — no glass, no drop shadow, above the mobile tab bar.
-export const SOCIAL_SHARE_TOAST_CLASS =
-  "pointer-events-none fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom)+var(--space-3))] z-50 mx-auto w-max md:bottom-[var(--space-6)]";
+// 155:194 / 155:372 — wash overlay, QR card, three actions. No glass, no drop shadow.
+export const SOCIAL_SHARE_SHEET_HOST_CLASS =
+  "fixed inset-0 z-50 flex h-dvh w-full flex-col bg-bg";
+
+export const SOCIAL_SHARE_SHEET_WASH_CLASS =
+  "pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-accent/18 to-transparent md:h-[520px] md:from-accent/12";
+
+export const SOCIAL_SHARE_SHEET_CHROME_CLASS =
+  "relative flex h-14 shrink-0 items-center px-[var(--space-4)]";
+
+export const SOCIAL_SHARE_SHEET_CLOSE_CLASS =
+  "flex size-10 shrink-0 items-center justify-center rounded-full bg-ink/8 text-ink";
+
+export const SOCIAL_SHARE_SHEET_BODY_CLASS =
+  "relative flex min-h-0 flex-1 flex-col items-center justify-center gap-[var(--space-6)] px-[var(--space-4)] pb-[var(--space-12)] md:gap-[var(--space-8)]";
+
+export const SOCIAL_SHARE_SHEET_CARD_CLASS =
+  "flex w-[310px] flex-col items-center justify-center gap-[var(--space-6)] rounded-[24px] border border-hairline bg-surface px-[var(--space-6)] py-[var(--space-8)] md:h-[420px] md:w-[360px]";
+
+export const SOCIAL_SHARE_SHEET_QR_CLASS =
+  "relative size-[240px] overflow-hidden bg-surface text-accent";
+
+export const SOCIAL_SHARE_SHEET_MARK_CLASS =
+  "absolute left-1/2 top-1/2 flex size-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[12px] border-2 border-accent bg-surface text-[16px] font-semibold text-accent";
+
+export const SOCIAL_SHARE_SHEET_HANDLE_CLASS =
+  "t-body font-semibold tracking-[0.06em] text-accent";
+
+export const SOCIAL_SHARE_SHEET_ACTIONS_CLASS =
+  "flex items-center justify-center gap-[var(--space-2)] md:gap-[var(--space-4)]";
+
+export const SOCIAL_SHARE_SHEET_ACTION_CLASS =
+  "flex w-[114px] flex-col items-center justify-center gap-[var(--space-2)] rounded-[16px] border border-hairline bg-surface py-[var(--space-4)] text-[length:var(--text-xs)] font-medium text-ink md:w-[128px]";
 
 export const SOCIAL_CREATE_CARD_CLASS =
   "flex flex-col gap-3 rounded-[8px] border border-hairline bg-surface p-4 md:gap-4 md:p-6";

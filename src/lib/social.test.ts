@@ -111,6 +111,10 @@ describe("social copy lock", () => {
     expect(SOCIAL.dms.olderPage).toContain("older");
     expect(SOCIAL.dms.latestMessages).toBe("Latest messages");
     expect(SOCIAL.profile.uploadPhoto).toBe("Upload photo");
+    expect(SOCIAL.profile.share).toBe("Share");
+    expect(SOCIAL.profile.shareProfile).toBe("Share profile");
+    expect(SOCIAL.profile.shareCopyLink).toBe("Copy link");
+    expect(SOCIAL.profile.shareDownload).toBe("Download");
     expect(SOCIAL.courses.subtitle).toContain("Social+Education");
     expect(SOCIAL.leaderboard.private).toBe("The leaderboard is private.");
     expect(SOCIAL.leaderboard.subtitle).toContain(PRODUCT_NAME);
