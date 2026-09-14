@@ -180,6 +180,10 @@ export const SOCIAL_HIGHLIGHT_RING_CLASS =
 export const SOCIAL_SHARE_CLASS =
   "inline-flex items-center justify-center gap-1.5 rounded-[8px] border border-hairline bg-surface px-[14px] py-[var(--space-2)] t-body-sm font-medium text-ink";
 
+// House InlineNotice as a snackbar — no glass, no drop shadow, above the mobile tab bar.
+export const SOCIAL_SHARE_TOAST_CLASS =
+  "pointer-events-none fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom)+var(--space-3))] z-50 mx-auto w-max md:bottom-[var(--space-6)]";
+
 export const SOCIAL_CREATE_CARD_CLASS =
   "flex flex-col gap-3 rounded-[8px] border border-hairline bg-surface p-4 md:gap-4 md:p-6";
 

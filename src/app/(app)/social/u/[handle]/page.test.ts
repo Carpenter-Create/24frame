@@ -169,8 +169,8 @@ describe("Social public profile", () => {
     expect(html).toContain('data-social-profile-tab="credits"');
     expect(html).toContain("overflow-x-auto");
     expect(html).toContain('data-social-share-url="https://24frame.co/@ada"');
-    expect(html).toContain("data-social-profile-url");
-    expect(html).toContain(">24frame.co/@ada<");
+    expect(html).not.toContain("data-social-profile-url");
+    expect(html).not.toContain(">24frame.co/@ada<");
     expect(html).not.toContain("Copies ");
     expect(html).not.toContain("data-social-share-hint");
     expect(html).toContain("data-social-for-you");
