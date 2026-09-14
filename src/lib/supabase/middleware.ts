@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-import { socialVanityInternalPath } from "@/lib/social";
+import { socialProfileRewriteTarget } from "@/lib/social";
 
 import type { Database } from "./database.types";
 
@@ -56,7 +56,7 @@ export async function updateSession(request: NextRequest) {
 }
 
 function applySocialVanityRewrite(request: NextRequest, response: NextResponse): NextResponse {
-  const internal = socialVanityInternalPath(request.nextUrl.pathname);
+  const internal = socialProfileRewriteTarget(request.nextUrl.pathname);
   if (!internal) return response;
   const url = request.nextUrl.clone();
   url.pathname = internal;

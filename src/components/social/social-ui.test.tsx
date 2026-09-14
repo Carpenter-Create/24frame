@@ -77,6 +77,8 @@ describe("SocialPostCard faces", () => {
     );
     expect(html).toContain('src="https://s3.example/signed-avatar"');
     expect(html).toContain("Ada Lovelace");
+    expect(html).toContain('href="/social/u/ada"');
+    expect(html).not.toContain("/social/u/@");
     expect(html).not.toContain("AL");
     expect(html).not.toContain("data-social-avatar-ring");
     expect(html).not.toContain("ring-accent");

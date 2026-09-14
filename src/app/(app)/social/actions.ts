@@ -224,7 +224,7 @@ export async function toggleSocialFollow(formData: FormData): Promise<ActionResu
 
   revalidatePath(SOCIAL_ROUTES.home);
   const handle = String(formData.get("handle") ?? "").trim();
-  if (handle) revalidatePath(`${SOCIAL_ROUTES.members}/${encodeURIComponent(handle)}`);
+  if (handle) revalidatePath(socialProfileHref(handle));
   return {};
 }
 

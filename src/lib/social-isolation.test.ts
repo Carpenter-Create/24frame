@@ -105,16 +105,17 @@ describe("social isolation lock", () => {
     expect(sign).toContain("signedSocialMediaItems(post.media, post.author_id)");
   });
 
-  it("rewrites apex /@handle to /social/u/@handle and does not make vanity public", () => {
+  it("rewrites apex /@handle to /social/u/{bare} and does not make vanity public", () => {
     const social = readFileSync("src/lib/social.ts", "utf8");
     const middleware = readFileSync("src/lib/supabase/middleware.ts", "utf8");
     const nextConfig = readFileSync("next.config.ts", "utf8");
     expect(social).toContain("socialVanityInternalPath");
+    expect(social).toContain("socialProfileRewriteTarget");
     expect(social).toContain("socialProfileHref");
     expect(social).toContain("SOCIAL_VANITY_RESERVED_HANDLES");
     expect(nextConfig).not.toContain('source: "/@:handle"');
     expect(nextConfig).not.toContain("/social/u/@:handle");
-    expect(middleware).toContain("socialVanityInternalPath");
+    expect(middleware).toContain("socialProfileRewriteTarget");
     expect(middleware).toContain("NextResponse.rewrite");
     expect(middleware).not.toContain('path.startsWith("/@")');
   });

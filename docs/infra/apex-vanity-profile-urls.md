@@ -2,13 +2,13 @@
 
 Adam lock: the public canonical is `https://24frame.co/@{handle}`. Preview and share strings already emit that from #267. The product host stays `app.24frame.co`. This repo does not move the dashboard off `app.` and does not take over marketing paths.
 
-In-app destination: `/social/u/@{handle}`. This slice only rewrites `/@{handle}` to that route. Bare `/{handle}` is not mapped, so `/legal`, `/login`, and other apex pages stay untouched.
+In-app destination: `/social/u/{handle}` (bare handle — a path segment starting with `@` is a Next.js parallel-route slot). This slice only rewrites `/@{handle}` to that route. Bare `/{handle}` is not mapped, so `/legal`, `/login`, and other apex pages stay untouched.
 
 Reserved vanity names (`admin`, `api`, `www`, `login`, `legal`, plus `auth` / `app` / `portal` / `social`) are not rewritten. Claiming rules for the handle field stay on main (#267) — this slice does not change them.
 
 ## What this repo does
 
-- Middleware rewrite: `/@handle` → `/social/u/@handle` (reserved names skipped). The URL bar can stay `24frame.co/@handle` when **this** Vercel project serves the request. Next.js `rewrites()` is not used — a config rewrite cannot honor the reserved list and would map `/@login` after middleware left it alone.
+- Middleware rewrite: `/@handle` → `/social/u/{handle}` (reserved names skipped). Leftover `/social/u/@handle` bookmarks rewrite to the same bare route. The URL bar can stay `24frame.co/@handle` when **this** Vercel project serves the request. Next.js `rewrites()` is not used — a config rewrite cannot honor the reserved list and would map `/@login` after middleware left it alone.
 - `/@handle` still requires a session (same as the in-app profile). It is not added to the public-path list.
 
 ## Manual steps (CoS / Adam) — founder-executed

@@ -163,6 +163,37 @@ describe("Social public profile", () => {
     expect(html).not.toContain("data-social-profile-photo");
   });
 
+  it("renders the same public profile for a bare handle param", async () => {
+    stubClient({
+      posts: [
+        {
+          id: "p9",
+          body: "Public engine note",
+          author_id: "u2",
+          group_id: null,
+          like_count: 1,
+          created_at: "2026-09-13T12:00:00.000Z",
+        },
+      ],
+    });
+
+    const html = await renderPublic("ada");
+    expect(html).toContain("data-social-member");
+    expect(html).toContain("Ada Lovelace");
+    expect(html).toContain("@ada");
+    expect(html).toContain("Public engine note");
+    expect(html).not.toContain(SOCIAL.member.missing);
+  });
+
+  it("still accepts an @-decorated route param if one is passed", async () => {
+    stubClient();
+    const html = await renderPublic("@ada");
+    expect(html).toContain("data-social-member");
+    expect(html).toContain("Ada Lovelace");
+    expect(html).toContain("@ada");
+    expect(html).not.toContain(SOCIAL.member.missing);
+  });
+
   it("shows an honest empty state when that author has no posts", async () => {
     stubClient({ posts: [] });
     const html = await renderPublic();
