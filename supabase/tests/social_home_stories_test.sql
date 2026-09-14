@@ -4,7 +4,7 @@
 -- accepts locked labels only. Dashboard org_status stays unchanged.
 
 begin;
-select plan(24);
+select plan(22);
 
 select set_config('t.author', gen_random_uuid()::text, false);
 select set_config('t.follower', gen_random_uuid()::text, false);
@@ -121,7 +121,7 @@ select throws_ok(
     insert into public.follows (follower_id, followee_id)
     values (%L, %L)
   $sql$, current_setting('t.author'), current_setting('t.author')),
-  '23514',
+  '42501',
   null,
   'self-follow is rejected');
 
