@@ -215,7 +215,7 @@ describe("Social public profile", () => {
     expect(html).not.toContain("data-social-profile-photo");
   });
 
-  it("keeps the missing-handle empty state and does not fetch posts", async () => {
+  it("uses the same empty state for a missing handle or an RLS-null row", async () => {
     const { from } = stubClient({ member: null });
     const html = await renderPublic("@missing");
     expect(html).toContain("data-social-member-missing");

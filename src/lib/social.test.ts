@@ -82,6 +82,7 @@ describe("profile opt-in", () => {
     expect(row.level).toBe(1);
     expect(row.status).toBe("active");
     expect(row.trust_state).toBe("new");
+    expect(row.discoverable).toBe(true);
     expect(row).not.toHaveProperty("avatar_key");
     expect(row).not.toHaveProperty("org_id");
   });

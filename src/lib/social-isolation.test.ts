@@ -105,6 +105,23 @@ describe("social isolation lock", () => {
     expect(sign).toContain("signedSocialMediaItems(post.media, post.author_id)");
   });
 
+  it("lets authenticated members select active public handles", () => {
+    const migration = readFileSync(
+      "supabase/migrations/20260914210000_profiles_select_active_public.sql",
+      "utf8",
+    );
+    const page = readFileSync("src/app/(app)/social/u/[handle]/page.tsx", "utf8");
+    const insert = readFileSync("src/lib/social.ts", "utf8");
+    expect(migration).toContain("or status = 'active'");
+    expect(migration).toContain("or discoverable = true");
+    expect(migration).toMatch(/create policy profiles_select[\s\S]*status = 'active'/);
+    expect(migration).not.toMatch(/create policy profiles_select[\s\S]*status <> 'active'/);
+    expect(migration).not.toContain("createAdminClient");
+    expect(page).toContain('.eq("handle", handle)');
+    expect(page).not.toContain("createAdminClient");
+    expect(insert).toContain("discoverable: true");
+  });
+
   it("rewrites apex /@handle to /social/u/{bare} and does not make vanity public", () => {
     const social = readFileSync("src/lib/social.ts", "utf8");
     const middleware = readFileSync("src/lib/supabase/middleware.ts", "utf8");

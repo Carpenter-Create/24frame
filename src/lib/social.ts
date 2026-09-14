@@ -480,6 +480,7 @@ export function profileInsertRow(input: {
   level: number;
   status: "active";
   trust_state: "new";
+  discoverable: true;
 } {
   return {
     id: input.userId,
@@ -490,6 +491,7 @@ export function profileInsertRow(input: {
     level: 1,
     status: "active",
     trust_state: "new",
+    discoverable: true,
     ...(input.birthDate ? { birth_date: input.birthDate } : {}),
   };
 }
