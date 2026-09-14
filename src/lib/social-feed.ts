@@ -2,6 +2,7 @@ import type { createClient } from "@/lib/supabase/server";
 import { LIST_PAGE, rangeFor } from "@/lib/list-bounds";
 import { followingAuthorIds } from "@/lib/social-home";
 import type { SocialCategoryTopic } from "@/lib/social-categories";
+import { displayHandle, socialProfileHref } from "@/lib/social";
 import { isStoryLive, storyRailUnseen } from "@/lib/social-stories";
 
 type ServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -238,8 +239,8 @@ export async function loadExploreSearch(
       kind: "person",
       id: person.id,
       title: person.display_name,
-      subtitle: `@${person.handle}`,
-      href: `/social/members/${encodeURIComponent(person.handle)}`,
+      subtitle: displayHandle(person.handle),
+      href: socialProfileHref(person.handle),
     });
   }
   for (const post of posts ?? []) {

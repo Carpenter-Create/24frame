@@ -5,19 +5,27 @@ import { ASK_GLOBEE } from "@/lib/ask-globee";
 import { PRODUCT_NAME, SOCIAL_WORKSPACE } from "@/lib/product";
 import {
   conversationRoomLabel,
+  displayHandle,
+  handleFieldValue,
   inboxPeerIds,
   isEligibleBirthDate,
   likeInsertRow,
   messageInsertRow,
   normalizeConversationTitle,
   normalizeHandle,
+  parseProfileHandleParam,
   postInsertRow,
   profileInsertRow,
   quietDmAddError,
   SOCIAL,
   SOCIAL_BANNED_PRODUCT_NAMES,
+  SOCIAL_PROFILE_ORIGIN,
   SOCIAL_ROUTES,
   socialInitials,
+  socialProfileHref,
+  socialProfilePublicUrl,
+  stripHandleDecorators,
+  suggestedHandleSeed,
 } from "./social";
 
 describe("social copy lock", () => {
@@ -37,6 +45,9 @@ describe("social copy lock", () => {
     expect(SOCIAL_ROUTES.leaderboard).toBe("/social/leaderboard");
     expect(SOCIAL_ROUTES.courses).toBe("/social/courses");
     expect(SOCIAL_ROUTES.home).toBe("/social");
+    expect(SOCIAL_ROUTES.profileByHandle).toBe("/social/u");
+    expect(SOCIAL.profile.handlePlaceholder).toBe("Set your handle");
+    expect(SOCIAL.profile.handleRequired).toBe("Handle is required.");
     expect(SOCIAL.courses.subtitle).toContain("Social+Education");
     expect(SOCIAL.leaderboard.private).toBe("The leaderboard is private.");
     expect(SOCIAL.leaderboard.subtitle).toContain(PRODUCT_NAME);
@@ -69,12 +80,40 @@ describe("profile opt-in", () => {
     expect(row).not.toHaveProperty("org_id");
   });
 
+  it("omits birth_date when ensure creates the row", () => {
+    const row = profileInsertRow({
+      userId: "u1",
+      handle: "ada",
+      displayName: "Ada",
+    });
+    expect(row).not.toHaveProperty("birth_date");
+    expect(row.handle).toBe("ada");
+  });
+
   it("rejects short handles and under-13 birth dates", () => {
     expect(normalizeHandle("ab")).toBeNull();
     expect(normalizeHandle("Ada_Lovelace")).toBe("ada_lovelace");
     expect(isEligibleBirthDate("2014-01-01", new Date("2026-09-12T00:00:00.000Z"))).toBe(false);
     expect(isEligibleBirthDate("2013-09-12", new Date("2026-09-12T00:00:00.000Z"))).toBe(true);
     expect(socialInitials("Ada Lovelace")).toBe("AL");
+  });
+
+  it("strips @ from handle input and keeps the house profile URL stable", () => {
+    expect(stripHandleDecorators("@@acarpcreate")).toBe("acarpcreate");
+    expect(normalizeHandle("@Ada_Lovelace")).toBe("ada_lovelace");
+    expect(normalizeHandle("@@acarpcreate")).toBe("acarpcreate");
+    expect(displayHandle("ada")).toBe("@ada");
+    expect(handleFieldValue("acarpcreate")).toBe("@acarpcreate");
+    expect(handleFieldValue("")).toBe("");
+    expect(socialProfileHref("Ada")).toBe("/social/u/@ada");
+    expect(socialProfileHref("@acarpcreate")).toBe("/social/u/@acarpcreate");
+    expect(socialProfilePublicUrl("acarpcreate")).toBe(
+      "https://app.24frame.co/social/u/@acarpcreate",
+    );
+    expect(SOCIAL_PROFILE_ORIGIN).toBe("https://app.24frame.co");
+    expect(parseProfileHandleParam("%40ada")).toBe("ada");
+    expect(parseProfileHandleParam("@ada")).toBe("ada");
+    expect(suggestedHandleSeed("Ada.Carp@example.com", "u1")).toBe("adacarp");
   });
 });
 
@@ -169,7 +208,7 @@ describe("social writes stay on the live spine", () => {
     const surfaces = [
       "src/app/(app)/social/page.tsx",
       "src/app/(app)/social/profile/page.tsx",
-      "src/app/(app)/social/members/[handle]/page.tsx",
+      "src/app/(app)/social/u/[handle]/page.tsx",
       "src/app/(app)/social/dms/page.tsx",
       "src/app/(app)/social/dms/[id]/page.tsx",
       "src/app/(app)/social/leaderboard/page.tsx",

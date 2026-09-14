@@ -1,8 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
+vi.mock("@/lib/social-profile", () => ({
+  ensureOwnSocialProfile: vi.fn(),
+}));
 
 import { createClient } from "@/lib/supabase/server";
+import { ensureOwnSocialProfile } from "@/lib/social-profile";
 
 import { GET } from "./route";
 
@@ -17,10 +21,14 @@ function mockAuth({
 }: { exchangeError?: AuthError; verifyError?: AuthError } = {}) {
   const exchangeCodeForSession = vi.fn(async () => ({ error: exchangeError }));
   const verifyOtp = vi.fn(async () => ({ error: verifyError }));
+  const getUser = vi.fn(async () => ({
+    data: { user: { id: "u1", email: "ada@example.com", user_metadata: { display_name: "Ada" } } },
+    error: null,
+  }));
   vi.mocked(createClient).mockResolvedValue({
-    auth: { exchangeCodeForSession, verifyOtp },
+    auth: { exchangeCodeForSession, verifyOtp, getUser },
   } as never);
-  return { exchangeCodeForSession, verifyOtp };
+  return { exchangeCodeForSession, verifyOtp, getUser };
 }
 
 function silenceConsoleError() {
@@ -99,5 +107,9 @@ describe("auth callback failure logging", () => {
 
     expect(res.headers.get("location")).toBe("https://app.test/queue");
     expect(errorSpy).not.toHaveBeenCalled();
+    expect(ensureOwnSocialProfile).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ id: "u1", email: "ada@example.com", name: "Ada" }),
+    );
   });
 });

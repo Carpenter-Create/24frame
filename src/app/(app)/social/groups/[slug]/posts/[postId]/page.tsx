@@ -4,11 +4,12 @@ import { redirect } from "next/navigation";
 import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { SocialLikeButton } from "@/components/social/social-forms";
-import { SocialAvatar, SocialNeedProfile, SocialPostMedia } from "@/components/social/social-ui";
+import { SocialAvatar, SocialPostMedia } from "@/components/social/social-ui";
 import { signedAvatarUrl } from "@/lib/s3-avatars";
 import { signedSocialMediaItems } from "@/lib/s3-social-media";
 import { SOCIAL, socialGroupHref, socialMemberHref } from "@/lib/social";
-import { loadLikedPostIds, loadOwnProfile } from "@/lib/social-feed";
+import { loadLikedPostIds } from "@/lib/social-feed";
+import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 
@@ -42,7 +43,7 @@ export default async function SocialPostPage({
     );
   }
 
-  const profile = await loadOwnProfile(supabase, ctx.user.id);
+  const profile = await ensureOwnSocialProfile(supabase, ctx.user);
   const { data: author } = await supabase
     .from("profiles")
     .select("id, handle, display_name")
@@ -73,16 +74,12 @@ export default async function SocialPostPage({
         </div>
         {post.body ? <p className="t-body text-ink whitespace-pre-wrap">{post.body}</p> : null}
         <SocialPostMedia items={media} />
-        {profile ? (
-          <SocialLikeButton
-            postId={post.id}
-            liked={liked.has(post.id)}
-            likeCount={post.like_count}
-            groupSlug={group.slug}
-          />
-        ) : (
-          <SocialNeedProfile />
-        )}
+        <SocialLikeButton
+          postId={post.id}
+          liked={liked.has(post.id)}
+          likeCount={post.like_count}
+          groupSlug={group.slug}
+        />
       </article>
     </div>
   );

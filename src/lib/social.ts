@@ -2,6 +2,7 @@ import { PRODUCT_NAME, SOCIAL_WORKSPACE } from "@/lib/product";
 import type { SocialMediaItem, SocialMediaRuleError } from "@/lib/social-media";
 
 // Social workspace copy and input rules. Lives in lib/, not JSX.
+// House profile URL is /social/u/@{bareHandle} (see socialProfileHref).
 // Account faces reuse signedAvatarUrl. Post media uses 24frame-media
 // keys on posts.media. Title S3 / S3_BUCKET stay film-only.
 // Group DMs reuse Pack 4 conversations.kind=group. Gated community
@@ -16,6 +17,7 @@ export const SOCIAL_ROUTES = {
   storiesNew: "/social/stories/new",
   profile: "/social/profile",
   members: "/social/members",
+  profileByHandle: "/social/u",
   groups: "/social/groups",
   groupsNew: "/social/groups/new",
   courses: "/social/courses",
@@ -23,8 +25,51 @@ export const SOCIAL_ROUTES = {
   dms: "/social/dms",
 } as const;
 
+/** Production house origin for the live handle URL preview. */
+export const SOCIAL_PROFILE_ORIGIN = "https://app.24frame.co";
+
+// House profile URL (locked): /social/u/@{bareHandle}
+// Example: https://app.24frame.co/social/u/@acarpcreate
+// Persist the bare handle in profiles.handle (no @). Display as @handle.
+// /social/members/{handle} redirects here so older links stay stable.
+
+export function bareHandle(raw: string): string {
+  return stripHandleDecorators(raw).trim().toLowerCase();
+}
+
+export function stripHandleDecorators(raw: string): string {
+  return raw.replace(/@/g, "");
+}
+
+export function displayHandle(handle: string): string {
+  const bare = bareHandle(handle);
+  return bare ? `@${bare}` : "";
+}
+
+export function handleFieldValue(handle: string): string {
+  return displayHandle(handle);
+}
+
+export function socialProfileHref(handle: string): string {
+  const bare = bareHandle(handle);
+  return bare ? `${SOCIAL_ROUTES.profileByHandle}/@${bare}` : SOCIAL_ROUTES.profileByHandle;
+}
+
+export function socialProfilePublicUrl(handle: string): string {
+  const bare = bareHandle(handle);
+  return `${SOCIAL_PROFILE_ORIGIN}${SOCIAL_ROUTES.profileByHandle}/@${bare}`;
+}
+
+export function parseProfileHandleParam(raw: string): string | null {
+  try {
+    return normalizeHandle(decodeURIComponent(raw));
+  } catch {
+    return normalizeHandle(raw);
+  }
+}
+
 export function socialMemberHref(handle: string): string {
-  return `${SOCIAL_ROUTES.members}/${encodeURIComponent(handle)}`;
+  return socialProfileHref(handle);
 }
 
 export function socialGroupHref(slug: string): string {
@@ -111,14 +156,18 @@ export const SOCIAL = {
     subtitle: "Your creator profile in this workspace.",
     emptyTitle: "Create a creator profile",
     emptyBody:
-      "A profile is optional. Company aggregation does not create one. Handle and display name only — photos stay later.",
+      "A profile is created for this signed-in account. Company aggregation and org invite do not create one for anyone else.",
     handle: "Handle",
+    handlePlaceholder: "Set your handle",
+    handleRequired: "Handle is required.",
+    handleInvalid: "Enter a handle of 3–30 letters, numbers, or underscores.",
     displayName: "Display name",
+    defaultDisplayName: "Member",
     bio: "Bio",
     bioSubmit: "Save bio",
     birthDate: "Date of birth",
     birthDateHint: "Required. You must be 13 or older.",
-    submit: "Create profile",
+    submit: "Save handle",
     handleTaken: "That handle is already taken.",
     created: "Profile created.",
   },
@@ -226,10 +275,25 @@ const HANDLE_RE = /^[a-z0-9_]+$/;
 const SLUG_RE = /^[a-z0-9-]+$/;
 
 export function normalizeHandle(raw: string): string | null {
-  const handle = raw.trim().toLowerCase();
+  const handle = bareHandle(raw);
   if (handle.length < HANDLE_MIN || handle.length > HANDLE_MAX) return null;
   if (!HANDLE_RE.test(handle)) return null;
   return handle;
+}
+
+/** Bare unique-ish seed from the sign-in email local-part. Not a display name. */
+export function suggestedHandleSeed(email: string, userId: string): string {
+  const local = (email.split("@")[0] ?? "").toLowerCase();
+  const cleaned = local.replace(/[^a-z0-9_]/g, "").slice(0, HANDLE_MAX);
+  if (cleaned.length >= HANDLE_MIN && HANDLE_RE.test(cleaned)) return cleaned;
+  const fallback = `u${userId.replace(/-/g, "").slice(0, 12)}`;
+  return fallback.slice(0, HANDLE_MAX);
+}
+
+export function suggestedHandleCollisionSuffix(userId: string, attempt: number): string {
+  const compact = userId.replace(/-/g, "");
+  const tag = compact.slice(attempt * 2, attempt * 2 + 4) || String(attempt + 2);
+  return `_${tag}`;
 }
 
 export function normalizeDisplayName(raw: string): string | null {
@@ -339,19 +403,22 @@ export function profileInsertRow(input: {
   userId: string;
   handle: string;
   displayName: string;
-  birthDate: string;
+  birthDate?: string;
 }) {
-  return {
+  const row = {
     id: input.userId,
     handle: input.handle,
     display_name: input.displayName,
-    birth_date: input.birthDate,
     app_role: "member" as const,
     points_total: 0,
     level: 1,
     status: "active" as const,
     trust_state: "new" as const,
   };
+  if (input.birthDate) {
+    return { ...row, birth_date: input.birthDate };
+  }
+  return row;
 }
 
 export function socialMediaRuleMessage(error: SocialMediaRuleError): string {

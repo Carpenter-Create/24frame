@@ -1,12 +1,12 @@
 import { redirect } from "next/navigation";
 
-import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { SocialBioForm, SocialProfileCreateForm } from "@/components/social/social-forms";
 import { SocialAvatar } from "@/components/social/social-ui";
 import { signedAvatarUrl } from "@/lib/s3-avatars";
-import { SOCIAL } from "@/lib/social";
-import { loadLiveStories, loadOwnProfile } from "@/lib/social-feed";
+import { displayHandle, SOCIAL } from "@/lib/social";
+import { loadLiveStories } from "@/lib/social-feed";
+import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 
@@ -15,7 +15,7 @@ export default async function SocialProfilePage() {
   if (!ctx) redirect("/login");
 
   const supabase = await createClient();
-  const profile = await loadOwnProfile(supabase, ctx.user.id);
+  const profile = await ensureOwnSocialProfile(supabase, ctx.user);
   const photoUrl = profile ? await signedAvatarUrl(profile.id) : null;
   const liveStories = profile ? await loadLiveStories(supabase, [profile.id]) : [];
 
@@ -32,16 +32,14 @@ export default async function SocialProfilePage() {
             />
             <div>
               <p className="t-body font-medium text-ink">{profile.display_name}</p>
-              <p className="t-body-sm text-ink-3">@{profile.handle}</p>
+              <p className="t-body-sm text-ink-3">{displayHandle(profile.handle)}</p>
             </div>
           </div>
+          <SocialProfileCreateForm handle={profile.handle} displayName={profile.display_name} />
           <SocialBioForm bio={profile.bio ?? ""} />
         </div>
       ) : (
-        <div className="flex flex-col gap-[var(--space-4)]">
-          <HouseEmpty>{SOCIAL.profile.emptyBody}</HouseEmpty>
-          <SocialProfileCreateForm />
-        </div>
+        <SocialProfileCreateForm />
       )}
     </div>
   );

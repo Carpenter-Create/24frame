@@ -8,6 +8,7 @@ import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
 import { ASK_GLOBEE } from "@/lib/ask-globee";
 import { SOCIAL } from "@/lib/social";
+import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import SocialHomePage from "./page";
 
 vi.mock("next/navigation", () => ({
@@ -24,6 +25,9 @@ vi.mock("@/lib/s3-avatars", () => ({
 vi.mock("@/lib/s3-social-media", () => ({
   signedSocialMediaItems: vi.fn().mockResolvedValue([]),
   signedSocialMediaByPostId: vi.fn().mockResolvedValue(new Map()),
+}));
+vi.mock("@/lib/social-profile", () => ({
+  ensureOwnSocialProfile: vi.fn(),
 }));
 vi.mock("@/app/(app)/social/actions", () => ({
   createSocialProfile: vi.fn(),
@@ -123,29 +127,37 @@ function stubClient({
   return { from };
 }
 
+const ensured = {
+  id: "u1",
+  handle: "ada",
+  display_name: "Ada Lovelace",
+  status: "active",
+  bio: null,
+};
+
 describe("Social home", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(signedAvatarUrls).mockResolvedValue(new Map());
     vi.mocked(signedSocialMediaByPostId).mockResolvedValue(new Map());
+    vi.mocked(ensureOwnSocialProfile).mockResolvedValue(ensured);
   });
 
   it("renders for a signed-in user without an org", async () => {
-    stubClient();
+    stubClient({ profile: ensured });
     vi.mocked(getOrgContext).mockResolvedValue(ctx({ hasOrg: false }) as never);
 
     const html = await renderHome();
     expect(html).toContain("data-social-home");
     expect(html).toContain(SOCIAL.home.title);
     expect(html).toContain("24Frame");
-    expect(html).toContain("data-social-need-profile");
-    expect(html).toContain(SOCIAL.cta.needProfile);
-    expect(html).toContain("/social/profile");
+    expect(html).toContain("data-social-checklist");
     expect(html).toContain("data-social-lenses");
     expect(html).toContain("data-social-stories");
     expect(html).toContain("data-social-following-empty");
     expect(html).toContain("Cinematography");
     expect(html).toContain("Music");
+    expect(html).not.toContain("data-social-need-profile");
     expect(html).not.toContain("Cinematographers");
     expect(html).not.toContain("Composers");
     expect(html).not.toContain("data-social-post-form");
@@ -153,18 +165,17 @@ describe("Social home", () => {
     expect(html).not.toContain(ASK_GLOBEE.headline);
   });
 
-  it("does not auto-create a profile when none exists", async () => {
-    const { from } = stubClient();
+  it("shows the checklist once the ensure path has a profile", async () => {
+    const { from } = stubClient({ profile: ensured });
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
     const html = await renderHome();
-    expect(from).toHaveBeenCalledWith("profiles");
+    expect(ensureOwnSocialProfile).toHaveBeenCalled();
     expect(from).toHaveBeenCalledWith("stories");
-    expect(from).not.toHaveBeenCalledWith("posts");
-    expect(html).toContain("data-social-need-profile");
-    expect(html).toContain(SOCIAL.cta.profileHrefLabel);
+    expect(html).toContain("data-social-checklist");
+    expect(html).toContain("data-social-story-create");
+    expect(html).not.toContain("data-social-need-profile");
     expect(html).not.toContain("data-social-post-form");
-    expect(html).not.toContain("data-social-like");
   });
 
   it("shows a signed author face on a feed post", async () => {

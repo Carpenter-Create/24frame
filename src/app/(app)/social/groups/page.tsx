@@ -4,9 +4,8 @@ import { redirect } from "next/navigation";
 import { HouseEmpty, TextAction } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { SocialJoinGroupButton } from "@/components/social/social-forms";
-import { SocialNeedProfile } from "@/components/social/social-ui";
 import { SOCIAL, SOCIAL_ROUTES, socialGroupHref } from "@/lib/social";
-import { loadOwnProfile } from "@/lib/social-feed";
+import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
@@ -16,7 +15,7 @@ export default async function SocialGroupsPage() {
   if (!ctx) redirect("/login");
 
   const supabase = await createClient();
-  const profile = await loadOwnProfile(supabase, ctx.user.id);
+  const profile = await ensureOwnSocialProfile(supabase, ctx.user);
   const { data: canCreate } = profile
     ? await supabase.rpc("has_capability", { p_user: ctx.user.id, p_cap: "create_group" })
     : { data: false };
@@ -47,7 +46,6 @@ export default async function SocialGroupsPage() {
           ) : null
         }
       />
-      {!profile ? <SocialNeedProfile /> : null}
       {all.length === 0 ? <HouseEmpty>{SOCIAL.groups.empty}</HouseEmpty> : null}
       {myGroups.length > 0 ? (
         <section className="mb-[var(--space-8)]">
