@@ -404,21 +404,28 @@ export function profileInsertRow(input: {
   handle: string;
   displayName: string;
   birthDate?: string;
-}) {
-  const row = {
+}): {
+  id: string;
+  handle: string;
+  display_name: string;
+  birth_date?: string;
+  app_role: "member";
+  points_total: number;
+  level: number;
+  status: "active";
+  trust_state: "new";
+} {
+  return {
     id: input.userId,
     handle: input.handle,
     display_name: input.displayName,
-    app_role: "member" as const,
+    app_role: "member",
     points_total: 0,
     level: 1,
-    status: "active" as const,
-    trust_state: "new" as const,
+    status: "active",
+    trust_state: "new",
+    ...(input.birthDate ? { birth_date: input.birthDate } : {}),
   };
-  if (input.birthDate) {
-    return { ...row, birth_date: input.birthDate };
-  }
-  return row;
 }
 
 export function socialMediaRuleMessage(error: SocialMediaRuleError): string {
