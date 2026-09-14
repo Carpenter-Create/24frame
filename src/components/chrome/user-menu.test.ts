@@ -34,6 +34,7 @@ describe("UserMenuIdentity", () => {
     expect(html).toContain('data-user-menu-email=""');
     expect(html).toContain("ada@example.com");
     expect(html).toContain(">A<");
+    expect(html).not.toContain("<img");
     expect(html).toContain("size-12");
     expect(html).toContain("t-body-sm text-ink-3");
     expect(html).not.toContain("data-user-menu-name");
@@ -58,6 +59,24 @@ describe("UserMenuIdentity", () => {
     expect(html).not.toContain("Jane Doe");
     expect(html).toContain("jane.doe@studio.com");
   });
+
+  it("shows the signed face when one exists and keeps the initial when empty", () => {
+    const withFace = renderToStaticMarkup(
+      createElement(UserMenuIdentity, {
+        email: "ada@example.com",
+        photoUrl: "https://s3.example/signed-avatar",
+      }),
+    );
+    const empty = renderToStaticMarkup(
+      createElement(UserMenuIdentity, { email: "ada@example.com", photoUrl: null }),
+    );
+
+    expect(withFace).toContain('src="https://s3.example/signed-avatar"');
+    expect(withFace).toContain("data-identity-photo");
+    expect(withFace).not.toContain(">A<");
+    expect(empty).toContain(">A<");
+    expect(empty).not.toContain("<img");
+  });
 });
 
 describe("UserMenu trigger", () => {
@@ -65,8 +84,25 @@ describe("UserMenu trigger", () => {
     const html = renderToStaticMarkup(createElement(UserMenu, { email: "nina@studio.com" }));
     expect(html).toContain('data-user-menu-trigger=""');
     expect(html).toContain("N");
+    expect(html).not.toContain("<img");
     expect(html).not.toContain("Switch to dark mode");
     expect(html).not.toContain("Switch to light mode");
+  });
+
+  it("shows the signed face on both header avatars and keeps the initial when empty", () => {
+    const withFace = renderToStaticMarkup(
+      createElement(UserMenu, {
+        email: "nina@studio.com",
+        photoUrl: "https://s3.example/signed-avatar",
+      }),
+    );
+    const empty = renderToStaticMarkup(createElement(UserMenu, { email: "nina@studio.com" }));
+
+    expect(withFace).toContain('src="https://s3.example/signed-avatar"');
+    expect(withFace.match(/src="https:\/\/s3\.example\/signed-avatar"/g)?.length).toBe(2);
+    expect(withFace).not.toContain(">N<");
+    expect(empty).toContain(">N<");
+    expect(empty).not.toContain("<img");
   });
 });
 
@@ -74,8 +110,8 @@ describe("UserMenu close control", () => {
   it("opens the mobile 544:561 / 537:557 sheet and the desktop 629:795 dropdown from the avatar", () => {
     expect(menuSrc).toContain("MobileAccountMenu");
     expect(menuSrc).toContain("DesktopAccountMenu");
-    expect(menuSrc).toContain("<MobileAccountMenu email={email} name={name} />");
-    expect(menuSrc).toContain("<DesktopAccountMenu email={email} name={name} />");
+    expect(menuSrc).toContain("<MobileAccountMenu email={email} name={name} photoUrl={photoUrl} />");
+    expect(menuSrc).toContain("<DesktopAccountMenu email={email} name={name} photoUrl={photoUrl} />");
     expect(sheetSrc).toContain('data-user-menu-desktop=""');
     expect(sheetSrc).toContain("hidden md:block");
     expect(sheetSrc).toContain("ACCOUNT_SHEET_ITEMS");
@@ -93,9 +129,14 @@ describe("UserMenu identity source lock", () => {
     const layoutSrc = readFileSync(join(here, "../../app/(app)/layout.tsx"), "utf8");
     expect(layoutSrc).toContain("email={ctx.user.email}");
     expect(layoutSrc).toContain("name={ctx.user.name}");
+    expect(layoutSrc).toContain("photoUrl={photoUrl}");
+    expect(layoutSrc).toContain("signedAvatarUrl(ctx.user.id)");
+    expect(layoutSrc).not.toContain("signedAvatarUrl(ctx.activeOrg");
     expect(layoutSrc).not.toContain("display_name");
     expect(layoutSrc).not.toContain("user_metadata");
     expect(layoutSrc).not.toContain("full_name");
+    expect(layoutSrc).not.toContain("putAvatarObject");
+    expect(layoutSrc).not.toContain("uploadAccountPhoto");
     expect(menuSrc).not.toContain("split(\"@\")");
     expect(menuSrc).not.toContain("local-part");
     expect(menuSrc).not.toContain("user_metadata");

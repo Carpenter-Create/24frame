@@ -28,11 +28,20 @@ vi.mock("./side-nav", () => ({
   SideNav: () => createElement("nav", { "data-side-nav": "" }),
 }));
 vi.mock("./user-menu", () => ({
-  UserMenu: ({ email, name }: { email: string; name?: string | null }) =>
+  UserMenu: ({
+    email,
+    name,
+    photoUrl,
+  }: {
+    email: string;
+    name?: string | null;
+    photoUrl?: string | null;
+  }) =>
     createElement("div", {
       "data-user-menu-host": "",
       "data-email": email,
       "data-name": name ?? "",
+      "data-photo": photoUrl ?? "",
     }),
 }));
 
@@ -53,11 +62,13 @@ function renderShell(
   messagesSurface?: MessagesSurface,
   name?: string | null,
   defaultCollapsed = false,
+  photoUrl?: string | null,
 ): string {
   return renderToStaticMarkup(
     <AppShell
       email="ada@example.com"
       name={name}
+      photoUrl={photoUrl}
       orgs={[{ id: "org-1", name: "Acme" }]}
       activeOrgId="org-1"
       messagesUnread={Promise.resolve(0)}
@@ -91,8 +102,12 @@ describe("AppShell header", () => {
     const html = renderShell();
     expect(html).toContain('data-email="ada@example.com"');
     expect(html).toContain('data-name=""');
+    expect(html).toContain('data-photo=""');
     expect(renderShell(undefined, "Ada Lovelace")).toContain('data-name="Ada Lovelace"');
-    expect(shellSrc).toContain("<UserMenu email={email} name={name} />");
+    expect(renderShell(undefined, "Ada Lovelace", false, "https://s3.example/signed-avatar")).toContain(
+      'data-photo="https://s3.example/signed-avatar"',
+    );
+    expect(shellSrc).toContain("<UserMenu email={email} name={name} photoUrl={photoUrl} />");
     expect(shellSrc).toContain("Phone avatar opens 544:561");
     expect(shellSrc).toContain("<MobileNav isGcStaff={isGcStaff} workspace={workspace} />");
     expect(shellSrc).not.toContain("AccountOverlay");
@@ -102,7 +117,7 @@ describe("AppShell header", () => {
   it("is avatar-only on every Access route — no org switcher", () => {
     expect(shellSrc).not.toContain("OrganizationSwitcher");
     expect(shellSrc).toContain("justify-end");
-    expect(shellSrc).toContain("<UserMenu email={email} name={name} />");
+    expect(shellSrc).toContain("<UserMenu email={email} name={name} photoUrl={photoUrl} />");
 
     for (const path of ["/", "/titles", "/deliveries", "/catalog-health", "/messages"]) {
       navigation.pathname = path;

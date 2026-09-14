@@ -129,6 +129,8 @@ describe("account name persist read-after-write", () => {
     expect(authImpl).not.toMatch(/await supabase\.auth\.getUser\(/);
     expect(pageSrc).toContain("ctx.user.name");
     expect(layoutSrc).toContain("name={ctx.user.name}");
+    expect(layoutSrc).toContain("photoUrl={photoUrl}");
+    expect(layoutSrc).toContain("signedAvatarUrl(ctx.user.id)");
   });
 
   it("does not invent a name when the refreshed claims still have none", () => {

@@ -4,6 +4,7 @@ import type { ComponentProps, ReactNode } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
 
+import { accountPhotoSrc } from "@/lib/account-avatar";
 import { cn } from "@/lib/cn";
 import {
   APP_SHEET_HAIRLINE_CLASS,
@@ -66,19 +67,31 @@ export function HouseEmpty({ children }: { children: ReactNode }) {
 // Always render name and email. Real values only — no dashes, no pill well.
 export function IdentityBlock({
   avatarInitial,
+  photoUrl,
   name,
   email,
   className,
 }: {
   avatarInitial: string;
+  photoUrl?: string | null;
   name: string;
   email: string;
   className?: string;
 }) {
+  const face = accountPhotoSrc(photoUrl);
   return (
     <div data-identity-block="" className={cn(IDENTITY_BLOCK_CLASS, className)}>
-      <div data-identity-avatar="" className={IDENTITY_AVATAR_CLASS}>
-        {avatarInitial}
+      <div
+        data-identity-avatar=""
+        data-identity-photo={face ? "" : undefined}
+        className={cn(IDENTITY_AVATAR_CLASS, face ? "overflow-hidden" : null)}
+      >
+        {face ? (
+          // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the private avatars bucket
+          <img src={face} alt="" className="size-full object-cover" />
+        ) : (
+          avatarInitial
+        )}
       </div>
       <div data-identity-who="" className="flex flex-col items-start gap-[var(--space-2)]">
         <p data-identity-name="" className={IDENTITY_NAME_CLASS}>

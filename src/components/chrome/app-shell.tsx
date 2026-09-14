@@ -46,6 +46,7 @@ type Org = { id: string; name: string };
 export function AppShell({
   email,
   name,
+  photoUrl,
   messagesUnread,
   isGcStaff = false,
   defaultCollapsed = false,
@@ -55,6 +56,7 @@ export function AppShell({
 }: {
   email: string;
   name?: string | null;
+  photoUrl?: string | null;
   orgs: Org[];
   activeOrgId: string | null;
   /** Promise, not a number — resolved inside SideNav's Suspense boundary so the
@@ -186,7 +188,7 @@ export function AppShell({
           {titlesBleed ? <TitlesHeaderSearch /> : null}
         </div>
         <div className="flex items-center gap-3">
-          <UserMenu email={email} name={name} />
+          <UserMenu email={email} name={name} photoUrl={photoUrl} />
         </div>
       </header>
 

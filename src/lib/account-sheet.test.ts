@@ -272,6 +272,7 @@ describe("account sheet identity", () => {
   it("keeps name and email fields without dashes when empty", () => {
     const empty = accountSheetIdentity("");
     expect(empty.avatarInitial).toBe("?");
+    expect(empty.photoUrl).toBeNull();
     expect(empty.name).toBe("");
     expect(empty.email).toBe("");
     expect(empty.name).not.toBe("—");
@@ -294,9 +295,22 @@ describe("account sheet identity", () => {
     expect(named.name).toBe("Ada Lovelace");
     expect(named.email).toBe("ada@example.com");
     expect(named.avatarInitial).toBe("A");
+    expect(named.photoUrl).toBeNull();
     expect(accountSheetIdentity("ada@example.com", "   ")).toEqual(
       accountSheetIdentity("ada@example.com"),
     );
+  });
+
+  it("carries the signed face when one exists and ignores a blank URL", () => {
+    const withFace = accountSheetIdentity(
+      "ada@example.com",
+      "Ada Lovelace",
+      "https://s3.example/signed-avatar",
+    );
+    expect(withFace.photoUrl).toBe("https://s3.example/signed-avatar");
+    expect(withFace.avatarInitial).toBe("A");
+    expect(accountSheetIdentity("ada@example.com", null, "   ").photoUrl).toBeNull();
+    expect(accountSheetIdentity("ada@example.com", null, null).photoUrl).toBeNull();
   });
 });
 

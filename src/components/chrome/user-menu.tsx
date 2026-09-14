@@ -1,6 +1,7 @@
 "use client";
 
 import { signOut } from "@/app/actions";
+import { accountPhotoSrc } from "@/lib/account-avatar";
 import { userMenuAvatarInitial, userMenuName } from "@/lib/user-menu";
 import { DesktopAccountMenu, MobileAccountMenu } from "./account-sheet";
 
@@ -11,12 +12,15 @@ export function onUserMenuLogOut(): void {
 export function UserMenuIdentity({
   email,
   name,
+  photoUrl,
 }: {
   email: string;
   name?: string | null;
+  photoUrl?: string | null;
 }) {
   const displayName = userMenuName(name);
   const initial = userMenuAvatarInitial(email);
+  const face = accountPhotoSrc(photoUrl);
 
   return (
     <div
@@ -25,9 +29,15 @@ export function UserMenuIdentity({
     >
       <div
         data-user-menu-avatar=""
-        className="flex size-12 shrink-0 items-center justify-center rounded-full bg-surface-muted t-body font-normal text-ink-2"
+        data-identity-photo={face ? "" : undefined}
+        className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted t-body font-normal text-ink-2"
       >
-        {initial}
+        {face ? (
+          // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the private avatars bucket
+          <img src={face} alt="" className="size-full object-cover" />
+        ) : (
+          initial
+        )}
       </div>
       <div className="min-w-0">
         {displayName ? (
@@ -46,14 +56,16 @@ export function UserMenuIdentity({
 export function UserMenu({
   email,
   name,
+  photoUrl,
 }: {
   email: string;
   name?: string | null;
+  photoUrl?: string | null;
 }) {
   return (
     <>
-      <MobileAccountMenu email={email} name={name} />
-      <DesktopAccountMenu email={email} name={name} />
+      <MobileAccountMenu email={email} name={name} photoUrl={photoUrl} />
+      <DesktopAccountMenu email={email} name={name} photoUrl={photoUrl} />
     </>
   );
 }

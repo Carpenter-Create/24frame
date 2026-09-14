@@ -10,6 +10,7 @@ import {
   AVATAR_MAX_BYTES,
   AVATAR_OBJECT_NAME,
   AVATAR_SIGNED_URL_TTL_SECONDS,
+  accountPhotoSrc,
   avatarObjectKey,
   isAvatarContentType,
   isAvatarObjectKey,
@@ -21,6 +22,11 @@ const avatarSrc = readFileSync(join(here, "account-avatar.ts"), "utf8");
 const s3AvatarsSrc = readFileSync(join(here, "s3-avatars.ts"), "utf8");
 const s3TitlesSrc = readFileSync(join(here, "s3.ts"), "utf8");
 const assetsSrc = readFileSync(join(here, "assets.ts"), "utf8");
+const layoutSrc = readFileSync(join(here, "../app/(app)/layout.tsx"), "utf8");
+const settingsSrc = readFileSync(join(here, "../app/(app)/settings/profile/page.tsx"), "utf8");
+const formSrc = readFileSync(join(here, "../app/(app)/account/account-profile-form.tsx"), "utf8");
+const socialProfileSrc = readFileSync(join(here, "../app/(app)/social/profile/page.tsx"), "utf8");
+const uploadSrc = readFileSync(join(here, "../app/(app)/account/actions.ts"), "utf8");
 
 describe("avatarObjectKey", () => {
   it("is avatars/{user-id}/avatar and nothing else", () => {
@@ -41,6 +47,21 @@ describe("avatarObjectKey", () => {
   });
 });
 
+describe("accountPhotoSrc", () => {
+  it("keeps a signed GET and treats empty as no face", () => {
+    expect(accountPhotoSrc("https://s3.example/signed-avatar")).toBe(
+      "https://s3.example/signed-avatar",
+    );
+    expect(accountPhotoSrc("  https://s3.example/signed-avatar  ")).toBe(
+      "https://s3.example/signed-avatar",
+    );
+    expect(accountPhotoSrc(null)).toBeNull();
+    expect(accountPhotoSrc(undefined)).toBeNull();
+    expect(accountPhotoSrc("")).toBeNull();
+    expect(accountPhotoSrc("   ")).toBeNull();
+  });
+});
+
 describe("avatar content rules", () => {
   it("allows jpeg/png/webp only, caps at 2 MB, and signs for 5 minutes", () => {
     expect(AVATAR_CONTENT_TYPES).toEqual(["image/jpeg", "image/png", "image/webp"]);
@@ -52,6 +73,22 @@ describe("avatar content rules", () => {
     expect(AVATAR_ACCEPT).toBe("image/jpeg,image/png,image/webp");
     expect(AVATAR_MAX_BYTES).toBe(2 * 1024 * 1024);
     expect(AVATAR_SIGNED_URL_TTL_SECONDS).toBe(300);
+  });
+});
+
+describe("one face across chrome, Settings, and Social", () => {
+  it("signs avatars/{user-id}/avatar from the session user and keeps one upload", () => {
+    expect(layoutSrc).toContain("signedAvatarUrl(ctx.user.id)");
+    expect(layoutSrc).toContain("photoUrl={photoUrl}");
+    expect(settingsSrc).toContain("signedAvatarUrl(ctx.user.id)");
+    expect(formSrc).toContain("uploadAccountPhoto");
+    expect(socialProfileSrc).toContain("signedAvatarUrl(profile.id)");
+    expect(socialProfileSrc).not.toContain("uploadAccountPhoto");
+    expect(socialProfileSrc).not.toContain("putAvatarObject");
+    expect(uploadSrc).toContain("putAvatarObject(ctx.user.id");
+    expect(uploadSrc).toContain('revalidatePath("/", "layout")');
+    expect(layoutSrc).not.toContain("putAvatarObject");
+    expect(layoutSrc).not.toContain("S3_BUCKET");
   });
 });
 

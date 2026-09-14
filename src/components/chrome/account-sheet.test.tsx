@@ -86,15 +86,35 @@ function minBoxPx(className: string, prop: "min-h" | "min-w"): number {
   return match ? Number(match[1]) : 0;
 }
 
-function renderSheet(email = "ada@example.com", name?: string | null): string {
+function renderSheet(
+  email = "ada@example.com",
+  name?: string | null,
+  photoUrl?: string | null,
+): string {
   return renderToStaticMarkup(
-    <AccountSheet email={email} name={name} pathname="/" onClose={() => undefined} />,
+    <AccountSheet
+      email={email}
+      name={name}
+      photoUrl={photoUrl}
+      pathname="/"
+      onClose={() => undefined}
+    />,
   );
 }
 
-function renderDropdown(email = "ada@example.com", name?: string | null): string {
+function renderDropdown(
+  email = "ada@example.com",
+  name?: string | null,
+  photoUrl?: string | null,
+): string {
   return renderToStaticMarkup(
-    <AccountMenuDropdown email={email} name={name} pathname="/" onClose={() => undefined} />,
+    <AccountMenuDropdown
+      email={email}
+      name={name}
+      photoUrl={photoUrl}
+      pathname="/"
+      onClose={() => undefined}
+    />,
   );
 }
 
@@ -111,12 +131,30 @@ describe("MobileAccountMenu trigger", () => {
     expect(html).toContain("rounded-full");
     expect(html).toContain("bg-surface-muted");
     expect(html).toContain(">N<");
+    expect(html).not.toContain("<img");
     expect(html).not.toContain("data-account-sheet=\"\"");
     expect(html).not.toContain("data-mobile-nav-sheet");
     expect(html).not.toContain("data-mobile-nav-trigger");
     expect(src).toContain("createPortal");
     expect(src).toContain("document.body");
     expect(src).not.toContain("data-mobile-nav");
+  });
+
+  it("shows the signed face on the 32 trigger and keeps the initial when empty", () => {
+    navigation.pathname = "/";
+    const withFace = renderToStaticMarkup(
+      <MobileAccountMenu email="nina@studio.com" photoUrl="https://s3.example/signed-avatar" />,
+    );
+    const empty = renderToStaticMarkup(<MobileAccountMenu email="nina@studio.com" />);
+
+    expect(withFace).toContain('src="https://s3.example/signed-avatar"');
+    expect(withFace).toContain("overflow-hidden");
+    expect(withFace).not.toContain(">N<");
+    expect(empty).toContain(">N<");
+    expect(empty).not.toContain("<img");
+    expect(src).toContain("accountPhotoSrc");
+    expect(src).not.toContain("signedAvatarUrl");
+    expect(src).not.toContain("uploadAccountPhoto");
   });
 });
 
@@ -278,6 +316,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(html).toContain("data-identity-name");
     expect(html).toContain("data-identity-email");
     expect(identity).toContain(">A<");
+    expect(identity).not.toContain("<img");
     expect(identity).not.toContain("—");
     expect(identity).toContain("ada@example.com");
     expect(identity).not.toContain("Ada Lovelace");
@@ -311,6 +350,21 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(html).toContain("Ada Lovelace");
     expect(html).toContain("ada@example.com");
     expect(html).toContain("data-identity-name");
+  });
+
+  it("shows the signed face in Identity and keeps the initial when empty", () => {
+    const withFace = renderSheet("ada@example.com", "Ada Lovelace", "https://s3.example/signed-avatar");
+    const empty = renderSheet("ada@example.com", "Ada Lovelace");
+    const identity = withFace.slice(
+      withFace.indexOf("data-identity-block"),
+      withFace.indexOf("data-account-sheet-rule"),
+    );
+
+    expect(identity).toContain('src="https://s3.example/signed-avatar"');
+    expect(identity).toContain("data-identity-photo");
+    expect(identity).not.toContain(">A<");
+    expect(empty).toContain(">A<");
+    expect(empty).not.toContain("<img");
   });
 
   it("lists Profile, Agreements, Appearance, Help, Refer a friend — then Log out with the footer", () => {
@@ -683,6 +737,7 @@ describe("AccountMenuDropdown 629:795", () => {
     expect(emailClass).not.toContain("truncate");
     expect(emailClass).not.toContain("ellipsis");
     expect(avatarClass).toContain("size-12");
+    expect(html).not.toContain("<img");
     expect(html).not.toContain("Adam Carpenter");
     expect(html).not.toContain("admin@ccbfg.com");
     expect(long).toContain("Ada King-Noel Lovelace Byron");
@@ -692,6 +747,21 @@ describe("AccountMenuDropdown 629:795", () => {
     expect(src).toContain("open ? closeMenu : openMenu");
     expect(src).toContain('variant="dropdown"');
     expect(src).toContain('variant="sheet"');
+  });
+
+  it("shows the signed face in stacked Identity and keeps the initial when empty", () => {
+    const withFace = renderDropdown(
+      "ada@example.com",
+      "Ada Lovelace",
+      "https://s3.example/signed-avatar",
+    );
+    const empty = renderDropdown("ada@example.com", "Ada Lovelace");
+
+    expect(withFace).toContain('src="https://s3.example/signed-avatar"');
+    expect(withFace).toContain("data-identity-photo");
+    expect(withFace).not.toContain(">A<");
+    expect(empty).toContain(">A<");
+    expect(empty).not.toContain("<img");
   });
 
   it("keeps 24 between items — leftover last-item → Log out is 48, hairline only under Log out", () => {
@@ -851,6 +921,7 @@ describe("AccountMenuDropdown 629:795", () => {
     expect(html).toContain("data-user-menu-trigger");
     expect(html).toContain("hidden md:block");
     expect(html).toContain(">N<");
+    expect(html).not.toContain("<img");
     expect(html).not.toContain("data-user-menu-desktop-panel");
     expect(html).not.toContain("data-account-sheet=\"\"");
     expect(src).toContain("<AccountMenuDropdown");
@@ -860,6 +931,19 @@ describe("AccountMenuDropdown 629:795", () => {
     expect(desktop.slice(0, desktop.indexOf("export function AccountSheet"))).not.toContain(
       "<AccountSheet",
     );
+  });
+
+  it("shows the signed face on the desktop 32 trigger and keeps the initial when empty", () => {
+    const withFace = renderToStaticMarkup(
+      <DesktopAccountMenu email="nina@studio.com" photoUrl="https://s3.example/signed-avatar" />,
+    );
+    const empty = renderToStaticMarkup(<DesktopAccountMenu email="nina@studio.com" />);
+
+    expect(withFace).toContain('src="https://s3.example/signed-avatar"');
+    expect(withFace).toContain("overflow-hidden");
+    expect(withFace).not.toContain(">N<");
+    expect(empty).toContain(">N<");
+    expect(empty).not.toContain("<img");
   });
 
   it("applies align-end so the 264 right edge is flush to the avatar", () => {
