@@ -1,5 +1,5 @@
 // One 24Frame account, two workspaces. Cookie persists the last chosen
-// mode the same way gc_sidebar_collapsed persists the rail. Pathname
+// mode the same way 24frame_sidebar_collapsed persists the rail. Pathname
 // still wins on destination routes so a /social bookmark shows Social
 // destinations even if the cookie still says aggregation.
 

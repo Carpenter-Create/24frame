@@ -39,11 +39,12 @@ vi.mock("./user-menu", () => ({
 import { AppShell } from "./app-shell";
 import type { MessagesSurface } from "@/lib/ask-globee";
 import {
-  RAIL_COLLAPSE_RL_CHEVRON,
-  RAIL_COLLAPSE_RL_CHEVRON_CLASS,
-  RAIL_COLLAPSE_RL_CHEVRON_EXPAND_ROW_CLASS,
-  RAIL_COLLAPSE_RL_CHEVRON_ICON_CLASS,
-  RAIL_COLLAPSE_RL_CHEVRON_ICON_STROKE,
+  RAIL_COLLAPSE_CHEVRON,
+  RAIL_COLLAPSE_CHEVRON_CLASS,
+  RAIL_COLLAPSE_EXPAND_ROW_CLASS,
+  RAIL_COLLAPSE_CHEVRON_ICON_CLASS,
+  RAIL_COLLAPSE_CHEVRON_ICON_STROKE,
+  SIDEBAR_COLLAPSED_COOKIE,
 } from "@/lib/rail-collapse";
 
 const shellSrc = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "app-shell.tsx"), "utf8");
@@ -135,6 +136,7 @@ describe("AppShell Access rail and home frame", () => {
     expect(html).toContain("px-[var(--content-inset)]");
     expect(html).toContain("py-[var(--space-8)]");
     expect(html).not.toContain("px-6 pb-24 pt-8");
+    expect(html).not.toContain("px-6 ");
     expect(html).not.toContain("Search");
     expect(html).not.toContain("data-org-switcher");
   });
@@ -153,14 +155,16 @@ describe("AppShell Access rail and home frame", () => {
 
     navigation.pathname = "/deliveries";
     const deliveries = renderShell();
-    expect(deliveries).toContain("px-6 pb-24 pt-8");
+    expect(deliveries).toContain("px-[var(--content-inset)] pb-24 pt-8");
+    expect(deliveries).not.toContain("px-6 pb-24 pt-8");
     expect(deliveries).not.toContain("data-app-home-frame");
     expect(deliveries).not.toContain("data-app-messages-frame");
     expect(deliveries).not.toContain("data-org-switcher");
 
     navigation.pathname = "/catalog-health";
     const health = renderShell();
-    expect(health).toContain("px-6 pb-24 pt-8");
+    expect(health).toContain("px-[var(--content-inset)] pb-24 pt-8");
+    expect(health).not.toContain("px-6 pb-24 pt-8");
     expect(health).not.toContain("data-app-home-frame");
     expect(health).not.toContain("data-app-messages-frame");
     expect(health).not.toContain("data-org-switcher");
@@ -272,7 +276,7 @@ describe("AppShell /settings rail", () => {
     expect(html).toContain('data-settings-rail=""');
     expect(html).toContain("data-settings-rail-nav");
     expect(html).toContain("data-user-menu-host");
-    expect(html).toContain("Dashboard");
+    expect(html).toContain("Home");
     expect(html).toContain("Profile");
     expect(html).toContain("Agreements");
     expect(html).toContain("Refer a friend");
@@ -299,7 +303,7 @@ describe("AppShell /settings rail", () => {
     expect(shellSrc).toContain("collapsed && !settingsPage");
     expect(shellSrc).not.toContain("SettingsLocalNav");
     expect(shellSrc).not.toContain("md:w-[220px]");
-    expect(html).not.toContain(`data-rail-collapse="${RAIL_COLLAPSE_RL_CHEVRON}"`);
+    expect(html).not.toContain(`data-rail-collapse="${RAIL_COLLAPSE_CHEVRON}"`);
   });
 
   it("keeps the Access rail on neighboring routes", () => {
@@ -327,29 +331,33 @@ describe("AppShell /settings rail", () => {
       expect(html).toContain("data-settings-header-back");
       expect(html).toContain('href="/"');
       expect(html).not.toContain("Collapse sidebar");
-      expect(html).not.toContain(`data-rail-collapse="${RAIL_COLLAPSE_RL_CHEVRON}"`);
+      expect(html).not.toContain(`data-rail-collapse="${RAIL_COLLAPSE_CHEVRON}"`);
     }
   });
 });
 
-describe("AppShell RL rail-collapse chevron", () => {
-  it("uses ChevronsLeft in the expanded header row with RL tokens", () => {
+describe("AppShell rail-collapse chevron", () => {
+  it("uses ChevronsLeft in the expanded header row with house tokens", () => {
     navigation.pathname = "/";
     const html = renderShell();
     expect(html).toContain("Collapse sidebar");
     expect(html).toContain(`title="Collapse sidebar"`);
     expect(html).toContain("lucide-chevrons-left");
     expect(html).not.toContain("lucide-chevrons-right");
-    expect(html).toContain(`data-rail-collapse="${RAIL_COLLAPSE_RL_CHEVRON}"`);
-    expect(html).toContain(RAIL_COLLAPSE_RL_CHEVRON_CLASS);
-    expect(html).toContain(RAIL_COLLAPSE_RL_CHEVRON_ICON_CLASS);
-    expect(html).toContain(`stroke-width="${RAIL_COLLAPSE_RL_CHEVRON_ICON_STROKE}"`);
+    expect(html).toContain(`data-rail-collapse="${RAIL_COLLAPSE_CHEVRON}"`);
+    expect(html).toContain(RAIL_COLLAPSE_CHEVRON_CLASS);
+    expect(html).toContain(RAIL_COLLAPSE_CHEVRON_ICON_CLASS);
+    expect(html).toContain(`stroke-width="${RAIL_COLLAPSE_CHEVRON_ICON_STROKE}"`);
     expect(html).not.toContain("Expand sidebar");
-    expect(html).not.toContain(RAIL_COLLAPSE_RL_CHEVRON_EXPAND_ROW_CLASS);
+    expect(html).not.toContain(RAIL_COLLAPSE_EXPAND_ROW_CLASS);
     expect(html).toContain("24Frame");
     expect(shellSrc).toContain("ChevronsLeft");
     expect(shellSrc).toContain("ChevronsRight");
-    expect(shellSrc).toContain("RAIL_COLLAPSE_RL_CHEVRON");
+    expect(shellSrc).toContain("RAIL_COLLAPSE_CHEVRON");
+    expect(shellSrc).not.toContain("RAIL_COLLAPSE_RL");
+    expect(shellSrc).not.toMatch(/\brl-/);
+    expect(shellSrc).not.toContain("AskGlobeeChromeProvider");
+    expect(shellSrc).toContain("AskAssistantChromeProvider");
     expect(shellSrc).not.toContain("PanelLeftOpen");
     expect(shellSrc).not.toContain("PanelLeftClose");
     expect(shellSrc).not.toContain("PanelLeft");
@@ -362,12 +370,12 @@ describe("AppShell RL rail-collapse chevron", () => {
     expect(html).toContain(`title="Expand sidebar"`);
     expect(html).toContain("lucide-chevrons-right");
     expect(html).not.toContain("lucide-chevrons-left");
-    expect(html).toContain(`data-rail-collapse="${RAIL_COLLAPSE_RL_CHEVRON}"`);
-    expect(html).toContain(RAIL_COLLAPSE_RL_CHEVRON_EXPAND_ROW_CLASS);
-    expect(html).toContain(RAIL_COLLAPSE_RL_CHEVRON_CLASS);
-    expect(html).toContain(RAIL_COLLAPSE_RL_CHEVRON_ICON_CLASS);
+    expect(html).toContain(`data-rail-collapse="${RAIL_COLLAPSE_CHEVRON}"`);
+    expect(html).toContain(RAIL_COLLAPSE_EXPAND_ROW_CLASS);
+    expect(html).toContain(RAIL_COLLAPSE_CHEVRON_CLASS);
+    expect(html).toContain(RAIL_COLLAPSE_CHEVRON_ICON_CLASS);
     expect(html).not.toContain("Collapse sidebar");
-    const expandIdx = html.indexOf(RAIL_COLLAPSE_RL_CHEVRON_EXPAND_ROW_CLASS);
+    const expandIdx = html.indexOf(RAIL_COLLAPSE_EXPAND_ROW_CLASS);
     const navIdx = html.indexOf("data-side-nav");
     expect(expandIdx).toBeGreaterThan(-1);
     expect(navIdx).toBeGreaterThan(expandIdx);
@@ -376,14 +384,15 @@ describe("AppShell RL rail-collapse chevron", () => {
     expect(expandSlice).not.toContain("border-hairline");
   });
 
-  it("keeps collapse off on settings and persistence on the Access cookie", () => {
-    expect(shellSrc).toContain("gc_sidebar_collapsed");
+  it("keeps collapse off on settings and persistence on the house cookie", () => {
+    expect(shellSrc).toContain("persistSidebarCollapsed");
+    expect(shellSrc).toContain("migrateSidebarCollapsedCookie");
+    expect(shellSrc).not.toContain("gc_sidebar_collapsed");
     expect(shellSrc).toContain("defaultCollapsed");
     expect(shellSrc).toContain("<MobileNav isGcStaff={isGcStaff} workspace={workspace} />");
+    expect(SIDEBAR_COLLAPSED_COOKIE).toBe("24frame_sidebar_collapsed");
     navigation.pathname = "/settings";
     expect(renderShell(undefined, undefined, true)).not.toContain("Expand sidebar");
-    expect(renderShell(undefined, undefined, true)).not.toContain(
-      RAIL_COLLAPSE_RL_CHEVRON_EXPAND_ROW_CLASS,
-    );
+    expect(renderShell(undefined, undefined, true)).not.toContain(RAIL_COLLAPSE_EXPAND_ROW_CLASS);
   });
 });

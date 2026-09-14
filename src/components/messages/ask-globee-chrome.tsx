@@ -23,7 +23,7 @@ const AskGlobeeChromeContext = createContext<AskGlobeeChromeContextValue>({
   setConversations: () => {},
 });
 
-export function AskGlobeeChromeProvider({
+export function AskAssistantChromeProvider({
   children,
   initialChrome = null,
   initialConversations = [],

@@ -35,7 +35,7 @@ export function WorkspaceSwitcher({
       data-workspace-switcher=""
       role="group"
       aria-label="Workspace"
-      className="flex items-center gap-1 rounded-[var(--radius)] border border-hairline bg-surface p-0.5"
+      className="flex items-center gap-1 rounded-[var(--radius)] border border-hairline bg-surface p-0.5 shadow-none"
     >
       {OPTIONS.map((option) => {
         const active = current === option.mode;
@@ -47,7 +47,7 @@ export function WorkspaceSwitcher({
             aria-pressed={active}
             onClick={() => select(option.mode)}
             className={cn(
-              "rounded-[var(--radius)] px-2 py-1 t-body-sm leading-4 transition-colors",
+              "rounded-[var(--radius)] px-2 py-1 t-body-sm leading-4 shadow-none transition-colors",
               active
                 ? "bg-surface-muted font-medium text-ink"
                 : "font-normal text-ink-2 hover:text-ink",

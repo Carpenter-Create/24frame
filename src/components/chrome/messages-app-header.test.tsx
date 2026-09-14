@@ -23,7 +23,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { ASK_GLOBEE } from "@/lib/ask-globee";
-import { AskGlobeeChromeProvider } from "@/components/messages/ask-globee-chrome";
+import { AskAssistantChromeProvider } from "@/components/messages/ask-globee-chrome";
 import { MessagesAppHeader } from "./messages-app-header";
 
 const src = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "messages-app-header.tsx"), "utf8");
@@ -67,11 +67,11 @@ describe("MessagesAppHeader", () => {
     navigation.search = `thread=${THREAD}`;
     const html = visible(
       renderToStaticMarkup(
-        <AskGlobeeChromeProvider
+        <AskAssistantChromeProvider
           initialChrome={{ id: THREAD, title: "What needs attention", pinned_at: null }}
         >
           <MessagesAppHeader surface="ask-globee-landing" />
-        </AskGlobeeChromeProvider>,
+        </AskAssistantChromeProvider>,
       ),
     );
     expect(html).toContain("data-header-thread");
@@ -138,11 +138,11 @@ describe("MessagesAppHeader", () => {
     navigation.search = `thread=${THREAD}`;
     const html = visible(
       renderToStaticMarkup(
-        <AskGlobeeChromeProvider
+        <AskAssistantChromeProvider
           initialChrome={{ id: THREAD, title: "What needs attention", pinned_at: null }}
         >
           <MessagesAppHeader surface="ask-globee-landing" />
-        </AskGlobeeChromeProvider>,
+        </AskAssistantChromeProvider>,
       ),
     );
     const deleteDialog = src.slice(
@@ -277,11 +277,11 @@ describe("MessagesAppHeader", () => {
     navigation.search = `thread=${THREAD}`;
     const html = visible(
       renderToStaticMarkup(
-        <AskGlobeeChromeProvider
+        <AskAssistantChromeProvider
           initialChrome={{ id: THREAD, title: "What needs attention", pinned_at: null }}
         >
           <MessagesAppHeader surface="ask-globee-landing" />
-        </AskGlobeeChromeProvider>,
+        </AskAssistantChromeProvider>,
       ),
     );
     const shell = readFileSync(

@@ -74,7 +74,7 @@ describe("house primitives", () => {
     expect(accountSrc).toContain("from \"./house\"");
     expect(accountSrc).toContain("<Close44");
     expect(accountSrc).toContain("<IdentityBlock");
-    expect(accountSrc).toContain("<TextAction");
+    expect(accountSrc).not.toContain("<TextAction");
     expect(accountSrc).toContain("<SheetGroup");
     expect(navSrc).toContain("from \"./house\"");
     expect(navSrc).toContain("<Close44");

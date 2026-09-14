@@ -5,6 +5,7 @@ import { getOrgContext } from "@/lib/supabase/context";
 import { AppShell } from "@/components/chrome/app-shell";
 import { resolveMessagesSurface } from "@/lib/ask-globee";
 import { getActiveOrgTier } from "@/lib/org-tier";
+import { readSidebarCollapsed } from "@/lib/rail-collapse";
 import { parseWorkspaceCookie, WORKSPACE_COOKIE } from "@/lib/workspace";
 
 // Server layout for all authenticated routes: resolves the session + the user's orgs
@@ -31,7 +32,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   // Sidebar collapse + workspace mode persist in cookies; read here so there's no flash.
   const jar = await cookies();
-  const sidebarCollapsed = jar.get("gc_sidebar_collapsed")?.value === "1";
+  const sidebarCollapsed = readSidebarCollapsed((name) => jar.get(name)?.value);
   const defaultWorkspace = parseWorkspaceCookie(jar.get(WORKSPACE_COOKIE)?.value);
   const messagesSurface = resolveMessagesSurface({
     isGcStaff: ctx.isGcStaff,

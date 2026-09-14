@@ -17,7 +17,7 @@ import {
   settingsSection,
 } from "@/lib/settings";
 
-// 600:881 settings rail — occupies the 220 Access slot. Dashboard is
+// 600:881 settings rail — occupies the 220 Access slot. Home is
 // 16 chevron + 15 Regular. Active is a muted wash that follows the
 // path. Do not add Titles, Appearance, Account, Users, or API.
 export function SettingsRail() {

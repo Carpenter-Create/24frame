@@ -33,7 +33,8 @@ describe("user menu lock", () => {
     expect(USER_MENU.agreementsHref).toBe("/settings/agreements");
     expect(USER_MENU.helpHref).toBe("/help");
     expect(USER_MENU.referHref).toBe("/settings/refer");
-    expect(USER_MENU.legalHref).toBe("https://globalcontent.co/legal");
+    expect(USER_MENU).not.toHaveProperty("legal");
+    expect(USER_MENU).not.toHaveProperty("legalHref");
     expect(USER_MENU).not.toHaveProperty("appearanceHref");
     expect(USER_MENU).not.toHaveProperty("companyProfile");
     expect(USER_MENU).not.toHaveProperty("companyProfileHref");
@@ -84,9 +85,10 @@ describe("user menu lock", () => {
     expect(hrefs.join(" ")).not.toMatch(/notifications|privacy|phone|job/i);
   });
 
-  it("pins Legal to the public site and versions from package.json", () => {
-    expect(USER_MENU.legal).toBe("Legal");
-    expect(USER_MENU.legalHref).toBe("https://globalcontent.co/legal");
+  it("parks Legal and versions from package.json", () => {
+    expect(USER_MENU).not.toHaveProperty("legal");
+    expect(USER_MENU).not.toHaveProperty("legalHref");
+    expect(USER_MENU_ABSENT).toContain("Legal");
     expect(userMenuVersion()).toBe("v0.1.0");
     expect(USER_MENU.versionPrefix).toBe("v");
   });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { ChevronsLeft, ChevronsRight } from "lucide-react";
 
@@ -11,16 +11,18 @@ import { SettingsHeaderBack } from "./settings-header-back";
 import { MobileNav } from "./mobile-nav";
 import { MessagesAppHeader } from "./messages-app-header";
 import { TitlesHeaderSearch } from "@/components/titles/titles-header-search";
-import { AskGlobeeChromeProvider } from "@/components/messages/ask-globee-chrome";
+import { AskAssistantChromeProvider } from "@/components/messages/ask-globee-chrome";
 import { cn } from "@/lib/cn";
 import type { MessagesSurface } from "@/lib/ask-globee";
 import { MOBILE_CHROME_LEAD_PAD_CLASS } from "@/lib/mobile-chrome";
 import {
-  RAIL_COLLAPSE_RL_CHEVRON,
-  RAIL_COLLAPSE_RL_CHEVRON_CLASS,
-  RAIL_COLLAPSE_RL_CHEVRON_EXPAND_ROW_CLASS,
-  RAIL_COLLAPSE_RL_CHEVRON_ICON_CLASS,
-  RAIL_COLLAPSE_RL_CHEVRON_ICON_STROKE,
+  RAIL_COLLAPSE_CHEVRON,
+  RAIL_COLLAPSE_CHEVRON_CLASS,
+  RAIL_COLLAPSE_EXPAND_ROW_CLASS,
+  RAIL_COLLAPSE_CHEVRON_ICON_CLASS,
+  RAIL_COLLAPSE_CHEVRON_ICON_STROKE,
+  migrateSidebarCollapsedCookie,
+  persistSidebarCollapsed,
 } from "@/lib/rail-collapse";
 import { PRODUCT_NAME } from "@/lib/product";
 import { isSettingsPath, SETTINGS_RAIL_PAD_CLASS } from "@/lib/settings";
@@ -37,9 +39,9 @@ type Org = { id: string; name: string };
 // bottom sheet — client destinations, or those plus staff destinations when
 // isGcStaff. Desktop 1:2 rail is unchanged.
 // /settings paths: the Access destinations leave. One 220 rail (pad 16)
-// occupies that slot — ← Dashboard / Profile / Agreements / Refer a
+// occupies that slot — ← Home / Profile / Agreements / Refer a
 // friend. Not a second column. Collapse stays off. Phone left slot is
-// the same ← Dashboard (623:785). Hamburger stays off. Avatar 32 stays.
+// the same ← Home (623:785). Hamburger stays off. Avatar 32 stays.
 export function AppShell({
   email,
   name,
@@ -68,22 +70,26 @@ export function AppShell({
   const workspace = resolveWorkspaceMode(pathname, defaultWorkspace);
   // The catalog opts out of the centered width cap so its hero can bleed full-width
   // (edge of sidebar → right edge). That page then manages its own content max-width.
-  // Client `/` uses the locked Access frame (48 / 32) without restyling other pages.
+  // Non-bleed pages share `--content-inset`. Titles stay the bleed exception.
   const titlesBleed = pathname === "/titles";
   const homePage = pathname === "/";
   const messagesPage = pathname === "/messages";
   const settingsPage = isSettingsPath(pathname);
 
+  useEffect(() => {
+    migrateSidebarCollapsedCookie(collapsed);
+  }, [collapsed]);
+
   const toggle = () => {
     setCollapsed((c) => {
       const next = !c;
-      document.cookie = `gc_sidebar_collapsed=${next ? "1" : "0"}; path=/; max-age=31536000; samesite=lax`;
+      persistSidebarCollapsed(next);
       return next;
     });
   };
 
   return (
-    <AskGlobeeChromeProvider>
+    <AskAssistantChromeProvider>
     <div
       className="min-h-dvh"
       style={
@@ -101,7 +107,7 @@ export function AppShell({
         <div
           className={cn(
             "flex items-center",
-            settingsPage ? "px-[var(--space-4)]" : collapsed ? "justify-center px-3" : "gap-2 px-3",
+            settingsPage ? "px-[var(--space-4)]" : collapsed ? "justify-center px-2" : "gap-2 px-2",
           )}
           style={{ height: "var(--header-height)" }}
         >
@@ -115,30 +121,30 @@ export function AppShell({
               aria-label="Collapse sidebar"
               title="Collapse sidebar"
               aria-pressed={false}
-              data-rail-collapse={RAIL_COLLAPSE_RL_CHEVRON}
-              className={RAIL_COLLAPSE_RL_CHEVRON_CLASS}
+              data-rail-collapse={RAIL_COLLAPSE_CHEVRON}
+              className={RAIL_COLLAPSE_CHEVRON_CLASS}
             >
               <ChevronsLeft
-                className={RAIL_COLLAPSE_RL_CHEVRON_ICON_CLASS}
-                strokeWidth={RAIL_COLLAPSE_RL_CHEVRON_ICON_STROKE}
+                className={RAIL_COLLAPSE_CHEVRON_ICON_CLASS}
+                strokeWidth={RAIL_COLLAPSE_CHEVRON_ICON_STROKE}
               />
             </button>
           )}
         </div>
         {settingsPage || !collapsed ? null : (
-          <div className={RAIL_COLLAPSE_RL_CHEVRON_EXPAND_ROW_CLASS}>
+          <div className={RAIL_COLLAPSE_EXPAND_ROW_CLASS}>
             <button
               type="button"
               onClick={toggle}
               aria-label="Expand sidebar"
               title="Expand sidebar"
               aria-pressed={true}
-              data-rail-collapse={RAIL_COLLAPSE_RL_CHEVRON}
-              className={RAIL_COLLAPSE_RL_CHEVRON_CLASS}
+              data-rail-collapse={RAIL_COLLAPSE_CHEVRON}
+              className={RAIL_COLLAPSE_CHEVRON_CLASS}
             >
               <ChevronsRight
-                className={RAIL_COLLAPSE_RL_CHEVRON_ICON_CLASS}
-                strokeWidth={RAIL_COLLAPSE_RL_CHEVRON_ICON_STROKE}
+                className={RAIL_COLLAPSE_CHEVRON_ICON_CLASS}
+                strokeWidth={RAIL_COLLAPSE_CHEVRON_ICON_STROKE}
               />
             </button>
           </div>
@@ -206,12 +212,12 @@ export function AppShell({
             {children}
           </div>
         ) : (
-          <div className="mx-auto w-full px-6 pb-24 pt-8" style={{ maxWidth: "var(--page-max-width)" }}>
+          <div className="mx-auto w-full px-[var(--content-inset)] pb-24 pt-8" style={{ maxWidth: "var(--page-max-width)" }}>
             {children}
           </div>
         )}
       </main>
     </div>
-    </AskGlobeeChromeProvider>
+    </AskAssistantChromeProvider>
   );
 }
