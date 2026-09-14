@@ -3,12 +3,17 @@ import { GeistSans } from "geist/font/sans";
 import "./globals.css";
 
 import { ThemeSync } from "@/components/theme-toggle";
+import { BRAND_ICON_SRC } from "@/lib/brand";
 import { AGGREGATION_WORKSPACE, PRODUCT_NAME } from "@/lib/product";
 import { NO_FLASH_THEME_SCRIPT } from "@/lib/theme";
 
 export const metadata: Metadata = {
   title: PRODUCT_NAME,
   description: `${PRODUCT_NAME} ${AGGREGATION_WORKSPACE}.`,
+  icons: {
+    icon: [{ url: BRAND_ICON_SRC, type: "image/svg+xml" }],
+    apple: [{ url: BRAND_ICON_SRC, type: "image/svg+xml" }],
+  },
 };
 
 // Applied before paint to prevent a flash. Light is the guaranteed default;
