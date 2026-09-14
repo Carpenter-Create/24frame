@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu } from "lucide-react";
+import { List } from "@phosphor-icons/react";
 
 import { MOBILE_NAV, isClientNavActive, railDestinations, type NavItem } from "@/lib/nav";
 import { cn } from "@/lib/cn";
@@ -14,16 +14,19 @@ import { SOCIAL_ICON_SIZE_NAV, socialNavIconName } from "@/lib/social-icons";
 import {
   MOBILE_CHROME_HAMBURGER_BUTTON_CLASS,
   MOBILE_CHROME_ICON_CLASS,
-  MOBILE_CHROME_ICON_STROKE,
 } from "@/lib/mobile-chrome";
+import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import { AppSheetHead, AppSheetSurface, Close44 } from "./house";
+import { NavGlyph } from "./nav-glyph";
 
-// Phone menu: lucide Menu 16 / 1.33 / tertiary in the shared 44 hit
+// Phone menu: Phosphor List Bold 16 / tertiary in the shared 44 hit
+// (84:240 / 82:13). Density stays the house 16 / 44 — not a 20px invent.
 // (same object as the Ask Globee clock). Opens an opaque full-bleed
 // portal. The sheet surface is 543:576 app-sheet chrome — same object as
 // the account sheet, different body. Header is one row: large "Menu" on the
-// list edge, Close/44 at top-right. Rows use the same Lucide
-// marks as the rail (item.icon, 16 / 1.33, stroke only). Client destinations
+// list edge, Close/44 at top-right. Aggregation rows use the same
+// Phosphor marks as the rail (Bold idle / Fill active). Social rows
+// use Social Figma V1 Phosphor via SocialIcon. Client destinations
 // only unless isGcStaff — staff get NAV, then a hairline + 24 gap, then
 // GC_NAV. Hidden at md, where the desktop rail stays.
 // Destination clicks keep the opaque portal mounted until the next route
@@ -65,7 +68,7 @@ export function MobileNav({
         onClick={() => setOpenedOn(pathname)}
         className={MOBILE_CHROME_HAMBURGER_BUTTON_CLASS}
       >
-        <Menu className={MOBILE_CHROME_ICON_CLASS} strokeWidth={MOBILE_CHROME_ICON_STROKE} />
+        <List className={MOBILE_CHROME_ICON_CLASS} weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
       </button>
       {sheet && typeof document !== "undefined" ? createPortal(sheet, document.body) : sheet}
     </>
@@ -105,7 +108,6 @@ export function MobileNavSheet({
 
   const link = (item: NavItem) => {
     const active = isClientNavActive(pathname, item);
-    const Icon = item.icon;
     return (
       <Link
         key={item.href}
@@ -124,7 +126,7 @@ export function MobileNavSheet({
             className="shrink-0"
           />
         ) : (
-          <Icon className="size-4 shrink-0" strokeWidth={1.33} />
+          <NavGlyph item={item} active={active} />
         )}
         {item.label}
       </Link>

@@ -8,8 +8,11 @@ import { cn } from "@/lib/cn";
 import type { WorkspaceMode } from "@/lib/workspace";
 import { SocialIcon } from "@/components/social/social-icon";
 import { SOCIAL_ICON_SIZE_NAV, socialNavIconName } from "@/lib/social-icons";
+import { NavGlyph } from "./nav-glyph";
 
-// Access rail: 13px labels (--text-sm / t-body-sm), 16px Lucide at 1.33, muted grey wash when active.
+// Access rail: 13px labels (--text-sm / t-body-sm), 16px Phosphor Bold idle /
+// Fill active (75:5 / 61:2). Social destinations use Social Figma V1 Phosphor
+// via SocialIcon.
 // Collapsed mode is icon-only (labels/badges hidden; title tooltips; unread → accent dot).
 export function SideNav({
   messagesUnread,
@@ -37,7 +40,6 @@ export function SideNav({
     badge: React.ReactNode = null,
   ) => {
     const active = item.exact ? pathname === item.href : pathname.startsWith(item.href);
-    const Icon = item.icon;
     const social = workspace === "social";
     return (
       <Link
@@ -71,7 +73,7 @@ export function SideNav({
             className="shrink-0"
           />
         ) : (
-          <Icon className="size-4 shrink-0" strokeWidth={1.33} />
+          <NavGlyph item={item} active={active} />
         )}
         {!collapsed ? <span className="flex-1 truncate">{item.label}</span> : null}
         {badge}

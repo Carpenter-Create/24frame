@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronLeft } from "lucide-react";
+import { CaretLeft } from "@phosphor-icons/react";
+
+import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
 import { cn } from "@/lib/cn";
 import {
@@ -18,8 +20,9 @@ import {
 } from "@/lib/settings";
 
 // 600:881 settings rail — occupies the 220 Access slot. Home is
-// 16 chevron + 15 Regular. Active is a muted wash that follows the
-// path. Do not add Titles, Appearance, Account, Users, or API.
+// 16 Phosphor caret-left Bold + 15 Regular (75:132). Active is a
+// muted wash that follows the path. Labels stay text-led. Do not
+// add Titles, Appearance, Account, Users, or API.
 export function SettingsRail() {
   const section = settingsSection(usePathname());
 
@@ -40,7 +43,10 @@ export function SettingsRail() {
             )}
           >
             {item.kind === "dashboard" ? (
-              <ChevronLeft className={SETTINGS_RAIL_CHEVRON_CLASS} strokeWidth={1.33} />
+              <CaretLeft
+                className={SETTINGS_RAIL_CHEVRON_CLASS}
+                weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
+              />
             ) : null}
             {item.label}
           </Link>

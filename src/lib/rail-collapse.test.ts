@@ -6,7 +6,7 @@ import {
   RAIL_COLLAPSE_CHEVRON_CLASS,
   RAIL_COLLAPSE_EXPAND_ROW_CLASS,
   RAIL_COLLAPSE_CHEVRON_ICON_CLASS,
-  RAIL_COLLAPSE_CHEVRON_ICON_STROKE,
+  RAIL_COLLAPSE_CHEVRON_ICON_WEIGHT,
   SIDEBAR_COLLAPSED_COOKIE,
   SIDEBAR_COLLAPSED_COOKIE_LEGACY,
   parseSidebarCollapsedCookie,
@@ -25,7 +25,7 @@ describe("rail-collapse tokens", () => {
     expect(RAIL_COLLAPSE_CHEVRON_CLASS).toContain("rounded-[var(--radius-sm)]");
     expect(RAIL_COLLAPSE_CHEVRON_CLASS).toContain("text-ink-3");
     expect(RAIL_COLLAPSE_CHEVRON_ICON_CLASS).toBe("h-4 w-4");
-    expect(RAIL_COLLAPSE_CHEVRON_ICON_STROKE).toBe(1.33);
+    expect(RAIL_COLLAPSE_CHEVRON_ICON_WEIGHT).toBe("bold");
     expect(RAIL_COLLAPSE_EXPAND_ROW_CLASS).toBe("flex h-8 items-center justify-center");
     expect(RAIL_COLLAPSE_EXPAND_ROW_CLASS).not.toMatch(/border|hairline/);
     expect(src).not.toMatch(/\brl-/);

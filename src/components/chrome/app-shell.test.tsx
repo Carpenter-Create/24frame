@@ -52,7 +52,7 @@ import {
   RAIL_COLLAPSE_CHEVRON_CLASS,
   RAIL_COLLAPSE_EXPAND_ROW_CLASS,
   RAIL_COLLAPSE_CHEVRON_ICON_CLASS,
-  RAIL_COLLAPSE_CHEVRON_ICON_STROKE,
+  RAIL_COLLAPSE_CHEVRON_ICON_WEIGHT,
   SIDEBAR_COLLAPSED_COOKIE,
 } from "@/lib/rail-collapse";
 
@@ -354,22 +354,25 @@ describe("AppShell /settings rail", () => {
 });
 
 describe("AppShell rail-collapse chevron", () => {
-  it("uses ChevronsLeft in the expanded header row with house tokens", () => {
+  it("uses CaretDoubleLeft Bold in the expanded header row with house tokens", () => {
     navigation.pathname = "/";
     const html = renderShell();
     expect(html).toContain("Collapse sidebar");
     expect(html).toContain(`title="Collapse sidebar"`);
-    expect(html).toContain("lucide-chevrons-left");
-    expect(html).not.toContain("lucide-chevrons-right");
+    expect(html).toContain('viewBox="0 0 256 256"');
+    expect(html).toContain('fill="currentColor"');
+    expect(html).not.toContain("lucide-");
+    expect(html).not.toContain("stroke-width");
     expect(html).toContain(`data-rail-collapse="${RAIL_COLLAPSE_CHEVRON}"`);
     expect(html).toContain(RAIL_COLLAPSE_CHEVRON_CLASS);
     expect(html).toContain(RAIL_COLLAPSE_CHEVRON_ICON_CLASS);
-    expect(html).toContain(`stroke-width="${RAIL_COLLAPSE_CHEVRON_ICON_STROKE}"`);
+    expect(shellSrc).toContain("weight={RAIL_COLLAPSE_CHEVRON_ICON_WEIGHT}");
+    expect(RAIL_COLLAPSE_CHEVRON_ICON_WEIGHT).toBe("bold");
     expect(html).not.toContain("Expand sidebar");
     expect(html).not.toContain(RAIL_COLLAPSE_EXPAND_ROW_CLASS);
     expect(html).toContain("24Frame");
-    expect(shellSrc).toContain("ChevronsLeft");
-    expect(shellSrc).toContain("ChevronsRight");
+    expect(shellSrc).toContain("CaretDoubleLeft");
+    expect(shellSrc).toContain("CaretDoubleRight");
     expect(shellSrc).toContain("RAIL_COLLAPSE_CHEVRON");
     expect(shellSrc).not.toContain("RAIL_COLLAPSE_RL");
     expect(shellSrc).not.toMatch(/\brl-/);
@@ -382,13 +385,15 @@ describe("AppShell rail-collapse chevron", () => {
     expect(shellSrc).not.toContain("PanelLeft");
   });
 
-  it("puts ChevronsRight on a separate expand row when collapsed", () => {
+  it("puts CaretDoubleRight Bold on a separate expand row when collapsed", () => {
     navigation.pathname = "/";
     const html = renderShell(undefined, undefined, true);
     expect(html).toContain("Expand sidebar");
     expect(html).toContain(`title="Expand sidebar"`);
-    expect(html).toContain("lucide-chevrons-right");
-    expect(html).not.toContain("lucide-chevrons-left");
+    expect(html).toContain('viewBox="0 0 256 256"');
+    expect(html).toContain('fill="currentColor"');
+    expect(html).not.toContain("lucide-");
+    expect(html).not.toContain("stroke-width");
     expect(html).toContain(`data-rail-collapse="${RAIL_COLLAPSE_CHEVRON}"`);
     expect(html).toContain(RAIL_COLLAPSE_EXPAND_ROW_CLASS);
     expect(html).toContain(RAIL_COLLAPSE_CHEVRON_CLASS);

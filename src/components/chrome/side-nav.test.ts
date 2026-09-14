@@ -27,7 +27,7 @@ describe("SideNav Access rail", () => {
     ]);
   });
 
-  it("uses 13px labels via --text-sm / t-body-sm, 16px Lucide at 1.33, and an 8px item gap", () => {
+  it("uses 13px labels via --text-sm / t-body-sm, 16px Phosphor Bold/Fill, and an 8px item gap", () => {
     const tokens = readFileSync("src/app/tokens.css", "utf8");
     const globals = readFileSync("src/app/globals.css", "utf8");
     const itemClass = navSrc.match(
@@ -40,8 +40,9 @@ describe("SideNav Access rail", () => {
     expect(itemClass).not.toContain("text-[0.875rem]");
     expect(itemClass).not.toMatch(/(?:^|[\s"])t-body(?:[\s"]|$)/);
     expect(navSrc).not.toContain("text-[0.875rem]");
-    expect(navSrc).toContain("const Icon = item.icon");
-    expect(navSrc).toContain('<Icon className="size-4 shrink-0" strokeWidth={1.33} />');
+    expect(navSrc).toContain("<NavGlyph item={item} active={active} />");
+    expect(navSrc).toContain("16px Phosphor Bold idle");
+    expect(navSrc).not.toContain("16px Lucide at 1.33");
     expect(navSrc).not.toContain("NavMark");
     expect(navSrc).not.toContain("markSrc");
     expect(navSrc).not.toContain("ask-globee-16.png");
@@ -54,6 +55,7 @@ describe("SideNav Access rail", () => {
     expect(navSrc).toContain("STAFF_RAIL_EYEBROW");
     expect(navSrc).not.toContain("PRODUCT_NAME");
     expect(navSrc).not.toContain("strokeWidth={1.5}");
+    expect(navSrc).not.toContain("strokeWidth={1.33}");
   });
 
   it("marks the active item with a muted grey wash, not faded blue", () => {

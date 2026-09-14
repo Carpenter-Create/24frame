@@ -2,7 +2,9 @@
 
 import { useState, type ComponentProps, type ReactNode } from "react";
 import Link from "next/link";
-import { X } from "lucide-react";
+import { X } from "@phosphor-icons/react";
+
+import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
 import { accountPhotoSrc } from "@/lib/account-avatar";
 import { cn } from "@/lib/cn";
@@ -22,7 +24,7 @@ import {
   TEXT_ACTION_CLASS,
 } from "@/lib/house-sheet";
 
-// 543:562 Close/44 — muted 44 circle, lucide X 16 / 1.33 tertiary.
+// 543:562 Close/44 — live muted 44 circle. Glyph only: Phosphor X Bold 16.
 export function Close44({
   label,
   className,
@@ -35,7 +37,7 @@ export function Close44({
       {...props}
       className={cn(CLOSE_44_CLASS, className)}
     >
-      <X className="size-4" strokeWidth={1.33} />
+      <X className="size-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
     </button>
   );
 }

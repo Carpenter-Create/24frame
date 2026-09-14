@@ -52,7 +52,11 @@ describe("house primitives", () => {
     expect(close).toContain(CLOSE_44_CLASS);
     expect(empty).toContain(HOUSE_EMPTY_CLASS);
     expect(empty).toContain("Help is empty.");
-    expect(close).toContain("stroke-width=\"1.33\"");
+    expect(close).toContain('fill="currentColor"');
+    expect(close).toContain('viewBox="0 0 256 256"');
+    expect(close).not.toContain("stroke-width");
+    expect(close).not.toContain("lucide-");
+    expect(houseSrc).toContain('<X className="size-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />');
     expect(action).toContain(TEXT_ACTION_CLASS);
     expect(action).toContain('href="/account"');
     expect(identity).toContain("data-identity-avatar");

@@ -208,7 +208,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(minBoxPx(closeClass, "min-w")).toBeGreaterThanOrEqual(44);
     expect(src).toContain("<Close44");
     expect(src).not.toMatch(/duration-\d|ease-out|ease-in|@keyframes|bounce/i);
-    expect(houseSrc).toContain('<X className="size-4" strokeWidth={1.33} />');
+    expect(houseSrc).toContain('<X className="size-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />');
     expect(src).toContain("event.key === \"Escape\"");
     expect(tokens).toMatch(/--space-6:\s*1\.5rem/);
     expect(tokens).toMatch(/--space-8:\s*2rem/);
@@ -426,7 +426,10 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(logOutClass).toContain("text-accent");
     expect(logOutClass).not.toContain("text-ink ");
     expect(html).toContain(SHEET_GROUP_CHEVRON_CLASS);
-    expect(html).toContain("stroke-width=\"1.33\"");
+    expect(html).toContain('fill="currentColor"');
+    expect(html).toContain('viewBox="0 0 256 256"');
+    expect(html).not.toContain("stroke-width");
+    expect(html).not.toContain("lucide-");
     expect(html).not.toContain("ThemeGlyph");
     expect(html).toContain("data-account-menu-appearance-mode");
     expect(html).toContain("Light");
@@ -560,9 +563,11 @@ describe("AccountSheet 544:561 / 537:557", () => {
 
     expect(html).not.toContain("Back to main menu");
     expect(backTag).toContain(`aria-label="${APPEARANCE.back}"`);
-    expect(html).toContain("lucide-chevron-left");
+    expect(html).not.toContain("lucide-");
     expect(html).toContain(SHEET_GROUP_CHEVRON_CLASS);
-    expect(html).toContain("stroke-width=\"1.33\"");
+    expect(html).toContain('fill="currentColor"');
+    expect(html).toContain('viewBox="0 0 256 256"');
+    expect(html).not.toContain('stroke-width="1.33"');
     expect(html).toContain("text-ink-3");
     expect(backTag).not.toContain("Back to main menu");
     expect(html).toContain(APPEARANCE.systemDefault);
@@ -597,7 +602,8 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(attrClass(sheet, "data-appearance-check")).not.toContain("text-ink ");
     expect(sheet).not.toContain("data-account-menu-appearance-wash");
     expect(src).toContain("AccountBackChevron");
-    expect(src).toContain("ChevronLeft");
+    expect(src).toContain("CaretLeft");
+    expect(src).not.toContain("ChevronLeft");
     expect(src).toContain("APPEARANCE.back");
     expect(src).toContain("AccountAppearanceFlyout");
     expect(src).toContain("applyDocumentThemePreference");

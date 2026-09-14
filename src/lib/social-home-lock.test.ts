@@ -125,16 +125,24 @@ describe("Social Home miss list v1 P0 lock", () => {
     const sideNav = readFileSync("src/components/chrome/side-nav.tsx", "utf8");
     const publicProfile = readFileSync("src/app/(app)/social/u/[handle]/page.tsx", "utf8");
     const socialStories = readFileSync("src/app/(app)/social/stories/page.tsx", "utf8");
-    for (const src of [settingsProfile, accountSheet, userMenu, settingsRail]) {
+    // Settings/Profile interiors and the user-menu register stay Mercury —
+    // no Social primitives. Account/settings-rail glyphs swapped to Phosphor
+    // in Aggregation chrome; structure stays.
+    for (const src of [settingsProfile, userMenu]) {
       expect(src).not.toContain("SocialIcon");
       expect(src).not.toContain("@phosphor-icons");
       expect(src).not.toContain("social-chrome");
     }
+    for (const src of [accountSheet, settingsRail]) {
+      expect(src).not.toContain("SocialIcon");
+      expect(src).not.toContain("social-chrome");
+    }
     expect(settingsProfile).toContain("AccountProfileForm");
     expect(settingsProfile).toContain("CompanyProfileForm");
-    expect(settingsRail).toContain("ChevronLeft");
-    expect(settingsRail).toContain("strokeWidth={1.33}");
-    expect(sideNav).toContain('<Icon className="size-4 shrink-0" strokeWidth={1.33} />');
+    expect(settingsRail).toContain("CaretLeft");
+    expect(settingsRail).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
+    expect(sideNav).toContain("SocialIcon");
+    expect(sideNav).toContain("<NavGlyph item={item} active={active} />");
     expect(home).not.toContain("PageHeader");
     expect(create).not.toContain("PageHeader");
     expect(profile).not.toContain("PageHeader");
