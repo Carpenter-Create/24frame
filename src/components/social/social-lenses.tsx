@@ -13,7 +13,7 @@ import { SOCIAL_PILL_ACTIVE_CLASS, SOCIAL_PILL_CLASS, SOCIAL_PILL_IDLE_CLASS } f
 
 export function SocialLensRow({ active }: { active: SocialCategoryLabel }) {
   return (
-    <div data-social-lenses="" className="-mx-[var(--content-inset)] overflow-x-auto px-[var(--content-inset)]">
+    <div data-social-lenses="" className="overflow-x-auto">
       <div className="flex w-max gap-[var(--space-2)] pb-[var(--space-3)]">
         {SOCIAL_CATEGORY_LABELS.map((label) => {
           const current = label === active;

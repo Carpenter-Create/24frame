@@ -9,9 +9,13 @@ import {
   SOCIAL_ACTION_CLASS,
   SOCIAL_ACTION_SECONDARY_CLASS,
   SOCIAL_AVATAR_LG_CLASS,
+  SOCIAL_AVATAR_PROFILE_CLASS,
   SOCIAL_AVATAR_SM_CLASS,
-  SOCIAL_CARD_CLASS,
-  SOCIAL_CARD_MUTED_CLASS,
+  SOCIAL_FEED_ROW_CLASS,
+  SOCIAL_HANDLE_PILL_CLASS,
+  SOCIAL_HIGHLIGHT_RING_CLASS,
+  SOCIAL_PROFILE_GRID_CLASS,
+  SOCIAL_PROFILE_TILE_CLASS,
 } from "@/lib/social-chrome";
 import {
   displayHandle,
@@ -23,9 +27,11 @@ import {
   socialInitials,
   socialProfilePublicHost,
   socialRelativeTime,
+  socialShareHint,
 } from "@/lib/social";
 import { SocialLikeButton } from "./social-forms";
 import { SocialEmpty } from "./social-empty";
+import { SocialIcon } from "./social-icon";
 
 export function SocialNeedProfile() {
   return (
@@ -45,10 +51,16 @@ export function SocialAvatar({
   name: string;
   photoUrl?: string | null;
   ring?: "unseen" | "live" | null;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "profile";
 }) {
   const box =
-    size === "lg" ? SOCIAL_AVATAR_LG_CLASS : size === "sm" ? SOCIAL_AVATAR_SM_CLASS : IDENTITY_AVATAR_CLASS;
+    size === "lg"
+      ? SOCIAL_AVATAR_LG_CLASS
+      : size === "profile"
+        ? SOCIAL_AVATAR_PROFILE_CLASS
+        : size === "sm"
+          ? SOCIAL_AVATAR_SM_CLASS
+          : IDENTITY_AVATAR_CLASS;
   return (
     <div
       data-social-avatar=""
@@ -117,7 +129,7 @@ export type SocialPostCardModel = {
 export function SocialPostMedia({ items }: { items: readonly SocialPostMediaItem[] }) {
   if (items.length === 0) return null;
   return (
-    <div data-social-post-media="" className="flex flex-col gap-[var(--space-2)]">
+    <div data-social-post-media="" className="flex flex-col gap-2">
       {items.map((item) =>
         item.kind === "video" ? (
           <video
@@ -135,7 +147,7 @@ export function SocialPostMedia({ items }: { items: readonly SocialPostMediaItem
             data-social-post-image=""
             src={item.url}
             alt=""
-            className="h-[420px] w-full rounded-[8px] bg-surface-muted object-cover"
+            className="h-[360px] w-full rounded-[8px] bg-surface-muted object-cover"
           />
         ),
       )}
@@ -161,47 +173,80 @@ export function SocialProfileIdentity({
   ring?: "unseen" | "live" | null;
   photoAction?: ReactNode;
   stats?: { posts: number; followers: number; following: number };
-  actions?: ReactNode;
+  actions?: () => ReactNode;
   children?: ReactNode;
 }) {
+  const actionRow = actions ? (
+    <div className="flex w-full items-center gap-2 md:w-auto">
+      {actions()}
+      {photoAction}
+    </div>
+  ) : photoAction ? (
+    <div className="flex w-full items-center gap-2 md:w-auto">{photoAction}</div>
+  ) : null;
+
   return (
-    <div data-social-profile-identity="" className="flex flex-col gap-[var(--space-6)] md:flex-row md:items-start">
-      <SocialAvatar name={name} photoUrl={photoUrl} ring={ring} size="lg" />
-      <div className="flex min-w-0 flex-1 flex-col gap-[var(--space-2)]">
-        <div className="flex flex-col gap-[var(--space-4)] md:flex-row md:items-start md:justify-between">
-          <div className="min-w-0">
-            <p className="text-[length:var(--text-title)] font-semibold text-ink">{name}</p>
-            <p className="t-body text-ink-2">{displayHandle(handle)}</p>
-            <p className="t-body-sm text-ink-2">{socialProfilePublicHost(handle)}</p>
+    <div data-social-profile-identity="" className="flex flex-col gap-3">
+      <div className="flex items-start gap-3 md:gap-4">
+        <SocialAvatar name={name} photoUrl={photoUrl} ring={ring} size="profile" />
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+            <div className="min-w-0">
+              <p className="text-[18px] font-semibold text-ink md:text-[22px]">{name}</p>
+              <p className={cn(SOCIAL_HANDLE_PILL_CLASS, "mt-1")}>{displayHandle(handle)}</p>
+              <p className="mt-1 t-label text-ink-2">{socialProfilePublicHost(handle)}</p>
+            </div>
+            {actionRow ? <div className="hidden shrink-0 md:flex">{actionRow}</div> : null}
           </div>
-          <div className="flex shrink-0 flex-wrap items-center gap-[var(--space-2)]">
-            {actions}
-            {photoAction}
-          </div>
+          {bio?.trim() ? (
+            <p data-social-profile-bio="" className="hidden t-body text-ink whitespace-pre-wrap md:block">
+              {bio}
+            </p>
+          ) : null}
+          {stats ? (
+            <div data-social-profile-stats="" className="hidden flex-wrap gap-5 t-body md:flex">
+              <p>
+                <span className="font-semibold text-ink">{formatSocialCount(stats.posts)}</span>{" "}
+                <span className="text-ink-2">{SOCIAL.profile.postsStat}</span>
+              </p>
+              <p>
+                <span className="font-semibold text-ink">{formatSocialCount(stats.followers)}</span>{" "}
+                <span className="text-ink-2">{SOCIAL.profile.followersStat}</span>
+              </p>
+              <p>
+                <span className="font-semibold text-ink">{formatSocialCount(stats.following)}</span>{" "}
+                <span className="text-ink-2">{SOCIAL.profile.followingStat}</span>
+              </p>
+            </div>
+          ) : null}
         </div>
-        {bio?.trim() ? (
-          <p data-social-profile-bio="" className="t-body text-ink whitespace-pre-wrap">
-            {bio}
-          </p>
-        ) : null}
-        {stats ? (
-          <div data-social-profile-stats="" className="flex flex-wrap gap-[var(--space-6)] t-body">
-            <p>
-              <span className="font-semibold text-ink">{formatSocialCount(stats.posts)}</span>{" "}
-              <span className="text-ink-2">{SOCIAL.profile.postsStat}</span>
-            </p>
-            <p>
-              <span className="font-semibold text-ink">{formatSocialCount(stats.followers)}</span>{" "}
-              <span className="text-ink-2">{SOCIAL.profile.followersStat}</span>
-            </p>
-            <p>
-              <span className="font-semibold text-ink">{formatSocialCount(stats.following)}</span>{" "}
-              <span className="text-ink-2">{SOCIAL.profile.followingStat}</span>
-            </p>
-          </div>
-        ) : null}
-        {children}
       </div>
+      {bio?.trim() ? (
+        <p data-social-profile-bio="" className="t-body-sm text-ink whitespace-pre-wrap md:hidden">
+          {bio}
+        </p>
+      ) : null}
+      {stats ? (
+        <div data-social-profile-stats="" className="flex flex-wrap gap-4 t-body-sm md:hidden">
+          <p>
+            <span className="font-semibold text-ink">{formatSocialCount(stats.posts)}</span>{" "}
+            <span className="text-ink-2">{SOCIAL.profile.postsStat}</span>
+          </p>
+          <p>
+            <span className="font-semibold text-ink">{formatSocialCount(stats.followers)}</span>{" "}
+            <span className="text-ink-2">{SOCIAL.profile.followersStat}</span>
+          </p>
+          <p>
+            <span className="font-semibold text-ink">{formatSocialCount(stats.following)}</span>{" "}
+            <span className="text-ink-2">{SOCIAL.profile.followingStat}</span>
+          </p>
+        </div>
+      ) : null}
+      {actionRow ? <div className="flex md:hidden">{actionRow}</div> : null}
+      <p data-social-share-hint="" className="t-label text-ink-2">
+        {socialShareHint(handle)}
+      </p>
+      {children}
     </div>
   );
 }
@@ -213,24 +258,24 @@ export function SocialHighlights({
 }) {
   if (cards.length === 0) return null;
   return (
-    <div data-social-highlights="" className="flex flex-col gap-[var(--space-4)]">
-      <div className="flex gap-[var(--space-4)] overflow-x-auto">
+    <div data-social-highlights="" className="flex flex-col gap-2">
+      <div className="flex gap-3 overflow-x-auto">
         {cards.map((card) => (
           <Link
             key={card.id}
             href={card.href}
             data-social-highlight={card.id}
-            className="flex w-16 shrink-0 flex-col items-center gap-[var(--space-2)]"
+            className="flex w-14 shrink-0 flex-col items-center gap-1"
           >
-            <span className="rounded-full border-2 border-accent p-[3px]">
+            <span className={SOCIAL_HIGHLIGHT_RING_CLASS}>
               {card.photoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET
-                <img src={card.photoUrl} alt="" className="size-14 rounded-full object-cover" />
+                <img src={card.photoUrl} alt="" className="size-12 rounded-full object-cover" />
               ) : (
-                <span className="block size-14 rounded-full bg-surface-muted" />
+                <span className="block size-12 rounded-full bg-surface-muted" />
               )}
             </span>
-            <span className="w-full truncate text-center t-body-sm text-ink">{card.label}</span>
+            <span className="w-full truncate text-center t-label text-ink">{card.label}</span>
           </Link>
         ))}
       </div>
@@ -275,7 +320,7 @@ export function SocialAuthorHistory({
           {mediaPosts.length > 0 ? (
             <div
               data-social-profile-grid=""
-              className="grid grid-cols-2 gap-[var(--space-2)] md:grid-cols-3"
+              className={SOCIAL_PROFILE_GRID_CLASS}
             >
               {mediaPosts.map((post) => {
                 const first = post.media[0];
@@ -283,7 +328,7 @@ export function SocialAuthorHistory({
                   <article
                     key={post.id}
                     data-social-post={post.id}
-                    className="relative flex h-[220px] flex-col justify-between overflow-hidden rounded-[8px] bg-surface-muted p-[var(--space-4)]"
+                    className={SOCIAL_PROFILE_TILE_CLASS}
                   >
                     {first.kind === "video" ? (
                       <video
@@ -360,49 +405,123 @@ export function socialAuthorPostCard(input: {
 
 export function SocialPostCard({ post }: { post: SocialPostCardModel }) {
   const media = post.media.length > 0;
+  const handle = post.authorHandle ? displayHandle(post.authorHandle).slice(1) : post.authorName;
   return (
-    <article
-      data-social-post={post.id}
-      className={media ? SOCIAL_CARD_CLASS : SOCIAL_CARD_MUTED_CLASS}
-    >
-      {media ? <SocialPostMedia items={post.media} /> : null}
-      <div className="flex items-center gap-[var(--space-3)]">
-        <SocialAvatar name={post.authorName} photoUrl={post.authorPhotoUrl} size="sm" />
-        <div className="min-w-0">
-          {post.authorHandle ? (
-            <Link href={socialMemberHref(post.authorHandle)} className="t-body-sm font-medium text-ink">
-              {post.authorName}
-            </Link>
-          ) : (
-            <p className="t-body-sm font-medium text-ink">{post.authorName}</p>
-          )}
-          <p className="t-body-sm text-ink-2">
-            {socialRelativeTime(post.createdAt)}
-            {post.groupSlug && post.groupName ? (
-              <>
-                {" · "}
-                <Link href={socialGroupHref(post.groupSlug)} className="text-ink-2">
-                  {post.groupName}
-                </Link>
-              </>
+    <article data-social-post={post.id}>
+      <div className={cn(SOCIAL_FEED_ROW_CLASS, "hidden md:flex")}>
+        <div className="flex items-center gap-2.5">
+          <SocialAvatar name={post.authorName} photoUrl={post.authorPhotoUrl} size="sm" />
+          <div className="min-w-0">
+            {post.authorHandle ? (
+              <Link href={socialMemberHref(post.authorHandle)} className="t-body-sm font-semibold text-ink">
+                {post.authorName}
+              </Link>
             ) : (
-              <> · {SOCIAL.follow.following}</>
+              <p className="t-body-sm font-semibold text-ink">{post.authorName}</p>
             )}
-          </p>
+            <p className="t-label text-ink-2">
+              {socialRelativeTime(post.createdAt)}
+              {post.groupSlug && post.groupName ? (
+                <>
+                  {" · "}
+                  <Link href={socialGroupHref(post.groupSlug)} className="text-ink-2">
+                    {post.groupName}
+                  </Link>
+                </>
+              ) : (
+                <> · {SOCIAL.follow.following}</>
+              )}
+            </p>
+          </div>
+        </div>
+        {media ? <SocialPostMedia items={post.media} /> : null}
+        {post.body ? <p className="t-body text-ink whitespace-pre-wrap">{post.body}</p> : null}
+        <div className="flex items-center gap-2 t-label text-ink-2">
+          {media ? (
+            <span className="font-medium text-ink-3">
+              {post.media[0]?.kind === "video" ? SOCIAL.home.videoKind : SOCIAL.home.photoKind}
+            </span>
+          ) : (
+            <span className="font-medium text-ink-3">{SOCIAL.create.text}</span>
+          )}
+          {post.canLike ? (
+            <SocialLikeButton
+              postId={post.id}
+              liked={post.liked}
+              likeCount={post.likeCount}
+              groupSlug={post.groupSlug ?? undefined}
+            />
+          ) : (
+            <p>{socialPostEngagement(post)}</p>
+          )}
         </div>
       </div>
-      {post.body ? <p className="t-body text-ink whitespace-pre-wrap">{post.body}</p> : null}
-      <div className="flex items-center gap-[var(--space-4)] t-body-sm text-ink-2">
-        {post.canLike ? (
-          <SocialLikeButton
-            postId={post.id}
-            liked={post.liked}
-            likeCount={post.likeCount}
-            groupSlug={post.groupSlug ?? undefined}
-          />
-        ) : (
-          <p>{socialPostEngagement(post)}</p>
-        )}
+      <div data-social-post-mobile="" className="flex flex-col bg-surface md:hidden">
+        <div className="flex items-center gap-2 px-3 py-2">
+          <SocialAvatar name={post.authorName} photoUrl={post.authorPhotoUrl} size="sm" ring={media ? "unseen" : null} />
+          {post.authorHandle ? (
+            <Link href={socialMemberHref(post.authorHandle)} className="t-body-sm font-semibold text-ink">
+              {handle}
+            </Link>
+          ) : (
+            <p className="t-body-sm font-semibold text-ink">{handle}</p>
+          )}
+        </div>
+        {media ? (
+          <div data-social-post-media="" className="-mx-0">
+            {post.media[0]?.kind === "video" ? (
+              <video
+                data-social-post-video=""
+                controls
+                preload="metadata"
+                src={post.media[0].url}
+                className="aspect-square w-full bg-surface-muted object-cover"
+              />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET
+              <img
+                data-social-post-image=""
+                src={post.media[0]?.url}
+                alt=""
+                className="aspect-square w-full bg-surface-muted object-cover"
+              />
+            )}
+          </div>
+        ) : null}
+        <div className="flex flex-col gap-1 px-3 pb-2.5 pt-2">
+          <div className="flex items-center gap-3.5">
+            {post.canLike ? (
+              <SocialLikeButton
+                postId={post.id}
+                liked={post.liked}
+                likeCount={post.likeCount}
+                groupSlug={post.groupSlug ?? undefined}
+                icon
+              />
+            ) : (
+              <SocialIcon name="heart" size={22} />
+            )}
+            <SocialIcon name="chat-circle" size={22} />
+            <SocialIcon name="paper-plane-tilt" size={22} />
+          </div>
+          <p className="t-body-sm font-semibold text-ink">
+            {post.likeCount} {SOCIAL.post.likes}
+          </p>
+          {post.body ? (
+            <p className="t-body-sm text-ink">
+              <span className="font-semibold">{handle} </span>
+              {post.body}
+            </p>
+          ) : null}
+          {post.commentCount ? (
+            <p className="t-body-sm text-ink-2">
+              {post.commentCount} {SOCIAL.post.comments}
+            </p>
+          ) : null}
+          <p className="text-[10px] font-medium uppercase tracking-[0.04em] text-ink-3">
+            {socialRelativeTime(post.createdAt)}
+          </p>
+        </div>
       </div>
     </article>
   );

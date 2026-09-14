@@ -76,6 +76,11 @@ export const SOCIAL_MOBILE_PILL: LucideNavItem[] = SOCIAL_NAV.filter(
   (item) => item.href !== SOCIAL_ROUTES.create,
 );
 
+export const SOCIAL_RAIL = {
+  workspace: "Social",
+  destinations: "Destinations",
+} as const;
+
 // Staff rail eyebrow. Not a 24Frame product wordmark.
 export const STAFF_RAIL_EYEBROW = "Staff";
 

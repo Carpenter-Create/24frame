@@ -6,6 +6,7 @@ import {
   SOCIAL_EXPLORE_POSTS_LIMIT,
   SOCIAL_FOLLOWEES_LIMIT,
   SOCIAL_FOLLOWING_WALL_LIMIT,
+  SOCIAL_FOR_YOU_PEOPLE_LIMIT,
   SOCIAL_STORIES_RAIL_LIMIT,
   followingWallKeysetOrFilter,
   encodeFollowingWallCursor,
@@ -369,6 +370,28 @@ export async function loadExploreSearch(
     postsTruncated: postsPage.truncated,
     truncated: peoplePage.truncated || postsPage.truncated,
   };
+}
+
+export type SocialSuggestedPerson = {
+  id: string;
+  handle: string;
+  display_name: string;
+};
+
+export async function loadSuggestedPeople(
+  supabase: ServerClient,
+  excludeIds: readonly string[],
+): Promise<SocialSuggestedPerson[]> {
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, handle, display_name")
+    .eq("status", "active")
+    .order("handle", { ascending: true })
+    .range(...probeRange(SOCIAL_EXPLORE_PEOPLE_LIMIT));
+  const blocked = new Set(excludeIds.filter(Boolean));
+  return (data ?? [])
+    .filter((row) => !blocked.has(row.id))
+    .slice(0, SOCIAL_FOR_YOU_PEOPLE_LIMIT);
 }
 
 export async function loadProfilesByIds(

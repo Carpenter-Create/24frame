@@ -2,12 +2,14 @@ import { redirect } from "next/navigation";
 
 import { TextAction } from "@/components/chrome/house";
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { SocialOnboardingChecklist } from "@/components/social/social-checklist";
 import { SocialEmpty } from "@/components/social/social-empty";
-import { SocialLensRow } from "@/components/social/social-lenses";
+import { SocialFirstWin } from "@/components/social/social-first-win";
+import { SocialForYouRail } from "@/components/social/social-for-you";
+import { SocialHomeComposer } from "@/components/social/social-home-composer";
+import { SocialHomeTabs } from "@/components/social/social-home-tabs";
 import { SocialStoriesRail } from "@/components/social/social-stories-rail";
 import { SocialPostCard } from "@/components/social/social-ui";
-import { SOCIAL_PAGE_CLASS } from "@/lib/social-chrome";
+import { SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS, SOCIAL_PILL_ACTIVE_CLASS, SOCIAL_PILL_CLASS } from "@/lib/social-chrome";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
 import { parseSocialCategoryParam, SOCIAL_CATEGORY_ALL, SOCIAL_CATEGORY_PARAM } from "@/lib/social-categories";
@@ -17,7 +19,7 @@ import {
   parseFollowingWallCursorParam,
   socialFollowingWallHref,
 } from "@/lib/social-home-bounds";
-import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
+import { parseSocialHomeLane, SOCIAL, SOCIAL_HOME_LANE_PARAM, SOCIAL_ROUTES } from "@/lib/social";
 import {
   groupStoryRail,
   loadFolloweeIds,
@@ -27,6 +29,7 @@ import {
   loadLiveStories,
   loadOwnPostFacts,
   loadProfilesByIds,
+  loadSuggestedPeople,
   loadViewedStoryIds,
 } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
@@ -45,6 +48,7 @@ export default async function SocialHomePage({
   const topic = parseSocialCategoryParam(sp[SOCIAL_CATEGORY_PARAM]);
   const category = topic === SOCIAL_CATEGORY_ALL ? null : topic;
   const cursor = parseFollowingWallCursorParam(sp[SOCIAL_FOLLOWING_WALL_CURSOR_PARAM]);
+  const lane = parseSocialHomeLane(sp[SOCIAL_HOME_LANE_PARAM]);
 
   const supabase = await createClient();
   const profile = await ensureOwnSocialProfile(supabase, ctx.user);
@@ -52,11 +56,12 @@ export default async function SocialHomePage({
     ? await loadFolloweeIds(supabase, ctx.user.id)
     : { ids: [] as string[], truncated: false };
   const authorIds = followingAuthorIds(ctx.user.id, followees.ids);
-  const [wall, storiesPage] = await Promise.all([
+  const [wall, storiesPage, suggested] = await Promise.all([
     profile
       ? loadFollowingPosts(supabase, authorIds, { category, cursor })
       : Promise.resolve({ posts: [], truncated: false, nextCursor: null }),
     loadLiveStories(supabase, authorIds),
+    loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids]),
   ]);
   const posts = wall.posts;
   const stories = storiesPage.stories;
@@ -64,7 +69,12 @@ export default async function SocialHomePage({
   const viewed = profile ? await loadViewedStoryIds(supabase, ctx.user.id, storyIds) : new Set<string>();
   const rail = groupStoryRail(stories, viewed);
   const peopleIds = [
-    ...new Set([ctx.user.id, ...posts.map((post) => post.author_id), ...rail.map((card) => card.authorId)]),
+    ...new Set([
+      ctx.user.id,
+      ...posts.map((post) => post.author_id),
+      ...rail.map((card) => card.authorId),
+      ...suggested.map((person) => person.id),
+    ]),
   ];
   const [authors, faces, media] = await Promise.all([
     loadProfilesByIds(supabase, peopleIds),
@@ -78,8 +88,8 @@ export default async function SocialHomePage({
   const liked = profile
     ? await loadLikedPostIds(supabase, ctx.user.id, posts.map((post) => post.id))
     : new Set<string>();
-  const facts = profile ? await loadOwnPostFacts(supabase, ctx.user.id) : null;
   const photoUrl = faces.get(ctx.user.id) ?? null;
+  const facts = profile ? await loadOwnPostFacts(supabase, ctx.user.id) : null;
   const checklist = profile
     ? socialChecklistItems({
         hasPhoto: !!photoUrl,
@@ -91,69 +101,94 @@ export default async function SocialHomePage({
     : [];
 
   return (
-    <div data-social-home="" className={SOCIAL_PAGE_CLASS}>
-      <h1 className="sr-only">{SOCIAL.home.title}</h1>
-      <p className="sr-only">{SOCIAL.home.subtitle}</p>
-      <SocialStoriesRail cards={rail} authors={authors} faces={faces} canCreate={!!profile} />
-      {storiesPage.truncated ? (
-        <InlineNotice tone="info" data-social-stories-truncated="">
-          {SOCIAL.home.truncatedStories}
-        </InlineNotice>
-      ) : null}
-      {followees.truncated ? (
-        <InlineNotice tone="info" data-social-followees-truncated="">
-          {SOCIAL.home.truncatedFollowees}
-        </InlineNotice>
-      ) : null}
-      <SocialLensRow active={topic} />
-      {profile ? <SocialOnboardingChecklist items={checklist} /> : null}
-      {wall.truncated ? (
-        <div data-social-wall-truncated="" className="flex flex-col gap-[var(--space-3)]">
-          <InlineNotice tone="info">{SOCIAL.home.truncatedWall}</InlineNotice>
-          {wall.nextCursor ? (
-            <TextAction href={socialFollowingWallHref({ topic, after: wall.nextCursor })} data-social-wall-older="">
-              {SOCIAL.home.olderPosts}
-            </TextAction>
-          ) : null}
-        </div>
-      ) : null}
-      {posts.length === 0 ? (
-        <div data-social-following-empty="">
-          <SocialEmpty
-            icon="users"
-            title={SOCIAL.home.empty}
-            hint={SOCIAL.home.emptyHint}
-            action={{ href: SOCIAL_ROUTES.explore, label: SOCIAL.home.goExplore }}
-          />
-        </div>
-      ) : (
-        <div data-social-feed="" className="flex flex-col gap-[var(--space-4)]">
-          {posts.map((post) => {
-            const author = authors.get(post.author_id);
-            const group = post.group_id ? groups.get(post.group_id) : null;
-            return (
-              <SocialPostCard
-                key={post.id}
-                post={{
-                  id: post.id,
-                  body: post.body,
-                  likeCount: post.like_count,
-                  liked: liked.has(post.id),
-                  createdAt: post.created_at,
-                  authorId: post.author_id,
-                  authorHandle: author?.handle ?? null,
-                  authorName: author?.display_name ?? "Member",
-                  authorPhotoUrl: faces.get(post.author_id) ?? null,
-                  groupSlug: group?.slug ?? null,
-                  groupName: group?.name ?? null,
-                  canLike: !!profile,
-                  media: media.get(post.id) ?? [],
-                }}
+    <div data-social-home="" className={SOCIAL_HOME_LAYOUT_CLASS}>
+      <div className={SOCIAL_HOME_CENTER_CLASS}>
+        <h1 className="sr-only">{SOCIAL.home.title}</h1>
+        <p className="sr-only">{SOCIAL.home.subtitle}</p>
+        <SocialStoriesRail cards={rail} authors={authors} faces={faces} canCreate={!!profile} />
+        {storiesPage.truncated ? (
+          <InlineNotice tone="info" data-social-stories-truncated="">
+            {SOCIAL.home.truncatedStories}
+          </InlineNotice>
+        ) : null}
+        {followees.truncated ? (
+          <InlineNotice tone="info" data-social-followees-truncated="">
+            {SOCIAL.home.truncatedFollowees}
+          </InlineNotice>
+        ) : null}
+        {profile ? (
+          <SocialHomeComposer authorName={profile.display_name} authorPhotoUrl={photoUrl} />
+        ) : null}
+        <SocialHomeTabs active={lane} />
+        {lane === "for-you" ? (
+          <div data-social-for-you-lane="" className="flex flex-col gap-3">
+            {suggested.length === 0 ? (
+              <SocialEmpty
+                icon="users"
+                title={SOCIAL.forYou.people}
+                hint={SOCIAL.home.emptyHint}
+                action={{ href: SOCIAL_ROUTES.explore, label: SOCIAL.home.goExplore }}
               />
-            );
-          })}
-        </div>
-      )}
+            ) : null}
+            <SocialForYouRail people={suggested} faces={faces} layout="lane" />
+          </div>
+        ) : (
+          <>
+            {wall.truncated ? (
+              <div data-social-wall-truncated="" className="flex flex-col gap-[var(--space-3)]">
+                <InlineNotice tone="info">{SOCIAL.home.truncatedWall}</InlineNotice>
+                {wall.nextCursor ? (
+                  <TextAction href={socialFollowingWallHref({ topic, after: wall.nextCursor })} data-social-wall-older="">
+                    {SOCIAL.home.olderPosts}
+                  </TextAction>
+                ) : null}
+              </div>
+            ) : null}
+            {posts.length === 0 ? (
+              <div data-social-following-empty="" className="flex flex-col gap-3">
+                <div data-social-empty-lenses="" className="hidden md:block">
+                  <span className={`${SOCIAL_PILL_CLASS} ${SOCIAL_PILL_ACTIVE_CLASS}`}>{SOCIAL_CATEGORY_ALL}</span>
+                </div>
+                {profile && !facts?.hasPost ? <SocialFirstWin items={checklist} /> : null}
+                <SocialEmpty
+                  icon="users"
+                  title={SOCIAL.home.empty}
+                  hint={SOCIAL.home.emptyHint}
+                  action={{ href: SOCIAL_ROUTES.explore, label: SOCIAL.home.goExplore }}
+                />
+              </div>
+            ) : (
+              <div data-social-feed="" className="flex flex-col">
+                {posts.map((post) => {
+                  const author = authors.get(post.author_id);
+                  const group = post.group_id ? groups.get(post.group_id) : null;
+                  return (
+                    <SocialPostCard
+                      key={post.id}
+                      post={{
+                        id: post.id,
+                        body: post.body,
+                        likeCount: post.like_count,
+                        liked: liked.has(post.id),
+                        createdAt: post.created_at,
+                        authorId: post.author_id,
+                        authorHandle: author?.handle ?? null,
+                        authorName: author?.display_name ?? "Member",
+                        authorPhotoUrl: faces.get(post.author_id) ?? null,
+                        groupSlug: group?.slug ?? null,
+                        groupName: group?.name ?? null,
+                        canLike: !!profile,
+                        media: media.get(post.id) ?? [],
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+      {lane === "following" ? <SocialForYouRail people={suggested} faces={faces} /> : null}
     </div>
   );
 }

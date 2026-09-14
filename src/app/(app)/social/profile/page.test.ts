@@ -130,7 +130,15 @@ describe("Social profile public face", () => {
     expect(html).toContain("data-social-handle-field");
     expect(html).toContain(SOCIAL.profile.handlePlaceholder);
     expect(html).toContain("https://24frame.co/@ada");
+    expect(html).toContain("24frame.co/@ada");
     expect(html).toContain("@ada");
+    expect(html).toContain("data-social-profile-tabs");
+    expect(html).toContain(SOCIAL.profile.postsTab);
+    expect(html).toContain(SOCIAL.profile.highlightsTab);
+    expect(html).toContain("data-social-for-you");
+    expect(html).toContain("data-social-share");
+    expect(html).not.toContain("Education");
+    expect(html).not.toContain("Reels");
     expect(html).not.toContain("Globee");
     expect(html).not.toContain("app.24frame.co");
     expect(from).not.toHaveBeenCalledWith("memberships");
@@ -198,8 +206,12 @@ describe("Social profile public face", () => {
     const html = renderToStaticMarkup(await SocialProfilePage());
     expect(html).toContain("data-social-author-empty");
     expect(html).toContain(SOCIAL.profile.postsEmpty);
+    expect(html).toContain(SOCIAL.profile.postsEmptyOwnHint);
+    expect(html).toContain(SOCIAL.profile.sharePost);
     expect(html).not.toContain("data-social-author-posts");
     expect(html).not.toContain("data-social-author-truncated");
+    expect(html).not.toContain("Sets");
+    expect(html).not.toContain("Riley Okonkwo");
   });
 
   it("names the bound when author history is truncated", async () => {

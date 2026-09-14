@@ -11,8 +11,8 @@ import { SocialStoriesRail } from "./social-stories-rail";
 const authors = new Map([["u2", { display_name: "Maya Chen", handle: "maya" }]]);
 const faces = new Map([["u2", "https://s3.example/signed-avatar"]]);
 
-describe("Social Home craft-raise (Figma 1:9 / 1:21)", () => {
-  it("renders portrait story tiles with a 36px create control and muted/unseen rings", () => {
+describe("Social Home craft (Figma 130:215)", () => {
+  it("renders portrait story tiles with a 28px create control and muted/unseen rings", () => {
     const html = renderToStaticMarkup(
       <SocialStoriesRail
         canCreate
@@ -44,8 +44,8 @@ describe("Social Home craft-raise (Figma 1:9 / 1:21)", () => {
     expect(html).toContain("data-social-story-media");
     expect(html).toContain('src="https://s3.example/signed-avatar"');
     expect(html).toContain("Maya Chen");
-    expect(html).toContain("w-[112px]");
-    expect(html).toContain("h-[168px]");
+    expect(html).toContain("w-[96px]");
+    expect(html).toContain("h-[144px]");
     expect(html).toContain("p-[3px]");
     expect(html).toContain("bg-accent");
     expect(html.indexOf("Maya Chen")).toBeGreaterThan(html.indexOf("data-social-story-media"));

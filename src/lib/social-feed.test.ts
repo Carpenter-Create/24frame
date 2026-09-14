@@ -243,7 +243,7 @@ describe("class 5 Social Home access lock", () => {
     );
     const explore = src.slice(
       src.indexOf("export async function loadExploreSearch"),
-      src.indexOf("export async function loadProfilesByIds"),
+      src.indexOf("export type SocialSuggestedPerson"),
     );
     expect(followees).toContain("probeRange(SOCIAL_FOLLOWEES_LIMIT)");
     expect(wall).toContain("probeRange(SOCIAL_FOLLOWING_WALL_LIMIT)");

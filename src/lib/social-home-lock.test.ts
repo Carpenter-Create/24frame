@@ -15,7 +15,6 @@ const dock = readFileSync("src/components/social/social-mobile-dock.tsx", "utf8"
 const card = readFileSync("src/components/social/social-ui.tsx", "utf8");
 const rail = readFileSync("src/components/social/social-stories-rail.tsx", "utf8");
 const empty = readFileSync("src/components/social/social-empty.tsx", "utf8");
-const checklist = readFileSync("src/components/social/social-checklist.tsx", "utf8");
 const chrome = readFileSync("src/lib/social-chrome.ts", "utf8");
 const icons = readFileSync("src/lib/social-icons.ts", "utf8");
 const pkg = readFileSync("package.json", "utf8");
@@ -47,19 +46,22 @@ describe("Social Home miss list v1 P0 lock", () => {
     ]);
   });
 
-  it("keeps Home on the following wall with stories, Home-only lenses, and no composer", () => {
+  it("keeps Home on the following wall with stories, composer, and Following | For you tabs", () => {
     expect(home).toContain("loadFollowingPosts");
     expect(home).toContain("SocialStoriesRail");
-    expect(home).toContain("SocialLensRow");
-    expect(home).toContain("SocialOnboardingChecklist");
+    expect(home).toContain("SocialHomeComposer");
+    expect(home).toContain("SocialHomeTabs");
+    expect(home).toContain("SocialForYouRail");
     expect(home).toContain("ensureOwnSocialProfile");
     expect(home).toContain("data-social-following-empty");
+    expect(home).not.toContain("SocialLensRow");
     expect(home).not.toContain("SocialNeedProfile");
     expect(home).not.toContain("SocialPostCompose");
     expect(home).not.toContain("SocialCreateCompose");
-    expect(home).not.toContain("What's on your mind");
-    expect(home).not.toContain("Whats on your mind");
     expect(home).not.toContain("loadVisiblePosts");
+    expect(home).not.toContain("education");
+    expect(SOCIAL.home.followingTab).toBe("Following");
+    expect(SOCIAL.home.forYouTab).toBe("For you");
     expect(SOCIAL.checklist.photo).toBe("Add a profile photo");
     expect(SOCIAL.checklist.bio).toBe("Write a short bio");
     expect(SOCIAL.checklist.introduce).toBe("Introduce yourself");
@@ -123,32 +125,62 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(explore).not.toContain("Reels");
   });
 
-  it("locks Home craft-raise finish against Figma 1:9 / 1:21", () => {
+  it("locks Home chrome against Figma 130:215 X-lane gravity", () => {
+    const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
+    const composer = readFileSync("src/components/social/social-home-composer.tsx", "utf8");
+    const forYou = readFileSync("src/components/social/social-for-you.tsx", "utf8");
+    const extras = readFileSync("src/components/social/social-rail-extras.tsx", "utf8");
     expect(rail).toContain("SOCIAL_ICON_SIZE_STORY_CREATE");
     expect(rail).toContain("SOCIAL_STORY_MEDIA_CLASS");
     expect(rail).toContain("data-social-story-media");
     expect(rail).toContain("bg-accent");
     expect(rail).toContain("bg-hairline");
+    expect(rail).toContain("w-[96px]");
     expect(rail).not.toContain("size-10");
-    expect(rail).not.toContain("size={28}");
-    expect(card.slice(card.indexOf("export function SocialPostCard")).indexOf("SocialPostMedia")).toBeLessThan(
-      card.slice(card.indexOf("export function SocialPostCard")).indexOf("SocialAvatar"),
+    expect(card).toContain("SOCIAL_FEED_ROW_CLASS");
+    expect(card.slice(card.indexOf("export function SocialPostCard")).indexOf("SocialAvatar")).toBeLessThan(
+      card.slice(card.indexOf("export function SocialPostCard")).indexOf("SocialPostMedia"),
     );
     expect(home).toContain('icon="users"');
-    expect(rail).toContain("px-[var(--content-inset)]");
+    expect(home).toContain("SocialHomeTabs");
+    expect(composer).toContain("data-social-home-composer");
+    expect(composer).toContain("text-ink-2");
+    expect(composer).not.toContain("text-accent");
+    expect(extras).toContain("data-social-rail-create");
+    expect(extras).toContain("data-social-rail-account");
+    expect(extras).toContain("SOCIAL_CREATE_CTA_CLASS");
+    expect(forYou).toContain("SOCIAL.forYou.native");
+    expect(forYou).not.toContain("education");
+    expect(forYou).not.toContain("Education");
     expect(empty).toContain("SOCIAL_EMPTY_ACTION_CLASS");
-    expect(empty).toContain("SOCIAL_ICON_SIZE_EMPTY");
-    expect(checklist).toContain("SOCIAL_CHECKLIST_CLASS");
-    expect(chrome).toContain('rounded-[8px] bg-surface-muted');
-    expect(chrome).toContain("gap-[var(--space-2)]");
-    expect(chrome).toContain("p-[var(--space-4)]");
+    expect(chrome).toContain("SOCIAL_FEED_ROW_CLASS");
     expect(chrome).toContain("p-[3px]");
-    expect(icons).toContain("SOCIAL_ICON_SIZE_STORY_CREATE = 36");
+    expect(icons).toContain("SOCIAL_ICON_SIZE_STORY_CREATE = 28");
     expect(icons).toContain('"users"');
+    expect(icons).toContain('"share-network"');
+    expect(icons).toContain('"text-t"');
     expect(home).not.toContain("WorkspaceSwitcher");
     expect(home).not.toContain("SocialPostCompose");
     expect(home).not.toContain("SocialCreateCompose");
-    expect(home).not.toContain("What's on your mind");
+    expect(shell).toContain("data-social-workspace");
+    expect(shell).not.toContain("Aggregation|Social");
+    expect(chrome).toContain('SOCIAL_FIGMA_HOME = "130:215"');
+    expect(chrome).toContain('SOCIAL_FIGMA_HOME_EMPTY = "133:816"');
+    expect(chrome).toContain('SOCIAL_FIGMA_HOME_MOBILE = "133:1078"');
+    expect(home).toContain("SocialFirstWin");
+    expect(home).toContain("data-social-empty-lenses");
+    expect(rail).toContain("data-social-stories-mobile");
+    expect(chrome).toContain("129:215");
+    expect(chrome).toContain("129:415");
+    expect(chrome).toContain("129:615");
+    expect(chrome).toContain("135:585");
+    expect(chrome).toContain("135:1037");
+    expect(chrome).toContain("135:1214");
+    expect(create).toContain("SocialForYouRail");
+    expect(create).toContain("SocialCreateCompose");
+    expect(create).not.toContain("Riley Okonkwo");
+    expect(create).not.toContain("MicroDramaPilot");
+    expect(create).not.toContain("education");
   });
 
   it("keeps Social Figma and Settings Mercury on separate registers", () => {

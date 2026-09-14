@@ -1,11 +1,14 @@
 // Brand marks. Asset 8 is the rail emblem (wide viewBox, no baked tile).
-// Asset 10 is favicon / apple / PWA (baked #050835 rounded square).
+// Favicon / apple / PWA is Adam's 1080 PNG (Sporty Blue field, white 24).
+// That PNG supersedes Asset 10 SVG for favicon/PWA only. Emblem stays Asset 8.
 // Header chip is emblem-only — wordmark Asset 1 stays out.
-// Blue #1769FF on the 24 mark does not remap. Corners remap:
+// Blue #1769FF on the Asset 8 24 mark does not remap. Corners remap:
 // light chrome #14171A (currentColor / text-ink), dark chrome #fff.
 
 export const BRAND_EMBLEM_SRC = "/brand/24frame-emblem.svg";
-export const BRAND_ICON_SRC = "/brand/24frame-icon.svg";
+export const BRAND_ICON_SRC = "/brand/24frame-favicon.png";
+export const BRAND_ICON_TYPE = "image/png";
+export const BRAND_ICON_SIZE = "1080x1080";
 
 export const BRAND_EMBLEM_VIEWBOX = "0 0 1055 634.59";
 export const BRAND_ICON_VIEWBOX = "0 0 490.04 490.04";

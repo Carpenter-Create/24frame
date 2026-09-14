@@ -169,6 +169,59 @@ export function socialProfilePublicHost(handle: string): string {
   return bare ? `24frame.co/@${bare}` : "24frame.co/@";
 }
 
+export const SOCIAL_CREATE_KIND_PARAM = "kind";
+export const SOCIAL_CREATE_KINDS = ["photo", "video", "text"] as const;
+export type SocialCreateKind = (typeof SOCIAL_CREATE_KINDS)[number];
+
+export function parseSocialCreateKind(raw: string | string[] | undefined | null): SocialCreateKind | null {
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  if (!value) return null;
+  return (SOCIAL_CREATE_KINDS as readonly string[]).includes(value) ? (value as SocialCreateKind) : null;
+}
+
+export function socialCreateHref(kind?: SocialCreateKind | null): string {
+  return kind ? `${SOCIAL_ROUTES.create}?${SOCIAL_CREATE_KIND_PARAM}=${kind}` : SOCIAL_ROUTES.create;
+}
+
+export const SOCIAL_HOME_LANE_PARAM = "lane";
+export const SOCIAL_HOME_LANES = ["following", "for-you"] as const;
+export type SocialHomeLane = (typeof SOCIAL_HOME_LANES)[number];
+
+export function parseSocialHomeLane(raw: string | string[] | undefined | null): SocialHomeLane {
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return value === "for-you" ? "for-you" : "following";
+}
+
+export function socialHomeLaneHref(lane: SocialHomeLane): string {
+  return lane === "for-you" ? `${SOCIAL_ROUTES.home}?${SOCIAL_HOME_LANE_PARAM}=for-you` : SOCIAL_ROUTES.home;
+}
+
+export const SOCIAL_PROFILE_TAB_PARAM = "tab";
+export const SOCIAL_PROFILE_TABS = ["posts", "highlights"] as const;
+export type SocialProfileTab = (typeof SOCIAL_PROFILE_TABS)[number];
+
+export function parseSocialProfileTab(raw: string | string[] | undefined | null): SocialProfileTab {
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return value === "highlights" ? "highlights" : "posts";
+}
+
+export function socialProfileTabHref(base: string, tab: SocialProfileTab): string {
+  return tab === "highlights" ? `${base}?${SOCIAL_PROFILE_TAB_PARAM}=highlights` : base;
+}
+
+export function socialShareHint(handle: string): string {
+  return `${SOCIAL.profile.shareCopies} ${socialProfilePublicUrl(handle)}`;
+}
+
+export function socialFirstName(displayName: string | null | undefined): string {
+  return displayName?.trim().split(/\s+/)[0] ?? "";
+}
+
+export function socialComposerPrompt(displayName: string | null | undefined): string {
+  const first = socialFirstName(displayName);
+  return first ? `${SOCIAL.home.composerPromptNamed} ${first}?` : SOCIAL.home.composerPrompt;
+}
+
 export function formatSocialCount(n: number): string {
   if (n < 1000) return String(n);
   if (n < 10_000) {
@@ -198,9 +251,13 @@ export const SOCIAL = {
   home: {
     title: "Home",
     subtitle: `Posts from people you follow in ${PRODUCT_NAME}.`,
-    empty: "No posts from people you follow yet.",
+    empty: "No posts from people you follow yet",
     emptyHint: "Explore to find creators and start your following wall.",
-    goExplore: "Go to Explore",
+    goExplore: "Explore creators",
+    composerPrompt: "What's on your mind?",
+    composerPromptNamed: "What's on your mind",
+    followingTab: "Following",
+    forYouTab: "For you",
     compose: "Write a post",
     submit: "Post",
     captionPlaceholder: "Write a caption…",
@@ -233,6 +290,7 @@ export const SOCIAL = {
     title: "Explore",
     subtitle: `Find what is moving in ${PRODUCT_NAME}.`,
     search: "Search",
+    searchSocial: "Search Social",
     searchPlaceholder: "Search people and posts",
     empty: "No trending topics yet.",
     noResults: "No matching people or posts.",
@@ -244,6 +302,13 @@ export const SOCIAL = {
     text: "Text",
     photo: "Photo",
     video: "Video",
+    caption: "Caption",
+    dropEmpty: "Add a photo or video",
+    dropEmptyHint: "Nothing attached yet",
+    dropPhoto: "Drop photo here",
+    dropPhotoHint: "or choose from library · stills up to 20MB",
+    dropVideo: "Drop video here",
+    dropVideoHint: "or choose from library",
   },
   stories: {
     create: "Create story",
@@ -256,6 +321,7 @@ export const SOCIAL = {
     expired: "That story is no longer available.",
     submit: "Share",
     you: "You",
+    yourStory: "Your story",
     reply: "Reply quietly…",
   },
   checklist: {
@@ -272,10 +338,19 @@ export const SOCIAL = {
     firstPostCta: "Create post",
     firstStory: "Create your first story",
     firstStoryCta: "Create story",
+    firstWinHint: "One clear next step. Photo, video, or text — the composer above is ready.",
+    setupAvailable: "setup steps available",
+    showSetup: "Show",
   },
   follow: {
     follow: "Follow",
     following: "Following",
+  },
+  forYou: {
+    title: "For you",
+    native: "Social-native",
+    people: "Suggested people",
+    topics: "Topics for you",
   },
   profile: {
     title: "Profile",
@@ -298,13 +373,19 @@ export const SOCIAL = {
     created: "Profile created.",
     postsEmpty: "No posts yet.",
     postsEmptyHint: "When they share stills, clips, or notes, they will land here.",
-    postsEmptyOwnHint: "Share a still, clip, or note. It will land here.",
+    postsEmptyOwnHint: "Share a still, clip, or note — your grid starts here.",
     sharePost: "Share a post",
     postsTruncated: `Showing the latest ${LIST_PAGE} posts.`,
     uploadPhoto: "Upload photo",
     uploadingPhoto: "Uploading…",
     edit: "Edit profile",
     share: "Share",
+    shareCopied: "Copied",
+    shareCopies: "Copies",
+    postsTab: "Posts",
+    highlightsTab: "Highlights",
+    highlightsEmpty: "No highlights yet.",
+    highlightsEmptyHint: "Live stories appear here for 24 hours.",
     postsStat: "posts",
     followersStat: "followers",
     followingStat: "following",
@@ -410,6 +491,20 @@ export const SOCIAL = {
     profileHrefLabel: "Create a creator profile",
   },
 } as const;
+
+export function socialCreateWellCopy(
+  kind: SocialCreateKind,
+  attached: boolean,
+): { title: string; hint: string } | null {
+  if (kind === "text") return null;
+  if (kind === "video") {
+    return { title: SOCIAL.create.dropVideo, hint: SOCIAL.create.dropVideoHint };
+  }
+  if (attached) {
+    return { title: SOCIAL.create.dropPhoto, hint: SOCIAL.create.dropPhotoHint };
+  }
+  return { title: SOCIAL.create.dropEmpty, hint: SOCIAL.create.dropEmptyHint };
+}
 
 export const HANDLE_MIN = 3;
 export const HANDLE_MAX = 30;

@@ -72,6 +72,10 @@ export function socialChecklistIncomplete(items: readonly SocialChecklistItem[])
   return items.some((item) => !item.done);
 }
 
+export function socialChecklistRemaining(items: readonly SocialChecklistItem[]): number {
+  return items.filter((item) => !item.done).length;
+}
+
 export function followingAuthorIds(selfId: string, followeeIds: readonly string[]): string[] {
   return [...new Set([selfId, ...followeeIds.filter(Boolean)])];
 }

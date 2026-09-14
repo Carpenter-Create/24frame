@@ -19,6 +19,14 @@ export const SOCIAL_PHOSPHOR_ICONS = [
   "caret-right",
   "x",
   "heart",
+  "film-strip",
+  "squares-four",
+  "magnifying-glass",
+  "tray",
+  "paper-plane-tilt",
+  "play",
+  "share-network",
+  "text-t",
 ] as const;
 
 export type SocialPhosphorIconName = (typeof SOCIAL_PHOSPHOR_ICONS)[number];
@@ -38,4 +46,8 @@ export function socialNavIconName(href: string): SocialPhosphorIconName {
 export const SOCIAL_ICON_SIZE_NAV = 20;
 export const SOCIAL_ICON_SIZE_DOCK = 22;
 export const SOCIAL_ICON_SIZE_EMPTY = 40;
-export const SOCIAL_ICON_SIZE_STORY_CREATE = 36;
+export const SOCIAL_ICON_SIZE_STORY_CREATE = 28;
+export const SOCIAL_ICON_SIZE_COMPOSER = 16;
+export const SOCIAL_ICON_SIZE_SEARCH = 16;
+export const SOCIAL_ICON_SIZE_HEADER = 20;
+export const SOCIAL_ICON_SIZE_SHARE = 16;

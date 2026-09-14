@@ -14,6 +14,9 @@ import {
   normalizeConversationTitle,
   normalizeHandle,
   parseProfileHandleParam,
+  parseSocialCreateKind,
+  parseSocialHomeLane,
+  parseSocialProfileTab,
   postInsertRow,
   profileInsertRow,
   quietDmAddError,
@@ -21,13 +24,19 @@ import {
   SOCIAL_BANNED_PRODUCT_NAMES,
   SOCIAL_PROFILE_ORIGIN,
   SOCIAL_ROUTES,
+  socialComposerPrompt,
+  socialCreateHref,
+  socialCreateWellCopy,
   socialHandleRequiredError,
+  socialHomeLaneHref,
   socialInitials,
   formatSocialCount,
   socialProfileHref,
   socialProfilePublicHost,
   socialProfilePublicUrl,
   socialProfileRewriteTarget,
+  socialProfileTabHref,
+  socialShareHint,
   socialVanityInternalPath,
   stripHandleDecorators,
   suggestedHandleSeed,
@@ -146,6 +155,27 @@ describe("profile opt-in", () => {
     expect(SOCIAL_PROFILE_ORIGIN).toBe("https://24frame.co");
     expect(socialProfilePublicUrl("acarpcreate")).not.toContain("app.24frame.co");
     expect(socialProfilePublicUrl("acarpcreate")).not.toContain("/social/u/");
+    expect(socialShareHint("ada")).toBe("Copies https://24frame.co/@ada");
+    expect(parseSocialCreateKind("photo")).toBe("photo");
+    expect(parseSocialCreateKind("clip")).toBeNull();
+    expect(socialCreateHref("video")).toBe("/social/create?kind=video");
+    expect(socialCreateWellCopy("photo", false)).toEqual({
+      title: SOCIAL.create.dropEmpty,
+      hint: SOCIAL.create.dropEmptyHint,
+    });
+    expect(socialCreateWellCopy("photo", true)?.title).toBe(SOCIAL.create.dropPhoto);
+    expect(socialCreateWellCopy("video", false)?.title).toBe(SOCIAL.create.dropVideo);
+    expect(socialCreateWellCopy("text", false)).toBeNull();
+    expect(SOCIAL.create.photo).toBe("Photo");
+    expect(SOCIAL.create.caption).toBe("Caption");
+    expect(parseSocialHomeLane("for-you")).toBe("for-you");
+    expect(socialHomeLaneHref("following")).toBe("/social");
+    expect(parseSocialProfileTab("highlights")).toBe("highlights");
+    expect(parseSocialProfileTab("reels")).toBe("posts");
+    expect(socialProfileTabHref("/social/u/ada", "highlights")).toBe("/social/u/ada?tab=highlights");
+    expect(socialComposerPrompt("Ada Lovelace")).toBe("What's on your mind Ada?");
+    expect(SOCIAL.profile.postsTab).toBe("Posts");
+    expect(SOCIAL.profile.highlightsTab).toBe("Highlights");
     expect(parseProfileHandleParam("%40ada")).toBe("ada");
     expect(parseProfileHandleParam("@ada")).toBe("ada");
     expect(parseProfileHandleParam("ada")).toBe("ada");
@@ -244,7 +274,9 @@ describe("social writes stay on the live spine", () => {
     expect(actions).not.toContain("from(\"organizations\")");
     expect(pages).toContain("loadFollowingPosts");
     expect(pages).not.toContain("SocialPostCompose");
-    expect(pages).toContain("SocialLensRow");
+    expect(pages).toContain("SocialHomeTabs");
+    expect(pages).toContain("SocialHomeComposer");
+    expect(pages).not.toContain("SocialLensRow");
     expect(pages).toContain("SocialStoriesRail");
     expect(pages).not.toContain("from(\"titles\")");
     expect(board).toContain("loadLeaderboardBoard");
