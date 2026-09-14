@@ -17,6 +17,14 @@ import { useThemePreference } from "@/components/theme-toggle";
 import { signOut } from "@/app/actions";
 import { accountPhotoSrc } from "@/lib/account-avatar";
 import {
+  AppSheetHairline,
+  Close44,
+  IdentityBlock,
+  IdentityPhoto,
+  SheetGroup,
+  SheetGroupItem,
+} from "./house";
+import {
   ACCOUNT_MENU_APPEARANCE_CHEVRON_CLASS,
   ACCOUNT_MENU_APPEARANCE_COPY_CLASS,
   ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS,
@@ -67,13 +75,6 @@ import { APP_SHEET_SCRIM_CLASS, SHEET_GROUP_CHEVRON_CLASS } from "@/lib/house-sh
 import { applyDocumentThemePreference } from "@/lib/theme";
 import { USER_MENU, userMenuAvatarInitial, userMenuVersion } from "@/lib/user-menu";
 import { MenuSurfaceAccent } from "./menu-surface";
-import {
-  AppSheetHairline,
-  Close44,
-  IdentityBlock,
-  SheetGroup,
-  SheetGroupItem,
-} from "./house";
 
 function AccountRowChevron() {
   return <ChevronRight className={SHEET_GROUP_CHEVRON_CLASS} strokeWidth={1.33} />;
@@ -128,12 +129,7 @@ function AccountMenuTrigger({
       onClick={onOpen}
       className={face ? `${className} overflow-hidden` : className}
     >
-      {face ? (
-        // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the private avatars bucket
-        <img src={face} alt="" className="size-full object-cover" />
-      ) : (
-        initial
-      )}
+      <IdentityPhoto avatarInitial={initial} photoUrl={photoUrl} />
     </button>
   );
 }

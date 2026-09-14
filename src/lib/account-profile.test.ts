@@ -130,7 +130,9 @@ describe("account name persist read-after-write", () => {
     expect(pageSrc).toContain("ctx.user.name");
     expect(layoutSrc).toContain("name={ctx.user.name}");
     expect(layoutSrc).toContain("photoUrl={photoUrl}");
-    expect(layoutSrc).toContain("signedAvatarUrl(ctx.user.id)");
+    expect(layoutSrc).toContain("hasAvatarObject(ctx.user.id)");
+    expect(layoutSrc).toContain("ACCOUNT_PHOTO_HREF");
+    expect(layoutSrc).not.toContain("signedAvatarUrl");
   });
 
   it("does not invent a name when the refreshed claims still have none", () => {

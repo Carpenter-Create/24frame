@@ -10,6 +10,7 @@ import {
   AVATAR_MAX_BYTES,
   AVATAR_OBJECT_NAME,
   AVATAR_SIGNED_URL_TTL_SECONDS,
+  ACCOUNT_PHOTO_HREF,
   accountPhotoSrc,
   avatarObjectKey,
   isAvatarContentType,
@@ -27,6 +28,7 @@ const settingsSrc = readFileSync(join(here, "../app/(app)/settings/profile/page.
 const formSrc = readFileSync(join(here, "../app/(app)/account/account-profile-form.tsx"), "utf8");
 const socialProfileSrc = readFileSync(join(here, "../app/(app)/social/profile/page.tsx"), "utf8");
 const uploadSrc = readFileSync(join(here, "../app/(app)/account/actions.ts"), "utf8");
+const photoRouteSrc = readFileSync(join(here, "../app/api/account/photo/route.ts"), "utf8");
 
 describe("avatarObjectKey", () => {
   it("is avatars/{user-id}/avatar and nothing else", () => {
@@ -59,6 +61,8 @@ describe("accountPhotoSrc", () => {
     expect(accountPhotoSrc(undefined)).toBeNull();
     expect(accountPhotoSrc("")).toBeNull();
     expect(accountPhotoSrc("   ")).toBeNull();
+    expect(accountPhotoSrc(ACCOUNT_PHOTO_HREF)).toBe(ACCOUNT_PHOTO_HREF);
+    expect(ACCOUNT_PHOTO_HREF).toBe("/api/account/photo");
   });
 });
 
@@ -78,8 +82,10 @@ describe("avatar content rules", () => {
 
 describe("one face across chrome, Settings, and Social", () => {
   it("signs avatars/{user-id}/avatar from the session user and keeps one upload", () => {
-    expect(layoutSrc).toContain("signedAvatarUrl(ctx.user.id)");
+    expect(layoutSrc).toContain("hasAvatarObject(ctx.user.id)");
+    expect(layoutSrc).toContain("ACCOUNT_PHOTO_HREF");
     expect(layoutSrc).toContain("photoUrl={photoUrl}");
+    expect(layoutSrc).not.toContain("signedAvatarUrl");
     expect(settingsSrc).toContain("signedAvatarUrl(ctx.user.id)");
     expect(formSrc).toContain("uploadAccountPhoto");
     expect(socialProfileSrc).toContain("signedAvatarUrl(profile.id)");
@@ -87,6 +93,9 @@ describe("one face across chrome, Settings, and Social", () => {
     expect(socialProfileSrc).not.toContain("putAvatarObject");
     expect(uploadSrc).toContain("putAvatarObject(ctx.user.id");
     expect(uploadSrc).toContain('revalidatePath("/", "layout")');
+    expect(photoRouteSrc).toContain("signedAvatarUrl(user.id)");
+    expect(photoRouteSrc).toContain("private, no-store");
+    expect(photoRouteSrc).not.toContain("activeOrg");
     expect(layoutSrc).not.toContain("putAvatarObject");
     expect(layoutSrc).not.toContain("S3_BUCKET");
   });

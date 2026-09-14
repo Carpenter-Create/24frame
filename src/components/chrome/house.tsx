@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentProps, ReactNode } from "react";
+import { useState, type ComponentProps, type ReactNode } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
 
@@ -63,6 +63,32 @@ export function HouseEmpty({ children }: { children: ReactNode }) {
   );
 }
 
+// Face bytes, or the existing initial. onError drops a failed img so chrome
+// never shows a broken circle. The layout passes ACCOUNT_PHOTO_HREF so the
+// route re-signs; a 5-minute S3 GET is not held in the client shell.
+export function IdentityPhoto({
+  avatarInitial,
+  photoUrl,
+}: {
+  avatarInitial: string;
+  photoUrl?: string | null;
+}) {
+  const face = accountPhotoSrc(photoUrl);
+  const [brokenSrc, setBrokenSrc] = useState<string | null>(null);
+  const broken = Boolean(face && brokenSrc === face);
+
+  if (!face || broken) return avatarInitial;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element -- same-origin face route; handler signs a short-lived GET
+    <img
+      src={face}
+      alt=""
+      className="size-full object-cover"
+      onError={() => setBrokenSrc(face)}
+    />
+  );
+}
+
 // 543:565 Identity block — 48 circle, name 15 Regular ink, email 13 tertiary.
 // Always render name and email. Real values only — no dashes, no pill well.
 export function IdentityBlock({
@@ -86,12 +112,7 @@ export function IdentityBlock({
         data-identity-photo={face ? "" : undefined}
         className={cn(IDENTITY_AVATAR_CLASS, face ? "overflow-hidden" : null)}
       >
-        {face ? (
-          // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the private avatars bucket
-          <img src={face} alt="" className="size-full object-cover" />
-        ) : (
-          avatarInitial
-        )}
+        <IdentityPhoto avatarInitial={avatarInitial} photoUrl={photoUrl} />
       </div>
       <div data-identity-who="" className="flex flex-col items-start gap-[var(--space-2)]">
         <p data-identity-name="" className={IDENTITY_NAME_CLASS}>

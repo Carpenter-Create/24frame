@@ -22,6 +22,7 @@ vi.mock("@aws-sdk/s3-request-presigner", () => ({
 import { HeadObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 
 import {
+  hasAvatarObject,
   headAvatarObject,
   presignAvatarGet,
   putAvatarObject,
@@ -90,6 +91,18 @@ describe("s3-avatars dedicated bucket", () => {
       Object.assign(new Error("NotFound"), { name: "NotFound", $metadata: { httpStatusCode: 404 } }),
     );
     await expect(signedAvatarUrl(UID)).resolves.toBeNull();
+    expect(mockGetSignedUrl).not.toHaveBeenCalled();
+  });
+
+  it("hasAvatarObject is true only when HEAD succeeds, and never throws", async () => {
+    mockSend.mockResolvedValueOnce({});
+    await expect(hasAvatarObject(UID)).resolves.toBe(true);
+    mockSend.mockRejectedValueOnce(
+      Object.assign(new Error("NotFound"), { name: "NotFound", $metadata: { httpStatusCode: 404 } }),
+    );
+    await expect(hasAvatarObject(UID)).resolves.toBe(false);
+    mockSend.mockRejectedValueOnce(new Error("AccessDenied"));
+    await expect(hasAvatarObject(UID)).resolves.toBe(false);
     expect(mockGetSignedUrl).not.toHaveBeenCalled();
   });
 

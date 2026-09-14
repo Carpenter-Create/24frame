@@ -2,7 +2,8 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 
 import { getOrgContext } from "@/lib/supabase/context";
-import { signedAvatarUrl } from "@/lib/s3-avatars";
+import { ACCOUNT_PHOTO_HREF } from "@/lib/account-avatar";
+import { hasAvatarObject } from "@/lib/s3-avatars";
 import { AppShell } from "@/components/chrome/app-shell";
 import { resolveMessagesSurface } from "@/lib/ask-globee";
 import { getActiveOrgTier } from "@/lib/org-tier";
@@ -41,8 +42,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     tier: ctx.activeOrg ? await getActiveOrgTier(ctx.activeOrg.id) : null,
   });
   // Mapping C: the same avatars/{user-id}/avatar object Settings uploads
-  // and Social already signs. Do not key the face off org_id.
-  const photoUrl = await signedAvatarUrl(ctx.user.id);
+  // and Social already signs. Chrome uses the same-origin face route so
+  // a 5-minute signed GET is never held across the client-shell lifetime.
+  // Do not key the face off org_id.
+  const photoUrl = (await hasAvatarObject(ctx.user.id)) ? ACCOUNT_PHOTO_HREF : null;
 
   return (
     <AppShell
