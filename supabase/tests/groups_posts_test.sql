@@ -3,9 +3,11 @@
 -- Create group/post requires an active profile. Catalog membership
 -- revoke must not delete a profile or its posts. Dashboard org_status
 -- stays unchanged. Social tables must not privilege-bridge via is_gc_staff.
+-- Invariant 13: deleting (or attempting to delete) a group must not
+-- destroy independently owned member posts. Close/hide instead.
 
 begin;
-select plan(52);
+select plan(67);
 
 select set_config('t.org',      gen_random_uuid()::text, false);
 select set_config('t.owner',    gen_random_uuid()::text, false);
@@ -96,6 +98,46 @@ select ok(
       and column_name = 'org_id'
   ),
   'social tables have no org_id');
+select is(
+  (select array_agg(e.enumlabel::text order by e.enumsortorder)
+     from pg_enum e
+     join pg_type t on t.oid = e.enumtypid
+     join pg_namespace n on n.oid = t.typnamespace
+    where n.nspname = 'public' and t.typname = 'group_status'),
+  array['active','hidden','closed']::text[],
+  'group_status uses close/hide lifecycle labels');
+select ok(
+  exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'groups'
+      and column_name = 'status'
+  ),
+  'groups.status exists for close/hide');
+select is(
+  (select c.confdeltype
+     from pg_constraint c
+     join pg_class rel on rel.oid = c.conrelid
+     join pg_namespace n on n.oid = rel.relnamespace
+    where n.nspname = 'public'
+      and rel.relname = 'posts'
+      and c.conname = 'posts_group_id_fkey'),
+  'r',
+  'posts.group_id is ON DELETE RESTRICT');
+select ok(
+  not exists (
+    select 1
+    from pg_policy pol
+    join pg_class c on c.oid = pol.polrelid
+    join pg_namespace n on n.oid = c.relnamespace
+    where n.nspname = 'public'
+      and c.relname = 'groups'
+      and pol.polname = 'groups_delete_staff'
+  ),
+  'groups_delete_staff hard-delete policy is removed');
+select ok(
+  not has_table_privilege('authenticated', 'public.groups', 'DELETE'),
+  'authenticated cannot DELETE groups');
 select ok(
   exists (
     select 1 from pg_proc p
@@ -458,6 +500,116 @@ select is(
     where author_id = current_setting('t.member')::uuid)::int,
   1,
   'deleting a membership row does not cascade-delete the posts');
+
+-- ---- invariant 13: group delete must not destroy another member's posts ----
+set local role authenticated;
+select set_config('request.jwt.claims',
+  json_build_object('sub', current_setting('t.creator'), 'role', 'authenticated')::text,
+  true);
+
+select lives_ok(
+  format($sql$
+    insert into public.posts (author_id, group_id, body)
+    values (%L, %L, 'member owned group post')
+  $sql$, current_setting('t.creator'), current_setting('t.public_gid')),
+  'group member can post into the public group');
+
+select set_config('t.member_group_post',
+  (select id::text from public.posts
+    where body = 'member owned group post' limit 1), true);
+select set_config('t.member_feed_post',
+  (select id::text from public.posts
+    where author_id = current_setting('t.creator')::uuid
+      and group_id is null
+    limit 1), true);
+
+set local role authenticated;
+select set_config('request.jwt.claims',
+  json_build_object('sub', current_setting('t.admin'), 'role', 'authenticated')::text,
+  true);
+
+select throws_ok(
+  format($sql$
+    delete from public.groups where id = %L
+  $sql$, current_setting('t.public_gid')),
+  '42501',
+  null,
+  'staff cannot hard-delete a group (close/hide only)');
+
+reset role;
+select is(
+  (select count(*) from public.posts
+    where id = current_setting('t.member_group_post')::uuid)::int,
+  1,
+  'staff delete attempt does not destroy another member group post');
+select is(
+  (select count(*) from public.posts
+    where id = current_setting('t.member_feed_post')::uuid)::int,
+  1,
+  'staff delete attempt does not destroy that member personal Social post');
+
+set local role service_role;
+select set_config('request.jwt.claims',
+  json_build_object('role', 'service_role')::text, true);
+
+select throws_ok(
+  format($sql$
+    delete from public.groups where id = %L
+  $sql$, current_setting('t.public_gid')),
+  '23503',
+  null,
+  'service_role delete is restricted while member posts exist');
+
+reset role;
+select is(
+  (select count(*) from public.posts
+    where id = current_setting('t.member_group_post')::uuid)::int,
+  1,
+  'RESTRICT delete leaves independently owned member posts');
+
+set local role authenticated;
+select set_config('request.jwt.claims',
+  json_build_object('sub', current_setting('t.admin'), 'role', 'authenticated')::text,
+  true);
+
+select lives_ok(
+  format($sql$
+    update public.groups set status = 'closed'
+     where id = %L
+  $sql$, current_setting('t.public_gid')),
+  'staff close a group instead of deleting it');
+
+reset role;
+select is(
+  (select count(*) from public.posts
+    where id = current_setting('t.member_group_post')::uuid)::int,
+  1,
+  'closing a group does not destroy member posts');
+
+set local role authenticated;
+select set_config('request.jwt.claims',
+  json_build_object('sub', current_setting('t.member'), 'role', 'authenticated')::text,
+  true);
+
+select throws_ok(
+  format($sql$
+    insert into public.group_members (group_id, user_id, role)
+    values (%L, %L, 'member')
+  $sql$, current_setting('t.public_gid'), current_setting('t.member')),
+  '42501',
+  null,
+  'closed group cannot be newly joined');
+
+reset role;
+delete from public.group_members
+ where group_id = current_setting('t.public_gid')::uuid
+   and user_id = current_setting('t.creator')::uuid;
+
+select is(
+  (select count(*) from public.posts
+    where author_id = current_setting('t.creator')::uuid)::int,
+  2,
+  'revoking group membership does not wipe personal Social posts');
 
 -- ---- catalog user without a profile still works (Pack 1 regression) --------
 set local role authenticated;

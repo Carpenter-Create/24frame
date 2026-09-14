@@ -46,4 +46,19 @@ describe("social isolation lock", () => {
     expect(actions).toContain('from("stories")');
     expect(actions).not.toContain("from(\"reels\")");
   });
+
+  it("locks posts.group_id off ON DELETE CASCADE", () => {
+    const migration = readFileSync(
+      "supabase/migrations/20260914180000_social_group_delete_no_cascade_posts.sql",
+      "utf8",
+    );
+    expect(migration).toContain("LIFECYCLE CLASS");
+    expect(migration).toContain("ACCESS PATH");
+    expect(migration).toContain("NO ORG_ID ON SOCIAL");
+    expect(migration).toMatch(/on delete restrict/i);
+    expect(migration).toContain("drop policy if exists groups_delete_staff");
+    expect(migration).not.toMatch(/create policy groups_delete_staff/i);
+    expect(migration).toContain("revoke delete on public.groups from authenticated");
+    expect(migration).toContain("no org_id");
+  });
 });
