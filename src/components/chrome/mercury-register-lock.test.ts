@@ -94,6 +94,17 @@ describe("Adam Mercury register lock", () => {
       expect(file).not.toContain("6:2");
       expect(file).not.toContain("6:3");
     }
+    expect(phosphor).toContain("84:46");
+    expect(phosphor).toContain("84:176");
+    expect(phosphor).toContain("84:240");
+    expect(phosphor).toContain("82:5");
+    expect(phosphor).toContain("82:9");
+    expect(phosphor).toContain("82:13");
+    expect(src("src/components/chrome/app-shell.tsx")).toContain("CaretDoubleRight");
+    expect(src("src/components/chrome/account-sheet.tsx")).toContain("SignOut");
+    expect(src("src/components/chrome/mobile-nav.tsx")).toContain(
+      'import { List } from "@phosphor-icons/react"',
+    );
   });
 
   it("does not escalate Mercury past current — 16 Bold idle, no Social bleed", () => {
