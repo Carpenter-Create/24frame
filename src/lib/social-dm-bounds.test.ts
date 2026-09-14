@@ -41,7 +41,7 @@ describe("DM independent caps", () => {
     expect(src).toContain("iMessage");
     expect(src).toContain("created_at+id keyset");
     expect(src).toContain("SOCIAL_DM_FANOUT_BATCH");
-    expect(src).not.toMatch(/org_id on Social/i);
+    expect(src).not.toMatch(/org_id uuid/i);
     expect(src).not.toContain("my_deliveries");
     expect(src).not.toContain("loadFollowingPosts");
     expect(src).not.toContain("has_course_access");

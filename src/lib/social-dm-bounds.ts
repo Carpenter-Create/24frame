@@ -1,7 +1,7 @@
 import { quotePostgrestValue } from "@/lib/social-home-bounds";
 
 /**
- * DM access paths (class 6). Mapping C: profiles.id — no org_id on Social.
+ * DM access paths (class 6). Mapping C: profiles.id — no org_id.
  * Exclusive rooms are multi-party DMs (iMessage model), not gated groups.
  *
  * ACCESS PATH + CARDINALITY (independent caps; do not share PostgREST max_rows):
