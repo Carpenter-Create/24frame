@@ -16,9 +16,13 @@
 // is void.
 // Mobile is a 90% sheet — leftover above Log out is flex-1 grow
 // (open white). Do not hug. Log out, hairline, footer stay at the
-// bottom. Log out → hairline 24. Hairline → footer 24. Footer →
-// bottom 32 (sheet pad B). Not 48/48/48. No hairline above Log
-// out. 571:911 stays off. Closed sheet is 544:561 / 537:557.
+// bottom. Item-list overflow lives on that leftover pane — same
+// containment as house nav destinations — so Refer cannot paint
+// over the pin. Surface clips. Do not put overflow-y-auto on the
+// 90% surface. Log out → hairline 24. Hairline → footer 24.
+// Footer → bottom 32 (sheet pad B). Not 48/48/48. No hairline
+// above Log out. 571:911 stays off. Closed sheet is 544:561 /
+// 537:557.
 // Desktop 629:795 height is relative to the stack (content hug).
 // 264 wide. Leftover last-item → Log out is 48 (house section
 // air, --space-12). The 48 adds to the stack. Not 0. Not 134.
@@ -69,13 +73,16 @@ export const ACCOUNT_SHEET_HOST_CLASS =
   "fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end";
 
 export const ACCOUNT_SHEET_SURFACE_CLASS =
-  "account-sheet-surface relative z-10 flex h-[90dvh] w-full flex-col gap-[var(--space-6)] overflow-y-auto rounded-t-[16px] bg-surface px-[var(--space-6)] pb-[var(--space-8)] pt-[calc(4px+var(--space-8))] app-sheet-rise";
+  "account-sheet-surface relative z-10 flex h-[90dvh] w-full flex-col gap-[var(--space-6)] overflow-hidden rounded-t-[16px] bg-surface px-[var(--space-6)] pb-[var(--space-8)] pt-[calc(4px+var(--space-8))] app-sheet-rise";
 
 export const ACCOUNT_SHEET_HEAD_CLASS =
   "flex min-h-12 w-full shrink-0 items-center justify-between";
 
-// Leftover grow. Overflow lives on the 90% surface.
-export const ACCOUNT_SHEET_SCROLL_CLASS = "flex min-h-0 flex-1 flex-col";
+// Leftover grow. Overflow lives here — house nav destinations
+// pane — so the item list cannot paint over the pinned Log out
+// footer. Surface clips. Do not overflow-y-auto the 90% surface.
+export const ACCOUNT_SHEET_SCROLL_CLASS =
+  "flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain";
 
 export const ACCOUNT_SHEET_LOGOUT_CLASS =
   "flex items-center gap-[var(--space-2)] text-[length:var(--text-base)] font-normal leading-5 text-accent";
@@ -84,8 +91,9 @@ export const ACCOUNT_SHEET_LOGOUT_CLASS =
 // hairline 24. Hairline → footer 24. Footer → bottom 32 (sheet
 // pad B). Not 48/48/48. Leftover above Log out is the 90% grow.
 // Do not put Log out in the item group. Pin gap is not
-// (Log out+rule) → footer. Hairline only under Log out. 571:911
-// stays off.
+// (Log out+rule) → footer. Hairline only under Log out. Item
+// overflow stays on the leftover pane so Refer cannot stack on
+// this pin. 571:911 stays off.
 export const ACCOUNT_SHEET_PIN_CLASS =
   "flex w-full shrink-0 flex-col gap-[var(--space-6)]";
 

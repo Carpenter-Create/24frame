@@ -120,8 +120,10 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_SHEET_SCROLL_CLASS).toContain("flex-1");
     expect(ACCOUNT_SHEET_SCROLL_CLASS).toContain("min-h-0");
     expect(ACCOUNT_SHEET_SCROLL_CLASS).not.toContain("min-h-[var(--space-12)]");
-    expect(ACCOUNT_SHEET_SCROLL_CLASS).not.toContain("overflow-y-auto");
-    expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain("overflow-y-auto");
+    expect(ACCOUNT_SHEET_SCROLL_CLASS).toContain("overflow-y-auto");
+    expect(ACCOUNT_SHEET_SCROLL_CLASS).toContain("overscroll-contain");
+    expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain("overflow-hidden");
+    expect(ACCOUNT_SHEET_SURFACE_CLASS).not.toContain("overflow-y-auto");
     expect(ACCOUNT_SHEET_LOGOUT_CLASS).toContain("text-accent");
     expect(ACCOUNT_SHEET_LOGOUT_CLASS).not.toContain("text-ink");
     expect(ACCOUNT_SHEET_PIN_CLASS).toContain("gap-[var(--space-6)]");

@@ -654,7 +654,9 @@ function AccountMenuBody({
 // sheet stays 544:561 / 537:557.
 // Leftover under the last item is the 90% grow (open white). Log out,
 // hairline, footer are pin siblings. Hairline only under Log out.
-// Do not add a hairline above Log out. 571:911 stays off.
+// Do not add a hairline above Log out. Item-list overflow lives on
+// the leftover pane — house nav destinations — so Refer cannot paint over Log out.
+// Surface clips. 571:911 stays off.
 // Log out → hairline 24. Hairline → footer 24. Footer → bottom 32
 // (sheet pad B). Not 48/48/48.
 export function MobileAccountMenu({
