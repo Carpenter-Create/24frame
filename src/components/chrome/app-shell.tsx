@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CaretDoubleLeft, CaretDoubleRight } from "@phosphor-icons/react";
 
@@ -10,6 +11,7 @@ import { SettingsRail } from "./settings-rail";
 import { SettingsHeaderBack } from "./settings-header-back";
 import { MobileNav } from "./mobile-nav";
 import { MessagesAppHeader } from "./messages-app-header";
+import { BrandEmblem } from "./brand-emblem";
 import { TitlesHeaderSearch } from "@/components/titles/titles-header-search";
 import { AskAssistantChromeProvider } from "@/components/messages/ask-globee-chrome";
 import { cn } from "@/lib/cn";
@@ -26,7 +28,7 @@ import {
 } from "@/lib/rail-collapse";
 import { PRODUCT_NAME } from "@/lib/product";
 import { isSettingsPath, SETTINGS_RAIL_PAD_CLASS } from "@/lib/settings";
-import { resolveWorkspaceMode, type WorkspaceMode } from "@/lib/workspace";
+import { resolveWorkspaceMode, workspaceHome, type WorkspaceMode } from "@/lib/workspace";
 import { SocialMobileDock } from "@/components/social/social-mobile-dock";
 
 type Org = { id: string; name: string };
@@ -113,9 +115,17 @@ export function AppShell({
           )}
           style={{ height: "var(--header-height)" }}
         >
-          {settingsPage || !collapsed ? (
-            <span className="flex-1 truncate t-body font-medium text-ink">{PRODUCT_NAME}</span>
-          ) : null}
+          <Link
+            href={workspaceHome(workspace)}
+            aria-label={PRODUCT_NAME}
+            data-brand-emblem=""
+            className={cn(
+              "inline-flex shrink-0 items-center",
+              settingsPage || collapsed ? undefined : "min-w-0 flex-1",
+            )}
+          >
+            <BrandEmblem />
+          </Link>
           {settingsPage || collapsed ? null : (
             <button
               type="button"

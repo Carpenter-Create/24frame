@@ -387,6 +387,33 @@ describe("AppShell rail-collapse chevron", () => {
     expect(shellSrc).not.toContain("PanelLeft");
   });
 
+  it("shows Asset 8 emblem-only in expanded, collapsed, settings, and Social rails", () => {
+    navigation.pathname = "/";
+    const expanded = renderShell();
+    expect(expanded).toContain("data-brand-emblem");
+    expect(expanded).toContain('aria-label="24Frame"');
+    expect(expanded).toContain('href="/"');
+    expect(expanded).toContain("data-brand-emblem-mark");
+    expect(expanded).not.toContain("t-body font-medium text-ink");
+    expect(shellSrc).not.toContain("24frame-wordmark");
+    expect(shellSrc).not.toContain("BrandWordmark");
+
+    const collapsed = renderShell(undefined, undefined, true);
+    expect(collapsed).toContain("data-brand-emblem");
+    expect(collapsed).toContain('aria-label="24Frame"');
+    expect(collapsed).toContain('href="/"');
+
+    navigation.pathname = "/social";
+    const social = renderShell();
+    expect(social).toContain("data-brand-emblem");
+    expect(social).toContain('href="/social"');
+
+    navigation.pathname = "/settings";
+    const settings = renderShell();
+    expect(settings).toContain("data-brand-emblem");
+    expect(settings).toContain('href="/"');
+  });
+
   it("puts CaretDoubleRight Bold on a separate expand row when collapsed", () => {
     navigation.pathname = "/";
     const html = renderShell(undefined, undefined, true);
