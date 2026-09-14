@@ -3032,6 +3032,7 @@ export type Database = {
         Args: { p_conversation: string; p_seen_at: string }
         Returns: undefined
       }
+      mark_all_notifications_read: { Args: Record<PropertyKey, never>; Returns: undefined }
       mark_notifications_read: { Args: { p_ids: string[] }; Returns: undefined }
       member_can: {
         Args: { p_capability: string; p_org: string; p_uid: string }
@@ -3055,7 +3056,7 @@ export type Database = {
         }[]
       }
       my_findings: {
-        Args: { p_limit?: number }
+        Args: { p_limit?: number; p_org_id?: string }
         Returns: {
           code: string
           created_at: string

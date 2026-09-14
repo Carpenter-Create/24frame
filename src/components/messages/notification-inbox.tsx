@@ -25,6 +25,10 @@ export function NotificationInbox({
   truncated?: boolean;
 }) {
   const unreadIds = notifications.filter((n) => n.unread).map((n) => n.id);
+  // Truncated inboxes can hide unread rows. Show Mark all whenever the
+  // visible page has unread or the list overflowed — the action writes
+  // every visible unread, not just this page.
+  const showMarkAll = unreadIds.length > 0 || truncated;
 
   return (
     <div data-messages-inbox="">
@@ -36,9 +40,9 @@ export function NotificationInbox({
         </InlineNotice>
       ) : null}
 
-      {unreadIds.length > 0 ? (
+      {showMarkAll ? (
         <div className="pb-4">
-          <MarkAllRead ids={unreadIds} />
+          <MarkAllRead />
         </div>
       ) : null}
 

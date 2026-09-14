@@ -102,6 +102,10 @@ describe("CatalogHealthPage modes", () => {
     const html = renderToStaticMarkup(await CatalogHealthPage());
 
     expect(rpc).toHaveBeenCalledWith("my_findings", { p_limit: UNPAGINATED_MAX + 1 });
+    expect(rpc).not.toHaveBeenCalledWith(
+      "my_findings",
+      expect.objectContaining({ p_org_id: expect.anything() }),
+    );
     expect(html).toContain("Catalog Health");
     expect(html).toContain(CATALOG_HEALTH_SUBTITLE);
     expect(html).toContain("Acme Film");
@@ -122,13 +126,17 @@ describe("CatalogHealthPage modes", () => {
   });
 
   it("keeps the org-scoped catalog for a user with a client org", async () => {
-    stubClient();
+    const { rpc } = stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(
       ctx({ isGcStaff: false, orgStatus: "active" }) as never,
     );
 
     const html = renderToStaticMarkup(await CatalogHealthPage());
 
+    expect(rpc).toHaveBeenCalledWith("my_findings", {
+      p_limit: UNPAGINATED_MAX + 1,
+      p_org_id: "org-1",
+    });
     expect(html).toContain("Acme Film");
     expect(html).toContain("/titles/title-acme/metadata");
     expect(html).not.toContain("Other Film");
@@ -136,13 +144,17 @@ describe("CatalogHealthPage modes", () => {
   });
 
   it("still scopes to the client org when GC staff also hold one", async () => {
-    stubClient();
+    const { rpc } = stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(
       ctx({ isGcStaff: true, orgStatus: "active" }) as never,
     );
 
     const html = renderToStaticMarkup(await CatalogHealthPage());
 
+    expect(rpc).toHaveBeenCalledWith("my_findings", {
+      p_limit: UNPAGINATED_MAX + 1,
+      p_org_id: "org-1",
+    });
     expect(html).toContain("Acme Film");
     expect(html).toContain("/titles/title-acme/metadata");
     expect(html).not.toContain("Other Film");
@@ -172,7 +184,10 @@ describe("CatalogHealthPage modes", () => {
 
     const html = renderToStaticMarkup(await CatalogHealthPage());
 
-    expect(rpc).toHaveBeenCalledWith("my_findings", { p_limit: UNPAGINATED_MAX + 1 });
+    expect(rpc).toHaveBeenCalledWith("my_findings", {
+      p_limit: UNPAGINATED_MAX + 1,
+      p_org_id: "org-1",
+    });
     expect(html).toContain('data-my-list-truncated="findings"');
     expect(html).toContain(CATALOG_HEALTH_TRUNCATED);
   });

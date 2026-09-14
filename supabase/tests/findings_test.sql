@@ -3,7 +3,7 @@
 -- my_findings + RLS (own-org only) for the findings store (§19).
 
 begin;
-select plan(13);
+select plan(16);
 
 select set_config('t.orgA',   gen_random_uuid()::text, false);
 select set_config('t.orgB',   gen_random_uuid()::text, false);
@@ -89,6 +89,21 @@ select is((select count(*) from public.my_findings(0))::int, 0,
   'p_limit 0 returns no findings');
 select is((select count(*) from public.my_findings(1))::int, 1,
   'p_limit bounds my_findings');
+select is((select count(*) from public.my_findings(500, current_setting('t.orgB')::uuid))::int, 0,
+  'p_org_id scopes away orgs the caller cannot see');
+
+-- GC can see every org; p_org_id must still apply before the bound.
+reset role;
+insert into public.findings (org_id, entity_type, entity_id, code, source, severity, message, source_refs, logic_version)
+  values (current_setting('t.orgB')::uuid, 'title', gen_random_uuid(),
+          'metadata.missing.synopsis', 'validator', 'high', 'Synopsis is required.', '{}'::jsonb, 'metadata-v1');
+set local role authenticated;
+select set_config('request.jwt.claims', json_build_object('sub', current_setting('t.gc'),'role','authenticated')::text, true);
+select ok((select count(*) from public.my_findings()) >= 2,
+  'GC my_findings without p_org_id sees both orgs');
+select is((select count(*) from public.my_findings(500, current_setting('t.orgA')::uuid)
+            where org_id = current_setting('t.orgB')::uuid)::int, 0,
+  'GC my_findings with p_org_id does not return another org');
 
 reset role;
 select * from finish();

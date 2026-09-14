@@ -4,9 +4,9 @@ import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
-import { markNotificationsRead } from "./actions";
+import { markAllNotificationsRead } from "./actions";
 
-export function MarkAllRead({ ids }: { ids: string[] }) {
+export function MarkAllRead() {
   const router = useRouter();
   const [pending, start] = useTransition();
   return (
@@ -15,7 +15,7 @@ export function MarkAllRead({ ids }: { ids: string[] }) {
       disabled={pending}
       onClick={() =>
         start(async () => {
-          await markNotificationsRead(ids);
+          await markAllNotificationsRead();
           router.refresh(); // refresh the page + the layout's nav unread badge
         })
       }

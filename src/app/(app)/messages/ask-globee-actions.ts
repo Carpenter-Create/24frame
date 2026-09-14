@@ -60,7 +60,7 @@ async function loadOrgAnswer(
     .eq("org_id", orgId)
     .order("created_at", { ascending: false })
     .range(...rangeFor(UNPAGINATED_MAX));
-  const findings = await loadMyFindings(supabase);
+  const findings = await loadMyFindings(supabase, { orgId });
   return answerAskGlobeePrompt({
     prompt,
     corpus: {

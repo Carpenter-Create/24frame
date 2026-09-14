@@ -38,12 +38,19 @@ export async function loadMyDeliveries(
   return { rows: normalizeMyDeliveries(probed.rows), truncated: probed.truncated };
 }
 
+/**
+ * Probe one past the cap. Pass orgId so the cap applies after that org,
+ * not across every org member_can can see. Omit p_org_id (do not pass null)
+ * — optional-detach rule.
+ */
 export async function loadMyFindings(
   supabase: ServerClient,
-  opts?: { limit?: number },
+  opts?: { limit?: number; orgId?: string },
 ): Promise<BoundedList<MyFindingRow>> {
   const limit = opts?.limit ?? MY_LIST_LIMIT;
-  const { data } = await supabase.rpc("my_findings", { p_limit: limit + 1 });
+  const args: { p_limit: number; p_org_id?: string } = { p_limit: limit + 1 };
+  if (opts?.orgId) args.p_org_id = opts.orgId;
+  const { data } = await supabase.rpc("my_findings", args);
   return splitProbe(data as MyFindingRow[] | null, limit);
 }
 

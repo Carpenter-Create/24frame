@@ -244,7 +244,10 @@ describe("completeAskGlobeeTurn", () => {
       });
 
     await expect(completeAskGlobeeTurn(THREAD)).resolves.toEqual({});
-    expect(rpc).toHaveBeenCalledWith("my_findings", { p_limit: UNPAGINATED_MAX + 1 });
+    expect(rpc).toHaveBeenCalledWith("my_findings", {
+      p_limit: UNPAGINATED_MAX + 1,
+      p_org_id: "org-1",
+    });
     expect(fetchMock).toHaveBeenCalled();
     expect(inserted).toHaveLength(1);
     expect(inserted[0]?.row).toMatchObject({

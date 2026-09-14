@@ -30,7 +30,10 @@ export default async function CatalogHealthPage() {
   const activeOrgId = ctx.activeOrg?.id ?? null;
   const gcWide = ctx.isGcStaff && !activeOrgId;
 
-  const loaded = await loadMyFindings(supabase);
+  const loaded = await loadMyFindings(
+    supabase,
+    activeOrgId ? { orgId: activeOrgId } : undefined,
+  );
   const findings = activeOrgId
     ? loaded.rows.filter((f) => f.org_id === activeOrgId)
     : loaded.rows;

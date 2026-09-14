@@ -81,10 +81,19 @@ describe("loadMyDeliveries", () => {
 describe("loadMyFindings", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("probes one past the cap", async () => {
+  it("probes one past the cap and omits p_org_id on the unscoped path", async () => {
     const { rpc, client } = stubRpc([{ id: "f1", org_id: "org-1" }]);
     await loadMyFindings(client);
     expect(rpc).toHaveBeenCalledWith("my_findings", { p_limit: UNPAGINATED_MAX + 1 });
+  });
+
+  it("scopes the cap to one org when orgId is passed", async () => {
+    const { rpc, client } = stubRpc([{ id: "f1", org_id: "org-1" }]);
+    await loadMyFindings(client, { orgId: "org-1" });
+    expect(rpc).toHaveBeenCalledWith("my_findings", {
+      p_limit: UNPAGINATED_MAX + 1,
+      p_org_id: "org-1",
+    });
   });
 
   it("reports truncated when the extra row came back", async () => {
@@ -119,6 +128,8 @@ describe("class 4 migration lock", () => {
     expect(migration).toContain("drop function if exists public.my_notifications()");
     expect(migration).toContain("p_limit integer default 500");
     expect(migration).toContain("p_title_id uuid default null");
+    expect(migration).toContain("p_org_id uuid default null");
+    expect(migration).toContain("mark_all_notifications_read");
     expect(migration).toContain("limit least(greatest(coalesce(p_limit, 0), 0), 501)");
     expect(migration).toContain("do NOT apply to production");
     expect(migration).toContain("Do not add profile_id");

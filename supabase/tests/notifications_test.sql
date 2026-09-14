@@ -3,7 +3,7 @@
 -- (mark_notifications_read / my_notifications.unread / my_unread_count).
 
 begin;
-select plan(16);
+select plan(19);
 
 select set_config('t.orgA',    gen_random_uuid()::text, false);
 select set_config('t.orgB',    gen_random_uuid()::text, false);
@@ -84,6 +84,19 @@ select lives_ok(
 select is(public.my_unread_count(), 0, 'viewer unread count = 0 — their own inbox only');
 -- And the proof it stayed private: ownerA already read it, so nothing observable changed for
 -- anyone else. The per-user assertion above (memberA unread while ownerA read) is the pair.
+
+-- ---- mark_all_notifications_read: every visible unread, not a page of ids --
+select set_config('request.jwt.claims', json_build_object('sub', current_setting('t.gc'),'role','authenticated')::text, true);
+select set_config('t.nid2',
+  (select public.create_notification(current_setting('t.orgA')::uuid, 'delivery_update', 'Live',
+     '"Film" is live', '{"title_id":"x","status":"live"}'::jsonb))::text,
+  false);
+select set_config('request.jwt.claims', json_build_object('sub', current_setting('t.ownerA'),'role','authenticated')::text, true);
+select is(public.my_unread_count(), 1, 'ownerA has a second unread after mark-one');
+select lives_ok(
+  $$ select public.mark_all_notifications_read() $$,
+  'ownerA marks all read without an id list');
+select is(public.my_unread_count(), 0, 'ownerA unread count = 0 after mark all');
 
 -- ---- org_notification_recipients: GC-only, active members only -------------
 select set_config('request.jwt.claims', json_build_object('sub', current_setting('t.gc'),'role','authenticated')::text, true);
