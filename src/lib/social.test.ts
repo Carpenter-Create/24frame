@@ -21,6 +21,7 @@ import {
   SOCIAL_BANNED_PRODUCT_NAMES,
   SOCIAL_PROFILE_ORIGIN,
   SOCIAL_ROUTES,
+  socialHandleRequiredError,
   socialInitials,
   socialProfileHref,
   socialProfilePublicUrl,
@@ -47,7 +48,7 @@ describe("social copy lock", () => {
     expect(SOCIAL_ROUTES.home).toBe("/social");
     expect(SOCIAL_ROUTES.profileByHandle).toBe("/social/u");
     expect(SOCIAL.profile.handlePlaceholder).toBe("Set your handle");
-    expect(SOCIAL.profile.handleRequired).toBe("Handle is required.");
+    expect(SOCIAL.profile.handleRequired).toBe("Add a handle to continue.");
     expect(SOCIAL.courses.subtitle).toContain("Social+Education");
     expect(SOCIAL.leaderboard.private).toBe("The leaderboard is private.");
     expect(SOCIAL.leaderboard.subtitle).toContain(PRODUCT_NAME);
@@ -104,13 +105,19 @@ describe("profile opt-in", () => {
     expect(normalizeHandle("@@acarpcreate")).toBe("acarpcreate");
     expect(displayHandle("ada")).toBe("@ada");
     expect(handleFieldValue("acarpcreate")).toBe("@acarpcreate");
-    expect(handleFieldValue("")).toBe("");
+    expect(handleFieldValue("")).toBe("@");
+    expect(socialHandleRequiredError("")).toBe(SOCIAL.profile.handleRequired);
+    expect(socialHandleRequiredError("@")).toBe(SOCIAL.profile.handleRequired);
+    expect(socialHandleRequiredError("@@@")).toBe(SOCIAL.profile.handleRequired);
+    expect(socialHandleRequiredError("@ada")).toBeNull();
     expect(socialProfileHref("Ada")).toBe("/social/u/@ada");
     expect(socialProfileHref("@acarpcreate")).toBe("/social/u/@acarpcreate");
-    expect(socialProfilePublicUrl("acarpcreate")).toBe(
-      "https://app.24frame.co/social/u/@acarpcreate",
-    );
-    expect(SOCIAL_PROFILE_ORIGIN).toBe("https://app.24frame.co");
+    expect(socialProfilePublicUrl("acarpcreate")).toBe("https://24frame.co/@acarpcreate");
+    expect(socialProfilePublicUrl("")).toBe("https://24frame.co/@");
+    expect(socialProfilePublicUrl("@Ada")).toBe("https://24frame.co/@ada");
+    expect(SOCIAL_PROFILE_ORIGIN).toBe("https://24frame.co");
+    expect(socialProfilePublicUrl("acarpcreate")).not.toContain("app.24frame.co");
+    expect(socialProfilePublicUrl("acarpcreate")).not.toContain("/social/u/");
     expect(parseProfileHandleParam("%40ada")).toBe("ada");
     expect(parseProfileHandleParam("@ada")).toBe("ada");
     expect(suggestedHandleSeed("Ada.Carp@example.com", "u1")).toBe("adacarp");

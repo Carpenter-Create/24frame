@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
@@ -14,15 +15,30 @@ describe("SocialHandleField", () => {
     expect(html).toContain(`placeholder="${SOCIAL.profile.handlePlaceholder}"`);
     expect(html).toContain("data-social-handle-url");
     expect(html).toContain(socialProfilePublicUrl("acarpcreate"));
-    expect(html).toContain("https://app.24frame.co/social/u/@acarpcreate");
+    expect(html).toContain("https://24frame.co/@acarpcreate");
+    expect(html).not.toContain("app.24frame.co");
+    expect(html).not.toContain("/social/u/");
   });
 
-  it("uses the empty placeholder when no handle is set", () => {
+  it("keeps @ in an empty field and always shows the live URL preview", () => {
     const html = renderToStaticMarkup(
       <SocialHandleField id="social-handle" name="handle" defaultHandle="" />,
     );
+    expect(html).toContain('value="@"');
     expect(html).toContain(`placeholder="${SOCIAL.profile.handlePlaceholder}"`);
-    expect(html).toContain('value=""');
-    expect(html).toContain("https://app.24frame.co/social/u/@");
+    expect(html).toContain("data-social-handle-url");
+    expect(html).toContain("https://24frame.co/@");
+    expect(html).toContain(socialProfilePublicUrl(""));
+    expect(html).not.toContain("app.24frame.co");
+    expect(html).not.toContain("/social/u/");
+  });
+
+  it("keeps the required-handle check on the profile submit path", () => {
+    const form = readFileSync("src/components/social/social-forms.tsx", "utf8");
+    const actions = readFileSync("src/app/(app)/social/actions.ts", "utf8");
+    expect(form).toContain("socialHandleRequiredError");
+    expect(form).toContain("SocialHandleField");
+    expect(actions).toContain("socialHandleRequiredError");
+    expect(actions).toContain("profileInsertRow");
   });
 });

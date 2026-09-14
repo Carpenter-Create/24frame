@@ -6,7 +6,7 @@ import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 import { signedAvatarUrl } from "@/lib/s3-avatars";
 import { SOCIAL } from "@/lib/social";
-import { ensureOwnSocialProfile } from "@/lib/social-profile";
+import { ensureOwnSocialProfileResult } from "@/lib/social-profile";
 import SocialProfilePage from "./page";
 
 vi.mock("next/navigation", () => ({
@@ -21,7 +21,7 @@ vi.mock("@/lib/s3-avatars", () => ({
   signedAvatarUrls: vi.fn().mockResolvedValue(new Map()),
 }));
 vi.mock("@/lib/social-profile", () => ({
-  ensureOwnSocialProfile: vi.fn(),
+  ensureOwnSocialProfileResult: vi.fn(),
 }));
 vi.mock("@/app/(app)/social/actions", () => ({
   createSocialProfile: vi.fn(),
@@ -67,12 +67,15 @@ describe("Social profile opt-in", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(signedAvatarUrl).mockResolvedValue(null);
-    vi.mocked(ensureOwnSocialProfile).mockResolvedValue({
-      id: "u1",
-      handle: "ada",
-      display_name: "Ada Lovelace",
-      status: "active",
-      bio: null,
+    vi.mocked(ensureOwnSocialProfileResult).mockResolvedValue({
+      profile: {
+        id: "u1",
+        handle: "ada",
+        display_name: "Ada Lovelace",
+        status: "active",
+        bio: null,
+      },
+      error: null,
     });
   });
 
@@ -90,9 +93,10 @@ describe("Social profile opt-in", () => {
     expect(html).toContain("data-social-profile-form");
     expect(html).toContain("data-social-handle-field");
     expect(html).toContain(SOCIAL.profile.handlePlaceholder);
-    expect(html).toContain("https://app.24frame.co/social/u/@ada");
+    expect(html).toContain("https://24frame.co/@ada");
     expect(html).toContain("@ada");
     expect(html).not.toContain("Globee");
+    expect(html).not.toContain("app.24frame.co");
     expect(from).not.toHaveBeenCalledWith("memberships");
   });
 
@@ -125,5 +129,34 @@ describe("Social profile opt-in", () => {
     expect(src).not.toContain("putAvatarObject");
     expect(src).not.toContain("uploadAccountPhoto");
     expect(src).not.toContain("S3_AVATARS_BUCKET");
+  });
+
+  it("shows @handle after ensure, not an empty create form", async () => {
+    stubProfile({ id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const html = renderToStaticMarkup(await SocialProfilePage());
+    expect(html).toContain("@ada");
+    expect(html).toContain("https://24frame.co/@ada");
+    expect(html).toContain('value="@ada"');
+    expect(html).toContain("Ada Lovelace");
+  });
+
+  it("keeps SocialHandleField on the empty create form when ensure fails", async () => {
+    stubProfile(null);
+    vi.mocked(ensureOwnSocialProfileResult).mockResolvedValue({
+      profile: null,
+      error: "null value in column birth_date",
+    });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const html = renderToStaticMarkup(await SocialProfilePage());
+    expect(html).toContain("data-social-handle-field");
+    expect(html).toContain('value="@"');
+    expect(html).toContain("data-social-handle-url");
+    expect(html).toContain("https://24frame.co/@");
+    expect(html).toContain(SOCIAL.profile.handlePlaceholder);
+    expect(html).toContain("null value in column birth_date");
+    expect(html).not.toContain("Ada Lovelace");
   });
 });

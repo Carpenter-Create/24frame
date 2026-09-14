@@ -2,7 +2,8 @@ import { PRODUCT_NAME, SOCIAL_WORKSPACE } from "@/lib/product";
 import type { SocialMediaItem, SocialMediaRuleError } from "@/lib/social-media";
 
 // Social workspace copy and input rules. Lives in lib/, not JSX.
-// House profile URL is /social/u/@{bareHandle} (see socialProfileHref).
+// Public share / preview URL is https://24frame.co/@{bareHandle}.
+// In-app navigation stays /social/u/@{bareHandle} (see socialProfileHref).
 // Account faces reuse signedAvatarUrl. Post media uses 24frame-media
 // keys on posts.media. Title S3 / S3_BUCKET stay film-only.
 // Group DMs reuse Pack 4 conversations.kind=group. Gated community
@@ -25,13 +26,14 @@ export const SOCIAL_ROUTES = {
   dms: "/social/dms",
 } as const;
 
-/** Production house origin for the live handle URL preview. */
-export const SOCIAL_PROFILE_ORIGIN = "https://app.24frame.co";
+/** Apex origin for the public profile URL preview and share string. */
+export const SOCIAL_PROFILE_ORIGIN = "https://24frame.co";
 
-// House profile URL (locked): /social/u/@{bareHandle}
-// Example: https://app.24frame.co/social/u/@acarpcreate
-// Persist the bare handle in profiles.handle (no @). Display as @handle.
-// /social/members/{handle} redirects here so older links stay stable.
+// Public profile URL (locked): https://24frame.co/@{bareHandle}
+// Example: https://24frame.co/@acarpcreate
+// In-app route remains /social/u/@{bareHandle}. Persist the bare handle
+// in profiles.handle (no @). Display as @handle.
+// /social/members/{handle} redirects to the in-app route.
 
 export function bareHandle(raw: string): string {
   return stripHandleDecorators(raw).trim().toLowerCase();
@@ -47,7 +49,7 @@ export function displayHandle(handle: string): string {
 }
 
 export function handleFieldValue(handle: string): string {
-  return displayHandle(handle);
+  return `@${bareHandle(handle)}`;
 }
 
 export function socialProfileHref(handle: string): string {
@@ -57,7 +59,7 @@ export function socialProfileHref(handle: string): string {
 
 export function socialProfilePublicUrl(handle: string): string {
   const bare = bareHandle(handle);
-  return `${SOCIAL_PROFILE_ORIGIN}${SOCIAL_ROUTES.profileByHandle}/@${bare}`;
+  return `${SOCIAL_PROFILE_ORIGIN}/@${bare}`;
 }
 
 export function parseProfileHandleParam(raw: string): string | null {
@@ -159,7 +161,7 @@ export const SOCIAL = {
       "A profile is created for this signed-in account. Company aggregation and org invite do not create one for anyone else.",
     handle: "Handle",
     handlePlaceholder: "Set your handle",
-    handleRequired: "Handle is required.",
+    handleRequired: "Add a handle to continue.",
     handleInvalid: "Enter a handle of 3–30 letters, numbers, or underscores.",
     displayName: "Display name",
     defaultDisplayName: "Member",
@@ -279,6 +281,10 @@ export function normalizeHandle(raw: string): string | null {
   if (handle.length < HANDLE_MIN || handle.length > HANDLE_MAX) return null;
   if (!HANDLE_RE.test(handle)) return null;
   return handle;
+}
+
+export function socialHandleRequiredError(raw: string): string | null {
+  return bareHandle(raw) ? null : SOCIAL.profile.handleRequired;
 }
 
 /** Bare unique-ish seed from the sign-in email local-part. Not a display name. */
