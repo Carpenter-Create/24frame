@@ -6,6 +6,8 @@ import { Suspense, use, useRef } from "react";
 import { railDestinations, STAFF_RAIL_EYEBROW, type NavItem } from "@/lib/nav";
 import { cn } from "@/lib/cn";
 import type { WorkspaceMode } from "@/lib/workspace";
+import { SocialIcon } from "@/components/social/social-icon";
+import { SOCIAL_ICON_SIZE_NAV, socialNavIconName } from "@/lib/social-icons";
 
 // Access rail: 13px labels (--text-sm / t-body-sm), 16px Lucide at 1.33, muted grey wash when active.
 // Collapsed mode is icon-only (labels/badges hidden; title tooltips; unread → accent dot).
@@ -36,6 +38,7 @@ export function SideNav({
   ) => {
     const active = item.exact ? pathname === item.href : pathname.startsWith(item.href);
     const Icon = item.icon;
+    const social = workspace === "social";
     return (
       <Link
         key={item.href}
@@ -54,13 +57,28 @@ export function SideNav({
         aria-label={collapsed ? item.label : undefined}
         className={cn(
           "relative flex items-center rounded-[var(--radius)] t-body-sm leading-4 transition-colors",
-          collapsed ? "justify-center px-0 py-2" : "gap-2 px-2 py-2",
+          social
+            ? collapsed
+              ? "justify-center px-0 py-2"
+              : "gap-3 px-3 py-2"
+            : collapsed
+              ? "justify-center px-0 py-2"
+              : "gap-2 px-2 py-2",
           active
             ? "bg-surface-muted font-medium text-ink"
             : "font-normal text-ink-2 hover:bg-surface-muted hover:text-ink",
         )}
       >
-        <Icon className="size-4 shrink-0" strokeWidth={1.33} />
+        {social ? (
+          <SocialIcon
+            name={socialNavIconName(item.href)}
+            active={active}
+            size={SOCIAL_ICON_SIZE_NAV}
+            className="shrink-0"
+          />
+        ) : (
+          <Icon className="size-4 shrink-0" strokeWidth={1.33} />
+        )}
         {!collapsed ? <span className="flex-1 truncate">{item.label}</span> : null}
         {badge}
       </Link>

@@ -63,7 +63,11 @@ function chain(result: unknown) {
     error: null,
   }));
   c.then = (resolve: (value: unknown) => unknown) =>
-    Promise.resolve({ data: result, error: null }).then(resolve);
+    Promise.resolve({
+      data: result,
+      error: null,
+      count: Array.isArray(result) ? result.length : 0,
+    }).then(resolve);
   return c;
 }
 
@@ -157,7 +161,8 @@ describe("Social public profile", () => {
     expect(html).toContain('data-social-post="p9"');
     expect(html).toContain("data-social-author-history");
     expect(html).toContain("data-social-follow");
-    expect(html).toContain("data-social-open-dm");
+    expect(html).toContain("data-social-share");
+    expect(html).not.toContain("data-social-open-dm");
     expect(html).not.toContain("data-social-profile-form");
     expect(html).not.toContain("data-social-bio-form");
     expect(html).not.toContain("data-social-profile-photo");

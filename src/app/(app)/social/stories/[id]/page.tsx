@@ -1,13 +1,22 @@
 import { redirect } from "next/navigation";
 
-import { HouseEmpty } from "@/components/chrome/house";
-import { PageHeader } from "@/components/ui/page-header";
-import { SocialAvatar, SocialPostMedia } from "@/components/social/social-ui";
-import { signedAvatarUrl } from "@/lib/s3-avatars";
+import { SocialEmpty } from "@/components/social/social-empty";
+import { SocialStoriesRail } from "@/components/social/social-stories-rail";
+import { SocialStoryViewer } from "@/components/social/social-story-viewer";
+import { SOCIAL_PAGE_CLASS } from "@/lib/social-chrome";
+import { signedAvatarUrl, signedAvatarUrls } from "@/lib/s3-avatars";
 import { signedSocialMediaItems } from "@/lib/s3-social-media";
+import { followingAuthorIds } from "@/lib/social-home";
 import { isStoryLive } from "@/lib/social-stories";
-import { SOCIAL } from "@/lib/social";
-import { loadProfilesByIds, loadStoryById } from "@/lib/social-feed";
+import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
+import {
+  groupStoryRail,
+  loadFolloweeIds,
+  loadLiveStories,
+  loadProfilesByIds,
+  loadStoryById,
+  loadViewedStoryIds,
+} from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { markSocialStoryViewed } from "@/app/(app)/social/actions";
 import { getOrgContext } from "@/lib/supabase/context";
@@ -26,17 +35,25 @@ export default async function SocialStoryPage({
   const story = await loadStoryById(supabase, id);
   if (!story) {
     return (
-      <div data-social-story-missing="">
-        <PageHeader title={SOCIAL.stories.title} />
-        <HouseEmpty>{SOCIAL.stories.missing}</HouseEmpty>
+      <div data-social-story-missing="" className={SOCIAL_PAGE_CLASS}>
+        <h1 className="sr-only">{SOCIAL.stories.title}</h1>
+        <SocialEmpty
+          icon="warning-circle"
+          title={SOCIAL.stories.missing}
+          action={{ href: SOCIAL_ROUTES.stories, label: SOCIAL.member.goHome }}
+        />
       </div>
     );
   }
   if (!isStoryLive(story.expires_at)) {
     return (
-      <div data-social-story-expired="">
-        <PageHeader title={SOCIAL.stories.title} />
-        <HouseEmpty>{SOCIAL.stories.expired}</HouseEmpty>
+      <div data-social-story-expired="" className={SOCIAL_PAGE_CLASS}>
+        <h1 className="sr-only">{SOCIAL.stories.title}</h1>
+        <SocialEmpty
+          icon="warning-circle"
+          title={SOCIAL.stories.expired}
+          action={{ href: SOCIAL_ROUTES.stories, label: SOCIAL.member.goHome }}
+        />
       </div>
     );
   }
@@ -44,22 +61,56 @@ export default async function SocialStoryPage({
   const profile = await ensureOwnSocialProfile(supabase, ctx.user);
   if (profile) await markSocialStoryViewed(story.id);
 
-  const authors = await loadProfilesByIds(supabase, [story.author_id]);
-  const author = authors.get(story.author_id);
-  const name = author?.display_name ?? "Member";
-  const [photoUrl, media] = await Promise.all([
+  const followees = profile
+    ? await loadFolloweeIds(supabase, ctx.user.id)
+    : { ids: [] as string[] };
+  const authorIds = followingAuthorIds(ctx.user.id, followees.ids);
+  const [authorStoriesPage, railPage] = await Promise.all([
+    loadLiveStories(supabase, [story.author_id]),
+    loadLiveStories(supabase, authorIds),
+  ]);
+  const sequence = [...authorStoriesPage.stories].sort(
+    (a, b) => Date.parse(a.created_at) - Date.parse(b.created_at) || a.id.localeCompare(b.id),
+  );
+  const index = Math.max(0, sequence.findIndex((row) => row.id === story.id));
+  const prevId = sequence[index - 1]?.id ?? null;
+  const nextId = sequence[index + 1]?.id ?? null;
+  const viewed = profile
+    ? await loadViewedStoryIds(
+        supabase,
+        ctx.user.id,
+        railPage.stories.map((row) => row.id),
+      )
+    : new Set<string>();
+  const rail = groupStoryRail(railPage.stories, viewed);
+  const peopleIds = [...new Set([story.author_id, ctx.user.id, ...rail.map((card) => card.authorId)])];
+  const [authors, photoUrl, media, faces] = await Promise.all([
+    loadProfilesByIds(supabase, peopleIds),
     signedAvatarUrl(story.author_id),
     signedSocialMediaItems(story.media, story.author_id, "stories"),
+    signedAvatarUrls(peopleIds),
   ]);
+  const author = authors.get(story.author_id);
+  const name = author?.display_name ?? "Member";
 
   return (
-    <div data-social-story={story.id}>
-      <PageHeader title={name} subtitle={SOCIAL.stories.title} />
-      <div className="flex flex-col gap-[var(--space-4)]">
-        <SocialAvatar name={name} photoUrl={photoUrl} ring="live" />
-        {story.body ? <p className="t-body text-ink whitespace-pre-wrap">{story.body}</p> : null}
-        <SocialPostMedia items={media} />
-      </div>
+    <div data-social-story={story.id} className={SOCIAL_PAGE_CLASS}>
+      <h1 className="sr-only">{name}</h1>
+      <SocialStoriesRail cards={rail} authors={authors} faces={faces} canCreate={!!profile} />
+      <SocialStoryViewer
+        storyId={story.id}
+        authorId={story.author_id}
+        authorName={name}
+        authorPhotoUrl={photoUrl}
+        createdAt={story.created_at}
+        body={story.body}
+        media={media}
+        prevId={prevId}
+        nextId={nextId}
+        index={index}
+        total={Math.max(sequence.length, 1)}
+        canReply={!!profile && story.author_id !== ctx.user.id}
+      />
     </div>
   );
 }

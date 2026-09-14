@@ -1,12 +1,13 @@
 import { redirect } from "next/navigation";
 
-import { HouseEmpty, TextAction } from "@/components/chrome/house";
-import { PageHeader } from "@/components/ui/page-header";
+import { TextAction } from "@/components/chrome/house";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { SocialOnboardingChecklist } from "@/components/social/social-checklist";
+import { SocialEmpty } from "@/components/social/social-empty";
 import { SocialLensRow } from "@/components/social/social-lenses";
 import { SocialStoriesRail } from "@/components/social/social-stories-rail";
 import { SocialPostCard } from "@/components/social/social-ui";
+import { SOCIAL_PAGE_CLASS } from "@/lib/social-chrome";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
 import { parseSocialCategoryParam, SOCIAL_CATEGORY_ALL, SOCIAL_CATEGORY_PARAM } from "@/lib/social-categories";
@@ -16,7 +17,7 @@ import {
   parseFollowingWallCursorParam,
   socialFollowingWallHref,
 } from "@/lib/social-home-bounds";
-import { SOCIAL } from "@/lib/social";
+import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import {
   groupStoryRail,
   loadFolloweeIds,
@@ -90,23 +91,23 @@ export default async function SocialHomePage({
     : [];
 
   return (
-    <div data-social-home="">
-      <PageHeader title={SOCIAL.home.title} subtitle={SOCIAL.home.subtitle} />
+    <div data-social-home="" className={SOCIAL_PAGE_CLASS}>
+      <h1 className="sr-only">{SOCIAL.home.title}</h1>
       <SocialStoriesRail cards={rail} authors={authors} faces={faces} canCreate={!!profile} />
       {storiesPage.truncated ? (
-        <InlineNotice tone="info" className="mb-[var(--space-4)]" data-social-stories-truncated="">
+        <InlineNotice tone="info" data-social-stories-truncated="">
           {SOCIAL.home.truncatedStories}
         </InlineNotice>
       ) : null}
       {followees.truncated ? (
-        <InlineNotice tone="info" className="mb-[var(--space-4)]" data-social-followees-truncated="">
+        <InlineNotice tone="info" data-social-followees-truncated="">
           {SOCIAL.home.truncatedFollowees}
         </InlineNotice>
       ) : null}
-      {profile ? <SocialOnboardingChecklist items={checklist} /> : null}
       <SocialLensRow active={topic} />
+      {profile ? <SocialOnboardingChecklist items={checklist} /> : null}
       {wall.truncated ? (
-        <div data-social-wall-truncated="" className="mb-[var(--space-4)] flex flex-col gap-[var(--space-3)]">
+        <div data-social-wall-truncated="" className="flex flex-col gap-[var(--space-3)]">
           <InlineNotice tone="info">{SOCIAL.home.truncatedWall}</InlineNotice>
           {wall.nextCursor ? (
             <TextAction href={socialFollowingWallHref({ topic, after: wall.nextCursor })} data-social-wall-older="">
@@ -117,10 +118,15 @@ export default async function SocialHomePage({
       ) : null}
       {posts.length === 0 ? (
         <div data-social-following-empty="">
-          <HouseEmpty>{SOCIAL.home.empty}</HouseEmpty>
+          <SocialEmpty
+            icon="image"
+            title={SOCIAL.home.empty}
+            hint={SOCIAL.home.emptyHint}
+            action={{ href: SOCIAL_ROUTES.explore, label: SOCIAL.home.goExplore }}
+          />
         </div>
       ) : (
-        <div data-social-feed="">
+        <div data-social-feed="" className="flex flex-col gap-[var(--space-4)]">
           {posts.map((post) => {
             const author = authors.get(post.author_id);
             const group = post.group_id ? groups.get(post.group_id) : null;

@@ -23,7 +23,9 @@ import {
   SOCIAL_ROUTES,
   socialHandleRequiredError,
   socialInitials,
+  formatSocialCount,
   socialProfileHref,
+  socialProfilePublicHost,
   socialProfilePublicUrl,
   socialProfileRewriteTarget,
   socialVanityInternalPath,
@@ -41,7 +43,8 @@ describe("social copy lock", () => {
     expect(SOCIAL.explore.subtitle).toContain(PRODUCT_NAME);
     expect(SOCIAL_ROUTES.explore).toBe("/social/explore");
     expect(SOCIAL_ROUTES.create).toBe("/social/create");
-    expect(SOCIAL_ROUTES.storiesNew).toBe("/social/stories/new");
+      expect(SOCIAL_ROUTES.stories).toBe("/social/stories");
+      expect(SOCIAL_ROUTES.storiesNew).toBe("/social/stories/new");
     expect(SOCIAL.dms.subtitle).toContain(PRODUCT_NAME);
     expect(SOCIAL.dms.addPeople).toBe("Add people");
     expect(SOCIAL_ROUTES.dms).toBe("/social/dms");
@@ -134,6 +137,10 @@ describe("profile opt-in", () => {
     expect(hrefSrc).toContain("${SOCIAL_ROUTES.profileByHandle}/${bare}");
     expect(hrefSrc).not.toContain("${SOCIAL_ROUTES.profileByHandle}/@${bare}");
     expect(socialProfilePublicUrl("acarpcreate")).toBe("https://24frame.co/@acarpcreate");
+    expect(socialProfilePublicHost("acarpcreate")).toBe("24frame.co/@acarpcreate");
+    expect(formatSocialCount(24)).toBe("24");
+    expect(formatSocialCount(1200)).toBe("1.2k");
+    expect(formatSocialCount(318)).toBe("318");
     expect(socialProfilePublicUrl("")).toBe("https://24frame.co/@");
     expect(socialProfilePublicUrl("@Ada")).toBe("https://24frame.co/@ada");
     expect(SOCIAL_PROFILE_ORIGIN).toBe("https://24frame.co");

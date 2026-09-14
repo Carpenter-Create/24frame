@@ -8,6 +8,7 @@ import { SOCIAL, SOCIAL_ROUTES } from "./social";
 const home = readFileSync("src/app/(app)/social/page.tsx", "utf8");
 const explore = readFileSync("src/app/(app)/social/explore/page.tsx", "utf8");
 const create = readFileSync("src/app/(app)/social/create/page.tsx", "utf8");
+const stories = readFileSync("src/app/(app)/social/stories/page.tsx", "utf8");
 const messages = readFileSync("src/app/(app)/social/dms/page.tsx", "utf8");
 const profile = readFileSync("src/app/(app)/social/profile/page.tsx", "utf8");
 const dock = readFileSync("src/components/social/social-mobile-dock.tsx", "utf8");
@@ -53,11 +54,11 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).not.toContain("SocialPostCompose");
     expect(home).not.toContain("SocialCreateCompose");
     expect(home).not.toContain("loadVisiblePosts");
-    expect(SOCIAL.checklist.photo).toBe("Photo");
-    expect(SOCIAL.checklist.bio).toBe("Bio");
+    expect(SOCIAL.checklist.photo).toBe("Add a profile photo");
+    expect(SOCIAL.checklist.bio).toBe("Write a short bio");
     expect(SOCIAL.checklist.introduce).toBe("Introduce yourself");
-    expect(SOCIAL.checklist.firstPost).toBe("First post");
-    expect(SOCIAL.checklist.firstStory).toBe("First story");
+    expect(SOCIAL.checklist.firstPost).toBe("Share your first post");
+    expect(SOCIAL.checklist.firstStory).toBe("Create your first story");
   });
 
   it("hides Home lenses on Explore, Messages, Profile, and Create", () => {
@@ -71,6 +72,9 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(profile).not.toContain("SocialLensRow");
     expect(create).not.toContain("SocialLensRow");
     expect(create).toContain("SocialCreateCompose");
+    expect(stories).toContain("SocialStoriesRail");
+    expect(stories).toContain("data-social-stories-empty");
+    expect(stories).not.toContain("SocialLensRow");
   });
 
   it("locks the Home category register", () => {
@@ -104,6 +108,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(pkg).toContain('"next": "16.3.5"');
     expect(dock).toContain("data-social-mobile-pill");
     expect(dock).toContain("data-social-create-fab");
+    expect(dock).toContain("SocialIcon");
+    expect(dock).toContain('name="plus"');
     expect(home).not.toContain("Reels");
     expect(explore).not.toContain("Reels");
   });
