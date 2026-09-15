@@ -16,7 +16,7 @@ import {
 } from "@/lib/social-chrome";
 import { SOCIAL_ICON_SIZE_COMPOSER, SOCIAL_ICON_SIZE_STORY_PLUS } from "@/lib/social-icons";
 import { SOCIAL_MEDIA_ACCEPT } from "@/lib/social-media";
-import { SOCIAL, SOCIAL_ROUTES, socialComposerPrompt } from "@/lib/social";
+import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { SocialEmpty, SocialStoriesEmpty } from "./social-empty";
 import { SocialHomeComposer } from "./social-home-composer";
 import { SocialOnboardingChecklist } from "./social-checklist";
@@ -37,8 +37,8 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).toContain(SOCIAL_COMPOSER_FIELD_CLASS);
     expect(html).toContain(SOCIAL_COMPOSER_MEDIA_CLASS);
     expect(html).toContain("/social/create?kind=text");
-    expect(html).toContain(socialComposerPrompt("Adam Carpenter"));
-    expect(html).toContain(SOCIAL.home.composerPrompt);
+    expect(html).toContain("What&#x27;s on your mind Adam?");
+    expect(html).toContain("What&#x27;s on your mind?");
     expect(html).toContain(SOCIAL.home.attach);
     expect(html).toContain(`accept="${SOCIAL_MEDIA_ACCEPT}"`);
     expect(html).toContain('data-social-icon="image"');

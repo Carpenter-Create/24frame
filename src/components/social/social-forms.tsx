@@ -263,8 +263,10 @@ export function SocialCreateCompose({
   authorPhotoUrl?: string | null;
   initialKind?: ComposeKind | null;
 }) {
+  const [homeMedia] = useState(takeSocialHomeComposerMedia);
+  const ingestHomeMedia = homeMedia.length > 0 && (initialKind ?? "photo") !== "text";
   const [error, setError] = useState("");
-  const [uploading, setUploading] = useState(false);
+  const [uploading, setUploading] = useState(ingestHomeMedia);
   const [kind, setKind] = useState<ComposeKind>(initialKind ?? "photo");
   const [body, setBody] = useState("");
   const [media, setMedia] = useState<SocialMediaItem[]>([]);
@@ -278,11 +280,9 @@ export function SocialCreateCompose({
   const well = socialCreateWellCopy(kind, media.length > 0);
 
   useEffect(() => {
-    const files = takeSocialHomeComposerMedia();
-    if (files.length === 0 || (initialKind ?? "photo") === "text") return;
+    if (!ingestHomeMedia) return;
     let cancelled = false;
-    setUploading(true);
-    void uploadSocialMedia(files, [], SOCIAL_MEDIA_MAX_ITEMS, "posts").then((result) => {
+    void uploadSocialMedia(homeMedia, [], SOCIAL_MEDIA_MAX_ITEMS, "posts").then((result) => {
       if (cancelled) return;
       setUploading(false);
       if (result.error) {
@@ -294,7 +294,7 @@ export function SocialCreateCompose({
     return () => {
       cancelled = true;
     };
-  }, [initialKind]);
+  }, [homeMedia, ingestHomeMedia]);
 
   async function onPick(files: ArrayLike<File> | null) {
     if (!files || files.length === 0 || kind === "text") return;
