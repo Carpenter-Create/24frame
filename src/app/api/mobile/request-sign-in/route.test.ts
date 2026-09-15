@@ -18,6 +18,7 @@ vi.mock("@/lib/dashboard-sign-in-rate-limit", async () => {
 });
 
 import { issueMobileSignInCode } from "@/lib/auth-magic-link";
+import { AuthSesSuppressedError } from "@/lib/auth-ses";
 import {
   assertDashboardSignInAllowed,
   DashboardSignInRateLimitError,
@@ -76,6 +77,29 @@ describe("POST /api/mobile/request-sign-in", () => {
       error: "Too many requests. Please try again later.",
     });
     expect(issueMobileSignInCode).not.toHaveBeenCalled();
+  });
+
+  it("surfaces a suppressed destination as 422 without AWS internals", async () => {
+    const logged = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    vi.mocked(issueMobileSignInCode).mockRejectedValue(
+      new AuthSesSuppressedError("ada@studio.com"),
+    );
+    const res = await POST(
+      new Request("https://app.24frame.co/api/mobile/request-sign-in", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email: "ada@studio.com" }),
+      }),
+    );
+    expect(res.status).toBe(422);
+    expect(await res.json()).toEqual({
+      error: "This address cannot receive sign-in mail.",
+    });
+    expect(logged).toHaveBeenCalledWith(
+      "[mobile-sign-in] SES destination suppressed",
+      "ada@studio.com",
+    );
+    logged.mockRestore();
   });
 
   it("keeps the mobile send path off signInWithOtp", () => {

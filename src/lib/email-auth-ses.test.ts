@@ -5,10 +5,15 @@ const { mockSendAuthSesEmail } = vi.hoisted(() => ({
   mockSendAuthSesEmail: vi.fn(),
 }));
 
-vi.mock("@/lib/auth-ses", () => ({
-  sendAuthSesEmail: mockSendAuthSesEmail,
-}));
+vi.mock("@/lib/auth-ses", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/auth-ses")>();
+  return {
+    ...actual,
+    sendAuthSesEmail: mockSendAuthSesEmail,
+  };
+});
 
+import { AuthSesSuppressedError } from "@/lib/auth-ses";
 import {
   buildMagicLinkEmail,
   buildOtpEmail,
@@ -54,6 +59,18 @@ describe("Auth house mail uses SES transport", () => {
       ...expected,
     });
     expect(expected.text).toContain("Or enter this code: 847291");
+  });
+
+  it("propagates AuthSesSuppressedError from the SES transport", async () => {
+    const suppressed = new AuthSesSuppressedError("holder@example.com");
+    mockSendAuthSesEmail.mockRejectedValueOnce(suppressed);
+    await expect(sendOtpEmail("holder@example.com", "012345")).rejects.toBe(suppressed);
+    mockSendAuthSesEmail.mockRejectedValueOnce(suppressed);
+    await expect(sendMagicLinkEmail("holder@example.com", SIGN_IN_URL)).rejects.toBe(suppressed);
+    mockSendAuthSesEmail.mockRejectedValueOnce(suppressed);
+    await expect(sendSignInWithCodeEmail("holder@example.com", SIGN_IN_URL, "847291")).rejects.toBe(
+      suppressed,
+    );
   });
 
   it("keeps Auth send functions off Resend", () => {

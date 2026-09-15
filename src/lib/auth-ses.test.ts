@@ -15,7 +15,7 @@ vi.mock("@aws-sdk/client-sesv2", async (importOriginal) => {
   };
 });
 
-import { SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2";
+import { MessageRejected, SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2";
 
 import {
   AUTH_SES_CONFIGURATION_SET,
@@ -24,9 +24,12 @@ import {
   AUTH_SES_ENV,
   AUTH_SES_IDENTITY_DOMAIN,
   AUTH_SES_REGION,
+  AUTH_SES_SUPPRESSED_USER_MESSAGE,
+  AuthSesSuppressedError,
   authEmailFrom,
   authEmailReplyTo,
   emailAddressFrom,
+  isAuthSesSuppressedError,
   requireAuthSesRegion,
   sendAuthSesEmail,
 } from "./auth-ses";
@@ -181,7 +184,28 @@ describe("auth SES isolation", () => {
     expect(() => authEmailFrom()).toThrow(/24frame\.co/);
   });
 
-  it("wraps SES send failures without leaking other AWS namespaces", async () => {
+  it("maps SES MessageRejected to AuthSesSuppressedError with the recipient", async () => {
+    mockSend.mockRejectedValueOnce(
+      new MessageRejected({
+        message: "Email address is on the suppression list.",
+        $metadata: { httpStatusCode: 400 },
+      }),
+    );
+    const send = sendAuthSesEmail({
+      to: "holder@example.com",
+      subject: "x",
+      text: "x",
+      html: "<p>x</p>",
+    });
+    await expect(send).rejects.toBeInstanceOf(AuthSesSuppressedError);
+    await expect(send).rejects.toMatchObject({
+      name: "AuthSesSuppressedError",
+      recipient: "holder@example.com",
+      message: "Auth SES destination suppressed: holder@example.com",
+    });
+  });
+
+  it("maps a MessageRejected-named Error to AuthSesSuppressedError", async () => {
     mockSend.mockRejectedValueOnce(new Error("MessageRejected"));
     await expect(
       sendAuthSesEmail({
@@ -190,7 +214,50 @@ describe("auth SES isolation", () => {
         text: "x",
         html: "<p>x</p>",
       }),
-    ).rejects.toThrow(/Email send failed: MessageRejected/);
+    ).rejects.toBeInstanceOf(AuthSesSuppressedError);
+  });
+
+  it("maps account-suppressed destination text to AuthSesSuppressedError", async () => {
+    mockSend.mockRejectedValueOnce(
+      new Error(
+        "Amazon SES did not send the message to this address because it is on the suppression list for your account.",
+      ),
+    );
+    try {
+      await sendAuthSesEmail({
+        to: "blocked@example.com",
+        subject: "x",
+        text: "x",
+        html: "<p>x</p>",
+      });
+      expect.unreachable();
+    } catch (error) {
+      expect(isAuthSesSuppressedError(error)).toBe(true);
+      if (isAuthSesSuppressedError(error)) {
+        expect(error.recipient).toBe("blocked@example.com");
+      }
+    }
+  });
+
+  it("wraps other SES send failures as generic send failures", async () => {
+    mockSend.mockRejectedValueOnce(
+      Object.assign(new Error("Sending paused for the account."), {
+        name: "AccountSendingPausedException",
+      }),
+    );
+    const send = sendAuthSesEmail({
+      to: "holder@example.com",
+      subject: "x",
+      text: "x",
+      html: "<p>x</p>",
+    });
+    await expect(send).rejects.toThrow(/Email send failed: Sending paused for the account\./);
+    await expect(send).rejects.not.toBeInstanceOf(AuthSesSuppressedError);
+  });
+
+  it("keeps the user-facing suppressed string free of AWS internals", () => {
+    expect(AUTH_SES_SUPPRESSED_USER_MESSAGE).toBe("This address cannot receive sign-in mail.");
+    expect(AUTH_SES_SUPPRESSED_USER_MESSAGE).not.toMatch(/SES|AWS|MessageRejected|suppression/i);
   });
 
   it("sends Simple content with house subject/text/html", async () => {
@@ -249,6 +316,8 @@ describe("auth SES isolation", () => {
     expect(src).not.toContain("from \"resend\"");
     expect(src).not.toContain("@aws-sdk/client-cognito");
     expect(src).not.toContain("noreply@");
+    expect(src).not.toContain("GetSuppressedDestinationCommand");
+    expect(src).toContain("AuthSesSuppressedError");
     expect(src).toContain("ConfigurationSetName: AUTH_SES_CONFIGURATION_SET");
     expect(src).toContain("ReplyToAddresses");
     expect(src).toContain('Value: "auth"');
