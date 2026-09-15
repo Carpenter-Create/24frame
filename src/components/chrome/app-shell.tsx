@@ -84,11 +84,17 @@ export function AppShell({
 }) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const [workspaceCookie, setWorkspaceCookie] = useState(defaultWorkspace);
+  const cookiesApplied = useRef(false);
+  const collapseTouched = useRef(false);
   const pathname = usePathname();
   const workspace = resolveWorkspaceMode(pathname, workspaceCookie);
   const applyChromeCookies = useCallback(
     (next: { defaultCollapsed: boolean; defaultWorkspace: WorkspaceMode }) => {
-      setCollapsed(next.defaultCollapsed);
+      if (cookiesApplied.current) return;
+      cookiesApplied.current = true;
+      if (!collapseTouched.current) {
+        setCollapsed(next.defaultCollapsed);
+      }
       setWorkspaceCookie(next.defaultWorkspace);
     },
     [],
@@ -153,6 +159,7 @@ export function AppShell({
   }
 
   const toggle = () => {
+    collapseTouched.current = true;
     setCollapsed((c) => {
       const next = !c;
       persistSidebarCollapsed(next);
@@ -431,10 +438,7 @@ function ChromeCookieSync({
   onCookies: (next: { defaultCollapsed: boolean; defaultWorkspace: WorkspaceMode }) => void;
 }) {
   const data = use(chrome);
-  const applied = useRef(false);
   useEffect(() => {
-    if (applied.current) return;
-    applied.current = true;
     onCookies({
       defaultCollapsed: data.defaultCollapsed,
       defaultWorkspace: data.defaultWorkspace,

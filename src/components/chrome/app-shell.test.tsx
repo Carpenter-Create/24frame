@@ -523,14 +523,22 @@ describe("AppShell rail-collapse chevron", () => {
     expect(pending).not.toContain("data-social-rail");
 
     expect(shellSrc).toContain("<ChromeCookieSync chrome={chrome} onCookies={applyChromeCookies} />");
+    expect(shellSrc).toContain("if (cookiesApplied.current) return");
+    expect(shellSrc).toContain("if (!collapseTouched.current)");
     expect(shellSrc).toContain("setCollapsed(next.defaultCollapsed)");
     expect(shellSrc).toContain("setWorkspaceCookie(next.defaultWorkspace)");
+    expect(shellSrc).toContain("collapseTouched.current = true");
+    const applyFn = shellSrc.slice(
+      shellSrc.indexOf("const applyChromeCookies"),
+      shellSrc.indexOf("const cookieSync"),
+    );
+    expect(applyFn).toContain("if (cookiesApplied.current) return");
+    expect(applyFn).toContain("if (!collapseTouched.current)");
     const syncFn = shellSrc.slice(shellSrc.indexOf("function ChromeCookieSync"));
     const syncBody = syncFn.slice(0, syncFn.indexOf("\nfunction SideNavSlot"));
     expect(syncBody).toContain("use(chrome)");
     expect(syncBody).toContain("data.defaultCollapsed");
     expect(syncBody).toContain("data.defaultWorkspace");
-    expect(syncBody).toContain("applied.current = true");
     expect(syncBody).not.toContain("persistSidebarCollapsed");
     expect(syncBody).not.toContain("persistWorkspaceCookie");
     const appShellFn = shellSrc.slice(shellSrc.indexOf("export function AppShell"));
