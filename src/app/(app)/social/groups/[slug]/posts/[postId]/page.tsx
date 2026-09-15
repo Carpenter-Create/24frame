@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
@@ -10,19 +9,15 @@ import { signedSocialMediaItems } from "@/lib/s3-social-media";
 import { SOCIAL, socialGroupHref, socialMemberHref } from "@/lib/social";
 import { loadLikedPostIds } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
-import { getOrgContext } from "@/lib/supabase/context";
-import { createClient } from "@/lib/supabase/server";
+import { requireSocialSession } from "@/lib/social-session";
 
 export default async function SocialPostPage({
   params,
 }: {
   params: Promise<{ slug: string; postId: string }>;
 }) {
-  const ctx = await getOrgContext();
-  if (!ctx) redirect("/login");
-
-  const { slug, postId } = await params;
-  const supabase = await createClient();
+  const [session, { slug, postId }] = await Promise.all([requireSocialSession(), params]);
+  const { ctx, supabase } = session;
   const { data: group } = await supabase
     .from("groups")
     .select("id, slug, name")

@@ -1,29 +1,37 @@
+import { Suspense } from "react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { InlineNotice } from "@/components/ui/inline-notice";
+import { SocialDmsRowsSkeleton } from "@/components/social/social-skeletons";
 import { SocialConversationFaces } from "@/components/social/social-ui";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { conversationRoomLabel, inboxPeerIds, SOCIAL, socialDmHref } from "@/lib/social";
-import { loadDmInbox, type DmInboxRow } from "@/lib/social-dms";
+import { loadDmInbox } from "@/lib/social-dms";
 import { loadProfilesByIds } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
-import { getOrgContext } from "@/lib/supabase/context";
-import { createClient } from "@/lib/supabase/server";
+import { requireSocialSession, type SocialSession } from "@/lib/social-session";
 
 export default async function SocialDmsPage() {
-  const ctx = await getOrgContext();
-  if (!ctx) redirect("/login");
+  const session = await requireSocialSession();
+  return (
+    <div data-social-dms="">
+      <PageHeader title={SOCIAL.dms.title} subtitle={SOCIAL.dms.subtitle} />
+      <Suspense fallback={<SocialDmsRowsSkeleton />}>
+        <SocialDmsInbox session={session} />
+      </Suspense>
+    </div>
+  );
+}
 
-  const supabase = await createClient();
-  const profile = await ensureOwnSocialProfile(supabase, ctx.user);
-  const inbox = profile
-    ? await loadDmInbox(supabase)
-    : { rows: [] as DmInboxRow[], truncated: false };
-
-  const rows = inbox.rows;
+async function SocialDmsInbox({ session }: { session: SocialSession }) {
+  const { ctx, supabase } = session;
+  const [profile, inbox] = await Promise.all([
+    ensureOwnSocialProfile(supabase, ctx.user),
+    loadDmInbox(supabase),
+  ]);
+  const rows = profile ? inbox.rows : [];
   const peopleIds = [...new Set(rows.flatMap((row) => inboxPeerIds(row)))];
   const [peers, faces] = await Promise.all([
     loadProfilesByIds(supabase, peopleIds),
@@ -31,9 +39,8 @@ export default async function SocialDmsPage() {
   ]);
 
   return (
-    <div data-social-dms="">
-      <PageHeader title={SOCIAL.dms.title} subtitle={SOCIAL.dms.subtitle} />
-      {inbox.truncated ? (
+    <>
+      {inbox.truncated && profile ? (
         <InlineNotice tone="info" className="mb-[var(--space-4)]" data-social-dms-truncated="">
           {SOCIAL.dms.truncatedInbox}
         </InlineNotice>
@@ -73,6 +80,6 @@ export default async function SocialDmsPage() {
           );
         })}
       </ul>
-    </div>
+    </>
   );
 }

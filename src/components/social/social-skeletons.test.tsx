@@ -20,6 +20,8 @@ const LOADING = [
   "src/app/(app)/social/stories/[id]/loading.tsx",
   "src/app/(app)/social/explore/loading.tsx",
   "src/app/(app)/social/dms/loading.tsx",
+  "src/app/(app)/social/profile/edit/loading.tsx",
+  "src/app/(app)/social/profile/edit/bio/loading.tsx",
 ] as const;
 
 describe("Social loading skeletons", () => {
@@ -52,6 +54,7 @@ describe("Social loading skeletons", () => {
     expect(stories).toContain("data-social-stories-index-skeleton");
     expect(viewer).toContain("data-social-story-viewer-skeleton");
     expect(explore).toContain("data-social-explore-skeleton");
+    expect(explore).toContain("data-social-explore-results-skeleton");
     expect(dms).toContain("data-social-dms-skeleton");
 
     for (const html of [home, profile, create, stories, viewer, explore, dms]) {

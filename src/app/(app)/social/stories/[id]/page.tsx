@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation";
-
 import { SocialEmpty } from "@/components/social/social-empty";
 import { SocialForYouRail } from "@/components/social/social-for-you";
 import { SocialStoriesRail } from "@/components/social/social-stories-rail";
@@ -21,17 +19,15 @@ import {
 } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { markSocialStoryViewed } from "@/app/(app)/social/actions";
-import { getOrgContext } from "@/lib/supabase/context";
-import { createClient } from "@/lib/supabase/server";
+import { requireSocialSession } from "@/lib/social-session";
 
 export default async function SocialStoryPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const [ctx, { id }] = await Promise.all([getOrgContext(), params]);
-  if (!ctx) redirect("/login");
-  const supabase = await createClient();
+  const [session, { id }] = await Promise.all([requireSocialSession(), params]);
+  const { ctx, supabase } = session;
   const story = await loadStoryById(supabase, id);
   if (!story) {
     return (
@@ -58,14 +54,11 @@ export default async function SocialStoryPage({
     );
   }
 
-  const profile = await ensureOwnSocialProfile(supabase, ctx.user);
-  const followeesPromise = profile
-    ? loadFolloweeIds(supabase, ctx.user.id)
-    : Promise.resolve({ ids: [] as string[] });
-  const [followees] = await Promise.all([
-    followeesPromise,
-    profile ? markSocialStoryViewed(story.id) : Promise.resolve(),
+  const [profile, followees] = await Promise.all([
+    ensureOwnSocialProfile(supabase, ctx.user),
+    loadFolloweeIds(supabase, ctx.user.id),
   ]);
+  if (profile) await markSocialStoryViewed(story.id);
   const authorIds = followingAuthorIds(ctx.user.id, followees.ids);
   const [authorStoriesPage, railPage, suggested] = await Promise.all([
     loadLiveStories(supabase, [story.author_id]),

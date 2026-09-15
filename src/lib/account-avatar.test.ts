@@ -83,10 +83,13 @@ describe("avatar content rules", () => {
 
 describe("one face across chrome, Settings, and Social", () => {
   it("signs avatars/{user-id}/avatar from the session user and keeps one upload", () => {
-    expect(layoutSrc).toContain("hasAvatarObject(ctx.user.id)");
-    expect(layoutSrc).toContain("ACCOUNT_PHOTO_HREF");
-    expect(layoutSrc).toContain("photoUrl={photoUrl}");
+    const chromeSrc = readFileSync(join(here, "app-shell-chrome.ts"), "utf8");
+    expect(chromeSrc).toContain("hasAvatarObject(ctx.user.id)");
+    expect(chromeSrc).toContain("ACCOUNT_PHOTO_HREF");
+    expect(chromeSrc).toContain("photoUrl: hasPhoto ? ACCOUNT_PHOTO_HREF : null");
+    expect(layoutSrc).toContain("loadAppShellChrome()");
     expect(layoutSrc).not.toContain("signedAvatarUrl");
+    expect(chromeSrc).not.toContain("signedAvatarUrl");
     expect(settingsSrc).toContain("signedAvatarUrl(ctx.user.id)");
     expect(formSrc).toContain("uploadAccountPhoto");
     expect(socialProfileSrc).toContain("signedAvatarUrl(profile.id)");

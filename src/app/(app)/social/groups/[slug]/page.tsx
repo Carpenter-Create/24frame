@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation";
-
 import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { SocialJoinGroupButton, SocialPostCompose } from "@/components/social/social-forms";
@@ -13,19 +11,15 @@ import {
   loadVisiblePosts,
 } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
-import { getOrgContext } from "@/lib/supabase/context";
-import { createClient } from "@/lib/supabase/server";
+import { requireSocialSession } from "@/lib/social-session";
 
 export default async function SocialGroupPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const ctx = await getOrgContext();
-  if (!ctx) redirect("/login");
-
-  const { slug } = await params;
-  const supabase = await createClient();
+  const [session, { slug }] = await Promise.all([requireSocialSession(), params]);
+  const { ctx, supabase } = session;
   const { data: group } = await supabase
     .from("groups")
     .select("id, slug, name, description, visibility, member_count")

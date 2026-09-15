@@ -1,18 +1,12 @@
-import { redirect } from "next/navigation";
-
 import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { SocialGroupCreateForm } from "@/components/social/social-forms";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
-import { getOrgContext } from "@/lib/supabase/context";
-import { createClient } from "@/lib/supabase/server";
+import { requireSocialSession } from "@/lib/social-session";
 
 export default async function SocialGroupNewPage() {
-  const ctx = await getOrgContext();
-  if (!ctx) redirect("/login");
-
-  const supabase = await createClient();
+  const { ctx, supabase } = await requireSocialSession();
   const profile = await ensureOwnSocialProfile(supabase, ctx.user);
   const { data: canCreate } = profile
     ? await supabase.rpc("has_capability", { p_user: ctx.user.id, p_cap: "create_group" })

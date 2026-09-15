@@ -353,7 +353,7 @@ describe("social writes stay on the live spine", () => {
     expect(pages).toContain("SocialStoriesRail");
     expect(pages).not.toContain("from(\"titles\")");
     expect(board).toContain("loadLeaderboardBoard");
-    expect(board).toContain("createClient");
+    expect(board).toContain("requireSocialSession");
     expect(board).not.toContain("createAdminClient");
     expect(board).not.toContain("rebuild_leaderboards");
     expect(actions).not.toContain("from(\"courses\")");

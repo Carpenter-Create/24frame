@@ -128,11 +128,14 @@ describe("account name persist read-after-write", () => {
     expect(authImpl).toContain("authDisplayName");
     expect(authImpl).not.toMatch(/await supabase\.auth\.getUser\(/);
     expect(pageSrc).toContain("ctx.user.name");
-    expect(layoutSrc).toContain("name={ctx.user.name}");
-    expect(layoutSrc).toContain("photoUrl={photoUrl}");
-    expect(layoutSrc).toContain("hasAvatarObject(ctx.user.id)");
-    expect(layoutSrc).toContain("ACCOUNT_PHOTO_HREF");
+    const chromeSrc = readFileSync(join(here, "app-shell-chrome.ts"), "utf8");
+    expect(chromeSrc).toContain("name: ctx.user.name");
+    expect(chromeSrc).toContain("photoUrl: hasPhoto ? ACCOUNT_PHOTO_HREF : null");
+    expect(chromeSrc).toContain("hasAvatarObject(ctx.user.id)");
+    expect(chromeSrc).toContain("ACCOUNT_PHOTO_HREF");
+    expect(layoutSrc).toContain("loadAppShellChrome()");
     expect(layoutSrc).not.toContain("signedAvatarUrl");
+    expect(chromeSrc).not.toContain("signedAvatarUrl");
   });
 
   it("does not invent a name when the refreshed claims still have none", () => {

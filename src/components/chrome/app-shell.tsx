@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, use, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CaretDoubleLeft, CaretDoubleRight } from "@phosphor-icons/react";
@@ -15,6 +15,7 @@ import { BrandEmblem } from "./brand-emblem";
 import { TitlesHeaderSearch } from "@/components/titles/titles-header-search";
 import { AskAssistantChromeProvider } from "@/components/messages/ask-globee-chrome";
 import { cn } from "@/lib/cn";
+import type { AppShellChrome } from "@/lib/app-shell-chrome";
 import type { MessagesSurface } from "@/lib/ask-globee";
 import { MOBILE_CHROME_LEAD_PAD_CLASS } from "@/lib/mobile-chrome";
 import {
@@ -54,7 +55,8 @@ type Org = { id: string; name: string };
 // friend. Not a second column. Collapse stays off. Phone left slot is
 // the same ← Home (623:785). Hamburger stays off. Avatar 32 stays.
 export function AppShell({
-  email,
+  chrome,
+  email = "",
   name,
   photoUrl,
   messagesUnread,
@@ -64,11 +66,13 @@ export function AppShell({
   defaultWorkspace = "aggregation",
   children,
 }: {
-  email: string;
+  /** Layout chrome. Do not use() this at the AppShell top — that re-blocks {children}. */
+  chrome?: Promise<AppShellChrome>;
+  email?: string;
   name?: string | null;
   photoUrl?: string | null;
-  orgs: Org[];
-  activeOrgId: string | null;
+  orgs?: Org[];
+  activeOrgId?: string | null;
   /** Promise, not a number — resolved inside SideNav's Suspense boundary so the
    *  shell paints without waiting on the badge query. */
   messagesUnread: Promise<number>;
@@ -79,8 +83,28 @@ export function AppShell({
   children: React.ReactNode;
 }) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
+  const [workspaceCookie, setWorkspaceCookie] = useState(defaultWorkspace);
+  const cookiesApplied = useRef(false);
+  const collapseTouched = useRef(false);
   const pathname = usePathname();
-  const workspace = resolveWorkspaceMode(pathname, defaultWorkspace);
+  const workspace = resolveWorkspaceMode(pathname, workspaceCookie);
+  const applyChromeCookies = useCallback(
+    (next: { defaultCollapsed: boolean; defaultWorkspace: WorkspaceMode }) => {
+      if (cookiesApplied.current) return;
+      cookiesApplied.current = true;
+      if (!collapseTouched.current) {
+        setCollapsed(next.defaultCollapsed);
+      }
+      setWorkspaceCookie(next.defaultWorkspace);
+    },
+    [],
+  );
+  const cookieSync =
+    chrome ? (
+      <Suspense fallback={null}>
+        <ChromeCookieSync chrome={chrome} onCookies={applyChromeCookies} />
+      </Suspense>
+    ) : null;
   // The catalog opts out of the centered width cap so its hero can bleed full-width
   // (edge of sidebar → right edge). That page then manages its own content max-width.
   // Non-bleed pages share `--content-inset`. Titles stay the bleed exception.
@@ -97,8 +121,9 @@ export function AppShell({
   if (socialChrome) {
     return (
       <AskAssistantChromeProvider>
+        {cookieSync}
         <div className="min-h-dvh bg-bg" data-social-workspace="">
-          <SocialTopBar email={email} name={name} photoUrl={photoUrl} />
+          <SocialTopBarSlot chrome={chrome} email={email} name={name} photoUrl={photoUrl} />
           <aside
             className={cn(
               "fixed left-0 top-[calc(var(--header-height)+16px)] z-30 hidden h-[calc(100dvh-var(--header-height)-32px)] flex-col md:flex",
@@ -118,7 +143,7 @@ export function AppShell({
                 />
               </div>
               <div className="min-h-0 flex-1" />
-              <SocialRailAccountChip name={name} photoUrl={photoUrl} />
+              <SocialRailAccountChipSlot chrome={chrome} name={name} photoUrl={photoUrl} />
             </div>
           </aside>
           <main
@@ -134,6 +159,7 @@ export function AppShell({
   }
 
   const toggle = () => {
+    collapseTouched.current = true;
     setCollapsed((c) => {
       const next = !c;
       persistSidebarCollapsed(next);
@@ -143,6 +169,7 @@ export function AppShell({
 
   return (
     <AskAssistantChromeProvider>
+    {cookieSync}
     <div
       className="min-h-dvh"
       style={
@@ -216,7 +243,8 @@ export function AppShell({
           {settingsPage ? (
             <SettingsRail />
           ) : (
-            <SideNav
+            <SideNavSlot
+              chrome={chrome}
               messagesUnread={messagesUnread}
               isGcStaff={isGcStaff}
               collapsed={collapsed}
@@ -241,12 +269,19 @@ export function AppShell({
         style={{ height: "var(--header-height)", marginLeft: "var(--sidebar-width)" }}
       >
         <div data-app-header-leading="" className="mr-auto flex min-w-0 flex-1 items-center gap-2">
-          {settingsPage ? <SettingsHeaderBack /> : <MobileNav isGcStaff={isGcStaff} workspace={workspace} />}
-          {messagesPage ? <MessagesAppHeader surface={messagesSurface} /> : null}
+          {settingsPage ? (
+            <SettingsHeaderBack />
+          ) : (
+            <MobileNavSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />
+          )}
+          {messagesPage ? (
+            <MessagesHeaderSlot chrome={chrome} messagesSurface={messagesSurface} />
+          ) : null}
           {titlesBleed ? <TitlesHeaderSearch /> : null}
         </div>
         <div className="flex items-center gap-3">
-          <UserMenu
+          <AccountMenuSlot
+            chrome={chrome}
             email={email}
             name={name}
             photoUrl={photoUrl}
@@ -286,4 +321,222 @@ export function AppShell({
     </div>
     </AskAssistantChromeProvider>
   );
+}
+
+function SocialTopBarSlot({
+  chrome,
+  email,
+  name,
+  photoUrl,
+}: {
+  chrome?: Promise<AppShellChrome>;
+  email: string;
+  name?: string | null;
+  photoUrl?: string | null;
+}) {
+  if (!chrome) return <SocialTopBar email={email} name={name} photoUrl={photoUrl} />;
+  return (
+    <Suspense fallback={<SocialTopBar email={email} name={name} photoUrl={photoUrl} />}>
+      <SocialTopBarFromChrome chrome={chrome} />
+    </Suspense>
+  );
+}
+
+function SocialTopBarFromChrome({ chrome }: { chrome: Promise<AppShellChrome> }) {
+  const data = use(chrome);
+  return <SocialTopBar email={data.email} name={data.name} photoUrl={data.photoUrl} />;
+}
+
+function SocialRailAccountChipSlot({
+  chrome,
+  name,
+  photoUrl,
+}: {
+  chrome?: Promise<AppShellChrome>;
+  name?: string | null;
+  photoUrl?: string | null;
+}) {
+  if (!chrome) return <SocialRailAccountChip name={name} photoUrl={photoUrl} />;
+  return (
+    <Suspense fallback={<SocialRailAccountChip name={name} photoUrl={photoUrl} />}>
+      <SocialRailAccountChipFromChrome chrome={chrome} />
+    </Suspense>
+  );
+}
+
+function SocialRailAccountChipFromChrome({ chrome }: { chrome: Promise<AppShellChrome> }) {
+  const data = use(chrome);
+  return <SocialRailAccountChip name={data.name} photoUrl={data.photoUrl} />;
+}
+
+function MessagesHeaderSlot({
+  chrome,
+  messagesSurface,
+}: {
+  chrome?: Promise<AppShellChrome>;
+  messagesSurface: MessagesSurface;
+}) {
+  if (!chrome) return <MessagesAppHeader surface={messagesSurface} />;
+  return (
+    <Suspense fallback={<MessagesAppHeader surface={messagesSurface} />}>
+      <MessagesHeaderFromChrome chrome={chrome} />
+    </Suspense>
+  );
+}
+
+function MessagesHeaderFromChrome({ chrome }: { chrome: Promise<AppShellChrome> }) {
+  const data = use(chrome);
+  return <MessagesAppHeader surface={data.messagesSurface} />;
+}
+
+function AccountMenuSlot({
+  chrome,
+  email,
+  name,
+  photoUrl,
+  defaultWorkspace,
+}: {
+  chrome?: Promise<AppShellChrome>;
+  email: string;
+  name?: string | null;
+  photoUrl?: string | null;
+  defaultWorkspace: WorkspaceMode;
+}) {
+  if (!chrome) {
+    return <UserMenu email={email} name={name} photoUrl={photoUrl} defaultWorkspace={defaultWorkspace} />;
+  }
+  return (
+    <Suspense
+      fallback={<UserMenu email={email} name={name} photoUrl={photoUrl} defaultWorkspace={defaultWorkspace} />}
+    >
+      <UserMenuFromChrome chrome={chrome} />
+    </Suspense>
+  );
+}
+
+function UserMenuFromChrome({
+  chrome,
+}: {
+  chrome: Promise<AppShellChrome>;
+}) {
+  const data = use(chrome);
+  return (
+    <UserMenu
+      email={data.email}
+      name={data.name}
+      photoUrl={data.photoUrl}
+      defaultWorkspace={data.defaultWorkspace}
+    />
+  );
+}
+
+function ChromeCookieSync({
+  chrome,
+  onCookies,
+}: {
+  chrome: Promise<AppShellChrome>;
+  onCookies: (next: { defaultCollapsed: boolean; defaultWorkspace: WorkspaceMode }) => void;
+}) {
+  const data = use(chrome);
+  useEffect(() => {
+    onCookies({
+      defaultCollapsed: data.defaultCollapsed,
+      defaultWorkspace: data.defaultWorkspace,
+    });
+  }, [data.defaultCollapsed, data.defaultWorkspace, onCookies]);
+  return null;
+}
+
+function SideNavSlot({
+  chrome,
+  messagesUnread,
+  isGcStaff,
+  collapsed,
+  workspace,
+}: {
+  chrome?: Promise<AppShellChrome>;
+  messagesUnread: Promise<number>;
+  isGcStaff: boolean;
+  collapsed: boolean;
+  workspace: WorkspaceMode;
+}) {
+  if (!chrome) {
+    return (
+      <SideNav
+        messagesUnread={messagesUnread}
+        isGcStaff={isGcStaff}
+        collapsed={collapsed}
+        workspace={workspace}
+      />
+    );
+  }
+  return (
+    <Suspense
+      fallback={
+        <SideNav
+          messagesUnread={messagesUnread}
+          isGcStaff={isGcStaff}
+          collapsed={collapsed}
+          workspace={workspace}
+        />
+      }
+    >
+      <SideNavFromChrome
+        chrome={chrome}
+        messagesUnread={messagesUnread}
+        collapsed={collapsed}
+        workspace={workspace}
+      />
+    </Suspense>
+  );
+}
+
+function SideNavFromChrome({
+  chrome,
+  messagesUnread,
+  collapsed,
+  workspace,
+}: {
+  chrome: Promise<AppShellChrome>;
+  messagesUnread: Promise<number>;
+  collapsed: boolean;
+  workspace: WorkspaceMode;
+}) {
+  const data = use(chrome);
+  return (
+    <SideNav
+      messagesUnread={messagesUnread}
+      isGcStaff={data.isGcStaff}
+      collapsed={collapsed}
+      workspace={workspace}
+    />
+  );
+}
+
+function MobileNavSlot({
+  chrome,
+  isGcStaff,
+  workspace,
+}: {
+  chrome?: Promise<AppShellChrome>;
+  isGcStaff: boolean;
+  workspace: WorkspaceMode;
+}) {
+  if (!chrome) return <MobileNav isGcStaff={isGcStaff} workspace={workspace} />;
+  return (
+    <Suspense fallback={<MobileNav isGcStaff={isGcStaff} workspace={workspace} />}>
+      <MobileNavFromChrome chrome={chrome} workspace={workspace} />
+    </Suspense>
+  );
+}
+
+function MobileNavFromChrome({
+  chrome,
+  workspace,
+}: {
+  chrome: Promise<AppShellChrome>;
+  workspace: WorkspaceMode;
+}) {
+  const data = use(chrome);
+  return <MobileNav isGcStaff={data.isGcStaff} workspace={workspace} />;
 }

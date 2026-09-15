@@ -1,22 +1,16 @@
-import { redirect } from "next/navigation";
-
 import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { loadCourseDetail } from "@/lib/courses";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
-import { getOrgContext } from "@/lib/supabase/context";
-import { createClient } from "@/lib/supabase/server";
+import { requireSocialSession } from "@/lib/social-session";
 
 export default async function SocialCourseDetailPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const ctx = await getOrgContext();
-  if (!ctx) redirect("/login");
-
-  const { slug } = await params;
-  const supabase = await createClient();
+  const [session, { slug }] = await Promise.all([requireSocialSession(), params]);
+  const { ctx, supabase } = session;
   const detail = await loadCourseDetail(supabase, slug, ctx.user.id);
 
   if (!detail.course) {

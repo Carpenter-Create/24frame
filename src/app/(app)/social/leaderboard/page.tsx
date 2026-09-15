@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import { PageHeader } from "@/components/ui/page-header";
 import { SocialAvatar } from "@/components/social/social-ui";
@@ -13,19 +12,16 @@ import {
 } from "@/lib/leaderboard";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { SOCIAL } from "@/lib/social";
-import { getOrgContext } from "@/lib/supabase/context";
-import { createClient } from "@/lib/supabase/server";
+import { requireSocialSession } from "@/lib/social-session";
 
 export default async function SocialLeaderboardPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const ctx = await getOrgContext();
-  if (!ctx) redirect("/login");
-
-  const supabase = await createClient();
-  const board = await loadLeaderboardBoard(supabase, (await searchParams).window, ctx.user.id);
+  const [session, sp] = await Promise.all([requireSocialSession(), searchParams]);
+  const { ctx, supabase } = session;
+  const board = await loadLeaderboardBoard(supabase, sp.window, ctx.user.id);
   const computed = formatLeaderboardComputedAt(board.computedAt);
   const faces = await signedAvatarUrls([
     ...board.top.map((row) => row.user_id),

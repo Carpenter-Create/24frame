@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { renderToStaticMarkup } from "react-dom/server";
+import { renderServerMarkup } from "@/lib/render-server-markup";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getOrgContext } from "@/lib/supabase/context";
@@ -49,7 +49,7 @@ describe("Social Explore", () => {
   });
 
   it("is a trending and search shell without Home lenses", async () => {
-    const html = renderToStaticMarkup(
+    const html = await renderServerMarkup(
       await SocialExplorePage({ searchParams: Promise.resolve({}) }),
     );
     expect(html).toContain("data-social-explore");
@@ -61,6 +61,12 @@ describe("Social Explore", () => {
     expect(html).not.toContain("Cinematography");
     expect(html).not.toContain("data-social-feed");
     expect(readFileSync("src/app/(app)/social/explore/page.tsx", "utf8")).not.toContain("SocialLensRow");
+    expect(readFileSync("src/app/(app)/social/explore/page.tsx", "utf8")).toContain(
+      "SocialExploreResultsSkeleton",
+    );
+    expect(readFileSync("src/app/(app)/social/explore/page.tsx", "utf8")).not.toContain(
+      "fallback={<SocialExploreSkeleton",
+    );
   });
 
   it("sends an unauthenticated visitor to login", async () => {
@@ -92,7 +98,7 @@ describe("Social Explore", () => {
       from: vi.fn((table: string) => (table === "profiles" ? peopleChain : postsChain)),
     } as never);
 
-    const html = renderToStaticMarkup(
+    const html = await renderServerMarkup(
       await SocialExplorePage({ searchParams: Promise.resolve({ q: "ada" }) }),
     );
     expect(html).toContain("data-social-explore-truncated");
