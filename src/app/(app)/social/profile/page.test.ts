@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { renderToStaticMarkup } from "react-dom/server";
+import { renderServerMarkup } from "@/lib/render-server-markup";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getOrgContext } from "@/lib/supabase/context";
@@ -124,7 +124,7 @@ describe("Social profile public face", () => {
     const { from } = stubClient({ profile: ensured });
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
-    const html = renderToStaticMarkup(await SocialProfilePage());
+    const html = await renderServerMarkup(await SocialProfilePage());
     expect(html).toContain("data-social-profile");
     expect(html).toContain("https://24frame.co/@ada");
     expect(html).toContain('data-social-share-url="https://24frame.co/@ada"');
@@ -164,7 +164,7 @@ describe("Social profile public face", () => {
     });
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
-    const html = renderToStaticMarkup(await SocialProfilePage());
+    const html = await renderServerMarkup(await SocialProfilePage());
     expect(html).toContain("data-social-profile-identity");
     expect(html).toContain("Ada Lovelace");
     expect(html).toContain("@ada");
@@ -192,7 +192,7 @@ describe("Social profile public face", () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
     vi.mocked(signedAvatarUrl).mockResolvedValue("https://s3.example/signed-avatar");
 
-    const html = renderToStaticMarkup(await SocialProfilePage());
+    const html = await renderServerMarkup(await SocialProfilePage());
     expect(html).toContain('src="https://s3.example/signed-avatar"');
     expect(html).toContain("Ada Lovelace");
     expect(html).not.toContain("AL");
@@ -212,7 +212,7 @@ describe("Social profile public face", () => {
     stubClient({ profile: ensured, posts: [] });
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
-    const html = renderToStaticMarkup(await SocialProfilePage());
+    const html = await renderServerMarkup(await SocialProfilePage());
     expect(html).toContain("data-social-author-empty");
     expect(html).toContain(SOCIAL.profile.postsEmpty);
     expect(html).toContain(SOCIAL.profile.postsEmptyOwnHint);
@@ -239,7 +239,7 @@ describe("Social profile public face", () => {
     stubClient({ profile: ensured, posts });
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
-    const html = renderToStaticMarkup(await SocialProfilePage());
+    const html = await renderServerMarkup(await SocialProfilePage());
     expect(html).toContain("data-social-author-truncated");
     expect(html).toContain(SOCIAL.profile.postsTruncated);
     expect(html).toContain('data-social-post="p0"');
@@ -262,7 +262,7 @@ describe("Social profile public face", () => {
     });
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
-    const html = renderToStaticMarkup(
+    const html = await renderServerMarkup(
       await SocialProfilePage({ searchParams: Promise.resolve({ tab: "credits" }) }),
     );
     expect(html).toContain('data-social-profile-tab="credits"');
@@ -280,7 +280,7 @@ describe("Social profile public face", () => {
     stubClient({ profile: ensured });
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
-    const html = renderToStaticMarkup(await SocialProfilePage());
+    const html = await renderServerMarkup(await SocialProfilePage());
     expect(html).toContain("@ada");
     expect(html).toContain("https://24frame.co/@ada");
     expect(html).toContain("Ada Lovelace");
@@ -296,7 +296,7 @@ describe("Social profile public face", () => {
     });
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
-    const html = renderToStaticMarkup(await SocialProfilePage());
+    const html = await renderServerMarkup(await SocialProfilePage());
     expect(html).toContain("data-social-handle-field");
     expect(html).toContain('value="@"');
     expect(html).toContain("data-social-handle-url");

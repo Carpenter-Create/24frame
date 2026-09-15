@@ -1,29 +1,23 @@
+import { Suspense } from "react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { Input } from "@/components/ui/input";
+import { SocialExploreSkeleton } from "@/components/social/social-skeletons";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { loadExploreSearch } from "@/lib/social-feed";
-import { getOrgContext } from "@/lib/supabase/context";
-import { createClient } from "@/lib/supabase/server";
+import { requireSocialSession, type SocialSession } from "@/lib/social-session";
 
 export default async function SocialExplorePage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const [ctx, sp] = await Promise.all([getOrgContext(), searchParams]);
-  if (!ctx) redirect("/login");
+  const [session, sp] = await Promise.all([requireSocialSession(), searchParams]);
   const raw = sp.q;
   const q = (Array.isArray(raw) ? raw[0] : raw)?.trim() ?? "";
-  const supabase = await createClient();
-  const results = q
-    ? await loadExploreSearch(supabase, q)
-    : { hits: [], truncated: false, peopleTruncated: false, postsTruncated: false };
-  const hits = results.hits;
 
   return (
     <div data-social-explore="">
@@ -40,32 +34,43 @@ export default async function SocialExplorePage({
         />
       </form>
       {q ? (
-        hits.length === 0 ? (
-          <HouseEmpty>{SOCIAL.explore.noResults}</HouseEmpty>
-        ) : (
-          <>
-            {results.truncated ? (
-              <InlineNotice tone="info" className="mb-[var(--space-4)]" data-social-explore-truncated="">
-                {SOCIAL.explore.truncated}
-              </InlineNotice>
-            ) : null}
-            <ul data-social-explore-results="" className="flex flex-col gap-[var(--space-3)]">
-              {hits.map((hit) => (
-                <li key={`${hit.kind}-${hit.id}`}>
-                  <Link href={hit.href} className="flex flex-col gap-1">
-                    <span className="t-body font-medium text-ink">{hit.title}</span>
-                    {hit.subtitle ? <span className="t-body-sm text-ink-3">{hit.subtitle}</span> : null}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </>
-        )
+        <Suspense fallback={<SocialExploreSkeleton />}>
+          <SocialExploreHits session={session} q={q} />
+        </Suspense>
       ) : (
         <div data-social-explore-trending="">
           <HouseEmpty>{SOCIAL.explore.empty}</HouseEmpty>
         </div>
       )}
     </div>
+  );
+}
+
+async function SocialExploreHits({ session, q }: { session: SocialSession; q: string }) {
+  const results = await loadExploreSearch(session.supabase, q);
+  const hits = results.hits;
+
+  if (hits.length === 0) {
+    return <HouseEmpty>{SOCIAL.explore.noResults}</HouseEmpty>;
+  }
+
+  return (
+    <>
+      {results.truncated ? (
+        <InlineNotice tone="info" className="mb-[var(--space-4)]" data-social-explore-truncated="">
+          {SOCIAL.explore.truncated}
+        </InlineNotice>
+      ) : null}
+      <ul data-social-explore-results="" className="flex flex-col gap-[var(--space-3)]">
+        {hits.map((hit) => (
+          <li key={`${hit.kind}-${hit.id}`}>
+            <Link href={hit.href} className="flex flex-col gap-1">
+              <span className="t-body font-medium text-ink">{hit.title}</span>
+              {hit.subtitle ? <span className="t-body-sm text-ink-3">{hit.subtitle}</span> : null}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </>
   );
 }

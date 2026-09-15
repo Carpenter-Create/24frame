@@ -1,16 +1,10 @@
-import { redirect } from "next/navigation";
-
 import { SocialStoryCompose } from "@/components/social/social-forms";
 import { SOCIAL } from "@/lib/social";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
-import { getOrgContext } from "@/lib/supabase/context";
-import { createClient } from "@/lib/supabase/server";
+import { requireSocialSession } from "@/lib/social-session";
 
 export default async function SocialStoryCreatePage() {
-  const ctx = await getOrgContext();
-  if (!ctx) redirect("/login");
-
-  const supabase = await createClient();
+  const { ctx, supabase } = await requireSocialSession();
   await ensureOwnSocialProfile(supabase, ctx.user);
 
   return (

@@ -1,18 +1,13 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { loadDiscoverableCourses } from "@/lib/courses";
 import { SOCIAL, socialCourseHref } from "@/lib/social";
-import { getOrgContext } from "@/lib/supabase/context";
-import { createClient } from "@/lib/supabase/server";
+import { requireSocialSession } from "@/lib/social-session";
 
 export default async function SocialCoursesPage() {
-  const ctx = await getOrgContext();
-  if (!ctx) redirect("/login");
-
-  const supabase = await createClient();
+  const { supabase } = await requireSocialSession();
   const courses = await loadDiscoverableCourses(supabase);
 
   return (

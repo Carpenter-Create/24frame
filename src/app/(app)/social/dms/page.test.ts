@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
+import { renderServerMarkup } from "@/lib/render-server-markup";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getOrgContext } from "@/lib/supabase/context";
@@ -100,7 +101,7 @@ describe("social DMs", () => {
     }));
     vi.mocked(createClient).mockResolvedValue({ from, rpc } as never);
 
-    const html = renderToStaticMarkup(await SocialDmsPage());
+    const html = await renderServerMarkup(await SocialDmsPage());
     expect(html).toContain("data-social-dms");
     expect(html).toContain('data-social-dm-kind="group"');
     expect(html).toContain("Bob One, Carol One");
@@ -138,7 +139,7 @@ describe("social DMs", () => {
       rpc,
     } as never);
 
-    const html = renderToStaticMarkup(await SocialDmsPage());
+    const html = await renderServerMarkup(await SocialDmsPage());
     expect(html).toContain("data-social-dms-truncated");
     expect(html).toContain(SOCIAL.dms.truncatedInbox);
     expect(html).toContain("c49");

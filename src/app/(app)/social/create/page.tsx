@@ -1,36 +1,30 @@
-import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 import { SocialCreateCompose } from "@/components/social/social-forms";
 import { SocialForYouRail } from "@/components/social/social-for-you";
+import { SocialForYouSkeleton } from "@/components/social/social-skeletons";
 import { SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS } from "@/lib/social-chrome";
 import { signedAvatarUrl, signedAvatarUrls } from "@/lib/s3-avatars";
 import { parseSocialCreateKind, SOCIAL } from "@/lib/social";
 import { loadFolloweeIds, loadSuggestedPeople } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
-import { getOrgContext } from "@/lib/supabase/context";
-import { createClient } from "@/lib/supabase/server";
+import { requireSocialSession, type SocialSession } from "@/lib/social-session";
 
 export default async function SocialCreatePage({
   searchParams,
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 } = {}) {
-  const [ctx, sp] = await Promise.all([
-    getOrgContext(),
+  const [session, sp] = await Promise.all([
+    requireSocialSession(),
     searchParams ? searchParams : Promise.resolve({} as Record<string, string | string[] | undefined>),
   ]);
-  if (!ctx) redirect("/login");
   const initialKind = parseSocialCreateKind(sp.kind);
-  const supabase = await createClient();
-  const profile = await ensureOwnSocialProfile(supabase, ctx.user);
-  const [photoUrl, followees] = await Promise.all([
-    profile ? signedAvatarUrl(profile.id) : Promise.resolve(null),
-    profile
-      ? loadFolloweeIds(supabase, ctx.user.id)
-      : Promise.resolve({ ids: [] as string[], truncated: false }),
+  const { ctx, supabase } = session;
+  const [profile, photoUrl] = await Promise.all([
+    ensureOwnSocialProfile(supabase, ctx.user),
+    signedAvatarUrl(ctx.user.id),
   ]);
-  const suggested = await loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids]);
-  const faces = suggested.length > 0 ? await signedAvatarUrls(suggested.map((person) => person.id)) : new Map();
 
   return (
     <div data-social-create="" className={SOCIAL_HOME_LAYOUT_CLASS}>
@@ -43,7 +37,17 @@ export default async function SocialCreatePage({
           initialKind={initialKind}
         />
       </div>
-      <SocialForYouRail people={suggested} faces={faces} />
+      <Suspense fallback={<SocialForYouSkeleton />}>
+        <SocialCreateForYouSlot session={session} />
+      </Suspense>
     </div>
   );
+}
+
+async function SocialCreateForYouSlot({ session }: { session: SocialSession }) {
+  const { ctx, supabase } = session;
+  const followees = await loadFolloweeIds(supabase, ctx.user.id);
+  const suggested = await loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids]);
+  const faces = suggested.length > 0 ? await signedAvatarUrls(suggested.map((person) => person.id)) : new Map();
+  return <SocialForYouRail people={suggested} faces={faces} />;
 }

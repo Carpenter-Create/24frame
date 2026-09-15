@@ -26,6 +26,7 @@ export function SocialTopBar({
     >
       <Link
         href={workspaceHome("social")}
+        prefetch
         aria-label={PRODUCT_NAME}
         data-brand-emblem=""
         className="inline-flex shrink-0 items-center"
@@ -53,6 +54,7 @@ export function SocialTopBar({
       <div className="flex items-center gap-2.5 md:gap-3">
         <Link
           href={SOCIAL_ROUTES.explore}
+          prefetch
           aria-label={SOCIAL.explore.searchSocial}
           data-social-header-search-icon=""
           className="flex size-8 items-center justify-center text-ink md:hidden"
@@ -61,6 +63,7 @@ export function SocialTopBar({
         </Link>
         <Link
           href={SOCIAL_ROUTES.dms}
+          prefetch
           aria-label={SOCIAL.dms.title}
           data-social-header-tray=""
           className="hidden items-center justify-center text-ink md:flex"

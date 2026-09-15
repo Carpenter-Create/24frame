@@ -303,6 +303,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(storyViewer).not.toContain("SocialMobileDock");
     expect(topBar).toContain("data-social-header-tray");
     expect(topBar).toContain("data-social-header-search");
+    expect(topBar).toContain("prefetch");
     expect(topBar).not.toContain("data-social-mobile-pill");
     expect(readFileSync("src/lib/nav.ts", "utf8")).not.toContain("SOCIAL_MOBILE_PILL");
     expect(tabBar).toContain("data-social-tab-bar");
@@ -346,6 +347,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(existsSync("src/app/(app)/social/explore/loading.tsx")).toBe(true);
     expect(existsSync("src/app/(app)/social/dms/loading.tsx")).toBe(true);
     expect(existsSync("src/app/(app)/social/stories/loading.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/social/layout.tsx")).toBe(true);
     expect(readFileSync("src/app/(app)/social/loading.tsx", "utf8")).toContain("SocialHomeSkeleton");
     expect(readFileSync("src/app/(app)/social/loading.tsx", "utf8")).not.toContain("DashboardSkeleton");
     expect(sideNav).toContain("prefetch={social}");
@@ -353,7 +355,16 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(tabBar).toContain("prefetch");
     expect(tabBar).toContain("useSocialNavPending");
     expect(home).toContain("loadOwnPostFacts");
+    expect(home).toContain("requireSocialSession");
+    expect(home).toContain("Suspense");
     expect(home).toContain("Promise.all");
+    expect(readFileSync("src/app/(app)/social/layout.tsx", "utf8")).toContain(
+      "export default function SocialLayout",
+    );
+    expect(readFileSync("src/app/(app)/social/layout.tsx", "utf8")).not.toContain(
+      "export default async function SocialLayout",
+    );
+    expect(readFileSync("src/app/(app)/social/layout.tsx", "utf8")).toContain("loadSocialSession()");
     expect(profile).toContain("Promise.all");
     expect(create).toContain("Promise.all");
     expect(stories).toContain("Promise.all");

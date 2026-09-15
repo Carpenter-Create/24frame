@@ -21,7 +21,7 @@ import {
   SOCIAL_STORY_VIEWER_CLASS,
 } from "@/lib/social-chrome";
 
-function SocialForYouSkeleton() {
+export function SocialForYouSkeleton() {
   return (
     <aside data-social-for-you-skeleton="" className={SOCIAL_FOR_YOU_RAIL_CLASS}>
       <Skeleton className="h-4 w-24" />
@@ -30,6 +30,43 @@ function SocialForYouSkeleton() {
         <Skeleton className="h-14 w-full rounded-[8px]" />
       </div>
     </aside>
+  );
+}
+
+export function SocialRecentChatsSkeleton() {
+  return (
+    <aside data-social-recent-chats-skeleton="" className={SOCIAL_CHATS_COLUMN_CLASS}>
+      <div className={SOCIAL_CHATS_PANEL_CLASS}>
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-16 w-full rounded-[12px]" />
+        <Skeleton className="h-16 w-full rounded-[12px]" />
+      </div>
+    </aside>
+  );
+}
+
+export function SocialHomeCenterSkeleton() {
+  return (
+    <div className={SOCIAL_HOME_CENTER_CLASS}>
+      <div className={SOCIAL_COMPOSER_CLASS}>
+        <Skeleton className={SOCIAL_AVATAR_SM_CLASS} />
+        <Skeleton className="h-9 min-w-0 flex-1" />
+        <Skeleton className="size-9 shrink-0" />
+      </div>
+      <SocialStoriesRailSkeleton tall />
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className={SOCIAL_FEED_ROW_CLASS}>
+          <div className="flex gap-2">
+            <Skeleton className={SOCIAL_AVATAR_SM_CLASS} />
+            <div className="flex min-w-0 flex-1 flex-col gap-2">
+              <Skeleton className="h-3.5 w-1/3" />
+              <Skeleton className="h-3 w-2/3" />
+            </div>
+          </div>
+          <Skeleton className="h-40 w-full rounded-[8px]" />
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -52,33 +89,8 @@ function SocialStoriesRailSkeleton({
 export function SocialHomeSkeleton() {
   return (
     <div data-social-home-skeleton="" className={SOCIAL_HOME_LAYOUT_CLASS}>
-      <aside data-social-recent-chats-skeleton="" className={SOCIAL_CHATS_COLUMN_CLASS}>
-        <div className={SOCIAL_CHATS_PANEL_CLASS}>
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-16 w-full rounded-[12px]" />
-          <Skeleton className="h-16 w-full rounded-[12px]" />
-        </div>
-      </aside>
-      <div className={SOCIAL_HOME_CENTER_CLASS}>
-        <div className={SOCIAL_COMPOSER_CLASS}>
-          <Skeleton className={SOCIAL_AVATAR_SM_CLASS} />
-          <Skeleton className="h-9 min-w-0 flex-1" />
-          <Skeleton className="size-9 shrink-0" />
-        </div>
-        <SocialStoriesRailSkeleton tall />
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className={SOCIAL_FEED_ROW_CLASS}>
-            <div className="flex gap-2">
-              <Skeleton className={SOCIAL_AVATAR_SM_CLASS} />
-              <div className="flex min-w-0 flex-1 flex-col gap-2">
-                <Skeleton className="h-3.5 w-1/3" />
-                <Skeleton className="h-3 w-2/3" />
-              </div>
-            </div>
-            <Skeleton className="h-40 w-full rounded-[8px]" />
-          </div>
-        ))}
-      </div>
+      <SocialRecentChatsSkeleton />
+      <SocialHomeCenterSkeleton />
       <SocialForYouSkeleton />
     </div>
   );
@@ -178,13 +190,9 @@ export function SocialExploreSkeleton() {
   );
 }
 
-export function SocialDmsSkeleton() {
+export function SocialDmsRowsSkeleton() {
   return (
-    <div data-social-dms-skeleton="" className="flex flex-col gap-[var(--space-4)]">
-      <div className="flex flex-col gap-2 pb-6">
-        <Skeleton className="h-7 w-36" />
-        <Skeleton className="h-3.5 w-56" />
-      </div>
+    <div data-social-dms-rows-skeleton="" className="flex flex-col">
       {Array.from({ length: 4 }).map((_, i) => (
         <div
           key={i}
@@ -197,6 +205,18 @@ export function SocialDmsSkeleton() {
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+export function SocialDmsSkeleton() {
+  return (
+    <div data-social-dms-skeleton="" className="flex flex-col gap-[var(--space-4)]">
+      <div className="flex flex-col gap-2 pb-6">
+        <Skeleton className="h-7 w-36" />
+        <Skeleton className="h-3.5 w-56" />
+      </div>
+      <SocialDmsRowsSkeleton />
     </div>
   );
 }

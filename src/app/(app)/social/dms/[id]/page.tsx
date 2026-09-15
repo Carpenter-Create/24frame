@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation";
-
 import { HouseEmpty, TextAction } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { InlineNotice } from "@/components/ui/inline-notice";
@@ -15,8 +13,7 @@ import { conversationRoomLabel, displayHandle, SOCIAL, SOCIAL_ROUTES } from "@/l
 import { loadDmParticipants, loadDmThreadMessages } from "@/lib/social-dms";
 import { loadProfilesByIds } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
-import { getOrgContext } from "@/lib/supabase/context";
-import { createClient } from "@/lib/supabase/server";
+import { requireSocialSession } from "@/lib/social-session";
 import { markSocialDmRead } from "../../actions";
 
 export default async function SocialDmThreadPage({
@@ -26,12 +23,13 @@ export default async function SocialDmThreadPage({
   params: Promise<{ id: string }>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const ctx = await getOrgContext();
-  if (!ctx) redirect("/login");
-
-  const { id } = await params;
-  const cursor = parseDmThreadCursorParam((await searchParams)?.[SOCIAL_DM_THREAD_CURSOR_PARAM]);
-  const supabase = await createClient();
+  const [session, { id }, sp] = await Promise.all([
+    requireSocialSession(),
+    params,
+    searchParams ? searchParams : Promise.resolve({} as Record<string, string | string[] | undefined>),
+  ]);
+  const { ctx, supabase } = session;
+  const cursor = parseDmThreadCursorParam(sp[SOCIAL_DM_THREAD_CURSOR_PARAM]);
   const profile = await ensureOwnSocialProfile(supabase, ctx.user);
 
   const { data: conversation } = await supabase

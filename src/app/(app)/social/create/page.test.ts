@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { renderToStaticMarkup } from "react-dom/server";
+import { renderServerMarkup } from "@/lib/render-server-markup";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getOrgContext } from "@/lib/supabase/context";
@@ -65,7 +65,7 @@ describe("Social Create", () => {
 
   it("is its own compose destination and not Home chrome", async () => {
     stubProfile({ id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" });
-    const html = renderToStaticMarkup(await SocialCreatePage());
+    const html = await renderServerMarkup(await SocialCreatePage());
     expect(html).toContain("data-social-create");
     expect(html).toContain(SOCIAL.create.title);
     expect(html).toContain("data-social-create-form");

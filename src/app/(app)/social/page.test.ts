@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { renderToStaticMarkup } from "react-dom/server";
+import { renderServerMarkup } from "@/lib/render-server-markup";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getOrgContext } from "@/lib/supabase/context";
@@ -87,7 +87,7 @@ function chain(result: unknown) {
 }
 
 async function renderHome(query: Record<string, string> = {}) {
-  return renderToStaticMarkup(
+  return renderServerMarkup(
     await SocialHomePage({
       searchParams: Promise.resolve(query),
     }),

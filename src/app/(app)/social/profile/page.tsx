@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import Link from "next/link";
 
 import { InlineNotice } from "@/components/ui/inline-notice";
@@ -7,6 +7,7 @@ import { SocialEmpty } from "@/components/social/social-empty";
 import { SocialForYouRail } from "@/components/social/social-for-you";
 import { SocialProfileTabs } from "@/components/social/social-profile-tabs";
 import { SocialShareButton } from "@/components/social/social-share-button";
+import { SocialForYouSkeleton } from "@/components/social/social-skeletons";
 import {
   SocialAuthorHistory,
   SocialHighlights,
@@ -23,6 +24,7 @@ import {
   SOCIAL_ROUTES,
   socialRelativeTime,
   socialStoryHref,
+  type SocialProfileTab,
 } from "@/lib/social";
 import {
   loadAuthorPosts,
@@ -33,22 +35,19 @@ import {
   loadSuggestedPeople,
 } from "@/lib/social-feed";
 import { ensureOwnSocialProfileResult } from "@/lib/social-profile";
-import { getOrgContext } from "@/lib/supabase/context";
-import { createClient } from "@/lib/supabase/server";
+import { requireSocialSession, type SocialSession } from "@/lib/social-session";
 
 export default async function SocialProfilePage({
   searchParams,
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 } = {}) {
-  const [ctx, sp] = await Promise.all([
-    getOrgContext(),
+  const [session, sp] = await Promise.all([
+    requireSocialSession(),
     searchParams ? searchParams : Promise.resolve({} as Record<string, string | string[] | undefined>),
   ]);
-  if (!ctx) redirect("/login");
   const tab = parseSocialProfileTab(sp[SOCIAL_PROFILE_TAB_PARAM]);
-  const supabase = await createClient();
-  const { profile, error: ensureError } = await ensureOwnSocialProfileResult(supabase, ctx.user);
+  const { profile, error: ensureError } = await ensureOwnSocialProfileResult(session.supabase, session.ctx.user);
 
   if (!profile) {
     return (
@@ -62,25 +61,42 @@ export default async function SocialProfilePage({
     );
   }
 
-  const [photoUrl, liveStoriesPage, history, counts, followees] = await Promise.all([
+  return (
+    <div data-social-profile="" className={SOCIAL_HOME_LAYOUT_CLASS}>
+      <SocialProfileMain session={session} tab={tab} />
+      <Suspense fallback={<SocialForYouSkeleton />}>
+        <SocialProfileForYouSlot session={session} />
+      </Suspense>
+    </div>
+  );
+}
+
+async function SocialProfileMain({
+  session,
+  tab,
+}: {
+  session: SocialSession;
+  tab: SocialProfileTab;
+}) {
+  const { ctx, supabase } = session;
+  const { profile } = await ensureOwnSocialProfileResult(supabase, ctx.user);
+  if (!profile) return null;
+
+  const [photoUrl, liveStoriesPage, history, counts] = await Promise.all([
     signedAvatarUrl(profile.id),
     loadLiveStories(supabase, [profile.id]),
     loadAuthorPosts(supabase, profile.id),
     loadProfileSocialCounts(supabase, profile.id),
-    loadFolloweeIds(supabase, ctx.user.id),
   ]);
   const liveStories = liveStoriesPage.stories;
-  const [media, liked, suggested] = await Promise.all([
+  const [media, liked] = await Promise.all([
     signedSocialMediaByPostId(history.posts),
     loadLikedPostIds(
       supabase,
       ctx.user.id,
       history.posts.map((post) => post.id),
     ),
-    loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids]),
   ]);
-  const faces =
-    suggested.length > 0 ? await signedAvatarUrls(suggested.map((person) => person.id)) : new Map();
 
   const highlightCards = liveStories.map((story) => ({
     id: story.id,
@@ -90,57 +106,63 @@ export default async function SocialProfilePage({
   }));
 
   return (
-    <div data-social-profile="" className={SOCIAL_HOME_LAYOUT_CLASS}>
-      <div className={SOCIAL_HOME_CENTER_CLASS}>
-        <h1 className="sr-only">{SOCIAL.profile.title}</h1>
-        <SocialProfileIdentity
-          name={profile.display_name}
-          handle={profile.handle}
-          photoUrl={photoUrl}
-          bio={profile.bio?.trim() ? profile.bio : SOCIAL.profile.ownFace}
-          ring={liveStories.length > 0 ? "live" : null}
-          stats={counts ?? undefined}
-          actions={() => (
-            <>
-              <Link href={SOCIAL_ROUTES.profileEdit} className={`${SOCIAL_ACTION_CLASS} min-w-0 flex-1 text-center md:flex-none`}>
-                {SOCIAL.profile.edit}
-              </Link>
-              <SocialShareButton handle={profile.handle} stretch />
-            </>
-          )}
-        />
-        <SocialProfileTabs baseHref={SOCIAL_ROUTES.profile} active={tab} />
-        {tab === "credits" ? (
-          <SocialEmpty icon="film-slate" title={SOCIAL.profile.creditsEmpty} />
-        ) : tab === "highlights" ? (
-          highlightCards.length > 0 ? (
-            <SocialHighlights cards={highlightCards} />
-          ) : (
-            <SocialEmpty icon="image" title={SOCIAL.profile.highlightsEmpty} hint={SOCIAL.profile.highlightsEmptyHint} />
-          )
-        ) : (
+    <div className={SOCIAL_HOME_CENTER_CLASS}>
+      <h1 className="sr-only">{SOCIAL.profile.title}</h1>
+      <SocialProfileIdentity
+        name={profile.display_name}
+        handle={profile.handle}
+        photoUrl={photoUrl}
+        bio={profile.bio?.trim() ? profile.bio : SOCIAL.profile.ownFace}
+        ring={liveStories.length > 0 ? "live" : null}
+        stats={counts ?? undefined}
+        actions={() => (
           <>
-            <SocialHighlights cards={highlightCards} />
-            <SocialAuthorHistory
-              truncated={history.truncated}
-              emptyHint={SOCIAL.profile.postsEmptyOwnHint}
-              emptyAction={{ href: SOCIAL_ROUTES.create, label: SOCIAL.profile.sharePost }}
-              posts={history.posts.map((post) =>
-                socialAuthorPostCard({
-                  post,
-                  authorHandle: profile.handle,
-                  authorName: profile.display_name,
-                  authorPhotoUrl: photoUrl,
-                  liked: liked.has(post.id),
-                  canLike: true,
-                  media: media.get(post.id) ?? [],
-                }),
-              )}
-            />
+            <Link href={SOCIAL_ROUTES.profileEdit} className={`${SOCIAL_ACTION_CLASS} min-w-0 flex-1 text-center md:flex-none`}>
+              {SOCIAL.profile.edit}
+            </Link>
+            <SocialShareButton handle={profile.handle} stretch />
           </>
         )}
-      </div>
-      <SocialForYouRail people={suggested} faces={faces} />
+      />
+      <SocialProfileTabs baseHref={SOCIAL_ROUTES.profile} active={tab} />
+      {tab === "credits" ? (
+        <SocialEmpty icon="film-slate" title={SOCIAL.profile.creditsEmpty} />
+      ) : tab === "highlights" ? (
+        highlightCards.length > 0 ? (
+          <SocialHighlights cards={highlightCards} />
+        ) : (
+          <SocialEmpty icon="image" title={SOCIAL.profile.highlightsEmpty} hint={SOCIAL.profile.highlightsEmptyHint} />
+        )
+      ) : (
+        <>
+          <SocialHighlights cards={highlightCards} />
+          <SocialAuthorHistory
+            truncated={history.truncated}
+            emptyHint={SOCIAL.profile.postsEmptyOwnHint}
+            emptyAction={{ href: SOCIAL_ROUTES.create, label: SOCIAL.profile.sharePost }}
+            posts={history.posts.map((post) =>
+              socialAuthorPostCard({
+                post,
+                authorHandle: profile.handle,
+                authorName: profile.display_name,
+                authorPhotoUrl: photoUrl,
+                liked: liked.has(post.id),
+                canLike: true,
+                media: media.get(post.id) ?? [],
+              }),
+            )}
+          />
+        </>
+      )}
     </div>
   );
+}
+
+async function SocialProfileForYouSlot({ session }: { session: SocialSession }) {
+  const { ctx, supabase } = session;
+  const followees = await loadFolloweeIds(supabase, ctx.user.id);
+  const suggested = await loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids]);
+  const faces =
+    suggested.length > 0 ? await signedAvatarUrls(suggested.map((person) => person.id)) : new Map();
+  return <SocialForYouRail people={suggested} faces={faces} />;
 }

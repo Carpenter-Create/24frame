@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation";
-
 import { SocialFollowButton } from "@/components/social/social-forms";
 import { SocialEmpty } from "@/components/social/social-empty";
 import { SocialForYouRail } from "@/components/social/social-for-you";
@@ -34,8 +32,7 @@ import {
   loadSuggestedPeople,
 } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
-import { getOrgContext } from "@/lib/supabase/context";
-import { createClient } from "@/lib/supabase/server";
+import { requireSocialSession } from "@/lib/social-session";
 
 export default async function SocialPublicProfilePage({
   params,
@@ -44,14 +41,14 @@ export default async function SocialPublicProfilePage({
   params: Promise<{ handle: string }>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const ctx = await getOrgContext();
-  if (!ctx) redirect("/login");
-
-  const { handle: raw } = await params;
+  const [session, { handle: raw }, sp] = await Promise.all([
+    requireSocialSession(),
+    params,
+    searchParams ? searchParams : Promise.resolve({} as Record<string, string | string[] | undefined>),
+  ]);
+  const { ctx, supabase } = session;
   const handle = parseProfileHandleParam(raw);
-  const sp = searchParams ? await searchParams : {};
   const tab = parseSocialProfileTab(sp[SOCIAL_PROFILE_TAB_PARAM]);
-  const supabase = await createClient();
   const own = await ensureOwnSocialProfile(supabase, ctx.user);
   // Null is a missing handle or an RLS-hidden row — same empty state.
   const { data: member } = handle

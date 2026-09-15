@@ -1,20 +1,17 @@
-import { redirect } from "next/navigation";
-
 import { SocialProfileEditForm } from "@/components/social/social-profile-edit";
 import { signedAvatarUrl } from "@/lib/s3-avatars";
 import { SOCIAL_ROUTES } from "@/lib/social";
 import { ensureOwnSocialProfileResult } from "@/lib/social-profile";
-import { getOrgContext } from "@/lib/supabase/context";
-import { createClient } from "@/lib/supabase/server";
+import { requireSocialSession } from "@/lib/social-session";
+import { redirect } from "next/navigation";
 
 export default async function SocialProfileEditPage() {
-  const ctx = await getOrgContext();
-  if (!ctx) redirect("/login");
-  const supabase = await createClient();
-  const { profile } = await ensureOwnSocialProfileResult(supabase, ctx.user);
+  const { ctx, supabase } = await requireSocialSession();
+  const [{ profile }, photoUrl] = await Promise.all([
+    ensureOwnSocialProfileResult(supabase, ctx.user),
+    signedAvatarUrl(ctx.user.id),
+  ]);
   if (!profile) redirect(SOCIAL_ROUTES.profile);
-
-  const photoUrl = await signedAvatarUrl(profile.id);
 
   return (
     <SocialProfileEditForm
