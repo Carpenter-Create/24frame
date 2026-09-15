@@ -1,7 +1,6 @@
 // Social measured chrome. Tokens only — no hex.
-// Desktop Home clean: Figma 164:1136 / 164:1360
-//   (supersedes 160:482 / 160:741 for desktop measure + rail).
-// Mobile Home pack stays 160:964 / 160:1129 — this PR does not move it.
+// Desktop Home clean: Figma 169:964 / 169:1281 (164:1136 / 164:1360 still in place).
+// Mobile Home: Figma 169:1519 setup-as-first-feed-card; pill hide stays 160:1129.
 // Profile ship: Figma 129:215 / 129:415 / 129:615.
 // Profile share sheet: Figma 155:194 / 155:372.
 // Create ship: Figma 135:585 / 135:1037 / 135:1214.
@@ -11,12 +10,13 @@
 // Stories picker: Figma 144:1218 / 144:1444.
 // No glass, no drop shadow. Aggregation / Settings Mercury stays elsewhere.
 
-export const SOCIAL_FIGMA_HOME = "164:1136";
-export const SOCIAL_FIGMA_HOME_EMPTY = "164:1360";
-export const SOCIAL_FIGMA_HOME_MOBILE = "160:964";
+export const SOCIAL_FIGMA_HOME = "169:964";
+export const SOCIAL_FIGMA_HOME_EMPTY = "169:1281";
+export const SOCIAL_FIGMA_HOME_MOBILE = "169:1519";
 export const SOCIAL_FIGMA_HOME_MOBILE_SCROLL = "160:1129";
+export const SOCIAL_FIGMA_HOME_DESKTOP_PRIOR = ["164:1136", "164:1360"] as const;
 
-// Desktop Social Home measure — 164:1136 / 164:1360.
+// Desktop Social Home measure — 169:964 / 169:1281.
 export const SOCIAL_DESKTOP_MEASURE = {
   left: 240,
   gutter: 16,
