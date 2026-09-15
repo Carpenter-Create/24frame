@@ -17,6 +17,7 @@ import {
   SOCIAL_PROFILE_EDIT_BODY_CLASS,
   SOCIAL_PROFILE_EDIT_CARD_CLASS,
   SOCIAL_PROFILE_EDIT_DONE_CLASS,
+  SOCIAL_PROFILE_EDIT_FIELD_CLASS,
   SOCIAL_PROFILE_EDIT_HANDLE_CLASS,
   SOCIAL_PROFILE_EDIT_HANDLE_ERROR_CLASS,
   SOCIAL_PROFILE_EDIT_HEADER_CLASS,
@@ -209,7 +210,7 @@ export function SocialProfileEditForm({
                 autoComplete="nickname"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="min-w-0 flex-1 bg-transparent t-body-sm text-ink outline-none"
+                className={SOCIAL_PROFILE_EDIT_FIELD_CLASS}
               />
             </div>
             <div className="h-px bg-hairline" />
@@ -227,7 +228,7 @@ export function SocialProfileEditForm({
                     value={bareHandle(username)}
                     placeholder={SOCIAL.profile.usernamePlaceholder}
                     onChange={(e) => applyHandle(e.target.value)}
-                    className="min-w-0 flex-1 bg-transparent text-ink outline-none placeholder:text-ink-2"
+                    className={`${SOCIAL_PROFILE_EDIT_FIELD_CLASS} placeholder:text-ink-2`}
                   />
                 </div>
               </div>
