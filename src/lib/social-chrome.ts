@@ -1,6 +1,7 @@
 // Social measured chrome. Tokens only — no hex.
 // Desktop Home clean: Figma 169:964 / 169:1281 (164:1136 / 164:1360 still in place).
-// Mobile setup placement is HOLD — do not invent. Pill stays 160:964 / 160:1129.
+// Mobile Home: Figma 169:1519 setup after Stories, before Following wall.
+// Pill hide stays 160:1129.
 // Profile ship: Figma 129:215 / 129:415 / 129:615.
 // Profile share sheet: Figma 155:194 / 155:372.
 // Create ship: Figma 135:585 / 135:1037 / 135:1214.
@@ -12,7 +13,7 @@
 
 export const SOCIAL_FIGMA_HOME = "169:964";
 export const SOCIAL_FIGMA_HOME_EMPTY = "169:1281";
-export const SOCIAL_FIGMA_HOME_MOBILE = "160:964";
+export const SOCIAL_FIGMA_HOME_MOBILE = "169:1519";
 export const SOCIAL_FIGMA_HOME_MOBILE_SCROLL = "160:1129";
 export const SOCIAL_FIGMA_HOME_DESKTOP_PRIOR = ["164:1136", "164:1360"] as const;
 
