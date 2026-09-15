@@ -252,7 +252,7 @@ export function AppShell({
           {titlesBleed ? <TitlesHeaderSearch /> : null}
         </div>
         <div className="flex items-center gap-3">
-          <UserMenuSlot
+          <AccountMenuSlot
             chrome={chrome}
             email={email}
             name={name}
@@ -341,7 +341,27 @@ function SocialRailAccountChipFromChrome({ chrome }: { chrome: Promise<AppShellC
   return <SocialRailAccountChip name={data.name} photoUrl={data.photoUrl} />;
 }
 
-function UserMenuSlot({
+function MessagesHeaderSlot({
+  chrome,
+  messagesSurface,
+}: {
+  chrome?: Promise<AppShellChrome>;
+  messagesSurface: MessagesSurface;
+}) {
+  if (!chrome) return <MessagesAppHeader surface={messagesSurface} />;
+  return (
+    <Suspense fallback={<MessagesAppHeader surface={messagesSurface} />}>
+      <MessagesHeaderFromChrome chrome={chrome} />
+    </Suspense>
+  );
+}
+
+function MessagesHeaderFromChrome({ chrome }: { chrome: Promise<AppShellChrome> }) {
+  const data = use(chrome);
+  return <MessagesAppHeader surface={data.messagesSurface} />;
+}
+
+function AccountMenuSlot({
   chrome,
   email,
   name,
@@ -382,24 +402,4 @@ function UserMenuFromChrome({
       defaultWorkspace={data.defaultWorkspace}
     />
   );
-}
-
-function MessagesHeaderSlot({
-  chrome,
-  messagesSurface,
-}: {
-  chrome?: Promise<AppShellChrome>;
-  messagesSurface: MessagesSurface;
-}) {
-  if (!chrome) return <MessagesAppHeader surface={messagesSurface} />;
-  return (
-    <Suspense fallback={<MessagesAppHeader surface={messagesSurface} />}>
-      <MessagesHeaderFromChrome chrome={chrome} />
-    </Suspense>
-  );
-}
-
-function MessagesHeaderFromChrome({ chrome }: { chrome: Promise<AppShellChrome> }) {
-  const data = use(chrome);
-  return <MessagesAppHeader surface={data.messagesSurface} />;
 }
