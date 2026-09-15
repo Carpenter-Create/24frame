@@ -18,11 +18,14 @@ vi.mock("@aws-sdk/client-sesv2", async (importOriginal) => {
 import { SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2";
 
 import {
+  AUTH_SES_CONFIGURATION_SET,
   AUTH_SES_DEFAULT_FROM,
+  AUTH_SES_DEFAULT_REPLY_TO,
   AUTH_SES_ENV,
   AUTH_SES_IDENTITY_DOMAIN,
   AUTH_SES_REGION,
   authEmailFrom,
+  authEmailReplyTo,
   emailAddressFrom,
   requireAuthSesRegion,
   sendAuthSesEmail,
@@ -63,6 +66,7 @@ function clearSesAwsEnv() {
   delete process.env.SES_AWS_ACCESS_KEY_ID;
   delete process.env.SES_AWS_SECRET_ACCESS_KEY;
   delete process.env.PORTAL_EMAIL_FROM;
+  delete process.env.PORTAL_EMAIL_REPLY_TO;
 }
 
 describe("auth SES isolation", () => {
@@ -81,6 +85,7 @@ describe("auth SES isolation", () => {
     process.env.RESEND_API_KEY = "re_test_unused";
     setSesAwsEnv();
     delete process.env.PORTAL_EMAIL_FROM;
+    delete process.env.PORTAL_EMAIL_REPLY_TO;
   });
 
   afterEach(() => {
@@ -90,7 +95,9 @@ describe("auth SES isolation", () => {
   it("pins the verified 24frame.co identity in us-west-2", () => {
     expect(AUTH_SES_REGION).toBe("us-west-2");
     expect(AUTH_SES_IDENTITY_DOMAIN).toBe("24frame.co");
-    expect(AUTH_SES_DEFAULT_FROM).toBe("24Frame <noreply@24frame.co>");
+    expect(AUTH_SES_DEFAULT_FROM).toBe("24Frame <auth@24frame.co>");
+    expect(AUTH_SES_CONFIGURATION_SET).toBe("24frame-auth");
+    expect(AUTH_SES_DEFAULT_REPLY_TO).toBe("admin@globalcontent.co");
     expect(AUTH_SES_ENV).toEqual([
       "SES_AWS_REGION",
       "SES_AWS_ACCESS_KEY_ID",
@@ -156,11 +163,17 @@ describe("auth SES isolation", () => {
     expect(() => requireAuthSesRegion()).toThrow(/us-west-2/);
   });
 
-  it("defaults From to noreply@24frame.co and accepts PORTAL_EMAIL_FROM on that domain", () => {
+  it("defaults From to auth@24frame.co and accepts PORTAL_EMAIL_FROM on that domain", () => {
     expect(authEmailFrom()).toBe(AUTH_SES_DEFAULT_FROM);
-    expect(emailAddressFrom(authEmailFrom())).toBe("noreply@24frame.co");
+    expect(emailAddressFrom(authEmailFrom())).toBe("auth@24frame.co");
     process.env.PORTAL_EMAIL_FROM = "24Frame <signin@24frame.co>";
     expect(authEmailFrom()).toBe("24Frame <signin@24frame.co>");
+  });
+
+  it("defaults Reply-To to admin@globalcontent.co and prefers PORTAL_EMAIL_REPLY_TO", () => {
+    expect(authEmailReplyTo()).toBe(AUTH_SES_DEFAULT_REPLY_TO);
+    process.env.PORTAL_EMAIL_REPLY_TO = "ops@globalcontent.co";
+    expect(authEmailReplyTo()).toBe("ops@globalcontent.co");
   });
 
   it("refuses a From address off the verified 24frame.co identity", () => {
@@ -195,6 +208,9 @@ describe("auth SES isolation", () => {
     expect(command.input).toEqual({
       FromEmailAddress: AUTH_SES_DEFAULT_FROM,
       Destination: { ToAddresses: ["holder@example.com"] },
+      ReplyToAddresses: [AUTH_SES_DEFAULT_REPLY_TO],
+      ConfigurationSetName: AUTH_SES_CONFIGURATION_SET,
+      EmailTags: [{ Name: "purpose", Value: "auth" }],
       Content: {
         Simple: {
           Subject: { Data: "Your 24Frame access code", Charset: "UTF-8" },
@@ -207,6 +223,22 @@ describe("auth SES isolation", () => {
     });
   });
 
+  it("sends Reply-To from PORTAL_EMAIL_REPLY_TO when set", async () => {
+    process.env.PORTAL_EMAIL_REPLY_TO = "ops@globalcontent.co";
+    mockSend.mockResolvedValueOnce({ MessageId: "ses-message-3" });
+    await sendAuthSesEmail({
+      to: "holder@example.com",
+      subject: "Your 24Frame access code",
+      text: "Your verification code is 012345.",
+      html: "<p>012345</p>",
+    });
+    const command = mockSend.mock.calls[0]?.[0];
+    expect(command).toBeInstanceOf(SendEmailCommand);
+    expect(command.input.ConfigurationSetName).toBe("24frame-auth");
+    expect(command.input.ReplyToAddresses).toEqual(["ops@globalcontent.co"]);
+    expect(command.input.EmailTags).toEqual([{ Name: "purpose", Value: "auth" }]);
+  });
+
   it("never reads title, finance, media, or Resend secrets", () => {
     const src = readFileSync("src/lib/auth-ses.ts", "utf8");
     expect(src).not.toContain("process.env.AWS_ACCESS_KEY_ID");
@@ -216,6 +248,10 @@ describe("auth SES isolation", () => {
     expect(src).not.toContain("RESEND");
     expect(src).not.toContain("from \"resend\"");
     expect(src).not.toContain("@aws-sdk/client-cognito");
+    expect(src).not.toContain("noreply@");
+    expect(src).toContain("ConfigurationSetName: AUTH_SES_CONFIGURATION_SET");
+    expect(src).toContain("ReplyToAddresses");
+    expect(src).toContain('Value: "auth"');
   });
 
   it("smoke script prints env presence, not secret values", () => {
@@ -225,5 +261,8 @@ describe("auth SES isolation", () => {
     expect(src).not.toContain("console.log(process.env.SES_AWS_SECRET_ACCESS_KEY");
     expect(src).toContain("buildMagicLinkEmail");
     expect(src).toContain("sendAuthSesEmail");
+    expect(src).toContain("auth@24frame.co");
+    expect(src).toContain("PORTAL_EMAIL_REPLY_TO");
+    expect(src).not.toContain("noreply@");
   });
 });

@@ -16,7 +16,7 @@ export { buildMagicLinkEmail, buildOtpEmail, buildSignInWithCodeEmail } from "@/
 
 // Auth transactional mail (magic link / OTP / verification) sends via SES us-west-2
 // on the verified 24frame.co identity. From-address is PORTAL_EMAIL_FROM /
-// noreply@24frame.co — see auth-ses.ts. No Cognito.
+// auth@24frame.co — never noreply. See auth-ses.ts. No Cognito.
 //
 // Residual Resend: GC-Support / asset notification mail only, from the dedicated
 // assets identity (founder: "anything asset related should come from

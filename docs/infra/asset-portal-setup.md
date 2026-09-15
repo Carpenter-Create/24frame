@@ -123,7 +123,7 @@ Portal OTP is Auth transactional mail. Send it through SES, not Resend.
 See [`auth-ses.md`](auth-ses.md).
 
 `PORTAL_EMAIL_FROM` is an address on the verified `24frame.co` identity (e.g.
-`24Frame <noreply@24frame.co>`). Off-domain From addresses are refused.
+`24Frame <auth@24frame.co>`). Never noreply. Off-domain From addresses are refused.
 
 Residual Resend (`RESEND_API_KEY`, `ASSETS_EMAIL_FROM`) is GC-support/asset
 notification only.

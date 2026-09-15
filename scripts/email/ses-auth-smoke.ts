@@ -40,7 +40,8 @@ async function main(): Promise<void> {
   for (const name of AUTH_SES_ENV) {
     console.log(`${name}: ${envPresent(name) ? "set" : "missing"}`);
   }
-  console.log(`PORTAL_EMAIL_FROM: ${envPresent("PORTAL_EMAIL_FROM") ? "set" : "unset (defaults to noreply@24frame.co)"}`);
+  console.log(`PORTAL_EMAIL_FROM: ${envPresent("PORTAL_EMAIL_FROM") ? "set" : "unset (defaults to auth@24frame.co)"}`);
+  console.log(`PORTAL_EMAIL_REPLY_TO: ${envPresent("PORTAL_EMAIL_REPLY_TO") ? "set" : "unset (defaults to admin@globalcontent.co)"}`);
   console.log(`From: ${from}`);
   console.log("Does not read AWS_* / FINANCE_AWS_* / MEDIA_AWS_* / RESEND_API_KEY.");
 
