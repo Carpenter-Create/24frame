@@ -120,18 +120,14 @@ describe("Social profile public face", () => {
     });
   });
 
-  it("shows the handle field after ensure and does not insert on render", async () => {
+  it("shows the public face after ensure and does not insert on render", async () => {
     const { from } = stubClient({ profile: ensured });
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
     const html = renderToStaticMarkup(await SocialProfilePage());
     expect(html).toContain("data-social-profile");
-    expect(html).toContain("data-social-profile-form");
-    expect(html).toContain("data-social-handle-field");
-    expect(html).toContain(SOCIAL.profile.handlePlaceholder);
     expect(html).toContain("https://24frame.co/@ada");
     expect(html).toContain('data-social-share-url="https://24frame.co/@ada"');
-    expect(html).toContain("data-social-handle-url");
     expect(html).not.toContain("data-social-profile-url");
     expect(html).not.toContain(">24frame.co/@ada<");
     expect(html).not.toContain("Copies ");
@@ -152,7 +148,7 @@ describe("Social profile public face", () => {
     expect(from).not.toHaveBeenCalledWith("memberships");
   });
 
-  it("renders the public face with history and edit affordances", async () => {
+  it("renders the public face with history and the header Edit profile button", async () => {
     stubClient({
       profile: ensured,
       posts: [
@@ -178,11 +174,15 @@ describe("Social profile public face", () => {
     expect(html).toContain('data-social-post="p1"');
     expect(html).toContain("data-social-author-history");
     expect(html).toContain("data-social-author-posts");
-    expect(html).toContain("data-social-profile-form");
-    expect(html).toContain("data-social-bio-form");
-    expect(html).toContain("data-social-profile-photo");
-    expect(html).toContain(SOCIAL.profile.uploadPhoto);
-    expect(html).toContain('type="file"');
+    expect(html).toContain(SOCIAL.profile.edit);
+    expect(html).toContain('href="#social-profile-edit"');
+    expect(html).not.toContain("id=\"social-profile-edit\"");
+    expect(html).not.toContain("<summary");
+    expect(html).not.toContain("data-social-profile-form");
+    expect(html).not.toContain("data-social-bio-form");
+    expect(html).not.toContain("data-social-profile-photo");
+    expect(html).not.toContain(SOCIAL.profile.uploadPhoto);
+    expect(html).not.toContain('type="file"');
     expect(html).toContain("AL");
   });
 
@@ -195,12 +195,12 @@ describe("Social profile public face", () => {
     expect(html).toContain('src="https://s3.example/signed-avatar"');
     expect(html).toContain("Ada Lovelace");
     expect(html).not.toContain("AL");
-    expect(html).toContain("data-social-profile-photo");
-    expect(html).toContain("data-social-profile-form");
+    expect(html).not.toContain("data-social-profile-photo");
+    expect(html).not.toContain("data-social-profile-form");
 
     const src = readFileSync("src/app/(app)/social/profile/page.tsx", "utf8");
     expect(src).toContain("signedAvatarUrl");
-    expect(src).toContain("SocialProfilePhotoForm");
+    expect(src).not.toContain("SocialProfilePhotoForm");
     expect(src).toContain("loadAuthorPosts");
     expect(src).not.toContain("putAvatarObject");
     expect(src).not.toContain("uploadAccountPhoto");
@@ -220,6 +220,9 @@ describe("Social profile public face", () => {
     expect(html).not.toContain("data-social-author-truncated");
     expect(html).not.toContain("Sets");
     expect(html).not.toContain("Riley Okonkwo");
+    expect(html).toContain(SOCIAL.profile.edit);
+    expect(html).not.toContain("id=\"social-profile-edit\"");
+    expect(html).not.toContain("<summary");
   });
 
   it("names the bound when author history is truncated", async () => {
@@ -278,8 +281,9 @@ describe("Social profile public face", () => {
     const html = renderToStaticMarkup(await SocialProfilePage());
     expect(html).toContain("@ada");
     expect(html).toContain("https://24frame.co/@ada");
-    expect(html).toContain('value="@ada"');
     expect(html).toContain("Ada Lovelace");
+    expect(html).not.toContain('value="@ada"');
+    expect(html).not.toContain("data-social-handle-field");
   });
 
   it("keeps SocialHandleField on the empty create form when ensure fails", async () => {
