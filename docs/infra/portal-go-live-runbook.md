@@ -24,7 +24,7 @@ export BUCKET=<your real assets bucket>           # e.g. gc-content-assets-prod 
 export APEX=<your GC domain>                       # e.g. globalcontent.tv
 export PORTAL_SUBDOMAIN=links.$APEX               # the branded asset-download host
 export APP_ORIGIN=https://<your app origin>        # this app's own URL, e.g. https://app.$APEX (for PORTAL_BASE_URL)
-export SENDER=noreply@24frame.co                   # Auth OTP From — verified 24frame.co SES identity
+export SENDER=auth@24frame.co                      # Auth OTP From — never noreply; verified 24frame.co SES identity
 export HOSTED_ZONE_ID=<Route53 hosted zone id for $APEX>   # aws route53 list-hosted-zones
 export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 echo "acct=$ACCOUNT_ID bucket=$BUCKET subdomain=$PORTAL_SUBDOMAIN origin=$APP_ORIGIN"

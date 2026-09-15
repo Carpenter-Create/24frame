@@ -60,7 +60,7 @@ Local dev has **two email paths** and only one is fake:
   template still includes both `{{ .ConfirmationURL }}` and `{{ .Token }}`.
 - **App Auth email** (dashboard + mobile sign-in, portal OTP — `src/lib/email.ts`
   via `src/lib/auth-ses.ts`) → **Amazon SES us-west-2**, from `PORTAL_EMAIL_FROM`
-  / `noreply@24frame.co` → **a real inbox, even from localhost.**
+  / `auth@24frame.co` (never noreply) → **a real inbox, even from localhost.**
 - **GC Support / asset notification** (same `email.ts` module) → **Resend residual**,
   from `ASSETS_EMAIL_FROM` / `assets@globalcontent.co`.
 
