@@ -15,7 +15,7 @@ task-def `:3`, and Vercel finance env below are **live** (account
 `405912452061` / `us-west-2`). New image revisions and Aurora cutover
 stay founder-gated. SES us-west-2 is production-approved; `24frame.co`
 + DKIM are verified. Auth transactional mail is SES — see
-[`auth-ses.md`](auth-ses.md). Not Cognito.
+[`auth-ses.md`](auth-ses.md). Auth stays Supabase Auth.
 
 ## Live resources
 

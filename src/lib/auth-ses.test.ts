@@ -214,8 +214,8 @@ describe("auth SES isolation", () => {
     expect(src).not.toContain("process.env.FINANCE_AWS");
     expect(src).not.toContain("process.env.MEDIA_AWS");
     expect(src).not.toContain("RESEND");
-    expect(src).not.toContain("Cognito");
     expect(src).not.toContain("from \"resend\"");
+    expect(src).not.toContain("@aws-sdk/client-cognito");
   });
 
   it("smoke script prints env presence, not secret values", () => {

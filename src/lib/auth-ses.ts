@@ -5,7 +5,7 @@ import { PRODUCT_NAME } from "@/lib/product";
 // Auth transactional mail (magic link / OTP / verification) via SES us-west-2
 // on the verified 24frame.co identity. Dedicated SES_AWS_* namespace — never
 // AWS_* (titles), FINANCE_AWS_* (finance S3), or MEDIA_AWS_* (social).
-// Never NEXT_PUBLIC_. No Cognito. Leaf transport: imported from server-only
+// Never NEXT_PUBLIC_. Auth stays Supabase Auth. Leaf transport: imported from server-only
 // email.ts and the founder smoke script. Do not import from a client module.
 
 export const AUTH_SES_REGION = "us-west-2";
