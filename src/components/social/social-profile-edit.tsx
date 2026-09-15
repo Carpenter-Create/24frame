@@ -34,7 +34,6 @@ import {
   bareHandle,
   handleFieldValue,
   socialHandleRequiredError,
-  socialInitials,
   socialProfilePublicUrl,
   stripHandleDecorators,
 } from "@/lib/social";
