@@ -1,6 +1,6 @@
 // Social measured chrome. Tokens only — no hex.
-// Home pack: Figma 157:328 / 157:1078 / 157:1297 / 158:461
-//   (supersedes 130:215 / 133:816 / 133:1078 for this pack).
+// Home pack: Figma 160:482 / 160:741 / 160:964 / 160:1129
+//   (supersedes 157:328 / 157:1078 / 157:1297 / 158:461 for this pack).
 // Profile ship: Figma 129:215 / 129:415 / 129:615.
 // Profile share sheet: Figma 155:194 / 155:372.
 // Create ship: Figma 135:585 / 135:1037 / 135:1214.
@@ -10,10 +10,10 @@
 // Stories picker: Figma 144:1218 / 144:1444.
 // No glass, no drop shadow. Aggregation / Settings Mercury stays elsewhere.
 
-export const SOCIAL_FIGMA_HOME = "157:328";
-export const SOCIAL_FIGMA_HOME_EMPTY = "157:1078";
-export const SOCIAL_FIGMA_HOME_MOBILE = "157:1297";
-export const SOCIAL_FIGMA_HOME_MOBILE_SCROLL = "158:461";
+export const SOCIAL_FIGMA_HOME = "160:482";
+export const SOCIAL_FIGMA_HOME_EMPTY = "160:741";
+export const SOCIAL_FIGMA_HOME_MOBILE = "160:964";
+export const SOCIAL_FIGMA_HOME_MOBILE_SCROLL = "160:1129";
 export const SOCIAL_FIGMA_PROFILE = ["129:215", "129:415", "129:615"] as const;
 export const SOCIAL_FIGMA_PROFILE_SHARE = ["155:194", "155:372"] as const;
 export const SOCIAL_FIGMA_CREATE = ["135:585", "135:1037", "135:1214"] as const;
@@ -91,7 +91,7 @@ export const SOCIAL_STORY_FACE_CLASS =
 export const SOCIAL_STORY_MEDIA_CLASS =
   "relative size-full overflow-hidden rounded-[9px] bg-surface-muted";
 
-// Home tall FB-style cards — 157:328 / 157:1297. Circular rings superseded.
+// Home tall FB-style cards — 160:482 / 160:964. Circular rings superseded.
 export const SOCIAL_HOME_STORY_CARD_CLASS =
   "relative h-[192px] w-[108px] shrink-0 overflow-hidden rounded-[16px] border border-hairline bg-surface-muted md:h-[200px] md:w-[112px]";
 
@@ -136,14 +136,17 @@ export const SOCIAL_STORY_PROGRESS_BAR_CLASS = "h-[3px] flex-1 rounded-full";
 export const SOCIAL_STORY_CARET_CLASS =
   "absolute top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-surface-muted text-ink-2";
 
+// Home composer compact — 160:482 / 160:741 / 160:964 / 160:1129.
+// Single row: avatar | field (text) | media icon. Photo|Video|Text pills gone
+// on this surface only. Create keeps its kind pills.
 export const SOCIAL_COMPOSER_CLASS =
-  "flex flex-col gap-2 border border-hairline bg-surface px-3 pb-2 pt-2.5";
+  "flex h-16 items-center gap-3 rounded-[16px] border border-hairline bg-surface px-3 py-3 md:px-4";
 
 export const SOCIAL_COMPOSER_FIELD_CLASS =
-  "flex h-10 min-w-0 flex-1 items-center rounded-[20px] bg-surface-muted px-[16px] t-body text-ink-2";
+  "flex h-9 min-w-0 flex-1 items-center t-body text-ink-2";
 
-export const SOCIAL_COMPOSER_ACTION_CLASS =
-  "inline-flex items-center gap-[6px] rounded-[8px] px-[10px] py-[6px] t-label font-medium text-ink-2";
+export const SOCIAL_COMPOSER_MEDIA_CLASS =
+  "relative flex size-9 shrink-0 cursor-pointer items-center justify-center text-ink-2";
 
 export const SOCIAL_FOLLOW_COMPACT_CLASS =
   "inline-flex items-center rounded-[8px] bg-accent px-[10px] py-[5px] text-[11px] font-semibold text-accent-contrast";
@@ -160,7 +163,7 @@ export const SOCIAL_CREATE_CTA_CLASS =
 export const SOCIAL_ACCOUNT_CHIP_CLASS =
   "flex w-full items-center gap-2.5 rounded-[12px] border border-hairline bg-surface-muted p-2.5";
 
-// Floating pill — 157:1297 visible / 158:461 hidden on scroll-down.
+// Floating pill — 160:964 visible / 160:1129 hidden on scroll-down.
 // Desktop left Aggregation rail is unchanged; pill is md:hidden.
 export const SOCIAL_TAB_BAR_CLASS =
   "fixed inset-x-0 bottom-0 z-40 flex justify-center pb-[max(12px,env(safe-area-inset-bottom))] transition-transform duration-200 ease-out md:hidden";

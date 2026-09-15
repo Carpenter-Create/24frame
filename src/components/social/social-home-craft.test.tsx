@@ -1,22 +1,58 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
+}));
 
 import {
   SOCIAL_CHECKLIST_CLASS,
+  SOCIAL_COMPOSER_CLASS,
+  SOCIAL_COMPOSER_FIELD_CLASS,
+  SOCIAL_COMPOSER_MEDIA_CLASS,
   SOCIAL_EMPTY_ACTION_CLASS,
   SOCIAL_EMPTY_PANEL_CLASS,
   SOCIAL_STORIES_EMPTY_ACTION_CLASS,
 } from "@/lib/social-chrome";
-import { SOCIAL_ICON_SIZE_STORY_PLUS } from "@/lib/social-icons";
-import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
+import { SOCIAL_ICON_SIZE_COMPOSER, SOCIAL_ICON_SIZE_STORY_PLUS } from "@/lib/social-icons";
+import { SOCIAL_MEDIA_ACCEPT } from "@/lib/social-media";
+import { SOCIAL, SOCIAL_ROUTES, socialComposerPrompt } from "@/lib/social";
 import { SocialEmpty, SocialStoriesEmpty } from "./social-empty";
+import { SocialHomeComposer } from "./social-home-composer";
 import { SocialOnboardingChecklist } from "./social-checklist";
 import { SocialStoriesRail } from "./social-stories-rail";
 
 const authors = new Map([["u2", { display_name: "Maya Chen", handle: "maya" }]]);
 const faces = new Map([["u2", "https://s3.example/signed-avatar"]]);
 
-describe("Social Home craft (Figma 157:328 / 157:1297)", () => {
+describe("Social Home craft (Figma 160:482 / 160:964)", () => {
+  it("renders the compact composer as avatar | field | media, no Photo|Video|Text pills", () => {
+    const html = renderToStaticMarkup(
+      <SocialHomeComposer authorName="Adam Carpenter" />,
+    );
+    expect(html).toContain("data-social-home-composer");
+    expect(html).toContain("data-social-composer-prompt");
+    expect(html).toContain("data-social-composer-media");
+    expect(html).toContain(SOCIAL_COMPOSER_CLASS);
+    expect(html).toContain(SOCIAL_COMPOSER_FIELD_CLASS);
+    expect(html).toContain(SOCIAL_COMPOSER_MEDIA_CLASS);
+    expect(html).toContain("/social/create?kind=text");
+    expect(html).toContain(socialComposerPrompt("Adam Carpenter"));
+    expect(html).toContain(SOCIAL.home.composerPrompt);
+    expect(html).toContain(SOCIAL.home.attach);
+    expect(html).toContain(`accept="${SOCIAL_MEDIA_ACCEPT}"`);
+    expect(html).toContain('data-social-icon="image"');
+    expect(html).toContain(`width="${SOCIAL_ICON_SIZE_COMPOSER}"`);
+    expect(html).toContain("text-ink-2");
+    expect(html).not.toContain("data-social-composer-action");
+    expect(html).not.toContain(SOCIAL.create.photo);
+    expect(html).not.toContain(SOCIAL.create.video);
+    expect(html).not.toContain(`>${SOCIAL.create.text}<`);
+    expect(SOCIAL_COMPOSER_CLASS).toContain("h-16");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("rounded-[16px]");
+    expect(SOCIAL_COMPOSER_FIELD_CLASS).not.toContain("bg-surface-muted");
+  });
+
   it("renders tall FB-style story tiles with a plus well and unseen face rings", () => {
     const html = renderToStaticMarkup(
       <SocialStoriesRail

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,7 @@ import {
   type SocialMediaItem,
   type SocialMediaLane,
 } from "@/lib/social-media";
+import { takeSocialHomeComposerMedia } from "@/lib/social-home-composer";
 import {
   displayHandle,
   SOCIAL,
@@ -110,7 +111,7 @@ export function SocialProfileCreateForm({
 type ComposeKind = "text" | "photo" | "video";
 
 async function uploadSocialMedia(
-  files: FileList | null,
+  files: ArrayLike<File> | null,
   current: SocialMediaItem[],
   max: number,
   lane: SocialMediaLane,
@@ -157,7 +158,7 @@ export function SocialPostCompose({
   const [media, setMedia] = useState<SocialMediaItem[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  async function onPick(files: FileList | null) {
+  async function onPick(files: ArrayLike<File> | null) {
     if (!files || files.length === 0) return;
     setError("");
     setUploading(true);
@@ -276,7 +277,26 @@ export function SocialCreateCompose({
         : SOCIAL_MEDIA_ACCEPT;
   const well = socialCreateWellCopy(kind, media.length > 0);
 
-  async function onPick(files: FileList | null) {
+  useEffect(() => {
+    const files = takeSocialHomeComposerMedia();
+    if (files.length === 0 || (initialKind ?? "photo") === "text") return;
+    let cancelled = false;
+    setUploading(true);
+    void uploadSocialMedia(files, [], SOCIAL_MEDIA_MAX_ITEMS, "posts").then((result) => {
+      if (cancelled) return;
+      setUploading(false);
+      if (result.error) {
+        setError(result.error);
+        return;
+      }
+      if (result.items) setMedia(result.items);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [initialKind]);
+
+  async function onPick(files: ArrayLike<File> | null) {
     if (!files || files.length === 0 || kind === "text") return;
     setError("");
     setUploading(true);
