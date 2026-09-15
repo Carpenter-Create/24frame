@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 
 import { socialChecklistIncomplete, type SocialChecklistItem } from "@/lib/social-home";
 import { SOCIAL } from "@/lib/social";
@@ -15,8 +14,7 @@ import { SOCIAL_ICON_SIZE_NAV } from "@/lib/social-icons";
 import { SocialIcon } from "./social-icon";
 
 export function SocialOnboardingChecklist({ items }: { items: readonly SocialChecklistItem[] }) {
-  const [dismissed, setDismissed] = useState(false);
-  if (dismissed || !socialChecklistIncomplete(items)) return null;
+  if (!socialChecklistIncomplete(items)) return null;
 
   const done = items.filter((item) => item.done).length;
 
@@ -32,14 +30,6 @@ export function SocialOnboardingChecklist({ items }: { items: readonly SocialChe
             {done} of {items.length} {SOCIAL.checklist.progress}
           </p>
         </div>
-        <button
-          type="button"
-          data-social-checklist-dismiss=""
-          className="t-body-sm text-ink-2"
-          onClick={() => setDismissed(true)}
-        >
-          {SOCIAL.checklist.dismiss}
-        </button>
       </div>
       <div className="h-1 w-full overflow-hidden rounded-full bg-surface-muted">
         <div

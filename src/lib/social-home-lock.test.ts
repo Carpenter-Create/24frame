@@ -1,8 +1,9 @@
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-import { SOCIAL_NAV } from "./nav";
+import { SOCIAL_DESKTOP_NAV, SOCIAL_NAV } from "./nav";
 import { SOCIAL_CATEGORY_LABELS } from "./social-categories";
+import { SOCIAL_DESKTOP_MEASURE } from "./social-chrome";
 import { SOCIAL, SOCIAL_PROFILE_TABS, SOCIAL_ROUTES } from "./social";
 
 const home = readFileSync("src/app/(app)/social/page.tsx", "utf8");
@@ -33,6 +34,12 @@ describe("Social Home miss list v1 P0 lock", () => {
       SOCIAL_ROUTES.create,
       SOCIAL_ROUTES.dms,
       SOCIAL_ROUTES.profile,
+    ]);
+    expect(SOCIAL_DESKTOP_NAV.map((item) => item.label)).toEqual([
+      "Home",
+      "Explore",
+      "Messages",
+      "Profile",
     ]);
     expect(SOCIAL_NAV.map((item) => item.href)).not.toContain(SOCIAL_ROUTES.groups);
     expect(SOCIAL_NAV.map((item) => item.href)).not.toContain(SOCIAL_ROUTES.courses);
@@ -115,7 +122,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(explore).not.toContain("Reels");
   });
 
-  it("locks Home chrome against Figma 160:482 composer compact + tall Stories", () => {
+  it("locks Home chrome against Figma 164:1136 composer compact + tall Stories", () => {
     const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
     const composer = readFileSync("src/components/social/social-home-composer.tsx", "utf8");
     const forYou = readFileSync("src/components/social/social-for-you.tsx", "utf8");
@@ -142,10 +149,11 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(composer).not.toContain("text-accent");
     expect(composer).not.toContain("data-social-composer-action");
     expect(composer).not.toContain("ACTIONS");
-    expect(extras).toContain("data-social-rail-create");
+    expect(extras).not.toContain("data-social-rail-create");
     expect(extras).toContain("data-social-rail-account");
-    expect(extras).toContain("SOCIAL_CREATE_CTA_CLASS");
-    expect(forYou).toContain("SOCIAL.forYou.native");
+    expect(forYou).toContain("SocialOnboardingChecklist");
+    expect(forYou).not.toContain("SOCIAL.forYou.native");
+    expect(forYou).not.toContain("Social-native");
     expect(forYou).not.toContain("education");
     expect(forYou).not.toContain("Education");
     expect(empty).toContain("SOCIAL_EMPTY_ACTION_CLASS");
@@ -162,15 +170,33 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).not.toContain("SocialCreateCompose");
     expect(shell).toContain("data-social-workspace");
     expect(shell).not.toContain("Aggregation|Social");
-    expect(chrome).toContain('SOCIAL_FIGMA_HOME = "160:482"');
-    expect(chrome).toContain('SOCIAL_FIGMA_HOME_EMPTY = "160:741"');
+    expect(chrome).toContain('SOCIAL_FIGMA_HOME = "164:1136"');
+    expect(chrome).toContain('SOCIAL_FIGMA_HOME_EMPTY = "164:1360"');
     expect(chrome).toContain('SOCIAL_FIGMA_HOME_MOBILE = "160:964"');
     expect(chrome).toContain('SOCIAL_FIGMA_HOME_MOBILE_SCROLL = "160:1129"');
+    expect(chrome).toContain("left: 240");
+    expect(chrome).toContain("gutter: 16");
+    expect(chrome).toContain("center: 680");
+    expect(chrome).toContain("right: 300");
+    expect(chrome).toContain("padR: 16");
+    expect(chrome).toContain("px-[16px]");
+    expect(chrome).toContain("gap-[16px]");
     expect(chrome).toContain("SOCIAL_COMPOSER_MEDIA_CLASS");
     expect(chrome).not.toContain("SOCIAL_COMPOSER_ACTION_CLASS");
-    expect(home).toContain("SocialFirstWin");
-    expect(home).not.toContain("SocialOnboardingChecklist");
+    expect(home).not.toContain("SocialFirstWin");
+    expect(home).toContain("checklist={profile ? checklist : []}");
+    expect(home).toContain("SOCIAL.home.emptyQuiet");
+    expect(home).toContain("md:hidden");
     expect(home).toContain("data-social-empty-lenses");
+    expect(shell).not.toContain("Destinations");
+    expect(shell).not.toContain("SocialRailCreateCta");
+    expect(shell).not.toContain("SOCIAL_RAIL.workspace");
+    expect(SOCIAL_DESKTOP_NAV.map((item) => item.label)).toEqual([
+      "Home",
+      "Explore",
+      "Messages",
+      "Profile",
+    ]);
     expect(rail).toContain("data-social-stories-mobile");
     expect(chrome).toContain("129:215");
     expect(chrome).toContain("129:415");
@@ -293,17 +319,25 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(messages).toContain("Promise.all");
   });
 
-  it("keeps first-win primary and the checklist demoted on empty desktop 160:741", () => {
-    const firstWin = readFileSync("src/components/social/social-first-win.tsx", "utf8");
-    expect(chrome).toContain('SOCIAL_FIGMA_HOME_EMPTY = "160:741"');
-    expect(home).toContain("SocialFirstWin");
-    expect(home).not.toContain("SocialOnboardingChecklist");
-    expect(firstWin).toContain("hidden md:flex");
-    expect(firstWin).toContain("data-social-first-win-setup");
-    const firstWinBody = firstWin.slice(firstWin.indexOf("export function SocialFirstWin"));
-    expect(firstWinBody.indexOf("SOCIAL.checklist.firstPost")).toBeLessThan(firstWinBody.indexOf("<details"));
-    expect(firstWinBody.indexOf("<details")).toBeLessThan(firstWinBody.indexOf("<SocialOnboardingChecklist"));
-    expect(firstWin).not.toContain("119:670");
+  it("puts Finish setting up on the desktop For you rail and keeps empty quiet on 164:1360", () => {
+    const forYou = readFileSync("src/components/social/social-for-you.tsx", "utf8");
+    const checklist = readFileSync("src/components/social/social-checklist.tsx", "utf8");
+    expect(chrome).toContain('SOCIAL_FIGMA_HOME_EMPTY = "164:1360"');
+    expect(home).not.toContain("SocialFirstWin");
+    expect(home).not.toContain("firstWinHint");
+    expect(forYou).toContain("SocialOnboardingChecklist");
+    expect(forYou).toContain("layout === \"rail\"");
+    expect(checklist).not.toContain("data-social-checklist-dismiss");
+    expect(SOCIAL_DESKTOP_MEASURE).toEqual({
+      left: 240,
+      gutter: 16,
+      center: 680,
+      right: 300,
+      padR: 16,
+    });
+    expect(SOCIAL.home.emptyQuiet).toBe("No posts yet");
+    expect(SOCIAL.checklist).not.toHaveProperty("firstWinHint");
+    expect(SOCIAL.forYou).not.toHaveProperty("native");
     expect(chrome).not.toContain("119:112");
     expect(chrome).not.toContain("120:174");
   });

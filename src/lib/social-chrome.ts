@@ -1,6 +1,7 @@
 // Social measured chrome. Tokens only — no hex.
-// Home pack: Figma 160:482 / 160:741 / 160:964 / 160:1129
-//   (supersedes 157:328 / 157:1078 / 157:1297 / 158:461 for this pack).
+// Desktop Home clean: Figma 164:1136 / 164:1360
+//   (supersedes 160:482 / 160:741 for desktop measure + rail).
+// Mobile Home pack stays 160:964 / 160:1129 — this PR does not move it.
 // Profile ship: Figma 129:215 / 129:415 / 129:615.
 // Profile share sheet: Figma 155:194 / 155:372.
 // Create ship: Figma 135:585 / 135:1037 / 135:1214.
@@ -10,10 +11,19 @@
 // Stories picker: Figma 144:1218 / 144:1444.
 // No glass, no drop shadow. Aggregation / Settings Mercury stays elsewhere.
 
-export const SOCIAL_FIGMA_HOME = "160:482";
-export const SOCIAL_FIGMA_HOME_EMPTY = "160:741";
+export const SOCIAL_FIGMA_HOME = "164:1136";
+export const SOCIAL_FIGMA_HOME_EMPTY = "164:1360";
 export const SOCIAL_FIGMA_HOME_MOBILE = "160:964";
 export const SOCIAL_FIGMA_HOME_MOBILE_SCROLL = "160:1129";
+
+// Desktop Social Home measure — 164:1136 / 164:1360.
+export const SOCIAL_DESKTOP_MEASURE = {
+  left: 240,
+  gutter: 16,
+  center: 680,
+  right: 300,
+  padR: 16,
+} as const;
 export const SOCIAL_FIGMA_PROFILE = ["129:215", "129:415", "129:615"] as const;
 export const SOCIAL_FIGMA_PROFILE_SHARE = ["155:194", "155:372"] as const;
 export const SOCIAL_FIGMA_CREATE = ["135:585", "135:1037", "135:1214"] as const;
@@ -34,12 +44,12 @@ export const SOCIAL_RAIL_WIDTH_CLASS = "w-[240px]";
 export const SOCIAL_RAIL_MAIN_OFFSET_CLASS = "md:ml-[240px]";
 export const SOCIAL_FOR_YOU_WIDTH_CLASS = "w-[300px]";
 export const SOCIAL_CENTER_WIDTH_CLASS = "w-full min-w-0 lg:max-w-[680px]";
+export const SOCIAL_DESKTOP_FRAME_PAD_CLASS = "w-full px-[16px] py-4";
 
 export const SOCIAL_PAGE_CLASS =
   "flex flex-col gap-[var(--space-4)] pb-[var(--space-12)]";
 
-export const SOCIAL_HOME_LAYOUT_CLASS =
-  "flex items-start gap-[var(--space-4)]";
+export const SOCIAL_HOME_LAYOUT_CLASS = "flex items-start gap-[16px]";
 
 export const SOCIAL_HOME_CENTER_CLASS =
   "flex min-w-0 flex-1 flex-col gap-2 lg:max-w-[680px]";

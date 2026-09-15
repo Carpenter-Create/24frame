@@ -56,8 +56,8 @@ export function SideNav({
         // render of EVERY destination on EVERY navigation — ~400 invocations
         // in one short session. Hovering warms the one destination you are
         // about to click. Deduped per href so re-hovering does not re-fire.
-        // Social: VIEWPORT prefetch on. Five destinations plus local
-        // loading.tsx — not the Aggregation dashboard skeleton.
+        // Social: VIEWPORT prefetch on. Desktop rail is four destinations
+        // plus local loading.tsx — not the Aggregation dashboard skeleton.
         prefetch={social}
         onMouseEnter={social ? undefined : () => warm(item.href)}
         onFocus={social ? undefined : () => warm(item.href)}

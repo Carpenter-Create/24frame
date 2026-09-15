@@ -173,10 +173,17 @@ describe("Social home", () => {
     expect(html).toContain("data-social-following-empty");
     expect(html).toContain("data-social-for-you");
     expect(html).toContain('data-social-icon="users"');
+    expect(html).toContain('data-social-icon="image"');
     expect(html).toContain("Cinematography");
     expect(html).toContain("Music");
-    expect(html).toContain("data-social-first-win");
+    expect(html).not.toContain("data-social-first-win");
+    expect(html).toContain("data-social-checklist");
+    expect(html).toContain(SOCIAL.checklist.title);
     expect(html).toContain(SOCIAL.checklist.firstPost);
+    expect(html).toContain(SOCIAL.home.emptyQuiet);
+    expect(html).toContain(SOCIAL.home.emptyHint);
+    expect(html).not.toContain("One clear next step");
+    expect(html).not.toContain("Social-native");
     expect(html).toContain("data-social-empty-lenses");
     expect(html).not.toContain("data-social-lenses");
     expect(html).not.toContain("Education");
@@ -197,7 +204,7 @@ describe("Social home", () => {
     expect(from).toHaveBeenCalledWith("stories");
     expect(html).toContain("data-social-home-composer");
     expect(html).toContain("data-social-story-create");
-    expect(html).toContain("data-social-first-win");
+    expect(html).not.toContain("data-social-first-win");
     expect(html).toContain("data-social-checklist");
     expect(html).not.toContain("data-social-need-profile");
     expect(html).not.toContain("data-social-post-form");
@@ -227,6 +234,8 @@ describe("Social home", () => {
     expect(html).toContain("Ada Lovelace");
     expect(html).toContain('src="https://s3.example/signed-avatar"');
     expect(html).toContain("data-social-home-composer");
+    expect(html).toContain("data-social-checklist");
+    expect(html).toContain(SOCIAL.checklist.title);
     expect(html).not.toContain("AL");
     expect(html).not.toContain("data-social-avatar-ring");
   });

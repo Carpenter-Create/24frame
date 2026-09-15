@@ -28,15 +28,15 @@ import {
 } from "@/lib/rail-collapse";
 import { PRODUCT_NAME } from "@/lib/product";
 import { isSettingsPath, SETTINGS_RAIL_PAD_CLASS } from "@/lib/settings";
-import { SOCIAL_RAIL } from "@/lib/nav";
 import {
+  SOCIAL_DESKTOP_FRAME_PAD_CLASS,
   SOCIAL_RAIL_MAIN_OFFSET_CLASS,
   SOCIAL_RAIL_WIDTH_CLASS,
   SOCIAL_TAB_BAR_MAIN_PAD_CLASS,
 } from "@/lib/social-chrome";
 import { resolveWorkspaceMode, workspaceHome, type WorkspaceMode } from "@/lib/workspace";
 import { SocialMobileTabBar } from "@/components/social/social-mobile-tab-bar";
-import { SocialRailAccountChip, SocialRailCreateCta } from "@/components/social/social-rail-extras";
+import { SocialRailAccountChip } from "@/components/social/social-rail-extras";
 import { SocialTopBar } from "@/components/social/social-top-bar";
 
 type Org = { id: string; name: string };
@@ -107,8 +107,6 @@ export function AppShell({
             data-social-rail=""
           >
             <div className="flex h-full flex-col gap-3 p-4">
-              <p className="text-[12px] font-semibold leading-4 text-ink-2">{SOCIAL_RAIL.workspace}</p>
-              <p className="text-[10px] font-medium leading-[14px] text-ink-3">{SOCIAL_RAIL.destinations}</p>
               <div className="min-h-0 overflow-y-auto">
                 <SideNav
                   messagesUnread={messagesUnread}
@@ -117,7 +115,6 @@ export function AppShell({
                   workspace="social"
                 />
               </div>
-              <SocialRailCreateCta />
               <div className="min-h-0 flex-1" />
               <SocialRailAccountChip name={name} photoUrl={photoUrl} />
             </div>
@@ -126,7 +123,7 @@ export function AppShell({
             className={cn("min-h-[calc(100dvh-var(--header-height))]", SOCIAL_RAIL_MAIN_OFFSET_CLASS)}
             data-app-social-frame=""
           >
-            <div className={cn("w-full px-4 py-4", SOCIAL_TAB_BAR_MAIN_PAD_CLASS)}>{children}</div>
+            <div className={cn(SOCIAL_DESKTOP_FRAME_PAD_CLASS, SOCIAL_TAB_BAR_MAIN_PAD_CLASS)}>{children}</div>
           </main>
           <SocialMobileTabBar />
         </div>

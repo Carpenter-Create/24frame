@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { SocialOnboardingChecklist } from "@/components/social/social-checklist";
 import { SocialFollowButton } from "@/components/social/social-forms";
 import { SocialAvatar } from "@/components/social/social-ui";
 import {
@@ -9,26 +10,31 @@ import {
 } from "@/lib/social-chrome";
 import { SOCIAL_CATEGORY_TOPICS, socialHomeLensHref } from "@/lib/social-categories";
 import { displayHandle, SOCIAL, socialMemberHref } from "@/lib/social";
+import { socialChecklistIncomplete, type SocialChecklistItem } from "@/lib/social-home";
 import type { SocialSuggestedPerson } from "@/lib/social-feed";
 
 export function SocialForYouRail({
   people,
   faces,
   layout = "rail",
+  checklist = [],
 }: {
   people: readonly SocialSuggestedPerson[];
   faces: ReadonlyMap<string, string | null>;
   layout?: "rail" | "lane";
+  checklist?: readonly SocialChecklistItem[];
 }) {
+  const showChecklist = layout === "rail" && socialChecklistIncomplete(checklist);
+
   return (
     <aside
       data-social-for-you=""
       data-social-for-you-layout={layout}
       className={layout === "lane" ? "flex w-full flex-col gap-3" : SOCIAL_FOR_YOU_RAIL_CLASS}
     >
+      {showChecklist ? <SocialOnboardingChecklist items={checklist} /> : null}
       <div className="flex items-center justify-between">
         <p className="t-body font-semibold text-ink">{SOCIAL.forYou.title}</p>
-        <p className="t-label font-medium text-ink-3">{SOCIAL.forYou.native}</p>
       </div>
       {people.length > 0 ? (
         <div data-social-for-you-people="" className={SOCIAL_FOR_YOU_CARD_CLASS}>

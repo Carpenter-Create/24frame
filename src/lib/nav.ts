@@ -59,10 +59,11 @@ export const NAV: PhosphorNavItem[] = [
   { label: ASK_GLOBEE.headline, href: "/messages", family: "phosphor", icon: Sparkle },
 ];
 
-// Social workspace rail. Five primary jobs. Messages here is DMs — never
-// /messages. Groups / Courses / Leaderboard stay parked off this rail.
-// SOCIAL_NAV family stays Lucide for NavGlyph fallback. Social chrome
-// rematch is SocialIcon (Social Figma V1).
+// Social workspace rail. Mobile tab keeps five jobs (Create stays).
+// Desktop rail is Home / Explore / Messages / Profile — composer owns create.
+// Messages here is DMs — never /messages. Groups / Courses / Leaderboard
+// stay parked off this rail. SOCIAL_NAV family stays Lucide for NavGlyph
+// fallback. Social chrome rematch is SocialIcon (Social Figma V1).
 export const SOCIAL_NAV: LucideNavItem[] = [
   { label: "Home", href: SOCIAL_ROUTES.home, family: "lucide", icon: House, exact: true },
   { label: "Explore", href: SOCIAL_ROUTES.explore, family: "lucide", icon: Compass },
@@ -71,10 +72,9 @@ export const SOCIAL_NAV: LucideNavItem[] = [
   { label: "Profile", href: SOCIAL_ROUTES.profile, family: "lucide", icon: UserRound },
 ];
 
-export const SOCIAL_RAIL = {
-  workspace: "Social",
-  destinations: "Destinations",
-} as const;
+export const SOCIAL_DESKTOP_NAV: LucideNavItem[] = SOCIAL_NAV.filter(
+  (item) => item.href !== SOCIAL_ROUTES.create,
+);
 
 // Staff rail eyebrow. Not a 24Frame product wordmark.
 export const STAFF_RAIL_EYEBROW = "Staff";
@@ -120,8 +120,8 @@ export function clientNavCurrent(pathname: string): NavItem {
 
 // Client phone sheet stays the Aggregation NAV destinations. Staff already use
 // those plus the operator set — do not leave them on a client-only menu.
-// Social mode is Home / Explore / Create / Messages / Profile.
-// Ask 24Frame AI and GC_NAV stay Aggregation-only.
+// Social mobile tab is Home / Explore / Create / Messages / Profile.
+// Desktop rail drops Create. Ask 24Frame AI and GC_NAV stay Aggregation-only.
 export function mobileNavDestinations(
   isGcStaff: boolean,
   workspace: WorkspaceMode = "aggregation",
@@ -134,6 +134,6 @@ export function railDestinations(
   isGcStaff: boolean,
   workspace: WorkspaceMode = "aggregation",
 ): { items: NavItem[]; staffItems: NavItem[] } {
-  if (workspace === "social") return { items: SOCIAL_NAV, staffItems: [] };
+  if (workspace === "social") return { items: SOCIAL_DESKTOP_NAV, staffItems: [] };
   return { items: NAV, staffItems: isGcStaff ? GC_NAV : [] };
 }

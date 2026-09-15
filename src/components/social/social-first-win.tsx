@@ -10,7 +10,6 @@ export function SocialFirstWin({ items }: { items: readonly SocialChecklistItem[
   return (
     <div data-social-first-win="" className={`${SOCIAL_FIRST_WIN_CLASS} hidden md:flex`}>
       <p className="text-[18px] font-semibold text-ink">{SOCIAL.checklist.firstPost}</p>
-      <p className="t-body-sm text-ink-2">{SOCIAL.checklist.firstWinHint}</p>
       <Link href={SOCIAL_ROUTES.create} className={`${SOCIAL_EMPTY_ACTION_CLASS} rounded-[24px]`}>
         {SOCIAL.checklist.firstPostCta}
       </Link>

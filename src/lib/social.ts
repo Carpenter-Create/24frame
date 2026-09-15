@@ -262,6 +262,7 @@ export const SOCIAL = {
     subtitle: `Posts from people you follow in ${PRODUCT_NAME}.`,
     empty: "No posts from people you follow yet",
     emptyHint: "Explore to find creators and start your following wall.",
+    emptyQuiet: "No posts yet",
     goExplore: "Explore creators",
     composerPrompt: "What's on your mind?",
     composerPromptNamed: "What's on your mind",
@@ -377,7 +378,6 @@ export const SOCIAL = {
     firstPostCta: "Create post",
     firstStory: "Create your first story",
     firstStoryCta: "Create story",
-    firstWinHint: "One clear next step. Photo, video, or text — the composer above is ready.",
     setupAvailable: "setup steps available",
     showSetup: "Show",
   },
@@ -387,7 +387,6 @@ export const SOCIAL = {
   },
   forYou: {
     title: "For you",
-    native: "Social-native",
     people: "Suggested people",
     topics: "Topics for you",
   },

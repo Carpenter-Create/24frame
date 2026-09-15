@@ -1,17 +1,7 @@
 import Link from "next/link";
 
-import { SocialIcon } from "@/components/social/social-icon";
-import { SOCIAL_ACCOUNT_CHIP_CLASS, SOCIAL_AVATAR_SM_CLASS, SOCIAL_CREATE_CTA_CLASS } from "@/lib/social-chrome";
+import { SOCIAL_ACCOUNT_CHIP_CLASS, SOCIAL_AVATAR_SM_CLASS } from "@/lib/social-chrome";
 import { SOCIAL, SOCIAL_ROUTES, socialInitials } from "@/lib/social";
-
-export function SocialRailCreateCta() {
-  return (
-    <Link href={SOCIAL_ROUTES.create} data-social-rail-create="" className={SOCIAL_CREATE_CTA_CLASS}>
-      <SocialIcon name="plus" active size={18} className="text-accent-contrast" />
-      {SOCIAL.create.title}
-    </Link>
-  );
-}
 
 export function SocialRailAccountChip({
   name,
