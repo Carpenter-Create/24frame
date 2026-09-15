@@ -48,6 +48,9 @@ describe("SocialProfileEditForm", () => {
     expect(html).not.toContain("Education");
     expect(html).not.toContain("Reels");
     expect(html).not.toContain("#1769ff");
+    expect(html).toContain("text-[16px]");
+    expect(html).not.toMatch(/id="social-edit-name"[^>]*t-body-sm/);
+    expect(html).not.toMatch(/id="social-edit-handle"[^>]*t-body-sm/);
   });
 
   it("shows the empty-handle preview URL", () => {

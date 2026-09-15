@@ -31,6 +31,8 @@ describe("SocialProfileBioEditor", () => {
     expect(html).not.toContain("<form");
     expect(html).not.toContain("Education");
     expect(html).not.toContain("#1769ff");
+    expect(html).toContain("text-[16px]");
+    expect(html).not.toMatch(/data-social-bio-textarea=""[^>]*t-body-sm/);
   });
 
   it("keeps Edit drafts mounted by using a same-tree Back when nested", () => {
