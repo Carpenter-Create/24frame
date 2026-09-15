@@ -1,0 +1,142 @@
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+
+import {
+  FORM_CONTROL_BARE_CLASS,
+  FORM_CONTROL_BOX_CLASS,
+  FORM_CONTROL_TEXT_CLASS,
+  formControlClass,
+} from "./form-control";
+
+const globals = readFileSync("src/app/globals.css", "utf8");
+const layout = readFileSync("src/app/layout.tsx", "utf8");
+const inputSrc = readFileSync("src/components/ui/input.tsx", "utf8");
+const textareaSrc = readFileSync("src/components/ui/textarea.tsx", "utf8");
+const accountForm = readFileSync("src/app/(app)/account/account-profile-form.tsx", "utf8");
+const companyForm = readFileSync("src/app/(app)/account/company-profile-form.tsx", "utf8");
+const socialEdit = readFileSync("src/components/social/social-profile-edit.tsx", "utf8");
+const socialBio = readFileSync("src/components/social/social-profile-bio.tsx", "utf8");
+const socialForms = readFileSync("src/components/social/social-forms.tsx", "utf8");
+const socialExplore = readFileSync("src/app/(app)/social/explore/page.tsx", "utf8");
+const socialTopBar = readFileSync("src/components/social/social-top-bar.tsx", "utf8");
+const searchField = readFileSync("src/components/layout/search-field.tsx", "utf8");
+
+function walkTsx(dir: string, acc: string[] = []): string[] {
+  for (const name of readdirSync(dir)) {
+    const path = join(dir, name);
+    const stat = statSync(path);
+    if (stat.isDirectory()) walkTsx(path, acc);
+    else if (name.endsWith(".tsx") && !name.includes(".test.")) acc.push(path);
+  }
+  return acc;
+}
+
+const SKIP_TYPES = /type=["'](hidden|file|checkbox|radio|submit|button|reset|image|range|color)["']/;
+
+function rawTextControls(src: string): string[] {
+  const hits: string[] = [];
+  const startRe = /<(input|textarea)\b/g;
+  let match: RegExpExecArray | null;
+  while ((match = startRe.exec(src))) {
+    let i = match.index + match[0].length;
+    let depth = 0;
+    while (i < src.length) {
+      const ch = src[i];
+      if (ch === "{") depth += 1;
+      else if (ch === "}") depth = Math.max(0, depth - 1);
+      else if (ch === ">" && depth === 0) {
+        const tag = src.slice(match.index, i + 1);
+        if (match[1] === "input" && SKIP_TYPES.test(tag)) break;
+        hits.push(tag.replace(/\s+/g, " "));
+        break;
+      }
+      i += 1;
+    }
+  }
+  return hits;
+}
+
+describe("form-control SoT", () => {
+  it("owns the 16px iOS no-zoom floor on t-control, not house t-body", () => {
+    expect(FORM_CONTROL_TEXT_CLASS).toBe("t-control");
+    expect(globals).toMatch(/\.t-control\s*\{[\s\S]*?font-size:\s*16px/);
+    expect(globals).toMatch(/\.t-body\s*\{[\s\S]*?font-size:\s*var\(--text-base\)/);
+    expect(globals).toMatch(/\.t-body-sm\s*\{[\s\S]*?font-size:\s*var\(--text-sm\)/);
+    expect(formControlClass()).toContain("t-control");
+    expect(formControlClass()).toContain("border-hairline");
+    expect(formControlClass("bare")).toContain("bg-transparent");
+    expect(FORM_CONTROL_BOX_CLASS).not.toContain("t-body");
+    expect(FORM_CONTROL_BARE_CLASS).not.toContain("t-body");
+  });
+
+  it("puts Input and Textarea on the shared class so future fields inherit", () => {
+    expect(inputSrc).toContain("formControlClass");
+    expect(textareaSrc).toContain("formControlClass");
+    expect(inputSrc).not.toContain("t-body");
+    expect(textareaSrc).not.toContain("t-body");
+    expect(inputSrc).not.toContain("text-[16px]");
+    expect(textareaSrc).not.toContain("text-[16px]");
+  });
+
+  it("does not use a maximum-scale viewport hack", () => {
+    expect(layout).not.toContain("maximum-scale");
+    expect(inputSrc).not.toContain("maximum-scale");
+    expect(textareaSrc).not.toContain("maximum-scale");
+    expect(globals).not.toContain("maximum-scale");
+  });
+
+  it("migrates Social Edit/Bio, Settings/account, composers, and search onto the primitive", () => {
+    expect(socialEdit).toContain('variant="bare"');
+    expect(socialEdit).toContain('id="social-edit-name"');
+    expect(socialEdit).toContain('id="social-edit-handle"');
+    expect(socialEdit).toContain("<Input");
+    expect(socialEdit).toContain('type="file"');
+    expect(socialBio).toContain("<Textarea");
+    expect(socialBio).toContain('variant="bare"');
+    expect(socialBio).toContain("data-social-bio-textarea");
+    expect(socialBio).not.toContain("<textarea");
+    expect(accountForm).toContain("<Input");
+    expect(accountForm).not.toContain("ACCOUNT_FIELD_CLASS");
+    expect(accountForm).not.toContain("text-[16px]");
+    expect(companyForm).toContain("<Input");
+    expect(companyForm).not.toContain("ACCOUNT_FIELD_CLASS");
+    expect(socialForms).toContain("<Textarea");
+    expect(socialForms).toContain('id="social-post-body"');
+    expect(socialForms).toContain('id="social-create-body"');
+    expect(socialForms).toContain('id="social-dm-body"');
+    expect(socialForms).not.toContain("<textarea");
+    expect(socialExplore).toContain("<Input");
+    expect(socialExplore).toContain('id="social-explore-q"');
+    expect(socialTopBar).toContain("<Input");
+    expect(socialTopBar).toContain('id="social-header-q"');
+    expect(searchField).toContain("FORM_CONTROL_TEXT_CLASS");
+    expect(searchField).not.toContain("t-body-sm");
+    expect(readFileSync("src/components/messages/ask-globee-landing.tsx", "utf8")).toContain(
+      'variant="bare"',
+    );
+    expect(readFileSync("src/components/messages/ask-globee-thread.tsx", "utf8")).toContain(
+      "<Input",
+    );
+  });
+
+  it("keeps leftover raw inputs as non-text controls, plus SearchField on the SoT class", () => {
+    const files = [
+      ...walkTsx("src/components"),
+      ...walkTsx("src/app"),
+    ];
+    const leftovers: string[] = [];
+    for (const file of files) {
+      if (file.endsWith("src/components/ui/input.tsx")) continue;
+      if (file.endsWith("src/components/ui/textarea.tsx")) continue;
+      const src = readFileSync(file, "utf8");
+      for (const hit of rawTextControls(src)) {
+        leftovers.push(`${file}: ${hit}`);
+      }
+    }
+    expect(leftovers).toEqual([
+      expect.stringContaining("src/components/layout/search-field.tsx"),
+    ]);
+    expect(searchField).toContain("FORM_CONTROL_TEXT_CLASS");
+  });
+});

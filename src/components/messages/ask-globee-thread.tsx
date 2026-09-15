@@ -30,6 +30,7 @@ import {
   completeAskGlobeeTurn,
   setAskGlobeeThumb,
 } from "@/app/(app)/messages/ask-globee-actions";
+import { Input } from "@/components/ui/input";
 import { useAskGlobeeChrome } from "./ask-globee-chrome";
 import { AskGlobeeThinking } from "./ask-globee-thinking";
 
@@ -408,14 +409,15 @@ export function AskGlobeeThread({
               className={`flex h-14 w-full max-w-[640px] items-center justify-between rounded-full border border-hairline bg-surface px-[var(--space-4)] ${COMPOSER_FOCUS}`}
             >
               <span className="sr-only">{ASK_GLOBEE.composerPlaceholder}</span>
-              <input
+              <Input
+                variant="bare"
                 type="text"
                 name="prompt"
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
                 placeholder={ASK_GLOBEE.composerPlaceholder}
                 autoComplete="off"
-                className={`min-w-0 flex-1 bg-transparent t-body-sm text-ink placeholder:text-ink-3 ${COMPOSER_FOCUS}`}
+                className={`flex-1 ${COMPOSER_FOCUS}`}
               />
               <button
                 type="submit"

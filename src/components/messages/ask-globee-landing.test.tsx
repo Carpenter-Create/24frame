@@ -250,7 +250,8 @@ describe("AskGlobeeLanding", () => {
     expect(html).not.toContain(ASK_GLOBEE.need);
     expect(html).not.toContain("Beta");
     expect(src).toContain("text-left");
-    expect(src).toContain("placeholder:text-ink-3");
+    expect(src).toContain("<Input");
+    expect(src).toContain('variant="bare"');
     expect(src).toContain("px-[var(--space-4)]");
     expect(src).toContain("items-center");
     expect(tokens).toContain("--text-tertiary: #9aa0a9;");

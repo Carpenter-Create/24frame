@@ -9,6 +9,7 @@ import { createSocialProfile } from "@/app/(app)/social/actions";
 import { SocialProfileBioEditor } from "@/components/social/social-profile-bio";
 import { SocialIcon } from "@/components/social/social-icon";
 import { InlineNotice } from "@/components/ui/inline-notice";
+import { Input } from "@/components/ui/input";
 import { ACCOUNT_PROFILE } from "@/lib/account-profile";
 import { AVATAR_ACCEPT, AVATAR_MAX_BYTES, isAvatarContentType } from "@/lib/account-avatar";
 import {
@@ -17,7 +18,6 @@ import {
   SOCIAL_PROFILE_EDIT_BODY_CLASS,
   SOCIAL_PROFILE_EDIT_CARD_CLASS,
   SOCIAL_PROFILE_EDIT_DONE_CLASS,
-  SOCIAL_PROFILE_EDIT_FIELD_CLASS,
   SOCIAL_PROFILE_EDIT_HANDLE_CLASS,
   SOCIAL_PROFILE_EDIT_HANDLE_ERROR_CLASS,
   SOCIAL_PROFILE_EDIT_HEADER_CLASS,
@@ -204,13 +204,14 @@ export function SocialProfileEditForm({
               <label htmlFor="social-edit-name" className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>
                 {SOCIAL.profile.name}
               </label>
-              <input
+              <Input
+                variant="bare"
                 id="social-edit-name"
                 name="display_name"
                 autoComplete="nickname"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className={SOCIAL_PROFILE_EDIT_FIELD_CLASS}
+                className="flex-1"
               />
             </div>
             <div className="h-px bg-hairline" />
@@ -221,14 +222,15 @@ export function SocialProfileEditForm({
                 </label>
                 <div className={handleError ? SOCIAL_PROFILE_EDIT_HANDLE_ERROR_CLASS : SOCIAL_PROFILE_EDIT_HANDLE_CLASS}>
                   <span className="font-medium text-ink-2">@</span>
-                  <input
+                  <Input
+                    variant="bare"
                     id="social-edit-handle"
                     name="handle"
                     autoComplete="username"
                     value={bareHandle(username)}
                     placeholder={SOCIAL.profile.usernamePlaceholder}
                     onChange={(e) => applyHandle(e.target.value)}
-                    className={`${SOCIAL_PROFILE_EDIT_FIELD_CLASS} placeholder:text-ink-2`}
+                    className="flex-1 placeholder:text-ink-2"
                   />
                 </div>
               </div>

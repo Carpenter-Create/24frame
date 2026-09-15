@@ -1,13 +1,9 @@
-import { cn } from "@/lib/cn";
+import { formControlClass, type FormControlVariant } from "@/lib/form-control";
 
-export function Input({ className, ...props }: React.ComponentProps<"input">) {
-  return (
-    <input
-      className={cn(
-        "w-full rounded-[var(--radius-sm)] border border-hairline bg-surface px-3 py-2 t-body text-ink outline-none transition-colors placeholder:text-ink-3 focus:border-accent",
-        className,
-      )}
-      {...props}
-    />
-  );
+export function Input({
+  className,
+  variant = "box",
+  ...props
+}: React.ComponentProps<"input"> & { variant?: FormControlVariant }) {
+  return <input className={formControlClass(variant, className)} {...props} />;
 }

@@ -130,6 +130,15 @@ body {
     font-weight: 400;
     line-height: 1.6;
   }
+  /* Text-entry floor. iOS Safari zooms focused input/textarea under 16px.
+     px, not rem — a smaller root must not drop below the floor.
+     Use via Input/Textarea (or FORM_CONTROL_TEXT_CLASS). Not a display scale. */
+  .t-control {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+  }
   /* Eyebrows / kickers — Geist Sans, uppercase + tracked (matches globalcontent-web;
      the site moved off the mono "systems" register). Tint with text-accent per usage. */
   .t-label {

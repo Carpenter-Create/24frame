@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import {
-  ACCOUNT_FIELD_CLASS,
   ACCOUNT_NAME_MAX,
   ACCOUNT_PHOTO_CIRCLE_CLASS,
   ACCOUNT_PROFILE,
@@ -119,7 +118,6 @@ export function AccountProfileForm({
           }}
           maxLength={ACCOUNT_NAME_MAX}
           autoComplete="name"
-          className={ACCOUNT_FIELD_CLASS}
         />
       </div>
       <div className="flex flex-col gap-[var(--space-2)]">
@@ -131,7 +129,6 @@ export function AccountProfileForm({
           value={email}
           readOnly
           aria-readonly="true"
-          className={ACCOUNT_FIELD_CLASS}
         />
         <p className="t-body-sm text-ink-3">{ACCOUNT_PROFILE.emailHint}</p>
       </div>

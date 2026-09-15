@@ -8,11 +8,11 @@ import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 import { signedAvatarUrl } from "@/lib/s3-avatars";
 import {
-  ACCOUNT_FIELD_CLASS,
   ACCOUNT_PROFILE,
   ACCOUNT_PHOTO_CIRCLE_CLASS,
   COMPANY_PROFILE,
 } from "@/lib/account-profile";
+import { FORM_CONTROL_TEXT_CLASS } from "@/lib/form-control";
 import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import { SETTINGS, SETTINGS_ABSENT, SETTINGS_LOCAL_NAV } from "@/lib/settings";
 import SettingsProfilePage from "./page";
@@ -136,7 +136,7 @@ describe("SettingsProfilePage", () => {
     expect(html).not.toContain("Used to sign in.");
     expect(html).toContain('id="account-name"');
     expect(html).toContain('id="account-email"');
-    expect(html).toContain(ACCOUNT_FIELD_CLASS);
+    expect(html).toContain(FORM_CONTROL_TEXT_CLASS);
     expect(html).toContain("readOnly");
     expect(html).toContain(ACCOUNT_PROFILE.uploadPhoto);
     expect(html).toContain(TEXT_ACTION_CLASS);
@@ -206,7 +206,8 @@ describe("SettingsProfilePage", () => {
     expect(pageSrc).not.toContain("S3_AVATARS_BUCKET");
     expect(formSrc).toContain("saveAccountName");
     expect(formSrc).toContain("uploadAccountPhoto");
-    expect(formSrc).toContain("ACCOUNT_FIELD_CLASS");
+    expect(formSrc).toContain("<Input");
+    expect(formSrc).not.toContain("ACCOUNT_FIELD_CLASS");
     expect(formSrc).toContain("TEXT_ACTION_CLASS");
     expect(actionSrc).toContain("putAvatarObject");
     expect(actionSrc).toContain('revalidatePath("/settings")');

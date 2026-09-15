@@ -15,6 +15,7 @@ import {
 } from "@/lib/ask-globee";
 import { type AskGlobeeHistoryRow } from "@/lib/ask-globee-conversations";
 import { startAskGlobeeConversation } from "@/app/(app)/messages/ask-globee-actions";
+import { Input } from "@/components/ui/input";
 import {
   ASK_GLOBEE_CLOCK_BUTTON_CLASS,
   MOBILE_CHROME_CLOCK_DOCK_CLASS,
@@ -150,14 +151,15 @@ export function AskGlobeeLanding({
           >
             <label className="flex h-14 w-full max-w-[640px] items-center justify-between rounded-[28px] border border-hairline bg-surface px-[var(--space-4)]">
               <span className="sr-only">{ASK_GLOBEE.composerPlaceholderMobile}</span>
-              <input
+              <Input
+                variant="bare"
                 type="text"
                 name="prompt"
                 value={prompt}
                 onChange={(event) => setPrompt(event.target.value)}
                 placeholder={ASK_GLOBEE.composerPlaceholderMobile}
                 autoComplete="off"
-                className="min-w-0 flex-1 bg-transparent text-left t-body-sm text-ink placeholder:text-ink-3 focus:outline-none"
+                className="flex-1 text-left focus:outline-none"
               />
               <button
                 type="submit"

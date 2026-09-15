@@ -31,7 +31,7 @@ describe("SocialProfileBioEditor", () => {
     expect(html).not.toContain("<form");
     expect(html).not.toContain("Education");
     expect(html).not.toContain("#1769ff");
-    expect(html).toContain("text-[16px]");
+    expect(html).toContain("t-control");
     expect(html).not.toMatch(/data-social-bio-textarea=""[^>]*t-body-sm/);
   });
 

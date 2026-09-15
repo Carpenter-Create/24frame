@@ -303,23 +303,14 @@ export const SOCIAL_PROFILE_EDIT_ROW_CLASS =
 export const SOCIAL_PROFILE_EDIT_LABEL_CLASS =
   "w-[88px] shrink-0 pt-0.5 t-label text-ink-2 md:w-24";
 
-// House t-body is 15px and t-body-sm is 13px. iOS Safari zooms the page
-// when a focused form control is under 16px. Lock Edit/Bio fields only —
-// no maximum-scale viewport hack.
-export const SOCIAL_PROFILE_EDIT_FIELD_CLASS =
-  "min-w-0 flex-1 bg-transparent text-[16px] text-ink outline-none";
-
 export const SOCIAL_PROFILE_EDIT_HANDLE_CLASS =
-  "flex min-w-0 flex-1 items-center rounded-[12px] bg-surface-muted px-3 py-2.5 text-[16px]";
+  "flex min-w-0 flex-1 items-center rounded-[12px] bg-surface-muted px-3 py-2.5 t-control";
 
 export const SOCIAL_PROFILE_EDIT_HANDLE_ERROR_CLASS =
-  "flex min-w-0 flex-1 items-center rounded-[12px] border border-ink bg-surface-muted px-3 py-2.5 text-[16px]";
+  "flex min-w-0 flex-1 items-center rounded-[12px] border border-ink bg-surface-muted px-3 py-2.5 t-control";
 
 export const SOCIAL_PROFILE_BIO_CARD_CLASS =
   "flex w-full flex-col gap-4 rounded-[16px] border border-hairline bg-surface p-4";
-
-export const SOCIAL_PROFILE_BIO_TEXTAREA_CLASS =
-  "min-h-[120px] w-full resize-none bg-transparent text-[16px] leading-[22px] text-ink outline-none placeholder:text-ink-3";
 
 // 155:194 / 155:372 — wash overlay, QR card, three actions. No glass, no drop shadow.
 export const SOCIAL_SHARE_SHEET_HOST_CLASS =

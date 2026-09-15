@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { InlineNotice } from "@/components/ui/inline-notice";
+import { Input } from "@/components/ui/input";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { loadExploreSearch } from "@/lib/social-feed";
 import { getOrgContext } from "@/lib/supabase/context";
@@ -31,12 +32,11 @@ export default async function SocialExplorePage({
         <label className="sr-only" htmlFor="social-explore-q">
           {SOCIAL.explore.search}
         </label>
-        <input
+        <Input
           id="social-explore-q"
           name="q"
           defaultValue={q}
           placeholder={SOCIAL.explore.searchPlaceholder}
-          className="w-full rounded-[var(--radius)] border border-hairline bg-surface px-3 py-2 t-body text-ink outline-none placeholder:text-ink-3 focus:border-accent"
         />
       </form>
       {q ? (

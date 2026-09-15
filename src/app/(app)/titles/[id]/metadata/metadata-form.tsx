@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { METADATA_FIELDS, type FieldDef } from "@/lib/metadata";
 import { saveMetadata } from "./actions";
@@ -83,11 +84,10 @@ export function MetadataForm({
             <label key={f.key} className="flex flex-col gap-1">
               <span className="t-body-sm text-ink-2">{f.label}</span>
               {f.type === "textarea" ? (
-                <textarea
+                <Textarea
                   value={state[f.key]}
                   onChange={(e) => set(f.key, e.target.value)}
                   rows={4}
-                  className="w-full rounded-[var(--radius-sm)] border border-hairline bg-surface px-3 py-2 t-body text-ink outline-none transition-colors focus:border-accent"
                 />
               ) : f.type === "select" ? (
                 <select

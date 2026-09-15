@@ -7,10 +7,10 @@ import { useRouter } from "next/navigation";
 import { updateSocialBio } from "@/app/(app)/social/actions";
 import { SocialIcon } from "@/components/social/social-icon";
 import { InlineNotice } from "@/components/ui/inline-notice";
+import { Textarea } from "@/components/ui/textarea";
 import {
   SOCIAL_PROFILE_BIO_CARD_CLASS,
   SOCIAL_PROFILE_BIO_DONE_CLASS,
-  SOCIAL_PROFILE_BIO_TEXTAREA_CLASS,
   SOCIAL_PROFILE_EDIT_BACK_CLASS,
   SOCIAL_PROFILE_EDIT_BODY_CLASS,
   SOCIAL_PROFILE_EDIT_HEADER_CLASS,
@@ -104,7 +104,8 @@ export function SocialProfileBioEditor({
                 {socialBioCounterLabel(value)}
               </p>
             </div>
-            <textarea
+            <Textarea
+              variant="bare"
               id="social-bio"
               name="bio"
               data-social-bio-textarea=""
@@ -112,7 +113,7 @@ export function SocialProfileBioEditor({
               maxLength={BIO_MAX}
               value={value}
               onChange={(e) => setValue(socialBioFieldValue(e.target.value))}
-              className={SOCIAL_PROFILE_BIO_TEXTAREA_CLASS}
+              className="min-h-[120px] resize-none leading-[22px]"
             />
           </div>
           <p data-social-bio-privacy="" className="t-body-sm text-ink-2">

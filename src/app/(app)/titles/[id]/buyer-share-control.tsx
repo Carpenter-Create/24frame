@@ -123,12 +123,12 @@ export function BuyerShareControl({
               <div key={link.linkId} className="rounded-[var(--radius-sm)] border border-hairline p-3">
                 <p className="t-body-sm font-medium text-ink">{displayName}</p>
                 <div className="mt-1.5 flex items-center gap-2">
-                  <input
+                  <Input
                     readOnly
                     value={link.url}
                     aria-label={`Screener share link for ${displayName}`}
                     onFocus={(e) => e.currentTarget.select()}
-                    className="min-w-0 flex-1 truncate rounded-[var(--radius-sm)] border border-hairline bg-surface px-2 py-1 t-body-sm text-ink-2"
+                    className="min-w-0 flex-1 truncate px-2 py-1 text-ink-2"
                   />
                   <Button type="button" onClick={() => copy(link.linkId, link.url)} className="shrink-0">
                     {copiedId === link.linkId ? "Copied" : "Copy"}
