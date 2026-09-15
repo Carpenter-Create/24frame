@@ -24,6 +24,7 @@ export { buildMagicLinkEmail, buildOtpEmail, buildSignInWithCodeEmail } from "@/
 // must not use this path.
 const EMAIL_FROM = process.env.ASSETS_EMAIL_FROM ?? `${PRODUCT_NAME} <assets@globalcontent.co>`;
 
+// Thin wrappers: AuthSesSuppressedError and generic SES send failures propagate.
 export async function sendOtpEmail(to: string, code: string): Promise<void> {
   const { subject, text, html } = buildOtpEmail(code);
   await sendAuthSesEmail({ to, subject, text, html });

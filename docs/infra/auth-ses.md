@@ -61,12 +61,43 @@ RESEND_API_KEY=
 ASSETS_EMAIL_FROM=
 ```
 
+## Suppression (AWS-owned — do not reinvent)
+
+Account-level suppression is **already enabled** in SES us-west-2 for
+**BOUNCE + COMPLAINT**. SES will not deliver further Auth mail to those
+addresses. This repo does not manage the list and does not call
+`GetSuppressedDestination` (that would need extra IAM on `24frame-auth-ses`
+and a pre-send round trip). IAM stays `ses:SendEmail` + `ses:SendRawEmail`
+only.
+
+SNS email alerts to `admin@globalcontent.co` are **Confirmed** for
+BOUNCE + COMPLAINT. Those alerts are **operator-facing**. There is **no**
+custom SNS → DB webhook in this app.
+
+On `SendEmail`, the app maps SES `MessageRejected` and suppression-shaped
+destination failures (`suppression list` / `suppressed destination`) to
+`AuthSesSuppressedError` (`src/lib/auth-ses.ts`) with the recipient address.
+Other SES faults stay generic `Email send failed: …`.
+
+Dashboard `/login` and mobile `/api/mobile/request-sign-in` catch
+`AuthSesSuppressedError` and show `AUTH_SES_SUPPRESSED_USER_MESSAGE`
+("This address cannot receive sign-in mail.") — no AWS internals. Portal
+`/api/portal/request-otp` lets the error propagate; the buyer UI does not
+distinguish mail failures today (non-403/429 maps to the expired/withdrawn
+string). Operators still get the SNS bounce/complaint alert.
+
+AWS account-level suppression can also accept `SendEmail` and drop delivery
+asynchronously. That path is **not** mapped here — SNS remains the operator
+signal. Do not add a webhook unless a later founder-authorized slice says so.
+
 ## IAM (founder-executed)
 
 Dedicated send user in the E8 account, `us-west-2`. Suggested name
 `24frame-auth-ses`. Allow `ses:SendEmail` and `ses:SendRawEmail` on the
 verified `24frame.co` identity and `configuration-set/24frame-auth`. Do not
-attach title, finance, or media policies. Do not apply from CI.
+attach title, finance, or media policies. Do not add
+`ses:GetSuppressedDestination` unless a later slice adds a pre-send check.
+Do not apply from CI.
 
 ## Live smoke (founder / CoS)
 

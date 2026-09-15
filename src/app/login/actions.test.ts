@@ -20,6 +20,7 @@ vi.mock("@/lib/auth-magic-link", () => ({
 
 import { headers } from "next/headers";
 import { issueDashboardSignInLink } from "@/lib/auth-magic-link";
+import { AuthSesSuppressedError } from "@/lib/auth-ses";
 import {
   assertDashboardSignInAllowed,
   DashboardSignInRateLimitError,
@@ -85,6 +86,24 @@ describe("requestMagicLink", () => {
       email: "jane@acmefilms.com",
       requestOrigin: "https://app.24frame.co",
     });
+  });
+
+  it("returns the suppressed-destination string without AWS internals", async () => {
+    const logged = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    vi.mocked(issueDashboardSignInLink).mockRejectedValue(
+      new AuthSesSuppressedError("jane@acmefilms.com"),
+    );
+    await expect(
+      requestMagicLink({ ok: false, message: "" }, form({ email: "jane@acmefilms.com" })),
+    ).resolves.toEqual({
+      ok: false,
+      message: "This address cannot receive sign-in mail.",
+    });
+    expect(logged).toHaveBeenCalledWith(
+      "[dashboard-sign-in] SES destination suppressed",
+      "jane@acmefilms.com",
+    );
+    logged.mockRestore();
   });
 
   it("logs mint/send failures and returns a generic client string", async () => {

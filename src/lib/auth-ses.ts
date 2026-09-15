@@ -1,4 +1,4 @@
-import { SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2";
+import { MessageRejected, SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2";
 
 import { PRODUCT_NAME } from "@/lib/product";
 
@@ -28,6 +28,28 @@ export type AuthSesEmail = {
   text: string;
   html: string;
 };
+
+// SES account-level suppression (BOUNCE + COMPLAINT) is already on in AWS.
+// SendEmail to a suppressed destination fails as MessageRejected (or a
+// suppression-shaped SES error). Map that to a typed failure so Auth callers
+// do not treat it as a generic mail outage. No pre-send suppression lookup
+// (extra IAM + latency). No SNS→DB webhook.
+export class AuthSesSuppressedError extends Error {
+  readonly recipient: string;
+
+  constructor(recipient: string) {
+    super(`Auth SES destination suppressed: ${recipient}`);
+    this.name = "AuthSesSuppressedError";
+    this.recipient = recipient;
+  }
+}
+
+export const AUTH_SES_SUPPRESSED_USER_MESSAGE =
+  "This address cannot receive sign-in mail.";
+
+export function isAuthSesSuppressedError(error: unknown): error is AuthSesSuppressedError {
+  return error instanceof AuthSesSuppressedError;
+}
 
 function requireSesEnv(name: (typeof AUTH_SES_ENV)[number]): string {
   const value = process.env[name]?.trim();
@@ -73,6 +95,30 @@ function authSesClient(): SESv2Client {
   });
 }
 
+function sesFailureText(error: unknown): string {
+  if (typeof error === "string") return error;
+  if (error instanceof Error) return `${error.name} ${error.message}`;
+  if (error && typeof error === "object") {
+    const name = "name" in error && typeof error.name === "string" ? error.name : "";
+    const code = "Code" in error && typeof error.Code === "string" ? error.Code : "";
+    const message = "message" in error && typeof error.message === "string" ? error.message : "";
+    return `${name} ${code} ${message}`;
+  }
+  return String(error);
+}
+
+// Verified against SES / SDK shapes: SESv2 SendEmail throws MessageRejected
+// (name/Code MessageRejected; SDK class MessageRejected). Account-suppressed
+// destinations also surface "suppression list" / "suppressed destination" in
+// the message. Other SES faults (throttles, paused sending, missing MessageId)
+// stay generic send failures.
+function isSesSuppressedFailure(error: unknown): boolean {
+  if (error instanceof MessageRejected) return true;
+  return /MessageRejected|suppression list|suppressed destination|account-level suppression/i.test(
+    sesFailureText(error),
+  );
+}
+
 export async function sendAuthSesEmail(msg: AuthSesEmail): Promise<{ messageId: string }> {
   const from = authEmailFrom();
   const command = new SendEmailCommand({
@@ -95,6 +141,9 @@ export async function sendAuthSesEmail(msg: AuthSesEmail): Promise<{ messageId: 
   try {
     response = await authSesClient().send(command);
   } catch (error) {
+    if (isSesSuppressedFailure(error)) {
+      throw new AuthSesSuppressedError(msg.to);
+    }
     throw new Error(`Email send failed: ${error instanceof Error ? error.message : error}`);
   }
   const messageId = response.MessageId;

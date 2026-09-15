@@ -7,6 +7,10 @@ import {
   issueMobileSignInCode,
 } from "@/lib/auth-magic-link";
 import {
+  AUTH_SES_SUPPRESSED_USER_MESSAGE,
+  isAuthSesSuppressedError,
+} from "@/lib/auth-ses";
+import {
   assertDashboardSignInAllowed,
   clientIpFromForwarded,
   DashboardSignInRateLimitError,
@@ -16,8 +20,9 @@ const Body = z.object({
   email: z.string().email().max(320),
 });
 
-// Mobile Expo cannot hold the service role. Mint + house Resend send live here
+// Mobile Expo cannot hold the service role. Mint + house SES send live here
 // (same pipe as web /login). Never return the OTP or link in the JSON body.
+// AuthSesSuppressedError is a first-class send failure — not a generic mail outage.
 export async function POST(req: Request) {
   const raw = (await req.json().catch(() => null)) as { email?: unknown } | null;
   const email =
@@ -34,6 +39,10 @@ export async function POST(req: Request) {
   } catch (err) {
     if (err instanceof DashboardSignInRateLimitError) {
       return NextResponse.json({ error: MOBILE_SIGN_IN_RATE_LIMITED }, { status: 429 });
+    }
+    if (isAuthSesSuppressedError(err)) {
+      console.warn("[mobile-sign-in] SES destination suppressed", err.recipient);
+      return NextResponse.json({ error: AUTH_SES_SUPPRESSED_USER_MESSAGE }, { status: 422 });
     }
     console.error(
       "[mobile-sign-in] mint/send failed",
