@@ -67,7 +67,7 @@ In the Slice 2 pull request — not production-applied.
 
 - AWS owns finance files + worker compute. Live relational SoT clusters are frame-aurora-dev and frame-aurora-prod in us-west-2. Auth stays Supabase Auth. The app still reads survivor Postgres until Secure Compute and cutover.
 - Founder applies the Slice 2 finance migrations after merge. Filenames live under `supabase/migrations`.
-- Live finance buckets, IAM, ECS cluster, ECR, EventBridge rule `24frame-finance-poll`, and worker task-def `24frame-finance-worker:3` exist. Dedicated finance CloudFront is live on Vercel Production (`FINANCE_CLOUDFRONT_*`); Preview stays S3 presign. Worker code polls `finance_jobs` against the current SoT (`FINANCE_DATABASE_URL` interim; `AURORA_DATABASE_URL` when valid). New image revisions and Aurora cutover stay founder-gated. SES lineup exists; DNS is pending — not Auth cutover.
+- Live finance buckets, IAM, ECS cluster, ECR, EventBridge rule `24frame-finance-poll`, and worker task-def `24frame-finance-worker:3` exist. Dedicated finance CloudFront is live on Vercel Production (`FINANCE_CLOUDFRONT_*`); Preview stays S3 presign. Worker code polls `finance_jobs` against the current SoT (`FINANCE_DATABASE_URL` interim; `AURORA_DATABASE_URL` when valid). New image revisions and Aurora cutover stay founder-gated. SES us-west-2 is production-approved; `24frame.co` + DKIM are verified. Auth transactional mail (magic link / OTP / verification) sends via SES on that identity. Resend remains only for GC-support/asset notification mail. Auth stays Supabase Auth — no Cognito.
 - Production mutation table above is unchanged until founder applies.
 
 ---

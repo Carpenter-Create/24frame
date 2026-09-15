@@ -13,8 +13,9 @@ avatar credentials.
 Buckets, IAM, ECS/ECR/log group, CloudFront, EventBridge poll, worker
 task-def `:3`, and Vercel finance env below are **live** (account
 `405912452061` / `us-west-2`). New image revisions and Aurora cutover
-stay founder-gated. SES lineup exists; DNS is pending — not Auth
-cutover.
+stay founder-gated. SES us-west-2 is production-approved; `24frame.co`
++ DKIM are verified. Auth transactional mail is SES — see
+[`auth-ses.md`](auth-ses.md). Not Cognito.
 
 ## Live resources
 
@@ -40,7 +41,7 @@ cutover.
 | CloudFront public key | `FrameFinanceSign-20260913` / `K3I3XBSSXSZVPM` | Dedicated finance signing key. Not the media key |
 | CloudFront key group | `99f2211c-605d-404a-8864-946e955c99ae` | Trusted key group on the finance distro |
 | Secrets Manager | `24frame/finance/cloudfront-private-key` | `us-west-2`. Name only — never the PEM |
-| SES | Lineup exists | DNS pending. Do **not** claim SES Auth cutover |
+| SES | Auth cutover in-repo | us-west-2; verified `24frame.co`. Founder sets `SES_AWS_*` + `PORTAL_EMAIL_FROM`. Residual Resend is GC-support/asset notification only. See [`auth-ses.md`](auth-ses.md) |
 
 ## Env names (server-only)
 
@@ -74,7 +75,8 @@ as `AURORA_DATABASE_URL`. The worker uses that guard, then falls back to
    disable it from CI.
 2. Slice 2 SQL apply is already live on survivor. Aurora SQL apply and
    app cutover stay founder-only.
-3. SES DNS. Lineup exists. This is **not** Auth cutover.
+3. SES Auth IAM user + Vercel `SES_AWS_*` / `PORTAL_EMAIL_FROM` (founder-executed).
+   Live inbox smoke is founder/CoS. See [`auth-ses.md`](auth-ses.md).
 
 ## Worker image (schedule live; new revisions founder-executed)
 

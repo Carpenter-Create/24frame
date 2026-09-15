@@ -1,8 +1,9 @@
-# Asset portal (CloudFront + Resend) setup — run once per environment
+# Asset portal (CloudFront + Auth SES) setup — run once per environment
 
 Prereqs: `aws` CLI authenticated to the GC AWS account; the asset bucket from
 `docs/infra/asset-storage-setup.md` already exists (`$BUCKET`); a GC-owned domain
-managed in Route 53; a Resend account.
+managed in Route 53. Portal OTP is SES on verified `24frame.co` — see
+[`auth-ses.md`](auth-ses.md). Resend is residual for GC-support/asset notification only.
 
     export AWS_REGION=us-east-1
     export BUCKET=gc-content-assets-prod
@@ -116,15 +117,16 @@ Point the subdomain at the distribution:
 (`Z2FDTNDATAQYW2` is AWS's fixed CloudFront alias hosted-zone ID — same in every
 account.) Once this resolves, `CLOUDFRONT_DOMAIN` is `https://$PORTAL_SUBDOMAIN`.
 
-## 6) Resend account + sending domain
+## 6) Auth OTP — SES us-west-2 on 24frame.co
 
-In the Resend dashboard: add the GC sending domain, add the returned DKIM/SPF/DMARC
-DNS records to Route 53, wait for domain status `Verified`. Create an API key
-scoped to sending only.
+Portal OTP is Auth transactional mail. Send it through SES, not Resend.
+See [`auth-ses.md`](auth-ses.md).
 
-`PORTAL_EMAIL_FROM` is an address on the verified domain (e.g.
-`links@notifications.globalcontent.example`) — must match the verified domain
-exactly or Resend will reject the send.
+`PORTAL_EMAIL_FROM` is an address on the verified `24frame.co` identity (e.g.
+`24Frame <noreply@24frame.co>`). Off-domain From addresses are refused.
+
+Residual Resend (`RESEND_API_KEY`, `ASSETS_EMAIL_FROM`) is GC-support/asset
+notification only.
 
 ## 7) Env vars (server-only — none `NEXT_PUBLIC_`)
 
@@ -135,23 +137,26 @@ Set in `.env.local` (dev) and in Vercel (all environments the portal runs in):
 | `CLOUDFRONT_DOMAIN` | Base URL the app builds signed download URLs against (custom subdomain or `*.cloudfront.net`). |
 | `CLOUDFRONT_KEY_PAIR_ID` | Public key ID CloudFront uses to verify the URL signature. |
 | `CLOUDFRONT_PRIVATE_KEY` | PEM private key used to sign download URLs server-side; pairs with `CLOUDFRONT_KEY_PAIR_ID`; never committed. |
-| `RESEND_API_KEY` | Auth for sending the OTP email via Resend. |
-| `PORTAL_EMAIL_FROM` | Verified-domain sender address for portal OTP emails. |
+| `SES_AWS_REGION` | Must be `us-west-2`. |
+| `SES_AWS_ACCESS_KEY_ID` | Dedicated Auth SES IAM. Never `AWS_*` / `FINANCE_AWS_*` / `MEDIA_AWS_*`. |
+| `SES_AWS_SECRET_ACCESS_KEY` | Dedicated Auth SES IAM. |
+| `PORTAL_EMAIL_FROM` | `24frame.co` sender for portal OTP emails. |
+| `RESEND_API_KEY` | Residual — GC-support/asset notification only. Not Auth. |
 | `PORTAL_BASE_URL` | Base URL (this app's own origin) used to build the `/portal/[token]` link GC staff copy and send. |
 
-All six are read server-side only (route handlers / server actions) — never passed to
+These are read server-side only (route handlers / server actions) — never passed to
 the client bundle, never prefixed `NEXT_PUBLIC_`. Confirmed by the `/leak-check` pass
 for this slice.
 
-## Manual end-to-end test (run after CloudFront + Resend are provisioned)
+## Manual end-to-end test (run after CloudFront + SES Auth are provisioned)
 
-This cannot be exercised until the infra above exists in a real AWS account and
-Resend account — it is **not** run as part of automated verification.
+This cannot be exercised until the infra above exists in a real AWS account —
+it is **not** run as part of automated verification.
 
 1. As GC, open `/gc/deliveries`, pick a delivery whose title has a master asset,
    click **Generate link**, copy the URL.
 2. In a logged-out browser (or incognito), open the URL → enter name/company/email
-   → receive the one-time code via Resend → verify the code → click **Download** →
+   → receive the one-time code via SES → verify the code → click **Download** →
    confirm the file downloads via a signed `$CLOUDFRONT_DOMAIN` URL (inspect the
    request: query string carries `Key-Pair-Id`, `Signature`, `Expires`).
 3. Back in `/gc/deliveries`, confirm the access-event list shows, in order:
@@ -169,16 +174,16 @@ Negatives:
 
 Record the result of this checklist in `docs/known-divergences.md` (or the sign-off
 thread) once run — it is the one step in this slice that automated tests cannot
-cover, since it depends on real CloudFront signing and a real Resend send.
+cover, since it depends on real CloudFront signing and a real SES Auth send.
 
 ---
 
 ## Screener room (Portal-2)
 
 The screener room reuses **the same infrastructure as the master download** — no
-new AWS or Resend provisioning. The screener streams from S3 via the same
-CloudFront distribution + signing key pair, and the OTP email uses the same Resend
-sender. Differences from the master-download path:
+new AWS or SES Auth provisioning. The screener streams from S3 via the same
+CloudFront distribution + signing key pair, and the OTP email uses the same SES
+`24frame.co` sender. Differences from the master-download path:
 
 - **Screeners stay on S3 Standard — never Glaciered.** Only masters have the 90-day
   Glacier lifecycle. A dedicated screener is always immediately streamable. (If a
@@ -192,7 +197,7 @@ sender. Differences from the master-download path:
 - **No rights/grant gate on the pitch view** (Rule 12 governs distribution, not
   pitching) — the only gate is OTP identity.
 
-Env vars: **unchanged** (the six from the table above). `PORTAL_BASE_URL` is reused
+Env vars: **unchanged** (the table above). `PORTAL_BASE_URL` is reused
 to build screener-link URLs on `/gc/review`.
 
 ### Manual end-to-end test (run after the Portal-1 provisioning is in place)
@@ -202,7 +207,7 @@ to build screener-link URLs on `/gc/review`.
 2. As GC, on `/gc/review` for that title, click **Generate screener link** → copy
    the `$PORTAL_BASE_URL/portal/<token>` URL.
 3. In a logged-out browser, open the URL → enter name/company/email → receive the
-   code via Resend → verify → the **screener plays** (streamed inline via a signed
+   code via SES → verify → the **screener plays** (streamed inline via a signed
    `$CLOUDFRONT_DOMAIN` URL — it should not download).
 4. Scrub, pause, and finish the video. Back on `/gc/review`, confirm the per-viewer
    summary shows that viewer's **% watched**, **completed**, **replays**, and
@@ -211,7 +216,7 @@ to build screener-link URLs on `/gc/review`.
    card; `POST /api/portal/screener` for that session returns `403`.
 
 Record the result alongside the Portal-1 checklist — this depends on real CloudFront
-signing and a real Resend send, which automated tests cannot cover.
+signing and a real SES Auth send, which automated tests cannot cover.
 
 ---
 
@@ -253,7 +258,7 @@ Expedited tier — all build on the same `s3.ts` helpers.
 
 ## OTP-request abuse defense (Turnstile + caps + WAF)
 
-`/api/portal/request-otp` is public + unauthenticated and sends real Resend email to a
+`/api/portal/request-otp` is public + unauthenticated and sends real SES Auth email to a
 self-supplied address. App-layer defenses (in code): **Cloudflare Turnstile** on the
 portal identity form + server-side verify (existing Turnstile env keys — no new provisioning);
 a per-`(link,email)` cap (5/hr) and a per-`link` cap (20/hr) counted from `portal_otps`.

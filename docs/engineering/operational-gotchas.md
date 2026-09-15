@@ -58,12 +58,15 @@ Local dev has **two email paths** and only one is fake:
   reachable if something calls `signInWithOtp`) → the local stack's own SMTP →
   **Mailpit at <http://127.0.0.1:54324>**. Never reaches a real inbox. The hosted
   template still includes both `{{ .ConfirmationURL }}` and `{{ .Token }}`.
-- **App email** (dashboard + mobile sign-in, portal OTP, GC Support — `src/lib/email.ts`) →
-  **Resend**, from `PORTAL_EMAIL_FROM` / `assets@globalcontent.co` → **a real inbox, even from localhost.**
+- **App Auth email** (dashboard + mobile sign-in, portal OTP — `src/lib/email.ts`
+  via `src/lib/auth-ses.ts`) → **Amazon SES us-west-2**, from `PORTAL_EMAIL_FROM`
+  / `noreply@24frame.co` → **a real inbox, even from localhost.**
+- **GC Support / asset notification** (same `email.ts` module) → **Resend residual**,
+  from `ASSETS_EMAIL_FROM` / `assets@globalcontent.co`.
 
 Dashboard `/login` and mobile `/api/mobile/request-sign-in` do not call `signInWithOtp`.
 They mint with service-role `generateLink` (no GoTrue mail) and send house email via
-Resend — web is link-only; mobile includes the enterable OTP in the same house shell.
+SES — web is link-only; mobile includes the enterable OTP in the same house shell.
 GoTrue's `auth.rate_limit.email_sent` no longer applies to normal product sign-in;
 app-layer `dashboard_sign_in_requests` caps both surfaces.
 

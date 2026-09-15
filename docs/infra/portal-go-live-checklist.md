@@ -6,7 +6,7 @@
 > commands are in `asset-portal-setup.md`; this page is the ordered "what to do, in what order, and how
 > to know it worked."
 
-**Nothing here is destructive to existing data.** It stands up new AWS/Resend resources and sets env vars.
+**Nothing here is destructive to existing data.** It stands up new AWS resources and sets env vars. Auth OTP is SES (`docs/infra/auth-ses.md`). Resend is residual for GC-support/asset notification only.
 Do them in order — later steps depend on values from earlier ones.
 
 ---
@@ -48,11 +48,12 @@ Follow **`asset-portal-setup.md` §1–§5** (copy-paste CLI). In order:
 **Verify:** `https://<subdomain>/` resolves to CloudFront; a manually-signed URL for a known S3 key downloads.
 **Produces env:** `CLOUDFRONT_DOMAIN` (= `https://<subdomain>`), `CLOUDFRONT_KEY_PAIR_ID`, `CLOUDFRONT_PRIVATE_KEY`.
 
-## 4. Resend — account + verified sending domain
-Follow **`asset-portal-setup.md` §6**.
-**Do:** create/verify a **sending domain** in Resend (DNS records), create an **API key**.
-**Verify:** the domain shows "Verified" in Resend; a test send from `PORTAL_EMAIL_FROM` arrives.
-**Produces env:** `RESEND_API_KEY`, `PORTAL_EMAIL_FROM` (an address on the verified domain).
+## 4. Auth OTP mail — SES us-west-2 on 24frame.co
+Follow **`auth-ses.md`**. Portal OTP is Auth transactional mail, not Resend.
+**Do:** founder sets dedicated `SES_AWS_*` (us-west-2) + `PORTAL_EMAIL_FROM` on the verified `24frame.co` identity.
+**Verify:** `pnpm exec tsx scripts/email/ses-auth-smoke.ts --live --to <inbox>` arrives from `24frame.co`.
+**Produces env:** `SES_AWS_REGION`, `SES_AWS_ACCESS_KEY_ID`, `SES_AWS_SECRET_ACCESS_KEY`, `PORTAL_EMAIL_FROM`.
+**Residual:** `RESEND_API_KEY` / `ASSETS_EMAIL_FROM` remain for GC-support/asset notification only.
 
 ## 5. Set env vars — Vercel (all environments) + your local `.env.local`
 Set these **server-only** vars (none are `NEXT_PUBLIC_`):
@@ -62,12 +63,15 @@ Set these **server-only** vars (none are `NEXT_PUBLIC_`):
 | `CLOUDFRONT_DOMAIN` | step 3 | base URL for signed asset URLs |
 | `CLOUDFRONT_KEY_PAIR_ID` | step 3 | CloudFront public-key id |
 | `CLOUDFRONT_PRIVATE_KEY` | step 3 | PEM signing key (headers/footers + newlines preserved) |
-| `RESEND_API_KEY` | step 4 | send OTP email |
-| `PORTAL_EMAIL_FROM` | step 4 | verified-domain sender |
+| `SES_AWS_REGION` | step 4 | must be `us-west-2` |
+| `SES_AWS_ACCESS_KEY_ID` | step 4 | dedicated Auth SES IAM (not `AWS_*` / `FINANCE_AWS_*`) |
+| `SES_AWS_SECRET_ACCESS_KEY` | step 4 | dedicated Auth SES IAM |
+| `PORTAL_EMAIL_FROM` | step 4 | `24frame.co` sender for portal OTP |
+| `RESEND_API_KEY` | residual | GC-support/asset notification only — not Auth |
 | `PORTAL_BASE_URL` | this app's own origin (e.g. `https://app.globalcontent.<domain>`) | builds the `/portal/<token>` link GC pastes into email |
 
 **Where:** Vercel project → Settings → Environment Variables (Production + Preview). Mirror into `.env.local` for local testing.
-**Verify:** `vercel env ls` shows all six; none prefixed `NEXT_PUBLIC_`. Redeploy so they take effect.
+**Verify:** `vercel env ls` shows the CloudFront + SES Auth names; none prefixed `NEXT_PUBLIC_`. Redeploy so they take effect.
 
 ## 6. Vercel WAF — rate-limit the portal API (required, security)
 **Do:** add a **Firewall / WAF rate-limit rule** on `/api/portal/*` (per-IP + global). The app already has
@@ -96,6 +100,6 @@ nav unread badge; advance a delivery → a "delivery update" message appears.
 ---
 
 ## What unlocks after go-live (code work, when you're ready)
-- **Email channel for notifications** — now that Resend is on `main`, wire `create_notification` to also
-  send email (currently in-app only).
+- **Notification email residual** — GC-support/asset notification still uses Resend
+  (`RESEND_API_KEY`). Auth OTP is SES. Do not send Auth mail through Resend.
 - **Health score** — aggregate of findings, once you finalize the canonical metadata field list (§21.1).
