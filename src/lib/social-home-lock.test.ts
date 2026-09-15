@@ -417,6 +417,12 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(profile).not.toContain("PageHeader");
     expect(profile).not.toContain("AccountProfileForm");
     expect(profile).toContain("SocialProfileIdentity");
+    expect(profile).toContain("SOCIAL.profile.edit");
+    expect(profile).toContain('href="#social-profile-edit"');
+    expect(profile).not.toContain("<details");
+    expect(profile).not.toContain("<summary");
+    expect(profile).not.toContain("SocialProfilePhotoForm");
+    expect(profile).not.toContain("SocialBioForm");
     expect(card).not.toContain("socialProfilePublicHost");
     expect(card).not.toContain("data-social-profile-url");
     expect(card).not.toContain("socialShareHint");

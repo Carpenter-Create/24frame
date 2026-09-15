@@ -2,11 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 
 import { InlineNotice } from "@/components/ui/inline-notice";
-import {
-  SocialBioForm,
-  SocialProfileCreateForm,
-  SocialProfilePhotoForm,
-} from "@/components/social/social-forms";
+import { SocialProfileCreateForm } from "@/components/social/social-forms";
 import { SocialEmpty } from "@/components/social/social-empty";
 import { SocialForYouRail } from "@/components/social/social-for-you";
 import { SocialProfileTabs } from "@/components/social/social-profile-tabs";
@@ -143,12 +139,6 @@ export default async function SocialProfilePage({
             />
           </>
         )}
-        <details id="social-profile-edit" className="flex flex-col gap-[var(--space-4)]">
-          <summary className="t-body-sm text-ink-2">{SOCIAL.profile.edit}</summary>
-          <SocialProfilePhotoForm />
-          <SocialProfileCreateForm handle={profile.handle} displayName={profile.display_name} />
-          <SocialBioForm bio={profile.bio ?? ""} />
-        </details>
       </div>
       <SocialForYouRail people={suggested} faces={faces} />
     </div>
