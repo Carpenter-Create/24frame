@@ -10,6 +10,8 @@ import {
   SOCIAL_CHECKLIST_CLASS,
   SOCIAL_CHECKLIST_ROW_CLASS,
   SOCIAL_CHECKLIST_ROW_LAST_CLASS,
+  SOCIAL_CHECKLIST_TRACK_CLASS,
+  SOCIAL_CHECKLIST_TRACK_NESTED_CLASS,
   SOCIAL_FOR_YOU_CARD_CLASS,
 } from "@/lib/social-chrome";
 import { SOCIAL_ICON_SIZE_NAV } from "@/lib/social-icons";
@@ -49,7 +51,7 @@ export function SocialOnboardingChecklist({
           {SOCIAL.checklist.dismiss}
         </button>
       </div>
-      <div className="h-1 w-full overflow-hidden rounded-full bg-surface-muted">
+      <div className={tone === "nested" ? SOCIAL_CHECKLIST_TRACK_NESTED_CLASS : SOCIAL_CHECKLIST_TRACK_CLASS}>
         <div
           data-social-checklist-progress=""
           className="h-full rounded-full bg-accent"

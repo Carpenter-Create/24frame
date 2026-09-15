@@ -7,7 +7,10 @@ vi.mock("next/navigation", () => ({
 
 import {
   SOCIAL_CHECKLIST_CLASS,
+  SOCIAL_CHECKLIST_TRACK_CLASS,
+  SOCIAL_CHECKLIST_TRACK_NESTED_CLASS,
   SOCIAL_COMPOSER_CLASS,
+  SOCIAL_FOR_YOU_CARD_CLASS,
   SOCIAL_COMPOSER_FIELD_CLASS,
   SOCIAL_COMPOSER_MEDIA_CLASS,
   SOCIAL_EMPTY_ACTION_CLASS,
@@ -141,6 +144,31 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(SOCIAL_CHECKLIST_CLASS).toContain("p-[var(--space-4)]");
     expect(html).toContain(SOCIAL.checklist.title);
     expect(html).toContain(SOCIAL.checklist.photoCta);
+    expect(html).toContain(SOCIAL_CHECKLIST_TRACK_CLASS);
+  });
+
+  it("keeps the nested For you setup track on surface so the unfilled bar reads", () => {
+    const html = renderToStaticMarkup(
+      <SocialOnboardingChecklist
+        tone="nested"
+        items={[
+          {
+            id: "photo",
+            label: SOCIAL.checklist.photo,
+            href: SOCIAL_ROUTES.profile,
+            cta: SOCIAL.checklist.photoCta,
+            done: false,
+          },
+        ]}
+      />,
+    );
+    expect(html).toContain('data-social-checklist-tone="nested"');
+    expect(html).toContain(SOCIAL_FOR_YOU_CARD_CLASS);
+    expect(html).toContain(SOCIAL_CHECKLIST_TRACK_NESTED_CLASS);
+    expect(html).not.toContain(SOCIAL_CHECKLIST_TRACK_CLASS);
+    expect(SOCIAL_FOR_YOU_CARD_CLASS).toContain("bg-surface-muted");
+    expect(SOCIAL_CHECKLIST_TRACK_NESTED_CLASS).toContain("bg-surface");
+    expect(SOCIAL_CHECKLIST_TRACK_NESTED_CLASS).not.toContain("bg-surface-muted");
   });
 });
 

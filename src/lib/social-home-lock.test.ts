@@ -367,6 +367,9 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(forYou).toContain("layout === \"rail\"");
     expect(checklist).toContain("data-social-checklist-dismiss");
     expect(checklist).toContain("SOCIAL.checklist.dismiss");
+    expect(checklist).toContain("SOCIAL_CHECKLIST_TRACK_NESTED_CLASS");
+    expect(chrome).toContain("SOCIAL_CHECKLIST_TRACK_NESTED_CLASS");
+    expect(chrome).toContain("SOCIAL_CHECKLIST_TRACK_CLASS");
     expect(SOCIAL_DESKTOP_MEASURE).toEqual({
       dest: 200,
       gutter: 16,

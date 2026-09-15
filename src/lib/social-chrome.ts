@@ -96,6 +96,12 @@ export const SOCIAL_EMPTY_ACTION_CLASS =
 export const SOCIAL_CHECKLIST_CLASS =
   "flex flex-col gap-[var(--space-2)] rounded-[8px] border border-hairline bg-surface p-[var(--space-4)]";
 
+export const SOCIAL_CHECKLIST_TRACK_CLASS =
+  "h-1 w-full overflow-hidden rounded-full bg-surface-muted";
+
+export const SOCIAL_CHECKLIST_TRACK_NESTED_CLASS =
+  "h-1 w-full overflow-hidden rounded-full bg-surface";
+
 export const SOCIAL_CHECKLIST_ROW_CLASS = "border-b border-hairline py-[var(--space-3)]";
 
 export const SOCIAL_CHECKLIST_ROW_LAST_CLASS = "py-[var(--space-3)]";
