@@ -221,6 +221,8 @@ describe("mobileNavDestinations", () => {
     expect(isSocialTabActive("/social/stories", SOCIAL_NAV[0])).toBe(true);
     expect(isSocialTabActive("/social/create", SOCIAL_NAV[2])).toBe(true);
     expect(isSocialTabActive("/social/u/maya", SOCIAL_NAV[4])).toBe(true);
+    expect(isSocialTabActive("/social/profile/edit", SOCIAL_NAV[4])).toBe(true);
+    expect(isSocialTabActive("/social/profile/edit/bio", SOCIAL_NAV[4])).toBe(true);
     expect(isSocialTabActive("/social/explore", SOCIAL_NAV[0])).toBe(false);
     expect(railDestinations(true, "social").staffItems).toEqual([]);
     expect(railDestinations(true, "aggregation").staffItems.map((item) => item.href)).toContain(

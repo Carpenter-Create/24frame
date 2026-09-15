@@ -12,6 +12,7 @@ import {
   openSocialDm,
   presignSocialMediaUpload,
   toggleSocialLike,
+  updateSocialBio,
 } from "./actions";
 
 vi.mock("@/lib/s3-social-media", () => ({
@@ -117,7 +118,7 @@ describe("social actions", () => {
     const form = new FormData();
     form.set("handle", "@@@");
     expect(await createSocialProfile(form)).toEqual({ error: SOCIAL.profile.handleRequired });
-    expect(SOCIAL.profile.handleRequired).toBe("Add a handle to continue.");
+    expect(SOCIAL.profile.handleRequired).toBe("Handle is required");
   });
 
   it("rejects a blank handle when ensure cannot insert a row", async () => {
@@ -434,5 +435,24 @@ describe("social actions", () => {
       contentType: "video/mp4",
     });
     expect(presignSocialMediaPut).toHaveBeenCalledWith(`stories/${author}/${object}.mp4`, "video/mp4");
+  });
+
+  it("stores bio newlines and counts them toward 150", async () => {
+    const { updates } = stub({
+      profile: { id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" },
+    });
+    const form = new FormData();
+    form.set("bio", "Founder\nInvestor");
+    expect(await updateSocialBio(form)).toEqual({});
+    expect(updates).toEqual([{ table: "profiles", row: { bio: "Founder\nInvestor" } }]);
+  });
+
+  it("rejects a bio over 150 including newlines", async () => {
+    stub({
+      profile: { id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" },
+    });
+    const form = new FormData();
+    form.set("bio", `a\n${"b".repeat(149)}`);
+    expect(await updateSocialBio(form)).toEqual({ error: SOCIAL.profile.bioLimit });
   });
 });

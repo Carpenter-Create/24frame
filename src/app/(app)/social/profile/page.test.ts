@@ -175,7 +175,8 @@ describe("Social profile public face", () => {
     expect(html).toContain("data-social-author-history");
     expect(html).toContain("data-social-author-posts");
     expect(html).toContain(SOCIAL.profile.edit);
-    expect(html).toContain('href="#social-profile-edit"');
+    expect(html).toContain('href="/social/profile/edit"');
+    expect(html).not.toContain('href="#social-profile-edit"');
     expect(html).not.toContain("id=\"social-profile-edit\"");
     expect(html).not.toContain("<summary");
     expect(html).not.toContain("data-social-profile-form");
@@ -221,6 +222,7 @@ describe("Social profile public face", () => {
     expect(html).not.toContain("Sets");
     expect(html).not.toContain("Riley Okonkwo");
     expect(html).toContain(SOCIAL.profile.edit);
+    expect(html).toContain('href="/social/profile/edit"');
     expect(html).not.toContain("id=\"social-profile-edit\"");
     expect(html).not.toContain("<summary");
   });

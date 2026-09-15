@@ -40,7 +40,7 @@ export function socialChecklistItems(input: {
     {
       id: "bio",
       label: SOCIAL.checklist.bio,
-      href: SOCIAL_ROUTES.profile,
+      href: SOCIAL_ROUTES.profileBio,
       cta: SOCIAL.checklist.bioCta,
       done: input.hasBio,
     },

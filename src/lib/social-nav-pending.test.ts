@@ -25,6 +25,8 @@ describe("social nav pending", () => {
       false,
     );
     expect(socialNavPendingSettled(`${SOCIAL_ROUTES.dms}/room-1`, SOCIAL_ROUTES.dms)).toBe(true);
+    expect(socialNavPendingSettled(SOCIAL_ROUTES.profileEdit, SOCIAL_ROUTES.profile)).toBe(true);
+    expect(socialNavPendingSettled(SOCIAL_ROUTES.profileBio, SOCIAL_ROUTES.profile)).toBe(true);
     expect(socialNavPendingSettled(SOCIAL_ROUTES.home, SOCIAL_ROUTES.explore)).toBe(false);
   });
 

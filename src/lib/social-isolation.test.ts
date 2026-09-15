@@ -46,6 +46,14 @@ describe("social isolation lock", () => {
     expect(actions).toContain('from("stories")');
     expect(actions).not.toContain("from(\"reels\")");
     expect(actions).toContain("ensureOwnSocialProfile");
+    const editPage = readFileSync("src/app/(app)/social/profile/edit/page.tsx", "utf8");
+    const bioPage = readFileSync("src/app/(app)/social/profile/edit/bio/page.tsx", "utf8");
+    expect(editPage).toContain('from "@/lib/supabase/server"');
+    expect(bioPage).toContain('from "@/lib/supabase/server"');
+    expect(editPage).not.toContain("@/lib/supabase/admin");
+    expect(bioPage).not.toContain("@/lib/supabase/admin");
+    expect(editPage).not.toContain("SERVICE_ROLE");
+    expect(bioPage).not.toContain("from(\"reels\")");
   });
 
   it("does not create another person's Social profile from org invite or membership", () => {

@@ -13,6 +13,8 @@ import {
   SOCIAL_HOME_CENTER_CLASS,
   SOCIAL_HOME_LAYOUT_CLASS,
   SOCIAL_HOME_STORY_CARD_CLASS,
+  SOCIAL_PROFILE_EDIT_HOST_CLASS,
+  SOCIAL_PROFILE_EDIT_SHEET_CLASS,
   SOCIAL_PROFILE_GRID_CLASS,
   SOCIAL_PROFILE_TILE_CLASS,
   SOCIAL_STORY_CARD_CLASS,
@@ -105,6 +107,21 @@ export function SocialProfileSkeleton() {
         </div>
       </div>
       <SocialForYouSkeleton />
+    </div>
+  );
+}
+
+export function SocialProfileEditSkeleton() {
+  return (
+    <div data-social-profile-edit-skeleton="" className={SOCIAL_PROFILE_EDIT_HOST_CLASS}>
+      <div className={SOCIAL_PROFILE_EDIT_SHEET_CLASS}>
+        <Skeleton className="h-14 w-full" />
+        <div className="flex flex-col items-center gap-4 px-4 pt-6">
+          <Skeleton className="size-[88px] rounded-full" />
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-48 w-full rounded-[16px]" />
+        </div>
+      </div>
     </div>
   );
 }

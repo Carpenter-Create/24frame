@@ -42,6 +42,12 @@ import {
   socialVanityInternalPath,
   stripHandleDecorators,
   suggestedHandleSeed,
+  BIO_MAX,
+  normalizeBio,
+  socialBioCount,
+  socialBioCounterLabel,
+  socialBioEnterSubmits,
+  socialBioFieldValue,
 } from "./social";
 
 describe("social copy lock", () => {
@@ -102,7 +108,13 @@ describe("social copy lock", () => {
     expect(SOCIAL_ROUTES.home).toBe("/social");
     expect(SOCIAL_ROUTES.profileByHandle).toBe("/social/u");
     expect(SOCIAL.profile.handlePlaceholder).toBe("Set your handle");
-    expect(SOCIAL.profile.handleRequired).toBe("Add a handle to continue.");
+    expect(SOCIAL.profile.handleRequired).toBe("Handle is required");
+    expect(SOCIAL_ROUTES.profileEdit).toBe("/social/profile/edit");
+    expect(SOCIAL_ROUTES.profileBio).toBe("/social/profile/edit/bio");
+    expect(SOCIAL.profile.username).toBe("Username");
+    expect(SOCIAL.profile.bioPrivacy).toBe("Your bio shows on your public profile.");
+    expect(SOCIAL.profile.addLink).toBe("Add link");
+    expect(SOCIAL.profile.editPicture).toBe("Edit picture");
     expect(SOCIAL.profile.postsEmpty).toBe("No posts yet.");
     expect(SOCIAL.profile.postsTruncated).toContain("200");
     expect(SOCIAL.home.truncatedWall).toContain("50");
@@ -231,6 +243,15 @@ describe("profile opt-in", () => {
     expect(parseProfileHandleParam("@ada")).toBe("ada");
     expect(parseProfileHandleParam("ada")).toBe("ada");
     expect(suggestedHandleSeed("Ada.Carp@example.com", "u1")).toBe("adacarp");
+    expect(BIO_MAX).toBe(150);
+    expect(socialBioEnterSubmits()).toBe(false);
+    expect(socialBioFieldValue("line1\r\nline2")).toBe("line1\nline2");
+    expect(normalizeBio("Founder\nInvestor")).toBe("Founder\nInvestor");
+    expect(socialBioCount("Founder\nInvestor")).toBe(16);
+    expect(socialBioCounterLabel("Founder\nInvestor")).toBe("16 / 150");
+    expect(normalizeBio(`${"a".repeat(150)}\n`)).toBe("a".repeat(150));
+    expect(normalizeBio(`a\n${"b".repeat(149)}`)).toBeNull();
+    expect(normalizeBio("   \n  ")).toBe("");
   });
 
   it("rewrites only /@handle to the in-app /social/u/{bare} profile", () => {
