@@ -381,17 +381,15 @@ function AccountMenuSlot({
     <Suspense
       fallback={<UserMenu email={email} name={name} photoUrl={photoUrl} defaultWorkspace={defaultWorkspace} />}
     >
-      <UserMenuFromChrome chrome={chrome} defaultWorkspace={defaultWorkspace} />
+      <UserMenuFromChrome chrome={chrome} />
     </Suspense>
   );
 }
 
 function UserMenuFromChrome({
   chrome,
-  defaultWorkspace,
 }: {
   chrome: Promise<AppShellChrome>;
-  defaultWorkspace: WorkspaceMode;
 }) {
   const data = use(chrome);
   return (
