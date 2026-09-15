@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { SocialStoriesEmpty } from "@/components/social/social-empty";
 import { SocialForYouRail } from "@/components/social/social-for-you";
-import { SocialForYouSkeleton } from "@/components/social/social-skeletons";
+import { SocialForYouSkeleton, SocialStoriesCenterSkeleton } from "@/components/social/social-skeletons";
 import { SocialStoriesRail } from "@/components/social/social-stories-rail";
 import { SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS } from "@/lib/social-chrome";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
@@ -24,7 +24,9 @@ export default async function SocialStoriesPage() {
   const session = await requireSocialSession();
   return (
     <div data-social-stories-index="" className={SOCIAL_HOME_LAYOUT_CLASS}>
-      <SocialStoriesMain session={session} />
+      <Suspense fallback={<SocialStoriesCenterSkeleton />}>
+        <SocialStoriesMain session={session} />
+      </Suspense>
       <Suspense fallback={<SocialForYouSkeleton />}>
         <SocialStoriesForYouSlot session={session} />
       </Suspense>

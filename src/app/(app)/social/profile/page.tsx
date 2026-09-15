@@ -7,7 +7,7 @@ import { SocialEmpty } from "@/components/social/social-empty";
 import { SocialForYouRail } from "@/components/social/social-for-you";
 import { SocialProfileTabs } from "@/components/social/social-profile-tabs";
 import { SocialShareButton } from "@/components/social/social-share-button";
-import { SocialForYouSkeleton } from "@/components/social/social-skeletons";
+import { SocialForYouSkeleton, SocialProfileCenterSkeleton } from "@/components/social/social-skeletons";
 import {
   SocialAuthorHistory,
   SocialHighlights,
@@ -63,7 +63,9 @@ export default async function SocialProfilePage({
 
   return (
     <div data-social-profile="" className={SOCIAL_HOME_LAYOUT_CLASS}>
-      <SocialProfileMain session={session} tab={tab} />
+      <Suspense fallback={<SocialProfileCenterSkeleton />}>
+        <SocialProfileMain session={session} tab={tab} />
+      </Suspense>
       <Suspense fallback={<SocialForYouSkeleton />}>
         <SocialProfileForYouSlot session={session} />
       </Suspense>

@@ -96,28 +96,34 @@ export function SocialHomeSkeleton() {
   );
 }
 
+export function SocialProfileCenterSkeleton() {
+  return (
+    <div className={SOCIAL_HOME_CENTER_CLASS}>
+      <div className="flex items-start gap-3 md:gap-4">
+        <Skeleton className={SOCIAL_AVATAR_PROFILE_CLASS} />
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <Skeleton className="h-6 w-40" />
+          <Skeleton className="h-7 w-24 rounded-[8px]" />
+          <Skeleton className="h-3 w-2/3" />
+        </div>
+      </div>
+      <div className="flex gap-4">
+        <Skeleton className="h-8 w-16" />
+        <Skeleton className="h-8 w-20" />
+      </div>
+      <div className={SOCIAL_PROFILE_GRID_CLASS}>
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} className={SOCIAL_PROFILE_TILE_CLASS} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function SocialProfileSkeleton() {
   return (
     <div data-social-profile-skeleton="" className={SOCIAL_HOME_LAYOUT_CLASS}>
-      <div className={SOCIAL_HOME_CENTER_CLASS}>
-        <div className="flex items-start gap-3 md:gap-4">
-          <Skeleton className={SOCIAL_AVATAR_PROFILE_CLASS} />
-          <div className="flex min-w-0 flex-1 flex-col gap-2">
-            <Skeleton className="h-6 w-40" />
-            <Skeleton className="h-7 w-24 rounded-[8px]" />
-            <Skeleton className="h-3 w-2/3" />
-          </div>
-        </div>
-        <div className="flex gap-4">
-          <Skeleton className="h-8 w-16" />
-          <Skeleton className="h-8 w-20" />
-        </div>
-        <div className={SOCIAL_PROFILE_GRID_CLASS}>
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className={SOCIAL_PROFILE_TILE_CLASS} />
-          ))}
-        </div>
-      </div>
+      <SocialProfileCenterSkeleton />
       <SocialForYouSkeleton />
     </div>
   );
@@ -152,12 +158,18 @@ export function SocialCreateSkeleton() {
   );
 }
 
+export function SocialStoriesCenterSkeleton() {
+  return (
+    <div className={SOCIAL_HOME_CENTER_CLASS}>
+      <SocialStoriesRailSkeleton />
+    </div>
+  );
+}
+
 export function SocialStoriesSkeleton() {
   return (
     <div data-social-stories-index-skeleton="" className={SOCIAL_HOME_LAYOUT_CLASS}>
-      <div className={SOCIAL_HOME_CENTER_CLASS}>
-        <SocialStoriesRailSkeleton />
-      </div>
+      <SocialStoriesCenterSkeleton />
       <SocialForYouSkeleton />
     </div>
   );
