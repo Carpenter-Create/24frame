@@ -26,7 +26,15 @@ import {
   socialBioFieldValue,
 } from "@/lib/social";
 
-export function SocialProfileBioEditor({ bio }: { bio: string }) {
+export function SocialProfileBioEditor({
+  bio,
+  onBack,
+  onSaved,
+}: {
+  bio: string;
+  onBack?: () => void;
+  onSaved?: (bio: string) => void;
+}) {
   const router = useRouter();
   const [value, setValue] = useState(socialBioFieldValue(bio));
   const [error, setError] = useState("");
@@ -43,6 +51,10 @@ export function SocialProfileBioEditor({ bio }: { bio: string }) {
       setError(result.error);
       return;
     }
+    if (onSaved) {
+      onSaved(value);
+      return;
+    }
     router.push(SOCIAL_ROUTES.profileEdit);
   }
 
@@ -50,13 +62,25 @@ export function SocialProfileBioEditor({ bio }: { bio: string }) {
     <div data-social-profile-bio="" className={SOCIAL_PROFILE_EDIT_HOST_CLASS}>
       <div className={SOCIAL_PROFILE_EDIT_SHEET_CLASS}>
         <header data-social-profile-bio-header="" className={SOCIAL_PROFILE_EDIT_HEADER_CLASS}>
-          <Link
-            href={SOCIAL_ROUTES.profileEdit}
-            className={SOCIAL_PROFILE_EDIT_BACK_CLASS}
-            aria-label={SOCIAL.profile.back}
-          >
-            <SocialIcon name="caret-left" size={SOCIAL_ICON_SIZE_HEADER} />
-          </Link>
+          {onBack ? (
+            <button
+              type="button"
+              data-social-profile-bio-back=""
+              onClick={onBack}
+              className={SOCIAL_PROFILE_EDIT_BACK_CLASS}
+              aria-label={SOCIAL.profile.back}
+            >
+              <SocialIcon name="caret-left" size={SOCIAL_ICON_SIZE_HEADER} />
+            </button>
+          ) : (
+            <Link
+              href={SOCIAL_ROUTES.profileEdit}
+              className={SOCIAL_PROFILE_EDIT_BACK_CLASS}
+              aria-label={SOCIAL.profile.back}
+            >
+              <SocialIcon name="caret-left" size={SOCIAL_ICON_SIZE_HEADER} />
+            </Link>
+          )}
           <h1 className="min-w-0 flex-1 text-center text-[17px] font-semibold text-ink">
             {SOCIAL.profile.bio}
           </h1>

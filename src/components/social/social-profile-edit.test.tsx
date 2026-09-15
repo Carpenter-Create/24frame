@@ -38,7 +38,8 @@ describe("SocialProfileEditForm", () => {
     expect(html).toContain("Writes engines.");
     expect(html).toContain("Second line.");
     expect(html).toContain("whitespace-pre-wrap");
-    expect(html).toContain(`href="${"/social/profile/edit/bio"}"`);
+    expect(html).toContain("data-social-profile-edit-bio-open");
+    expect(html).not.toContain('href="/social/profile/edit/bio"');
     expect(html).toContain(SOCIAL.profile.links);
     expect(html).toContain(SOCIAL.profile.addLink);
     expect(html).toContain(SOCIAL.profile.editPicture);

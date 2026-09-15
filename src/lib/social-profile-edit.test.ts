@@ -16,7 +16,7 @@ import {
   socialBioEnterSubmits,
   socialProfilePublicUrl,
 } from "@/lib/social";
-import { SOCIAL_PROFILE_EDIT_LOCK } from "@/lib/social-profile-edit";
+import { SOCIAL_PROFILE_EDIT_LOCK, socialProfileEditFace } from "@/lib/social-profile-edit";
 
 const edit = readFileSync("src/components/social/social-profile-edit.tsx", "utf8");
 const bio = readFileSync("src/components/social/social-profile-bio.tsx", "utf8");
@@ -43,8 +43,13 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(edit).toContain("socialProfilePublicUrl");
     expect(edit).toContain("uploadAccountPhoto");
     expect(edit).toContain("data-social-profile-edit-links");
-    expect(edit).toContain("SOCIAL_ROUTES.profileBio");
+    expect(edit).toContain("SocialProfileBioEditor");
+    expect(edit).toContain("data-social-profile-edit-bio-open");
+    expect(edit).not.toContain("SOCIAL_ROUTES.profileBio");
     expect(edit.slice(edit.indexOf("data-social-profile-edit-links"))).not.toContain("<Link");
+    expect(SOCIAL_PROFILE_EDIT_LOCK.keepsDraftOnBio).toBe(true);
+    expect(socialProfileEditFace(true)).toBe("bio");
+    expect(socialProfileEditFace(false)).toBe("edit");
     expect(edit).not.toContain("Instagram");
     expect(edit).not.toContain("Reels");
   });

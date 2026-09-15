@@ -32,4 +32,12 @@ describe("SocialProfileBioEditor", () => {
     expect(html).not.toContain("Education");
     expect(html).not.toContain("#1769ff");
   });
+
+  it("keeps Edit drafts mounted by using a same-tree Back when nested", () => {
+    const html = renderToStaticMarkup(
+      <SocialProfileBioEditor bio="" onBack={() => undefined} onSaved={() => undefined} />,
+    );
+    expect(html).toContain("data-social-profile-bio-back");
+    expect(html).not.toContain('href="/social/profile/edit"');
+  });
 });

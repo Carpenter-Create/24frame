@@ -19,4 +19,12 @@ export const SOCIAL_PROFILE_EDIT_LOCK = {
   editHref: SOCIAL_ROUTES.profileEdit,
   bioHref: SOCIAL_ROUTES.profileBio,
   enterSubmits: socialBioEnterSubmits(),
+  // Bio from Edit is a same-tree face. Name/handle stay mounted.
+  keepsDraftOnBio: true,
 } as const;
+
+export type SocialProfileEditFace = "edit" | "bio";
+
+export function socialProfileEditFace(openBio: boolean): SocialProfileEditFace {
+  return openBio ? "bio" : "edit";
+}

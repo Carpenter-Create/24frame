@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { uploadAccountPhoto } from "@/app/(app)/account/actions";
 import { createSocialProfile } from "@/app/(app)/social/actions";
+import { SocialProfileBioEditor } from "@/components/social/social-profile-bio";
 import { SocialIcon } from "@/components/social/social-icon";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { ACCOUNT_PROFILE } from "@/lib/account-profile";
@@ -37,6 +38,7 @@ import {
   socialProfilePublicUrl,
   stripHandleDecorators,
 } from "@/lib/social";
+import { socialProfileEditFace, type SocialProfileEditFace } from "@/lib/social-profile-edit";
 
 function EditHeader({
   title,
@@ -87,6 +89,8 @@ export function SocialProfileEditForm({
   const [handleError, setHandleError] = useState("");
   const [pending, setPending] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [face, setFace] = useState<SocialProfileEditFace>("edit");
+  const [bioText, setBioText] = useState(bio);
   const preview = socialProfilePublicUrl(bareHandle(username));
   const required = socialHandleRequiredError(username);
 
@@ -137,6 +141,19 @@ export function SocialProfileEditForm({
       return;
     }
     router.push(SOCIAL_ROUTES.profile);
+  }
+
+  if (face === "bio") {
+    return (
+      <SocialProfileBioEditor
+        bio={bioText}
+        onBack={() => setFace(socialProfileEditFace(false))}
+        onSaved={(next) => {
+          setBioText(next);
+          setFace(socialProfileEditFace(false));
+        }}
+      />
+    );
   }
 
   return (
@@ -224,18 +241,23 @@ export function SocialProfileEditForm({
               </p>
             </div>
             <div className="h-px bg-hairline" />
-            <Link href={SOCIAL_ROUTES.profileBio} className={SOCIAL_PROFILE_EDIT_ROW_CLASS}>
+            <button
+              type="button"
+              data-social-profile-edit-bio-open=""
+              onClick={() => setFace(socialProfileEditFace(true))}
+              className={`${SOCIAL_PROFILE_EDIT_ROW_CLASS} text-left`}
+            >
               <span className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>{SOCIAL.profile.bio}</span>
               <span className="flex min-w-0 flex-1 items-start gap-2">
                 <span
                   data-social-profile-edit-bio=""
                   className="min-w-0 flex-1 whitespace-pre-wrap t-body-sm text-ink"
                 >
-                  {bio.trim() ? bio.slice(0, BIO_MAX) : ""}
+                  {bioText.trim() ? bioText.slice(0, BIO_MAX) : ""}
                 </span>
                 <SocialIcon name="caret-right" size={16} className="mt-0.5 shrink-0 text-ink-2" />
               </span>
-            </Link>
+            </button>
             <div className="h-px bg-hairline" />
             <div data-social-profile-edit-links="" className={SOCIAL_PROFILE_EDIT_ROW_CLASS}>
               <span className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>{SOCIAL.profile.links}</span>
