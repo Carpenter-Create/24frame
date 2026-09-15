@@ -455,9 +455,11 @@ describe("AppShell rail-collapse chevron", () => {
     expect(html).toContain("data-social-workspace");
     expect(html).toContain("data-social-top-bar");
     expect(html).toContain("data-social-header-search");
-    expect(html).toContain("data-social-rail-create");
+    expect(html).not.toContain("data-social-rail-create");
+    expect(html).not.toContain("Destinations");
     expect(html).toContain("data-social-rail-account");
     expect(html).toContain("Ada Lovelace");
+    expect(html).toContain('data-social-tab-item="Create"');
     expect(html).not.toContain("data-social-mobile-pill");
     expect(html).not.toContain("data-social-create-fab");
     expect(html).not.toContain("data-social-mobile-dock");
