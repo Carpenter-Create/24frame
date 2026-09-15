@@ -2,13 +2,15 @@
 
 ## Context
 All six portal/findings/notifications slices are merged to `main` and green. Nothing code-blocks launch —
-what remains is **provisioning** (AWS CloudFront + S3 lifecycle + IAM, Resend, Vercel env + WAF) and the
+what remains is **provisioning** (AWS CloudFront + S3 lifecycle + IAM, SES Auth mail, Vercel env + WAF) and the
 manual end-to-end tests. This runbook is the ordered, paste-able CLI version with a fill-in table so you
 can run it top-to-bottom. Companion: `asset-portal-setup.md` (reference) and `portal-go-live-checklist.md`
 (the what/why index).
 
 **Prereqs:** `aws` CLI authenticated to the GC AWS account (`aws sts get-caller-identity` returns the GC
-account), plus `openssl`, `jq`, and the `vercel` CLI (`npm i -g vercel && vercel link`). Resend account created.
+account), plus `openssl`, `jq`, and the `vercel` CLI (`npm i -g vercel && vercel link`).
+Auth OTP is SES on verified `24frame.co` — see `auth-ses.md`. Resend is residual for
+GC-support/asset notification only.
 Nothing here deletes data — it creates new resources and sets env vars.
 
 ---
@@ -22,7 +24,7 @@ export BUCKET=<your real assets bucket>           # e.g. gc-content-assets-prod 
 export APEX=<your GC domain>                       # e.g. globalcontent.tv
 export PORTAL_SUBDOMAIN=links.$APEX               # the branded asset-download host
 export APP_ORIGIN=https://<your app origin>        # this app's own URL, e.g. https://app.$APEX (for PORTAL_BASE_URL)
-export SENDER=links@notifications.$APEX            # OTP "from" address (on a domain you'll verify in Resend)
+export SENDER=noreply@24frame.co                   # Auth OTP From — verified 24frame.co SES identity
 export HOSTED_ZONE_ID=<Route53 hosted zone id for $APEX>   # aws route53 list-hosted-zones
 export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 echo "acct=$ACCOUNT_ID bucket=$BUCKET subdomain=$PORTAL_SUBDOMAIN origin=$APP_ORIGIN"
@@ -193,23 +195,27 @@ curl -sI "https://$PORTAL_SUBDOMAIN/" | head -1   # expect an HTTP response from
 export CLOUDFRONT_DOMAIN="https://$PORTAL_SUBDOMAIN"
 ```
 
-## STEP 9 — Resend (domain verify is console; DNS via CLI) + API key
-Resend has no CLI, so:
-1. Resend dashboard → **Domains → Add** the sending domain (e.g. `notifications.$APEX`). It shows DKIM/SPF (and DMARC) records.
-2. Add those records in Route 53 (`aws route53 change-resource-record-sets ...`, one UPSERT per record), wait until Resend shows **Verified**.
-3. Resend dashboard → **API Keys → Create** a send-only key → copy it (that's `RESEND_API_KEY`).
+## STEP 9 — Auth OTP via SES us-west-2 (24frame.co)
+Portal OTP is Auth transactional mail. Do **not** send it through Resend.
+See [`auth-ses.md`](auth-ses.md). Founder provisions a dedicated SES IAM user
+(`24frame-auth-ses` suggested) in the E8 account and sets `SES_AWS_*` +
+`PORTAL_EMAIL_FROM`. Residual `RESEND_API_KEY` is GC-support/asset notification only.
 
-## STEP 10 — Set the 6 env vars (Vercel + local)
+## STEP 10 — Set env vars (Vercel + local)
 The private key is multiline — write it to Vercel from the file to preserve newlines:
 ```bash
 printf '%s' "$CLOUDFRONT_DOMAIN"      | vercel env add CLOUDFRONT_DOMAIN production
 printf '%s' "$PUBLIC_KEY_ID"          | vercel env add CLOUDFRONT_KEY_PAIR_ID production
 vercel env add CLOUDFRONT_PRIVATE_KEY production < /tmp/cf-portal-private.pem
-printf '%s' "<RESEND_API_KEY>"        | vercel env add RESEND_API_KEY production
+printf '%s' "us-west-2"               | vercel env add SES_AWS_REGION production
+printf '%s' "<SES_AWS_ACCESS_KEY_ID>" | vercel env add SES_AWS_ACCESS_KEY_ID production
+printf '%s' "<SES_AWS_SECRET_ACCESS_KEY>" | vercel env add SES_AWS_SECRET_ACCESS_KEY production
 printf '%s' "$SENDER"                 | vercel env add PORTAL_EMAIL_FROM production
 printf '%s' "$APP_ORIGIN"             | vercel env add PORTAL_BASE_URL production
+# residual — notification mail only, not Auth:
+# printf '%s' "<RESEND_API_KEY>"      | vercel env add RESEND_API_KEY production
 # repeat each for `preview` if you want the portal working in preview deploys.
-vercel env ls | grep -Ei 'cloudfront|resend|portal_'   # verify all six, none NEXT_PUBLIC_
+vercel env ls | grep -Ei 'cloudfront|ses_aws|portal_|resend'   # none NEXT_PUBLIC_
 # mirror the same 6 into your local .env.local for local testing, then:
 vercel --prod        # redeploy so the new env takes effect
 ```
@@ -218,8 +224,8 @@ Then **securely delete** the local PEM: `rm /tmp/cf-portal-private.pem` (it's no
 ## STEP 11 — Vercel WAF rate-limit on /api/portal/* (launch gate)
 Vercel Firewall is dashboard-managed: Vercel project → **Firewall** → **Add Rule** → **Rate Limit** →
 path `/api/portal/*` (or specifically `/api/portal/request-otp`), a sane per-IP limit (e.g. 20 req / 10 min),
-action **Deny/Challenge**. Enable it. **Do not send real recipients to the portal until this rule + a verified
-Resend domain are both live.**
+action **Deny/Challenge**. Enable it. **Do not send real recipients to the portal until this rule + SES Auth
+(`SES_AWS_*` / `PORTAL_EMAIL_FROM` on 24frame.co) are both live.**
 
 ---
 
@@ -236,5 +242,5 @@ Resend domain are both live.**
    delivery → a "delivery update" message appears.
 
 ## After go-live (optional code follow-ons, when you want them)
-- **Email channel for notifications** (Resend now on `main`): wire `create_notification` to also send email.
+- **Notification email residual:** GC-support/asset notification still uses Resend. Auth OTP is SES.
 - **Health score**: aggregate of findings, once you finalize the canonical metadata field list (§21.1).

@@ -1,121 +1,37 @@
 import "server-only";
 import { Resend } from "resend";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { sendAuthSesEmail } from "@/lib/auth-ses";
 import {
-  EMAIL_BODY,
-  EMAIL_BODY_LINE,
-  EMAIL_BODY_SIZE,
-  EMAIL_HEADLINE_LINE,
-  EMAIL_HEADLINE_SIZE,
-  EMAIL_INK,
-  EMAIL_SECONDARY,
-  houseOtpCode,
-  housePrimaryButton,
-  housePrimaryLink,
-  wrapHouseEmail,
-} from "@/lib/email-house";
-import { PORTAL } from "@/lib/portal";
+  buildMagicLinkEmail,
+  buildOtpEmail,
+  buildSignInWithCodeEmail,
+  escapeEmailHtml,
+} from "@/lib/email-auth-templates";
+import { EMAIL_BODY, housePrimaryLink, wrapHouseEmail } from "@/lib/email-house";
 import { PRODUCT_NAME } from "@/lib/product";
 import type { Database } from "@/lib/supabase/database.types";
 
-// Asset-related + GC-Support emails send from a dedicated identity (founder: "anything asset
-// related should come from assets@globalcontent.co"). Override via ASSETS_EMAIL_FROM; defaults
-// to the verified assets@ address on the globalcontent.co Resend domain (no extra setup needed).
+export { buildMagicLinkEmail, buildOtpEmail, buildSignInWithCodeEmail } from "@/lib/email-auth-templates";
+
+// Auth transactional mail (magic link / OTP / verification) sends via SES us-west-2
+// on the verified 24frame.co identity. From-address is PORTAL_EMAIL_FROM /
+// noreply@24frame.co — see auth-ses.ts. No Cognito.
+//
+// Residual Resend: GC-Support / asset notification mail only, from the dedicated
+// assets identity (founder: "anything asset related should come from
+// assets@globalcontent.co"). Override via ASSETS_EMAIL_FROM. Auth send functions
+// must not use this path.
 const EMAIL_FROM = process.env.ASSETS_EMAIL_FROM ?? `${PRODUCT_NAME} <assets@globalcontent.co>`;
 
-// Product sign-in (web + mobile house pipe). Prefer PORTAL_EMAIL_FROM (noreply@24frame.co);
-// fall back to the assets sender so existing previews keep sending if only ASSETS is set.
-function signInEmailFrom(): string {
-  return (
-    process.env.PORTAL_EMAIL_FROM ??
-    process.env.ASSETS_EMAIL_FROM ??
-    `${PRODUCT_NAME} <assets@globalcontent.co>`
-  );
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-export function buildOtpEmail(code: string): { subject: string; text: string; html: string } {
-  const subject = `Your ${PRODUCT_NAME} access code`;
-  const text =
-    `Your verification code is ${code}.\n\n` +
-    `It expires in ${PORTAL.otpTtlMinutes} minutes. If you didn't request this, you can ignore this message.`;
-  const html = wrapHouseEmail(
-    `<p style="margin:0 0 12px;color:${EMAIL_BODY}">Your verification code is</p>` +
-      `<div style="margin:0 0 16px">${houseOtpCode(code)}</div>` +
-      `<p style="margin:0;color:${EMAIL_SECONDARY}">It expires in ${PORTAL.otpTtlMinutes} minutes. If you didn't request this, you can ignore this message.</p>`,
-  );
-  return { subject, text, html };
-}
-
 export async function sendOtpEmail(to: string, code: string): Promise<void> {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) throw new Error("Missing RESEND_API_KEY");
   const { subject, text, html } = buildOtpEmail(code);
-  const resend = new Resend(apiKey);
-  const { error } = await resend.emails.send({ from: EMAIL_FROM, to, subject, text, html });
-  if (error) throw new Error(`Email send failed: ${error.message}`);
-}
-
-// Web dashboard login. Mints happen in auth-magic-link.ts; this is the link-only house
-// mail so web never receives a dual-purpose (link + code) body.
-export function buildMagicLinkEmail(signInUrl: string): { subject: string; text: string; html: string } {
-  const subject = `Your ${PRODUCT_NAME} sign-in link`;
-  const text =
-    `Use this link to sign in. If you didn't request this, you can ignore this message.\n\n` +
-    `Sign in to ${PRODUCT_NAME}: ${signInUrl}\n`;
-  const html = wrapHouseEmail(
-    `<p style="margin:0 0 12px;font-size:${EMAIL_HEADLINE_SIZE}px;line-height:${EMAIL_HEADLINE_LINE}px;font-weight:600;color:${EMAIL_INK}">Sign in</p>` +
-      `<p style="margin:0 0 28px;font-size:${EMAIL_BODY_SIZE}px;line-height:${EMAIL_BODY_LINE}px;color:${EMAIL_BODY}">` +
-      `Use this link to sign in. If you didn't request this, you can ignore this message.` +
-      `</p>` +
-      housePrimaryButton(escapeHtml(signInUrl), "Sign in"),
-  );
-  return { subject, text, html };
+  await sendAuthSesEmail({ to, subject, text, html });
 }
 
 export async function sendMagicLinkEmail(to: string, signInUrl: string): Promise<void> {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) throw new Error("Missing RESEND_API_KEY");
   const { subject, text, html } = buildMagicLinkEmail(signInUrl);
-  const resend = new Resend(apiKey);
-  const { error } = await resend.emails.send({
-    from: signInEmailFrom(),
-    to,
-    subject,
-    text,
-    html,
-  });
-  if (error) throw new Error(`Email send failed: ${error.message}`);
-}
-
-// Mobile sign-in: same subject + house shell as web, plus the enterable OTP (anti–iOS
-// linkify defenses live in email-house). Hosted Auth magic_link is not the send path.
-export function buildSignInWithCodeEmail(
-  signInUrl: string,
-  code: string,
-): { subject: string; text: string; html: string } {
-  const subject = `Your ${PRODUCT_NAME} sign-in link`;
-  const text =
-    `Use this link to sign in. If you didn't request this, you can ignore this message.\n\n` +
-    `Sign in to ${PRODUCT_NAME}: ${signInUrl}\n\n` +
-    `Or enter this code: ${code}\n`;
-  const html = wrapHouseEmail(
-    `<p style="margin:0 0 12px;font-size:${EMAIL_HEADLINE_SIZE}px;line-height:${EMAIL_HEADLINE_LINE}px;font-weight:600;color:${EMAIL_INK}">Sign in</p>` +
-      `<p style="margin:0 0 28px;font-size:${EMAIL_BODY_SIZE}px;line-height:${EMAIL_BODY_LINE}px;color:${EMAIL_BODY}">` +
-      `Use this link to sign in. If you didn't request this, you can ignore this message.` +
-      `</p>` +
-      housePrimaryButton(escapeHtml(signInUrl), "Sign in") +
-      `<p style="margin:0 0 8px;font-size:${EMAIL_BODY_SIZE}px;line-height:${EMAIL_BODY_LINE}px;color:${EMAIL_BODY}">Or enter this code:</p>` +
-      `<div style="margin:0">${houseOtpCode(code)}</div>`,
-  );
-  return { subject, text, html };
+  await sendAuthSesEmail({ to, subject, text, html });
 }
 
 export async function sendSignInWithCodeEmail(
@@ -123,18 +39,8 @@ export async function sendSignInWithCodeEmail(
   signInUrl: string,
   code: string,
 ): Promise<void> {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) throw new Error("Missing RESEND_API_KEY");
   const { subject, text, html } = buildSignInWithCodeEmail(signInUrl, code);
-  const resend = new Resend(apiKey);
-  const { error } = await resend.emails.send({
-    from: signInEmailFrom(),
-    to,
-    subject,
-    text,
-    html,
-  });
-  if (error) throw new Error(`Email send failed: ${error.message}`);
+  await sendAuthSesEmail({ to, subject, text, html });
 }
 
 // GC-Support notification email (§20). Body is the same voice-approved line shown in-app;
@@ -150,12 +56,13 @@ export function buildNotificationEmail(args: {
   const { subject, body, ctaLabel, ctaUrl } = args;
   const text = `${body}\n\n${ctaLabel}: ${ctaUrl}\n\n${PRODUCT_NAME}`;
   const html = wrapHouseEmail(
-    `<p style="margin:0 0 16px;color:${EMAIL_BODY}">${escapeHtml(body)}</p>` +
-      housePrimaryLink(ctaUrl, escapeHtml(ctaLabel)),
+    `<p style="margin:0 0 16px;color:${EMAIL_BODY}">${escapeEmailHtml(body)}</p>` +
+      housePrimaryLink(ctaUrl, escapeEmailHtml(ctaLabel)),
   );
   return { subject, text, html };
 }
 
+// Residual Resend path — GC-Support / asset notification only. Not Auth.
 async function sendNotificationEmail(
   to: string,
   msg: { subject: string; text: string; html: string },

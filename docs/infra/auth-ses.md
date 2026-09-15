@@ -1,0 +1,65 @@
+# Auth transactional email — SES us-west-2
+
+Mail transport only. Auth stays Supabase Auth. **No Cognito.**
+
+SES production in the E8/24Frame account (`405912452061`) is approved in
+`us-west-2` (case 178940071800399; out of sandbox). `24frame.co` + DKIM are
+verified there. The prior Resend lock for Auth is superseded.
+
+## What sends where
+
+| Mail | Transport | From |
+| --- | --- | --- |
+| Dashboard magic link | SES | `PORTAL_EMAIL_FROM` / `24Frame <noreply@24frame.co>` |
+| Mobile sign-in (link + OTP) | SES | same |
+| Portal OTP / verification | SES | same |
+| GC-Support / asset notification | **Resend residual** | `ASSETS_EMAIL_FROM` / `assets@globalcontent.co` |
+
+Do not invent domains. Do not reuse `AWS_*` (titles), `FINANCE_AWS_*`
+(finance S3), or `MEDIA_AWS_*` (social).
+
+## Env names (server-only — never `NEXT_PUBLIC_`)
+
+Set on Vercel Production + Preview, and in local `.env.local` for live send.
+Names only — never commit values.
+
+```
+SES_AWS_REGION=us-west-2
+SES_AWS_ACCESS_KEY_ID=
+SES_AWS_SECRET_ACCESS_KEY=
+PORTAL_EMAIL_FROM=
+```
+
+`PORTAL_EMAIL_FROM` must be an address on `24frame.co`. If unset, Auth send
+defaults to `24Frame <noreply@24frame.co>`.
+
+Residual (not Auth):
+
+```
+RESEND_API_KEY=
+ASSETS_EMAIL_FROM=
+```
+
+## IAM (founder-executed)
+
+Dedicated send user in the E8 account, `us-west-2`. Suggested name
+`24frame-auth-ses`. Allow `ses:SendEmail` and `ses:SendRawEmail` on the
+verified `24frame.co` identity only. Do not attach title, finance, or media
+policies. Do not apply from CI.
+
+## Live smoke (founder / CoS)
+
+CI covers the SES command shape and that Auth callers still build the house
+templates. A live inbox send needs the `SES_AWS_*` credentials this
+environment does not have.
+
+```bash
+# Dry-run — prints whether env names are set. No send. No secret values.
+pnpm exec tsx scripts/email/ses-auth-smoke.ts
+
+# Live — one house magic-link template from the 24frame.co identity.
+pnpm exec tsx scripts/email/ses-auth-smoke.ts --live --to <inbox>
+```
+
+Confirm the message arrives from the 24frame.co From address and that SES
+in us-west-2 shows the MessageId. The smoke link is not a usable session.
