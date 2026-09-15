@@ -17,6 +17,7 @@ import { ASK_GLOBEE } from "@/lib/ask-globee";
 import {
   GC_NAV,
   NAV,
+  SOCIAL_DESKTOP_NAV,
   SOCIAL_NAV,
   STAFF_RAIL_EYEBROW,
   clientNavCurrent,
@@ -200,6 +201,18 @@ describe("mobileNavDestinations", () => {
       "Home",
       "Explore",
       "Create",
+      "Messages",
+      "Profile",
+    ]);
+    expect(SOCIAL_DESKTOP_NAV.map((item) => item.label)).toEqual([
+      "Home",
+      "Explore",
+      "Messages",
+      "Profile",
+    ]);
+    expect(railDestinations(false, "social").items.map((item) => item.label)).toEqual([
+      "Home",
+      "Explore",
       "Messages",
       "Profile",
     ]);

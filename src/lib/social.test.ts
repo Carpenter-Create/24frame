@@ -51,6 +51,9 @@ describe("social copy lock", () => {
     expect(blob).toContain(SOCIAL_WORKSPACE);
     expect(SOCIAL.home.subtitle).toContain("follow");
     expect(SOCIAL.home.subtitle).toContain(PRODUCT_NAME);
+    expect(SOCIAL.home.emptyQuiet).toBe("No posts yet");
+    expect(blob).not.toContain("Social-native");
+    expect(blob).not.toContain("One clear next step");
     expect(SOCIAL.explore.subtitle).toContain(PRODUCT_NAME);
     expect(SOCIAL_ROUTES.explore).toBe("/social/explore");
     expect(SOCIAL_ROUTES.create).toBe("/social/create");

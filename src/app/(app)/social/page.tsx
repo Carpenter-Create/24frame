@@ -2,8 +2,8 @@ import { redirect } from "next/navigation";
 
 import { TextAction } from "@/components/chrome/house";
 import { InlineNotice } from "@/components/ui/inline-notice";
+import { SocialOnboardingChecklist } from "@/components/social/social-checklist";
 import { SocialEmpty } from "@/components/social/social-empty";
-import { SocialFirstWin } from "@/components/social/social-first-win";
 import { SocialForYouRail } from "@/components/social/social-for-you";
 import { SocialHomeComposer } from "@/components/social/social-home-composer";
 import { SocialHomeTabs } from "@/components/social/social-home-tabs";
@@ -117,6 +117,11 @@ export default async function SocialHomePage({
             {SOCIAL.home.truncatedFollowees}
           </InlineNotice>
         ) : null}
+        {lane === "following" && profile ? (
+          <div data-social-home-setup="" className="lg:hidden">
+            <SocialOnboardingChecklist items={checklist} />
+          </div>
+        ) : null}
         <SocialHomeTabs active={lane} />
         {lane === "for-you" ? (
           <div data-social-for-you-lane="" className="flex flex-col gap-3">
@@ -147,13 +152,17 @@ export default async function SocialHomePage({
                 <div data-social-empty-lenses="" className="hidden md:block">
                   <span className={`${SOCIAL_PILL_CLASS} ${SOCIAL_PILL_ACTIVE_CLASS}`}>{SOCIAL_CATEGORY_ALL}</span>
                 </div>
-                {profile && !facts?.hasPost ? <SocialFirstWin items={checklist} /> : null}
-                <SocialEmpty
-                  icon="users"
-                  title={SOCIAL.home.empty}
-                  hint={SOCIAL.home.emptyHint}
-                  action={{ href: SOCIAL_ROUTES.explore, label: SOCIAL.home.goExplore }}
-                />
+                <div className="md:hidden">
+                  <SocialEmpty
+                    icon="users"
+                    title={SOCIAL.home.empty}
+                    hint={SOCIAL.home.emptyHint}
+                    action={{ href: SOCIAL_ROUTES.explore, label: SOCIAL.home.goExplore }}
+                  />
+                </div>
+                <div className="hidden md:block">
+                  <SocialEmpty icon="image" title={SOCIAL.home.emptyQuiet} />
+                </div>
               </div>
             ) : (
               <div data-social-feed="" className="flex flex-col">
@@ -186,7 +195,9 @@ export default async function SocialHomePage({
           </>
         )}
       </div>
-      {lane === "following" ? <SocialForYouRail people={suggested} faces={faces} /> : null}
+      {lane === "following" ? (
+        <SocialForYouRail people={suggested} faces={faces} checklist={profile ? checklist : []} />
+      ) : null}
     </div>
   );
 }
