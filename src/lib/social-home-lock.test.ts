@@ -198,8 +198,10 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chats).toContain("SOCIAL_ROUTES.dms");
     expect(chats).toContain("socialDmHref");
     expect(chats).toContain("SOCIAL.home.chatsEmpty");
-    expect(chats).toContain("size-8");
-    expect(chats).toContain("h-16");
+    expect(chats).toContain("SOCIAL_AVATAR_32_CLASS");
+    expect(chats).toContain("SOCIAL_CHAT_ROW_CLASS");
+    expect(chrome).toContain("size-8");
+    expect(chrome).toContain("h-16");
     expect(chats).not.toContain("/messages");
     expect(chats).not.toContain("Loved");
     expect(shell).toContain("SOCIAL_RAIL_PANEL_CLASS");
