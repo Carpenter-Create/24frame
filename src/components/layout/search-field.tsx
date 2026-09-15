@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 
+import { FORM_CONTROL_TEXT_CLASS } from "@/lib/form-control";
+import { cn } from "@/lib/cn";
+
 // Debounced, URL-driven search (Visual/Metadata registers). Writes ?q= (preserving
 // other params) via router.replace so the server re-renders filtered results — no
 // client-side filtering, no scroll jump.
@@ -43,11 +46,13 @@ export function SearchField({
         onChange={(e) => setValue(e.target.value)}
         placeholder={placeholder}
         aria-label={placeholder}
-        className={
+        className={cn(
+          FORM_CONTROL_TEXT_CLASS,
+          "text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none",
           hint
-            ? "h-8 w-56 rounded-full border border-hairline bg-surface-muted pl-8 pr-12 t-body-sm text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none sm:w-80"
-            : "h-8 w-44 rounded-full border border-hairline bg-surface pl-8 pr-3 t-body-sm text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none sm:w-56"
-        }
+            ? "h-8 w-56 rounded-full border border-hairline bg-surface-muted pl-8 pr-12 sm:w-80"
+            : "h-8 w-44 rounded-full border border-hairline bg-surface pl-8 pr-3 sm:w-56",
+        )}
       />
       {hint ? (
         <span

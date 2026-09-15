@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { ACCOUNT_FIELD_CLASS, ACCOUNT_NAME_MAX, COMPANY_PROFILE } from "@/lib/account-profile";
+import { ACCOUNT_NAME_MAX, COMPANY_PROFILE } from "@/lib/account-profile";
 import { saveCompanyName } from "./actions";
 
 // organizations.name. member_can(manage_settings) is the write gate
@@ -62,7 +62,6 @@ export function CompanyProfileForm({
           aria-readonly={!canEdit}
           maxLength={ACCOUNT_NAME_MAX}
           autoComplete="organization"
-          className={ACCOUNT_FIELD_CLASS}
         />
       </div>
       {canEdit ? (

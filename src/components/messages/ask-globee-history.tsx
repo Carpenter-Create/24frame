@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 
+import { Input } from "@/components/ui/input";
 import { ASK_GLOBEE, askGlobeeThreadHref } from "@/lib/ask-globee";
 import {
   filterAskGlobeeHistory,
@@ -35,7 +36,8 @@ export function AskGlobeeHistoryPanel({
     >
       <label className="block">
         <span className="sr-only">{ASK_GLOBEE.historySearchPlaceholder}</span>
-        <input
+        <Input
+          variant="bare"
           id={searchId}
           type="search"
           value={query}
@@ -43,7 +45,7 @@ export function AskGlobeeHistoryPanel({
           placeholder={ASK_GLOBEE.historySearchPlaceholder}
           autoComplete="off"
           data-ask-globee-history-search=""
-          className="h-10 w-full rounded-[var(--radius-sm)] border border-hairline bg-transparent px-[var(--space-3)] t-body-sm text-ink placeholder:text-ink-3 focus:outline-none"
+          className="h-10 w-full rounded-[var(--radius-sm)] border border-hairline bg-transparent px-[var(--space-3)] focus:outline-none"
         />
       </label>
 

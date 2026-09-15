@@ -2,12 +2,11 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { avatarObjectKey } from "@/lib/account-avatar";
+import { FORM_CONTROL_TEXT_CLASS } from "@/lib/form-control";
 import {
   SOCIAL_FIGMA_PROFILE_BIO,
   SOCIAL_FIGMA_PROFILE_EDIT,
   SOCIAL_FIGMA_PROFILE_OWN,
-  SOCIAL_PROFILE_BIO_TEXTAREA_CLASS,
-  SOCIAL_PROFILE_EDIT_FIELD_CLASS,
   SOCIAL_PROFILE_EDIT_HANDLE_CLASS,
   SOCIAL_PROFILE_EDIT_HANDLE_ERROR_CLASS,
 } from "@/lib/social-chrome";
@@ -102,23 +101,22 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(SOCIAL_ROUTES.profileEdit).toBe("/social/profile/edit");
   });
 
-  it("locks Edit/Bio Name, Username, and Bio fields at 16px so iOS Safari does not zoom", () => {
+  it("puts Edit/Bio Name, Username, and Bio on the shared form-control primitive", () => {
     const globals = readFileSync("src/app/globals.css", "utf8");
     const layout = readFileSync("src/app/layout.tsx", "utf8");
+    expect(globals).toMatch(/\.t-control\s*\{[\s\S]*?font-size:\s*16px/);
     expect(globals).toMatch(/\.t-body\s*\{[\s\S]*?font-size:\s*var\(--text-base\)/);
     expect(globals).toMatch(/\.t-body-sm\s*\{[\s\S]*?font-size:\s*var\(--text-sm\)/);
-    expect(SOCIAL_PROFILE_EDIT_FIELD_CLASS).toContain("text-[16px]");
-    expect(SOCIAL_PROFILE_EDIT_FIELD_CLASS).not.toContain("t-body-sm");
-    expect(SOCIAL_PROFILE_EDIT_HANDLE_CLASS).toContain("text-[16px]");
+    expect(FORM_CONTROL_TEXT_CLASS).toBe("t-control");
+    expect(SOCIAL_PROFILE_EDIT_HANDLE_CLASS).toContain(FORM_CONTROL_TEXT_CLASS);
     expect(SOCIAL_PROFILE_EDIT_HANDLE_CLASS).not.toContain("t-body-sm");
-    expect(SOCIAL_PROFILE_EDIT_HANDLE_ERROR_CLASS).toContain("text-[16px]");
+    expect(SOCIAL_PROFILE_EDIT_HANDLE_ERROR_CLASS).toContain(FORM_CONTROL_TEXT_CLASS);
     expect(SOCIAL_PROFILE_EDIT_HANDLE_ERROR_CLASS).not.toContain("t-body-sm");
-    expect(SOCIAL_PROFILE_BIO_TEXTAREA_CLASS).toContain("text-[16px]");
-    expect(SOCIAL_PROFILE_BIO_TEXTAREA_CLASS).not.toContain("t-body-sm");
-    expect(edit).toContain("SOCIAL_PROFILE_EDIT_FIELD_CLASS");
+    expect(edit).toContain("<Input");
+    expect(edit).toContain('variant="bare"');
     expect(edit).toContain('id="social-edit-name"');
     expect(edit).toContain('id="social-edit-handle"');
-    expect(bio).toContain("SOCIAL_PROFILE_BIO_TEXTAREA_CLASS");
+    expect(bio).toContain("<Textarea");
     expect(bio).toContain("data-social-bio-textarea");
     expect(edit).not.toContain("maximum-scale");
     expect(bio).not.toContain("maximum-scale");

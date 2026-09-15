@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InlineNotice } from "@/components/ui/inline-notice";
+import { Textarea } from "@/components/ui/textarea";
 import { saveVendor } from "./actions";
 
 export type VendorInitial = {
@@ -60,8 +61,6 @@ export function VendorForm({ initial }: { initial?: VendorInitial }) {
     router.refresh();
   }
 
-  const ta = "w-full rounded-[var(--radius-sm)] border border-hairline bg-surface px-3 py-2 t-body-sm text-ink outline-none focus:border-accent";
-
   return (
     <form onSubmit={onSubmit} className="flex max-w-xl flex-col gap-4">
       <label className="flex flex-col gap-1">
@@ -91,15 +90,15 @@ export function VendorForm({ initial }: { initial?: VendorInitial }) {
       </label>
       <label className="flex flex-col gap-1">
         <span className="t-body-sm text-ink-2">Email template</span>
-        <textarea value={v.emailTemplate} onChange={(e) => set("emailTemplate", e.target.value)} rows={3} className={ta} />
+        <Textarea value={v.emailTemplate} onChange={(e) => set("emailTemplate", e.target.value)} rows={3} />
       </label>
       <label className="flex flex-col gap-1">
         <span className="t-body-sm text-ink-2">Company info (JSON, optional)</span>
-        <textarea value={v.companyInfoJson} onChange={(e) => set("companyInfoJson", e.target.value)} rows={3} className={ta} />
+        <Textarea value={v.companyInfoJson} onChange={(e) => set("companyInfoJson", e.target.value)} rows={3} />
       </label>
       <label className="flex flex-col gap-1">
         <span className="t-body-sm text-ink-2">Export format spec (JSON, optional)</span>
-        <textarea value={v.exportSpecJson} onChange={(e) => set("exportSpecJson", e.target.value)} rows={3} className={ta} />
+        <Textarea value={v.exportSpecJson} onChange={(e) => set("exportSpecJson", e.target.value)} rows={3} />
       </label>
       <label className="flex items-center gap-2">
         <input type="checkbox" checked={v.active} onChange={(e) => set("active", e.target.checked)} />

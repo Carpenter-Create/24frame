@@ -5,7 +5,6 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
-  ACCOUNT_FIELD_CLASS,
   ACCOUNT_NAME_MAX,
   ACCOUNT_PROFILE,
   COMPANY_PROFILE,
@@ -13,6 +12,7 @@ import {
   authDisplayName,
   companySaveSchema,
 } from "./account-profile";
+import { FORM_CONTROL_TEXT_CLASS } from "./form-control";
 import { USER_MENU, userMenuName } from "./user-menu";
 import { accountSheetIdentity } from "./account-sheet";
 
@@ -143,16 +143,19 @@ describe("account name persist read-after-write", () => {
 });
 
 describe("account field 16px lock", () => {
-  it("locks /settings/profile inputs at 16px and leaves dashboard Input on t-body", () => {
-    expect(ACCOUNT_FIELD_CLASS).toContain("16px");
+  it("uses the shared form-control primitive — no per-surface 16px override", () => {
+    expect(FORM_CONTROL_TEXT_CLASS).toBe("t-control");
+    expect(globalsSrc).toMatch(/\.t-control\s*\{[\s\S]*?font-size:\s*16px/);
     expect(globalsSrc).toMatch(/\.t-body\s*\{[\s\S]*?font-size:\s*var\(--text-base\)/);
-    expect(inputSrc).toContain("t-body");
-    expect(inputSrc).not.toContain("16px");
-    expect(formSrc).toContain("ACCOUNT_FIELD_CLASS");
+    expect(inputSrc).toContain("formControlClass");
+    expect(inputSrc).not.toContain("t-body");
+    expect(formSrc).toContain("<Input");
+    expect(formSrc).not.toContain("ACCOUNT_FIELD_CLASS");
     expect(formSrc).toContain("TEXT_ACTION_CLASS");
     expect(formSrc).toContain("uploadAccountPhoto");
     expect(formSrc).toContain('#account-name")?.blur()');
-    expect(companyFormSrc).toContain("ACCOUNT_FIELD_CLASS");
+    expect(companyFormSrc).toContain("<Input");
+    expect(companyFormSrc).not.toContain("ACCOUNT_FIELD_CLASS");
     expect(companyFormSrc).toContain('#company-name")?.blur()');
   });
 });

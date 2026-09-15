@@ -62,6 +62,9 @@ describe("AskGlobeeHistoryPanel", () => {
     expect(html).toContain("What should I submit next");
     expect(html).toContain("data-ask-globee-history-current");
     expect(html).toContain("border border-hairline bg-transparent");
+    expect(html).toContain("t-control");
+    expect(html).not.toMatch(/data-ask-globee-history-search=""[^>]*py-2/);
+    expect(src).toContain('variant="bare"');
     expect(html).toContain(`/messages?thread=${THREAD}`);
     expect(html).not.toContain("Winter Line");
     expect(html).not.toContain("Harbor Lights");

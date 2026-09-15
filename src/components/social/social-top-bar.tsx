@@ -3,6 +3,7 @@ import Link from "next/link";
 import { BrandEmblem } from "@/components/chrome/brand-emblem";
 import { UserMenu } from "@/components/chrome/user-menu";
 import { SocialIcon } from "@/components/social/social-icon";
+import { Input } from "@/components/ui/input";
 import { PRODUCT_NAME } from "@/lib/product";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { SOCIAL_ICON_SIZE_HEADER, SOCIAL_ICON_SIZE_SEARCH } from "@/lib/social-icons";
@@ -41,11 +42,12 @@ export function SocialTopBar({
         <label className="sr-only" htmlFor="social-header-q">
           {SOCIAL.explore.searchSocial}
         </label>
-        <input
+        <Input
+          variant="bare"
           id="social-header-q"
           name="q"
           placeholder={SOCIAL.explore.searchSocial}
-          className="h-full min-w-0 flex-1 bg-transparent t-body-sm text-ink outline-none placeholder:text-ink-2"
+          className="h-full flex-1 placeholder:text-ink-2"
         />
       </form>
       <div className="flex items-center gap-2.5 md:gap-3">

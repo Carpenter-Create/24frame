@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { uploadAccountPhoto } from "@/app/(app)/account/actions";
 import { ACCOUNT_PROFILE } from "@/lib/account-profile";
@@ -193,14 +194,13 @@ export function SocialPostCompose({
       <label className="sr-only" htmlFor="social-post-body">
         {SOCIAL.home.compose}
       </label>
-      <textarea
+      <Textarea
         id="social-post-body"
         name="body"
         rows={3}
         value={body}
         onChange={(e) => setBody(e.target.value)}
         placeholder={SOCIAL.home.compose}
-        className="w-full rounded-[var(--radius)] border border-hairline bg-surface px-3 py-2 t-body text-ink outline-none placeholder:text-ink-3 focus:border-accent"
       />
       {media.length > 0 ? (
         <ul data-social-post-attachments="" className="flex flex-col gap-1">
@@ -419,14 +419,14 @@ export function SocialCreateCompose({
         <label className="t-label font-medium text-ink-2 md:t-body-sm" htmlFor="social-create-body">
           {SOCIAL.create.caption}
         </label>
-        <textarea
+        <Textarea
           id="social-create-body"
           name="body"
           rows={3}
           value={body}
           onChange={(e) => setBody(e.target.value)}
           placeholder={SOCIAL.home.captionPlaceholder}
-          className="h-20 w-full rounded-[8px] border border-hairline bg-surface px-3 py-3 t-body-sm text-ink outline-none placeholder:text-ink-2 focus:border-accent md:h-24 md:px-[14px] md:t-body"
+          className="h-20 rounded-[8px] px-3 py-3 placeholder:text-ink-2 md:h-24 md:px-[14px]"
         />
       </div>
       <div className="sr-only">
@@ -527,12 +527,11 @@ export function SocialBioForm({ bio }: { bio: string }) {
     >
       <div className="flex flex-col gap-1">
         <Label htmlFor="social-bio">{SOCIAL.profile.bio}</Label>
-        <textarea
+        <Textarea
           id="social-bio"
           name="bio"
           rows={3}
           defaultValue={bio}
-          className="w-full rounded-[var(--radius)] border border-hairline bg-surface px-3 py-2 t-body text-ink outline-none placeholder:text-ink-3 focus:border-accent"
         />
       </div>
       <FormError error={error} />
@@ -676,11 +675,10 @@ export function SocialGroupCreateForm() {
       </div>
       <div className="flex flex-col gap-1">
         <Label htmlFor="social-group-description">{SOCIAL.groupNew.description}</Label>
-        <textarea
+        <Textarea
           id="social-group-description"
           name="description"
           rows={3}
-          className="w-full rounded-[var(--radius)] border border-hairline bg-surface px-3 py-2 t-body text-ink outline-none placeholder:text-ink-3 focus:border-accent"
         />
       </div>
       <FormError error={error} />
@@ -747,13 +745,12 @@ export function SocialDmCompose({ conversationId }: { conversationId: string }) 
       <label className="sr-only" htmlFor="social-dm-body">
         {SOCIAL.dms.compose}
       </label>
-      <textarea
+      <Textarea
         id="social-dm-body"
         name="body"
         rows={3}
         required
         placeholder={SOCIAL.dms.compose}
-        className="w-full rounded-[var(--radius)] border border-hairline bg-surface px-3 py-2 t-body text-ink outline-none placeholder:text-ink-3 focus:border-accent"
       />
       <FormError error={error} />
       <Button type="submit">{SOCIAL.dms.submit}</Button>
