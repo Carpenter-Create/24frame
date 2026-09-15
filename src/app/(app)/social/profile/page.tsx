@@ -102,7 +102,7 @@ export default async function SocialProfilePage({
           stats={counts ?? undefined}
           actions={() => (
             <>
-              <Link href="#social-profile-edit" className={`${SOCIAL_ACTION_CLASS} min-w-0 flex-1 text-center md:flex-none`}>
+              <Link href={SOCIAL_ROUTES.profileEdit} className={`${SOCIAL_ACTION_CLASS} min-w-0 flex-1 text-center md:flex-none`}>
                 {SOCIAL.profile.edit}
               </Link>
               <SocialShareButton handle={profile.handle} stretch />

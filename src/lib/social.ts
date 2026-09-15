@@ -34,6 +34,8 @@ export const SOCIAL_ROUTES = {
   stories: "/social/stories",
   storiesNew: "/social/stories/new",
   profile: "/social/profile",
+  profileEdit: "/social/profile/edit",
+  profileBio: "/social/profile/edit/bio",
   members: "/social/members",
   profileByHandle: "/social/u",
   groups: "/social/groups",
@@ -400,12 +402,23 @@ export const SOCIAL = {
       "A profile is created for this signed-in account. Company aggregation and org invite do not create one for anyone else.",
     handle: "Handle",
     handlePlaceholder: "Set your handle",
-    handleRequired: "Add a handle to continue.",
+    handleRequired: "Handle is required",
     handleInvalid: "Enter a handle of 3–30 letters, numbers, or underscores.",
+    username: "Username",
+    usernamePlaceholder: "username",
     displayName: "Display name",
+    name: "Name",
     defaultDisplayName: "Member",
     bio: "Bio",
+    bioLabel: "BIO",
     bioSubmit: "Save bio",
+    bioPrivacy: "Your bio shows on your public profile.",
+    bioLimit: "150 characters.",
+    done: "Done",
+    back: "Back",
+    editPicture: "Edit picture",
+    links: "Links",
+    addLink: "Add link",
     birthDate: "Date of birth",
     birthDateHint: "Required. You must be 13 or older.",
     submit: "Save handle",
@@ -555,7 +568,7 @@ export const HANDLE_MIN = 3;
 export const HANDLE_MAX = 30;
 export const DISPLAY_NAME_MAX = 80;
 export const POST_BODY_MAX = 2000;
-export const BIO_MAX = 280;
+export const BIO_MAX = 150;
 export const MESSAGE_BODY_MAX = 2000;
 export const GROUP_NAME_MAX = 80;
 export const GROUP_SLUG_MAX = 40;
@@ -604,8 +617,26 @@ export function normalizePostBody(raw: string): string | null {
   return body;
 }
 
+/** Soft newlines stay in the stored bio and count toward BIO_MAX. */
+export function socialBioFieldValue(raw: string): string {
+  return raw.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+}
+
+export function socialBioCount(raw: string): number {
+  return socialBioFieldValue(raw).length;
+}
+
+export function socialBioCounterLabel(raw: string): string {
+  return `${socialBioCount(raw)} / ${BIO_MAX}`;
+}
+
+/** Enter/Return inserts a newline. Done is the Sporty Blue check only. */
+export function socialBioEnterSubmits(): false {
+  return false;
+}
+
 export function normalizeBio(raw: string): string | null {
-  const bio = raw.trim().replace(/\s+/g, " ");
+  const bio = socialBioFieldValue(raw).trim();
   if (bio.length === 0) return "";
   if (bio.length > BIO_MAX) return null;
   return bio;

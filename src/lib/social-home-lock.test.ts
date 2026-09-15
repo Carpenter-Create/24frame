@@ -3,7 +3,12 @@ import { describe, expect, it } from "vitest";
 
 import { SOCIAL_DESKTOP_NAV, SOCIAL_NAV } from "./nav";
 import { SOCIAL_CATEGORY_LABELS } from "./social-categories";
-import { SOCIAL_DESKTOP_MEASURE } from "./social-chrome";
+import {
+  SOCIAL_DESKTOP_MEASURE,
+  SOCIAL_FIGMA_PROFILE_BIO,
+  SOCIAL_FIGMA_PROFILE_EDIT,
+  SOCIAL_FIGMA_PROFILE_OWN,
+} from "./social-chrome";
 import { SOCIAL, SOCIAL_PROFILE_TABS, SOCIAL_ROUTES } from "./social";
 
 const home = readFileSync("src/app/(app)/social/page.tsx", "utf8");
@@ -335,6 +340,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     const tabBar = readFileSync("src/components/social/social-mobile-tab-bar.tsx", "utf8");
     expect(existsSync("src/app/(app)/social/loading.tsx")).toBe(true);
     expect(existsSync("src/app/(app)/social/profile/loading.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/social/profile/edit/loading.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/social/profile/edit/bio/loading.tsx")).toBe(true);
     expect(existsSync("src/app/(app)/social/create/loading.tsx")).toBe(true);
     expect(existsSync("src/app/(app)/social/explore/loading.tsx")).toBe(true);
     expect(existsSync("src/app/(app)/social/dms/loading.tsx")).toBe(true);
@@ -418,7 +425,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(profile).not.toContain("AccountProfileForm");
     expect(profile).toContain("SocialProfileIdentity");
     expect(profile).toContain("SOCIAL.profile.edit");
-    expect(profile).toContain('href="#social-profile-edit"');
+    expect(profile).toContain("SOCIAL_ROUTES.profileEdit");
+    expect(profile).not.toContain('href="#social-profile-edit"');
     expect(profile).not.toContain("<details");
     expect(profile).not.toContain("<summary");
     expect(profile).not.toContain("SocialProfilePhotoForm");
@@ -441,5 +449,12 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(publicProfile).toContain("film-slate");
     expect(publicProfile).toContain("creditsEmpty");
     expect(socialStories).not.toContain("PageHeader");
+    expect(SOCIAL_FIGMA_PROFILE_EDIT).toEqual(["180:206", "180:1946", "181:2184"]);
+    expect(SOCIAL_FIGMA_PROFILE_BIO).toEqual(["180:2004", "180:2026"]);
+    expect(SOCIAL_FIGMA_PROFILE_OWN).toEqual(["181:230", "181:2000"]);
+    expect(chrome).toContain("180:206");
+    expect(chrome).toContain("180:2004");
+    expect(chrome).toContain("181:2184");
+    expect(profile).not.toContain("Education");
   });
 });

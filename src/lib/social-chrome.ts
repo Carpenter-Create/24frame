@@ -29,6 +29,9 @@ export const SOCIAL_DESKTOP_MEASURE = {
   padR: 16,
 } as const;
 export const SOCIAL_FIGMA_PROFILE = ["129:215", "129:415", "129:615"] as const;
+export const SOCIAL_FIGMA_PROFILE_OWN = ["181:230", "181:2000"] as const;
+export const SOCIAL_FIGMA_PROFILE_EDIT = ["180:206", "180:1946", "181:2184"] as const;
+export const SOCIAL_FIGMA_PROFILE_BIO = ["180:2004", "180:2026"] as const;
 export const SOCIAL_FIGMA_PROFILE_SHARE = ["155:194", "155:372"] as const;
 export const SOCIAL_FIGMA_CREATE = ["135:585", "135:1037", "135:1214"] as const;
 export const SOCIAL_FIGMA_STORIES = ["138:163", "138:889", "138:943"] as const;
@@ -258,6 +261,59 @@ export const SOCIAL_HIGHLIGHT_RING_CLASS =
 
 export const SOCIAL_SHARE_CLASS =
   "inline-flex items-center justify-center gap-1.5 rounded-[8px] border border-hairline bg-surface px-[14px] py-[var(--space-2)] t-body-sm font-medium text-ink";
+
+// 180:206 / 180:1946 / 181:2184 — Edit profile. Mobile full page; desktop
+// 480 sheet on wash. 180:2004 / 180:2026 — Bio editor. Tokens only.
+export const SOCIAL_PROFILE_EDIT_HOST_CLASS =
+  "fixed inset-0 z-50 flex flex-col bg-bg md:items-center md:justify-center md:bg-ink/40";
+
+export const SOCIAL_PROFILE_EDIT_SHEET_CLASS =
+  "flex h-full w-full flex-col overflow-y-auto bg-bg md:h-auto md:max-h-[90dvh] md:w-[480px] md:rounded-[16px] md:border md:border-hairline md:bg-surface";
+
+export const SOCIAL_PROFILE_EDIT_HEADER_CLASS =
+  "flex h-14 shrink-0 items-center gap-2 border-b border-hairline bg-surface py-2 pl-2 pr-4";
+
+export const SOCIAL_PROFILE_EDIT_BACK_CLASS =
+  "flex size-9 shrink-0 items-center justify-center rounded-full bg-surface-muted text-ink";
+
+export const SOCIAL_PROFILE_EDIT_DONE_CLASS =
+  "shrink-0 t-body-sm font-semibold text-accent";
+
+export const SOCIAL_PROFILE_BIO_DONE_CLASS =
+  "flex shrink-0 items-center justify-center rounded-full bg-accent px-3 py-2 text-accent-contrast";
+
+export const SOCIAL_PROFILE_EDIT_BODY_CLASS =
+  "flex flex-col gap-6 px-4 pb-12 pt-6 md:p-6";
+
+export const SOCIAL_PROFILE_EDIT_PHOTO_CLASS =
+  "flex flex-col items-center justify-center gap-4";
+
+export const SOCIAL_PROFILE_EDIT_AVATAR_CLASS =
+  "flex size-[88px] shrink-0 items-center justify-center overflow-hidden rounded-full border border-hairline bg-surface-muted text-ink";
+
+export const SOCIAL_PROFILE_EDIT_PICTURE_CLASS =
+  "t-body-sm font-medium text-accent";
+
+export const SOCIAL_PROFILE_EDIT_CARD_CLASS =
+  "flex w-full flex-col overflow-hidden rounded-[16px] border border-hairline bg-surface px-4";
+
+export const SOCIAL_PROFILE_EDIT_ROW_CLASS =
+  "flex w-full items-start gap-4 py-4";
+
+export const SOCIAL_PROFILE_EDIT_LABEL_CLASS =
+  "w-[88px] shrink-0 pt-0.5 t-label text-ink-2 md:w-24";
+
+export const SOCIAL_PROFILE_EDIT_HANDLE_CLASS =
+  "flex min-w-0 flex-1 items-center rounded-[12px] bg-surface-muted px-3 py-2.5 t-body-sm";
+
+export const SOCIAL_PROFILE_EDIT_HANDLE_ERROR_CLASS =
+  "flex min-w-0 flex-1 items-center rounded-[12px] border border-ink bg-surface-muted px-3 py-2.5 t-body-sm";
+
+export const SOCIAL_PROFILE_BIO_CARD_CLASS =
+  "flex w-full flex-col gap-4 rounded-[16px] border border-hairline bg-surface p-4";
+
+export const SOCIAL_PROFILE_BIO_TEXTAREA_CLASS =
+  "min-h-[120px] w-full resize-none bg-transparent t-body-sm leading-[22px] text-ink outline-none placeholder:text-ink-3";
 
 // 155:194 / 155:372 — wash overlay, QR card, three actions. No glass, no drop shadow.
 export const SOCIAL_SHARE_SHEET_HOST_CLASS =

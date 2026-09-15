@@ -29,7 +29,7 @@ describe("onboarding checklist", () => {
       SOCIAL.checklist.firstStory,
     ]);
     expect(items[0]?.href).toBe(SETTINGS.profileHref);
-    expect(items[1]?.href).toBe(SOCIAL_ROUTES.profile);
+    expect(items[1]?.href).toBe(SOCIAL_ROUTES.profileBio);
     expect(items[2]?.href).toBe(SOCIAL_ROUTES.create);
     expect(items[4]?.href).toBe(SOCIAL_ROUTES.storiesNew);
     expect(items[1]?.done).toBe(true);

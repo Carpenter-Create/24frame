@@ -107,6 +107,8 @@ export async function createSocialProfile(formData: FormData): Promise<ActionRes
   }
 
   revalidatePath(SOCIAL_ROUTES.profile);
+  revalidatePath(SOCIAL_ROUTES.profileEdit);
+  revalidatePath(SOCIAL_ROUTES.profileBio);
   revalidatePath(SOCIAL_ROUTES.home);
   revalidatePath(socialProfileHref(handle));
   return {};
@@ -197,12 +199,14 @@ export async function updateSocialBio(formData: FormData): Promise<ActionResult>
   if (!profileId) return { error: SOCIAL.cta.needProfile };
 
   const bio = normalizeBio(String(formData.get("bio") ?? ""));
-  if (bio == null) return { error: SOCIAL.profile.bio };
+  if (bio == null) return { error: SOCIAL.profile.bioLimit };
 
   const { error } = await supabase.from("profiles").update({ bio: bio || null }).eq("id", profileId);
   if (error) return { error: error.message };
 
   revalidatePath(SOCIAL_ROUTES.profile);
+  revalidatePath(SOCIAL_ROUTES.profileEdit);
+  revalidatePath(SOCIAL_ROUTES.profileBio);
   revalidatePath(SOCIAL_ROUTES.home);
   return {};
 }

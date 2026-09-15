@@ -108,6 +108,7 @@ export function isSocialTabActive(pathname: string, item: NavItem): boolean {
   if (item.href === SOCIAL_ROUTES.profile) {
     return (
       pathname === SOCIAL_ROUTES.profile ||
+      pathname.startsWith(`${SOCIAL_ROUTES.profile}/`) ||
       pathname.startsWith(`${SOCIAL_ROUTES.profileByHandle}/`)
     );
   }
