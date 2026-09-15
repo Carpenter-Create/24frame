@@ -50,10 +50,9 @@ export function SocialHomeSkeleton() {
     <div data-social-home-skeleton="" className={SOCIAL_HOME_LAYOUT_CLASS}>
       <div className={SOCIAL_HOME_CENTER_CLASS}>
         <div className={SOCIAL_COMPOSER_CLASS}>
-          <div className="flex items-center gap-2.5">
-            <Skeleton className={SOCIAL_AVATAR_SM_CLASS} />
-            <Skeleton className="h-10 min-w-0 flex-1 rounded-[20px]" />
-          </div>
+          <Skeleton className={SOCIAL_AVATAR_SM_CLASS} />
+          <Skeleton className="h-9 min-w-0 flex-1" />
+          <Skeleton className="size-9 shrink-0" />
         </div>
         <SocialStoriesRailSkeleton tall />
         {Array.from({ length: 3 }).map((_, i) => (

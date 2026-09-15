@@ -21,6 +21,7 @@ vi.mock("next/navigation", () => ({
   redirect: vi.fn((to: string) => {
     throw new Error(`REDIRECT:${to}`);
   }),
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
 }));
 vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
@@ -158,6 +159,11 @@ describe("Social home", () => {
     expect(html).toContain(SOCIAL.home.title);
     expect(html).toContain("24Frame");
     expect(html).toContain("data-social-home-composer");
+    expect(html).toContain("data-social-composer-media");
+    expect(html).toContain('data-social-icon="image"');
+    expect(html).toContain("/social/create?kind=text");
+    expect(html).toContain(SOCIAL.home.attach);
+    expect(html).not.toContain("data-social-composer-action");
     expect(html.indexOf("data-social-home-composer")).toBeLessThan(html.indexOf("data-social-stories"));
     expect(html).toContain("data-social-stories-tall");
     expect(html).toContain("data-social-home-tabs");

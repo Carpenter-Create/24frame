@@ -37,7 +37,7 @@ import {
 import { SOCIAL_ICON_SIZE_TAB } from "@/lib/social-icons";
 import { SocialMobileTabBar } from "./social-mobile-tab-bar";
 
-describe("Social floating pill tab bar (Figma 157:1297 / 158:461)", () => {
+describe("Social floating pill tab bar (Figma 160:964 / 160:1129)", () => {
   it("renders five icon jobs in a floating pill, no FAB", () => {
     navigation.pathname = "/social";
     const html = renderToStaticMarkup(createElement(SocialMobileTabBar));

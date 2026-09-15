@@ -197,6 +197,7 @@ describe("profile opt-in", () => {
     expect(parseSocialCreateKind("photo")).toBe("photo");
     expect(parseSocialCreateKind("clip")).toBeNull();
     expect(socialCreateHref("video")).toBe("/social/create?kind=video");
+    expect(socialCreateHref("text")).toBe("/social/create?kind=text");
     expect(socialCreateWellCopy("photo", false)).toEqual({
       title: SOCIAL.create.dropEmpty,
       hint: SOCIAL.create.dropEmptyHint,
