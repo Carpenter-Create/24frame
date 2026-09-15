@@ -20,7 +20,7 @@ import {
 import { SocialIcon } from "./social-icon";
 import { SocialNavPendingProbe, useSocialNavPending } from "./use-social-nav-pending";
 
-// Floating pill — Figma 169:1519 visible / 160:1129 hidden on scroll-down.
+// Floating pill — Figma 160:964 visible / 160:1129 hidden on scroll-down.
 // Five jobs, icons only, no FAB. Prefetch on: five destinations + local Social loading.tsx.
 // Mercury floating dock stays gone.
 

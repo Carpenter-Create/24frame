@@ -178,7 +178,7 @@ describe("Social home", () => {
     expect(html).toContain("Music");
     expect(html).not.toContain("data-social-first-win");
     expect(html).toContain("data-social-checklist");
-    expect(html).toContain("data-social-home-setup");
+    expect(html).not.toContain("data-social-home-setup");
     expect(html).toContain("data-social-checklist-dismiss");
     expect(html).toContain(SOCIAL.checklist.title);
     expect(html).toContain(SOCIAL.checklist.firstPost);
@@ -321,7 +321,6 @@ describe("Social home", () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
     const html = await renderHome({ lane: "for-you" });
     expect(html).toContain("data-social-for-you-lane");
-    expect(html).not.toContain("data-social-home-setup");
     expect(html).toContain(SOCIAL.forYou.people);
     expect(html).toContain(SOCIAL.forYou.topics);
     expect(html).toContain("Cinematography");

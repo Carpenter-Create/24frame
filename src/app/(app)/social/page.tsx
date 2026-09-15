@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 
 import { TextAction } from "@/components/chrome/house";
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { SocialOnboardingChecklist } from "@/components/social/social-checklist";
 import { SocialEmpty } from "@/components/social/social-empty";
 import { SocialForYouRail } from "@/components/social/social-for-you";
 import { SocialHomeComposer } from "@/components/social/social-home-composer";
@@ -116,11 +115,6 @@ export default async function SocialHomePage({
           <InlineNotice tone="info" data-social-followees-truncated="">
             {SOCIAL.home.truncatedFollowees}
           </InlineNotice>
-        ) : null}
-        {lane === "following" && profile ? (
-          <div data-social-home-setup="" className="lg:hidden">
-            <SocialOnboardingChecklist items={checklist} />
-          </div>
         ) : null}
         <SocialHomeTabs active={lane} />
         {lane === "for-you" ? (

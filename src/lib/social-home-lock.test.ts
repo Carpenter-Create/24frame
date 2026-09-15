@@ -172,7 +172,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(shell).not.toContain("Aggregation|Social");
     expect(chrome).toContain('SOCIAL_FIGMA_HOME = "169:964"');
     expect(chrome).toContain('SOCIAL_FIGMA_HOME_EMPTY = "169:1281"');
-    expect(chrome).toContain('SOCIAL_FIGMA_HOME_MOBILE = "169:1519"');
+    expect(chrome).toContain('SOCIAL_FIGMA_HOME_MOBILE = "160:964"');
     expect(chrome).toContain('SOCIAL_FIGMA_HOME_MOBILE_SCROLL = "160:1129"');
     expect(chrome).toContain("164:1136");
     expect(chrome).toContain("164:1360");
@@ -187,10 +187,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).not.toContain("SOCIAL_COMPOSER_ACTION_CLASS");
     expect(home).not.toContain("SocialFirstWin");
     expect(home).toContain("checklist={profile ? checklist : []}");
-    expect(home).toContain("data-social-home-setup");
-    expect(home).toContain("lg:hidden");
-    expect(home.indexOf("<SocialStoriesRail")).toBeLessThan(home.indexOf("data-social-home-setup"));
-    expect(home.indexOf("data-social-home-setup")).toBeLessThan(home.indexOf("<SocialHomeTabs"));
+    expect(home).not.toContain("data-social-home-setup");
     expect(home).toContain("SOCIAL.home.emptyQuiet");
     expect(home).toContain("md:hidden");
     expect(home).toContain("data-social-empty-lenses");
@@ -285,7 +282,6 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(tabBar).not.toContain("prefetch={false}");
     expect(tabBar).not.toContain("data-social-create-fab");
     expect(tabBar).not.toContain("data-social-mobile-pill");
-    expect(tabBar).toContain("169:1519");
     expect(chrome).toContain("SOCIAL_TAB_BAR_CLASS");
     expect(chrome).toContain("SOCIAL_TAB_PILL_CLASS");
     expect(chrome).toContain("SOCIAL_TAB_PILL_HIDDEN_CLASS");
@@ -326,14 +322,15 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(messages).toContain("Promise.all");
   });
 
-  it("puts Finish setting up on the desktop For you rail and mobile first feed card on 169:1281 / 169:1519", () => {
+  it("puts Finish setting up on the desktop For you rail and holds mobile setup placement", () => {
     const forYou = readFileSync("src/components/social/social-for-you.tsx", "utf8");
     const checklist = readFileSync("src/components/social/social-checklist.tsx", "utf8");
     expect(chrome).toContain('SOCIAL_FIGMA_HOME_EMPTY = "169:1281"');
-    expect(chrome).toContain('SOCIAL_FIGMA_HOME_MOBILE = "169:1519"');
+    expect(chrome).toContain('SOCIAL_FIGMA_HOME_MOBILE = "160:964"');
+    expect(chrome).toContain("HOLD");
     expect(home).not.toContain("SocialFirstWin");
     expect(home).not.toContain("firstWinHint");
-    expect(home).toContain("data-social-home-setup");
+    expect(home).not.toContain("data-social-home-setup");
     expect(forYou).toContain("SocialOnboardingChecklist");
     expect(forYou).toContain("layout === \"rail\"");
     expect(checklist).toContain("data-social-checklist-dismiss");
