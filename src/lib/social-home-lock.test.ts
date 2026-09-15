@@ -359,6 +359,15 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(stories).toContain("Promise.all");
     expect(explore).toContain("Promise.all");
     expect(messages).toContain("Promise.all");
+    const layout = readFileSync("src/app/(app)/layout.tsx", "utf8");
+    const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
+    expect(layout).toContain("export default function AppLayout");
+    expect(layout).not.toContain("export default async function AppLayout");
+    expect(layout).toContain("loadAppShellChrome()");
+    expect(layout).not.toMatch(/await hasAvatarObject/);
+    expect(layout).not.toMatch(/await getActiveOrgTier/);
+    expect(shell).toContain("SocialTopBarFromChrome");
+    expect(shell).toContain("Do not use() this at the AppShell top");
   });
 
   it("puts Finish setting up on the desktop For you rail and mobile first feed card on 176:1346 / 169:1519", () => {

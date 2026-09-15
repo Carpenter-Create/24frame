@@ -46,6 +46,7 @@ vi.mock("./user-menu", () => ({
 }));
 
 import { AppShell } from "./app-shell";
+import type { AppShellChrome } from "@/lib/app-shell-chrome";
 import type { MessagesSurface } from "@/lib/ask-globee";
 import {
   RAIL_COLLAPSE_CHEVRON,
@@ -447,6 +448,22 @@ describe("AppShell rail-collapse chevron", () => {
     navigation.pathname = "/settings";
     expect(renderShell(undefined, undefined, true)).not.toContain("Expand sidebar");
     expect(renderShell(undefined, undefined, true)).not.toContain(RAIL_COLLAPSE_EXPAND_ROW_CLASS);
+  });
+
+  it("paints Social chrome and children before layout chrome resolves", () => {
+    navigation.pathname = "/social";
+    const chrome = new Promise<AppShellChrome>(() => {});
+    const html = renderToStaticMarkup(
+      <AppShell chrome={chrome} messagesUnread={new Promise(() => {})}>
+        destination-page
+      </AppShell>,
+    );
+    expect(html).toContain("data-social-workspace");
+    expect(html).toContain("data-social-top-bar");
+    expect(html).toContain("data-social-tab-bar");
+    expect(html).toContain('data-social-tab-item="Create"');
+    expect(html).toContain("destination-page");
+    expect(html).toContain("data-app-social-frame");
   });
 
   it("adds Social X-lane chrome without reopening Access collapse", () => {

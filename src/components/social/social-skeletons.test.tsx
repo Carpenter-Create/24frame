@@ -20,6 +20,8 @@ const LOADING = [
   "src/app/(app)/social/stories/[id]/loading.tsx",
   "src/app/(app)/social/explore/loading.tsx",
   "src/app/(app)/social/dms/loading.tsx",
+  "src/app/(app)/social/profile/edit/loading.tsx",
+  "src/app/(app)/social/profile/edit/bio/loading.tsx",
 ] as const;
 
 describe("Social loading skeletons", () => {

@@ -126,18 +126,21 @@ describe("UserMenu close control", () => {
 describe("UserMenu identity source lock", () => {
   it("does not manufacture a name in the shell or layout", () => {
     const layoutSrc = readFileSync(join(here, "../../app/(app)/layout.tsx"), "utf8");
-    expect(layoutSrc).toContain("email={ctx.user.email}");
-    expect(layoutSrc).toContain("name={ctx.user.name}");
-    expect(layoutSrc).toContain("photoUrl={photoUrl}");
-    expect(layoutSrc).toContain("hasAvatarObject(ctx.user.id)");
-    expect(layoutSrc).toContain("ACCOUNT_PHOTO_HREF");
+    const chromeSrc = readFileSync(join(here, "../../lib/app-shell-chrome.ts"), "utf8");
+    expect(layoutSrc).toContain("loadAppShellChrome()");
+    expect(chromeSrc).toContain("email: ctx.user.email");
+    expect(chromeSrc).toContain("name: ctx.user.name");
+    expect(chromeSrc).toContain("photoUrl: hasPhoto ? ACCOUNT_PHOTO_HREF : null");
+    expect(chromeSrc).toContain("hasAvatarObject(ctx.user.id)");
+    expect(chromeSrc).toContain("ACCOUNT_PHOTO_HREF");
     expect(layoutSrc).not.toContain("signedAvatarUrl");
-    expect(layoutSrc).not.toContain("signedAvatarUrl(ctx.activeOrg");
-    expect(layoutSrc).not.toContain("display_name");
-    expect(layoutSrc).not.toContain("user_metadata");
-    expect(layoutSrc).not.toContain("full_name");
-    expect(layoutSrc).not.toContain("putAvatarObject");
-    expect(layoutSrc).not.toContain("uploadAccountPhoto");
+    expect(chromeSrc).not.toContain("signedAvatarUrl");
+    expect(chromeSrc).not.toContain("signedAvatarUrl(ctx.activeOrg");
+    expect(chromeSrc).not.toContain("display_name");
+    expect(chromeSrc).not.toContain("user_metadata");
+    expect(chromeSrc).not.toContain("full_name");
+    expect(chromeSrc).not.toContain("putAvatarObject");
+    expect(chromeSrc).not.toContain("uploadAccountPhoto");
     expect(menuSrc).not.toContain("split(\"@\")");
     expect(menuSrc).not.toContain("local-part");
     expect(menuSrc).not.toContain("user_metadata");
