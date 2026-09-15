@@ -10,11 +10,20 @@ import {
   SOCIAL_CHECKLIST_CLASS,
   SOCIAL_CHECKLIST_ROW_CLASS,
   SOCIAL_CHECKLIST_ROW_LAST_CLASS,
+  SOCIAL_CHECKLIST_TRACK_CLASS,
+  SOCIAL_CHECKLIST_TRACK_NESTED_CLASS,
+  SOCIAL_FOR_YOU_CARD_CLASS,
 } from "@/lib/social-chrome";
 import { SOCIAL_ICON_SIZE_NAV } from "@/lib/social-icons";
 import { SocialIcon } from "./social-icon";
 
-export function SocialOnboardingChecklist({ items }: { items: readonly SocialChecklistItem[] }) {
+export function SocialOnboardingChecklist({
+  items,
+  tone = "card",
+}: {
+  items: readonly SocialChecklistItem[];
+  tone?: "card" | "nested";
+}) {
   const [dismissed, setDismissed] = useState(false);
   if (dismissed || !socialChecklistIncomplete(items)) return null;
 
@@ -23,7 +32,8 @@ export function SocialOnboardingChecklist({ items }: { items: readonly SocialChe
   return (
     <section
       data-social-checklist=""
-      className={SOCIAL_CHECKLIST_CLASS}
+      data-social-checklist-tone={tone}
+      className={tone === "nested" ? SOCIAL_FOR_YOU_CARD_CLASS : SOCIAL_CHECKLIST_CLASS}
     >
       <div className="flex items-center justify-between gap-[var(--space-4)]">
         <div className="flex flex-col gap-1">
@@ -41,7 +51,7 @@ export function SocialOnboardingChecklist({ items }: { items: readonly SocialChe
           {SOCIAL.checklist.dismiss}
         </button>
       </div>
-      <div className="h-1 w-full overflow-hidden rounded-full bg-surface-muted">
+      <div className={tone === "nested" ? SOCIAL_CHECKLIST_TRACK_NESTED_CLASS : SOCIAL_CHECKLIST_TRACK_CLASS}>
         <div
           data-social-checklist-progress=""
           className="h-full rounded-full bg-accent"

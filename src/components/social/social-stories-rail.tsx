@@ -5,6 +5,7 @@ import { cn } from "@/lib/cn";
 import {
   SOCIAL_HOME_STORY_CARD_CLASS,
   SOCIAL_HOME_STORY_CREATE_FACE_CLASS,
+  SOCIAL_HOME_STORY_CREATE_INITIAL_CLASS,
   SOCIAL_HOME_STORY_CREATE_LABEL_CLASS,
   SOCIAL_HOME_STORY_FACE_CLASS,
   SOCIAL_HOME_STORY_FACE_RING_CLASS,
@@ -17,7 +18,7 @@ import {
 } from "@/lib/social-chrome";
 import { SOCIAL_ICON_SIZE_STORY_PLUS } from "@/lib/social-icons";
 import type { SocialStoryRailCard } from "@/lib/social-feed";
-import { SOCIAL, SOCIAL_ROUTES, socialInitials, socialStoryHref } from "@/lib/social";
+import { SOCIAL, SOCIAL_ROUTES, socialFirstName, socialInitials, socialStoryHref } from "@/lib/social";
 
 function storyLabel(name: string): string {
   const parts = name.trim().split(/\s+/);
@@ -25,16 +26,25 @@ function storyLabel(name: string): string {
   return parts[0] ?? name;
 }
 
+function createStoryInitial(name: string | null | undefined): string {
+  const letter = socialFirstName(name ?? SOCIAL.home.you)[0];
+  return letter ? letter.toUpperCase() : socialInitials(name ?? SOCIAL.home.you);
+}
+
 function HomeTallStoriesRail({
   cards,
   authors,
   faces,
   canCreate,
+  createName,
+  createPhotoUrl,
 }: {
   cards: readonly SocialStoryRailCard[];
   authors: ReadonlyMap<string, { display_name: string; handle?: string }>;
   faces: ReadonlyMap<string, string | null>;
   canCreate: boolean;
+  createName?: string | null;
+  createPhotoUrl?: string | null;
 }) {
   return (
     <div
@@ -51,7 +61,16 @@ function HomeTallStoriesRail({
             aria-label={SOCIAL.stories.create}
             className={SOCIAL_HOME_STORY_CARD_CLASS}
           >
-            <span className={SOCIAL_HOME_STORY_CREATE_FACE_CLASS} />
+            <span className={SOCIAL_HOME_STORY_CREATE_FACE_CLASS}>
+              {createPhotoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the private avatars bucket
+                <img src={createPhotoUrl} alt="" className="absolute inset-0 size-full object-cover opacity-40" />
+              ) : (
+                <span className={SOCIAL_HOME_STORY_CREATE_INITIAL_CLASS}>
+                  {createStoryInitial(createName)}
+                </span>
+              )}
+            </span>
             <span className={SOCIAL_HOME_STORY_PLUS_CLASS}>
               <SocialIcon
                 name="plus"
@@ -114,17 +133,28 @@ export function SocialStoriesRail({
   authors,
   faces,
   canCreate,
+  createName,
+  createPhotoUrl,
   surface = "home",
 }: {
   cards: readonly SocialStoryRailCard[];
   authors: ReadonlyMap<string, { display_name: string; handle?: string }>;
   faces: ReadonlyMap<string, string | null>;
   canCreate: boolean;
+  createName?: string | null;
+  createPhotoUrl?: string | null;
   surface?: "home" | "stories";
 }) {
   if (surface === "home") {
     return (
-      <HomeTallStoriesRail cards={cards} authors={authors} faces={faces} canCreate={canCreate} />
+      <HomeTallStoriesRail
+        cards={cards}
+        authors={authors}
+        faces={faces}
+        canCreate={canCreate}
+        createName={createName}
+        createPhotoUrl={createPhotoUrl}
+      />
     );
   }
 

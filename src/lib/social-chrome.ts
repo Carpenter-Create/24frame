@@ -1,5 +1,6 @@
 // Social measured chrome. Tokens only — no hex.
-// Desktop Home clean: Figma 169:964 / 169:1281 (164:1136 / 164:1360 still in place).
+// Desktop Home Circle-primary: Figma 176:1085 / 176:1346.
+// Prior desktop: 169:964 / 169:1281 (164:1136 / 164:1360 still in place).
 // Mobile Home: Figma 169:1519 setup after Stories, before Following wall.
 // Pill hide stays 160:1129.
 // Profile ship: Figma 129:215 / 129:415 / 129:615.
@@ -11,17 +12,19 @@
 // Stories picker: Figma 144:1218 / 144:1444.
 // No glass, no drop shadow. Aggregation / Settings Mercury stays elsewhere.
 
-export const SOCIAL_FIGMA_HOME = "169:964";
-export const SOCIAL_FIGMA_HOME_EMPTY = "169:1281";
+export const SOCIAL_FIGMA_HOME = "176:1085";
+export const SOCIAL_FIGMA_HOME_EMPTY = "176:1346";
 export const SOCIAL_FIGMA_HOME_MOBILE = "169:1519";
 export const SOCIAL_FIGMA_HOME_MOBILE_SCROLL = "160:1129";
-export const SOCIAL_FIGMA_HOME_DESKTOP_PRIOR = ["164:1136", "164:1360"] as const;
+export const SOCIAL_FIGMA_HOME_DESKTOP_PRIOR = ["169:964", "169:1281", "164:1136", "164:1360"] as const;
 
-// Desktop Social Home measure — 169:964 / 169:1281.
+// Desktop Social Home measure — 176:1085 / 176:1346.
+// dest 200 | gutter 16 | chats 200 | gutter 16 | center 676 | gutter 16 | For you 300 | padR 16 = 1440.
 export const SOCIAL_DESKTOP_MEASURE = {
-  left: 240,
+  dest: 200,
   gutter: 16,
-  center: 680,
+  chats: 200,
+  center: 676,
   right: 300,
   padR: 16,
 } as const;
@@ -41,10 +44,12 @@ export const SOCIAL_FIGMA_STORY_STUDIO = [
 ] as const;
 export const SOCIAL_FIGMA_STORY_PICKER = ["144:1218", "144:1444"] as const;
 
-export const SOCIAL_RAIL_WIDTH_CLASS = "w-[240px]";
-export const SOCIAL_RAIL_MAIN_OFFSET_CLASS = "md:ml-[240px]";
+export const SOCIAL_RAIL_WIDTH_CLASS = "w-[200px]";
+export const SOCIAL_RAIL_MAIN_OFFSET_CLASS = "md:ml-[200px]";
+export const SOCIAL_RAIL_PANEL_CLASS =
+  "rounded-[16px] border border-hairline bg-surface";
 export const SOCIAL_FOR_YOU_WIDTH_CLASS = "w-[300px]";
-export const SOCIAL_CENTER_WIDTH_CLASS = "w-full min-w-0 lg:max-w-[680px]";
+export const SOCIAL_CENTER_WIDTH_CLASS = "w-full min-w-0 lg:max-w-[676px]";
 export const SOCIAL_DESKTOP_FRAME_PAD_CLASS = "w-full px-[16px] py-4";
 
 export const SOCIAL_PAGE_CLASS =
@@ -53,10 +58,28 @@ export const SOCIAL_PAGE_CLASS =
 export const SOCIAL_HOME_LAYOUT_CLASS = "flex items-start gap-[16px]";
 
 export const SOCIAL_HOME_CENTER_CLASS =
-  "flex min-w-0 flex-1 flex-col gap-2 lg:max-w-[680px]";
+  "flex min-w-0 flex-1 flex-col gap-2 lg:max-w-[676px]";
+
+export const SOCIAL_CHATS_COLUMN_CLASS =
+  "hidden w-[200px] shrink-0 flex-col lg:flex";
+
+export const SOCIAL_CHATS_PANEL_CLASS =
+  "flex w-full flex-col gap-2 rounded-[16px] border border-hairline bg-surface p-4";
+
+export const SOCIAL_CHAT_ROW_CLASS =
+  "flex h-16 items-center gap-2 rounded-[12px] px-2";
+
+export const SOCIAL_CHAT_ROW_MUTED_CLASS =
+  "flex h-16 items-center gap-2 rounded-[12px] bg-surface-muted px-2";
+
+export const SOCIAL_CHAT_EMPTY_CLASS =
+  "flex flex-col items-center justify-center gap-2 rounded-[12px] px-4 py-6";
+
+export const SOCIAL_AVATAR_32_CLASS =
+  "flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted t-label font-medium text-ink-2";
 
 export const SOCIAL_FOR_YOU_RAIL_CLASS =
-  "hidden w-[300px] shrink-0 flex-col gap-3 lg:flex";
+  "hidden w-[300px] shrink-0 flex-col gap-4 rounded-[16px] border border-hairline bg-surface p-4 lg:flex";
 
 export const SOCIAL_CARD_CLASS =
   "flex flex-col gap-[var(--space-3)] rounded-[8px] border border-hairline bg-surface p-[var(--space-4)]";
@@ -72,6 +95,12 @@ export const SOCIAL_EMPTY_ACTION_CLASS =
 
 export const SOCIAL_CHECKLIST_CLASS =
   "flex flex-col gap-[var(--space-2)] rounded-[8px] border border-hairline bg-surface p-[var(--space-4)]";
+
+export const SOCIAL_CHECKLIST_TRACK_CLASS =
+  "h-1 w-full overflow-hidden rounded-full bg-surface-muted";
+
+export const SOCIAL_CHECKLIST_TRACK_NESTED_CLASS =
+  "h-1 w-full overflow-hidden rounded-full bg-surface";
 
 export const SOCIAL_CHECKLIST_ROW_CLASS = "border-b border-hairline py-[var(--space-3)]";
 
@@ -104,16 +133,19 @@ export const SOCIAL_STORY_MEDIA_CLASS =
 
 // Home tall FB-style cards — 160:482 / 160:964. Circular rings superseded.
 export const SOCIAL_HOME_STORY_CARD_CLASS =
-  "relative h-[192px] w-[108px] shrink-0 overflow-hidden rounded-[16px] border border-hairline bg-surface-muted md:h-[200px] md:w-[112px]";
+  "relative h-[192px] w-[108px] shrink-0 overflow-hidden rounded-[16px] border border-hairline bg-surface md:h-[200px] md:w-[112px]";
 
 export const SOCIAL_HOME_STORY_CREATE_FACE_CLASS =
-  "absolute inset-x-0 top-0 h-[134px] bg-surface-muted md:h-[140px]";
+  "absolute inset-x-0 top-0 flex h-[114px] items-center justify-center overflow-hidden bg-surface-muted md:h-[120px]";
+
+export const SOCIAL_HOME_STORY_CREATE_INITIAL_CLASS =
+  "text-[32px] font-semibold text-ink-2/45 md:text-[40px]";
 
 export const SOCIAL_HOME_STORY_PLUS_CLASS =
-  "absolute left-1/2 top-[115px] z-10 flex size-9 -translate-x-1/2 items-center justify-center rounded-full border-[3px] border-surface bg-accent text-accent-contrast md:top-[117px]";
+  "absolute left-1/2 top-[96px] z-10 flex size-9 -translate-x-1/2 items-center justify-center rounded-full border-[3px] border-surface bg-accent text-accent-contrast md:top-[100px] md:size-10";
 
 export const SOCIAL_HOME_STORY_CREATE_LABEL_CLASS =
-  "absolute inset-x-0 bottom-0 flex h-12 items-center justify-center bg-surface t-label font-medium text-ink";
+  "absolute inset-x-0 bottom-0 flex h-[78px] items-center justify-center bg-surface px-2 text-center t-label font-medium text-ink md:h-20";
 
 export const SOCIAL_HOME_STORY_FACE_RING_CLASS =
   "absolute left-2 top-2 z-10 flex size-8 items-center justify-center overflow-hidden rounded-full border-2 bg-surface p-[2px] md:left-[9px] md:top-[9px] md:size-9";
@@ -163,7 +195,7 @@ export const SOCIAL_FOLLOW_COMPACT_CLASS =
   "inline-flex items-center rounded-[8px] bg-accent px-[10px] py-[5px] text-[11px] font-semibold text-accent-contrast";
 
 export const SOCIAL_FOR_YOU_CARD_CLASS =
-  "flex w-full flex-col gap-2 rounded-[8px] border border-hairline bg-surface p-3";
+  "flex w-full flex-col gap-2 rounded-[12px] bg-surface-muted p-4";
 
 export const SOCIAL_FEED_ROW_CLASS =
   "flex flex-col gap-2 border-b border-hairline bg-surface p-3";
@@ -195,7 +227,7 @@ export const SOCIAL_HOME_TAB_CLASS =
   "flex flex-1 flex-col items-center gap-2.5 px-4 pt-3 t-body";
 
 export const SOCIAL_TOPIC_CHIP_CLASS =
-  "inline-flex items-center rounded-[14px] bg-surface-muted px-[10px] py-[5px] text-[11px] font-medium text-ink";
+  "inline-flex items-center rounded-[14px] bg-surface px-[10px] py-[5px] text-[11px] font-medium text-ink";
 
 export const SOCIAL_FIRST_WIN_CLASS =
   "flex flex-col items-center justify-center gap-2.5 rounded-[8px] border border-hairline bg-surface px-5 pb-4 pt-5 text-center";

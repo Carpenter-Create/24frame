@@ -263,6 +263,8 @@ export const SOCIAL = {
     empty: "No posts from people you follow yet",
     emptyHint: "Explore to find creators and start your following wall.",
     emptyQuiet: "No posts yet",
+    recentChats: "Recent chats",
+    chatsEmpty: "No messages yet",
     goExplore: "Explore creators",
     composerPrompt: "What's on your mind?",
     composerPromptNamed: "What's on your mind",

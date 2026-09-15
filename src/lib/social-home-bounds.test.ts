@@ -9,6 +9,7 @@ import {
   SOCIAL_FOLLOWING_WALL_CURSOR_PARAM,
   SOCIAL_FOLLOWING_WALL_LIMIT,
   SOCIAL_FOR_YOU_PEOPLE_LIMIT,
+  SOCIAL_HOME_CHATS_LIMIT,
   SOCIAL_STORIES_RAIL_LIMIT,
   encodeFollowingWallCursor,
   followingWallKeysetOrFilter,
@@ -26,6 +27,7 @@ describe("Social Home independent caps", () => {
     expect(SOCIAL_EXPLORE_PEOPLE_LIMIT).toBe(20);
     expect(SOCIAL_EXPLORE_POSTS_LIMIT).toBe(20);
     expect(SOCIAL_FOR_YOU_PEOPLE_LIMIT).toBe(3);
+    expect(SOCIAL_HOME_CHATS_LIMIT).toBe(4);
     expect(SOCIAL_FOLLOWING_WALL_LIMIT).not.toBe(SOCIAL_FOLLOWEES_LIMIT);
     expect(SOCIAL_FOLLOWING_WALL_LIMIT).not.toBe(SOCIAL_STORIES_RAIL_LIMIT);
     expect(SOCIAL_FOLLOWING_WALL_LIMIT).not.toBe(LIST_PAGE);
@@ -44,6 +46,8 @@ describe("Social Home independent caps", () => {
     expect(src).toContain("Mapping C");
     expect(src).toContain("no org_id");
     expect(src).toContain("created_at+id keyset");
+    expect(src).toContain("Home recent chats");
+    expect(src).toContain("SOCIAL_HOME_CHATS_LIMIT");
     expect(src).not.toMatch(/org_id on Social/i);
     expect(src).not.toContain("get_dm_inbox");
   });

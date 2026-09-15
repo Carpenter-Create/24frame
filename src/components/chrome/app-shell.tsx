@@ -31,6 +31,7 @@ import { isSettingsPath, SETTINGS_RAIL_PAD_CLASS } from "@/lib/settings";
 import {
   SOCIAL_DESKTOP_FRAME_PAD_CLASS,
   SOCIAL_RAIL_MAIN_OFFSET_CLASS,
+  SOCIAL_RAIL_PANEL_CLASS,
   SOCIAL_RAIL_WIDTH_CLASS,
   SOCIAL_TAB_BAR_MAIN_PAD_CLASS,
 } from "@/lib/social-chrome";
@@ -100,8 +101,9 @@ export function AppShell({
           <SocialTopBar email={email} name={name} photoUrl={photoUrl} />
           <aside
             className={cn(
-              "fixed left-0 top-[var(--header-height)] z-30 hidden h-[calc(100dvh-var(--header-height))] flex-col border-r border-hairline bg-surface md:flex",
+              "fixed left-0 top-[calc(var(--header-height)+16px)] z-30 hidden h-[calc(100dvh-var(--header-height)-32px)] flex-col md:flex",
               SOCIAL_RAIL_WIDTH_CLASS,
+              SOCIAL_RAIL_PANEL_CLASS,
             )}
             data-app-rail=""
             data-social-rail=""
