@@ -52,6 +52,8 @@ describe("social copy lock", () => {
     expect(SOCIAL.home.subtitle).toContain("follow");
     expect(SOCIAL.home.subtitle).toContain(PRODUCT_NAME);
     expect(SOCIAL.home.emptyQuiet).toBe("No posts yet");
+    expect(SOCIAL.home.recentChats).toBe("Recent chats");
+    expect(SOCIAL.home.chatsEmpty).toBe("No messages yet");
     expect(blob).not.toContain("Social-native");
     expect(blob).not.toContain("One clear next step");
     expect(SOCIAL.explore.subtitle).toContain(PRODUCT_NAME);

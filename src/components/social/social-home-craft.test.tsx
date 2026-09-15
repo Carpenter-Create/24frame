@@ -93,6 +93,11 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).toContain("rounded-[16px]");
     expect(html).toContain("bg-accent");
     expect(html).toContain("bg-band/55");
+    expect(html).toContain("md:h-[120px]");
+    expect(html).toContain("md:h-20");
+    expect(html).toContain("md:top-[100px]");
+    expect(html).toContain("md:size-10");
+    expect(html).toContain("font-medium");
     expect(html.indexOf("Maya C.")).toBeGreaterThan(html.indexOf("data-social-story-media"));
   });
 
@@ -179,7 +184,7 @@ describe("Social Stories craft (Figma 138:163 / 138:889 / 138:943)", () => {
 
   it("keeps Home rail tall FB-style and Create story when surface is home", () => {
     const html = renderToStaticMarkup(
-      <SocialStoriesRail canCreate authors={authors} faces={faces} cards={[]} />,
+      <SocialStoriesRail canCreate createName="Adam Carpenter" authors={authors} faces={faces} cards={[]} />,
     );
     expect(html).toContain('data-social-stories-surface="home"');
     expect(html).toContain("data-social-stories-tall");
@@ -187,6 +192,8 @@ describe("Social Stories craft (Figma 138:163 / 138:889 / 138:943)", () => {
     expect(html).toContain("h-[192px]");
     expect(html).toContain(`width="${SOCIAL_ICON_SIZE_STORY_PLUS}"`);
     expect(html).toContain(SOCIAL.stories.create);
+    expect(html).toContain("A");
+    expect(html).toContain("text-ink-2/45");
     expect(html).not.toContain(SOCIAL.stories.yourStory);
     expect(html).not.toContain("w-[68px]");
   });

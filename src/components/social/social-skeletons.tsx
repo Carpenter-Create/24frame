@@ -6,6 +6,8 @@ import {
   SOCIAL_CREATE_CARD_CLASS,
   SOCIAL_CREATE_WELL_CLASS,
   SOCIAL_FEED_ROW_CLASS,
+  SOCIAL_CHATS_COLUMN_CLASS,
+  SOCIAL_CHATS_PANEL_CLASS,
   SOCIAL_FOR_YOU_CARD_CLASS,
   SOCIAL_FOR_YOU_RAIL_CLASS,
   SOCIAL_HOME_CENTER_CLASS,
@@ -48,6 +50,13 @@ function SocialStoriesRailSkeleton({
 export function SocialHomeSkeleton() {
   return (
     <div data-social-home-skeleton="" className={SOCIAL_HOME_LAYOUT_CLASS}>
+      <aside data-social-recent-chats-skeleton="" className={SOCIAL_CHATS_COLUMN_CLASS}>
+        <div className={SOCIAL_CHATS_PANEL_CLASS}>
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-16 w-full rounded-[12px]" />
+          <Skeleton className="h-16 w-full rounded-[12px]" />
+        </div>
+      </aside>
       <div className={SOCIAL_HOME_CENTER_CLASS}>
         <div className={SOCIAL_COMPOSER_CLASS}>
           <Skeleton className={SOCIAL_AVATAR_SM_CLASS} />

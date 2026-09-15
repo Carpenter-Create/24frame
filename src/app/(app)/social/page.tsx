@@ -7,19 +7,22 @@ import { SocialEmpty } from "@/components/social/social-empty";
 import { SocialForYouRail } from "@/components/social/social-for-you";
 import { SocialHomeComposer } from "@/components/social/social-home-composer";
 import { SocialHomeTabs } from "@/components/social/social-home-tabs";
+import { SocialRecentChats } from "@/components/social/social-recent-chats";
 import { SocialStoriesRail } from "@/components/social/social-stories-rail";
 import { SocialPostCard } from "@/components/social/social-ui";
 import { SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS, SOCIAL_PILL_ACTIVE_CLASS, SOCIAL_PILL_CLASS } from "@/lib/social-chrome";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
 import { parseSocialCategoryParam, SOCIAL_CATEGORY_ALL, SOCIAL_CATEGORY_PARAM } from "@/lib/social-categories";
+import { socialHomeChats } from "@/lib/social-home-chats";
 import { followingAuthorIds, socialChecklistItems } from "@/lib/social-home";
 import {
   SOCIAL_FOLLOWING_WALL_CURSOR_PARAM,
+  SOCIAL_HOME_CHATS_LIMIT,
   parseFollowingWallCursorParam,
   socialFollowingWallHref,
 } from "@/lib/social-home-bounds";
-import { parseSocialHomeLane, SOCIAL, SOCIAL_HOME_LANE_PARAM, SOCIAL_ROUTES } from "@/lib/social";
+import { loadDmInbox, type DmInboxRow } from "@/lib/social-dms";
 import {
   groupStoryRail,
   loadFolloweeIds,
@@ -32,6 +35,7 @@ import {
   loadSuggestedPeople,
   loadViewedStoryIds,
 } from "@/lib/social-feed";
+import { inboxPeerIds, parseSocialHomeLane, SOCIAL, SOCIAL_HOME_LANE_PARAM, SOCIAL_ROUTES } from "@/lib/social";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
@@ -54,13 +58,16 @@ export default async function SocialHomePage({
     ? await loadFolloweeIds(supabase, ctx.user.id)
     : { ids: [] as string[], truncated: false };
   const authorIds = followingAuthorIds(ctx.user.id, followees.ids);
-  const [wall, storiesPage, suggested, facts] = await Promise.all([
+  const [wall, storiesPage, suggested, facts, inbox] = await Promise.all([
     profile
       ? loadFollowingPosts(supabase, authorIds, { category, cursor })
       : Promise.resolve({ posts: [], truncated: false, nextCursor: null }),
     loadLiveStories(supabase, authorIds),
     loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids]),
     profile ? loadOwnPostFacts(supabase, ctx.user.id) : Promise.resolve(null),
+    profile
+      ? loadDmInbox(supabase, { limit: SOCIAL_HOME_CHATS_LIMIT })
+      : Promise.resolve({ rows: [] as DmInboxRow[], truncated: false }),
   ]);
   const posts = wall.posts;
   const stories = storiesPage.stories;
@@ -71,6 +78,7 @@ export default async function SocialHomePage({
       ...posts.map((post) => post.author_id),
       ...stories.map((story) => story.author_id),
       ...suggested.map((person) => person.id),
+      ...inbox.rows.flatMap((row) => inboxPeerIds(row)),
     ]),
   ];
   const [viewed, authors, faces, media, groups, liked] = await Promise.all([
@@ -97,16 +105,28 @@ export default async function SocialHomePage({
         hasStory: facts?.hasStory ?? false,
       })
     : [];
+  const chats = socialHomeChats(
+    inbox.rows,
+    new Map([...authors.entries()].map(([id, author]) => [id, author.display_name])),
+  );
 
   return (
     <div data-social-home="" className={SOCIAL_HOME_LAYOUT_CLASS}>
+      <SocialRecentChats chats={chats} faces={faces} />
       <div className={SOCIAL_HOME_CENTER_CLASS}>
         <h1 className="sr-only">{SOCIAL.home.title}</h1>
         <p className="sr-only">{SOCIAL.home.subtitle}</p>
         {profile ? (
           <SocialHomeComposer authorName={profile.display_name} authorPhotoUrl={photoUrl} />
         ) : null}
-        <SocialStoriesRail cards={rail} authors={authors} faces={faces} canCreate={!!profile} />
+        <SocialStoriesRail
+          cards={rail}
+          authors={authors}
+          faces={faces}
+          canCreate={!!profile}
+          createName={profile?.display_name}
+          createPhotoUrl={photoUrl}
+        />
         {storiesPage.truncated ? (
           <InlineNotice tone="info" data-social-stories-truncated="">
             {SOCIAL.home.truncatedStories}

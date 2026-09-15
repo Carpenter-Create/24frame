@@ -32,9 +32,9 @@ export function SocialForYouRail({
       data-social-for-you-layout={layout}
       className={layout === "lane" ? "flex w-full flex-col gap-3" : SOCIAL_FOR_YOU_RAIL_CLASS}
     >
-      {showChecklist ? <SocialOnboardingChecklist items={checklist} /> : null}
+      {showChecklist ? <SocialOnboardingChecklist items={checklist} tone="nested" /> : null}
       <div className="flex items-center justify-between">
-        <p className="t-body font-semibold text-ink">{SOCIAL.forYou.title}</p>
+        <p className="t-body-sm font-medium text-ink-2">{SOCIAL.forYou.title}</p>
       </div>
       {people.length > 0 ? (
         <div data-social-for-you-people="" className={SOCIAL_FOR_YOU_CARD_CLASS}>

@@ -55,6 +55,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).not.toContain("SocialProfileTabs");
     expect(home).not.toContain("creditsEmpty");
     expect(home).toContain("SocialForYouRail");
+    expect(home).toContain("SocialRecentChats");
+    expect(home).toContain("loadDmInbox");
     expect(home).toContain("ensureOwnSocialProfile");
     expect(home).toContain("data-social-following-empty");
     expect(home).not.toContain("SocialLensRow");
@@ -122,11 +124,12 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(explore).not.toContain("Reels");
   });
 
-  it("locks Home chrome against Figma 169:964 composer compact + tall Stories", () => {
+  it("locks Home chrome against Figma 176:1085 Circle-primary + compact composer", () => {
     const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
     const composer = readFileSync("src/components/social/social-home-composer.tsx", "utf8");
     const forYou = readFileSync("src/components/social/social-for-you.tsx", "utf8");
     const extras = readFileSync("src/components/social/social-rail-extras.tsx", "utf8");
+    const chats = readFileSync("src/components/social/social-recent-chats.tsx", "utf8");
     expect(rail).toContain("SOCIAL_ICON_SIZE_STORY_PLUS");
     expect(rail).toContain("SOCIAL_HOME_STORY_CARD_CLASS");
     expect(rail).toContain("data-social-stories-tall");
@@ -170,17 +173,40 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).not.toContain("SocialCreateCompose");
     expect(shell).toContain("data-social-workspace");
     expect(shell).not.toContain("Aggregation|Social");
-    expect(chrome).toContain('SOCIAL_FIGMA_HOME = "169:964"');
-    expect(chrome).toContain('SOCIAL_FIGMA_HOME_EMPTY = "169:1281"');
+    expect(chrome).toContain('SOCIAL_FIGMA_HOME = "176:1085"');
+    expect(chrome).toContain('SOCIAL_FIGMA_HOME_EMPTY = "176:1346"');
     expect(chrome).toContain('SOCIAL_FIGMA_HOME_MOBILE = "169:1519"');
     expect(chrome).toContain('SOCIAL_FIGMA_HOME_MOBILE_SCROLL = "160:1129"');
+    expect(chrome).toContain("169:964");
+    expect(chrome).toContain("169:1281");
     expect(chrome).toContain("164:1136");
     expect(chrome).toContain("164:1360");
-    expect(chrome).toContain("left: 240");
+    expect(chrome).toContain("dest: 200");
+    expect(chrome).toContain("chats: 200");
     expect(chrome).toContain("gutter: 16");
-    expect(chrome).toContain("center: 680");
+    expect(chrome).toContain("center: 676");
     expect(chrome).toContain("right: 300");
     expect(chrome).toContain("padR: 16");
+    expect(chrome).toContain("w-[200px]");
+    expect(chrome).toContain("md:ml-[200px]");
+    expect(chrome).toContain("lg:max-w-[676px]");
+    expect(chrome).toContain("SOCIAL_RAIL_PANEL_CLASS");
+    expect(chrome).toContain("SOCIAL_CHATS_PANEL_CLASS");
+    expect(chrome).toContain("rounded-[16px]");
+    expect(home).toContain("SocialRecentChats");
+    expect(home).not.toContain('"/messages"');
+    expect(chats).toContain("SOCIAL_ROUTES.dms");
+    expect(chats).toContain("socialDmHref");
+    expect(chats).toContain("SOCIAL.home.chatsEmpty");
+    expect(chats).toContain("size-8");
+    expect(chats).toContain("h-16");
+    expect(chats).not.toContain("/messages");
+    expect(chats).not.toContain("Loved");
+    expect(shell).toContain("SOCIAL_RAIL_PANEL_CLASS");
+    expect(shell).toContain("top-[calc(var(--header-height)+16px)]");
+    expect(chrome).not.toContain("Inter");
+    expect(chrome).not.toContain("#d1e0fa");
+    expect(chrome).not.toContain("shadow-");
     expect(chrome).toContain("px-[16px]");
     expect(chrome).toContain("gap-[16px]");
     expect(chrome).toContain("SOCIAL_COMPOSER_MEDIA_CLASS");
@@ -326,25 +352,28 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(messages).toContain("Promise.all");
   });
 
-  it("puts Finish setting up on the desktop For you rail and mobile first feed card on 169:1281 / 169:1519", () => {
+  it("puts Finish setting up on the desktop For you rail and mobile first feed card on 176:1346 / 169:1519", () => {
     const forYou = readFileSync("src/components/social/social-for-you.tsx", "utf8");
     const checklist = readFileSync("src/components/social/social-checklist.tsx", "utf8");
-    expect(chrome).toContain('SOCIAL_FIGMA_HOME_EMPTY = "169:1281"');
+    expect(chrome).toContain('SOCIAL_FIGMA_HOME_EMPTY = "176:1346"');
     expect(chrome).toContain('SOCIAL_FIGMA_HOME_MOBILE = "169:1519"');
     expect(home).not.toContain("SocialFirstWin");
     expect(home).not.toContain("firstWinHint");
     expect(home).toContain("data-social-home-setup");
     expect(forYou).toContain("SocialOnboardingChecklist");
+    expect(forYou).toContain('tone="nested"');
     expect(forYou).toContain("layout === \"rail\"");
     expect(checklist).toContain("data-social-checklist-dismiss");
     expect(checklist).toContain("SOCIAL.checklist.dismiss");
     expect(SOCIAL_DESKTOP_MEASURE).toEqual({
-      left: 240,
+      dest: 200,
       gutter: 16,
-      center: 680,
+      chats: 200,
+      center: 676,
       right: 300,
       padR: 16,
     });
+    expect(SOCIAL_DESKTOP_MEASURE.dest + SOCIAL_DESKTOP_MEASURE.gutter + SOCIAL_DESKTOP_MEASURE.chats + SOCIAL_DESKTOP_MEASURE.gutter + SOCIAL_DESKTOP_MEASURE.center + SOCIAL_DESKTOP_MEASURE.gutter + SOCIAL_DESKTOP_MEASURE.right + SOCIAL_DESKTOP_MEASURE.padR).toBe(1440);
     expect(SOCIAL.home.emptyQuiet).toBe("No posts yet");
     expect(SOCIAL.checklist).not.toHaveProperty("firstWinHint");
     expect(SOCIAL.forYou).not.toHaveProperty("native");
