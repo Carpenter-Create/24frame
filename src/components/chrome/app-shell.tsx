@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, use, useEffect, useState } from "react";
+import { Suspense, use, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CaretDoubleLeft, CaretDoubleRight } from "@phosphor-icons/react";
@@ -83,8 +83,22 @@ export function AppShell({
   children: React.ReactNode;
 }) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
+  const [workspaceCookie, setWorkspaceCookie] = useState(defaultWorkspace);
   const pathname = usePathname();
-  const workspace = resolveWorkspaceMode(pathname, defaultWorkspace);
+  const workspace = resolveWorkspaceMode(pathname, workspaceCookie);
+  const applyChromeCookies = useCallback(
+    (next: { defaultCollapsed: boolean; defaultWorkspace: WorkspaceMode }) => {
+      setCollapsed(next.defaultCollapsed);
+      setWorkspaceCookie(next.defaultWorkspace);
+    },
+    [],
+  );
+  const cookieSync =
+    chrome ? (
+      <Suspense fallback={null}>
+        <ChromeCookieSync chrome={chrome} onCookies={applyChromeCookies} />
+      </Suspense>
+    ) : null;
   // The catalog opts out of the centered width cap so its hero can bleed full-width
   // (edge of sidebar → right edge). That page then manages its own content max-width.
   // Non-bleed pages share `--content-inset`. Titles stay the bleed exception.
@@ -101,6 +115,7 @@ export function AppShell({
   if (socialChrome) {
     return (
       <AskAssistantChromeProvider>
+        {cookieSync}
         <div className="min-h-dvh bg-bg" data-social-workspace="">
           <SocialTopBarSlot chrome={chrome} email={email} name={name} photoUrl={photoUrl} />
           <aside
@@ -147,6 +162,7 @@ export function AppShell({
 
   return (
     <AskAssistantChromeProvider>
+    {cookieSync}
     <div
       className="min-h-dvh"
       style={
@@ -220,7 +236,8 @@ export function AppShell({
           {settingsPage ? (
             <SettingsRail />
           ) : (
-            <SideNav
+            <SideNavSlot
+              chrome={chrome}
               messagesUnread={messagesUnread}
               isGcStaff={isGcStaff}
               collapsed={collapsed}
@@ -245,7 +262,11 @@ export function AppShell({
         style={{ height: "var(--header-height)", marginLeft: "var(--sidebar-width)" }}
       >
         <div data-app-header-leading="" className="mr-auto flex min-w-0 flex-1 items-center gap-2">
-          {settingsPage ? <SettingsHeaderBack /> : <MobileNav isGcStaff={isGcStaff} workspace={workspace} />}
+          {settingsPage ? (
+            <SettingsHeaderBack />
+          ) : (
+            <MobileNavSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />
+          )}
           {messagesPage ? (
             <MessagesHeaderSlot chrome={chrome} messagesSurface={messagesSurface} />
           ) : null}
@@ -400,4 +421,118 @@ function UserMenuFromChrome({
       defaultWorkspace={data.defaultWorkspace}
     />
   );
+}
+
+function ChromeCookieSync({
+  chrome,
+  onCookies,
+}: {
+  chrome: Promise<AppShellChrome>;
+  onCookies: (next: { defaultCollapsed: boolean; defaultWorkspace: WorkspaceMode }) => void;
+}) {
+  const data = use(chrome);
+  const applied = useRef(false);
+  useEffect(() => {
+    if (applied.current) return;
+    applied.current = true;
+    onCookies({
+      defaultCollapsed: data.defaultCollapsed,
+      defaultWorkspace: data.defaultWorkspace,
+    });
+  }, [data.defaultCollapsed, data.defaultWorkspace, onCookies]);
+  return null;
+}
+
+function SideNavSlot({
+  chrome,
+  messagesUnread,
+  isGcStaff,
+  collapsed,
+  workspace,
+}: {
+  chrome?: Promise<AppShellChrome>;
+  messagesUnread: Promise<number>;
+  isGcStaff: boolean;
+  collapsed: boolean;
+  workspace: WorkspaceMode;
+}) {
+  if (!chrome) {
+    return (
+      <SideNav
+        messagesUnread={messagesUnread}
+        isGcStaff={isGcStaff}
+        collapsed={collapsed}
+        workspace={workspace}
+      />
+    );
+  }
+  return (
+    <Suspense
+      fallback={
+        <SideNav
+          messagesUnread={messagesUnread}
+          isGcStaff={isGcStaff}
+          collapsed={collapsed}
+          workspace={workspace}
+        />
+      }
+    >
+      <SideNavFromChrome
+        chrome={chrome}
+        messagesUnread={messagesUnread}
+        collapsed={collapsed}
+        workspace={workspace}
+      />
+    </Suspense>
+  );
+}
+
+function SideNavFromChrome({
+  chrome,
+  messagesUnread,
+  collapsed,
+  workspace,
+}: {
+  chrome: Promise<AppShellChrome>;
+  messagesUnread: Promise<number>;
+  collapsed: boolean;
+  workspace: WorkspaceMode;
+}) {
+  const data = use(chrome);
+  return (
+    <SideNav
+      messagesUnread={messagesUnread}
+      isGcStaff={data.isGcStaff}
+      collapsed={collapsed}
+      workspace={workspace}
+    />
+  );
+}
+
+function MobileNavSlot({
+  chrome,
+  isGcStaff,
+  workspace,
+}: {
+  chrome?: Promise<AppShellChrome>;
+  isGcStaff: boolean;
+  workspace: WorkspaceMode;
+}) {
+  if (!chrome) return <MobileNav isGcStaff={isGcStaff} workspace={workspace} />;
+  return (
+    <Suspense fallback={<MobileNav isGcStaff={isGcStaff} workspace={workspace} />}>
+      <MobileNavFromChrome chrome={chrome} workspace={workspace} />
+    </Suspense>
+  );
+}
+
+function MobileNavFromChrome({
+  chrome,
+  workspace,
+}: {
+  chrome: Promise<AppShellChrome>;
+  workspace: WorkspaceMode;
+}) {
+  const data = use(chrome);
+  return <MobileNav isGcStaff={data.isGcStaff} workspace={workspace} />;
 }

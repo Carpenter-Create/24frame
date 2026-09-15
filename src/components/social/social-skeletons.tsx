@@ -189,6 +189,16 @@ export function SocialStoryViewerSkeleton() {
   );
 }
 
+export function SocialExploreResultsSkeleton() {
+  return (
+    <div data-social-explore-results-skeleton="" className="flex flex-col gap-[var(--space-3)]">
+      <Skeleton className="h-16 w-full rounded-[var(--radius-lg)]" />
+      <Skeleton className="h-16 w-full rounded-[var(--radius-lg)]" />
+      <Skeleton className="h-16 w-full rounded-[var(--radius-lg)]" />
+    </div>
+  );
+}
+
 export function SocialExploreSkeleton() {
   return (
     <div data-social-explore-skeleton="" className="flex flex-col gap-[var(--space-6)]">
@@ -197,7 +207,7 @@ export function SocialExploreSkeleton() {
         <Skeleton className="h-3.5 w-56" />
       </div>
       <Skeleton className="h-10 w-full rounded-[var(--radius)]" />
-      <Skeleton className="h-24 w-full rounded-[var(--radius-lg)]" />
+      <SocialExploreResultsSkeleton />
     </div>
   );
 }

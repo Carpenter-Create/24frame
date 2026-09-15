@@ -5,7 +5,7 @@ import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { Input } from "@/components/ui/input";
-import { SocialExploreSkeleton } from "@/components/social/social-skeletons";
+import { SocialExploreResultsSkeleton } from "@/components/social/social-skeletons";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { loadExploreSearch } from "@/lib/social-feed";
 import { requireSocialSession, type SocialSession } from "@/lib/social-session";
@@ -34,7 +34,7 @@ export default async function SocialExplorePage({
         />
       </form>
       {q ? (
-        <Suspense fallback={<SocialExploreSkeleton />}>
+        <Suspense fallback={<SocialExploreResultsSkeleton />}>
           <SocialExploreHits session={session} q={q} />
         </Suspense>
       ) : (

@@ -61,6 +61,12 @@ describe("Social Explore", () => {
     expect(html).not.toContain("Cinematography");
     expect(html).not.toContain("data-social-feed");
     expect(readFileSync("src/app/(app)/social/explore/page.tsx", "utf8")).not.toContain("SocialLensRow");
+    expect(readFileSync("src/app/(app)/social/explore/page.tsx", "utf8")).toContain(
+      "SocialExploreResultsSkeleton",
+    );
+    expect(readFileSync("src/app/(app)/social/explore/page.tsx", "utf8")).not.toContain(
+      "fallback={<SocialExploreSkeleton",
+    );
   });
 
   it("sends an unauthenticated visitor to login", async () => {

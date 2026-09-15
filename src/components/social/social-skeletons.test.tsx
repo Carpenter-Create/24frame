@@ -54,6 +54,7 @@ describe("Social loading skeletons", () => {
     expect(stories).toContain("data-social-stories-index-skeleton");
     expect(viewer).toContain("data-social-story-viewer-skeleton");
     expect(explore).toContain("data-social-explore-skeleton");
+    expect(explore).toContain("data-social-explore-results-skeleton");
     expect(dms).toContain("data-social-dms-skeleton");
 
     for (const html of [home, profile, create, stories, viewer, explore, dms]) {

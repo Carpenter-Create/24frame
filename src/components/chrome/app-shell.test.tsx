@@ -25,7 +25,11 @@ vi.mock("./organization-switcher", () => ({
   OrganizationSwitcher: () => createElement("div", { "data-org-switcher": "" }),
 }));
 vi.mock("./side-nav", () => ({
-  SideNav: () => createElement("nav", { "data-side-nav": "" }),
+  SideNav: ({ isGcStaff }: { isGcStaff?: boolean }) =>
+    createElement("nav", {
+      "data-side-nav": "",
+      "data-gc-staff": isGcStaff ? "" : undefined,
+    }),
 }));
 vi.mock("./user-menu", () => ({
   UserMenu: ({
@@ -58,6 +62,16 @@ import {
 } from "@/lib/rail-collapse";
 
 const shellSrc = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "app-shell.tsx"), "utf8");
+
+function fulfilledChrome(data: AppShellChrome): Promise<AppShellChrome> {
+  const chrome = Promise.resolve(data) as Promise<AppShellChrome> & {
+    status: "fulfilled";
+    value: AppShellChrome;
+  };
+  chrome.status = "fulfilled";
+  chrome.value = data;
+  return chrome;
+}
 
 function renderShell(
   messagesSurface?: MessagesSurface,
@@ -112,7 +126,7 @@ describe("AppShell header", () => {
     expect(shellSrc).toContain("Phone avatar opens 544:561");
     expect(shellSrc).toContain("Workspace switcher lives in the account menu");
     expect(shellSrc).not.toContain("WorkspaceSwitcher");
-    expect(shellSrc).toContain("<MobileNav isGcStaff={isGcStaff} workspace={workspace} />");
+    expect(shellSrc).toContain("<MobileNavSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />");
     expect(shellSrc).not.toContain("AccountOverlay");
     expect(shellSrc).not.toContain("AccountSheet");
   });
@@ -250,7 +264,7 @@ describe("AppShell client mobile chrome", () => {
     expect(html).not.toContain("data-social-create-fab");
     expect(shellSrc).toContain("hidden h-dvh flex-col");
     expect(shellSrc).toContain("md:flex");
-    expect(shellSrc).toContain("<MobileNav isGcStaff={isGcStaff} workspace={workspace} />");
+    expect(shellSrc).toContain("<MobileNavSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />");
     expect(shellSrc).not.toContain("GC_NAV");
     expect(shellSrc).not.toMatch(/key=\{pathname\}/);
 
@@ -443,11 +457,86 @@ describe("AppShell rail-collapse chevron", () => {
     expect(shellSrc).toContain("migrateSidebarCollapsedCookie");
     expect(shellSrc).not.toContain("gc_sidebar_collapsed");
     expect(shellSrc).toContain("defaultCollapsed");
-    expect(shellSrc).toContain("<MobileNav isGcStaff={isGcStaff} workspace={workspace} />");
+    expect(shellSrc).toContain("<MobileNavSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />");
     expect(SIDEBAR_COLLAPSED_COOKIE).toBe("24frame_sidebar_collapsed");
     navigation.pathname = "/settings";
     expect(renderShell(undefined, undefined, true)).not.toContain("Expand sidebar");
     expect(renderShell(undefined, undefined, true)).not.toContain(RAIL_COLLAPSE_EXPAND_ROW_CLASS);
+  });
+
+  it("restores staff destinations from chrome without blocking children", () => {
+    navigation.pathname = "/";
+    const pending = renderToStaticMarkup(
+      <AppShell chrome={new Promise(() => {})} messagesUnread={new Promise(() => {})}>
+        page
+      </AppShell>,
+    );
+    expect(pending).toContain("page");
+    expect(pending).toContain("data-side-nav");
+    expect(pending).not.toContain("data-gc-staff");
+    expect(pending).toContain("data-mobile-nav-trigger");
+
+    const staff = renderToStaticMarkup(
+      <AppShell
+        chrome={fulfilledChrome({
+          email: "ada@example.com",
+          name: "Ada",
+          photoUrl: null,
+          orgs: [],
+          activeOrgId: null,
+          unread: Promise.resolve(0),
+          isGcStaff: true,
+          defaultCollapsed: false,
+          messagesSurface: "staff-inbox",
+          defaultWorkspace: "aggregation",
+        })}
+        messagesUnread={Promise.resolve(0)}
+      >
+        page
+      </AppShell>,
+    );
+    expect(staff).toContain("data-gc-staff");
+    expect(staff).toContain('data-email="ada@example.com"');
+    expect(staff).toContain("page");
+    expect(shellSrc).toContain("SideNavFromChrome");
+    expect(shellSrc).toContain("MobileNavFromChrome");
+    expect(shellSrc).toContain("ChromeCookieSync");
+    expect(shellSrc).toContain("data.isGcStaff");
+    expect(shellSrc).toContain("isGcStaff={data.isGcStaff}");
+    expect(shellSrc).toContain("data.defaultCollapsed");
+    expect(shellSrc).toContain("data.defaultWorkspace");
+    const appShellFn = shellSrc.slice(shellSrc.indexOf("export function AppShell"));
+    const beforeSocial = appShellFn.slice(0, appShellFn.indexOf("if (socialChrome)"));
+    expect(beforeSocial).not.toMatch(/\buse\(chrome\)/);
+  });
+
+  it("applies resolved chrome cookies from a Suspense slot without persisting defaults", () => {
+    navigation.pathname = "/";
+    const pending = renderToStaticMarkup(
+      <AppShell chrome={new Promise(() => {})} messagesUnread={new Promise(() => {})}>
+        page
+      </AppShell>,
+    );
+    expect(pending).toContain("Collapse sidebar");
+    expect(pending).not.toContain("Expand sidebar");
+    expect(pending).toContain("data-side-nav");
+    expect(pending).not.toContain("data-social-rail");
+
+    expect(shellSrc).toContain("<ChromeCookieSync chrome={chrome} onCookies={applyChromeCookies} />");
+    expect(shellSrc).toContain("setCollapsed(next.defaultCollapsed)");
+    expect(shellSrc).toContain("setWorkspaceCookie(next.defaultWorkspace)");
+    const syncFn = shellSrc.slice(shellSrc.indexOf("function ChromeCookieSync"));
+    const syncBody = syncFn.slice(0, syncFn.indexOf("\nfunction SideNavSlot"));
+    expect(syncBody).toContain("use(chrome)");
+    expect(syncBody).toContain("data.defaultCollapsed");
+    expect(syncBody).toContain("data.defaultWorkspace");
+    expect(syncBody).toContain("applied.current = true");
+    expect(syncBody).not.toContain("persistSidebarCollapsed");
+    expect(syncBody).not.toContain("persistWorkspaceCookie");
+    const appShellFn = shellSrc.slice(shellSrc.indexOf("export function AppShell"));
+    const beforeSocial = appShellFn.slice(0, appShellFn.indexOf("if (socialChrome)"));
+    expect(beforeSocial).not.toMatch(/\buse\(chrome\)/);
+    expect(beforeSocial).toContain("cookieSync");
   });
 
   it("paints Social chrome and children before layout chrome resolves", () => {
