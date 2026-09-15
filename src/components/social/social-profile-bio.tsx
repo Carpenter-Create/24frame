@@ -22,6 +22,7 @@ import {
   BIO_MAX,
   SOCIAL,
   SOCIAL_ROUTES,
+  normalizeBio,
   socialBioCounterLabel,
   socialBioFieldValue,
 } from "@/lib/social";
@@ -52,7 +53,7 @@ export function SocialProfileBioEditor({
       return;
     }
     if (onSaved) {
-      onSaved(value);
+      onSaved(normalizeBio(value) ?? "");
       return;
     }
     router.push(SOCIAL_ROUTES.profileEdit);

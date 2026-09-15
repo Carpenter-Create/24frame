@@ -76,6 +76,7 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(bio).toContain('type="button"');
     expect(bio).not.toContain("onKeyDown");
     expect(bio).not.toContain("preventDefault");
+    expect(bio).toContain("normalizeBio(value)");
     expect(bio).not.toContain("<form");
     expect(socialBioEnterSubmits()).toBe(false);
     expect(normalizeBio("Founder\nInvestor")).toBe("Founder\nInvestor");

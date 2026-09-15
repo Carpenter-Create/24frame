@@ -252,6 +252,7 @@ describe("profile opt-in", () => {
     expect(normalizeBio(`${"a".repeat(150)}\n`)).toBe("a".repeat(150));
     expect(normalizeBio(`a\n${"b".repeat(149)}`)).toBeNull();
     expect(normalizeBio("   \n  ")).toBe("");
+    expect(normalizeBio("hello\n")).toBe("hello");
   });
 
   it("rewrites only /@handle to the in-app /social/u/{bare} profile", () => {
