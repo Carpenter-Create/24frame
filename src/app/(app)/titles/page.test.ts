@@ -259,7 +259,8 @@ describe("client /titles catalog", () => {
     for (const open of statusPills) {
       expect(open).toContain("rounded-full");
       expect(open).toContain("border-hairline");
-      expect(open).toContain("t-body-sm font-normal text-ink-2");
+      expect(open).toContain("t-body-sm text-ink-2");
+      expect(open).not.toContain("t-body-sm font-normal");
       expect(open).not.toContain("bg-surface-muted");
       expect(open).not.toContain("bg-accent");
     }
@@ -299,7 +300,7 @@ describe("client /titles catalog", () => {
     expect(html).toContain("2019");
     const yearTag = openingTagsWith(html, 'data-titles-catalog-year=""');
     expect(yearTag).toHaveLength(1);
-    expect(yearTag[0]).toContain("t-body-sm font-normal text-ink-3");
+    expect(yearTag[0]).toContain("t-body-sm text-ink-3");
     expect(html).toContain("Undated film");
     expect(html).not.toContain("—");
     expect(html).not.toContain("2026-08-10");

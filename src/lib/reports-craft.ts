@@ -8,5 +8,5 @@ export const REPORTS_HERO_CLASS =
 export const REPORTS_HERO_CELL_CLASS = "flex flex-col gap-[var(--space-2)] p-[var(--space-6)]";
 export const REPORTS_SELECT_CLASS =
   "rounded-[var(--radius-sm)] border border-hairline bg-surface px-[var(--space-4)] py-[var(--space-2)] t-body-sm text-ink";
-export const REPORTS_DOWNLOAD_CLASS = "t-body-sm font-normal text-accent";
-export const REPORTS_DOWNLOAD_OFF_CLASS = "t-body-sm font-normal text-ink-3";
+export const REPORTS_DOWNLOAD_CLASS = "t-body-sm text-accent";
+export const REPORTS_DOWNLOAD_OFF_CLASS = "t-body-sm text-ink-3";

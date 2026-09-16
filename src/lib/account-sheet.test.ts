@@ -257,7 +257,7 @@ describe("account sheet lock", () => {
   it("locks the footer on both menus to 13 Regular / 16 — version tertiary, Legal parked", () => {
     expect(ACCOUNT_SHEET_FOOTER_CLASS).toContain("h-4");
     expect(ACCOUNT_SHEET_VERSION_CLASS).toContain("t-body-sm");
-    expect(ACCOUNT_SHEET_VERSION_CLASS).toContain("font-normal");
+    expect(ACCOUNT_SHEET_VERSION_CLASS).not.toContain("font-normal");
     expect(ACCOUNT_SHEET_VERSION_CLASS).toContain("leading-4");
     expect(ACCOUNT_SHEET_VERSION_CLASS).toContain("text-ink-3");
     expect(accountSheet).not.toHaveProperty("ACCOUNT_SHEET_LEGAL_CLASS");

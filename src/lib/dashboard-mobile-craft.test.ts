@@ -32,9 +32,10 @@ describe("company-admin Dashboard mobile craft", () => {
     expect(DASHBOARD_ADMIN_CHROME_CLASS).not.toContain("sm:flex-row");
     expect(DASHBOARD_TITLE_MOBILE_CLASS).toBe("md:hidden");
     expect(DASHBOARD_TITLE_DESKTOP_CLASS).toBe("max-md:hidden");
-    expect(DASHBOARD_CARD_PAD_HERO).toContain("max-md:px-[var(--space-4)]");
+    expect(DASHBOARD_CARD_PAD_HERO).toContain("px-[var(--space-4)]");
+    expect(DASHBOARD_CARD_PAD_HERO).toContain("py-[var(--space-4)]");
     expect(DASHBOARD_ADMIN_STACK_CLASS).toContain("gap-[var(--space-6)]");
-    expect(DASHBOARD_ADMIN_STACK_CLASS).toContain("md:gap-[var(--space-12)]");
+    expect(DASHBOARD_ADMIN_STACK_CLASS).not.toContain("md:gap-[var(--space-12)]");
     expect(DASHBOARD_DO_NEXT_SECONDARY_CLASS).toContain("max-md:");
   });
 

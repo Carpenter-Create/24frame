@@ -2,6 +2,8 @@
 // no Coinbase brand, no invented px type. Hairline + air; no drop shadow.
 // Period menu rematches the Mercury workspace switcher: quiet trigger,
 // trailing Sporty Blue check, flush-left labels.
+// Fidelity × Royalogic density: one Period control, kickers, dense rows,
+// related gap 8 · card pad 16 · section air 24. No Dashboard-only tokens.
 
 export const DASHBOARD_CARD_CLASS =
   "card-surface dashboard-home-panel flex h-full flex-col overflow-hidden shadow-none";
@@ -9,10 +11,34 @@ export const DASHBOARD_CARD_CLASS =
 export const DASHBOARD_MODULE_CARD_CLASS =
   "card-surface overflow-hidden shadow-none";
 
-export const DASHBOARD_CARD_PAD_HERO =
-  "px-[var(--space-6)] py-[var(--space-6)] max-md:px-[var(--space-4)] max-md:py-[var(--space-4)]";
+export const DASHBOARD_CARD_PAD =
+  "px-[var(--space-4)] py-[var(--space-4)]";
 
-export const DASHBOARD_CARD_PAD_LIST = "px-[var(--space-4)] py-[var(--space-4)]";
+export const DASHBOARD_CARD_PAD_HERO = DASHBOARD_CARD_PAD;
+
+export const DASHBOARD_CARD_PAD_LIST = DASHBOARD_CARD_PAD;
+
+export const DASHBOARD_KICKER_CLASS = "t-label text-ink-3";
+
+export const DASHBOARD_RELATED_GAP_CLASS = "gap-[var(--space-2)]";
+
+export const DASHBOARD_SECTION_AIR_CLASS = "gap-[var(--space-6)]";
+
+export const DASHBOARD_ROW_CLASS =
+  "flex min-h-10 items-center justify-between gap-[var(--space-2)] px-[var(--space-4)] py-[var(--space-2)]";
+
+export const DASHBOARD_ROW_LIST_CLASS = "divide-y divide-hairline border-t border-hairline";
+
+export const DASHBOARD_RANKED_LIST_CLASS =
+  "flex flex-col gap-[var(--space-2)] border-t border-hairline px-[var(--space-4)] py-[var(--space-4)]";
+
+export const DASHBOARD_MONEY_CLASS = "t-data t-body-sm shrink-0 text-right text-ink";
+
+export const DASHBOARD_HERO_VALUE_CLASS = "t-display t-data text-ink";
+
+export const DASHBOARD_HERO_DELTA_CLASS = "t-body-sm text-ink-3";
+
+export const DASHBOARD_HERO_ASOF_CLASS = "t-body-sm text-ink-3";
 
 // Phone (`< md`) only. Desktop #328/#329 locks stay at md+.
 export const DASHBOARD_MOBILE_BREAKPOINT_CLASS = "max-md";
@@ -24,7 +50,7 @@ export const DASHBOARD_ADMIN_OVERVIEW_CLASS =
   "grid grid-cols-1 gap-[var(--space-6)] max-md:flex max-md:flex-col lg:grid-cols-5";
 
 export const DASHBOARD_ADMIN_STACK_CLASS =
-  "flex flex-col gap-[var(--space-6)] md:gap-[var(--space-12)]";
+  "flex flex-col gap-[var(--space-6)]";
 
 export const DASHBOARD_STANDARD_STACK_CLASS = "flex flex-col gap-[var(--space-12)]";
 
@@ -51,7 +77,7 @@ export const DASHBOARD_TITLE_DESKTOP_CLASS = "max-md:hidden";
 export const DASHBOARD_ORG_LABEL_CLASS = "t-label text-ink-3 max-md:hidden";
 
 export const DASHBOARD_PERIOD_TRIGGER_CLASS =
-  "group flex min-w-[10rem] items-center justify-between gap-[var(--space-2)] rounded-[var(--radius-sm)] border border-hairline bg-surface px-[var(--space-4)] py-[var(--space-2)] t-body-sm text-ink max-md:min-w-0 max-md:flex-1";
+  "group flex min-w-[10rem] items-center justify-between gap-[var(--space-2)] rounded-[var(--radius-sm)] border border-hairline bg-surface-muted px-[var(--space-4)] py-[var(--space-2)] t-body-sm text-ink max-md:min-w-0 max-md:flex-1";
 
 export const DASHBOARD_PERIOD_TRIGGER_LABEL_CLASS = "min-w-0 truncate";
 
@@ -65,7 +91,7 @@ export const DASHBOARD_PERIOD_GROUP_CLASS =
   "px-[var(--space-4)] pb-[var(--space-1)] pt-[var(--space-2)] t-label text-ink-3";
 
 export const DASHBOARD_PERIOD_OPTION_CLASS =
-  "flex w-full items-center justify-between gap-[var(--space-2)] px-[var(--space-4)] py-[var(--space-2)] text-left t-body-sm font-normal text-ink";
+  "flex w-full items-center justify-between gap-[var(--space-2)] px-[var(--space-4)] py-[var(--space-2)] text-left t-body-sm text-ink";
 
 export const DASHBOARD_PERIOD_OPTION_SELECTED_CLASS = "bg-surface-muted";
 

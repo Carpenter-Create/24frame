@@ -80,7 +80,7 @@ export const WORKSPACE_SWITCHER_MARK_CLASS =
 // slot — not a left gutter, not in the label column. Same rows on
 // mobile and desktop. Keep #320.
 export const WORKSPACE_SWITCHER_OPTION_CLASS =
-  "flex w-full items-center justify-between gap-[var(--space-2)] px-[var(--space-4)] py-[var(--space-2)] text-left t-body-sm font-normal text-ink";
+  "flex w-full items-center justify-between gap-[var(--space-2)] px-[var(--space-4)] py-[var(--space-2)] text-left t-body-sm text-ink";
 
 export const WORKSPACE_SWITCHER_OPTION_SELECTED_CLASS = "bg-surface-muted";
 

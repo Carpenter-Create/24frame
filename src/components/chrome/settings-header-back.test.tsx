@@ -51,7 +51,7 @@ describe("SettingsHeaderBack", () => {
     expect(SETTINGS.dashboardHref).toBe("/");
     expect(SETTINGS_HEADER_BACK_CLASS).toContain("gap-[var(--space-2)]");
     expect(SETTINGS_HEADER_BACK_CLASS).toContain("t-body");
-    expect(SETTINGS_HEADER_BACK_CLASS).toContain("font-normal");
+    expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("font-normal");
     expect(SETTINGS_HEADER_BACK_CLASS).toContain("md:hidden");
     expect(SETTINGS_HEADER_PAD_CLASS).toBe(MOBILE_CHROME_LEAD_PAD_CLASS);
     expect(SETTINGS_RAIL_CHEVRON_CLASS).toBe("size-4 shrink-0");

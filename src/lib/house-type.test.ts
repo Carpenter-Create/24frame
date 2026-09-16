@@ -30,7 +30,20 @@ const DASHBOARD_CHROME_PATHS = [
     .map((name) => join("src/components/dashboard", name)),
 ];
 
-const BANNED_ARBITRARY_PX = /text-\[(?:11|13|20|40)px\]/;
+const BANNED_ARBITRARY_PX = /text-\[\d+px\]/;
+const BODY_400_DRIFT = /\bt-body(?:-sm)?\s+font-normal\b|\bfont-normal\s+t-body(?:-sm)?\b/;
+const TITLE_500_DRIFT = /\bt-title\s+font-(?:medium|semibold)\b|\bfont-(?:medium|semibold)\s+t-title\b/;
+
+const HOUSE_ROLE_PATHS = [
+  "src/app/tokens.css",
+  "src/app/globals.css",
+  "src/lib/dashboard-craft.ts",
+  "src/lib/house-sheet.ts",
+  "src/lib/settings.ts",
+  "src/lib/reports-craft.ts",
+  "src/lib/workspace-switcher.ts",
+  "src/lib/account-sheet.ts",
+];
 
 describe("house type ladder", () => {
   it("locks the shared rem ladder to 12 / 13 / 15 / 17 / 24 / 48", () => {
@@ -66,10 +79,16 @@ describe("house type roles", () => {
     expect(tokens).toMatch(/--tracking-tight:\s*-0\.02em;/);
 
     expect(globals).toMatch(
-      /\.t-display\s*\{[\s\S]*?font-size:\s*var\(--text-hero\)[\s\S]*?font-weight:\s*500[\s\S]*?line-height:\s*1\.04[\s\S]*?letter-spacing:\s*-0\.035em/,
+      /\.t-display\s*\{[\s\S]*?font-size:\s*var\(--text-hero\)[\s\S]*?font-weight:\s*500[\s\S]*?line-height:\s*1\.04[\s\S]*?letter-spacing:\s*-0\.035em[\s\S]*?font-variant-numeric:\s*tabular-nums/,
     );
     expect(globals).toMatch(
       /\.t-title\s*\{[\s\S]*?font-weight:\s*var\(--type-title-weight\)[\s\S]*?line-height:\s*1\.15[\s\S]*?letter-spacing:\s*var\(--tracking-tight\)/,
+    );
+    expect(globals).toMatch(
+      /\.t-section\s*\{[\s\S]*?font-weight:\s*var\(--type-title-weight\)/,
+    );
+    expect(globals).toMatch(
+      /\.t-statement\s*\{[\s\S]*?font-weight:\s*var\(--type-title-weight\)/,
     );
     expect(globals).toMatch(
       /\.t-label\s*\{[\s\S]*?font-weight:\s*600[\s\S]*?letter-spacing:\s*0\.12em[\s\S]*?text-transform:\s*uppercase/,
@@ -82,6 +101,20 @@ describe("house type roles", () => {
     expect(globals).toMatch(
       /@media \(max-width: 767px\)\s*\{\s*\.t-display\s*\{[\s\S]*?font-size:\s*var\(--text-title\)/,
     );
+    expect(globals).not.toMatch(/\.t-title\s*\{[^}]*font-weight:\s*500/);
+    expect(globals).not.toMatch(/\.t-section\s*\{[^}]*font-weight:\s*500/);
+    expect(globals).not.toMatch(/\.t-statement\s*\{[^}]*font-weight:\s*500/);
+    expect(globals).not.toMatch(/\.t-body\s*\{[^}]*font-weight:\s*400/);
+    expect(globals).not.toMatch(/\.t-body-sm\s*\{[^}]*font-weight:\s*400/);
+    expect(globals).not.toMatch(/\.t-lead\s*\{[^}]*font-weight:\s*400/);
+  });
+
+  it("kills 400-as-body and 500-as-title drift on shared house chrome", () => {
+    for (const path of HOUSE_ROLE_PATHS) {
+      const src = readFileSync(path, "utf8");
+      expect(src, path).not.toMatch(BODY_400_DRIFT);
+      expect(src, path).not.toMatch(TITLE_500_DRIFT);
+    }
   });
 });
 
@@ -126,6 +159,14 @@ describe("Dashboard type jobs", () => {
     expect(identity).toMatch(/<h1 class="t-title text-ink">Acme<\/h1>/);
     expect(html).toMatch(/<h1 class="t-title text-ink" data-dashboard-title=""/);
     expect(html).toMatch(/data-dashboard-stat="revenue"[^>]*t-display t-data/);
+    expect(html).toContain("data-dashboard-revenue-compare");
+    expect(html).toContain("data-dashboard-revenue-asof");
+    expect(html.indexOf('data-dashboard-stat="revenue"')).toBeLessThan(
+      html.indexOf("data-dashboard-revenue-compare"),
+    );
+    expect(html.indexOf("data-dashboard-revenue-compare")).toBeLessThan(
+      html.indexOf("data-dashboard-revenue-asof"),
+    );
     expect(html).toContain(`t-label text-ink-3">${DASHBOARD_ADMIN.revenue}`);
     expect(html).toContain(DASHBOARD_PERIOD_TRIGGER_CLASS);
     expect(DASHBOARD_PERIOD_TRIGGER_CLASS).toContain("t-body-sm");

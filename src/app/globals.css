@@ -86,6 +86,7 @@ body {
     font-weight: 500;
     line-height: 1.04;
     letter-spacing: -0.035em;
+    font-variant-numeric: tabular-nums;
   }
   @media (max-width: 767px) {
     .t-display {
@@ -102,16 +103,16 @@ body {
   .t-statement {
     font-family: var(--font-sans);
     font-size: var(--text-title);
-    font-weight: 500;
+    font-weight: var(--type-title-weight);
     line-height: 1.22;
     letter-spacing: var(--tracking-tight);
   }
-  /* Section headings — Mercury register: clean sans, medium weight, sentence
-     case, tight tracking. Page titles, not the hero step. */
+  /* Section headings — title role (480), sentence case, tight tracking.
+     Page titles, not the hero step. Do not bind 500-as-title. */
   .t-section {
     font-family: var(--font-sans);
     font-size: var(--text-title);
-    font-weight: 500;
+    font-weight: var(--type-title-weight);
     line-height: 1.15;
     letter-spacing: var(--tracking-tight);
   }

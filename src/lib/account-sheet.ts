@@ -105,7 +105,7 @@ export const ACCOUNT_SHEET_LOGOUT_STACK_CLASS = "flex w-full shrink-0 flex-col";
 export const ACCOUNT_SHEET_FOOTER_CLASS =
   "flex h-4 w-full shrink-0 items-center justify-between";
 
-export const ACCOUNT_SHEET_VERSION_CLASS = "t-body-sm font-normal leading-4 text-ink-3";
+export const ACCOUNT_SHEET_VERSION_CLASS = "t-body-sm leading-4 text-ink-3";
 
 // 629:795 — 264. Height is relative to the stack (h-auto hug).
 // Leftover last-item → Log out is 48 (house --space-12). The
@@ -193,7 +193,7 @@ export const ACCOUNT_MENU_APPEARANCE_COPY_CLASS =
 export const ACCOUNT_MENU_APPEARANCE_CHEVRON_CLASS = "relative z-10 shrink-0";
 
 export const ACCOUNT_MENU_APPEARANCE_MODE_CLASS =
-  "t-body-sm font-normal leading-4 text-ink-2";
+  "t-body-sm leading-4 text-ink-2";
 
 // 613:888 — second 264 surface. Desktop: gap 8 left of the parent.
 // Top = Appearance row top, offset 0. Not parent menu top.
@@ -209,7 +209,7 @@ export const ACCOUNT_MENU_APPEARANCE_FLYOUT_ROW_CLASS =
   "flex w-full items-start gap-[var(--space-2)] p-[var(--space-4)] text-left text-[length:var(--text-base)] font-normal leading-5 text-ink";
 
 export const ACCOUNT_MENU_APPEARANCE_FLYOUT_HELPER_CLASS =
-  "t-body-sm font-normal leading-4 text-ink-2";
+  "t-body-sm leading-4 text-ink-2";
 
 export const ACCOUNT_MENU_APPEARANCE_FLYOUT_MARK_CLASS = "size-4 shrink-0";
 

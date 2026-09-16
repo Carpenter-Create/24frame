@@ -7,7 +7,7 @@
 export const CLOSE_44_CLASS =
   "flex size-[44px] min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-full bg-surface-muted text-ink-3";
 
-export const TEXT_ACTION_CLASS = "t-body-sm font-normal text-accent";
+export const TEXT_ACTION_CLASS = "t-body-sm text-accent";
 
 // House empty line — same 15 Regular as catalog / titles empties.
 // Do not invent product copy in the primitive.
@@ -19,11 +19,11 @@ export const SHEET_GROUP_CHEVRON_CLASS = "size-4 shrink-0 text-ink-3";
 export const IDENTITY_BLOCK_CLASS = "flex min-w-0 items-center gap-[var(--space-4)]";
 
 export const IDENTITY_AVATAR_CLASS =
-  "flex size-12 shrink-0 items-center justify-center rounded-full bg-surface-muted t-body font-normal text-ink-2";
+  "flex size-12 shrink-0 items-center justify-center rounded-full bg-surface-muted t-body text-ink-2";
 
-export const IDENTITY_NAME_CLASS = "t-body font-normal text-ink";
+export const IDENTITY_NAME_CLASS = "t-body text-ink";
 
-export const IDENTITY_EMAIL_CLASS = "t-body-sm font-normal text-ink-3";
+export const IDENTITY_EMAIL_CLASS = "t-body-sm text-ink-3";
 
 export const SHEET_GROUP_CLASS = "flex flex-col items-start gap-[var(--space-6)]";
 

@@ -138,7 +138,8 @@ describe("TitlesCatalogStill craft", () => {
     expect(name).not.toContain("t-heading");
     expect(stack).toContain("Craft film");
     expect(stack).toContain("data-titles-catalog-year");
-    expect(year).toContain("t-body-sm font-normal text-ink-3");
+    expect(year).toContain("t-body-sm text-ink-3");
+    expect(year).not.toContain("font-normal");
     expect(meta).toContain("flex min-w-0 flex-wrap items-center");
     expect(stack).toContain(TITLE_STATUS_LABELS.live);
     expect(stack).not.toContain("t-heading");
@@ -162,7 +163,8 @@ describe("TitlesCatalogStill craft", () => {
 
     expect(pill).toContain("rounded-full");
     expect(pill).toContain("border-hairline");
-    expect(pill).toContain("t-body-sm font-normal text-ink-2");
+    expect(pill).toContain("t-body-sm text-ink-2");
+    expect(pill).not.toContain("font-normal");
     expect(pill).not.toContain("bg-surface-muted");
     expect(pill).not.toContain("bg-accent");
     expect(pill).not.toMatch(/green|emerald|success/);
@@ -336,7 +338,8 @@ describe("TitlesCatalogRail 528:542 lock", () => {
     expect(frame).toContain("rounded-[12px]");
     expect(frame).not.toContain("rounded-[var(--radius-lg)]");
     expect(name).toContain("t-body text-ink");
-    expect(year).toContain("t-body-sm font-normal text-ink-2");
+    expect(year).toContain("t-body-sm text-ink-2");
+    expect(year).not.toContain("font-normal");
     expect(html).toContain("2019");
     expect(html).not.toContain("data-titles-catalog-status");
     expect(html).not.toContain("bg-band");

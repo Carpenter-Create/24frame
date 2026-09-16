@@ -138,7 +138,7 @@ function LeaderboardRow({
       <div className="min-w-0 flex-1">
         <p className="t-body font-medium text-ink">
           {name}
-          {you ? <span className="t-body-sm font-normal text-ink-3"> (you)</span> : null}
+          {you ? <span className="t-body-sm text-ink-3"> (you)</span> : null}
         </p>
       </div>
       <span className="t-body-sm text-ink-3">
