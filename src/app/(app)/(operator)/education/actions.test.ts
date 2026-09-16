@@ -28,6 +28,7 @@ import {
   createEducationLesson,
   presignEducationUpload,
   startEducationLessonEncode,
+  updateEducationCourse,
   uploadEducationCover,
   uploadEducationLessonSource,
 } from "./actions";
@@ -160,20 +161,76 @@ describe("education admin actions", () => {
     adminClient();
     await expect(
       createEducationCourse({
-        slug: "paid-course",
         title: "Paid fixture",
         model: "paid",
         price: "49.00",
       }),
-    ).resolves.toEqual({ slug: "paid-course", courseId: COURSE });
+    ).resolves.toEqual({ slug: "paid-fixture", courseId: COURSE });
     await expect(
       createEducationCourse({
-        slug: "paid-empty",
         title: "Paid empty",
         model: "paid",
         price: "",
       }),
     ).resolves.toEqual({ error: EDUCATION_ADMIN.invalid });
+  });
+
+  it("derives create slugs from title and ignores a client-authored slug", async () => {
+    staffClient({ user_id: USER.id });
+    const admin = adminClient();
+    await expect(
+      createEducationCourse({
+        slug: "staff-authored",
+        title: "Welcome To 24Frame Two",
+        model: "free",
+      }),
+    ).resolves.toEqual({ slug: "welcome-to-24frame-two", courseId: COURSE });
+    expect(admin.courseInsertFn).toHaveBeenCalledWith(
+      expect.objectContaining({ slug: "welcome-to-24frame-two" }),
+    );
+    expect(admin.courseInsertFn).not.toHaveBeenCalledWith(
+      expect.objectContaining({ slug: "staff-authored" }),
+    );
+  });
+
+  it("keeps the existing slug on update and ignores a client slug", async () => {
+    staffClient({ user_id: USER.id });
+    const updateEq = vi.fn(async () => ({ error: null }));
+    const update = vi.fn(() => ({ eq: updateEq }));
+    const from = vi.fn((table: string) => {
+      if (table === "courses") {
+        return {
+          ...query({ slug: "welcome-to-24frame" }),
+          update,
+        };
+      }
+      if (table === "instructors") {
+        return {
+          ...query(null),
+          insert: vi.fn(() => insertResult({ id: "instructor-1" })),
+        };
+      }
+      throw new Error(`unexpected admin from(${table})`);
+    });
+    vi.mocked(createAdminClient).mockReturnValue({ from } as never);
+
+    await expect(
+      updateEducationCourse({
+        courseId: COURSE,
+        title: "Renamed Welcome",
+        slug: "hacked-slug",
+        model: "free",
+        status: "draft",
+      }),
+    ).resolves.toEqual({ slug: "welcome-to-24frame" });
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Renamed Welcome",
+      }),
+    );
+    expect(update).toHaveBeenCalledWith(
+      expect.not.objectContaining({ slug: expect.anything() }),
+    );
   });
 
   it("creates a lesson without a free-taste flag and opens an education_videos row", async () => {

@@ -20,7 +20,6 @@ import {
   isCourseStatus,
   isEducationObjectKey,
   minutesToDurationSeconds,
-  normalizeCourseSlug,
   normalizeEducationCoverContentType,
   normalizeEducationSourceContentType,
   parseEducationPriceDollars,
@@ -91,16 +90,11 @@ async function nextCoursePosition(admin: AdminClient): Promise<number> {
   return (data?.[0]?.position ?? 0) + 1;
 }
 
-async function allocateUniqueCourseSlug(
-  admin: AdminClient,
-  title: string,
-  override?: string,
-): Promise<string | null> {
+async function allocateUniqueCourseSlug(admin: AdminClient, title: string): Promise<string | null> {
   const { data } = await admin.from("courses").select("slug");
   return allocateCourseSlug(
     title,
     (data ?? []).map((row) => row.slug),
-    override,
   );
 }
 
@@ -144,7 +138,6 @@ export async function createEducationCourse(
 ): Promise<{ error?: string; slug?: string; courseId?: string }> {
   const parsed = z
     .object({
-      slug: z.string().optional(),
       title: z.string().trim().min(1).max(EDUCATION_NAME_MAX),
       description: z.string().trim().max(EDUCATION_SUMMARY_MAX).optional(),
       model: z.enum(["free", "paid"]),
@@ -162,7 +155,7 @@ export async function createEducationCourse(
   if (!staff.ok) return { error: staff.error };
 
   const admin = createAdminClient();
-  const slug = await allocateUniqueCourseSlug(admin, parsed.data.title, parsed.data.slug);
+  const slug = await allocateUniqueCourseSlug(admin, parsed.data.title);
   if (!slug) return { error: EDUCATION_ADMIN.invalid };
   const instructor = await resolveInstructorId(admin, parsed.data);
   if (!instructor.ok) return { error: instructor.error };
@@ -196,7 +189,6 @@ export async function updateEducationCourse(raw: unknown): Promise<{ error?: str
       courseId: z.string().uuid(),
       title: z.string().trim().min(1).max(EDUCATION_NAME_MAX),
       description: z.string().trim().max(EDUCATION_SUMMARY_MAX).optional(),
-      slug: z.string().optional(),
       model: z.enum(["free", "paid"]),
       price: z.string().optional(),
       status: z.enum(COURSE_STATUSES),
@@ -223,42 +215,20 @@ export async function updateEducationCourse(raw: unknown): Promise<{ error?: str
   const instructor = await resolveInstructorId(admin, parsed.data);
   if (!instructor.ok) return { error: instructor.error };
 
-  let nextSlug = course.slug;
-  const override = parsed.data.slug?.trim() ?? "";
-  if (override) {
-    const allocated = await allocateUniqueCourseSlug(admin, parsed.data.title, override);
-    if (!allocated) return { error: EDUCATION_ADMIN.invalid };
-    const normalizedOverride = normalizeCourseSlug(override);
-    nextSlug = allocated === course.slug || normalizedOverride === course.slug ? course.slug : allocated;
-    if (nextSlug !== course.slug) {
-      const { data: taken } = await admin.from("courses").select("id").eq("slug", nextSlug).maybeSingle();
-      if (taken && taken.id !== parsed.data.courseId) {
-        const again = await allocateUniqueCourseSlug(admin, parsed.data.title, override);
-        if (!again) return { error: EDUCATION_ADMIN.invalid };
-        nextSlug = again;
-      }
-    }
-  }
-
   const { error } = await admin
     .from("courses")
     .update({
       title: parsed.data.title,
       description: parsed.data.description || null,
-      slug: nextSlug,
       is_flagship_free: product.is_flagship_free,
       price_cents: product.price_cents,
       status: parsed.data.status,
       instructor_id: instructor.instructorId,
     })
     .eq("id", parsed.data.courseId);
-  if (error) {
-    if (uniqueConflict(error)) return { error: EDUCATION_ADMIN.conflict };
-    return { error: error.message };
-  }
+  if (error) return { error: error.message };
   revalidateEducation(course.slug);
-  if (nextSlug !== course.slug) revalidateEducation(nextSlug);
-  return { slug: nextSlug };
+  return { slug: course.slug };
 }
 
 export async function createEducationModule(raw: unknown): Promise<{ error?: string }> {
