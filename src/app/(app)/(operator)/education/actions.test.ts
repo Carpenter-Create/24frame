@@ -19,12 +19,17 @@ import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isEducationAwsConfigured, presignEducationSourcePut, putEducationSourceObject } from "@/lib/s3-education";
+import {
+  isEducationMediaconvertConfigured,
+  submitEducationHlsJob,
+} from "@/lib/education-mediaconvert";
 import { EDUCATION_ADMIN, educationCoverKey } from "@/lib/education";
 
 import {
   createEducationCourse,
   createEducationLesson,
   presignEducationUpload,
+  startEducationLessonEncode,
   uploadEducationCover,
 } from "./actions";
 
@@ -68,13 +73,22 @@ function insertResult(row: unknown, error: { code?: string; message?: string } |
   return chain;
 }
 
-function adminClient(options?: { insertError?: { code?: string; message?: string } | null }) {
+function adminClient(options?: {
+  insertError?: { code?: string; message?: string } | null;
+  videoInsertError?: { code?: string; message?: string } | null;
+  lessonRow?: Record<string, unknown> | null;
+}) {
   const courseInsert = insertResult({ id: COURSE }, options?.insertError ?? null);
   const lessonInsert = insertResult({ id: LESSON });
-  const videoInsert = insertResult({ id: VIDEO });
+  const videoInsert = insertResult({ id: VIDEO }, options?.videoInsertError ?? null);
   const courseInsertFn = vi.fn(() => courseInsert);
   const lessonInsertFn = vi.fn(() => lessonInsert);
   const videoInsertFn = vi.fn(() => videoInsert);
+  const lessonUpdate = vi.fn(() => ({ eq: vi.fn(async () => ({ error: null })) }));
+  const videoUpdate = vi.fn(() => ({ eq: vi.fn(async () => ({ error: null })) }));
+  const lessonRead = options?.lessonRow
+    ? query(options.lessonRow)
+    : query([{ position: 1 }]);
   const from = vi.fn((table: string) => {
     if (table === "courses") {
       return {
@@ -93,18 +107,18 @@ function adminClient(options?: { insertError?: { code?: string; message?: string
     }
     if (table === "lessons") {
       return {
-        ...query([{ position: 1 }]),
+        ...lessonRead,
         insert: lessonInsertFn,
-        update: vi.fn(() => ({ eq: vi.fn(async () => ({ error: null })) })),
+        update: lessonUpdate,
       };
     }
     if (table === "education_videos") {
-      return { insert: videoInsertFn };
+      return { insert: videoInsertFn, update: videoUpdate };
     }
     throw new Error(`unexpected admin from(${table})`);
   });
   vi.mocked(createAdminClient).mockReturnValue({ from } as never);
-  return { from, courseInsertFn, lessonInsertFn, videoInsertFn };
+  return { from, courseInsertFn, lessonInsertFn, videoInsertFn, lessonUpdate, videoUpdate };
 }
 
 describe("education admin actions", () => {
@@ -185,6 +199,41 @@ describe("education admin actions", () => {
     ).resolves.toEqual({ lessonId: LESSON });
     expect(admin.from).toHaveBeenCalledWith("education_videos");
     expect(admin.from).toHaveBeenCalledWith("lessons");
+  });
+
+  it("returns the inserted lessonId when the education_videos write fails", async () => {
+    staffClient({ user_id: USER.id });
+    adminClient({ videoInsertError: { message: "video write failed" } });
+    await expect(
+      createEducationLesson({
+        moduleId: MODULE,
+        title: "Opening lesson",
+        lessonType: "lesson",
+      }),
+    ).resolves.toEqual({ error: "video write failed", lessonId: LESSON });
+  });
+
+  it("writes submit_failed onto education_videos when encode submit throws", async () => {
+    staffClient({ user_id: USER.id });
+    vi.mocked(isEducationMediaconvertConfigured).mockReturnValue(true);
+    vi.mocked(submitEducationHlsJob).mockRejectedValue(new Error("MediaConvert denied"));
+    const admin = adminClient({
+      lessonRow: {
+        id: LESSON,
+        source_key: `courses/${COURSE}/lessons/${LESSON}/source.mp4`,
+        education_video_id: VIDEO,
+        modules: { course_id: COURSE, courses: { slug: "welcome" } },
+      },
+    });
+    await expect(startEducationLessonEncode({ lessonId: LESSON })).resolves.toEqual({
+      error: EDUCATION_ADMIN.encodeFailed,
+    });
+    expect(admin.lessonUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ encode_status: "submit_failed", encode_error: "MediaConvert denied" }),
+    );
+    expect(admin.videoUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ encode_status: "submit_failed", encode_error: "MediaConvert denied" }),
+    );
   });
 
   it("returns a clear error when Education storage env is stubbed", async () => {

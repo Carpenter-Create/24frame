@@ -121,6 +121,14 @@ function CoverDropzone({
         type="button"
         data-education-cover-dropzone=""
         onClick={() => inputRef.current?.click()}
+        onDragOver={(event) => {
+          event.preventDefault();
+        }}
+        onDrop={(event) => {
+          event.preventDefault();
+          const dropped = event.dataTransfer.files[0];
+          if (dropped) onFile(dropped);
+        }}
         className="relative flex aspect-video w-full flex-col items-center justify-center overflow-hidden rounded-[var(--radius)] border border-dashed border-hairline bg-surface-muted text-ink-3 transition hover:border-accent"
       >
         {preview ? (
@@ -234,42 +242,53 @@ export function NewCourseModal({
   const [title, setTitle] = useState("");
   const [summary, setSummary] = useState("");
   const [cover, setCover] = useState<File | null>(null);
+  const [created, setCreated] = useState<{ courseId: string; slug: string } | null>(null);
+
+  function close() {
+    setCreated(null);
+    onClose();
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     setSaving(true);
     setError("");
-    const res = await createEducationCourse({
-      title,
-      description: summary,
-      slug: String(form.get("slug") ?? ""),
-      model: String(form.get("model") ?? "free"),
-      price: String(form.get("price") ?? ""),
-      instructorId: String(form.get("instructorId") ?? "") || undefined,
-      instructorName: String(form.get("instructorName") ?? "") || undefined,
-    });
-    if (res.error || !res.slug || !res.courseId) {
-      setSaving(false);
-      return setError(res.error ?? EDUCATION_ADMIN.invalid);
+    let courseId = created?.courseId;
+    let slug = created?.slug;
+    if (!courseId || !slug) {
+      const res = await createEducationCourse({
+        title,
+        description: summary,
+        slug: String(form.get("slug") ?? ""),
+        model: String(form.get("model") ?? "free"),
+        price: String(form.get("price") ?? ""),
+        instructorId: String(form.get("instructorId") ?? "") || undefined,
+        instructorName: String(form.get("instructorName") ?? "") || undefined,
+      });
+      if (res.error || !res.slug || !res.courseId) {
+        setSaving(false);
+        return setError(res.error ?? EDUCATION_ADMIN.invalid);
+      }
+      courseId = res.courseId;
+      slug = res.slug;
+      setCreated({ courseId, slug });
     }
     if (cover) {
-      const uploadError = await uploadCover({ kind: "cover", courseId: res.courseId, file: cover });
+      const uploadError = await uploadCover({ kind: "cover", courseId, file: cover });
       if (uploadError) {
         setSaving(false);
-        router.push(`${EDUCATION_HREF}/${res.slug}`);
-        router.refresh();
         return setError(uploadError);
       }
     }
     setSaving(false);
-    onClose();
-    router.push(`${EDUCATION_HREF}/${res.slug}`);
+    close();
+    router.push(`${EDUCATION_HREF}/${slug}`);
     router.refresh();
   }
 
   return (
-    <Dialog open={open} onClose={onClose} title={EDUCATION_ADMIN.newCourse}>
+    <Dialog open={open} onClose={close} title={EDUCATION_ADMIN.newCourse}>
       <form onSubmit={onSubmit} className="flex flex-col gap-[var(--space-6)]" data-education-new-course="">
         {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
         <CoverDropzone file={cover} onFile={setCover} accept="image/jpeg,image/png,image/webp" />
@@ -297,7 +316,7 @@ export function NewCourseModal({
         <InstructorFields instructors={instructors} />
         <CourseProductFields defaultModel="free" />
         <div className="flex items-center justify-end gap-[var(--space-3)]">
-          <Button type="button" variant="ghost" onClick={onClose}>
+          <Button type="button" variant="ghost" onClick={close}>
             {EDUCATION_ADMIN.cancel}
           </Button>
           <Button type="submit" disabled={saving}>
@@ -572,6 +591,12 @@ export function NewLessonModal({
   const [name, setName] = useState("");
   const [summary, setSummary] = useState("");
   const [cover, setCover] = useState<File | null>(null);
+  const [createdLessonId, setCreatedLessonId] = useState<string | null>(null);
+
+  function close() {
+    setCreatedLessonId(null);
+    onClose();
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -579,22 +604,29 @@ export function NewLessonModal({
     const durationRaw = String(form.get("durationMinutes") ?? "").trim();
     setSaving(true);
     setError("");
-    const res = await createEducationLesson({
-      moduleId: String(form.get("moduleId") ?? ""),
-      title: name,
-      summary,
-      durationMinutes: durationRaw === "" ? null : Number(durationRaw),
-      lessonType: "lesson",
-    });
-    if (res.error || !res.lessonId) {
-      setSaving(false);
-      return setError(res.error ?? EDUCATION_ADMIN.invalid);
+    let lessonId = createdLessonId;
+    if (!lessonId) {
+      const res = await createEducationLesson({
+        moduleId: String(form.get("moduleId") ?? ""),
+        title: name,
+        summary,
+        durationMinutes: durationRaw === "" ? null : Number(durationRaw),
+        lessonType: "lesson",
+      });
+      if (res.lessonId) {
+        lessonId = res.lessonId;
+        setCreatedLessonId(res.lessonId);
+      }
+      if (res.error || !lessonId) {
+        setSaving(false);
+        return setError(res.error ?? EDUCATION_ADMIN.invalid);
+      }
     }
     if (cover) {
       const uploadError = await uploadCover({
         kind: "lesson_cover",
         courseId,
-        lessonId: res.lessonId,
+        lessonId,
         file: cover,
       });
       if (uploadError) {
@@ -607,12 +639,12 @@ export function NewLessonModal({
     setName("");
     setSummary("");
     setCover(null);
-    onClose();
+    close();
     router.refresh();
   }
 
   return (
-    <Dialog open={open} onClose={onClose} title={EDUCATION_ADMIN.newLesson}>
+    <Dialog open={open} onClose={close} title={EDUCATION_ADMIN.newLesson}>
       <form onSubmit={onSubmit} className="flex flex-col gap-[var(--space-6)]" data-education-new-lesson="">
         {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
         <CoverDropzone file={cover} onFile={setCover} accept="image/jpeg,image/png,image/webp" />
@@ -661,7 +693,7 @@ export function NewLessonModal({
           </select>
         </label>
         <div className="flex items-center justify-end gap-[var(--space-3)]">
-          <Button type="button" variant="ghost" onClick={onClose}>
+          <Button type="button" variant="ghost" onClick={close}>
             {EDUCATION_ADMIN.cancel}
           </Button>
           <Button type="submit" disabled={saving} data-education-add-lesson-submit="">

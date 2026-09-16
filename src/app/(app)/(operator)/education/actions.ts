@@ -358,13 +358,15 @@ export async function createEducationLesson(
     })
     .select("id")
     .maybeSingle();
-  if (videoError || !video) return { error: videoError?.message ?? EDUCATION_ADMIN.invalid };
+  if (videoError || !video) {
+    return { error: videoError?.message ?? EDUCATION_ADMIN.invalid, lessonId: lesson.id };
+  }
 
   const { error: linkError } = await admin
     .from("lessons")
     .update({ education_video_id: video.id })
     .eq("id", lesson.id);
-  if (linkError) return { error: linkError.message };
+  if (linkError) return { error: linkError.message, lessonId: lesson.id };
 
   if (slug) revalidateEducation(slug);
   return { lessonId: lesson.id };
@@ -781,14 +783,25 @@ export async function startEducationLessonEncode(raw: unknown): Promise<{ error?
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : EDUCATION_ADMIN.encodeFailed;
+    const now = new Date().toISOString();
     await admin
       .from("lessons")
       .update({
         encode_status: "submit_failed",
         encode_error: message,
-        encode_updated_at: new Date().toISOString(),
+        encode_updated_at: now,
       })
       .eq("id", lesson.id);
+    if (lesson.education_video_id) {
+      await admin
+        .from("education_videos")
+        .update({
+          encode_status: "submit_failed",
+          encode_error: message,
+          encode_updated_at: now,
+        })
+        .eq("id", lesson.education_video_id);
+    }
     if (/environment variable is not set/.test(message)) return { error: EDUCATION_ADMIN.encodeUnset };
     return { error: EDUCATION_ADMIN.encodeFailed };
   }
