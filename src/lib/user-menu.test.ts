@@ -11,21 +11,21 @@ import {
 } from "./user-menu";
 
 describe("user menu lock", () => {
-  it("keeps Mercury order: Workspace, Profile, Settings, Appearance", () => {
+  it("keeps Mercury order: Profile, Settings, Appearance — Workspace is not a menu row", () => {
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).toEqual([
-      "workspace",
       "profile",
       "settings",
       "appearance",
     ]);
     expect(USER_MENU_ACTIONS.map((item) => item.label)).toEqual([
-      "Workspace",
       "Profile",
       "Settings",
       "Appearance",
     ]);
     expect(USER_MENU.settings).toBe("Settings");
     expect(USER_MENU.settingsHref).toBe("/settings");
+    expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("workspace");
+    expect(USER_MENU_ACTIONS.map((item) => item.label)).not.toContain("Workspace");
   });
 
   it("points Profile and Settings at existing /settings doors — Appearance is not a page", () => {
@@ -43,23 +43,21 @@ describe("user menu lock", () => {
     expect(USER_MENU.appearance).toBe("Appearance");
     expect(USER_MENU.workspace).toBe("Workspace");
     expect(USER_MENU_ACTIONS[0]).toEqual({
-      kind: "workspace",
-      label: "Workspace",
-    });
-    expect(USER_MENU_ACTIONS[1]).toEqual({
       kind: "profile",
       label: "Profile",
       href: "/settings/profile",
     });
-    expect(USER_MENU_ACTIONS[2]).toEqual({
+    expect(USER_MENU_ACTIONS[1]).toEqual({
       kind: "settings",
       label: "Settings",
       href: "/settings",
     });
-    expect(USER_MENU_ACTIONS[3]).toEqual({
+    expect(USER_MENU_ACTIONS[2]).toEqual({
       kind: "appearance",
       label: "Appearance",
     });
+    expect(USER_MENU_ABSENT).toContain("Workspace");
+    expect(USER_MENU_ABSENT).toContain("Workspaces");
   });
 
   it("does not invent /account/appearance, /account/profile, Company, Phone, Job, or leftovers", () => {

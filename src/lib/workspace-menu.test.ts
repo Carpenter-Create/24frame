@@ -21,8 +21,8 @@ describe("workspace menu copy", () => {
   it("lists Aggregation, Social, and Education on Route A /social/courses", () => {
     expect(WORKSPACE_MENU.title).toBe("Workspace");
     expect(WORKSPACE_MENU.title).toBe(USER_MENU.workspace);
-    expect(WORKSPACE_MENU.back).toBe("Back");
-    expect(WORKSPACE_MENU.back).not.toBe("Back to main menu");
+    expect(WORKSPACE_MENU).not.toHaveProperty("back");
+    expect(WORKSPACE_MENU).not.toHaveProperty("href");
     expect(WORKSPACE_MENU_CANDIDATES.map((option) => option.id)).toEqual([
       "aggregation",
       "social",

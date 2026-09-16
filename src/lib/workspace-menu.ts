@@ -1,13 +1,11 @@
-// Account-menu Workspace. Lives in lib/, not JSX.
-// Desktop: second 264 surface, gap 8 left of the parent — same
-// geometry as Appearance 613:888. Mobile is a same-sheet drill-in.
-// Open Workspace replaces the list face; house 16 tertiary Back
-// returns to main. Desktop flyout has no Back. Not a page. Not a
-// route. Not a header chip.
-// Miss-list is Aggregation | Social | Education. Member Education land
-// is Route A /social/courses. Do not send members to /education (staff
-// CMS), /account/workspace, or /settings/workspace. Staff Manage
-// courses in Settings is a separate /education door — not workspace land.
+// Header workspace lanes. Lives in lib/, not JSX.
+// The control sits left of the avatar. Popover lists only
+// accessible lanes. Not a page. Not a route. Not an account-menu
+// row. Miss-list is Aggregation | Social | Education. Member
+// Education land is Route A /social/courses. Do not send members
+// to /education (staff CMS), /account/workspace, or
+// /settings/workspace. Staff Manage courses in Settings is a
+// separate /education door — not workspace land.
 
 import { USER_MENU } from "@/lib/user-menu";
 import {
@@ -18,7 +16,6 @@ import { type WorkspaceMode, workspaceHome } from "@/lib/workspace";
 
 export const WORKSPACE_MENU = {
   title: USER_MENU.workspace,
-  back: "Back",
 } as const;
 
 export const WORKSPACE_EDUCATION_LABEL = "Education";

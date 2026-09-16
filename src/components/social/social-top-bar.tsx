@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { BrandEmblem } from "@/components/chrome/brand-emblem";
 import { UserMenu } from "@/components/chrome/user-menu";
+import { WorkspaceSwitcher } from "@/components/chrome/workspace-switcher";
 import { SocialIcon } from "@/components/social/social-icon";
 import { Input } from "@/components/ui/input";
 import { PRODUCT_NAME } from "@/lib/product";
@@ -70,7 +71,8 @@ export function SocialTopBar({
         >
           <SocialIcon name="tray" size={SOCIAL_ICON_SIZE_HEADER} />
         </Link>
-        <UserMenu email={email} name={name} photoUrl={photoUrl} defaultWorkspace="social" />
+        <WorkspaceSwitcher current="social" />
+        <UserMenu email={email} name={name} photoUrl={photoUrl} />
       </div>
     </header>
   );

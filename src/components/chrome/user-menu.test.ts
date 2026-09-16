@@ -110,7 +110,7 @@ describe("UserMenu close control", () => {
   it("opens the mobile 544:561 / 537:557 sheet and the desktop 629:795 dropdown from the avatar", () => {
     expect(menuSrc).toContain("MobileAccountMenu");
     expect(menuSrc).toContain("DesktopAccountMenu");
-    expect(menuSrc).toContain("defaultWorkspace={defaultWorkspace}");
+    expect(menuSrc).not.toContain("defaultWorkspace");
     expect(sheetSrc).toContain('data-user-menu-desktop=""');
     expect(sheetSrc).toContain("hidden md:block");
     expect(sheetSrc).toContain("ACCOUNT_SHEET_ITEMS");
@@ -154,17 +154,17 @@ describe("UserMenu item lock (source)", () => {
     expect(sheetSrc).toContain("MobileAccountMenu");
     expect(sheetSrc).toContain('data-user-menu-item="logOut"');
     expect(sheetSrc).toContain('setFace(face === "appearance" ? "main" : "appearance")');
-    expect(sheetSrc).toContain('setFace(face === "workspace" ? "main" : "workspace")');
+    expect(sheetSrc).not.toContain('setFace(face === "workspace" ? "main" : "workspace")');
     expect(sheetSrc).toContain('setFace("appearance")');
-    expect(sheetSrc).toContain('setFace("workspace")');
+    expect(sheetSrc).not.toContain('setFace("workspace")');
     expect(sheetSrc).toContain('onBack={() => setFace("main")}');
     expect(sheetSrc).not.toContain("onUserMenuAppearance");
     expect(sheetSrc).not.toContain("toggleDocumentTheme");
     expect(sheetSrc).not.toContain("ThemeGlyph");
     expect(sheetSrc).not.toContain("/account/appearance");
     expect(sheetSrc).not.toContain("/account/workspace");
-    expect(sheetSrc).toContain("AccountWorkspaceRow");
-    expect(sheetSrc).toContain("AccountWorkspaceFlyout");
+    expect(sheetSrc).not.toContain("AccountWorkspaceRow");
+    expect(sheetSrc).not.toContain("AccountWorkspaceFlyout");
     expect(sheetSrc).not.toContain("type=\"radio\"");
     for (const absent of USER_MENU_ABSENT) {
       expect(sheetSrc).not.toContain(absent);
@@ -192,7 +192,6 @@ describe("UserMenu item lock (source)", () => {
 
   it("desktop panel items are the same list as mobile", () => {
     expect(USER_MENU_ACTIONS.map((item) => item.label)).toEqual([
-      "Workspace",
       "Profile",
       "Settings",
       "Appearance",

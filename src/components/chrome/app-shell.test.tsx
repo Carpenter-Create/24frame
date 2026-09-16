@@ -123,10 +123,13 @@ describe("AppShell header", () => {
     expect(renderShell(undefined, "Ada Lovelace", false, "https://s3.example/signed-avatar")).toContain(
       'data-photo="https://s3.example/signed-avatar"',
     );
-    expect(shellSrc).toContain("defaultWorkspace={defaultWorkspace}");
     expect(shellSrc).toContain("Phone avatar opens 544:561");
-    expect(shellSrc).toContain("Workspace switcher lives in the account menu");
-    expect(shellSrc).not.toContain("WorkspaceSwitcher");
+    expect(shellSrc).toContain("Workspace switcher sits left of the avatar");
+    expect(shellSrc).toContain("WorkspaceSwitcher");
+    expect(shellSrc).toContain("<WorkspaceSwitcher current={workspace} />");
+    expect(html).toContain("data-workspace-switcher");
+    expect(html).toContain("Aggregation");
+    expect(html.indexOf("data-workspace-switcher")).toBeLessThan(html.indexOf("data-user-menu-host"));
     expect(shellSrc).toContain("<MobileNavSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />");
     expect(shellSrc).not.toContain("AccountOverlay");
     expect(shellSrc).not.toContain("AccountSheet");
@@ -135,7 +138,7 @@ describe("AppShell header", () => {
   it("is avatar-only on every Access route — no org switcher", () => {
     expect(shellSrc).not.toContain("OrganizationSwitcher");
     expect(shellSrc).toContain("justify-end");
-    expect(shellSrc).toContain("defaultWorkspace={defaultWorkspace}");
+    expect(shellSrc).toContain("<WorkspaceSwitcher current={workspace} />");
 
     for (const path of ["/", "/titles", "/deliveries", "/catalog-health", "/messages"]) {
       navigation.pathname = path;
@@ -571,6 +574,8 @@ describe("AppShell rail-collapse chevron", () => {
     );
     expect(html).toContain("data-social-workspace");
     expect(html).toContain("data-social-top-bar");
+    expect(html).toContain("data-workspace-switcher");
+    expect(html).toContain("Social");
     expect(html).toContain("data-social-tab-bar");
     expect(html).toContain('data-social-tab-item="Create"');
     expect(html).toContain("destination-page");
@@ -609,6 +614,8 @@ describe("AppShell rail-collapse chevron", () => {
     const html = renderShell();
     expect(html).toContain("data-education-workspace");
     expect(html).toContain('data-workspace="education"');
+    expect(html).toContain("data-workspace-switcher");
+    expect(html).toContain("Education");
     expect(html).toContain("data-app-header");
     expect(html).toContain('href="/social/courses"');
     expect(html).not.toContain("data-social-workspace");
