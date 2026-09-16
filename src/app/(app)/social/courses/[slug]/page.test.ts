@@ -11,6 +11,7 @@ vi.mock("next/navigation", () => ({
   redirect: vi.fn((to: string) => {
     throw new Error(`REDIRECT:${to}`);
   }),
+  useRouter: () => ({ refresh: vi.fn(), push: vi.fn(), replace: vi.fn() }),
 }));
 vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
@@ -51,6 +52,7 @@ function stubClient({
     slug: string;
     title: string;
     description: string | null;
+    cover_key: string | null;
     is_flagship_free: boolean;
     created_at: string;
   } | null,
@@ -95,6 +97,7 @@ describe("Social course detail", () => {
         slug: "welcome-to-24frame",
         title: "Welcome to 24Frame",
         description: "Placeholder orientation for the Social+Education workspace.",
+        cover_key: null,
         is_flagship_free: true,
         created_at: "2026-09-12T14:00:00.000Z",
       },
@@ -131,10 +134,14 @@ describe("Social course detail", () => {
     expect(html).toContain("Orientation");
     expect(html).toContain("What this workspace is");
     expect(html).toContain("What comes later");
+    expect(html).toContain("data-course-player");
+    expect(html).toContain("data-course-cover");
+    expect(html).toContain("aspect-video");
     expect(html).not.toContain("data-course-denied");
     expect(html).not.toContain("LOCKED");
-    expect(html).not.toContain("video");
+    expect(html).not.toContain("<video");
     expect(html).not.toContain("—");
+    expect(html).not.toContain("/lessons/");
   });
 
   it("quiets denied access and still shows preview titles", async () => {
@@ -144,6 +151,7 @@ describe("Social course detail", () => {
         slug: "paid-fixture",
         title: "Paid fixture",
         description: null,
+        cover_key: null,
         is_flagship_free: false,
         created_at: "2026-09-12T14:00:00.000Z",
       },
@@ -181,6 +189,28 @@ describe("Social course detail", () => {
     expect(html).not.toContain("$");
   });
 
+  it("shows house error and Retry when the detail load fails", async () => {
+    const from = vi.fn((table: string) => {
+      if (table === "courses") {
+        const c: Record<string, unknown> = {};
+        const self = () => c;
+        c.select = vi.fn(self);
+        c.eq = vi.fn(self);
+        c.maybeSingle = vi.fn(async () => ({ data: null, error: { message: "failed" } }));
+        return c;
+      }
+      throw new Error(`unexpected from(${table})`);
+    });
+    vi.mocked(createClient).mockResolvedValue({ from, rpc: vi.fn() } as never);
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const html = await renderPage("welcome-to-24frame");
+    expect(html).toContain("data-course-error");
+    expect(html).toContain(SOCIAL.courses.detailError);
+    expect(html).toContain(SOCIAL.courses.retry);
+    expect(html).not.toContain("data-course-modules");
+  });
+
   it("shows quiet missing copy when the slug is not visible", async () => {
     stubClient({ course: null });
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
@@ -199,14 +229,26 @@ describe("Social course detail", () => {
 });
 
 describe("course detail lock", () => {
-  it("does not add a player, price CTA, or member publish control", () => {
+  it("keeps consume in-detail and does not add a price CTA or member publish control", () => {
     const page = readFileSync("src/app/(app)/social/courses/[slug]/page.tsx", "utf8");
+    const consume = readFileSync("src/components/courses/course-consume.tsx", "utf8");
+    expect(page).toContain("CourseConsume");
+    expect(page).toContain("SOCIAL.courses.title");
     expect(page).not.toContain("MediaConvert");
     expect(page).not.toContain("HLS");
-    expect(page).not.toContain("video");
+    expect(page).not.toContain("<video");
+    expect(page).not.toContain("/lessons/");
     expect(page).not.toContain("createSocialCourse");
     expect(page).not.toContain("SocialAvatar");
     expect(page).not.toContain("signedAvatarUrl");
     expect(page).not.toContain("LOCKED");
+    expect(consume).toContain("data-course-player");
+    expect(consume).not.toContain("/lessons/");
+    expect(readFileSync("src/app/(app)/social/courses/[slug]/loading.tsx", "utf8")).toContain(
+      "CourseDetailSkeleton",
+    );
+    expect(readFileSync("src/app/(app)/social/courses/[slug]/error.tsx", "utf8")).toContain(
+      "data-course-retry",
+    );
   });
 });

@@ -1,3 +1,6 @@
+import { CourseConsume } from "@/components/courses/course-consume";
+import { CourseCover } from "@/components/courses/course-cover";
+import { CourseRetry } from "@/components/courses/course-retry";
 import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { loadCourseDetail } from "@/lib/courses";
@@ -13,10 +16,28 @@ export default async function SocialCourseDetailPage({
   const { ctx, supabase } = session;
   const detail = await loadCourseDetail(supabase, slug, ctx.user.id);
 
+  if (detail.failed) {
+    return (
+      <div data-social-course-error="">
+        <PageHeader
+          title={SOCIAL.courses.title}
+          backLink={{ href: SOCIAL_ROUTES.courses, label: SOCIAL.courses.title }}
+        />
+        <div data-course-error="" className="flex flex-col items-start gap-[var(--space-3)]">
+          <HouseEmpty>{SOCIAL.courses.detailError}</HouseEmpty>
+          <CourseRetry label={SOCIAL.courses.retry} />
+        </div>
+      </div>
+    );
+  }
+
   if (!detail.course) {
     return (
       <div data-social-course-missing="">
-        <PageHeader title={SOCIAL.courses.title} backLink={{ href: SOCIAL_ROUTES.courses }} />
+        <PageHeader
+          title={SOCIAL.courses.title}
+          backLink={{ href: SOCIAL_ROUTES.courses, label: SOCIAL.courses.title }}
+        />
         <HouseEmpty>{SOCIAL.courses.missing}</HouseEmpty>
       </div>
     );
@@ -26,47 +47,26 @@ export default async function SocialCourseDetailPage({
     <div data-social-course={detail.course.slug}>
       <PageHeader
         title={detail.course.title}
-        subtitle={detail.course.description ?? undefined}
         backLink={{ href: SOCIAL_ROUTES.courses, label: SOCIAL.courses.title }}
       />
+      <CourseCover title={detail.course.title} />
+      {detail.course.description ? (
+        <p className="mt-[var(--space-4)] t-body text-ink-2">{detail.course.description}</p>
+      ) : null}
       {!detail.hasAccess ? (
-        <p data-course-denied="" className="t-body text-ink-2">
-          {SOCIAL.courses.denied}
-        </p>
+        <div data-course-denied="" className="mt-[var(--space-6)]">
+          <HouseEmpty>{SOCIAL.courses.denied}</HouseEmpty>
+        </div>
       ) : null}
       {detail.hasAccess && detail.modules.length === 0 ? (
-        <HouseEmpty>{SOCIAL.courses.empty}</HouseEmpty>
+        <div className="mt-[var(--space-6)]">
+          <HouseEmpty>{SOCIAL.courses.empty}</HouseEmpty>
+        </div>
       ) : null}
       {detail.modules.length > 0 ? (
-        <section data-course-modules="" className="mt-[var(--space-6)]">
-          <h2 className="t-label text-ink-3">{SOCIAL.courses.modules}</h2>
-          <ol className="mt-[var(--space-3)] flex flex-col gap-[var(--space-6)]">
-            {detail.modules.map((module) => (
-              <li key={module.id} data-course-module={module.id}>
-                <h3 className="t-body font-medium text-ink">{module.title}</h3>
-                {module.lessons.length === 0 ? (
-                  <p className="mt-[var(--space-2)] t-body-sm text-ink-3">{SOCIAL.courses.empty}</p>
-                ) : (
-                  <ol className="mt-[var(--space-2)] flex flex-col gap-[var(--space-2)]">
-                    {module.lessons.map((lesson) => (
-                      <li
-                        key={lesson.id}
-                        data-course-lesson={lesson.id}
-                        data-course-preview={lesson.free_preview && !detail.hasAccess ? "" : undefined}
-                        className="t-body-sm text-ink-2"
-                      >
-                        {lesson.title}
-                        {lesson.free_preview && !detail.hasAccess ? (
-                          <span className="text-ink-3"> ({SOCIAL.courses.preview})</span>
-                        ) : null}
-                      </li>
-                    ))}
-                  </ol>
-                )}
-              </li>
-            ))}
-          </ol>
-        </section>
+        <div className="mt-[var(--space-6)]">
+          <CourseConsume modules={detail.modules} hasAccess={detail.hasAccess} />
+        </div>
       ) : null}
     </div>
   );

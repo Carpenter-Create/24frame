@@ -12,9 +12,12 @@ export type CourseRow = {
   slug: string;
   title: string;
   description: string | null;
+  cover_key: string | null;
   is_flagship_free: boolean;
   created_at: string;
 };
+
+export const COURSE_COVER_ASPECT_CLASS = "aspect-video";
 
 export type CourseModuleRow = {
   id: string;
@@ -38,6 +41,12 @@ export type CourseDetail = {
   course: CourseRow | null;
   hasAccess: boolean;
   modules: CourseOutlineModule[];
+  failed: boolean;
+};
+
+export type CourseListResult = {
+  courses: CourseRow[];
+  failed: boolean;
 };
 
 export function courseHref(slug: string): string {
@@ -80,15 +89,46 @@ export function outlineForDisplay(
   return grouped.filter((module) => module.lessons.length > 0);
 }
 
+export function firstOutlineLesson(
+  modules: CourseOutlineModule[],
+): CourseLessonRow | null {
+  for (const module of modules) {
+    const lesson = module.lessons[0];
+    if (lesson) return lesson;
+  }
+  return null;
+}
+
+export function lessonInOutline(
+  modules: CourseOutlineModule[],
+  lessonId: string,
+): CourseLessonRow | null {
+  for (const module of modules) {
+    const lesson = module.lessons.find((row) => row.id === lessonId);
+    if (lesson) return lesson;
+  }
+  return null;
+}
+
+export function courseLessonDurationLabel(seconds: number | null): string | null {
+  if (seconds == null || seconds <= 0) return null;
+  const minutes = Math.floor(seconds / 60);
+  const remainder = seconds % 60;
+  if (minutes === 0) return `${remainder}s`;
+  if (remainder === 0) return `${minutes}m`;
+  return `${minutes}m ${remainder}s`;
+}
+
 export async function loadDiscoverableCourses(
   supabase: ServerClient,
-): Promise<CourseRow[]> {
-  const { data } = await supabase
+): Promise<CourseListResult> {
+  const { data, error } = await supabase
     .from("courses")
-    .select("id, slug, title, description, is_flagship_free, created_at")
+    .select("id, slug, title, description, cover_key, is_flagship_free, created_at")
     .order("created_at", { ascending: true })
     .range(...rangeFor(UNPAGINATED_MAX));
-  return (data ?? []) as CourseRow[];
+  if (error) return { courses: [], failed: true };
+  return { courses: (data ?? []) as CourseRow[], failed: false };
 }
 
 export async function loadCourseDetail(
@@ -96,14 +136,18 @@ export async function loadCourseDetail(
   slug: string,
   userId: string,
 ): Promise<CourseDetail> {
-  const { data: course } = await supabase
+  const { data: course, error } = await supabase
     .from("courses")
-    .select("id, slug, title, description, is_flagship_free, created_at")
+    .select("id, slug, title, description, cover_key, is_flagship_free, created_at")
     .eq("slug", decodeURIComponent(slug))
     .maybeSingle();
 
+  if (error) {
+    return { course: null, hasAccess: false, modules: [], failed: true };
+  }
+
   if (!course) {
-    return { course: null, hasAccess: false, modules: [] };
+    return { course: null, hasAccess: false, modules: [], failed: false };
   }
 
   const { data: access } = await supabase.rpc("has_course_access", {
@@ -112,29 +156,38 @@ export async function loadCourseDetail(
   });
   const hasAccess = access === true;
 
-  const { data: moduleRows } = await supabase
+  const { data: moduleRows, error: moduleError } = await supabase
     .from("modules")
     .select("id, course_id, title, position")
     .eq("course_id", course.id)
     .order("position", { ascending: true })
     .range(...rangeFor(UNPAGINATED_MAX));
 
+  if (moduleError) {
+    return { course, hasAccess, modules: [], failed: true };
+  }
+
   const modules = (moduleRows ?? []) as CourseModuleRow[];
   const moduleIds = modules.map((module) => module.id);
   if (moduleIds.length === 0) {
-    return { course, hasAccess, modules: [] };
+    return { course, hasAccess, modules: [], failed: false };
   }
 
-  const { data: lessonRows } = await supabase
+  const { data: lessonRows, error: lessonError } = await supabase
     .from("lessons")
     .select("id, module_id, title, position, duration_seconds, free_preview")
     .in("module_id", moduleIds)
     .order("position", { ascending: true })
     .range(...rangeFor(UNPAGINATED_MAX));
 
+  if (lessonError) {
+    return { course, hasAccess, modules: [], failed: true };
+  }
+
   return {
     course,
     hasAccess,
     modules: outlineForDisplay(modules, (lessonRows ?? []) as CourseLessonRow[], hasAccess),
+    failed: false,
   };
 }

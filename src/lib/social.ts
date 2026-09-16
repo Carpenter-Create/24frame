@@ -543,6 +543,10 @@ export const SOCIAL = {
     denied: "This course is not available.",
     preview: "Preview",
     modules: "Modules",
+    error: "Courses could not be loaded.",
+    detailError: "This course could not be loaded.",
+    retry: "Retry",
+    playerEmpty: "No lesson is ready to play.",
   },
   cta: {
     needProfile: "Create a creator profile to post, like, or message.",
