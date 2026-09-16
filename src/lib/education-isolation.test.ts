@@ -44,7 +44,7 @@ describe("education isolation", () => {
     expect(migration).not.toMatch(/is_gc_staff\(/);
   });
 
-  it("puts staff Course management on Education workspace, not GC_NAV or member browse", () => {
+  it("puts staff Manage courses on Education workspace, not GC_NAV or member browse", () => {
     expect(EDUCATION_HREF).toBe("/education");
     expect(EDUCATION_MANAGE_NAV.map((item) => item.href)).toEqual([EDUCATION_HREF]);
     expect(EDUCATION_MANAGE_NAV.map((item) => item.label)).toEqual([EDUCATION_ADMIN.manage]);
@@ -69,7 +69,7 @@ describe("education isolation", () => {
     const blob = JSON.stringify(EDUCATION_ADMIN);
     expect(blob).not.toMatch(/seamless|frictionless|upload and earn|MasterClass|buy|Stripe|Apple Pay|Klarna/i);
     expect(EDUCATION_ADMIN.title).toBe("Manage courses");
-    expect(EDUCATION_ADMIN.manage).toBe("Course management");
+    expect(EDUCATION_ADMIN.manage).toBe("Manage courses");
     expect(EDUCATION_ADMIN.free).toBe("Free");
     expect(EDUCATION_ADMIN.paid).toBe("Paid");
     expect(blob).not.toContain("Welcome");
