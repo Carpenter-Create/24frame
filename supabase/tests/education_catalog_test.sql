@@ -4,7 +4,7 @@
 -- has_course_access. Authenticated writes stay denied.
 
 begin;
-select plan(28);
+select plan(29);
 
 select set_config('t.alpha',   gen_random_uuid()::text, false);
 select set_config('t.staff',   gen_random_uuid()::text, false);
