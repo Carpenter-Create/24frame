@@ -4,6 +4,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
 import { DASHBOARD_ADMIN, parseDashboardPeriod } from "@/lib/dashboard-admin";
+import { DASHBOARD_FIXTURE } from "@/lib/dashboard-fixture";
 import { DashboardAdminHero, DashboardRecentActivity } from "./dashboard-admin-hero";
 
 vi.mock("next/navigation", () => ({
@@ -21,6 +22,9 @@ describe("DashboardAdminHero", () => {
         options: [
           { key: "all", label: "All time", group: "all" },
           { key: "ytd", label: "YTD 2026", group: "ytd" },
+          { key: "2026", label: "2026", group: "year" },
+          { key: "Q32026", label: "Q3 2026", group: "quarter" },
+          { key: "2026-09", label: "2026-09", group: "month" },
         ],
         userId: null,
         users: [{ id: "maya", label: "Maya Chen" }],
@@ -40,9 +44,46 @@ describe("DashboardAdminHero", () => {
     expect(html).toContain(DASHBOARD_ADMIN.activity);
     expect(html).toContain("Acme");
     expect(html).toContain("All time");
+    expect(html).toContain("data-dashboard-period-grains");
+    expect(html).toContain("card-surface");
+    expect(html).toContain("shadow-none");
+    expect(html).toMatch(/data-dashboard-stat="revenue"[^>]*t-title/);
+    expect(html).not.toMatch(/data-dashboard-stat="revenue"[^>]*t-display/);
+    expect(html).not.toContain("data-dashboard-fixture-banner");
     expect(html).not.toContain("Export");
     expect(html).not.toContain("Royalogic");
     expect(html).not.toContain("$");
+  });
+
+  it("labels fixture money when craft sample is on", () => {
+    const html = renderToStaticMarkup(
+      createElement(DashboardAdminHero, {
+        orgName: "Acme",
+        period: parseDashboardPeriod("all", now),
+        options: [{ key: "all", label: "All time", group: "all" }],
+        userId: null,
+        users: [],
+        hero: {
+          totalCents: 120_000_00,
+          asOf: "All time",
+          updated: "2026-07",
+          compare: { text: "+10.0%", priorLabel: "2025-10" },
+          points: [
+            { key: "2026-07", label: "2026-07", year: 2026, month: 7, netCents: 120_000_00 },
+          ],
+        },
+        activity: [],
+        fixture: true,
+      }),
+    );
+    expect(html).toContain("data-dashboard-fixture-banner");
+    expect(html).toContain(DASHBOARD_FIXTURE.banner);
+    expect(html).toContain(DASHBOARD_FIXTURE.sampleMark);
+    expect(html).toContain("$120,000.00");
+    expect(html).toMatch(/data-dashboard-stat="revenue"[^>]*t-display t-data/);
+    expect(html).toContain("text-ink-3");
+    expect(html).not.toContain("text-emerald");
+    expect(html).not.toContain("text-rose");
   });
 
   it("renders recent activity as numbered rows with thin bars when counts exist", () => {

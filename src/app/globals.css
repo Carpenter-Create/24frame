@@ -27,6 +27,7 @@
   --color-hairline: var(--border);
   --color-accent: var(--accent);
   --color-accent-contrast: var(--accent-contrast);
+  --color-accent-wash: var(--accent-wash);
   --color-band: var(--band);
   --color-band-ink: var(--band-ink);
 
@@ -122,13 +123,13 @@ body {
     font-family: var(--font-sans);
     font-size: var(--text-base);
     font-weight: 400;
-    line-height: 1.65;
+    line-height: 1.5;
   }
   .t-body-sm {
     font-family: var(--font-sans);
     font-size: var(--text-sm);
     font-weight: 400;
-    line-height: 1.6;
+    line-height: 1.45;
   }
   /* Text-entry floor. iOS Safari zooms focused input/textarea under 16px.
      px, not rem — a smaller root must not drop below the floor.
@@ -155,6 +156,13 @@ body {
     font-family: var(--font-sans);
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.01em;
+  }
+  /* Mercury-quiet card: white on canvas, hairline only, house radius. No shadow. */
+  .card-surface {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: none;
   }
   /* Hide the scrollbar on streaming rails (keeps horizontal scroll, drops the chrome). */
   .no-scrollbar {

@@ -26,6 +26,9 @@ import {
   revenueCompare,
   revenuePlayheadKey,
   dashboardDeltaLine,
+  dashboardGrainActive,
+  dashboardGrainOption,
+  DASHBOARD_PERIOD_GRAINS,
   revenuePointsFromLabels,
 } from "./dashboard-admin";
 
@@ -74,6 +77,22 @@ describe("company admin period and scope", () => {
     expect(dashboardHref({ period: "Q42025", user: "maya" })).toBe(
       `${DASHBOARD_HREF}?period=Q42025&user=maya`,
     );
+    expect(DASHBOARD_PERIOD_GRAINS.map((grain) => grain.label)).toEqual([
+      DASHBOARD_ADMIN.allTime,
+      DASHBOARD_ADMIN.year,
+      DASHBOARD_ADMIN.quarter,
+      DASHBOARD_ADMIN.month,
+      DASHBOARD_ADMIN.ytd,
+    ]);
+    expect(dashboardGrainActive("all", "all")).toBe(true);
+    expect(dashboardGrainActive("2026", "year")).toBe(true);
+    expect(dashboardGrainActive("Q32026", "quarter")).toBe(true);
+    expect(dashboardGrainActive("2026-09", "month")).toBe(true);
+    expect(dashboardGrainActive("ytd", "ytd")).toBe(true);
+    expect(dashboardGrainActive("2026", "all")).toBe(false);
+    const options = dashboardPeriodOptions(now, []);
+    expect(dashboardGrainOption(options, "year")?.key).toBe("2026");
+    expect(dashboardGrainOption(options, "all")?.key).toBe("all");
   });
 
   it("filters ISO timestamps in UTC and lists current standards before historical pickers", () => {

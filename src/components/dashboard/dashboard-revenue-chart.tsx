@@ -11,6 +11,7 @@ import {
   pointDelta,
   type DashboardRevenuePoint,
 } from "@/lib/dashboard-admin";
+import { DASHBOARD_FIXTURE } from "@/lib/dashboard-fixture";
 
 const H = 200;
 const PAD = { top: 16, right: 48, bottom: 24, left: 16 };
@@ -18,9 +19,11 @@ const PAD = { top: 16, right: 48, bottom: 24, left: 16 };
 export function DashboardRevenueChart({
   points,
   playheadKey,
+  fixture = false,
 }: {
   points: readonly DashboardRevenuePoint[];
   playheadKey: string | null;
+  fixture?: boolean;
 }) {
   const plotRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState<number | null>(null);
@@ -50,12 +53,14 @@ export function DashboardRevenueChart({
   const hoverIndex = hover ? points.findIndex((point) => point.key === hover.key) : -1;
   const hoverDelta = hoverIndex >= 0 ? pointDelta(points, hoverIndex) : null;
   const playhead = geom?.xy.find((point) => point.key === playheadKey) ?? geom?.xy[geom.xy.length - 1];
+  const money = (cents: number) =>
+    fixture ? `${formatUsdCents(cents)} ${DASHBOARD_FIXTURE.sampleMark}` : formatUsdCents(cents);
 
   return (
     <div ref={plotRef} data-dashboard-revenue-chart="" className="relative" style={{ height: H }}>
       {points.length === 0 ? (
         <div className="flex h-full items-center px-[var(--space-6)]">
-          <p className="t-body text-ink-2">{DASHBOARD_ADMIN.chartEmpty}</p>
+          <p className="t-body-sm text-ink-3">{DASHBOARD_ADMIN.chartEmpty}</p>
         </div>
       ) : geom ? (
         <>
@@ -78,6 +83,20 @@ export function DashboardRevenueChart({
                 <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
               </linearGradient>
             </defs>
+            {[0.25, 0.5, 0.75].map((step) => {
+              const y = PAD.top + geom.innerH * step;
+              return (
+                <line
+                  key={step}
+                  x1={PAD.left}
+                  x2={geom.w - PAD.right}
+                  y1={y}
+                  y2={y}
+                  stroke="var(--border)"
+                  strokeWidth={1}
+                />
+              );
+            })}
             <line
               x1={PAD.left}
               x2={geom.w - PAD.right}
@@ -101,12 +120,21 @@ export function DashboardRevenueChart({
                 x2={hover.x}
                 y1={PAD.top}
                 y2={geom.baseY}
-                stroke="var(--text-tertiary)"
+                stroke="var(--text-secondary)"
                 strokeWidth={1}
                 strokeDasharray="4 4"
               />
             ) : null}
-            {playhead ? <circle cx={playhead.x} cy={playhead.y} r={4} fill="currentColor" /> : null}
+            {playhead ? (
+              <circle
+                cx={playhead.x}
+                cy={playhead.y}
+                r={4}
+                fill="currentColor"
+                stroke="var(--surface)"
+                strokeWidth={2}
+              />
+            ) : null}
             {hover ? (
               <circle
                 cx={hover.x}
@@ -123,8 +151,7 @@ export function DashboardRevenueChart({
                 x={tick.x}
                 y={H - 8}
                 textAnchor="middle"
-                className="t-data"
-                fontSize={11}
+                className="t-label t-data"
                 fill="var(--text-tertiary)"
               >
                 {tick.label}
@@ -134,11 +161,11 @@ export function DashboardRevenueChart({
           {hover ? (
             <div
               data-dashboard-revenue-tooltip=""
-              className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-[var(--radius-sm)] border border-hairline bg-surface px-[var(--space-4)] py-[var(--space-2)]"
+              className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-[var(--radius)] border border-hairline bg-surface px-[var(--space-4)] py-[var(--space-2)] shadow-none"
               style={{ left: Math.min(Math.max(hover.x, 72), geom.w - 72), top: hover.y - 8 }}
             >
               <p className="t-label text-ink-3">{hover.label}</p>
-              <p className="t-data t-body text-ink">{formatUsdCents(hover.netCents)}</p>
+              <p className="t-data t-heading text-ink">{money(hover.netCents)}</p>
               {hoverDelta ? (
                 <p className="t-body-sm text-ink-3">{dashboardDeltaLine(hoverDelta)}</p>
               ) : null}
@@ -156,7 +183,7 @@ export function DashboardRevenueChart({
               {points.map((point) => (
                 <tr key={point.key}>
                   <td>{point.label}</td>
-                  <td>{formatUsdCents(point.netCents)}</td>
+                  <td>{money(point.netCents)}</td>
                 </tr>
               ))}
             </tbody>

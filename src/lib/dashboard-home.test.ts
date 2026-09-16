@@ -321,12 +321,12 @@ describe("house type register", () => {
   const globals = readFileSync("src/app/globals.css", "utf8");
 
   it("keeps one large moment in the shared --text-* scale", () => {
-    expect(tokens).toMatch(/--text-xs:\s*0\.75rem;/);
-    expect(tokens).toMatch(/--text-sm:\s*0\.8125rem;/);
-    expect(tokens).toMatch(/--text-base:\s*0\.9375rem;/);
-    expect(tokens).toMatch(/--text-lg:\s*1\.0625rem;/);
-    expect(tokens).toMatch(/--text-title:\s*1\.5rem;/);
-    expect(tokens).toMatch(/--text-hero:\s*3rem;/);
+    expect(tokens).toMatch(/--text-xs:\s*0\.6875rem;/);
+    expect(tokens).toMatch(/--text-sm:\s*0\.75rem;/);
+    expect(tokens).toMatch(/--text-base:\s*0\.8125rem;/);
+    expect(tokens).toMatch(/--text-lg:\s*0\.9375rem;/);
+    expect(tokens).toMatch(/--text-title:\s*1\.25rem;/);
+    expect(tokens).toMatch(/--text-hero:\s*2\.5rem;/);
   });
 
   it("binds .t-* steps to those tokens instead of display clamp()", () => {
@@ -337,6 +337,9 @@ describe("house type register", () => {
     expect(globals).toMatch(/\.t-body\s*\{[\s\S]*?font-size:\s*var\(--text-base\)/);
     expect(globals).toMatch(/\.t-body-sm\s*\{[\s\S]*?font-size:\s*var\(--text-sm\)/);
     expect(globals).toMatch(/\.t-label\s*\{[\s\S]*?font-size:\s*var\(--text-xs\)/);
+    expect(globals).toMatch(/\.card-surface\s*\{[\s\S]*?box-shadow:\s*none/);
+    expect(tokens).toContain("--accent-wash:");
+    expect(tokens).toContain("--accent: #1769ff;");
     expect(globals).not.toMatch(
       /\.t-(display|title|statement|section|heading|subhead|lead)\s*\{[^}]*clamp\(/,
     );
@@ -413,7 +416,7 @@ describe("client home type locks", () => {
     expect(html).toContain(TITLE_STATUS_LABELS.live);
     expect(html).toContain("data-dashboard-status-pill");
     expect(html).toContain("border-hairline");
-    expect(html).toContain("t-body font-medium text-ink");
+    expect(html).toContain("t-body-sm font-medium text-ink");
     expect(html).not.toContain(dashboardAttentionSummary(1));
     expect(html).not.toContain("titles need your attention");
     expect(html).not.toContain("Artwork missing");

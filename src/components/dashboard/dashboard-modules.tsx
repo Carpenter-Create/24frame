@@ -7,6 +7,7 @@ import {
   DashboardHomeStatusPill,
 } from "@/components/dashboard/dashboard-home";
 import { Card, CardBody } from "@/components/ui/card";
+import { DASHBOARD_CARD_PAD_LIST, DASHBOARD_MODULE_CARD_CLASS } from "@/lib/dashboard-craft";
 import {
   DASHBOARD_HOME,
   dashboardCatalogValue,
@@ -37,7 +38,7 @@ export function DashboardAnalyticsOverview({
     <Link
       href={reportsHref({ period: "this-month" })}
       data-dashboard-overview=""
-      className="grid grid-cols-2 overflow-hidden rounded-[var(--radius-lg)] border border-hairline bg-surface"
+      className={`${DASHBOARD_MODULE_CARD_CLASS} grid grid-cols-2`}
     >
       {cells.map((cell, i) => (
         <div
@@ -46,7 +47,7 @@ export function DashboardAnalyticsOverview({
           className={`flex flex-col gap-[var(--space-2)] p-[var(--space-6)] ${i > 0 ? "border-l border-hairline" : ""}`}
         >
           <span className="t-label text-ink-3">{cell.label}</span>
-          <span className="t-data t-title text-ink">{cell.value}</span>
+          <span className="t-data t-heading text-ink">{cell.value}</span>
         </div>
       ))}
     </Link>
@@ -76,7 +77,7 @@ export function DashboardListPanel({
 }) {
   return (
     <DashboardHomePanel aria-label={label} data-dashboard-module={testId}>
-      <span className="px-[var(--space-6)] py-[var(--space-4)] t-label text-ink-3">{label}</span>
+      <span className={`${DASHBOARD_CARD_PAD_LIST} t-label text-ink-3`}>{label}</span>
       {children ?? <DashboardHomeEmpty>{empty}</DashboardHomeEmpty>}
     </DashboardHomePanel>
   );
@@ -90,12 +91,12 @@ export function DashboardTitleRows({ items }: { items: readonly ClientHomeJustIn
         return (
           <li
             key={item.id}
-            className="flex items-center justify-between gap-[var(--space-6)] px-[var(--space-6)] py-[var(--space-4)]"
+            className="flex items-center justify-between gap-[var(--space-4)] px-[var(--space-4)] py-[var(--space-4)]"
           >
             <span className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
               <Link
                 href={`/titles/${item.id}`}
-                className="t-body font-medium text-ink transition-colors hover:text-ink-2"
+                className="t-body-sm font-medium text-ink transition-colors hover:text-ink-2"
               >
                 {item.title}
               </Link>
@@ -115,24 +116,24 @@ export function DashboardTopTitles({ items }: { items: readonly DashboardRankedT
   const max = items[0]?.count ?? 0;
   return (
     <DashboardHomePanel aria-label={DASHBOARD_HOME.topTitles} data-dashboard-module="top-titles">
-      <div className="flex items-center justify-between gap-[var(--space-4)] px-[var(--space-6)] py-[var(--space-4)]">
+      <div className={`flex items-center justify-between gap-[var(--space-4)] ${DASHBOARD_CARD_PAD_LIST}`}>
         <p className="t-label text-ink-3">{DASHBOARD_HOME.topTitles}</p>
         <TextAction href="/titles">{DASHBOARD_HOME.viewAll}</TextAction>
       </div>
       {items.length === 0 ? (
         <DashboardHomeEmpty>{DASHBOARD_HOME.topTitlesEmpty}</DashboardHomeEmpty>
       ) : (
-        <ol className="flex flex-col gap-[var(--space-4)] border-t border-hairline px-[var(--space-6)] py-[var(--space-6)]">
+        <ol className="flex flex-col gap-[var(--space-2)] border-t border-hairline px-[var(--space-4)] py-[var(--space-4)]">
           {items.map((item, i) => {
             const percent = rankedBarPercent(item.count, max);
             return (
               <li key={item.id} className="flex flex-col gap-[var(--space-2)]">
                 <div className="flex items-center justify-between gap-[var(--space-4)]">
-                  <span className="flex min-w-0 items-center gap-[var(--space-4)]">
+                  <span className="flex min-w-0 items-center gap-[var(--space-2)]">
                     <span className="t-data t-body-sm w-4 shrink-0 text-ink-3">{i + 1}</span>
                     <Link
                       href={`/titles/${item.id}`}
-                      className="truncate t-body font-medium text-ink hover:text-ink-2"
+                      className="truncate t-body-sm font-medium text-ink hover:text-ink-2"
                     >
                       {item.title}
                     </Link>
@@ -142,9 +143,9 @@ export function DashboardTopTitles({ items }: { items: readonly DashboardRankedT
                   ) : null}
                 </div>
                 {percent > 0 ? (
-                  <div className="h-2 overflow-hidden rounded-full bg-surface-muted">
+                  <div className="h-1 overflow-hidden rounded-[var(--radius-sm)] bg-surface-muted">
                     <div
-                      className={`h-full rounded-full ${i === 0 ? "bg-accent" : "bg-ink-3"}`}
+                      className={`h-full ${i === 0 ? "bg-accent" : "bg-ink-3"}`}
                       style={{ width: `${percent}%` }}
                     />
                   </div>
@@ -170,11 +171,11 @@ export function DashboardDeliveriesAction({ rows }: { rows: readonly DashboardDe
           {rows.map((row) => (
             <li
               key={row.delivery_id}
-              className="flex items-center justify-between gap-[var(--space-6)] px-[var(--space-6)] py-[var(--space-4)]"
+              className="flex items-center justify-between gap-[var(--space-4)] px-[var(--space-4)] py-[var(--space-4)]"
             >
               <Link
                 href={`/titles/${row.title_id}`}
-                className="t-body font-medium text-ink transition-colors hover:text-ink-2"
+                className="t-body-sm font-medium text-ink transition-colors hover:text-ink-2"
               >
                 {row.title}
               </Link>
@@ -198,15 +199,15 @@ export function DashboardFindingsGlance({
 }) {
   return (
     <DashboardHomePanel aria-label={DASHBOARD_HOME.findingsGlance} data-dashboard-module="findings-glance">
-      <div className="flex items-center justify-between gap-[var(--space-4)] px-[var(--space-6)] py-[var(--space-4)]">
+      <div className={`flex items-center justify-between gap-[var(--space-4)] ${DASHBOARD_CARD_PAD_LIST}`}>
         <p className="t-label text-ink-3">{DASHBOARD_HOME.findingsGlance}</p>
         <TextAction href="/catalog-health">{DASHBOARD_HOME.findingsGlanceCta}</TextAction>
       </div>
-      <div className="border-t border-hairline px-[var(--space-6)] py-[var(--space-6)]">
+      <div className="border-t border-hairline px-[var(--space-4)] py-[var(--space-4)]">
         <p
           data-dashboard-findings-count=""
           data-dashboard-stat="needsAttention"
-          className="t-display t-data text-ink"
+          className="t-title t-data text-ink"
         >
           {dashboardCatalogValue(count, isPartial)}
         </p>
@@ -236,10 +237,10 @@ export function DashboardCountList({
           {rows.map((row) => (
             <li
               key={row.name}
-              className="flex items-center justify-between gap-[var(--space-6)] px-[var(--space-6)] py-[var(--space-4)]"
+              className="flex items-center justify-between gap-[var(--space-4)] px-[var(--space-4)] py-[var(--space-4)]"
             >
-              <span className="t-body text-ink">{row.name}</span>
-              <span className="t-data t-body text-ink">{row.count}</span>
+              <span className="t-body-sm text-ink">{row.name}</span>
+              <span className="t-data t-body-sm text-ink">{row.count}</span>
             </li>
           ))}
         </ul>
@@ -267,10 +268,10 @@ export function DashboardWhatChanged({
             <li
               key={row.key}
               data-dashboard-change={row.key}
-              className="flex items-center justify-between gap-[var(--space-6)] px-[var(--space-6)] py-[var(--space-4)]"
+              className="flex items-center justify-between gap-[var(--space-4)] px-[var(--space-4)] py-[var(--space-4)]"
             >
-              <span className="t-body text-ink">{row.label}</span>
-              <span className="t-data t-body text-ink-2">{row.count}</span>
+              <span className="t-body-sm text-ink">{row.label}</span>
+              <span className="t-data t-body-sm text-ink-2">{row.count}</span>
             </li>
           ))}
         </ul>
