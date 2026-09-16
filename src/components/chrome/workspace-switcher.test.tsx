@@ -10,7 +10,13 @@ vi.mock("next/navigation", () => ({
 }));
 
 import { availableWorkspaceOptions } from "@/lib/workspace-menu";
-import { WORKSPACE_SWITCHER_CHEVRON_CLASS } from "@/lib/workspace-switcher";
+import {
+  WORKSPACE_SWITCHER_CHEVRON_CLASS,
+  WORKSPACE_SWITCHER_OPTION_CHECK_CLASS,
+  WORKSPACE_SWITCHER_OPTION_CHECK_GUTTER_CLASS,
+  WORKSPACE_SWITCHER_OPTION_CLASS,
+  WORKSPACE_SWITCHER_OPTION_LABEL_CLASS,
+} from "@/lib/workspace-switcher";
 import { WorkspaceSwitcher } from "./workspace-switcher";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -68,6 +74,43 @@ describe("workspace switcher header control", () => {
     expect(html).not.toContain("data-workspace-switcher-trigger");
     expect(html).not.toContain("data-workspace-switcher-popover");
     expect(html).not.toContain("<svg");
+  });
+
+  it("keeps selected and unselected labels on one left edge with a trailing check", () => {
+    const html = renderToStaticMarkup(
+      <WorkspaceSwitcher current="education" defaultOpen />,
+    );
+    const options = [
+      ...html.matchAll(/data-workspace-switcher-option="([^"]+)"[^>]*>([\s\S]*?)<\/button>/g),
+    ];
+    expect(options).toHaveLength(3);
+
+    for (const [, mode, body] of options) {
+      const labelAt = body.indexOf("data-workspace-switcher-option-label");
+      const checkAt = body.indexOf("data-workspace-switcher-option-check");
+      expect(labelAt).toBeGreaterThan(-1);
+      expect(checkAt).toBeGreaterThan(labelAt);
+      expect(body).toContain(WORKSPACE_SWITCHER_OPTION_LABEL_CLASS);
+      expect(body).toContain(WORKSPACE_SWITCHER_OPTION_CHECK_GUTTER_CLASS);
+      if (mode === "education") {
+        const markAt = body.indexOf("data-appearance-check");
+        expect(markAt).toBeGreaterThan(checkAt);
+        expect(body).toContain(WORKSPACE_SWITCHER_OPTION_CHECK_CLASS);
+      } else {
+        expect(body).not.toContain("data-appearance-check");
+      }
+    }
+
+    expect(src.indexOf("data-workspace-switcher-option-label")).toBeLessThan(
+      src.indexOf("data-workspace-switcher-option-check"),
+    );
+    expect(src.indexOf("<AppearanceCheck")).toBeGreaterThan(
+      src.indexOf("data-workspace-switcher-option-check"),
+    );
+    expect(src).not.toMatch(/<AppearanceCheck[\s\S]*data-workspace-switcher-option-label/);
+    expect(WORKSPACE_SWITCHER_OPTION_CLASS).toContain("justify-between");
+    expect(WORKSPACE_SWITCHER_OPTION_CLASS).toContain("px-[var(--space-4)]");
+    expect(WORKSPACE_SWITCHER_OPTION_CLASS).not.toMatch(/\b(?:md|max-md):/);
   });
 });
 
