@@ -30,7 +30,8 @@ describe("AddTitleButton header", () => {
     expect(open).not.toContain("max-md:text-accent");
     expect(open).not.toContain("max-md:bg-transparent");
     expect(open).not.toContain("rounded-full");
-    expect(src).toContain("t-body-sm font-normal text-accent");
+    expect(src).toContain("t-body-sm text-accent");
+    expect(src).not.toContain("t-body-sm font-normal");
     expect(src).not.toContain("max-md:text-accent");
     expect(src).not.toContain("max-md:bg-transparent");
     expect(src).not.toContain("Plus");

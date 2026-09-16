@@ -6,6 +6,10 @@ import {
   DASHBOARD_CARD_CLASS,
   DASHBOARD_CARD_PAD_LIST,
   DASHBOARD_DO_NEXT_SECONDARY_CLASS,
+  DASHBOARD_KICKER_CLASS,
+  DASHBOARD_RELATED_GAP_CLASS,
+  DASHBOARD_ROW_CLASS,
+  DASHBOARD_ROW_LIST_CLASS,
 } from "@/lib/dashboard-craft";
 import { DASHBOARD_ATTENTION_CLEAR } from "@/lib/findings";
 import {
@@ -155,18 +159,18 @@ export function DashboardDoNext({
       data-dashboard-do-next-secondary={secondary ? "" : undefined}
       className={secondary ? DASHBOARD_DO_NEXT_SECONDARY_CLASS : undefined}
     >
-      <span className={cn(DASHBOARD_CARD_PAD_LIST, "t-label text-ink-3")}>{DASHBOARD_HOME.doNext}</span>
+      <span className={cn(DASHBOARD_CARD_PAD_LIST, DASHBOARD_KICKER_CLASS)}>{DASHBOARD_HOME.doNext}</span>
       {items.length === 0 ? (
         <DashboardHomeEmpty>{DASHBOARD_ATTENTION_CLEAR}</DashboardHomeEmpty>
       ) : (
-        <ul className="divide-y divide-hairline border-t border-hairline">
+        <ul className={DASHBOARD_ROW_LIST_CLASS}>
           {items.map((item) => {
             const statusLabel = dashboardTitleStatusLabel(item.status);
             return (
               <li
                 key={item.id}
                 data-dashboard-do-next-row={item.id}
-                className="flex items-center justify-between gap-[var(--space-4)] px-[var(--space-4)] py-[var(--space-4)]"
+                className={DASHBOARD_ROW_CLASS}
               >
                 <div className="min-w-0">
                   <Link
@@ -212,22 +216,22 @@ export function DashboardJustIn({
 
   return (
     <DashboardHomePanel aria-label={DASHBOARD_HOME.justIn} data-dashboard-just-in="">
-      <span className={cn(DASHBOARD_CARD_PAD_LIST, "t-label text-ink-3")}>{DASHBOARD_HOME.justIn}</span>
+      <span className={cn(DASHBOARD_CARD_PAD_LIST, DASHBOARD_KICKER_CLASS)}>{DASHBOARD_HOME.justIn}</span>
       {titles.length === 0 ? (
         <DashboardHomeEmpty action={emptyAction}>{emptyCopy}</DashboardHomeEmpty>
       ) : (
-        <ul className="divide-y divide-hairline border-t border-hairline">
+        <ul className={DASHBOARD_ROW_LIST_CLASS}>
           {titles.map((t) => {
             const statusLabel = dashboardTitleStatusLabel(t.status);
             return (
               <li
                 key={t.id}
                 data-dashboard-just-in-row={t.id}
-                className="flex items-center justify-between gap-[var(--space-4)] px-[var(--space-4)] py-[var(--space-4)]"
+                className={DASHBOARD_ROW_CLASS}
               >
                 <span
                   data-dashboard-just-in-cluster=""
-                  className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1"
+                  className={cn("flex min-w-0 flex-wrap items-center", DASHBOARD_RELATED_GAP_CLASS)}
                 >
                   <Link
                     href={`/titles/${t.id}`}

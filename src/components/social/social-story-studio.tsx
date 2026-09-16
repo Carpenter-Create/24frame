@@ -486,7 +486,7 @@ export function SocialStoryCompose() {
       {phase === "posted" ? (
         <div data-social-story-posted="" className={SOCIAL_STORY_POSTED_CLASS}>
           <SocialIcon name="check-circle" size={SOCIAL_ICON_SIZE_STORY_POSTED} className="text-accent" />
-          <p className="t-title font-semibold text-ink">{SOCIAL.stories.posted}</p>
+          <p className="t-title text-ink">{SOCIAL.stories.posted}</p>
           <p className="t-body-sm text-ink-2">{SOCIAL.stories.postedHint}</p>
           <Link
             href={SOCIAL_ROUTES.stories}

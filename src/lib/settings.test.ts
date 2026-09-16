@@ -197,7 +197,7 @@ describe("settings hub lock", () => {
       label: "Settings",
     });
     expect(SETTINGS_HEADER_BACK_CLASS).toBe(
-      "flex items-center gap-[var(--space-2)] t-body font-normal md:hidden",
+      "flex items-center gap-[var(--space-2)] t-body md:hidden",
     );
     expect(SETTINGS_HEADER_PAD_CLASS).toBe(MOBILE_CHROME_LEAD_PAD_CLASS);
     expect(SETTINGS_HEADER_PAD_CLASS).toBe("px-[var(--space-6)]");
@@ -208,7 +208,7 @@ describe("settings hub lock", () => {
   it("locks the settings rail on 220 pad 16, 15 Regular, house wash", () => {
     expect(SETTINGS_RAIL_PAD_CLASS).toBe("p-[var(--space-4)]");
     expect(SETTINGS_RAIL_ITEM_CLASS).toContain("t-body");
-    expect(SETTINGS_RAIL_ITEM_CLASS).toContain("font-normal");
+    expect(SETTINGS_RAIL_ITEM_CLASS).not.toContain("font-normal");
     expect(SETTINGS_RAIL_ITEM_CLASS).not.toContain("t-body-sm");
     expect(SETTINGS_RAIL_CHEVRON_CLASS).toBe("size-4 shrink-0");
     expect(SETTINGS_RAIL_ACTIVE_CLASS).toContain("bg-surface-muted");

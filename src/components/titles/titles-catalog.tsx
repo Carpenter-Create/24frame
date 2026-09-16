@@ -169,7 +169,7 @@ export function TitlesCatalogRailStill({
           {title}
         </span>
         {year ? (
-          <span className="t-body-sm font-normal text-ink-2" data-titles-catalog-rail-year="">
+            <span className="t-body-sm text-ink-2" data-titles-catalog-rail-year="">
             {year}
           </span>
         ) : null}
@@ -233,12 +233,12 @@ export function TitlesCatalogStill({
           data-titles-catalog-meta=""
         >
           {year ? (
-            <span className="t-body-sm font-normal text-ink-3" data-titles-catalog-year="">
+            <span className="t-body-sm text-ink-3" data-titles-catalog-year="">
               {year}
             </span>
           ) : null}
           <span
-            className="inline-flex w-fit items-center rounded-full border border-hairline px-[var(--space-3)] py-[var(--space-1)] t-body-sm font-normal text-ink-2"
+            className="inline-flex w-fit items-center rounded-full border border-hairline px-[var(--space-3)] py-[var(--space-1)] t-body-sm text-ink-2"
             data-titles-catalog-status=""
           >
             {statusLabel}

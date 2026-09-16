@@ -31,13 +31,13 @@ export function UserMenuIdentity({
       <div
         data-user-menu-avatar=""
         data-identity-photo={face ? "" : undefined}
-        className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted t-body font-normal text-ink-2"
+        className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted t-body text-ink-2"
       >
         <IdentityPhoto avatarInitial={initial} photoUrl={photoUrl} />
       </div>
       <div className="min-w-0">
         {displayName ? (
-          <div data-user-menu-name="" className="truncate t-body font-normal text-ink">
+          <div data-user-menu-name="" className="truncate t-body text-ink">
             {displayName}
           </div>
         ) : null}

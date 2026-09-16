@@ -20,7 +20,13 @@ import {
   DASHBOARD_CARD_PAD_HERO,
   DASHBOARD_CARD_PAD_LIST,
   DASHBOARD_FIXTURE_BANNER_CLASS,
+  DASHBOARD_HERO_ASOF_CLASS,
+  DASHBOARD_HERO_DELTA_CLASS,
+  DASHBOARD_HERO_VALUE_CLASS,
+  DASHBOARD_KICKER_CLASS,
   DASHBOARD_ORG_LABEL_CLASS,
+  DASHBOARD_RANKED_LIST_CLASS,
+  DASHBOARD_RELATED_GAP_CLASS,
   DASHBOARD_TITLE_DESKTOP_CLASS,
   DASHBOARD_TITLE_MOBILE_CLASS,
 } from "@/lib/dashboard-craft";
@@ -106,24 +112,29 @@ export function DashboardRevenueCard({
       aria-label={DASHBOARD_ADMIN.revenue}
       className={DASHBOARD_CARD_CLASS}
     >
-      <div className={cn("flex flex-col gap-[var(--space-2)]", DASHBOARD_CARD_PAD_HERO)}>
-        <p className="t-label text-ink-3">{DASHBOARD_ADMIN.revenue}</p>
+      <div className={cn("flex flex-col", DASHBOARD_RELATED_GAP_CLASS, DASHBOARD_CARD_PAD_HERO)}>
+        <p className={DASHBOARD_KICKER_CLASS}>{DASHBOARD_ADMIN.revenue}</p>
         <p
           data-dashboard-stat="revenue"
           className={
             hero.totalCents === null
               ? "t-title text-ink"
-              : "t-display t-data leading-none text-ink"
+              : DASHBOARD_HERO_VALUE_CLASS
           }
         >
           {value}
         </p>
-        <p className="t-label text-ink-3">{dashboardAsOfLine(hero)}</p>
         {hero.compare ? (
-          <p data-dashboard-revenue-compare="" className="t-body-sm text-ink-3">
+          <p
+            data-dashboard-revenue-compare=""
+            className={DASHBOARD_HERO_DELTA_CLASS}
+          >
             {dashboardDeltaLine(hero.compare)}
           </p>
         ) : null}
+        <p data-dashboard-revenue-asof="" className={DASHBOARD_HERO_ASOF_CLASS}>
+          {dashboardAsOfLine(hero)}
+        </p>
       </div>
       <div className="border-t border-hairline">
         <DashboardRevenueChart
@@ -144,8 +155,8 @@ export function DashboardRecentActivity({ items }: { items: readonly DashboardAc
       data-dashboard-module="recent-activity"
       className={DASHBOARD_CARD_CLASS}
     >
-      <div className={cn("flex items-center justify-between gap-[var(--space-4)]", DASHBOARD_CARD_PAD_LIST)}>
-        <p className="t-label text-ink-3">{DASHBOARD_ADMIN.activity}</p>
+      <div className={cn("flex items-center justify-between", DASHBOARD_RELATED_GAP_CLASS, DASHBOARD_CARD_PAD_LIST)}>
+        <p className={DASHBOARD_KICKER_CLASS}>{DASHBOARD_ADMIN.activity}</p>
         <TextAction href="/titles">{DASHBOARD_ADMIN.viewAll}</TextAction>
       </div>
       {items.length === 0 ? (
@@ -153,13 +164,13 @@ export function DashboardRecentActivity({ items }: { items: readonly DashboardAc
           {DASHBOARD_ADMIN.activityEmpty}
         </p>
       ) : (
-        <ol className="flex flex-col gap-[var(--space-2)] border-t border-hairline px-[var(--space-4)] py-[var(--space-4)]">
+        <ol className={DASHBOARD_RANKED_LIST_CLASS}>
           {items.map((item, i) => {
             const percent = rankedBarPercent(item.count, max);
             return (
-              <li key={item.id} className="flex flex-col gap-[var(--space-2)]">
-                <div className="flex items-center justify-between gap-[var(--space-4)]">
-                  <span className="flex min-w-0 items-center gap-[var(--space-2)]">
+              <li key={item.id} className={cn("flex min-h-10 flex-col", DASHBOARD_RELATED_GAP_CLASS)}>
+                <div className={cn("flex items-center justify-between", DASHBOARD_RELATED_GAP_CLASS)}>
+                  <span className={cn("flex min-w-0 items-center", DASHBOARD_RELATED_GAP_CLASS)}>
                     <span className="t-data t-body-sm w-4 shrink-0 text-ink-3">{i + 1}</span>
                     <span className="min-w-0">
                       <Link
@@ -171,7 +182,7 @@ export function DashboardRecentActivity({ items }: { items: readonly DashboardAc
                       <span className="t-body-sm text-ink-3">{item.detail}</span>
                     </span>
                   </span>
-                  <time className="t-body-sm shrink-0 text-ink-3" dateTime={item.at}>
+                  <time className="t-data t-body-sm shrink-0 text-right text-ink-3" dateTime={item.at}>
                     {dashboardJustInDate(item.at)}
                   </time>
                 </div>

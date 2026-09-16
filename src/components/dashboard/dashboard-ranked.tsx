@@ -4,7 +4,14 @@ import { useState } from "react";
 import { ChartBar, List } from "@phosphor-icons/react";
 
 import { TextAction } from "@/components/chrome/house";
-import { DASHBOARD_CARD_PAD_LIST, DASHBOARD_MODULE_CARD_CLASS } from "@/lib/dashboard-craft";
+import {
+  DASHBOARD_CARD_PAD_LIST,
+  DASHBOARD_KICKER_CLASS,
+  DASHBOARD_MONEY_CLASS,
+  DASHBOARD_MODULE_CARD_CLASS,
+  DASHBOARD_RANKED_LIST_CLASS,
+  DASHBOARD_RELATED_GAP_CLASS,
+} from "@/lib/dashboard-craft";
 import { DASHBOARD_HOME, rankedBarPercent } from "@/lib/dashboard-home";
 import {
   PHOSPHOR_CHROME_ICON_CLASS,
@@ -37,10 +44,10 @@ export function DashboardRankedBars({
       {...(territory ? { "data-dashboard-territory": "" } : {})}
       className={DASHBOARD_MODULE_CARD_CLASS}
     >
-      <div className={`flex items-center justify-between gap-[var(--space-4)] ${DASHBOARD_CARD_PAD_LIST}`}>
-        <p className="t-label text-ink-3">{label}</p>
-        <div className="flex items-center gap-[var(--space-4)]">
-          <div className="flex items-center gap-[var(--space-2)]">
+      <div className={`flex items-center justify-between ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD_LIST}`}>
+        <p className={DASHBOARD_KICKER_CLASS}>{label}</p>
+        <div className={`flex items-center ${DASHBOARD_RELATED_GAP_CLASS}`}>
+          <div className={`flex items-center ${DASHBOARD_RELATED_GAP_CLASS}`}>
             <button
               type="button"
               aria-label={DASHBOARD_HOME.viewChart}
@@ -70,17 +77,17 @@ export function DashboardRankedBars({
           {empty}
         </p>
       ) : (
-        <ol className="flex flex-col gap-[var(--space-2)] border-t border-hairline px-[var(--space-4)] py-[var(--space-4)]">
+        <ol className={DASHBOARD_RANKED_LIST_CLASS}>
           {rows.map((row, i) => {
             const percent = rankedBarPercent(row.count, max);
             return (
-              <li key={row.name} className="flex flex-col gap-[var(--space-2)]">
-                <div className="flex items-center justify-between gap-[var(--space-4)]">
-                  <span className="flex min-w-0 items-center gap-[var(--space-2)]">
+              <li key={row.name} className={`flex min-h-10 flex-col ${DASHBOARD_RELATED_GAP_CLASS}`}>
+                <div className={`flex items-center justify-between ${DASHBOARD_RELATED_GAP_CLASS}`}>
+                  <span className={`flex min-w-0 items-center ${DASHBOARD_RELATED_GAP_CLASS}`}>
                     <span className="t-data t-body-sm w-4 shrink-0 text-ink-3">{i + 1}</span>
                     <span className="t-body-sm text-ink">{row.name}</span>
                   </span>
-                  <span className="t-data t-body-sm text-ink">{row.count}</span>
+                  <span className={DASHBOARD_MONEY_CLASS}>{row.count}</span>
                 </div>
                 {mode === "chart" ? (
                   <div className="h-1 overflow-hidden rounded-[var(--radius-sm)] bg-surface-muted">

@@ -47,7 +47,8 @@ describe("UserMenuIdentity", () => {
     );
     expect(html).toContain('data-user-menu-name=""');
     expect(html).toContain("Ada Lovelace");
-    expect(html).toContain("t-body font-normal text-ink");
+    expect(html).toContain("t-body text-ink");
+    expect(html).not.toContain("t-body font-normal");
     expect(html).toContain("t-body-sm text-ink-3");
   });
 

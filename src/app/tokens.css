@@ -60,6 +60,9 @@
   --text-title:1.5rem;     /* 24 — .t-title / .page-title */
   --text-hero: 3rem;       /* 48 — .t-display / hero-value */
   --tracking-tight: -0.02em;
+  /* Role weights bind in globals .t-* (house-wide). Title 480 · body 420.
+     Do not override with font-normal (400-as-body) or font-medium (500-as-title).
+     No Dashboard-only token CSS. */
   --type-title-weight: 480;
   --type-body-weight: 420;
 

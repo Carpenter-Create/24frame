@@ -148,7 +148,7 @@ export const SETTINGS_LOCAL_NAV = SETTINGS_HUB_NAV;
 export const SETTINGS_RAIL_PAD_CLASS = "p-[var(--space-4)]";
 export const SETTINGS_RAIL_NAV_CLASS = "flex flex-col gap-[var(--space-2)]";
 export const SETTINGS_RAIL_ITEM_CLASS =
-  "flex items-center rounded-[var(--radius)] px-[var(--space-2)] py-[var(--space-2)] t-body font-normal leading-5";
+  "flex items-center rounded-[var(--radius)] px-[var(--space-2)] py-[var(--space-2)] t-body leading-5";
 export const SETTINGS_RAIL_DASHBOARD_CLASS = "gap-[var(--space-2)]";
 export const SETTINGS_RAIL_ACTIVE_CLASS = "bg-surface-muted text-ink";
 export const SETTINGS_RAIL_IDLE_CLASS =
@@ -159,13 +159,13 @@ export const SETTINGS_RAIL_TITLE_CLASS = "t-section text-ink";
 export const SETTINGS_PANE_CLASS = "flex flex-col gap-[var(--space-12)]";
 export const SETTINGS_SECTION_CLASS = "flex flex-col gap-[var(--space-6)]";
 export const SETTINGS_QUIET_ROW_CLASS =
-  "flex items-center justify-between t-body font-normal leading-5 text-ink";
+  "flex items-center justify-between t-body leading-5 text-ink";
 
 // 623:785 — phone header left slot. Hub list back is Home. Pushed
 // section back is Settings (list). Hidden at md, where the rail stays.
 export const SETTINGS_HEADER_PAD_CLASS = MOBILE_CHROME_LEAD_PAD_CLASS;
 export const SETTINGS_HEADER_BACK_CLASS =
-  "flex items-center gap-[var(--space-2)] t-body font-normal md:hidden";
+  "flex items-center gap-[var(--space-2)] t-body md:hidden";
 
 export const SETTINGS_RAIL_ABSENT = [
   "Titles",

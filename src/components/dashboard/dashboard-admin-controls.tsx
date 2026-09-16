@@ -117,6 +117,7 @@ export function DashboardAdminControls({
             <button
               type="button"
               data-dashboard-period=""
+              data-dashboard-period-one=""
               aria-label={DASHBOARD_ADMIN.period}
               aria-expanded={open}
               aria-haspopup="listbox"

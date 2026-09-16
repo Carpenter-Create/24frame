@@ -20,7 +20,7 @@ export function AddTitleButton({ orgId }: { orgId: string }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="t-body-sm font-normal text-accent transition-colors hover:underline"
+        className="t-body-sm text-accent transition-colors hover:underline"
         data-add-title=""
       >
         {TITLES_CATALOG.addTitle}
