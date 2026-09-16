@@ -5,7 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getOrgContext } from "@/lib/supabase/context";
 import { CLIENTS_PAGE, ORG_ROLE_LABELS, ORG_STATUS_LABELS } from "@/lib/clients";
 import { DASHBOARD_HOME, dashboardJustInDate } from "@/lib/dashboard-home";
-import { FINANCE_CLIENT, FINANCE_CLIENT_HREF, FINANCE_PAGE } from "@/lib/finance";
+import { FINANCE_PAGE } from "@/lib/finance";
+import { REPORTS_HREF } from "@/lib/reports";
 import { AGGREGATION_EMPTY } from "@/lib/aggregation-empty";
 import { DASHBOARD_ATTENTION_CLEAR, dashboardAttentionSummary } from "@/lib/findings";
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
@@ -19,6 +20,9 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
+vi.mock("next/headers", () => ({
+  cookies: vi.fn(async () => ({ get: () => undefined })),
+}));
 
 type Status = "registered" | "awaiting_payment" | "active";
 
@@ -76,6 +80,7 @@ function stubClient(
   });
   const rpc = vi.fn(async (name: string) => {
     if (name === "my_findings") return { data: findings, error: null };
+    if (name === "my_deliveries") return { data: [], error: null };
     if (name === "gc_client_directory") return { data: [], error: null };
     throw new Error(`unexpected rpc(${name})`);
   });
@@ -121,6 +126,12 @@ describe("DashboardPage modes", () => {
     expect(html).toContain(DASHBOARD_ATTENTION_CLEAR);
     expect(html).toContain("/catalog-health");
     expect(html).toContain("data-dashboard-home");
+    expect(html).toContain("data-dashboard-hero");
+    expect(html).toContain("data-dashboard-overview");
+    expect(html).toContain("data-dashboard-reports-cta");
+    expect(html).toContain(`href="${REPORTS_HREF}"`);
+    expect(html).toContain(DASHBOARD_HOME.reportsCta);
+    expect(html).not.toContain("data-finance-glance");
     expect(html).not.toContain("data-finance-glance-stub");
     expect(html).toContain("dashboard-home-pill");
     expect(html).toContain('href="/catalog-health"');
@@ -197,10 +208,10 @@ describe("DashboardPage modes", () => {
     expect(rpc).not.toHaveBeenCalledWith("gc_client_directory", expect.anything());
     expect(html).toContain("Acme");
     expect(html).toContain("data-dashboard-snapshot");
-    expect(html).toContain("data-finance-glance");
-    expect(html).toContain(FINANCE_CLIENT.glanceRate);
-    expect(html).toContain(FINANCE_CLIENT.glanceCta);
-    expect(html).toContain(`href="${FINANCE_CLIENT_HREF}"`);
+    expect(html).toContain("data-dashboard-hero");
+    expect(html).toContain("data-dashboard-reports-cta");
+    expect(html).toContain(DASHBOARD_HOME.reportsCta);
+    expect(html).not.toContain("data-finance-glance");
     expect(html).not.toContain("data-finance-glance-stub");
     expect(html).not.toContain(FINANCE_PAGE.glance);
     expect(html).not.toContain(CLIENTS_PAGE.subtitle);
@@ -492,27 +503,30 @@ describe("client home copy lock", () => {
     expect(html).not.toContain("Metadata incomplete");
   });
 
-  it("shows the client finance glance for a view_financial seat", async () => {
+  it("shows the Reports pointer and visual home modules for a client org", async () => {
     stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(
       ctx({ isGcStaff: false, orgStatus: "active" }) as never,
     );
     const html = renderToStaticMarkup(await DashboardPage());
-    expect(html).toContain("data-finance-glance");
-    expect(html).toContain("dashboard-home-panel");
-    expect(html).toContain(FINANCE_CLIENT.glanceRate);
-    expect(html).toContain(FINANCE_CLIENT.glanceBalance);
-    expect(html).toContain(FINANCE_CLIENT.glanceThreshold);
-    expect(html).toContain(FINANCE_CLIENT.glanceLatest);
-    expect(html).toContain(FINANCE_CLIENT.glanceNone);
-    expect(html).toContain(`href="${FINANCE_CLIENT_HREF}"`);
-    expect(html).toContain(FINANCE_CLIENT.glanceCta);
+    expect(html).toContain("data-dashboard-hero");
+    expect(html).toContain("data-dashboard-overview");
+    expect(html).toContain('data-dashboard-module="top-titles"');
+    expect(html).toContain('data-dashboard-module="deliveries-action"');
+    expect(html).toContain('data-dashboard-module="findings-glance"');
+    expect(html).toContain('data-dashboard-module="what-changed"');
+    expect(html).toContain("data-dashboard-reports-cta");
+    expect(html).toContain(`href="${REPORTS_HREF}"`);
+    expect(html).toContain(DASHBOARD_HOME.reportsCta);
+    expect(html).not.toContain("data-finance-glance");
     expect(html).not.toContain("data-finance-glance-stub");
     expect(html).not.toContain("Revenue");
     expect(html).not.toContain("bg-band");
+    expect(html).not.toContain("data-reports-period");
+    expect(html).not.toContain("data-reports-download");
   });
 
-  it("hides the Earn glance when the recipient cannot view financial", async () => {
+  it("still shows the Reports pointer when the recipient cannot view financial", async () => {
     stubClient();
     vi.mocked(getOrgContext).mockResolvedValue({
       ...ctx({ isGcStaff: false, orgStatus: "active" }),
@@ -520,9 +534,9 @@ describe("client home copy lock", () => {
     } as never);
     const html = renderToStaticMarkup(await DashboardPage());
     expect(html).toContain("data-dashboard-home");
+    expect(html).toContain("data-dashboard-reports-cta");
     expect(html).not.toContain("data-finance-glance");
     expect(html).not.toContain("data-finance-glance-stub");
-    expect(html).not.toContain(FINANCE_CLIENT.glanceRate);
   });
 
   it("hides Add Title on an empty catalog when the viewer cannot operate", async () => {

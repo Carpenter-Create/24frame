@@ -146,9 +146,9 @@ describe("recipients cannot see or write suspense", () => {
   });
 
   it("keeps recipient UI and export off the suspense pool", () => {
-    const list = readFileSync("src/app/(app)/earn/page.tsx", "utf8");
-    const detail = readFileSync("src/app/(app)/earn/[periodId]/page.tsx", "utf8");
-    const exp = readFileSync("src/app/(app)/earn/[periodId]/export/route.ts", "utf8");
+    const list = readFileSync("src/app/(app)/reports/page.tsx", "utf8");
+    const detail = readFileSync("src/app/(app)/reports/[periodId]/page.tsx", "utf8");
+    const exp = readFileSync("src/app/(app)/reports/[periodId]/export/route.ts", "utf8");
     const load = readFileSync("src/lib/finance-recipient-load.ts", "utf8");
     const staffList = readFileSync("src/app/(app)/(operator)/gc/finance/page.tsx", "utf8");
     for (const src of [list, detail, exp]) {

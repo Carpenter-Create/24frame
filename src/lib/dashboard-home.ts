@@ -1,4 +1,5 @@
 import { isJustIn } from "@/lib/releases";
+import { isoInReportsPeriod, parseReportsPeriod } from "@/lib/reports";
 import { TITLE_STATUS_LABELS, type TitleStatus } from "@/lib/titles";
 import { TITLES_CATALOG } from "@/lib/titles-catalog";
 
@@ -19,11 +20,40 @@ export const DASHBOARD_HOME = {
   needsAttention: "Needs attention",
   live: "Live",
   doNext: "Do next",
+  overview: "Overview",
+  addedThisMonth: "Added this month",
+  inPipeline: "In pipeline",
+  topTitles: "Top titles",
+  topTitlesEmpty: "No title activity this month yet.",
+  reportsCta: "Reports",
+  reportsPointer: "All-time activity",
+  hero: "Catalog activity",
+  heroEmpty: "Catalog activity charts here as titles are added.",
+  deliveriesAction: "Deliveries needing action",
+  deliveriesActionEmpty: "No deliveries need action.",
+  findingsGlance: "Catalog Health",
+  findingsGlanceEmpty: "Nothing needs your attention right now.",
+  findingsGlanceCta: "Open Catalog Health",
+  platforms: "Top platforms",
+  territories: "Top territories",
+  platformsEmpty: "No platform activity yet.",
+  territoriesEmpty: "No territory activity yet.",
+  whatChanged: "What changed",
+  whatChangedEmpty: "No changes since your last visit.",
+  whatChangedFirst: "No prior visit to compare yet.",
+  pending: "Pending submissions",
+  pendingEmpty: "No pending submissions.",
 } as const;
 
 export const DASHBOARD_HOME_DO_NEXT = 5;
 export const DASHBOARD_HOME_DRAFTS = DASHBOARD_HOME_DO_NEXT;
 export const DASHBOARD_HOME_JUST_IN = 5;
+export const DASHBOARD_HOME_TOP_TITLES = 5;
+export const DASHBOARD_HOME_STACK = 5;
+
+const PIPELINE_TITLE_STATUSES = new Set(["submitted", "in_review", "in_delivery"]);
+const PENDING_SUBMISSION_STATUSES = new Set(["submitted", "in_review"]);
+const DELIVERY_ACTION_STATUSES = new Set(["pending", "rejected"]);
 
 const JUST_IN_DATE = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
@@ -179,4 +209,105 @@ export function clientHomeSnapshot({
         created_at: t.created_at,
       })),
   };
+}
+
+export function titlesAddedThisMonth(titles: readonly ClientHomeTitle[], now: Date): number {
+  const period = parseReportsPeriod("this-month", now);
+  return titles.filter((title) => isoInReportsPeriod(title.created_at, period)).length;
+}
+
+export function titlesInPipeline(titles: readonly ClientHomeTitle[]): number {
+  return titles.filter((title) => PIPELINE_TITLE_STATUSES.has(title.status)).length;
+}
+
+/** Titles added this month, newest first. Recency is the activity — no invented rank. */
+export function topTitlesThisMonth(
+  titles: readonly ClientHomeTitle[],
+  now: Date,
+): ClientHomeJustInItem[] {
+  const period = parseReportsPeriod("this-month", now);
+  return [...titles]
+    .filter((title) => isoInReportsPeriod(title.created_at, period))
+    .sort((a, b) => (a.created_at < b.created_at ? 1 : -1))
+    .slice(0, DASHBOARD_HOME_TOP_TITLES)
+    .map((title) => ({
+      id: title.id,
+      title: title.title,
+      status: title.status,
+      created_at: title.created_at,
+    }));
+}
+
+export type DashboardDeliveryRow = {
+  delivery_id: string;
+  title_id: string;
+  title: string;
+  vendor_name: string;
+  territory: string;
+  status: string;
+  updated_at: string | null;
+};
+
+export function deliveriesNeedingAction(
+  rows: readonly DashboardDeliveryRow[],
+): DashboardDeliveryRow[] {
+  return rows
+    .filter((row) => DELIVERY_ACTION_STATUSES.has(row.status))
+    .sort((a, b) => (a.updated_at ?? "") < (b.updated_at ?? "") ? 1 : -1)
+    .slice(0, DASHBOARD_HOME_STACK);
+}
+
+export function pendingSubmissions(titles: readonly ClientHomeTitle[]): ClientHomeJustInItem[] {
+  return [...titles]
+    .filter((title) => PENDING_SUBMISSION_STATUSES.has(title.status))
+    .sort((a, b) => (a.created_at < b.created_at ? 1 : -1))
+    .slice(0, DASHBOARD_HOME_STACK)
+    .map((title) => ({
+      id: title.id,
+      title: title.title,
+      status: title.status,
+      created_at: title.created_at,
+    }));
+}
+
+export type DashboardChangeRow = {
+  key: "titles" | "deliveries" | "findings";
+  label: string;
+  count: number;
+};
+
+export function dashboardWhatChanged(input: {
+  titlesAdded: number;
+  deliveriesUpdated: number;
+  findingsOpened: number;
+}): DashboardChangeRow[] {
+  const rows: DashboardChangeRow[] = [];
+  if (input.titlesAdded > 0) {
+    rows.push({
+      key: "titles",
+      label: input.titlesAdded === 1 ? "1 title added" : `${input.titlesAdded} titles added`,
+      count: input.titlesAdded,
+    });
+  }
+  if (input.deliveriesUpdated > 0) {
+    rows.push({
+      key: "deliveries",
+      label:
+        input.deliveriesUpdated === 1
+          ? "1 delivery updated"
+          : `${input.deliveriesUpdated} deliveries updated`,
+      count: input.deliveriesUpdated,
+    });
+  }
+  if (input.findingsOpened > 0) {
+    rows.push({
+      key: "findings",
+      label:
+        input.findingsOpened === 1
+          ? "1 finding opened"
+          : `${input.findingsOpened} findings opened`,
+      count: input.findingsOpened,
+    });
+  }
+  return rows;
 }

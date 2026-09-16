@@ -39,9 +39,9 @@ export const ONBOARDING_HIGHLIGHTS: Highlight[] = [
     status: "live",
   },
   {
-    title: "Analytics",
-    body: "Performance across platforms and territories.",
-    status: "soon",
+    title: "Reports",
+    body: "Activity across Aggregation.",
+    status: "live",
   },
   {
     title: `${ASSISTANT_NAME} assistant`,

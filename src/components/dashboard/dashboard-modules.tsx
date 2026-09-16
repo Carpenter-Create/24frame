@@ -1,0 +1,262 @@
+import Link from "next/link";
+
+import { TextAction } from "@/components/chrome/house";
+import {
+  DashboardHomeEmpty,
+  DashboardHomePanel,
+  DashboardHomeStatusPill,
+} from "@/components/dashboard/dashboard-home";
+import { Card, CardBody } from "@/components/ui/card";
+import {
+  DASHBOARD_HOME,
+  dashboardCatalogValue,
+  dashboardJustInDate,
+  dashboardTitleStatusLabel,
+  type ClientHomeJustInItem,
+  type DashboardChangeRow,
+  type DashboardDeliveryRow,
+} from "@/lib/dashboard-home";
+import { CATALOG_HEALTH_EMPTY } from "@/lib/findings";
+import { REPORTS_HREF, reportsHref } from "@/lib/reports";
+import type { ReportsCountRow } from "@/lib/reports";
+
+export function DashboardAnalyticsOverview({
+  addedThisMonth,
+  inPipeline,
+}: {
+  addedThisMonth: number;
+  inPipeline: number;
+}) {
+  const cells = [
+    { key: "added", label: DASHBOARD_HOME.addedThisMonth, value: String(addedThisMonth) },
+    { key: "pipeline", label: DASHBOARD_HOME.inPipeline, value: String(inPipeline) },
+  ] as const;
+  return (
+    <Link
+      href={reportsHref({ period: "this-month" })}
+      data-dashboard-overview=""
+      className="grid grid-cols-2 overflow-hidden rounded-[var(--radius-lg)] border border-hairline bg-surface"
+    >
+      {cells.map((cell, i) => (
+        <div
+          key={cell.key}
+          data-dashboard-overview-cell={cell.key}
+          className={`flex flex-col gap-[var(--space-2)] p-[var(--space-6)] ${i > 0 ? "border-l border-hairline" : ""}`}
+        >
+          <span className="t-label text-ink-3">{cell.label}</span>
+          <span className="t-data t-title text-ink">{cell.value}</span>
+        </div>
+      ))}
+    </Link>
+  );
+}
+
+export function DashboardFramedEmpty({ children }: { children: React.ReactNode }) {
+  return (
+    <Card>
+      <CardBody>
+        <p className="t-body text-ink-2">{children}</p>
+      </CardBody>
+    </Card>
+  );
+}
+
+export function DashboardListPanel({
+  label,
+  empty,
+  children,
+  testId,
+}: {
+  label: string;
+  empty: string;
+  children?: React.ReactNode;
+  testId: string;
+}) {
+  return (
+    <DashboardHomePanel aria-label={label} data-dashboard-module={testId}>
+      <span className="px-[var(--space-6)] py-[var(--space-4)] t-label text-ink-3">{label}</span>
+      {children ?? <DashboardHomeEmpty>{empty}</DashboardHomeEmpty>}
+    </DashboardHomePanel>
+  );
+}
+
+export function DashboardTitleRows({ items }: { items: readonly ClientHomeJustInItem[] }) {
+  return (
+    <ul className="divide-y divide-hairline border-t border-hairline">
+      {items.map((item) => {
+        const statusLabel = dashboardTitleStatusLabel(item.status);
+        return (
+          <li
+            key={item.id}
+            className="flex items-center justify-between gap-[var(--space-6)] px-[var(--space-6)] py-[var(--space-4)]"
+          >
+            <span className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+              <Link
+                href={`/titles/${item.id}`}
+                className="t-body font-medium text-ink transition-colors hover:text-ink-2"
+              >
+                {item.title}
+              </Link>
+              {statusLabel ? <DashboardHomeStatusPill label={statusLabel} /> : null}
+            </span>
+            <time className="t-body-sm shrink-0 text-ink-3" dateTime={item.created_at}>
+              {dashboardJustInDate(item.created_at)}
+            </time>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+export function DashboardTopTitles({ items }: { items: readonly ClientHomeJustInItem[] }) {
+  return (
+    <DashboardListPanel
+      label={DASHBOARD_HOME.topTitles}
+      empty={DASHBOARD_HOME.topTitlesEmpty}
+      testId="top-titles"
+    >
+      {items.length > 0 ? <DashboardTitleRows items={items} /> : undefined}
+    </DashboardListPanel>
+  );
+}
+
+export function DashboardDeliveriesAction({ rows }: { rows: readonly DashboardDeliveryRow[] }) {
+  return (
+    <DashboardListPanel
+      label={DASHBOARD_HOME.deliveriesAction}
+      empty={DASHBOARD_HOME.deliveriesActionEmpty}
+      testId="deliveries-action"
+    >
+      {rows.length > 0 ? (
+        <ul className="divide-y divide-hairline border-t border-hairline">
+          {rows.map((row) => (
+            <li
+              key={row.delivery_id}
+              className="flex items-center justify-between gap-[var(--space-6)] px-[var(--space-6)] py-[var(--space-4)]"
+            >
+              <Link
+                href={`/titles/${row.title_id}`}
+                className="t-body font-medium text-ink transition-colors hover:text-ink-2"
+              >
+                {row.title}
+              </Link>
+              <span className="t-body-sm shrink-0 text-ink-3">
+                {row.vendor_name} · {row.territory}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : undefined}
+    </DashboardListPanel>
+  );
+}
+
+export function DashboardFindingsGlance({
+  count,
+  isPartial,
+}: {
+  count: number;
+  isPartial: boolean;
+}) {
+  return (
+    <DashboardHomePanel aria-label={DASHBOARD_HOME.findingsGlance} data-dashboard-module="findings-glance">
+      <div className="flex items-center justify-between gap-[var(--space-4)] px-[var(--space-6)] py-[var(--space-4)]">
+        <p className="t-label text-ink-3">{DASHBOARD_HOME.findingsGlance}</p>
+        <TextAction href="/catalog-health">{DASHBOARD_HOME.findingsGlanceCta}</TextAction>
+      </div>
+      <div className="border-t border-hairline px-[var(--space-6)] py-[var(--space-6)]">
+        <p data-dashboard-findings-count="" className="t-display t-data text-ink">
+          {dashboardCatalogValue(count, isPartial)}
+        </p>
+        {count === 0 ? (
+          <p className="mt-[var(--space-2)] t-body-sm text-ink-3">{CATALOG_HEALTH_EMPTY}</p>
+        ) : null}
+      </div>
+    </DashboardHomePanel>
+  );
+}
+
+export function DashboardCountList({
+  label,
+  empty,
+  rows,
+  testId,
+}: {
+  label: string;
+  empty: string;
+  rows: readonly ReportsCountRow[];
+  testId: string;
+}) {
+  return (
+    <DashboardListPanel label={label} empty={empty} testId={testId}>
+      {rows.length > 0 ? (
+        <ul className="divide-y divide-hairline border-t border-hairline">
+          {rows.map((row) => (
+            <li
+              key={row.name}
+              className="flex items-center justify-between gap-[var(--space-6)] px-[var(--space-6)] py-[var(--space-4)]"
+            >
+              <span className="t-body text-ink">{row.name}</span>
+              <span className="t-data t-body text-ink">{row.count}</span>
+            </li>
+          ))}
+        </ul>
+      ) : undefined}
+    </DashboardListPanel>
+  );
+}
+
+export function DashboardWhatChanged({
+  firstVisit,
+  rows,
+}: {
+  firstVisit: boolean;
+  rows: readonly DashboardChangeRow[];
+}) {
+  return (
+    <DashboardListPanel
+      label={DASHBOARD_HOME.whatChanged}
+      empty={firstVisit ? DASHBOARD_HOME.whatChangedFirst : DASHBOARD_HOME.whatChangedEmpty}
+      testId="what-changed"
+    >
+      {rows.length > 0 ? (
+        <ul className="divide-y divide-hairline border-t border-hairline">
+          {rows.map((row) => (
+            <li
+              key={row.key}
+              data-dashboard-change={row.key}
+              className="flex items-center justify-between gap-[var(--space-6)] px-[var(--space-6)] py-[var(--space-4)]"
+            >
+              <span className="t-body text-ink">{row.label}</span>
+              <span className="t-data t-body text-ink-2">{row.count}</span>
+            </li>
+          ))}
+        </ul>
+      ) : undefined}
+    </DashboardListPanel>
+  );
+}
+
+export function DashboardPendingSubmissions({ items }: { items: readonly ClientHomeJustInItem[] }) {
+  if (items.length === 0) return null;
+  return (
+    <DashboardListPanel
+      label={DASHBOARD_HOME.pending}
+      empty={DASHBOARD_HOME.pendingEmpty}
+      testId="pending"
+    >
+      <DashboardTitleRows items={items} />
+    </DashboardListPanel>
+  );
+}
+
+export function DashboardReportsCta() {
+  return (
+    <div data-dashboard-reports-cta="" className="flex flex-col gap-[var(--space-2)]">
+      <p className="t-body-sm text-ink-3">{DASHBOARD_HOME.reportsPointer}</p>
+      <TextAction href={REPORTS_HREF}>{DASHBOARD_HOME.reportsCta}</TextAction>
+    </div>
+  );
+}
+

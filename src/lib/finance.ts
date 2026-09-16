@@ -1,12 +1,12 @@
 import { PRODUCT_NAME } from "@/lib/product";
 
 // Staff ops copy + client recipient copy. Ops write path stays /gc/finance.
-// Recipient read path is /earn (legacy /finance* redirects here). Official
-// complementary-split lock: display client % and remainder only. Do not invent
-// a second fee field.
+// Recipient read path is /reports (legacy /earn* and /finance* redirect there).
+// Official complementary-split lock: display client % and remainder only. Do
+// not invent a second fee field.
 
 export const FINANCE_HREF = "/gc/finance";
-export const FINANCE_CLIENT_HREF = "/earn";
+export const FINANCE_CLIENT_HREF = "/reports";
 
 export const FINANCE_WRITE_RPCS = [
   "create_finance_period",
@@ -93,11 +93,11 @@ export const FINANCE_PAGE = {
 } as const;
 
 export const FINANCE_CLIENT = {
-  title: "Earn",
+  title: "Reports",
   subtitle: "Organization purse. Monthly periods. USD.",
   empty: "No statements yet.",
   notYet: "This period is not closed yet.",
-  noAccess: "Earn is not available on this seat.",
+  noAccess: "Statement activity is not available on this seat.",
   noOrg: "Choose an organization to read statements.",
   pack: "Download pack",
   pdf: "Branded PDF",
@@ -123,9 +123,9 @@ export const FINANCE_CLIENT = {
   glanceNone: "No closed statement yet.",
   glanceNoTerm: "No current term",
   glanceNoThreshold: "No threshold",
-  glanceCta: "Earn",
+  glanceCta: "Reports",
   download: "Download",
-  navAria: "Earn, organization purse",
+  navAria: "Reports",
 } as const;
 
 export const FINANCE_LOGIC_VERSION = "finance-ops-slice-1.1-client-tier-remainder";

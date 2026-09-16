@@ -169,8 +169,7 @@ describe("MobileNavSheet", () => {
       "Titles",
       "Deliveries",
       "Catalog Health",
-      "Analytics",
-      "Earn",
+      "Reports",
       "Ask 24Frame AI",
     ]);
     for (const item of NAV) {

@@ -41,8 +41,7 @@ describe("client NAV", () => {
       "/titles",
       "/deliveries",
       "/catalog-health",
-      "/analytics",
-      "/earn",
+      "/reports",
       "/messages",
     ]);
     expect(hrefs).not.toContain("/");
@@ -54,7 +53,7 @@ describe("client NAV", () => {
     expect(hrefs).not.toContain("/gc/finance");
   });
 
-  it("marks Dashboard current on `/` and `/dashboard`, Earn on purse paths", () => {
+  it("marks Dashboard current on `/` and `/dashboard`, Reports on legacy activity paths", () => {
     expect(clientNavCurrent("/").label).toBe("Dashboard");
     expect(clientNavCurrent("/dashboard").label).toBe("Dashboard");
     expect(isClientNavActive("/", NAV[0])).toBe(true);
@@ -62,11 +61,12 @@ describe("client NAV", () => {
     expect(isClientNavActive("/titles", NAV[0])).toBe(false);
     expect(clientNavCurrent("/titles").label).toBe("Titles");
     expect(clientNavCurrent("/titles/abc").label).toBe("Titles");
-    expect(clientNavCurrent("/analytics").label).toBe("Analytics");
-    expect(clientNavCurrent("/earn").label).toBe("Earn");
-    expect(clientNavCurrent("/earn/abc").label).toBe("Earn");
-    expect(clientNavCurrent("/finance").label).toBe("Earn");
-    expect(clientNavCurrent("/finance/abc").label).toBe("Earn");
+    expect(clientNavCurrent("/reports").label).toBe("Reports");
+    expect(clientNavCurrent("/analytics").label).toBe("Reports");
+    expect(clientNavCurrent("/earn").label).toBe("Reports");
+    expect(clientNavCurrent("/earn/abc").label).toBe("Reports");
+    expect(clientNavCurrent("/finance").label).toBe("Reports");
+    expect(clientNavCurrent("/finance/abc").label).toBe("Reports");
     expect(clientNavCurrent("/messages").label).toBe("Ask 24Frame AI");
     expect(clientNavCurrent("/messages").label).toBe(ASK_GLOBEE.headline);
     expect(clientNavCurrent("/queue").label).toBe("Dashboard");
@@ -103,7 +103,6 @@ describe("client NAV", () => {
       PaperPlaneTilt,
       Pulse,
       ChartBar,
-      Wallet,
       Sparkle,
     ]);
     expect(GC_NAV.map((item) => item.icon)).toEqual([
@@ -150,8 +149,7 @@ describe("GC_NAV", () => {
       "Titles",
       "Deliveries",
       "Catalog Health",
-      "Analytics",
-      "Earn",
+      "Reports",
       "Ask 24Frame AI",
       "Queue",
       "24Frame Deliveries",
@@ -177,8 +175,7 @@ describe("mobileNavDestinations", () => {
       "Titles",
       "Deliveries",
       "Catalog Health",
-      "Analytics",
-      "Earn",
+      "Reports",
       "Ask 24Frame AI",
     ]);
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/queue");
@@ -192,8 +189,7 @@ describe("mobileNavDestinations", () => {
       "Titles",
       "Deliveries",
       "Catalog Health",
-      "Analytics",
-      "Earn",
+      "Reports",
       "Ask 24Frame AI",
       "Queue",
       "24Frame Deliveries",
