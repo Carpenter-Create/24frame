@@ -1,0 +1,576 @@
+import { DASHBOARD_HOME_STACK, type ClientHomeFinding, type ClientHomeTitle } from "@/lib/dashboard-home";
+import { formatUsdCents } from "@/lib/finance";
+import { parseReportsUserId, reportsUserLabel, type ReportsUserOption } from "@/lib/reports";
+
+// Company-admin Dashboard hero. Period + user URL state rematch RL Overview
+// behavior only — Geist / Sporty Blue / hairline. No invented money series.
+
+export const DASHBOARD_HREF = "/dashboard";
+
+export const DASHBOARD_ADMIN = {
+  revenue: "Net revenue",
+  revenueEmpty: "No revenue for this period yet.",
+  chartEmpty: "Revenue charts here when a closed statement exists.",
+  asOfPrefix: "As of",
+  updatedPrefix: "Updated",
+  updatedNone: "No closed statement yet.",
+  activity: "Recent account activity",
+  activityEmpty: "No account activity for this period yet.",
+  viewAll: "View all",
+  findUser: "Find a user account",
+  allCompany: "All company activity",
+  period: "Period",
+  allTime: "All time",
+  ytd: "YTD",
+  year: "Year",
+  quarter: "Quarter",
+  month: "Month",
+  titleAdded: "Title added",
+  deliveryUpdated: "Delivery updated",
+  findingOpened: "Finding opened",
+} as const;
+
+export function isCompanyAdminRole(role: string | null | undefined): boolean {
+  return role === "account_owner";
+}
+
+export type DashboardPeriodKind = "all" | "ytd" | "year" | "quarter" | "month";
+
+export type DashboardPeriod =
+  | { kind: "all"; key: "all"; label: string }
+  | { kind: "ytd"; key: "ytd"; year: number; label: string }
+  | { kind: "year"; key: string; year: number; label: string }
+  | { kind: "quarter"; key: string; year: number; quarter: 1 | 2 | 3 | 4; label: string }
+  | { kind: "month"; key: string; year: number; month: number; label: string };
+
+export type DashboardPeriodOption = {
+  key: string;
+  label: string;
+  group: DashboardPeriodKind;
+};
+
+export type DashboardRevenuePoint = {
+  key: string;
+  label: string;
+  year: number;
+  month: number;
+  netCents: number;
+};
+
+export type DashboardRevenueHero = {
+  totalCents: number | null;
+  asOf: string;
+  updated: string | null;
+  compare: DashboardCompare | null;
+  points: DashboardRevenuePoint[];
+};
+
+export type DashboardCompare = {
+  text: string;
+  priorLabel: string;
+};
+
+export type DashboardActivityRow = {
+  id: string;
+  title: string;
+  href: string;
+  at: string;
+  count: number;
+  detail: string;
+};
+
+function scalarQuery(value: string | string[] | undefined): string | undefined {
+  return typeof value === "string" ? value : undefined;
+}
+
+export function utcYearMonth(now: Date): { year: number; month: number } {
+  return { year: now.getUTCFullYear(), month: now.getUTCMonth() + 1 };
+}
+
+export function utcQuarter(month: number): 1 | 2 | 3 | 4 {
+  return Math.ceil(month / 3) as 1 | 2 | 3 | 4;
+}
+
+export function dashboardYearKey(year: number): string {
+  return String(year);
+}
+
+export function dashboardQuarterKey(year: number, quarter: 1 | 2 | 3 | 4): string {
+  return `Q${quarter}${year}`;
+}
+
+export function dashboardMonthKey(year: number, month: number): string {
+  return `${year}-${String(month).padStart(2, "0")}`;
+}
+
+export function dashboardQuarterLabel(year: number, quarter: 1 | 2 | 3 | 4): string {
+  return `Q${quarter} ${year}`;
+}
+
+export function dashboardYtdLabel(year: number): string {
+  return `${DASHBOARD_ADMIN.ytd} ${year}`;
+}
+
+export function parseDashboardPeriod(
+  raw: string | string[] | undefined,
+  now: Date,
+): DashboardPeriod {
+  const value = scalarQuery(raw);
+  const current = utcYearMonth(now);
+  const currentQuarter = utcQuarter(current.month);
+  if (!value || value === "all") {
+    return { kind: "all", key: "all", label: DASHBOARD_ADMIN.allTime };
+  }
+  if (value === "ytd") {
+    return { kind: "ytd", key: "ytd", year: current.year, label: dashboardYtdLabel(current.year) };
+  }
+  if (value === "year") {
+    return {
+      kind: "year",
+      key: dashboardYearKey(current.year),
+      year: current.year,
+      label: dashboardYearKey(current.year),
+    };
+  }
+  if (value === "quarter") {
+    return {
+      kind: "quarter",
+      key: dashboardQuarterKey(current.year, currentQuarter),
+      year: current.year,
+      quarter: currentQuarter,
+      label: dashboardQuarterLabel(current.year, currentQuarter),
+    };
+  }
+  if (value === "month" || value === "this-month") {
+    return {
+      kind: "month",
+      key: dashboardMonthKey(current.year, current.month),
+      year: current.year,
+      month: current.month,
+      label: dashboardMonthKey(current.year, current.month),
+    };
+  }
+  const quarter = /^Q([1-4])\s*(\d{4})$/i.exec(value);
+  if (quarter) {
+    const q = Number(quarter[1]) as 1 | 2 | 3 | 4;
+    const year = Number(quarter[2]);
+    return {
+      kind: "quarter",
+      key: dashboardQuarterKey(year, q),
+      year,
+      quarter: q,
+      label: dashboardQuarterLabel(year, q),
+    };
+  }
+  if (/^\d{4}$/.test(value)) {
+    const year = Number(value);
+    return { kind: "year", key: dashboardYearKey(year), year, label: dashboardYearKey(year) };
+  }
+  const month = /^(\d{4})-(\d{2})$/.exec(value);
+  if (month) {
+    const year = Number(month[1]);
+    const monthNumber = Number(month[2]);
+    if (monthNumber >= 1 && monthNumber <= 12) {
+      return {
+        kind: "month",
+        key: dashboardMonthKey(year, monthNumber),
+        year,
+        month: monthNumber,
+        label: dashboardMonthKey(year, monthNumber),
+      };
+    }
+  }
+  return { kind: "all", key: "all", label: DASHBOARD_ADMIN.allTime };
+}
+
+export function dashboardHref(input: { period?: string; user?: string | null }): string {
+  const params = new URLSearchParams();
+  if (input.period && input.period !== "all") params.set("period", input.period);
+  if (input.user) params.set("user", input.user);
+  const query = params.toString();
+  return query ? `${DASHBOARD_HREF}?${query}` : DASHBOARD_HREF;
+}
+
+export function parseDashboardUserId(raw: string | string[] | undefined): string | null {
+  return parseReportsUserId(raw);
+}
+
+export function dashboardUserLabel(input: {
+  displayName?: string | null;
+  handle?: string | null;
+}): string | null {
+  return reportsUserLabel(input);
+}
+
+export function filterDashboardUsers(
+  users: readonly ReportsUserOption[],
+  query: string,
+): ReportsUserOption[] {
+  const needle = query.trim().toLowerCase();
+  if (!needle) return [];
+  return users.filter((user) => user.label.toLowerCase().includes(needle));
+}
+
+function yearMonthInPeriod(year: number, month: number, period: DashboardPeriod): boolean {
+  if (period.kind === "all") return true;
+  if (period.kind === "year" || period.kind === "ytd") return year === period.year;
+  if (period.kind === "quarter") {
+    return year === period.year && utcQuarter(month) === period.quarter;
+  }
+  return year === period.year && month === period.month;
+}
+
+export function isoInDashboardPeriod(iso: string, period: DashboardPeriod): boolean {
+  if (period.kind === "all") return true;
+  const ms = Date.parse(iso);
+  if (!Number.isFinite(ms)) return false;
+  const date = new Date(ms);
+  return yearMonthInPeriod(date.getUTCFullYear(), date.getUTCMonth() + 1, period);
+}
+
+export function dashboardPeriodOptions(
+  now: Date,
+  sources: readonly { year: number; month: number }[],
+): DashboardPeriodOption[] {
+  const current = parseDashboardPeriod("month", now);
+  const year = parseDashboardPeriod("year", now);
+  const quarter = parseDashboardPeriod("quarter", now);
+  const ytd = parseDashboardPeriod("ytd", now);
+  const seen = new Set<string>(["all", ytd.key, year.key, quarter.key, current.key]);
+  const options: DashboardPeriodOption[] = [
+    { key: "all", label: DASHBOARD_ADMIN.allTime, group: "all" },
+    { key: ytd.key, label: ytd.label, group: "ytd" },
+    { key: year.key, label: year.label, group: "year" },
+    { key: quarter.key, label: quarter.label, group: "quarter" },
+    { key: current.key, label: current.label, group: "month" },
+  ];
+
+  const extra: DashboardPeriodOption[] = [];
+  for (const source of sources) {
+    if (!Number.isInteger(source.year) || source.month < 1 || source.month > 12) continue;
+    const monthKey = dashboardMonthKey(source.year, source.month);
+    const yearKey = dashboardYearKey(source.year);
+    const q = utcQuarter(source.month);
+    const quarterKey = dashboardQuarterKey(source.year, q);
+    const candidates: DashboardPeriodOption[] = [
+      { key: yearKey, label: yearKey, group: "year" },
+      { key: quarterKey, label: dashboardQuarterLabel(source.year, q), group: "quarter" },
+      { key: monthKey, label: monthKey, group: "month" },
+    ];
+    for (const candidate of candidates) {
+      if (seen.has(candidate.key)) continue;
+      seen.add(candidate.key);
+      extra.push(candidate);
+    }
+  }
+  extra.sort((a, b) => (a.key < b.key ? 1 : a.key > b.key ? -1 : 0));
+  return [...options, ...extra];
+}
+
+export function dashboardPeriodOptionsFor(
+  period: DashboardPeriod,
+  now: Date,
+  sources: readonly { year: number; month: number }[],
+): DashboardPeriodOption[] {
+  const options = dashboardPeriodOptions(now, sources);
+  if (options.some((option) => option.key === period.key)) return options;
+  return [
+    ...options,
+    { key: period.key, label: period.label, group: period.kind },
+  ];
+}
+
+export function filterDashboardTitles<T extends ClientHomeTitle & { created_by?: string | null }>(
+  titles: readonly T[],
+  period: DashboardPeriod,
+  userId: string | null,
+): T[] {
+  return titles.filter((title) => {
+    if (userId && title.created_by !== userId) return false;
+    return isoInDashboardPeriod(title.created_at, period);
+  });
+}
+
+export function dashboardUserTitleIds<T extends { id: string; created_by?: string | null }>(
+  titles: readonly T[],
+  userId: string | null,
+): Set<string> | null {
+  if (!userId) return null;
+  return new Set(titles.filter((title) => title.created_by === userId).map((title) => title.id));
+}
+
+export function filterDashboardDeliveries<
+  T extends { title_id: string; updated_at: string | null },
+>(
+  deliveries: readonly T[],
+  period: DashboardPeriod,
+  titleIds: ReadonlySet<string> | null,
+): T[] {
+  return deliveries.filter((row) => {
+    if (titleIds && !titleIds.has(row.title_id)) return false;
+    if (!row.updated_at) return period.kind === "all";
+    return isoInDashboardPeriod(row.updated_at, period);
+  });
+}
+
+export function formatUsdCompact(cents: number): string {
+  const abs = Math.abs(cents) / 100;
+  const sign = cents < 0 ? "−" : "";
+  if (abs >= 1_000_000) return `${sign}$${(abs / 1_000_000).toFixed(1)}M`;
+  if (abs >= 1_000) return `${sign}$${(abs / 1_000).toFixed(1)}K`;
+  return formatUsdCents(cents);
+}
+
+export function revenueCompare(
+  currentCents: number,
+  priorCents: number | null,
+  priorLabel: string,
+): DashboardCompare | null {
+  if (priorCents === null) return null;
+  if (priorCents === 0) return null;
+  const raw = ((currentCents - priorCents) / Math.abs(priorCents)) * 100;
+  const sign = raw > 0 ? "+" : raw < 0 ? "−" : "";
+  return {
+    text: `${sign}${Math.abs(raw).toFixed(1)}%`,
+    priorLabel,
+  };
+}
+
+export function pointDelta(
+  points: readonly DashboardRevenuePoint[],
+  index: number,
+): DashboardCompare | null {
+  if (index <= 0) return null;
+  const current = points[index];
+  const prior = points[index - 1];
+  if (!current || !prior) return null;
+  return revenueCompare(current.netCents, prior.netCents, prior.label);
+}
+
+/** TrendChart tooltip line: period already shown above; this is ↑/↓ % vs prior. */
+export function dashboardDeltaLine(compare: DashboardCompare): string {
+  const arrow = compare.text.startsWith("−") ? "↓" : compare.text.startsWith("+") ? "↑" : "";
+  return `${arrow} ${compare.text} vs ${compare.priorLabel}`.trim();
+}
+
+export function revenuePlayheadKey(
+  period: DashboardPeriod,
+  points: readonly DashboardRevenuePoint[],
+): string | null {
+  const inPeriod = points.filter((point) => yearMonthInPeriod(point.year, point.month, period));
+  return inPeriod[inPeriod.length - 1]?.key ?? points[points.length - 1]?.key ?? null;
+}
+
+function shiftMonth(year: number, month: number, delta: number): { year: number; month: number } {
+  const index = year * 12 + (month - 1) + delta;
+  return { year: Math.floor(index / 12), month: (index % 12) + 1 };
+}
+
+function priorPeriod(period: DashboardPeriod): DashboardPeriod | null {
+  if (period.kind === "all") return null;
+  if (period.kind === "ytd" || period.kind === "year") {
+    const year = period.year - 1;
+    return period.kind === "ytd"
+      ? { kind: "ytd", key: "ytd", year, label: dashboardYtdLabel(year) }
+      : { kind: "year", key: dashboardYearKey(year), year, label: dashboardYearKey(year) };
+  }
+  if (period.kind === "quarter") {
+    const prevQ = (period.quarter === 1 ? 4 : period.quarter - 1) as 1 | 2 | 3 | 4;
+    const year = period.quarter === 1 ? period.year - 1 : period.year;
+    return {
+      kind: "quarter",
+      key: dashboardQuarterKey(year, prevQ),
+      year,
+      quarter: prevQ,
+      label: dashboardQuarterLabel(year, prevQ),
+    };
+  }
+  const prev = shiftMonth(period.year, period.month, -1);
+  return {
+    kind: "month",
+    key: dashboardMonthKey(prev.year, prev.month),
+    year: prev.year,
+    month: prev.month,
+    label: dashboardMonthKey(prev.year, prev.month),
+  };
+}
+
+function sumPoints(points: readonly DashboardRevenuePoint[]): number {
+  return points.reduce((sum, point) => sum + point.netCents, 0);
+}
+
+export function buildDashboardRevenueHero(input: {
+  period: DashboardPeriod;
+  points: readonly DashboardRevenuePoint[];
+  userId: string | null;
+}): DashboardRevenueHero {
+  if (input.userId) {
+    return {
+      totalCents: null,
+      asOf: input.period.label,
+      updated: null,
+      compare: null,
+      points: [],
+    };
+  }
+  const inPeriod = input.points.filter((point) =>
+    yearMonthInPeriod(point.year, point.month, input.period),
+  );
+  const latest = inPeriod[inPeriod.length - 1] ?? null;
+  const prior = priorPeriod(input.period);
+  const priorPoints = prior
+    ? input.points.filter((point) => yearMonthInPeriod(point.year, point.month, prior))
+    : [];
+  const totalCents = inPeriod.length > 0 ? sumPoints(inPeriod) : null;
+  const priorTotal = prior && priorPoints.length > 0 ? sumPoints(priorPoints) : null;
+  return {
+    totalCents,
+    asOf: input.period.label,
+    updated: latest?.label ?? null,
+    compare: totalCents === null ? null : revenueCompare(totalCents, priorTotal, prior?.label ?? ""),
+    points: [...input.points],
+  };
+}
+
+export function revenuePointsFromLabels(
+  rows: readonly { label: string; netCents: number }[],
+): DashboardRevenuePoint[] {
+  return closedRevenuePoints(
+    rows.flatMap((row) => {
+      const match = /^(\d{4})-(\d{2})$/.exec(row.label);
+      if (!match) return [];
+      return [{ year: Number(match[1]), month: Number(match[2]), netCents: row.netCents }];
+    }),
+  );
+}
+
+export function closedRevenuePoints(
+  rows: readonly { year: number; month: number; netCents: number | null }[],
+): DashboardRevenuePoint[] {
+  return rows
+    .filter((row) => row.netCents !== null)
+    .map((row) => ({
+      key: dashboardMonthKey(row.year, row.month),
+      label: dashboardMonthKey(row.year, row.month),
+      year: row.year,
+      month: row.month,
+      netCents: row.netCents ?? 0,
+    }))
+    .sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
+}
+
+export type DashboardChartXY = DashboardRevenuePoint & { x: number; y: number };
+
+export function dashboardChartGeometry(
+  points: readonly DashboardRevenuePoint[],
+  width: number,
+  height: number,
+  pad: { top: number; right: number; bottom: number; left: number },
+): {
+  xy: DashboardChartXY[];
+  line: string;
+  area: string;
+  baseY: number;
+  innerH: number;
+  ticks: { x: number; label: string }[];
+  w: number;
+} | null {
+  if (points.length === 0 || width <= 0) return null;
+  const innerW = Math.max(width - pad.left - pad.right, 1);
+  const innerH = height - pad.top - pad.bottom;
+  const values = points.map((point) => point.netCents);
+  const min = Math.min(...values, 0);
+  const max = Math.max(...values, 0);
+  const span = Math.max(max - min, 1);
+  const px = (index: number) =>
+    pad.left + (points.length === 1 ? innerW / 2 : (index / (points.length - 1)) * innerW);
+  const py = (value: number) => pad.top + innerH - ((value - min) / span) * innerH;
+  const xy = points.map((point, index) => ({ ...point, x: px(index), y: py(point.netCents) }));
+  const line = xy.map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(" ");
+  const baseY = pad.top + innerH;
+  const area = `${line} L${xy[xy.length - 1].x.toFixed(2)},${baseY} L${xy[0].x.toFixed(2)},${baseY} Z`;
+  const tickIdx =
+    xy.length <= 4 ? xy.map((_, i) => i) : [0, Math.floor((xy.length - 1) / 2), xy.length - 1];
+  const ticks = [...new Set(tickIdx)].map((i) => ({ x: xy[i].x, label: xy[i].label }));
+  return { xy, line, area, baseY, innerH, ticks, w: width };
+}
+
+export function nearestChartPoint(
+  xy: readonly DashboardChartXY[],
+  hoverX: number,
+): DashboardChartXY | null {
+  if (xy.length === 0) return null;
+  let best = xy[0];
+  for (const point of xy) {
+    if (Math.abs(point.x - hoverX) < Math.abs(best.x - hoverX)) best = point;
+  }
+  return best;
+}
+
+export function recentAccountActivity(input: {
+  titles: readonly (ClientHomeTitle & { created_by?: string | null })[];
+  deliveries: readonly {
+    delivery_id: string;
+    title_id: string;
+    title: string;
+    updated_at: string | null;
+  }[];
+  findings: readonly ClientHomeFinding[];
+  period: DashboardPeriod;
+  userId: string | null;
+}): DashboardActivityRow[] {
+  const titleIds = dashboardUserTitleIds(input.titles, input.userId);
+  const titles = filterDashboardTitles(input.titles, input.period, input.userId);
+  const deliveries = filterDashboardDeliveries(input.deliveries, input.period, titleIds);
+  const deliveryCounts = new Map<string, number>();
+  for (const row of deliveries) {
+    deliveryCounts.set(row.title_id, (deliveryCounts.get(row.title_id) ?? 0) + 1);
+  }
+
+  const rows: DashboardActivityRow[] = [];
+  for (const title of titles) {
+    rows.push({
+      id: `title:${title.id}`,
+      title: title.title,
+      href: `/titles/${title.id}`,
+      at: title.created_at,
+      count: deliveryCounts.get(title.id) ?? 0,
+      detail: DASHBOARD_ADMIN.titleAdded,
+    });
+  }
+  for (const row of deliveries) {
+    if (!row.updated_at) continue;
+    rows.push({
+      id: `delivery:${row.delivery_id}`,
+      title: row.title,
+      href: `/titles/${row.title_id}`,
+      at: row.updated_at,
+      count: 1,
+      detail: DASHBOARD_ADMIN.deliveryUpdated,
+    });
+  }
+  for (const finding of input.findings) {
+    if (titleIds && !titleIds.has(finding.entity_id)) continue;
+    if (!finding.created_at || !isoInDashboardPeriod(finding.created_at, input.period)) continue;
+    const title = input.titles.find((row) => row.id === finding.entity_id);
+    if (!title) continue;
+    rows.push({
+      id: `finding:${finding.entity_id}:${finding.created_at}`,
+      title: title.title,
+      href: `/titles/${title.id}`,
+      at: finding.created_at,
+      count: 0,
+      detail: finding.message?.trim() || DASHBOARD_ADMIN.findingOpened,
+    });
+  }
+
+  return rows
+    .sort((a, b) => (a.at < b.at ? 1 : -1))
+    .slice(0, DASHBOARD_HOME_STACK);
+}
+
+export function dashboardAsOfLine(hero: DashboardRevenueHero): string {
+  const asOf = `${DASHBOARD_ADMIN.asOfPrefix} ${hero.asOf}`;
+  if (!hero.updated) return `${asOf} · ${DASHBOARD_ADMIN.updatedNone}`;
+  return `${asOf} · ${DASHBOARD_ADMIN.updatedPrefix} ${hero.updated}`;
+}

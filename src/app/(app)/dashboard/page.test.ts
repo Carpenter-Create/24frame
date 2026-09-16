@@ -5,7 +5,9 @@ import { createClient } from "@/lib/supabase/server";
 import { getOrgContext } from "@/lib/supabase/context";
 import { CLIENTS_PAGE, ORG_ROLE_LABELS, ORG_STATUS_LABELS } from "@/lib/clients";
 import { DASHBOARD_HOME, dashboardJustInDate } from "@/lib/dashboard-home";
+import { DASHBOARD_ADMIN } from "@/lib/dashboard-admin";
 import { FINANCE_PAGE } from "@/lib/finance";
+import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 import { REPORTS_HREF } from "@/lib/reports";
 import { AGGREGATION_EMPTY } from "@/lib/aggregation-empty";
 import { DASHBOARD_ATTENTION_CLEAR, dashboardAttentionSummary } from "@/lib/findings";
@@ -17,7 +19,10 @@ vi.mock("next/navigation", () => ({
   redirect: vi.fn((to: string) => {
     throw new Error(`REDIRECT:${to}`);
   }),
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(),
 }));
+vi.mock("@/lib/finance-recipient-load", () => ({ loadRecipientDashboard: vi.fn() }));
 vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 vi.mock("next/headers", () => ({
@@ -26,15 +31,23 @@ vi.mock("next/headers", () => ({
 
 type Status = "registered" | "awaiting_payment" | "active";
 
-function ctx({ isGcStaff, orgStatus }: { isGcStaff: boolean; orgStatus: Status | null }) {
+function ctx({
+  isGcStaff,
+  orgStatus,
+  role = "delivery_ops",
+}: {
+  isGcStaff: boolean;
+  orgStatus: Status | null;
+  role?: string;
+}) {
   const org = orgStatus ? { id: "org-1", name: "Acme", status: orgStatus } : null;
   return {
     user: { id: "u1", email: "someone@example.com" },
-    rows: org ? [{ role: "account_owner", organizations: org }] : [],
+    rows: org ? [{ role, organizations: org }] : [],
     orgs: org ? [{ id: org.id, name: org.name }] : [],
     activeOrg: org,
-    activeRole: org ? "account_owner" : null,
-    canOperate: !!org,
+    activeRole: org ? role : null,
+    canOperate: !!org && (role === "account_owner" || role === "delivery_ops"),
     isGcStaff,
     unread: Promise.resolve(0),
   };
@@ -73,9 +86,17 @@ function stubClient(
     range: vi.fn(async () => ({ data: [], error: null })),
     maybeSingle: vi.fn(async () => ({ data: null, error: null })),
   };
+  const listChain = {
+    select: vi.fn(() => listChain),
+    eq: vi.fn(() => listChain),
+    in: vi.fn(() => listChain),
+    order: vi.fn(() => listChain),
+    range: vi.fn(async () => ({ data: [], error: null })),
+  };
   const from = vi.fn((table: string) => {
     if (table === "titles") return titlesChain;
     if (table === "finance_periods" || table === "contract_terms") return financeChain;
+    if (table === "memberships" || table === "profiles") return listChain;
     throw new Error(`unexpected from(${table})`);
   });
   const rpc = vi.fn(async (name: string) => {
@@ -100,7 +121,16 @@ function statValue(html: string, key: string): string | null {
  * (focused work stays there) and not the client wizard.
  */
 describe("DashboardPage modes", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(loadRecipientDashboard).mockResolvedValue({
+      periods: [],
+      latestClosed: null,
+      latestStatement: null,
+      ledger: [],
+      clientRateBp: null,
+    });
+  });
 
   it("renders the organization-scoped portfolio for a user with a client org", async () => {
     const { from, eq, rpc } = stubClient();
@@ -278,8 +308,21 @@ describe("DashboardPage modes", () => {
   });
 });
 
+function stubRecipient() {
+  vi.mocked(loadRecipientDashboard).mockResolvedValue({
+    periods: [],
+    latestClosed: null,
+    latestStatement: null,
+    ledger: [],
+    clientRateBp: null,
+  });
+}
+
 describe("client home information model", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    stubRecipient();
+  });
 
   it("shows the Overview hero, Top titles, ranked bars, Recent, and Do next without revenue", async () => {
     stubClient(
@@ -438,7 +481,10 @@ describe("client home information model", () => {
 });
 
 describe("client home copy lock", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    stubRecipient();
+  });
 
   it("locks empty catalog copy to The catalog is empty. and the existing Add Title action", async () => {
     stubClient();
@@ -562,5 +608,83 @@ describe("client home copy lock", () => {
     expect(html).toContain(DASHBOARD_HOME.catalogEmpty);
     expect(html).not.toContain("data-dashboard-add-title");
     expect(html).not.toContain(DASHBOARD_HOME.addTitle);
+  });
+});
+
+describe("company admin Overview hero", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    stubRecipient();
+  });
+
+  it("rematches RL Overview: period chrome, revenue MetricCard, recent activity, no export", async () => {
+    stubClient();
+    vi.mocked(getOrgContext).mockResolvedValue(
+      ctx({ isGcStaff: false, orgStatus: "active", role: "account_owner" }) as never,
+    );
+    const html = renderToStaticMarkup(await DashboardPage({ searchParams: Promise.resolve({}) }));
+
+    expect(html).toContain("data-dashboard-admin-hero");
+    expect(html).toContain("data-dashboard-admin-chrome");
+    expect(html).toContain("data-dashboard-admin-controls");
+    expect(html).toContain("data-dashboard-period");
+    expect(html).toContain("data-dashboard-user");
+    expect(html).toContain("data-dashboard-revenue");
+    expect(html).toContain("data-dashboard-revenue-chart");
+    expect(html).toContain('data-dashboard-module="recent-activity"');
+    expect(html).toContain("lg:grid-cols-5");
+    expect(html).toContain("lg:col-span-3");
+    expect(html).toContain("lg:col-span-2");
+    expect(html).toMatch(/<h1 class="t-section text-ink">All time<\/h1>/);
+    expect(html).toContain(DASHBOARD_ADMIN.revenue);
+    expect(html).toContain(DASHBOARD_ADMIN.revenueEmpty);
+    expect(html).toContain(DASHBOARD_ADMIN.activity);
+    expect(html).toContain(DASHBOARD_ADMIN.allTime);
+    expect(html).toContain(DASHBOARD_ADMIN.ytd);
+    expect(html).toContain("2026");
+    expect(html).toContain(DASHBOARD_ADMIN.findUser);
+    expect(html).toContain(DASHBOARD_ADMIN.allCompany);
+    expect(html).toContain("As of All time");
+    expect(html).toContain(DASHBOARD_ADMIN.chartEmpty);
+    expect(html).toContain("data-dashboard-overview");
+    expect(html).toContain("data-dashboard-reports-cta");
+    expect(html).toContain(`href="${REPORTS_HREF}"`);
+    expect(html).not.toContain("data-reports-download");
+    expect(html).not.toContain("Export CSV");
+    expect(html).not.toContain("View lines");
+    expect(html).not.toContain("Royalogic");
+    expect(html).not.toContain("Advisory");
+    expect(html).not.toContain("bg-band");
+    expect(html).not.toContain("shadow-lg");
+    expect(html).not.toContain('data-dashboard-module="top-titles"');
+    expect(html).not.toContain("recharts");
+    expect(loadRecipientDashboard).toHaveBeenCalledWith("org-1");
+  });
+
+  it("keeps a named period in ?period= and does not invent a user roster", async () => {
+    stubClient();
+    vi.mocked(getOrgContext).mockResolvedValue(
+      ctx({ isGcStaff: false, orgStatus: "active", role: "account_owner" }) as never,
+    );
+    const html = renderToStaticMarkup(
+      await DashboardPage({ searchParams: Promise.resolve({ period: "Q32026" }) }),
+    );
+    expect(html).toMatch(/<h1 class="t-section text-ink">Q3 2026<\/h1>/);
+    expect(html).toContain('value="Q32026"');
+    expect(html).not.toContain("data-dashboard-user-results");
+    expect(html).toContain(DASHBOARD_ADMIN.allCompany);
+  });
+
+  it("does not load org money when a user is scoped", async () => {
+    stubClient();
+    vi.mocked(getOrgContext).mockResolvedValue(
+      ctx({ isGcStaff: false, orgStatus: "active", role: "account_owner" }) as never,
+    );
+    const html = renderToStaticMarkup(
+      await DashboardPage({ searchParams: Promise.resolve({ user: "maya" }) }),
+    );
+    expect(loadRecipientDashboard).not.toHaveBeenCalled();
+    expect(html).toContain(DASHBOARD_ADMIN.revenueEmpty);
+    expect(html).toContain(DASHBOARD_ADMIN.chartEmpty);
   });
 });
