@@ -495,13 +495,16 @@ describe("client home copy lock", () => {
     );
     const html = renderToStaticMarkup(await DashboardPage());
     expect(html).toContain("data-finance-glance");
+    expect(html).toContain("dashboard-home-panel");
     expect(html).toContain(FINANCE_CLIENT.glanceRate);
     expect(html).toContain(FINANCE_CLIENT.glanceBalance);
     expect(html).toContain(FINANCE_CLIENT.glanceThreshold);
     expect(html).toContain(FINANCE_CLIENT.glanceLatest);
+    expect(html).toContain(FINANCE_CLIENT.glanceNone);
     expect(html).toContain('href="/finance"');
     expect(html).not.toContain("data-finance-glance-stub");
     expect(html).not.toContain("Revenue");
+    expect(html).not.toContain("bg-band");
   });
 
   it("hides Add Title on an empty catalog when the viewer cannot operate", async () => {

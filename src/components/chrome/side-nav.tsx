@@ -63,7 +63,7 @@ export function SideNav({
         onFocus={social ? undefined : () => warm(item.href)}
         onClick={social ? (event) => markPending(item.href, event) : undefined}
         title={collapsed ? item.label : undefined}
-        aria-label={collapsed ? item.label : undefined}
+        aria-label={item.ariaLabel ?? (collapsed ? item.label : undefined)}
         data-social-rail-pending={social && pendingHref === item.href ? "" : undefined}
         className={cn(
           "relative flex items-center rounded-[var(--radius)] t-body-sm leading-4 transition-colors",

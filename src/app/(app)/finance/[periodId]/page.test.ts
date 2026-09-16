@@ -117,6 +117,11 @@ describe("client Finance period", () => {
     expect(html).toContain(FINANCE_CLIENT.pdf);
     expect(html).toContain(FINANCE_CLIENT.csv);
     expect(html).toContain(FINANCE_CLIENT.pack);
+    expect(html).toContain(FINANCE_CLIENT.download);
+    expect(html).toContain("data-finance-download");
+    expect(html).toContain("data-finance-statement-doc");
+    expect(html).toContain("Acme");
+    expect(html).not.toContain("bg-band");
     expect(html).toContain("/finance/p-closed/export?format=pdf");
     expect(html).toContain("/finance/p-closed/export?format=csv");
     expect(html).toContain("data-finance-dashboard");

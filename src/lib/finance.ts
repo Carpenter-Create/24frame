@@ -86,6 +86,7 @@ export const FINANCE_PAGE = {
   ledger: "Ledger",
   glance: `Finance periods live on the ${PRODUCT_NAME} Finance rail.`,
   glanceCta: "Finance",
+  navAria: "Finance, operations",
   writeDenied: "Import, post, and close are limited to owner and accountant seats.",
   usd: "USD",
 } as const;
@@ -122,6 +123,8 @@ export const FINANCE_CLIENT = {
   glanceNoTerm: "No current term",
   glanceNoThreshold: "No threshold",
   glanceCta: "Finance",
+  download: "Download",
+  navAria: "Finance, organization purse",
 } as const;
 
 export const FINANCE_LOGIC_VERSION = "finance-ops-slice-1.1-client-tier-remainder";

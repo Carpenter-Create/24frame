@@ -1,5 +1,4 @@
 import { Card, CardBody } from "@/components/ui/card";
-import { Stat, StatGrid } from "@/components/layout/stat";
 import {
   FINANCE_CLIENT,
   FINANCE_PAGE,
@@ -7,79 +6,91 @@ import {
   formatUsdCents,
 } from "@/lib/finance";
 import {
+  FINANCE_CARD_PAD_CLASS,
+  FINANCE_HERO_CLASS,
+  FINANCE_RELATED_CLASS,
+  FINANCE_SECTION_CLASS,
+  FINANCE_SOURCE_MONEY_CLASS,
+  FINANCE_STACK_CLASS,
+  FINANCE_STRIP_CELL_CLASS,
+  FINANCE_STRIP_CLASS,
+} from "@/lib/finance-craft";
+import {
   invoiceAmountLabel,
   selfBillingInvoice,
   thresholdMeter,
   titleContributionShares,
 } from "@/lib/finance-dashboard";
 import type { PeriodStatement, StatementPostedItem } from "@/lib/finance-statement";
-import { ThresholdMeterBar, TitleContributionBars } from "./finance-meters";
+import { FinanceStatusPill, ThresholdMeterBar, TitleContributionBars } from "./finance-meters";
 
-export function ClientPeriodDashboard({ statement }: { statement: PeriodStatement }) {
+export function ClientPeriodDashboard({
+  statement,
+  orgName,
+  periodLabel,
+  status,
+}: {
+  statement: PeriodStatement;
+  orgName: string;
+  periodLabel: string;
+  status: "open" | "closed";
+}) {
   const org = statement.org;
   const invoice = selfBillingInvoice(org);
   const contributions = titleContributionShares(statement.titles);
+  const closeKind = org?.close.kind ?? null;
 
   return (
-    <div data-finance-dashboard="" className="flex flex-col gap-[var(--space-8)]">
+    <div data-finance-dashboard="" data-finance-statement-doc="" className={FINANCE_STACK_CLASS}>
+      <header data-finance-statement-header="" className={FINANCE_HERO_CLASS}>
+        <p className="t-label text-ink-3">{orgName}</p>
+        <p className="mt-[var(--space-2)] t-statement text-ink">{periodLabel}</p>
+        <div className="mt-[var(--space-4)] flex flex-wrap items-center gap-[var(--space-4)]">
+          <FinanceStatusPill status={status} />
+          <span className="t-data t-body-sm text-ink-2">{formatClientRateBp(org?.clientRateBp ?? null)}</span>
+        </div>
+        {org ? (
+          <>
+            <p className="mt-[var(--space-6)] t-display t-data text-ink">
+              {formatUsdCents(org.netCents)}
+            </p>
+            <p
+              data-finance-close-outcome=""
+              className="mt-[var(--space-2)] t-body-sm text-ink-2"
+            >
+              {invoiceAmountLabel(invoice)}
+            </p>
+          </>
+        ) : (
+          <p className="mt-[var(--space-6)] t-body-sm text-ink-3">{FINANCE_PAGE.noTerm}</p>
+        )}
+      </header>
+
       {org ? (
-        <section className="rounded-[var(--radius-lg)] bg-band px-[var(--space-8)] py-[var(--space-8)] text-band-ink">
-          <p className="t-label text-band-ink/50">{FINANCE_CLIENT.overview}</p>
-          <p className="mt-[var(--space-2)] t-display t-data text-band-ink">
-            {formatUsdCents(org.netCents)}
-          </p>
-          <p className="mt-[var(--space-2)] t-body-sm text-band-ink/60">
-            {invoiceAmountLabel(invoice)}
-          </p>
-          <StatGrid surface="band" className="mt-[var(--space-8)]">
-            <Stat
-              surface="band"
-              label={FINANCE_CLIENT.glanceRate}
-              value={formatClientRateBp(org.clientRateBp)}
+        <section className={FINANCE_SECTION_CLASS}>
+          <h2 className="t-body font-medium text-ink">{FINANCE_CLIENT.overview}</h2>
+          <div data-finance-contract-strip="" className={FINANCE_STRIP_CLASS}>
+            <Metric label={FINANCE_CLIENT.glanceRate} value={formatClientRateBp(org.clientRateBp)} />
+            <Metric
+              label={FINANCE_PAGE.aggregatorKeep}
+              value={formatUsdCents(org.aggregatorKeepCents)}
             />
-            <Stat surface="band" label={FINANCE_PAGE.opening} value={formatUsdCents(org.openingCents)} />
-            <Stat
-              surface="band"
+            <Metric label={FINANCE_CLIENT.recoupVisible} value={formatUsdCents(org.recoupCents)} />
+            <Metric
+              label={FINANCE_CLIENT.adjustmentVisible}
+              value={formatUsdCents(org.adjustmentCents)}
+            />
+            <Metric label={FINANCE_PAGE.opening} value={formatUsdCents(org.openingCents)} />
+            <Metric
               label={FINANCE_PAGE.closing}
               value={formatUsdCents(org.close.closingBalanceCents)}
             />
-            <Stat
-              surface="band"
-              label={FINANCE_PAGE.threshold}
-              value={
-                org.thresholdCents === null
-                  ? FINANCE_CLIENT.glanceNoThreshold
-                  : formatUsdCents(org.thresholdCents)
-              }
-            />
-          </StatGrid>
-        </section>
-      ) : (
-        <p className="t-body-sm text-ink-3">{FINANCE_PAGE.noTerm}</p>
-      )}
-
-      {org ? (
-        <section className="flex flex-col gap-3">
-          <h2 className="t-body font-medium text-ink">{FINANCE_CLIENT.overview}</h2>
-          <Card>
-            <CardBody className="flex flex-col gap-4">
+          </div>
+          <Card className="shadow-none">
+            <CardBody className={FINANCE_CARD_PAD_CLASS}>
               <ThresholdMeterBar
                 meter={thresholdMeter(org.netCents, org.thresholdCents, org.thresholdMet)}
               />
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <Metric label={FINANCE_PAGE.bankReceipt} value={formatUsdCents(org.bankReceiptCents)} />
-                <Metric label={FINANCE_PAGE.clientShare} value={formatUsdCents(org.clientShareCents)} />
-                <Metric
-                  label={FINANCE_PAGE.aggregatorKeep}
-                  value={formatUsdCents(org.aggregatorKeepCents)}
-                />
-                <Metric
-                  label={org.close.kind === "payable" ? FINANCE_PAGE.payable : FINANCE_PAGE.carryForward}
-                  value={formatUsdCents(
-                    org.close.kind === "payable" ? org.netCents : org.close.closingBalanceCents,
-                  )}
-                />
-              </div>
             </CardBody>
           </Card>
         </section>
@@ -96,7 +107,7 @@ export function ClientPeriodDashboard({ statement }: { statement: PeriodStatemen
         total={org?.adjustmentCents ?? 0}
       />
 
-      <section className="flex flex-col gap-3">
+      <section className={FINANCE_SECTION_CLASS}>
         <h2 className="t-body font-medium text-ink">{FINANCE_CLIENT.contribution}</h2>
         {contributions.length === 0 ? (
           <p className="t-body-sm text-ink-3">{FINANCE_PAGE.unmapped}</p>
@@ -105,24 +116,30 @@ export function ClientPeriodDashboard({ statement }: { statement: PeriodStatemen
         )}
       </section>
 
-      <section className="flex flex-col gap-3">
+      <section className={FINANCE_SECTION_CLASS}>
         <h2 className="t-body font-medium text-ink">{FINANCE_PAGE.source}</h2>
         <p className="t-body-sm text-ink-3">{FINANCE_PAGE.sourceHint}</p>
         {statement.sourceLines.length === 0 ? (
           <p className="t-body-sm text-ink-3">{FINANCE_PAGE.sourceEmpty}</p>
         ) : (
-          <Card>
-            <CardBody className="overflow-x-auto" data-finance-source="">
+          <Card className="shadow-none">
+            <CardBody className={`overflow-x-auto ${FINANCE_CARD_PAD_CLASS}`} data-finance-source="">
               <table className="w-full">
                 <thead>
                   <tr className="text-left">
-                    <th className="t-label py-2 font-normal text-ink-3">{FINANCE_PAGE.endpoint}</th>
-                    <th className="t-label py-2 font-normal text-ink-3">{FINANCE_PAGE.externalId}</th>
-                    <th className="t-label py-2 font-normal text-ink-3">{FINANCE_PAGE.mappedTitle}</th>
-                    <th className="t-label py-2 text-right font-normal text-ink-3">
+                    <th className="t-label py-[var(--space-2)] font-normal text-ink-3">
+                      {FINANCE_PAGE.endpoint}
+                    </th>
+                    <th className="t-label py-[var(--space-2)] font-normal text-ink-3">
+                      {FINANCE_PAGE.externalId}
+                    </th>
+                    <th className="t-label py-[var(--space-2)] font-normal text-ink-3">
+                      {FINANCE_PAGE.mappedTitle}
+                    </th>
+                    <th className="t-label py-[var(--space-2)] text-right font-normal text-ink-3">
                       {FINANCE_PAGE.reported}
                     </th>
-                    <th className="t-label py-2 text-right font-normal text-ink-3">
+                    <th className="t-label py-[var(--space-2)] text-right font-normal text-ink-3">
                       {FINANCE_PAGE.bankReceipt}
                     </th>
                   </tr>
@@ -130,15 +147,17 @@ export function ClientPeriodDashboard({ statement }: { statement: PeriodStatemen
                 <tbody>
                   {statement.sourceLines.map((line) => (
                     <tr key={line.id} className="border-t border-hairline">
-                      <td className="t-body-sm py-2 text-ink">{line.endpoint}</td>
-                      <td className="t-body-sm py-2 text-ink-3">{line.externalId}</td>
-                      <td className="t-body-sm py-2 text-ink-3">
+                      <td className="t-body-sm py-[var(--space-2)] text-ink">{line.endpoint}</td>
+                      <td className="t-body-sm py-[var(--space-2)] text-ink-3">{line.externalId}</td>
+                      <td className="t-body-sm py-[var(--space-2)] text-ink-3">
                         {line.titleName ?? FINANCE_PAGE.unmapped}
                       </td>
-                      <td className="t-body-sm py-2 text-right text-ink-3">
-                        {line.reportedCents === null ? "—" : formatUsdCents(line.reportedCents)}
+                      <td className="t-body-sm py-[var(--space-2)] text-right text-ink-3">
+                        <span className="t-data">
+                          {line.reportedCents === null ? "—" : formatUsdCents(line.reportedCents)}
+                        </span>
                       </td>
-                      <td className="t-body-sm py-2 text-right text-ink">
+                      <td className={`t-body-sm py-[var(--space-2)] ${FINANCE_SOURCE_MONEY_CLASS}`}>
                         {formatUsdCents(line.bankReceiptCents)}
                       </td>
                     </tr>
@@ -151,10 +170,10 @@ export function ClientPeriodDashboard({ statement }: { statement: PeriodStatemen
       </section>
 
       {org ? (
-        <section className="flex flex-col gap-3">
+        <section className={FINANCE_SECTION_CLASS}>
           <h2 className="t-body font-medium text-ink">{FINANCE_PAGE.orgRollup}</h2>
-          <Card>
-            <CardBody className="flex flex-col gap-2" data-finance-rollup="">
+          <Card className="shadow-none">
+            <CardBody className={`${FINANCE_RELATED_CLASS} ${FINANCE_CARD_PAD_CLASS}`} data-finance-rollup="">
               <MetricRow label={FINANCE_PAGE.periodNet} value={formatUsdCents(org.netCents)} />
               <MetricRow
                 label={FINANCE_PAGE.clientShare}
@@ -164,6 +183,14 @@ export function ClientPeriodDashboard({ statement }: { statement: PeriodStatemen
                 label={FINANCE_PAGE.aggregatorKeep}
                 value={formatUsdCents(org.aggregatorKeepCents)}
               />
+              <p data-finance-close-kind="" className="flex justify-between gap-[var(--space-4)] t-body-sm text-ink">
+                <span>{closeKind === "payable" ? FINANCE_PAGE.payable : FINANCE_PAGE.carryForward}</span>
+                <span className="t-data">
+                  {formatUsdCents(
+                    closeKind === "payable" ? org.netCents : org.close.closingBalanceCents,
+                  )}
+                </span>
+              </p>
             </CardBody>
           </Card>
         </section>
@@ -182,22 +209,25 @@ function PostedSection({
   total: number;
 }) {
   return (
-    <section className="flex flex-col gap-3" data-finance-posted={title}>
-      <div className="flex items-baseline justify-between gap-4">
+    <section className={FINANCE_SECTION_CLASS} data-finance-posted={title}>
+      <div className="flex items-baseline justify-between gap-[var(--space-4)]">
         <h2 className="t-body font-medium text-ink">{title}</h2>
         <span className="t-data text-ink">{formatUsdCents(total)}</span>
       </div>
       {items.length === 0 ? (
         <p className="t-body-sm text-ink-3">{FINANCE_CLIENT.nonePosted}</p>
       ) : (
-        <ul className="flex flex-col gap-2">
+        <ul className={FINANCE_RELATED_CLASS}>
           {items.map((item) => (
-            <li key={item.id} className="flex justify-between gap-4 t-body-sm text-ink-2">
+            <li
+              key={item.id}
+              className="flex justify-between gap-[var(--space-4)] t-body-sm text-ink-2"
+            >
               <span>
                 {item.titleName ?? FINANCE_PAGE.orgRollup}
                 {item.note ? ` · ${item.note}` : ""}
               </span>
-              <span className="text-ink">{formatUsdCents(item.amountCents)}</span>
+              <span className="t-data text-ink">{formatUsdCents(item.amountCents)}</span>
             </li>
           ))}
         </ul>
@@ -208,7 +238,7 @@ function PostedSection({
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col gap-1">
+    <div className={FINANCE_STRIP_CELL_CLASS}>
       <span className="t-label text-ink-3">{label}</span>
       <span className="t-data text-ink">{value}</span>
     </div>
@@ -217,9 +247,9 @@ function Metric({ label, value }: { label: string; value: string }) {
 
 function MetricRow({ label, value }: { label: string; value: string }) {
   return (
-    <p className="flex justify-between gap-4 t-body-sm text-ink-2">
+    <p className="flex justify-between gap-[var(--space-4)] t-body-sm text-ink-2">
       <span>{label}</span>
-      <span className="text-ink">{value}</span>
+      <span className="t-data text-ink">{value}</span>
     </p>
   );
 }

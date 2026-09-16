@@ -53,6 +53,7 @@ describe("SideNav Access rail", () => {
     expect(navSrc).not.toContain("gap-2.5 px-3");
     expect(navSrc).not.toContain("gap-2.5");
     expect(navSrc).toContain("STAFF_RAIL_EYEBROW");
+    expect(navSrc).toContain("aria-label={item.ariaLabel ?? (collapsed ? item.label : undefined)}");
     expect(navSrc).not.toContain("PRODUCT_NAME");
     expect(navSrc).not.toContain("strokeWidth={1.5}");
     expect(navSrc).not.toContain("strokeWidth={1.33}");
