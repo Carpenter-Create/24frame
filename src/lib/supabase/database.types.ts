@@ -1070,36 +1070,56 @@ export type Database = {
       }
       courses: {
         Row: {
+          catalog_code: string
           cover_key: string | null
           created_at: string
           description: string | null
           id: string
+          instructor_id: string | null
           is_flagship_free: boolean
+          position: number
           price_cents: number | null
           slug: string
+          status: Database["public"]["Enums"]["course_status"]
           title: string
         }
         Insert: {
+          catalog_code?: string
           cover_key?: string | null
           created_at?: string
           description?: string | null
           id?: string
+          instructor_id?: string | null
           is_flagship_free?: boolean
+          position?: number
           price_cents?: number | null
           slug: string
+          status?: Database["public"]["Enums"]["course_status"]
           title: string
         }
         Update: {
+          catalog_code?: string
           cover_key?: string | null
           created_at?: string
           description?: string | null
           id?: string
+          instructor_id?: string | null
           is_flagship_free?: boolean
+          position?: number
           price_cents?: number | null
           slug?: string
+          status?: Database["public"]["Enums"]["course_status"]
           title?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "courses_instructor_id_fkey"
+            columns: ["instructor_id"]
+            isOneToOne: false
+            referencedRelation: "instructors"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       modules: {
         Row: {
@@ -1132,7 +1152,9 @@ export type Database = {
       }
       lessons: {
         Row: {
+          cover_key: string | null
           duration_seconds: number | null
+          education_video_id: string | null
           encode_error: string | null
           encode_job_id: string | null
           encode_status: Database["public"]["Enums"]["course_encode_status"] | null
@@ -1140,13 +1162,17 @@ export type Database = {
           free_preview: boolean
           hls_key: string | null
           id: string
+          lesson_type: string
           module_id: string
           position: number
           source_key: string | null
+          summary: string | null
           title: string
         }
         Insert: {
+          cover_key?: string | null
           duration_seconds?: number | null
+          education_video_id?: string | null
           encode_error?: string | null
           encode_job_id?: string | null
           encode_status?: Database["public"]["Enums"]["course_encode_status"] | null
@@ -1154,13 +1180,17 @@ export type Database = {
           free_preview?: boolean
           hls_key?: string | null
           id?: string
+          lesson_type?: string
           module_id: string
           position: number
           source_key?: string | null
+          summary?: string | null
           title: string
         }
         Update: {
+          cover_key?: string | null
           duration_seconds?: number | null
+          education_video_id?: string | null
           encode_error?: string | null
           encode_job_id?: string | null
           encode_status?: Database["public"]["Enums"]["course_encode_status"] | null
@@ -1168,17 +1198,101 @@ export type Database = {
           free_preview?: boolean
           hls_key?: string | null
           id?: string
+          lesson_type?: string
           module_id?: string
           position?: number
           source_key?: string | null
+          summary?: string | null
           title?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "lessons_education_video_id_fkey"
+            columns: ["education_video_id"]
+            isOneToOne: false
+            referencedRelation: "education_videos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "lessons_module_id_fkey"
             columns: ["module_id"]
             isOneToOne: false
             referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      instructors: {
+        Row: {
+          bio: string | null
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      education_videos: {
+        Row: {
+          course_id: string
+          created_at: string
+          encode_error: string | null
+          encode_job_id: string | null
+          encode_status: Database["public"]["Enums"]["course_encode_status"] | null
+          encode_updated_at: string | null
+          hls_key: string | null
+          id: string
+          lesson_id: string | null
+          source_key: string | null
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          encode_error?: string | null
+          encode_job_id?: string | null
+          encode_status?: Database["public"]["Enums"]["course_encode_status"] | null
+          encode_updated_at?: string | null
+          hls_key?: string | null
+          id?: string
+          lesson_id?: string | null
+          source_key?: string | null
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          encode_error?: string | null
+          encode_job_id?: string | null
+          encode_status?: Database["public"]["Enums"]["course_encode_status"] | null
+          encode_updated_at?: string | null
+          hls_key?: string | null
+          id?: string
+          lesson_id?: string | null
+          source_key?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "education_videos_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "education_videos_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: true
+            referencedRelation: "lessons"
             referencedColumns: ["id"]
           },
         ]
@@ -3024,6 +3138,7 @@ export type Database = {
         Args: { p_course: string; p_user: string }
         Returns: boolean
       }
+      next_course_catalog_code: { Args: Record<PropertyKey, never>; Returns: string }
       is_active_conversation_participant: {
         Args: { p_conversation: string; p_user: string }
         Returns: boolean
@@ -3300,6 +3415,7 @@ export type Database = {
         | "complete"
         | "failed"
         | "submit_failed"
+      course_status: "draft" | "published" | "archived"
       delivery_status:
         | "pending"
         | "delivered"
@@ -3567,6 +3683,7 @@ export const Constants = {
         "failed",
         "submit_failed",
       ],
+      course_status: ["draft", "published", "archived"],
       delivery_status: [
         "pending",
         "delivered",
