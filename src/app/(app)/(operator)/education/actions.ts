@@ -882,4 +882,104 @@ export async function refreshEducationLessonEncode(raw: unknown): Promise<{ erro
   return {};
 }
 
+async function applyEducationPositions(
+  admin: AdminClient,
+  table: "courses" | "modules" | "lessons",
+  orderedIds: string[],
+): Promise<{ error?: string }> {
+  for (const [index, id] of orderedIds.entries()) {
+    const { error } = await admin.from(table).update({ position: index + 1 }).eq("id", id);
+    if (error) return { error: error.message };
+  }
+  return {};
+}
+
+export async function reorderEducationCourses(raw: unknown): Promise<{ error?: string }> {
+  const parsed = z.object({ orderedIds: z.array(z.string().uuid()).min(1) }).safeParse(raw);
+  if (!parsed.success) return { error: EDUCATION_ADMIN.invalid };
+
+  const staff = await requireEducationStaff();
+  if (!staff.ok) return { error: staff.error };
+
+  const admin = createAdminClient();
+  const { data, error } = await admin.from("courses").select("id");
+  if (error) return { error: error.message };
+  const known = new Set((data ?? []).map((row) => row.id));
+  if (parsed.data.orderedIds.some((id) => !known.has(id))) return { error: EDUCATION_ADMIN.invalid };
+
+  const applied = await applyEducationPositions(admin, "courses", parsed.data.orderedIds);
+  if (applied.error) return applied;
+  revalidateEducation();
+  return {};
+}
+
+export async function reorderEducationModules(raw: unknown): Promise<{ error?: string }> {
+  const parsed = z
+    .object({
+      courseId: z.string().uuid(),
+      orderedIds: z.array(z.string().uuid()).min(1),
+    })
+    .safeParse(raw);
+  if (!parsed.success) return { error: EDUCATION_ADMIN.invalid };
+
+  const staff = await requireEducationStaff();
+  if (!staff.ok) return { error: staff.error };
+
+  const admin = createAdminClient();
+  const { data: course } = await admin
+    .from("courses")
+    .select("slug")
+    .eq("id", parsed.data.courseId)
+    .maybeSingle();
+  if (!course) return { error: EDUCATION_ADMIN.missing };
+
+  const { data, error } = await admin
+    .from("modules")
+    .select("id")
+    .eq("course_id", parsed.data.courseId);
+  if (error) return { error: error.message };
+  const known = new Set((data ?? []).map((row) => row.id));
+  if (parsed.data.orderedIds.some((id) => !known.has(id))) return { error: EDUCATION_ADMIN.invalid };
+
+  const applied = await applyEducationPositions(admin, "modules", parsed.data.orderedIds);
+  if (applied.error) return applied;
+  revalidateEducation(course.slug);
+  return {};
+}
+
+export async function reorderEducationLessons(raw: unknown): Promise<{ error?: string }> {
+  const parsed = z
+    .object({
+      moduleId: z.string().uuid(),
+      orderedIds: z.array(z.string().uuid()).min(1),
+    })
+    .safeParse(raw);
+  if (!parsed.success) return { error: EDUCATION_ADMIN.invalid };
+
+  const staff = await requireEducationStaff();
+  if (!staff.ok) return { error: staff.error };
+
+  const admin = createAdminClient();
+  const { data: moduleRow } = await admin
+    .from("modules")
+    .select("id, courses(slug)")
+    .eq("id", parsed.data.moduleId)
+    .maybeSingle();
+  if (!moduleRow) return { error: EDUCATION_ADMIN.missing };
+
+  const { data, error } = await admin
+    .from("lessons")
+    .select("id")
+    .eq("module_id", parsed.data.moduleId);
+  if (error) return { error: error.message };
+  const known = new Set((data ?? []).map((row) => row.id));
+  if (parsed.data.orderedIds.some((id) => !known.has(id))) return { error: EDUCATION_ADMIN.invalid };
+
+  const applied = await applyEducationPositions(admin, "lessons", parsed.data.orderedIds);
+  if (applied.error) return applied;
+  const slug = courseSlugFromJoin(moduleRow.courses);
+  if (slug) revalidateEducation(slug);
+  return {};
+}
+
 export type { CourseStatus };

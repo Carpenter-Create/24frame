@@ -132,7 +132,8 @@ export const EDUCATION_ADMIN = {
   published: "Published",
   archived: "Archived",
   instructor: "Instructor",
-  instructorHint: "Optional. Creates an instructor if the name is new.",
+  instructorHint: "Optional. Choose an existing instructor.",
+  instructorNone: "None",
   position: "Position",
   flagship: "Flagship (free)",
   model: "Access",
@@ -159,7 +160,26 @@ export const EDUCATION_ADMIN = {
   encodeNone: "No source yet.",
   encodeSourceReady: "Source ready.",
   encodeReady: "Ready",
+  encodePillNone: "No source",
+  encodePillSourceReady: "Source ready",
+  encodePillEncoding: "Encoding",
+  encodePillComplete: "Complete",
+  encodePillError: "Error",
+  editSettings: "Edit settings",
+  editLesson: "Edit lesson",
+  settings: "Course settings",
+  publish: "Publish",
+  playlist: "Playlist",
+  videos: "Videos",
+  selectCourse: "Select a course.",
+  selectVideo: "Select a video.",
+  emptyOutline: "Add a module, then a lesson.",
+  retry: "Retry",
+  upload: "Upload",
+  encode: "Encode",
+  refresh: "Refresh",
   consume: "Open consume view",
+  consumePath: "Consume path",
   manage: "Course management",
   invalid: "Check the fields and try again.",
   conflict: "That slug is already in use.",
@@ -181,6 +201,16 @@ export const EDUCATION_ENCODE_LABELS: Record<CourseEncodeStatus, string> = {
   failed: "Failed",
   submit_failed: "Submit failed",
 };
+
+export const EDUCATION_ENCODE_PILLS = {
+  none: EDUCATION_ADMIN.encodePillNone,
+  source_ready: EDUCATION_ADMIN.encodePillSourceReady,
+  encoding: EDUCATION_ADMIN.encodePillEncoding,
+  complete: EDUCATION_ADMIN.encodePillComplete,
+  error: EDUCATION_ADMIN.encodePillError,
+} as const;
+
+export type EducationEncodePill = (typeof EDUCATION_ENCODE_PILLS)[keyof typeof EDUCATION_ENCODE_PILLS];
 
 const uuidSchema = z.string().uuid();
 
@@ -446,6 +476,44 @@ export function educationEncodeLabel(
   }
   if (hasSource) return EDUCATION_ADMIN.encodeSourceReady;
   return EDUCATION_ADMIN.encodeNone;
+}
+
+export function educationEncodePill(
+  status: CourseEncodeStatus | string | null | undefined,
+  hasSource = false,
+): EducationEncodePill {
+  if (status === "complete") return EDUCATION_ENCODE_PILLS.complete;
+  if (status === "submitted" || status === "running") return EDUCATION_ENCODE_PILLS.encoding;
+  if (status === "failed" || status === "submit_failed") return EDUCATION_ENCODE_PILLS.error;
+  if (hasSource) return EDUCATION_ENCODE_PILLS.source_ready;
+  return EDUCATION_ENCODE_PILLS.none;
+}
+
+export function canRefreshEducationEncode(status: CourseEncodeStatus | string | null | undefined): boolean {
+  return status === "submitted" || status === "running" || status === "failed" || status === "submit_failed";
+}
+
+export function educationQuietDate(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(date);
+}
+
+export function moveOrderedIds(ids: readonly string[], fromIndex: number, toIndex: number): string[] {
+  if (
+    fromIndex === toIndex ||
+    fromIndex < 0 ||
+    toIndex < 0 ||
+    fromIndex >= ids.length ||
+    toIndex >= ids.length
+  ) {
+    return [...ids];
+  }
+  const next = [...ids];
+  const [moved] = next.splice(fromIndex, 1);
+  if (!moved) return [...ids];
+  next.splice(toIndex, 0, moved);
+  return next;
 }
 
 const EDUCATION_ENCODE_RESUBMIT_STATUSES = ["failed", "submit_failed"] as const;

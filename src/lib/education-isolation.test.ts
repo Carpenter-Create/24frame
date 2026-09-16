@@ -72,6 +72,13 @@ describe("education isolation", () => {
     expect(EDUCATION_ADMIN.manage).toBe("Course management");
     expect(EDUCATION_ADMIN.free).toBe("Free");
     expect(EDUCATION_ADMIN.paid).toBe("Paid");
+    expect(blob).not.toContain("Welcome");
+    expect(blob).not.toContain("New & For You");
+    const rail = readFileSync("src/app/(app)/(operator)/education/education-course-rail.tsx", "utf8");
+    expect(rail).toContain("NewCourseButton");
+    expect(rail).toContain("data-education-course-name");
+    expect(rail).not.toMatch(/Welcome|New & For You|\bHome\b/);
+    expect(rail).not.toContain("data-education-home");
   });
 
   it("keeps product setup on staff admin and does not add a member checkout", () => {

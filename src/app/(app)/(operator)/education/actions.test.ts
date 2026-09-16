@@ -27,6 +27,7 @@ import {
   createEducationCourse,
   createEducationLesson,
   presignEducationUpload,
+  reorderEducationCourses,
   startEducationLessonEncode,
   updateEducationCourse,
   uploadEducationCover,
@@ -231,6 +232,32 @@ describe("education admin actions", () => {
     expect(update).toHaveBeenCalledWith(
       expect.not.objectContaining({ slug: expect.anything() }),
     );
+  });
+
+  it("writes course positions in the given order for gc_staff", async () => {
+    staffClient({ user_id: USER.id });
+    const updates: unknown[] = [];
+    const from = vi.fn((table: string) => {
+      if (table !== "courses") throw new Error(`unexpected from(${table})`);
+      return {
+        select: vi.fn(() => ({
+          then: (resolve: (value: unknown) => unknown) =>
+            Promise.resolve({
+              data: [{ id: COURSE }, { id: OTHER_COURSE }],
+              error: null,
+            }).then(resolve),
+        })),
+        update: vi.fn((payload: unknown) => {
+          updates.push(payload);
+          return { eq: vi.fn(async () => ({ error: null })) };
+        }),
+      };
+    });
+    vi.mocked(createAdminClient).mockReturnValue({ from } as never);
+    await expect(
+      reorderEducationCourses({ orderedIds: [OTHER_COURSE, COURSE] }),
+    ).resolves.toEqual({});
+    expect(updates).toEqual([{ position: 1 }, { position: 2 }]);
   });
 
   it("creates a lesson without a free-taste flag and opens an education_videos row", async () => {

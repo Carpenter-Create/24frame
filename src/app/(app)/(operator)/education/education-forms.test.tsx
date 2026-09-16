@@ -22,7 +22,13 @@ vi.mock("./actions", () => ({
   uploadEducationLessonSource: vi.fn(),
 }));
 
-import { EditCourseForm, LessonAdminForm, NewCourseModal, NewLessonModal } from "./education-forms";
+import {
+  EditCourseForm,
+  EditLessonModal,
+  LessonAdminForm,
+  NewCourseModal,
+  NewLessonModal,
+} from "./education-forms";
 
 describe("course slug lock", () => {
   it("does not render an editable slug control on New course or Edit course", () => {
@@ -44,7 +50,7 @@ describe("course slug lock", () => {
     const editHtml = renderToStaticMarkup(
       <EditCourseForm
         courseId="22222222-2222-4222-8222-222222222222"
-        title="Welcome to 24Frame"
+        title="Orientation"
         description=""
         catalogCode="EDU-0001"
         status="draft"
@@ -90,6 +96,56 @@ describe("New lesson modal miss list A v1.1", () => {
     expect(html).not.toMatch(/free.?taste|Free preview/i);
     expect(html).not.toMatch(/#e91e63|#d500f9|#ff00ff|magenta/i);
     expect(html).not.toContain("1769FF");
+  });
+});
+
+describe("instructor picker P0", () => {
+  it("links instructor_id and does not create-as-you-type", () => {
+    const src = readFileSync("src/app/(app)/(operator)/education/education-forms.tsx", "utf8");
+    expect(src).toContain("data-education-instructor-picker");
+    expect(src).toContain('name="instructorId"');
+    expect(src).not.toContain('name="instructorName"');
+    expect(src).not.toContain("instructorName");
+    expect(src).toContain("EDUCATION_ADMIN.instructorHint");
+
+    const html = renderToStaticMarkup(
+      <NewCourseModal
+        open
+        onClose={() => undefined}
+        instructors={[{ id: "11111111-1111-4111-8111-111111111111", name: "Ada", bio: null, created_at: "" }]}
+      />,
+    );
+    expect(html).toContain("data-education-instructor-picker");
+    expect(html).toContain("Ada");
+    expect(html).not.toContain('name="instructorName"');
+    expect(html).not.toContain("Creates an instructor");
+  });
+});
+
+describe("Edit lesson modal", () => {
+  it("uses the Passion-house lesson modal, not an inline megapage form", () => {
+    const html = renderToStaticMarkup(
+      <EditLessonModal
+        open
+        onClose={() => undefined}
+        courseId="22222222-2222-4222-8222-222222222222"
+        modules={[{ id: "m1", course_id: "c1", title: "Orientation", position: 1 }]}
+        lesson={{
+          id: "l1",
+          moduleId: "m1",
+          title: "Opening",
+          summary: "",
+          durationSeconds: 600,
+        }}
+      />,
+    );
+    expect(html).toContain("data-education-edit-lesson-form");
+    expect(html).toContain(EDUCATION_ADMIN.editLesson);
+    expect(html).toContain('data-education-lesson-type="lesson"');
+    expect(html).toContain(EDUCATION_ADMIN.cancel);
+    expect(html).toContain(EDUCATION_ADMIN.save);
+    expect(html).not.toContain("Sequence");
+    expect(html).not.toMatch(/free.?taste/i);
   });
 });
 

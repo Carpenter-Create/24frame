@@ -13,6 +13,7 @@ import {
   COURSE_STATUSES,
   COURSE_STATUS_LABELS,
   EDUCATION_ADMIN,
+  EDUCATION_ENCODE_LABELS,
   EDUCATION_HREF,
   EDUCATION_NAME_MAX,
   EDUCATION_SUMMARY_MAX,
@@ -94,10 +95,12 @@ function CoverDropzone({
   file,
   onFile,
   accept,
+  existingSrc,
 }: {
   file: File | null;
   onFile: (file: File | null) => void;
   accept: string;
+  existingSrc?: string | null;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const preview = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
@@ -108,6 +111,8 @@ function CoverDropzone({
     };
   }, [preview]);
 
+  const shown = preview ?? existingSrc ?? null;
+
   return (
     <div className={field}>
       <span className={label}>{EDUCATION_ADMIN.cover}</span>
@@ -117,10 +122,10 @@ function CoverDropzone({
         onClick={() => inputRef.current?.click()}
         className="relative flex aspect-video w-full flex-col items-center justify-center overflow-hidden rounded-[var(--radius)] border border-dashed border-hairline bg-surface-muted text-ink-3 transition hover:border-accent"
       >
-        {preview ? (
+        {shown ? (
           // Preview only. Signed consume covers stay on CourseCover.
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={preview} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          <img src={shown} alt="" className="absolute inset-0 h-full w-full object-cover" />
         ) : (
           <span className="px-[var(--space-4)] text-center t-body-sm">{EDUCATION_ADMIN.coverHint}</span>
         )}
@@ -240,7 +245,6 @@ export function NewCourseModal({
       model: String(form.get("model") ?? "free"),
       price: String(form.get("price") ?? ""),
       instructorId: String(form.get("instructorId") ?? "") || undefined,
-      instructorName: String(form.get("instructorName") ?? "") || undefined,
     });
     if (res.error || !res.slug || !res.courseId) {
       setSaving(false);
@@ -282,7 +286,7 @@ export function NewCourseModal({
           onChange={setSummary}
           multiline
         />
-        <InstructorFields instructors={instructors} />
+        <InstructorPicker instructors={instructors} />
         <CourseProductFields defaultModel="free" />
         <div className="flex items-center justify-end gap-[var(--space-3)]">
           <Button type="button" variant="ghost" onClick={onClose}>
@@ -297,7 +301,7 @@ export function NewCourseModal({
   );
 }
 
-function InstructorFields({
+function InstructorPicker({
   instructors,
   defaultInstructorId,
 }: {
@@ -308,21 +312,19 @@ function InstructorFields({
     <fieldset className="flex flex-col gap-3" data-education-instructor="">
       <legend className={label}>{EDUCATION_ADMIN.instructor}</legend>
       <span className="t-body-sm text-ink-3">{EDUCATION_ADMIN.instructorHint}</span>
-      {instructors.length > 0 ? (
-        <select
-          name="instructorId"
-          defaultValue={defaultInstructorId ?? ""}
-          className="w-full rounded-[var(--radius-sm)] border border-hairline bg-surface px-3 py-2 t-control text-ink"
-        >
-          <option value=""></option>
-          {instructors.map((instructor) => (
-            <option key={instructor.id} value={instructor.id}>
-              {instructor.name}
-            </option>
-          ))}
-        </select>
-      ) : null}
-      <Input name="instructorName" maxLength={160} placeholder="" />
+      <select
+        name="instructorId"
+        data-education-instructor-picker=""
+        defaultValue={defaultInstructorId ?? ""}
+        className="w-full rounded-[var(--radius-sm)] border border-hairline bg-surface px-3 py-2 t-control text-ink"
+      >
+        <option value="">{EDUCATION_ADMIN.instructorNone}</option>
+        {instructors.map((instructor) => (
+          <option key={instructor.id} value={instructor.id}>
+            {instructor.name}
+          </option>
+        ))}
+      </select>
     </fieldset>
   );
 }
@@ -332,21 +334,25 @@ export function EditCourseForm({
   title,
   description,
   catalogCode,
+  consumePath,
   status,
   isFlagshipFree,
   priceCents,
   instructorId,
   instructors,
+  onSaved,
 }: {
   courseId: string;
   title: string;
   description: string;
   catalogCode: string;
+  consumePath?: string;
   status: CourseStatus;
   isFlagshipFree: boolean;
   priceCents: number | null;
   instructorId: string | null;
   instructors: InstructorRow[];
+  onSaved?: () => void;
 }) {
   const router = useRouter();
   const [error, setError] = useState("");
@@ -367,21 +373,28 @@ export function EditCourseForm({
       price: String(form.get("price") ?? ""),
       status: String(form.get("status") ?? status),
       instructorId: String(form.get("instructorId") ?? "") || undefined,
-      instructorName: String(form.get("instructorName") ?? "") || undefined,
     });
     setSaving(false);
     if (res.error) return setError(res.error);
+    onSaved?.();
     router.refresh();
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex max-w-xl flex-col gap-[var(--space-6)]" data-education-edit="">
+    <form onSubmit={onSubmit} className="flex flex-col gap-[var(--space-6)]" data-education-edit="">
       {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
       <p className="t-body-sm text-ink-3" data-education-catalog-code="">
         {EDUCATION_ADMIN.catalogCode}
         {": "}
         {catalogCode}
       </p>
+      {consumePath ? (
+        <p className="t-body-sm text-ink-3" data-education-consume-path="">
+          {EDUCATION_ADMIN.consumePath}
+          {": "}
+          {consumePath}
+        </p>
+      ) : null}
       <CountedInput
         name="title"
         labelText={EDUCATION_ADMIN.courseTitle}
@@ -412,7 +425,7 @@ export function EditCourseForm({
           ))}
         </select>
       </label>
-      <InstructorFields instructors={instructors} defaultInstructorId={instructorId} />
+      <InstructorPicker instructors={instructors} defaultInstructorId={instructorId} />
       <CourseProductFields
         defaultModel={educationProductModel(isFlagshipFree)}
         defaultPriceCents={priceCents}
@@ -424,7 +437,13 @@ export function EditCourseForm({
   );
 }
 
-export function CoverUploadForm({ courseId }: { courseId: string }) {
+export function CoverUploadForm({
+  courseId,
+  existingSrc,
+}: {
+  courseId: string;
+  existingSrc?: string | null;
+}) {
   const router = useRouter();
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -455,7 +474,12 @@ export function CoverUploadForm({ courseId }: { courseId: string }) {
   return (
     <form onSubmit={onSubmit} className="flex max-w-xl flex-col gap-[var(--space-4)]" data-education-cover="">
       {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
-      <CoverDropzone file={file} onFile={setFile} accept="image/jpeg,image/png,image/webp" />
+      <CoverDropzone
+        file={file}
+        onFile={setFile}
+        accept="image/jpeg,image/png,image/webp"
+        existingSrc={existingSrc}
+      />
       <Button type="submit" variant="secondary" disabled={saving || !file}>
         {saving ? EDUCATION_ADMIN.saving : EDUCATION_ADMIN.uploadCover}
       </Button>
@@ -650,55 +674,186 @@ export function NewLessonModal({
   );
 }
 
-export function LessonAdminForm({
+export function EditLessonButton({
   courseId,
-  lessonId,
-  title,
-  summary,
-  durationSeconds,
-  encodeLabel,
-  encodeError,
-  canStartEncode,
+  modules,
+  lesson,
 }: {
   courseId: string;
-  lessonId: string;
-  title: string;
-  summary: string;
-  durationSeconds: number | null;
-  encodeLabel: string;
-  encodeError?: string | null;
-  canStartEncode: boolean;
+  modules: CourseModuleRow[];
+  lesson: {
+    id: string;
+    moduleId: string;
+    title: string;
+    summary: string;
+    durationSeconds: number | null;
+  };
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Button type="button" variant="secondary" data-education-edit-lesson="" onClick={() => setOpen(true)}>
+        {EDUCATION_ADMIN.editLesson}
+      </Button>
+      {open ? (
+        <EditLessonModal
+          open
+          onClose={() => setOpen(false)}
+          courseId={courseId}
+          modules={modules}
+          lesson={lesson}
+        />
+      ) : null}
+    </>
+  );
+}
+
+export function EditLessonModal({
+  open,
+  onClose,
+  courseId,
+  modules,
+  lesson,
+}: {
+  open: boolean;
+  onClose: () => void;
+  courseId: string;
+  modules: CourseModuleRow[];
+  lesson: {
+    id: string;
+    moduleId: string;
+    title: string;
+    summary: string;
+    durationSeconds: number | null;
+  };
 }) {
   const router = useRouter();
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const [name, setName] = useState(title);
-  const [lessonSummary, setLessonSummary] = useState(summary);
+  const [name, setName] = useState(lesson.title);
+  const [summary, setSummary] = useState(lesson.summary);
+  const [cover, setCover] = useState<File | null>(null);
 
-  async function onSave(e: React.FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     const durationRaw = String(form.get("durationMinutes") ?? "").trim();
     setSaving(true);
     setError("");
-    try {
-      const res = await updateEducationLesson({
-        lessonId,
-        title: name,
-        summary: lessonSummary,
-        durationMinutes: durationRaw === "" ? null : Number(durationRaw),
-      });
-      if (res.error) {
-        setError(res.error);
-        return;
-      }
-      router.refresh();
-    } catch {
-      setError(EDUCATION_ADMIN.invalid);
-    } finally {
+    const res = await updateEducationLesson({
+      lessonId: lesson.id,
+      title: name,
+      summary,
+      durationMinutes: durationRaw === "" ? null : Number(durationRaw),
+    });
+    if (res.error) {
       setSaving(false);
+      return setError(res.error);
     }
+    if (cover) {
+      const uploadError = await uploadCover({
+        kind: "lesson_cover",
+        courseId,
+        lessonId: lesson.id,
+        file: cover,
+      });
+      if (uploadError) {
+        setSaving(false);
+        router.refresh();
+        return setError(uploadError);
+      }
+    }
+    setSaving(false);
+    onClose();
+    router.refresh();
   }
+
+  return (
+    <Dialog open={open} onClose={onClose} title={EDUCATION_ADMIN.editLesson}>
+      <form onSubmit={onSubmit} className="flex flex-col gap-[var(--space-6)]" data-education-edit-lesson-form="">
+        {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
+        <CoverDropzone file={cover} onFile={setCover} accept="image/jpeg,image/png,image/webp" />
+        <fieldset className="flex flex-col gap-3" data-education-lesson-types="">
+          <legend className={label}>{EDUCATION_ADMIN.lessonType}</legend>
+          <div
+            data-education-lesson-type="lesson"
+            className="rounded-[var(--radius)] border border-accent bg-surface px-[var(--space-4)] py-[var(--space-4)]"
+          >
+            <p className="t-body font-medium text-ink">{EDUCATION_ADMIN.lessonTypeLesson}</p>
+          </div>
+        </fieldset>
+        <CountedInput
+          name="title"
+          labelText={EDUCATION_ADMIN.lessonTitle}
+          max={EDUCATION_NAME_MAX}
+          value={name}
+          onChange={setName}
+          required
+        />
+        <CountedInput
+          name="summary"
+          labelText={EDUCATION_ADMIN.lessonSummary}
+          max={EDUCATION_SUMMARY_MAX}
+          value={summary}
+          onChange={setSummary}
+          multiline
+        />
+        <label className={field}>
+          <span className={label}>{EDUCATION_ADMIN.duration}</span>
+          <Input
+            name="durationMinutes"
+            type="number"
+            min={1}
+            max={24 * 60}
+            defaultValue={durationSecondsToMinutesInput(lesson.durationSeconds)}
+          />
+        </label>
+        <label className={field}>
+          <span className={label}>{EDUCATION_ADMIN.modulePlacement}</span>
+          <select
+            name="moduleId"
+            disabled
+            defaultValue={lesson.moduleId}
+            className="w-full rounded-[var(--radius-sm)] border border-hairline bg-surface px-3 py-2 t-control text-ink"
+          >
+            {modules.map((module) => (
+              <option key={module.id} value={module.id}>
+                {module.title}
+              </option>
+            ))}
+          </select>
+        </label>
+        <div className="flex items-center justify-end gap-[var(--space-3)]">
+          <Button type="button" variant="ghost" onClick={onClose}>
+            {EDUCATION_ADMIN.cancel}
+          </Button>
+          <Button type="submit" disabled={saving} data-education-edit-lesson-submit="">
+            {saving ? EDUCATION_ADMIN.saving : EDUCATION_ADMIN.save}
+          </Button>
+        </div>
+      </form>
+    </Dialog>
+  );
+}
+
+export function LessonMediaPane({
+  courseId,
+  lessonId,
+  encodePill,
+  encodeError,
+  canStartEncode,
+  canRefresh,
+}: {
+  courseId: string;
+  lessonId: string;
+  encodePill: string;
+  encodeError?: string | null;
+  canStartEncode: boolean;
+  canRefresh: boolean;
+}) {
+  const router = useRouter();
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
 
   async function onUpload(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -758,46 +913,20 @@ export function LessonAdminForm({
   }
 
   return (
-    <div className="flex flex-col gap-3" data-education-lesson={lessonId}>
+    <div className="flex flex-col gap-[var(--space-4)]" data-education-lesson={lessonId} data-education-media-pane="">
       {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
-      <p className="t-body-sm text-ink-3">{encodeLabel}</p>
+      <span
+        data-education-encode-pill=""
+        className="inline-flex w-fit rounded-full border border-hairline px-[var(--space-2)] py-0.5 t-body-sm text-ink-2"
+      >
+        {encodePill}
+      </span>
       {encodeError ? (
         <p className="t-body-sm text-ink-3" data-education-encode-error="">
           {encodeError}
         </p>
       ) : null}
-      <form onSubmit={onSave} className="flex max-w-xl flex-col gap-[var(--space-4)]">
-        <CountedInput
-          name="title"
-          labelText={EDUCATION_ADMIN.lessonTitle}
-          max={EDUCATION_NAME_MAX}
-          value={name}
-          onChange={setName}
-          required
-        />
-        <CountedInput
-          name="summary"
-          labelText={EDUCATION_ADMIN.lessonSummary}
-          max={EDUCATION_SUMMARY_MAX}
-          value={lessonSummary}
-          onChange={setLessonSummary}
-          multiline
-        />
-        <label className={field}>
-          <span className={label}>{EDUCATION_ADMIN.duration}</span>
-          <Input
-            name="durationMinutes"
-            type="number"
-            min={1}
-            max={24 * 60}
-            defaultValue={durationSecondsToMinutesInput(durationSeconds)}
-          />
-        </label>
-        <Button type="submit" variant="secondary" disabled={saving}>
-          {saving ? EDUCATION_ADMIN.saving : EDUCATION_ADMIN.save}
-        </Button>
-      </form>
-      <form onSubmit={onUpload} className="flex max-w-xl flex-col gap-3">
+      <form onSubmit={onUpload} className="flex flex-col gap-3" data-education-upload-source="">
         <label className={field}>
           <span className={label}>{EDUCATION_ADMIN.source}</span>
           <Input name="file" type="file" accept="video/mp4,video/quicktime,video/webm" required />
@@ -808,13 +937,46 @@ export function LessonAdminForm({
       </form>
       <div className="flex flex-wrap gap-2">
         <Button type="button" variant="secondary" disabled={saving || !canStartEncode} onClick={() => void onEncode()}>
-          {EDUCATION_ADMIN.startEncode}
+          {canStartEncode && encodePill === EDUCATION_ADMIN.encodePillError
+            ? EDUCATION_ADMIN.retry
+            : EDUCATION_ADMIN.startEncode}
         </Button>
-        <Button type="button" variant="ghost" disabled={saving} onClick={() => void onRefresh()}>
-          {EDUCATION_ADMIN.refreshEncode}
-        </Button>
+        {canRefresh ? (
+          <Button type="button" variant="ghost" disabled={saving} onClick={() => void onRefresh()}>
+            {EDUCATION_ADMIN.refreshEncode}
+          </Button>
+        ) : null}
       </div>
     </div>
+  );
+}
+
+export function LessonAdminForm(props: {
+  courseId: string;
+  lessonId: string;
+  title: string;
+  summary: string;
+  durationSeconds: number | null;
+  encodeLabel: string;
+  encodeError?: string | null;
+  canStartEncode: boolean;
+}) {
+  return (
+    <LessonMediaPane
+      courseId={props.courseId}
+      lessonId={props.lessonId}
+      encodePill={props.encodeLabel}
+      encodeError={props.encodeError}
+      canStartEncode={props.canStartEncode}
+      canRefresh={
+        props.encodeLabel === EDUCATION_ADMIN.encodePillEncoding ||
+        props.encodeLabel === EDUCATION_ADMIN.encodePillError ||
+        props.encodeLabel === EDUCATION_ENCODE_LABELS.submitted ||
+        props.encodeLabel === EDUCATION_ENCODE_LABELS.running ||
+        props.encodeLabel === EDUCATION_ENCODE_LABELS.failed ||
+        props.encodeLabel === EDUCATION_ENCODE_LABELS.submit_failed
+      }
+    />
   );
 }
 
