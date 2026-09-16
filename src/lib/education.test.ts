@@ -24,8 +24,12 @@ import {
   isEducationCatalogCode,
   minutesToDurationSeconds,
   educationCommercialLabel,
+  canRefreshEducationEncode,
   canStartEducationEncode,
   educationEncodeLabel,
+  educationEncodePill,
+  educationQuietDate,
+  moveOrderedIds,
   educationPriceInputValue,
   educationProductModel,
   formatEducationPriceCents,
@@ -66,6 +70,11 @@ describe("education names and keys", () => {
     expect(EDUCATION_ADMIN.manage).toBe("Course management");
     expect(EDUCATION_ADMIN.title).toBe("Manage courses");
     expect(EDUCATION_ADMIN.addLesson).toBe("Add lesson");
+    expect(EDUCATION_ADMIN.title).toBe("Manage courses");
+    expect(EDUCATION_ADMIN.newCourse).toBe("New course");
+    expect(JSON.stringify(EDUCATION_ADMIN)).not.toContain("Welcome");
+    expect(JSON.stringify(EDUCATION_ADMIN)).not.toContain("New & For You");
+    expect(JSON.stringify(EDUCATION_ADMIN)).not.toContain("Home");
   });
 
   it("keeps object keys on the courses prefix", () => {
@@ -161,6 +170,18 @@ describe("education names and keys", () => {
     expect(educationEncodeLabel("submit_failed", true)).toBe("Submit failed");
     expect(educationEncodeLabel(null, true)).toBe("Source ready.");
     expect(educationEncodeLabel(null, false)).toBe("No source yet.");
+    expect(educationEncodePill(null, false)).toBe("No source");
+    expect(educationEncodePill(null, true)).toBe("Source ready");
+    expect(educationEncodePill("submitted", true)).toBe("Encoding");
+    expect(educationEncodePill("running", true)).toBe("Encoding");
+    expect(educationEncodePill("complete", true)).toBe("Complete");
+    expect(educationEncodePill("failed", true)).toBe("Error");
+    expect(educationEncodePill("submit_failed", true)).toBe("Error");
+    expect(canRefreshEducationEncode("running")).toBe(true);
+    expect(canRefreshEducationEncode("submit_failed")).toBe(true);
+    expect(canRefreshEducationEncode(null)).toBe(false);
+    expect(educationQuietDate("2026-09-12T14:00:00.000Z")).toBe("Sep 12, 2026");
+    expect(moveOrderedIds(["a", "b", "c"], 0, 2)).toEqual(["b", "c", "a"]);
     expect(mapMediaConvertJobStatus("PROGRESSING")).toBe("running");
     expect(mapMediaConvertJobStatus("COMPLETE")).toBe("complete");
     expect(mapMediaConvertJobStatus("ERROR")).toBe("failed");
