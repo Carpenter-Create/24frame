@@ -86,6 +86,23 @@ Agents do not set values.
 - Members consume on Route A `/social/courses/[slug]` only.
 - Education clients never import `@/lib/s3`, `@/lib/s3-social-media`,
   `@/lib/s3-finance`, `@/lib/s3-avatars`, or `@/lib/mediaconvert`.
+- Production HLS playback uses **CloudFront signed cookies** scoped to
+  `https://{EDUCATION_CLOUDFRONT_DOMAIN}/courses/{courseId}/lessons/{lessonId}/hls/*`
+  (`CloudFront-Policy`, `CloudFront-Signature`, `CloudFront-Key-Pair-Id`).
+  Cookie **Domain** is the Education CF hostname (smoke host like
+  `d2po08x60lie2q.cloudfront.net`). Cookie **Path** is
+  `/courses/{courseId}/lessons/{lessonId}/hls`. The member consume
+  page (`/social/courses/[slug]`) sets `playbackUrl` to
+  `/api/education/hls/{courseId}/{lessonId}/source.m3u8`. That route
+  sets the cookies on its response and attaches them on the
+  server-side fetch to CloudFront so relative child `source_hls.m3u8`
+  / `.ts` are authorized. House does not put Education CF on an app
+  parent domain, so the browser cannot store `Domain=*.cloudfront.net`
+  cookies from the Vercel host — the app-proxy is required.
+- Preview leaves `EDUCATION_CLOUDFRONT_*` empty. Consume keeps the
+  S3 presigned master URL. Relative HLS children are not authorized
+  by that presign (Preview play limitation). Do not read
+  `CLOUDFRONT_*` / `MEDIA_CLOUDFRONT_*` / `FINANCE_CLOUDFRONT_*`.
 - Cover and lesson source bytes PUT **server-side** (same pattern as
   avatars). Browser CORS on the Education source bucket is not required
   for staff uploads.

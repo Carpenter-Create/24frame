@@ -24,6 +24,8 @@ describe("education isolation", () => {
     expect(infra).toContain("24frame-education-output-prod");
     expect(infra).toContain("Do **not** create these buckets");
     expect(infra).toContain("Cover and lesson source bytes PUT **server-side**");
+    expect(infra).toContain("courses/{courseId}/lessons/{lessonId}/hls/*");
+    expect(infra).toContain("/api/education/hls/");
     expect(infra).toContain("EDUCATION_AWS_ACCESS_KEY_ID");
     expect(envExample).toContain("EDUCATION_AWS_ACCESS_KEY_ID=");
     expect(envExample).toContain("S3_EDUCATION_SOURCE_BUCKET=");
@@ -112,6 +114,16 @@ describe("education isolation", () => {
     );
     expect(actions).not.toContain('from "@/lib/s3"');
     expect(actions).not.toContain('from "@/lib/s3-social-media"');
+    const hls = readFileSync(
+      "src/app/api/education/hls/[courseId]/[lessonId]/[...asset]/route.ts",
+      "utf8",
+    );
+    expect(hls).toContain("signEducationCloudfrontCookies");
+    expect(hls).not.toContain('from "@/lib/cloudfront"');
+    expect(hls).not.toContain('from "@/lib/s3"');
+    expect(hls).not.toContain("process.env.CLOUDFRONT_");
+    expect(hls).not.toContain("process.env.MEDIA_CLOUDFRONT_");
+    expect(hls).not.toContain("process.env.FINANCE_CLOUDFRONT_");
   });
 
   it("uploads covers and lesson sources server-side so Saving… can clear without a browser S3 PUT", () => {
