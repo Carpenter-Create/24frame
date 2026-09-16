@@ -91,15 +91,21 @@ export function DashboardAdminControls({
 
   useEffect(() => {
     if (!sheetOpen) return undefined;
+    const media = window.matchMedia("(min-width: 768px)");
     const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") setSheetOpen(false);
     };
+    const onMedia = () => {
+      if (media.matches) setSheetOpen(false);
+    };
+    if (!media.matches) document.body.style.overflow = "hidden";
     document.addEventListener("keydown", onKey);
+    media.addEventListener("change", onMedia);
     return () => {
       document.body.style.overflow = previous;
       document.removeEventListener("keydown", onKey);
+      media.removeEventListener("change", onMedia);
     };
   }, [sheetOpen]);
 
@@ -223,6 +229,7 @@ export function DashboardAdminControls({
         }}
         onClear={() => {
           setQuery("");
+          setSheetOpen(false);
           go({ user: null });
         }}
         onClose={() => setSheetOpen(false)}
