@@ -207,10 +207,10 @@ export async function loadDiscoverableCourseMeta(
   }
 
   const lessonsByCourse = new Map<string, Pick<CourseLessonRow, "duration_seconds">[]>();
-  for (const module of modules) {
-    const list = lessonsByCourse.get(module.course_id) ?? [];
-    list.push(...(lessonsByModule.get(module.id) ?? []));
-    lessonsByCourse.set(module.course_id, list);
+  for (const courseModule of modules) {
+    const list = lessonsByCourse.get(courseModule.course_id) ?? [];
+    list.push(...(lessonsByModule.get(courseModule.id) ?? []));
+    lessonsByCourse.set(courseModule.course_id, list);
   }
 
   for (const course of courses) {
