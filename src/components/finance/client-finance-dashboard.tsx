@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { Card, CardBody } from "@/components/ui/card";
-import { Stat, StatGrid } from "@/components/layout/stat";
 import { HouseEmpty } from "@/components/chrome/house";
 import {
   FINANCE_CLIENT,
@@ -9,10 +8,25 @@ import {
   formatUsdCents,
 } from "@/lib/finance";
 import {
+  FINANCE_CARD_HOVER_CLASS,
+  FINANCE_CARD_PAD_CLASS,
+  FINANCE_HERO_CLASS,
+  FINANCE_RELATED_CLASS,
+  FINANCE_SECTION_CLASS,
+  FINANCE_STACK_CLASS,
+  FINANCE_STRIP_CELL_CLASS,
+  FINANCE_STRIP_CLASS,
+} from "@/lib/finance-craft";
+import {
   invoiceAmountLabel,
   type ClientFinanceDashboard,
 } from "@/lib/finance-dashboard";
-import { NetHistoryChart, ThresholdMeterBar, TitleContributionBars } from "./finance-meters";
+import {
+  FinanceStatusPill,
+  NetHistoryChart,
+  ThresholdMeterBar,
+  TitleContributionBars,
+} from "./finance-meters";
 
 export function ClientFinanceDashboardView({ dashboard }: { dashboard: ClientFinanceDashboard }) {
   const latest = dashboard.latest;
@@ -23,73 +37,50 @@ export function ClientFinanceDashboardView({ dashboard }: { dashboard: ClientFin
   }
 
   return (
-    <div data-finance-dashboard="" className="flex flex-col gap-[var(--space-8)]">
-      <section className="rounded-[var(--radius-lg)] bg-band px-[var(--space-8)] py-[var(--space-8)] text-band-ink">
-        <p className="t-label text-band-ink/50">{FINANCE_CLIENT.glanceLatest}</p>
+    <div data-finance-dashboard="" className={FINANCE_STACK_CLASS}>
+      <section data-finance-hero="" className={FINANCE_HERO_CLASS}>
+        <p className="t-label text-ink-3">{FINANCE_CLIENT.glanceLatest}</p>
         {latest && org ? (
           <>
-            <p className="mt-[var(--space-2)] t-display t-data text-band-ink">
+            <p className="mt-[var(--space-2)] t-display t-data text-ink">
               {formatUsdCents(org.netCents)}
             </p>
-            <p className="mt-[var(--space-2)] t-body-sm text-band-ink/60">
+            <p className="mt-[var(--space-2)] t-body-sm text-ink-2">
               {latest.label} · {invoiceAmountLabel(latest.invoice)}
             </p>
           </>
         ) : (
-          <p className="mt-[var(--space-2)] t-title text-band-ink">{FINANCE_CLIENT.glanceNone}</p>
+          <p className="mt-[var(--space-2)] t-title text-ink">{FINANCE_CLIENT.glanceNone}</p>
         )}
-        <StatGrid surface="band" className="mt-[var(--space-8)]">
-          <Stat surface="band" label={FINANCE_CLIENT.glanceRate} value={dashboard.rateLabel} />
-          <Stat
-            surface="band"
-            label={FINANCE_PAGE.periodNet}
-            value={org ? formatUsdCents(org.netCents) : "—"}
-          />
-          <Stat
-            surface="band"
-            label={FINANCE_CLIENT.glanceThreshold}
-            value={
-              latest?.threshold.thresholdCents == null
-                ? FINANCE_CLIENT.glanceNoThreshold
-                : formatUsdCents(latest.threshold.thresholdCents)
-            }
-          />
-          <Stat
-            surface="band"
-            label={FINANCE_CLIENT.closedCount}
-            value={String(dashboard.closedCount)}
-            meta={`${dashboard.openCount} ${FINANCE_CLIENT.openCount.toLowerCase()}`}
-          />
-        </StatGrid>
       </section>
 
       {latest && org ? (
-        <section className="flex flex-col gap-3">
+        <section className={FINANCE_SECTION_CLASS}>
           <h2 className="t-body font-medium text-ink">{FINANCE_CLIENT.overview}</h2>
-          <Card>
-            <CardBody className="flex flex-col gap-4">
+          <div data-finance-contract-strip="" className={FINANCE_STRIP_CLASS}>
+            <Metric label={FINANCE_CLIENT.glanceRate} value={dashboard.rateLabel} />
+            <Metric
+              label={FINANCE_PAGE.aggregatorKeep}
+              value={formatUsdCents(org.aggregatorKeepCents)}
+            />
+            <Metric label={FINANCE_CLIENT.recoupVisible} value={formatUsdCents(org.recoupCents)} />
+            <Metric
+              label={FINANCE_CLIENT.adjustmentVisible}
+              value={formatUsdCents(org.adjustmentCents)}
+            />
+            <Metric label={FINANCE_PAGE.opening} value={formatUsdCents(org.openingCents)} />
+            <Metric
+              label={FINANCE_PAGE.closing}
+              value={formatUsdCents(org.close.closingBalanceCents)}
+            />
+          </div>
+          <Card className="shadow-none">
+            <CardBody className={FINANCE_CARD_PAD_CLASS}>
               <ThresholdMeterBar meter={latest.threshold} />
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <Metric label={FINANCE_PAGE.opening} value={formatUsdCents(org.openingCents)} />
-                <Metric
-                  label={FINANCE_PAGE.closing}
-                  value={formatUsdCents(org.close.closingBalanceCents)}
-                />
-                <Metric label={FINANCE_PAGE.clientShare} value={formatUsdCents(org.clientShareCents)} />
-                <Metric
-                  label={FINANCE_PAGE.aggregatorKeep}
-                  value={formatUsdCents(org.aggregatorKeepCents)}
-                />
-                <Metric label={FINANCE_CLIENT.recoupVisible} value={formatUsdCents(org.recoupCents)} />
-                <Metric
-                  label={FINANCE_CLIENT.adjustmentVisible}
-                  value={formatUsdCents(org.adjustmentCents)}
-                />
-              </div>
             </CardBody>
           </Card>
           {latest.contributions.length > 0 ? (
-            <div className="flex flex-col gap-3">
+            <div className={FINANCE_RELATED_CLASS}>
               <h3 className="t-body-sm text-ink-2">{FINANCE_CLIENT.contribution}</h3>
               <TitleContributionBars contributions={latest.contributions} />
             </div>
@@ -97,25 +88,30 @@ export function ClientFinanceDashboardView({ dashboard }: { dashboard: ClientFin
         </section>
       ) : null}
 
-      <section className="flex flex-col gap-3">
+      <section className={FINANCE_SECTION_CLASS}>
         <h2 className="t-body font-medium text-ink">{FINANCE_CLIENT.history}</h2>
         <NetHistoryChart points={dashboard.chart} />
-        <div className="flex flex-col gap-3">
+        <div className={FINANCE_SECTION_CLASS}>
           {dashboard.history.map((period) => (
-            <Link key={period.id} href={period.href} className="block">
-              <Card className="transition-colors hover:border-accent">
-                <CardBody className="flex items-center justify-between gap-4">
-                  <div className="flex flex-col gap-0.5">
+            <Link
+              key={period.id}
+              href={period.href}
+              data-finance-history-card={period.id}
+              className="block"
+            >
+              <Card className={FINANCE_CARD_HOVER_CLASS}>
+                <CardBody
+                  className={`flex items-center justify-between gap-[var(--space-4)] ${FINANCE_CARD_PAD_CLASS}`}
+                >
+                  <div className={FINANCE_RELATED_CLASS}>
                     <span className="t-body font-medium text-ink">{period.label}</span>
-                    <span className="t-body-sm text-ink-3">
-                      {FINANCE_PAGE.opening} {formatUsdCents(period.openingCents)}
-                      {period.netCents === null
-                        ? ""
-                        : ` · ${FINANCE_PAGE.periodNet} ${formatUsdCents(period.netCents)}`}
+                    <span className="t-data text-ink">
+                      {period.netCents === null ? "—" : formatUsdCents(period.netCents)}
                     </span>
                   </div>
-                  <span className="t-label text-ink-2">
-                    {period.status === "closed" ? FINANCE_PAGE.statusClosed : FINANCE_PAGE.statusOpen}
+                  <span className="flex items-center gap-[var(--space-4)]">
+                    <FinanceStatusPill status={period.status} />
+                    <HistoryChevron />
                   </span>
                 </CardBody>
               </Card>
@@ -129,9 +125,29 @@ export function ClientFinanceDashboardView({ dashboard }: { dashboard: ClientFin
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col gap-1">
+    <div className={FINANCE_STRIP_CELL_CLASS}>
       <span className="t-label text-ink-3">{label}</span>
       <span className="t-data text-ink">{value}</span>
     </div>
+  );
+}
+
+function HistoryChevron() {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 16 16"
+      className="size-4 shrink-0 text-ink-3"
+      data-finance-history-chevron=""
+    >
+      <path
+        d="M6 3.5 11 8l-5 4.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }

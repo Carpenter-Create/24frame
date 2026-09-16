@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 import { getOrgContext } from "@/lib/supabase/context";
 import { PageHeader } from "@/components/ui/page-header";
-import { HouseEmpty } from "@/components/chrome/house";
+import { HouseEmpty, TextAction } from "@/components/chrome/house";
 import { ClientPeriodDashboard } from "@/components/finance/client-period-dashboard";
 import {
   FINANCE_CLIENT,
@@ -12,6 +12,7 @@ import {
   financePeriodLabel,
   orgRoleCanViewFinancial,
 } from "@/lib/finance";
+import { FINANCE_DOWNLOAD_CLASS } from "@/lib/finance-craft";
 import { loadRecipientPeriod, loadRecipientStatement } from "@/lib/finance-recipient-load";
 
 export default async function ClientFinancePeriodPage({
@@ -63,18 +64,30 @@ export default async function ClientFinancePeriodPage({
         subtitle={`${FINANCE_PAGE.statusClosed} · ${FINANCE_PAGE.usd}`}
         backLink={{ href: FINANCE_CLIENT_HREF, label: FINANCE_CLIENT.title }}
         actions={
-          <div className="flex flex-col items-end gap-2">
+          <div
+            data-finance-download=""
+            className="flex flex-col items-end gap-[var(--space-2)]"
+          >
             <p className="t-label text-ink-3">{FINANCE_CLIENT.pack}</p>
-            <a href={financeExportHref(period.id, "pdf")} className="t-body-sm font-normal text-accent">
-              {FINANCE_CLIENT.pdf}
-            </a>
-            <a href={financeExportHref(period.id, "csv")} className="t-body-sm font-normal text-accent">
-              {FINANCE_CLIENT.csv}
-            </a>
+            <div className="flex flex-wrap items-center justify-end gap-[var(--space-4)]">
+              <a
+                href={financeExportHref(period.id, "pdf")}
+                aria-label={FINANCE_CLIENT.pdf}
+                className={FINANCE_DOWNLOAD_CLASS}
+              >
+                {FINANCE_CLIENT.download}
+              </a>
+              <TextAction href={financeExportHref(period.id, "csv")}>{FINANCE_CLIENT.csv}</TextAction>
+            </div>
           </div>
         }
       />
-      <ClientPeriodDashboard statement={statement} />
+      <ClientPeriodDashboard
+        statement={statement}
+        orgName={ctx.activeOrg.name}
+        periodLabel={title}
+        status="closed"
+      />
     </>
   );
 }

@@ -122,7 +122,10 @@ describe("client Finance list", () => {
 
     const html = renderToStaticMarkup(await ClientFinancePage());
     expect(html).toContain("data-finance-dashboard");
+    expect(html).toContain("data-finance-hero");
+    expect(html).toContain("data-finance-contract-strip");
     expect(html).toContain("data-finance-history-chart");
+    expect(html).not.toContain("bg-band");
     expect(html).toContain("2026-08");
     expect(html).toContain("2026-09");
     expect(html).toContain(`${FINANCE_CLIENT_HREF}/p-closed`);

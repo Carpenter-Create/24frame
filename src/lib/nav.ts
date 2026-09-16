@@ -21,6 +21,7 @@ import {
 
 import type { PhosphorIcon } from "@/lib/phosphor-icon";
 import { ASK_GLOBEE } from "@/lib/ask-globee";
+import { FINANCE_CLIENT, FINANCE_PAGE } from "@/lib/finance";
 import { PRODUCT_NAME } from "@/lib/product";
 import type { WorkspaceMode } from "@/lib/workspace";
 import { EDUCATION_ADMIN, EDUCATION_HREF } from "@/lib/education";
@@ -33,6 +34,7 @@ export type PhosphorNavItem = {
   family: "phosphor";
   icon: PhosphorIcon;
   exact?: boolean;
+  ariaLabel?: string;
 };
 
 export type LucideNavItem = {
@@ -41,6 +43,7 @@ export type LucideNavItem = {
   family: "lucide";
   icon: LucideIcon;
   exact?: boolean;
+  ariaLabel?: string;
 };
 
 export type NavItem = PhosphorNavItem | LucideNavItem;
@@ -58,7 +61,13 @@ export const NAV: PhosphorNavItem[] = [
   { label: "Titles", href: "/titles", family: "phosphor", icon: FilmSlate },
   { label: "Deliveries", href: "/deliveries", family: "phosphor", icon: PaperPlaneTilt },
   { label: "Catalog Health", href: "/catalog-health", family: "phosphor", icon: Pulse },
-  { label: "Finance", href: "/finance", family: "phosphor", icon: Wallet },
+  {
+    label: "Finance",
+    href: "/finance",
+    family: "phosphor",
+    icon: Wallet,
+    ariaLabel: FINANCE_CLIENT.navAria,
+  },
   { label: ASK_GLOBEE.headline, href: "/messages", family: "phosphor", icon: Sparkle },
 ];
 
@@ -115,7 +124,13 @@ export const GC_NAV: PhosphorNavItem[] = [
   { label: "Queue", href: "/queue", family: "phosphor", icon: Tray },
   { label: `${PRODUCT_NAME} Deliveries`, href: "/gc/deliveries", family: "phosphor", icon: PaperPlaneTilt },
   { label: "Vendors", href: "/vendors", family: "phosphor", icon: Storefront },
-  { label: "Finance", href: "/gc/finance", family: "phosphor", icon: Wallet },
+  {
+    label: "Finance",
+    href: "/gc/finance",
+    family: "phosphor",
+    icon: Wallet,
+    ariaLabel: FINANCE_PAGE.navAria,
+  },
   { label: "Clients", href: "/gc/clients", family: "phosphor", icon: Users },
 ];
 
