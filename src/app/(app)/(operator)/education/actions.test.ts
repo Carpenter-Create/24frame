@@ -19,12 +19,18 @@ import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isEducationAwsConfigured, presignEducationSourcePut, putEducationSourceObject } from "@/lib/s3-education";
-import { EDUCATION_ADMIN, educationCoverKey } from "@/lib/education";
+import { EDUCATION_ADMIN, educationCoverKey, educationLessonSourceKey } from "@/lib/education";
 
-import { createEducationCourse, presignEducationUpload, uploadEducationCover } from "./actions";
+import {
+  createEducationCourse,
+  presignEducationUpload,
+  uploadEducationCover,
+  uploadEducationLessonSource,
+} from "./actions";
 
 const USER = { id: "11111111-1111-4111-8111-111111111111" };
 const COURSE = "22222222-2222-4222-8222-222222222222";
+const LESSON = "33333333-3333-4333-8333-333333333333";
 
 function staffClient(row: { user_id: string } | null) {
   const chain = {
@@ -213,5 +219,123 @@ describe("uploadEducationCover", () => {
       error: EDUCATION_ADMIN.notAuthorized,
     });
     expect(putEducationSourceObject).not.toHaveBeenCalled();
+  });
+});
+
+function sourceForm(file: File, courseId = COURSE, lessonId = LESSON) {
+  const body = new FormData();
+  body.set("courseId", courseId);
+  body.set("lessonId", lessonId);
+  body.set("file", file);
+  return body;
+}
+
+function sourceAdminClient(courseId = COURSE) {
+  const maybeSingle = vi.fn(async () => ({
+    data: {
+      id: LESSON,
+      modules: { course_id: courseId, courses: { slug: "cos-smoke-2026-09-15" } },
+    },
+    error: null,
+  }));
+  const select = vi.fn(() => ({ eq: vi.fn(() => ({ maybeSingle })) }));
+  const updateEq = vi.fn(async () => ({ error: null }));
+  const update = vi.fn(() => ({ eq: updateEq }));
+  const from = vi.fn(() => ({ select, update }));
+  vi.mocked(createAdminClient).mockReturnValue({ from } as never);
+  return { from, update, updateEq };
+}
+
+describe("uploadEducationLessonSource", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(getAuthUser).mockResolvedValue(USER as never);
+    vi.mocked(putEducationSourceObject).mockResolvedValue(undefined);
+  });
+
+  it("PUTs source bytes then sets source_key and does not hang on a browser PUT", async () => {
+    staffClient({ user_id: USER.id });
+    vi.mocked(isEducationAwsConfigured).mockReturnValue(true);
+    const { update } = sourceAdminClient();
+    const file = new File([new Uint8Array([1, 2, 3, 4])], "smoke.mp4", { type: "video/mp4" });
+    await expect(uploadEducationLessonSource(sourceForm(file))).resolves.toEqual({});
+    const key = educationLessonSourceKey(COURSE, LESSON, "video/mp4");
+    expect(putEducationSourceObject).toHaveBeenCalledTimes(1);
+    const [putKey, body, type] = vi.mocked(putEducationSourceObject).mock.calls[0] ?? [];
+    expect(putKey).toBe(key);
+    expect(type).toBe("video/mp4");
+    expect(body).toBeInstanceOf(Uint8Array);
+    expect(update).toHaveBeenCalledWith({
+      source_key: key,
+      encode_status: null,
+      encode_job_id: null,
+      encode_error: null,
+      hls_key: null,
+      encode_updated_at: expect.any(String),
+    });
+    expect(presignEducationSourcePut).not.toHaveBeenCalled();
+  });
+
+  it("normalizes an empty MP4 MIME so attach is not rejected after a successful PUT", async () => {
+    staffClient({ user_id: USER.id });
+    vi.mocked(isEducationAwsConfigured).mockReturnValue(true);
+    const { update } = sourceAdminClient();
+    const file = new File([new Uint8Array([1])], "smoke.MP4", { type: "" });
+    await expect(uploadEducationLessonSource(sourceForm(file))).resolves.toEqual({});
+    expect(putEducationSourceObject).toHaveBeenCalledWith(
+      educationLessonSourceKey(COURSE, LESSON, "video/mp4"),
+      expect.any(Uint8Array),
+      "video/mp4",
+    );
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({ source_key: educationLessonSourceKey(COURSE, LESSON, "video/mp4") }),
+    );
+  });
+
+  it("does not write source_key when the source PUT fails", async () => {
+    staffClient({ user_id: USER.id });
+    vi.mocked(isEducationAwsConfigured).mockReturnValue(true);
+    const { update } = sourceAdminClient();
+    vi.mocked(putEducationSourceObject).mockRejectedValueOnce(new Error("AccessDenied"));
+    const file = new File([new Uint8Array([1])], "smoke.mp4", { type: "video/mp4" });
+    await expect(uploadEducationLessonSource(sourceForm(file))).resolves.toEqual({
+      error: EDUCATION_ADMIN.uploadFailed,
+    });
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it("refuses when Education storage env is stubbed", async () => {
+    staffClient({ user_id: USER.id });
+    vi.mocked(isEducationAwsConfigured).mockReturnValue(false);
+    const { update } = sourceAdminClient();
+    const file = new File([new Uint8Array([1])], "smoke.mp4", { type: "video/mp4" });
+    await expect(uploadEducationLessonSource(sourceForm(file))).resolves.toEqual({
+      error: EDUCATION_ADMIN.envUnset,
+    });
+    expect(putEducationSourceObject).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it("refuses a member write", async () => {
+    staffClient(null);
+    vi.mocked(isEducationAwsConfigured).mockReturnValue(true);
+    const file = new File([new Uint8Array([1])], "smoke.mp4", { type: "video/mp4" });
+    await expect(uploadEducationLessonSource(sourceForm(file))).resolves.toEqual({
+      error: EDUCATION_ADMIN.notAuthorized,
+    });
+    expect(putEducationSourceObject).not.toHaveBeenCalled();
+  });
+
+  it("refuses when the lesson is not on the given course", async () => {
+    staffClient({ user_id: USER.id });
+    vi.mocked(isEducationAwsConfigured).mockReturnValue(true);
+    const otherCourse = "44444444-4444-4444-8444-444444444444";
+    const { update } = sourceAdminClient(otherCourse);
+    const file = new File([new Uint8Array([1])], "smoke.mp4", { type: "video/mp4" });
+    await expect(uploadEducationLessonSource(sourceForm(file))).resolves.toEqual({
+      error: EDUCATION_ADMIN.missing,
+    });
+    expect(putEducationSourceObject).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
   });
 });

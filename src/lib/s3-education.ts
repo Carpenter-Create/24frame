@@ -60,8 +60,8 @@ function educationClient(bucket: string): { bucket: string; s3: S3Client } {
         accessKeyId: requireEducationAwsEnv("EDUCATION_AWS_ACCESS_KEY_ID"),
         secretAccessKey: requireEducationAwsEnv("EDUCATION_AWS_SECRET_ACCESS_KEY"),
       },
-      // Browser PUTs (lesson source) cannot send the SDK's default CRC32
-      // checksum headers. WHEN_REQUIRED keeps SignedHeaders=host + Content-Type.
+      // Staff cover/source PUT server-side. WHEN_REQUIRED also keeps unused
+      // presign helpers browser-safe (no default CRC32 SignedHeaders).
       requestChecksumCalculation: "WHEN_REQUIRED",
     }),
   };

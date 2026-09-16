@@ -13,18 +13,16 @@ import {
   educationProductModel,
   type EducationProductModel,
 } from "@/lib/education";
-import { putEducationBrowserObject } from "@/lib/education-browser-put";
 import {
-  attachEducationLessonSource,
   createEducationCourse,
   createEducationLesson,
   createEducationModule,
-  presignEducationUpload,
   refreshEducationLessonEncode,
   startEducationLessonEncode,
   updateEducationCourse,
   updateEducationLesson,
   uploadEducationCover,
+  uploadEducationLessonSource,
 } from "./actions";
 
 const field = "flex flex-col gap-1";
@@ -77,10 +75,6 @@ function CourseProductFields({
       ) : null}
     </fieldset>
   );
-}
-
-async function putObject(url: string, file: File): Promise<boolean> {
-  return putEducationBrowserObject(url, file, file.type);
 }
 
 export function CreateCourseForm() {
@@ -332,15 +326,23 @@ export function LessonAdminForm({
     const durationRaw = String(form.get("durationSeconds") ?? "").trim();
     setSaving(true);
     setError("");
-    const res = await updateEducationLesson({
-      lessonId,
-      title: String(form.get("title") ?? ""),
-      durationSeconds: durationRaw === "" ? null : Number(durationRaw),
-      freePreview: form.get("freePreview") === "on",
-    });
-    setSaving(false);
-    if (res.error) return setError(res.error);
-    router.refresh();
+    try {
+      const res = await updateEducationLesson({
+        lessonId,
+        title: String(form.get("title") ?? ""),
+        durationSeconds: durationRaw === "" ? null : Number(durationRaw),
+        freePreview: form.get("freePreview") === "on",
+      });
+      if (res.error) {
+        setError(res.error);
+        return;
+      }
+      router.refresh();
+    } catch {
+      setError(EDUCATION_ADMIN.invalid);
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function onUpload(e: React.FormEvent<HTMLFormElement>) {
@@ -350,23 +352,11 @@ export function LessonAdminForm({
     setSaving(true);
     setError("");
     try {
-      const signed = await presignEducationUpload({
-        kind: "source",
-        courseId,
-        lessonId,
-        contentType: file.type,
-        byteLength: file.size,
-      });
-      if (signed.error || !signed.url || !signed.key) {
-        setError(signed.error ?? EDUCATION_ADMIN.uploadFailed);
-        return;
-      }
-      const ok = await putObject(signed.url, file);
-      if (!ok) {
-        setError(EDUCATION_ADMIN.uploadFailed);
-        return;
-      }
-      const attached = await attachEducationLessonSource({ courseId, lessonId, key: signed.key });
+      const body = new FormData();
+      body.set("courseId", courseId);
+      body.set("lessonId", lessonId);
+      body.set("file", file);
+      const attached = await uploadEducationLessonSource(body);
       if (attached.error) {
         setError(attached.error);
         return;
@@ -382,19 +372,35 @@ export function LessonAdminForm({
   async function onEncode() {
     setSaving(true);
     setError("");
-    const res = await startEducationLessonEncode({ lessonId });
-    setSaving(false);
-    if (res.error) return setError(res.error);
-    router.refresh();
+    try {
+      const res = await startEducationLessonEncode({ lessonId });
+      if (res.error) {
+        setError(res.error);
+        return;
+      }
+      router.refresh();
+    } catch {
+      setError(EDUCATION_ADMIN.encodeFailed);
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function onRefresh() {
     setSaving(true);
     setError("");
-    const res = await refreshEducationLessonEncode({ lessonId });
-    setSaving(false);
-    if (res.error) return setError(res.error);
-    router.refresh();
+    try {
+      const res = await refreshEducationLessonEncode({ lessonId });
+      if (res.error) {
+        setError(res.error);
+        return;
+      }
+      router.refresh();
+    } catch {
+      setError(EDUCATION_ADMIN.encodeFailed);
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
