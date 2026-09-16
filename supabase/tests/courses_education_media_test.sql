@@ -51,6 +51,28 @@ select ok(
 
 select ok(
   exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'courses'
+      and column_name = 'is_flagship_free'
+  )
+  and exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'courses'
+      and column_name = 'price_cents'
+      and is_nullable = 'YES'
+  )
+  and exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'lessons'
+      and column_name = 'free_preview'
+  ),
+  'product setup reuses is_flagship_free, nullable price_cents, and lesson free_preview');
+
+select ok(
+  exists (
     select 1
     from pg_type t
     join pg_namespace n on n.oid = t.typnamespace
