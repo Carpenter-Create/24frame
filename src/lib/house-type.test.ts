@@ -124,7 +124,7 @@ describe("Dashboard type jobs", () => {
     );
 
     expect(identity).toMatch(/<h1 class="t-title text-ink">Acme<\/h1>/);
-    expect(html).toMatch(/data-dashboard-title=""[^>]*t-title/);
+    expect(html).toMatch(/<h1 class="t-title text-ink" data-dashboard-title=""/);
     expect(html).toMatch(/data-dashboard-stat="revenue"[^>]*t-display t-data/);
     expect(html).toContain(`t-label text-ink-3">${DASHBOARD_ADMIN.revenue}`);
     expect(html).toContain(DASHBOARD_PERIOD_TRIGGER_CLASS);
