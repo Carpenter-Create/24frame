@@ -7,10 +7,10 @@ import {
   DASHBOARD_ADMIN,
   dashboardHref,
   filterDashboardUsers,
+  type DashboardPeriodOption,
 } from "@/lib/dashboard-admin";
-import { FORM_CONTROL_TEXT_CLASS } from "@/lib/form-control";
+import { Input } from "@/components/ui/input";
 import { REPORTS_SELECT_CLASS } from "@/lib/reports-craft";
-import type { DashboardPeriodOption } from "@/lib/dashboard-admin";
 import type { ReportsUserOption } from "@/lib/reports";
 
 export function DashboardAdminControls({
@@ -64,7 +64,7 @@ export function DashboardAdminControls({
       <div className="relative">
         <label className="flex items-center gap-[var(--space-2)]">
           <span className="t-label text-ink-3">{DASHBOARD_ADMIN.findUser}</span>
-          <input
+          <Input
             data-dashboard-user=""
             type="text"
             role="combobox"
@@ -75,7 +75,7 @@ export function DashboardAdminControls({
             placeholder={selected?.label ?? DASHBOARD_ADMIN.allCompany}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            className={`${FORM_CONTROL_TEXT_CLASS} ${REPORTS_SELECT_CLASS} w-56`}
+            className="w-56"
           />
         </label>
         {matches.length > 0 ? (
