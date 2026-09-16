@@ -623,7 +623,7 @@ describe("company admin Overview hero", () => {
   });
 
   it("rematches RL Overview: period chrome, revenue MetricCard, recent activity, no export", async () => {
-    stubClient();
+    const { from } = stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(
       ctx({ isGcStaff: false, orgStatus: "active", role: "account_owner" }) as never,
     );
@@ -635,7 +635,7 @@ describe("company admin Overview hero", () => {
     expect(html).toContain("data-dashboard-period");
     expect(html).not.toContain("data-dashboard-period-grains");
     expect(html).not.toContain("<select");
-    expect(html).toContain("data-dashboard-user");
+    expect(html).not.toContain("data-dashboard-user");
     expect(html).toContain("data-dashboard-revenue");
     expect(html).toContain("data-dashboard-revenue-chart");
     expect(html).toContain('data-dashboard-module="recent-activity"');
@@ -656,8 +656,11 @@ describe("company admin Overview hero", () => {
     expect(html).toContain(DASHBOARD_ADMIN.allTime);
     expect(html).toContain(DASHBOARD_ADMIN.period);
     expect(html).toContain("data-dashboard-period-current");
-    expect(html).toContain(DASHBOARD_ADMIN.findUser);
-    expect(html).toContain(DASHBOARD_ADMIN.allCompany);
+    expect(html).not.toContain(DASHBOARD_ADMIN.findUser);
+    expect(html).not.toContain("FIND A USER ACCOUNT");
+    expect(html).not.toContain(DASHBOARD_ADMIN.allCompany);
+    expect(from).not.toHaveBeenCalledWith("memberships");
+    expect(from).not.toHaveBeenCalledWith("profiles");
     expect(html).toContain("As of All time");
     expect(html).toContain("data-dashboard-chart-empty");
     expect(html).not.toContain(DASHBOARD_ADMIN.chartEmpty);
@@ -739,8 +742,10 @@ describe("company admin Overview hero", () => {
     expect(html).toMatch(/data-dashboard-title-desktop="" class="max-md:hidden">Q3 2026</);
     expect(html).toContain("Q3 2026");
     expect(html).not.toContain('value="Q32026"');
+    expect(html).not.toContain("data-dashboard-user");
     expect(html).not.toContain("data-dashboard-user-results");
-    expect(html).toContain(DASHBOARD_ADMIN.allCompany);
+    expect(html).not.toContain(DASHBOARD_ADMIN.findUser);
+    expect(html).not.toContain(DASHBOARD_ADMIN.allCompany);
   });
 
   it("does not load org money when a user is scoped", async () => {

@@ -1,19 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { CaretDown } from "@phosphor-icons/react";
 
 import { AppearanceCheck } from "@/components/chrome/appearance-check";
 import { Close44 } from "@/components/chrome/house";
-import { Input } from "@/components/ui/input";
 import {
   DASHBOARD_ADMIN,
   dashboardHref,
   dashboardPeriodMenuGroups,
   dashboardPeriodOption,
-  filterDashboardUsers,
   type DashboardPeriodMenuGroup,
   type DashboardPeriodOption,
 } from "@/lib/dashboard-admin";
@@ -28,7 +26,6 @@ import {
   DASHBOARD_PERIOD_SHEET_HOST_CLASS,
   DASHBOARD_PERIOD_TRIGGER_CLASS,
   DASHBOARD_PERIOD_TRIGGER_LABEL_CLASS,
-  DASHBOARD_USER_FIELD_DESKTOP_CLASS,
   dashboardPeriodOptionClass,
 } from "@/lib/dashboard-craft";
 import {
@@ -37,37 +34,24 @@ import {
   APP_SHEET_SURFACE_CLASS,
 } from "@/lib/house-sheet";
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
-import type { ReportsUserOption } from "@/lib/reports";
 
 export function DashboardAdminControls({
   periodKey,
   options,
-  userId,
-  users,
   defaultOpen = false,
 }: {
   periodKey: string;
   options: readonly DashboardPeriodOption[];
-  userId: string | null;
-  users: readonly ReportsUserOption[];
   defaultOpen?: boolean;
 }) {
   const router = useRouter();
   const hostRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(defaultOpen);
-  const selected = users.find((user) => user.id === userId) ?? null;
-  const [query, setQuery] = useState("");
   const current = dashboardPeriodOption(options, periodKey);
   const groups = dashboardPeriodMenuGroups(options);
 
-  function go(next: { period?: string; user?: string | null }) {
-    router.replace(
-      dashboardHref({
-        period: next.period ?? periodKey,
-        user: next.user === undefined ? userId : next.user,
-      }),
-      { scroll: false },
-    );
+  function go(period: string) {
+    router.replace(dashboardHref({ period }), { scroll: false });
   }
 
   useEffect(() => {
@@ -100,8 +84,6 @@ export function DashboardAdminControls({
       document.body.style.overflow = previous;
     };
   }, [open]);
-
-  const matches = useMemo(() => filterDashboardUsers(users, query), [users, query]);
 
   return (
     <div
@@ -141,7 +123,7 @@ export function DashboardAdminControls({
                   periodKey={periodKey}
                   onPick={(key) => {
                     setOpen(false);
-                    go({ period: key });
+                    go(key);
                   }}
                 />
               </div>
@@ -149,29 +131,13 @@ export function DashboardAdminControls({
           </div>
         </div>
       </div>
-      <div className={DASHBOARD_USER_FIELD_DESKTOP_CLASS}>
-        <DashboardUserField
-          query={query}
-          selected={selected}
-          matches={matches}
-          onQuery={setQuery}
-          onPick={(id) => {
-            setQuery("");
-            go({ user: id });
-          }}
-          onClear={() => {
-            setQuery("");
-            go({ user: null });
-          }}
-        />
-      </div>
       {open ? (
         <DashboardPeriodSheet
           groups={groups}
           periodKey={periodKey}
           onPick={(key) => {
             setOpen(false);
-            go({ period: key });
+            go(key);
           }}
           onClose={() => setOpen(false)}
         />
@@ -258,71 +224,4 @@ function DashboardPeriodSheet({
     </div>
   );
   return typeof document !== "undefined" ? createPortal(sheet, document.body) : sheet;
-}
-
-function DashboardUserField({
-  query,
-  selected,
-  matches,
-  onQuery,
-  onPick,
-  onClear,
-}: {
-  query: string;
-  selected: ReportsUserOption | null;
-  matches: readonly ReportsUserOption[];
-  onQuery: (value: string) => void;
-  onPick: (id: string) => void;
-  onClear: () => void;
-}) {
-  return (
-    <>
-      <label className="flex items-center gap-[var(--space-2)]">
-        <span className="t-label text-ink-3">{DASHBOARD_ADMIN.findUser}</span>
-        <Input
-          data-dashboard-user=""
-          type="text"
-          role="combobox"
-          aria-expanded={matches.length > 0}
-          aria-controls="dashboard-user-results"
-          aria-autocomplete="list"
-          autoComplete="off"
-          placeholder={selected?.label ?? DASHBOARD_ADMIN.allCompany}
-          value={query}
-          onChange={(event) => onQuery(event.target.value)}
-          className="w-56"
-        />
-      </label>
-      {matches.length > 0 ? (
-        <ul
-          id="dashboard-user-results"
-          data-dashboard-user-results=""
-          className="absolute right-0 z-10 mt-[var(--space-2)] w-full overflow-hidden rounded-[var(--radius)] border border-hairline bg-surface shadow-none"
-        >
-          {matches.map((user) => (
-            <li key={user.id}>
-              <button
-                type="button"
-                data-dashboard-user-option={user.id}
-                className="w-full px-[var(--space-4)] py-[var(--space-2)] text-left t-body-sm text-ink hover:bg-surface-muted"
-                onClick={() => onPick(user.id)}
-              >
-                {user.label}
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-      {selected ? (
-        <button
-          type="button"
-          data-dashboard-user-clear=""
-          className="mt-[var(--space-2)] t-body-sm text-accent"
-          onClick={onClear}
-        >
-          {DASHBOARD_ADMIN.allCompany}
-        </button>
-      ) : null}
-    </>
-  );
 }

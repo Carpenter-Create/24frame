@@ -27,8 +27,6 @@ describe("DashboardAdminControls", () => {
       createElement(DashboardAdminControls, {
         periodKey: "all",
         options,
-        userId: null,
-        users: [],
         defaultOpen: true,
       }),
     );
@@ -57,16 +55,17 @@ describe("DashboardAdminControls", () => {
     expect(html).toContain("data-dashboard-period-sheet");
     expect(html).toContain("max-md:hidden");
     expect(html).toContain("md:hidden");
+    expect(html).not.toContain("data-dashboard-user");
     expect(html).not.toContain("data-dashboard-user-overflow");
+    expect(html).not.toContain(DASHBOARD_ADMIN.findUser);
+    expect(html).not.toContain(DASHBOARD_ADMIN.allCompany);
   });
 
-  it("opens phone Period as a house bottom sheet and keeps Find-user off that sheet", () => {
+  it("opens phone Period as a house bottom sheet and keeps Find-user off Dashboard chrome", () => {
     const html = renderToStaticMarkup(
       createElement(DashboardAdminControls, {
         periodKey: "all",
         options,
-        userId: null,
-        users: [{ id: "maya", label: "Maya Chen" }],
         defaultOpen: true,
       }),
     );
@@ -74,8 +73,12 @@ describe("DashboardAdminControls", () => {
     expect(html).toContain(DASHBOARD_ADMIN.period);
     expect(html).toContain(DASHBOARD_ADMIN.close);
     expect(html).toContain("app-sheet-rise");
+    expect(html).not.toContain("data-dashboard-user");
     expect(html).not.toContain("data-dashboard-user-sheet");
     expect(html).not.toContain("data-dashboard-user-overflow");
+    expect(html).not.toContain(DASHBOARD_ADMIN.findUser);
+    expect(html).not.toContain("FIND A USER ACCOUNT");
+    expect(html).not.toContain(DASHBOARD_ADMIN.allCompany);
     expect(html).not.toContain("data-dashboard-period-grains");
   });
 
@@ -91,7 +94,12 @@ describe("DashboardAdminControls", () => {
     expect(src).toContain("createPortal");
     expect(src).toContain("data-dashboard-period-sheet");
     expect(src).not.toContain("DotsThree");
+    expect(src).not.toContain("DashboardUserField");
+    expect(src).not.toContain("data-dashboard-user");
     expect(src).not.toContain("data-dashboard-user-sheet");
     expect(src).not.toContain("DASHBOARD_USER_OVERFLOW_CLASS");
+    expect(src).not.toContain("DASHBOARD_USER_FIELD_DESKTOP_CLASS");
+    expect(src).not.toContain("filterDashboardUsers");
+    expect(src).not.toContain("findUser");
   });
 });

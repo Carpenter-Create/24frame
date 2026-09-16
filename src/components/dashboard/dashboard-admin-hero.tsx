@@ -35,7 +35,6 @@ import {
 } from "@/lib/dashboard-craft";
 import { DASHBOARD_FIXTURE, dashboardFixtureLabel } from "@/lib/dashboard-fixture";
 import { dashboardJustInDate, rankedBarPercent } from "@/lib/dashboard-home";
-import type { ReportsUserOption } from "@/lib/reports";
 import { cn } from "@/lib/cn";
 
 export function DashboardFixtureBanner() {
@@ -54,15 +53,11 @@ export function DashboardAdminChrome({
   orgName,
   period,
   options,
-  userId,
-  users,
   periodMenuOpen = false,
 }: {
   orgName: string;
   period: DashboardPeriod;
   options: readonly DashboardPeriodOption[];
-  userId: string | null;
-  users: readonly ReportsUserOption[];
   periodMenuOpen?: boolean;
 }) {
   return (
@@ -84,8 +79,6 @@ export function DashboardAdminChrome({
       <DashboardAdminControls
         periodKey={period.key}
         options={options}
-        userId={userId}
-        users={users}
         defaultOpen={periodMenuOpen}
       />
     </div>
@@ -198,8 +191,6 @@ export function DashboardAdminHero({
   orgName,
   period,
   options,
-  userId,
-  users,
   hero,
   activity,
   fixture = false,
@@ -208,8 +199,6 @@ export function DashboardAdminHero({
   orgName: string;
   period: DashboardPeriod;
   options: readonly DashboardPeriodOption[];
-  userId: string | null;
-  users: readonly ReportsUserOption[];
   hero: DashboardRevenueHero;
   activity: readonly DashboardActivityRow[];
   fixture?: boolean;
@@ -222,8 +211,6 @@ export function DashboardAdminHero({
         orgName={orgName}
         period={period}
         options={options}
-        userId={userId}
-        users={users}
         periodMenuOpen={periodMenuOpen}
       />
       <div

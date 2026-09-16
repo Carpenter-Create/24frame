@@ -130,8 +130,6 @@ describe("Dashboard type jobs", () => {
         orgName: "Acme",
         period: parseDashboardPeriod("all", now),
         options: [{ key: "all", label: "All time", group: "all" }],
-        userId: null,
-        users: [],
         hero: {
           totalCents: 120_000_00,
           asOf: "All time",

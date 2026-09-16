@@ -69,8 +69,6 @@ export const DASHBOARD_CHART_EMPTY_CLASS =
 export const DASHBOARD_FIXTURE_BANNER_CLASS =
   "rounded-[var(--radius)] border border-hairline bg-surface px-[var(--space-4)] py-[var(--space-2)] t-label text-ink-3 shadow-none max-md:sticky max-md:top-[var(--header-height)] max-md:z-20";
 
-export const DASHBOARD_USER_FIELD_DESKTOP_CLASS = "relative max-md:hidden";
-
 export const DASHBOARD_PERIOD_SHEET_HOST_CLASS =
   "fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end md:hidden";
 

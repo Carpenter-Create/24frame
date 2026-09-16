@@ -26,8 +26,6 @@ describe("DashboardAdminHero", () => {
           { key: "Q32026", label: "Q3 2026", group: "quarter" },
           { key: "2026-09", label: "2026-09", group: "month" },
         ],
-        userId: null,
-        users: [{ id: "maya", label: "Maya Chen" }],
         hero: {
           totalCents: null,
           asOf: "All time",
@@ -72,8 +70,6 @@ describe("DashboardAdminHero", () => {
         orgName: "Acme",
         period: parseDashboardPeriod("all", now),
         options: [{ key: "all", label: "All time", group: "all" }],
-        userId: null,
-        users: [],
         hero: {
           totalCents: 120_000_00,
           asOf: "All time",
