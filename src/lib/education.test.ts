@@ -67,7 +67,7 @@ describe("education names and keys", () => {
     expect(EDUCATION_BUCKETS.output.dev).toBe("24frame-education-output-dev");
     expect(EDUCATION_HREF).toBe("/education");
     expect(educationCourseHref("welcome-to-24frame")).toBe("/education/welcome-to-24frame");
-    expect(EDUCATION_ADMIN.manage).toBe("Course management");
+    expect(EDUCATION_ADMIN.manage).toBe("Manage courses");
     expect(EDUCATION_ADMIN.title).toBe("Manage courses");
     expect(EDUCATION_ADMIN.addLesson).toBe("Add lesson");
     expect(EDUCATION_ADMIN.title).toBe("Manage courses");

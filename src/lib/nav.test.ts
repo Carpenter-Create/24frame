@@ -221,7 +221,7 @@ describe("mobileNavDestinations", () => {
     ]);
     expect(mobileNavDestinations(true, "education").map((item) => item.label)).toEqual([
       "Education",
-      "Course management",
+      "Manage courses",
     ]);
     expect(mobileNavDestinations(true, "education").map((item) => item.href)).not.toContain("/");
     expect(mobileNavDestinations(true, "education").map((item) => item.href)).not.toContain(
@@ -247,7 +247,7 @@ describe("mobileNavDestinations", () => {
       "/education",
     ]);
     expect(railDestinations(true, "education").staffItems.map((item) => item.label)).toEqual([
-      "Course management",
+      "Manage courses",
     ]);
     expect(EDUCATION_MANAGE_NAV.map((item) => item.href)).toEqual(["/education"]);
     expect(railDestinations(true, "education").items.map((item) => item.href)).not.toEqual(

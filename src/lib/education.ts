@@ -180,7 +180,7 @@ export const EDUCATION_ADMIN = {
   refresh: "Refresh",
   consume: "Open consume view",
   consumePath: "Consume path",
-  manage: "Course management",
+  manage: "Manage courses",
   invalid: "Check the fields and try again.",
   conflict: "That slug is already in use.",
   uploadFailed: "Upload could not start.",

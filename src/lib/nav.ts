@@ -94,7 +94,7 @@ export const EDUCATION_NAV: PhosphorNavItem[] = [
   },
 ];
 
-// Staff-only Course management. Rendered in Education workspace when
+// Staff-only Manage courses. Rendered in Education workspace when
 // isGcStaff. Members never see this. Not on GC_NAV — Education is the
 // staff path, not Aggregation Staff /gc.
 export const EDUCATION_MANAGE_NAV: PhosphorNavItem[] = [
