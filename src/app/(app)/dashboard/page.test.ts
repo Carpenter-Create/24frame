@@ -646,11 +646,12 @@ describe("company admin Overview hero", () => {
     expect(html).toContain("data-dashboard-mobile-stack");
     expect(html).toContain("data-dashboard-title-mobile");
     expect(html).toContain("data-dashboard-title-desktop");
-    expect(html).toContain("data-dashboard-user-overflow");
+    expect(html).not.toContain("data-dashboard-user-overflow");
     expect(html).toContain("data-dashboard-do-next-secondary");
     expect(html).toMatch(/data-dashboard-title-desktop="" class="max-md:hidden">All time</);
     expect(html).toContain(DASHBOARD_ADMIN.revenue);
-    expect(html).toContain(DASHBOARD_ADMIN.revenueEmpty);
+    expect(html).toContain("$0.00");
+    expect(html).not.toContain(DASHBOARD_ADMIN.revenueEmpty);
     expect(html).toContain(DASHBOARD_ADMIN.activity);
     expect(html).toContain(DASHBOARD_ADMIN.allTime);
     expect(html).toContain(DASHBOARD_ADMIN.period);
@@ -658,7 +659,8 @@ describe("company admin Overview hero", () => {
     expect(html).toContain(DASHBOARD_ADMIN.findUser);
     expect(html).toContain(DASHBOARD_ADMIN.allCompany);
     expect(html).toContain("As of All time");
-    expect(html).toContain(DASHBOARD_ADMIN.chartEmpty);
+    expect(html).toContain("data-dashboard-chart-empty");
+    expect(html).not.toContain(DASHBOARD_ADMIN.chartEmpty);
     expect(html).toContain("data-dashboard-overview");
     expect(html).toContain("data-dashboard-reports-cta");
     expect(html).toContain(`href="${REPORTS_HREF}"`);
@@ -750,7 +752,9 @@ describe("company admin Overview hero", () => {
       await DashboardPage({ searchParams: Promise.resolve({ user: "maya" }) }),
     );
     expect(loadRecipientDashboard).not.toHaveBeenCalled();
-    expect(html).toContain(DASHBOARD_ADMIN.revenueEmpty);
-    expect(html).toContain(DASHBOARD_ADMIN.chartEmpty);
+    expect(html).toContain("$0.00");
+    expect(html).not.toContain(DASHBOARD_ADMIN.revenueEmpty);
+    expect(html).toContain("data-dashboard-chart-empty");
+    expect(html).not.toContain(DASHBOARD_ADMIN.chartEmpty);
   });
 });

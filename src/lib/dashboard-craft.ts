@@ -44,7 +44,7 @@ export const DASHBOARD_HERO_ASOF_CLASS = "t-body-sm text-ink-3";
 export const DASHBOARD_MOBILE_BREAKPOINT_CLASS = "max-md";
 
 export const DASHBOARD_ADMIN_CHROME_CLASS =
-  "flex flex-col gap-[var(--space-4)] md:flex-row md:items-start md:justify-between";
+  "flex flex-col gap-[var(--space-6)] md:flex-row md:items-start md:justify-between";
 
 export const DASHBOARD_ADMIN_OVERVIEW_CLASS =
   "grid grid-cols-1 gap-[var(--space-6)] max-md:flex max-md:flex-col lg:grid-cols-5";
@@ -61,16 +61,20 @@ export const DASHBOARD_CHART_HEIGHT_MOBILE = 176;
 export const DASHBOARD_CHART_HEIGHT_DESKTOP = 200;
 export const DASHBOARD_CHART_FRAME_CLASS = "relative h-[176px] w-full md:h-[200px]";
 
+// Named metric-block → chart gap (16). Empty well is page-48 compact — not 176 theater.
+export const DASHBOARD_HERO_TO_CHART_GAP_CLASS = "pt-[var(--space-4)]";
+export const DASHBOARD_CHART_EMPTY_CLASS =
+  "relative flex h-[var(--space-12)] w-full items-center px-[var(--space-4)]";
+
 export const DASHBOARD_FIXTURE_BANNER_CLASS =
   "rounded-[var(--radius)] border border-hairline bg-surface px-[var(--space-4)] py-[var(--space-2)] t-label text-ink-3 shadow-none max-md:sticky max-md:top-[var(--header-height)] max-md:z-20";
 
-export const DASHBOARD_USER_OVERFLOW_CLASS =
-  "flex size-[44px] min-h-[44px] min-w-[44px] shrink-0 items-center justify-center text-ink-3 md:hidden";
-
 export const DASHBOARD_USER_FIELD_DESKTOP_CLASS = "relative max-md:hidden";
 
-export const DASHBOARD_USER_SHEET_HOST_CLASS =
+export const DASHBOARD_PERIOD_SHEET_HOST_CLASS =
   "fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end md:hidden";
+
+export const DASHBOARD_PERIOD_MENU_DESKTOP_CLASS = "max-md:hidden";
 
 export const DASHBOARD_TITLE_MOBILE_CLASS = "md:hidden";
 export const DASHBOARD_TITLE_DESKTOP_CLASS = "max-md:hidden";

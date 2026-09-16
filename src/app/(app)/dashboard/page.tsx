@@ -74,9 +74,9 @@ import { buildClientFinanceDashboard } from "@/lib/finance-dashboard";
 import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 
 // Company-admin `/dashboard` rematches RL Overview structure inside house
-// tokens: one labeled period menu, MetricCard revenue + scrub, Recent activity.
-// Phone (`< md`) is a single-column stack — metric → scrub → lists — and
-// hides type-to-find behind an overflow sheet. Desktop #328/#329 locks stay.
+// tokens: one labeled period control, MetricCard revenue + scrub, Recent activity.
+// Phone (`< md`) is a single-column stack — $0.00 empty hero, compact chart,
+// Period bottom sheet. Find-user is desktop only; user scope lives on /reports.
 // Standard seats keep the catalog hero. Export stays on /reports.
 // Fixture money is labeled + env-gated and never enters export/ledger.
 

@@ -54,26 +54,28 @@ describe("DashboardAdminControls", () => {
     expect(html).not.toContain("<select");
     expect(html).not.toContain("REPORTS_SELECT_CLASS");
     expect(html).not.toMatch(/<label[^>]*>[\s\S]*data-dashboard-period-menu/);
-    expect(html).toContain("data-dashboard-user-overflow");
+    expect(html).toContain("data-dashboard-period-sheet");
     expect(html).toContain("max-md:hidden");
     expect(html).toContain("md:hidden");
+    expect(html).not.toContain("data-dashboard-user-overflow");
   });
 
-  it("opens find-user on phone from overflow into a house sheet", () => {
+  it("opens phone Period as a house bottom sheet and keeps Find-user off that sheet", () => {
     const html = renderToStaticMarkup(
       createElement(DashboardAdminControls, {
         periodKey: "all",
         options,
         userId: null,
         users: [{ id: "maya", label: "Maya Chen" }],
-        userSheetOpen: true,
+        defaultOpen: true,
       }),
     );
-    expect(html).toContain("data-dashboard-user-overflow");
-    expect(html).toContain("data-dashboard-user-sheet");
-    expect(html).toContain(DASHBOARD_ADMIN.findUser);
-    expect(html).toContain(DASHBOARD_ADMIN.findUserClose);
+    expect(html).toContain("data-dashboard-period-sheet");
+    expect(html).toContain(DASHBOARD_ADMIN.period);
+    expect(html).toContain(DASHBOARD_ADMIN.close);
     expect(html).toContain("app-sheet-rise");
+    expect(html).not.toContain("data-dashboard-user-sheet");
+    expect(html).not.toContain("data-dashboard-user-overflow");
     expect(html).not.toContain("data-dashboard-period-grains");
   });
 
@@ -87,8 +89,9 @@ describe("DashboardAdminControls", () => {
     expect(src).toContain("AppearanceCheck");
     expect(src).not.toMatch(/<label[\s\S]*data-dashboard-period[\s\S]*<\/label>/);
     expect(src).toContain("createPortal");
-    expect(src).toContain("DotsThree");
-    expect(src).toContain("data-dashboard-user-sheet");
-    expect(src).toContain("DASHBOARD_USER_OVERFLOW_CLASS");
+    expect(src).toContain("data-dashboard-period-sheet");
+    expect(src).not.toContain("DotsThree");
+    expect(src).not.toContain("data-dashboard-user-sheet");
+    expect(src).not.toContain("DASHBOARD_USER_OVERFLOW_CLASS");
   });
 });
