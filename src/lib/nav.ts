@@ -101,6 +101,7 @@ export const GC_NAV: PhosphorNavItem[] = [
   { label: `${PRODUCT_NAME} Deliveries`, href: "/gc/deliveries", family: "phosphor", icon: PaperPlaneTilt },
   { label: "Vendors", href: "/vendors", family: "phosphor", icon: Storefront },
   { label: "Finance", href: "/gc/finance", family: "phosphor", icon: Wallet },
+  { label: WORKSPACE_EDUCATION_LABEL, href: "/gc/education", family: "phosphor", icon: BookOpen },
   { label: "Clients", href: "/gc/clients", family: "phosphor", icon: Users },
 ];
 

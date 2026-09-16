@@ -4,6 +4,7 @@ import { CourseRetry } from "@/components/courses/course-retry";
 import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { loadCourseDetail } from "@/lib/courses";
+import { attachEducationLessonPlayback, signedEducationCoverUrl } from "@/lib/s3-education";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { requireSocialSession } from "@/lib/social-session";
 
@@ -14,7 +15,16 @@ export default async function SocialCourseDetailPage({
 }) {
   const [session, { slug }] = await Promise.all([requireSocialSession(), params]);
   const { ctx, supabase } = session;
-  const detail = await loadCourseDetail(supabase, slug, ctx.user.id);
+  const loaded = await loadCourseDetail(supabase, slug, ctx.user.id);
+  const [modules, coverUrl] = loaded.course
+    ? await Promise.all([
+        attachEducationLessonPlayback(loaded.modules),
+        loaded.course.cover_key
+          ? signedEducationCoverUrl(loaded.course.cover_key)
+          : Promise.resolve(null),
+      ])
+    : [loaded.modules, null];
+  const detail = { ...loaded, modules };
 
   if (detail.failed) {
     return (
@@ -49,7 +59,7 @@ export default async function SocialCourseDetailPage({
         title={detail.course.title}
         backLink={{ href: SOCIAL_ROUTES.courses, label: SOCIAL.courses.title }}
       />
-      <CourseCover title={detail.course.title} />
+      <CourseCover title={detail.course.title} src={coverUrl} />
       {detail.course.description ? (
         <p className="mt-[var(--space-4)] t-body text-ink-2">{detail.course.description}</p>
       ) : null}

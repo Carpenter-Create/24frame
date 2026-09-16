@@ -106,6 +106,7 @@ export function isForbiddenMediaBucket(bucket: string): boolean {
   const name = bucket.trim().toLowerCase();
   if (!name) return true;
   if (name === TITLE_ASSET_BUCKET_NAME) return true;
+  if (name.includes("24frame-education") || name.includes("24frame-finance")) return true;
   if (name === (process.env.S3_BUCKET ?? "").toLowerCase()) return true;
   if (name === (process.env.S3_AVATARS_BUCKET ?? "").toLowerCase()) return true;
   return false;

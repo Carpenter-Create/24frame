@@ -30,6 +30,9 @@ const preview: CourseLessonRow = {
   position: 1,
   duration_seconds: null,
   free_preview: true,
+  source_key: null,
+  hls_key: null,
+  encode_status: null,
 };
 
 const body: CourseLessonRow = {
@@ -39,6 +42,9 @@ const body: CourseLessonRow = {
   position: 2,
   duration_seconds: null,
   free_preview: false,
+  source_key: null,
+  hls_key: null,
+  encode_status: null,
 };
 
 describe("has_course_access mirror", () => {

@@ -14,6 +14,7 @@ export type CourseRow = {
   description: string | null;
   cover_key: string | null;
   is_flagship_free: boolean;
+  price_cents: number | null;
   created_at: string;
 };
 
@@ -26,6 +27,13 @@ export type CourseModuleRow = {
   position: number;
 };
 
+export type CourseEncodeStatus =
+  | "submitted"
+  | "running"
+  | "complete"
+  | "failed"
+  | "submit_failed";
+
 export type CourseLessonRow = {
   id: string;
   module_id: string;
@@ -33,6 +41,10 @@ export type CourseLessonRow = {
   position: number;
   duration_seconds: number | null;
   free_preview: boolean;
+  source_key: string | null;
+  hls_key: string | null;
+  encode_status: CourseEncodeStatus | null;
+  playbackUrl?: string | null;
 };
 
 export type CourseOutlineModule = CourseModuleRow & { lessons: CourseLessonRow[] };
@@ -124,7 +136,7 @@ export async function loadDiscoverableCourses(
 ): Promise<CourseListResult> {
   const { data, error } = await supabase
     .from("courses")
-    .select("id, slug, title, description, cover_key, is_flagship_free, created_at")
+    .select("id, slug, title, description, cover_key, is_flagship_free, price_cents, created_at")
     .order("created_at", { ascending: true })
     .range(...rangeFor(UNPAGINATED_MAX));
   if (error) return { courses: [], failed: true };
@@ -138,7 +150,7 @@ export async function loadCourseDetail(
 ): Promise<CourseDetail> {
   const { data: course, error } = await supabase
     .from("courses")
-    .select("id, slug, title, description, cover_key, is_flagship_free, created_at")
+    .select("id, slug, title, description, cover_key, is_flagship_free, price_cents, created_at")
     .eq("slug", decodeURIComponent(slug))
     .maybeSingle();
 
@@ -175,7 +187,9 @@ export async function loadCourseDetail(
 
   const { data: lessonRows, error: lessonError } = await supabase
     .from("lessons")
-    .select("id, module_id, title, position, duration_seconds, free_preview")
+    .select(
+      "id, module_id, title, position, duration_seconds, free_preview, source_key, hls_key, encode_status",
+    )
     .in("module_id", moduleIds)
     .order("position", { ascending: true })
     .range(...rangeFor(UNPAGINATED_MAX));
