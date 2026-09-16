@@ -1,9 +1,8 @@
 import { CourseConsume } from "@/components/courses/course-consume";
-import { CourseCover } from "@/components/courses/course-cover";
 import { CourseRetry } from "@/components/courses/course-retry";
 import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
-import { loadCourseDetail } from "@/lib/courses";
+import { loadCourseDetail, loadCourseInstructorName } from "@/lib/courses";
 import { attachEducationLessonPlayback, signedEducationCoverUrl } from "@/lib/s3-education";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { requireSocialSession } from "@/lib/social-session";
@@ -16,14 +15,15 @@ export default async function SocialCourseDetailPage({
   const [session, { slug }] = await Promise.all([requireSocialSession(), params]);
   const { ctx, supabase } = session;
   const loaded = await loadCourseDetail(supabase, slug, ctx.user.id);
-  const [modules, coverUrl] = loaded.course
+  const [modules, coverUrl, instructorName] = loaded.course
     ? await Promise.all([
         attachEducationLessonPlayback(loaded.modules),
         loaded.course.cover_key
           ? signedEducationCoverUrl(loaded.course.cover_key)
           : Promise.resolve(null),
+        loadCourseInstructorName(supabase, loaded.course.instructor_id),
       ])
-    : [loaded.modules, null];
+    : [loaded.modules, null, null];
   const detail = { ...loaded, modules };
 
   if (detail.failed) {
@@ -58,8 +58,13 @@ export default async function SocialCourseDetailPage({
       <PageHeader
         title={detail.course.title}
         backLink={{ href: SOCIAL_ROUTES.courses, label: SOCIAL.courses.title }}
+        className="pb-0"
       />
-      <CourseCover title={detail.course.title} src={coverUrl} />
+      {instructorName ? (
+        <p data-course-instructor="" className="mt-[var(--space-2)] t-body-sm text-ink-3">
+          {instructorName}
+        </p>
+      ) : null}
       {detail.course.description ? (
         <p className="mt-[var(--space-4)] t-body text-ink-2">{detail.course.description}</p>
       ) : null}
@@ -74,8 +79,12 @@ export default async function SocialCourseDetailPage({
         </div>
       ) : null}
       {detail.modules.length > 0 ? (
-        <div className="mt-[var(--space-6)]">
-          <CourseConsume modules={detail.modules} hasAccess={detail.hasAccess} />
+        <div className="mt-[var(--space-12)]">
+          <CourseConsume
+            modules={detail.modules}
+            hasAccess={detail.hasAccess}
+            coverUrl={coverUrl}
+          />
         </div>
       ) : null}
     </div>
