@@ -347,6 +347,58 @@ export function educationHlsManifestKey(courseId: string, lessonId: string): str
   return `${educationHlsPrefix(courseId, lessonId)}source.m3u8`;
 }
 
+/** Cookie Path / Resource stem. No trailing slash. */
+export function educationHlsCookiePath(courseId: string, lessonId: string): string {
+  return `/${educationHlsPrefix(courseId, lessonId).replace(/\/$/, "")}`;
+}
+
+export function educationHlsCookieResource(
+  origin: string,
+  courseId: string,
+  lessonId: string,
+): string {
+  return `${origin.replace(/\/+$/, "")}/courses/${courseId}/*`;
+}
+
+export function educationHlsPlaybackHref(courseId: string, lessonId: string): string {
+  educationHlsPrefix(courseId, lessonId);
+  return `/api/education/hls/${courseId}/${lessonId}/source.m3u8`;
+}
+
+export function educationHlsAssetKey(
+  courseId: string,
+  lessonId: string,
+  assetPath: string,
+): string | null {
+  let prefix: string;
+  try {
+    prefix = educationHlsPrefix(courseId, lessonId);
+  } catch {
+    return null;
+  }
+  const rest = assetPath.replace(/^\/+/, "");
+  if (!rest || rest.includes("..") || rest.includes("\\") || rest.includes("//")) {
+    return null;
+  }
+  if (!/^[A-Za-z0-9._-]+(?:\/[A-Za-z0-9._-]+)*$/.test(rest)) {
+    return null;
+  }
+  const key = `${prefix}${rest}`;
+  if (isForbiddenEducationKey(key)) return null;
+  return key;
+}
+
+export function educationHlsContentType(assetPath: string): string {
+  const name = assetPath.toLowerCase();
+  if (name.endsWith(".m3u8")) return "application/vnd.apple.mpegurl";
+  if (name.endsWith(".ts")) return "video/mp2t";
+  if (name.endsWith(".m4s")) return "video/iso.segment";
+  if (name.endsWith(".mp4")) return "video/mp4";
+  if (name.endsWith(".aac")) return "audio/aac";
+  if (name.endsWith(".vtt")) return "text/vtt";
+  return "application/octet-stream";
+}
+
 export function normalizeCourseSlug(raw: string): string | null {
   const slug = raw
     .trim()

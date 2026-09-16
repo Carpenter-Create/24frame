@@ -10,6 +10,7 @@ import {
   EDUCATION_PUT_TTL_SECONDS,
   EDUCATION_S3_ENV,
   EDUCATION_SIGNED_URL_TTL_SECONDS,
+  educationHlsPlaybackHref,
   isEducationObjectKey,
   isForbiddenEducationKey,
   lessonPlaybackReady,
@@ -161,9 +162,15 @@ export async function signedEducationCoverUrls(
   return new Map(entries.filter((entry): entry is readonly [string, string] => Boolean(entry[1])));
 }
 
+// When Education CloudFront is configured, playbackUrl is the
+// same-origin HLS proxy. That route sets lesson-scoped signed cookies
+// (Domain = CF host, Path = /courses/{courseId}/lessons/{lessonId}/hls)
+// and fetches children with those cookies. Preview (CF env empty)
+// keeps the S3 presigned master — relative children stay unauthorized.
 export async function attachEducationLessonPlayback(
   modules: CourseOutlineModule[],
 ): Promise<CourseOutlineModule[]> {
+  const cloudfront = isEducationCloudfrontConfigured();
   return Promise.all(
     modules.map(async (courseModule) => ({
       ...courseModule,
@@ -171,7 +178,9 @@ export async function attachEducationLessonPlayback(
         courseModule.lessons.map(async (lesson) => ({
           ...lesson,
           playbackUrl: lessonPlaybackReady(lesson)
-            ? await signedEducationHlsUrl(lesson.hls_key ?? "")
+            ? cloudfront
+              ? educationHlsPlaybackHref(courseModule.course_id, lesson.id)
+              : await signedEducationHlsUrl(lesson.hls_key ?? "")
             : null,
         })),
       ),

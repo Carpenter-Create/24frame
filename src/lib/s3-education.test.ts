@@ -31,8 +31,15 @@ import {
   isEducationCloudfrontConfigured,
   signEducationCloudfrontUrl,
 } from "@/lib/education-cloudfront";
-import { EDUCATION_AWS_ENV, educationCoverKey, educationHlsManifestKey, educationLessonSourceKey } from "./education";
 import {
+  EDUCATION_AWS_ENV,
+  educationCoverKey,
+  educationHlsManifestKey,
+  educationHlsPlaybackHref,
+  educationLessonSourceKey,
+} from "./education";
+import {
+  attachEducationLessonPlayback,
   educationOutputBucket,
   educationSourceBucket,
   presignEducationOutputGet,
@@ -163,6 +170,67 @@ describe("s3-education isolated lane", () => {
     await expect(signedEducationHlsUrl(HLS)).resolves.toBe("https://d-education.cloudfront.net/signed");
     expect(signEducationCloudfrontUrl).toHaveBeenCalledWith(HLS);
     expect(mockGetSignedUrl).not.toHaveBeenCalled();
+  });
+
+  it("attaches the lesson HLS proxy href when Education CF env is present", async () => {
+    vi.mocked(isEducationCloudfrontConfigured).mockReturnValue(true);
+    const modules = [
+      {
+        id: "m1",
+        course_id: COURSE,
+        title: "Orientation",
+        position: 1,
+        lessons: [
+          {
+            id: LESSON,
+            module_id: "m1",
+            title: "Ready lesson",
+            position: 1,
+            duration_seconds: null,
+            free_preview: false,
+            source_key: null,
+            hls_key: HLS,
+            encode_status: "complete" as const,
+          },
+        ],
+      },
+    ];
+    const result = await attachEducationLessonPlayback(modules);
+    expect(result[0]?.lessons[0]?.playbackUrl).toBe(educationHlsPlaybackHref(COURSE, LESSON));
+    expect(result[0]?.lessons[0]?.playbackUrl).toBe(
+      `/api/education/hls/${COURSE}/${LESSON}/source.m3u8`,
+    );
+    expect(signEducationCloudfrontUrl).not.toHaveBeenCalled();
+    expect(mockGetSignedUrl).not.toHaveBeenCalled();
+  });
+
+  it("keeps Preview S3 presign playback when Education CF env is empty", async () => {
+    vi.mocked(isEducationCloudfrontConfigured).mockReturnValue(false);
+    mockGetSignedUrl.mockResolvedValueOnce("https://s3.example/hls");
+    const modules = [
+      {
+        id: "m1",
+        course_id: COURSE,
+        title: "Orientation",
+        position: 1,
+        lessons: [
+          {
+            id: LESSON,
+            module_id: "m1",
+            title: "Ready lesson",
+            position: 1,
+            duration_seconds: null,
+            free_preview: false,
+            source_key: null,
+            hls_key: HLS,
+            encode_status: "complete" as const,
+          },
+        ],
+      },
+    ];
+    const result = await attachEducationLessonPlayback(modules);
+    expect(result[0]?.lessons[0]?.playbackUrl).toBe("https://s3.example/hls");
+    expect(signEducationCloudfrontUrl).not.toHaveBeenCalled();
   });
 
   it("returns null for signed helpers when Education env is stubbed", async () => {

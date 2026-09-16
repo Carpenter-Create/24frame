@@ -9,7 +9,12 @@ import {
   assertEducationBucketName,
   educationCoverKey,
   educationCourseHref,
+  educationHlsAssetKey,
+  educationHlsContentType,
+  educationHlsCookiePath,
+  educationHlsCookieResource,
   educationHlsManifestKey,
+  educationHlsPlaybackHref,
   educationHlsPrefix,
   educationLessonCoverKey,
   educationLessonSourceKey,
@@ -75,6 +80,25 @@ describe("education names and keys", () => {
     expect(educationHlsManifestKey(COURSE, LESSON)).toBe(
       `courses/${COURSE}/lessons/${LESSON}/hls/source.m3u8`,
     );
+    expect(educationHlsCookiePath(COURSE, LESSON)).toBe(
+      `/courses/${COURSE}/lessons/${LESSON}/hls`,
+    );
+    expect(educationHlsCookieResource("https://d-education.cloudfront.net", COURSE, LESSON)).toBe(
+      `https://d-education.cloudfront.net/courses/${COURSE}/lessons/${LESSON}/hls/*`,
+    );
+    expect(educationHlsPlaybackHref(COURSE, LESSON)).toBe(
+      `/api/education/hls/${COURSE}/${LESSON}/source.m3u8`,
+    );
+    expect(educationHlsAssetKey(COURSE, LESSON, "source_hls.m3u8")).toBe(
+      `courses/${COURSE}/lessons/${LESSON}/hls/source_hls.m3u8`,
+    );
+    expect(educationHlsAssetKey(COURSE, LESSON, "source_hls_00001.ts")).toBe(
+      `courses/${COURSE}/lessons/${LESSON}/hls/source_hls_00001.ts`,
+    );
+    expect(educationHlsAssetKey(COURSE, LESSON, "../secret.ts")).toBeNull();
+    expect(educationHlsAssetKey(COURSE, LESSON, "orgs/x")).toBeNull();
+    expect(educationHlsContentType("source.m3u8")).toBe("application/vnd.apple.mpegurl");
+    expect(educationHlsContentType("source_hls_00001.ts")).toBe("video/mp2t");
     expect(isEducationObjectKey(`courses/${COURSE}/cover.jpg`)).toBe(true);
     expect(isEducationObjectKey(`courses/${COURSE}/lessons/${LESSON}/cover.jpg`)).toBe(true);
     expect(isEducationObjectKey(`posts/${COURSE}/${LESSON}.jpg`)).toBe(false);
