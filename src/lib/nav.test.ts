@@ -256,6 +256,8 @@ describe("mobileNavDestinations", () => {
     expect(navSrc).toContain("EDUCATION_NAV");
     expect(navSrc).toContain('workspace === "education"');
     expect(EDUCATION_NAV.every((item) => item.family === "phosphor")).toBe(true);
+    expect(EDUCATION_NAV.map((item) => item.icon)).toEqual([BookOpen]);
+    expect(EDUCATION_MANAGE_NAV.map((item) => item.icon)).toEqual([BookOpen]);
     expect(EDUCATION_NAV.map((item) => item.href)).not.toContain("/education");
     expect(SOCIAL_NAV.map((item) => item.label)).toEqual([
       "Home",
