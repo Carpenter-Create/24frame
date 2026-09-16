@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CaretDown } from "@phosphor-icons/react";
 
@@ -32,6 +32,7 @@ export function WorkspaceSwitcher({
   defaultOpen?: boolean;
 }) {
   const router = useRouter();
+  const hostRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(defaultOpen);
   const label = workspaceModeLabel(current);
   const canSwitch = workspaceSwitcherShowsChevron(options);
@@ -41,8 +42,16 @@ export function WorkspaceSwitcher({
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
     };
+    const onPointer = (event: MouseEvent) => {
+      const host = hostRef.current;
+      if (host && !host.contains(event.target as Node)) setOpen(false);
+    };
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    document.addEventListener("mousedown", onPointer);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onPointer);
+    };
   }, [open]);
 
   if (options.length === 0) return null;
@@ -56,7 +65,7 @@ export function WorkspaceSwitcher({
   }
 
   return (
-    <div data-workspace-switcher="" className="relative">
+    <div ref={hostRef} data-workspace-switcher="" className="relative">
       <button
         type="button"
         data-workspace-switcher-trigger=""

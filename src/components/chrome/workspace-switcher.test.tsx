@@ -51,6 +51,8 @@ describe("workspace switcher header control", () => {
     expect(src).toContain("persistWorkspaceCookie");
     expect(src).toContain("workspaceHome(option.mode)");
     expect(src).toContain("availableWorkspaceOptions");
+    expect(src).toContain("mousedown");
+    expect(src).toContain("Escape");
   });
 
   it("drops the chevron when only one workspace is reachable", () => {
