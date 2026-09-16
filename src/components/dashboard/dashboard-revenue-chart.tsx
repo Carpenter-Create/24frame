@@ -59,7 +59,7 @@ export function DashboardRevenueChart({
   return (
     <div ref={plotRef} data-dashboard-revenue-chart="" className={DASHBOARD_CHART_FRAME_CLASS}>
       {points.length === 0 ? (
-        <div className="flex h-full items-center px-[var(--space-6)] max-md:px-[var(--space-4)]">
+        <div className="flex h-full items-center px-[var(--space-4)]">
           <p className="t-body-sm text-ink-3">{DASHBOARD_ADMIN.chartEmpty}</p>
         </div>
       ) : geom ? (
