@@ -22,7 +22,46 @@ vi.mock("./actions", () => ({
   uploadEducationLessonSource: vi.fn(),
 }));
 
-import { LessonAdminForm, NewLessonModal } from "./education-forms";
+import { EditCourseForm, LessonAdminForm, NewCourseModal, NewLessonModal } from "./education-forms";
+
+describe("course slug lock", () => {
+  it("does not render an editable slug control on New course or Edit course", () => {
+    const src = readFileSync("src/app/(app)/(operator)/education/education-forms.tsx", "utf8");
+    const actions = readFileSync("src/app/(app)/(operator)/education/actions.ts", "utf8");
+    expect(src).not.toMatch(/name=["']slug["']/);
+    expect(src).not.toContain("<Input name=\"slug\"");
+    expect(src).not.toContain('form.get("slug")');
+    expect(actions).not.toMatch(/slug: z\.string/);
+    expect(actions).toContain("allocateUniqueCourseSlug(admin, parsed.data.title)");
+
+    const createHtml = renderToStaticMarkup(
+      <NewCourseModal open onClose={() => undefined} instructors={[]} />,
+    );
+    expect(createHtml).toContain("data-education-new-course");
+    expect(createHtml).not.toMatch(/name=["']slug["']/);
+    expect(createHtml).not.toContain(EDUCATION_ADMIN.slugHint);
+
+    const editHtml = renderToStaticMarkup(
+      <EditCourseForm
+        courseId="22222222-2222-4222-8222-222222222222"
+        title="Welcome to 24Frame"
+        description=""
+        catalogCode="EDU-0001"
+        status="draft"
+        isFlagshipFree
+        priceCents={null}
+        instructorId={null}
+        instructors={[]}
+      />,
+    );
+    expect(editHtml).toContain("data-education-edit");
+    expect(editHtml).toContain(EDUCATION_ADMIN.catalogCode);
+    expect(editHtml).toContain("EDU-0001");
+    expect(editHtml).not.toMatch(/name=["']slug["']/);
+    expect(editHtml).not.toContain(EDUCATION_ADMIN.slugHint);
+    expect(editHtml).not.toContain("welcome-to-24frame");
+  });
+});
 
 describe("New lesson modal miss list A v1.1", () => {
   it("renders Passion-house fields without Sequence or a free-taste toggle", () => {

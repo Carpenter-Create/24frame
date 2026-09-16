@@ -237,7 +237,6 @@ export function NewCourseModal({
     const res = await createEducationCourse({
       title,
       description: summary,
-      slug: String(form.get("slug") ?? ""),
       model: String(form.get("model") ?? "free"),
       price: String(form.get("price") ?? ""),
       instructorId: String(form.get("instructorId") ?? "") || undefined,
@@ -283,11 +282,6 @@ export function NewCourseModal({
           onChange={setSummary}
           multiline
         />
-        <label className={field}>
-          <span className={label}>{EDUCATION_ADMIN.slug}</span>
-          <span className="t-body-sm text-ink-3">{EDUCATION_ADMIN.slugHint}</span>
-          <Input name="slug" maxLength={80} />
-        </label>
         <InstructorFields instructors={instructors} />
         <CourseProductFields defaultModel="free" />
         <div className="flex items-center justify-end gap-[var(--space-3)]">
@@ -337,7 +331,6 @@ export function EditCourseForm({
   courseId,
   title,
   description,
-  slug,
   catalogCode,
   status,
   isFlagshipFree,
@@ -348,7 +341,6 @@ export function EditCourseForm({
   courseId: string;
   title: string;
   description: string;
-  slug: string;
   catalogCode: string;
   status: CourseStatus;
   isFlagshipFree: boolean;
@@ -371,7 +363,6 @@ export function EditCourseForm({
       courseId,
       title: name,
       description: summary,
-      slug: String(form.get("slug") ?? ""),
       model: String(form.get("model") ?? "free"),
       price: String(form.get("price") ?? ""),
       status: String(form.get("status") ?? status),
@@ -380,9 +371,6 @@ export function EditCourseForm({
     });
     setSaving(false);
     if (res.error) return setError(res.error);
-    if (res.slug && res.slug !== slug) {
-      router.push(`${EDUCATION_HREF}/${res.slug}`);
-    }
     router.refresh();
   }
 
@@ -410,11 +398,6 @@ export function EditCourseForm({
         onChange={setSummary}
         multiline
       />
-      <label className={field}>
-        <span className={label}>{EDUCATION_ADMIN.slug}</span>
-        <span className="t-body-sm text-ink-3">{EDUCATION_ADMIN.slugHint}</span>
-        <Input name="slug" maxLength={80} defaultValue={slug} />
-      </label>
       <label className={field}>
         <span className={label}>{EDUCATION_ADMIN.status}</span>
         <select

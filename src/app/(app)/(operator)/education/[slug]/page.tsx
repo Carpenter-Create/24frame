@@ -76,7 +76,6 @@ export default async function GcEducationCoursePage({
           courseId={course.id}
           title={course.title}
           description={course.description ?? ""}
-          slug={course.slug}
           catalogCode={course.catalog_code}
           status={course.status}
           isFlagshipFree={course.is_flagship_free}
