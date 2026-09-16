@@ -37,6 +37,7 @@ describe("finance meters", () => {
     expect(html).toContain(`0 0 640 ${FINANCE_CHART_VIEW_HEIGHT}`);
     expect(html).toContain("2026-07");
     expect(html).toContain("2026-08");
+    expect(html).toContain("<circle");
     expect(html).toContain(FINANCE_CLIENT.history);
   });
 });

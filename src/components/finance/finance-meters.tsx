@@ -105,6 +105,9 @@ export function NetHistoryChart({
       <path d={area} fill="currentColor" opacity="0.18" />
       <path d={line} fill="none" stroke="currentColor" strokeWidth="2" />
       {xy.map((point) => (
+        <circle key={`${point.id}-dot`} cx={point.x} cy={point.y} r="3" fill="currentColor" />
+      ))}
+      {xy.map((point) => (
         <text
           key={point.id}
           x={point.x}
