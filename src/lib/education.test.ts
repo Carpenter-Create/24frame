@@ -19,6 +19,7 @@ import {
   isEducationCatalogCode,
   minutesToDurationSeconds,
   educationCommercialLabel,
+  canStartEducationEncode,
   educationEncodeLabel,
   educationPriceInputValue,
   educationProductModel,
@@ -133,6 +134,9 @@ describe("education names and keys", () => {
       false,
     );
     expect(educationEncodeLabel("complete")).toBe("Complete");
+    expect(educationEncodeLabel("submit_failed", true)).toBe("Submit failed");
+    expect(educationEncodeLabel(null, true)).toBe("Source ready.");
+    expect(educationEncodeLabel(null, false)).toBe("No source yet.");
     expect(mapMediaConvertJobStatus("PROGRESSING")).toBe("running");
     expect(mapMediaConvertJobStatus("COMPLETE")).toBe("complete");
     expect(mapMediaConvertJobStatus("ERROR")).toBe("failed");
@@ -175,5 +179,16 @@ describe("education names and keys", () => {
     expect(educationCharCount("", 80)).toBe("0/80");
     expect(educationCharCount("Lesson", 80)).toBe("6/80");
     expect(educationCharCount("", 200)).toBe("0/200");
+  });
+
+  it("lets staff start encode when source is present and status is none, failed, or submit_failed", () => {
+    const source = educationLessonSourceKey(COURSE, LESSON, "video/mp4");
+    expect(canStartEducationEncode({ source_key: source, encode_status: null })).toBe(true);
+    expect(canStartEducationEncode({ source_key: source, encode_status: "failed" })).toBe(true);
+    expect(canStartEducationEncode({ source_key: source, encode_status: "submit_failed" })).toBe(true);
+    expect(canStartEducationEncode({ source_key: source, encode_status: "submitted" })).toBe(false);
+    expect(canStartEducationEncode({ source_key: source, encode_status: "running" })).toBe(false);
+    expect(canStartEducationEncode({ source_key: source, encode_status: "complete" })).toBe(false);
+    expect(canStartEducationEncode({ source_key: null, encode_status: "submit_failed" })).toBe(false);
   });
 });

@@ -19,12 +19,15 @@ import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isEducationAwsConfigured, presignEducationSourcePut, putEducationSourceObject } from "@/lib/s3-education";
-import { EDUCATION_ADMIN, educationCoverKey, educationLessonSourceKey } from "@/lib/education";
+import { isEducationMediaconvertConfigured, submitEducationHlsJob } from "@/lib/education-mediaconvert";
+import { EDUCATION_ADMIN, educationCoverKey, educationHlsPrefix, educationLessonSourceKey } from "@/lib/education";
+import { revalidatePath } from "next/cache";
 
 import {
   createEducationCourse,
   createEducationLesson,
   presignEducationUpload,
+  startEducationLessonEncode,
   uploadEducationCover,
   uploadEducationLessonSource,
 } from "./actions";
@@ -407,5 +410,73 @@ describe("uploadEducationLessonSource", () => {
     });
     expect(putEducationSourceObject).not.toHaveBeenCalled();
     expect(update).not.toHaveBeenCalled();
+  });
+});
+
+function encodeAdminClient(lesson: {
+  source_key: string | null;
+  encode_status: string | null;
+}) {
+  const maybeSingle = vi.fn(async () => ({
+    data: {
+      id: LESSON,
+      source_key: lesson.source_key,
+      encode_status: lesson.encode_status,
+      modules: { course_id: COURSE, courses: { slug: "cos-smoke-2026-09-15" } },
+    },
+    error: null,
+  }));
+  const select = vi.fn(() => ({ eq: vi.fn(() => ({ maybeSingle })) }));
+  const updateEq = vi.fn(async () => ({ error: null }));
+  const update = vi.fn(() => ({ eq: updateEq }));
+  const from = vi.fn(() => ({ select, update }));
+  vi.mocked(createAdminClient).mockReturnValue({ from } as never);
+  return { from, update };
+}
+
+describe("startEducationLessonEncode", () => {
+  const sourceKey = educationLessonSourceKey(COURSE, LESSON, "video/mp4");
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(getAuthUser).mockResolvedValue(USER as never);
+    vi.mocked(isEducationMediaconvertConfigured).mockReturnValue(true);
+  });
+
+  it("resubmits when source is present and status is submit_failed", async () => {
+    staffClient({ user_id: USER.id });
+    encodeAdminClient({ source_key: sourceKey, encode_status: "submit_failed" });
+    vi.mocked(submitEducationHlsJob).mockResolvedValueOnce({ externalJobId: "job-retry" });
+    await expect(startEducationLessonEncode({ lessonId: LESSON })).resolves.toEqual({});
+    expect(submitEducationHlsJob).toHaveBeenCalledWith({
+      sourceKey,
+      destinationPrefix: educationHlsPrefix(COURSE, LESSON),
+    });
+  });
+
+  it("revalidates and returns the MediaConvert message when submit fails", async () => {
+    staffClient({ user_id: USER.id });
+    const { update } = encodeAdminClient({ source_key: sourceKey, encode_status: null });
+    vi.mocked(submitEducationHlsJob).mockRejectedValueOnce(
+      new Error("/outputGroups/0/outputs/0: nameModifier is a required property"),
+    );
+    await expect(startEducationLessonEncode({ lessonId: LESSON })).resolves.toEqual({
+      error: "/outputGroups/0/outputs/0: nameModifier is a required property",
+    });
+    expect(update).toHaveBeenCalledWith({
+      encode_status: "submit_failed",
+      encode_error: "/outputGroups/0/outputs/0: nameModifier is a required property",
+      encode_updated_at: expect.any(String),
+    });
+    expect(revalidatePath).toHaveBeenCalledWith("/education/cos-smoke-2026-09-15");
+  });
+
+  it("refuses an in-flight encode even when source is present", async () => {
+    staffClient({ user_id: USER.id });
+    encodeAdminClient({ source_key: sourceKey, encode_status: "running" });
+    await expect(startEducationLessonEncode({ lessonId: LESSON })).resolves.toEqual({
+      error: EDUCATION_ADMIN.encodeFailed,
+    });
+    expect(submitEducationHlsJob).not.toHaveBeenCalled();
   });
 });

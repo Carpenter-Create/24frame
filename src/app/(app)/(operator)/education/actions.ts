@@ -12,6 +12,7 @@ import {
   EDUCATION_TITLE_MAX,
   allocateCourseSlug,
   educationCoverKey,
+  canStartEducationEncode,
   educationHlsManifestKey,
   educationHlsPrefix,
   educationLessonCoverKey,
@@ -790,10 +791,11 @@ export async function startEducationLessonEncode(raw: unknown): Promise<{ error?
   const admin = createAdminClient();
   const { data: lesson } = await admin
     .from("lessons")
-    .select("id, source_key, education_video_id, modules(course_id, courses(slug))")
+    .select("id, source_key, encode_status, education_video_id, modules(course_id, courses(slug))")
     .eq("id", parsed.data.lessonId)
     .maybeSingle();
   if (!lesson?.source_key) return { error: EDUCATION_ADMIN.encodeNone };
+  if (!canStartEducationEncode(lesson)) return { error: EDUCATION_ADMIN.encodeFailed };
 
   const moduleRow = Array.isArray(lesson.modules) ? lesson.modules[0] : lesson.modules;
   const courseId = moduleRow?.course_id;
@@ -840,8 +842,19 @@ export async function startEducationLessonEncode(raw: unknown): Promise<{ error?
         encode_updated_at: new Date().toISOString(),
       })
       .eq("id", lesson.id);
+    if (lesson.education_video_id) {
+      await admin
+        .from("education_videos")
+        .update({
+          encode_status: "submit_failed",
+          encode_error: message,
+          encode_updated_at: new Date().toISOString(),
+        })
+        .eq("id", lesson.education_video_id);
+    }
+    if (slug) revalidateEducation(slug);
     if (/environment variable is not set/.test(message)) return { error: EDUCATION_ADMIN.encodeUnset };
-    return { error: EDUCATION_ADMIN.encodeFailed };
+    return { error: message };
   }
 
   if (slug) revalidateEducation(slug);

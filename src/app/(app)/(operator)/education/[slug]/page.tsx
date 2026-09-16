@@ -9,6 +9,7 @@ import {
   COURSE_STATUS_LABELS,
   EDUCATION_ADMIN,
   EDUCATION_HREF,
+  canStartEducationEncode,
   educationCommercialLabel,
   educationEncodeLabel,
 } from "@/lib/education";
@@ -100,8 +101,9 @@ export default async function GcEducationCoursePage({
                   title={lesson.title}
                   summary={lesson.summary ?? ""}
                   durationSeconds={lesson.duration_seconds}
-                  encodeLabel={educationEncodeLabel(lesson.encode_status)}
-                  hasSource={Boolean(lesson.source_key)}
+                  encodeLabel={educationEncodeLabel(lesson.encode_status, Boolean(lesson.source_key))}
+                  encodeError={lesson.encode_error}
+                  canStartEncode={canStartEducationEncode(lesson)}
                 />
               ))}
             </CardBody>

@@ -56,6 +56,7 @@ export type CourseLessonRow = {
   source_key: string | null;
   hls_key: string | null;
   encode_status: CourseEncodeStatus | null;
+  encode_error?: string | null;
   playbackUrl?: string | null;
 };
 

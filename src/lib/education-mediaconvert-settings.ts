@@ -2,6 +2,13 @@
 // without credentials. The thin wrapper in education-mediaconvert.ts
 // is the only file that calls MediaConvert.
 
+// MediaConvert requires NameModifier on HLS outputs. House title file
+// jobs use `_screener`; Education stays on this isolated suffix. The
+// master playlist remains `source.m3u8` because Destination is a
+// trailing-slash prefix (input basename). The modifier names the
+// variant playlist only (`source_hls.m3u8`).
+export const EDUCATION_HLS_NAME_MODIFIER = "_hls";
+
 export function educationHlsDestination(prefix: string): string {
   if (!prefix.endsWith("/")) {
     throw new Error("Education HLS destination must be a trailing-slash prefix");
@@ -40,6 +47,7 @@ export function buildEducationHlsJobSettings(input: {
         },
         Outputs: [
           {
+            NameModifier: EDUCATION_HLS_NAME_MODIFIER,
             ContainerSettings: { Container: "M3U8" },
             VideoDescription: {
               CodecSettings: {
