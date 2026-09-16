@@ -28,6 +28,7 @@ import {
   migrateSidebarCollapsedCookie,
   persistSidebarCollapsed,
 } from "@/lib/rail-collapse";
+import { APP_HEADER_TRAILING_CLUSTER_CLASS } from "@/lib/workspace-switcher";
 import { PRODUCT_NAME } from "@/lib/product";
 import { isSettingsPath, SETTINGS_RAIL_PAD_CLASS } from "@/lib/settings";
 import {
@@ -241,6 +242,18 @@ export function AppShell({
           </div>
         )}
         <div
+          data-workspace-switcher-rail=""
+          className={cn(
+            settingsPage
+              ? "px-[var(--space-4)] pb-[var(--space-2)]"
+              : collapsed
+                ? "flex justify-center px-2 pb-2"
+                : "px-2 pb-2",
+          )}
+        >
+          <WorkspaceSwitcher current={workspace} compact={collapsed && !settingsPage} />
+        </div>
+        <div
           className={cn("flex-1 overflow-y-auto", settingsPage ? SETTINGS_RAIL_PAD_CLASS : "pt-1")}
         >
           {settingsPage ? (
@@ -257,8 +270,9 @@ export function AppShell({
         </div>
       </aside>
 
-      {/* Access header is workspace control + avatar / account menu — no org
-          switcher on any route. Workspace switcher sits left of the avatar.
+      {/* Access header trailing cluster is the avatar only — same slot as
+          Social / Education. Mercury switcher is top-left: rail on desktop,
+          header lead on phone. One switcher. No org switcher on any route.
           Search mounts on the Access `/messages` gate, and on mobile `/titles`
           (528:542). Desktop 1:3, `/` 1:2, and `/titles/[id]` stay that pair.
           Phone avatar opens 544:561. Hamburger stays the nav sheet. */}
@@ -277,13 +291,15 @@ export function AppShell({
           ) : (
             <MobileNavSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />
           )}
+          <div className="md:hidden" data-workspace-switcher-lead="">
+            <WorkspaceSwitcher current={workspace} />
+          </div>
           {messagesPage ? (
             <MessagesHeaderSlot chrome={chrome} messagesSurface={messagesSurface} />
           ) : null}
           {titlesBleed ? <TitlesHeaderSearch /> : null}
         </div>
-        <div className="flex items-center gap-3">
-          <WorkspaceSwitcher current={workspace} />
+        <div data-app-header-trailing="" className={APP_HEADER_TRAILING_CLUSTER_CLASS}>
           <AccountMenuSlot
             chrome={chrome}
             email={email}
