@@ -19,6 +19,7 @@ export const DASHBOARD_ADMIN = {
   activityEmpty: "No account activity for this period.",
   viewAll: "View all",
   findUser: "Find a user account",
+  findUserClose: "Close",
   allCompany: "All company activity",
   period: "Period",
   allTime: "All time",

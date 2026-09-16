@@ -642,7 +642,13 @@ describe("company admin Overview hero", () => {
     expect(html).toContain("lg:grid-cols-5");
     expect(html).toContain("lg:col-span-3");
     expect(html).toContain("lg:col-span-2");
-    expect(html).toMatch(/<h1 class="t-section text-ink">All time<\/h1>/);
+    expect(html).toContain("max-md:flex-col");
+    expect(html).toContain("data-dashboard-mobile-stack");
+    expect(html).toContain("data-dashboard-title-mobile");
+    expect(html).toContain("data-dashboard-title-desktop");
+    expect(html).toContain("data-dashboard-user-overflow");
+    expect(html).toContain("data-dashboard-do-next-secondary");
+    expect(html).toMatch(/data-dashboard-title-desktop="" class="max-md:hidden">All time</);
     expect(html).toContain(DASHBOARD_ADMIN.revenue);
     expect(html).toContain(DASHBOARD_ADMIN.revenueEmpty);
     expect(html).toContain(DASHBOARD_ADMIN.activity);
@@ -728,7 +734,7 @@ describe("company admin Overview hero", () => {
     const html = renderToStaticMarkup(
       await DashboardPage({ searchParams: Promise.resolve({ period: "Q32026" }) }),
     );
-    expect(html).toMatch(/<h1 class="t-section text-ink">Q3 2026<\/h1>/);
+    expect(html).toMatch(/data-dashboard-title-desktop="" class="max-md:hidden">Q3 2026</);
     expect(html).toContain("Q3 2026");
     expect(html).not.toContain('value="Q32026"');
     expect(html).not.toContain("data-dashboard-user-results");

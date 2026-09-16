@@ -54,6 +54,27 @@ describe("DashboardAdminControls", () => {
     expect(html).not.toContain("<select");
     expect(html).not.toContain("REPORTS_SELECT_CLASS");
     expect(html).not.toMatch(/<label[^>]*>[\s\S]*data-dashboard-period-menu/);
+    expect(html).toContain("data-dashboard-user-overflow");
+    expect(html).toContain("max-md:hidden");
+    expect(html).toContain("md:hidden");
+  });
+
+  it("opens find-user on phone from overflow into a house sheet", () => {
+    const html = renderToStaticMarkup(
+      createElement(DashboardAdminControls, {
+        periodKey: "all",
+        options,
+        userId: null,
+        users: [{ id: "maya", label: "Maya Chen" }],
+        userSheetOpen: true,
+      }),
+    );
+    expect(html).toContain("data-dashboard-user-overflow");
+    expect(html).toContain("data-dashboard-user-sheet");
+    expect(html).toContain(DASHBOARD_ADMIN.findUser);
+    expect(html).toContain(DASHBOARD_ADMIN.findUserClose);
+    expect(html).toContain("app-sheet-rise");
+    expect(html).not.toContain("data-dashboard-period-grains");
   });
 
   it("keeps URL sync on replace and does not mount a native select", () => {
@@ -65,5 +86,9 @@ describe("DashboardAdminControls", () => {
     expect(src).not.toContain("data-dashboard-period-grains");
     expect(src).toContain("AppearanceCheck");
     expect(src).not.toMatch(/<label[\s\S]*data-dashboard-period[\s\S]*<\/label>/);
+    expect(src).toContain("createPortal");
+    expect(src).toContain("DotsThree");
+    expect(src).toContain("data-dashboard-user-sheet");
+    expect(src).toContain("DASHBOARD_USER_OVERFLOW_CLASS");
   });
 });

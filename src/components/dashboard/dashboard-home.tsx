@@ -2,7 +2,11 @@ import Link from "next/link";
 import { Activity } from "lucide-react";
 
 import { cn } from "@/lib/cn";
-import { DASHBOARD_CARD_CLASS, DASHBOARD_CARD_PAD_LIST } from "@/lib/dashboard-craft";
+import {
+  DASHBOARD_CARD_CLASS,
+  DASHBOARD_CARD_PAD_LIST,
+  DASHBOARD_DO_NEXT_SECONDARY_CLASS,
+} from "@/lib/dashboard-craft";
 import { DASHBOARD_ATTENTION_CLEAR } from "@/lib/findings";
 import {
   DASHBOARD_HOME,
@@ -137,9 +141,20 @@ export function DashboardSnapshot({
   );
 }
 
-export function DashboardDoNext({ items }: { items: ClientHomeDoNextItem[] }) {
+export function DashboardDoNext({
+  items,
+  secondary = false,
+}: {
+  items: ClientHomeDoNextItem[];
+  secondary?: boolean;
+}) {
   return (
-    <DashboardHomePanel aria-label={DASHBOARD_HOME.doNext} data-dashboard-do-next="">
+    <DashboardHomePanel
+      aria-label={DASHBOARD_HOME.doNext}
+      data-dashboard-do-next=""
+      data-dashboard-do-next-secondary={secondary ? "" : undefined}
+      className={secondary ? DASHBOARD_DO_NEXT_SECONDARY_CLASS : undefined}
+    >
       <span className={cn(DASHBOARD_CARD_PAD_LIST, "t-label text-ink-3")}>{DASHBOARD_HOME.doNext}</span>
       {items.length === 0 ? (
         <DashboardHomeEmpty>{DASHBOARD_ATTENTION_CLEAR}</DashboardHomeEmpty>
