@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { CaretDown } from "@phosphor-icons/react";
 
 import { AppearanceCheck } from "./appearance-check";
@@ -16,40 +15,25 @@ import {
 import {
   WORKSPACE_SWITCHER,
   WORKSPACE_SWITCHER_HEADER_CLASS,
-  WORKSPACE_SWITCHER_HEADER_COPY_CLASS,
-  WORKSPACE_SWITCHER_HEADER_MARK_CLASS,
-  WORKSPACE_SWITCHER_HEADER_NAME_CLASS,
-  WORKSPACE_SWITCHER_HEADER_ROLE_CLASS,
   WORKSPACE_SWITCHER_MARK_CLASS,
   WORKSPACE_SWITCHER_OPTION_CHECK_CLASS,
   WORKSPACE_SWITCHER_OPTION_CHECK_GUTTER_CLASS,
   WORKSPACE_SWITCHER_OPTION_LABEL_CLASS,
   WORKSPACE_SWITCHER_PANEL_CLASS,
-  WORKSPACE_SWITCHER_RULE_CLASS,
-  WORKSPACE_SWITCHER_SETTINGS_CLASS,
   WORKSPACE_SWITCHER_STATIC_CLASS,
   WORKSPACE_SWITCHER_TRIGGER_CLASS,
   WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS,
   workspaceSwitcherChevronClass,
   workspaceSwitcherMarkLetter,
   workspaceSwitcherOptionClass,
-  workspaceSwitcherRole,
-  workspaceSwitcherSettingsHref,
   workspaceSwitcherShowsChevron,
-  workspaceSwitcherShowsSettings,
 } from "@/lib/workspace-switcher";
 
-function WorkspaceMark({
-  mode,
-  size,
-}: {
-  mode: WorkspaceMode;
-  size: "sm" | "md";
-}) {
+function WorkspaceMark({ mode }: { mode: WorkspaceMode }) {
   return (
     <span
       data-workspace-switcher-mark={mode}
-      className={size === "md" ? WORKSPACE_SWITCHER_HEADER_MARK_CLASS : WORKSPACE_SWITCHER_MARK_CLASS}
+      className={WORKSPACE_SWITCHER_MARK_CLASS}
       aria-hidden="true"
     >
       {workspaceSwitcherMarkLetter(mode)}
@@ -67,13 +51,10 @@ export function WorkspaceSwitcher({
   defaultOpen?: boolean;
 }) {
   const router = useRouter();
-  const pathname = usePathname();
   const hostRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(defaultOpen);
   const label = workspaceModeLabel(current);
   const canSwitch = workspaceSwitcherShowsChevron(options);
-  const showSettings = workspaceSwitcherShowsSettings();
-  const settingsHref = workspaceSwitcherSettingsHref(pathname);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -135,32 +116,12 @@ export function WorkspaceSwitcher({
           className={WORKSPACE_SWITCHER_PANEL_CLASS}
         >
           <div data-workspace-switcher-header="" className={WORKSPACE_SWITCHER_HEADER_CLASS}>
-            <WorkspaceMark mode={current} size="md" />
-            <div className={WORKSPACE_SWITCHER_HEADER_COPY_CLASS}>
-              <div data-workspace-switcher-header-name="" className={WORKSPACE_SWITCHER_HEADER_NAME_CLASS}>
-                {label}
-              </div>
-              <div data-workspace-switcher-header-role="" className={WORKSPACE_SWITCHER_HEADER_ROLE_CLASS}>
-                {workspaceSwitcherRole(current)}
-              </div>
-            </div>
+            {WORKSPACE_SWITCHER.heading}
           </div>
-          {showSettings ? (
-            <div className={WORKSPACE_SWITCHER_RULE_CLASS}>
-              <Link
-                href={settingsHref}
-                data-workspace-switcher-settings=""
-                className={WORKSPACE_SWITCHER_SETTINGS_CLASS}
-                onClick={() => setOpen(false)}
-              >
-                {WORKSPACE_SWITCHER.settings}
-              </Link>
-            </div>
-          ) : null}
           <div
             role="listbox"
-            aria-label={WORKSPACE_SWITCHER.label}
-            className={WORKSPACE_SWITCHER_RULE_CLASS}
+            aria-label={WORKSPACE_SWITCHER.heading}
+            className="flex flex-col"
           >
             {options.map((option) => {
               const selected = current === option.mode;
@@ -178,7 +139,7 @@ export function WorkspaceSwitcher({
                     if (current !== option.mode) router.push(workspaceHome(option.mode));
                   }}
                 >
-                  <WorkspaceMark mode={option.mode} size="sm" />
+                  <WorkspaceMark mode={option.mode} />
                   <span
                     data-workspace-switcher-option-label=""
                     className={WORKSPACE_SWITCHER_OPTION_LABEL_CLASS}
