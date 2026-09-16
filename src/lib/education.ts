@@ -195,6 +195,27 @@ export function isEducationVideoContentType(value: string): value is EducationVi
   return (EDUCATION_VIDEO_CONTENT_TYPES as readonly string[]).includes(value);
 }
 
+const SOURCE_TYPE_ALIASES: Record<string, EducationVideoContentType> = {
+  "video/x-m4v": "video/mp4",
+  "video/x-mp4": "video/mp4",
+};
+
+const SOURCE_EXT_TYPES: Record<string, EducationVideoContentType> = {
+  mp4: "video/mp4",
+  m4v: "video/mp4",
+  mov: "video/quicktime",
+  webm: "video/webm",
+};
+
+/** Browsers sometimes send an empty type for MP4; infer from the name. */
+export function normalizeEducationSourceContentType(contentType: string, fileName = ""): string {
+  const raw = contentType.trim().toLowerCase();
+  if (isEducationVideoContentType(raw)) return raw;
+  if (raw in SOURCE_TYPE_ALIASES) return SOURCE_TYPE_ALIASES[raw];
+  const ext = fileName.trim().toLowerCase().split(".").pop() ?? "";
+  return SOURCE_EXT_TYPES[ext] ?? contentType;
+}
+
 export function isForbiddenEducationKey(key: string): boolean {
   if (!key || key.includes("..") || key.includes("\\") || key.startsWith("/") || key.includes("//")) {
     return true;

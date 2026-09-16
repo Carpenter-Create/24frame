@@ -41,9 +41,10 @@ const nextConfig: NextConfig = {
     // but this is a Tier 3 app — if anything looks stale after a write, this flag is the
     // first thing to remove.
     staleTimes: { dynamic: 30 },
-    // Cover upload is a server-side FormData PUT (avatars pattern). Default
-    // 1MB would reject a valid Education cover before attachEducationCover.
-    serverActions: { bodySizeLimit: "11mb" },
+    // Education staff uploads PUT server-side (avatars pattern). Cover ≤10MB,
+    // lesson source ≤2GB. Default 1MB would reject a valid file before attach.
+    // 3gb leaves FormData headroom over EDUCATION_VIDEO_MAX_BYTES.
+    serverActions: { bodySizeLimit: "3gb" },
   },
 
   images: {

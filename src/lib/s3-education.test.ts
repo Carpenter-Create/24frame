@@ -31,7 +31,7 @@ import {
   isEducationCloudfrontConfigured,
   signEducationCloudfrontUrl,
 } from "@/lib/education-cloudfront";
-import { EDUCATION_AWS_ENV, educationCoverKey, educationHlsManifestKey } from "./education";
+import { EDUCATION_AWS_ENV, educationCoverKey, educationHlsManifestKey, educationLessonSourceKey } from "./education";
 import {
   educationOutputBucket,
   educationSourceBucket,
@@ -46,6 +46,7 @@ import {
 const COURSE = "11111111-1111-4111-8111-111111111111";
 const LESSON = "22222222-2222-4222-8222-222222222222";
 const COVER = educationCoverKey(COURSE, "image/jpeg");
+const SOURCE = educationLessonSourceKey(COURSE, LESSON, "video/mp4");
 const HLS = educationHlsManifestKey(COURSE, LESSON);
 
 const EDUCATION_AWS = {
@@ -101,6 +102,21 @@ describe("s3-education isolated lane", () => {
     expect(cmd.input.Key).toBe(COVER);
     expect(cmd.input.Body).toBe(body);
     expect(cmd.input.ContentType).toBe("image/jpeg");
+    expect(cmd.input.ACL).toBeUndefined();
+  });
+
+  it("PUTs lesson source bytes on the Education source bucket", async () => {
+    mockSend.mockResolvedValueOnce({});
+    const body = new Uint8Array([1, 2, 3, 4]);
+    await putEducationSourceObject(SOURCE, body, "video/mp4");
+    expect(mockSend).toHaveBeenCalledTimes(1);
+    const cmd = mockSend.mock.calls[0]?.[0] as PutObjectCommand;
+    expect(cmd).toBeInstanceOf(PutObjectCommand);
+    expect(cmd.input.Bucket).toBe("test-education-source-bucket");
+    expect(cmd.input.Bucket).not.toBe(process.env.S3_BUCKET);
+    expect(cmd.input.Key).toBe(SOURCE);
+    expect(cmd.input.Body).toBe(body);
+    expect(cmd.input.ContentType).toBe("video/mp4");
     expect(cmd.input.ACL).toBeUndefined();
   });
 

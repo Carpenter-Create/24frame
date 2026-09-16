@@ -86,8 +86,10 @@ Agents do not set values.
 - Members consume on Route A `/social/courses/[slug]` only.
 - Education clients never import `@/lib/s3`, `@/lib/s3-social-media`,
   `@/lib/s3-finance`, `@/lib/s3-avatars`, or `@/lib/mediaconvert`.
-- Cover bytes PUT **server-side** (same pattern as avatars). Browser CORS
-  on the Education source bucket is not required for covers.
-- Lesson source remains a browser presigned PUT. Founder applies CORS on
-  the source bucket before lesson-upload smoke. Do not create CORS from
-  this repository.
+- Cover and lesson source bytes PUT **server-side** (same pattern as
+  avatars). Browser CORS on the Education source bucket is not required
+  for staff uploads.
+- Do not wire a browser presigned PUT for Education staff uploads. If a
+  future browser path is required, apply CORS on the Education source
+  bucket only — never Social / Titles / finance / avatars. Do not create
+  CORS from this repository unless founder-authorized.

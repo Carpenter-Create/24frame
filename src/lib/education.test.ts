@@ -26,6 +26,7 @@ import {
   mapMediaConvertJobStatus,
   normalizeCourseSlug,
   normalizeEducationCoverContentType,
+  normalizeEducationSourceContentType,
   validateEducationUpload,
 } from "./education";
 
@@ -103,6 +104,10 @@ describe("education names and keys", () => {
     expect(normalizeEducationCoverContentType("image/jpg", "cover.JPG")).toBe("image/jpeg");
     expect(normalizeEducationCoverContentType("", "poster.webp")).toBe("image/webp");
     expect(normalizeEducationCoverContentType("image/gif", "x.gif")).toBe("image/gif");
+    expect(normalizeEducationSourceContentType("video/mp4", "lesson.mp4")).toBe("video/mp4");
+    expect(normalizeEducationSourceContentType("", "smoke.MP4")).toBe("video/mp4");
+    expect(normalizeEducationSourceContentType("video/x-m4v", "clip.m4v")).toBe("video/mp4");
+    expect(normalizeEducationSourceContentType("video/avi", "x.avi")).toBe("video/avi");
   });
 
   it("treats complete + playback key as ready", () => {
