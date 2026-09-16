@@ -8,6 +8,7 @@ import {
   Pulse,
   Sparkle,
   SquaresFour,
+  ChartBar,
   Storefront,
   Tray,
   Users,
@@ -33,27 +34,42 @@ import {
 const navSrc = readFileSync("src/lib/nav.ts", "utf8");
 
 describe("client NAV", () => {
-  it("keeps Home at / and never exposes operator routes", () => {
+  it("keeps Dashboard at /dashboard and never exposes operator routes", () => {
     const hrefs = NAV.map((item) => item.href);
-    expect(hrefs[0]).toBe("/");
-    expect(hrefs).toContain("/deliveries");
+    expect(hrefs).toEqual([
+      "/dashboard",
+      "/titles",
+      "/deliveries",
+      "/catalog-health",
+      "/analytics",
+      "/earn",
+      "/messages",
+    ]);
+    expect(hrefs).not.toContain("/");
+    expect(hrefs).not.toContain("/finance");
     expect(hrefs).not.toContain("/gc/deliveries");
     expect(hrefs).not.toContain("/queue");
     expect(hrefs).not.toContain("/vendors");
     expect(hrefs).not.toContain("/gc/clients");
+    expect(hrefs).not.toContain("/gc/finance");
   });
 
-  it("marks Home current on `/` and Titles on a title path", () => {
-    expect(clientNavCurrent("/").label).toBe("Home");
+  it("marks Dashboard current on `/` and `/dashboard`, Earn on purse paths", () => {
+    expect(clientNavCurrent("/").label).toBe("Dashboard");
+    expect(clientNavCurrent("/dashboard").label).toBe("Dashboard");
     expect(isClientNavActive("/", NAV[0])).toBe(true);
+    expect(isClientNavActive("/dashboard", NAV[0])).toBe(true);
     expect(isClientNavActive("/titles", NAV[0])).toBe(false);
     expect(clientNavCurrent("/titles").label).toBe("Titles");
     expect(clientNavCurrent("/titles/abc").label).toBe("Titles");
-    expect(clientNavCurrent("/finance").label).toBe("Finance");
-    expect(clientNavCurrent("/finance/abc").label).toBe("Finance");
+    expect(clientNavCurrent("/analytics").label).toBe("Analytics");
+    expect(clientNavCurrent("/earn").label).toBe("Earn");
+    expect(clientNavCurrent("/earn/abc").label).toBe("Earn");
+    expect(clientNavCurrent("/finance").label).toBe("Earn");
+    expect(clientNavCurrent("/finance/abc").label).toBe("Earn");
     expect(clientNavCurrent("/messages").label).toBe("Ask 24Frame AI");
     expect(clientNavCurrent("/messages").label).toBe(ASK_GLOBEE.headline);
-    expect(clientNavCurrent("/queue").label).toBe("Home");
+    expect(clientNavCurrent("/queue").label).toBe("Dashboard");
   });
 
   it("keeps /messages as Ask Globee with Phosphor Sparkle, not Messages or the bee", () => {
@@ -86,6 +102,7 @@ describe("client NAV", () => {
       FilmSlate,
       PaperPlaneTilt,
       Pulse,
+      ChartBar,
       Wallet,
       Sparkle,
     ]);
@@ -129,11 +146,12 @@ describe("GC_NAV", () => {
 
   it("keeps the full staff rail — client destinations then the operator set", () => {
     expect([...NAV, ...GC_NAV].map((item) => item.label)).toEqual([
-      "Home",
+      "Dashboard",
       "Titles",
       "Deliveries",
       "Catalog Health",
-      "Finance",
+      "Analytics",
+      "Earn",
       "Ask 24Frame AI",
       "Queue",
       "24Frame Deliveries",
@@ -141,6 +159,7 @@ describe("GC_NAV", () => {
       "Finance",
       "Clients",
     ]);
+    expect(GC_NAV.map((item) => item.label)).not.toContain("Earn");
     expect(STAFF_RAIL_EYEBROW).toBe("Staff");
     expect(STAFF_RAIL_EYEBROW).not.toBe("24Frame");
     expect(STAFF_RAIL_EYEBROW).not.toBe("24FRAME");
@@ -154,11 +173,12 @@ describe("GC_NAV", () => {
 describe("mobileNavDestinations", () => {
   it("keeps the client sheet on the Aggregation NAV destinations", () => {
     expect(mobileNavDestinations(false).map((item) => item.label)).toEqual([
-      "Home",
+      "Dashboard",
       "Titles",
       "Deliveries",
       "Catalog Health",
-      "Finance",
+      "Analytics",
+      "Earn",
       "Ask 24Frame AI",
     ]);
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/queue");
@@ -168,11 +188,12 @@ describe("mobileNavDestinations", () => {
 
   it("gives staff the operator destinations plus the client five", () => {
     expect(mobileNavDestinations(true).map((item) => item.label)).toEqual([
-      "Home",
+      "Dashboard",
       "Titles",
       "Deliveries",
       "Catalog Health",
-      "Finance",
+      "Analytics",
+      "Earn",
       "Ask 24Frame AI",
       "Queue",
       "24Frame Deliveries",

@@ -2,8 +2,8 @@ import { isJustIn } from "@/lib/releases";
 import { TITLE_STATUS_LABELS, type TitleStatus } from "@/lib/titles";
 import { TITLES_CATALOG } from "@/lib/titles-catalog";
 
-// Client `/` portfolio copy and snapshot derivation. Lives in lib/, not JSX.
-// Identity on `/` is the real org name only — no status, role, or term line.
+// Client `/dashboard` portfolio copy and snapshot derivation. Lives in lib/, not JSX.
+// Identity on Dashboard is the real org name only — no status, role, or term line.
 // Do not invent Access, upcoming, revenue, or a "stuck too long" metric.
 // Empty-catalog CTA is the existing Titles Add Title action — do not invent a
 // second control. Artwork-missing copy is a finding message, never invented here.

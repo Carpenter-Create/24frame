@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { FINANCE_CLIENT, FINANCE_CLIENT_HREF, formatUsdCents } from "./finance";
+import {
+  FINANCE_CLIENT,
+  FINANCE_CLIENT_HREF,
+  canSeeClientFinanceGlance,
+  canViewClientEarn,
+  formatUsdCents,
+} from "./finance";
 import { buildClientFinanceGlance } from "./finance-glance";
 
 describe("buildClientFinanceGlance", () => {
@@ -48,5 +54,46 @@ describe("buildClientFinanceGlance", () => {
     expect(glance.thresholdLabel).toBe(FINANCE_CLIENT.glanceNoThreshold);
     expect(glance.latestLabel).toBe(FINANCE_CLIENT.glanceNone);
     expect(glance.latestHref).toBeNull();
+  });
+});
+
+describe("client Earn glance gate", () => {
+  it("shows the card for staff on a client org and for view_financial recipients", () => {
+    expect(
+      canSeeClientFinanceGlance({ isGcStaff: true, hasActiveOrg: true, role: "account_owner" }),
+    ).toBe(true);
+    expect(
+      canSeeClientFinanceGlance({ isGcStaff: true, hasActiveOrg: true, role: "viewer" }),
+    ).toBe(true);
+    expect(
+      canSeeClientFinanceGlance({ isGcStaff: false, hasActiveOrg: true, role: "account_owner" }),
+    ).toBe(true);
+    expect(
+      canSeeClientFinanceGlance({ isGcStaff: false, hasActiveOrg: true, role: "accountant" }),
+    ).toBe(true);
+    expect(
+      canSeeClientFinanceGlance({ isGcStaff: false, hasActiveOrg: true, role: "legal" }),
+    ).toBe(true);
+  });
+
+  it("hides the card without a purse or without view_financial", () => {
+    expect(
+      canSeeClientFinanceGlance({ isGcStaff: true, hasActiveOrg: false, role: null }),
+    ).toBe(false);
+    expect(
+      canSeeClientFinanceGlance({ isGcStaff: false, hasActiveOrg: true, role: "viewer" }),
+    ).toBe(false);
+    expect(
+      canSeeClientFinanceGlance({ isGcStaff: false, hasActiveOrg: true, role: "delivery_ops" }),
+    ).toBe(false);
+    expect(
+      canSeeClientFinanceGlance({ isGcStaff: false, hasActiveOrg: false, role: "account_owner" }),
+    ).toBe(false);
+  });
+
+  it("lets staff open Earn on a client org and keeps recipients on view_financial", () => {
+    expect(canViewClientEarn({ isGcStaff: true, role: "viewer" })).toBe(true);
+    expect(canViewClientEarn({ isGcStaff: false, role: "account_owner" })).toBe(true);
+    expect(canViewClientEarn({ isGcStaff: false, role: "viewer" })).toBe(false);
   });
 });

@@ -165,11 +165,12 @@ describe("MobileNavSheet", () => {
     const dest = html.slice(destStart);
 
     expect(NAV.map((item) => item.label)).toEqual([
-      "Home",
+      "Dashboard",
       "Titles",
       "Deliveries",
       "Catalog Health",
-      "Finance",
+      "Analytics",
+      "Earn",
       "Ask 24Frame AI",
     ]);
     for (const item of NAV) {
@@ -191,8 +192,8 @@ describe("MobileNavSheet", () => {
       join(dirname(fileURLToPath(import.meta.url)), "../../app/tokens.css"),
       "utf8",
     );
-    const current = linkHtml(html, "/");
-    const currentClass = linkClass(html, "/");
+    const current = linkHtml(html, "/dashboard");
+    const currentClass = linkClass(html, "/dashboard");
 
     expect(currentClass).toContain("t-body text-ink bg-surface-muted");
     expect(currentClass).toContain("p-[var(--space-4)]");
@@ -247,7 +248,7 @@ describe("MobileNavSheet", () => {
     expect(src).not.toContain("Chevron");
 
     for (const item of [...NAV, ...GC_NAV]) {
-      const active = item.href === "/";
+      const active = item.href === "/dashboard";
       const mark = iconMark(item, active);
       const row = linkHtml(html, item.href);
       expect(dest).toContain(item.label);
@@ -267,7 +268,7 @@ describe("MobileNavSheet", () => {
     const homeFill = iconMark(NAV[0], true).svg;
     const homeIdle = iconMark(NAV[0], false).svg;
     expect(homeFill).not.toBe(homeIdle);
-    expect(linkHtml(html, "/")).toContain(homeFill);
+    expect(linkHtml(html, "/dashboard")).toContain(homeFill);
     expect(linkHtml(html, "/titles")).toContain(iconMark(NAV[1], false).svg);
   });
 
@@ -283,7 +284,7 @@ describe("MobileNavSheet", () => {
       expect(dest).toContain(`href="${item.href}"`);
     }
     expect(linkClass(html, "/vendors")).toContain("t-body text-ink bg-surface-muted");
-    expect(linkClass(html, "/")).toContain("t-body text-ink hover:bg-surface-muted");
+    expect(linkClass(html, "/dashboard")).toContain("t-body text-ink hover:bg-surface-muted");
     expect(html).not.toContain("t-section");
     const tokens = readFileSync(
       join(dirname(fileURLToPath(import.meta.url)), "../../app/tokens.css"),

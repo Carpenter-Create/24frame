@@ -65,13 +65,17 @@ describe("title isolation", () => {
 });
 
 describe("mapping C — finance stays Aggregation", () => {
-  it("puts recipient Finance on client Aggregation NAV and keeps ops on GC_NAV", () => {
-    expect(NAV.map((item) => item.href)).toContain("/finance");
+  it("puts recipient Earn on client Aggregation NAV and keeps ops on GC_NAV", () => {
+    expect(NAV.map((item) => item.href)).toContain("/earn");
+    expect(NAV.map((item) => item.href)).not.toContain("/finance");
     expect(NAV.map((item) => item.href)).not.toContain("/gc/finance");
+    expect(SOCIAL_NAV.map((item) => item.href)).not.toContain("/earn");
     expect(SOCIAL_NAV.map((item) => item.href)).not.toContain("/finance");
     expect(SOCIAL_NAV.map((item) => item.href)).not.toContain("/gc/finance");
     expect(GC_NAV.map((item) => item.href)).toContain("/gc/finance");
+    expect(GC_NAV.map((item) => item.href)).not.toContain("/earn");
     expect(GC_NAV.map((item) => item.href)).not.toContain("/finance");
+    expect(GC_NAV.map((item) => item.label)).not.toContain("Earn");
   });
 
   it("keeps finance tables on org_id and off profiles", () => {
@@ -81,11 +85,13 @@ describe("mapping C — finance stays Aggregation", () => {
     expect(migration).toContain("must not have profile_id");
   });
 
-  it("wires client home glance for recipients and keeps the staff stub on staff home", () => {
-    const home = readFileSync("src/app/(app)/page.tsx", "utf8");
+  it("wires client Dashboard glance for a client org and keeps the staff stub off that purse", () => {
+    const home = readFileSync("src/app/(app)/dashboard/page.tsx", "utf8");
     expect(home).toContain("DashboardFinanceGlance");
     expect(home).toContain("DashboardClientFinanceGlance");
-    expect(home).toContain("ctx.isGcStaff ? (");
+    expect(home).toContain("canSeeClientFinanceGlance");
+    expect(home).toContain("clientGlance ? (");
+    expect(home).not.toContain("!ctx.isGcStaff && orgRoleCanViewFinancial");
     expect(home).not.toContain("Statements");
   });
 
@@ -169,7 +175,15 @@ describe("mapping C — finance stays Aggregation", () => {
     expect(FINANCE_WRITE_RPCS).toContain("set_finance_period_threshold");
     expect(FINANCE_WRITE_RPCS).toContain("move_sales_lines_to_suspense");
     expect(FINANCE_WRITE_RPCS).toContain("assign_suspense_lines_to_period");
-    expect(FINANCE_CLIENT_HREF).toBe("/finance");
+    expect(FINANCE_CLIENT_HREF).toBe("/earn");
+    const nextConfig = readFileSync("next.config.ts", "utf8");
+    expect(nextConfig).toContain('source: "/"');
+    expect(nextConfig).toContain('destination: "/dashboard"');
+    expect(nextConfig).toContain('source: "/finance"');
+    expect(nextConfig).toContain('destination: "/earn"');
+    expect(nextConfig).toContain('source: "/finance/:path*"');
+    expect(nextConfig).toContain('destination: "/earn/:path*"');
+    expect(nextConfig).not.toContain('source: "/gc/finance"');
     expect(suspenseMigration).toContain("sales_lines SELECT must hide suspense from recipients");
     expect(suspenseMigration).toContain("do not invent a parallel suspense money table");
     expect(awsMigration).toContain("apply_finance_close");

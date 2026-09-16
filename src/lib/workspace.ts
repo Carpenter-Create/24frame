@@ -12,9 +12,13 @@ export type WorkspaceMode = "aggregation" | "social" | "education";
 export const WORKSPACE_MODES = ["aggregation", "social", "education"] as const;
 
 const AGGREGATION_PREFIXES = [
+  "/dashboard",
   "/titles",
   "/deliveries",
   "/catalog-health",
+  "/analytics",
+  "/earn",
+  "/finance",
   "/messages",
   "/queue",
   "/vendors",
@@ -30,7 +34,7 @@ export function parseWorkspaceCookie(value: string | undefined | null): Workspac
 export function workspaceHome(mode: WorkspaceMode): string {
   if (mode === "social") return "/social";
   if (mode === "education") return "/social/courses";
-  return "/";
+  return "/dashboard";
 }
 
 export function isEducationPath(pathname: string): boolean {
@@ -48,7 +52,7 @@ export function isSocialPath(pathname: string): boolean {
 }
 
 export function isAggregationPath(pathname: string): boolean {
-  if (pathname === "/") return true;
+  if (pathname === "/" || pathname === "/dashboard") return true;
   return AGGREGATION_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 }
 

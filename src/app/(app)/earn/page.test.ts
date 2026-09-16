@@ -199,9 +199,9 @@ describe("client Finance list", () => {
 
 describe("recipient write surface", () => {
   it("does not import staff write actions or finance write RPCs", () => {
-    const list = readFileSync("src/app/(app)/finance/page.tsx", "utf8");
-    const detail = readFileSync("src/app/(app)/finance/[periodId]/page.tsx", "utf8");
-    const exp = readFileSync("src/app/(app)/finance/[periodId]/export/route.ts", "utf8");
+    const list = readFileSync("src/app/(app)/earn/page.tsx", "utf8");
+    const detail = readFileSync("src/app/(app)/earn/[periodId]/page.tsx", "utf8");
+    const exp = readFileSync("src/app/(app)/earn/[periodId]/export/route.ts", "utf8");
     for (const src of [list, detail, exp]) {
       expect(src).not.toContain("gc/finance/actions");
       expect(src).not.toContain("finance-forms");

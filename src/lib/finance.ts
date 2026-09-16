@@ -1,11 +1,12 @@
 import { PRODUCT_NAME } from "@/lib/product";
 
 // Staff ops copy + client recipient copy. Ops write path stays /gc/finance.
-// Recipient read path is /finance. Official complementary-split lock: display
-// client % and remainder only. Do not invent a second fee field.
+// Recipient read path is /earn (legacy /finance* redirects here). Official
+// complementary-split lock: display client % and remainder only. Do not invent
+// a second fee field.
 
 export const FINANCE_HREF = "/gc/finance";
-export const FINANCE_CLIENT_HREF = "/finance";
+export const FINANCE_CLIENT_HREF = "/earn";
 
 export const FINANCE_WRITE_RPCS = [
   "create_finance_period",
@@ -92,11 +93,11 @@ export const FINANCE_PAGE = {
 } as const;
 
 export const FINANCE_CLIENT = {
-  title: "Finance",
+  title: "Earn",
   subtitle: "Organization purse. Monthly periods. USD.",
   empty: "No statements yet.",
   notYet: "This period is not closed yet.",
-  noAccess: "Finance is not available on this seat.",
+  noAccess: "Earn is not available on this seat.",
   noOrg: "Choose an organization to read statements.",
   pack: "Download pack",
   pdf: "Branded PDF",
@@ -122,9 +123,9 @@ export const FINANCE_CLIENT = {
   glanceNone: "No closed statement yet.",
   glanceNoTerm: "No current term",
   glanceNoThreshold: "No threshold",
-  glanceCta: "Finance",
+  glanceCta: "Earn",
   download: "Download",
-  navAria: "Finance, organization purse",
+  navAria: "Earn, organization purse",
 } as const;
 
 export const FINANCE_LOGIC_VERSION = "finance-ops-slice-1.1-client-tier-remainder";
@@ -154,6 +155,26 @@ export function staffCanWriteFinance(role: string | null | undefined): boolean {
 /** Existing member_can view_financial seats. Viewer and delivery_ops stay out. */
 export function orgRoleCanViewFinancial(role: string | null | undefined): boolean {
   return role === "account_owner" || role === "accountant" || role === "legal";
+}
+
+/** Client Earn purse: recipients with view_financial, or GC staff on a client org. */
+export function canViewClientEarn(input: {
+  isGcStaff: boolean;
+  role: string | null | undefined;
+}): boolean {
+  return input.isGcStaff || orgRoleCanViewFinancial(input.role);
+}
+
+/**
+ * Dashboard glance. Client org + (staff or view_financial) → card.
+ * Staff-only / no purse → stub (caller). Recipient without view_financial → hide.
+ */
+export function canSeeClientFinanceGlance(input: {
+  isGcStaff: boolean;
+  hasActiveOrg: boolean;
+  role: string | null | undefined;
+}): boolean {
+  return input.hasActiveOrg && canViewClientEarn({ isGcStaff: input.isGcStaff, role: input.role });
 }
 
 /** Recipients never import, close, post, or write threshold. */

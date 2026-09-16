@@ -52,7 +52,7 @@ describe("workspace menu copy", () => {
       "Education",
     ]);
     expect(availableWorkspaceOptions().map((option) => option.href)).toEqual([
-      "/",
+      "/dashboard",
       "/social",
       "/social/courses",
     ]);

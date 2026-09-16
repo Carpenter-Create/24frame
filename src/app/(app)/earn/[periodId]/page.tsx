@@ -10,7 +10,7 @@ import {
   FINANCE_PAGE,
   financeExportHref,
   financePeriodLabel,
-  orgRoleCanViewFinancial,
+  canViewClientEarn,
 } from "@/lib/finance";
 import { FINANCE_DOWNLOAD_CLASS } from "@/lib/finance-craft";
 import { loadRecipientPeriod, loadRecipientStatement } from "@/lib/finance-recipient-load";
@@ -23,7 +23,7 @@ export default async function ClientFinancePeriodPage({
   const { periodId } = await params;
   const ctx = await getOrgContext();
   if (!ctx) redirect("/login");
-  if (!ctx.activeOrg || !orgRoleCanViewFinancial(ctx.activeRole)) {
+  if (!ctx.activeOrg || !canViewClientEarn({ isGcStaff: ctx.isGcStaff, role: ctx.activeRole })) {
     return (
       <>
         <PageHeader

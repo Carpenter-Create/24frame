@@ -9,7 +9,7 @@ import {
 import type { ClientFinanceGlance } from "@/lib/finance-glance";
 
 // Staff stub stays the Slice 1 rail pointer. Client glance is a house card:
-// rate, balance/threshold, latest closed statement, Sporty Blue Finance CTA.
+// rate, balance/threshold, latest closed statement, Sporty Blue Earn CTA.
 
 export function DashboardFinanceGlance() {
   return (

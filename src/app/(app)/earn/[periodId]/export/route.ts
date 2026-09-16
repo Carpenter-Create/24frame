@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { FINANCE_CLIENT, orgRoleCanViewFinancial, recipientMayExportPeriod } from "@/lib/finance";
+import { FINANCE_CLIENT, canViewClientEarn, recipientMayExportPeriod } from "@/lib/finance";
 import { loadRecipientPeriod } from "@/lib/finance-recipient-load";
 import { signedFinanceUrl } from "@/lib/s3-finance";
 import { getOrgContext } from "@/lib/supabase/context";
@@ -12,7 +12,7 @@ export async function GET(
 ) {
   const ctx = await getOrgContext();
   if (!ctx) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
-  if (!ctx.activeOrg || !orgRoleCanViewFinancial(ctx.activeRole)) {
+  if (!ctx.activeOrg || !canViewClientEarn({ isGcStaff: ctx.isGcStaff, role: ctx.activeRole })) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 

@@ -44,7 +44,7 @@ describe("workspace switcher lock", () => {
       "Education",
     ]);
     expect(workspaceSwitcherOptions().map((option) => option.href)).toEqual([
-      "/",
+      "/dashboard",
       "/social",
       "/social/courses",
     ]);
@@ -121,7 +121,7 @@ describe("workspace switcher lock", () => {
 
   it("keeps the existing workspace cookie write — no second scheme", () => {
     expect(persistWorkspaceCookie.name).toBe("persistWorkspaceCookie");
-    expect(workspaceHome("aggregation")).toBe("/");
+    expect(workspaceHome("aggregation")).toBe("/dashboard");
     expect(workspaceHome("social")).toBe("/social");
   });
 });
