@@ -91,7 +91,7 @@ describe("Social nav leftover split (shared shell vs Social-local)", () => {
     expect(resolveWorkspaceMode("/social/profile/edit", "aggregation")).toBe("social");
     expect(resolveWorkspaceMode("/messages", "social")).toBe("aggregation");
     expect(appShell).toContain("if (socialChrome)");
-    expect(appShell).not.toContain("WorkspaceSwitcher");
+    expect(appShell).toContain("WorkspaceSwitcher");
   });
 
   it("parallelizes Social session and streams page slots on the nav pack", () => {

@@ -4,12 +4,13 @@
 // would show. Photo is the signed avatars/{user-id}/avatar face, or the
 // email initial when empty. Always render both fields. No dashes, no invented
 // local-part name. Items after the Identity hairline are
-// USER_MENU_ACTIONS — the same list on mobile and desktop. Workspace
-// sits above Profile. Desktop Workspace / Appearance are 613:888
-// beside — not pages. Mobile is a same-sheet drill-in that replaces
-// the list face. Destinations use existing routes only — not
-// /account/workspace or /account/appearance. Company stays off
-// this menu. Log out + version are the footer group — not a
+// USER_MENU_ACTIONS — the same list on mobile and desktop.
+// Workspace is the header control, not this menu. Desktop
+// Appearance is 613:888 beside — not a page. Mobile is a
+// same-sheet drill-in that replaces the list face. Destinations
+// use existing routes only — not /account/workspace or
+// /account/appearance. Company stays off this menu. Log out +
+// version are the footer group — not a
 // packed list row. Hairline only under Log out. No hairline above
 // Log out. #209 #210 #211 hug / hairline-sandwich stay void on
 // mobile. Desktop hugs the stack. 384 is void. 618:785 overlay
@@ -27,7 +28,7 @@
 // 264 wide. Leftover last-item → Log out is 48 (house section
 // air, --space-12). The 48 adds to the stack. Not 0. Not 134.
 // No h-[Npx]. No min-h. No 522 / 570 / 672 floor. Align-end.
-// 24 pad. 24 between Workspace / Profile / Settings / Appearance.
+// 24 pad. 24 between Profile / Settings / Appearance.
 // Log out → hairline 24. Hairline → footer 24. Footer →
 // bottom 24. 613:888 top is the open submenu row, offset 0. Labels
 // stay one source.
@@ -111,8 +112,8 @@ export const ACCOUNT_SHEET_VERSION_CLASS = "t-body-sm font-normal leading-4 text
 // 48 adds to the stack. NOT 0. NOT 134. NOT h-[Npx]. NOT
 // min-h. NOT 522. NOT 570. NOT 672. NOT 384. Align-end to the
 // avatar (right edge flush). 8px (--space-2) under the trigger.
-// Not a 90% sheet. 24 pad. 24 between Workspace / Profile /
-// Settings / Appearance. No leftover grow. Pin Log out,
+// Not a 90% sheet. 24 pad. 24 between Profile / Settings /
+// Appearance. No leftover grow. Pin Log out,
 // hairline, footer as siblings. Hairline only under Log out.
 // Log out → hairline 24. Hairline → footer 24. Do not hug the
 // rule. Pin gap is not (Log out+rule) → footer. Footer →

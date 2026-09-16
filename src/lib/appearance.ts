@@ -10,7 +10,7 @@
 import { USER_MENU } from "@/lib/user-menu";
 import type { ThemePreference } from "@/lib/theme";
 
-export type AccountMenuFace = "main" | "appearance" | "workspace";
+export type AccountMenuFace = "main" | "appearance";
 
 export const APPEARANCE = {
   title: USER_MENU.appearance,

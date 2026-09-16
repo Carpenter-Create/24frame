@@ -47,20 +47,20 @@ describe("Adam Mercury register lock", () => {
       expect(file).not.toContain("84:46");
     }
     expect(ACCOUNT_SHEET_ITEMS).toBe(USER_MENU_ACTIONS);
-    expect(USER_MENU_ACTIONS.map((item) => item.kind)[0]).toBe("workspace");
-    expect(USER_MENU_ACTIONS.map((item) => item.kind)[1]).toBe("profile");
-    expect(USER_MENU_ACTIONS.map((item) => item.kind)[2]).toBe("settings");
+    expect(USER_MENU_ACTIONS.map((item) => item.kind)[0]).toBe("profile");
+    expect(USER_MENU_ACTIONS.map((item) => item.kind)[1]).toBe("settings");
+    expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("workspace");
     expect(SETTINGS_HUB_NAV.map((item) => item.label)).toEqual([
       "You",
       "Social",
       "Education",
       "Aggregation",
     ]);
-    expect(src("src/components/chrome/app-shell.tsx")).not.toContain("WorkspaceSwitcher");
-    expect(src("src/components/chrome/account-sheet.tsx")).toContain(
+    expect(src("src/components/chrome/app-shell.tsx")).toContain("WorkspaceSwitcher");
+    expect(src("src/components/chrome/account-sheet.tsx")).not.toContain(
       'data-user-menu-item="workspace"',
     );
-    expect(src("src/components/chrome/account-sheet.tsx")).toContain("AccountWorkspaceRow");
+    expect(src("src/components/chrome/account-sheet.tsx")).not.toContain("AccountWorkspaceRow");
   });
 
   it("keeps shared account/settings layout tokens — Phosphor is glyph-only", () => {

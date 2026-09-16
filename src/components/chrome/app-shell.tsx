@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { CaretDoubleLeft, CaretDoubleRight } from "@phosphor-icons/react";
 
 import { UserMenu } from "./user-menu";
+import { WorkspaceSwitcher } from "./workspace-switcher";
 import { SideNav } from "./side-nav";
 import { SettingsRail } from "./settings-rail";
 import { SettingsHeaderBack } from "./settings-header-back";
@@ -256,10 +257,10 @@ export function AppShell({
         </div>
       </aside>
 
-      {/* Access header is avatar / account menu only — no org switcher on any route.
-          Workspace switcher lives in the account menu, above Profile.
+      {/* Access header is workspace control + avatar / account menu — no org
+          switcher on any route. Workspace switcher sits left of the avatar.
           Search mounts on the Access `/messages` gate, and on mobile `/titles`
-          (528:542). Desktop 1:3, `/` 1:2, and `/titles/[id]` 1:4 stay avatar-only.
+          (528:542). Desktop 1:3, `/` 1:2, and `/titles/[id]` stay that pair.
           Phone avatar opens 544:561. Hamburger stays the nav sheet. */}
       <header
         className={cn(
@@ -282,12 +283,12 @@ export function AppShell({
           {titlesBleed ? <TitlesHeaderSearch /> : null}
         </div>
         <div className="flex items-center gap-3">
+          <WorkspaceSwitcher current={workspace} />
           <AccountMenuSlot
             chrome={chrome}
             email={email}
             name={name}
             photoUrl={photoUrl}
-            defaultWorkspace={defaultWorkspace}
           />
         </div>
       </header>
@@ -396,21 +397,17 @@ function AccountMenuSlot({
   email,
   name,
   photoUrl,
-  defaultWorkspace,
 }: {
   chrome?: Promise<AppShellChrome>;
   email: string;
   name?: string | null;
   photoUrl?: string | null;
-  defaultWorkspace: WorkspaceMode;
 }) {
   if (!chrome) {
-    return <UserMenu email={email} name={name} photoUrl={photoUrl} defaultWorkspace={defaultWorkspace} />;
+    return <UserMenu email={email} name={name} photoUrl={photoUrl} />;
   }
   return (
-    <Suspense
-      fallback={<UserMenu email={email} name={name} photoUrl={photoUrl} defaultWorkspace={defaultWorkspace} />}
-    >
+    <Suspense fallback={<UserMenu email={email} name={name} photoUrl={photoUrl} />}>
       <UserMenuFromChrome chrome={chrome} />
     </Suspense>
   );
@@ -422,14 +419,7 @@ function UserMenuFromChrome({
   chrome: Promise<AppShellChrome>;
 }) {
   const data = use(chrome);
-  return (
-    <UserMenu
-      email={data.email}
-      name={data.name}
-      photoUrl={data.photoUrl}
-      defaultWorkspace={data.defaultWorkspace}
-    />
-  );
+  return <UserMenu email={data.email} name={data.name} photoUrl={data.photoUrl} />;
 }
 
 function ChromeCookieSync({
