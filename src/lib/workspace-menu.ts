@@ -1,11 +1,13 @@
 // Header workspace lanes. Lives in lib/, not JSX.
-// The control sits left of the avatar. Popover lists only
-// accessible lanes. Not a page. Not a route. Not an account-menu
-// row. Miss-list is Aggregation | Social | Education. Member
-// Education land is Route A /social/courses. Do not send members
-// to /education (staff CMS), /account/workspace, or
-// /settings/workspace. Staff Manage courses in Settings is a
-// separate /education door — not workspace land.
+// Mercury trigger is top-left on Aggregation chrome. Social
+// matches that lead. Trailing header cluster is the avatar —
+// not a second switcher. Popover lists only accessible lanes.
+// Not a page. Not a route. Not an account-menu row. Miss-list
+// is Aggregation | Social | Education. Member Education land
+// is Route A /social/courses. Do not send members to /education
+// (staff CMS), /account/workspace, or /settings/workspace.
+// Staff Manage courses in Settings is a separate /education
+// door — not workspace land.
 
 import { USER_MENU } from "@/lib/user-menu";
 import {

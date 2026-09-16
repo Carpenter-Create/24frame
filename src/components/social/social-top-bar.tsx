@@ -9,6 +9,7 @@ import { PRODUCT_NAME } from "@/lib/product";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { SOCIAL_ICON_SIZE_HEADER, SOCIAL_ICON_SIZE_SEARCH } from "@/lib/social-icons";
 import { workspaceHome } from "@/lib/workspace";
+import { APP_HEADER_TRAILING_CLUSTER_CLASS } from "@/lib/workspace-switcher";
 
 export function SocialTopBar({
   email,
@@ -23,17 +24,20 @@ export function SocialTopBar({
     <header
       data-app-header=""
       data-social-top-bar=""
-      className="sticky top-0 z-40 flex h-[var(--header-height)] items-center justify-between border-b border-hairline bg-surface px-3 md:px-5"
+      className="sticky top-0 z-40 flex h-[var(--header-height)] items-center justify-between border-b border-hairline bg-surface pl-3 pr-[var(--space-6)] md:pl-5 md:pr-[var(--content-inset)]"
     >
-      <Link
-        href={workspaceHome("social")}
-        prefetch
-        aria-label={PRODUCT_NAME}
-        data-brand-emblem=""
-        className="inline-flex shrink-0 items-center"
-      >
-        <BrandEmblem />
-      </Link>
+      <div className="flex min-w-0 items-center gap-2">
+        <Link
+          href={workspaceHome("social")}
+          prefetch
+          aria-label={PRODUCT_NAME}
+          data-brand-emblem=""
+          className="inline-flex shrink-0 items-center"
+        >
+          <BrandEmblem />
+        </Link>
+        <WorkspaceSwitcher current="social" />
+      </div>
       <form
         data-social-header-search=""
         action={SOCIAL_ROUTES.explore}
@@ -52,27 +56,30 @@ export function SocialTopBar({
           className="h-full flex-1 placeholder:text-ink-2"
         />
       </form>
-      <div className="flex items-center gap-2.5 md:gap-3">
-        <Link
-          href={SOCIAL_ROUTES.explore}
-          prefetch
-          aria-label={SOCIAL.explore.searchSocial}
-          data-social-header-search-icon=""
-          className="flex size-8 items-center justify-center text-ink md:hidden"
-        >
-          <SocialIcon name="magnifying-glass" size={SOCIAL_ICON_SIZE_HEADER} />
-        </Link>
-        <Link
-          href={SOCIAL_ROUTES.dms}
-          prefetch
-          aria-label={SOCIAL.dms.title}
-          data-social-header-tray=""
-          className="hidden items-center justify-center text-ink md:flex"
-        >
-          <SocialIcon name="tray" size={SOCIAL_ICON_SIZE_HEADER} />
-        </Link>
-        <WorkspaceSwitcher current="social" />
-        <UserMenu email={email} name={name} photoUrl={photoUrl} />
+      <div className="flex items-center gap-[var(--space-3)]">
+        <div data-social-header-actions="" className="flex items-center gap-2.5 md:gap-3">
+          <Link
+            href={SOCIAL_ROUTES.explore}
+            prefetch
+            aria-label={SOCIAL.explore.searchSocial}
+            data-social-header-search-icon=""
+            className="flex size-8 items-center justify-center text-ink md:hidden"
+          >
+            <SocialIcon name="magnifying-glass" size={SOCIAL_ICON_SIZE_HEADER} />
+          </Link>
+          <Link
+            href={SOCIAL_ROUTES.dms}
+            prefetch
+            aria-label={SOCIAL.dms.title}
+            data-social-header-tray=""
+            className="hidden items-center justify-center text-ink md:flex"
+          >
+            <SocialIcon name="tray" size={SOCIAL_ICON_SIZE_HEADER} />
+          </Link>
+        </div>
+        <div data-app-header-trailing="" className={APP_HEADER_TRAILING_CLUSTER_CLASS}>
+          <UserMenu email={email} name={name} photoUrl={photoUrl} />
+        </div>
       </div>
     </header>
   );

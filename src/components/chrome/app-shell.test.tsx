@@ -124,7 +124,7 @@ describe("AppShell header", () => {
       'data-photo="https://s3.example/signed-avatar"',
     );
     expect(shellSrc).toContain("Phone avatar opens 544:561");
-    expect(shellSrc).toContain("Workspace switcher sits left of the avatar");
+    expect(shellSrc).toContain("Mercury switcher is top-left");
     expect(shellSrc).toContain("WorkspaceSwitcher");
     expect(shellSrc).toContain("<WorkspaceSwitcher current={workspace} />");
     expect(html).toContain("data-workspace-switcher");
