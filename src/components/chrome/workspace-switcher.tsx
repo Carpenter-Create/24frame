@@ -61,12 +61,10 @@ export function WorkspaceSwitcher({
   current,
   options = availableWorkspaceOptions(),
   defaultOpen = false,
-  compact = false,
 }: {
   current: WorkspaceMode;
   options?: readonly WorkspaceMenuOption[];
   defaultOpen?: boolean;
-  compact?: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -99,7 +97,6 @@ export function WorkspaceSwitcher({
   if (!canSwitch) {
     return (
       <span data-workspace-switcher="" className={WORKSPACE_SWITCHER_STATIC_CLASS}>
-        <WorkspaceMark mode={current} size="sm" />
         <span data-workspace-switcher-current="" className={WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS}>
           {label}
         </span>
@@ -111,7 +108,6 @@ export function WorkspaceSwitcher({
     <div
       ref={hostRef}
       data-workspace-switcher=""
-      data-workspace-switcher-compact={compact ? "" : undefined}
       className="relative min-w-0"
     >
       <button
@@ -123,11 +119,7 @@ export function WorkspaceSwitcher({
         onClick={() => setOpen((next) => !next)}
         className={WORKSPACE_SWITCHER_TRIGGER_CLASS}
       >
-        <WorkspaceMark mode={current} size="sm" />
-        <span
-          data-workspace-switcher-current=""
-          className={compact ? "sr-only" : WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS}
-        >
+        <span data-workspace-switcher-current="" className={WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS}>
           {label}
         </span>
         <CaretDown

@@ -26,18 +26,15 @@ export function SocialTopBar({
       data-social-top-bar=""
       className="sticky top-0 z-40 flex h-[var(--header-height)] items-center justify-between border-b border-hairline bg-surface pl-3 pr-[var(--space-6)] md:pl-5 md:pr-[var(--content-inset)]"
     >
-      <div className="flex min-w-0 items-center gap-2">
-        <Link
-          href={workspaceHome("social")}
-          prefetch
-          aria-label={PRODUCT_NAME}
-          data-brand-emblem=""
-          className="inline-flex shrink-0 items-center"
-        >
-          <BrandEmblem />
-        </Link>
-        <WorkspaceSwitcher current="social" />
-      </div>
+      <Link
+        href={workspaceHome("social")}
+        prefetch
+        aria-label={PRODUCT_NAME}
+        data-brand-emblem=""
+        className="inline-flex shrink-0 items-center"
+      >
+        <BrandEmblem />
+      </Link>
       <form
         data-social-header-search=""
         action={SOCIAL_ROUTES.explore}
@@ -78,6 +75,7 @@ export function SocialTopBar({
           </Link>
         </div>
         <div data-app-header-trailing="" className={APP_HEADER_TRAILING_CLUSTER_CLASS}>
+          <WorkspaceSwitcher current="social" />
           <UserMenu email={email} name={name} photoUrl={photoUrl} />
         </div>
       </div>

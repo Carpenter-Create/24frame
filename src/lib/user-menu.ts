@@ -2,9 +2,9 @@
 // One list for both instances: desktop panel and mobile sheet.
 // Chrome may differ (sheet vs fuller panel). Labels may not.
 // Mercury order: identity → Profile → Settings → Appearance →
-// Log out. Workspace lives on the Mercury switcher — rail
-// top-left on Aggregation chrome, not this menu. One Settings
-// hub. No forked Settings.
+// Log out. Workspace lives on the header switcher, left of
+// the avatar — not this menu. One Settings hub. No forked
+// Settings.
 // Profile is /settings/profile (You identity). Settings land href
 // is settingsLandHref(pathname) — do not invent /account/*.
 // Agreements / Refer stay /settings doors, not menu rows. Help

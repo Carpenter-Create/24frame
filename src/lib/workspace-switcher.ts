@@ -1,15 +1,16 @@
 // Mercury workspace switcher. Lives in lib/, not JSX.
-// Aggregation chrome: trigger is top-left (rail on desktop, header
-// lead on phone). One switcher — the old top-right Aggregation
-// control is retired. Social / Education share the same trailing
-// header cluster (avatar). Social-only icons sit left of that slot
-// and do not shift the avatar.
+// Placement is pre-#321: header right cluster, left of the avatar.
+// One switcher — no rail / header-lead duplicate. Rail top-left
+// stays the static 24 brand. Social / Education share that same
+// trailing cluster. Social-only icons sit left of the slot so the
+// avatar x does not shift.
 //
-// Trigger: mark + truncated current name. Chevron is hidden at rest;
-// it appears on hover / focus and while the menu is open (touch:
-// press/open). Menu order: current-workspace header → Settings (the
-// existing /settings door only) → list with leading marks, flush-left
-// names, trailing Sporty Blue check (#320).
+// Trigger: truncated current workspace name only. No leading mark
+// or circle — the avatar already provides that. Chevron is hidden
+// at rest; it appears on hover / focus and while the menu is open
+// (touch: press/open). Menu order: current-workspace header →
+// Settings (the existing /settings door only) → list with leading
+// marks, flush-left names, trailing Sporty Blue check (#320).
 //
 // Three workspaces only. No All Accounts clone. No Referrals /
 // billing. Staff Manage courses stays a Settings door — not a fourth
@@ -69,7 +70,7 @@ export const WORKSPACE_SWITCHER_CHEVRON_CLASS =
 export const WORKSPACE_SWITCHER_CHEVRON_OPEN_CLASS = "opacity-100";
 
 export const WORKSPACE_SWITCHER_PANEL_CLASS =
-  "absolute left-0 top-full z-50 mt-[var(--space-2)] flex min-w-[16rem] flex-col overflow-hidden rounded-[12px] border border-hairline bg-surface py-[var(--space-2)] shadow-none";
+  "absolute right-0 top-full z-50 mt-[var(--space-2)] flex min-w-[16rem] flex-col overflow-hidden rounded-[12px] border border-hairline bg-surface py-[var(--space-2)] shadow-none";
 
 export const WORKSPACE_SWITCHER_HEADER_CLASS =
   "flex items-center gap-[var(--space-4)] px-[var(--space-4)] py-[var(--space-4)]";

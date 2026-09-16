@@ -31,22 +31,30 @@ const sheetSrc = readFileSync(join(here, "account-sheet.tsx"), "utf8");
 const userMenuSrc = readFileSync(join(here, "../../lib/user-menu.ts"), "utf8");
 
 describe("workspace switcher header control", () => {
-  it("shows mark + truncated current name on the Mercury trigger", () => {
+  it("shows the workspace name only on the trigger — no leading mark", () => {
     const html = renderToStaticMarkup(<WorkspaceSwitcher current="aggregation" />);
     expect(html).toContain("data-workspace-switcher");
     expect(html).toContain("data-workspace-switcher-current");
-    expect(html).toContain('data-workspace-switcher-mark="aggregation"');
     expect(html).toContain("Aggregation");
+    expect(html).not.toContain("data-workspace-switcher-mark");
     expect(html).toContain("data-workspace-switcher-chevron");
     expect(html).toContain(WORKSPACE_SWITCHER_CHEVRON_CLASS);
     expect(html).not.toContain('data-workspace-switcher-chevron-open');
     expect(html).not.toContain("/education");
     expect(shellSrc).toContain("<WorkspaceSwitcher current={workspace} />");
-    expect(shellSrc).toContain("data-workspace-switcher-rail");
-    expect(shellSrc).toContain("data-workspace-switcher-lead");
+    expect(shellSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(1);
+    expect(shellSrc).not.toContain("data-workspace-switcher-rail");
+    expect(shellSrc).not.toContain("data-workspace-switcher-lead");
     expect(shellSrc.indexOf("<WorkspaceSwitcher")).toBeLessThan(shellSrc.indexOf("<AccountMenuSlot"));
     expect(topBarSrc).toContain("<WorkspaceSwitcher current=\"social\" />");
+    expect(topBarSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(1);
     expect(topBarSrc.indexOf("<WorkspaceSwitcher")).toBeLessThan(topBarSrc.indexOf("<UserMenu"));
+    const triggerSrc = src.slice(
+      src.indexOf("data-workspace-switcher-trigger"),
+      src.indexOf("data-workspace-switcher-popover"),
+    );
+    expect(triggerSrc).toContain("data-workspace-switcher-current");
+    expect(triggerSrc).not.toContain("WorkspaceMark");
   });
 
   it("opens header, Settings, then Aggregation / Social / Education", () => {
@@ -57,6 +65,7 @@ describe("workspace switcher header control", () => {
     expect(html).toContain("data-workspace-switcher-header");
     expect(html).toContain("data-workspace-switcher-header-name");
     expect(html).toContain("data-workspace-switcher-header-role");
+    expect(html).toContain('data-workspace-switcher-mark="social"');
     expect(html).toContain(workspaceSwitcherRole("social"));
     expect(html).toContain("data-workspace-switcher-settings");
     expect(html).toContain(WORKSPACE_SWITCHER.settings);
@@ -94,7 +103,7 @@ describe("workspace switcher header control", () => {
     expect(html).toContain("data-workspace-switcher");
     expect(html).toContain("data-workspace-switcher-current");
     expect(html).toContain(only!.label);
-    expect(html).toContain(`data-workspace-switcher-mark="${only!.mode}"`);
+    expect(html).not.toContain("data-workspace-switcher-mark");
     expect(html).not.toContain("data-workspace-switcher-chevron");
     expect(html).not.toContain("data-workspace-switcher-trigger");
     expect(html).not.toContain("data-workspace-switcher-popover");
@@ -153,25 +162,32 @@ describe("workspace switcher header control", () => {
 });
 
 describe("workspace switcher placement", () => {
-  it("puts the Aggregation trigger top-left and retires the header-right duplicate", () => {
-    expect(shellSrc).toContain("data-workspace-switcher-rail");
-    expect(shellSrc).toContain("data-workspace-switcher-lead");
+  it("puts one switcher in the shared right cluster, left of the avatar", () => {
+    expect(shellSrc).not.toContain("data-workspace-switcher-rail");
+    expect(shellSrc).not.toContain("data-workspace-switcher-lead");
+    expect(shellSrc).toContain("data-brand-emblem");
     expect(shellSrc).toContain("data-app-header-trailing");
     expect(shellSrc).toContain("APP_HEADER_TRAILING_CLUSTER_CLASS");
+    expect(shellSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(1);
     const trailing = shellSrc.slice(
       shellSrc.indexOf("data-app-header-trailing"),
       shellSrc.indexOf("</header>"),
     );
+    expect(trailing).toContain("WorkspaceSwitcher");
     expect(trailing).toContain("AccountMenuSlot");
-    expect(trailing).not.toContain("WorkspaceSwitcher");
-    expect(shellSrc).toContain('className="md:hidden" data-workspace-switcher-lead=""');
-    expect(topBarSrc.indexOf("<WorkspaceSwitcher")).toBeLessThan(
+    expect(trailing.indexOf("WorkspaceSwitcher")).toBeLessThan(
+      trailing.indexOf("AccountMenuSlot"),
+    );
+    expect(topBarSrc.indexOf("data-brand-emblem")).toBeLessThan(
       topBarSrc.indexOf("data-social-header-actions"),
     );
     expect(topBarSrc.indexOf("data-social-header-actions")).toBeLessThan(
       topBarSrc.indexOf("data-app-header-trailing"),
     );
     expect(topBarSrc.indexOf("data-app-header-trailing")).toBeLessThan(
+      topBarSrc.indexOf("<WorkspaceSwitcher"),
+    );
+    expect(topBarSrc.indexOf("<WorkspaceSwitcher")).toBeLessThan(
       topBarSrc.indexOf("<UserMenu"),
     );
     expect(topBarSrc).toContain("APP_HEADER_TRAILING_CLUSTER_CLASS");

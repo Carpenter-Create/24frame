@@ -124,11 +124,14 @@ describe("AppShell header", () => {
       'data-photo="https://s3.example/signed-avatar"',
     );
     expect(shellSrc).toContain("Phone avatar opens 544:561");
-    expect(shellSrc).toContain("Mercury switcher is top-left");
+    expect(shellSrc).toContain("One switcher, left of the");
     expect(shellSrc).toContain("WorkspaceSwitcher");
     expect(shellSrc).toContain("<WorkspaceSwitcher current={workspace} />");
     expect(html).toContain("data-workspace-switcher");
     expect(html).toContain("Aggregation");
+    expect((html.match(/data-workspace-switcher=""/g) ?? []).length).toBe(1);
+    expect(html).not.toContain("data-workspace-switcher-rail");
+    expect(html).not.toContain("data-workspace-switcher-lead");
     expect(html.indexOf("data-workspace-switcher")).toBeLessThan(html.indexOf("data-user-menu-host"));
     expect(shellSrc).toContain("<MobileNavSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />");
     expect(shellSrc).not.toContain("AccountOverlay");

@@ -242,18 +242,6 @@ export function AppShell({
           </div>
         )}
         <div
-          data-workspace-switcher-rail=""
-          className={cn(
-            settingsPage
-              ? "px-[var(--space-4)] pb-[var(--space-2)]"
-              : collapsed
-                ? "flex justify-center px-2 pb-2"
-                : "px-2 pb-2",
-          )}
-        >
-          <WorkspaceSwitcher current={workspace} compact={collapsed && !settingsPage} />
-        </div>
-        <div
           className={cn("flex-1 overflow-y-auto", settingsPage ? SETTINGS_RAIL_PAD_CLASS : "pt-1")}
         >
           {settingsPage ? (
@@ -270,12 +258,13 @@ export function AppShell({
         </div>
       </aside>
 
-      {/* Access header trailing cluster is the avatar only — same slot as
-          Social / Education. Mercury switcher is top-left: rail on desktop,
-          header lead on phone. One switcher. No org switcher on any route.
-          Search mounts on the Access `/messages` gate, and on mobile `/titles`
-          (528:542). Desktop 1:3, `/` 1:2, and `/titles/[id]` stay that pair.
-          Phone avatar opens 544:561. Hamburger stays the nav sheet. */}
+      {/* Access header trailing cluster is workspace switcher + avatar —
+          same slot as Social / Education. One switcher, left of the
+          avatar. Rail top-left stays the static 24 brand. No org
+          switcher on any route. Search mounts on the Access `/messages`
+          gate, and on mobile `/titles` (528:542). Desktop 1:3, `/` 1:2,
+          and `/titles/[id]` stay that pair. Phone avatar opens 544:561.
+          Hamburger stays the nav sheet. */}
       <header
         className={cn(
           "sticky top-0 z-40 flex items-center justify-end gap-4 border-b border-hairline bg-surface/85 backdrop-blur",
@@ -291,15 +280,13 @@ export function AppShell({
           ) : (
             <MobileNavSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />
           )}
-          <div className="md:hidden" data-workspace-switcher-lead="">
-            <WorkspaceSwitcher current={workspace} />
-          </div>
           {messagesPage ? (
             <MessagesHeaderSlot chrome={chrome} messagesSurface={messagesSurface} />
           ) : null}
           {titlesBleed ? <TitlesHeaderSearch /> : null}
         </div>
         <div data-app-header-trailing="" className={APP_HEADER_TRAILING_CLUSTER_CLASS}>
+          <WorkspaceSwitcher current={workspace} />
           <AccountMenuSlot
             chrome={chrome}
             email={email}
