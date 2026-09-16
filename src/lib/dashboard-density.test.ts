@@ -44,8 +44,6 @@ function adminHero(compare: boolean) {
         { key: "all", label: "All time", group: "all" },
         { key: "ytd", label: "YTD 2026", group: "ytd" },
       ],
-      userId: null,
-      users: [],
       hero: {
         totalCents: 120_000_00,
         asOf: "All time",

@@ -2,8 +2,9 @@ import { DASHBOARD_HOME_STACK, type ClientHomeFinding, type ClientHomeTitle } fr
 import { formatUsdCents } from "@/lib/finance";
 import { parseReportsUserId, reportsUserLabel, type ReportsUserOption } from "@/lib/reports";
 
-// Company-admin Dashboard hero. Period + user URL state rematch RL Overview
+// Company-admin Dashboard hero. Period URL state rematch RL Overview
 // behavior only — Geist / Sporty Blue / hairline. One labeled period menu.
+// Find-user chrome is gone; leftover ?user= parsing stays inert for data.
 // Live money is never invented here; craft sample series lives in the fixture.
 
 export const DASHBOARD_HREF = "/dashboard";
@@ -19,6 +20,7 @@ export const DASHBOARD_ADMIN = {
   activity: "Recent account activity",
   activityEmpty: "No account activity for this period.",
   viewAll: "View all",
+  // Killed from Dashboard chrome after the 2026-09-16 Adam lock — tests lock absence.
   findUser: "Find a user account",
   close: "Close",
   allCompany: "All company activity",

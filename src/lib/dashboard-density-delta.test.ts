@@ -23,7 +23,6 @@ import {
   DASHBOARD_RELATED_GAP_CLASS,
   DASHBOARD_SECTION_AIR_CLASS,
   DASHBOARD_STANDARD_STACK_CLASS,
-  DASHBOARD_USER_FIELD_DESKTOP_CLASS,
 } from "@/lib/dashboard-craft";
 import { DASHBOARD_FIXTURE } from "@/lib/dashboard-fixture";
 
@@ -47,8 +46,6 @@ function emptyHeroHtml() {
       orgName: "Acme",
       period: parseDashboardPeriod("all", now),
       options,
-      userId: null,
-      users: [{ id: "maya", label: "Maya Chen" }],
       hero: {
         totalCents: null,
         asOf: "All time",
@@ -103,8 +100,6 @@ describe("Aggregation Dashboard density delta after #332", () => {
       createElement(DashboardAdminControls, {
         periodKey: "all",
         options,
-        userId: null,
-        users: [],
         defaultOpen: true,
       }),
     );
@@ -126,18 +121,25 @@ describe("Aggregation Dashboard density delta after #332", () => {
     expect(controlsSrc).not.toContain("data-dashboard-period-grains");
   });
 
-  it("removes Find-user from phone Dashboard and keeps desktop type-to-find", () => {
+  it("removes Find-user from Dashboard on phone and md+", () => {
     const html = emptyHeroHtml();
-    expect(html).toContain("data-dashboard-user");
-    expect(html).toContain(DASHBOARD_USER_FIELD_DESKTOP_CLASS);
-    expect(DASHBOARD_USER_FIELD_DESKTOP_CLASS).toContain("max-md:hidden");
+    expect(html).not.toContain("data-dashboard-user");
     expect(html).not.toContain("data-dashboard-user-overflow");
     expect(html).not.toContain("data-dashboard-user-sheet");
+    expect(html).not.toContain(DASHBOARD_ADMIN.findUser);
+    expect(html).not.toContain("FIND A USER ACCOUNT");
+    expect(html).not.toContain(DASHBOARD_ADMIN.allCompany);
     expect(controlsSrc).not.toContain("DotsThree");
+    expect(controlsSrc).not.toContain("DashboardUserField");
+    expect(controlsSrc).not.toContain("data-dashboard-user");
     expect(controlsSrc).not.toContain("data-dashboard-user-overflow");
     expect(controlsSrc).not.toContain("data-dashboard-user-sheet");
+    expect(controlsSrc).not.toContain("DASHBOARD_USER_FIELD_DESKTOP_CLASS");
+    expect(craftSrc).not.toContain("DASHBOARD_USER_FIELD_DESKTOP_CLASS");
     expect(craftSrc).not.toContain("DASHBOARD_USER_OVERFLOW_CLASS");
     expect(craftSrc).not.toContain("DASHBOARD_USER_SHEET_HOST_CLASS");
+    expect(heroSrc).not.toContain("users=");
+    expect(heroSrc).not.toContain("userId");
   });
 
   it("locks air to 8 / 16 / 24 and page 48 — no fifth gutter", () => {
@@ -162,8 +164,6 @@ describe("Aggregation Dashboard density delta after #332", () => {
         orgName: "Acme",
         period: parseDashboardPeriod("all", now),
         options: [{ key: "all", label: "All time", group: "all" }],
-        userId: null,
-        users: [],
         hero: {
           totalCents: 120_000_00,
           asOf: "All time",

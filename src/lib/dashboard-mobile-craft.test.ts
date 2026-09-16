@@ -15,7 +15,6 @@ import {
   DASHBOARD_PERIOD_SHEET_HOST_CLASS,
   DASHBOARD_TITLE_DESKTOP_CLASS,
   DASHBOARD_TITLE_MOBILE_CLASS,
-  DASHBOARD_USER_FIELD_DESKTOP_CLASS,
 } from "@/lib/dashboard-craft";
 
 describe("company-admin Dashboard mobile craft", () => {
@@ -47,14 +46,18 @@ describe("company-admin Dashboard mobile craft", () => {
     expect(DASHBOARD_CHART_FRAME_CLASS).toContain("md:h-[200px]");
   });
 
-  it("keeps Find-user off phone Dashboard and Period on a bottom sheet", () => {
-    expect(DASHBOARD_USER_FIELD_DESKTOP_CLASS).toContain("max-md:hidden");
+  it("keeps Find-user off Dashboard on phone and md+ and Period on a bottom sheet", () => {
     expect(DASHBOARD_PERIOD_SHEET_HOST_CLASS).toContain("md:hidden");
     expect(DASHBOARD_PERIOD_SHEET_HOST_CLASS).toContain("justify-end");
     const controls = readFileSync("src/components/dashboard/dashboard-admin-controls.tsx", "utf8");
+    const craft = readFileSync("src/lib/dashboard-craft.ts", "utf8");
     expect(controls).toContain("data-dashboard-period-sheet");
+    expect(controls).not.toContain("data-dashboard-user");
     expect(controls).not.toContain("data-dashboard-user-overflow");
     expect(controls).not.toContain("data-dashboard-user-sheet");
+    expect(controls).not.toContain("Find a user account");
+    expect(craft).not.toContain("DASHBOARD_USER_FIELD_DESKTOP_CLASS");
+    expect(craft).not.toContain("max-md:hidden\" // user");
   });
 
   it("keeps Sample banner + populated fixture rules and kills RL / export / chips", () => {

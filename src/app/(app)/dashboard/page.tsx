@@ -37,7 +37,6 @@ import {
 import {
   buildDashboardRevenueHero,
   dashboardPeriodOptionsFor,
-  dashboardUserLabel,
   dashboardUserTitleIds,
   filterDashboardDeliveries,
   filterDashboardTitles,
@@ -62,7 +61,7 @@ import {
   dashboardFixtureEnabled,
   dashboardFixtureSources,
 } from "@/lib/dashboard-fixture";
-import { LIST_PAGE, UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
+import { UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
 import { loadMyDeliveries, loadMyFindings } from "@/lib/my-lists";
 import { GcClientsDirectory } from "@/app/(app)/(operator)/gc/clients/clients-directory";
 import { HouseEmpty, TextAction } from "@/components/chrome/house";
@@ -76,7 +75,8 @@ import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 // Company-admin `/dashboard` rematches RL Overview structure inside house
 // tokens: one labeled period control, MetricCard revenue + scrub, Recent activity.
 // Phone (`< md`) is a single-column stack — $0.00 empty hero, compact chart,
-// Period bottom sheet. Find-user is desktop only; user scope lives on /reports.
+// Period bottom sheet. Find-user is gone on phone and md+; user scope lives
+// on /reports later. Leftover ?user= parsing stays inert for data only.
 // Standard seats keep the catalog hero. Export stays on /reports.
 // Fixture money is labeled + env-gated and never enters export/ledger.
 
@@ -163,24 +163,6 @@ export default async function DashboardPage({
   let adminHero = null;
   let useFixture = false;
   if (isAdmin) {
-    const memberships = await supabase
-      .from("memberships")
-      .select("user_id")
-      .eq("org_id", org.id)
-      .eq("status", "active")
-      .range(...rangeFor(LIST_PAGE));
-    const memberIds = [...new Set((memberships.data ?? []).map((row) => row.user_id))];
-    const { data: profiles } =
-      memberIds.length === 0
-        ? { data: [] as { id: string; display_name: string; handle: string }[] }
-        : await supabase.from("profiles").select("id, display_name, handle").in("id", memberIds);
-    const users = (profiles ?? [])
-      .map((profile) => {
-        const label = dashboardUserLabel({ displayName: profile.display_name, handle: profile.handle });
-        return label ? { id: profile.id, label } : null;
-      })
-      .filter((row): row is { id: string; label: string } => row != null);
-
     const canReadMoney = !userId && canViewClientEarn({ isGcStaff: ctx.isGcStaff, role: ctx.activeRole });
     const moneyLoaded = canReadMoney ? await loadRecipientDashboard(org.id) : null;
     const money = moneyLoaded
@@ -220,8 +202,6 @@ export default async function DashboardPage({
         orgName={org.name}
         period={period}
         options={dashboardPeriodOptionsFor(period, now, monthSources)}
-        userId={userId}
-        users={users}
         hero={buildDashboardRevenueHero({ period, points, userId })}
         fixture={useFixture}
         activity={
