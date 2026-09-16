@@ -306,7 +306,7 @@ export function AppShell({
           <div className="w-full pb-24">{children}</div>
         ) : homePage ? (
           <div
-            className="w-full px-[var(--content-inset)] py-[var(--space-8)]"
+            className="w-full px-[var(--content-inset)] py-[var(--space-8)] max-md:px-[var(--space-6)] max-md:py-[var(--space-6)]"
             data-app-home-frame=""
           >
             {children}

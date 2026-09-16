@@ -44,7 +44,7 @@ export function DashboardAnalyticsOverview({
         <div
           key={cell.key}
           data-dashboard-overview-cell={cell.key}
-          className={`flex flex-col gap-[var(--space-2)] p-[var(--space-6)] ${i > 0 ? "border-l border-hairline" : ""}`}
+          className={`flex flex-col gap-[var(--space-2)] p-[var(--space-6)] max-md:p-[var(--space-4)] ${i > 0 ? "border-l border-hairline" : ""}`}
         >
           <span className="t-label text-ink-3">{cell.label}</span>
           <span className="t-data t-heading text-ink">{cell.value}</span>

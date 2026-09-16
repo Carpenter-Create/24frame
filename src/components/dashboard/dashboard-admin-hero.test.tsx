@@ -41,6 +41,11 @@ describe("DashboardAdminHero", () => {
     );
     expect(html).toContain("data-dashboard-admin-hero");
     expect(html).toContain("lg:grid-cols-5");
+    expect(html).toContain("max-md:flex");
+    expect(html).toContain("max-md:flex-col");
+    expect(html).toContain("data-dashboard-mobile-stack");
+    expect(html).toContain("data-dashboard-title-mobile");
+    expect(html).toContain("data-dashboard-title-desktop");
     expect(html).toContain(DASHBOARD_ADMIN.revenue);
     expect(html).toContain(DASHBOARD_ADMIN.activity);
     expect(html).toContain("Acme");
@@ -120,6 +125,7 @@ describe("DashboardAdminHero", () => {
     const chart = readFileSync("src/components/dashboard/dashboard-revenue-chart.tsx", "utf8");
     const controls = readFileSync("src/components/dashboard/dashboard-admin-controls.tsx", "utf8");
     const page = readFileSync("src/app/(app)/dashboard/page.tsx", "utf8");
+    const craft = readFileSync("src/lib/dashboard-craft.ts", "utf8");
     for (const src of [hero, chart, controls, page]) {
       expect(src).not.toContain("recharts");
       expect(src).not.toContain("RevenueTimeline");
@@ -128,7 +134,11 @@ describe("DashboardAdminHero", () => {
     }
     expect(controls).toContain("router.replace");
     expect(chart).toContain("strokeDasharray");
-    expect(hero).toContain("lg:grid-cols-5");
+    expect(hero).toContain("DASHBOARD_ADMIN_OVERVIEW_CLASS");
+    expect(craft).toContain("lg:grid-cols-5");
+    expect(craft).toContain("max-md:flex-col");
+    expect(craft).toContain("md:flex-row");
+    expect(craft).not.toContain("sm:flex-row");
     expect(page).toContain("DashboardAdminHero");
   });
 });

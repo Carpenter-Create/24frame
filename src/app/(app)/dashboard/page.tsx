@@ -49,6 +49,10 @@ import {
   revenuePointsFromLabels,
 } from "@/lib/dashboard-admin";
 import {
+  DASHBOARD_ADMIN_STACK_CLASS,
+  DASHBOARD_STANDARD_STACK_CLASS,
+} from "@/lib/dashboard-craft";
+import {
   DASHBOARD_FIXTURE_ADDED,
   DASHBOARD_FIXTURE_PIPELINE,
   DASHBOARD_FIXTURE_PLATFORMS,
@@ -71,6 +75,8 @@ import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 
 // Company-admin `/dashboard` rematches RL Overview structure inside house
 // tokens: one labeled period menu, MetricCard revenue + scrub, Recent activity.
+// Phone (`< md`) is a single-column stack — metric → scrub → lists — and
+// hides type-to-find behind an overflow sheet. Desktop #328/#329 locks stay.
 // Standard seats keep the catalog hero. Export stays on /reports.
 // Fixture money is labeled + env-gated and never enters export/ledger.
 
@@ -266,7 +272,10 @@ export default async function DashboardPage({
         </>
       )}
 
-      <div className="flex flex-col gap-[var(--space-12)]">
+      <div
+        data-dashboard-stack=""
+        className={isAdmin ? DASHBOARD_ADMIN_STACK_CLASS : DASHBOARD_STANDARD_STACK_CLASS}
+      >
         <DashboardAnalyticsOverview
           addedThisMonth={useFixture && liveAdded === 0 ? DASHBOARD_FIXTURE_ADDED : liveAdded}
           inPipeline={useFixture && livePipeline === 0 ? DASHBOARD_FIXTURE_PIPELINE : livePipeline}
@@ -294,7 +303,7 @@ export default async function DashboardPage({
             catalogEmpty={snapshot.catalog === 0}
             canAddTitle={ctx.canOperate}
           />
-          <DashboardDoNext items={snapshot.doNext} />
+          <DashboardDoNext items={snapshot.doNext} secondary={isAdmin} />
         </div>
         <DashboardReportsCta />
         <DashboardDeliveriesAction rows={deliveriesNeedingAction(scopedDeliveries)} />

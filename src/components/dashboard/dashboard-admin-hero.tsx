@@ -14,9 +14,15 @@ import {
   type DashboardRevenueHero,
 } from "@/lib/dashboard-admin";
 import {
+  DASHBOARD_ADMIN_CHROME_CLASS,
+  DASHBOARD_ADMIN_OVERVIEW_CLASS,
   DASHBOARD_CARD_CLASS,
   DASHBOARD_CARD_PAD_HERO,
   DASHBOARD_CARD_PAD_LIST,
+  DASHBOARD_FIXTURE_BANNER_CLASS,
+  DASHBOARD_ORG_LABEL_CLASS,
+  DASHBOARD_TITLE_DESKTOP_CLASS,
+  DASHBOARD_TITLE_MOBILE_CLASS,
 } from "@/lib/dashboard-craft";
 import { DASHBOARD_FIXTURE, dashboardFixtureLabel } from "@/lib/dashboard-fixture";
 import { dashboardJustInDate, rankedBarPercent } from "@/lib/dashboard-home";
@@ -29,7 +35,7 @@ export function DashboardFixtureBanner() {
     <p
       data-dashboard-fixture-banner=""
       role="status"
-      className="rounded-[var(--radius)] border border-hairline bg-surface px-[var(--space-4)] py-[var(--space-2)] t-label text-ink-3 shadow-none"
+      className={DASHBOARD_FIXTURE_BANNER_CLASS}
     >
       {DASHBOARD_FIXTURE.banner} · {DASHBOARD_FIXTURE.note}
     </p>
@@ -43,6 +49,7 @@ export function DashboardAdminChrome({
   userId,
   users,
   periodMenuOpen = false,
+  userSheetOpen = false,
 }: {
   orgName: string;
   period: DashboardPeriod;
@@ -50,15 +57,23 @@ export function DashboardAdminChrome({
   userId: string | null;
   users: readonly ReportsUserOption[];
   periodMenuOpen?: boolean;
+  userSheetOpen?: boolean;
 }) {
   return (
     <div
       data-dashboard-admin-chrome=""
-      className="flex flex-col gap-[var(--space-4)] sm:flex-row sm:items-start sm:justify-between"
+      className={DASHBOARD_ADMIN_CHROME_CLASS}
     >
       <header className="min-w-0">
-        <p className="t-label text-ink-3">{orgName}</p>
-        <h1 className="t-section text-ink">{period.label}</h1>
+        <p className={DASHBOARD_ORG_LABEL_CLASS}>{orgName}</p>
+        <h1 className="t-section text-ink" data-dashboard-title="">
+          <span data-dashboard-title-mobile="" className={DASHBOARD_TITLE_MOBILE_CLASS}>
+            {orgName}
+          </span>
+          <span data-dashboard-title-desktop="" className={DASHBOARD_TITLE_DESKTOP_CLASS}>
+            {period.label}
+          </span>
+        </h1>
       </header>
       <DashboardAdminControls
         periodKey={period.key}
@@ -66,6 +81,7 @@ export function DashboardAdminChrome({
         userId={userId}
         users={users}
         defaultOpen={periodMenuOpen}
+        userSheetOpen={userSheetOpen}
       />
     </div>
   );
@@ -186,6 +202,7 @@ export function DashboardAdminHero({
   activity,
   fixture = false,
   periodMenuOpen = false,
+  userSheetOpen = false,
 }: {
   orgName: string;
   period: DashboardPeriod;
@@ -196,6 +213,7 @@ export function DashboardAdminHero({
   activity: readonly DashboardActivityRow[];
   fixture?: boolean;
   periodMenuOpen?: boolean;
+  userSheetOpen?: boolean;
 }) {
   return (
     <div data-dashboard-admin-hero="" className="flex flex-col gap-[var(--space-6)]">
@@ -207,10 +225,12 @@ export function DashboardAdminHero({
         userId={userId}
         users={users}
         periodMenuOpen={periodMenuOpen}
+        userSheetOpen={userSheetOpen}
       />
       <div
         data-dashboard-overview-row=""
-        className="grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-5"
+        data-dashboard-mobile-stack=""
+        className={DASHBOARD_ADMIN_OVERVIEW_CLASS}
       >
         <div className="lg:col-span-3">
           <DashboardRevenueCard period={period} hero={hero} fixture={fixture} />

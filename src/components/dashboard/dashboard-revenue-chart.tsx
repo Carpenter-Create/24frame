@@ -11,9 +11,9 @@ import {
   pointDelta,
   type DashboardRevenuePoint,
 } from "@/lib/dashboard-admin";
+import { DASHBOARD_CHART_FRAME_CLASS } from "@/lib/dashboard-craft";
 import { DASHBOARD_FIXTURE } from "@/lib/dashboard-fixture";
 
-const H = 200;
 const PAD = { top: 16, right: 48, bottom: 24, left: 16 };
 
 export function DashboardRevenueChart({
@@ -26,23 +26,23 @@ export function DashboardRevenueChart({
   fixture?: boolean;
 }) {
   const plotRef = useRef<HTMLDivElement>(null);
-  const [width, setWidth] = useState<number | null>(null);
+  const [size, setSize] = useState<{ w: number; h: number } | null>(null);
   const [hoverX, setHoverX] = useState<number | null>(null);
 
   useEffect(() => {
     const el = plotRef.current;
     if (!el) return;
     const ro = new ResizeObserver((entries) => {
-      const w = entries[0]?.contentRect.width;
-      if (w) setWidth(w);
+      const box = entries[0]?.contentRect;
+      if (box && box.width && box.height) setSize({ w: box.width, h: box.height });
     });
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
 
   const geom = useMemo(
-    () => (width == null ? null : dashboardChartGeometry(points, width, H, PAD)),
-    [points, width],
+    () => (size == null ? null : dashboardChartGeometry(points, size.w, size.h, PAD)),
+    [points, size],
   );
 
   const hover = useMemo(() => {
@@ -57,17 +57,17 @@ export function DashboardRevenueChart({
     fixture ? `${formatUsdCents(cents)} ${DASHBOARD_FIXTURE.sampleMark}` : formatUsdCents(cents);
 
   return (
-    <div ref={plotRef} data-dashboard-revenue-chart="" className="relative" style={{ height: H }}>
+    <div ref={plotRef} data-dashboard-revenue-chart="" className={DASHBOARD_CHART_FRAME_CLASS}>
       {points.length === 0 ? (
-        <div className="flex h-full items-center px-[var(--space-6)]">
+        <div className="flex h-full items-center px-[var(--space-6)] max-md:px-[var(--space-4)]">
           <p className="t-body-sm text-ink-3">{DASHBOARD_ADMIN.chartEmpty}</p>
         </div>
       ) : geom ? (
         <>
           <svg
             width={geom.w}
-            height={H}
-            viewBox={`0 0 ${geom.w} ${H}`}
+            height={size?.h ?? geom.innerH}
+            viewBox={`0 0 ${geom.w} ${size?.h ?? 0}`}
             className="block text-accent"
             role="img"
             aria-label={`${DASHBOARD_ADMIN.revenue}: ${points.length} closed periods.`}
@@ -149,7 +149,7 @@ export function DashboardRevenueChart({
               <text
                 key={`${tick.x}-${tick.label}`}
                 x={tick.x}
-                y={H - 8}
+                y={(size?.h ?? 0) - 8}
                 textAnchor="middle"
                 className="t-label t-data"
                 fill="var(--text-tertiary)"
