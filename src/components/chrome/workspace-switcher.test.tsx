@@ -11,11 +11,9 @@ vi.mock("next/navigation", () => ({
 
 import { availableWorkspaceOptions } from "@/lib/workspace-menu";
 import {
-  APP_HEADER_TRAILING_CLUSTER_CLASS,
   WORKSPACE_SWITCHER,
   WORKSPACE_SWITCHER_ABSENT,
   WORKSPACE_SWITCHER_CHEVRON_CLASS,
-  WORKSPACE_SWITCHER_CHEVRON_OPEN_CLASS,
   WORKSPACE_SWITCHER_OPTION_CHECK_CLASS,
   WORKSPACE_SWITCHER_OPTION_CHECK_GUTTER_CLASS,
   WORKSPACE_SWITCHER_OPTION_CLASS,
@@ -159,7 +157,7 @@ describe("workspace switcher placement", () => {
     expect(shellSrc).toContain("data-workspace-switcher-rail");
     expect(shellSrc).toContain("data-workspace-switcher-lead");
     expect(shellSrc).toContain("data-app-header-trailing");
-    expect(shellSrc).toContain(APP_HEADER_TRAILING_CLUSTER_CLASS);
+    expect(shellSrc).toContain("APP_HEADER_TRAILING_CLUSTER_CLASS");
     const trailing = shellSrc.slice(
       shellSrc.indexOf("data-app-header-trailing"),
       shellSrc.indexOf("</header>"),
@@ -176,7 +174,7 @@ describe("workspace switcher placement", () => {
     expect(topBarSrc.indexOf("data-app-header-trailing")).toBeLessThan(
       topBarSrc.indexOf("<UserMenu"),
     );
-    expect(topBarSrc).toContain(APP_HEADER_TRAILING_CLUSTER_CLASS);
+    expect(topBarSrc).toContain("APP_HEADER_TRAILING_CLUSTER_CLASS");
     expect(topBarSrc).toContain("md:pr-[var(--content-inset)]");
     expect(topBarSrc).toContain("pr-[var(--space-6)]");
   });
