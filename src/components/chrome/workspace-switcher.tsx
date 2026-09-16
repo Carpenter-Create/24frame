@@ -15,10 +15,13 @@ import {
 import {
   WORKSPACE_SWITCHER,
   WORKSPACE_SWITCHER_CHEVRON_CLASS,
-  WORKSPACE_SWITCHER_OPTION_CLASS,
+  WORKSPACE_SWITCHER_OPTION_CHECK_CLASS,
+  WORKSPACE_SWITCHER_OPTION_CHECK_GUTTER_CLASS,
+  WORKSPACE_SWITCHER_OPTION_LABEL_CLASS,
   WORKSPACE_SWITCHER_PANEL_CLASS,
   WORKSPACE_SWITCHER_STATIC_CLASS,
   WORKSPACE_SWITCHER_TRIGGER_CLASS,
+  workspaceSwitcherOptionClass,
   workspaceSwitcherShowsChevron,
 } from "@/lib/workspace-switcher";
 
@@ -89,24 +92,41 @@ export function WorkspaceSwitcher({
           aria-label={WORKSPACE_SWITCHER.label}
           className={WORKSPACE_SWITCHER_PANEL_CLASS}
         >
-          {options.map((option) => (
-            <button
-              key={option.mode}
-              type="button"
-              role="option"
-              data-workspace-switcher-option={option.mode}
-              aria-selected={current === option.mode}
-              className={WORKSPACE_SWITCHER_OPTION_CLASS}
-              onClick={() => {
-                persistWorkspaceCookie(option.mode);
-                setOpen(false);
-                if (current !== option.mode) router.push(workspaceHome(option.mode));
-              }}
-            >
-              <AppearanceCheck selected={current === option.mode} />
-              <span>{option.label}</span>
-            </button>
-          ))}
+          {options.map((option) => {
+            const selected = current === option.mode;
+            return (
+              <button
+                key={option.mode}
+                type="button"
+                role="option"
+                data-workspace-switcher-option={option.mode}
+                aria-selected={selected}
+                className={workspaceSwitcherOptionClass(selected)}
+                onClick={() => {
+                  persistWorkspaceCookie(option.mode);
+                  setOpen(false);
+                  if (current !== option.mode) router.push(workspaceHome(option.mode));
+                }}
+              >
+                <span
+                  data-workspace-switcher-option-label=""
+                  className={WORKSPACE_SWITCHER_OPTION_LABEL_CLASS}
+                >
+                  {option.label}
+                </span>
+                <span
+                  data-workspace-switcher-option-check=""
+                  className={WORKSPACE_SWITCHER_OPTION_CHECK_GUTTER_CLASS}
+                  aria-hidden="true"
+                >
+                  <AppearanceCheck
+                    selected={selected}
+                    className={WORKSPACE_SWITCHER_OPTION_CHECK_CLASS}
+                  />
+                </span>
+              </button>
+            );
+          })}
         </div>
       ) : null}
     </div>

@@ -5,10 +5,15 @@ import { availableWorkspaceOptions, WORKSPACE_EDUCATION_HREF } from "./workspace
 import {
   WORKSPACE_SWITCHER,
   WORKSPACE_SWITCHER_CHEVRON_CLASS,
+  WORKSPACE_SWITCHER_OPTION_CHECK_CLASS,
+  WORKSPACE_SWITCHER_OPTION_CHECK_GUTTER_CLASS,
   WORKSPACE_SWITCHER_OPTION_CLASS,
+  WORKSPACE_SWITCHER_OPTION_LABEL_CLASS,
+  WORKSPACE_SWITCHER_OPTION_SELECTED_CLASS,
   WORKSPACE_SWITCHER_PANEL_CLASS,
   WORKSPACE_SWITCHER_STATIC_CLASS,
   WORKSPACE_SWITCHER_TRIGGER_CLASS,
+  workspaceSwitcherOptionClass,
   workspaceSwitcherOptions,
   workspaceSwitcherShowsChevron,
 } from "./workspace-switcher";
@@ -51,6 +56,21 @@ describe("workspace switcher lock", () => {
     expect(WORKSPACE_SWITCHER_TRIGGER_CLASS).toContain("t-body-sm");
     expect(WORKSPACE_SWITCHER_PANEL_CLASS).toContain("border-hairline");
     expect(WORKSPACE_SWITCHER_OPTION_CLASS).toContain("t-body-sm");
+  });
+
+  it("keeps labels flush-left and trails a Sporty Blue check", () => {
+    expect(WORKSPACE_SWITCHER_OPTION_CLASS).toContain("justify-between");
+    expect(WORKSPACE_SWITCHER_OPTION_CLASS).toContain("px-[var(--space-4)]");
+    expect(WORKSPACE_SWITCHER_OPTION_CLASS).not.toMatch(/\b(?:md|max-md):/);
+    expect(WORKSPACE_SWITCHER_OPTION_LABEL_CLASS).toContain("text-left");
+    expect(WORKSPACE_SWITCHER_OPTION_LABEL_CLASS).toContain("flex-1");
+    expect(WORKSPACE_SWITCHER_OPTION_CHECK_GUTTER_CLASS).toBe("size-4 shrink-0");
+    expect(WORKSPACE_SWITCHER_OPTION_CHECK_CLASS).toBe("text-accent");
+    expect(WORKSPACE_SWITCHER_OPTION_SELECTED_CLASS).toBe("bg-surface-muted");
+    expect(workspaceSwitcherOptionClass(false)).toBe(WORKSPACE_SWITCHER_OPTION_CLASS);
+    expect(workspaceSwitcherOptionClass(true)).toBe(
+      `${WORKSPACE_SWITCHER_OPTION_CLASS} ${WORKSPACE_SWITCHER_OPTION_SELECTED_CLASS}`,
+    );
   });
 
   it("keeps the existing workspace cookie write — no second scheme", () => {
