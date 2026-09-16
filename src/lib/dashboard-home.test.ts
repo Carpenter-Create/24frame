@@ -19,6 +19,14 @@ import {
   dashboardCatalogValue,
   dashboardJustInDate,
   dashboardTitleStatusLabel,
+  dashboardWhatChanged,
+  deliveriesNeedingAction,
+  pendingSubmissions,
+  rankedBarPercent,
+  titlesAddedThisMonth,
+  titlesInPipeline,
+  topTitleActivity,
+  topTitlesThisMonth,
   DASHBOARD_HOME,
   DASHBOARD_HOME_DO_NEXT,
   DASHBOARD_HOME_DRAFTS,
@@ -243,6 +251,60 @@ describe("clientHomeSnapshot", () => {
         created_at: "2026-08-10T00:00:00.000Z",
       },
     ]);
+  });
+});
+
+describe("dashboard home add-on derivation", () => {
+  it("counts this-month titles and pipeline from real statuses", () => {
+    const titles = [
+      title({ id: "aug", status: "live", created_at: "2026-08-02T00:00:00.000Z" }),
+      title({ id: "sep", status: "in_review", created_at: "2026-09-02T00:00:00.000Z" }),
+      title({ id: "pipe", status: "submitted", created_at: "2026-07-01T00:00:00.000Z" }),
+    ];
+    const now = new Date("2026-09-16T12:00:00.000Z");
+    expect(titlesAddedThisMonth(titles, now)).toBe(1);
+    expect(titlesInPipeline(titles)).toBe(2);
+    expect(topTitlesThisMonth(titles, now).map((row) => row.id)).toEqual(["sep"]);
+    expect(pendingSubmissions(titles).map((row) => row.id)).toEqual(["sep", "pipe"]);
+    expect(
+      topTitleActivity(titles, [{ title_id: "pipe" }, { title_id: "pipe" }, { title_id: "sep" }], now).map(
+        (row) => row.id,
+      ),
+    ).toEqual(["pipe", "sep"]);
+    expect(rankedBarPercent(2, 4)).toBe(50);
+    expect(rankedBarPercent(0, 4)).toBe(0);
+    expect(rankedBarPercent(1, 0)).toBe(0);
+  });
+
+  it("lists deliveries that need action and greyscale what-changed rows", () => {
+    expect(
+      deliveriesNeedingAction([
+        {
+          delivery_id: "d1",
+          title_id: "t1",
+          title: "A",
+          vendor_name: "Alpha",
+          territory: "US",
+          status: "pending",
+          updated_at: "2026-09-02T00:00:00.000Z",
+        },
+        {
+          delivery_id: "d2",
+          title_id: "t2",
+          title: "B",
+          vendor_name: "Beta",
+          territory: "CA",
+          status: "live",
+          updated_at: "2026-09-03T00:00:00.000Z",
+        },
+      ]).map((row) => row.delivery_id),
+    ).toEqual(["d1"]);
+    expect(dashboardWhatChanged({ titlesAdded: 1, deliveriesUpdated: 0, findingsOpened: 2 })).toEqual([
+      { key: "titles", label: "1 title added", count: 1 },
+      { key: "findings", label: "2 findings opened", count: 2 },
+    ]);
+    expect(DASHBOARD_HOME.reportsCta).toBe("Reports");
+    expect(DASHBOARD_HOME.hero).toBe("Catalog activity");
   });
 });
 

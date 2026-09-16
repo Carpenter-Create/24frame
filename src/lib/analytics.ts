@@ -1,10 +1,12 @@
-// Analytics rail destination. P0 is a named shell — not money, not Earn.
-// Depth (platform / territory / title) stays later. Copy lives here, not JSX.
+// Legacy Analytics copy. The rail and slug are Reports — keep these aliases
+// so older tests and imports do not invent a second surface.
 
-export const ANALYTICS_HREF = "/analytics";
+import { REPORTS_HREF, REPORTS_PAGE } from "@/lib/reports";
+
+export const ANALYTICS_HREF = REPORTS_HREF;
 
 export const ANALYTICS_PAGE = {
-  title: "Analytics",
-  subtitle: "Performance across platforms and territories.",
-  empty: "No analytics on this workspace yet.",
+  title: REPORTS_PAGE.title,
+  subtitle: REPORTS_PAGE.subtitle,
+  empty: REPORTS_PAGE.empty,
 } as const;

@@ -122,8 +122,8 @@ describe("client Finance period", () => {
     expect(html).toContain("data-finance-statement-doc");
     expect(html).toContain("Acme");
     expect(html).not.toContain("bg-band");
-    expect(html).toContain("/earn/p-closed/export?format=pdf");
-    expect(html).toContain("/earn/p-closed/export?format=csv");
+    expect(html).toContain("/reports/p-closed/export?format=pdf");
+    expect(html).toContain("/reports/p-closed/export?format=csv");
     expect(html).toContain("data-finance-dashboard");
     expect(html).toContain("avod");
     expect(html).toContain("ext-99");

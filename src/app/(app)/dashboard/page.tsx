@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
@@ -7,40 +8,45 @@ import {
   DashboardHomePillLink,
   DashboardJustIn,
   DashboardOrgIdentity,
-  DashboardSnapshot,
 } from "@/components/dashboard/dashboard-home";
+import { DashboardCatalogHero } from "@/components/dashboard/dashboard-catalog-hero";
+import {
+  DashboardAnalyticsOverview,
+  DashboardDeliveriesAction,
+  DashboardFindingsGlance,
+  DashboardPendingSubmissions,
+  DashboardReportsCta,
+  DashboardTopTitles,
+  DashboardWhatChanged,
+} from "@/components/dashboard/dashboard-modules";
+import { DashboardRankedBars } from "@/components/dashboard/dashboard-ranked";
+import { DashboardVisitStamp } from "@/components/dashboard/dashboard-visit-stamp";
+import { DashboardFinanceGlance } from "@/components/dashboard/dashboard-finance-glance";
 import {
   DASHBOARD_HOME,
   clientHomeSnapshot,
-  dashboardCatalogValue,
+  dashboardWhatChanged,
+  deliveriesNeedingAction,
+  pendingSubmissions,
+  titlesAddedThisMonth,
+  titlesInPipeline,
+  topTitleActivity,
 } from "@/lib/dashboard-home";
-import { LIST_PAGE, UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
-import { loadMyFindings } from "@/lib/my-lists";
+import { UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
+import { loadMyDeliveries, loadMyFindings } from "@/lib/my-lists";
 import { GcClientsDirectory } from "@/app/(app)/(operator)/gc/clients/clients-directory";
 import { HouseEmpty, TextAction } from "@/components/chrome/house";
-import {
-  DashboardClientFinanceGlance,
-  DashboardFinanceGlance,
-} from "@/components/dashboard/dashboard-finance-glance";
 import { AGGREGATION_EMPTY } from "@/lib/aggregation-empty";
-import { FINANCE_CLIENT_HREF, canSeeClientFinanceGlance } from "@/lib/finance";
-import { buildClientFinanceGlance } from "@/lib/finance-glance";
+import { DASHBOARD_SEEN_COOKIE, afterLastVisit, parseDashboardSeen } from "@/lib/dashboard-visit";
+import { countNamedRows } from "@/lib/reports";
 
-// Client `/dashboard` is the organization-scoped portfolio: identity, three live
-// numbers, what to do next (findings + drafts), Recent, and an Earn glance.
-// No Analytics charts, no full statement chrome. Catalog Health remains the
-// findings surface. Staff without a client org stay on the GC-wide roster.
+// Client `/dashboard` inhabits Overview visual space: hero metric + chart
+// beside Top titles, then ranked bars, a territory card, and the locked
+// module stack. Period, download, and user filter stay on /reports.
 export default async function DashboardPage() {
   const supabase = await createClient();
-  // Resolved once per request and shared with the layout above (React cache()).
   const ctx = await getOrgContext();
   if (!ctx) redirect("/login");
-  // Client dashboard needs an org. A GC operator is not a client and must not be
-  // given a manufactured one. Staff without a client org stay on Dashboard and
-  // see the existing GC-wide clients roster. Queue stays the focused work queue.
-  // Mapping C: a non-staff account with no org stays in the shell — empty
-  // Aggregation with a path into existing onboarding. Do not bounce them to
-  // company onboarding just to reach Social.
   if (ctx.rows.length === 0 || !ctx.activeOrg) {
     if (!ctx.isGcStaff) {
       return (
@@ -60,97 +66,104 @@ export default async function DashboardPage() {
     );
   }
   const org = ctx.activeOrg;
+  const now = new Date();
+  const jar = await cookies();
+  const lastVisitMs = parseDashboardSeen(jar.get(DASHBOARD_SEEN_COOKIE)?.value);
 
-  // Portfolio reads for the active org (RLS-scoped; counts computed here).
-  // BOUNDED. These feed portfolio counts, so a cap makes the numbers a floor rather than a
-  // total once a catalog exceeds it. Phase 4 of the catalog-at-scale spec replaces the
-  // count-in-JS with a DB aggregate, which is both correct and cheaper.
-  const { data: titleRows } = await supabase
-    .from("titles")
-    .select("id, title, status, created_at")
-    .eq("org_id", org.id)
-    .order("created_at", { ascending: false })
-    .range(...rangeFor(UNPAGINATED_MAX));
+  const [{ data: titleRows }, findings, deliveries] = await Promise.all([
+    supabase
+      .from("titles")
+      .select("id, title, status, created_at")
+      .eq("org_id", org.id)
+      .order("created_at", { ascending: false })
+      .range(...rangeFor(UNPAGINATED_MAX)),
+    loadMyFindings(supabase, { orgId: org.id }),
+    loadMyDeliveries(supabase),
+  ]);
   const titles = titleRows ?? [];
-
-  const findings = await loadMyFindings(supabase, { orgId: org.id });
   const snapshot = clientHomeSnapshot({
     titles,
     findings: findings.rows,
     orgId: org.id,
-    now: new Date(),
+    now,
     bound: UNPAGINATED_MAX,
     findingsIsPartial: findings.truncated,
   });
-  const showClientGlance = canSeeClientFinanceGlance({
-    isGcStaff: ctx.isGcStaff,
-    hasActiveOrg: true,
-    role: ctx.activeRole,
+  const createdAt = titles
+    .map((title) => Date.parse(title.created_at))
+    .filter((ms) => Number.isFinite(ms));
+  const actionDeliveries = deliveriesNeedingAction(deliveries.rows);
+  const pending = pendingSubmissions(titles);
+  const platforms = countNamedRows(deliveries.rows.map((row) => ({ name: row.vendor_name }))).slice(0, 5);
+  const territories = countNamedRows(deliveries.rows.map((row) => ({ name: row.territory }))).slice(0, 5);
+  const changes = dashboardWhatChanged({
+    titlesAdded: titles.filter((title) => afterLastVisit(title.created_at, lastVisitMs)).length,
+    deliveriesUpdated: deliveries.rows.filter((row) => afterLastVisit(row.updated_at, lastVisitMs)).length,
+    findingsOpened: findings.rows.filter((row) => afterLastVisit(row.created_at, lastVisitMs)).length,
   });
-  const [{ data: term }, { data: financePeriods }] = showClientGlance
-    ? await Promise.all([
-        supabase
-          .from("contract_terms")
-          .select("revenue_share_rate_bp")
-          .eq("org_id", org.id)
-          .is("effective_to", null)
-          .order("effective_from", { ascending: false })
-          .limit(1)
-          .maybeSingle(),
-        supabase
-          .from("finance_periods")
-          .select(
-            "id, period_year, period_month, status, opening_balance_cents, closing_balance_cents, threshold_cents",
-          )
-          .eq("org_id", org.id)
-          .order("period_year", { ascending: false })
-          .order("period_month", { ascending: false })
-          .range(...rangeFor(LIST_PAGE)),
-      ])
-    : [
-        { data: null },
-        { data: [] as never },
-      ];
-  const clientGlance = showClientGlance
-    ? buildClientFinanceGlance({
-        clientRateBp: term?.revenue_share_rate_bp ?? null,
-        periods: financePeriods ?? [],
-        financeHref: FINANCE_CLIENT_HREF,
-      })
-    : null;
 
   return (
     <div className="dashboard-home flex flex-col gap-[var(--space-6)]" data-dashboard-home="">
-      <div className="flex flex-col gap-5">
-        <div className="flex flex-col gap-[var(--space-6)] sm:flex-row sm:items-center sm:justify-between">
-          <DashboardOrgIdentity name={org.name} />
-          <DashboardHomePillLink href="/catalog-health">
-            {DASHBOARD_HOME.catalogHealthCta}
-          </DashboardHomePillLink>
-        </div>
-
-        <DashboardSnapshot
-          catalog={dashboardCatalogValue(snapshot.catalog, snapshot.catalogIsPartial)}
-          needsAttention={dashboardCatalogValue(
-            snapshot.needsAttention,
-            snapshot.findingsIsPartial,
-          )}
-          live={dashboardCatalogValue(snapshot.live, snapshot.catalogIsPartial)}
-        />
+      <DashboardVisitStamp nowIso={now.toISOString()} />
+      <div className="flex flex-col gap-[var(--space-6)] sm:flex-row sm:items-center sm:justify-between">
+        <DashboardOrgIdentity name={org.name} />
+        <DashboardHomePillLink href="/catalog-health">
+          {DASHBOARD_HOME.catalogHealthCta}
+        </DashboardHomePillLink>
       </div>
 
-      <div className="flex flex-col gap-[var(--space-8)]">
-        <DashboardDoNext items={snapshot.doNext} />
-        <DashboardJustIn
-          titles={snapshot.justIn}
-          catalogEmpty={snapshot.catalog === 0}
-          canAddTitle={ctx.canOperate}
+      <div
+        data-dashboard-overview-row=""
+        className="grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-3"
+      >
+        <div className="lg:col-span-2">
+          <DashboardCatalogHero
+            createdAt={createdAt}
+            nowMs={now.getTime()}
+            catalog={snapshot.catalog}
+            catalogIsPartial={snapshot.catalogIsPartial}
+            live={snapshot.live}
+            liveIsPartial={snapshot.catalogIsPartial}
+          />
+        </div>
+        <DashboardTopTitles items={topTitleActivity(titles, deliveries.rows, now)} />
+      </div>
+
+      <div className="flex flex-col gap-[var(--space-12)]">
+        <DashboardAnalyticsOverview
+          addedThisMonth={titlesAddedThisMonth(titles, now)}
+          inPipeline={titlesInPipeline(titles)}
         />
-        {clientGlance ? (
-          <DashboardClientFinanceGlance glance={clientGlance} />
-        ) : ctx.isGcStaff ? (
-          <DashboardFinanceGlance />
-        ) : null}
+        <div className="grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-2">
+          <DashboardRankedBars
+            label={DASHBOARD_HOME.platforms}
+            empty={DASHBOARD_HOME.platformsEmpty}
+            rows={platforms}
+            testId="platforms"
+            viewAllHref="/deliveries"
+          />
+          <DashboardRankedBars
+            label={DASHBOARD_HOME.territories}
+            empty={DASHBOARD_HOME.territoriesEmpty}
+            rows={territories}
+            testId="territories"
+            viewAllHref="/deliveries"
+            territory
+          />
+        </div>
+        <div className="grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-2">
+          <DashboardJustIn
+            titles={snapshot.justIn}
+            catalogEmpty={snapshot.catalog === 0}
+            canAddTitle={ctx.canOperate}
+          />
+          <DashboardDoNext items={snapshot.doNext} />
+        </div>
+        <DashboardReportsCta />
+        <DashboardDeliveriesAction rows={actionDeliveries} />
+        <DashboardFindingsGlance count={snapshot.needsAttention} isPartial={snapshot.findingsIsPartial} />
+        <DashboardWhatChanged firstVisit={lastVisitMs == null} rows={changes} />
+        <DashboardPendingSubmissions items={pending} />
       </div>
     </div>
   );

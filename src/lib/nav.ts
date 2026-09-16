@@ -22,8 +22,9 @@ import {
 
 import type { PhosphorIcon } from "@/lib/phosphor-icon";
 import { ASK_GLOBEE } from "@/lib/ask-globee";
-import { FINANCE_CLIENT, FINANCE_PAGE } from "@/lib/finance";
+import { FINANCE_PAGE } from "@/lib/finance";
 import { PRODUCT_NAME } from "@/lib/product";
+import { REPORTS_HREF, REPORTS_PAGE, isLegacyReportsPath } from "@/lib/reports";
 import type { WorkspaceMode } from "@/lib/workspace";
 import { EDUCATION_ADMIN, EDUCATION_HREF } from "@/lib/education";
 import { SOCIAL_ROUTES } from "@/lib/social";
@@ -54,21 +55,20 @@ export function isPhosphorNavItem(item: NavItem): item is PhosphorNavItem {
 }
 
 // GC's flat nav — only what exists or is v1-scoped. Settings stays deferred.
-// Ask Globee is the /messages destination (href unchanged). Earn is the
-// client recipient door. Staff ops stays on GC_NAV at /gc/finance.
+// Ask Globee is the /messages destination (href unchanged). Reports is the
+// one client activity door. Staff ops stays on GC_NAV at /gc/finance.
 // Glyphs: Figma 75:5 / 75:2 / 61:2 Phosphor Bold idle, Fill active.
 export const NAV: PhosphorNavItem[] = [
   { label: "Dashboard", href: "/dashboard", family: "phosphor", icon: SquaresFour, exact: true },
   { label: "Titles", href: "/titles", family: "phosphor", icon: FilmSlate },
   { label: "Deliveries", href: "/deliveries", family: "phosphor", icon: PaperPlaneTilt },
   { label: "Catalog Health", href: "/catalog-health", family: "phosphor", icon: Pulse },
-  { label: "Analytics", href: "/analytics", family: "phosphor", icon: ChartBar },
   {
-    label: "Earn",
-    href: "/earn",
+    label: REPORTS_PAGE.title,
+    href: REPORTS_HREF,
     family: "phosphor",
-    icon: Wallet,
-    ariaLabel: FINANCE_CLIENT.navAria,
+    icon: ChartBar,
+    ariaLabel: REPORTS_PAGE.navAria,
   },
   { label: ASK_GLOBEE.headline, href: "/messages", family: "phosphor", icon: Sparkle },
 ];
@@ -145,9 +145,7 @@ export const MOBILE_NAV = {
 
 export function isClientNavActive(pathname: string, item: NavItem): boolean {
   if (item.href === "/dashboard" && pathname === "/") return true;
-  if (item.href === "/earn" && (pathname === "/finance" || pathname.startsWith("/finance/"))) {
-    return true;
-  }
+  if (item.href === REPORTS_HREF && isLegacyReportsPath(pathname)) return true;
   return item.exact ? pathname === item.href : pathname.startsWith(item.href);
 }
 

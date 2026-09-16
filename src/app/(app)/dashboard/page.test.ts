@@ -5,7 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getOrgContext } from "@/lib/supabase/context";
 import { CLIENTS_PAGE, ORG_ROLE_LABELS, ORG_STATUS_LABELS } from "@/lib/clients";
 import { DASHBOARD_HOME, dashboardJustInDate } from "@/lib/dashboard-home";
-import { FINANCE_CLIENT, FINANCE_CLIENT_HREF, FINANCE_PAGE } from "@/lib/finance";
+import { FINANCE_PAGE } from "@/lib/finance";
+import { REPORTS_HREF } from "@/lib/reports";
 import { AGGREGATION_EMPTY } from "@/lib/aggregation-empty";
 import { DASHBOARD_ATTENTION_CLEAR, dashboardAttentionSummary } from "@/lib/findings";
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
@@ -19,6 +20,9 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
+vi.mock("next/headers", () => ({
+  cookies: vi.fn(async () => ({ get: () => undefined })),
+}));
 
 type Status = "registered" | "awaiting_payment" | "active";
 
@@ -76,6 +80,7 @@ function stubClient(
   });
   const rpc = vi.fn(async (name: string) => {
     if (name === "my_findings") return { data: findings, error: null };
+    if (name === "my_deliveries") return { data: [], error: null };
     if (name === "gc_client_directory") return { data: [], error: null };
     throw new Error(`unexpected rpc(${name})`);
   });
@@ -121,6 +126,15 @@ describe("DashboardPage modes", () => {
     expect(html).toContain(DASHBOARD_ATTENTION_CLEAR);
     expect(html).toContain("/catalog-health");
     expect(html).toContain("data-dashboard-home");
+    expect(html).toContain("data-dashboard-hero");
+    expect(html).toContain("data-dashboard-overview-row");
+    expect(html).toContain("data-dashboard-overview");
+    expect(html).toContain("data-dashboard-territory");
+    expect(html).toContain("data-dashboard-ranked=\"platforms\"");
+    expect(html).toContain("data-dashboard-reports-cta");
+    expect(html).toContain(`href="${REPORTS_HREF}"`);
+    expect(html).toContain(DASHBOARD_HOME.reportsCta);
+    expect(html).not.toContain("data-finance-glance");
     expect(html).not.toContain("data-finance-glance-stub");
     expect(html).toContain("dashboard-home-pill");
     expect(html).toContain('href="/catalog-health"');
@@ -140,7 +154,8 @@ describe("DashboardPage modes", () => {
     expect(html).toContain("text-accent-contrast");
     expect(html).not.toContain(CLIENTS_PAGE.title);
     expect(html).not.toContain(CLIENTS_PAGE.subtitle);
-    expect(html).not.toContain("lg:grid-cols-2");
+    expect(html).toContain("lg:grid-cols-3");
+    expect(html).toContain("lg:grid-cols-2");
     expect(html).not.toContain(dashboardAttentionSummary(1));
     expect(html).not.toContain("titles need your attention");
     expect(html).not.toContain("Meridian Pictures");
@@ -170,12 +185,12 @@ describe("DashboardPage modes", () => {
     expect(html).toContain("dashboard-home-panel");
     expect(html).toContain("t-body font-medium text-ink");
     expect(html).not.toContain("t-subhead");
-    expect(html).not.toContain("t-title");
     expect(html).not.toContain(DASHBOARD_HOME.justInEmpty);
     expect(html).not.toContain(DASHBOARD_HOME.catalogEmpty);
     expect(html).not.toContain("data-dashboard-add-title");
     expect(html).not.toContain(DASHBOARD_HOME.addTitle);
-    expect(html).not.toContain("t-body-sm text-accent");
+    expect(html).toContain("data-dashboard-just-in-cluster");
+    expect(html).toContain("t-body font-medium text-ink");
     expect(html).toContain(TITLE_STATUS_LABELS.live);
     expect(html).toContain("data-dashboard-status-pill");
     expect(html).toContain(dashboardJustInDate(createdAt));
@@ -196,11 +211,11 @@ describe("DashboardPage modes", () => {
     });
     expect(rpc).not.toHaveBeenCalledWith("gc_client_directory", expect.anything());
     expect(html).toContain("Acme");
-    expect(html).toContain("data-dashboard-snapshot");
-    expect(html).toContain("data-finance-glance");
-    expect(html).toContain(FINANCE_CLIENT.glanceRate);
-    expect(html).toContain(FINANCE_CLIENT.glanceCta);
-    expect(html).toContain(`href="${FINANCE_CLIENT_HREF}"`);
+    expect(html).toContain("data-dashboard-overview-row");
+    expect(html).toContain("data-dashboard-hero");
+    expect(html).toContain("data-dashboard-reports-cta");
+    expect(html).toContain(DASHBOARD_HOME.reportsCta);
+    expect(html).not.toContain("data-finance-glance");
     expect(html).not.toContain("data-finance-glance-stub");
     expect(html).not.toContain(FINANCE_PAGE.glance);
     expect(html).not.toContain(CLIENTS_PAGE.subtitle);
@@ -266,7 +281,7 @@ describe("DashboardPage modes", () => {
 describe("client home information model", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("shows three numbers, Do next, Recent, and no chart or revenue", async () => {
+  it("shows the Overview hero, Top titles, ranked bars, Recent, and Do next without revenue", async () => {
     stubClient(
       [
         {
@@ -296,16 +311,18 @@ describe("client home information model", () => {
     expect(html).toMatch(/<h1 class="t-section text-ink">Acme<\/h1>/);
     expect(html).toMatch(/data-dashboard-stat="catalog"[^>]*t-display t-data/);
     expect(html).toMatch(/data-dashboard-stat="needsAttention"[^>]*t-display t-data/);
-    expect(html).toMatch(/data-dashboard-stat="live"[^>]*t-display t-data/);
+    expect(html).toMatch(/data-dashboard-stat="live"/);
+    expect(html).not.toMatch(/data-dashboard-stat="live"[^>]*t-display/);
     expect(html).not.toMatch(/data-dashboard-stat="[^"]*"[^>]*t-title/);
     expect(html).not.toMatch(/<h1[^>]*t-display/);
-    expect(html).toContain(`t-label text-ink-3">${DASHBOARD_HOME.catalog}`);
+    expect(html).toContain(`t-label text-ink-3">${DASHBOARD_HOME.hero}`);
     expect(html).toContain(`t-label text-ink-3">${DASHBOARD_HOME.doNext}`);
     expect(html).toContain(`t-label text-ink-3">${DASHBOARD_HOME.justIn}`);
-    expect(html).toContain(DASHBOARD_HOME.catalog);
-    expect(html).toContain(DASHBOARD_HOME.needsAttention);
     expect(html).toContain(DASHBOARD_HOME.live);
     expect(html).toContain(DASHBOARD_HOME.doNext);
+    expect(html).toContain("data-dashboard-overview-row");
+    expect(html).toContain("data-dashboard-territory");
+    expect(html).toContain('data-dashboard-module="top-titles"');
     expect(html).not.toContain(dashboardAttentionSummary(1));
     expect(html).not.toContain("titles need your attention");
     expect(html).toContain("Synopsis is required.");
@@ -318,8 +335,11 @@ describe("client home information model", () => {
     expect(html).toContain("data-dashboard-status-pill");
     expect(html).toContain("data-dashboard-do-next");
     expect(html).toContain("data-dashboard-just-in");
+    expect(html).toContain("data-dashboard-hero");
+    expect(html).toContain("data-dashboard-overview");
     expect(html).toContain("flex flex-col gap-[var(--space-6)]");
-    expect(html).not.toContain("lg:grid-cols-2");
+    expect(html).toContain("lg:grid-cols-3");
+    expect(html).toContain("lg:grid-cols-2");
     expect(html).toContain(DASHBOARD_HOME.justIn);
     expect(html).not.toContain("Just in");
     expect(html).not.toContain(DASHBOARD_HOME.catalogEmpty);
@@ -327,10 +347,9 @@ describe("client home information model", () => {
     expect(html).not.toContain(`${ORG_STATUS_LABELS.active} · ${ORG_ROLE_LABELS.account_owner}`);
     expect(html).not.toContain(ORG_STATUS_LABELS.active);
     expect(html).not.toContain(ORG_ROLE_LABELS.account_owner);
-    expect(html).toMatch(/data-dashboard-stat="needsAttention"[^>]*text-accent/);
     expect(html).not.toContain("Revenue");
     expect(html).not.toContain("Upcoming");
-    expect(html).not.toContain("Catalog activity");
+    expect(html).toContain(DASHBOARD_HOME.hero);
     expect(html).not.toContain("dashboard-home-hero");
     expect(html).not.toContain("bg-band");
     expect(html).not.toContain("Access");
@@ -339,8 +358,8 @@ describe("client home information model", () => {
     expect(html).not.toContain("Artwork missing");
     expect(html).not.toContain("Metadata incomplete");
     expect(html).not.toMatch(/>—</);
-    expect(html.indexOf("data-dashboard-do-next")).toBeLessThan(
-      html.indexOf("data-dashboard-just-in"),
+    expect(html.indexOf("data-dashboard-just-in")).toBeLessThan(
+      html.indexOf("data-dashboard-do-next"),
     );
   });
 
@@ -492,27 +511,33 @@ describe("client home copy lock", () => {
     expect(html).not.toContain("Metadata incomplete");
   });
 
-  it("shows the client finance glance for a view_financial seat", async () => {
+  it("shows the Reports pointer and visual home modules for a client org", async () => {
     stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(
       ctx({ isGcStaff: false, orgStatus: "active" }) as never,
     );
     const html = renderToStaticMarkup(await DashboardPage());
-    expect(html).toContain("data-finance-glance");
-    expect(html).toContain("dashboard-home-panel");
-    expect(html).toContain(FINANCE_CLIENT.glanceRate);
-    expect(html).toContain(FINANCE_CLIENT.glanceBalance);
-    expect(html).toContain(FINANCE_CLIENT.glanceThreshold);
-    expect(html).toContain(FINANCE_CLIENT.glanceLatest);
-    expect(html).toContain(FINANCE_CLIENT.glanceNone);
-    expect(html).toContain(`href="${FINANCE_CLIENT_HREF}"`);
-    expect(html).toContain(FINANCE_CLIENT.glanceCta);
+    expect(html).toContain("data-dashboard-hero");
+    expect(html).toContain("data-dashboard-overview-row");
+    expect(html).toContain("data-dashboard-overview");
+    expect(html).toContain("data-dashboard-territory");
+    expect(html).toContain('data-dashboard-ranked="platforms"');
+    expect(html).toContain('data-dashboard-module="top-titles"');
+    expect(html).toContain('data-dashboard-module="deliveries-action"');
+    expect(html).toContain('data-dashboard-module="findings-glance"');
+    expect(html).toContain('data-dashboard-module="what-changed"');
+    expect(html).toContain("data-dashboard-reports-cta");
+    expect(html).toContain(`href="${REPORTS_HREF}"`);
+    expect(html).toContain(DASHBOARD_HOME.reportsCta);
+    expect(html).not.toContain("data-finance-glance");
     expect(html).not.toContain("data-finance-glance-stub");
     expect(html).not.toContain("Revenue");
     expect(html).not.toContain("bg-band");
+    expect(html).not.toContain("data-reports-period");
+    expect(html).not.toContain("data-reports-download");
   });
 
-  it("hides the Earn glance when the recipient cannot view financial", async () => {
+  it("still shows the Reports pointer when the recipient cannot view financial", async () => {
     stubClient();
     vi.mocked(getOrgContext).mockResolvedValue({
       ...ctx({ isGcStaff: false, orgStatus: "active" }),
@@ -520,9 +545,9 @@ describe("client home copy lock", () => {
     } as never);
     const html = renderToStaticMarkup(await DashboardPage());
     expect(html).toContain("data-dashboard-home");
+    expect(html).toContain("data-dashboard-reports-cta");
     expect(html).not.toContain("data-finance-glance");
     expect(html).not.toContain("data-finance-glance-stub");
-    expect(html).not.toContain(FINANCE_CLIENT.glanceRate);
   });
 
   it("hides Add Title on an empty catalog when the viewer cannot operate", async () => {
