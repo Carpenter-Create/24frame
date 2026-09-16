@@ -4,10 +4,9 @@
 // Open Workspace replaces the list face; house 16 tertiary Back
 // returns to main. Desktop flyout has no Back. Not a page. Not a
 // route. Not a header chip.
-// Miss-list is Aggregation | Social | Education. Education product
-// is HOLD — list it only when an Education destination already
-// exists. Do not invent /education, /account/workspace, or
-// /settings/workspace.
+// Miss-list is Aggregation | Social | Education. Education land is
+// Route A /social/courses. Do not invent /education, /account/workspace,
+// or /settings/workspace.
 
 import { USER_MENU } from "@/lib/user-menu";
 import {
@@ -23,8 +22,8 @@ export const WORKSPACE_MENU = {
 
 export const WORKSPACE_EDUCATION_LABEL = "Education";
 
-/** Existing Education destination only. Null while the product is HOLD. */
-export const WORKSPACE_EDUCATION_HREF: string | null = null;
+/** Existing Education destination only. Route A — never /education. */
+export const WORKSPACE_EDUCATION_HREF = "/social/courses";
 
 export type WorkspaceMenuCandidateId = "aggregation" | "social" | "education";
 
@@ -37,6 +36,7 @@ export const WORKSPACE_MENU_CANDIDATES = [
 export const WORKSPACE_FLYOUT_OPTIONS = [
   { mode: "aggregation" as const, label: WORKSPACE_AGGREGATION_LABEL },
   { mode: "social" as const, label: WORKSPACE_SOCIAL_LABEL },
+  { mode: "education" as const, label: WORKSPACE_EDUCATION_LABEL },
 ] as const;
 
 export type WorkspaceMenuOption = {
@@ -51,20 +51,28 @@ export function workspaceCandidateAccessible(id: WorkspaceMenuCandidateId): bool
 }
 
 export function availableWorkspaceOptions(): readonly WorkspaceMenuOption[] {
-  return WORKSPACE_MENU_CANDIDATES.flatMap((candidate) => {
-    if (!workspaceCandidateAccessible(candidate.id) || candidate.id === "education") {
-      return [];
-    }
-    return [
-      {
-        mode: candidate.id,
+  const options: WorkspaceMenuOption[] = [];
+  for (const candidate of WORKSPACE_MENU_CANDIDATES) {
+    if (!workspaceCandidateAccessible(candidate.id)) continue;
+    if (candidate.id === "education") {
+      options.push({
+        mode: "education",
         label: candidate.label,
-        href: workspaceHome(candidate.id),
-      },
-    ];
-  });
+        href: WORKSPACE_EDUCATION_HREF,
+      });
+      continue;
+    }
+    options.push({
+      mode: candidate.id,
+      label: candidate.label,
+      href: workspaceHome(candidate.id),
+    });
+  }
+  return options;
 }
 
 export function workspaceModeLabel(mode: WorkspaceMode): string {
-  return mode === "social" ? WORKSPACE_SOCIAL_LABEL : WORKSPACE_AGGREGATION_LABEL;
+  if (mode === "social") return WORKSPACE_SOCIAL_LABEL;
+  if (mode === "education") return WORKSPACE_EDUCATION_LABEL;
+  return WORKSPACE_AGGREGATION_LABEL;
 }

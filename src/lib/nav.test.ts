@@ -197,6 +197,18 @@ describe("mobileNavDestinations", () => {
     expect(mobileNavDestinations(true, "social").map((item) => item.href)).not.toContain("/messages");
     expect(mobileNavDestinations(true, "social").map((item) => item.href)).not.toContain("/queue");
     expect(mobileNavDestinations(true, "social").map((item) => item.href)).not.toContain("/social/groups");
+    expect(mobileNavDestinations(true, "social").map((item) => item.href)).not.toContain(
+      "/social/courses",
+    );
+    expect(mobileNavDestinations(true, "social").map((item) => item.href)).not.toContain(
+      "/social/leaderboard",
+    );
+    expect(mobileNavDestinations(false, "education").map((item) => item.href)).toEqual(
+      mobileNavDestinations(false, "aggregation").map((item) => item.href),
+    );
+    expect(railDestinations(false, "education").items.map((item) => item.href)).toEqual(
+      railDestinations(false, "aggregation").items.map((item) => item.href),
+    );
     expect(SOCIAL_NAV.map((item) => item.label)).toEqual([
       "Home",
       "Explore",

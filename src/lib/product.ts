@@ -2,10 +2,10 @@
 // and download brand hang off these. Identifiers stay (ask-globee,
 // /messages, is_gc_staff). Parent entity is Holdings LLC only.
 //
-// One 24Frame account. Two workspaces: Aggregation (catalog) and Social
-// (creator profile, groups, posts, DMs, Social+Education course
-// placeholders). /messages stays Ask 24Frame AI. Social destinations
-// live under /social/*. Org invite stays Aggregation.
+// One 24Frame account. Three workspace destinations: Aggregation
+// (catalog), Social (creator profile, groups, posts, DMs), and
+// Education (Route A /social/courses). /messages stays Ask 24Frame AI.
+// Do not invent /education. Org invite stays Aggregation.
 
 export const PRODUCT_NAME = "24Frame";
 export const ASSISTANT_NAME = "24Frame AI";

@@ -397,6 +397,8 @@ describe("AppShell rail-collapse chevron", () => {
     expect(shellSrc).toContain("AskAssistantChromeProvider");
     expect(shellSrc).not.toContain("SocialMobileDock");
     expect(shellSrc).toContain('workspace === "social" && !settingsPage');
+    expect(shellSrc).toContain("data-education-workspace");
+    expect(shellSrc).toContain('workspace === "education"');
     expect(shellSrc).not.toContain("PanelLeftOpen");
     expect(shellSrc).not.toContain("PanelLeftClose");
     expect(shellSrc).not.toContain("PanelLeft");
@@ -588,5 +590,24 @@ describe("AppShell rail-collapse chevron", () => {
     expect(shellSrc).toContain("persistSidebarCollapsed");
     expect(shellSrc).not.toContain("AskGlobeeChromeProvider");
     expect(shellSrc).not.toContain("RAIL_COLLAPSE_RL");
+  });
+
+  it("uses house chrome on Education courses routes — no Social feed chrome", () => {
+    navigation.pathname = "/social/courses";
+    const html = renderShell();
+    expect(html).toContain("data-education-workspace");
+    expect(html).toContain("data-app-header");
+    expect(html).toContain('href="/social/courses"');
+    expect(html).not.toContain("data-social-workspace");
+    expect(html).not.toContain("data-social-top-bar");
+    expect(html).not.toContain("data-social-tab-bar");
+    expect(html).not.toContain("data-social-rail");
+    expect(html).not.toContain('data-social-tab-item="Create"');
+
+    navigation.pathname = "/social/courses/welcome-to-24frame";
+    const detail = renderShell();
+    expect(detail).toContain("data-education-workspace");
+    expect(detail).toContain("data-app-header");
+    expect(detail).not.toContain("data-social-workspace");
   });
 });

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  isEducationPath,
+  isSocialPath,
   parseWorkspaceCookie,
   resolveWorkspaceMode,
   WORKSPACE_COOKIE,
@@ -9,26 +11,39 @@ import {
 } from "./workspace";
 
 describe("workspace mode", () => {
-  it("persists aggregation or social in a cookie like the rail collapse", () => {
+  it("persists aggregation, social, or education in a cookie like the rail collapse", () => {
     expect(WORKSPACE_COOKIE).toBe("24frame_workspace");
     expect(parseWorkspaceCookie(undefined)).toBe("aggregation");
     expect(parseWorkspaceCookie("social")).toBe("social");
+    expect(parseWorkspaceCookie("education")).toBe("education");
     expect(parseWorkspaceCookie("nope")).toBe("aggregation");
     expect(workspaceCookieWrite("social")).toContain("24frame_workspace=social");
+    expect(workspaceCookieWrite("education")).toContain("24frame_workspace=education");
     expect(workspaceHome("social")).toBe("/social");
+    expect(workspaceHome("education")).toBe("/social/courses");
     expect(workspaceHome("aggregation")).toBe("/");
+    expect(workspaceHome("education")).not.toBe("/education");
   });
 
   it("lets pathname win on destination routes and cookie win on shared ones", () => {
     expect(resolveWorkspaceMode("/social", "aggregation")).toBe("social");
     expect(resolveWorkspaceMode("/social/dms/abc", "aggregation")).toBe("social");
     expect(resolveWorkspaceMode("/social/leaderboard", "aggregation")).toBe("social");
-    expect(resolveWorkspaceMode("/social/courses", "aggregation")).toBe("social");
-    expect(resolveWorkspaceMode("/social/courses/welcome-to-24frame", "aggregation")).toBe("social");
+    expect(resolveWorkspaceMode("/social/courses", "aggregation")).toBe("education");
+    expect(resolveWorkspaceMode("/social/courses/welcome-to-24frame", "aggregation")).toBe(
+      "education",
+    );
+    expect(isEducationPath("/social/courses")).toBe(true);
+    expect(isEducationPath("/social/courses/welcome-to-24frame")).toBe(true);
+    expect(isEducationPath("/social")).toBe(false);
+    expect(isSocialPath("/social/courses")).toBe(false);
+    expect(isSocialPath("/social")).toBe(true);
     expect(resolveWorkspaceMode("/messages", "social")).toBe("aggregation");
     expect(resolveWorkspaceMode("/titles/1", "social")).toBe("aggregation");
     expect(resolveWorkspaceMode("/", "social")).toBe("aggregation");
     expect(resolveWorkspaceMode("/settings/profile", "social")).toBe("social");
+    expect(resolveWorkspaceMode("/settings/profile", "education")).toBe("education");
     expect(resolveWorkspaceMode("/help", "aggregation")).toBe("aggregation");
+    expect(resolveWorkspaceMode("/help", "education")).toBe("education");
   });
 });

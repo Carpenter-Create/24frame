@@ -172,6 +172,7 @@ export function AppShell({
     {cookieSync}
     <div
       className="min-h-dvh"
+      data-education-workspace={workspace === "education" ? "" : undefined}
       style={
         collapsed && !settingsPage
           ? ({ "--sidebar-width": "var(--sidebar-width-collapsed)" } as React.CSSProperties)

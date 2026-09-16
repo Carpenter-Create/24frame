@@ -62,7 +62,8 @@ export const NAV: PhosphorNavItem[] = [
 // Social workspace rail. Mobile tab keeps five jobs (Create stays).
 // Desktop rail is Home / Explore / Messages / Profile — composer owns create.
 // Messages here is DMs — never /messages. Groups / Courses / Leaderboard
-// stay parked off this rail. SOCIAL_NAV family stays Lucide for NavGlyph
+// stay parked off this rail. Education uses house Aggregation icons —
+// no Education-only icon set. SOCIAL_NAV family stays Lucide for NavGlyph
 // fallback. Social chrome rematch is SocialIcon (Social Figma V1).
 export const SOCIAL_NAV: LucideNavItem[] = [
   { label: "Home", href: SOCIAL_ROUTES.home, family: "lucide", icon: House, exact: true },

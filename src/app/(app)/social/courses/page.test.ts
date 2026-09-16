@@ -12,6 +12,7 @@ vi.mock("next/navigation", () => ({
   redirect: vi.fn((to: string) => {
     throw new Error(`REDIRECT:${to}`);
   }),
+  useRouter: () => ({ refresh: vi.fn(), push: vi.fn(), replace: vi.fn() }),
 }));
 vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
@@ -47,12 +48,24 @@ function stubClient(
     slug: string;
     title: string;
     description: string | null;
+    cover_key: string | null;
     is_flagship_free: boolean;
     created_at: string;
   }[] = [],
+  failed = false,
 ) {
   const from = vi.fn((table: string) => {
-    if (table === "courses") return chain(courses);
+    if (table === "courses") {
+      if (failed) {
+        const c: Record<string, unknown> = {};
+        const self = () => c;
+        c.select = vi.fn(self);
+        c.order = vi.fn(self);
+        c.range = vi.fn(async () => ({ data: null, error: { message: "failed" } }));
+        return c;
+      }
+      return chain(courses);
+    }
     throw new Error(`unexpected from(${table})`);
   });
   vi.mocked(createClient).mockResolvedValue({ from, rpc: vi.fn() } as never);
@@ -69,6 +82,7 @@ describe("Social courses list", () => {
         slug: "welcome-to-24frame",
         title: "Welcome to 24Frame",
         description: "Placeholder orientation for the Social+Education workspace.",
+        cover_key: null,
         is_flagship_free: true,
         created_at: "2026-09-12T14:00:00.000Z",
       },
@@ -84,11 +98,17 @@ describe("Social courses list", () => {
     expect(html).toContain("Social+Education");
     expect(html).toContain("Welcome to 24Frame");
     expect(html).toContain("/social/courses/welcome-to-24frame");
+    expect(html).toContain("data-course-grid");
+    expect(html).toContain("data-course-card");
+    expect(html).toContain("data-course-cover");
+    expect(html).toContain("aspect-video");
+    expect(html).not.toContain("<table");
     expect(html).not.toContain("LOCKED");
     expect(html).not.toContain("Globee");
     expect(html).not.toContain(ASK_GLOBEE.headline);
     expect(html).not.toContain("—");
     expect(html).not.toContain("courses/new");
+    expect(html).not.toContain("My learning");
   });
 
   it("shows the empty state when there are no courses", async () => {
@@ -98,7 +118,19 @@ describe("Social courses list", () => {
     const html = renderToStaticMarkup(await SocialCoursesPage());
     expect(html).toContain("data-house-empty");
     expect(html).toContain(SOCIAL.courses.empty);
-    expect(html).not.toContain("data-course-row");
+    expect(html).not.toContain("data-course-card");
+  });
+
+  it("shows house error and Retry when the list fails", async () => {
+    stubClient([], true);
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const html = renderToStaticMarkup(await SocialCoursesPage());
+    expect(html).toContain("data-course-error");
+    expect(html).toContain(SOCIAL.courses.error);
+    expect(html).toContain(SOCIAL.courses.retry);
+    expect(html).toContain("data-course-retry");
+    expect(html).not.toContain("data-course-card");
   });
 
   it("sends an unauthenticated visitor to login", async () => {
@@ -115,6 +147,13 @@ describe("course list lock", () => {
     expect(page).not.toContain('"/messages"');
     expect(page).not.toContain("createSocialCourse");
     expect(page).not.toContain("SocialAvatar");
+    expect(page).not.toContain("My learning");
+    expect(readFileSync("src/app/(app)/social/courses/loading.tsx", "utf8")).toContain(
+      "CourseDiscoverSkeleton",
+    );
+    expect(readFileSync("src/app/(app)/social/courses/error.tsx", "utf8")).toContain(
+      "data-course-retry",
+    );
     expect(messages).toContain("AskGlobeeLanding");
     expect(messages).not.toContain("from(\"courses\")");
   });

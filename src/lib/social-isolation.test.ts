@@ -46,6 +46,8 @@ describe("social isolation lock", () => {
     expect(list).not.toContain("@/lib/supabase/admin");
     expect(detail).not.toContain("@/lib/supabase/admin");
     expect(actions).not.toContain("from(\"courses\")");
+    expect(list).not.toContain("/education");
+    expect(detail).not.toContain("/lessons/");
     expect(actions).toContain('from("follows")');
     expect(actions).toContain('from("stories")');
     expect(actions).not.toContain("from(\"reels\")");

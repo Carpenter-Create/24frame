@@ -655,7 +655,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(src).not.toContain("w-[342px]");
   });
 
-  it("opens Workspace as a same-sheet drill-in — Back 16 tertiary, Aggregation / Social, no Education product", () => {
+  it("opens Workspace as a same-sheet drill-in — Back 16 tertiary, Aggregation / Social / Education", () => {
     const html = renderToStaticMarkup(
       <AccountSheetWorkspace current="aggregation" onBack={() => undefined} />,
     );
@@ -670,10 +670,11 @@ describe("AccountSheet 544:561 / 537:557", () => {
     const backClass = attrClass(html, 'data-sheet-group-item="back"');
     const aggregationClass = attrClass(html, 'data-sheet-group-item="aggregation"');
     const socialClass = attrClass(html, 'data-sheet-group-item="social"');
+    const educationClass = attrClass(html, 'data-sheet-group-item="education"');
 
     expect(html).toContain("Aggregation");
     expect(html).toContain("Social");
-    expect(html).not.toContain("Education");
+    expect(html).toContain("Education");
     expect(html).not.toContain("/education");
     expect(html).not.toContain("/account/workspace");
     expect(html).toContain("data-appearance-check");
@@ -681,6 +682,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(backClass).toBe(SHEET_GROUP_ITEM_CLASS);
     expect(aggregationClass).toBe(SHEET_GROUP_ITEM_CLASS);
     expect(socialClass).toBe(SHEET_GROUP_ITEM_CLASS);
+    expect(educationClass).toBe(SHEET_GROUP_ITEM_CLASS);
     expect(sheet).toContain("data-identity-block");
     expect(sheet).toContain("data-account-sheet-close");
     expect(sheet).toContain('data-sheet-group-item="back"');
@@ -1005,7 +1007,7 @@ describe("AccountMenuDropdown 629:795", () => {
     expect(attrClass(appearance, "data-account-menu-appearance-chevron")).toContain("z-10");
   });
 
-  it("opens Workspace 613:888 as a second 264 surface — Aggregation / Social above Profile", () => {
+  it("opens Workspace 613:888 as a second 264 surface — Aggregation / Social / Education above Profile", () => {
     const workspace = renderToStaticMarkup(
       <AccountMenuDropdown
         email="ada@example.com"
@@ -1026,7 +1028,7 @@ describe("AccountMenuDropdown 629:795", () => {
     expect(workspace).toContain("data-identity-block");
     expect(workspace).toContain("Aggregation");
     expect(workspace).toContain("Social");
-    expect(workspace).not.toContain("Education");
+    expect(workspace).toContain("Education");
     expect(workspace).not.toContain("/education");
     expect(workspace).not.toContain("/account/workspace");
     expect(workspace).not.toContain("data-account-menu-appearance-flyout");
@@ -1035,12 +1037,16 @@ describe("AccountMenuDropdown 629:795", () => {
     expect(flyout).not.toContain('data-sheet-group-item="back"');
     expect(flyout).toContain('data-account-menu-workspace-option="aggregation"');
     expect(flyout).toContain('data-account-menu-workspace-option="social"');
+    expect(flyout).toContain('data-account-menu-workspace-option="education"');
     expect(flyout).toContain('aria-pressed="true"');
     expect(flyout).toContain("data-appearance-check");
     expect(tagWith(workspace, 'data-account-menu-workspace-option="aggregation"')).toContain(
       'aria-pressed="true"',
     );
     expect(tagWith(workspace, 'data-account-menu-workspace-option="social"')).toContain(
+      'aria-pressed="false"',
+    );
+    expect(tagWith(workspace, 'data-account-menu-workspace-option="education"')).toContain(
       'aria-pressed="false"',
     );
     expect(flyoutClass).toBe(ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS);

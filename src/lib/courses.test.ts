@@ -4,8 +4,12 @@ import { describe, expect, it } from "vitest";
 import { PRODUCT_NAME } from "@/lib/product";
 import { SOCIAL, SOCIAL_ROUTES, socialCourseHref } from "@/lib/social";
 import {
+  COURSE_COVER_ASPECT_CLASS,
   courseAccessGranted,
   courseHref,
+  courseLessonDurationLabel,
+  firstOutlineLesson,
+  lessonInOutline,
   outlineForDisplay,
   visibleCourseLessons,
   type CourseLessonRow,
@@ -58,6 +62,17 @@ describe("placeholder outline", () => {
     const outline = outlineForDisplay([moduleOne], [preview, body], false);
     expect(outline).toHaveLength(1);
     expect(outline[0].lessons).toEqual([preview]);
+    expect(firstOutlineLesson(outline)?.id).toBe("l1");
+    expect(lessonInOutline(outline, "l1")).toEqual(preview);
+    expect(lessonInOutline(outline, "l2")).toBeNull();
+  });
+
+  it("labels real durations only", () => {
+    expect(courseLessonDurationLabel(null)).toBeNull();
+    expect(courseLessonDurationLabel(0)).toBeNull();
+    expect(courseLessonDurationLabel(45)).toBe("45s");
+    expect(courseLessonDurationLabel(120)).toBe("2m");
+    expect(courseLessonDurationLabel(90)).toBe("1m 30s");
   });
 });
 
@@ -75,22 +90,32 @@ describe("course routes and copy", () => {
 });
 
 describe("course lock", () => {
-  it("does not add a member publish path, player, or entitlements table", () => {
+  it("does not add a member publish path, deep-link, or entitlements table", () => {
     const list = readFileSync("src/app/(app)/social/courses/page.tsx", "utf8");
     const detail = readFileSync("src/app/(app)/social/courses/[slug]/page.tsx", "utf8");
+    const consume = readFileSync("src/components/courses/course-consume.tsx", "utf8");
     const lib = readFileSync("src/lib/courses.ts", "utf8");
     const actions = readFileSync("src/app/(app)/social/actions.ts", "utf8");
     const forms = readFileSync("src/components/social/social-forms.tsx", "utf8");
     const migration = readFileSync("supabase/migrations/20260912240000_courses.sql", "utf8");
 
     expect(list).toContain("loadDiscoverableCourses");
+    expect(list).toContain("data-course-grid");
+    expect(list).toContain("CourseCard");
     expect(detail).toContain("loadCourseDetail");
     expect(detail).toContain("data-course-denied");
+    expect(detail).toContain("CourseConsume");
+    expect(detail).not.toContain("/lessons/");
+    expect(consume).toContain("data-course-player");
+    expect(consume).not.toContain("/lessons/");
+    expect(COURSE_COVER_ASPECT_CLASS).toBe("aspect-video");
     expect(lib).toContain("has_course_access");
+    expect(lib).toContain("cover_key");
     expect(lib).not.toContain('rpc("has_entitlement"');
     expect(lib).not.toContain("MediaConvert");
     expect(lib).not.toContain("m3u8");
     expect(lib).not.toContain("CloudFront");
+    expect(lib).not.toContain("lesson_progress");
     expect(actions).not.toContain("from(\"courses\")");
     expect(actions).not.toContain("createSocialCourse");
     expect(forms).not.toContain("Course");
@@ -102,5 +127,9 @@ describe("course lock", () => {
     expect(migration).not.toContain("media_asset_id uuid");
     expect(migration).not.toMatch(/create table if not exists public\.lesson_progress/);
     expect(() => readFileSync("src/app/(app)/social/courses/new/page.tsx")).toThrow();
+    expect(() => readFileSync("src/app/(app)/education/page.tsx")).toThrow();
+    expect(() =>
+      readFileSync("src/app/(app)/social/courses/lessons/[id]/page.tsx"),
+    ).toThrow();
   });
 });
