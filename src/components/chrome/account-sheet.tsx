@@ -75,6 +75,7 @@ import {
 } from "@/lib/appearance";
 import { APP_SHEET_SCRIM_CLASS, SHEET_GROUP_CHEVRON_CLASS } from "@/lib/house-sheet";
 import { applyDocumentThemePreference } from "@/lib/theme";
+import { settingsLandHref } from "@/lib/settings";
 import { USER_MENU, userMenuAvatarInitial, userMenuVersion } from "@/lib/user-menu";
 import {
   persistWorkspaceCookie,
@@ -518,12 +519,13 @@ function AccountMenuItems({
             />
           );
         }
+        const href = item.kind === "settings" ? settingsLandHref(pathname) : item.href;
         return (
           <SheetGroupItem
             key={item.kind}
             item={item.kind}
-            href={item.href}
-            onClick={destinationClickClosesSheet(pathname, item.href) ? onClose : undefined}
+            href={href}
+            onClick={destinationClickClosesSheet(pathname, href) ? onClose : undefined}
           >
             {item.label}
             <AccountRowChevron />
@@ -648,7 +650,8 @@ function AccountMenuBody({
 // Quiet scrim; page stays under. 90% viewport, slides up. Hug is void.
 // Do not restyle to the desktop leftover dropdown.
 // One top row: Identity 48 + Close/44. Hairline — USER_MENU_ACTIONS.
-// Workspace sits above Profile. Open Workspace / Appearance replaces
+// Mercury: Workspace, Profile, Settings, Appearance. Open Workspace /
+// Appearance replaces
 // the list face on the same sheet. Back is the house 16 tertiary
 // chevron — Close stays Close. 618:785 overlay is void. Closed
 // sheet stays 544:561 / 537:557.
@@ -705,8 +708,8 @@ export function MobileAccountMenu({
 // Not 0. Not 134. No h-[Npx]. No min-h. No 522 / 570 / 672
 // floor. Align-end to the avatar (right edge flush). 8px under
 // the trigger. Close killed. Stacked identity. 24 pad. 24
-// between Workspace / Profile / Agreements / Appearance / Help /
-// Refer. No leftover grow. Pin Log out, hairline, footer as siblings.
+// between Workspace / Profile / Settings / Appearance. No leftover
+// grow. Pin Log out, hairline, footer as siblings.
 // Hairline only under Log out. Log out → hairline 24. Hairline →
 // footer 24. Do not hug the rule. Footer → bottom 24. Not a 90%
 // sheet. Not a tall right takeover.

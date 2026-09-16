@@ -1,19 +1,18 @@
-// /settings/profile copy + identity helpers. Copy lives here, not in
+// You / /settings/profile identity helpers. Copy lives here, not in
 // JSX. Name is user_metadata.display_name (already written at org
 // create). Email is auth.users — shown, not changed. Company name is
-// organizations.name. 627:818 stacks that block under the user card
-// on /settings/profile. /account/company redirects. Company stays off
-// the rail and the Identity menu. Logo / description / mailing
-// address / website / LinkedIn / socials are not in the schema —
-// do not invent them.
+// organizations.name and now lives on /settings/aggregation.
+// /account/company redirects. Company stays off the rail and the
+// Identity menu. Logo / description / mailing address / website /
+// LinkedIn / socials are not in the schema — do not invent them.
 
 import { z } from "zod";
 
 import { COMPANY_AGGREGATION_WORKSPACE } from "@/lib/product";
 import { USER_MENU, userMenuName } from "@/lib/user-menu";
 
-// Settings section title is Profile. The Identity menu label is Profile.
-// Company is the stacked block on this page — not a rail row.
+// Identity menu label is Profile. Company is the Aggregation pane —
+// not a rail row.
 
 /** Conservative bound — same ceiling as other person/company name writes. */
 export const ACCOUNT_NAME_MAX = 200;

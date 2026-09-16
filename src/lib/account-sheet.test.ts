@@ -51,18 +51,14 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).toEqual([
       "workspace",
       "profile",
-      "agreements",
+      "settings",
       "appearance",
-      "help",
-      "refer",
     ]);
     expect(ACCOUNT_SHEET_ITEMS.map((item) => item.label)).toEqual([
       "Workspace",
       "Profile",
-      "Agreements",
+      "Settings",
       "Appearance",
-      "Help",
-      "Refer a friend",
     ]);
     expect(ACCOUNT_SHEET_ITEMS[0]?.kind).toBe("workspace");
     expect(ACCOUNT_SHEET_ITEMS[1]?.kind).toBe("profile");
@@ -72,17 +68,14 @@ describe("account sheet lock", () => {
     const hrefs = ACCOUNT_SHEET_ITEMS.flatMap((item) => ("href" in item ? [item.href] : []));
     expect(hrefs).toEqual([
       USER_MENU.profileHref,
-      USER_MENU.agreementsHref,
-      USER_MENU.helpHref,
-      USER_MENU.referHref,
+      USER_MENU.settingsHref,
     ]);
     expect(USER_MENU).not.toHaveProperty("appearanceHref");
     expect(hrefs).not.toContain("/account/appearance");
     expect(hrefs).not.toContain("/account/company");
     expect(hrefs.join(" ")).not.toMatch(/notifications|phone|job/i);
     expect(hrefs).toContain("/settings/profile");
-    expect(hrefs).toContain("/settings/agreements");
-    expect(hrefs).toContain("/settings/refer");
+    expect(hrefs).toContain("/settings");
     expect(hrefs).not.toContain("/account/profile");
     expect(hrefs.join(" ")).not.toContain("globalcontent.co");
   });
@@ -323,12 +316,9 @@ describe("account sheet identity", () => {
 describe("account sheet destination close", () => {
   it("closes immediately only on the same href", () => {
     expect(destinationClickClosesSheet("/settings/profile", "/settings/profile")).toBe(true);
-    expect(destinationClickClosesSheet("/settings/agreements", "/settings/agreements")).toBe(
-      true,
-    );
-    expect(destinationClickClosesSheet("/settings/refer", "/settings/refer")).toBe(true);
-    expect(destinationClickClosesSheet("/settings/profile", "/settings/agreements")).toBe(false);
-    expect(destinationClickClosesSheet("/", "/settings/profile")).toBe(false);
+    expect(destinationClickClosesSheet("/settings/education", "/settings/education")).toBe(true);
+    expect(destinationClickClosesSheet("/settings/profile", "/settings/you")).toBe(false);
+    expect(destinationClickClosesSheet("/", "/settings/aggregation")).toBe(false);
     expect(destinationClickClosesSheet("/help", "/help")).toBe(true);
     expect(destinationClickClosesSheet("/settings/profile", "/help")).toBe(false);
   });

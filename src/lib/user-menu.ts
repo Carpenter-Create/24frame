@@ -1,18 +1,17 @@
 // Account-menu copy and lock. Lives in lib/, not JSX.
 // One list for both instances: desktop panel and mobile sheet.
 // Chrome may differ (sheet vs fuller panel). Labels may not.
-// Profile is /settings/profile. Agreements is /settings/agreements.
-// Refer a friend is /settings/refer. Company stays off this menu
-// and the settings rail — the block lives on /settings/profile.
-// Workspace is first — Appearance-style submenu, not a page.
-// Desktop Workspace / Appearance are 613:888 beside. Mobile is a
-// same-sheet drill-in. Not a page — do not invent
+// Mercury order: identity → Workspace → Profile → Settings →
+// Appearance → Log out. One Settings hub. No forked Settings.
+// Profile is /settings/profile (You identity). Settings land href
+// is settingsLandHref(pathname) — do not invent /account/*.
+// Agreements / Refer stay /settings doors, not menu rows. Help
+// stays /help. Company stays off this menu. Workspace and
+// Appearance stay in-menu submenus — not pages. Do not invent
 // /account/workspace, /settings/workspace, /account/appearance,
-// or /settings/appearance.
-// Help stays /help. Legal is parked — no product hop, no invented
-// /legal page, no marketing-domain link. Do not invent
-// /account/profile, Phone, Job, Notifications, Privacy, Manage account,
-// or a name derived from the email local-part.
+// or /settings/appearance. Legal is parked. Do not invent
+// Phone, Job, Notifications, Privacy, Manage account, or a name
+// derived from the email local-part.
 
 import { version as APP_VERSION } from "../../package.json";
 
@@ -20,6 +19,8 @@ export const USER_MENU = {
   workspace: "Workspace",
   profile: "Profile",
   profileHref: "/settings/profile",
+  settings: "Settings",
+  settingsHref: "/settings",
   agreements: "Agreements",
   agreementsHref: "/settings/agreements",
   appearance: "Appearance",
@@ -50,19 +51,9 @@ export type UserMenuLinkAction =
       href: typeof USER_MENU.profileHref;
     }
   | {
-      kind: "agreements";
-      label: typeof USER_MENU.agreements;
-      href: typeof USER_MENU.agreementsHref;
-    }
-  | {
-      kind: "help";
-      label: typeof USER_MENU.help;
-      href: typeof USER_MENU.helpHref;
-    }
-  | {
-      kind: "refer";
-      label: typeof USER_MENU.refer;
-      href: typeof USER_MENU.referHref;
+      kind: "settings";
+      label: typeof USER_MENU.settings;
+      href: typeof USER_MENU.settingsHref;
     };
 
 export type UserMenuAction =
@@ -73,10 +64,8 @@ export type UserMenuAction =
 export const USER_MENU_ACTIONS: readonly UserMenuAction[] = [
   { kind: "workspace", label: USER_MENU.workspace },
   { kind: "profile", label: USER_MENU.profile, href: USER_MENU.profileHref },
-  { kind: "agreements", label: USER_MENU.agreements, href: USER_MENU.agreementsHref },
+  { kind: "settings", label: USER_MENU.settings, href: USER_MENU.settingsHref },
   { kind: "appearance", label: USER_MENU.appearance },
-  { kind: "help", label: USER_MENU.help, href: USER_MENU.helpHref },
-  { kind: "refer", label: USER_MENU.refer, href: USER_MENU.referHref },
 ];
 
 export function userMenuVersion(): string {

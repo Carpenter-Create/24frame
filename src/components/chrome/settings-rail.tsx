@@ -2,33 +2,37 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CaretLeft } from "@phosphor-icons/react";
-
-import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
 import { cn } from "@/lib/cn";
 import {
-  SETTINGS_LOCAL_NAV,
+  SETTINGS,
+  SETTINGS_HUB_NAV,
   SETTINGS_RAIL_ACTIVE_CLASS,
-  SETTINGS_RAIL_CHEVRON_CLASS,
-  SETTINGS_RAIL_DASHBOARD_CLASS,
   SETTINGS_RAIL_IDLE_CLASS,
   SETTINGS_RAIL_ITEM_CLASS,
   SETTINGS_RAIL_NAV_CLASS,
+  SETTINGS_RAIL_TITLE_CLASS,
+  settingsHubNav,
+  settingsHubSection,
   settingsRailActive,
-  settingsSection,
 } from "@/lib/settings";
+import { availableWorkspaceOptions } from "@/lib/workspace-menu";
 
-// 600:881 settings rail — occupies the 220 Access slot. Home is
-// 16 Phosphor caret-left Bold + 15 Regular (75:132). Active is a
-// muted wash that follows the path. Labels stay text-led. Do not
-// add Titles, Appearance, Account, Users, or API.
+// Settings hub rail — occupies the 220 Access slot. Title Settings.
+// You · Social · Education · Aggregation (omit a lane the user
+// cannot access). House muted wash. Not a workspace switch.
+// 75:132 — 16 Phosphor caret lives on the phone back, not these rows.
 export function SettingsRail() {
-  const section = settingsSection(usePathname());
+  const section = settingsHubSection(usePathname());
+  const items = settingsHubNav(availableWorkspaceOptions().map((option) => option.mode));
+  const nav = items.length > 0 ? items : SETTINGS_HUB_NAV;
 
   return (
     <nav data-settings-rail-nav="" className={SETTINGS_RAIL_NAV_CLASS}>
-      {SETTINGS_LOCAL_NAV.map((item) => {
+      <p data-settings-rail-title="" className={SETTINGS_RAIL_TITLE_CLASS}>
+        {SETTINGS.title}
+      </p>
+      {nav.map((item) => {
         const active = settingsRailActive(item.kind, section);
         return (
           <Link
@@ -38,16 +42,9 @@ export function SettingsRail() {
             aria-current={active ? "page" : undefined}
             className={cn(
               SETTINGS_RAIL_ITEM_CLASS,
-              item.kind === "dashboard" ? SETTINGS_RAIL_DASHBOARD_CLASS : undefined,
               active ? SETTINGS_RAIL_ACTIVE_CLASS : SETTINGS_RAIL_IDLE_CLASS,
             )}
           >
-            {item.kind === "dashboard" ? (
-              <CaretLeft
-                className={SETTINGS_RAIL_CHEVRON_CLASS}
-                weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
-              />
-            ) : null}
             {item.label}
           </Link>
         );

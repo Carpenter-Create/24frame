@@ -312,9 +312,13 @@ describe("AppShell /settings rail", () => {
     expect(html).toContain("data-settings-rail-nav");
     expect(html).toContain("data-user-menu-host");
     expect(html).toContain("Home");
-    expect(html).toContain("Profile");
-    expect(html).toContain("Agreements");
-    expect(html).toContain("Refer a friend");
+    expect(html).toContain("Settings");
+    expect(html).toContain("You");
+    expect(html).toContain("Social");
+    expect(html).toContain("Education");
+    expect(html).toContain("Aggregation");
+    expect(html).not.toContain("Agreements");
+    expect(html).not.toContain("Refer a friend");
     expect(html).not.toContain("data-side-nav");
     expect(html).not.toContain("Titles");
     expect(html).not.toContain("Deliveries");
@@ -355,16 +359,23 @@ describe("AppShell /settings rail", () => {
   });
 
   it("keeps the focused 220 rail on every /settings path", () => {
-    for (const path of ["/settings/profile", "/settings/agreements", "/settings/refer"]) {
+    for (const path of [
+      "/settings/you",
+      "/settings/social",
+      "/settings/education",
+      "/settings/aggregation",
+      "/settings/profile",
+    ]) {
       navigation.pathname = path;
       const html = renderShell();
       expect(html).toContain('data-settings-rail=""');
       expect(html).toContain("data-settings-rail-nav");
-      expect(html).toContain("Refer a friend");
+      expect(html).toContain("You");
+      expect(html).toContain("Education");
       expect(html).not.toContain("data-side-nav");
       expect(html).not.toContain("data-mobile-nav-trigger");
       expect(html).toContain("data-settings-header-back");
-      expect(html).toContain('href="/"');
+      expect(html).toContain('href="/settings"');
       expect(html).not.toContain("Collapse sidebar");
       expect(html).not.toContain(`data-rail-collapse="${RAIL_COLLAPSE_CHEVRON}"`);
     }
