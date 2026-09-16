@@ -357,7 +357,7 @@ export function educationHlsCookieResource(
   courseId: string,
   lessonId: string,
 ): string {
-  return `${origin.replace(/\/+$/, "")}/courses/${courseId}/*`;
+  return `${origin.replace(/\/+$/, "")}${educationHlsCookiePath(courseId, lessonId)}/*`;
 }
 
 export function educationHlsPlaybackHref(courseId: string, lessonId: string): string {
