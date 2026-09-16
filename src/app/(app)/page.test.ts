@@ -11,7 +11,7 @@ vi.mock("next/navigation", () => ({
 describe("Aggregation root", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("sends `/` to Dashboard", async () => {
-    await expect(Promise.resolve(AggregationRootPage())).rejects.toThrow("REDIRECT:/dashboard");
+  it("sends `/` to Dashboard", () => {
+    expect(() => AggregationRootPage()).toThrow("REDIRECT:/dashboard");
   });
 });
