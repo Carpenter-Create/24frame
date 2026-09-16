@@ -14,6 +14,7 @@ export type CourseRow = {
   description: string | null;
   cover_key: string | null;
   is_flagship_free: boolean;
+  price_cents: number | null;
   created_at: string;
 };
 
@@ -135,7 +136,7 @@ export async function loadDiscoverableCourses(
 ): Promise<CourseListResult> {
   const { data, error } = await supabase
     .from("courses")
-    .select("id, slug, title, description, cover_key, is_flagship_free, created_at")
+    .select("id, slug, title, description, cover_key, is_flagship_free, price_cents, created_at")
     .order("created_at", { ascending: true })
     .range(...rangeFor(UNPAGINATED_MAX));
   if (error) return { courses: [], failed: true };
@@ -149,7 +150,7 @@ export async function loadCourseDetail(
 ): Promise<CourseDetail> {
   const { data: course, error } = await supabase
     .from("courses")
-    .select("id, slug, title, description, cover_key, is_flagship_free, created_at")
+    .select("id, slug, title, description, cover_key, is_flagship_free, price_cents, created_at")
     .eq("slug", decodeURIComponent(slug))
     .maybeSingle();
 

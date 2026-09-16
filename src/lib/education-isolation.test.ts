@@ -44,8 +44,25 @@ describe("education isolation", () => {
 
   it("keeps Education copy off SaaS and buy language", () => {
     const blob = JSON.stringify(EDUCATION_ADMIN);
-    expect(blob).not.toMatch(/seamless|frictionless|upload and earn|MasterClass|buy/i);
+    expect(blob).not.toMatch(/seamless|frictionless|upload and earn|MasterClass|buy|Stripe|Apple Pay|Klarna/i);
     expect(EDUCATION_ADMIN.title).toBe("Education");
+    expect(EDUCATION_ADMIN.free).toBe("Free");
+    expect(EDUCATION_ADMIN.paid).toBe("Paid");
+  });
+
+  it("keeps product setup on staff admin and does not add a member checkout", () => {
+    const forms = readFileSync("src/app/(app)/(operator)/gc/education/education-forms.tsx", "utf8");
+    const actions = readFileSync("src/app/(app)/(operator)/gc/education/actions.ts", "utf8");
+    const consume = readFileSync("src/components/courses/course-consume.tsx", "utf8");
+    const list = readFileSync("src/app/(app)/social/courses/page.tsx", "utf8");
+    expect(forms).toContain("data-education-product");
+    expect(forms).toContain("freePreview");
+    expect(actions).toContain("price_cents");
+    expect(actions).toContain("is_flagship_free");
+    expect(actions).not.toMatch(/stripe|checkout|Apple Pay|Klarna/i);
+    expect(forms).not.toMatch(/stripe|checkout|Apple Pay|Klarna/i);
+    expect(consume).not.toMatch(/Buy|checkout|Stripe/i);
+    expect(list).not.toMatch(/Buy|checkout|Stripe/i);
   });
 
   it("does not let Education clients import other storage lanes", () => {

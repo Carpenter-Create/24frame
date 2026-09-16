@@ -6,7 +6,13 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { EDUCATION_ADMIN, EDUCATION_HREF } from "@/lib/education";
+import {
+  EDUCATION_ADMIN,
+  EDUCATION_HREF,
+  educationPriceInputValue,
+  educationProductModel,
+  type EducationProductModel,
+} from "@/lib/education";
 import {
   attachEducationCover,
   attachEducationLessonSource,
@@ -22,6 +28,55 @@ import {
 
 const field = "flex flex-col gap-1";
 const label = "t-body-sm text-ink-2";
+
+function CourseProductFields({
+  defaultModel,
+  defaultPriceCents,
+}: {
+  defaultModel: EducationProductModel;
+  defaultPriceCents?: number | null;
+}) {
+  const [model, setModel] = useState<EducationProductModel>(defaultModel);
+  return (
+    <fieldset className="flex flex-col gap-3" data-education-product="">
+      <legend className={label}>{EDUCATION_ADMIN.model}</legend>
+      <div className="flex gap-[var(--space-4)]">
+        <label className="flex items-center gap-2 t-body-sm text-ink-2">
+          <input
+            type="radio"
+            name="model"
+            value="free"
+            checked={model === "free"}
+            onChange={() => setModel("free")}
+          />
+          {EDUCATION_ADMIN.free}
+        </label>
+        <label className="flex items-center gap-2 t-body-sm text-ink-2">
+          <input
+            type="radio"
+            name="model"
+            value="paid"
+            checked={model === "paid"}
+            onChange={() => setModel("paid")}
+          />
+          {EDUCATION_ADMIN.paid}
+        </label>
+      </div>
+      {model === "paid" ? (
+        <label className={field}>
+          <span className={label}>{EDUCATION_ADMIN.price}</span>
+          <span className="t-body-sm text-ink-3">{EDUCATION_ADMIN.oneTime}</span>
+          <Input
+            name="price"
+            inputMode="decimal"
+            required
+            defaultValue={educationPriceInputValue(defaultPriceCents)}
+          />
+        </label>
+      ) : null}
+    </fieldset>
+  );
+}
 
 async function putObject(url: string, file: File): Promise<boolean> {
   const res = await fetch(url, {
@@ -46,7 +101,8 @@ export function CreateCourseForm() {
       slug: String(form.get("slug") ?? ""),
       title: String(form.get("title") ?? ""),
       description: String(form.get("description") ?? ""),
-      isFlagshipFree: form.get("isFlagshipFree") === "on",
+      model: String(form.get("model") ?? "free"),
+      price: String(form.get("price") ?? ""),
     });
     setSaving(false);
     if (res.error) return setError(res.error);
@@ -71,10 +127,7 @@ export function CreateCourseForm() {
         <span className={label}>{EDUCATION_ADMIN.description}</span>
         <Input name="description" maxLength={2000} />
       </label>
-      <label className="flex items-center gap-2 t-body-sm text-ink-2">
-        <input type="checkbox" name="isFlagshipFree" defaultChecked />
-        {EDUCATION_ADMIN.flagship}
-      </label>
+      <CourseProductFields defaultModel="free" />
       <Button type="submit" disabled={saving}>
         {saving ? EDUCATION_ADMIN.saving : EDUCATION_ADMIN.create}
       </Button>
@@ -87,11 +140,13 @@ export function EditCourseForm({
   title,
   description,
   isFlagshipFree,
+  priceCents,
 }: {
   courseId: string;
   title: string;
   description: string;
   isFlagshipFree: boolean;
+  priceCents: number | null;
 }) {
   const router = useRouter();
   const [error, setError] = useState("");
@@ -106,7 +161,8 @@ export function EditCourseForm({
       courseId,
       title: String(form.get("title") ?? ""),
       description: String(form.get("description") ?? ""),
-      isFlagshipFree: form.get("isFlagshipFree") === "on",
+      model: String(form.get("model") ?? "free"),
+      price: String(form.get("price") ?? ""),
     });
     setSaving(false);
     if (res.error) return setError(res.error);
@@ -124,10 +180,10 @@ export function EditCourseForm({
         <span className={label}>{EDUCATION_ADMIN.description}</span>
         <Input name="description" maxLength={2000} defaultValue={description} />
       </label>
-      <label className="flex items-center gap-2 t-body-sm text-ink-2">
-        <input type="checkbox" name="isFlagshipFree" defaultChecked={isFlagshipFree} />
-        {EDUCATION_ADMIN.flagship}
-      </label>
+      <CourseProductFields
+        defaultModel={educationProductModel(isFlagshipFree)}
+        defaultPriceCents={priceCents}
+      />
       <Button type="submit" disabled={saving}>
         {saving ? EDUCATION_ADMIN.saving : EDUCATION_ADMIN.save}
       </Button>
@@ -243,9 +299,12 @@ export function AddLessonForm({ moduleId }: { moduleId: string }) {
         <span className={label}>{EDUCATION_ADMIN.lessonTitle}</span>
         <Input name="title" required maxLength={160} />
       </label>
-      <label className="flex items-center gap-2 t-body-sm text-ink-2">
-        <input type="checkbox" name="freePreview" />
-        {EDUCATION_ADMIN.preview}
+      <label className="flex flex-col gap-1">
+        <span className="flex items-center gap-2 t-body-sm text-ink-2">
+          <input type="checkbox" name="freePreview" />
+          {EDUCATION_ADMIN.preview}
+        </span>
+        <span className="t-body-sm text-ink-3">{EDUCATION_ADMIN.previewHint}</span>
       </label>
       <Button type="submit" variant="secondary" disabled={saving}>
         {saving ? EDUCATION_ADMIN.saving : EDUCATION_ADMIN.addLesson}
@@ -351,9 +410,12 @@ export function LessonAdminForm({
           <span className={label}>{EDUCATION_ADMIN.duration}</span>
           <Input name="durationSeconds" type="number" min={1} defaultValue={durationSeconds ?? ""} />
         </label>
-        <label className="flex items-center gap-2 t-body-sm text-ink-2">
-          <input type="checkbox" name="freePreview" defaultChecked={freePreview} />
-          {EDUCATION_ADMIN.preview}
+        <label className="flex flex-col gap-1">
+          <span className="flex items-center gap-2 t-body-sm text-ink-2">
+            <input type="checkbox" name="freePreview" defaultChecked={freePreview} />
+            {EDUCATION_ADMIN.preview}
+          </span>
+          <span className="t-body-sm text-ink-3">{EDUCATION_ADMIN.previewHint}</span>
         </label>
         <Button type="submit" variant="secondary" disabled={saving}>
           {saving ? EDUCATION_ADMIN.saving : EDUCATION_ADMIN.save}

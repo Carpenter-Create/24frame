@@ -3,7 +3,7 @@ import Link from "next/link";
 import { HouseEmpty } from "@/components/chrome/house";
 import { Card, CardBody } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
-import { educationCourseHref, EDUCATION_ADMIN } from "@/lib/education";
+import { educationCommercialLabel, educationCourseHref, EDUCATION_ADMIN } from "@/lib/education";
 import { loadDiscoverableCourses } from "@/lib/courses";
 import { createClient } from "@/lib/supabase/server";
 
@@ -30,7 +30,13 @@ export default async function GcEducationPage() {
                   <Link href={educationCourseHref(course.slug)} className="t-body font-medium text-ink">
                     {course.title}
                   </Link>
-                  <p className="mt-[var(--space-2)] t-body-sm text-ink-3">{course.slug}</p>
+                  <p className="mt-[var(--space-2)] t-body-sm text-ink-3">
+                    {course.slug}
+                    {" · "}
+                    <span data-education-model="">
+                      {educationCommercialLabel(course.is_flagship_free, course.price_cents)}
+                    </span>
+                  </p>
                 </CardBody>
               </Card>
             </li>

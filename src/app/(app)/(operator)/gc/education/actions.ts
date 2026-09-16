@@ -13,7 +13,10 @@ import {
   educationLessonSourceKey,
   isEducationObjectKey,
   normalizeCourseSlug,
+  parseEducationPriceDollars,
+  resolveEducationProduct,
   validateEducationUpload,
+  type EducationProductModel,
 } from "@/lib/education";
 import {
   getEducationEncodeJob,
@@ -54,18 +57,29 @@ function uniqueConflict(error: { code?: string | null; message?: string | null }
   return error.code === "23505" || (error.message ?? "").includes("courses_slug");
 }
 
+function parseEducationProduct(raw: {
+  model: EducationProductModel;
+  price?: string;
+}): ReturnType<typeof resolveEducationProduct> {
+  const priceCents = raw.model === "paid" ? parseEducationPriceDollars(raw.price ?? "") : null;
+  return resolveEducationProduct({ model: raw.model, priceCents });
+}
+
 export async function createEducationCourse(raw: unknown): Promise<{ error?: string; slug?: string }> {
   const parsed = z
     .object({
       slug: z.string(),
       title: z.string().trim().min(1).max(EDUCATION_TITLE_MAX),
       description: z.string().trim().max(2000).optional(),
-      isFlagshipFree: z.boolean(),
+      model: z.enum(["free", "paid"]),
+      price: z.string().optional(),
     })
     .safeParse(raw);
   if (!parsed.success) return { error: EDUCATION_ADMIN.invalid };
   const slug = normalizeCourseSlug(parsed.data.slug);
   if (!slug) return { error: EDUCATION_ADMIN.invalid };
+  const product = parseEducationProduct(parsed.data);
+  if (!product.ok) return { error: EDUCATION_ADMIN.invalid };
 
   const staff = await requireEducationStaff();
   if (!staff.ok) return { error: staff.error };
@@ -75,7 +89,8 @@ export async function createEducationCourse(raw: unknown): Promise<{ error?: str
     slug,
     title: parsed.data.title,
     description: parsed.data.description || null,
-    is_flagship_free: parsed.data.isFlagshipFree,
+    is_flagship_free: product.is_flagship_free,
+    price_cents: product.price_cents,
   });
   if (error) {
     if (uniqueConflict(error)) return { error: EDUCATION_ADMIN.conflict };
@@ -91,10 +106,13 @@ export async function updateEducationCourse(raw: unknown): Promise<{ error?: str
       courseId: z.string().uuid(),
       title: z.string().trim().min(1).max(EDUCATION_TITLE_MAX),
       description: z.string().trim().max(2000).optional(),
-      isFlagshipFree: z.boolean(),
+      model: z.enum(["free", "paid"]),
+      price: z.string().optional(),
     })
     .safeParse(raw);
   if (!parsed.success) return { error: EDUCATION_ADMIN.invalid };
+  const product = parseEducationProduct(parsed.data);
+  if (!product.ok) return { error: EDUCATION_ADMIN.invalid };
 
   const staff = await requireEducationStaff();
   if (!staff.ok) return { error: staff.error };
@@ -112,7 +130,8 @@ export async function updateEducationCourse(raw: unknown): Promise<{ error?: str
     .update({
       title: parsed.data.title,
       description: parsed.data.description || null,
-      is_flagship_free: parsed.data.isFlagshipFree,
+      is_flagship_free: product.is_flagship_free,
+      price_cents: product.price_cents,
     })
     .eq("id", parsed.data.courseId);
   if (error) return { error: error.message };

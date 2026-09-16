@@ -19,7 +19,7 @@ export async function loadEducationAdminDetail(
 ): Promise<CourseDetail> {
   const { data: course, error } = await admin
     .from("courses")
-    .select("id, slug, title, description, cover_key, is_flagship_free, created_at")
+    .select("id, slug, title, description, cover_key, is_flagship_free, price_cents, created_at")
     .eq("slug", decodeURIComponent(slug))
     .maybeSingle();
 

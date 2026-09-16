@@ -11,8 +11,14 @@ import {
   educationHlsManifestKey,
   educationHlsPrefix,
   educationLessonSourceKey,
+  educationCommercialLabel,
   educationEncodeLabel,
+  educationPriceInputValue,
+  educationProductModel,
+  formatEducationPriceCents,
   isEducationObjectKey,
+  parseEducationPriceDollars,
+  resolveEducationProduct,
   isForbiddenEducationBucket,
   isForbiddenEducationKey,
   lessonPlaybackReady,
@@ -107,5 +113,28 @@ describe("education names and keys", () => {
     expect(mapMediaConvertJobStatus("PROGRESSING")).toBe("running");
     expect(mapMediaConvertJobStatus("COMPLETE")).toBe("complete");
     expect(mapMediaConvertJobStatus("ERROR")).toBe("failed");
+  });
+
+  it("maps Free to flagship with a null price and Paid to one-time cents", () => {
+    expect(resolveEducationProduct({ model: "free", priceCents: 4900 })).toEqual({
+      ok: true,
+      is_flagship_free: true,
+      price_cents: null,
+    });
+    expect(resolveEducationProduct({ model: "paid", priceCents: 4900 })).toEqual({
+      ok: true,
+      is_flagship_free: false,
+      price_cents: 4900,
+    });
+    expect(resolveEducationProduct({ model: "paid", priceCents: null })).toEqual({ ok: false });
+    expect(parseEducationPriceDollars("49")).toBe(4900);
+    expect(parseEducationPriceDollars("49.50")).toBe(4950);
+    expect(parseEducationPriceDollars("0")).toBeNull();
+    expect(educationPriceInputValue(4900)).toBe("49.00");
+    expect(formatEducationPriceCents(4950)).toBe("$49.50");
+    expect(educationProductModel(true)).toBe("free");
+    expect(educationProductModel(false)).toBe("paid");
+    expect(educationCommercialLabel(true, null)).toBe("Free");
+    expect(educationCommercialLabel(false, 4900)).toBe("Paid · $49.00");
   });
 });

@@ -56,7 +56,7 @@ describe("education admin actions", () => {
       createEducationCourse({
         slug: "member-write",
         title: "Nope",
-        isFlagshipFree: true,
+        model: "free",
       }),
     ).resolves.toEqual({ error: EDUCATION_ADMIN.notAuthorized });
     expect(admin.from).not.toHaveBeenCalled();
@@ -69,7 +69,8 @@ describe("education admin actions", () => {
       createEducationCourse({
         slug: "Welcome To 24Frame Two",
         title: "Welcome",
-        isFlagshipFree: true,
+        model: "free",
+        price: "49",
       }),
     ).resolves.toEqual({ slug: "welcome-to-24frame-two" });
     expect(createAdminClient).toHaveBeenCalled();
@@ -79,7 +80,35 @@ describe("education admin actions", () => {
       title: "Welcome",
       description: null,
       is_flagship_free: true,
+      price_cents: null,
     });
+  });
+
+  it("persists a one-time price on Paid and rejects a Paid course without a price", async () => {
+    staffClient({ user_id: USER.id });
+    const admin = adminClient();
+    await expect(
+      createEducationCourse({
+        slug: "paid-course",
+        title: "Paid fixture",
+        model: "paid",
+        price: "49.00",
+      }),
+    ).resolves.toEqual({ slug: "paid-course" });
+    expect(admin.insert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        is_flagship_free: false,
+        price_cents: 4900,
+      }),
+    );
+    await expect(
+      createEducationCourse({
+        slug: "paid-empty",
+        title: "Paid empty",
+        model: "paid",
+        price: "",
+      }),
+    ).resolves.toEqual({ error: EDUCATION_ADMIN.invalid });
   });
 
   it("returns a clear error when Education storage env is stubbed", async () => {

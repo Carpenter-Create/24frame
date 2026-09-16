@@ -8,6 +8,7 @@ import { loadEducationAdminDetail } from "@/lib/education-admin";
 import {
   EDUCATION_ADMIN,
   EDUCATION_HREF,
+  educationCommercialLabel,
   educationEncodeLabel,
 } from "@/lib/education";
 import { SOCIAL_ROUTES, socialCourseHref } from "@/lib/social";
@@ -43,6 +44,10 @@ export default async function GcEducationCoursePage({
         backLink={{ href: EDUCATION_HREF, label: EDUCATION_ADMIN.title }}
       />
       <p className="mb-[var(--space-6)] t-body-sm text-ink-3">
+        <span data-education-model="">
+          {educationCommercialLabel(course.is_flagship_free, course.price_cents)}
+        </span>
+        {" · "}
         <Link href={socialCourseHref(course.slug)}>{EDUCATION_ADMIN.consume}</Link>
         {" · "}
         {SOCIAL_ROUTES.courses}/{course.slug}
@@ -53,6 +58,7 @@ export default async function GcEducationCoursePage({
           title={course.title}
           description={course.description ?? ""}
           isFlagshipFree={course.is_flagship_free}
+          priceCents={course.price_cents}
         />
         <CoverUploadForm courseId={course.id} />
         <AddModuleForm courseId={course.id} />

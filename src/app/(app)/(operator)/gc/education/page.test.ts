@@ -41,7 +41,18 @@ describe("GcEducationPage", () => {
             description: null,
             cover_key: null,
             is_flagship_free: true,
+            price_cents: null,
             created_at: "2026-09-12T14:00:00.000Z",
+          },
+          {
+            id: "c2",
+            slug: "paid-fixture",
+            title: "Paid fixture",
+            description: null,
+            cover_key: null,
+            is_flagship_free: false,
+            price_cents: 4900,
+            created_at: "2026-09-12T15:00:00.000Z",
           },
         ]);
       }
@@ -56,6 +67,11 @@ describe("GcEducationPage", () => {
     expect(html).toContain("Welcome to 24Frame");
     expect(html).toContain(`${EDUCATION_HREF}/welcome-to-24frame`);
     expect(html).toContain(EDUCATION_ADMIN.create);
+    expect(html).toContain("data-education-product");
+    expect(html).toContain("data-education-model");
+    expect(html).toContain(EDUCATION_ADMIN.free);
+    expect(html).toContain("Paid · $49.00");
+    expect(html).not.toContain("Stripe");
     expect(html).not.toContain('href="/education"');
     expect(html).not.toContain("MasterClass");
   });

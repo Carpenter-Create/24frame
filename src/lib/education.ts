@@ -113,6 +113,12 @@ export const EDUCATION_ADMIN = {
   courseTitle: "Title",
   description: "Description",
   flagship: "Flagship (free)",
+  model: "Access",
+  free: "Free",
+  paid: "Paid",
+  price: "Price (USD)",
+  oneTime: "One-time",
+  previewHint: "Visible without course access.",
   cover: "Cover",
   uploadCover: "Upload cover",
   addModule: "Add module",
@@ -311,4 +317,63 @@ export function mapMediaConvertJobStatus(status: string): CourseEncodeStatus | n
 
 export function educationCourseHref(slug: string): string {
   return `${EDUCATION_HREF}/${encodeURIComponent(slug)}`;
+}
+
+export const EDUCATION_PRODUCT_MODELS = ["free", "paid"] as const;
+export type EducationProductModel = (typeof EDUCATION_PRODUCT_MODELS)[number];
+export const EDUCATION_PRICE_CENTS_MAX = 9_999_999;
+
+export function parseEducationPriceDollars(raw: string): number | null {
+  const value = raw.trim();
+  if (!/^\d+(\.\d{1,2})?$/.test(value)) return null;
+  const cents = Math.round(Number(value) * 100);
+  if (!Number.isInteger(cents) || cents < 1 || cents > EDUCATION_PRICE_CENTS_MAX) return null;
+  return cents;
+}
+
+export function educationPriceInputValue(cents: number | null | undefined): string {
+  if (cents == null || cents < 1) return "";
+  return (cents / 100).toFixed(2);
+}
+
+export function formatEducationPriceCents(cents: number): string {
+  return `$${(cents / 100).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+export function resolveEducationProduct(input: {
+  model: EducationProductModel;
+  priceCents: number | null;
+}):
+  | { ok: true; is_flagship_free: boolean; price_cents: number | null }
+  | { ok: false } {
+  if (input.model === "free") {
+    return { ok: true, is_flagship_free: true, price_cents: null };
+  }
+  if (
+    input.priceCents == null ||
+    !Number.isInteger(input.priceCents) ||
+    input.priceCents < 1 ||
+    input.priceCents > EDUCATION_PRICE_CENTS_MAX
+  ) {
+    return { ok: false };
+  }
+  return { ok: true, is_flagship_free: false, price_cents: input.priceCents };
+}
+
+export function educationProductModel(isFlagshipFree: boolean): EducationProductModel {
+  return isFlagshipFree ? "free" : "paid";
+}
+
+export function educationCommercialLabel(
+  isFlagshipFree: boolean,
+  priceCents?: number | null,
+): string {
+  if (isFlagshipFree) return EDUCATION_ADMIN.free;
+  if (priceCents != null && priceCents > 0) {
+    return `${EDUCATION_ADMIN.paid} · ${formatEducationPriceCents(priceCents)}`;
+  }
+  return EDUCATION_ADMIN.paid;
 }
