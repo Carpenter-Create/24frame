@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronDown, ChevronRight, GripVertical } from "lucide-react";
@@ -69,22 +69,18 @@ export function EducationCourseOverview({
 }) {
   const router = useRouter();
   const consumePath = `${SOCIAL_ROUTES.courses}/${course.slug}`;
-  const firstLessonId = modules.flatMap((module) => module.lessons).at(0)?.id ?? null;
+  const firstLessonId = modules.flatMap((row) => row.lessons).at(0)?.id ?? null;
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(firstLessonId);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [openModules, setOpenModules] = useState<Record<string, boolean>>(() => {
-    const selectedModule = modules.find((module) => module.lessons.some((lesson) => lesson.id === firstLessonId));
-    return Object.fromEntries(modules.map((module) => [module.id, module.id === selectedModule?.id]));
+    const selectedModule = modules.find((row) => row.lessons.some((lesson) => lesson.id === firstLessonId));
+    return Object.fromEntries(modules.map((row) => [row.id, row.id === selectedModule?.id]));
   });
   const [publishing, setPublishing] = useState(false);
 
-  const selected = useMemo(() => {
-    for (const module of modules) {
-      const lesson = module.lessons.find((row) => row.id === selectedLessonId);
-      if (lesson) return { module, lesson };
-    }
-    return null;
-  }, [modules, selectedLessonId]);
+  const selectedModule = modules.find((row) => row.lessons.some((lesson) => lesson.id === selectedLessonId));
+  const selectedLesson = selectedModule?.lessons.find((row) => row.id === selectedLessonId) ?? null;
+  const selected = selectedModule && selectedLesson ? { courseModule: selectedModule, lesson: selectedLesson } : null;
 
   function toggleModule(moduleId: string) {
     setOpenModules((current) => ({ ...current, [moduleId]: !current[moduleId] }));
@@ -97,7 +93,7 @@ export function EducationCourseOverview({
 
   async function onModuleDrop(fromId: string, toId: string) {
     if (fromId === toId) return;
-    const ids = modules.map((module) => module.id);
+    const ids = modules.map((row) => row.id);
     const fromIndex = ids.indexOf(fromId);
     const toIndex = ids.indexOf(toId);
     if (fromIndex < 0 || toIndex < 0) return;
@@ -110,9 +106,9 @@ export function EducationCourseOverview({
 
   async function onLessonDrop(moduleId: string, fromId: string, toId: string) {
     if (fromId === toId) return;
-    const module = modules.find((row) => row.id === moduleId);
-    if (!module) return;
-    const ids = module.lessons.map((lesson) => lesson.id);
+    const courseModule = modules.find((row) => row.id === moduleId);
+    if (!courseModule) return;
+    const ids = courseModule.lessons.map((lesson) => lesson.id);
     const fromIndex = ids.indexOf(fromId);
     const toIndex = ids.indexOf(toId);
     if (fromIndex < 0 || toIndex < 0) return;
@@ -322,7 +318,7 @@ export function EducationCourseOverview({
                 modules={modules}
                 lesson={{
                   id: selected.lesson.id,
-                  moduleId: selected.module.id,
+                  moduleId: selected.courseModule.id,
                   title: selected.lesson.title,
                   summary: selected.lesson.summary ?? "",
                   durationSeconds: selected.lesson.duration_seconds,

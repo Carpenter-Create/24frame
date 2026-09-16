@@ -695,13 +695,15 @@ export function EditLessonButton({
       <Button type="button" variant="secondary" data-education-edit-lesson="" onClick={() => setOpen(true)}>
         {EDUCATION_ADMIN.editLesson}
       </Button>
-      <EditLessonModal
-        open={open}
-        onClose={() => setOpen(false)}
-        courseId={courseId}
-        modules={modules}
-        lesson={lesson}
-      />
+      {open ? (
+        <EditLessonModal
+          open
+          onClose={() => setOpen(false)}
+          courseId={courseId}
+          modules={modules}
+          lesson={lesson}
+        />
+      ) : null}
     </>
   );
 }
@@ -731,14 +733,6 @@ export function EditLessonModal({
   const [name, setName] = useState(lesson.title);
   const [summary, setSummary] = useState(lesson.summary);
   const [cover, setCover] = useState<File | null>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    setName(lesson.title);
-    setSummary(lesson.summary);
-    setCover(null);
-    setError("");
-  }, [open, lesson.title, lesson.summary]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
