@@ -35,6 +35,7 @@ describe("education admin lock", () => {
     const actions = readFileSync("src/app/(app)/(operator)/education/actions.ts", "utf8");
     expect(layout).toContain("EducationStaffShell");
     expect(layout).toContain("createAdminClient");
+    expect(layout).toContain('export const dynamic = "force-dynamic"');
     expect(rail).toContain("NewCourseButton");
     expect(rail).toContain("data-education-course-name");
     expect(rail).not.toMatch(/Welcome|New & For You|\bHome\b/);
