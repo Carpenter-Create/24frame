@@ -66,7 +66,7 @@ export function DashboardAdminChrome({
     >
       <header className="min-w-0">
         <p className={DASHBOARD_ORG_LABEL_CLASS}>{orgName}</p>
-        <h1 className="t-section text-ink" data-dashboard-title="">
+        <h1 className="t-title text-ink" data-dashboard-title="">
           <span data-dashboard-title-mobile="" className={DASHBOARD_TITLE_MOBILE_CLASS}>
             {orgName}
           </span>

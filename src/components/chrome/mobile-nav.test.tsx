@@ -133,7 +133,7 @@ describe("MobileNavSheet", () => {
     );
 
     expect(MOBILE_NAV.sheet).toBe("Menu");
-    expect(tokens).toMatch(/--text-title:\s*1\.25rem/);
+    expect(tokens).toMatch(/--text-title:\s*1\.5rem/);
     expect(html).toContain("data-mobile-nav-header");
     expect(headerClass).toContain("justify-between");
     expect(headerClass).toContain("items-center");

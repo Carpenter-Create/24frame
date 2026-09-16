@@ -35,7 +35,7 @@ describe("AddTitleButton header", () => {
     expect(src).not.toContain("max-md:bg-transparent");
     expect(src).not.toContain("Plus");
     expect(src).not.toContain("from \"@/components/ui/button\"");
-    expect(tokens).toMatch(/--text-sm:\s*0\.75rem;/);
+    expect(tokens).toMatch(/--text-sm:\s*0\.8125rem;/);
     expect(tokens).toContain("--accent: #1769ff;");
     expect(globals).toMatch(/\.t-body-sm\s*\{[\s\S]*?font-size:\s*var\(--text-sm\)/);
   });

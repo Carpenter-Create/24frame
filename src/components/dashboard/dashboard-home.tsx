@@ -61,7 +61,7 @@ export function DashboardHomeStatusPill({ label }: { label: string }) {
   return (
     <span
       data-dashboard-status-pill=""
-      className="inline-flex shrink-0 items-center rounded-full border border-hairline bg-surface-muted px-2 py-[3px] text-[length:var(--text-xs)] font-medium text-ink-2"
+      className="inline-flex shrink-0 items-center rounded-full border border-hairline bg-surface-muted px-2 py-[3px] t-body-sm text-ink-2"
     >
       {label}
     </span>
@@ -86,7 +86,7 @@ export function DashboardHomeEmpty({
 export function DashboardOrgIdentity({ name }: { name: string }) {
   return (
     <header className="dashboard-home-identity min-w-0">
-      <h1 className="t-section text-ink">{name}</h1>
+      <h1 className="t-title text-ink">{name}</h1>
     </header>
   );
 }
@@ -128,7 +128,7 @@ export function DashboardSnapshot({
           <dd
             data-dashboard-stat={stat.key}
             className={cn(
-              // One large moment on `/` — org name stays t-section (title step).
+              // One large moment on `/` — org name stays t-title (title step).
               "t-display t-data leading-none",
               stat.highlight ? "text-accent" : "text-ink",
             )}

@@ -202,10 +202,10 @@ describe("MessagesAppHeader", () => {
     expect(src).toContain("truncate t-body text-ink md:hidden");
     expect(src).not.toContain("truncate t-body-sm text-ink");
     expect(src).not.toContain("t-title");
-    expect(tokens).toMatch(/--text-lg:\s*0\.9375rem;/);
-    expect(tokens).toMatch(/--text-base:\s*0\.8125rem;/);
-    expect(tokens).toMatch(/--text-sm:\s*0\.75rem;/);
-    expect(tokens).toMatch(/--text-title:\s*1\.25rem;/);
+    expect(tokens).toMatch(/--text-lg:\s*1\.0625rem;/);
+    expect(tokens).toMatch(/--text-base:\s*0\.9375rem;/);
+    expect(tokens).toMatch(/--text-sm:\s*0\.8125rem;/);
+    expect(tokens).toMatch(/--text-title:\s*1\.5rem;/);
     expect(globals).toMatch(/\.t-heading\s*\{[\s\S]*?font-size:\s*var\(--text-lg\)/);
     expect(globals).toMatch(/\.t-body\s*\{[\s\S]*?font-size:\s*var\(--text-base\)/);
     expect(globals).toMatch(/\.t-body-sm\s*\{[\s\S]*?font-size:\s*var\(--text-sm\)/);

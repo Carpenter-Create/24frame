@@ -149,7 +149,7 @@ describe("DashboardPage modes", () => {
     });
     expect(rpc).not.toHaveBeenCalledWith("gc_client_directory", expect.anything());
     expect(html).toContain("Acme");
-    expect(html).toMatch(/<h1 class="t-section text-ink">Acme<\/h1>/);
+    expect(html).toMatch(/<h1 class="t-title text-ink">Acme<\/h1>/);
     expect(html).not.toMatch(/<h1[^>]*t-display/);
     expect(html).not.toContain(ORG_STATUS_LABELS.active);
     expect(html).not.toContain(ORG_ROLE_LABELS.account_owner);
@@ -352,7 +352,7 @@ describe("client home information model", () => {
     expect(statValue(html, "catalog")).toBe("2");
     expect(statValue(html, "needsAttention")).toBe("1");
     expect(statValue(html, "live")).toBe("1");
-    expect(html).toMatch(/<h1 class="t-section text-ink">Acme<\/h1>/);
+    expect(html).toMatch(/<h1 class="t-title text-ink">Acme<\/h1>/);
     expect(html).toMatch(/data-dashboard-stat="catalog"[^>]*t-display t-data/);
     expect(html).toMatch(/data-dashboard-stat="needsAttention"[^>]*t-title t-data/);
     expect(html).toMatch(/data-dashboard-stat="live"/);

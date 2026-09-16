@@ -321,12 +321,12 @@ describe("house type register", () => {
   const globals = readFileSync("src/app/globals.css", "utf8");
 
   it("keeps one large moment in the shared --text-* scale", () => {
-    expect(tokens).toMatch(/--text-xs:\s*0\.6875rem;/);
-    expect(tokens).toMatch(/--text-sm:\s*0\.75rem;/);
-    expect(tokens).toMatch(/--text-base:\s*0\.8125rem;/);
-    expect(tokens).toMatch(/--text-lg:\s*0\.9375rem;/);
-    expect(tokens).toMatch(/--text-title:\s*1\.25rem;/);
-    expect(tokens).toMatch(/--text-hero:\s*2\.5rem;/);
+    expect(tokens).toMatch(/--text-xs:\s*0\.75rem;/);
+    expect(tokens).toMatch(/--text-sm:\s*0\.8125rem;/);
+    expect(tokens).toMatch(/--text-base:\s*0\.9375rem;/);
+    expect(tokens).toMatch(/--text-lg:\s*1\.0625rem;/);
+    expect(tokens).toMatch(/--text-title:\s*1\.5rem;/);
+    expect(tokens).toMatch(/--text-hero:\s*3rem;/);
   });
 
   it("binds .t-* steps to those tokens instead of display clamp()", () => {
@@ -361,9 +361,9 @@ describe("client home type locks", () => {
       }),
     );
 
-    expect(identity).toMatch(/<h1 class="t-section text-ink">Acme<\/h1>/);
+    expect(identity).toMatch(/<h1 class="t-title text-ink">Acme<\/h1>/);
     expect(identity).not.toContain("t-display");
-    expect(identity).not.toContain("t-title");
+    expect(identity).not.toContain("t-section");
     expect(identity).not.toMatch(/Active|Account owner|Registered/i);
     expect(identity).not.toContain("status");
     expect(identity).not.toContain("rounded-full bg-accent");
