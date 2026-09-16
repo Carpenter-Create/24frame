@@ -58,12 +58,12 @@ describe("DashboardAdminHero", () => {
     expect(html).not.toContain("<select");
     expect(html).toContain("card-surface");
     expect(html).toContain("shadow-none");
-    expect(html).toMatch(/data-dashboard-stat="revenue"[^>]*t-title/);
-    expect(html).not.toMatch(/data-dashboard-stat="revenue"[^>]*t-display/);
+    expect(html).toMatch(/data-dashboard-stat="revenue"[^>]*t-display t-data/);
+    expect(html).toContain("$0.00");
+    expect(html).not.toContain(DASHBOARD_ADMIN.revenueEmpty);
     expect(html).not.toContain("data-dashboard-fixture-banner");
     expect(html).not.toContain("Export");
     expect(html).not.toContain("Royalogic");
-    expect(html).not.toContain("$");
   });
 
   it("labels fixture money when craft sample is on", () => {

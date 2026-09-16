@@ -12,11 +12,10 @@ import {
   DASHBOARD_CHART_HEIGHT_MOBILE,
   DASHBOARD_DO_NEXT_SECONDARY_CLASS,
   DASHBOARD_FIXTURE_BANNER_CLASS,
+  DASHBOARD_PERIOD_SHEET_HOST_CLASS,
   DASHBOARD_TITLE_DESKTOP_CLASS,
   DASHBOARD_TITLE_MOBILE_CLASS,
   DASHBOARD_USER_FIELD_DESKTOP_CLASS,
-  DASHBOARD_USER_OVERFLOW_CLASS,
-  DASHBOARD_USER_SHEET_HOST_CLASS,
 } from "@/lib/dashboard-craft";
 
 describe("company-admin Dashboard mobile craft", () => {
@@ -48,11 +47,14 @@ describe("company-admin Dashboard mobile craft", () => {
     expect(DASHBOARD_CHART_FRAME_CLASS).toContain("md:h-[200px]");
   });
 
-  it("hides type-to-find behind overflow/sheet on phone", () => {
+  it("keeps Find-user off phone Dashboard and Period on a bottom sheet", () => {
     expect(DASHBOARD_USER_FIELD_DESKTOP_CLASS).toContain("max-md:hidden");
-    expect(DASHBOARD_USER_OVERFLOW_CLASS).toContain("md:hidden");
-    expect(DASHBOARD_USER_OVERFLOW_CLASS).toContain("size-[44px]");
-    expect(DASHBOARD_USER_SHEET_HOST_CLASS).toContain("md:hidden");
+    expect(DASHBOARD_PERIOD_SHEET_HOST_CLASS).toContain("md:hidden");
+    expect(DASHBOARD_PERIOD_SHEET_HOST_CLASS).toContain("justify-end");
+    const controls = readFileSync("src/components/dashboard/dashboard-admin-controls.tsx", "utf8");
+    expect(controls).toContain("data-dashboard-period-sheet");
+    expect(controls).not.toContain("data-dashboard-user-overflow");
+    expect(controls).not.toContain("data-dashboard-user-sheet");
   });
 
   it("keeps Sample banner + populated fixture rules and kills RL / export / chips", () => {

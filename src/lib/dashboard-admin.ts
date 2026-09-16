@@ -10,6 +10,7 @@ export const DASHBOARD_HREF = "/dashboard";
 
 export const DASHBOARD_ADMIN = {
   revenue: "Net revenue",
+  // Killed from the hero metric slot after #332 Mac FAIL — tests lock absence.
   revenueEmpty: "No revenue for this period.",
   chartEmpty: "No closed statement for this period.",
   asOfPrefix: "As of",
@@ -19,7 +20,7 @@ export const DASHBOARD_ADMIN = {
   activityEmpty: "No account activity for this period.",
   viewAll: "View all",
   findUser: "Find a user account",
-  findUserClose: "Close",
+  close: "Close",
   allCompany: "All company activity",
   period: "Period",
   allTime: "All time",
@@ -619,4 +620,9 @@ export function dashboardAsOfLine(hero: DashboardRevenueHero): string {
   const asOf = `${DASHBOARD_ADMIN.asOfPrefix} ${hero.asOf}`;
   if (!hero.updated) return `${asOf} · ${DASHBOARD_ADMIN.updatedNone}`;
   return `${asOf} · ${DASHBOARD_ADMIN.updatedPrefix} ${hero.updated}`;
+}
+
+/** Tabular hero money. Null / no-statement periods are $0.00 — never an essay. */
+export function dashboardHeroMoney(totalCents: number | null): string {
+  return formatUsdCents(totalCents ?? 0);
 }

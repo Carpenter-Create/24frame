@@ -11,7 +11,7 @@ import {
   pointDelta,
   type DashboardRevenuePoint,
 } from "@/lib/dashboard-admin";
-import { DASHBOARD_CHART_FRAME_CLASS } from "@/lib/dashboard-craft";
+import { DASHBOARD_CHART_EMPTY_CLASS, DASHBOARD_CHART_FRAME_CLASS } from "@/lib/dashboard-craft";
 import { DASHBOARD_FIXTURE } from "@/lib/dashboard-fixture";
 
 const PAD = { top: 16, right: 48, bottom: 24, left: 16 };
@@ -56,12 +56,17 @@ export function DashboardRevenueChart({
   const money = (cents: number) =>
     fixture ? `${formatUsdCents(cents)} ${DASHBOARD_FIXTURE.sampleMark}` : formatUsdCents(cents);
 
+  const empty = points.length === 0;
+
   return (
-    <div ref={plotRef} data-dashboard-revenue-chart="" className={DASHBOARD_CHART_FRAME_CLASS}>
-      {points.length === 0 ? (
-        <div className="flex h-full items-center px-[var(--space-6)] max-md:px-[var(--space-4)]">
-          <p className="t-body-sm text-ink-3">{DASHBOARD_ADMIN.chartEmpty}</p>
-        </div>
+    <div
+      ref={plotRef}
+      data-dashboard-revenue-chart=""
+      data-dashboard-chart-empty={empty ? "" : undefined}
+      className={empty ? DASHBOARD_CHART_EMPTY_CLASS : DASHBOARD_CHART_FRAME_CLASS}
+    >
+      {empty ? (
+        <div data-dashboard-chart-empty-slot="" className="h-px w-full bg-hairline" aria-hidden />
       ) : geom ? (
         <>
           <svg

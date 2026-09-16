@@ -28,6 +28,7 @@ import {
   dashboardDeltaLine,
   dashboardPeriodMenuGroups,
   dashboardPeriodOption,
+  dashboardHeroMoney,
   DASHBOARD_PERIOD_MENU_GROUPS,
   revenuePointsFromLabels,
 } from "./dashboard-admin";
@@ -205,6 +206,8 @@ describe("company admin revenue series", () => {
     });
     expect(empty.totalCents).toBeNull();
     expect(empty.compare).toBeNull();
+    expect(dashboardHeroMoney(empty.totalCents)).toBe("$0.00");
+    expect(dashboardHeroMoney(null)).toBe("$0.00");
     expect(dashboardAsOfLine(empty)).toBe(`As of 2025 · ${DASHBOARD_ADMIN.updatedNone}`);
 
     const scoped = buildDashboardRevenueHero({

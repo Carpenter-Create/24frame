@@ -7,6 +7,7 @@ import {
   DASHBOARD_ADMIN,
   dashboardAsOfLine,
   dashboardDeltaLine,
+  dashboardHeroMoney,
   revenuePlayheadKey,
   type DashboardActivityRow,
   type DashboardPeriod,
@@ -16,12 +17,14 @@ import {
 import {
   DASHBOARD_ADMIN_CHROME_CLASS,
   DASHBOARD_ADMIN_OVERVIEW_CLASS,
+  DASHBOARD_ADMIN_STACK_CLASS,
   DASHBOARD_CARD_CLASS,
   DASHBOARD_CARD_PAD_HERO,
   DASHBOARD_CARD_PAD_LIST,
   DASHBOARD_FIXTURE_BANNER_CLASS,
   DASHBOARD_HERO_ASOF_CLASS,
   DASHBOARD_HERO_DELTA_CLASS,
+  DASHBOARD_HERO_TO_CHART_GAP_CLASS,
   DASHBOARD_HERO_VALUE_CLASS,
   DASHBOARD_KICKER_CLASS,
   DASHBOARD_ORG_LABEL_CLASS,
@@ -32,7 +35,6 @@ import {
 } from "@/lib/dashboard-craft";
 import { DASHBOARD_FIXTURE, dashboardFixtureLabel } from "@/lib/dashboard-fixture";
 import { dashboardJustInDate, rankedBarPercent } from "@/lib/dashboard-home";
-import { formatUsdCents } from "@/lib/finance";
 import type { ReportsUserOption } from "@/lib/reports";
 import { cn } from "@/lib/cn";
 
@@ -55,7 +57,6 @@ export function DashboardAdminChrome({
   userId,
   users,
   periodMenuOpen = false,
-  userSheetOpen = false,
 }: {
   orgName: string;
   period: DashboardPeriod;
@@ -63,7 +64,6 @@ export function DashboardAdminChrome({
   userId: string | null;
   users: readonly ReportsUserOption[];
   periodMenuOpen?: boolean;
-  userSheetOpen?: boolean;
 }) {
   return (
     <div
@@ -87,7 +87,6 @@ export function DashboardAdminChrome({
         userId={userId}
         users={users}
         defaultOpen={periodMenuOpen}
-        userSheetOpen={userSheetOpen}
       />
     </div>
   );
@@ -102,8 +101,7 @@ export function DashboardRevenueCard({
   hero: DashboardRevenueHero;
   fixture?: boolean;
 }) {
-  const raw =
-    hero.totalCents === null ? DASHBOARD_ADMIN.revenueEmpty : formatUsdCents(hero.totalCents);
+  const raw = dashboardHeroMoney(hero.totalCents);
   const value = fixture ? dashboardFixtureLabel(raw) : raw;
   return (
     <section
@@ -114,14 +112,7 @@ export function DashboardRevenueCard({
     >
       <div className={cn("flex flex-col", DASHBOARD_RELATED_GAP_CLASS, DASHBOARD_CARD_PAD_HERO)}>
         <p className={DASHBOARD_KICKER_CLASS}>{DASHBOARD_ADMIN.revenue}</p>
-        <p
-          data-dashboard-stat="revenue"
-          className={
-            hero.totalCents === null
-              ? "t-title text-ink"
-              : DASHBOARD_HERO_VALUE_CLASS
-          }
-        >
+        <p data-dashboard-stat="revenue" className={DASHBOARD_HERO_VALUE_CLASS}>
           {value}
         </p>
         {hero.compare ? (
@@ -136,7 +127,7 @@ export function DashboardRevenueCard({
           {dashboardAsOfLine(hero)}
         </p>
       </div>
-      <div className="border-t border-hairline">
+      <div className={cn("border-t border-hairline", DASHBOARD_HERO_TO_CHART_GAP_CLASS)}>
         <DashboardRevenueChart
           points={hero.points}
           playheadKey={revenuePlayheadKey(period, hero.points)}
@@ -213,7 +204,6 @@ export function DashboardAdminHero({
   activity,
   fixture = false,
   periodMenuOpen = false,
-  userSheetOpen = false,
 }: {
   orgName: string;
   period: DashboardPeriod;
@@ -224,10 +214,9 @@ export function DashboardAdminHero({
   activity: readonly DashboardActivityRow[];
   fixture?: boolean;
   periodMenuOpen?: boolean;
-  userSheetOpen?: boolean;
 }) {
   return (
-    <div data-dashboard-admin-hero="" className="flex flex-col gap-[var(--space-6)]">
+    <div data-dashboard-admin-hero="" className={DASHBOARD_ADMIN_STACK_CLASS}>
       {fixture ? <DashboardFixtureBanner /> : null}
       <DashboardAdminChrome
         orgName={orgName}
@@ -236,7 +225,6 @@ export function DashboardAdminHero({
         userId={userId}
         users={users}
         periodMenuOpen={periodMenuOpen}
-        userSheetOpen={userSheetOpen}
       />
       <div
         data-dashboard-overview-row=""

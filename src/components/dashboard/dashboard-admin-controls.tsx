@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
-import { CaretDown, DotsThree } from "@phosphor-icons/react";
+import { CaretDown } from "@phosphor-icons/react";
 
 import { AppearanceCheck } from "@/components/chrome/appearance-check";
 import { Close44 } from "@/components/chrome/house";
@@ -14,20 +14,21 @@ import {
   dashboardPeriodMenuGroups,
   dashboardPeriodOption,
   filterDashboardUsers,
+  type DashboardPeriodMenuGroup,
   type DashboardPeriodOption,
 } from "@/lib/dashboard-admin";
 import {
   DASHBOARD_PERIOD_CHEVRON_CLASS,
   DASHBOARD_PERIOD_GROUP_CLASS,
+  DASHBOARD_PERIOD_MENU_DESKTOP_CLASS,
   DASHBOARD_PERIOD_OPTION_CHECK_CLASS,
   DASHBOARD_PERIOD_OPTION_CHECK_GUTTER_CLASS,
   DASHBOARD_PERIOD_OPTION_LABEL_CLASS,
   DASHBOARD_PERIOD_PANEL_CLASS,
+  DASHBOARD_PERIOD_SHEET_HOST_CLASS,
   DASHBOARD_PERIOD_TRIGGER_CLASS,
   DASHBOARD_PERIOD_TRIGGER_LABEL_CLASS,
   DASHBOARD_USER_FIELD_DESKTOP_CLASS,
-  DASHBOARD_USER_OVERFLOW_CLASS,
-  DASHBOARD_USER_SHEET_HOST_CLASS,
   dashboardPeriodOptionClass,
 } from "@/lib/dashboard-craft";
 import {
@@ -35,7 +36,7 @@ import {
   APP_SHEET_SCRIM_CLASS,
   APP_SHEET_SURFACE_CLASS,
 } from "@/lib/house-sheet";
-import { PHOSPHOR_CHROME_ICON_CLASS, PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
+import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import type { ReportsUserOption } from "@/lib/reports";
 
 export function DashboardAdminControls({
@@ -44,19 +45,16 @@ export function DashboardAdminControls({
   userId,
   users,
   defaultOpen = false,
-  userSheetOpen = false,
 }: {
   periodKey: string;
   options: readonly DashboardPeriodOption[];
   userId: string | null;
   users: readonly ReportsUserOption[];
   defaultOpen?: boolean;
-  userSheetOpen?: boolean;
 }) {
   const router = useRouter();
   const hostRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(defaultOpen);
-  const [sheetOpen, setSheetOpen] = useState(userSheetOpen);
   const selected = users.find((user) => user.id === userId) ?? null;
   const [query, setQuery] = useState("");
   const current = dashboardPeriodOption(options, periodKey);
@@ -79,7 +77,11 @@ export function DashboardAdminControls({
     };
     const onPointer = (event: MouseEvent) => {
       const host = hostRef.current;
-      if (host && !host.contains(event.target as Node)) setOpen(false);
+      if (!host || host.contains(event.target as Node)) return;
+      if (typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches) {
+        return;
+      }
+      setOpen(false);
     };
     document.addEventListener("keydown", onKey);
     document.addEventListener("mousedown", onPointer);
@@ -90,18 +92,14 @@ export function DashboardAdminControls({
   }, [open]);
 
   useEffect(() => {
-    if (!sheetOpen) return undefined;
+    if (!open || typeof window === "undefined") return undefined;
+    if (!window.matchMedia("(max-width: 767px)").matches) return undefined;
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setSheetOpen(false);
-    };
-    document.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = previous;
-      document.removeEventListener("keydown", onKey);
     };
-  }, [sheetOpen]);
+  }, [open]);
 
   const matches = useMemo(() => filterDashboardUsers(users, query), [users, query]);
 
@@ -134,52 +132,18 @@ export function DashboardAdminControls({
               />
             </button>
             {open ? (
-              <div data-dashboard-period-menu="" className={DASHBOARD_PERIOD_PANEL_CLASS}>
-                <div role="listbox" aria-label={DASHBOARD_ADMIN.period} className="flex flex-col">
-                  {groups.map((group) => (
-                    <div key={group.group} data-dashboard-period-group={group.group}>
-                      {group.group === "all" || group.group === "ytd" ? null : (
-                        <div data-dashboard-period-group-label="" className={DASHBOARD_PERIOD_GROUP_CLASS}>
-                          {group.label}
-                        </div>
-                      )}
-                      {group.options.map((option) => {
-                        const isSelected = option.key === periodKey;
-                        return (
-                          <button
-                            key={option.key}
-                            type="button"
-                            role="option"
-                            data-dashboard-period-option={option.key}
-                            aria-selected={isSelected}
-                            className={dashboardPeriodOptionClass(isSelected)}
-                            onClick={() => {
-                              setOpen(false);
-                              go({ period: option.key });
-                            }}
-                          >
-                            <span
-                              data-dashboard-period-option-label=""
-                              className={DASHBOARD_PERIOD_OPTION_LABEL_CLASS}
-                            >
-                              {option.label}
-                            </span>
-                            <span
-                              data-dashboard-period-option-check=""
-                              className={DASHBOARD_PERIOD_OPTION_CHECK_GUTTER_CLASS}
-                              aria-hidden="true"
-                            >
-                              <AppearanceCheck
-                                selected={isSelected}
-                                className={DASHBOARD_PERIOD_OPTION_CHECK_CLASS}
-                              />
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  ))}
-                </div>
+              <div
+                data-dashboard-period-menu=""
+                className={`${DASHBOARD_PERIOD_PANEL_CLASS} ${DASHBOARD_PERIOD_MENU_DESKTOP_CLASS}`}
+              >
+                <DashboardPeriodOptions
+                  groups={groups}
+                  periodKey={periodKey}
+                  onPick={(key) => {
+                    setOpen(false);
+                    go({ period: key });
+                  }}
+                />
               </div>
             ) : null}
           </div>
@@ -201,35 +165,99 @@ export function DashboardAdminControls({
           }}
         />
       </div>
-      <button
-        type="button"
-        data-dashboard-user-overflow=""
-        aria-label={DASHBOARD_ADMIN.findUser}
-        aria-expanded={sheetOpen}
-        aria-haspopup="dialog"
-        className={DASHBOARD_USER_OVERFLOW_CLASS}
-        onClick={() => setSheetOpen(true)}
-      >
-        <DotsThree className={PHOSPHOR_CHROME_ICON_CLASS} weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
-      </button>
-      {sheetOpen ? <DashboardUserSheet
-        query={query}
-        selected={selected}
-        matches={matches}
-        onQuery={setQuery}
-        onPick={(id) => {
-          setQuery("");
-          setSheetOpen(false);
-          go({ user: id });
-        }}
-        onClear={() => {
-          setQuery("");
-          go({ user: null });
-        }}
-        onClose={() => setSheetOpen(false)}
-      /> : null}
+      {open ? (
+        <DashboardPeriodSheet
+          groups={groups}
+          periodKey={periodKey}
+          onPick={(key) => {
+            setOpen(false);
+            go({ period: key });
+          }}
+          onClose={() => setOpen(false)}
+        />
+      ) : null}
     </div>
   );
+}
+
+function DashboardPeriodOptions({
+  groups,
+  periodKey,
+  onPick,
+}: {
+  groups: readonly DashboardPeriodMenuGroup[];
+  periodKey: string;
+  onPick: (key: string) => void;
+}) {
+  return (
+    <div role="listbox" aria-label={DASHBOARD_ADMIN.period} className="flex flex-col">
+      {groups.map((group) => (
+        <div key={group.group} data-dashboard-period-group={group.group}>
+          {group.group === "all" || group.group === "ytd" ? null : (
+            <div data-dashboard-period-group-label="" className={DASHBOARD_PERIOD_GROUP_CLASS}>
+              {group.label}
+            </div>
+          )}
+          {group.options.map((option) => {
+            const isSelected = option.key === periodKey;
+            return (
+              <button
+                key={option.key}
+                type="button"
+                role="option"
+                data-dashboard-period-option={option.key}
+                aria-selected={isSelected}
+                className={dashboardPeriodOptionClass(isSelected)}
+                onClick={() => onPick(option.key)}
+              >
+                <span data-dashboard-period-option-label="" className={DASHBOARD_PERIOD_OPTION_LABEL_CLASS}>
+                  {option.label}
+                </span>
+                <span
+                  data-dashboard-period-option-check=""
+                  className={DASHBOARD_PERIOD_OPTION_CHECK_GUTTER_CLASS}
+                  aria-hidden="true"
+                >
+                  <AppearanceCheck selected={isSelected} className={DASHBOARD_PERIOD_OPTION_CHECK_CLASS} />
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function DashboardPeriodSheet({
+  groups,
+  periodKey,
+  onPick,
+  onClose,
+}: {
+  groups: readonly DashboardPeriodMenuGroup[];
+  periodKey: string;
+  onPick: (key: string) => void;
+  onClose: () => void;
+}) {
+  const sheet = (
+    <div
+      data-dashboard-period-sheet=""
+      role="dialog"
+      aria-label={DASHBOARD_ADMIN.period}
+      className={DASHBOARD_PERIOD_SHEET_HOST_CLASS}
+    >
+      <button type="button" aria-label={DASHBOARD_ADMIN.close} className={APP_SHEET_SCRIM_CLASS} onClick={onClose} />
+      <div className={`${APP_SHEET_SURFACE_CLASS} relative z-10 shadow-none`}>
+        <div className={`${APP_SHEET_HEAD_CLASS} justify-between`}>
+          <p className="t-label text-ink-3">{DASHBOARD_ADMIN.period}</p>
+          <Close44 label={DASHBOARD_ADMIN.close} onClick={onClose} />
+        </div>
+        <DashboardPeriodOptions groups={groups} periodKey={periodKey} onPick={onPick} />
+      </div>
+    </div>
+  );
+  return typeof document !== "undefined" ? createPortal(sheet, document.body) : sheet;
 }
 
 function DashboardUserField({
@@ -239,7 +267,6 @@ function DashboardUserField({
   onQuery,
   onPick,
   onClear,
-  sheet = false,
 }: {
   query: string;
   selected: ReportsUserOption | null;
@@ -247,38 +274,30 @@ function DashboardUserField({
   onQuery: (value: string) => void;
   onPick: (id: string) => void;
   onClear: () => void;
-  sheet?: boolean;
 }) {
-  const resultsId = sheet ? "dashboard-user-sheet-results" : "dashboard-user-results";
   return (
     <>
       <label className="flex items-center gap-[var(--space-2)]">
         <span className="t-label text-ink-3">{DASHBOARD_ADMIN.findUser}</span>
         <Input
-          data-dashboard-user={sheet ? undefined : ""}
-          data-dashboard-user-sheet-input={sheet ? "" : undefined}
+          data-dashboard-user=""
           type="text"
           role="combobox"
           aria-expanded={matches.length > 0}
-          aria-controls={resultsId}
+          aria-controls="dashboard-user-results"
           aria-autocomplete="list"
           autoComplete="off"
           placeholder={selected?.label ?? DASHBOARD_ADMIN.allCompany}
           value={query}
           onChange={(event) => onQuery(event.target.value)}
-          className={sheet ? "w-full" : "w-56"}
+          className="w-56"
         />
       </label>
       {matches.length > 0 ? (
         <ul
-          id={resultsId}
-          data-dashboard-user-results={sheet ? undefined : ""}
-          data-dashboard-user-sheet-results={sheet ? "" : undefined}
-          className={
-            sheet
-              ? "mt-[var(--space-2)] overflow-hidden rounded-[var(--radius)] border border-hairline bg-surface shadow-none"
-              : "absolute right-0 z-10 mt-[var(--space-2)] w-full overflow-hidden rounded-[var(--radius)] border border-hairline bg-surface shadow-none"
-          }
+          id="dashboard-user-results"
+          data-dashboard-user-results=""
+          className="absolute right-0 z-10 mt-[var(--space-2)] w-full overflow-hidden rounded-[var(--radius)] border border-hairline bg-surface shadow-none"
         >
           {matches.map((user) => (
             <li key={user.id}>
@@ -306,44 +325,4 @@ function DashboardUserField({
       ) : null}
     </>
   );
-}
-
-function DashboardUserSheet({
-  query,
-  selected,
-  matches,
-  onQuery,
-  onPick,
-  onClear,
-  onClose,
-}: {
-  query: string;
-  selected: ReportsUserOption | null;
-  matches: readonly ReportsUserOption[];
-  onQuery: (value: string) => void;
-  onPick: (id: string) => void;
-  onClear: () => void;
-  onClose: () => void;
-}) {
-  const sheet = (
-    <div data-dashboard-user-sheet="" role="dialog" aria-label={DASHBOARD_ADMIN.findUser} className={DASHBOARD_USER_SHEET_HOST_CLASS}>
-      <button type="button" aria-label={DASHBOARD_ADMIN.findUserClose} className={APP_SHEET_SCRIM_CLASS} onClick={onClose} />
-      <div className={`${APP_SHEET_SURFACE_CLASS} relative z-10 shadow-none`}>
-        <div className={`${APP_SHEET_HEAD_CLASS} justify-between`}>
-          <p className="t-label text-ink-3">{DASHBOARD_ADMIN.findUser}</p>
-          <Close44 label={DASHBOARD_ADMIN.findUserClose} onClick={onClose} />
-        </div>
-        <DashboardUserField
-          sheet
-          query={query}
-          selected={selected}
-          matches={matches}
-          onQuery={onQuery}
-          onPick={onPick}
-          onClear={onClear}
-        />
-      </div>
-    </div>
-  );
-  return typeof document !== "undefined" ? createPortal(sheet, document.body) : sheet;
 }
