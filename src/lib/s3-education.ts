@@ -60,6 +60,9 @@ function educationClient(bucket: string): { bucket: string; s3: S3Client } {
         accessKeyId: requireEducationAwsEnv("EDUCATION_AWS_ACCESS_KEY_ID"),
         secretAccessKey: requireEducationAwsEnv("EDUCATION_AWS_SECRET_ACCESS_KEY"),
       },
+      // Browser PUTs (lesson source) cannot send the SDK's default CRC32
+      // checksum headers. WHEN_REQUIRED keeps SignedHeaders=host + Content-Type.
+      requestChecksumCalculation: "WHEN_REQUIRED",
     }),
   };
 }
@@ -70,19 +73,38 @@ function assertEducationKey(key: string): void {
   }
 }
 
+export async function putEducationSourceObject(
+  key: string,
+  body: Uint8Array,
+  contentType: EducationImageContentType | EducationVideoContentType,
+): Promise<void> {
+  assertEducationKey(key);
+  const { bucket, s3 } = educationClient(educationSourceBucket());
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: bucket,
+      Key: key,
+      Body: body,
+      ContentType: contentType,
+      CacheControl: "private, max-age=300",
+    }),
+  );
+}
+
 export async function presignEducationSourcePut(
   key: string,
   contentType: EducationImageContentType | EducationVideoContentType,
 ): Promise<string> {
   assertEducationKey(key);
   const { bucket, s3 } = educationClient(educationSourceBucket());
+  // Browser fetch only sends Content-Type. Do not sign Cache-Control —
+  // a signed extra header 403s the PUT and the cover/source form hangs.
   return getSignedUrl(
     s3,
     new PutObjectCommand({
       Bucket: bucket,
       Key: key,
       ContentType: contentType,
-      CacheControl: "private, max-age=300",
     }),
     { expiresIn: EDUCATION_PUT_TTL_SECONDS },
   );

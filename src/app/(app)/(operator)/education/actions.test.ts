@@ -7,6 +7,7 @@ vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: vi.fn() }));
 vi.mock("@/lib/s3-education", () => ({
   isEducationAwsConfigured: vi.fn(() => false),
   presignEducationSourcePut: vi.fn(),
+  putEducationSourceObject: vi.fn(),
 }));
 vi.mock("@/lib/education-mediaconvert", () => ({
   isEducationMediaconvertConfigured: vi.fn(() => false),
@@ -17,10 +18,10 @@ vi.mock("@/lib/education-mediaconvert", () => ({
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { isEducationAwsConfigured, presignEducationSourcePut } from "@/lib/s3-education";
-import { EDUCATION_ADMIN } from "@/lib/education";
+import { isEducationAwsConfigured, presignEducationSourcePut, putEducationSourceObject } from "@/lib/s3-education";
+import { EDUCATION_ADMIN, educationCoverKey } from "@/lib/education";
 
-import { createEducationCourse, presignEducationUpload } from "./actions";
+import { createEducationCourse, presignEducationUpload, uploadEducationCover } from "./actions";
 
 const USER = { id: "11111111-1111-4111-8111-111111111111" };
 const COURSE = "22222222-2222-4222-8222-222222222222";
@@ -123,5 +124,94 @@ describe("education admin actions", () => {
       }),
     ).resolves.toEqual({ error: EDUCATION_ADMIN.envUnset });
     expect(presignEducationSourcePut).not.toHaveBeenCalled();
+  });
+});
+
+function coverForm(file: File, courseId = COURSE) {
+  const body = new FormData();
+  body.set("courseId", courseId);
+  body.set("file", file);
+  return body;
+}
+
+function coverAdminClient() {
+  const maybeSingle = vi.fn(async () => ({ data: { slug: "cos-smoke-2026-09-15" }, error: null }));
+  const select = vi.fn(() => ({ eq: vi.fn(() => ({ maybeSingle })) }));
+  const updateEq = vi.fn(async () => ({ error: null }));
+  const update = vi.fn(() => ({ eq: updateEq }));
+  const from = vi.fn(() => ({ select, update }));
+  vi.mocked(createAdminClient).mockReturnValue({ from } as never);
+  return { from, update, updateEq };
+}
+
+describe("uploadEducationCover", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(getAuthUser).mockResolvedValue(USER as never);
+    vi.mocked(putEducationSourceObject).mockResolvedValue(undefined);
+  });
+
+  it("PUTs cover bytes then sets cover_key and does not hang on a browser PUT", async () => {
+    staffClient({ user_id: USER.id });
+    vi.mocked(isEducationAwsConfigured).mockReturnValue(true);
+    const { update } = coverAdminClient();
+    const file = new File([new Uint8Array([1, 2, 3])], "cover.jpg", { type: "image/jpeg" });
+    await expect(uploadEducationCover(coverForm(file))).resolves.toEqual({});
+    const key = educationCoverKey(COURSE, "image/jpeg");
+    expect(putEducationSourceObject).toHaveBeenCalledTimes(1);
+    const [putKey, body, type] = vi.mocked(putEducationSourceObject).mock.calls[0] ?? [];
+    expect(putKey).toBe(key);
+    expect(type).toBe("image/jpeg");
+    expect(body).toBeInstanceOf(Uint8Array);
+    expect(update).toHaveBeenCalledWith({ cover_key: key });
+    expect(presignEducationSourcePut).not.toHaveBeenCalled();
+  });
+
+  it("normalizes image/jpg so attach is not rejected after a successful PUT", async () => {
+    staffClient({ user_id: USER.id });
+    vi.mocked(isEducationAwsConfigured).mockReturnValue(true);
+    const { update } = coverAdminClient();
+    const file = new File([new Uint8Array([1])], "cover.JPG", { type: "image/jpg" });
+    await expect(uploadEducationCover(coverForm(file))).resolves.toEqual({});
+    expect(putEducationSourceObject).toHaveBeenCalledWith(
+      educationCoverKey(COURSE, "image/jpeg"),
+      expect.any(Uint8Array),
+      "image/jpeg",
+    );
+    expect(update).toHaveBeenCalledWith({ cover_key: educationCoverKey(COURSE, "image/jpeg") });
+  });
+
+  it("does not write cover_key when the source PUT fails", async () => {
+    staffClient({ user_id: USER.id });
+    vi.mocked(isEducationAwsConfigured).mockReturnValue(true);
+    const { update } = coverAdminClient();
+    vi.mocked(putEducationSourceObject).mockRejectedValueOnce(new Error("AccessDenied"));
+    const file = new File([new Uint8Array([1])], "cover.jpg", { type: "image/jpeg" });
+    await expect(uploadEducationCover(coverForm(file))).resolves.toEqual({
+      error: EDUCATION_ADMIN.uploadFailed,
+    });
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it("refuses when Education storage env is stubbed", async () => {
+    staffClient({ user_id: USER.id });
+    vi.mocked(isEducationAwsConfigured).mockReturnValue(false);
+    const { update } = coverAdminClient();
+    const file = new File([new Uint8Array([1])], "cover.jpg", { type: "image/jpeg" });
+    await expect(uploadEducationCover(coverForm(file))).resolves.toEqual({
+      error: EDUCATION_ADMIN.envUnset,
+    });
+    expect(putEducationSourceObject).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it("refuses a member write", async () => {
+    staffClient(null);
+    vi.mocked(isEducationAwsConfigured).mockReturnValue(true);
+    const file = new File([new Uint8Array([1])], "cover.jpg", { type: "image/jpeg" });
+    await expect(uploadEducationCover(coverForm(file))).resolves.toEqual({
+      error: EDUCATION_ADMIN.notAuthorized,
+    });
+    expect(putEducationSourceObject).not.toHaveBeenCalled();
   });
 });

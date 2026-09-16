@@ -13,8 +13,8 @@ import {
   educationProductModel,
   type EducationProductModel,
 } from "@/lib/education";
+import { putEducationBrowserObject } from "@/lib/education-browser-put";
 import {
-  attachEducationCover,
   attachEducationLessonSource,
   createEducationCourse,
   createEducationLesson,
@@ -24,6 +24,7 @@ import {
   startEducationLessonEncode,
   updateEducationCourse,
   updateEducationLesson,
+  uploadEducationCover,
 } from "./actions";
 
 const field = "flex flex-col gap-1";
@@ -79,12 +80,7 @@ function CourseProductFields({
 }
 
 async function putObject(url: string, file: File): Promise<boolean> {
-  const res = await fetch(url, {
-    method: "PUT",
-    headers: { "Content-Type": file.type },
-    body: file,
-  });
-  return res.ok;
+  return putEducationBrowserObject(url, file, file.type);
 }
 
 export function CreateCourseForm() {
@@ -202,25 +198,21 @@ export function CoverUploadForm({ courseId }: { courseId: string }) {
     if (!file) return;
     setSaving(true);
     setError("");
-    const signed = await presignEducationUpload({
-      kind: "cover",
-      courseId,
-      contentType: file.type,
-      byteLength: file.size,
-    });
-    if (signed.error || !signed.url || !signed.key) {
+    try {
+      const body = new FormData();
+      body.set("courseId", courseId);
+      body.set("file", file);
+      const attached = await uploadEducationCover(body);
+      if (attached.error) {
+        setError(attached.error);
+        return;
+      }
+      router.refresh();
+    } catch {
+      setError(EDUCATION_ADMIN.uploadFailed);
+    } finally {
       setSaving(false);
-      return setError(signed.error ?? EDUCATION_ADMIN.uploadFailed);
     }
-    const ok = await putObject(signed.url, file);
-    if (!ok) {
-      setSaving(false);
-      return setError(EDUCATION_ADMIN.uploadFailed);
-    }
-    const attached = await attachEducationCover({ courseId, key: signed.key });
-    setSaving(false);
-    if (attached.error) return setError(attached.error);
-    router.refresh();
   }
 
   return (
@@ -357,26 +349,34 @@ export function LessonAdminForm({
     if (!file) return;
     setSaving(true);
     setError("");
-    const signed = await presignEducationUpload({
-      kind: "source",
-      courseId,
-      lessonId,
-      contentType: file.type,
-      byteLength: file.size,
-    });
-    if (signed.error || !signed.url || !signed.key) {
+    try {
+      const signed = await presignEducationUpload({
+        kind: "source",
+        courseId,
+        lessonId,
+        contentType: file.type,
+        byteLength: file.size,
+      });
+      if (signed.error || !signed.url || !signed.key) {
+        setError(signed.error ?? EDUCATION_ADMIN.uploadFailed);
+        return;
+      }
+      const ok = await putObject(signed.url, file);
+      if (!ok) {
+        setError(EDUCATION_ADMIN.uploadFailed);
+        return;
+      }
+      const attached = await attachEducationLessonSource({ courseId, lessonId, key: signed.key });
+      if (attached.error) {
+        setError(attached.error);
+        return;
+      }
+      router.refresh();
+    } catch {
+      setError(EDUCATION_ADMIN.uploadFailed);
+    } finally {
       setSaving(false);
-      return setError(signed.error ?? EDUCATION_ADMIN.uploadFailed);
     }
-    const ok = await putObject(signed.url, file);
-    if (!ok) {
-      setSaving(false);
-      return setError(EDUCATION_ADMIN.uploadFailed);
-    }
-    const attached = await attachEducationLessonSource({ courseId, lessonId, key: signed.key });
-    setSaving(false);
-    if (attached.error) return setError(attached.error);
-    router.refresh();
   }
 
   async function onEncode() {
