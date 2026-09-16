@@ -22,8 +22,10 @@ import {
   dashboardWhatChanged,
   deliveriesNeedingAction,
   pendingSubmissions,
+  rankedBarPercent,
   titlesAddedThisMonth,
   titlesInPipeline,
+  topTitleActivity,
   topTitlesThisMonth,
   DASHBOARD_HOME,
   DASHBOARD_HOME_DO_NEXT,
@@ -264,6 +266,14 @@ describe("dashboard home add-on derivation", () => {
     expect(titlesInPipeline(titles)).toBe(2);
     expect(topTitlesThisMonth(titles, now).map((row) => row.id)).toEqual(["sep"]);
     expect(pendingSubmissions(titles).map((row) => row.id)).toEqual(["sep", "pipe"]);
+    expect(
+      topTitleActivity(titles, [{ title_id: "pipe" }, { title_id: "pipe" }, { title_id: "sep" }], now).map(
+        (row) => row.id,
+      ),
+    ).toEqual(["pipe", "sep"]);
+    expect(rankedBarPercent(2, 4)).toBe(50);
+    expect(rankedBarPercent(0, 4)).toBe(0);
+    expect(rankedBarPercent(1, 0)).toBe(0);
   });
 
   it("lists deliveries that need action and greyscale what-changed rows", () => {

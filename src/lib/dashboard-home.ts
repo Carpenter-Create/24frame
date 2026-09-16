@@ -25,6 +25,9 @@ export const DASHBOARD_HOME = {
   inPipeline: "In pipeline",
   topTitles: "Top titles",
   topTitlesEmpty: "No title activity this month yet.",
+  viewAll: "View all",
+  viewList: "List",
+  viewChart: "Chart",
   reportsCta: "Reports",
   reportsPointer: "All-time activity",
   hero: "Catalog activity",
@@ -236,6 +239,46 @@ export function topTitlesThisMonth(
       status: title.status,
       created_at: title.created_at,
     }));
+}
+
+export type DashboardRankedTitle = ClientHomeJustInItem & { count: number };
+
+/**
+ * Side-panel Top titles. Delivery counts are a real magnitude when they
+ * exist. Otherwise recency this month — no invented rank or money.
+ */
+export function topTitleActivity(
+  titles: readonly ClientHomeTitle[],
+  deliveries: readonly { title_id: string }[],
+  now: Date,
+): DashboardRankedTitle[] {
+  const counts = new Map<string, number>();
+  for (const row of deliveries) {
+    counts.set(row.title_id, (counts.get(row.title_id) ?? 0) + 1);
+  }
+  const ranked = [...titles]
+    .filter((title) => (counts.get(title.id) ?? 0) > 0)
+    .sort((a, b) => {
+      const diff = (counts.get(b.id) ?? 0) - (counts.get(a.id) ?? 0);
+      if (diff !== 0) return diff;
+      return a.created_at < b.created_at ? 1 : -1;
+    })
+    .slice(0, DASHBOARD_HOME_TOP_TITLES)
+    .map((title) => ({
+      id: title.id,
+      title: title.title,
+      status: title.status,
+      created_at: title.created_at,
+      count: counts.get(title.id) ?? 0,
+    }));
+  if (ranked.length > 0) return ranked;
+  return topTitlesThisMonth(titles, now).map((title) => ({ ...title, count: 0 }));
+}
+
+/** Bar width from a real max. Zero max means no bar — never invent share. */
+export function rankedBarPercent(count: number, max: number): number {
+  if (max <= 0 || count <= 0) return 0;
+  return Math.round((count / max) * 100);
 }
 
 export type DashboardDeliveryRow = {

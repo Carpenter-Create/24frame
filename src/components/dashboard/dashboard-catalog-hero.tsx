@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { DASHBOARD_HOME, dashboardCatalogValue } from "@/lib/dashboard-home";
 import { cumulativeCatalogSeries } from "@/lib/catalog-activity";
 
-const H = 160;
+const H = 200;
 const PAD = { top: 16, right: 16, bottom: 24, left: 16 };
 
 export function DashboardCatalogHero({
@@ -13,11 +13,15 @@ export function DashboardCatalogHero({
   nowMs,
   catalog,
   catalogIsPartial,
+  live,
+  liveIsPartial,
 }: {
   createdAt: number[];
   nowMs: number;
   catalog: number;
   catalogIsPartial: boolean;
+  live: number;
+  liveIsPartial: boolean;
 }) {
   const plotRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState<number | null>(null);
@@ -57,11 +61,17 @@ export function DashboardCatalogHero({
     <section
       data-dashboard-hero=""
       aria-label={DASHBOARD_HOME.hero}
-      className="overflow-hidden rounded-[var(--radius-lg)] border border-hairline bg-surface"
+      className="h-full overflow-hidden rounded-[var(--radius-lg)] border border-hairline bg-surface"
     >
-      <div className="flex items-end justify-between gap-[var(--space-4)] px-[var(--space-6)] py-[var(--space-4)]">
+      <div className="flex flex-col gap-[var(--space-2)] px-[var(--space-6)] py-[var(--space-6)]">
         <p className="t-label text-ink-3">{DASHBOARD_HOME.hero}</p>
-        <p className="t-data t-title text-ink">{dashboardCatalogValue(catalog, catalogIsPartial)}</p>
+        <p data-dashboard-stat="catalog" className="t-display t-data leading-none text-ink">
+          {dashboardCatalogValue(catalog, catalogIsPartial)}
+        </p>
+        <p className="t-body-sm text-ink-3">
+          <span data-dashboard-stat="live">{dashboardCatalogValue(live, liveIsPartial)}</span>
+          {` ${DASHBOARD_HOME.live}`}
+        </p>
       </div>
       <div ref={plotRef} className="relative border-t border-hairline" style={{ height: H }}>
         {!series ? (

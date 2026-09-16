@@ -8,16 +8,6 @@ import type { ClientFinanceDashboard } from "@/lib/finance-dashboard";
 import { TITLE_STATUS_LABELS, type TitleStatus } from "@/lib/titles";
 import Link from "next/link";
 
-export function ReportsEmpty() {
-  return (
-    <Card data-reports-empty="">
-      <CardBody>
-        <p className="t-body text-ink-2">{REPORTS_PAGE.empty}</p>
-      </CardBody>
-    </Card>
-  );
-}
-
 export function ReportsHero({
   catalog,
   live,
@@ -102,6 +92,8 @@ export function ReportsBody({
   findingsIsPartial,
   platforms,
   territories,
+  statuses,
+  deliveryStatuses,
   topTitles,
   money,
 }: {
@@ -114,6 +106,8 @@ export function ReportsBody({
   findingsIsPartial: boolean;
   platforms: readonly ReportsCountRow[];
   territories: readonly ReportsCountRow[];
+  statuses: readonly ReportsCountRow[];
+  deliveryStatuses: readonly ReportsCountRow[];
   topTitles: readonly ClientHomeJustInItem[];
   money: ClientFinanceDashboard | null;
 }) {
@@ -127,6 +121,20 @@ export function ReportsBody({
         findingsIsPartial={findingsIsPartial}
       />
       <ReportsCatalogChart createdAt={createdAt} nowMs={nowMs} />
+      <div className="grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-2">
+        <ReportsBreakdown
+          label={REPORTS_PAGE.status}
+          empty={REPORTS_PAGE.statusEmpty}
+          rows={statuses}
+          testId="status"
+        />
+        <ReportsBreakdown
+          label={REPORTS_PAGE.deliveries}
+          empty={REPORTS_PAGE.deliveriesEmpty}
+          rows={deliveryStatuses}
+          testId="deliveries"
+        />
+      </div>
       <div className="grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-2">
         <ReportsBreakdown
           label={REPORTS_PAGE.platforms}

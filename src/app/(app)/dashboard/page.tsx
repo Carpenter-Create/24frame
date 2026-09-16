@@ -8,12 +8,10 @@ import {
   DashboardHomePillLink,
   DashboardJustIn,
   DashboardOrgIdentity,
-  DashboardSnapshot,
 } from "@/components/dashboard/dashboard-home";
 import { DashboardCatalogHero } from "@/components/dashboard/dashboard-catalog-hero";
 import {
   DashboardAnalyticsOverview,
-  DashboardCountList,
   DashboardDeliveriesAction,
   DashboardFindingsGlance,
   DashboardPendingSubmissions,
@@ -21,18 +19,18 @@ import {
   DashboardTopTitles,
   DashboardWhatChanged,
 } from "@/components/dashboard/dashboard-modules";
+import { DashboardRankedBars } from "@/components/dashboard/dashboard-ranked";
 import { DashboardVisitStamp } from "@/components/dashboard/dashboard-visit-stamp";
 import { DashboardFinanceGlance } from "@/components/dashboard/dashboard-finance-glance";
 import {
   DASHBOARD_HOME,
   clientHomeSnapshot,
-  dashboardCatalogValue,
   dashboardWhatChanged,
   deliveriesNeedingAction,
   pendingSubmissions,
   titlesAddedThisMonth,
   titlesInPipeline,
-  topTitlesThisMonth,
+  topTitleActivity,
 } from "@/lib/dashboard-home";
 import { UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
 import { loadMyDeliveries, loadMyFindings } from "@/lib/my-lists";
@@ -42,10 +40,9 @@ import { AGGREGATION_EMPTY } from "@/lib/aggregation-empty";
 import { DASHBOARD_SEEN_COOKIE, afterLastVisit, parseDashboardSeen } from "@/lib/dashboard-visit";
 import { countNamedRows } from "@/lib/reports";
 
-// Client `/dashboard` is the visual Aggregation home: org identity, catalog
-// hero, metric strip, then the locked module stack. Period, download, and
-// user filter stay on /reports. Staff without a client org stay on the
-// GC-wide roster. Catalog Health remains the findings surface.
+// Client `/dashboard` inhabits Overview visual space: hero metric + chart
+// beside Top titles, then ranked bars, a territory card, and the locked
+// module stack. Period, download, and user filter stay on /reports.
 export default async function DashboardPage() {
   const supabase = await createClient();
   const ctx = await getOrgContext();
@@ -115,24 +112,45 @@ export default async function DashboardPage() {
         </DashboardHomePillLink>
       </div>
 
-      <DashboardCatalogHero
-        createdAt={createdAt}
-        nowMs={now.getTime()}
-        catalog={snapshot.catalog}
-        catalogIsPartial={snapshot.catalogIsPartial}
-      />
-
-      <DashboardSnapshot
-        catalog={dashboardCatalogValue(snapshot.catalog, snapshot.catalogIsPartial)}
-        needsAttention={dashboardCatalogValue(snapshot.needsAttention, snapshot.findingsIsPartial)}
-        live={dashboardCatalogValue(snapshot.live, snapshot.catalogIsPartial)}
-      />
+      <div
+        data-dashboard-overview-row=""
+        className="grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-3"
+      >
+        <div className="lg:col-span-2">
+          <DashboardCatalogHero
+            createdAt={createdAt}
+            nowMs={now.getTime()}
+            catalog={snapshot.catalog}
+            catalogIsPartial={snapshot.catalogIsPartial}
+            live={snapshot.live}
+            liveIsPartial={snapshot.catalogIsPartial}
+          />
+        </div>
+        <DashboardTopTitles items={topTitleActivity(titles, deliveries.rows, now)} />
+      </div>
 
       <div className="flex flex-col gap-[var(--space-12)]">
         <DashboardAnalyticsOverview
           addedThisMonth={titlesAddedThisMonth(titles, now)}
           inPipeline={titlesInPipeline(titles)}
         />
+        <div className="grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-2">
+          <DashboardRankedBars
+            label={DASHBOARD_HOME.platforms}
+            empty={DASHBOARD_HOME.platformsEmpty}
+            rows={platforms}
+            testId="platforms"
+            viewAllHref="/deliveries"
+          />
+          <DashboardRankedBars
+            label={DASHBOARD_HOME.territories}
+            empty={DASHBOARD_HOME.territoriesEmpty}
+            rows={territories}
+            testId="territories"
+            viewAllHref="/deliveries"
+            territory
+          />
+        </div>
         <div className="grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-2">
           <DashboardJustIn
             titles={snapshot.justIn}
@@ -141,24 +159,9 @@ export default async function DashboardPage() {
           />
           <DashboardDoNext items={snapshot.doNext} />
         </div>
-        <DashboardTopTitles items={topTitlesThisMonth(titles, now)} />
         <DashboardReportsCta />
         <DashboardDeliveriesAction rows={actionDeliveries} />
         <DashboardFindingsGlance count={snapshot.needsAttention} isPartial={snapshot.findingsIsPartial} />
-        <div className="grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-2">
-          <DashboardCountList
-            label={DASHBOARD_HOME.platforms}
-            empty={DASHBOARD_HOME.platformsEmpty}
-            rows={platforms}
-            testId="platforms"
-          />
-          <DashboardCountList
-            label={DASHBOARD_HOME.territories}
-            empty={DASHBOARD_HOME.territoriesEmpty}
-            rows={territories}
-            testId="territories"
-          />
-        </div>
         <DashboardWhatChanged firstVisit={lastVisitMs == null} rows={changes} />
         <DashboardPendingSubmissions items={pending} />
       </div>

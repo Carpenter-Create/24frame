@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { DASHBOARD_HOME } from "@/lib/dashboard-home";
 import { REPORTS_HREF } from "@/lib/reports";
 
-import { DashboardAnalyticsOverview, DashboardReportsCta } from "./dashboard-modules";
+import { DashboardAnalyticsOverview, DashboardReportsCta, DashboardTopTitles } from "./dashboard-modules";
 
 describe("dashboard visual home modules", () => {
   it("links the quiet overview strip to Reports without a period picker", () => {
@@ -28,5 +28,28 @@ describe("dashboard visual home modules", () => {
     expect(html).toContain(`href="${REPORTS_HREF}"`);
     expect(html).toContain("text-accent");
     expect(html).not.toContain("$");
+  });
+
+  it("renders Top titles as a ranked list card with View all, not a second line chart", () => {
+    const html = renderToStaticMarkup(
+      createElement(DashboardTopTitles, {
+        items: [
+          {
+            id: "t1",
+            title: "Winter Light",
+            status: "live",
+            created_at: "2026-09-02T00:00:00.000Z",
+            count: 3,
+          },
+        ],
+      }),
+    );
+    expect(html).toContain('data-dashboard-module="top-titles"');
+    expect(html).toContain("Winter Light");
+    expect(html).toContain(DASHBOARD_HOME.viewAll);
+    expect(html).toContain("bg-accent");
+    expect(html).not.toContain("data-dashboard-hero");
+    expect(html).not.toContain("$");
+    expect(html).not.toContain("Royalogic");
   });
 });

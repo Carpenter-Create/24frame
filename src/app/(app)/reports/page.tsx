@@ -5,7 +5,7 @@ import { getOrgContext } from "@/lib/supabase/context";
 import { PageHeader } from "@/components/ui/page-header";
 import { HouseEmpty } from "@/components/chrome/house";
 import { ReportsControls } from "@/components/reports/reports-controls";
-import { ReportsBody, ReportsEmpty } from "@/components/reports/reports-shell";
+import { ReportsBody } from "@/components/reports/reports-shell";
 import { canViewClientEarn } from "@/lib/finance";
 import { buildClientFinanceDashboard } from "@/lib/finance-dashboard";
 import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
@@ -20,14 +20,15 @@ import {
   reportsUserLabel,
   yearMonthFromIso,
 } from "@/lib/reports";
-import { topTitlesThisMonth } from "@/lib/dashboard-home";
 import {
   filterReportsDeliveries,
   filterReportsTitles,
-  reportsHasBody,
+  reportsDeliveryStatusRows,
   reportsHeroMetrics,
   reportsPlatformRows,
+  reportsStatusRows,
   reportsTerritoryRows,
+  topReportsTitles,
 } from "@/lib/reports-view";
 
 export default async function ReportsPage({
@@ -138,23 +139,21 @@ export default async function ReportsPage({
           />
         }
       />
-      {reportsHasBody({ titles: scopedTitles, deliveries: scopedDeliveries, hasMoney }) ? (
-        <ReportsBody
-          createdAt={createdAt}
-          nowMs={now.getTime()}
-          catalog={hero.catalog}
-          live={hero.live}
-          needsAttention={hero.needsAttention}
-          catalogIsPartial={hero.catalogIsPartial}
-          findingsIsPartial={hero.findingsIsPartial}
-          platforms={reportsPlatformRows(scopedDeliveries)}
-          territories={reportsTerritoryRows(scopedDeliveries)}
-          topTitles={topTitlesThisMonth(scopedTitles, now)}
-          money={hasMoney ? money : null}
-        />
-      ) : (
-        <ReportsEmpty />
-      )}
+      <ReportsBody
+        createdAt={createdAt}
+        nowMs={now.getTime()}
+        catalog={hero.catalog}
+        live={hero.live}
+        needsAttention={hero.needsAttention}
+        catalogIsPartial={hero.catalogIsPartial}
+        findingsIsPartial={hero.findingsIsPartial}
+        platforms={reportsPlatformRows(scopedDeliveries)}
+        territories={reportsTerritoryRows(scopedDeliveries)}
+        statuses={reportsStatusRows(scopedTitles)}
+        deliveryStatuses={reportsDeliveryStatusRows(scopedDeliveries)}
+        topTitles={topReportsTitles(scopedTitles)}
+        money={hasMoney ? money : null}
+      />
     </>
   );
 }

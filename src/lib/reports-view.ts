@@ -1,5 +1,13 @@
-import { clientHomeSnapshot, type ClientHomeFinding, type ClientHomeTitle } from "@/lib/dashboard-home";
+import {
+  clientHomeSnapshot,
+  dashboardTitleStatusLabel,
+  DASHBOARD_HOME_TOP_TITLES,
+  type ClientHomeFinding,
+  type ClientHomeJustInItem,
+  type ClientHomeTitle,
+} from "@/lib/dashboard-home";
 import { countNamedRows, isoInReportsPeriod, type ReportsCountRow, type ReportsPeriod } from "@/lib/reports";
+import { DELIVERY_STATUS_ROW_LABELS, type DeliveryStatus } from "@/lib/titles";
 
 export type ReportsTitle = ClientHomeTitle & { created_by?: string | null };
 
@@ -10,6 +18,7 @@ export type ReportsDelivery = {
   vendor_name: string;
   territory: string;
   updated_at: string | null;
+  status?: string;
 };
 
 export function filterReportsTitles(
@@ -71,6 +80,37 @@ export function reportsPlatformRows(deliveries: readonly ReportsDelivery[]): Rep
 
 export function reportsTerritoryRows(deliveries: readonly ReportsDelivery[]): ReportsCountRow[] {
   return countNamedRows(deliveries.map((row) => ({ name: row.territory })));
+}
+
+export function reportsStatusRows(titles: readonly ReportsTitle[]): ReportsCountRow[] {
+  return countNamedRows(
+    titles.flatMap((title) => {
+      const name = dashboardTitleStatusLabel(title.status);
+      return name ? [{ name }] : [];
+    }),
+  );
+}
+
+export function reportsDeliveryStatusRows(deliveries: readonly ReportsDelivery[]): ReportsCountRow[] {
+  return countNamedRows(
+    deliveries.flatMap((row) => {
+      if (!row.status || !Object.hasOwn(DELIVERY_STATUS_ROW_LABELS, row.status)) return [];
+      return [{ name: DELIVERY_STATUS_ROW_LABELS[row.status as DeliveryStatus] }];
+    }),
+  );
+}
+
+/** Newest titles already scoped to the selected period. Recency only — no invented rank. */
+export function topReportsTitles(titles: readonly ReportsTitle[]): ClientHomeJustInItem[] {
+  return [...titles]
+    .sort((a, b) => (a.created_at < b.created_at ? 1 : -1))
+    .slice(0, DASHBOARD_HOME_TOP_TITLES)
+    .map((title) => ({
+      id: title.id,
+      title: title.title,
+      status: title.status,
+      created_at: title.created_at,
+    }));
 }
 
 export function reportsHasBody(input: {

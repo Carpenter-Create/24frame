@@ -12,9 +12,11 @@ import {
   dashboardCatalogValue,
   dashboardJustInDate,
   dashboardTitleStatusLabel,
+  rankedBarPercent,
   type ClientHomeJustInItem,
   type DashboardChangeRow,
   type DashboardDeliveryRow,
+  type DashboardRankedTitle,
 } from "@/lib/dashboard-home";
 import { CATALOG_HEALTH_EMPTY } from "@/lib/findings";
 import { REPORTS_HREF, reportsHref } from "@/lib/reports";
@@ -109,15 +111,50 @@ export function DashboardTitleRows({ items }: { items: readonly ClientHomeJustIn
   );
 }
 
-export function DashboardTopTitles({ items }: { items: readonly ClientHomeJustInItem[] }) {
+export function DashboardTopTitles({ items }: { items: readonly DashboardRankedTitle[] }) {
+  const max = items[0]?.count ?? 0;
   return (
-    <DashboardListPanel
-      label={DASHBOARD_HOME.topTitles}
-      empty={DASHBOARD_HOME.topTitlesEmpty}
-      testId="top-titles"
-    >
-      {items.length > 0 ? <DashboardTitleRows items={items} /> : undefined}
-    </DashboardListPanel>
+    <DashboardHomePanel aria-label={DASHBOARD_HOME.topTitles} data-dashboard-module="top-titles">
+      <div className="flex items-center justify-between gap-[var(--space-4)] px-[var(--space-6)] py-[var(--space-4)]">
+        <p className="t-label text-ink-3">{DASHBOARD_HOME.topTitles}</p>
+        <TextAction href="/titles">{DASHBOARD_HOME.viewAll}</TextAction>
+      </div>
+      {items.length === 0 ? (
+        <DashboardHomeEmpty>{DASHBOARD_HOME.topTitlesEmpty}</DashboardHomeEmpty>
+      ) : (
+        <ol className="flex flex-col gap-[var(--space-4)] border-t border-hairline px-[var(--space-6)] py-[var(--space-6)]">
+          {items.map((item, i) => {
+            const percent = rankedBarPercent(item.count, max);
+            return (
+              <li key={item.id} className="flex flex-col gap-[var(--space-2)]">
+                <div className="flex items-center justify-between gap-[var(--space-4)]">
+                  <span className="flex min-w-0 items-center gap-[var(--space-4)]">
+                    <span className="t-data t-body-sm w-4 shrink-0 text-ink-3">{i + 1}</span>
+                    <Link
+                      href={`/titles/${item.id}`}
+                      className="truncate t-body font-medium text-ink hover:text-ink-2"
+                    >
+                      {item.title}
+                    </Link>
+                  </span>
+                  {item.count > 0 ? (
+                    <span className="t-data t-body shrink-0 text-ink">{item.count}</span>
+                  ) : null}
+                </div>
+                {percent > 0 ? (
+                  <div className="h-2 overflow-hidden rounded-full bg-surface-muted">
+                    <div
+                      className={`h-full rounded-full ${i === 0 ? "bg-accent" : "bg-ink-3"}`}
+                      style={{ width: `${percent}%` }}
+                    />
+                  </div>
+                ) : null}
+              </li>
+            );
+          })}
+        </ol>
+      )}
+    </DashboardHomePanel>
   );
 }
 
@@ -166,7 +203,11 @@ export function DashboardFindingsGlance({
         <TextAction href="/catalog-health">{DASHBOARD_HOME.findingsGlanceCta}</TextAction>
       </div>
       <div className="border-t border-hairline px-[var(--space-6)] py-[var(--space-6)]">
-        <p data-dashboard-findings-count="" className="t-display t-data text-ink">
+        <p
+          data-dashboard-findings-count=""
+          data-dashboard-stat="needsAttention"
+          className="t-display t-data text-ink"
+        >
           {dashboardCatalogValue(count, isPartial)}
         </p>
         {count === 0 ? (
