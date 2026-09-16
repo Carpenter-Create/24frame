@@ -8,9 +8,10 @@
 // Trigger: truncated current workspace name only. No leading mark
 // or circle — the avatar already provides that. Chevron is hidden
 // at rest; it appears on hover / focus and while the menu is open
-// (touch: press/open). Menu order: current-workspace header →
-// Settings (the existing /settings door only) → list with leading
-// marks, flush-left names, trailing Sporty Blue check (#320).
+// (touch: press/open). Menu: quiet Workspaces heading, then three
+// rows with leading marks, flush-left names, trailing Sporty Blue
+// check on the current lane (#320). No current-workspace identity
+// header. No Settings section — Settings stays on the avatar menu.
 //
 // Three workspaces only. No All Accounts clone. No Referrals /
 // billing. Staff Manage courses stays a Settings door — not a fourth
@@ -19,8 +20,6 @@
 // cookie. Do not invent /education, /account/workspace, or
 // /settings/workspace.
 
-import { SOCIAL_WORKSPACE } from "@/lib/product";
-import { settingsLandHref } from "@/lib/settings";
 import { USER_MENU } from "@/lib/user-menu";
 import {
   availableWorkspaceOptions,
@@ -30,7 +29,7 @@ import type { WorkspaceMode } from "@/lib/workspace";
 
 export const WORKSPACE_SWITCHER = {
   label: USER_MENU.workspace,
-  settings: USER_MENU.settings,
+  heading: "Workspaces",
 } as const;
 
 export const WORKSPACE_SWITCHER_ABSENT = [
@@ -39,13 +38,11 @@ export const WORKSPACE_SWITCHER_ABSENT = [
   "Refer a friend",
   "billing",
   "Manage courses",
+  "Settings",
+  "Catalog",
+  "Courses",
+  "Social workspace",
 ] as const;
-
-export const WORKSPACE_SWITCHER_ROLE = {
-  aggregation: "Catalog",
-  social: SOCIAL_WORKSPACE,
-  education: "Courses",
-} as const satisfies Record<WorkspaceMode, string>;
 
 export const WORKSPACE_SWITCHER_MARK = {
   aggregation: "A",
@@ -73,24 +70,10 @@ export const WORKSPACE_SWITCHER_PANEL_CLASS =
   "absolute right-0 top-full z-50 mt-[var(--space-2)] flex min-w-[16rem] flex-col overflow-hidden rounded-[12px] border border-hairline bg-surface py-[var(--space-2)] shadow-none";
 
 export const WORKSPACE_SWITCHER_HEADER_CLASS =
-  "flex items-center gap-[var(--space-4)] px-[var(--space-4)] py-[var(--space-4)]";
-
-export const WORKSPACE_SWITCHER_HEADER_COPY_CLASS = "min-w-0 flex-1";
-
-export const WORKSPACE_SWITCHER_HEADER_NAME_CLASS = "truncate t-body font-medium text-ink";
-
-export const WORKSPACE_SWITCHER_HEADER_ROLE_CLASS = "truncate t-body-sm text-ink-3";
-
-export const WORKSPACE_SWITCHER_HEADER_MARK_CLASS =
-  "flex size-8 shrink-0 items-center justify-center rounded-full bg-surface-muted t-label font-medium text-ink-2";
+  "px-[var(--space-4)] pb-[var(--space-1)] pt-[var(--space-2)] t-label text-ink-3";
 
 export const WORKSPACE_SWITCHER_MARK_CLASS =
   "flex size-6 shrink-0 items-center justify-center rounded-full bg-surface-muted t-label font-medium text-ink-2";
-
-export const WORKSPACE_SWITCHER_SETTINGS_CLASS =
-  "flex w-full items-center px-[var(--space-4)] py-[var(--space-2)] text-left t-body-sm font-normal text-ink hover:bg-surface-muted";
-
-export const WORKSPACE_SWITCHER_RULE_CLASS = "border-t border-hairline";
 
 // Trailing Sporty Blue check. Labels stay flush-left on one shared
 // pad after the leading mark gutter. The check is a reserved right
@@ -112,20 +95,6 @@ export const APP_HEADER_TRAILING_CLUSTER_CLASS =
 
 export function workspaceSwitcherMarkLetter(mode: WorkspaceMode): string {
   return WORKSPACE_SWITCHER_MARK[mode];
-}
-
-export function workspaceSwitcherRole(mode: WorkspaceMode): string {
-  return WORKSPACE_SWITCHER_ROLE[mode];
-}
-
-export function workspaceSwitcherShowsSettings(): boolean {
-  return WORKSPACE_SWITCHER.settings === USER_MENU.settings && USER_MENU.settingsHref === "/settings";
-}
-
-export function workspaceSwitcherSettingsHref(
-  pathname: string | null | undefined,
-): string {
-  return settingsLandHref(pathname);
 }
 
 export function workspaceSwitcherChevronClass(open: boolean): string {

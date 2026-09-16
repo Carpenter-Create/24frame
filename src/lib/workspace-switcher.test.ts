@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import { SOCIAL_WORKSPACE } from "./product";
-import { settingsLandHref } from "./settings";
 import { USER_MENU } from "./user-menu";
 import { availableWorkspaceOptions, WORKSPACE_EDUCATION_HREF } from "./workspace-menu";
 import {
@@ -10,7 +8,7 @@ import {
   WORKSPACE_SWITCHER_ABSENT,
   WORKSPACE_SWITCHER_CHEVRON_CLASS,
   WORKSPACE_SWITCHER_CHEVRON_OPEN_CLASS,
-  WORKSPACE_SWITCHER_HEADER_MARK_CLASS,
+  WORKSPACE_SWITCHER_HEADER_CLASS,
   WORKSPACE_SWITCHER_MARK,
   WORKSPACE_SWITCHER_MARK_CLASS,
   WORKSPACE_SWITCHER_OPTION_CHECK_CLASS,
@@ -19,8 +17,6 @@ import {
   WORKSPACE_SWITCHER_OPTION_LABEL_CLASS,
   WORKSPACE_SWITCHER_OPTION_SELECTED_CLASS,
   WORKSPACE_SWITCHER_PANEL_CLASS,
-  WORKSPACE_SWITCHER_ROLE,
-  WORKSPACE_SWITCHER_SETTINGS_CLASS,
   WORKSPACE_SWITCHER_STATIC_CLASS,
   WORKSPACE_SWITCHER_TRIGGER_CLASS,
   WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS,
@@ -28,19 +24,16 @@ import {
   workspaceSwitcherMarkLetter,
   workspaceSwitcherOptionClass,
   workspaceSwitcherOptions,
-  workspaceSwitcherRole,
-  workspaceSwitcherSettingsHref,
   workspaceSwitcherShowsChevron,
-  workspaceSwitcherShowsSettings,
 } from "./workspace-switcher";
 import { persistWorkspaceCookie, workspaceHome } from "./workspace";
 
 describe("workspace switcher lock", () => {
-  it("reuses the account-menu Workspace word only as the control name", () => {
+  it("names the control Workspace and the quiet menu heading Workspaces", () => {
     expect(WORKSPACE_SWITCHER.label).toBe("Workspace");
     expect(WORKSPACE_SWITCHER.label).toBe(USER_MENU.workspace);
-    expect(WORKSPACE_SWITCHER.settings).toBe(USER_MENU.settings);
-    expect(WORKSPACE_SWITCHER.settings).toBe("Settings");
+    expect(WORKSPACE_SWITCHER.heading).toBe("Workspaces");
+    expect(WORKSPACE_SWITCHER).not.toHaveProperty("settings");
     expect(USER_MENU).not.toHaveProperty("workspaceHref");
   });
 
@@ -104,23 +97,14 @@ describe("workspace switcher lock", () => {
     );
   });
 
-  it("uses leading marks and the existing Settings door only", () => {
+  it("uses leading row marks and a quiet Workspaces heading — no identity header or Settings", () => {
     expect(workspaceSwitcherMarkLetter("aggregation")).toBe("A");
     expect(workspaceSwitcherMarkLetter("social")).toBe("S");
     expect(workspaceSwitcherMarkLetter("education")).toBe("E");
     expect(WORKSPACE_SWITCHER_MARK).toEqual({ aggregation: "A", social: "S", education: "E" });
     expect(WORKSPACE_SWITCHER_MARK_CLASS).toContain("size-6");
-    expect(WORKSPACE_SWITCHER_HEADER_MARK_CLASS).toContain("size-8");
-    expect(workspaceSwitcherRole("aggregation")).toBe("Catalog");
-    expect(workspaceSwitcherRole("social")).toBe(SOCIAL_WORKSPACE);
-    expect(workspaceSwitcherRole("education")).toBe("Courses");
-    expect(WORKSPACE_SWITCHER_ROLE.social).toBe(SOCIAL_WORKSPACE);
-    expect(workspaceSwitcherShowsSettings()).toBe(true);
-    expect(workspaceSwitcherSettingsHref("/")).toBe("/settings/aggregation");
-    expect(workspaceSwitcherSettingsHref("/social")).toBe("/settings/social");
-    expect(workspaceSwitcherSettingsHref("/social/courses")).toBe("/settings/education");
-    expect(workspaceSwitcherSettingsHref("/")).toBe(settingsLandHref("/"));
-    expect(WORKSPACE_SWITCHER_SETTINGS_CLASS).toContain("t-body-sm");
+    expect(WORKSPACE_SWITCHER_HEADER_CLASS).toContain("t-label");
+    expect(WORKSPACE_SWITCHER_HEADER_CLASS).toContain("text-ink-3");
     expect(WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS).toContain("truncate");
     expect(WORKSPACE_SWITCHER_PANEL_CLASS).toContain("right-0");
     expect(WORKSPACE_SWITCHER_PANEL_CLASS).toContain("shadow-none");

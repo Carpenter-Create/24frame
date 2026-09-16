@@ -14,12 +14,12 @@ import {
   WORKSPACE_SWITCHER,
   WORKSPACE_SWITCHER_ABSENT,
   WORKSPACE_SWITCHER_CHEVRON_CLASS,
+  WORKSPACE_SWITCHER_HEADER_CLASS,
   WORKSPACE_SWITCHER_OPTION_CHECK_CLASS,
   WORKSPACE_SWITCHER_OPTION_CHECK_GUTTER_CLASS,
   WORKSPACE_SWITCHER_OPTION_CLASS,
   WORKSPACE_SWITCHER_OPTION_LABEL_CLASS,
   workspaceSwitcherChevronClass,
-  workspaceSwitcherRole,
 } from "@/lib/workspace-switcher";
 import { WorkspaceSwitcher } from "./workspace-switcher";
 
@@ -57,19 +57,20 @@ describe("workspace switcher header control", () => {
     expect(triggerSrc).not.toContain("WorkspaceMark");
   });
 
-  it("opens header, Settings, then Aggregation / Social / Education", () => {
+  it("opens a quiet Workspaces heading, then Aggregation / Social / Education", () => {
     const html = renderToStaticMarkup(
       <WorkspaceSwitcher current="social" defaultOpen />,
     );
     expect(html).toContain("data-workspace-switcher-popover");
     expect(html).toContain("data-workspace-switcher-header");
-    expect(html).toContain("data-workspace-switcher-header-name");
-    expect(html).toContain("data-workspace-switcher-header-role");
-    expect(html).toContain('data-workspace-switcher-mark="social"');
-    expect(html).toContain(workspaceSwitcherRole("social"));
-    expect(html).toContain("data-workspace-switcher-settings");
-    expect(html).toContain(WORKSPACE_SWITCHER.settings);
-    expect(html).toContain('href="/settings/aggregation"');
+    expect(html).toContain(WORKSPACE_SWITCHER.heading);
+    expect(html).toContain(WORKSPACE_SWITCHER_HEADER_CLASS);
+    expect(html).not.toContain("data-workspace-switcher-header-name");
+    expect(html).not.toContain("data-workspace-switcher-header-role");
+    expect(html).not.toContain("data-workspace-switcher-settings");
+    expect(html).not.toContain('href="/settings/aggregation"');
+    expect(html).not.toContain('href="/settings/social"');
+    expect(html).not.toContain('href="/settings/education"');
     expect(html).toContain('data-workspace-switcher-option="aggregation"');
     expect(html).toContain('data-workspace-switcher-option="social"');
     expect(html).toContain('data-workspace-switcher-option="education"');
@@ -82,11 +83,14 @@ describe("workspace switcher header control", () => {
       expect(html).not.toContain(absent);
     }
     expect(src.indexOf("data-workspace-switcher-header")).toBeLessThan(
-      src.indexOf("data-workspace-switcher-settings"),
-    );
-    expect(src.indexOf("data-workspace-switcher-settings")).toBeLessThan(
       src.indexOf("data-workspace-switcher-option"),
     );
+    expect(src).not.toContain("data-workspace-switcher-header-name");
+    expect(src).not.toContain("data-workspace-switcher-header-role");
+    expect(src).not.toContain("data-workspace-switcher-settings");
+    expect(src).not.toContain("workspaceSwitcherRole");
+    expect(src).not.toContain("workspaceSwitcherShowsSettings");
+    expect(src).not.toContain("workspaceSwitcherSettingsHref");
     expect(src).toContain("persistWorkspaceCookie");
     expect(src).toContain("workspaceHome(option.mode)");
     expect(src).toContain("availableWorkspaceOptions");
