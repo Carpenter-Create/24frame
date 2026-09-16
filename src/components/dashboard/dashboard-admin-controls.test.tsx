@@ -53,6 +53,7 @@ describe("DashboardAdminControls", () => {
     expect(html).not.toContain("data-dashboard-period-grains");
     expect(html).not.toContain("<select");
     expect(html).not.toContain("REPORTS_SELECT_CLASS");
+    expect(html).not.toMatch(/<label[^>]*>[\s\S]*data-dashboard-period-menu/);
   });
 
   it("keeps URL sync on replace and does not mount a native select", () => {
@@ -63,5 +64,6 @@ describe("DashboardAdminControls", () => {
     expect(src).not.toContain("DASHBOARD_PERIOD_GRAINS");
     expect(src).not.toContain("data-dashboard-period-grains");
     expect(src).toContain("AppearanceCheck");
+    expect(src).not.toMatch(/<label[\s\S]*data-dashboard-period[\s\S]*<\/label>/);
   });
 });

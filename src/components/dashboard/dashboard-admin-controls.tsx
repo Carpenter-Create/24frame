@@ -84,7 +84,7 @@ export function DashboardAdminControls({
       className="flex flex-wrap items-center justify-end gap-[var(--space-4)]"
     >
       <div className="flex flex-wrap items-center gap-[var(--space-4)]">
-        <label className="flex items-center gap-[var(--space-2)]">
+        <div className="flex items-center gap-[var(--space-2)]">
           <span className="t-label text-ink-3">{DASHBOARD_ADMIN.period}</span>
           <div ref={hostRef} className="relative">
             <button
@@ -155,7 +155,7 @@ export function DashboardAdminControls({
               </div>
             ) : null}
           </div>
-        </label>
+        </div>
       </div>
       <div className="relative">
         <label className="flex items-center gap-[var(--space-2)]">
