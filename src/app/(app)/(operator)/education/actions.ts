@@ -4,20 +4,28 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import {
+  COURSE_STATUSES,
   EDUCATION_ADMIN,
   EDUCATION_HREF,
+  EDUCATION_NAME_MAX,
+  EDUCATION_SUMMARY_MAX,
   EDUCATION_TITLE_MAX,
+  allocateCourseSlug,
   educationCoverKey,
   educationHlsManifestKey,
   educationHlsPrefix,
+  educationLessonCoverKey,
   educationLessonSourceKey,
+  isCourseStatus,
   isEducationObjectKey,
+  minutesToDurationSeconds,
   normalizeCourseSlug,
   normalizeEducationCoverContentType,
   normalizeEducationSourceContentType,
   parseEducationPriceDollars,
   resolveEducationProduct,
   validateEducationUpload,
+  type CourseStatus,
   type EducationProductModel,
 } from "@/lib/education";
 import {
@@ -71,19 +79,81 @@ function parseEducationProduct(raw: {
   return resolveEducationProduct({ model: raw.model, priceCents });
 }
 
-export async function createEducationCourse(raw: unknown): Promise<{ error?: string; slug?: string }> {
+type AdminClient = ReturnType<typeof createAdminClient>;
+
+async function nextCoursePosition(admin: AdminClient): Promise<number> {
+  const { data } = await admin
+    .from("courses")
+    .select("position")
+    .order("position", { ascending: false })
+    .limit(1);
+  return (data?.[0]?.position ?? 0) + 1;
+}
+
+async function allocateUniqueCourseSlug(
+  admin: AdminClient,
+  title: string,
+  override?: string,
+): Promise<string | null> {
+  const { data } = await admin.from("courses").select("slug");
+  return allocateCourseSlug(
+    title,
+    (data ?? []).map((row) => row.slug),
+    override,
+  );
+}
+
+async function resolveInstructorId(
+  admin: AdminClient,
+  input: { instructorId?: string; instructorName?: string },
+): Promise<{ ok: true; instructorId: string | null } | { ok: false; error: string }> {
+  if (input.instructorId) {
+    const { data } = await admin
+      .from("instructors")
+      .select("id")
+      .eq("id", input.instructorId)
+      .maybeSingle();
+    if (!data) return { ok: false, error: EDUCATION_ADMIN.invalid };
+    return { ok: true, instructorId: data.id };
+  }
+  const name = input.instructorName?.trim() ?? "";
+  if (!name) return { ok: true, instructorId: null };
+  const { data: existing } = await admin
+    .from("instructors")
+    .select("id")
+    .eq("name", name)
+    .maybeSingle();
+  if (existing) return { ok: true, instructorId: existing.id };
+  const { data: created, error } = await admin
+    .from("instructors")
+    .insert({ name })
+    .select("id")
+    .maybeSingle();
+  if (error || !created) return { ok: false, error: error?.message ?? EDUCATION_ADMIN.invalid };
+  return { ok: true, instructorId: created.id };
+}
+
+function courseSlugFromJoin(courses: { slug: string } | { slug: string }[] | null | undefined): string | undefined {
+  const course = Array.isArray(courses) ? courses[0] : courses;
+  return course?.slug;
+}
+
+export async function createEducationCourse(
+  raw: unknown,
+): Promise<{ error?: string; slug?: string; courseId?: string }> {
   const parsed = z
     .object({
-      slug: z.string(),
-      title: z.string().trim().min(1).max(EDUCATION_TITLE_MAX),
-      description: z.string().trim().max(2000).optional(),
+      slug: z.string().optional(),
+      title: z.string().trim().min(1).max(EDUCATION_NAME_MAX),
+      description: z.string().trim().max(EDUCATION_SUMMARY_MAX).optional(),
       model: z.enum(["free", "paid"]),
       price: z.string().optional(),
+      status: z.enum(COURSE_STATUSES).optional(),
+      instructorId: z.string().uuid().optional(),
+      instructorName: z.string().trim().max(EDUCATION_TITLE_MAX).optional(),
     })
     .safeParse(raw);
   if (!parsed.success) return { error: EDUCATION_ADMIN.invalid };
-  const slug = normalizeCourseSlug(parsed.data.slug);
-  if (!slug) return { error: EDUCATION_ADMIN.invalid };
   const product = parseEducationProduct(parsed.data);
   if (!product.ok) return { error: EDUCATION_ADMIN.invalid };
 
@@ -91,34 +161,52 @@ export async function createEducationCourse(raw: unknown): Promise<{ error?: str
   if (!staff.ok) return { error: staff.error };
 
   const admin = createAdminClient();
-  const { error } = await admin.from("courses").insert({
-    slug,
-    title: parsed.data.title,
-    description: parsed.data.description || null,
-    is_flagship_free: product.is_flagship_free,
-    price_cents: product.price_cents,
-  });
-  if (error) {
-    if (uniqueConflict(error)) return { error: EDUCATION_ADMIN.conflict };
-    return { error: error.message };
+  const slug = await allocateUniqueCourseSlug(admin, parsed.data.title, parsed.data.slug);
+  if (!slug) return { error: EDUCATION_ADMIN.invalid };
+  const instructor = await resolveInstructorId(admin, parsed.data);
+  if (!instructor.ok) return { error: instructor.error };
+  const position = await nextCoursePosition(admin);
+
+  const { data: created, error } = await admin
+    .from("courses")
+    .insert({
+      slug,
+      title: parsed.data.title,
+      description: parsed.data.description || null,
+      is_flagship_free: product.is_flagship_free,
+      price_cents: product.price_cents,
+      status: parsed.data.status ?? "draft",
+      position,
+      instructor_id: instructor.instructorId,
+    })
+    .select("id")
+    .maybeSingle();
+  if (error || !created) {
+    if (error && uniqueConflict(error)) return { error: EDUCATION_ADMIN.conflict };
+    return { error: error?.message ?? EDUCATION_ADMIN.invalid };
   }
   revalidateEducation(slug);
-  return { slug };
+  return { slug, courseId: created.id };
 }
 
-export async function updateEducationCourse(raw: unknown): Promise<{ error?: string }> {
+export async function updateEducationCourse(raw: unknown): Promise<{ error?: string; slug?: string }> {
   const parsed = z
     .object({
       courseId: z.string().uuid(),
-      title: z.string().trim().min(1).max(EDUCATION_TITLE_MAX),
-      description: z.string().trim().max(2000).optional(),
+      title: z.string().trim().min(1).max(EDUCATION_NAME_MAX),
+      description: z.string().trim().max(EDUCATION_SUMMARY_MAX).optional(),
+      slug: z.string().optional(),
       model: z.enum(["free", "paid"]),
       price: z.string().optional(),
+      status: z.enum(COURSE_STATUSES),
+      instructorId: z.string().uuid().optional(),
+      instructorName: z.string().trim().max(EDUCATION_TITLE_MAX).optional(),
     })
     .safeParse(raw);
   if (!parsed.success) return { error: EDUCATION_ADMIN.invalid };
   const product = parseEducationProduct(parsed.data);
   if (!product.ok) return { error: EDUCATION_ADMIN.invalid };
+  if (!isCourseStatus(parsed.data.status)) return { error: EDUCATION_ADMIN.invalid };
 
   const staff = await requireEducationStaff();
   if (!staff.ok) return { error: staff.error };
@@ -131,18 +219,45 @@ export async function updateEducationCourse(raw: unknown): Promise<{ error?: str
     .maybeSingle();
   if (readError || !course) return { error: EDUCATION_ADMIN.missing };
 
+  const instructor = await resolveInstructorId(admin, parsed.data);
+  if (!instructor.ok) return { error: instructor.error };
+
+  let nextSlug = course.slug;
+  const override = parsed.data.slug?.trim() ?? "";
+  if (override) {
+    const allocated = await allocateUniqueCourseSlug(admin, parsed.data.title, override);
+    if (!allocated) return { error: EDUCATION_ADMIN.invalid };
+    const normalizedOverride = normalizeCourseSlug(override);
+    nextSlug = allocated === course.slug || normalizedOverride === course.slug ? course.slug : allocated;
+    if (nextSlug !== course.slug) {
+      const { data: taken } = await admin.from("courses").select("id").eq("slug", nextSlug).maybeSingle();
+      if (taken && taken.id !== parsed.data.courseId) {
+        const again = await allocateUniqueCourseSlug(admin, parsed.data.title, override);
+        if (!again) return { error: EDUCATION_ADMIN.invalid };
+        nextSlug = again;
+      }
+    }
+  }
+
   const { error } = await admin
     .from("courses")
     .update({
       title: parsed.data.title,
       description: parsed.data.description || null,
+      slug: nextSlug,
       is_flagship_free: product.is_flagship_free,
       price_cents: product.price_cents,
+      status: parsed.data.status,
+      instructor_id: instructor.instructorId,
     })
     .eq("id", parsed.data.courseId);
-  if (error) return { error: error.message };
+  if (error) {
+    if (uniqueConflict(error)) return { error: EDUCATION_ADMIN.conflict };
+    return { error: error.message };
+  }
   revalidateEducation(course.slug);
-  return {};
+  if (nextSlug !== course.slug) revalidateEducation(nextSlug);
+  return { slug: nextSlug };
 }
 
 export async function createEducationModule(raw: unknown): Promise<{ error?: string }> {
@@ -182,18 +297,28 @@ export async function createEducationModule(raw: unknown): Promise<{ error?: str
   return {};
 }
 
-export async function createEducationLesson(raw: unknown): Promise<{ error?: string }> {
+export async function createEducationLesson(
+  raw: unknown,
+): Promise<{ error?: string; lessonId?: string }> {
   const parsed = z
     .object({
       moduleId: z.string().uuid(),
-      title: z.string().trim().min(1).max(EDUCATION_TITLE_MAX),
-      freePreview: z.boolean().optional(),
+      title: z.string().trim().min(1).max(EDUCATION_NAME_MAX),
+      summary: z.string().trim().max(EDUCATION_SUMMARY_MAX).optional(),
+      durationMinutes: z.number().int().min(1).max(24 * 60).nullable().optional(),
+      lessonType: z.literal("lesson").optional(),
     })
     .safeParse(raw);
   if (!parsed.success) return { error: EDUCATION_ADMIN.invalid };
 
   const staff = await requireEducationStaff();
   if (!staff.ok) return { error: staff.error };
+
+  const durationSeconds =
+    parsed.data.durationMinutes == null ? null : minutesToDurationSeconds(parsed.data.durationMinutes);
+  if (parsed.data.durationMinutes != null && durationSeconds == null) {
+    return { error: EDUCATION_ADMIN.invalid };
+  }
 
   const admin = createAdminClient();
   const { data: moduleRow } = await admin
@@ -202,7 +327,7 @@ export async function createEducationLesson(raw: unknown): Promise<{ error?: str
     .eq("id", parsed.data.moduleId)
     .maybeSingle();
   if (!moduleRow) return { error: EDUCATION_ADMIN.missing };
-  const slug = Array.isArray(moduleRow.courses) ? moduleRow.courses[0]?.slug : moduleRow.courses?.slug;
+  const slug = courseSlugFromJoin(moduleRow.courses);
 
   const { data: existing } = await admin
     .from("lessons")
@@ -211,30 +336,60 @@ export async function createEducationLesson(raw: unknown): Promise<{ error?: str
     .order("position", { ascending: false })
     .limit(1);
   const position = (existing?.[0]?.position ?? 0) + 1;
-  const { error } = await admin.from("lessons").insert({
-    module_id: parsed.data.moduleId,
-    title: parsed.data.title,
-    position,
-    free_preview: parsed.data.freePreview ?? false,
-  });
-  if (error) return { error: error.message };
+  const { data: lesson, error } = await admin
+    .from("lessons")
+    .insert({
+      module_id: parsed.data.moduleId,
+      title: parsed.data.title,
+      summary: parsed.data.summary || null,
+      position,
+      duration_seconds: durationSeconds,
+      lesson_type: "lesson",
+      free_preview: false,
+    })
+    .select("id")
+    .maybeSingle();
+  if (error || !lesson) return { error: error?.message ?? EDUCATION_ADMIN.invalid };
+
+  const { data: video, error: videoError } = await admin
+    .from("education_videos")
+    .insert({
+      course_id: moduleRow.course_id,
+      lesson_id: lesson.id,
+    })
+    .select("id")
+    .maybeSingle();
+  if (videoError || !video) return { error: videoError?.message ?? EDUCATION_ADMIN.invalid };
+
+  const { error: linkError } = await admin
+    .from("lessons")
+    .update({ education_video_id: video.id })
+    .eq("id", lesson.id);
+  if (linkError) return { error: linkError.message };
+
   if (slug) revalidateEducation(slug);
-  return {};
+  return { lessonId: lesson.id };
 }
 
 export async function updateEducationLesson(raw: unknown): Promise<{ error?: string }> {
   const parsed = z
     .object({
       lessonId: z.string().uuid(),
-      title: z.string().trim().min(1).max(EDUCATION_TITLE_MAX),
-      durationSeconds: z.number().int().min(1).max(86_400).nullable().optional(),
-      freePreview: z.boolean(),
+      title: z.string().trim().min(1).max(EDUCATION_NAME_MAX),
+      summary: z.string().trim().max(EDUCATION_SUMMARY_MAX).optional(),
+      durationMinutes: z.number().int().min(1).max(24 * 60).nullable().optional(),
     })
     .safeParse(raw);
   if (!parsed.success) return { error: EDUCATION_ADMIN.invalid };
 
   const staff = await requireEducationStaff();
   if (!staff.ok) return { error: staff.error };
+
+  const durationSeconds =
+    parsed.data.durationMinutes == null ? null : minutesToDurationSeconds(parsed.data.durationMinutes);
+  if (parsed.data.durationMinutes != null && durationSeconds == null) {
+    return { error: EDUCATION_ADMIN.invalid };
+  }
 
   const admin = createAdminClient();
   const { data: lesson } = await admin
@@ -248,15 +403,15 @@ export async function updateEducationLesson(raw: unknown): Promise<{ error?: str
     .from("lessons")
     .update({
       title: parsed.data.title,
-      duration_seconds: parsed.data.durationSeconds ?? null,
-      free_preview: parsed.data.freePreview,
+      summary: parsed.data.summary || null,
+      duration_seconds: durationSeconds,
     })
     .eq("id", parsed.data.lessonId);
   if (error) return { error: error.message };
 
   const moduleRow = Array.isArray(lesson.modules) ? lesson.modules[0] : lesson.modules;
-  const course = moduleRow && (Array.isArray(moduleRow.courses) ? moduleRow.courses[0] : moduleRow.courses);
-  if (course?.slug) revalidateEducation(course.slug);
+  const slug = courseSlugFromJoin(moduleRow?.courses);
+  if (slug) revalidateEducation(slug);
   return {};
 }
 
@@ -267,7 +422,7 @@ export async function presignEducationUpload(raw: unknown): Promise<{
 }> {
   const parsed = z
     .object({
-      kind: z.enum(["cover", "source"]),
+      kind: z.enum(["cover", "source", "lesson_cover"]),
       courseId: z.string().uuid(),
       lessonId: z.string().uuid().optional(),
       contentType: z.string(),
@@ -279,7 +434,7 @@ export async function presignEducationUpload(raw: unknown): Promise<{
   const staff = await requireEducationStaff();
   if (!staff.ok) return { error: staff.error };
   if (!isEducationAwsConfigured()) return { error: EDUCATION_ADMIN.envUnset };
-  if (parsed.data.kind === "source" && !parsed.data.lessonId) {
+  if ((parsed.data.kind === "source" || parsed.data.kind === "lesson_cover") && !parsed.data.lessonId) {
     return { error: EDUCATION_ADMIN.invalid };
   }
 
@@ -295,11 +450,17 @@ export async function presignEducationUpload(raw: unknown): Promise<{
     key =
       parsed.data.kind === "cover"
         ? educationCoverKey(parsed.data.courseId, checked.contentType)
-        : educationLessonSourceKey(
-            parsed.data.courseId,
-            parsed.data.lessonId ?? "",
-            checked.contentType,
-          );
+        : parsed.data.kind === "lesson_cover"
+          ? educationLessonCoverKey(
+              parsed.data.courseId,
+              parsed.data.lessonId ?? "",
+              checked.contentType,
+            )
+          : educationLessonSourceKey(
+              parsed.data.courseId,
+              parsed.data.lessonId ?? "",
+              checked.contentType,
+            );
   } catch {
     return { error: EDUCATION_ADMIN.invalid };
   }
@@ -368,6 +529,71 @@ export async function uploadEducationCover(formData: FormData): Promise<{ error?
     .eq("id", parsed.data.courseId);
   if (error) return { error: error.message };
   revalidateEducation(course.slug);
+  return {};
+}
+
+export async function uploadEducationLessonCover(formData: FormData): Promise<{ error?: string }> {
+  const courseId = String(formData.get("courseId") ?? "");
+  const lessonId = String(formData.get("lessonId") ?? "");
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) return { error: EDUCATION_ADMIN.invalid };
+  const parsed = z
+    .object({ courseId: z.string().uuid(), lessonId: z.string().uuid() })
+    .safeParse({ courseId, lessonId });
+  if (!parsed.success) return { error: EDUCATION_ADMIN.invalid };
+
+  const staff = await requireEducationStaff();
+  if (!staff.ok) return { error: staff.error };
+  if (!isEducationAwsConfigured()) return { error: EDUCATION_ADMIN.envUnset };
+
+  const contentType = normalizeEducationCoverContentType(file.type, file.name);
+  const checked = validateEducationUpload({
+    kind: "lesson_cover",
+    contentType,
+    byteLength: file.size,
+  });
+  if (!checked.ok) return { error: EDUCATION_ADMIN.invalid };
+
+  let key: string;
+  try {
+    key = educationLessonCoverKey(parsed.data.courseId, parsed.data.lessonId, checked.contentType);
+  } catch {
+    return { error: EDUCATION_ADMIN.invalid };
+  }
+  if (
+    !isEducationObjectKey(key) ||
+    !key.startsWith(`courses/${parsed.data.courseId}/lessons/${parsed.data.lessonId}/cover.`)
+  ) {
+    return { error: EDUCATION_ADMIN.invalid };
+  }
+
+  const admin = createAdminClient();
+  const { data: lesson } = await admin
+    .from("lessons")
+    .select("id, modules(courses(slug))")
+    .eq("id", parsed.data.lessonId)
+    .maybeSingle();
+  if (!lesson) return { error: EDUCATION_ADMIN.missing };
+
+  try {
+    const body = new Uint8Array(await file.arrayBuffer());
+    await putEducationSourceObject(key, body, checked.contentType);
+  } catch (err) {
+    if (err instanceof Error && /environment variable is not set/.test(err.message)) {
+      return { error: EDUCATION_ADMIN.envUnset };
+    }
+    return { error: EDUCATION_ADMIN.uploadFailed };
+  }
+
+  const { error } = await admin
+    .from("lessons")
+    .update({ cover_key: key })
+    .eq("id", parsed.data.lessonId);
+  if (error) return { error: error.message };
+
+  const moduleRow = Array.isArray(lesson.modules) ? lesson.modules[0] : lesson.modules;
+  const slug = courseSlugFromJoin(moduleRow?.courses);
+  if (slug) revalidateEducation(slug);
   return {};
 }
 
@@ -441,7 +667,7 @@ export async function uploadEducationLessonSource(formData: FormData): Promise<{
   const admin = createAdminClient();
   const { data: lesson } = await admin
     .from("lessons")
-    .select("id, modules(course_id, courses(slug))")
+    .select("id, education_video_id, modules(course_id, courses(slug))")
     .eq("id", parsed.data.lessonId)
     .maybeSingle();
   if (!lesson) return { error: EDUCATION_ADMIN.missing };
@@ -460,6 +686,7 @@ export async function uploadEducationLessonSource(formData: FormData): Promise<{
     return { error: EDUCATION_ADMIN.uploadFailed };
   }
 
+  const now = new Date().toISOString();
   const { error } = await admin
     .from("lessons")
     .update({
@@ -468,10 +695,25 @@ export async function uploadEducationLessonSource(formData: FormData): Promise<{
       encode_job_id: null,
       encode_error: null,
       hls_key: null,
-      encode_updated_at: new Date().toISOString(),
+      encode_updated_at: now,
     })
     .eq("id", parsed.data.lessonId);
   if (error) return { error: error.message };
+
+  if (lesson.education_video_id) {
+    await admin
+      .from("education_videos")
+      .update({
+        source_key: key,
+        encode_status: null,
+        encode_job_id: null,
+        encode_error: null,
+        hls_key: null,
+        encode_updated_at: now,
+      })
+      .eq("id", lesson.education_video_id);
+  }
+
   if (course?.slug) revalidateEducation(course.slug);
   return {};
 }
@@ -498,11 +740,12 @@ export async function attachEducationLessonSource(raw: unknown): Promise<{ error
   const admin = createAdminClient();
   const { data: lesson } = await admin
     .from("lessons")
-    .select("id, modules(courses(slug))")
+    .select("id, education_video_id, modules(courses(slug))")
     .eq("id", parsed.data.lessonId)
     .maybeSingle();
   if (!lesson) return { error: EDUCATION_ADMIN.missing };
 
+  const now = new Date().toISOString();
   const { error } = await admin
     .from("lessons")
     .update({
@@ -511,14 +754,28 @@ export async function attachEducationLessonSource(raw: unknown): Promise<{ error
       encode_job_id: null,
       encode_error: null,
       hls_key: null,
-      encode_updated_at: new Date().toISOString(),
+      encode_updated_at: now,
     })
     .eq("id", parsed.data.lessonId);
   if (error) return { error: error.message };
 
+  if (lesson.education_video_id) {
+    await admin
+      .from("education_videos")
+      .update({
+        source_key: parsed.data.key,
+        encode_status: null,
+        encode_job_id: null,
+        encode_error: null,
+        hls_key: null,
+        encode_updated_at: now,
+      })
+      .eq("id", lesson.education_video_id);
+  }
+
   const moduleRow = Array.isArray(lesson.modules) ? lesson.modules[0] : lesson.modules;
-  const course = moduleRow && (Array.isArray(moduleRow.courses) ? moduleRow.courses[0] : moduleRow.courses);
-  if (course?.slug) revalidateEducation(course.slug);
+  const slug = courseSlugFromJoin(moduleRow?.courses);
+  if (slug) revalidateEducation(slug);
   return {};
 }
 
@@ -533,14 +790,14 @@ export async function startEducationLessonEncode(raw: unknown): Promise<{ error?
   const admin = createAdminClient();
   const { data: lesson } = await admin
     .from("lessons")
-    .select("id, source_key, modules(course_id, courses(slug))")
+    .select("id, source_key, education_video_id, modules(course_id, courses(slug))")
     .eq("id", parsed.data.lessonId)
     .maybeSingle();
   if (!lesson?.source_key) return { error: EDUCATION_ADMIN.encodeNone };
 
   const moduleRow = Array.isArray(lesson.modules) ? lesson.modules[0] : lesson.modules;
   const courseId = moduleRow?.course_id;
-  const course = moduleRow && (Array.isArray(moduleRow.courses) ? moduleRow.courses[0] : moduleRow.courses);
+  const slug = courseSlugFromJoin(moduleRow?.courses);
   if (!courseId) return { error: EDUCATION_ADMIN.missing };
 
   const hlsKey = educationHlsManifestKey(courseId, lesson.id);
@@ -549,6 +806,7 @@ export async function startEducationLessonEncode(raw: unknown): Promise<{ error?
       sourceKey: lesson.source_key,
       destinationPrefix: educationHlsPrefix(courseId, lesson.id),
     });
+    const now = new Date().toISOString();
     const { error } = await admin
       .from("lessons")
       .update({
@@ -556,10 +814,22 @@ export async function startEducationLessonEncode(raw: unknown): Promise<{ error?
         encode_job_id: externalJobId,
         encode_error: null,
         hls_key: hlsKey,
-        encode_updated_at: new Date().toISOString(),
+        encode_updated_at: now,
       })
       .eq("id", lesson.id);
     if (error) return { error: error.message };
+    if (lesson.education_video_id) {
+      await admin
+        .from("education_videos")
+        .update({
+          encode_status: "submitted",
+          encode_job_id: externalJobId,
+          encode_error: null,
+          hls_key: hlsKey,
+          encode_updated_at: now,
+        })
+        .eq("id", lesson.education_video_id);
+    }
   } catch (err) {
     const message = err instanceof Error ? err.message : EDUCATION_ADMIN.encodeFailed;
     await admin
@@ -574,7 +844,7 @@ export async function startEducationLessonEncode(raw: unknown): Promise<{ error?
     return { error: EDUCATION_ADMIN.encodeFailed };
   }
 
-  if (course?.slug) revalidateEducation(course.slug);
+  if (slug) revalidateEducation(slug);
   return {};
 }
 
@@ -589,7 +859,7 @@ export async function refreshEducationLessonEncode(raw: unknown): Promise<{ erro
   const admin = createAdminClient();
   const { data: lesson } = await admin
     .from("lessons")
-    .select("id, encode_job_id, modules(courses(slug))")
+    .select("id, encode_job_id, education_video_id, modules(courses(slug))")
     .eq("id", parsed.data.lessonId)
     .maybeSingle();
   if (!lesson?.encode_job_id) return { error: EDUCATION_ADMIN.encodeNone };
@@ -597,15 +867,26 @@ export async function refreshEducationLessonEncode(raw: unknown): Promise<{ erro
   try {
     const job = await getEducationEncodeJob(lesson.encode_job_id);
     if (!job.status) return {};
+    const now = new Date().toISOString();
     const { error } = await admin
       .from("lessons")
       .update({
         encode_status: job.status,
         encode_error: job.errorMessage,
-        encode_updated_at: new Date().toISOString(),
+        encode_updated_at: now,
       })
       .eq("id", lesson.id);
     if (error) return { error: error.message };
+    if (lesson.education_video_id) {
+      await admin
+        .from("education_videos")
+        .update({
+          encode_status: job.status,
+          encode_error: job.errorMessage,
+          encode_updated_at: now,
+        })
+        .eq("id", lesson.education_video_id);
+    }
   } catch (err) {
     const message = err instanceof Error ? err.message : EDUCATION_ADMIN.encodeFailed;
     if (/environment variable is not set/.test(message)) return { error: EDUCATION_ADMIN.encodeUnset };
@@ -613,7 +894,9 @@ export async function refreshEducationLessonEncode(raw: unknown): Promise<{ erro
   }
 
   const moduleRow = Array.isArray(lesson.modules) ? lesson.modules[0] : lesson.modules;
-  const course = moduleRow && (Array.isArray(moduleRow.courses) ? moduleRow.courses[0] : moduleRow.courses);
-  if (course?.slug) revalidateEducation(course.slug);
+  const slug = courseSlugFromJoin(moduleRow?.courses);
+  if (slug) revalidateEducation(slug);
   return {};
 }
+
+export type { CourseStatus };

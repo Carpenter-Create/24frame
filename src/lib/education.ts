@@ -71,6 +71,14 @@ export const EDUCATION_IMAGE_MAX_BYTES = 10 * 1024 * 1024;
 export const EDUCATION_VIDEO_MAX_BYTES = 2 * 1024 * 1024 * 1024;
 export const EDUCATION_SLUG_MAX = 80;
 export const EDUCATION_TITLE_MAX = 160;
+export const EDUCATION_NAME_MAX = 80;
+export const EDUCATION_SUMMARY_MAX = 200;
+export const EDUCATION_DURATION_MINUTES_MAX = 24 * 60;
+export const EDUCATION_CATALOG_CODE_RE = /^EDU-\d{4,}$/;
+export const COURSE_STATUSES = ["draft", "published", "archived"] as const;
+export type CourseStatus = (typeof COURSE_STATUSES)[number];
+export const EDUCATION_LESSON_TYPES = ["lesson"] as const;
+export type EducationLessonType = (typeof EDUCATION_LESSON_TYPES)[number];
 
 export const EDUCATION_IMAGE_CONTENT_TYPES = [
   "image/jpeg",
@@ -86,7 +94,7 @@ export const EDUCATION_VIDEO_CONTENT_TYPES = [
 
 export type EducationImageContentType = (typeof EDUCATION_IMAGE_CONTENT_TYPES)[number];
 export type EducationVideoContentType = (typeof EDUCATION_VIDEO_CONTENT_TYPES)[number];
-export type EducationUploadKind = "cover" | "source";
+export type EducationUploadKind = "cover" | "source" | "lesson_cover";
 
 export const COURSE_ENCODE_STATUSES = [
   "submitted",
@@ -99,11 +107,14 @@ export const COURSE_ENCODE_STATUSES = [
 export type CourseEncodeStatus = (typeof COURSE_ENCODE_STATUSES)[number];
 
 export const EDUCATION_ADMIN = {
-  title: "Education",
-  subtitle: "Courses, modules, and lesson source.",
+  title: "Manage courses",
+  subtitle: "Draft, publish, and place courses.",
   create: "Create course",
+  newCourse: "New course",
+  newLesson: "New lesson",
   save: "Save",
   saving: "Saving…",
+  cancel: "Cancel",
   empty: "No courses yet.",
   error: "Education could not be loaded.",
   missing: "That course is not visible.",
@@ -112,23 +123,35 @@ export const EDUCATION_ADMIN = {
   envUnset: "Education storage is not configured.",
   encodeUnset: "Encode is not configured.",
   slug: "Slug",
-  courseTitle: "Title",
-  description: "Description",
+  slugHint: "Filled from the title. Change it only if you need a specific URL.",
+  courseTitle: "Name",
+  description: "Summary",
+  catalogCode: "Catalog code",
+  status: "Status",
+  draft: "Draft",
+  published: "Published",
+  archived: "Archived",
+  instructor: "Instructor",
+  instructorHint: "Optional. Creates an instructor if the name is new.",
+  position: "Position",
   flagship: "Flagship (free)",
   model: "Access",
   free: "Free",
   paid: "Paid",
   price: "Price (USD)",
   oneTime: "One-time",
-  previewHint: "Visible without course access.",
   cover: "Cover",
+  coverHint: "Drop a cover or click to upload.",
   uploadCover: "Upload cover",
   addModule: "Add module",
   addLesson: "Add lesson",
   moduleTitle: "Module title",
-  lessonTitle: "Lesson title",
-  duration: "Duration (seconds)",
-  preview: "Free preview",
+  lessonTitle: "Name",
+  lessonSummary: "Summary",
+  lessonType: "Lesson type",
+  lessonTypeLesson: "Lesson",
+  duration: "Duration (minutes)",
+  modulePlacement: "Section",
   source: "Lesson source",
   uploadSource: "Upload source",
   startEncode: "Start encode",
@@ -141,7 +164,14 @@ export const EDUCATION_ADMIN = {
   conflict: "That slug is already in use.",
   uploadFailed: "Upload could not start.",
   encodeFailed: "Encode could not start.",
+  needsModule: "Add a section before you add a lesson.",
 } as const;
+
+export const COURSE_STATUS_LABELS: Record<CourseStatus, string> = {
+  draft: EDUCATION_ADMIN.draft,
+  published: EDUCATION_ADMIN.published,
+  archived: EDUCATION_ADMIN.archived,
+};
 
 export const EDUCATION_ENCODE_LABELS: Record<CourseEncodeStatus, string> = {
   submitted: "Submitted",
@@ -256,9 +286,26 @@ export function isEducationObjectKey(key: string): boolean {
   if (isForbiddenEducationKey(key)) return false;
   return (
     /^courses\/[0-9a-f-]{36}\/cover\.(jpg|jpeg|png|webp)$/i.test(key) ||
+    /^courses\/[0-9a-f-]{36}\/lessons\/[0-9a-f-]{36}\/cover\.(jpg|jpeg|png|webp)$/i.test(key) ||
     /^courses\/[0-9a-f-]{36}\/lessons\/[0-9a-f-]{36}\/source\.(mp4|mov|webm)$/i.test(key) ||
     /^courses\/[0-9a-f-]{36}\/lessons\/[0-9a-f-]{36}\/hls\/source\.m3u8$/i.test(key)
   );
+}
+
+export function educationLessonCoverKey(
+  courseId: string,
+  lessonId: string,
+  contentType: string,
+): string {
+  const course = uuidSchema.safeParse(courseId);
+  const lesson = uuidSchema.safeParse(lessonId);
+  if (!course.success || !lesson.success) {
+    throw new Error("Education lesson cover key requires course and lesson ids");
+  }
+  if (!isEducationImageContentType(contentType)) {
+    throw new Error("Unsupported education cover type");
+  }
+  return `${EDUCATION_KEY_PREFIX}/${course.data}/lessons/${lesson.data}/cover.${EXT_BY_IMAGE[contentType]}`;
 }
 
 export function educationCoverKey(courseId: string, contentType: string): string {
@@ -320,7 +367,7 @@ export function validateEducationUpload(input: {
   if (!Number.isFinite(input.byteLength) || input.byteLength <= 0) {
     return { ok: false, error: "missing" };
   }
-  if (input.kind === "cover") {
+  if (input.kind === "cover" || input.kind === "lesson_cover") {
     if (!isEducationImageContentType(input.contentType)) return { ok: false, error: "type" };
     if (input.byteLength > EDUCATION_IMAGE_MAX_BYTES) return { ok: false, error: "tooLarge" };
     return { ok: true, contentType: input.contentType };
@@ -422,4 +469,47 @@ export function educationCommercialLabel(
     return `${EDUCATION_ADMIN.paid} · ${formatEducationPriceCents(priceCents)}`;
   }
   return EDUCATION_ADMIN.paid;
+}
+
+export function isEducationCatalogCode(value: string): boolean {
+  return EDUCATION_CATALOG_CODE_RE.test(value);
+}
+
+export function isCourseStatus(value: string): value is CourseStatus {
+  return (COURSE_STATUSES as readonly string[]).includes(value);
+}
+
+export function educationCharCount(value: string, max: number): string {
+  return `${value.length}/${max}`;
+}
+
+export function minutesToDurationSeconds(minutes: number): number | null {
+  if (!Number.isInteger(minutes) || minutes < 1 || minutes > EDUCATION_DURATION_MINUTES_MAX) {
+    return null;
+  }
+  return minutes * 60;
+}
+
+export function durationSecondsToMinutesInput(seconds: number | null | undefined): string {
+  if (seconds == null || seconds <= 0) return "";
+  return String(Math.max(1, Math.round(seconds / 60)));
+}
+
+export function allocateCourseSlug(
+  title: string,
+  existing: string[],
+  override?: string,
+): string | null {
+  const raw = override?.trim() ? override : title;
+  const base = normalizeCourseSlug(raw);
+  if (!base) return null;
+  const taken = new Set(existing.map((slug) => slug.toLowerCase()));
+  if (!taken.has(base)) return base;
+  for (let n = 2; n < 1000; n += 1) {
+    const suffix = `-${n}`;
+    const trimmed = base.slice(0, Math.max(1, EDUCATION_SLUG_MAX - suffix.length)).replace(/-+$/g, "");
+    const candidate = normalizeCourseSlug(`${trimmed}${suffix}`);
+    if (candidate && !taken.has(candidate)) return candidate;
+  }
+  return null;
 }

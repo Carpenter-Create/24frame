@@ -11,7 +11,13 @@ import {
   educationCourseHref,
   educationHlsManifestKey,
   educationHlsPrefix,
+  educationLessonCoverKey,
   educationLessonSourceKey,
+  allocateCourseSlug,
+  durationSecondsToMinutesInput,
+  educationCharCount,
+  isEducationCatalogCode,
+  minutesToDurationSeconds,
   educationCommercialLabel,
   educationEncodeLabel,
   educationPriceInputValue,
@@ -52,10 +58,15 @@ describe("education names and keys", () => {
     expect(EDUCATION_HREF).toBe("/education");
     expect(educationCourseHref("welcome-to-24frame")).toBe("/education/welcome-to-24frame");
     expect(EDUCATION_ADMIN.manage).toBe("Course management");
+    expect(EDUCATION_ADMIN.title).toBe("Manage courses");
+    expect(EDUCATION_ADMIN.addLesson).toBe("Add lesson");
   });
 
   it("keeps object keys on the courses prefix", () => {
     expect(educationCoverKey(COURSE, "image/jpeg")).toBe(`courses/${COURSE}/cover.jpg`);
+    expect(educationLessonCoverKey(COURSE, LESSON, "image/jpeg")).toBe(
+      `courses/${COURSE}/lessons/${LESSON}/cover.jpg`,
+    );
     expect(educationLessonSourceKey(COURSE, LESSON, "video/mp4")).toBe(
       `courses/${COURSE}/lessons/${LESSON}/source.mp4`,
     );
@@ -64,6 +75,7 @@ describe("education names and keys", () => {
       `courses/${COURSE}/lessons/${LESSON}/hls/source.m3u8`,
     );
     expect(isEducationObjectKey(`courses/${COURSE}/cover.jpg`)).toBe(true);
+    expect(isEducationObjectKey(`courses/${COURSE}/lessons/${LESSON}/cover.jpg`)).toBe(true);
     expect(isEducationObjectKey(`posts/${COURSE}/${LESSON}.jpg`)).toBe(false);
   });
 
@@ -147,5 +159,21 @@ describe("education names and keys", () => {
     expect(educationProductModel(false)).toBe("paid");
     expect(educationCommercialLabel(true, null)).toBe("Free");
     expect(educationCommercialLabel(false, 4900)).toBe("Paid · $49.00");
+  });
+
+  it("allocates unique slugs, catalog codes, minutes, and char counts", () => {
+    expect(allocateCourseSlug("Welcome To 24Frame", [])).toBe("welcome-to-24frame");
+    expect(allocateCourseSlug("Welcome To 24Frame", ["welcome-to-24frame"])).toBe("welcome-to-24frame-2");
+    expect(allocateCourseSlug("Welcome", ["other-slug"], "Welcome To 24Frame")).toBe(
+      "welcome-to-24frame",
+    );
+    expect(isEducationCatalogCode("EDU-0001")).toBe(true);
+    expect(isEducationCatalogCode("edu-1")).toBe(false);
+    expect(minutesToDurationSeconds(12)).toBe(720);
+    expect(minutesToDurationSeconds(0)).toBeNull();
+    expect(durationSecondsToMinutesInput(720)).toBe("12");
+    expect(educationCharCount("", 80)).toBe("0/80");
+    expect(educationCharCount("Lesson", 80)).toBe("6/80");
+    expect(educationCharCount("", 200)).toBe("0/200");
   });
 });

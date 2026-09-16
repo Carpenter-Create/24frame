@@ -4,7 +4,15 @@ import { describe, expect, it } from "vitest";
 import { EDUCATION_ADMIN, EDUCATION_HREF } from "./education";
 import { EDUCATION_MANAGE_NAV, EDUCATION_NAV, GC_NAV } from "./nav";
 
-const migration = readFileSync("supabase/migrations/20260916010000_course_education_media.sql", "utf8");
+const mediaMigration = readFileSync(
+  "supabase/migrations/20260916010000_course_education_media.sql",
+  "utf8",
+);
+const catalogMigration = readFileSync(
+  "supabase/migrations/20260916020000_education_catalog.sql",
+  "utf8",
+);
+const migration = mediaMigration;
 const envExample = readFileSync(".env.example", "utf8");
 const infra = readFileSync("docs/infra/education-aws-setup.md", "utf8");
 
@@ -58,7 +66,7 @@ describe("education isolation", () => {
   it("keeps Education copy off SaaS and buy language", () => {
     const blob = JSON.stringify(EDUCATION_ADMIN);
     expect(blob).not.toMatch(/seamless|frictionless|upload and earn|MasterClass|buy|Stripe|Apple Pay|Klarna/i);
-    expect(EDUCATION_ADMIN.title).toBe("Education");
+    expect(EDUCATION_ADMIN.title).toBe("Manage courses");
     expect(EDUCATION_ADMIN.manage).toBe("Course management");
     expect(EDUCATION_ADMIN.free).toBe("Free");
     expect(EDUCATION_ADMIN.paid).toBe("Paid");
@@ -70,9 +78,19 @@ describe("education isolation", () => {
     const consume = readFileSync("src/components/courses/course-consume.tsx", "utf8");
     const list = readFileSync("src/app/(app)/social/courses/page.tsx", "utf8");
     expect(forms).toContain("data-education-product");
-    expect(forms).toContain("freePreview");
+    expect(forms).toContain("data-education-cover-dropzone");
+    expect(forms).toContain('data-education-lesson-type="lesson"');
+    expect(forms).toContain("EDUCATION_NAME_MAX");
+    expect(forms).toContain("EDUCATION_SUMMARY_MAX");
+    expect(forms).toContain("educationCharCount");
+    expect(forms).toContain("durationMinutes");
+    expect(forms).toContain("EDUCATION_ADMIN.addLesson");
+    expect(forms).not.toContain("freePreview");
+    expect(forms).not.toMatch(/Sequence|free.?taste|free.?preview/i);
+    expect(forms).not.toMatch(/#e91e63|#d500f9|#ff00ff|magenta|passion/i);
     expect(actions).toContain("price_cents");
     expect(actions).toContain("is_flagship_free");
+    expect(actions).not.toContain("freePreview");
     expect(actions).not.toMatch(/stripe|checkout|Apple Pay|Klarna/i);
     expect(forms).not.toMatch(/stripe|checkout|Apple Pay|Klarna/i);
     expect(consume).not.toMatch(/Buy|checkout|Stripe/i);
@@ -105,5 +123,19 @@ describe("education isolation", () => {
     expect(actions).toContain("cover_key");
     expect(actions).toContain("source_key");
     expect(nextConfig).toContain('bodySizeLimit: "3gb"');
+  });
+
+  it("locks catalog_code, instructors, and education_videos off media_assets and is_gc_staff", () => {
+    expect(catalogMigration).toContain("ADAM LOCK A");
+    expect(catalogMigration).toContain("catalog_code");
+    expect(catalogMigration).toContain("EDU-");
+    expect(catalogMigration).toContain("create table if not exists public.instructors");
+    expect(catalogMigration).toContain("create table if not exists public.education_videos");
+    expect(catalogMigration).toContain("do not wire is_gc_staff");
+    expect(catalogMigration).not.toMatch(/is_gc_staff\(/);
+    expect(catalogMigration).not.toMatch(/create table if not exists public\.media_assets/);
+    expect(catalogMigration).not.toMatch(/S3_MEDIA_|24frame-media-source/);
+    expect(catalogMigration).toContain("create policy courses_select");
+    expect(catalogMigration).toContain("status = 'published'");
   });
 });

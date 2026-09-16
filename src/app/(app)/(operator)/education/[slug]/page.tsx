@@ -6,6 +6,7 @@ import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { loadEducationAdminDetail } from "@/lib/education-admin";
 import {
+  COURSE_STATUS_LABELS,
   EDUCATION_ADMIN,
   EDUCATION_HREF,
   educationCommercialLabel,
@@ -14,7 +15,13 @@ import {
 import { SOCIAL_ROUTES, socialCourseHref } from "@/lib/social";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-import { AddLessonForm, AddModuleForm, CoverUploadForm, EditCourseForm, LessonAdminForm } from "../education-forms";
+import {
+  AddModuleForm,
+  CoverUploadForm,
+  EditCourseForm,
+  LessonAdminForm,
+  NewLessonButton,
+} from "../education-forms";
 
 export default async function GcEducationCoursePage({
   params,
@@ -42,8 +49,19 @@ export default async function GcEducationCoursePage({
       <PageHeader
         title={course.title}
         backLink={{ href: EDUCATION_HREF, label: EDUCATION_ADMIN.title }}
+        actions={
+          <NewLessonButton
+            courseId={course.id}
+            modules={detail.modules}
+            defaultModuleId={detail.modules[0]?.id}
+          />
+        }
       />
       <p className="mb-[var(--space-6)] t-body-sm text-ink-3">
+        <span data-education-catalog-code="">{course.catalog_code}</span>
+        {" · "}
+        {COURSE_STATUS_LABELS[course.status]}
+        {" · "}
         <span data-education-model="">
           {educationCommercialLabel(course.is_flagship_free, course.price_cents)}
         </span>
@@ -57,8 +75,13 @@ export default async function GcEducationCoursePage({
           courseId={course.id}
           title={course.title}
           description={course.description ?? ""}
+          slug={course.slug}
+          catalogCode={course.catalog_code}
+          status={course.status}
           isFlagshipFree={course.is_flagship_free}
           priceCents={course.price_cents}
+          instructorId={course.instructor_id}
+          instructors={detail.instructors}
         />
         <CoverUploadForm courseId={course.id} />
         <AddModuleForm courseId={course.id} />
@@ -69,15 +92,14 @@ export default async function GcEducationCoursePage({
               <CardTitle>{module.title}</CardTitle>
             </CardHeader>
             <CardBody className="flex flex-col gap-[var(--space-6)]">
-              <AddLessonForm moduleId={module.id} />
               {module.lessons.map((lesson) => (
                 <LessonAdminForm
                   key={lesson.id}
                   courseId={course.id}
                   lessonId={lesson.id}
                   title={lesson.title}
+                  summary={lesson.summary ?? ""}
                   durationSeconds={lesson.duration_seconds}
-                  freePreview={lesson.free_preview}
                   encodeLabel={educationEncodeLabel(lesson.encode_status)}
                   hasSource={Boolean(lesson.source_key)}
                 />

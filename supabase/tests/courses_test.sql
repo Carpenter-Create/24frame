@@ -153,10 +153,10 @@ select ok(
 
 -- ---- access rule: flagship true; paid false while tier rank stub is 0 ------
 reset role;
-insert into public.courses (slug, title, is_flagship_free, price_cents)
+insert into public.courses (slug, title, is_flagship_free, price_cents, status)
 values
-  ('pgtap-flagship', 'Flagship fixture', true, null),
-  ('pgtap-paid', 'Paid fixture', false, null);
+  ('pgtap-flagship', 'Flagship fixture', true, null, 'published'),
+  ('pgtap-paid', 'Paid fixture', false, null, 'published');
 
 select ok(
   public.has_course_access(
