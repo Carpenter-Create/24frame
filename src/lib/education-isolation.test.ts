@@ -106,6 +106,10 @@ describe("education isolation", () => {
     expect(mc).not.toContain('from "@/lib/mediaconvert"');
     expect(actions).toContain("createAdminClient");
     expect(actions).toContain("gc_staff");
+    expect(readFileSync("src/lib/education-admin.ts", "utf8")).toContain("encode_error");
+    expect(readFileSync("src/app/(app)/(operator)/education/[slug]/page.tsx", "utf8")).toContain(
+      "canStartEducationEncode",
+    );
     expect(actions).not.toContain('from "@/lib/s3"');
     expect(actions).not.toContain('from "@/lib/s3-social-media"');
   });

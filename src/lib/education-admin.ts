@@ -96,7 +96,7 @@ export async function loadEducationAdminDetail(
   const { data: lessonRows, error: lessonError } = await admin
     .from("lessons")
     .select(
-      "id, module_id, title, position, duration_seconds, free_preview, summary, cover_key, lesson_type, education_video_id, source_key, hls_key, encode_status",
+      "id, module_id, title, position, duration_seconds, free_preview, summary, cover_key, lesson_type, education_video_id, source_key, hls_key, encode_status, encode_error",
     )
     .in("module_id", moduleIds)
     .order("position", { ascending: true })

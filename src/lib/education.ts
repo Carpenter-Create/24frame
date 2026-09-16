@@ -157,6 +157,7 @@ export const EDUCATION_ADMIN = {
   startEncode: "Start encode",
   refreshEncode: "Refresh encode",
   encodeNone: "No source yet.",
+  encodeSourceReady: "Source ready.",
   encodeReady: "Ready",
   consume: "Open consume view",
   manage: "Course management",
@@ -384,12 +385,27 @@ export function lessonPlaybackReady(lesson: {
   return lesson.encode_status === "complete" && Boolean(lesson.hls_key) && !isForbiddenEducationKey(lesson.hls_key ?? "");
 }
 
-export function educationEncodeLabel(status: CourseEncodeStatus | string | null | undefined): string {
-  if (!status) return EDUCATION_ADMIN.encodeNone;
-  if ((COURSE_ENCODE_STATUSES as readonly string[]).includes(status)) {
+export function educationEncodeLabel(
+  status: CourseEncodeStatus | string | null | undefined,
+  hasSource = false,
+): string {
+  if (status && (COURSE_ENCODE_STATUSES as readonly string[]).includes(status)) {
     return EDUCATION_ENCODE_LABELS[status as CourseEncodeStatus];
   }
+  if (hasSource) return EDUCATION_ADMIN.encodeSourceReady;
   return EDUCATION_ADMIN.encodeNone;
+}
+
+const EDUCATION_ENCODE_RESUBMIT_STATUSES = ["failed", "submit_failed"] as const;
+
+export function canStartEducationEncode(lesson: {
+  source_key?: string | null;
+  encode_status?: CourseEncodeStatus | string | null;
+}): boolean {
+  if (!lesson.source_key) return false;
+  const status = lesson.encode_status;
+  if (!status) return true;
+  return (EDUCATION_ENCODE_RESUBMIT_STATUSES as readonly string[]).includes(status);
 }
 
 export function mapMediaConvertJobStatus(status: string): CourseEncodeStatus | null {

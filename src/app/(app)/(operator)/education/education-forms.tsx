@@ -674,7 +674,8 @@ export function LessonAdminForm({
   summary,
   durationSeconds,
   encodeLabel,
-  hasSource,
+  encodeError,
+  canStartEncode,
 }: {
   courseId: string;
   lessonId: string;
@@ -682,7 +683,8 @@ export function LessonAdminForm({
   summary: string;
   durationSeconds: number | null;
   encodeLabel: string;
-  hasSource: boolean;
+  encodeError?: string | null;
+  canStartEncode: boolean;
 }) {
   const router = useRouter();
   const [error, setError] = useState("");
@@ -746,7 +748,6 @@ export function LessonAdminForm({
       const res = await startEducationLessonEncode({ lessonId });
       if (res.error) {
         setError(res.error);
-        return;
       }
       router.refresh();
     } catch {
@@ -777,6 +778,11 @@ export function LessonAdminForm({
     <div className="flex flex-col gap-3" data-education-lesson={lessonId}>
       {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
       <p className="t-body-sm text-ink-3">{encodeLabel}</p>
+      {encodeError ? (
+        <p className="t-body-sm text-ink-3" data-education-encode-error="">
+          {encodeError}
+        </p>
+      ) : null}
       <form onSubmit={onSave} className="flex max-w-xl flex-col gap-[var(--space-4)]">
         <CountedInput
           name="title"
@@ -818,7 +824,7 @@ export function LessonAdminForm({
         </Button>
       </form>
       <div className="flex flex-wrap gap-2">
-        <Button type="button" variant="secondary" disabled={saving || !hasSource} onClick={() => void onEncode()}>
+        <Button type="button" variant="secondary" disabled={saving || !canStartEncode} onClick={() => void onEncode()}>
           {EDUCATION_ADMIN.startEncode}
         </Button>
         <Button type="button" variant="ghost" disabled={saving} onClick={() => void onRefresh()}>
