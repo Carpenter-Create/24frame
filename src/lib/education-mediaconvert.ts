@@ -49,10 +49,17 @@ function educationMediaconvertClient(): MediaConvertClient {
   });
 }
 
+function requireEducationMediaconvertEnv(): void {
+  for (const name of EDUCATION_MEDIACONVERT_ENV) {
+    requireEducationEnv(name);
+  }
+}
+
 export async function submitEducationHlsJob(input: {
   sourceKey: string;
   destinationPrefix: string;
 }): Promise<{ externalJobId: string }> {
+  requireEducationMediaconvertEnv();
   const settings = buildEducationHlsJobSettings({
     sourceKey: input.sourceKey,
     sourceBucket: educationSourceBucket(),
@@ -75,6 +82,7 @@ export async function getEducationEncodeJob(externalJobId: string): Promise<{
   rawStatus: string;
   errorMessage: string | null;
 }> {
+  requireEducationMediaconvertEnv();
   const out = await educationMediaconvertClient().send(new GetJobCommand({ Id: externalJobId }));
   if (!out.Job?.Status) throw new Error("MediaConvert did not return a job status");
   return {
