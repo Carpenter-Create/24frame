@@ -13,6 +13,7 @@ import {
   educationLessonSourceKey,
   isEducationObjectKey,
   normalizeCourseSlug,
+  normalizeEducationCoverContentType,
   parseEducationPriceDollars,
   resolveEducationProduct,
   validateEducationUpload,
@@ -23,7 +24,11 @@ import {
   isEducationMediaconvertConfigured,
   submitEducationHlsJob,
 } from "@/lib/education-mediaconvert";
-import { isEducationAwsConfigured, presignEducationSourcePut } from "@/lib/s3-education";
+import {
+  isEducationAwsConfigured,
+  presignEducationSourcePut,
+  putEducationSourceObject,
+} from "@/lib/s3-education";
 import { SOCIAL_ROUTES } from "@/lib/social";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAuthUser } from "@/lib/supabase/auth";
@@ -284,14 +289,19 @@ export async function presignEducationUpload(raw: unknown): Promise<{
   });
   if (!checked.ok) return { error: EDUCATION_ADMIN.invalid };
 
-  const key =
-    parsed.data.kind === "cover"
-      ? educationCoverKey(parsed.data.courseId, checked.contentType)
-      : educationLessonSourceKey(
-          parsed.data.courseId,
-          parsed.data.lessonId ?? "",
-          checked.contentType,
-        );
+  let key: string;
+  try {
+    key =
+      parsed.data.kind === "cover"
+        ? educationCoverKey(parsed.data.courseId, checked.contentType)
+        : educationLessonSourceKey(
+            parsed.data.courseId,
+            parsed.data.lessonId ?? "",
+            checked.contentType,
+          );
+  } catch {
+    return { error: EDUCATION_ADMIN.invalid };
+  }
 
   try {
     const url = await presignEducationSourcePut(key, checked.contentType);
@@ -302,6 +312,62 @@ export async function presignEducationUpload(raw: unknown): Promise<{
     }
     return { error: EDUCATION_ADMIN.uploadFailed };
   }
+}
+
+export async function uploadEducationCover(formData: FormData): Promise<{ error?: string }> {
+  const courseId = String(formData.get("courseId") ?? "");
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) return { error: EDUCATION_ADMIN.invalid };
+  const parsed = z.object({ courseId: z.string().uuid() }).safeParse({ courseId });
+  if (!parsed.success) return { error: EDUCATION_ADMIN.invalid };
+
+  const staff = await requireEducationStaff();
+  if (!staff.ok) return { error: staff.error };
+  if (!isEducationAwsConfigured()) return { error: EDUCATION_ADMIN.envUnset };
+
+  const contentType = normalizeEducationCoverContentType(file.type, file.name);
+  const checked = validateEducationUpload({
+    kind: "cover",
+    contentType,
+    byteLength: file.size,
+  });
+  if (!checked.ok) return { error: EDUCATION_ADMIN.invalid };
+
+  let key: string;
+  try {
+    key = educationCoverKey(parsed.data.courseId, checked.contentType);
+  } catch {
+    return { error: EDUCATION_ADMIN.invalid };
+  }
+  if (!isEducationObjectKey(key) || !key.startsWith(`courses/${parsed.data.courseId}/cover.`)) {
+    return { error: EDUCATION_ADMIN.invalid };
+  }
+
+  const admin = createAdminClient();
+  const { data: course } = await admin
+    .from("courses")
+    .select("slug")
+    .eq("id", parsed.data.courseId)
+    .maybeSingle();
+  if (!course) return { error: EDUCATION_ADMIN.missing };
+
+  try {
+    const body = new Uint8Array(await file.arrayBuffer());
+    await putEducationSourceObject(key, body, checked.contentType);
+  } catch (err) {
+    if (err instanceof Error && /environment variable is not set/.test(err.message)) {
+      return { error: EDUCATION_ADMIN.envUnset };
+    }
+    return { error: EDUCATION_ADMIN.uploadFailed };
+  }
+
+  const { error } = await admin
+    .from("courses")
+    .update({ cover_key: key })
+    .eq("id", parsed.data.courseId);
+  if (error) return { error: error.message };
+  revalidateEducation(course.slug);
+  return {};
 }
 
 export async function attachEducationCover(raw: unknown): Promise<{ error?: string }> {

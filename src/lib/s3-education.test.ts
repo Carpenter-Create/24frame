@@ -1,8 +1,9 @@
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockGetSignedUrl } = vi.hoisted(() => ({
+const { mockGetSignedUrl, mockSend } = vi.hoisted(() => ({
   mockGetSignedUrl: vi.fn(),
+  mockSend: vi.fn(),
 }));
 
 vi.mock("@aws-sdk/client-s3", async (importOriginal) => {
@@ -10,7 +11,7 @@ vi.mock("@aws-sdk/client-s3", async (importOriginal) => {
   return {
     ...actual,
     S3Client: vi.fn().mockImplementation(function S3ClientMock() {
-      return { send: vi.fn() };
+      return { send: mockSend };
     }),
   };
 });
@@ -37,6 +38,7 @@ import {
   presignEducationOutputGet,
   presignEducationSourceGet,
   presignEducationSourcePut,
+  putEducationSourceObject,
   signedEducationCoverUrl,
   signedEducationHlsUrl,
 } from "./s3-education";
@@ -67,6 +69,7 @@ function unsetEducationAwsEnv() {
 describe("s3-education isolated lane", () => {
   beforeEach(() => {
     mockGetSignedUrl.mockReset();
+    mockSend.mockReset();
     vi.mocked(S3Client).mockClear();
     vi.mocked(isEducationCloudfrontConfigured).mockReturnValue(false);
     vi.mocked(signEducationCloudfrontUrl).mockReset();
@@ -86,6 +89,21 @@ describe("s3-education isolated lane", () => {
     setEducationAwsEnv();
   });
 
+  it("PUTs cover bytes on the Education source bucket", async () => {
+    mockSend.mockResolvedValueOnce({});
+    const body = new Uint8Array([1, 2, 3]);
+    await putEducationSourceObject(COVER, body, "image/jpeg");
+    expect(mockSend).toHaveBeenCalledTimes(1);
+    const cmd = mockSend.mock.calls[0]?.[0] as PutObjectCommand;
+    expect(cmd).toBeInstanceOf(PutObjectCommand);
+    expect(cmd.input.Bucket).toBe("test-education-source-bucket");
+    expect(cmd.input.Bucket).not.toBe(process.env.S3_BUCKET);
+    expect(cmd.input.Key).toBe(COVER);
+    expect(cmd.input.Body).toBe(body);
+    expect(cmd.input.ContentType).toBe("image/jpeg");
+    expect(cmd.input.ACL).toBeUndefined();
+  });
+
   it("presigns cover PUT/GET on the Education source bucket", async () => {
     mockGetSignedUrl.mockResolvedValueOnce("https://s3.example/put");
     await expect(presignEducationSourcePut(COVER, "image/jpeg")).resolves.toBe("https://s3.example/put");
@@ -94,6 +112,7 @@ describe("s3-education isolated lane", () => {
     expect(putCmd.input.Bucket).toBe("test-education-source-bucket");
     expect(putCmd.input.Bucket).not.toBe(process.env.S3_BUCKET);
     expect(putCmd.input.Key).toBe(COVER);
+    expect(putCmd.input.CacheControl).toBeUndefined();
 
     mockGetSignedUrl.mockResolvedValueOnce("https://s3.example/get");
     await expect(presignEducationSourceGet(COVER)).resolves.toBe("https://s3.example/get");
@@ -146,6 +165,7 @@ describe("s3-education isolated lane", () => {
         accessKeyId: EDUCATION_AWS.EDUCATION_AWS_ACCESS_KEY_ID,
         secretAccessKey: EDUCATION_AWS.EDUCATION_AWS_SECRET_ACCESS_KEY,
       },
+      requestChecksumCalculation: "WHEN_REQUIRED",
     });
     const config = vi.mocked(S3Client).mock.calls[0]?.[0] as {
       region?: string;

@@ -15,6 +15,7 @@ describe("education isolation", () => {
     expect(infra).toContain("24frame-education-source-prod");
     expect(infra).toContain("24frame-education-output-prod");
     expect(infra).toContain("Do **not** create these buckets");
+    expect(infra).toContain("Cover bytes PUT **server-side**");
     expect(infra).toContain("EDUCATION_AWS_ACCESS_KEY_ID");
     expect(envExample).toContain("EDUCATION_AWS_ACCESS_KEY_ID=");
     expect(envExample).toContain("S3_EDUCATION_SOURCE_BUCKET=");
@@ -89,5 +90,17 @@ describe("education isolation", () => {
     expect(actions).toContain("gc_staff");
     expect(actions).not.toContain('from "@/lib/s3"');
     expect(actions).not.toContain('from "@/lib/s3-social-media"');
+  });
+
+  it("uploads covers server-side so Saving… can clear without a browser S3 PUT", () => {
+    const forms = readFileSync("src/app/(app)/(operator)/education/education-forms.tsx", "utf8");
+    const actions = readFileSync("src/app/(app)/(operator)/education/actions.ts", "utf8");
+    const nextConfig = readFileSync("next.config.ts", "utf8");
+    expect(forms).toContain("uploadEducationCover");
+    expect(forms).toContain("finally");
+    expect(forms).not.toMatch(/presignEducationUpload\(\{\s*kind:\s*"cover"/);
+    expect(actions).toContain("putEducationSourceObject");
+    expect(actions).toContain("cover_key");
+    expect(nextConfig).toContain('bodySizeLimit: "11mb"');
   });
 });

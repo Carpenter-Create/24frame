@@ -169,6 +169,28 @@ export function isEducationImageContentType(value: string): value is EducationIm
   return (EDUCATION_IMAGE_CONTENT_TYPES as readonly string[]).includes(value);
 }
 
+const COVER_TYPE_ALIASES: Record<string, EducationImageContentType> = {
+  "image/jpg": "image/jpeg",
+  "image/pjpeg": "image/jpeg",
+  "image/x-png": "image/png",
+};
+
+const COVER_EXT_TYPES: Record<string, EducationImageContentType> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+};
+
+/** Browsers sometimes send `image/jpg` or an empty type; infer from the name. */
+export function normalizeEducationCoverContentType(contentType: string, fileName = ""): string {
+  const raw = contentType.trim().toLowerCase();
+  if (isEducationImageContentType(raw)) return raw;
+  if (raw in COVER_TYPE_ALIASES) return COVER_TYPE_ALIASES[raw];
+  const ext = fileName.trim().toLowerCase().split(".").pop() ?? "";
+  return COVER_EXT_TYPES[ext] ?? contentType;
+}
+
 export function isEducationVideoContentType(value: string): value is EducationVideoContentType {
   return (EDUCATION_VIDEO_CONTENT_TYPES as readonly string[]).includes(value);
 }

@@ -25,6 +25,7 @@ import {
   lessonPlaybackReady,
   mapMediaConvertJobStatus,
   normalizeCourseSlug,
+  normalizeEducationCoverContentType,
   validateEducationUpload,
 } from "./education";
 
@@ -99,6 +100,9 @@ describe("education names and keys", () => {
       ok: false,
       error: "type",
     });
+    expect(normalizeEducationCoverContentType("image/jpg", "cover.JPG")).toBe("image/jpeg");
+    expect(normalizeEducationCoverContentType("", "poster.webp")).toBe("image/webp");
+    expect(normalizeEducationCoverContentType("image/gif", "x.gif")).toBe("image/gif");
   });
 
   it("treats complete + playback key as ready", () => {
