@@ -414,10 +414,12 @@ describe("Social Home miss list v1 P0 lock", () => {
   });
 
   it("keeps Social Figma and Settings Mercury on separate registers", () => {
-    const settingsProfile = readFileSync("src/app/(app)/settings/profile/page.tsx", "utf8");
+    const settingsProfile = readFileSync("src/components/settings/you-settings.tsx", "utf8");
+    const settingsAggregation = readFileSync("src/components/settings/aggregation-settings.tsx", "utf8");
     const accountSheet = readFileSync("src/components/chrome/account-sheet.tsx", "utf8");
     const userMenu = readFileSync("src/components/chrome/user-menu.tsx", "utf8");
     const settingsRail = readFileSync("src/components/chrome/settings-rail.tsx", "utf8");
+    const settingsBack = readFileSync("src/components/chrome/settings-header-back.tsx", "utf8");
     const sideNav = readFileSync("src/components/chrome/side-nav.tsx", "utf8");
     const publicProfile = readFileSync("src/app/(app)/social/u/[handle]/page.tsx", "utf8");
     const socialStories = readFileSync("src/app/(app)/social/stories/page.tsx", "utf8");
@@ -434,9 +436,9 @@ describe("Social Home miss list v1 P0 lock", () => {
       expect(src).not.toContain("social-chrome");
     }
     expect(settingsProfile).toContain("AccountProfileForm");
-    expect(settingsProfile).toContain("CompanyProfileForm");
-    expect(settingsRail).toContain("CaretLeft");
-    expect(settingsRail).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
+    expect(settingsAggregation).toContain("CompanyProfileForm");
+    expect(settingsBack).toContain("CaretLeft");
+    expect(settingsBack).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
     expect(sideNav).toContain("SocialIcon");
     expect(sideNav).toContain("<NavGlyph item={item} active={active} />");
     expect(home).not.toContain("PageHeader");

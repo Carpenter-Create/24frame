@@ -2,7 +2,13 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+const navigation = vi.hoisted(() => ({ pathname: "/settings" }));
+
+vi.mock("next/navigation", () => ({
+  usePathname: () => navigation.pathname,
+}));
 
 import { MOBILE_CHROME_LEAD_PAD_CLASS } from "@/lib/mobile-chrome";
 import {
@@ -31,7 +37,8 @@ const railSrc = readFileSync(
 );
 
 describe("SettingsHeaderBack", () => {
-  it("is 16 chevron-left + Home 15 Regular, gap 8, href /", () => {
+  it("is 16 chevron-left + Home on the hub list", () => {
+    navigation.pathname = "/settings";
     const html = renderToStaticMarkup(<SettingsHeaderBack />);
     expect(html).toContain('data-settings-header-back=""');
     expect(html).toContain(`href="${SETTINGS.dashboardHref}"`);
@@ -47,14 +54,12 @@ describe("SettingsHeaderBack", () => {
     expect(SETTINGS_HEADER_BACK_CLASS).toContain("font-normal");
     expect(SETTINGS_HEADER_BACK_CLASS).toContain("md:hidden");
     expect(SETTINGS_HEADER_PAD_CLASS).toBe(MOBILE_CHROME_LEAD_PAD_CLASS);
-    expect(SETTINGS_HEADER_PAD_CLASS).toBe("px-[var(--space-6)]");
     expect(SETTINGS_RAIL_CHEVRON_CLASS).toBe("size-4 shrink-0");
     expect(src).toContain("CaretLeft");
     expect(src).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
+    expect(src).toContain("settingsHeaderBack");
     expect(src).not.toContain("ChevronLeft");
     expect(src).not.toContain("lucide-react");
-    expect(src).toContain("SETTINGS.dashboardHref");
-    expect(src).toContain("SETTINGS.dashboard");
     expect(src).not.toContain("Menu");
     expect(src).not.toContain("MobileNav");
     expect(src).not.toContain("hamburger");
@@ -63,9 +68,15 @@ describe("SettingsHeaderBack", () => {
     expect(src).not.toContain("Company");
   });
 
-  it("is the same / back as the 600:881 rail, not a new IA", () => {
-    expect(src).toContain("600:881");
-    expect(src).toContain("623:785");
+  it("pushes back to Settings from a section pane", () => {
+    navigation.pathname = "/settings/education";
+    const html = renderToStaticMarkup(<SettingsHeaderBack />);
+    expect(html).toContain(`href="${SETTINGS.href}"`);
+    expect(html).toContain(SETTINGS.title);
+    expect(html).not.toContain(`>${SETTINGS.dashboard}<`);
+  });
+
+  it("stays house chrome — rail is the desktop nav, not a new IA", () => {
     expect(src).not.toContain("SettingsLocalNav");
     expect(src).not.toContain("SETTINGS_LOCAL_NAV");
     expect(src).not.toContain("/settings/profile");
@@ -80,8 +91,7 @@ describe("SettingsHeaderBack", () => {
     );
     expect(accountSrc).toContain("flex h-8 w-8 items-center justify-center rounded-full");
     expect(accountSrc).toContain("md:hidden");
-    expect(railSrc).toContain("600:881");
-    expect(railSrc).toContain("SETTINGS_LOCAL_NAV");
+    expect(railSrc).toContain("SETTINGS_HUB_NAV");
     expect(railSrc).not.toContain("SettingsHeaderBack");
     expect(railSrc).not.toContain("623:785");
   });

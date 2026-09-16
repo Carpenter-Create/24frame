@@ -6,7 +6,8 @@
 // route. Not a header chip.
 // Miss-list is Aggregation | Social | Education. Member Education land
 // is Route A /social/courses. Do not send members to /education (staff
-// CMS), /account/workspace, or /settings/workspace.
+// CMS), /account/workspace, or /settings/workspace. Staff Manage
+// courses in Settings is a separate /education door — not workspace land.
 
 import { USER_MENU } from "@/lib/user-menu";
 import {

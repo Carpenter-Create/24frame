@@ -51,9 +51,10 @@ type Org = { id: string; name: string };
 // bottom sheet — client destinations, or those plus staff destinations when
 // isGcStaff. Desktop 1:2 rail is unchanged.
 // /settings paths: the Access destinations leave. One 220 rail (pad 16)
-// occupies that slot — ← Home / Profile / Agreements / Refer a
-// friend. Not a second column. Collapse stays off. Phone left slot is
-// the same ← Home (623:785). Hamburger stays off. Avatar 32 stays.
+// occupies that slot — Settings title + You / Social / Education /
+// Aggregation. Not a second column. Collapse stays off. Phone list is
+// the same sections; pushed panes back to Settings. Hamburger stays
+// off. Avatar 32 stays.
 export function AppShell({
   chrome,
   email = "",

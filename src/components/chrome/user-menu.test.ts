@@ -176,6 +176,8 @@ describe("UserMenu item lock (source)", () => {
   it("keeps Profile on /settings/profile and Appearance off any page door", () => {
     expect(USER_MENU.profileHref).toBe("/settings/profile");
     expect(USER_MENU.profile).toBe("Profile");
+    expect(USER_MENU.settings).toBe("Settings");
+    expect(USER_MENU.settingsHref).toBe("/settings");
     expect(USER_MENU.agreementsHref).toBe("/settings/agreements");
     expect(USER_MENU.helpHref).toBe("/help");
     expect(USER_MENU.referHref).toBe("/settings/refer");
@@ -192,10 +194,8 @@ describe("UserMenu item lock (source)", () => {
     expect(USER_MENU_ACTIONS.map((item) => item.label)).toEqual([
       "Workspace",
       "Profile",
-      "Agreements",
+      "Settings",
       "Appearance",
-      "Help",
-      "Refer a friend",
     ]);
     expect(sheetSrc).toContain("ACCOUNT_SHEET_ITEMS.map");
     expect(sheetSrc.indexOf("DesktopAccountMenu")).toBeGreaterThan(-1);

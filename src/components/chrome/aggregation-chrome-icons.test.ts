@@ -17,7 +17,6 @@ describe("Aggregation chrome Phosphor lock + Design miss list", () => {
     expect(rail).toContain("SquaresFour");
     expect(rail).toContain("FilmSlate");
     expect(rail).toContain("PaperPlaneTilt");
-    expect(settingsRail).toContain("CaretLeft");
     expect(settingsBack).toContain("CaretLeft");
     expect(settingsRail).not.toContain("lucide-react");
     expect(settingsBack).not.toContain("lucide-react");

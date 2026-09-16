@@ -8,7 +8,7 @@ import {
 } from "@/lib/phosphor-icon";
 import {
   SETTINGS_HEADER_BACK_CLASS,
-  SETTINGS_LOCAL_NAV,
+  SETTINGS_HUB_NAV,
   SETTINGS_RAIL_CHEVRON_CLASS,
   SETTINGS_RAIL_ITEM_CLASS,
 } from "@/lib/settings";
@@ -21,6 +21,10 @@ const settingsPages = [
   "src/app/(app)/settings/page.tsx",
   "src/app/(app)/settings/loading.tsx",
   "src/app/(app)/settings/profile/page.tsx",
+  "src/app/(app)/settings/you/page.tsx",
+  "src/app/(app)/settings/social/page.tsx",
+  "src/app/(app)/settings/education/page.tsx",
+  "src/app/(app)/settings/aggregation/page.tsx",
   "src/app/(app)/settings/agreements/page.tsx",
   "src/app/(app)/settings/refer/page.tsx",
 ] as const;
@@ -41,16 +45,16 @@ describe("Adam Mercury register lock", () => {
       const file = src(path);
       expect(file).not.toContain("@phosphor-icons/react");
       expect(file).not.toContain("84:46");
-      expect(file).not.toContain("Education");
     }
     expect(ACCOUNT_SHEET_ITEMS).toBe(USER_MENU_ACTIONS);
     expect(USER_MENU_ACTIONS.map((item) => item.kind)[0]).toBe("workspace");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)[1]).toBe("profile");
-    expect(SETTINGS_LOCAL_NAV.map((item) => item.label)).toEqual([
-      "Home",
-      "Profile",
-      "Agreements",
-      "Refer a friend",
+    expect(USER_MENU_ACTIONS.map((item) => item.kind)[2]).toBe("settings");
+    expect(SETTINGS_HUB_NAV.map((item) => item.label)).toEqual([
+      "You",
+      "Social",
+      "Education",
+      "Aggregation",
     ]);
     expect(src("src/components/chrome/app-shell.tsx")).not.toContain("WorkspaceSwitcher");
     expect(src("src/components/chrome/account-sheet.tsx")).toContain(
@@ -74,7 +78,7 @@ describe("Adam Mercury register lock", () => {
     expect(src("src/components/chrome/account-sheet.tsx")).toContain(
       'className="size-4 shrink-0"',
     );
-    expect(src("src/components/chrome/settings-rail.tsx")).toContain(
+    expect(src("src/components/chrome/settings-header-back.tsx")).toContain(
       "className={SETTINGS_RAIL_CHEVRON_CLASS}",
     );
   });

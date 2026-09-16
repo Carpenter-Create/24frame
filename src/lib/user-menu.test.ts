@@ -11,30 +11,26 @@ import {
 } from "./user-menu";
 
 describe("user menu lock", () => {
-  it("keeps the same Identity rows on mobile and desktop: Workspace, Profile, Agreements, Appearance, Help, Refer a friend", () => {
+  it("keeps Mercury order: Workspace, Profile, Settings, Appearance", () => {
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).toEqual([
       "workspace",
       "profile",
-      "agreements",
+      "settings",
       "appearance",
-      "help",
-      "refer",
     ]);
     expect(USER_MENU_ACTIONS.map((item) => item.label)).toEqual([
       "Workspace",
       "Profile",
-      "Agreements",
+      "Settings",
       "Appearance",
-      "Help",
-      "Refer a friend",
     ]);
-    expect(USER_MENU_ACTIONS.map((item) => item.kind).indexOf("workspace")).toBeLessThan(
-      USER_MENU_ACTIONS.map((item) => item.kind).indexOf("profile"),
-    );
+    expect(USER_MENU.settings).toBe("Settings");
+    expect(USER_MENU.settingsHref).toBe("/settings");
   });
 
-  it("points each door at its existing route — Appearance is not a page", () => {
+  it("points Profile and Settings at existing /settings doors — Appearance is not a page", () => {
     expect(USER_MENU.profileHref).toBe("/settings/profile");
+    expect(USER_MENU.settingsHref).toBe("/settings");
     expect(USER_MENU.agreementsHref).toBe("/settings/agreements");
     expect(USER_MENU.helpHref).toBe("/help");
     expect(USER_MENU.referHref).toBe("/settings/refer");
@@ -56,23 +52,13 @@ describe("user menu lock", () => {
       href: "/settings/profile",
     });
     expect(USER_MENU_ACTIONS[2]).toEqual({
-      kind: "agreements",
-      label: "Agreements",
-      href: "/settings/agreements",
+      kind: "settings",
+      label: "Settings",
+      href: "/settings",
     });
     expect(USER_MENU_ACTIONS[3]).toEqual({
       kind: "appearance",
       label: "Appearance",
-    });
-    expect(USER_MENU_ACTIONS[4]).toEqual({
-      kind: "help",
-      label: "Help",
-      href: "/help",
-    });
-    expect(USER_MENU_ACTIONS[5]).toEqual({
-      kind: "refer",
-      label: "Refer a friend",
-      href: "/settings/refer",
     });
   });
 
@@ -83,16 +69,16 @@ describe("user menu lock", () => {
       expect(labels).not.toContain(absent);
     }
     expect(labels).toContain("Profile");
+    expect(labels).toContain("Settings");
     expect(labels).not.toContain("User Profile");
-    expect(hrefs).toEqual([
-      "/settings/profile",
-      "/settings/agreements",
-      "/help",
-      "/settings/refer",
-    ]);
+    expect(labels).not.toContain("Agreements");
+    expect(labels).not.toContain("Help");
+    expect(labels).not.toContain("Refer a friend");
+    expect(hrefs).toEqual(["/settings/profile", "/settings"]);
     expect(hrefs).not.toContain("/account/appearance");
     expect(hrefs).not.toContain("/account/profile");
     expect(hrefs).not.toContain("/account/company");
+    expect(hrefs).not.toContain("/account/settings");
     expect(hrefs.join(" ")).not.toMatch(/notifications|privacy|phone|job/i);
   });
 
