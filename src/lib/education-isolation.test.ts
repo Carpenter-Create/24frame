@@ -103,7 +103,12 @@ describe("education isolation", () => {
     expect(actions).not.toMatch(/stripe|checkout|Apple Pay|Klarna/i);
     expect(forms).not.toMatch(/stripe|checkout|Apple Pay|Klarna/i);
     expect(consume).not.toMatch(/Buy|checkout|Stripe/i);
+    expect(consume).toContain("data-course-playlist");
+    expect(consume).toContain("lg:flex-row");
     expect(list).not.toMatch(/Buy|checkout|Stripe/i);
+    expect(list).not.toContain("Welcome");
+    expect(list).not.toContain("New & For You");
+    expect(list).not.toContain("Manage courses");
   });
 
   it("does not let Education clients import other storage lanes", () => {

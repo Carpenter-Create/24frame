@@ -2,7 +2,11 @@ import { CourseCard } from "@/components/courses/course-card";
 import { CourseRetry } from "@/components/courses/course-retry";
 import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
-import { loadDiscoverableCourses } from "@/lib/courses";
+import {
+  courseDiscoverMetaLabel,
+  loadDiscoverableCourseMeta,
+  loadDiscoverableCourses,
+} from "@/lib/courses";
 import { signedEducationCoverUrls } from "@/lib/s3-education";
 import { SOCIAL } from "@/lib/social";
 import { requireSocialSession } from "@/lib/social-session";
@@ -10,7 +14,12 @@ import { requireSocialSession } from "@/lib/social-session";
 export default async function SocialCoursesPage() {
   const { supabase } = await requireSocialSession();
   const { courses, failed } = await loadDiscoverableCourses(supabase);
-  const covers = failed ? new Map<string, string>() : await signedEducationCoverUrls(courses);
+  const [covers, meta] = failed
+    ? [new Map<string, string>(), new Map()]
+    : await Promise.all([
+        signedEducationCoverUrls(courses),
+        loadDiscoverableCourseMeta(supabase, courses),
+      ]);
 
   return (
     <div data-social-courses="" data-education-courses="">
@@ -28,7 +37,12 @@ export default async function SocialCoursesPage() {
           className="grid grid-cols-1 gap-[var(--space-6)] md:grid-cols-2"
         >
           {courses.map((course) => (
-            <CourseCard key={course.id} course={course} coverUrl={covers.get(course.id)} />
+            <CourseCard
+              key={course.id}
+              course={course}
+              coverUrl={covers.get(course.id)}
+              metaLabel={courseDiscoverMetaLabel(meta.get(course.id) ?? { lessonCount: 0, durationSeconds: null })}
+            />
           ))}
         </ul>
       ) : null}

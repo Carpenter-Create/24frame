@@ -35,6 +35,7 @@ function chain(result: unknown) {
   const self = () => c;
   c.select = vi.fn(self);
   c.eq = vi.fn(self);
+  c.in = vi.fn(self);
   c.order = vi.fn(self);
   c.range = vi.fn(async () => ({ data: result, error: null }));
   c.then = (resolve: (value: unknown) => unknown) =>
@@ -53,6 +54,10 @@ function stubClient(
     created_at: string;
   }[] = [],
   failed = false,
+  extras: {
+    modules?: { id: string; course_id: string }[];
+    lessons?: { id: string; module_id: string; duration_seconds: number | null }[];
+  } = {},
 ) {
   const from = vi.fn((table: string) => {
     if (table === "courses") {
@@ -61,12 +66,15 @@ function stubClient(
         const self = () => c;
         c.select = vi.fn(self);
         c.eq = vi.fn(self);
+        c.in = vi.fn(self);
         c.order = vi.fn(self);
         c.range = vi.fn(async () => ({ data: null, error: { message: "failed" } }));
         return c;
       }
       return chain(courses);
     }
+    if (table === "modules") return chain(extras.modules ?? []);
+    if (table === "lessons") return chain(extras.lessons ?? []);
     throw new Error(`unexpected from(${table})`);
   });
   vi.mocked(createClient).mockResolvedValue({ from, rpc: vi.fn() } as never);
@@ -77,17 +85,24 @@ describe("Social courses list", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("renders placeholder courses for a signed-in user", async () => {
-    const { from } = stubClient([
+    const { from } = stubClient(
+      [
+        {
+          id: "c1",
+          slug: "welcome-to-24frame",
+          title: "Welcome to 24Frame",
+          description: "Orientation for 24Frame Education.",
+          cover_key: null,
+          is_flagship_free: true,
+          created_at: "2026-09-12T14:00:00.000Z",
+        },
+      ],
+      false,
       {
-        id: "c1",
-        slug: "welcome-to-24frame",
-        title: "Welcome to 24Frame",
-        description: "Orientation for 24Frame Education.",
-        cover_key: null,
-        is_flagship_free: true,
-        created_at: "2026-09-12T14:00:00.000Z",
+        modules: [{ id: "m1", course_id: "c1" }],
+        lessons: [{ id: "l1", module_id: "m1", duration_seconds: 120 }],
       },
-    ]);
+    );
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
     const html = renderToStaticMarkup(await SocialCoursesPage());
@@ -105,6 +120,13 @@ describe("Social courses list", () => {
     expect(html).toContain("data-course-card");
     expect(html).toContain("data-course-cover");
     expect(html).toContain("aspect-video");
+    expect(html).toContain("data-course-card-meta");
+    expect(html).toContain("1 lesson");
+    expect(html).toContain("2m");
+    expect(html).not.toContain("text-3xl");
+    expect(html).not.toContain("New &amp; For You");
+    expect(html).not.toContain("New & For You");
+    expect(html).not.toContain("Resume");
     expect(html).not.toContain("<table");
     expect(html).not.toContain("LOCKED");
     expect(html).not.toContain("Globee");
@@ -151,6 +173,10 @@ describe("course list lock", () => {
     expect(page).not.toContain("createSocialCourse");
     expect(page).not.toContain("SocialAvatar");
     expect(page).not.toContain("My learning");
+    expect(page).not.toContain("Welcome /");
+    expect(page).not.toContain("New & For You");
+    expect(page).not.toContain("Manage courses");
+    expect(page).not.toMatch(/Buy|checkout|Stripe/i);
     expect(readFileSync("src/app/(app)/social/courses/loading.tsx", "utf8")).toContain(
       "CourseDiscoverSkeleton",
     );

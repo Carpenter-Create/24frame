@@ -1,4 +1,4 @@
-import { SOCIAL_ROUTES } from "@/lib/social";
+import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import type { CourseStatus } from "@/lib/education";
 import type { createClient } from "@/lib/supabase/server";
 import { UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
@@ -142,6 +142,97 @@ export function courseLessonDurationLabel(seconds: number | null): string | null
   if (minutes === 0) return `${remainder}s`;
   if (remainder === 0) return `${minutes}m`;
   return `${minutes}m ${remainder}s`;
+}
+
+export type CourseDiscoverMeta = {
+  lessonCount: number;
+  durationSeconds: number | null;
+};
+
+export function courseOutlineMeta(
+  lessons: Pick<CourseLessonRow, "duration_seconds">[],
+): CourseDiscoverMeta {
+  const durations = lessons
+    .map((lesson) => lesson.duration_seconds)
+    .filter((seconds): seconds is number => seconds != null && seconds > 0);
+  return {
+    lessonCount: lessons.length,
+    durationSeconds: durations.length > 0 ? durations.reduce((sum, seconds) => sum + seconds, 0) : null,
+  };
+}
+
+export function courseDiscoverMetaLabel(meta: CourseDiscoverMeta): string | null {
+  const parts: string[] = [];
+  if (meta.lessonCount === 1) parts.push(SOCIAL.courses.lessonOne);
+  if (meta.lessonCount > 1) parts.push(`${meta.lessonCount} ${SOCIAL.courses.lessons}`);
+  const duration = courseLessonDurationLabel(meta.durationSeconds);
+  if (duration) parts.push(duration);
+  return parts.length > 0 ? parts.join(" · ") : null;
+}
+
+export async function loadDiscoverableCourseMeta(
+  supabase: ServerClient,
+  courses: CourseRow[],
+): Promise<Map<string, CourseDiscoverMeta>> {
+  const meta = new Map<string, CourseDiscoverMeta>();
+  if (courses.length === 0) return meta;
+
+  const { data: moduleRows, error: moduleError } = await supabase
+    .from("modules")
+    .select("id, course_id")
+    .in("course_id", courses.map((course) => course.id))
+    .range(...rangeFor(UNPAGINATED_MAX));
+  if (moduleError || !moduleRows?.length) return meta;
+
+  const modules = moduleRows as { id: string; course_id: string }[];
+  const { data: lessonRows, error: lessonError } = await supabase
+    .from("lessons")
+    .select("id, module_id, duration_seconds")
+    .in(
+      "module_id",
+      modules.map((module) => module.id),
+    )
+    .range(...rangeFor(UNPAGINATED_MAX));
+  if (lessonError || !lessonRows) return meta;
+
+  const lessonsByModule = new Map<string, Pick<CourseLessonRow, "duration_seconds">[]>();
+  for (const lesson of lessonRows as {
+    id: string;
+    module_id: string;
+    duration_seconds: number | null;
+  }[]) {
+    const list = lessonsByModule.get(lesson.module_id) ?? [];
+    list.push({ duration_seconds: lesson.duration_seconds });
+    lessonsByModule.set(lesson.module_id, list);
+  }
+
+  const lessonsByCourse = new Map<string, Pick<CourseLessonRow, "duration_seconds">[]>();
+  for (const courseModule of modules) {
+    const list = lessonsByCourse.get(courseModule.course_id) ?? [];
+    list.push(...(lessonsByModule.get(courseModule.id) ?? []));
+    lessonsByCourse.set(courseModule.course_id, list);
+  }
+
+  for (const course of courses) {
+    const lessons = lessonsByCourse.get(course.id) ?? [];
+    if (lessons.length > 0) meta.set(course.id, courseOutlineMeta(lessons));
+  }
+  return meta;
+}
+
+export async function loadCourseInstructorName(
+  supabase: ServerClient,
+  instructorId: string | null,
+): Promise<string | null> {
+  if (!instructorId) return null;
+  const { data, error } = await supabase
+    .from("instructors")
+    .select("name")
+    .eq("id", instructorId)
+    .maybeSingle();
+  if (error || !data) return null;
+  const name = typeof data.name === "string" ? data.name.trim() : "";
+  return name || null;
 }
 
 export async function loadDiscoverableCourses(

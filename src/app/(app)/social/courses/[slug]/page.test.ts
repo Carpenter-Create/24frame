@@ -54,6 +54,7 @@ function stubClient({
     description: string | null;
     cover_key: string | null;
     is_flagship_free: boolean;
+    instructor_id?: string | null;
     created_at: string;
   } | null,
   modules = [] as { id: string; course_id: string; title: string; position: number }[],
@@ -65,12 +66,14 @@ function stubClient({
     duration_seconds: number | null;
     free_preview: boolean;
   }[],
+  instructor = null as { id: string; name: string } | null,
   access = true,
 } = {}) {
   const from = vi.fn((table: string) => {
     if (table === "courses") return chain(course);
     if (table === "modules") return chain(modules);
     if (table === "lessons") return chain(lessons);
+    if (table === "instructors") return chain(instructor);
     throw new Error(`unexpected from(${table})`);
   });
   const rpc = vi.fn(async (name: string) => {
@@ -99,6 +102,7 @@ describe("Social course detail", () => {
         description: "Orientation for 24Frame Education.",
         cover_key: null,
         is_flagship_free: true,
+        instructor_id: "i1",
         created_at: "2026-09-12T14:00:00.000Z",
       },
       modules: [{ id: "m1", course_id: "c1", title: "Orientation", position: 1 }],
@@ -108,7 +112,7 @@ describe("Social course detail", () => {
           module_id: "m1",
           title: "What this workspace is",
           position: 1,
-          duration_seconds: null,
+          duration_seconds: 90,
           free_preview: true,
         },
         {
@@ -116,10 +120,11 @@ describe("Social course detail", () => {
           module_id: "m1",
           title: "What comes later",
           position: 2,
-          duration_seconds: null,
+          duration_seconds: 120,
           free_preview: false,
         },
       ],
+      instructor: { id: "i1", name: "Ada Lovelace" },
       access: true,
     });
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
@@ -135,8 +140,20 @@ describe("Social course detail", () => {
     expect(html).toContain("What this workspace is");
     expect(html).toContain("What comes later");
     expect(html).toContain("data-course-player");
+    expect(html).toContain("data-course-playlist");
+    expect(html).toContain(SOCIAL.courses.playlist);
+    expect(html).toContain("data-course-lesson-active");
+    expect(html).toContain("data-course-instructor");
+    expect(html).toContain("Ada Lovelace");
+    expect(html).toContain("1m 30s");
+    expect(html).toContain("2m");
     expect(html).toContain("data-course-cover");
     expect(html).toContain("aspect-video");
+    expect(html).toContain("lg:flex-row");
+    expect(html).not.toContain("data-course-resume");
+    expect(html).not.toContain("Resume");
+    expect(html).not.toContain("New &amp; For You");
+    expect(html).not.toContain("Manage courses");
     expect(html).not.toContain("data-course-denied");
     expect(html).not.toContain("LOCKED");
     expect(html).not.toContain("<video");
@@ -234,6 +251,8 @@ describe("course detail lock", () => {
     const consume = readFileSync("src/components/courses/course-consume.tsx", "utf8");
     expect(page).toContain("CourseConsume");
     expect(page).toContain("SOCIAL.courses.title");
+    expect(page).toContain("loadCourseInstructorName");
+    expect(page).not.toContain("Resume");
     expect(page).not.toContain("MediaConvert");
     expect(page).not.toContain("HLS");
     expect(page).not.toContain("<video");
@@ -243,7 +262,11 @@ describe("course detail lock", () => {
     expect(page).not.toContain("signedAvatarUrl");
     expect(page).not.toContain("LOCKED");
     expect(consume).toContain("data-course-player");
+    expect(consume).toContain("data-course-playlist");
+    expect(consume).toContain("lg:flex-row");
     expect(consume).not.toContain("/lessons/");
+    expect(consume).not.toContain("Resume");
+    expect(consume).not.toMatch(/Buy|checkout|Stripe/i);
     expect(readFileSync("src/app/(app)/social/courses/[slug]/loading.tsx", "utf8")).toContain(
       "CourseDetailSkeleton",
     );

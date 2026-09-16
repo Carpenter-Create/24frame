@@ -6,8 +6,10 @@ import { SOCIAL, SOCIAL_ROUTES, socialCourseHref } from "@/lib/social";
 import {
   COURSE_COVER_ASPECT_CLASS,
   courseAccessGranted,
+  courseDiscoverMetaLabel,
   courseHref,
   courseLessonDurationLabel,
+  courseOutlineMeta,
   firstOutlineLesson,
   lessonInOutline,
   outlineForDisplay,
@@ -88,6 +90,21 @@ describe("placeholder outline", () => {
     expect(courseLessonDurationLabel(120)).toBe("2m");
     expect(courseLessonDurationLabel(90)).toBe("1m 30s");
   });
+
+  it("builds quiet discover meta from known lesson counts and durations", () => {
+    expect(courseOutlineMeta([])).toEqual({ lessonCount: 0, durationSeconds: null });
+    expect(courseDiscoverMetaLabel({ lessonCount: 0, durationSeconds: null })).toBeNull();
+    expect(courseOutlineMeta([{ duration_seconds: 120 }])).toEqual({
+      lessonCount: 1,
+      durationSeconds: 120,
+    });
+    expect(courseDiscoverMetaLabel({ lessonCount: 1, durationSeconds: 120 })).toBe("1 lesson · 2m");
+    expect(
+      courseDiscoverMetaLabel(
+        courseOutlineMeta([{ duration_seconds: 90 }, { duration_seconds: null }]),
+      ),
+    ).toBe("2 lessons · 1m 30s");
+  });
 });
 
 describe("course routes and copy", () => {
@@ -100,6 +117,9 @@ describe("course routes and copy", () => {
     expect(SOCIAL.courses.subtitle).not.toContain("Social+Education");
     expect(SOCIAL.courses.subtitle).not.toMatch(/placeholder/i);
     expect(SOCIAL.courses.empty).toBe("Nothing here yet.");
+    expect(SOCIAL.courses.playlist).toBe("Playlist");
+    expect(SOCIAL.courses.lessonOne).toBe("1 lesson");
+    expect(SOCIAL.courses.lessons).toBe("lessons");
     expect(SOCIAL.courses.error).toBe("Education could not be loaded.");
     expect(SOCIAL.courses.denied).toBe("This course is not available.");
     expect(SOCIAL.courses.denied).not.toMatch(/LOCKED|Buy|price/i);
@@ -119,14 +139,27 @@ describe("course lock", () => {
     const migration = readFileSync("supabase/migrations/20260912240000_courses.sql", "utf8");
 
     expect(list).toContain("loadDiscoverableCourses");
+    expect(list).toContain("loadDiscoverableCourseMeta");
     expect(list).toContain("data-course-grid");
     expect(list).toContain("CourseCard");
     expect(detail).toContain("loadCourseDetail");
+    expect(detail).toContain("loadCourseInstructorName");
     expect(detail).toContain("data-course-denied");
+    expect(detail).toContain("data-course-instructor");
     expect(detail).toContain("CourseConsume");
+    expect(detail).toContain("mt-[var(--space-12)]");
     expect(detail).not.toContain("/lessons/");
+    expect(detail).not.toContain("Resume");
     expect(consume).toContain("data-course-player");
+    expect(consume).toContain("data-course-playlist");
+    expect(consume).toContain("lg:flex-row");
+    expect(consume).toContain("lg:w-[20rem]");
+    expect(consume).toContain("p-[var(--space-4)]");
+    expect(consume).toContain("setSelectedId(lesson.id)");
     expect(consume).not.toContain("/lessons/");
+    expect(consume).not.toContain("Resume");
+    expect(consume).not.toContain("lesson_progress");
+    expect(consume).not.toMatch(/shadow-/);
     expect(COURSE_COVER_ASPECT_CLASS).toBe("aspect-video");
     expect(lib).toContain("has_course_access");
     expect(lib).toContain("cover_key");
@@ -134,7 +167,18 @@ describe("course lock", () => {
     expect(lib).not.toContain("MediaConvert");
     expect(lib).not.toContain("m3u8");
     expect(lib).not.toContain("CloudFront");
+    expect(lib).toContain("loadDiscoverableCourseMeta");
+    expect(lib).toContain("loadCourseInstructorName");
     expect(lib).not.toContain("lesson_progress");
+    expect(lib).not.toContain("Resume");
+    expect(readFileSync("src/components/courses/course-cover.tsx", "utf8")).not.toContain("charAt");
+    expect(readFileSync("src/components/courses/course-cover.tsx", "utf8")).not.toMatch(/shadow-/);
+    expect(readFileSync("src/components/courses/course-card.tsx", "utf8")).toContain(
+      "data-course-card-meta",
+    );
+    expect(readFileSync("src/components/courses/course-lesson-player.tsx", "utf8")).toContain(
+      "data-course-playback",
+    );
     expect(actions).not.toContain("from(\"courses\")");
     expect(actions).not.toContain("createSocialCourse");
     expect(forms).not.toContain("Course");
