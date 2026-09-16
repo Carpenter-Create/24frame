@@ -38,7 +38,7 @@ export default async function ReportsPage({
 }) {
   const ctx = await getOrgContext();
   if (!ctx) redirect("/login");
-  const sp = await (searchParams ?? Promise.resolve({}));
+  const sp = await (searchParams ?? Promise.resolve({} as Record<string, string | string[] | undefined>));
   const now = new Date();
   const period = parseReportsPeriod(sp.period, now);
   const userId = parseReportsUserId(sp.user);

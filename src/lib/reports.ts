@@ -163,12 +163,13 @@ export function reportsDownloadHref(input: {
   period: ReportsPeriod;
   periods: readonly { id: string; period_year: number; period_month: number; status: string }[];
 }): string | null {
-  if (!reportsPeriodIsConcrete(input.period)) return null;
+  const selected = input.period;
+  if (selected.kind === "all") return null;
   const match = input.periods.find(
     (period) =>
       period.status === "closed" &&
-      period.period_year === input.period.year &&
-      period.period_month === input.period.month,
+      period.period_year === selected.year &&
+      period.period_month === selected.month,
   );
   return match ? financeExportHref(match.id, "pdf") : null;
 }

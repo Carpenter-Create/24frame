@@ -58,8 +58,8 @@ export function reportsHeroMetrics(input: {
   findingsIsPartial: boolean;
 } {
   const snap = clientHomeSnapshot({
-    titles: input.titles,
-    findings: input.findings,
+    titles: [...input.titles],
+    findings: [...input.findings],
     orgId: input.orgId,
     now: new Date(),
     bound: input.bound,
