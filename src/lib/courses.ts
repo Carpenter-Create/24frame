@@ -1,4 +1,5 @@
 import { SOCIAL_ROUTES } from "@/lib/social";
+import type { CourseStatus } from "@/lib/education";
 import type { createClient } from "@/lib/supabase/server";
 import { UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
 
@@ -15,8 +16,15 @@ export type CourseRow = {
   cover_key: string | null;
   is_flagship_free: boolean;
   price_cents: number | null;
+  catalog_code: string;
+  status: CourseStatus;
+  position: number;
+  instructor_id: string | null;
   created_at: string;
 };
+
+export const COURSE_MEMBER_SELECT =
+  "id, slug, title, description, cover_key, is_flagship_free, price_cents, catalog_code, status, position, instructor_id, created_at";
 
 export const COURSE_COVER_ASPECT_CLASS = "aspect-video";
 
@@ -41,6 +49,10 @@ export type CourseLessonRow = {
   position: number;
   duration_seconds: number | null;
   free_preview: boolean;
+  summary: string | null;
+  cover_key: string | null;
+  lesson_type: string;
+  education_video_id: string | null;
   source_key: string | null;
   hls_key: string | null;
   encode_status: CourseEncodeStatus | null;
@@ -136,8 +148,9 @@ export async function loadDiscoverableCourses(
 ): Promise<CourseListResult> {
   const { data, error } = await supabase
     .from("courses")
-    .select("id, slug, title, description, cover_key, is_flagship_free, price_cents, created_at")
-    .order("created_at", { ascending: true })
+    .select(COURSE_MEMBER_SELECT)
+    .eq("status", "published")
+    .order("position", { ascending: true })
     .range(...rangeFor(UNPAGINATED_MAX));
   if (error) return { courses: [], failed: true };
   return { courses: (data ?? []) as CourseRow[], failed: false };
@@ -150,8 +163,9 @@ export async function loadCourseDetail(
 ): Promise<CourseDetail> {
   const { data: course, error } = await supabase
     .from("courses")
-    .select("id, slug, title, description, cover_key, is_flagship_free, price_cents, created_at")
+    .select(COURSE_MEMBER_SELECT)
     .eq("slug", decodeURIComponent(slug))
+    .eq("status", "published")
     .maybeSingle();
 
   if (error) {
@@ -188,7 +202,7 @@ export async function loadCourseDetail(
   const { data: lessonRows, error: lessonError } = await supabase
     .from("lessons")
     .select(
-      "id, module_id, title, position, duration_seconds, free_preview, source_key, hls_key, encode_status",
+      "id, module_id, title, position, duration_seconds, free_preview, summary, cover_key, lesson_type, education_video_id, source_key, hls_key, encode_status",
     )
     .in("module_id", moduleIds)
     .order("position", { ascending: true })

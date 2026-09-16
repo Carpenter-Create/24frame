@@ -60,6 +60,7 @@ function stubClient(
         const c: Record<string, unknown> = {};
         const self = () => c;
         c.select = vi.fn(self);
+        c.eq = vi.fn(self);
         c.order = vi.fn(self);
         c.range = vi.fn(async () => ({ data: null, error: { message: "failed" } }));
         return c;

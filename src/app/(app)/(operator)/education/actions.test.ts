@@ -21,10 +21,18 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { isEducationAwsConfigured, presignEducationSourcePut, putEducationSourceObject } from "@/lib/s3-education";
 import { EDUCATION_ADMIN, educationCoverKey } from "@/lib/education";
 
-import { createEducationCourse, presignEducationUpload, uploadEducationCover } from "./actions";
+import {
+  createEducationCourse,
+  createEducationLesson,
+  presignEducationUpload,
+  uploadEducationCover,
+} from "./actions";
 
 const USER = { id: "11111111-1111-4111-8111-111111111111" };
 const COURSE = "22222222-2222-4222-8222-222222222222";
+const MODULE = "33333333-3333-4333-8333-333333333333";
+const LESSON = "44444444-4444-4444-8444-444444444444";
+const VIDEO = "55555555-5555-4555-8555-555555555555";
 
 function staffClient(row: { user_id: string } | null) {
   const chain = {
@@ -37,11 +45,66 @@ function staffClient(row: { user_id: string } | null) {
   return { from };
 }
 
-function adminClient(insertError: { code?: string; message?: string } | null = null) {
-  const insert = vi.fn(async () => ({ error: insertError }));
-  const from = vi.fn(() => ({ insert }));
+function query(data: unknown) {
+  const q: Record<string, unknown> = {};
+  const self = () => q;
+  q.select = vi.fn(self);
+  q.eq = vi.fn(self);
+  q.order = vi.fn(self);
+  q.limit = vi.fn(self);
+  q.maybeSingle = vi.fn(async () => ({
+    data: Array.isArray(data) ? (data[0] ?? null) : data,
+    error: null,
+  }));
+  q.then = (resolve: (value: unknown) => unknown) =>
+    Promise.resolve({ data, error: null }).then(resolve);
+  return q;
+}
+
+function insertResult(row: unknown, error: { code?: string; message?: string } | null = null) {
+  const chain: Record<string, unknown> = {};
+  chain.select = vi.fn(() => chain);
+  chain.maybeSingle = vi.fn(async () => ({ data: error ? null : row, error }));
+  return chain;
+}
+
+function adminClient(options?: { insertError?: { code?: string; message?: string } | null }) {
+  const courseInsert = insertResult({ id: COURSE }, options?.insertError ?? null);
+  const lessonInsert = insertResult({ id: LESSON });
+  const videoInsert = insertResult({ id: VIDEO });
+  const courseInsertFn = vi.fn(() => courseInsert);
+  const lessonInsertFn = vi.fn(() => lessonInsert);
+  const videoInsertFn = vi.fn(() => videoInsert);
+  const from = vi.fn((table: string) => {
+    if (table === "courses") {
+      return {
+        ...query([]),
+        insert: courseInsertFn,
+      };
+    }
+    if (table === "instructors") {
+      return {
+        ...query(null),
+        insert: vi.fn(() => insertResult({ id: "instructor-1" })),
+      };
+    }
+    if (table === "modules") {
+      return query({ id: MODULE, course_id: COURSE, courses: { slug: "welcome" } });
+    }
+    if (table === "lessons") {
+      return {
+        ...query([{ position: 1 }]),
+        insert: lessonInsertFn,
+        update: vi.fn(() => ({ eq: vi.fn(async () => ({ error: null })) })),
+      };
+    }
+    if (table === "education_videos") {
+      return { insert: videoInsertFn };
+    }
+    throw new Error(`unexpected admin from(${table})`);
+  });
   vi.mocked(createAdminClient).mockReturnValue({ from } as never);
-  return { from, insert };
+  return { from, courseInsertFn, lessonInsertFn, videoInsertFn };
 }
 
 describe("education admin actions", () => {
@@ -55,7 +118,6 @@ describe("education admin actions", () => {
     const admin = adminClient();
     await expect(
       createEducationCourse({
-        slug: "member-write",
         title: "Nope",
         model: "free",
       }),
@@ -63,31 +125,34 @@ describe("education admin actions", () => {
     expect(admin.from).not.toHaveBeenCalled();
   });
 
-  it("inserts a course through the service-role client for gc_staff", async () => {
+  it("inserts a course through the service-role client for gc_staff with auto slug", async () => {
     staffClient({ user_id: USER.id });
     const admin = adminClient();
     await expect(
       createEducationCourse({
-        slug: "Welcome To 24Frame Two",
-        title: "Welcome",
+        title: "Welcome To 24Frame Two",
         model: "free",
         price: "49",
       }),
-    ).resolves.toEqual({ slug: "welcome-to-24frame-two" });
+    ).resolves.toEqual({ slug: "welcome-to-24frame-two", courseId: COURSE });
     expect(createAdminClient).toHaveBeenCalled();
     expect(admin.from).toHaveBeenCalledWith("courses");
-    expect(admin.insert).toHaveBeenCalledWith({
-      slug: "welcome-to-24frame-two",
-      title: "Welcome",
-      description: null,
-      is_flagship_free: true,
-      price_cents: null,
-    });
+    expect(admin.courseInsertFn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        slug: "welcome-to-24frame-two",
+        title: "Welcome To 24Frame Two",
+        description: null,
+        is_flagship_free: true,
+        price_cents: null,
+        status: "draft",
+        instructor_id: null,
+      }),
+    );
   });
 
   it("persists a one-time price on Paid and rejects a Paid course without a price", async () => {
     staffClient({ user_id: USER.id });
-    const admin = adminClient();
+    adminClient();
     await expect(
       createEducationCourse({
         slug: "paid-course",
@@ -95,13 +160,7 @@ describe("education admin actions", () => {
         model: "paid",
         price: "49.00",
       }),
-    ).resolves.toEqual({ slug: "paid-course" });
-    expect(admin.insert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        is_flagship_free: false,
-        price_cents: 4900,
-      }),
-    );
+    ).resolves.toEqual({ slug: "paid-course", courseId: COURSE });
     await expect(
       createEducationCourse({
         slug: "paid-empty",
@@ -110,6 +169,22 @@ describe("education admin actions", () => {
         price: "",
       }),
     ).resolves.toEqual({ error: EDUCATION_ADMIN.invalid });
+  });
+
+  it("creates a lesson without a free-taste flag and opens an education_videos row", async () => {
+    staffClient({ user_id: USER.id });
+    const admin = adminClient();
+    await expect(
+      createEducationLesson({
+        moduleId: MODULE,
+        title: "Opening lesson",
+        summary: "A short summary",
+        durationMinutes: 12,
+        lessonType: "lesson",
+      }),
+    ).resolves.toEqual({ lessonId: LESSON });
+    expect(admin.from).toHaveBeenCalledWith("education_videos");
+    expect(admin.from).toHaveBeenCalledWith("lessons");
   });
 
   it("returns a clear error when Education storage env is stubbed", async () => {

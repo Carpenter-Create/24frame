@@ -140,8 +140,8 @@ select ok(
   'authenticated remains select-only on course tables');
 
 reset role;
-insert into public.courses (slug, title, is_flagship_free)
-values ('pgtap-education-media', 'Education media fixture', true);
+insert into public.courses (slug, title, is_flagship_free, status)
+values ('pgtap-education-media', 'Education media fixture', true, 'published');
 
 insert into public.modules (course_id, title, position)
 values ((select id from public.courses where slug = 'pgtap-education-media'), 'Module', 1);
