@@ -51,25 +51,24 @@ export function workspaceCandidateAccessible(id: WorkspaceMenuCandidateId): bool
 }
 
 export function availableWorkspaceOptions(): readonly WorkspaceMenuOption[] {
-  return WORKSPACE_MENU_CANDIDATES.flatMap((candidate) => {
-    if (!workspaceCandidateAccessible(candidate.id)) return [];
+  const options: WorkspaceMenuOption[] = [];
+  for (const candidate of WORKSPACE_MENU_CANDIDATES) {
+    if (!workspaceCandidateAccessible(candidate.id)) continue;
     if (candidate.id === "education") {
-      return [
-        {
-          mode: "education" as const,
-          label: candidate.label,
-          href: WORKSPACE_EDUCATION_HREF,
-        },
-      ];
-    }
-    return [
-      {
-        mode: candidate.id,
+      options.push({
+        mode: "education",
         label: candidate.label,
-        href: workspaceHome(candidate.id),
-      },
-    ];
-  });
+        href: WORKSPACE_EDUCATION_HREF,
+      });
+      continue;
+    }
+    options.push({
+      mode: candidate.id,
+      label: candidate.label,
+      href: workspaceHome(candidate.id),
+    });
+  }
+  return options;
 }
 
 export function workspaceModeLabel(mode: WorkspaceMode): string {

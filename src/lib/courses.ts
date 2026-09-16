@@ -92,8 +92,8 @@ export function outlineForDisplay(
 export function firstOutlineLesson(
   modules: CourseOutlineModule[],
 ): CourseLessonRow | null {
-  for (const module of modules) {
-    const lesson = module.lessons[0];
+  for (const courseModule of modules) {
+    const lesson = courseModule.lessons[0];
     if (lesson) return lesson;
   }
   return null;
@@ -103,8 +103,8 @@ export function lessonInOutline(
   modules: CourseOutlineModule[],
   lessonId: string,
 ): CourseLessonRow | null {
-  for (const module of modules) {
-    const lesson = module.lessons.find((row) => row.id === lessonId);
+  for (const courseModule of modules) {
+    const lesson = courseModule.lessons.find((row) => row.id === lessonId);
     if (lesson) return lesson;
   }
   return null;
