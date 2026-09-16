@@ -36,6 +36,7 @@ describe("DashboardAdminHero", () => {
           points: [],
         },
         activity: [],
+        periodMenuOpen: true,
       }),
     );
     expect(html).toContain("data-dashboard-admin-hero");
@@ -44,7 +45,12 @@ describe("DashboardAdminHero", () => {
     expect(html).toContain(DASHBOARD_ADMIN.activity);
     expect(html).toContain("Acme");
     expect(html).toContain("All time");
-    expect(html).toContain("data-dashboard-period-grains");
+    expect(html).toContain("data-dashboard-period");
+    expect(html).toContain("data-dashboard-period-menu");
+    expect(html).toContain('data-dashboard-period-option="all"');
+    expect(html).toContain('data-dashboard-period-option="ytd"');
+    expect(html).not.toContain("data-dashboard-period-grains");
+    expect(html).not.toContain("<select");
     expect(html).toContain("card-surface");
     expect(html).toContain("shadow-none");
     expect(html).toMatch(/data-dashboard-stat="revenue"[^>]*t-title/);
@@ -74,6 +80,7 @@ describe("DashboardAdminHero", () => {
         },
         activity: [],
         fixture: true,
+        periodMenuOpen: true,
       }),
     );
     expect(html).toContain("data-dashboard-fixture-banner");

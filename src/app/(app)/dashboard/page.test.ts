@@ -633,7 +633,8 @@ describe("company admin Overview hero", () => {
     expect(html).toContain("data-dashboard-admin-chrome");
     expect(html).toContain("data-dashboard-admin-controls");
     expect(html).toContain("data-dashboard-period");
-    expect(html).toContain("data-dashboard-period-grains");
+    expect(html).not.toContain("data-dashboard-period-grains");
+    expect(html).not.toContain("<select");
     expect(html).toContain("data-dashboard-user");
     expect(html).toContain("data-dashboard-revenue");
     expect(html).toContain("data-dashboard-revenue-chart");
@@ -646,8 +647,8 @@ describe("company admin Overview hero", () => {
     expect(html).toContain(DASHBOARD_ADMIN.revenueEmpty);
     expect(html).toContain(DASHBOARD_ADMIN.activity);
     expect(html).toContain(DASHBOARD_ADMIN.allTime);
-    expect(html).toContain(DASHBOARD_ADMIN.ytd);
-    expect(html).toContain("2026");
+    expect(html).toContain(DASHBOARD_ADMIN.period);
+    expect(html).toContain("data-dashboard-period-current");
     expect(html).toContain(DASHBOARD_ADMIN.findUser);
     expect(html).toContain(DASHBOARD_ADMIN.allCompany);
     expect(html).toContain("As of All time");
@@ -679,8 +680,31 @@ describe("company admin Overview hero", () => {
     expect(html).toContain("data-dashboard-fixture-banner");
     expect(html).toContain(DASHBOARD_FIXTURE.banner);
     expect(html).toContain(DASHBOARD_FIXTURE.sampleMark);
-    expect(html).toContain("$496,000.00");
+    expect(html).toContain("$2,104,000.00");
+    expect(html).toContain("Window A");
+    expect(html).toContain("United States");
+    expect(html).toContain("Sample title 01");
+    expect(html).toMatch(/data-dashboard-overview-cell="added"[^>]*>[\s\S]*?>4</);
+    expect(html).toMatch(/data-dashboard-overview-cell="pipeline"[^>]*>[\s\S]*?>7</);
+    expect(html).not.toContain(DASHBOARD_ADMIN.chartEmpty);
+    expect(html).not.toContain(DASHBOARD_HOME.platformsEmpty);
+    expect(html).not.toContain(DASHBOARD_HOME.territoriesEmpty);
     expect(html).not.toContain("data-reports-download");
+  });
+
+  it("keeps sample series when the month grain is selected", async () => {
+    vi.stubEnv(DASHBOARD_CRAFT_FIXTURE_ENV, "1");
+    stubClient();
+    vi.mocked(getOrgContext).mockResolvedValue(
+      ctx({ isGcStaff: false, orgStatus: "active", role: "account_owner" }) as never,
+    );
+    const html = renderToStaticMarkup(
+      await DashboardPage({ searchParams: Promise.resolve({ period: "2026-09" }) }),
+    );
+    expect(html).toContain("data-dashboard-fixture-banner");
+    expect(html).toContain("$154,000.00");
+    expect(html).not.toContain(DASHBOARD_ADMIN.chartEmpty);
+    expect(html).not.toContain(DASHBOARD_ADMIN.revenueEmpty);
   });
 
   it("does not fixture the standard-user Dashboard even when the env gate is on", async () => {
@@ -705,7 +729,8 @@ describe("company admin Overview hero", () => {
       await DashboardPage({ searchParams: Promise.resolve({ period: "Q32026" }) }),
     );
     expect(html).toMatch(/<h1 class="t-section text-ink">Q3 2026<\/h1>/);
-    expect(html).toContain('value="Q32026"');
+    expect(html).toContain("Q3 2026");
+    expect(html).not.toContain('value="Q32026"');
     expect(html).not.toContain("data-dashboard-user-results");
     expect(html).toContain(DASHBOARD_ADMIN.allCompany);
   });

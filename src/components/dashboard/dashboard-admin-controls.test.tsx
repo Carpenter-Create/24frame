@@ -1,0 +1,69 @@
+import { createElement } from "react";
+import { readFileSync } from "node:fs";
+import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it, vi } from "vitest";
+
+import { DASHBOARD_ADMIN, dashboardPeriodOptions } from "@/lib/dashboard-admin";
+import {
+  DASHBOARD_PERIOD_OPTION_CHECK_CLASS,
+  DASHBOARD_PERIOD_PANEL_CLASS,
+  DASHBOARD_PERIOD_TRIGGER_CLASS,
+} from "@/lib/dashboard-craft";
+import { DashboardAdminControls } from "./dashboard-admin-controls";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
+}));
+
+const now = new Date("2026-09-16T12:00:00.000Z");
+const options = dashboardPeriodOptions(now, [
+  { year: 2025, month: 12 },
+  { year: 2026, month: 8 },
+]);
+
+describe("DashboardAdminControls", () => {
+  it("renders one labeled period menu with a Sporty Blue check and no grain chips", () => {
+    const html = renderToStaticMarkup(
+      createElement(DashboardAdminControls, {
+        periodKey: "all",
+        options,
+        userId: null,
+        users: [],
+        defaultOpen: true,
+      }),
+    );
+    expect(html).toContain("data-dashboard-period");
+    expect(html).toContain("data-dashboard-period-menu");
+    expect(html).toContain("data-dashboard-period-current");
+    expect(html).toContain(DASHBOARD_ADMIN.allTime);
+    expect(html).toContain(DASHBOARD_ADMIN.ytd);
+    expect(html).toContain('data-dashboard-period-group="year"');
+    expect(html).toContain('data-dashboard-period-group="quarter"');
+    expect(html).toContain('data-dashboard-period-group="month"');
+    expect(html).toContain('data-dashboard-period-option="all"');
+    expect(html).toContain('data-dashboard-period-option="ytd"');
+    expect(html).toContain('data-dashboard-period-option="2026"');
+    expect(html).toContain('data-dashboard-period-option="Q32026"');
+    expect(html).toContain('data-dashboard-period-option="2026-09"');
+    expect(html).toContain(DASHBOARD_PERIOD_TRIGGER_CLASS);
+    expect(html).toContain(DASHBOARD_PERIOD_PANEL_CLASS);
+    expect(html).toContain(DASHBOARD_PERIOD_OPTION_CHECK_CLASS);
+    expect(html).toContain("data-appearance-check");
+    expect(html).toContain("shadow-none");
+    expect(html).not.toContain("data-dashboard-period-grains");
+    expect(html).not.toContain("<select");
+    expect(html).not.toContain("REPORTS_SELECT_CLASS");
+    expect(html).not.toMatch(/<label[^>]*>[\s\S]*data-dashboard-period-menu/);
+  });
+
+  it("keeps URL sync on replace and does not mount a native select", () => {
+    const src = readFileSync("src/components/dashboard/dashboard-admin-controls.tsx", "utf8");
+    expect(src).toContain("router.replace");
+    expect(src).toContain("dashboardHref");
+    expect(src).not.toContain("<select");
+    expect(src).not.toContain("DASHBOARD_PERIOD_GRAINS");
+    expect(src).not.toContain("data-dashboard-period-grains");
+    expect(src).toContain("AppearanceCheck");
+    expect(src).not.toMatch(/<label[\s\S]*data-dashboard-period[\s\S]*<\/label>/);
+  });
+});

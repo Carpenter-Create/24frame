@@ -26,9 +26,9 @@ import {
   revenueCompare,
   revenuePlayheadKey,
   dashboardDeltaLine,
-  dashboardGrainActive,
-  dashboardGrainOption,
-  DASHBOARD_PERIOD_GRAINS,
+  dashboardPeriodMenuGroups,
+  dashboardPeriodOption,
+  DASHBOARD_PERIOD_MENU_GROUPS,
   revenuePointsFromLabels,
 } from "./dashboard-admin";
 
@@ -77,22 +77,20 @@ describe("company admin period and scope", () => {
     expect(dashboardHref({ period: "Q42025", user: "maya" })).toBe(
       `${DASHBOARD_HREF}?period=Q42025&user=maya`,
     );
-    expect(DASHBOARD_PERIOD_GRAINS.map((grain) => grain.label)).toEqual([
-      DASHBOARD_ADMIN.allTime,
-      DASHBOARD_ADMIN.year,
-      DASHBOARD_ADMIN.quarter,
-      DASHBOARD_ADMIN.month,
-      DASHBOARD_ADMIN.ytd,
+    expect(DASHBOARD_PERIOD_MENU_GROUPS.map((section) => section.group)).toEqual([
+      "all",
+      "ytd",
+      "year",
+      "quarter",
+      "month",
     ]);
-    expect(dashboardGrainActive("all", "all")).toBe(true);
-    expect(dashboardGrainActive("2026", "year")).toBe(true);
-    expect(dashboardGrainActive("Q32026", "quarter")).toBe(true);
-    expect(dashboardGrainActive("2026-09", "month")).toBe(true);
-    expect(dashboardGrainActive("ytd", "ytd")).toBe(true);
-    expect(dashboardGrainActive("2026", "all")).toBe(false);
     const options = dashboardPeriodOptions(now, []);
-    expect(dashboardGrainOption(options, "year")?.key).toBe("2026");
-    expect(dashboardGrainOption(options, "all")?.key).toBe("all");
+    expect(dashboardPeriodOption(options, "2026")?.group).toBe("year");
+    expect(dashboardPeriodOption(options, "all")?.label).toBe(DASHBOARD_ADMIN.allTime);
+    const menu = dashboardPeriodMenuGroups(options);
+    expect(menu.map((section) => section.group)).toEqual(["all", "ytd", "year", "quarter", "month"]);
+    expect(menu[0]?.options.map((row) => row.key)).toEqual(["all"]);
+    expect(menu[1]?.options.map((row) => row.key)).toEqual(["ytd"]);
   });
 
   it("filters ISO timestamps in UTC and lists current standards before historical pickers", () => {
@@ -122,6 +120,14 @@ describe("company admin period and scope", () => {
     expect(options.some((row) => row.key === "2025")).toBe(true);
     expect(options.some((row) => row.key === "Q42025")).toBe(true);
     expect(options.some((row) => row.key === "2025-12")).toBe(true);
+    const menu = dashboardPeriodMenuGroups(options);
+    expect(menu.map((section) => section.group)).toEqual(["all", "ytd", "year", "quarter", "month"]);
+    expect(menu.find((section) => section.group === "year")?.options.map((row) => row.key)).toEqual([
+      "2026",
+      "2025",
+    ]);
+    expect(menu.find((section) => section.group === "quarter")?.options[0]?.key).toBe("Q32026");
+    expect(menu.find((section) => section.group === "month")?.options[0]?.key).toBe("2026-09");
     const selected = parseDashboardPeriod("Q12020", now);
     expect(dashboardPeriodOptionsFor(selected, now, []).some((row) => row.key === "Q12020")).toBe(
       true,

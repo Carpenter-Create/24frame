@@ -42,12 +42,14 @@ export function DashboardAdminChrome({
   options,
   userId,
   users,
+  periodMenuOpen = false,
 }: {
   orgName: string;
   period: DashboardPeriod;
   options: readonly DashboardPeriodOption[];
   userId: string | null;
   users: readonly ReportsUserOption[];
+  periodMenuOpen?: boolean;
 }) {
   return (
     <div
@@ -63,6 +65,7 @@ export function DashboardAdminChrome({
         options={options}
         userId={userId}
         users={users}
+        defaultOpen={periodMenuOpen}
       />
     </div>
   );
@@ -182,6 +185,7 @@ export function DashboardAdminHero({
   hero,
   activity,
   fixture = false,
+  periodMenuOpen = false,
 }: {
   orgName: string;
   period: DashboardPeriod;
@@ -191,6 +195,7 @@ export function DashboardAdminHero({
   hero: DashboardRevenueHero;
   activity: readonly DashboardActivityRow[];
   fixture?: boolean;
+  periodMenuOpen?: boolean;
 }) {
   return (
     <div data-dashboard-admin-hero="" className="flex flex-col gap-[var(--space-6)]">
@@ -201,6 +206,7 @@ export function DashboardAdminHero({
         options={options}
         userId={userId}
         users={users}
+        periodMenuOpen={periodMenuOpen}
       />
       <div
         data-dashboard-overview-row=""
