@@ -16,6 +16,7 @@ import {
   Tray,
   Storefront,
   Users,
+  BookOpen,
 } from "@phosphor-icons/react";
 
 import type { PhosphorIcon } from "@/lib/phosphor-icon";
@@ -23,6 +24,7 @@ import { ASK_GLOBEE } from "@/lib/ask-globee";
 import { PRODUCT_NAME } from "@/lib/product";
 import type { WorkspaceMode } from "@/lib/workspace";
 import { SOCIAL_ROUTES } from "@/lib/social";
+import { WORKSPACE_EDUCATION_LABEL } from "@/lib/workspace-menu";
 
 export type PhosphorNavItem = {
   label: string;
@@ -62,9 +64,11 @@ export const NAV: PhosphorNavItem[] = [
 // Social workspace rail. Mobile tab keeps five jobs (Create stays).
 // Desktop rail is Home / Explore / Messages / Profile — composer owns create.
 // Messages here is DMs — never /messages. Groups / Courses / Leaderboard
-// stay parked off this rail. Education uses house Aggregation icons —
-// no Education-only icon set. SOCIAL_NAV family stays Lucide for NavGlyph
-// fallback. Social chrome rematch is SocialIcon (Social Figma V1).
+// stay parked off this rail. Education land is house chrome + an
+// Education rail on Route A — not Aggregation destinations, not STAFF,
+// not Social feed chrome. Phosphor house glyphs only; no Education-only
+// icon family. SOCIAL_NAV family stays Lucide for NavGlyph fallback.
+// Social chrome rematch is SocialIcon (Social Figma V1).
 export const SOCIAL_NAV: LucideNavItem[] = [
   { label: "Home", href: SOCIAL_ROUTES.home, family: "lucide", icon: House, exact: true },
   { label: "Explore", href: SOCIAL_ROUTES.explore, family: "lucide", icon: Compass },
@@ -76,6 +80,16 @@ export const SOCIAL_NAV: LucideNavItem[] = [
 export const SOCIAL_DESKTOP_NAV: LucideNavItem[] = SOCIAL_NAV.filter(
   (item) => item.href !== SOCIAL_ROUTES.create,
 );
+
+// Education rail. Route A /social/courses only. Do not invent /education.
+export const EDUCATION_NAV: PhosphorNavItem[] = [
+  {
+    label: WORKSPACE_EDUCATION_LABEL,
+    href: SOCIAL_ROUTES.courses,
+    family: "phosphor",
+    icon: BookOpen,
+  },
+];
 
 // Staff rail eyebrow. Not a 24Frame product wordmark.
 export const STAFF_RAIL_EYEBROW = "Staff";
@@ -129,6 +143,7 @@ export function mobileNavDestinations(
   workspace: WorkspaceMode = "aggregation",
 ): NavItem[] {
   if (workspace === "social") return SOCIAL_NAV;
+  if (workspace === "education") return EDUCATION_NAV;
   return isGcStaff ? [...NAV, ...GC_NAV] : NAV;
 }
 
@@ -137,5 +152,6 @@ export function railDestinations(
   workspace: WorkspaceMode = "aggregation",
 ): { items: NavItem[]; staffItems: NavItem[] } {
   if (workspace === "social") return { items: SOCIAL_DESKTOP_NAV, staffItems: [] };
+  if (workspace === "education") return { items: EDUCATION_NAV, staffItems: [] };
   return { items: NAV, staffItems: isGcStaff ? GC_NAV : [] };
 }

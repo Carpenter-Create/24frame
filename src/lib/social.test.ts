@@ -132,7 +132,11 @@ describe("social copy lock", () => {
     expect(SOCIAL.profile.shareProfile).toBe("Share profile");
     expect(SOCIAL.profile.shareCopyLink).toBe("Copy link");
     expect(SOCIAL.profile.shareDownload).toBe("Download");
-    expect(SOCIAL.courses.subtitle).toContain("Social+Education");
+    expect(SOCIAL.courses.title).toBe("Education");
+    expect(SOCIAL.courses.subtitle).toBe(`Education in ${PRODUCT_NAME}.`);
+    expect(SOCIAL.courses.subtitle).not.toContain("Social+Education");
+    expect(SOCIAL.courses.empty).toBe("Nothing here yet.");
+    expect(SOCIAL.courses.error).toBe("Education could not be loaded.");
     expect(SOCIAL.leaderboard.private).toBe("The leaderboard is private.");
     expect(SOCIAL.leaderboard.subtitle).toContain(PRODUCT_NAME);
     for (const banned of SOCIAL_BANNED_PRODUCT_NAMES) {

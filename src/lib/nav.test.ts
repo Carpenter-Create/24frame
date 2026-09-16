@@ -23,6 +23,7 @@ import {
   clientNavCurrent,
   isClientNavActive,
   isSocialTabActive,
+  EDUCATION_NAV,
   mobileNavDestinations,
   railDestinations,
 } from "./nav";
@@ -203,12 +204,42 @@ describe("mobileNavDestinations", () => {
     expect(mobileNavDestinations(true, "social").map((item) => item.href)).not.toContain(
       "/social/leaderboard",
     );
-    expect(mobileNavDestinations(false, "education").map((item) => item.href)).toEqual(
+    expect(EDUCATION_NAV.map((item) => ({ label: item.label, href: item.href }))).toEqual([
+      { label: "Education", href: "/social/courses" },
+    ]);
+    expect(mobileNavDestinations(false, "education").map((item) => item.href)).toEqual([
+      "/social/courses",
+    ]);
+    expect(mobileNavDestinations(true, "education").map((item) => item.href)).toEqual([
+      "/social/courses",
+    ]);
+    expect(mobileNavDestinations(true, "education").map((item) => item.label)).toEqual([
+      "Education",
+    ]);
+    expect(mobileNavDestinations(true, "education").map((item) => item.href)).not.toContain("/");
+    expect(mobileNavDestinations(true, "education").map((item) => item.href)).not.toContain(
+      "/titles",
+    );
+    expect(mobileNavDestinations(true, "education").map((item) => item.href)).not.toContain(
+      "/queue",
+    );
+    expect(mobileNavDestinations(true, "education").map((item) => item.href)).not.toEqual(
       mobileNavDestinations(false, "aggregation").map((item) => item.href),
     );
-    expect(railDestinations(false, "education").items.map((item) => item.href)).toEqual(
+    expect(railDestinations(false, "education").items.map((item) => item.href)).toEqual([
+      "/social/courses",
+    ]);
+    expect(railDestinations(true, "education").items.map((item) => item.label)).toEqual([
+      "Education",
+    ]);
+    expect(railDestinations(true, "education").staffItems).toEqual([]);
+    expect(railDestinations(true, "education").items.map((item) => item.href)).not.toEqual(
       railDestinations(false, "aggregation").items.map((item) => item.href),
     );
+    expect(navSrc).toContain("EDUCATION_NAV");
+    expect(navSrc).toContain('workspace === "education"');
+    expect(EDUCATION_NAV.every((item) => item.family === "phosphor")).toBe(true);
+    expect(EDUCATION_NAV.map((item) => item.href)).not.toContain("/education");
     expect(SOCIAL_NAV.map((item) => item.label)).toEqual([
       "Home",
       "Explore",

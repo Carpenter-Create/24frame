@@ -25,10 +25,11 @@ vi.mock("./organization-switcher", () => ({
   OrganizationSwitcher: () => createElement("div", { "data-org-switcher": "" }),
 }));
 vi.mock("./side-nav", () => ({
-  SideNav: ({ isGcStaff }: { isGcStaff?: boolean }) =>
+  SideNav: ({ isGcStaff, workspace }: { isGcStaff?: boolean; workspace?: string }) =>
     createElement("nav", {
       "data-side-nav": "",
       "data-gc-staff": isGcStaff ? "" : undefined,
+      "data-workspace": workspace ?? "aggregation",
     }),
 }));
 vi.mock("./user-menu", () => ({
@@ -596,6 +597,7 @@ describe("AppShell rail-collapse chevron", () => {
     navigation.pathname = "/social/courses";
     const html = renderShell();
     expect(html).toContain("data-education-workspace");
+    expect(html).toContain('data-workspace="education"');
     expect(html).toContain("data-app-header");
     expect(html).toContain('href="/social/courses"');
     expect(html).not.toContain("data-social-workspace");
@@ -607,6 +609,7 @@ describe("AppShell rail-collapse chevron", () => {
     navigation.pathname = "/social/courses/welcome-to-24frame";
     const detail = renderShell();
     expect(detail).toContain("data-education-workspace");
+    expect(detail).toContain('data-workspace="education"');
     expect(detail).toContain("data-app-header");
     expect(detail).not.toContain("data-social-workspace");
   });
