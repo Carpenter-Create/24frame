@@ -35,7 +35,12 @@ describe("workspace mode", () => {
     );
     expect(isEducationPath("/social/courses")).toBe(true);
     expect(isEducationPath("/social/courses/welcome-to-24frame")).toBe(true);
+    expect(isEducationPath("/education")).toBe(true);
+    expect(isEducationPath("/education/welcome-to-24frame")).toBe(true);
+    expect(isEducationPath("/gc/education")).toBe(false);
     expect(isEducationPath("/social")).toBe(false);
+    expect(resolveWorkspaceMode("/education", "aggregation")).toBe("education");
+    expect(resolveWorkspaceMode("/education/welcome-to-24frame", "social")).toBe("education");
     expect(isSocialPath("/social/courses")).toBe(false);
     expect(isSocialPath("/social")).toBe(true);
     expect(resolveWorkspaceMode("/messages", "social")).toBe("aggregation");

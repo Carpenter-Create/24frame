@@ -4,8 +4,9 @@
 //
 // One 24Frame account. Three workspace destinations: Aggregation
 // (catalog), Social (creator profile, groups, posts, DMs), and
-// Education (Route A /social/courses). /messages stays Ask 24Frame AI.
-// Do not invent /education. Org invite stays Aggregation.
+// Education consume (Route A /social/courses). Staff CMS is /education
+// under (operator). /messages stays Ask 24Frame AI. Org invite stays
+// Aggregation.
 
 export const PRODUCT_NAME = "24Frame";
 export const ASSISTANT_NAME = "24Frame AI";

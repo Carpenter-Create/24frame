@@ -2,7 +2,8 @@
 // last chosen mode the same way 24frame_sidebar_collapsed persists the
 // rail. Pathname still wins on destination routes so a /social bookmark
 // shows Social destinations even if the cookie still says aggregation.
-// Education land is Route A /social/courses — do not invent /education.
+// Education consume land is Route A /social/courses. Staff CMS is
+// /education under (operator). Member workspace home stays Route A.
 
 export const WORKSPACE_COOKIE = "24frame_workspace";
 
@@ -33,7 +34,12 @@ export function workspaceHome(mode: WorkspaceMode): string {
 }
 
 export function isEducationPath(pathname: string): boolean {
-  return pathname === "/social/courses" || pathname.startsWith("/social/courses/");
+  return (
+    pathname === "/social/courses" ||
+    pathname.startsWith("/social/courses/") ||
+    pathname === "/education" ||
+    pathname.startsWith("/education/")
+  );
 }
 
 export function isSocialPath(pathname: string): boolean {

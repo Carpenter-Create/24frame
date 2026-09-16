@@ -3,8 +3,10 @@ import { z } from "zod";
 // Education storage + staff admin contracts. Dedicated 24frame-education
 // source/output pair. Never 24frame-media, never title film, never
 // finance, never avatars. Staff writes are app-layer only.
+// Staff CMS lives at /education under (operator). Member discover stays
+// Route A /social/courses.
 
-export const EDUCATION_HREF = "/gc/education";
+export const EDUCATION_HREF = "/education";
 
 export const EDUCATION_AWS_ENV = [
   "EDUCATION_AWS_REGION",
@@ -134,6 +136,7 @@ export const EDUCATION_ADMIN = {
   encodeNone: "No source yet.",
   encodeReady: "Ready",
   consume: "Open consume view",
+  manage: "Course management",
   invalid: "Check the fields and try again.",
   conflict: "That slug is already in use.",
   uploadFailed: "Upload could not start.",

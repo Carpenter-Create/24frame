@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { EDUCATION_ADMIN, EDUCATION_HREF } from "./education";
-import { EDUCATION_NAV, GC_NAV } from "./nav";
+import { EDUCATION_MANAGE_NAV, EDUCATION_NAV, GC_NAV } from "./nav";
 
 const migration = readFileSync("supabase/migrations/20260916010000_course_education_media.sql", "utf8");
 const envExample = readFileSync(".env.example", "utf8");
@@ -33,26 +33,39 @@ describe("education isolation", () => {
     expect(migration).not.toMatch(/is_gc_staff\(/);
   });
 
-  it("puts staff Education on GC_NAV and keeps the member rail on Route A", () => {
-    expect(GC_NAV.map((item) => item.href)).toContain(EDUCATION_HREF);
+  it("puts staff Course management on Education workspace, not GC_NAV or member browse", () => {
+    expect(EDUCATION_HREF).toBe("/education");
+    expect(EDUCATION_MANAGE_NAV.map((item) => item.href)).toEqual([EDUCATION_HREF]);
+    expect(EDUCATION_MANAGE_NAV.map((item) => item.label)).toEqual([EDUCATION_ADMIN.manage]);
+    expect(GC_NAV.map((item) => item.href)).not.toContain(EDUCATION_HREF);
+    expect(GC_NAV.map((item) => item.href)).not.toContain("/gc/education");
     expect(EDUCATION_NAV.map((item) => item.href)).toEqual(["/social/courses"]);
     expect(EDUCATION_NAV.map((item) => item.href)).not.toContain(EDUCATION_HREF);
-    expect(existsSync("src/app/(app)/(operator)/gc/education/page.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/(operator)/education/page.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/(operator)/education/[slug]/page.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/(operator)/gc/education/page.tsx")).toBe(false);
     expect(existsSync("src/app/(app)/education/page.tsx")).toBe(false);
     expect(existsSync("src/app/(app)/social/courses/new/page.tsx")).toBe(false);
+    const nextConfig = readFileSync("next.config.ts", "utf8");
+    expect(nextConfig).toContain('source: "/gc/education"');
+    expect(nextConfig).toContain('destination: "/education"');
+    expect(nextConfig).toContain('source: "/gc/education/:slug"');
+    expect(nextConfig).toContain('destination: "/education/:slug"');
+    expect(nextConfig).toContain("permanent: true");
   });
 
   it("keeps Education copy off SaaS and buy language", () => {
     const blob = JSON.stringify(EDUCATION_ADMIN);
     expect(blob).not.toMatch(/seamless|frictionless|upload and earn|MasterClass|buy|Stripe|Apple Pay|Klarna/i);
     expect(EDUCATION_ADMIN.title).toBe("Education");
+    expect(EDUCATION_ADMIN.manage).toBe("Course management");
     expect(EDUCATION_ADMIN.free).toBe("Free");
     expect(EDUCATION_ADMIN.paid).toBe("Paid");
   });
 
   it("keeps product setup on staff admin and does not add a member checkout", () => {
-    const forms = readFileSync("src/app/(app)/(operator)/gc/education/education-forms.tsx", "utf8");
-    const actions = readFileSync("src/app/(app)/(operator)/gc/education/actions.ts", "utf8");
+    const forms = readFileSync("src/app/(app)/(operator)/education/education-forms.tsx", "utf8");
+    const actions = readFileSync("src/app/(app)/(operator)/education/actions.ts", "utf8");
     const consume = readFileSync("src/components/courses/course-consume.tsx", "utf8");
     const list = readFileSync("src/app/(app)/social/courses/page.tsx", "utf8");
     expect(forms).toContain("data-education-product");
@@ -68,7 +81,7 @@ describe("education isolation", () => {
   it("does not let Education clients import other storage lanes", () => {
     const s3 = readFileSync("src/lib/s3-education.ts", "utf8");
     const mc = readFileSync("src/lib/education-mediaconvert.ts", "utf8");
-    const actions = readFileSync("src/app/(app)/(operator)/gc/education/actions.ts", "utf8");
+    const actions = readFileSync("src/app/(app)/(operator)/education/actions.ts", "utf8");
     expect(s3).not.toContain('from "@/lib/s3"');
     expect(s3).not.toContain('from "@/lib/s3-social-media"');
     expect(mc).not.toContain('from "@/lib/mediaconvert"');

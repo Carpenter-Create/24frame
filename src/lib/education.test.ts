@@ -4,6 +4,7 @@ import {
   EDUCATION_AWS_ACCOUNT,
   EDUCATION_AWS_REGION,
   EDUCATION_BUCKETS,
+  EDUCATION_ADMIN,
   EDUCATION_HREF,
   assertEducationBucketName,
   educationCoverKey,
@@ -46,8 +47,9 @@ describe("education names and keys", () => {
     expect(EDUCATION_BUCKETS.source.dev).toBe("24frame-education-source-dev");
     expect(EDUCATION_BUCKETS.output.prod).toBe("24frame-education-output-prod");
     expect(EDUCATION_BUCKETS.output.dev).toBe("24frame-education-output-dev");
-    expect(EDUCATION_HREF).toBe("/gc/education");
-    expect(educationCourseHref("welcome-to-24frame")).toBe("/gc/education/welcome-to-24frame");
+    expect(EDUCATION_HREF).toBe("/education");
+    expect(educationCourseHref("welcome-to-24frame")).toBe("/education/welcome-to-24frame");
+    expect(EDUCATION_ADMIN.manage).toBe("Course management");
   });
 
   it("keeps object keys on the courses prefix", () => {
