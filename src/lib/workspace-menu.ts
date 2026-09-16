@@ -4,9 +4,9 @@
 // Open Workspace replaces the list face; house 16 tertiary Back
 // returns to main. Desktop flyout has no Back. Not a page. Not a
 // route. Not a header chip.
-// Miss-list is Aggregation | Social | Education. Education land is
-// Route A /social/courses. Do not invent /education, /account/workspace,
-// or /settings/workspace.
+// Miss-list is Aggregation | Social | Education. Member Education land
+// is Route A /social/courses. Do not send members to /education (staff
+// CMS), /account/workspace, or /settings/workspace.
 
 import { USER_MENU } from "@/lib/user-menu";
 import {
@@ -22,7 +22,7 @@ export const WORKSPACE_MENU = {
 
 export const WORKSPACE_EDUCATION_LABEL = "Education";
 
-/** Existing Education destination only. Route A — never /education. */
+/** Member Education destination. Route A — never staff CMS /education. */
 export const WORKSPACE_EDUCATION_HREF = "/social/courses";
 
 export type WorkspaceMenuCandidateId = "aggregation" | "social" | "education";

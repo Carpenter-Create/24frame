@@ -57,6 +57,13 @@ const nextConfig: NextConfig = {
     // holding a derivative longer than its source URL stays valid.
     minimumCacheTTL: 3600,
   },
+
+  async redirects() {
+    return [
+      { source: "/gc/education", destination: "/education", permanent: true },
+      { source: "/gc/education/:slug", destination: "/education/:slug", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;

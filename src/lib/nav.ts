@@ -23,6 +23,7 @@ import type { PhosphorIcon } from "@/lib/phosphor-icon";
 import { ASK_GLOBEE } from "@/lib/ask-globee";
 import { PRODUCT_NAME } from "@/lib/product";
 import type { WorkspaceMode } from "@/lib/workspace";
+import { EDUCATION_ADMIN, EDUCATION_HREF } from "@/lib/education";
 import { SOCIAL_ROUTES } from "@/lib/social";
 import { WORKSPACE_EDUCATION_LABEL } from "@/lib/workspace-menu";
 
@@ -81,11 +82,25 @@ export const SOCIAL_DESKTOP_NAV: LucideNavItem[] = SOCIAL_NAV.filter(
   (item) => item.href !== SOCIAL_ROUTES.create,
 );
 
-// Education rail. Route A /social/courses only. Do not invent /education.
+// Member Education rail. Browse stays Route A /social/courses.
+// Staff CMS is /education (operator-gated) via EDUCATION_MANAGE_NAV —
+// never a member manage destination on this rail.
 export const EDUCATION_NAV: PhosphorNavItem[] = [
   {
     label: WORKSPACE_EDUCATION_LABEL,
     href: SOCIAL_ROUTES.courses,
+    family: "phosphor",
+    icon: BookOpen,
+  },
+];
+
+// Staff-only Course management. Rendered in Education workspace when
+// isGcStaff. Members never see this. Not on GC_NAV — Education is the
+// staff path, not Aggregation Staff /gc.
+export const EDUCATION_MANAGE_NAV: PhosphorNavItem[] = [
+  {
+    label: EDUCATION_ADMIN.manage,
+    href: EDUCATION_HREF,
     family: "phosphor",
     icon: BookOpen,
   },
@@ -101,7 +116,6 @@ export const GC_NAV: PhosphorNavItem[] = [
   { label: `${PRODUCT_NAME} Deliveries`, href: "/gc/deliveries", family: "phosphor", icon: PaperPlaneTilt },
   { label: "Vendors", href: "/vendors", family: "phosphor", icon: Storefront },
   { label: "Finance", href: "/gc/finance", family: "phosphor", icon: Wallet },
-  { label: WORKSPACE_EDUCATION_LABEL, href: "/gc/education", family: "phosphor", icon: BookOpen },
   { label: "Clients", href: "/gc/clients", family: "phosphor", icon: Users },
 ];
 
@@ -144,7 +158,9 @@ export function mobileNavDestinations(
   workspace: WorkspaceMode = "aggregation",
 ): NavItem[] {
   if (workspace === "social") return SOCIAL_NAV;
-  if (workspace === "education") return EDUCATION_NAV;
+  if (workspace === "education") {
+    return isGcStaff ? [...EDUCATION_NAV, ...EDUCATION_MANAGE_NAV] : EDUCATION_NAV;
+  }
   return isGcStaff ? [...NAV, ...GC_NAV] : NAV;
 }
 
@@ -153,6 +169,8 @@ export function railDestinations(
   workspace: WorkspaceMode = "aggregation",
 ): { items: NavItem[]; staffItems: NavItem[] } {
   if (workspace === "social") return { items: SOCIAL_DESKTOP_NAV, staffItems: [] };
-  if (workspace === "education") return { items: EDUCATION_NAV, staffItems: [] };
+  if (workspace === "education") {
+    return { items: EDUCATION_NAV, staffItems: isGcStaff ? EDUCATION_MANAGE_NAV : [] };
+  }
   return { items: NAV, staffItems: isGcStaff ? GC_NAV : [] };
 }

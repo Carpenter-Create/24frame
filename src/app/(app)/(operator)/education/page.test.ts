@@ -12,7 +12,7 @@ vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 
 import { createClient } from "@/lib/supabase/server";
 import { EDUCATION_ADMIN, EDUCATION_HREF } from "@/lib/education";
-import { GC_NAV } from "@/lib/nav";
+import { EDUCATION_MANAGE_NAV, GC_NAV } from "@/lib/nav";
 
 import GcEducationPage from "./page";
 
@@ -72,16 +72,19 @@ describe("GcEducationPage", () => {
     expect(html).toContain(EDUCATION_ADMIN.free);
     expect(html).toContain("Paid · $49.00");
     expect(html).not.toContain("Stripe");
-    expect(html).not.toContain('href="/education"');
+    expect(html).not.toContain("/gc/education");
     expect(html).not.toContain("MasterClass");
   });
 });
 
 describe("education admin lock", () => {
-  it("lives under the operator gc_staff layout and GC_NAV", () => {
-    expect(GC_NAV.map((item) => item.href)).toContain(EDUCATION_HREF);
-    const page = readFileSync("src/app/(app)/(operator)/gc/education/page.tsx", "utf8");
-    const actions = readFileSync("src/app/(app)/(operator)/gc/education/actions.ts", "utf8");
+  it("lives under the operator gc_staff layout, not GC_NAV", () => {
+    expect(EDUCATION_HREF).toBe("/education");
+    expect(EDUCATION_MANAGE_NAV.map((item) => item.href)).toContain(EDUCATION_HREF);
+    expect(GC_NAV.map((item) => item.href)).not.toContain(EDUCATION_HREF);
+    expect(GC_NAV.map((item) => item.href)).not.toContain("/gc/education");
+    const page = readFileSync("src/app/(app)/(operator)/education/page.tsx", "utf8");
+    const actions = readFileSync("src/app/(app)/(operator)/education/actions.ts", "utf8");
     expect(page).toContain("CreateCourseForm");
     expect(actions).toContain("createAdminClient");
     expect(actions).toContain("gc_staff");
