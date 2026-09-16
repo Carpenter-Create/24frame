@@ -27,6 +27,7 @@ export const FINANCE_BUCKETS = {
 
 export const FORBIDDEN_FINANCE_BUCKET_MARKERS = [
   "24frame-media",
+  "24frame-education",
   "gc-content-assets",
   "gc-avatars",
 ] as const;

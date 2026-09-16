@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { CourseCover } from "@/components/courses/course-cover";
+import { CourseLessonPlayer } from "@/components/courses/course-lesson-player";
 import { HouseEmpty } from "@/components/chrome/house";
 import {
   courseLessonDurationLabel,
@@ -13,8 +14,8 @@ import {
 import { SOCIAL } from "@/lib/social";
 import { cn } from "@/lib/cn";
 
-// In-detail consume only. No lesson deep-link route. No invented media
-// pipeline. Seeds have titles only. The 16:9 well holds the selected lesson.
+// In-detail consume only. No lesson deep-link route. The 16:9 well
+// plays a signed lesson URL when one is ready; otherwise the cover well.
 
 export function CourseConsume({
   modules,
@@ -32,7 +33,11 @@ export function CourseConsume({
   return (
     <div data-course-consume="">
       <div data-course-player="" className="flex flex-col gap-[var(--space-3)]">
-        <CourseCover title={selected?.title ?? SOCIAL.courses.title} />
+        {selected?.playbackUrl ? (
+          <CourseLessonPlayer src={selected.playbackUrl} title={selected.title} />
+        ) : (
+          <CourseCover title={selected?.title ?? SOCIAL.courses.title} />
+        )}
         {selected ? (
           <div className="flex flex-col gap-[var(--space-2)]">
             <p className="t-body font-medium text-ink">{selected.title}</p>

@@ -1133,26 +1133,44 @@ export type Database = {
       lessons: {
         Row: {
           duration_seconds: number | null
+          encode_error: string | null
+          encode_job_id: string | null
+          encode_status: Database["public"]["Enums"]["course_encode_status"] | null
+          encode_updated_at: string | null
           free_preview: boolean
+          hls_key: string | null
           id: string
           module_id: string
           position: number
+          source_key: string | null
           title: string
         }
         Insert: {
           duration_seconds?: number | null
+          encode_error?: string | null
+          encode_job_id?: string | null
+          encode_status?: Database["public"]["Enums"]["course_encode_status"] | null
+          encode_updated_at?: string | null
           free_preview?: boolean
+          hls_key?: string | null
           id?: string
           module_id: string
           position: number
+          source_key?: string | null
           title: string
         }
         Update: {
           duration_seconds?: number | null
+          encode_error?: string | null
+          encode_job_id?: string | null
+          encode_status?: Database["public"]["Enums"]["course_encode_status"] | null
+          encode_updated_at?: string | null
           free_preview?: boolean
+          hls_key?: string | null
           id?: string
           module_id?: string
           position?: number
+          source_key?: string | null
           title?: string
         }
         Relationships: [
@@ -3276,6 +3294,12 @@ export type Database = {
       conversation_kind: "direct" | "group"
       conversation_role: "user" | "globee"
       conversation_thumb: "up" | "down"
+      course_encode_status:
+        | "submitted"
+        | "running"
+        | "complete"
+        | "failed"
+        | "submit_failed"
       delivery_status:
         | "pending"
         | "delivered"
@@ -3536,6 +3560,13 @@ export const Constants = {
       conversation_kind: ["direct", "group"],
       conversation_role: ["user", "globee"],
       conversation_thumb: ["up", "down"],
+      course_encode_status: [
+        "submitted",
+        "running",
+        "complete",
+        "failed",
+        "submit_failed",
+      ],
       delivery_status: [
         "pending",
         "delivered",

@@ -29,7 +29,7 @@ describe("finance AWS isolation", () => {
     expect(FINANCE_BUCKETS.prod).toBe("24frame-finance-prod");
     expect(FINANCE_BUCKETS.dev).toBe("24frame-finance-dev");
     expect(FORBIDDEN_FINANCE_BUCKET_MARKERS).toEqual(
-      expect.arrayContaining(["24frame-media", "gc-content-assets", "gc-avatars"]),
+      expect.arrayContaining(["24frame-media", "24frame-education", "gc-content-assets", "gc-avatars"]),
     );
     expect(isForbiddenFinanceBucket("24frame-finance-dev")).toBe(false);
     expect(isForbiddenFinanceBucket("24frame-media-prod")).toBe(true);

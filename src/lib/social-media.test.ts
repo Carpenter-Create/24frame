@@ -48,6 +48,8 @@ describe("social media keys", () => {
     expect(isForbiddenMediaBucket("test-avatars-bucket")).toBe(true);
     expect(isForbiddenMediaBucket("24frame-media-source-prod")).toBe(false);
     expect(isForbiddenMediaBucket("test-media-source-bucket")).toBe(false);
+    expect(isForbiddenMediaBucket("24frame-education-source-prod")).toBe(true);
+    expect(isForbiddenMediaBucket("24frame-finance-prod")).toBe(true);
   });
 });
 

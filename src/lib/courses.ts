@@ -26,6 +26,13 @@ export type CourseModuleRow = {
   position: number;
 };
 
+export type CourseEncodeStatus =
+  | "submitted"
+  | "running"
+  | "complete"
+  | "failed"
+  | "submit_failed";
+
 export type CourseLessonRow = {
   id: string;
   module_id: string;
@@ -33,6 +40,10 @@ export type CourseLessonRow = {
   position: number;
   duration_seconds: number | null;
   free_preview: boolean;
+  source_key: string | null;
+  hls_key: string | null;
+  encode_status: CourseEncodeStatus | null;
+  playbackUrl?: string | null;
 };
 
 export type CourseOutlineModule = CourseModuleRow & { lessons: CourseLessonRow[] };
@@ -175,7 +186,9 @@ export async function loadCourseDetail(
 
   const { data: lessonRows, error: lessonError } = await supabase
     .from("lessons")
-    .select("id, module_id, title, position, duration_seconds, free_preview")
+    .select(
+      "id, module_id, title, position, duration_seconds, free_preview, source_key, hls_key, encode_status",
+    )
     .in("module_id", moduleIds)
     .order("position", { ascending: true })
     .range(...rangeFor(UNPAGINATED_MAX));

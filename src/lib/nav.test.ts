@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { Bot, MessageSquare, Sparkle as LucideSparkle, Sparkles } from "lucide-react";
 import {
+  BookOpen,
   FilmSlate,
   PaperPlaneTilt,
   Pulse,
@@ -92,6 +93,7 @@ describe("client NAV", () => {
       PaperPlaneTilt,
       Storefront,
       Wallet,
+      BookOpen,
       Users,
     ]);
     expect(NAV.every((item) => item.family === "phosphor")).toBe(true);
@@ -121,6 +123,7 @@ describe("GC_NAV", () => {
       { label: "24Frame Deliveries", href: "/gc/deliveries" },
       { label: "Vendors", href: "/vendors" },
       { label: "Finance", href: "/gc/finance" },
+      { label: "Education", href: "/gc/education" },
       { label: "Clients", href: "/gc/clients" },
     ]);
   });
@@ -137,6 +140,7 @@ describe("GC_NAV", () => {
       "24Frame Deliveries",
       "Vendors",
       "Finance",
+      "Education",
       "Clients",
     ]);
     expect(STAFF_RAIL_EYEBROW).toBe("Staff");
@@ -176,6 +180,7 @@ describe("mobileNavDestinations", () => {
       "24Frame Deliveries",
       "Vendors",
       "Finance",
+      "Education",
       "Clients",
     ]);
   });
