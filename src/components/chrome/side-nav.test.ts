@@ -27,14 +27,14 @@ describe("SideNav Access rail", () => {
     ]);
   });
 
-  it("uses 12px labels via --text-sm / t-body-sm, 16px Phosphor Bold/Fill, and an 8px item gap", () => {
+  it("uses house --text-sm / t-body-sm labels, 16px Phosphor Bold/Fill, and an 8px item gap", () => {
     const tokens = readFileSync("src/app/tokens.css", "utf8");
     const globals = readFileSync("src/app/globals.css", "utf8");
     const itemClass = navSrc.match(
       /"relative flex items-center rounded-\[var\(--radius\)\] [^"]+"/,
     )?.[0];
-    expect(navSrc).toContain("12px labels (--text-sm / t-body-sm)");
-    expect(tokens).toMatch(/--text-sm:\s*0\.75rem;/);
+    expect(navSrc).toContain("house --text-sm / t-body-sm labels");
+    expect(tokens).toMatch(/--text-sm:\s*0\.8125rem;/);
     expect(globals).toMatch(/\.t-body-sm\s*\{[\s\S]*?font-size:\s*var\(--text-sm\)/);
     expect(itemClass).toContain("t-body-sm leading-4");
     expect(itemClass).not.toContain("text-[0.875rem]");

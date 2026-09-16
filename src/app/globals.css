@@ -39,6 +39,16 @@
   --color-border: var(--border);
 
   --font-sans: var(--font-geist-sans), "Geist", ui-sans-serif, -apple-system, system-ui, sans-serif;
+
+  /* Size utilities resolve to the house --text-* ladder in tokens.css.
+     No parallel px scale for xs / sm / base / lg / title / hero. */
+  --text-xs: var(--text-xs);
+  --text-sm: var(--text-sm);
+  --text-base: var(--text-base);
+  --text-lg: var(--text-lg);
+  --text-title: var(--text-title);
+  --text-hero: var(--text-hero);
+  --tracking-tight: var(--tracking-tight);
 }
 
 html {
@@ -55,6 +65,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-geist-sans), "Geist", ui-sans-serif, -apple-system, system-ui, sans-serif;
+  font-weight: var(--type-body-weight);
   line-height: 1.6;
   letter-spacing: -0.006em;
   -webkit-font-smoothing: antialiased;
@@ -68,6 +79,7 @@ body {
    figures (tabular-nums; no monospace face).
    ============================================================ */
 @layer components {
+  /* Display / hero-value. Phone MOB-G-03 steps to --text-title; still this role. */
   .t-display {
     font-family: var(--font-sans);
     font-size: var(--text-hero);
@@ -75,10 +87,15 @@ body {
     line-height: 1.04;
     letter-spacing: -0.035em;
   }
+  @media (max-width: 767px) {
+    .t-display {
+      font-size: var(--text-title);
+    }
+  }
   .t-title {
     font-family: var(--font-sans);
     font-size: var(--text-title);
-    font-weight: 500;
+    font-weight: var(--type-title-weight);
     line-height: 1.15;
     letter-spacing: var(--tracking-tight);
   }
@@ -115,21 +132,21 @@ body {
   .t-lead {
     font-family: var(--font-sans);
     font-size: var(--text-lg);
-    font-weight: 400;
+    font-weight: var(--type-body-weight);
     line-height: 1.55;
     letter-spacing: -0.01em;
   }
   .t-body {
     font-family: var(--font-sans);
     font-size: var(--text-base);
-    font-weight: 400;
-    line-height: 1.5;
+    font-weight: var(--type-body-weight);
+    line-height: 1.65;
   }
   .t-body-sm {
     font-family: var(--font-sans);
     font-size: var(--text-sm);
-    font-weight: 400;
-    line-height: 1.45;
+    font-weight: var(--type-body-weight);
+    line-height: 1.6;
   }
   /* Text-entry floor. iOS Safari zooms focused input/textarea under 16px.
      px, not rem — a smaller root must not drop below the floor.
@@ -151,11 +168,14 @@ body {
     text-transform: uppercase;
   }
   /* Figures — Geist Sans with tabular-nums so numbers align (NO monospace; the brand
-     moved away from Geist Mono). */
+     moved away from Geist Mono). Combined with .t-display, display tracking wins. */
   .t-data {
     font-family: var(--font-sans);
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.01em;
+  }
+  .t-display.t-data {
+    letter-spacing: -0.035em;
   }
   /* Mercury-quiet card: white on canvas, hairline only, house radius. No shadow. */
   .card-surface {
