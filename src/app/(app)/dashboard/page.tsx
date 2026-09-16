@@ -49,8 +49,14 @@ import {
   revenuePointsFromLabels,
 } from "@/lib/dashboard-admin";
 import {
+  DASHBOARD_FIXTURE_ADDED,
+  DASHBOARD_FIXTURE_PIPELINE,
+  DASHBOARD_FIXTURE_PLATFORMS,
   DASHBOARD_FIXTURE_POINTS,
+  DASHBOARD_FIXTURE_TERRITORIES,
+  dashboardFixtureActivity,
   dashboardFixtureEnabled,
+  dashboardFixtureSources,
 } from "@/lib/dashboard-fixture";
 import { LIST_PAGE, UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
 import { loadMyDeliveries, loadMyFindings } from "@/lib/my-lists";
@@ -64,7 +70,7 @@ import { buildClientFinanceDashboard } from "@/lib/finance-dashboard";
 import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 
 // Company-admin `/dashboard` rematches RL Overview structure inside house
-// tokens: period grains, MetricCard revenue + scrub, Recent activity.
+// tokens: one labeled period menu, MetricCard revenue + scrub, Recent activity.
 // Standard seats keep the catalog hero. Export stays on /reports.
 // Fixture money is labeled + env-gated and never enters export/ledger.
 
@@ -149,6 +155,7 @@ export default async function DashboardPage({
   });
 
   let adminHero = null;
+  let useFixture = false;
   if (isAdmin) {
     const memberships = await supabase
       .from("memberships")
@@ -180,11 +187,11 @@ export default async function DashboardPage({
         })
       : null;
     const livePoints = revenuePointsFromLabels(money?.chart ?? []);
-    const fixture =
+    useFixture =
       dashboardFixtureEnabled({ isGcStaff: ctx.isGcStaff, isCompanyAdmin: isAdmin }) &&
       !userId &&
       livePoints.length === 0;
-    const points = fixture ? DASHBOARD_FIXTURE_POINTS : livePoints;
+    const points = useFixture ? DASHBOARD_FIXTURE_POINTS : livePoints;
     const monthSources = [
       ...titles
         .map((title) => yearMonthFromIso(title.created_at))
@@ -193,7 +200,15 @@ export default async function DashboardPage({
         .map((row) => (row.updated_at ? yearMonthFromIso(row.updated_at) : null))
         .filter((row): row is { year: number; month: number } => row != null),
       ...points.map((point) => ({ year: point.year, month: point.month })),
+      ...(useFixture ? dashboardFixtureSources() : []),
     ];
+    const liveActivity = recentAccountActivity({
+      titles,
+      deliveries: deliveries.rows,
+      findings: findings.rows,
+      period,
+      userId,
+    });
     adminHero = (
       <DashboardAdminHero
         orgName={org.name}
@@ -202,17 +217,24 @@ export default async function DashboardPage({
         userId={userId}
         users={users}
         hero={buildDashboardRevenueHero({ period, points, userId })}
-        fixture={fixture}
-        activity={recentAccountActivity({
-          titles,
-          deliveries: deliveries.rows,
-          findings: findings.rows,
-          period,
-          userId,
-        })}
+        fixture={useFixture}
+        activity={
+          useFixture && liveActivity.length === 0
+            ? dashboardFixtureActivity(period, now)
+            : liveActivity
+        }
       />
     );
   }
+
+  const liveAdded = titlesAddedThisMonth(scopedTitles, now);
+  const livePipeline = titlesInPipeline(scopedTitles);
+  const livePlatforms = countNamedRows(
+    scopedDeliveries.map((row) => ({ name: row.vendor_name })),
+  ).slice(0, 5);
+  const liveTerritories = countNamedRows(
+    scopedDeliveries.map((row) => ({ name: row.territory })),
+  ).slice(0, 5);
 
   return (
     <div className="dashboard-home flex flex-col gap-[var(--space-6)]" data-dashboard-home="">
@@ -246,21 +268,21 @@ export default async function DashboardPage({
 
       <div className="flex flex-col gap-[var(--space-12)]">
         <DashboardAnalyticsOverview
-          addedThisMonth={titlesAddedThisMonth(scopedTitles, now)}
-          inPipeline={titlesInPipeline(scopedTitles)}
+          addedThisMonth={useFixture && liveAdded === 0 ? DASHBOARD_FIXTURE_ADDED : liveAdded}
+          inPipeline={useFixture && livePipeline === 0 ? DASHBOARD_FIXTURE_PIPELINE : livePipeline}
         />
         <div className="grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-2">
           <DashboardRankedBars
             label={DASHBOARD_HOME.platforms}
             empty={DASHBOARD_HOME.platformsEmpty}
-            rows={countNamedRows(scopedDeliveries.map((row) => ({ name: row.vendor_name }))).slice(0, 5)}
+            rows={useFixture && livePlatforms.length === 0 ? DASHBOARD_FIXTURE_PLATFORMS : livePlatforms}
             testId="platforms"
             viewAllHref="/deliveries"
           />
           <DashboardRankedBars
             label={DASHBOARD_HOME.territories}
             empty={DASHBOARD_HOME.territoriesEmpty}
-            rows={countNamedRows(scopedDeliveries.map((row) => ({ name: row.territory }))).slice(0, 5)}
+            rows={useFixture && liveTerritories.length === 0 ? DASHBOARD_FIXTURE_TERRITORIES : liveTerritories}
             testId="territories"
             viewAllHref="/deliveries"
             territory

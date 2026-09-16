@@ -1,21 +1,31 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { CaretDown } from "@phosphor-icons/react";
 
+import { AppearanceCheck } from "@/components/chrome/appearance-check";
+import { Input } from "@/components/ui/input";
 import {
   DASHBOARD_ADMIN,
-  DASHBOARD_PERIOD_GRAINS,
-  dashboardGrainActive,
-  dashboardGrainOption,
   dashboardHref,
+  dashboardPeriodMenuGroups,
+  dashboardPeriodOption,
   filterDashboardUsers,
   type DashboardPeriodOption,
 } from "@/lib/dashboard-admin";
-import { DASHBOARD_GRAIN_ACTIVE_CLASS, DASHBOARD_GRAIN_IDLE_CLASS } from "@/lib/dashboard-craft";
-import { Input } from "@/components/ui/input";
-import { REPORTS_SELECT_CLASS } from "@/lib/reports-craft";
-import { cn } from "@/lib/cn";
+import {
+  DASHBOARD_PERIOD_CHEVRON_CLASS,
+  DASHBOARD_PERIOD_GROUP_CLASS,
+  DASHBOARD_PERIOD_OPTION_CHECK_CLASS,
+  DASHBOARD_PERIOD_OPTION_CHECK_GUTTER_CLASS,
+  DASHBOARD_PERIOD_OPTION_LABEL_CLASS,
+  DASHBOARD_PERIOD_PANEL_CLASS,
+  DASHBOARD_PERIOD_TRIGGER_CLASS,
+  DASHBOARD_PERIOD_TRIGGER_LABEL_CLASS,
+  dashboardPeriodOptionClass,
+} from "@/lib/dashboard-craft";
+import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import type { ReportsUserOption } from "@/lib/reports";
 
 export function DashboardAdminControls({
@@ -23,16 +33,21 @@ export function DashboardAdminControls({
   options,
   userId,
   users,
+  defaultOpen = false,
 }: {
   periodKey: string;
   options: readonly DashboardPeriodOption[];
   userId: string | null;
   users: readonly ReportsUserOption[];
+  defaultOpen?: boolean;
 }) {
   const router = useRouter();
+  const hostRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(defaultOpen);
   const selected = users.find((user) => user.id === userId) ?? null;
   const [query, setQuery] = useState("");
-  const extras = options.filter((option) => !DASHBOARD_PERIOD_GRAINS.some((grain) => grain.group === option.group && dashboardGrainOption(options, grain.group)?.key === option.key));
+  const current = dashboardPeriodOption(options, periodKey);
+  const groups = dashboardPeriodMenuGroups(options);
 
   function go(next: { period?: string; user?: string | null }) {
     router.replace(
@@ -44,6 +59,23 @@ export function DashboardAdminControls({
     );
   }
 
+  useEffect(() => {
+    if (!open) return undefined;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    const onPointer = (event: MouseEvent) => {
+      const host = hostRef.current;
+      if (host && !host.contains(event.target as Node)) setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("mousedown", onPointer);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onPointer);
+    };
+  }, [open]);
+
   const matches = useMemo(() => filterDashboardUsers(users, query), [users, query]);
 
   return (
@@ -52,43 +84,78 @@ export function DashboardAdminControls({
       className="flex flex-wrap items-center justify-end gap-[var(--space-4)]"
     >
       <div className="flex flex-wrap items-center gap-[var(--space-4)]">
-        <span className="t-label text-ink-3">{DASHBOARD_ADMIN.period}</span>
-        <nav
-          data-dashboard-period-grains=""
-          aria-label={DASHBOARD_ADMIN.period}
-          className="flex items-center gap-[var(--space-4)]"
-        >
-          {DASHBOARD_PERIOD_GRAINS.map((grain) => {
-            const option = dashboardGrainOption(options, grain.group);
-            if (!option) return null;
-            const active = dashboardGrainActive(periodKey, grain.group);
-            return (
-              <button
-                key={grain.group}
-                type="button"
-                data-dashboard-period-grain={grain.group}
-                aria-pressed={active}
-                className={cn(active ? DASHBOARD_GRAIN_ACTIVE_CLASS : DASHBOARD_GRAIN_IDLE_CLASS)}
-                onClick={() => go({ period: option.key })}
-              >
-                {grain.label}
-              </button>
-            );
-          })}
-        </nav>
-        <select
-          data-dashboard-period=""
-          aria-label={DASHBOARD_ADMIN.period}
-          className={cn(REPORTS_SELECT_CLASS, extras.length === 0 && "sr-only")}
-          value={periodKey}
-          onChange={(event) => go({ period: event.target.value })}
-        >
-          {options.map((option) => (
-            <option key={option.key} value={option.key}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+        <label className="flex items-center gap-[var(--space-2)]">
+          <span className="t-label text-ink-3">{DASHBOARD_ADMIN.period}</span>
+          <div ref={hostRef} className="relative">
+            <button
+              type="button"
+              data-dashboard-period=""
+              aria-label={DASHBOARD_ADMIN.period}
+              aria-expanded={open}
+              aria-haspopup="listbox"
+              onClick={() => setOpen((next) => !next)}
+              className={DASHBOARD_PERIOD_TRIGGER_CLASS}
+            >
+              <span data-dashboard-period-current="" className={DASHBOARD_PERIOD_TRIGGER_LABEL_CLASS}>
+                {current?.label ?? periodKey}
+              </span>
+              <CaretDown
+                data-dashboard-period-chevron=""
+                className={DASHBOARD_PERIOD_CHEVRON_CLASS}
+                weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
+              />
+            </button>
+            {open ? (
+              <div data-dashboard-period-menu="" className={DASHBOARD_PERIOD_PANEL_CLASS}>
+                <div role="listbox" aria-label={DASHBOARD_ADMIN.period} className="flex flex-col">
+                  {groups.map((group) => (
+                    <div key={group.group} data-dashboard-period-group={group.group}>
+                      {group.group === "all" || group.group === "ytd" ? null : (
+                        <div data-dashboard-period-group-label="" className={DASHBOARD_PERIOD_GROUP_CLASS}>
+                          {group.label}
+                        </div>
+                      )}
+                      {group.options.map((option) => {
+                        const isSelected = option.key === periodKey;
+                        return (
+                          <button
+                            key={option.key}
+                            type="button"
+                            role="option"
+                            data-dashboard-period-option={option.key}
+                            aria-selected={isSelected}
+                            className={dashboardPeriodOptionClass(isSelected)}
+                            onClick={() => {
+                              setOpen(false);
+                              go({ period: option.key });
+                            }}
+                          >
+                            <span
+                              data-dashboard-period-option-label=""
+                              className={DASHBOARD_PERIOD_OPTION_LABEL_CLASS}
+                            >
+                              {option.label}
+                            </span>
+                            <span
+                              data-dashboard-period-option-check=""
+                              className={DASHBOARD_PERIOD_OPTION_CHECK_GUTTER_CLASS}
+                              aria-hidden="true"
+                            >
+                              <AppearanceCheck
+                                selected={isSelected}
+                                className={DASHBOARD_PERIOD_OPTION_CHECK_CLASS}
+                              />
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </label>
       </div>
       <div className="relative">
         <label className="flex items-center gap-[var(--space-2)]">

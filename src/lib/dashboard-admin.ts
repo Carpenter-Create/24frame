@@ -3,7 +3,8 @@ import { formatUsdCents } from "@/lib/finance";
 import { parseReportsUserId, reportsUserLabel, type ReportsUserOption } from "@/lib/reports";
 
 // Company-admin Dashboard hero. Period + user URL state rematch RL Overview
-// behavior only — Geist / Sporty Blue / hairline. No invented money series.
+// behavior only — Geist / Sporty Blue / hairline. One labeled period menu.
+// Live money is never invented here; craft sample series lives in the fixture.
 
 export const DASHBOARD_HREF = "/dashboard";
 
@@ -49,27 +50,48 @@ export type DashboardPeriodOption = {
   group: DashboardPeriodKind;
 };
 
-export const DASHBOARD_PERIOD_GRAINS = [
+export const DASHBOARD_PERIOD_MENU_GROUPS = [
   { group: "all" as const, label: DASHBOARD_ADMIN.allTime },
+  { group: "ytd" as const, label: DASHBOARD_ADMIN.ytd },
   { group: "year" as const, label: DASHBOARD_ADMIN.year },
   { group: "quarter" as const, label: DASHBOARD_ADMIN.quarter },
   { group: "month" as const, label: DASHBOARD_ADMIN.month },
-  { group: "ytd" as const, label: DASHBOARD_ADMIN.ytd },
-];
+] as const;
 
-export function dashboardGrainOption(
-  options: readonly DashboardPeriodOption[],
-  group: DashboardPeriodKind,
-): DashboardPeriodOption | undefined {
-  return options.find((option) => option.group === group);
+export type DashboardPeriodMenuGroup = {
+  group: DashboardPeriodKind;
+  label: string;
+  options: DashboardPeriodOption[];
+};
+
+function periodOptionRecency(option: DashboardPeriodOption): number {
+  if (option.group === "all") return Number.POSITIVE_INFINITY;
+  if (option.group === "ytd") return Number.POSITIVE_INFINITY - 1;
+  if (option.group === "year") return Number(option.key) * 100;
+  const quarter = /^Q([1-4])(\d{4})$/i.exec(option.key);
+  if (quarter) return Number(quarter[2]) * 100 + Number(quarter[1]) * 20;
+  const month = /^(\d{4})-(\d{2})$/.exec(option.key);
+  if (month) return Number(month[1]) * 100 + Number(month[2]);
+  return 0;
 }
 
-export function dashboardGrainActive(periodKey: string, group: DashboardPeriodKind): boolean {
-  if (group === "all") return periodKey === "all";
-  if (group === "ytd") return periodKey === "ytd";
-  if (group === "year") return /^\d{4}$/.test(periodKey);
-  if (group === "quarter") return /^Q[1-4]\d{4}$/i.test(periodKey);
-  return /^\d{4}-\d{2}$/.test(periodKey);
+export function dashboardPeriodMenuGroups(
+  options: readonly DashboardPeriodOption[],
+): DashboardPeriodMenuGroup[] {
+  return DASHBOARD_PERIOD_MENU_GROUPS.flatMap((section) => {
+    const rows = options
+      .filter((option) => option.group === section.group)
+      .sort((a, b) => periodOptionRecency(b) - periodOptionRecency(a));
+    if (rows.length === 0) return [];
+    return [{ group: section.group, label: section.label, options: rows }];
+  });
+}
+
+export function dashboardPeriodOption(
+  options: readonly DashboardPeriodOption[],
+  key: string,
+): DashboardPeriodOption | undefined {
+  return options.find((option) => option.key === key);
 }
 
 export type DashboardRevenuePoint = {
