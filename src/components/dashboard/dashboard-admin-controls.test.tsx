@@ -7,6 +7,8 @@ import { DASHBOARD_ADMIN, dashboardPeriodOptions } from "@/lib/dashboard-admin";
 import {
   DASHBOARD_PERIOD_OPTION_CHECK_CLASS,
   DASHBOARD_PERIOD_PANEL_CLASS,
+  DASHBOARD_PERIOD_SHEET_SCROLL_CLASS,
+  DASHBOARD_PERIOD_SHEET_SURFACE_CLASS,
   DASHBOARD_PERIOD_TRIGGER_CLASS,
 } from "@/lib/dashboard-craft";
 import { DashboardAdminControls } from "./dashboard-admin-controls";
@@ -74,6 +76,8 @@ describe("DashboardAdminControls", () => {
     expect(html).toContain(DASHBOARD_ADMIN.period);
     expect(html).toContain(DASHBOARD_ADMIN.close);
     expect(html).toContain("app-sheet-rise");
+    expect(html).toContain(DASHBOARD_PERIOD_SHEET_SURFACE_CLASS);
+    expect(html).toContain(DASHBOARD_PERIOD_SHEET_SCROLL_CLASS);
     expect(html).not.toContain("data-dashboard-user-sheet");
     expect(html).not.toContain("data-dashboard-user-overflow");
     expect(html).not.toContain("data-dashboard-period-grains");

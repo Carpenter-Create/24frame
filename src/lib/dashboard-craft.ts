@@ -74,6 +74,16 @@ export const DASHBOARD_USER_FIELD_DESKTOP_CLASS = "relative max-md:hidden";
 export const DASHBOARD_PERIOD_SHEET_HOST_CLASS =
   "fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end md:hidden";
 
+// Surface clips at 90dvh. Overflow lives on the inner pane — same
+// containment as the house account sheet — so a long All time / YTD /
+// year / quarter / month list cannot push Close or earlier periods
+// off-screen while body scroll is locked.
+export const DASHBOARD_PERIOD_SHEET_SURFACE_CLASS =
+  "relative z-10 max-h-[90dvh] min-h-0 overflow-hidden shadow-none";
+
+export const DASHBOARD_PERIOD_SHEET_SCROLL_CLASS =
+  "flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain";
+
 export const DASHBOARD_PERIOD_MENU_DESKTOP_CLASS = "max-md:hidden";
 
 export const DASHBOARD_TITLE_MOBILE_CLASS = "md:hidden";

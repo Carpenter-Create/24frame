@@ -26,6 +26,8 @@ import {
   DASHBOARD_PERIOD_OPTION_LABEL_CLASS,
   DASHBOARD_PERIOD_PANEL_CLASS,
   DASHBOARD_PERIOD_SHEET_HOST_CLASS,
+  DASHBOARD_PERIOD_SHEET_SCROLL_CLASS,
+  DASHBOARD_PERIOD_SHEET_SURFACE_CLASS,
   DASHBOARD_PERIOD_TRIGGER_CLASS,
   DASHBOARD_PERIOD_TRIGGER_LABEL_CLASS,
   DASHBOARD_USER_FIELD_DESKTOP_CLASS,
@@ -248,12 +250,14 @@ function DashboardPeriodSheet({
       className={DASHBOARD_PERIOD_SHEET_HOST_CLASS}
     >
       <button type="button" aria-label={DASHBOARD_ADMIN.close} className={APP_SHEET_SCRIM_CLASS} onClick={onClose} />
-      <div className={`${APP_SHEET_SURFACE_CLASS} relative z-10 shadow-none`}>
+      <div className={`${APP_SHEET_SURFACE_CLASS} ${DASHBOARD_PERIOD_SHEET_SURFACE_CLASS}`}>
         <div className={`${APP_SHEET_HEAD_CLASS} justify-between`}>
           <p className="t-label text-ink-3">{DASHBOARD_ADMIN.period}</p>
           <Close44 label={DASHBOARD_ADMIN.close} onClick={onClose} />
         </div>
-        <DashboardPeriodOptions groups={groups} periodKey={periodKey} onPick={onPick} />
+        <div className={DASHBOARD_PERIOD_SHEET_SCROLL_CLASS}>
+          <DashboardPeriodOptions groups={groups} periodKey={periodKey} onPick={onPick} />
+        </div>
       </div>
     </div>
   );

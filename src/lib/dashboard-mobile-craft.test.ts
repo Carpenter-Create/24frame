@@ -13,6 +13,8 @@ import {
   DASHBOARD_DO_NEXT_SECONDARY_CLASS,
   DASHBOARD_FIXTURE_BANNER_CLASS,
   DASHBOARD_PERIOD_SHEET_HOST_CLASS,
+  DASHBOARD_PERIOD_SHEET_SCROLL_CLASS,
+  DASHBOARD_PERIOD_SHEET_SURFACE_CLASS,
   DASHBOARD_TITLE_DESKTOP_CLASS,
   DASHBOARD_TITLE_MOBILE_CLASS,
   DASHBOARD_USER_FIELD_DESKTOP_CLASS,
@@ -51,8 +53,14 @@ describe("company-admin Dashboard mobile craft", () => {
     expect(DASHBOARD_USER_FIELD_DESKTOP_CLASS).toContain("max-md:hidden");
     expect(DASHBOARD_PERIOD_SHEET_HOST_CLASS).toContain("md:hidden");
     expect(DASHBOARD_PERIOD_SHEET_HOST_CLASS).toContain("justify-end");
+    expect(DASHBOARD_PERIOD_SHEET_SURFACE_CLASS).toContain("max-h-[90dvh]");
+    expect(DASHBOARD_PERIOD_SHEET_SURFACE_CLASS).toContain("overflow-hidden");
+    expect(DASHBOARD_PERIOD_SHEET_SURFACE_CLASS).not.toContain("overflow-y-auto");
+    expect(DASHBOARD_PERIOD_SHEET_SCROLL_CLASS).toContain("min-h-0");
+    expect(DASHBOARD_PERIOD_SHEET_SCROLL_CLASS).toContain("overflow-y-auto");
     const controls = readFileSync("src/components/dashboard/dashboard-admin-controls.tsx", "utf8");
     expect(controls).toContain("data-dashboard-period-sheet");
+    expect(controls).toContain("DASHBOARD_PERIOD_SHEET_SCROLL_CLASS");
     expect(controls).not.toContain("data-dashboard-user-overflow");
     expect(controls).not.toContain("data-dashboard-user-sheet");
   });
