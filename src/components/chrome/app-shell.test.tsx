@@ -427,7 +427,7 @@ describe("AppShell rail-collapse chevron", () => {
     const expanded = renderShell();
     expect(expanded).toContain("data-brand-emblem");
     expect(expanded).toContain('aria-label="24Frame"');
-    expect(expanded).toContain('href="/"');
+    expect(expanded).toContain('href="/dashboard"');
     expect(expanded).toContain("data-brand-emblem-mark");
     expect(expanded).not.toContain("t-body font-medium text-ink");
     expect(shellSrc).not.toContain("24frame-wordmark");
@@ -436,7 +436,7 @@ describe("AppShell rail-collapse chevron", () => {
     const collapsed = renderShell(undefined, undefined, true);
     expect(collapsed).toContain("data-brand-emblem");
     expect(collapsed).toContain('aria-label="24Frame"');
-    expect(collapsed).toContain('href="/"');
+    expect(collapsed).toContain('href="/dashboard"');
 
     navigation.pathname = "/social";
     const social = renderShell();
@@ -446,7 +446,7 @@ describe("AppShell rail-collapse chevron", () => {
     navigation.pathname = "/settings";
     const settings = renderShell();
     expect(settings).toContain("data-brand-emblem");
-    expect(settings).toContain('href="/"');
+    expect(settings).toContain('href="/dashboard"');
   });
 
   it("puts CaretDoubleRight Bold on a separate expand row when collapsed", () => {

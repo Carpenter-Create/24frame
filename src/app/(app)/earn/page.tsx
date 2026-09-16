@@ -4,7 +4,7 @@ import { getOrgContext } from "@/lib/supabase/context";
 import { PageHeader } from "@/components/ui/page-header";
 import { HouseEmpty } from "@/components/chrome/house";
 import { ClientFinanceDashboardView } from "@/components/finance/client-finance-dashboard";
-import { FINANCE_CLIENT, orgRoleCanViewFinancial } from "@/lib/finance";
+import { FINANCE_CLIENT, canViewClientEarn } from "@/lib/finance";
 import { buildClientFinanceDashboard } from "@/lib/finance-dashboard";
 import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 
@@ -19,7 +19,7 @@ export default async function ClientFinancePage() {
       </>
     );
   }
-  if (!orgRoleCanViewFinancial(ctx.activeRole)) {
+  if (!canViewClientEarn({ isGcStaff: ctx.isGcStaff, role: ctx.activeRole })) {
     return (
       <>
         <PageHeader title={FINANCE_CLIENT.title} subtitle={FINANCE_CLIENT.subtitle} />

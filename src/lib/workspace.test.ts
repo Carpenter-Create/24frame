@@ -21,7 +21,7 @@ describe("workspace mode", () => {
     expect(workspaceCookieWrite("education")).toContain("24frame_workspace=education");
     expect(workspaceHome("social")).toBe("/social");
     expect(workspaceHome("education")).toBe("/social/courses");
-    expect(workspaceHome("aggregation")).toBe("/");
+    expect(workspaceHome("aggregation")).toBe("/dashboard");
     expect(workspaceHome("education")).not.toBe("/education");
   });
 
@@ -46,6 +46,11 @@ describe("workspace mode", () => {
     expect(resolveWorkspaceMode("/messages", "social")).toBe("aggregation");
     expect(resolveWorkspaceMode("/titles/1", "social")).toBe("aggregation");
     expect(resolveWorkspaceMode("/", "social")).toBe("aggregation");
+    expect(resolveWorkspaceMode("/dashboard", "social")).toBe("aggregation");
+    expect(resolveWorkspaceMode("/analytics", "social")).toBe("aggregation");
+    expect(resolveWorkspaceMode("/earn", "social")).toBe("aggregation");
+    expect(resolveWorkspaceMode("/earn/p1", "social")).toBe("aggregation");
+    expect(resolveWorkspaceMode("/finance", "social")).toBe("aggregation");
     expect(resolveWorkspaceMode("/settings/profile", "social")).toBe("social");
     expect(resolveWorkspaceMode("/settings/profile", "education")).toBe("education");
     expect(resolveWorkspaceMode("/help", "aggregation")).toBe("aggregation");

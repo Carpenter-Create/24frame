@@ -112,7 +112,7 @@ export function AppShell({
   // (edge of sidebar → right edge). That page then manages its own content max-width.
   // Non-bleed pages share `--content-inset`. Titles stay the bleed exception.
   const titlesBleed = pathname === "/titles";
-  const homePage = pathname === "/";
+  const homePage = pathname === "/" || pathname === "/dashboard";
   const messagesPage = pathname === "/messages";
   const settingsPage = isSettingsPath(pathname);
   const socialChrome = workspace === "social" && !settingsPage;

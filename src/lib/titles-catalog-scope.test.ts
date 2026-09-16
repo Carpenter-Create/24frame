@@ -13,7 +13,7 @@ function src(rel: string): string {
 }
 
 const OTHER_PAGES = [
-  "src/app/(app)/page.tsx",
+  "src/app/(app)/dashboard/page.tsx",
   "src/app/(app)/deliveries/page.tsx",
   "src/app/(app)/catalog-health/page.tsx",
   "src/app/(app)/messages/page.tsx",
@@ -28,7 +28,7 @@ const OTHER_PAGES = [
 describe("titles catalog scope", () => {
   it("keeps desktop catalog search on /titles and mobile search in the /titles header", () => {
     const catalogPage = src("src/app/(app)/titles/page.tsx");
-    const homePage = src("src/app/(app)/page.tsx");
+    const homePage = src("src/app/(app)/dashboard/page.tsx");
     const shell = src("src/components/chrome/app-shell.tsx");
     const headerSearch = src("src/components/titles/titles-header-search.tsx");
     const searchField = src("src/components/layout/search-field.tsx");
@@ -79,7 +79,7 @@ describe("titles catalog scope", () => {
     const catalog = src("src/components/titles/titles-catalog.tsx");
     const home = src("src/components/dashboard/dashboard-home.tsx");
     const titleDetail = src("src/app/(app)/titles/[id]/page.tsx");
-    const homePage = src("src/app/(app)/page.tsx");
+    const homePage = src("src/app/(app)/dashboard/page.tsx");
 
     expect(catalog).toContain("px-[var(--space-4)]");
     expect(catalog).toContain("titles-catalog-rail");

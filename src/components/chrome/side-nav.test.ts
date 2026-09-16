@@ -10,19 +10,21 @@ const navSrc = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "side-
 describe("SideNav Access rail", () => {
   it("keeps the locked client destinations", () => {
     expect(NAV.map((item) => item.label)).toEqual([
-      "Home",
+      "Dashboard",
       "Titles",
       "Deliveries",
       "Catalog Health",
-      "Finance",
+      "Analytics",
+      "Earn",
       "Ask 24Frame AI",
     ]);
     expect(NAV.map((item) => item.href)).toEqual([
-      "/",
+      "/dashboard",
       "/titles",
       "/deliveries",
       "/catalog-health",
-      "/finance",
+      "/analytics",
+      "/earn",
       "/messages",
     ]);
   });

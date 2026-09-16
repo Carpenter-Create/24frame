@@ -15,7 +15,7 @@ const awsSrc = readFileSync("src/lib/finance-aws.ts", "utf8");
 const s3Src = readFileSync("src/lib/s3-finance.ts", "utf8");
 const cfSrc = readFileSync("src/lib/finance-cloudfront.ts", "utf8");
 const actions = readFileSync("src/app/(app)/(operator)/gc/finance/actions.ts", "utf8");
-const exportRoute = readFileSync("src/app/(app)/finance/[periodId]/export/route.ts", "utf8");
+const exportRoute = readFileSync("src/app/(app)/earn/[periodId]/export/route.ts", "utf8");
 
 describe("finance AWS isolation", () => {
   afterEach(() => {

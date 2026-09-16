@@ -15,7 +15,7 @@ const glance = readFileSync("src/components/dashboard/dashboard-finance-glance.t
 const dashboard = readFileSync("src/components/finance/client-finance-dashboard.tsx", "utf8");
 const period = readFileSync("src/components/finance/client-period-dashboard.tsx", "utf8");
 const meters = readFileSync("src/components/finance/finance-meters.tsx", "utf8");
-const statementPage = readFileSync("src/app/(app)/finance/[periodId]/page.tsx", "utf8");
+const statementPage = readFileSync("src/app/(app)/earn/[periodId]/page.tsx", "utf8");
 const switcher = readFileSync("src/lib/workspace-switcher.ts", "utf8");
 
 const clientSurfaces = [glance, dashboard, period, meters, statementPage];
@@ -53,15 +53,16 @@ describe("finance visual craft register", () => {
     expect(switcher).toContain("APP_HEADER_TRAILING_CLUSTER_CLASS");
   });
 
-  it("keeps dual Finance rail labels and distinguishes purse vs ops", () => {
-    const client = NAV.find((item) => item.href === "/finance");
+  it("keeps Earn on the client rail and Finance on STAFF ops", () => {
+    const client = NAV.find((item) => item.href === "/earn");
     const staff = GC_NAV.find((item) => item.href === "/gc/finance");
-    expect(client?.label).toBe("Finance");
+    expect(client?.label).toBe("Earn");
     expect(staff?.label).toBe("Finance");
     expect(client?.ariaLabel).toBe(FINANCE_CLIENT.navAria);
     expect(staff?.ariaLabel).toBe(FINANCE_PAGE.navAria);
     expect(FINANCE_CLIENT.subtitle.toLowerCase()).toContain("purse");
     expect(FINANCE_PAGE.subtitle.toLowerCase()).toContain("import");
     expect(client?.ariaLabel).not.toBe(staff?.ariaLabel);
+    expect(GC_NAV.map((item) => item.label)).not.toContain("Earn");
   });
 });

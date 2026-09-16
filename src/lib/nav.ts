@@ -11,6 +11,7 @@ import {
   FilmSlate,
   PaperPlaneTilt,
   Pulse,
+  ChartBar,
   Wallet,
   Sparkle,
   Tray,
@@ -53,17 +54,18 @@ export function isPhosphorNavItem(item: NavItem): item is PhosphorNavItem {
 }
 
 // GC's flat nav — only what exists or is v1-scoped. Settings stays deferred.
-// Ask Globee is the /messages destination (href unchanged). Finance is the
+// Ask Globee is the /messages destination (href unchanged). Earn is the
 // client recipient door. Staff ops stays on GC_NAV at /gc/finance.
 // Glyphs: Figma 75:5 / 75:2 / 61:2 Phosphor Bold idle, Fill active.
 export const NAV: PhosphorNavItem[] = [
-  { label: "Home", href: "/", family: "phosphor", icon: SquaresFour, exact: true },
+  { label: "Dashboard", href: "/dashboard", family: "phosphor", icon: SquaresFour, exact: true },
   { label: "Titles", href: "/titles", family: "phosphor", icon: FilmSlate },
   { label: "Deliveries", href: "/deliveries", family: "phosphor", icon: PaperPlaneTilt },
   { label: "Catalog Health", href: "/catalog-health", family: "phosphor", icon: Pulse },
+  { label: "Analytics", href: "/analytics", family: "phosphor", icon: ChartBar },
   {
-    label: "Finance",
-    href: "/finance",
+    label: "Earn",
+    href: "/earn",
     family: "phosphor",
     icon: Wallet,
     ariaLabel: FINANCE_CLIENT.navAria,
@@ -142,6 +144,10 @@ export const MOBILE_NAV = {
 } as const;
 
 export function isClientNavActive(pathname: string, item: NavItem): boolean {
+  if (item.href === "/dashboard" && pathname === "/") return true;
+  if (item.href === "/earn" && (pathname === "/finance" || pathname.startsWith("/finance/"))) {
+    return true;
+  }
   return item.exact ? pathname === item.href : pathname.startsWith(item.href);
 }
 

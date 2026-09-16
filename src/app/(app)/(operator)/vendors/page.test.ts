@@ -168,11 +168,12 @@ describe("staff /vendors address book", () => {
 describe("staff rail and neighboring locks", () => {
   it("keeps the full staff rail", () => {
     expect([...NAV, ...GC_NAV].map((item) => item.label)).toEqual([
-      "Home",
+      "Dashboard",
       "Titles",
       "Deliveries",
       "Catalog Health",
-      "Finance",
+      "Analytics",
+      "Earn",
       "Ask 24Frame AI",
       "Queue",
       "24Frame Deliveries",
@@ -187,7 +188,7 @@ describe("staff rail and neighboring locks", () => {
     const deliveries = readFileSync("src/app/(app)/deliveries/page.tsx", "utf8");
     const titles = readFileSync("src/app/(app)/titles/page.tsx", "utf8");
     const nav = readFileSync("src/components/chrome/side-nav.tsx", "utf8");
-    const home = readFileSync("src/app/(app)/page.tsx", "utf8");
+    const home = readFileSync("src/app/(app)/dashboard/page.tsx", "utf8");
 
     expect(ask).toContain("Figma 7:73 landing chrome");
     expect(ask).toContain("rounded-[28px]");

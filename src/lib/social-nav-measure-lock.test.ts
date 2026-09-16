@@ -26,10 +26,10 @@ const SOCIAL_NAV_PAGES = [
 ] as const;
 
 const AGGREGATION_PAGE_MODULES = [
-  "@/app/(app)/page",
+  "@/app/(app)/dashboard/page",
   "@/app/(app)/titles/page",
   "@/app/(app)/messages/page",
-  "@/app/(app)/finance/page",
+  "@/app/(app)/earn/page",
   "@/app/(app)/deliveries/page",
 ] as const;
 
@@ -77,7 +77,7 @@ describe("Social nav leftover split (shared shell vs Social-local)", () => {
       }
       expect(src).not.toContain('from "@/app/(app)/titles');
       expect(src).not.toContain('from "@/app/(app)/messages');
-      expect(src).not.toContain('from "@/app/(app)/finance');
+      expect(src).not.toContain('from "@/app/(app)/earn');
       expect(src).not.toContain("WorkspaceSwitcher");
       expect(src).not.toContain("data-app-home-frame");
       expect(src).not.toContain("data-app-messages-frame");

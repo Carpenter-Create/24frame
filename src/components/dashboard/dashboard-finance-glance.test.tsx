@@ -7,7 +7,7 @@ import { buildClientFinanceGlance } from "@/lib/finance-glance";
 import { DashboardClientFinanceGlance, DashboardFinanceGlance } from "./dashboard-finance-glance";
 
 describe("DashboardClientFinanceGlance", () => {
-  it("renders a house card with rate, balance, threshold, latest, and a Finance CTA", () => {
+  it("renders a house card with rate, balance, threshold, latest, and an Earn CTA", () => {
     const glance = buildClientFinanceGlance({
       clientRateBp: 8500,
       financeHref: FINANCE_CLIENT_HREF,
