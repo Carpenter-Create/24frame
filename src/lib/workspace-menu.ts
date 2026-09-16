@@ -1,7 +1,8 @@
 // Header workspace lanes. Lives in lib/, not JSX.
-// Mercury trigger is top-left on Aggregation chrome. Social
-// matches that lead. Trailing header cluster is the avatar —
-// not a second switcher. Popover lists only accessible lanes.
+// Mercury trigger sits in the shared header-right cluster,
+// left of the avatar — not the rail. Trailing cluster is
+// switcher + avatar. One switcher. Popover lists only
+// accessible lanes.
 // Not a page. Not a route. Not an account-menu row. Miss-list
 // is Aggregation | Social | Education. Member Education land
 // is Route A /social/courses. Do not send members to /education

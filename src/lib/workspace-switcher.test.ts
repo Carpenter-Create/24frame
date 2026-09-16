@@ -122,15 +122,15 @@ describe("workspace switcher lock", () => {
     expect(workspaceSwitcherSettingsHref("/")).toBe(settingsLandHref("/"));
     expect(WORKSPACE_SWITCHER_SETTINGS_CLASS).toContain("t-body-sm");
     expect(WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS).toContain("truncate");
-    expect(WORKSPACE_SWITCHER_PANEL_CLASS).toContain("left-0");
+    expect(WORKSPACE_SWITCHER_PANEL_CLASS).toContain("right-0");
     expect(WORKSPACE_SWITCHER_PANEL_CLASS).toContain("shadow-none");
-    expect(WORKSPACE_SWITCHER_PANEL_CLASS).not.toContain("right-0");
+    expect(WORKSPACE_SWITCHER_PANEL_CLASS).not.toContain("left-0");
     for (const absent of WORKSPACE_SWITCHER_ABSENT) {
       expect(WORKSPACE_SWITCHER).not.toHaveProperty(absent);
     }
   });
 
-  it("reserves one trailing header cluster for the avatar", () => {
+  it("reserves one trailing header cluster for switcher + avatar", () => {
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("shrink-0");
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("gap-[var(--space-3)]");
   });
