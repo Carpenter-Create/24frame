@@ -81,7 +81,7 @@ describe("Social courses list", () => {
         id: "c1",
         slug: "welcome-to-24frame",
         title: "Welcome to 24Frame",
-        description: "Placeholder orientation for the Social+Education workspace.",
+        description: "Orientation for 24Frame Education.",
         cover_key: null,
         is_flagship_free: true,
         created_at: "2026-09-12T14:00:00.000Z",
@@ -93,9 +93,11 @@ describe("Social courses list", () => {
     expect(from).toHaveBeenCalledWith("courses");
     expect(from).not.toHaveBeenCalledWith("titles");
     expect(html).toContain("data-social-courses");
+    expect(SOCIAL.courses.title).toBe("Education");
     expect(html).toContain(SOCIAL.courses.title);
     expect(html).toContain("24Frame");
-    expect(html).toContain("Social+Education");
+    expect(html).not.toContain("Courses");
+    expect(html).not.toContain("Social+Education");
     expect(html).toContain("Welcome to 24Frame");
     expect(html).toContain("/social/courses/welcome-to-24frame");
     expect(html).toContain("data-course-grid");

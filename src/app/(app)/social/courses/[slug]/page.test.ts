@@ -96,7 +96,7 @@ describe("Social course detail", () => {
         id: "c1",
         slug: "welcome-to-24frame",
         title: "Welcome to 24Frame",
-        description: "Placeholder orientation for the Social+Education workspace.",
+        description: "Orientation for 24Frame Education.",
         cover_key: null,
         is_flagship_free: true,
         created_at: "2026-09-12T14:00:00.000Z",

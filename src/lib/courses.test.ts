@@ -77,15 +77,20 @@ describe("placeholder outline", () => {
 });
 
 describe("course routes and copy", () => {
-  it("uses 24Frame Social+Education language and stays browse-only", () => {
+  it("uses Education land copy on Route A and stays browse-only", () => {
     expect(SOCIAL_ROUTES.courses).toBe("/social/courses");
     expect(socialCourseHref("welcome-to-24frame")).toBe("/social/courses/welcome-to-24frame");
     expect(courseHref("social-education")).toBe("/social/courses/social-education");
-    expect(SOCIAL.courses.subtitle).toContain(PRODUCT_NAME);
-    expect(SOCIAL.courses.subtitle).toContain("Social+Education");
+    expect(SOCIAL.courses.title).toBe("Education");
+    expect(SOCIAL.courses.subtitle).toBe(`Education in ${PRODUCT_NAME}.`);
+    expect(SOCIAL.courses.subtitle).not.toContain("Social+Education");
+    expect(SOCIAL.courses.subtitle).not.toMatch(/placeholder/i);
+    expect(SOCIAL.courses.empty).toBe("Nothing here yet.");
+    expect(SOCIAL.courses.error).toBe("Education could not be loaded.");
     expect(SOCIAL.courses.denied).toBe("This course is not available.");
     expect(SOCIAL.courses.denied).not.toMatch(/LOCKED|Buy|price/i);
     expect(JSON.stringify(SOCIAL.courses)).not.toMatch(/—/);
+    expect(JSON.stringify(SOCIAL.courses)).not.toContain("Courses");
   });
 });
 
