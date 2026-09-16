@@ -14,9 +14,9 @@ import {
 import { SOCIAL_ICON_SIZE_NAV, socialNavIconName } from "@/lib/social-icons";
 import { NavGlyph } from "./nav-glyph";
 
-// Access rail: 13px labels (--text-sm / t-body-sm), 16px Phosphor Bold idle /
-// Fill active (75:5 / 61:2). Social destinations use Social Figma V1 Phosphor
-// via SocialIcon.
+// Access rail: 12px labels (--text-sm / t-body-sm), 16px Phosphor Bold idle /
+// Fill active (75:5 / 61:2). Active = Sporty Blue icon+text + quiet wash.
+// Social destinations use Social Figma V1 Phosphor via SocialIcon.
 // Collapsed mode is icon-only (labels/badges hidden; title tooltips; unread → accent dot).
 export function SideNav({
   messagesUnread,
@@ -69,7 +69,7 @@ export function SideNav({
           "relative flex items-center rounded-[var(--radius)] t-body-sm leading-4 transition-colors",
           collapsed ? "justify-center px-0 py-2" : "gap-2 px-2 py-2",
           active
-            ? "bg-surface-muted font-medium text-ink"
+            ? "bg-accent-wash font-medium text-accent"
             : "font-normal text-ink-2 hover:bg-surface-muted hover:text-ink",
         )}
       >

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Activity } from "lucide-react";
 
 import { cn } from "@/lib/cn";
+import { DASHBOARD_CARD_CLASS, DASHBOARD_CARD_PAD_LIST } from "@/lib/dashboard-craft";
 import { DASHBOARD_ATTENTION_CLEAR } from "@/lib/findings";
 import {
   DASHBOARD_HOME,
@@ -21,7 +22,7 @@ export function DashboardHomePanel({
   return (
     <section
       className={cn(
-        "dashboard-home-panel flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] border border-hairline bg-surface",
+        DASHBOARD_CARD_CLASS,
         className,
       )}
       {...props}
@@ -71,8 +72,8 @@ export function DashboardHomeEmpty({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="dashboard-home-empty flex flex-1 flex-col justify-center border-t border-hairline px-[var(--space-6)] py-[var(--space-10)]">
-      <p className="t-body text-ink-2">{children}</p>
+    <div className="dashboard-home-empty flex flex-1 flex-col justify-center border-t border-hairline px-[var(--space-4)] py-[var(--space-6)]">
+      <p className="t-body-sm text-ink-3">{children}</p>
       {action}
     </div>
   );
@@ -139,7 +140,7 @@ export function DashboardSnapshot({
 export function DashboardDoNext({ items }: { items: ClientHomeDoNextItem[] }) {
   return (
     <DashboardHomePanel aria-label={DASHBOARD_HOME.doNext} data-dashboard-do-next="">
-      <span className="px-[var(--space-6)] py-4 t-label text-ink-3">{DASHBOARD_HOME.doNext}</span>
+      <span className={cn(DASHBOARD_CARD_PAD_LIST, "t-label text-ink-3")}>{DASHBOARD_HOME.doNext}</span>
       {items.length === 0 ? (
         <DashboardHomeEmpty>{DASHBOARD_ATTENTION_CLEAR}</DashboardHomeEmpty>
       ) : (
@@ -150,12 +151,12 @@ export function DashboardDoNext({ items }: { items: ClientHomeDoNextItem[] }) {
               <li
                 key={item.id}
                 data-dashboard-do-next-row={item.id}
-                className="flex items-center justify-between gap-[var(--space-6)] px-[var(--space-6)] py-4"
+                className="flex items-center justify-between gap-[var(--space-4)] px-[var(--space-4)] py-[var(--space-4)]"
               >
                 <div className="min-w-0">
                   <Link
                     href={`/titles/${item.id}`}
-                    className="t-body font-medium text-ink transition-colors hover:text-ink-2"
+                    className="t-body-sm font-medium text-ink transition-colors hover:text-ink-2"
                   >
                     {item.title}
                   </Link>
@@ -196,7 +197,7 @@ export function DashboardJustIn({
 
   return (
     <DashboardHomePanel aria-label={DASHBOARD_HOME.justIn} data-dashboard-just-in="">
-      <span className="px-[var(--space-6)] py-4 t-label text-ink-3">{DASHBOARD_HOME.justIn}</span>
+      <span className={cn(DASHBOARD_CARD_PAD_LIST, "t-label text-ink-3")}>{DASHBOARD_HOME.justIn}</span>
       {titles.length === 0 ? (
         <DashboardHomeEmpty action={emptyAction}>{emptyCopy}</DashboardHomeEmpty>
       ) : (
@@ -207,7 +208,7 @@ export function DashboardJustIn({
               <li
                 key={t.id}
                 data-dashboard-just-in-row={t.id}
-                className="flex items-center justify-between gap-[var(--space-6)] px-[var(--space-6)] py-4"
+                className="flex items-center justify-between gap-[var(--space-4)] px-[var(--space-4)] py-[var(--space-4)]"
               >
                 <span
                   data-dashboard-just-in-cluster=""
@@ -215,7 +216,7 @@ export function DashboardJustIn({
                 >
                   <Link
                     href={`/titles/${t.id}`}
-                    className="t-body font-medium text-ink transition-colors hover:text-ink-2"
+                    className="t-body-sm font-medium text-ink transition-colors hover:text-ink-2"
                   >
                     {t.title}
                   </Link>

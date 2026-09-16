@@ -48,6 +48,10 @@ import {
   recentAccountActivity,
   revenuePointsFromLabels,
 } from "@/lib/dashboard-admin";
+import {
+  DASHBOARD_FIXTURE_POINTS,
+  dashboardFixtureEnabled,
+} from "@/lib/dashboard-fixture";
 import { LIST_PAGE, UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
 import { loadMyDeliveries, loadMyFindings } from "@/lib/my-lists";
 import { GcClientsDirectory } from "@/app/(app)/(operator)/gc/clients/clients-directory";
@@ -59,9 +63,10 @@ import { canViewClientEarn } from "@/lib/finance";
 import { buildClientFinanceDashboard } from "@/lib/finance-dashboard";
 import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 
-// Company-admin `/dashboard` rematches RL Overview behavior: period chrome,
-// MetricCard revenue + scrub chart, Recent activity. Standard seats keep the
-// #326 catalog hero. Export stays on /reports. No invented money.
+// Company-admin `/dashboard` rematches RL Overview structure inside house
+// tokens: period grains, MetricCard revenue + scrub, Recent activity.
+// Standard seats keep the catalog hero. Export stays on /reports.
+// Fixture money is labeled + env-gated and never enters export/ledger.
 
 type TitleRow = ClientHomeTitle & { created_by?: string | null };
 
@@ -174,7 +179,12 @@ export default async function DashboardPage({
           latestStatement: moneyLoaded.latestStatement,
         })
       : null;
-    const points = revenuePointsFromLabels(money?.chart ?? []);
+    const livePoints = revenuePointsFromLabels(money?.chart ?? []);
+    const fixture =
+      dashboardFixtureEnabled({ isGcStaff: ctx.isGcStaff, isCompanyAdmin: isAdmin }) &&
+      !userId &&
+      livePoints.length === 0;
+    const points = fixture ? DASHBOARD_FIXTURE_POINTS : livePoints;
     const monthSources = [
       ...titles
         .map((title) => yearMonthFromIso(title.created_at))
@@ -192,6 +202,7 @@ export default async function DashboardPage({
         userId={userId}
         users={users}
         hero={buildDashboardRevenueHero({ period, points, userId })}
+        fixture={fixture}
         activity={recentAccountActivity({
           titles,
           deliveries: deliveries.rows,

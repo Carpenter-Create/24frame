@@ -1,11 +1,12 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createClient } from "@/lib/supabase/server";
 import { getOrgContext } from "@/lib/supabase/context";
 import { CLIENTS_PAGE, ORG_ROLE_LABELS, ORG_STATUS_LABELS } from "@/lib/clients";
 import { DASHBOARD_HOME, dashboardJustInDate } from "@/lib/dashboard-home";
 import { DASHBOARD_ADMIN } from "@/lib/dashboard-admin";
+import { DASHBOARD_CRAFT_FIXTURE_ENV, DASHBOARD_FIXTURE } from "@/lib/dashboard-fixture";
 import { FINANCE_PAGE } from "@/lib/finance";
 import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 import { REPORTS_HREF } from "@/lib/reports";
@@ -213,14 +214,14 @@ describe("DashboardPage modes", () => {
     expect(html).toContain("Winter Light");
     expect(html).toContain("/titles/title-1");
     expect(html).toContain("dashboard-home-panel");
-    expect(html).toContain("t-body font-medium text-ink");
+    expect(html).toContain("t-body-sm font-medium text-ink");
     expect(html).not.toContain("t-subhead");
     expect(html).not.toContain(DASHBOARD_HOME.justInEmpty);
     expect(html).not.toContain(DASHBOARD_HOME.catalogEmpty);
     expect(html).not.toContain("data-dashboard-add-title");
     expect(html).not.toContain(DASHBOARD_HOME.addTitle);
     expect(html).toContain("data-dashboard-just-in-cluster");
-    expect(html).toContain("t-body font-medium text-ink");
+    expect(html).toContain("t-body-sm font-medium text-ink");
     expect(html).toContain(TITLE_STATUS_LABELS.live);
     expect(html).toContain("data-dashboard-status-pill");
     expect(html).toContain(dashboardJustInDate(createdAt));
@@ -353,10 +354,10 @@ describe("client home information model", () => {
     expect(statValue(html, "live")).toBe("1");
     expect(html).toMatch(/<h1 class="t-section text-ink">Acme<\/h1>/);
     expect(html).toMatch(/data-dashboard-stat="catalog"[^>]*t-display t-data/);
-    expect(html).toMatch(/data-dashboard-stat="needsAttention"[^>]*t-display t-data/);
+    expect(html).toMatch(/data-dashboard-stat="needsAttention"[^>]*t-title t-data/);
     expect(html).toMatch(/data-dashboard-stat="live"/);
     expect(html).not.toMatch(/data-dashboard-stat="live"[^>]*t-display/);
-    expect(html).not.toMatch(/data-dashboard-stat="[^"]*"[^>]*t-title/);
+    expect(html).not.toMatch(/data-dashboard-stat="catalog"[^>]*t-title/);
     expect(html).not.toMatch(/<h1[^>]*t-display/);
     expect(html).toContain(`t-label text-ink-3">${DASHBOARD_HOME.hero}`);
     expect(html).toContain(`t-label text-ink-3">${DASHBOARD_HOME.doNext}`);
@@ -369,7 +370,7 @@ describe("client home information model", () => {
     expect(html).not.toContain(dashboardAttentionSummary(1));
     expect(html).not.toContain("titles need your attention");
     expect(html).toContain("Synopsis is required.");
-    expect(html).toContain("t-body font-medium text-ink");
+    expect(html).toContain("t-body-sm font-medium text-ink");
     expect(html).not.toContain("t-subhead");
     expect(html).toContain("Draft Work");
     expect(html).toContain(TITLE_STATUS_LABELS.draft);
@@ -617,6 +618,10 @@ describe("company admin Overview hero", () => {
     stubRecipient();
   });
 
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("rematches RL Overview: period chrome, revenue MetricCard, recent activity, no export", async () => {
     stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(
@@ -628,6 +633,7 @@ describe("company admin Overview hero", () => {
     expect(html).toContain("data-dashboard-admin-chrome");
     expect(html).toContain("data-dashboard-admin-controls");
     expect(html).toContain("data-dashboard-period");
+    expect(html).toContain("data-dashboard-period-grains");
     expect(html).toContain("data-dashboard-user");
     expect(html).toContain("data-dashboard-revenue");
     expect(html).toContain("data-dashboard-revenue-chart");
@@ -658,7 +664,36 @@ describe("company admin Overview hero", () => {
     expect(html).not.toContain("shadow-lg");
     expect(html).not.toContain('data-dashboard-module="top-titles"');
     expect(html).not.toContain("recharts");
+    expect(html).not.toContain("data-dashboard-fixture-banner");
+    expect(html).not.toContain(DASHBOARD_FIXTURE.sampleMark);
     expect(loadRecipientDashboard).toHaveBeenCalledWith("org-1");
+  });
+
+  it("labels sample revenue when the craft fixture gate is on", async () => {
+    vi.stubEnv(DASHBOARD_CRAFT_FIXTURE_ENV, "1");
+    stubClient();
+    vi.mocked(getOrgContext).mockResolvedValue(
+      ctx({ isGcStaff: false, orgStatus: "active", role: "account_owner" }) as never,
+    );
+    const html = renderToStaticMarkup(await DashboardPage({ searchParams: Promise.resolve({}) }));
+    expect(html).toContain("data-dashboard-fixture-banner");
+    expect(html).toContain(DASHBOARD_FIXTURE.banner);
+    expect(html).toContain(DASHBOARD_FIXTURE.sampleMark);
+    expect(html).toContain("$496,000.00");
+    expect(html).not.toContain("data-reports-download");
+  });
+
+  it("does not fixture the standard-user Dashboard even when the env gate is on", async () => {
+    vi.stubEnv(DASHBOARD_CRAFT_FIXTURE_ENV, "1");
+    stubClient();
+    vi.mocked(getOrgContext).mockResolvedValue(
+      ctx({ isGcStaff: false, orgStatus: "active", role: "delivery_ops" }) as never,
+    );
+    const html = renderToStaticMarkup(await DashboardPage());
+    expect(html).not.toContain("data-dashboard-admin-hero");
+    expect(html).not.toContain("data-dashboard-fixture-banner");
+    expect(html).not.toContain(DASHBOARD_FIXTURE.banner);
+    expect(html).toContain("data-dashboard-hero");
   });
 
   it("keeps a named period in ?period= and does not invent a user roster", async () => {

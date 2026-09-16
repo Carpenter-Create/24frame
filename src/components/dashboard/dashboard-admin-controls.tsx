@@ -5,12 +5,17 @@ import { useRouter } from "next/navigation";
 
 import {
   DASHBOARD_ADMIN,
+  DASHBOARD_PERIOD_GRAINS,
+  dashboardGrainActive,
+  dashboardGrainOption,
   dashboardHref,
   filterDashboardUsers,
   type DashboardPeriodOption,
 } from "@/lib/dashboard-admin";
+import { DASHBOARD_GRAIN_ACTIVE_CLASS, DASHBOARD_GRAIN_IDLE_CLASS } from "@/lib/dashboard-craft";
 import { Input } from "@/components/ui/input";
 import { REPORTS_SELECT_CLASS } from "@/lib/reports-craft";
+import { cn } from "@/lib/cn";
 import type { ReportsUserOption } from "@/lib/reports";
 
 export function DashboardAdminControls({
@@ -27,6 +32,7 @@ export function DashboardAdminControls({
   const router = useRouter();
   const selected = users.find((user) => user.id === userId) ?? null;
   const [query, setQuery] = useState("");
+  const extras = options.filter((option) => !DASHBOARD_PERIOD_GRAINS.some((grain) => grain.group === option.group && dashboardGrainOption(options, grain.group)?.key === option.key));
 
   function go(next: { period?: string; user?: string | null }) {
     router.replace(
@@ -45,12 +51,35 @@ export function DashboardAdminControls({
       data-dashboard-admin-controls=""
       className="flex flex-wrap items-center justify-end gap-[var(--space-4)]"
     >
-      <label className="flex items-center gap-[var(--space-2)]">
+      <div className="flex flex-wrap items-center gap-[var(--space-4)]">
         <span className="t-label text-ink-3">{DASHBOARD_ADMIN.period}</span>
+        <nav
+          data-dashboard-period-grains=""
+          aria-label={DASHBOARD_ADMIN.period}
+          className="flex items-center gap-[var(--space-4)]"
+        >
+          {DASHBOARD_PERIOD_GRAINS.map((grain) => {
+            const option = dashboardGrainOption(options, grain.group);
+            if (!option) return null;
+            const active = dashboardGrainActive(periodKey, grain.group);
+            return (
+              <button
+                key={grain.group}
+                type="button"
+                data-dashboard-period-grain={grain.group}
+                aria-pressed={active}
+                className={cn(active ? DASHBOARD_GRAIN_ACTIVE_CLASS : DASHBOARD_GRAIN_IDLE_CLASS)}
+                onClick={() => go({ period: option.key })}
+              >
+                {grain.label}
+              </button>
+            );
+          })}
+        </nav>
         <select
           data-dashboard-period=""
           aria-label={DASHBOARD_ADMIN.period}
-          className={REPORTS_SELECT_CLASS}
+          className={cn(REPORTS_SELECT_CLASS, extras.length === 0 && "sr-only")}
           value={periodKey}
           onChange={(event) => go({ period: event.target.value })}
         >
@@ -60,7 +89,7 @@ export function DashboardAdminControls({
             </option>
           ))}
         </select>
-      </label>
+      </div>
       <div className="relative">
         <label className="flex items-center gap-[var(--space-2)]">
           <span className="t-label text-ink-3">{DASHBOARD_ADMIN.findUser}</span>
@@ -82,7 +111,7 @@ export function DashboardAdminControls({
           <ul
             id="dashboard-user-results"
             data-dashboard-user-results=""
-            className="absolute right-0 z-10 mt-[var(--space-2)] w-full overflow-hidden rounded-[var(--radius-sm)] border border-hairline bg-surface"
+            className="absolute right-0 z-10 mt-[var(--space-2)] w-full overflow-hidden rounded-[var(--radius)] border border-hairline bg-surface shadow-none"
           >
             {matches.map((user) => (
               <li key={user.id}>
@@ -105,7 +134,7 @@ export function DashboardAdminControls({
           <button
             type="button"
             data-dashboard-user-clear=""
-            className="mt-[var(--space-2)] t-body-sm text-ink-3 hover:text-ink-2"
+            className="mt-[var(--space-2)] t-body-sm text-accent"
             onClick={() => {
               setQuery("");
               go({ user: null });

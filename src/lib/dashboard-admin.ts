@@ -9,13 +9,13 @@ export const DASHBOARD_HREF = "/dashboard";
 
 export const DASHBOARD_ADMIN = {
   revenue: "Net revenue",
-  revenueEmpty: "No revenue for this period yet.",
-  chartEmpty: "Revenue charts here when a closed statement exists.",
+  revenueEmpty: "No revenue for this period.",
+  chartEmpty: "No closed statement for this period.",
   asOfPrefix: "As of",
   updatedPrefix: "Updated",
-  updatedNone: "No closed statement yet.",
+  updatedNone: "No closed statement.",
   activity: "Recent account activity",
-  activityEmpty: "No account activity for this period yet.",
+  activityEmpty: "No account activity for this period.",
   viewAll: "View all",
   findUser: "Find a user account",
   allCompany: "All company activity",
@@ -48,6 +48,29 @@ export type DashboardPeriodOption = {
   label: string;
   group: DashboardPeriodKind;
 };
+
+export const DASHBOARD_PERIOD_GRAINS = [
+  { group: "all" as const, label: DASHBOARD_ADMIN.allTime },
+  { group: "year" as const, label: DASHBOARD_ADMIN.year },
+  { group: "quarter" as const, label: DASHBOARD_ADMIN.quarter },
+  { group: "month" as const, label: DASHBOARD_ADMIN.month },
+  { group: "ytd" as const, label: DASHBOARD_ADMIN.ytd },
+];
+
+export function dashboardGrainOption(
+  options: readonly DashboardPeriodOption[],
+  group: DashboardPeriodKind,
+): DashboardPeriodOption | undefined {
+  return options.find((option) => option.group === group);
+}
+
+export function dashboardGrainActive(periodKey: string, group: DashboardPeriodKind): boolean {
+  if (group === "all") return periodKey === "all";
+  if (group === "ytd") return periodKey === "ytd";
+  if (group === "year") return /^\d{4}$/.test(periodKey);
+  if (group === "quarter") return /^Q[1-4]\d{4}$/i.test(periodKey);
+  return /^\d{4}-\d{2}$/.test(periodKey);
+}
 
 export type DashboardRevenuePoint = {
   key: string;

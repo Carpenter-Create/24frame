@@ -27,14 +27,14 @@ describe("SideNav Access rail", () => {
     ]);
   });
 
-  it("uses 13px labels via --text-sm / t-body-sm, 16px Phosphor Bold/Fill, and an 8px item gap", () => {
+  it("uses 12px labels via --text-sm / t-body-sm, 16px Phosphor Bold/Fill, and an 8px item gap", () => {
     const tokens = readFileSync("src/app/tokens.css", "utf8");
     const globals = readFileSync("src/app/globals.css", "utf8");
     const itemClass = navSrc.match(
       /"relative flex items-center rounded-\[var\(--radius\)\] [^"]+"/,
     )?.[0];
-    expect(navSrc).toContain("13px labels (--text-sm / t-body-sm)");
-    expect(tokens).toMatch(/--text-sm:\s*0\.8125rem;/);
+    expect(navSrc).toContain("12px labels (--text-sm / t-body-sm)");
+    expect(tokens).toMatch(/--text-sm:\s*0\.75rem;/);
     expect(globals).toMatch(/\.t-body-sm\s*\{[\s\S]*?font-size:\s*var\(--text-sm\)/);
     expect(itemClass).toContain("t-body-sm leading-4");
     expect(itemClass).not.toContain("text-[0.875rem]");
@@ -69,11 +69,10 @@ describe("SideNav Access rail", () => {
     expect(navSrc).not.toContain("prefetch={false}");
   });
 
-  it("marks the active item with a muted grey wash, not faded blue", () => {
-    expect(navSrc).toContain("bg-surface-muted font-medium text-ink");
+  it("marks the active item with Sporty Blue text and a quiet wash, not RL grey", () => {
+    expect(navSrc).toContain("bg-accent-wash font-medium text-accent");
     expect(navSrc).toContain("font-normal text-ink-2 hover:bg-surface-muted hover:text-ink");
+    expect(navSrc).not.toContain("bg-surface-muted font-medium text-ink");
     expect(navSrc).not.toContain('active ? "bg-surface text-ink"');
-    expect(navSrc).not.toMatch(/active\s*\?\s*"[^"]*accent/);
-    expect(navSrc).not.toMatch(/active\s*\?\s*"[^"]*blue/);
   });
 });
