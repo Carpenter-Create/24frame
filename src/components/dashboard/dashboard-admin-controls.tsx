@@ -18,6 +18,7 @@ import {
 import {
   DASHBOARD_PERIOD_CHEVRON_CLASS,
   DASHBOARD_PERIOD_GROUP_CLASS,
+  DASHBOARD_PERIOD_KICKER_CLASS,
   DASHBOARD_PERIOD_MENU_DESKTOP_CLASS,
   DASHBOARD_PERIOD_OPTION_CHECK_CLASS,
   DASHBOARD_PERIOD_OPTION_CHECK_GUTTER_CLASS,
@@ -88,47 +89,47 @@ export function DashboardAdminControls({
   return (
     <div
       data-dashboard-admin-controls=""
-      className="flex w-full flex-wrap items-center justify-end gap-[var(--space-4)] md:w-auto"
+      className="flex w-auto shrink-0 items-center justify-end"
     >
-      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-[var(--space-4)] md:flex-none">
-        <div className="flex min-w-0 flex-1 items-center gap-[var(--space-2)] md:flex-none">
-          <span className="t-label text-ink-3">{DASHBOARD_ADMIN.period}</span>
-          <div ref={hostRef} className="relative min-w-0 flex-1 md:flex-none">
-            <button
-              type="button"
-              data-dashboard-period=""
-              data-dashboard-period-one=""
-              aria-label={DASHBOARD_ADMIN.period}
-              aria-expanded={open}
-              aria-haspopup="listbox"
-              onClick={() => setOpen((next) => !next)}
-              className={DASHBOARD_PERIOD_TRIGGER_CLASS}
+      <div className="flex min-w-0 items-center gap-[var(--space-2)]">
+        <span data-dashboard-period-kicker="" className={DASHBOARD_PERIOD_KICKER_CLASS}>
+          {DASHBOARD_ADMIN.period}
+        </span>
+        <div ref={hostRef} className="relative min-w-0 md:flex-none">
+          <button
+            type="button"
+            data-dashboard-period=""
+            data-dashboard-period-one=""
+            aria-label={DASHBOARD_ADMIN.period}
+            aria-expanded={open}
+            aria-haspopup="listbox"
+            onClick={() => setOpen((next) => !next)}
+            className={DASHBOARD_PERIOD_TRIGGER_CLASS}
+          >
+            <span data-dashboard-period-current="" className={DASHBOARD_PERIOD_TRIGGER_LABEL_CLASS}>
+              {current?.label ?? periodKey}
+            </span>
+            <CaretDown
+              data-dashboard-period-chevron=""
+              className={DASHBOARD_PERIOD_CHEVRON_CLASS}
+              weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
+            />
+          </button>
+          {open ? (
+            <div
+              data-dashboard-period-menu=""
+              className={`${DASHBOARD_PERIOD_PANEL_CLASS} ${DASHBOARD_PERIOD_MENU_DESKTOP_CLASS}`}
             >
-              <span data-dashboard-period-current="" className={DASHBOARD_PERIOD_TRIGGER_LABEL_CLASS}>
-                {current?.label ?? periodKey}
-              </span>
-              <CaretDown
-                data-dashboard-period-chevron=""
-                className={DASHBOARD_PERIOD_CHEVRON_CLASS}
-                weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
+              <DashboardPeriodOptions
+                groups={groups}
+                periodKey={periodKey}
+                onPick={(key) => {
+                  setOpen(false);
+                  go(key);
+                }}
               />
-            </button>
-            {open ? (
-              <div
-                data-dashboard-period-menu=""
-                className={`${DASHBOARD_PERIOD_PANEL_CLASS} ${DASHBOARD_PERIOD_MENU_DESKTOP_CLASS}`}
-              >
-                <DashboardPeriodOptions
-                  groups={groups}
-                  periodKey={periodKey}
-                  onPick={(key) => {
-                    setOpen(false);
-                    go(key);
-                  }}
-                />
-              </div>
-            ) : null}
-          </div>
+            </div>
+          ) : null}
         </div>
       </div>
       {open ? (

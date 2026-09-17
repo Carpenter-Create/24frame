@@ -28,8 +28,11 @@ describe("company-admin Dashboard mobile craft", () => {
     expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).not.toContain("sm:grid-cols-5");
     expect(DASHBOARD_ADMIN_CHROME_CLASS).toContain("md:flex-row");
     expect(DASHBOARD_ADMIN_CHROME_CLASS).not.toContain("sm:flex-row");
-    expect(DASHBOARD_TITLE_MOBILE_CLASS).toBe("md:hidden");
-    expect(DASHBOARD_TITLE_DESKTOP_CLASS).toBe("max-md:hidden");
+    expect(DASHBOARD_TITLE_MOBILE_CLASS).toContain("md:hidden");
+    expect(DASHBOARD_TITLE_MOBILE_CLASS).toContain("t-body-sm");
+    expect(DASHBOARD_TITLE_MOBILE_CLASS).toContain("text-ink-2");
+    expect(DASHBOARD_TITLE_DESKTOP_CLASS).toContain("max-md:hidden");
+    expect(DASHBOARD_TITLE_DESKTOP_CLASS).toContain("t-title");
     expect(DASHBOARD_CARD_PAD_HERO).toContain("px-[var(--space-4)]");
     expect(DASHBOARD_CARD_PAD_HERO).toContain("py-[var(--space-4)]");
     expect(DASHBOARD_ADMIN_STACK_CLASS).toContain("gap-[var(--space-6)]");

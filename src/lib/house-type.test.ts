@@ -155,7 +155,7 @@ describe("Dashboard type jobs", () => {
     );
 
     expect(identity).toMatch(/<h1 class="t-title text-ink">Acme<\/h1>/);
-    expect(html).toMatch(/<h1 class="t-title text-ink" data-dashboard-title=""/);
+    expect(html).toMatch(/data-dashboard-title-desktop="" class="[^"]*t-title text-ink"/);
     expect(html).toMatch(/data-dashboard-stat="revenue"[^>]*t-display t-data/);
     expect(html).toContain("data-dashboard-revenue-compare");
     expect(html).toContain("data-dashboard-revenue-asof");

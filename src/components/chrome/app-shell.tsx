@@ -260,7 +260,9 @@ export function AppShell({
 
       {/* Access header trailing cluster is workspace switcher + avatar —
           same slot as Social / Education. One switcher, left of the
-          avatar. Rail top-left stays the static 24 brand. No org
+          avatar, gap 8. Hamburger stays left alone — do not center the
+          workspace name. Period stays on the Dashboard org row, not
+          this header. Rail top-left stays the static 24 brand. No org
           switcher on any route. Search mounts on the Access `/messages`
           gate, and on mobile `/titles` (528:542). Desktop 1:3, `/` 1:2,
           and `/titles/[id]` stay that pair. Phone avatar opens 544:561.
