@@ -23,8 +23,14 @@ describe("StatusProgressTrack", () => {
     expect(html).toContain("bg-accent");
     expect(html).toContain("bg-surface-muted");
     expect(html).toContain("h-[3px]");
-    expect(html).toContain("t-label");
+    expect(html).toContain("gap-1.5");
+    expect(html).toContain("t-body-sm text-ink-3");
+    expect(html).not.toContain("t-label");
     expect(html).toContain("In review");
+    expect(html.indexOf("data-status-progress-label")).toBeLessThan(
+      html.indexOf("data-status-progress-track"),
+    );
+    expect(html).toContain("mr-[var(--space-4)]");
     expect(html).not.toMatch(/green|emerald|rose|red|yellow/);
   });
 

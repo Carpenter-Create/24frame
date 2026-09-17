@@ -3,8 +3,10 @@ import { TITLE_STATUS_LABELS, type DeliveryStatus, type TitleStatus } from "@/li
 // Segmented Sporty Blue lifecycle track for Titles + Deliveries list rows.
 // Pipeline fill is inclusive through the current stage. Off-pipeline statuses
 // stay a muted badge — no track, no rainbow, no continuous %.
-// Track labels are stage names. Do not reuse the client TITLE_STATUS_LABELS
-// quirk that maps in_delivery → "Submitted" on this control.
+// Track labels are stage names in house list-meta type (t-body-sm), not t-label
+// caps. Do not reuse the client TITLE_STATUS_LABELS quirk that maps
+// in_delivery → "Submitted" on this control. Trailing inset keeps the cluster
+// off the card edge; gap-1.5 keeps dashes distinct.
 
 export const TITLE_STATUS_TRACK_STEPS = [
   "Draft",
@@ -46,19 +48,19 @@ export type StatusProgressModel = {
 };
 
 export const STATUS_PROGRESS_HOST_CLASS =
-  "flex w-[7.5rem] shrink-0 flex-col items-stretch gap-[2px]";
+  "mr-[var(--space-4)] flex w-[7.5rem] shrink-0 flex-col items-stretch gap-[2px]";
 
 export const STATUS_PROGRESS_TRACK_CLASS =
-  "flex h-[3px] w-full gap-px overflow-hidden rounded-full";
+  "flex h-[3px] w-full gap-1.5 overflow-hidden rounded-full";
 
 export const STATUS_PROGRESS_SEG_ON_CLASS = "min-w-0 flex-1 bg-accent";
 
 export const STATUS_PROGRESS_SEG_OFF_CLASS = "min-w-0 flex-1 bg-surface-muted";
 
-export const STATUS_PROGRESS_LABEL_CLASS = "t-label text-ink-3";
+export const STATUS_PROGRESS_LABEL_CLASS = "t-body-sm text-ink-3";
 
 export const STATUS_PROGRESS_OFF_CLASS =
-  "inline-flex w-fit shrink-0 items-center rounded-full border border-hairline px-[var(--space-3)] py-[var(--space-1)] t-body-sm text-ink-2";
+  "mr-[var(--space-4)] inline-flex w-fit shrink-0 items-center rounded-full border border-hairline px-[var(--space-3)] py-[var(--space-1)] t-body-sm text-ink-2";
 
 function titleOffLabel(status: string): string {
   return status in TITLE_STATUS_LABELS
