@@ -150,7 +150,10 @@ describe("DashboardAdminHero", () => {
     expect(html).toContain("data-dashboard-activity-clock");
     expect(html).toContain(dashboardJustInDate(at));
     expect(html).toContain(dashboardJustInTime(at));
-    expect(html).toContain("t-label text-ink-3");
+    expect(html).toMatch(
+      /data-dashboard-activity-clock="" class="block t-body-sm text-ink-3"/,
+    );
+    expect(html).not.toMatch(/data-dashboard-activity-clock=""[^>]*\bt-label\b/);
     expect(html).not.toContain("$");
   });
 
