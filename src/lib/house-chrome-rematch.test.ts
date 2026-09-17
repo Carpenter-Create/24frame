@@ -20,6 +20,7 @@ import {
   HOUSE_RAIL_ACTIVE_CLASS,
   HOUSE_RAIL_ITEM_CLASS,
   HOUSE_RAIL_PANEL_CLASS,
+  HOUSE_HEADER_SEARCH_GAP_CLASS,
   HOUSE_SEARCH_PILL_CLASS,
 } from "@/lib/house-shell";
 import { EDUCATION_SEARCH } from "@/lib/course-search";
@@ -100,12 +101,6 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(shell).toContain('workspace === "education" && !settingsPage');
     expect(shell).toContain('data-education-header-search-host="phone"');
     expect(shell).toContain('data-education-header-search-host="desktop"');
-    expect(shell.indexOf('presentation="pills"')).toBeLessThan(
-      shell.indexOf('data-education-header-search-host="desktop"'),
-    );
-    expect(shell.indexOf('data-education-header-search-host="desktop"')).toBeLessThan(
-      shell.indexOf("AccountMenuSlot"),
-    );
     expect(topBar).toContain("data-social-header-search");
     expect(topBar).toContain("HOUSE_SEARCH_PILL_CLASS");
 
@@ -116,6 +111,61 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(education).toContain('action="/social/courses"');
     expect(educationSearch).not.toContain("md:w-[420px]");
     expect(educationSearch).not.toContain("md:flex-none");
+  });
+
+  it("places Social and Education search beside the logo — not center-floating", () => {
+    expect(HOUSE_HEADER_SEARCH_GAP_CLASS).toBe("gap-[var(--space-4)]");
+    expect(topBar).toContain("data-social-header-lead");
+    expect(topBar).toContain("HOUSE_HEADER_SEARCH_GAP_CLASS");
+    expect(topBar).not.toContain("left-1/2");
+    expect(topBar).not.toContain("-translate-x-1/2");
+    expect(topBar.indexOf("data-brand-emblem")).toBeLessThan(
+      topBar.indexOf("data-social-header-search"),
+    );
+    expect(topBar.indexOf("data-social-header-search")).toBeLessThan(
+      topBar.indexOf("data-social-header-actions"),
+    );
+    expect(topBar.indexOf("data-social-header-lead")).toBeLessThan(
+      topBar.indexOf("data-social-header-search"),
+    );
+    expect(topBar.indexOf("</form>")).toBeLessThan(topBar.indexOf("data-app-header-trailing"));
+
+    const social = renderToStaticMarkup(
+      createElement(SocialTopBar, { email: "ada@example.com", name: "Ada" }),
+    );
+    expect(social).toContain("data-social-header-lead");
+    expect(social).toContain(HOUSE_HEADER_SEARCH_GAP_CLASS);
+    expect(social.indexOf("data-brand-emblem")).toBeLessThan(
+      social.indexOf("data-social-header-search"),
+    );
+    expect(social.indexOf("data-social-header-search")).toBeLessThan(
+      social.indexOf("data-app-header-trailing"),
+    );
+    expect(social).not.toContain("left-1/2");
+
+    const leading = shell.slice(
+      shell.indexOf("data-app-header-leading"),
+      shell.indexOf("data-app-header-trailing"),
+    );
+    const trailing = shell.slice(
+      shell.indexOf("data-app-header-trailing"),
+      shell.indexOf("</header>"),
+    );
+    expect(leading).toContain("data-app-header-brand-search");
+    expect(leading).toContain("HOUSE_HEADER_SEARCH_GAP_CLASS");
+    expect(leading).toContain('data-education-header-search-host="desktop"');
+    expect(leading).toContain('data-education-header-search-host="phone"');
+    expect(leading.indexOf("data-brand-emblem")).toBeLessThan(
+      leading.indexOf('data-education-header-search-host="desktop"'),
+    );
+    expect(leading.indexOf('data-education-header-search-host="desktop"')).toBeLessThan(
+      leading.indexOf('data-education-header-search-host="phone"'),
+    );
+    expect(trailing).toContain('presentation="pills"');
+    expect(trailing).toContain("AccountMenuSlot");
+    expect(trailing).not.toContain("EducationHeaderSearch");
+    expect(trailing).not.toContain("data-education-header-search-host");
+    expect(shell).not.toContain("SearchField");
   });
 
   it("removes the Social Messages icon from the top bar — side nav only", () => {

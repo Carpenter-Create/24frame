@@ -635,10 +635,14 @@ describe("AppShell rail-collapse chevron", () => {
     expect(html).toContain('data-education-header-search-host="phone"');
     expect(html).toContain('data-education-header-search-host="desktop"');
     expect(html).toContain("data-education-header-search");
-    expect(html.indexOf('data-workspace-switcher-presentation="pills"')).toBeLessThan(
+    expect(html).toContain("data-app-header-brand-search");
+    expect(html.indexOf("data-brand-emblem")).toBeLessThan(
       html.indexOf('data-education-header-search-host="desktop"'),
     );
     expect(html.indexOf('data-education-header-search-host="desktop"')).toBeLessThan(
+      html.indexOf('data-workspace-switcher-presentation="pills"'),
+    );
+    expect(html.indexOf('data-workspace-switcher-presentation="pills"')).toBeLessThan(
       html.indexOf("data-user-menu-host"),
     );
     expect(html).toContain("data-app-header");

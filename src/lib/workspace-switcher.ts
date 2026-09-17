@@ -151,8 +151,7 @@ export const APP_HEADER_TRAILING_CLUSTER_CLASS =
 
 export const APP_HEADER_EDUCATION_SEARCH_PHONE_CLASS = "min-w-0 flex-1 md:hidden";
 
-export const APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS =
-  "hidden min-w-0 flex-1 md:flex md:max-w-[420px]";
+export const APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS = "w-[420px] shrink-0";
 
 export const APP_HEADER_LEADING_CLASS =
   "mr-auto flex min-w-0 flex-1 items-center gap-[var(--space-2)]";

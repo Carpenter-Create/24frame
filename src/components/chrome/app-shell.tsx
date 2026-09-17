@@ -36,7 +36,11 @@ import {
   APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS,
   APP_HEADER_WORKSPACE_PILL_HOST_CLASS,
 } from "@/lib/workspace-switcher";
-import { HOUSE_PAGE_CANVAS_CLASS, HOUSE_RAIL_PANEL_CLASS } from "@/lib/house-shell";
+import {
+  HOUSE_HEADER_SEARCH_GAP_CLASS,
+  HOUSE_PAGE_CANVAS_CLASS,
+  HOUSE_RAIL_PANEL_CLASS,
+} from "@/lib/house-shell";
 import { PRODUCT_NAME } from "@/lib/product";
 import { isSettingsPath, SETTINGS_RAIL_PAD_CLASS } from "@/lib/settings";
 import {
@@ -259,7 +263,8 @@ export function AppShell({
           top, not a second rail chrome. Period stays on the
           Dashboard org row. No org switcher on any route.
           Aggregation has no top search. Education mounts a quiet
-          course/video search. Social keeps its live search. Search
+          course/video search immediately right of the logo, same
+          slot as Social live search — not center-floating. Search
           also mounts on the Access `/messages` gate, and on mobile
           `/titles` (528:542). Phone avatar opens 544:561. Hamburger
           stays the nav sheet. Do not invent Move chrome or a
@@ -280,14 +285,29 @@ export function AppShell({
           ) : (
             <MobileNavSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />
           )}
-          <Link
-            href={workspaceHome(workspace)}
-            aria-label={PRODUCT_NAME}
-            data-brand-emblem=""
-            className="hidden shrink-0 items-center md:inline-flex"
+          <div
+            data-app-header-brand-search=""
+            className={cn("hidden min-w-0 items-center md:flex", HOUSE_HEADER_SEARCH_GAP_CLASS)}
           >
-            <BrandEmblem />
-          </Link>
+            <Link
+              href={workspaceHome(workspace)}
+              aria-label={PRODUCT_NAME}
+              data-brand-emblem=""
+              className="inline-flex shrink-0 items-center"
+            >
+              <BrandEmblem />
+            </Link>
+            {workspace === "education" && !settingsPage ? (
+              <div
+                data-education-header-search-host="desktop"
+                className={APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS}
+              >
+                <Suspense fallback={null}>
+                  <EducationHeaderSearch />
+                </Suspense>
+              </div>
+            ) : null}
+          </div>
           <div
             data-app-header-workspace-pill=""
             className={APP_HEADER_WORKSPACE_PILL_HOST_CLASS}
@@ -315,16 +335,6 @@ export function AppShell({
           >
             <WorkspaceSwitcher current={workspace} presentation="pills" />
           </div>
-          {workspace === "education" && !settingsPage ? (
-            <div
-              data-education-header-search-host="desktop"
-              className={APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS}
-            >
-              <Suspense fallback={null}>
-                <EducationHeaderSearch />
-              </Suspense>
-            </div>
-          ) : null}
           <AccountMenuSlot
             chrome={chrome}
             email={email}
