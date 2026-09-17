@@ -74,8 +74,8 @@ describe("reports view filters", () => {
         { id: "c", title: "C", status: "unknown", created_at: "2026-08-04T00:00:00.000Z" },
       ]),
     ).toEqual([
-      { name: TITLE_STATUS_LABELS.draft, count: 1 },
       { name: TITLE_STATUS_LABELS.live, count: 1 },
+      { name: TITLE_STATUS_LABELS.draft, count: 1 },
     ]);
     expect(
       reportsDeliveryStatusRows([

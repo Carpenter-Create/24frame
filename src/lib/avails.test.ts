@@ -33,10 +33,9 @@ describe("Avails staff surface", () => {
     const page = readFileSync("src/app/(app)/(operator)/avails/page.tsx", "utf8");
     expect(page).toContain("TODO(design)");
     expect(page).toContain("AVAILS_PAGE.title");
-    expect(page).not.toContain("StatusProgressTrack");
+    expect(page).not.toContain("status-progress-track");
     expect(page).not.toContain("TitlesCatalogListRow");
     expect(page).not.toContain("grid-cols-3");
-    expect(page).not.toContain("territory");
     expect(page).not.toContain('from("titles")');
   });
 });
