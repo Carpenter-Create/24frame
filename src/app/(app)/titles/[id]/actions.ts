@@ -235,3 +235,42 @@ export async function revokeBuyerScreenerLink(input: {
   revalidatePath(`/titles/${input.titleId}`);
   return {};
 }
+
+export async function deleteTitle(titleId: string): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const user = await getAuthUser();
+  if (!user) return { error: "Not authenticated." };
+
+  const { error } = await supabase.rpc("delete_title", { p_title_id: titleId });
+  if (error) return { error: error.message };
+
+  revalidatePath("/titles");
+  revalidatePath(`/titles/${titleId}`);
+  return {};
+}
+
+export async function archiveTitle(titleId: string): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const user = await getAuthUser();
+  if (!user) return { error: "Not authenticated." };
+
+  const { error } = await supabase.rpc("archive_title", { p_title_id: titleId });
+  if (error) return { error: error.message };
+
+  revalidatePath("/titles");
+  revalidatePath(`/titles/${titleId}`);
+  return {};
+}
+
+export async function restoreTitle(titleId: string): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const user = await getAuthUser();
+  if (!user) return { error: "Not authenticated." };
+
+  const { error } = await supabase.rpc("restore_title", { p_title_id: titleId });
+  if (error) return { error: error.message };
+
+  revalidatePath("/titles");
+  revalidatePath(`/titles/${titleId}`);
+  return {};
+}

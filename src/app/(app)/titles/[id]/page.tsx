@@ -23,7 +23,9 @@ import { BuyerShareControl } from "./buyer-share-control";
 import { ScreenerWatchButton } from "./screener-watch-button";
 import { AssetDownloadButton } from "./asset-download-button";
 import { SubmitButton } from "./submit-button";
+import { TitleLifecycleControls } from "./title-lifecycle-controls";
 import { titleDisplayStatus, DELIVERY_STATUS_ROW_LABELS, TITLE_DETAIL, type TitleStatus } from "@/lib/titles";
+import { titleLifecycleFlags } from "@/lib/titles-lifecycle";
 import { TITLE_DELIVERIES_TRUNCATED } from "@/lib/deliveries-browse";
 import { DETAIL_LIST, rangeFor } from "@/lib/list-bounds";
 import { loadMyDeliveries } from "@/lib/my-lists";
@@ -178,6 +180,16 @@ export default async function TitleDetailPage({ params }: { params: Promise<{ id
   if (totalCount > 0) heroFacts.push({ label: "Live", value: `${liveCount}/${totalCount}` });
 
   const canSubmit = canOperate && title.status === "draft";
+  const needsReportingCheck =
+    ctx.isGcStaff && title.status !== "draft" && title.status !== "archived";
+  const { data: hasReportingActivity } = needsReportingCheck
+    ? await supabase.rpc("title_has_reporting_activity", { p_title_id: id })
+    : { data: false };
+  const lifecycleFlags = titleLifecycleFlags(
+    { isStaff: ctx.isGcStaff, canOperate },
+    title.status as TitleStatus,
+    hasReportingActivity === true,
+  );
 
   // Screener is watchable when its source exists: a dedicated screener asset if the title
   // is set to 'dedicated', else the master. (The stream is signed server-side, RLS-scoped.)
@@ -245,6 +257,12 @@ export default async function TitleDetailPage({ params }: { params: Promise<{ id
             </InlineNotice>
           )
         ) : null}
+        <TitleLifecycleControls
+          titleId={title.id}
+          status={title.status as TitleStatus}
+          isStaff={ctx.isGcStaff}
+          flags={lifecycleFlags}
+        />
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Side rail — compact facts */}

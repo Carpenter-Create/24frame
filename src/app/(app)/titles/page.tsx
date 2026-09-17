@@ -28,10 +28,10 @@ import {
 } from "@/components/titles/titles-catalog";
 import type { TitleStatus } from "@/lib/titles";
 
-// Client `/titles` is the catalog you operate: every title the org owns, every
-// existing title.status, on this one page. Phone stacks full-width landscape
-// art over the title; desktop keeps the landscape-thumb row. `catalog_id`
-// stays GC-only.
+// Client `/titles` is the catalog you operate: active titles by default,
+// Archived via the status filter. Soft-deleted titles are omitted.
+// Phone stacks full-width landscape art over the title; desktop keeps the
+// landscape-thumb row. `catalog_id` stays GC-only.
 
 export default async function TitlesPage({
   searchParams,
@@ -58,10 +58,21 @@ export default async function TitlesPage({
   // without an exact count(*), which is its own cost over an RLS-filtered table.
   // Keyset pagination is phase 2; this makes the limit honest in the meantime.
   const [tFrom, tTo] = probeRange(LIST_PAGE);
-  const { data: titlePage } = await supabase
+  let titlesQuery = supabase
     .from("titles")
     .select("id, title, status, created_at, catalog_id, release_date")
     .eq("org_id", activeOrg.id)
+    .is("deleted_at", null);
+  if (statusFilter === "all") {
+    titlesQuery = titlesQuery.neq("status", "archived");
+  } else if (statusFilter === "archived") {
+    titlesQuery = titlesQuery.eq("status", "archived");
+  } else if (statusFilter === "submitted") {
+    titlesQuery = titlesQuery.in("status", ["submitted", "in_delivery"]);
+  } else {
+    titlesQuery = titlesQuery.eq("status", statusFilter);
+  }
+  const { data: titlePage } = await titlesQuery
     .order("created_at", { ascending: false })
     .range(tFrom, tTo);
   const { rows: list, truncated } = splitProbe(titlePage, LIST_PAGE);

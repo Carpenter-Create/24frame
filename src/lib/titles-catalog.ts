@@ -6,11 +6,13 @@ import {
 import { TITLE_STATUS_LABELS, type TitleStatus } from "@/lib/titles";
 
 // Client `/titles` catalog copy and list helpers. Lives in lib/, not JSX.
-// One list, every org-owned title, every existing title.status. Do not invent
-// statuses or a second catalog. Landscape stills in the house shell — not the
-// poster 5-up. Phone stacks full-width 16:9 art over the title. Desktop keeps
-// the horizontal landscape-thumb row. Type matches the Dashboard register:
-// Geist, black sentence-case, quiet ink selected. Sporty Blue stays on Add Title.
+// Active catalog by default (Archived excluded). Archived is a first-class
+// status filter on the existing title.status model. Soft-deleted titles are
+// omitted. Do not invent a second catalog. Landscape stills in the house
+// shell — not the poster 5-up. Phone stacks full-width 16:9 art over the
+// title. Desktop keeps the horizontal landscape-thumb row. Type matches the
+// Dashboard register: Geist, black sentence-case, quiet ink selected.
+// Sporty Blue stays on Add Title.
 
 export const TITLES_CATALOG = {
   title: "Titles",
@@ -113,6 +115,7 @@ export const CATALOG_LIFECYCLE_STATES = [
   "live",
   "takedown_requested",
   "taken_down",
+  "archived",
 ] as const satisfies readonly TitleStatus[];
 
 export function catalogStatusMark(status: TitleStatus): string {
@@ -152,7 +155,8 @@ export type CatalogStatusFilter =
   | "in_review"
   | "live"
   | "takedown_requested"
-  | "taken_down";
+  | "taken_down"
+  | "archived";
 
 export const CATALOG_STATUS_FILTERS: { key: CatalogStatusFilter; label: string }[] = [
   { key: "all", label: TITLES_CATALOG.statusAll },
@@ -162,6 +166,7 @@ export const CATALOG_STATUS_FILTERS: { key: CatalogStatusFilter; label: string }
   { key: "live", label: TITLE_STATUS_LABELS.live },
   { key: "takedown_requested", label: TITLE_STATUS_LABELS.takedown_requested },
   { key: "taken_down", label: TITLE_STATUS_LABELS.taken_down },
+  { key: "archived", label: TITLE_STATUS_LABELS.archived },
 ];
 
 export function parseCatalogStatusFilter(v: string | undefined): CatalogStatusFilter {
@@ -176,7 +181,9 @@ export function filterCatalogByStatus<T extends { status: string }>(
   rows: T[],
   status: CatalogStatusFilter,
 ): T[] {
-  if (status === "all") return rows;
+  if (status === "all") {
+    return rows.filter((r) => r.status !== "archived");
+  }
   if (status === "submitted") {
     return rows.filter((r) => r.status === "submitted" || r.status === "in_delivery");
   }

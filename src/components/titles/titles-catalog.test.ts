@@ -173,7 +173,7 @@ describe("TitlesCatalogListRow craft", () => {
     expect(draftPill).not.toContain("bg-accent");
   });
 
-  it("places title, year, and every TITLE_STATUS_LABELS pill — no delivered, no seventh unique", () => {
+  it("places title, year, and every TITLE_STATUS_LABELS pill — no delivered, Archived is first-class", () => {
     for (const status of ALL_STATUSES) {
       const html = renderRow({
         href: `/titles/${status}`,
@@ -193,8 +193,9 @@ describe("TitlesCatalogListRow craft", () => {
       }
     }
     const labels = ALL_STATUSES.map((status) => TITLE_STATUS_LABELS[status]);
-    expect(labels).toHaveLength(7);
-    expect(new Set(labels).size).toBe(6);
+    expect(labels).toHaveLength(8);
+    expect(new Set(labels).size).toBe(7);
+    expect(TITLE_STATUS_LABELS.archived).toBe("Archived");
     expect(TITLE_STATUS_LABELS.in_delivery).toBe("Submitted");
     expect(TITLE_STATUS_LABELS.submitted).toBe("Submitted");
     expect(labels).not.toContain("Delivered");
@@ -378,6 +379,7 @@ describe("TitlesCatalogStatusFilter craft", () => {
     expect(html).toContain("Draft");
     expect(html).toContain("In review");
     expect(html).toContain("Takedown requested");
+    expect(html).toContain("Archived");
     expect(current).not.toContain("t-label");
     expect(html).not.toContain("Upcoming");
     expect(html).not.toContain("In progress");

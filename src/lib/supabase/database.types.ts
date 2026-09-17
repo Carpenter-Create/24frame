@@ -40,6 +40,8 @@ export type Database = {
           content_hash: string
           content_type: string | null
           created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
           id: string
           kind: Database["public"]["Enums"]["asset_kind"]
           org_id: string
@@ -54,6 +56,8 @@ export type Database = {
           content_hash: string
           content_type?: string | null
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
           kind: Database["public"]["Enums"]["asset_kind"]
           org_id: string
@@ -68,6 +72,8 @@ export type Database = {
           content_hash?: string
           content_type?: string | null
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
           kind?: Database["public"]["Enums"]["asset_kind"]
           org_id?: string
@@ -2641,10 +2647,13 @@ export type Database = {
       }
       titles: {
         Row: {
+          archived_from: Database["public"]["Enums"]["title_status"] | null
           catalog_id: string | null
           catalog_no: number
           created_at: string
           created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           id: string
           org_id: string
           original_release_date: string | null
@@ -2657,10 +2666,13 @@ export type Database = {
           work_id: string | null
         }
         Insert: {
+          archived_from?: Database["public"]["Enums"]["title_status"] | null
           catalog_id?: string | null
           catalog_no?: number
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
           org_id: string
           original_release_date?: string | null
@@ -2673,10 +2685,13 @@ export type Database = {
           work_id?: string | null
         }
         Update: {
+          archived_from?: Database["public"]["Enums"]["title_status"] | null
           catalog_id?: string | null
           catalog_no?: number
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
           org_id?: string
           original_release_date?: string | null
@@ -2850,6 +2865,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      archive_title: { Args: { p_title_id: string }; Returns: undefined }
       accept_terms: {
         Args: {
           p_content_hash: string
@@ -3360,9 +3376,15 @@ export type Database = {
         Args: { p_media: Json; p_author: string; p_lane: string }
         Returns: boolean
       }
+      restore_title: { Args: { p_title_id: string }; Returns: undefined }
       submit_title: {
         Args: { p_org_id: string; p_title_id: string }
         Returns: undefined
+      }
+      delete_title: { Args: { p_title_id: string }; Returns: undefined }
+      title_has_reporting_activity: {
+        Args: { p_title_id: string }
+        Returns: boolean
       }
       suggest_same_work: {
         Args: { p_title_id: string }
@@ -3523,6 +3545,7 @@ export type Database = {
         | "live"
         | "takedown_requested"
         | "taken_down"
+        | "archived"
       transcode_status:
         | "submitted"
         | "running"
@@ -3800,6 +3823,7 @@ export const Constants = {
         "live",
         "takedown_requested",
         "taken_down",
+        "archived",
       ],
       transcode_status: [
         "submitted",

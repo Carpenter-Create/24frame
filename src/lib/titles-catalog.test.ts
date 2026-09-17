@@ -38,14 +38,16 @@ const ALL_STATES: TitleStatus[] = [
   "live",
   "takedown_requested",
   "taken_down",
+  "archived",
 ];
+const ACTIVE_STATES = ALL_STATES.filter((status) => status !== "archived");
 
 describe("catalog lifecycle", () => {
   it("keeps every existing title.status on one catalog list", () => {
     expect([...CATALOG_LIFECYCLE_STATES]).toEqual(ALL_STATES);
     const list = ALL_STATES.map((status) => ({ id: status, status }));
     expect(list.map((row) => row.status)).toEqual(ALL_STATES);
-    expect(list).toHaveLength(7);
+    expect(list).toHaveLength(8);
   });
 
   it("surfaces founder-decided labels for each existing status", () => {
@@ -59,6 +61,7 @@ describe("catalog lifecycle", () => {
     expect(catalogStatusMark("live")).toBe("Live");
     expect(catalogStatusMark("takedown_requested")).toBe("Takedown requested");
     expect(catalogStatusMark("taken_down")).toBe("Taken down");
+    expect(catalogStatusMark("archived")).toBe("Archived");
     expect(ALL_STATES.map(catalogStatusMark)).not.toContain("Delivered");
     const unique = [...new Set(ALL_STATES.map(catalogStatusMark))];
     expect(unique).toEqual([
@@ -68,8 +71,9 @@ describe("catalog lifecycle", () => {
       "Live",
       "Takedown requested",
       "Taken down",
+      "Archived",
     ]);
-    expect(unique).toHaveLength(6);
+    expect(unique).toHaveLength(7);
   });
 
   it("does not invent a status or a second catalog label", () => {
@@ -161,6 +165,7 @@ describe("catalog status filter", () => {
       "live",
       "takedown_requested",
       "taken_down",
+      "archived",
     ]);
     expect(CATALOG_STATUS_FILTERS.map((f) => f.label)).not.toContain("Upcoming");
     expect(CATALOG_STATUS_FILTERS.map((f) => f.label)).not.toContain("In progress");
@@ -176,7 +181,11 @@ describe("catalog status filter", () => {
       "in_delivery",
     ]);
     expect(filterCatalogByStatus(rows, "draft").map((r) => r.status)).toEqual(["draft"]);
+    expect(filterCatalogByStatus(rows, "all")).toEqual(
+      ACTIVE_STATES.map((status) => ({ id: status, status })),
+    );
     expect(filterCatalogByStatus(rows, "all")).toHaveLength(7);
+    expect(filterCatalogByStatus(rows, "archived").map((r) => r.status)).toEqual(["archived"]);
   });
 
   it("preserves search when building a status href", () => {

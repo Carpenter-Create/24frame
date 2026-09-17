@@ -27,6 +27,7 @@ const OTHER_PAGES = [
 
 const TITLES_COMMENT_PATHS = [
   "src/lib/titles-catalog.ts",
+  "src/lib/titles-lifecycle.ts",
   "src/components/titles/titles-catalog.tsx",
   "src/app/(app)/titles/page.tsx",
   "src/app/(app)/titles/[id]/page.tsx",

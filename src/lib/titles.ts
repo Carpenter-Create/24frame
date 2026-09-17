@@ -12,6 +12,7 @@ export const TITLE_STATUS_LABELS: Record<TitleStatus, string> = {
   live: "Live",
   takedown_requested: "Takedown requested",
   taken_down: "Taken down",
+  archived: "Archived",
 };
 
 // The status a client sees. Once a title is live on ≥1 platform, show the derived
