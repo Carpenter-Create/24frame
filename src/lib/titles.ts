@@ -53,4 +53,13 @@ export const TITLE_DETAIL = {
   relatedLabel: "Related",
   deliveriesLink: "Deliveries",
   healthLink: "Catalog Health",
+  playTrailer: "Play trailer",
+  sectionSynopsis: "Synopsis",
+  sectionMetadata: "Metadata",
+  sectionAssets: "Assets",
+  sectionCredits: "Credits",
+  sectionRights: "Rights & territories",
+  sectionDeliveries: "Deliveries",
+  editMetadata: "Edit",
+  viewMetadata: "View",
 } as const;

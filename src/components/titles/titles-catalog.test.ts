@@ -204,17 +204,18 @@ describe("TitlesCatalogListRow craft", () => {
 });
 
 describe("TitlesCatalogFrame craft", () => {
-  it("uses house section air of 24 under the operate bar", () => {
+  it("uses tight 8 air from H1 through the list", () => {
     const html = renderToStaticMarkup(createElement(TitlesCatalogFrame));
-    expect(html).toContain("gap-[var(--space-6)]");
-    expect(html).toContain("md:gap-[var(--space-8)]");
+    expect(html).toContain("gap-[var(--space-2)]");
+    expect(html).not.toContain("gap-[var(--space-6)]");
+    expect(html).not.toContain("md:gap-[var(--space-8)]");
     expect(html).not.toContain("gap-[var(--space-12)]");
     expect(html).not.toContain("gap-[var(--space-10)]");
   });
 
-  it("keeps empty catalog on the same 24 section air", () => {
+  it("keeps empty catalog on the same tight air", () => {
     const html = renderToStaticMarkup(createElement(TitlesCatalogFrame, { empty: true }));
-    expect(html).toContain("gap-[var(--space-6)]");
+    expect(html).toContain("gap-[var(--space-2)]");
     expect(html).not.toContain("md:gap-[var(--space-8)]");
   });
 });
@@ -237,28 +238,20 @@ describe("TitlesCatalogHeader type lock", () => {
     expect(html).not.toContain("t-label");
   });
 
-  it("puts count under the title", () => {
-    const html = renderToStaticMarkup(
-      createElement(TitlesCatalogHeader, { count: "7 in catalog" }),
-    );
+  it("omits a count subtitle under Titles", () => {
+    const html = renderToStaticMarkup(createElement(TitlesCatalogHeader));
 
-    expect(html).toContain("data-titles-catalog-count");
-    expect(html).toContain("7 in catalog");
-    expect(html).not.toContain("10 in catalog");
+    expect(html).not.toContain("data-titles-catalog-count");
+    expect(html).not.toContain("in catalog");
     expect(html).not.toContain("data-titles-catalog-operate");
     expect(html).not.toContain("data-titles-catalog-filters");
     expect(html).not.toContain("data-titles-catalog-header-cluster");
     expect(html).not.toContain("data-titles-catalog-header-operate");
-    const titleAt = html.indexOf("<h1");
-    const countAt = html.indexOf("data-titles-catalog-count");
-    expect(titleAt).toBeGreaterThan(-1);
-    expect(countAt).toBeGreaterThan(titleAt);
   });
 
   it("trails status house select on the title row when q/status are passed", () => {
     const html = renderToStaticMarkup(
       createElement(TitlesCatalogHeader, {
-        count: "7 in catalog",
         q: "",
         status: "all",
       }),
@@ -271,11 +264,11 @@ describe("TitlesCatalogHeader type lock", () => {
     expect(html).toContain("data-house-page-select");
     expect(html).toContain(">All<");
     const titleAt = html.indexOf("<h1");
-    const countAt = html.indexOf("data-titles-catalog-count");
     const filtersAt = html.indexOf("data-titles-catalog-filters");
     expect(titleAt).toBeGreaterThan(-1);
-    expect(countAt).toBeGreaterThan(titleAt);
     expect(filtersAt).toBeGreaterThan(titleAt);
+    expect(html).not.toContain("data-titles-catalog-count");
+    expect(html).not.toContain("in catalog");
   });
 
   it("locks the page title to --text-title / --text-lg and the row title to --text-base", () => {
@@ -310,12 +303,13 @@ describe("TitlesCatalogList landscape row lock", () => {
           TitlesCatalogList,
           null,
           createElement(TitlesCatalogListRow, {
-            href: "/titles/1",
+            href: "/titles/24F-0001234",
             title: "Craft film",
             stillUrl: null,
             status: "live",
             statusLabel: TITLE_STATUS_LABELS.live,
             year: "2019",
+            publicId: "24F-0001234",
           }),
         ),
       ),
@@ -349,6 +343,8 @@ describe("TitlesCatalogList landscape row lock", () => {
     expect(name).toContain("md:truncate");
     expect(year).toContain("t-body-sm text-ink-3");
     expect(html).toContain("2019");
+    expect(html).toContain("data-titles-catalog-public-id");
+    expect(html).toContain("24F-0001234");
     expect(pill).toContain("bg-ink");
     expect(pill).not.toContain("bg-accent");
     expect(html).not.toContain("bg-band");
@@ -407,7 +403,6 @@ describe("Titles catalog phone CTA cluster", () => {
   it("trails phone + on the header with All, and keeps toolbar search-only on phone", () => {
     const html = renderToStaticMarkup(
       createElement(TitlesCatalogHeader, {
-        count: "7 in catalog",
         q: "",
         status: "all",
         action: createElement("button", {

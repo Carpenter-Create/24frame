@@ -32,8 +32,8 @@ function openingTagWith(html: string, marker: string): string {
   return html.slice(start, end + 1);
 }
 
-describe("TitleHero landscape rematch", () => {
-  it("opens with a 16:9 landscape frame on the house light canvas", () => {
+describe("TitleHero album-grammar rematch", () => {
+  it("puts leading landscape art beside title, status, and quiet meta", () => {
     const html = renderToStaticMarkup(
       createElement(TitleHero, {
         title: "Craft film",
@@ -42,15 +42,22 @@ describe("TitleHero landscape rematch", () => {
         status: "live",
         statusLabel: "Live",
         bannerUrl: "https://cdn/wide.jpg",
+        meta: ["2019", "Drama", "24F-0001234"],
       }),
     );
+    const band = openingTagWith(html, 'data-title-hero-band=""');
     const frame = openingTagWith(html, 'data-title-hero-frame=""');
 
     expect(html).toContain("data-title-hero");
+    expect(band).toContain("flex flex-col");
+    expect(band).toContain("md:flex-row");
     expect(frame).toContain("aspect-[16/9]");
     expect(frame).toContain("rounded-[var(--radius-lg)]");
+    expect(frame).toContain('data-title-hero-art="landscape"');
     expect(html).toContain("https://cdn/wide.jpg");
     expect(html).toContain("Craft film");
+    expect(html).toContain("t-title");
+    expect(html).toContain("2019 · Drama · 24F-0001234");
     expect(html).toContain("Titles");
     expect(html).not.toContain("bg-band");
     expect(html).not.toContain("text-band-ink");
@@ -58,6 +65,23 @@ describe("TitleHero landscape rematch", () => {
     expect(html).not.toContain("from-black");
     expect(html).not.toContain("bg-gradient");
     expect(html).not.toContain("shadow-lg");
+  });
+
+  it("uses a square crop when only a poster exists", () => {
+    const html = renderToStaticMarkup(
+      createElement(TitleHero, {
+        title: "Poster film",
+        backHref: "/titles",
+        status: "draft",
+        statusLabel: "Draft",
+        bannerUrl: null,
+        posterUrl: "https://cdn/poster.jpg",
+      }),
+    );
+    const frame = openingTagWith(html, 'data-title-hero-frame=""');
+    expect(frame).toContain("aspect-square");
+    expect(frame).toContain('data-title-hero-art="square"');
+    expect(html).toContain("https://cdn/poster.jpg");
   });
 
   it("keeps missing artwork as a muted landscape placeholder", () => {
@@ -77,7 +101,7 @@ describe("TitleHero landscape rematch", () => {
     expect(html).not.toContain("t-data select-none text-3xl");
   });
 
-  it("puts ink title and an ink status pill below the hero", () => {
+  it("puts the ink status pill with the title and actions under the meta", () => {
     const html = renderToStaticMarkup(
       createElement(TitleHero, {
         title: "Craft film",
@@ -85,15 +109,17 @@ describe("TitleHero landscape rematch", () => {
         status: "live",
         statusLabel: "Live · 1 of 2 platforms",
         bannerUrl: null,
-        facts: [{ label: "Release", value: "May 1, 2019" }],
+        meta: ["May 1, 2019"],
+        action: createElement("button", { "data-title-play-trailer": "" }, "Play trailer"),
       }),
     );
     const pill = openingTagWith(html, 'data-title-hero-status=""');
 
-    expect(html).toContain("t-section");
+    expect(html).toContain("t-title");
     expect(html).toContain("Craft film");
-    expect(html).toContain("Release");
     expect(html).toContain("May 1, 2019");
+    expect(html).toContain("data-title-hero-actions");
+    expect(html).toContain("Play trailer");
     expect(pill).toContain("bg-ink");
     expect(pill).toContain("text-surface");
     expect(pill).not.toContain("bg-accent");

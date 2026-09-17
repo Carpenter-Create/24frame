@@ -196,7 +196,7 @@ describe("catalog status filter", () => {
 });
 
 describe("catalog count chrome", () => {
-  it("names the real count and marks a bounded read as a floor", () => {
+  it("keeps the helper honest and unused as Titles subtitle", () => {
     expect(catalogCountValue(7, false)).toBe("7");
     expect(catalogCountValue(200, true)).toBe("200+");
     expect(catalogCountLabel(7, false)).toBe("7 in catalog");

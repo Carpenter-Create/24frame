@@ -11,13 +11,13 @@ import { titleArtworkUrls } from "@/lib/artwork";
 import { filterTitles, type BrowseTitle } from "@/lib/titles-browse";
 import {
   TITLES_CATALOG,
-  catalogCountLabel,
   catalogReleaseYear,
   catalogStatusMark,
   catalogStillSrc,
   filterCatalogByStatus,
   parseCatalogStatusFilter,
 } from "@/lib/titles-catalog";
+import { publicCatalogId, titleClientPath } from "@/lib/title-public-id";
 import {
   TitlesCatalogEmpty,
   TitlesCatalogFrame,
@@ -31,7 +31,7 @@ import type { TitleStatus } from "@/lib/titles";
 // Client `/titles` is the catalog you operate: active titles by default,
 // Archived via the status filter. Soft-deleted titles are omitted.
 // Phone stacks full-width landscape art over the title; desktop keeps the
-// landscape-thumb row. `catalog_id` stays GC-only.
+// landscape-thumb row. Client chrome uses 24F- public ids; ops keeps GC-.
 
 export default async function TitlesPage({
   searchParams,
@@ -93,15 +93,20 @@ export default async function TitlesPage({
 
   const filtered = filterCatalogByStatus(filterTitles(all, q), statusFilter);
 
-  const stills = filtered.map((r) => ({
-    key: r.id,
-    href: `/titles/${r.id}`,
-    title: r.title,
-    stillUrl: catalogStillSrc(r.bannerUrl),
-    status: r.status,
-    statusLabel: catalogStatusMark(r.status as TitleStatus),
-    year: catalogReleaseYear(r.release_date),
-  }));
+  const catalogById = new Map(list.map((t) => [t.id, t.catalog_id]));
+  const stills = filtered.map((r) => {
+    const catalogId = catalogById.get(r.id) ?? null;
+    return {
+      key: r.id,
+      href: titleClientPath(catalogId),
+      title: r.title,
+      stillUrl: catalogStillSrc(r.bannerUrl),
+      status: r.status,
+      statusLabel: catalogStatusMark(r.status as TitleStatus),
+      year: catalogReleaseYear(r.release_date),
+      publicId: publicCatalogId(catalogId),
+    };
+  });
 
   const emptyCopy =
     list.length === 0
@@ -115,7 +120,6 @@ export default async function TitlesPage({
   return (
     <TitlesCatalogFrame empty={list.length === 0}>
       <TitlesCatalogHeader
-        count={catalogCountLabel(list.length, truncated)}
         q={list.length > 0 ? q : undefined}
         status={list.length > 0 ? statusFilter : undefined}
         action={
@@ -165,6 +169,7 @@ export default async function TitlesPage({
               status={r.status}
               statusLabel={r.statusLabel}
               year={r.year}
+              publicId={r.publicId}
             />
           ))}
         </TitlesCatalogList>

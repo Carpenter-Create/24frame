@@ -27,6 +27,7 @@ import {
 // Type is the Dashboard register. Accent is Sporty Blue Add Title:
 // phone header + (house 44), desktop labeled pill. Not a list FAB.
 // Status filter is HousePageSelect trailing on the header (Dashboard All time SoT).
+// Vertical air above the rows is tight: H1 → toolbar → list at 8.
 
 export function TitlesCatalogFrame({
   className,
@@ -36,35 +37,33 @@ export function TitlesCatalogFrame({
   return (
     <div
       className={cn(
-        "titles-catalog mx-auto flex w-full flex-col gap-[var(--space-6)] px-[var(--space-4)] py-[var(--space-12)] md:px-[var(--space-10)] md:py-0 md:pt-[var(--space-8)]",
-        empty ? undefined : "md:gap-[var(--space-8)]",
+        "titles-catalog mx-auto flex w-full flex-col gap-[var(--space-2)] px-[var(--space-4)] py-[var(--space-12)] md:px-[var(--space-10)] md:py-0 md:pt-[var(--space-8)]",
         className,
       )}
       style={{ maxWidth: "var(--content-max)" }}
       data-titles-catalog=""
+      {...(empty ? { "data-titles-catalog-empty": "" } : {})}
       {...props}
     />
   );
 }
 
 export function TitlesCatalogHeader({
-  count,
   q,
   status,
   action,
 }: {
-  count?: string;
   q?: string;
   status?: CatalogStatusFilter;
   action?: React.ReactNode;
 }) {
   // Dashboard All time SoT: title cluster left, house select trailing on the
-  // same identity row (desktop + phone). Count stays under the title.
+  // same identity row (desktop + phone). No count subtitle under Titles.
   // Phone trailing cluster is All + plus. Desktop header stays title · All.
   const showStatus = typeof q === "string" && status != null;
   return (
     <header
-      className="titles-catalog-header flex flex-row items-center justify-between gap-[var(--space-2)] md:items-start md:gap-[var(--space-6)]"
+      className="titles-catalog-header flex flex-row items-center justify-between gap-[var(--space-2)] md:items-center md:gap-[var(--space-6)]"
       data-titles-catalog-header-row=""
     >
       <div className="min-w-0">
@@ -76,14 +75,6 @@ export function TitlesCatalogHeader({
             {TITLES_CATALOG.title}
           </span>
         </h1>
-        {count ? (
-          <p
-            className="mt-[var(--space-1)] t-body-sm text-ink-3"
-            data-titles-catalog-count=""
-          >
-            {count}
-          </p>
-        ) : null}
       </div>
       {showStatus || action ? (
         <div
@@ -239,6 +230,7 @@ export function TitlesCatalogListRow({
   status,
   statusLabel,
   year,
+  publicId,
 }: {
   href: string;
   title: string;
@@ -246,6 +238,7 @@ export function TitlesCatalogListRow({
   status: string;
   statusLabel: string;
   year?: string | null;
+  publicId?: string | null;
 }) {
   return (
     <Link
@@ -265,13 +258,22 @@ export function TitlesCatalogListRow({
           >
             {title}
           </span>
-          {year ? (
-            <span
-              className="t-body-sm text-ink-3"
-              data-titles-catalog-year=""
-              data-titles-catalog-list-year=""
-            >
-              {year}
+          {year || publicId ? (
+            <span className="t-body-sm text-ink-3">
+              {year ? (
+                <span data-titles-catalog-year="" data-titles-catalog-list-year="">
+                  {year}
+                </span>
+              ) : null}
+              {year && publicId ? " · " : null}
+              {publicId ? (
+                <span
+                  className="tabular-nums"
+                  data-titles-catalog-public-id=""
+                >
+                  {publicId}
+                </span>
+              ) : null}
             </span>
           ) : null}
         </span>

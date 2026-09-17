@@ -34,7 +34,7 @@ export function HeaderSkeleton({ withActions = false }: { withActions?: boolean 
 export function CatalogSkeleton() {
   return (
     <div
-      className="mx-auto flex w-full flex-col gap-[var(--space-6)] px-[var(--space-4)] md:px-[var(--space-10)] md:pt-[var(--space-8)]"
+      className="mx-auto flex w-full flex-col gap-[var(--space-2)] px-[var(--space-4)] md:px-[var(--space-10)] md:pt-[var(--space-8)]"
       style={{ maxWidth: "var(--content-max)" }}
       data-titles-catalog-skeleton=""
     >
@@ -99,20 +99,21 @@ export function CardListSkeleton({ cards = 4 }: { cards?: number }) {
   );
 }
 
-/** Title detail: the landscape hero, then the two-column body. */
+/** Title detail: leading art + meta, then stacked sections. */
 export function TitleDetailSkeleton() {
   return (
     <>
-      <Skeleton className="aspect-[16/9] w-full rounded-[var(--radius-lg)]" />
-      <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-[1fr_360px]">
-        <div className="flex flex-col gap-3">
-          <Skeleton className="h-48 w-full rounded-[var(--radius-lg)]" />
-          <Skeleton className="h-32 w-full rounded-[var(--radius-lg)]" />
+      <div className="flex flex-col gap-[var(--space-4)] md:flex-row md:items-start">
+        <Skeleton className="aspect-[16/9] w-full rounded-[var(--radius-lg)] md:w-80" />
+        <div className="flex min-w-0 flex-1 flex-col gap-[var(--space-3)]">
+          <Skeleton className="h-8 w-56" />
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="h-9 w-32 rounded-full" />
         </div>
-        <div className="flex flex-col gap-3">
-          <Skeleton className="h-40 w-full rounded-[var(--radius-lg)]" />
-          <Skeleton className="h-28 w-full rounded-[var(--radius-lg)]" />
-        </div>
+      </div>
+      <div className="mt-[var(--space-6)] flex flex-col gap-[var(--space-6)] border-t border-hairline pt-[var(--space-6)]">
+        <Skeleton className="h-32 w-full rounded-[var(--radius-lg)]" />
+        <Skeleton className="h-40 w-full rounded-[var(--radius-lg)]" />
       </div>
     </>
   );
