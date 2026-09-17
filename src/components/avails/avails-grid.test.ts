@@ -27,7 +27,7 @@ vi.mock("next/link", () => ({
   }) => createElement("a", { href, ...props }, children),
 }));
 
-import { AvailsEmpty, AvailsGrid, AvailsTile } from "./avails-grid";
+import { AvailsGrid, AvailsTile } from "./avails-grid";
 
 function openingTagWith(html: string, marker: string): string {
   const at = html.indexOf(marker);
