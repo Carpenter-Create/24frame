@@ -136,4 +136,42 @@ describe("dashboard register chrome", () => {
     expect(platforms).not.toContain("contributors");
     expect(`${titles}${territories}${platforms}`).not.toContain("Exports");
   });
+
+  it("keeps quiet empty Top modules instead of omitting them", () => {
+    const titles = renderToStaticMarkup(
+      createElement(DashboardTopTitles, { items: [], quietEmpty: true }),
+    );
+    const platforms = renderToStaticMarkup(
+      createElement(DashboardRankedBars, {
+        label: DASHBOARD_HOME.platforms,
+        empty: DASHBOARD_HOME.platformsEmpty,
+        rows: [],
+        testId: "platforms",
+        viewAllHref: "/deliveries",
+      }),
+    );
+    const territories = renderToStaticMarkup(
+      createElement(DashboardRankedBars, {
+        label: DASHBOARD_HOME.territories,
+        empty: DASHBOARD_HOME.territoriesEmpty,
+        rows: [],
+        testId: "territories",
+        viewAllHref: "/deliveries",
+        territory: true,
+      }),
+    );
+    expect(titles).toContain('data-dashboard-module="top-titles"');
+    expect(titles).toContain("data-dashboard-ranked-empty");
+    expect(titles).toContain(DASHBOARD_HOME.topTitlesEmpty);
+    expect(titles).toContain("data-dashboard-view-alts");
+    expect(titles).toContain("data-dashboard-view-all");
+    expect(platforms).toContain('data-dashboard-ranked="platforms"');
+    expect(platforms).toContain(DASHBOARD_HOME.platformsEmpty);
+    expect(platforms).toContain('data-dashboard-view-alt="list"');
+    expect(platforms).toContain('data-dashboard-view-alt="bars"');
+    expect(territories).toContain("data-dashboard-territory");
+    expect(territories).toContain(DASHBOARD_HOME.territoriesEmpty);
+    expect(territories).toContain('data-dashboard-view-alt="map"');
+    expect(territories).not.toContain("data-dashboard-territory-map");
+  });
 });

@@ -51,8 +51,14 @@ export const DASHBOARD_MOBILE_BREAKPOINT_CLASS = "max-md";
 export const DASHBOARD_ADMIN_CHROME_CLASS =
   "flex flex-row items-center justify-between gap-[var(--space-2)] md:flex-row md:items-start md:justify-between md:gap-[var(--space-6)]";
 
+// Desktop: Net revenue dominant left (3) · Recent account activity right (2).
+// Phone (`< md`): stack Revenue then Activity. RL Overview order, Coinbase quiet.
 export const DASHBOARD_ADMIN_OVERVIEW_CLASS =
-  "flex flex-col gap-[var(--space-6)]";
+  "grid grid-cols-1 gap-[var(--space-6)] max-md:flex max-md:flex-col lg:grid-cols-5";
+
+export const DASHBOARD_ADMIN_HERO_REVENUE_CLASS = "lg:col-span-3";
+
+export const DASHBOARD_ADMIN_HERO_ACTIVITY_CLASS = "lg:col-span-2";
 
 export const DASHBOARD_ADMIN_PAIR_CLASS =
   "grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-2";

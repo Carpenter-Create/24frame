@@ -118,8 +118,12 @@ describe("Aggregation Dashboard Coinbase register lock", () => {
     expect(DASHBOARD_VIEW_ALL_CLASS).toContain("text-accent");
     expect(craft).not.toContain("amber");
     expect(craft).not.toContain("gold");
-    expect(html).not.toContain('data-dashboard-ranked="platforms"');
-    expect(html).not.toContain("data-dashboard-territory");
+    expect(html).toContain('data-dashboard-ranked="platforms"');
+    expect(html).toContain("data-dashboard-territory");
+    expect(html).toContain('data-dashboard-ranked="territories"');
+    expect(html).toContain(DASHBOARD_HOME.platformsEmpty);
+    expect(html).toContain(DASHBOARD_HOME.territoriesEmpty);
+    expect(html).toContain(DASHBOARD_HOME.topTitlesEmpty);
     expect(html).toContain("data-dashboard-reports-cta");
     expect(html).toContain(DASHBOARD_HOME.reportsCta);
     expect(html).not.toContain("data-dashboard-just-in");
@@ -139,7 +143,12 @@ describe("Aggregation Dashboard Coinbase register lock", () => {
     expect(html).not.toContain("shadow-lg");
     expect(html).not.toContain("shadow-md");
     expect(html).toContain("shadow-none");
-    expect(html).not.toContain("lg:grid-cols-5");
+    expect(html).toContain("lg:grid-cols-5");
+    expect(html).toContain("lg:col-span-3");
+    expect(html).toContain("lg:col-span-2");
+    expect(html.indexOf("data-dashboard-overview-revenue")).toBeLessThan(
+      html.indexOf("data-dashboard-overview-activity"),
+    );
     expect(DASHBOARD_RELATED_GAP_CLASS).toBe("gap-[var(--space-2)]");
     expect(DASHBOARD_CARD_PAD_HERO).toBe("px-[var(--space-4)] py-[var(--space-4)]");
     expect(DASHBOARD_SECTION_AIR_CLASS).toBe("gap-[var(--space-6)]");

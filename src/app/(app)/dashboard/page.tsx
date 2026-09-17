@@ -80,7 +80,9 @@ import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 // inert for data only. Catalog-velocity strip is gone — Adam lock
 // 2026-09-16. Company-admin also drops Recent, Do next, Deliveries needing
 // action, Catalog Health count, What changed, and Pending submissions.
-// Quiet Reports text CTA stays. Standard seats keep the catalog hero.
+// Top titles / Top platforms / Top territories always render — quiet empty
+// like RL, never omitted. Quiet Reports text CTA stays. Standard seats
+// keep the catalog hero.
 // Export stays on /reports. Fixture money is labeled + env-gated and never
 // enters export/ledger.
 
@@ -233,8 +235,6 @@ export default async function DashboardPage({
     useFixture && liveTerritories.length === 0 ? DASHBOARD_FIXTURE_TERRITORIES : liveTerritories;
   const adminTopTitles =
     useFixture && liveTopTitles.length === 0 ? dashboardFixtureTopTitles(now) : liveTopTitles;
-  const showAdminPlatforms = adminPlatforms.length > 0;
-  const showAdminTerritories = adminTerritories.length > 0;
 
   return (
     <div className="dashboard-home flex flex-col gap-[var(--space-6)]" data-dashboard-home="">
@@ -279,39 +279,27 @@ export default async function DashboardPage({
           />
         ) : null}
         {isAdmin ? (
-          showAdminPlatforms || showAdminTerritories ? (
-            <div
-              className={
-                showAdminPlatforms && showAdminTerritories
-                  ? DASHBOARD_ADMIN_PAIR_CLASS
-                  : DASHBOARD_ADMIN_STACK_CLASS
-              }
-            >
-              {showAdminPlatforms ? (
-                <DashboardRankedBars
-                  label={DASHBOARD_HOME.platforms}
-                  empty={DASHBOARD_HOME.platformsEmpty}
-                  rows={adminPlatforms}
-                  testId="platforms"
-                  viewAllHref="/deliveries"
-                  periodLabel={period.label}
-                  updated={adminUpdated}
-                />
-              ) : null}
-              {showAdminTerritories ? (
-                <DashboardRankedBars
-                  label={DASHBOARD_HOME.territories}
-                  empty={DASHBOARD_HOME.territoriesEmpty}
-                  rows={adminTerritories}
-                  testId="territories"
-                  viewAllHref="/deliveries"
-                  territory
-                  periodLabel={period.label}
-                  updated={adminUpdated}
-                />
-              ) : null}
-            </div>
-          ) : null
+          <div className={DASHBOARD_ADMIN_PAIR_CLASS}>
+            <DashboardRankedBars
+              label={DASHBOARD_HOME.platforms}
+              empty={DASHBOARD_HOME.platformsEmpty}
+              rows={adminPlatforms}
+              testId="platforms"
+              viewAllHref="/deliveries"
+              periodLabel={period.label}
+              updated={adminUpdated}
+            />
+            <DashboardRankedBars
+              label={DASHBOARD_HOME.territories}
+              empty={DASHBOARD_HOME.territoriesEmpty}
+              rows={adminTerritories}
+              testId="territories"
+              viewAllHref="/deliveries"
+              territory
+              periodLabel={period.label}
+              updated={adminUpdated}
+            />
+          </div>
         ) : (
           <div className={DASHBOARD_ADMIN_PAIR_CLASS}>
             <DashboardRankedBars
