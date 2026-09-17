@@ -13,6 +13,8 @@ import {
   DASHBOARD_VIEW_ALL_CLASS,
   DASHBOARD_VIEW_ALT_BUTTON_ON_CLASS,
   DASHBOARD_VIEW_ALT_CLUSTER_CLASS,
+  DASHBOARD_TOP_PILL_BUTTON_ON_CLASS,
+  DASHBOARD_TOP_PILL_CLUSTER_CLASS,
 } from "@/lib/dashboard-craft";
 import { DASHBOARD_HOME } from "@/lib/dashboard-home";
 import { createClient } from "@/lib/supabase/server";
@@ -106,24 +108,33 @@ describe("Aggregation Dashboard Coinbase register lock", () => {
     expect(html).not.toContain("data-dashboard-period-kicker");
     expect(html).toContain('data-dashboard-module="recent-activity"');
     expect(html).toContain(DASHBOARD_ADMIN.activity);
+    expect(html).toContain("data-dashboard-top-performing");
+    expect(html).toContain(DASHBOARD_HOME.topPerforming);
+    expect(html).toContain(DASHBOARD_HOME.pillTitles);
+    expect(html).toContain(DASHBOARD_HOME.pillPlatforms);
+    expect(html).toContain(DASHBOARD_HOME.pillTerritories);
+    expect(html).toContain('data-dashboard-top-pill="titles"');
     expect(html).toContain('data-dashboard-module="top-titles"');
-    expect(html).toContain(DASHBOARD_HOME.topTitles);
     expect(html).toContain("data-dashboard-view-alts");
     expect(html).toContain("data-dashboard-view-all-arrow");
     expect(html).toContain(DASHBOARD_VIEW_ALL_CLASS);
     expect(html).toContain(DASHBOARD_VIEW_ALT_CLUSTER_CLASS);
+    expect(html).toContain(DASHBOARD_TOP_PILL_CLUSTER_CLASS);
     expect(DASHBOARD_VIEW_ALT_BUTTON_ON_CLASS).toBe("text-accent");
     expect(DASHBOARD_VIEW_ALT_BUTTON_ON_CLASS).not.toContain("bg-");
+    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).toBe("text-accent");
+    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).not.toContain("bg-");
     expect(DASHBOARD_VIEW_ALT_CLUSTER_CLASS).toContain("border-hairline");
+    expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).toContain("border-hairline");
     expect(DASHBOARD_VIEW_ALL_CLASS).toContain("text-accent");
     expect(craft).not.toContain("amber");
     expect(craft).not.toContain("gold");
+    expect(html).not.toContain("bg-foreground");
+    expect(html).not.toContain("text-background");
     expect(html).toContain('data-dashboard-ranked="platforms"');
     expect(html).toContain("data-dashboard-territory");
     expect(html).toContain('data-dashboard-ranked="territories"');
-    expect(html).toContain("data-dashboard-territory-map");
-    expect(html).toContain(DASHBOARD_HOME.platformsEmpty);
-    expect(html).toContain(DASHBOARD_HOME.territoriesEmpty);
+    expect(html).not.toContain("data-dashboard-territory-map");
     expect(html).toContain(DASHBOARD_HOME.topTitlesEmpty);
     expect(html).toContain("data-dashboard-reports-cta");
     expect(html).toContain(DASHBOARD_HOME.reportsCta);
@@ -136,9 +147,10 @@ describe("Aggregation Dashboard Coinbase register lock", () => {
     expect(html).not.toContain("Added this month");
     expect(html).not.toContain("In pipeline");
     expect(html).not.toContain("Top works");
+    expect(html).not.toContain("Top titles");
+    expect(html).not.toContain("Top platforms");
     expect(html).not.toContain("Top territories");
     expect(html).toContain("Territories");
-    expect(html).toContain("data-dashboard-territory-swatch");
     expect(DASHBOARD_HOME.territories).toBe("Territories");
     expect(html).not.toContain("HeadlineStats");
     expect(html).not.toContain("contributors");
@@ -158,7 +170,7 @@ describe("Aggregation Dashboard Coinbase register lock", () => {
     expect(DASHBOARD_CARD_PAD_HERO).toBe("px-[var(--space-4)] py-[var(--space-4)]");
     expect(DASHBOARD_SECTION_AIR_CLASS).toBe("gap-[var(--space-6)]");
     expect(DASHBOARD_ADMIN_STACK_CLASS).toBe("flex flex-col gap-[var(--space-6)]");
-    expect(page).toContain("DashboardTopTitles");
+    expect(page).toContain("DashboardTopPerforming");
     expect(page).not.toMatch(/isAdmin \? \(\s*<div className=\{DASHBOARD_ADMIN_PAIR_CLASS\}/);
     expect(html).not.toContain("lg:grid-cols-2");
     expect(hero).toContain("DASHBOARD_ROW_LIST_CLASS");

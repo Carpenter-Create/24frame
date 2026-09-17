@@ -14,6 +14,10 @@ export const DASHBOARD_REGISTER_VIEWS = ["map", "list", "bars"] as const;
 
 export type DashboardRegisterView = (typeof DASHBOARD_REGISTER_VIEWS)[number];
 
+export const DASHBOARD_TOP_PILLS = ["titles", "platforms", "territories"] as const;
+
+export type DashboardTopPill = (typeof DASHBOARD_TOP_PILLS)[number];
+
 /** RL TerritoryMap LIST_DEFAULT_LIMIT. */
 export const DASHBOARD_LIST_DEFAULT_LIMIT = 10;
 

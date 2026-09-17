@@ -147,26 +147,30 @@ function expectCompanyAdminStructuralDelta(html: string) {
   expect(html).toContain("data-dashboard-period-current");
   expect(html).toContain("data-dashboard-period-chevron");
   expect(html).toContain('data-dashboard-module="recent-activity"');
+  expect(html).toContain("data-dashboard-top-performing");
+  expect(html).toContain(DASHBOARD_HOME.topPerforming);
+  expect(html).toContain('data-dashboard-top-pill="titles"');
+  expect(html).toContain('data-dashboard-top-pill="platforms"');
+  expect(html).toContain('data-dashboard-top-pill="territories"');
   expect(html).toContain('data-dashboard-module="top-titles"');
   expect(html).toContain("data-dashboard-view-alts");
   expect(html).toContain("data-dashboard-view-all");
   expect(html).toContain("data-dashboard-view-all-arrow");
+  expect(html).toContain('data-dashboard-view-alt="list"');
+  expect(html).toContain('data-dashboard-view-alt="bars"');
+  expect(html).not.toContain('data-dashboard-view-alt="map"');
   expect(html).toContain('data-dashboard-ranked="platforms"');
   expect(html).toContain("data-dashboard-territory");
   expect(html).toContain('data-dashboard-ranked="territories"');
   expect(html).not.toContain("lg:grid-cols-2");
-  expect(html.indexOf('data-dashboard-module="top-titles"')).toBeLessThan(
-    html.indexOf('data-dashboard-ranked="platforms"'),
+  expect(html.indexOf('data-dashboard-top-pill="titles"')).toBeLessThan(
+    html.indexOf('data-dashboard-top-pill="platforms"'),
   );
-  expect(html.indexOf('data-dashboard-ranked="platforms"')).toBeLessThan(
-    html.indexOf('data-dashboard-ranked="territories"'),
+  expect(html.indexOf('data-dashboard-top-pill="platforms"')).toBeLessThan(
+    html.indexOf('data-dashboard-top-pill="territories"'),
   );
-  expect(html).toContain("data-dashboard-territory-map");
-  expect(html).toContain("data-dashboard-territory-swatch");
   expect(html).not.toContain("Top territories");
-  expect(html).toContain(DASHBOARD_HOME.territories);
-  expect(html).toContain(DASHBOARD_HOME.platformsEmpty);
-  expect(html).toContain(DASHBOARD_HOME.territoriesEmpty);
+  expect(html).toContain(DASHBOARD_HOME.pillTerritories);
   expect(html).toContain(DASHBOARD_HOME.topTitlesEmpty);
   expect(html).toContain("data-dashboard-ranked-empty");
   expect(html).toContain("data-dashboard-reports-cta");
@@ -712,13 +716,16 @@ describe("company admin Overview hero", () => {
       html.indexOf('data-dashboard-module="recent-activity"'),
     );
     expect(html.indexOf('data-dashboard-module="recent-activity"')).toBeLessThan(
-      html.indexOf('data-dashboard-module="top-titles"'),
+      html.indexOf("data-dashboard-top-performing"),
     );
-    expect(html.indexOf('data-dashboard-module="top-titles"')).toBeLessThan(
-      html.indexOf('data-dashboard-ranked="platforms"'),
+    expect(html.indexOf("data-dashboard-top-performing")).toBeLessThan(
+      html.indexOf('data-dashboard-top-pill="titles"'),
     );
-    expect(html.indexOf('data-dashboard-ranked="platforms"')).toBeLessThan(
-      html.indexOf('data-dashboard-ranked="territories"'),
+    expect(html.indexOf('data-dashboard-top-pill="titles"')).toBeLessThan(
+      html.indexOf('data-dashboard-top-pill="platforms"'),
+    );
+    expect(html.indexOf('data-dashboard-top-pill="platforms"')).toBeLessThan(
+      html.indexOf('data-dashboard-top-pill="territories"'),
     );
     expect(html).toContain("data-dashboard-mobile-stack");
     expect(html).toContain("data-dashboard-title-mobile");
@@ -800,9 +807,9 @@ describe("company admin Overview hero", () => {
     expect(html).toContain(DASHBOARD_FIXTURE.banner);
     expect(html).toContain(DASHBOARD_FIXTURE.sampleMark);
     expect(html).toContain("$2,104,000.00");
-    expect(html).toContain("Window A");
-    expect(html).toContain("United States");
     expect(html).toContain("Sample title 01");
+    expect(html).toContain("data-dashboard-top-performing");
+    expect(html).toContain(DASHBOARD_HOME.topPerforming);
     expectNoCatalogVelocityStrip(html);
     expect(html).not.toContain(DASHBOARD_ADMIN.chartEmpty);
     expect(html).not.toContain(DASHBOARD_HOME.platformsEmpty);

@@ -32,6 +32,14 @@ export const DASHBOARD_SECTION_AIR_CLASS = "gap-[var(--space-6)]";
 export const DASHBOARD_ROW_CLASS =
   "flex min-h-10 items-center justify-between gap-[var(--space-2)] px-[var(--space-4)] py-[var(--space-2)]";
 
+// RL Sources / Territories table grammar — one row, not a stub chart:
+// rank · name · share bar · % · count. Same columns in list and bars.
+export const DASHBOARD_RANKED_TABLE_ROW_CLASS =
+  "flex min-h-10 items-center gap-[var(--space-2)] px-[var(--space-4)] py-[var(--space-2)]";
+
+export const DASHBOARD_RANKED_SHARE_TRACK_CLASS =
+  "h-2 min-w-16 flex-1 overflow-hidden rounded-[var(--radius-sm)] bg-surface-muted";
+
 export const DASHBOARD_ROW_LIST_CLASS = "divide-y divide-hairline border-t border-hairline";
 
 export const DASHBOARD_RANKED_LIST_CLASS =
@@ -74,7 +82,21 @@ export const DASHBOARD_VIEW_ALT_BUTTON_ON_CLASS = "text-accent";
 export const DASHBOARD_VIEW_ALL_CLASS =
   "inline-flex items-center gap-[var(--space-2)] t-body-sm text-accent";
 
-export const DASHBOARD_MAP_FRAME_CLASS = "relative w-full";
+// Top performing pills — Sporty Blue active, hairline idle. Not Coinbase black fill.
+export const DASHBOARD_TOP_PILL_CLUSTER_CLASS =
+  "flex items-center divide-x divide-hairline border border-hairline";
+
+export const DASHBOARD_TOP_PILL_BUTTON_CLASS =
+  "bg-transparent px-[var(--space-4)] py-[var(--space-2)] t-body-sm";
+
+export const DASHBOARD_TOP_PILL_BUTTON_ON_CLASS = "text-accent";
+
+export const DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS = "text-ink-3";
+
+// RL TerritoryMap Overview frame: Mercator 700×340 inside p-6. Not a mini stub.
+export const DASHBOARD_MAP_FRAME_CLASS = "relative w-full min-h-[340px]";
+
+export const DASHBOARD_MAP_PAD_CLASS = "p-[var(--space-6)]";
 
 export const DASHBOARD_LEGEND_CLASS =
   "flex items-center gap-[var(--space-2)] t-label text-ink-3";
