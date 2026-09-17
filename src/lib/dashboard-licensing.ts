@@ -1,4 +1,9 @@
-import { DASHBOARD_HOME_STACK, type ClientHomeFinding, type ClientHomeTitle } from "@/lib/dashboard-home";
+import {
+  DASHBOARD_HOME_STACK,
+  dashboardCatalogValue,
+  type ClientHomeFinding,
+  type ClientHomeTitle,
+} from "@/lib/dashboard-home";
 import { titleClientPath } from "@/lib/title-public-id";
 import { TITLE_STATUS_LABELS, type TitleStatus } from "@/lib/titles";
 import { catalogStillSrc } from "@/lib/titles-catalog";
@@ -44,7 +49,20 @@ export type LicensingStatusSnapshot = {
   needsAttention: number;
   inReview: number;
   rows: LicensingRow[];
+  findingsIsPartial?: boolean;
+  titlesIsPartial?: boolean;
 };
+
+export function licensingCountValue(
+  count: number,
+  key: LicensingBucket,
+  snapshot: Pick<LicensingStatusSnapshot, "findingsIsPartial" | "titlesIsPartial">,
+): string {
+  const titlesPartial = Boolean(snapshot.titlesIsPartial);
+  const findingsPartial = Boolean(snapshot.findingsIsPartial);
+  if (key === "inReview") return dashboardCatalogValue(count, titlesPartial);
+  return dashboardCatalogValue(count, findingsPartial || titlesPartial);
+}
 
 export function isRequiredFinding(severity: string | null | undefined): boolean {
   return severity === "high";
@@ -105,6 +123,8 @@ export function buildLicensingStatus(input: {
   titles: readonly LicensingTitle[];
   findings: readonly ClientHomeFinding[];
   stills?: ReadonlyMap<string, string | null>;
+  findingsIsPartial?: boolean;
+  titlesIsPartial?: boolean;
 }): LicensingStatusSnapshot {
   const findingsByTitle = new Map<string, ClientHomeFinding[]>();
   for (const finding of input.findings) {
@@ -117,6 +137,8 @@ export function buildLicensingStatus(input: {
   let needsAttention = 0;
   let inReview = 0;
   const candidates: LicensingRow[] = [];
+  const findingsIsPartial = Boolean(input.findingsIsPartial);
+  const titlesIsPartial = Boolean(input.titlesIsPartial);
 
   for (const title of input.titles) {
     const findings = [...(findingsByTitle.get(title.id) ?? [])].sort(
@@ -127,12 +149,15 @@ export function buildLicensingStatus(input: {
     const hasRequired = required.length > 0;
     // Archived is not Ready / In review. Required findings still count as
     // Needs attention — Catalog Health owns that queue.
-    const buckets =
+    // Absence in a truncated findings window is not "no required finding".
+    const buckets: LicensingBucket[] =
       title.status === "archived"
         ? hasRequired
-          ? (["needsAttention"] as const satisfies readonly LicensingBucket[])
+          ? ["needsAttention"]
           : []
-        : licensingBuckets(title.status, hasRequired);
+        : licensingBuckets(title.status, hasRequired).filter(
+            (bucket) => !(findingsIsPartial && bucket === "ready"),
+          );
     if (buckets.includes("ready")) ready += 1;
     if (buckets.includes("needsAttention")) needsAttention += 1;
     if (buckets.includes("inReview")) inReview += 1;
@@ -159,5 +184,5 @@ export function buildLicensingStatus(input: {
     })
     .slice(0, DASHBOARD_HOME_STACK);
 
-  return { ready, needsAttention, inReview, rows };
+  return { ready, needsAttention, inReview, rows, findingsIsPartial, titlesIsPartial };
 }

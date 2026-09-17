@@ -57,4 +57,21 @@ describe("DashboardLicensingStatus", () => {
     expect(html).toMatch(/data-dashboard-licensing-count="ready">0</);
     expect(html).not.toContain("Sample");
   });
+
+  it("marks Ready and Needs attention as floors when findings are truncated", () => {
+    const html = renderToStaticMarkup(
+      createElement(DashboardLicensingStatus, {
+        snapshot: {
+          ready: 0,
+          needsAttention: 1,
+          inReview: 2,
+          findingsIsPartial: true,
+          rows: [],
+        },
+      }),
+    );
+    expect(html).toMatch(/data-dashboard-licensing-count="ready"[^>]*>0\+</);
+    expect(html).toMatch(/data-dashboard-licensing-count="needsAttention"[^>]*>1\+</);
+    expect(html).toMatch(/data-dashboard-licensing-count="inReview"[^>]*>2</);
+  });
 });

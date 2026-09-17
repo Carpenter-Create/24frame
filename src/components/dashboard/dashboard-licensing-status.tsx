@@ -16,6 +16,7 @@ import {
 } from "@/lib/dashboard-craft";
 import {
   DASHBOARD_LICENSING,
+  licensingCountValue,
   type LicensingRow,
   type LicensingStatusSnapshot,
 } from "@/lib/dashboard-licensing";
@@ -92,7 +93,7 @@ export function DashboardLicensingStatus({
               data-dashboard-licensing-count={count.key}
               className="t-data t-body-sm text-ink"
             >
-              {count.value}
+              {licensingCountValue(count.value, count.key, snapshot)}
             </dd>
           </div>
         ))}

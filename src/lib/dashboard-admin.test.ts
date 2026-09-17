@@ -337,4 +337,32 @@ describe("recent account activity", () => {
     expect(hydrated[1]?.href).toBe("/titles/24F-0001234");
     expect(dashboardJustInTime("2026-09-02T15:04:00.000Z")).toMatch(/\d{1,2}:\d{2}/);
   });
+
+  it("keeps a delivery link on the title id when catalog_id is off the titles page", () => {
+    const rows = recentAccountActivity({
+      titles: [
+        {
+          id: "newer",
+          title: "Winter Light",
+          status: "live",
+          created_at: "2026-09-02T00:00:00.000Z",
+          catalog_id: "GC-0001234",
+        },
+      ],
+      deliveries: [
+        {
+          delivery_id: "d-old",
+          title_id: "older-title-id",
+          title: "Harbor Cut",
+          updated_at: "2026-09-10T00:00:00.000Z",
+        },
+      ],
+      findings: [],
+      period: parseDashboardPeriod("all", now),
+      userId: null,
+    });
+    const delivery = rows.find((row) => row.id === "delivery:d-old");
+    expect(delivery?.title).toBe("Harbor Cut");
+    expect(delivery?.href).toBe("/titles/older-title-id");
+  });
 });

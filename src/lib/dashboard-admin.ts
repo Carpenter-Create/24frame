@@ -605,8 +605,15 @@ export function applyActivityActors(
   });
 }
 
-function activityHref(catalogId: string | null | undefined): string {
-  return titleClientPath(catalogId);
+function activityHref(
+  catalogId: string | null | undefined,
+  titleId?: string,
+): string {
+  const path = titleClientPath(catalogId);
+  if (path !== "/titles" || !titleId) return path;
+  // catalog_id is only on the bounded titles page. A delivery can still
+  // name an older title — titleRouteLookups accepts the primary key.
+  return `/titles/${titleId}`;
 }
 
 export function recentAccountActivity(input: {
@@ -654,7 +661,7 @@ export function recentAccountActivity(input: {
     rows.push({
       id: `delivery:${row.delivery_id}`,
       title: row.title,
-      href: activityHref(title?.catalog_id),
+      href: activityHref(title?.catalog_id, row.title_id),
       at: row.updated_at,
       count: 1,
       detail: DASHBOARD_ADMIN.deliveryUpdated,

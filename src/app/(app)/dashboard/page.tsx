@@ -264,6 +264,8 @@ export default async function DashboardPage({
     const licensingBase = buildLicensingStatus({
       titles,
       findings: findings.rows,
+      findingsIsPartial: findings.truncated,
+      titlesIsPartial: titles.length >= UNPAGINATED_MAX,
     });
     const artwork = await titleArtworkUrls(
       supabase,

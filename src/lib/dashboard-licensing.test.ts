@@ -10,6 +10,7 @@ import {
   isRecommendedFinding,
   isRequiredFinding,
   licensingBuckets,
+  licensingCountValue,
 } from "./dashboard-licensing";
 
 const titlesSrc = readFileSync("src/lib/dashboard-licensing.ts", "utf8");
@@ -101,6 +102,45 @@ describe("licensing signal map", () => {
     expect(snapshot.rows[2]?.meta).toBe("Keywords recommended.");
     expect(snapshot.rows[2]?.href).toBe("/titles/24F-0001234");
     expect(snapshot.rows.some((row) => row.id === "draft-recommended")).toBe(false);
+  });
+
+  it("does not count Ready from a truncated findings window", () => {
+    const snapshot = buildLicensingStatus({
+      titles: [
+        {
+          id: "live-ready",
+          title: "Winter Light",
+          status: "live",
+          created_at: "2026-09-02T00:00:00.000Z",
+          catalog_id: "GC-0001234",
+        },
+        {
+          id: "live-required",
+          title: "Harbor Cut",
+          status: "live",
+          created_at: "2026-09-03T00:00:00.000Z",
+          catalog_id: "GC-0001235",
+        },
+      ],
+      findings: [
+        {
+          org_id: "org-1",
+          entity_id: "live-required",
+          severity: "high",
+          message: "Synopsis is required.",
+        },
+      ],
+      findingsIsPartial: true,
+    });
+
+    expect(snapshot.ready).toBe(0);
+    expect(snapshot.needsAttention).toBe(1);
+    expect(snapshot.findingsIsPartial).toBe(true);
+    expect(snapshot.rows.map((row) => row.id)).toEqual(["live-required"]);
+    expect(licensingCountValue(snapshot.ready, "ready", snapshot)).toBe("0+");
+    expect(licensingCountValue(snapshot.needsAttention, "needsAttention", snapshot)).toBe("1+");
+    expect(pageSrc).toContain("findingsIsPartial: findings.truncated");
+    expect(pageSrc).toContain("titlesIsPartial: titles.length >= UNPAGINATED_MAX");
   });
 
   it("does not invent a licensing table or Filmhub Licensed/Removed domain", () => {
