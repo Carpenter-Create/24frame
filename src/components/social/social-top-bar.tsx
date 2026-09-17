@@ -1,25 +1,9 @@
-import Link from "next/link";
-
-import { BrandEmblem } from "@/components/chrome/brand-emblem";
+import { HouseLeadChrome } from "@/components/chrome/house-lead-chrome";
 import { UserMenu } from "@/components/chrome/user-menu";
-import { WorkspaceSwitcher } from "@/components/chrome/workspace-switcher";
-import { SocialIcon } from "@/components/social/social-icon";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/cn";
 import {
-  HOUSE_HEADER_SEARCH_GAP_CLASS,
-  HOUSE_ICON_BUTTON_CLASS,
-  HOUSE_SEARCH_PILL_CLASS,
-} from "@/lib/house-shell";
-import { PRODUCT_NAME } from "@/lib/product";
-import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
-import { SOCIAL_ICON_SIZE_HEADER, SOCIAL_ICON_SIZE_SEARCH } from "@/lib/social-icons";
-import { workspaceHome } from "@/lib/workspace";
-import {
-  APP_HEADER_TRAILING_CLUSTER_CLASS,
-  APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS,
-  APP_HEADER_WORKSPACE_PILL_HOST_CLASS,
-} from "@/lib/workspace-switcher";
+  SocialHeaderSearch,
+  SocialHeaderSearchPhone,
+} from "@/components/social/social-header-search";
 
 export function SocialTopBar({
   email,
@@ -31,77 +15,12 @@ export function SocialTopBar({
   photoUrl?: string | null;
 }) {
   return (
-    <header
-      data-app-header=""
-      data-social-top-bar=""
-      className="sticky top-0 z-40 flex h-[var(--header-height)] items-center justify-between border-b border-hairline bg-surface pl-3 pr-[var(--space-6)] md:pl-5 md:pr-[var(--content-inset)]"
-    >
-      <div
-        data-social-header-lead=""
-        className={cn("flex min-w-0 items-center", HOUSE_HEADER_SEARCH_GAP_CLASS)}
-      >
-        <Link
-          href={workspaceHome("social")}
-          prefetch
-          aria-label={PRODUCT_NAME}
-          data-brand-emblem=""
-          className="inline-flex shrink-0 items-center"
-        >
-          <BrandEmblem />
-        </Link>
-        <form
-          data-social-header-search=""
-          action={SOCIAL_ROUTES.explore}
-          method="get"
-          className={cn(
-            "hidden h-9 w-[420px] items-center gap-2 px-3 md:flex",
-            HOUSE_SEARCH_PILL_CLASS,
-          )}
-        >
-          <SocialIcon name="magnifying-glass" size={SOCIAL_ICON_SIZE_SEARCH} className="text-ink-3" />
-          <label className="sr-only" htmlFor="social-header-q">
-            {SOCIAL.explore.searchSocial}
-          </label>
-          <Input
-            variant="bare"
-            id="social-header-q"
-            name="q"
-            placeholder={SOCIAL.explore.searchSocial}
-            className="h-full flex-1 placeholder:text-ink-3"
-          />
-        </form>
-      </div>
-      <div className="flex items-center gap-[var(--space-3)]">
-        <div data-social-header-actions="" className="flex items-center gap-2.5 md:gap-3">
-          <Link
-            href={SOCIAL_ROUTES.explore}
-            prefetch
-            aria-label={SOCIAL.explore.searchSocial}
-            data-social-header-search-icon=""
-            className={cn(
-              "flex size-8 items-center justify-center text-ink-2 md:hidden",
-              HOUSE_ICON_BUTTON_CLASS,
-            )}
-          >
-            <SocialIcon name="magnifying-glass" size={SOCIAL_ICON_SIZE_HEADER} />
-          </Link>
-        </div>
-        <div data-app-header-trailing="" className={APP_HEADER_TRAILING_CLUSTER_CLASS}>
-          <div
-            data-app-header-workspace-pill=""
-            className={APP_HEADER_WORKSPACE_PILL_HOST_CLASS}
-          >
-            <WorkspaceSwitcher current="social" />
-          </div>
-          <div
-            data-app-header-workspace-desktop=""
-            className={APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS}
-          >
-            <WorkspaceSwitcher current="social" presentation="pills" />
-          </div>
-          <UserMenu email={email} name={name} photoUrl={photoUrl} />
-        </div>
-      </div>
-    </header>
+    <HouseLeadChrome
+      workspace="social"
+      logoVisible="always"
+      search={<SocialHeaderSearch />}
+      phoneSearch={<SocialHeaderSearchPhone />}
+      accountMenu={<UserMenu email={email} name={name} photoUrl={photoUrl} />}
+    />
   );
 }

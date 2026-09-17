@@ -9,7 +9,7 @@ const account = readFileSync("src/components/chrome/account-sheet.tsx", "utf8");
 const house = readFileSync("src/components/chrome/house.tsx", "utf8");
 const mobile = readFileSync("src/components/chrome/mobile-nav.tsx", "utf8");
 const messages = readFileSync("src/components/chrome/messages-app-header.tsx", "utf8");
-const socialTopBar = readFileSync("src/components/social/social-top-bar.tsx", "utf8");
+const socialTopBar = readFileSync("src/components/social/social-header-search.tsx", "utf8");
 
 describe("Aggregation chrome Phosphor lock + Design miss list", () => {
   it("ships measured Phosphor glyphs only; leaves unmeasured chrome on Lucide", () => {

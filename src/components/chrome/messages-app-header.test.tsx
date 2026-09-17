@@ -217,6 +217,14 @@ describe("MessagesAppHeader", () => {
       join(dirname(fileURLToPath(import.meta.url)), "app-shell.tsx"),
       "utf8",
     );
+    const lead = readFileSync(
+      join(dirname(fileURLToPath(import.meta.url)), "house-lead-chrome.tsx"),
+      "utf8",
+    );
+    const leadLib = readFileSync(
+      join(dirname(fileURLToPath(import.meta.url)), "../../lib/house-lead-chrome.ts"),
+      "utf8",
+    );
     const landing = readFileSync(
       join(dirname(fileURLToPath(import.meta.url)), "../messages/ask-globee-landing.tsx"),
       "utf8",
@@ -262,11 +270,11 @@ describe("MessagesAppHeader", () => {
     expect(src).not.toContain("strokeWidth={2}");
     expect((src.match(/<MoreHorizontal/g) ?? []).length).toBe(1);
     expect(shell).not.toContain("MessagesThreadOverflow");
-    expect(shell).toContain('<WorkspaceSwitcher current={workspace} tone="pill" />');
-    expect(shell).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
-    expect(shell).toContain("justify-end gap-4");
-    expect(shell).toContain("MOBILE_CHROME_LEAD_PAD_CLASS");
-    expect(shell).toContain("md:px-[var(--content-inset)]");
+    expect(lead).toContain('<WorkspaceSwitcher current={workspace} tone="pill" />');
+    expect(lead).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
+    expect(leadLib).toContain("justify-end gap-4");
+    expect(leadLib).toContain("MOBILE_CHROME_LEAD_PAD_CLASS");
+    expect(leadLib).toContain("md:px-[var(--content-inset)]");
     expect(shell).toContain("gap-3");
     expect(landing).not.toContain("MessagesThreadOverflow");
     expect(landing).not.toContain("data-ask-globee-title-cluster");
@@ -287,6 +295,10 @@ describe("MessagesAppHeader", () => {
     );
     const shell = readFileSync(
       join(dirname(fileURLToPath(import.meta.url)), "app-shell.tsx"),
+      "utf8",
+    );
+    const lead = readFileSync(
+      join(dirname(fileURLToPath(import.meta.url)), "house-lead-chrome.tsx"),
       "utf8",
     );
     const userMenu = readFileSync(
@@ -331,10 +343,10 @@ describe("MessagesAppHeader", () => {
     );
     expect(src).toContain('className="hidden size-4 shrink-0 items-center justify-center text-ink-3 md:flex"');
     expect(src.indexOf("data-ask-globee-download")).toBeLessThan(src.indexOf("<MoreHorizontal"));
-    expect(shell).toContain("justify-end gap-4");
-    expect(shell).toContain("APP_HEADER_LEADING_CLASS");
-    expect(shell).toContain('<WorkspaceSwitcher current={workspace} tone="pill" />');
-    expect(shell).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
+    expect(lead).toContain("HOUSE_LEAD_CHROME_CLASS");
+    expect(lead).toContain("APP_HEADER_LEADING_CLASS");
+    expect(lead).toContain('<WorkspaceSwitcher current={workspace} tone="pill" />');
+    expect(lead).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
     expect(shell.indexOf("<MessagesAppHeader")).toBeLessThan(shell.indexOf("<UserMenu"));
     expect(tokens).toMatch(/--space-4:\s*1rem;/);
     expect(userMenu).not.toContain("data-ask-globee-title-cluster");

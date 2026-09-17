@@ -39,6 +39,7 @@ const tokens = readFileSync("src/app/tokens.css", "utf8");
 const globals = readFileSync("src/app/globals.css", "utf8");
 const craft = readFileSync("src/lib/dashboard-craft.ts", "utf8");
 const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
+const lead = readFileSync("src/components/chrome/house-lead-chrome.tsx", "utf8");
 const sideNav = readFileSync("src/components/chrome/side-nav.tsx", "utf8");
 const search = readFileSync("src/components/layout/search-field.tsx", "utf8");
 const statusFilter = readFileSync("src/components/layout/status-filter.tsx", "utf8");
@@ -73,8 +74,9 @@ describe("Coinbase shell rematch — Adam miss list v1", () => {
     expect(HOUSE_RAIL_IDLE_CLASS).toBe("font-normal text-ink hover:bg-surface-muted");
     expect(sideNav).not.toContain("font-normal text-ink-2");
     expect(tokens).toContain("--accent-wash:");
-    expect(shell).toContain("<BrandEmblem />");
+    expect(lead).toContain("<BrandEmblem />");
     expect(shell).not.toContain("BrandWordmark");
+    expect(lead).not.toContain("BrandWordmark");
     expect(sideNav).not.toContain("BrandWordmark");
   });
 
@@ -84,7 +86,7 @@ describe("Coinbase shell rematch — Adam miss list v1", () => {
     expect(HOUSE_SEARCH_PILL_CLASS).toBe("rounded-full border-0 bg-surface-muted");
     expect(search).not.toContain("bg-surface pl-8");
     expect(shell).not.toContain("SearchField");
-    expect(shell).toContain('tone="pill"');
+    expect(lead).toContain('tone="pill"');
     expect(DASHBOARD_TITLE_DESKTOP_CLASS).toContain("t-title");
     expect(DASHBOARD_TITLE_DESKTOP_CLASS).toContain("text-ink");
     expect(DASHBOARD_TITLE_DESKTOP_CLASS).not.toContain("t-label");

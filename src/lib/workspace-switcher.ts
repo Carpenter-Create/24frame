@@ -29,11 +29,16 @@
 // Staff Manage courses stays a Settings door — not a fourth
 // lane. Education land stays Route A /social/courses.
 // Education quiet top-bar search stays Education-only: phone
-// in the leading cluster, desktop right of pills / left of
-// avatar. Persist with persistWorkspaceCookie — do not invent
+// in the leading cluster, desktop in the shared mid-lead slot
+// (same Facebook-compact geometry as Social). Persist with
+// persistWorkspaceCookie — do not invent
 // a second cookie. Do not invent /education, /account/workspace,
 // or /settings/workspace.
 
+import {
+  HOUSE_LEAD_SEARCH_DESKTOP_CLASS,
+  HOUSE_LEAD_SEARCH_PHONE_CLASS,
+} from "@/lib/house-lead-chrome";
 import {
   HOUSE_CONTROL_PILL_CLASS,
   HOUSE_FILTER_OFF_CLASS,
@@ -149,9 +154,9 @@ export const WORKSPACE_SWITCHER_OPTION_CHECK_CLASS = "text-accent";
 export const APP_HEADER_TRAILING_CLUSTER_CLASS =
   "flex min-w-0 items-center gap-[var(--space-2)] max-md:shrink-0";
 
-export const APP_HEADER_EDUCATION_SEARCH_PHONE_CLASS = "min-w-0 flex-1 md:hidden";
+export const APP_HEADER_EDUCATION_SEARCH_PHONE_CLASS = HOUSE_LEAD_SEARCH_PHONE_CLASS;
 
-export const APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS = "w-[420px] shrink-0";
+export const APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS = HOUSE_LEAD_SEARCH_DESKTOP_CLASS;
 
 export const APP_HEADER_LEADING_CLASS =
   "mr-auto flex min-w-0 flex-1 items-center gap-[var(--space-2)]";

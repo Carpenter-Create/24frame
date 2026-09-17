@@ -63,6 +63,10 @@ import {
 } from "@/lib/rail-collapse";
 
 const shellSrc = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "app-shell.tsx"), "utf8");
+const leadSrc = readFileSync(
+  join(dirname(fileURLToPath(import.meta.url)), "house-lead-chrome.tsx"),
+  "utf8",
+);
 
 function fulfilledChrome(data: AppShellChrome): Promise<AppShellChrome> {
   const chrome = Promise.resolve(data) as Promise<AppShellChrome> & {
@@ -125,10 +129,15 @@ describe("AppShell header", () => {
     );
     expect(shellSrc).toContain("Phone avatar opens 544:561");
     expect(shellSrc).toContain("hamburger · gap 8 · one workspace");
-    expect(shellSrc).toContain("WorkspaceSwitcher");
-    expect(shellSrc).toContain('<WorkspaceSwitcher current={workspace} tone="pill" />');
-    expect(shellSrc).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
+    expect(shellSrc).toContain("HouseLeadChrome");
+    expect(leadSrc).toContain("WorkspaceSwitcher");
+    expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} tone="pill" />');
+    expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
     expect(html).toContain("data-workspace-switcher");
+    expect(html).toContain("data-house-lead-scroll");
+    expect(html).toContain("h-dvh");
+    expect(html).toContain("overflow-hidden");
+    expect(html).toContain("overflow-y-auto");
     expect(html).toContain("Aggregation");
     expect((html.match(/data-workspace-switcher=""/g) ?? []).length).toBe(2);
     expect(html).toContain('data-workspace-switcher-tone="pill"');
@@ -151,9 +160,9 @@ describe("AppShell header", () => {
 
   it("is avatar-only on every Access route — no org switcher", () => {
     expect(shellSrc).not.toContain("OrganizationSwitcher");
-    expect(shellSrc).toContain("justify-end");
-    expect(shellSrc).toContain('<WorkspaceSwitcher current={workspace} tone="pill" />');
-    expect(shellSrc).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
+    expect(leadSrc).toContain("HOUSE_LEAD_CHROME_CLASS");
+    expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} tone="pill" />');
+    expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
 
     for (const path of ["/", "/titles", "/deliveries", "/catalog-health", "/messages"]) {
       navigation.pathname = path;
@@ -595,6 +604,10 @@ describe("AppShell rail-collapse chevron", () => {
     expect(html).toContain('data-social-tab-item="Create"');
     expect(html).toContain("destination-page");
     expect(html).toContain("data-app-social-frame");
+    expect(html).toContain("data-house-lead-scroll");
+    expect(html).toContain("h-dvh");
+    expect(html).toContain("overflow-hidden");
+    expect(html).toContain("overflow-y-auto");
   });
 
   it("adds Social X-lane chrome without reopening Access collapse", () => {

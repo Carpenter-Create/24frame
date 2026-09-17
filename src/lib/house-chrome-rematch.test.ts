@@ -35,7 +35,9 @@ import { SETTINGS_RAIL_ITEM_CLASS } from "@/lib/settings";
 const tokens = readFileSync("src/app/tokens.css", "utf8");
 const globals = readFileSync("src/app/globals.css", "utf8");
 const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
+const lead = readFileSync("src/components/chrome/house-lead-chrome.tsx", "utf8");
 const topBar = readFileSync("src/components/social/social-top-bar.tsx", "utf8");
+const socialSearch = readFileSync("src/components/social/social-header-search.tsx", "utf8");
 const sideNav = readFileSync("src/components/chrome/side-nav.tsx", "utf8");
 const titlesPage = readFileSync("src/app/(app)/titles/page.tsx", "utf8");
 const titlesCatalog = readFileSync("src/lib/titles-catalog.ts", "utf8");
@@ -50,9 +52,12 @@ const educationSearch = readFileSync("src/components/chrome/education-header-sea
 
 const FUN_CHROME_PATHS = [
   "src/lib/house-shell.ts",
+  "src/lib/house-lead-chrome.ts",
   "src/components/chrome/app-shell.tsx",
+  "src/components/chrome/house-lead-chrome.tsx",
   "src/components/chrome/side-nav.tsx",
   "src/components/social/social-top-bar.tsx",
+  "src/components/social/social-header-search.tsx",
   "src/lib/social-chrome.ts",
   "src/lib/workspace-switcher.ts",
   "src/lib/mobile-chrome.ts",
@@ -64,13 +69,14 @@ const FUN_CHROME_PATHS = [
 describe("house chrome rematch miss list v1.1", () => {
   it("uses Social side nav + full-width top on Aggregation and Education — no third chrome", () => {
     expect(shell).toContain('workspace === "social" && !settingsPage');
-    expect(shell).toContain("data-house-full-width-top");
+    expect(lead).toContain("data-house-full-width-top");
+    expect(shell).toContain("<HouseLeadChrome");
     expect(shell).toContain("HOUSE_RAIL_PANEL_CLASS");
     expect(shell).toContain("top-[calc(var(--header-height)+16px)]");
     expect(shell).toContain("h-[calc(100dvh-var(--header-height)-32px)]");
     expect(shell).not.toContain("border-r border-hairline");
     expect(shell).not.toMatch(/style=\{\{ height: "var\(--header-height\)", marginLeft: "var\(--sidebar-width\)" \}\}/);
-    expect(shell).toContain("<BrandEmblem />");
+    expect(lead).toContain("<BrandEmblem />");
     expect(shell).toContain("<SideNav");
     expect(shell).not.toContain("StudioRail");
     expect(shell).not.toContain("data-studio-rail");
@@ -99,10 +105,10 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(shell).not.toContain("SearchField");
     expect(shell).toContain("EducationHeaderSearch");
     expect(shell).toContain('workspace === "education" && !settingsPage');
-    expect(shell).toContain('data-education-header-search-host="phone"');
-    expect(shell).toContain('data-education-header-search-host="desktop"');
-    expect(topBar).toContain("data-social-header-search");
-    expect(topBar).toContain("HOUSE_SEARCH_PILL_CLASS");
+    expect(lead).toContain('data-education-header-search-host={education ? "desktop" : undefined}');
+    expect(lead).toContain('data-education-header-search-host={education ? "phone" : undefined}');
+    expect(socialSearch).toContain("data-social-header-search");
+    expect(socialSearch).toContain("HOUSE_SEARCH_PILL_CLASS");
 
     const education = renderToStaticMarkup(createElement(EducationHeaderSearch));
     expect(education).toContain("data-education-header-search");
@@ -115,20 +121,22 @@ describe("house chrome rematch miss list v1.1", () => {
 
   it("places Social and Education search beside the logo — not center-floating", () => {
     expect(HOUSE_HEADER_SEARCH_GAP_CLASS).toBe("gap-[var(--space-4)]");
-    expect(topBar).toContain("data-social-header-lead");
-    expect(topBar).toContain("HOUSE_HEADER_SEARCH_GAP_CLASS");
-    expect(topBar).not.toContain("left-1/2");
-    expect(topBar).not.toContain("-translate-x-1/2");
-    expect(topBar.indexOf("data-brand-emblem")).toBeLessThan(
-      topBar.indexOf("data-social-header-search"),
+    expect(lead).toContain("data-social-header-lead");
+    expect(lead).toContain("HOUSE_LEAD_SLOT_CLASS");
+    expect(lead).not.toContain("left-1/2");
+    expect(lead).not.toContain("-translate-x-1/2");
+    expect(lead.indexOf("data-brand-emblem")).toBeLessThan(
+      lead.indexOf("data-house-lead-search"),
     );
-    expect(topBar.indexOf("data-social-header-search")).toBeLessThan(
-      topBar.indexOf("data-social-header-actions"),
+    expect(lead.indexOf("data-house-lead-search")).toBeLessThan(
+      lead.indexOf("data-social-header-actions"),
     );
-    expect(topBar.indexOf("data-social-header-lead")).toBeLessThan(
-      topBar.indexOf("data-social-header-search"),
+    expect(lead.indexOf("data-social-header-lead")).toBeLessThan(
+      lead.indexOf("data-house-lead-search"),
     );
-    expect(topBar.indexOf("</form>")).toBeLessThan(topBar.indexOf("data-app-header-trailing"));
+    expect(lead.indexOf("data-house-lead-search")).toBeLessThan(
+      lead.indexOf("data-app-header-trailing"),
+    );
 
     const social = renderToStaticMarkup(
       createElement(SocialTopBar, { email: "ada@example.com", name: "Ada" }),
@@ -143,26 +151,26 @@ describe("house chrome rematch miss list v1.1", () => {
     );
     expect(social).not.toContain("left-1/2");
 
-    const leading = shell.slice(
-      shell.indexOf("data-app-header-leading"),
-      shell.indexOf("data-app-header-trailing"),
+    const leading = lead.slice(
+      lead.indexOf("data-app-header-leading"),
+      lead.indexOf("data-app-header-trailing"),
     );
-    const trailing = shell.slice(
-      shell.indexOf("data-app-header-trailing"),
-      shell.indexOf("</header>"),
+    const trailing = lead.slice(
+      lead.indexOf("data-app-header-trailing"),
+      lead.indexOf("</header>"),
     );
     expect(leading).toContain("data-app-header-brand-search");
-    expect(leading).toContain("HOUSE_HEADER_SEARCH_GAP_CLASS");
-    expect(leading).toContain('data-education-header-search-host="desktop"');
-    expect(leading).toContain('data-education-header-search-host="phone"');
+    expect(leading).toContain("HOUSE_LEAD_SLOT_CLASS");
+    expect(leading).toContain('data-education-header-search-host={education ? "desktop" : undefined}');
+    expect(leading).toContain('data-education-header-search-host={education ? "phone" : undefined}');
     expect(leading.indexOf("data-brand-emblem")).toBeLessThan(
-      leading.indexOf('data-education-header-search-host="desktop"'),
+      leading.indexOf('data-education-header-search-host={education ? "desktop" : undefined}'),
     );
-    expect(leading.indexOf('data-education-header-search-host="desktop"')).toBeLessThan(
-      leading.indexOf('data-education-header-search-host="phone"'),
+    expect(leading.indexOf('data-education-header-search-host={education ? "desktop" : undefined}')).toBeLessThan(
+      leading.indexOf('data-education-header-search-host={education ? "phone" : undefined}'),
     );
     expect(trailing).toContain('presentation="pills"');
-    expect(trailing).toContain("AccountMenuSlot");
+    expect(trailing).toContain("{accountMenu}");
     expect(trailing).not.toContain("EducationHeaderSearch");
     expect(trailing).not.toContain("data-education-header-search-host");
     expect(shell).not.toContain("SearchField");
@@ -180,13 +188,13 @@ describe("house chrome rematch miss list v1.1", () => {
   });
 
   it("keeps one phone workspace switcher, Staff on Aggregation, one Sporty Blue pill", () => {
-    expect(shell.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
-    expect(topBar.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
-    expect(shell).toContain('presentation="pills"');
-    expect(topBar).toContain('presentation="pills"');
-    expect(shell).toContain('tone="pill"');
-    expect(shell).toContain("APP_HEADER_WORKSPACE_PILL_HOST_CLASS");
-    expect(shell).toContain("APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS");
+    expect(lead.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
+    expect(shell).toContain("<HouseLeadChrome");
+    expect(topBar).toContain("<HouseLeadChrome");
+    expect(lead).toContain('presentation="pills"');
+    expect(lead).toContain('tone="pill"');
+    expect(lead).toContain("APP_HEADER_WORKSPACE_PILL_HOST_CLASS");
+    expect(lead).toContain("APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS");
     expect(nav).toContain('if (workspace === "social") return { items: SOCIAL_DESKTOP_NAV, staffItems: [] }');
     expect(sideNav).toContain("staffItems");
     expect(HOUSE_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash font-medium text-accent");
@@ -196,8 +204,8 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(mobileChrome).toContain("HOUSE_ICON_BUTTON_CLASS");
     expect(collapse).toContain("HOUSE_ICON_BUTTON_CLASS");
     expect(socialChrome).toContain("HOUSE_RAIL_PANEL_CLASS");
-    expect(topBar).toContain("HOUSE_ICON_BUTTON_CLASS");
-    expect(topBar).toContain("HOUSE_SEARCH_PILL_CLASS");
+    expect(socialSearch).toContain("HOUSE_ICON_BUTTON_CLASS");
+    expect(socialSearch).toContain("HOUSE_SEARCH_PILL_CLASS");
   });
 
   it("uses one rounded register on Aggregation, Social, and Education", () => {
@@ -217,7 +225,7 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(houseShell).toMatch(/social\/fun chrome lane/);
     expect(houseShell).toMatch(/do not flatten/);
     expect(shell).toContain("data-social-workspace");
-    expect(shell).toContain("data-house-full-width-top");
+    expect(lead).toContain("data-house-full-width-top");
     expect(HOUSE_RAIL_ITEM_CLASS).toContain("rounded-full");
     expect(HOUSE_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash font-medium text-accent");
     expect(HOUSE_RAIL_ACTIVE_CLASS).not.toContain("bg-ink");

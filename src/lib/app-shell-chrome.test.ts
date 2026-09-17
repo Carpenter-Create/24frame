@@ -132,7 +132,8 @@ describe("Social nav no longer waits on the (app) layout waterfall", () => {
     const appShellFn = shellSrc.slice(shellSrc.indexOf("export function AppShell"));
     const beforeSocial = appShellFn.slice(0, appShellFn.indexOf("if (socialChrome)"));
     expect(beforeSocial).not.toMatch(/\buse\(chrome\)/);
-    expect(shellSrc).toContain("SocialTopBarFromChrome");
+    expect(shellSrc).toContain("HouseLeadChrome");
+    expect(shellSrc).not.toContain("SocialTopBarFromChrome");
     expect(shellSrc).toContain("SocialRailAccountChipFromChrome");
     expect(shellSrc).toContain("SideNavFromChrome");
     expect(shellSrc).toContain("MobileNavFromChrome");

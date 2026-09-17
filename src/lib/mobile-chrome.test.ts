@@ -22,6 +22,7 @@ import {
 const here = dirname(fileURLToPath(import.meta.url));
 const tokens = readFileSync(join(here, "../app/tokens.css"), "utf8");
 const shellSrc = readFileSync(join(here, "../components/chrome/app-shell.tsx"), "utf8");
+const leadLibSrc = readFileSync(join(here, "house-lead-chrome.ts"), "utf8");
 const navSrc = readFileSync(join(here, "../components/chrome/mobile-nav.tsx"), "utf8");
 const landingSrc = readFileSync(join(here, "../components/messages/ask-globee-landing.tsx"), "utf8");
 const threadSrc = readFileSync(join(here, "../components/messages/ask-globee-thread.tsx"), "utf8");
@@ -67,8 +68,8 @@ describe("mobile chrome hamburger / clock lock", () => {
   });
 
   it("is consumed by the header hamburger and the Ask Globee clock, not the thread", () => {
-    expect(shellSrc).toContain("MOBILE_CHROME_LEAD_PAD_CLASS");
-    expect(shellSrc).toContain("md:px-[var(--content-inset)]");
+    expect(leadLibSrc).toContain("MOBILE_CHROME_LEAD_PAD_CLASS");
+    expect(leadLibSrc).toContain("md:px-[var(--content-inset)]");
     expect(shellSrc).toContain('data-app-messages-frame=""');
     expect(shellSrc).toContain("p-[var(--content-inset)]");
 

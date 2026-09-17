@@ -19,7 +19,7 @@ const socialEdit = readFileSync("src/components/social/social-profile-edit.tsx",
 const socialBio = readFileSync("src/components/social/social-profile-bio.tsx", "utf8");
 const socialForms = readFileSync("src/components/social/social-forms.tsx", "utf8");
 const socialExplore = readFileSync("src/app/(app)/social/explore/page.tsx", "utf8");
-const socialTopBar = readFileSync("src/components/social/social-top-bar.tsx", "utf8");
+const socialTopBar = readFileSync("src/components/social/social-header-search.tsx", "utf8");
 const searchField = readFileSync("src/components/layout/search-field.tsx", "utf8");
 
 function walkTsx(dir: string, acc: string[] = []): string[] {
