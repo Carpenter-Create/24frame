@@ -27,7 +27,7 @@ import { cn } from "@/lib/cn";
 // RL Overview SoT: Carpenter-Create/royalogic
 // `src/components/overview/TerritoryMap.tsx` — map/list/bars + choropleth +
 // legend + view alts. This file is the map plot. House rematch only:
-// Geist · Sporty Blue wash · hairline. No amber/gold. No `geojson` module.
+// Geist · Sporty Blue wash · hairline. No RL brand fill. No `geojson` module.
 type CountryFeature = {
   type: "Feature";
   id?: string | number;
