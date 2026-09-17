@@ -17,7 +17,7 @@ export const SENTRY_IGNORE_ERRORS: Array<string | RegExp> = [
   /^Network Error$/i,
   /Failed to fetch/i,
   /NetworkError when attempting to fetch/i,
-  /Load failed/i,
+  /^(?:TypeError:\s*)?Load failed\.?$/i,
   /The operation was aborted/i,
   /The user aborted a request/i,
   /signal is aborted/i,
@@ -38,6 +38,7 @@ export type SentryScrubEvent = {
   message?: string;
   exception?: { values?: Array<{ type?: string; value?: string }> };
   request?: {
+    url?: string;
     headers?: Record<string, string>;
     cookies?: Record<string, string> | string;
     query_string?: string | Array<[string, string]> | Record<string, string>;
@@ -99,7 +100,11 @@ export function isIgnoredSentryEvent(event: SentryScrubEvent): boolean {
 }
 
 export function isSensitiveSentryKey(key: string): boolean {
-  return SENSITIVE_KEY.test(key) || SUPABASE_AUTH_COOKIE.test(key);
+  return (
+    SENSITIVE_KEY.test(key) ||
+    SUPABASE_AUTH_COOKIE.test(key) ||
+    key.toLowerCase() === "code"
+  );
 }
 
 function scrubCookieHeader(value: string): string {
@@ -110,11 +115,25 @@ function scrubCookieHeader(value: string): string {
 
 function scrubQueryString(value: string): string {
   return value.replace(
-    /(^|[?&])([^=&]+)=([^&]*)/g,
+    /(^|[?&])([^=&?]+)=([^&]*)/g,
     (full, prefix: string, name: string) =>
       isSensitiveSentryKey(decodeURIComponent(name))
         ? `${prefix}${name}=[Filtered]`
         : full,
+  );
+}
+
+function scrubUrl(value: string): string {
+  const withoutPortalToken = value.replace(
+    /\/portal\/[^/?#]+/gi,
+    (match: string, offset: number) =>
+      value.slice(offset - 4, offset) === "/api" ? match : "/portal/[Filtered]",
+  );
+  const queryIndex = withoutPortalToken.indexOf("?");
+  if (queryIndex === -1) return withoutPortalToken;
+  return (
+    withoutPortalToken.slice(0, queryIndex) +
+    scrubQueryString(withoutPortalToken.slice(queryIndex))
   );
 }
 
@@ -132,6 +151,10 @@ function scrubUnknown(value: unknown): unknown {
 function scrubRequest(event: SentryScrubEvent): void {
   const request = event.request;
   if (!request) return;
+
+  if (typeof request.url === "string") {
+    request.url = scrubUrl(request.url);
+  }
 
   if (request.headers) {
     const headers: Record<string, string> = {};
@@ -191,8 +214,17 @@ export function scrubSentryPayload<T extends SentryScrubEvent>(event: T): T {
 
   if (event.breadcrumbs) {
     for (const crumb of event.breadcrumbs) {
+      if (crumb.message) {
+        crumb.message = scrubUrl(crumb.message);
+      }
       if (crumb.data) {
-        crumb.data = scrubUnknown(crumb.data) as Record<string, unknown>;
+        const data = scrubUnknown(crumb.data) as Record<string, unknown>;
+        for (const [key, nested] of Object.entries(data)) {
+          if (typeof nested === "string") {
+            data[key] = scrubUrl(nested);
+          }
+        }
+        crumb.data = data;
       }
     }
   }

@@ -103,9 +103,13 @@ describe("Sentry ignore and scrubbing", () => {
       true,
     );
     expect(isIgnoredSentryMessage("Load failed")).toBe(true);
+    expect(isIgnoredSentryMessage("TypeError: Load failed")).toBe(true);
     expect(isIgnoredSentryMessage("The operation was aborted.")).toBe(true);
     expect(isIgnoredSentryMessage("TypeError: Network Error")).toBe(false);
     expect(isIgnoredSentryMessage("Rights grant update failed")).toBe(false);
+    expect(isIgnoredSentryMessage("Upload failed.")).toBe(false);
+    expect(isIgnoredSentryMessage("part upload failed (503)")).toBe(false);
+    expect(isIgnoredSentryMessage("Finance upload failed.")).toBe(false);
   });
 
   it("drops ignored events in beforeSend", () => {
@@ -119,6 +123,7 @@ describe("Sentry ignore and scrubbing", () => {
   it("scrubs auth cookies, headers, and tokens without touching other fields", () => {
     const event = scrubSentryEvent({
       request: {
+        url: "https://app.24frame.co/auth/callback?code=pkce-grant&token_hash=otp-grant&type=email&next=/",
         headers: {
           authorization: "Bearer secret-token",
           cookie:
@@ -129,7 +134,7 @@ describe("Sentry ignore and scrubbing", () => {
           "sb-abc-auth-token": "jwt.here",
           theme: "light",
         },
-        query_string: "access_token=abc&title=heat",
+        query_string: "access_token=abc&code=pkce-grant&title=heat",
         data: { access_token: "abc", title: "Heat" },
       },
       user: {
@@ -138,7 +143,17 @@ describe("Sentry ignore and scrubbing", () => {
         username: "rights-holder",
       },
       extra: { authorization: "Bearer x", titleId: "t1" },
-      breadcrumbs: [{ data: { authorization: "Bearer x", path: "/titles" } }],
+      breadcrumbs: [
+        {
+          message: "GET https://app.24frame.co/portal/share-token-value",
+          data: {
+            authorization: "Bearer x",
+            path: "/titles",
+            url: "https://app.24frame.co/portal/share-token-value?token=abc",
+            to: "/api/portal/download",
+          },
+        },
+      ],
     });
 
     expect(event).not.toBeNull();
@@ -151,20 +166,32 @@ describe("Sentry ignore and scrubbing", () => {
       "sb-abc-auth-token": "[Filtered]",
       theme: "light",
     });
-    expect(event?.request?.query_string).toBe("access_token=[Filtered]&title=heat");
+    expect(event?.request?.url).toBe(
+      "https://app.24frame.co/auth/callback?code=[Filtered]&token_hash=[Filtered]&type=email&next=/",
+    );
+    expect(event?.request?.query_string).toBe(
+      "access_token=[Filtered]&code=[Filtered]&title=heat",
+    );
     expect(event?.request?.data).toEqual({ access_token: "[Filtered]", title: "Heat" });
     expect(event?.user).toEqual({});
     expect(event?.extra).toEqual({ authorization: "[Filtered]", titleId: "t1" });
+    expect(event?.breadcrumbs?.[0]?.message).toBe(
+      "GET https://app.24frame.co/portal/[Filtered]",
+    );
     expect(event?.breadcrumbs?.[0]?.data).toEqual({
       authorization: "[Filtered]",
       path: "/titles",
+      url: "https://app.24frame.co/portal/[Filtered]?token=[Filtered]",
+      to: "/api/portal/download",
     });
   });
 
-  it("treats supabase auth cookies and authorization as sensitive", () => {
+  it("treats supabase auth cookies, authorization, and auth code as sensitive", () => {
     expect(isSensitiveSentryKey("sb-uevsculwzwlhxeamagwg-auth-token")).toBe(true);
     expect(isSensitiveSentryKey("Authorization")).toBe(true);
+    expect(isSensitiveSentryKey("code")).toBe(true);
     expect(isSensitiveSentryKey("theme")).toBe(false);
+    expect(isSensitiveSentryKey("status_code")).toBe(false);
   });
 });
 
