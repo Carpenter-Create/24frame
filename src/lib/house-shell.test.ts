@@ -151,7 +151,7 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     );
     expect(header).toContain("data-social-header-search");
     expect(header).toContain(HOUSE_SEARCH_PILL_CLASS);
-    expect(header).toContain("<BrandEmblem");
+    expect(header).toContain("data-brand-emblem");
 
     const chip = renderToStaticMarkup(createElement(SocialRailAccountChip, { name: "Ada Lovelace" }));
     expect(chip).toContain("t-body-sm");
