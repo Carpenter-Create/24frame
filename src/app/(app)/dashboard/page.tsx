@@ -136,6 +136,7 @@ export default async function DashboardPage({
       .from("titles")
       .select("id, title, status, created_at, created_by")
       .eq("org_id", org.id)
+      .neq("status", "archived")
       .order("created_at", { ascending: false })
       .range(...rangeFor(UNPAGINATED_MAX)),
     loadMyFindings(supabase, { orgId: org.id }),

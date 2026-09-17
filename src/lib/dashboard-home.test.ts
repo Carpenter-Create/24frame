@@ -93,6 +93,45 @@ describe("clientHomeSnapshot", () => {
     expect(snap.justIn.every((t) => t.status !== "archived")).toBe(true);
   });
 
+  it("does not count findings on archived titles as needs attention", () => {
+    const snap = clientHomeSnapshot({
+      titles: [
+        title({ id: "live-1", status: "live" }),
+        title({ id: "arch-1", status: "archived" }),
+      ],
+      findings: [
+        { org_id: "org-1", entity_id: "arch-1", message: "Synopsis is required." },
+        { org_id: "org-1", entity_id: "live-1", message: "Genre is required." },
+      ],
+      orgId: "org-1",
+      now: NOW,
+      bound: UNPAGINATED_MAX,
+    });
+    expect(snap.needsAttention).toBe(1);
+    expect(snap.doNext.map((d) => d.id)).toEqual(["live-1"]);
+  });
+
+  it("keeps the catalog floor when archived rows consumed the bound window", () => {
+    const titles = [
+      ...Array.from({ length: UNPAGINATED_MAX - 1 }, (_, i) =>
+        title({ id: `t-${i}`, status: "live" }),
+      ),
+      title({ id: "arch-1", status: "archived" }),
+    ];
+    const snap = clientHomeSnapshot({
+      titles,
+      findings: [],
+      orgId: "org-1",
+      now: NOW,
+      bound: UNPAGINATED_MAX,
+    });
+    expect(snap.catalog).toBe(UNPAGINATED_MAX - 1);
+    expect(snap.catalogIsPartial).toBe(true);
+    expect(dashboardCatalogValue(snap.catalog, snap.catalogIsPartial)).toBe(
+      `${UNPAGINATED_MAX - 1}+`,
+    );
+  });
+
   it("marks a bounded catalog and live count as a floor, not a claimed total", () => {
     const titles = Array.from({ length: UNPAGINATED_MAX }, (_, i) =>
       title({ id: `t-${i}`, status: i < 3 ? "draft" : "live" }),

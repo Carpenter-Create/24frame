@@ -14,9 +14,11 @@
 --
 -- GATES:
 --   Owner (operate, not staff): own-org Drafts only. Never after submit.
---   Staff (is_gc_staff): Drafts always; submitted / Complete / Live only when
---   the hard predicate is empty. If any fact row exists → delete refused;
---   Archive is the path. Archive does not erase assets, rights, or money.
+--   Staff with operate (member_can → gc_can): Drafts always; submitted /
+--   Complete / Live only when the hard predicate is empty. If any fact row
+--   exists → delete refused; Archive is the path. View-only staff
+--   (gc_legal, gc_accountant, gc_viewer) cannot delete or archive.
+--   Archive does not erase assets, rights, or money.
 --
 -- APPLY (founder / CoS / Adam — after merge, not from this PR):
 --   Requires 20260917120000_title_status_archived.sql already applied.
@@ -129,12 +131,12 @@ begin
   if not public.member_can(auth.uid(), v_org, 'view') then
     raise exception 'Title not found';
   end if;
+  if not public.member_can(auth.uid(), v_org, 'operate') then
+    raise exception 'Not authorized to delete this title';
+  end if;
 
   v_staff := public.is_gc_staff(auth.uid());
   if not v_staff then
-    if not public.member_can(auth.uid(), v_org, 'operate') then
-      raise exception 'Not authorized to delete this title';
-    end if;
     if v_status <> 'draft' then
       raise exception 'Submitted titles cannot be deleted. Archive instead.';
     end if;

@@ -75,6 +75,7 @@ function stubClient(
       eq(...args);
       return titlesChain;
     },
+    neq: vi.fn(() => titlesChain),
     order: vi.fn(() => titlesChain),
     range: vi.fn(async () => ({ data: titles, error: null })),
   };
@@ -198,7 +199,7 @@ describe("DashboardPage modes", () => {
   });
 
   it("renders the organization-scoped portfolio for a user with a client org", async () => {
-    const { from, eq, rpc } = stubClient();
+    const { from, eq, rpc, titlesChain } = stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(
       ctx({ isGcStaff: false, orgStatus: "active" }) as never,
     );
@@ -207,6 +208,7 @@ describe("DashboardPage modes", () => {
 
     expect(from).toHaveBeenCalledWith("titles");
     expect(eq).toHaveBeenCalledWith("org_id", "org-1");
+    expect(titlesChain.neq).toHaveBeenCalledWith("status", "archived");
     expect(rpc).toHaveBeenCalledWith("my_findings", {
       p_limit: UNPAGINATED_MAX + 1,
       p_org_id: "org-1",

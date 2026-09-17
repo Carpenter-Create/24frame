@@ -69,6 +69,19 @@ describe("title lifecycle gates", () => {
     expect(titleLifecycleFlags(viewer, "live", false).canArchive).toBe(false);
     expect(titleLifecycleFlags(viewer, "archived", false).canRestore).toBe(false);
   });
+
+  it("hides archive, restore, and delete from staff without operate", () => {
+    const legal = { isStaff: true, canOperate: false };
+    expect(titleLifecycleFlags(legal, "draft", false).canDelete).toBe(false);
+    expect(titleLifecycleFlags(legal, "live", false)).toEqual({
+      canDelete: false,
+      canArchive: false,
+      canRestore: false,
+      offerArchiveFromDelete: false,
+    });
+    expect(titleLifecycleFlags(legal, "live", true).canArchive).toBe(false);
+    expect(titleLifecycleFlags(legal, "archived", false).canRestore).toBe(false);
+  });
 });
 
 describe("title lifecycle copy", () => {

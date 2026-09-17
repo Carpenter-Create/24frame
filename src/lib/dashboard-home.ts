@@ -165,7 +165,7 @@ export function clientHomeSnapshot({
   const activeTitles = titles.filter((t) => t.status !== "archived");
   const newestFirst = [...activeTitles].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
   const titleById = new Map(newestFirst.map((t) => [t.id, t]));
-  const orgFindings = findings.filter((f) => f.org_id === orgId);
+  const orgFindings = findings.filter((f) => f.org_id === orgId && titleById.has(f.entity_id));
 
   const findingsByTitle = new Map<string, ClientHomeFinding[]>();
   for (const f of orgFindings) {
@@ -207,7 +207,7 @@ export function clientHomeSnapshot({
 
   return {
     catalog: activeTitles.length,
-    catalogIsPartial: activeTitles.length >= bound,
+    catalogIsPartial: titles.length >= bound,
     needsAttention: new Set(orgFindings.map((f) => f.entity_id)).size,
     findingsIsPartial,
     live: activeTitles.filter((t) => t.status === "live").length,

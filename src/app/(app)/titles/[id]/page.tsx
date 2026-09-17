@@ -186,11 +186,16 @@ export default async function TitleDetailPage({ params }: { params: Promise<{ id
   const canSubmit = canOperate && title.status === "draft";
   const needsReportingCheck =
     ctx.isGcStaff && title.status !== "draft" && title.status !== "archived";
-  const { data: hasReportingActivity } = needsReportingCheck
-    ? await supabase.rpc("title_has_reporting_activity", { p_title_id: id })
-    : { data: false };
+  const [{ data: hasReportingActivity }, { data: staffCanOperate }] = await Promise.all([
+    needsReportingCheck
+      ? supabase.rpc("title_has_reporting_activity", { p_title_id: id })
+      : Promise.resolve({ data: false }),
+    ctx.isGcStaff
+      ? supabase.rpc("gc_can", { p_uid: ctx.user.id, p_capability: "operate" })
+      : Promise.resolve({ data: false }),
+  ]);
   const lifecycleFlags = titleLifecycleFlags(
-    { isStaff: ctx.isGcStaff, canOperate },
+    { isStaff: ctx.isGcStaff, canOperate: canOperate || staffCanOperate === true },
     title.status as TitleStatus,
     hasReportingActivity === true,
   );

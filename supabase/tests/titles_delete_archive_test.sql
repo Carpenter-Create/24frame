@@ -1,10 +1,11 @@
 -- titles_delete_archive_test.sql
--- CoS unlock: owner drafts only; staff drafts always; staff Complete/Live only
--- when sales_lines + ledger_entries are empty; archive + restore; asset cascade;
--- audit; deleted titles leave the catalog.
+-- CoS unlock: owner drafts only; operate-capable staff drafts always; staff
+-- Complete/Live only when sales_lines + ledger_entries are empty; view-only
+-- staff cannot delete or archive; archive + restore; asset cascade; audit;
+-- deleted titles leave the catalog.
 
 begin;
-select plan(19);
+select plan(21);
 
 select set_config('t.org_a', gen_random_uuid()::text, false);
 select set_config('t.org_b', gen_random_uuid()::text, false);
@@ -12,6 +13,7 @@ select set_config('t.owner', gen_random_uuid()::text, false);
 select set_config('t.deliv', gen_random_uuid()::text, false);
 select set_config('t.viewer', gen_random_uuid()::text, false);
 select set_config('t.gc', gen_random_uuid()::text, false);
+select set_config('t.legal', gen_random_uuid()::text, false);
 select set_config('t.draft', gen_random_uuid()::text, false);
 select set_config('t.live_clean', gen_random_uuid()::text, false);
 select set_config('t.live_money', gen_random_uuid()::text, false);
@@ -23,7 +25,8 @@ insert into auth.users (id) values
   (current_setting('t.owner')::uuid),
   (current_setting('t.deliv')::uuid),
   (current_setting('t.viewer')::uuid),
-  (current_setting('t.gc')::uuid);
+  (current_setting('t.gc')::uuid),
+  (current_setting('t.legal')::uuid);
 
 insert into public.organizations (id, name, status) values
   (current_setting('t.org_a')::uuid, 'Org A', 'active'),
@@ -35,7 +38,8 @@ insert into public.memberships (org_id, user_id, role, status) values
   (current_setting('t.org_a')::uuid, current_setting('t.viewer')::uuid, 'viewer', 'active');
 
 insert into public.gc_staff (user_id, role) values
-  (current_setting('t.gc')::uuid, 'gc_delivery_ops');
+  (current_setting('t.gc')::uuid, 'gc_delivery_ops'),
+  (current_setting('t.legal')::uuid, 'gc_legal');
 
 insert into public.titles (id, org_id, title, status, created_by) values
   (current_setting('t.draft')::uuid, current_setting('t.org_a')::uuid, 'Draft One', 'draft', current_setting('t.owner')::uuid),
@@ -136,6 +140,18 @@ select lives_ok(
 
 select is((select status::text from public.titles where id = current_setting('t.live_clean')::uuid),
   'live', 'restore returns the prior status');
+
+-- ===== view-only staff cannot delete or archive =====
+select set_config('request.jwt.claims',
+  json_build_object('sub', current_setting('t.legal'), 'role', 'authenticated')::text, true);
+
+select throws_ok(
+  $$ select public.delete_title(current_setting('t.live_clean')::uuid) $$,
+  'P0001', null, 'gc_legal cannot delete a title');
+
+select throws_ok(
+  $$ select public.archive_title(current_setting('t.live_clean')::uuid) $$,
+  'P0001', null, 'gc_legal cannot archive a title');
 
 -- ===== staff: live with facts refused; live without facts deleted =====
 select set_config('request.jwt.claims',

@@ -55,7 +55,7 @@ export function titleLifecycleFlags(
 ): TitleLifecycleFlags {
   const archived = isArchivedTitleStatus(status);
   const draft = isDraftTitleStatus(status);
-  const operate = actor.canOperate || actor.isStaff;
+  const operate = actor.canOperate;
 
   if (archived) {
     return {
@@ -76,15 +76,15 @@ export function titleLifecycleFlags(
   }
 
   // Submitted / Complete / Live (and later lifecycle). Owner never deletes
-  // after submit. Staff may delete only when the hard money/reporting
-  // predicate is empty; otherwise Archive is the offered path.
+  // after submit. Staff with operate may delete only when the hard
+  // money/reporting predicate is empty; otherwise Archive is the offered path.
   if (actor.isStaff) {
     const blocked = hasReportingActivity;
     return {
-      canDelete: !blocked,
-      canArchive: true,
+      canDelete: operate && !blocked,
+      canArchive: operate,
       canRestore: false,
-      offerArchiveFromDelete: blocked,
+      offerArchiveFromDelete: operate && blocked,
     };
   }
 
