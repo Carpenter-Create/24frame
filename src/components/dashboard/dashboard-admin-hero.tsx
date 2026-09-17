@@ -3,6 +3,7 @@ import Link from "next/link";
 import { DashboardViewAll } from "@/components/dashboard/dashboard-view-alts";
 import { DashboardAdminControls } from "@/components/dashboard/dashboard-admin-controls";
 import { DashboardRevenueChart } from "@/components/dashboard/dashboard-revenue-chart";
+import { DashboardLicensingStatus } from "@/components/dashboard/dashboard-licensing-status";
 import {
   DASHBOARD_ADMIN,
   dashboardAsOfLine,
@@ -15,8 +16,10 @@ import {
   type DashboardRevenueHero,
 } from "@/lib/dashboard-admin";
 import {
+  DASHBOARD_ACTIVITY_AVATAR_CLASS,
+  DASHBOARD_ACTIVITY_ROW_CLASS,
   DASHBOARD_ADMIN_CHROME_CLASS,
-  DASHBOARD_ADMIN_HERO_ACTIVITY_CLASS,
+  DASHBOARD_ADMIN_HERO_LICENSING_CLASS,
   DASHBOARD_ADMIN_HERO_REVENUE_CLASS,
   DASHBOARD_ADMIN_OVERVIEW_CLASS,
   DASHBOARD_ADMIN_STACK_CLASS,
@@ -30,13 +33,13 @@ import {
   DASHBOARD_HERO_VALUE_CLASS,
   DASHBOARD_SECTION_TITLE_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
-  DASHBOARD_ROW_CLASS,
   DASHBOARD_ROW_LIST_CLASS,
   DASHBOARD_TITLE_DESKTOP_CLASS,
   DASHBOARD_TITLE_MOBILE_CLASS,
 } from "@/lib/dashboard-craft";
 import { DASHBOARD_FIXTURE, dashboardFixtureLabel } from "@/lib/dashboard-fixture";
-import { dashboardJustInDate } from "@/lib/dashboard-home";
+import { dashboardJustInDate, dashboardJustInTime } from "@/lib/dashboard-home";
+import type { LicensingStatusSnapshot } from "@/lib/dashboard-licensing";
 import { cn } from "@/lib/cn";
 
 export function DashboardFixtureBanner() {
@@ -151,18 +154,36 @@ export function DashboardRecentActivity({ items }: { items: readonly DashboardAc
       ) : (
         <ol className={DASHBOARD_ROW_LIST_CLASS}>
           {items.map((item) => (
-            <li key={item.id} className={DASHBOARD_ROW_CLASS}>
-              <span className="min-w-0">
+            <li key={item.id} className={DASHBOARD_ACTIVITY_ROW_CLASS}>
+              <span
+                data-dashboard-activity-actor=""
+                aria-hidden
+                className={DASHBOARD_ACTIVITY_AVATAR_CLASS}
+              >
+                {item.actor.initial}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="t-body-sm text-ink-3">{item.detail}</span>
+                {" "}
                 <Link
                   href={item.href}
-                  className="block truncate t-body-sm font-medium text-ink hover:text-ink-2"
+                  className="t-body-sm font-medium text-ink hover:text-ink-2"
                 >
                   {item.title}
                 </Link>
-                <span className="t-body-sm text-ink-3">{item.detail}</span>
               </span>
-              <time className="t-data t-body-sm shrink-0 text-right text-ink-3" dateTime={item.at}>
-                {dashboardJustInDate(item.at)}
+              <time
+                className="shrink-0 text-right"
+                dateTime={item.at}
+                data-dashboard-activity-time=""
+              >
+                <span className="block t-body-sm text-ink-3">{dashboardJustInDate(item.at)}</span>
+                <span
+                  data-dashboard-activity-clock=""
+                  className="block t-label text-ink-3"
+                >
+                  {dashboardJustInTime(item.at)}
+                </span>
               </time>
             </li>
           ))}
@@ -177,7 +198,7 @@ export function DashboardAdminHero({
   period,
   options,
   hero,
-  activity,
+  licensing,
   fixture = false,
   periodMenuOpen = false,
 }: {
@@ -185,7 +206,7 @@ export function DashboardAdminHero({
   period: DashboardPeriod;
   options: readonly DashboardPeriodOption[];
   hero: DashboardRevenueHero;
-  activity: readonly DashboardActivityRow[];
+  licensing: LicensingStatusSnapshot;
   fixture?: boolean;
   periodMenuOpen?: boolean;
 }) {
@@ -206,8 +227,8 @@ export function DashboardAdminHero({
         <div data-dashboard-overview-revenue="" className={DASHBOARD_ADMIN_HERO_REVENUE_CLASS}>
           <DashboardRevenueCard period={period} hero={hero} fixture={fixture} />
         </div>
-        <div data-dashboard-overview-activity="" className={DASHBOARD_ADMIN_HERO_ACTIVITY_CLASS}>
-          <DashboardRecentActivity items={activity} />
+        <div data-dashboard-overview-licensing="" className={DASHBOARD_ADMIN_HERO_LICENSING_CLASS}>
+          <DashboardLicensingStatus snapshot={licensing} />
         </div>
       </div>
     </div>

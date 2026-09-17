@@ -71,6 +71,9 @@ function stubClient() {
   const from = vi.fn((table: string) => {
     if (table === "titles") return titlesChain;
     if (table === "finance_periods" || table === "contract_terms") return financeChain;
+    if (table === "memberships" || table === "profiles" || table === "assets" || table === "deliveries") {
+      return financeChain;
+    }
     throw new Error(`unexpected from(${table})`);
   });
   const rpc = vi.fn(async (name: string) => {
@@ -109,6 +112,8 @@ describe("Aggregation Dashboard Coinbase register lock", () => {
     );
     expect(html).toContain("data-dashboard-period-one");
     expect(html).not.toContain("data-dashboard-period-kicker");
+    expect(html).toContain('data-dashboard-module="licensing-status"');
+    expect(html).toContain("Licensing status");
     expect(html).toContain('data-dashboard-module="recent-activity"');
     expect(html).toContain(DASHBOARD_ADMIN.activity);
     expect(html).toContain("data-dashboard-top-performing");
@@ -139,9 +144,11 @@ describe("Aggregation Dashboard Coinbase register lock", () => {
     expect(html).toContain(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS);
     expect(html).toContain(`t-heading text-ink">${DASHBOARD_ADMIN.revenue}`);
     expect(html).toContain(`t-heading text-ink">${DASHBOARD_ADMIN.activity}`);
+    expect(html).toContain(`t-heading text-ink">Licensing status`);
     expect(html).toContain(`t-heading text-ink">${DASHBOARD_HOME.topPerforming}`);
     expect(html).not.toContain(`t-label text-ink-3">${DASHBOARD_ADMIN.revenue}`);
     expect(html).not.toContain(`t-label text-ink-3">${DASHBOARD_ADMIN.activity}`);
+    expect(html).not.toContain(`t-label text-ink-3">Licensing status`);
     expect(html).not.toContain(`t-label text-ink-3">${DASHBOARD_HOME.topPerforming}`);
     expect(craft).not.toContain("amber");
     expect(craft).not.toContain("gold");
@@ -181,7 +188,13 @@ describe("Aggregation Dashboard Coinbase register lock", () => {
     expect(html).toContain("lg:col-span-3");
     expect(html).toContain("lg:col-span-2");
     expect(html.indexOf("data-dashboard-overview-revenue")).toBeLessThan(
-      html.indexOf("data-dashboard-overview-activity"),
+      html.indexOf("data-dashboard-overview-licensing"),
+    );
+    expect(html.indexOf("data-dashboard-overview-licensing")).toBeLessThan(
+      html.indexOf("data-dashboard-top-performing"),
+    );
+    expect(html.indexOf("data-dashboard-top-performing")).toBeLessThan(
+      html.indexOf('data-dashboard-module="recent-activity"'),
     );
     expect(DASHBOARD_RELATED_GAP_CLASS).toBe("gap-[var(--space-2)]");
     expect(DASHBOARD_CARD_PAD_HERO).toBe("px-[var(--space-4)] py-[var(--space-4)]");

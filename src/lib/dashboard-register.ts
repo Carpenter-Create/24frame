@@ -5,10 +5,11 @@ import { ISO_COUNTRIES } from "@/lib/territories";
 import type { ReportsCountRow } from "@/lib/reports";
 
 // Company-admin `/dashboard` register rematches RL Overview
-// (`HeadlineStats` → Net revenue left, activity right, `TopWorksCard` →
-// Top titles, `TerritoryMap` → Territories map/list/bars). House tokens
-// only — Geist · Sporty Blue · hairline. 24Frame nouns only. No Top works /
-// sources / contributors / Exports. Coinbase quieter than RL flourish.
+// (`HeadlineStats` → Net revenue left, Licensing status right, `TopWorksCard` →
+// Top titles, `TerritoryMap` → Territories map/list/bars). Recent account
+// activity sits full-width under Top performing. House tokens only — Geist ·
+// Sporty Blue · hairline. 24Frame nouns only. No Top works / sources /
+// contributors / Exports. Coinbase quieter than RL flourish.
 
 export const DASHBOARD_REGISTER_VIEWS = ["map", "list", "bars"] as const;
 

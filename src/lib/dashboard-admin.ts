@@ -1,6 +1,7 @@
 import { DASHBOARD_HOME_STACK, type ClientHomeFinding, type ClientHomeTitle } from "@/lib/dashboard-home";
 import { formatUsdCents } from "@/lib/finance";
 import { parseReportsUserId, reportsUserLabel, type ReportsUserOption } from "@/lib/reports";
+import { titleClientPath } from "@/lib/title-public-id";
 
 // Company-admin Dashboard hero. Period URL state rematch RL Overview
 // behavior only — Geist / Sporty Blue / hairline. One unlabeled period menu.
@@ -119,6 +120,11 @@ export type DashboardCompare = {
   priorLabel: string;
 };
 
+export type DashboardActivityActor = {
+  id: string | null;
+  initial: string;
+};
+
 export type DashboardActivityRow = {
   id: string;
   title: string;
@@ -126,6 +132,8 @@ export type DashboardActivityRow = {
   at: string;
   count: number;
   detail: string;
+  actorId: string | null;
+  actor: DashboardActivityActor;
 };
 
 function scalarQuery(value: string | string[] | undefined): string | undefined {
@@ -556,13 +564,62 @@ export function nearestChartPoint(
   return best;
 }
 
+export function dashboardActivityInitial(name: string | null | undefined): string {
+  const trimmed = name?.trim() ?? "";
+  return (trimmed.charAt(0) || "?").toUpperCase();
+}
+
+export function dashboardActivityActor(
+  actorId: string | null | undefined,
+  name?: string | null,
+): DashboardActivityActor {
+  const id = actorId?.trim() || null;
+  return { id, initial: dashboardActivityInitial(name) };
+}
+
+export function activityDeliveryId(rowId: string): string | null {
+  return rowId.startsWith("delivery:") ? rowId.slice("delivery:".length) : null;
+}
+
+/**
+ * Overlay real delivery actors + profile names. Missing people stay a muted
+ * "?" — never an invented name.
+ */
+export function applyActivityActors(
+  rows: readonly DashboardActivityRow[],
+  input: {
+    deliveryActors?: ReadonlyMap<string, string | null>;
+    profileNames?: ReadonlyMap<string, string | null>;
+  } = {},
+): DashboardActivityRow[] {
+  return rows.map((row) => {
+    const deliveryId = activityDeliveryId(row.id);
+    const actorId =
+      (deliveryId ? input.deliveryActors?.get(deliveryId) : null) ?? row.actorId;
+    const name = actorId ? (input.profileNames?.get(actorId) ?? null) : null;
+    return {
+      ...row,
+      actorId,
+      actor: dashboardActivityActor(actorId, name),
+    };
+  });
+}
+
+function activityHref(catalogId: string | null | undefined): string {
+  return titleClientPath(catalogId);
+}
+
 export function recentAccountActivity(input: {
-  titles: readonly (ClientHomeTitle & { created_by?: string | null })[];
+  titles: readonly (ClientHomeTitle & {
+    created_by?: string | null;
+    catalog_id?: string | null;
+  })[];
   deliveries: readonly {
     delivery_id: string;
     title_id: string;
     title: string;
     updated_at: string | null;
+    created_by?: string | null;
   }[];
   findings: readonly ClientHomeFinding[];
   period: DashboardPeriod;
@@ -578,24 +635,31 @@ export function recentAccountActivity(input: {
 
   const rows: DashboardActivityRow[] = [];
   for (const title of titles) {
+    const actorId = title.created_by?.trim() || null;
     rows.push({
       id: `title:${title.id}`,
       title: title.title,
-      href: `/titles/${title.id}`,
+      href: activityHref(title.catalog_id),
       at: title.created_at,
       count: deliveryCounts.get(title.id) ?? 0,
       detail: DASHBOARD_ADMIN.titleAdded,
+      actorId,
+      actor: dashboardActivityActor(actorId),
     });
   }
   for (const row of deliveries) {
     if (!row.updated_at) continue;
+    const title = input.titles.find((item) => item.id === row.title_id);
+    const actorId = row.created_by?.trim() || null;
     rows.push({
       id: `delivery:${row.delivery_id}`,
       title: row.title,
-      href: `/titles/${row.title_id}`,
+      href: activityHref(title?.catalog_id),
       at: row.updated_at,
       count: 1,
       detail: DASHBOARD_ADMIN.deliveryUpdated,
+      actorId,
+      actor: dashboardActivityActor(actorId),
     });
   }
   for (const finding of input.findings) {
@@ -606,10 +670,12 @@ export function recentAccountActivity(input: {
     rows.push({
       id: `finding:${finding.entity_id}:${finding.created_at}`,
       title: title.title,
-      href: `/titles/${title.id}`,
+      href: activityHref(title.catalog_id),
       at: finding.created_at,
       count: 0,
       detail: finding.message?.trim() || DASHBOARD_ADMIN.findingOpened,
+      actorId: null,
+      actor: dashboardActivityActor(null),
     });
   }
 

@@ -107,6 +107,8 @@ export function dashboardFixtureActivity(
         at,
         count: title.count,
         detail: title.detail,
+        actorId: null,
+        actor: { id: null, initial: "?" },
       },
     ];
   });
