@@ -17,16 +17,14 @@ describe("SideNav Access rail", () => {
     expect(NAV.map((item) => item.label)).toEqual([
       "Dashboard",
       "Titles",
-      "Deliveries",
-      "Catalog Health",
+      "Attention",
       "Reports",
       "Ask 24Frame AI",
     ]);
     expect(NAV.map((item) => item.href)).toEqual([
       "/dashboard",
       "/titles",
-      "/deliveries",
-      "/catalog-health",
+      "/attention",
       "/reports",
       "/messages",
     ]);

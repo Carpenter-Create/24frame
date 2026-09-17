@@ -312,10 +312,10 @@ export default async function TitleDetailPage({ params }: { params: Promise<{ id
         className="mt-[var(--space-4)] flex flex-wrap gap-[var(--space-4)]"
         data-title-ops-links=""
       >
-        <Link href="/deliveries" className="t-body-sm text-accent">
+        <Link href="/titles" className="t-body-sm text-accent">
           {TITLE_DETAIL.deliveriesLink}
         </Link>
-        <Link href="/catalog-health" className="t-body-sm text-accent">
+        <Link href="/attention" className="t-body-sm text-accent">
           {TITLE_DETAIL.healthLink}
         </Link>
       </nav>

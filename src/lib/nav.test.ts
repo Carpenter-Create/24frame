@@ -39,11 +39,12 @@ describe("client NAV", () => {
     expect(hrefs).toEqual([
       "/dashboard",
       "/titles",
-      "/deliveries",
-      "/catalog-health",
+      "/attention",
       "/reports",
       "/messages",
     ]);
+    expect(hrefs).not.toContain("/deliveries");
+    expect(hrefs).not.toContain("/catalog-health");
     expect(hrefs).not.toContain("/");
     expect(hrefs).not.toContain("/finance");
     expect(hrefs).not.toContain("/gc/deliveries");
@@ -61,6 +62,8 @@ describe("client NAV", () => {
     expect(isClientNavActive("/titles", NAV[0])).toBe(false);
     expect(clientNavCurrent("/titles").label).toBe("Titles");
     expect(clientNavCurrent("/titles/abc").label).toBe("Titles");
+    expect(clientNavCurrent("/attention").label).toBe("Attention");
+    expect(clientNavCurrent("/catalog-health").label).toBe("Attention");
     expect(clientNavCurrent("/reports").label).toBe("Reports");
     expect(clientNavCurrent("/analytics").label).toBe("Reports");
     expect(clientNavCurrent("/earn").label).toBe("Reports");
@@ -100,7 +103,6 @@ describe("client NAV", () => {
     expect(NAV.map((item) => item.icon)).toEqual([
       SquaresFour,
       FilmSlate,
-      PaperPlaneTilt,
       Pulse,
       ChartBar,
       Sparkle,
@@ -147,8 +149,7 @@ describe("GC_NAV", () => {
     expect([...NAV, ...GC_NAV].map((item) => item.label)).toEqual([
       "Dashboard",
       "Titles",
-      "Deliveries",
-      "Catalog Health",
+      "Attention",
       "Reports",
       "Ask 24Frame AI",
       "Queue",
@@ -173,8 +174,7 @@ describe("mobileNavDestinations", () => {
     expect(mobileNavDestinations(false).map((item) => item.label)).toEqual([
       "Dashboard",
       "Titles",
-      "Deliveries",
-      "Catalog Health",
+      "Attention",
       "Reports",
       "Ask 24Frame AI",
     ]);
@@ -187,8 +187,7 @@ describe("mobileNavDestinations", () => {
     expect(mobileNavDestinations(true).map((item) => item.label)).toEqual([
       "Dashboard",
       "Titles",
-      "Deliveries",
-      "Catalog Health",
+      "Attention",
       "Reports",
       "Ask 24Frame AI",
       "Queue",

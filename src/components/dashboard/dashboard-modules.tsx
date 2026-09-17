@@ -130,7 +130,7 @@ export function DashboardFindingsGlance({
     <DashboardHomePanel aria-label={DASHBOARD_HOME.findingsGlance} data-dashboard-module="findings-glance">
       <div className={`flex items-center justify-between ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD_LIST}`}>
         <p className={DASHBOARD_SECTION_TITLE_CLASS}>{DASHBOARD_HOME.findingsGlance}</p>
-        <TextAction href="/catalog-health">{DASHBOARD_HOME.findingsGlanceCta}</TextAction>
+        <TextAction href="/attention">{DASHBOARD_HOME.findingsGlanceCta}</TextAction>
       </div>
       <div className="border-t border-hairline px-[var(--space-4)] py-[var(--space-4)]">
         <p

@@ -472,15 +472,15 @@ describe("client home type locks", () => {
     expect(html).not.toMatch(/text-green|bg-green|text-emerald/);
   });
 
-  it("renders the Catalog Health pill as the one accent action to /catalog-health", () => {
+  it("renders the Attention pill as the one accent action to /attention", () => {
     const html = renderToStaticMarkup(
       createElement(
         DashboardHomePillLink,
-        { href: "/catalog-health" } as { href: string; children: string },
+        { href: "/attention" } as { href: string; children: string },
         DASHBOARD_HOME.catalogHealthCta,
       ),
     );
-    expect(html).toContain('href="/catalog-health"');
+    expect(html).toContain('href="/attention"');
     expect(html).toContain(DASHBOARD_HOME.catalogHealthCta);
     expect(html).toContain("h-9");
     expect(html).toContain("t-body-sm");

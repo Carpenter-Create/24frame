@@ -7,8 +7,12 @@ export const FINDING_SEVERITY_LABEL: Record<"high" | "low", string> = {
   low: "Recommended",
 };
 
-// Catalog Health = the single client-side findings/health overview.
-export const CATALOG_HEALTH_TITLE = "Catalog Health";
+// Attention = the single client-side findings/health overview.
+// Former Catalog Health route `/catalog-health` redirects here.
+export const ATTENTION_TITLE = "Attention";
+export const ATTENTION_HREF = "/attention";
+export const CATALOG_HEALTH_HREF = "/catalog-health";
+export const CATALOG_HEALTH_TITLE = ATTENTION_TITLE;
 export const CATALOG_HEALTH_SUBTITLE = "What needs your attention across your catalog.";
 export const CATALOG_HEALTH_EMPTY = "Nothing needs your attention right now.";
 export const CATALOG_HEALTH_TRUNCATED = `Showing the first ${UNPAGINATED_MAX} open findings. More exist — this list is not complete.`;

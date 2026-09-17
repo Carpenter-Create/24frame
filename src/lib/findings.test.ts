@@ -19,7 +19,7 @@ describe("catalog health findings helpers", () => {
   it("names the findings count without inventing a mark-done action", () => {
     expect(catalogHealthCountLabel(1)).toBe("1 finding");
     expect(catalogHealthCountLabel(2)).toBe("2 findings");
-    expect(CATALOG_HEALTH_TITLE).toBe("Catalog Health");
+    expect(CATALOG_HEALTH_TITLE).toBe("Attention");
     expect(CATALOG_HEALTH_SUBTITLE).toBe("What needs your attention across your catalog.");
     expect(CATALOG_HEALTH_EMPTY).toBe("Nothing needs your attention right now.");
     expect(CATALOG_HEALTH_EMPTY.toLowerCase()).not.toContain("mark");

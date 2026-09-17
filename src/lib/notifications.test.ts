@@ -18,16 +18,16 @@ describe("NOTIFICATION_EMAIL.delivery_update.link (sender-facing API)", () => {
     });
   });
 
-  it("pairs /deliveries with View your deliveries when titleId is absent", () => {
-    expect(link({})).toEqual({ path: "/deliveries", cta: "View your deliveries" });
-    expect(link()).toEqual({ path: "/deliveries", cta: "View your deliveries" });
+  it("pairs /titles with View your titles when titleId is absent", () => {
+    expect(link({})).toEqual({ path: "/titles", cta: "View your titles" });
+    expect(link()).toEqual({ path: "/titles", cta: "View your titles" });
   });
 
-  it("pairs /deliveries with View your deliveries for unsafe titleId values", () => {
+  it("pairs /titles with View your titles for unsafe titleId values", () => {
     for (const titleId of ["../admin", "not-a-uuid", `${TITLE_ID}/extra`, ""]) {
       expect(link({ titleId })).toEqual({
-        path: "/deliveries",
-        cta: "View your deliveries",
+        path: "/titles",
+        cta: "View your titles",
       });
     }
   });

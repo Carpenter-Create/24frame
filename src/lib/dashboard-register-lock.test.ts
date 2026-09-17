@@ -71,7 +71,13 @@ function stubClient() {
   const from = vi.fn((table: string) => {
     if (table === "titles") return titlesChain;
     if (table === "finance_periods" || table === "contract_terms") return financeChain;
-    if (table === "memberships" || table === "profiles" || table === "assets" || table === "deliveries") {
+    if (
+      table === "memberships" ||
+      table === "profiles" ||
+      table === "assets" ||
+      table === "deliveries" ||
+      table === "audit_log"
+    ) {
       return financeChain;
     }
     throw new Error(`unexpected from(${table})`);
@@ -112,6 +118,8 @@ describe("Aggregation Dashboard Coinbase register lock", () => {
     );
     expect(html).toContain("data-dashboard-period-one");
     expect(html).not.toContain("data-dashboard-period-kicker");
+    expect(html).toContain('data-dashboard-module="attention"');
+    expect(html).toContain("Attention");
     expect(html).toContain('data-dashboard-module="licensing-status"');
     expect(html).toContain("Licensing status");
     expect(html).toContain('data-dashboard-module="recent-activity"');
@@ -144,10 +152,12 @@ describe("Aggregation Dashboard Coinbase register lock", () => {
     expect(html).toContain(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS);
     expect(html).toContain(`t-heading text-ink">${DASHBOARD_ADMIN.revenue}`);
     expect(html).toContain(`t-heading text-ink">${DASHBOARD_ADMIN.activity}`);
+    expect(html).toContain(`t-heading text-ink">Attention`);
     expect(html).toContain(`t-heading text-ink">Licensing status`);
     expect(html).toContain(`t-heading text-ink">${DASHBOARD_HOME.topPerforming}`);
     expect(html).not.toContain(`t-label text-ink-3">${DASHBOARD_ADMIN.revenue}`);
     expect(html).not.toContain(`t-label text-ink-3">${DASHBOARD_ADMIN.activity}`);
+    expect(html).not.toContain(`t-label text-ink-3">Attention`);
     expect(html).not.toContain(`t-label text-ink-3">Licensing status`);
     expect(html).not.toContain(`t-label text-ink-3">${DASHBOARD_HOME.topPerforming}`);
     expect(craft).not.toContain("amber");
@@ -185,12 +195,16 @@ describe("Aggregation Dashboard Coinbase register lock", () => {
     expect(html).not.toContain("shadow-md");
     expect(html).toContain("shadow-none");
     expect(html).toContain("lg:grid-cols-5");
+    expect(html).toContain("items-start");
     expect(html).toContain("lg:col-span-3");
     expect(html).toContain("lg:col-span-2");
     expect(html.indexOf("data-dashboard-overview-revenue")).toBeLessThan(
-      html.indexOf("data-dashboard-overview-licensing"),
+      html.indexOf("data-dashboard-overview-attention"),
     );
-    expect(html.indexOf("data-dashboard-overview-licensing")).toBeLessThan(
+    expect(html.indexOf("data-dashboard-overview-attention")).toBeLessThan(
+      html.indexOf('data-dashboard-module="licensing-status"'),
+    );
+    expect(html.indexOf('data-dashboard-module="licensing-status"')).toBeLessThan(
       html.indexOf("data-dashboard-top-performing"),
     );
     expect(html.indexOf("data-dashboard-top-performing")).toBeLessThan(

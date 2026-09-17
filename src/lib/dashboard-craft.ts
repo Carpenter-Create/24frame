@@ -96,21 +96,21 @@ export const DASHBOARD_MOBILE_BREAKPOINT_CLASS = "max-md";
 export const DASHBOARD_ADMIN_CHROME_CLASS =
   "flex flex-row items-center justify-between gap-[var(--space-2)] md:flex-row md:items-start md:justify-between md:gap-[var(--space-6)]";
 
-// Desktop: Net revenue dominant left (3) · Licensing status right (2).
-// Phone (`< md`): stack Revenue then Licensing. Recent activity is full-width
-// below Top performing — not this pair.
+// Desktop: taller Net revenue left (3) · Attention glance right (2).
+// Phone (`< md`): stack Revenue then Attention. Licensing status is
+// full-width under this pair, then Top performing, then Recent activity.
 export const DASHBOARD_ADMIN_OVERVIEW_CLASS =
-  "grid grid-cols-1 gap-[var(--space-6)] max-md:flex max-md:flex-col lg:grid-cols-5";
+  "grid grid-cols-1 items-start gap-[var(--space-6)] max-md:flex max-md:flex-col lg:grid-cols-5";
 
 export const DASHBOARD_ADMIN_HERO_REVENUE_CLASS = "lg:col-span-3";
 
-export const DASHBOARD_ADMIN_HERO_LICENSING_CLASS = "lg:col-span-2";
+export const DASHBOARD_ADMIN_HERO_ATTENTION_CLASS = "lg:col-span-2";
 
 export const DASHBOARD_LICENSING_THUMB_CLASS =
   "relative aspect-[16/9] w-16 shrink-0 overflow-hidden rounded-[var(--radius-sm)] bg-surface-muted [&_img]:h-full [&_img]:w-full [&_img]:object-cover [&_img]:object-center";
 
-export const DASHBOARD_LICENSING_SUMMARY_CLASS =
-  "grid grid-cols-3 gap-[var(--space-2)] border-t border-hairline px-[var(--space-4)] py-[var(--space-2)]";
+export const DASHBOARD_LICENSING_NEST_CLASS =
+  "px-[var(--space-4)] py-[var(--space-3)]";
 
 export const DASHBOARD_ACTIVITY_ROW_CLASS =
   "flex min-h-10 items-center gap-[var(--space-2)] px-[var(--space-4)] py-[var(--space-2)]";
@@ -176,8 +176,8 @@ export const DASHBOARD_DO_NEXT_SECONDARY_CLASS =
   "max-md:border-transparent max-md:bg-transparent";
 
 export const DASHBOARD_CHART_HEIGHT_MOBILE = 176;
-export const DASHBOARD_CHART_HEIGHT_DESKTOP = 200;
-export const DASHBOARD_CHART_FRAME_CLASS = "relative h-[176px] w-full md:h-[200px]";
+export const DASHBOARD_CHART_HEIGHT_DESKTOP = 240;
+export const DASHBOARD_CHART_FRAME_CLASS = "relative h-[176px] w-full md:h-[240px]";
 
 // Named metric-block → chart gap (16). Empty well is page-48 compact — not 176 theater.
 export const DASHBOARD_HERO_TO_CHART_GAP_CLASS = "pt-[var(--space-4)]";

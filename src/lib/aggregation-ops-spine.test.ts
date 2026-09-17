@@ -15,23 +15,23 @@ function src(rel: string): string {
 }
 
 describe("aggregation ops spine rematch", () => {
-  it("keeps Titles · Deliveries · Catalog Health as distinct rail jobs", () => {
+  it("keeps Titles · Attention as distinct rail jobs", () => {
     expect(NAV.map((item) => item.label)).toEqual([
       "Dashboard",
       "Titles",
-      "Deliveries",
-      "Catalog Health",
+      "Attention",
       "Reports",
       "Ask 24Frame AI",
     ]);
     expect(NAV.map((item) => item.href)).toEqual([
       "/dashboard",
       "/titles",
-      "/deliveries",
-      "/catalog-health",
+      "/attention",
       "/reports",
       "/messages",
     ]);
+    expect(NAV.map((item) => item.href)).not.toContain("/deliveries");
+    expect(NAV.map((item) => item.href)).not.toContain("/catalog-health");
   });
 
   it("keeps product-true title statuses and Required / Recommended findings", () => {
@@ -46,16 +46,16 @@ describe("aggregation ops spine rematch", () => {
       "Archived",
     ]);
     expect(FINDING_SEVERITY_LABEL).toEqual({ high: "Required", low: "Recommended" });
-    expect(CATALOG_HEALTH_TITLE).toBe("Catalog Health");
+    expect(CATALOG_HEALTH_TITLE).toBe("Attention");
     expect(DELIVERIES_NO_DATA.actionHref).toBe("/titles");
   });
 
   it("does not invent analytics, period, or create-delivery chrome on the three ops routes", () => {
     const titles = src("src/app/(app)/titles/page.tsx");
     const deliveries = src("src/app/(app)/deliveries/page.tsx");
-    const health = src("src/app/(app)/catalog-health/page.tsx");
+    const health = src("src/app/(app)/attention/page.tsx");
 
-    for (const page of [titles, deliveries, health]) {
+    for (const page of [titles, health]) {
       expect(page).not.toMatch(/\bDownload\b/);
       expect(page).not.toMatch(/\bEarn\b/);
       expect(page).not.toMatch(/period/i);
@@ -65,8 +65,9 @@ describe("aggregation ops spine rematch", () => {
       expect(page).not.toContain("Create delivery");
     }
     expect(titles).toContain("AddTitleButton");
-    expect(deliveries).toContain("data-deliveries-pipeline");
+    expect(deliveries).toContain('redirect("/titles")');
     expect(health).toContain("catalogHealthTitleHref");
     expect(health).toContain("FindingRows");
+    expect(health).toContain("ATTENTION_TITLE");
   });
 });

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { DashboardViewAll } from "@/components/dashboard/dashboard-view-alts";
 import { DashboardAdminControls } from "@/components/dashboard/dashboard-admin-controls";
 import { DashboardRevenueChart } from "@/components/dashboard/dashboard-revenue-chart";
-import { DashboardLicensingStatus } from "@/components/dashboard/dashboard-licensing-status";
+import { DashboardAttention } from "@/components/dashboard/dashboard-attention";
 import {
   DASHBOARD_ADMIN,
   dashboardAsOfLine,
@@ -19,7 +19,7 @@ import {
   DASHBOARD_ACTIVITY_AVATAR_CLASS,
   DASHBOARD_ACTIVITY_ROW_CLASS,
   DASHBOARD_ADMIN_CHROME_CLASS,
-  DASHBOARD_ADMIN_HERO_LICENSING_CLASS,
+  DASHBOARD_ADMIN_HERO_ATTENTION_CLASS,
   DASHBOARD_ADMIN_HERO_REVENUE_CLASS,
   DASHBOARD_ADMIN_OVERVIEW_CLASS,
   DASHBOARD_ADMIN_STACK_CLASS,
@@ -39,7 +39,7 @@ import {
 } from "@/lib/dashboard-craft";
 import { DASHBOARD_FIXTURE, dashboardFixtureLabel } from "@/lib/dashboard-fixture";
 import { dashboardJustInDate, dashboardJustInTime } from "@/lib/dashboard-home";
-import type { LicensingStatusSnapshot } from "@/lib/dashboard-licensing";
+import type { AttentionSnapshot } from "@/lib/dashboard-attention";
 import { cn } from "@/lib/cn";
 
 export function DashboardFixtureBanner() {
@@ -198,7 +198,7 @@ export function DashboardAdminHero({
   period,
   options,
   hero,
-  licensing,
+  attention,
   fixture = false,
   periodMenuOpen = false,
 }: {
@@ -206,7 +206,7 @@ export function DashboardAdminHero({
   period: DashboardPeriod;
   options: readonly DashboardPeriodOption[];
   hero: DashboardRevenueHero;
-  licensing: LicensingStatusSnapshot;
+  attention: AttentionSnapshot;
   fixture?: boolean;
   periodMenuOpen?: boolean;
 }) {
@@ -227,8 +227,8 @@ export function DashboardAdminHero({
         <div data-dashboard-overview-revenue="" className={DASHBOARD_ADMIN_HERO_REVENUE_CLASS}>
           <DashboardRevenueCard period={period} hero={hero} fixture={fixture} />
         </div>
-        <div data-dashboard-overview-licensing="" className={DASHBOARD_ADMIN_HERO_LICENSING_CLASS}>
-          <DashboardLicensingStatus snapshot={licensing} />
+        <div data-dashboard-overview-attention="" className={DASHBOARD_ADMIN_HERO_ATTENTION_CLASS}>
+          <DashboardAttention snapshot={attention} />
         </div>
       </div>
     </div>

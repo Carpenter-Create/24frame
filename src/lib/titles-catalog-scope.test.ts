@@ -15,7 +15,7 @@ function src(rel: string): string {
 const OTHER_PAGES = [
   "src/app/(app)/dashboard/page.tsx",
   "src/app/(app)/deliveries/page.tsx",
-  "src/app/(app)/catalog-health/page.tsx",
+  "src/app/(app)/attention/page.tsx",
   "src/app/(app)/messages/page.tsx",
   "src/app/(app)/(operator)/gc/titles/[id]/page.tsx",
   "src/app/(app)/titles/[id]/page.tsx",
@@ -105,10 +105,10 @@ describe("titles catalog scope", () => {
     expect(homePage).not.toContain("-mx-[var(--space-4)]");
   });
 
-  it("deep-links title detail into Deliveries and Catalog Health", () => {
+  it("deep-links title detail into Titles and Attention", () => {
     const titleDetail = src("src/app/(app)/titles/[id]/page.tsx");
-    expect(titleDetail).toContain('href="/deliveries"');
-    expect(titleDetail).toContain('href="/catalog-health"');
+    expect(titleDetail).toContain('href="/titles"');
+    expect(titleDetail).toContain('href="/attention"');
     expect(titleDetail).toContain("data-title-ops-links");
     expect(titleDetail).toContain("TITLE_DETAIL");
   });
@@ -116,7 +116,8 @@ describe("titles catalog scope", () => {
   it("does not add a drafts nav item or move the catalog onto deliveries", () => {
     expect(NAV.filter((item) => item.href === "/titles")).toHaveLength(1);
     expect(NAV.some((item) => /draft/i.test(item.label))).toBe(false);
-    expect(NAV.find((item) => item.href === "/deliveries")?.label).toBe("Deliveries");
+    expect(NAV.find((item) => item.href === "/attention")?.label).toBe("Attention");
+    expect(NAV.find((item) => item.href === "/deliveries")).toBeUndefined();
     expect(GC_NAV.some((item) => item.href === "/titles")).toBe(false);
   });
 

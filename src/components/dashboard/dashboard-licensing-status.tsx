@@ -3,23 +3,22 @@ import { Camera } from "lucide-react";
 
 import { DashboardViewAll } from "@/components/dashboard/dashboard-view-alts";
 import { Artwork } from "@/components/layout/artwork";
+import { StatusProgressTrack } from "@/components/ui/status-progress-track";
 import { cn } from "@/lib/cn";
 import {
   DASHBOARD_CARD_CLASS,
   DASHBOARD_CARD_PAD_LIST,
-  DASHBOARD_LICENSING_SUMMARY_CLASS,
+  DASHBOARD_LICENSING_NEST_CLASS,
   DASHBOARD_LICENSING_THUMB_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
-  DASHBOARD_ROW_CLASS,
-  DASHBOARD_ROW_LIST_CLASS,
   DASHBOARD_SECTION_TITLE_CLASS,
 } from "@/lib/dashboard-craft";
 import {
   DASHBOARD_LICENSING,
-  type LicensingRow,
+  type LicensingEndpointRow,
   type LicensingStatusSnapshot,
+  type LicensingTitleGroup,
 } from "@/lib/dashboard-licensing";
-import { catalogStatusPillClass } from "@/lib/titles-catalog";
 
 function LicensingThumb({ title, stillUrl }: { title: string; stillUrl: string | null }) {
   return (
@@ -44,18 +43,47 @@ function LicensingThumb({ title, stillUrl }: { title: string; stillUrl: string |
   );
 }
 
-function LicensingStatusPill({ status, label }: { status: string; label: string }) {
+function LicensingEndpointRowView({ row }: { row: LicensingEndpointRow }) {
   return (
-    <span
-      data-dashboard-status-pill=""
-      data-dashboard-licensing-pill=""
-      className={cn(
-        "inline-flex shrink-0 items-center rounded-full px-[var(--space-3)] py-[var(--space-1)] t-body-sm",
-        catalogStatusPillClass(status),
-      )}
+    <li
+      data-dashboard-licensing-endpoint={row.deliveryId}
+      className="flex min-h-10 items-center justify-between gap-[var(--space-2)]"
     >
-      {label}
-    </span>
+      <span
+        data-dashboard-licensing-endpoint-meta=""
+        className="min-w-0 truncate t-body-sm text-ink-3"
+      >
+        {row.endpoint}
+      </span>
+      <StatusProgressTrack
+        pipeline="delivery"
+        status={row.status}
+        data-dashboard-licensing-track=""
+      />
+    </li>
+  );
+}
+
+function LicensingTitleGroupView({ group }: { group: LicensingTitleGroup }) {
+  return (
+    <li data-dashboard-licensing-title={group.id} className={DASHBOARD_LICENSING_NEST_CLASS}>
+      <div className="flex items-start gap-[var(--space-3)]">
+        <LicensingThumb title={group.title} stillUrl={group.stillUrl} />
+        <div className="min-w-0 flex-1">
+          <Link
+            href={group.href}
+            className="block truncate t-body-sm font-medium text-ink hover:text-ink-2"
+          >
+            {group.title}
+          </Link>
+          <ul className="mt-[var(--space-2)]" data-dashboard-licensing-endpoints="">
+            {group.endpoints.map((row) => (
+              <LicensingEndpointRowView key={row.deliveryId} row={row} />
+            ))}
+          </ul>
+        </div>
+      </div>
+    </li>
   );
 }
 
@@ -64,16 +92,6 @@ export function DashboardLicensingStatus({
 }: {
   snapshot: LicensingStatusSnapshot;
 }) {
-  const counts = [
-    { key: "ready", label: DASHBOARD_LICENSING.ready, value: snapshot.ready },
-    {
-      key: "needsAttention",
-      label: DASHBOARD_LICENSING.needsAttention,
-      value: snapshot.needsAttention,
-    },
-    { key: "inReview", label: DASHBOARD_LICENSING.inReview, value: snapshot.inReview },
-  ] as const;
-
   return (
     <section
       aria-label={DASHBOARD_LICENSING.title}
@@ -84,20 +102,7 @@ export function DashboardLicensingStatus({
         <p className={DASHBOARD_SECTION_TITLE_CLASS}>{DASHBOARD_LICENSING.title}</p>
         <DashboardViewAll href={DASHBOARD_LICENSING.viewAllHref} />
       </div>
-      <dl className={DASHBOARD_LICENSING_SUMMARY_CLASS} data-dashboard-licensing-summary="">
-        {counts.map((count) => (
-          <div key={count.key} className="min-w-0">
-            <dt className="t-label text-ink-3">{count.label}</dt>
-            <dd
-              data-dashboard-licensing-count={count.key}
-              className="t-data t-body-sm text-ink"
-            >
-              {count.value}
-            </dd>
-          </div>
-        ))}
-      </dl>
-      {snapshot.rows.length === 0 ? (
+      {snapshot.groups.length === 0 ? (
         <p
           data-dashboard-licensing-empty=""
           className="border-t border-hairline px-[var(--space-4)] py-[var(--space-2)] t-body-sm text-ink-3"
@@ -105,31 +110,9 @@ export function DashboardLicensingStatus({
           {DASHBOARD_LICENSING.empty}
         </p>
       ) : (
-        <ul className={DASHBOARD_ROW_LIST_CLASS}>
-          {snapshot.rows.map((row: LicensingRow) => (
-            <li key={row.id}>
-              <Link
-                href={row.href}
-                data-dashboard-licensing-row={row.id}
-                className={cn(DASHBOARD_ROW_CLASS, "hover:text-ink-2")}
-              >
-                <LicensingThumb title={row.title} stillUrl={row.stillUrl} />
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate t-body-sm font-medium text-ink">
-                    {row.title}
-                  </span>
-                  {row.meta ? (
-                    <span
-                      data-dashboard-licensing-meta=""
-                      className="block truncate t-body-sm text-ink-3"
-                    >
-                      {row.meta}
-                    </span>
-                  ) : null}
-                </span>
-                <LicensingStatusPill status={row.status} label={row.statusLabel} />
-              </Link>
-            </li>
+        <ul className="divide-y divide-hairline border-t border-hairline">
+          {snapshot.groups.map((group) => (
+            <LicensingTitleGroupView key={group.id} group={group} />
           ))}
         </ul>
       )}

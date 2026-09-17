@@ -1,83 +1,24 @@
-import { renderToStaticMarkup } from "react-dom/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { readFileSync } from "node:fs";
+import { describe, expect, it, vi } from "vitest";
 
-import { createClient } from "@/lib/supabase/server";
-import { DELIVERIES_NO_DATA, DELIVERIES_TRUNCATED } from "@/lib/deliveries-browse";
-import { UNPAGINATED_MAX } from "@/lib/list-bounds";
-import DeliveriesPage from "./page";
+import DeliveriesRedirectPage from "./page";
 
-vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
+vi.mock("next/navigation", () => ({
+  redirect: vi.fn((to: string) => {
+    throw new Error(`REDIRECT:${to}`);
+  }),
+}));
 
-const ROW = {
-  delivery_id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
-  title_id: "11111111-1111-4111-8111-111111111111",
-  title: "Winter Light",
-  vendor_name: "Endpoint",
-  territory: "US",
-  status: "live",
-  updated_at: "2026-09-01T00:00:00.000Z",
-};
-
-function stubRpc(data: unknown[]) {
-  const rpc = vi.fn(async () => ({ data, error: null }));
-  vi.mocked(createClient).mockResolvedValue({ rpc } as never);
-  return { rpc };
-}
-
-describe("DeliveriesPage bounds", () => {
-  beforeEach(() => vi.clearAllMocks());
-
-  it("probes one row past the cap so truncation can be detected", async () => {
-    const { rpc } = stubRpc([]);
-    await DeliveriesPage({ searchParams: Promise.resolve({}) });
-    expect(rpc).toHaveBeenCalledWith("my_deliveries", { p_limit: UNPAGINATED_MAX + 1 });
-  });
-
-  it("renders no truncated state when the list is short", async () => {
-    stubRpc([ROW]);
-    const html = renderToStaticMarkup(
-      await DeliveriesPage({ searchParams: Promise.resolve({}) }),
-    );
-    expect(html).toContain("Winter Light");
-    expect(html).toContain("1 package");
-    expect(html).toContain("1 title");
-    expect(html).toContain("data-deliveries-pipeline");
-    expect(html).toContain("data-deliveries-row");
-    expect(html).toContain("Live");
-    expect(html).toContain("data-deliveries-status");
-    expect(html).toContain('data-status-progress-variant="pipeline"');
-    expect(html).toContain("mr-[var(--space-4)]");
-    expect(html.match(/data-status-progress-seg="filled"/g) ?? []).toHaveLength(3);
-    expect(html).toContain("Filter by status");
-    expect(html).not.toContain("Platform");
-    expect(html).not.toContain("Download");
-    expect(html).not.toContain("Create delivery");
-    expect(html).not.toContain('data-my-list-truncated="deliveries"');
-    expect(html).not.toContain(DELIVERIES_TRUNCATED);
-  });
-
-  it("renders rejected as a muted badge with no track", async () => {
-    stubRpc([{ ...ROW, status: "rejected" }]);
-    const html = renderToStaticMarkup(
-      await DeliveriesPage({ searchParams: Promise.resolve({}) }),
-    );
-    expect(html).toContain("Rejected");
-    expect(html).toContain('data-status-progress-variant="off"');
-    expect(html).not.toContain("data-status-progress-track");
-    expect(html).toContain("Filter by status");
-  });
-
-  it("surfaces an honest notice when the probe overflows", async () => {
-    const rows = Array.from({ length: UNPAGINATED_MAX + 1 }, (_, i) => ({
-      ...ROW,
-      delivery_id: `aaaaaaaa-aaaa-4aaa-8aaa-${String(i).padStart(12, "0")}`,
-    }));
-    stubRpc(rows);
-    const html = renderToStaticMarkup(
-      await DeliveriesPage({ searchParams: Promise.resolve({}) }),
-    );
-    expect(html).toContain('data-my-list-truncated="deliveries"');
-    expect(html).toContain(DELIVERIES_TRUNCATED);
-    expect(html).not.toContain(DELIVERIES_NO_DATA.title);
+describe("client Deliveries redirect", () => {
+  it("redirects /deliveries to /titles and does not render a browse page", () => {
+    expect(() => DeliveriesRedirectPage()).toThrow("REDIRECT:/titles");
+    const pageSrc = readFileSync("src/app/(app)/deliveries/page.tsx", "utf8");
+    expect(pageSrc).toContain("redirect");
+    expect(pageSrc).toContain("/titles");
+    expect(pageSrc).not.toContain("data-deliveries-pipeline");
+    expect(pageSrc).not.toContain("loadMyDeliveries");
+    expect(pageSrc).not.toContain("/licensing");
+    const staff = readFileSync("src/app/(app)/(operator)/gc/deliveries/page.tsx", "utf8");
+    expect(staff).toContain("Deliveries");
   });
 });

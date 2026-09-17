@@ -140,20 +140,14 @@ describe("Dashboard type jobs", () => {
             { key: "2026-07", label: "2026-07", year: 2026, month: 7, netCents: 120_000_00 },
           ],
         },
-        licensing: {
-          ready: 1,
-          needsAttention: 0,
-          inReview: 0,
+        attention: {
           rows: [
             {
-              id: "t1",
-              title: "Winter Light",
+              id: "f1",
+              what: "Synopsis is required.",
+              at: "2026-09-12T15:04:00.000Z",
               href: "/titles/24F-0001234",
-              status: "live",
-              statusLabel: "Live",
-              stillUrl: null,
-              meta: null,
-              buckets: ["ready"],
+              kind: "catalog",
             },
           ],
         },
@@ -178,8 +172,9 @@ describe("Dashboard type jobs", () => {
     expect(html).toContain(DASHBOARD_PERIOD_TRIGGER_CLASS);
     expect(DASHBOARD_PERIOD_TRIGGER_CLASS).toContain("t-body-sm");
     expect(DASHBOARD_PERIOD_TRIGGER_CLASS).not.toContain("t-display");
-    expect(html).toContain("t-data t-body-sm");
-    expect(html).toContain("t-body-sm font-medium text-ink");
+    expect(html).toContain("t-body-sm text-ink-3");
+    expect(html).toContain("data-dashboard-attention-clock");
+    expect(html).not.toContain("t-display t-body-sm");
     expect(html).toContain("data-dashboard-fixture-banner");
     expect(html).toContain(DASHBOARD_FIXTURE.banner);
     expect(DASHBOARD_FIXTURE_BANNER_CLASS).toMatch(/\bt-label\b|\bt-body-sm\b/);

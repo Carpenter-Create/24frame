@@ -353,7 +353,7 @@ const TOP_PERFORMING_PANES: Record<
   platforms: {
     label: DASHBOARD_HOME.pillPlatforms,
     empty: DASHBOARD_HOME.platformsEmpty,
-    href: "/deliveries",
+    href: "/titles",
     testId: "platforms",
     modes: ["list", "bars"],
     defaultMode: "list",
@@ -363,7 +363,7 @@ const TOP_PERFORMING_PANES: Record<
   territories: {
     label: DASHBOARD_HOME.pillTerritories,
     empty: DASHBOARD_HOME.territoriesEmpty,
-    href: "/deliveries",
+    href: "/titles",
     testId: "territories",
     modes: ["map", "list", "bars"],
     defaultMode: "map",

@@ -61,8 +61,7 @@ export function isPhosphorNavItem(item: NavItem): item is PhosphorNavItem {
 export const NAV: PhosphorNavItem[] = [
   { label: "Dashboard", href: "/dashboard", family: "phosphor", icon: SquaresFour, exact: true },
   { label: "Titles", href: "/titles", family: "phosphor", icon: FilmSlate },
-  { label: "Deliveries", href: "/deliveries", family: "phosphor", icon: PaperPlaneTilt },
-  { label: "Catalog Health", href: "/catalog-health", family: "phosphor", icon: Pulse },
+  { label: "Attention", href: "/attention", family: "phosphor", icon: Pulse },
   {
     label: REPORTS_PAGE.title,
     href: REPORTS_HREF,
@@ -146,6 +145,12 @@ export const MOBILE_NAV = {
 export function isClientNavActive(pathname: string, item: NavItem): boolean {
   if (item.href === "/dashboard" && pathname === "/") return true;
   if (item.href === REPORTS_HREF && isLegacyReportsPath(pathname)) return true;
+  if (
+    item.href === "/attention" &&
+    (pathname === "/catalog-health" || pathname.startsWith("/catalog-health/"))
+  ) {
+    return true;
+  }
   return item.exact ? pathname === item.href : pathname.startsWith(item.href);
 }
 
