@@ -110,7 +110,7 @@ describe("AppShell header", () => {
     expect(shellSrc).not.toContain("ThemeGlyph");
     expect(shellSrc).not.toMatch(/bell|⌘K|CommandK|command-k/i);
     expect(shellSrc).not.toContain("SearchField");
-    expect(shellSrc).toContain("TitlesHeaderSearch");
+    expect(shellSrc).not.toContain("TitlesHeaderSearch");
   });
 
   it("keeps the account menu in the header", () => {
@@ -194,9 +194,8 @@ describe("AppShell Access rail and home frame", () => {
     expect(titles).not.toContain("data-app-home-frame");
     expect(titles).not.toContain("data-app-messages-frame");
     expect(titles).not.toContain("data-org-switcher");
-    expect(titles).toContain("data-titles-header-search");
-    expect(titles).toContain("md:hidden");
-    expect(titles).toContain("Search titles...");
+    expect(titles).not.toContain("data-titles-header-search");
+    expect(titles).not.toContain("Search titles...");
     expect(titles).not.toContain("⌘K");
 
     navigation.pathname = "/deliveries";
@@ -246,7 +245,7 @@ describe("AppShell Access rail and home frame", () => {
     expect(renderShell("access-gate")).not.toContain("data-titles-header-search");
     navigation.pathname = "/titles";
     expect(renderShell("access-gate")).not.toContain("data-header-search");
-    expect(renderShell("access-gate")).toContain("data-titles-header-search");
+    expect(renderShell("access-gate")).not.toContain("data-titles-header-search");
     navigation.pathname = "/titles/title-1";
     expect(renderShell("access-gate")).not.toContain("data-titles-header-search");
     expect(shellSrc).not.toContain("SearchField");

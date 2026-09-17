@@ -19,6 +19,17 @@ vi.mock("next/image", () => ({
   }) => createElement("img", { src, className, alt: "" }),
 }));
 
+vi.mock("next/link", () => ({
+  default: ({
+    href,
+    children,
+    ...props
+  }: {
+    href: string;
+    children?: React.ReactNode;
+  }) => createElement("a", { href, ...props }, children),
+}));
+
 import { TITLES_CATALOG } from "@/lib/titles-catalog";
 
 import {
@@ -26,12 +37,11 @@ import {
   TitlesCatalogHeader,
   TitlesCatalogList,
   TitlesCatalogListRow,
-  TitlesCatalogStill,
 } from "./titles-catalog";
 
 const ALL_STATUSES = Object.keys(TITLE_STATUS_LABELS) as TitleStatus[];
 
-function renderStill(props: {
+function renderRow(props: {
   href: string;
   title: string;
   stillUrl: string | null;
@@ -39,7 +49,7 @@ function renderStill(props: {
   statusLabel: string;
   year?: string | null;
 }): string {
-  return renderToStaticMarkup(createElement(TitlesCatalogStill, props));
+  return renderToStaticMarkup(createElement(TitlesCatalogListRow, props));
 }
 
 function openingTagWith(html: string, marker: string): string {
@@ -49,63 +59,36 @@ function openingTagWith(html: string, marker: string): string {
   return html.slice(start, end + 1);
 }
 
-describe("TitlesCatalogStill craft", () => {
-  it("lets the still be the canvas — no card chrome, no caption box", () => {
-    const html = renderStill({
+describe("TitlesCatalogListRow craft", () => {
+  it("is a landscape-thumb row — not a poster card", () => {
+    const html = renderRow({
       href: "/titles/1",
       title: "Craft film",
-      stillUrl: "https://cdn/poster.jpg",
+      stillUrl: "https://cdn/wide.jpg",
       status: "live",
       statusLabel: TITLE_STATUS_LABELS.live,
       year: "2019",
     });
-    const card = openingTagWith(html, 'data-titles-catalog-card=""');
+    const row = openingTagWith(html, 'data-titles-catalog-list-row=""');
     const frame = openingTagWith(html, 'data-titles-catalog-frame=""');
-    const stack = openingTagWith(html, 'data-titles-catalog-stack=""');
 
-    expect(card).toContain("data-titles-catalog-card");
-    expect(card).toContain("flex flex-col gap-[var(--space-3)]");
-    expect(card).not.toContain("border-hairline");
-    expect(card).not.toContain("bg-surface");
-    expect(card).not.toContain("overflow-hidden");
+    expect(row).toContain("flex items-center");
+    expect(row).toContain("px-[var(--space-4)]");
+    expect(row).toContain("py-[var(--space-4)]");
+    expect(frame).toContain("aspect-[16/9]");
+    expect(frame).toContain("w-[40%]");
+    expect(frame).toContain("md:w-[160px]");
     expect(frame).toContain("rounded-[var(--radius-lg)]");
-    expect(stack).not.toContain("px-[var(--space-4)]");
-    expect(stack).not.toContain("pb-[var(--space-4)]");
-    expect(stack).not.toContain("pt-[var(--space-3)]");
+    expect(frame).toContain('data-titles-catalog-crop="cover"');
+    expect(html).not.toContain("aspect-[2/3]");
+    expect(html).not.toContain("data-titles-catalog-card");
     expect(html).not.toContain("bg-gradient");
     expect(html).not.toContain("shadow");
+    expect(html).not.toMatch(/hover:scale|group-hover:scale/);
   });
 
-  it("forces the same 2:3 cover crop on poster and banner stills", () => {
-    const poster = renderStill({
-      href: "/titles/1",
-      title: "Poster film",
-      stillUrl: "https://cdn/poster.jpg",
-      status: "live",
-      statusLabel: TITLE_STATUS_LABELS.live,
-    });
-    const banner = renderStill({
-      href: "/titles/2",
-      title: "Banner film",
-      stillUrl: "https://cdn/banner.jpg",
-      status: "draft",
-      statusLabel: TITLE_STATUS_LABELS.draft,
-    });
-
-    for (const html of [poster, banner]) {
-      const frame = openingTagWith(html, 'data-titles-catalog-frame=""');
-      expect(frame).toContain("aspect-[2/3]");
-      expect(frame).toContain('data-titles-catalog-crop="cover"');
-      expect(frame).toContain("[&amp;_img]:object-cover");
-      expect(frame).toContain("[&amp;_img]:object-center");
-      expect(html).toContain("object-cover");
-      expect(html).not.toContain("object-contain");
-      expect(html).not.toContain("aspect-[16/9]");
-    }
-  });
-
-  it("keeps a null still as honest empty art — no image, no preload", () => {
-    const html = renderStill({
+  it("keeps a null still as a muted camera wash — no image, no monogram", () => {
+    const html = renderRow({
       href: "/titles/1",
       title: "Empty film",
       stillUrl: null,
@@ -120,8 +103,8 @@ describe("TitlesCatalogStill craft", () => {
     expect(html).not.toContain("t-data select-none text-3xl");
   });
 
-  it("keeps the card title on --text-sm, with year and pill on one line", () => {
-    const html = renderStill({
+  it("keeps title ink, year quiet, and the status pill trailing", () => {
+    const html = renderRow({
       href: "/titles/1",
       title: "Craft film",
       stillUrl: null,
@@ -129,37 +112,26 @@ describe("TitlesCatalogStill craft", () => {
       statusLabel: TITLE_STATUS_LABELS.live,
       year: "2019",
     });
-    const stack = html.slice(html.indexOf("data-titles-catalog-stack"));
     const name = openingTagWith(html, 'data-titles-catalog-name=""');
     const year = openingTagWith(html, 'data-titles-catalog-year=""');
-    const meta = openingTagWith(html, 'data-titles-catalog-meta=""');
 
-    expect(name).toContain("t-body-sm font-medium text-ink");
+    expect(name).toContain("t-body font-medium text-ink");
     expect(name).not.toContain("t-heading");
-    expect(stack).toContain("Craft film");
-    expect(stack).toContain("data-titles-catalog-year");
     expect(year).toContain("t-body-sm text-ink-3");
-    expect(year).not.toContain("font-normal");
-    expect(meta).toContain("flex min-w-0 flex-wrap items-center");
-    expect(stack).toContain(TITLE_STATUS_LABELS.live);
-    expect(stack).not.toContain("t-heading");
-    expect(stack).not.toContain("t-section");
-    expect(stack).not.toContain("t-display");
-    expect(stack).not.toContain("t-title");
     expect(html).toMatch(
-      /data-titles-catalog-name[\s\S]*Craft film[\s\S]*data-titles-catalog-meta[\s\S]*data-titles-catalog-year[\s\S]*2019[\s\S]*data-titles-catalog-status[\s\S]*Live/,
+      /data-titles-catalog-name[\s\S]*Craft film[\s\S]*data-titles-catalog-year[\s\S]*2019[\s\S]*data-titles-catalog-status[\s\S]*Live/,
     );
   });
 
   it("marks Live as the ink-selected fill and other statuses as hairline pills", () => {
-    const live = renderStill({
+    const live = renderRow({
       href: "/titles/1",
       title: "Craft film",
       stillUrl: null,
       status: "live",
       statusLabel: TITLE_STATUS_LABELS.live,
     });
-    const draft = renderStill({
+    const draft = renderRow({
       href: "/titles/2",
       title: "Draft film",
       stillUrl: null,
@@ -172,7 +144,6 @@ describe("TitlesCatalogStill craft", () => {
     expect(livePill).toContain("rounded-full");
     expect(livePill).toContain("bg-ink");
     expect(livePill).toContain("text-surface");
-    expect(livePill).not.toContain("border-hairline");
     expect(livePill).not.toContain("bg-accent");
     expect(livePill).not.toMatch(/green|emerald|success/);
     expect(draftPill).toContain("border-hairline");
@@ -181,26 +152,9 @@ describe("TitlesCatalogStill craft", () => {
     expect(draftPill).not.toContain("bg-accent");
   });
 
-  it("does not scale the poster on hover", () => {
-    const html = renderStill({
-      href: "/titles/1",
-      title: "Craft film",
-      stillUrl: "https://cdn/poster.jpg",
-      status: "live",
-      statusLabel: TITLE_STATUS_LABELS.live,
-    });
-    const card = openingTagWith(html, 'data-titles-catalog-card=""');
-    const frame = openingTagWith(html, 'data-titles-catalog-frame=""');
-
-    expect(card).not.toContain("group");
-    expect(card).not.toMatch(/hover:scale|group-hover:scale|scale-/);
-    expect(frame).not.toMatch(/hover:scale|group-hover:scale|scale-/);
-    expect(html).not.toMatch(/hover:scale|group-hover:scale/);
-  });
-
   it("places title, year, and every TITLE_STATUS_LABELS pill — no delivered, no seventh unique", () => {
     for (const status of ALL_STATUSES) {
-      const html = renderStill({
+      const html = renderRow({
         href: `/titles/${status}`,
         title: `${status} film`,
         stillUrl: null,
@@ -208,14 +162,13 @@ describe("TitlesCatalogStill craft", () => {
         statusLabel: TITLE_STATUS_LABELS[status],
         year: status === "live" ? "2019" : null,
       });
-      const stack = html.slice(html.indexOf("data-titles-catalog-stack"));
-      expect(stack).toContain(`${status} film`);
-      expect(stack).toContain(TITLE_STATUS_LABELS[status]);
+      expect(html).toContain(`${status} film`);
+      expect(html).toContain(TITLE_STATUS_LABELS[status]);
       if (status === "live") {
-        expect(stack).toContain("data-titles-catalog-year");
-        expect(stack).toContain("2019");
+        expect(html).toContain("data-titles-catalog-year");
+        expect(html).toContain("2019");
       } else {
-        expect(stack).not.toContain("data-titles-catalog-year");
+        expect(html).not.toContain("data-titles-catalog-year");
       }
     }
     const labels = ALL_STATUSES.map((status) => TITLE_STATUS_LABELS[status]);
@@ -255,41 +208,30 @@ describe("TitlesCatalogHeader type lock", () => {
     expect(html).not.toContain("t-heading");
   });
 
-  it("puts count under the title and search on the same header row", () => {
+  it("puts count under the title", () => {
     const html = renderToStaticMarkup(
-      createElement(TitlesCatalogHeader, {
-        count: "7 in catalog",
-        action: createElement("span", null, "Search"),
-      }),
+      createElement(TitlesCatalogHeader, { count: "7 in catalog" }),
     );
 
-    expect(html).toContain(
-      "titles-catalog-header flex items-center justify-between gap-[var(--space-2)] md:items-start md:gap-[var(--space-6)]",
-    );
     expect(html).toContain("data-titles-catalog-count");
     expect(html).toContain("7 in catalog");
     expect(html).not.toContain("10 in catalog");
-    expect(html).toContain("data-titles-catalog-operate");
-    expect(html).toContain(
-      "titles-catalog-operate flex shrink-0 items-center gap-[var(--space-4)]",
-    );
-    expect(html).not.toContain("titles-catalog-operate flex w-full items-center justify-between");
+    expect(html).not.toContain("data-titles-catalog-operate");
     const titleAt = html.indexOf("<h1");
     const countAt = html.indexOf("data-titles-catalog-count");
-    const operateAt = html.indexOf("data-titles-catalog-operate");
     expect(titleAt).toBeGreaterThan(-1);
     expect(countAt).toBeGreaterThan(titleAt);
-    expect(operateAt).toBeGreaterThan(countAt);
   });
 
-  it("locks the page title to --text-title and the card title to --text-sm", () => {
+  it("locks the page title to --text-title and the row title to --text-base", () => {
     const tokens = readFileSync(join(ROOT, "src/app/tokens.css"), "utf8");
     const globals = readFileSync(join(ROOT, "src/app/globals.css"), "utf8");
 
     expect(tokens).toMatch(/--text-sm:\s*0\.8125rem;/);
+    expect(tokens).toMatch(/--text-base:\s*0\.9375rem;/);
     expect(tokens).toMatch(/--text-title:\s*1\.5rem;/);
     expect(globals).toMatch(/\.t-section\s*\{[\s\S]*?font-size:\s*var\(--text-title\)/);
-    expect(globals).toMatch(/\.t-body-sm\s*\{[\s\S]*?font-size:\s*var\(--text-sm\)/);
+    expect(globals).toMatch(/\.t-body\s*\{[\s\S]*?font-size:\s*var\(--text-base\)/);
   });
 
   it("keeps Titles as the page title on phone and desktop", () => {
@@ -300,8 +242,8 @@ describe("TitlesCatalogHeader type lock", () => {
   });
 });
 
-describe("TitlesCatalogList phone lock", () => {
-  it("is a hairline list on phone — title, year, ink status, no snap rail", () => {
+describe("TitlesCatalogList landscape row lock", () => {
+  it("is one hairline list for phone and desktop — landscape thumb, no 5-up, no snap rail", () => {
     const html = renderToStaticMarkup(
       createElement(
         TitlesCatalogFrame,
@@ -312,6 +254,7 @@ describe("TitlesCatalogList phone lock", () => {
           createElement(TitlesCatalogListRow, {
             href: "/titles/1",
             title: "Craft film",
+            stillUrl: null,
             status: "live",
             statusLabel: TITLE_STATUS_LABELS.live,
             year: "2019",
@@ -322,8 +265,9 @@ describe("TitlesCatalogList phone lock", () => {
     const catalog = openingTagWith(html, 'data-titles-catalog=""');
     const list = openingTagWith(html, 'data-titles-catalog-list=""');
     const row = openingTagWith(html, 'data-titles-catalog-list-row=""');
-    const name = openingTagWith(html, 'data-titles-catalog-list-name=""');
-    const year = openingTagWith(html, 'data-titles-catalog-list-year=""');
+    const frame = openingTagWith(html, 'data-titles-catalog-frame=""');
+    const name = openingTagWith(html, 'data-titles-catalog-name=""');
+    const year = openingTagWith(html, 'data-titles-catalog-year=""');
     const pill = openingTagWith(html, 'data-titles-catalog-status=""');
 
     expect(html).not.toContain("Recently added");
@@ -332,11 +276,14 @@ describe("TitlesCatalogList phone lock", () => {
     expect(html).not.toContain("Spotlight");
     expect(html).not.toContain("snap-x");
     expect(html).not.toContain("w-[140px]");
+    expect(html).not.toContain("xl:grid-cols-5");
+    expect(html).not.toContain("data-titles-catalog-grid");
     expect(catalog).toContain("px-[var(--space-4)]");
-    expect(list).toContain("md:hidden");
     expect(list).toContain("rounded-[var(--radius-lg)]");
     expect(list).toContain("border-hairline");
+    expect(list).not.toContain("md:hidden");
     expect(row).toContain("border-b");
+    expect(frame).toContain("aspect-[16/9]");
     expect(name).toContain("t-body font-medium text-ink");
     expect(year).toContain("t-body-sm text-ink-3");
     expect(html).toContain("2019");

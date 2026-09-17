@@ -28,6 +28,16 @@ vi.mock("next/image", () => ({
   default: ({ src, className }: { src: string; className?: string }) =>
     createElement("img", { src, className, alt: "" }),
 }));
+vi.mock("next/link", () => ({
+  default: ({
+    href,
+    children,
+    ...props
+  }: {
+    href: string;
+    children?: React.ReactNode;
+  }) => createElement("a", { href, ...props }, children),
+}));
 
 const ALL_STATUSES: TitleStatus[] = [
   "draft",
@@ -128,22 +138,18 @@ describe("client /titles catalog", () => {
     const html = await renderCatalog();
 
     expect(html).toContain("data-titles-catalog");
-    expect(html).toContain("data-titles-catalog-grid");
-    expect(html).toContain("data-titles-catalog-card");
-    expect(html).toContain("hidden gap-x-[var(--space-8)]");
-    expect(html).toContain("xl:grid-cols-5");
-    expect(html).toContain("gap-x-[var(--space-8)]");
-    expect(html).toContain("gap-y-[var(--space-16)]");
-    expect(html).toContain("aspect-[2/3]");
+    expect(html).toContain("data-titles-catalog-list");
+    expect(html).toContain("data-titles-catalog-list-row");
+    expect(html).toContain("data-titles-catalog-toolbar");
+    expect(html).toContain("aspect-[16/9]");
     expect(html).toContain("rounded-[var(--radius-lg)]");
-    expect(html).toContain("data-titles-catalog-crop=\"cover\"");
+    expect(html).toContain('data-titles-catalog-crop="cover"');
     expect(html).toContain("[&amp;_img]:object-cover");
     expect(html).toContain("[&amp;_img]:object-center");
-    expect(html).toContain("data-titles-catalog-stack");
-    expect(html).not.toMatch(/[^:]grid-cols-5/);
-    expect(html).not.toContain("grid-cols-6");
-    expect(html).not.toContain("lg:grid-cols-3");
-    expect(html).not.toContain("aspect-[16/9]");
+    expect(html).not.toContain("data-titles-catalog-grid");
+    expect(html).not.toContain("data-titles-catalog-card");
+    expect(html).not.toContain("xl:grid-cols-5");
+    expect(html).not.toContain("aspect-[2/3]");
     expect(html).not.toContain("Recently added");
     expect(html).not.toContain("Spotlight");
     expect(html).not.toContain("In progress");
@@ -151,26 +157,19 @@ describe("client /titles catalog", () => {
     expect(html).not.toContain("FIXTURE");
     expect(html).not.toContain("Meridian");
     expect(html).not.toMatch(/hover:scale|group-hover:scale/);
-    expect(html).not.toContain("grid-cols-6");
-    expect(html).not.toContain("grid-cols-1");
-    expect(html).not.toContain("sm:grid-cols-2");
-    expect(html).toContain("md:grid-cols-3");
-    expect(html).toContain("lg:grid-cols-4");
-    expect(html).toContain("xl:grid-cols-5");
 
-    const cards = html.match(/data-titles-catalog-card=""/g) ?? [];
-    expect(cards).toHaveLength(ALL_STATUSES.length);
+    const rows = html.match(/data-titles-catalog-list-row=""/g) ?? [];
+    expect(rows).toHaveLength(ALL_STATUSES.length);
     expect(html).toMatch(
-      /data-titles-catalog-card[\s\S]*data-titles-catalog-frame[\s\S]*data-titles-catalog-status/,
+      /data-titles-catalog-list-row[\s\S]*data-titles-catalog-frame[\s\S]*data-titles-catalog-status/,
     );
 
     const statusLabels = [...html.matchAll(/data-titles-catalog-status="">([^<]*)/g)].map(
       (match) => match[1],
     );
-    const expected = ALL_STATUSES.map((status) => TITLE_STATUS_LABELS[status]);
-    expect(statusLabels).toEqual([...expected, ...expected]);
+    expect(statusLabels).toEqual(ALL_STATUSES.map((status) => TITLE_STATUS_LABELS[status]));
     expect(new Set(statusLabels).size).toBe(6);
-    expect(statusLabels.filter((label) => label === "Submitted")).toHaveLength(4);
+    expect(statusLabels.filter((label) => label === "Submitted")).toHaveLength(2);
     expect(statusLabels).not.toContain("Delivered");
     expect(statusLabels).not.toContain("delivered");
 
@@ -182,30 +181,21 @@ describe("client /titles catalog", () => {
     }
   });
 
-  it("puts Titles, catalog count, search, and Add Title on the Version 24 header row", async () => {
+  it("puts Titles, catalog count, then search, status filter, and Add Title", async () => {
     stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
     const html = await renderCatalog();
 
-    expect(html).toContain(
-      "titles-catalog-header flex items-center justify-between gap-[var(--space-2)] md:items-start md:gap-[var(--space-6)]",
-    );
-    expect(html).not.toContain("titles-catalog-header flex flex-col gap-[var(--space-8)]");
+    expect(html).toContain("titles-catalog-header");
+    expect(html).toContain("data-titles-catalog-toolbar");
+    expect(html).toContain("data-titles-catalog-search");
+    expect(html).toContain("data-titles-catalog-filters");
     expect(html).toContain("data-titles-catalog-operate");
-    expect(html).toContain(
-      "titles-catalog-operate flex shrink-0 items-center gap-[var(--space-4)]",
-    );
-    expect(html).not.toContain(
-      "titles-catalog-operate flex w-full items-center justify-between",
-    );
     expect(html).toContain(
       "titles-catalog mx-auto flex w-full flex-col gap-[var(--space-6)] px-[var(--space-4)]",
     );
     expect(html).toContain("md:gap-[var(--space-8)]");
-    expect(html).not.toContain(
-      "titles-catalog mx-auto flex w-full flex-col gap-[var(--space-10)]",
-    );
     expect(html).toMatch(/<h1 class="t-section text-ink">Titles<\/h1>/);
     expect(html).not.toMatch(/<h1[^>]*t-display/);
     expect(html).not.toMatch(/<h1[^>]*t-title/);
@@ -215,20 +205,20 @@ describe("client /titles catalog", () => {
 
     const titleClose = html.indexOf("</h1>");
     const countAt = html.indexOf("data-titles-catalog-count");
-    const operateAt = html.indexOf("data-titles-catalog-operate");
+    const toolbarAt = html.indexOf("data-titles-catalog-toolbar");
     const searchAt = html.indexOf("Search titles...");
     const addAt = html.indexOf("data-add-title");
     expect(titleClose).toBeGreaterThan(-1);
     expect(countAt).toBeGreaterThan(titleClose);
-    expect(operateAt).toBeGreaterThan(-1);
-    expect(searchAt).toBeGreaterThan(operateAt);
-    expect(addAt).toBeGreaterThan(operateAt);
+    expect(toolbarAt).toBeGreaterThan(countAt);
+    expect(searchAt).toBeGreaterThan(toolbarAt);
+    expect(addAt).toBeGreaterThan(searchAt);
 
-    const operateChunk = html.slice(operateAt);
-    expect(operateChunk).toContain("Search titles...");
-    expect(operateChunk).toContain(TITLES_CATALOG.addTitle);
-    expect(operateChunk).toContain("data-add-title");
-    expect(operateChunk).not.toContain("data-titles-catalog-count");
+    expect(html).toContain(TITLES_CATALOG.addTitle);
+    expect(html).toContain("Filter by status");
+    expect(html).toContain('href="/titles"');
+    expect(html).toContain('href="/titles?status=draft"');
+    expect(html).toContain('href="/titles?status=live"');
   });
 
   it("keeps search, Add Title, and quiet TITLE_STATUS_LABELS pills — no SaaS subtitle", async () => {
@@ -265,20 +255,19 @@ describe("client /titles catalog", () => {
     const hairlinePills = statusPills.filter((open) => open.includes("border-hairline"));
     expect(livePills.length).toBeGreaterThan(0);
     expect(hairlinePills.length).toBeGreaterThan(0);
-    expect(html).toContain("t-body-sm font-medium text-ink");
+    expect(html).toContain("t-body font-medium text-ink");
     expect(html).not.toContain("t-heading text-ink");
     expect(html).not.toContain("rounded-full bg-surface-muted");
-    expect(html).not.toMatch(/data-titles-catalog-card[\s\S]*t-section/);
-    expect(html).not.toMatch(/data-titles-catalog-card[\s\S]*t-display/);
-    expect(html).not.toMatch(/data-titles-catalog-card[\s\S]*t-title/);
-    expect(html).not.toMatch(/data-titles-catalog-stack[\s\S]*t-body font-medium/);
+    expect(html).not.toMatch(/data-titles-catalog-list-row[\s\S]*t-section/);
+    expect(html).not.toMatch(/data-titles-catalog-list-row[\s\S]*t-display/);
+    expect(html).not.toMatch(/data-titles-catalog-list-row[\s\S]*t-title/);
     expect(html).not.toContain("group-hover:text-ink-2");
     for (const status of ALL_STATUSES) {
       expect(html).toContain(TITLE_STATUS_LABELS[status]);
     }
   });
 
-  it("shows the release_date year under a poster and omits it when unset", async () => {
+  it("shows the release_date year on the row and omits it when unset", async () => {
     stubClient([
       titleRow("live", 0, {
         title: "Dated film",
@@ -296,7 +285,7 @@ describe("client /titles catalog", () => {
     const html = await renderCatalog();
 
     expect(html).toContain("Dated film");
-    expect(html).toContain("data-titles-catalog-card");
+    expect(html).toContain("data-titles-catalog-list-row");
     expect(html).toContain("data-titles-catalog-year");
     expect(html).toContain("2019");
     const yearTag = openingTagsWith(html, 'data-titles-catalog-year=""');
@@ -310,45 +299,37 @@ describe("client /titles catalog", () => {
     const years = html.match(/data-titles-catalog-year=""/g) ?? [];
     expect(years).toHaveLength(1);
     expect(html).toMatch(
-      /data-titles-catalog-card[\s\S]*Dated film[\s\S]*data-titles-catalog-year[\s\S]*2019[\s\S]*data-titles-catalog-status/,
+      /data-titles-catalog-list-row[\s\S]*Dated film[\s\S]*data-titles-catalog-year[\s\S]*2019[\s\S]*data-titles-catalog-status/,
     );
-    const gridAt = html.indexOf("data-titles-catalog-grid");
-    const undatedCard = html.slice(html.indexOf("Undated film", gridAt));
-    expect(undatedCard.slice(0, undatedCard.indexOf("data-titles-catalog-status"))).not.toContain(
+    const undatedRow = html.slice(html.indexOf("Undated film"));
+    expect(undatedRow.slice(0, undatedRow.indexOf("data-titles-catalog-status"))).not.toContain(
       "data-titles-catalog-year",
     );
-    expect(html.match(/data-titles-catalog-list-year=""/g) ?? []).toHaveLength(1);
   });
 
-  it("reads each title as a full-bleed still with type in air — no boxed card", async () => {
+  it("reads each title as a landscape-thumb row in a hairline list", async () => {
     stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
     const html = await renderCatalog();
-    const cards = openingTagsWith(html, 'data-titles-catalog-card=""');
+    const rows = openingTagsWith(html, 'data-titles-catalog-list-row=""');
     const frames = openingTagsWith(html, 'data-titles-catalog-frame=""');
-    const stacks = openingTagsWith(html, 'data-titles-catalog-stack=""');
-    expect(cards).toHaveLength(ALL_STATUSES.length);
+    expect(rows).toHaveLength(ALL_STATUSES.length);
     expect(frames).toHaveLength(ALL_STATUSES.length);
-    expect(stacks).toHaveLength(ALL_STATUSES.length);
-    for (const open of cards) {
-      expect(open).toContain("data-titles-catalog-card");
-      expect(open).not.toContain("border-hairline");
-      expect(open).not.toContain("bg-surface");
-      expect(open).not.toContain("overflow-hidden");
+    for (const open of rows) {
+      expect(open).toContain("flex items-center");
+      expect(open).toContain("px-[var(--space-4)]");
     }
     for (const open of frames) {
+      expect(open).toContain("aspect-[16/9]");
       expect(open).toContain("rounded-[var(--radius-lg)]");
-    }
-    for (const open of stacks) {
-      expect(open).not.toContain("px-[var(--space-4)]");
-      expect(open).not.toContain("pb-[var(--space-4)]");
     }
     expect(html).not.toContain("bg-gradient");
     expect(html).not.toContain("from-accent");
+    expect(html).not.toContain("bg-band");
   });
 
-  it("applies the same 2:3 cover crop to every catalog still", async () => {
+  it("applies the same 16:9 cover crop to every catalog still", async () => {
     stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
@@ -358,15 +339,15 @@ describe("client /titles catalog", () => {
     for (const open of frames) {
       expect(open).toContain("data-titles-catalog-frame");
       expect(open).toContain('data-titles-catalog-crop="cover"');
-      expect(open).toContain("aspect-[2/3]");
+      expect(open).toContain("aspect-[16/9]");
       expect(open).toContain("[&amp;_img]:object-cover");
       expect(open).toContain("[&amp;_img]:object-center");
-      expect(open).not.toContain("aspect-[16/9]");
+      expect(open).not.toContain("aspect-[2/3]");
       expect(open).not.toContain("object-contain");
     }
   });
 
-  it("keeps title small and year plus TITLE_STATUS_LABELS on one meta line", async () => {
+  it("keeps title ink and year plus TITLE_STATUS_LABELS on the row", async () => {
     stubClient([
       titleRow("live", 0, { title: "Stacked film", release_date: "2019-05-01" }),
     ]);
@@ -374,28 +355,25 @@ describe("client /titles catalog", () => {
 
     const html = await renderCatalog();
     const name = openingTagsWith(html, 'data-titles-catalog-name=""');
-    const meta = openingTagsWith(html, 'data-titles-catalog-meta=""');
     expect(name).toHaveLength(1);
-    expect(name[0]).toContain("t-body-sm font-medium text-ink");
+    expect(name[0]).toContain("t-body font-medium text-ink");
     expect(name[0]).not.toContain("t-heading");
-    expect(meta).toHaveLength(1);
-    expect(meta[0]).toContain("flex min-w-0 flex-wrap items-center");
     expect(html).toMatch(
-      /data-titles-catalog-name[\s\S]*Stacked film[\s\S]*data-titles-catalog-meta[\s\S]*data-titles-catalog-year[\s\S]*2019[\s\S]*data-titles-catalog-status[\s\S]*Live/,
+      /data-titles-catalog-name[\s\S]*Stacked film[\s\S]*data-titles-catalog-year[\s\S]*2019[\s\S]*data-titles-catalog-status[\s\S]*Live/,
     );
     expect(html).toContain("gap-[var(--space-1)]");
     expect(html).not.toContain("Delivered");
     expect(html).not.toContain("delivered");
   });
 
-  it("prefers poster then banner and keeps the same cover crop on both", async () => {
+  it("uses landscape banners and leaves poster-only titles as muted placeholders", async () => {
     stubClient([
       titleRow("draft", 0, { title: "Poster title" }),
       titleRow("live", 1, { title: "Banner title" }),
     ]);
     vi.mocked(titleArtworkUrls).mockResolvedValue(
       new Map([
-        ["title-draft", { poster: "https://cdn/poster.jpg", banner: "https://cdn/wide.jpg" }],
+        ["title-draft", { poster: "https://cdn/poster.jpg", banner: null }],
         ["title-live", { poster: null, banner: "https://cdn/wide.jpg" }],
       ]),
     );
@@ -403,14 +381,14 @@ describe("client /titles catalog", () => {
 
     const html = await renderCatalog();
 
-    expect(html).toContain("https://cdn/poster.jpg");
     expect(html).toContain("https://cdn/wide.jpg");
-    expect(html).not.toContain("data-titles-catalog-empty-art");
+    expect(html).not.toContain("https://cdn/poster.jpg");
+    expect(html).toContain("data-titles-catalog-empty-art");
     const frames = openingTagsWith(html, 'data-titles-catalog-frame=""');
     expect(frames).toHaveLength(2);
     for (const open of frames) {
       expect(open).toContain('data-titles-catalog-crop="cover"');
-      expect(open).toContain("aspect-[2/3]");
+      expect(open).toContain("aspect-[16/9]");
       expect(open).toContain("[&amp;_img]:object-cover");
       expect(open).toContain("[&amp;_img]:object-center");
     }
@@ -491,21 +469,21 @@ describe("client /titles catalog", () => {
     const html = await renderCatalog();
 
     expect(html).toContain('placeholder="Search titles..."');
-    expect(html).toContain("data-titles-catalog-operate");
-    const operate = html.slice(html.indexOf("data-titles-catalog-operate"));
-    expect(operate).toContain("Search titles...");
-    expect(operate).toContain("max-md:hidden");
+    expect(html).toContain("data-titles-catalog-search");
+    const search = html.slice(html.indexOf("data-titles-catalog-search"));
+    expect(search).toContain("Search titles...");
+    expect(html).not.toContain("max-md:hidden");
     expect(html).not.toContain("⌘K");
     expect(html).not.toContain("CommandK");
   });
 
-  it("does not scale posters or invent fixture catalog chrome", async () => {
+  it("does not scale stills or invent fixture catalog chrome", async () => {
     stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
     const html = await renderCatalog();
-    const cards = openingTagsWith(html, 'data-titles-catalog-card=""');
+    const rows = openingTagsWith(html, 'data-titles-catalog-list-row=""');
     const frames = openingTagsWith(html, 'data-titles-catalog-frame=""');
-    for (const open of [...cards, ...frames]) {
+    for (const open of [...rows, ...frames]) {
       expect(open).not.toMatch(/hover:scale|group-hover:scale|scale-/);
     }
     expect(html).not.toContain("FIXTURE");
@@ -514,7 +492,7 @@ describe("client /titles catalog", () => {
     expect(html).not.toMatch(/hover:scale|group-hover:scale/);
   });
 
-  it("locks phone to a hairline list and one Sporty Blue Add Title pill", async () => {
+  it("locks phone and desktop to the same landscape-thumb row and one Sporty Blue Add Title pill", async () => {
     stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
     const html = await renderCatalog();
@@ -530,6 +508,8 @@ describe("client /titles catalog", () => {
     expect(html).not.toContain("snap-x");
     expect(html).not.toContain("w-[140px]");
     expect(html).not.toContain("h-[210px]");
+    expect(html).toContain("w-[40%]");
+    expect(html).toContain("md:w-[160px]");
     expect(html).toContain(
       "titles-catalog mx-auto flex w-full flex-col gap-[var(--space-6)] px-[var(--space-4)]",
     );
@@ -537,7 +517,6 @@ describe("client /titles catalog", () => {
     expect(add[0]).toContain("t-body-sm");
     expect(add[0]).toContain("bg-accent");
     expect(add[0]).toContain("rounded-full");
-    expect(html).toContain("max-md:hidden");
     expect(html).not.toContain("Recently added");
     expect(html).not.toContain("Store");
     expect(html).not.toContain("Apple TV");
@@ -545,6 +524,7 @@ describe("client /titles catalog", () => {
     expect(html).not.toMatch(/\bStore\b/);
     expect(html.match(/data-titles-catalog-list=""/g) ?? []).toHaveLength(1);
     expect(html).not.toContain("data-titles-catalog-rail");
+    expect(html).not.toContain("data-titles-catalog-grid");
   });
 
   it("locks empty catalog to one quiet line plus the Add Title pill", async () => {
@@ -569,7 +549,7 @@ describe("client /titles catalog", () => {
     expect(html).not.toContain("Meridian Pictures");
   });
 
-  it("locks desktop header Add Title as the Sporty Blue pill and keeps the 5-up grid", async () => {
+  it("locks Add Title as the Sporty Blue pill and keeps landscape rows, not a 5-up grid", async () => {
     stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
     const html = await renderCatalog();
@@ -580,10 +560,34 @@ describe("client /titles catalog", () => {
     expect(add[0]).toContain("bg-accent");
     expect(add[0]).toContain("text-accent-contrast");
     expect(add[0]).toContain("rounded-full");
-    expect(html).toContain("data-titles-catalog-grid");
-    expect(html).toContain("md:grid-cols-3");
-    expect(html).toContain("lg:grid-cols-4");
-    expect(html).toContain("xl:grid-cols-5");
-    expect(html).toContain("hidden gap-x-[var(--space-8)]");
+    expect(html).toContain("data-titles-catalog-list");
+    expect(html).toContain("aspect-[16/9]");
+    expect(html).not.toContain("data-titles-catalog-grid");
+    expect(html).not.toContain("xl:grid-cols-5");
+    expect(html).not.toContain("aspect-[2/3]");
+  });
+
+  it("filters the list by a product-true status lens", async () => {
+    stubClient();
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+    const html = await renderCatalog({ status: "draft" });
+
+    expect(html).toContain("draft film");
+    expect(html).not.toContain("live film");
+    expect(html).not.toContain("in_review film");
+    expect(html.match(/data-titles-catalog-list-row=""/g) ?? []).toHaveLength(1);
+    expect(html).toContain('aria-current="true"');
+    expect(html).toContain('href="/titles"');
+  });
+
+  it("treats submitted and in_delivery as one Submitted lens", async () => {
+    stubClient();
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+    const html = await renderCatalog({ status: "submitted" });
+
+    expect(html).toContain("submitted film");
+    expect(html).toContain("in_delivery film");
+    expect(html).not.toContain("draft film");
+    expect(html.match(/data-titles-catalog-list-row=""/g) ?? []).toHaveLength(2);
   });
 });

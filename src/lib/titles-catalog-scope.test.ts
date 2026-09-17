@@ -25,12 +25,20 @@ const OTHER_PAGES = [
   "src/components/layout/banner-card.tsx",
 ] as const;
 
+const TITLES_COMMENT_PATHS = [
+  "src/lib/titles-catalog.ts",
+  "src/components/titles/titles-catalog.tsx",
+  "src/app/(app)/titles/page.tsx",
+  "src/app/(app)/titles/[id]/page.tsx",
+  "src/components/layout/title-hero.tsx",
+  "src/app/(app)/titles/add-title-button.tsx",
+] as const;
+
 describe("titles catalog scope", () => {
-  it("keeps desktop catalog search on /titles and mobile search in the /titles header", () => {
+  it("keeps catalog search on /titles for phone and desktop", () => {
     const catalogPage = src("src/app/(app)/titles/page.tsx");
     const homePage = src("src/app/(app)/dashboard/page.tsx");
     const shell = src("src/components/chrome/app-shell.tsx");
-    const headerSearch = src("src/components/titles/titles-header-search.tsx");
     const searchField = src("src/components/layout/search-field.tsx");
     const messagesPage = src("src/app/(app)/messages/page.tsx");
     const accessGate = src("src/components/messages/access-upgrade-gate.tsx");
@@ -41,13 +49,9 @@ describe("titles catalog scope", () => {
 
     expect(catalogPage).toContain("SearchField");
     expect(catalogPage).toContain("TITLES_CATALOG.searchPlaceholder");
-    expect(catalogPage).toContain("max-md:hidden");
+    expect(catalogPage).toContain("TitlesCatalogToolbar");
     expect(searchField).toContain("Search titles...");
-    expect(headerSearch).toContain("SearchField");
-    expect(headerSearch).toContain("md:hidden");
-    expect(headerSearch).toContain("data-titles-header-search");
-    expect(shell).toContain("TitlesHeaderSearch");
-    expect(shell).toContain("titlesBleed ? <TitlesHeaderSearch");
+    expect(shell).not.toContain("TitlesHeaderSearch");
     expect(shell).not.toContain("SearchField");
     expect(shell).not.toContain("Search titles");
     expect(shell).not.toMatch(/⌘K|CommandK|command-k/i);
@@ -75,7 +79,7 @@ describe("titles catalog scope", () => {
     }
   });
 
-  it("keeps the phone list 16 inset on the /titles frame, not a -mx-4 cancel", () => {
+  it("keeps the list 16 inset on the /titles frame, not a -mx-4 cancel", () => {
     const catalog = src("src/components/titles/titles-catalog.tsx");
     const home = src("src/components/dashboard/dashboard-home.tsx");
     const titleDetail = src("src/app/(app)/titles/[id]/page.tsx");
@@ -83,7 +87,10 @@ describe("titles catalog scope", () => {
 
     expect(catalog).toContain("px-[var(--space-4)]");
     expect(catalog).toContain("titles-catalog-list");
+    expect(catalog).toContain("aspect-[16/9]");
     expect(catalog).not.toContain("titles-catalog-rail");
+    expect(catalog).not.toContain("titles-catalog-grid");
+    expect(catalog).not.toContain("aspect-[2/3]");
     expect(catalog).not.toContain("-mx-[var(--space-4)]");
     expect(home).not.toContain("titles-catalog-list");
     expect(home).not.toContain("-mx-[var(--space-4)]");
@@ -106,5 +113,24 @@ describe("titles catalog scope", () => {
     expect(NAV.some((item) => /draft/i.test(item.label))).toBe(false);
     expect(NAV.find((item) => item.href === "/deliveries")?.label).toBe("Deliveries");
     expect(GC_NAV.some((item) => item.href === "/titles")).toBe(false);
+  });
+
+  it("loads landscape row skeletons, not a poster grid", () => {
+    const skeletons = src("src/components/layout/page-skeletons.tsx");
+    expect(skeletons).toContain("data-titles-catalog-skeleton");
+    expect(skeletons).toContain("aspect-[16/9]");
+    expect(skeletons).not.toContain("PosterGridSkeleton");
+    expect(skeletons).not.toContain("aspect-[2/3]");
+    expect(src("src/app/(app)/titles/loading.tsx")).toContain("CatalogSkeleton");
+    expect(src("src/app/(app)/titles/[id]/loading.tsx")).toContain("TitleDetailSkeleton");
+  });
+
+  it("keeps house-shell language in titles comments — no reference-brand word", () => {
+    for (const path of TITLES_COMMENT_PATHS) {
+      const contents = src(path);
+      expect(contents, path).not.toMatch(/Filmhub/i);
+      expect(contents, path).not.toMatch(/Relay/i);
+      expect(contents, path).not.toMatch(/Coinbase/i);
+    }
   });
 });

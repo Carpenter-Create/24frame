@@ -5,15 +5,19 @@ import { TITLE_STATUS_LABELS, type TitleStatus } from "@/lib/titles";
 import { DASHBOARD_HOME } from "./dashboard-home";
 import {
   CATALOG_LIFECYCLE_STATES,
+  CATALOG_STATUS_FILTERS,
   TITLE_STATUS_PILL_IDLE_CLASS,
   TITLE_STATUS_PILL_LIVE_CLASS,
   TITLES_CATALOG,
   catalogCountLabel,
   catalogCountValue,
+  catalogFilterHref,
   catalogReleaseYear,
   catalogStatusMark,
   catalogStatusPillClass,
   catalogStillSrc,
+  filterCatalogByStatus,
+  parseCatalogStatusFilter,
 } from "./titles-catalog";
 
 const ALL_STATES: TitleStatus[] = [
@@ -67,9 +71,9 @@ describe("catalog lifecycle", () => {
 });
 
 describe("catalogStillSrc", () => {
-  it("prefers a real poster for the portrait still", () => {
+  it("prefers the landscape banner and does not force-crop a poster", () => {
     expect(catalogStillSrc("https://cdn/banner.jpg", "https://cdn/poster.jpg")).toBe(
-      "https://cdn/poster.jpg",
+      "https://cdn/banner.jpg",
     );
   });
 
@@ -77,7 +81,8 @@ describe("catalogStillSrc", () => {
     expect(catalogStillSrc("https://cdn/banner.jpg", null)).toBe("https://cdn/banner.jpg");
   });
 
-  it("returns null when there is no artwork — honest empty, not a fake poster", () => {
+  it("returns null when there is no landscape — honest empty, not a cropped poster", () => {
+    expect(catalogStillSrc(null, "https://cdn/poster.jpg")).toBeNull();
     expect(catalogStillSrc(null, null)).toBeNull();
     expect(catalogStillSrc(undefined, "")).toBeNull();
   });
@@ -125,6 +130,41 @@ describe("catalog status pills", () => {
     expect(catalogStatusPillClass("taken_down")).toBe(TITLE_STATUS_PILL_IDLE_CLASS);
     expect(catalogStatusPillClass("live")).not.toContain("bg-accent");
     expect(catalogStatusPillClass("draft")).not.toMatch(/green|red|emerald|rose/);
+  });
+});
+
+describe("catalog status filter", () => {
+  it("uses product-true labels and does not invent Upcoming or In progress", () => {
+    expect(CATALOG_STATUS_FILTERS.map((f) => f.key)).toEqual([
+      "all",
+      "draft",
+      "submitted",
+      "in_review",
+      "live",
+      "takedown_requested",
+      "taken_down",
+    ]);
+    expect(CATALOG_STATUS_FILTERS.map((f) => f.label)).not.toContain("Upcoming");
+    expect(CATALOG_STATUS_FILTERS.map((f) => f.label)).not.toContain("In progress");
+    expect(parseCatalogStatusFilter("draft")).toBe("draft");
+    expect(parseCatalogStatusFilter("bogus")).toBe("all");
+    expect(parseCatalogStatusFilter(undefined)).toBe("all");
+  });
+
+  it("groups submitted and in_delivery under Submitted", () => {
+    const rows = ALL_STATES.map((status) => ({ id: status, status }));
+    expect(filterCatalogByStatus(rows, "submitted").map((r) => r.status)).toEqual([
+      "submitted",
+      "in_delivery",
+    ]);
+    expect(filterCatalogByStatus(rows, "draft").map((r) => r.status)).toEqual(["draft"]);
+    expect(filterCatalogByStatus(rows, "all")).toHaveLength(7);
+  });
+
+  it("preserves search when building a status href", () => {
+    expect(catalogFilterHref("winter", "live")).toBe("/titles?q=winter&status=live");
+    expect(catalogFilterHref("", "all")).toBe("/titles");
+    expect(catalogFilterHref("  ", "draft")).toBe("/titles?status=draft");
   });
 });
 

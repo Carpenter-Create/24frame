@@ -202,9 +202,8 @@ export default async function TitleDetailPage({ params }: { params: Promise<{ id
         title={title.title}
         backHref="/titles"
         backLabel="Titles"
+        status={title.status}
         statusLabel={statusLabel}
-        active={liveCount > 0}
-        posterUrl={art.poster}
         bannerUrl={art.banner}
         facts={heroFacts}
         action={screenerAvailable ? <ScreenerWatchButton titleId={title.id} /> : null}

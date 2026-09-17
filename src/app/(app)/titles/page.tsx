@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 import { createClient } from "@/lib/supabase/server";
 import { getOrgContext } from "@/lib/supabase/context";
@@ -14,21 +15,22 @@ import {
   catalogReleaseYear,
   catalogStatusMark,
   catalogStillSrc,
+  filterCatalogByStatus,
+  parseCatalogStatusFilter,
 } from "@/lib/titles-catalog";
 import {
   TitlesCatalogEmpty,
   TitlesCatalogFrame,
-  TitlesCatalogGrid,
   TitlesCatalogHeader,
   TitlesCatalogList,
   TitlesCatalogListRow,
-  TitlesCatalogStill,
+  TitlesCatalogToolbar,
 } from "@/components/titles/titles-catalog";
 import type { TitleStatus } from "@/lib/titles";
 
 // Client `/titles` is the catalog you operate: every title the org owns, every
-// existing title.status, on this one page. Desktop is the unboxed 5-up grid.
-// Phone is a hairline list. `catalog_id` stays GC-only.
+// existing title.status, on this one page. Landscape-thumb rows in the house
+// shell. `catalog_id` stays GC-only.
 
 export default async function TitlesPage({
   searchParams,
@@ -38,6 +40,7 @@ export default async function TitlesPage({
   const sp = await searchParams;
   const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
   const q = (str(sp.q) ?? "").slice(0, 100);
+  const statusFilter = parseCatalogStatusFilter(str(sp.status));
 
   const supabase = await createClient();
   // Shared with the layout via React cache() — no second identity check, no second
@@ -76,7 +79,7 @@ export default async function TitlesPage({
     bannerUrl: posters.get(t.id)?.banner ?? null,
   }));
 
-  const filtered = filterTitles(all, q);
+  const filtered = filterCatalogByStatus(filterTitles(all, q), statusFilter);
 
   const stills = filtered.map((r) => ({
     key: r.id,
@@ -88,23 +91,34 @@ export default async function TitlesPage({
     year: catalogReleaseYear(r.release_date),
   }));
 
+  const emptyCopy =
+    list.length === 0
+      ? canOperate
+        ? TITLES_CATALOG.empty
+        : TITLES_CATALOG.emptyReadOnly
+      : q.trim()
+        ? `${TITLES_CATALOG.searchMiss(q.trim())} ${TITLES_CATALOG.searchMissHint}`
+        : TITLES_CATALOG.statusMiss;
+
   return (
     <TitlesCatalogFrame empty={list.length === 0}>
-      <TitlesCatalogHeader
-        count={catalogCountLabel(list.length, truncated)}
-        action={
-          list.length > 0 || canOperate ? (
-            <>
-              {list.length > 0 ? (
-                <div className="max-md:hidden">
-                  <SearchField placeholder={TITLES_CATALOG.searchPlaceholder} />
-                </div>
-              ) : null}
-              {canOperate ? <AddTitleButton orgId={activeOrg.id} /> : null}
-            </>
-          ) : undefined
-        }
-      />
+      <TitlesCatalogHeader count={catalogCountLabel(list.length, truncated)} />
+
+      {list.length > 0 || canOperate ? (
+        <TitlesCatalogToolbar
+          q={q}
+          status={statusFilter}
+          search={
+            list.length > 0 ? (
+              <Suspense fallback={null}>
+                <SearchField placeholder={TITLES_CATALOG.searchPlaceholder} />
+              </Suspense>
+            ) : undefined
+          }
+          action={canOperate ? <AddTitleButton orgId={activeOrg.id} /> : undefined}
+          filters={list.length > 0}
+        />
+      ) : null}
 
       {/* Honest about the bound. Silent truncation is the bug this replaced — a client with
           more titles than the page size could not see them and nothing said so. Paging
@@ -116,42 +130,22 @@ export default async function TitlesPage({
         </InlineNotice>
       ) : null}
 
-      {list.length === 0 ? (
-        <TitlesCatalogEmpty>
-          {canOperate ? TITLES_CATALOG.empty : TITLES_CATALOG.emptyReadOnly}
-        </TitlesCatalogEmpty>
-      ) : filtered.length === 0 ? (
-        <TitlesCatalogEmpty>
-          {TITLES_CATALOG.searchMiss(q.trim())} {TITLES_CATALOG.searchMissHint}
-        </TitlesCatalogEmpty>
+      {stills.length === 0 ? (
+        <TitlesCatalogEmpty>{emptyCopy}</TitlesCatalogEmpty>
       ) : (
-        <>
-          <TitlesCatalogList>
-            {stills.map((r) => (
-              <TitlesCatalogListRow
-                key={r.key}
-                href={r.href}
-                title={r.title}
-                status={r.status}
-                statusLabel={r.statusLabel}
-                year={r.year}
-              />
-            ))}
-          </TitlesCatalogList>
-          <TitlesCatalogGrid>
-            {stills.map((r) => (
-              <TitlesCatalogStill
-                key={r.key}
-                href={r.href}
-                title={r.title}
-                stillUrl={r.stillUrl}
-                status={r.status}
-                statusLabel={r.statusLabel}
-                year={r.year}
-              />
-            ))}
-          </TitlesCatalogGrid>
-        </>
+        <TitlesCatalogList>
+          {stills.map((r) => (
+            <TitlesCatalogListRow
+              key={r.key}
+              href={r.href}
+              title={r.title}
+              stillUrl={r.stillUrl}
+              status={r.status}
+              statusLabel={r.statusLabel}
+              year={r.year}
+            />
+          ))}
+        </TitlesCatalogList>
       )}
     </TitlesCatalogFrame>
   );

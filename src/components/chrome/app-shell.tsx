@@ -13,7 +13,6 @@ import { SettingsHeaderBack } from "./settings-header-back";
 import { MobileNav } from "./mobile-nav";
 import { MessagesAppHeader } from "./messages-app-header";
 import { BrandEmblem } from "./brand-emblem";
-import { TitlesHeaderSearch } from "@/components/titles/titles-header-search";
 import { AskAssistantChromeProvider } from "@/components/messages/ask-globee-chrome";
 import { cn } from "@/lib/cn";
 import type { AppShellChrome } from "@/lib/app-shell-chrome";
@@ -297,7 +296,6 @@ export function AppShell({
           {messagesPage ? (
             <MessagesHeaderSlot chrome={chrome} messagesSurface={messagesSurface} />
           ) : null}
-          {titlesBleed ? <TitlesHeaderSearch /> : null}
         </div>
         <div data-app-header-trailing="" className={APP_HEADER_TRAILING_CLUSTER_CLASS}>
           <div
