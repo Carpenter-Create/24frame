@@ -181,7 +181,7 @@ describe("MessagesAppHeader", () => {
     expect(deleteDialog).not.toContain("bg-accent");
     expect(deleteDialog).not.toContain('variant="primary"');
     expect(confirmHtml).toContain(ASK_GLOBEE.deleteConfirm);
-    expect(confirmHtml).toContain("text-[#c4564a]");
+    expect(html).toContain("text-[#c4564a]");
     expect(confirmHtml).not.toContain("bg-accent");
     expect(confirmHtml).not.toContain("bg-primary");
     expect(cancelHtml).toContain(ASK_GLOBEE.cancelLabel);

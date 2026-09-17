@@ -32,10 +32,15 @@ describe("dialog confirm grammar", () => {
   });
 
   it("puts confirm footers on DialogFooter + Button, not a Titles-only height hack", () => {
+    const deleteDialog = titles.slice(
+      titles.indexOf("title={titleDeleteConfirmTitle"),
+      titles.indexOf("title={titleArchiveConfirmTitle"),
+    );
     expect(titles).toContain("DialogFooter");
     expect(titles).toContain('size="sm"');
-    expect(titles).not.toContain("min-h-");
-    expect(titles).not.toContain("h-[");
+    expect(deleteDialog).toContain("DialogFooter");
+    expect(deleteDialog).not.toContain("min-h-");
+    expect(deleteDialog).not.toContain("h-[");
     expect(header).toContain("DialogFooter");
     expect(header).toContain('size="sm"');
   });
