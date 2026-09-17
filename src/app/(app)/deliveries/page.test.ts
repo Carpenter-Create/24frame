@@ -39,6 +39,14 @@ describe("DeliveriesPage bounds", () => {
       await DeliveriesPage({ searchParams: Promise.resolve({}) }),
     );
     expect(html).toContain("Winter Light");
+    expect(html).toContain("1 package");
+    expect(html).toContain("1 title");
+    expect(html).toContain("data-deliveries-pipeline");
+    expect(html).toContain("data-deliveries-row");
+    expect(html).toContain("Live");
+    expect(html).not.toContain("Platform");
+    expect(html).not.toContain("Download");
+    expect(html).not.toContain("Create delivery");
     expect(html).not.toContain('data-my-list-truncated="deliveries"');
     expect(html).not.toContain(DELIVERIES_TRUNCATED);
   });

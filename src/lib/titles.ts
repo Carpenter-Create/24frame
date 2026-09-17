@@ -45,3 +45,10 @@ export const DELIVERY_STATUS_ROW_LABELS: Record<DeliveryStatus, string> = {
   rejected: "Rejected",
   taken_down: "Taken down",
 };
+
+// Title-detail deep-links into the other ops-spine routes. Copy in lib/, not JSX.
+export const TITLE_DETAIL = {
+  relatedLabel: "Related",
+  deliveriesLink: "Deliveries",
+  healthLink: "Catalog Health",
+} as const;

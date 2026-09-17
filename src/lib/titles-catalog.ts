@@ -1,15 +1,15 @@
+import { HOUSE_FILTER_ON_CLASS } from "@/lib/house-shell";
 import { TITLE_STATUS_LABELS, type TitleStatus } from "@/lib/titles";
 
 // Client `/titles` catalog copy and list helpers. Lives in lib/, not JSX.
 // One list, every org-owned title, every existing title.status. Do not invent
-// statuses or a second catalog. Mobile 528:542 is one Recent snap rail — not a
-// storefront, not a second desktop grid.
+// statuses or a second catalog. Desktop is the 5-up still grid; phone is a
+// hairline list. Status pills stay greyscale ink; Live uses the ink-selected fill.
 
 export const TITLES_CATALOG = {
   title: "Titles",
   addTitle: "Add Title",
   searchPlaceholder: "Search titles...",
-  recent: "Recent",
   empty: "No titles yet.",
   emptyCatalog: "The catalog is empty.",
   emptyCanOperate: "Add your first title to begin building your catalog.",
@@ -18,6 +18,15 @@ export const TITLES_CATALOG = {
   searchMissHint: "Try a different search.",
   inCatalog: (n: string) => `${n} in catalog`,
 } as const;
+
+export const TITLE_STATUS_PILL_IDLE_CLASS = "border border-hairline text-ink-2";
+
+export const TITLE_STATUS_PILL_LIVE_CLASS = HOUSE_FILTER_ON_CLASS;
+
+/** Greyscale ink pill. Live is the ink-selected fill — no accent, no loud packs. */
+export function catalogStatusPillClass(status: TitleStatus | string): string {
+  return status === "live" ? TITLE_STATUS_PILL_LIVE_CLASS : TITLE_STATUS_PILL_IDLE_CLASS;
+}
 
 /**
  * Catalog size chrome. A truncated read is a floor, not a total — same honesty

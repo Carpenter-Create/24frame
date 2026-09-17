@@ -92,7 +92,8 @@ describe("staff /gc/deliveries empty copy", () => {
     const vendors = readFileSync("src/app/(app)/(operator)/vendors/page.tsx", "utf8");
 
     expect(clientDeliveries).toContain("EmptyState");
-    expect(clientDeliveries).toContain("Where your titles are placed and their status.");
+    expect(clientDeliveries).toContain("DELIVERIES_NO_DATA");
+    expect(clientDeliveries).toContain("data-deliveries-pipeline");
     expect(vendors).toContain("VENDORS_PAGE");
     expect(pageSrc).not.toContain("EmptyState");
     expect(pageSrc).not.toContain("VENDORS_PAGE");

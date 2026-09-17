@@ -30,7 +30,7 @@ export function HeaderSkeleton({ withActions = false }: { withActions?: boolean 
   );
 }
 
-/** Catalog: header + search/sort controls + the poster grid. */
+/** Catalog: header + search/Add Title + phone list / desktop poster grid. */
 export function CatalogSkeleton() {
   return (
     <>
@@ -38,10 +38,26 @@ export function CatalogSkeleton() {
         <Skeleton className="h-8 w-32" />
         <div className="flex gap-2">
           <Skeleton className="h-9 w-56 rounded-[var(--radius-sm)]" />
-          <Skeleton className="h-9 w-24 rounded-[var(--radius-sm)]" />
+          <Skeleton className="h-9 w-24 rounded-full" />
         </div>
       </div>
-      <PosterGridSkeleton count={8} />
+      <div className="overflow-hidden rounded-[var(--radius-lg)] border border-hairline bg-surface md:hidden">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex items-center justify-between gap-4 border-b border-hairline px-4 py-4 last:border-b-0"
+          >
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="h-3 w-16" />
+            </div>
+            <Skeleton className="h-6 w-16 rounded-full" />
+          </div>
+        ))}
+      </div>
+      <div className="max-md:hidden">
+        <PosterGridSkeleton count={8} />
+      </div>
     </>
   );
 }

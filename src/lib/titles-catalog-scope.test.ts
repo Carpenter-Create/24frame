@@ -75,21 +75,30 @@ describe("titles catalog scope", () => {
     }
   });
 
-  it("keeps the mobile rail 16 inset on the /titles frame, not a -mx-4 cancel", () => {
+  it("keeps the phone list 16 inset on the /titles frame, not a -mx-4 cancel", () => {
     const catalog = src("src/components/titles/titles-catalog.tsx");
     const home = src("src/components/dashboard/dashboard-home.tsx");
     const titleDetail = src("src/app/(app)/titles/[id]/page.tsx");
     const homePage = src("src/app/(app)/dashboard/page.tsx");
 
     expect(catalog).toContain("px-[var(--space-4)]");
-    expect(catalog).toContain("titles-catalog-rail");
+    expect(catalog).toContain("titles-catalog-list");
+    expect(catalog).not.toContain("titles-catalog-rail");
     expect(catalog).not.toContain("-mx-[var(--space-4)]");
-    expect(home).not.toContain("titles-catalog-rail");
+    expect(home).not.toContain("titles-catalog-list");
     expect(home).not.toContain("-mx-[var(--space-4)]");
     expect(titleDetail).not.toContain("titles-catalog");
     expect(titleDetail).not.toContain("-mx-[var(--space-4)]");
     expect(homePage).not.toContain("titles-catalog");
     expect(homePage).not.toContain("-mx-[var(--space-4)]");
+  });
+
+  it("deep-links title detail into Deliveries and Catalog Health", () => {
+    const titleDetail = src("src/app/(app)/titles/[id]/page.tsx");
+    expect(titleDetail).toContain('href="/deliveries"');
+    expect(titleDetail).toContain('href="/catalog-health"');
+    expect(titleDetail).toContain("data-title-ops-links");
+    expect(titleDetail).toContain("TITLE_DETAIL");
   });
 
   it("does not add a drafts nav item or move the catalog onto deliveries", () => {

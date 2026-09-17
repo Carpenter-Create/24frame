@@ -3,37 +3,28 @@ import { Send } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
-import { DataTable, type Column } from "@/components/layout/data-table";
 import { EmptyState } from "@/components/layout/empty-state";
-import { StatusChip } from "@/components/layout/status-chip";
 import { StatusFilter } from "@/components/layout/status-filter";
 import { InlineNotice } from "@/components/ui/inline-notice";
+import { cn } from "@/lib/cn";
 import { loadMyDeliveries } from "@/lib/my-lists";
+import { DELIVERY_STATUS_ROW_LABELS } from "@/lib/titles";
 import {
+  DEFAULT_DELIVERY_SORT,
   DELIVERIES_FILTER_MISS,
   DELIVERIES_NO_DATA,
   DELIVERIES_TRUNCATED,
   DELIVERY_STATUS_FILTERS,
+  deliveriesCountLabel,
   deliveriesShowAllHref,
-  deliveriesSortHref,
   deliveriesStatusHref,
-  deliveryStatusDisplay,
+  deliveryPackageLabel,
+  deliveryStatusPillClass,
   deliveryTitleHref,
   filterDeliveries,
-  parseDeliverySort,
+  groupDeliveriesByTitle,
   parseDeliveryStatusFilter,
-  sortDeliveries,
-  type DeliveryBrowseRow,
 } from "@/lib/deliveries-browse";
-
-const UPDATED_FMT = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
-
-function formatUpdated(value: string | null): string {
-  if (value == null || value === "") return "—";
-  const ms = Date.parse(value);
-  if (!Number.isFinite(ms)) return "—";
-  return UPDATED_FMT.format(ms);
-}
 
 export default async function DeliveriesPage({
   searchParams,
@@ -42,58 +33,22 @@ export default async function DeliveriesPage({
 }) {
   const sp = await searchParams;
   const statusFilter = parseDeliveryStatusFilter(sp.status);
-  const sort = parseDeliverySort(sp.sort, sp.dir);
 
   const supabase = await createClient();
   // Untrusted RPC payload — loader validates rows and probes one past the cap.
   const { rows, truncated } = await loadMyDeliveries(supabase);
   const filtered = filterDeliveries(rows, statusFilter);
-  const sorted = sortDeliveries(filtered, sort);
+  const grouped = groupDeliveriesByTitle(filtered);
 
   const statusHref = (key: (typeof DELIVERY_STATUS_FILTERS)[number]["key"]) =>
-    deliveriesStatusHref(statusFilter, sort, key);
-  const sortHref = (key: string) => deliveriesSortHref(statusFilter, sort, key);
-
-  const columns: Column<DeliveryBrowseRow>[] = [
-    {
-      key: "title",
-      header: "Title",
-      sortable: true,
-      cell: (r) => <span className="font-medium text-ink">{r.title}</span>,
-    },
-    {
-      key: "vendor",
-      header: "Platform",
-      sortable: true,
-      cell: (r) => r.vendor_name,
-    },
-    {
-      key: "territory",
-      header: "Territory",
-      cell: (r) => r.territory,
-    },
-    {
-      key: "status",
-      header: "Status",
-      sortable: true,
-      cell: (r) => {
-        const { label, tone } = deliveryStatusDisplay(r.status);
-        return <StatusChip label={label} tone={tone} />;
-      },
-    },
-    {
-      key: "updated",
-      header: "Updated",
-      sortable: true,
-      align: "right",
-      width: "w-36",
-      cell: (r) => <span className="text-ink-2">{formatUpdated(r.updated_at)}</span>,
-    },
-  ];
+    deliveriesStatusHref(statusFilter, DEFAULT_DELIVERY_SORT, key);
 
   return (
     <>
-      <PageHeader title="Deliveries" subtitle="Where your titles are placed and their status." />
+      <PageHeader
+        title="Deliveries"
+        subtitle={rows.length > 0 ? deliveriesCountLabel(groupDeliveriesByTitle(rows)) : undefined}
+      />
 
       {truncated ? (
         <InlineNotice tone="info" className="mb-4" data-my-list-truncated="deliveries">
@@ -129,7 +84,7 @@ export default async function DeliveriesPage({
               description={DELIVERIES_FILTER_MISS.description}
               action={
                 <Link
-                  href={deliveriesShowAllHref(statusFilter, sort)}
+                  href={deliveriesShowAllHref(statusFilter, DEFAULT_DELIVERY_SORT)}
                   className="t-body-sm text-accent transition-colors hover:underline"
                 >
                   {DELIVERIES_FILTER_MISS.actionLabel}
@@ -137,14 +92,36 @@ export default async function DeliveriesPage({
               }
             />
           ) : (
-            <DataTable
-              columns={columns}
-              rows={sorted}
-              rowKey={(r) => r.delivery_id}
-              sort={sort}
-              sortHref={sortHref}
-              rowHref={deliveryTitleHref}
-            />
+            <div
+              className="overflow-hidden rounded-[var(--radius-lg)] border border-hairline bg-surface"
+              data-deliveries-pipeline=""
+            >
+              {grouped.map((row) => (
+                <Link
+                  key={row.title_id}
+                  href={deliveryTitleHref(row)}
+                  prefetch={false}
+                  className="flex items-center justify-between gap-[var(--space-4)] border-b border-hairline px-[var(--space-4)] py-[var(--space-4)] last:border-b-0"
+                  data-deliveries-row=""
+                >
+                  <span className="flex min-w-0 flex-col gap-[var(--space-1)]">
+                    <span className="truncate t-body font-medium text-ink">{row.title}</span>
+                    <span className="t-body-sm text-ink-3">
+                      {deliveryPackageLabel(row.packageCount)}
+                    </span>
+                  </span>
+                  <span
+                    className={cn(
+                      "inline-flex w-fit shrink-0 items-center rounded-full px-[var(--space-3)] py-[var(--space-1)] t-body-sm",
+                      deliveryStatusPillClass(row.status),
+                    )}
+                    data-deliveries-status=""
+                  >
+                    {DELIVERY_STATUS_ROW_LABELS[row.status]}
+                  </span>
+                </Link>
+              ))}
+            </div>
           )}
         </div>
       )}

@@ -115,8 +115,105 @@ export function normalizeMyDeliveries(data: unknown): DeliveryBrowseRow[] {
   return out;
 }
 
-export function deliveryTitleHref(row: DeliveryBrowseRow): string {
+export function deliveryTitleHref(row: { title_id: string }): string {
   return `/titles/${row.title_id}`;
+}
+
+export type DeliveryTitleRow = {
+  title_id: string;
+  title: string;
+  packageCount: number;
+  status: DeliveryStatus;
+  updated_at: string | null;
+};
+
+/** Attention-first rollup of product-true package statuses. Do not invent labels. */
+const DELIVERY_ROLLUP_RANK: Record<DeliveryStatus, number> = {
+  rejected: 0,
+  pending: 1,
+  delivered: 2,
+  live: 3,
+  taken_down: 4,
+};
+
+export function deliveryRollupStatus(statuses: readonly DeliveryStatus[]): DeliveryStatus {
+  if (statuses.length === 0) return "pending";
+  return statuses.reduce((best, status) =>
+    DELIVERY_ROLLUP_RANK[status] < DELIVERY_ROLLUP_RANK[best] ? status : best,
+  );
+}
+
+export function isDeliveryInProgress(status: DeliveryStatus): boolean {
+  return status === "pending" || status === "delivered";
+}
+
+export function deliveryPackageLabel(n: number): string {
+  return n === 1 ? "1 package" : `${n} packages`;
+}
+
+export function deliveriesCountLabel(groups: readonly DeliveryTitleRow[]): string {
+  const inProgress = groups.filter((g) => isDeliveryInProgress(g.status)).length;
+  if (inProgress > 0) return `${inProgress} in progress`;
+  return groups.length === 1 ? "1 title" : `${groups.length} titles`;
+}
+
+/**
+ * One row per title: package count + attention-first status.
+ * Sort is latest package update, then title, then title_id.
+ */
+export function groupDeliveriesByTitle(
+  rows: readonly DeliveryBrowseRow[],
+): DeliveryTitleRow[] {
+  const byTitle = new Map<string, DeliveryBrowseRow[]>();
+  for (const row of rows) {
+    const list = byTitle.get(row.title_id);
+    if (list) list.push(row);
+    else byTitle.set(row.title_id, [row]);
+  }
+
+  const groups: DeliveryTitleRow[] = [];
+  for (const [title_id, list] of byTitle) {
+    let latestMs: number | null = null;
+    let latestAt: string | null = null;
+    for (const row of list) {
+      const ms = deliveryUpdatedAtMs(row.updated_at);
+      if (ms == null) continue;
+      if (latestMs == null || ms > latestMs) {
+        latestMs = ms;
+        latestAt = row.updated_at;
+      }
+    }
+    groups.push({
+      title_id,
+      title: list[0].title,
+      packageCount: list.length,
+      status: deliveryRollupStatus(list.map((row) => row.status)),
+      updated_at: latestAt,
+    });
+  }
+
+  return groups.sort((a, b) => {
+    const am = deliveryUpdatedAtMs(a.updated_at);
+    const bm = deliveryUpdatedAtMs(b.updated_at);
+    const an = am == null;
+    const bn = bm == null;
+    if (an && bn) {
+      const byTitleName = a.title.toLowerCase().localeCompare(b.title.toLowerCase());
+      return byTitleName !== 0 ? byTitleName : a.title_id.localeCompare(b.title_id);
+    }
+    if (an) return 1;
+    if (bn) return -1;
+    if (am !== bm) return (bm as number) - (am as number);
+    const byTitleName = a.title.toLowerCase().localeCompare(b.title.toLowerCase());
+    return byTitleName !== 0 ? byTitleName : a.title_id.localeCompare(b.title_id);
+  });
+}
+
+export const DELIVERY_STATUS_PILL_IDLE_CLASS = "border border-hairline text-ink-2";
+export const DELIVERY_STATUS_PILL_LIVE_CLASS = "bg-ink text-surface";
+
+export function deliveryStatusPillClass(status: DeliveryStatus): string {
+  return status === "live" ? DELIVERY_STATUS_PILL_LIVE_CLASS : DELIVERY_STATUS_PILL_IDLE_CLASS;
 }
 
 export type DeliveryChipTone = "neutral" | "active" | "muted";

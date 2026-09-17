@@ -24,8 +24,8 @@ import { TITLES_CATALOG } from "@/lib/titles-catalog";
 import {
   TitlesCatalogFrame,
   TitlesCatalogHeader,
-  TitlesCatalogRail,
-  TitlesCatalogRailStill,
+  TitlesCatalogList,
+  TitlesCatalogListRow,
   TitlesCatalogStill,
 } from "./titles-catalog";
 
@@ -151,23 +151,34 @@ describe("TitlesCatalogStill craft", () => {
     );
   });
 
-  it("marks status as a hairline pill, not a filled muted chip", () => {
-    const html = renderStill({
+  it("marks Live as the ink-selected fill and other statuses as hairline pills", () => {
+    const live = renderStill({
       href: "/titles/1",
       title: "Craft film",
       stillUrl: null,
       status: "live",
       statusLabel: TITLE_STATUS_LABELS.live,
     });
-    const pill = openingTagWith(html, 'data-titles-catalog-status=""');
+    const draft = renderStill({
+      href: "/titles/2",
+      title: "Draft film",
+      stillUrl: null,
+      status: "draft",
+      statusLabel: TITLE_STATUS_LABELS.draft,
+    });
+    const livePill = openingTagWith(live, 'data-titles-catalog-status=""');
+    const draftPill = openingTagWith(draft, 'data-titles-catalog-status=""');
 
-    expect(pill).toContain("rounded-full");
-    expect(pill).toContain("border-hairline");
-    expect(pill).toContain("t-body-sm text-ink-2");
-    expect(pill).not.toContain("font-normal");
-    expect(pill).not.toContain("bg-surface-muted");
-    expect(pill).not.toContain("bg-accent");
-    expect(pill).not.toMatch(/green|emerald|success/);
+    expect(livePill).toContain("rounded-full");
+    expect(livePill).toContain("bg-ink");
+    expect(livePill).toContain("text-surface");
+    expect(livePill).not.toContain("border-hairline");
+    expect(livePill).not.toContain("bg-accent");
+    expect(livePill).not.toMatch(/green|emerald|success/);
+    expect(draftPill).toContain("border-hairline");
+    expect(draftPill).toContain("text-ink-2");
+    expect(draftPill).not.toContain("bg-ink");
+    expect(draftPill).not.toContain("bg-accent");
   });
 
   it("does not scale the poster on hover", () => {
@@ -218,18 +229,18 @@ describe("TitlesCatalogStill craft", () => {
 });
 
 describe("TitlesCatalogFrame craft", () => {
-  it("uses a house --space-* gap under the operate bar, not the old canyon", () => {
+  it("uses house section air of 24 under the operate bar", () => {
     const html = renderToStaticMarkup(createElement(TitlesCatalogFrame));
+    expect(html).toContain("gap-[var(--space-6)]");
     expect(html).toContain("md:gap-[var(--space-8)]");
-    expect(html).toContain("gap-[var(--space-12)]");
+    expect(html).not.toContain("gap-[var(--space-12)]");
     expect(html).not.toContain("gap-[var(--space-10)]");
-    expect(html).not.toContain("gap-[var(--space-6)]");
   });
 
-  it("tightens empty 529:542 to 24 between identity and copy", () => {
+  it("keeps empty catalog on the same 24 section air", () => {
     const html = renderToStaticMarkup(createElement(TitlesCatalogFrame, { empty: true }));
-    expect(html).toContain("gap-[var(--space-6)] md:gap-[var(--space-8)]");
-    expect(html).not.toContain("gap-[var(--space-12)] md:gap-[var(--space-8)]");
+    expect(html).toContain("gap-[var(--space-6)]");
+    expect(html).not.toContain("md:gap-[var(--space-8)]");
   });
 });
 
@@ -237,7 +248,7 @@ describe("TitlesCatalogHeader type lock", () => {
   it("keeps the page title on the 24px section step, not a second hero", () => {
     const html = renderToStaticMarkup(createElement(TitlesCatalogHeader));
 
-    expect(html).toMatch(/<h1 class="t-section text-ink max-md:hidden">Titles<\/h1>/);
+    expect(html).toMatch(/<h1 class="t-section text-ink">Titles<\/h1>/);
     expect(html).toContain(TITLES_CATALOG.title);
     expect(html).not.toMatch(/<h1[^>]*t-display/);
     expect(html).not.toMatch(/<h1[^>]*t-title/);
@@ -281,69 +292,58 @@ describe("TitlesCatalogHeader type lock", () => {
     expect(globals).toMatch(/\.t-body-sm\s*\{[\s\S]*?font-size:\s*var\(--text-sm\)/);
   });
 
-  it("uses the org name on mobile 528:542 and Titles on desktop 1:3", () => {
-    const html = renderToStaticMarkup(
-      createElement(TitlesCatalogHeader, { identity: "Acme" }),
-    );
-    expect(html).toContain("data-titles-catalog-identity");
-    expect(html).toContain("Acme");
-    expect(html).toContain("md:hidden");
-    expect(html).toMatch(/<h1 class="t-section text-ink max-md:hidden">Titles<\/h1>/);
+  it("keeps Titles as the page title on phone and desktop", () => {
+    const html = renderToStaticMarkup(createElement(TitlesCatalogHeader));
+    expect(html).toMatch(/<h1 class="t-section text-ink">Titles<\/h1>/);
+    expect(html).not.toContain("data-titles-catalog-identity");
     expect(html).not.toContain("Meridian Pictures");
   });
 });
 
-describe("TitlesCatalogRail 528:542 lock", () => {
-  it("is one Recent snap rail — 140×210 r12, 16 gap, 16 side from the frame", () => {
+describe("TitlesCatalogList phone lock", () => {
+  it("is a hairline list on phone — title, year, ink status, no snap rail", () => {
     const html = renderToStaticMarkup(
       createElement(
         TitlesCatalogFrame,
         null,
         createElement(
-          TitlesCatalogRail,
+          TitlesCatalogList,
           null,
-          createElement(TitlesCatalogRailStill, {
+          createElement(TitlesCatalogListRow, {
             href: "/titles/1",
             title: "Craft film",
-            stillUrl: null,
             status: "live",
+            statusLabel: TITLE_STATUS_LABELS.live,
             year: "2019",
           }),
         ),
       ),
     );
     const catalog = openingTagWith(html, 'data-titles-catalog=""');
-    const rail = openingTagWith(html, 'data-titles-catalog-rail=""');
-    const track = openingTagWith(html, 'data-titles-catalog-rail-track=""');
-    const card = openingTagWith(html, 'data-titles-catalog-rail-card=""');
-    const frame = openingTagWith(html, 'data-titles-catalog-rail-frame=""');
-    const name = openingTagWith(html, 'data-titles-catalog-rail-name=""');
-    const year = openingTagWith(html, 'data-titles-catalog-rail-year=""');
+    const list = openingTagWith(html, 'data-titles-catalog-list=""');
+    const row = openingTagWith(html, 'data-titles-catalog-list-row=""');
+    const name = openingTagWith(html, 'data-titles-catalog-list-name=""');
+    const year = openingTagWith(html, 'data-titles-catalog-list-year=""');
+    const pill = openingTagWith(html, 'data-titles-catalog-status=""');
 
-    expect(html).toContain(TITLES_CATALOG.recent);
     expect(html).not.toContain("Recently added");
+    expect(html).not.toContain("Recent");
     expect(html).not.toContain("Store");
     expect(html).not.toContain("Spotlight");
+    expect(html).not.toContain("snap-x");
+    expect(html).not.toContain("w-[140px]");
     expect(catalog).toContain("px-[var(--space-4)]");
-    expect(rail).toContain("md:hidden");
-    expect(track).toContain("snap-x");
-    expect(track).toContain("snap-mandatory");
-    expect(track).toContain("gap-[var(--space-4)]");
-    expect(track).not.toContain("-mx-[var(--space-4)]");
-    expect(track).not.toContain("px-[var(--space-4)]");
-    expect(card).toContain("w-[140px]");
-    expect(card).toContain("snap-start");
-    expect(frame).toContain("h-[210px]");
-    expect(frame).toContain("w-[140px]");
-    expect(frame).toContain("rounded-[12px]");
-    expect(frame).not.toContain("rounded-[var(--radius-lg)]");
-    expect(name).toContain("t-body text-ink");
-    expect(year).toContain("t-body-sm text-ink-2");
-    expect(year).not.toContain("font-normal");
+    expect(list).toContain("md:hidden");
+    expect(list).toContain("rounded-[var(--radius-lg)]");
+    expect(list).toContain("border-hairline");
+    expect(row).toContain("border-b");
+    expect(name).toContain("t-body font-medium text-ink");
+    expect(year).toContain("t-body-sm text-ink-3");
     expect(html).toContain("2019");
-    expect(html).not.toContain("data-titles-catalog-status");
+    expect(pill).toContain("bg-ink");
+    expect(pill).not.toContain("bg-accent");
     expect(html).not.toContain("bg-band");
     expect(html).not.toMatch(/\bStore\b/);
-    expect(html.match(/data-titles-catalog-rail=""/g) ?? []).toHaveLength(1);
+    expect(html.match(/data-titles-catalog-list=""/g) ?? []).toHaveLength(1);
   });
 });
