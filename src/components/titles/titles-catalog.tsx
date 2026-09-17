@@ -1,16 +1,37 @@
 import Link from "next/link";
+import { Camera } from "lucide-react";
 
 import { Artwork } from "@/components/layout/artwork";
 import { cn } from "@/lib/cn";
-import { catalogStatusPillClass, TITLES_CATALOG } from "@/lib/titles-catalog";
+import {
+  CATALOG_STATUS_FILTERS,
+  TITLES_CATALOG,
+  TITLES_FILTER_DESKTOP_CLUSTER_CLASS,
+  TITLES_FILTER_PHONE_CHEVRON_CLASS,
+  TITLES_FILTER_PHONE_HOST_CLASS,
+  TITLES_FILTER_PHONE_PANEL_CLASS,
+  TITLES_FILTER_PHONE_TRIGGER_CLASS,
+  TITLES_LIST_CLASS,
+  TITLES_LIST_ROW_CLASS,
+  TITLES_ROW_COPY_CLASS,
+  TITLES_ROW_META_CLASS,
+  TITLES_ROW_NAME_CLASS,
+  TITLES_THUMB_CLASS,
+  TITLES_TITLE_DESKTOP_CLASS,
+  TITLES_TITLE_MOBILE_CLASS,
+  catalogFilterHref,
+  catalogStatusFilterLabel,
+  catalogStatusPillClass,
+  titlesFilterPhoneOptionClass,
+  titlesFilterPillClass,
+  type CatalogStatusFilter,
+} from "@/lib/titles-catalog";
 
 // Client `/titles` chrome only. Not the shared Card, BannerCard, or DataTable —
 // those must not restyle home, Deliveries, Catalog Health, or staff surfaces.
-// Desktop is the unboxed 5-up still grid under the house shell: full-bleed 2:3
-// art, type in air, year and TITLE_STATUS_LABELS ink pill. Phone is a hairline
-// list — not a snap rail, not a crushed 5-up. Accent is the one Add Title
-// Sporty Blue pill. Page-local still crop: every catalog img is object-cover /
-// object-center so Artwork's default treatment cannot diverge.
+// Phone (`< md`): full-width 16:9 art on top, title / year / status under.
+// Desktop (`md+`): landscape-thumb row — art leading, title/year, status.
+// Type is the Dashboard register. Accent is the one Add Title Sporty Blue pill.
 
 export function TitlesCatalogFrame({
   className,
@@ -31,35 +52,135 @@ export function TitlesCatalogFrame({
   );
 }
 
-export function TitlesCatalogHeader({
-  action,
-  count,
+export function TitlesCatalogHeader({ count }: { count?: string }) {
+  return (
+    <header className="titles-catalog-header">
+      <h1 data-titles-catalog-title="">
+        <span data-titles-catalog-title-mobile="" className={TITLES_TITLE_MOBILE_CLASS}>
+          {TITLES_CATALOG.title}
+        </span>
+        <span data-titles-catalog-title-desktop="" className={TITLES_TITLE_DESKTOP_CLASS}>
+          {TITLES_CATALOG.title}
+        </span>
+      </h1>
+      {count ? (
+        <p
+          className="mt-[var(--space-1)] t-body-sm text-ink-3"
+          data-titles-catalog-count=""
+        >
+          {count}
+        </p>
+      ) : null}
+    </header>
+  );
+}
+
+export function TitlesCatalogStatusFilter({
+  q,
+  status,
 }: {
+  q: string;
+  status: CatalogStatusFilter;
+}) {
+  const currentLabel = catalogStatusFilterLabel(status);
+
+  return (
+    <>
+      <details className={TITLES_FILTER_PHONE_HOST_CLASS} data-titles-catalog-status-compact="">
+        <summary
+          className={TITLES_FILTER_PHONE_TRIGGER_CLASS}
+          aria-label={TITLES_CATALOG.statusFilterLabel}
+        >
+          <span data-titles-catalog-status-current="">{currentLabel}</span>
+          <svg
+            className={TITLES_FILTER_PHONE_CHEVRON_CLASS}
+            viewBox="0 0 16 16"
+            fill="none"
+            aria-hidden
+          >
+            <path
+              d="M4 6l4 4 4-4"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </summary>
+        <div className={TITLES_FILTER_PHONE_PANEL_CLASS} role="listbox">
+          {CATALOG_STATUS_FILTERS.map((option) => (
+            <Link
+              key={`phone-${option.key}`}
+              href={catalogFilterHref(q, option.key)}
+              aria-current={option.key === status ? "true" : undefined}
+              className={titlesFilterPhoneOptionClass(option.key === status)}
+            >
+              {option.label}
+            </Link>
+          ))}
+        </div>
+      </details>
+      <div
+        className={TITLES_FILTER_DESKTOP_CLUSTER_CLASS}
+        data-titles-catalog-status-pills=""
+        role="group"
+        aria-label={TITLES_CATALOG.statusFilterLabel}
+      >
+        {CATALOG_STATUS_FILTERS.map((option) => (
+          <Link
+            key={`desktop-${option.key}`}
+            href={catalogFilterHref(q, option.key)}
+            aria-current={option.key === status ? "true" : undefined}
+            className={titlesFilterPillClass(option.key === status)}
+          >
+            {option.label}
+          </Link>
+        ))}
+      </div>
+    </>
+  );
+}
+
+export function TitlesCatalogToolbar({
+  q,
+  status,
+  search,
+  action,
+  filters = true,
+}: {
+  q: string;
+  status: CatalogStatusFilter;
+  search?: React.ReactNode;
   action?: React.ReactNode;
-  count?: string;
+  filters?: boolean;
 }) {
   return (
-    <header className="titles-catalog-header flex items-center justify-between gap-[var(--space-2)] md:items-start md:gap-[var(--space-6)]">
-      <div className="min-w-0 flex-1">
-        <h1 className="t-section text-ink">{TITLES_CATALOG.title}</h1>
-        {count ? (
-          <p
-            className="mt-[var(--space-1)] t-body-sm text-ink-3"
-            data-titles-catalog-count=""
-          >
-            {count}
-          </p>
-        ) : null}
-      </div>
+    <div
+      className="titles-catalog-toolbar flex flex-col gap-[var(--space-4)] md:flex-row md:items-center"
+      data-titles-catalog-toolbar=""
+    >
+      {search ? (
+        <div
+          className="min-w-0 w-full md:w-auto [&_input]:w-full [&_input]:sm:w-full md:[&_input]:w-56"
+          data-titles-catalog-search=""
+        >
+          {search}
+        </div>
+      ) : null}
+      {filters ? (
+        <div className="min-w-0 flex-1" data-titles-catalog-filters="">
+          <TitlesCatalogStatusFilter q={q} status={status} />
+        </div>
+      ) : null}
       {action ? (
         <div
-          className="titles-catalog-operate flex shrink-0 items-center gap-[var(--space-4)]"
+          className="flex shrink-0 justify-end md:ml-auto"
           data-titles-catalog-operate=""
         >
           {action}
         </div>
       ) : null}
-    </header>
+    </div>
   );
 }
 
@@ -82,23 +203,9 @@ export function TitlesCatalogEmpty({
   );
 }
 
-export function TitlesCatalogGrid({ children }: { children: React.ReactNode }) {
-  return (
-    <div
-      className="titles-catalog-grid hidden gap-x-[var(--space-8)] gap-y-[var(--space-16)] md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
-      data-titles-catalog-grid=""
-    >
-      {children}
-    </div>
-  );
-}
-
 export function TitlesCatalogList({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      className="titles-catalog-list overflow-hidden rounded-[var(--radius-lg)] border border-hairline bg-surface md:hidden"
-      data-titles-catalog-list=""
-    >
+    <div className={TITLES_LIST_CLASS} data-titles-catalog-list="">
       {children}
     </div>
   );
@@ -124,46 +231,40 @@ export function TitleStatusPill({
   );
 }
 
-export function TitlesCatalogListRow({
-  href,
+function TitlesCatalogThumb({
   title,
-  status,
-  statusLabel,
-  year,
+  stillUrl,
 }: {
-  href: string;
   title: string;
-  status: string;
-  statusLabel: string;
-  year?: string | null;
+  stillUrl: string | null;
 }) {
   return (
-    <Link
-      href={href}
-      prefetch={false}
-      className="flex items-center justify-between gap-[var(--space-4)] border-b border-hairline px-[var(--space-4)] py-[var(--space-4)] last:border-b-0"
-      data-titles-catalog-list-row=""
-      data-title-status={status}
+    <div
+      className={TITLES_THUMB_CLASS}
+      data-titles-catalog-frame=""
+      data-titles-catalog-crop="cover"
     >
-      <span className="flex min-w-0 flex-col gap-[var(--space-1)]">
-        <span
-          className="min-w-0 truncate t-body font-medium text-ink"
-          data-titles-catalog-list-name=""
+      {stillUrl ? (
+        <Artwork
+          src={stillUrl}
+          title={title}
+          rounded="rounded-none"
+          className="absolute inset-0 h-full w-full"
+          sizes="(max-width: 768px) 100vw, 160px"
+        />
+      ) : (
+        <div
+          className="absolute inset-0 flex items-center justify-center bg-surface-muted"
+          data-titles-catalog-empty-art=""
         >
-          {title}
-        </span>
-        {year ? (
-          <span className="t-body-sm text-ink-3" data-titles-catalog-list-year="">
-            {year}
-          </span>
-        ) : null}
-      </span>
-      <TitleStatusPill status={status} statusLabel={statusLabel} />
-    </Link>
+          <Camera className="h-4 w-4 text-ink-3" strokeWidth={1.5} aria-hidden />
+        </div>
+      )}
+    </div>
   );
 }
 
-export function TitlesCatalogStill({
+export function TitlesCatalogListRow({
   href,
   title,
   stillUrl,
@@ -182,49 +283,32 @@ export function TitlesCatalogStill({
     <Link
       href={href}
       prefetch={false}
-      className="titles-catalog-card flex flex-col gap-[var(--space-3)]"
-      data-titles-catalog-card=""
+      className={TITLES_LIST_ROW_CLASS}
+      data-titles-catalog-list-row=""
       data-title-status={status}
     >
-      <div
-        className="relative aspect-[2/3] w-full overflow-hidden rounded-[var(--radius-lg)] bg-surface-muted [&_img]:h-full [&_img]:w-full [&_img]:object-cover [&_img]:object-center"
-        data-titles-catalog-frame=""
-        data-titles-catalog-crop="cover"
-      >
-        {stillUrl ? (
-          <Artwork
-            src={stillUrl}
-            title={title}
-            rounded="rounded-none"
-            className="absolute inset-0 h-full w-full"
-            sizes="(max-width: 768px) 140px, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
-          />
-        ) : (
-          <div className="absolute inset-0 bg-surface-muted" data-titles-catalog-empty-art="" />
-        )}
-      </div>
-      <div
-        className="flex flex-col gap-[var(--space-1)]"
-        data-titles-catalog-stack=""
-      >
-        <span
-          className="min-w-0 truncate t-body-sm font-medium text-ink"
-          data-titles-catalog-name=""
-        >
-          {title}
-        </span>
-        <div
-          className="flex min-w-0 flex-wrap items-center gap-x-[var(--space-2)] gap-y-[var(--space-1)]"
-          data-titles-catalog-meta=""
-        >
+      <TitlesCatalogThumb title={title} stillUrl={stillUrl} />
+      <span className={TITLES_ROW_META_CLASS} data-titles-catalog-row-meta="">
+        <span className={TITLES_ROW_COPY_CLASS}>
+          <span
+            className={TITLES_ROW_NAME_CLASS}
+            data-titles-catalog-name=""
+            data-titles-catalog-list-name=""
+          >
+            {title}
+          </span>
           {year ? (
-            <span className="t-body-sm text-ink-3" data-titles-catalog-year="">
+            <span
+              className="t-body-sm text-ink-3"
+              data-titles-catalog-year=""
+              data-titles-catalog-list-year=""
+            >
               {year}
             </span>
           ) : null}
-          <TitleStatusPill status={status} statusLabel={statusLabel} />
-        </div>
-      </div>
+        </span>
+        <TitleStatusPill status={status} statusLabel={statusLabel} />
+      </span>
     </Link>
   );
 }

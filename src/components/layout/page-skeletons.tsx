@@ -1,4 +1,4 @@
-import { Skeleton, TableSkeleton, PosterGridSkeleton } from "@/components/layout/skeleton";
+import { Skeleton, TableSkeleton } from "@/components/layout/skeleton";
 
 // Route-level loading shells.
 //
@@ -30,35 +30,38 @@ export function HeaderSkeleton({ withActions = false }: { withActions?: boolean 
   );
 }
 
-/** Catalog: header + search/Add Title + phone list / desktop poster grid. */
+/** Catalog: header + search/filter chrome + landscape-thumb rows. */
 export function CatalogSkeleton() {
   return (
-    <>
-      <div className="flex items-start justify-between gap-4 pb-6">
-        <Skeleton className="h-8 w-32" />
-        <div className="flex gap-2">
-          <Skeleton className="h-9 w-56 rounded-[var(--radius-sm)]" />
-          <Skeleton className="h-9 w-24 rounded-full" />
-        </div>
+    <div
+      className="mx-auto flex w-full flex-col gap-[var(--space-6)] px-[var(--space-4)] md:px-[var(--space-10)] md:pt-[var(--space-8)]"
+      style={{ maxWidth: "var(--content-max)" }}
+      data-titles-catalog-skeleton=""
+    >
+      <Skeleton className="h-8 w-32" />
+      <div className="flex flex-col gap-[var(--space-4)] md:flex-row md:items-center">
+        <Skeleton className="h-8 w-full rounded-full md:w-56" />
+        <Skeleton className="h-8 w-24 md:hidden" />
+        <Skeleton className="hidden h-8 w-40 rounded-full md:block" />
       </div>
-      <div className="overflow-hidden rounded-[var(--radius-lg)] border border-hairline bg-surface md:hidden">
-        {Array.from({ length: 4 }).map((_, i) => (
+      <div className="flex flex-col gap-[var(--space-4)] md:gap-0 md:overflow-hidden md:rounded-[var(--radius-lg)] md:border md:border-hairline md:bg-surface">
+        {Array.from({ length: 6 }).map((_, i) => (
           <div
             key={i}
-            className="flex items-center justify-between gap-4 border-b border-hairline px-4 py-4 last:border-b-0"
+            className="flex flex-col overflow-hidden rounded-[var(--radius-lg)] border border-hairline bg-surface md:flex-row md:items-center md:gap-[var(--space-4)] md:rounded-none md:border-0 md:border-b md:px-[var(--space-4)] md:py-[var(--space-4)] md:last:border-0"
           >
-            <div className="flex flex-col gap-2">
-              <Skeleton className="h-4 w-40" />
-              <Skeleton className="h-3 w-16" />
+            <Skeleton className="aspect-[16/9] w-full md:w-[160px] md:rounded-[var(--radius-lg)]" />
+            <div className="flex flex-col gap-2 px-[var(--space-4)] py-[var(--space-4)] md:min-w-0 md:flex-1 md:flex-row md:items-center md:justify-between md:p-0">
+              <div className="flex flex-col gap-2">
+                <Skeleton className="h-4 w-40" />
+                <Skeleton className="h-3 w-16" />
+              </div>
+              <Skeleton className="h-6 w-16 rounded-full" />
             </div>
-            <Skeleton className="h-6 w-16 rounded-full" />
           </div>
         ))}
       </div>
-      <div className="max-md:hidden">
-        <PosterGridSkeleton count={8} />
-      </div>
-    </>
+    </div>
   );
 }
 
@@ -91,11 +94,11 @@ export function CardListSkeleton({ cards = 4 }: { cards?: number }) {
   );
 }
 
-/** Title detail: the charcoal hero, then the two-column body. */
+/** Title detail: the landscape hero, then the two-column body. */
 export function TitleDetailSkeleton() {
   return (
     <>
-      <Skeleton className="h-[220px] w-full rounded-[var(--radius-lg)]" />
+      <Skeleton className="aspect-[16/9] w-full rounded-[var(--radius-lg)]" />
       <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-[1fr_360px]">
         <div className="flex flex-col gap-3">
           <Skeleton className="h-48 w-full rounded-[var(--radius-lg)]" />
