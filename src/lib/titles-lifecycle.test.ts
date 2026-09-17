@@ -5,11 +5,16 @@ import {
   TITLE_LIFECYCLE,
   excludeArchivedTitles,
   isArchivedTitleStatus,
+  quoteTitleName,
   titleArchiveConfirmBody,
+  titleArchiveConfirmTitle,
   titleDeleteConfirmBody,
+  titleDeleteConfirmTitle,
   titleHasLifecycleActions,
   titleLifecycleFlags,
   titleListHasReportingActivity,
+  titleRestoreConfirmBody,
+  titleRestoreConfirmTitle,
 } from "@/lib/titles-lifecycle";
 
 describe("title lifecycle gates", () => {
@@ -96,17 +101,32 @@ describe("title lifecycle copy", () => {
     expect(TITLE_LIFECYCLE.archiveBody).toBe(
       "This leaves the active catalog. Assets, rights, and reporting stay on record.",
     );
-    expect(titleDeleteConfirmBody({ isStaff: false, status: "draft" })).toBe(
-      TITLE_LIFECYCLE.deleteDraftBody,
+    expect(quoteTitleName("Harbor Cut")).toBe("“Harbor Cut”");
+    expect(titleDeleteConfirmTitle("Harbor Cut")).toBe("Delete “Harbor Cut”");
+    expect(titleArchiveConfirmTitle("Harbor Cut")).toBe("Archive “Harbor Cut”");
+    expect(titleRestoreConfirmTitle("Harbor Cut")).toBe("Restore “Harbor Cut”");
+    expect(titleDeleteConfirmBody({ isStaff: false, status: "draft", name: "Harbor Cut" })).toBe(
+      "This removes the draft “Harbor Cut” and its files from the catalog.",
     );
-    expect(titleDeleteConfirmBody({ isStaff: true, status: "live" })).toBe(
-      TITLE_LIFECYCLE.deleteStaffBody,
+    expect(titleDeleteConfirmBody({ isStaff: true, status: "live", name: "Harbor Cut" })).toBe(
+      "This removes “Harbor Cut” and its files from the catalog.",
     );
-    expect(titleArchiveConfirmBody(true)).toBe(TITLE_LIFECYCLE.archiveFromDeleteBody);
-    expect(titleArchiveConfirmBody(false)).toBe(TITLE_LIFECYCLE.archiveBody);
+    expect(titleArchiveConfirmBody(true, "Harbor Cut")).toBe(
+      "“Harbor Cut” has reporting history and cannot be deleted. Archive it to remove it from the active catalog.",
+    );
+    expect(titleArchiveConfirmBody(false, "Harbor Cut")).toBe(
+      "“Harbor Cut” leaves the active catalog. Assets, rights, and reporting stay on record.",
+    );
+    expect(titleRestoreConfirmBody("Harbor Cut")).toBe(
+      "This returns “Harbor Cut” to the active catalog.",
+    );
     expect(TITLE_LIFECYCLE.moreLabel).toBe("Title actions");
     expect(TITLE_LIFECYCLE.deleteDraftBody).not.toMatch(/cannot be undone|permanent|warning/i);
     expect(TITLE_LIFECYCLE.archiveBody).not.toMatch(/irreversible|forever|warning/i);
+    expect(titleDeleteConfirmBody({ isStaff: false, status: "draft", name: "Harbor Cut" })).not.toMatch(
+      /cannot be undone|permanent|warning/i,
+    );
+    expect(titleArchiveConfirmBody(true, "Harbor Cut")).not.toMatch(/irreversible|forever|warning/i);
   });
 
   it("labels archived as a first-class title status", () => {

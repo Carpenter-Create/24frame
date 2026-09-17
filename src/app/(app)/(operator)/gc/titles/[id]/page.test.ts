@@ -95,6 +95,7 @@ describe("GcTitleDetail transcode_jobs read (Task 6A)", () => {
     expect(pageSrc).toContain("TitleLifecycleControls");
     expect(pageSrc).toContain("titleLifecycleFlags");
     expect(pageSrc).toContain("title_has_reporting_activity");
+    expect(pageSrc).toContain("titleName={t.title}");
     expect(pageSrc).not.toContain("StaffDelete");
   });
 });

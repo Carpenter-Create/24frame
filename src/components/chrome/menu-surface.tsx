@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentProps } from "react";
+import { Children, isValidElement, type ComponentProps, type ReactNode } from "react";
 
 import {
   DropdownMenuContent,
@@ -9,12 +9,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/cn";
 import {
+  countMenuSurfaceItems,
   MENU_SURFACE_ACCENT_CLASS,
   MENU_SURFACE_ACCENT_CLIP_CLASS,
-  MENU_SURFACE_CONTENT_CLASS,
   MENU_SURFACE_ITEM_CLASS,
   MENU_SURFACE_ITEM_DANGER_CLASS,
   MENU_SURFACE_SEPARATOR_CLASS,
+  menuSurfaceContentClass,
+  menuSurfaceDensityForCount,
+  type MenuSurfaceDensity,
 } from "@/lib/menu-surface";
 
 // Optional Identity half-bar. Same chrome on the desktop dropdown and the
@@ -27,16 +30,35 @@ export function MenuSurfaceAccent() {
   );
 }
 
+function densityFromChildren(
+  children: ReactNode,
+  density?: MenuSurfaceDensity,
+): MenuSurfaceDensity {
+  if (density) return density;
+  const items = Children.toArray(children).filter((child) => isValidElement(child));
+  return menuSurfaceDensityForCount(countMenuSurfaceItems(items));
+}
+
 export function MenuSurfaceContent({
   className,
   accent = false,
+  density,
   children,
   ...props
-}: ComponentProps<typeof DropdownMenuContent> & { accent?: boolean }) {
+}: ComponentProps<typeof DropdownMenuContent> & {
+  accent?: boolean;
+  density?: MenuSurfaceDensity;
+}) {
+  const resolved = densityFromChildren(children, density);
   return (
     <DropdownMenuContent
-      className={cn(MENU_SURFACE_CONTENT_CLASS, accent && "relative", className)}
       {...props}
+      data-menu-surface-density={resolved}
+      className={cn(
+        menuSurfaceContentClass(resolved),
+        accent && "relative",
+        className,
+      )}
     >
       {accent ? <MenuSurfaceAccent /> : null}
       {children}
@@ -67,6 +89,7 @@ export function MenuSurfaceSeparator({
 }: ComponentProps<typeof DropdownMenuSeparator>) {
   return (
     <DropdownMenuSeparator
+      data-menu-surface-separator=""
       className={cn(MENU_SURFACE_SEPARATOR_CLASS, className)}
       {...props}
     />

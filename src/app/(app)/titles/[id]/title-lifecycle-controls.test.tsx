@@ -5,7 +5,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
-import { TITLE_LIFECYCLE } from "@/lib/titles-lifecycle";
+import { TITLE_LIFECYCLE, titleDeleteConfirmTitle } from "@/lib/titles-lifecycle";
 import { TitleLifecycleControls } from "./title-lifecycle-controls";
 
 vi.mock("next/navigation", () => ({
@@ -14,6 +14,11 @@ vi.mock("next/navigation", () => ({
 
 const src = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "title-lifecycle-controls.tsx"), "utf8");
 const pageSrc = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "page.tsx"), "utf8");
+const listSrc = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../page.tsx"), "utf8");
+const gcSrc = readFileSync(
+  join(dirname(fileURLToPath(import.meta.url)), "../../(operator)/gc/titles/[id]/page.tsx"),
+  "utf8",
+);
 
 const DELETE_FLAGS = {
   canDelete: true,
@@ -27,6 +32,7 @@ describe("TitleLifecycleControls", () => {
     const html = renderToStaticMarkup(
       createElement(TitleLifecycleControls, {
         titleId: "t1",
+        titleName: "Harbor Cut",
         status: "draft",
         isStaff: false,
         flags: DELETE_FLAGS,
@@ -37,6 +43,8 @@ describe("TitleLifecycleControls", () => {
     expect(html).toContain(TITLE_LIFECYCLE.moreLabel);
     expect(html).toContain("data-title-lifecycle-delete-confirm");
     expect(html).toContain(TITLE_LIFECYCLE.deleteLabel);
+    expect(html).toContain(titleDeleteConfirmTitle("Harbor Cut"));
+    expect(html).toContain("“Harbor Cut”");
     expect(html).not.toContain("data-title-lifecycle-archive-confirm");
     expect(html).not.toContain("cannot be undone");
     expect(html).not.toContain("bg-accent");
@@ -46,6 +54,7 @@ describe("TitleLifecycleControls", () => {
     const html = renderToStaticMarkup(
       createElement(TitleLifecycleControls, {
         titleId: "t1",
+        titleName: "Harbor Cut",
         status: "live",
         isStaff: true,
         flags: {
@@ -66,6 +75,7 @@ describe("TitleLifecycleControls", () => {
     const html = renderToStaticMarkup(
       createElement(TitleLifecycleControls, {
         titleId: "t1",
+        titleName: "Harbor Cut",
         status: "archived",
         isStaff: false,
         flags: {
@@ -85,6 +95,7 @@ describe("TitleLifecycleControls", () => {
     const html = renderToStaticMarkup(
       createElement(TitleLifecycleControls, {
         titleId: "t1",
+        titleName: "Harbor Cut",
         status: "live",
         isStaff: false,
         flags: {
@@ -110,10 +121,26 @@ describe("TitleLifecycleControls", () => {
     expect(src).not.toContain('className="t-body-sm text-ink-2 hover:text-ink"');
   });
 
+  it("uses house Button + DialogFooter on confirms — never menu-item classes as actions", () => {
+    expect(src).toContain("from \"@/components/ui/button\"");
+    expect(src).toContain("DialogFooter");
+    expect(src).toContain('variant="secondary"');
+    expect(src).toContain('variant="danger"');
+    expect(src).toContain("titleDeleteConfirmTitle");
+    expect(src).toContain("titleArchiveConfirmTitle");
+    expect(src).toContain("titleRestoreConfirmTitle");
+    expect(src).toContain("titleName");
+    expect(src).not.toContain("MENU_SURFACE_ITEM_CLASS");
+    expect(src).not.toContain("MENU_SURFACE_ITEM_DANGER_CLASS");
+  });
+
   it("mounts on the title-detail hero overflow, not mid-page alone", () => {
     expect(pageSrc).toContain("overflow={");
     expect(pageSrc).toContain("<TitleLifecycleControls");
     expect(pageSrc).toContain("isStaff={ctx.isGcStaff}");
+    expect(pageSrc).toContain("titleName={title.title}");
+    expect(listSrc).toContain("titleName={r.title}");
+    expect(gcSrc).toContain("titleName={t.title}");
     expect(pageSrc.indexOf("overflow={")).toBeLessThan(pageSrc.indexOf("<TitleLifecycleControls"));
     expect(pageSrc).toContain("titleRole");
     expect(pageSrc).toContain("ctx.activeRole");

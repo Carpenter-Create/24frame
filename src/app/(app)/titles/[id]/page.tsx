@@ -312,6 +312,7 @@ export default async function TitleDetailPage({ params }: { params: Promise<{ id
         overflow={
           <TitleLifecycleControls
             titleId={title.id}
+            titleName={title.title}
             status={title.status as TitleStatus}
             isStaff={ctx.isGcStaff}
             flags={lifecycleFlags}

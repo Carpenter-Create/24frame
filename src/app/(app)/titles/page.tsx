@@ -186,6 +186,7 @@ export default async function TitlesPage({
                 titleHasLifecycleActions(r.flags) ? (
                   <TitleLifecycleControls
                     titleId={r.key}
+                    titleName={r.title}
                     status={r.status as TitleStatus}
                     isStaff={ctx.isGcStaff}
                     flags={r.flags}

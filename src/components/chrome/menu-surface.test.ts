@@ -18,7 +18,9 @@ describe("shared menu surface instances", () => {
     expect(surfaceSrc).toContain("<DropdownMenuContent");
     expect(surfaceSrc).toContain("<DropdownMenuItem");
     expect(surfaceSrc).toContain("<DropdownMenuSeparator");
-    expect(surfaceSrc).toContain("MENU_SURFACE_CONTENT_CLASS");
+    expect(surfaceSrc).toContain("menuSurfaceContentClass");
+    expect(surfaceSrc).toContain("menuSurfaceDensityForCount");
+    expect(surfaceSrc).toContain("data-menu-surface-density");
     expect(surfaceSrc).toContain("MENU_SURFACE_ITEM_CLASS");
     expect(surfaceSrc).toContain("MENU_SURFACE_SEPARATOR_CLASS");
     expect(surfaceSrc).toContain("MENU_SURFACE_ITEM_DANGER_CLASS");

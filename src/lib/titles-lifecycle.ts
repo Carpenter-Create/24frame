@@ -97,17 +97,42 @@ export function titleLifecycleFlags(
   };
 }
 
+export function quoteTitleName(name: string): string {
+  return `“${name.trim()}”`;
+}
+
+export function titleDeleteConfirmTitle(name: string): string {
+  return `${TITLE_LIFECYCLE.deleteLabel} ${quoteTitleName(name)}`;
+}
+
+export function titleArchiveConfirmTitle(name: string): string {
+  return `${TITLE_LIFECYCLE.archiveLabel} ${quoteTitleName(name)}`;
+}
+
+export function titleRestoreConfirmTitle(name: string): string {
+  return `${TITLE_LIFECYCLE.restoreLabel} ${quoteTitleName(name)}`;
+}
+
 export function titleDeleteConfirmBody(input: {
   isStaff: boolean;
   status: TitleStatus | string;
+  name: string;
 }): string {
+  const quoted = quoteTitleName(input.name);
   return input.isStaff && !isDraftTitleStatus(input.status)
-    ? TITLE_LIFECYCLE.deleteStaffBody
-    : TITLE_LIFECYCLE.deleteDraftBody;
+    ? `This removes ${quoted} and its files from the catalog.`
+    : `This removes the draft ${quoted} and its files from the catalog.`;
 }
 
-export function titleArchiveConfirmBody(offerFromDelete: boolean): string {
-  return offerFromDelete ? TITLE_LIFECYCLE.archiveFromDeleteBody : TITLE_LIFECYCLE.archiveBody;
+export function titleArchiveConfirmBody(offerFromDelete: boolean, name: string): string {
+  const quoted = quoteTitleName(name);
+  return offerFromDelete
+    ? `${quoted} has reporting history and cannot be deleted. Archive it to remove it from the active catalog.`
+    : `${quoted} leaves the active catalog. Assets, rights, and reporting stay on record.`;
+}
+
+export function titleRestoreConfirmBody(name: string): string {
+  return `This returns ${quoteTitleName(name)} to the active catalog.`;
 }
 
 export function titleHasLifecycleActions(flags: TitleLifecycleFlags): boolean {
