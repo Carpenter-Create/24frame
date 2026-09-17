@@ -25,7 +25,12 @@ export const DASHBOARD_HOME = {
   topTitlesEmpty: "No title activity this month yet.",
   viewAll: "View all",
   viewList: "List",
-  viewChart: "Chart",
+  viewBars: "Bars",
+  viewMap: "Map",
+  // Kept as Bars — Overview view-alt noun. Do not revive "Chart".
+  viewChart: "Bars",
+  legendLow: "Low",
+  legendHigh: "High",
   reportsCta: "Reports",
   reportsPointer: "All-time activity",
   hero: "Catalog activity",

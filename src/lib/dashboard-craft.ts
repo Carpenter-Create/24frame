@@ -2,8 +2,9 @@
 // no Coinbase brand, no invented px type. Hairline + air; no drop shadow.
 // Period menu rematches the Mercury workspace switcher: quiet trigger,
 // trailing Sporty Blue check, flush-left labels.
-// Fidelity × Royalogic density: one Period control, kickers, dense rows,
-// related gap 8 · card pad 16 · section air 24. No Dashboard-only tokens.
+// Fidelity density × Coinbase quiet-play: one Period control, kickers,
+// dense rows, related gap 8 · card pad 16 · section air 24.
+// Overview structure rematch — 24Frame nouns only. No Dashboard-only tokens.
 // Period chrome (phone + desktop): unlabeled value + chevron on the org row.
 // Period is chrome, not H1. Dominant read stays the $.
 
@@ -49,7 +50,26 @@ export const DASHBOARD_ADMIN_CHROME_CLASS =
   "flex flex-row items-center justify-between gap-[var(--space-2)] md:flex-row md:items-start md:justify-between md:gap-[var(--space-6)]";
 
 export const DASHBOARD_ADMIN_OVERVIEW_CLASS =
-  "grid grid-cols-1 gap-[var(--space-6)] max-md:flex max-md:flex-col lg:grid-cols-5";
+  "flex flex-col gap-[var(--space-6)]";
+
+export const DASHBOARD_ADMIN_PAIR_CLASS =
+  "grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-2";
+
+export const DASHBOARD_VIEW_ALT_CLUSTER_CLASS =
+  "flex items-center overflow-hidden rounded-[var(--radius-sm)] border border-hairline";
+
+export const DASHBOARD_VIEW_ALT_BUTTON_CLASS =
+  "flex size-8 items-center justify-center";
+
+export const DASHBOARD_VIEW_ALT_BUTTON_ON_CLASS = "bg-surface-muted text-accent";
+
+export const DASHBOARD_VIEW_ALL_CLASS =
+  "inline-flex items-center gap-[var(--space-2)] t-body-sm text-accent";
+
+export const DASHBOARD_MAP_FRAME_CLASS = "relative h-[220px] w-full";
+
+export const DASHBOARD_LEGEND_CLASS =
+  "flex items-center gap-[var(--space-2)] t-label text-ink-3";
 
 export const DASHBOARD_ADMIN_STACK_CLASS =
   "flex flex-col gap-[var(--space-6)]";

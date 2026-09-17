@@ -45,6 +45,7 @@ import {
   revenuePointsFromLabels,
 } from "@/lib/dashboard-admin";
 import {
+  DASHBOARD_ADMIN_PAIR_CLASS,
   DASHBOARD_ADMIN_STACK_CLASS,
   DASHBOARD_STANDARD_STACK_CLASS,
 } from "@/lib/dashboard-craft";
@@ -55,6 +56,7 @@ import {
   dashboardFixtureActivity,
   dashboardFixtureEnabled,
   dashboardFixtureSources,
+  dashboardFixtureTopTitles,
 } from "@/lib/dashboard-fixture";
 import { UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
 import { loadMyDeliveries, loadMyFindings } from "@/lib/my-lists";
@@ -67,20 +69,20 @@ import { canViewClientEarn } from "@/lib/finance";
 import { buildClientFinanceDashboard } from "@/lib/finance-dashboard";
 import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 
-// Company-admin `/dashboard` rematches RL Overview structure inside house
-// tokens: unlabeled period chrome (value + chevron), MetricCard revenue +
-// scrub, account activity. Period is chrome, not H1 — dominant read is the $.
-// Phone (`< md`) is a single-column stack — $0.00 empty hero, compact chart,
-// Period bottom sheet. Find-user is gone on phone and md+; user scope lives
-// on /reports later. Leftover ?user= parsing stays inert for data only.
-// Catalog-velocity strip (Added this month / In pipeline) is gone — Adam lock
+// Company-admin `/dashboard` rematches Overview analytics structure inside
+// house tokens: unlabeled period chrome, Net revenue $ + scrub, Recent
+// account activity, Top titles (list/bars), Top platforms (list/bars),
+// Top territories (map/list/bars). 24Frame nouns only — never Top works,
+// sources, contributors, or Exports. Period is chrome, not H1 — dominant
+// read is the $. Phone (`< md`) is a single-column stack — $0.00 empty
+// hero, compact chart, Period bottom sheet. Find-user is gone on phone and
+// md+; user scope lives on /reports later. Leftover ?user= parsing stays
+// inert for data only. Catalog-velocity strip is gone — Adam lock
 // 2026-09-16. Company-admin also drops Recent, Do next, Deliveries needing
 // action, Catalog Health count, What changed, and Pending submissions.
-// Activity feed keeps the recent signal; catalog ops stay on Titles /
-// Catalog Health. Quiet Reports text CTA stays. Do not replace with a
-// Needs-attention composite or another ops strip unless a later lock says
-// so. Standard seats keep the catalog hero. Export stays on /reports.
-// Fixture money is labeled + env-gated and never enters export/ledger.
+// Quiet Reports text CTA stays. Standard seats keep the catalog hero.
+// Export stays on /reports. Fixture money is labeled + env-gated and never
+// enters export/ledger.
 
 type TitleRow = ClientHomeTitle & { created_by?: string | null };
 
@@ -164,6 +166,7 @@ export default async function DashboardPage({
 
   let adminHero = null;
   let useFixture = false;
+  let adminUpdated: string | null = null;
   if (isAdmin) {
     const canReadMoney = !userId && canViewClientEarn({ isGcStaff: ctx.isGcStaff, role: ctx.activeRole });
     const moneyLoaded = canReadMoney ? await loadRecipientDashboard(org.id) : null;
@@ -199,12 +202,14 @@ export default async function DashboardPage({
       period,
       userId,
     });
+    const revenueHero = buildDashboardRevenueHero({ period, points, userId });
+    adminUpdated = revenueHero.updated;
     adminHero = (
       <DashboardAdminHero
         orgName={org.name}
         period={period}
         options={dashboardPeriodOptionsFor(period, now, monthSources)}
-        hero={buildDashboardRevenueHero({ period, points, userId })}
+        hero={revenueHero}
         fixture={useFixture}
         activity={
           useFixture && liveActivity.length === 0
@@ -215,12 +220,21 @@ export default async function DashboardPage({
     );
   }
 
+  const liveTopTitles = topTitleActivity(scopedTitles, scopedDeliveries, now);
   const livePlatforms = countNamedRows(
     scopedDeliveries.map((row) => ({ name: row.vendor_name })),
   ).slice(0, 5);
   const liveTerritories = countNamedRows(
     scopedDeliveries.map((row) => ({ name: row.territory })),
   ).slice(0, 5);
+  const adminPlatforms =
+    useFixture && livePlatforms.length === 0 ? DASHBOARD_FIXTURE_PLATFORMS : livePlatforms;
+  const adminTerritories =
+    useFixture && liveTerritories.length === 0 ? DASHBOARD_FIXTURE_TERRITORIES : liveTerritories;
+  const adminTopTitles =
+    useFixture && liveTopTitles.length === 0 ? dashboardFixtureTopTitles(now) : liveTopTitles;
+  const showAdminPlatforms = adminPlatforms.length > 0;
+  const showAdminTerritories = adminTerritories.length > 0;
 
   return (
     <div className="dashboard-home flex flex-col gap-[var(--space-6)]" data-dashboard-home="">
@@ -247,7 +261,7 @@ export default async function DashboardPage({
                 liveIsPartial={snapshot.catalogIsPartial}
               />
             </div>
-            <DashboardTopTitles items={topTitleActivity(scopedTitles, scopedDeliveries, now)} />
+            <DashboardTopTitles items={liveTopTitles} />
           </div>
         </>
       )}
@@ -256,23 +270,67 @@ export default async function DashboardPage({
         data-dashboard-stack=""
         className={isAdmin ? DASHBOARD_ADMIN_STACK_CLASS : DASHBOARD_STANDARD_STACK_CLASS}
       >
-        <div className="grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-2">
-          <DashboardRankedBars
-            label={DASHBOARD_HOME.platforms}
-            empty={DASHBOARD_HOME.platformsEmpty}
-            rows={useFixture && livePlatforms.length === 0 ? DASHBOARD_FIXTURE_PLATFORMS : livePlatforms}
-            testId="platforms"
-            viewAllHref="/deliveries"
+        {isAdmin ? (
+          <DashboardTopTitles
+            items={adminTopTitles}
+            periodLabel={period.label}
+            updated={adminUpdated}
+            quietEmpty
           />
-          <DashboardRankedBars
-            label={DASHBOARD_HOME.territories}
-            empty={DASHBOARD_HOME.territoriesEmpty}
-            rows={useFixture && liveTerritories.length === 0 ? DASHBOARD_FIXTURE_TERRITORIES : liveTerritories}
-            testId="territories"
-            viewAllHref="/deliveries"
-            territory
-          />
-        </div>
+        ) : null}
+        {isAdmin ? (
+          showAdminPlatforms || showAdminTerritories ? (
+            <div
+              className={
+                showAdminPlatforms && showAdminTerritories
+                  ? DASHBOARD_ADMIN_PAIR_CLASS
+                  : DASHBOARD_ADMIN_STACK_CLASS
+              }
+            >
+              {showAdminPlatforms ? (
+                <DashboardRankedBars
+                  label={DASHBOARD_HOME.platforms}
+                  empty={DASHBOARD_HOME.platformsEmpty}
+                  rows={adminPlatforms}
+                  testId="platforms"
+                  viewAllHref="/deliveries"
+                  periodLabel={period.label}
+                  updated={adminUpdated}
+                />
+              ) : null}
+              {showAdminTerritories ? (
+                <DashboardRankedBars
+                  label={DASHBOARD_HOME.territories}
+                  empty={DASHBOARD_HOME.territoriesEmpty}
+                  rows={adminTerritories}
+                  testId="territories"
+                  viewAllHref="/deliveries"
+                  territory
+                  periodLabel={period.label}
+                  updated={adminUpdated}
+                />
+              ) : null}
+            </div>
+          ) : null
+        ) : (
+          <div className={DASHBOARD_ADMIN_PAIR_CLASS}>
+            <DashboardRankedBars
+              label={DASHBOARD_HOME.platforms}
+              empty={DASHBOARD_HOME.platformsEmpty}
+              rows={livePlatforms}
+              testId="platforms"
+              viewAllHref="/deliveries"
+            />
+            <DashboardRankedBars
+              label={DASHBOARD_HOME.territories}
+              empty={DASHBOARD_HOME.territoriesEmpty}
+              rows={liveTerritories}
+              testId="territories"
+              viewAllHref="/deliveries"
+              territory
+            />
+          </div>
+        )}
         {isAdmin ? null : (
           <div className="grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-2">
             <DashboardJustIn

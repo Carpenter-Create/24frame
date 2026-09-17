@@ -11,7 +11,6 @@ import {
   DASHBOARD_CARD_PAD_LIST,
   DASHBOARD_KICKER_CLASS,
   DASHBOARD_MONEY_CLASS,
-  DASHBOARD_RANKED_LIST_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
   DASHBOARD_ROW_CLASS,
   DASHBOARD_ROW_LIST_CLASS,
@@ -21,11 +20,9 @@ import {
   dashboardCatalogValue,
   dashboardJustInDate,
   dashboardTitleStatusLabel,
-  rankedBarPercent,
   type ClientHomeJustInItem,
   type DashboardChangeRow,
   type DashboardDeliveryRow,
-  type DashboardRankedTitle,
 } from "@/lib/dashboard-home";
 import { CATALOG_HEALTH_EMPTY } from "@/lib/findings";
 import { REPORTS_HREF } from "@/lib/reports";
@@ -89,52 +86,7 @@ export function DashboardTitleRows({ items }: { items: readonly ClientHomeJustIn
   );
 }
 
-export function DashboardTopTitles({ items }: { items: readonly DashboardRankedTitle[] }) {
-  const max = items[0]?.count ?? 0;
-  return (
-    <DashboardHomePanel aria-label={DASHBOARD_HOME.topTitles} data-dashboard-module="top-titles">
-      <div className={`flex items-center justify-between ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD_LIST}`}>
-        <p className={DASHBOARD_KICKER_CLASS}>{DASHBOARD_HOME.topTitles}</p>
-        <TextAction href="/titles">{DASHBOARD_HOME.viewAll}</TextAction>
-      </div>
-      {items.length === 0 ? (
-        <DashboardHomeEmpty>{DASHBOARD_HOME.topTitlesEmpty}</DashboardHomeEmpty>
-      ) : (
-        <ol className={DASHBOARD_RANKED_LIST_CLASS}>
-          {items.map((item, i) => {
-            const percent = rankedBarPercent(item.count, max);
-            return (
-              <li key={item.id} className={`flex min-h-10 flex-col ${DASHBOARD_RELATED_GAP_CLASS}`}>
-                <div className={`flex items-center justify-between ${DASHBOARD_RELATED_GAP_CLASS}`}>
-                  <span className={`flex min-w-0 items-center ${DASHBOARD_RELATED_GAP_CLASS}`}>
-                    <span className="t-data t-body-sm w-4 shrink-0 text-ink-3">{i + 1}</span>
-                    <Link
-                      href={`/titles/${item.id}`}
-                      className="truncate t-body-sm font-medium text-ink hover:text-ink-2"
-                    >
-                      {item.title}
-                    </Link>
-                  </span>
-                  {item.count > 0 ? (
-                    <span className={DASHBOARD_MONEY_CLASS}>{item.count}</span>
-                  ) : null}
-                </div>
-                {percent > 0 ? (
-                  <div className="h-1 overflow-hidden rounded-[var(--radius-sm)] bg-surface-muted">
-                    <div
-                      className={`h-full ${i === 0 ? "bg-accent" : "bg-ink-3"}`}
-                      style={{ width: `${percent}%` }}
-                    />
-                  </div>
-                ) : null}
-              </li>
-            );
-          })}
-        </ol>
-      )}
-    </DashboardHomePanel>
-  );
-}
+export { DashboardTopTitles } from "@/components/dashboard/dashboard-ranked";
 
 export function DashboardDeliveriesAction({ rows }: { rows: readonly DashboardDeliveryRow[] }) {
   return (
