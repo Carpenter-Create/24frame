@@ -10,9 +10,12 @@ import {
   DASHBOARD_SECTION_TITLE_CLASS,
   DASHBOARD_MODULE_CARD_CLASS,
   DASHBOARD_MONEY_CLASS,
+  DASHBOARD_RANKED_GRADE_ROW_CLASS,
+  DASHBOARD_RANKED_MARK_CLASS,
+  DASHBOARD_RANKED_META_CLASS,
+  DASHBOARD_RANKED_NAME_CLASS,
   DASHBOARD_RANKED_PANE_CLASS,
   DASHBOARD_RANKED_SHARE_TRACK_CLASS,
-  DASHBOARD_RANKED_TABLE_ROW_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
   DASHBOARD_ROW_LIST_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_CLASS,
@@ -42,14 +45,29 @@ import type { DashboardRankedTitle } from "@/lib/dashboard-home";
 import type { ReportsCountRow } from "@/lib/reports";
 import { cn } from "@/lib/cn";
 
-function RankedName({ row }: { row: DashboardRankedRow }) {
+function RankedIdentity({
+  row,
+  shareLabel,
+}: {
+  row: DashboardRankedRow;
+  shareLabel: string;
+}) {
   const [main, qualifier] = splitDashboardTitle(row.label);
-  const extra = row.code ? ` · ${row.code}` : null;
+  const extras = [qualifier, row.code].filter((part): part is string => Boolean(part));
+  const meta = extras.length > 0 ? `${extras.join(" · ")} · ${shareLabel}` : shareLabel;
+  const name = <span className={`block truncate ${DASHBOARD_RANKED_NAME_CLASS}`}>{main}</span>;
   return (
-    <span className="min-w-0 truncate t-body-sm text-ink">
-      {main}
-      {qualifier ? <span className="font-normal text-ink-3">{` ${qualifier}`}</span> : null}
-      {extra ? <span className="text-ink-3">{extra}</span> : null}
+    <span className="min-w-0 flex-1">
+      {row.href ? (
+        <Link href={row.href} className="block min-w-0 truncate hover:text-ink-2">
+          {name}
+        </Link>
+      ) : (
+        name
+      )}
+      <span data-dashboard-ranked-share="" className={`block truncate ${DASHBOARD_RANKED_META_CLASS}`}>
+        {meta}
+      </span>
     </span>
   );
 }
@@ -64,41 +82,33 @@ export function DashboardRankedRows({
   shareTotal?: number;
 }) {
   const total = shareTotal ?? rankedTotal(rows);
+  const bars = mode === "bars";
   return (
     <ol
       data-dashboard-ranked-rows={mode}
-      data-dashboard-ranked-grammar="table"
+      data-dashboard-ranked-grammar={bars ? "table" : "grade"}
       className={DASHBOARD_ROW_LIST_CLASS}
     >
       {rows.map((row, i) => {
         const share = dashboardSharePercent(row.count, total);
-        const name = <RankedName row={row} />;
         return (
-          <li key={row.key} data-dashboard-ranked-row="" className={DASHBOARD_RANKED_TABLE_ROW_CLASS}>
-            <span data-dashboard-ranked-rank="" className="t-data t-body-sm w-4 shrink-0 text-ink-3">
+          <li key={row.key} data-dashboard-ranked-row="" className={DASHBOARD_RANKED_GRADE_ROW_CLASS}>
+            <span
+              data-dashboard-ranked-mark=""
+              data-dashboard-ranked-rank=""
+              className={DASHBOARD_RANKED_MARK_CLASS}
+            >
               {i + 1}
             </span>
-            <span className="min-w-0 flex-1 truncate">
-              {row.href ? (
-                <Link href={row.href} className="min-w-0 truncate t-body-sm font-medium text-ink hover:text-ink-2">
-                  <RankedName row={row} />
-                </Link>
-              ) : (
-                name
-              )}
-            </span>
-            <span data-dashboard-ranked-bar="" aria-hidden className={DASHBOARD_RANKED_SHARE_TRACK_CLASS}>
-              <span
-                className={`block h-full ${i === 0 ? "bg-accent/70" : "bg-ink-3"}`}
-                style={{ width: `${share}%` }}
-              />
-            </span>
-            <span
-              data-dashboard-ranked-share=""
-              className="t-data t-body-sm w-12 shrink-0 text-right text-ink-3"
-            >
-              {dashboardShareLabel(row.count, total)}
-            </span>
+            <RankedIdentity row={row} shareLabel={dashboardShareLabel(row.count, total)} />
+            {bars ? (
+              <span data-dashboard-ranked-bar="" aria-hidden className={DASHBOARD_RANKED_SHARE_TRACK_CLASS}>
+                <span
+                  className={`block h-full ${i === 0 ? "bg-accent/70" : "bg-ink-3"}`}
+                  style={{ width: `${share}%` }}
+                />
+              </span>
+            ) : null}
             <span data-dashboard-ranked-value="" className={DASHBOARD_MONEY_CLASS}>
               {row.count}
             </span>

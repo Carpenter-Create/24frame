@@ -177,8 +177,8 @@ describe("Aggregation Dashboard mobile chrome — org-row Period", () => {
     expect(DASHBOARD_ADMIN_CHROME_CLASS).toContain("gap-[var(--space-2)]");
     expect(DASHBOARD_ADMIN_CHROME_CLASS).not.toContain("flex-col");
     expect(DASHBOARD_TITLE_MOBILE_CLASS).toBe(DASHBOARD_ORG_NAME_MOBILE_CLASS);
-    expect(DASHBOARD_ORG_NAME_MOBILE_CLASS).toContain("t-body-sm");
-    expect(DASHBOARD_ORG_NAME_MOBILE_CLASS).toContain("text-ink-2");
+    expect(DASHBOARD_ORG_NAME_MOBILE_CLASS).toContain("t-heading");
+    expect(DASHBOARD_ORG_NAME_MOBILE_CLASS).toContain("text-ink");
     expect(DASHBOARD_ORG_NAME_MOBILE_CLASS).toContain("md:hidden");
     expect(DASHBOARD_ORG_NAME_MOBILE_CLASS).not.toContain("t-title");
     expect(DASHBOARD_ORG_NAME_MOBILE_CLASS).not.toContain("t-label");

@@ -31,7 +31,7 @@ describe("SideNav Access rail", () => {
     const tokens = readFileSync("src/app/tokens.css", "utf8");
     const globals = readFileSync("src/app/globals.css", "utf8");
     const itemClass = navSrc.match(
-      /"relative flex items-center rounded-\[var\(--radius\)\] [^"]+"/,
+      /"relative flex items-center rounded-full [^"]+"/,
     )?.[0];
     expect(navSrc).toContain("house --text-sm / t-body-sm labels");
     expect(tokens).toMatch(/--text-sm:\s*0\.8125rem;/);
@@ -69,10 +69,13 @@ describe("SideNav Access rail", () => {
     expect(navSrc).not.toContain("prefetch={false}");
   });
 
-  it("marks the active item with Sporty Blue text and a quiet wash, not RL grey", () => {
+  it("marks the active item with a light-blue pill wash and Sporty Blue type", () => {
+    expect(navSrc).toContain("rounded-full");
     expect(navSrc).toContain("bg-accent-wash font-medium text-accent");
-    expect(navSrc).toContain("font-normal text-ink-2 hover:bg-surface-muted hover:text-ink");
+    expect(navSrc).toContain("font-normal text-ink hover:bg-surface-muted");
+    expect(navSrc).not.toContain("font-normal text-ink-2");
     expect(navSrc).not.toContain("bg-surface-muted font-medium text-ink");
     expect(navSrc).not.toContain('active ? "bg-surface text-ink"');
+    expect(navSrc).not.toContain("Coinbase");
   });
 });

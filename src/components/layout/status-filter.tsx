@@ -25,8 +25,8 @@ export function StatusFilter<T extends string>({
             className={cn(
               "rounded-full px-3 py-1 t-label transition-colors",
               active
-                ? "bg-ink text-canvas"
-                : "bg-surface-muted text-ink-2 hover:text-ink",
+                ? "bg-ink text-surface"
+                : "bg-surface-muted text-ink hover:text-ink",
             )}
           >
             {o.label}

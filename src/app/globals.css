@@ -178,11 +178,11 @@ body {
   .t-display.t-data {
     letter-spacing: -0.035em;
   }
-  /* Mercury-quiet card: white on canvas, hairline only, house radius. No shadow. */
+  /* Coinbase-air card: white on #FAFAFB canvas, 16 corner, hairline only. No shadow. */
   .card-surface {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: var(--radius-lg);
     box-shadow: none;
   }
   /* Hide the scrollbar on streaming rails (keeps horizontal scroll, drops the chrome). */
