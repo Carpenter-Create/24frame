@@ -98,8 +98,8 @@ with the same 404 a genuinely missing object gets, misfiring `headObjectMeta`'s 
 The consequence — runtime gap becomes build-time failure — needs to be known going in, not
 discovered via a failed deploy.
 
-Founder lock 2026-09-17: **deleted title prefixes are the one DeleteObject exception** on
-`S3_BUCKET`. `purgeTitlePrefix` in `src/lib/s3.ts` lists + deletes under
+Deleted title prefixes are the one DeleteObject exception on `S3_BUCKET` (founder lock).
+`purgeTitlePrefix` in `src/lib/s3.ts` lists + deletes under
 `orgs/<orgId>/titles/<titleId>/` only. IAM must stay on that prefix — never `$BUCKET/*`.
 The existing unscoped `s3:ListBucket` in `gc-assets-mediaconvert` (HeadBucket for
 `headObjectMeta`) stays; do not replace it with the prefix-conditioned list statement
