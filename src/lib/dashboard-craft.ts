@@ -100,13 +100,17 @@ export const DASHBOARD_ADMIN_CHROME_CLASS =
 
 // Desktop: taller Net revenue left (3) · Attention glance right (2).
 // One height pair — lg stretch + shared cell/card h-full. Phone (`< md`)
-// stacks Revenue then Attention with items-start; no forced equal height.
+// stacks Revenue then Attention and stretches to the content column.
+// items-start on a max-md flex-col is the cross-axis (width) and
+// shrink-wraps tiles, leaving a right gutter. max-md:items-stretch
+// fills the house page inset; heights stay content-sized (no equal
+// height pair below lg). md grid keeps items-start; lg stretches.
 // Licensing status is full-width under this pair, then Top performing,
 // then Recent activity.
 export const DASHBOARD_ADMIN_OVERVIEW_CLASS =
-  "grid grid-cols-1 items-start gap-[var(--space-6)] max-md:flex max-md:flex-col lg:grid-cols-5 lg:items-stretch";
+  "grid w-full grid-cols-1 items-start gap-[var(--space-6)] max-md:flex max-md:w-full max-md:flex-col max-md:items-stretch lg:grid-cols-5 lg:items-stretch";
 
-export const DASHBOARD_ADMIN_TOP_ROW_CELL_CLASS = "h-full min-h-0";
+export const DASHBOARD_ADMIN_TOP_ROW_CELL_CLASS = "h-full min-h-0 w-full";
 
 export const DASHBOARD_ADMIN_HERO_REVENUE_CLASS =
   `${DASHBOARD_ADMIN_TOP_ROW_CELL_CLASS} lg:col-span-3`;
@@ -175,8 +179,11 @@ export const DASHBOARD_LEGEND_CLASS =
 
 export const DASHBOARD_CHOROPLETH_SWATCH_CLASS = "h-2 w-5 rounded-[var(--radius-sm)]";
 
+// Shared admin column (hero + Licensing / Top performing / activity).
+// w-full: phone tiles fill the house page inset — same left+right as
+// the org title row. Do not add items-start; that collapses width.
 export const DASHBOARD_ADMIN_STACK_CLASS =
-  "flex flex-col gap-[var(--space-6)]";
+  "flex w-full flex-col gap-[var(--space-6)]";
 
 export const DASHBOARD_STANDARD_STACK_CLASS = "flex flex-col gap-[var(--space-12)]";
 

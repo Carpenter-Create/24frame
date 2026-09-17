@@ -160,7 +160,7 @@ describe("Dashboard Fidelity × Royalogic density", () => {
     expect(DASHBOARD_CARD_PAD_LIST).toBe("px-[var(--space-4)] py-[var(--space-4)]");
     expect(DASHBOARD_CARD_PAD_HERO).toBe(DASHBOARD_CARD_PAD_LIST);
     expect(DASHBOARD_SECTION_AIR_CLASS).toBe("gap-[var(--space-6)]");
-    expect(DASHBOARD_ADMIN_STACK_CLASS).toBe("flex flex-col gap-[var(--space-6)]");
+    expect(DASHBOARD_ADMIN_STACK_CLASS).toBe("flex w-full flex-col gap-[var(--space-6)]");
     expect(DASHBOARD_ROW_CLASS).toContain("min-h-10");
     expect(DASHBOARD_ROW_CLASS).toContain("py-[var(--space-2)]");
     expect(DASHBOARD_ROW_CLASS).toContain("px-[var(--space-4)]");

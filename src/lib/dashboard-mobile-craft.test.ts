@@ -3,8 +3,11 @@ import { describe, expect, it } from "vitest";
 
 import {
   DASHBOARD_ADMIN_CHROME_CLASS,
+  DASHBOARD_ADMIN_HERO_ATTENTION_CLASS,
+  DASHBOARD_ADMIN_HERO_REVENUE_CLASS,
   DASHBOARD_ADMIN_OVERVIEW_CLASS,
   DASHBOARD_ADMIN_STACK_CLASS,
+  DASHBOARD_ADMIN_TOP_ROW_CELL_CLASS,
   DASHBOARD_MOBILE_BREAKPOINT_CLASS,
   DASHBOARD_CARD_PAD_HERO,
   DASHBOARD_CHART_FRAME_CLASS,
@@ -21,13 +24,22 @@ describe("company-admin Dashboard mobile craft", () => {
   it("locks phone composition to < md without reopening a peer $ collage", () => {
     expect(DASHBOARD_MOBILE_BREAKPOINT_CLASS).toBe("max-md");
     expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("max-md:flex-col");
+    expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("max-md:items-stretch");
+    expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("max-md:w-full");
+    expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("w-full");
     expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("gap-[var(--space-6)]");
     expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("lg:grid-cols-5");
     expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("items-start");
     expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("lg:items-stretch");
-    expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).not.toContain("max-md:items-stretch");
+    expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).not.toContain("md:items-stretch");
     expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).not.toContain("md:grid-cols-5");
     expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).not.toContain("sm:grid-cols-5");
+    expect(DASHBOARD_ADMIN_STACK_CLASS).toContain("w-full");
+    expect(DASHBOARD_ADMIN_STACK_CLASS).toContain("flex-col");
+    expect(DASHBOARD_ADMIN_STACK_CLASS).not.toContain("items-start");
+    expect(DASHBOARD_ADMIN_TOP_ROW_CELL_CLASS).toContain("w-full");
+    expect(DASHBOARD_ADMIN_HERO_REVENUE_CLASS).toContain("w-full");
+    expect(DASHBOARD_ADMIN_HERO_ATTENTION_CLASS).toContain("w-full");
     expect(DASHBOARD_ADMIN_CHROME_CLASS).toContain("md:flex-row");
     expect(DASHBOARD_ADMIN_CHROME_CLASS).not.toContain("sm:flex-row");
     expect(DASHBOARD_TITLE_MOBILE_CLASS).toContain("md:hidden");
@@ -43,6 +55,39 @@ describe("company-admin Dashboard mobile craft", () => {
     expect(DASHBOARD_ADMIN_STACK_CLASS).toContain("gap-[var(--space-6)]");
     expect(DASHBOARD_ADMIN_STACK_CLASS).not.toContain("md:gap-[var(--space-12)]");
     expect(DASHBOARD_DO_NEXT_SECONDARY_CLASS).toContain("max-md:");
+  });
+
+  it("stretches the phone overview + stack to the content column — shared tokens only", () => {
+    const hero = readFileSync("src/components/dashboard/dashboard-admin-hero.tsx", "utf8");
+    const page = readFileSync("src/app/(app)/dashboard/page.tsx", "utf8");
+    const attention = readFileSync("src/components/dashboard/dashboard-attention.tsx", "utf8");
+    const licensing = readFileSync("src/components/dashboard/dashboard-licensing-status.tsx", "utf8");
+    const ranked = readFileSync("src/components/dashboard/dashboard-ranked.tsx", "utf8");
+    expect(DASHBOARD_ADMIN_OVERVIEW_CLASS.split(/\s+/)).toEqual(
+      expect.arrayContaining([
+        "w-full",
+        "items-start",
+        "max-md:flex",
+        "max-md:w-full",
+        "max-md:flex-col",
+        "max-md:items-stretch",
+        "lg:grid-cols-5",
+        "lg:items-stretch",
+      ]),
+    );
+    expect(DASHBOARD_ADMIN_STACK_CLASS.split(/\s+/)).toEqual(
+      expect.arrayContaining(["flex", "w-full", "flex-col"]),
+    );
+    expect(DASHBOARD_ADMIN_STACK_CLASS.split(/\s+/)).not.toContain("items-start");
+    expect(hero).toContain("DASHBOARD_ADMIN_OVERVIEW_CLASS");
+    expect(hero).toContain("DASHBOARD_ADMIN_STACK_CLASS");
+    expect(hero).toContain("DASHBOARD_ADMIN_HERO_REVENUE_CLASS");
+    expect(hero).toContain("DASHBOARD_ADMIN_HERO_ATTENTION_CLASS");
+    expect(page).toContain("DASHBOARD_ADMIN_STACK_CLASS");
+    expect(hero).toContain('data-dashboard-mobile-stack=""');
+    for (const src of [attention, licensing, ranked]) {
+      expect(src).not.toMatch(/className=\{[^}]*w-full/);
+    }
   });
 
   it("keeps the scrub in the 160–200px band and full width on phone", () => {

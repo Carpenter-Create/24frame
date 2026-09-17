@@ -147,7 +147,7 @@ describe("Aggregation Dashboard density delta after #332", () => {
     expect(DASHBOARD_CARD_PAD_HERO).toBe("px-[var(--space-4)] py-[var(--space-4)]");
     expect(DASHBOARD_HERO_TO_CHART_GAP_CLASS).toBe("pt-[var(--space-4)]");
     expect(DASHBOARD_SECTION_AIR_CLASS).toBe("gap-[var(--space-6)]");
-    expect(DASHBOARD_ADMIN_STACK_CLASS).toBe("flex flex-col gap-[var(--space-6)]");
+    expect(DASHBOARD_ADMIN_STACK_CLASS).toBe("flex w-full flex-col gap-[var(--space-6)]");
     expect(DASHBOARD_ADMIN_CHROME_CLASS).toContain("gap-[var(--space-6)]");
     expect(DASHBOARD_STANDARD_STACK_CLASS).toBe("flex flex-col gap-[var(--space-12)]");
     expect(heroSrc).toContain("DASHBOARD_HERO_TO_CHART_GAP_CLASS");
