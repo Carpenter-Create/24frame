@@ -15,6 +15,9 @@ import {
   TITLES_ROW_META_CLASS,
   TITLES_ROW_NAME_CLASS,
   TITLES_THUMB_CLASS,
+  TITLES_TILE_ART_CLASS,
+  TITLES_TILE_CLASS,
+  TITLES_TILE_STILL_SIZES,
   TITLES_TITLE_DESKTOP_CLASS,
   TITLES_TITLE_MOBILE_CLASS,
   type CatalogStatusFilter,
@@ -24,6 +27,7 @@ import {
 // those must not restyle home, Deliveries, Catalog Health, or staff surfaces.
 // Phone (`< md`): full-width 16:9 art on top, title / year / status under.
 // Desktop (`md+`): landscape-thumb row — art leading, title/year, status.
+// TitlesLandscapeTile is the same art surface + quiet title for Avails.
 // Type is the Dashboard register. Accent is Sporty Blue Add Title:
 // phone header + (house 44), desktop labeled pill. Not a list FAB.
 // Status filter is HousePageSelect trailing on the header (Dashboard All time SoT).
@@ -188,16 +192,20 @@ export function TitleStatusPill({
   );
 }
 
-function TitlesCatalogThumb({
+export function TitlesCatalogThumb({
   title,
   stillUrl,
+  className,
+  sizes = "(max-width: 768px) 100vw, 160px",
 }: {
   title: string;
   stillUrl: string | null;
+  className?: string;
+  sizes?: string;
 }) {
   return (
     <div
-      className={TITLES_THUMB_CLASS}
+      className={className ?? TITLES_THUMB_CLASS}
       data-titles-catalog-frame=""
       data-titles-catalog-crop="cover"
     >
@@ -207,7 +215,7 @@ function TitlesCatalogThumb({
           title={title}
           rounded="rounded-none"
           className="absolute inset-0 h-full w-full"
-          sizes="(max-width: 768px) 100vw, 160px"
+          sizes={sizes}
         />
       ) : (
         <div
@@ -218,6 +226,35 @@ function TitlesCatalogThumb({
         </div>
       )}
     </div>
+  );
+}
+
+export function TitlesLandscapeTile({
+  href,
+  title,
+  stillUrl,
+}: {
+  href: string;
+  title: string;
+  stillUrl: string | null;
+}) {
+  return (
+    <Link
+      href={href}
+      prefetch={false}
+      className={TITLES_TILE_CLASS}
+      data-titles-landscape-tile=""
+    >
+      <TitlesCatalogThumb
+        title={title}
+        stillUrl={stillUrl}
+        className={TITLES_TILE_ART_CLASS}
+        sizes={TITLES_TILE_STILL_SIZES}
+      />
+      <span className={TITLES_ROW_NAME_CLASS} data-titles-catalog-name="">
+        {title}
+      </span>
+    </Link>
   );
 }
 

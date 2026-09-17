@@ -16,6 +16,11 @@ import {
   TITLES_ADD_ICON_CLASS,
   TITLES_CATALOG,
   TITLES_FILTER_PILL_CLASS,
+  TITLES_LANDSCAPE_ART_CLASS,
+  TITLES_THUMB_CLASS,
+  TITLES_TILE_ART_CLASS,
+  TITLES_TILE_CLASS,
+  TITLES_TILE_STILL_SIZES,
   TITLES_TITLE_DESKTOP_CLASS,
   TITLES_TITLE_MOBILE_CLASS,
   catalogCountLabel,
@@ -81,6 +86,21 @@ describe("catalog lifecycle", () => {
     expect(CATALOG_LIFECYCLE_STATES).not.toContain("in_progress");
     expect(CATALOG_LIFECYCLE_STATES).not.toContain("approved");
     expect(Object.values(TITLES_CATALOG)).not.toContain("Drafts");
+  });
+});
+
+describe("shared landscape art", () => {
+  it("keeps the list thumb and the Avails tile on the same 16:9 surface", () => {
+    expect(TITLES_LANDSCAPE_ART_CLASS).toContain("aspect-[16/9]");
+    expect(TITLES_LANDSCAPE_ART_CLASS).toContain("[&_img]:object-cover");
+    expect(TITLES_LANDSCAPE_ART_CLASS).not.toContain("aspect-[2/3]");
+    expect(TITLES_THUMB_CLASS).toContain(TITLES_LANDSCAPE_ART_CLASS);
+    expect(TITLES_THUMB_CLASS).toContain("md:w-[160px]");
+    expect(TITLES_TILE_ART_CLASS).toContain(TITLES_LANDSCAPE_ART_CLASS);
+    expect(TITLES_TILE_ART_CLASS).toContain("rounded-[var(--radius-lg)]");
+    expect(TITLES_TILE_ART_CLASS).not.toContain("md:w-[160px]");
+    expect(TITLES_TILE_CLASS).toBe("flex flex-col gap-[var(--space-4)]");
+    expect(TITLES_TILE_STILL_SIZES).toBe("(max-width: 768px) 100vw, 33vw");
   });
 });
 

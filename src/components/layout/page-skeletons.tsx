@@ -70,6 +70,26 @@ export function CatalogSkeleton() {
   );
 }
 
+/** Staff Avails: header + 3-wide landscape tiles (1-wide on phone). */
+export function AvailsSkeleton() {
+  return (
+    <>
+      <HeaderSkeleton />
+      <div
+        className="grid grid-cols-1 gap-[var(--space-4)] md:grid-cols-3"
+        data-avails-skeleton=""
+      >
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="flex flex-col gap-[var(--space-4)]">
+            <Skeleton className="aspect-[16/9] w-full rounded-[var(--radius-lg)]" />
+            <Skeleton className="h-4 w-2/3" />
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
 /** Any list-of-rows surface: deliveries, vendors, the GC queue. */
 export function ListSkeleton({ rows = 6, withActions = false }: { rows?: number; withActions?: boolean }) {
   return (

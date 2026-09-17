@@ -45,12 +45,18 @@ import {
 } from "@/lib/titles-catalog";
 
 import {
+  TITLES_TILE_ART_CLASS,
+  TITLES_TILE_CLASS,
+} from "@/lib/titles-catalog";
+
+import {
   TitlesCatalogFrame,
   TitlesCatalogHeader,
   TitlesCatalogList,
   TitlesCatalogListRow,
   TitlesCatalogStatusFilter,
   TitlesCatalogToolbar,
+  TitlesLandscapeTile,
 } from "./titles-catalog";
 
 const ALL_STATUSES = Object.keys(TITLE_STATUS_LABELS) as TitleStatus[];
@@ -295,6 +301,37 @@ describe("TitlesCatalogHeader type lock", () => {
     expect(html.match(/Titles/g)?.length).toBeGreaterThanOrEqual(2);
     expect(html).not.toContain("data-titles-catalog-identity");
     expect(html).not.toContain("Meridian Pictures");
+  });
+});
+
+describe("TitlesLandscapeTile craft", () => {
+  it("is the shared landscape art plus a quiet title — no track, no card chrome", () => {
+    const html = renderToStaticMarkup(
+      createElement(TitlesLandscapeTile, {
+        href: "/gc/titles/title-1",
+        title: "Winter Light",
+        stillUrl: "https://cdn/wide.jpg",
+      }),
+    );
+    const tile = openingTagWith(html, 'data-titles-landscape-tile=""');
+    const frame = openingTagWith(html, 'data-titles-catalog-frame=""');
+    const name = openingTagWith(html, 'data-titles-catalog-name=""');
+
+    expect(tile).toContain(TITLES_TILE_CLASS);
+    expect(frame).toContain("aspect-[16/9]");
+    expect(frame).toContain("rounded-[var(--radius-lg)]");
+    expect(frame).toContain("[&amp;_img]:object-cover");
+    expect(TITLES_TILE_ART_CLASS).toContain("aspect-[16/9]");
+    expect(frame).not.toContain("md:w-[160px]");
+    expect(name).toContain("t-body font-medium text-ink");
+    expect(html).toContain("Winter Light");
+    expect(html).toContain('href="/gc/titles/title-1"');
+    expect(html).toContain("https://cdn/wide.jpg");
+    expect(html).not.toContain("data-status-progress");
+    expect(html).not.toContain("data-titles-catalog-status");
+    expect(html).not.toContain("data-titles-catalog-list-row");
+    expect(html).not.toContain("aspect-[2/3]");
+    expect(html).not.toMatch(/hover:-translate|group-hover:scale|hover:scale/);
   });
 });
 

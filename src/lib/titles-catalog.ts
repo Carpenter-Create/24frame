@@ -10,8 +10,9 @@ import { TITLE_STATUS_LABELS, type TitleStatus } from "@/lib/titles";
 // status filter on the existing title.status model. Soft-deleted titles are
 // omitted. Do not invent a second catalog. Landscape stills in the house
 // shell — not the poster 5-up. Phone stacks full-width 16:9 art over the
-// title. Desktop keeps the horizontal landscape-thumb row. Type matches the
-// Dashboard register: Geist, black sentence-case, quiet ink selected.
+// title. Desktop keeps the horizontal landscape-thumb row. The same 16:9
+// surface is the Avails tile. Type matches the Dashboard register: Geist,
+// black sentence-case, quiet ink selected.
 // Sporty Blue stays on Add Title.
 
 export const TITLES_CATALOG = {
@@ -44,8 +45,21 @@ export const TITLES_ADD_ICON_CLASS =
 
 export const TITLES_ROW_NAME_CLASS = "t-body font-medium text-ink md:truncate";
 
+// Shared 16:9 cover surface. Titles list thumbs and Avails tiles use this
+// art — not a second Avails media ratio, not a poster crop.
+export const TITLES_LANDSCAPE_ART_CLASS =
+  "relative aspect-[16/9] w-full shrink-0 overflow-hidden bg-surface-muted [&_img]:h-full [&_img]:w-full [&_img]:object-cover [&_img]:object-center";
+
 export const TITLES_THUMB_CLASS =
-  "relative aspect-[16/9] w-full shrink-0 overflow-hidden bg-surface-muted md:w-[160px] md:rounded-[var(--radius-lg)] [&_img]:h-full [&_img]:w-full [&_img]:object-cover [&_img]:object-center";
+  `${TITLES_LANDSCAPE_ART_CLASS} md:w-[160px] md:rounded-[var(--radius-lg)]`;
+
+// Full-width tile art: same surface as the list thumb, house r16, no 160 crop.
+export const TITLES_TILE_ART_CLASS = `${TITLES_LANDSCAPE_ART_CLASS} rounded-[var(--radius-lg)]`;
+
+// Art + quiet title. 16 related. No card chrome, no status track.
+export const TITLES_TILE_CLASS = "flex flex-col gap-[var(--space-4)]";
+
+export const TITLES_TILE_STILL_SIZES = "(max-width: 768px) 100vw, 33vw";
 
 export const TITLES_LIST_CLASS =
   "titles-catalog-list flex flex-col gap-[var(--space-4)] md:gap-0 md:overflow-hidden md:rounded-[var(--radius-lg)] md:border md:border-hairline md:bg-surface";
