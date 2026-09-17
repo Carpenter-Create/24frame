@@ -65,4 +65,9 @@ describe("AddTitleButton header", () => {
     expect(src).not.toContain("fixed");
     expect(html).not.toContain("fixed");
   });
+
+  it("portals the dialog off hidden breakpoint hosts so showModal cannot inert the page", () => {
+    expect(src).toContain("createPortal");
+    expect(src).toContain("document.body");
+  });
 });
