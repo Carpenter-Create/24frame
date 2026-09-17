@@ -849,7 +849,7 @@ describe("company admin Overview hero", () => {
     expect(html).not.toMatch(/data-dashboard-title-desktop="" class="[^"]*t-label/);
     expect(html).toContain(DASHBOARD_ADMIN.allTime);
     expect(html).toContain("As of All time");
-    expect(html).toContain(DASHBOARD_LICENSING.needsAttention);
+    expect(html).toContain(DASHBOARD_LICENSING.empty);
     expect(html).not.toContain('data-dashboard-module="findings-glance"');
     expect(html).not.toContain(DASHBOARD_HOME.doNext);
   });

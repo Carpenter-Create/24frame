@@ -1,10 +1,11 @@
 import type { DeliveryBrowseRow } from "@/lib/deliveries-browse";
 import { titleClientPath } from "@/lib/title-public-id";
+import type { DeliveryStatus } from "@/lib/titles";
 import { catalogStillSrc } from "@/lib/titles-catalog";
 
 // Company-admin `/dashboard` Licensing status. Nested title → endpoint
 // composition from existing deliveries. No licensing_* tables, no Filmhub
-// Licensed/Removed domain, no readiness buckets. View all → /titles.
+// channel domain, no readiness buckets. View all → /titles.
 
 export const DASHBOARD_LICENSING = {
   title: "Licensing status",
@@ -24,7 +25,7 @@ export type LicensingEndpointRow = {
   deliveryId: string;
   endpoint: string;
   territory: string;
-  status: string;
+  status: DeliveryStatus;
   updatedAt: string | null;
 };
 
@@ -62,32 +63,31 @@ export function buildLicensingStatus(input: {
     byTitle.set(row.title_id, list);
   }
 
-  const groups = [...byTitle.entries()]
-    .map(([titleId, rows]) => {
-      const title = titleById.get(titleId);
-      if (!title) return null;
-      const endpoints = [...rows]
-        .sort((a, b) => (deliveryRecency(a) < deliveryRecency(b) ? 1 : -1))
-        .map((row) => ({
-          deliveryId: row.delivery_id,
-          endpoint: row.vendor_name,
-          territory: row.territory,
-          status: row.status,
-          updatedAt: row.updated_at,
-        }));
-      const latest = endpoints[0]?.updatedAt ?? "";
-      return {
-        latest,
-        group: {
-          id: title.id,
-          title: title.title,
-          href: titleClientPath(title.catalog_id),
-          stillUrl: catalogStillSrc(input.stills?.get(title.id) ?? null),
-          endpoints,
-        } satisfies LicensingTitleGroup,
-      };
-    })
-    .filter((row): row is { latest: string; group: LicensingTitleGroup } => row != null)
+  const candidates: { latest: string; group: LicensingTitleGroup }[] = [];
+  for (const [titleId, rows] of byTitle) {
+    const title = titleById.get(titleId);
+    if (!title) continue;
+    const endpoints = [...rows]
+      .sort((a, b) => (deliveryRecency(a) < deliveryRecency(b) ? 1 : -1))
+      .map((row) => ({
+        deliveryId: row.delivery_id,
+        endpoint: row.vendor_name,
+        territory: row.territory,
+        status: row.status,
+        updatedAt: row.updated_at,
+      }));
+    candidates.push({
+      latest: endpoints[0]?.updatedAt ?? "",
+      group: {
+        id: title.id,
+        title: title.title,
+        href: titleClientPath(title.catalog_id),
+        stillUrl: catalogStillSrc(input.stills?.get(title.id) ?? null),
+        endpoints,
+      },
+    });
+  }
+  const groups = candidates
     .sort((a, b) => (a.latest < b.latest ? 1 : -1))
     .slice(0, DASHBOARD_LICENSING_TITLE_CAP)
     .map((row) => row.group);

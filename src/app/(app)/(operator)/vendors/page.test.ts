@@ -93,16 +93,16 @@ describe("staff /vendors address book", () => {
     expect(pageSrc).toContain("PageHeader");
   });
 
-  it("renders empty Add vendor as Sporty Blue text, matching /deliveries View titles", async () => {
+  it("renders empty Add vendor as Sporty Blue text, matching Titles empty action", async () => {
     const html = await renderVendors([]);
     const marker = html.indexOf('data-vendors-add=""');
     const addStart = html.lastIndexOf("<a", marker);
     const addEnd = html.indexOf("</a>", marker);
     const add = html.slice(addStart, addEnd);
     const viewTitlesClass = "t-body-sm text-accent transition-colors hover:underline";
-    const deliveriesSrc = readFileSync("src/app/(app)/deliveries/page.tsx", "utf8");
+    const titlesSrc = readFileSync("src/app/(app)/titles/page.tsx", "utf8");
 
-    expect(deliveriesSrc).toContain(viewTitlesClass);
+    expect(titlesSrc).toContain("AddTitleButton");
     expect(pageSrc).toContain(viewTitlesClass);
     expect(add).toContain("t-body-sm");
     expect(add).toContain("text-accent");

@@ -172,8 +172,9 @@ describe("Dashboard type jobs", () => {
     expect(html).toContain(DASHBOARD_PERIOD_TRIGGER_CLASS);
     expect(DASHBOARD_PERIOD_TRIGGER_CLASS).toContain("t-body-sm");
     expect(DASHBOARD_PERIOD_TRIGGER_CLASS).not.toContain("t-display");
-    expect(html).toContain("t-data t-body-sm");
-    expect(html).toContain("t-body-sm font-medium text-ink");
+    expect(html).toContain("t-body-sm text-ink-3");
+    expect(html).toContain("data-dashboard-attention-clock");
+    expect(html).not.toContain("t-display t-body-sm");
     expect(html).toContain("data-dashboard-fixture-banner");
     expect(html).toContain(DASHBOARD_FIXTURE.banner);
     expect(DASHBOARD_FIXTURE_BANNER_CLASS).toMatch(/\bt-label\b|\bt-body-sm\b/);
