@@ -94,7 +94,8 @@ describe("title lifecycle copy", () => {
   it("labels archived as a first-class title status", () => {
     expect(TITLE_STATUS_LABELS.archived).toBe("Archived");
     expect(titleDisplayStatus("archived", 2, 3)).toBe("Archived");
-    expect(titleDisplayStatus("live", 2, 3)).toBe("Live · 2 of 3 platforms");
+    expect(titleDisplayStatus("live", 2, 3)).toBe("Approved · 2 of 3 platforms");
+    expect(TITLE_STATUS_LABELS.live).toBe("Approved");
   });
 });
 

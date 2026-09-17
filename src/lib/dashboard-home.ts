@@ -18,7 +18,7 @@ export const DASHBOARD_HOME = {
   catalogHealthCta: "Attention",
   catalog: "Catalog",
   needsAttention: "Needs attention",
-  live: "Live",
+  live: "Approved",
   doNext: "Do next",
   overview: "Overview",
   topPerforming: "Top performing",

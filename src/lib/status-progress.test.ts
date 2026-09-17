@@ -46,21 +46,21 @@ describe("titleStatusProgress", () => {
     expect(statusProgressFilledCount(inDelivery)).toBe(4);
 
     const live = titleStatusProgress("live");
-    expect(live.label).toBe("Live");
+    expect(live.label).toBe("Approved");
     expect(live.currentIndex).toBe(4);
     expect(statusProgressFilledCount(live)).toBe(5);
-    expect(statusProgressAriaLabel(live)).toBe("Live, step 5 of 5");
+    expect(statusProgressAriaLabel(live)).toBe("Approved, step 5 of 5");
   });
 
-  it("treats derived live (≥1 delivery live) as Live 5/5", () => {
+  it("treats derived live (≥1 delivery live) as Approved 5/5", () => {
     for (const status of ["draft", "submitted", "in_review", "in_delivery"] as const) {
       const model = titleStatusProgress(status, 1);
       expect(model.variant).toBe("pipeline");
-      expect(model.label).toBe("Live");
+      expect(model.label).toBe("Approved");
       expect(model.currentIndex).toBe(4);
       expect(statusProgressFilledCount(model)).toBe(5);
     }
-    expect(titleStatusProgress("live", 2).label).toBe("Live");
+    expect(titleStatusProgress("live", 2).label).toBe("Approved");
   });
 
   it("keeps official off-pipeline takedown statuses as muted badges", () => {
@@ -82,7 +82,7 @@ describe("titleStatusProgress", () => {
       "Submitted",
       "In review",
       "In delivery",
-      "Live",
+      "Approved",
     ]);
     expect(titleStatusProgress("in_delivery").steps).not.toContain("Delivered");
     expect(titleStatusProgress("upcoming" as TitleStatus).variant).toBe("off");
@@ -104,10 +104,10 @@ describe("deliveryStatusProgress", () => {
     expect(statusProgressFilledCount(delivered)).toBe(2);
 
     const live = deliveryStatusProgress("live");
-    expect(live.label).toBe("Live");
+    expect(live.label).toBe("Approved");
     expect(live.currentIndex).toBe(2);
     expect(statusProgressFilledCount(live)).toBe(3);
-    expect(statusProgressAriaLabel(live)).toBe("Live, step 3 of 3");
+    expect(statusProgressAriaLabel(live)).toBe("Approved, step 3 of 3");
   });
 
   it("keeps rejected and taken_down as muted badges", () => {

@@ -13,7 +13,7 @@ export const TITLE_STATUS_TRACK_STEPS = [
   "Submitted",
   "In review",
   "In delivery",
-  "Live",
+  "Approved",
 ] as const;
 
 export const TITLE_STATUS_TRACK_KEYS = [
@@ -29,7 +29,7 @@ export const TITLE_STATUS_OFF_TRACK = [
   "taken_down",
 ] as const;
 
-export const DELIVERY_STATUS_TRACK_STEPS = ["Pending", "Delivered", "Live"] as const;
+export const DELIVERY_STATUS_TRACK_STEPS = ["Pending", "Delivered", "Approved"] as const;
 
 export const DELIVERY_STATUS_TRACK_KEYS = ["pending", "delivered", "live"] as const;
 
@@ -69,7 +69,7 @@ function titleOffLabel(status: string): string {
 }
 
 /**
- * Titles list/detail track. Live is the `live` enum or derived live when
+ * Titles list/detail track. Approved is the `live` enum or derived live when
  * ≥1 delivery is live — same rollup gate as titleDisplayStatus, without
  * inventing DB state. Official off-pipeline is takedown only; any other
  * existing product signal that is not on-track stays a muted badge.

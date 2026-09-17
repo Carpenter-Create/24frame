@@ -97,7 +97,7 @@ describe("executeAskGlobeeTool", () => {
     expect(result).toEqual({
       titles: [
         { title: "Harbor Cut", status: "Draft" },
-        { title: "Winter Light", status: "Live" },
+        { title: "Winter Light", status: "Approved" },
       ],
     });
     expectIsolated(result);

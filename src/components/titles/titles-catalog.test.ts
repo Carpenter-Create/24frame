@@ -137,7 +137,7 @@ describe("TitlesCatalogListRow craft", () => {
     expect(name).not.toContain("t-label");
     expect(year).toContain("t-body-sm text-ink-3");
     expect(html).toMatch(
-      /data-titles-catalog-name[\s\S]*Craft film[\s\S]*data-titles-catalog-year[\s\S]*2019[\s\S]*data-titles-catalog-status[\s\S]*Live/,
+      /data-titles-catalog-name[\s\S]*Craft film[\s\S]*data-titles-catalog-year[\s\S]*2019[\s\S]*data-titles-catalog-status[\s\S]*Approved/,
     );
   });
 
@@ -168,7 +168,7 @@ describe("TitlesCatalogListRow craft", () => {
     expect(takedownHost).toContain("mr-[var(--space-4)]");
     expect(live.match(/data-status-progress-seg="filled"/g) ?? []).toHaveLength(5);
     expect(live).toContain("bg-accent");
-    expect(live).toContain("Live");
+    expect(live).toContain("Approved");
     expect(live).not.toMatch(/green|emerald|success|rose|red/);
     expect(draft.match(/data-status-progress-seg="filled"/g) ?? []).toHaveLength(1);
     expect(draft).toContain("Draft");
@@ -351,7 +351,7 @@ describe("TitlesCatalogList landscape row lock", () => {
     expect(html).toContain("24F-0001234");
     expect(track).toContain('data-status-progress-variant="pipeline"');
     expect(html).toContain("bg-accent");
-    expect(html).toContain("Live");
+    expect(html).toContain("Approved");
     expect(html).not.toContain("bg-band");
     expect(html).not.toMatch(/\bStore\b/);
     expect(html.match(/data-titles-catalog-list=""/g) ?? []).toHaveLength(1);

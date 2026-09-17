@@ -119,8 +119,8 @@ describe("TitleHero album-grammar rematch", () => {
     expect(html).toContain("Play trailer");
     expect(track).toContain('data-status-progress-variant="pipeline"');
     expect(html.match(/data-status-progress-seg="filled"/g) ?? []).toHaveLength(5);
-    expect(html).toContain("Live");
-    expect(html).not.toContain("Live · 1 of 2 platforms");
+    expect(html).toContain("Approved");
+    expect(html).not.toContain("Approved · 1 of 2 platforms");
     expect(html).not.toContain("Social");
     expect(html).not.toContain("Education");
     expect(html).not.toContain("Channels");

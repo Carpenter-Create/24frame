@@ -1,5 +1,5 @@
 import { isUpcoming } from "@/lib/releases";
-import type { TitleStatus } from "@/lib/titles";
+import { TITLE_STATUS_LABELS, type TitleStatus } from "@/lib/titles";
 
 // Pure helpers for the streaming-browse Titles surface (Visual register). No React,
 // no client state — the page filters/groups server-side from the URL, so these are
@@ -31,7 +31,7 @@ export function filterTitles<T extends { title: string }>(rows: T[], q: string):
 /**
  * Group titles into streaming-style rails, emitted in a fixed priority order and only
  * when non-empty. A title may appear in more than one rail (e.g. "Recently added" +
- * "Live"), matching the streaming idiom. Within a rail, order is recency-desc except
+ * Approved), matching the streaming idiom. Within a rail, order is recency-desc except
  * "Upcoming", which is soonest-first.
  */
 export function groupIntoRails(rows: BrowseTitle[], now: Date): Rail<BrowseTitle>[] {
@@ -42,7 +42,7 @@ export function groupIntoRails(rows: BrowseTitle[], now: Date): Rail<BrowseTitle
   if (recent.length) rails.push({ key: "recent", label: "Recently added", rows: recent });
 
   const live = byRecency.filter((r) => r.live > 0);
-  if (live.length) rails.push({ key: "live", label: "Live", rows: live });
+  if (live.length) rails.push({ key: "live", label: TITLE_STATUS_LABELS.live, rows: live });
 
   const upcoming = byRecency
     .filter((r) => isUpcoming(r.release_date, now))
@@ -81,7 +81,7 @@ export type CatalogStatusFilter = "all" | "live" | "upcoming" | "in_review" | "i
 
 export const CATALOG_STATUS_FILTERS: { key: CatalogStatusFilter; label: string }[] = [
   { key: "all", label: "All" },
-  { key: "live", label: "Live" },
+  { key: "live", label: TITLE_STATUS_LABELS.live },
   { key: "upcoming", label: "Upcoming" },
   { key: "in_review", label: "In review" },
   { key: "in_progress", label: "In progress" },

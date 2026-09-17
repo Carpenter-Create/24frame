@@ -11,6 +11,7 @@ import {
   ChartBar,
   Storefront,
   Tray,
+  CheckCircle,
   Users,
   Wallet,
 } from "@phosphor-icons/react";
@@ -49,6 +50,7 @@ describe("client NAV", () => {
     expect(hrefs).not.toContain("/finance");
     expect(hrefs).not.toContain("/gc/deliveries");
     expect(hrefs).not.toContain("/queue");
+    expect(hrefs).not.toContain("/avails");
     expect(hrefs).not.toContain("/vendors");
     expect(hrefs).not.toContain("/gc/clients");
     expect(hrefs).not.toContain("/gc/finance");
@@ -109,6 +111,7 @@ describe("client NAV", () => {
     ]);
     expect(GC_NAV.map((item) => item.icon)).toEqual([
       Tray,
+      CheckCircle,
       PaperPlaneTilt,
       Storefront,
       Wallet,
@@ -138,6 +141,7 @@ describe("GC_NAV", () => {
   it("adds staff-only GC Deliveries between Queue and Vendors, with Clients last", () => {
     expect(GC_NAV.map((item) => ({ label: item.label, href: item.href }))).toEqual([
       { label: "Queue", href: "/queue" },
+      { label: "Avails", href: "/avails" },
       { label: "24Frame Deliveries", href: "/gc/deliveries" },
       { label: "Vendors", href: "/vendors" },
       { label: "Finance", href: "/gc/finance" },
@@ -153,13 +157,15 @@ describe("GC_NAV", () => {
       "Reports",
       "Ask 24Frame AI",
       "Queue",
+      "Avails",
       "24Frame Deliveries",
       "Vendors",
       "Finance",
       "Clients",
     ]);
     expect(GC_NAV.map((item) => item.label)).not.toContain("Earn");
-    expect(STAFF_RAIL_EYEBROW).toBe("Staff");
+    expect(STAFF_RAIL_EYEBROW).toBe("Team");
+    expect(STAFF_RAIL_EYEBROW).not.toBe("Staff");
     expect(STAFF_RAIL_EYEBROW).not.toBe("24Frame");
     expect(STAFF_RAIL_EYEBROW).not.toBe("24FRAME");
   });
@@ -179,6 +185,7 @@ describe("mobileNavDestinations", () => {
       "Ask 24Frame AI",
     ]);
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/queue");
+    expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/avails");
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/vendors");
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/gc/clients");
   });
@@ -191,6 +198,7 @@ describe("mobileNavDestinations", () => {
       "Reports",
       "Ask 24Frame AI",
       "Queue",
+      "Avails",
       "24Frame Deliveries",
       "Vendors",
       "Finance",

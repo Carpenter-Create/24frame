@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { parseReportsPeriod } from "./reports";
-import { TITLE_STATUS_LABELS } from "./titles";
+import { DELIVERY_STATUS_ROW_LABELS, TITLE_STATUS_LABELS } from "./titles";
 import {
   filterReportsDeliveries,
   filterReportsTitles,
@@ -99,7 +99,7 @@ describe("reports view filters", () => {
         },
       ]),
     ).toEqual([
-      { name: "Live", count: 1 },
+      { name: DELIVERY_STATUS_ROW_LABELS.live, count: 1 },
       { name: "Pending", count: 1 },
     ]);
     expect(

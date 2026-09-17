@@ -40,7 +40,7 @@ describe("aggregation ops spine rematch", () => {
       "Submitted",
       "In review",
       "Submitted",
-      "Live",
+      "Approved",
       "Takedown requested",
       "Taken down",
       "Archived",
