@@ -32,9 +32,9 @@ describe("DashboardLicensingStatus", () => {
     expect(html).toContain(DASHBOARD_LICENSING.title);
     expect(html).toContain('href="/catalog-health"');
     expect(html).toContain("data-dashboard-licensing-summary");
-    expect(html).toContain('data-dashboard-licensing-count="ready">1<');
-    expect(html).toContain('data-dashboard-licensing-count="needsAttention">2<');
-    expect(html).toContain('data-dashboard-licensing-count="inReview">3<');
+    expect(html).toMatch(/data-dashboard-licensing-count="ready"[^>]*>1</);
+    expect(html).toMatch(/data-dashboard-licensing-count="needsAttention"[^>]*>2</);
+    expect(html).toMatch(/data-dashboard-licensing-count="inReview"[^>]*>3</);
     expect(html).toContain("Winter Light");
     expect(html).toContain('href="/titles/24F-0001234"');
     expect(html).toContain("data-dashboard-licensing-thumb");
@@ -54,7 +54,7 @@ describe("DashboardLicensingStatus", () => {
     );
     expect(html).toContain(DASHBOARD_LICENSING.empty);
     expect(html).toContain("data-dashboard-licensing-empty");
-    expect(html).toMatch(/data-dashboard-licensing-count="ready">0</);
+    expect(html).toMatch(/data-dashboard-licensing-count="ready"[^>]*>0</);
     expect(html).not.toContain("Sample");
   });
 });

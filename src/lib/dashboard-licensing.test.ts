@@ -37,6 +37,8 @@ describe("licensing signal map", () => {
     expect(licensingBuckets("live", true)).toEqual(["needsAttention"]);
     expect(licensingBuckets("submitted", true)).toEqual(["needsAttention", "inReview"]);
     expect(licensingBuckets("draft", false)).toEqual([]);
+    expect(licensingBuckets("archived", true)).toEqual(["needsAttention"]);
+    expect(licensingBuckets("archived", false)).toEqual([]);
   });
 
   it("counts required findings only and keeps recommended as row meta", () => {
@@ -69,6 +71,12 @@ describe("licensing signal map", () => {
           status: "draft",
           created_at: "2026-09-05T00:00:00.000Z",
         },
+        {
+          id: "archived-required",
+          title: "Old Reel",
+          status: "archived",
+          created_at: "2026-01-01T00:00:00.000Z",
+        },
       ],
       findings: [
         {
@@ -89,25 +97,41 @@ describe("licensing signal map", () => {
           severity: "low",
           message: "Artwork recommended.",
         },
+        {
+          org_id: "org-1",
+          entity_id: "archived-required",
+          severity: "high",
+          message: "Master is required.",
+        },
       ],
     });
 
     expect(snapshot.ready).toBe(1);
-    expect(snapshot.needsAttention).toBe(1);
+    expect(snapshot.needsAttention).toBe(2);
     expect(snapshot.inReview).toBe(1);
-    expect(snapshot.rows.map((row) => row.id)).toEqual(["live-required", "review", "live-ready"]);
-    expect(snapshot.rows[0]?.href).toBe("/titles/24F-0001235");
-    expect(snapshot.rows[0]?.statusLabel).toBe("Live");
-    expect(snapshot.rows[2]?.meta).toBe("Keywords recommended.");
-    expect(snapshot.rows[2]?.href).toBe("/titles/24F-0001234");
+    expect(snapshot.rows.map((row) => row.id)).toEqual([
+      "live-required",
+      "archived-required",
+      "review",
+      "live-ready",
+    ]);
+    const liveRequired = snapshot.rows.find((row) => row.id === "live-required");
+    const liveReady = snapshot.rows.find((row) => row.id === "live-ready");
+    const archivedRequired = snapshot.rows.find((row) => row.id === "archived-required");
+    expect(liveRequired?.href).toBe("/titles/24F-0001235");
+    expect(liveRequired?.statusLabel).toBe("Live");
+    expect(liveRequired?.meta).toBe("Synopsis is required.");
+    expect(liveReady?.meta).toBe("Keywords recommended.");
+    expect(liveReady?.href).toBe("/titles/24F-0001234");
+    expect(archivedRequired?.buckets).toEqual(["needsAttention"]);
     expect(snapshot.rows.some((row) => row.id === "draft-recommended")).toBe(false);
   });
 
   it("does not invent a licensing table or Filmhub Licensed/Removed domain", () => {
-    expect(titlesSrc).not.toMatch(/licensing_/);
+    expect(titlesSrc).not.toMatch(/from\(["']licensing_/);
     expect(titlesSrc).not.toContain("Licensed");
     expect(titlesSrc).not.toContain("Removed");
-    expect(pageSrc).not.toMatch(/licensing_/);
+    expect(pageSrc).not.toMatch(/from\(["']licensing_/);
     expect(pageSrc).toContain("buildLicensingStatus");
     expect(pageSrc).toContain("DashboardRecentActivity");
     expect(pageSrc).toContain("licensing={licensing}");

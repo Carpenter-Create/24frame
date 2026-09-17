@@ -4,7 +4,7 @@ import { TITLE_STATUS_LABELS, type TitleStatus } from "@/lib/titles";
 import { catalogStillSrc } from "@/lib/titles-catalog";
 
 // Company-admin `/dashboard` Licensing status. Maps existing title_status +
-// Catalog Health findings — no licensing_* tables or Filmhub channel domain.
+// Catalog Health findings — no new licensing-domain tables or Filmhub channel domain.
 // Ready = live minus open required findings. In review = submitted |
 // in_review | in_delivery. Needs attention = titles with open required
 // findings (required-only for counts; recommended may appear as row meta).
@@ -76,8 +76,11 @@ function findingPriority(finding: ClientHomeFinding): number {
   return 2;
 }
 
-function rowMeta(recommended: readonly ClientHomeFinding[]): string | null {
-  for (const finding of recommended) {
+function rowMeta(
+  required: readonly ClientHomeFinding[],
+  recommended: readonly ClientHomeFinding[],
+): string | null {
+  for (const finding of [...required, ...recommended]) {
     const message = finding.message?.trim();
     if (message) return message;
   }
@@ -125,14 +128,11 @@ export function buildLicensingStatus(input: {
     const required = findings.filter((finding) => isRequiredFinding(finding.severity));
     const recommended = findings.filter((finding) => isRecommendedFinding(finding.severity));
     const hasRequired = required.length > 0;
-    // Archived is not Ready / In review. Required findings still count as
-    // Needs attention — Catalog Health owns that queue.
-    const buckets =
-      title.status === "archived"
-        ? hasRequired
-          ? (["needsAttention"] as const satisfies readonly LicensingBucket[])
-          : []
-        : licensingBuckets(title.status, hasRequired);
+    // licensingBuckets always returns LicensingBucket[] — do not special-case
+    // archived with `as const` (that narrows includes() to "needsAttention").
+    // Archived is not Ready / In review; required findings still count as
+    // Needs attention.
+    const buckets = licensingBuckets(title.status, hasRequired);
     if (buckets.includes("ready")) ready += 1;
     if (buckets.includes("needsAttention")) needsAttention += 1;
     if (buckets.includes("inReview")) inReview += 1;
@@ -144,7 +144,7 @@ export function buildLicensingStatus(input: {
       status: title.status,
       statusLabel: statusLabel(title.status),
       stillUrl: catalogStillSrc(input.stills?.get(title.id) ?? null),
-      meta: rowMeta(recommended),
+      meta: rowMeta(required, recommended),
       buckets,
     });
   }
