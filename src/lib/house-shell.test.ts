@@ -3,7 +3,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
-import { EducationStaffShell } from "@/app/(app)/(operator)/education/education-shell";
+import { EducationCourseRail } from "@/app/(app)/(operator)/education/education-course-rail";
 import { SocialRailAccountChip } from "@/components/social/social-rail-extras";
 import { SocialTopBar } from "@/components/social/social-top-bar";
 import { PageHeader } from "@/components/ui/page-header";
@@ -65,6 +65,10 @@ const socialChrome = readFileSync("src/lib/social-chrome.ts", "utf8");
 const socialTabBar = readFileSync("src/components/social/social-mobile-tab-bar.tsx", "utf8");
 const educationRail = readFileSync(
   "src/app/(app)/(operator)/education/education-course-rail.tsx",
+  "utf8",
+);
+const educationShell = readFileSync(
+  "src/app/(app)/(operator)/education/education-shell.tsx",
   "utf8",
 );
 const card = readFileSync("src/components/ui/card.tsx", "utf8");
@@ -168,39 +172,37 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(educationRail).toContain("rounded-[var(--radius-lg)]");
     expect(educationRail).toContain("shadow-none");
 
+    expect(educationShell).toContain("HOUSE_SECTION_AIR_CLASS");
+    expect(educationShell).toContain("data-gc-education");
+
     const html = renderToStaticMarkup(
-      createElement(
-        EducationStaffShell,
-        {
-          courses: [
-            {
-              id: "c1",
-              slug: "orientation",
-              title: "Orientation",
-              description: null,
-              cover_key: null,
-              is_flagship_free: true,
-              price_cents: null,
-              catalog_code: "EDU-0001",
-              status: "published",
-              position: 1,
-              instructor_id: null,
-              created_at: "2026-09-12T14:00:00.000Z",
-              instructor_name: null,
-            },
-          ],
-          instructors: [],
-        },
-        createElement(PageHeader, { title: "Manage courses" }),
-      ),
+      createElement(EducationCourseRail, {
+        courses: [
+          {
+            id: "c1",
+            slug: "orientation",
+            title: "Orientation",
+            description: null,
+            cover_key: null,
+            is_flagship_free: true,
+            price_cents: null,
+            catalog_code: "EDU-0001",
+            status: "published",
+            position: 1,
+            instructor_id: null,
+            created_at: "2026-09-12T14:00:00.000Z",
+            instructor_name: null,
+          },
+        ],
+        instructors: [],
+      }),
     );
-    expect(html).toContain("data-gc-education");
-    expect(html).toContain(HOUSE_SECTION_AIR_CLASS);
+    const title = renderToStaticMarkup(createElement(PageHeader, { title: "Manage courses" }));
     expect(html).toContain("data-education-course-rail");
     expect(html).toContain(HOUSE_RAIL_ACTIVE_CLASS);
-    expect(html).toContain("t-title text-ink");
-    expect(html).toContain("Manage courses");
-    expect(html).not.toContain("t-subhead");
+    expect(title).toContain("t-title text-ink");
+    expect(title).toContain("Manage courses");
+    expect(title).not.toContain("t-subhead");
   });
 
   it("keeps BrandEmblem language and bans the reference-brand word from shell comments", () => {
