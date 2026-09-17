@@ -9,7 +9,7 @@ import {
 import { Card, CardBody } from "@/components/ui/card";
 import {
   DASHBOARD_CARD_PAD_LIST,
-  DASHBOARD_KICKER_CLASS,
+  DASHBOARD_SECTION_TITLE_CLASS,
   DASHBOARD_MONEY_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
   DASHBOARD_ROW_CLASS,
@@ -51,7 +51,7 @@ export function DashboardListPanel({
 }) {
   return (
     <DashboardHomePanel aria-label={label} data-dashboard-module={testId}>
-      <span className={`${DASHBOARD_CARD_PAD_LIST} ${DASHBOARD_KICKER_CLASS}`}>{label}</span>
+      <span className={`${DASHBOARD_CARD_PAD_LIST} ${DASHBOARD_SECTION_TITLE_CLASS}`}>{label}</span>
       {children ?? <DashboardHomeEmpty>{empty}</DashboardHomeEmpty>}
     </DashboardHomePanel>
   );
@@ -129,7 +129,7 @@ export function DashboardFindingsGlance({
   return (
     <DashboardHomePanel aria-label={DASHBOARD_HOME.findingsGlance} data-dashboard-module="findings-glance">
       <div className={`flex items-center justify-between ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD_LIST}`}>
-        <p className={DASHBOARD_KICKER_CLASS}>{DASHBOARD_HOME.findingsGlance}</p>
+        <p className={DASHBOARD_SECTION_TITLE_CLASS}>{DASHBOARD_HOME.findingsGlance}</p>
         <TextAction href="/catalog-health">{DASHBOARD_HOME.findingsGlanceCta}</TextAction>
       </div>
       <div className="border-t border-hairline px-[var(--space-4)] py-[var(--space-4)]">

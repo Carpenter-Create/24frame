@@ -6,7 +6,7 @@ import {
   DASHBOARD_CARD_CLASS,
   DASHBOARD_CARD_PAD_LIST,
   DASHBOARD_DO_NEXT_SECONDARY_CLASS,
-  DASHBOARD_KICKER_CLASS,
+  DASHBOARD_SECTION_TITLE_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
   DASHBOARD_ROW_CLASS,
   DASHBOARD_ROW_LIST_CLASS,
@@ -159,7 +159,7 @@ export function DashboardDoNext({
       data-dashboard-do-next-secondary={secondary ? "" : undefined}
       className={secondary ? DASHBOARD_DO_NEXT_SECONDARY_CLASS : undefined}
     >
-      <span className={cn(DASHBOARD_CARD_PAD_LIST, DASHBOARD_KICKER_CLASS)}>{DASHBOARD_HOME.doNext}</span>
+      <span className={cn(DASHBOARD_CARD_PAD_LIST, DASHBOARD_SECTION_TITLE_CLASS)}>{DASHBOARD_HOME.doNext}</span>
       {items.length === 0 ? (
         <DashboardHomeEmpty>{DASHBOARD_ATTENTION_CLEAR}</DashboardHomeEmpty>
       ) : (
@@ -216,7 +216,7 @@ export function DashboardJustIn({
 
   return (
     <DashboardHomePanel aria-label={DASHBOARD_HOME.justIn} data-dashboard-just-in="">
-      <span className={cn(DASHBOARD_CARD_PAD_LIST, DASHBOARD_KICKER_CLASS)}>{DASHBOARD_HOME.justIn}</span>
+      <span className={cn(DASHBOARD_CARD_PAD_LIST, DASHBOARD_SECTION_TITLE_CLASS)}>{DASHBOARD_HOME.justIn}</span>
       {titles.length === 0 ? (
         <DashboardHomeEmpty action={emptyAction}>{emptyCopy}</DashboardHomeEmpty>
       ) : (

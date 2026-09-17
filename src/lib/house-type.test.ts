@@ -165,7 +165,8 @@ describe("Dashboard type jobs", () => {
     expect(html.indexOf("data-dashboard-revenue-compare")).toBeLessThan(
       html.indexOf("data-dashboard-revenue-asof"),
     );
-    expect(html).toContain(`t-label text-ink-3">${DASHBOARD_ADMIN.revenue}`);
+    expect(html).toContain(`t-heading text-ink">${DASHBOARD_ADMIN.revenue}`);
+    expect(html).not.toContain(`t-label text-ink-3">${DASHBOARD_ADMIN.revenue}`);
     expect(html).toContain(DASHBOARD_PERIOD_TRIGGER_CLASS);
     expect(DASHBOARD_PERIOD_TRIGGER_CLASS).toContain("t-body-sm");
     expect(DASHBOARD_PERIOD_TRIGGER_CLASS).not.toContain("t-display");

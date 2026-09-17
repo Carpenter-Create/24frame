@@ -15,6 +15,9 @@ import {
   DASHBOARD_MAP_PAD_CLASS,
   DASHBOARD_RANKED_SHARE_TRACK_CLASS,
   DASHBOARD_RANKED_TABLE_ROW_CLASS,
+  DASHBOARD_SECTION_TITLE_CLASS,
+  DASHBOARD_TOP_PILL_BUTTON_CLASS,
+  DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_ON_CLASS,
   DASHBOARD_TOP_PILL_CLUSTER_CLASS,
 } from "@/lib/dashboard-craft";
@@ -249,16 +252,27 @@ describe("dashboard register chrome", () => {
     expect(DASHBOARD_HOME.pillTitles).toBe("Titles");
     expect(DASHBOARD_HOME.pillPlatforms).toBe("Platforms");
     expect(DASHBOARD_HOME.pillTerritories).toBe("Territories");
-    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).toBe("text-accent");
-    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).not.toContain("bg-");
-    expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).toContain("border-hairline");
+    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).toBe("bg-ink text-canvas");
+    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).not.toContain("text-accent");
+    expect(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS).toBe("bg-surface-muted text-ink");
+    expect(DASHBOARD_TOP_PILL_BUTTON_CLASS).toContain("rounded-full");
+    expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).toContain("gap-[var(--space-2)]");
+    expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).not.toContain("divide-x");
+    expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).not.toContain("border-hairline");
+    expect(DASHBOARD_SECTION_TITLE_CLASS).toBe("t-heading text-ink");
+    expect(DASHBOARD_SECTION_TITLE_CLASS).not.toContain("t-label");
+    expect(DASHBOARD_SECTION_TITLE_CLASS).not.toContain("text-ink-3");
     for (const html of [titles, platforms, territories]) {
       expect(html).toContain("data-dashboard-top-performing");
       expect(html).toContain(DASHBOARD_HOME.topPerforming);
+      expect(html).toContain(`t-heading text-ink">${DASHBOARD_HOME.topPerforming}`);
+      expect(html).not.toContain(`t-label text-ink-3">${DASHBOARD_HOME.topPerforming}`);
       expect(html).toContain('data-dashboard-top-pill="titles"');
       expect(html).toContain('data-dashboard-top-pill="platforms"');
       expect(html).toContain('data-dashboard-top-pill="territories"');
       expect(html).toContain(DASHBOARD_TOP_PILL_CLUSTER_CLASS);
+      expect(html).toContain(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS);
+      expect(html).toContain(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS);
       expect(html).toContain("text-accent");
       expect(html).not.toContain("bg-foreground");
       expect(html).not.toContain("text-background");

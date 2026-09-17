@@ -25,6 +25,10 @@ export const DASHBOARD_CARD_PAD_LIST = DASHBOARD_CARD_PAD;
 
 export const DASHBOARD_KICKER_CLASS = "t-label text-ink-3";
 
+// RL Overview section titles: near-ink, heading weight, sentence case.
+// Not a grey tracked ALL CAPS kicker. Meta/subcopy stays t-body-sm text-ink-3.
+export const DASHBOARD_SECTION_TITLE_CLASS = "t-heading text-ink";
+
 export const DASHBOARD_RELATED_GAP_CLASS = "gap-[var(--space-2)]";
 
 export const DASHBOARD_SECTION_AIR_CLASS = "gap-[var(--space-6)]";
@@ -82,16 +86,18 @@ export const DASHBOARD_VIEW_ALT_BUTTON_ON_CLASS = "text-accent";
 export const DASHBOARD_VIEW_ALL_CLASS =
   "inline-flex items-center gap-[var(--space-2)] t-body-sm text-accent";
 
-// Top performing pills — Sporty Blue active, hairline idle. Not Coinbase black fill.
+// Top performing pills — Coinbase separate rounded pills with gap.
+// Active: ink fill + canvas label. Idle: muted fill + ink label.
+// Not a segmented strip. Sporty Blue stays on View all / view-alt glyphs only.
 export const DASHBOARD_TOP_PILL_CLUSTER_CLASS =
-  "flex items-center divide-x divide-hairline border border-hairline";
+  "flex items-center gap-[var(--space-2)]";
 
 export const DASHBOARD_TOP_PILL_BUTTON_CLASS =
-  "bg-transparent px-[var(--space-4)] py-[var(--space-2)] t-body-sm";
+  "rounded-full px-[var(--space-4)] py-[var(--space-2)] t-body-sm";
 
-export const DASHBOARD_TOP_PILL_BUTTON_ON_CLASS = "text-accent";
+export const DASHBOARD_TOP_PILL_BUTTON_ON_CLASS = "bg-ink text-canvas";
 
-export const DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS = "text-ink-3";
+export const DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS = "bg-surface-muted text-ink";
 
 // RL TerritoryMap Overview frame: Mercator 700×340 inside p-6. Not a mini stub.
 export const DASHBOARD_MAP_FRAME_CLASS = "relative w-full min-h-[340px]";

@@ -16,6 +16,7 @@ import {
   DASHBOARD_HERO_DELTA_CLASS,
   DASHBOARD_HERO_VALUE_CLASS,
   DASHBOARD_KICKER_CLASS,
+  DASHBOARD_SECTION_TITLE_CLASS,
   DASHBOARD_MONEY_CLASS,
   DASHBOARD_PERIOD_TRIGGER_CLASS,
   DASHBOARD_RANKED_LIST_CLASS,
@@ -108,7 +109,7 @@ describe("Dashboard Fidelity × Royalogic density", () => {
     expect(pageSrc).not.toContain("data-dashboard-period-grains");
   });
 
-  it("binds tracked uppercase kickers and right-aligned tabular money on modules", () => {
+  it("binds ink sentence-case section titles and right-aligned tabular money on modules", () => {
     const hero = adminHero(true);
     const top = renderToStaticMarkup(
       createElement(DashboardTopTitles, {
@@ -147,12 +148,15 @@ describe("Dashboard Fidelity × Royalogic density", () => {
       }),
     );
 
+    expect(DASHBOARD_SECTION_TITLE_CLASS).toBe("t-heading text-ink");
+    expect(DASHBOARD_SECTION_TITLE_CLASS).not.toContain("t-label");
     expect(DASHBOARD_KICKER_CLASS).toBe("t-label text-ink-3");
-    expect(hero).toContain(`t-label text-ink-3">${DASHBOARD_ADMIN.revenue}`);
-    expect(activity).toContain(`t-label text-ink-3">${DASHBOARD_ADMIN.activity}`);
-    expect(top).toContain(`t-label text-ink-3">${DASHBOARD_HOME.topTitles}`);
-    expect(doNext).toContain(`t-label text-ink-3">${DASHBOARD_HOME.doNext}`);
-    expect(findings).toContain(`t-label text-ink-3">${DASHBOARD_HOME.findingsGlance}`);
+    expect(hero).toContain(`t-heading text-ink">${DASHBOARD_ADMIN.revenue}`);
+    expect(activity).toContain(`t-heading text-ink">${DASHBOARD_ADMIN.activity}`);
+    expect(top).toContain(`t-heading text-ink">${DASHBOARD_HOME.topTitles}`);
+    expect(doNext).toContain(`t-heading text-ink">${DASHBOARD_HOME.doNext}`);
+    expect(findings).toContain(`t-heading text-ink">${DASHBOARD_HOME.findingsGlance}`);
+    expect(hero).not.toContain(`t-label text-ink-3">${DASHBOARD_ADMIN.revenue}`);
     expect(DASHBOARD_MONEY_CLASS).toContain("t-data");
     expect(DASHBOARD_MONEY_CLASS).toContain("text-right");
     expect(top).toContain(DASHBOARD_MONEY_CLASS);

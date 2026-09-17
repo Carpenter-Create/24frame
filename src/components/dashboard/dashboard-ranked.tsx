@@ -7,7 +7,7 @@ import { DashboardViewAll, DashboardViewAlts } from "@/components/dashboard/dash
 import { DashboardTerritoryMap } from "@/components/dashboard/dashboard-territory-map";
 import {
   DASHBOARD_CARD_PAD_LIST,
-  DASHBOARD_KICKER_CLASS,
+  DASHBOARD_SECTION_TITLE_CLASS,
   DASHBOARD_MODULE_CARD_CLASS,
   DASHBOARD_MONEY_CLASS,
   DASHBOARD_RANKED_SHARE_TRACK_CLASS,
@@ -224,7 +224,7 @@ export function DashboardRankedModule({
     >
       <div className={cn("flex items-start justify-between", DASHBOARD_RELATED_GAP_CLASS, DASHBOARD_CARD_PAD_LIST)}>
         <div className={cn("min-w-0", DASHBOARD_RELATED_GAP_CLASS, "flex flex-col")}>
-          <p className={DASHBOARD_KICKER_CLASS}>{label}</p>
+          <p className={DASHBOARD_SECTION_TITLE_CLASS}>{label}</p>
           {meta ? (
             <p data-dashboard-module-meta="" className="t-body-sm text-ink-3">
               {meta}
@@ -411,7 +411,7 @@ export function DashboardTopPerforming({
         )}
       >
         <div className={cn("min-w-0", DASHBOARD_RELATED_GAP_CLASS, "flex flex-col")}>
-          <p className={DASHBOARD_KICKER_CLASS}>{DASHBOARD_HOME.topPerforming}</p>
+          <p className={DASHBOARD_SECTION_TITLE_CLASS}>{DASHBOARD_HOME.topPerforming}</p>
           {meta ? (
             <p data-dashboard-module-meta="" className="t-body-sm text-ink-3">
               {meta}

@@ -28,7 +28,7 @@ import {
   DASHBOARD_HERO_DELTA_CLASS,
   DASHBOARD_HERO_TO_CHART_GAP_CLASS,
   DASHBOARD_HERO_VALUE_CLASS,
-  DASHBOARD_KICKER_CLASS,
+  DASHBOARD_SECTION_TITLE_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
   DASHBOARD_ROW_CLASS,
   DASHBOARD_ROW_LIST_CLASS,
@@ -106,7 +106,7 @@ export function DashboardRevenueCard({
       className={DASHBOARD_CARD_CLASS}
     >
       <div className={cn("flex flex-col", DASHBOARD_RELATED_GAP_CLASS, DASHBOARD_CARD_PAD_HERO)}>
-        <p className={DASHBOARD_KICKER_CLASS}>{DASHBOARD_ADMIN.revenue}</p>
+        <p className={DASHBOARD_SECTION_TITLE_CLASS}>{DASHBOARD_ADMIN.revenue}</p>
         <p data-dashboard-stat="revenue" className={DASHBOARD_HERO_VALUE_CLASS}>
           {value}
         </p>
@@ -141,7 +141,7 @@ export function DashboardRecentActivity({ items }: { items: readonly DashboardAc
       className={DASHBOARD_CARD_CLASS}
     >
       <div className={cn("flex items-center justify-between", DASHBOARD_RELATED_GAP_CLASS, DASHBOARD_CARD_PAD_LIST)}>
-        <p className={DASHBOARD_KICKER_CLASS}>{DASHBOARD_ADMIN.activity}</p>
+        <p className={DASHBOARD_SECTION_TITLE_CLASS}>{DASHBOARD_ADMIN.activity}</p>
         <DashboardViewAll href="/titles" />
       </div>
       {items.length === 0 ? (

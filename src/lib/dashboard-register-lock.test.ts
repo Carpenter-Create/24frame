@@ -13,6 +13,9 @@ import {
   DASHBOARD_VIEW_ALL_CLASS,
   DASHBOARD_VIEW_ALT_BUTTON_ON_CLASS,
   DASHBOARD_VIEW_ALT_CLUSTER_CLASS,
+  DASHBOARD_SECTION_TITLE_CLASS,
+  DASHBOARD_TOP_PILL_BUTTON_CLASS,
+  DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_ON_CLASS,
   DASHBOARD_TOP_PILL_CLUSTER_CLASS,
 } from "@/lib/dashboard-craft";
@@ -122,11 +125,24 @@ describe("Aggregation Dashboard Coinbase register lock", () => {
     expect(html).toContain(DASHBOARD_TOP_PILL_CLUSTER_CLASS);
     expect(DASHBOARD_VIEW_ALT_BUTTON_ON_CLASS).toBe("text-accent");
     expect(DASHBOARD_VIEW_ALT_BUTTON_ON_CLASS).not.toContain("bg-");
-    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).toBe("text-accent");
-    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).not.toContain("bg-");
+    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).toBe("bg-ink text-canvas");
+    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).not.toContain("text-accent");
+    expect(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS).toBe("bg-surface-muted text-ink");
+    expect(DASHBOARD_TOP_PILL_BUTTON_CLASS).toContain("rounded-full");
     expect(DASHBOARD_VIEW_ALT_CLUSTER_CLASS).toContain("border-hairline");
-    expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).toContain("border-hairline");
+    expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).toContain("gap-[var(--space-2)]");
+    expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).not.toContain("divide-x");
+    expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).not.toContain("border-hairline");
     expect(DASHBOARD_VIEW_ALL_CLASS).toContain("text-accent");
+    expect(DASHBOARD_SECTION_TITLE_CLASS).toBe("t-heading text-ink");
+    expect(html).toContain(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS);
+    expect(html).toContain(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS);
+    expect(html).toContain(`t-heading text-ink">${DASHBOARD_ADMIN.revenue}`);
+    expect(html).toContain(`t-heading text-ink">${DASHBOARD_ADMIN.activity}`);
+    expect(html).toContain(`t-heading text-ink">${DASHBOARD_HOME.topPerforming}`);
+    expect(html).not.toContain(`t-label text-ink-3">${DASHBOARD_ADMIN.revenue}`);
+    expect(html).not.toContain(`t-label text-ink-3">${DASHBOARD_ADMIN.activity}`);
+    expect(html).not.toContain(`t-label text-ink-3">${DASHBOARD_HOME.topPerforming}`);
     expect(craft).not.toContain("amber");
     expect(craft).not.toContain("gold");
     expect(html).not.toContain("bg-foreground");
@@ -136,8 +152,9 @@ describe("Aggregation Dashboard Coinbase register lock", () => {
     expect(html).toContain('data-dashboard-ranked="territories"');
     expect(html).not.toContain("data-dashboard-territory-map");
     expect(html).toContain(DASHBOARD_HOME.topTitlesEmpty);
-    expect(html).toContain("data-dashboard-reports-cta");
-    expect(html).toContain(DASHBOARD_HOME.reportsCta);
+    expect(html).not.toContain("data-dashboard-reports-cta");
+    expect(html).not.toContain(DASHBOARD_HOME.reportsCta);
+    expect(html).not.toContain(DASHBOARD_HOME.reportsPointer);
     expect(html).not.toContain("data-dashboard-just-in");
     expect(html).not.toContain("data-dashboard-do-next");
     expect(html).not.toContain('data-dashboard-module="deliveries-action"');
