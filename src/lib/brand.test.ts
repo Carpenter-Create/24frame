@@ -31,6 +31,7 @@ const appleIconPng = readFileSync("src/app/apple-icon.png");
 const layoutSrc = readFileSync("src/app/layout.tsx", "utf8");
 const manifestSrc = readFileSync("src/app/manifest.ts", "utf8");
 const shellSrc = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
+const leadSrc = readFileSync("src/components/chrome/house-lead-chrome.tsx", "utf8");
 const emblemSrc = readFileSync("src/components/chrome/brand-emblem.tsx", "utf8");
 
 const PNG_SIG = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
@@ -96,13 +97,14 @@ describe("Asset 8 emblem + Adam favicon PNG lock", () => {
   });
 
   it("wires the rail chip to emblem-only home and PNG favicon/apple/PWA", () => {
-    expect(shellSrc).toContain("<BrandEmblem />");
-    expect(shellSrc).toContain("data-brand-emblem");
-    expect(shellSrc).toContain("workspaceHome(workspace)");
-    expect(shellSrc).toContain("aria-label={PRODUCT_NAME}");
+    expect(leadSrc).toContain("<BrandEmblem />");
+    expect(leadSrc).toContain("data-brand-emblem");
+    expect(leadSrc).toContain("workspaceHome(workspace)");
+    expect(leadSrc).toContain("aria-label={PRODUCT_NAME}");
     expect(shellSrc).not.toContain("{PRODUCT_NAME}</span>");
     expect(shellSrc).not.toContain("24frame-wordmark");
     expect(shellSrc).not.toContain("BrandWordmark");
+    expect(leadSrc).not.toContain("BrandWordmark");
     expect(layoutSrc).toContain("BRAND_ICON_SRC");
     expect(layoutSrc).toContain("BRAND_ICON_TYPE");
     expect(layoutSrc).toContain("BRAND_ICON_SIZE");
