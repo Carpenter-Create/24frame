@@ -219,9 +219,17 @@ describe("client /titles catalog", () => {
 
     expect(html).toContain(TITLES_CATALOG.addTitle);
     expect(html).toContain("Filter by status");
-    expect(html).toContain('href="/titles"');
-    expect(html).toContain('href="/titles?status=draft"');
-    expect(html).toContain('href="/titles?status=live"');
+    expect(html).toContain("data-house-page-select");
+    expect(html).toContain("data-titles-catalog-chrome");
+    expect(html).toContain("data-titles-catalog-status-current");
+    expect(html).toContain(">All<");
+    expect(html).not.toContain("data-titles-catalog-status-pills");
+    expect(html).not.toContain("<select");
+    const chromeAt = html.indexOf("data-titles-catalog-chrome");
+    const filtersAt = html.indexOf("data-titles-catalog-filters");
+    expect(chromeAt).toBeGreaterThan(searchAt);
+    expect(filtersAt).toBeGreaterThan(chromeAt);
+    expect(addAt).toBeGreaterThan(filtersAt);
   });
 
   it("keeps search, Add Title, and quiet TITLE_STATUS_LABELS pills — no SaaS subtitle", async () => {
@@ -529,7 +537,10 @@ describe("client /titles catalog", () => {
     expect(html).toContain("flex flex-col");
     expect(html).toContain("md:flex-row");
     expect(html).toContain("data-titles-catalog-status-compact");
-    expect(html).toContain("data-titles-catalog-status-pills");
+    expect(html).toContain("data-house-page-select");
+    expect(html).toContain("data-titles-catalog-chrome");
+    expect(html).not.toContain("data-titles-catalog-status-pills");
+    expect(html).not.toContain("<select");
     expect(html).not.toContain("data-titles-catalog-fab");
     expect(html).toContain(
       "titles-catalog mx-auto flex w-full flex-col gap-[var(--space-6)] px-[var(--space-4)]",
@@ -597,8 +608,10 @@ describe("client /titles catalog", () => {
     expect(html).not.toContain("live film");
     expect(html).not.toContain("in_review film");
     expect(html.match(/data-titles-catalog-list-row=""/g) ?? []).toHaveLength(1);
-    expect(html).toContain('aria-current="true"');
-    expect(html).toContain('href="/titles"');
+    expect(html).toContain("data-titles-catalog-status-current");
+    expect(html).toContain(">Draft<");
+    expect(html).toContain("data-house-page-select");
+    expect(html).toContain('aria-expanded="false"');
   });
 
   it("treats submitted and in_delivery as one Submitted lens", async () => {
