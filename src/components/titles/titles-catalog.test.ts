@@ -244,10 +244,34 @@ describe("TitlesCatalogHeader type lock", () => {
     expect(html).toContain("7 in catalog");
     expect(html).not.toContain("10 in catalog");
     expect(html).not.toContain("data-titles-catalog-operate");
+    expect(html).not.toContain("data-titles-catalog-filters");
     const titleAt = html.indexOf("<h1");
     const countAt = html.indexOf("data-titles-catalog-count");
     expect(titleAt).toBeGreaterThan(-1);
     expect(countAt).toBeGreaterThan(titleAt);
+  });
+
+  it("trails status house select on the title row when q/status are passed", () => {
+    const html = renderToStaticMarkup(
+      createElement(TitlesCatalogHeader, {
+        count: "7 in catalog",
+        q: "",
+        status: "all",
+      }),
+    );
+    const header = openingTagWith(html, 'data-titles-catalog-header-row=""');
+    expect(header).toContain("flex flex-row");
+    expect(header).toContain("justify-between");
+    expect(html).toContain("data-titles-catalog-filters");
+    expect(html).toContain("data-titles-catalog-status-compact");
+    expect(html).toContain("data-house-page-select");
+    expect(html).toContain(">All<");
+    const titleAt = html.indexOf("<h1");
+    const countAt = html.indexOf("data-titles-catalog-count");
+    const filtersAt = html.indexOf("data-titles-catalog-filters");
+    expect(titleAt).toBeGreaterThan(-1);
+    expect(countAt).toBeGreaterThan(titleAt);
+    expect(filtersAt).toBeGreaterThan(titleAt);
   });
 
   it("locks the page title to --text-title / --text-lg and the row title to --text-base", () => {
@@ -356,12 +380,20 @@ describe("TitlesCatalogStatusFilter craft", () => {
     expect(html).not.toContain("In progress");
   });
 
-  it("keeps phone toolbar chrome as one select + Add Title row under search", () => {
+  it("trails status on the header identity row like Dashboard period — not toolbar chrome", () => {
     const catalog = readFileSync(join(ROOT, "src/components/titles/titles-catalog.tsx"), "utf8");
-    expect(catalog).toContain("data-titles-catalog-chrome");
-    expect(catalog).toContain("md:contents");
-    expect(catalog).toContain("HousePageSelect");
-    expect(catalog).toMatch(/left house select/i);
+    const filter = readFileSync(
+      join(ROOT, "src/components/titles/titles-status-filter.tsx"),
+      "utf8",
+    );
+    expect(catalog).toContain("data-titles-catalog-header-row");
+    expect(catalog).toContain("data-titles-catalog-filters");
+    expect(catalog).toContain("TitlesCatalogStatusFilter");
+    expect(catalog).toMatch(/TitlesCatalogHeader[\s\S]*TitlesCatalogStatusFilter/);
+    expect(catalog).toMatch(/Toolbar is\s+[\s\S]*search \+ Add Title only/i);
+    expect(filter).toContain("HousePageSelect");
+    expect(filter).not.toMatch(/triggerClassName=/);
+    expect(filter).toContain('menuAlign="end"');
     expect(catalog).not.toContain("data-titles-catalog-status-pills");
   });
 });

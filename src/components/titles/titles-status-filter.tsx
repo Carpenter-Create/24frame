@@ -12,7 +12,9 @@ import {
 } from "@/lib/titles-catalog";
 
 // Titles status lens — house-page-select consumer (Dashboard All time SoT).
-// Not a full-bleed native <select>, not a wrapping chip wall on phone.
+// Trailing on TitlesCatalogHeader like Dashboard period on the identity row.
+// Shared house trigger (desktop pill / phone transparent text+chevron) — no
+// Titles-only triggerClassName overrides.
 
 export function TitlesCatalogStatusFilter({
   q,
@@ -36,8 +38,7 @@ export function TitlesCatalogStatusFilter({
         sheetTitle={TITLES_CATALOG.statusFilterLabel}
         closeLabel="Close"
         defaultOpen={defaultOpen}
-        menuAlign="start"
-        triggerClassName="min-w-0 w-auto max-md:justify-start"
+        menuAlign="end"
         onPick={(key) => {
           router.replace(catalogFilterHref(q, key as CatalogStatusFilter), {
             scroll: false,

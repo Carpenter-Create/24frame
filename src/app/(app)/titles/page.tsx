@@ -103,12 +103,14 @@ export default async function TitlesPage({
 
   return (
     <TitlesCatalogFrame empty={list.length === 0}>
-      <TitlesCatalogHeader count={catalogCountLabel(list.length, truncated)} />
+      <TitlesCatalogHeader
+        count={catalogCountLabel(list.length, truncated)}
+        q={list.length > 0 ? q : undefined}
+        status={list.length > 0 ? statusFilter : undefined}
+      />
 
       {list.length > 0 || canOperate ? (
         <TitlesCatalogToolbar
-          q={q}
-          status={statusFilter}
           search={
             list.length > 0 ? (
               <Suspense fallback={null}>
@@ -117,7 +119,6 @@ export default async function TitlesPage({
             ) : undefined
           }
           action={canOperate ? <AddTitleButton orgId={activeOrg.id} /> : undefined}
-          filters={list.length > 0}
         />
       ) : null}
 

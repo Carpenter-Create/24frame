@@ -181,13 +181,14 @@ describe("client /titles catalog", () => {
     }
   });
 
-  it("puts Titles, catalog count, then search, status filter, and Add Title", async () => {
+  it("puts Titles + status on the header row, count under title, then search and Add Title", async () => {
     stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
     const html = await renderCatalog();
 
     expect(html).toContain("titles-catalog-header");
+    expect(html).toContain("data-titles-catalog-header-row");
     expect(html).toContain("data-titles-catalog-toolbar");
     expect(html).toContain("data-titles-catalog-search");
     expect(html).toContain("data-titles-catalog-filters");
@@ -208,28 +209,31 @@ describe("client /titles catalog", () => {
 
     const titleClose = html.indexOf("</h1>");
     const countAt = html.indexOf("data-titles-catalog-count");
+    const filtersAt = html.indexOf("data-titles-catalog-filters");
     const toolbarAt = html.indexOf("data-titles-catalog-toolbar");
     const searchAt = html.indexOf("Search titles...");
     const addAt = html.indexOf("data-add-title");
+    const chromeAt = html.indexOf("data-titles-catalog-chrome");
     expect(titleClose).toBeGreaterThan(-1);
     expect(countAt).toBeGreaterThan(titleClose);
+    // Status trails on the header (Dashboard All time SoT), before toolbar.
+    expect(filtersAt).toBeGreaterThan(-1);
+    expect(filtersAt).toBeLessThan(toolbarAt);
     expect(toolbarAt).toBeGreaterThan(countAt);
     expect(searchAt).toBeGreaterThan(toolbarAt);
     expect(addAt).toBeGreaterThan(searchAt);
+    // Chrome is search + Add Title only — no status in toolbar.
+    expect(chromeAt).toBeGreaterThan(searchAt);
+    expect(addAt).toBeGreaterThan(chromeAt);
+    expect(filtersAt).toBeLessThan(chromeAt);
 
     expect(html).toContain(TITLES_CATALOG.addTitle);
     expect(html).toContain("Filter by status");
     expect(html).toContain("data-house-page-select");
-    expect(html).toContain("data-titles-catalog-chrome");
     expect(html).toContain("data-titles-catalog-status-current");
     expect(html).toContain(">All<");
     expect(html).not.toContain("data-titles-catalog-status-pills");
     expect(html).not.toContain("<select");
-    const chromeAt = html.indexOf("data-titles-catalog-chrome");
-    const filtersAt = html.indexOf("data-titles-catalog-filters");
-    expect(chromeAt).toBeGreaterThan(searchAt);
-    expect(filtersAt).toBeGreaterThan(chromeAt);
-    expect(addAt).toBeGreaterThan(filtersAt);
   });
 
   it("keeps search, Add Title, and quiet TITLE_STATUS_LABELS pills — no SaaS subtitle", async () => {
@@ -274,12 +278,17 @@ describe("client /titles catalog", () => {
     expect(html).not.toMatch(/data-titles-catalog-list-row[\s\S]*t-title/);
     const filtersHtml = html.slice(
       html.indexOf("data-titles-catalog-filters"),
-      html.indexOf("data-titles-catalog-operate"),
+      html.indexOf("data-titles-catalog-toolbar"),
     );
     expect(filtersHtml).toContain("t-body-sm");
     expect(filtersHtml).toContain("data-titles-catalog-status-compact");
     expect(filtersHtml).not.toContain("t-label ");
     expect(filtersHtml).not.toContain("uppercase");
+    // Status is on the header identity row, not in toolbar chrome.
+    expect(html).toContain("data-titles-catalog-header-row");
+    expect(html.indexOf("data-titles-catalog-filters")).toBeLessThan(
+      html.indexOf("data-titles-catalog-toolbar"),
+    );
     expect(html).not.toContain("group-hover:text-ink-2");
     for (const status of ALL_STATUSES) {
       expect(html).toContain(TITLE_STATUS_LABELS[status]);
