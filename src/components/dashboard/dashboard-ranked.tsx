@@ -10,6 +10,7 @@ import {
   DASHBOARD_SECTION_TITLE_CLASS,
   DASHBOARD_MODULE_CARD_CLASS,
   DASHBOARD_MONEY_CLASS,
+  DASHBOARD_RANKED_PANE_CLASS,
   DASHBOARD_RANKED_SHARE_TRACK_CLASS,
   DASHBOARD_RANKED_TABLE_ROW_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
@@ -20,6 +21,7 @@ import {
   DASHBOARD_TOP_PILL_CLUSTER_CLASS,
 } from "@/lib/dashboard-craft";
 import { DASHBOARD_HOME } from "@/lib/dashboard-home";
+import { preserveWindowScroll } from "@/lib/dashboard-scroll";
 import {
   DASHBOARD_LIST_DEFAULT_LIMIT,
   dashboardConcentrationLine,
@@ -388,9 +390,12 @@ export function DashboardTopPerforming({
       : rankedRowsFromCounts(pill === "platforms" ? platforms : territories, pane.territory);
 
   function selectPill(next: DashboardTopPill) {
-    setPill(next);
-    setMode(TOP_PERFORMING_PANES[next].defaultMode);
-    setShowAll(false);
+    if (next === pill) return;
+    preserveWindowScroll(() => {
+      setPill(next);
+      setMode(TOP_PERFORMING_PANES[next].defaultMode);
+      setShowAll(false);
+    });
   }
 
   return (
@@ -442,19 +447,30 @@ export function DashboardTopPerforming({
               );
             })}
           </div>
-          <DashboardViewAlts modes={pane.modes} mode={view} onChange={setMode} />
+          <DashboardViewAlts
+            modes={pane.modes}
+            mode={view}
+            onChange={(next) => {
+              if (next === view) return;
+              preserveWindowScroll(() => {
+                setMode(next);
+              });
+            }}
+          />
           <DashboardViewAll href={pane.href} />
         </div>
       </div>
-      <DashboardRankedPane
-        rows={rows}
-        view={view}
-        empty={pane.empty}
-        territory={pane.territory}
-        showAll={showAll}
-        onToggleShowAll={() => setShowAll((open) => !open)}
-        concentrate={pane.concentrate}
-      />
+      <div data-dashboard-ranked-pane="" className={DASHBOARD_RANKED_PANE_CLASS}>
+        <DashboardRankedPane
+          rows={rows}
+          view={view}
+          empty={pane.empty}
+          territory={pane.territory}
+          showAll={showAll}
+          onToggleShowAll={() => setShowAll((open) => !open)}
+          concentrate={pane.concentrate}
+        />
+      </div>
     </section>
   );
 }
