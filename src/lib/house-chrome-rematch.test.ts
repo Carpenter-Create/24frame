@@ -12,10 +12,13 @@ vi.mock("next/navigation", () => ({
 import { EducationHeaderSearch } from "@/components/chrome/education-header-search";
 import { SocialTopBar } from "@/components/social/social-top-bar";
 import {
+  HOUSE_CONTROL_PILL_CLASS,
   HOUSE_FILTER_ON_CLASS,
+  HOUSE_ICON_BUTTON_CLASS,
   HOUSE_MODULE_CLASS,
   HOUSE_PAGE_CANVAS_CLASS,
   HOUSE_RAIL_ACTIVE_CLASS,
+  HOUSE_RAIL_PANEL_CLASS,
   HOUSE_SEARCH_PILL_CLASS,
 } from "@/lib/house-shell";
 import { EDUCATION_SEARCH } from "@/lib/education-search";
@@ -29,13 +32,19 @@ const sideNav = readFileSync("src/components/chrome/side-nav.tsx", "utf8");
 const titlesPage = readFileSync("src/app/(app)/titles/page.tsx", "utf8");
 const titlesCatalog = readFileSync("src/lib/titles-catalog.ts", "utf8");
 const nav = readFileSync("src/lib/nav.ts", "utf8");
+const switcher = readFileSync("src/lib/workspace-switcher.ts", "utf8");
+const mobileChrome = readFileSync("src/lib/mobile-chrome.ts", "utf8");
+const collapse = readFileSync("src/lib/rail-collapse.ts", "utf8");
+const socialChrome = readFileSync("src/lib/social-chrome.ts", "utf8");
 
 describe("house chrome rematch miss list v1.1", () => {
   it("uses Social side nav + full-width top on Aggregation and Education — no third chrome", () => {
     expect(shell).toContain('workspace === "social" && !settingsPage');
     expect(shell).toContain("data-house-full-width-top");
-    expect(shell).toContain("top-[var(--header-height)]");
-    expect(shell).toContain("h-[calc(100dvh-var(--header-height))]");
+    expect(shell).toContain("HOUSE_RAIL_PANEL_CLASS");
+    expect(shell).toContain("top-[calc(var(--header-height)+16px)]");
+    expect(shell).toContain("h-[calc(100dvh-var(--header-height)-32px)]");
+    expect(shell).not.toContain("border-r border-hairline");
     expect(shell).not.toMatch(/style=\{\{ height: "var\(--header-height\)", marginLeft: "var\(--sidebar-width\)" \}\}/);
     expect(shell).toContain("<BrandEmblem />");
     expect(shell).toContain("<SideNav");
@@ -53,6 +62,10 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(HOUSE_MODULE_CLASS).toContain("bg-surface-muted");
     expect(HOUSE_MODULE_CLASS).toContain("rounded-[var(--radius-lg)]");
     expect(HOUSE_MODULE_CLASS).toContain("shadow-none");
+    expect(HOUSE_RAIL_PANEL_CLASS).toContain("rounded-[var(--radius-lg)]");
+    expect(HOUSE_CONTROL_PILL_CLASS).toBe("rounded-full");
+    expect(HOUSE_ICON_BUTTON_CLASS).toBe("rounded-full");
+    expect(HOUSE_SEARCH_PILL_CLASS).toContain("rounded-full");
     expect(shell).toContain("HOUSE_PAGE_CANVAS_CLASS");
     expect(globals).toMatch(/\.card-surface\s*\{[\s\S]*?box-shadow:\s*none/);
     expect(shell).not.toMatch(/shadow-(?:sm|md|lg|xl)/);
@@ -93,6 +106,12 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(sideNav).toContain("staffItems");
     expect(HOUSE_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash font-medium text-accent");
     expect(HOUSE_FILTER_ON_CLASS).toBe("bg-ink text-surface");
+    expect(switcher).toContain("rounded-full");
+    expect(switcher).not.toContain("rounded-[var(--radius-sm)]");
+    expect(mobileChrome).toContain("rounded-full");
+    expect(collapse).toContain("rounded-full");
+    expect(socialChrome).toContain("HOUSE_RAIL_PANEL_CLASS");
+    expect(topBar).toContain("rounded-full");
   });
 
   it("keeps house tokens, Titles content, and Delete/Archive unmixed", () => {

@@ -34,7 +34,7 @@ import {
   APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS,
   APP_HEADER_WORKSPACE_PILL_HOST_CLASS,
 } from "@/lib/workspace-switcher";
-import { HOUSE_PAGE_CANVAS_CLASS } from "@/lib/house-shell";
+import { HOUSE_PAGE_CANVAS_CLASS, HOUSE_RAIL_PANEL_CLASS } from "@/lib/house-shell";
 import { PRODUCT_NAME } from "@/lib/product";
 import { isSettingsPath, SETTINGS_RAIL_PAD_CLASS } from "@/lib/settings";
 import {
@@ -189,10 +189,12 @@ export function AppShell({
       }
     >
       <aside
-        className="fixed left-0 top-[var(--header-height)] z-30 hidden h-[calc(100dvh-var(--header-height))] flex-col border-r border-hairline bg-surface md:flex"
+        className={cn(
+          "fixed left-4 top-[calc(var(--header-height)+16px)] z-30 hidden h-[calc(100dvh-var(--header-height)-32px)] w-[calc(var(--sidebar-width)-16px)] flex-col md:flex",
+          HOUSE_RAIL_PANEL_CLASS,
+        )}
         data-app-rail=""
         data-settings-rail={settingsPage ? "" : undefined}
-        style={{ width: "var(--sidebar-width)" }}
       >
         {settingsPage || collapsed ? null : (
           <div className="flex justify-end px-2 pt-1">

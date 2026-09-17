@@ -4,7 +4,7 @@
 export const RAIL_COLLAPSE_CHEVRON = "chevron";
 
 export const RAIL_COLLAPSE_CHEVRON_CLASS =
-  "flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--radius-sm)] text-ink-3 transition-colors hover:bg-surface-muted hover:text-ink-2";
+  "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-ink-3 transition-colors hover:bg-surface-muted hover:text-ink-2";
 
 export const RAIL_COLLAPSE_CHEVRON_ICON_CLASS = "h-4 w-4";
 

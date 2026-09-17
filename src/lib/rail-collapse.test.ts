@@ -22,7 +22,7 @@ describe("rail-collapse tokens", () => {
   it("keeps house chevron names and measured values", () => {
     expect(RAIL_COLLAPSE_CHEVRON).toBe("chevron");
     expect(RAIL_COLLAPSE_CHEVRON_CLASS).toContain("h-7 w-7");
-    expect(RAIL_COLLAPSE_CHEVRON_CLASS).toContain("rounded-[var(--radius-sm)]");
+    expect(RAIL_COLLAPSE_CHEVRON_CLASS).toContain("rounded-full");
     expect(RAIL_COLLAPSE_CHEVRON_CLASS).toContain("text-ink-3");
     expect(RAIL_COLLAPSE_CHEVRON_ICON_CLASS).toBe("h-4 w-4");
     expect(RAIL_COLLAPSE_CHEVRON_ICON_WEIGHT).toBe("bold");

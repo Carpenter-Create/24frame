@@ -13,7 +13,11 @@
 // No glass, no drop shadow. App-shell chrome (search, rail, filters) uses
 // house-shell. Feed / stories / create measured IA stays here.
 
-import { HOUSE_FILTER_OFF_CLASS, HOUSE_FILTER_ON_CLASS } from "@/lib/house-shell";
+import {
+  HOUSE_FILTER_OFF_CLASS,
+  HOUSE_FILTER_ON_CLASS,
+  HOUSE_RAIL_PANEL_CLASS,
+} from "@/lib/house-shell";
 
 export const SOCIAL_FIGMA_HOME = "176:1085";
 export const SOCIAL_FIGMA_HOME_EMPTY = "176:1346";
@@ -52,8 +56,7 @@ export const SOCIAL_FIGMA_STORY_PICKER = ["144:1218", "144:1444"] as const;
 
 export const SOCIAL_RAIL_WIDTH_CLASS = "w-[200px]";
 export const SOCIAL_RAIL_MAIN_OFFSET_CLASS = "md:ml-[200px]";
-export const SOCIAL_RAIL_PANEL_CLASS =
-  "rounded-[16px] border border-hairline bg-surface";
+export const SOCIAL_RAIL_PANEL_CLASS = HOUSE_RAIL_PANEL_CLASS;
 export const SOCIAL_FOR_YOU_WIDTH_CLASS = "w-[300px]";
 export const SOCIAL_CENTER_WIDTH_CLASS = "w-full min-w-0 lg:max-w-[676px]";
 export const SOCIAL_DESKTOP_FRAME_PAD_CLASS = "w-full px-[16px] py-4";

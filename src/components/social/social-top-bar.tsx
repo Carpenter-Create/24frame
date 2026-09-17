@@ -65,7 +65,7 @@ export function SocialTopBar({
             prefetch
             aria-label={SOCIAL.explore.searchSocial}
             data-social-header-search-icon=""
-            className="flex size-8 items-center justify-center text-ink-2 md:hidden"
+            className="flex size-8 items-center justify-center rounded-full text-ink-2 md:hidden"
           >
             <SocialIcon name="magnifying-glass" size={SOCIAL_ICON_SIZE_HEADER} />
           </Link>

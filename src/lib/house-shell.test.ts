@@ -25,6 +25,7 @@ import {
   HOUSE_RAIL_ACTIVE_CLASS,
   HOUSE_RAIL_IDLE_CLASS,
   HOUSE_RAIL_ITEM_CLASS,
+  HOUSE_RAIL_PANEL_CLASS,
   HOUSE_RELATED_GAP_CLASS,
   HOUSE_SEARCH_PILL_CLASS,
   HOUSE_SECTION_AIR_CLASS,
@@ -115,6 +116,9 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(HOUSE_PAGE_CANVAS_CLASS).toBe("bg-bg");
     expect(HOUSE_MODULE_CLASS).toBe(
       "rounded-[var(--radius-lg)] bg-surface-muted shadow-none",
+    );
+    expect(HOUSE_RAIL_PANEL_CLASS).toBe(
+      "rounded-[var(--radius-lg)] border border-hairline bg-surface shadow-none",
     );
     expect(HOUSE_CARD_PAD).toBe("px-[var(--space-4)] py-[var(--space-4)]");
     expect(HOUSE_RELATED_GAP_CLASS).toBe("gap-[var(--space-2)]");

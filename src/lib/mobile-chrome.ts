@@ -25,7 +25,7 @@ export const MOBILE_CHROME_ICON_STROKE = 1.33;
 export const MOBILE_CHROME_LEAD_PAD_CLASS = "px-[var(--space-6)]";
 
 export const MOBILE_CHROME_ICON_BUTTON_CLASS =
-  "flex size-[44px] min-h-[44px] min-w-[44px] shrink-0 items-center justify-center overflow-visible text-ink-3";
+  "flex size-[44px] min-h-[44px] min-w-[44px] shrink-0 items-center justify-center overflow-visible rounded-full text-ink-3";
 
 export const MOBILE_CHROME_ICON_CLASS = "size-4 overflow-visible";
 
