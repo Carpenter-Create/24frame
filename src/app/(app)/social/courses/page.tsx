@@ -20,11 +20,10 @@ function firstSearchValue(value: string | string[] | undefined): string {
   return Array.isArray(value) ? (value[0] ?? "") : (value ?? "");
 }
 
-export default async function SocialCoursesPage({
-  searchParams,
-}: {
+export default async function SocialCoursesPage(props?: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const searchParams = props?.searchParams;
   const [{ supabase }, sp] = await Promise.all([
     requireSocialSession(),
     searchParams ?? Promise.resolve({} as Record<string, string | string[] | undefined>),
