@@ -159,6 +159,8 @@ describe("Aggregation Dashboard Coinbase register lock", () => {
     expect(DASHBOARD_SECTION_AIR_CLASS).toBe("gap-[var(--space-6)]");
     expect(DASHBOARD_ADMIN_STACK_CLASS).toBe("flex flex-col gap-[var(--space-6)]");
     expect(page).toContain("DashboardTopTitles");
+    expect(page).not.toMatch(/isAdmin \? \(\s*<div className=\{DASHBOARD_ADMIN_PAIR_CLASS\}/);
+    expect(html).not.toContain("lg:grid-cols-2");
     expect(hero).toContain("DASHBOARD_ROW_LIST_CLASS");
     expect(craft).toContain("shadow-none");
   });

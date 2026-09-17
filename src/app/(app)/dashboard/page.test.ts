@@ -154,6 +154,13 @@ function expectCompanyAdminStructuralDelta(html: string) {
   expect(html).toContain('data-dashboard-ranked="platforms"');
   expect(html).toContain("data-dashboard-territory");
   expect(html).toContain('data-dashboard-ranked="territories"');
+  expect(html).not.toContain("lg:grid-cols-2");
+  expect(html.indexOf('data-dashboard-module="top-titles"')).toBeLessThan(
+    html.indexOf('data-dashboard-ranked="platforms"'),
+  );
+  expect(html.indexOf('data-dashboard-ranked="platforms"')).toBeLessThan(
+    html.indexOf('data-dashboard-ranked="territories"'),
+  );
   expect(html).toContain("data-dashboard-territory-map");
   expect(html).toContain("data-dashboard-territory-swatch");
   expect(html).not.toContain("Top territories");
