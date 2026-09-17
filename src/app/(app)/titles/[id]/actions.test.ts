@@ -67,7 +67,7 @@ function fakeSupabase(opts: {
     if (table === "portal_links") return fakeQuery(opts.candidates ?? []);
     if (table === "titles") {
       const row = opts.title === undefined ? { id: "title-1", org_id: "org-1" } : opts.title;
-      return fakeQuery(row ? [row as Candidate] : []);
+      return fakeQuery(row ? [row as unknown as Candidate] : []);
     }
     throw new Error(`fakeSupabase: unexpected table "${table}"`);
   });
