@@ -3,7 +3,10 @@ import { describe, expect, it } from "vitest";
 import { USER_MENU } from "./user-menu";
 import { availableWorkspaceOptions, WORKSPACE_EDUCATION_HREF } from "./workspace-menu";
 import {
+  APP_HEADER_LEADING_CLASS,
   APP_HEADER_TRAILING_CLUSTER_CLASS,
+  APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS,
+  APP_HEADER_WORKSPACE_PILL_HOST_CLASS,
   WORKSPACE_SWITCHER,
   WORKSPACE_SWITCHER_ABSENT,
   WORKSPACE_SWITCHER_CHEVRON_CLASS,
@@ -17,6 +20,9 @@ import {
   WORKSPACE_SWITCHER_OPTION_LABEL_CLASS,
   WORKSPACE_SWITCHER_OPTION_SELECTED_CLASS,
   WORKSPACE_SWITCHER_PANEL_CLASS,
+  WORKSPACE_SWITCHER_PILL_CHEVRON_CLASS,
+  WORKSPACE_SWITCHER_PILL_PANEL_CLASS,
+  WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS,
   WORKSPACE_SWITCHER_STATIC_CLASS,
   WORKSPACE_SWITCHER_TRIGGER_CLASS,
   WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS,
@@ -24,7 +30,9 @@ import {
   workspaceSwitcherMarkLetter,
   workspaceSwitcherOptionClass,
   workspaceSwitcherOptions,
+  workspaceSwitcherPanelClass,
   workspaceSwitcherShowsChevron,
+  workspaceSwitcherTriggerClass,
 } from "./workspace-switcher";
 import { persistWorkspaceCookie, workspaceHome } from "./workspace";
 
@@ -115,9 +123,23 @@ describe("workspace switcher lock", () => {
     }
   });
 
-  it("reserves one trailing header cluster for switcher + avatar", () => {
+  it("reserves a phone leading pill after the hamburger and a desktop trailing cluster", () => {
+    expect(APP_HEADER_LEADING_CLASS).toContain("gap-[var(--space-2)]");
+    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).toBe("shrink-0 md:hidden");
+    expect(APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS).toBe("hidden md:contents");
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("shrink-0");
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("gap-[var(--space-2)]");
+    expect(workspaceSwitcherTriggerClass("pill")).toBe(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS);
+    expect(workspaceSwitcherTriggerClass("plain")).toBe(WORKSPACE_SWITCHER_TRIGGER_CLASS);
+    expect(workspaceSwitcherPanelClass("pill")).toBe(WORKSPACE_SWITCHER_PILL_PANEL_CLASS);
+    expect(workspaceSwitcherPanelClass()).toBe(WORKSPACE_SWITCHER_PANEL_CLASS);
+    expect(workspaceSwitcherChevronClass(false, "pill")).toBe(WORKSPACE_SWITCHER_PILL_CHEVRON_CLASS);
+    expect(workspaceSwitcherChevronClass(true, "pill")).toBe(WORKSPACE_SWITCHER_PILL_CHEVRON_CLASS);
+    expect(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS).toContain("border-hairline");
+    expect(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS).toContain("bg-surface-muted");
+    expect(WORKSPACE_SWITCHER_PILL_PANEL_CLASS).toContain("left-0");
+    expect(WORKSPACE_SWITCHER_PANEL_CLASS).toContain("right-0");
+    expect(WORKSPACE_SWITCHER_PANEL_CLASS).not.toContain("left-0");
   });
 
   it("keeps the existing workspace cookie write — no second scheme", () => {

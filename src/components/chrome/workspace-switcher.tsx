@@ -19,14 +19,15 @@ import {
   WORKSPACE_SWITCHER_OPTION_CHECK_CLASS,
   WORKSPACE_SWITCHER_OPTION_CHECK_GUTTER_CLASS,
   WORKSPACE_SWITCHER_OPTION_LABEL_CLASS,
-  WORKSPACE_SWITCHER_PANEL_CLASS,
-  WORKSPACE_SWITCHER_STATIC_CLASS,
-  WORKSPACE_SWITCHER_TRIGGER_CLASS,
   WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS,
+  type WorkspaceSwitcherTone,
   workspaceSwitcherChevronClass,
   workspaceSwitcherMarkLetter,
   workspaceSwitcherOptionClass,
+  workspaceSwitcherPanelClass,
   workspaceSwitcherShowsChevron,
+  workspaceSwitcherStaticClass,
+  workspaceSwitcherTriggerClass,
 } from "@/lib/workspace-switcher";
 
 function WorkspaceMark({ mode }: { mode: WorkspaceMode }) {
@@ -45,10 +46,12 @@ export function WorkspaceSwitcher({
   current,
   options = availableWorkspaceOptions(),
   defaultOpen = false,
+  tone = "plain",
 }: {
   current: WorkspaceMode;
   options?: readonly WorkspaceMenuOption[];
   defaultOpen?: boolean;
+  tone?: WorkspaceSwitcherTone;
 }) {
   const router = useRouter();
   const hostRef = useRef<HTMLDivElement>(null);
@@ -77,7 +80,11 @@ export function WorkspaceSwitcher({
 
   if (!canSwitch) {
     return (
-      <span data-workspace-switcher="" className={WORKSPACE_SWITCHER_STATIC_CLASS}>
+      <span
+        data-workspace-switcher=""
+        data-workspace-switcher-tone={tone}
+        className={workspaceSwitcherStaticClass(tone)}
+      >
         <span data-workspace-switcher-current="" className={WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS}>
           {label}
         </span>
@@ -89,6 +96,7 @@ export function WorkspaceSwitcher({
     <div
       ref={hostRef}
       data-workspace-switcher=""
+      data-workspace-switcher-tone={tone}
       className="relative min-w-0"
     >
       <button
@@ -98,7 +106,7 @@ export function WorkspaceSwitcher({
         aria-expanded={open}
         aria-haspopup="listbox"
         onClick={() => setOpen((next) => !next)}
-        className={WORKSPACE_SWITCHER_TRIGGER_CLASS}
+        className={workspaceSwitcherTriggerClass(tone)}
       >
         <span data-workspace-switcher-current="" className={WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS}>
           {label}
@@ -106,14 +114,14 @@ export function WorkspaceSwitcher({
         <CaretDown
           data-workspace-switcher-chevron=""
           data-workspace-switcher-chevron-open={open ? "" : undefined}
-          className={workspaceSwitcherChevronClass(open)}
+          className={workspaceSwitcherChevronClass(open, tone)}
           weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
         />
       </button>
       {open ? (
         <div
           data-workspace-switcher-popover=""
-          className={WORKSPACE_SWITCHER_PANEL_CLASS}
+          className={workspaceSwitcherPanelClass(tone)}
         >
           <div data-workspace-switcher-header="" className={WORKSPACE_SWITCHER_HEADER_CLASS}>
             {WORKSPACE_SWITCHER.heading}
