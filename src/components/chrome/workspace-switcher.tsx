@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import { CaretDown } from "@phosphor-icons/react";
 
@@ -19,15 +19,19 @@ import {
   WORKSPACE_SWITCHER_OPTION_CHECK_CLASS,
   WORKSPACE_SWITCHER_OPTION_CHECK_GUTTER_CLASS,
   WORKSPACE_SWITCHER_OPTION_LABEL_CLASS,
+  WORKSPACE_SWITCHER_SEGMENT_LABEL_CLASS,
   WORKSPACE_SWITCHER_SEGMENTS_CLASS,
   WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS,
   type WorkspaceSwitcherPresentation,
   type WorkspaceSwitcherTone,
   workspaceSwitcherChevronClass,
   workspaceSwitcherMarkLetter,
+  workspaceSwitcherNextSegmentIndex,
   workspaceSwitcherOptionClass,
   workspaceSwitcherPanelClass,
   workspaceSwitcherSegmentClass,
+  workspaceSwitcherSegmentLabel,
+  workspaceSwitcherSegmentTabIndex,
   workspaceSwitcherShowsChevron,
   workspaceSwitcherShowsSegments,
   workspaceSwitcherStaticClass,
@@ -63,8 +67,20 @@ function WorkspaceSwitcherPills({
   options: readonly WorkspaceMenuOption[];
 }) {
   const router = useRouter();
-  const label = workspaceModeLabel(current);
+  const segmentRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const label = workspaceSwitcherSegmentLabel(current);
   const canSwitch = workspaceSwitcherShowsSegments(options);
+
+  function onSegmentKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>, index: number) {
+    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+    event.preventDefault();
+    const next = workspaceSwitcherNextSegmentIndex(
+      index,
+      options.length,
+      event.key === "ArrowRight" ? 1 : -1,
+    );
+    segmentRefs.current[next]?.focus();
+  }
 
   if (!canSwitch) {
     return (
@@ -73,7 +89,7 @@ function WorkspaceSwitcherPills({
         data-workspace-switcher-presentation="pills"
         className={workspaceSwitcherStaticClass("plain")}
       >
-        <span data-workspace-switcher-current="" className={WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS}>
+        <span data-workspace-switcher-current="" className={WORKSPACE_SWITCHER_SEGMENT_LABEL_CLASS}>
           {label}
         </span>
       </span>
@@ -85,22 +101,28 @@ function WorkspaceSwitcherPills({
       data-workspace-switcher=""
       data-workspace-switcher-presentation="pills"
       data-workspace-switcher-pills=""
-      role="group"
+      role="tablist"
       aria-label={WORKSPACE_SWITCHER.label}
       className={WORKSPACE_SWITCHER_SEGMENTS_CLASS}
     >
-      {options.map((option) => {
+      {options.map((option, index) => {
         const selected = current === option.mode;
         return (
           <button
             key={option.mode}
+            ref={(node) => {
+              segmentRefs.current[index] = node;
+            }}
             type="button"
+            role="tab"
             data-workspace-switcher-segment={option.mode}
-            aria-pressed={selected}
+            aria-selected={selected}
+            tabIndex={workspaceSwitcherSegmentTabIndex(selected)}
             className={workspaceSwitcherSegmentClass(selected)}
             onClick={() => selectWorkspace(current, option, router)}
+            onKeyDown={(event) => onSegmentKeyDown(event, index)}
           >
-            {option.label}
+            {workspaceSwitcherSegmentLabel(option.mode)}
           </button>
         );
       })}

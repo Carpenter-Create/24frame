@@ -13,7 +13,13 @@ import {
 import { HOUSE_SEARCH_PILL_CLASS } from "@/lib/house-shell";
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
-export function EducationHeaderSearch() {
+export function EducationHeaderSearch({
+  className,
+  inputId = "education-header-q",
+}: {
+  className?: string;
+  inputId?: string;
+}) {
   const pathname = usePathname();
   const params = useSearchParams();
   const q = parseEducationSearchQuery(params.get("q"));
@@ -25,8 +31,9 @@ export function EducationHeaderSearch() {
       action={action}
       method="get"
       className={cn(
-        "flex h-9 min-w-0 flex-1 items-center gap-2 px-3 md:max-w-[420px] md:flex-none md:w-[420px]",
+        "flex h-9 min-w-0 flex-1 items-center gap-2 px-3",
         HOUSE_SEARCH_PILL_CLASS,
+        className,
       )}
     >
       <MagnifyingGlass
@@ -34,12 +41,12 @@ export function EducationHeaderSearch() {
         weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
         aria-hidden
       />
-      <label className="sr-only" htmlFor="education-header-q">
+      <label className="sr-only" htmlFor={inputId}>
         {EDUCATION_SEARCH.label}
       </label>
       <Input
         variant="bare"
-        id="education-header-q"
+        id={inputId}
         name="q"
         defaultValue={q}
         placeholder={EDUCATION_SEARCH.placeholder}

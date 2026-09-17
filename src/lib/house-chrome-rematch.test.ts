@@ -98,8 +98,13 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(shell).not.toContain("SearchField");
     expect(shell).toContain("EducationHeaderSearch");
     expect(shell).toContain('workspace === "education" && !settingsPage');
-    expect(shell.indexOf("EducationHeaderSearch")).toBeLessThan(
-      shell.indexOf('presentation="pills"'),
+    expect(shell).toContain('data-education-header-search-host="phone"');
+    expect(shell).toContain('data-education-header-search-host="desktop"');
+    expect(shell.indexOf('presentation="pills"')).toBeLessThan(
+      shell.indexOf('data-education-header-search-host="desktop"'),
+    );
+    expect(shell.indexOf('data-education-header-search-host="desktop"')).toBeLessThan(
+      shell.indexOf("AccountMenuSlot"),
     );
     expect(topBar).toContain("data-social-header-search");
     expect(topBar).toContain("HOUSE_SEARCH_PILL_CLASS");
@@ -109,6 +114,8 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(education).toContain(HOUSE_SEARCH_PILL_CLASS);
     expect(education).toContain(EDUCATION_SEARCH.placeholder);
     expect(education).toContain('action="/social/courses"');
+    expect(educationSearch).not.toContain("md:w-[420px]");
+    expect(educationSearch).not.toContain("md:flex-none");
   });
 
   it("removes the Social Messages icon from the top bar — side nav only", () => {

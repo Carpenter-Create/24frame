@@ -21,14 +21,18 @@
 // Settings section — Settings stays on the avatar menu.
 //
 // Three workspaces only. Hide lanes the user/org lacks — no
-// dead pills. Single option → static label. No All Accounts
-// clone. No Referrals / billing. Staff Manage courses stays a
-// Settings door — not a fourth lane. Education land stays
-// Route A /social/courses. Education quiet top-bar search stays
-// Education-only and coexists with the desktop pill cluster.
-// Persist with persistWorkspaceCookie — do not invent a second
-// cookie. Do not invent /education, /account/workspace, or
-// /settings/workspace.
+// dead / grey-lie pills. Single option → static label. Labels
+// stay Aggregation · Social · Education at every breakpoint —
+// no Agg, Edu, or ellipsis-as-design. Tight width flexes the
+// trailing cluster (search yields); pills stay full words and
+// shrink-0. No All Accounts clone. No Referrals / billing.
+// Staff Manage courses stays a Settings door — not a fourth
+// lane. Education land stays Route A /social/courses.
+// Education quiet top-bar search stays Education-only: phone
+// in the leading cluster, desktop right of pills / left of
+// avatar. Persist with persistWorkspaceCookie — do not invent
+// a second cookie. Do not invent /education, /account/workspace,
+// or /settings/workspace.
 
 import {
   HOUSE_CONTROL_PILL_CLASS,
@@ -39,6 +43,7 @@ import { USER_MENU } from "@/lib/user-menu";
 import {
   availableWorkspaceOptions,
   type WorkspaceMenuOption,
+  workspaceModeLabel,
 } from "@/lib/workspace-menu";
 import type { WorkspaceMode } from "@/lib/workspace";
 
@@ -58,6 +63,8 @@ export const WORKSPACE_SWITCHER_ABSENT = [
   "Courses",
   "Social workspace",
 ] as const;
+
+export const WORKSPACE_SWITCHER_SHORT_LABELS = ["Agg", "Edu"] as const;
 
 export const WORKSPACE_SWITCHER_MARK = {
   aggregation: "A",
@@ -85,12 +92,15 @@ export const WORKSPACE_SWITCHER_PILL_STATIC_CLASS =
   `flex min-w-0 items-center gap-[var(--space-2)] ${HOUSE_CONTROL_PILL_CLASS} border border-hairline bg-surface-muted px-[var(--space-2)] py-[var(--space-1)] t-body-sm font-medium text-ink`;
 
 // Desktop md+ sliding pills — Top Performing house grammar, not a
-// Sporty Blue strip. Hide unavailable lanes in the caller options.
+// Sporty Blue strip. Full words only — shrink-0, no truncate.
+// Hide unavailable lanes in the caller options.
 export const WORKSPACE_SWITCHER_SEGMENTS_CLASS =
-  "flex items-center gap-[var(--space-2)]";
+  "flex shrink-0 items-center gap-[var(--space-2)]";
 
 export const WORKSPACE_SWITCHER_SEGMENT_CLASS =
-  "rounded-full px-[var(--space-4)] py-[var(--space-2)] t-body-sm";
+  "shrink-0 whitespace-nowrap rounded-full px-[var(--space-4)] py-[var(--space-2)] t-body-sm";
+
+export const WORKSPACE_SWITCHER_SEGMENT_LABEL_CLASS = "whitespace-nowrap";
 
 export const WORKSPACE_SWITCHER_SEGMENT_ON_CLASS = HOUSE_FILTER_ON_CLASS;
 
@@ -137,7 +147,12 @@ export const WORKSPACE_SWITCHER_OPTION_CHECK_GUTTER_CLASS = "size-4 shrink-0";
 export const WORKSPACE_SWITCHER_OPTION_CHECK_CLASS = "text-accent";
 
 export const APP_HEADER_TRAILING_CLUSTER_CLASS =
-  "flex shrink-0 items-center gap-[var(--space-2)]";
+  "flex min-w-0 items-center gap-[var(--space-2)] max-md:shrink-0";
+
+export const APP_HEADER_EDUCATION_SEARCH_PHONE_CLASS = "min-w-0 flex-1 md:hidden";
+
+export const APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS =
+  "hidden min-w-0 flex-1 md:flex md:max-w-[420px]";
 
 export const APP_HEADER_LEADING_CLASS =
   "mr-auto flex min-w-0 flex-1 items-center gap-[var(--space-2)]";
@@ -212,4 +227,21 @@ export function workspaceSwitcherSegmentClass(selected: boolean): string {
   return selected
     ? `${WORKSPACE_SWITCHER_SEGMENT_CLASS} ${WORKSPACE_SWITCHER_SEGMENT_ON_CLASS}`
     : `${WORKSPACE_SWITCHER_SEGMENT_CLASS} ${WORKSPACE_SWITCHER_SEGMENT_OFF_CLASS}`;
+}
+
+export function workspaceSwitcherSegmentLabel(mode: WorkspaceMode): string {
+  return workspaceModeLabel(mode);
+}
+
+export function workspaceSwitcherSegmentTabIndex(selected: boolean): number {
+  return selected ? 0 : -1;
+}
+
+export function workspaceSwitcherNextSegmentIndex(
+  index: number,
+  count: number,
+  direction: 1 | -1,
+): number {
+  if (count <= 0) return 0;
+  return (index + direction + count) % count;
 }

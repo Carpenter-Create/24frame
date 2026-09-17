@@ -116,6 +116,11 @@ describe("workspace switcher header control", () => {
     expect(html).toContain("Aggregation");
     expect(html).toContain("Social");
     expect(html).toContain("Education");
+    expect(html).not.toMatch(/>\s*Agg\s*</);
+    expect(html).not.toMatch(/>\s*Edu\s*</);
+    expect(html).toContain('role="tablist"');
+    expect(html).toContain('role="tab"');
+    expect(html).toContain("aria-selected");
     expect(html).toContain(WORKSPACE_SWITCHER_SEGMENT_ON_CLASS);
     expect(html).toContain(WORKSPACE_SWITCHER_SEGMENT_OFF_CLASS);
     expect(html).not.toContain("data-workspace-switcher-trigger");
@@ -127,6 +132,13 @@ describe("workspace switcher header control", () => {
     expect(src).toContain("persistWorkspaceCookie");
     expect(src).toContain("workspaceHome(option.mode)");
     expect(src).toContain("availableWorkspaceOptions");
+    expect(src).toContain("workspaceSwitcherSegmentLabel");
+    expect(src).toContain("ArrowRight");
+    expect(src).toContain("ArrowLeft");
+    expect(src).toContain("workspaceSwitcherNextSegmentIndex");
+    expect(src).not.toContain('"Agg"');
+    expect(src).not.toContain('"Edu"');
+    expect(src).not.toContain("ellipsis");
     for (const absent of WORKSPACE_SWITCHER_ABSENT) {
       expect(html).not.toContain(absent);
     }

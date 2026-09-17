@@ -9,6 +9,8 @@ import {
   DASHBOARD_TOP_PILL_CLUSTER_CLASS,
 } from "./dashboard-craft";
 import {
+  APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS,
+  APP_HEADER_EDUCATION_SEARCH_PHONE_CLASS,
   APP_HEADER_LEADING_CLASS,
   APP_HEADER_TRAILING_CLUSTER_CLASS,
   APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS,
@@ -31,8 +33,10 @@ import {
   WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS,
   WORKSPACE_SWITCHER_SEGMENTS_CLASS,
   WORKSPACE_SWITCHER_SEGMENT_CLASS,
+  WORKSPACE_SWITCHER_SEGMENT_LABEL_CLASS,
   WORKSPACE_SWITCHER_SEGMENT_OFF_CLASS,
   WORKSPACE_SWITCHER_SEGMENT_ON_CLASS,
+  WORKSPACE_SWITCHER_SHORT_LABELS,
   WORKSPACE_SWITCHER_STATIC_CLASS,
   WORKSPACE_SWITCHER_TRIGGER_CLASS,
   WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS,
@@ -41,7 +45,10 @@ import {
   workspaceSwitcherOptionClass,
   workspaceSwitcherOptions,
   workspaceSwitcherPanelClass,
+  workspaceSwitcherNextSegmentIndex,
   workspaceSwitcherSegmentClass,
+  workspaceSwitcherSegmentLabel,
+  workspaceSwitcherSegmentTabIndex,
   workspaceSwitcherShowsChevron,
   workspaceSwitcherShowsSegments,
   workspaceSwitcherTriggerClass,
@@ -161,8 +168,17 @@ describe("workspace switcher lock", () => {
   });
 
   it("uses Top Performing house grammar for desktop sliding pills", () => {
-    expect(WORKSPACE_SWITCHER_SEGMENTS_CLASS).toBe(DASHBOARD_TOP_PILL_CLUSTER_CLASS);
-    expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toBe(DASHBOARD_TOP_PILL_BUTTON_CLASS);
+    expect(WORKSPACE_SWITCHER_SEGMENTS_CLASS).toContain("flex");
+    expect(WORKSPACE_SWITCHER_SEGMENTS_CLASS).toContain("items-center");
+    expect(WORKSPACE_SWITCHER_SEGMENTS_CLASS).toContain(DASHBOARD_TOP_PILL_CLUSTER_CLASS.slice("flex ".length));
+    expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("rounded-full");
+    expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("px-[var(--space-4)]");
+    expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("py-[var(--space-2)]");
+    expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("t-body-sm");
+    expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).toBe("flex items-center gap-[var(--space-2)]");
+    expect(DASHBOARD_TOP_PILL_BUTTON_CLASS).toBe(
+      "rounded-full px-[var(--space-4)] py-[var(--space-2)] t-body-sm",
+    );
     expect(WORKSPACE_SWITCHER_SEGMENT_ON_CLASS).toBe(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS);
     expect(WORKSPACE_SWITCHER_SEGMENT_OFF_CLASS).toBe(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS);
     expect(WORKSPACE_SWITCHER_SEGMENT_ON_CLASS).toBe("bg-ink text-surface");
@@ -177,5 +193,30 @@ describe("workspace switcher lock", () => {
     expect(workspaceSwitcherSegmentClass(false)).toBe(
       `${WORKSPACE_SWITCHER_SEGMENT_CLASS} ${WORKSPACE_SWITCHER_SEGMENT_OFF_CLASS}`,
     );
+  });
+
+  it("keeps full workspace names on desktop pills — no Agg/Edu/ellipsis", () => {
+    expect(workspaceSwitcherSegmentLabel("aggregation")).toBe("Aggregation");
+    expect(workspaceSwitcherSegmentLabel("social")).toBe("Social");
+    expect(workspaceSwitcherSegmentLabel("education")).toBe("Education");
+    expect(WORKSPACE_SWITCHER_SHORT_LABELS).toEqual(["Agg", "Edu"]);
+    expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("whitespace-nowrap");
+    expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("shrink-0");
+    expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).not.toContain("truncate");
+    expect(WORKSPACE_SWITCHER_SEGMENT_LABEL_CLASS).toBe("whitespace-nowrap");
+    expect(WORKSPACE_SWITCHER_SEGMENT_LABEL_CLASS).not.toContain("truncate");
+    expect(WORKSPACE_SWITCHER_SEGMENTS_CLASS).toContain("shrink-0");
+    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("min-w-0");
+    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("max-md:shrink-0");
+    expect(APP_HEADER_EDUCATION_SEARCH_PHONE_CLASS).toContain("md:hidden");
+    expect(APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS).toContain("hidden");
+    expect(APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS).toContain("md:flex");
+    expect(APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS).toContain("md:max-w-[420px]");
+    expect(APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS).not.toContain("md:w-[420px]");
+    expect(workspaceSwitcherSegmentTabIndex(true)).toBe(0);
+    expect(workspaceSwitcherSegmentTabIndex(false)).toBe(-1);
+    expect(workspaceSwitcherNextSegmentIndex(0, 3, 1)).toBe(1);
+    expect(workspaceSwitcherNextSegmentIndex(2, 3, 1)).toBe(0);
+    expect(workspaceSwitcherNextSegmentIndex(0, 3, -1)).toBe(2);
   });
 });
