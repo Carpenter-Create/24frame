@@ -134,6 +134,10 @@ describe("AppShell header", () => {
     expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} tone="pill" />');
     expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
     expect(html).toContain("data-workspace-switcher");
+    expect(html).toContain("data-house-lead-scroll");
+    expect(html).toContain("h-dvh");
+    expect(html).toContain("overflow-hidden");
+    expect(html).toContain("overflow-y-auto");
     expect(html).toContain("Aggregation");
     expect((html.match(/data-workspace-switcher=""/g) ?? []).length).toBe(2);
     expect(html).toContain('data-workspace-switcher-tone="pill"');
@@ -600,6 +604,10 @@ describe("AppShell rail-collapse chevron", () => {
     expect(html).toContain('data-social-tab-item="Create"');
     expect(html).toContain("destination-page");
     expect(html).toContain("data-app-social-frame");
+    expect(html).toContain("data-house-lead-scroll");
+    expect(html).toContain("h-dvh");
+    expect(html).toContain("overflow-hidden");
+    expect(html).toContain("overflow-y-auto");
   });
 
   it("adds Social X-lane chrome without reopening Access collapse", () => {

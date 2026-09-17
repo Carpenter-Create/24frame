@@ -25,6 +25,7 @@ import {
   migrateSidebarCollapsedCookie,
   persistSidebarCollapsed,
 } from "@/lib/rail-collapse";
+import { HOUSE_LEAD_SCROLL_CLASS, HOUSE_LEAD_SHELL_CLASS } from "@/lib/house-lead-chrome";
 import { HOUSE_PAGE_CANVAS_CLASS, HOUSE_RAIL_PANEL_CLASS } from "@/lib/house-shell";
 import { isSettingsPath, SETTINGS_RAIL_PAD_CLASS } from "@/lib/settings";
 import {
@@ -45,7 +46,8 @@ import {
 type Org = { id: string; name: string };
 
 // Shell composition ported from watershedportal, rethemed to GC tokens. Fixed sidebar +
-// sticky header + centered content frame. The sidebar collapses to an icon-only rail; the
+// viewport-pinned lead chrome + centered content frame. Page scroll lives
+// on main — not on a wrapper that includes the header (G9). The sidebar collapses to an icon-only rail; the
 // state persists in a cookie (read by the (app) layout → `defaultCollapsed`, so there's no
 // flash) and, when collapsed, overrides `--sidebar-width` so the header + main follow.
 // Phone: the rail is gone (hidden + width tokens collapse). A header hamburger opens a
@@ -124,7 +126,7 @@ export function AppShell({
     return (
       <AskAssistantChromeProvider>
         {cookieSync}
-        <div className={cn("min-h-dvh", HOUSE_PAGE_CANVAS_CLASS)} data-social-workspace="">
+        <div className={cn(HOUSE_LEAD_SHELL_CLASS, HOUSE_PAGE_CANVAS_CLASS)} data-social-workspace="">
           <HouseLeadChrome
             workspace="social"
             logoVisible="always"
@@ -157,8 +159,9 @@ export function AppShell({
             </div>
           </aside>
           <main
-            className={cn("min-h-[calc(100dvh-var(--header-height))]", SOCIAL_RAIL_MAIN_OFFSET_CLASS)}
+            className={cn(HOUSE_LEAD_SCROLL_CLASS, SOCIAL_RAIL_MAIN_OFFSET_CLASS)}
             data-app-social-frame=""
+            data-house-lead-scroll=""
           >
             <div className={cn(SOCIAL_DESKTOP_FRAME_PAD_CLASS, SOCIAL_TAB_BAR_MAIN_PAD_CLASS)}>{children}</div>
           </main>
@@ -181,7 +184,7 @@ export function AppShell({
     <AskAssistantChromeProvider>
     {cookieSync}
     <div
-      className={cn("min-h-dvh", HOUSE_PAGE_CANVAS_CLASS)}
+      className={cn(HOUSE_LEAD_SHELL_CLASS, HOUSE_PAGE_CANVAS_CLASS)}
       data-education-workspace={workspace === "education" ? "" : undefined}
       style={
         collapsed && !settingsPage
@@ -299,9 +302,10 @@ export function AppShell({
       />
 
       <main
+        className={HOUSE_LEAD_SCROLL_CLASS}
+        data-house-lead-scroll=""
         style={{
           marginLeft: "var(--sidebar-width)",
-          minHeight: "calc(100dvh - var(--header-height))",
         }}
       >
         {titlesBleed ? (

@@ -5,13 +5,25 @@
 // Aggregation mid-lead stays empty (agg-search-no). Logo inset
 // does not drift when the search slot is empty. Do not invent a
 // fourth product or an Aggregation search.
+//
+// G9 — lead chrome stays pinned to the viewport. Mac rubber-band /
+// pull-down overscroll must not carry the header. Document/body is
+// not the scroll ancestor. The shell is a viewport column; page
+// scroll lives on main. Social + Education share this contract —
+// not an Aggregation-only sticky hack. Phone follows the same pin.
 
 import { HOUSE_HEADER_SEARCH_GAP_CLASS } from "@/lib/house-shell";
 import { MOBILE_CHROME_LEAD_PAD_CLASS } from "@/lib/mobile-chrome";
 
 export const HOUSE_LEAD_SEARCH_WIDTH_PX = 240;
 
-export const HOUSE_LEAD_CHROME_CLASS = `sticky top-0 z-40 flex items-center justify-end gap-4 border-b border-hairline bg-surface/85 backdrop-blur ${MOBILE_CHROME_LEAD_PAD_CLASS} md:px-[var(--content-inset)]`;
+export const HOUSE_LEAD_SHELL_CLASS =
+  "flex h-dvh flex-col overflow-hidden overscroll-none";
+
+export const HOUSE_LEAD_SCROLL_CLASS =
+  "min-h-0 flex-1 overflow-y-auto overscroll-contain";
+
+export const HOUSE_LEAD_CHROME_CLASS = `sticky top-0 z-40 shrink-0 flex items-center justify-end gap-4 border-b border-hairline bg-surface/85 backdrop-blur ${MOBILE_CHROME_LEAD_PAD_CLASS} md:px-[var(--content-inset)]`;
 
 export const HOUSE_LEAD_LOGO_CLASS = "inline-flex shrink-0 items-center";
 

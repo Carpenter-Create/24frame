@@ -16,9 +16,11 @@ import { SocialTopBar } from "@/components/social/social-top-bar";
 import {
   HOUSE_LEAD_CHROME_CLASS,
   HOUSE_LEAD_LOGO_CLASS,
+  HOUSE_LEAD_SCROLL_CLASS,
   HOUSE_LEAD_SEARCH_DESKTOP_CLASS,
   HOUSE_LEAD_SEARCH_PILL_CLASS,
   HOUSE_LEAD_SEARCH_WIDTH_PX,
+  HOUSE_LEAD_SHELL_CLASS,
 } from "@/lib/house-lead-chrome";
 import { HOUSE_HEADER_SEARCH_GAP_CLASS, HOUSE_SEARCH_PILL_CLASS } from "@/lib/house-shell";
 import { EDUCATION_SEARCH } from "@/lib/course-search";
@@ -51,7 +53,7 @@ function leadHtml(workspace: "aggregation" | "social" | "education") {
   );
 }
 
-describe("house lead chrome — unify-lead-now G1–G8", () => {
+describe("house lead chrome — unify-lead-now G1–G9", () => {
   it("G1 ships one shared lead primitive — AppShell and SocialTopBar both mount it", () => {
     expect(existsSync("src/components/chrome/house-lead-chrome.tsx")).toBe(true);
     expect(shell).toContain("<HouseLeadChrome");
@@ -186,5 +188,30 @@ describe("house lead chrome — unify-lead-now G1–G8", () => {
     expect(absorbed).toContain(HOUSE_LEAD_CHROME_CLASS);
     expect(absorbed).toContain(HOUSE_LEAD_SEARCH_DESKTOP_CLASS);
     expect(absorbed).not.toContain("w-[420px]");
+  });
+
+  it("G9 pins the shared lead to the viewport — page scroll lives on main", () => {
+    expect(HOUSE_LEAD_CHROME_CLASS).toContain("sticky");
+    expect(HOUSE_LEAD_CHROME_CLASS).toContain("top-0");
+    expect(HOUSE_LEAD_CHROME_CLASS).toContain("shrink-0");
+    expect(HOUSE_LEAD_SHELL_CLASS).toBe(
+      "flex h-dvh flex-col overflow-hidden overscroll-none",
+    );
+    expect(HOUSE_LEAD_SCROLL_CLASS).toBe(
+      "min-h-0 flex-1 overflow-y-auto overscroll-contain",
+    );
+    expect(HOUSE_LEAD_SHELL_CLASS).not.toContain("min-h-dvh");
+    expect(leadLib).toContain("G9");
+    expect(leadLib).toContain("not the scroll ancestor");
+    expect(shell).toContain("HOUSE_LEAD_SHELL_CLASS");
+    expect(shell).toContain("HOUSE_LEAD_SCROLL_CLASS");
+    expect(shell.match(/HOUSE_LEAD_SHELL_CLASS/g)?.length).toBe(3);
+    expect(shell.match(/HOUSE_LEAD_SCROLL_CLASS/g)?.length).toBe(3);
+    expect(shell.match(/data-house-lead-scroll/g)?.length).toBe(2);
+    expect(shell).not.toContain("min-h-dvh");
+    expect(shell).not.toContain("min-h-[calc(100dvh-var(--header-height))]");
+    expect(shell).not.toContain("minHeight: \"calc(100dvh - var(--header-height))\"");
+    expect(shell).not.toContain("data-aggregation-sticky");
+    expect(leadSrc).not.toContain("fixed inset-x-0");
   });
 });
