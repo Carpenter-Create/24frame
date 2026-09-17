@@ -219,6 +219,7 @@ describe("settings hub lock", () => {
       "Attention",
       "Ask 24Frame AI",
       "Queue",
+      "Avails",
       "Vendors",
       "Finance",
       "Clients",

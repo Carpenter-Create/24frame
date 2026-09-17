@@ -220,7 +220,7 @@ describe("page-view helpers (consumed by /deliveries)", () => {
   it("maps valid statuses to approved labels and tones", () => {
     expect(deliveryStatusDisplay("pending")).toEqual({ label: "Pending", tone: "neutral" });
     expect(deliveryStatusDisplay("delivered")).toEqual({ label: "Delivered", tone: "neutral" });
-    expect(deliveryStatusDisplay("live")).toEqual({ label: "Live", tone: "active" });
+    expect(deliveryStatusDisplay("live")).toEqual({ label: "Approved", tone: "active" });
     expect(deliveryStatusDisplay("rejected")).toEqual({ label: "Rejected", tone: "muted" });
     expect(deliveryStatusDisplay("taken_down")).toEqual({ label: "Taken down", tone: "muted" });
   });

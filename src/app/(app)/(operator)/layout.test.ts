@@ -31,7 +31,7 @@ function stubClient(staffRow: { user_id: string } | null) {
 }
 
 /**
- * /queue, /gc/clients, and /education stay behind the (operator) gc_staff gate. Dual-mode `/`
+ * /queue, /avails, /gc/clients, and /education stay behind the (operator) gc_staff gate. Dual-mode `/`
  * must not weaken that boundary — a client hitting those URLs is still bounced.
  */
 describe("OperatorLayout gc_staff gate", () => {

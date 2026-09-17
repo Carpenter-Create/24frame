@@ -15,6 +15,7 @@ import {
   Wallet,
   Sparkle,
   Tray,
+  CheckCircle,
   Storefront,
   Users,
   BookOpen,
@@ -22,6 +23,7 @@ import {
 
 import type { PhosphorIcon } from "@/lib/phosphor-icon";
 import { ASK_GLOBEE } from "@/lib/ask-globee";
+import { AVAILS_HREF, AVAILS_PAGE } from "@/lib/avails";
 import { FINANCE_PAGE } from "@/lib/finance";
 import { PRODUCT_NAME } from "@/lib/product";
 import { REPORTS_HREF, REPORTS_PAGE, isLegacyReportsPath } from "@/lib/reports";
@@ -116,13 +118,14 @@ export const EDUCATION_MANAGE_NAV: PhosphorNavItem[] = [
   },
 ];
 
-// Staff rail eyebrow. Not a 24Frame product wordmark.
-export const STAFF_RAIL_EYEBROW = "Staff";
+// Staff-block rail eyebrow. Same isGcStaff gate. Not a 24Frame product wordmark.
+export const STAFF_RAIL_EYEBROW = "Team";
 
 // Staff-only operator surfaces. Rendered by SideNav only when isGcStaff is true;
 // the (operator) layout remains the authorization gate for these hrefs.
 export const GC_NAV: PhosphorNavItem[] = [
   { label: "Queue", href: "/queue", family: "phosphor", icon: Tray },
+  { label: AVAILS_PAGE.title, href: AVAILS_HREF, family: "phosphor", icon: CheckCircle },
   { label: `${PRODUCT_NAME} Deliveries`, href: "/gc/deliveries", family: "phosphor", icon: PaperPlaneTilt },
   { label: "Vendors", href: "/vendors", family: "phosphor", icon: Storefront },
   {

@@ -74,7 +74,8 @@ describe("clientHomeSnapshot", () => {
     expect(snap.doNext[1]?.reason).toBeNull();
     expect(DASHBOARD_HOME.catalog).toBe("Catalog");
     expect(DASHBOARD_HOME.needsAttention).toBe("Needs attention");
-    expect(DASHBOARD_HOME.live).toBe("Live");
+    expect(DASHBOARD_HOME.live).toBe(TITLE_STATUS_LABELS.live);
+    expect(DASHBOARD_HOME.live).toBe("Approved");
   });
 
   it("excludes archived titles from the active catalog count", () => {

@@ -50,6 +50,7 @@ export const ACCOUNT_SHEET_ABSENT = [
   "Finance",
   ASK_ASSISTANT,
   "Queue",
+  "Avails",
   "Manage account",
   "ACCOUNT",
   "credits",

@@ -173,6 +173,7 @@ export const SETTINGS_RAIL_ABSENT = [
   "Attention",
   ASK_ASSISTANT,
   "Queue",
+  "Avails",
   "Vendors",
   "Finance",
   "Clients",

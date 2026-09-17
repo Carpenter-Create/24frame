@@ -430,7 +430,7 @@ describe("client /titles catalog", () => {
     expect(name[0].replaceAll("md:truncate", "")).not.toContain("truncate");
     expect(name[0]).not.toContain("t-heading");
     expect(html).toMatch(
-      /data-titles-catalog-name[\s\S]*Stacked film[\s\S]*data-titles-catalog-year[\s\S]*2019[\s\S]*data-titles-catalog-status[\s\S]*Live/,
+      /data-titles-catalog-name[\s\S]*Stacked film[\s\S]*data-titles-catalog-year[\s\S]*2019[\s\S]*data-titles-catalog-status[\s\S]*Approved/,
     );
     expect(html).toContain("gap-[var(--space-1)]");
     expect(html).not.toContain("Delivered");

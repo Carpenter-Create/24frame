@@ -58,7 +58,7 @@ describe("catalog lifecycle", () => {
     expect(catalogStatusMark("submitted")).toBe("Submitted");
     expect(catalogStatusMark("in_review")).toBe("In review");
     expect(catalogStatusMark("in_delivery")).toBe("Submitted");
-    expect(catalogStatusMark("live")).toBe("Live");
+    expect(catalogStatusMark("live")).toBe("Approved");
     expect(catalogStatusMark("takedown_requested")).toBe("Takedown requested");
     expect(catalogStatusMark("taken_down")).toBe("Taken down");
     expect(catalogStatusMark("archived")).toBe("Archived");
@@ -68,7 +68,7 @@ describe("catalog lifecycle", () => {
       "Draft",
       "Submitted",
       "In review",
-      "Live",
+      "Approved",
       "Takedown requested",
       "Taken down",
       "Archived",

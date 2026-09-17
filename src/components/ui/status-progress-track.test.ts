@@ -43,12 +43,12 @@ describe("StatusProgressTrack", () => {
     expect(html).not.toContain(STATUS_PROGRESS_SEG_ON_CLASS);
   });
 
-  it("keeps delivery Live at 3/3", () => {
+  it("keeps delivery Approved at 3/3", () => {
     const html = renderToStaticMarkup(
       createElement(StatusProgressTrack, { pipeline: "delivery", status: "live" }),
     );
     expect(html.match(/data-status-progress-seg="filled"/g) ?? []).toHaveLength(3);
     expect(html).not.toContain('data-status-progress-seg="empty"');
-    expect(html).toContain("Live");
+    expect(html).toContain("Approved");
   });
 });

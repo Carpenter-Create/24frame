@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { parseReportsPeriod } from "./reports";
-import { TITLE_STATUS_LABELS } from "./titles";
+import { DELIVERY_STATUS_ROW_LABELS, TITLE_STATUS_LABELS } from "./titles";
 import {
   filterReportsDeliveries,
   filterReportsTitles,
@@ -74,8 +74,8 @@ describe("reports view filters", () => {
         { id: "c", title: "C", status: "unknown", created_at: "2026-08-04T00:00:00.000Z" },
       ]),
     ).toEqual([
-      { name: TITLE_STATUS_LABELS.draft, count: 1 },
       { name: TITLE_STATUS_LABELS.live, count: 1 },
+      { name: TITLE_STATUS_LABELS.draft, count: 1 },
     ]);
     expect(
       reportsDeliveryStatusRows([
@@ -99,7 +99,7 @@ describe("reports view filters", () => {
         },
       ]),
     ).toEqual([
-      { name: "Live", count: 1 },
+      { name: DELIVERY_STATUS_ROW_LABELS.live, count: 1 },
       { name: "Pending", count: 1 },
     ]);
     expect(

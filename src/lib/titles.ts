@@ -3,32 +3,33 @@ import type { Database } from "@/lib/supabase/database.types";
 export type TitleStatus = Database["public"]["Enums"]["title_status"];
 
 // Client-facing title vocabulary (founder-decided): in_review → "In review",
-// in_delivery → "Submitted". "Live" is derived (≥1 delivery live), not an enum value.
+// in_delivery → "Submitted". "Approved" is derived (≥1 delivery live), not an enum value.
+// DB enum key stays `live`.
 export const TITLE_STATUS_LABELS: Record<TitleStatus, string> = {
   draft: "Draft",
   submitted: "Submitted",
   in_review: "In review",
   in_delivery: "Submitted",
-  live: "Live",
+  live: "Approved",
   takedown_requested: "Takedown requested",
   taken_down: "Taken down",
   archived: "Archived",
 };
 
 // The status a client sees. Once a title is live on ≥1 platform, show the derived
-// "Live · N of M platforms" rollup on top of its lifecycle state.
+// "Approved · N of M platforms" rollup on top of its lifecycle state.
 export function titleDisplayStatus(status: TitleStatus, liveCount: number, totalCount: number): string {
   if (status === "archived") return TITLE_STATUS_LABELS.archived;
-  if (liveCount > 0) return `Live · ${liveCount} of ${totalCount} platforms`;
+  if (liveCount > 0) return `Approved · ${liveCount} of ${totalCount} platforms`;
   return TITLE_STATUS_LABELS[status];
 }
 
-// GC-facing status wording (assembly line: review → approved/ready → delivering → live).
+// GC-facing status wording (assembly line: review → approved/ready → delivering → approved).
 // Clients see TITLE_STATUS_LABELS; GC's operator view is clearer.
 export const GC_TITLE_STATUS_LABELS: Partial<Record<TitleStatus, string>> = {
   in_review: "Needs review",
   in_delivery: "Approved · ready to deliver",
-  live: "Live",
+  live: "Approved",
   takedown_requested: "Takedown requested",
   taken_down: "Taken down",
 };
@@ -43,7 +44,7 @@ export type DeliveryStatus = Database["public"]["Enums"]["delivery_status"];
 export const DELIVERY_STATUS_ROW_LABELS: Record<DeliveryStatus, string> = {
   pending: "Pending",
   delivered: "Delivered",
-  live: "Live",
+  live: "Approved",
   rejected: "Rejected",
   taken_down: "Taken down",
 };

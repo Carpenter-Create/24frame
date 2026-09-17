@@ -10,6 +10,7 @@ import {
   cumulativeCatalogSeries,
   type CatalogRange,
 } from "@/lib/catalog-activity";
+import { DASHBOARD_HOME } from "@/lib/dashboard-home";
 
 // ── The Dashboard hero ─────────────────────────────────────────────────────
 // A single charcoal band (--band, a sanctioned greyscale surface — not a colour)
@@ -321,7 +322,7 @@ export function CatalogActivityHero({ createdAt, nowMs, stats }: CatalogActivity
       <StatGrid surface="band" className="mt-[var(--space-8)]">
         <Stat surface="band" label="Catalog" value={stats.catalog} />
         <Stat surface="band" label="Upcoming" value={stats.upcoming} />
-        <Stat surface="band" label="Live" value={stats.live} />
+        <Stat surface="band" label={DASHBOARD_HOME.live} value={stats.live} />
         <Stat surface="band" label="Revenue" value={stats.revenue} muted />
       </StatGrid>
     </section>
