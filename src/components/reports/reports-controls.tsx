@@ -7,6 +7,7 @@ import { CaretDown } from "@phosphor-icons/react";
 
 import { Close44 } from "@/components/chrome/house";
 import { AppearanceCheck } from "@/components/chrome/appearance-check";
+import { Input } from "@/components/ui/input";
 import {
   DASHBOARD_PERIOD_CHEVRON_CLASS,
   DASHBOARD_PERIOD_GROUP_CLASS,
@@ -371,12 +372,13 @@ function ReportsUserScope({
           </div>
           <label className="border-b border-hairline px-[var(--space-4)] py-[var(--space-2)]">
             <span className="sr-only">{REPORTS_PAGE.findUser}</span>
-            <input
+            <Input
               data-reports-user-typeahead=""
+              variant="bare"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder={REPORTS_PAGE.findUser}
-              className="w-full bg-transparent t-body-sm text-ink placeholder:text-ink-3"
+              className="w-full"
             />
           </label>
           <ul role="listbox" aria-label={REPORTS_PAGE.scope} className="max-h-56 overflow-y-auto">

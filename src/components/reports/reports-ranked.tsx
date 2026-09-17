@@ -73,10 +73,12 @@ export function ReportsTopPerforming({
   updated?: string | null;
   showUsers?: boolean;
 }) {
-  const pills = showUsers ? REPORTS_TOP_PILLS : REPORTS_TOP_PILLS.filter((pill) => pill !== "users");
+  const pills: readonly ReportsTopPill[] = showUsers
+    ? REPORTS_TOP_PILLS
+    : (["titles", "platforms"] as const);
   const [pill, setPill] = useState<ReportsTopPill>("titles");
   const [mode, setMode] = useState<Exclude<DashboardRegisterView, "map">>("list");
-  const active = pills.includes(pill) ? pill : "titles";
+  const active: ReportsTopPill = pills.includes(pill) ? pill : "titles";
   const pane = PANES[active];
   const meta = dashboardModuleMetaLine({ period: periodLabel, updated });
   const rows =
