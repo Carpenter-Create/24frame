@@ -19,7 +19,7 @@ import {
   DashboardTopTitles,
   DashboardWhatChanged,
 } from "@/components/dashboard/dashboard-modules";
-import { DashboardRankedBars } from "@/components/dashboard/dashboard-ranked";
+import { DashboardRankedBars, DashboardTopPerforming } from "@/components/dashboard/dashboard-ranked";
 import {
   DASHBOARD_PLATFORM_LIMIT,
   DASHBOARD_TERRITORY_LIMIT,
@@ -75,8 +75,8 @@ import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 
 // Company-admin `/dashboard` rematches Overview analytics structure inside
 // house tokens: unlabeled period chrome, Net revenue $ + scrub, Recent
-// account activity, Top titles (list/bars), Top platforms (list/bars),
-// Territories (map/list/bars). 24Frame nouns only — never Top works,
+// account activity, then one Top performing section (Titles / Platforms /
+// Territories pills). 24Frame nouns only — never Top works,
 // sources, contributors, or Exports. Period is chrome, not H1 — dominant
 // read is the $. Phone (`< md`) is a single-column stack — $0.00 empty
 // hero, compact chart, Period bottom sheet. Find-user is gone on phone and
@@ -84,10 +84,10 @@ import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 // inert for data only. Catalog-velocity strip is gone — Adam lock
 // 2026-09-16. Company-admin also drops Recent, Do next, Deliveries needing
 // action, Catalog Health count, What changed, and Pending submissions.
-// Top titles / Top platforms / Territories always render — quiet empty,
-// never omitted. Each Top module is its own full-width row (RL Overview
-// stack, not a 2-up pair). Quiet Reports text CTA stays. Standard seats
-// keep the catalog hero.
+// Top performing always renders — selected pill owns the full-width body
+// (list default for Titles/Platforms; map default for Territories). Quiet
+// empty, never omitted. Quiet Reports text CTA stays. Standard seats keep
+// the catalog hero and the platforms/territories pair.
 // Export stays on /reports. Fixture money is labeled + env-gated and never
 // enters export/ledger.
 
@@ -276,32 +276,10 @@ export default async function DashboardPage({
         className={isAdmin ? DASHBOARD_ADMIN_STACK_CLASS : DASHBOARD_STANDARD_STACK_CLASS}
       >
         {isAdmin ? (
-          <DashboardTopTitles
-            items={adminTopTitles}
-            periodLabel={period.label}
-            updated={adminUpdated}
-            quietEmpty
-          />
-        ) : null}
-        {isAdmin ? (
-          <DashboardRankedBars
-            label={DASHBOARD_HOME.platforms}
-            empty={DASHBOARD_HOME.platformsEmpty}
-            rows={adminPlatforms}
-            testId="platforms"
-            viewAllHref="/deliveries"
-            periodLabel={period.label}
-            updated={adminUpdated}
-          />
-        ) : null}
-        {isAdmin ? (
-          <DashboardRankedBars
-            label={DASHBOARD_HOME.territories}
-            empty={DASHBOARD_HOME.territoriesEmpty}
-            rows={adminTerritories}
-            testId="territories"
-            viewAllHref="/deliveries"
-            territory
+          <DashboardTopPerforming
+            titles={adminTopTitles}
+            platforms={adminPlatforms}
+            territories={adminTerritories}
             periodLabel={period.label}
             updated={adminUpdated}
           />

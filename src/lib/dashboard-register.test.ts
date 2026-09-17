@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   DashboardRankedBars,
   DashboardRankedRows,
+  DashboardTopPerforming,
   DashboardTopTitles,
 } from "@/components/dashboard/dashboard-ranked";
 import { DashboardViewAll, DashboardViewAlts } from "@/components/dashboard/dashboard-view-alts";
@@ -14,6 +15,8 @@ import {
   DASHBOARD_MAP_PAD_CLASS,
   DASHBOARD_RANKED_SHARE_TRACK_CLASS,
   DASHBOARD_RANKED_TABLE_ROW_CLASS,
+  DASHBOARD_TOP_PILL_BUTTON_ON_CLASS,
+  DASHBOARD_TOP_PILL_CLUSTER_CLASS,
 } from "@/lib/dashboard-craft";
 import { DASHBOARD_HOME } from "@/lib/dashboard-home";
 import {
@@ -207,6 +210,85 @@ describe("dashboard register chrome", () => {
     expect(territories).toContain(DASHBOARD_HOME.territories);
     expect(territories).toContain("100%");
     expect(territories).not.toContain("Top territories");
+  });
+
+  it("owns Top performing in one section — Titles list default, Territories map", () => {
+    const titles = renderToStaticMarkup(
+      createElement(DashboardTopPerforming, {
+        titles: [
+          {
+            id: "t1",
+            title: "Winter Light",
+            status: "live",
+            created_at: "2026-09-02T00:00:00.000Z",
+            count: 3,
+          },
+        ],
+        platforms: [{ name: "Window A", count: 4 }],
+        territories: [{ name: "US", count: 4 }],
+        periodLabel: "All time",
+      }),
+    );
+    const platforms = renderToStaticMarkup(
+      createElement(DashboardTopPerforming, {
+        titles: [],
+        platforms: [{ name: "Window A", count: 4 }],
+        territories: [{ name: "US", count: 4 }],
+        defaultPill: "platforms",
+      }),
+    );
+    const territories = renderToStaticMarkup(
+      createElement(DashboardTopPerforming, {
+        titles: [],
+        platforms: [{ name: "Window A", count: 4 }],
+        territories: [{ name: "US", count: 4 }],
+        defaultPill: "territories",
+      }),
+    );
+    expect(DASHBOARD_HOME.topPerforming).toBe("Top performing");
+    expect(DASHBOARD_HOME.pillTitles).toBe("Titles");
+    expect(DASHBOARD_HOME.pillPlatforms).toBe("Platforms");
+    expect(DASHBOARD_HOME.pillTerritories).toBe("Territories");
+    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).toBe("text-accent");
+    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).not.toContain("bg-");
+    expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).toContain("border-hairline");
+    for (const html of [titles, platforms, territories]) {
+      expect(html).toContain("data-dashboard-top-performing");
+      expect(html).toContain(DASHBOARD_HOME.topPerforming);
+      expect(html).toContain('data-dashboard-top-pill="titles"');
+      expect(html).toContain('data-dashboard-top-pill="platforms"');
+      expect(html).toContain('data-dashboard-top-pill="territories"');
+      expect(html).toContain(DASHBOARD_TOP_PILL_CLUSTER_CLASS);
+      expect(html).toContain("text-accent");
+      expect(html).not.toContain("bg-foreground");
+      expect(html).not.toContain("text-background");
+      expect(html).not.toContain("Top works");
+      expect(html).not.toContain("Top titles");
+      expect(html).not.toContain("Top platforms");
+    }
+    expect(titles).toContain('data-dashboard-view="list"');
+    expect(titles).toContain('data-dashboard-ranked-grammar="table"');
+    expect(titles).toContain("data-dashboard-ranked-rank");
+    expect(titles).toContain("data-dashboard-ranked-bar");
+    expect(titles).toContain("Winter Light");
+    expect(titles).toContain('data-dashboard-view-alt="list"');
+    expect(titles).toContain('data-dashboard-view-alt="bars"');
+    expect(titles).not.toContain('data-dashboard-view-alt="map"');
+    expect(titles).toContain("data-dashboard-view-all-arrow");
+    expect(titles).toContain('href="/titles"');
+    expect(titles).not.toContain("Window A");
+    expect(platforms).toContain('data-dashboard-view="list"');
+    expect(platforms).toContain("Window A");
+    expect(platforms).toContain('data-dashboard-ranked-grammar="table"');
+    expect(platforms).toContain('href="/deliveries"');
+    expect(territories).toContain('data-dashboard-view="map"');
+    expect(territories).toContain("data-dashboard-territory-map");
+    expect(territories).toContain('data-dashboard-territory-scale="overview"');
+    expect(territories).toContain("min-h-[340px]");
+    expect(territories).toContain("p-[var(--space-6)]");
+    expect(territories).toContain('data-dashboard-view-alt="map"');
+    expect(territories).toContain('data-dashboard-view-alt="list"');
+    expect(territories).toContain('data-dashboard-view-alt="bars"');
   });
 
   it("gives Top titles list/bars and Territories map/list/bars — 24Frame nouns only", () => {

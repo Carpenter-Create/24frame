@@ -82,6 +82,17 @@ export const DASHBOARD_VIEW_ALT_BUTTON_ON_CLASS = "text-accent";
 export const DASHBOARD_VIEW_ALL_CLASS =
   "inline-flex items-center gap-[var(--space-2)] t-body-sm text-accent";
 
+// Top performing pills — Sporty Blue active, hairline idle. Not Coinbase black fill.
+export const DASHBOARD_TOP_PILL_CLUSTER_CLASS =
+  "flex items-center divide-x divide-hairline border border-hairline";
+
+export const DASHBOARD_TOP_PILL_BUTTON_CLASS =
+  "bg-transparent px-[var(--space-4)] py-[var(--space-2)] t-body-sm";
+
+export const DASHBOARD_TOP_PILL_BUTTON_ON_CLASS = "text-accent";
+
+export const DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS = "text-ink-3";
+
 // RL TerritoryMap Overview frame: Mercator 700×340 inside p-6. Not a mini stub.
 export const DASHBOARD_MAP_FRAME_CLASS = "relative w-full min-h-[340px]";
 
