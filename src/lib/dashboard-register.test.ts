@@ -16,6 +16,7 @@ import {
   DASHBOARD_RANKED_SHARE_TRACK_CLASS,
   DASHBOARD_RANKED_TABLE_ROW_CLASS,
   DASHBOARD_SECTION_TITLE_CLASS,
+  DASHBOARD_TOP_BODY_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_ON_CLASS,
@@ -262,6 +263,8 @@ describe("dashboard register chrome", () => {
     expect(DASHBOARD_SECTION_TITLE_CLASS).toBe("t-heading text-ink");
     expect(DASHBOARD_SECTION_TITLE_CLASS).not.toContain("t-label");
     expect(DASHBOARD_SECTION_TITLE_CLASS).not.toContain("text-ink-3");
+    expect(DASHBOARD_TOP_BODY_CLASS).toContain("min-h-[340px]");
+    expect(DASHBOARD_TOP_BODY_CLASS).toContain("[overflow-anchor:none]");
     for (const html of [titles, platforms, territories]) {
       expect(html).toContain("data-dashboard-top-performing");
       expect(html).toContain(DASHBOARD_HOME.topPerforming);
@@ -270,6 +273,11 @@ describe("dashboard register chrome", () => {
       expect(html).toContain('data-dashboard-top-pill="titles"');
       expect(html).toContain('data-dashboard-top-pill="platforms"');
       expect(html).toContain('data-dashboard-top-pill="territories"');
+      expect(html).toContain('data-dashboard-top-body=""');
+      expect(html).toContain(DASHBOARD_TOP_BODY_CLASS);
+      expect(html).toContain('type="button"');
+      expect(html).not.toContain('data-dashboard-top-pill="titles" href');
+      expect(html).not.toContain("scrollIntoView");
       expect(html).toContain(DASHBOARD_TOP_PILL_CLUSTER_CLASS);
       expect(html).toContain(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS);
       expect(html).toContain(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS);

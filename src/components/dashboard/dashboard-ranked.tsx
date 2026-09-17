@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 import { DashboardViewAll, DashboardViewAlts } from "@/components/dashboard/dashboard-view-alts";
@@ -14,11 +14,17 @@ import {
   DASHBOARD_RANKED_TABLE_ROW_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
   DASHBOARD_ROW_LIST_CLASS,
+  DASHBOARD_TOP_BODY_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_ON_CLASS,
   DASHBOARD_TOP_PILL_CLUSTER_CLASS,
 } from "@/lib/dashboard-craft";
+import {
+  readWindowScroll,
+  restoreWindowScrollAfterPaint,
+  type DashboardWindowScroll,
+} from "@/lib/dashboard-scroll";
 import { DASHBOARD_HOME } from "@/lib/dashboard-home";
 import {
   DASHBOARD_LIST_DEFAULT_LIMIT,
@@ -380,6 +386,7 @@ export function DashboardTopPerforming({
   const pane = TOP_PERFORMING_PANES[pill];
   const [mode, setMode] = useState<DashboardRegisterView>(pane.defaultMode);
   const [showAll, setShowAll] = useState(false);
+  const scrollLock = useRef<DashboardWindowScroll | null>(null);
   const view = pane.modes.includes(mode) ? mode : pane.defaultMode;
   const meta = dashboardModuleMetaLine({ period: periodLabel, updated });
   const rows =
@@ -387,10 +394,27 @@ export function DashboardTopPerforming({
       ? rankedRowsFromTitles(titles)
       : rankedRowsFromCounts(pill === "platforms" ? platforms : territories, pane.territory);
 
+  useLayoutEffect(() => {
+    const pos = scrollLock.current;
+    if (!pos) return;
+    scrollLock.current = null;
+    restoreWindowScrollAfterPaint(pos);
+  });
+
+  function lockWindowScroll() {
+    scrollLock.current = readWindowScroll();
+  }
+
   function selectPill(next: DashboardTopPill) {
+    lockWindowScroll();
     setPill(next);
     setMode(TOP_PERFORMING_PANES[next].defaultMode);
     setShowAll(false);
+  }
+
+  function selectView(next: DashboardRegisterView) {
+    lockWindowScroll();
+    setMode(next);
   }
 
   return (
@@ -442,19 +466,21 @@ export function DashboardTopPerforming({
               );
             })}
           </div>
-          <DashboardViewAlts modes={pane.modes} mode={view} onChange={setMode} />
+          <DashboardViewAlts modes={pane.modes} mode={view} onChange={selectView} />
           <DashboardViewAll href={pane.href} />
         </div>
       </div>
-      <DashboardRankedPane
-        rows={rows}
-        view={view}
-        empty={pane.empty}
-        territory={pane.territory}
-        showAll={showAll}
-        onToggleShowAll={() => setShowAll((open) => !open)}
-        concentrate={pane.concentrate}
-      />
+      <div data-dashboard-top-body="" className={DASHBOARD_TOP_BODY_CLASS}>
+        <DashboardRankedPane
+          rows={rows}
+          view={view}
+          empty={pane.empty}
+          territory={pane.territory}
+          showAll={showAll}
+          onToggleShowAll={() => setShowAll((open) => !open)}
+          concentrate={pane.concentrate}
+        />
+      </div>
     </section>
   );
 }

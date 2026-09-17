@@ -99,6 +99,10 @@ export const DASHBOARD_TOP_PILL_BUTTON_ON_CLASS = "bg-ink text-canvas";
 
 export const DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS = "bg-surface-muted text-ink";
 
+// Reserve the TerritoryMap frame height so Titles/Platforms list panes do not
+// collapse the page and jump scroll when the map unmounts.
+export const DASHBOARD_TOP_BODY_CLASS = "min-h-[340px] [overflow-anchor:none]";
+
 // RL TerritoryMap Overview frame: Mercator 700×340 inside p-6. Not a mini stub.
 export const DASHBOARD_MAP_FRAME_CLASS = "relative w-full min-h-[340px]";
 

@@ -14,6 +14,7 @@ import {
   DASHBOARD_VIEW_ALT_BUTTON_ON_CLASS,
   DASHBOARD_VIEW_ALT_CLUSTER_CLASS,
   DASHBOARD_SECTION_TITLE_CLASS,
+  DASHBOARD_TOP_BODY_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_ON_CLASS,
@@ -99,6 +100,7 @@ describe("Aggregation Dashboard Coinbase register lock", () => {
     const page = readFileSync("src/app/(app)/dashboard/page.tsx", "utf8");
     const hero = readFileSync("src/components/dashboard/dashboard-admin-hero.tsx", "utf8");
     const craft = readFileSync("src/lib/dashboard-craft.ts", "utf8");
+    const ranked = readFileSync("src/components/dashboard/dashboard-ranked.tsx", "utf8");
 
     expect(html).toMatch(/data-dashboard-stat="revenue"[^>]*t-display t-data/);
     expect(html).toContain("$0.00");
@@ -140,6 +142,15 @@ describe("Aggregation Dashboard Coinbase register lock", () => {
     expect(html).toContain(`t-heading text-ink">${DASHBOARD_ADMIN.revenue}`);
     expect(html).toContain(`t-heading text-ink">${DASHBOARD_ADMIN.activity}`);
     expect(html).toContain(`t-heading text-ink">${DASHBOARD_HOME.topPerforming}`);
+    expect(html).toContain("data-dashboard-top-body");
+    expect(html).toContain(DASHBOARD_TOP_BODY_CLASS);
+    expect(DASHBOARD_TOP_BODY_CLASS).toContain("min-h-[340px]");
+    expect(ranked).toContain("readWindowScroll");
+    expect(ranked).toContain("restoreWindowScrollAfterPaint");
+    expect(ranked).toContain("useLayoutEffect");
+    expect(ranked).toContain('type="button"');
+    expect(ranked).not.toContain("scrollIntoView");
+    expect(ranked).not.toContain("<a data-dashboard-top-pill");
     expect(html).not.toContain(`t-label text-ink-3">${DASHBOARD_ADMIN.revenue}`);
     expect(html).not.toContain(`t-label text-ink-3">${DASHBOARD_ADMIN.activity}`);
     expect(html).not.toContain(`t-label text-ink-3">${DASHBOARD_HOME.topPerforming}`);
