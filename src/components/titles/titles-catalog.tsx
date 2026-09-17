@@ -25,7 +25,7 @@ import {
 // Phone (`< md`): full-width 16:9 art on top, title / year / status under.
 // Desktop (`md+`): landscape-thumb row — art leading, title/year, status.
 // Type is the Dashboard register. Accent is the one Add Title Sporty Blue pill.
-// Status filter is HousePageSelect (Dashboard All time SoT) — not native select.
+// Status filter is HousePageSelect trailing on the header (Dashboard All time SoT).
 
 export function TitlesCatalogFrame({
   className,
@@ -46,45 +46,63 @@ export function TitlesCatalogFrame({
   );
 }
 
-export function TitlesCatalogHeader({ count }: { count?: string }) {
+export function TitlesCatalogHeader({
+  count,
+  q,
+  status,
+}: {
+  count?: string;
+  q?: string;
+  status?: CatalogStatusFilter;
+}) {
+  // Dashboard All time SoT: title cluster left, house select trailing on the
+  // same identity row (desktop + phone). Count stays under the title.
+  const showStatus = typeof q === "string" && status != null;
   return (
-    <header className="titles-catalog-header">
-      <h1 data-titles-catalog-title="">
-        <span data-titles-catalog-title-mobile="" className={TITLES_TITLE_MOBILE_CLASS}>
-          {TITLES_CATALOG.title}
-        </span>
-        <span data-titles-catalog-title-desktop="" className={TITLES_TITLE_DESKTOP_CLASS}>
-          {TITLES_CATALOG.title}
-        </span>
-      </h1>
-      {count ? (
-        <p
-          className="mt-[var(--space-1)] t-body-sm text-ink-3"
-          data-titles-catalog-count=""
+    <header
+      className="titles-catalog-header flex flex-row items-center justify-between gap-[var(--space-2)] md:items-start md:gap-[var(--space-6)]"
+      data-titles-catalog-header-row=""
+    >
+      <div className="min-w-0">
+        <h1 data-titles-catalog-title="">
+          <span data-titles-catalog-title-mobile="" className={TITLES_TITLE_MOBILE_CLASS}>
+            {TITLES_CATALOG.title}
+          </span>
+          <span data-titles-catalog-title-desktop="" className={TITLES_TITLE_DESKTOP_CLASS}>
+            {TITLES_CATALOG.title}
+          </span>
+        </h1>
+        {count ? (
+          <p
+            className="mt-[var(--space-1)] t-body-sm text-ink-3"
+            data-titles-catalog-count=""
+          >
+            {count}
+          </p>
+        ) : null}
+      </div>
+      {showStatus ? (
+        <div
+          className="flex w-auto shrink-0 items-center justify-end"
+          data-titles-catalog-filters=""
         >
-          {count}
-        </p>
+          <TitlesCatalogStatusFilter q={q} status={status} />
+        </div>
       ) : null}
     </header>
   );
 }
 
 export function TitlesCatalogToolbar({
-  q,
-  status,
   search,
   action,
-  filters = true,
 }: {
-  q: string;
-  status: CatalogStatusFilter;
   search?: React.ReactNode;
   action?: React.ReactNode;
-  filters?: boolean;
 }) {
-  // Phone: search row, then ONE chrome row — left house select (intrinsic) +
-  // right Sporty Blue Add Title. Kill stacked All row + lone Add Title row.
-  // Desktop: search · house select · Add Title on one row.
+  // Status lives on TitlesCatalogHeader (Dashboard period SoT). Toolbar is
+  // search + Add Title only — no status filter in chrome.
+  // Phone: search full width; Add Title on the chrome row alone or denser with search.
   return (
     <div
       className="titles-catalog-toolbar flex flex-col gap-[var(--space-4)] md:flex-row md:items-center"
@@ -98,27 +116,17 @@ export function TitlesCatalogToolbar({
           {search}
         </div>
       ) : null}
-      {filters || action ? (
+      {action ? (
         <div
-          className="flex w-full min-w-0 items-center gap-[var(--space-2)] md:contents"
+          className="flex w-full min-w-0 items-center justify-end md:contents"
           data-titles-catalog-chrome=""
         >
-          {filters ? (
-            <div
-              className="min-w-0 w-auto shrink-0 md:min-w-0"
-              data-titles-catalog-filters=""
-            >
-              <TitlesCatalogStatusFilter q={q} status={status} />
-            </div>
-          ) : null}
-          {action ? (
-            <div
-              className="ml-auto flex shrink-0 justify-end md:ml-auto"
-              data-titles-catalog-operate=""
-            >
-              {action}
-            </div>
-          ) : null}
+          <div
+            className="ml-auto flex shrink-0 justify-end md:ml-auto"
+            data-titles-catalog-operate=""
+          >
+            {action}
+          </div>
         </div>
       ) : null}
     </div>
