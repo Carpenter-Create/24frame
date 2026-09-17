@@ -27,6 +27,7 @@ import {
   HOUSE_RAIL_ITEM_CLASS,
   HOUSE_RAIL_PANEL_CLASS,
   HOUSE_RELATED_GAP_CLASS,
+  HOUSE_HEADER_SEARCH_GAP_CLASS,
   HOUSE_SEARCH_PILL_CLASS,
   HOUSE_SECTION_AIR_CLASS,
 } from "@/lib/house-shell";
@@ -123,6 +124,7 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(HOUSE_CARD_PAD).toBe("px-[var(--space-4)] py-[var(--space-4)]");
     expect(HOUSE_RELATED_GAP_CLASS).toBe("gap-[var(--space-2)]");
     expect(HOUSE_SECTION_AIR_CLASS).toBe("gap-[var(--space-6)]");
+    expect(HOUSE_HEADER_SEARCH_GAP_CLASS).toBe("gap-[var(--space-4)]");
     expect(HOUSE_SEARCH_PILL_CLASS).toBe("rounded-full border-0 bg-surface-muted");
     expect(HOUSE_RAIL_ITEM_CLASS).toContain("rounded-full");
     expect(HOUSE_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash font-medium text-accent");

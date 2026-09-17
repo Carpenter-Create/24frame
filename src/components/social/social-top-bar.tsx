@@ -6,7 +6,11 @@ import { WorkspaceSwitcher } from "@/components/chrome/workspace-switcher";
 import { SocialIcon } from "@/components/social/social-icon";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/cn";
-import { HOUSE_ICON_BUTTON_CLASS, HOUSE_SEARCH_PILL_CLASS } from "@/lib/house-shell";
+import {
+  HOUSE_HEADER_SEARCH_GAP_CLASS,
+  HOUSE_ICON_BUTTON_CLASS,
+  HOUSE_SEARCH_PILL_CLASS,
+} from "@/lib/house-shell";
 import { PRODUCT_NAME } from "@/lib/product";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { SOCIAL_ICON_SIZE_HEADER, SOCIAL_ICON_SIZE_SEARCH } from "@/lib/social-icons";
@@ -32,36 +36,41 @@ export function SocialTopBar({
       data-social-top-bar=""
       className="sticky top-0 z-40 flex h-[var(--header-height)] items-center justify-between border-b border-hairline bg-surface pl-3 pr-[var(--space-6)] md:pl-5 md:pr-[var(--content-inset)]"
     >
-      <Link
-        href={workspaceHome("social")}
-        prefetch
-        aria-label={PRODUCT_NAME}
-        data-brand-emblem=""
-        className="inline-flex shrink-0 items-center"
+      <div
+        data-social-header-lead=""
+        className={cn("flex min-w-0 items-center", HOUSE_HEADER_SEARCH_GAP_CLASS)}
       >
-        <BrandEmblem />
-      </Link>
-      <form
-        data-social-header-search=""
-        action={SOCIAL_ROUTES.explore}
-        method="get"
-        className={cn(
-          "hidden h-9 w-[420px] items-center gap-2 px-3 md:flex",
-          HOUSE_SEARCH_PILL_CLASS,
-        )}
-      >
-        <SocialIcon name="magnifying-glass" size={SOCIAL_ICON_SIZE_SEARCH} className="text-ink-3" />
-        <label className="sr-only" htmlFor="social-header-q">
-          {SOCIAL.explore.searchSocial}
-        </label>
-        <Input
-          variant="bare"
-          id="social-header-q"
-          name="q"
-          placeholder={SOCIAL.explore.searchSocial}
-          className="h-full flex-1 placeholder:text-ink-3"
-        />
-      </form>
+        <Link
+          href={workspaceHome("social")}
+          prefetch
+          aria-label={PRODUCT_NAME}
+          data-brand-emblem=""
+          className="inline-flex shrink-0 items-center"
+        >
+          <BrandEmblem />
+        </Link>
+        <form
+          data-social-header-search=""
+          action={SOCIAL_ROUTES.explore}
+          method="get"
+          className={cn(
+            "hidden h-9 w-[420px] items-center gap-2 px-3 md:flex",
+            HOUSE_SEARCH_PILL_CLASS,
+          )}
+        >
+          <SocialIcon name="magnifying-glass" size={SOCIAL_ICON_SIZE_SEARCH} className="text-ink-3" />
+          <label className="sr-only" htmlFor="social-header-q">
+            {SOCIAL.explore.searchSocial}
+          </label>
+          <Input
+            variant="bare"
+            id="social-header-q"
+            name="q"
+            placeholder={SOCIAL.explore.searchSocial}
+            className="h-full flex-1 placeholder:text-ink-3"
+          />
+        </form>
+      </div>
       <div className="flex items-center gap-[var(--space-3)]">
         <div data-social-header-actions="" className="flex items-center gap-2.5 md:gap-3">
           <Link
