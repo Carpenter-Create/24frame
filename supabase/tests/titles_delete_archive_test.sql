@@ -4,7 +4,7 @@
 -- audit; deleted titles leave the catalog.
 
 begin;
-select plan(20);
+select plan(19);
 
 select set_config('t.org_a', gen_random_uuid()::text, false);
 select set_config('t.org_b', gen_random_uuid()::text, false);

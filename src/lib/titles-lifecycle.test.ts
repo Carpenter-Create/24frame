@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { TITLE_STATUS_LABELS } from "@/lib/titles";
+import { TITLE_STATUS_LABELS, titleDisplayStatus } from "@/lib/titles";
 import {
   TITLE_LIFECYCLE,
   excludeArchivedTitles,
@@ -93,6 +93,8 @@ describe("title lifecycle copy", () => {
 
   it("labels archived as a first-class title status", () => {
     expect(TITLE_STATUS_LABELS.archived).toBe("Archived");
+    expect(titleDisplayStatus("archived", 2, 3)).toBe("Archived");
+    expect(titleDisplayStatus("live", 2, 3)).toBe("Live · 2 of 3 platforms");
   });
 });
 

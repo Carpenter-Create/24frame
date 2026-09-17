@@ -173,7 +173,11 @@ export default async function TitleDetailPage({ params }: { params: Promise<{ id
 
   const statusLabel = titleDisplayStatus(title.status as TitleStatus, liveCount, totalCount);
   const statusTone: "neutral" | "active" | "muted" =
-    liveCount > 0 ? "active" : title.status === "draft" ? "muted" : "neutral";
+    title.status === "archived" || title.status === "draft"
+      ? "muted"
+      : liveCount > 0
+        ? "active"
+        : "neutral";
 
   const heroFacts: { label: string; value: React.ReactNode }[] = [];
   if (title.release_date) heroFacts.push({ label: "Release", value: formatReleaseDate(title.release_date) });
