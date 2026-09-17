@@ -9,6 +9,7 @@
 
 export type SentryRuntime = "client" | "server" | "edge";
 export type SentryEnvironment = "production" | "preview" | "development";
+export type SentryEnv = Record<string, string | undefined>;
 
 export const SENTRY_IGNORE_ERRORS: Array<string | RegExp> = [
   /ResizeObserver loop/i,
@@ -51,18 +52,14 @@ export type SentryScrubEvent = {
   breadcrumbs?: Array<{ data?: Record<string, unknown>; message?: string }>;
 };
 
-export function sentryEnvironment(
-  env: NodeJS.ProcessEnv = process.env,
-): SentryEnvironment {
+export function sentryEnvironment(env: SentryEnv = process.env): SentryEnvironment {
   if (env.VERCEL_ENV === "production" || env.VERCEL_ENV === "preview") {
     return env.VERCEL_ENV;
   }
   return "development";
 }
 
-export function sentryTracesSampleRate(
-  env: NodeJS.ProcessEnv = process.env,
-): number {
+export function sentryTracesSampleRate(env: SentryEnv = process.env): number {
   return sentryEnvironment(env) === "production" ? 0.1 : 1;
 }
 
@@ -73,7 +70,7 @@ function blankToUndefined(value: string | undefined): string | undefined {
 
 export function resolveSentryDsn(
   runtime: SentryRuntime,
-  env: NodeJS.ProcessEnv = process.env,
+  env: SentryEnv = process.env,
 ): string | undefined {
   if (runtime === "client") {
     return blankToUndefined(env.NEXT_PUBLIC_SENTRY_DSN);
@@ -162,8 +159,9 @@ function scrubRequest(event: SentryScrubEvent): void {
   if (typeof request.query_string === "string") {
     request.query_string = scrubQueryString(request.query_string);
   } else if (Array.isArray(request.query_string)) {
-    request.query_string = request.query_string.map(([key, value]) =>
-      isSensitiveSentryKey(key) ? [key, "[Filtered]"] : [key, value],
+    request.query_string = request.query_string.map(
+      ([key, value]): [string, string] =>
+        isSensitiveSentryKey(key) ? [key, "[Filtered]"] : [key, value],
     );
   } else if (request.query_string) {
     const query: Record<string, string> = {};
@@ -224,7 +222,7 @@ export type SentrySharedInit = {
 
 export function sentryInitOptions(
   runtime: SentryRuntime,
-  env: NodeJS.ProcessEnv = process.env,
+  env: SentryEnv = process.env,
 ): SentrySharedInit | undefined {
   const dsn = resolveSentryDsn(runtime, env);
   if (!dsn) return undefined;

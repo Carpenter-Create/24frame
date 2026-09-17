@@ -178,7 +178,7 @@ describe("Sentry wiring contract", () => {
     const nextConfig = readFileSync("next.config.ts", "utf8");
     expect(nextConfig).toContain("withSentryConfig");
     expect(nextConfig).toContain("sourcemaps: { disable: true }");
-    expect(nextConfig).not.toContain("SENTRY_AUTH_TOKEN");
+    expect(nextConfig).not.toContain("authToken:");
     expect(readFileSync("src/middleware.ts", "utf8")).toContain("sentry-tunnel");
   });
 

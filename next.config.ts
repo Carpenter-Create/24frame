@@ -82,8 +82,7 @@ const nextConfig: NextConfig = {
 };
 
 // Org/project slugs are public identifiers for the existing Sentry project.
-// DSN stays env-only. Source maps are off: uploading them would require
-// approving @sentry/cli install scripts and SENTRY_AUTH_TOKEN.
+// DSN stays env-only. Source maps are off — no auth token, no CLI upload.
 export default withSentryConfig(nextConfig, {
   org: process.env.SENTRY_ORG ?? "e8-holdings-llc",
   project: process.env.SENTRY_PROJECT ?? "24frame",
