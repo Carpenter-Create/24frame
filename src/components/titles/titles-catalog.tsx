@@ -24,7 +24,8 @@ import {
 // those must not restyle home, Deliveries, Catalog Health, or staff surfaces.
 // Phone (`< md`): full-width 16:9 art on top, title / year / status under.
 // Desktop (`md+`): landscape-thumb row — art leading, title/year, status.
-// Type is the Dashboard register. Accent is the one Add Title Sporty Blue pill.
+// Type is the Dashboard register. Accent is Sporty Blue Add Title:
+// phone header + (house 44), desktop labeled pill. Not a list FAB.
 // Status filter is HousePageSelect trailing on the header (Dashboard All time SoT).
 
 export function TitlesCatalogFrame({
@@ -50,13 +51,16 @@ export function TitlesCatalogHeader({
   count,
   q,
   status,
+  action,
 }: {
   count?: string;
   q?: string;
   status?: CatalogStatusFilter;
+  action?: React.ReactNode;
 }) {
   // Dashboard All time SoT: title cluster left, house select trailing on the
   // same identity row (desktop + phone). Count stays under the title.
+  // Phone trailing cluster is All + plus. Desktop header stays title · All.
   const showStatus = typeof q === "string" && status != null;
   return (
     <header
@@ -81,12 +85,24 @@ export function TitlesCatalogHeader({
           </p>
         ) : null}
       </div>
-      {showStatus ? (
+      {showStatus || action ? (
         <div
-          className="flex w-auto shrink-0 items-center justify-end"
-          data-titles-catalog-filters=""
+          className="flex w-auto shrink-0 items-center justify-end gap-[var(--space-2)]"
+          data-titles-catalog-header-cluster=""
         >
-          <TitlesCatalogStatusFilter q={q} status={status} />
+          {showStatus ? (
+            <div
+              className="flex w-auto shrink-0 items-center justify-end"
+              data-titles-catalog-filters=""
+            >
+              <TitlesCatalogStatusFilter q={q} status={status} />
+            </div>
+          ) : null}
+          {action ? (
+            <div className="md:hidden" data-titles-catalog-header-operate="">
+              {action}
+            </div>
+          ) : null}
         </div>
       ) : null}
     </header>
@@ -100,12 +116,15 @@ export function TitlesCatalogToolbar({
   search?: React.ReactNode;
   action?: React.ReactNode;
 }) {
-  // Status lives on TitlesCatalogHeader (Dashboard period SoT). Toolbar is
-  // search + Add Title only — no status filter in chrome.
-  // Phone: search full width; Add Title on the chrome row alone or denser with search.
+  // Status lives on TitlesCatalogHeader (Dashboard period SoT).
+  // Phone toolbar is search only. Desktop toolbar is search + labeled Add Title.
+  if (!search && !action) return null;
   return (
     <div
-      className="titles-catalog-toolbar flex flex-col gap-[var(--space-4)] md:flex-row md:items-center"
+      className={cn(
+        "titles-catalog-toolbar flex flex-col gap-[var(--space-4)] md:flex-row md:items-center",
+        !search && "max-md:hidden",
+      )}
       data-titles-catalog-toolbar=""
     >
       {search ? (
@@ -118,7 +137,7 @@ export function TitlesCatalogToolbar({
       ) : null}
       {action ? (
         <div
-          className="flex w-full min-w-0 items-center justify-end md:contents"
+          className="hidden w-full min-w-0 items-center justify-end md:contents"
           data-titles-catalog-chrome=""
         >
           <div

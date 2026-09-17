@@ -13,6 +13,7 @@ import {
   CATALOG_STATUS_FILTERS,
   TITLE_STATUS_PILL_IDLE_CLASS,
   TITLE_STATUS_PILL_LIVE_CLASS,
+  TITLES_ADD_ICON_CLASS,
   TITLES_CATALOG,
   TITLES_FILTER_PILL_CLASS,
   TITLES_TITLE_DESKTOP_CLASS,
@@ -110,6 +111,14 @@ describe("Add Title copy", () => {
     expect(TITLES_CATALOG.addTitle).toBe("Add Title");
     expect(TITLES_CATALOG.title).toBe("Titles");
     expect(TITLES_CATALOG.searchPlaceholder).toBe("Search titles...");
+  });
+
+  it("locks the phone + to the house 44 Sporty Blue hit", () => {
+    expect(TITLES_ADD_ICON_CLASS).toContain("size-[44px]");
+    expect(TITLES_ADD_ICON_CLASS).toContain("min-h-[44px]");
+    expect(TITLES_ADD_ICON_CLASS).toContain("min-w-[44px]");
+    expect(TITLES_ADD_ICON_CLASS).toContain("px-0");
+    expect(TITLES_ADD_ICON_CLASS).not.toContain("fixed");
   });
 
   it("keeps empty catalog copy aligned with home and a quieter ops empty line", () => {

@@ -107,6 +107,11 @@ export default async function TitlesPage({
         count={catalogCountLabel(list.length, truncated)}
         q={list.length > 0 ? q : undefined}
         status={list.length > 0 ? statusFilter : undefined}
+        action={
+          canOperate ? (
+            <AddTitleButton orgId={activeOrg.id} appearance="icon" />
+          ) : undefined
+        }
       />
 
       {list.length > 0 || canOperate ? (
@@ -118,7 +123,11 @@ export default async function TitlesPage({
               </Suspense>
             ) : undefined
           }
-          action={canOperate ? <AddTitleButton orgId={activeOrg.id} /> : undefined}
+          action={
+            canOperate ? (
+              <AddTitleButton orgId={activeOrg.id} appearance="labeled" />
+            ) : undefined
+          }
         />
       ) : null}
 

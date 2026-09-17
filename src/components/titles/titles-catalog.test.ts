@@ -50,6 +50,7 @@ import {
   TitlesCatalogList,
   TitlesCatalogListRow,
   TitlesCatalogStatusFilter,
+  TitlesCatalogToolbar,
 } from "./titles-catalog";
 
 const ALL_STATUSES = Object.keys(TITLE_STATUS_LABELS) as TitleStatus[];
@@ -245,6 +246,8 @@ describe("TitlesCatalogHeader type lock", () => {
     expect(html).not.toContain("10 in catalog");
     expect(html).not.toContain("data-titles-catalog-operate");
     expect(html).not.toContain("data-titles-catalog-filters");
+    expect(html).not.toContain("data-titles-catalog-header-cluster");
+    expect(html).not.toContain("data-titles-catalog-header-operate");
     const titleAt = html.indexOf("<h1");
     const countAt = html.indexOf("data-titles-catalog-count");
     expect(titleAt).toBeGreaterThan(-1);
@@ -390,7 +393,7 @@ describe("TitlesCatalogStatusFilter craft", () => {
     expect(catalog).toContain("data-titles-catalog-filters");
     expect(catalog).toContain("TitlesCatalogStatusFilter");
     expect(catalog).toMatch(/TitlesCatalogHeader[\s\S]*TitlesCatalogStatusFilter/);
-    expect(catalog).toMatch(/Toolbar is\s+[\s\S]*search \+ Add Title only/i);
+    expect(catalog).toMatch(/Phone toolbar is search only/i);
     expect(filter).toContain("HousePageSelect");
     expect(filter).not.toMatch(/triggerClassName=/);
     expect(filter).toContain('menuAlign="end"');
@@ -398,8 +401,59 @@ describe("TitlesCatalogStatusFilter craft", () => {
   });
 });
 
+describe("Titles catalog phone CTA cluster", () => {
+  it("trails phone + on the header with All, and keeps toolbar search-only on phone", () => {
+    const html = renderToStaticMarkup(
+      createElement(TitlesCatalogHeader, {
+        count: "7 in catalog",
+        q: "",
+        status: "all",
+        action: createElement("button", {
+          "data-add-title": "",
+          "data-add-title-icon": "",
+          "aria-label": TITLES_CATALOG.addTitle,
+        }),
+      }),
+    );
+    const cluster = openingTagWith(html, 'data-titles-catalog-header-cluster=""');
+    const operate = openingTagWith(html, 'data-titles-catalog-header-operate=""');
+
+    expect(cluster).toContain("gap-[var(--space-2)]");
+    expect(html).toContain("data-titles-catalog-filters");
+    expect(html).toContain("data-titles-catalog-status-compact");
+    expect(html).toContain(">All<");
+    expect(operate).toContain("md:hidden");
+    expect(html).toContain("data-add-title-icon");
+    expect(html).toContain(`aria-label="${TITLES_CATALOG.addTitle}"`);
+    const filtersAt = html.indexOf("data-titles-catalog-filters");
+    const operateAt = html.indexOf("data-titles-catalog-header-operate");
+    expect(filtersAt).toBeGreaterThan(-1);
+    expect(operateAt).toBeGreaterThan(filtersAt);
+  });
+
+  it("hides labeled Add Title from the phone toolbar row", () => {
+    const html = renderToStaticMarkup(
+      createElement(TitlesCatalogToolbar, {
+        search: createElement("input", { placeholder: TITLES_CATALOG.searchPlaceholder }),
+        action: createElement("button", {
+          "data-add-title": "",
+          "data-add-title-labeled": "",
+        }),
+      }),
+    );
+    const chrome = openingTagWith(html, 'data-titles-catalog-chrome=""');
+    expect(html).toContain("data-titles-catalog-search");
+    expect(html).toContain(TITLES_CATALOG.searchPlaceholder);
+    expect(chrome).toContain("hidden");
+    expect(chrome).toContain("md:contents");
+    expect(html).toContain("data-add-title-labeled");
+    expect(html).not.toContain("data-add-title-icon");
+    expect(html).not.toContain("data-titles-catalog-fab");
+  });
+});
+
 describe("Titles catalog has no stray FAB", () => {
-  it("keeps one Sporty Blue Add Title and no fixed list/up control", () => {
+  it("keeps Sporty Blue Add Title in header/toolbar chrome and no fixed list/up control", () => {
     const catalog = readFileSync(join(ROOT, "src/components/titles/titles-catalog.tsx"), "utf8");
     const page = readFileSync(join(ROOT, "src/app/(app)/titles/page.tsx"), "utf8");
     const add = readFileSync(join(ROOT, "src/app/(app)/titles/add-title-button.tsx"), "utf8");
@@ -411,8 +465,11 @@ describe("Titles catalog has no stray FAB", () => {
     expect(catalog).not.toContain("from \"lucide-react\";\nimport { List");
     expect(page).not.toContain("data-titles-catalog-fab");
     expect(page).not.toMatch(/fixed[\s\S]{0,80}(bottom|right)/);
+    expect(page).toContain('appearance="icon"');
+    expect(page).toContain('appearance="labeled"');
     expect(add).toContain("data-add-title");
-    expect(add).not.toContain("Plus");
+    expect(add).toContain("data-add-title-icon");
+    expect(add).toContain("Plus");
     expect(add).not.toContain("fixed");
   });
 });
