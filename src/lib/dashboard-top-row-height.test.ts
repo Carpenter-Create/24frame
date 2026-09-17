@@ -12,7 +12,7 @@ import {
   DASHBOARD_ADMIN_TOP_ROW_CELL_CLASS,
   DASHBOARD_CARD_CLASS,
 } from "@/lib/dashboard-craft";
-import { DASHBOARD_ATTENTION } from "@/lib/dashboard-attention";
+import { DASHBOARD_ATTENTION, type AttentionRow } from "@/lib/dashboard-attention";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
@@ -23,7 +23,7 @@ const craft = readFileSync("src/lib/dashboard-craft.ts", "utf8");
 const hero = readFileSync("src/components/dashboard/dashboard-admin-hero.tsx", "utf8");
 const attention = readFileSync("src/components/dashboard/dashboard-attention.tsx", "utf8");
 
-function renderHero(rows: readonly { id: string; what: string; at: string; href: string; kind: "catalog" }[]) {
+function renderHero(rows: AttentionRow[]) {
   return renderToStaticMarkup(
     createElement(DashboardAdminHero, {
       orgName: "Acme",
