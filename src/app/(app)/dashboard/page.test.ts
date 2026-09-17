@@ -115,6 +115,14 @@ function statValue(html: string, key: string): string | null {
   return match?.[1] ?? null;
 }
 
+/** Catalog-velocity twin cards are gone from `/dashboard` — Adam lock 2026-09-16. */
+function expectNoCatalogVelocityStrip(html: string) {
+  expect(html).not.toContain("Added this month");
+  expect(html).not.toContain("In pipeline");
+  expect(html).not.toContain("data-dashboard-overview-cell");
+  expect(html).not.toContain('data-dashboard-overview=""');
+}
+
 /**
  * `/dashboard` has two legitimate modes. A client org still gets the
  * organization-scoped portfolio. GC staff without a client org stay on
@@ -159,7 +167,7 @@ describe("DashboardPage modes", () => {
     expect(html).toContain("data-dashboard-home");
     expect(html).toContain("data-dashboard-hero");
     expect(html).toContain("data-dashboard-overview-row");
-    expect(html).toContain("data-dashboard-overview");
+    expectNoCatalogVelocityStrip(html);
     expect(html).toContain("data-dashboard-territory");
     expect(html).toContain("data-dashboard-ranked=\"platforms\"");
     expect(html).toContain("data-dashboard-reports-cta");
@@ -365,6 +373,7 @@ describe("client home information model", () => {
     expect(html).toContain(DASHBOARD_HOME.live);
     expect(html).toContain(DASHBOARD_HOME.doNext);
     expect(html).toContain("data-dashboard-overview-row");
+    expectNoCatalogVelocityStrip(html);
     expect(html).toContain("data-dashboard-territory");
     expect(html).toContain('data-dashboard-module="top-titles"');
     expect(html).not.toContain(dashboardAttentionSummary(1));
@@ -380,7 +389,7 @@ describe("client home information model", () => {
     expect(html).toContain("data-dashboard-do-next");
     expect(html).toContain("data-dashboard-just-in");
     expect(html).toContain("data-dashboard-hero");
-    expect(html).toContain("data-dashboard-overview");
+    expectNoCatalogVelocityStrip(html);
     expect(html).toContain("flex flex-col gap-[var(--space-6)]");
     expect(html).toContain("lg:grid-cols-3");
     expect(html).toContain("lg:grid-cols-2");
@@ -566,7 +575,7 @@ describe("client home copy lock", () => {
     const html = renderToStaticMarkup(await DashboardPage());
     expect(html).toContain("data-dashboard-hero");
     expect(html).toContain("data-dashboard-overview-row");
-    expect(html).toContain("data-dashboard-overview");
+    expectNoCatalogVelocityStrip(html);
     expect(html).toContain("data-dashboard-territory");
     expect(html).toContain('data-dashboard-ranked="platforms"');
     expect(html).toContain('data-dashboard-module="top-titles"');
@@ -664,7 +673,11 @@ describe("company admin Overview hero", () => {
     expect(html).toContain("As of All time");
     expect(html).toContain("data-dashboard-chart-empty");
     expect(html).not.toContain(DASHBOARD_ADMIN.chartEmpty);
-    expect(html).toContain("data-dashboard-overview");
+    expect(html).toContain("data-dashboard-overview-row");
+    expectNoCatalogVelocityStrip(html);
+    expect(html).toContain("data-dashboard-period");
+    expect(html).toContain("data-dashboard-revenue");
+    expect(html).toContain('data-dashboard-module="recent-activity"');
     expect(html).toContain("data-dashboard-reports-cta");
     expect(html).toContain(`href="${REPORTS_HREF}"`);
     expect(html).not.toContain("data-reports-download");
@@ -681,6 +694,22 @@ describe("company admin Overview hero", () => {
     expect(loadRecipientDashboard).toHaveBeenCalledWith("org-1");
   });
 
+  it("has no Added-this-month / In-pipeline strip on company-admin Dashboard", async () => {
+    stubClient();
+    vi.mocked(getOrgContext).mockResolvedValue(
+      ctx({ isGcStaff: false, orgStatus: "active", role: "account_owner" }) as never,
+    );
+    const html = renderToStaticMarkup(await DashboardPage({ searchParams: Promise.resolve({}) }));
+    expectNoCatalogVelocityStrip(html);
+    expect(html).toContain("data-dashboard-admin-hero");
+    expect(html).toContain("data-dashboard-revenue");
+    expect(html).toContain("$0.00");
+    expect(html).toContain("data-dashboard-period");
+    expect(html).toContain('data-dashboard-module="recent-activity"');
+    expect(html).toContain("data-dashboard-ranked=\"platforms\"");
+    expect(html).toContain("data-dashboard-do-next");
+  });
+
   it("labels sample revenue when the craft fixture gate is on", async () => {
     vi.stubEnv(DASHBOARD_CRAFT_FIXTURE_ENV, "1");
     stubClient();
@@ -695,8 +724,7 @@ describe("company admin Overview hero", () => {
     expect(html).toContain("Window A");
     expect(html).toContain("United States");
     expect(html).toContain("Sample title 01");
-    expect(html).toMatch(/data-dashboard-overview-cell="added"[^>]*>[\s\S]*?>4</);
-    expect(html).toMatch(/data-dashboard-overview-cell="pipeline"[^>]*>[\s\S]*?>7</);
+    expectNoCatalogVelocityStrip(html);
     expect(html).not.toContain(DASHBOARD_ADMIN.chartEmpty);
     expect(html).not.toContain(DASHBOARD_HOME.platformsEmpty);
     expect(html).not.toContain(DASHBOARD_HOME.territoriesEmpty);

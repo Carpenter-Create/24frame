@@ -5,8 +5,6 @@ import { parseDashboardPeriod } from "./dashboard-admin";
 import {
   DASHBOARD_CRAFT_FIXTURE_ENV,
   DASHBOARD_FIXTURE,
-  DASHBOARD_FIXTURE_ADDED,
-  DASHBOARD_FIXTURE_PIPELINE,
   DASHBOARD_FIXTURE_PLATFORMS,
   DASHBOARD_FIXTURE_POINTS,
   DASHBOARD_FIXTURE_TERRITORIES,
@@ -49,9 +47,7 @@ describe("dashboard craft fixture", () => {
     expect(dashboardFixtureSources().some((row) => row.year === 2026 && row.month === 9)).toBe(true);
   });
 
-  it("fills KPIs, platforms, territories, and in-period activity without vendor names", () => {
-    expect(DASHBOARD_FIXTURE_ADDED).toBeGreaterThan(0);
-    expect(DASHBOARD_FIXTURE_PIPELINE).toBeGreaterThan(0);
+  it("fills platforms, territories, and in-period activity without vendor names", () => {
     expect(DASHBOARD_FIXTURE_PLATFORMS.length).toBeGreaterThan(1);
     expect(DASHBOARD_FIXTURE_TERRITORIES.length).toBeGreaterThan(1);
     expect(DASHBOARD_FIXTURE_PLATFORMS.every((row) => row.name.startsWith("Window"))).toBe(true);

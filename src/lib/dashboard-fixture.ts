@@ -51,9 +51,6 @@ export const DASHBOARD_FIXTURE_POINTS: DashboardRevenuePoint[] = [
   { key: "2026-09", label: "2026-09", year: 2026, month: 9, netCents: 154_000_00 },
 ];
 
-export const DASHBOARD_FIXTURE_ADDED = 4;
-export const DASHBOARD_FIXTURE_PIPELINE = 7;
-
 // Window labels only — never a vendor, partner, or platform name.
 export const DASHBOARD_FIXTURE_PLATFORMS: ReportsCountRow[] = [
   { name: "Window A", count: 18 },

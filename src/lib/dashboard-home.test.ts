@@ -23,8 +23,6 @@ import {
   deliveriesNeedingAction,
   pendingSubmissions,
   rankedBarPercent,
-  titlesAddedThisMonth,
-  titlesInPipeline,
   topTitleActivity,
   topTitlesThisMonth,
   DASHBOARD_HOME,
@@ -255,15 +253,13 @@ describe("clientHomeSnapshot", () => {
 });
 
 describe("dashboard home add-on derivation", () => {
-  it("counts this-month titles and pipeline from real statuses", () => {
+  it("ranks this-month titles and pending submissions from real statuses", () => {
     const titles = [
       title({ id: "aug", status: "live", created_at: "2026-08-02T00:00:00.000Z" }),
       title({ id: "sep", status: "in_review", created_at: "2026-09-02T00:00:00.000Z" }),
       title({ id: "pipe", status: "submitted", created_at: "2026-07-01T00:00:00.000Z" }),
     ];
     const now = new Date("2026-09-16T12:00:00.000Z");
-    expect(titlesAddedThisMonth(titles, now)).toBe(1);
-    expect(titlesInPipeline(titles)).toBe(2);
     expect(topTitlesThisMonth(titles, now).map((row) => row.id)).toEqual(["sep"]);
     expect(pendingSubmissions(titles).map((row) => row.id)).toEqual(["sep", "pipe"]);
     expect(
@@ -489,6 +485,16 @@ describe("client home copy lock", () => {
     expect(DASHBOARD_HOME.addTitle).toBe("Add Title");
     expect(DASHBOARD_HOME.addTitle).toBe(TITLES_CATALOG.addTitle);
     expect(DASHBOARD_HOME.addTitleHref).toBe("/titles");
+  });
+
+  it("does not keep Added-this-month / In-pipeline catalog-velocity copy or helpers", () => {
+    expect(DASHBOARD_HOME).not.toHaveProperty("addedThisMonth");
+    expect(DASHBOARD_HOME).not.toHaveProperty("inPipeline");
+    const src = readFileSync("src/lib/dashboard-home.ts", "utf8");
+    expect(src).not.toContain("titlesAddedThisMonth");
+    expect(src).not.toContain("titlesInPipeline");
+    expect(src).not.toContain("Added this month");
+    expect(src).not.toContain("In pipeline");
   });
 
   it("renders The catalog is empty. with one Add Title text control", () => {
