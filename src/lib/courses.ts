@@ -235,6 +235,46 @@ export async function loadCourseInstructorName(
   return name || null;
 }
 
+export async function loadDiscoverableLessonTitles(
+  supabase: ServerClient,
+  courses: CourseRow[],
+): Promise<Map<string, string[]>> {
+  const titles = new Map<string, string[]>();
+  if (courses.length === 0) return titles;
+
+  const { data: moduleRows, error: moduleError } = await supabase
+    .from("modules")
+    .select("id, course_id")
+    .in("course_id", courses.map((course) => course.id))
+    .range(...rangeFor(UNPAGINATED_MAX));
+  if (moduleError || !moduleRows?.length) return titles;
+
+  const modules = moduleRows as { id: string; course_id: string }[];
+  const { data: lessonRows, error: lessonError } = await supabase
+    .from("lessons")
+    .select("id, module_id, title")
+    .in(
+      "module_id",
+      modules.map((module) => module.id),
+    )
+    .range(...rangeFor(UNPAGINATED_MAX));
+  if (lessonError || !lessonRows) return titles;
+
+  const titlesByModule = new Map<string, string[]>();
+  for (const lesson of lessonRows as { id: string; module_id: string; title: string }[]) {
+    const list = titlesByModule.get(lesson.module_id) ?? [];
+    if (lesson.title) list.push(lesson.title);
+    titlesByModule.set(lesson.module_id, list);
+  }
+
+  for (const courseModule of modules) {
+    const list = titles.get(courseModule.course_id) ?? [];
+    list.push(...(titlesByModule.get(courseModule.id) ?? []));
+    titles.set(courseModule.course_id, list);
+  }
+  return titles;
+}
+
 export async function loadDiscoverableCourses(
   supabase: ServerClient,
 ): Promise<CourseListResult> {

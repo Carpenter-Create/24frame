@@ -3,16 +3,28 @@ import { CourseRetry } from "@/components/courses/course-retry";
 import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { loadCourseDetail, loadCourseInstructorName } from "@/lib/courses";
+import { filterEducationOutline, parseEducationSearchQuery } from "@/lib/education-search";
 import { attachEducationLessonPlayback, signedEducationCoverUrl } from "@/lib/s3-education";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { requireSocialSession } from "@/lib/social-session";
 
+function firstSearchValue(value: string | string[] | undefined): string {
+  return Array.isArray(value) ? (value[0] ?? "") : (value ?? "");
+}
+
 export default async function SocialCourseDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const [session, { slug }] = await Promise.all([requireSocialSession(), params]);
+  const [session, { slug }, sp] = await Promise.all([
+    requireSocialSession(),
+    params,
+    searchParams ?? Promise.resolve({} as Record<string, string | string[] | undefined>),
+  ]);
+  const q = parseEducationSearchQuery(firstSearchValue(sp.q));
   const { ctx, supabase } = session;
   const loaded = await loadCourseDetail(supabase, slug, ctx.user.id);
   const [modules, coverUrl, instructorName] = loaded.course
@@ -24,7 +36,7 @@ export default async function SocialCourseDetailPage({
         loadCourseInstructorName(supabase, loaded.course.instructor_id),
       ])
     : [loaded.modules, null, null];
-  const detail = { ...loaded, modules };
+  const detail = { ...loaded, modules: filterEducationOutline(modules, q) };
 
   if (detail.failed) {
     return (

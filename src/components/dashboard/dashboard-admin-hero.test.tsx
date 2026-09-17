@@ -68,7 +68,7 @@ describe("DashboardAdminHero", () => {
     expect(html).toContain('data-dashboard-period-option="ytd"');
     expect(html).not.toContain("data-dashboard-period-grains");
     expect(html).not.toContain("<select");
-    expect(html).toContain("card-surface");
+    expect(html).toContain("bg-surface-muted");
     expect(html).toContain("shadow-none");
     expect(html).toMatch(/data-dashboard-stat="revenue"[^>]*t-display t-data/);
     expect(html).toContain("$0.00");

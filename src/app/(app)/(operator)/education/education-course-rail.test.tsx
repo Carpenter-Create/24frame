@@ -9,6 +9,7 @@ import { HOUSE_CARD_PAD, HOUSE_RAIL_ACTIVE_CLASS } from "@/lib/house-shell";
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh: vi.fn(), push: vi.fn(), replace: vi.fn() }),
   usePathname: () => "/education/orientation",
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 vi.mock("./actions", () => ({

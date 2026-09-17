@@ -1,10 +1,16 @@
 // House app-shell chrome — one grammar for Aggregation · Social · Education.
 // Tokens stay in tokens.css. Do not fork workspace-scoped token files.
-// Page canvas is --bg (#FAFAFB). Cards are r16 · pad 16 · section 24 ·
-// related 8 · edge 48 · hairline only. Active rail is Sporty Blue tint
-// wash + accent type. Header Search is a quiet muted pill. Content-filter
+// Page canvas is --bg (white). Grey modules are --surface-muted (#F4F4F6)
+// r16 only when a module is needed — never a page wash. Cards that stay
+// white use hairline. No shadow. Active rail is Sporty Blue tint wash +
+// accent type. Header Search is a quiet muted pill. Content-filter
 // selected is ink; period chips stay muted. Sporty Blue fill is reserved
-// for the primary CTA, the active rail wash, and links.
+// for the primary CTA, the selected rail pill, and links.
+
+export const HOUSE_PAGE_CANVAS_CLASS = "bg-bg";
+
+export const HOUSE_MODULE_CLASS =
+  "rounded-[var(--radius-lg)] bg-surface-muted shadow-none";
 
 export const HOUSE_CARD_PAD = "px-[var(--space-4)] py-[var(--space-4)]";
 

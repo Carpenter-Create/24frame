@@ -13,6 +13,7 @@ import { SettingsHeaderBack } from "./settings-header-back";
 import { MobileNav } from "./mobile-nav";
 import { MessagesAppHeader } from "./messages-app-header";
 import { BrandEmblem } from "./brand-emblem";
+import { EducationHeaderSearch } from "./education-header-search";
 import { AskAssistantChromeProvider } from "@/components/messages/ask-globee-chrome";
 import { cn } from "@/lib/cn";
 import type { AppShellChrome } from "@/lib/app-shell-chrome";
@@ -33,6 +34,7 @@ import {
   APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS,
   APP_HEADER_WORKSPACE_PILL_HOST_CLASS,
 } from "@/lib/workspace-switcher";
+import { HOUSE_PAGE_CANVAS_CLASS } from "@/lib/house-shell";
 import { PRODUCT_NAME } from "@/lib/product";
 import { isSettingsPath, SETTINGS_RAIL_PAD_CLASS } from "@/lib/settings";
 import {
@@ -129,7 +131,7 @@ export function AppShell({
     return (
       <AskAssistantChromeProvider>
         {cookieSync}
-        <div className="min-h-dvh bg-bg" data-social-workspace="">
+        <div className={cn("min-h-dvh", HOUSE_PAGE_CANVAS_CLASS)} data-social-workspace="">
           <SocialTopBarSlot chrome={chrome} email={email} name={name} photoUrl={photoUrl} />
           <aside
             className={cn(
@@ -178,7 +180,7 @@ export function AppShell({
     <AskAssistantChromeProvider>
     {cookieSync}
     <div
-      className="min-h-dvh bg-bg"
+      className={cn("min-h-dvh", HOUSE_PAGE_CANVAS_CLASS)}
       data-education-workspace={workspace === "education" ? "" : undefined}
       style={
         collapsed && !settingsPage
@@ -187,30 +189,13 @@ export function AppShell({
       }
     >
       <aside
-        className="fixed left-0 top-0 z-30 hidden h-dvh flex-col border-r border-hairline bg-surface md:flex"
+        className="fixed left-0 top-[var(--header-height)] z-30 hidden h-[calc(100dvh-var(--header-height))] flex-col border-r border-hairline bg-surface md:flex"
         data-app-rail=""
         data-settings-rail={settingsPage ? "" : undefined}
         style={{ width: "var(--sidebar-width)" }}
       >
-        <div
-          className={cn(
-            "flex items-center",
-            settingsPage ? "px-[var(--space-4)]" : collapsed ? "justify-center px-2" : "gap-2 px-2",
-          )}
-          style={{ height: "var(--header-height)" }}
-        >
-          <Link
-            href={workspaceHome(workspace)}
-            aria-label={PRODUCT_NAME}
-            data-brand-emblem=""
-            className={cn(
-              "inline-flex shrink-0 items-center",
-              settingsPage || collapsed ? undefined : "min-w-0 flex-1",
-            )}
-          >
-            <BrandEmblem />
-          </Link>
-          {settingsPage || collapsed ? null : (
+        {settingsPage || collapsed ? null : (
+          <div className="flex justify-end px-2 pt-1">
             <button
               type="button"
               onClick={toggle}
@@ -225,8 +210,8 @@ export function AppShell({
                 weight={RAIL_COLLAPSE_CHEVRON_ICON_WEIGHT}
               />
             </button>
-          )}
-        </div>
+          </div>
+        )}
         {settingsPage || !collapsed ? null : (
           <div className={RAIL_COLLAPSE_EXPAND_ROW_CLASS}>
             <button
@@ -262,16 +247,19 @@ export function AppShell({
         </div>
       </aside>
 
-      {/* Access phone header is hamburger · gap 8 · Aggregation pill
-          left, avatar alone right. Do not center the pill. Do not
-          cluster it with the avatar. Desktop keeps the trailing
-          switcher + avatar cluster. Period stays on the Dashboard
-          org row, not this header. Rail top-left stays the static
-          24 brand. No org switcher on any route. Search mounts on
-          the Access `/messages` gate, and on mobile `/titles`
-          (528:542). Desktop 1:3, `/` 1:2, and `/titles/[id]` stay
-          that pair. Phone avatar opens 544:561. Hamburger stays the
-          nav sheet. Do not invent Move / search chrome. */}
+      {/* Full-width top + dest side nav — same chrome as Social.
+          Access phone header is hamburger · gap 8 · one workspace
+          pill left, avatar alone right. Do not center the pill. Do
+          not cluster it with the avatar. Desktop keeps the trailing
+          switcher + avatar cluster. Brand sits on the full-width
+          top, not a second rail chrome. Period stays on the
+          Dashboard org row. No org switcher on any route.
+          Aggregation has no top search. Education mounts a quiet
+          course/video search. Social keeps its live search. Search
+          also mounts on the Access `/messages` gate, and on mobile
+          `/titles` (528:542). Phone avatar opens 544:561. Hamburger
+          stays the nav sheet. Do not invent Move chrome or a
+          second phone switcher. Studio secondary rail stays HOLD. */}
       <header
         className={cn(
           "sticky top-0 z-40 flex items-center justify-end gap-4 border-b border-hairline bg-surface/85 backdrop-blur",
@@ -279,7 +267,8 @@ export function AppShell({
           "md:px-[var(--content-inset)]",
         )}
         data-app-header=""
-        style={{ height: "var(--header-height)", marginLeft: "var(--sidebar-width)" }}
+        data-house-full-width-top=""
+        style={{ height: "var(--header-height)" }}
       >
         <div data-app-header-leading="" className={APP_HEADER_LEADING_CLASS}>
           {settingsPage ? (
@@ -287,12 +276,25 @@ export function AppShell({
           ) : (
             <MobileNavSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />
           )}
+          <Link
+            href={workspaceHome(workspace)}
+            aria-label={PRODUCT_NAME}
+            data-brand-emblem=""
+            className="hidden shrink-0 items-center md:inline-flex"
+          >
+            <BrandEmblem />
+          </Link>
           <div
             data-app-header-workspace-pill=""
             className={APP_HEADER_WORKSPACE_PILL_HOST_CLASS}
           >
             <WorkspaceSwitcher current={workspace} tone="pill" />
           </div>
+          {workspace === "education" && !settingsPage ? (
+            <Suspense fallback={null}>
+              <EducationHeaderSearch />
+            </Suspense>
+          ) : null}
           {messagesPage ? (
             <MessagesHeaderSlot chrome={chrome} messagesSurface={messagesSurface} />
           ) : null}

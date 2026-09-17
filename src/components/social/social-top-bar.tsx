@@ -69,15 +69,6 @@ export function SocialTopBar({
           >
             <SocialIcon name="magnifying-glass" size={SOCIAL_ICON_SIZE_HEADER} />
           </Link>
-          <Link
-            href={SOCIAL_ROUTES.dms}
-            prefetch
-            aria-label={SOCIAL.dms.title}
-            data-social-header-tray=""
-            className="hidden items-center justify-center text-ink-2 md:flex"
-          >
-            <SocialIcon name="tray" size={SOCIAL_ICON_SIZE_HEADER} />
-          </Link>
         </div>
         <div data-app-header-trailing="" className={APP_HEADER_TRAILING_CLUSTER_CLASS}>
           <WorkspaceSwitcher current="social" />
