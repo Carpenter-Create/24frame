@@ -43,6 +43,7 @@ describe("aggregation ops spine rematch", () => {
       "Live",
       "Takedown requested",
       "Taken down",
+      "Archived",
     ]);
     expect(FINDING_SEVERITY_LABEL).toEqual({ high: "Required", low: "Recommended" });
     expect(CATALOG_HEALTH_TITLE).toBe("Catalog Health");

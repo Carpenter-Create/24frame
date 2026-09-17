@@ -12,11 +12,13 @@ export const TITLE_STATUS_LABELS: Record<TitleStatus, string> = {
   live: "Live",
   takedown_requested: "Takedown requested",
   taken_down: "Taken down",
+  archived: "Archived",
 };
 
 // The status a client sees. Once a title is live on ≥1 platform, show the derived
 // "Live · N of M platforms" rollup on top of its lifecycle state.
 export function titleDisplayStatus(status: TitleStatus, liveCount: number, totalCount: number): string {
+  if (status === "archived") return TITLE_STATUS_LABELS.archived;
   if (liveCount > 0) return `Live · ${liveCount} of ${totalCount} platforms`;
   return TITLE_STATUS_LABELS[status];
 }

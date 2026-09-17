@@ -77,6 +77,22 @@ describe("clientHomeSnapshot", () => {
     expect(DASHBOARD_HOME.live).toBe("Live");
   });
 
+  it("excludes archived titles from the active catalog count", () => {
+    const snap = clientHomeSnapshot({
+      titles: [
+        title({ id: "live-1", status: "live" }),
+        title({ id: "arch-1", status: "archived" }),
+        title({ id: "draft-1", status: "draft" }),
+      ],
+      findings: [],
+      orgId: "org-1",
+      now: NOW,
+      bound: UNPAGINATED_MAX,
+    });
+    expect(snap.catalog).toBe(2);
+    expect(snap.justIn.every((t) => t.status !== "archived")).toBe(true);
+  });
+
   it("marks a bounded catalog and live count as a floor, not a claimed total", () => {
     const titles = Array.from({ length: UNPAGINATED_MAX }, (_, i) =>
       title({ id: `t-${i}`, status: i < 3 ? "draft" : "live" }),

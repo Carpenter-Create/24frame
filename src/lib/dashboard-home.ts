@@ -162,7 +162,8 @@ export function clientHomeSnapshot({
   bound: number;
   findingsIsPartial?: boolean;
 }): ClientHomeSnapshot {
-  const newestFirst = [...titles].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+  const activeTitles = titles.filter((t) => t.status !== "archived");
+  const newestFirst = [...activeTitles].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
   const titleById = new Map(newestFirst.map((t) => [t.id, t]));
   const orgFindings = findings.filter((f) => f.org_id === orgId);
 
@@ -205,11 +206,11 @@ export function clientHomeSnapshot({
   const doNext = [...findingRows, ...draftRows].slice(0, DASHBOARD_HOME_DO_NEXT);
 
   return {
-    catalog: titles.length,
-    catalogIsPartial: titles.length >= bound,
+    catalog: activeTitles.length,
+    catalogIsPartial: activeTitles.length >= bound,
     needsAttention: new Set(orgFindings.map((f) => f.entity_id)).size,
     findingsIsPartial,
-    live: titles.filter((t) => t.status === "live").length,
+    live: activeTitles.filter((t) => t.status === "live").length,
     doNext,
     justIn: newestFirst
       .filter((t) => isJustIn(t.created_at, now))

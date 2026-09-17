@@ -92,6 +92,9 @@ function stubClient(
   const titlesChain = {
     select: vi.fn(() => titlesChain),
     eq: vi.fn(() => titlesChain),
+    is: vi.fn(() => titlesChain),
+    neq: vi.fn(() => titlesChain),
+    in: vi.fn(() => titlesChain),
     order: vi.fn(() => titlesChain),
     range: vi.fn(async () => ({ data: titles, error: null })),
   };
@@ -653,6 +656,28 @@ describe("client /titles catalog", () => {
     expect(html).toContain(">Draft<");
     expect(html).toContain("data-house-page-select");
     expect(html).toContain('aria-expanded="false"');
+  });
+
+  it("excludes Archived from the default catalog and shows it when filtered", async () => {
+    stubClient([
+      ...ALL_STATUSES.map((status, i) => titleRow(status, i)),
+      titleRow("archived", 9, { title: "archived film", id: "title-archived" }),
+    ]);
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const active = await renderCatalog();
+    expect(active).toContain("draft film");
+    expect(active).toContain("live film");
+    expect(active).not.toContain("archived film");
+    expect(active.match(/data-titles-catalog-list-row=""/g) ?? []).toHaveLength(
+      ALL_STATUSES.length,
+    );
+
+    const archived = await renderCatalog({ status: "archived" });
+    expect(archived).toContain("archived film");
+    expect(archived).toContain(TITLE_STATUS_LABELS.archived);
+    expect(archived).not.toContain("draft film");
+    expect(archived.match(/data-titles-catalog-list-row=""/g) ?? []).toHaveLength(1);
   });
 
   it("treats submitted and in_delivery as one Submitted lens", async () => {

@@ -12,7 +12,7 @@ vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 
 import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/supabase/auth";
-import { createBuyerScreenerLink } from "./actions";
+import { archiveTitle, createBuyerScreenerLink, deleteTitle, restoreTitle } from "./actions";
 
 type Candidate = { recipient_name: string; expires_at?: string };
 
@@ -140,5 +140,26 @@ describe("createBuyerScreenerLink — collision branching", () => {
     expect(res.error).toBe("Enter the buyer's name.");
     expect(supabase.from).not.toHaveBeenCalled();
     expect(supabase.rpc).not.toHaveBeenCalled();
+  });
+});
+
+describe("title delete / archive / restore actions", () => {
+  it("calls delete_title and returns the RPC error", async () => {
+    const supabase = fakeSupabase({ rpcError: "Submitted titles cannot be deleted. Archive instead." });
+    vi.mocked(createClient).mockResolvedValue(supabase as unknown as Awaited<ReturnType<typeof createClient>>);
+
+    const res = await deleteTitle("title-1");
+    expect(supabase.rpc).toHaveBeenCalledWith("delete_title", { p_title_id: "title-1" });
+    expect(res.error).toBe("Submitted titles cannot be deleted. Archive instead.");
+  });
+
+  it("calls archive_title and restore_title", async () => {
+    const supabase = fakeSupabase({});
+    vi.mocked(createClient).mockResolvedValue(supabase as unknown as Awaited<ReturnType<typeof createClient>>);
+
+    expect((await archiveTitle("title-1")).error).toBeUndefined();
+    expect(supabase.rpc).toHaveBeenCalledWith("archive_title", { p_title_id: "title-1" });
+    expect((await restoreTitle("title-1")).error).toBeUndefined();
+    expect(supabase.rpc).toHaveBeenCalledWith("restore_title", { p_title_id: "title-1" });
   });
 });
