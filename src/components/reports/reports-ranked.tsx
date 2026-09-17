@@ -8,7 +8,6 @@ import { DashboardTerritoryMap } from "@/components/dashboard/dashboard-territor
 import {
   DASHBOARD_CARD_PAD_LIST,
   DASHBOARD_MODULE_CARD_CLASS,
-  DASHBOARD_RANKED_PANE_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
   DASHBOARD_SECTION_TITLE_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_CLASS,
@@ -141,7 +140,7 @@ export function ReportsTopPerforming({
           <DashboardViewAll href={pane.href} />
         </div>
       </div>
-      <div data-reports-ranked-pane="" className={DASHBOARD_RANKED_PANE_CLASS}>
+      <div data-reports-ranked-pane="" className="[overflow-anchor:none]">
         {rows.length === 0 ? (
           <p
             data-reports-ranked-empty=""

@@ -62,6 +62,7 @@ export function ReportsControls({
   downloadHref,
   showUserScope = true,
   periodSheetOpen = false,
+  userScopeOpen = false,
 }: {
   period: ReportsPeriod;
   options: readonly ReportsPeriodOption[];
@@ -70,6 +71,7 @@ export function ReportsControls({
   downloadHref: string | null;
   showUserScope?: boolean;
   periodSheetOpen?: boolean;
+  userScopeOpen?: boolean;
 }) {
   const router = useRouter();
   const concrete = period.kind !== "all";
@@ -95,6 +97,7 @@ export function ReportsControls({
         <ReportsUserScope
           userIds={userIds}
           users={users}
+          defaultOpen={userScopeOpen}
           onChange={(next) => go({ users: next })}
         />
       ) : null}
@@ -255,7 +258,15 @@ function ReportsPeriodSheet({
           {groups.map((group) => (
             <div key={group.group} data-reports-period-group={group.group}>
               {group.group === "all" || group.group === "ytd" ? null : (
-                <div className={DASHBOARD_PERIOD_GROUP_CLASS}>{group.rows[0]?.label && group.group}</div>
+                <div data-reports-period-group-label="" className={DASHBOARD_PERIOD_GROUP_CLASS}>
+                  {group.group === "year"
+                    ? REPORTS_PAGE.year
+                    : group.group === "quarter"
+                      ? REPORTS_PAGE.quarter
+                      : group.group === "month"
+                        ? REPORTS_PAGE.month
+                        : REPORTS_PAGE.custom}
+                </div>
               )}
               {group.rows.map((option) => {
                 const isSelected = option.key === periodKey;
@@ -301,13 +312,15 @@ function ReportsUserScope({
   userIds,
   users,
   onChange,
+  defaultOpen,
 }: {
   userIds: readonly string[];
   users: readonly ReportsUserOption[];
   onChange: (next: readonly string[]) => void;
+  defaultOpen: boolean;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   const [query, setQuery] = useState("");
   const selected = new Set(userIds);
   const matches = filterReportsUsers(users, query);

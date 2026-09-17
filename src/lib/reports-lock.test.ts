@@ -107,6 +107,35 @@ describe("Aggregation Reports miss list v1.1", () => {
     );
     expect(sheet).toContain("data-reports-period-sheet");
     expect(sheet).toContain("data-reports-period-custom");
+    expect(sheet).toContain("data-reports-period-group-label");
+    expect(sheet).toContain(REPORTS_PAGE.year);
+    expect(sheet).toContain(REPORTS_PAGE.quarter);
+    expect(sheet).toContain(REPORTS_PAGE.month);
+  });
+
+  it("keeps admin user scope as All activity plus typeahead multi-select", () => {
+    const html = renderToStaticMarkup(
+      createElement(ReportsControls, {
+        period: parseReportsPeriod("all", now),
+        options: reportsPeriodOptions(now, []),
+        userIds: ["u1"],
+        users: [
+          { id: "u1", label: "Maya Chen" },
+          { id: "u2", label: "Jordan Lee" },
+        ],
+        downloadHref: null,
+        userScopeOpen: true,
+      }),
+    );
+    expect(html).toContain("data-reports-user");
+    expect(html).toContain("data-reports-user-panel");
+    expect(html).toContain("data-reports-user-typeahead");
+    expect(html).toContain("data-reports-user-clear");
+    expect(html).toContain(REPORTS_PAGE.findUser);
+    expect(html).toContain(REPORTS_PAGE.clearScope);
+    expect(html).toContain("Maya Chen");
+    expect(html).toContain("Jordan Lee");
+    expect(html).toContain('<input');
   });
 
   it("keeps Download primary only for a concrete exportable period", () => {
@@ -189,6 +218,7 @@ describe("Aggregation Reports miss list v1.1", () => {
     expect(html).not.toContain("data-dashboard-do-next");
     expect(html).not.toContain("Needs attention");
     expect(html).toContain(REPORTS_TITLE_DESKTOP_CLASS);
+    expect(html).not.toContain("min-h-[calc(340px+2*var(--space-6))]");
     expect(parseDashboardPeriod("ytd", now).kind).toBe("ytd");
   });
 
