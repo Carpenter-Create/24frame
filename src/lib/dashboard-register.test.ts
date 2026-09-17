@@ -13,6 +13,7 @@ import { DashboardViewAll, DashboardViewAlts } from "@/components/dashboard/dash
 import {
   DASHBOARD_MAP_FRAME_CLASS,
   DASHBOARD_MAP_PAD_CLASS,
+  DASHBOARD_RANKED_PANE_CLASS,
   DASHBOARD_RANKED_SHARE_TRACK_CLASS,
   DASHBOARD_RANKED_TABLE_ROW_CLASS,
   DASHBOARD_SECTION_TITLE_CLASS,
@@ -303,6 +304,20 @@ describe("dashboard register chrome", () => {
     expect(territories).toContain('data-dashboard-view-alt="map"');
     expect(territories).toContain('data-dashboard-view-alt="list"');
     expect(territories).toContain('data-dashboard-view-alt="bars"');
+    expect(DASHBOARD_RANKED_PANE_CLASS).toBe("[overflow-anchor:none]");
+    for (const html of [titles, platforms, territories]) {
+      expect(html).toContain("data-dashboard-ranked-pane");
+      expect(html).toContain(DASHBOARD_RANKED_PANE_CLASS);
+    }
+  });
+
+  it("preserves window scroll when Top performing pills leave the Territories map", () => {
+    const src = readFileSync("src/components/dashboard/dashboard-ranked.tsx", "utf8");
+    expect(src).toContain("preserveWindowScroll");
+    expect(src).toMatch(/function selectPill[\s\S]*preserveWindowScroll\(\(\) => \{/);
+    expect(src).not.toMatch(
+      /function selectPill\([^)]*\) \{\s*setPill\(next\);\s*setMode\(TOP_PERFORMING_PANES\[next\]\.defaultMode\);/,
+    );
   });
 
   it("gives Top titles list/bars and Territories map/list/bars — 24Frame nouns only", () => {

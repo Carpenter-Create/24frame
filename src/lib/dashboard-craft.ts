@@ -99,6 +99,11 @@ export const DASHBOARD_TOP_PILL_BUTTON_ON_CLASS = "bg-ink text-canvas";
 
 export const DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS = "bg-surface-muted text-ink";
 
+// Map unmount is taller than Titles/Platforms lists. Do not let the
+// departing map become the scroll anchor (html scroll-behavior: smooth
+// would ease /dashboard to top).
+export const DASHBOARD_RANKED_PANE_CLASS = "[overflow-anchor:none]";
+
 // RL TerritoryMap Overview frame: Mercator 700×340 inside p-6. Not a mini stub.
 export const DASHBOARD_MAP_FRAME_CLASS = "relative w-full min-h-[340px]";
 
