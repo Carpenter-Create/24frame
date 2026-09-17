@@ -3,8 +3,18 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
-import { DashboardRankedBars, DashboardTopTitles } from "@/components/dashboard/dashboard-ranked";
+import {
+  DashboardRankedBars,
+  DashboardRankedRows,
+  DashboardTopTitles,
+} from "@/components/dashboard/dashboard-ranked";
 import { DashboardViewAll, DashboardViewAlts } from "@/components/dashboard/dashboard-view-alts";
+import {
+  DASHBOARD_MAP_FRAME_CLASS,
+  DASHBOARD_MAP_PAD_CLASS,
+  DASHBOARD_RANKED_SHARE_TRACK_CLASS,
+  DASHBOARD_RANKED_TABLE_ROW_CLASS,
+} from "@/lib/dashboard-craft";
 import { DASHBOARD_HOME } from "@/lib/dashboard-home";
 import {
   DASHBOARD_CHOROPLETH_SCALE,
@@ -120,6 +130,9 @@ describe("dashboard register chrome", () => {
     expect(mapSrc).toContain("DASHBOARD_MAP_SCALE");
     expect(mapSrc).toContain("DASHBOARD_MAP_CENTER");
     expect(mapSrc).toContain("data-dashboard-territory-swatch");
+    expect(mapSrc).toContain("data-dashboard-territory-scale");
+    expect(mapSrc).toContain("DASHBOARD_MAP_PAD_CLASS");
+    expect(mapSrc).not.toContain("p-[var(--space-4)]");
     expect(mapSrc).not.toContain("geoGraticule10");
     expect(mapSrc).not.toContain("geoNaturalEarth1");
     expect(mapSrc).not.toMatch(/amber|orange|#[Ff][Ff]|hsl\(38/);
@@ -127,6 +140,73 @@ describe("dashboard register chrome", () => {
     expect(DASHBOARD_MAP_HEIGHT).toBe(340);
     expect(DASHBOARD_MAP_SCALE).toBe(120);
     expect(DASHBOARD_MAP_CENTER).toEqual([0, 30]);
+    expect(DASHBOARD_MAP_PAD_CLASS).toBe("p-[var(--space-6)]");
+    expect(DASHBOARD_MAP_FRAME_CLASS).toContain("min-h-[340px]");
+  });
+
+  it("uses Sources table grammar for list and bars — not a stub chart", () => {
+    const sample = [{ key: "a", label: "Window A", count: 4 }];
+    const listRows = renderToStaticMarkup(
+      createElement(DashboardRankedRows, { rows: sample, mode: "list" }),
+    );
+    const barRows = renderToStaticMarkup(
+      createElement(DashboardRankedRows, { rows: sample, mode: "bars" }),
+    );
+    const titles = renderToStaticMarkup(
+      createElement(DashboardTopTitles, {
+        items: [
+          {
+            id: "t1",
+            title: "Winter Light",
+            status: "live",
+            created_at: "2026-09-02T00:00:00.000Z",
+            count: 3,
+          },
+        ],
+      }),
+    );
+    const platforms = renderToStaticMarkup(
+      createElement(DashboardRankedBars, {
+        label: DASHBOARD_HOME.platforms,
+        empty: DASHBOARD_HOME.platformsEmpty,
+        rows: [{ name: "Window A", count: 4 }],
+        testId: "platforms",
+        viewAllHref: "/deliveries",
+      }),
+    );
+    const territories = renderToStaticMarkup(
+      createElement(DashboardRankedBars, {
+        label: DASHBOARD_HOME.territories,
+        empty: DASHBOARD_HOME.territoriesEmpty,
+        rows: [{ name: "US", count: 4 }],
+        testId: "territories",
+        viewAllHref: "/deliveries",
+        territory: true,
+        defaultMode: "list",
+      }),
+    );
+    for (const html of [listRows, barRows, titles, platforms, territories]) {
+      expect(html).toContain('data-dashboard-ranked-grammar="table"');
+      expect(html).toContain("data-dashboard-ranked-rank");
+      expect(html).toContain("data-dashboard-ranked-bar");
+      expect(html).toContain("data-dashboard-ranked-share");
+      expect(html).toContain("data-dashboard-ranked-value");
+      expect(html).toContain(DASHBOARD_RANKED_TABLE_ROW_CLASS);
+      expect(html).toContain(DASHBOARD_RANKED_SHARE_TRACK_CLASS);
+      expect(html).not.toContain("flex-col items-stretch");
+      expect(html).not.toContain("h-1 w-16");
+    }
+    expect(DASHBOARD_RANKED_SHARE_TRACK_CLASS).toContain("h-2");
+    expect(DASHBOARD_RANKED_SHARE_TRACK_CLASS).toContain("min-w-16");
+    expect(DASHBOARD_RANKED_SHARE_TRACK_CLASS).toContain("flex-1");
+    expect(listRows).toContain('data-dashboard-ranked-rows="list"');
+    expect(barRows).toContain('data-dashboard-ranked-rows="bars"');
+    expect(titles).toContain("data-dashboard-concentration");
+    expect(titles).toContain("data-dashboard-view-all-arrow");
+    expect(platforms).toContain(DASHBOARD_HOME.platforms);
+    expect(territories).toContain(DASHBOARD_HOME.territories);
+    expect(territories).toContain("100%");
+    expect(territories).not.toContain("Top territories");
   });
 
   it("gives Top titles list/bars and Territories map/list/bars — 24Frame nouns only", () => {
@@ -179,6 +259,9 @@ describe("dashboard register chrome", () => {
     expect(territories).not.toContain("Top territories");
     expect(territories).toContain('data-dashboard-view-alt="map"');
     expect(territories).toContain("data-dashboard-territory-map");
+    expect(territories).toContain('data-dashboard-territory-scale="overview"');
+    expect(territories).toContain("min-h-[340px]");
+    expect(territories).toContain("p-[var(--space-6)]");
     expect(territories).toContain(DASHBOARD_HOME.legendLow);
     expect(territories).toContain(DASHBOARD_HOME.legendHigh);
     expect(territories).toContain("data-dashboard-territory-swatch");
@@ -227,6 +310,7 @@ describe("dashboard register chrome", () => {
     expect(territories).toContain(DASHBOARD_HOME.territoriesEmpty);
     expect(territories).toContain('data-dashboard-view-alt="map"');
     expect(territories).toContain("data-dashboard-territory-map");
+    expect(territories).toContain('data-dashboard-territory-scale="overview"');
     expect(territories).toContain("0 territories");
     expect(territories).toContain("data-dashboard-territory-swatch");
     expect(territories).toContain(DASHBOARD_HOME.legendLow);

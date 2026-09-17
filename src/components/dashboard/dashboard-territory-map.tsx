@@ -26,6 +26,7 @@ import {
   DASHBOARD_CHOROPLETH_SWATCH_CLASS,
   DASHBOARD_LEGEND_CLASS,
   DASHBOARD_MAP_FRAME_CLASS,
+  DASHBOARD_MAP_PAD_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
 } from "@/lib/dashboard-craft";
 import { cn } from "@/lib/cn";
@@ -110,8 +111,12 @@ export function DashboardTerritoryMap({
   }, [byNumeric, max]);
 
   return (
-    <div data-dashboard-territory-map="" className="border-t border-hairline">
-      <div className={cn(DASHBOARD_MAP_FRAME_CLASS, "p-[var(--space-4)]")}>
+    <div
+      data-dashboard-territory-map=""
+      data-dashboard-territory-scale="overview"
+      className="border-t border-hairline"
+    >
+      <div className={cn(DASHBOARD_MAP_FRAME_CLASS, DASHBOARD_MAP_PAD_CLASS)}>
         <div className="relative">
           <svg
             viewBox={`0 0 ${DASHBOARD_MAP_WIDTH} ${DASHBOARD_MAP_HEIGHT}`}

@@ -10,8 +10,9 @@ import {
   DASHBOARD_KICKER_CLASS,
   DASHBOARD_MODULE_CARD_CLASS,
   DASHBOARD_MONEY_CLASS,
+  DASHBOARD_RANKED_SHARE_TRACK_CLASS,
+  DASHBOARD_RANKED_TABLE_ROW_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
-  DASHBOARD_ROW_CLASS,
   DASHBOARD_ROW_LIST_CLASS,
 } from "@/lib/dashboard-craft";
 import { DASHBOARD_HOME } from "@/lib/dashboard-home";
@@ -57,65 +58,43 @@ export function DashboardRankedRows({
 }) {
   const total = shareTotal ?? rankedTotal(rows);
   return (
-    <ol data-dashboard-ranked-rows={mode} className={DASHBOARD_ROW_LIST_CLASS}>
+    <ol
+      data-dashboard-ranked-rows={mode}
+      data-dashboard-ranked-grammar="table"
+      className={DASHBOARD_ROW_LIST_CLASS}
+    >
       {rows.map((row, i) => {
         const share = dashboardSharePercent(row.count, total);
         const name = <RankedName row={row} />;
         return (
-          <li key={row.key} className={cn(DASHBOARD_ROW_CLASS, mode === "bars" && "flex-col items-stretch")}>
-            {mode === "list" ? (
-              <>
-                <span className={cn("flex min-w-0 items-center", DASHBOARD_RELATED_GAP_CLASS)}>
-                  <span className="t-data t-body-sm w-4 shrink-0 text-ink-3">{i + 1}</span>
-                  {row.href ? (
-                    <Link href={row.href} className="min-w-0 truncate t-body-sm font-medium text-ink hover:text-ink-2">
-                      <RankedName row={row} />
-                    </Link>
-                  ) : (
-                    name
-                  )}
-                </span>
-                <span className={cn("flex shrink-0 items-center", DASHBOARD_RELATED_GAP_CLASS)}>
-                  <span
-                    aria-hidden
-                    className="h-1 w-16 overflow-hidden rounded-[var(--radius-sm)] bg-surface-muted"
-                  >
-                    <span
-                      className={`block h-full ${i === 0 ? "bg-accent/70" : "bg-ink-3"}`}
-                      style={{ width: `${share}%` }}
-                    />
-                  </span>
-                  <span className="t-data t-body-sm w-10 text-right text-ink-3">
-                    {dashboardShareLabel(row.count, total)}
-                  </span>
-                  <span className={DASHBOARD_MONEY_CLASS}>{row.count}</span>
-                </span>
-              </>
-            ) : (
-              <>
-                <div className={cn("flex items-center justify-between", DASHBOARD_RELATED_GAP_CLASS)}>
-                  <span className={cn("flex min-w-0 items-center", DASHBOARD_RELATED_GAP_CLASS)}>
-                    <span className="t-data t-body-sm w-4 shrink-0 text-ink-3">{i + 1}</span>
-                    {row.href ? (
-                      <Link href={row.href} className="truncate t-body-sm font-medium text-ink hover:text-ink-2">
-                        <RankedName row={row} />
-                      </Link>
-                    ) : (
-                      name
-                    )}
-                  </span>
-                  <span className={DASHBOARD_MONEY_CLASS}>{row.count}</span>
-                </div>
-                {share > 0 ? (
-                  <div className="h-1 overflow-hidden rounded-[var(--radius-sm)] bg-surface-muted">
-                    <div
-                      className={`h-full ${i === 0 ? "bg-accent/70" : "bg-ink-3"}`}
-                      style={{ width: `${share}%` }}
-                    />
-                  </div>
-                ) : null}
-              </>
-            )}
+          <li key={row.key} data-dashboard-ranked-row="" className={DASHBOARD_RANKED_TABLE_ROW_CLASS}>
+            <span data-dashboard-ranked-rank="" className="t-data t-body-sm w-4 shrink-0 text-ink-3">
+              {i + 1}
+            </span>
+            <span className="min-w-0 flex-1 truncate">
+              {row.href ? (
+                <Link href={row.href} className="min-w-0 truncate t-body-sm font-medium text-ink hover:text-ink-2">
+                  <RankedName row={row} />
+                </Link>
+              ) : (
+                name
+              )}
+            </span>
+            <span data-dashboard-ranked-bar="" aria-hidden className={DASHBOARD_RANKED_SHARE_TRACK_CLASS}>
+              <span
+                className={`block h-full ${i === 0 ? "bg-accent/70" : "bg-ink-3"}`}
+                style={{ width: `${share}%` }}
+              />
+            </span>
+            <span
+              data-dashboard-ranked-share=""
+              className="t-data t-body-sm w-12 shrink-0 text-right text-ink-3"
+            >
+              {dashboardShareLabel(row.count, total)}
+            </span>
+            <span data-dashboard-ranked-value="" className={DASHBOARD_MONEY_CLASS}>
+              {row.count}
+            </span>
           </li>
         );
       })}
