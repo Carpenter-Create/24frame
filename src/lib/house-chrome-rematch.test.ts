@@ -98,6 +98,14 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(shell).not.toContain("SearchField");
     expect(shell).toContain("EducationHeaderSearch");
     expect(shell).toContain('workspace === "education" && !settingsPage');
+    expect(shell).toContain('data-education-header-search-host="phone"');
+    expect(shell).toContain('data-education-header-search-host="desktop"');
+    expect(shell.indexOf('presentation="pills"')).toBeLessThan(
+      shell.indexOf('data-education-header-search-host="desktop"'),
+    );
+    expect(shell.indexOf('data-education-header-search-host="desktop"')).toBeLessThan(
+      shell.indexOf("AccountMenuSlot"),
+    );
     expect(topBar).toContain("data-social-header-search");
     expect(topBar).toContain("HOUSE_SEARCH_PILL_CLASS");
 
@@ -106,6 +114,8 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(education).toContain(HOUSE_SEARCH_PILL_CLASS);
     expect(education).toContain(EDUCATION_SEARCH.placeholder);
     expect(education).toContain('action="/social/courses"');
+    expect(educationSearch).not.toContain("md:w-[420px]");
+    expect(educationSearch).not.toContain("md:flex-none");
   });
 
   it("removes the Social Messages icon from the top bar — side nav only", () => {
@@ -121,7 +131,9 @@ describe("house chrome rematch miss list v1.1", () => {
 
   it("keeps one phone workspace switcher, Staff on Aggregation, one Sporty Blue pill", () => {
     expect(shell.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
-    expect(topBar.match(/<WorkspaceSwitcher/g)?.length).toBe(1);
+    expect(topBar.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
+    expect(shell).toContain('presentation="pills"');
+    expect(topBar).toContain('presentation="pills"');
     expect(shell).toContain('tone="pill"');
     expect(shell).toContain("APP_HEADER_WORKSPACE_PILL_HOST_CLASS");
     expect(shell).toContain("APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS");

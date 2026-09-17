@@ -30,6 +30,8 @@ import {
 } from "@/lib/rail-collapse";
 import {
   APP_HEADER_LEADING_CLASS,
+  APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS,
+  APP_HEADER_EDUCATION_SEARCH_PHONE_CLASS,
   APP_HEADER_TRAILING_CLUSTER_CLASS,
   APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS,
   APP_HEADER_WORKSPACE_PILL_HOST_CLASS,
@@ -293,9 +295,14 @@ export function AppShell({
             <WorkspaceSwitcher current={workspace} tone="pill" />
           </div>
           {workspace === "education" && !settingsPage ? (
-            <Suspense fallback={null}>
-              <EducationHeaderSearch />
-            </Suspense>
+            <div
+              data-education-header-search-host="phone"
+              className={APP_HEADER_EDUCATION_SEARCH_PHONE_CLASS}
+            >
+              <Suspense fallback={null}>
+                <EducationHeaderSearch inputId="education-header-q-phone" />
+              </Suspense>
+            </div>
           ) : null}
           {messagesPage ? (
             <MessagesHeaderSlot chrome={chrome} messagesSurface={messagesSurface} />
@@ -306,8 +313,18 @@ export function AppShell({
             data-app-header-workspace-desktop=""
             className={APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS}
           >
-            <WorkspaceSwitcher current={workspace} />
+            <WorkspaceSwitcher current={workspace} presentation="pills" />
           </div>
+          {workspace === "education" && !settingsPage ? (
+            <div
+              data-education-header-search-host="desktop"
+              className={APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS}
+            >
+              <Suspense fallback={null}>
+                <EducationHeaderSearch />
+              </Suspense>
+            </div>
+          ) : null}
           <AccountMenuSlot
             chrome={chrome}
             email={email}

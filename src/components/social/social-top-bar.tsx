@@ -11,7 +11,11 @@ import { PRODUCT_NAME } from "@/lib/product";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { SOCIAL_ICON_SIZE_HEADER, SOCIAL_ICON_SIZE_SEARCH } from "@/lib/social-icons";
 import { workspaceHome } from "@/lib/workspace";
-import { APP_HEADER_TRAILING_CLUSTER_CLASS } from "@/lib/workspace-switcher";
+import {
+  APP_HEADER_TRAILING_CLUSTER_CLASS,
+  APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS,
+  APP_HEADER_WORKSPACE_PILL_HOST_CLASS,
+} from "@/lib/workspace-switcher";
 
 export function SocialTopBar({
   email,
@@ -74,7 +78,18 @@ export function SocialTopBar({
           </Link>
         </div>
         <div data-app-header-trailing="" className={APP_HEADER_TRAILING_CLUSTER_CLASS}>
-          <WorkspaceSwitcher current="social" />
+          <div
+            data-app-header-workspace-pill=""
+            className={APP_HEADER_WORKSPACE_PILL_HOST_CLASS}
+          >
+            <WorkspaceSwitcher current="social" />
+          </div>
+          <div
+            data-app-header-workspace-desktop=""
+            className={APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS}
+          >
+            <WorkspaceSwitcher current="social" presentation="pills" />
+          </div>
           <UserMenu email={email} name={name} photoUrl={photoUrl} />
         </div>
       </div>

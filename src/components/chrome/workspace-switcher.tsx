@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import { CaretDown } from "@phosphor-icons/react";
 
@@ -19,13 +19,21 @@ import {
   WORKSPACE_SWITCHER_OPTION_CHECK_CLASS,
   WORKSPACE_SWITCHER_OPTION_CHECK_GUTTER_CLASS,
   WORKSPACE_SWITCHER_OPTION_LABEL_CLASS,
+  WORKSPACE_SWITCHER_SEGMENT_LABEL_CLASS,
+  WORKSPACE_SWITCHER_SEGMENTS_CLASS,
   WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS,
+  type WorkspaceSwitcherPresentation,
   type WorkspaceSwitcherTone,
   workspaceSwitcherChevronClass,
   workspaceSwitcherMarkLetter,
+  workspaceSwitcherNextSegmentIndex,
   workspaceSwitcherOptionClass,
   workspaceSwitcherPanelClass,
+  workspaceSwitcherSegmentClass,
+  workspaceSwitcherSegmentLabel,
+  workspaceSwitcherSegmentTabIndex,
   workspaceSwitcherShowsChevron,
+  workspaceSwitcherShowsSegments,
   workspaceSwitcherStaticClass,
   workspaceSwitcherTriggerClass,
 } from "@/lib/workspace-switcher";
@@ -42,16 +50,98 @@ function WorkspaceMark({ mode }: { mode: WorkspaceMode }) {
   );
 }
 
+function selectWorkspace(
+  current: WorkspaceMode,
+  option: WorkspaceMenuOption,
+  router: ReturnType<typeof useRouter>,
+) {
+  persistWorkspaceCookie(option.mode);
+  if (current !== option.mode) router.push(workspaceHome(option.mode));
+}
+
+function WorkspaceSwitcherPills({
+  current,
+  options,
+}: {
+  current: WorkspaceMode;
+  options: readonly WorkspaceMenuOption[];
+}) {
+  const router = useRouter();
+  const segmentRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const label = workspaceSwitcherSegmentLabel(current);
+  const canSwitch = workspaceSwitcherShowsSegments(options);
+
+  function onSegmentKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>, index: number) {
+    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+    event.preventDefault();
+    const next = workspaceSwitcherNextSegmentIndex(
+      index,
+      options.length,
+      event.key === "ArrowRight" ? 1 : -1,
+    );
+    segmentRefs.current[next]?.focus();
+  }
+
+  if (!canSwitch) {
+    return (
+      <span
+        data-workspace-switcher=""
+        data-workspace-switcher-presentation="pills"
+        className={workspaceSwitcherStaticClass("plain")}
+      >
+        <span data-workspace-switcher-current="" className={WORKSPACE_SWITCHER_SEGMENT_LABEL_CLASS}>
+          {label}
+        </span>
+      </span>
+    );
+  }
+
+  return (
+    <div
+      data-workspace-switcher=""
+      data-workspace-switcher-presentation="pills"
+      data-workspace-switcher-pills=""
+      role="tablist"
+      aria-label={WORKSPACE_SWITCHER.label}
+      className={WORKSPACE_SWITCHER_SEGMENTS_CLASS}
+    >
+      {options.map((option, index) => {
+        const selected = current === option.mode;
+        return (
+          <button
+            key={option.mode}
+            ref={(node) => {
+              segmentRefs.current[index] = node;
+            }}
+            type="button"
+            role="tab"
+            data-workspace-switcher-segment={option.mode}
+            aria-selected={selected}
+            tabIndex={workspaceSwitcherSegmentTabIndex(selected)}
+            className={workspaceSwitcherSegmentClass(selected)}
+            onClick={() => selectWorkspace(current, option, router)}
+            onKeyDown={(event) => onSegmentKeyDown(event, index)}
+          >
+            {workspaceSwitcherSegmentLabel(option.mode)}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function WorkspaceSwitcher({
   current,
   options = availableWorkspaceOptions(),
   defaultOpen = false,
   tone = "plain",
+  presentation = "menu",
 }: {
   current: WorkspaceMode;
   options?: readonly WorkspaceMenuOption[];
   defaultOpen?: boolean;
   tone?: WorkspaceSwitcherTone;
+  presentation?: WorkspaceSwitcherPresentation;
 }) {
   const router = useRouter();
   const hostRef = useRef<HTMLDivElement>(null);
@@ -77,6 +167,10 @@ export function WorkspaceSwitcher({
   }, [open]);
 
   if (options.length === 0) return null;
+
+  if (presentation === "pills") {
+    return <WorkspaceSwitcherPills current={current} options={options} />;
+  }
 
   if (!canSwitch) {
     return (
@@ -142,9 +236,8 @@ export function WorkspaceSwitcher({
                   aria-selected={selected}
                   className={workspaceSwitcherOptionClass(selected)}
                   onClick={() => {
-                    persistWorkspaceCookie(option.mode);
+                    selectWorkspace(current, option, router);
                     setOpen(false);
-                    if (current !== option.mode) router.push(workspaceHome(option.mode));
                   }}
                 >
                   <WorkspaceMark mode={option.mode} />

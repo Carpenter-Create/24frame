@@ -127,11 +127,16 @@ describe("AppShell header", () => {
     expect(shellSrc).toContain("hamburger · gap 8 · one workspace");
     expect(shellSrc).toContain("WorkspaceSwitcher");
     expect(shellSrc).toContain('<WorkspaceSwitcher current={workspace} tone="pill" />');
-    expect(shellSrc).toContain("<WorkspaceSwitcher current={workspace} />");
+    expect(shellSrc).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
     expect(html).toContain("data-workspace-switcher");
     expect(html).toContain("Aggregation");
     expect((html.match(/data-workspace-switcher=""/g) ?? []).length).toBe(2);
     expect(html).toContain('data-workspace-switcher-tone="pill"');
+    expect(html).toContain('data-workspace-switcher-presentation="pills"');
+    expect(html).toContain("data-workspace-switcher-pills");
+    expect(html).toContain('data-workspace-switcher-segment="aggregation"');
+    expect(html).toContain('data-workspace-switcher-segment="social"');
+    expect(html).toContain('data-workspace-switcher-segment="education"');
     expect(html).toContain("data-app-header-workspace-pill");
     expect(html).not.toContain("data-workspace-switcher-rail");
     expect(html).not.toContain("data-workspace-switcher-lead");
@@ -148,7 +153,7 @@ describe("AppShell header", () => {
     expect(shellSrc).not.toContain("OrganizationSwitcher");
     expect(shellSrc).toContain("justify-end");
     expect(shellSrc).toContain('<WorkspaceSwitcher current={workspace} tone="pill" />');
-    expect(shellSrc).toContain("<WorkspaceSwitcher current={workspace} />");
+    expect(shellSrc).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
 
     for (const path of ["/", "/titles", "/deliveries", "/catalog-health", "/messages"]) {
       navigation.pathname = path;
@@ -624,7 +629,18 @@ describe("AppShell rail-collapse chevron", () => {
     expect(html).toContain("data-education-workspace");
     expect(html).toContain('data-workspace="education"');
     expect(html).toContain("data-workspace-switcher");
+    expect(html).toContain("Aggregation");
+    expect(html).toContain("Social");
     expect(html).toContain("Education");
+    expect(html).toContain('data-education-header-search-host="phone"');
+    expect(html).toContain('data-education-header-search-host="desktop"');
+    expect(html).toContain("data-education-header-search");
+    expect(html.indexOf('data-workspace-switcher-presentation="pills"')).toBeLessThan(
+      html.indexOf('data-education-header-search-host="desktop"'),
+    );
+    expect(html.indexOf('data-education-header-search-host="desktop"')).toBeLessThan(
+      html.indexOf("data-user-menu-host"),
+    );
     expect(html).toContain("data-app-header");
     expect(html).toContain('href="/social/courses"');
     expect(html).not.toContain("data-social-workspace");
