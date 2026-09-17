@@ -14,6 +14,7 @@ import {
   DASHBOARD_MAP_FRAME_CLASS,
   DASHBOARD_MAP_PAD_CLASS,
   DASHBOARD_RANKED_PANE_CLASS,
+  DASHBOARD_RANKED_PANE_MIN_HEIGHT_CLASS,
   DASHBOARD_RANKED_SHARE_TRACK_CLASS,
   DASHBOARD_RANKED_TABLE_ROW_CLASS,
   DASHBOARD_SECTION_TITLE_CLASS,
@@ -304,20 +305,44 @@ describe("dashboard register chrome", () => {
     expect(territories).toContain('data-dashboard-view-alt="map"');
     expect(territories).toContain('data-dashboard-view-alt="list"');
     expect(territories).toContain('data-dashboard-view-alt="bars"');
-    expect(DASHBOARD_RANKED_PANE_CLASS).toBe("[overflow-anchor:none]");
+    expect(DASHBOARD_RANKED_PANE_MIN_HEIGHT_CLASS).toBe(
+      "min-h-[calc(340px+2*var(--space-6))]",
+    );
+    expect(DASHBOARD_RANKED_PANE_MIN_HEIGHT_CLASS).toContain("340px");
+    expect(DASHBOARD_RANKED_PANE_MIN_HEIGHT_CLASS).toContain("var(--space-6)");
+    expect(DASHBOARD_RANKED_PANE_CLASS).toContain("[overflow-anchor:none]");
+    expect(DASHBOARD_RANKED_PANE_CLASS).toContain(DASHBOARD_RANKED_PANE_MIN_HEIGHT_CLASS);
+    expect(DASHBOARD_MAP_FRAME_CLASS).toContain("min-h-[340px]");
+    expect(DASHBOARD_MAP_PAD_CLASS).toBe("p-[var(--space-6)]");
     for (const html of [titles, platforms, territories]) {
       expect(html).toContain("data-dashboard-ranked-pane");
       expect(html).toContain(DASHBOARD_RANKED_PANE_CLASS);
+      expect(html).toContain("[overflow-anchor:none]");
+      expect(html).toContain(DASHBOARD_RANKED_PANE_MIN_HEIGHT_CLASS);
+      expect(html).toMatch(/type="button"[^>]*data-dashboard-top-pill="titles"/);
+      expect(html).toMatch(/type="button"[^>]*data-dashboard-top-pill="platforms"/);
+      expect(html).toMatch(/type="button"[^>]*data-dashboard-top-pill="territories"/);
+      expect(html).not.toMatch(/<a[^>]*data-dashboard-top-pill=/);
+      expect(html).not.toMatch(/data-dashboard-top-pill="[^"]+"[^>]*href=/);
     }
   });
 
   it("preserves window scroll when Top performing pills leave the Territories map", () => {
     const src = readFileSync("src/components/dashboard/dashboard-ranked.tsx", "utf8");
+    const helper = readFileSync("src/lib/dashboard-scroll.ts", "utf8");
+    const css = readFileSync("src/app/globals.css", "utf8");
     expect(src).toContain("preserveWindowScroll");
     expect(src).toMatch(/function selectPill[\s\S]*preserveWindowScroll\(\(\) => \{/);
+    expect(src).toMatch(/type="button"[\s\S]*data-dashboard-top-pill=\{id\}/);
+    expect(src).not.toContain("scrollIntoView");
     expect(src).not.toMatch(
       /function selectPill\([^)]*\) \{\s*setPill\(next\);\s*setMode\(TOP_PERFORMING_PANES\[next\]\.defaultMode\);/,
     );
+    expect(helper).toContain("document.documentElement");
+    expect(helper).toContain("root.style.scrollBehavior");
+    expect(helper).toContain("DASHBOARD_SCROLL_SWAP_BEHAVIOR");
+    expect(helper).toContain("requestAnimationFrame");
+    expect(css).toMatch(/html \{\s*height: 100%;\s*scroll-behavior: smooth;/);
   });
 
   it("gives Top titles list/bars and Territories map/list/bars — 24Frame nouns only", () => {
