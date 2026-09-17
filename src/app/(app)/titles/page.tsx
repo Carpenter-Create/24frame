@@ -12,7 +12,6 @@ import { filterTitles, type BrowseTitle } from "@/lib/titles-browse";
 import {
   TITLES_CATALOG,
   catalogReleaseYear,
-  catalogStatusMark,
   catalogStillSrc,
   filterCatalogByStatus,
   parseCatalogStatusFilter,
@@ -26,7 +25,6 @@ import {
   TitlesCatalogListRow,
   TitlesCatalogToolbar,
 } from "@/components/titles/titles-catalog";
-import type { TitleStatus } from "@/lib/titles";
 
 // Client `/titles` is the catalog you operate: active titles by default,
 // Archived via the status filter. Soft-deleted titles are omitted.
@@ -102,7 +100,7 @@ export default async function TitlesPage({
       title: r.title,
       stillUrl: catalogStillSrc(r.bannerUrl),
       status: r.status,
-      statusLabel: catalogStatusMark(r.status as TitleStatus),
+      liveCount: r.live,
       year: catalogReleaseYear(r.release_date),
       publicId: publicCatalogId(catalogId),
     };
@@ -167,7 +165,7 @@ export default async function TitlesPage({
               title={r.title}
               stillUrl={r.stillUrl}
               status={r.status}
-              statusLabel={r.statusLabel}
+              liveCount={r.liveCount}
               year={r.year}
               publicId={r.publicId}
             />

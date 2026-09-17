@@ -6,9 +6,9 @@ import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/layout/empty-state";
 import { StatusFilter } from "@/components/layout/status-filter";
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { cn } from "@/lib/cn";
 import { loadMyDeliveries } from "@/lib/my-lists";
-import { DELIVERY_STATUS_ROW_LABELS } from "@/lib/titles";
+import { StatusProgressTrack } from "@/components/ui/status-progress-track";
+import { deliveryStatusProgress } from "@/lib/status-progress";
 import {
   DEFAULT_DELIVERY_SORT,
   DELIVERIES_FILTER_MISS,
@@ -19,7 +19,6 @@ import {
   deliveriesShowAllHref,
   deliveriesStatusHref,
   deliveryPackageLabel,
-  deliveryStatusPillClass,
   deliveryTitleHref,
   filterDeliveries,
   groupDeliveriesByTitle,
@@ -110,15 +109,10 @@ export default async function DeliveriesPage({
                       {deliveryPackageLabel(row.packageCount)}
                     </span>
                   </span>
-                  <span
-                    className={cn(
-                      "inline-flex w-fit shrink-0 items-center rounded-full px-[var(--space-3)] py-[var(--space-1)] t-body-sm",
-                      deliveryStatusPillClass(row.status),
-                    )}
+                  <StatusProgressTrack
+                    {...deliveryStatusProgress(row.status)}
                     data-deliveries-status=""
-                  >
-                    {DELIVERY_STATUS_ROW_LABELS[row.status]}
-                  </span>
+                  />
                 </Link>
               ))}
             </div>

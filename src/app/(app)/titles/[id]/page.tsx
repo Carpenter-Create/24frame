@@ -299,7 +299,7 @@ export default async function TitleDetailPage({ params }: { params: Promise<{ id
         backHref="/titles"
         backLabel="Titles"
         status={title.status}
-        statusLabel={statusLabel}
+        liveCount={liveCount}
         bannerUrl={art.banner}
         posterUrl={art.poster}
         meta={heroMeta}
