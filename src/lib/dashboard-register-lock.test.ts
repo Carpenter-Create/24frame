@@ -196,6 +196,7 @@ describe("Aggregation Dashboard Coinbase register lock", () => {
     expect(html).toContain("shadow-none");
     expect(html).toContain("lg:grid-cols-5");
     expect(html).toContain("items-start");
+    expect(html).toContain("lg:items-stretch");
     expect(html).toContain("lg:col-span-3");
     expect(html).toContain("lg:col-span-2");
     expect(html.indexOf("data-dashboard-overview-revenue")).toBeLessThan(
