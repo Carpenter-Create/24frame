@@ -48,7 +48,7 @@ describe("Dashboard top-row height pair (Net | Attention)", () => {
     expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("lg:items-stretch");
     expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("lg:grid-cols-5");
     expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).not.toMatch(/(^|\s)items-stretch(\s|$)/);
-    expect(DASHBOARD_ADMIN_TOP_ROW_CELL_CLASS).toBe("h-full min-h-0");
+    expect(DASHBOARD_ADMIN_TOP_ROW_CELL_CLASS).toBe("h-full min-h-0 w-full");
     expect(DASHBOARD_ADMIN_HERO_REVENUE_CLASS).toContain(DASHBOARD_ADMIN_TOP_ROW_CELL_CLASS);
     expect(DASHBOARD_ADMIN_HERO_ATTENTION_CLASS).toContain(DASHBOARD_ADMIN_TOP_ROW_CELL_CLASS);
     expect(DASHBOARD_ADMIN_HERO_REVENUE_CLASS).toContain("lg:col-span-3");
@@ -104,12 +104,13 @@ describe("Dashboard top-row height pair (Net | Attention)", () => {
     expect(html.slice(revenueAt, revenueAt + 280)).toContain("h-full");
   });
 
-  it("G5 — phone stack stays items-start; stretch is desktop-pair only", () => {
-    expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("items-start");
+  it("G5 — phone stack stretches full width; equal-height stretch stays lg-only", () => {
     expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("max-md:flex-col");
+    expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("max-md:items-stretch");
+    expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("max-md:w-full");
     expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("lg:items-stretch");
-    expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).not.toContain("max-md:items-stretch");
-    expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).not.toContain("md:items-stretch");
+    expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("items-start");
+    expect(DASHBOARD_ADMIN_OVERVIEW_CLASS.split(/\s+/)).not.toContain("md:items-stretch");
     expect(htmlHasUnprefixedItemsStretch(DASHBOARD_ADMIN_OVERVIEW_CLASS)).toBe(false);
     expect(DASHBOARD_ADMIN.revenue).toBe("Net revenue");
   });
