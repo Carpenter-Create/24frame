@@ -4,6 +4,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
 import { DASHBOARD_ADMIN, parseDashboardPeriod } from "@/lib/dashboard-admin";
+import { DASHBOARD_ROW_CLASS } from "@/lib/dashboard-craft";
 import { DASHBOARD_FIXTURE } from "@/lib/dashboard-fixture";
 import { DashboardAdminHero, DashboardRecentActivity } from "./dashboard-admin-hero";
 
@@ -38,9 +39,8 @@ describe("DashboardAdminHero", () => {
       }),
     );
     expect(html).toContain("data-dashboard-admin-hero");
-    expect(html).toContain("lg:grid-cols-5");
-    expect(html).toContain("max-md:flex");
-    expect(html).toContain("max-md:flex-col");
+    expect(html).not.toContain("lg:grid-cols-5");
+    expect(html).toContain("flex flex-col");
     expect(html).toContain("data-dashboard-mobile-stack");
     expect(html).toContain("data-dashboard-title-mobile");
     expect(html).toContain("data-dashboard-title-desktop");
@@ -97,7 +97,7 @@ describe("DashboardAdminHero", () => {
     expect(html).not.toContain("text-rose");
   });
 
-  it("renders recent activity as numbered rows with thin bars when counts exist", () => {
+  it("renders Recent account activity as dense hairline rows", () => {
     const html = renderToStaticMarkup(
       createElement(DashboardRecentActivity, {
         items: [
@@ -114,8 +114,8 @@ describe("DashboardAdminHero", () => {
     );
     expect(html).toContain('data-dashboard-module="recent-activity"');
     expect(html).toContain("Winter Light");
-    expect(html).toContain("bg-accent");
-    expect(html).toContain("h-1");
+    expect(html).toContain("data-dashboard-view-all");
+    expect(html).toContain(DASHBOARD_ROW_CLASS);
     expect(html).not.toContain("$");
   });
 
@@ -134,8 +134,8 @@ describe("DashboardAdminHero", () => {
     expect(controls).toContain("router.replace");
     expect(chart).toContain("strokeDasharray");
     expect(hero).toContain("DASHBOARD_ADMIN_OVERVIEW_CLASS");
-    expect(craft).toContain("lg:grid-cols-5");
-    expect(craft).toContain("max-md:flex-col");
+    expect(craft).toContain("lg:grid-cols-2");
+    expect(craft).not.toContain("lg:grid-cols-5");
     expect(craft).toContain("md:flex-row");
     expect(craft).not.toContain("sm:flex-row");
     expect(page).toContain("DashboardAdminHero");

@@ -7,6 +7,7 @@ import {
   type DashboardPeriod,
   type DashboardRevenuePoint,
 } from "@/lib/dashboard-admin";
+import type { DashboardRankedTitle } from "@/lib/dashboard-home";
 import type { ReportsCountRow } from "@/lib/reports";
 
 // Craft-settlement fixture for company-admin `/dashboard` only.
@@ -113,4 +114,15 @@ export function dashboardFixtureActivity(
 
 export function dashboardFixtureSources(): { year: number; month: number }[] {
   return DASHBOARD_FIXTURE_POINTS.map((point) => ({ year: point.year, month: point.month }));
+}
+
+export function dashboardFixtureTopTitles(now: Date): DashboardRankedTitle[] {
+  const current = utcYearMonth(now);
+  return FIXTURE_TITLES.map((title, index) => ({
+    id: title.id,
+    title: dashboardFixtureLabel(title.title),
+    status: "live",
+    created_at: fixtureIso(current.year, current.month, 12 - index),
+    count: title.count,
+  }));
 }

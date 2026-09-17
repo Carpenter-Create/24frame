@@ -46,9 +46,13 @@ describe("dashboard visual home modules", () => {
     expect(html).toContain('data-dashboard-module="top-titles"');
     expect(html).toContain("Winter Light");
     expect(html).toContain(DASHBOARD_HOME.viewAll);
+    expect(html).toContain("data-dashboard-view-all-arrow");
+    expect(html).toContain('data-dashboard-view-alt="list"');
+    expect(html).toContain('data-dashboard-view-alt="bars"');
     expect(html).toContain("bg-accent");
     expect(html).not.toContain("data-dashboard-hero");
     expect(html).not.toContain("$");
     expect(html).not.toContain("Royalogic");
+    expect(html).not.toContain("Top works");
   });
 });

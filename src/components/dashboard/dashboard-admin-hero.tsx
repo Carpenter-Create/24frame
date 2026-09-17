@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { TextAction } from "@/components/chrome/house";
+import { DashboardViewAll } from "@/components/dashboard/dashboard-view-alts";
 import { DashboardAdminControls } from "@/components/dashboard/dashboard-admin-controls";
 import { DashboardRevenueChart } from "@/components/dashboard/dashboard-revenue-chart";
 import {
@@ -27,13 +27,14 @@ import {
   DASHBOARD_HERO_TO_CHART_GAP_CLASS,
   DASHBOARD_HERO_VALUE_CLASS,
   DASHBOARD_KICKER_CLASS,
-  DASHBOARD_RANKED_LIST_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
+  DASHBOARD_ROW_CLASS,
+  DASHBOARD_ROW_LIST_CLASS,
   DASHBOARD_TITLE_DESKTOP_CLASS,
   DASHBOARD_TITLE_MOBILE_CLASS,
 } from "@/lib/dashboard-craft";
 import { DASHBOARD_FIXTURE, dashboardFixtureLabel } from "@/lib/dashboard-fixture";
-import { dashboardJustInDate, rankedBarPercent } from "@/lib/dashboard-home";
+import { dashboardJustInDate } from "@/lib/dashboard-home";
 import { cn } from "@/lib/cn";
 
 export function DashboardFixtureBanner() {
@@ -131,7 +132,6 @@ export function DashboardRevenueCard({
 }
 
 export function DashboardRecentActivity({ items }: { items: readonly DashboardActivityRow[] }) {
-  const max = Math.max(0, ...items.map((item) => item.count));
   return (
     <section
       aria-label={DASHBOARD_ADMIN.activity}
@@ -140,46 +140,30 @@ export function DashboardRecentActivity({ items }: { items: readonly DashboardAc
     >
       <div className={cn("flex items-center justify-between", DASHBOARD_RELATED_GAP_CLASS, DASHBOARD_CARD_PAD_LIST)}>
         <p className={DASHBOARD_KICKER_CLASS}>{DASHBOARD_ADMIN.activity}</p>
-        <TextAction href="/titles">{DASHBOARD_ADMIN.viewAll}</TextAction>
+        <DashboardViewAll href="/titles" />
       </div>
       {items.length === 0 ? (
-        <p className="border-t border-hairline px-[var(--space-4)] py-[var(--space-4)] t-body-sm text-ink-3">
+        <p className="border-t border-hairline px-[var(--space-4)] py-[var(--space-2)] t-body-sm text-ink-3">
           {DASHBOARD_ADMIN.activityEmpty}
         </p>
       ) : (
-        <ol className={DASHBOARD_RANKED_LIST_CLASS}>
-          {items.map((item, i) => {
-            const percent = rankedBarPercent(item.count, max);
-            return (
-              <li key={item.id} className={cn("flex min-h-10 flex-col", DASHBOARD_RELATED_GAP_CLASS)}>
-                <div className={cn("flex items-center justify-between", DASHBOARD_RELATED_GAP_CLASS)}>
-                  <span className={cn("flex min-w-0 items-center", DASHBOARD_RELATED_GAP_CLASS)}>
-                    <span className="t-data t-body-sm w-4 shrink-0 text-ink-3">{i + 1}</span>
-                    <span className="min-w-0">
-                      <Link
-                        href={item.href}
-                        className="block truncate t-body-sm font-medium text-ink hover:text-ink-2"
-                      >
-                        {item.title}
-                      </Link>
-                      <span className="t-body-sm text-ink-3">{item.detail}</span>
-                    </span>
-                  </span>
-                  <time className="t-data t-body-sm shrink-0 text-right text-ink-3" dateTime={item.at}>
-                    {dashboardJustInDate(item.at)}
-                  </time>
-                </div>
-                {percent > 0 ? (
-                  <div className="h-1 overflow-hidden rounded-[var(--radius-sm)] bg-surface-muted">
-                    <div
-                      className={`h-full ${i === 0 ? "bg-accent" : "bg-ink-3"}`}
-                      style={{ width: `${percent}%` }}
-                    />
-                  </div>
-                ) : null}
-              </li>
-            );
-          })}
+        <ol className={DASHBOARD_ROW_LIST_CLASS}>
+          {items.map((item) => (
+            <li key={item.id} className={DASHBOARD_ROW_CLASS}>
+              <span className="min-w-0">
+                <Link
+                  href={item.href}
+                  className="block truncate t-body-sm font-medium text-ink hover:text-ink-2"
+                >
+                  {item.title}
+                </Link>
+                <span className="t-body-sm text-ink-3">{item.detail}</span>
+              </span>
+              <time className="t-data t-body-sm shrink-0 text-right text-ink-3" dateTime={item.at}>
+                {dashboardJustInDate(item.at)}
+              </time>
+            </li>
+          ))}
         </ol>
       )}
     </section>
@@ -217,12 +201,8 @@ export function DashboardAdminHero({
         data-dashboard-mobile-stack=""
         className={DASHBOARD_ADMIN_OVERVIEW_CLASS}
       >
-        <div className="lg:col-span-3">
-          <DashboardRevenueCard period={period} hero={hero} fixture={fixture} />
-        </div>
-        <div className="lg:col-span-2">
-          <DashboardRecentActivity items={activity} />
-        </div>
+        <DashboardRevenueCard period={period} hero={hero} fixture={fixture} />
+        <DashboardRecentActivity items={activity} />
       </div>
     </div>
   );

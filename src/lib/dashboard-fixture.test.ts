@@ -12,6 +12,7 @@ import {
   dashboardFixtureEnabled,
   dashboardFixtureLabel,
   dashboardFixtureSources,
+  dashboardFixtureTopTitles,
 } from "./dashboard-fixture";
 
 const now = new Date("2026-09-16T12:00:00.000Z");
@@ -50,6 +51,9 @@ describe("dashboard craft fixture", () => {
   it("fills platforms, territories, and in-period activity without vendor names", () => {
     expect(DASHBOARD_FIXTURE_PLATFORMS.length).toBeGreaterThan(1);
     expect(DASHBOARD_FIXTURE_TERRITORIES.length).toBeGreaterThan(1);
+    expect(dashboardFixtureTopTitles(now).every((row) => row.title.includes(DASHBOARD_FIXTURE.sampleMark))).toBe(
+      true,
+    );
     expect(DASHBOARD_FIXTURE_PLATFORMS.every((row) => row.name.startsWith("Window"))).toBe(true);
     const all = dashboardFixtureActivity(parseDashboardPeriod("all", now), now);
     expect(all.length).toBeGreaterThan(1);
