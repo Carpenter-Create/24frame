@@ -35,6 +35,7 @@ const options = dashboardPeriodOptions(now, [
   { year: 2026, month: 8 },
 ]);
 const shellSrc = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
+const leadSrc = readFileSync("src/components/chrome/house-lead-chrome.tsx", "utf8");
 const heroSrc = readFileSync("src/components/dashboard/dashboard-admin-hero.tsx", "utf8");
 const controlsSrc = readFileSync("src/components/dashboard/dashboard-admin-controls.tsx", "utf8");
 const craftSrc = readFileSync("src/lib/dashboard-craft.ts", "utf8");
@@ -62,13 +63,15 @@ describe("Aggregation Dashboard mobile chrome — Mercury leading pill", () => {
     expect(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS).toContain("t-body-sm");
     expect(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS).toContain("text-ink");
     expect(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS).not.toMatch(/green|emerald|#00|#12|#1[Bb]|#1769FF/);
-    expect(shellSrc).toContain("data-app-header-leading");
-    expect(shellSrc).toContain("data-app-header-workspace-pill");
-    expect(shellSrc).toContain("APP_HEADER_LEADING_CLASS");
-    expect(shellSrc).toContain('tone="pill"');
-    const header = shellSrc.slice(
-      shellSrc.indexOf("data-app-header="),
-      shellSrc.indexOf("</header>"),
+    expect(leadSrc).toContain("data-app-header-leading");
+    expect(leadSrc).toContain("data-app-header-workspace-pill");
+    expect(leadSrc).toContain("APP_HEADER_LEADING_CLASS");
+    expect(leadSrc).toContain('tone="pill"');
+    expect(shellSrc).toContain("MobileNavSlot");
+    expect(shellSrc).toContain("<HouseLeadChrome");
+    const header = leadSrc.slice(
+      leadSrc.indexOf("data-app-header="),
+      leadSrc.indexOf("</header>"),
     );
     expect(header).not.toContain("justify-center");
     expect(header).not.toContain("left-1/2");
@@ -77,16 +80,18 @@ describe("Aggregation Dashboard mobile chrome — Mercury leading pill", () => {
       header.indexOf("data-app-header-leading"),
       header.indexOf("data-app-header-trailing"),
     );
-    expect(leading).toContain("MobileNavSlot");
+    expect(leading).toContain("{leadingNav}");
     expect(leading).toContain("data-app-header-workspace-pill");
     expect(leading).toContain("<WorkspaceSwitcher current={workspace} tone=\"pill\" />");
-    expect(leading).not.toContain("AccountMenuSlot");
-    expect(leading.indexOf("MobileNavSlot")).toBeLessThan(
+    expect(leading).not.toContain("{accountMenu}");
+    expect(leading.indexOf("{leadingNav}")).toBeLessThan(
       leading.indexOf("data-app-header-workspace-pill"),
     );
     expect(leading.indexOf("data-app-header-workspace-pill")).toBeLessThan(
-      leading.indexOf("MessagesHeaderSlot"),
+      leading.indexOf("{afterLead}"),
     );
+    expect(shellSrc).toContain("afterLead=");
+    expect(shellSrc).toContain("MessagesHeaderSlot");
     const pillHtml = renderToStaticMarkup(
       createElement(WorkspaceSwitcher, { current: "aggregation", tone: "pill" }),
     );
@@ -101,21 +106,23 @@ describe("Aggregation Dashboard mobile chrome — Mercury leading pill", () => {
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("gap-[var(--space-2)]");
     expect(APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS).toContain("hidden");
     expect(APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS).toContain("md:contents");
-    expect(shellSrc).toContain("data-app-header-trailing");
-    expect(shellSrc).toContain("APP_HEADER_TRAILING_CLUSTER_CLASS");
-    const trailing = shellSrc.slice(
-      shellSrc.indexOf("data-app-header-trailing"),
-      shellSrc.indexOf("</header>"),
+    expect(leadSrc).toContain("data-app-header-trailing");
+    expect(leadSrc).toContain("APP_HEADER_TRAILING_CLUSTER_CLASS");
+    const trailing = leadSrc.slice(
+      leadSrc.indexOf("data-app-header-trailing"),
+      leadSrc.indexOf("</header>"),
     );
     expect(trailing).toContain("data-app-header-workspace-desktop");
     expect(trailing).toContain("<WorkspaceSwitcher current={workspace} presentation=\"pills\" />");
     expect(trailing).not.toContain('tone="pill"');
-    expect(trailing).toContain("AccountMenuSlot");
+    expect(trailing).toContain("{accountMenu}");
     expect(trailing).not.toContain("EducationHeaderSearch");
     expect(trailing).not.toContain("data-education-header-search-host");
     expect(trailing.indexOf("data-app-header-workspace-desktop")).toBeLessThan(
-      trailing.indexOf("AccountMenuSlot"),
+      trailing.indexOf("{accountMenu}"),
     );
+    expect(shellSrc).toContain("accountMenu=");
+    expect(shellSrc).toContain("AccountMenuSlot");
     expect(trailing).not.toContain("MobileNav");
     expect(trailing).not.toContain("data-dashboard-period");
     expect(trailing).not.toContain("Move");

@@ -209,8 +209,9 @@ describe("workspace switcher lock", () => {
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("min-w-0");
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("max-md:shrink-0");
     expect(APP_HEADER_EDUCATION_SEARCH_PHONE_CLASS).toContain("md:hidden");
-    expect(APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS).toBe("w-[420px] shrink-0");
+    expect(APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS).toBe("hidden w-[240px] shrink-0 md:flex");
     expect(APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS).not.toContain("flex-1");
+    expect(APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS).not.toContain("w-[420px]");
     expect(APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS).not.toContain("md:max-w-[420px]");
     expect(workspaceSwitcherSegmentTabIndex(true)).toBe(0);
     expect(workspaceSwitcherSegmentTabIndex(false)).toBe(-1);

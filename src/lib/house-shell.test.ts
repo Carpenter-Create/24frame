@@ -87,6 +87,9 @@ const HOUSE_SHELL_COMMENT_PATHS = [
   "src/components/chrome/app-shell.tsx",
   "src/components/chrome/side-nav.tsx",
   "src/components/social/social-top-bar.tsx",
+  "src/components/social/social-header-search.tsx",
+  "src/lib/house-lead-chrome.ts",
+  "src/components/chrome/house-lead-chrome.tsx",
   "src/lib/social-chrome.ts",
   "src/app/(app)/(operator)/education/education-shell.tsx",
   "src/app/(app)/(operator)/education/education-course-rail.tsx",
@@ -144,7 +147,9 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(sideNav).toContain("HOUSE_RAIL_ACTIVE_CLASS");
     expect(sideNav).toContain("HOUSE_RAIL_IDLE_CLASS");
     expect(shell).toContain("HOUSE_PAGE_CANVAS_CLASS");
-    expect(shell).toContain("<BrandEmblem />");
+    expect(readFileSync("src/components/chrome/house-lead-chrome.tsx", "utf8")).toContain(
+      "<BrandEmblem />",
+    );
     expect(shell).not.toContain("BrandWordmark");
     expect(card).toContain("card-surface");
     expect(card).toContain("HOUSE_CARD_PAD");
@@ -153,11 +158,13 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
   });
 
   it("rematches Social header Search, rail type, filters, and tab accent", () => {
-    expect(socialTopBar).toContain("HOUSE_SEARCH_PILL_CLASS");
-    expect(socialTopBar).toContain("placeholder:text-ink-3");
-    expect(socialTopBar).toContain("text-ink-3");
-    expect(socialTopBar).toContain("text-ink-2");
-    expect(socialTopBar).not.toContain("rounded-[10px]");
+    const socialSearch = readFileSync("src/components/social/social-header-search.tsx", "utf8");
+    expect(socialSearch).toContain("HOUSE_SEARCH_PILL_CLASS");
+    expect(socialSearch).toContain("placeholder:text-ink-3");
+    expect(socialSearch).toContain("text-ink-3");
+    expect(socialSearch).toContain("text-ink-2");
+    expect(socialSearch).not.toContain("rounded-[10px]");
+    expect(socialTopBar).toContain("HouseLeadChrome");
     expect(socialChrome).toContain("HOUSE_FILTER_ON_CLASS");
     expect(SOCIAL_PILL_ACTIVE_CLASS).toBe(HOUSE_FILTER_ON_CLASS);
     expect(SOCIAL_PILL_IDLE_CLASS).toBe(HOUSE_FILTER_OFF_CLASS);
@@ -218,7 +225,9 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
   });
 
   it("keeps BrandEmblem language and bans the reference-brand word from shell comments", () => {
-    expect(shell).toContain("<BrandEmblem />");
+    expect(readFileSync("src/components/chrome/house-lead-chrome.tsx", "utf8")).toContain(
+      "<BrandEmblem />",
+    );
     expect(sideNav).toContain("BrandEmblem");
     for (const path of HOUSE_SHELL_COMMENT_PATHS) {
       const src = readFileSync(path, "utf8");

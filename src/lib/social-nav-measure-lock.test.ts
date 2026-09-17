@@ -56,7 +56,8 @@ describe("Social nav leftover split (shared shell vs Social-local)", () => {
     expect(chrome).toContain("cache(async");
     expect(chrome).toContain("hasAvatarObject(ctx.user.id)");
     expect(chrome).toContain("getActiveOrgTier");
-    expect(appShell).toContain("SocialTopBarFromChrome");
+    expect(appShell).toContain("HouseLeadChrome");
+    expect(appShell).not.toContain("SocialTopBarFromChrome");
     expect(appShell).toContain("Do not use() this at the AppShell top");
   });
 
@@ -91,7 +92,7 @@ describe("Social nav leftover split (shared shell vs Social-local)", () => {
     expect(resolveWorkspaceMode("/social/profile/edit", "aggregation")).toBe("social");
     expect(resolveWorkspaceMode("/messages", "social")).toBe("aggregation");
     expect(appShell).toContain("if (socialChrome)");
-    expect(appShell).toContain("WorkspaceSwitcher");
+    expect(appShell).toContain("HouseLeadChrome");
   });
 
   it("parallelizes Social session and streams page slots on the nav pack", () => {

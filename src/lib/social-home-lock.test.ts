@@ -302,9 +302,11 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(stories).not.toContain("SocialMobileDock");
     expect(storyViewer).not.toContain("SocialMobileDock");
     expect(topBar).not.toContain("data-social-header-tray");
-    expect(topBar).toContain("data-social-header-search");
-    expect(topBar).toContain("prefetch");
+    expect(topBar).toContain("SocialHeaderSearch");
     expect(topBar).not.toContain("data-social-mobile-pill");
+    const socialSearch = readFileSync("src/components/social/social-header-search.tsx", "utf8");
+    expect(socialSearch).toContain("data-social-header-search");
+    expect(socialSearch).toContain("prefetch");
     expect(readFileSync("src/lib/nav.ts", "utf8")).not.toContain("SOCIAL_MOBILE_PILL");
     expect(tabBar).toContain("data-social-tab-bar");
     expect(tabBar).toContain("data-social-tab-pill");
@@ -377,7 +379,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(layout).toContain("loadAppShellChrome()");
     expect(layout).not.toMatch(/await hasAvatarObject/);
     expect(layout).not.toMatch(/await getActiveOrgTier/);
-    expect(shell).toContain("SocialTopBarFromChrome");
+    expect(shell).toContain("HouseLeadChrome");
+    expect(shell).not.toContain("SocialTopBarFromChrome");
     expect(shell).toContain("Do not use() this at the AppShell top");
   });
 

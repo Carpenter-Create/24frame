@@ -10,6 +10,7 @@ import {
   educationSearchAction,
   parseEducationSearchQuery,
 } from "@/lib/course-search";
+import { HOUSE_LEAD_SEARCH_PILL_CLASS } from "@/lib/house-lead-chrome";
 import { HOUSE_SEARCH_PILL_CLASS } from "@/lib/house-shell";
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
@@ -31,7 +32,7 @@ export function EducationHeaderSearch({
       action={action}
       method="get"
       className={cn(
-        "flex h-9 min-w-0 flex-1 items-center gap-2 px-3",
+        HOUSE_LEAD_SEARCH_PILL_CLASS,
         HOUSE_SEARCH_PILL_CLASS,
         className,
       )}

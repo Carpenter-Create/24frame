@@ -29,6 +29,7 @@ import { WorkspaceSwitcher } from "./workspace-switcher";
 const here = dirname(fileURLToPath(import.meta.url));
 const src = readFileSync(join(here, "workspace-switcher.tsx"), "utf8");
 const shellSrc = readFileSync(join(here, "app-shell.tsx"), "utf8");
+const leadSrc = readFileSync(join(here, "house-lead-chrome.tsx"), "utf8");
 const topBarSrc = readFileSync(join(here, "../social/social-top-bar.tsx"), "utf8");
 const sheetSrc = readFileSync(join(here, "account-sheet.tsx"), "utf8");
 const userMenuSrc = readFileSync(join(here, "../../lib/user-menu.ts"), "utf8");
@@ -44,16 +45,15 @@ describe("workspace switcher header control", () => {
     expect(html).toContain(WORKSPACE_SWITCHER_CHEVRON_CLASS);
     expect(html).not.toContain('data-workspace-switcher-chevron-open');
     expect(html).not.toContain("/education");
-    expect(shellSrc).toContain('<WorkspaceSwitcher current={workspace} tone="pill" />');
-    expect(shellSrc).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
-    expect(shellSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
+    expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} tone="pill" />');
+    expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
+    expect(leadSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
     expect(shellSrc).not.toContain("data-workspace-switcher-rail");
     expect(shellSrc).not.toContain("data-workspace-switcher-lead");
-    expect(shellSrc.indexOf("<WorkspaceSwitcher")).toBeLessThan(shellSrc.indexOf("<AccountMenuSlot"));
-    expect(topBarSrc).toContain("<WorkspaceSwitcher current=\"social\" />");
-    expect(topBarSrc).toContain('<WorkspaceSwitcher current="social" presentation="pills" />');
-    expect(topBarSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
-    expect(topBarSrc.indexOf("<WorkspaceSwitcher")).toBeLessThan(topBarSrc.indexOf("<UserMenu"));
+    expect(leadSrc.indexOf("<WorkspaceSwitcher")).toBeLessThan(leadSrc.indexOf("{accountMenu}"));
+    expect(topBarSrc).toContain("HouseLeadChrome");
+    expect(topBarSrc).toContain('workspace="social"');
+    expect(topBarSrc).toContain("<UserMenu");
     const triggerSrc = src.slice(
       src.indexOf("data-workspace-switcher-trigger"),
       src.indexOf("data-workspace-switcher-popover"),
@@ -241,49 +241,46 @@ describe("workspace switcher placement", () => {
   it("puts the phone pill after the hamburger and keeps desktop + Social trailing", () => {
     expect(shellSrc).not.toContain("data-workspace-switcher-rail");
     expect(shellSrc).not.toContain("data-workspace-switcher-lead");
-    expect(shellSrc).toContain("data-brand-emblem");
-    expect(shellSrc).toContain("data-app-header-trailing");
-    expect(shellSrc).toContain("data-app-header-workspace-pill");
-    expect(shellSrc).toContain("APP_HEADER_LEADING_CLASS");
-    expect(shellSrc).toContain("APP_HEADER_TRAILING_CLUSTER_CLASS");
-    expect(shellSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
-    const leading = shellSrc.slice(
-      shellSrc.indexOf("data-app-header-leading"),
-      shellSrc.indexOf("data-app-header-trailing"),
+    expect(leadSrc).toContain("data-brand-emblem");
+    expect(leadSrc).toContain("data-app-header-trailing");
+    expect(leadSrc).toContain("data-app-header-workspace-pill");
+    expect(leadSrc).toContain("APP_HEADER_LEADING_CLASS");
+    expect(leadSrc).toContain("APP_HEADER_TRAILING_CLUSTER_CLASS");
+    expect(leadSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
+    expect(shellSrc).toContain("<HouseLeadChrome");
+    expect(shellSrc).toContain("MobileNavSlot");
+    const leading = leadSrc.slice(
+      leadSrc.indexOf("data-app-header-leading"),
+      leadSrc.indexOf("data-app-header-trailing"),
     );
     expect(leading).toContain('tone="pill"');
-    expect(leading.indexOf("MobileNavSlot")).toBeLessThan(
+    expect(leading.indexOf("{leadingNav}")).toBeLessThan(
       leading.indexOf("data-app-header-workspace-pill"),
     );
-    const trailing = shellSrc.slice(
-      shellSrc.indexOf("data-app-header-trailing"),
-      shellSrc.indexOf("</header>"),
+    const trailing = leadSrc.slice(
+      leadSrc.indexOf("data-app-header-trailing"),
+      leadSrc.indexOf("</header>"),
     );
     expect(trailing).toContain("data-app-header-workspace-desktop");
     expect(trailing).toContain('presentation="pills"');
     expect(trailing).not.toContain('tone="pill"');
     expect(trailing).toContain("WorkspaceSwitcher");
-    expect(trailing).toContain("AccountMenuSlot");
+    expect(trailing).toContain("{accountMenu}");
     expect(trailing.indexOf("WorkspaceSwitcher")).toBeLessThan(
-      trailing.indexOf("AccountMenuSlot"),
+      trailing.indexOf("{accountMenu}"),
     );
-    expect(topBarSrc.indexOf("data-brand-emblem")).toBeLessThan(
-      topBarSrc.indexOf("data-social-header-actions"),
+    expect(leadSrc.indexOf("data-brand-emblem")).toBeLessThan(
+      leadSrc.indexOf("data-social-header-actions"),
     );
-    expect(topBarSrc.indexOf("data-social-header-actions")).toBeLessThan(
-      topBarSrc.indexOf("data-app-header-trailing"),
+    expect(leadSrc.indexOf("data-social-header-actions")).toBeLessThan(
+      leadSrc.indexOf("data-app-header-trailing"),
     );
-    expect(topBarSrc.indexOf("data-app-header-trailing")).toBeLessThan(
-      topBarSrc.indexOf("<WorkspaceSwitcher"),
+    expect(leadSrc.indexOf("data-app-header-trailing")).toBeLessThan(
+      leadSrc.indexOf('presentation="pills"'),
     );
-    expect(topBarSrc.indexOf("<WorkspaceSwitcher")).toBeLessThan(
-      topBarSrc.indexOf("<UserMenu"),
-    );
-    expect(topBarSrc).toContain("data-app-header-workspace-pill");
-    expect(topBarSrc).toContain("data-app-header-workspace-desktop");
-    expect(topBarSrc).toContain("APP_HEADER_TRAILING_CLUSTER_CLASS");
-    expect(topBarSrc).toContain("md:pr-[var(--content-inset)]");
-    expect(topBarSrc).toContain("pr-[var(--space-6)]");
+    expect(topBarSrc).toContain("HouseLeadChrome");
+    expect(topBarSrc).toContain('workspace="social"');
+    expect(leadSrc).toContain("HOUSE_LEAD_CHROME_CLASS");
   });
 });
 

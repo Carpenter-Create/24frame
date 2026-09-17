@@ -3,8 +3,9 @@ import { SOCIAL_ROUTES } from "@/lib/social";
 import { EDUCATION_HREF } from "@/lib/education";
 
 // Quiet Education header search. Course + video only. Copy lives here,
-// not in JSX. Aggregation keeps no top search. Social keeps its own live
-// Explore search. Do not reuse Titles SearchField.
+// not in JSX. Mounts in the shared mid-lead slot with Social live
+// Explore search (Facebook-compact). Aggregation keeps no top search.
+// Do not reuse Titles SearchField.
 
 export const EDUCATION_SEARCH = {
   label: "Search courses and videos",
