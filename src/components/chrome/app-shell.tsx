@@ -28,7 +28,12 @@ import {
   migrateSidebarCollapsedCookie,
   persistSidebarCollapsed,
 } from "@/lib/rail-collapse";
-import { APP_HEADER_TRAILING_CLUSTER_CLASS } from "@/lib/workspace-switcher";
+import {
+  APP_HEADER_LEADING_CLASS,
+  APP_HEADER_TRAILING_CLUSTER_CLASS,
+  APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS,
+  APP_HEADER_WORKSPACE_PILL_HOST_CLASS,
+} from "@/lib/workspace-switcher";
 import { PRODUCT_NAME } from "@/lib/product";
 import { isSettingsPath, SETTINGS_RAIL_PAD_CLASS } from "@/lib/settings";
 import {
@@ -258,15 +263,16 @@ export function AppShell({
         </div>
       </aside>
 
-      {/* Access header trailing cluster is workspace switcher + avatar —
-          same slot as Social / Education. One switcher, left of the
-          avatar, gap 8. Hamburger stays left alone — do not center the
-          workspace name. Period stays on the Dashboard org row, not
-          this header. Rail top-left stays the static 24 brand. No org
-          switcher on any route. Search mounts on the Access `/messages`
-          gate, and on mobile `/titles` (528:542). Desktop 1:3, `/` 1:2,
-          and `/titles/[id]` stay that pair. Phone avatar opens 544:561.
-          Hamburger stays the nav sheet. */}
+      {/* Access phone header is hamburger · gap 8 · Aggregation pill
+          left, avatar alone right. Do not center the pill. Do not
+          cluster it with the avatar. Desktop keeps the trailing
+          switcher + avatar cluster. Period stays on the Dashboard
+          org row, not this header. Rail top-left stays the static
+          24 brand. No org switcher on any route. Search mounts on
+          the Access `/messages` gate, and on mobile `/titles`
+          (528:542). Desktop 1:3, `/` 1:2, and `/titles/[id]` stay
+          that pair. Phone avatar opens 544:561. Hamburger stays the
+          nav sheet. Do not invent Move / search chrome. */}
       <header
         className={cn(
           "sticky top-0 z-40 flex items-center justify-end gap-4 border-b border-hairline bg-surface/85 backdrop-blur",
@@ -276,19 +282,30 @@ export function AppShell({
         data-app-header=""
         style={{ height: "var(--header-height)", marginLeft: "var(--sidebar-width)" }}
       >
-        <div data-app-header-leading="" className="mr-auto flex min-w-0 flex-1 items-center gap-2">
+        <div data-app-header-leading="" className={APP_HEADER_LEADING_CLASS}>
           {settingsPage ? (
             <SettingsHeaderBack />
           ) : (
             <MobileNavSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />
           )}
+          <div
+            data-app-header-workspace-pill=""
+            className={APP_HEADER_WORKSPACE_PILL_HOST_CLASS}
+          >
+            <WorkspaceSwitcher current={workspace} tone="pill" />
+          </div>
           {messagesPage ? (
             <MessagesHeaderSlot chrome={chrome} messagesSurface={messagesSurface} />
           ) : null}
           {titlesBleed ? <TitlesHeaderSearch /> : null}
         </div>
         <div data-app-header-trailing="" className={APP_HEADER_TRAILING_CLUSTER_CLASS}>
-          <WorkspaceSwitcher current={workspace} />
+          <div
+            data-app-header-workspace-desktop=""
+            className={APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS}
+          >
+            <WorkspaceSwitcher current={workspace} />
+          </div>
           <AccountMenuSlot
             chrome={chrome}
             email={email}

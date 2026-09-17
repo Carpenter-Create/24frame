@@ -15,9 +15,16 @@ import {
   DASHBOARD_TITLE_MOBILE_CLASS,
 } from "@/lib/dashboard-craft";
 import {
+  APP_HEADER_LEADING_CLASS,
   APP_HEADER_TRAILING_CLUSTER_CLASS,
-  WORKSPACE_SWITCHER_CHEVRON_CLASS,
+  APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS,
+  APP_HEADER_WORKSPACE_PILL_HOST_CLASS,
+  WORKSPACE_SWITCHER,
+  WORKSPACE_SWITCHER_PILL_CHEVRON_CLASS,
+  WORKSPACE_SWITCHER_PILL_PANEL_CLASS,
+  WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS,
 } from "@/lib/workspace-switcher";
+import { WorkspaceSwitcher } from "@/components/chrome/workspace-switcher";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
@@ -45,34 +52,25 @@ function chromeHtml() {
   );
 }
 
-describe("Aggregation Dashboard mobile chrome — header cluster", () => {
-  it("locks the trailing [workspace][avatar] cluster at gap 8", () => {
-    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("shrink-0");
-    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("gap-[var(--space-2)]");
-    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).not.toContain("gap-[var(--space-3)]");
-    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).not.toContain("gap-[var(--space-4)]");
-    expect(shellSrc).toContain("data-app-header-trailing");
-    expect(shellSrc).toContain("APP_HEADER_TRAILING_CLUSTER_CLASS");
-    const trailing = shellSrc.slice(
-      shellSrc.indexOf("data-app-header-trailing"),
-      shellSrc.indexOf("</header>"),
-    );
-    expect(trailing).toContain("WorkspaceSwitcher");
-    expect(trailing).toContain("AccountMenuSlot");
-    expect(trailing.indexOf("WorkspaceSwitcher")).toBeLessThan(trailing.indexOf("AccountMenuSlot"));
-    expect(trailing).not.toContain("MobileNav");
-    expect(trailing).not.toContain("data-dashboard-period");
-  });
-
-  it("keeps the hamburger left alone — no centered Aggregation orphan", () => {
+describe("Aggregation Dashboard mobile chrome — Mercury leading pill", () => {
+  it("puts a compact Aggregation pill after the hamburger — not centered, not with the avatar", () => {
+    expect(APP_HEADER_LEADING_CLASS).toContain("gap-[var(--space-2)]");
+    expect(APP_HEADER_LEADING_CLASS).not.toContain("justify-center");
+    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).toContain("md:hidden");
+    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).not.toContain("mx-auto");
+    expect(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS).toContain("border-hairline");
+    expect(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS).toContain("bg-surface-muted");
+    expect(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS).toContain("t-body-sm");
+    expect(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS).toContain("text-ink");
+    expect(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS).not.toMatch(/green|emerald|#00|#12|#1[Bb]|#1769FF/);
     expect(shellSrc).toContain("data-app-header-leading");
-    expect(shellSrc).toContain("MobileNavSlot");
+    expect(shellSrc).toContain("data-app-header-workspace-pill");
+    expect(shellSrc).toContain("APP_HEADER_LEADING_CLASS");
+    expect(shellSrc).toContain('tone="pill"');
     const header = shellSrc.slice(
       shellSrc.indexOf("data-app-header="),
       shellSrc.indexOf("</header>"),
     );
-    expect(header).toContain("data-app-header-leading");
-    expect(header).toContain("data-app-header-trailing");
     expect(header).not.toContain("justify-center");
     expect(header).not.toContain("left-1/2");
     expect(header).not.toContain("-translate-x-1/2");
@@ -81,29 +79,82 @@ describe("Aggregation Dashboard mobile chrome — header cluster", () => {
       header.indexOf("data-app-header-trailing"),
     );
     expect(leading).toContain("MobileNavSlot");
-    expect(leading).not.toContain("WorkspaceSwitcher");
+    expect(leading).toContain("data-app-header-workspace-pill");
+    expect(leading).toContain("<WorkspaceSwitcher current={workspace} tone=\"pill\" />");
     expect(leading).not.toContain("AccountMenuSlot");
-    expect(leading.indexOf("data-app-header-leading")).toBeLessThan(
-      header.indexOf("data-app-header-trailing"),
+    expect(leading.indexOf("MobileNavSlot")).toBeLessThan(
+      leading.indexOf("data-app-header-workspace-pill"),
     );
+    expect(leading.indexOf("data-app-header-workspace-pill")).toBeLessThan(
+      leading.indexOf("MessagesHeaderSlot"),
+    );
+    const pillHtml = renderToStaticMarkup(
+      createElement(WorkspaceSwitcher, { current: "aggregation", tone: "pill" }),
+    );
+    expect(pillHtml).toContain('data-workspace-switcher-tone="pill"');
+    expect(pillHtml).toContain("Aggregation");
+    expect(pillHtml).toContain(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS);
+    expect(pillHtml).toContain("data-workspace-switcher-chevron");
   });
 
-  it("keeps a quiet workspace chevron always-on for phone affordance", () => {
-    expect(WORKSPACE_SWITCHER_CHEVRON_CLASS).toContain("opacity-0");
-    expect(WORKSPACE_SWITCHER_CHEVRON_CLASS).toContain("max-md:opacity-100");
-    expect(WORKSPACE_SWITCHER_CHEVRON_CLASS).toContain("group-hover:opacity-100");
+  it("leaves the trailing avatar alone — no Aggregation+avatar phone cluster", () => {
+    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("shrink-0");
+    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("gap-[var(--space-2)]");
+    expect(APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS).toContain("hidden");
+    expect(APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS).toContain("md:contents");
+    expect(shellSrc).toContain("data-app-header-trailing");
+    expect(shellSrc).toContain("APP_HEADER_TRAILING_CLUSTER_CLASS");
+    const trailing = shellSrc.slice(
+      shellSrc.indexOf("data-app-header-trailing"),
+      shellSrc.indexOf("</header>"),
+    );
+    expect(trailing).toContain("data-app-header-workspace-desktop");
+    expect(trailing).toContain("<WorkspaceSwitcher current={workspace} />");
+    expect(trailing).not.toContain('tone="pill"');
+    expect(trailing).toContain("AccountMenuSlot");
+    expect(trailing.indexOf("data-app-header-workspace-desktop")).toBeLessThan(
+      trailing.indexOf("AccountMenuSlot"),
+    );
+    expect(trailing).not.toContain("MobileNav");
+    expect(trailing).not.toContain("data-dashboard-period");
+    expect(trailing).not.toContain("Move");
+    expect(shellSrc).not.toContain("data-header-move");
+    expect(shellSrc).not.toContain("data-mercury-search");
+    expect(shellSrc).not.toContain("data-workspace-switcher-lead");
+    expect(shellSrc).not.toContain("data-workspace-switcher-rail");
+  });
+
+  it("keeps a quiet always-on chevron on the pill and the Workspaces menu", () => {
+    expect(WORKSPACE_SWITCHER_PILL_CHEVRON_CLASS).toContain("opacity-100");
+    expect(WORKSPACE_SWITCHER_PILL_CHEVRON_CLASS).not.toContain("opacity-0");
+    expect(WORKSPACE_SWITCHER_PILL_PANEL_CLASS).toContain("left-0");
+    expect(WORKSPACE_SWITCHER_PILL_PANEL_CLASS).not.toContain("right-0");
+    expect(WORKSPACE_SWITCHER.heading).toBe("Workspaces");
+    const open = renderToStaticMarkup(
+      createElement(WorkspaceSwitcher, {
+        current: "aggregation",
+        tone: "pill",
+        defaultOpen: true,
+      }),
+    );
+    expect(open).toContain("data-workspace-switcher-popover");
+    expect(open).toContain(WORKSPACE_SWITCHER.heading);
+    expect(open).toContain('data-workspace-switcher-option="aggregation"');
+    expect(open).toContain('data-workspace-switcher-option="social"');
+    expect(open).toContain('data-workspace-switcher-option="education"');
+    expect(open).toContain(WORKSPACE_SWITCHER_PILL_PANEL_CLASS);
     expect(switcherSrc).toContain("Mercury");
     expect(switcherSrc).toContain("Workspaces");
   });
 
   it("does not put Period in the top header next to Aggregation", () => {
-    const trailing = shellSrc.slice(
-      shellSrc.indexOf("data-app-header-trailing"),
+    const header = shellSrc.slice(
+      shellSrc.indexOf("data-app-header="),
       shellSrc.indexOf("</header>"),
     );
-    expect(trailing).not.toContain("DashboardAdminControls");
-    expect(trailing).not.toContain("data-dashboard-period");
-    expect(trailing).not.toContain("DASHBOARD_ADMIN.period");
+    expect(header).not.toContain("DashboardAdminControls");
+    expect(header).not.toContain("data-dashboard-period");
+    expect(header).not.toContain("DASHBOARD_ADMIN.period");
     expect(shellSrc).not.toContain("data-dashboard-period");
     expect(heroSrc).not.toContain("data-app-header");
   });

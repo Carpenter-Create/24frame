@@ -41,8 +41,9 @@ describe("workspace switcher header control", () => {
     expect(html).toContain(WORKSPACE_SWITCHER_CHEVRON_CLASS);
     expect(html).not.toContain('data-workspace-switcher-chevron-open');
     expect(html).not.toContain("/education");
+    expect(shellSrc).toContain('<WorkspaceSwitcher current={workspace} tone="pill" />');
     expect(shellSrc).toContain("<WorkspaceSwitcher current={workspace} />");
-    expect(shellSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(1);
+    expect(shellSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
     expect(shellSrc).not.toContain("data-workspace-switcher-rail");
     expect(shellSrc).not.toContain("data-workspace-switcher-lead");
     expect(shellSrc.indexOf("<WorkspaceSwitcher")).toBeLessThan(shellSrc.indexOf("<AccountMenuSlot"));
@@ -166,17 +167,28 @@ describe("workspace switcher header control", () => {
 });
 
 describe("workspace switcher placement", () => {
-  it("puts one switcher in the shared right cluster, left of the avatar", () => {
+  it("puts the phone pill after the hamburger and keeps desktop + Social trailing", () => {
     expect(shellSrc).not.toContain("data-workspace-switcher-rail");
     expect(shellSrc).not.toContain("data-workspace-switcher-lead");
     expect(shellSrc).toContain("data-brand-emblem");
     expect(shellSrc).toContain("data-app-header-trailing");
+    expect(shellSrc).toContain("data-app-header-workspace-pill");
+    expect(shellSrc).toContain("APP_HEADER_LEADING_CLASS");
     expect(shellSrc).toContain("APP_HEADER_TRAILING_CLUSTER_CLASS");
-    expect(shellSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(1);
+    expect(shellSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
+    const leading = shellSrc.slice(
+      shellSrc.indexOf("data-app-header-leading"),
+      shellSrc.indexOf("data-app-header-trailing"),
+    );
+    expect(leading).toContain('tone="pill"');
+    expect(leading.indexOf("MobileNavSlot")).toBeLessThan(
+      leading.indexOf("data-app-header-workspace-pill"),
+    );
     const trailing = shellSrc.slice(
       shellSrc.indexOf("data-app-header-trailing"),
       shellSrc.indexOf("</header>"),
     );
+    expect(trailing).toContain("data-app-header-workspace-desktop");
     expect(trailing).toContain("WorkspaceSwitcher");
     expect(trailing).toContain("AccountMenuSlot");
     expect(trailing.indexOf("WorkspaceSwitcher")).toBeLessThan(

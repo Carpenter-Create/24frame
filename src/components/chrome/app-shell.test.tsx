@@ -124,14 +124,20 @@ describe("AppShell header", () => {
       'data-photo="https://s3.example/signed-avatar"',
     );
     expect(shellSrc).toContain("Phone avatar opens 544:561");
-    expect(shellSrc).toContain("One switcher, left of the");
+    expect(shellSrc).toContain("hamburger · gap 8 · Aggregation pill");
     expect(shellSrc).toContain("WorkspaceSwitcher");
+    expect(shellSrc).toContain('<WorkspaceSwitcher current={workspace} tone="pill" />');
     expect(shellSrc).toContain("<WorkspaceSwitcher current={workspace} />");
     expect(html).toContain("data-workspace-switcher");
     expect(html).toContain("Aggregation");
-    expect((html.match(/data-workspace-switcher=""/g) ?? []).length).toBe(1);
+    expect((html.match(/data-workspace-switcher=""/g) ?? []).length).toBe(2);
+    expect(html).toContain('data-workspace-switcher-tone="pill"');
+    expect(html).toContain("data-app-header-workspace-pill");
     expect(html).not.toContain("data-workspace-switcher-rail");
     expect(html).not.toContain("data-workspace-switcher-lead");
+    expect(html.indexOf("data-app-header-workspace-pill")).toBeLessThan(
+      html.indexOf("data-user-menu-host"),
+    );
     expect(html.indexOf("data-workspace-switcher")).toBeLessThan(html.indexOf("data-user-menu-host"));
     expect(shellSrc).toContain("<MobileNavSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />");
     expect(shellSrc).not.toContain("AccountOverlay");
@@ -141,6 +147,7 @@ describe("AppShell header", () => {
   it("is avatar-only on every Access route — no org switcher", () => {
     expect(shellSrc).not.toContain("OrganizationSwitcher");
     expect(shellSrc).toContain("justify-end");
+    expect(shellSrc).toContain('<WorkspaceSwitcher current={workspace} tone="pill" />');
     expect(shellSrc).toContain("<WorkspaceSwitcher current={workspace} />");
 
     for (const path of ["/", "/titles", "/deliveries", "/catalog-health", "/messages"]) {
