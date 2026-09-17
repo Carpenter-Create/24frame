@@ -577,32 +577,105 @@ export function dashboardActivityActor(
   return { id, initial: dashboardActivityInitial(name) };
 }
 
+export const DASHBOARD_ACTIVITY_AUDIT_ENTITIES = ["titles", "deliveries", "findings"] as const;
+export const DASHBOARD_ACTIVITY_AUDIT_ACTIONS = ["insert", "update"] as const;
+
+export type DashboardActivityAuditEntity = (typeof DASHBOARD_ACTIVITY_AUDIT_ENTITIES)[number];
+export type DashboardActivityAuditAction = (typeof DASHBOARD_ACTIVITY_AUDIT_ACTIONS)[number];
+
+export type DashboardAuditEvent = {
+  entity: string;
+  entity_id: string | null;
+  action: string;
+  actor: string | null;
+  at: string;
+};
+
+export type DashboardActivityAuditTarget = {
+  entity: DashboardActivityAuditEntity;
+  entityId: string;
+  action: DashboardActivityAuditAction;
+};
+
+export function activityRowEntity(rowId: string): DashboardActivityAuditTarget | null {
+  if (rowId.startsWith("title:")) {
+    const entityId = rowId.slice("title:".length).trim();
+    return entityId ? { entity: "titles", entityId, action: "insert" } : null;
+  }
+  if (rowId.startsWith("delivery:")) {
+    const entityId = rowId.slice("delivery:".length).trim();
+    return entityId ? { entity: "deliveries", entityId, action: "update" } : null;
+  }
+  if (rowId.startsWith("finding:")) {
+    const rest = rowId.slice("finding:".length).trim();
+    // finding:${id} only — composite title+created_at keys cannot join audit_log.
+    if (!rest || rest.includes(":")) return null;
+    return { entity: "findings", entityId: rest, action: "insert" };
+  }
+  return null;
+}
+
 export function activityDeliveryId(rowId: string): string | null {
-  return rowId.startsWith("delivery:") ? rowId.slice("delivery:".length) : null;
+  const target = activityRowEntity(rowId);
+  return target?.entity === "deliveries" ? target.entityId : null;
+}
+
+export function activityAuditEntityIds(rows: readonly DashboardActivityRow[]): string[] {
+  return [
+    ...new Set(
+      rows
+        .map((row) => activityRowEntity(row.id)?.entityId)
+        .filter((id): id is string => Boolean(id)),
+    ),
+  ];
+}
+
+function latestAuditEvent(
+  events: readonly DashboardAuditEvent[],
+  target: DashboardActivityAuditTarget,
+): DashboardAuditEvent | null {
+  const matches = events.filter(
+    (event) => event.entity === target.entity && event.entity_id === target.entityId,
+  );
+  const preferred =
+    target.entity === "deliveries"
+      ? matches.filter((event) => event.action === "update")
+      : matches.filter((event) => event.action === target.action);
+  const pool = preferred.length > 0 ? preferred : target.entity === "deliveries"
+    ? matches.filter((event) => event.action === "insert")
+    : [];
+  return [...pool].sort((a, b) => (a.at < b.at ? 1 : -1))[0] ?? null;
 }
 
 /**
- * Overlay real delivery actors + profile names. Missing people stay a muted
- * "?" — never an invented name.
+ * Stamp audit_log.actor + audit_log.at onto synthesized activity rows.
+ * Missing or unresolved people stay a muted "?" — never an invented name.
+ * Does not invent event types; copy grammar stays Title added / Delivery
+ * updated / Finding opened.
  */
-export function applyActivityActors(
+export function applyActivityAudit(
   rows: readonly DashboardActivityRow[],
   input: {
-    deliveryActors?: ReadonlyMap<string, string | null>;
+    events?: readonly DashboardAuditEvent[];
     profileNames?: ReadonlyMap<string, string | null>;
   } = {},
 ): DashboardActivityRow[] {
-  return rows.map((row) => {
-    const deliveryId = activityDeliveryId(row.id);
-    const actorId =
-      (deliveryId ? input.deliveryActors?.get(deliveryId) : null) ?? row.actorId;
-    const name = actorId ? (input.profileNames?.get(actorId) ?? null) : null;
-    return {
-      ...row,
-      actorId,
-      actor: dashboardActivityActor(actorId, name),
-    };
-  });
+  const events = input.events ?? [];
+  return rows
+    .map((row) => {
+      const target = activityRowEntity(row.id);
+      const event = target ? latestAuditEvent(events, target) : null;
+      if (!event) return row;
+      const actorId = event.actor?.trim() || null;
+      const name = actorId ? (input.profileNames?.get(actorId) ?? null) : null;
+      return {
+        ...row,
+        at: event.at || row.at,
+        actorId,
+        actor: dashboardActivityActor(actorId, name),
+      };
+    })
+    .sort((a, b) => (a.at < b.at ? 1 : -1));
 }
 
 function activityHref(catalogId: string | null | undefined): string {
@@ -619,7 +692,6 @@ export function recentAccountActivity(input: {
     title_id: string;
     title: string;
     updated_at: string | null;
-    created_by?: string | null;
   }[];
   findings: readonly ClientHomeFinding[];
   period: DashboardPeriod;
@@ -635,7 +707,6 @@ export function recentAccountActivity(input: {
 
   const rows: DashboardActivityRow[] = [];
   for (const title of titles) {
-    const actorId = title.created_by?.trim() || null;
     rows.push({
       id: `title:${title.id}`,
       title: title.title,
@@ -643,14 +714,13 @@ export function recentAccountActivity(input: {
       at: title.created_at,
       count: deliveryCounts.get(title.id) ?? 0,
       detail: DASHBOARD_ADMIN.titleAdded,
-      actorId,
-      actor: dashboardActivityActor(actorId),
+      actorId: null,
+      actor: dashboardActivityActor(null),
     });
   }
   for (const row of deliveries) {
     if (!row.updated_at) continue;
     const title = input.titles.find((item) => item.id === row.title_id);
-    const actorId = row.created_by?.trim() || null;
     rows.push({
       id: `delivery:${row.delivery_id}`,
       title: row.title,
@@ -658,8 +728,8 @@ export function recentAccountActivity(input: {
       at: row.updated_at,
       count: 1,
       detail: DASHBOARD_ADMIN.deliveryUpdated,
-      actorId,
-      actor: dashboardActivityActor(actorId),
+      actorId: null,
+      actor: dashboardActivityActor(null),
     });
   }
   for (const finding of input.findings) {
@@ -667,8 +737,11 @@ export function recentAccountActivity(input: {
     if (!finding.created_at || !isoInDashboardPeriod(finding.created_at, input.period)) continue;
     const title = input.titles.find((row) => row.id === finding.entity_id);
     if (!title) continue;
+    const findingId = finding.id?.trim();
     rows.push({
-      id: `finding:${finding.entity_id}:${finding.created_at}`,
+      id: findingId
+        ? `finding:${findingId}`
+        : `finding:${finding.entity_id}:${finding.created_at}`,
       title: title.title,
       href: activityHref(title.catalog_id),
       at: finding.created_at,

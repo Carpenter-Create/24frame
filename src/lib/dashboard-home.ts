@@ -85,6 +85,8 @@ export type ClientHomeFinding = {
   message?: string | null;
   severity?: string | null;
   created_at?: string | null;
+  /** my_findings.id — used to join audit_log.entity_id. Optional in tests. */
+  id?: string;
 };
 
 export type ClientHomeDoNextItem = {

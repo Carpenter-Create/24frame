@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createClient } from "@/lib/supabase/server";
 import { getOrgContext } from "@/lib/supabase/context";
 import { CLIENTS_PAGE, ORG_ROLE_LABELS, ORG_STATUS_LABELS } from "@/lib/clients";
-import { DASHBOARD_HOME, dashboardJustInDate } from "@/lib/dashboard-home";
+import { DASHBOARD_HOME, dashboardJustInDate, dashboardJustInTime } from "@/lib/dashboard-home";
 import { DASHBOARD_ADMIN } from "@/lib/dashboard-admin";
 import { DASHBOARD_LICENSING } from "@/lib/dashboard-licensing";
 import { DASHBOARD_CRAFT_FIXTURE_ENV, DASHBOARD_FIXTURE } from "@/lib/dashboard-fixture";
@@ -69,7 +69,19 @@ function stubClient(
     entity_id: string;
     message?: string | null;
     severity?: string | null;
+    id?: string;
+    created_at?: string;
   }[] = [],
+  extras: {
+    audit?: {
+      entity: string;
+      entity_id: string | null;
+      action: string;
+      actor: string | null;
+      at: string;
+    }[];
+    profiles?: { id: string; display_name: string | null }[];
+  } = {},
 ) {
   const eq = vi.fn();
   const titlesChain = {
@@ -97,15 +109,23 @@ function stubClient(
     order: vi.fn(() => listChain),
     range: vi.fn(async () => ({ data: [], error: null })),
   };
+  const auditChain = {
+    select: vi.fn(() => auditChain),
+    eq: vi.fn(() => auditChain),
+    in: vi.fn(() => auditChain),
+    order: vi.fn(() => auditChain),
+    range: vi.fn(async () => ({ data: extras.audit ?? [], error: null })),
+  };
+  const profilesChain = {
+    select: vi.fn(() => profilesChain),
+    in: vi.fn(async () => ({ data: extras.profiles ?? [], error: null })),
+  };
   const from = vi.fn((table: string) => {
     if (table === "titles") return titlesChain;
     if (table === "finance_periods" || table === "contract_terms") return financeChain;
-    if (
-      table === "memberships" ||
-      table === "profiles" ||
-      table === "assets" ||
-      table === "deliveries"
-    ) {
+    if (table === "audit_log") return auditChain;
+    if (table === "profiles") return profilesChain;
+    if (table === "memberships" || table === "assets" || table === "deliveries") {
       return listChain;
     }
     throw new Error(`unexpected from(${table})`);
@@ -932,9 +952,50 @@ describe("company admin Overview hero", () => {
     expect(html).toContain("Synopsis is required.");
     expect(html).toContain("data-dashboard-activity-actor");
     expect(html).toContain("data-dashboard-activity-clock");
+    expect(html).toContain("?");
     expect(html).not.toContain("Licensed");
     expect(html).not.toContain("Removed");
     expect(html).not.toContain("Sample licensing");
+  });
+
+  it("surfaces audit_log actor initials and exact timestamp without inventing people", async () => {
+    const at = "2026-09-02T15:04:00.000Z";
+    stubClient(
+      [
+        {
+          id: "title-1",
+          title: "Winter Light",
+          status: "live",
+          created_at: "2026-09-02T00:00:00.000Z",
+          created_by: "ignored-creator",
+          catalog_id: "GC-0001234",
+        },
+      ],
+      [],
+      {
+        audit: [
+          {
+            entity: "titles",
+            entity_id: "title-1",
+            action: "insert",
+            actor: "maya",
+            at,
+          },
+        ],
+        profiles: [{ id: "maya", display_name: "Maya Chen" }],
+      },
+    );
+    vi.mocked(getOrgContext).mockResolvedValue(
+      ctx({ isGcStaff: false, orgStatus: "active", role: "account_owner" }) as never,
+    );
+    const html = renderToStaticMarkup(await DashboardPage({ searchParams: Promise.resolve({}) }));
+    expect(html).toContain("data-dashboard-activity-actor");
+    expect(html).toContain(">M<");
+    expect(html).toContain("data-dashboard-activity-clock");
+    expect(html).toContain(dashboardJustInDate(at));
+    expect(html).toContain(dashboardJustInTime(at));
+    expect(html).not.toContain("Maya Chen");
+    expect(html).not.toContain("ignored-creator");
   });
 
   it("does not load org money when a user is scoped", async () => {
