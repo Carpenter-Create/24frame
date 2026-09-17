@@ -6,6 +6,12 @@ import { GripVertical } from "lucide-react";
 
 import type { EducationAdminCourseRow, InstructorRow } from "@/lib/education-admin";
 import { educationCourseHref, moveOrderedIds } from "@/lib/education";
+import {
+  HOUSE_CARD_PAD,
+  HOUSE_RAIL_ACTIVE_CLASS,
+  HOUSE_RAIL_IDLE_CLASS,
+  HOUSE_RELATED_GAP_CLASS,
+} from "@/lib/house-shell";
 import { cn } from "@/lib/cn";
 
 import { reorderEducationCourses } from "./actions";
@@ -36,7 +42,11 @@ export function EducationCourseRail({
   return (
     <aside
       data-education-course-rail=""
-      className="flex w-full shrink-0 flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border border-hairline bg-surface px-[var(--space-4)] py-[var(--space-4)] lg:w-[16rem]"
+      className={cn(
+        "flex w-full shrink-0 flex-col rounded-[var(--radius-lg)] border border-hairline bg-surface shadow-none lg:w-[16rem]",
+        HOUSE_RELATED_GAP_CLASS,
+        HOUSE_CARD_PAD,
+      )}
     >
       <NewCourseButton instructors={instructors} />
       <ul className="flex flex-col">
@@ -64,8 +74,8 @@ export function EducationCourseRail({
                   href={href}
                   data-education-course-name=""
                   className={cn(
-                    "min-w-0 flex-1 truncate rounded-[var(--radius-sm)] px-[var(--space-2)] py-[var(--space-2)] t-body",
-                    current ? "bg-surface-muted font-medium text-ink" : "text-ink-2 hover:text-ink",
+                    "min-w-0 flex-1 truncate rounded-full px-[var(--space-2)] py-[var(--space-2)] t-body-sm",
+                    current ? HOUSE_RAIL_ACTIVE_CLASS : HOUSE_RAIL_IDLE_CLASS,
                   )}
                 >
                   {course.title}

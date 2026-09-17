@@ -5,6 +5,8 @@ import { UserMenu } from "@/components/chrome/user-menu";
 import { WorkspaceSwitcher } from "@/components/chrome/workspace-switcher";
 import { SocialIcon } from "@/components/social/social-icon";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/cn";
+import { HOUSE_SEARCH_PILL_CLASS } from "@/lib/house-shell";
 import { PRODUCT_NAME } from "@/lib/product";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { SOCIAL_ICON_SIZE_HEADER, SOCIAL_ICON_SIZE_SEARCH } from "@/lib/social-icons";
@@ -39,9 +41,12 @@ export function SocialTopBar({
         data-social-header-search=""
         action={SOCIAL_ROUTES.explore}
         method="get"
-        className="hidden h-9 w-[420px] items-center gap-2 rounded-[10px] bg-surface-muted px-3 md:flex"
+        className={cn(
+          "hidden h-9 w-[420px] items-center gap-2 px-3 md:flex",
+          HOUSE_SEARCH_PILL_CLASS,
+        )}
       >
-        <SocialIcon name="magnifying-glass" size={SOCIAL_ICON_SIZE_SEARCH} className="text-ink-2" />
+        <SocialIcon name="magnifying-glass" size={SOCIAL_ICON_SIZE_SEARCH} className="text-ink-3" />
         <label className="sr-only" htmlFor="social-header-q">
           {SOCIAL.explore.searchSocial}
         </label>
@@ -50,7 +55,7 @@ export function SocialTopBar({
           id="social-header-q"
           name="q"
           placeholder={SOCIAL.explore.searchSocial}
-          className="h-full flex-1 placeholder:text-ink-2"
+          className="h-full flex-1 placeholder:text-ink-3"
         />
       </form>
       <div className="flex items-center gap-[var(--space-3)]">
@@ -60,7 +65,7 @@ export function SocialTopBar({
             prefetch
             aria-label={SOCIAL.explore.searchSocial}
             data-social-header-search-icon=""
-            className="flex size-8 items-center justify-center text-ink md:hidden"
+            className="flex size-8 items-center justify-center text-ink-2 md:hidden"
           >
             <SocialIcon name="magnifying-glass" size={SOCIAL_ICON_SIZE_HEADER} />
           </Link>
@@ -69,7 +74,7 @@ export function SocialTopBar({
             prefetch
             aria-label={SOCIAL.dms.title}
             data-social-header-tray=""
-            className="hidden items-center justify-center text-ink md:flex"
+            className="hidden items-center justify-center text-ink-2 md:flex"
           >
             <SocialIcon name="tray" size={SOCIAL_ICON_SIZE_HEADER} />
           </Link>

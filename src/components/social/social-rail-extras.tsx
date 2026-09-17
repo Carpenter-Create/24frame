@@ -21,7 +21,7 @@ export function SocialRailAccountChip({
           socialInitials(label)
         )}
       </span>
-      <span className="min-w-0 truncate text-[12px] font-semibold text-ink">{label}</span>
+      <span className="min-w-0 truncate t-body-sm font-medium text-ink">{label}</span>
     </Link>
   );
 }

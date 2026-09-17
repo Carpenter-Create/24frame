@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 
 import { FORM_CONTROL_TEXT_CLASS } from "@/lib/form-control";
+import { HOUSE_SEARCH_PILL_CLASS } from "@/lib/house-shell";
 import { cn } from "@/lib/cn";
 
 // Debounced, URL-driven search (Visual/Metadata registers). Writes ?q= (preserving
@@ -51,8 +52,8 @@ export function SearchField({
           FORM_CONTROL_TEXT_CLASS,
           "text-ink placeholder:text-ink-3 focus:border-transparent focus:outline-none",
           hint
-            ? "h-8 w-56 rounded-full border-0 bg-surface-muted pl-8 pr-12 sm:w-80"
-            : "h-8 w-44 rounded-full border-0 bg-surface-muted pl-8 pr-3 sm:w-56",
+            ? `h-8 w-56 pl-8 pr-12 sm:w-80 ${HOUSE_SEARCH_PILL_CLASS}`
+            : `h-8 w-44 pl-8 pr-3 sm:w-56 ${HOUSE_SEARCH_PILL_CLASS}`,
         )}
       />
       {hint ? (

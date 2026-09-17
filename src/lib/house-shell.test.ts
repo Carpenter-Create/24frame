@@ -1,0 +1,216 @@
+import { existsSync, readFileSync } from "node:fs";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it, vi } from "vitest";
+
+import { EducationCourseRail } from "@/app/(app)/(operator)/education/education-course-rail";
+import { SocialRailAccountChip } from "@/components/social/social-rail-extras";
+import { SocialTopBar } from "@/components/social/social-top-bar";
+import { PageHeader } from "@/components/ui/page-header";
+import {
+  DASHBOARD_CARD_PAD,
+  DASHBOARD_PERIOD_OPTION_SELECTED_CLASS,
+  DASHBOARD_RELATED_GAP_CLASS,
+  DASHBOARD_SECTION_AIR_CLASS,
+  DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
+  DASHBOARD_TOP_PILL_BUTTON_ON_CLASS,
+} from "@/lib/dashboard-craft";
+import {
+  HOUSE_CARD_PAD,
+  HOUSE_FILTER_OFF_CLASS,
+  HOUSE_FILTER_ON_CLASS,
+  HOUSE_PERIOD_SELECTED_CLASS,
+  HOUSE_RAIL_ACTIVE_CLASS,
+  HOUSE_RAIL_IDLE_CLASS,
+  HOUSE_RAIL_ITEM_CLASS,
+  HOUSE_RELATED_GAP_CLASS,
+  HOUSE_SEARCH_PILL_CLASS,
+  HOUSE_SECTION_AIR_CLASS,
+} from "@/lib/house-shell";
+import { SOCIAL_PILL_ACTIVE_CLASS, SOCIAL_PILL_IDLE_CLASS } from "@/lib/social-chrome";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
+  usePathname: () => "/education/orientation",
+}));
+
+vi.mock("@/app/(app)/(operator)/education/actions", () => ({
+  reorderEducationCourses: vi.fn(),
+  createEducationCourse: vi.fn(),
+  uploadEducationCover: vi.fn(),
+}));
+
+vi.mock("next/link", async () => {
+  const React = await import("react");
+  function MockLink({
+    href,
+    children,
+    ...props
+  }: {
+    href: string;
+    children?: React.ReactNode;
+    prefetch?: boolean;
+  }) {
+    return React.createElement("a", { href, ...props }, children);
+  }
+  return { __esModule: true, default: MockLink, useLinkStatus: () => ({ pending: false }) };
+});
+
+const tokens = readFileSync("src/app/tokens.css", "utf8");
+const globals = readFileSync("src/app/globals.css", "utf8");
+const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
+const sideNav = readFileSync("src/components/chrome/side-nav.tsx", "utf8");
+const socialTopBar = readFileSync("src/components/social/social-top-bar.tsx", "utf8");
+const socialChrome = readFileSync("src/lib/social-chrome.ts", "utf8");
+const socialTabBar = readFileSync("src/components/social/social-mobile-tab-bar.tsx", "utf8");
+const educationRail = readFileSync(
+  "src/app/(app)/(operator)/education/education-course-rail.tsx",
+  "utf8",
+);
+const educationShell = readFileSync(
+  "src/app/(app)/(operator)/education/education-shell.tsx",
+  "utf8",
+);
+const card = readFileSync("src/components/ui/card.tsx", "utf8");
+const pageHeader = readFileSync("src/components/ui/page-header.tsx", "utf8");
+
+const HOUSE_SHELL_COMMENT_PATHS = [
+  "src/lib/house-shell.ts",
+  "src/lib/dashboard-craft.ts",
+  "src/app/tokens.css",
+  "src/app/globals.css",
+  "src/components/chrome/app-shell.tsx",
+  "src/components/chrome/side-nav.tsx",
+  "src/components/social/social-top-bar.tsx",
+  "src/lib/social-chrome.ts",
+  "src/app/(app)/(operator)/education/education-shell.tsx",
+  "src/app/(app)/(operator)/education/education-course-rail.tsx",
+  "src/components/ui/card.tsx",
+  "src/components/ui/page-header.tsx",
+  "src/components/layout/search-field.tsx",
+  "src/components/layout/status-filter.tsx",
+] as const;
+
+describe("house shell rematch — Aggregation · Social · Education", () => {
+  it("keeps one canvas, card, and accent wash for every workspace", () => {
+    expect(tokens).toMatch(/--bg:\s*#fafafb;/);
+    expect(tokens).toMatch(/--surface:\s*#ffffff;/);
+    expect(tokens).toMatch(/--surface-muted:\s*#f4f4f6;/);
+    expect(tokens).toMatch(/--text:\s*#14171a;/);
+    expect(tokens).toMatch(/--accent:\s*#1769ff;/);
+    expect(tokens).toMatch(/--radius-lg:\s*16px;/);
+    expect(tokens).toMatch(/--content-inset:\s*48px;/);
+    expect(tokens).toContain("--accent-wash:");
+    expect(tokens).toMatch(/Aggregation · Social · Education/);
+    expect(tokens).not.toMatch(/--radius-lg:\s*14px;/);
+    expect(tokens).not.toMatch(/\[data-(?:dashboard|social|education)[^\]]*\]/);
+    expect(globals).toMatch(/\.card-surface\s*\{[\s\S]*?border-radius:\s*var\(--radius-lg\)/);
+    expect(globals).toMatch(/\.card-surface\s*\{[\s\S]*?box-shadow:\s*none/);
+    expect(existsSync("src/app/tokens-social.css")).toBe(false);
+    expect(existsSync("src/app/tokens-education.css")).toBe(false);
+    expect(existsSync("src/app/tokens-aggregation.css")).toBe(false);
+    expect(HOUSE_CARD_PAD).toBe("px-[var(--space-4)] py-[var(--space-4)]");
+    expect(HOUSE_RELATED_GAP_CLASS).toBe("gap-[var(--space-2)]");
+    expect(HOUSE_SECTION_AIR_CLASS).toBe("gap-[var(--space-6)]");
+    expect(HOUSE_SEARCH_PILL_CLASS).toBe("rounded-full border-0 bg-surface-muted");
+    expect(HOUSE_RAIL_ITEM_CLASS).toContain("rounded-full");
+    expect(HOUSE_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash font-medium text-accent");
+    expect(HOUSE_RAIL_IDLE_CLASS).toBe("font-normal text-ink hover:bg-surface-muted");
+    expect(HOUSE_FILTER_ON_CLASS).toBe("bg-ink text-surface");
+    expect(HOUSE_FILTER_OFF_CLASS).toBe("bg-surface-muted text-ink");
+    expect(HOUSE_PERIOD_SELECTED_CLASS).toBe("bg-surface-muted");
+  });
+
+  it("aliases Dashboard craft onto the same house classes — no workspace fork", () => {
+    expect(DASHBOARD_CARD_PAD).toBe(HOUSE_CARD_PAD);
+    expect(DASHBOARD_RELATED_GAP_CLASS).toBe(HOUSE_RELATED_GAP_CLASS);
+    expect(DASHBOARD_SECTION_AIR_CLASS).toBe(HOUSE_SECTION_AIR_CLASS);
+    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).toBe(HOUSE_FILTER_ON_CLASS);
+    expect(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS).toBe(HOUSE_FILTER_OFF_CLASS);
+    expect(DASHBOARD_PERIOD_OPTION_SELECTED_CLASS).toBe(HOUSE_PERIOD_SELECTED_CLASS);
+    expect(sideNav).toContain("HOUSE_RAIL_ACTIVE_CLASS");
+    expect(sideNav).toContain("HOUSE_RAIL_IDLE_CLASS");
+    expect(shell).toContain("bg-bg");
+    expect(shell).toContain("<BrandEmblem />");
+    expect(shell).not.toContain("BrandWordmark");
+    expect(card).toContain("card-surface");
+    expect(card).toContain("HOUSE_CARD_PAD");
+    expect(pageHeader).toContain("t-title text-ink");
+    expect(pageHeader).not.toContain("t-subhead text-ink");
+  });
+
+  it("rematches Social header Search, rail type, filters, and tab accent", () => {
+    expect(socialTopBar).toContain("HOUSE_SEARCH_PILL_CLASS");
+    expect(socialTopBar).toContain("placeholder:text-ink-3");
+    expect(socialTopBar).toContain("text-ink-3");
+    expect(socialTopBar).toContain("text-ink-2");
+    expect(socialTopBar).not.toContain("rounded-[10px]");
+    expect(socialChrome).toContain("HOUSE_FILTER_ON_CLASS");
+    expect(SOCIAL_PILL_ACTIVE_CLASS).toBe(HOUSE_FILTER_ON_CLASS);
+    expect(SOCIAL_PILL_IDLE_CLASS).toBe(HOUSE_FILTER_OFF_CLASS);
+    expect(SOCIAL_PILL_ACTIVE_CLASS).not.toContain("bg-accent");
+
+    const header = renderToStaticMarkup(
+      createElement(SocialTopBar, { email: "ada@example.com", name: "Ada" }),
+    );
+    expect(header).toContain("data-social-header-search");
+    expect(header).toContain(HOUSE_SEARCH_PILL_CLASS);
+    expect(header).toContain("data-brand-emblem");
+
+    const chip = renderToStaticMarkup(createElement(SocialRailAccountChip, { name: "Ada Lovelace" }));
+    expect(chip).toContain("t-body-sm");
+    expect(chip).toContain("Ada Lovelace");
+    expect(chip).not.toContain("text-[12px]");
+
+    expect(socialTabBar).toContain('active ? "text-accent" : "text-ink"');
+  });
+
+  it("rematches the Education course rail to the house active pill", () => {
+    expect(educationRail).toContain("HOUSE_RAIL_ACTIVE_CLASS");
+    expect(educationRail).toContain("HOUSE_RAIL_IDLE_CLASS");
+    expect(educationRail).toContain("HOUSE_CARD_PAD");
+    expect(educationRail).toContain("rounded-[var(--radius-lg)]");
+    expect(educationRail).toContain("shadow-none");
+
+    expect(educationShell).toContain("HOUSE_SECTION_AIR_CLASS");
+    expect(educationShell).toContain("data-gc-education");
+
+    const html = renderToStaticMarkup(
+      createElement(EducationCourseRail, {
+        courses: [
+          {
+            id: "c1",
+            slug: "orientation",
+            title: "Orientation",
+            description: null,
+            cover_key: null,
+            is_flagship_free: true,
+            price_cents: null,
+            catalog_code: "EDU-0001",
+            status: "published",
+            position: 1,
+            instructor_id: null,
+            created_at: "2026-09-12T14:00:00.000Z",
+            instructor_name: null,
+          },
+        ],
+        instructors: [],
+      }),
+    );
+    const title = renderToStaticMarkup(createElement(PageHeader, { title: "Manage courses" }));
+    expect(html).toContain("data-education-course-rail");
+    expect(html).toContain(HOUSE_RAIL_ACTIVE_CLASS);
+    expect(title).toContain("t-title text-ink");
+    expect(title).toContain("Manage courses");
+    expect(title).not.toContain("t-subhead");
+  });
+
+  it("keeps BrandEmblem language and bans the reference-brand word from shell comments", () => {
+    expect(shell).toContain("<BrandEmblem />");
+    expect(sideNav).toContain("BrandEmblem");
+    for (const path of HOUSE_SHELL_COMMENT_PATHS) {
+      const src = readFileSync(path, "utf8");
+      expect(src, path).not.toMatch(/Coinbase/i);
+    }
+  });
+});

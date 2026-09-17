@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Suspense, use, useRef } from "react";
 import { railDestinations, STAFF_RAIL_EYEBROW, type NavItem } from "@/lib/nav";
+import { HOUSE_RAIL_ACTIVE_CLASS, HOUSE_RAIL_IDLE_CLASS, HOUSE_RAIL_ITEM_CLASS } from "@/lib/house-shell";
 import { cn } from "@/lib/cn";
 import type { WorkspaceMode } from "@/lib/workspace";
 import { SocialIcon } from "@/components/social/social-icon";
@@ -67,11 +68,9 @@ export function SideNav({
         aria-label={item.ariaLabel ?? (collapsed ? item.label : undefined)}
         data-social-rail-pending={social && pendingHref === item.href ? "" : undefined}
         className={cn(
-          "relative flex items-center rounded-full t-body-sm leading-4 transition-colors",
+          HOUSE_RAIL_ITEM_CLASS,
           collapsed ? "justify-center px-0 py-2" : "gap-2 px-2 py-2",
-          active
-            ? "bg-accent-wash font-medium text-accent"
-            : "font-normal text-ink hover:bg-surface-muted",
+          active ? HOUSE_RAIL_ACTIVE_CLASS : HOUSE_RAIL_IDLE_CLASS,
         )}
       >
         {social ? <SocialNavPendingProbe href={item.href} onPending={markPending} /> : null}

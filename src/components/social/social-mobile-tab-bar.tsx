@@ -72,7 +72,7 @@ export function SocialMobileTabBar() {
                 data-social-tab-item={item.label}
                 data-social-tab-pending={pendingHref === item.href ? "" : undefined}
                 onClick={(event) => markPending(item.href, event)}
-                className={cn(SOCIAL_TAB_ITEM_CLASS, active ? "text-ink" : "text-ink-2")}
+                className={cn(SOCIAL_TAB_ITEM_CLASS, active ? "text-accent" : "text-ink")}
               >
                 <SocialNavPendingProbe href={item.href} onPending={markPending} />
                 <SocialIcon

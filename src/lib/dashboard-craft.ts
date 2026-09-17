@@ -1,14 +1,24 @@
 // Company-admin Dashboard craft classes. House tokens only — no RL orange,
-// no Coinbase brand, no invented px type. Hairline + air; no drop shadow.
+// no invented px type. Hairline + air; no drop shadow.
 // Period menu rematches the Mercury workspace switcher: quiet trigger,
 // trailing Sporty Blue check, flush-left labels.
-// Coinbase shell air: related gap 8 · card pad 16 · section air 24 · card 16.
-// Overview structure rematch — 24Frame nouns only. No Dashboard-only tokens.
+// House shell air: related gap 8 · card pad 16 · section air 24 · card 16.
+// Shared with Social + Education via house-shell — no Dashboard-only tokens.
+// Overview structure rematch — 24Frame nouns only.
 // Period chrome (phone + desktop): unlabeled value + chevron on the org row.
 // Period is chrome, not H1. Dominant read stays the $.
 // Page title is black sentence-case. Section titles are t-heading ink.
 // View-alt selected is Sporty Blue glyph weight, not a filled chip.
 // Content-filter selected is ink #14171A + white type — not Sporty Blue fill.
+
+import {
+  HOUSE_CARD_PAD,
+  HOUSE_FILTER_OFF_CLASS,
+  HOUSE_FILTER_ON_CLASS,
+  HOUSE_PERIOD_SELECTED_CLASS,
+  HOUSE_RELATED_GAP_CLASS,
+  HOUSE_SECTION_AIR_CLASS,
+} from "@/lib/house-shell";
 
 export const DASHBOARD_CARD_CLASS =
   "card-surface dashboard-home-panel flex h-full flex-col overflow-hidden shadow-none";
@@ -16,8 +26,7 @@ export const DASHBOARD_CARD_CLASS =
 export const DASHBOARD_MODULE_CARD_CLASS =
   "card-surface overflow-hidden shadow-none";
 
-export const DASHBOARD_CARD_PAD =
-  "px-[var(--space-4)] py-[var(--space-4)]";
+export const DASHBOARD_CARD_PAD = HOUSE_CARD_PAD;
 
 export const DASHBOARD_CARD_PAD_HERO = DASHBOARD_CARD_PAD;
 
@@ -29,14 +38,14 @@ export const DASHBOARD_KICKER_CLASS = "t-label text-ink-3";
 // Not a grey tracked ALL CAPS kicker. Meta/subcopy stays t-body-sm text-ink-3.
 export const DASHBOARD_SECTION_TITLE_CLASS = "t-heading text-ink";
 
-export const DASHBOARD_RELATED_GAP_CLASS = "gap-[var(--space-2)]";
+export const DASHBOARD_RELATED_GAP_CLASS = HOUSE_RELATED_GAP_CLASS;
 
-export const DASHBOARD_SECTION_AIR_CLASS = "gap-[var(--space-6)]";
+export const DASHBOARD_SECTION_AIR_CLASS = HOUSE_SECTION_AIR_CLASS;
 
 export const DASHBOARD_ROW_CLASS =
   "flex min-h-10 items-center justify-between gap-[var(--space-2)] px-[var(--space-4)] py-[var(--space-2)]";
 
-// Coinbase ranked-row grade: circular mark · bold name · quiet meta · right $.
+// House ranked-row grade: circular mark · bold name · quiet meta · right $.
 // Bars view-alt keeps the share track. List does not.
 export const DASHBOARD_RANKED_TABLE_ROW_CLASS =
   "flex min-h-10 items-center gap-[var(--space-2)] px-[var(--space-4)] py-[var(--space-2)]";
@@ -73,7 +82,7 @@ export const DASHBOARD_ADMIN_CHROME_CLASS =
   "flex flex-row items-center justify-between gap-[var(--space-2)] md:flex-row md:items-start md:justify-between md:gap-[var(--space-6)]";
 
 // Desktop: Net revenue dominant left (3) · Recent account activity right (2).
-// Phone (`< md`): stack Revenue then Activity. RL Overview order, Coinbase quiet.
+// Phone (`< md`): stack Revenue then Activity. RL Overview order, house-shell quiet.
 export const DASHBOARD_ADMIN_OVERVIEW_CLASS =
   "grid grid-cols-1 gap-[var(--space-6)] max-md:flex max-md:flex-col lg:grid-cols-5";
 
@@ -95,7 +104,7 @@ export const DASHBOARD_VIEW_ALT_BUTTON_ON_CLASS = "text-accent";
 export const DASHBOARD_VIEW_ALL_CLASS =
   "inline-flex items-center gap-[var(--space-2)] t-body-sm text-accent";
 
-// Top performing pills — Coinbase separate rounded pills with gap.
+// Top performing pills — house separate rounded pills with gap.
 // Active: ink fill + canvas label. Idle: muted fill + ink label.
 // Not a segmented strip. Sporty Blue stays on View all / view-alt glyphs only.
 export const DASHBOARD_TOP_PILL_CLUSTER_CLASS =
@@ -104,9 +113,9 @@ export const DASHBOARD_TOP_PILL_CLUSTER_CLASS =
 export const DASHBOARD_TOP_PILL_BUTTON_CLASS =
   "rounded-full px-[var(--space-4)] py-[var(--space-2)] t-body-sm";
 
-export const DASHBOARD_TOP_PILL_BUTTON_ON_CLASS = "bg-ink text-surface";
+export const DASHBOARD_TOP_PILL_BUTTON_ON_CLASS = HOUSE_FILTER_ON_CLASS;
 
-export const DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS = "bg-surface-muted text-ink";
+export const DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS = HOUSE_FILTER_OFF_CLASS;
 
 // Map unmount is taller than Titles/Platforms lists. Do not let the
 // departing map become the scroll anchor (html scroll-behavior: smooth
@@ -177,7 +186,7 @@ export const DASHBOARD_PERIOD_GROUP_CLASS =
 export const DASHBOARD_PERIOD_OPTION_CLASS =
   "flex w-full items-center justify-between gap-[var(--space-2)] px-[var(--space-4)] py-[var(--space-2)] text-left t-body-sm text-ink";
 
-export const DASHBOARD_PERIOD_OPTION_SELECTED_CLASS = "bg-surface-muted";
+export const DASHBOARD_PERIOD_OPTION_SELECTED_CLASS = HOUSE_PERIOD_SELECTED_CLASS;
 
 export const DASHBOARD_PERIOD_OPTION_LABEL_CLASS = "min-w-0 flex-1 text-left";
 

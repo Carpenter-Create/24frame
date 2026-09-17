@@ -38,6 +38,7 @@ const HOUSE_ROLE_PATHS = [
   "src/app/tokens.css",
   "src/app/globals.css",
   "src/lib/dashboard-craft.ts",
+  "src/lib/house-shell.ts",
   "src/lib/house-sheet.ts",
   "src/lib/settings.ts",
   "src/lib/reports-craft.ts",
