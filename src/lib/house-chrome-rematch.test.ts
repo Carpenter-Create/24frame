@@ -19,7 +19,10 @@ import {
   HOUSE_PAGE_CANVAS_CLASS,
   HOUSE_RAIL_ACTIVE_CLASS,
   HOUSE_RAIL_ITEM_CLASS,
+  HOUSE_RAIL_FLOAT_CLASS,
   HOUSE_RAIL_PANEL_CLASS,
+  HOUSE_CHROME_GUTTER_X_CLASS,
+  HOUSE_CANVAS_X_CLASS,
   HOUSE_HEADER_SEARCH_GAP_CLASS,
   HOUSE_SEARCH_PILL_CLASS,
 } from "@/lib/house-shell";
@@ -73,8 +76,9 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(lead).toContain("data-house-full-width-top");
     expect(shell).toContain("<HouseLeadChrome");
     expect(shell).toContain("HOUSE_RAIL_PANEL_CLASS");
-    expect(shell).toContain("top-[calc(var(--header-height)+16px)]");
-    expect(shell).toContain("h-[calc(100dvh-var(--header-height)-32px)]");
+    expect(shell).toContain("HOUSE_RAIL_FLOAT_CLASS");
+    expect(HOUSE_RAIL_FLOAT_CLASS).toContain("left-[var(--chrome-gutter)]");
+    expect(HOUSE_RAIL_FLOAT_CLASS).toContain("top-[calc(var(--header-height)+var(--chrome-gutter))]");
     expect(shell).not.toContain("border-r border-hairline");
     expect(shell).not.toMatch(/style=\{\{ height: "var\(--header-height\)", marginLeft: "var\(--sidebar-width\)" \}\}/);
     expect(lead).toContain("<BrandEmblem />");
@@ -210,9 +214,9 @@ describe("house chrome rematch miss list v1.1", () => {
   });
 
   it("uses one rounded register on Aggregation, Social, and Education", () => {
-    expect(shell.match(/left-4 top-\[calc\(var\(--header-height\)\+16px\)\]/g)?.length).toBe(2);
+    expect(shell.match(/HOUSE_RAIL_FLOAT_CLASS/g)?.length).toBe(3);
     expect(shell).not.toContain("fixed left-0 top-[calc(var(--header-height)+16px)]");
-    expect(SOCIAL_RAIL_WIDTH_CLASS).toBe("w-[calc(200px-16px)]");
+    expect(SOCIAL_RAIL_WIDTH_CLASS).toBe("w-[calc(200px-var(--chrome-gutter))]");
     expect(SOCIAL_ACCOUNT_CHIP_CLASS).toContain(HOUSE_MODULE_CLASS);
     expect(SOCIAL_FOR_YOU_CARD_CLASS).toContain(HOUSE_MODULE_CLASS);
     expect(SETTINGS_RAIL_ITEM_CLASS).toContain("rounded-full");
@@ -286,7 +290,35 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(shell).toContain("<HouseLeadChrome");
     expect(shell).toContain("SOCIAL_RAIL_PANEL_CLASS");
     expect(shell).not.toContain("StudioRail");
-    expect(SOCIAL_RAIL_WIDTH_CLASS).toBe("w-[calc(200px-16px)]");
+    expect(SOCIAL_RAIL_WIDTH_CLASS).toBe("w-[calc(200px-var(--chrome-gutter))]");
+  });
+
+  it("locks lead ↔ rail chrome gutter (G6)", () => {
+    const leadLib = readFileSync("src/lib/house-lead-chrome.ts", "utf8");
+    expect(tokens).toMatch(/--chrome-gutter:\s*16px;/);
+    expect(HOUSE_CHROME_GUTTER_X_CLASS).toBe("md:px-[var(--chrome-gutter)]");
+    expect(HOUSE_CANVAS_X_CLASS).toBe("px-[var(--chrome-gutter)]");
+    expect(HOUSE_RAIL_FLOAT_CLASS).toContain("left-[var(--chrome-gutter)]");
+    expect(HOUSE_RAIL_FLOAT_CLASS).toContain("top-[calc(var(--header-height)+var(--chrome-gutter))]");
+    expect(HOUSE_RAIL_FLOAT_CLASS).toContain(
+      "h-[calc(100dvh-var(--header-height)-calc(var(--chrome-gutter)*2))]",
+    );
+    expect(leadLib).toContain("HOUSE_CHROME_GUTTER_X_CLASS");
+    expect(leadLib).not.toContain("md:px-[var(--content-inset)]");
+    expect(lead).not.toContain("md:px-[var(--content-inset)]");
+    expect(lead).not.toContain("md:pl-5");
+    expect(shell.match(/HOUSE_RAIL_FLOAT_CLASS/g)?.length).toBe(3);
+    expect(shell).toContain("HOUSE_CANVAS_X_CLASS");
+    expect(shell).toContain("HOUSE_CHROME_GUTTER_X_CLASS");
+    expect(shell).not.toContain("left-4 ");
+    expect(shell).not.toContain("md:px-[var(--content-inset)]");
+    expect(collapse).toContain("var(--chrome-gutter)");
+    expect(socialChrome).toContain("px-[var(--chrome-gutter)]");
+    expect(socialChrome).toContain("w-[calc(200px-var(--chrome-gutter))]");
+    expect(socialChrome).not.toContain("md:px-[var(--content-inset)]");
+    expect(houseShell).toContain("HOUSE_CHROME_GUTTER");
+    expect(houseShell).not.toContain("SOCIAL_CHROME_GUTTER");
+    expect(houseShell).not.toContain("AGG_CHROME_GUTTER");
   });
 
   it("keeps house tokens, Titles content, and Delete/Archive unmixed", () => {

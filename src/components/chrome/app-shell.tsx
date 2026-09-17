@@ -23,7 +23,13 @@ import {
   persistSidebarCollapsed,
 } from "@/lib/rail-collapse";
 import { HOUSE_LEAD_SCROLL_CLASS, HOUSE_LEAD_SHELL_CLASS } from "@/lib/house-lead-chrome";
-import { HOUSE_PAGE_CANVAS_CLASS, HOUSE_RAIL_PANEL_CLASS } from "@/lib/house-shell";
+import {
+  HOUSE_CANVAS_X_CLASS,
+  HOUSE_CHROME_GUTTER_X_CLASS,
+  HOUSE_PAGE_CANVAS_CLASS,
+  HOUSE_RAIL_FLOAT_CLASS,
+  HOUSE_RAIL_PANEL_CLASS,
+} from "@/lib/house-shell";
 import { isSettingsPath, SETTINGS_RAIL_PAD_CLASS } from "@/lib/settings";
 import {
   SOCIAL_DESKTOP_FRAME_PAD_CLASS,
@@ -110,7 +116,9 @@ export function AppShell({
     ) : null;
   // The catalog opts out of the centered width cap so its hero can bleed full-width
   // (edge of sidebar → right edge). That page then manages its own content max-width.
-  // Non-bleed pages share `--content-inset`. Titles stay the bleed exception.
+  // Non-bleed pages share `--chrome-gutter` on the canvas x so the
+  // trailing chrome and content column share one right edge. Titles
+  // stay the bleed exception. Messages keeps `--content-inset` vertical.
   const titlesBleed = pathname === "/titles";
   const homePage = pathname === "/" || pathname === "/dashboard";
   const messagesPage = pathname === "/messages";
@@ -155,7 +163,7 @@ export function AppShell({
           />
           <aside
             className={cn(
-              "fixed left-4 top-[calc(var(--header-height)+16px)] z-30 hidden h-[calc(100dvh-var(--header-height)-32px)] flex-col md:flex",
+              HOUSE_RAIL_FLOAT_CLASS,
               collapsed ? RAIL_WIDTH_CLASS : SOCIAL_RAIL_WIDTH_CLASS,
               SOCIAL_RAIL_PANEL_CLASS,
             )}
@@ -205,7 +213,7 @@ export function AppShell({
     >
       <aside
         className={cn(
-          "fixed left-4 top-[calc(var(--header-height)+16px)] z-30 hidden h-[calc(100dvh-var(--header-height)-32px)] flex-col md:flex",
+          HOUSE_RAIL_FLOAT_CLASS,
           RAIL_WIDTH_CLASS,
           HOUSE_RAIL_PANEL_CLASS,
         )}
@@ -289,20 +297,26 @@ export function AppShell({
           <div className="w-full pb-24">{children}</div>
         ) : homePage ? (
           <div
-            className="w-full px-[var(--content-inset)] py-[var(--space-8)] max-md:px-[var(--space-6)] max-md:py-[var(--space-6)]"
+            className={cn(
+              "w-full py-[var(--space-8)] max-md:px-[var(--space-6)] max-md:py-[var(--space-6)]",
+              HOUSE_CANVAS_X_CLASS,
+            )}
             data-app-home-frame=""
           >
             {children}
           </div>
         ) : messagesPage ? (
           <div
-            className="w-full p-[var(--content-inset)]"
+            className={cn("w-full p-[var(--content-inset)]", HOUSE_CHROME_GUTTER_X_CLASS)}
             data-app-messages-frame=""
           >
             {children}
           </div>
         ) : (
-          <div className="mx-auto w-full px-[var(--content-inset)] pb-24 pt-8" style={{ maxWidth: "var(--page-max-width)" }}>
+          <div
+            className={cn("mx-auto w-full pb-24 pt-8", HOUSE_CANVAS_X_CLASS)}
+            style={{ maxWidth: "var(--page-max-width)" }}
+          >
             {children}
           </div>
         )}

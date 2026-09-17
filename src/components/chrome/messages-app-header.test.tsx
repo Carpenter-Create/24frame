@@ -274,7 +274,7 @@ describe("MessagesAppHeader", () => {
     expect(lead).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
     expect(leadLib).toContain("justify-end gap-4");
     expect(leadLib).toContain("MOBILE_CHROME_LEAD_PAD_CLASS");
-    expect(leadLib).toContain("md:px-[var(--content-inset)]");
+    expect(leadLib).toContain("HOUSE_CHROME_GUTTER_X_CLASS");
     expect(shell).toContain("gap-3");
     expect(landing).not.toContain("MessagesThreadOverflow");
     expect(landing).not.toContain("data-ask-globee-title-cluster");

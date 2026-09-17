@@ -69,7 +69,7 @@ describe("mobile chrome hamburger / clock lock", () => {
 
   it("is consumed by the header hamburger and the Ask Globee clock, not the thread", () => {
     expect(leadLibSrc).toContain("MOBILE_CHROME_LEAD_PAD_CLASS");
-    expect(leadLibSrc).toContain("md:px-[var(--content-inset)]");
+    expect(leadLibSrc).toContain("HOUSE_CHROME_GUTTER_X_CLASS");
     expect(shellSrc).toContain('data-app-messages-frame=""');
     expect(shellSrc).toContain("p-[var(--content-inset)]");
 

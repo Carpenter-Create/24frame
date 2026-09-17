@@ -210,11 +210,11 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chats).not.toContain("/messages");
     expect(chats).not.toContain("Loved");
     expect(shell).toContain("SOCIAL_RAIL_PANEL_CLASS");
-    expect(shell).toContain("top-[calc(var(--header-height)+16px)]");
+    expect(shell).toContain("HOUSE_RAIL_FLOAT_CLASS");
     expect(chrome).not.toContain("Inter");
     expect(chrome).not.toContain("#d1e0fa");
     expect(chrome).not.toContain("shadow-");
-    expect(chrome).toContain("px-[16px]");
+    expect(chrome).toContain("px-[var(--chrome-gutter)]");
     expect(chrome).toContain("gap-[16px]");
     expect(chrome).toContain("SOCIAL_COMPOSER_MEDIA_CLASS");
     expect(chrome).not.toContain("SOCIAL_COMPOSER_ACTION_CLASS");

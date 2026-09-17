@@ -13,6 +13,16 @@
 
 export const HOUSE_PAGE_CANVAS_CLASS = "bg-bg";
 
+/** Desktop chrome gutter. Lead logo / rail / trailing / canvas share this. */
+export const HOUSE_CHROME_GUTTER = "var(--chrome-gutter)";
+
+export const HOUSE_CHROME_GUTTER_X_CLASS = "md:px-[var(--chrome-gutter)]";
+
+export const HOUSE_CANVAS_X_CLASS = "px-[var(--chrome-gutter)]";
+
+export const HOUSE_RAIL_FLOAT_CLASS =
+  "fixed left-[var(--chrome-gutter)] top-[calc(var(--header-height)+var(--chrome-gutter))] z-30 hidden h-[calc(100dvh-var(--header-height)-calc(var(--chrome-gutter)*2))] flex-col md:flex";
+
 export const HOUSE_MODULE_CLASS =
   "rounded-[var(--radius-lg)] bg-surface-muted shadow-none";
 

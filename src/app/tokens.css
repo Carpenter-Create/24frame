@@ -87,6 +87,10 @@
   --header-height: 56px;
   --sidebar-width: 220px;        /* Access rail — locked client `/` */
   --sidebar-width-collapsed: 60px;
+  /* Desktop chrome gutter — lead logo left · rail panel left · lead
+     trailing right · canvas right. Same value both sides. Not
+     --content-inset (page reading measure). */
+  --chrome-gutter: 16px;
   --content-inset: 48px;
   --content-inset-tablet: 32px;
   --page-max-width: 67.5rem;   /* 1080px — the single centered page cap */

@@ -184,7 +184,7 @@ describe("AppShell header", () => {
       expect(html).toContain("justify-end");
       expect(html).toContain("data-user-menu-host");
       expect(html).toContain("data-app-header");
-      expect(html).toContain("px-[var(--content-inset)]");
+      expect(html).toContain("px-[var(--chrome-gutter)]");
     }
   });
 });
@@ -197,6 +197,7 @@ describe("AppShell Access rail and home frame", () => {
     );
     expect(tokens).toMatch(/--sidebar-width:\s*220px;/);
     expect(tokens).toMatch(/--content-inset:\s*48px;/);
+    expect(tokens).toMatch(/--chrome-gutter:\s*16px;/);
     expect(tokens).toMatch(/--header-height:\s*56px;/);
     expect(tokens).not.toMatch(/--sidebar-width:\s*190px;/);
 
@@ -206,7 +207,7 @@ describe("AppShell Access rail and home frame", () => {
     expect(html).toMatch(/<aside class="[^"]*\bbg-surface\b[^"]*" data-app-rail=""/);
     expect(html).not.toMatch(/<aside class="[^"]*bg-surface-muted/);
     expect(html).toContain("data-app-home-frame");
-    expect(html).toContain("px-[var(--content-inset)]");
+    expect(html).toContain("px-[var(--chrome-gutter)]");
     expect(html).toContain("py-[var(--space-8)]");
     expect(html).not.toContain("px-6 pb-24 pt-8");
     expect(html).not.toContain("px-6 ");
@@ -227,7 +228,8 @@ describe("AppShell Access rail and home frame", () => {
 
     navigation.pathname = "/deliveries";
     const deliveries = renderShell();
-    expect(deliveries).toContain("px-[var(--content-inset)] pb-24 pt-8");
+    expect(deliveries).toContain("px-[var(--chrome-gutter)]");
+    expect(deliveries).toContain("pb-24 pt-8");
     expect(deliveries).not.toContain("px-6 pb-24 pt-8");
     expect(deliveries).not.toContain("data-app-home-frame");
     expect(deliveries).not.toContain("data-app-messages-frame");
@@ -235,7 +237,8 @@ describe("AppShell Access rail and home frame", () => {
 
     navigation.pathname = "/catalog-health";
     const health = renderShell();
-    expect(health).toContain("px-[var(--content-inset)] pb-24 pt-8");
+    expect(health).toContain("px-[var(--chrome-gutter)]");
+    expect(health).toContain("pb-24 pt-8");
     expect(health).not.toContain("px-6 pb-24 pt-8");
     expect(health).not.toContain("data-app-home-frame");
     expect(health).not.toContain("data-app-messages-frame");
@@ -248,6 +251,7 @@ describe("AppShell Access rail and home frame", () => {
     expect(inbox).toContain("data-app-messages-frame");
     expect(inbox).toContain("data-app-header-leading");
     expect(inbox).toContain("p-[var(--content-inset)]");
+    expect(inbox).toContain("md:px-[var(--chrome-gutter)]");
     expect(inbox).not.toContain("data-app-home-frame");
     expect(inbox).not.toContain("data-header-search");
     expect(inbox).not.toContain("⌘K");
@@ -302,8 +306,7 @@ describe("AppShell client mobile chrome", () => {
     expect(html).not.toContain("data-tab-bar");
     expect(html).not.toContain("data-social-mobile-pill");
     expect(html).not.toContain("data-social-create-fab");
-    expect(shellSrc).toContain("hidden h-[calc(100dvh-var(--header-height)-32px)] flex-col");
-    expect(shellSrc).toContain("md:flex");
+    expect(shellSrc).toContain("HOUSE_RAIL_FLOAT_CLASS");
     expect(shellSrc).toContain("<MobileNavSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />");
     expect(shellSrc).not.toContain("GC_NAV");
     expect(shellSrc).not.toMatch(/key=\{pathname\}/);
