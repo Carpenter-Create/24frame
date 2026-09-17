@@ -72,9 +72,9 @@ describe("dashboard register helpers", () => {
 
   it("splits title parentheticals and reports Top 1 / Top 5 share", () => {
     expect(splitDashboardTitle("Winter Light")).toEqual(["Winter Light", null]);
-    expect(splitDashboardTitle("Winter Light (Director's Cut)")).toEqual([
+    expect(splitDashboardTitle("Winter Light (Theatrical)")).toEqual([
       "Winter Light",
-      "(Director's Cut)",
+      "(Theatrical)",
     ]);
     expect(dashboardConcentration([4, 2, 3, 1, 2])).toEqual({
       top1Pct: (4 / 12) * 100,
@@ -239,7 +239,7 @@ describe("dashboard register chrome", () => {
         items: [
           {
             id: "t1",
-            title: "Winter Light (Director's Cut)",
+            title: "Winter Light (Theatrical)",
             status: "live",
             created_at: "2026-09-02T00:00:00.000Z",
             count: 6,
@@ -255,7 +255,7 @@ describe("dashboard register chrome", () => {
       }),
     );
     expect(titles).toContain("Winter Light");
-    expect(titles).toContain("(Director's Cut)");
+    expect(titles).toContain("(Theatrical)");
     expect(titles).toContain("60.0% Top 1");
     expect(titles).toContain("100.0% Top 5");
     expect(titles).not.toContain("Top works");
