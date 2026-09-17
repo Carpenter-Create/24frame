@@ -31,7 +31,7 @@ describe("company-admin Dashboard mobile craft", () => {
     expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("lg:grid-cols-5");
     expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("items-start");
     expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("lg:items-stretch");
-    expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).not.toContain("md:items-stretch");
+    expect(DASHBOARD_ADMIN_OVERVIEW_CLASS.split(/\s+/)).not.toContain("md:items-stretch");
     expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).not.toContain("md:grid-cols-5");
     expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).not.toContain("sm:grid-cols-5");
     expect(DASHBOARD_ADMIN_STACK_CLASS).toContain("w-full");

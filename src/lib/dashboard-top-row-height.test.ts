@@ -110,7 +110,7 @@ describe("Dashboard top-row height pair (Net | Attention)", () => {
     expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("max-md:w-full");
     expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("lg:items-stretch");
     expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("items-start");
-    expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).not.toContain("md:items-stretch");
+    expect(DASHBOARD_ADMIN_OVERVIEW_CLASS.split(/\s+/)).not.toContain("md:items-stretch");
     expect(htmlHasUnprefixedItemsStretch(DASHBOARD_ADMIN_OVERVIEW_CLASS)).toBe(false);
     expect(DASHBOARD_ADMIN.revenue).toBe("Net revenue");
   });
