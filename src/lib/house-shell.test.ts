@@ -30,6 +30,10 @@ import {
   HOUSE_HEADER_SEARCH_GAP_CLASS,
   HOUSE_SEARCH_PILL_CLASS,
   HOUSE_SECTION_AIR_CLASS,
+  HOUSE_CHROME_GUTTER,
+  HOUSE_CHROME_GUTTER_X_CLASS,
+  HOUSE_CANVAS_X_CLASS,
+  HOUSE_RAIL_FLOAT_CLASS,
 } from "@/lib/house-shell";
 import { SOCIAL_PILL_ACTIVE_CLASS, SOCIAL_PILL_IDLE_CLASS } from "@/lib/social-chrome";
 
@@ -108,6 +112,7 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(tokens).toMatch(/--accent:\s*#1769ff;/);
     expect(tokens).toMatch(/--radius-lg:\s*16px;/);
     expect(tokens).toMatch(/--content-inset:\s*48px;/);
+    expect(tokens).toMatch(/--chrome-gutter:\s*16px;/);
     expect(tokens).toContain("--accent-wash:");
     expect(tokens).toMatch(/Aggregation · Social · Education/);
     expect(tokens).not.toMatch(/--radius-lg:\s*14px;/);
@@ -128,6 +133,10 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(HOUSE_RELATED_GAP_CLASS).toBe("gap-[var(--space-2)]");
     expect(HOUSE_SECTION_AIR_CLASS).toBe("gap-[var(--space-6)]");
     expect(HOUSE_HEADER_SEARCH_GAP_CLASS).toBe("gap-[var(--space-4)]");
+    expect(HOUSE_CHROME_GUTTER).toBe("var(--chrome-gutter)");
+    expect(HOUSE_CHROME_GUTTER_X_CLASS).toBe("md:px-[var(--chrome-gutter)]");
+    expect(HOUSE_CANVAS_X_CLASS).toBe("px-[var(--chrome-gutter)]");
+    expect(HOUSE_RAIL_FLOAT_CLASS).toContain("left-[var(--chrome-gutter)]");
     expect(HOUSE_SEARCH_PILL_CLASS).toBe("rounded-full border-0 bg-surface-muted");
     expect(HOUSE_RAIL_ITEM_CLASS).toContain("rounded-full");
     expect(HOUSE_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash font-medium text-accent");
@@ -181,6 +190,14 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(chip).toContain("t-body-sm");
     expect(chip).toContain("Ada Lovelace");
     expect(chip).not.toContain("text-[12px]");
+
+    const collapsedChip = renderToStaticMarkup(
+      createElement(SocialRailAccountChip, { name: "Ada Lovelace", collapsed: true }),
+    );
+    expect(collapsedChip).toContain("data-social-rail-account");
+    expect(collapsedChip).toContain('aria-label="Ada Lovelace"');
+    expect(collapsedChip).toContain("justify-center");
+    expect(collapsedChip).not.toContain("truncate t-body-sm");
 
     expect(socialTabBar).toContain('active ? "text-accent" : "text-ink"');
   });

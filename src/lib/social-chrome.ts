@@ -58,12 +58,12 @@ export const SOCIAL_FIGMA_STORY_PICKER = ["144:1218", "144:1444"] as const;
 // Dest column stays 200 (measure). Panel insets 16 so the r16
 // corner reads — same float as Aggregation / Education. Not a
 // flush-left strip.
-export const SOCIAL_RAIL_WIDTH_CLASS = "w-[calc(200px-16px)]";
+export const SOCIAL_RAIL_WIDTH_CLASS = "w-[calc(200px-var(--chrome-gutter))]";
 export const SOCIAL_RAIL_MAIN_OFFSET_CLASS = "md:ml-[200px]";
 export const SOCIAL_RAIL_PANEL_CLASS = HOUSE_RAIL_PANEL_CLASS;
 export const SOCIAL_FOR_YOU_WIDTH_CLASS = "w-[300px]";
 export const SOCIAL_CENTER_WIDTH_CLASS = "w-full min-w-0 lg:max-w-[676px]";
-export const SOCIAL_DESKTOP_FRAME_PAD_CLASS = "w-full px-[16px] py-4";
+export const SOCIAL_DESKTOP_FRAME_PAD_CLASS = "w-full px-[var(--chrome-gutter)] py-4";
 
 export const SOCIAL_PAGE_CLASS =
   "flex flex-col gap-[var(--space-4)] pb-[var(--space-12)]";

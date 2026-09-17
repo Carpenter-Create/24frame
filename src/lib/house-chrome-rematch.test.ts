@@ -19,7 +19,10 @@ import {
   HOUSE_PAGE_CANVAS_CLASS,
   HOUSE_RAIL_ACTIVE_CLASS,
   HOUSE_RAIL_ITEM_CLASS,
+  HOUSE_RAIL_FLOAT_CLASS,
   HOUSE_RAIL_PANEL_CLASS,
+  HOUSE_CHROME_GUTTER_X_CLASS,
+  HOUSE_CANVAS_X_CLASS,
   HOUSE_HEADER_SEARCH_GAP_CLASS,
   HOUSE_SEARCH_PILL_CLASS,
 } from "@/lib/house-shell";
@@ -62,6 +65,7 @@ const FUN_CHROME_PATHS = [
   "src/lib/workspace-switcher.ts",
   "src/lib/mobile-chrome.ts",
   "src/lib/rail-collapse.ts",
+  "src/components/chrome/rail-collapse.tsx",
   "src/lib/settings.ts",
   "src/components/chrome/education-header-search.tsx",
 ] as const;
@@ -72,8 +76,9 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(lead).toContain("data-house-full-width-top");
     expect(shell).toContain("<HouseLeadChrome");
     expect(shell).toContain("HOUSE_RAIL_PANEL_CLASS");
-    expect(shell).toContain("top-[calc(var(--header-height)+16px)]");
-    expect(shell).toContain("h-[calc(100dvh-var(--header-height)-32px)]");
+    expect(shell).toContain("HOUSE_RAIL_FLOAT_CLASS");
+    expect(HOUSE_RAIL_FLOAT_CLASS).toContain("left-[var(--chrome-gutter)]");
+    expect(HOUSE_RAIL_FLOAT_CLASS).toContain("top-[calc(var(--header-height)+var(--chrome-gutter))]");
     expect(shell).not.toContain("border-r border-hairline");
     expect(shell).not.toMatch(/style=\{\{ height: "var\(--header-height\)", marginLeft: "var\(--sidebar-width\)" \}\}/);
     expect(lead).toContain("<BrandEmblem />");
@@ -209,9 +214,9 @@ describe("house chrome rematch miss list v1.1", () => {
   });
 
   it("uses one rounded register on Aggregation, Social, and Education", () => {
-    expect(shell.match(/left-4 top-\[calc\(var\(--header-height\)\+16px\)\]/g)?.length).toBe(2);
+    expect(shell.match(/HOUSE_RAIL_FLOAT_CLASS/g)?.length).toBe(3);
     expect(shell).not.toContain("fixed left-0 top-[calc(var(--header-height)+16px)]");
-    expect(SOCIAL_RAIL_WIDTH_CLASS).toBe("w-[calc(200px-16px)]");
+    expect(SOCIAL_RAIL_WIDTH_CLASS).toBe("w-[calc(200px-var(--chrome-gutter))]");
     expect(SOCIAL_ACCOUNT_CHIP_CLASS).toContain(HOUSE_MODULE_CLASS);
     expect(SOCIAL_FOR_YOU_CARD_CLASS).toContain(HOUSE_MODULE_CLASS);
     expect(SETTINGS_RAIL_ITEM_CLASS).toContain("rounded-full");
@@ -243,6 +248,77 @@ describe("house chrome rematch miss list v1.1", () => {
       expect(src, path).not.toMatch(/Royalogic/i);
       expect(src, path).not.toMatch(/\brl-/);
     }
+  });
+
+  it("locks Social onto the shared rail-collapse SoT (G1–G5)", () => {
+    const railUi = readFileSync("src/components/chrome/rail-collapse.tsx", "utf8");
+    const extras = readFileSync("src/components/social/social-rail-extras.tsx", "utf8");
+
+    expect(existsSync("src/components/chrome/rail-collapse.tsx")).toBe(true);
+    expect(shell.match(/<RailCollapse collapsed=\{collapsed\} onToggle=\{toggle\} \/>/g)?.length).toBe(2);
+    expect(shell).not.toContain("collapsed={false}");
+    expect(shell).not.toContain("SocialRailCollapse");
+    expect(shell).not.toContain("data-social-rail-collapse");
+    expect(railUi).toContain("RAIL_COLLAPSE_CHEVRON");
+    expect(railUi).toContain("CaretDoubleLeft");
+    expect(railUi).toContain("CaretDoubleRight");
+    expect(railUi).toContain("RAIL_COLLAPSE_CHEVRON_CLASS");
+    expect(railUi).toContain("RAIL_COLLAPSE_EXPAND_ROW_CLASS");
+    expect(railUi).not.toMatch(/Royalogic/i);
+    expect(railUi).not.toMatch(/\brl-/);
+
+    expect(shell).toContain("persistSidebarCollapsed");
+    expect(shell).toContain("RAIL_COLLAPSE_WIDTH_VAR");
+    expect(shell).toContain("RAIL_WIDTH_CLASS");
+    expect(shell).toContain('style={collapseWidthStyle}');
+    expect(collapse).toContain('SIDEBAR_COLLAPSED_COOKIE = "24frame_sidebar_collapsed"');
+    expect(collapse).toContain('RAIL_COLLAPSE_WIDTH_VAR = "var(--sidebar-width-collapsed)"');
+
+    const socialAside = shell.slice(
+      shell.indexOf("data-social-rail="),
+      shell.indexOf("data-app-social-frame="),
+    );
+    expect(socialAside.indexOf("<RailCollapse")).toBeLessThan(socialAside.indexOf("<SideNav"));
+    expect(socialAside).toContain("collapsed={collapsed}");
+    expect(socialAside).toContain('workspace="social"');
+    expect(extras).toContain("collapsed?: boolean");
+    expect(extras).toContain("collapsed && \"justify-center p-2\"");
+
+    expect(shell).toContain('collapsed ? undefined : SOCIAL_RAIL_MAIN_OFFSET_CLASS');
+    expect(shell).toContain('marginLeft: "var(--sidebar-width)"');
+    expect(shell).toContain("data-social-workspace");
+    expect(shell).toContain("<HouseLeadChrome");
+    expect(shell).toContain("SOCIAL_RAIL_PANEL_CLASS");
+    expect(shell).not.toContain("StudioRail");
+    expect(SOCIAL_RAIL_WIDTH_CLASS).toBe("w-[calc(200px-var(--chrome-gutter))]");
+  });
+
+  it("locks lead ↔ rail chrome gutter (G6)", () => {
+    const leadLib = readFileSync("src/lib/house-lead-chrome.ts", "utf8");
+    expect(tokens).toMatch(/--chrome-gutter:\s*16px;/);
+    expect(HOUSE_CHROME_GUTTER_X_CLASS).toBe("md:px-[var(--chrome-gutter)]");
+    expect(HOUSE_CANVAS_X_CLASS).toBe("px-[var(--chrome-gutter)]");
+    expect(HOUSE_RAIL_FLOAT_CLASS).toContain("left-[var(--chrome-gutter)]");
+    expect(HOUSE_RAIL_FLOAT_CLASS).toContain("top-[calc(var(--header-height)+var(--chrome-gutter))]");
+    expect(HOUSE_RAIL_FLOAT_CLASS).toContain(
+      "h-[calc(100dvh-var(--header-height)-calc(var(--chrome-gutter)*2))]",
+    );
+    expect(leadLib).toContain("HOUSE_CHROME_GUTTER_X_CLASS");
+    expect(leadLib).not.toContain("md:px-[var(--content-inset)]");
+    expect(lead).not.toContain("md:px-[var(--content-inset)]");
+    expect(lead).not.toContain("md:pl-5");
+    expect(shell.match(/HOUSE_RAIL_FLOAT_CLASS/g)?.length).toBe(3);
+    expect(shell).toContain("HOUSE_CANVAS_X_CLASS");
+    expect(shell).toContain("HOUSE_CHROME_GUTTER_X_CLASS");
+    expect(shell).not.toContain("left-4 ");
+    expect(shell).not.toContain("md:px-[var(--content-inset)]");
+    expect(collapse).toContain("var(--chrome-gutter)");
+    expect(socialChrome).toContain("px-[var(--chrome-gutter)]");
+    expect(socialChrome).toContain("w-[calc(200px-var(--chrome-gutter))]");
+    expect(socialChrome).not.toContain("md:px-[var(--content-inset)]");
+    expect(houseShell).toContain("HOUSE_CHROME_GUTTER");
+    expect(houseShell).not.toContain("SOCIAL_CHROME_GUTTER");
+    expect(houseShell).not.toContain("AGG_CHROME_GUTTER");
   });
 
   it("keeps house tokens, Titles content, and Delete/Archive unmixed", () => {

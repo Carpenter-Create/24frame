@@ -150,7 +150,7 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(social).toContain(HOUSE_LEAD_CHROME_CLASS);
     expect(aggregation).toContain(HOUSE_LEAD_LOGO_CLASS);
     expect(social).toContain(HOUSE_LEAD_LOGO_CLASS);
-    expect(HOUSE_LEAD_CHROME_CLASS).toContain("md:px-[var(--content-inset)]");
+    expect(HOUSE_LEAD_CHROME_CLASS).toContain("md:px-[var(--chrome-gutter)]");
     expect(leadSrc).not.toContain("md:pl-5");
     expect(leadSrc).not.toContain("justify-between");
     expect(leadSrc).toContain("search ?");

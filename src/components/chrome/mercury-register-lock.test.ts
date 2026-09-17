@@ -107,7 +107,8 @@ describe("Adam Mercury register lock", () => {
     expect(phosphor).toContain("82:5");
     expect(phosphor).toContain("82:9");
     expect(phosphor).toContain("82:13");
-    expect(src("src/components/chrome/app-shell.tsx")).toContain("CaretDoubleRight");
+    expect(src("src/components/chrome/rail-collapse.tsx")).toContain("CaretDoubleRight");
+    expect(src("src/components/chrome/app-shell.tsx")).toContain("<RailCollapse");
     expect(src("src/components/chrome/account-sheet.tsx")).toContain("SignOut");
     expect(src("src/components/chrome/mobile-nav.tsx")).toContain(
       'import { List } from "@phosphor-icons/react"',

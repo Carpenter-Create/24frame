@@ -14,6 +14,11 @@ export const RAIL_COLLAPSE_CHEVRON_ICON_WEIGHT = "bold" as const;
 
 export const RAIL_COLLAPSE_EXPAND_ROW_CLASS = "flex h-8 items-center justify-center";
 
+/** Shared dest rail width. Collapsed overrides `--sidebar-width` to the collapsed var. */
+export const RAIL_WIDTH_CLASS = "w-[calc(var(--sidebar-width)-var(--chrome-gutter))]";
+
+export const RAIL_COLLAPSE_WIDTH_VAR = "var(--sidebar-width-collapsed)";
+
 export const SIDEBAR_COLLAPSED_COOKIE = "24frame_sidebar_collapsed";
 
 export const SIDEBAR_COLLAPSED_COOKIE_LEGACY = "gc_sidebar_collapsed";
