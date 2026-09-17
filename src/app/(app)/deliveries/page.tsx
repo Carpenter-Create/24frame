@@ -8,7 +8,6 @@ import { StatusFilter } from "@/components/layout/status-filter";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { loadMyDeliveries } from "@/lib/my-lists";
 import { StatusProgressTrack } from "@/components/ui/status-progress-track";
-import { deliveryStatusProgress } from "@/lib/status-progress";
 import {
   DEFAULT_DELIVERY_SORT,
   DELIVERIES_FILTER_MISS,
@@ -110,7 +109,8 @@ export default async function DeliveriesPage({
                     </span>
                   </span>
                   <StatusProgressTrack
-                    {...deliveryStatusProgress(row.status)}
+                    pipeline="delivery"
+                    status={row.status}
                     data-deliveries-status=""
                   />
                 </Link>

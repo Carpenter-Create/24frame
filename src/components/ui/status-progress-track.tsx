@@ -6,30 +6,35 @@ import {
   STATUS_PROGRESS_SEG_OFF_CLASS,
   STATUS_PROGRESS_SEG_ON_CLASS,
   STATUS_PROGRESS_TRACK_CLASS,
+  deliveryStatusProgress,
   statusProgressAriaLabel,
-  type StatusProgressVariant,
+  titleStatusProgress,
 } from "@/lib/status-progress";
 
 // Shared segmented lifecycle track. Filled segments use the house Sporty Blue
 // token. Off-pipeline is a muted greyscale badge — no track.
 
 export function StatusProgressTrack({
-  steps,
-  currentIndex,
-  label,
-  variant = "pipeline",
+  pipeline,
+  status,
+  liveCount = 0,
+  label: labelOverride,
   className,
   ...props
 }: {
-  steps: readonly string[];
-  currentIndex: number;
-  label: string;
-  variant?: StatusProgressVariant;
+  pipeline: "title" | "delivery";
+  status: string;
+  liveCount?: number;
+  label?: string;
 } & Omit<React.ComponentProps<"span">, "children">) {
-  const model = { steps, currentIndex, label, variant };
-  const ariaLabel = statusProgressAriaLabel(model);
+  const model =
+    pipeline === "title"
+      ? titleStatusProgress(status, liveCount)
+      : deliveryStatusProgress(status);
+  const label = labelOverride ?? model.label;
+  const ariaLabel = statusProgressAriaLabel({ ...model, label });
 
-  if (variant === "off") {
+  if (model.variant === "off") {
     return (
       <span
         {...props}
@@ -49,7 +54,7 @@ export function StatusProgressTrack({
       {...props}
       data-status-progress=""
       data-status-progress-variant="pipeline"
-      data-status-progress-current={currentIndex}
+      data-status-progress-current={model.currentIndex}
       className={cn(STATUS_PROGRESS_HOST_CLASS, className)}
     >
       <span
@@ -58,8 +63,8 @@ export function StatusProgressTrack({
         data-status-progress-track=""
         className={STATUS_PROGRESS_TRACK_CLASS}
       >
-        {steps.map((step, index) => {
-          const filled = index <= currentIndex;
+        {model.steps.map((step, index) => {
+          const filled = index <= model.currentIndex;
           return (
             <span
               key={step}

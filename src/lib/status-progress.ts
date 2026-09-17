@@ -23,7 +23,6 @@ export const TITLE_STATUS_TRACK_KEYS = [
 ] as const;
 
 export const TITLE_STATUS_OFF_TRACK = [
-  "archived",
   "takedown_requested",
   "taken_down",
 ] as const;
@@ -47,16 +46,16 @@ export type StatusProgressModel = {
 };
 
 export const STATUS_PROGRESS_HOST_CLASS =
-  "flex w-[7.5rem] shrink-0 flex-col items-stretch gap-[var(--space-1)]";
+  "flex w-[7.5rem] shrink-0 flex-col items-stretch gap-[2px]";
 
 export const STATUS_PROGRESS_TRACK_CLASS =
-  "flex h-3 w-full gap-px overflow-hidden rounded-[2px] md:h-3.5";
+  "flex h-[3px] w-full gap-px overflow-hidden rounded-full";
 
 export const STATUS_PROGRESS_SEG_ON_CLASS = "min-w-0 flex-1 bg-accent";
 
 export const STATUS_PROGRESS_SEG_OFF_CLASS = "min-w-0 flex-1 bg-surface-muted";
 
-export const STATUS_PROGRESS_LABEL_CLASS = "t-body-sm text-ink-3";
+export const STATUS_PROGRESS_LABEL_CLASS = "t-label text-ink-3";
 
 export const STATUS_PROGRESS_OFF_CLASS =
   "inline-flex w-fit shrink-0 items-center rounded-full border border-hairline px-[var(--space-3)] py-[var(--space-1)] t-body-sm text-ink-2";
@@ -70,7 +69,8 @@ function titleOffLabel(status: string): string {
 /**
  * Titles list/detail track. Live is the `live` enum or derived live when
  * ≥1 delivery is live — same rollup gate as titleDisplayStatus, without
- * inventing DB state. Archived / takedown stay off-track even if liveCount > 0.
+ * inventing DB state. Official off-pipeline is takedown only; any other
+ * existing product signal that is not on-track stays a muted badge.
  */
 export function titleStatusProgress(
   status: TitleStatus | string,

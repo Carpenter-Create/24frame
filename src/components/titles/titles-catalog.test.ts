@@ -154,14 +154,14 @@ describe("TitlesCatalogListRow craft", () => {
       stillUrl: null,
       status: "draft",
     });
-    const archived = renderRow({
+    const takedown = renderRow({
       href: "/titles/3",
-      title: "Archived film",
+      title: "Takedown film",
       stillUrl: null,
-      status: "archived",
+      status: "takedown_requested",
     });
     const liveHost = openingTagWith(live, 'data-titles-catalog-status=""');
-    const archivedHost = openingTagWith(archived, 'data-titles-catalog-status=""');
+    const takedownHost = openingTagWith(takedown, 'data-titles-catalog-status=""');
 
     expect(liveHost).toContain('data-status-progress-variant="pipeline"');
     expect(live.match(/data-status-progress-seg="filled"/g) ?? []).toHaveLength(5);
@@ -170,11 +170,11 @@ describe("TitlesCatalogListRow craft", () => {
     expect(live).not.toMatch(/green|emerald|success|rose|red/);
     expect(draft.match(/data-status-progress-seg="filled"/g) ?? []).toHaveLength(1);
     expect(draft).toContain("Draft");
-    expect(archivedHost).toContain('data-status-progress-variant="off"');
-    expect(archivedHost).toContain("border-hairline");
-    expect(archivedHost).toContain("text-ink-2");
-    expect(archived).not.toContain("data-status-progress-track");
-    expect(archived).toContain("Archived");
+    expect(takedownHost).toContain('data-status-progress-variant="off"');
+    expect(takedownHost).toContain("border-hairline");
+    expect(takedownHost).toContain("text-ink-2");
+    expect(takedown).not.toContain("data-status-progress-track");
+    expect(takedown).toContain("Takedown requested");
   });
 
   it("places title, year, and the track stage label — In delivery is not Submitted", () => {

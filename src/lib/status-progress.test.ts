@@ -4,8 +4,10 @@ import { TITLE_STATUS_LABELS, type DeliveryStatus, type TitleStatus } from "@/li
 import {
   DELIVERY_STATUS_OFF_TRACK,
   DELIVERY_STATUS_TRACK_STEPS,
+  STATUS_PROGRESS_LABEL_CLASS,
   STATUS_PROGRESS_SEG_OFF_CLASS,
   STATUS_PROGRESS_SEG_ON_CLASS,
+  STATUS_PROGRESS_TRACK_CLASS,
   TITLE_STATUS_OFF_TRACK,
   TITLE_STATUS_TRACK_STEPS,
   deliveryStatusProgress,
@@ -15,7 +17,7 @@ import {
 } from "./status-progress";
 
 describe("titleStatusProgress", () => {
-  it("maps on-track titles through current inclusive (G1–G3)", () => {
+  it("maps on-track titles through current inclusive", () => {
     const draft = titleStatusProgress("draft");
     expect(draft.variant).toBe("pipeline");
     expect(draft.label).toBe("Draft");
@@ -59,7 +61,9 @@ describe("titleStatusProgress", () => {
     expect(titleStatusProgress("live", 2).label).toBe("Live");
   });
 
-  it("keeps archived and takedown as muted badges even with live deliveries (G4)", () => {
+  it("keeps official off-pipeline takedown statuses as muted badges", () => {
+    expect([...TITLE_STATUS_OFF_TRACK]).toEqual(["takedown_requested", "taken_down"]);
+    expect(TITLE_STATUS_OFF_TRACK).not.toContain("archived");
     for (const status of TITLE_STATUS_OFF_TRACK) {
       const model = titleStatusProgress(status, 3);
       expect(model.variant).toBe("off");
@@ -84,7 +88,7 @@ describe("titleStatusProgress", () => {
 });
 
 describe("deliveryStatusProgress", () => {
-  it("maps pending / delivered / live as 1/3 · 2/3 · 3/3 (G5)", () => {
+  it("maps pending / delivered / live as 1/3 · 2/3 · 3/3", () => {
     const pending = deliveryStatusProgress("pending");
     expect(pending.variant).toBe("pipeline");
     expect(pending.label).toBe("Pending");
@@ -123,5 +127,12 @@ describe("status progress tokens", () => {
     expect(STATUS_PROGRESS_SEG_ON_CLASS).not.toMatch(/green|emerald|rose|red|yellow/);
     expect(STATUS_PROGRESS_SEG_OFF_CLASS).toContain("bg-surface-muted");
     expect(STATUS_PROGRESS_SEG_OFF_CLASS).not.toContain("bg-accent");
+  });
+
+  it("keeps the track thin (2–3px), not a chunky bar", () => {
+    expect(STATUS_PROGRESS_TRACK_CLASS).toContain("h-[3px]");
+    expect(STATUS_PROGRESS_TRACK_CLASS).not.toMatch(/\bh-3\b|\bh-3\.5\b|\bh-4\b/);
+    expect(STATUS_PROGRESS_LABEL_CLASS).toContain("t-label");
+    expect(STATUS_PROGRESS_LABEL_CLASS).toContain("text-ink-3");
   });
 });

@@ -4,7 +4,6 @@ import { ArrowLeft, Camera } from "lucide-react";
 import { Artwork } from "./artwork";
 import { StatusProgressTrack } from "@/components/ui/status-progress-track";
 import { cn } from "@/lib/cn";
-import { titleStatusProgress } from "@/lib/status-progress";
 
 // Title-detail hero in the house shell: leading art, title / lifecycle
 // track / quiet meta to the right, primary action under the meta. Landscape banner
@@ -88,7 +87,9 @@ export function TitleHero({
           <div className="flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[var(--space-2)]">
             <h1 className="t-title leading-tight text-ink">{title}</h1>
             <StatusProgressTrack
-              {...titleStatusProgress(status, liveCount)}
+              pipeline="title"
+              status={status}
+              liveCount={liveCount}
               data-title-hero-status=""
             />
           </div>

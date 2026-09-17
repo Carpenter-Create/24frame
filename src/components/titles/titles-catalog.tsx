@@ -7,7 +7,6 @@ import { StatusProgressTrack } from "@/components/ui/status-progress-track";
 
 export { TitlesCatalogStatusFilter } from "@/components/titles/titles-status-filter";
 import { cn } from "@/lib/cn";
-import { titleStatusProgress } from "@/lib/status-progress";
 import {
   TITLES_CATALOG,
   TITLES_LIST_CLASS,
@@ -179,8 +178,14 @@ export function TitleStatusPill({
   status: string;
   liveCount?: number;
 }) {
-  const model = titleStatusProgress(status, liveCount);
-  return <StatusProgressTrack {...model} data-titles-catalog-status="" />;
+  return (
+    <StatusProgressTrack
+      pipeline="title"
+      status={status}
+      liveCount={liveCount}
+      data-titles-catalog-status=""
+    />
+  );
 }
 
 function TitlesCatalogThumb({
