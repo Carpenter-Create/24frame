@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs/config";
 
 // Artwork is served from CloudFront in production and from presigned S3 in local/preview
 // (see lib/asset-url). next/image will only optimise a remote source whose host is listed
@@ -41,6 +42,9 @@ const nextConfig: NextConfig = {
     // but this is a Tier 3 app — if anything looks stale after a write, this flag is the
     // first thing to remove.
     staleTimes: { dynamic: 30 },
+    // Lets instrumentation-client.ts export onRouterTransitionStart so Sentry
+    // can attach client navigation spans. Off by default in Next 16.3.
+    instrumentationClientRouterTransitionEvents: true,
     // Education staff uploads PUT server-side (avatars pattern). Cover ≤10MB,
     // lesson source ≤2GB. Default 1MB would reject a valid file before attach.
     // 3gb leaves FormData headroom over EDUCATION_VIDEO_MAX_BYTES.
@@ -77,4 +81,14 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Org/project slugs are public identifiers for the existing Sentry project.
+// DSN stays env-only. Source maps are off: uploading them would require
+// approving @sentry/cli install scripts and SENTRY_AUTH_TOKEN.
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG ?? "e8-holdings-llc",
+  project: process.env.SENTRY_PROJECT ?? "24frame",
+  silent: !process.env.CI,
+  telemetry: false,
+  sourcemaps: { disable: true },
+  tunnelRoute: "/sentry-tunnel",
+});

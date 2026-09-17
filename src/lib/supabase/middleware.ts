@@ -45,7 +45,8 @@ export async function updateSession(request: NextRequest) {
     path.startsWith("/api/mobile") ||   // mobile sign-in mint/send (rate-limited in-handler)
     // Stripe webhook authenticates by signature, not a user session — must not be
     // redirected to /login (it has no cookies).
-    path === "/api/stripe/webhook";
+    path === "/api/stripe/webhook" ||
+    path === "/sentry-tunnel"; // Sentry tunnel; also excluded from the matcher
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
