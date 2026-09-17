@@ -11,9 +11,15 @@ import {
   deliveriesStatusHref,
   deliveryStatusDisplay,
   deliveryStatusTone,
+  deliveriesCountLabel,
+  deliveryPackageLabel,
+  deliveryRollupStatus,
+  deliveryStatusPillClass,
   deliveryTitleHref,
   deliveryUpdatedAtMs,
   filterDeliveries,
+  groupDeliveriesByTitle,
+  isDeliveryInProgress,
   normalizeMyDeliveries,
   parseDeliverySort,
   parseDeliveryStatusFilter,
@@ -316,6 +322,54 @@ describe("sortDeliveries", () => {
       "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
       "ffffffff-ffff-4fff-8fff-ffffffffffff",
     ]);
+  });
+});
+
+describe("groupDeliveriesByTitle", () => {
+  it("rolls packages into one title row with product-true status and count", () => {
+    const mixed: DeliveryBrowseRow[] = [
+      { ...rows[0], title_id: ID.t1, title: "Winter Light", status: "pending", updated_at: "2026-03-01T12:00:00.000Z" },
+      { ...rows[0], delivery_id: ID.a, title_id: ID.t1, title: "Winter Light", status: "live", updated_at: "2026-01-01T12:00:00.000Z" },
+      { ...rows[1], title_id: ID.t2, title: "Harbor Lights", status: "live", updated_at: "2026-02-01T12:00:00.000Z" },
+    ];
+    const groups = groupDeliveriesByTitle(mixed);
+    expect(groups).toHaveLength(2);
+    expect(groups[0]).toMatchObject({
+      title_id: ID.t1,
+      title: "Winter Light",
+      packageCount: 2,
+      status: "pending",
+    });
+    expect(groups[1]).toMatchObject({
+      title_id: ID.t2,
+      title: "Harbor Lights",
+      packageCount: 1,
+      status: "live",
+    });
+    expect(deliveryPackageLabel(1)).toBe("1 package");
+    expect(deliveryPackageLabel(2)).toBe("2 packages");
+    expect(deliveriesCountLabel(groups)).toBe("1 in progress");
+  });
+
+  it("uses attention-first rollup and never invents pipeline labels", () => {
+    expect(deliveryRollupStatus(["live", "rejected", "pending"])).toBe("rejected");
+    expect(deliveryRollupStatus(["live", "delivered"])).toBe("delivered");
+    expect(deliveryRollupStatus(["live", "taken_down"])).toBe("live");
+    expect(isDeliveryInProgress("pending")).toBe(true);
+    expect(isDeliveryInProgress("delivered")).toBe(true);
+    expect(isDeliveryInProgress("live")).toBe(false);
+    expect(deliveryStatusPillClass("live")).toBe("bg-ink text-surface");
+    expect(deliveryStatusPillClass("pending")).toContain("border-hairline");
+    expect(deliveryStatusPillClass("rejected")).not.toMatch(/red|rose|green/);
+  });
+
+  it("uses a quiet total when nothing is in progress", () => {
+    const liveOnly = groupDeliveriesByTitle([
+      { ...rows[1], status: "live" },
+      { ...rows[3], status: "taken_down", title_id: ID.t4 },
+    ]);
+    expect(deliveriesCountLabel(liveOnly)).toBe("2 titles");
+    expect(deliveriesCountLabel([liveOnly[0]])).toBe("1 title");
   });
 });
 

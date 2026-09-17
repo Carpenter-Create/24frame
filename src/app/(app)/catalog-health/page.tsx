@@ -10,7 +10,10 @@ import { InlineNotice } from "@/components/ui/inline-notice";
 import {
   CATALOG_HEALTH_EMPTY,
   CATALOG_HEALTH_SUBTITLE,
+  CATALOG_HEALTH_TITLE,
   CATALOG_HEALTH_TRUNCATED,
+  catalogHealthCountLabel,
+  catalogHealthTitleHref,
 } from "@/lib/findings";
 import { UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
 import { loadMyFindings } from "@/lib/my-lists";
@@ -51,7 +54,12 @@ export default async function CatalogHealthPage() {
 
   return (
     <>
-      <PageHeader title="Catalog Health" subtitle={CATALOG_HEALTH_SUBTITLE} />
+      <PageHeader
+        title={CATALOG_HEALTH_TITLE}
+        subtitle={
+          findings.length > 0 ? catalogHealthCountLabel(findings.length) : CATALOG_HEALTH_SUBTITLE
+        }
+      />
 
       {loaded.truncated ? (
         <InlineNotice tone="info" className="mb-4" data-my-list-truncated="findings">
@@ -66,18 +74,16 @@ export default async function CatalogHealthPage() {
           </CardBody>
         </Card>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-[var(--space-6)]" data-catalog-health="">
           {Object.entries(byTitle).map(([titleId, items]) => {
             const t = titleById.get(titleId);
             const orgName = t?.organizations?.name;
+            const href = catalogHealthTitleHref(titleId, gcWide);
             return (
-              <Card key={titleId}>
+              <Card key={titleId} data-catalog-health-group="">
                 <CardBody>
                   <div className="flex items-baseline justify-between gap-4 pb-2">
-                    <Link
-                      href={gcWide ? `/gc/titles/${titleId}` : `/titles/${titleId}/metadata`}
-                      className="t-body font-medium text-accent"
-                    >
+                    <Link href={href} className="t-body font-medium text-accent">
                       {t?.title ?? "Title"}
                     </Link>
                     <span className="t-body-sm text-ink-3">
@@ -86,7 +92,7 @@ export default async function CatalogHealthPage() {
                         : t?.catalog_id}
                     </span>
                   </div>
-                  <FindingRows findings={items} />
+                  <FindingRows findings={items} href={href} />
                 </CardBody>
               </Card>
             );

@@ -23,7 +23,7 @@ import { BuyerShareControl } from "./buyer-share-control";
 import { ScreenerWatchButton } from "./screener-watch-button";
 import { AssetDownloadButton } from "./asset-download-button";
 import { SubmitButton } from "./submit-button";
-import { titleDisplayStatus, DELIVERY_STATUS_ROW_LABELS, type TitleStatus } from "@/lib/titles";
+import { titleDisplayStatus, DELIVERY_STATUS_ROW_LABELS, TITLE_DETAIL, type TitleStatus } from "@/lib/titles";
 import { TITLE_DELIVERIES_TRUNCATED } from "@/lib/deliveries-browse";
 import { DETAIL_LIST, rangeFor } from "@/lib/list-bounds";
 import { loadMyDeliveries } from "@/lib/my-lists";
@@ -209,6 +209,19 @@ export default async function TitleDetailPage({ params }: { params: Promise<{ id
         facts={heroFacts}
         action={screenerAvailable ? <ScreenerWatchButton titleId={title.id} /> : null}
       />
+
+      <nav
+        aria-label={TITLE_DETAIL.relatedLabel}
+        className="mt-6 flex flex-wrap gap-[var(--space-4)]"
+        data-title-ops-links=""
+      >
+        <Link href="/deliveries" className="t-body-sm text-accent">
+          {TITLE_DETAIL.deliveriesLink}
+        </Link>
+        <Link href="/catalog-health" className="t-body-sm text-accent">
+          {TITLE_DETAIL.healthLink}
+        </Link>
+      </nav>
 
       <div className="mt-6 flex flex-col gap-6">
         {/* Attention — surfaced only when there's something to act on */}

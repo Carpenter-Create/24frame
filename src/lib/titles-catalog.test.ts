@@ -1,14 +1,18 @@
 import { describe, expect, it } from "vitest";
 
+import { HOUSE_FILTER_ON_CLASS } from "@/lib/house-shell";
 import { TITLE_STATUS_LABELS, type TitleStatus } from "@/lib/titles";
 import { DASHBOARD_HOME } from "./dashboard-home";
 import {
   CATALOG_LIFECYCLE_STATES,
+  TITLE_STATUS_PILL_IDLE_CLASS,
+  TITLE_STATUS_PILL_LIVE_CLASS,
   TITLES_CATALOG,
   catalogCountLabel,
   catalogCountValue,
   catalogReleaseYear,
   catalogStatusMark,
+  catalogStatusPillClass,
   catalogStillSrc,
 } from "./titles-catalog";
 
@@ -103,14 +107,24 @@ describe("Add Title copy", () => {
     expect(TITLES_CATALOG.searchPlaceholder).toBe("Search titles...");
   });
 
-  it("locks mobile 528:542 Recent and empty 529:542 copy to the home phrases", () => {
-    expect(TITLES_CATALOG.recent).toBe("Recent");
-    expect(TITLES_CATALOG.recent).not.toBe("Recently added");
+  it("keeps empty catalog copy aligned with home and a quieter ops empty line", () => {
+    expect(TITLES_CATALOG.empty).toBe("No titles yet.");
     expect(TITLES_CATALOG.emptyCatalog).toBe("The catalog is empty.");
-    expect(TITLES_CATALOG.recent).toBe(DASHBOARD_HOME.justIn);
     expect(TITLES_CATALOG.emptyCatalog).toBe(DASHBOARD_HOME.catalogEmpty);
     expect(TITLES_CATALOG.emptyCatalog).not.toBe(TITLES_CATALOG.empty);
     expect(TITLES_CATALOG.emptyCatalog).not.toBe(TITLES_CATALOG.emptyCanOperate);
+  });
+});
+
+describe("catalog status pills", () => {
+  it("keeps greyscale ink pills and fills only Live", () => {
+    expect(TITLE_STATUS_PILL_LIVE_CLASS).toBe(HOUSE_FILTER_ON_CLASS);
+    expect(catalogStatusPillClass("live")).toBe(HOUSE_FILTER_ON_CLASS);
+    expect(catalogStatusPillClass("draft")).toBe(TITLE_STATUS_PILL_IDLE_CLASS);
+    expect(catalogStatusPillClass("in_review")).toBe(TITLE_STATUS_PILL_IDLE_CLASS);
+    expect(catalogStatusPillClass("taken_down")).toBe(TITLE_STATUS_PILL_IDLE_CLASS);
+    expect(catalogStatusPillClass("live")).not.toContain("bg-accent");
+    expect(catalogStatusPillClass("draft")).not.toMatch(/green|red|emerald|rose/);
   });
 });
 

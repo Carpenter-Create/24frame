@@ -8,9 +8,19 @@ export const FINDING_SEVERITY_LABEL: Record<"high" | "low", string> = {
 };
 
 // Catalog Health = the single client-side findings/health overview.
+export const CATALOG_HEALTH_TITLE = "Catalog Health";
 export const CATALOG_HEALTH_SUBTITLE = "What needs your attention across your catalog.";
 export const CATALOG_HEALTH_EMPTY = "Nothing needs your attention right now.";
 export const CATALOG_HEALTH_TRUNCATED = `Showing the first ${UNPAGINATED_MAX} open findings. More exist — this list is not complete.`;
+
+export function catalogHealthCountLabel(n: number): string {
+  return n === 1 ? "1 finding" : `${n} findings`;
+}
+
+/** Findings resolve on the title — staff stay on the GC title path. */
+export function catalogHealthTitleHref(titleId: string, gcWide: boolean): string {
+  return gcWide ? `/gc/titles/${titleId}` : `/titles/${titleId}`;
+}
 
 // Home Do next lists finding + draft rows; Catalog Health owns the full queue.
 export const DASHBOARD_ATTENTION_CLEAR = "Your catalog is in good standing.";

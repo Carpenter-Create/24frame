@@ -18,24 +18,20 @@ const tokens = readFileSync(join(here, "../../tokens.css"), "utf8");
 const globals = readFileSync(join(here, "../../globals.css"), "utf8");
 
 describe("AddTitleButton header", () => {
-  it("locks 13px Sporty Blue text on desktop so a mobile-only revert fails", () => {
+  it("locks the one Sporty Blue filled pill so a text-only revert fails", () => {
     const html = renderToStaticMarkup(createElement(AddTitleButton, { orgId: "org-1" }));
     const at = html.indexOf("data-add-title");
     const open = html.slice(html.lastIndexOf("<", at), html.indexOf(">", at) + 1);
 
     expect(html).toContain(TITLES_CATALOG.addTitle);
     expect(open).toContain("t-body-sm");
-    expect(open).toContain("text-accent");
-    expect(open).not.toContain("bg-accent");
-    expect(open).not.toContain("max-md:text-accent");
-    expect(open).not.toContain("max-md:bg-transparent");
-    expect(open).not.toContain("rounded-full");
-    expect(src).toContain("t-body-sm text-accent");
-    expect(src).not.toContain("t-body-sm font-normal");
-    expect(src).not.toContain("max-md:text-accent");
-    expect(src).not.toContain("max-md:bg-transparent");
+    expect(open).toContain("bg-accent");
+    expect(open).toContain("text-accent-contrast");
+    expect(open).toContain("rounded-full");
+    expect(src).toContain("from \"@/components/ui/button\"");
+    expect(src).toContain("<Button");
+    expect(src).not.toContain("t-body-sm text-accent");
     expect(src).not.toContain("Plus");
-    expect(src).not.toContain("from \"@/components/ui/button\"");
     expect(tokens).toMatch(/--text-sm:\s*0\.8125rem;/);
     expect(tokens).toContain("--accent: #1769ff;");
     expect(globals).toMatch(/\.t-body-sm\s*\{[\s\S]*?font-size:\s*var\(--text-sm\)/);

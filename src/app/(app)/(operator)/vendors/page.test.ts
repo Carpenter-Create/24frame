@@ -192,7 +192,8 @@ describe("staff rail and neighboring locks", () => {
     expect(ask).toContain("Figma 7:73 landing chrome");
     expect(ask).toContain("rounded-[28px]");
     expect(deliveries).toContain("EmptyState");
-    expect(deliveries).toContain("Where your titles are placed and their status.");
+    expect(deliveries).toContain("DELIVERIES_NO_DATA");
+    expect(deliveries).toContain("data-deliveries-pipeline");
     expect(titles).toContain("TITLES_CATALOG");
     expect(nav).toContain("Access rail");
     expect(home).toContain("GcClientsDirectory");

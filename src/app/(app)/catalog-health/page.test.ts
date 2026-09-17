@@ -108,7 +108,8 @@ describe("CatalogHealthPage modes", () => {
 
     expect(rpc).toHaveBeenCalledWith("my_findings", { p_limit: UNPAGINATED_MAX + 1 });
     expect(html).toContain("Catalog Health");
-    expect(html).toContain(CATALOG_HEALTH_SUBTITLE);
+    expect(html).toContain("2 findings");
+    expect(html).not.toContain(CATALOG_HEALTH_SUBTITLE);
     expect(html).toContain("Acme Film");
     expect(html).toContain("Other Film");
     expect(html).toContain("Other Client");
@@ -139,7 +140,9 @@ describe("CatalogHealthPage modes", () => {
       p_org_id: "org-1",
     });
     expect(html).toContain("Acme Film");
-    expect(html).toContain("/titles/title-acme/metadata");
+    expect(html).toContain("/titles/title-acme");
+    expect(html).not.toContain("/titles/title-acme/metadata");
+    expect(html).toContain("Required");
     expect(html).not.toContain("Other Film");
     expect(html).not.toContain("/gc/titles/");
   });
@@ -153,7 +156,8 @@ describe("CatalogHealthPage modes", () => {
     const html = renderToStaticMarkup(await CatalogHealthPage());
 
     expect(html).toContain("Acme Film");
-    expect(html).toContain("/titles/title-acme/metadata");
+    expect(html).toContain("/titles/title-acme");
+    expect(html).not.toContain("/titles/title-acme/metadata");
     expect(html).not.toContain("Other Film");
   });
 

@@ -20,16 +20,15 @@ import {
   TitlesCatalogFrame,
   TitlesCatalogGrid,
   TitlesCatalogHeader,
-  TitlesCatalogRail,
-  TitlesCatalogRailStill,
+  TitlesCatalogList,
+  TitlesCatalogListRow,
   TitlesCatalogStill,
 } from "@/components/titles/titles-catalog";
 import type { TitleStatus } from "@/lib/titles";
 
 // Client `/titles` is the catalog you operate: every title the org owns, every
-// existing title.status, on this one page. Desktop 1:3 is the unboxed grid.
-// Mobile 528:542 is one Recent snap rail — not a storefront, not Apple TV dark,
-// not a second catalog. `catalog_id` stays GC-only.
+// existing title.status, on this one page. Desktop is the unboxed 5-up grid.
+// Phone is a hairline list. `catalog_id` stays GC-only.
 
 export default async function TitlesPage({
   searchParams,
@@ -92,7 +91,6 @@ export default async function TitlesPage({
   return (
     <TitlesCatalogFrame empty={list.length === 0}>
       <TitlesCatalogHeader
-        identity={activeOrg.name}
         count={catalogCountLabel(list.length, truncated)}
         action={
           list.length > 0 || canOperate ? (
@@ -119,32 +117,27 @@ export default async function TitlesPage({
       ) : null}
 
       {list.length === 0 ? (
-        <>
-          <TitlesCatalogEmpty className="md:hidden">
-            {TITLES_CATALOG.emptyCatalog}
-          </TitlesCatalogEmpty>
-          <TitlesCatalogEmpty className="max-md:hidden">
-            {canOperate ? TITLES_CATALOG.emptyCanOperate : TITLES_CATALOG.emptyReadOnly}
-          </TitlesCatalogEmpty>
-        </>
+        <TitlesCatalogEmpty>
+          {canOperate ? TITLES_CATALOG.empty : TITLES_CATALOG.emptyReadOnly}
+        </TitlesCatalogEmpty>
       ) : filtered.length === 0 ? (
         <TitlesCatalogEmpty>
           {TITLES_CATALOG.searchMiss(q.trim())} {TITLES_CATALOG.searchMissHint}
         </TitlesCatalogEmpty>
       ) : (
         <>
-          <TitlesCatalogRail>
+          <TitlesCatalogList>
             {stills.map((r) => (
-              <TitlesCatalogRailStill
+              <TitlesCatalogListRow
                 key={r.key}
                 href={r.href}
                 title={r.title}
-                stillUrl={r.stillUrl}
                 status={r.status}
+                statusLabel={r.statusLabel}
                 year={r.year}
               />
             ))}
-          </TitlesCatalogRail>
+          </TitlesCatalogList>
           <TitlesCatalogGrid>
             {stills.map((r) => (
               <TitlesCatalogStill
