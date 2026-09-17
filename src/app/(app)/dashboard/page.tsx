@@ -86,8 +86,9 @@ import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 // action, Catalog Health count, What changed, and Pending submissions.
 // Top performing always renders — selected pill owns the full-width body
 // (list default for Titles/Platforms; map default for Territories). Quiet
-// empty, never omitted. Quiet Reports text CTA stays. Standard seats keep
-// the catalog hero and the platforms/territories pair.
+// empty, never omitted. Company-admin drops the All-time activity / Reports
+// footer. Standard seats keep the catalog hero, platforms/territories pair,
+// and Reports pointer.
 // Export stays on /reports. Fixture money is labeled + env-gated and never
 // enters export/ledger.
 
@@ -312,9 +313,9 @@ export default async function DashboardPage({
             <DashboardDoNext items={snapshot.doNext} />
           </div>
         )}
-        <DashboardReportsCta />
         {isAdmin ? null : (
           <>
+            <DashboardReportsCta />
             <DashboardDeliveriesAction rows={deliveriesNeedingAction(scopedDeliveries)} />
             <DashboardFindingsGlance count={snapshot.needsAttention} isPartial={snapshot.findingsIsPartial} />
             <DashboardWhatChanged firstVisit={lastVisitMs == null} rows={stackChanges} />

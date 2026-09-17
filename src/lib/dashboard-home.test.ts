@@ -404,7 +404,7 @@ describe("client home type locks", () => {
       }),
     );
 
-    expect(html).toContain(`t-label text-ink-3">${DASHBOARD_HOME.doNext}`);
+    expect(html).toContain(`t-heading text-ink">${DASHBOARD_HOME.doNext}`);
     expect(html).toContain("Winter Light");
     expect(html).toContain("Synopsis is required.");
     expect(html).toContain("Draft Work");
@@ -439,7 +439,7 @@ describe("client home type locks", () => {
       }),
     );
 
-    expect(html).toContain(`t-label text-ink-3">${DASHBOARD_HOME.justIn}`);
+    expect(html).toContain(`t-heading text-ink">${DASHBOARD_HOME.justIn}`);
     expect(html).toContain("Winter Light");
     expect(html).toContain(TITLE_STATUS_LABELS.submitted);
     expect(html).toContain(dashboardJustInDate(created));
@@ -510,7 +510,7 @@ describe("client home copy lock", () => {
     const addEnd = html.indexOf("</a>", marker);
     const link = html.slice(addStart, addEnd);
 
-    expect(html).toContain(`t-label text-ink-3">${DASHBOARD_HOME.justIn}`);
+    expect(html).toContain(`t-heading text-ink">${DASHBOARD_HOME.justIn}`);
     expect(html).toContain(DASHBOARD_HOME.catalogEmpty);
     expect(html.split(DASHBOARD_HOME.catalogEmpty).length - 1).toBe(1);
     expect(html.split(DASHBOARD_HOME.addTitle).length - 1).toBe(1);

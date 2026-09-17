@@ -173,9 +173,10 @@ function expectCompanyAdminStructuralDelta(html: string) {
   expect(html).toContain(DASHBOARD_HOME.pillTerritories);
   expect(html).toContain(DASHBOARD_HOME.topTitlesEmpty);
   expect(html).toContain("data-dashboard-ranked-empty");
-  expect(html).toContain("data-dashboard-reports-cta");
-  expect(html).toContain(`href="${REPORTS_HREF}"`);
-  expect(html).toContain(DASHBOARD_HOME.reportsCta);
+  expect(html).not.toContain("data-dashboard-reports-cta");
+  expect(html).not.toContain(`href="${REPORTS_HREF}"`);
+  expect(html).not.toContain(DASHBOARD_HOME.reportsCta);
+  expect(html).not.toContain(DASHBOARD_HOME.reportsPointer);
 }
 
 /**
@@ -422,9 +423,9 @@ describe("client home information model", () => {
     expect(html).not.toMatch(/data-dashboard-stat="live"[^>]*t-display/);
     expect(html).not.toMatch(/data-dashboard-stat="catalog"[^>]*t-title/);
     expect(html).not.toMatch(/<h1[^>]*t-display/);
-    expect(html).toContain(`t-label text-ink-3">${DASHBOARD_HOME.hero}`);
-    expect(html).toContain(`t-label text-ink-3">${DASHBOARD_HOME.doNext}`);
-    expect(html).toContain(`t-label text-ink-3">${DASHBOARD_HOME.justIn}`);
+    expect(html).toContain(`t-heading text-ink">${DASHBOARD_HOME.hero}`);
+    expect(html).toContain(`t-heading text-ink">${DASHBOARD_HOME.doNext}`);
+    expect(html).toContain(`t-heading text-ink">${DASHBOARD_HOME.justIn}`);
     expect(html).toContain(DASHBOARD_HOME.live);
     expect(html).toContain(DASHBOARD_HOME.doNext);
     expect(html).toContain("data-dashboard-overview-row");
@@ -592,7 +593,7 @@ describe("client home copy lock", () => {
     const html = renderToStaticMarkup(await DashboardPage());
 
     expect(DASHBOARD_HOME.justIn).toBe("Recent");
-    expect(html).toContain(`t-label text-ink-3">${DASHBOARD_HOME.justIn}`);
+    expect(html).toContain(`t-heading text-ink">${DASHBOARD_HOME.justIn}`);
     expect(html).toContain(">Recent<");
     expect(html).not.toContain("Just in");
   });
@@ -753,8 +754,10 @@ describe("company admin Overview hero", () => {
     expect(html).toContain("data-dashboard-period");
     expect(html).toContain("data-dashboard-revenue");
     expect(html).toContain('data-dashboard-module="recent-activity"');
-    expect(html).toContain("data-dashboard-reports-cta");
-    expect(html).toContain(`href="${REPORTS_HREF}"`);
+    expect(html).not.toContain("data-dashboard-reports-cta");
+    expect(html).not.toContain(`href="${REPORTS_HREF}"`);
+    expect(html).not.toContain(DASHBOARD_HOME.reportsCta);
+    expect(html).not.toContain(DASHBOARD_HOME.reportsPointer);
     expect(html).not.toContain("data-reports-download");
     expect(html).not.toContain("Export CSV");
     expect(html).not.toContain("View lines");

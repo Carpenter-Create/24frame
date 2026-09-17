@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { DASHBOARD_SECTION_TITLE_CLASS } from "@/lib/dashboard-craft";
 import { DASHBOARD_HOME, dashboardCatalogValue } from "@/lib/dashboard-home";
 import { cumulativeCatalogSeries } from "@/lib/catalog-activity";
 
@@ -64,7 +65,7 @@ export function DashboardCatalogHero({
       className="h-full overflow-hidden rounded-[var(--radius-lg)] border border-hairline bg-surface"
     >
       <div className="flex flex-col gap-[var(--space-2)] px-[var(--space-6)] py-[var(--space-6)]">
-        <p className="t-label text-ink-3">{DASHBOARD_HOME.hero}</p>
+        <p className={DASHBOARD_SECTION_TITLE_CLASS}>{DASHBOARD_HOME.hero}</p>
         <p data-dashboard-stat="catalog" className="t-display t-data leading-none text-ink">
           {dashboardCatalogValue(catalog, catalogIsPartial)}
         </p>
