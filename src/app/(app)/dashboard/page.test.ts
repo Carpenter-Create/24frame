@@ -6,6 +6,7 @@ import { getOrgContext } from "@/lib/supabase/context";
 import { CLIENTS_PAGE, ORG_ROLE_LABELS, ORG_STATUS_LABELS } from "@/lib/clients";
 import { DASHBOARD_HOME, dashboardJustInDate } from "@/lib/dashboard-home";
 import { DASHBOARD_ADMIN } from "@/lib/dashboard-admin";
+import { DASHBOARD_LICENSING } from "@/lib/dashboard-licensing";
 import { DASHBOARD_CRAFT_FIXTURE_ENV, DASHBOARD_FIXTURE } from "@/lib/dashboard-fixture";
 import { FINANCE_PAGE } from "@/lib/finance";
 import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
@@ -60,6 +61,8 @@ function stubClient(
     title: string;
     status: string;
     created_at: string;
+    created_by?: string | null;
+    catalog_id?: string | null;
   }[] = [],
   findings: {
     org_id: string;
@@ -97,7 +100,14 @@ function stubClient(
   const from = vi.fn((table: string) => {
     if (table === "titles") return titlesChain;
     if (table === "finance_periods" || table === "contract_terms") return financeChain;
-    if (table === "memberships" || table === "profiles") return listChain;
+    if (
+      table === "memberships" ||
+      table === "profiles" ||
+      table === "assets" ||
+      table === "deliveries"
+    ) {
+      return listChain;
+    }
     throw new Error(`unexpected from(${table})`);
   });
   const rpc = vi.fn(async (name: string) => {
@@ -146,6 +156,9 @@ function expectCompanyAdminStructuralDelta(html: string) {
   expect(html).toContain("data-dashboard-period");
   expect(html).toContain("data-dashboard-period-current");
   expect(html).toContain("data-dashboard-period-chevron");
+  expect(html).toContain('data-dashboard-module="licensing-status"');
+  expect(html).toContain(DASHBOARD_LICENSING.title);
+  expect(html).toContain("data-dashboard-licensing-summary");
   expect(html).toContain('data-dashboard-module="recent-activity"');
   expect(html).toContain("data-dashboard-top-performing");
   expect(html).toContain(DASHBOARD_HOME.topPerforming);
@@ -703,21 +716,26 @@ describe("company admin Overview hero", () => {
     expect(html).not.toContain("data-dashboard-user");
     expect(html).toContain("data-dashboard-revenue");
     expect(html).toContain("data-dashboard-revenue-chart");
+    expect(html).toContain('data-dashboard-module="licensing-status"');
     expect(html).toContain('data-dashboard-module="recent-activity"');
     expect(html).toContain("lg:grid-cols-5");
     expect(html).toContain("lg:col-span-3");
     expect(html).toContain("lg:col-span-2");
     expect(html).toContain("max-md:flex-col");
     expect(html).toContain("data-dashboard-overview-revenue");
-    expect(html).toContain("data-dashboard-overview-activity");
+    expect(html).toContain("data-dashboard-overview-licensing");
+    expect(html).not.toContain("data-dashboard-overview-activity");
     expect(html.indexOf("data-dashboard-overview-revenue")).toBeLessThan(
-      html.indexOf("data-dashboard-overview-activity"),
+      html.indexOf("data-dashboard-overview-licensing"),
     );
     expect(html.indexOf("data-dashboard-revenue")).toBeLessThan(
-      html.indexOf('data-dashboard-module="recent-activity"'),
+      html.indexOf('data-dashboard-module="licensing-status"'),
     );
-    expect(html.indexOf('data-dashboard-module="recent-activity"')).toBeLessThan(
+    expect(html.indexOf('data-dashboard-module="licensing-status"')).toBeLessThan(
       html.indexOf("data-dashboard-top-performing"),
+    );
+    expect(html.indexOf("data-dashboard-top-performing")).toBeLessThan(
+      html.indexOf('data-dashboard-module="recent-activity"'),
     );
     expect(html.indexOf("data-dashboard-top-performing")).toBeLessThan(
       html.indexOf('data-dashboard-top-pill="titles"'),
@@ -796,7 +814,9 @@ describe("company admin Overview hero", () => {
     expect(html).not.toMatch(/data-dashboard-title-desktop="" class="[^"]*t-label/);
     expect(html).toContain(DASHBOARD_ADMIN.allTime);
     expect(html).toContain("As of All time");
-    expect(html).not.toContain("Needs attention");
+    expect(html).toContain(DASHBOARD_LICENSING.needsAttention);
+    expect(html).not.toContain('data-dashboard-module="findings-glance"');
+    expect(html).not.toContain(DASHBOARD_HOME.doNext);
   });
 
   it("labels sample revenue when the craft fixture gate is on", async () => {
@@ -811,6 +831,9 @@ describe("company admin Overview hero", () => {
     expect(html).toContain(DASHBOARD_FIXTURE.sampleMark);
     expect(html).toContain("$2,104,000.00");
     expect(html).toContain("Sample title 01");
+    expect(html).toContain(DASHBOARD_LICENSING.empty);
+    expect(html).toContain("data-dashboard-licensing-empty");
+    expect(html).not.toContain("Sample licensing");
     expect(html).toContain("data-dashboard-top-performing");
     expect(html).toContain(DASHBOARD_HOME.topPerforming);
     expectNoCatalogVelocityStrip(html);
@@ -864,6 +887,54 @@ describe("company admin Overview hero", () => {
     expect(html).not.toContain("data-dashboard-user-results");
     expect(html).not.toContain(DASHBOARD_ADMIN.findUser);
     expect(html).not.toContain(DASHBOARD_ADMIN.allCompany);
+  });
+
+  it("maps live titles into Licensing status and activity actors without fake licenses", async () => {
+    stubClient(
+      [
+        {
+          id: "title-1",
+          title: "Winter Light",
+          status: "live",
+          created_at: "2026-09-02T15:04:00.000Z",
+          created_by: "maya",
+          catalog_id: "GC-0001234",
+        },
+        {
+          id: "title-2",
+          title: "Harbor Cut",
+          status: "in_review",
+          created_at: "2026-09-03T00:00:00.000Z",
+          catalog_id: "GC-0001235",
+        },
+      ],
+      [
+        {
+          org_id: "org-1",
+          entity_id: "title-1",
+          severity: "high",
+          message: "Synopsis is required.",
+        },
+      ],
+    );
+    vi.mocked(getOrgContext).mockResolvedValue(
+      ctx({ isGcStaff: false, orgStatus: "active", role: "account_owner" }) as never,
+    );
+    const html = renderToStaticMarkup(await DashboardPage({ searchParams: Promise.resolve({}) }));
+    expect(html).toContain('data-dashboard-licensing-count="ready"');
+    expect(html).toMatch(/data-dashboard-licensing-count="ready"[^>]*>0</);
+    expect(html).toMatch(/data-dashboard-licensing-count="needsAttention"[^>]*>1</);
+    expect(html).toMatch(/data-dashboard-licensing-count="inReview"[^>]*>1</);
+    expect(html).toContain('href="/titles/24F-0001234"');
+    expect(html).toContain('href="/titles/24F-0001235"');
+    expect(html).toContain("data-dashboard-licensing-thumb");
+    expect(html).toContain("data-dashboard-licensing-pill");
+    expect(html).toContain("Synopsis is required.");
+    expect(html).toContain("data-dashboard-activity-actor");
+    expect(html).toContain("data-dashboard-activity-clock");
+    expect(html).not.toContain("Licensed");
+    expect(html).not.toContain("Removed");
+    expect(html).not.toContain("Sample licensing");
   });
 
   it("does not load org money when a user is scoped", async () => {

@@ -10,7 +10,10 @@ import {
   DashboardOrgIdentity,
 } from "@/components/dashboard/dashboard-home";
 import { DashboardCatalogHero } from "@/components/dashboard/dashboard-catalog-hero";
-import { DashboardAdminHero } from "@/components/dashboard/dashboard-admin-hero";
+import {
+  DashboardAdminHero,
+  DashboardRecentActivity,
+} from "@/components/dashboard/dashboard-admin-hero";
 import {
   DashboardDeliveriesAction,
   DashboardFindingsGlance,
@@ -45,9 +48,13 @@ import {
   isCompanyAdminRole,
   parseDashboardPeriod,
   parseDashboardUserId,
+  activityDeliveryId,
+  applyActivityActors,
   recentAccountActivity,
   revenuePointsFromLabels,
 } from "@/lib/dashboard-admin";
+import { buildLicensingStatus } from "@/lib/dashboard-licensing";
+import { titleArtworkUrls } from "@/lib/artwork";
 import {
   DASHBOARD_ADMIN_PAIR_CLASS,
   DASHBOARD_ADMIN_STACK_CLASS,
@@ -74,25 +81,29 @@ import { buildClientFinanceDashboard } from "@/lib/finance-dashboard";
 import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 
 // Company-admin `/dashboard` rematches Overview analytics structure inside
-// house tokens: unlabeled period chrome, Net revenue $ + scrub, Recent
-// account activity, then one Top performing section (Titles / Platforms /
-// Territories pills). 24Frame nouns only — never Top works,
-// sources, contributors, or Exports. Period is chrome, not H1 — dominant
-// read is the $. Phone (`< md`) is a single-column stack — $0.00 empty
-// hero, compact chart, Period bottom sheet. Find-user is gone on phone and
-// md+; user scope lives on /reports later. Leftover ?user= parsing stays
-// inert for data only. Catalog-velocity strip is gone — Adam lock
-// 2026-09-16. Company-admin also drops Recent, Do next, Deliveries needing
-// action, Catalog Health count, What changed, and Pending submissions.
-// Top performing always renders — selected pill owns the full-width body
-// (list default for Titles/Platforms; map default for Territories). Quiet
-// empty, never omitted. Company-admin drops the All-time activity / Reports
-// footer. Standard seats keep the catalog hero, platforms/territories pair,
-// and Reports pointer.
+// house tokens: unlabeled period chrome, Net revenue $ + scrub, Licensing
+// status, then one Top performing section (Titles / Platforms /
+// Territories pills), then Recent account activity full-width. 24Frame
+// nouns only — never Top works, sources, contributors, or Exports. Period
+// is chrome, not H1 — dominant read is the $. Phone (`< md`) is a
+// single-column stack — Net → Licensing → Top performing → Recent.
+// Find-user is gone on phone and md+; user scope lives on /reports later.
+// Leftover ?user= parsing stays inert for data only. Catalog-velocity
+// strip is gone — Adam lock 2026-09-16. Company-admin also drops Recent
+// (the old just-in module), Do next, Deliveries needing action, Catalog
+// Health count, What changed, and Pending submissions. Top performing
+// always renders — selected pill owns the full-width body (list default
+// for Titles/Platforms; map default for Territories). Quiet empty, never
+// omitted. Company-admin drops the All-time activity / Reports footer.
+// Standard seats keep the catalog hero, platforms/territories pair, and
+// Reports pointer.
 // Export stays on /reports. Fixture money is labeled + env-gated and never
-// enters export/ledger.
+// enters export/ledger. Licensing never uses the money fixture.
 
-type TitleRow = ClientHomeTitle & { created_by?: string | null };
+type TitleRow = ClientHomeTitle & {
+  created_by?: string | null;
+  catalog_id?: string | null;
+};
 
 export default async function DashboardPage({
   searchParams,
@@ -134,7 +145,7 @@ export default async function DashboardPage({
   const [{ data: titleRows }, findings, deliveries] = await Promise.all([
     supabase
       .from("titles")
-      .select("id, title, status, created_at, created_by")
+      .select("id, title, status, created_at, created_by, catalog_id")
       .eq("org_id", org.id)
       .order("created_at", { ascending: false })
       .range(...rangeFor(UNPAGINATED_MAX)),
@@ -175,6 +186,7 @@ export default async function DashboardPage({
   let adminHero = null;
   let useFixture = false;
   let adminUpdated: string | null = null;
+  let adminActivity: ReturnType<typeof recentAccountActivity> = [];
   if (isAdmin) {
     const canReadMoney = !userId && canViewClientEarn({ isGcStaff: ctx.isGcStaff, role: ctx.activeRole });
     const moneyLoaded = canReadMoney ? await loadRecipientDashboard(org.id) : null;
@@ -210,6 +222,61 @@ export default async function DashboardPage({
       period,
       userId,
     });
+    const deliveryIds = liveActivity
+      .map((row) => activityDeliveryId(row.id))
+      .filter((id): id is string => Boolean(id));
+    let deliveryActors = new Map<string, string | null>();
+    if (deliveryIds.length > 0) {
+      const { data: deliveryActorRows } = await supabase
+        .from("deliveries")
+        .select("id, created_by")
+        .in("id", deliveryIds);
+      deliveryActors = new Map(
+        (deliveryActorRows ?? []).map((row) => [row.id, row.created_by]),
+      );
+    }
+    const actorIds = [
+      ...new Set(
+        applyActivityActors(liveActivity, { deliveryActors })
+          .map((row) => row.actorId)
+          .filter((id): id is string => Boolean(id)),
+      ),
+    ];
+    let profileNames = new Map<string, string | null>();
+    if (actorIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, display_name")
+        .in("id", actorIds);
+      profileNames = new Map(
+        (profiles ?? []).map((row) => [row.id, row.display_name]),
+      );
+    }
+    const hydratedActivity = applyActivityActors(liveActivity, {
+      deliveryActors,
+      profileNames,
+    });
+    adminActivity =
+      useFixture && hydratedActivity.length === 0
+        ? dashboardFixtureActivity(period, now)
+        : hydratedActivity;
+
+    const licensingBase = buildLicensingStatus({
+      titles,
+      findings: findings.rows,
+    });
+    const artwork = await titleArtworkUrls(
+      supabase,
+      licensingBase.rows.map((row) => row.id),
+    );
+    const licensing = {
+      ...licensingBase,
+      rows: licensingBase.rows.map((row) => ({
+        ...row,
+        stillUrl: artwork.get(row.id)?.banner ?? null,
+      })),
+    };
+
     const revenueHero = buildDashboardRevenueHero({ period, points, userId });
     adminUpdated = revenueHero.updated;
     adminHero = (
@@ -219,11 +286,7 @@ export default async function DashboardPage({
         options={dashboardPeriodOptionsFor(period, now, monthSources)}
         hero={revenueHero}
         fixture={useFixture}
-        activity={
-          useFixture && liveActivity.length === 0
-            ? dashboardFixtureActivity(period, now)
-            : liveActivity
-        }
+        licensing={licensing}
       />
     );
   }
@@ -277,13 +340,16 @@ export default async function DashboardPage({
         className={isAdmin ? DASHBOARD_ADMIN_STACK_CLASS : DASHBOARD_STANDARD_STACK_CLASS}
       >
         {isAdmin ? (
-          <DashboardTopPerforming
-            titles={adminTopTitles}
-            platforms={adminPlatforms}
-            territories={adminTerritories}
-            periodLabel={period.label}
-            updated={adminUpdated}
-          />
+          <>
+            <DashboardTopPerforming
+              titles={adminTopTitles}
+              platforms={adminPlatforms}
+              territories={adminTerritories}
+              periodLabel={period.label}
+              updated={adminUpdated}
+            />
+            <DashboardRecentActivity items={adminActivity} />
+          </>
         ) : (
           <div className={DASHBOARD_ADMIN_PAIR_CLASS}>
             <DashboardRankedBars

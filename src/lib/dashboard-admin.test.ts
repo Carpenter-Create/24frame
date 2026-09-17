@@ -6,6 +6,9 @@ import {
   DASHBOARD_HREF,
   buildDashboardRevenueHero,
   closedRevenuePoints,
+  activityDeliveryId,
+  applyActivityActors,
+  dashboardActivityInitial,
   dashboardAsOfLine,
   dashboardChartGeometry,
   dashboardHref,
@@ -32,6 +35,7 @@ import {
   DASHBOARD_PERIOD_MENU_GROUPS,
   revenuePointsFromLabels,
 } from "./dashboard-admin";
+import { dashboardJustInTime } from "./dashboard-home";
 
 const now = new Date("2026-09-16T12:00:00.000Z");
 
@@ -275,6 +279,10 @@ describe("recent account activity", () => {
       "Older",
     ]);
     expect(rows[2]?.count).toBe(1);
+    expect(rows.map((row) => row.actorId)).toEqual([null, null, "maya", "other"]);
+    expect(rows[2]?.actor.initial).toBe("?");
+    expect(rows[0]?.actor.initial).toBe("?");
+    expect(rows[2]?.href).toBe("/titles");
     expect(
       recentAccountActivity({
         titles: [
@@ -286,5 +294,47 @@ describe("recent account activity", () => {
         userId: "other",
       }),
     ).toEqual([]);
+  });
+
+  it("hydrates actor initials from real profile names and keeps an exact timestamp", () => {
+    const rows = recentAccountActivity({
+      titles: [
+        {
+          id: "a",
+          title: "Winter Light",
+          status: "live",
+          created_at: "2026-09-02T00:00:00.000Z",
+          created_by: "maya",
+          catalog_id: "GC-0001234",
+        },
+      ],
+      deliveries: [
+        {
+          delivery_id: "d1",
+          title_id: "a",
+          title: "Winter Light",
+          updated_at: "2026-09-10T00:00:00.000Z",
+        },
+      ],
+      findings: [],
+      period: parseDashboardPeriod("all", now),
+      userId: null,
+    });
+    expect(activityDeliveryId(rows[0]?.id ?? "")).toBe("d1");
+    expect(dashboardActivityInitial("Maya Chen")).toBe("M");
+    expect(dashboardActivityInitial(null)).toBe("?");
+    const hydrated = applyActivityActors(rows, {
+      deliveryActors: new Map([["d1", "sam"]]),
+      profileNames: new Map([
+        ["maya", "Maya Chen"],
+        ["sam", "Sam Rivera"],
+      ]),
+    });
+    expect(hydrated.map((row) => row.actor)).toEqual([
+      { id: "sam", initial: "S" },
+      { id: "maya", initial: "M" },
+    ]);
+    expect(hydrated[1]?.href).toBe("/titles/24F-0001234");
+    expect(dashboardJustInTime("2026-09-02T15:04:00.000Z")).toMatch(/\d{1,2}:\d{2}/);
   });
 });

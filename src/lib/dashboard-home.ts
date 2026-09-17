@@ -68,6 +68,7 @@ const PENDING_SUBMISSION_STATUSES = new Set(["submitted", "in_review"]);
 const DELIVERY_ACTION_STATUSES = new Set(["pending", "rejected"]);
 
 const JUST_IN_DATE = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
+const JUST_IN_TIME = new Intl.DateTimeFormat("en-US", { timeStyle: "short" });
 
 export type ClientHomeTitle = {
   id: string;
@@ -121,6 +122,11 @@ export function dashboardCatalogValue(count: number, isPartial: boolean): string
 
 export function dashboardJustInDate(iso: string): string {
   return JUST_IN_DATE.format(new Date(iso));
+}
+
+/** Exact clock time. Quieter than the date — never a relative "ago". */
+export function dashboardJustInTime(iso: string): string {
+  return JUST_IN_TIME.format(new Date(iso));
 }
 
 export function dashboardTitleStatusLabel(status: string): string | null {
