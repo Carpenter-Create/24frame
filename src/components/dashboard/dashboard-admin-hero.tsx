@@ -27,7 +27,6 @@ import {
   DASHBOARD_HERO_TO_CHART_GAP_CLASS,
   DASHBOARD_HERO_VALUE_CLASS,
   DASHBOARD_KICKER_CLASS,
-  DASHBOARD_ORG_LABEL_CLASS,
   DASHBOARD_RANKED_LIST_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
   DASHBOARD_TITLE_DESKTOP_CLASS,
@@ -51,12 +50,12 @@ export function DashboardFixtureBanner() {
 
 export function DashboardAdminChrome({
   orgName,
-  period,
+  periodKey,
   options,
   periodMenuOpen = false,
 }: {
   orgName: string;
-  period: DashboardPeriod;
+  periodKey: string;
   options: readonly DashboardPeriodOption[];
   periodMenuOpen?: boolean;
 }) {
@@ -67,18 +66,17 @@ export function DashboardAdminChrome({
       className={DASHBOARD_ADMIN_CHROME_CLASS}
     >
       <header className="min-w-0">
-        <p className={DASHBOARD_ORG_LABEL_CLASS}>{orgName}</p>
         <h1 data-dashboard-title="">
           <span data-dashboard-title-mobile="" className={DASHBOARD_TITLE_MOBILE_CLASS}>
             {orgName}
           </span>
           <span data-dashboard-title-desktop="" className={DASHBOARD_TITLE_DESKTOP_CLASS}>
-            {period.label}
+            {orgName}
           </span>
         </h1>
       </header>
       <DashboardAdminControls
-        periodKey={period.key}
+        periodKey={periodKey}
         options={options}
         defaultOpen={periodMenuOpen}
       />
@@ -210,7 +208,7 @@ export function DashboardAdminHero({
       {fixture ? <DashboardFixtureBanner /> : null}
       <DashboardAdminChrome
         orgName={orgName}
-        period={period}
+        periodKey={period.key}
         options={options}
         periodMenuOpen={periodMenuOpen}
       />

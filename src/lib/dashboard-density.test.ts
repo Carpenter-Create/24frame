@@ -182,7 +182,8 @@ describe("Dashboard Fidelity × Royalogic density", () => {
     );
     expect(doNext).toContain("data-dashboard-do-next-secondary");
     expect(DASHBOARD_DO_NEXT_SECONDARY_CLASS).toContain("max-md:bg-transparent");
-    expect(pageSrc).toContain("secondary={isAdmin}");
+    expect(pageSrc).not.toContain("secondary={isAdmin}");
+    expect(pageSrc).toContain("isAdmin ? null");
     expect(pageSrc).not.toMatch(/\bMarkets\b/);
     expect(heroSrc).not.toMatch(/\bMarkets\b/);
     expect(craftSrc).not.toMatch(/\bMarkets\b/);

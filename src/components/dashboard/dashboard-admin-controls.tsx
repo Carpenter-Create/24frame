@@ -18,7 +18,6 @@ import {
 import {
   DASHBOARD_PERIOD_CHEVRON_CLASS,
   DASHBOARD_PERIOD_GROUP_CLASS,
-  DASHBOARD_PERIOD_KICKER_CLASS,
   DASHBOARD_PERIOD_MENU_DESKTOP_CLASS,
   DASHBOARD_PERIOD_OPTION_CHECK_CLASS,
   DASHBOARD_PERIOD_OPTION_CHECK_GUTTER_CLASS,
@@ -92,9 +91,6 @@ export function DashboardAdminControls({
       className="flex w-auto shrink-0 items-center justify-end"
     >
       <div className="flex min-w-0 items-center gap-[var(--space-2)]">
-        <span data-dashboard-period-kicker="" className={DASHBOARD_PERIOD_KICKER_CLASS}>
-          {DASHBOARD_ADMIN.period}
-        </span>
         <div ref={hostRef} className="relative min-w-0 md:flex-none">
           <button
             type="button"

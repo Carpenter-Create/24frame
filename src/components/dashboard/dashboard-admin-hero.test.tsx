@@ -44,6 +44,9 @@ describe("DashboardAdminHero", () => {
     expect(html).toContain("data-dashboard-mobile-stack");
     expect(html).toContain("data-dashboard-title-mobile");
     expect(html).toContain("data-dashboard-title-desktop");
+    expect(html).toMatch(/data-dashboard-title-desktop=""[^>]*>Acme</);
+    expect(html).not.toMatch(/data-dashboard-title-desktop=""[^>]*>All time</);
+    expect(html).not.toContain("data-dashboard-period-kicker");
     expect(html).toContain(DASHBOARD_ADMIN.revenue);
     expect(html).toContain(DASHBOARD_ADMIN.activity);
     expect(html).toContain("Acme");
