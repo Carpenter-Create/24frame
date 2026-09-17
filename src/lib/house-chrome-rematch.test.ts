@@ -18,6 +18,7 @@ import {
   HOUSE_MODULE_CLASS,
   HOUSE_PAGE_CANVAS_CLASS,
   HOUSE_RAIL_ACTIVE_CLASS,
+  HOUSE_RAIL_ITEM_CLASS,
   HOUSE_RAIL_PANEL_CLASS,
   HOUSE_SEARCH_PILL_CLASS,
 } from "@/lib/house-shell";
@@ -42,6 +43,22 @@ const switcher = readFileSync("src/lib/workspace-switcher.ts", "utf8");
 const mobileChrome = readFileSync("src/lib/mobile-chrome.ts", "utf8");
 const collapse = readFileSync("src/lib/rail-collapse.ts", "utf8");
 const socialChrome = readFileSync("src/lib/social-chrome.ts", "utf8");
+const houseShell = readFileSync("src/lib/house-shell.ts", "utf8");
+const settings = readFileSync("src/lib/settings.ts", "utf8");
+const educationSearch = readFileSync("src/components/chrome/education-header-search.tsx", "utf8");
+
+const FUN_CHROME_PATHS = [
+  "src/lib/house-shell.ts",
+  "src/components/chrome/app-shell.tsx",
+  "src/components/chrome/side-nav.tsx",
+  "src/components/social/social-top-bar.tsx",
+  "src/lib/social-chrome.ts",
+  "src/lib/workspace-switcher.ts",
+  "src/lib/mobile-chrome.ts",
+  "src/lib/rail-collapse.ts",
+  "src/lib/settings.ts",
+  "src/components/chrome/education-header-search.tsx",
+] as const;
 
 describe("house chrome rematch miss list v1.1", () => {
   it("uses Social side nav + full-width top on Aggregation and Education — no third chrome", () => {
@@ -132,6 +149,30 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(mobileChrome).toContain("HOUSE_ICON_BUTTON_CLASS");
     expect(collapse).toContain("HOUSE_ICON_BUTTON_CLASS");
     expect(socialChrome).toContain("HOUSE_MODULE_CLASS");
+  });
+
+  it("stays on the 24Frame social/fun chrome lane — not a professional flatten", () => {
+    expect(houseShell).toMatch(/social\/fun chrome lane/);
+    expect(houseShell).toMatch(/do not flatten/);
+    expect(shell).toContain("data-social-workspace");
+    expect(shell).toContain("data-house-full-width-top");
+    expect(HOUSE_RAIL_ITEM_CLASS).toContain("rounded-full");
+    expect(HOUSE_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash font-medium text-accent");
+    expect(HOUSE_RAIL_ACTIVE_CLASS).not.toContain("bg-ink");
+    expect(HOUSE_RAIL_ACTIVE_CLASS).not.toMatch(/(?:^|[\s"])bg-accent(?:[\s"]|$)/);
+    expect(HOUSE_SEARCH_PILL_CLASS).toContain("rounded-full");
+    expect(HOUSE_CONTROL_PILL_CLASS).toBe("rounded-full");
+    expect(HOUSE_ICON_BUTTON_CLASS).toBe("rounded-full");
+    expect(HOUSE_MODULE_CLASS).toContain("rounded-[var(--radius-lg)]");
+    expect(tokens).toMatch(/--accent:\s*#1769ff;/);
+    expect(tokens).not.toMatch(/#f97316|#ea580c|#ff6a00|#ff7a00/i);
+    expect(settings).toContain("rounded-full");
+    expect(educationSearch).toContain("HOUSE_SEARCH_PILL_CLASS");
+    for (const path of FUN_CHROME_PATHS) {
+      const src = readFileSync(path, "utf8");
+      expect(src, path).not.toMatch(/Royalogic/i);
+      expect(src, path).not.toMatch(/\brl-/);
+    }
   });
 
   it("keeps house tokens, Titles content, and Delete/Archive unmixed", () => {
