@@ -261,7 +261,11 @@ export function TitlesCatalogListRow({
           {year || publicId ? (
             <span className="t-body-sm text-ink-3">
               {year ? (
-                <span data-titles-catalog-year="" data-titles-catalog-list-year="">
+                <span
+                  className="t-body-sm text-ink-3"
+                  data-titles-catalog-year=""
+                  data-titles-catalog-list-year=""
+                >
                   {year}
                 </span>
               ) : null}
