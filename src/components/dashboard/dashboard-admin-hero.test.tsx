@@ -46,10 +46,12 @@ describe("DashboardAdminHero", () => {
     );
     expect(html).toContain("data-dashboard-admin-hero");
     expect(html).toContain("lg:grid-cols-5");
+    expect(html).toContain("lg:items-stretch");
     expect(html).toContain("lg:col-span-3");
     expect(html).toContain("lg:col-span-2");
     expect(html).toContain("max-md:flex");
     expect(html).toContain("max-md:flex-col");
+    expect(html).toContain("items-start");
     expect(html).toContain("data-dashboard-overview-revenue");
     expect(html).toContain("data-dashboard-overview-attention");
     expect(html.indexOf("data-dashboard-overview-revenue")).toBeLessThan(
@@ -181,6 +183,7 @@ describe("DashboardAdminHero", () => {
     );
     expect(craft).toContain("lg:grid-cols-2");
     expect(craft).toContain("lg:grid-cols-5");
+    expect(craft).toContain("lg:items-stretch");
     expect(craft).toContain("lg:col-span-3");
     expect(craft).toContain("lg:col-span-2");
     expect(craft).toContain("max-md:flex-col");

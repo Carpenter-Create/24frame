@@ -36,6 +36,8 @@ import {
   housePageSelectOptionClass,
 } from "@/lib/house-page-select";
 
+// Shared card fill for paired rows (Net | Attention) and other modules.
+// h-full + flex-col: stretch the surface; content stays top-aligned.
 export const DASHBOARD_CARD_CLASS =
   `${HOUSE_MODULE_CLASS} dashboard-home-panel flex h-full flex-col overflow-hidden shadow-none`;
 
@@ -97,14 +99,20 @@ export const DASHBOARD_ADMIN_CHROME_CLASS =
   "flex flex-row items-center justify-between gap-[var(--space-2)] md:flex-row md:items-start md:justify-between md:gap-[var(--space-6)]";
 
 // Desktop: taller Net revenue left (3) · Attention glance right (2).
-// Phone (`< md`): stack Revenue then Attention. Licensing status is
-// full-width under this pair, then Top performing, then Recent activity.
+// One height pair — lg stretch + shared cell/card h-full. Phone (`< md`)
+// stacks Revenue then Attention with items-start; no forced equal height.
+// Licensing status is full-width under this pair, then Top performing,
+// then Recent activity.
 export const DASHBOARD_ADMIN_OVERVIEW_CLASS =
-  "grid grid-cols-1 items-start gap-[var(--space-6)] max-md:flex max-md:flex-col lg:grid-cols-5";
+  "grid grid-cols-1 items-start gap-[var(--space-6)] max-md:flex max-md:flex-col lg:grid-cols-5 lg:items-stretch";
 
-export const DASHBOARD_ADMIN_HERO_REVENUE_CLASS = "lg:col-span-3";
+export const DASHBOARD_ADMIN_TOP_ROW_CELL_CLASS = "h-full min-h-0";
 
-export const DASHBOARD_ADMIN_HERO_ATTENTION_CLASS = "lg:col-span-2";
+export const DASHBOARD_ADMIN_HERO_REVENUE_CLASS =
+  `${DASHBOARD_ADMIN_TOP_ROW_CELL_CLASS} lg:col-span-3`;
+
+export const DASHBOARD_ADMIN_HERO_ATTENTION_CLASS =
+  `${DASHBOARD_ADMIN_TOP_ROW_CELL_CLASS} lg:col-span-2`;
 
 export const DASHBOARD_LICENSING_THUMB_CLASS =
   "relative aspect-[16/9] w-16 shrink-0 overflow-hidden rounded-[var(--radius-sm)] bg-surface-muted [&_img]:h-full [&_img]:w-full [&_img]:object-cover [&_img]:object-center";

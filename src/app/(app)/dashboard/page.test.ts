@@ -750,6 +750,7 @@ describe("company admin Overview hero", () => {
     expect(html).toContain('data-dashboard-module="licensing-status"');
     expect(html).toContain('data-dashboard-module="recent-activity"');
     expect(html).toContain("lg:grid-cols-5");
+    expect(html).toContain("lg:items-stretch");
     expect(html).toContain("lg:col-span-3");
     expect(html).toContain("lg:col-span-2");
     expect(html).toContain("max-md:flex-col");
