@@ -7,12 +7,24 @@ import { DashboardRankedBars, DashboardTopTitles } from "@/components/dashboard/
 import { DashboardViewAll, DashboardViewAlts } from "@/components/dashboard/dashboard-view-alts";
 import { DASHBOARD_HOME } from "@/lib/dashboard-home";
 import {
+  DASHBOARD_CHOROPLETH_SCALE,
+  DASHBOARD_LIST_DEFAULT_LIMIT,
+  DASHBOARD_MAP_CENTER,
+  DASHBOARD_MAP_HEIGHT,
+  DASHBOARD_MAP_SCALE,
+  DASHBOARD_MAP_WIDTH,
   dashboardChoroplethFill,
+  dashboardChoroplethIndex,
+  dashboardConcentration,
+  dashboardConcentrationLine,
+  dashboardListLimitLabel,
   dashboardModuleMetaLine,
   dashboardShareLabel,
+  dashboardShowTopLabel,
   dashboardTerritoryCountLabel,
   rankedRowsFromCounts,
   resolveTerritoryRef,
+  splitDashboardTitle,
 } from "@/lib/dashboard-register";
 import { isoAlpha2FromNumeric, isoNumericForAlpha2 } from "@/lib/iso3166-numeric";
 
@@ -43,12 +55,35 @@ describe("dashboard register helpers", () => {
     );
   });
 
-  it("fills the choropleth from Sporty Blue wash — never amber or green", () => {
-    expect(dashboardChoroplethFill(0)).toBe("var(--surface-muted)");
-    expect(dashboardChoroplethFill(1)).toContain("var(--accent)");
-    expect(dashboardChoroplethFill(1)).toMatch(/color-mix/);
-    expect(dashboardChoroplethFill(1)).not.toMatch(/100%/);
-    expect(dashboardChoroplethFill(0.5)).not.toMatch(/amber|orange|#[Ff][Ff]|emerald|green|#1769FF/);
+  it("fills the choropleth from a discrete Sporty Blue scale — never amber or green", () => {
+    expect(DASHBOARD_CHOROPLETH_SCALE).toHaveLength(6);
+    expect(dashboardChoroplethFill(0, 100)).toBe("var(--surface-muted)");
+    expect(dashboardChoroplethFill(0, 0)).toBe(DASHBOARD_CHOROPLETH_SCALE[0]);
+    expect(dashboardChoroplethIndex(0, 100)).toBe(0);
+    expect(dashboardChoroplethIndex(1, 100)).toBe(1);
+    expect(dashboardChoroplethIndex(100, 100)).toBe(5);
+    expect(dashboardChoroplethFill(100, 100)).toBe(DASHBOARD_CHOROPLETH_SCALE[5]);
+    expect(dashboardChoroplethFill(100, 100)).toContain("var(--accent)");
+    expect(dashboardChoroplethFill(100, 100)).toMatch(/color-mix/);
+    expect(dashboardChoroplethFill(100, 100)).not.toMatch(/100%/);
+    expect(dashboardChoroplethFill(50, 100)).not.toMatch(/amber|orange|#[Ff][Ff]|emerald|green|#1769FF/);
+    expect(dashboardChoroplethFill(20, 100)).toBe(dashboardChoroplethFill(21, 100));
+  });
+
+  it("splits title parentheticals and reports Top 1 / Top 5 share", () => {
+    expect(splitDashboardTitle("Winter Light")).toEqual(["Winter Light", null]);
+    expect(splitDashboardTitle("Winter Light (Director's Cut)")).toEqual([
+      "Winter Light",
+      "(Director's Cut)",
+    ]);
+    expect(dashboardConcentration([4, 2, 3, 1, 2])).toEqual({
+      top1Pct: (4 / 12) * 100,
+      top5Pct: 100,
+    });
+    expect(dashboardConcentrationLine([4, 2, 3, 1, 2])).toBe("33.3% Top 1 · 100.0% Top 5");
+    expect(DASHBOARD_LIST_DEFAULT_LIMIT).toBe(10);
+    expect(dashboardListLimitLabel(12)).toBe("View all 12 territories");
+    expect(dashboardShowTopLabel()).toBe("Show top 10");
   });
 });
 
@@ -81,10 +116,17 @@ describe("dashboard register chrome", () => {
     expect(mapSrc).not.toMatch(/from ["']geojson["']/);
     expect(mapSrc).toContain("CountryFeature");
     expect(mapSrc).toContain("TerritoryPath");
-    expect(mapSrc).toContain("geoGraticule10");
-    expect(mapSrc).toContain("Sphere");
-    expect(mapSrc).toContain("geoNaturalEarth1");
-    expect(mapSrc).not.toMatch(/amber|orange|#[Ff][Ff]/);
+    expect(mapSrc).toContain("geoMercator");
+    expect(mapSrc).toContain("DASHBOARD_MAP_SCALE");
+    expect(mapSrc).toContain("DASHBOARD_MAP_CENTER");
+    expect(mapSrc).toContain("data-dashboard-territory-swatch");
+    expect(mapSrc).not.toContain("geoGraticule10");
+    expect(mapSrc).not.toContain("geoNaturalEarth1");
+    expect(mapSrc).not.toMatch(/amber|orange|#[Ff][Ff]|hsl\(38/);
+    expect(DASHBOARD_MAP_WIDTH).toBe(700);
+    expect(DASHBOARD_MAP_HEIGHT).toBe(340);
+    expect(DASHBOARD_MAP_SCALE).toBe(120);
+    expect(DASHBOARD_MAP_CENTER).toEqual([0, 30]);
   });
 
   it("gives Top titles list/bars and Territories map/list/bars — 24Frame nouns only", () => {
@@ -122,17 +164,25 @@ describe("dashboard register chrome", () => {
         viewAllHref: "/deliveries",
       }),
     );
+    expect(DASHBOARD_HOME.territories).toBe("Territories");
+    expect(DASHBOARD_HOME.territories).not.toBe("Top territories");
     expect(titles).toContain(DASHBOARD_HOME.topTitles);
     expect(titles).toContain('data-dashboard-view-alt="list"');
     expect(titles).toContain('data-dashboard-view-alt="bars"');
     expect(titles).not.toContain('data-dashboard-view-alt="map"');
     expect(titles).toContain("data-dashboard-view-all-arrow");
+    expect(titles).toContain("data-dashboard-concentration");
+    expect(titles).toContain("100.0% Top 1");
+    expect(titles).toContain("100.0% Top 5");
     expect(titles).not.toContain("Top works");
     expect(territories).toContain(DASHBOARD_HOME.territories);
+    expect(territories).not.toContain("Top territories");
     expect(territories).toContain('data-dashboard-view-alt="map"');
     expect(territories).toContain("data-dashboard-territory-map");
     expect(territories).toContain(DASHBOARD_HOME.legendLow);
     expect(territories).toContain(DASHBOARD_HOME.legendHigh);
+    expect(territories).toContain("data-dashboard-territory-swatch");
+    expect(territories.split("data-dashboard-territory-swatch").length - 1).toBe(5);
     expect(platforms).toContain(DASHBOARD_HOME.platforms);
     expect(platforms).toContain('data-dashboard-view-alt="list"');
     expect(platforms).toContain('data-dashboard-view-alt="bars"');
@@ -178,5 +228,57 @@ describe("dashboard register chrome", () => {
     expect(territories).toContain('data-dashboard-view-alt="map"');
     expect(territories).toContain("data-dashboard-territory-map");
     expect(territories).toContain("0 territories");
+    expect(territories).toContain("data-dashboard-territory-swatch");
+    expect(territories).toContain(DASHBOARD_HOME.legendLow);
+    expect(territories).toContain(DASHBOARD_HOME.legendHigh);
+  });
+
+  it("keeps parentheticals quiet on Top titles and expands Territories past 10", () => {
+    const titles = renderToStaticMarkup(
+      createElement(DashboardTopTitles, {
+        items: [
+          {
+            id: "t1",
+            title: "Winter Light (Director's Cut)",
+            status: "live",
+            created_at: "2026-09-02T00:00:00.000Z",
+            count: 6,
+          },
+          {
+            id: "t2",
+            title: "Harbor",
+            status: "live",
+            created_at: "2026-09-01T00:00:00.000Z",
+            count: 4,
+          },
+        ],
+      }),
+    );
+    expect(titles).toContain("Winter Light");
+    expect(titles).toContain("(Director's Cut)");
+    expect(titles).toContain("60.0% Top 1");
+    expect(titles).toContain("100.0% Top 5");
+    expect(titles).not.toContain("Top works");
+
+    const many = Array.from({ length: 12 }, (_, i) => ({
+      name: `T${String(i + 1).padStart(2, "0")}`,
+      count: 12 - i,
+    }));
+    const territories = renderToStaticMarkup(
+      createElement(DashboardRankedBars, {
+        label: DASHBOARD_HOME.territories,
+        empty: DASHBOARD_HOME.territoriesEmpty,
+        rows: many,
+        testId: "territories",
+        viewAllHref: "/deliveries",
+        territory: true,
+        defaultMode: "list",
+      }),
+    );
+    expect(territories).toContain("data-dashboard-territory-more");
+    expect(territories).toContain("View all 12 territories");
+    expect(territories).toContain(">T01<");
+    expect(territories).toContain(">T10<");
+    expect(territories).not.toContain(">T11<");
   });
 });

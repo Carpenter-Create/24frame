@@ -74,10 +74,12 @@ export const DASHBOARD_VIEW_ALT_BUTTON_ON_CLASS = "text-accent";
 export const DASHBOARD_VIEW_ALL_CLASS =
   "inline-flex items-center gap-[var(--space-2)] t-body-sm text-accent";
 
-export const DASHBOARD_MAP_FRAME_CLASS = "relative h-[220px] w-full";
+export const DASHBOARD_MAP_FRAME_CLASS = "relative w-full";
 
 export const DASHBOARD_LEGEND_CLASS =
   "flex items-center gap-[var(--space-2)] t-label text-ink-3";
+
+export const DASHBOARD_CHOROPLETH_SWATCH_CLASS = "h-2 w-5 rounded-[var(--radius-sm)]";
 
 export const DASHBOARD_ADMIN_STACK_CLASS =
   "flex flex-col gap-[var(--space-6)]";
