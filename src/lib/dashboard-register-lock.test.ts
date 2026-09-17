@@ -136,6 +136,10 @@ describe("Aggregation Dashboard Coinbase register lock", () => {
     expect(html).not.toContain("Added this month");
     expect(html).not.toContain("In pipeline");
     expect(html).not.toContain("Top works");
+    expect(html).not.toContain("Top territories");
+    expect(html).toContain("Territories");
+    expect(html).toContain("data-dashboard-territory-swatch");
+    expect(DASHBOARD_HOME.territories).toBe("Territories");
     expect(html).not.toContain("HeadlineStats");
     expect(html).not.toContain("contributors");
     expect(html).not.toContain("Exports");

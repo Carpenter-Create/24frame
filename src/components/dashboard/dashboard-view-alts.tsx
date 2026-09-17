@@ -46,7 +46,7 @@ export function DashboardViewAlts({
           <button
             key={item}
             type="button"
-            aria-label={VIEW_LABEL[item]}
+            aria-label={`${VIEW_LABEL[item]} view`}
             aria-pressed={on}
             data-dashboard-view-alt={item}
             onClick={() => onChange(item)}

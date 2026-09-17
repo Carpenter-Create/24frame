@@ -16,12 +16,17 @@ import {
 } from "@/lib/dashboard-craft";
 import { DASHBOARD_HOME } from "@/lib/dashboard-home";
 import {
+  DASHBOARD_LIST_DEFAULT_LIMIT,
+  dashboardConcentrationLine,
+  dashboardListLimitLabel,
   dashboardModuleMetaLine,
   dashboardShareLabel,
   dashboardSharePercent,
+  dashboardShowTopLabel,
   rankedRowsFromCounts,
   rankedRowsFromTitles,
   rankedTotal,
+  splitDashboardTitle,
   type DashboardRankedRow,
   type DashboardRegisterView,
 } from "@/lib/dashboard-register";
@@ -29,27 +34,33 @@ import type { DashboardRankedTitle } from "@/lib/dashboard-home";
 import type { ReportsCountRow } from "@/lib/reports";
 import { cn } from "@/lib/cn";
 
+function RankedName({ row }: { row: DashboardRankedRow }) {
+  const [main, qualifier] = splitDashboardTitle(row.label);
+  const extra = row.code ? ` · ${row.code}` : null;
+  return (
+    <span className="min-w-0 truncate t-body-sm text-ink">
+      {main}
+      {qualifier ? <span className="font-normal text-ink-3">{` ${qualifier}`}</span> : null}
+      {extra ? <span className="text-ink-3">{extra}</span> : null}
+    </span>
+  );
+}
+
 export function DashboardRankedRows({
   rows,
   mode,
+  shareTotal,
 }: {
   rows: readonly DashboardRankedRow[];
   mode: Exclude<DashboardRegisterView, "map">;
+  shareTotal?: number;
 }) {
-  const total = rankedTotal(rows);
-  const max = Math.max(0, ...rows.map((row) => row.count));
+  const total = shareTotal ?? rankedTotal(rows);
   return (
     <ol data-dashboard-ranked-rows={mode} className={DASHBOARD_ROW_LIST_CLASS}>
       {rows.map((row, i) => {
-        const share = dashboardSharePercent(row.count, max);
-        const name = (
-          <span className="min-w-0 truncate t-body-sm text-ink">
-            {row.label}
-            {row.code ? (
-              <span className="text-ink-3">{` · ${row.code}`}</span>
-            ) : null}
-          </span>
-        );
+        const share = dashboardSharePercent(row.count, total);
+        const name = <RankedName row={row} />;
         return (
           <li key={row.key} className={cn(DASHBOARD_ROW_CLASS, mode === "bars" && "flex-col items-stretch")}>
             {mode === "list" ? (
@@ -58,8 +69,7 @@ export function DashboardRankedRows({
                   <span className="t-data t-body-sm w-4 shrink-0 text-ink-3">{i + 1}</span>
                   {row.href ? (
                     <Link href={row.href} className="min-w-0 truncate t-body-sm font-medium text-ink hover:text-ink-2">
-                      {row.label}
-                      {row.code ? <span className="font-normal text-ink-3">{` · ${row.code}`}</span> : null}
+                      <RankedName row={row} />
                     </Link>
                   ) : (
                     name
@@ -71,7 +81,7 @@ export function DashboardRankedRows({
                     className="h-1 w-16 overflow-hidden rounded-[var(--radius-sm)] bg-surface-muted"
                   >
                     <span
-                      className={`block h-full ${i === 0 ? "bg-accent" : "bg-ink-3"}`}
+                      className={`block h-full ${i === 0 ? "bg-accent/70" : "bg-ink-3"}`}
                       style={{ width: `${share}%` }}
                     />
                   </span>
@@ -88,7 +98,7 @@ export function DashboardRankedRows({
                     <span className="t-data t-body-sm w-4 shrink-0 text-ink-3">{i + 1}</span>
                     {row.href ? (
                       <Link href={row.href} className="truncate t-body-sm font-medium text-ink hover:text-ink-2">
-                        {row.label}
+                        <RankedName row={row} />
                       </Link>
                     ) : (
                       name
@@ -99,7 +109,7 @@ export function DashboardRankedRows({
                 {share > 0 ? (
                   <div className="h-1 overflow-hidden rounded-[var(--radius-sm)] bg-surface-muted">
                     <div
-                      className={`h-full ${i === 0 ? "bg-accent" : "bg-ink-3"}`}
+                      className={`h-full ${i === 0 ? "bg-accent/70" : "bg-ink-3"}`}
                       style={{ width: `${share}%` }}
                     />
                   </div>
@@ -124,6 +134,7 @@ export function DashboardRankedModule({
   territory = false,
   periodLabel,
   updated,
+  concentrate = false,
 }: {
   label: string;
   empty: string;
@@ -135,11 +146,19 @@ export function DashboardRankedModule({
   territory?: boolean;
   periodLabel?: string | null;
   updated?: string | null;
+  concentrate?: boolean;
 }) {
   const start = modes.includes(defaultMode) ? defaultMode : modes[0];
   const [mode, setMode] = useState<DashboardRegisterView>(start);
+  const [showAll, setShowAll] = useState(false);
   const meta = dashboardModuleMetaLine({ period: periodLabel, updated });
   const view = modes.includes(mode) ? mode : start;
+  const listCapped =
+    territory && view === "list" && !showAll && rows.length > DASHBOARD_LIST_DEFAULT_LIMIT;
+  const visibleRows = listCapped ? rows.slice(0, DASHBOARD_LIST_DEFAULT_LIMIT) : rows;
+  const concentration = concentrate && rows.length > 0
+    ? dashboardConcentrationLine(rows.map((row) => row.count))
+    : null;
 
   return (
     <section
@@ -183,8 +202,32 @@ export function DashboardRankedModule({
           {empty}
         </p>
       ) : (
-        <DashboardRankedRows rows={rows} mode={view === "map" ? "bars" : view} />
+        <DashboardRankedRows
+          rows={visibleRows}
+          mode={view === "map" ? "bars" : view}
+          shareTotal={rankedTotal(rows)}
+        />
       )}
+      {territory && view === "list" && rows.length > DASHBOARD_LIST_DEFAULT_LIMIT ? (
+        <div className="flex items-center justify-between border-t border-hairline px-[var(--space-4)] py-[var(--space-2)]">
+          <button
+            type="button"
+            data-dashboard-territory-more=""
+            className="t-body-sm text-ink-3 hover:text-ink"
+            onClick={() => setShowAll((open) => !open)}
+          >
+            {showAll ? dashboardShowTopLabel() : dashboardListLimitLabel(rows.length)}
+          </button>
+        </div>
+      ) : null}
+      {concentration ? (
+        <p
+          data-dashboard-concentration=""
+          className="border-t border-hairline px-[var(--space-4)] py-[var(--space-2)] t-body-sm text-ink-3"
+        >
+          {concentration}
+        </p>
+      ) : null}
     </section>
   );
 }
@@ -250,6 +293,7 @@ export function DashboardTopTitles({
       defaultMode="bars"
       periodLabel={periodLabel}
       updated={updated}
+      concentrate
     />
   );
 }

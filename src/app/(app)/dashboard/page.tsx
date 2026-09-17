@@ -20,6 +20,10 @@ import {
   DashboardWhatChanged,
 } from "@/components/dashboard/dashboard-modules";
 import { DashboardRankedBars } from "@/components/dashboard/dashboard-ranked";
+import {
+  DASHBOARD_PLATFORM_LIMIT,
+  DASHBOARD_TERRITORY_LIMIT,
+} from "@/lib/dashboard-register";
 import { DashboardVisitStamp } from "@/components/dashboard/dashboard-visit-stamp";
 import { DashboardFinanceGlance } from "@/components/dashboard/dashboard-finance-glance";
 import {
@@ -72,7 +76,7 @@ import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 // Company-admin `/dashboard` rematches Overview analytics structure inside
 // house tokens: unlabeled period chrome, Net revenue $ + scrub, Recent
 // account activity, Top titles (list/bars), Top platforms (list/bars),
-// Top territories (map/list/bars). 24Frame nouns only — never Top works,
+// Territories (map/list/bars). 24Frame nouns only — never Top works,
 // sources, contributors, or Exports. Period is chrome, not H1 — dominant
 // read is the $. Phone (`< md`) is a single-column stack — $0.00 empty
 // hero, compact chart, Period bottom sheet. Find-user is gone on phone and
@@ -80,9 +84,9 @@ import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 // inert for data only. Catalog-velocity strip is gone — Adam lock
 // 2026-09-16. Company-admin also drops Recent, Do next, Deliveries needing
 // action, Catalog Health count, What changed, and Pending submissions.
-// Top titles / Top platforms / Top territories always render — quiet empty
-// like RL, never omitted. Quiet Reports text CTA stays. Standard seats
-// keep the catalog hero.
+// Top titles / Top platforms / Territories always render — quiet empty,
+// never omitted. Quiet Reports text CTA stays. Standard seats keep the
+// catalog hero.
 // Export stays on /reports. Fixture money is labeled + env-gated and never
 // enters export/ledger.
 
@@ -225,10 +229,10 @@ export default async function DashboardPage({
   const liveTopTitles = topTitleActivity(scopedTitles, scopedDeliveries, now);
   const livePlatforms = countNamedRows(
     scopedDeliveries.map((row) => ({ name: row.vendor_name })),
-  ).slice(0, 5);
+  ).slice(0, isAdmin ? DASHBOARD_PLATFORM_LIMIT : 5);
   const liveTerritories = countNamedRows(
     scopedDeliveries.map((row) => ({ name: row.territory })),
-  ).slice(0, 5);
+  ).slice(0, isAdmin ? DASHBOARD_TERRITORY_LIMIT : 5);
   const adminPlatforms =
     useFixture && livePlatforms.length === 0 ? DASHBOARD_FIXTURE_PLATFORMS : livePlatforms;
   const adminTerritories =
