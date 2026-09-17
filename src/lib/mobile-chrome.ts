@@ -16,6 +16,8 @@
 // to the header lead so the 16 glyphs share one column. Not Close/44 —
 // that object is a muted circle. Desktop clock stays size-4 at left-0.
 
+import { HOUSE_ICON_BUTTON_CLASS } from "@/lib/house-shell";
+
 export const MOBILE_CHROME_LEAD_PAD_PX = 24;
 export const MOBILE_CHROME_MESSAGES_FRAME_PAD_PX = 48;
 export const MOBILE_CHROME_ICON_HIT_PX = 44;
@@ -25,7 +27,7 @@ export const MOBILE_CHROME_ICON_STROKE = 1.33;
 export const MOBILE_CHROME_LEAD_PAD_CLASS = "px-[var(--space-6)]";
 
 export const MOBILE_CHROME_ICON_BUTTON_CLASS =
-  "flex size-[44px] min-h-[44px] min-w-[44px] shrink-0 items-center justify-center overflow-visible rounded-full text-ink-3";
+  `flex size-[44px] min-h-[44px] min-w-[44px] shrink-0 items-center justify-center overflow-visible ${HOUSE_ICON_BUTTON_CLASS} text-ink-3`;
 
 export const MOBILE_CHROME_ICON_CLASS = "size-4 overflow-visible";
 

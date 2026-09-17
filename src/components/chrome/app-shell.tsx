@@ -135,7 +135,7 @@ export function AppShell({
           <SocialTopBarSlot chrome={chrome} email={email} name={name} photoUrl={photoUrl} />
           <aside
             className={cn(
-              "fixed left-0 top-[calc(var(--header-height)+16px)] z-30 hidden h-[calc(100dvh-var(--header-height)-32px)] flex-col md:flex",
+              "fixed left-4 top-[calc(var(--header-height)+16px)] z-30 hidden h-[calc(100dvh-var(--header-height)-32px)] flex-col md:flex",
               SOCIAL_RAIL_WIDTH_CLASS,
               SOCIAL_RAIL_PANEL_CLASS,
             )}

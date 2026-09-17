@@ -23,6 +23,12 @@ import {
 } from "@/lib/house-shell";
 import { EDUCATION_SEARCH } from "@/lib/course-search";
 import { SOCIAL_DESKTOP_NAV } from "@/lib/nav";
+import {
+  SOCIAL_ACCOUNT_CHIP_CLASS,
+  SOCIAL_FOR_YOU_CARD_CLASS,
+  SOCIAL_RAIL_WIDTH_CLASS,
+} from "@/lib/social-chrome";
+import { SETTINGS_RAIL_ITEM_CLASS } from "@/lib/settings";
 
 const tokens = readFileSync("src/app/tokens.css", "utf8");
 const globals = readFileSync("src/app/globals.css", "utf8");
@@ -106,12 +112,26 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(sideNav).toContain("staffItems");
     expect(HOUSE_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash font-medium text-accent");
     expect(HOUSE_FILTER_ON_CLASS).toBe("bg-ink text-surface");
-    expect(switcher).toContain("rounded-full");
+    expect(switcher).toContain("HOUSE_CONTROL_PILL_CLASS");
     expect(switcher).not.toContain("rounded-[var(--radius-sm)]");
-    expect(mobileChrome).toContain("rounded-full");
-    expect(collapse).toContain("rounded-full");
+    expect(mobileChrome).toContain("HOUSE_ICON_BUTTON_CLASS");
+    expect(collapse).toContain("HOUSE_ICON_BUTTON_CLASS");
     expect(socialChrome).toContain("HOUSE_RAIL_PANEL_CLASS");
-    expect(topBar).toContain("rounded-full");
+    expect(topBar).toContain("HOUSE_ICON_BUTTON_CLASS");
+    expect(topBar).toContain("HOUSE_SEARCH_PILL_CLASS");
+  });
+
+  it("uses one rounded register on Aggregation, Social, and Education", () => {
+    expect(shell.match(/left-4 top-\[calc\(var\(--header-height\)\+16px\)\]/g)?.length).toBe(2);
+    expect(shell).not.toContain("fixed left-0 top-[calc(var(--header-height)+16px)]");
+    expect(SOCIAL_RAIL_WIDTH_CLASS).toBe("w-[calc(200px-16px)]");
+    expect(SOCIAL_ACCOUNT_CHIP_CLASS).toContain(HOUSE_MODULE_CLASS);
+    expect(SOCIAL_FOR_YOU_CARD_CLASS).toContain(HOUSE_MODULE_CLASS);
+    expect(SETTINGS_RAIL_ITEM_CLASS).toContain("rounded-full");
+    expect(switcher).toContain("HOUSE_CONTROL_PILL_CLASS");
+    expect(mobileChrome).toContain("HOUSE_ICON_BUTTON_CLASS");
+    expect(collapse).toContain("HOUSE_ICON_BUTTON_CLASS");
+    expect(socialChrome).toContain("HOUSE_MODULE_CLASS");
   });
 
   it("keeps house tokens, Titles content, and Delete/Archive unmixed", () => {

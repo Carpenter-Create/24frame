@@ -16,6 +16,7 @@
 import {
   HOUSE_FILTER_OFF_CLASS,
   HOUSE_FILTER_ON_CLASS,
+  HOUSE_MODULE_CLASS,
   HOUSE_RAIL_PANEL_CLASS,
 } from "@/lib/house-shell";
 
@@ -54,7 +55,10 @@ export const SOCIAL_FIGMA_STORY_STUDIO = [
 ] as const;
 export const SOCIAL_FIGMA_STORY_PICKER = ["144:1218", "144:1444"] as const;
 
-export const SOCIAL_RAIL_WIDTH_CLASS = "w-[200px]";
+// Dest column stays 200 (measure). Panel insets 16 so the r16
+// corner reads — same float as Aggregation / Education. Not a
+// flush-left strip.
+export const SOCIAL_RAIL_WIDTH_CLASS = "w-[calc(200px-16px)]";
 export const SOCIAL_RAIL_MAIN_OFFSET_CLASS = "md:ml-[200px]";
 export const SOCIAL_RAIL_PANEL_CLASS = HOUSE_RAIL_PANEL_CLASS;
 export const SOCIAL_FOR_YOU_WIDTH_CLASS = "w-[300px]";
@@ -204,7 +208,7 @@ export const SOCIAL_FOLLOW_COMPACT_CLASS =
   "inline-flex items-center rounded-[8px] bg-accent px-[10px] py-[5px] text-[11px] font-semibold text-accent-contrast";
 
 export const SOCIAL_FOR_YOU_CARD_CLASS =
-  "flex w-full flex-col gap-2 rounded-[12px] bg-surface-muted p-4";
+  `${HOUSE_MODULE_CLASS} flex w-full flex-col gap-2 p-4`;
 
 export const SOCIAL_FEED_ROW_CLASS =
   "flex flex-col gap-2 border-b border-hairline bg-surface p-3";
@@ -213,7 +217,7 @@ export const SOCIAL_CREATE_CTA_CLASS =
   "inline-flex w-full items-center justify-center gap-2 rounded-[24px] bg-accent px-4 py-3 t-body font-semibold text-accent-contrast";
 
 export const SOCIAL_ACCOUNT_CHIP_CLASS =
-  "flex w-full items-center gap-2.5 rounded-[12px] border border-hairline bg-surface-muted p-2.5";
+  `${HOUSE_MODULE_CLASS} flex w-full items-center gap-2.5 border border-hairline p-2.5`;
 
 // Floating pill — 160:964 visible / 160:1129 hidden on scroll-down.
 // Desktop left Aggregation rail is unchanged; pill is md:hidden.
