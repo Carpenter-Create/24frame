@@ -163,15 +163,25 @@ export function DashboardRankedModule({
           <DashboardViewAll href={viewAllHref} />
         </div>
       </div>
-      {rows.length === 0 ? (
+      {view === "map" && territory ? (
+        <>
+          <DashboardTerritoryMap rows={rows} />
+          {rows.length === 0 ? (
+            <p
+              data-dashboard-ranked-empty=""
+              className="border-t border-hairline px-[var(--space-4)] py-[var(--space-2)] t-body-sm text-ink-3"
+            >
+              {empty}
+            </p>
+          ) : null}
+        </>
+      ) : rows.length === 0 ? (
         <p
           data-dashboard-ranked-empty=""
           className="border-t border-hairline px-[var(--space-4)] py-[var(--space-2)] t-body-sm text-ink-3"
         >
           {empty}
         </p>
-      ) : view === "map" && territory ? (
-        <DashboardTerritoryMap rows={rows} />
       ) : (
         <DashboardRankedRows rows={rows} mode={view === "map" ? "bars" : view} />
       )}

@@ -151,8 +151,14 @@ function expectCompanyAdminStructuralDelta(html: string) {
   expect(html).toContain("data-dashboard-view-alts");
   expect(html).toContain("data-dashboard-view-all");
   expect(html).toContain("data-dashboard-view-all-arrow");
-  expect(html).not.toContain('data-dashboard-ranked="platforms"');
-  expect(html).not.toContain("data-dashboard-territory");
+  expect(html).toContain('data-dashboard-ranked="platforms"');
+  expect(html).toContain("data-dashboard-territory");
+  expect(html).toContain('data-dashboard-ranked="territories"');
+  expect(html).toContain("data-dashboard-territory-map");
+  expect(html).toContain(DASHBOARD_HOME.platformsEmpty);
+  expect(html).toContain(DASHBOARD_HOME.territoriesEmpty);
+  expect(html).toContain(DASHBOARD_HOME.topTitlesEmpty);
+  expect(html).toContain("data-dashboard-ranked-empty");
   expect(html).toContain("data-dashboard-reports-cta");
   expect(html).toContain(`href="${REPORTS_HREF}"`);
   expect(html).toContain(DASHBOARD_HOME.reportsCta);
@@ -683,9 +689,27 @@ describe("company admin Overview hero", () => {
     expect(html).toContain("data-dashboard-revenue");
     expect(html).toContain("data-dashboard-revenue-chart");
     expect(html).toContain('data-dashboard-module="recent-activity"');
-    expect(html).not.toContain("lg:grid-cols-5");
-    expect(html).not.toContain("lg:col-span-3");
-    expect(html).not.toContain("lg:col-span-2");
+    expect(html).toContain("lg:grid-cols-5");
+    expect(html).toContain("lg:col-span-3");
+    expect(html).toContain("lg:col-span-2");
+    expect(html).toContain("max-md:flex-col");
+    expect(html).toContain("data-dashboard-overview-revenue");
+    expect(html).toContain("data-dashboard-overview-activity");
+    expect(html.indexOf("data-dashboard-overview-revenue")).toBeLessThan(
+      html.indexOf("data-dashboard-overview-activity"),
+    );
+    expect(html.indexOf("data-dashboard-revenue")).toBeLessThan(
+      html.indexOf('data-dashboard-module="recent-activity"'),
+    );
+    expect(html.indexOf('data-dashboard-module="recent-activity"')).toBeLessThan(
+      html.indexOf('data-dashboard-module="top-titles"'),
+    );
+    expect(html.indexOf('data-dashboard-module="top-titles"')).toBeLessThan(
+      html.indexOf('data-dashboard-ranked="platforms"'),
+    );
+    expect(html.indexOf('data-dashboard-ranked="platforms"')).toBeLessThan(
+      html.indexOf('data-dashboard-ranked="territories"'),
+    );
     expect(html).toContain("data-dashboard-mobile-stack");
     expect(html).toContain("data-dashboard-title-mobile");
     expect(html).toContain("data-dashboard-title-desktop");

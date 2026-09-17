@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { feature } from "topojson-client";
-import { geoNaturalEarth1, geoPath } from "d3-geo";
+import { geoGraticule10, geoNaturalEarth1, geoPath } from "d3-geo";
 import type { GeometryCollection, Topology } from "topojson-specification";
 import countries110m from "world-atlas/countries-110m.json";
 
@@ -24,8 +24,10 @@ import {
 } from "@/lib/dashboard-craft";
 import { cn } from "@/lib/cn";
 
-// Local topology types — no `geojson` module. topojson-client's `feature`
-// is cast once; path drawing uses d3-geo against that collection.
+// RL Overview SoT: Carpenter-Create/royalogic
+// `src/components/overview/TerritoryMap.tsx` — map/list/bars + choropleth +
+// legend + view alts. This file is the map plot. House rematch only:
+// Geist · Sporty Blue wash · hairline. No RL brand fill. No `geojson` module.
 type CountryFeature = {
   type: "Feature";
   id?: string | number;
@@ -80,8 +82,8 @@ export function DashboardTerritoryMap({
     return () => ro.disconnect();
   }, []);
 
-  const paths = useMemo(() => {
-    if (!size) return [] as TerritoryPath[];
+  const plot = useMemo(() => {
+    if (!size) return null;
     const projection = geoNaturalEarth1().fitExtent(
       [
         [8, 8],
@@ -90,7 +92,9 @@ export function DashboardTerritoryMap({
       world as never,
     );
     const path = geoPath(projection);
-    return world.features.flatMap((entry: CountryFeature): TerritoryPath[] => {
+    const sphere = path({ type: "Sphere" } as never);
+    const graticule = path(geoGraticule10());
+    const countries = world.features.flatMap((entry: CountryFeature): TerritoryPath[] => {
       const numeric = Number(entry.id);
       if (numeric === ANTARCTICA) return [];
       const d = path(entry as never);
@@ -106,6 +110,7 @@ export function DashboardTerritoryMap({
         },
       ];
     });
+    return { sphere, graticule, countries };
   }, [byNumeric, max, size]);
 
   const hover = hoverKey ? rows.find((row) => row.key === hoverKey) ?? null : null;
@@ -113,7 +118,7 @@ export function DashboardTerritoryMap({
   return (
     <div data-dashboard-territory-map="" className="border-t border-hairline">
       <div ref={plotRef} className={DASHBOARD_MAP_FRAME_CLASS}>
-        {size ? (
+        {size && plot ? (
           <svg
             width={size.w}
             height={size.h}
@@ -122,7 +127,24 @@ export function DashboardTerritoryMap({
             role="img"
             aria-label={DASHBOARD_HOME.territories}
           >
-            {paths.map((item: TerritoryPath) => (
+            {plot.sphere ? (
+              <path
+                d={plot.sphere}
+                fill="var(--surface-muted)"
+                stroke="var(--border)"
+                strokeWidth={0.6}
+              />
+            ) : null}
+            {plot.graticule ? (
+              <path
+                d={plot.graticule}
+                fill="none"
+                stroke="var(--border)"
+                strokeWidth={0.4}
+                opacity={0.45}
+              />
+            ) : null}
+            {plot.countries.map((item: TerritoryPath) => (
               <path
                 key={item.id}
                 d={item.d}

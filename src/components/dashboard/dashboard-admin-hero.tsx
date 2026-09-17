@@ -16,6 +16,8 @@ import {
 } from "@/lib/dashboard-admin";
 import {
   DASHBOARD_ADMIN_CHROME_CLASS,
+  DASHBOARD_ADMIN_HERO_ACTIVITY_CLASS,
+  DASHBOARD_ADMIN_HERO_REVENUE_CLASS,
   DASHBOARD_ADMIN_OVERVIEW_CLASS,
   DASHBOARD_ADMIN_STACK_CLASS,
   DASHBOARD_CARD_CLASS,
@@ -201,8 +203,12 @@ export function DashboardAdminHero({
         data-dashboard-mobile-stack=""
         className={DASHBOARD_ADMIN_OVERVIEW_CLASS}
       >
-        <DashboardRevenueCard period={period} hero={hero} fixture={fixture} />
-        <DashboardRecentActivity items={activity} />
+        <div data-dashboard-overview-revenue="" className={DASHBOARD_ADMIN_HERO_REVENUE_CLASS}>
+          <DashboardRevenueCard period={period} hero={hero} fixture={fixture} />
+        </div>
+        <div data-dashboard-overview-activity="" className={DASHBOARD_ADMIN_HERO_ACTIVITY_CLASS}>
+          <DashboardRecentActivity items={activity} />
+        </div>
       </div>
     </div>
   );

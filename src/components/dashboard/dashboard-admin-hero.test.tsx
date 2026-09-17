@@ -39,8 +39,19 @@ describe("DashboardAdminHero", () => {
       }),
     );
     expect(html).toContain("data-dashboard-admin-hero");
-    expect(html).not.toContain("lg:grid-cols-5");
-    expect(html).toContain("flex flex-col");
+    expect(html).toContain("lg:grid-cols-5");
+    expect(html).toContain("lg:col-span-3");
+    expect(html).toContain("lg:col-span-2");
+    expect(html).toContain("max-md:flex");
+    expect(html).toContain("max-md:flex-col");
+    expect(html).toContain("data-dashboard-overview-revenue");
+    expect(html).toContain("data-dashboard-overview-activity");
+    expect(html.indexOf("data-dashboard-overview-revenue")).toBeLessThan(
+      html.indexOf("data-dashboard-overview-activity"),
+    );
+    expect(html.indexOf("data-dashboard-revenue")).toBeLessThan(
+      html.indexOf('data-dashboard-module="recent-activity"'),
+    );
     expect(html).toContain("data-dashboard-mobile-stack");
     expect(html).toContain("data-dashboard-title-mobile");
     expect(html).toContain("data-dashboard-title-desktop");
@@ -134,8 +145,19 @@ describe("DashboardAdminHero", () => {
     expect(controls).toContain("router.replace");
     expect(chart).toContain("strokeDasharray");
     expect(hero).toContain("DASHBOARD_ADMIN_OVERVIEW_CLASS");
+    expect(hero).toContain("DASHBOARD_ADMIN_HERO_REVENUE_CLASS");
+    expect(hero).toContain("DASHBOARD_ADMIN_HERO_ACTIVITY_CLASS");
+    expect(hero).toMatch(
+      /data-dashboard-overview-revenue=""[\s\S]*data-dashboard-overview-activity=""/,
+    );
+    expect(hero).not.toMatch(
+      /data-dashboard-overview-activity=""[\s\S]*data-dashboard-overview-revenue=""/,
+    );
     expect(craft).toContain("lg:grid-cols-2");
-    expect(craft).not.toContain("lg:grid-cols-5");
+    expect(craft).toContain("lg:grid-cols-5");
+    expect(craft).toContain("lg:col-span-3");
+    expect(craft).toContain("lg:col-span-2");
+    expect(craft).toContain("max-md:flex-col");
     expect(craft).toContain("md:flex-row");
     expect(craft).not.toContain("sm:flex-row");
     expect(page).toContain("DashboardAdminHero");

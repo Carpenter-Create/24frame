@@ -20,9 +20,9 @@ import {
 describe("company-admin Dashboard mobile craft", () => {
   it("locks phone composition to < md without reopening a peer $ collage", () => {
     expect(DASHBOARD_MOBILE_BREAKPOINT_CLASS).toBe("max-md");
-    expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("flex-col");
+    expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("max-md:flex-col");
     expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("gap-[var(--space-6)]");
-    expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).not.toContain("lg:grid-cols-5");
+    expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("lg:grid-cols-5");
     expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).not.toContain("md:grid-cols-5");
     expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).not.toContain("sm:grid-cols-5");
     expect(DASHBOARD_ADMIN_CHROME_CLASS).toContain("md:flex-row");

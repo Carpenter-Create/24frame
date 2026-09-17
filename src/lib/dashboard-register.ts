@@ -4,11 +4,11 @@ import { isoAlpha2FromNumeric, isoNumericForAlpha2 } from "@/lib/iso3166-numeric
 import { ISO_COUNTRIES } from "@/lib/territories";
 import type { ReportsCountRow } from "@/lib/reports";
 
-// Company-admin `/dashboard` register: Overview structure (hero · activity ·
-// ranked modules · view alts) rematched to house tokens. 24Frame nouns only —
-// Net revenue, Recent account activity, Top titles, Top platforms,
-// Top territories, Reports. No Top works / sources / contributors / Exports.
-// Tilt: Coinbase quiet-play over RL flourish. Sporty Blue wash, not amber.
+// Company-admin `/dashboard` register rematches RL Overview
+// (`HeadlineStats` → Net revenue left, activity right, `TopWorksCard` →
+// Top titles, `TerritoryMap` → Territories map/list/bars). House tokens
+// only — Geist · Sporty Blue · hairline. 24Frame nouns only. No Top works /
+// sources / contributors / Exports. Coinbase quieter than RL flourish.
 
 export const DASHBOARD_REGISTER_VIEWS = ["map", "list", "bars"] as const;
 
