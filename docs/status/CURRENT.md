@@ -30,6 +30,14 @@ Architecture and phase detail: [`docs/agentic-engineering/AGENTIC_ENGINEERING_V1
 
 ---
 
+## Title prefix purge (founder lock 2026-09-17)
+
+Soft-deleted titles always purge `orgs/<orgId>/titles/<titleId>/` (ListObjectsV2 + DeleteObjects).
+Soft-delete rows stay for audit; bytes must go. App IAM may hold `s3:DeleteObject` /
+`s3:DeleteObjects` on that prefix only — not a bucket wipe. Live keep: GC-0000013. Existing
+soft-deleted orphans (GC-0000021, GC-0000037, GC-0000045) are a CoS one-shot after this
+product harden ships. Avatars / education / social / finance are out of scope.
+
 ## Binding safety gates
 
 Full doctrine: [`AGENTS.md`](../../AGENTS.md). Domain truth: [`docs/domain-spec.md`](../domain-spec.md).

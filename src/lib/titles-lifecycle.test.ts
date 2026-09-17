@@ -121,6 +121,10 @@ describe("title lifecycle copy", () => {
       "This returns “Harbor Cut” to the active catalog.",
     );
     expect(TITLE_LIFECYCLE.moreLabel).toBe("Title actions");
+    expect(TITLE_LIFECYCLE.purgeFailed).toBe(
+      "The title left the catalog. Stored files could not be removed; the system will retry.",
+    );
+    expect(TITLE_LIFECYCLE.purgeFailed).not.toMatch(/cannot be undone|permanent|warning/i);
     expect(TITLE_LIFECYCLE.deleteDraftBody).not.toMatch(/cannot be undone|permanent|warning/i);
     expect(TITLE_LIFECYCLE.archiveBody).not.toMatch(/irreversible|forever|warning/i);
     expect(titleDeleteConfirmBody({ isStaff: false, status: "draft", name: "Harbor Cut" })).not.toMatch(

@@ -8,9 +8,12 @@ import {
   HeadObjectCommand,
   HeadBucketCommand,
   RestoreObjectCommand,
+  ListObjectsV2Command,
+  DeleteObjectsCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
+import { assertTitleAssetPrefix, titleAssetPrefix } from "@/lib/assets";
 import { stableSigningDate } from "@/lib/signing-window";
 
 // Server-only S3 client. Credentials come from AWS_ACCESS_KEY_ID /
@@ -297,4 +300,75 @@ export async function resolveOrRestore(
   if (state === "restoring") return { status: "restoring", justInitiated: false };
   await initiateRestore(key);
   return { status: "restoring", justInitiated: true };
+}
+
+// ---- Deleted-title prefix purge (founder lock 2026-09-17) -------------------
+// Soft-deleted titles always drop every object under
+//   orgs/<orgId>/titles/<titleId>/
+// ListObjectsV2 + DeleteObjects. Soft-delete DB rows stay for audit; bytes
+// must go. Scoped to that prefix only — never a bucket wipe. Avatars,
+// education, social, and finance buckets are other clients.
+//
+// DeleteObjects authorizes as s3:DeleteObject (and the documented
+// s3:DeleteObjects alias). IAM must stay prefix-scoped; see
+// docs/infra/asset-storage-setup.md.
+
+const DELETE_OBJECTS_MAX = 1000;
+
+export type TitlePrefixPurgeResult = {
+  prefix: string;
+  deleted: number;
+};
+
+export async function purgeTitlePrefix(
+  orgId: string,
+  titleId: string,
+): Promise<TitlePrefixPurgeResult> {
+  const prefix = assertTitleAssetPrefix(titleAssetPrefix(orgId, titleId));
+  let token: string | undefined;
+  let deleted = 0;
+
+  do {
+    const listed = await s3.send(
+      new ListObjectsV2Command({
+        Bucket: S3_BUCKET,
+        Prefix: prefix,
+        ContinuationToken: token,
+        MaxKeys: DELETE_OBJECTS_MAX,
+      }),
+    );
+
+    const keys: string[] = [];
+    for (const object of listed.Contents ?? []) {
+      const key = object.Key;
+      if (!key) continue;
+      if (!key.startsWith(prefix)) {
+        throw new Error(`Refusing to purge key outside title prefix: ${key}`);
+      }
+      keys.push(key);
+    }
+
+    if (keys.length > 0) {
+      const out = await s3.send(
+        new DeleteObjectsCommand({
+          Bucket: S3_BUCKET,
+          Delete: {
+            Objects: keys.map((Key) => ({ Key })),
+            Quiet: true,
+          },
+        }),
+      );
+      if (out.Errors && out.Errors.length > 0) {
+        const first = out.Errors[0];
+        throw new Error(
+          `S3 DeleteObjects failed for ${first.Key ?? prefix}: ${first.Message ?? first.Code ?? "unknown error"}`,
+        );
+      }
+      deleted += keys.length;
+    }
+
+    token = listed.IsTruncated ? listed.NextContinuationToken : undefined;
+  } while (token);
+
+  return { prefix, deleted };
 }

@@ -24,6 +24,8 @@ export const TITLE_LIFECYCLE = {
   cancelLabel: "Cancel",
   afterSubmit: "Submitted titles cannot be deleted. Archive instead.",
   reportingHistory: "This title has reporting history. Archive it instead.",
+  purgeFailed:
+    "The title left the catalog. Stored files could not be removed; the system will retry.",
 } as const;
 
 export type TitleLifecycleActor = {

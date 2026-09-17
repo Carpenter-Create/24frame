@@ -47,6 +47,7 @@ export type Database = {
           org_id: string
           original_filename: string | null
           provided_by: string | null
+          purged_at: string | null
           received_at: string
           storage_key: string
           title_id: string
@@ -63,6 +64,7 @@ export type Database = {
           org_id: string
           original_filename?: string | null
           provided_by?: string | null
+          purged_at?: string | null
           received_at?: string
           storage_key: string
           title_id: string
@@ -79,6 +81,7 @@ export type Database = {
           org_id?: string
           original_filename?: string | null
           provided_by?: string | null
+          purged_at?: string | null
           received_at?: string
           storage_key?: string
           title_id?: string
@@ -2659,6 +2662,7 @@ export type Database = {
           original_release_date: string | null
           release_date: string | null
           release_type: Database["public"]["Enums"]["release_type"]
+          s3_purged_at: string | null
           screener_source: Database["public"]["Enums"]["screener_source"]
           status: Database["public"]["Enums"]["title_status"]
           title: string
@@ -2678,6 +2682,7 @@ export type Database = {
           original_release_date?: string | null
           release_date?: string | null
           release_type?: Database["public"]["Enums"]["release_type"]
+          s3_purged_at?: string | null
           screener_source?: Database["public"]["Enums"]["screener_source"]
           status?: Database["public"]["Enums"]["title_status"]
           title: string
@@ -2697,6 +2702,7 @@ export type Database = {
           original_release_date?: string | null
           release_date?: string | null
           release_type?: Database["public"]["Enums"]["release_type"]
+          s3_purged_at?: string | null
           screener_source?: Database["public"]["Enums"]["screener_source"]
           status?: Database["public"]["Enums"]["title_status"]
           title?: string
@@ -3382,6 +3388,10 @@ export type Database = {
         Returns: undefined
       }
       delete_title: { Args: { p_title_id: string }; Returns: undefined }
+      mark_deleted_title_prefix_purged: {
+        Args: { p_title_id: string }
+        Returns: undefined
+      }
       title_has_reporting_activity: {
         Args: { p_title_id: string }
         Returns: boolean
