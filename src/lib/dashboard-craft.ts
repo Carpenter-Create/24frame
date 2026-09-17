@@ -101,8 +101,15 @@ export const DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS = "bg-surface-muted text-ink";
 
 // Map unmount is taller than Titles/Platforms lists. Do not let the
 // departing map become the scroll anchor (html scroll-behavior: smooth
-// would ease /dashboard to top).
-export const DASHBOARD_RANKED_PANE_CLASS = "[overflow-anchor:none]";
+// would ease /dashboard to top). Keep the pane ≥ Territories map frame
+// (DASHBOARD_MAP_FRAME min-h-[340px] + pad) so map↔list does not collapse
+// document height. Sitewide smooth scroll stays; only the swap helper
+// suppresses it.
+export const DASHBOARD_RANKED_PANE_MIN_HEIGHT_CLASS =
+  "min-h-[calc(340px+2*var(--space-6))]";
+
+export const DASHBOARD_RANKED_PANE_CLASS =
+  `[overflow-anchor:none] ${DASHBOARD_RANKED_PANE_MIN_HEIGHT_CLASS}`;
 
 // RL TerritoryMap Overview frame: Mercator 700×340 inside p-6. Not a mini stub.
 export const DASHBOARD_MAP_FRAME_CLASS = "relative w-full min-h-[340px]";
