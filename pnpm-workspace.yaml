@@ -12,7 +12,12 @@ packages:
 # sharp = image processing (Next.js image optimization),
 # unrs-resolver = eslint import resolver,
 # esbuild = tsx binary for the finance worker (workers/finance/Dockerfile).
+#
+# @sentry/cli stays false: its postinstall downloads a native binary. Error
+# reporting does not need it. Source-map upload can be enabled later by
+# flipping this to true and setting SENTRY_AUTH_TOKEN — founder-gated.
 allowBuilds:
+  '@sentry/cli': false
   esbuild: true
   sharp: true
   unrs-resolver: true
