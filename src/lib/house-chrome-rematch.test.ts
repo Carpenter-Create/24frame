@@ -62,6 +62,7 @@ const FUN_CHROME_PATHS = [
   "src/lib/workspace-switcher.ts",
   "src/lib/mobile-chrome.ts",
   "src/lib/rail-collapse.ts",
+  "src/components/chrome/rail-collapse.tsx",
   "src/lib/settings.ts",
   "src/components/chrome/education-header-search.tsx",
 ] as const;
@@ -243,6 +244,49 @@ describe("house chrome rematch miss list v1.1", () => {
       expect(src, path).not.toMatch(/Royalogic/i);
       expect(src, path).not.toMatch(/\brl-/);
     }
+  });
+
+  it("locks Social onto the shared rail-collapse SoT (G1–G5)", () => {
+    const railUi = readFileSync("src/components/chrome/rail-collapse.tsx", "utf8");
+    const extras = readFileSync("src/components/social/social-rail-extras.tsx", "utf8");
+
+    expect(existsSync("src/components/chrome/rail-collapse.tsx")).toBe(true);
+    expect(shell.match(/<RailCollapse collapsed=\{collapsed\} onToggle=\{toggle\} \/>/g)?.length).toBe(2);
+    expect(shell).not.toContain("collapsed={false}");
+    expect(shell).not.toContain("SocialRailCollapse");
+    expect(shell).not.toContain("data-social-rail-collapse");
+    expect(railUi).toContain("RAIL_COLLAPSE_CHEVRON");
+    expect(railUi).toContain("CaretDoubleLeft");
+    expect(railUi).toContain("CaretDoubleRight");
+    expect(railUi).toContain("RAIL_COLLAPSE_CHEVRON_CLASS");
+    expect(railUi).toContain("RAIL_COLLAPSE_EXPAND_ROW_CLASS");
+    expect(railUi).not.toMatch(/Royalogic/i);
+    expect(railUi).not.toMatch(/\brl-/);
+
+    expect(shell).toContain("persistSidebarCollapsed");
+    expect(shell).toContain("RAIL_COLLAPSE_WIDTH_VAR");
+    expect(shell).toContain("RAIL_WIDTH_CLASS");
+    expect(shell).toContain('style={collapseWidthStyle}');
+    expect(collapse).toContain('SIDEBAR_COLLAPSED_COOKIE = "24frame_sidebar_collapsed"');
+    expect(collapse).toContain('RAIL_COLLAPSE_WIDTH_VAR = "var(--sidebar-width-collapsed)"');
+
+    const socialAside = shell.slice(
+      shell.indexOf("data-social-rail="),
+      shell.indexOf("data-app-social-frame="),
+    );
+    expect(socialAside.indexOf("<RailCollapse")).toBeLessThan(socialAside.indexOf("<SideNav"));
+    expect(socialAside).toContain("collapsed={collapsed}");
+    expect(socialAside).toContain('workspace="social"');
+    expect(extras).toContain("collapsed?: boolean");
+    expect(extras).toContain("collapsed && \"justify-center p-2\"");
+
+    expect(shell).toContain('collapsed ? undefined : SOCIAL_RAIL_MAIN_OFFSET_CLASS');
+    expect(shell).toContain('marginLeft: "var(--sidebar-width)"');
+    expect(shell).toContain("data-social-workspace");
+    expect(shell).toContain("<HouseLeadChrome");
+    expect(shell).toContain("SOCIAL_RAIL_PANEL_CLASS");
+    expect(shell).not.toContain("StudioRail");
+    expect(SOCIAL_RAIL_WIDTH_CLASS).toBe("w-[calc(200px-16px)]");
   });
 
   it("keeps house tokens, Titles content, and Delete/Archive unmixed", () => {

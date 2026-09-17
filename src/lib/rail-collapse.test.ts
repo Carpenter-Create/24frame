@@ -7,6 +7,8 @@ import {
   RAIL_COLLAPSE_EXPAND_ROW_CLASS,
   RAIL_COLLAPSE_CHEVRON_ICON_CLASS,
   RAIL_COLLAPSE_CHEVRON_ICON_WEIGHT,
+  RAIL_COLLAPSE_WIDTH_VAR,
+  RAIL_WIDTH_CLASS,
   SIDEBAR_COLLAPSED_COOKIE,
   SIDEBAR_COLLAPSED_COOKIE_LEGACY,
   parseSidebarCollapsedCookie,
@@ -28,9 +30,13 @@ describe("rail-collapse tokens", () => {
     expect(RAIL_COLLAPSE_CHEVRON_ICON_WEIGHT).toBe("bold");
     expect(RAIL_COLLAPSE_EXPAND_ROW_CLASS).toBe("flex h-8 items-center justify-center");
     expect(RAIL_COLLAPSE_EXPAND_ROW_CLASS).not.toMatch(/border|hairline/);
+    expect(RAIL_WIDTH_CLASS).toBe("w-[calc(var(--sidebar-width)-16px)]");
+    expect(RAIL_COLLAPSE_WIDTH_VAR).toBe("var(--sidebar-width-collapsed)");
     expect(src).not.toMatch(/\brl-/);
     expect(src).not.toContain("RAIL_COLLAPSE_RL");
     expect(src).not.toMatch(/Royalogic/i);
+    expect(src).not.toContain("social-sidebar-collapsed");
+    expect(src).not.toContain("SOCIAL_RAIL_COLLAPSE");
   });
 });
 

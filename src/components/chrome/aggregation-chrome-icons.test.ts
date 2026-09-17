@@ -4,7 +4,8 @@ import { describe, expect, it } from "vitest";
 const rail = readFileSync("src/lib/nav.ts", "utf8");
 const settingsRail = readFileSync("src/components/chrome/settings-rail.tsx", "utf8");
 const settingsBack = readFileSync("src/components/chrome/settings-header-back.tsx", "utf8");
-const collapse = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
+const collapse = readFileSync("src/components/chrome/rail-collapse.tsx", "utf8");
+const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
 const account = readFileSync("src/components/chrome/account-sheet.tsx", "utf8");
 const house = readFileSync("src/components/chrome/house.tsx", "utf8");
 const mobile = readFileSync("src/components/chrome/mobile-nav.tsx", "utf8");
@@ -28,6 +29,10 @@ describe("Aggregation chrome Phosphor lock + Design miss list", () => {
     expect(collapse).not.toContain("lucide-react");
     expect(collapse).not.toContain("ChevronsLeft");
     expect(collapse).not.toContain("ChevronsRight");
+    expect(shell).toContain("<RailCollapse collapsed={collapsed} onToggle={toggle} />");
+    expect(shell).not.toContain("lucide-react");
+    expect(shell).not.toContain("ChevronsLeft");
+    expect(shell).not.toContain("ChevronsRight");
 
     expect(account).toContain("CaretLeft");
     expect(account).toContain("CaretRight");

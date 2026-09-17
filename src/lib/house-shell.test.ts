@@ -182,6 +182,14 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(chip).toContain("Ada Lovelace");
     expect(chip).not.toContain("text-[12px]");
 
+    const collapsedChip = renderToStaticMarkup(
+      createElement(SocialRailAccountChip, { name: "Ada Lovelace", collapsed: true }),
+    );
+    expect(collapsedChip).toContain("data-social-rail-account");
+    expect(collapsedChip).toContain('aria-label="Ada Lovelace"');
+    expect(collapsedChip).toContain("justify-center");
+    expect(collapsedChip).not.toContain("truncate t-body-sm");
+
     expect(socialTabBar).toContain('active ? "text-accent" : "text-ink"');
   });
 

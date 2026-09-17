@@ -2,7 +2,6 @@
 
 import { Suspense, use, useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { CaretDoubleLeft, CaretDoubleRight } from "@phosphor-icons/react";
 
 import { UserMenu } from "./user-menu";
 import { SideNav } from "./side-nav";
@@ -12,16 +11,14 @@ import { MobileNav } from "./mobile-nav";
 import { MessagesAppHeader } from "./messages-app-header";
 import { EducationHeaderSearch } from "./education-header-search";
 import { HouseLeadChrome } from "./house-lead-chrome";
+import { RailCollapse } from "./rail-collapse";
 import { AskAssistantChromeProvider } from "@/components/messages/ask-globee-chrome";
 import { cn } from "@/lib/cn";
 import type { AppShellChrome } from "@/lib/app-shell-chrome";
 import type { MessagesSurface } from "@/lib/ask-globee";
 import {
-  RAIL_COLLAPSE_CHEVRON,
-  RAIL_COLLAPSE_CHEVRON_CLASS,
-  RAIL_COLLAPSE_EXPAND_ROW_CLASS,
-  RAIL_COLLAPSE_CHEVRON_ICON_CLASS,
-  RAIL_COLLAPSE_CHEVRON_ICON_WEIGHT,
+  RAIL_COLLAPSE_WIDTH_VAR,
+  RAIL_WIDTH_CLASS,
   migrateSidebarCollapsedCookie,
   persistSidebarCollapsed,
 } from "@/lib/rail-collapse";
@@ -53,11 +50,13 @@ type Org = { id: string; name: string };
 // Phone: the rail is gone (hidden + width tokens collapse). A header hamburger opens a
 // bottom sheet — client destinations, or those plus staff destinations when
 // isGcStaff. Desktop 1:2 rail is unchanged.
-// /settings paths: the Access destinations leave. One 220 rail (pad 16)
-// occupies that slot — Settings title + You / Social / Education /
-// Aggregation. Not a second column. Collapse stays off. Phone list is
-// the same sections; pushed panes back to Settings. Hamburger stays
-// off. Avatar 32 stays.
+// Social mounts the same RailCollapse + cookie + width-var path as
+// Aggregation · Education. Do not pin Social expanded or invent a
+// Social-only chevron. /settings paths: the Access destinations leave.
+// One 220 rail (pad 16) occupies that slot — Settings title + You /
+// Social / Education / Aggregation. Not a second column. Collapse stays
+// off. Phone list is the same sections; pushed panes back to Settings.
+// Hamburger stays off. Avatar 32 stays.
 export function AppShell({
   chrome,
   email = "",
@@ -122,11 +121,29 @@ export function AppShell({
     migrateSidebarCollapsedCookie(collapsed);
   }, [collapsed]);
 
+  const toggle = () => {
+    collapseTouched.current = true;
+    setCollapsed((c) => {
+      const next = !c;
+      persistSidebarCollapsed(next);
+      return next;
+    });
+  };
+
+  const collapseWidthStyle =
+    collapsed && !settingsPage
+      ? ({ "--sidebar-width": RAIL_COLLAPSE_WIDTH_VAR } as React.CSSProperties)
+      : undefined;
+
   if (socialChrome) {
     return (
       <AskAssistantChromeProvider>
         {cookieSync}
-        <div className={cn(HOUSE_LEAD_SHELL_CLASS, HOUSE_PAGE_CANVAS_CLASS)} data-social-workspace="">
+        <div
+          className={cn(HOUSE_LEAD_SHELL_CLASS, HOUSE_PAGE_CANVAS_CLASS)}
+          data-social-workspace=""
+          style={collapseWidthStyle}
+        >
           <HouseLeadChrome
             workspace="social"
             logoVisible="always"
@@ -139,27 +156,34 @@ export function AppShell({
           <aside
             className={cn(
               "fixed left-4 top-[calc(var(--header-height)+16px)] z-30 hidden h-[calc(100dvh-var(--header-height)-32px)] flex-col md:flex",
-              SOCIAL_RAIL_WIDTH_CLASS,
+              collapsed ? RAIL_WIDTH_CLASS : SOCIAL_RAIL_WIDTH_CLASS,
               SOCIAL_RAIL_PANEL_CLASS,
             )}
             data-app-rail=""
             data-social-rail=""
           >
-            <div className="flex h-full flex-col gap-3 p-4">
+            <RailCollapse collapsed={collapsed} onToggle={toggle} />
+            <div className={cn("flex min-h-0 flex-1 flex-col", collapsed ? "gap-2 px-1 pb-2" : "gap-3 p-4")}>
               <div className="min-h-0 overflow-y-auto">
                 <SideNav
                   messagesUnread={messagesUnread}
                   isGcStaff={false}
-                  collapsed={false}
+                  collapsed={collapsed}
                   workspace="social"
                 />
               </div>
               <div className="min-h-0 flex-1" />
-              <SocialRailAccountChipSlot chrome={chrome} name={name} photoUrl={photoUrl} />
+              <SocialRailAccountChipSlot
+                chrome={chrome}
+                name={name}
+                photoUrl={photoUrl}
+                collapsed={collapsed}
+              />
             </div>
           </aside>
           <main
-            className={cn(HOUSE_LEAD_SCROLL_CLASS, SOCIAL_RAIL_MAIN_OFFSET_CLASS)}
+            className={cn(HOUSE_LEAD_SCROLL_CLASS, collapsed ? undefined : SOCIAL_RAIL_MAIN_OFFSET_CLASS)}
+            style={collapsed ? { marginLeft: "var(--sidebar-width)" } : undefined}
             data-app-social-frame=""
             data-house-lead-scroll=""
           >
@@ -171,71 +195,24 @@ export function AppShell({
     );
   }
 
-  const toggle = () => {
-    collapseTouched.current = true;
-    setCollapsed((c) => {
-      const next = !c;
-      persistSidebarCollapsed(next);
-      return next;
-    });
-  };
-
   return (
     <AskAssistantChromeProvider>
     {cookieSync}
     <div
       className={cn(HOUSE_LEAD_SHELL_CLASS, HOUSE_PAGE_CANVAS_CLASS)}
       data-education-workspace={workspace === "education" ? "" : undefined}
-      style={
-        collapsed && !settingsPage
-          ? ({ "--sidebar-width": "var(--sidebar-width-collapsed)" } as React.CSSProperties)
-          : undefined
-      }
+      style={collapseWidthStyle}
     >
       <aside
         className={cn(
-          "fixed left-4 top-[calc(var(--header-height)+16px)] z-30 hidden h-[calc(100dvh-var(--header-height)-32px)] w-[calc(var(--sidebar-width)-16px)] flex-col md:flex",
+          "fixed left-4 top-[calc(var(--header-height)+16px)] z-30 hidden h-[calc(100dvh-var(--header-height)-32px)] flex-col md:flex",
+          RAIL_WIDTH_CLASS,
           HOUSE_RAIL_PANEL_CLASS,
         )}
         data-app-rail=""
         data-settings-rail={settingsPage ? "" : undefined}
       >
-        {settingsPage || collapsed ? null : (
-          <div className="flex justify-end px-2 pt-1">
-            <button
-              type="button"
-              onClick={toggle}
-              aria-label="Collapse sidebar"
-              title="Collapse sidebar"
-              aria-pressed={false}
-              data-rail-collapse={RAIL_COLLAPSE_CHEVRON}
-              className={RAIL_COLLAPSE_CHEVRON_CLASS}
-            >
-              <CaretDoubleLeft
-                className={RAIL_COLLAPSE_CHEVRON_ICON_CLASS}
-                weight={RAIL_COLLAPSE_CHEVRON_ICON_WEIGHT}
-              />
-            </button>
-          </div>
-        )}
-        {settingsPage || !collapsed ? null : (
-          <div className={RAIL_COLLAPSE_EXPAND_ROW_CLASS}>
-            <button
-              type="button"
-              onClick={toggle}
-              aria-label="Expand sidebar"
-              title="Expand sidebar"
-              aria-pressed={true}
-              data-rail-collapse={RAIL_COLLAPSE_CHEVRON}
-              className={RAIL_COLLAPSE_CHEVRON_CLASS}
-            >
-              <CaretDoubleRight
-                className={RAIL_COLLAPSE_CHEVRON_ICON_CLASS}
-                weight={RAIL_COLLAPSE_CHEVRON_ICON_WEIGHT}
-              />
-            </button>
-          </div>
-        )}
+        {settingsPage ? null : <RailCollapse collapsed={collapsed} onToggle={toggle} />}
         <div
           className={cn("flex-1 overflow-y-auto", settingsPage ? SETTINGS_RAIL_PAD_CLASS : "pt-1")}
         >
@@ -339,22 +316,30 @@ function SocialRailAccountChipSlot({
   chrome,
   name,
   photoUrl,
+  collapsed,
 }: {
   chrome?: Promise<AppShellChrome>;
   name?: string | null;
   photoUrl?: string | null;
+  collapsed: boolean;
 }) {
-  if (!chrome) return <SocialRailAccountChip name={name} photoUrl={photoUrl} />;
+  if (!chrome) return <SocialRailAccountChip name={name} photoUrl={photoUrl} collapsed={collapsed} />;
   return (
-    <Suspense fallback={<SocialRailAccountChip name={name} photoUrl={photoUrl} />}>
-      <SocialRailAccountChipFromChrome chrome={chrome} />
+    <Suspense fallback={<SocialRailAccountChip name={name} photoUrl={photoUrl} collapsed={collapsed} />}>
+      <SocialRailAccountChipFromChrome chrome={chrome} collapsed={collapsed} />
     </Suspense>
   );
 }
 
-function SocialRailAccountChipFromChrome({ chrome }: { chrome: Promise<AppShellChrome> }) {
+function SocialRailAccountChipFromChrome({
+  chrome,
+  collapsed,
+}: {
+  chrome: Promise<AppShellChrome>;
+  collapsed: boolean;
+}) {
   const data = use(chrome);
-  return <SocialRailAccountChip name={data.name} photoUrl={data.photoUrl} />;
+  return <SocialRailAccountChip name={data.name} photoUrl={data.photoUrl} collapsed={collapsed} />;
 }
 
 function MessagesHeaderSlot({
