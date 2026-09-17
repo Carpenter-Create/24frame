@@ -29,8 +29,9 @@ import {
 import type { TitleStatus } from "@/lib/titles";
 
 // Client `/titles` is the catalog you operate: every title the org owns, every
-// existing title.status, on this one page. Landscape-thumb rows in the house
-// shell. `catalog_id` stays GC-only.
+// existing title.status, on this one page. Phone stacks full-width landscape
+// art over the title; desktop keeps the landscape-thumb row. `catalog_id`
+// stays GC-only.
 
 export default async function TitlesPage({
   searchParams,

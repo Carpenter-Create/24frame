@@ -41,20 +41,23 @@ export function CatalogSkeleton() {
       <Skeleton className="h-8 w-32" />
       <div className="flex flex-col gap-[var(--space-4)] md:flex-row md:items-center">
         <Skeleton className="h-8 w-full rounded-full md:w-56" />
-        <Skeleton className="h-8 w-24 rounded-full" />
+        <Skeleton className="h-8 w-24 md:hidden" />
+        <Skeleton className="hidden h-8 w-40 rounded-full md:block" />
       </div>
-      <div className="overflow-hidden rounded-[var(--radius-lg)] border border-hairline bg-surface">
+      <div className="flex flex-col gap-[var(--space-4)] md:gap-0 md:overflow-hidden md:rounded-[var(--radius-lg)] md:border md:border-hairline md:bg-surface">
         {Array.from({ length: 6 }).map((_, i) => (
           <div
             key={i}
-            className="flex items-center gap-[var(--space-4)] border-b border-hairline px-[var(--space-4)] py-[var(--space-4)] last:border-0"
+            className="flex flex-col overflow-hidden rounded-[var(--radius-lg)] border border-hairline bg-surface md:flex-row md:items-center md:gap-[var(--space-4)] md:rounded-none md:border-0 md:border-b md:px-[var(--space-4)] md:py-[var(--space-4)] md:last:border-0"
           >
-            <Skeleton className="aspect-[16/9] w-[40%] max-w-[168px] rounded-[var(--radius-lg)] md:w-[160px] md:max-w-none" />
-            <div className="flex min-w-0 flex-1 flex-col gap-2">
-              <Skeleton className="h-4 w-1/3" />
-              <Skeleton className="h-3 w-16" />
+            <Skeleton className="aspect-[16/9] w-full md:w-[160px] md:rounded-[var(--radius-lg)]" />
+            <div className="flex flex-col gap-2 px-[var(--space-4)] py-[var(--space-4)] md:min-w-0 md:flex-1 md:flex-row md:items-center md:justify-between md:p-0">
+              <div className="flex flex-col gap-2">
+                <Skeleton className="h-4 w-40" />
+                <Skeleton className="h-3 w-16" />
+              </div>
+              <Skeleton className="h-6 w-16 rounded-full" />
             </div>
-            <Skeleton className="h-6 w-16 rounded-full" />
           </div>
         ))}
       </div>

@@ -81,13 +81,17 @@ describe("titles catalog scope", () => {
 
   it("keeps the list 16 inset on the /titles frame, not a -mx-4 cancel", () => {
     const catalog = src("src/components/titles/titles-catalog.tsx");
+    const catalogLib = src("src/lib/titles-catalog.ts");
     const home = src("src/components/dashboard/dashboard-home.tsx");
     const titleDetail = src("src/app/(app)/titles/[id]/page.tsx");
     const homePage = src("src/app/(app)/dashboard/page.tsx");
 
     expect(catalog).toContain("px-[var(--space-4)]");
     expect(catalog).toContain("titles-catalog-list");
-    expect(catalog).toContain("aspect-[16/9]");
+    expect(catalogLib).toContain("aspect-[16/9]");
+    expect(catalog).toContain("TITLES_THUMB_CLASS");
+    expect(catalog).toContain("TitlesCatalogStatusFilter");
+    expect(catalog).not.toContain("@/components/layout/status-filter");
     expect(catalog).not.toContain("titles-catalog-rail");
     expect(catalog).not.toContain("titles-catalog-grid");
     expect(catalog).not.toContain("aspect-[2/3]");
@@ -119,6 +123,10 @@ describe("titles catalog scope", () => {
     const skeletons = src("src/components/layout/page-skeletons.tsx");
     expect(skeletons).toContain("data-titles-catalog-skeleton");
     expect(skeletons).toContain("aspect-[16/9]");
+    expect(skeletons).toContain("w-full");
+    expect(skeletons).toContain("flex flex-col");
+    expect(skeletons).toContain("md:flex-row");
+    expect(skeletons).not.toContain("w-[40%]");
     expect(skeletons).not.toContain("PosterGridSkeleton");
     expect(skeletons).not.toContain("aspect-[2/3]");
     expect(src("src/app/(app)/titles/loading.tsx")).toContain("CatalogSkeleton");

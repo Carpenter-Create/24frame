@@ -2,6 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import { HOUSE_FILTER_ON_CLASS } from "@/lib/house-shell";
 import { TITLE_STATUS_LABELS, type TitleStatus } from "@/lib/titles";
+import {
+  DASHBOARD_TITLE_DESKTOP_CLASS,
+  DASHBOARD_TITLE_MOBILE_CLASS,
+  DASHBOARD_TOP_PILL_BUTTON_CLASS,
+} from "./dashboard-craft";
 import { DASHBOARD_HOME } from "./dashboard-home";
 import {
   CATALOG_LIFECYCLE_STATES,
@@ -9,10 +14,14 @@ import {
   TITLE_STATUS_PILL_IDLE_CLASS,
   TITLE_STATUS_PILL_LIVE_CLASS,
   TITLES_CATALOG,
+  TITLES_FILTER_PILL_CLASS,
+  TITLES_TITLE_DESKTOP_CLASS,
+  TITLES_TITLE_MOBILE_CLASS,
   catalogCountLabel,
   catalogCountValue,
   catalogFilterHref,
   catalogReleaseYear,
+  catalogStatusFilterLabel,
   catalogStatusMark,
   catalogStatusPillClass,
   catalogStillSrc,
@@ -125,6 +134,15 @@ describe("catalog status pills", () => {
 });
 
 describe("catalog status filter", () => {
+  it("matches the Dashboard title and pill register", () => {
+    expect(TITLES_TITLE_MOBILE_CLASS).toBe(DASHBOARD_TITLE_MOBILE_CLASS);
+    expect(TITLES_TITLE_DESKTOP_CLASS).toBe(DASHBOARD_TITLE_DESKTOP_CLASS);
+    expect(TITLES_FILTER_PILL_CLASS).toBe(DASHBOARD_TOP_PILL_BUTTON_CLASS);
+    expect(catalogStatusFilterLabel("all")).toBe("All");
+    expect(catalogStatusFilterLabel("in_review")).toBe("In review");
+    expect(catalogStatusFilterLabel("takedown_requested")).toBe("Takedown requested");
+  });
+
   it("uses product-true labels and does not invent Upcoming or In progress", () => {
     expect(CATALOG_STATUS_FILTERS.map((f) => f.key)).toEqual([
       "all",

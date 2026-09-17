@@ -196,9 +196,12 @@ describe("client /titles catalog", () => {
       "titles-catalog mx-auto flex w-full flex-col gap-[var(--space-6)] px-[var(--space-4)]",
     );
     expect(html).toContain("md:gap-[var(--space-8)]");
-    expect(html).toMatch(/<h1 class="t-section text-ink">Titles<\/h1>/);
+    expect(html).toContain("data-titles-catalog-title-mobile");
+    expect(html).toContain("data-titles-catalog-title-desktop");
+    expect(html).toContain("t-heading text-ink");
+    expect(html).toContain("t-title text-ink");
     expect(html).not.toMatch(/<h1[^>]*t-display/);
-    expect(html).not.toMatch(/<h1[^>]*t-title/);
+    expect(html).not.toMatch(/<h1[^>]*t-section/);
     expect(html).toContain("data-titles-catalog-count");
     expect(html).toContain(`${ALL_STATUSES.length} in catalog`);
     expect(html).not.toContain("10 in catalog");
@@ -256,11 +259,19 @@ describe("client /titles catalog", () => {
     expect(livePills.length).toBeGreaterThan(0);
     expect(hairlinePills.length).toBeGreaterThan(0);
     expect(html).toContain("t-body font-medium text-ink");
-    expect(html).not.toContain("t-heading text-ink");
+    expect(html).toContain("t-heading text-ink");
     expect(html).not.toContain("rounded-full bg-surface-muted");
     expect(html).not.toMatch(/data-titles-catalog-list-row[\s\S]*t-section/);
     expect(html).not.toMatch(/data-titles-catalog-list-row[\s\S]*t-display/);
     expect(html).not.toMatch(/data-titles-catalog-list-row[\s\S]*t-title/);
+    const filtersHtml = html.slice(
+      html.indexOf("data-titles-catalog-filters"),
+      html.indexOf("data-titles-catalog-operate"),
+    );
+    expect(filtersHtml).toContain("t-body-sm");
+    expect(filtersHtml).toContain("data-titles-catalog-status-compact");
+    expect(filtersHtml).not.toContain("t-label ");
+    expect(filtersHtml).not.toContain("uppercase");
     expect(html).not.toContain("group-hover:text-ink-2");
     for (const status of ALL_STATUSES) {
       expect(html).toContain(TITLE_STATUS_LABELS[status]);
@@ -317,8 +328,10 @@ describe("client /titles catalog", () => {
     expect(rows).toHaveLength(ALL_STATUSES.length);
     expect(frames).toHaveLength(ALL_STATUSES.length);
     for (const open of rows) {
-      expect(open).toContain("flex items-center");
-      expect(open).toContain("px-[var(--space-4)]");
+      expect(open).toContain("flex flex-col");
+      expect(open).toContain("md:flex-row");
+      expect(open).toContain("md:items-center");
+      expect(open).toContain("md:px-[var(--space-4)]");
     }
     for (const open of frames) {
       expect(open).toContain("aspect-[16/9]");
@@ -357,6 +370,8 @@ describe("client /titles catalog", () => {
     const name = openingTagsWith(html, 'data-titles-catalog-name=""');
     expect(name).toHaveLength(1);
     expect(name[0]).toContain("t-body font-medium text-ink");
+    expect(name[0]).toContain("md:truncate");
+    expect(name[0].replaceAll("md:truncate", "")).not.toContain("truncate");
     expect(name[0]).not.toContain("t-heading");
     expect(html).toMatch(
       /data-titles-catalog-name[\s\S]*Stacked film[\s\S]*data-titles-catalog-year[\s\S]*2019[\s\S]*data-titles-catalog-status[\s\S]*Live/,
@@ -472,7 +487,7 @@ describe("client /titles catalog", () => {
     expect(html).toContain("data-titles-catalog-search");
     const search = html.slice(html.indexOf("data-titles-catalog-search"));
     expect(search).toContain("Search titles...");
-    expect(html).not.toContain("max-md:hidden");
+    expect(search).not.toContain("max-md:hidden");
     expect(html).not.toContain("⌘K");
     expect(html).not.toContain("CommandK");
   });
@@ -508,8 +523,14 @@ describe("client /titles catalog", () => {
     expect(html).not.toContain("snap-x");
     expect(html).not.toContain("w-[140px]");
     expect(html).not.toContain("h-[210px]");
-    expect(html).toContain("w-[40%]");
+    expect(html).not.toContain("w-[40%]");
+    expect(html).toContain("w-full");
     expect(html).toContain("md:w-[160px]");
+    expect(html).toContain("flex flex-col");
+    expect(html).toContain("md:flex-row");
+    expect(html).toContain("data-titles-catalog-status-compact");
+    expect(html).toContain("data-titles-catalog-status-pills");
+    expect(html).not.toContain("data-titles-catalog-fab");
     expect(html).toContain(
       "titles-catalog mx-auto flex w-full flex-col gap-[var(--space-6)] px-[var(--space-4)]",
     );

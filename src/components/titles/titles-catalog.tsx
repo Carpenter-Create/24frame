@@ -2,21 +2,36 @@ import Link from "next/link";
 import { Camera } from "lucide-react";
 
 import { Artwork } from "@/components/layout/artwork";
-import { StatusFilter } from "@/components/layout/status-filter";
 import { cn } from "@/lib/cn";
 import {
   CATALOG_STATUS_FILTERS,
   TITLES_CATALOG,
+  TITLES_FILTER_DESKTOP_CLUSTER_CLASS,
+  TITLES_FILTER_PHONE_CHEVRON_CLASS,
+  TITLES_FILTER_PHONE_HOST_CLASS,
+  TITLES_FILTER_PHONE_PANEL_CLASS,
+  TITLES_FILTER_PHONE_TRIGGER_CLASS,
+  TITLES_LIST_CLASS,
+  TITLES_LIST_ROW_CLASS,
+  TITLES_ROW_COPY_CLASS,
+  TITLES_ROW_META_CLASS,
+  TITLES_ROW_NAME_CLASS,
+  TITLES_THUMB_CLASS,
+  TITLES_TITLE_DESKTOP_CLASS,
+  TITLES_TITLE_MOBILE_CLASS,
   catalogFilterHref,
+  catalogStatusFilterLabel,
   catalogStatusPillClass,
+  titlesFilterPhoneOptionClass,
+  titlesFilterPillClass,
   type CatalogStatusFilter,
 } from "@/lib/titles-catalog";
 
 // Client `/titles` chrome only. Not the shared Card, BannerCard, or DataTable —
 // those must not restyle home, Deliveries, Catalog Health, or staff surfaces.
-// Landscape-thumb rows in the house shell: 16:9 art, ink title, quiet year,
-// TITLE_STATUS_LABELS pill. Phone uses the same row grammar with a readable
-// leading thumb. Accent is the one Add Title Sporty Blue pill.
+// Phone (`< md`): full-width 16:9 art on top, title / year / status under.
+// Desktop (`md+`): landscape-thumb row — art leading, title/year, status.
+// Type is the Dashboard register. Accent is the one Add Title Sporty Blue pill.
 
 export function TitlesCatalogFrame({
   className,
@@ -40,7 +55,14 @@ export function TitlesCatalogFrame({
 export function TitlesCatalogHeader({ count }: { count?: string }) {
   return (
     <header className="titles-catalog-header">
-      <h1 className="t-section text-ink">{TITLES_CATALOG.title}</h1>
+      <h1 data-titles-catalog-title="">
+        <span data-titles-catalog-title-mobile="" className={TITLES_TITLE_MOBILE_CLASS}>
+          {TITLES_CATALOG.title}
+        </span>
+        <span data-titles-catalog-title-desktop="" className={TITLES_TITLE_DESKTOP_CLASS}>
+          {TITLES_CATALOG.title}
+        </span>
+      </h1>
       {count ? (
         <p
           className="mt-[var(--space-1)] t-body-sm text-ink-3"
@@ -50,6 +72,72 @@ export function TitlesCatalogHeader({ count }: { count?: string }) {
         </p>
       ) : null}
     </header>
+  );
+}
+
+export function TitlesCatalogStatusFilter({
+  q,
+  status,
+}: {
+  q: string;
+  status: CatalogStatusFilter;
+}) {
+  const currentLabel = catalogStatusFilterLabel(status);
+
+  return (
+    <>
+      <details className={TITLES_FILTER_PHONE_HOST_CLASS} data-titles-catalog-status-compact="">
+        <summary
+          className={TITLES_FILTER_PHONE_TRIGGER_CLASS}
+          aria-label={TITLES_CATALOG.statusFilterLabel}
+        >
+          <span data-titles-catalog-status-current="">{currentLabel}</span>
+          <svg
+            className={TITLES_FILTER_PHONE_CHEVRON_CLASS}
+            viewBox="0 0 16 16"
+            fill="none"
+            aria-hidden
+          >
+            <path
+              d="M4 6l4 4 4-4"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </summary>
+        <div className={TITLES_FILTER_PHONE_PANEL_CLASS} role="listbox">
+          {CATALOG_STATUS_FILTERS.map((option) => (
+            <Link
+              key={`phone-${option.key}`}
+              href={catalogFilterHref(q, option.key)}
+              aria-current={option.key === status ? "true" : undefined}
+              className={titlesFilterPhoneOptionClass(option.key === status)}
+            >
+              {option.label}
+            </Link>
+          ))}
+        </div>
+      </details>
+      <div
+        className={TITLES_FILTER_DESKTOP_CLUSTER_CLASS}
+        data-titles-catalog-status-pills=""
+        role="group"
+        aria-label={TITLES_CATALOG.statusFilterLabel}
+      >
+        {CATALOG_STATUS_FILTERS.map((option) => (
+          <Link
+            key={`desktop-${option.key}`}
+            href={catalogFilterHref(q, option.key)}
+            aria-current={option.key === status ? "true" : undefined}
+            className={titlesFilterPillClass(option.key === status)}
+          >
+            {option.label}
+          </Link>
+        ))}
+      </div>
+    </>
   );
 }
 
@@ -81,11 +169,7 @@ export function TitlesCatalogToolbar({
       ) : null}
       {filters ? (
         <div className="min-w-0 flex-1" data-titles-catalog-filters="">
-          <StatusFilter
-            current={status}
-            options={CATALOG_STATUS_FILTERS}
-            hrefFor={(key) => catalogFilterHref(q, key)}
-          />
+          <TitlesCatalogStatusFilter q={q} status={status} />
         </div>
       ) : null}
       {action ? (
@@ -121,10 +205,7 @@ export function TitlesCatalogEmpty({
 
 export function TitlesCatalogList({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      className="titles-catalog-list overflow-hidden rounded-[var(--radius-lg)] border border-hairline bg-surface"
-      data-titles-catalog-list=""
-    >
+    <div className={TITLES_LIST_CLASS} data-titles-catalog-list="">
       {children}
     </div>
   );
@@ -159,7 +240,7 @@ function TitlesCatalogThumb({
 }) {
   return (
     <div
-      className="relative aspect-[16/9] w-[40%] max-w-[168px] shrink-0 overflow-hidden rounded-[var(--radius-lg)] bg-surface-muted md:w-[160px] md:max-w-none [&_img]:h-full [&_img]:w-full [&_img]:object-cover [&_img]:object-center"
+      className={TITLES_THUMB_CLASS}
       data-titles-catalog-frame=""
       data-titles-catalog-crop="cover"
     >
@@ -169,7 +250,7 @@ function TitlesCatalogThumb({
           title={title}
           rounded="rounded-none"
           className="absolute inset-0 h-full w-full"
-          sizes="(max-width: 768px) 40vw, 160px"
+          sizes="(max-width: 768px) 100vw, 160px"
         />
       ) : (
         <div
@@ -202,30 +283,32 @@ export function TitlesCatalogListRow({
     <Link
       href={href}
       prefetch={false}
-      className="flex items-center gap-[var(--space-4)] border-b border-hairline px-[var(--space-4)] py-[var(--space-4)] last:border-b-0"
+      className={TITLES_LIST_ROW_CLASS}
       data-titles-catalog-list-row=""
       data-title-status={status}
     >
       <TitlesCatalogThumb title={title} stillUrl={stillUrl} />
-      <span className="flex min-w-0 flex-1 flex-col gap-[var(--space-1)]">
-        <span
-          className="min-w-0 truncate t-body font-medium text-ink"
-          data-titles-catalog-name=""
-          data-titles-catalog-list-name=""
-        >
-          {title}
-        </span>
-        {year ? (
+      <span className={TITLES_ROW_META_CLASS} data-titles-catalog-row-meta="">
+        <span className={TITLES_ROW_COPY_CLASS}>
           <span
-            className="t-body-sm text-ink-3"
-            data-titles-catalog-year=""
-            data-titles-catalog-list-year=""
+            className={TITLES_ROW_NAME_CLASS}
+            data-titles-catalog-name=""
+            data-titles-catalog-list-name=""
           >
-            {year}
+            {title}
           </span>
-        ) : null}
+          {year ? (
+            <span
+              className="t-body-sm text-ink-3"
+              data-titles-catalog-year=""
+              data-titles-catalog-list-year=""
+            >
+              {year}
+            </span>
+          ) : null}
+        </span>
+        <TitleStatusPill status={status} statusLabel={statusLabel} />
       </span>
-      <TitleStatusPill status={status} statusLabel={statusLabel} />
     </Link>
   );
 }

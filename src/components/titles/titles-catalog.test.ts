@@ -30,13 +30,24 @@ vi.mock("next/link", () => ({
   }) => createElement("a", { href, ...props }, children),
 }));
 
-import { TITLES_CATALOG } from "@/lib/titles-catalog";
+import {
+  DASHBOARD_TITLE_DESKTOP_CLASS,
+  DASHBOARD_TITLE_MOBILE_CLASS,
+  DASHBOARD_TOP_PILL_BUTTON_CLASS,
+} from "@/lib/dashboard-craft";
+import {
+  TITLES_CATALOG,
+  TITLES_FILTER_PILL_CLASS,
+  TITLES_TITLE_DESKTOP_CLASS,
+  TITLES_TITLE_MOBILE_CLASS,
+} from "@/lib/titles-catalog";
 
 import {
   TitlesCatalogFrame,
   TitlesCatalogHeader,
   TitlesCatalogList,
   TitlesCatalogListRow,
+  TitlesCatalogStatusFilter,
 } from "./titles-catalog";
 
 const ALL_STATUSES = Object.keys(TITLE_STATUS_LABELS) as TitleStatus[];
@@ -72,14 +83,17 @@ describe("TitlesCatalogListRow craft", () => {
     const row = openingTagWith(html, 'data-titles-catalog-list-row=""');
     const frame = openingTagWith(html, 'data-titles-catalog-frame=""');
 
-    expect(row).toContain("flex items-center");
-    expect(row).toContain("px-[var(--space-4)]");
-    expect(row).toContain("py-[var(--space-4)]");
+    expect(row).toContain("flex flex-col");
+    expect(row).toContain("md:flex-row");
+    expect(row).toContain("md:items-center");
+    expect(row).toContain("md:px-[var(--space-4)]");
+    expect(row).toContain("md:py-[var(--space-4)]");
     expect(frame).toContain("aspect-[16/9]");
-    expect(frame).toContain("w-[40%]");
+    expect(frame).toContain("w-full");
     expect(frame).toContain("md:w-[160px]");
-    expect(frame).toContain("rounded-[var(--radius-lg)]");
+    expect(frame).toContain("md:rounded-[var(--radius-lg)]");
     expect(frame).toContain('data-titles-catalog-crop="cover"');
+    expect(html).not.toContain("w-[40%]");
     expect(html).not.toContain("aspect-[2/3]");
     expect(html).not.toContain("data-titles-catalog-card");
     expect(html).not.toContain("bg-gradient");
@@ -116,7 +130,11 @@ describe("TitlesCatalogListRow craft", () => {
     const year = openingTagWith(html, 'data-titles-catalog-year=""');
 
     expect(name).toContain("t-body font-medium text-ink");
+    expect(name).toContain("md:truncate");
+    expect(name.includes("truncate")).toBe(true);
+    expect(name.replaceAll("md:truncate", "")).not.toContain("truncate");
     expect(name).not.toContain("t-heading");
+    expect(name).not.toContain("t-label");
     expect(year).toContain("t-body-sm text-ink-3");
     expect(html).toMatch(
       /data-titles-catalog-name[\s\S]*Craft film[\s\S]*data-titles-catalog-year[\s\S]*2019[\s\S]*data-titles-catalog-status[\s\S]*Live/,
@@ -198,14 +216,21 @@ describe("TitlesCatalogFrame craft", () => {
 });
 
 describe("TitlesCatalogHeader type lock", () => {
-  it("keeps the page title on the 24px section step, not a second hero", () => {
+  it("matches the Dashboard page-title register", () => {
     const html = renderToStaticMarkup(createElement(TitlesCatalogHeader));
+    const mobile = openingTagWith(html, 'data-titles-catalog-title-mobile=""');
+    const desktop = openingTagWith(html, 'data-titles-catalog-title-desktop=""');
 
-    expect(html).toMatch(/<h1 class="t-section text-ink">Titles<\/h1>/);
+    expect(TITLES_TITLE_MOBILE_CLASS).toBe(DASHBOARD_TITLE_MOBILE_CLASS);
+    expect(TITLES_TITLE_DESKTOP_CLASS).toBe(DASHBOARD_TITLE_DESKTOP_CLASS);
+    expect(mobile).toContain("t-heading text-ink");
+    expect(mobile).toContain("md:hidden");
+    expect(desktop).toContain("t-title text-ink");
+    expect(desktop).toContain("max-md:hidden");
     expect(html).toContain(TITLES_CATALOG.title);
     expect(html).not.toMatch(/<h1[^>]*t-display/);
-    expect(html).not.toMatch(/<h1[^>]*t-title/);
-    expect(html).not.toContain("t-heading");
+    expect(html).not.toMatch(/<h1[^>]*t-section/);
+    expect(html).not.toContain("t-label");
   });
 
   it("puts count under the title", () => {
@@ -223,20 +248,23 @@ describe("TitlesCatalogHeader type lock", () => {
     expect(countAt).toBeGreaterThan(titleAt);
   });
 
-  it("locks the page title to --text-title and the row title to --text-base", () => {
+  it("locks the page title to --text-title / --text-lg and the row title to --text-base", () => {
     const tokens = readFileSync(join(ROOT, "src/app/tokens.css"), "utf8");
     const globals = readFileSync(join(ROOT, "src/app/globals.css"), "utf8");
 
     expect(tokens).toMatch(/--text-sm:\s*0\.8125rem;/);
     expect(tokens).toMatch(/--text-base:\s*0\.9375rem;/);
     expect(tokens).toMatch(/--text-title:\s*1\.5rem;/);
-    expect(globals).toMatch(/\.t-section\s*\{[\s\S]*?font-size:\s*var\(--text-title\)/);
+    expect(globals).toMatch(/\.t-title\s*\{[\s\S]*?font-size:\s*var\(--text-title\)/);
+    expect(globals).toMatch(/\.t-heading\s*\{[\s\S]*?font-size:\s*var\(--text-lg\)/);
     expect(globals).toMatch(/\.t-body\s*\{[\s\S]*?font-size:\s*var\(--text-base\)/);
   });
 
   it("keeps Titles as the page title on phone and desktop", () => {
     const html = renderToStaticMarkup(createElement(TitlesCatalogHeader));
-    expect(html).toMatch(/<h1 class="t-section text-ink">Titles<\/h1>/);
+    expect(html).toContain("data-titles-catalog-title-mobile");
+    expect(html).toContain("data-titles-catalog-title-desktop");
+    expect(html.match(/Titles/g)?.length).toBeGreaterThanOrEqual(2);
     expect(html).not.toContain("data-titles-catalog-identity");
     expect(html).not.toContain("Meridian Pictures");
   });
@@ -279,12 +307,16 @@ describe("TitlesCatalogList landscape row lock", () => {
     expect(html).not.toContain("xl:grid-cols-5");
     expect(html).not.toContain("data-titles-catalog-grid");
     expect(catalog).toContain("px-[var(--space-4)]");
-    expect(list).toContain("rounded-[var(--radius-lg)]");
-    expect(list).toContain("border-hairline");
+    expect(list).toContain("md:rounded-[var(--radius-lg)]");
+    expect(list).toContain("md:border-hairline");
     expect(list).not.toContain("md:hidden");
-    expect(row).toContain("border-b");
+    expect(row).toContain("flex flex-col");
+    expect(row).toContain("md:flex-row");
+    expect(row).toContain("md:border-b");
     expect(frame).toContain("aspect-[16/9]");
+    expect(frame).toContain("w-full");
     expect(name).toContain("t-body font-medium text-ink");
+    expect(name).toContain("md:truncate");
     expect(year).toContain("t-body-sm text-ink-3");
     expect(html).toContain("2019");
     expect(pill).toContain("bg-ink");
@@ -292,5 +324,49 @@ describe("TitlesCatalogList landscape row lock", () => {
     expect(html).not.toContain("bg-band");
     expect(html).not.toMatch(/\bStore\b/);
     expect(html.match(/data-titles-catalog-list=""/g) ?? []).toHaveLength(1);
+  });
+});
+
+describe("TitlesCatalogStatusFilter craft", () => {
+  it("uses a compact sentence-case trigger on phone and Dashboard pills on desktop", () => {
+    const html = renderToStaticMarkup(
+      createElement(TitlesCatalogStatusFilter, { q: "", status: "all" }),
+    );
+    const compact = openingTagWith(html, 'data-titles-catalog-status-compact=""');
+    const pills = openingTagWith(html, 'data-titles-catalog-status-pills=""');
+    const trigger = openingTagWith(html, 'data-titles-catalog-status-current=""');
+
+    expect(TITLES_FILTER_PILL_CLASS).toBe(DASHBOARD_TOP_PILL_BUTTON_CLASS);
+    expect(compact).toContain("md:hidden");
+    expect(pills).toContain("hidden");
+    expect(pills).toContain("md:flex");
+    expect(html).toContain("t-body-sm");
+    expect(html).not.toContain("t-label");
+    expect(html).toContain("All");
+    expect(html).toContain("Draft");
+    expect(html).toContain("In review");
+    expect(html).toContain("Takedown requested");
+    expect(trigger).not.toContain("t-label");
+    expect(html).not.toContain("Upcoming");
+    expect(html).not.toContain("In progress");
+  });
+});
+
+describe("Titles catalog has no stray FAB", () => {
+  it("keeps one Sporty Blue Add Title and no fixed list/up control", () => {
+    const catalog = readFileSync(join(ROOT, "src/components/titles/titles-catalog.tsx"), "utf8");
+    const page = readFileSync(join(ROOT, "src/app/(app)/titles/page.tsx"), "utf8");
+    const add = readFileSync(join(ROOT, "src/app/(app)/titles/add-title-button.tsx"), "utf8");
+
+    expect(catalog).not.toMatch(/fixed[\s\S]{0,80}(bottom|right)/);
+    expect(catalog).not.toContain("data-titles-catalog-fab");
+    expect(catalog).not.toContain("ArrowUp");
+    expect(catalog).not.toContain("@phosphor-icons");
+    expect(catalog).not.toContain("from \"lucide-react\";\nimport { List");
+    expect(page).not.toContain("data-titles-catalog-fab");
+    expect(page).not.toMatch(/fixed[\s\S]{0,80}(bottom|right)/);
+    expect(add).toContain("data-add-title");
+    expect(add).not.toContain("Plus");
+    expect(add).not.toContain("fixed");
   });
 });
