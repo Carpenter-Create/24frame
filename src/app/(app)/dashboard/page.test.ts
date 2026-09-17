@@ -792,8 +792,8 @@ describe("company admin Overview hero", () => {
     );
     const html = renderToStaticMarkup(await DashboardPage({ searchParams: Promise.resolve({}) }));
     expectCompanyAdminStructuralDelta(html);
-    expect(html).toMatch(/data-dashboard-title-desktop="" class="[^"]*t-label text-ink-3/);
-    expect(html).not.toMatch(/data-dashboard-title-desktop="" class="[^"]*t-title/);
+    expect(html).toMatch(/data-dashboard-title-desktop="" class="[^"]*t-title text-ink/);
+    expect(html).not.toMatch(/data-dashboard-title-desktop="" class="[^"]*t-label/);
     expect(html).toContain(DASHBOARD_ADMIN.allTime);
     expect(html).toContain("As of All time");
     expect(html).not.toContain("Needs attention");

@@ -2,13 +2,13 @@
 // no Coinbase brand, no invented px type. Hairline + air; no drop shadow.
 // Period menu rematches the Mercury workspace switcher: quiet trigger,
 // trailing Sporty Blue check, flush-left labels.
-// Fidelity density × Coinbase quiet-play: one Period control, kickers,
-// dense rows, related gap 8 · card pad 16 · section air 24.
+// Coinbase shell air: related gap 8 · card pad 16 · section air 24 · card 16.
 // Overview structure rematch — 24Frame nouns only. No Dashboard-only tokens.
 // Period chrome (phone + desktop): unlabeled value + chevron on the org row.
 // Period is chrome, not H1. Dominant read stays the $.
-// Coinbase quiet-play over RL flourish: hairline + type do hierarchy.
+// Page title is black sentence-case. Section titles are t-heading ink.
 // View-alt selected is Sporty Blue glyph weight, not a filled chip.
+// Content-filter selected is ink #14171A + white type — not Sporty Blue fill.
 
 export const DASHBOARD_CARD_CLASS =
   "card-surface dashboard-home-panel flex h-full flex-col overflow-hidden shadow-none";
@@ -36,10 +36,19 @@ export const DASHBOARD_SECTION_AIR_CLASS = "gap-[var(--space-6)]";
 export const DASHBOARD_ROW_CLASS =
   "flex min-h-10 items-center justify-between gap-[var(--space-2)] px-[var(--space-4)] py-[var(--space-2)]";
 
-// RL Sources / Territories table grammar — one row, not a stub chart:
-// rank · name · share bar · % · count. Same columns in list and bars.
+// Coinbase ranked-row grade: circular mark · bold name · quiet meta · right $.
+// Bars view-alt keeps the share track. List does not.
 export const DASHBOARD_RANKED_TABLE_ROW_CLASS =
   "flex min-h-10 items-center gap-[var(--space-2)] px-[var(--space-4)] py-[var(--space-2)]";
+
+export const DASHBOARD_RANKED_GRADE_ROW_CLASS = DASHBOARD_RANKED_TABLE_ROW_CLASS;
+
+export const DASHBOARD_RANKED_MARK_CLASS =
+  "flex size-8 shrink-0 items-center justify-center rounded-full bg-surface-muted t-data t-body-sm font-medium text-ink";
+
+export const DASHBOARD_RANKED_NAME_CLASS = "t-body-sm font-medium text-ink";
+
+export const DASHBOARD_RANKED_META_CLASS = "t-body-sm text-ink-3";
 
 export const DASHBOARD_RANKED_SHARE_TRACK_CLASS =
   "h-2 min-w-16 flex-1 overflow-hidden rounded-[var(--radius-sm)] bg-surface-muted";
@@ -95,7 +104,7 @@ export const DASHBOARD_TOP_PILL_CLUSTER_CLASS =
 export const DASHBOARD_TOP_PILL_BUTTON_CLASS =
   "rounded-full px-[var(--space-4)] py-[var(--space-2)] t-body-sm";
 
-export const DASHBOARD_TOP_PILL_BUTTON_ON_CLASS = "bg-ink text-canvas";
+export const DASHBOARD_TOP_PILL_BUTTON_ON_CLASS = "bg-ink text-surface";
 
 export const DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS = "bg-surface-muted text-ink";
 
@@ -146,9 +155,9 @@ export const DASHBOARD_PERIOD_SHEET_HOST_CLASS =
 
 export const DASHBOARD_PERIOD_MENU_DESKTOP_CLASS = "max-md:hidden";
 
-export const DASHBOARD_ORG_NAME_MOBILE_CLASS = "t-body-sm text-ink-2 md:hidden";
+export const DASHBOARD_ORG_NAME_MOBILE_CLASS = "t-heading text-ink md:hidden";
 export const DASHBOARD_TITLE_MOBILE_CLASS = DASHBOARD_ORG_NAME_MOBILE_CLASS;
-export const DASHBOARD_ORG_LABEL_CLASS = "t-label text-ink-3 max-md:hidden";
+export const DASHBOARD_ORG_LABEL_CLASS = "t-title text-ink max-md:hidden";
 export const DASHBOARD_TITLE_DESKTOP_CLASS = DASHBOARD_ORG_LABEL_CLASS;
 
 export const DASHBOARD_PERIOD_TRIGGER_CLASS =

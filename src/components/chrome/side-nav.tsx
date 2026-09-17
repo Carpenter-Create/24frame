@@ -15,7 +15,8 @@ import { SOCIAL_ICON_SIZE_NAV, socialNavIconName } from "@/lib/social-icons";
 import { NavGlyph } from "./nav-glyph";
 
 // Access rail: house --text-sm / t-body-sm labels, 16px Phosphor Bold idle /
-// Fill active (75:5 / 61:2). Active = Sporty Blue icon+text + quiet wash.
+// Fill active (75:5 / 61:2). Active = Sporty Blue icon+text + light-blue
+// pill wash. Inactive = ink. Rail mark is BrandEmblem (24Frame), not a C.
 // Social destinations use Social Figma V1 Phosphor via SocialIcon.
 // Collapsed mode is icon-only (labels/badges hidden; title tooltips; unread → accent dot).
 export function SideNav({
@@ -66,11 +67,11 @@ export function SideNav({
         aria-label={item.ariaLabel ?? (collapsed ? item.label : undefined)}
         data-social-rail-pending={social && pendingHref === item.href ? "" : undefined}
         className={cn(
-          "relative flex items-center rounded-[var(--radius)] t-body-sm leading-4 transition-colors",
+          "relative flex items-center rounded-full t-body-sm leading-4 transition-colors",
           collapsed ? "justify-center px-0 py-2" : "gap-2 px-2 py-2",
           active
             ? "bg-accent-wash font-medium text-accent"
-            : "font-normal text-ink-2 hover:bg-surface-muted hover:text-ink",
+            : "font-normal text-ink hover:bg-surface-muted",
         )}
       >
         {social ? <SocialNavPendingProbe href={item.href} onPending={markPending} /> : null}

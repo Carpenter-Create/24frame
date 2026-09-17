@@ -27,7 +27,8 @@
      checkpoint and is still pending; that does not block the accent.) */
   --accent: #1769ff;            /* Global Content — Sporty Blue */
   --accent-contrast: #ffffff;   /* white on the blue */
-  /* Quiet wash for active rail — Sporty Blue at a whisper, not a filled pill. */
+  /* Light-blue pill wash for the active rail — Sporty Blue tint on white.
+     Type/icon stay #1769FF. Not a filled Coinbase-blue chip. */
   --accent-wash: color-mix(in srgb, var(--accent) 10%, var(--surface));
 
   /* --- Neutral ramp — LIGHT (default base) ---
@@ -70,8 +71,10 @@
   --space-1: 0.25rem; --space-2: 0.5rem;  --space-3: 0.75rem; --space-4: 1rem;
   --space-6: 1.5rem;  --space-8: 2rem;    --space-10: 2.5rem; --space-12: 3rem; --space-16: 4rem;
 
-  /* --- Radius + hairline elevation --- */
-  --radius-sm: 6px; --radius: 10px; --radius-lg: 14px;
+  /* --- Radius + hairline elevation ---
+     --radius-lg is the house card corner (16). Shared on purpose — no
+     Dashboard-only radius fork. Controls stay on --radius / --radius-sm. */
+  --radius-sm: 6px; --radius: 10px; --radius-lg: 16px;
   --border-width: 1px;
 
   /* --- Layout --- */

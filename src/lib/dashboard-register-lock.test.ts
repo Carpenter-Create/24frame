@@ -125,7 +125,7 @@ describe("Aggregation Dashboard Coinbase register lock", () => {
     expect(html).toContain(DASHBOARD_TOP_PILL_CLUSTER_CLASS);
     expect(DASHBOARD_VIEW_ALT_BUTTON_ON_CLASS).toBe("text-accent");
     expect(DASHBOARD_VIEW_ALT_BUTTON_ON_CLASS).not.toContain("bg-");
-    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).toBe("bg-ink text-canvas");
+    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).toBe("bg-ink text-surface");
     expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).not.toContain("text-accent");
     expect(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS).toBe("bg-surface-muted text-ink");
     expect(DASHBOARD_TOP_PILL_BUTTON_CLASS).toContain("rounded-full");

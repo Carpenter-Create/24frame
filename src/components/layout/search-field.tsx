@@ -10,6 +10,7 @@ import { cn } from "@/lib/cn";
 // Debounced, URL-driven search (Visual/Metadata registers). Writes ?q= (preserving
 // other params) via router.replace so the server re-renders filtered results — no
 // client-side filtering, no scroll jump.
+// Header treatment: soft grey pill (#F4F4F6 / --surface-muted), quiet placeholder.
 export function SearchField({
   placeholder = "Search titles...",
   hint,
@@ -48,10 +49,10 @@ export function SearchField({
         aria-label={placeholder}
         className={cn(
           FORM_CONTROL_TEXT_CLASS,
-          "text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none",
+          "text-ink placeholder:text-ink-3 focus:border-transparent focus:outline-none",
           hint
-            ? "h-8 w-56 rounded-full border border-hairline bg-surface-muted pl-8 pr-12 sm:w-80"
-            : "h-8 w-44 rounded-full border border-hairline bg-surface pl-8 pr-3 sm:w-56",
+            ? "h-8 w-56 rounded-full border-0 bg-surface-muted pl-8 pr-12 sm:w-80"
+            : "h-8 w-44 rounded-full border-0 bg-surface-muted pl-8 pr-3 sm:w-56",
         )}
       />
       {hint ? (

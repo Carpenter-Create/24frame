@@ -194,15 +194,22 @@ describe("dashboard register chrome", () => {
       }),
     );
     for (const html of [listRows, barRows, titles, platforms, territories]) {
-      expect(html).toContain('data-dashboard-ranked-grammar="table"');
+      expect(html).toContain("data-dashboard-ranked-mark");
       expect(html).toContain("data-dashboard-ranked-rank");
-      expect(html).toContain("data-dashboard-ranked-bar");
       expect(html).toContain("data-dashboard-ranked-share");
       expect(html).toContain("data-dashboard-ranked-value");
       expect(html).toContain(DASHBOARD_RANKED_TABLE_ROW_CLASS);
-      expect(html).toContain(DASHBOARD_RANKED_SHARE_TRACK_CLASS);
       expect(html).not.toContain("flex-col items-stretch");
       expect(html).not.toContain("h-1 w-16");
+    }
+    expect(listRows).toContain('data-dashboard-ranked-grammar="grade"');
+    expect(listRows).not.toContain("data-dashboard-ranked-bar");
+    expect(territories).toContain('data-dashboard-ranked-grammar="grade"');
+    expect(territories).not.toContain("data-dashboard-ranked-bar");
+    for (const html of [barRows, titles, platforms]) {
+      expect(html).toContain('data-dashboard-ranked-grammar="table"');
+      expect(html).toContain("data-dashboard-ranked-bar");
+      expect(html).toContain(DASHBOARD_RANKED_SHARE_TRACK_CLASS);
     }
     expect(DASHBOARD_RANKED_SHARE_TRACK_CLASS).toContain("h-2");
     expect(DASHBOARD_RANKED_SHARE_TRACK_CLASS).toContain("min-w-16");
@@ -254,7 +261,7 @@ describe("dashboard register chrome", () => {
     expect(DASHBOARD_HOME.pillTitles).toBe("Titles");
     expect(DASHBOARD_HOME.pillPlatforms).toBe("Platforms");
     expect(DASHBOARD_HOME.pillTerritories).toBe("Territories");
-    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).toBe("bg-ink text-canvas");
+    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).toBe("bg-ink text-surface");
     expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).not.toContain("text-accent");
     expect(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS).toBe("bg-surface-muted text-ink");
     expect(DASHBOARD_TOP_PILL_BUTTON_CLASS).toContain("rounded-full");
@@ -283,9 +290,10 @@ describe("dashboard register chrome", () => {
       expect(html).not.toContain("Top platforms");
     }
     expect(titles).toContain('data-dashboard-view="list"');
-    expect(titles).toContain('data-dashboard-ranked-grammar="table"');
+    expect(titles).toContain('data-dashboard-ranked-grammar="grade"');
+    expect(titles).toContain("data-dashboard-ranked-mark");
     expect(titles).toContain("data-dashboard-ranked-rank");
-    expect(titles).toContain("data-dashboard-ranked-bar");
+    expect(titles).not.toContain("data-dashboard-ranked-bar");
     expect(titles).toContain("Winter Light");
     expect(titles).toContain('data-dashboard-view-alt="list"');
     expect(titles).toContain('data-dashboard-view-alt="bars"');
@@ -295,7 +303,7 @@ describe("dashboard register chrome", () => {
     expect(titles).not.toContain("Window A");
     expect(platforms).toContain('data-dashboard-view="list"');
     expect(platforms).toContain("Window A");
-    expect(platforms).toContain('data-dashboard-ranked-grammar="table"');
+    expect(platforms).toContain('data-dashboard-ranked-grammar="grade"');
     expect(platforms).toContain('href="/deliveries"');
     expect(territories).toContain('data-dashboard-view="map"');
     expect(territories).toContain("data-dashboard-territory-map");
