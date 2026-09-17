@@ -5,11 +5,14 @@ import { TITLE_STATUS_LABELS } from "./titles";
 import {
   filterReportsDeliveries,
   filterReportsTitles,
+  reportsCompositionRows,
   reportsDeliveryStatusRows,
+  reportsDetailRows,
   reportsHasBody,
   reportsPlatformRows,
   reportsStatusRows,
   reportsTerritoryRows,
+  reportsUserRows,
   topReportsTitles,
 } from "./reports-view";
 
@@ -25,6 +28,10 @@ describe("reports view filters", () => {
       "a",
     ]);
     expect(filterReportsTitles(titles, parseReportsPeriod("all", now), "u2").map((t) => t.id)).toEqual([
+      "b",
+    ]);
+    expect(filterReportsTitles(titles, parseReportsPeriod("all", now), ["u1", "u2"]).map((t) => t.id)).toEqual([
+      "a",
       "b",
     ]);
   });
@@ -101,5 +108,51 @@ describe("reports view filters", () => {
         { id: "new", title: "New", status: "draft", created_at: "2026-09-02T00:00:00.000Z" },
       ]).map((row) => row.id),
     ).toEqual(["new", "old"]);
+  });
+
+  it("builds composition, user ranks, and a detail table from real rows", () => {
+    const titles = [
+      { id: "a", title: "A", status: "live", created_at: "2026-08-02T00:00:00.000Z", created_by: "u1" },
+      { id: "b", title: "B", status: "draft", created_at: "2026-09-02T00:00:00.000Z", created_by: "u2" },
+    ];
+    const users = [
+      { id: "u1", label: "Maya" },
+      { id: "u2", label: "Jon" },
+    ];
+    expect(reportsUserRows(titles, users)).toEqual([
+      { name: "Jon", count: 1 },
+      { name: "Maya", count: 1 },
+    ]);
+    expect(
+      reportsCompositionRows({
+        contributions: [{ titleName: "A", clientShareCents: 500 }],
+        platforms: [{ name: "Window A", count: 2 }],
+      }),
+    ).toEqual([{ name: "A", count: 1, cents: 500 }]);
+    expect(
+      reportsCompositionRows({
+        contributions: [],
+        platforms: [{ name: "Window A", count: 2 }],
+      }),
+    ).toEqual([{ name: "Window A", count: 2, cents: null }]);
+    expect(
+      reportsDetailRows({
+        titles,
+        deliveries: [
+          {
+            delivery_id: "d1",
+            title_id: "a",
+            title: "A",
+            vendor_name: "Alpha",
+            territory: "US",
+            updated_at: "2026-08-10T00:00:00.000Z",
+          },
+        ],
+        users,
+      }).map((row) => ({ id: row.id, user: row.user, deliveries: row.deliveries })),
+    ).toEqual([
+      { id: "b", user: "Jon", deliveries: 0 },
+      { id: "a", user: "Maya", deliveries: 1 },
+    ]);
   });
 });

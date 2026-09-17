@@ -2,69 +2,113 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { cumulativeCatalogSeries } from "@/lib/catalog-activity";
+import { formatUsdCents } from "@/lib/finance";
+import {
+  dashboardChartGeometry,
+  dashboardDeltaLine,
+  nearestChartPoint,
+  pointDelta,
+  type DashboardRevenuePoint,
+} from "@/lib/dashboard-admin";
 import { REPORTS_PAGE } from "@/lib/reports";
-import type { ReportsCountRow } from "@/lib/reports";
+import { REPORTS_CHART_EMPTY_CLASS, REPORTS_CHART_FRAME_CLASS } from "@/lib/reports-craft";
+import { REPORTS_FIXTURE } from "@/lib/reports-fixture";
 
-const H = 160;
-const PAD = { top: 16, right: 16, bottom: 24, left: 16 };
+const PAD = { top: 16, right: 48, bottom: 24, left: 16 };
 
-export function ReportsCatalogChart({ createdAt, nowMs }: { createdAt: number[]; nowMs: number }) {
+export function ReportsRevenueChart({
+  points,
+  comparePoints = [],
+  playheadKey,
+  fixture = false,
+}: {
+  points: readonly DashboardRevenuePoint[];
+  comparePoints?: readonly DashboardRevenuePoint[];
+  playheadKey: string | null;
+  fixture?: boolean;
+}) {
   const plotRef = useRef<HTMLDivElement>(null);
-  const [width, setWidth] = useState<number | null>(null);
+  const [size, setSize] = useState<{ w: number; h: number } | null>(null);
+  const [hoverX, setHoverX] = useState<number | null>(null);
 
   useEffect(() => {
     const el = plotRef.current;
     if (!el) return;
     const ro = new ResizeObserver((entries) => {
-      const w = entries[0]?.contentRect.width;
-      if (w) setWidth(w);
+      const box = entries[0]?.contentRect;
+      if (box && box.width && box.height) setSize({ w: box.width, h: box.height });
     });
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
 
-  const series = useMemo(
-    () => cumulativeCatalogSeries([...createdAt].sort((a, b) => a - b), nowMs, Infinity),
-    [createdAt, nowMs],
+  const geom = useMemo(
+    () => (size == null ? null : dashboardChartGeometry(points, size.w, size.h, PAD)),
+    [points, size],
+  );
+  const compareGeom = useMemo(
+    () => (size == null ? null : dashboardChartGeometry(comparePoints, size.w, size.h, PAD)),
+    [comparePoints, size],
   );
 
-  const geom = useMemo(() => {
-    if (!series || width == null) return null;
-    const innerW = Math.max(width - PAD.left - PAD.right, 1);
-    const innerH = H - PAD.top - PAD.bottom;
-    const span = Math.max(nowMs - series.start, 1);
-    const yTop = series.yMax * 1.12 || 1;
-    const px = (t: number) => PAD.left + ((t - series.start) / span) * innerW;
-    const py = (c: number) => PAD.top + innerH - (c / yTop) * innerH;
-    const xy = series.points.map((p) => ({ x: px(p.t), y: py(p.c) }));
-    const line = xy.map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(" ");
-    const baseY = PAD.top + innerH;
-    const area = `${line} L${xy[xy.length - 1].x.toFixed(2)},${baseY} L${xy[0].x.toFixed(2)},${baseY} Z`;
-    return { line, area, baseY, last: xy[xy.length - 1], w: width };
-  }, [series, width, nowMs]);
+  const hover = useMemo(() => {
+    if (!geom || hoverX == null) return null;
+    return nearestChartPoint(geom.xy, hoverX);
+  }, [geom, hoverX]);
+
+  const hoverIndex = hover ? points.findIndex((point) => point.key === hover.key) : -1;
+  const hoverDelta = hoverIndex >= 0 ? pointDelta(points, hoverIndex) : null;
+  const playhead = geom?.xy.find((point) => point.key === playheadKey) ?? geom?.xy[geom.xy.length - 1];
+  const money = (cents: number) =>
+    fixture ? `${formatUsdCents(cents)} ${REPORTS_FIXTURE.sampleMark}` : formatUsdCents(cents);
+
+  const empty = points.length === 0;
 
   return (
-    <section
+    <div
+      ref={plotRef}
       data-reports-series=""
-      aria-label={REPORTS_PAGE.series}
-      className="overflow-hidden rounded-[var(--radius-lg)] border border-hairline bg-surface"
+      data-reports-revenue-chart=""
+      data-reports-chart-empty={empty ? "" : undefined}
+      className={empty ? REPORTS_CHART_EMPTY_CLASS : REPORTS_CHART_FRAME_CLASS}
     >
-      <p className="px-[var(--space-6)] py-[var(--space-4)] t-label text-ink-3">{REPORTS_PAGE.series}</p>
-      <div ref={plotRef} className="relative border-t border-hairline" style={{ height: H }}>
-        {!series ? (
-          <div className="flex h-full items-center px-[var(--space-6)]">
-            <p className="t-body text-ink-2">{REPORTS_PAGE.seriesEmpty}</p>
-          </div>
-        ) : geom ? (
+      {empty ? (
+        <div data-reports-chart-empty-slot="" className="h-px w-full bg-hairline" aria-hidden />
+      ) : geom ? (
+        <>
           <svg
             width={geom.w}
-            height={H}
-            viewBox={`0 0 ${geom.w} ${H}`}
+            height={size?.h ?? geom.innerH}
+            viewBox={`0 0 ${geom.w} ${size?.h ?? 0}`}
             className="block text-accent"
             role="img"
-            aria-label={`${REPORTS_PAGE.series}: ${series.total} titles.`}
+            aria-label={`${REPORTS_PAGE.series}: ${points.length} closed periods.`}
+            onPointerMove={(event) => {
+              const rect = event.currentTarget.getBoundingClientRect();
+              setHoverX(event.clientX - rect.left);
+            }}
+            onPointerLeave={() => setHoverX(null)}
           >
+            <defs>
+              <linearGradient id="gc-reports-revenue-fill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="currentColor" stopOpacity="0.16" />
+                <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            {[0.25, 0.5, 0.75].map((step) => {
+              const y = PAD.top + geom.innerH * step;
+              return (
+                <line
+                  key={step}
+                  x1={PAD.left}
+                  x2={geom.w - PAD.right}
+                  y1={y}
+                  y2={y}
+                  stroke="var(--border)"
+                  strokeWidth={1}
+                />
+              );
+            })}
             <line
               x1={PAD.left}
               x2={geom.w - PAD.right}
@@ -73,58 +117,104 @@ export function ReportsCatalogChart({ createdAt, nowMs }: { createdAt: number[];
               stroke="var(--border)"
               strokeWidth={1}
             />
-            <path d={geom.area} fill="currentColor" fillOpacity={0.08} />
-            <path d={geom.line} fill="none" stroke="currentColor" strokeWidth={2} strokeLinejoin="round" />
-            <circle cx={geom.last.x} cy={geom.last.y} r={4} fill="currentColor" />
+            {compareGeom ? (
+              <path
+                d={compareGeom.line}
+                fill="none"
+                stroke="var(--text-tertiary)"
+                strokeWidth={1.5}
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                data-reports-series-compare=""
+              />
+            ) : null}
+            <path d={geom.area} fill="url(#gc-reports-revenue-fill)" />
+            <path
+              d={geom.line}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+            {hover ? (
+              <line
+                x1={hover.x}
+                x2={hover.x}
+                y1={PAD.top}
+                y2={geom.baseY}
+                stroke="var(--text-secondary)"
+                strokeWidth={1}
+                strokeDasharray="4 4"
+              />
+            ) : null}
+            {playhead ? (
+              <circle
+                cx={playhead.x}
+                cy={playhead.y}
+                r={4}
+                fill="currentColor"
+                stroke="var(--surface)"
+                strokeWidth={2}
+              />
+            ) : null}
+            {hover ? (
+              <circle
+                cx={hover.x}
+                cy={hover.y}
+                r={5}
+                fill="currentColor"
+                stroke="var(--surface)"
+                strokeWidth={2}
+              />
+            ) : null}
+            {geom.ticks.map((tick) => (
+              <text
+                key={`${tick.x}-${tick.label}`}
+                x={tick.x}
+                y={(size?.h ?? 0) - 8}
+                textAnchor="middle"
+                className="t-label t-data"
+                fill="var(--text-tertiary)"
+              >
+                {tick.label}
+              </text>
+            ))}
           </svg>
-        ) : (
-          <div className="h-full" aria-hidden />
-        )}
-      </div>
-    </section>
-  );
-}
-
-export function ReportsBreakdown({
-  label,
-  empty,
-  rows,
-  testId,
-}: {
-  label: string;
-  empty: string;
-  rows: readonly ReportsCountRow[];
-  testId: string;
-}) {
-  const max = rows[0]?.count ?? 0;
-  return (
-    <section
-      data-reports-breakdown={testId}
-      className="overflow-hidden rounded-[var(--radius-lg)] border border-hairline bg-surface"
-    >
-      <p className="px-[var(--space-6)] py-[var(--space-4)] t-label text-ink-3">{label}</p>
-      {rows.length === 0 ? (
-        <p className="border-t border-hairline px-[var(--space-6)] py-[var(--space-6)] t-body text-ink-2">
-          {empty}
-        </p>
+          {hover ? (
+            <div
+              data-reports-revenue-tooltip=""
+              className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-[var(--radius)] border border-hairline bg-surface px-[var(--space-4)] py-[var(--space-2)] shadow-none"
+              style={{ left: Math.min(Math.max(hover.x, 72), geom.w - 72), top: hover.y - 8 }}
+            >
+              <p className="t-label text-ink-3">{hover.label}</p>
+              <p className="t-data t-heading text-ink">{money(hover.netCents)}</p>
+              {hoverDelta ? (
+                <p className="t-body-sm text-ink-3">{dashboardDeltaLine(hoverDelta)}</p>
+              ) : null}
+            </div>
+          ) : null}
+          <table className="sr-only">
+            <caption>{REPORTS_PAGE.series}</caption>
+            <thead>
+              <tr>
+                <th>Period</th>
+                <th>Net</th>
+              </tr>
+            </thead>
+            <tbody>
+              {points.map((point) => (
+                <tr key={point.key}>
+                  <td>{point.label}</td>
+                  <td>{money(point.netCents)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
       ) : (
-        <ul className="flex flex-col gap-[var(--space-4)] border-t border-hairline px-[var(--space-6)] py-[var(--space-6)]">
-          {rows.map((row) => (
-            <li key={row.name} className="flex flex-col gap-[var(--space-2)]">
-              <div className="flex items-center justify-between gap-[var(--space-4)]">
-                <span className="t-body text-ink">{row.name}</span>
-                <span className="t-data t-body text-ink">{row.count}</span>
-              </div>
-              <div className="h-2 overflow-hidden rounded-full bg-surface-muted">
-                <div
-                  className="h-full rounded-full bg-accent"
-                  style={{ width: `${max === 0 ? 0 : Math.round((row.count / max) * 100)}%` }}
-                />
-              </div>
-            </li>
-          ))}
-        </ul>
+        <div className="h-full" aria-hidden />
       )}
-    </section>
+    </div>
   );
 }
