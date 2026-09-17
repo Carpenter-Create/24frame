@@ -176,9 +176,10 @@ describe("client /titles catalog", () => {
     expect(statusLabels).not.toContain("Delivered");
     expect(statusLabels).not.toContain("delivered");
 
-    for (const status of ALL_STATUSES) {
+    for (const [i, status] of ALL_STATUSES.entries()) {
       expect(html).toContain(`${status} film`);
-      expect(html).toContain(`/titles/title-${status}`);
+      expect(html).toContain(`/titles/24F-${i}`);
+      expect(html).not.toContain(`/titles/title-${status}`);
       expect(html).toContain(`data-title-status="${status}"`);
       expect(html).toContain(TITLE_STATUS_LABELS[status]);
     }
@@ -199,21 +200,19 @@ describe("client /titles catalog", () => {
     expect(html).toContain("data-titles-catalog-header-operate");
     expect(html).toContain("data-titles-catalog-operate");
     expect(html).toContain(
-      "titles-catalog mx-auto flex w-full flex-col gap-[var(--space-6)] px-[var(--space-4)]",
+      "titles-catalog mx-auto flex w-full flex-col gap-[var(--space-2)] px-[var(--space-4)]",
     );
-    expect(html).toContain("md:gap-[var(--space-8)]");
+    expect(html).not.toContain("md:gap-[var(--space-8)]");
     expect(html).toContain("data-titles-catalog-title-mobile");
     expect(html).toContain("data-titles-catalog-title-desktop");
     expect(html).toContain("t-heading text-ink");
     expect(html).toContain("t-title text-ink");
     expect(html).not.toMatch(/<h1[^>]*t-display/);
     expect(html).not.toMatch(/<h1[^>]*t-section/);
-    expect(html).toContain("data-titles-catalog-count");
-    expect(html).toContain(`${ALL_STATUSES.length} in catalog`);
-    expect(html).not.toContain("10 in catalog");
+    expect(html).not.toContain("data-titles-catalog-count");
+    expect(html).not.toContain("in catalog");
 
     const titleClose = html.indexOf("</h1>");
-    const countAt = html.indexOf("data-titles-catalog-count");
     const filtersAt = html.indexOf("data-titles-catalog-filters");
     const headerOperateAt = html.indexOf("data-titles-catalog-header-operate");
     const iconAt = html.indexOf("data-add-title-icon");
@@ -222,7 +221,6 @@ describe("client /titles catalog", () => {
     const chromeAt = html.indexOf("data-titles-catalog-chrome");
     const labeledAt = html.indexOf("data-add-title-labeled");
     expect(titleClose).toBeGreaterThan(-1);
-    expect(countAt).toBeGreaterThan(titleClose);
     // Status + phone plus trail on the header (Dashboard All time SoT), before toolbar.
     expect(filtersAt).toBeGreaterThan(-1);
     expect(filtersAt).toBeLessThan(toolbarAt);
@@ -230,7 +228,7 @@ describe("client /titles catalog", () => {
     expect(headerOperateAt).toBeLessThan(toolbarAt);
     expect(iconAt).toBeGreaterThan(headerOperateAt);
     expect(iconAt).toBeLessThan(toolbarAt);
-    expect(toolbarAt).toBeGreaterThan(countAt);
+    expect(toolbarAt).toBeGreaterThan(titleClose);
     expect(searchAt).toBeGreaterThan(toolbarAt);
     // Phone toolbar is search only; labeled Add Title stays desktop chrome.
     expect(chromeAt).toBeGreaterThan(searchAt);
@@ -311,6 +309,18 @@ describe("client /titles catalog", () => {
     for (const status of ALL_STATUSES) {
       expect(html).toContain(TITLE_STATUS_LABELS[status]);
     }
+  });
+
+  it("puts a quiet 24F- public id on the row and links with it", async () => {
+    stubClient([titleRow("live", 0, { title: "Public id film", id: "uuid-live" })]);
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+    const html = await renderCatalog();
+
+    expect(html).toContain('href="/titles/24F-0"');
+    expect(html).toContain("data-titles-catalog-public-id");
+    expect(html).toContain("24F-0");
+    expect(html).not.toContain("/titles/uuid-live");
+    expect(html).not.toContain("GC-0");
   });
 
   it("shows the release_date year on the row and omits it when unset", async () => {
@@ -495,13 +505,12 @@ describe("client /titles catalog", () => {
     await expect(renderCatalog()).rejects.toThrow("REDIRECT:/login");
   });
 
-  it("names the real catalog count and marks a bounded read as a floor", async () => {
+  it("omits a catalog-count subtitle and still names a bounded read", async () => {
     stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
     const exact = await renderCatalog();
-    expect(exact).toContain(`${ALL_STATUSES.length} in catalog`);
-    expect(exact).not.toContain("10 in catalog");
-    expect(exact).not.toContain(`${ALL_STATUSES.length}+ in catalog`);
+    expect(exact).not.toContain("in catalog");
+    expect(exact).not.toContain("data-titles-catalog-count");
 
     const bounded = Array.from({ length: LIST_PAGE + 1 }, (_, i) =>
       titleRow("draft", i, { id: `title-draft-${i}`, title: `Bounded film ${i}` }),
@@ -509,9 +518,8 @@ describe("client /titles catalog", () => {
     stubClient(bounded);
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
     const html = await renderCatalog();
-    expect(html).toContain(`${LIST_PAGE}+ in catalog`);
-    expect(html).not.toContain(`${LIST_PAGE + 1} in catalog`);
-    expect(html).not.toContain("10 in catalog");
+    expect(html).not.toContain("in catalog");
+    expect(html).not.toContain("data-titles-catalog-count");
     expect(html).toContain(`more than ${LIST_PAGE} titles`);
   });
 
@@ -575,7 +583,7 @@ describe("client /titles catalog", () => {
     expect(html).not.toContain("<select");
     expect(html).not.toContain("data-titles-catalog-fab");
     expect(html).toContain(
-      "titles-catalog mx-auto flex w-full flex-col gap-[var(--space-6)] px-[var(--space-4)]",
+      "titles-catalog mx-auto flex w-full flex-col gap-[var(--space-2)] px-[var(--space-4)]",
     );
     expect(add).toHaveLength(2);
     expect(icon).toHaveLength(1);
@@ -606,7 +614,8 @@ describe("client /titles catalog", () => {
     expect(html).toContain(TITLES_CATALOG.empty);
     expect(html).toContain("No titles yet.");
     expect(html.split("No titles yet.").length - 1).toBe(1);
-    expect(html).toContain("0 in catalog");
+    expect(html).not.toContain("in catalog");
+    expect(html).not.toContain("data-titles-catalog-count");
     expect(html).toContain(TITLES_CATALOG.addTitle);
     expect(html).toContain("data-titles-catalog-header-operate");
     expect(add).toHaveLength(2);

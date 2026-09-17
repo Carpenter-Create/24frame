@@ -45,5 +45,6 @@ export async function saveMetadata(
 
   revalidatePath(`/titles/${titleId}`);
   revalidatePath(`/titles/${titleId}/metadata`);
+  revalidatePath("/titles", "layout");
   return {};
 }

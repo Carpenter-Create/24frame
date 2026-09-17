@@ -50,6 +50,7 @@ export async function addRights(input: {
   if (error) return { error: error.message };
 
   revalidatePath(`/titles/${input.titleId}`);
+  revalidatePath("/titles", "layout");
   return {};
 }
 
@@ -71,6 +72,7 @@ export async function setScreenerSource(input: {
   if (error) return { error: error.message };
 
   revalidatePath(`/titles/${input.titleId}`);
+  revalidatePath("/titles", "layout");
   return {};
 }
 
@@ -97,6 +99,7 @@ export async function setTitleReleaseInfo(input: {
   if (error) return { error: error.message };
 
   revalidatePath(`/titles/${input.titleId}`);
+  revalidatePath("/titles", "layout");
   return {};
 }
 
@@ -133,6 +136,7 @@ export async function submitTitle(
   }
 
   revalidatePath(`/titles/${titleId}`);
+  revalidatePath("/titles", "layout");
   return {};
 }
 
@@ -217,6 +221,7 @@ export async function createBuyerScreenerLink(input: {
 
   const base = process.env.PORTAL_BASE_URL?.replace(/\/+$/, "") ?? "";
   revalidatePath(`/titles/${input.titleId}`);
+  revalidatePath("/titles", "layout");
   return { url: `${base}/portal/${token}` };
 }
 
@@ -233,6 +238,7 @@ export async function revokeBuyerScreenerLink(input: {
   if (error) return { error: error.message };
 
   revalidatePath(`/titles/${input.titleId}`);
+  revalidatePath("/titles", "layout");
   return {};
 }
 
@@ -246,6 +252,7 @@ export async function deleteTitle(titleId: string): Promise<{ error?: string }> 
 
   revalidatePath("/titles");
   revalidatePath(`/titles/${titleId}`);
+  revalidatePath("/titles", "layout");
   return {};
 }
 
@@ -259,6 +266,7 @@ export async function archiveTitle(titleId: string): Promise<{ error?: string }>
 
   revalidatePath("/titles");
   revalidatePath(`/titles/${titleId}`);
+  revalidatePath("/titles", "layout");
   return {};
 }
 
@@ -272,5 +280,6 @@ export async function restoreTitle(titleId: string): Promise<{ error?: string }>
 
   revalidatePath("/titles");
   revalidatePath(`/titles/${titleId}`);
+  revalidatePath("/titles", "layout");
   return {};
 }
