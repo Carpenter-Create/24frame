@@ -23,6 +23,13 @@ import {
   DASHBOARD_MONEY_CLASS,
 } from "@/lib/dashboard-craft";
 import { DASHBOARD_HOME } from "@/lib/dashboard-home";
+import {
+  HOUSE_FILTER_OFF_CLASS,
+  HOUSE_FILTER_ON_CLASS,
+  HOUSE_RAIL_ACTIVE_CLASS,
+  HOUSE_RAIL_IDLE_CLASS,
+  HOUSE_SEARCH_PILL_CLASS,
+} from "@/lib/house-shell";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
@@ -59,9 +66,11 @@ describe("Coinbase shell rematch — Adam miss list v1", () => {
   });
 
   it("paints the active rail as a Sporty Blue tint pill and inactive ink", () => {
-    expect(sideNav).toContain("rounded-full");
-    expect(sideNav).toContain("bg-accent-wash font-medium text-accent");
-    expect(sideNav).toContain("font-normal text-ink hover:bg-surface-muted");
+    expect(sideNav).toContain("HOUSE_RAIL_ITEM_CLASS");
+    expect(sideNav).toContain("HOUSE_RAIL_ACTIVE_CLASS");
+    expect(sideNav).toContain("HOUSE_RAIL_IDLE_CLASS");
+    expect(HOUSE_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash font-medium text-accent");
+    expect(HOUSE_RAIL_IDLE_CLASS).toBe("font-normal text-ink hover:bg-surface-muted");
     expect(sideNav).not.toContain("font-normal text-ink-2");
     expect(tokens).toContain("--accent-wash:");
     expect(shell).toContain("<BrandEmblem />");
@@ -70,11 +79,10 @@ describe("Coinbase shell rematch — Adam miss list v1", () => {
   });
 
   it("keeps Search a quiet #F4F4F6 pill and page titles black sentence-case", () => {
-    expect(search).toContain("bg-surface-muted");
+    expect(search).toContain("HOUSE_SEARCH_PILL_CLASS");
     expect(search).toContain("placeholder:text-ink-3");
-    expect(search).toContain("rounded-full");
+    expect(HOUSE_SEARCH_PILL_CLASS).toBe("rounded-full border-0 bg-surface-muted");
     expect(search).not.toContain("bg-surface pl-8");
-    expect(search).toContain("border-0");
     expect(shell).not.toContain("SearchField");
     expect(shell).toContain('tone="pill"');
     expect(DASHBOARD_TITLE_DESKTOP_CLASS).toContain("t-title");
@@ -91,8 +99,10 @@ describe("Coinbase shell rematch — Adam miss list v1", () => {
     expect(DASHBOARD_PERIOD_TRIGGER_CLASS).toContain("bg-surface-muted");
     expect(DASHBOARD_PERIOD_TRIGGER_CLASS).not.toContain("bg-accent");
     expect(DASHBOARD_PERIOD_OPTION_SELECTED_CLASS).toBe("bg-surface-muted");
-    expect(statusFilter).toContain("bg-ink text-surface");
-    expect(statusFilter).toContain("bg-surface-muted text-ink");
+    expect(statusFilter).toContain("HOUSE_FILTER_ON_CLASS");
+    expect(statusFilter).toContain("HOUSE_FILTER_OFF_CLASS");
+    expect(HOUSE_FILTER_ON_CLASS).toBe("bg-ink text-surface");
+    expect(HOUSE_FILTER_OFF_CLASS).toBe("bg-surface-muted text-ink");
     expect(statusFilter).not.toContain("bg-accent");
     const chart = readFileSync("src/components/dashboard/dashboard-revenue-chart.tsx", "utf8");
     expect(chart).toContain('className="block text-accent"');

@@ -178,7 +178,7 @@ body {
   .t-display.t-data {
     letter-spacing: -0.035em;
   }
-  /* Coinbase-air card: white on #FAFAFB canvas, 16 corner, hairline only. No shadow. */
+  /* House-air card: white on #FAFAFB canvas, 16 corner, hairline only. No shadow. */
   .card-surface {
     background: var(--surface);
     border: 1px solid var(--border);

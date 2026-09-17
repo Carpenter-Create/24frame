@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { EDUCATION_ADMIN, EDUCATION_HREF } from "@/lib/education";
 import type { EducationAdminCourseRow } from "@/lib/education-admin";
+import { HOUSE_CARD_PAD, HOUSE_RAIL_ACTIVE_CLASS } from "@/lib/house-shell";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh: vi.fn(), push: vi.fn(), replace: vi.fn() }),
@@ -62,6 +63,8 @@ describe("EducationCourseRail copy lock", () => {
     expect(html).toContain(`${EDUCATION_HREF}/orientation`);
     expect(html).toContain("data-education-course-name");
     expect(html).toContain("data-education-drag");
+    expect(html).toContain(HOUSE_RAIL_ACTIVE_CLASS);
+    expect(html).toContain(HOUSE_CARD_PAD);
     expect(html).not.toContain("Welcome");
     expect(html).not.toContain("New & For You");
     expect(html).not.toContain("Home");

@@ -11,6 +11,7 @@ import { InlineNotice } from "@/components/ui/inline-notice";
 import { uploadAccountPhoto } from "@/app/(app)/account/actions";
 import { ACCOUNT_PROFILE } from "@/lib/account-profile";
 import { AVATAR_ACCEPT, AVATAR_MAX_BYTES, isAvatarContentType } from "@/lib/account-avatar";
+import { HOUSE_FILTER_OFF_CLASS, HOUSE_FILTER_ON_CLASS } from "@/lib/house-shell";
 import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import {
   SOCIAL_ACTION_CLASS,
@@ -348,14 +349,14 @@ export function SocialCreateCompose({
               data-social-create-kind-active={active ? "" : undefined}
               className={cn(
                 SOCIAL_CREATE_KIND_CLASS,
-                active ? "bg-accent font-semibold text-accent-contrast" : "bg-surface-muted font-medium text-ink",
+                active ? HOUSE_FILTER_ON_CLASS : HOUSE_FILTER_OFF_CLASS,
               )}
               onClick={() => setKind(value)}
             >
               <SocialIcon
                 name={CREATE_KIND_ICONS[value]}
                 size={16}
-                className={active ? "text-accent-contrast" : "text-ink-2"}
+                className={active ? "text-surface" : "text-ink-2"}
               />
               {value === "text" ? SOCIAL.create.text : value === "photo" ? SOCIAL.create.photo : SOCIAL.create.video}
             </button>

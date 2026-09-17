@@ -179,7 +179,7 @@ export function AppShell({
     <AskAssistantChromeProvider>
     {cookieSync}
     <div
-      className="min-h-dvh"
+      className="min-h-dvh bg-bg"
       data-education-workspace={workspace === "education" ? "" : undefined}
       style={
         collapsed && !settingsPage

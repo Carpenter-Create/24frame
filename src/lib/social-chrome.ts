@@ -10,7 +10,10 @@
 // Stories studio: Figma 146:230 / 146:1050 / 146:1072 / 146:1099
 //   desktop 146:1125 / 146:1147 / 146:1173 / 147:251.
 // Stories picker: Figma 144:1218 / 144:1444.
-// No glass, no drop shadow. Aggregation / Settings Mercury stays elsewhere.
+// No glass, no drop shadow. App-shell chrome (search, rail, filters) uses
+// house-shell. Feed / stories / create measured IA stays here.
+
+import { HOUSE_FILTER_OFF_CLASS, HOUSE_FILTER_ON_CLASS } from "@/lib/house-shell";
 
 export const SOCIAL_FIGMA_HOME = "176:1085";
 export const SOCIAL_FIGMA_HOME_EMPTY = "176:1346";
@@ -112,9 +115,9 @@ export const SOCIAL_CHECKLIST_ROW_LAST_CLASS = "py-[var(--space-3)]";
 export const SOCIAL_PILL_CLASS =
   "rounded-full px-[14px] py-[var(--space-2)] t-body-sm whitespace-nowrap";
 
-export const SOCIAL_PILL_ACTIVE_CLASS = "bg-accent font-medium text-accent-contrast";
+export const SOCIAL_PILL_ACTIVE_CLASS = HOUSE_FILTER_ON_CLASS;
 
-export const SOCIAL_PILL_IDLE_CLASS = "bg-surface-muted text-ink";
+export const SOCIAL_PILL_IDLE_CLASS = HOUSE_FILTER_OFF_CLASS;
 
 export const SOCIAL_ACTION_CLASS =
   "inline-flex items-center justify-center rounded-[8px] bg-accent px-[var(--space-6)] py-[var(--space-2)] t-body-sm font-medium text-accent-contrast";
