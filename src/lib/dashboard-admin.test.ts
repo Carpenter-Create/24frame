@@ -7,7 +7,7 @@ import {
   buildDashboardRevenueHero,
   closedRevenuePoints,
   activityDeliveryId,
-  applyActivityActors,
+  applyActivityAudit,
   dashboardActivityInitial,
   dashboardAsOfLine,
   dashboardChartGeometry,
@@ -279,9 +279,8 @@ describe("recent account activity", () => {
       "Older",
     ]);
     expect(rows[2]?.count).toBe(1);
-    expect(rows.map((row) => row.actorId)).toEqual([null, null, "maya", "other"]);
-    expect(rows[2]?.actor.initial).toBe("?");
-    expect(rows[0]?.actor.initial).toBe("?");
+    expect(rows.map((row) => row.actorId)).toEqual([null, null, null, null]);
+    expect(rows.every((row) => row.actor.initial === "?")).toBe(true);
     expect(rows[2]?.href).toBe("/titles");
     expect(
       recentAccountActivity({
@@ -296,7 +295,7 @@ describe("recent account activity", () => {
     ).toEqual([]);
   });
 
-  it("hydrates actor initials from real profile names and keeps an exact timestamp", () => {
+  it("stamps actor + exact time from audit_log and never invents a person", () => {
     const rows = recentAccountActivity({
       titles: [
         {
@@ -316,25 +315,89 @@ describe("recent account activity", () => {
           updated_at: "2026-09-10T00:00:00.000Z",
         },
       ],
-      findings: [],
+      findings: [
+        {
+          id: "f1",
+          org_id: "org-1",
+          entity_id: "a",
+          message: "Synopsis is required.",
+          created_at: "2026-09-11T00:00:00.000Z",
+        },
+      ],
       period: parseDashboardPeriod("all", now),
       userId: null,
     });
-    expect(activityDeliveryId(rows[0]?.id ?? "")).toBe("d1");
+    expect(activityDeliveryId(rows[1]?.id ?? "")).toBe("d1");
     expect(dashboardActivityInitial("Maya Chen")).toBe("M");
     expect(dashboardActivityInitial(null)).toBe("?");
-    const hydrated = applyActivityActors(rows, {
-      deliveryActors: new Map([["d1", "sam"]]),
+    const hydrated = applyActivityAudit(rows, {
+      events: [
+        {
+          entity: "findings",
+          entity_id: "f1",
+          action: "insert",
+          actor: null,
+          at: "2026-09-11T09:30:00.000Z",
+        },
+        {
+          entity: "deliveries",
+          entity_id: "d1",
+          action: "update",
+          actor: "sam",
+          at: "2026-09-10T18:22:00.000Z",
+        },
+        {
+          entity: "titles",
+          entity_id: "a",
+          action: "insert",
+          actor: "maya",
+          at: "2026-09-02T15:04:00.000Z",
+        },
+      ],
       profileNames: new Map([
         ["maya", "Maya Chen"],
         ["sam", "Sam Rivera"],
       ]),
     });
     expect(hydrated.map((row) => row.actor)).toEqual([
+      { id: null, initial: "?" },
       { id: "sam", initial: "S" },
       { id: "maya", initial: "M" },
     ]);
-    expect(hydrated[1]?.href).toBe("/titles/24F-0001234");
+    expect(hydrated.map((row) => row.at)).toEqual([
+      "2026-09-11T09:30:00.000Z",
+      "2026-09-10T18:22:00.000Z",
+      "2026-09-02T15:04:00.000Z",
+    ]);
+    expect(hydrated[2]?.href).toBe("/titles/24F-0001234");
+    expect(applyActivityAudit(rows, { events: [] }).every((row) => row.actor.initial === "?")).toBe(
+      true,
+    );
+    expect(
+      applyActivityAudit(rows, {
+        events: [
+          {
+            entity: "titles",
+            entity_id: "a",
+            action: "insert",
+            actor: "unknown",
+            at: "2026-09-02T15:04:00.000Z",
+          },
+          {
+            entity: "deliveries",
+            entity_id: "d1",
+            action: "insert",
+            actor: "sam",
+            at: "2026-09-10T18:22:00.000Z",
+          },
+        ],
+        profileNames: new Map([["sam", "Sam Rivera"]]),
+      }).map((row) => row.actor),
+    ).toEqual([
+      { id: null, initial: "?" },
+      { id: "sam", initial: "S" },
+      { id: "unknown", initial: "?" },
+    ]);
     expect(dashboardJustInTime("2026-09-02T15:04:00.000Z")).toMatch(/\d{1,2}:\d{2}/);
   });
 });

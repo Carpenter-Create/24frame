@@ -70,6 +70,31 @@ export function licensingBuckets(status: string, hasRequiredFinding: boolean): L
   return buckets;
 }
 
+/** Full union — never `as const` a single bucket (that narrows includes()). */
+export function licensingBucketSet(
+  buckets: readonly LicensingBucket[],
+): Set<LicensingBucket> {
+  return new Set<LicensingBucket>(buckets);
+}
+
+export function countLicensingBuckets(buckets: readonly LicensingBucket[]): {
+  ready: number;
+  needsAttention: number;
+  inReview: number;
+} {
+  const counts = { ready: 0, needsAttention: 0, inReview: 0 };
+  for (const bucket of buckets) {
+    switch (bucket) {
+      case "ready":
+      case "needsAttention":
+      case "inReview":
+        counts[bucket] += 1;
+        break;
+    }
+  }
+  return counts;
+}
+
 function findingPriority(finding: ClientHomeFinding): number {
   if (isRequiredFinding(finding.severity)) return 0;
   if (isRecommendedFinding(finding.severity)) return 1;
@@ -94,9 +119,10 @@ function statusLabel(status: string): string {
 }
 
 function rowRank(buckets: readonly LicensingBucket[]): number {
-  if (buckets.includes("needsAttention")) return 0;
-  if (buckets.includes("inReview")) return 1;
-  if (buckets.includes("ready")) return 2;
+  const present = licensingBucketSet(buckets);
+  if (present.has("needsAttention")) return 0;
+  if (present.has("inReview")) return 1;
+  if (present.has("ready")) return 2;
   return 3;
 }
 
@@ -128,14 +154,13 @@ export function buildLicensingStatus(input: {
     const required = findings.filter((finding) => isRequiredFinding(finding.severity));
     const recommended = findings.filter((finding) => isRecommendedFinding(finding.severity));
     const hasRequired = required.length > 0;
-    // licensingBuckets always returns LicensingBucket[] — do not special-case
-    // archived with `as const` (that narrows includes() to "needsAttention").
-    // Archived is not Ready / In review; required findings still count as
-    // Needs attention.
+    // Always LicensingBucket[] — never `as const ["needsAttention"]`.
+    // Archived is not Ready / In review; required findings still count.
     const buckets = licensingBuckets(title.status, hasRequired);
-    if (buckets.includes("ready")) ready += 1;
-    if (buckets.includes("needsAttention")) needsAttention += 1;
-    if (buckets.includes("inReview")) inReview += 1;
+    const counted = countLicensingBuckets(buckets);
+    ready += counted.ready;
+    needsAttention += counted.needsAttention;
+    inReview += counted.inReview;
     if (buckets.length === 0) continue;
     candidates.push({
       id: title.id,

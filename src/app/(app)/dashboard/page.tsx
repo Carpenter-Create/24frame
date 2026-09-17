@@ -48,10 +48,13 @@ import {
   isCompanyAdminRole,
   parseDashboardPeriod,
   parseDashboardUserId,
-  activityDeliveryId,
-  applyActivityActors,
+  DASHBOARD_ACTIVITY_AUDIT_ACTIONS,
+  DASHBOARD_ACTIVITY_AUDIT_ENTITIES,
+  activityAuditEntityIds,
+  applyActivityAudit,
   recentAccountActivity,
   revenuePointsFromLabels,
+  type DashboardAuditEvent,
 } from "@/lib/dashboard-admin";
 import { buildLicensingStatus } from "@/lib/dashboard-licensing";
 import { titleArtworkUrls } from "@/lib/artwork";
@@ -222,22 +225,25 @@ export default async function DashboardPage({
       period,
       userId,
     });
-    const deliveryIds = liveActivity
-      .map((row) => activityDeliveryId(row.id))
-      .filter((id): id is string => Boolean(id));
-    let deliveryActors = new Map<string, string | null>();
-    if (deliveryIds.length > 0) {
-      const { data: deliveryActorRows } = await supabase
-        .from("deliveries")
-        .select("id, created_by")
-        .in("id", deliveryIds);
-      deliveryActors = new Map(
-        (deliveryActorRows ?? []).map((row) => [row.id, row.created_by]),
-      );
+    // Actor + exact time come from audit_log — created_by is not the action.
+    const auditEntityIds = activityAuditEntityIds(liveActivity);
+    let auditEvents: DashboardAuditEvent[] = [];
+    if (auditEntityIds.length > 0) {
+      const { data: auditRows } = await supabase
+        .from("audit_log")
+        .select("entity, entity_id, action, actor, at")
+        .eq("org_id", org.id)
+        .in("entity", [...DASHBOARD_ACTIVITY_AUDIT_ENTITIES])
+        .in("action", [...DASHBOARD_ACTIVITY_AUDIT_ACTIONS])
+        .in("entity_id", auditEntityIds)
+        .order("at", { ascending: false })
+        .range(...rangeFor(UNPAGINATED_MAX));
+      auditEvents = auditRows ?? [];
     }
+    const stampedActivity = applyActivityAudit(liveActivity, { events: auditEvents });
     const actorIds = [
       ...new Set(
-        applyActivityActors(liveActivity, { deliveryActors })
+        stampedActivity
           .map((row) => row.actorId)
           .filter((id): id is string => Boolean(id)),
       ),
@@ -252,8 +258,8 @@ export default async function DashboardPage({
         (profiles ?? []).map((row) => [row.id, row.display_name]),
       );
     }
-    const hydratedActivity = applyActivityActors(liveActivity, {
-      deliveryActors,
+    const hydratedActivity = applyActivityAudit(liveActivity, {
+      events: auditEvents,
       profileNames,
     });
     adminActivity =
