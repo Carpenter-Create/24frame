@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
@@ -45,6 +46,8 @@ describe("dashboard register helpers", () => {
   it("fills the choropleth from Sporty Blue wash — never amber or green", () => {
     expect(dashboardChoroplethFill(0)).toBe("var(--surface-muted)");
     expect(dashboardChoroplethFill(1)).toContain("var(--accent)");
+    expect(dashboardChoroplethFill(1)).toMatch(/color-mix/);
+    expect(dashboardChoroplethFill(1)).not.toMatch(/100%/);
     expect(dashboardChoroplethFill(0.5)).not.toMatch(/amber|orange|#[Ff][Ff]|emerald|green|#1769FF/);
   });
 });
@@ -64,14 +67,20 @@ describe("dashboard register chrome", () => {
     expect(alts).toContain('data-dashboard-view-alt="list"');
     expect(alts).toContain('data-dashboard-view-alt="bars"');
     expect(alts).toContain("border-hairline");
-    expect(alts).toContain("bg-surface-muted");
+    expect(alts).toContain("divide-hairline");
     expect(alts).toContain("text-accent");
+    expect(alts).not.toContain("bg-surface-muted");
+    expect(alts).not.toContain("bg-accent");
     expect(viewAll).toContain("data-dashboard-view-all");
     expect(viewAll).toContain("data-dashboard-view-all-arrow");
     expect(viewAll).toContain(DASHBOARD_HOME.viewAll);
     expect(viewAll).toContain("text-accent");
     expect(viewAll).not.toContain("text-amber");
     expect(alts).not.toContain("Top works");
+    const mapSrc = readFileSync("src/components/dashboard/dashboard-territory-map.tsx", "utf8");
+    expect(mapSrc).not.toMatch(/from ["']geojson["']/);
+    expect(mapSrc).toContain("CountryFeature");
+    expect(mapSrc).toContain("TerritoryPath");
   });
 
   it("gives Top titles list/bars and Territories map/list/bars — 24Frame nouns only", () => {

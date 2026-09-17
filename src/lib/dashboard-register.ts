@@ -8,6 +8,7 @@ import type { ReportsCountRow } from "@/lib/reports";
 // ranked modules · view alts) rematched to house tokens. 24Frame nouns only —
 // Net revenue, Recent account activity, Top titles, Top platforms,
 // Top territories, Reports. No Top works / sources / contributors / Exports.
+// Tilt: Coinbase quiet-play over RL flourish. Sporty Blue wash, not amber.
 
 export const DASHBOARD_REGISTER_VIEWS = ["map", "list", "bars"] as const;
 
@@ -113,11 +114,11 @@ export function dashboardTerritoryCountLabel(count: number): string {
   return count === 1 ? "1 territory" : `${count} territories`;
 }
 
-/** Sporty Blue wash — house accent mixed into muted surface. No amber/green. */
+/** Quiet Sporty Blue wash — house accent mixed into muted surface. No amber/green. */
 export function dashboardChoroplethFill(ratio: number): string {
   const clamped = Math.max(0, Math.min(1, ratio));
   if (clamped <= 0) return "var(--surface-muted)";
-  const pct = Math.round(18 + clamped * 82);
+  const pct = Math.round(12 + clamped * 44);
   return `color-mix(in srgb, var(--accent) ${pct}%, var(--surface-muted))`;
 }
 

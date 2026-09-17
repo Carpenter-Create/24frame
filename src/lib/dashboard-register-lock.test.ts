@@ -11,6 +11,7 @@ import {
   DASHBOARD_RELATED_GAP_CLASS,
   DASHBOARD_SECTION_AIR_CLASS,
   DASHBOARD_VIEW_ALL_CLASS,
+  DASHBOARD_VIEW_ALT_BUTTON_ON_CLASS,
   DASHBOARD_VIEW_ALT_CLUSTER_CLASS,
 } from "@/lib/dashboard-craft";
 import { DASHBOARD_HOME } from "@/lib/dashboard-home";
@@ -111,6 +112,12 @@ describe("Aggregation Dashboard Coinbase register lock", () => {
     expect(html).toContain("data-dashboard-view-all-arrow");
     expect(html).toContain(DASHBOARD_VIEW_ALL_CLASS);
     expect(html).toContain(DASHBOARD_VIEW_ALT_CLUSTER_CLASS);
+    expect(DASHBOARD_VIEW_ALT_BUTTON_ON_CLASS).toBe("text-accent");
+    expect(DASHBOARD_VIEW_ALT_BUTTON_ON_CLASS).not.toContain("bg-");
+    expect(DASHBOARD_VIEW_ALT_CLUSTER_CLASS).toContain("border-hairline");
+    expect(DASHBOARD_VIEW_ALL_CLASS).toContain("text-accent");
+    expect(craft).not.toContain("amber");
+    expect(craft).not.toContain("gold");
     expect(html).not.toContain('data-dashboard-ranked="platforms"');
     expect(html).not.toContain("data-dashboard-territory");
     expect(html).toContain("data-dashboard-reports-cta");

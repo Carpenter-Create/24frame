@@ -40,8 +40,7 @@ describe("DashboardAdminHero", () => {
     );
     expect(html).toContain("data-dashboard-admin-hero");
     expect(html).not.toContain("lg:grid-cols-5");
-    expect(html).toContain("max-md:flex");
-    expect(html).toContain("max-md:flex-col");
+    expect(html).toContain("flex flex-col");
     expect(html).toContain("data-dashboard-mobile-stack");
     expect(html).toContain("data-dashboard-title-mobile");
     expect(html).toContain("data-dashboard-title-desktop");

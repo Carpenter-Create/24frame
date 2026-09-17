@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { feature } from "topojson-client";
 import { geoNaturalEarth1, geoPath } from "d3-geo";
-import type { Feature, FeatureCollection, Geometry } from "geojson";
 import type { GeometryCollection, Topology } from "topojson-specification";
 import countries110m from "world-atlas/countries-110m.json";
 
@@ -25,14 +24,31 @@ import {
 } from "@/lib/dashboard-craft";
 import { cn } from "@/lib/cn";
 
-type CountryFeature = Feature<Geometry, { name?: string }> & { id?: string | number };
+// Local topology types — no `geojson` module. topojson-client's `feature`
+// is cast once; path drawing uses d3-geo against that collection.
+type CountryFeature = {
+  type: "Feature";
+  id?: string | number;
+  properties?: { name?: string } | null;
+  geometry: object | null;
+};
+
+type CountryCollection = {
+  type: "FeatureCollection";
+  features: CountryFeature[];
+};
+
+type TerritoryPath = {
+  id: string;
+  d: string;
+  row: DashboardRankedRow | null;
+  fill: string;
+};
 
 const ANTARCTICA = 10;
 
-const world = feature(
-  countries110m as Topology<{ countries: GeometryCollection }>,
-  (countries110m as Topology<{ countries: GeometryCollection }>).objects.countries,
-) as FeatureCollection<Geometry, { name?: string }>;
+const topology = countries110m as Topology<{ countries: GeometryCollection }>;
+const world = feature(topology, topology.objects.countries) as unknown as CountryCollection;
 
 export function DashboardTerritoryMap({
   rows,
@@ -65,26 +81,25 @@ export function DashboardTerritoryMap({
   }, []);
 
   const paths = useMemo(() => {
-    if (!size) return [];
+    if (!size) return [] as TerritoryPath[];
     const projection = geoNaturalEarth1().fitExtent(
       [
         [8, 8],
         [size.w - 8, size.h - 8],
       ],
-      world,
+      world as never,
     );
     const path = geoPath(projection);
-    return world.features.flatMap((entry) => {
-      const item = entry as CountryFeature;
-      const numeric = Number(item.id);
+    return world.features.flatMap((entry: CountryFeature): TerritoryPath[] => {
+      const numeric = Number(entry.id);
       if (numeric === ANTARCTICA) return [];
-      const d = path(item);
+      const d = path(entry as never);
       if (!d) return [];
-      const row = dashboardRowForNumeric(byNumeric, item.id);
+      const row = dashboardRowForNumeric(byNumeric, entry.id);
       const ratio = row ? dashboardShareRatio(row.count, max) : 0;
       return [
         {
-          id: String(item.id ?? item.properties?.name ?? d.slice(0, 12)),
+          id: String(entry.id ?? entry.properties?.name ?? d.slice(0, 12)),
           d,
           row,
           fill: row ? dashboardChoroplethFill(ratio) : "var(--surface-muted)",
@@ -107,7 +122,7 @@ export function DashboardTerritoryMap({
             role="img"
             aria-label={DASHBOARD_HOME.territories}
           >
-            {paths.map((item) => (
+            {paths.map((item: TerritoryPath) => (
               <path
                 key={item.id}
                 d={item.d}
@@ -128,7 +143,7 @@ export function DashboardTerritoryMap({
         {hover ? (
           <div
             data-dashboard-territory-hover=""
-            className="pointer-events-none absolute left-[var(--space-4)] top-[var(--space-2)] rounded-[var(--radius)] border border-hairline bg-surface px-[var(--space-4)] py-[var(--space-2)] shadow-none"
+            className="pointer-events-none absolute left-[var(--space-4)] top-[var(--space-2)] border border-hairline bg-surface px-[var(--space-4)] py-[var(--space-2)] shadow-none"
           >
             <p className="t-body-sm text-ink">
               {hover.label}
@@ -150,10 +165,10 @@ export function DashboardTerritoryMap({
           <span>{DASHBOARD_HOME.legendLow}</span>
           <span
             aria-hidden
-            className="h-1.5 w-16 rounded-[var(--radius-sm)]"
+            className="h-px w-16"
             style={{
               background:
-                "linear-gradient(to right, var(--surface-muted), color-mix(in srgb, var(--accent) 92%, var(--surface-muted)))",
+                "linear-gradient(to right, var(--surface-muted), color-mix(in srgb, var(--accent) 56%, var(--surface-muted)))",
             }}
           />
           <span>{DASHBOARD_HOME.legendHigh}</span>
@@ -165,6 +180,20 @@ export function DashboardTerritoryMap({
           {dashboardTerritoryCountLabel(rows.length)}
         </p>
       </div>
+      <table className="sr-only">
+        <caption>{DASHBOARD_HOME.territories}</caption>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.key}>
+              <td>
+                {row.label}
+                {row.code ? ` · ${row.code}` : ""}
+              </td>
+              <td>{row.count}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

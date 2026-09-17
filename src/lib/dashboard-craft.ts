@@ -7,6 +7,8 @@
 // Overview structure rematch — 24Frame nouns only. No Dashboard-only tokens.
 // Period chrome (phone + desktop): unlabeled value + chevron on the org row.
 // Period is chrome, not H1. Dominant read stays the $.
+// Coinbase quiet-play over RL flourish: hairline + type do hierarchy.
+// View-alt selected is Sporty Blue glyph weight, not a filled chip.
 
 export const DASHBOARD_CARD_CLASS =
   "card-surface dashboard-home-panel flex h-full flex-col overflow-hidden shadow-none";
@@ -56,12 +58,12 @@ export const DASHBOARD_ADMIN_PAIR_CLASS =
   "grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-2";
 
 export const DASHBOARD_VIEW_ALT_CLUSTER_CLASS =
-  "flex items-center overflow-hidden rounded-[var(--radius-sm)] border border-hairline";
+  "flex items-center divide-x divide-hairline border border-hairline";
 
 export const DASHBOARD_VIEW_ALT_BUTTON_CLASS =
-  "flex size-8 items-center justify-center";
+  "flex size-8 items-center justify-center bg-transparent";
 
-export const DASHBOARD_VIEW_ALT_BUTTON_ON_CLASS = "bg-surface-muted text-accent";
+export const DASHBOARD_VIEW_ALT_BUTTON_ON_CLASS = "text-accent";
 
 export const DASHBOARD_VIEW_ALL_CLASS =
   "inline-flex items-center gap-[var(--space-2)] t-body-sm text-accent";
