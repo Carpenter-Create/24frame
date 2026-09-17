@@ -30,14 +30,16 @@ vi.mock("next/link", () => ({
   }) => createElement("a", { href, ...props }, children),
 }));
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn() }),
+}));
+
 import {
   DASHBOARD_TITLE_DESKTOP_CLASS,
   DASHBOARD_TITLE_MOBILE_CLASS,
-  DASHBOARD_TOP_PILL_BUTTON_CLASS,
 } from "@/lib/dashboard-craft";
 import {
   TITLES_CATALOG,
-  TITLES_FILTER_PILL_CLASS,
   TITLES_TITLE_DESKTOP_CLASS,
   TITLES_TITLE_MOBILE_CLASS,
 } from "@/lib/titles-catalog";
@@ -328,27 +330,39 @@ describe("TitlesCatalogList landscape row lock", () => {
 });
 
 describe("TitlesCatalogStatusFilter craft", () => {
-  it("uses a compact sentence-case trigger on phone and Dashboard pills on desktop", () => {
+  it("uses HousePageSelect (Dashboard All time SoT), not pills or native select", () => {
     const html = renderToStaticMarkup(
-      createElement(TitlesCatalogStatusFilter, { q: "", status: "all" }),
+      createElement(TitlesCatalogStatusFilter, { q: "", status: "all", defaultOpen: true }),
     );
     const compact = openingTagWith(html, 'data-titles-catalog-status-compact=""');
-    const pills = openingTagWith(html, 'data-titles-catalog-status-pills=""');
-    const trigger = openingTagWith(html, 'data-titles-catalog-status-current=""');
+    const current = openingTagWith(html, 'data-titles-catalog-status-current=""');
 
-    expect(TITLES_FILTER_PILL_CLASS).toBe(DASHBOARD_TOP_PILL_BUTTON_CLASS);
-    expect(compact).toContain("md:hidden");
-    expect(pills).toContain("hidden");
-    expect(pills).toContain("md:flex");
+    expect(html).toContain("data-house-page-select");
+    expect(html).toContain("data-house-page-select-menu");
+    expect(html).toContain("data-house-page-select-sheet");
+    expect(html).toContain("data-titles-catalog-status-trigger");
+    expect(html).toContain("data-appearance-check");
+    expect(compact).toContain("w-auto");
+    expect(compact).toContain("shrink-0");
+    expect(html).not.toContain("data-titles-catalog-status-pills");
+    expect(html).not.toContain("<select");
     expect(html).toContain("t-body-sm");
-    expect(html).not.toContain("t-label");
     expect(html).toContain("All");
     expect(html).toContain("Draft");
     expect(html).toContain("In review");
     expect(html).toContain("Takedown requested");
-    expect(trigger).not.toContain("t-label");
+    expect(current).not.toContain("t-label");
     expect(html).not.toContain("Upcoming");
     expect(html).not.toContain("In progress");
+  });
+
+  it("keeps phone toolbar chrome as one select + Add Title row under search", () => {
+    const catalog = readFileSync(join(ROOT, "src/components/titles/titles-catalog.tsx"), "utf8");
+    expect(catalog).toContain("data-titles-catalog-chrome");
+    expect(catalog).toContain("md:contents");
+    expect(catalog).toContain("HousePageSelect");
+    expect(catalog).toMatch(/left house select/i);
+    expect(catalog).not.toContain("data-titles-catalog-status-pills");
   });
 });
 

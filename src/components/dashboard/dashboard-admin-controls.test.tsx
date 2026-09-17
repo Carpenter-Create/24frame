@@ -85,15 +85,17 @@ describe("DashboardAdminControls", () => {
 
   it("keeps URL sync on replace and does not mount a native select", () => {
     const src = readFileSync("src/components/dashboard/dashboard-admin-controls.tsx", "utf8");
+    const primitive = readFileSync("src/components/chrome/house-page-select.tsx", "utf8");
     expect(src).toContain("router.replace");
     expect(src).toContain("dashboardHref");
+    expect(src).toContain("HousePageSelect");
     expect(src).not.toContain("<select");
     expect(src).not.toContain("DASHBOARD_PERIOD_GRAINS");
     expect(src).not.toContain("data-dashboard-period-grains");
-    expect(src).toContain("AppearanceCheck");
     expect(src).not.toMatch(/<label[\s\S]*data-dashboard-period[\s\S]*<\/label>/);
-    expect(src).toContain("createPortal");
     expect(src).toContain("data-dashboard-period-sheet");
+    expect(primitive).toContain("AppearanceCheck");
+    expect(primitive).toContain("createPortal");
     expect(src).not.toContain("DotsThree");
     expect(src).not.toContain("DashboardUserField");
     expect(src).not.toContain("data-dashboard-user");

@@ -2,15 +2,12 @@ import Link from "next/link";
 import { Camera } from "lucide-react";
 
 import { Artwork } from "@/components/layout/artwork";
+import { TitlesCatalogStatusFilter } from "@/components/titles/titles-status-filter";
+
+export { TitlesCatalogStatusFilter } from "@/components/titles/titles-status-filter";
 import { cn } from "@/lib/cn";
 import {
-  CATALOG_STATUS_FILTERS,
   TITLES_CATALOG,
-  TITLES_FILTER_DESKTOP_CLUSTER_CLASS,
-  TITLES_FILTER_PHONE_CHEVRON_CLASS,
-  TITLES_FILTER_PHONE_HOST_CLASS,
-  TITLES_FILTER_PHONE_PANEL_CLASS,
-  TITLES_FILTER_PHONE_TRIGGER_CLASS,
   TITLES_LIST_CLASS,
   TITLES_LIST_ROW_CLASS,
   TITLES_ROW_COPY_CLASS,
@@ -19,11 +16,7 @@ import {
   TITLES_THUMB_CLASS,
   TITLES_TITLE_DESKTOP_CLASS,
   TITLES_TITLE_MOBILE_CLASS,
-  catalogFilterHref,
-  catalogStatusFilterLabel,
   catalogStatusPillClass,
-  titlesFilterPhoneOptionClass,
-  titlesFilterPillClass,
   type CatalogStatusFilter,
 } from "@/lib/titles-catalog";
 
@@ -32,6 +25,7 @@ import {
 // Phone (`< md`): full-width 16:9 art on top, title / year / status under.
 // Desktop (`md+`): landscape-thumb row — art leading, title/year, status.
 // Type is the Dashboard register. Accent is the one Add Title Sporty Blue pill.
+// Status filter is HousePageSelect (Dashboard All time SoT) — not native select.
 
 export function TitlesCatalogFrame({
   className,
@@ -75,72 +69,6 @@ export function TitlesCatalogHeader({ count }: { count?: string }) {
   );
 }
 
-export function TitlesCatalogStatusFilter({
-  q,
-  status,
-}: {
-  q: string;
-  status: CatalogStatusFilter;
-}) {
-  const currentLabel = catalogStatusFilterLabel(status);
-
-  return (
-    <>
-      <details className={TITLES_FILTER_PHONE_HOST_CLASS} data-titles-catalog-status-compact="">
-        <summary
-          className={TITLES_FILTER_PHONE_TRIGGER_CLASS}
-          aria-label={TITLES_CATALOG.statusFilterLabel}
-        >
-          <span data-titles-catalog-status-current="">{currentLabel}</span>
-          <svg
-            className={TITLES_FILTER_PHONE_CHEVRON_CLASS}
-            viewBox="0 0 16 16"
-            fill="none"
-            aria-hidden
-          >
-            <path
-              d="M4 6l4 4 4-4"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </summary>
-        <div className={TITLES_FILTER_PHONE_PANEL_CLASS} role="listbox">
-          {CATALOG_STATUS_FILTERS.map((option) => (
-            <Link
-              key={`phone-${option.key}`}
-              href={catalogFilterHref(q, option.key)}
-              aria-current={option.key === status ? "true" : undefined}
-              className={titlesFilterPhoneOptionClass(option.key === status)}
-            >
-              {option.label}
-            </Link>
-          ))}
-        </div>
-      </details>
-      <div
-        className={TITLES_FILTER_DESKTOP_CLUSTER_CLASS}
-        data-titles-catalog-status-pills=""
-        role="group"
-        aria-label={TITLES_CATALOG.statusFilterLabel}
-      >
-        {CATALOG_STATUS_FILTERS.map((option) => (
-          <Link
-            key={`desktop-${option.key}`}
-            href={catalogFilterHref(q, option.key)}
-            aria-current={option.key === status ? "true" : undefined}
-            className={titlesFilterPillClass(option.key === status)}
-          >
-            {option.label}
-          </Link>
-        ))}
-      </div>
-    </>
-  );
-}
-
 export function TitlesCatalogToolbar({
   q,
   status,
@@ -154,6 +82,9 @@ export function TitlesCatalogToolbar({
   action?: React.ReactNode;
   filters?: boolean;
 }) {
+  // Phone: search row, then ONE chrome row — left house select (intrinsic) +
+  // right Sporty Blue Add Title. Kill stacked All row + lone Add Title row.
+  // Desktop: search · house select · Add Title on one row.
   return (
     <div
       className="titles-catalog-toolbar flex flex-col gap-[var(--space-4)] md:flex-row md:items-center"
@@ -167,17 +98,27 @@ export function TitlesCatalogToolbar({
           {search}
         </div>
       ) : null}
-      {filters ? (
-        <div className="min-w-0 flex-1" data-titles-catalog-filters="">
-          <TitlesCatalogStatusFilter q={q} status={status} />
-        </div>
-      ) : null}
-      {action ? (
+      {filters || action ? (
         <div
-          className="flex shrink-0 justify-end md:ml-auto"
-          data-titles-catalog-operate=""
+          className="flex w-full min-w-0 items-center gap-[var(--space-2)] md:contents"
+          data-titles-catalog-chrome=""
         >
-          {action}
+          {filters ? (
+            <div
+              className="min-w-0 w-auto shrink-0 md:min-w-0"
+              data-titles-catalog-filters=""
+            >
+              <TitlesCatalogStatusFilter q={q} status={status} />
+            </div>
+          ) : null}
+          {action ? (
+            <div
+              className="ml-auto flex shrink-0 justify-end md:ml-auto"
+              data-titles-catalog-operate=""
+            >
+              {action}
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>

@@ -15,10 +15,25 @@ import {
   HOUSE_CARD_PAD,
   HOUSE_FILTER_OFF_CLASS,
   HOUSE_FILTER_ON_CLASS,
-  HOUSE_PERIOD_SELECTED_CLASS,
   HOUSE_RELATED_GAP_CLASS,
   HOUSE_SECTION_AIR_CLASS,
 } from "@/lib/house-shell";
+
+import {
+  HOUSE_PAGE_SELECT_CHEVRON_CLASS,
+  HOUSE_PAGE_SELECT_GROUP_CLASS,
+  HOUSE_PAGE_SELECT_MENU_DESKTOP_CLASS,
+  HOUSE_PAGE_SELECT_OPTION_CHECK_CLASS,
+  HOUSE_PAGE_SELECT_OPTION_CHECK_GUTTER_CLASS,
+  HOUSE_PAGE_SELECT_OPTION_CLASS,
+  HOUSE_PAGE_SELECT_OPTION_LABEL_CLASS,
+  HOUSE_PAGE_SELECT_OPTION_SELECTED_CLASS,
+  HOUSE_PAGE_SELECT_PANEL_CLASS,
+  HOUSE_PAGE_SELECT_SHEET_HOST_CLASS,
+  HOUSE_PAGE_SELECT_TRIGGER_CLASS,
+  HOUSE_PAGE_SELECT_TRIGGER_LABEL_CLASS,
+  housePageSelectOptionClass,
+} from "@/lib/house-page-select";
 
 export const DASHBOARD_CARD_CLASS =
   "card-surface dashboard-home-panel flex h-full flex-col overflow-hidden shadow-none";
@@ -159,43 +174,35 @@ export const DASHBOARD_CHART_EMPTY_CLASS =
 export const DASHBOARD_FIXTURE_BANNER_CLASS =
   "rounded-[var(--radius)] border border-hairline bg-surface px-[var(--space-4)] py-[var(--space-2)] t-label text-ink-3 shadow-none max-md:sticky max-md:top-[var(--header-height)] max-md:z-20";
 
-export const DASHBOARD_PERIOD_SHEET_HOST_CLASS =
-  "fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end md:hidden";
+export const DASHBOARD_PERIOD_SHEET_HOST_CLASS = HOUSE_PAGE_SELECT_SHEET_HOST_CLASS;
 
-export const DASHBOARD_PERIOD_MENU_DESKTOP_CLASS = "max-md:hidden";
+export const DASHBOARD_PERIOD_MENU_DESKTOP_CLASS = HOUSE_PAGE_SELECT_MENU_DESKTOP_CLASS;
 
 export const DASHBOARD_ORG_NAME_MOBILE_CLASS = "t-heading text-ink md:hidden";
 export const DASHBOARD_TITLE_MOBILE_CLASS = DASHBOARD_ORG_NAME_MOBILE_CLASS;
 export const DASHBOARD_ORG_LABEL_CLASS = "t-title text-ink max-md:hidden";
 export const DASHBOARD_TITLE_DESKTOP_CLASS = DASHBOARD_ORG_LABEL_CLASS;
 
-export const DASHBOARD_PERIOD_TRIGGER_CLASS =
-  "group flex min-w-[10rem] items-center justify-between gap-[var(--space-2)] rounded-[var(--radius-sm)] border border-hairline bg-surface-muted px-[var(--space-4)] py-[var(--space-2)] t-body-sm text-ink max-md:min-w-0 max-md:flex-none max-md:justify-end max-md:border-0 max-md:bg-transparent max-md:px-0 max-md:py-0";
+export const DASHBOARD_PERIOD_TRIGGER_CLASS = HOUSE_PAGE_SELECT_TRIGGER_CLASS;
 
-export const DASHBOARD_PERIOD_TRIGGER_LABEL_CLASS = "min-w-0 truncate";
+export const DASHBOARD_PERIOD_TRIGGER_LABEL_CLASS = HOUSE_PAGE_SELECT_TRIGGER_LABEL_CLASS;
 
-export const DASHBOARD_PERIOD_CHEVRON_CLASS =
-  "size-4 shrink-0 text-ink-3 transition-opacity";
+export const DASHBOARD_PERIOD_CHEVRON_CLASS = HOUSE_PAGE_SELECT_CHEVRON_CLASS;
 
-export const DASHBOARD_PERIOD_PANEL_CLASS =
-  "absolute right-0 top-full z-50 mt-[var(--space-2)] flex max-h-80 min-w-[16rem] flex-col overflow-y-auto rounded-[12px] border border-hairline bg-surface py-[var(--space-2)] shadow-none";
+export const DASHBOARD_PERIOD_PANEL_CLASS = HOUSE_PAGE_SELECT_PANEL_CLASS;
 
-export const DASHBOARD_PERIOD_GROUP_CLASS =
-  "px-[var(--space-4)] pb-[var(--space-1)] pt-[var(--space-2)] t-label text-ink-3";
+export const DASHBOARD_PERIOD_GROUP_CLASS = HOUSE_PAGE_SELECT_GROUP_CLASS;
 
-export const DASHBOARD_PERIOD_OPTION_CLASS =
-  "flex w-full items-center justify-between gap-[var(--space-2)] px-[var(--space-4)] py-[var(--space-2)] text-left t-body-sm text-ink";
+export const DASHBOARD_PERIOD_OPTION_CLASS = HOUSE_PAGE_SELECT_OPTION_CLASS;
 
-export const DASHBOARD_PERIOD_OPTION_SELECTED_CLASS = HOUSE_PERIOD_SELECTED_CLASS;
+export const DASHBOARD_PERIOD_OPTION_SELECTED_CLASS = HOUSE_PAGE_SELECT_OPTION_SELECTED_CLASS;
 
-export const DASHBOARD_PERIOD_OPTION_LABEL_CLASS = "min-w-0 flex-1 text-left";
+export const DASHBOARD_PERIOD_OPTION_LABEL_CLASS = HOUSE_PAGE_SELECT_OPTION_LABEL_CLASS;
 
-export const DASHBOARD_PERIOD_OPTION_CHECK_GUTTER_CLASS = "size-4 shrink-0";
+export const DASHBOARD_PERIOD_OPTION_CHECK_GUTTER_CLASS = HOUSE_PAGE_SELECT_OPTION_CHECK_GUTTER_CLASS;
 
-export const DASHBOARD_PERIOD_OPTION_CHECK_CLASS = "text-accent";
+export const DASHBOARD_PERIOD_OPTION_CHECK_CLASS = HOUSE_PAGE_SELECT_OPTION_CHECK_CLASS;
 
 export function dashboardPeriodOptionClass(selected: boolean): string {
-  return selected
-    ? `${DASHBOARD_PERIOD_OPTION_CLASS} ${DASHBOARD_PERIOD_OPTION_SELECTED_CLASS}`
-    : DASHBOARD_PERIOD_OPTION_CLASS;
+  return housePageSelectOptionClass(selected);
 }
