@@ -68,13 +68,18 @@ import { buildClientFinanceDashboard } from "@/lib/finance-dashboard";
 import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 
 // Company-admin `/dashboard` rematches RL Overview structure inside house
-// tokens: one labeled period control, MetricCard revenue + scrub, Recent activity.
+// tokens: unlabeled period chrome (value + chevron), MetricCard revenue +
+// scrub, account activity. Period is chrome, not H1 — dominant read is the $.
 // Phone (`< md`) is a single-column stack — $0.00 empty hero, compact chart,
 // Period bottom sheet. Find-user is gone on phone and md+; user scope lives
 // on /reports later. Leftover ?user= parsing stays inert for data only.
 // Catalog-velocity strip (Added this month / In pipeline) is gone — Adam lock
-// 2026-09-16. Do not replace with another ops strip unless a later lock says so.
-// Standard seats keep the catalog hero. Export stays on /reports.
+// 2026-09-16. Company-admin also drops Recent, Do next, Deliveries needing
+// action, Catalog Health count, What changed, and Pending submissions.
+// Activity feed keeps the recent signal; catalog ops stay on Titles /
+// Catalog Health. Quiet Reports text CTA stays. Do not replace with a
+// Needs-attention composite or another ops strip unless a later lock says
+// so. Standard seats keep the catalog hero. Export stays on /reports.
 // Fixture money is labeled + env-gated and never enters export/ledger.
 
 type TitleRow = ClientHomeTitle & { created_by?: string | null };
@@ -268,19 +273,25 @@ export default async function DashboardPage({
             territory
           />
         </div>
-        <div className="grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-2">
-          <DashboardJustIn
-            titles={snapshot.justIn}
-            catalogEmpty={snapshot.catalog === 0}
-            canAddTitle={ctx.canOperate}
-          />
-          <DashboardDoNext items={snapshot.doNext} secondary={isAdmin} />
-        </div>
+        {isAdmin ? null : (
+          <div className="grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-2">
+            <DashboardJustIn
+              titles={snapshot.justIn}
+              catalogEmpty={snapshot.catalog === 0}
+              canAddTitle={ctx.canOperate}
+            />
+            <DashboardDoNext items={snapshot.doNext} />
+          </div>
+        )}
         <DashboardReportsCta />
-        <DashboardDeliveriesAction rows={deliveriesNeedingAction(scopedDeliveries)} />
-        <DashboardFindingsGlance count={snapshot.needsAttention} isPartial={snapshot.findingsIsPartial} />
-        <DashboardWhatChanged firstVisit={lastVisitMs == null} rows={stackChanges} />
-        <DashboardPendingSubmissions items={pendingSubmissions(scopedTitles)} />
+        {isAdmin ? null : (
+          <>
+            <DashboardDeliveriesAction rows={deliveriesNeedingAction(scopedDeliveries)} />
+            <DashboardFindingsGlance count={snapshot.needsAttention} isPartial={snapshot.findingsIsPartial} />
+            <DashboardWhatChanged firstVisit={lastVisitMs == null} rows={stackChanges} />
+            <DashboardPendingSubmissions items={pendingSubmissions(scopedTitles)} />
+          </>
+        )}
       </div>
     </div>
   );

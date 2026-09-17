@@ -4,7 +4,8 @@
 // trailing Sporty Blue check, flush-left labels.
 // Fidelity × Royalogic density: one Period control, kickers, dense rows,
 // related gap 8 · card pad 16 · section air 24. No Dashboard-only tokens.
-// Phone chrome: org-row Period (no PERIOD kicker), quiet selected label.
+// Period chrome (phone + desktop): unlabeled value + chevron on the org row.
+// Period is chrome, not H1. Dominant read stays the $.
 
 export const DASHBOARD_CARD_CLASS =
   "card-surface dashboard-home-panel flex h-full flex-col overflow-hidden shadow-none";
@@ -77,10 +78,8 @@ export const DASHBOARD_PERIOD_MENU_DESKTOP_CLASS = "max-md:hidden";
 
 export const DASHBOARD_ORG_NAME_MOBILE_CLASS = "t-body-sm text-ink-2 md:hidden";
 export const DASHBOARD_TITLE_MOBILE_CLASS = DASHBOARD_ORG_NAME_MOBILE_CLASS;
-export const DASHBOARD_TITLE_DESKTOP_CLASS = "max-md:hidden t-title text-ink";
 export const DASHBOARD_ORG_LABEL_CLASS = "t-label text-ink-3 max-md:hidden";
-
-export const DASHBOARD_PERIOD_KICKER_CLASS = "t-label text-ink-3 max-md:hidden";
+export const DASHBOARD_TITLE_DESKTOP_CLASS = DASHBOARD_ORG_LABEL_CLASS;
 
 export const DASHBOARD_PERIOD_TRIGGER_CLASS =
   "group flex min-w-[10rem] items-center justify-between gap-[var(--space-2)] rounded-[var(--radius-sm)] border border-hairline bg-surface-muted px-[var(--space-4)] py-[var(--space-2)] t-body-sm text-ink max-md:min-w-0 max-md:flex-none max-md:justify-end max-md:border-0 max-md:bg-transparent max-md:px-0 max-md:py-0";

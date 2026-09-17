@@ -123,6 +123,37 @@ function expectNoCatalogVelocityStrip(html: string) {
   expect(html).not.toContain('data-dashboard-overview=""');
 }
 
+/** Company-admin structural delta — Adam lock 2026-09-16 via CoS. */
+function expectCompanyAdminStructuralDelta(html: string) {
+  expectNoCatalogVelocityStrip(html);
+  expect(html).toMatch(/data-dashboard-title-desktop="" class="[^"]*max-md:hidden[^"]*">Acme</);
+  expect(html).not.toMatch(/data-dashboard-title-desktop=""[^>]*>All time</);
+  expect(html).not.toContain("data-dashboard-period-kicker");
+  expect(html).not.toContain("data-dashboard-just-in");
+  expect(html).not.toContain("data-dashboard-do-next");
+  expect(html).not.toContain(`>${DASHBOARD_HOME.justIn}<`);
+  expect(html).not.toContain(DASHBOARD_HOME.doNext);
+  expect(html).not.toContain('data-dashboard-module="deliveries-action"');
+  expect(html).not.toContain('data-dashboard-module="findings-glance"');
+  expect(html).not.toContain('data-dashboard-module="what-changed"');
+  expect(html).not.toContain('data-dashboard-module="pending"');
+  expect(html).not.toContain(DASHBOARD_HOME.deliveriesAction);
+  expect(html).not.toContain(DASHBOARD_HOME.findingsGlance);
+  expect(html).not.toContain(DASHBOARD_HOME.whatChanged);
+  expect(html).not.toContain(DASHBOARD_HOME.pending);
+  expect(html).toContain("data-dashboard-revenue");
+  expect(html).toContain("$0.00");
+  expect(html).toContain("data-dashboard-period");
+  expect(html).toContain("data-dashboard-period-current");
+  expect(html).toContain("data-dashboard-period-chevron");
+  expect(html).toContain('data-dashboard-module="recent-activity"');
+  expect(html).toContain('data-dashboard-ranked="platforms"');
+  expect(html).toContain("data-dashboard-territory");
+  expect(html).toContain("data-dashboard-reports-cta");
+  expect(html).toContain(`href="${REPORTS_HREF}"`);
+  expect(html).toContain(DASHBOARD_HOME.reportsCta);
+}
+
 /**
  * `/dashboard` has two legitimate modes. A client org still gets the
  * organization-scoped portfolio. GC staff without a client org stay on
@@ -656,8 +687,8 @@ describe("company admin Overview hero", () => {
     expect(html).toContain("data-dashboard-title-mobile");
     expect(html).toContain("data-dashboard-title-desktop");
     expect(html).not.toContain("data-dashboard-user-overflow");
-    expect(html).toContain("data-dashboard-do-next-secondary");
-    expect(html).toMatch(/data-dashboard-title-desktop="" class="[^"]*max-md:hidden[^"]*">All time</);
+    expect(html).not.toContain("data-dashboard-do-next-secondary");
+    expectCompanyAdminStructuralDelta(html);
     expect(html).toContain(DASHBOARD_ADMIN.revenue);
     expect(html).toContain("$0.00");
     expect(html).not.toContain(DASHBOARD_ADMIN.revenueEmpty);
@@ -700,14 +731,22 @@ describe("company admin Overview hero", () => {
       ctx({ isGcStaff: false, orgStatus: "active", role: "account_owner" }) as never,
     );
     const html = renderToStaticMarkup(await DashboardPage({ searchParams: Promise.resolve({}) }));
-    expectNoCatalogVelocityStrip(html);
+    expectCompanyAdminStructuralDelta(html);
     expect(html).toContain("data-dashboard-admin-hero");
-    expect(html).toContain("data-dashboard-revenue");
-    expect(html).toContain("$0.00");
-    expect(html).toContain("data-dashboard-period");
-    expect(html).toContain('data-dashboard-module="recent-activity"');
-    expect(html).toContain("data-dashboard-ranked=\"platforms\"");
-    expect(html).toContain("data-dashboard-do-next");
+  });
+
+  it("locks quiet Period chrome and strips Recent, Do next, and the bottom four", async () => {
+    stubClient();
+    vi.mocked(getOrgContext).mockResolvedValue(
+      ctx({ isGcStaff: false, orgStatus: "active", role: "account_owner" }) as never,
+    );
+    const html = renderToStaticMarkup(await DashboardPage({ searchParams: Promise.resolve({}) }));
+    expectCompanyAdminStructuralDelta(html);
+    expect(html).toMatch(/data-dashboard-title-desktop="" class="[^"]*t-label text-ink-3/);
+    expect(html).not.toMatch(/data-dashboard-title-desktop="" class="[^"]*t-title/);
+    expect(html).toContain(DASHBOARD_ADMIN.allTime);
+    expect(html).toContain("As of All time");
+    expect(html).not.toContain("Needs attention");
   });
 
   it("labels sample revenue when the craft fixture gate is on", async () => {
@@ -767,7 +806,8 @@ describe("company admin Overview hero", () => {
     const html = renderToStaticMarkup(
       await DashboardPage({ searchParams: Promise.resolve({ period: "Q32026" }) }),
     );
-    expect(html).toMatch(/data-dashboard-title-desktop="" class="[^"]*max-md:hidden[^"]*">Q3 2026</);
+    expect(html).toMatch(/data-dashboard-title-desktop="" class="[^"]*max-md:hidden[^"]*">Acme</);
+    expect(html).not.toMatch(/data-dashboard-title-desktop=""[^>]*>Q3 2026</);
     expect(html).toContain("Q3 2026");
     expect(html).not.toContain('value="Q32026"');
     expect(html).not.toContain("data-dashboard-user");

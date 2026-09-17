@@ -9,7 +9,6 @@ import { DASHBOARD_ADMIN, dashboardPeriodOptions, parseDashboardPeriod } from "@
 import {
   DASHBOARD_ADMIN_CHROME_CLASS,
   DASHBOARD_ORG_NAME_MOBILE_CLASS,
-  DASHBOARD_PERIOD_KICKER_CLASS,
   DASHBOARD_PERIOD_SHEET_HOST_CLASS,
   DASHBOARD_PERIOD_TRIGGER_CLASS,
   DASHBOARD_TITLE_MOBILE_CLASS,
@@ -45,7 +44,7 @@ function chromeHtml() {
   return renderToStaticMarkup(
     createElement(DashboardAdminChrome, {
       orgName: "GCNH, LLC",
-      period: parseDashboardPeriod("all", now),
+      periodKey: parseDashboardPeriod("all", now).key,
       options,
       periodMenuOpen: true,
     }),
@@ -166,6 +165,8 @@ describe("Aggregation Dashboard mobile chrome — org-row Period", () => {
     expect(html).toContain("data-dashboard-identity-row");
     expect(html).toContain("data-dashboard-title-mobile");
     expect(html).toContain("GCNH, LLC");
+    expect(html).toMatch(/data-dashboard-title-desktop=""[^>]*>GCNH, LLC</);
+    expect(html).not.toMatch(/data-dashboard-title-desktop=""[^>]*>All time</);
     expect(html).toContain("data-dashboard-period");
     expect(html).toContain("data-dashboard-period-one");
     expect(html).toContain("data-dashboard-period-current");
@@ -181,10 +182,8 @@ describe("Aggregation Dashboard mobile chrome — org-row Period", () => {
     expect(DASHBOARD_ORG_NAME_MOBILE_CLASS).toContain("md:hidden");
     expect(DASHBOARD_ORG_NAME_MOBILE_CLASS).not.toContain("t-title");
     expect(DASHBOARD_ORG_NAME_MOBILE_CLASS).not.toContain("t-label");
-    expect(DASHBOARD_PERIOD_KICKER_CLASS).toContain("max-md:hidden");
-    expect(DASHBOARD_PERIOD_KICKER_CLASS).toContain("t-label");
-    expect(html).toContain("data-dashboard-period-kicker");
-    expect(html).toMatch(/data-dashboard-period-kicker=""[^>]*max-md:hidden/);
+    expect(html).not.toContain("data-dashboard-period-kicker");
+    expect(controlsSrc).not.toContain("data-dashboard-period-kicker");
     expect(DASHBOARD_PERIOD_TRIGGER_CLASS).toContain("t-body-sm");
     expect(DASHBOARD_PERIOD_TRIGGER_CLASS).toContain("max-md:bg-transparent");
     expect(DASHBOARD_PERIOD_TRIGGER_CLASS).toContain("max-md:border-0");
@@ -194,7 +193,8 @@ describe("Aggregation Dashboard mobile chrome — org-row Period", () => {
       html.indexOf("data-dashboard-period-current"),
     );
     expect(heroSrc).toContain("data-dashboard-identity-row");
-    expect(controlsSrc).toContain("data-dashboard-period-kicker");
+    expect(heroSrc).not.toContain("period.label");
+    expect(craftSrc).not.toContain("DASHBOARD_PERIOD_KICKER_CLASS");
   });
 
   it("opens Period from the org-row control into the existing bottom sheet", () => {

@@ -3,7 +3,7 @@ import { formatUsdCents } from "@/lib/finance";
 import { parseReportsUserId, reportsUserLabel, type ReportsUserOption } from "@/lib/reports";
 
 // Company-admin Dashboard hero. Period URL state rematch RL Overview
-// behavior only — Geist / Sporty Blue / hairline. One labeled period menu.
+// behavior only — Geist / Sporty Blue / hairline. One unlabeled period menu.
 // Find-user chrome is gone; leftover ?user= parsing stays inert for data.
 // Live money is never invented here; craft sample series lives in the fixture.
 

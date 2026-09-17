@@ -22,7 +22,7 @@ const options = dashboardPeriodOptions(now, [
 ]);
 
 describe("DashboardAdminControls", () => {
-  it("renders one labeled period menu with a Sporty Blue check and no grain chips", () => {
+  it("renders one unlabeled period menu with a Sporty Blue check and no grain chips", () => {
     const html = renderToStaticMarkup(
       createElement(DashboardAdminControls, {
         periodKey: "all",
@@ -33,6 +33,7 @@ describe("DashboardAdminControls", () => {
     expect(html).toContain("data-dashboard-period");
     expect(html).toContain("data-dashboard-period-menu");
     expect(html).toContain("data-dashboard-period-current");
+    expect(html).not.toContain("data-dashboard-period-kicker");
     expect(html).toContain(DASHBOARD_ADMIN.allTime);
     expect(html).toContain(DASHBOARD_ADMIN.ytd);
     expect(html).toContain('data-dashboard-period-group="year"');
