@@ -215,6 +215,7 @@ export default async function GcTitleDetail({ params }: { params: Promise<{ id: 
         </div>
         <TitleLifecycleControls
           titleId={t.id}
+          titleName={t.title}
           status={t.status as TitleStatus}
           isStaff
           flags={lifecycleFlags}

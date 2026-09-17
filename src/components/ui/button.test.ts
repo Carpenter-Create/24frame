@@ -15,4 +15,12 @@ describe("product buttons", () => {
     expect(home).not.toContain("hover:-translate-y-px");
     expect(home).not.toContain("active:translate-y-0");
   });
+
+  it("registers danger as thin ink on the same pill, not a filled scare surface", () => {
+    expect(src).toContain('"primary" | "secondary" | "ghost" | "danger"');
+    expect(src).toContain("danger:");
+    expect(src).toContain("text-[#c4564a]");
+    expect(src).not.toMatch(/danger:\s*"bg-/);
+    expect(src).not.toContain("bg-red");
+  });
 });

@@ -16,7 +16,7 @@ import {
 
 import { SearchField } from "@/components/layout/search-field";
 import { Button } from "@/components/ui/button";
-import { Dialog } from "@/components/ui/dialog";
+import { Dialog, DialogFooter } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -26,15 +26,10 @@ import {
   ThreadPopoverItem,
   ThreadPopoverSeparator,
 } from "./menu-surface";
-import { cn } from "@/lib/cn";
 import {
   THREAD_POPOVER_DELETE_ICON_CLASS,
   THREAD_POPOVER_ICON_CLASS,
 } from "@/lib/house-sheet";
-import {
-  MENU_SURFACE_ITEM_CLASS,
-  MENU_SURFACE_ITEM_DANGER_CLASS,
-} from "@/lib/menu-surface";
 import { Input } from "@/components/ui/input";
 import {
   ASK_GLOBEE,
@@ -214,21 +209,22 @@ function MessagesThreadHeader({ title }: { title: string }) {
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
         title={ASK_GLOBEE.deleteTitle}
+        size="sm"
       >
         <p className="t-body-sm text-ink-2">{ASK_GLOBEE.deleteBody}</p>
-        <div className="mt-[var(--space-4)] flex justify-end gap-[var(--space-2)]">
-          <button
+        <DialogFooter>
+          <Button
             type="button"
+            variant="secondary"
             data-ask-globee-delete-cancel=""
-            className={MENU_SURFACE_ITEM_CLASS}
             onClick={() => setDeleteOpen(false)}
           >
             {ASK_GLOBEE.cancelLabel}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="danger"
             data-ask-globee-delete-confirm=""
-            className={cn(MENU_SURFACE_ITEM_CLASS, MENU_SURFACE_ITEM_DANGER_CLASS)}
             onClick={() => {
               if (!chrome) return;
               void deleteAskGlobeeConversation(chrome.id).then((result) => {
@@ -241,8 +237,8 @@ function MessagesThreadHeader({ title }: { title: string }) {
             }}
           >
             {ASK_GLOBEE.deleteConfirm}
-          </button>
-        </div>
+          </Button>
+        </DialogFooter>
       </Dialog>
     </div>
   );

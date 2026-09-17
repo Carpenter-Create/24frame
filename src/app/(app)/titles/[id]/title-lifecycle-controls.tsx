@@ -4,21 +4,22 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MoreHorizontal } from "lucide-react";
 
-import { Dialog } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogFooter } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { MenuSurfaceContent, MenuSurfaceItem } from "@/components/chrome/menu-surface";
 import { cn } from "@/lib/cn";
 import { HOUSE_ICON_BUTTON_CLASS } from "@/lib/house-shell";
 import {
-  MENU_SURFACE_ITEM_CLASS,
-  MENU_SURFACE_ITEM_DANGER_CLASS,
-} from "@/lib/menu-surface";
-import {
   TITLE_LIFECYCLE,
   titleArchiveConfirmBody,
+  titleArchiveConfirmTitle,
   titleDeleteConfirmBody,
+  titleDeleteConfirmTitle,
   titleHasLifecycleActions,
+  titleRestoreConfirmBody,
+  titleRestoreConfirmTitle,
   type TitleLifecycleFlags,
 } from "@/lib/titles-lifecycle";
 import type { TitleStatus } from "@/lib/titles";
@@ -26,11 +27,13 @@ import { archiveTitle, deleteTitle, restoreTitle } from "./actions";
 
 export function TitleLifecycleControls({
   titleId,
+  titleName,
   status,
   isStaff,
   flags,
 }: {
   titleId: string;
+  titleName: string;
   status: TitleStatus;
   isStaff: boolean;
   flags: TitleLifecycleFlags;
@@ -118,30 +121,27 @@ export function TitleLifecycleControls({
       <Dialog
         open={open === "delete"}
         onClose={() => setOpen(null)}
-        title={TITLE_LIFECYCLE.deleteTitle}
+        title={titleDeleteConfirmTitle(titleName)}
+        size="sm"
       >
-        <p className="t-body-sm text-ink-2">{titleDeleteConfirmBody({ isStaff, status })}</p>
+        <p className="t-body-sm text-ink-2">{titleDeleteConfirmBody({ isStaff, status, name: titleName })}</p>
         {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
-        <div className="mt-[var(--space-4)] flex justify-end gap-[var(--space-2)]">
-          <button
-            type="button"
-            className={MENU_SURFACE_ITEM_CLASS}
-            onClick={() => setOpen(null)}
-          >
+        <DialogFooter>
+          <Button type="button" variant="secondary" onClick={() => setOpen(null)}>
             {TITLE_LIFECYCLE.cancelLabel}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="danger"
             data-title-lifecycle-delete-confirm=""
             disabled={saving}
-            className={cn(MENU_SURFACE_ITEM_CLASS, MENU_SURFACE_ITEM_DANGER_CLASS)}
             onClick={() =>
               void run(() => deleteTitle(titleId), () => router.push("/titles"))
             }
           >
             {TITLE_LIFECYCLE.deleteConfirm}
-          </button>
-        </div>
+          </Button>
+        </DialogFooter>
       </Dialog>
       ) : null}
 
@@ -149,30 +149,27 @@ export function TitleLifecycleControls({
       <Dialog
         open={open === "archive"}
         onClose={() => setOpen(null)}
-        title={TITLE_LIFECYCLE.archiveTitle}
+        title={titleArchiveConfirmTitle(titleName)}
+        size="sm"
       >
         <p className="t-body-sm text-ink-2">
-          {titleArchiveConfirmBody(flags.offerArchiveFromDelete)}
+          {titleArchiveConfirmBody(flags.offerArchiveFromDelete, titleName)}
         </p>
         {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
-        <div className="mt-[var(--space-4)] flex justify-end gap-[var(--space-2)]">
-          <button
-            type="button"
-            className={MENU_SURFACE_ITEM_CLASS}
-            onClick={() => setOpen(null)}
-          >
+        <DialogFooter>
+          <Button type="button" variant="secondary" onClick={() => setOpen(null)}>
             {TITLE_LIFECYCLE.cancelLabel}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="danger"
             data-title-lifecycle-archive-confirm=""
             disabled={saving}
-            className={MENU_SURFACE_ITEM_CLASS}
             onClick={() => void run(() => archiveTitle(titleId))}
           >
             {TITLE_LIFECYCLE.archiveConfirm}
-          </button>
-        </div>
+          </Button>
+        </DialogFooter>
       </Dialog>
       ) : null}
 
@@ -180,28 +177,25 @@ export function TitleLifecycleControls({
       <Dialog
         open={open === "restore"}
         onClose={() => setOpen(null)}
-        title={TITLE_LIFECYCLE.restoreTitle}
+        title={titleRestoreConfirmTitle(titleName)}
+        size="sm"
       >
-        <p className="t-body-sm text-ink-2">{TITLE_LIFECYCLE.restoreBody}</p>
+        <p className="t-body-sm text-ink-2">{titleRestoreConfirmBody(titleName)}</p>
         {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
-        <div className="mt-[var(--space-4)] flex justify-end gap-[var(--space-2)]">
-          <button
-            type="button"
-            className={MENU_SURFACE_ITEM_CLASS}
-            onClick={() => setOpen(null)}
-          >
+        <DialogFooter>
+          <Button type="button" variant="secondary" onClick={() => setOpen(null)}>
             {TITLE_LIFECYCLE.cancelLabel}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="danger"
             data-title-lifecycle-restore-confirm=""
             disabled={saving}
-            className={MENU_SURFACE_ITEM_CLASS}
             onClick={() => void run(() => restoreTitle(titleId))}
           >
             {TITLE_LIFECYCLE.restoreConfirm}
-          </button>
-        </div>
+          </Button>
+        </DialogFooter>
       </Dialog>
       ) : null}
     </div>
