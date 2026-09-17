@@ -44,8 +44,13 @@ export const TITLES_ADD_ICON_CLASS =
 
 export const TITLES_ROW_NAME_CLASS = "t-body font-medium text-ink md:truncate";
 
+// Shared 16:9 landscape art surface. Titles rows constrain it to 160px on
+// desktop; Avails tiles keep it full-cell. Do not invent a second crop.
+export const TITLES_LANDSCAPE_ART_CLASS =
+  "relative aspect-[16/9] w-full shrink-0 overflow-hidden bg-surface-muted [&_img]:h-full [&_img]:w-full [&_img]:object-cover [&_img]:object-center";
+
 export const TITLES_THUMB_CLASS =
-  "relative aspect-[16/9] w-full shrink-0 overflow-hidden bg-surface-muted md:w-[160px] md:rounded-[var(--radius-lg)] [&_img]:h-full [&_img]:w-full [&_img]:object-cover [&_img]:object-center";
+  `${TITLES_LANDSCAPE_ART_CLASS} md:w-[160px] md:rounded-[var(--radius-lg)]`;
 
 export const TITLES_LIST_CLASS =
   "titles-catalog-list flex flex-col gap-[var(--space-4)] md:gap-0 md:overflow-hidden md:rounded-[var(--radius-lg)] md:border md:border-hairline md:bg-surface";

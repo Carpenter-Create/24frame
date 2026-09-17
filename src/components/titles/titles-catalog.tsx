@@ -14,13 +14,15 @@ import {
   TITLES_ROW_COPY_CLASS,
   TITLES_ROW_META_CLASS,
   TITLES_ROW_NAME_CLASS,
+  TITLES_LANDSCAPE_ART_CLASS,
   TITLES_THUMB_CLASS,
   TITLES_TITLE_DESKTOP_CLASS,
   TITLES_TITLE_MOBILE_CLASS,
   type CatalogStatusFilter,
 } from "@/lib/titles-catalog";
 
-// Client `/titles` chrome only. Not the shared Card, BannerCard, or DataTable —
+// Client `/titles` chrome only. TitlesLandscapeArt is the shared 16:9 still —
+// Avails tiles reuse it. Not the shared Card, BannerCard, or DataTable —
 // those must not restyle home, Deliveries, Catalog Health, or staff surfaces.
 // Phone (`< md`): full-width 16:9 art on top, title / year / status under.
 // Desktop (`md+`): landscape-thumb row — art leading, title/year, status.
@@ -188,16 +190,21 @@ export function TitleStatusPill({
   );
 }
 
-function TitlesCatalogThumb({
+export function TitlesLandscapeArt({
   title,
   stillUrl,
+  className,
+  sizes = "(max-width: 768px) 100vw, 160px",
 }: {
   title: string;
   stillUrl: string | null;
+  className?: string;
+  sizes?: string;
 }) {
   return (
     <div
-      className={TITLES_THUMB_CLASS}
+      className={cn(TITLES_LANDSCAPE_ART_CLASS, className)}
+      data-titles-landscape-art=""
       data-titles-catalog-frame=""
       data-titles-catalog-crop="cover"
     >
@@ -207,7 +214,7 @@ function TitlesCatalogThumb({
           title={title}
           rounded="rounded-none"
           className="absolute inset-0 h-full w-full"
-          sizes="(max-width: 768px) 100vw, 160px"
+          sizes={sizes}
         />
       ) : (
         <div
@@ -218,6 +225,22 @@ function TitlesCatalogThumb({
         </div>
       )}
     </div>
+  );
+}
+
+function TitlesCatalogThumb({
+  title,
+  stillUrl,
+}: {
+  title: string;
+  stillUrl: string | null;
+}) {
+  return (
+    <TitlesLandscapeArt
+      title={title}
+      stillUrl={stillUrl}
+      className={TITLES_THUMB_CLASS}
+    />
   );
 }
 

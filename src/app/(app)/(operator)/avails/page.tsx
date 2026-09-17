@@ -1,10 +1,41 @@
+import { createClient } from "@/lib/supabase/server";
+import { titleArtworkUrls } from "@/lib/artwork";
+import { LIST_PAGE, probeRange, splitProbe } from "@/lib/list-bounds";
+import { InlineNotice } from "@/components/ui/inline-notice";
 import { PageHeader } from "@/components/ui/page-header";
-import { AVAILS_PAGE } from "@/lib/avails";
+import { AvailsGrid } from "@/components/avails/avails-grid";
+import { AVAILS_PAGE, toAvailsTile } from "@/lib/avails";
 
-// TODO(design): Avails body layout is held — Adam asked Design for A vs B
-// (Titles-style list without StatusProgressTrack vs 3-wide landscape poster
-// grid). Quiet empty shell only until CoS sends the winner. No list fork,
-// no territory / avails matrix.
-export default function AvailsPage() {
-  return <PageHeader title={AVAILS_PAGE.title} />;
+// Staff /avails body. G4B: 3-wide landscape tiles (house 16 gap), 1-wide
+// phone stack. Shared Titles landscape art + quiet title. Live / Approved
+// only. Cross-org via is_gc_staff. Click → staff title detail.
+
+export default async function AvailsPage() {
+  const supabase = await createClient();
+  const [from, to] = probeRange(LIST_PAGE);
+  const { data: titlePage } = await supabase
+    .from("titles")
+    .select("id, title")
+    .eq("status", "live")
+    .is("deleted_at", null)
+    .order("created_at", { ascending: false })
+    .range(from, to);
+  const { rows: list, truncated } = splitProbe(titlePage, LIST_PAGE);
+  const posters = await titleArtworkUrls(
+    supabase,
+    list.map((t) => t.id),
+  );
+  const tiles = list.map((t) =>
+    toAvailsTile(t, posters.get(t.id)?.banner ?? null),
+  );
+
+  return (
+    <>
+      <PageHeader title={AVAILS_PAGE.title} />
+      {truncated ? (
+        <InlineNotice tone="info">{AVAILS_PAGE.truncated(LIST_PAGE)}</InlineNotice>
+      ) : null}
+      <AvailsGrid tiles={tiles} />
+    </>
+  );
 }
