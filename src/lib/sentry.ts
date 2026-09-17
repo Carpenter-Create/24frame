@@ -9,7 +9,7 @@
 
 export type SentryRuntime = "client" | "server" | "edge";
 export type SentryEnvironment = "production" | "preview" | "development";
-export type SentryEnv = Record<string, string | undefined>;
+export type SentryEnv = Partial<NodeJS.ProcessEnv>;
 
 export const SENTRY_IGNORE_ERRORS: Array<string | RegExp> = [
   /ResizeObserver loop/i,
