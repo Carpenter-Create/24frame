@@ -7,8 +7,9 @@
 //
 // Trigger: truncated current workspace name only. No leading mark
 // or circle — the avatar already provides that. Chevron is hidden
-// at rest; it appears on hover / focus and while the menu is open
-// (touch: press/open). Menu: quiet Workspaces heading, then three
+// at rest on md+; it appears on hover / focus and while the menu
+// is open. Phone keeps a quiet always-on chevron for affordance.
+// Menu: quiet Workspaces heading, then three
 // rows with leading marks, flush-left names, trailing Sporty Blue
 // check on the current lane (#320). No current-workspace identity
 // header. No Settings section — Settings stays on the avatar menu.
@@ -58,11 +59,11 @@ export const WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS = "min-w-0 truncate";
 export const WORKSPACE_SWITCHER_STATIC_CLASS =
   "flex min-w-0 items-center gap-[var(--space-2)] px-2 py-1 t-body-sm font-medium text-ink";
 
-// Hidden at rest. Desktop hover / keyboard focus reveals it. Open
-// state adds opacity-100 so touch press/open is enough — no permanent
-// arrow on a quiet Mercury trigger.
+// Hidden at rest on md+. Desktop hover / keyboard focus reveals it.
+// Open state adds opacity-100. Phone (`max-md`) keeps the chevron
+// visible so Aggregation affordance is not hover-only.
 export const WORKSPACE_SWITCHER_CHEVRON_CLASS =
-  "size-4 shrink-0 text-ink-3 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100";
+  "size-4 shrink-0 text-ink-3 opacity-0 max-md:opacity-100 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100";
 
 export const WORKSPACE_SWITCHER_CHEVRON_OPEN_CLASS = "opacity-100";
 
@@ -91,7 +92,7 @@ export const WORKSPACE_SWITCHER_OPTION_CHECK_GUTTER_CLASS = "size-4 shrink-0";
 export const WORKSPACE_SWITCHER_OPTION_CHECK_CLASS = "text-accent";
 
 export const APP_HEADER_TRAILING_CLUSTER_CLASS =
-  "flex shrink-0 items-center gap-[var(--space-3)]";
+  "flex shrink-0 items-center gap-[var(--space-2)]";
 
 export function workspaceSwitcherMarkLetter(mode: WorkspaceMode): string {
   return WORKSPACE_SWITCHER_MARK[mode];

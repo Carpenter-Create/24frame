@@ -63,11 +63,12 @@ export function DashboardAdminChrome({
   return (
     <div
       data-dashboard-admin-chrome=""
+      data-dashboard-identity-row=""
       className={DASHBOARD_ADMIN_CHROME_CLASS}
     >
       <header className="min-w-0">
         <p className={DASHBOARD_ORG_LABEL_CLASS}>{orgName}</p>
-        <h1 className="t-title text-ink" data-dashboard-title="">
+        <h1 data-dashboard-title="">
           <span data-dashboard-title-mobile="" className={DASHBOARD_TITLE_MOBILE_CLASS}>
             {orgName}
           </span>

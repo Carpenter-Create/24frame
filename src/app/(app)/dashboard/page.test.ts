@@ -648,7 +648,7 @@ describe("company admin Overview hero", () => {
     expect(html).toContain("data-dashboard-title-desktop");
     expect(html).not.toContain("data-dashboard-user-overflow");
     expect(html).toContain("data-dashboard-do-next-secondary");
-    expect(html).toMatch(/data-dashboard-title-desktop="" class="max-md:hidden">All time</);
+    expect(html).toMatch(/data-dashboard-title-desktop="" class="[^"]*max-md:hidden[^"]*">All time</);
     expect(html).toContain(DASHBOARD_ADMIN.revenue);
     expect(html).toContain("$0.00");
     expect(html).not.toContain(DASHBOARD_ADMIN.revenueEmpty);
@@ -739,7 +739,7 @@ describe("company admin Overview hero", () => {
     const html = renderToStaticMarkup(
       await DashboardPage({ searchParams: Promise.resolve({ period: "Q32026" }) }),
     );
-    expect(html).toMatch(/data-dashboard-title-desktop="" class="max-md:hidden">Q3 2026</);
+    expect(html).toMatch(/data-dashboard-title-desktop="" class="[^"]*max-md:hidden[^"]*">Q3 2026</);
     expect(html).toContain("Q3 2026");
     expect(html).not.toContain('value="Q32026"');
     expect(html).not.toContain("data-dashboard-user");
