@@ -46,7 +46,7 @@ const PANES: Record<
   platforms: {
     label: REPORTS_PAGE.platforms,
     empty: REPORTS_PAGE.platformsEmpty,
-    href: "/deliveries",
+    href: "/titles",
     testId: "platforms",
   },
   users: {
@@ -191,7 +191,7 @@ export function ReportsTerritories({
           {real ? (
             <DashboardViewAlts modes={["map", "list", "bars"]} mode={view} onChange={setMode} />
           ) : null}
-          <DashboardViewAll href="/deliveries" />
+          <DashboardViewAll href="/titles" />
         </div>
       </div>
       {real && view === "map" ? (

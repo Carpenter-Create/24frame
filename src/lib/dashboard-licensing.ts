@@ -1,188 +1,96 @@
-import { DASHBOARD_HOME_STACK, type ClientHomeFinding, type ClientHomeTitle } from "@/lib/dashboard-home";
+import type { DeliveryBrowseRow } from "@/lib/deliveries-browse";
 import { titleClientPath } from "@/lib/title-public-id";
-import { TITLE_STATUS_LABELS, type TitleStatus } from "@/lib/titles";
 import { catalogStillSrc } from "@/lib/titles-catalog";
 
-// Company-admin `/dashboard` Licensing status. Maps existing title_status +
-// Catalog Health findings — no new licensing-domain tables or Filmhub channel domain.
-// Ready = live minus open required findings. In review = submitted |
-// in_review | in_delivery. Needs attention = titles with open required
-// findings (required-only for counts; recommended may appear as row meta).
+// Company-admin `/dashboard` Licensing status. Nested title → endpoint
+// composition from existing deliveries. No licensing_* tables, no Filmhub
+// Licensed/Removed domain, no readiness buckets. View all → /titles.
 
 export const DASHBOARD_LICENSING = {
   title: "Licensing status",
-  ready: "Ready",
-  needsAttention: "Needs attention",
-  inReview: "In review",
-  empty: "No titles to show.",
-  viewAllHref: "/catalog-health",
+  empty: "No submissions yet.",
+  viewAllHref: "/titles",
 } as const;
 
-export const LICENSING_IN_REVIEW_STATUSES = ["submitted", "in_review", "in_delivery"] as const;
+export const DASHBOARD_LICENSING_TITLE_CAP = 3;
 
-const IN_REVIEW = new Set<string>(LICENSING_IN_REVIEW_STATUSES);
-
-export type LicensingBucket = "ready" | "needsAttention" | "inReview";
-
-export type LicensingTitle = ClientHomeTitle & {
+export type LicensingTitle = {
+  id: string;
+  title: string;
   catalog_id?: string | null;
 };
 
-export type LicensingRow = {
+export type LicensingEndpointRow = {
+  deliveryId: string;
+  endpoint: string;
+  territory: string;
+  status: string;
+  updatedAt: string | null;
+};
+
+export type LicensingTitleGroup = {
   id: string;
   title: string;
   href: string;
-  status: string;
-  statusLabel: string;
   stillUrl: string | null;
-  meta: string | null;
-  buckets: readonly LicensingBucket[];
+  endpoints: LicensingEndpointRow[];
 };
 
 export type LicensingStatusSnapshot = {
-  ready: number;
-  needsAttention: number;
-  inReview: number;
-  rows: LicensingRow[];
+  groups: LicensingTitleGroup[];
 };
 
-export function isRequiredFinding(severity: string | null | undefined): boolean {
-  return severity === "high";
-}
-
-export function isRecommendedFinding(severity: string | null | undefined): boolean {
-  return severity === "low";
-}
-
-export function isLicensingInReview(status: string): boolean {
-  return IN_REVIEW.has(status);
-}
-
-export function isLicensingReady(status: string, hasRequiredFinding: boolean): boolean {
-  return status === "live" && !hasRequiredFinding;
-}
-
-export function licensingBuckets(status: string, hasRequiredFinding: boolean): LicensingBucket[] {
-  const buckets: LicensingBucket[] = [];
-  if (isLicensingReady(status, hasRequiredFinding)) buckets.push("ready");
-  if (hasRequiredFinding) buckets.push("needsAttention");
-  if (isLicensingInReview(status)) buckets.push("inReview");
-  return buckets;
-}
-
-/** Full union — never `as const` a single bucket (that narrows includes()). */
-export function licensingBucketSet(
-  buckets: readonly LicensingBucket[],
-): Set<LicensingBucket> {
-  return new Set<LicensingBucket>(buckets);
-}
-
-export function countLicensingBuckets(buckets: readonly LicensingBucket[]): {
-  ready: number;
-  needsAttention: number;
-  inReview: number;
-} {
-  const counts = { ready: 0, needsAttention: 0, inReview: 0 };
-  for (const bucket of buckets) {
-    switch (bucket) {
-      case "ready":
-      case "needsAttention":
-      case "inReview":
-        counts[bucket] += 1;
-        break;
-    }
-  }
-  return counts;
-}
-
-function findingPriority(finding: ClientHomeFinding): number {
-  if (isRequiredFinding(finding.severity)) return 0;
-  if (isRecommendedFinding(finding.severity)) return 1;
-  return 2;
-}
-
-function rowMeta(
-  required: readonly ClientHomeFinding[],
-  recommended: readonly ClientHomeFinding[],
-): string | null {
-  for (const finding of [...required, ...recommended]) {
-    const message = finding.message?.trim();
-    if (message) return message;
-  }
-  return null;
-}
-
-function statusLabel(status: string): string {
-  return Object.hasOwn(TITLE_STATUS_LABELS, status)
-    ? TITLE_STATUS_LABELS[status as TitleStatus]
-    : status;
-}
-
-function rowRank(buckets: readonly LicensingBucket[]): number {
-  const present = licensingBucketSet(buckets);
-  if (present.has("needsAttention")) return 0;
-  if (present.has("inReview")) return 1;
-  if (present.has("ready")) return 2;
-  return 3;
+function deliveryRecency(row: DeliveryBrowseRow): string {
+  return row.updated_at ?? "";
 }
 
 /**
- * Org-wide catalog truth — not period-scoped. Counts are titles, not findings.
- * Recommended findings never increment Needs attention.
+ * Titles with at least one submitted endpoint, newest activity first.
+ * Cap ~3 titles. Every endpoint on those titles is nested.
  */
 export function buildLicensingStatus(input: {
   titles: readonly LicensingTitle[];
-  findings: readonly ClientHomeFinding[];
+  deliveries: readonly DeliveryBrowseRow[];
   stills?: ReadonlyMap<string, string | null>;
 }): LicensingStatusSnapshot {
-  const findingsByTitle = new Map<string, ClientHomeFinding[]>();
-  for (const finding of input.findings) {
-    const list = findingsByTitle.get(finding.entity_id) ?? [];
-    list.push(finding);
-    findingsByTitle.set(finding.entity_id, list);
+  const titleById = new Map(input.titles.map((title) => [title.id, title]));
+  const byTitle = new Map<string, DeliveryBrowseRow[]>();
+  for (const row of input.deliveries) {
+    if (!titleById.has(row.title_id)) continue;
+    const list = byTitle.get(row.title_id) ?? [];
+    list.push(row);
+    byTitle.set(row.title_id, list);
   }
 
-  let ready = 0;
-  let needsAttention = 0;
-  let inReview = 0;
-  const candidates: LicensingRow[] = [];
-
-  for (const title of input.titles) {
-    const findings = [...(findingsByTitle.get(title.id) ?? [])].sort(
-      (a, b) => findingPriority(a) - findingPriority(b),
-    );
-    const required = findings.filter((finding) => isRequiredFinding(finding.severity));
-    const recommended = findings.filter((finding) => isRecommendedFinding(finding.severity));
-    const hasRequired = required.length > 0;
-    // Always LicensingBucket[] — never `as const ["needsAttention"]`.
-    // Archived is not Ready / In review; required findings still count.
-    const buckets = licensingBuckets(title.status, hasRequired);
-    const counted = countLicensingBuckets(buckets);
-    ready += counted.ready;
-    needsAttention += counted.needsAttention;
-    inReview += counted.inReview;
-    if (buckets.length === 0) continue;
-    candidates.push({
-      id: title.id,
-      title: title.title,
-      href: titleClientPath(title.catalog_id),
-      status: title.status,
-      statusLabel: statusLabel(title.status),
-      stillUrl: catalogStillSrc(input.stills?.get(title.id) ?? null),
-      meta: rowMeta(required, recommended),
-      buckets,
-    });
-  }
-
-  const rows = candidates
-    .sort((a, b) => {
-      const rank = rowRank(a.buckets) - rowRank(b.buckets);
-      if (rank !== 0) return rank;
-      const aCreated = input.titles.find((title) => title.id === a.id)?.created_at ?? "";
-      const bCreated = input.titles.find((title) => title.id === b.id)?.created_at ?? "";
-      return aCreated < bCreated ? 1 : -1;
+  const groups = [...byTitle.entries()]
+    .map(([titleId, rows]) => {
+      const title = titleById.get(titleId);
+      if (!title) return null;
+      const endpoints = [...rows]
+        .sort((a, b) => (deliveryRecency(a) < deliveryRecency(b) ? 1 : -1))
+        .map((row) => ({
+          deliveryId: row.delivery_id,
+          endpoint: row.vendor_name,
+          territory: row.territory,
+          status: row.status,
+          updatedAt: row.updated_at,
+        }));
+      const latest = endpoints[0]?.updatedAt ?? "";
+      return {
+        latest,
+        group: {
+          id: title.id,
+          title: title.title,
+          href: titleClientPath(title.catalog_id),
+          stillUrl: catalogStillSrc(input.stills?.get(title.id) ?? null),
+          endpoints,
+        } satisfies LicensingTitleGroup,
+      };
     })
-    .slice(0, DASHBOARD_HOME_STACK);
+    .filter((row): row is { latest: string; group: LicensingTitleGroup } => row != null)
+    .sort((a, b) => (a.latest < b.latest ? 1 : -1))
+    .slice(0, DASHBOARD_LICENSING_TITLE_CAP)
+    .map((row) => row.group);
 
-  return { ready, needsAttention, inReview, rows };
+  return { groups };
 }

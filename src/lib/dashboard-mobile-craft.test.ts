@@ -45,10 +45,10 @@ describe("company-admin Dashboard mobile craft", () => {
   it("keeps the scrub in the 160–200px band and full width on phone", () => {
     expect(DASHBOARD_CHART_HEIGHT_MOBILE).toBeGreaterThanOrEqual(160);
     expect(DASHBOARD_CHART_HEIGHT_MOBILE).toBeLessThanOrEqual(200);
-    expect(DASHBOARD_CHART_HEIGHT_DESKTOP).toBe(200);
+    expect(DASHBOARD_CHART_HEIGHT_DESKTOP).toBe(240);
     expect(DASHBOARD_CHART_FRAME_CLASS).toContain("w-full");
     expect(DASHBOARD_CHART_FRAME_CLASS).toContain("h-[176px]");
-    expect(DASHBOARD_CHART_FRAME_CLASS).toContain("md:h-[200px]");
+    expect(DASHBOARD_CHART_FRAME_CLASS).toContain("md:h-[240px]");
   });
 
   it("keeps Find-user off Dashboard on phone and md+ and Period on a bottom sheet", () => {

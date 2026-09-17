@@ -22,6 +22,7 @@ import {
   DashboardTopTitles,
   DashboardWhatChanged,
 } from "@/components/dashboard/dashboard-modules";
+import { DashboardLicensingStatus } from "@/components/dashboard/dashboard-licensing-status";
 import { DashboardRankedBars, DashboardTopPerforming } from "@/components/dashboard/dashboard-ranked";
 import {
   DASHBOARD_PLATFORM_LIMIT,
@@ -56,6 +57,7 @@ import {
   revenuePointsFromLabels,
   type DashboardAuditEvent,
 } from "@/lib/dashboard-admin";
+import { ATTENTION_HREF, buildAttentionGlance } from "@/lib/dashboard-attention";
 import { buildLicensingStatus } from "@/lib/dashboard-licensing";
 import { titleArtworkUrls } from "@/lib/artwork";
 import {
@@ -84,22 +86,24 @@ import { buildClientFinanceDashboard } from "@/lib/finance-dashboard";
 import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 
 // Company-admin `/dashboard` rematches Overview analytics structure inside
-// house tokens: unlabeled period chrome, Net revenue $ + scrub, Licensing
-// status, then one Top performing section (Titles / Platforms /
+// house tokens: unlabeled period chrome, taller Net revenue $ + scrub |
+// Attention glance, then Licensing status full-width (nested title →
+// endpoint), then one Top performing section (Titles / Platforms /
 // Territories pills), then Recent account activity full-width. 24Frame
 // nouns only — never Top works, sources, contributors, or Exports. Period
 // is chrome, not H1 — dominant read is the $. Phone (`< md`) is a
-// single-column stack — Net → Licensing → Top performing → Recent.
-// Find-user is gone on phone and md+; user scope lives on /reports later.
-// Leftover ?user= parsing stays inert for data only. Catalog-velocity
-// strip is gone — Adam lock 2026-09-16. Company-admin also drops Recent
-// (the old just-in module), Do next, Deliveries needing action, Catalog
-// Health count, What changed, and Pending submissions. Top performing
-// always renders — selected pill owns the full-width body (list default
-// for Titles/Platforms; map default for Territories). Quiet empty, never
-// omitted. Company-admin drops the All-time activity / Reports footer.
-// Standard seats keep the catalog hero, platforms/territories pair, and
-// Reports pointer.
+// single-column stack — Net → Attention → Licensing → Top performing →
+// Recent. Find-user is gone on phone and md+; user scope lives on /reports
+// later. Leftover ?user= parsing stays inert for data only.
+// Catalog-velocity strip is gone — Adam lock 2026-09-16. Licensing
+// readiness buckets are dead — Adam lock 2026-09-17. Company-admin also
+// drops Recent (the old just-in module), Do next, Deliveries needing
+// action, Catalog Health count, What changed, and Pending submissions.
+// Top performing always renders — selected pill owns the full-width body
+// (list default for Titles/Platforms; map default for Territories). Quiet
+// empty, never omitted. Company-admin drops the All-time activity /
+// Reports footer. Standard seats keep the catalog hero,
+// platforms/territories pair, and Reports pointer.
 // Export stays on /reports. Fixture money is labeled + env-gated and never
 // enters export/ledger. Licensing never uses the money fixture.
 
@@ -190,6 +194,7 @@ export default async function DashboardPage({
   let useFixture = false;
   let adminUpdated: string | null = null;
   let adminActivity: ReturnType<typeof recentAccountActivity> = [];
+  let adminLicensing: ReturnType<typeof buildLicensingStatus> = { groups: [] };
   if (isAdmin) {
     const canReadMoney = !userId && canViewClientEarn({ isGcStaff: ctx.isGcStaff, role: ctx.activeRole });
     const moneyLoaded = canReadMoney ? await loadRecipientDashboard(org.id) : null;
@@ -267,19 +272,23 @@ export default async function DashboardPage({
         ? dashboardFixtureActivity(period, now)
         : hydratedActivity;
 
+    const attention = buildAttentionGlance({
+      findings: findings.rows,
+      titles,
+    });
     const licensingBase = buildLicensingStatus({
       titles,
-      findings: findings.rows,
+      deliveries: deliveries.rows,
     });
     const artwork = await titleArtworkUrls(
       supabase,
-      licensingBase.rows.map((row) => row.id),
+      licensingBase.groups.map((group) => group.id),
     );
-    const licensing = {
+    adminLicensing = {
       ...licensingBase,
-      rows: licensingBase.rows.map((row) => ({
-        ...row,
-        stillUrl: artwork.get(row.id)?.banner ?? null,
+      groups: licensingBase.groups.map((group) => ({
+        ...group,
+        stillUrl: artwork.get(group.id)?.banner ?? null,
       })),
     };
 
@@ -292,7 +301,7 @@ export default async function DashboardPage({
         options={dashboardPeriodOptionsFor(period, now, monthSources)}
         hero={revenueHero}
         fixture={useFixture}
-        licensing={licensing}
+        attention={attention}
       />
     );
   }
@@ -318,7 +327,7 @@ export default async function DashboardPage({
         <>
           <div className="flex flex-col gap-[var(--space-6)] sm:flex-row sm:items-center sm:justify-between">
             <DashboardOrgIdentity name={org.name} />
-            <DashboardHomePillLink href="/catalog-health">
+            <DashboardHomePillLink href={ATTENTION_HREF}>
               {DASHBOARD_HOME.catalogHealthCta}
             </DashboardHomePillLink>
           </div>
@@ -347,6 +356,7 @@ export default async function DashboardPage({
       >
         {isAdmin ? (
           <>
+            <DashboardLicensingStatus snapshot={adminLicensing} />
             <DashboardTopPerforming
               titles={adminTopTitles}
               platforms={adminPlatforms}
@@ -363,14 +373,14 @@ export default async function DashboardPage({
               empty={DASHBOARD_HOME.platformsEmpty}
               rows={livePlatforms}
               testId="platforms"
-              viewAllHref="/deliveries"
+              viewAllHref="/titles"
             />
             <DashboardRankedBars
               label={DASHBOARD_HOME.territories}
               empty={DASHBOARD_HOME.territoriesEmpty}
               rows={liveTerritories}
               testId="territories"
-              viewAllHref="/deliveries"
+              viewAllHref="/titles"
               territory
             />
           </div>

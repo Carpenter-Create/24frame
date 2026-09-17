@@ -155,7 +155,7 @@ describe("Coinbase shell rematch — Adam miss list v1", () => {
     const catalog = renderToStaticMarkup(
       createElement(
         DashboardHomePillLink,
-        { href: "/catalog-health" } as { href: string; children: string },
+        { href: "/attention" } as { href: string; children: string },
         DASHBOARD_HOME.catalogHealthCta,
       ),
     );

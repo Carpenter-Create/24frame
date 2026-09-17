@@ -35,7 +35,7 @@ function deliveryUpdateLink(ctx: NotificationLinkCtx = {}): NotificationLink {
   if (isSafeTitleId(ctx.titleId)) {
     return { cta: "View title", path: `/titles/${ctx.titleId}` };
   }
-  return { cta: "View your deliveries", path: "/deliveries" };
+  return { cta: "View your titles", path: "/titles" };
 }
 
 function titleRejectedLink(ctx: NotificationLinkCtx = {}): NotificationLink {

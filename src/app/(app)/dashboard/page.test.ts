@@ -81,6 +81,15 @@ function stubClient(
       at: string;
     }[];
     profiles?: { id: string; display_name: string | null }[];
+    deliveries?: {
+      delivery_id: string;
+      title_id: string;
+      title: string;
+      vendor_name: string;
+      territory: string;
+      status: string;
+      updated_at: string | null;
+    }[];
   } = {},
 ) {
   const eq = vi.fn();
@@ -132,7 +141,7 @@ function stubClient(
   });
   const rpc = vi.fn(async (name: string) => {
     if (name === "my_findings") return { data: findings, error: null };
-    if (name === "my_deliveries") return { data: [], error: null };
+    if (name === "my_deliveries") return { data: extras.deliveries ?? [], error: null };
     if (name === "gc_client_directory") return { data: [], error: null };
     throw new Error(`unexpected rpc(${name})`);
   });
@@ -168,7 +177,6 @@ function expectCompanyAdminStructuralDelta(html: string) {
   expect(html).not.toContain('data-dashboard-module="what-changed"');
   expect(html).not.toContain('data-dashboard-module="pending"');
   expect(html).not.toContain(DASHBOARD_HOME.deliveriesAction);
-  expect(html).not.toContain(DASHBOARD_HOME.findingsGlance);
   expect(html).not.toContain(DASHBOARD_HOME.whatChanged);
   expect(html).not.toContain(DASHBOARD_HOME.pending);
   expect(html).toContain("data-dashboard-revenue");
@@ -176,9 +184,11 @@ function expectCompanyAdminStructuralDelta(html: string) {
   expect(html).toContain("data-dashboard-period");
   expect(html).toContain("data-dashboard-period-current");
   expect(html).toContain("data-dashboard-period-chevron");
+  expect(html).toContain('data-dashboard-module="attention"');
+  expect(html).toContain("Attention");
   expect(html).toContain('data-dashboard-module="licensing-status"');
   expect(html).toContain(DASHBOARD_LICENSING.title);
-  expect(html).toContain("data-dashboard-licensing-summary");
+  expect(html).not.toContain("data-dashboard-licensing-summary");
   expect(html).toContain('data-dashboard-module="recent-activity"');
   expect(html).toContain("data-dashboard-top-performing");
   expect(html).toContain(DASHBOARD_HOME.topPerforming);
@@ -252,7 +262,7 @@ describe("DashboardPage modes", () => {
     expect(html).not.toContain(ORG_ROLE_LABELS.account_owner);
     expect(html).not.toMatch(/Active · Account owner/);
     expect(html).toContain(DASHBOARD_ATTENTION_CLEAR);
-    expect(html).toContain("/catalog-health");
+    expect(html).toContain("/attention");
     expect(html).toContain("data-dashboard-home");
     expect(html).toContain("data-dashboard-hero");
     expect(html).toContain("data-dashboard-overview-row");
@@ -265,7 +275,7 @@ describe("DashboardPage modes", () => {
     expect(html).not.toContain("data-finance-glance");
     expect(html).not.toContain("data-finance-glance-stub");
     expect(html).toContain("dashboard-home-pill");
-    expect(html).toContain('href="/catalog-health"');
+    expect(html).toContain('href="/attention"');
     expect(html).toContain("h-9");
     expect(html).toContain("size-[14px]");
     expect(html).toContain(DASHBOARD_HOME.catalogEmpty);
@@ -736,6 +746,7 @@ describe("company admin Overview hero", () => {
     expect(html).not.toContain("data-dashboard-user");
     expect(html).toContain("data-dashboard-revenue");
     expect(html).toContain("data-dashboard-revenue-chart");
+    expect(html).toContain('data-dashboard-module="attention"');
     expect(html).toContain('data-dashboard-module="licensing-status"');
     expect(html).toContain('data-dashboard-module="recent-activity"');
     expect(html).toContain("lg:grid-cols-5");
@@ -743,12 +754,16 @@ describe("company admin Overview hero", () => {
     expect(html).toContain("lg:col-span-2");
     expect(html).toContain("max-md:flex-col");
     expect(html).toContain("data-dashboard-overview-revenue");
-    expect(html).toContain("data-dashboard-overview-licensing");
+    expect(html).toContain("data-dashboard-overview-attention");
+    expect(html).not.toContain("data-dashboard-overview-licensing");
     expect(html).not.toContain("data-dashboard-overview-activity");
     expect(html.indexOf("data-dashboard-overview-revenue")).toBeLessThan(
-      html.indexOf("data-dashboard-overview-licensing"),
+      html.indexOf("data-dashboard-overview-attention"),
     );
     expect(html.indexOf("data-dashboard-revenue")).toBeLessThan(
+      html.indexOf('data-dashboard-module="attention"'),
+    );
+    expect(html.indexOf('data-dashboard-module="attention"')).toBeLessThan(
       html.indexOf('data-dashboard-module="licensing-status"'),
     );
     expect(html.indexOf('data-dashboard-module="licensing-status"')).toBeLessThan(
@@ -909,11 +924,11 @@ describe("company admin Overview hero", () => {
     expect(html).not.toContain(DASHBOARD_ADMIN.allCompany);
   });
 
-  it("maps live titles into Licensing status and activity actors without fake licenses", async () => {
+  it("maps findings into Attention and deliveries into nested Licensing status", async () => {
     stubClient(
       [
         {
-          id: "title-1",
+          id: "11111111-1111-4111-8111-111111111111",
           title: "Winter Light",
           status: "live",
           created_at: "2026-09-02T15:04:00.000Z",
@@ -921,7 +936,7 @@ describe("company admin Overview hero", () => {
           catalog_id: "GC-0001234",
         },
         {
-          id: "title-2",
+          id: "22222222-2222-4222-8222-222222222222",
           title: "Harbor Cut",
           status: "in_review",
           created_at: "2026-09-03T00:00:00.000Z",
@@ -930,26 +945,54 @@ describe("company admin Overview hero", () => {
       ],
       [
         {
+          id: "f1",
           org_id: "org-1",
-          entity_id: "title-1",
+          entity_id: "11111111-1111-4111-8111-111111111111",
           severity: "high",
           message: "Synopsis is required.",
+          created_at: "2026-09-12T15:04:00.000Z",
         },
       ],
+      {
+        deliveries: [
+          {
+            delivery_id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+            title_id: "11111111-1111-4111-8111-111111111111",
+            title: "Winter Light",
+            vendor_name: "Endpoint A",
+            territory: "US",
+            status: "pending",
+            updated_at: "2026-09-12T00:00:00.000Z",
+          },
+          {
+            delivery_id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+            title_id: "11111111-1111-4111-8111-111111111111",
+            title: "Winter Light",
+            vendor_name: "Endpoint B",
+            territory: "CA",
+            status: "rejected",
+            updated_at: "2026-09-11T00:00:00.000Z",
+          },
+        ],
+      },
     );
     vi.mocked(getOrgContext).mockResolvedValue(
       ctx({ isGcStaff: false, orgStatus: "active", role: "account_owner" }) as never,
     );
     const html = renderToStaticMarkup(await DashboardPage({ searchParams: Promise.resolve({}) }));
-    expect(html).toContain('data-dashboard-licensing-count="ready"');
-    expect(html).toMatch(/data-dashboard-licensing-count="ready"[^>]*>0</);
-    expect(html).toMatch(/data-dashboard-licensing-count="needsAttention"[^>]*>1</);
-    expect(html).toMatch(/data-dashboard-licensing-count="inReview"[^>]*>1</);
-    expect(html).toContain('href="/titles/24F-0001234"');
-    expect(html).toContain('href="/titles/24F-0001235"');
-    expect(html).toContain("data-dashboard-licensing-thumb");
-    expect(html).toContain("data-dashboard-licensing-pill");
+    expect(html).toContain('data-dashboard-module="attention"');
     expect(html).toContain("Synopsis is required.");
+    expect(html).toContain("data-dashboard-attention-clock");
+    expect(html).toContain('data-dashboard-module="licensing-status"');
+    expect(html).toContain("Winter Light");
+    expect(html).toContain("Endpoint A");
+    expect(html).toContain("Endpoint B");
+    expect(html).toContain("data-dashboard-licensing-thumb");
+    expect(html).toContain("data-dashboard-licensing-endpoints");
+    expect(html).toContain('data-status-progress-variant="pipeline"');
+    expect(html).toContain('data-status-progress-variant="off"');
+    expect(html).not.toContain("data-dashboard-licensing-summary");
+    expect(html).not.toContain("data-dashboard-licensing-pill");
     expect(html).toContain("data-dashboard-activity-actor");
     expect(html).toContain("data-dashboard-activity-clock");
     expect(html).toContain("?");

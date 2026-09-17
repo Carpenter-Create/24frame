@@ -170,8 +170,7 @@ describe("staff rail and neighboring locks", () => {
     expect([...NAV, ...GC_NAV].map((item) => item.label)).toEqual([
       "Dashboard",
       "Titles",
-      "Deliveries",
-      "Catalog Health",
+      "Attention",
       "Reports",
       "Ask 24Frame AI",
       "Queue",
@@ -191,9 +190,9 @@ describe("staff rail and neighboring locks", () => {
 
     expect(ask).toContain("Figma 7:73 landing chrome");
     expect(ask).toContain("rounded-[28px]");
-    expect(deliveries).toContain("EmptyState");
-    expect(deliveries).toContain("DELIVERIES_NO_DATA");
-    expect(deliveries).toContain("data-deliveries-pipeline");
+    expect(deliveries).toContain('redirect("/titles")');
+    expect(deliveries).not.toContain("EmptyState");
+    expect(deliveries).not.toContain("data-deliveries-pipeline");
     expect(titles).toContain("TITLES_CATALOG");
     expect(nav).toContain("Access rail");
     expect(home).toContain("GcClientsDirectory");

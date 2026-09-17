@@ -77,6 +77,10 @@ const nextConfig: NextConfig = {
       { source: "/finance/:path*", destination: "/reports/:path*", permanent: true },
       { source: "/gc/education", destination: "/education", permanent: true },
       { source: "/gc/education/:slug", destination: "/education/:slug", permanent: true },
+      { source: "/catalog-health", destination: "/attention", permanent: true },
+      { source: "/catalog-health/:path*", destination: "/attention/:path*", permanent: true },
+      { source: "/deliveries", destination: "/titles", permanent: true },
+      { source: "/deliveries/:path*", destination: "/titles/:path*", permanent: true },
     ];
   },
 };

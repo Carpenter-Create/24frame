@@ -7,7 +7,7 @@ import { DASHBOARD_ADMIN, parseDashboardPeriod } from "@/lib/dashboard-admin";
 import { DASHBOARD_ACTIVITY_ROW_CLASS } from "@/lib/dashboard-craft";
 import { DASHBOARD_FIXTURE } from "@/lib/dashboard-fixture";
 import { dashboardJustInDate, dashboardJustInTime } from "@/lib/dashboard-home";
-import { DASHBOARD_LICENSING } from "@/lib/dashboard-licensing";
+import { DASHBOARD_ATTENTION } from "@/lib/dashboard-attention";
 import { DashboardAdminHero, DashboardRecentActivity } from "./dashboard-admin-hero";
 
 vi.mock("next/navigation", () => ({
@@ -16,10 +16,7 @@ vi.mock("next/navigation", () => ({
 
 const now = new Date("2026-09-16T12:00:00.000Z");
 
-const emptyLicensing = {
-  ready: 0,
-  needsAttention: 0,
-  inReview: 0,
+const emptyAttention = {
   rows: [],
 };
 
@@ -43,7 +40,7 @@ describe("DashboardAdminHero", () => {
           compare: null,
           points: [],
         },
-        licensing: emptyLicensing,
+        attention: emptyAttention,
         periodMenuOpen: true,
       }),
     );
@@ -54,13 +51,14 @@ describe("DashboardAdminHero", () => {
     expect(html).toContain("max-md:flex");
     expect(html).toContain("max-md:flex-col");
     expect(html).toContain("data-dashboard-overview-revenue");
-    expect(html).toContain("data-dashboard-overview-licensing");
+    expect(html).toContain("data-dashboard-overview-attention");
     expect(html.indexOf("data-dashboard-overview-revenue")).toBeLessThan(
-      html.indexOf("data-dashboard-overview-licensing"),
+      html.indexOf("data-dashboard-overview-attention"),
     );
     expect(html.indexOf("data-dashboard-revenue")).toBeLessThan(
-      html.indexOf('data-dashboard-module="licensing-status"'),
+      html.indexOf('data-dashboard-module="attention"'),
     );
+    expect(html).not.toContain('data-dashboard-module="licensing-status"');
     expect(html).not.toContain('data-dashboard-module="recent-activity"');
     expect(html).toContain("data-dashboard-mobile-stack");
     expect(html).toContain("data-dashboard-title-mobile");
@@ -69,7 +67,8 @@ describe("DashboardAdminHero", () => {
     expect(html).not.toMatch(/data-dashboard-title-desktop=""[^>]*>All time</);
     expect(html).not.toContain("data-dashboard-period-kicker");
     expect(html).toContain(DASHBOARD_ADMIN.revenue);
-    expect(html).toContain(DASHBOARD_LICENSING.title);
+    expect(html).toContain(DASHBOARD_ATTENTION.title);
+    expect(html).not.toContain("Licensing status");
     expect(html).not.toContain(DASHBOARD_ADMIN.activity);
     expect(html).toContain("Acme");
     expect(html).toContain("All time");
@@ -104,7 +103,7 @@ describe("DashboardAdminHero", () => {
             { key: "2026-07", label: "2026-07", year: 2026, month: 7, netCents: 120_000_00 },
           ],
         },
-        licensing: emptyLicensing,
+        attention: emptyAttention,
         fixture: true,
         periodMenuOpen: true,
       }),
@@ -117,7 +116,7 @@ describe("DashboardAdminHero", () => {
     expect(html).toContain("text-ink-3");
     expect(html).not.toContain("text-emerald");
     expect(html).not.toContain("text-rose");
-    expect(html).toContain(DASHBOARD_LICENSING.empty);
+    expect(html).toContain(DASHBOARD_ATTENTION.empty);
     expect(html).not.toContain("Licensed");
   });
 
@@ -173,12 +172,12 @@ describe("DashboardAdminHero", () => {
     expect(chart).toContain("strokeDasharray");
     expect(hero).toContain("DASHBOARD_ADMIN_OVERVIEW_CLASS");
     expect(hero).toContain("DASHBOARD_ADMIN_HERO_REVENUE_CLASS");
-    expect(hero).toContain("DASHBOARD_ADMIN_HERO_LICENSING_CLASS");
+    expect(hero).toContain("DASHBOARD_ADMIN_HERO_ATTENTION_CLASS");
     expect(hero).toMatch(
-      /data-dashboard-overview-revenue=""[\s\S]*data-dashboard-overview-licensing=""/,
+      /data-dashboard-overview-revenue=""[\s\S]*data-dashboard-overview-attention=""/,
     );
     expect(hero).not.toMatch(
-      /data-dashboard-overview-licensing=""[\s\S]*data-dashboard-overview-revenue=""/,
+      /data-dashboard-overview-attention=""[\s\S]*data-dashboard-overview-revenue=""/,
     );
     expect(craft).toContain("lg:grid-cols-2");
     expect(craft).toContain("lg:grid-cols-5");

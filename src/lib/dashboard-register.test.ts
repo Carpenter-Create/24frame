@@ -179,7 +179,7 @@ describe("dashboard register chrome", () => {
         empty: DASHBOARD_HOME.platformsEmpty,
         rows: [{ name: "Window A", count: 4 }],
         testId: "platforms",
-        viewAllHref: "/deliveries",
+        viewAllHref: "/titles",
       }),
     );
     const territories = renderToStaticMarkup(
@@ -188,7 +188,7 @@ describe("dashboard register chrome", () => {
         empty: DASHBOARD_HOME.territoriesEmpty,
         rows: [{ name: "US", count: 4 }],
         testId: "territories",
-        viewAllHref: "/deliveries",
+        viewAllHref: "/titles",
         territory: true,
         defaultMode: "list",
       }),
@@ -304,7 +304,7 @@ describe("dashboard register chrome", () => {
     expect(platforms).toContain('data-dashboard-view="list"');
     expect(platforms).toContain("Window A");
     expect(platforms).toContain('data-dashboard-ranked-grammar="grade"');
-    expect(platforms).toContain('href="/deliveries"');
+    expect(platforms).toContain('href="/titles"');
     expect(territories).toContain('data-dashboard-view="map"');
     expect(territories).toContain("data-dashboard-territory-map");
     expect(territories).toContain('data-dashboard-territory-scale="overview"');
@@ -374,7 +374,7 @@ describe("dashboard register chrome", () => {
         empty: DASHBOARD_HOME.territoriesEmpty,
         rows: [{ name: "US", count: 4 }],
         testId: "territories",
-        viewAllHref: "/deliveries",
+        viewAllHref: "/titles",
         territory: true,
         periodLabel: "All time",
       }),
@@ -385,7 +385,7 @@ describe("dashboard register chrome", () => {
         empty: DASHBOARD_HOME.platformsEmpty,
         rows: [{ name: "Window A", count: 4 }],
         testId: "platforms",
-        viewAllHref: "/deliveries",
+        viewAllHref: "/titles",
       }),
     );
     expect(DASHBOARD_HOME.territories).toBe("Territories");
@@ -428,7 +428,7 @@ describe("dashboard register chrome", () => {
         empty: DASHBOARD_HOME.platformsEmpty,
         rows: [],
         testId: "platforms",
-        viewAllHref: "/deliveries",
+        viewAllHref: "/titles",
       }),
     );
     const territories = renderToStaticMarkup(
@@ -437,7 +437,7 @@ describe("dashboard register chrome", () => {
         empty: DASHBOARD_HOME.territoriesEmpty,
         rows: [],
         testId: "territories",
-        viewAllHref: "/deliveries",
+        viewAllHref: "/titles",
         territory: true,
       }),
     );
@@ -498,7 +498,7 @@ describe("dashboard register chrome", () => {
         empty: DASHBOARD_HOME.territoriesEmpty,
         rows: many,
         testId: "territories",
-        viewAllHref: "/deliveries",
+        viewAllHref: "/titles",
         territory: true,
         defaultMode: "list",
       }),

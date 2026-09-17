@@ -140,20 +140,14 @@ describe("Dashboard type jobs", () => {
             { key: "2026-07", label: "2026-07", year: 2026, month: 7, netCents: 120_000_00 },
           ],
         },
-        licensing: {
-          ready: 1,
-          needsAttention: 0,
-          inReview: 0,
+        attention: {
           rows: [
             {
-              id: "t1",
-              title: "Winter Light",
+              id: "f1",
+              what: "Synopsis is required.",
+              at: "2026-09-12T15:04:00.000Z",
               href: "/titles/24F-0001234",
-              status: "live",
-              statusLabel: "Live",
-              stillUrl: null,
-              meta: null,
-              buckets: ["ready"],
+              kind: "catalog",
             },
           ],
         },
