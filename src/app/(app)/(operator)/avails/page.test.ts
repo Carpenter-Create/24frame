@@ -68,7 +68,7 @@ describe("AvailsPage", () => {
     expect(html).not.toContain("Add Title");
   });
 
-  it("loads live titles only and paints G4B landscape tiles to staff detail", async () => {
+  it("loads live titles only and paints avails-grid-3 landscape tiles to staff detail", async () => {
     const { from, titlesChain } = stubClient([
       { id: "live-1", title: "Approved one" },
       { id: "live-2", title: "Approved two" },

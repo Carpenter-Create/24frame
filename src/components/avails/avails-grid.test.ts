@@ -36,7 +36,7 @@ function openingTagWith(html: string, marker: string): string {
   return html.slice(start, end + 1);
 }
 
-describe("AvailsGrid G4B", () => {
+describe("AvailsGrid avails-grid-3", () => {
   it("is a 3-wide landscape tile grid that reuses Titles art + quiet title", () => {
     const html = renderToStaticMarkup(
       createElement(AvailsGrid, {

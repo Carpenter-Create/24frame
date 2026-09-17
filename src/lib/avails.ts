@@ -4,10 +4,11 @@ import {
   catalogStillSrc,
 } from "@/lib/titles-catalog";
 
-// Staff /avails. Adam lock G4B: 3-wide landscape tile grid on desktop,
-// 1-wide stack of the same tile on phone. Shared Titles landscape art +
-// quiet title — no Avails-only card, no StatusProgressTrack, no territory
-// matrix. Titles with status = live (Approved) only.
+// Staff /avails. Adam lock avails-grid-3 (B): 3-wide landscape tile grid
+// on desktop, 1-wide stack of the same tile on phone. Shared Titles
+// landscape art + quiet title — no Avails-only card, no
+// StatusProgressTrack, no territory matrix. Titles with status = live
+// (Approved) only.
 
 export const AVAILS_HREF = "/avails";
 

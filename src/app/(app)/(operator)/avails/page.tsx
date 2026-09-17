@@ -6,9 +6,9 @@ import { PageHeader } from "@/components/ui/page-header";
 import { AvailsGrid } from "@/components/avails/avails-grid";
 import { AVAILS_PAGE, toAvailsTile } from "@/lib/avails";
 
-// Staff /avails body. G4B: 3-wide landscape tiles (house 16 gap), 1-wide
-// phone stack. Shared Titles landscape art + quiet title. Live / Approved
-// only. Cross-org via is_gc_staff. Click → staff title detail.
+// Staff /avails body. avails-grid-3: 3-wide landscape tiles (house 16
+// gap), 1-wide phone stack. Shared Titles landscape art + quiet title.
+// Live / Approved only. Cross-org via is_gc_staff. Click → staff title.
 
 export default async function AvailsPage() {
   const supabase = await createClient();
