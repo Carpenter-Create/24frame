@@ -4,7 +4,9 @@ import { TITLE_STATUS_LABELS, type DeliveryStatus, type TitleStatus } from "@/li
 import {
   DELIVERY_STATUS_OFF_TRACK,
   DELIVERY_STATUS_TRACK_STEPS,
+  STATUS_PROGRESS_HOST_CLASS,
   STATUS_PROGRESS_LABEL_CLASS,
+  STATUS_PROGRESS_OFF_CLASS,
   STATUS_PROGRESS_SEG_OFF_CLASS,
   STATUS_PROGRESS_SEG_ON_CLASS,
   STATUS_PROGRESS_TRACK_CLASS,
@@ -132,7 +134,11 @@ describe("status progress tokens", () => {
   it("keeps the track thin (2–3px), not a chunky bar", () => {
     expect(STATUS_PROGRESS_TRACK_CLASS).toContain("h-[3px]");
     expect(STATUS_PROGRESS_TRACK_CLASS).not.toMatch(/\bh-3\b|\bh-3\.5\b|\bh-4\b/);
-    expect(STATUS_PROGRESS_LABEL_CLASS).toContain("t-label");
-    expect(STATUS_PROGRESS_LABEL_CLASS).toContain("text-ink-3");
+    expect(STATUS_PROGRESS_TRACK_CLASS).toContain("gap-1.5");
+    expect(STATUS_PROGRESS_TRACK_CLASS).not.toMatch(/\bgap-px\b|\bgap-0\b/);
+    expect(STATUS_PROGRESS_LABEL_CLASS).toBe("t-body-sm text-ink-3");
+    expect(STATUS_PROGRESS_LABEL_CLASS).not.toContain("t-label");
+    expect(STATUS_PROGRESS_HOST_CLASS).toContain("mr-[var(--space-4)]");
+    expect(STATUS_PROGRESS_OFF_CLASS).toContain("mr-[var(--space-4)]");
   });
 });

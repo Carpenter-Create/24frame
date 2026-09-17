@@ -164,6 +164,8 @@ describe("TitlesCatalogListRow craft", () => {
     const takedownHost = openingTagWith(takedown, 'data-titles-catalog-status=""');
 
     expect(liveHost).toContain('data-status-progress-variant="pipeline"');
+    expect(liveHost).toContain("mr-[var(--space-4)]");
+    expect(takedownHost).toContain("mr-[var(--space-4)]");
     expect(live.match(/data-status-progress-seg="filled"/g) ?? []).toHaveLength(5);
     expect(live).toContain("bg-accent");
     expect(live).toContain("Live");

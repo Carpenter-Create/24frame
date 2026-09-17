@@ -11,8 +11,9 @@ import {
   titleStatusProgress,
 } from "@/lib/status-progress";
 
-// Shared segmented lifecycle track. Filled segments use the house Sporty Blue
-// token. Off-pipeline is a muted greyscale badge — no track.
+// Shared segmented lifecycle track. Label sits above the ticks in house meta
+// type. Filled segments use the house Sporty Blue token. Off-pipeline is a
+// muted greyscale badge — no track.
 
 export function StatusProgressTrack({
   pipeline,
@@ -57,6 +58,9 @@ export function StatusProgressTrack({
       data-status-progress-current={model.currentIndex}
       className={cn(STATUS_PROGRESS_HOST_CLASS, className)}
     >
+      <span data-status-progress-label="" className={STATUS_PROGRESS_LABEL_CLASS}>
+        {label}
+      </span>
       <span
         role="img"
         aria-label={ariaLabel}
@@ -73,9 +77,6 @@ export function StatusProgressTrack({
             />
           );
         })}
-      </span>
-      <span data-status-progress-label="" className={STATUS_PROGRESS_LABEL_CLASS}>
-        {label}
       </span>
     </span>
   );

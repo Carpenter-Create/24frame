@@ -46,6 +46,7 @@ describe("DeliveriesPage bounds", () => {
     expect(html).toContain("Live");
     expect(html).toContain("data-deliveries-status");
     expect(html).toContain('data-status-progress-variant="pipeline"');
+    expect(html).toContain("mr-[var(--space-4)]");
     expect(html.match(/data-status-progress-seg="filled"/g) ?? []).toHaveLength(3);
     expect(html).toContain("Filter by status");
     expect(html).not.toContain("Platform");
