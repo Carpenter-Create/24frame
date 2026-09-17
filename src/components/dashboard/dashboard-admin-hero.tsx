@@ -180,7 +180,7 @@ export function DashboardRecentActivity({ items }: { items: readonly DashboardAc
                 <span className="block t-body-sm text-ink-3">{dashboardJustInDate(item.at)}</span>
                 <span
                   data-dashboard-activity-clock=""
-                  className="block t-label text-ink-3"
+                  className="block t-body-sm text-ink-3"
                 >
                   {dashboardJustInTime(item.at)}
                 </span>
