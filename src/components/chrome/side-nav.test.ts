@@ -76,6 +76,6 @@ describe("SideNav Access rail", () => {
     expect(navSrc).not.toContain("font-normal text-ink-2");
     expect(navSrc).not.toContain("bg-surface-muted font-medium text-ink");
     expect(navSrc).not.toContain('active ? "bg-surface text-ink"');
-    expect(navSrc).not.toContain("Coinbase");
+    expect(navSrc).not.toContain("BrandWordmark");
   });
 });

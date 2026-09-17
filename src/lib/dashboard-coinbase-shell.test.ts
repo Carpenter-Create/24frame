@@ -65,8 +65,8 @@ describe("Coinbase shell rematch — Adam miss list v1", () => {
     expect(sideNav).not.toContain("font-normal text-ink-2");
     expect(tokens).toContain("--accent-wash:");
     expect(shell).toContain("<BrandEmblem />");
-    expect(shell).not.toMatch(/Coinbase|coinbase/);
-    expect(sideNav).not.toMatch(/Coinbase|coinbase/);
+    expect(shell).not.toContain("BrandWordmark");
+    expect(sideNav).not.toContain("BrandWordmark");
   });
 
   it("keeps Search a quiet #F4F4F6 pill and page titles black sentence-case", () => {

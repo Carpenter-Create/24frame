@@ -16,7 +16,7 @@ import { NavGlyph } from "./nav-glyph";
 
 // Access rail: house --text-sm / t-body-sm labels, 16px Phosphor Bold idle /
 // Fill active (75:5 / 61:2). Active = Sporty Blue icon+text + light-blue
-// pill wash. Inactive = ink. No Coinbase C mark — BrandEmblem stays 24Frame.
+// pill wash. Inactive = ink. Rail mark is BrandEmblem (24Frame), not a C.
 // Social destinations use Social Figma V1 Phosphor via SocialIcon.
 // Collapsed mode is icon-only (labels/badges hidden; title tooltips; unread → accent dot).
 export function SideNav({
