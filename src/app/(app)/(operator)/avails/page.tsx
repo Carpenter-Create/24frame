@@ -12,7 +12,7 @@ import { createClient } from "@/lib/supabase/server";
 
 // Staff Avails = Approved titles (`status = live`) across orgs. Layout B:
 // 3-wide desktop grid of the shared Titles landscape tile. Phone stacks
-// the same tile 1-wide. No StatusProgressTrack. Click → staff title detail.
+// the same tile 1-wide. No progress track. Click → staff title detail.
 export default async function AvailsPage() {
   const supabase = await createClient();
   const [tFrom, tTo] = probeRange(LIST_PAGE);
