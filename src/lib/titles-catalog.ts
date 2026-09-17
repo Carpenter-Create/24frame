@@ -65,7 +65,6 @@ export function catalogStatusMark(status: TitleStatus): string {
  */
 export function catalogStillSrc(
   bannerUrl: string | null | undefined,
-  _posterUrl?: string | null,
 ): string | null {
   return bannerUrl || null;
 }

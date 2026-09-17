@@ -85,7 +85,7 @@ export default async function TitlesPage({
     key: r.id,
     href: `/titles/${r.id}`,
     title: r.title,
-    stillUrl: catalogStillSrc(r.bannerUrl, r.posterUrl),
+    stillUrl: catalogStillSrc(r.bannerUrl),
     status: r.status,
     statusLabel: catalogStatusMark(r.status as TitleStatus),
     year: catalogReleaseYear(r.release_date),

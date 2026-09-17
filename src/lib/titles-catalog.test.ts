@@ -71,20 +71,11 @@ describe("catalog lifecycle", () => {
 });
 
 describe("catalogStillSrc", () => {
-  it("prefers the landscape banner and does not force-crop a poster", () => {
-    expect(catalogStillSrc("https://cdn/banner.jpg", "https://cdn/poster.jpg")).toBe(
-      "https://cdn/banner.jpg",
-    );
-  });
-
-  it("uses a real banner when no poster exists", () => {
-    expect(catalogStillSrc("https://cdn/banner.jpg", null)).toBe("https://cdn/banner.jpg");
-  });
-
-  it("returns null when there is no landscape — honest empty, not a cropped poster", () => {
-    expect(catalogStillSrc(null, "https://cdn/poster.jpg")).toBeNull();
-    expect(catalogStillSrc(null, null)).toBeNull();
-    expect(catalogStillSrc(undefined, "")).toBeNull();
+  it("uses the landscape banner and returns null when it is missing", () => {
+    expect(catalogStillSrc("https://cdn/banner.jpg")).toBe("https://cdn/banner.jpg");
+    expect(catalogStillSrc(null)).toBeNull();
+    expect(catalogStillSrc(undefined)).toBeNull();
+    expect(catalogStillSrc("")).toBeNull();
   });
 });
 
