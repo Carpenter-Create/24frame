@@ -12,7 +12,6 @@ import {
 import { DashboardCatalogHero } from "@/components/dashboard/dashboard-catalog-hero";
 import { DashboardAdminHero } from "@/components/dashboard/dashboard-admin-hero";
 import {
-  DashboardAnalyticsOverview,
   DashboardDeliveriesAction,
   DashboardFindingsGlance,
   DashboardPendingSubmissions,
@@ -29,8 +28,6 @@ import {
   dashboardWhatChanged,
   deliveriesNeedingAction,
   pendingSubmissions,
-  titlesAddedThisMonth,
-  titlesInPipeline,
   topTitleActivity,
   type ClientHomeTitle,
 } from "@/lib/dashboard-home";
@@ -52,8 +49,6 @@ import {
   DASHBOARD_STANDARD_STACK_CLASS,
 } from "@/lib/dashboard-craft";
 import {
-  DASHBOARD_FIXTURE_ADDED,
-  DASHBOARD_FIXTURE_PIPELINE,
   DASHBOARD_FIXTURE_PLATFORMS,
   DASHBOARD_FIXTURE_POINTS,
   DASHBOARD_FIXTURE_TERRITORIES,
@@ -77,6 +72,8 @@ import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 // Phone (`< md`) is a single-column stack — $0.00 empty hero, compact chart,
 // Period bottom sheet. Find-user is gone on phone and md+; user scope lives
 // on /reports later. Leftover ?user= parsing stays inert for data only.
+// Catalog-velocity strip (Added this month / In pipeline) is gone — Adam lock
+// 2026-09-16. Do not replace with another ops strip unless a later lock says so.
 // Standard seats keep the catalog hero. Export stays on /reports.
 // Fixture money is labeled + env-gated and never enters export/ledger.
 
@@ -213,8 +210,6 @@ export default async function DashboardPage({
     );
   }
 
-  const liveAdded = titlesAddedThisMonth(scopedTitles, now);
-  const livePipeline = titlesInPipeline(scopedTitles);
   const livePlatforms = countNamedRows(
     scopedDeliveries.map((row) => ({ name: row.vendor_name })),
   ).slice(0, 5);
@@ -256,10 +251,6 @@ export default async function DashboardPage({
         data-dashboard-stack=""
         className={isAdmin ? DASHBOARD_ADMIN_STACK_CLASS : DASHBOARD_STANDARD_STACK_CLASS}
       >
-        <DashboardAnalyticsOverview
-          addedThisMonth={useFixture && liveAdded === 0 ? DASHBOARD_FIXTURE_ADDED : liveAdded}
-          inPipeline={useFixture && livePipeline === 0 ? DASHBOARD_FIXTURE_PIPELINE : livePipeline}
-        />
         <div className="grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-2">
           <DashboardRankedBars
             label={DASHBOARD_HOME.platforms}

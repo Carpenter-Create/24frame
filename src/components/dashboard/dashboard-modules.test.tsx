@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
@@ -5,19 +6,17 @@ import { describe, expect, it } from "vitest";
 import { DASHBOARD_HOME } from "@/lib/dashboard-home";
 import { REPORTS_HREF } from "@/lib/reports";
 
-import { DashboardAnalyticsOverview, DashboardReportsCta, DashboardTopTitles } from "./dashboard-modules";
+import { DashboardReportsCta, DashboardTopTitles } from "./dashboard-modules";
 
 describe("dashboard visual home modules", () => {
-  it("links the quiet overview strip to Reports without a period picker", () => {
-    const html = renderToStaticMarkup(
-      createElement(DashboardAnalyticsOverview, { addedThisMonth: 2, inPipeline: 1 }),
-    );
-    expect(html).toContain("data-dashboard-overview");
-    expect(html).toContain(DASHBOARD_HOME.addedThisMonth);
-    expect(html).toContain(DASHBOARD_HOME.inPipeline);
-    expect(html).toContain(`href="${REPORTS_HREF}?period=this-month"`);
-    expect(html).not.toContain("data-reports-period");
-    expect(html).not.toContain("Download");
+  it("does not keep an Added-this-month / In-pipeline overview strip", () => {
+    const src = readFileSync("src/components/dashboard/dashboard-modules.tsx", "utf8");
+    expect(src).not.toContain("DashboardAnalyticsOverview");
+    expect(src).not.toContain("addedThisMonth");
+    expect(src).not.toContain("inPipeline");
+    expect(src).not.toContain("data-dashboard-overview");
+    expect(src).not.toContain("Added this month");
+    expect(src).not.toContain("In pipeline");
   });
 
   it("renders a Sporty Blue Reports text CTA", () => {

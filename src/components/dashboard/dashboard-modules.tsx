@@ -11,7 +11,6 @@ import {
   DASHBOARD_CARD_PAD_LIST,
   DASHBOARD_KICKER_CLASS,
   DASHBOARD_MONEY_CLASS,
-  DASHBOARD_MODULE_CARD_CLASS,
   DASHBOARD_RANKED_LIST_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
   DASHBOARD_ROW_CLASS,
@@ -29,39 +28,8 @@ import {
   type DashboardRankedTitle,
 } from "@/lib/dashboard-home";
 import { CATALOG_HEALTH_EMPTY } from "@/lib/findings";
-import { REPORTS_HREF, reportsHref } from "@/lib/reports";
+import { REPORTS_HREF } from "@/lib/reports";
 import type { ReportsCountRow } from "@/lib/reports";
-
-export function DashboardAnalyticsOverview({
-  addedThisMonth,
-  inPipeline,
-}: {
-  addedThisMonth: number;
-  inPipeline: number;
-}) {
-  const cells = [
-    { key: "added", label: DASHBOARD_HOME.addedThisMonth, value: String(addedThisMonth) },
-    { key: "pipeline", label: DASHBOARD_HOME.inPipeline, value: String(inPipeline) },
-  ] as const;
-  return (
-    <Link
-      href={reportsHref({ period: "this-month" })}
-      data-dashboard-overview=""
-      className={`${DASHBOARD_MODULE_CARD_CLASS} grid grid-cols-2`}
-    >
-      {cells.map((cell, i) => (
-        <div
-          key={cell.key}
-          data-dashboard-overview-cell={cell.key}
-          className={`flex flex-col gap-[var(--space-2)] p-[var(--space-4)] ${i > 0 ? "border-l border-hairline" : ""}`}
-        >
-          <span className={DASHBOARD_KICKER_CLASS}>{cell.label}</span>
-          <span className="t-data t-heading text-ink">{cell.value}</span>
-        </div>
-      ))}
-    </Link>
-  );
-}
 
 export function DashboardFramedEmpty({ children }: { children: React.ReactNode }) {
   return (

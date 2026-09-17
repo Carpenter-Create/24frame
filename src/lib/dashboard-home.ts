@@ -21,8 +21,6 @@ export const DASHBOARD_HOME = {
   live: "Live",
   doNext: "Do next",
   overview: "Overview",
-  addedThisMonth: "Added this month",
-  inPipeline: "In pipeline",
   topTitles: "Top titles",
   topTitlesEmpty: "No title activity this month yet.",
   viewAll: "View all",
@@ -54,7 +52,6 @@ export const DASHBOARD_HOME_JUST_IN = 5;
 export const DASHBOARD_HOME_TOP_TITLES = 5;
 export const DASHBOARD_HOME_STACK = 5;
 
-const PIPELINE_TITLE_STATUSES = new Set(["submitted", "in_review", "in_delivery"]);
 const PENDING_SUBMISSION_STATUSES = new Set(["submitted", "in_review"]);
 const DELIVERY_ACTION_STATUSES = new Set(["pending", "rejected"]);
 
@@ -212,15 +209,6 @@ export function clientHomeSnapshot({
         created_at: t.created_at,
       })),
   };
-}
-
-export function titlesAddedThisMonth(titles: readonly ClientHomeTitle[], now: Date): number {
-  const period = parseReportsPeriod("this-month", now);
-  return titles.filter((title) => isoInReportsPeriod(title.created_at, period)).length;
-}
-
-export function titlesInPipeline(titles: readonly ClientHomeTitle[]): number {
-  return titles.filter((title) => PIPELINE_TITLE_STATUSES.has(title.status)).length;
 }
 
 /** Titles added this month, newest first. Recency is the activity — no invented rank. */
