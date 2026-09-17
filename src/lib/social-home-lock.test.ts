@@ -313,6 +313,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(tabBar).toContain("data-social-tab-bar-hidden");
     expect(tabBar).toContain("stepSocialTabBarScroll");
     expect(tabBar).toContain("createSocialTabBarScrollTracker");
+    expect(tabBar).toContain("[data-house-lead-scroll]");
+    expect(tabBar).toContain("scrollTop");
     expect(tabBar).toContain("SOCIAL_NAV");
     expect(tabBar).toContain("SOCIAL_ICON_SIZE_TAB");
     expect(tabBar).toContain("isSocialTabActive");

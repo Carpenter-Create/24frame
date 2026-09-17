@@ -28,17 +28,21 @@ function useSocialTabBarHidden() {
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
-    let tracker = createSocialTabBarScrollTracker(window.scrollY);
+    // G9: page scroll lives on main (`[data-house-lead-scroll]`), not window.
+    const scroller = document.querySelector<HTMLElement>("[data-house-lead-scroll]");
+    const readY = () => (scroller ? scroller.scrollTop : window.scrollY);
+    const target: EventTarget = scroller ?? window;
+    let tracker = createSocialTabBarScrollTracker(readY());
 
     const onScroll = () => {
-      const next = stepSocialTabBarScroll(tracker, window.scrollY);
+      const next = stepSocialTabBarScroll(tracker, readY());
       const changed = next.state !== tracker.state;
       tracker = next;
       if (changed) setHidden(next.state === "hidden");
     };
 
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    target.addEventListener("scroll", onScroll, { passive: true });
+    return () => target.removeEventListener("scroll", onScroll);
   }, []);
 
   return hidden;
