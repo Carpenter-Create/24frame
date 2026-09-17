@@ -293,7 +293,7 @@ describe("client /titles catalog", () => {
     expect(html).not.toMatch(/data-titles-catalog-list-row[\s\S]*t-title/);
     const filtersHtml = html.slice(
       html.indexOf("data-titles-catalog-filters"),
-      html.indexOf("data-titles-catalog-toolbar"),
+      html.indexOf("data-titles-catalog-header-operate"),
     );
     expect(filtersHtml).toContain("t-body-sm");
     expect(filtersHtml).toContain("data-titles-catalog-status-compact");
