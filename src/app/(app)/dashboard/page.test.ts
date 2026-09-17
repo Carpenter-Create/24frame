@@ -154,6 +154,7 @@ function expectCompanyAdminStructuralDelta(html: string) {
   expect(html).toContain('data-dashboard-ranked="platforms"');
   expect(html).toContain("data-dashboard-territory");
   expect(html).toContain('data-dashboard-ranked="territories"');
+  expect(html).toContain("data-dashboard-territory-map");
   expect(html).toContain(DASHBOARD_HOME.platformsEmpty);
   expect(html).toContain(DASHBOARD_HOME.territoriesEmpty);
   expect(html).toContain(DASHBOARD_HOME.topTitlesEmpty);

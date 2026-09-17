@@ -81,6 +81,10 @@ describe("dashboard register chrome", () => {
     expect(mapSrc).not.toMatch(/from ["']geojson["']/);
     expect(mapSrc).toContain("CountryFeature");
     expect(mapSrc).toContain("TerritoryPath");
+    expect(mapSrc).toContain("geoGraticule10");
+    expect(mapSrc).toContain("Sphere");
+    expect(mapSrc).toContain("geoNaturalEarth1");
+    expect(mapSrc).not.toMatch(/amber|orange|#[Ff][Ff]/);
   });
 
   it("gives Top titles list/bars and Territories map/list/bars — 24Frame nouns only", () => {
@@ -172,6 +176,7 @@ describe("dashboard register chrome", () => {
     expect(territories).toContain("data-dashboard-territory");
     expect(territories).toContain(DASHBOARD_HOME.territoriesEmpty);
     expect(territories).toContain('data-dashboard-view-alt="map"');
-    expect(territories).not.toContain("data-dashboard-territory-map");
+    expect(territories).toContain("data-dashboard-territory-map");
+    expect(territories).toContain("0 territories");
   });
 });
