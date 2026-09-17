@@ -11,6 +11,8 @@ const CANONICAL_UUID_RE =
 
 const CATALOG_REF_RE = /^(24F|GC)-([0-9]+)$/i;
 const DIGITS_RE = /^[0-9]+$/;
+/** Stored suffix is 6-digit pad + one Damm check digit (`GC-0000011`). */
+const STORED_CATALOG_SUFFIX_LEN = 7;
 
 export type TitleRouteLookup =
   | { field: "id"; value: string }
@@ -51,9 +53,11 @@ export function isCanonicalTitleSlug(
 }
 
 /**
- * Normalize-on-input lookups, in order. Prefixed and bare-digit slugs try the
- * generated ops catalog_id first, then catalog_no so `1234` still resolves
- * when the stored id is `GC-0012347` (zero-pad + check digit).
+ * Normalize-on-input lookups, in order. Bare and unpadded slugs try the
+ * generated ops catalog_id first, then catalog_no so `1234` / `24F-1234`
+ * still resolve when the stored id is `GC-0012347` (zero-pad + check digit).
+ * A full prefixed suffix already includes that pad and check digit — do not
+ * treat it as catalog_no (`24F-0000012` is not title 12).
  */
 export function titleRouteLookups(param: string): TitleRouteLookup[] | null {
   const raw = param.trim();
@@ -63,14 +67,15 @@ export function titleRouteLookups(param: string): TitleRouteLookup[] | null {
   const prefixed = CATALOG_REF_RE.exec(raw);
   if (prefixed) {
     const suffix = prefixed[2];
-    return catalogLookups(suffix);
+    return catalogLookups(suffix, suffix.length < STORED_CATALOG_SUFFIX_LEN);
   }
-  if (DIGITS_RE.test(raw)) return catalogLookups(raw);
+  if (DIGITS_RE.test(raw)) return catalogLookups(raw, true);
   return null;
 }
 
-function catalogLookups(digits: string): TitleRouteLookup[] {
+function catalogLookups(digits: string, allowCatalogNo: boolean): TitleRouteLookup[] {
   const lookups: TitleRouteLookup[] = [{ field: "catalog_id", value: `${OPS_CATALOG_PREFIX}-${digits}` }];
+  if (!allowCatalogNo) return lookups;
   const catalogNo = Number(digits);
   if (Number.isInteger(catalogNo) && catalogNo >= 0) {
     lookups.push({ field: "catalog_no", value: catalogNo });

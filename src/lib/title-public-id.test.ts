@@ -61,11 +61,9 @@ describe("titleRouteLookups", () => {
   it("accepts 24F-, GC-, bare digits, and a legacy UUID", () => {
     expect(titleRouteLookups("24F-0001234")).toEqual([
       { field: "catalog_id", value: "GC-0001234" },
-      { field: "catalog_no", value: 1234 },
     ]);
     expect(titleRouteLookups("GC-0001234")).toEqual([
       { field: "catalog_id", value: "GC-0001234" },
-      { field: "catalog_no", value: 1234 },
     ]);
     expect(titleRouteLookups("0001234")).toEqual([
       { field: "catalog_id", value: "GC-0001234" },
@@ -75,8 +73,21 @@ describe("titleRouteLookups", () => {
       { field: "catalog_id", value: "GC-1234" },
       { field: "catalog_no", value: 1234 },
     ]);
+    expect(titleRouteLookups("24F-1234")).toEqual([
+      { field: "catalog_id", value: "GC-1234" },
+      { field: "catalog_no", value: 1234 },
+    ]);
     expect(titleRouteLookups(UUID)).toEqual([{ field: "id", value: UUID }]);
     expect(titleRouteLookups(UUID.toUpperCase())).toEqual([{ field: "id", value: UUID }]);
+  });
+
+  it("does not treat a prefixed pad+check suffix as catalog_no", () => {
+    expect(titleRouteLookups("24F-0000012")).toEqual([
+      { field: "catalog_id", value: "GC-0000012" },
+    ]);
+    expect(titleRouteLookups("GC-0000012")).toEqual([
+      { field: "catalog_id", value: "GC-0000012" },
+    ]);
   });
 
   it("trims pasted input and rejects junk", () => {
@@ -112,6 +123,15 @@ describe("firstTitleMatch", () => {
     expect(lookup).toHaveBeenCalledTimes(2);
     expect(lookup).toHaveBeenNthCalledWith(1, { field: "catalog_id", value: "GC-1234" });
     expect(lookup).toHaveBeenNthCalledWith(2, { field: "catalog_no", value: 1234 });
+  });
+
+  it("does not fall through a prefixed stored-form slug to another catalog_no", async () => {
+    const lookup = vi.fn(async (filter: { field: string; value: string | number }) =>
+      filter.field === "catalog_no" && filter.value === 12 ? { id: "wrong" } : null,
+    );
+    await expect(firstTitleMatch(lookup, "24F-0000012")).resolves.toBeNull();
+    expect(lookup).toHaveBeenCalledTimes(1);
+    expect(lookup).toHaveBeenCalledWith({ field: "catalog_id", value: "GC-0000012" });
   });
 
   it("resolves a legacy UUID path in one lookup", async () => {
