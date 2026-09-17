@@ -100,6 +100,7 @@ export function TitleLifecycleControls({
       </div>
       {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
 
+      {flags.canDelete ? (
       <Dialog
         open={open === "delete"}
         onClose={() => setOpen(null)}
@@ -127,7 +128,9 @@ export function TitleLifecycleControls({
           </button>
         </div>
       </Dialog>
+      ) : null}
 
+      {flags.canArchive ? (
       <Dialog
         open={open === "archive"}
         onClose={() => setOpen(null)}
@@ -155,7 +158,9 @@ export function TitleLifecycleControls({
           </button>
         </div>
       </Dialog>
+      ) : null}
 
+      {flags.canRestore ? (
       <Dialog
         open={open === "restore"}
         onClose={() => setOpen(null)}
@@ -181,6 +186,7 @@ export function TitleLifecycleControls({
           </button>
         </div>
       </Dialog>
+      ) : null}
     </div>
   );
 }

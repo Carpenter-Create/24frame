@@ -669,7 +669,9 @@ describe("client /titles catalog", () => {
     expect(active).toContain("draft film");
     expect(active).toContain("live film");
     expect(active).not.toContain("archived film");
-    expect(active).toContain("Archived");
+    expect(active.match(/data-titles-catalog-list-row=""/g) ?? []).toHaveLength(
+      ALL_STATUSES.length,
+    );
 
     const archived = await renderCatalog({ status: "archived" });
     expect(archived).toContain("archived film");
