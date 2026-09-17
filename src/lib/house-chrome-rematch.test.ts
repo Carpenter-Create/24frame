@@ -21,7 +21,7 @@ import {
   HOUSE_RAIL_PANEL_CLASS,
   HOUSE_SEARCH_PILL_CLASS,
 } from "@/lib/house-shell";
-import { EDUCATION_SEARCH } from "@/lib/education-search";
+import { EDUCATION_SEARCH } from "@/lib/course-search";
 import { SOCIAL_DESKTOP_NAV } from "@/lib/nav";
 
 const tokens = readFileSync("src/app/tokens.css", "utf8");

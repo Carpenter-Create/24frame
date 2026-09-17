@@ -8,7 +8,7 @@ import {
   filterCoursesForEducationSearch,
   filterEducationOutline,
   parseEducationSearchQuery,
-} from "@/lib/education-search";
+} from "@/lib/course-search";
 import type { CourseOutlineModule } from "@/lib/courses";
 
 describe("Education quiet search", () => {

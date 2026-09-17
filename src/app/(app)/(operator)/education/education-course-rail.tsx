@@ -6,7 +6,7 @@ import { GripVertical } from "lucide-react";
 
 import type { EducationAdminCourseRow, InstructorRow } from "@/lib/education-admin";
 import { educationCourseHref, moveOrderedIds } from "@/lib/education";
-import { filterCoursesForEducationSearch } from "@/lib/education-search";
+import { filterCoursesForEducationSearch } from "@/lib/course-search";
 import {
   HOUSE_CARD_PAD,
   HOUSE_MODULE_CLASS,

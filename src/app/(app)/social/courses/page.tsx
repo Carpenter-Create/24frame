@@ -11,7 +11,7 @@ import {
 import {
   filterCoursesForEducationSearch,
   parseEducationSearchQuery,
-} from "@/lib/education-search";
+} from "@/lib/course-search";
 import { signedEducationCoverUrls } from "@/lib/s3-education";
 import { SOCIAL } from "@/lib/social";
 import { requireSocialSession } from "@/lib/social-session";

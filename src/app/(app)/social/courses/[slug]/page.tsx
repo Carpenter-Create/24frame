@@ -3,7 +3,7 @@ import { CourseRetry } from "@/components/courses/course-retry";
 import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { loadCourseDetail, loadCourseInstructorName } from "@/lib/courses";
-import { filterEducationOutline, parseEducationSearchQuery } from "@/lib/education-search";
+import { filterEducationOutline, parseEducationSearchQuery } from "@/lib/course-search";
 import { attachEducationLessonPlayback, signedEducationCoverUrl } from "@/lib/s3-education";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { requireSocialSession } from "@/lib/social-session";

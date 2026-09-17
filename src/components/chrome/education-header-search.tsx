@@ -9,7 +9,7 @@ import {
   EDUCATION_SEARCH,
   educationSearchAction,
   parseEducationSearchQuery,
-} from "@/lib/education-search";
+} from "@/lib/course-search";
 import { HOUSE_SEARCH_PILL_CLASS } from "@/lib/house-shell";
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
