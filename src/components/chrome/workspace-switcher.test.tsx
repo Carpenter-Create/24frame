@@ -19,6 +19,9 @@ import {
   WORKSPACE_SWITCHER_OPTION_CHECK_GUTTER_CLASS,
   WORKSPACE_SWITCHER_OPTION_CLASS,
   WORKSPACE_SWITCHER_OPTION_LABEL_CLASS,
+  WORKSPACE_SWITCHER_SEGMENTS_CLASS,
+  WORKSPACE_SWITCHER_SEGMENT_OFF_CLASS,
+  WORKSPACE_SWITCHER_SEGMENT_ON_CLASS,
   workspaceSwitcherChevronClass,
 } from "@/lib/workspace-switcher";
 import { WorkspaceSwitcher } from "./workspace-switcher";
@@ -42,13 +45,14 @@ describe("workspace switcher header control", () => {
     expect(html).not.toContain('data-workspace-switcher-chevron-open');
     expect(html).not.toContain("/education");
     expect(shellSrc).toContain('<WorkspaceSwitcher current={workspace} tone="pill" />');
-    expect(shellSrc).toContain("<WorkspaceSwitcher current={workspace} />");
+    expect(shellSrc).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
     expect(shellSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
     expect(shellSrc).not.toContain("data-workspace-switcher-rail");
     expect(shellSrc).not.toContain("data-workspace-switcher-lead");
     expect(shellSrc.indexOf("<WorkspaceSwitcher")).toBeLessThan(shellSrc.indexOf("<AccountMenuSlot"));
     expect(topBarSrc).toContain("<WorkspaceSwitcher current=\"social\" />");
-    expect(topBarSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(1);
+    expect(topBarSrc).toContain('<WorkspaceSwitcher current="social" presentation="pills" />');
+    expect(topBarSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
     expect(topBarSrc.indexOf("<WorkspaceSwitcher")).toBeLessThan(topBarSrc.indexOf("<UserMenu"));
     const triggerSrc = src.slice(
       src.indexOf("data-workspace-switcher-trigger"),
@@ -97,6 +101,61 @@ describe("workspace switcher header control", () => {
     expect(src).toContain("availableWorkspaceOptions");
     expect(src).toContain("mousedown");
     expect(src).toContain("Escape");
+  });
+
+  it("renders desktop sliding pills for available lanes only", () => {
+    const html = renderToStaticMarkup(
+      <WorkspaceSwitcher current="social" presentation="pills" />,
+    );
+    expect(html).toContain('data-workspace-switcher-presentation="pills"');
+    expect(html).toContain("data-workspace-switcher-pills");
+    expect(html).toContain(WORKSPACE_SWITCHER_SEGMENTS_CLASS);
+    expect(html).toContain('data-workspace-switcher-segment="aggregation"');
+    expect(html).toContain('data-workspace-switcher-segment="social"');
+    expect(html).toContain('data-workspace-switcher-segment="education"');
+    expect(html).toContain("Aggregation");
+    expect(html).toContain("Social");
+    expect(html).toContain("Education");
+    expect(html).toContain(WORKSPACE_SWITCHER_SEGMENT_ON_CLASS);
+    expect(html).toContain(WORKSPACE_SWITCHER_SEGMENT_OFF_CLASS);
+    expect(html).not.toContain("data-workspace-switcher-trigger");
+    expect(html).not.toContain("data-workspace-switcher-chevron");
+    expect(html).not.toContain("data-workspace-switcher-popover");
+    expect(html).not.toContain("data-workspace-switcher-mark");
+    expect(html).not.toContain("/education");
+    expect(html).not.toContain("/account/workspace");
+    expect(src).toContain("persistWorkspaceCookie");
+    expect(src).toContain("workspaceHome(option.mode)");
+    expect(src).toContain("availableWorkspaceOptions");
+    for (const absent of WORKSPACE_SWITCHER_ABSENT) {
+      expect(html).not.toContain(absent);
+    }
+  });
+
+  it("collapses desktop pills to a static label when only one lane is reachable", () => {
+    const [only] = availableWorkspaceOptions();
+    expect(only).toBeDefined();
+    const html = renderToStaticMarkup(
+      <WorkspaceSwitcher current={only!.mode} options={[only!]} presentation="pills" />,
+    );
+    expect(html).toContain('data-workspace-switcher-presentation="pills"');
+    expect(html).toContain("data-workspace-switcher-current");
+    expect(html).toContain(only!.label);
+    expect(html).not.toContain("data-workspace-switcher-pills");
+    expect(html).not.toContain("data-workspace-switcher-segment");
+    expect(html).not.toContain("data-workspace-switcher-trigger");
+    expect(html).not.toContain("data-workspace-switcher-chevron");
+  });
+
+  it("hides a missing lane instead of rendering a dead pill", () => {
+    const reachable = availableWorkspaceOptions().filter((option) => option.mode !== "education");
+    const html = renderToStaticMarkup(
+      <WorkspaceSwitcher current="aggregation" options={reachable} presentation="pills" />,
+    );
+    expect(html).toContain('data-workspace-switcher-segment="aggregation"');
+    expect(html).toContain('data-workspace-switcher-segment="social"');
+    expect(html).not.toContain('data-workspace-switcher-segment="education"');
+    expect(html).not.toContain("Education");
   });
 
   it("drops the chevron when only one workspace is reachable", () => {
@@ -189,6 +248,8 @@ describe("workspace switcher placement", () => {
       shellSrc.indexOf("</header>"),
     );
     expect(trailing).toContain("data-app-header-workspace-desktop");
+    expect(trailing).toContain('presentation="pills"');
+    expect(trailing).not.toContain('tone="pill"');
     expect(trailing).toContain("WorkspaceSwitcher");
     expect(trailing).toContain("AccountMenuSlot");
     expect(trailing.indexOf("WorkspaceSwitcher")).toBeLessThan(
@@ -206,6 +267,8 @@ describe("workspace switcher placement", () => {
     expect(topBarSrc.indexOf("<WorkspaceSwitcher")).toBeLessThan(
       topBarSrc.indexOf("<UserMenu"),
     );
+    expect(topBarSrc).toContain("data-app-header-workspace-pill");
+    expect(topBarSrc).toContain("data-app-header-workspace-desktop");
     expect(topBarSrc).toContain("APP_HEADER_TRAILING_CLUSTER_CLASS");
     expect(topBarSrc).toContain("md:pr-[var(--content-inset)]");
     expect(topBarSrc).toContain("pr-[var(--space-6)]");

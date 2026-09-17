@@ -306,7 +306,7 @@ export function AppShell({
             data-app-header-workspace-desktop=""
             className={APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS}
           >
-            <WorkspaceSwitcher current={workspace} />
+            <WorkspaceSwitcher current={workspace} presentation="pills" />
           </div>
           <AccountMenuSlot
             chrome={chrome}

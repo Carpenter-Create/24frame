@@ -3,6 +3,12 @@ import { describe, expect, it } from "vitest";
 import { USER_MENU } from "./user-menu";
 import { availableWorkspaceOptions, WORKSPACE_EDUCATION_HREF } from "./workspace-menu";
 import {
+  DASHBOARD_TOP_PILL_BUTTON_CLASS,
+  DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
+  DASHBOARD_TOP_PILL_BUTTON_ON_CLASS,
+  DASHBOARD_TOP_PILL_CLUSTER_CLASS,
+} from "./dashboard-craft";
+import {
   APP_HEADER_LEADING_CLASS,
   APP_HEADER_TRAILING_CLUSTER_CLASS,
   APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS,
@@ -23,6 +29,10 @@ import {
   WORKSPACE_SWITCHER_PILL_CHEVRON_CLASS,
   WORKSPACE_SWITCHER_PILL_PANEL_CLASS,
   WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS,
+  WORKSPACE_SWITCHER_SEGMENTS_CLASS,
+  WORKSPACE_SWITCHER_SEGMENT_CLASS,
+  WORKSPACE_SWITCHER_SEGMENT_OFF_CLASS,
+  WORKSPACE_SWITCHER_SEGMENT_ON_CLASS,
   WORKSPACE_SWITCHER_STATIC_CLASS,
   WORKSPACE_SWITCHER_TRIGGER_CLASS,
   WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS,
@@ -31,7 +41,9 @@ import {
   workspaceSwitcherOptionClass,
   workspaceSwitcherOptions,
   workspaceSwitcherPanelClass,
+  workspaceSwitcherSegmentClass,
   workspaceSwitcherShowsChevron,
+  workspaceSwitcherShowsSegments,
   workspaceSwitcherTriggerClass,
 } from "./workspace-switcher";
 import { persistWorkspaceCookie, workspaceHome } from "./workspace";
@@ -146,5 +158,24 @@ describe("workspace switcher lock", () => {
     expect(persistWorkspaceCookie.name).toBe("persistWorkspaceCookie");
     expect(workspaceHome("aggregation")).toBe("/dashboard");
     expect(workspaceHome("social")).toBe("/social");
+  });
+
+  it("uses Top Performing house grammar for desktop sliding pills", () => {
+    expect(WORKSPACE_SWITCHER_SEGMENTS_CLASS).toBe(DASHBOARD_TOP_PILL_CLUSTER_CLASS);
+    expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toBe(DASHBOARD_TOP_PILL_BUTTON_CLASS);
+    expect(WORKSPACE_SWITCHER_SEGMENT_ON_CLASS).toBe(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS);
+    expect(WORKSPACE_SWITCHER_SEGMENT_OFF_CLASS).toBe(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS);
+    expect(WORKSPACE_SWITCHER_SEGMENT_ON_CLASS).toBe("bg-ink text-surface");
+    expect(WORKSPACE_SWITCHER_SEGMENT_OFF_CLASS).toBe("bg-surface-muted text-ink");
+    expect(WORKSPACE_SWITCHER_SEGMENTS_CLASS).not.toContain("divide-x");
+    expect(WORKSPACE_SWITCHER_SEGMENT_ON_CLASS).not.toContain("text-accent");
+    expect(workspaceSwitcherShowsSegments()).toBe(true);
+    expect(workspaceSwitcherShowsSegments(workspaceSwitcherOptions().slice(0, 1))).toBe(false);
+    expect(workspaceSwitcherSegmentClass(true)).toBe(
+      `${WORKSPACE_SWITCHER_SEGMENT_CLASS} ${WORKSPACE_SWITCHER_SEGMENT_ON_CLASS}`,
+    );
+    expect(workspaceSwitcherSegmentClass(false)).toBe(
+      `${WORKSPACE_SWITCHER_SEGMENT_CLASS} ${WORKSPACE_SWITCHER_SEGMENT_OFF_CLASS}`,
+    );
   });
 });

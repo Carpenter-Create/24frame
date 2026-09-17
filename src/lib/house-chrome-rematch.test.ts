@@ -98,6 +98,9 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(shell).not.toContain("SearchField");
     expect(shell).toContain("EducationHeaderSearch");
     expect(shell).toContain('workspace === "education" && !settingsPage');
+    expect(shell.indexOf("EducationHeaderSearch")).toBeLessThan(
+      shell.indexOf('presentation="pills"'),
+    );
     expect(topBar).toContain("data-social-header-search");
     expect(topBar).toContain("HOUSE_SEARCH_PILL_CLASS");
 
@@ -121,7 +124,9 @@ describe("house chrome rematch miss list v1.1", () => {
 
   it("keeps one phone workspace switcher, Staff on Aggregation, one Sporty Blue pill", () => {
     expect(shell.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
-    expect(topBar.match(/<WorkspaceSwitcher/g)?.length).toBe(1);
+    expect(topBar.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
+    expect(shell).toContain('presentation="pills"');
+    expect(topBar).toContain('presentation="pills"');
     expect(shell).toContain('tone="pill"');
     expect(shell).toContain("APP_HEADER_WORKSPACE_PILL_HOST_CLASS");
     expect(shell).toContain("APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS");
