@@ -85,8 +85,9 @@ import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 // 2026-09-16. Company-admin also drops Recent, Do next, Deliveries needing
 // action, Catalog Health count, What changed, and Pending submissions.
 // Top titles / Top platforms / Territories always render — quiet empty,
-// never omitted. Quiet Reports text CTA stays. Standard seats keep the
-// catalog hero.
+// never omitted. Each Top module is its own full-width row (RL Overview
+// stack, not a 2-up pair). Quiet Reports text CTA stays. Standard seats
+// keep the catalog hero.
 // Export stays on /reports. Fixture money is labeled + env-gated and never
 // enters export/ledger.
 
@@ -283,27 +284,27 @@ export default async function DashboardPage({
           />
         ) : null}
         {isAdmin ? (
-          <div className={DASHBOARD_ADMIN_PAIR_CLASS}>
-            <DashboardRankedBars
-              label={DASHBOARD_HOME.platforms}
-              empty={DASHBOARD_HOME.platformsEmpty}
-              rows={adminPlatforms}
-              testId="platforms"
-              viewAllHref="/deliveries"
-              periodLabel={period.label}
-              updated={adminUpdated}
-            />
-            <DashboardRankedBars
-              label={DASHBOARD_HOME.territories}
-              empty={DASHBOARD_HOME.territoriesEmpty}
-              rows={adminTerritories}
-              testId="territories"
-              viewAllHref="/deliveries"
-              territory
-              periodLabel={period.label}
-              updated={adminUpdated}
-            />
-          </div>
+          <DashboardRankedBars
+            label={DASHBOARD_HOME.platforms}
+            empty={DASHBOARD_HOME.platformsEmpty}
+            rows={adminPlatforms}
+            testId="platforms"
+            viewAllHref="/deliveries"
+            periodLabel={period.label}
+            updated={adminUpdated}
+          />
+        ) : null}
+        {isAdmin ? (
+          <DashboardRankedBars
+            label={DASHBOARD_HOME.territories}
+            empty={DASHBOARD_HOME.territoriesEmpty}
+            rows={adminTerritories}
+            testId="territories"
+            viewAllHref="/deliveries"
+            territory
+            periodLabel={period.label}
+            updated={adminUpdated}
+          />
         ) : (
           <div className={DASHBOARD_ADMIN_PAIR_CLASS}>
             <DashboardRankedBars
