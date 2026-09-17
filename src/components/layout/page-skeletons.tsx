@@ -38,10 +38,15 @@ export function CatalogSkeleton() {
       style={{ maxWidth: "var(--content-max)" }}
       data-titles-catalog-skeleton=""
     >
-      <Skeleton className="h-8 w-32" />
+      <div className="flex flex-row items-center justify-between gap-[var(--space-2)]">
+        <Skeleton className="h-8 w-32" />
+        <div className="flex shrink-0 items-center justify-end gap-[var(--space-2)]">
+          <Skeleton className="h-5 w-10" />
+          <Skeleton className="size-[44px] rounded-full md:hidden" />
+        </div>
+      </div>
       <div className="flex flex-col gap-[var(--space-4)] md:flex-row md:items-center">
         <Skeleton className="h-8 w-full rounded-full md:w-56" />
-        <Skeleton className="h-8 w-24 md:hidden" />
         <Skeleton className="hidden h-8 w-40 rounded-full md:block" />
       </div>
       <div className="flex flex-col gap-[var(--space-4)] md:gap-0 md:overflow-hidden md:rounded-[var(--radius-lg)] md:border md:border-hairline md:bg-surface">

@@ -181,7 +181,7 @@ describe("client /titles catalog", () => {
     }
   });
 
-  it("puts Titles + status on the header row, count under title, then search and Add Title", async () => {
+  it("puts Titles + status and phone + on the header row, then search-only phone toolbar", async () => {
     stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
@@ -189,9 +189,11 @@ describe("client /titles catalog", () => {
 
     expect(html).toContain("titles-catalog-header");
     expect(html).toContain("data-titles-catalog-header-row");
+    expect(html).toContain("data-titles-catalog-header-cluster");
     expect(html).toContain("data-titles-catalog-toolbar");
     expect(html).toContain("data-titles-catalog-search");
     expect(html).toContain("data-titles-catalog-filters");
+    expect(html).toContain("data-titles-catalog-header-operate");
     expect(html).toContain("data-titles-catalog-operate");
     expect(html).toContain(
       "titles-catalog mx-auto flex w-full flex-col gap-[var(--space-6)] px-[var(--space-4)]",
@@ -210,30 +212,37 @@ describe("client /titles catalog", () => {
     const titleClose = html.indexOf("</h1>");
     const countAt = html.indexOf("data-titles-catalog-count");
     const filtersAt = html.indexOf("data-titles-catalog-filters");
+    const headerOperateAt = html.indexOf("data-titles-catalog-header-operate");
+    const iconAt = html.indexOf("data-add-title-icon");
     const toolbarAt = html.indexOf("data-titles-catalog-toolbar");
     const searchAt = html.indexOf("Search titles...");
-    const addAt = html.indexOf("data-add-title");
     const chromeAt = html.indexOf("data-titles-catalog-chrome");
+    const labeledAt = html.indexOf("data-add-title-labeled");
     expect(titleClose).toBeGreaterThan(-1);
     expect(countAt).toBeGreaterThan(titleClose);
-    // Status trails on the header (Dashboard All time SoT), before toolbar.
+    // Status + phone plus trail on the header (Dashboard All time SoT), before toolbar.
     expect(filtersAt).toBeGreaterThan(-1);
     expect(filtersAt).toBeLessThan(toolbarAt);
+    expect(headerOperateAt).toBeGreaterThan(filtersAt);
+    expect(headerOperateAt).toBeLessThan(toolbarAt);
+    expect(iconAt).toBeGreaterThan(headerOperateAt);
+    expect(iconAt).toBeLessThan(toolbarAt);
     expect(toolbarAt).toBeGreaterThan(countAt);
     expect(searchAt).toBeGreaterThan(toolbarAt);
-    expect(addAt).toBeGreaterThan(searchAt);
-    // Chrome is search + Add Title only — no status in toolbar.
+    // Phone toolbar is search only; labeled Add Title stays desktop chrome.
     expect(chromeAt).toBeGreaterThan(searchAt);
-    expect(addAt).toBeGreaterThan(chromeAt);
+    expect(labeledAt).toBeGreaterThan(chromeAt);
     expect(filtersAt).toBeLessThan(chromeAt);
 
     expect(html).toContain(TITLES_CATALOG.addTitle);
+    expect(html).toContain(`aria-label="${TITLES_CATALOG.addTitle}"`);
     expect(html).toContain("Filter by status");
     expect(html).toContain("data-house-page-select");
     expect(html).toContain("data-titles-catalog-status-current");
     expect(html).toContain(">All<");
     expect(html).not.toContain("data-titles-catalog-status-pills");
     expect(html).not.toContain("<select");
+    expect(html).not.toContain("data-titles-catalog-fab");
   });
 
   it("keeps search, Add Title, and quiet TITLE_STATUS_LABELS pills — no SaaS subtitle", async () => {
@@ -248,11 +257,17 @@ describe("client /titles catalog", () => {
     expect(html).toContain(TITLES_CATALOG.addTitle);
     expect(html).toContain("data-add-title");
     const add = openingTagsWith(html, 'data-add-title=""');
-    expect(add).toHaveLength(1);
-    expect(add[0]).toContain("t-body-sm");
-    expect(add[0]).toContain("bg-accent");
-    expect(add[0]).toContain("text-accent-contrast");
-    expect(add[0]).toContain("rounded-full");
+    const icon = openingTagsWith(html, 'data-add-title-icon=""');
+    const labeled = openingTagsWith(html, 'data-add-title-labeled=""');
+    expect(add).toHaveLength(2);
+    expect(icon).toHaveLength(1);
+    expect(labeled).toHaveLength(1);
+    expect(icon[0]).toContain("bg-accent");
+    expect(icon[0]).toContain("size-[44px]");
+    expect(labeled[0]).toContain("t-body-sm");
+    expect(labeled[0]).toContain("bg-accent");
+    expect(labeled[0]).toContain("text-accent-contrast");
+    expect(labeled[0]).toContain("rounded-full");
     expect(html).not.toContain("titles in Acme");
     expect(html).not.toContain("in Acme's catalog");
     expect(html).not.toMatch(/t-label[^>]*data-titles-catalog-status/);
@@ -452,6 +467,8 @@ describe("client /titles catalog", () => {
     expect(html).toContain("Search titles");
     expect(html).toContain("data-titles-catalog-status");
     expect(html).not.toContain("data-add-title");
+    expect(html).not.toContain("data-add-title-icon");
+    expect(html).not.toContain("data-titles-catalog-header-operate");
     expect(html).not.toContain(TITLES_CATALOG.addTitle);
   });
 
@@ -531,6 +548,8 @@ describe("client /titles catalog", () => {
     const list = openingTagsWith(html, 'data-titles-catalog-list=""');
     const rows = openingTagsWith(html, 'data-titles-catalog-list-row=""');
     const add = openingTagsWith(html, 'data-add-title=""');
+    const icon = openingTagsWith(html, 'data-add-title-icon=""');
+    const labeled = openingTagsWith(html, 'data-add-title-labeled=""');
 
     expect(html).toContain("Titles");
     expect(html).not.toContain("data-titles-catalog-identity");
@@ -548,16 +567,21 @@ describe("client /titles catalog", () => {
     expect(html).toContain("data-titles-catalog-status-compact");
     expect(html).toContain("data-house-page-select");
     expect(html).toContain("data-titles-catalog-chrome");
+    expect(html).toContain("data-titles-catalog-header-operate");
     expect(html).not.toContain("data-titles-catalog-status-pills");
     expect(html).not.toContain("<select");
     expect(html).not.toContain("data-titles-catalog-fab");
     expect(html).toContain(
       "titles-catalog mx-auto flex w-full flex-col gap-[var(--space-6)] px-[var(--space-4)]",
     );
-    expect(add).toHaveLength(1);
-    expect(add[0]).toContain("t-body-sm");
-    expect(add[0]).toContain("bg-accent");
-    expect(add[0]).toContain("rounded-full");
+    expect(add).toHaveLength(2);
+    expect(icon).toHaveLength(1);
+    expect(labeled).toHaveLength(1);
+    expect(icon[0]).toContain("bg-accent");
+    expect(icon[0]).toContain("size-[44px]");
+    expect(labeled[0]).toContain("t-body-sm");
+    expect(labeled[0]).toContain("bg-accent");
+    expect(labeled[0]).toContain("rounded-full");
     expect(html).not.toContain("Recently added");
     expect(html).not.toContain("Store");
     expect(html).not.toContain("Apple TV");
@@ -573,16 +597,22 @@ describe("client /titles catalog", () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
     const html = await renderCatalog();
     const add = openingTagsWith(html, 'data-add-title=""');
+    const icon = openingTagsWith(html, 'data-add-title-icon=""');
+    const labeled = openingTagsWith(html, 'data-add-title-labeled=""');
 
     expect(html).toContain(TITLES_CATALOG.empty);
     expect(html).toContain("No titles yet.");
     expect(html.split("No titles yet.").length - 1).toBe(1);
     expect(html).toContain("0 in catalog");
     expect(html).toContain(TITLES_CATALOG.addTitle);
-    expect(add).toHaveLength(1);
-    expect(add[0]).toContain("t-body-sm");
-    expect(add[0]).toContain("bg-accent");
-    expect(add[0]).toContain("rounded-full");
+    expect(html).toContain("data-titles-catalog-header-operate");
+    expect(add).toHaveLength(2);
+    expect(icon).toHaveLength(1);
+    expect(labeled).toHaveLength(1);
+    expect(icon[0]).toContain("bg-accent");
+    expect(labeled[0]).toContain("t-body-sm");
+    expect(labeled[0]).toContain("bg-accent");
+    expect(labeled[0]).toContain("rounded-full");
     expect(html).not.toContain("data-titles-catalog-list");
     expect(html).not.toContain("data-titles-catalog-rail");
     expect(html).not.toContain("Store");
@@ -595,12 +625,14 @@ describe("client /titles catalog", () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
     const html = await renderCatalog();
     const add = openingTagsWith(html, 'data-add-title=""');
+    const labeled = openingTagsWith(html, 'data-add-title-labeled=""');
 
-    expect(add).toHaveLength(1);
-    expect(add[0]).toContain("t-body-sm");
-    expect(add[0]).toContain("bg-accent");
-    expect(add[0]).toContain("text-accent-contrast");
-    expect(add[0]).toContain("rounded-full");
+    expect(add).toHaveLength(2);
+    expect(labeled).toHaveLength(1);
+    expect(labeled[0]).toContain("t-body-sm");
+    expect(labeled[0]).toContain("bg-accent");
+    expect(labeled[0]).toContain("text-accent-contrast");
+    expect(labeled[0]).toContain("rounded-full");
     expect(html).toContain("data-titles-catalog-list");
     expect(html).toContain("aspect-[16/9]");
     expect(html).not.toContain("data-titles-catalog-grid");

@@ -129,6 +129,8 @@ describe("titles catalog scope", () => {
     expect(skeletons).not.toContain("w-[40%]");
     expect(skeletons).not.toContain("PosterGridSkeleton");
     expect(skeletons).not.toContain("aspect-[2/3]");
+    expect(skeletons).toContain("size-[44px]");
+    expect(skeletons).not.toContain("h-8 w-24 md:hidden");
     expect(src("src/app/(app)/titles/loading.tsx")).toContain("CatalogSkeleton");
     expect(src("src/app/(app)/titles/[id]/loading.tsx")).toContain("TitleDetailSkeleton");
   });

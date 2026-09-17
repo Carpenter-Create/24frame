@@ -36,6 +36,10 @@ export const TITLE_STATUS_PILL_LIVE_CLASS = HOUSE_FILTER_ON_CLASS;
 export const TITLES_TITLE_MOBILE_CLASS = "t-heading text-ink md:hidden";
 export const TITLES_TITLE_DESKTOP_CLASS = "t-title text-ink max-md:hidden";
 
+// Phone header + — house 44 hit, Sporty Blue fill. Not a list FAB.
+export const TITLES_ADD_ICON_CLASS =
+  "size-[44px] min-h-[44px] min-w-[44px] px-0 py-0";
+
 export const TITLES_ROW_NAME_CLASS = "t-body font-medium text-ink md:truncate";
 
 export const TITLES_THUMB_CLASS =
