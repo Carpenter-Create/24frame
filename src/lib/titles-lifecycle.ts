@@ -5,6 +5,7 @@ import type { TitleStatus } from "@/lib/titles";
 // which control to offer. Confirm copy stays one line — no scare-copy.
 
 export const TITLE_LIFECYCLE = {
+  moreLabel: "Title actions",
   deleteLabel: "Delete",
   deleteTitle: "Delete title",
   deleteDraftBody: "This removes the draft and its files from the catalog.",
@@ -107,6 +108,17 @@ export function titleDeleteConfirmBody(input: {
 
 export function titleArchiveConfirmBody(offerFromDelete: boolean): string {
   return offerFromDelete ? TITLE_LIFECYCLE.archiveFromDeleteBody : TITLE_LIFECYCLE.archiveBody;
+}
+
+export function titleHasLifecycleActions(flags: TitleLifecycleFlags): boolean {
+  return flags.canDelete || flags.canArchive || flags.canRestore;
+}
+
+// List rows cannot run per-title reporting RPCs. Treat post-submit titles as
+// blocked so Delete is not offered without the hard predicate. Detail runs
+// title_has_reporting_activity before offering staff Delete.
+export function titleListHasReportingActivity(status: TitleStatus | string): boolean {
+  return !isDraftTitleStatus(status) && !isArchivedTitleStatus(status);
 }
 
 export function excludeArchivedTitles<T extends { status: string }>(rows: T[]): T[] {

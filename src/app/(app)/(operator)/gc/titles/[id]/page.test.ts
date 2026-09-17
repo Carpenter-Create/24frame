@@ -18,6 +18,7 @@ vi.mock("next/navigation", () => ({
   redirect: vi.fn(() => {
     throw new Error("unexpected redirect");
   }),
+  useRouter: () => ({ refresh: vi.fn(), push: vi.fn() }),
 }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/supabase/auth", () => ({ getAuthUser: vi.fn() }));
@@ -88,6 +89,13 @@ describe("GcTitleDetail transcode_jobs read (Task 6A)", () => {
     expect(pageSrc).not.toContain("submitProxyJob");
     expect(pageSrc).not.toContain("retryTranscodeJob");
     expect(pageSrc).not.toContain('from("./actions")');
+  });
+
+  it("mounts the shared title-lifecycle affordance, not a staff-only fork", () => {
+    expect(pageSrc).toContain("TitleLifecycleControls");
+    expect(pageSrc).toContain("titleLifecycleFlags");
+    expect(pageSrc).toContain("title_has_reporting_activity");
+    expect(pageSrc).not.toContain("StaffDelete");
   });
 });
 

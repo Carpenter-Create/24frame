@@ -21,6 +21,7 @@ export function TitleHero({
   meta = [],
   action,
   secondary,
+  overflow,
 }: {
   title: string;
   backHref: string;
@@ -32,6 +33,7 @@ export function TitleHero({
   meta?: string[];
   action?: React.ReactNode;
   secondary?: React.ReactNode;
+  overflow?: React.ReactNode;
 }) {
   const artUrl = bannerUrl || posterUrl;
   const artShape = bannerUrl ? "landscape" : posterUrl ? "square" : "landscape";
@@ -98,13 +100,14 @@ export function TitleHero({
               {meta.join(" · ")}
             </p>
           ) : null}
-          {action || secondary ? (
+          {action || secondary || overflow ? (
             <div
               className="flex flex-wrap items-center gap-[var(--space-2)]"
               data-title-hero-actions=""
             >
               {action}
               {secondary}
+              {overflow ? <div data-title-hero-overflow="">{overflow}</div> : null}
             </div>
           ) : null}
         </div>

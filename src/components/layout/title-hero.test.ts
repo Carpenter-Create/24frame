@@ -126,4 +126,20 @@ describe("TitleHero album-grammar rematch", () => {
     expect(html).not.toContain("Channels");
     expect(html).not.toContain("Insights");
   });
+
+  it("keeps the overflow actions menu in the hero actions row", () => {
+    const html = renderToStaticMarkup(
+      createElement(TitleHero, {
+        title: "Craft film",
+        backHref: "/titles",
+        status: "draft",
+        bannerUrl: null,
+        overflow: createElement("button", { "data-title-lifecycle-menu": "" }, "Title actions"),
+      }),
+    );
+    expect(html).toContain("data-title-hero-actions");
+    expect(html).toContain("data-title-hero-overflow");
+    expect(html).toContain("data-title-lifecycle-menu");
+    expect(html).toContain("Title actions");
+  });
 });

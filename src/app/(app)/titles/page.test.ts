@@ -480,6 +480,20 @@ describe("client /titles catalog", () => {
     expect(html).not.toContain("https://cdn/");
   });
 
+  it("shows row lifecycle actions for operate and hides them for a reader", async () => {
+    stubClient([titleRow("draft", 0), titleRow("live", 1)]);
+    vi.mocked(getOrgContext).mockResolvedValue(ctx({ canOperate: true }) as never);
+    const operate = await renderCatalog();
+    expect(operate).toContain("data-title-lifecycle-menu");
+    expect(operate).toContain("data-titles-catalog-row-actions");
+
+    stubClient([titleRow("draft", 0), titleRow("live", 1)]);
+    vi.mocked(getOrgContext).mockResolvedValue(ctx({ canOperate: false }) as never);
+    const reader = await renderCatalog();
+    expect(reader).not.toContain("data-title-lifecycle-menu");
+    expect(reader).not.toContain("data-titles-catalog-row-actions");
+  });
+
   it("hides Add Title when the viewer cannot operate", async () => {
     stubClient([titleRow("live", 0)]);
     vi.mocked(getOrgContext).mockResolvedValue(ctx({ canOperate: false }) as never);

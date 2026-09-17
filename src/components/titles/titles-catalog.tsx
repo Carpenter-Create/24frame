@@ -229,6 +229,7 @@ export function TitlesCatalogListRow({
   liveCount = 0,
   year,
   publicId,
+  overflow,
 }: {
   href: string;
   title: string;
@@ -237,15 +238,10 @@ export function TitlesCatalogListRow({
   liveCount?: number;
   year?: string | null;
   publicId?: string | null;
+  overflow?: React.ReactNode;
 }) {
-  return (
-    <Link
-      href={href}
-      prefetch={false}
-      className={TITLES_LIST_ROW_CLASS}
-      data-titles-catalog-list-row=""
-      data-title-status={status}
-    >
+  const body = (
+    <>
       <TitlesCatalogThumb title={title} stillUrl={stillUrl} />
       <span className={TITLES_ROW_META_CLASS} data-titles-catalog-row-meta="">
         <span className={TITLES_ROW_COPY_CLASS}>
@@ -281,6 +277,43 @@ export function TitlesCatalogListRow({
         </span>
         <TitleStatusPill status={status} liveCount={liveCount} />
       </span>
-    </Link>
+    </>
+  );
+
+  if (!overflow) {
+    return (
+      <Link
+        href={href}
+        prefetch={false}
+        className={TITLES_LIST_ROW_CLASS}
+        data-titles-catalog-list-row=""
+        data-title-status={status}
+      >
+        {body}
+      </Link>
+    );
+  }
+
+  return (
+    <div
+      className={TITLES_LIST_ROW_CLASS}
+      data-titles-catalog-list-row=""
+      data-title-status={status}
+    >
+      <Link
+        href={href}
+        prefetch={false}
+        className="flex min-w-0 flex-1 flex-col md:flex-row md:items-center md:gap-[var(--space-4)]"
+        data-titles-catalog-list-link=""
+      >
+        {body}
+      </Link>
+      <div
+        className="flex shrink-0 items-center self-end px-[var(--space-4)] pb-[var(--space-4)] md:self-center md:px-0 md:pb-0"
+        data-titles-catalog-row-actions=""
+      >
+        {overflow}
+      </div>
+    </div>
   );
 }

@@ -25,6 +25,13 @@ import {
   TitlesCatalogListRow,
   TitlesCatalogToolbar,
 } from "@/components/titles/titles-catalog";
+import { TitleLifecycleControls } from "./[id]/title-lifecycle-controls";
+import type { TitleStatus } from "@/lib/titles";
+import {
+  titleHasLifecycleActions,
+  titleLifecycleFlags,
+  titleListHasReportingActivity,
+} from "@/lib/titles-lifecycle";
 
 // Client `/titles` is the catalog you operate: active titles by default,
 // Archived via the status filter. Soft-deleted titles are omitted.
@@ -92,8 +99,14 @@ export default async function TitlesPage({
   const filtered = filterCatalogByStatus(filterTitles(all, q), statusFilter);
 
   const catalogById = new Map(list.map((t) => [t.id, t.catalog_id]));
+  const lifecycleActor = { isStaff: ctx.isGcStaff, canOperate };
   const stills = filtered.map((r) => {
     const catalogId = catalogById.get(r.id) ?? null;
+    const flags = titleLifecycleFlags(
+      lifecycleActor,
+      r.status,
+      titleListHasReportingActivity(r.status),
+    );
     return {
       key: r.id,
       href: titleClientPath(catalogId),
@@ -103,6 +116,7 @@ export default async function TitlesPage({
       liveCount: r.live,
       year: catalogReleaseYear(r.release_date),
       publicId: publicCatalogId(catalogId),
+      flags,
     };
   });
 
@@ -168,6 +182,16 @@ export default async function TitlesPage({
               liveCount={r.liveCount}
               year={r.year}
               publicId={r.publicId}
+              overflow={
+                titleHasLifecycleActions(r.flags) ? (
+                  <TitleLifecycleControls
+                    titleId={r.key}
+                    status={r.status as TitleStatus}
+                    isStaff={ctx.isGcStaff}
+                    flags={r.flags}
+                  />
+                ) : undefined
+              }
             />
           ))}
         </TitlesCatalogList>
