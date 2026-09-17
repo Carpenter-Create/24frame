@@ -3,6 +3,7 @@ import { Camera } from "lucide-react";
 
 import { Artwork } from "@/components/layout/artwork";
 import { TitlesCatalogStatusFilter } from "@/components/titles/titles-status-filter";
+import { StatusProgressTrack } from "@/components/ui/status-progress-track";
 
 export { TitlesCatalogStatusFilter } from "@/components/titles/titles-status-filter";
 import { cn } from "@/lib/cn";
@@ -16,7 +17,6 @@ import {
   TITLES_THUMB_CLASS,
   TITLES_TITLE_DESKTOP_CLASS,
   TITLES_TITLE_MOBILE_CLASS,
-  catalogStatusPillClass,
   type CatalogStatusFilter,
 } from "@/lib/titles-catalog";
 
@@ -27,6 +27,7 @@ import {
 // Type is the Dashboard register. Accent is Sporty Blue Add Title:
 // phone header + (house 44), desktop labeled pill. Not a list FAB.
 // Status filter is HousePageSelect trailing on the header (Dashboard All time SoT).
+// Row status is the shared Sporty Blue segment track — not a greyscale pill.
 // Vertical air above the rows is tight: H1 → toolbar → list at 8.
 
 export function TitlesCatalogFrame({
@@ -172,21 +173,18 @@ export function TitlesCatalogList({ children }: { children: React.ReactNode }) {
 
 export function TitleStatusPill({
   status,
-  statusLabel,
+  liveCount = 0,
 }: {
   status: string;
-  statusLabel: string;
+  liveCount?: number;
 }) {
   return (
-    <span
-      className={cn(
-        "inline-flex w-fit shrink-0 items-center rounded-full px-[var(--space-3)] py-[var(--space-1)] t-body-sm",
-        catalogStatusPillClass(status),
-      )}
+    <StatusProgressTrack
+      pipeline="title"
+      status={status}
+      liveCount={liveCount}
       data-titles-catalog-status=""
-    >
-      {statusLabel}
-    </span>
+    />
   );
 }
 
@@ -228,7 +226,7 @@ export function TitlesCatalogListRow({
   title,
   stillUrl,
   status,
-  statusLabel,
+  liveCount = 0,
   year,
   publicId,
 }: {
@@ -236,7 +234,7 @@ export function TitlesCatalogListRow({
   title: string;
   stillUrl: string | null;
   status: string;
-  statusLabel: string;
+  liveCount?: number;
   year?: string | null;
   publicId?: string | null;
 }) {
@@ -281,7 +279,7 @@ export function TitlesCatalogListRow({
             </span>
           ) : null}
         </span>
-        <TitleStatusPill status={status} statusLabel={statusLabel} />
+        <TitleStatusPill status={status} liveCount={liveCount} />
       </span>
     </Link>
   );

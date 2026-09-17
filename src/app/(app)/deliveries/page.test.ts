@@ -44,11 +44,26 @@ describe("DeliveriesPage bounds", () => {
     expect(html).toContain("data-deliveries-pipeline");
     expect(html).toContain("data-deliveries-row");
     expect(html).toContain("Live");
+    expect(html).toContain("data-deliveries-status");
+    expect(html).toContain('data-status-progress-variant="pipeline"');
+    expect(html.match(/data-status-progress-seg="filled"/g) ?? []).toHaveLength(3);
+    expect(html).toContain("Filter by status");
     expect(html).not.toContain("Platform");
     expect(html).not.toContain("Download");
     expect(html).not.toContain("Create delivery");
     expect(html).not.toContain('data-my-list-truncated="deliveries"');
     expect(html).not.toContain(DELIVERIES_TRUNCATED);
+  });
+
+  it("renders rejected as a muted badge with no track", async () => {
+    stubRpc([{ ...ROW, status: "rejected" }]);
+    const html = renderToStaticMarkup(
+      await DeliveriesPage({ searchParams: Promise.resolve({}) }),
+    );
+    expect(html).toContain("Rejected");
+    expect(html).toContain('data-status-progress-variant="off"');
+    expect(html).not.toContain("data-status-progress-track");
+    expect(html).toContain("Filter by status");
   });
 
   it("surfaces an honest notice when the probe overflows", async () => {

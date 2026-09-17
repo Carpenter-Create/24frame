@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getOrgContext } from "@/lib/supabase/context";
 import { LIST_PAGE } from "@/lib/list-bounds";
 import { TITLE_STATUS_LABELS, type TitleStatus } from "@/lib/titles";
+import { titleStatusProgress } from "@/lib/status-progress";
 import { TITLES_CATALOG } from "@/lib/titles-catalog";
 import { NAV } from "@/lib/nav";
 import TitlesPage from "./page";
@@ -167,12 +168,13 @@ describe("client /titles catalog", () => {
       /data-titles-catalog-list-row[\s\S]*data-titles-catalog-frame[\s\S]*data-titles-catalog-status/,
     );
 
-    const statusLabels = [...html.matchAll(/data-titles-catalog-status="">([^<]*)/g)].map(
+    const statusLabels = [...html.matchAll(/data-status-progress-label=""[^>]*>([^<]*)/g)].map(
       (match) => match[1],
     );
-    expect(statusLabels).toEqual(ALL_STATUSES.map((status) => TITLE_STATUS_LABELS[status]));
-    expect(new Set(statusLabels).size).toBe(6);
-    expect(statusLabels.filter((label) => label === "Submitted")).toHaveLength(2);
+    expect(statusLabels).toEqual(ALL_STATUSES.map((status) => titleStatusProgress(status).label));
+    expect(new Set(statusLabels).size).toBe(7);
+    expect(statusLabels.filter((label) => label === "Submitted")).toHaveLength(1);
+    expect(statusLabels.filter((label) => label === "In delivery")).toHaveLength(1);
     expect(statusLabels).not.toContain("Delivered");
     expect(statusLabels).not.toContain("delivered");
 
@@ -181,7 +183,7 @@ describe("client /titles catalog", () => {
       expect(html).toContain(`/titles/24F-${i}`);
       expect(html).not.toContain(`/titles/title-${status}`);
       expect(html).toContain(`data-title-status="${status}"`);
-      expect(html).toContain(TITLE_STATUS_LABELS[status]);
+      expect(html).toContain(titleStatusProgress(status).label);
     }
   });
 
@@ -275,17 +277,24 @@ describe("client /titles catalog", () => {
     expect(html).not.toMatch(/genre/i);
     expect(html).not.toMatch(/director/i);
 
-    const statusPills = openingTagsWith(html, 'data-titles-catalog-status=""');
-    expect(statusPills.length).toBeGreaterThanOrEqual(ALL_STATUSES.length);
-    for (const open of statusPills) {
+    const statusHosts = openingTagsWith(html, 'data-titles-catalog-status=""');
+    expect(statusHosts.length).toBeGreaterThanOrEqual(ALL_STATUSES.length);
+    const pipelineHosts = statusHosts.filter((open) =>
+      open.includes('data-status-progress-variant="pipeline"'),
+    );
+    const offHosts = statusHosts.filter((open) =>
+      open.includes('data-status-progress-variant="off"'),
+    );
+    expect(pipelineHosts.length).toBeGreaterThan(0);
+    expect(offHosts.length).toBeGreaterThan(0);
+    expect(html).toContain('data-status-progress-seg="filled"');
+    expect(html).toContain("bg-accent");
+    expect(html).not.toMatch(/data-titles-catalog-status[\s\S]{0,200}green|emerald|rose|red/);
+    for (const open of offHosts) {
       expect(open).toContain("rounded-full");
+      expect(open).toContain("border-hairline");
       expect(open).not.toContain("bg-accent");
-      expect(open).not.toMatch(/green|emerald|rose|red/);
     }
-    const livePills = statusPills.filter((open) => open.includes("bg-ink"));
-    const hairlinePills = statusPills.filter((open) => open.includes("border-hairline"));
-    expect(livePills.length).toBeGreaterThan(0);
-    expect(hairlinePills.length).toBeGreaterThan(0);
     expect(html).toContain("t-body font-medium text-ink");
     expect(html).toContain("t-heading text-ink");
     expect(html).not.toContain("rounded-full bg-surface-muted");
@@ -300,6 +309,7 @@ describe("client /titles catalog", () => {
     expect(filtersHtml).toContain("data-titles-catalog-status-compact");
     expect(filtersHtml).not.toContain("t-label ");
     expect(filtersHtml).not.toContain("uppercase");
+    expect(filtersHtml).not.toContain("data-status-progress-track");
     // Status is on the header identity row, not in toolbar chrome.
     expect(html).toContain("data-titles-catalog-header-row");
     expect(html.indexOf("data-titles-catalog-filters")).toBeLessThan(
@@ -307,8 +317,9 @@ describe("client /titles catalog", () => {
     );
     expect(html).not.toContain("group-hover:text-ink-2");
     for (const status of ALL_STATUSES) {
-      expect(html).toContain(TITLE_STATUS_LABELS[status]);
+      expect(html).toContain(titleStatusProgress(status).label);
     }
+    expect(html).toContain(TITLE_STATUS_LABELS.submitted);
   });
 
   it("puts a quiet 24F- public id on the row and links with it", async () => {

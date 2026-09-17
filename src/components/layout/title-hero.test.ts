@@ -40,7 +40,6 @@ describe("TitleHero album-grammar rematch", () => {
         backHref: "/titles",
         backLabel: "Titles",
         status: "live",
-        statusLabel: "Live",
         bannerUrl: "https://cdn/wide.jpg",
         meta: ["2019", "Drama", "24F-0001234"],
       }),
@@ -73,7 +72,6 @@ describe("TitleHero album-grammar rematch", () => {
         title: "Poster film",
         backHref: "/titles",
         status: "draft",
-        statusLabel: "Draft",
         bannerUrl: null,
         posterUrl: "https://cdn/poster.jpg",
       }),
@@ -90,7 +88,6 @@ describe("TitleHero album-grammar rematch", () => {
         title: "Empty film",
         backHref: "/titles",
         status: "draft",
-        statusLabel: "Draft",
         bannerUrl: null,
       }),
     );
@@ -101,28 +98,29 @@ describe("TitleHero album-grammar rematch", () => {
     expect(html).not.toContain("t-data select-none text-3xl");
   });
 
-  it("puts the ink status pill with the title and actions under the meta", () => {
+  it("puts the lifecycle track with the title and actions under the meta", () => {
     const html = renderToStaticMarkup(
       createElement(TitleHero, {
         title: "Craft film",
         backHref: "/titles",
-        status: "live",
-        statusLabel: "Live · 1 of 2 platforms",
+        status: "in_delivery",
+        liveCount: 1,
         bannerUrl: null,
         meta: ["May 1, 2019"],
         action: createElement("button", { "data-title-play-trailer": "" }, "Play trailer"),
       }),
     );
-    const pill = openingTagWith(html, 'data-title-hero-status=""');
+    const track = openingTagWith(html, 'data-title-hero-status=""');
 
     expect(html).toContain("t-title");
     expect(html).toContain("Craft film");
     expect(html).toContain("May 1, 2019");
     expect(html).toContain("data-title-hero-actions");
     expect(html).toContain("Play trailer");
-    expect(pill).toContain("bg-ink");
-    expect(pill).toContain("text-surface");
-    expect(pill).not.toContain("bg-accent");
+    expect(track).toContain('data-status-progress-variant="pipeline"');
+    expect(html.match(/data-status-progress-seg="filled"/g) ?? []).toHaveLength(5);
+    expect(html).toContain("Live");
+    expect(html).not.toContain("Live · 1 of 2 platforms");
     expect(html).not.toContain("Social");
     expect(html).not.toContain("Education");
     expect(html).not.toContain("Channels");

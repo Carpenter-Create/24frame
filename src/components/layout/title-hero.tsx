@@ -2,11 +2,11 @@ import Link from "next/link";
 import { ArrowLeft, Camera } from "lucide-react";
 
 import { Artwork } from "./artwork";
+import { StatusProgressTrack } from "@/components/ui/status-progress-track";
 import { cn } from "@/lib/cn";
-import { catalogStatusPillClass } from "@/lib/titles-catalog";
 
-// Title-detail hero in the house shell: leading art, title / ink status /
-// quiet meta to the right, primary action under the meta. Landscape banner
+// Title-detail hero in the house shell: leading art, title / lifecycle
+// track / quiet meta to the right, primary action under the meta. Landscape banner
 // when it exists; square poster crop otherwise; muted placeholder if neither.
 // House light canvas — not a full-bleed band.
 
@@ -15,7 +15,7 @@ export function TitleHero({
   backHref,
   backLabel = "Back",
   status,
-  statusLabel,
+  liveCount = 0,
   bannerUrl,
   posterUrl = null,
   meta = [],
@@ -26,7 +26,7 @@ export function TitleHero({
   backHref: string;
   backLabel?: string;
   status: string;
-  statusLabel: string;
+  liveCount?: number;
   bannerUrl: string | null;
   posterUrl?: string | null;
   meta?: string[];
@@ -86,15 +86,12 @@ export function TitleHero({
         >
           <div className="flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[var(--space-2)]">
             <h1 className="t-title leading-tight text-ink">{title}</h1>
-            <span
-              className={cn(
-                "inline-flex w-fit shrink-0 items-center rounded-full px-[var(--space-3)] py-[var(--space-1)] t-body-sm",
-                catalogStatusPillClass(status),
-              )}
+            <StatusProgressTrack
+              pipeline="title"
+              status={status}
+              liveCount={liveCount}
               data-title-hero-status=""
-            >
-              {statusLabel}
-            </span>
+            />
           </div>
           {meta.length > 0 ? (
             <p className="t-body-sm text-ink-3" data-title-hero-facts="">

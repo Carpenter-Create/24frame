@@ -60,7 +60,7 @@ function renderRow(props: {
   title: string;
   stillUrl: string | null;
   status: string;
-  statusLabel: string;
+  liveCount?: number;
   year?: string | null;
 }): string {
   return renderToStaticMarkup(createElement(TitlesCatalogListRow, props));
@@ -80,7 +80,6 @@ describe("TitlesCatalogListRow craft", () => {
       title: "Craft film",
       stillUrl: "https://cdn/wide.jpg",
       status: "live",
-      statusLabel: TITLE_STATUS_LABELS.live,
       year: "2019",
     });
     const row = openingTagWith(html, 'data-titles-catalog-list-row=""');
@@ -110,7 +109,6 @@ describe("TitlesCatalogListRow craft", () => {
       title: "Empty film",
       stillUrl: null,
       status: "draft",
-      statusLabel: TITLE_STATUS_LABELS.draft,
     });
 
     expect(html).toContain("data-titles-catalog-empty-art");
@@ -126,7 +124,6 @@ describe("TitlesCatalogListRow craft", () => {
       title: "Craft film",
       stillUrl: null,
       status: "live",
-      statusLabel: TITLE_STATUS_LABELS.live,
       year: "2019",
     });
     const name = openingTagWith(html, 'data-titles-catalog-name=""');
@@ -144,47 +141,58 @@ describe("TitlesCatalogListRow craft", () => {
     );
   });
 
-  it("marks Live as the ink-selected fill and other statuses as hairline pills", () => {
+  it("marks on-track statuses as a Sporty Blue segment track and off-track as a muted badge", () => {
     const live = renderRow({
       href: "/titles/1",
       title: "Craft film",
       stillUrl: null,
       status: "live",
-      statusLabel: TITLE_STATUS_LABELS.live,
     });
     const draft = renderRow({
       href: "/titles/2",
       title: "Draft film",
       stillUrl: null,
       status: "draft",
-      statusLabel: TITLE_STATUS_LABELS.draft,
     });
-    const livePill = openingTagWith(live, 'data-titles-catalog-status=""');
-    const draftPill = openingTagWith(draft, 'data-titles-catalog-status=""');
+    const takedown = renderRow({
+      href: "/titles/3",
+      title: "Takedown film",
+      stillUrl: null,
+      status: "takedown_requested",
+    });
+    const liveHost = openingTagWith(live, 'data-titles-catalog-status=""');
+    const takedownHost = openingTagWith(takedown, 'data-titles-catalog-status=""');
 
-    expect(livePill).toContain("rounded-full");
-    expect(livePill).toContain("bg-ink");
-    expect(livePill).toContain("text-surface");
-    expect(livePill).not.toContain("bg-accent");
-    expect(livePill).not.toMatch(/green|emerald|success/);
-    expect(draftPill).toContain("border-hairline");
-    expect(draftPill).toContain("text-ink-2");
-    expect(draftPill).not.toContain("bg-ink");
-    expect(draftPill).not.toContain("bg-accent");
+    expect(liveHost).toContain('data-status-progress-variant="pipeline"');
+    expect(live.match(/data-status-progress-seg="filled"/g) ?? []).toHaveLength(5);
+    expect(live).toContain("bg-accent");
+    expect(live).toContain("Live");
+    expect(live).not.toMatch(/green|emerald|success|rose|red/);
+    expect(draft.match(/data-status-progress-seg="filled"/g) ?? []).toHaveLength(1);
+    expect(draft).toContain("Draft");
+    expect(takedownHost).toContain('data-status-progress-variant="off"');
+    expect(takedownHost).toContain("border-hairline");
+    expect(takedownHost).toContain("text-ink-2");
+    expect(takedown).not.toContain("data-status-progress-track");
+    expect(takedown).toContain("Takedown requested");
   });
 
-  it("places title, year, and every TITLE_STATUS_LABELS pill — no delivered, Archived is first-class", () => {
+  it("places title, year, and the track stage label — In delivery is not Submitted", () => {
     for (const status of ALL_STATUSES) {
       const html = renderRow({
         href: `/titles/${status}`,
         title: `${status} film`,
         stillUrl: null,
         status,
-        statusLabel: TITLE_STATUS_LABELS[status],
         year: status === "live" ? "2019" : null,
       });
       expect(html).toContain(`${status} film`);
-      expect(html).toContain(TITLE_STATUS_LABELS[status]);
+      if (status === "in_delivery") {
+        expect(html).toContain("In delivery");
+        expect(html).not.toContain("Submitted");
+      } else {
+        expect(html).toContain(TITLE_STATUS_LABELS[status]);
+      }
       if (status === "live") {
         expect(html).toContain("data-titles-catalog-year");
         expect(html).toContain("2019");
@@ -192,14 +200,9 @@ describe("TitlesCatalogListRow craft", () => {
         expect(html).not.toContain("data-titles-catalog-year");
       }
     }
-    const labels = ALL_STATUSES.map((status) => TITLE_STATUS_LABELS[status]);
-    expect(labels).toHaveLength(8);
-    expect(new Set(labels).size).toBe(7);
     expect(TITLE_STATUS_LABELS.archived).toBe("Archived");
     expect(TITLE_STATUS_LABELS.in_delivery).toBe("Submitted");
     expect(TITLE_STATUS_LABELS.submitted).toBe("Submitted");
-    expect(labels).not.toContain("Delivered");
-    expect(labels).not.toContain("delivered");
   });
 });
 
@@ -307,7 +310,6 @@ describe("TitlesCatalogList landscape row lock", () => {
             title: "Craft film",
             stillUrl: null,
             status: "live",
-            statusLabel: TITLE_STATUS_LABELS.live,
             year: "2019",
             publicId: "24F-0001234",
           }),
@@ -320,7 +322,7 @@ describe("TitlesCatalogList landscape row lock", () => {
     const frame = openingTagWith(html, 'data-titles-catalog-frame=""');
     const name = openingTagWith(html, 'data-titles-catalog-name=""');
     const year = openingTagWith(html, 'data-titles-catalog-year=""');
-    const pill = openingTagWith(html, 'data-titles-catalog-status=""');
+    const track = openingTagWith(html, 'data-titles-catalog-status=""');
 
     expect(html).not.toContain("Recently added");
     expect(html).not.toContain("Recent");
@@ -345,8 +347,9 @@ describe("TitlesCatalogList landscape row lock", () => {
     expect(html).toContain("2019");
     expect(html).toContain("data-titles-catalog-public-id");
     expect(html).toContain("24F-0001234");
-    expect(pill).toContain("bg-ink");
-    expect(pill).not.toContain("bg-accent");
+    expect(track).toContain('data-status-progress-variant="pipeline"');
+    expect(html).toContain("bg-accent");
+    expect(html).toContain("Live");
     expect(html).not.toContain("bg-band");
     expect(html).not.toMatch(/\bStore\b/);
     expect(html.match(/data-titles-catalog-list=""/g) ?? []).toHaveLength(1);
