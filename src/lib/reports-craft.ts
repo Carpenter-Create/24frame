@@ -3,10 +3,12 @@
 // Sporty Blue fill. Content pills (Titles / Platforms / Users) use ink.
 // Download is the one primary when a concrete period can export.
 
+import { HOUSE_MODULE_CLASS } from "@/lib/house-shell";
+
 export const REPORTS_STACK_CLASS = "flex flex-col gap-[var(--space-6)]";
 export const REPORTS_SECTION_CLASS = "flex flex-col gap-[var(--space-6)]";
 export const REPORTS_RELATED_GAP_CLASS = "gap-[var(--space-2)]";
-export const REPORTS_CARD_CLASS = "card-surface overflow-hidden shadow-none";
+export const REPORTS_CARD_CLASS = `${HOUSE_MODULE_CLASS} overflow-hidden shadow-none`;
 export const REPORTS_CARD_PAD = "px-[var(--space-4)] py-[var(--space-4)]";
 export const REPORTS_SECTION_TITLE_CLASS = "t-heading text-ink";
 export const REPORTS_TITLE_MOBILE_CLASS = "t-heading text-ink md:hidden";

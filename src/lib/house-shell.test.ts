@@ -19,10 +19,13 @@ import {
   HOUSE_CARD_PAD,
   HOUSE_FILTER_OFF_CLASS,
   HOUSE_FILTER_ON_CLASS,
+  HOUSE_MODULE_CLASS,
+  HOUSE_PAGE_CANVAS_CLASS,
   HOUSE_PERIOD_SELECTED_CLASS,
   HOUSE_RAIL_ACTIVE_CLASS,
   HOUSE_RAIL_IDLE_CLASS,
   HOUSE_RAIL_ITEM_CLASS,
+  HOUSE_RAIL_PANEL_CLASS,
   HOUSE_RELATED_GAP_CLASS,
   HOUSE_SEARCH_PILL_CLASS,
   HOUSE_SECTION_AIR_CLASS,
@@ -32,6 +35,7 @@ import { SOCIAL_PILL_ACTIVE_CLASS, SOCIAL_PILL_IDLE_CLASS } from "@/lib/social-c
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
   usePathname: () => "/education/orientation",
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 vi.mock("@/app/(app)/(operator)/education/actions", () => ({
@@ -93,7 +97,7 @@ const HOUSE_SHELL_COMMENT_PATHS = [
 
 describe("house shell rematch — Aggregation · Social · Education", () => {
   it("keeps one canvas, card, and accent wash for every workspace", () => {
-    expect(tokens).toMatch(/--bg:\s*#fafafb;/);
+    expect(tokens).toMatch(/--bg:\s*#ffffff;/);
     expect(tokens).toMatch(/--surface:\s*#ffffff;/);
     expect(tokens).toMatch(/--surface-muted:\s*#f4f4f6;/);
     expect(tokens).toMatch(/--text:\s*#14171a;/);
@@ -109,6 +113,13 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(existsSync("src/app/tokens-social.css")).toBe(false);
     expect(existsSync("src/app/tokens-education.css")).toBe(false);
     expect(existsSync("src/app/tokens-aggregation.css")).toBe(false);
+    expect(HOUSE_PAGE_CANVAS_CLASS).toBe("bg-bg");
+    expect(HOUSE_MODULE_CLASS).toBe(
+      "rounded-[var(--radius-lg)] bg-surface-muted shadow-none",
+    );
+    expect(HOUSE_RAIL_PANEL_CLASS).toBe(
+      "rounded-[var(--radius-lg)] border border-hairline bg-surface shadow-none",
+    );
     expect(HOUSE_CARD_PAD).toBe("px-[var(--space-4)] py-[var(--space-4)]");
     expect(HOUSE_RELATED_GAP_CLASS).toBe("gap-[var(--space-2)]");
     expect(HOUSE_SECTION_AIR_CLASS).toBe("gap-[var(--space-6)]");
@@ -130,7 +141,7 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(DASHBOARD_PERIOD_OPTION_SELECTED_CLASS).toBe(HOUSE_PERIOD_SELECTED_CLASS);
     expect(sideNav).toContain("HOUSE_RAIL_ACTIVE_CLASS");
     expect(sideNav).toContain("HOUSE_RAIL_IDLE_CLASS");
-    expect(shell).toContain("bg-bg");
+    expect(shell).toContain("HOUSE_PAGE_CANVAS_CLASS");
     expect(shell).toContain("<BrandEmblem />");
     expect(shell).not.toContain("BrandWordmark");
     expect(card).toContain("card-surface");
@@ -169,8 +180,7 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(educationRail).toContain("HOUSE_RAIL_ACTIVE_CLASS");
     expect(educationRail).toContain("HOUSE_RAIL_IDLE_CLASS");
     expect(educationRail).toContain("HOUSE_CARD_PAD");
-    expect(educationRail).toContain("rounded-[var(--radius-lg)]");
-    expect(educationRail).toContain("shadow-none");
+    expect(educationRail).toContain("HOUSE_MODULE_CLASS");
 
     expect(educationShell).toContain("HOUSE_SECTION_AIR_CLASS");
     expect(educationShell).toContain("data-gc-education");

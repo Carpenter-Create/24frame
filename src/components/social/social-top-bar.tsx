@@ -6,7 +6,7 @@ import { WorkspaceSwitcher } from "@/components/chrome/workspace-switcher";
 import { SocialIcon } from "@/components/social/social-icon";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/cn";
-import { HOUSE_SEARCH_PILL_CLASS } from "@/lib/house-shell";
+import { HOUSE_ICON_BUTTON_CLASS, HOUSE_SEARCH_PILL_CLASS } from "@/lib/house-shell";
 import { PRODUCT_NAME } from "@/lib/product";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { SOCIAL_ICON_SIZE_HEADER, SOCIAL_ICON_SIZE_SEARCH } from "@/lib/social-icons";
@@ -65,18 +65,12 @@ export function SocialTopBar({
             prefetch
             aria-label={SOCIAL.explore.searchSocial}
             data-social-header-search-icon=""
-            className="flex size-8 items-center justify-center text-ink-2 md:hidden"
+            className={cn(
+              "flex size-8 items-center justify-center text-ink-2 md:hidden",
+              HOUSE_ICON_BUTTON_CLASS,
+            )}
           >
             <SocialIcon name="magnifying-glass" size={SOCIAL_ICON_SIZE_HEADER} />
-          </Link>
-          <Link
-            href={SOCIAL_ROUTES.dms}
-            prefetch
-            aria-label={SOCIAL.dms.title}
-            data-social-header-tray=""
-            className="hidden items-center justify-center text-ink-2 md:flex"
-          >
-            <SocialIcon name="tray" size={SOCIAL_ICON_SIZE_HEADER} />
           </Link>
         </div>
         <div data-app-header-trailing="" className={APP_HEADER_TRAILING_CLUSTER_CLASS}>

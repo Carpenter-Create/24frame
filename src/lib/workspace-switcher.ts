@@ -24,6 +24,7 @@
 // cookie. Do not invent /education, /account/workspace, or
 // /settings/workspace.
 
+import { HOUSE_CONTROL_PILL_CLASS } from "@/lib/house-shell";
 import { USER_MENU } from "@/lib/user-menu";
 import {
   availableWorkspaceOptions,
@@ -57,12 +58,11 @@ export const WORKSPACE_SWITCHER_MARK = {
 export type WorkspaceSwitcherTone = "plain" | "pill";
 
 export const WORKSPACE_SWITCHER_TRIGGER_CLASS =
-  "group flex min-w-0 items-center gap-[var(--space-2)] rounded-[var(--radius-sm)] px-2 py-1 t-body-sm font-medium text-ink transition-colors hover:bg-surface-muted";
+  `group flex min-w-0 items-center gap-[var(--space-2)] ${HOUSE_CONTROL_PILL_CLASS} px-2 py-1 t-body-sm font-medium text-ink transition-colors hover:bg-surface-muted`;
 
-// Phone leading pill — Mercury density, house tokens. Hairline +
-// muted fill. Not Mercury brand green/blue. Compact pad.
+// Phone leading pill — house tokens. Hairline + muted fill. Compact pad.
 export const WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS =
-  "group flex min-w-0 items-center gap-[var(--space-2)] rounded-[var(--radius-sm)] border border-hairline bg-surface-muted px-[var(--space-2)] py-[var(--space-1)] t-body-sm font-medium text-ink";
+  `group flex min-w-0 items-center gap-[var(--space-2)] ${HOUSE_CONTROL_PILL_CLASS} border border-hairline bg-surface-muted px-[var(--space-2)] py-[var(--space-1)] t-body-sm font-medium text-ink`;
 
 export const WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS = "min-w-0 truncate";
 
@@ -70,7 +70,7 @@ export const WORKSPACE_SWITCHER_STATIC_CLASS =
   "flex min-w-0 items-center gap-[var(--space-2)] px-2 py-1 t-body-sm font-medium text-ink";
 
 export const WORKSPACE_SWITCHER_PILL_STATIC_CLASS =
-  "flex min-w-0 items-center gap-[var(--space-2)] rounded-[var(--radius-sm)] border border-hairline bg-surface-muted px-[var(--space-2)] py-[var(--space-1)] t-body-sm font-medium text-ink";
+  `flex min-w-0 items-center gap-[var(--space-2)] ${HOUSE_CONTROL_PILL_CLASS} border border-hairline bg-surface-muted px-[var(--space-2)] py-[var(--space-1)] t-body-sm font-medium text-ink`;
 
 // Hidden at rest on md+. Desktop hover / keyboard focus reveals it.
 // Open state adds opacity-100. Phone pill chevron stays visible so

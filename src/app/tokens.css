@@ -34,7 +34,7 @@
   /* --- Neutral ramp — LIGHT (default base) ---
      House greyscale canon: airy, neutral near-white. Colour comes only from the
      sparing accent. */
-  --bg:            #fafafb;         /* airy neutral near-white */
+  --bg:            #ffffff;         /* white page canvas — not a grey wash */
   --surface:       #ffffff;         /* elevated white */
   --surface-muted: #f4f4f6;         /* panel fill */
   --border:        #ecedf0;         /* hairline */

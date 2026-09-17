@@ -45,8 +45,8 @@ const statusFilter = readFileSync("src/components/layout/status-filter.tsx", "ut
 const page = readFileSync("src/app/(app)/dashboard/page.tsx", "utf8");
 
 describe("Coinbase shell rematch — Adam miss list v1", () => {
-  it("keeps the page canvas on house #FAFAFB and cards on shared 16 radius", () => {
-    expect(tokens).toMatch(/--bg:\s*#fafafb;/);
+  it("keeps the page canvas on house white and cards on shared 16 radius", () => {
+    expect(tokens).toMatch(/--bg:\s*#ffffff;/);
     expect(tokens).toMatch(/--surface:\s*#ffffff;/);
     expect(tokens).toMatch(/--surface-muted:\s*#f4f4f6;/);
     expect(tokens).toMatch(/--text:\s*#14171a;/);

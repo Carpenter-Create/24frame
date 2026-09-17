@@ -1,10 +1,12 @@
 // Rail-collapse chevron tokens and sidebar-collapsed cookie.
 // House names only. Data attr values stay on RAIL_COLLAPSE_*.
 
+import { HOUSE_ICON_BUTTON_CLASS } from "@/lib/house-shell";
+
 export const RAIL_COLLAPSE_CHEVRON = "chevron";
 
 export const RAIL_COLLAPSE_CHEVRON_CLASS =
-  "flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--radius-sm)] text-ink-3 transition-colors hover:bg-surface-muted hover:text-ink-2";
+  `flex h-7 w-7 shrink-0 items-center justify-center ${HOUSE_ICON_BUTTON_CLASS} text-ink-3 transition-colors hover:bg-surface-muted hover:text-ink-2`;
 
 export const RAIL_COLLAPSE_CHEVRON_ICON_CLASS = "h-4 w-4";
 

@@ -124,7 +124,7 @@ describe("AppShell header", () => {
       'data-photo="https://s3.example/signed-avatar"',
     );
     expect(shellSrc).toContain("Phone avatar opens 544:561");
-    expect(shellSrc).toContain("hamburger · gap 8 · Aggregation pill");
+    expect(shellSrc).toContain("hamburger · gap 8 · one workspace");
     expect(shellSrc).toContain("WorkspaceSwitcher");
     expect(shellSrc).toContain('<WorkspaceSwitcher current={workspace} tone="pill" />');
     expect(shellSrc).toContain("<WorkspaceSwitcher current={workspace} />");
@@ -275,7 +275,7 @@ describe("AppShell client mobile chrome", () => {
     expect(html).not.toContain("data-tab-bar");
     expect(html).not.toContain("data-social-mobile-pill");
     expect(html).not.toContain("data-social-create-fab");
-    expect(shellSrc).toContain("hidden h-dvh flex-col");
+    expect(shellSrc).toContain("hidden h-[calc(100dvh-var(--header-height)-32px)] flex-col");
     expect(shellSrc).toContain("md:flex");
     expect(shellSrc).toContain("<MobileNavSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />");
     expect(shellSrc).not.toContain("GC_NAV");
@@ -607,7 +607,7 @@ describe("AppShell rail-collapse chevron", () => {
     expect(html).not.toContain("data-social-mobile-dock");
     expect(html).toContain("data-social-tab-bar");
     expect(html).toContain("data-social-tab-item");
-    expect(html).toContain("data-social-header-tray");
+    expect(html).not.toContain("data-social-header-tray");
     expect(html).not.toContain("data-rail-collapse");
     expect(html).not.toContain("data-mobile-nav-trigger");
     expect(html).toContain("24Frame");

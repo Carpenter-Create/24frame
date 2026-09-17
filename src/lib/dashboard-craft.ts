@@ -15,6 +15,7 @@ import {
   HOUSE_CARD_PAD,
   HOUSE_FILTER_OFF_CLASS,
   HOUSE_FILTER_ON_CLASS,
+  HOUSE_MODULE_CLASS,
   HOUSE_RELATED_GAP_CLASS,
   HOUSE_SECTION_AIR_CLASS,
 } from "@/lib/house-shell";
@@ -36,10 +37,9 @@ import {
 } from "@/lib/house-page-select";
 
 export const DASHBOARD_CARD_CLASS =
-  "card-surface dashboard-home-panel flex h-full flex-col overflow-hidden shadow-none";
+  `${HOUSE_MODULE_CLASS} dashboard-home-panel flex h-full flex-col overflow-hidden shadow-none`;
 
-export const DASHBOARD_MODULE_CARD_CLASS =
-  "card-surface overflow-hidden shadow-none";
+export const DASHBOARD_MODULE_CARD_CLASS = `${HOUSE_MODULE_CLASS} overflow-hidden shadow-none`;
 
 export const DASHBOARD_CARD_PAD = HOUSE_CARD_PAD;
 

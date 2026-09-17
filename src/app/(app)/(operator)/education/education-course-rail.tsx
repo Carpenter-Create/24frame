@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { GripVertical } from "lucide-react";
 
 import type { EducationAdminCourseRow, InstructorRow } from "@/lib/education-admin";
 import { educationCourseHref, moveOrderedIds } from "@/lib/education";
+import { filterCoursesForEducationSearch } from "@/lib/course-search";
 import {
   HOUSE_CARD_PAD,
+  HOUSE_MODULE_CLASS,
   HOUSE_RAIL_ACTIVE_CLASS,
   HOUSE_RAIL_IDLE_CLASS,
   HOUSE_RELATED_GAP_CLASS,
@@ -28,6 +30,8 @@ export function EducationCourseRail({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const params = useSearchParams();
+  const visibleCourses = filterCoursesForEducationSearch(courses, params.get("q") ?? "");
 
   async function onDrop(fromId: string, toId: string) {
     if (fromId === toId) return;
@@ -43,14 +47,15 @@ export function EducationCourseRail({
     <aside
       data-education-course-rail=""
       className={cn(
-        "flex w-full shrink-0 flex-col rounded-[var(--radius-lg)] border border-hairline bg-surface shadow-none lg:w-[16rem]",
+        "flex w-full shrink-0 flex-col lg:w-[16rem]",
+        HOUSE_MODULE_CLASS,
         HOUSE_RELATED_GAP_CLASS,
         HOUSE_CARD_PAD,
       )}
     >
       <NewCourseButton instructors={instructors} />
       <ul className="flex flex-col">
-        {courses.map((course) => {
+        {visibleCourses.map((course) => {
           const href = educationCourseHref(course.slug);
           const current = pathname === href;
           return (

@@ -301,7 +301,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(profile).not.toContain("SocialMobileDock");
     expect(stories).not.toContain("SocialMobileDock");
     expect(storyViewer).not.toContain("SocialMobileDock");
-    expect(topBar).toContain("data-social-header-tray");
+    expect(topBar).not.toContain("data-social-header-tray");
     expect(topBar).toContain("data-social-header-search");
     expect(topBar).toContain("prefetch");
     expect(topBar).not.toContain("data-social-mobile-pill");

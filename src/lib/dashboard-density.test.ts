@@ -197,7 +197,7 @@ describe("Dashboard Fidelity × Royalogic density", () => {
   });
 
   it("stays on the light house shell — no dark Fidelity port, no soft shadows, no green", () => {
-    expect(tokens).toMatch(/--bg:\s*#fafafb;/);
+    expect(tokens).toMatch(/--bg:\s*#ffffff;/);
     expect(tokens).toMatch(/--surface:\s*#ffffff;/);
     expect(tokens).toMatch(/--border:\s*#ecedf0;/);
     expect(tokens).toMatch(/--accent:\s*#1769ff;/);

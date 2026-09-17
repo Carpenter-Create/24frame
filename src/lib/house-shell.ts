@@ -1,10 +1,27 @@
 // House app-shell chrome — one grammar for Aggregation · Social · Education.
 // Tokens stay in tokens.css. Do not fork workspace-scoped token files.
-// Page canvas is --bg (#FAFAFB). Cards are r16 · pad 16 · section 24 ·
-// related 8 · edge 48 · hairline only. Active rail is Sporty Blue tint
-// wash + accent type. Header Search is a quiet muted pill. Content-filter
-// selected is ink; period chips stay muted. Sporty Blue fill is reserved
-// for the primary CTA, the active rail wash, and links.
+// Page canvas is --bg (white). Grey modules are --surface-muted (#F4F4F6)
+// r16 only when a module is needed — never a page wash. Cards that stay
+// white use hairline. No shadow. One rounded register house-wide: dest
+// rail is an r16 panel (not a sharp strip), search and nav are pills,
+// icon hits are circles, top-bar controls are pills. Active rail is
+// Sporty Blue tint wash + accent type. Header Search is a quiet muted
+// pill. Content-filter selected is ink; period chips stay muted.
+// Sporty Blue fill is reserved for the primary CTA, the selected rail
+// pill, and links. Stay on the social/fun chrome lane — do not flatten
+// toward a professional register.
+
+export const HOUSE_PAGE_CANVAS_CLASS = "bg-bg";
+
+export const HOUSE_MODULE_CLASS =
+  "rounded-[var(--radius-lg)] bg-surface-muted shadow-none";
+
+export const HOUSE_RAIL_PANEL_CLASS =
+  "rounded-[var(--radius-lg)] border border-hairline bg-surface shadow-none";
+
+export const HOUSE_ICON_BUTTON_CLASS = "rounded-full";
+
+export const HOUSE_CONTROL_PILL_CLASS = "rounded-full";
 
 export const HOUSE_CARD_PAD = "px-[var(--space-4)] py-[var(--space-4)]";
 

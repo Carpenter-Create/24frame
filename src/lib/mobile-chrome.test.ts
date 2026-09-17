@@ -42,7 +42,7 @@ describe("mobile chrome hamburger / clock lock", () => {
     expect(MOBILE_CHROME_ICON_BUTTON_CLASS).toContain("min-w-[44px]");
     expect(MOBILE_CHROME_ICON_BUTTON_CLASS).toContain("overflow-visible");
     expect(MOBILE_CHROME_ICON_BUTTON_CLASS).toContain("text-ink-3");
-    expect(MOBILE_CHROME_ICON_BUTTON_CLASS).not.toContain("rounded-full");
+    expect(MOBILE_CHROME_ICON_BUTTON_CLASS).toContain("rounded-full");
     expect(MOBILE_CHROME_ICON_BUTTON_CLASS).not.toContain("bg-surface-muted");
     expect(MOBILE_CHROME_ICON_CLASS).toBe("size-4 overflow-visible");
 

@@ -178,7 +178,8 @@ body {
   .t-display.t-data {
     letter-spacing: -0.035em;
   }
-  /* House-air card: white on #FAFAFB canvas, 16 corner, hairline only. No shadow. */
+  /* House card: hairline, 16 corner, no shadow. Page canvas is white.
+     Grey #F4F4F6 modules use --surface-muted when a module is needed. */
   .card-surface {
     background: var(--surface);
     border: 1px solid var(--border);
