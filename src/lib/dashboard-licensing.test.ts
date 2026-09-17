@@ -5,10 +5,12 @@ import {
   DASHBOARD_LICENSING,
   LICENSING_IN_REVIEW_STATUSES,
   buildLicensingStatus,
+  countLicensingBuckets,
   isLicensingInReview,
   isLicensingReady,
   isRecommendedFinding,
   isRequiredFinding,
+  licensingBucketSet,
   licensingBuckets,
 } from "./dashboard-licensing";
 
@@ -39,6 +41,16 @@ describe("licensing signal map", () => {
     expect(licensingBuckets("draft", false)).toEqual([]);
     expect(licensingBuckets("archived", true)).toEqual(["needsAttention"]);
     expect(licensingBuckets("archived", false)).toEqual([]);
+    const all = licensingBucketSet(["ready", "needsAttention", "inReview"]);
+    expect(all.has("ready")).toBe(true);
+    expect(all.has("needsAttention")).toBe(true);
+    expect(all.has("inReview")).toBe(true);
+    expect(countLicensingBuckets(["ready", "inReview", "needsAttention"])).toEqual({
+      ready: 1,
+      needsAttention: 1,
+      inReview: 1,
+    });
+    expect(titlesSrc).not.toMatch(/buckets\.includes\(/);
   });
 
   it("counts required findings only and keeps recommended as row meta", () => {
