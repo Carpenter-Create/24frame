@@ -123,7 +123,11 @@ export default async function TitleDetailPage({ params }: { params: Promise<{ id
   const titleId = title.id;
   const titleHref = titleClientPath(title.catalog_id);
 
-  const titleRole = rows.find((m) => m.organizations.id === title.org_id)?.role;
+  // Title-org role, not only the active-org cookie. Staff still get
+  // lifecycle flags via ctx.isGcStaff when they are not operate on this org.
+  const titleRole =
+    rows.find((m) => m.organizations.id === title.org_id)?.role ??
+    (ctx.activeOrg.id === title.org_id ? ctx.activeRole : null);
   const canOperate = titleRole === "account_owner" || titleRole === "delivery_ops";
 
   const { data: grants } = await supabase
@@ -305,6 +309,14 @@ export default async function TitleDetailPage({ params }: { params: Promise<{ id
         meta={heroMeta}
         action={trailer ? <TrailerPlayButton assetId={trailer.id} /> : null}
         secondary={screenerAvailable ? <ScreenerWatchButton titleId={title.id} /> : null}
+        overflow={
+          <TitleLifecycleControls
+            titleId={title.id}
+            status={title.status as TitleStatus}
+            isStaff={ctx.isGcStaff}
+            flags={lifecycleFlags}
+          />
+        }
       />
 
       <nav
@@ -343,13 +355,6 @@ export default async function TitleDetailPage({ params }: { params: Promise<{ id
             </InlineNotice>
           )
         ) : null}
-        <TitleLifecycleControls
-          titleId={title.id}
-          status={title.status as TitleStatus}
-          isStaff={ctx.isGcStaff}
-          flags={lifecycleFlags}
-        />
-
         {synopsis ? (
           <TitleDetailSection title={TITLE_DETAIL.sectionSynopsis}>
             <p className="t-body text-ink-2">{synopsis}</p>

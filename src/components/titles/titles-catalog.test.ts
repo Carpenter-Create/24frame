@@ -62,6 +62,7 @@ function renderRow(props: {
   status: string;
   liveCount?: number;
   year?: string | null;
+  overflow?: React.ReactNode;
 }): string {
   return renderToStaticMarkup(createElement(TitlesCatalogListRow, props));
 }
@@ -205,6 +206,27 @@ describe("TitlesCatalogListRow craft", () => {
     expect(TITLE_STATUS_LABELS.archived).toBe("Archived");
     expect(TITLE_STATUS_LABELS.in_delivery).toBe("Submitted");
     expect(TITLE_STATUS_LABELS.submitted).toBe("Submitted");
+  });
+
+  it("shows a row overflow slot only when lifecycle flags allow it", () => {
+    const withActions = renderRow({
+      href: "/titles/1",
+      title: "Draft film",
+      stillUrl: null,
+      status: "draft",
+      overflow: createElement("button", { "data-title-lifecycle-menu": "" }, "Title actions"),
+    });
+    const hidden = renderRow({
+      href: "/titles/1",
+      title: "Draft film",
+      stillUrl: null,
+      status: "draft",
+    });
+    expect(withActions).toContain("data-titles-catalog-row-actions");
+    expect(withActions).toContain("data-title-lifecycle-menu");
+    expect(withActions).toContain("Title actions");
+    expect(hidden).not.toContain("data-titles-catalog-row-actions");
+    expect(hidden).not.toContain("data-title-lifecycle-menu");
   });
 });
 

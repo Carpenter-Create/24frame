@@ -2,10 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { MoreHorizontal } from "lucide-react";
 
 import { Dialog } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { InlineNotice } from "@/components/ui/inline-notice";
+import { MenuSurfaceContent, MenuSurfaceItem } from "@/components/chrome/menu-surface";
 import { cn } from "@/lib/cn";
+import { HOUSE_ICON_BUTTON_CLASS } from "@/lib/house-shell";
 import {
   MENU_SURFACE_ITEM_CLASS,
   MENU_SURFACE_ITEM_DANGER_CLASS,
@@ -14,6 +18,7 @@ import {
   TITLE_LIFECYCLE,
   titleArchiveConfirmBody,
   titleDeleteConfirmBody,
+  titleHasLifecycleActions,
   type TitleLifecycleFlags,
 } from "@/lib/titles-lifecycle";
 import type { TitleStatus } from "@/lib/titles";
@@ -35,7 +40,7 @@ export function TitleLifecycleControls({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  if (!flags.canDelete && !flags.canArchive && !flags.canRestore) return null;
+  if (!titleHasLifecycleActions(flags)) return null;
 
   async function run(
     action: () => Promise<{ error?: string }>,
@@ -56,49 +61,58 @@ export function TitleLifecycleControls({
   }
 
   return (
-    <div className="flex flex-col gap-[var(--space-2)]" data-title-lifecycle="">
-      <div className="flex flex-wrap gap-[var(--space-3)]">
-        {flags.canDelete ? (
+    <div className="relative" data-title-lifecycle="">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
           <button
             type="button"
-            data-title-lifecycle-delete=""
-            className="t-body-sm text-ink-2 hover:text-ink"
-            onClick={() => {
-              setError("");
-              setOpen("delete");
-            }}
+            data-title-lifecycle-menu=""
+            aria-label={TITLE_LIFECYCLE.moreLabel}
+            className={cn(
+              "flex size-[44px] min-h-[44px] min-w-[44px] shrink-0 items-center justify-center text-ink hover:bg-surface-muted",
+              HOUSE_ICON_BUTTON_CLASS,
+            )}
           >
-            {TITLE_LIFECYCLE.deleteLabel}
+            <MoreHorizontal className="size-4" strokeWidth={1.33} />
           </button>
-        ) : null}
-        {flags.canArchive ? (
-          <button
-            type="button"
-            data-title-lifecycle-archive=""
-            className="t-body-sm text-ink-2 hover:text-ink"
-            onClick={() => {
-              setError("");
-              setOpen("archive");
-            }}
-          >
-            {TITLE_LIFECYCLE.archiveLabel}
-          </button>
-        ) : null}
-        {flags.canRestore ? (
-          <button
-            type="button"
-            data-title-lifecycle-restore=""
-            className="t-body-sm text-ink-2 hover:text-ink"
-            onClick={() => {
-              setError("");
-              setOpen("restore");
-            }}
-          >
-            {TITLE_LIFECYCLE.restoreLabel}
-          </button>
-        ) : null}
-      </div>
-      {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
+        </DropdownMenuTrigger>
+        <MenuSurfaceContent align="end" data-title-lifecycle-menu-surface="">
+          {flags.canDelete ? (
+            <MenuSurfaceItem
+              danger
+              data-title-lifecycle-delete=""
+              onSelect={() => {
+                setError("");
+                setOpen("delete");
+              }}
+            >
+              {TITLE_LIFECYCLE.deleteLabel}
+            </MenuSurfaceItem>
+          ) : null}
+          {flags.canArchive ? (
+            <MenuSurfaceItem
+              data-title-lifecycle-archive=""
+              onSelect={() => {
+                setError("");
+                setOpen("archive");
+              }}
+            >
+              {TITLE_LIFECYCLE.archiveLabel}
+            </MenuSurfaceItem>
+          ) : null}
+          {flags.canRestore ? (
+            <MenuSurfaceItem
+              data-title-lifecycle-restore=""
+              onSelect={() => {
+                setError("");
+                setOpen("restore");
+              }}
+            >
+              {TITLE_LIFECYCLE.restoreLabel}
+            </MenuSurfaceItem>
+          ) : null}
+        </MenuSurfaceContent>
+      </DropdownMenu>
 
       {flags.canDelete ? (
       <Dialog
@@ -107,6 +121,7 @@ export function TitleLifecycleControls({
         title={TITLE_LIFECYCLE.deleteTitle}
       >
         <p className="t-body-sm text-ink-2">{titleDeleteConfirmBody({ isStaff, status })}</p>
+        {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
         <div className="mt-[var(--space-4)] flex justify-end gap-[var(--space-2)]">
           <button
             type="button"
@@ -139,6 +154,7 @@ export function TitleLifecycleControls({
         <p className="t-body-sm text-ink-2">
           {titleArchiveConfirmBody(flags.offerArchiveFromDelete)}
         </p>
+        {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
         <div className="mt-[var(--space-4)] flex justify-end gap-[var(--space-2)]">
           <button
             type="button"
@@ -167,6 +183,7 @@ export function TitleLifecycleControls({
         title={TITLE_LIFECYCLE.restoreTitle}
       >
         <p className="t-body-sm text-ink-2">{TITLE_LIFECYCLE.restoreBody}</p>
+        {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
         <div className="mt-[var(--space-4)] flex justify-end gap-[var(--space-2)]">
           <button
             type="button"

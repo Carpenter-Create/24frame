@@ -19,6 +19,8 @@ import { BuyerLinks, type BuyerLink, type VendorOption } from "./buyer-links";
 import { TranscodePanel, type TranscodeJobRow } from "./transcode-panel";
 import { UNPAGINATED_MAX, DETAIL_LIST, rangeFor } from "@/lib/list-bounds";
 import { isMasterLicensed, type DeliveryForLicenceCheck } from "@/lib/master-licence";
+import { TitleLifecycleControls } from "@/app/(app)/titles/[id]/title-lifecycle-controls";
+import { titleLifecycleFlags } from "@/lib/titles-lifecycle";
 
 // The GC per-title detail = the internal review page (folds in /gc/review). Review actions
 // (approve/reject, same-work linking) show only while in_review; screener panel + metadata +
@@ -173,6 +175,15 @@ export default async function GcTitleDetail({ params }: { params: Promise<{ id: 
 
   const meta = (metaRow?.data as Record<string, unknown>) ?? {};
   const inReview = t.status === "in_review";
+  const needsReportingCheck = t.status !== "draft" && t.status !== "archived";
+  const { data: hasReportingActivity } = needsReportingCheck
+    ? await supabase.rpc("title_has_reporting_activity", { p_title_id: id })
+    : { data: false };
+  const lifecycleFlags = titleLifecycleFlags(
+    { isStaff: true, canOperate: canOperate === true },
+    t.status as TitleStatus,
+    hasReportingActivity === true,
+  );
 
   type TranscodeJobQueryRow = {
     id: string;
@@ -195,11 +206,19 @@ export default async function GcTitleDetail({ params }: { params: Promise<{ id: 
 
   return (
     <>
-      <div className="flex flex-col gap-0.5 pb-6">
-        <h1 className="t-subhead text-ink">{t.title}</h1>
-        <span className="t-body-sm text-ink-3">
-          {t.catalog_id} · {t.organizations?.name ?? "—"} · {gcTitleStatusLabel(t.status as TitleStatus)}
-        </span>
+      <div className="flex items-start justify-between gap-[var(--space-4)] pb-6">
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <h1 className="t-subhead text-ink">{t.title}</h1>
+          <span className="t-body-sm text-ink-3">
+            {t.catalog_id} · {t.organizations?.name ?? "—"} · {gcTitleStatusLabel(t.status as TitleStatus)}
+          </span>
+        </div>
+        <TitleLifecycleControls
+          titleId={t.id}
+          status={t.status as TitleStatus}
+          isStaff
+          flags={lifecycleFlags}
+        />
       </div>
 
       <div className="flex flex-col gap-4">

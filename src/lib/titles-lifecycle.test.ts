@@ -7,7 +7,9 @@ import {
   isArchivedTitleStatus,
   titleArchiveConfirmBody,
   titleDeleteConfirmBody,
+  titleHasLifecycleActions,
   titleLifecycleFlags,
+  titleListHasReportingActivity,
 } from "@/lib/titles-lifecycle";
 
 describe("title lifecycle gates", () => {
@@ -68,6 +70,21 @@ describe("title lifecycle gates", () => {
     expect(titleLifecycleFlags(viewer, "draft", false).canDelete).toBe(false);
     expect(titleLifecycleFlags(viewer, "live", false).canArchive).toBe(false);
     expect(titleLifecycleFlags(viewer, "archived", false).canRestore).toBe(false);
+    expect(titleHasLifecycleActions(titleLifecycleFlags(viewer, "draft", false))).toBe(false);
+  });
+
+  it("exposes list-row flags without weakening the reporting predicate", () => {
+    const staff = { isStaff: true, canOperate: false };
+    expect(titleListHasReportingActivity("draft")).toBe(false);
+    expect(titleListHasReportingActivity("live")).toBe(true);
+    expect(titleListHasReportingActivity("archived")).toBe(false);
+    expect(titleHasLifecycleActions(titleLifecycleFlags(staff, "draft", false))).toBe(true);
+    expect(titleLifecycleFlags(staff, "live", titleListHasReportingActivity("live"))).toEqual({
+      canDelete: false,
+      canArchive: true,
+      canRestore: false,
+      offerArchiveFromDelete: true,
+    });
   });
 });
 
@@ -87,6 +104,7 @@ describe("title lifecycle copy", () => {
     );
     expect(titleArchiveConfirmBody(true)).toBe(TITLE_LIFECYCLE.archiveFromDeleteBody);
     expect(titleArchiveConfirmBody(false)).toBe(TITLE_LIFECYCLE.archiveBody);
+    expect(TITLE_LIFECYCLE.moreLabel).toBe("Title actions");
     expect(TITLE_LIFECYCLE.deleteDraftBody).not.toMatch(/cannot be undone|permanent|warning/i);
     expect(TITLE_LIFECYCLE.archiveBody).not.toMatch(/irreversible|forever|warning/i);
   });
