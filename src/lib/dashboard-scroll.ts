@@ -10,7 +10,8 @@ export function readWindowScroll(): DashboardWindowScroll | null {
 
 export function restoreWindowScroll(pos: DashboardWindowScroll | null): void {
   if (!pos || typeof window === "undefined") return;
-  window.scrollTo(pos.x, pos.y);
+  // Two-arg scrollTo is behavior "auto" and inherits html { scroll-behavior: smooth }.
+  window.scrollTo({ left: pos.x, top: pos.y, behavior: "instant" });
 }
 
 export function afterWindowPaint(fn: () => void): void {

@@ -406,13 +406,16 @@ export function DashboardTopPerforming({
   }
 
   function selectPill(next: DashboardTopPill) {
+    const nextMode = TOP_PERFORMING_PANES[next].defaultMode;
+    if (next === pill && mode === nextMode && !showAll) return;
     lockWindowScroll();
     setPill(next);
-    setMode(TOP_PERFORMING_PANES[next].defaultMode);
+    setMode(nextMode);
     setShowAll(false);
   }
 
   function selectView(next: DashboardRegisterView) {
+    if (next === mode) return;
     lockWindowScroll();
     setMode(next);
   }

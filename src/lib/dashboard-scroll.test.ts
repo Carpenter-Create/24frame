@@ -20,7 +20,7 @@ describe("dashboard scroll lock", () => {
     const pos = readWindowScroll();
     expect(pos).toEqual({ x: 12, y: 640 });
     restoreWindowScroll(pos);
-    expect(scrollTo).toHaveBeenCalledWith(12, 640);
+    expect(scrollTo).toHaveBeenCalledWith({ left: 12, top: 640, behavior: "instant" });
     expect(scrollTo).not.toHaveBeenCalledWith(0, 0);
     restoreWindowScroll(null);
     expect(scrollTo).toHaveBeenCalledTimes(1);
@@ -36,13 +36,13 @@ describe("dashboard scroll lock", () => {
     });
 
     restoreWindowScrollAfterPaint(readWindowScroll());
-    expect(scrollTo).toHaveBeenCalledWith(0, 480);
+    expect(scrollTo).toHaveBeenCalledWith({ left: 0, top: 480, behavior: "instant" });
     expect(frames).toHaveLength(1);
     frames.shift()?.(0);
     expect(frames).toHaveLength(1);
     frames.shift()?.(0);
     expect(scrollTo).toHaveBeenCalledTimes(2);
-    expect(scrollTo).toHaveBeenNthCalledWith(2, 0, 480);
+    expect(scrollTo).toHaveBeenNthCalledWith(2, { left: 0, top: 480, behavior: "instant" });
   });
 
   it("runs afterWindowPaint immediately when rAF is missing", () => {
