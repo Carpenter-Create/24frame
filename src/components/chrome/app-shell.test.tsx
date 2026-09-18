@@ -101,6 +101,16 @@ function homeFrameMarkup(html: string): string {
   return html.slice(tagStart, tagEnd + 1);
 }
 
+function houseMeasureMarkup(html: string): string {
+  const style = html.indexOf("max-width:var(--page-max-width)");
+  expect(style).toBeGreaterThan(-1);
+  const tagStart = html.lastIndexOf("<div", style);
+  const tagEnd = html.indexOf(">", style);
+  expect(tagStart).toBeGreaterThan(-1);
+  expect(tagEnd).toBeGreaterThan(tagStart);
+  return html.slice(tagStart, tagEnd + 1);
+}
+
 function renderShell(
   messagesSurface?: MessagesSurface,
   name?: string | null,
@@ -333,6 +343,34 @@ describe("AppShell Access rail and home frame", () => {
     expect(health).not.toContain("data-app-home-frame");
     expect(health).not.toContain("data-app-messages-frame");
     expect(health).not.toContain("data-org-switcher");
+  });
+
+  it("gives Aggregation Dashboard the Education content measure", () => {
+    navigation.pathname = "/dashboard";
+    const dashboard = renderShell();
+    const dashboardCanvas = houseMeasureMarkup(dashboard);
+    expect(dashboard).not.toContain("data-app-home-frame");
+    expect(dashboardCanvas).toContain("mx-auto");
+    expect(dashboardCanvas).toContain("max-width:var(--page-max-width)");
+    expect(dashboardCanvas).toContain("px-[var(--chrome-gutter)]");
+    expect(dashboardCanvas).toContain("pb-24 pt-8");
+    expect(dashboardCanvas).not.toContain("access-rail-width");
+    expect(dashboard).not.toContain("ml-[var(--access-rail-width)]");
+    expect(dashboard).toContain("data-app-rail");
+    expect(dashboard).not.toContain('data-home-chrome=""');
+
+    navigation.pathname = "/social/courses";
+    const education = renderShell();
+    const educationCanvas = houseMeasureMarkup(education);
+    expect(education).not.toContain("data-app-home-frame");
+    expect(educationCanvas).toContain("mx-auto");
+    expect(educationCanvas).toContain("max-width:var(--page-max-width)");
+    expect(educationCanvas).toContain("px-[var(--chrome-gutter)]");
+    expect(educationCanvas).toContain("pb-24 pt-8");
+    expect(dashboardCanvas).toBe(educationCanvas);
+
+    expect(shellSrc).toContain('const homePage = pathname === "/" || homeChrome');
+    expect(shellSrc).not.toContain('pathname === "/dashboard" || homeChrome');
   });
 
   it("gives `/messages` the 48 inset and restores Search only for the Access gate", () => {
