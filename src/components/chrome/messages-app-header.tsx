@@ -14,7 +14,7 @@ import {
   Trash2,
 } from "lucide-react";
 
-import { SearchField } from "@/components/layout/search-field";
+import { HousePageSearch } from "@/components/chrome/house-page-search";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogFooter } from "@/components/ui/dialog";
 import {
@@ -26,6 +26,7 @@ import {
   ThreadPopoverItem,
   ThreadPopoverSeparator,
 } from "./menu-surface";
+import { HOUSE_LEAD_SEARCH_WIDTH_PX } from "@/lib/house-lead-chrome";
 import {
   THREAD_POPOVER_DELETE_ICON_CLASS,
   THREAD_POPOVER_ICON_CLASS,
@@ -250,8 +251,12 @@ function MessagesAppHeaderInner({ surface }: { surface: MessagesSurface }) {
   // Search mounts only for access-gate. Ask Globee landing/thread never restore it.
   if (surface === "access-gate" || showMessagesHeaderSearch(surface)) {
     return (
-      <div data-header-search="" className="flex min-w-0 items-center">
-        <SearchField
+      <div
+        data-header-search=""
+        className="flex min-w-0 w-full items-center"
+        style={{ maxWidth: HOUSE_LEAD_SEARCH_WIDTH_PX }}
+      >
+        <HousePageSearch
           placeholder={ASK_GLOBEE.headerSearchPlaceholder}
           hint={ASK_GLOBEE.headerSearchHint}
         />

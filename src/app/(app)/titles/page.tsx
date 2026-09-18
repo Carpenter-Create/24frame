@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getOrgContext } from "@/lib/supabase/context";
 import { LIST_PAGE, probeRange, splitProbe } from "@/lib/list-bounds";
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { SearchField } from "@/components/layout/search-field";
+import { HousePageSearch } from "@/components/chrome/house-page-search";
 import { AddTitleButton } from "./add-title-button";
 import { titleArtworkUrls } from "@/lib/artwork";
 import { filterTitles, type BrowseTitle } from "@/lib/titles-browse";
@@ -148,7 +148,7 @@ export default async function TitlesPage({
           search={
             list.length > 0 ? (
               <Suspense fallback={null}>
-                <SearchField placeholder={TITLES_CATALOG.searchPlaceholder} />
+                <HousePageSearch placeholder={TITLES_CATALOG.searchPlaceholder} />
               </Suspense>
             ) : undefined
           }

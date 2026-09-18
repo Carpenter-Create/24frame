@@ -550,7 +550,10 @@ describe("Titles catalog phone CTA cluster", () => {
       }),
     );
     const chrome = openingTagWith(html, 'data-titles-catalog-chrome=""');
+    const search = openingTagWith(html, 'data-titles-catalog-search=""');
     expect(html).toContain("data-titles-catalog-search");
+    expect(search).toContain("md:w-56");
+    expect(search).not.toContain("[&_input]");
     expect(html).toContain(TITLES_CATALOG.searchPlaceholder);
     expect(chrome).toContain("hidden");
     expect(chrome).toContain("md:contents");

@@ -20,7 +20,7 @@ const socialBio = readFileSync("src/components/social/social-profile-bio.tsx", "
 const socialForms = readFileSync("src/components/social/social-forms.tsx", "utf8");
 const socialExplore = readFileSync("src/app/(app)/social/explore/page.tsx", "utf8");
 const socialTopBar = readFileSync("src/components/social/social-header-search.tsx", "utf8");
-const searchField = readFileSync("src/components/layout/search-field.tsx", "utf8");
+const housePageSearch = readFileSync("src/components/chrome/house-page-search.tsx", "utf8");
 
 function walkTsx(dir: string, acc: string[] = []): string[] {
   for (const name of readdirSync(dir)) {
@@ -110,8 +110,9 @@ describe("form-control SoT", () => {
     expect(socialExplore).toContain('id="social-explore-q"');
     expect(socialTopBar).toContain("<Input");
     expect(socialTopBar).toContain('id="social-header-q"');
-    expect(searchField).toContain("FORM_CONTROL_TEXT_CLASS");
-    expect(searchField).not.toContain("t-body-sm");
+    expect(housePageSearch).toContain("<Input");
+    expect(housePageSearch).toContain('variant="bare"');
+    expect(housePageSearch).not.toContain("t-body-sm");
     expect(readFileSync("src/components/messages/ask-globee-landing.tsx", "utf8")).toContain(
       'variant="bare"',
     );
@@ -120,7 +121,7 @@ describe("form-control SoT", () => {
     );
   });
 
-  it("keeps leftover raw inputs as non-text controls, plus SearchField on the SoT class", () => {
+  it("leaves no raw text inputs outside Input/Textarea", () => {
     const files = [
       ...walkTsx("src/components"),
       ...walkTsx("src/app"),
@@ -134,9 +135,6 @@ describe("form-control SoT", () => {
         leftovers.push(`${file}: ${hit}`);
       }
     }
-    expect(leftovers).toEqual([
-      expect.stringContaining("src/components/layout/search-field.tsx"),
-    ]);
-    expect(searchField).toContain("FORM_CONTROL_TEXT_CLASS");
+    expect(leftovers).toEqual([]);
   });
 });

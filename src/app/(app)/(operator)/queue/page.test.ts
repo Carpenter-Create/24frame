@@ -226,7 +226,7 @@ describe("GcQueuePage", () => {
     expect(src).toContain("@/components/titles/titles-catalog");
     expect(src).toContain("TitlesCatalogListRow");
     expect(src).toContain("TitlesCatalogToolbar");
-    expect(src).toContain("SearchField");
+    expect(src).toContain("HousePageSearch");
     expect(src).toContain("TITLES_CATALOG.searchPlaceholder");
     expect(src).toContain("filterTitles");
     expect(src).toContain("catalogSearchMissCopy");
@@ -250,8 +250,9 @@ describe("GcQueuePage", () => {
     expect(html).toContain("data-titles-catalog-toolbar");
     expect(html).toContain("data-titles-catalog-search");
     expect(html).toContain(TITLES_CATALOG.searchPlaceholder);
+    expect(html).toContain("data-house-page-search");
     expect(html).toContain('placeholder="Search titles..."');
-    expect(html).toContain('aria-label="Search titles..."');
+    expect(html).toContain(">Search titles...</label>");
     expect(html).toContain("Harbor Cut");
     expect(html).not.toContain("data-titles-catalog-filters");
     expect(html).not.toContain("data-add-title");
