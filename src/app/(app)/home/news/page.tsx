@@ -11,7 +11,7 @@ export default async function NewsPage({
   searchParams,
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
-}) {
+} = {}) {
   const ctx = await getOrgContext();
   if (!ctx) redirect("/login");
 
