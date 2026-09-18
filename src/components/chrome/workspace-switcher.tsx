@@ -10,6 +10,7 @@ import {
   OVERVIEW_HREF,
   overviewLeadPills,
   overviewLeadSelected,
+  overviewLeadShouldNavigate,
   overviewTriggerLabel,
   type OverviewLeadPill,
 } from "@/lib/overview";
@@ -55,27 +56,22 @@ function WorkspaceMark({ mode }: { mode: WorkspaceMode }) {
   );
 }
 
-function selectWorkspace(
-  current: WorkspaceMode,
-  option: WorkspaceMenuOption,
-  router: ReturnType<typeof useRouter>,
-) {
-  persistWorkspaceCookie(option.mode);
-  if (current !== option.mode) router.push(workspaceHome(option.mode));
-}
-
 function selectLeadPill(
   current: WorkspaceMode,
   pill: OverviewLeadPill,
   options: readonly WorkspaceMenuOption[],
   router: ReturnType<typeof useRouter>,
+  pathname: string,
 ) {
+  if (!overviewLeadShouldNavigate(pathname, current, pill)) return;
   if (pill.id === "overview") {
     router.push(OVERVIEW_HREF);
     return;
   }
   const option = options.find((row) => row.mode === pill.id);
-  if (option) selectWorkspace(current, option, router);
+  if (!option) return;
+  persistWorkspaceCookie(option.mode);
+  router.push(workspaceHome(option.mode));
 }
 
 function WorkspaceSwitcherPills({
@@ -140,7 +136,7 @@ function WorkspaceSwitcherPills({
             aria-selected={selected}
             tabIndex={workspaceSwitcherSegmentTabIndex(selected)}
             className={workspaceSwitcherSegmentClass(selected)}
-            onClick={() => selectLeadPill(current, pill, options, router)}
+            onClick={() => selectLeadPill(current, pill, options, router, pathname)}
             onKeyDown={(event) => onSegmentKeyDown(event, index)}
           >
             {pill.label}
@@ -259,7 +255,7 @@ export function WorkspaceSwitcher({
                   aria-selected={selected}
                   className={workspaceSwitcherOptionClass(selected)}
                   onClick={() => {
-                    selectLeadPill(current, pill, options, router);
+                    selectLeadPill(current, pill, options, router, pathname);
                     setOpen(false);
                   }}
                 >

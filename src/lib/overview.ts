@@ -91,6 +91,15 @@ export function overviewTriggerLabel(
   return isOverviewPath(pathname) ? OVERVIEW_PAGE.title : workspaceLabel;
 }
 
+/** Idle pills always navigate — Overview is not Aggregation home. */
+export function overviewLeadShouldNavigate(
+  pathname: string,
+  workspace: WorkspaceMode,
+  pill: Pick<OverviewLeadPill, "id">,
+): boolean {
+  return !overviewLeadSelected(pill.id, pathname, workspace);
+}
+
 export function overviewSocialUnreadTotal(
   rows: readonly { unread_count: number }[],
 ): number {

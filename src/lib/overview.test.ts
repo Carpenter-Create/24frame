@@ -13,6 +13,7 @@ import {
   overviewEducationCourses,
   overviewLeadPills,
   overviewLeadSelected,
+  overviewLeadShouldNavigate,
   overviewSocialChats,
   overviewSocialUnreadTotal,
   overviewTriggerLabel,
@@ -55,6 +56,13 @@ describe("Overview lead pills", () => {
     expect(overviewLeadSelected("social", "/social", "social")).toBe(true);
     expect(overviewTriggerLabel("/overview", "Social")).toBe("Overview");
     expect(overviewTriggerLabel("/social", "Social")).toBe("Social");
+    expect(overviewLeadShouldNavigate("/overview", "aggregation", { id: "aggregation" })).toBe(
+      true,
+    );
+    expect(overviewLeadShouldNavigate("/overview", "aggregation", { id: "overview" })).toBe(false);
+    expect(overviewLeadShouldNavigate("/dashboard", "aggregation", { id: "aggregation" })).toBe(
+      false,
+    );
   });
 });
 
