@@ -11,6 +11,7 @@ import {
 import { overviewModuleHeaderAction } from "@/lib/overview";
 
 // Shared Home module shell — Social · Education · News · Needs you · AI.
+// Net revenue uses the dashboard panel + house period chips, not this shell.
 // Header chrome lives inside the grey panel. Do not float a title on page white.
 
 export function OverviewModule({

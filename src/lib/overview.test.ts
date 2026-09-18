@@ -21,6 +21,7 @@ import {
   OVERVIEW_RAIL_OFF_WIDTH,
   OVERVIEW_SOCIAL_DM_CAP,
   isHomeLandPath,
+  overviewHref,
   isHomeOwnedPath,
   isNewsHistoryPath,
   isOverviewPath,
@@ -144,18 +145,18 @@ describe("Home lead pills", () => {
 });
 
 describe("Home module caps", () => {
-  it("locks positive-first Home modules and folds This week into Aggregation", () => {
+  it("locks Net revenue first, then Social · Education · Needs you", () => {
     expect(OVERVIEW_MODULE_ORDER).toEqual([
+      "revenue",
       "social",
       "education",
-      "aggregation",
       "needs-you",
       "ai-next",
     ]);
     expect(OVERVIEW_PHONE_MODULE_ORDER).toEqual([
+      "revenue",
       "social",
       "education",
-      "aggregation",
       "needs-you",
       "ai-next",
       "news",
@@ -163,7 +164,12 @@ describe("Home module caps", () => {
     expect(OVERVIEW_PAGE.news).toBe("News");
     expect(OVERVIEW_PAGE.newsHref).toBe(NEWS_HREF);
     expect(OVERVIEW_PAGE.newsViewAll).toBe("View all");
-    expect(OVERVIEW_HOME_LAYOUT_CLASS).toContain("'aggregation'_'needs'_'ai'_'news'");
+    expect(OVERVIEW_HOME_LAYOUT_CLASS).toContain("'revenue'_'social'_'education'_'needs'_'ai'_'news'");
+    expect(OVERVIEW_HOME_LAYOUT_CLASS).not.toContain("aggregation");
+    expect(OVERVIEW_PAGE).not.toHaveProperty("topPerforming");
+    expect(overviewHref()).toBe(OVERVIEW_HREF);
+    expect(overviewHref({ period: "all" })).toBe(OVERVIEW_HREF);
+    expect(overviewHref({ period: "ytd" })).toBe(`${OVERVIEW_HREF}?period=ytd`);
     expect(OVERVIEW_NEWS_RAIL_WIDTH).toBe("20rem");
     expect(OVERVIEW_HOME_COLUMN_GUTTER).toBe("var(--chrome-gutter)");
     expect(OVERVIEW_HOME_LAYOUT_CLASS).toContain("lg:grid-cols-[minmax(0,1fr)_20rem]");

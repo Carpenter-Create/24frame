@@ -6,15 +6,11 @@ import {
   DashboardHomeEmpty,
   DashboardHomePanel,
 } from "@/components/dashboard/dashboard-home";
-
-import {
-  DashboardListPanel,
-  DashboardTitleRows,
-} from "@/components/dashboard/dashboard-modules";
 import { OverviewModule } from "@/components/overview/overview-module";
 import { NewsRail } from "@/components/news/news-rail";
 import { PageHeader } from "@/components/ui/page-header";
 import type { CourseRow } from "@/lib/courses";
+import type { DashboardPeriod } from "@/lib/dashboard-admin";
 import {
   DASHBOARD_CARD_PAD_LIST,
   DASHBOARD_RELATED_GAP_CLASS,
@@ -23,33 +19,41 @@ import {
   DASHBOARD_SECTION_AIR_CLASS,
   DASHBOARD_SECTION_TITLE_CLASS,
 } from "@/lib/dashboard-craft";
-import type { ClientHomeDoNextItem, ClientHomeJustInItem, DashboardChangeRow } from "@/lib/dashboard-home";
+import type { ClientHomeDoNextItem, DashboardChangeRow } from "@/lib/dashboard-home";
 import { formatUsdCents } from "@/lib/finance";
 import type { NewsItem } from "@/lib/news";
 import {
-  OVERVIEW_AREA_AGGREGATION_CLASS,
   OVERVIEW_AREA_AI_CLASS,
   OVERVIEW_AREA_EDUCATION_CLASS,
   OVERVIEW_AREA_NEEDS_CLASS,
   OVERVIEW_AREA_NEWS_CLASS,
+  OVERVIEW_AREA_REVENUE_CLASS,
   OVERVIEW_AREA_SOCIAL_CLASS,
   OVERVIEW_HOME_LAYOUT_CLASS,
   OVERVIEW_MODULE_NEST_CLASS,
   OVERVIEW_PAGE,
+  overviewHref,
 } from "@/lib/overview";
+import {
+  REPORTS_PERIOD_CHIP_CLASS,
+  REPORTS_PERIOD_CHIP_OFF_CLASS,
+  REPORTS_PERIOD_CHIP_ON_CLASS,
+} from "@/lib/reports-craft";
+import { REPORTS_PERIOD_PRESETS, reportsPeriodPresetKey } from "@/lib/reports";
 import { SOCIAL_AVATAR_32_CLASS } from "@/lib/social-chrome";
 import type { SocialHomeChat } from "@/lib/social-home-chats";
 import { socialDmHref, socialInitials } from "@/lib/social";
 import { cn } from "@/lib/cn";
 
-// Home IA v2 — left modules stay positive-first. News is the right
+// Home IA v2 order rewrite — Net revenue first. News is the right
 // rail on desktop and the last full-width stack on phone (after AI).
-// This-week pulse folds into Aggregation. Social stays avatars-only.
-// House primitives only. No News lookalike fork.
+// This-week pulse stays with Net revenue. Social stays avatars-only.
+// Period chips are the Aggregation/Finance house presets — not a
+// Home lookalike. Top performing is not on Home.
 
 export function OverviewHome({
   revenueCents,
-  topTitles,
+  period,
   socialUnread,
   socialChats,
   socialFaces,
@@ -63,7 +67,7 @@ export function OverviewHome({
   now,
 }: {
   revenueCents: number | null;
-  topTitles: readonly ClientHomeJustInItem[];
+  period: DashboardPeriod;
   socialUnread: number;
   socialChats: readonly SocialHomeChat[];
   socialFaces: ReadonlyMap<string, string | null>;
@@ -81,6 +85,57 @@ export function OverviewHome({
       <PageHeader title={OVERVIEW_PAGE.title} />
 
       <div data-overview-layout="" className={OVERVIEW_HOME_LAYOUT_CLASS}>
+      <div className={OVERVIEW_AREA_REVENUE_CLASS}>
+      <DashboardHomePanel aria-label={OVERVIEW_PAGE.revenue} data-overview-revenue="">
+        <div className={`flex items-center justify-between ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD_LIST}`}>
+          <p className={DASHBOARD_SECTION_TITLE_CLASS}>{OVERVIEW_PAGE.revenue}</p>
+          <TextAction href={OVERVIEW_PAGE.revenueHref}>{OVERVIEW_PAGE.aggregation}</TextAction>
+        </div>
+        <div
+          data-overview-revenue-period=""
+          className={`flex flex-wrap items-center ${DASHBOARD_RELATED_GAP_CLASS} px-[var(--space-4)]`}
+        >
+          {REPORTS_PERIOD_PRESETS.map((preset) => {
+            const on = period.kind === preset.grain;
+            const key = reportsPeriodPresetKey(preset.grain, now);
+            return (
+              <Link
+                key={preset.grain}
+                href={overviewHref({ period: key })}
+                data-overview-revenue-period-chip={preset.grain}
+                aria-pressed={on}
+                className={cn(
+                  REPORTS_PERIOD_CHIP_CLASS,
+                  on ? REPORTS_PERIOD_CHIP_ON_CLASS : REPORTS_PERIOD_CHIP_OFF_CLASS,
+                )}
+              >
+                {preset.label}
+              </Link>
+            );
+          })}
+        </div>
+        <div className="border-t border-hairline px-[var(--space-4)] py-[var(--space-4)]">
+          {revenueCents === null ? (
+            <DashboardHomeEmpty>{OVERVIEW_PAGE.revenueEmpty}</DashboardHomeEmpty>
+          ) : (
+            <p data-overview-revenue-value="" className="t-display t-data text-ink">
+              {formatUsdCents(revenueCents)}
+            </p>
+          )}
+        </div>
+        {weekPulse.length > 0 ? (
+          <ul data-overview-pulse="" className={DASHBOARD_ROW_LIST_CLASS}>
+            {weekPulse.map((row) => (
+              <li key={row.key} data-overview-week-row={row.key} className={DASHBOARD_ROW_CLASS}>
+                <span className="t-body-sm text-ink">{row.label}</span>
+                <span className="t-data t-body-sm text-ink-2">{row.count}</span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </DashboardHomePanel>
+      </div>
+
       <div className={OVERVIEW_AREA_SOCIAL_CLASS}>
       <OverviewModule
         testId="social"
@@ -144,44 +199,6 @@ export function OverviewHome({
         ) : null}
       </OverviewModule>
       </div>
-
-      <section
-        data-overview-aggregation=""
-        className={cn(OVERVIEW_AREA_AGGREGATION_CLASS, "flex flex-col", DASHBOARD_SECTION_AIR_CLASS)}
-      >
-        <DashboardListPanel
-          label={OVERVIEW_PAGE.topPerforming}
-          empty={OVERVIEW_PAGE.topPerformingEmpty}
-          testId="overview-top-performing"
-        >
-          {topTitles.length > 0 ? <DashboardTitleRows items={topTitles} /> : undefined}
-        </DashboardListPanel>
-        <DashboardHomePanel aria-label={OVERVIEW_PAGE.revenue} data-overview-revenue="">
-          <div className={`flex items-center justify-between ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD_LIST}`}>
-            <p className={DASHBOARD_SECTION_TITLE_CLASS}>{OVERVIEW_PAGE.revenue}</p>
-            <TextAction href={OVERVIEW_PAGE.revenueHref}>{OVERVIEW_PAGE.aggregation}</TextAction>
-          </div>
-          <div className="border-t border-hairline px-[var(--space-4)] py-[var(--space-4)]">
-            {revenueCents === null ? (
-              <DashboardHomeEmpty>{OVERVIEW_PAGE.revenueEmpty}</DashboardHomeEmpty>
-            ) : (
-              <p data-overview-revenue-value="" className="t-display t-data text-ink">
-                {formatUsdCents(revenueCents)}
-              </p>
-            )}
-          </div>
-          {weekPulse.length > 0 ? (
-            <ul data-overview-pulse="" className={DASHBOARD_ROW_LIST_CLASS}>
-              {weekPulse.map((row) => (
-                <li key={row.key} data-overview-week-row={row.key} className={DASHBOARD_ROW_CLASS}>
-                  <span className="t-body-sm text-ink">{row.label}</span>
-                  <span className="t-data t-body-sm text-ink-2">{row.count}</span>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </DashboardHomePanel>
-      </section>
 
       <div className={OVERVIEW_AREA_NEEDS_CLASS}>
       <OverviewModule

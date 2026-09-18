@@ -1,16 +1,23 @@
-import { createElement } from "react";
+import { createElement, type ComponentProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { OverviewHome } from "./overview-home";
 import type { CourseRow } from "@/lib/courses";
+import { parseDashboardPeriod } from "@/lib/dashboard-admin";
 import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import { DASHBOARD_SECTION_TITLE_CLASS } from "@/lib/dashboard-craft";
 import { NEWS_HREF, NEWS_PAGE } from "@/lib/news";
 import {
+  OVERVIEW_HREF,
   OVERVIEW_PHONE_MODULE_ORDER,
   OVERVIEW_PAGE,
 } from "@/lib/overview";
+import {
+  REPORTS_PAGE,
+  REPORTS_PERIOD_PRESETS,
+} from "@/lib/reports";
+import { REPORTS_PERIOD_CHIP_CLASS } from "@/lib/reports-craft";
 
 function moduleLabelClass(html: string, testId: string): string {
   const chunk = moduleChunk(html, testId);
@@ -22,21 +29,48 @@ function moduleChunk(html: string, testId: string): string {
   const start = html.indexOf(`data-overview-module="${testId}"`);
   if (start < 0) return "";
   const next = html.indexOf("data-overview-module=", start + 1);
-  const aggregation = testId === "education" ? html.indexOf("data-overview-aggregation", start) : -1;
-  const cuts = [next, aggregation, html.length].filter((at) => at >= 0);
-  return html.slice(start, Math.min(...cuts));
+  return html.slice(start, next >= 0 ? next : html.length);
+}
+
+function periodChipPressed(html: string, grain: string): boolean | null {
+  const match = html.match(
+    new RegExp(`<a[^>]*data-overview-revenue-period-chip="${grain}"[^>]*>`),
+  );
+  if (!match) return null;
+  return /aria-pressed="true"/.test(match[0]);
 }
 
 function moduleOrder(html: string): string[] {
   const marks = [
+    { id: "revenue", at: html.indexOf("data-overview-revenue") },
     { id: "social", at: html.indexOf('data-overview-module="social"') },
     { id: "education", at: html.indexOf('data-overview-module="education"') },
-    { id: "aggregation", at: html.indexOf("data-overview-aggregation") },
     { id: "news", at: html.indexOf('data-overview-module="news"') },
     { id: "needs-you", at: html.indexOf('data-overview-module="needs-you"') },
     { id: "ai-next", at: html.indexOf('data-overview-module="ai-next"') },
   ];
   return marks.filter((mark) => mark.at >= 0).sort((a, b) => a.at - b.at).map((mark) => mark.id);
+}
+
+const NOW = new Date("2026-09-18T18:00:00.000Z");
+
+function homeProps(
+  overrides: Partial<ComponentProps<typeof OverviewHome>> = {},
+): ComponentProps<typeof OverviewHome> {
+  return {
+    revenueCents: null,
+    period: parseDashboardPeriod("all", NOW),
+    socialUnread: 0,
+    socialChats: [],
+    socialFaces: new Map(),
+    courses: [],
+    needsYou: [],
+    weekPulse: [],
+    aiNext: [],
+    news: [],
+    now: NOW,
+    ...overrides,
+  };
 }
 
 const COURSE: CourseRow = {
@@ -56,29 +90,30 @@ const COURSE: CourseRow = {
 
 describe("OverviewHome", () => {
   it("renders locked modules with empty doors and 24Frame AI, not Globee", () => {
-    const html = renderToStaticMarkup(
-      createElement(OverviewHome, {
-        revenueCents: null,
-        topTitles: [],
-        socialUnread: 0,
-        socialChats: [],
-        socialFaces: new Map(),
-        courses: [],
-        needsYou: [],
-        weekPulse: [],
-        aiNext: [],
-        news: [],
-        now: new Date("2026-09-18T18:00:00.000Z"),
-      }),
-    );
+    const html = renderToStaticMarkup(createElement(OverviewHome, homeProps()));
     expect(html).toContain("data-overview");
     expect(html).toContain(OVERVIEW_PAGE.title);
     expect(html).toContain("Home");
     expect(html).not.toContain("Overview");
     expect(moduleOrder(html)).toEqual([...OVERVIEW_PHONE_MODULE_ORDER]);
     expect(html).not.toContain('data-overview-module="week"');
-    expect(html).toContain("data-overview-aggregation");
+    expect(html).not.toContain("data-overview-aggregation");
+    expect(html).not.toContain("data-overview-top-performing");
+    expect(html).not.toContain("Top performing");
     expect(html).toContain("data-overview-revenue");
+    expect(html).toContain("data-overview-revenue-period");
+    for (const preset of REPORTS_PERIOD_PRESETS) {
+      expect(html).toContain(`data-overview-revenue-period-chip="${preset.grain}"`);
+      expect(html).toContain(preset.label);
+    }
+    expect(html).toContain(REPORTS_PAGE.allTime);
+    expect(html).toContain(REPORTS_PAGE.ytd);
+    expect(html).toContain(REPORTS_PAGE.year);
+    expect(html).toContain(REPORTS_PAGE.quarter);
+    expect(html).toContain(REPORTS_PAGE.month);
+    expect(html).not.toContain("MTD");
+    expect(html).toContain(REPORTS_PERIOD_CHIP_CLASS);
+    expect(html).toContain(`href="${OVERVIEW_HREF}?period=ytd"`);
     expect(html).toContain("data-overview-news");
     expect(html).toContain("data-overview-layout");
     expect(html).toContain("lg:grid-cols-[minmax(0,1fr)_20rem]");
@@ -91,7 +126,6 @@ describe("OverviewHome", () => {
     expect(html).toContain('data-overview-module="ai-next"');
     expect(html).toContain(OVERVIEW_PAGE.needsYou);
     expect(html).toContain(OVERVIEW_PAGE.revenue);
-    expect(html).toContain(OVERVIEW_PAGE.topPerforming);
     expect(html).toContain(OVERVIEW_PAGE.social);
     expect(html).toContain(OVERVIEW_PAGE.education);
     expect(html).toContain(OVERVIEW_PAGE.news);
@@ -129,48 +163,57 @@ describe("OverviewHome", () => {
     expect(html).not.toContain("lesson_progress");
   });
 
+  it("selects the house YTD chip without inventing MTD", () => {
+    const html = renderToStaticMarkup(
+      createElement(
+        OverviewHome,
+        homeProps({ period: parseDashboardPeriod("ytd", NOW) }),
+      ),
+    );
+    expect(html).toContain('data-overview-revenue-period-chip="ytd"');
+    expect(periodChipPressed(html, "ytd")).toBe(true);
+    expect(periodChipPressed(html, "all")).toBe(false);
+    expect(html).toContain(REPORTS_PAGE.ytd);
+    expect(html).toContain(REPORTS_PAGE.month);
+    expect(html).not.toContain("MTD");
+    expect(html).not.toContain("Top performing");
+  });
+
   it("shows Social unread + faces, Education covers, week pulse, and three AI next-moves", () => {
     const html = renderToStaticMarkup(
-      createElement(OverviewHome, {
-        revenueCents: 100_000,
-        topTitles: [
-          {
-            id: "t1",
-            title: "Harbor Cut",
-            status: "live",
-            created_at: "2026-09-12T12:00:00.000Z",
-          },
-        ],
-        socialUnread: 4,
-        socialChats: [
-          {
-            conversationId: "dm1",
-            label: "Ada",
-            preview: "2 unread",
-            peerIds: ["u1"],
-          },
-        ],
-        socialFaces: new Map(),
-        courses: [COURSE],
-        needsYou: [{ id: "n1", what: "Synopsis is required.", href: "/titles/t1" }],
-        weekPulse: [{ key: "titles", label: "1 title added", count: 1 }],
-        news: [
-          {
-            id: "n1",
-            title: "Harbor Cut lands a festival slot",
-            url: "https://variety.com/harbor-cut",
-            source: "variety",
-            published_at: "2026-09-17T12:00:00.000Z",
-            image_url: null,
-          },
-        ],
-        now: new Date("2026-09-18T18:00:00.000Z"),
-        aiNext: [
-          { id: "a1", title: "North Wind", reason: "Chain of title is missing.", status: "draft" },
-          { id: "a2", title: "Winter Light", reason: null, status: "draft" },
-          { id: "a3", title: "Harbor Cut", reason: null, status: "draft" },
-        ],
-      }),
+      createElement(
+        OverviewHome,
+        homeProps({
+          revenueCents: 100_000,
+          socialUnread: 4,
+          socialChats: [
+            {
+              conversationId: "dm1",
+              label: "Ada",
+              preview: "2 unread",
+              peerIds: ["u1"],
+            },
+          ],
+          courses: [COURSE],
+          needsYou: [{ id: "n1", what: "Synopsis is required.", href: "/titles/t1" }],
+          weekPulse: [{ key: "titles", label: "1 title added", count: 1 }],
+          news: [
+            {
+              id: "n1",
+              title: "Harbor Cut lands a festival slot",
+              url: "https://variety.com/harbor-cut",
+              source: "variety",
+              published_at: "2026-09-17T12:00:00.000Z",
+              image_url: null,
+            },
+          ],
+          aiNext: [
+            { id: "a1", title: "North Wind", reason: "Chain of title is missing.", status: "draft" },
+            { id: "a2", title: "Winter Light", reason: null, status: "draft" },
+            { id: "a3", title: "Harbor Cut", reason: null, status: "draft" },
+          ],
+        }),
+      ),
     );
     expect(html).toContain("data-overview-revenue-value");
     expect(html).toContain("Harbor Cut");
@@ -181,8 +224,14 @@ describe("OverviewHome", () => {
     expect(html).not.toContain("Overview");
     expect(html).not.toContain('data-overview-module="week"');
     expect(moduleOrder(html)).toEqual([...OVERVIEW_PHONE_MODULE_ORDER]);
-    expect(html.indexOf("data-overview-aggregation")).toBeLessThan(html.indexOf("data-overview-pulse"));
-    expect(html.indexOf("data-overview-aggregation")).toBeLessThan(
+    expect(html.indexOf("data-overview-revenue")).toBeLessThan(
+      html.indexOf('data-overview-module="social"'),
+    );
+    expect(html.indexOf("data-overview-revenue")).toBeLessThan(html.indexOf("data-overview-pulse"));
+    expect(html.indexOf('data-overview-module="social"')).toBeLessThan(
+      html.indexOf('data-overview-module="education"'),
+    );
+    expect(html.indexOf('data-overview-module="education"')).toBeLessThan(
       html.indexOf('data-overview-module="needs-you"'),
     );
     expect(html.indexOf('data-overview-module="needs-you"')).toBeLessThan(
@@ -233,20 +282,13 @@ describe("OverviewHome", () => {
 
   it("renders the Figma progress bar from real course percent and does not invent 62%", () => {
     const html = renderToStaticMarkup(
-      createElement(OverviewHome, {
-        revenueCents: null,
-        topTitles: [],
-        socialUnread: 0,
-        socialChats: [],
-        socialFaces: new Map(),
-        courses: [COURSE],
-        courseProgress: new Map([["c1", 40]]),
-        needsYou: [],
-        weekPulse: [],
-        aiNext: [],
-        news: [],
-        now: new Date("2026-09-18T18:00:00.000Z"),
-      }),
+      createElement(
+        OverviewHome,
+        homeProps({
+          courses: [COURSE],
+          courseProgress: new Map([["c1", 40]]),
+        }),
+      ),
     );
     const education = moduleChunk(html, "education");
     const coverAt = education.indexOf("data-course-cover=");
@@ -280,21 +322,14 @@ describe("OverviewHome", () => {
 
   it("uses the signed Education cover on Home and keeps the title below the photo", () => {
     const html = renderToStaticMarkup(
-      createElement(OverviewHome, {
-        revenueCents: null,
-        topTitles: [],
-        socialUnread: 0,
-        socialChats: [],
-        socialFaces: new Map(),
-        courses: [COURSE],
-        courseCovers: new Map([["c1", "https://cover.example/photo.jpg"]]),
-        courseProgress: new Map([["c1", 40]]),
-        needsYou: [],
-        weekPulse: [],
-        aiNext: [],
-        news: [],
-        now: new Date("2026-09-18T18:00:00.000Z"),
-      }),
+      createElement(
+        OverviewHome,
+        homeProps({
+          courses: [COURSE],
+          courseCovers: new Map([["c1", "https://cover.example/photo.jpg"]]),
+          courseProgress: new Map([["c1", 40]]),
+        }),
+      ),
     );
     const education = moduleChunk(html, "education");
     const coverAt = education.indexOf("data-course-cover=");

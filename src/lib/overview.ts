@@ -9,7 +9,7 @@ import {
   type DashboardChangeRow,
 } from "@/lib/dashboard-home";
 import { NEWS_HOME_CAP, NEWS_HREF, NEWS_LEGACY_HREF, NEWS_PAGE } from "@/lib/news";
-import { REPORTS_HREF } from "@/lib/reports";
+import { REPORTS_HREF, REPORTS_PERIOD_ALL } from "@/lib/reports";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { availableWorkspaceOptions, type WorkspaceMenuOption } from "@/lib/workspace-menu";
 import type { WorkspaceMode } from "@/lib/workspace";
@@ -21,8 +21,10 @@ import type { WorkspaceMode } from "@/lib/workspace";
 // workspace and not an Aggregation / Social / Education destination.
 // /news permanently redirects there.
 // Home IA v2 (Adam 2026-09-18): no dest rail on /home — unify-lead
-// chrome + five modules only. Rails return in Aggregation · Social ·
-// Education. Copy lives here, not JSX.
+// chrome. Same-day order rewrite: Net revenue first, then Social ·
+// Education · Needs you. Top performing is not on Home. News stays
+// the Home rail (/home/news is View-all). Rails return in
+// Aggregation · Social · Education. Copy lives here, not JSX.
 
 export const OVERVIEW_HREF = "/home";
 export const OVERVIEW_LEGACY_HREF = "/overview";
@@ -33,11 +35,11 @@ export const OVERVIEW_AI_NEXT_CAP = 3;
 export const OVERVIEW_NEWS_CAP = NEWS_HOME_CAP;
 export const OVERVIEW_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
-/** Positive-first Home modules. This-week pulse folds into Aggregation. */
+/** Home modules after the 2026-09-18 order rewrite. Net revenue first. */
 export const OVERVIEW_MODULE_ORDER = [
+  "revenue",
   "social",
   "education",
-  "aggregation",
   "needs-you",
   "ai-next",
 ] as const;
@@ -46,9 +48,9 @@ export const OVERVIEW_MODULE_ORDER = [
  *  Phone-chrome / Home width: dest rail is gone; lead + main go full-canvas.
  *  Home modules inset separately (48 left + 16 right → 1376 at 1440). */
 export const OVERVIEW_PHONE_MODULE_ORDER = [
+  "revenue",
   "social",
   "education",
-  "aggregation",
   "needs-you",
   "ai-next",
   "news",
@@ -66,13 +68,13 @@ export const OVERVIEW_HOME_COLUMN_GUTTER = HOUSE_CHROME_GUTTER;
 export const OVERVIEW_HOME_LAYOUT_CLASS =
   "grid w-full grid-cols-1 items-start " +
   "gap-y-[var(--space-6)] gap-x-[var(--chrome-gutter)] " +
-  "[grid-template-areas:'social'_'education'_'aggregation'_'needs'_'ai'_'news'] " +
+  "[grid-template-areas:'revenue'_'social'_'education'_'needs'_'ai'_'news'] " +
   "lg:grid-cols-[minmax(0,1fr)_20rem] " +
-  "lg:[grid-template-areas:'social_news'_'education_news'_'aggregation_news'_'needs_news'_'ai_news']";
+  "lg:[grid-template-areas:'revenue_news'_'social_news'_'education_news'_'needs_news'_'ai_news']";
 
+export const OVERVIEW_AREA_REVENUE_CLASS = "[grid-area:revenue]";
 export const OVERVIEW_AREA_SOCIAL_CLASS = "[grid-area:social]";
 export const OVERVIEW_AREA_EDUCATION_CLASS = "[grid-area:education]";
-export const OVERVIEW_AREA_AGGREGATION_CLASS = "[grid-area:aggregation]";
 export const OVERVIEW_AREA_NEEDS_CLASS = "[grid-area:needs]";
 export const OVERVIEW_AREA_AI_CLASS = "[grid-area:ai]";
 export const OVERVIEW_AREA_NEWS_CLASS =
@@ -93,8 +95,6 @@ export const OVERVIEW_PAGE = {
   revenue: DASHBOARD_ADMIN.revenue,
   revenueEmpty: DASHBOARD_ADMIN.revenueEmpty,
   revenueHref: REPORTS_HREF,
-  topPerforming: DASHBOARD_HOME.topPerforming,
-  topPerformingEmpty: DASHBOARD_HOME.topTitlesEmpty,
   socialUnread: "Unread",
   socialEmpty: SOCIAL.home.chatsEmpty,
   socialHref: SOCIAL_ROUTES.dms,
@@ -112,6 +112,16 @@ export const OVERVIEW_PAGE = {
   aiNextHref: "/messages",
   aiAsk: ASK_ASSISTANT,
 } as const;
+
+/** Home land with the shared Aggregation/Finance period query. */
+export function overviewHref(input: { period?: string } = {}): string {
+  const params = new URLSearchParams();
+  if (input.period && input.period !== REPORTS_PERIOD_ALL) {
+    params.set("period", input.period);
+  }
+  const query = params.toString();
+  return query ? `${OVERVIEW_HREF}?${query}` : OVERVIEW_HREF;
+}
 
 /** Header TextAction only when the label is distinct from the module title. */
 export function overviewModuleHeaderAction(
