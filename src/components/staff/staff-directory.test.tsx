@@ -115,6 +115,7 @@ describe("house law — one directory primitive", () => {
     expect(clients).toContain("StaffDirectoryList");
     expect(vendorProfile).toContain("StaffDirectoryRow");
     expect(clientProfile).toContain("StaffDirectoryRow");
+    expect(clients).not.toContain("nested:");
     expect(clients).not.toContain("Card");
     expect(clients).not.toContain("<table");
     expect(clientProfile).not.toContain("Card");
