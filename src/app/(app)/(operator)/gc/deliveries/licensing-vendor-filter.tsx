@@ -14,7 +14,7 @@ import {
   type GcLicensingVendor,
 } from "@/lib/gc-deliveries";
 
-// Vendor lens — house-page-select consumer (Dashboard All time SoT).
+// Channel lens — house-page-select consumer (Dashboard All time SoT).
 // Status stays on StatusFilter chips. Do not invent a second select grammar.
 
 export function LicensingVendorFilter({

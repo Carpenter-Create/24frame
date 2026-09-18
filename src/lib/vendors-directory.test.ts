@@ -2,9 +2,10 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import {
+  CHANNELS_PAGE,
   VENDOR_FORM_FIELD_LABELS,
-  VENDORS_PAGE,
   asVendorDirectoryRow,
+  channelCardTags,
   filterVendorDirectory,
   normalizeVendorDirectory,
   parseVendorDirectoryFilter,
@@ -12,17 +13,19 @@ import {
   vendorDirectoryMeta,
 } from "./vendors-directory";
 
-describe("VENDORS_PAGE lock copy", () => {
+describe("CHANNELS_PAGE lock copy", () => {
   it("keeps the identity line and empty address-book copy", () => {
-    expect(VENDORS_PAGE.title).toBe("Vendors");
-    expect(VENDORS_PAGE.identity).toBe("Credentials are never stored here.");
-    expect(VENDORS_PAGE.emptyTitle).toBe("No vendors yet");
-    expect(VENDORS_PAGE.filterMiss).toBe("No vendors match this filter.");
-    expect(VENDORS_PAGE).not.toHaveProperty("emptySupport");
-    expect(VENDORS_PAGE.addVendor).toBe("Add vendor");
-    expect(VENDORS_PAGE.addHref).toBe("/vendors/new");
-    expect(JSON.stringify(VENDORS_PAGE)).not.toContain("GC distribution partners.");
-    expect(JSON.stringify(VENDORS_PAGE)).not.toContain("Add your first partner.");
+    expect(CHANNELS_PAGE.title).toBe("Channels");
+    expect(CHANNELS_PAGE.identity).toBe("Credentials are never stored here.");
+    expect(CHANNELS_PAGE.emptyTitle).toBe("No channels yet");
+    expect(CHANNELS_PAGE.filterMiss).toBe("No channels match this filter.");
+    expect(CHANNELS_PAGE).not.toHaveProperty("emptySupport");
+    expect(CHANNELS_PAGE.addChannel).toBe("Add channel");
+    expect(CHANNELS_PAGE.addHref).toBe("/channels/new");
+    expect(JSON.stringify(CHANNELS_PAGE)).not.toContain("GC distribution partners.");
+    expect(JSON.stringify(CHANNELS_PAGE)).not.toContain("Add your first partner.");
+    expect(JSON.stringify(CHANNELS_PAGE)).not.toContain("Vendors");
+    expect(JSON.stringify(CHANNELS_PAGE)).not.toContain("vendor");
   });
 
   it("lists the form fields that must not appear on the empty page", () => {
@@ -35,13 +38,13 @@ describe("VENDORS_PAGE lock copy", () => {
       "Company info (JSON, optional)",
       "Export format spec (JSON, optional)",
       "Active",
-      "Save vendor",
-      "New vendor",
+      "Save channel",
+      "New channel",
     ]);
   });
 });
 
-describe("vendor directory rows", () => {
+describe("channel directory rows", () => {
   const real = {
     id: "11111111-1111-4111-8111-111111111111",
     name: "Acme Distribution",
@@ -83,10 +86,10 @@ describe("vendor directory rows", () => {
     expect(parseVendorDirectoryFilter("nope")).toBe("all");
   });
 
-  it("builds the edit href and directory meta from the row", () => {
+  it("builds the channel href, meta, and real tags only", () => {
     const row = asVendorDirectoryRow(real);
     if (!row) throw new Error("expected row");
-    expect(vendorDirectoryHref(row)).toBe(`/vendors/${real.id}`);
+    expect(vendorDirectoryHref(row)).toBe(`/channels/${real.id}`);
     expect(vendorDirectoryMeta(row)).toBe("Portal upload");
     expect(
       vendorDirectoryMeta({
@@ -95,11 +98,20 @@ describe("vendor directory rows", () => {
         active: false,
       }),
     ).toBe("Email · inactive");
+    expect(channelCardTags(row)).toEqual([
+      { label: "Portal upload", tone: "neutral" },
+      { label: "Active", tone: "active" },
+    ]);
+    expect(channelCardTags({ ...row, deliveryMode: "email", active: false })).toEqual([
+      { label: "Email", tone: "neutral" },
+      { label: "Inactive", tone: "muted" },
+    ]);
+    expect(JSON.stringify(channelCardTags(row))).not.toMatch(/ACTION|ADVENTURE|genre/i);
   });
 });
 
 describe("shared EmptyState primitive stays the dashed 40-circle layout", () => {
-  it("does not pick up the vendors 48/24 hairline lock", () => {
+  it("does not pick up the channels 48/24 hairline lock", () => {
     const src = readFileSync("src/components/layout/empty-state.tsx", "utf8");
     expect(src).toContain("border-dashed");
     expect(src).toContain("h-10 w-10");

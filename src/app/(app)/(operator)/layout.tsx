@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/supabase/auth";
 
-// GC-operator surfaces (Queue, Avails, Vendors) render INSIDE the main client AppShell — same sidebar
+// GC-operator surfaces (Queue, Avails, Channels) render INSIDE the main client AppShell — same sidebar
 // as the rest of the portal, no separate area. This route group ((operator) = no URL segment)
 // adds only the gc_staff gate; the shell is provided by the parent (app) layout. Non-GC users
 // are bounced to the client home. (The gate is the security boundary — sidebar links are

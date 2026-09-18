@@ -1,0 +1,135 @@
+import Link from "next/link";
+import { Store } from "lucide-react";
+
+import { ChannelCard } from "@/components/channels/channel-card";
+import { ChannelCardGrid } from "@/components/channels/channel-card-grid";
+import { createClient } from "@/lib/supabase/server";
+import { PageHeader } from "@/components/ui/page-header";
+import { StatusFilter } from "@/components/layout/status-filter";
+import { UNPAGINATED_MAX, rangeFor, splitProbe } from "@/lib/list-bounds";
+import {
+  STAFF_DIRECTORY_COUNT_CLASS,
+  STAFF_DIRECTORY_EMPTY_CLASS,
+  STAFF_DIRECTORY_STACK_CLASS,
+  STAFF_DIRECTORY_TOOLBAR_CLASS,
+  directoryCountLabel,
+  filterHref,
+  searchParamString,
+} from "@/lib/staff-directory";
+import { CHANNELS_HREF } from "@/lib/channel-card";
+import { countLicensedTitlesByVendor } from "@/lib/vendor-profile";
+import {
+  CHANNELS_PAGE,
+  VENDOR_DIRECTORY_FILTERS,
+  channelCardTags,
+  filterVendorDirectory,
+  normalizeVendorDirectory,
+  parseVendorDirectoryFilter,
+  vendorDirectoryHref,
+} from "@/lib/vendors-directory";
+
+export default async function GcChannelsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+} = {}) {
+  const sp = await (searchParams ?? Promise.resolve({} as Record<string, string | string[] | undefined>));
+  const filter = parseVendorDirectoryFilter(searchParamString(sp.status));
+
+  const supabase = await createClient();
+  const [{ data: vendors }, deliveryProbe] = await Promise.all([
+    supabase
+      .from("vendors")
+      .select("id, name, delivery_mode, active")
+      .order("name", { ascending: true })
+      .range(...rangeFor(UNPAGINATED_MAX)),
+    supabase
+      .from("deliveries")
+      .select("vendor_id, title_id, status")
+      .range(...rangeFor(UNPAGINATED_MAX + 1)),
+  ]);
+  const { rows: deliveryRows, truncated: titlesTruncated } = splitProbe(
+    deliveryProbe.data,
+    UNPAGINATED_MAX,
+  );
+  const directory = normalizeVendorDirectory(vendors);
+  const list = filterVendorDirectory(directory, filter);
+  const titleCounts = countLicensedTitlesByVendor(deliveryRows);
+  const emptyDirectory = directory.length === 0;
+
+  const cards = list.map((vn) => {
+    const titles = titleCounts.get(vn.id) ?? 0;
+    return {
+      id: vn.id,
+      name: vn.name,
+      href: vendorDirectoryHref(vn),
+      tags: channelCardTags(vn),
+      meta:
+        titles > 0
+          ? directoryCountLabel(titles, "licensed title", "licensed titles", titlesTruncated)
+          : null,
+    };
+  });
+
+  return (
+    <>
+      <PageHeader
+        title={CHANNELS_PAGE.title}
+        subtitle={CHANNELS_PAGE.identity}
+        actions={
+          emptyDirectory ? undefined : (
+            <Link
+              href={CHANNELS_PAGE.addHref}
+              data-channels-add=""
+              className="t-body-sm text-accent transition-colors hover:underline"
+            >
+              {CHANNELS_PAGE.addChannel}
+            </Link>
+          )
+        }
+      />
+
+      <div data-channels-directory="" className={STAFF_DIRECTORY_STACK_CLASS}>
+        <div data-channels-toolbar="" className={STAFF_DIRECTORY_TOOLBAR_CLASS}>
+          <StatusFilter
+            current={filter}
+            options={[...VENDOR_DIRECTORY_FILTERS]}
+            hrefFor={(key) => filterHref(CHANNELS_HREF, key)}
+          />
+          <span data-channels-count="" className={STAFF_DIRECTORY_COUNT_CLASS}>
+            {directoryCountLabel(cards.length, "channel", "channels")}
+          </span>
+        </div>
+
+        {cards.length > 0 ? (
+          <ChannelCardGrid>
+            {cards.map((channel) => (
+              <ChannelCard key={channel.id} channel={channel} />
+            ))}
+          </ChannelCardGrid>
+        ) : emptyDirectory ? (
+          <div
+            data-channels-empty=""
+            className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] bg-surface-muted px-[var(--space-6)] py-[var(--space-12)] text-center"
+          >
+            <span className="flex size-12 items-center justify-center rounded-full bg-surface-muted text-ink-3">
+              <Store className="size-6" strokeWidth={1.33} />
+            </span>
+            <p className="t-body font-medium text-ink">{CHANNELS_PAGE.emptyTitle}</p>
+            <Link
+              href={CHANNELS_PAGE.addHref}
+              data-channels-add=""
+              className="t-body-sm text-accent transition-colors hover:underline"
+            >
+              {CHANNELS_PAGE.addChannel}
+            </Link>
+          </div>
+        ) : (
+          <p data-channels-filter-miss="" className={STAFF_DIRECTORY_EMPTY_CLASS}>
+            {CHANNELS_PAGE.filterMiss}
+          </p>
+        )}
+      </div>
+    </>
+  );
+}

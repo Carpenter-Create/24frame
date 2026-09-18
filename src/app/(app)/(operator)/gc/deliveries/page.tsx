@@ -18,7 +18,7 @@ import {
   gcLicensingShowAllHref,
   groupLicensingTitles,
   parseDeliveryStatusFilter,
-  parseGcLicensingVendorFilter,
+  parseGcLicensingChannelFilter,
 } from "@/lib/gc-deliveries";
 import {
   loadGcDeliveryCompanions,
@@ -42,7 +42,7 @@ export default async function GcDeliveriesPage({
   const sp = await (searchParams ?? Promise.resolve({} as Record<string, string | string[] | undefined>));
   const q = catalogSearchQuery(sp.q);
   const statusFilter = parseDeliveryStatusFilter(sp.status);
-  const vendorFilter = parseGcLicensingVendorFilter(sp.vendor);
+  const vendorFilter = parseGcLicensingChannelFilter(sp.channel, sp.vendor);
   const supabase = await createClient();
   let deliveriesQuery = supabase
     .from("deliveries")

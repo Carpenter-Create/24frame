@@ -4,6 +4,9 @@ import { ACTIVE_DELIVERY_STATUSES_LIST } from "@/lib/master-licence";
 import {
   asVendorDeliveryPlacement,
   asVendorProfileRecord,
+  channelCompanyRailFields,
+  channelOverviewText,
+  channelTerritories,
   countLicensedTitlesByVendor,
   isLicensedDeliveryStatus,
   vendorCompanyFields,
@@ -75,7 +78,7 @@ describe("vendor licensed-title catalog SoT", () => {
 describe("vendor profile fields", () => {
   it("keeps edit on a dedicated route under the profile", () => {
     expect(vendorEditHref("11111111-1111-4111-8111-111111111111")).toBe(
-      "/vendors/11111111-1111-4111-8111-111111111111/edit",
+      "/channels/11111111-1111-4111-8111-111111111111/edit",
     );
   });
 
@@ -116,5 +119,24 @@ describe("vendor profile fields", () => {
       status: "live",
     });
     expect(asVendorDeliveryPlacement({ title_id: "t1", territory: "US", status: "live" })).toBeNull();
+  });
+
+  it("reads overview and territories from real fields only", () => {
+    expect(channelOverviewText({ description: "Independent stories." })).toBe(
+      "Independent stories.",
+    );
+    expect(channelOverviewText({ region: "US" })).toBeNull();
+    expect(channelCompanyRailFields({ region: "US", description: "Hide me" })).toEqual([
+      { label: "region", value: "US" },
+    ]);
+    expect(
+      channelTerritories([
+        { titleId: "t1", title: "Autumn Road", catalogId: "GC-1", territory: "ca", status: "live" },
+        { titleId: "t1", title: "Autumn Road", catalogId: "GC-1", territory: "US", status: "live" },
+      ]),
+    ).toEqual([
+      { code: "CA", label: "Canada" },
+      { code: "US", label: "United States" },
+    ]);
   });
 });

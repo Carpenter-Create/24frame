@@ -81,6 +81,8 @@ const nextConfig: NextConfig = {
       { source: "/catalog-health/:path*", destination: "/attention/:path*", permanent: true },
       { source: "/deliveries", destination: "/titles", permanent: true },
       { source: "/deliveries/:path*", destination: "/titles/:path*", permanent: true },
+      { source: "/vendors", destination: "/channels", permanent: true },
+      { source: "/vendors/:path*", destination: "/channels/:path*", permanent: true },
     ];
   },
 };

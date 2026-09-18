@@ -12,7 +12,7 @@ import { publicCatalogId } from "@/lib/title-public-id";
 
 // Staff /gc/deliveries — staff-wide Licensing Status (all titles / all orgs).
 // Client nest copy stays on DASHBOARD_LICENSING. Href stays /gc/deliveries.
-// v2 list: Titles catalog parent + indented vendor sub-rows. No fluff
+// v2 list: Titles catalog parent + indented channel sub-rows. No fluff
 // subtitle. Deliver CTA is selection-gated. Avails-sourced title pool.
 export const GC_LICENSING_STATUS = {
   title: "Licensing Status",
@@ -22,9 +22,9 @@ export const GC_LICENSING_STATUS = {
   filterMiss: "No licensing status matches these filters.",
   searchMiss: (q: string) => `No titles match “${q}”.`,
   showAll: "Show all",
-  searchPlaceholder: "Search titles or vendors",
+  searchPlaceholder: "Search titles or channels",
   statusFilterLabel: "Filter by status",
-  vendorFilterLabel: "Filter by vendor",
+  vendorFilterLabel: "Filter by channel",
   vendorAll: "All",
 } as const;
 
@@ -50,7 +50,7 @@ export function licensingActivityDate(iso: string | null | undefined): string | 
 }
 
 export function licensingVendorCountLabel(n: number): string {
-  return n === 1 ? "1 vendor" : `${n} vendors`;
+  return n === 1 ? "1 channel" : `${n} channels`;
 }
 
 export type LicensingVendorRow = {
@@ -225,6 +225,14 @@ export function parseGcLicensingVendorFilter(v: QueryValue): string | null {
   return v.toLowerCase();
 }
 
+/** Prefer ?channel=; keep reading ?vendor= so old Licensing Status links work. */
+export function parseGcLicensingChannelFilter(
+  channel: QueryValue,
+  vendor?: QueryValue,
+): string | null {
+  return parseGcLicensingVendorFilter(channel) ?? parseGcLicensingVendorFilter(vendor);
+}
+
 export function gcLicensingHasFilters(
   status: DeliveryStatusFilter,
   vendor: string | null,
@@ -240,7 +248,7 @@ export function buildGcLicensingQuery(opts: {
   return buildQuery({
     q: opts.q?.trim() || undefined,
     status: opts.status === "all" ? undefined : opts.status,
-    vendor: opts.vendor ?? undefined,
+    channel: opts.vendor ?? undefined,
   });
 }
 

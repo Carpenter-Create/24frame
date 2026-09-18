@@ -4,10 +4,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createClient } from "@/lib/supabase/server";
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
-import { VENDOR_FORM_FIELD_LABELS, VENDORS_PAGE } from "@/lib/vendors-directory";
+import { CHANNELS_PAGE, VENDOR_FORM_FIELD_LABELS } from "@/lib/vendors-directory";
 import { GC_NAV, NAV } from "@/lib/nav";
 
-import GcVendorsPage from "./page";
+import GcChannelsPage from "./page";
 
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 
@@ -44,36 +44,37 @@ function stubClient(rows: VendorRow[] | null, deliveries: unknown[] | null = [])
   return { from, vendorsChain, deliveriesChain };
 }
 
-async function renderVendors(rows: VendorRow[] | null = []) {
+async function renderChannels(rows: VendorRow[] | null = []) {
   stubClient(rows);
-  return renderToStaticMarkup(await GcVendorsPage());
+  return renderToStaticMarkup(await GcChannelsPage());
 }
 
-const pageSrc = readFileSync("src/app/(app)/(operator)/vendors/page.tsx", "utf8");
+const pageSrc = readFileSync("src/app/(app)/(operator)/channels/page.tsx", "utf8");
 
-describe("staff /vendors address book", () => {
+describe("staff /channels card grid", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("renders identity + empty copy and one Add vendor control", async () => {
-    const html = await renderVendors([]);
+  it("renders identity + empty copy and one Add channel control", async () => {
+    const html = await renderChannels([]);
 
-    expect(html).toContain(VENDORS_PAGE.title);
-    expect(html).toContain(VENDORS_PAGE.identity);
-    expect(html).toContain(VENDORS_PAGE.emptyTitle);
+    expect(html).toContain(CHANNELS_PAGE.title);
+    expect(html).toContain(CHANNELS_PAGE.identity);
+    expect(html).toContain(CHANNELS_PAGE.emptyTitle);
     expect(html).not.toContain("GC distribution partners.");
     expect(html).not.toContain("Add your first partner.");
     expect(pageSrc).not.toContain("emptySupport");
-    expect(html).toContain(VENDORS_PAGE.addVendor);
-    expect(html).toContain(`href="${VENDORS_PAGE.addHref}"`);
-    expect(html).toContain("data-vendors-empty");
-    expect(html).toContain("data-vendors-add");
-    expect(html).toContain("data-staff-directory");
-    expect(html).toContain("0 vendors");
-    expect(html).not.toContain("data-vendors-directory");
+    expect(html).toContain(CHANNELS_PAGE.addChannel);
+    expect(html).toContain(`href="${CHANNELS_PAGE.addHref}"`);
+    expect(html).toContain("data-channels-empty");
+    expect(html).toContain("data-channels-add");
+    expect(html).toContain("0 channels");
+    expect(html).not.toContain("data-channels-grid");
+    expect(html).not.toContain("data-staff-directory");
+    expect(html).not.toContain("Vendors");
   });
 
   it("does not render VendorForm fields on the empty page", async () => {
-    const html = await renderVendors([]);
+    const html = await renderChannels([]);
 
     for (const label of VENDOR_FORM_FIELD_LABELS) {
       if (label === "Active") continue; // directory filter chip, not the form checkbox
@@ -81,13 +82,13 @@ describe("staff /vendors address book", () => {
     }
     expect(html).not.toContain("Company info");
     expect(html).not.toContain("Export format spec");
-    expect(html).not.toContain("Save vendor");
+    expect(html).not.toContain("Save channel");
     expect(pageSrc).not.toContain("VendorForm");
-    expect(pageSrc).not.toContain("New vendor");
+    expect(pageSrc).not.toContain("New channel");
   });
 
-  it("uses the Coinbase grey holding surface and the vendors empty chrome", async () => {
-    const html = await renderVendors([]);
+  it("uses house empty chrome and the Channels card primitives, not a Filmhub skin", async () => {
+    const html = await renderChannels([]);
 
     expect(html).toContain("rounded-[var(--radius-lg)]");
     expect(html).toContain("bg-surface-muted");
@@ -95,15 +96,17 @@ describe("staff /vendors address book", () => {
     expect(html).toContain("size-6");
     expect(html).toContain("stroke-width=\"1.33\"");
     expect(html).not.toContain("border-dashed");
+    expect(html).not.toContain("#635BFF");
     expect(pageSrc).not.toContain("EmptyState");
-    expect(pageSrc).not.toContain("Card");
+    expect(pageSrc).not.toContain("StaffDirectoryList");
     expect(pageSrc).toContain("PageHeader");
-    expect(pageSrc).toContain("StaffDirectoryList");
+    expect(pageSrc).toContain("ChannelCardGrid");
+    expect(pageSrc).toContain("ChannelCard");
   });
 
-  it("renders empty Add vendor as Sporty Blue text, matching Titles empty action", async () => {
-    const html = await renderVendors([]);
-    const marker = html.indexOf('data-vendors-add=""');
+  it("renders empty Add channel as Sporty Blue text, matching Titles empty action", async () => {
+    const html = await renderChannels([]);
+    const marker = html.indexOf('data-channels-add=""');
     const addStart = html.lastIndexOf("<a", marker);
     const addEnd = html.indexOf("</a>", marker);
     const add = html.slice(addStart, addEnd);
@@ -115,7 +118,7 @@ describe("staff /vendors address book", () => {
     expect(add).toContain("t-body-sm");
     expect(add).toContain("text-accent");
     expect(add).toContain("hover:underline");
-    expect(add).toContain(VENDORS_PAGE.addVendor);
+    expect(add).toContain(CHANNELS_PAGE.addChannel);
     expect(add).not.toContain("bg-accent");
     expect(add).not.toContain("text-accent-contrast");
     expect(add).not.toContain("rounded-[12px]");
@@ -124,54 +127,61 @@ describe("staff /vendors address book", () => {
     expect(add).not.toContain("inline-flex");
   });
 
-  it("does not put Add vendor in the header", async () => {
-    const html = await renderVendors([]);
-    const headerEnd = html.indexOf("data-vendors-address-book");
+  it("does not put Add channel in the header when the directory is empty", async () => {
+    const html = await renderChannels([]);
+    const headerEnd = html.indexOf("data-channels-directory");
     const header = html.slice(0, headerEnd);
-    expect(header).toContain(VENDORS_PAGE.title);
-    expect(header).toContain(VENDORS_PAGE.identity);
-    expect(header).not.toContain(VENDORS_PAGE.addVendor);
-    expect(header).not.toContain(VENDORS_PAGE.addHref);
+    expect(header).toContain(CHANNELS_PAGE.title);
+    expect(header).toContain(CHANNELS_PAGE.identity);
+    expect(header).not.toContain(CHANNELS_PAGE.addChannel);
+    expect(header).not.toContain(CHANNELS_PAGE.addHref);
   });
 
-  it("turns the same surface into a directory of real vendors", async () => {
+  it("renders a house card grid of real channels", async () => {
     const inactive: VendorRow = {
       id: "33333333-3333-4333-8333-333333333333",
       name: "Northwind Partners",
       delivery_mode: "portal_upload",
       active: false,
     };
-    const html = await renderVendors([REAL_VENDOR, inactive]);
+    const html = await renderChannels([REAL_VENDOR, inactive]);
 
-    expect(html).toContain("data-staff-directory");
-    expect(html).toContain("data-staff-directory-row");
-    expect(html).not.toContain("data-vendors-empty=\"\"");
-    expect(html).toContain("data-vendors-add=\"\"");
+    expect(html).toContain("data-channels-grid");
+    expect(html).toContain(`data-channel-card="${REAL_VENDOR.id}"`);
+    expect(html).toContain("data-channel-card-plate");
+    expect(html).toContain("data-channel-card-tags");
+    expect(html).not.toContain("data-staff-directory-row");
+    expect(html).not.toContain("data-channels-empty=\"\"");
+    expect(html).toContain("data-channels-add=\"\"");
     expect(html).toContain("Acme Distribution");
     expect(html).toContain("Northwind Partners");
-    expect(html).toContain(`/vendors/${REAL_VENDOR.id}`);
-    expect(html).toContain(`/vendors/${inactive.id}`);
+    expect(html).toContain(`/channels/${REAL_VENDOR.id}`);
+    expect(html).toContain(`/channels/${inactive.id}`);
     expect(html).toContain("Email");
-    expect(html).toContain("Portal upload · inactive");
+    expect(html).toContain("Portal upload");
+    expect(html).toContain("Active");
+    expect(html).toContain("Inactive");
     expect(html).toContain("AD");
     expect(html).toContain("NP");
-    expect(html).toContain("2 vendors");
-    expect(html).toContain(VENDORS_PAGE.identity);
+    expect(html).toContain("2 channels");
+    expect(html).toContain(CHANNELS_PAGE.identity);
+    expect(html).not.toContain("ACTION ADVENTURE");
+    expect(html).not.toMatch(/verified|checkmark/i);
     for (const label of VENDOR_FORM_FIELD_LABELS) {
       if (label === "Active") continue;
       expect(html).not.toContain(label);
     }
   });
 
-  it("does not invent fixture vendors in the page source", () => {
+  it("does not invent fixture channels in the page source", () => {
     expect(pageSrc).not.toMatch(/Netflix|Amazon|Hulu|Meridian|FIXTURE/i);
     expect(pageSrc).toContain("normalizeVendorDirectory");
     expect(pageSrc).not.toContain("VendorForm");
   });
 
-  it("bounds the vendors read", async () => {
+  it("bounds the vendors table read", async () => {
     const { from, vendorsChain, deliveriesChain } = stubClient([]);
-    await GcVendorsPage();
+    await GcChannelsPage();
     expect(from).toHaveBeenCalledWith("vendors");
     expect(from).toHaveBeenCalledWith("deliveries");
     expect(vendorsChain.range).toHaveBeenCalled();
@@ -191,7 +201,7 @@ describe("staff rail and neighboring locks", () => {
       "Queue",
       "Avails",
       "Licensing Status",
-      "Vendors",
+      "Channels",
       "Finance",
       "Clients",
     ]);
@@ -214,13 +224,13 @@ describe("staff rail and neighboring locks", () => {
     expect(home).toContain("GcClientsDirectory");
     expect(pageSrc).not.toContain("ask-globee");
     expect(pageSrc).not.toContain("TITLES_CATALOG");
-    expect(readFileSync("src/app/(app)/(operator)/vendors/new/page.tsx", "utf8")).toContain(
+    expect(readFileSync("src/app/(app)/(operator)/channels/new/page.tsx", "utf8")).toContain(
       "VendorForm",
     );
-    expect(readFileSync("src/app/(app)/(operator)/vendors/[id]/edit/page.tsx", "utf8")).toContain(
+    expect(readFileSync("src/app/(app)/(operator)/channels/[id]/edit/page.tsx", "utf8")).toContain(
       "VendorForm",
     );
-    expect(readFileSync("src/app/(app)/(operator)/vendors/[id]/page.tsx", "utf8")).not.toContain(
+    expect(readFileSync("src/app/(app)/(operator)/channels/[id]/page.tsx", "utf8")).not.toContain(
       "VendorForm",
     );
   });

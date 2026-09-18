@@ -13,8 +13,8 @@ import {
   type StaffDirectoryRowModel,
 } from "@/lib/staff-directory";
 
-// The ONE staff directory row. Vendors, client orgs, and org people all
-// render this. Do not patch a Card/table lookalike.
+// The ONE staff directory row. Client orgs and org people render this.
+// Team Channels index/detail use ChannelCard / ChannelDetail.
 
 export function StaffDirectoryRow({
   row,

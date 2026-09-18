@@ -19,7 +19,7 @@ describe("StaffDirectoryRow", () => {
           name: "Acme Distribution",
           secondary: "Portal upload",
           trailing: "2 titles",
-          href: "/vendors/1",
+          href: "/channels/1",
         }}
       />,
     );
@@ -29,7 +29,7 @@ describe("StaffDirectoryRow", () => {
     expect(html).toContain("Acme Distribution");
     expect(html).toContain("Portal upload");
     expect(html).toContain("2 titles");
-    expect(html).toContain('href="/vendors/1"');
+    expect(html).toContain('href="/channels/1"');
     expect(html).toContain(STAFF_DIRECTORY_AVATAR_CLASS);
     expect(html).toContain(STAFF_DIRECTORY_NAME_CLASS);
     expect(html).toContain("rounded-full");
@@ -99,9 +99,9 @@ describe("StaffDirectoryList", () => {
 });
 
 describe("house law — one directory primitive", () => {
-  it("is the row both Vendors and Clients import — no Card/table forks", () => {
-    const vendors = readFileSync("src/app/(app)/(operator)/vendors/page.tsx", "utf8");
-    const vendorProfile = readFileSync("src/app/(app)/(operator)/vendors/[id]/page.tsx", "utf8");
+  it("stays the Clients directory primitive — Channels uses its own card/detail", () => {
+    const channels = readFileSync("src/app/(app)/(operator)/channels/page.tsx", "utf8");
+    const channelProfile = readFileSync("src/app/(app)/(operator)/channels/[id]/page.tsx", "utf8");
     const clients = readFileSync(
       "src/app/(app)/(operator)/gc/clients/clients-directory.tsx",
       "utf8",
@@ -111,9 +111,11 @@ describe("house law — one directory primitive", () => {
       "utf8",
     );
 
-    expect(vendors).toContain("StaffDirectoryList");
+    expect(channels).toContain("ChannelCardGrid");
+    expect(channels).not.toContain("StaffDirectoryList");
+    expect(channelProfile).toContain("ChannelDetail");
+    expect(channelProfile).not.toContain("StaffDirectoryRow");
     expect(clients).toContain("StaffDirectoryList");
-    expect(vendorProfile).toContain("StaffDirectoryRow");
     expect(clientProfile).toContain("StaffDirectoryRow");
     expect(clients).not.toContain("nested:");
     expect(clients).not.toContain("Card");

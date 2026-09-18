@@ -24,6 +24,7 @@ const AGGREGATION_PREFIXES = [
   "/messages",
   "/queue",
   "/vendors",
+  "/channels",
   "/gc",
 ] as const;
 

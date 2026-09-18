@@ -87,7 +87,9 @@ describe("MobileNavSheet", () => {
     expect(html).not.toContain("bg-surface/");
     expect(html).not.toContain("backdrop-blur");
     expect(html).not.toContain("No vendors yet");
+    expect(html).not.toContain("No channels yet");
     expect(html).not.toContain("Add vendor");
+    expect(html).not.toContain("Add channel");
     expect(html).not.toContain("Credentials are never stored here.");
     expect(html).not.toContain("grid-cols-5");
     expect(html).not.toContain("tab-bar");
@@ -105,16 +107,16 @@ describe("MobileNavSheet", () => {
     expect(src).not.toMatch(/duration-\d|ease-out|ease-in|@keyframes|bounce/i);
   });
 
-  it("does not restack Dashboard or Vendors as a second large title", () => {
+  it("does not restack Dashboard or Channels as a second large title", () => {
     const dash = renderToStaticMarkup(<MobileNavSheet pathname="/" onClose={() => undefined} />);
-    const vendors = renderToStaticMarkup(
-      <MobileNavSheet pathname="/vendors" onClose={() => undefined} isGcStaff />,
+    const channels = renderToStaticMarkup(
+      <MobileNavSheet pathname="/channels" onClose={() => undefined} isGcStaff />,
     );
 
     expect(dash).not.toContain("t-section");
-    expect(vendors).not.toContain("t-section");
+    expect(channels).not.toContain("t-section");
     expect(dash).not.toContain(`t-title text-ink">${NAV[0].label}`);
-    expect(vendors).not.toContain(`t-title text-ink">${GC_NAV[2].label}`);
+    expect(channels).not.toContain(`t-title text-ink">${GC_NAV[2].label}`);
     expect(dash).toContain(`aria-label="${MOBILE_NAV.sheet}"`);
   });
 
@@ -270,9 +272,9 @@ describe("MobileNavSheet", () => {
     expect(linkHtml(html, "/titles")).toContain(iconMark(NAV[1], false).svg);
   });
 
-  it("gives staff /vendors the operator set plus Aggregation NAV, with Vendors current", () => {
+  it("gives staff /channels the operator set plus Aggregation NAV, with Channels current", () => {
     const html = renderToStaticMarkup(
-      <MobileNavSheet pathname="/vendors" onClose={() => undefined} isGcStaff />,
+      <MobileNavSheet pathname="/channels" onClose={() => undefined} isGcStaff />,
     );
     const destStart = html.indexOf("data-mobile-nav-destinations");
     const dest = html.slice(destStart);
@@ -281,7 +283,7 @@ describe("MobileNavSheet", () => {
       expect(dest).toContain(item.label);
       expect(dest).toContain(`href="${item.href}"`);
     }
-    expect(linkClass(html, "/vendors")).toContain("t-body text-ink bg-surface-muted");
+    expect(linkClass(html, "/channels")).toContain("t-body text-ink bg-surface-muted");
     expect(linkClass(html, "/dashboard")).toContain("t-body text-ink hover:bg-surface-muted");
     expect(html).not.toContain("t-section");
     const tokens = readFileSync(

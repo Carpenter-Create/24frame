@@ -53,11 +53,11 @@ export function VendorForm({ initial }: { initial?: VendorInitial }) {
       setSaving(false);
       return;
     }
-    // Create lives on /vendors/new and edit on /vendors/[id]/edit; both leave after
+    // Create lives on /channels/new and edit on /channels/[id]/edit; both leave after
     // save. Reset create state in case the form stays mounted during the push.
     setSaving(false);
     if (!initial?.id) setV(EMPTY);
-    router.push(v.id ? `/vendors/${v.id}` : "/vendors");
+    router.push(v.id ? `/channels/${v.id}` : "/channels");
     router.refresh();
   }
 
@@ -106,7 +106,7 @@ export function VendorForm({ initial }: { initial?: VendorInitial }) {
       </label>
 
       <Button type="submit" disabled={saving} className="self-start">
-        {saving ? "Saving…" : "Save vendor"}
+        {saving ? "Saving…" : "Save channel"}
       </Button>
       {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
     </form>

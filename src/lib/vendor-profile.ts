@@ -1,5 +1,7 @@
+import { CHANNELS_HREF } from "@/lib/channel-card";
 import { ACTIVE_DELIVERY_STATUSES_LIST } from "@/lib/master-licence";
 import { primitiveInfoFields, type StaffDirectoryField } from "@/lib/staff-directory";
+import { ISO_COUNTRIES } from "@/lib/territories";
 import { DELIVERY_STATUS_ROW_LABELS, type DeliveryStatus } from "@/lib/titles";
 import {
   VENDOR_MODE_LABELS,
@@ -7,20 +9,29 @@ import {
   type VendorDirectoryRow,
 } from "@/lib/vendors-directory";
 
-// Vendor profile + licensed-title catalog. Titles licensed to a vendor
+// Channel profile + licensed-title catalog. Titles licensed to a channel
 // come from deliveries (title × vendor × territory), gated by a grant
 // on the delivery row. Do not invent a vendor-titles table.
 
 export const VENDOR_PROFILE = {
-  infoTitle: "Vendor information",
-  reservedTitle: "Additional details",
+  infoTitle: "Channel information",
+  reservedTitle: "Details",
   reservedEmpty: "More fields will appear here.",
   catalogTitle: "Licensed titles",
-  catalogEmpty: "No titles licensed to this vendor yet.",
+  catalogEmpty: "No titles licensed to this channel yet.",
   catalogTruncated: (n: string) =>
     `Showing licensed titles from the first ${n} delivery rows. More may exist.`,
-  editVendor: "Edit vendor",
+  editVendor: "Edit channel",
+  breadcrumb: "Channels",
+  overviewTitle: "Overview",
+  opsTitle: "Delivery notes",
+  contactsTitle: "Contacts",
+  territoriesTitle: "Territories",
+  statusLabel: "Status",
+  deliveryLabel: "Delivery mode",
 } as const;
+
+const OVERVIEW_KEYS = new Set(["description", "overview", "about", "notes"]);
 
 export const VENDOR_PROFILE_FIELD_LABELS = {
   deliveryMode: "Delivery mode",
@@ -55,7 +66,42 @@ export type VendorLicensedTitle = {
 };
 
 export function vendorEditHref(id: string): string {
-  return `/vendors/${id}/edit`;
+  return `${CHANNELS_HREF}/${id}/edit`;
+}
+
+export function vendorProfileHref(id: string): string {
+  return `${CHANNELS_HREF}/${id}`;
+}
+
+export type ChannelTerritory = { code: string; label: string };
+
+/** Unique territories from real delivery rows. No invented countries. */
+export function channelTerritories(
+  rows: readonly VendorDeliveryPlacement[],
+): ChannelTerritory[] {
+  const codes = new Set<string>();
+  for (const row of rows) {
+    const code = row.territory.trim().toUpperCase();
+    if (code) codes.add(code);
+  }
+  return [...codes]
+    .sort()
+    .map((code) => ({ code, label: ISO_COUNTRIES[code] ?? code }));
+}
+
+/** Overview text only when company_info already carries one. Do not invent. */
+export function channelOverviewText(companyInfo: unknown): string | null {
+  const hit = primitiveInfoFields(companyInfo).find((field) =>
+    OVERVIEW_KEYS.has(field.label.toLowerCase()),
+  );
+  const value = hit?.value.trim() ?? "";
+  return value.length > 0 ? value : null;
+}
+
+export function channelCompanyRailFields(companyInfo: unknown): StaffDirectoryField[] {
+  return primitiveInfoFields(companyInfo).filter(
+    (field) => !OVERVIEW_KEYS.has(field.label.toLowerCase()),
+  );
 }
 
 export function isLicensedDeliveryStatus(status: string): boolean {

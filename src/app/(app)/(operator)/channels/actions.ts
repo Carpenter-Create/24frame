@@ -73,14 +73,14 @@ export async function saveVendor(raw: unknown): Promise<{ error?: string }> {
   if (error) {
     // 23505 = unique_violation on vendors_name_unique (case-insensitive). Return a
     // clean message rather than leaking the Postgres constraint text into the UI.
-    if (error.code === "23505") return { error: "A vendor with this name already exists." };
+    if (error.code === "23505") return { error: "A channel with this name already exists." };
     return { error: error.message };
   }
 
-  revalidatePath("/vendors");
+  revalidatePath("/channels");
   if (v.id) {
-    revalidatePath(`/vendors/${v.id}`);
-    revalidatePath(`/vendors/${v.id}/edit`);
+    revalidatePath(`/channels/${v.id}`);
+    revalidatePath(`/channels/${v.id}/edit`);
   }
   return {};
 }
