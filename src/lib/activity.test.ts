@@ -7,7 +7,10 @@ import {
   ACTIVITY_HREF,
   ACTIVITY_KIND_GLYPH,
   ACTIVITY_PERIOD_PRESETS,
+  ACTIVITY_BELL_ROW_ABSENT,
   activityBellItems,
+  activityBellVisibleItems,
+  activityBellVisibleOpenCount,
   activityKindGlyph,
   activityBellPreview,
   activityBellPreviewFromNotifications,
@@ -148,6 +151,18 @@ describe("Activity SoT", () => {
     expect(activityBellPreviewFromNotifications([row({ id: "n9", unread: false })]).items).toEqual([]);
   });
 
+  it("hides X-dismissed bell rows without dropping the remaining open count", () => {
+    const items = activityItemsFromNotifications([
+      row({ id: "n1" }),
+      row({ id: "n2" }),
+      row({ id: "n3" }),
+    ]);
+    expect(activityBellVisibleItems(items, ["n2"]).map((item) => item.id)).toEqual(["n1", "n3"]);
+    expect(activityBellVisibleOpenCount(9, items, ["n1"])).toBe(8);
+    expect(activityBellVisibleOpenCount(2, items.slice(0, 2), ["n1", "n2"])).toBe(0);
+    expect(activityBellVisibleOpenCount(3, items, new Set(["n9"]))).toBe(3);
+  });
+
   it("maps kind glyphs and relative time for the bell rows", () => {
     expect(activityKindGlyph("title_rejected")).toBe("film-slate");
     expect(activityKindGlyph("delivery_update")).toBe("paper-plane");
@@ -162,8 +177,13 @@ describe("Activity SoT", () => {
     expect(formatActivityRelativeTime("nope", now)).toBe("");
   });
 
-  it("keeps filter tabs off the bell — Activity page owns Open / Done / All", () => {
+  it("keeps filter tabs and View/Done row buttons off the bell", () => {
     expect(ACTIVITY_BELL_ABSENT).toEqual(["Unread", "Resolved", "Mark as read", "Messages"]);
+    expect(ACTIVITY_BELL_ROW_ABSENT).toEqual([
+      "{ACTIVITY.view}",
+      "{ACTIVITY.done}",
+      'data-activity-bell-view=""',
+    ]);
   });
 
   it("reuses Reports period pills instead of inventing a second grain set", () => {

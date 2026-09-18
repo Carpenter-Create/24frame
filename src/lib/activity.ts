@@ -163,6 +163,30 @@ export function activityBellPreviewFromNotifications(
   return activityBellPreview(items, openCount ?? activityOpenCount(items));
 }
 
+function asDoneIdSet(doneIds: ReadonlySet<string> | readonly string[]): ReadonlySet<string> {
+  return doneIds instanceof Set ? doneIds : new Set(doneIds);
+}
+
+// Bell inbox is open items only. X hides a row locally so the popover
+// can stay open; Done history still owns the durable read record.
+export function activityBellVisibleItems(
+  items: readonly ActivityItem[],
+  doneIds: ReadonlySet<string> | readonly string[],
+): ActivityItem[] {
+  const done = asDoneIdSet(doneIds);
+  return items.filter((item) => !done.has(item.id));
+}
+
+export function activityBellVisibleOpenCount(
+  openCount: number,
+  items: readonly ActivityItem[],
+  doneIds: ReadonlySet<string> | readonly string[],
+): number {
+  const done = asDoneIdSet(doneIds);
+  const dismissedVisible = items.filter((item) => done.has(item.id)).length;
+  return Math.max(0, openCount - dismissedVisible);
+}
+
 export function parseActivityPeriod(
   raw: string | string[] | undefined,
   now: Date,
@@ -224,11 +248,22 @@ export const ACTIVITY_BELL_ABSENT = [
   "Messages",
 ] as const;
 
+// Popover rows are a target link + X. No View / Done buttons.
+export const ACTIVITY_BELL_ROW_ABSENT = [
+  "{ACTIVITY.view}",
+  "{ACTIVITY.done}",
+  'data-activity-bell-view=""',
+] as const;
+
 export const ACTIVITY_BELL_MENU_CLASS = "min-w-[20rem] p-[var(--space-2)]";
 export const ACTIVITY_BELL_HEAD_CLASS =
   "flex items-center justify-between gap-[var(--space-2)] px-[var(--space-3)] py-[var(--space-2)]";
 export const ACTIVITY_BELL_ROW_CLASS =
-  "flex items-start gap-[var(--space-3)] px-[var(--space-3)] py-[var(--space-2)]";
+  "flex items-start gap-[var(--space-2)] px-[var(--space-3)] py-[var(--space-2)]";
+export const ACTIVITY_BELL_TARGET_CLASS =
+  "flex min-w-0 flex-1 items-start gap-[var(--space-3)] text-left text-ink";
+export const ACTIVITY_BELL_DISMISS_CLASS =
+  "flex size-8 shrink-0 items-center justify-center rounded-full text-ink-3 hover:bg-surface-muted hover:text-ink-2 disabled:opacity-50";
 export const ACTIVITY_BELL_DOT_CLASS = "size-2 shrink-0 rounded-full bg-accent";
 export const ACTIVITY_BELL_PLATE_CLASS =
   "flex size-8 shrink-0 items-center justify-center rounded-full bg-surface-muted";

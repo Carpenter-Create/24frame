@@ -6,12 +6,15 @@ import { describe, expect, it, vi } from "vitest";
 import {
   ACTIVITY,
   ACTIVITY_BELL_ABSENT,
+  ACTIVITY_BELL_DISMISS_CLASS,
   ACTIVITY_BELL_DOT_CLASS,
   ACTIVITY_BELL_FOOTER_CLASS,
   ACTIVITY_BELL_HEAD_CLASS,
   ACTIVITY_BELL_MENU_CLASS,
   ACTIVITY_BELL_PLATE_CLASS,
+  ACTIVITY_BELL_ROW_ABSENT,
   ACTIVITY_BELL_ROW_CLASS,
+  ACTIVITY_BELL_TARGET_CLASS,
   ACTIVITY_HREF,
   type ActivityBellPreview,
 } from "@/lib/activity";
@@ -61,8 +64,7 @@ describe("ActivityBell", () => {
     expect(src).toContain("data-activity-bell-badge");
     expect(src).toContain("ACTIVITY.viewAll");
     expect(src).toContain("ACTIVITY_HREF");
-    expect(src).toContain("ACTIVITY.done");
-    expect(src).toContain("ACTIVITY.view");
+    expect(src).toContain("ACTIVITY.markDone");
     expect(src).toContain("ACTIVITY.markAllDone");
     expect(src).toContain("data-activity-bell-view-all");
     expect(html).not.toContain("Messages");
@@ -100,31 +102,43 @@ describe("ActivityBell", () => {
     expect(ACTIVITY_BELL_MENU_CLASS).toContain("min-w-[20rem]");
     expect(ACTIVITY_BELL_HEAD_CLASS).toContain("justify-between");
     expect(ACTIVITY_BELL_ROW_CLASS).toContain("items-start");
+    expect(ACTIVITY_BELL_TARGET_CLASS).toContain("flex-1");
+    expect(ACTIVITY_BELL_DISMISS_CLASS).toContain("size-8");
     expect(ACTIVITY_BELL_DOT_CLASS).toBe("size-2 shrink-0 rounded-full bg-accent");
     expect(ACTIVITY_BELL_FOOTER_CLASS).toContain("px-[var(--space-3)]");
     expect(TEXT_ACTION_CLASS).toContain("text-accent");
   });
 
-  it("locks popover IA: Activity title, open rows, View + Done, footer, no filter tabs", () => {
+  it("locks popover IA: row body link + X mark-done, no View/Done buttons", () => {
     expect(src).toContain("ACTIVITY.title");
     expect(src).toContain("data-activity-bell-head");
     expect(src).toContain("data-activity-bell-row");
+    expect(src).toContain("data-activity-bell-target");
     expect(src).toContain("data-activity-bell-kind");
     expect(src).toContain("data-activity-bell-time");
     expect(src).toContain("data-activity-bell-dot");
-    expect(src).toContain("data-activity-bell-view");
     expect(src).toContain("data-activity-bell-mark-done");
     expect(src).toContain("data-activity-bell-mark-all-done");
+    expect(src).toContain("item.href");
+    expect(src).toContain("<X");
+    expect(src).toContain("keepBellOpen");
+    expect(src).toContain("onPointerDown");
+    expect(src).toContain("preventDefault");
+    expect(src).toContain("open={open}");
     expect(src).toContain("activityKindGlyph");
     expect(src).toContain("formatActivityRelativeTime");
     expect(src).toContain("FilmSlate");
     expect(src).toContain("PaperPlaneTilt");
     expect(ACTIVITY.title).toBe("Activity");
-    expect(ACTIVITY.view).toBe("View");
-    expect(ACTIVITY.done).toBe("Done");
+    expect(ACTIVITY.markDone).toBe("Mark done");
     expect(ACTIVITY.viewAll).toBe("View all activity →");
     expect(ACTIVITY.markAllDone).toBe("Mark all done");
+    expect(src).not.toContain("{ACTIVITY.view}");
+    expect(src).not.toContain("{ACTIVITY.done}");
     for (const absent of ACTIVITY_BELL_ABSENT) {
+      expect(src).not.toContain(absent);
+    }
+    for (const absent of ACTIVITY_BELL_ROW_ABSENT) {
       expect(src).not.toContain(absent);
     }
     expect(src).not.toContain("All/Unread");

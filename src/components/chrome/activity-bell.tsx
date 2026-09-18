@@ -1,9 +1,9 @@
 "use client";
 
-import { Suspense, use, useTransition } from "react";
+import { Suspense, use, useState, useTransition, type MouseEvent, type PointerEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Bell, Checks, FilmSlate, PaperPlaneTilt } from "@phosphor-icons/react";
+import { Bell, Checks, FilmSlate, PaperPlaneTilt, X } from "@phosphor-icons/react";
 
 import { markActivityDone } from "@/app/(app)/activity/actions";
 import {
@@ -13,14 +13,18 @@ import {
 import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
   ACTIVITY,
+  ACTIVITY_BELL_DISMISS_CLASS,
   ACTIVITY_BELL_DOT_CLASS,
   ACTIVITY_BELL_PLATE_CLASS,
   ACTIVITY_BELL_FOOTER_CLASS,
   ACTIVITY_BELL_HEAD_CLASS,
   ACTIVITY_BELL_MENU_CLASS,
   ACTIVITY_BELL_ROW_CLASS,
+  ACTIVITY_BELL_TARGET_CLASS,
   ACTIVITY_HREF,
   EMPTY_ACTIVITY_BELL,
+  activityBellVisibleItems,
+  activityBellVisibleOpenCount,
   activityKindGlyph,
   formatActivityRelativeTime,
   type ActivityBellPreview,
@@ -45,6 +49,11 @@ function asPromise<T>(value: T | Promise<T>): Promise<T> {
     : Promise.resolve(value);
 }
 
+function keepBellOpen(event: PointerEvent<HTMLButtonElement> | MouseEvent<HTMLButtonElement>) {
+  event.preventDefault();
+  event.stopPropagation();
+}
+
 export function ActivityBell({
   preview,
   openCount,
@@ -52,8 +61,20 @@ export function ActivityBell({
   preview?: Promise<ActivityBellPreview> | ActivityBellPreview;
   openCount?: Promise<number> | number;
 }) {
+  const [open, setOpen] = useState(false);
+  const [doneIds, setDoneIds] = useState<ReadonlySet<string>>(() => new Set());
+  const previewPromise = asPromise(preview ?? EMPTY_ACTIVITY_BELL);
+
+  function rememberDone(ids: readonly string[]) {
+    setDoneIds((prev) => {
+      const next = new Set(prev);
+      for (const id of ids) next.add(id);
+      return next;
+    });
+  }
+
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
@@ -68,7 +89,9 @@ export function ActivityBell({
           />
           <Suspense fallback={null}>
             <ActivityBellBadge
-              count={asPromise(openCount ?? previewOpenCount(preview))}
+              preview={previewPromise}
+              openCount={openCount}
+              doneIds={doneIds}
             />
           </Suspense>
         </button>
@@ -86,25 +109,29 @@ export function ActivityBell({
             </p>
           }
         >
-          <ActivityBellBody preview={asPromise(preview ?? EMPTY_ACTIVITY_BELL)} />
+          <ActivityBellBody
+            preview={previewPromise}
+            doneIds={doneIds}
+            onDone={rememberDone}
+          />
         </Suspense>
       </MenuSurfaceContent>
     </DropdownMenu>
   );
 }
 
-function previewOpenCount(
-  preview?: Promise<ActivityBellPreview> | ActivityBellPreview,
-): Promise<number> | number {
-  if (!preview) return 0;
-  if (typeof preview === "object" && "then" in preview) {
-    return preview.then((data) => data.openCount);
-  }
-  return preview.openCount;
-}
-
-function ActivityBellBadge({ count }: { count: Promise<number> }) {
-  const open = use(count);
+function ActivityBellBadge({
+  preview,
+  openCount,
+  doneIds,
+}: {
+  preview: Promise<ActivityBellPreview>;
+  openCount?: Promise<number> | number;
+  doneIds: ReadonlySet<string>;
+}) {
+  const data = use(preview);
+  const count = use(asPromise(openCount ?? data.openCount));
+  const open = activityBellVisibleOpenCount(count, data.items, doneIds);
   if (open <= 0) return null;
   return (
     <span
@@ -116,24 +143,33 @@ function ActivityBellBadge({ count }: { count: Promise<number> }) {
   );
 }
 
-function ActivityBellBody({ preview }: { preview: Promise<ActivityBellPreview> }) {
+function ActivityBellBody({
+  preview,
+  doneIds,
+  onDone,
+}: {
+  preview: Promise<ActivityBellPreview>;
+  doneIds: ReadonlySet<string>;
+  onDone: (ids: readonly string[]) => void;
+}) {
   const data = use(preview);
-  const ids = data.items.map((item) => item.id);
+  const items = activityBellVisibleItems(data.items, doneIds);
+  const ids = items.map((item) => item.id);
 
   return (
     <>
       <div data-activity-bell-head="" className={ACTIVITY_BELL_HEAD_CLASS}>
         <p className="t-heading text-ink">{ACTIVITY.title}</p>
-        {ids.length > 0 ? <MarkAllDone ids={ids} /> : null}
+        {ids.length > 0 ? <MarkAllDone ids={ids} onDone={onDone} /> : null}
       </div>
-      {data.items.length === 0 ? (
+      {items.length === 0 ? (
         <p className="px-[var(--space-3)] py-[var(--space-2)] t-body-sm text-ink-3">
           {ACTIVITY.emptyOpen}
         </p>
       ) : (
         <div data-activity-bell-items="">
-          {data.items.map((item) => (
-            <ActivityBellRow key={item.id} item={item} />
+          {items.map((item) => (
+            <ActivityBellRow key={item.id} item={item} onDone={onDone} />
           ))}
         </div>
       )}
@@ -151,57 +187,74 @@ function ActivityBellBody({ preview }: { preview: Promise<ActivityBellPreview> }
   );
 }
 
-function ActivityBellRow({ item }: { item: ActivityItem }) {
+function ActivityBellRow({
+  item,
+  onDone,
+}: {
+  item: ActivityItem;
+  onDone: (ids: readonly string[]) => void;
+}) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const Glyph = KIND_GLYPH[activityKindGlyph(item.kind)];
 
   return (
     <div data-activity-bell-row="" className={ACTIVITY_BELL_ROW_CLASS}>
-      <span data-activity-bell-plate="" className={ACTIVITY_BELL_PLATE_CLASS}>
-        <Glyph
-          data-activity-bell-kind={item.kind}
-          className={`${HOUSE_HEADER_CHROME_ICON_CLASS} text-ink-3`}
+      <Link href={item.href} data-activity-bell-target="" className={ACTIVITY_BELL_TARGET_CLASS}>
+        <span data-activity-bell-plate="" className={ACTIVITY_BELL_PLATE_CLASS}>
+          <Glyph
+            data-activity-bell-kind={item.kind}
+            className={`${HOUSE_HEADER_CHROME_ICON_CLASS} text-ink-3`}
+            weight={HOUSE_HEADER_CHROME_ICON_WEIGHT}
+            aria-hidden="true"
+          />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="flex items-start justify-between gap-[var(--space-2)]">
+            <span className="min-w-0 t-body-sm text-ink">{item.title}</span>
+            <span className="flex shrink-0 items-center gap-[var(--space-2)]">
+              <time className="t-label text-ink-3" dateTime={item.at} data-activity-bell-time="">
+                {formatActivityRelativeTime(item.at)}
+              </time>
+              <span data-activity-bell-dot="" className={ACTIVITY_BELL_DOT_CLASS} aria-hidden />
+            </span>
+          </span>
+          <span className="t-body-sm text-ink-3">{item.body}</span>
+        </span>
+      </Link>
+      <button
+        type="button"
+        data-activity-bell-mark-done=""
+        disabled={pending}
+        aria-label={ACTIVITY.markDone}
+        onPointerDown={keepBellOpen}
+        onClick={(event) => {
+          keepBellOpen(event);
+          start(async () => {
+            onDone([item.id]);
+            await markActivityDone([item.id]);
+            router.refresh();
+          });
+        }}
+        className={ACTIVITY_BELL_DISMISS_CLASS}
+      >
+        <X
+          className={HOUSE_HEADER_CHROME_ICON_CLASS}
           weight={HOUSE_HEADER_CHROME_ICON_WEIGHT}
           aria-hidden="true"
         />
-      </span>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-start justify-between gap-[var(--space-2)]">
-          <p className="min-w-0 t-body-sm text-ink">{item.title}</p>
-          <span className="flex shrink-0 items-center gap-[var(--space-2)]">
-            <time className="t-label text-ink-3" dateTime={item.at} data-activity-bell-time="">
-              {formatActivityRelativeTime(item.at)}
-            </time>
-            <span data-activity-bell-dot="" className={ACTIVITY_BELL_DOT_CLASS} aria-hidden />
-          </span>
-        </div>
-        <p className="t-body-sm text-ink-3">{item.body}</p>
-        <div className="flex items-center gap-[var(--space-4)] pt-[var(--space-1)]">
-          <Link href={item.href} data-activity-bell-view="" className={TEXT_ACTION_CLASS}>
-            {ACTIVITY.view}
-          </Link>
-          <button
-            type="button"
-            data-activity-bell-mark-done=""
-            disabled={pending}
-            onClick={() =>
-              start(async () => {
-                await markActivityDone([item.id]);
-                router.refresh();
-              })
-            }
-            className="t-label text-ink-3 underline-offset-2 hover:text-ink-2 hover:underline disabled:opacity-50"
-          >
-            {ACTIVITY.done}
-          </button>
-        </div>
-      </div>
+      </button>
     </div>
   );
 }
 
-function MarkAllDone({ ids }: { ids: string[] }) {
+function MarkAllDone({
+  ids,
+  onDone,
+}: {
+  ids: string[];
+  onDone: (ids: readonly string[]) => void;
+}) {
   const router = useRouter();
   const [pending, start] = useTransition();
   return (
@@ -209,14 +262,17 @@ function MarkAllDone({ ids }: { ids: string[] }) {
       type="button"
       data-activity-bell-mark-all-done=""
       disabled={pending}
-      onClick={() =>
+      onPointerDown={keepBellOpen}
+      onClick={(event) => {
+        keepBellOpen(event);
         start(async () => {
+          onDone(ids);
           await markActivityDone(ids);
           router.refresh();
-        })
-      }
+        });
+      }}
       aria-label={ACTIVITY.markAllDone}
-      className="flex size-8 items-center justify-center rounded-full text-ink-3 hover:bg-surface-muted hover:text-ink-2 disabled:opacity-50"
+      className={ACTIVITY_BELL_DISMISS_CLASS}
     >
       <Checks
         className={HOUSE_HEADER_CHROME_ICON_CLASS}
