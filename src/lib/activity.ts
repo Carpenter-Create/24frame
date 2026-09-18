@@ -180,6 +180,15 @@ export function activityPeriodPresetKey(grain: ReportsPeriodKind, now: Date): st
   return parseReportsPeriod(grain === "all" ? "all" : grain, now).key;
 }
 
+export function activityPeriodSelectOptions(
+  now: Date,
+): { key: string; label: string }[] {
+  return ACTIVITY_PERIOD_PRESETS.map((preset) => ({
+    key: activityPeriodPresetKey(preset.grain, now),
+    label: preset.label,
+  }));
+}
+
 export const ACTIVITY_KIND_GLYPH = {
   title_rejected: "film-slate",
   delivery_update: "paper-plane",
@@ -221,5 +230,7 @@ export const ACTIVITY_BELL_HEAD_CLASS =
 export const ACTIVITY_BELL_ROW_CLASS =
   "flex items-start gap-[var(--space-3)] px-[var(--space-3)] py-[var(--space-2)]";
 export const ACTIVITY_BELL_DOT_CLASS = "size-2 shrink-0 rounded-full bg-accent";
+export const ACTIVITY_BELL_PLATE_CLASS =
+  "flex size-8 shrink-0 items-center justify-center rounded-full bg-surface-muted";
 export const ACTIVITY_BELL_FOOTER_CLASS =
   "px-[var(--space-3)] py-[var(--space-2)]";

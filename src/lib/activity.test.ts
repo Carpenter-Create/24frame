@@ -18,6 +18,7 @@ import {
   activityItemsFromNotifications,
   activityOpenCount,
   activityPeriodPresetKey,
+  activityPeriodSelectOptions,
   filterActivityItems,
   formatActivityRelativeTime,
   isActivityOpen,
@@ -177,5 +178,12 @@ describe("Activity SoT", () => {
     expect(activityPeriodPresetKey("all", now)).toBe("all");
     expect(activityPeriodPresetKey("ytd", now)).toBe("ytd");
     expect(activityPeriodPresetKey("month", now)).toBe("2026-09");
+    expect(activityPeriodSelectOptions(now).map((option) => option.key)).toEqual([
+      "all",
+      "ytd",
+      "2026",
+      "Q32026",
+      "2026-09",
+    ]);
   });
 });

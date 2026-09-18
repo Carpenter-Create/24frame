@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { MarkAllDone, MarkDone } from "@/app/(app)/activity/mark-done";
+import { ActivityPeriodSelect } from "@/components/activity/activity-period-select";
 import { Card, CardBody } from "@/components/ui/card";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { PageHeader } from "@/components/ui/page-header";
@@ -12,6 +13,7 @@ import {
   activityHistoryPeriodVisible,
   activityHref,
   activityPeriodPresetKey,
+  activityPeriodSelectOptions,
   type ActivityItem,
   type ActivityState,
 } from "@/lib/activity";
@@ -21,6 +23,7 @@ import {
   REPORTS_PERIOD_CHIP_OFF_CLASS,
   REPORTS_PERIOD_CHIP_ON_CLASS,
   REPORTS_PERIOD_CHIP_STUB_CLASS,
+  REPORTS_PERIOD_CLUSTER_CLASS,
   REPORTS_RELATED_GAP_CLASS,
 } from "@/lib/reports-craft";
 
@@ -76,7 +79,7 @@ export function ActivityInbox({
         </div>
         {history ? (
           <div data-activity-period="" className={cn("min-w-0", REPORTS_RELATED_GAP_CLASS, "flex items-center")}>
-            <div data-activity-period-cluster="" className={ACTIVITY_CHIP_CLUSTER_CLASS}>
+            <div data-activity-period-cluster="" className={REPORTS_PERIOD_CLUSTER_CLASS}>
               {ACTIVITY_PERIOD_PRESETS.map((preset) => {
                 const key = activityPeriodPresetKey(preset.grain, now);
                 const on = period.kind === preset.grain;
@@ -104,6 +107,12 @@ export function ActivityInbox({
                 {REPORTS_PAGE.custom}
               </span>
             </div>
+            <ActivityPeriodSelect
+              state={state}
+              periodKey={period.key}
+              periodLabel={period.label}
+              options={activityPeriodSelectOptions(now)}
+            />
           </div>
         ) : null}
       </div>

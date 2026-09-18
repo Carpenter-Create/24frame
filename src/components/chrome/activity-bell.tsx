@@ -3,7 +3,7 @@
 import { Suspense, use, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Bell, FilmSlate, PaperPlaneTilt } from "@phosphor-icons/react";
+import { Bell, Checks, FilmSlate, PaperPlaneTilt } from "@phosphor-icons/react";
 
 import { markActivityDone } from "@/app/(app)/activity/actions";
 import {
@@ -14,6 +14,7 @@ import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu
 import {
   ACTIVITY,
   ACTIVITY_BELL_DOT_CLASS,
+  ACTIVITY_BELL_PLATE_CLASS,
   ACTIVITY_BELL_FOOTER_CLASS,
   ACTIVITY_BELL_HEAD_CLASS,
   ACTIVITY_BELL_MENU_CLASS,
@@ -157,12 +158,14 @@ function ActivityBellRow({ item }: { item: ActivityItem }) {
 
   return (
     <div data-activity-bell-row="" className={ACTIVITY_BELL_ROW_CLASS}>
-      <Glyph
-        data-activity-bell-kind={item.kind}
-        className={`${PHOSPHOR_CHROME_ICON_CLASS} text-ink-3`}
-        weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
-        aria-hidden="true"
-      />
+      <span data-activity-bell-plate="" className={ACTIVITY_BELL_PLATE_CLASS}>
+        <Glyph
+          data-activity-bell-kind={item.kind}
+          className={`${PHOSPHOR_CHROME_ICON_CLASS} text-ink-3`}
+          weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
+          aria-hidden="true"
+        />
+      </span>
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-[var(--space-2)]">
           <p className="min-w-0 t-body-sm text-ink">{item.title}</p>
@@ -212,9 +215,14 @@ function MarkAllDone({ ids }: { ids: string[] }) {
           router.refresh();
         })
       }
-      className="t-label text-ink-3 underline-offset-2 hover:text-ink-2 hover:underline disabled:opacity-50"
+      aria-label={ACTIVITY.markAllDone}
+      className="flex size-8 items-center justify-center rounded-full text-ink-3 hover:bg-surface-muted hover:text-ink-2 disabled:opacity-50"
     >
-      {ACTIVITY.markAllDone}
+      <Checks
+        className={PHOSPHOR_CHROME_ICON_CLASS}
+        weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
+        aria-hidden="true"
+      />
     </button>
   );
 }

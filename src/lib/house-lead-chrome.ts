@@ -51,4 +51,4 @@ export const HOUSE_THEME_TOGGLE_CLASS =
 // Surface-muted wash on the same 44/32 hit — not a boxed hover, not a
 // second icon family. Theme toggle stays quiet.
 export const HOUSE_HEADER_ICON_GHOST_CLASS =
-  `${HOUSE_THEME_TOGGLE_CLASS} hover:bg-surface-muted`;
+  `${HOUSE_THEME_TOGGLE_CLASS} hover:bg-surface-muted data-[state=open]:bg-surface-muted`;

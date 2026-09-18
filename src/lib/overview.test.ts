@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { ASK_GLOBEE_TRY_PROMPTS } from "./ask-globee";
 import {
   OVERVIEW,
   OVERVIEW_AI_CHIPS,
@@ -27,11 +28,15 @@ describe("Overview pulse SoT", () => {
     expect(OVERVIEW.openSocial).toBe("Open Social →");
     expect(OVERVIEW.openEducation).toBe("Open Education →");
     expect(OVERVIEW_EDUCATION_LIMIT).toBe(5);
+    expect(OVERVIEW.educationEmptyTitle).toBe("Education not entered yet");
+    expect(OVERVIEW.enterEducation).toBe("Enter Education");
+    expect(OVERVIEW_AI_CHIPS.map((chip) => chip.label)).toEqual([...ASK_GLOBEE_TRY_PROMPTS]);
     expect(OVERVIEW_AI_CHIPS.map((chip) => chip.href)).toEqual([
       "/messages",
       "/messages",
       "/messages",
     ]);
+    expect(JSON.stringify(OVERVIEW)).not.toContain("Globee");
   });
 
   it("does not invent revenue, unread, or course percent", () => {

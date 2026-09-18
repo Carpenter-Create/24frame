@@ -2,6 +2,8 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
+import { HOUSE_MODULE_CLASS } from "@/lib/house-shell";
+import { ASK_GLOBEE_TRY_PROMPTS } from "@/lib/ask-globee";
 import { OVERVIEW, OVERVIEW_AI_CHIPS, type OverviewPulseModel } from "@/lib/overview";
 
 import { OverviewPulse } from "./overview-pulse";
@@ -24,16 +26,19 @@ describe("OverviewPulse", () => {
     expect(html).toContain(OVERVIEW.title);
     expect(html).toContain(OVERVIEW.subtitle);
     expect(html).toContain("data-overview-aggregation");
-    expect(html).toContain("data-overview-education");
+    expect(html).toContain("data-overview-education-empty");
     expect(html).toContain("data-overview-needs-you");
     expect(html).toContain("data-overview-this-week");
     expect(html).toContain("data-overview-ai-next");
     expect(html).toContain("data-overview-social-empty");
     expect(html).toContain(OVERVIEW.enterSocial);
+    expect(html).toContain(OVERVIEW.enterEducation);
     expect(html).toContain(OVERVIEW.openDashboard);
-    expect(html).toContain(OVERVIEW.openEducation);
+    expect(html).toContain(HOUSE_MODULE_CLASS);
     expect(html).toContain('href="/messages"');
+    expect(html).toContain(ASK_GLOBEE_TRY_PROMPTS[0]);
     expect(html).toContain(OVERVIEW_AI_CHIPS[0]!.label);
+    expect(html).not.toContain(OVERVIEW.openEducation);
     expect(html).not.toContain("$128,440");
     expect(html).not.toContain("62% complete");
     expect(html).not.toContain("Globee");
@@ -63,6 +68,8 @@ describe("OverviewPulse", () => {
       }),
     );
     expect(html).toContain("data-overview-social");
+    expect(html).toContain("data-overview-education-covers");
+    expect(html).toContain(OVERVIEW.openEducation);
     expect(html).toContain("7 messages");
     expect(html).toContain("JK");
     expect(html).toContain("Catalog basics");

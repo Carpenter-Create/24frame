@@ -10,6 +10,7 @@ import {
   ACTIVITY_BELL_FOOTER_CLASS,
   ACTIVITY_BELL_HEAD_CLASS,
   ACTIVITY_BELL_MENU_CLASS,
+  ACTIVITY_BELL_PLATE_CLASS,
   ACTIVITY_BELL_ROW_CLASS,
   ACTIVITY_HREF,
   type ActivityBellPreview,
@@ -71,11 +72,18 @@ describe("ActivityBell", () => {
     expect(src).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
     expect(src).toContain("from \"@phosphor-icons/react\"");
     expect(src).toContain("<Bell");
+    expect(src).toContain("<Checks");
+    expect(src).toContain("ACTIVITY_BELL_PLATE_CLASS");
+    expect(src).toContain("data-activity-bell-plate");
     expect(src).not.toContain("DropdownMenuContent");
     expect(src).not.toContain("gold");
     expect(src).not.toContain("amber");
     expect(src).not.toContain("royalogic");
     expect(src).not.toContain("placeholder");
+    expect(HOUSE_HEADER_ICON_GHOST_CLASS).toContain("data-[state=open]:bg-surface-muted");
+    expect(ACTIVITY_BELL_PLATE_CLASS).toContain("size-8");
+    expect(ACTIVITY_BELL_PLATE_CLASS).toContain("rounded-full");
+    expect(ACTIVITY_BELL_PLATE_CLASS).toContain("bg-surface-muted");
     expect(ACTIVITY_BELL_MENU_CLASS).toContain("min-w-[20rem]");
     expect(ACTIVITY_BELL_HEAD_CLASS).toContain("justify-between");
     expect(ACTIVITY_BELL_ROW_CLASS).toContain("items-start");

@@ -119,6 +119,7 @@ describe("ActivityPage", () => {
     expect(html).toContain("North Wind is live");
     expect(html).toContain('data-activity-period=""');
     expect(html).toContain('data-activity-period-chip="ytd"');
+    expect(html).toContain('data-activity-period-select=""');
     expect(html).toContain('data-activity-period-stub=""');
     expect(html).not.toContain(ACTIVITY.markDone);
   });

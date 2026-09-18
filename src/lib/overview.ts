@@ -1,3 +1,4 @@
+import { ASK_GLOBEE_TRY_PROMPTS, askGlobeeLandingHref } from "@/lib/ask-globee";
 import { catalogHealthTitleHref } from "@/lib/findings";
 import { formatUsdCents } from "@/lib/finance";
 import {
@@ -42,16 +43,18 @@ export const OVERVIEW = {
   socialEmptyBody: "Enter Social to connect DMs and groups.",
   enterSocial: "Enter Social",
   educationEmpty: "No courses in the catalog yet.",
+  educationEmptyTitle: "Education not entered yet",
+  educationEmptyBody: "Enter Education to continue courses.",
+  enterEducation: "Enter Education",
   needsYouEmpty: "Nothing needs you right now.",
   thisWeekEmpty: "No pulse for this week yet.",
   noOrg: "Choose an organization to read Overview.",
 } as const;
 
-export const OVERVIEW_AI_CHIPS = [
-  { label: "Summarize open Titles holds", href: "/messages" },
-  { label: "What changed in YTD revenue?", href: "/messages" },
-  { label: "Draft follow-up for top DM", href: "/messages" },
-] as const;
+export const OVERVIEW_AI_CHIPS = ASK_GLOBEE_TRY_PROMPTS.map((label) => ({
+  label,
+  href: askGlobeeLandingHref(),
+}));
 
 export type OverviewCourse = {
   id: string;

@@ -196,6 +196,7 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("hover:bg-surface-muted");
     expect(HOUSE_HEADER_ICON_GHOST_CLASS).toContain(HOUSE_THEME_TOGGLE_CLASS);
     expect(HOUSE_HEADER_ICON_GHOST_CLASS).toContain("hover:bg-surface-muted");
+    expect(HOUSE_HEADER_ICON_GHOST_CLASS).toContain("data-[state=open]:bg-surface-muted");
     expect(HOUSE_HEADER_ICON_GHOST_CLASS).toContain("rounded-full");
     expect(leadLib).toContain("HOUSE_HEADER_ICON_GHOST_CLASS");
     expect(leadLib).toContain("soft circular ghost");
