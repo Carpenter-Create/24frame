@@ -6,7 +6,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { List } from "@phosphor-icons/react";
 
-import { MOBILE_NAV, isClientNavActive, railDestinations, type NavItem } from "@/lib/nav";
+import { MOBILE_NAV, isClientNavActive, isHouseAiNavItem, railDestinations, type NavItem } from "@/lib/nav";
+import { AskAiOpenButton } from "./ask-ai-overlay";
 import { cn } from "@/lib/cn";
 import type { WorkspaceMode } from "@/lib/workspace";
 import { SocialIcon } from "@/components/social/social-icon";
@@ -108,6 +109,34 @@ export function MobileNavSheet({
 
   const link = (item: NavItem) => {
     const active = isClientNavActive(pathname, item);
+    const rowClass = cn(
+      "flex w-full items-center gap-2.5 rounded-[var(--radius-lg)] p-[var(--space-4)] t-body text-ink",
+      active ? "bg-surface-muted" : "hover:bg-surface-muted",
+    );
+    const mark =
+      workspace === "social" ? (
+        <SocialIcon
+          name={socialNavIconName(item.href)}
+          active={active}
+          size={SOCIAL_ICON_SIZE_NAV}
+          className="shrink-0"
+        />
+      ) : (
+        <NavGlyph item={item} active={active} />
+      );
+    if (isHouseAiNavItem(item)) {
+      return (
+        <AskAiOpenButton
+          key={item.href}
+          data-mobile-nav-ask-ai=""
+          className={rowClass}
+          onClick={onClose}
+        >
+          {mark}
+          {item.label}
+        </AskAiOpenButton>
+      );
+    }
     return (
       <Link
         key={item.href}

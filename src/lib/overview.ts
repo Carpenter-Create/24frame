@@ -25,6 +25,10 @@ import type { WorkspaceMode } from "@/lib/workspace";
 // Education · Needs you. Top performing is not on Home. News stays
 // the Home rail (/home/news is View-all). Rails return in
 // Aggregation · Social · Education. Copy lives here, not JSX.
+// Home 24Frame AI module stays as a quiet overlay opener (Adam
+// 2026-09-18 addendum). Out of sight = out of mind. Do not delete
+// the teaser to "clean up" for the overlay. Tap opens `?ai=1` on
+// the current path — never /messages or Aggregation land.
 
 export const OVERVIEW_HREF = "/home";
 export const OVERVIEW_LEGACY_HREF = "/overview";
@@ -109,7 +113,7 @@ export const OVERVIEW_PAGE = {
   weekEmpty: DASHBOARD_HOME.whatChangedEmpty,
   aiNext: ASSISTANT_NAME,
   aiNextEmpty: "Nothing is ready to submit next.",
-  aiNextHref: "/messages",
+  aiNextHref: "?ai=1",
   aiAsk: ASK_ASSISTANT,
 } as const;
 

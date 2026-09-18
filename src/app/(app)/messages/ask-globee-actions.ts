@@ -10,6 +10,7 @@ import {
   isAskGlobeeThreadId,
   resolveMessagesSurface,
   type AskGlobeeTier,
+  type MessagesSurface,
 } from "@/lib/ask-globee";
 import {
   answerAskGlobeePrompt,
@@ -17,8 +18,12 @@ import {
 } from "@/lib/ask-globee-operator";
 import {
   nextAskGlobeeThumb,
+  sortAskGlobeeHistory,
+  type AskGlobeeHistoryRow,
+  type AskGlobeeStoredMessage,
   type AskGlobeeThumb,
 } from "@/lib/ask-globee-conversations";
+import { userMenuAvatarInitial } from "@/lib/user-menu";
 import { UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
 import { loadMyFindings } from "@/lib/my-lists";
 import { getActiveOrgTier } from "@/lib/org-tier";
@@ -107,8 +112,73 @@ export async function startAskGlobeeConversation(
   });
   if (userError) return { error: userError.message };
 
-  revalidatePath("/messages");
   return { conversationId: conversation.id };
+}
+
+export async function loadAskAiOverlay(threadId?: string | null): Promise<{
+  surface: MessagesSurface;
+  initials: string;
+  conversations: AskGlobeeHistoryRow[];
+  conversation: AskGlobeeHistoryRow | null;
+  messages: AskGlobeeStoredMessage[];
+}> {
+  const ctx = await getOrgContext();
+  const empty = {
+    surface: "access-gate" as const,
+    initials: "?",
+    conversations: [] as AskGlobeeHistoryRow[],
+    conversation: null,
+    messages: [] as AskGlobeeStoredMessage[],
+  };
+  if (!ctx) return empty;
+  const initials = userMenuAvatarInitial(ctx.user.email);
+  const tier = ctx.activeOrg ? await getActiveOrgTier(ctx.activeOrg.id) : null;
+  const surface = resolveMessagesSurface({
+    isGcStaff: ctx.isGcStaff,
+    hasActiveOrg: !!ctx.activeOrg,
+    tier,
+  });
+  if (!canRenderAskGlobeeLanding(surface) || !ctx.activeOrg) {
+    return { ...empty, surface, initials };
+  }
+
+  const supabase = await createClient();
+  const orgId = ctx.activeOrg.id;
+  const { data: historyRows } = await supabase
+    .from("ai_conversations")
+    .select("id, title, pinned_at, created_at, updated_at")
+    .eq("org_id", orgId)
+    .range(...rangeFor(UNPAGINATED_MAX));
+  const conversations = sortAskGlobeeHistory((historyRows ?? []) as AskGlobeeHistoryRow[]);
+  const nextThread = threadId && isAskGlobeeThreadId(threadId) ? threadId : null;
+  if (!nextThread) {
+    return { surface, initials, conversations, conversation: null, messages: [] };
+  }
+
+  const { data: conversationRow } = await supabase
+    .from("ai_conversations")
+    .select("id, title, pinned_at, created_at, updated_at")
+    .eq("id", nextThread)
+    .eq("org_id", orgId)
+    .maybeSingle();
+  const conversation = (conversationRow as AskGlobeeHistoryRow | null) ?? null;
+  if (!conversation) {
+    return { surface, initials, conversations, conversation: null, messages: [] };
+  }
+  const { data: messageRows } = await supabase
+    .from("ai_conversation_messages")
+    .select("id, role, body, lead, follow, thumbs, created_at")
+    .eq("conversation_id", conversation.id)
+    .eq("org_id", orgId)
+    .order("created_at", { ascending: true })
+    .range(...rangeFor(UNPAGINATED_MAX));
+  return {
+    surface,
+    initials,
+    conversations,
+    conversation,
+    messages: (messageRows ?? []) as AskGlobeeStoredMessage[],
+  };
 }
 
 export async function completeAskGlobeeTurn(

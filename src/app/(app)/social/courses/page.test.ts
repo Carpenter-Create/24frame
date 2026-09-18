@@ -183,7 +183,8 @@ describe("course list lock", () => {
     expect(readFileSync("src/app/(app)/social/courses/error.tsx", "utf8")).toContain(
       "data-course-retry",
     );
-    expect(messages).toContain("AskGlobeeLanding");
+    expect(messages).toContain("AskAiLegacyIntercept");
+    expect(messages).not.toContain("AskGlobeeLanding");
     expect(messages).not.toContain("from(\"courses\")");
   });
 });

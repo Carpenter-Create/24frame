@@ -180,6 +180,13 @@ describe("Home module caps", () => {
     expect(OVERVIEW_HOME_LAYOUT_CLASS).not.toContain("auto-cols");
     expect(OVERVIEW_HOME_LAYOUT_CLASS).toContain("grid-cols-1");
     expect(OVERVIEW_PAGE.thisWeek).toBe("This week");
+    expect(OVERVIEW_PAGE.aiNext).toBe("24Frame AI");
+    expect(OVERVIEW_PAGE.aiAsk).toBe("Ask 24Frame AI");
+    expect(OVERVIEW_PAGE.aiNextHref).toBe("?ai=1");
+    expect(OVERVIEW_PAGE.aiNextHref).not.toContain("/messages");
+    expect(readFileSync("src/lib/overview.ts", "utf8")).toContain(
+      "quiet overlay opener",
+    );
   });
 
   it("caps Social DMs at 5, Education covers at 3, and 24Frame AI next-moves at 3", () => {
@@ -247,8 +254,8 @@ describe("overviewModuleHeaderAction", () => {
 
   it("keeps a distinct destination CTA", () => {
     expect(
-      overviewModuleHeaderAction("24Frame AI", "/messages", "Ask 24Frame AI"),
-    ).toEqual({ href: "/messages", label: "Ask 24Frame AI" });
+      overviewModuleHeaderAction("24Frame AI", "?ai=1", "Ask 24Frame AI"),
+    ).toEqual({ href: "?ai=1", label: "Ask 24Frame AI" });
     expect(
       overviewModuleHeaderAction("Net revenue", "/reports", "Aggregation"),
     ).toEqual({ href: "/reports", label: "Aggregation" });

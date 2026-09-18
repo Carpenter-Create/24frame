@@ -389,7 +389,9 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(html).toContain('data-sheet-group-item="logOut"');
     expect(html).toContain(`href="${USER_MENU.profileHref}"`);
     expect(html).toContain('href="/settings/aggregation"');
-    expect(html).toContain(`href="${USER_MENU.askAssistantHref}"`);
+    expect(html).toContain('data-sheet-group-item="askAssistant"');
+    expect(html).not.toContain('href="/messages"');
+    expect(html).not.toContain(`href="${USER_MENU.askAssistantHref}"`);
     expect(html).not.toContain(`href="${USER_MENU.agreementsHref}"`);
     expect(html).not.toContain(`href="${USER_MENU.helpHref}"`);
     expect(html).not.toContain(`href="${USER_MENU.referHref}"`);
@@ -582,7 +584,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
   it("does not dump the rail, Ask Globee chrome, or Adobe leftovers", () => {
     const html = renderSheet();
     for (const item of [...NAV, ...GC_NAV]) {
-      if (item.href === "/messages") continue;
+      if (item.family === "house-ai") continue;
       expect(html).not.toContain(item.label);
       if (item.href !== "/") expect(html).not.toContain(`href="${item.href}"`);
     }

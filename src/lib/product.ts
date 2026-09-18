@@ -5,7 +5,8 @@
 // One 24Frame account. Three workspace destinations: Aggregation
 // (catalog), Social (creator profile, groups, posts, DMs), and
 // Education consume (Route A /social/courses). Staff CMS is /education
-// under (operator). /messages stays Ask 24Frame AI. Org invite stays
+// under (operator). Ask 24Frame AI is the shell overlay, not /messages.
+// Org invite stays
 // Aggregation.
 
 export const PRODUCT_NAME = "24Frame";

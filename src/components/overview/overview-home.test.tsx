@@ -1,6 +1,13 @@
+import { readFileSync } from "node:fs";
 import { createElement, type ComponentProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/home",
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(),
+}));
 
 import { OverviewHome } from "./overview-home";
 import type { CourseRow } from "@/lib/courses";
@@ -132,7 +139,9 @@ describe("OverviewHome", () => {
     expect(html).toContain(OVERVIEW_PAGE.aiNext);
     expect(html).toContain(OVERVIEW_PAGE.aiAsk);
     expect(html).toContain(`href="${OVERVIEW_PAGE.revenueHref}"`);
-    expect(html).toContain(`href="${OVERVIEW_PAGE.aiNextHref}"`);
+    expect(html).toContain("data-overview-ai-ask");
+    expect(html).not.toContain('href="/messages"');
+    expect(html).not.toContain(`href="${OVERVIEW_PAGE.aiNextHref}"`);
     expect(html).not.toContain(`href="${OVERVIEW_PAGE.socialHref}"`);
     expect(html).not.toContain(`href="${OVERVIEW_PAGE.educationHref}"`);
     expect(html).not.toContain(`href="${OVERVIEW_PAGE.needsYouHref}"`);
@@ -177,6 +186,33 @@ describe("OverviewHome", () => {
     expect(html).toContain(REPORTS_PAGE.month);
     expect(html).not.toContain("MTD");
     expect(html).not.toContain("Top performing");
+  });
+
+  it("keeps the Home AI teaser as a quiet overlay opener — never a dest hop", () => {
+    const html = renderToStaticMarkup(createElement(OverviewHome, homeProps()));
+    const ai = moduleChunk(html, "ai-next");
+    const revenueAt = html.indexOf("data-overview-revenue");
+    const needsAt = html.indexOf('data-overview-module="needs-you"');
+    const aiAt = html.indexOf('data-overview-module="ai-next"');
+    const moduleSrc = readFileSync(new URL("./overview-module.tsx", import.meta.url), "utf8");
+    const homeSrc = readFileSync(new URL("./overview-home.tsx", import.meta.url), "utf8");
+
+    expect(revenueAt).toBeGreaterThan(-1);
+    expect(needsAt).toBeGreaterThan(revenueAt);
+    expect(aiAt).toBeGreaterThan(needsAt);
+    expect(ai).toContain(OVERVIEW_PAGE.aiNext);
+    expect(ai).toContain(OVERVIEW_PAGE.aiAsk);
+    expect(ai).toContain("data-overview-ai-ask");
+    expect(ai).toContain("<button");
+    expect(ai).toContain(TEXT_ACTION_CLASS);
+    expect(ai).not.toContain('href="/messages"');
+    expect(ai).not.toContain('href="/dashboard"');
+    expect(ai).not.toContain(`href="${OVERVIEW_PAGE.aiNextHref}"`);
+    expect(html).not.toMatch(/promo|banner|shouty|maximize your/i);
+    expect(moduleSrc).toContain("AskAiOpenButton");
+    expect(moduleSrc).toContain("data-overview-ai-ask");
+    expect(homeSrc).toContain('testId="ai-next"');
+    expect(homeSrc).toContain("OVERVIEW_PAGE.aiAsk");
   });
 
   it("shows Social unread + faces, Education covers, week pulse, and three AI next-moves", () => {
@@ -266,7 +302,9 @@ describe("OverviewHome", () => {
     expect(html).toContain('data-overview-ai-next="a3"');
     expect(html).toContain("Ask 24Frame AI");
     expect(html).toContain(`href="${OVERVIEW_PAGE.revenueHref}"`);
-    expect(html).toContain(`href="${OVERVIEW_PAGE.aiNextHref}"`);
+    expect(html).toContain("data-overview-ai-ask");
+    expect(html).not.toContain('href="/messages"');
+    expect(html).not.toContain(`href="${OVERVIEW_PAGE.aiNextHref}"`);
     expect(html).not.toContain(`href="${OVERVIEW_PAGE.socialHref}"`);
     expect(html).not.toContain(`href="${OVERVIEW_PAGE.educationHref}"`);
     expect(html).not.toContain(`href="${OVERVIEW_PAGE.needsYouHref}"`);

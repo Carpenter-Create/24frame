@@ -22,6 +22,7 @@ import {
 const here = dirname(fileURLToPath(import.meta.url));
 const tokens = readFileSync(join(here, "../app/tokens.css"), "utf8");
 const shellSrc = readFileSync(join(here, "../components/chrome/app-shell.tsx"), "utf8");
+const overlaySrc = readFileSync(join(here, "../components/chrome/ask-ai-overlay.tsx"), "utf8");
 const leadLibSrc = readFileSync(join(here, "house-lead-chrome.ts"), "utf8");
 const navSrc = readFileSync(join(here, "../components/chrome/mobile-nav.tsx"), "utf8");
 const landingSrc = readFileSync(join(here, "../components/messages/ask-globee-landing.tsx"), "utf8");
@@ -71,8 +72,9 @@ describe("mobile chrome hamburger / clock lock", () => {
     expect(leadLibSrc).toContain("HOUSE_LEAD_PHONE_PAD_CLASS");
     expect(leadLibSrc).toContain("HOUSE_PHONE_TRAILING_GUTTER_CLASS");
     expect(leadLibSrc).toContain("HOUSE_CHROME_GUTTER_X_CLASS");
-    expect(shellSrc).toContain('data-app-messages-frame=""');
-    expect(shellSrc).toContain("p-[var(--content-inset)]");
+    expect(shellSrc).toContain("AskAiOverlayProvider");
+    expect(shellSrc).not.toContain('data-app-messages-frame=""');
+    expect(overlaySrc).toContain("AskGlobeeLanding");
 
     expect(navSrc).toContain("MOBILE_CHROME_HAMBURGER_BUTTON_CLASS");
     expect(navSrc).toContain("MOBILE_CHROME_ICON_CLASS");

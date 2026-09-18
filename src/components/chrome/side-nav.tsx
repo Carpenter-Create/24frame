@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useRef } from "react";
-import { railDestinations, STAFF_RAIL_EYEBROW, type NavItem } from "@/lib/nav";
+import { isHouseAiNavItem, railDestinations, STAFF_RAIL_EYEBROW, type NavItem } from "@/lib/nav";
+import { AskAiOpenButton } from "./ask-ai-overlay";
 import { HOUSE_RAIL_ACTIVE_CLASS, HOUSE_RAIL_IDLE_CLASS, HOUSE_RAIL_ITEM_CLASS } from "@/lib/house-shell";
 import { cn } from "@/lib/cn";
 import type { WorkspaceMode } from "@/lib/workspace";
@@ -47,6 +48,24 @@ export function SideNav({
     badge: React.ReactNode = null,
   ) => {
     const active = item.exact ? pathForActive === item.href : pathForActive.startsWith(item.href);
+    if (isHouseAiNavItem(item)) {
+      return (
+        <AskAiOpenButton
+          key={item.href}
+          aria-label={item.ariaLabel ?? (collapsed ? item.label : undefined)}
+          title={collapsed ? item.label : undefined}
+          data-side-nav-ask-ai=""
+          className={cn(
+            HOUSE_RAIL_ITEM_CLASS,
+            collapsed ? "justify-center px-0 py-2" : "gap-2 px-2 py-2",
+            HOUSE_RAIL_IDLE_CLASS,
+          )}
+        >
+          <NavGlyph item={item} active={false} />
+          {!collapsed ? <span className="flex-1 truncate">{item.label}</span> : null}
+        </AskAiOpenButton>
+      );
+    }
     return (
       <Link
         key={item.href}

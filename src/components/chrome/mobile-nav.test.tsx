@@ -176,7 +176,12 @@ describe("MobileNavSheet", () => {
     ]);
     for (const item of NAV) {
       expect(dest).toContain(item.label);
-      expect(dest).toContain(`href="${item.href}"`);
+      if (item.family === "house-ai") {
+        expect(dest).toContain("data-mobile-nav-ask-ai");
+        expect(dest).not.toContain(`href="${item.href}"`);
+      } else {
+        expect(dest).toContain(`href="${item.href}"`);
+      }
     }
     for (const item of GC_NAV) {
       expect(html).not.toContain(`href="${item.href}"`);
@@ -251,7 +256,10 @@ describe("MobileNavSheet", () => {
     for (const item of [...NAV, ...GC_NAV]) {
       const active = item.href === "/dashboard";
       const mark = iconMark(item, active);
-      const row = linkHtml(html, item.href);
+      const row =
+        item.family === "house-ai"
+          ? askAiRow(html)
+          : linkHtml(html, item.href);
       expect(dest).toContain(item.label);
       expect(mark.lucide).toBe("");
       expect(row).toContain(mark.svg);
@@ -259,7 +267,7 @@ describe("MobileNavSheet", () => {
       expect(row).toContain("shrink-0");
       expect(row).toContain('fill="currentColor"');
       expect(row).not.toContain('stroke-width="1.33"');
-      if (item.href === "/messages") {
+      if (item.family === "house-ai") {
         expect(row).toContain("data-house-ai-mark");
         expect(row).not.toContain("lucide-sparkles");
         expect(row).not.toContain("ask-globee-16.png");
@@ -283,7 +291,12 @@ describe("MobileNavSheet", () => {
 
     for (const item of [...NAV, ...GC_NAV]) {
       expect(dest).toContain(item.label);
-      expect(dest).toContain(`href="${item.href}"`);
+      if (item.family === "house-ai") {
+        expect(dest).toContain("data-mobile-nav-ask-ai");
+        expect(dest).not.toContain(`href="${item.href}"`);
+      } else {
+        expect(dest).toContain(`href="${item.href}"`);
+      }
     }
     expect(linkClass(html, "/channels")).toContain("t-body text-ink bg-surface-muted");
     expect(linkClass(html, "/dashboard")).toContain("t-body text-ink hover:bg-surface-muted");
@@ -348,6 +361,15 @@ function attrClass(html: string, attr: string): string {
   const classThenAttr = html.match(new RegExp(`class="([^"]*)"[^>]*${escaped}`));
   const attrThenClass = html.match(new RegExp(`${escaped}[^>]*class="([^"]*)"`));
   return classThenAttr?.[1] ?? attrThenClass?.[1] ?? "";
+}
+
+function askAiRow(html: string): string {
+  const mark = 'data-mobile-nav-ask-ai=""';
+  const at = html.indexOf(mark);
+  if (at < 0) return "";
+  const start = html.lastIndexOf("<button", at);
+  const end = html.indexOf("</button>", at);
+  return start >= 0 && end >= 0 ? html.slice(start, end + 9) : "";
 }
 
 function linkHtml(html: string, href: string): string {

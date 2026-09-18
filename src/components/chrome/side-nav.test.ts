@@ -28,7 +28,7 @@ describe("SideNav Access rail", () => {
       "/attention",
       "/activity",
       "/reports",
-      "/messages",
+      "?ai=1",
     ]);
   });
 

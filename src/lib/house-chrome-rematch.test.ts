@@ -319,7 +319,7 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(shell.match(/HOUSE_RAIL_FLOAT_CLASS/g)?.length).toBe(3);
     expect(shell).toContain("HOUSE_CANVAS_X_CLASS");
     expect(shell).toContain("HOUSE_HOME_RAIL_COLUMN_CLASS");
-    expect(shell).toContain("HOUSE_CHROME_GUTTER_X_CLASS");
+    expect(shell).not.toContain("data-app-messages-frame");
     expect(shell).not.toContain("left-4 ");
     expect(shell).not.toContain("md:px-[var(--content-inset)]");
     expect(collapse).toContain("var(--chrome-gutter)");
