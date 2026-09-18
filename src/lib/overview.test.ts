@@ -8,12 +8,12 @@ import { NEWS_HREF, NEWS_LEGACY_HREF } from "./news";
 import {
   OVERVIEW_AI_NEXT_CAP,
   OVERVIEW_EDUCATION_CAP,
-  OVERVIEW_EDUCATION_LABEL_CLASS,
   OVERVIEW_HREF,
   OVERVIEW_LEGACY_HREF,
   OVERVIEW_MODULE_ORDER,
   OVERVIEW_HOME_COLUMN_GUTTER,
   OVERVIEW_HOME_LAYOUT_CLASS,
+  OVERVIEW_MODULE_NEST_CLASS,
   OVERVIEW_NEWS_CAP,
   OVERVIEW_NEWS_RAIL_WIDTH,
   OVERVIEW_PAGE,
@@ -212,10 +212,21 @@ describe("Home module caps", () => {
     ).toEqual(["1 title added", "2 deliveries updated"]);
     expect(OVERVIEW_PAGE.educationEmpty).toBeTruthy();
     expect(JSON.stringify(OVERVIEW_PAGE)).not.toMatch(/lesson_progress/);
-    expect(OVERVIEW_EDUCATION_LABEL_CLASS).toBe("t-body-sm text-ink-2");
-    expect(OVERVIEW_EDUCATION_LABEL_CLASS).not.toContain("t-heading");
-    expect(OVERVIEW_EDUCATION_LABEL_CLASS).not.toContain("text-accent");
-    expect(OVERVIEW_EDUCATION_LABEL_CLASS).not.toContain("t-label");
+    expect(OVERVIEW_MODULE_NEST_CLASS).toBe(
+      "gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-4)]",
+    );
+    expect(readFileSync("src/lib/overview.ts", "utf8")).not.toContain(
+      "OVERVIEW_EDUCATION_LABEL_CLASS",
+    );
+    expect(readFileSync("src/components/overview/overview-module.tsx", "utf8")).toContain(
+      "DASHBOARD_SECTION_TITLE_CLASS",
+    );
+    expect(readFileSync("src/components/overview/overview-module.tsx", "utf8")).not.toContain(
+      "titleClass",
+    );
+    expect(readFileSync("src/components/overview/overview-home.tsx", "utf8")).not.toContain(
+      "titleClass",
+    );
   });
 });
 

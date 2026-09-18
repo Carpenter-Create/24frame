@@ -8,10 +8,15 @@ import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import { DASHBOARD_SECTION_TITLE_CLASS } from "@/lib/dashboard-craft";
 import { NEWS_HREF, NEWS_PAGE } from "@/lib/news";
 import {
-  OVERVIEW_EDUCATION_LABEL_CLASS,
   OVERVIEW_PHONE_MODULE_ORDER,
   OVERVIEW_PAGE,
 } from "@/lib/overview";
+
+function moduleLabelClass(html: string, testId: string): string {
+  const chunk = moduleChunk(html, testId);
+  const match = chunk.match(/data-overview-module-label="" class="([^"]+)"/);
+  return match?.[1] ?? "";
+}
 
 function moduleChunk(html: string, testId: string): string {
   const start = html.indexOf(`data-overview-module="${testId}"`);
@@ -99,11 +104,15 @@ describe("OverviewHome", () => {
     expect(html).not.toContain(`href="${OVERVIEW_PAGE.needsYouHref}"`);
     expect(moduleChunk(html, "social")).not.toContain(TEXT_ACTION_CLASS);
     expect(moduleChunk(html, "education")).not.toContain(TEXT_ACTION_CLASS);
-    expect(moduleChunk(html, "education")).toContain(OVERVIEW_EDUCATION_LABEL_CLASS);
-    expect(moduleChunk(html, "education")).not.toContain(DASHBOARD_SECTION_TITLE_CLASS);
+    expect(moduleLabelClass(html, "education")).toBe(DASHBOARD_SECTION_TITLE_CLASS);
+    expect(moduleLabelClass(html, "social")).toBe(DASHBOARD_SECTION_TITLE_CLASS);
+    expect(moduleLabelClass(html, "news")).toBe(DASHBOARD_SECTION_TITLE_CLASS);
+    expect(moduleLabelClass(html, "needs-you")).toBe(DASHBOARD_SECTION_TITLE_CLASS);
+    expect(moduleLabelClass(html, "ai-next")).toBe(DASHBOARD_SECTION_TITLE_CLASS);
     expect(moduleChunk(html, "needs-you")).not.toContain(TEXT_ACTION_CLASS);
     expect(moduleChunk(html, "ai-next")).toContain(TEXT_ACTION_CLASS);
     expect(moduleChunk(html, "news")).toContain(TEXT_ACTION_CLASS);
+    expect(moduleChunk(html, "news")).toContain("dashboard-home-panel");
     expect(html).toContain(OVERVIEW_PAGE.needsYouEmpty);
     expect(html).toContain(OVERVIEW_PAGE.revenueEmpty);
     expect(html).toContain(OVERVIEW_PAGE.socialEmpty);
@@ -211,8 +220,9 @@ describe("OverviewHome", () => {
     expect(html).not.toContain(`href="${OVERVIEW_PAGE.needsYouHref}"`);
     expect(moduleChunk(html, "social")).not.toContain(TEXT_ACTION_CLASS);
     expect(moduleChunk(html, "education")).not.toContain(TEXT_ACTION_CLASS);
-    expect(moduleChunk(html, "education")).toContain(OVERVIEW_EDUCATION_LABEL_CLASS);
-    expect(moduleChunk(html, "education")).not.toContain(DASHBOARD_SECTION_TITLE_CLASS);
+    expect(moduleLabelClass(html, "education")).toBe(DASHBOARD_SECTION_TITLE_CLASS);
+    expect(moduleLabelClass(html, "social")).toBe(DASHBOARD_SECTION_TITLE_CLASS);
+    expect(moduleLabelClass(html, "news")).toBe(DASHBOARD_SECTION_TITLE_CLASS);
     expect(moduleChunk(html, "needs-you")).not.toContain(TEXT_ACTION_CLASS);
     expect(html).not.toContain("62%");
     expect(html).not.toContain("Globee");
@@ -259,8 +269,7 @@ describe("OverviewHome", () => {
     expect(education).not.toContain("62%");
     expect(education).not.toContain("3 lessons");
     expect(education).not.toContain("lesson");
-    expect(education).toContain(OVERVIEW_EDUCATION_LABEL_CLASS);
-    expect(education).not.toContain(DASHBOARD_SECTION_TITLE_CLASS);
+    expect(moduleLabelClass(html, "education")).toBe(DASHBOARD_SECTION_TITLE_CLASS);
     expect(education).not.toContain(TEXT_ACTION_CLASS);
     expect(labelAt).toBeGreaterThan(-1);
     expect(labelAt).toBeLessThan(coverAt);
@@ -303,7 +312,7 @@ describe("OverviewHome", () => {
     expect(education).toContain("width:40%");
     expect(education).not.toContain("3 lessons");
     expect(education).not.toContain("lesson");
-    expect(education).toContain(OVERVIEW_EDUCATION_LABEL_CLASS);
+    expect(moduleLabelClass(html, "education")).toBe(DASHBOARD_SECTION_TITLE_CLASS);
     expect(education).not.toContain(TEXT_ACTION_CLASS);
   });
 });

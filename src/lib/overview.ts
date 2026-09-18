@@ -77,6 +77,10 @@ export const OVERVIEW_AREA_NEEDS_CLASS = "[grid-area:needs]";
 export const OVERVIEW_AREA_AI_CLASS = "[grid-area:ai]";
 export const OVERVIEW_AREA_NEWS_CLASS =
   "[grid-area:news] lg:sticky lg:top-[calc(var(--header-height)+var(--space-4))] lg:max-h-[calc(100dvh-var(--header-height)-var(--space-8))] lg:overflow-y-auto";
+
+/** Inner pad + gap for tiles inside a Home module shell (Education covers, News cards). */
+export const OVERVIEW_MODULE_NEST_CLASS =
+  "gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-4)]";
 export const OVERVIEW_RAIL_OFF_WIDTH = "0px";
 
 export const OVERVIEW_PAGE = {
@@ -108,10 +112,6 @@ export const OVERVIEW_PAGE = {
   aiNextHref: "/messages",
   aiAsk: ASK_ASSISTANT,
 } as const;
-
-// Figma Home Education module label — 13 / ink-2, not a heading and
-// not a Sporty Blue echo. Other Home modules stay section-title ink.
-export const OVERVIEW_EDUCATION_LABEL_CLASS = "t-body-sm text-ink-2";
 
 /** Header TextAction only when the label is distinct from the module title. */
 export function overviewModuleHeaderAction(

@@ -5,16 +5,31 @@ import {
   DASHBOARD_NEWS_THUMB_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
 } from "@/lib/dashboard-craft";
+import { cn } from "@/lib/cn";
 import { newsSourceLabel, type NewsItem } from "@/lib/news";
 import { socialRelativeTime } from "@/lib/social";
 
 // Link-out card: media plate · headline · source · relative time.
-// Vertical stack. House module surface. Same card on Home and /home/news.
+// History: discrete house module card. Home: nested tile inside the
+// shared OverviewModule shell (Education cover SoT — no second grey card).
 // No side thumb. No summary. No rewrite.
 
-export function NewsCard({ item, now }: { item: NewsItem; now: Date }) {
+export function NewsCard({
+  item,
+  now,
+  density = "history",
+}: {
+  item: NewsItem;
+  now: Date;
+  density?: "home" | "history";
+}) {
+  const home = density === "home";
   return (
-    <li data-news-card={item.id} className={DASHBOARD_MODULE_CARD_CLASS}>
+    <li
+      data-news-card={item.id}
+      data-news-card-density={density}
+      className={home ? undefined : DASHBOARD_MODULE_CARD_CLASS}
+    >
       <a
         href={item.url}
         target="_blank"
@@ -22,7 +37,13 @@ export function NewsCard({ item, now }: { item: NewsItem; now: Date }) {
         data-news-link={item.id}
         className="flex flex-col"
       >
-        <div data-news-thumb="" className={DASHBOARD_NEWS_THUMB_CLASS}>
+        <div
+          data-news-thumb=""
+          className={cn(
+            DASHBOARD_NEWS_THUMB_CLASS,
+            home && "rounded-[var(--radius)] border border-hairline",
+          )}
+        >
           {item.image_url ? (
             // Publisher media URL from the feed enclosure — not next/image remotes.
             // eslint-disable-next-line @next/next/no-img-element

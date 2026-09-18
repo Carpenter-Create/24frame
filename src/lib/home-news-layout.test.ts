@@ -98,9 +98,9 @@ describe("Home News layout + register lock", () => {
   });
 
   it("uses house card pad and section air — not a compressed News ticker", () => {
-    expect(rail).toContain("DASHBOARD_SECTION_AIR_CLASS");
+    expect(rail).toContain("OverviewModule");
+    expect(rail).toContain("OVERVIEW_MODULE_NEST_CLASS");
     expect(rail).not.toContain("DASHBOARD_ROW_LIST_CLASS");
-    expect(rail).not.toContain("DashboardHomePanel");
     expect(card).toContain("DASHBOARD_CARD_PAD");
     expect(card).toContain("DASHBOARD_RELATED_GAP_CLASS");
     expect(card).toContain("DASHBOARD_MODULE_CARD_CLASS");
@@ -137,6 +137,8 @@ describe("Home News layout + register lock", () => {
     expect(html).toContain("lg:grid-cols-[minmax(0,1fr)_20rem]");
     expect(html).toContain("gap-x-[var(--chrome-gutter)]");
     expect(html).toContain("data-overview-news");
+    expect(html).toContain('data-overview-module="news"');
+    expect(html).toContain("dashboard-home-panel");
     expect(html).toContain("No headlines from the last 30 days.");
     expect(html.indexOf("data-overview-aggregation")).toBeLessThan(
       html.indexOf('data-overview-module="needs-you"'),
