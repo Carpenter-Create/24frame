@@ -9,8 +9,10 @@ import {
   DASHBOARD_CARD_PAD,
   DASHBOARD_LICENSING_THUMB_CLASS,
   DASHBOARD_MODULE_CARD_CLASS,
+  DASHBOARD_NEWS_HISTORY_COLUMN_CLASS,
   DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS,
   DASHBOARD_NEWS_HISTORY_LIST_CLASS,
+  DASHBOARD_NEWS_HISTORY_ROW_CLASS,
   DASHBOARD_NEWS_HISTORY_THUMB_CLASS,
   DASHBOARD_NEWS_THUMB_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
@@ -37,6 +39,7 @@ import {
 const card = readFileSync("src/components/news/news-card.tsx", "utf8");
 const rail = readFileSync("src/components/news/news-rail.tsx", "utf8");
 const home = readFileSync("src/components/overview/overview-home.tsx", "utf8");
+const newsPage = readFileSync("src/app/(app)/home/news/page.tsx", "utf8");
 const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
 
 function emptyHome(): string {
@@ -110,7 +113,8 @@ describe("Home News layout + register lock", () => {
     expect(card).toContain("DASHBOARD_NEWS_THUMB_CLASS");
     expect(card).toContain("DASHBOARD_NEWS_HISTORY_THUMB_CLASS");
     expect(card).toContain("flex flex-col");
-    expect(card).toContain("items-start");
+    expect(card).toContain("DASHBOARD_NEWS_HISTORY_ROW_CLASS");
+    expect(card).not.toContain("items-start");
     expect(card).not.toContain("DASHBOARD_LICENSING_THUMB_CLASS");
     expect(rail).toContain("DASHBOARD_NEWS_HISTORY_LIST_CLASS");
     expect(card).not.toMatch(/py-\[var\(--space-[123]\)\]/);
@@ -128,16 +132,23 @@ describe("Home News layout + register lock", () => {
     expect(DASHBOARD_NEWS_THUMB_CLASS).not.toContain("w-28");
     expect(DASHBOARD_NEWS_THUMB_CLASS).not.toContain("md:w-32");
     expect(DASHBOARD_NEWS_HISTORY_THUMB_CLASS).toContain("aspect-[16/9]");
-    expect(DASHBOARD_NEWS_HISTORY_THUMB_CLASS).toContain("w-28");
-    expect(DASHBOARD_NEWS_HISTORY_THUMB_CLASS).toContain("rounded-[var(--radius)]");
+    expect(DASHBOARD_NEWS_HISTORY_THUMB_CLASS).toContain("w-40");
+    expect(DASHBOARD_NEWS_HISTORY_THUMB_CLASS).toContain("md:w-80");
+    expect(DASHBOARD_NEWS_HISTORY_THUMB_CLASS).not.toContain("w-16");
+    expect(DASHBOARD_NEWS_HISTORY_THUMB_CLASS).not.toContain("w-28");
+    expect(DASHBOARD_NEWS_HISTORY_ROW_CLASS).toContain("items-stretch");
     expect(DASHBOARD_LICENSING_THUMB_CLASS).toContain("w-16");
     expect(DASHBOARD_LICENSING_THUMB_CLASS).not.toMatch(/(?:^|\s)w-full(?:\s|$)/);
     expect(DASHBOARD_MODULE_CARD_CLASS).toContain("bg-surface-muted");
     expect(DASHBOARD_MODULE_CARD_CLASS).toContain("rounded-[var(--radius-lg)]");
     expect(DASHBOARD_NEWS_HISTORY_LIST_CLASS).toContain("flex flex-col");
     expect(DASHBOARD_NEWS_HISTORY_LIST_CLASS).not.toContain("lg:grid-cols-2");
-    expect(DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS).toContain("lg:grid-cols-[minmax(0,1fr)_20rem]");
+    expect(DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS).toContain("flex w-full flex-col");
+    expect(DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS).not.toContain("lg:grid-cols-[minmax(0,1fr)_20rem]");
     expect(DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS).not.toContain("lg:grid-cols-2");
+    expect(DASHBOARD_NEWS_HISTORY_COLUMN_CLASS).toBe("mx-auto w-full max-w-[840px]");
+    expect(DASHBOARD_NEWS_HISTORY_COLUMN_CLASS).not.toContain("1376");
+    expect(newsPage).toContain("DASHBOARD_NEWS_HISTORY_COLUMN_CLASS");
   });
 
   it("keeps the News column when the rail is empty", () => {

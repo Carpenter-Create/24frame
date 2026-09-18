@@ -126,10 +126,19 @@ export const DASHBOARD_LICENSING_THUMB_CLASS =
 export const DASHBOARD_NEWS_THUMB_CLASS =
   "relative aspect-[16/9] w-full shrink-0 overflow-hidden bg-surface-muted [&_img]:h-full [&_img]:w-full [&_img]:object-cover [&_img]:object-center";
 
-// /home/news history row thumb — left plate, house radius, 16:9, ~112px.
-// Grey muted plate when the article has no image. Not the Home stack thumb.
+// /home/news history row — image leads. Flush left plate, 16:9.
+// Phone 160 · desktop 320. Grey muted plate only when the article
+// has no image. Not the Home stack thumb. Not the licensing w-16.
 export const DASHBOARD_NEWS_HISTORY_THUMB_CLASS =
-  "relative aspect-[16/9] w-28 shrink-0 overflow-hidden rounded-[var(--radius)] bg-surface-muted [&_img]:h-full [&_img]:w-full [&_img]:object-cover [&_img]:object-center";
+  "relative aspect-[16/9] w-40 shrink-0 overflow-hidden bg-surface-muted md:w-80 [&_img]:h-full [&_img]:w-full [&_img]:object-cover [&_img]:object-center";
+
+// History row: media flush to the card edge, copy padded and
+// vertically centered. Image scale is the read; type is secondary.
+export const DASHBOARD_NEWS_HISTORY_ROW_CLASS =
+  `flex items-stretch ${DASHBOARD_RELATED_GAP_CLASS}`;
+
+export const DASHBOARD_NEWS_HISTORY_COPY_CLASS =
+  `flex min-w-0 flex-1 flex-col justify-center ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD}`;
 
 export const DASHBOARD_LICENSING_NEST_CLASS =
   "px-[var(--space-4)] py-[var(--space-3)]";
@@ -146,16 +155,17 @@ export const DASHBOARD_ADMIN_PAIR_CLASS =
 // /home/news: one dense full-width row per article. Home rail stays stacked.
 export const DASHBOARD_NEWS_HISTORY_LIST_CLASS = `flex flex-col ${DASHBOARD_RELATED_GAP_CLASS}`;
 
-// History page: list column + far-right Sources rail (same 20rem + chrome
-// gutter as the Home News rail). Phone stays one column — Sources is a
-// sheet / under-nav control, never a cramped second column.
+// History page: source chips under the H1, then a focused reading
+// list. No right Sources rail. Phone uses the same chip row
+// (horizontal scroll) — never a second bottom float or a cramped
+// second column.
 export const DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS =
-  "grid w-full grid-cols-1 items-start gap-x-[var(--chrome-gutter)] gap-y-[var(--space-6)] lg:grid-cols-[minmax(0,1fr)_20rem]";
+  `flex w-full flex-col ${DASHBOARD_SECTION_AIR_CLASS}`;
 
-export const DASHBOARD_NEWS_SOURCES_RAIL_CLASS =
-  "hidden lg:block lg:sticky lg:top-[calc(var(--header-height)+var(--space-4))]";
-
-export const DASHBOARD_NEWS_SOURCES_PHONE_CLASS = "lg:hidden";
+// Header + chips + list sit in one centered reading column. 840 is
+// the house reading measure already used by Deliver. Phone stays
+// full canvas width (house gutters come from the shell).
+export const DASHBOARD_NEWS_HISTORY_COLUMN_CLASS = "mx-auto w-full max-w-[840px]";
 
 export const DASHBOARD_VIEW_ALT_CLUSTER_CLASS =
   "flex items-center divide-x divide-hairline border border-hairline";
@@ -180,6 +190,17 @@ export const DASHBOARD_TOP_PILL_BUTTON_CLASS =
 export const DASHBOARD_TOP_PILL_BUTTON_ON_CLASS = HOUSE_FILTER_ON_CLASS;
 
 export const DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS = HOUSE_FILTER_OFF_CLASS;
+
+// /home/news source chips reuse the house filter pill (ink selected /
+// muted idle). Row scrolls horizontally when the allowlist overflows.
+export const DASHBOARD_NEWS_SOURCE_CHIPS_CLASS =
+  `${DASHBOARD_TOP_PILL_CLUSTER_CLASS} no-scrollbar w-full flex-nowrap overflow-x-auto`;
+
+export const DASHBOARD_NEWS_SOURCE_CHIP_CLASS = `${DASHBOARD_TOP_PILL_BUTTON_CLASS} shrink-0 whitespace-nowrap`;
+
+export const DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS = DASHBOARD_TOP_PILL_BUTTON_ON_CLASS;
+
+export const DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS = DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS;
 
 // Map unmount is taller than Titles/Platforms lists. Do not let the
 // departing map become the scroll anchor (html scroll-behavior: smooth

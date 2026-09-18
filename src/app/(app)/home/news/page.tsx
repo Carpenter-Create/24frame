@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { PageHeader } from "@/components/ui/page-header";
 import { NewsHistory } from "@/components/news/news-history";
+import { DASHBOARD_NEWS_HISTORY_COLUMN_CLASS } from "@/lib/dashboard-craft";
 import { NEWS_PAGE, NEWS_SOURCE_PARAM, newsHistoryBackLink, parseNewsSourceFilter } from "@/lib/news";
 import { loadNewsHistory } from "@/lib/news-load";
 import { getOrgContext } from "@/lib/supabase/context";
@@ -21,7 +22,7 @@ export default async function NewsPage({
   const selected = parseNewsSourceFilter(sp[NEWS_SOURCE_PARAM]);
 
   return (
-    <div data-news-history="">
+    <div data-news-history="" className={DASHBOARD_NEWS_HISTORY_COLUMN_CLASS}>
       <PageHeader
         title={NEWS_PAGE.title}
         subtitle={NEWS_PAGE.subtitle}

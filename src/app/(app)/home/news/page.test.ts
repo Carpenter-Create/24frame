@@ -2,9 +2,11 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+  DASHBOARD_NEWS_HISTORY_COLUMN_CLASS,
   DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS,
   DASHBOARD_NEWS_HISTORY_LIST_CLASS,
 } from "@/lib/dashboard-craft";
+import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import { NEWS_HOME_HREF, NEWS_PAGE, newsHistoryBackLink } from "@/lib/news";
 import { loadNewsHistory } from "@/lib/news-load";
 import { OVERVIEW_HREF, OVERVIEW_PAGE } from "@/lib/overview";
@@ -48,7 +50,7 @@ describe("NewsPage", () => {
     vi.clearAllMocks();
   });
 
-  it("renders the 90-day history with a Home crumb, list + Sources rail, and no inner News title", async () => {
+  it("renders the 90-day history with a Home crumb, source chips, focused reading column, and no inner News title", async () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
     vi.mocked(loadNewsHistory).mockResolvedValue({
       rows: [ITEM],
@@ -68,10 +70,17 @@ describe("NewsPage", () => {
     expect(html).toContain("Harbor Cut lands a festival slot");
     expect(html).toContain("https://variety.com/harbor-cut");
     expect(html).toContain("Variety");
+    expect(html).toContain(DASHBOARD_NEWS_HISTORY_COLUMN_CLASS);
+    expect(html).toContain("max-w-[840px]");
     expect(html).toContain(DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS);
     expect(html).toContain(DASHBOARD_NEWS_HISTORY_LIST_CLASS);
-    expect(html).toContain("data-news-sources-rail");
+    expect(html).toContain(TEXT_ACTION_CLASS);
+    expect(html).toContain("data-news-source-chips");
+    expect(html).toContain(NEWS_PAGE.sourcesAll);
     expect(html).toContain(NEWS_PAGE.sources);
+    expect(html).not.toContain("data-news-sources-rail");
+    expect(html).not.toContain("data-news-sources-phone");
+    expect(html).not.toContain("lg:grid-cols-[minmax(0,1fr)_20rem]");
     expect(html).toContain("flex flex-col");
     expect(html.indexOf("data-news-thumb")).toBeLessThan(html.indexOf("Harbor Cut lands a festival slot"));
     expect(html).not.toContain("lg:grid-cols-2");
