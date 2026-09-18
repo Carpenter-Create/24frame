@@ -22,3 +22,9 @@ ddc622d40573c098b6f608f824bc760a25075b66:scripts/security/c-group-1-auth-failure
 ddc622d40573c098b6f608f824bc760a25075b66:scripts/security/c-group-1-auth-failures.mjs:jwt:23
 e3441ece37d7a769865f5371268b011d8bfc6da9:scripts/security/l7-chain-of-title-gate.mjs:jwt:29
 e3441ece37d7a769865f5371268b011d8bfc6da9:scripts/security/l7-chain-of-title-gate.mjs:jwt:31
+
+# Unmerged #425 — sessionStorage name, not a credential.
+# `STORAGE_KEY` + `24frame_*` digits trip generic-api-key.
+# Introducing commit only (`git log --all`).
+691a9f005dbc890ce556bcb619059589fe672344:src/lib/ask-ai-overlay.ts:generic-api-key:12
+
