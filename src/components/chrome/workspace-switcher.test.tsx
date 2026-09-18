@@ -285,6 +285,7 @@ describe("workspace switcher placement", () => {
     expect(trailing).not.toContain('tone="pill"');
     expect(trailing).toContain("WorkspaceSwitcher");
     expect(trailing).toContain("{trailingNav}");
+    expect(trailing).toContain('data-app-header-trailing-nav="" className="md:hidden"');
     expect(trailing).toContain("<AskAssistantHeaderLink />");
     expect(trailing).toContain("<ThemeToggle />");
     expect(trailing).toContain("<ActivityBell");

@@ -110,6 +110,7 @@ describe("Aggregation Dashboard mobile chrome — emblem left, dest hamburger tr
     expect(trailing).toContain("{accountMenu}");
     expect(trailing).toContain("{trailingSearch");
     expect(trailing).toContain("{trailingNav}");
+    expect(trailing).toContain('data-app-header-trailing-nav="" className="md:hidden"');
     expect(trailing).not.toContain("data-education-header-search-host");
     expect(trailing.indexOf("{trailingNav}")).toBeLessThan(
       trailing.indexOf("data-app-header-workspace-desktop"),
