@@ -16,6 +16,8 @@ import {
   TITLES_ROW_NAME_CLASS,
   TITLES_ROW_STAFF_CELL_CLASS,
   TITLES_ROW_STAFF_CLASS,
+  TITLES_ROW_STAFF_SEP_CLASS,
+  type TitlesCatalogStaffCols,
   TITLES_LANDSCAPE_ART_CLASS,
   TITLES_THUMB_CLASS,
   TITLES_TITLE_DESKTOP_CLASS,
@@ -59,18 +61,26 @@ export function TitlesCatalogHeader({
   status,
   action,
   trailing,
+  filters,
 }: {
   title?: string;
   q?: string;
   status?: CatalogStatusFilter;
   action?: React.ReactNode;
   trailing?: React.ReactNode;
+  filters?: React.ReactNode;
 }) {
   // Dashboard All time SoT: title cluster left, house select trailing on the
   // same identity row (desktop + phone). No count subtitle under Titles.
   // Phone trailing cluster is All + plus. Desktop header stays title · All.
-  // `title` lets staff Queue reuse this header without a second H1 grammar.
-  const showStatus = typeof q === "string" && status != null;
+  // `title` lets staff Queue / Licensing Status reuse this header.
+  // `filters` lets Licensing trail status + vendor HousePageSelects in the
+  // same register as Titles status — not a second filter band.
+  const filterNode =
+    filters ??
+    (typeof q === "string" && status != null ? (
+      <TitlesCatalogStatusFilter q={q} status={status} />
+    ) : null);
   return (
     <header
       className="titles-catalog-header flex flex-row items-center justify-between gap-[var(--space-2)] md:items-center md:gap-[var(--space-6)]"
@@ -86,21 +96,24 @@ export function TitlesCatalogHeader({
           </span>
         </h1>
       </div>
-      {showStatus || action || trailing ? (
+      {filterNode || action || trailing ? (
         <div
           className="flex w-auto shrink-0 items-center justify-end gap-[var(--space-2)]"
           data-titles-catalog-header-cluster=""
         >
-          {showStatus ? (
+          {filterNode ? (
             <div
-              className="flex w-auto shrink-0 items-center justify-end"
+              className="flex w-auto shrink-0 items-center justify-end gap-[var(--space-2)]"
               data-titles-catalog-filters=""
             >
-              <TitlesCatalogStatusFilter q={q} status={status} />
+              {filterNode}
             </div>
           ) : null}
           {trailing ? (
-            <div className="shrink-0" data-titles-catalog-trailing="">
+            <div
+              className="flex shrink-0 items-center justify-end gap-[var(--space-2)]"
+              data-titles-catalog-trailing=""
+            >
               {trailing}
             </div>
           ) : null}
@@ -161,16 +174,15 @@ export function TitlesCatalogToolbar({
 export function TitlesCatalogEmpty({
   children,
   className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
+  ...props
+}: React.ComponentProps<"div"> & { children: React.ReactNode }) {
   return (
     <div
       className={cn(
         "titles-catalog-empty overflow-hidden rounded-[var(--radius-lg)] border border-hairline bg-surface px-[var(--space-4)] py-[var(--space-4)]",
         className,
       )}
+      {...props}
     >
       <p className="t-body-sm text-ink-3">{children}</p>
     </div>
@@ -256,12 +268,7 @@ function TitlesCatalogThumb({
   );
 }
 
-export type TitlesCatalogStaffCols = {
-  submitter: string;
-  submittedOn: string;
-  orgName?: string | null;
-  findings?: number;
-};
+export type { TitlesCatalogStaffCols };
 
 export function TitlesCatalogListRow({
   href,
@@ -293,11 +300,6 @@ export function TitlesCatalogListRow({
         data-titles-catalog-list-year=""
       >
         {year}
-      </span>
-    ) : null,
-    staff?.orgName ? (
-      <span key="org" data-titles-catalog-org="">
-        {staff.orgName}
       </span>
     ) : null,
     publicId ? (
@@ -337,14 +339,35 @@ export function TitlesCatalogListRow({
             >
               {staff.submitter}
             </span>
+            <span className={TITLES_ROW_STAFF_SEP_CLASS} aria-hidden>
+              {" · "}
+            </span>
             <span
               className={TITLES_ROW_STAFF_CELL_CLASS}
               data-titles-catalog-submitted=""
             >
               {staff.submittedOn}
             </span>
+            {staff.orgName ? (
+              <>
+                <span className={TITLES_ROW_STAFF_SEP_CLASS} aria-hidden>
+                  {" · "}
+                </span>
+                <span
+                  className={TITLES_ROW_STAFF_CELL_CLASS}
+                  data-titles-catalog-org=""
+                >
+                  {staff.orgName}
+                </span>
+              </>
+            ) : null}
             {staff.findings && staff.findings > 0 ? (
-              <span data-titles-catalog-findings="">⚑ {staff.findings}</span>
+              <>
+                <span className={TITLES_ROW_STAFF_SEP_CLASS} aria-hidden>
+                  {" · "}
+                </span>
+                <span data-titles-catalog-findings="">⚑ {staff.findings}</span>
+              </>
             ) : null}
           </span>
         ) : null}

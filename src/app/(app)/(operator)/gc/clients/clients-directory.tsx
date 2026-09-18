@@ -1,11 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
-import { PageHeader } from "@/components/ui/page-header";
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { StatusFilter } from "@/components/layout/status-filter";
 import { StaffDirectoryList } from "@/components/staff/staff-directory-list";
+import { TitlesCatalogHeader } from "@/components/titles/titles-catalog";
 import {
   CLIENTS_PAGE,
-  CLIENT_DIRECTORY_FILTERS,
   clientDirectorySecondary,
   clientOrgHref,
   filterClientOrgs,
@@ -17,16 +15,17 @@ import { UNPAGINATED_MAX, splitProbe } from "@/lib/list-bounds";
 import {
   STAFF_DIRECTORY_EMPTY_CLASS,
   directoryCountLabel,
-  filterHref,
 } from "@/lib/staff-directory";
+
+import { ClientsStatusFilter } from "./clients-status-filter";
 
 // GC-wide client roster. /gc/clients is the dedicated operator URL; `/`
 // reuses this same surface as the staff home when the session has no client
 // org. The RPC re-checks is_gc_staff, so a direct call fails closed even if
 // a React tree renders this outside the (operator) layout.
 //
-// List consumes org StaffDirectory rows only. Seats stay on
-// /gc/clients/[orgId] — never nested under a list row.
+// Chrome is TitlesCatalogHeader + HousePageSelect (Titles / Dashboard All
+// time SoT). Rows stay StaffDirectory. Seats stay on /gc/clients/[orgId].
 
 export async function GcClientsDirectory({
   statusFilter = "all",
@@ -53,7 +52,10 @@ export async function GcClientsDirectory({
 
   return (
     <>
-      <PageHeader title={CLIENTS_PAGE.title} />
+      <TitlesCatalogHeader
+        title={CLIENTS_PAGE.title}
+        filters={showFilters ? <ClientsStatusFilter status={statusFilter} /> : undefined}
+      />
 
       {truncated ? (
         <InlineNotice tone="error" className="mb-4">
@@ -64,15 +66,6 @@ export async function GcClientsDirectory({
       <StaffDirectoryList
         rows={rows}
         countLabel={directoryCountLabel(rows.length, "client", "clients")}
-        filters={
-          showFilters ? (
-            <StatusFilter
-              current={statusFilter}
-              options={[...CLIENT_DIRECTORY_FILTERS]}
-              hrefFor={(key) => filterHref("/gc/clients", key)}
-            />
-          ) : undefined
-        }
         empty={<p className={STAFF_DIRECTORY_EMPTY_CLASS}>{CLIENTS_PAGE.empty}</p>}
       />
     </>

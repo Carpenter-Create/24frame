@@ -4,17 +4,20 @@ import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { titleArtworkUrls } from "@/lib/artwork";
 import { SearchField } from "@/components/layout/search-field";
-import { StatusFilter } from "@/components/layout/status-filter";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { LicensingStatusList } from "@/components/licensing/licensing-status-list";
+import {
+  TitlesCatalogEmpty,
+  TitlesCatalogFrame,
+  TitlesCatalogHeader,
+  TitlesCatalogToolbar,
+} from "@/components/titles/titles-catalog";
 import {
   GC_DELIVERIES_EMPTY,
   GC_DELIVERIES_TRUNCATED,
   GC_LICENSING_STATUS,
-  DELIVERY_STATUS_FILTERS,
   filterLicensingGroups,
   gcLicensingHasFilters,
-  gcLicensingHref,
   gcLicensingShowAllHref,
   groupLicensingTitles,
   parseDeliveryStatusFilter,
@@ -24,11 +27,7 @@ import {
   loadGcDeliveryCompanions,
   uniqueIds,
 } from "@/lib/gc-deliveries-companions";
-import {
-  TITLES_TITLE_DESKTOP_CLASS,
-  TITLES_TITLE_MOBILE_CLASS,
-  catalogSearchQuery,
-} from "@/lib/titles-catalog";
+import { catalogSearchQuery } from "@/lib/titles-catalog";
 import { LIST_PAGE, UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
 
 import { LicensingStatusFilter } from "./licensing-status-filter";
@@ -111,13 +110,21 @@ export default async function GcDeliveriesPage({
   const emptyLabel = filtered ? GC_LICENSING_STATUS.showAll : GC_DELIVERIES_EMPTY.actionLabel;
 
   return (
-    <div data-gc-licensing-status="">
-      <header className="flex flex-row items-center justify-between gap-[var(--space-2)] pb-[var(--space-4)]">
-        <h1>
-          <span className={TITLES_TITLE_MOBILE_CLASS}>{GC_LICENSING_STATUS.title}</span>
-          <span className={TITLES_TITLE_DESKTOP_CLASS}>{GC_LICENSING_STATUS.title}</span>
-        </h1>
-      </header>
+    <TitlesCatalogFrame data-gc-licensing-status="">
+      <TitlesCatalogHeader
+        title={GC_LICENSING_STATUS.title}
+        filters={
+          <>
+            <LicensingStatusFilter status={statusFilter} vendor={vendorFilter} q={q} />
+            <LicensingVendorFilter
+              status={statusFilter}
+              vendor={vendorFilter}
+              vendors={vendorOpts}
+              q={q}
+            />
+          </>
+        }
+      />
 
       {grantsTruncated ? (
         <InlineNotice tone="info" className="mb-4" data-gc-deliveries-truncated="grants">
@@ -125,49 +132,27 @@ export default async function GcDeliveriesPage({
         </InlineNotice>
       ) : null}
 
-      <div className="flex flex-col gap-[var(--space-4)] pb-[var(--space-4)]">
-        <div data-gc-licensing-search="" className="w-full [&_input]:w-full [&_input]:sm:w-full">
-          <Suspense>
+      <TitlesCatalogToolbar
+        search={
+          <Suspense fallback={null}>
             <SearchField placeholder={GC_LICENSING_STATUS.searchPlaceholder} />
           </Suspense>
-        </div>
-        <div
-          className="flex flex-col gap-[var(--space-2)] md:flex-row md:flex-wrap md:items-center md:justify-between"
-          data-gc-licensing-filters=""
-        >
-          <div className="hidden md:flex" data-gc-licensing-status-chips="">
-            <StatusFilter
-              current={statusFilter}
-              options={DELIVERY_STATUS_FILTERS}
-              hrefFor={(key) => gcLicensingHref(key, vendorFilter, q)}
-            />
-          </div>
-          <LicensingStatusFilter status={statusFilter} vendor={vendorFilter} q={q} />
-          <LicensingVendorFilter
-            status={statusFilter}
-            vendor={vendorFilter}
-            vendors={vendorOpts}
-            q={q}
-          />
-        </div>
-      </div>
+        }
+      />
 
       {groups.length === 0 ? (
-        <div
-          className="overflow-hidden rounded-[var(--radius-lg)] border border-hairline bg-surface px-[var(--space-4)] py-[var(--space-4)]"
-          data-gc-licensing-empty=""
-        >
-          <p className="t-body-sm text-ink-3">{emptyCopy}</p>
+        <TitlesCatalogEmpty data-gc-licensing-empty="">
+          {emptyCopy}{" "}
           <Link
             href={emptyHref}
             className="t-body-sm text-accent transition-colors hover:underline"
           >
             {emptyLabel}
           </Link>
-        </div>
+        </TitlesCatalogEmpty>
       ) : (
         <LicensingStatusList groups={groups} />
       )}
-    </div>
+    </TitlesCatalogFrame>
   );
 }

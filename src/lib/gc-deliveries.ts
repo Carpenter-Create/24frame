@@ -1,6 +1,7 @@
 import { buildQuery } from "@/lib/catalog-view";
 import {
   DELIVERY_STATUS_FILTERS,
+  deliveryStatusFilterLabel,
   isCanonicalUuid,
   parseDeliveryStatusFilter,
   type DeliveryStatusFilter,
@@ -211,7 +212,7 @@ export const GC_DELIVERIES_EMPTY = {
 
 export const GC_LICENSING_VENDOR_ALL = "all";
 
-export { DELIVERY_STATUS_FILTERS, parseDeliveryStatusFilter };
+export { DELIVERY_STATUS_FILTERS, deliveryStatusFilterLabel, parseDeliveryStatusFilter };
 export type { DeliveryStatusFilter };
 
 export type GcLicensingVendor = { id: string; name: string };

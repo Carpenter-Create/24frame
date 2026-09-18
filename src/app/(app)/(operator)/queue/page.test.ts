@@ -129,9 +129,9 @@ describe("GcQueuePage", () => {
     expect(html).toContain("data-queue-catalog");
     expect(html).toContain("data-titles-catalog-header-row");
     expect(html).toContain(QUEUE_PAGE.title);
-    expect(html).toContain(QUEUE_PAGE.licensingStatus);
-    expect(html).toContain(`href="${QUEUE_PAGE.licensingStatusHref}"`);
-    expect(html).toContain("data-queue-licensing-status");
+    expect(html).not.toContain("Licensing Status");
+    expect(html).not.toContain("data-queue-licensing-status");
+    expect(html).not.toContain('href="/gc/deliveries"');
     expect(html).not.toContain("Delivery queue");
     expect(html).not.toContain("Needs review");
     expect(html).not.toContain("Ready to deliver");
@@ -211,6 +211,7 @@ describe("GcQueuePage", () => {
     expect(html).toContain("2019");
     expect(html).toContain("data-titles-catalog-submitter");
     expect(html).toContain("data-titles-catalog-submitted");
+    expect(html).toContain("data-titles-catalog-org");
     expect(html).toContain("data-titles-catalog-status");
     expect(html).toContain("In review");
     expect(html).toContain("In delivery");
@@ -244,8 +245,8 @@ describe("GcQueuePage", () => {
     const html = await renderQueue();
 
     expect(html).toContain(QUEUE_PAGE.title);
-    expect(html).toContain(QUEUE_PAGE.licensingStatus);
-    expect(html).toContain("data-queue-licensing-status");
+    expect(html).not.toContain("Licensing Status");
+    expect(html).not.toContain("data-queue-licensing-status");
     expect(html).toContain("data-titles-catalog-toolbar");
     expect(html).toContain("data-titles-catalog-search");
     expect(html).toContain(TITLES_CATALOG.searchPlaceholder);

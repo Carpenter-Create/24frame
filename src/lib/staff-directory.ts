@@ -3,8 +3,9 @@ import { HOUSE_MODULE_CLASS } from "@/lib/house-shell";
 // One Circle-style directory primitive for staff Clients (and profile rows).
 // Team Channels index is ChannelCardGrid — do not route it back through this.
 // Grammar (Circle Manage audience SoT): circular avatar, bold name,
-// muted secondary, optional trailing meta. Filter chips + count sit
-// above a grey Coinbase holding surface. Do not fork a second row.
+// muted secondary, optional trailing meta. Status lens is HousePageSelect
+// on the page H1. Count sits above a grey holding surface. Phone stacks.
+// Do not fork a second row.
 
 export const STAFF_DIRECTORY_SURFACE_CLASS = HOUSE_MODULE_CLASS;
 
@@ -16,7 +17,7 @@ export const STAFF_DIRECTORY_TOOLBAR_CLASS =
 export const STAFF_DIRECTORY_COUNT_CLASS = "t-body-sm text-ink-3";
 
 export const STAFF_DIRECTORY_ROW_CLASS =
-  "flex items-center gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-3)]";
+  "flex flex-col gap-[var(--space-2)] px-[var(--space-4)] py-[var(--space-3)] md:flex-row md:items-center md:gap-[var(--space-3)]";
 
 export const STAFF_DIRECTORY_NESTED_ROW_CLASS = "pl-[var(--space-10)]";
 
@@ -30,7 +31,7 @@ export const STAFF_DIRECTORY_NAME_CLASS = "t-body font-semibold text-ink";
 export const STAFF_DIRECTORY_SECONDARY_CLASS = "t-body-sm text-ink-3";
 
 export const STAFF_DIRECTORY_TRAILING_CLASS =
-  "ml-auto shrink-0 rounded-full bg-surface px-[var(--space-2)] py-[2px] t-body-sm text-ink-2";
+  "shrink-0 self-start rounded-full bg-surface px-[var(--space-2)] py-[2px] t-body-sm text-ink-2 md:ml-auto md:self-center";
 
 export const STAFF_DIRECTORY_SECTION_TITLE_CLASS =
   "px-[var(--space-4)] pt-[var(--space-4)] t-body font-medium text-ink";

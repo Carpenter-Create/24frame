@@ -2,6 +2,9 @@ import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
+}));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 
 import { createClient } from "@/lib/supabase/server";
@@ -115,9 +118,19 @@ describe("GcClientsPage read bound", () => {
       "utf8",
     );
     expect(directorySrc).toContain("StaffDirectoryList");
+    expect(directorySrc).toContain("TitlesCatalogHeader");
+    expect(directorySrc).toContain("ClientsStatusFilter");
+    expect(directorySrc).not.toContain("import { StatusFilter }");
+    expect(directorySrc).not.toContain("@/components/layout/status-filter");
+    expect(directorySrc).not.toContain("PageHeader");
     expect(directorySrc).not.toContain("clientSeatSecondary");
     expect(directorySrc).not.toContain("nested:");
     expect(directorySrc).not.toContain("subtitle=");
     expect(directorySrc).not.toContain("<table");
+    expect(html).toContain("data-titles-catalog-header-row");
+    expect(html).toContain("data-gc-clients-status-compact");
+    expect(html).toContain("data-house-page-select");
+    expect(html).not.toContain("REGISTERED");
+    expect(html).not.toContain("AWAITING PAYMENT");
   });
 });

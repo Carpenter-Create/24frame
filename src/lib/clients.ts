@@ -43,6 +43,7 @@ export type ClientOrg = {
 export const CLIENTS_PAGE = {
   title: "Clients",
   empty: "No clients yet.",
+  statusFilterLabel: "Filter by status",
 } as const;
 
 export const CLIENT_PROFILE = {
@@ -110,6 +111,10 @@ export function parseClientDirectoryFilter(value: string | undefined): ClientDir
   return CLIENT_DIRECTORY_FILTERS.some((option) => option.key === value)
     ? (value as ClientDirectoryFilter)
     : "all";
+}
+
+export function clientDirectoryFilterLabel(status: ClientDirectoryFilter): string {
+  return CLIENT_DIRECTORY_FILTERS.find((option) => option.key === status)?.label ?? "All";
 }
 
 export function filterClientOrgs(

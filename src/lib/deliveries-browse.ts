@@ -44,6 +44,13 @@ export const DELIVERY_STATUS_FILTERS: { key: DeliveryStatusFilter; label: string
   { key: "taken_down", label: DELIVERY_STATUS_ROW_LABELS.taken_down },
 ];
 
+export function deliveryStatusFilterLabel(status: DeliveryStatusFilter): string {
+  return (
+    DELIVERY_STATUS_FILTERS.find((option) => option.key === status)?.label ??
+    DELIVERY_STATUS_FILTERS[0].label
+  );
+}
+
 const STATUS_FILTER_KEYS = new Set<string>(DELIVERY_STATUS_FILTERS.map((f) => f.key));
 
 export const DELIVERY_SORT_KEYS = ["updated", "title", "vendor", "status"] as const;

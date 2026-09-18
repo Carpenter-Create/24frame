@@ -6,13 +6,14 @@ import { HousePageSelect } from "@/components/chrome/house-page-select";
 import {
   DELIVERY_STATUS_FILTERS,
   GC_LICENSING_STATUS,
+  deliveryStatusFilterLabel,
   gcLicensingHref,
   parseDeliveryStatusFilter,
   type DeliveryStatusFilter,
 } from "@/lib/gc-deliveries";
 
-// Phone status lens — Dashboard All time HousePageSelect. Desktop keeps
-// StatusFilter chips. Do not invent a Licensing-only mobile menu.
+// Status lens — house-page-select consumer (Dashboard All time / Titles SoT).
+// Trailing on TitlesCatalogHeader at every breakpoint. No StatusFilter chips.
 
 export function LicensingStatusFilter({
   status,
@@ -26,21 +27,19 @@ export function LicensingStatusFilter({
   defaultOpen?: boolean;
 }) {
   const router = useRouter();
-  const current =
-    DELIVERY_STATUS_FILTERS.find((option) => option.key === status)?.label ??
-    DELIVERY_STATUS_FILTERS[0].label;
+  const currentLabel = deliveryStatusFilterLabel(status);
 
   return (
-    <div data-gc-licensing-status-compact="" className="w-auto min-w-0 md:hidden">
+    <div data-gc-licensing-status-compact="" className="w-auto shrink-0">
       <HousePageSelect
         value={status}
-        label={current}
+        label={currentLabel}
         options={DELIVERY_STATUS_FILTERS}
         ariaLabel={GC_LICENSING_STATUS.statusFilterLabel}
         sheetTitle={GC_LICENSING_STATUS.statusFilterLabel}
         closeLabel="Close"
         defaultOpen={defaultOpen}
-        menuAlign="start"
+        menuAlign="end"
         onPick={(key) => {
           router.replace(gcLicensingHref(parseDeliveryStatusFilter(key), vendor, q), {
             scroll: false,

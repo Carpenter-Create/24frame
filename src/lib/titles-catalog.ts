@@ -63,12 +63,21 @@ export const TITLES_ROW_META_CLASS =
 
 export const TITLES_ROW_COPY_CLASS = "flex min-w-0 flex-col gap-[var(--space-1)]";
 
-// Staff /queue columns on the same row shell. Quiet meta — not a second list.
+// Staff meta on the same Titles row shell. Phone stacks; desktop is one
+// quiet middot line (submitter · date · org) — not bolted staff columns.
 export const TITLES_ROW_STAFF_CLASS =
-  "flex flex-col gap-[var(--space-1)] t-body-sm text-ink-3 md:flex-row md:items-center md:gap-[var(--space-6)]";
+  "flex flex-col gap-[var(--space-1)] t-body-sm text-ink-3 md:flex-row md:flex-wrap md:items-center md:gap-0";
 
-export const TITLES_ROW_STAFF_CELL_CLASS =
-  "t-body-sm text-ink-3 md:w-[9.5rem] md:shrink-0 md:truncate";
+export const TITLES_ROW_STAFF_CELL_CLASS = "t-body-sm text-ink-3 md:min-w-0";
+
+export const TITLES_ROW_STAFF_SEP_CLASS = "hidden t-body-sm text-ink-3 md:inline";
+
+export type TitlesCatalogStaffCols = {
+  submitter: string;
+  submittedOn: string;
+  orgName?: string | null;
+  findings?: number;
+};
 
 // Dashboard top-pill grammar on desktop. Phone is the compact period trigger —
 // not a wrapping ALL-CAPS chip wall.

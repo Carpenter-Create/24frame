@@ -15,7 +15,7 @@ import {
 } from "@/lib/gc-deliveries";
 
 // Channel lens — house-page-select consumer (Dashboard All time SoT).
-// Status stays on StatusFilter chips. Do not invent a second select grammar.
+// Shares the Titles header filter cluster with LicensingStatusFilter.
 
 export function LicensingVendorFilter({
   status,
