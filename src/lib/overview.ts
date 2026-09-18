@@ -1,7 +1,7 @@
 import { ASK_ASSISTANT, ASSISTANT_NAME } from "@/lib/product";
 import { DASHBOARD_ADMIN } from "@/lib/dashboard-admin";
 import { DASHBOARD_ATTENTION } from "@/lib/dashboard-attention";
-import { DASHBOARD_SECTION_AIR_CLASS } from "@/lib/dashboard-craft";
+import { HOUSE_CHROME_GUTTER } from "@/lib/house-shell";
 import {
   DASHBOARD_HOME,
   dashboardWhatChanged,
@@ -51,11 +51,20 @@ export const OVERVIEW_PHONE_MODULE_ORDER = [
   "ai-next",
 ] as const;
 
-/** Desktop: News is the right rail. Phone uses the stacked areas. */
+/** Desktop News rail measure inside the 1220 Home column. */
+export const OVERVIEW_NEWS_RAIL_WIDTH = "20rem";
+
+/** Main↔News gutter — same chrome gap as Aggregation main↔dest rail. */
+export const OVERVIEW_HOME_COLUMN_GUTTER = HOUSE_CHROME_GUTTER;
+
+/** Desktop: News is the right rail. Phone uses the stacked areas.
+ *  Vertical air is house section (24). Column gutter is chrome (16).
+ *  Empty News keeps the 20rem column — do not stretch main. */
 export const OVERVIEW_HOME_LAYOUT_CLASS =
-  `grid w-full grid-cols-1 items-start ${DASHBOARD_SECTION_AIR_CLASS} ` +
+  `grid w-full grid-cols-1 items-start ` +
+  `gap-y-[var(--space-6)] gap-x-[var(--chrome-gutter)] ` +
   `[grid-template-areas:'social'_'education'_'aggregation'_'news'_'needs'_'ai'] ` +
-  `lg:grid-cols-[minmax(0,1fr)_20rem] ` +
+  `lg:grid-cols-[minmax(0,1fr)_${OVERVIEW_NEWS_RAIL_WIDTH}] ` +
   `lg:[grid-template-areas:'social_news'_'education_news'_'aggregation_news'_'needs_news'_'ai_news']`;
 
 export const OVERVIEW_AREA_SOCIAL_CLASS = "[grid-area:social]";

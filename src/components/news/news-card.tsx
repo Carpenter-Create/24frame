@@ -1,10 +1,15 @@
 import { DashboardHomeStatusPill } from "@/components/dashboard/dashboard-home";
-import { DASHBOARD_LICENSING_THUMB_CLASS } from "@/lib/dashboard-craft";
+import {
+  DASHBOARD_CARD_PAD,
+  DASHBOARD_LICENSING_THUMB_CLASS,
+  DASHBOARD_RELATED_GAP_CLASS,
+} from "@/lib/dashboard-craft";
 import { newsSourceLabel, type NewsItem } from "@/lib/news";
 import { socialRelativeTime } from "@/lib/social";
 
 // Link-out card: title · thumbnail · source badge · relative time.
-// Same card on Home and /news. No summary. No rewrite.
+// House card pad + related gap. Same card on Home and /news.
+// No summary. No rewrite.
 
 export function NewsCard({ item, now }: { item: NewsItem; now: Date }) {
   return (
@@ -14,7 +19,7 @@ export function NewsCard({ item, now }: { item: NewsItem; now: Date }) {
         target="_blank"
         rel="noopener noreferrer"
         data-news-link={item.id}
-        className="flex items-start gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-3)]"
+        className={`flex items-start ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD}`}
       >
         <div data-news-thumb="" className={DASHBOARD_LICENSING_THUMB_CLASS}>
           {item.image_url ? (

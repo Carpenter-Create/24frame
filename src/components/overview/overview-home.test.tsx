@@ -7,7 +7,11 @@ import type { CourseRow } from "@/lib/courses";
 import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import { DASHBOARD_SECTION_TITLE_CLASS } from "@/lib/dashboard-craft";
 import { NEWS_HREF, NEWS_PAGE } from "@/lib/news";
-import { OVERVIEW_EDUCATION_LABEL_CLASS, OVERVIEW_PHONE_MODULE_ORDER, OVERVIEW_PAGE } from "@/lib/overview";
+import {
+  OVERVIEW_EDUCATION_LABEL_CLASS,
+  OVERVIEW_PHONE_MODULE_ORDER,
+  OVERVIEW_PAGE,
+} from "@/lib/overview";
 
 function moduleChunk(html: string, testId: string): string {
   const start = html.indexOf(`data-overview-module="${testId}"`);
@@ -71,6 +75,10 @@ describe("OverviewHome", () => {
     expect(html).toContain("data-overview-aggregation");
     expect(html).toContain("data-overview-revenue");
     expect(html).toContain("data-overview-news");
+    expect(html).toContain("data-overview-layout");
+    expect(html).toContain("lg:grid-cols-[minmax(0,1fr)_20rem]");
+    expect(html).toContain("gap-x-[var(--chrome-gutter)]");
+    expect(html).toContain("gap-y-[var(--space-6)]");
     expect(html).toContain('data-overview-module="social"');
     expect(html).toContain('data-overview-module="education"');
     expect(html).toContain('data-overview-module="news"');

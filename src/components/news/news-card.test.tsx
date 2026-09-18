@@ -5,6 +5,10 @@ import { describe, expect, it } from "vitest";
 
 import { NewsCard } from "./news-card";
 import { NewsRail } from "./news-rail";
+import {
+  DASHBOARD_CARD_PAD,
+  DASHBOARD_SECTION_AIR_CLASS,
+} from "@/lib/dashboard-craft";
 import { NEWS_HREF, NEWS_PAGE, type NewsItem } from "@/lib/news";
 
 const NOW = new Date("2026-09-18T18:00:00.000Z");
@@ -28,6 +32,7 @@ describe("NewsCard", () => {
     expect(html).toContain("noopener");
     expect(html).toContain("https://variety.com/thumbs/harbor.jpg");
     expect(html).toContain("data-news-time");
+    expect(html).toContain(DASHBOARD_CARD_PAD);
     expect(html).not.toMatch(/summary|rewrite|republish/i);
   });
 });
@@ -42,6 +47,8 @@ describe("NewsRail", () => {
     expect(html).toContain(`href="${NEWS_HREF}"`);
     expect(html).toContain('data-overview-module="news"');
     expect(html).toContain("Harbor Cut lands a festival slot");
+    expect(html).toContain(DASHBOARD_SECTION_AIR_CLASS);
+    expect(html).not.toContain("divide-y");
     expect(html).not.toMatch(/summary|rewrite|republish/i);
   });
 
