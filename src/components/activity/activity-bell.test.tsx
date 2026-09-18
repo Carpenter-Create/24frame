@@ -36,7 +36,8 @@ const OPEN_ITEMS = Array.from({ length: 5 }, (_, i) => ({
 
 const bellSrc = readFileSync("src/components/activity/activity-bell.tsx", "utf8");
 const themeSrc = readFileSync("src/components/theme-toggle.tsx", "utf8");
-const sparkleSrc = readFileSync("src/components/chrome/ask-assistant-header.tsx", "utf8");
+const askHeaderSrc = readFileSync("src/components/chrome/ask-assistant-header.tsx", "utf8");
+const houseAiMarkSrc = readFileSync("src/components/chrome/house-ai-mark.tsx", "utf8");
 
 describe("ActivityBell", () => {
   it("shows the open count and a circular ghost wash on the trigger", () => {
@@ -105,10 +106,10 @@ describe("ActivityBell", () => {
     expect(html).not.toContain("Resolved");
   });
 
-  it("matches #391 chrome idle weight on theme, bell, and 24Frame AI sparkle", () => {
+  it("matches #391 chrome idle weight on theme and bell", () => {
     expect(PHOSPHOR_CHROME_IDLE_WEIGHT).toBe("bold");
     expect(PHOSPHOR_CHROME_ICON_CLASS).toBe("size-4 shrink-0");
-    for (const src of [themeSrc, bellSrc, sparkleSrc]) {
+    for (const src of [themeSrc, bellSrc]) {
       expect(src).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
       expect(src).toContain("PHOSPHOR_CHROME_ICON_CLASS");
       expect(src).toContain("weight={PHOSPHOR_CHROME_IDLE_WEIGHT}");
@@ -118,5 +119,20 @@ describe("ActivityBell", () => {
       expect(src).not.toContain("size-6");
       expect(src).not.toContain("strokeWidth");
     }
+  });
+
+  it("uses the house AI mark on the 24Frame AI header slot — not Phosphor Sparkle", () => {
+    expect(askHeaderSrc).toContain("<HouseAiMark");
+    expect(askHeaderSrc).not.toContain("Sparkle");
+    expect(askHeaderSrc).not.toContain("Sparkles");
+    expect(askHeaderSrc).not.toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
+    expect(askHeaderSrc).not.toContain("@phosphor-icons/react");
+    expect(houseAiMarkSrc).toContain("PHOSPHOR_CHROME_ICON_CLASS");
+    expect(houseAiMarkSrc).toContain("data-house-ai-mark");
+    expect(houseAiMarkSrc).toContain('fill="currentColor"');
+    expect(houseAiMarkSrc).not.toContain("Sparkle");
+    expect(houseAiMarkSrc).not.toContain("size-5");
+    expect(houseAiMarkSrc).not.toContain("size-6");
+    expect(houseAiMarkSrc).not.toContain("strokeWidth");
   });
 });
