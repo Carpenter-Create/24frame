@@ -212,7 +212,7 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(leadSearch).toContain("HOUSE_SEARCH_PILL_CLASS");
     expect(lead).toContain("ThemeToggle");
     expect(readFileSync("src/lib/house-lead-chrome.ts", "utf8")).toContain("HOUSE_THEME_TOGGLE_CLASS");
-    expect(readFileSync("src/lib/house-lead-chrome.ts", "utf8")).toContain("MOBILE_CHROME_ICON_BUTTON_CLASS");
+    expect(readFileSync("src/lib/house-lead-chrome.ts", "utf8")).toContain("HOUSE_ICON_BUTTON_CLASS");
   });
 
   it("uses one rounded register on Aggregation, Social, and Education", () => {

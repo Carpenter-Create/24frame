@@ -144,10 +144,13 @@ describe("workspace switcher lock", () => {
 
   it("reserves a phone leading pill after the hamburger and a desktop trailing cluster", () => {
     expect(APP_HEADER_LEADING_CLASS).toContain("gap-[var(--space-2)]");
-    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).toBe("shrink-0 md:hidden");
+    expect(APP_HEADER_LEADING_CLASS).toContain("max-md:overflow-hidden");
+    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).toBe("min-w-0 md:hidden");
+    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).not.toContain("shrink-0");
     expect(APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS).toBe("hidden md:contents");
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("shrink-0");
-    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("gap-[var(--space-2)]");
+    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("gap-[var(--space-1)]");
+    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("md:gap-[var(--space-2)]");
     expect(workspaceSwitcherTriggerClass("pill")).toBe(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS);
     expect(workspaceSwitcherTriggerClass("plain")).toBe(WORKSPACE_SWITCHER_TRIGGER_CLASS);
     expect(workspaceSwitcherPanelClass("pill")).toBe(WORKSPACE_SWITCHER_PILL_PANEL_CLASS);

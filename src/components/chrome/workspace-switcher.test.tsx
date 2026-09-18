@@ -11,6 +11,9 @@ vi.mock("next/navigation", () => ({
 
 import { availableWorkspaceOptions } from "@/lib/workspace-menu";
 import {
+  APP_HEADER_LEADING_CLASS,
+  APP_HEADER_TRAILING_CLUSTER_CLASS,
+  APP_HEADER_WORKSPACE_PILL_HOST_CLASS,
   WORKSPACE_SWITCHER,
   WORKSPACE_SWITCHER_ABSENT,
   WORKSPACE_SWITCHER_CHEVRON_CLASS,
@@ -312,6 +315,26 @@ describe("workspace switcher placement", () => {
     expect(topBarSrc).toContain("HouseLeadChrome");
     expect(topBarSrc).toContain('workspace="social"');
     expect(leadSrc).toContain("HOUSE_LEAD_CHROME_CLASS");
+    expect(leadSrc).toContain("APP_HEADER_WORKSPACE_PILL_HOST_CLASS");
+    expect(leadSrc.indexOf("data-brand-emblem")).toBeLessThan(
+      leadSrc.indexOf("data-app-header-workspace-pill"),
+    );
+    expect(leadSrc.indexOf("data-app-header-workspace-pill")).toBeLessThan(
+      leadSrc.indexOf("data-app-header-trailing"),
+    );
+  });
+
+  it("lets the phone pill yield so it cannot overlap the brand mark", () => {
+    expect(leadSrc).toContain("APP_HEADER_WORKSPACE_PILL_HOST_CLASS");
+    expect(leadSrc).toContain("APP_HEADER_LEADING_CLASS");
+    expect(leadSrc).toContain("<BrandLogo />");
+    expect(leadSrc).not.toContain("BrandEmblem");
+    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).toBe("min-w-0 md:hidden");
+    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).not.toContain("shrink-0");
+    expect(APP_HEADER_LEADING_CLASS).toContain("max-md:overflow-hidden");
+    expect(APP_HEADER_LEADING_CLASS).toContain("min-w-0");
+    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("max-md:shrink-0");
+    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("gap-[var(--space-1)]");
   });
 });
 

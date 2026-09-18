@@ -7,6 +7,7 @@ import { BrandLogo } from "@/components/chrome/brand-logo";
 import {
   BRAND_CORNER_FILL_DARK,
   BRAND_CORNER_FILL_LIGHT,
+  BRAND_DESKTOP_WORDMARK_CLASS,
   BRAND_EMBLEM_CORNER_BR_POINTS,
   BRAND_EMBLEM_CORNER_TL_POINTS,
   BRAND_EMBLEM_FOUR_DOT_PATH,
@@ -14,6 +15,7 @@ import {
   BRAND_EMBLEM_SRC,
   BRAND_EMBLEM_TWO_PATH,
   BRAND_EMBLEM_VIEWBOX,
+  BRAND_PHONE_EMBLEM_CLASS,
   BRAND_ICON_SIZE,
   BRAND_ICON_SRC,
   BRAND_ICON_TILE_FILL,
@@ -59,20 +61,31 @@ describe("full 24Frame wordmark header lock", () => {
     expect(BRAND_MARK_FILL).toBe("#1769FF");
   });
 
-  it("renders one shared theme-aware BrandLogo — light + dark imgs", () => {
+  it("renders one shared theme-aware BrandLogo — phone emblem, md+ wordmark", () => {
     const html = renderToStaticMarkup(createElement(BrandLogo));
+    expect(html).toContain(BRAND_EMBLEM_SRC);
     expect(html).toContain(BRAND_LOGO_LIGHT_SRC);
     expect(html).toContain(BRAND_LOGO_DARK_SRC);
+    expect(html).toContain('data-brand-logo-mark="emblem"');
+    expect(html).toContain('data-brand-logo-mark="emblem-light"');
     expect(html).toContain('data-brand-logo-mark="light"');
     expect(html).toContain('data-brand-logo-mark="dark"');
+    expect(html).toContain(BRAND_PHONE_EMBLEM_CLASS);
+    expect(html).toContain(BRAND_DESKTOP_WORDMARK_CLASS);
+    expect(html).toContain("md:hidden");
+    expect(html).toContain("hidden");
+    expect(html).toContain("md:block");
+    expect(html).toContain("dark:md:block");
     expect(html).toContain("dark:hidden");
-    expect(html).toContain("dark:block");
     expect(html).toContain("h-5");
     expect(html).toContain("md:h-6");
     expect(html).toContain("w-auto");
+    expect(logoSrc).toContain("BRAND_EMBLEM_SRC");
     expect(logoSrc).toContain("BRAND_LOGO_LIGHT_SRC");
     expect(logoSrc).toContain("BRAND_LOGO_DARK_SRC");
-    expect(logoSrc).not.toContain("24frame-emblem");
+    expect(logoSrc).toContain("BRAND_PHONE_EMBLEM_CLASS");
+    expect(logoSrc).toContain("BRAND_DESKTOP_WORDMARK_CLASS");
+    expect(existsSync("src/components/chrome/brand-emblem.tsx")).toBe(false);
   });
 
   it("wires house lead chrome to BrandLogo — same SoT, no workspace forks", () => {
@@ -99,8 +112,8 @@ describe("full 24Frame wordmark header lock", () => {
   });
 });
 
-describe("archived Asset 8 emblem + Adam favicon PNG lock", () => {
-  it("keeps Asset 8 bytes archived and unwired from lead chrome", () => {
+describe("Asset 8 phone emblem + Adam favicon PNG lock", () => {
+  it("wires Asset 8 as the phone lead and keeps wordmark from md", () => {
     expect(emblemSvg).toContain(`viewBox="${BRAND_EMBLEM_VIEWBOX}"`);
     expect(emblemSvg).toContain("fill: #1769ff");
     expect(emblemSvg).toContain("fill: #fff");
@@ -112,6 +125,12 @@ describe("archived Asset 8 emblem + Adam favicon PNG lock", () => {
     expect(emblemSvg).toContain(BRAND_EMBLEM_CORNER_BR_POINTS);
     expect(emblemSvg).toContain(BRAND_EMBLEM_CORNER_TL_POINTS);
     expect(BRAND_EMBLEM_SRC).toBe("/brand/24frame-emblem.svg");
+    expect(BRAND_PHONE_EMBLEM_CLASS).toContain("md:hidden");
+    expect(BRAND_PHONE_EMBLEM_CLASS).not.toContain("md:block");
+    expect(BRAND_DESKTOP_WORDMARK_CLASS).toContain("hidden");
+    expect(BRAND_DESKTOP_WORDMARK_CLASS).toContain("md:h-6");
+    expect(BRAND_DESKTOP_WORDMARK_CLASS).not.toContain("md:hidden");
+    expect(logoSrc).toContain("BRAND_EMBLEM_SRC");
     expect(leadSrc).not.toContain(BRAND_EMBLEM_SRC);
     expect(existsSync("src/components/chrome/brand-emblem.tsx")).toBe(false);
     expect(BRAND_CORNER_FILL_LIGHT).toBe("#14171A");
