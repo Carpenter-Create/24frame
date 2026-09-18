@@ -20,6 +20,7 @@ describe("aggregation ops spine rematch", () => {
       "Dashboard",
       "Titles",
       "Recent activity",
+      "Activity",
       "Reports",
       "Ask 24Frame AI",
     ]);
@@ -27,6 +28,7 @@ describe("aggregation ops spine rematch", () => {
       "/dashboard",
       "/titles",
       "/attention",
+      "/activity",
       "/reports",
       "/messages",
     ]);

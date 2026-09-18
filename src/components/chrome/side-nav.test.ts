@@ -18,6 +18,7 @@ describe("SideNav Access rail", () => {
       "Dashboard",
       "Titles",
       "Recent activity",
+      "Activity",
       "Reports",
       "Ask 24Frame AI",
     ]);
@@ -25,6 +26,7 @@ describe("SideNav Access rail", () => {
       "/dashboard",
       "/titles",
       "/attention",
+      "/activity",
       "/reports",
       "/messages",
     ]);

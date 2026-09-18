@@ -1,5 +1,5 @@
 // Shared top lead chrome for Aggregation · Social · Education.
-// [ Logo · fixed lead slot ] — [ optional search · same gap ] ····· [ switcher · theme · avatar ]
+// [ Logo · fixed lead slot ] — [ optional search · same gap ] ····· [ switcher · Ask 24Frame AI · theme · bell · avatar ]
 // Social live explore search and Education quiet courses/videos
 // search share Facebook-compact geometry (04-facebook.png SoT)
 // via one HouseLeadSearch primitive — never twin files.

@@ -14,6 +14,7 @@ import {
   ChartBar,
   Wallet,
   Sparkle,
+  Bell,
   Tray,
   CheckCircle,
   Storefront,
@@ -22,6 +23,7 @@ import {
 } from "@phosphor-icons/react";
 
 import type { PhosphorIcon } from "@/lib/phosphor-icon";
+import { ACTIVITY_HREF, ACTIVITY_PAGE } from "@/lib/activity";
 import { ASK_GLOBEE } from "@/lib/ask-globee";
 import { AVAILS_HREF, AVAILS_PAGE } from "@/lib/avails";
 import { FINANCE_PAGE } from "@/lib/finance";
@@ -57,13 +59,22 @@ export function isPhosphorNavItem(item: NavItem): item is PhosphorNavItem {
 }
 
 // GC's flat nav — only what exists or is v1-scoped. Settings stays deferred.
-// Ask Globee is the /messages destination (href unchanged). Reports is the
-// one client activity door. Staff ops stays on GC_NAV at /gc/finance.
-// Glyphs: Figma 75:5 / 75:2 / 61:2 Phosphor Bold idle, Fill active.
+// Activity is the account-alert log (/activity). Recent activity stays
+// catalog findings (/attention). Ask 24Frame AI is /messages.
+// Reports is the one client activity door. Staff ops stays on GC_NAV
+// at /gc/finance. Glyphs: Figma 75:5 / 75:2 / 61:2 Phosphor Bold idle,
+// Fill active.
 export const NAV: PhosphorNavItem[] = [
   { label: "Dashboard", href: "/dashboard", family: "phosphor", icon: SquaresFour, exact: true },
   { label: "Titles", href: "/titles", family: "phosphor", icon: FilmSlate },
   { label: "Recent activity", href: "/attention", family: "phosphor", icon: Pulse },
+  {
+    label: ACTIVITY_PAGE.title,
+    href: ACTIVITY_HREF,
+    family: "phosphor",
+    icon: Bell,
+    ariaLabel: ACTIVITY_PAGE.navAria,
+  },
   {
     label: REPORTS_PAGE.title,
     href: REPORTS_HREF,
@@ -179,7 +190,8 @@ export function clientNavCurrent(pathname: string): NavItem {
 // Client phone sheet stays the Aggregation NAV destinations. Staff already use
 // those plus the operator set — do not leave them on a client-only menu.
 // Social mobile tab is Home / Explore / Create / Messages / Profile.
-// Desktop rail drops Create. Ask 24Frame AI and GC_NAV stay Aggregation-only.
+// Desktop rail drops Create. Activity + Ask 24Frame AI stay Aggregation
+// rail destinations; header bell + sparkle reach them from every shell.
 export function mobileNavDestinations(
   isGcStaff: boolean,
   workspace: WorkspaceMode = "aggregation",

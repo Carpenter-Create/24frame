@@ -32,6 +32,9 @@ const THREAD = "2f1c8b6a-4d3e-4a11-9c22-7b8e1d0a5f44";
 describe("Ask Globee copy lock", () => {
   it("keeps the Access gate lines and Upgrade path", () => {
     expect(ASK_GLOBEE.headline).toBe("Ask 24Frame AI");
+    expect(ASK_GLOBEE.pageTitle).toBe("Ask 24Frame AI");
+    expect(ASK_GLOBEE.globeeMark).toBe("AI");
+    expect(ASK_GLOBEE.globeeMark).not.toBe("G");
     expect(ASK_GLOBEE.analyze).toBe("Analyze anything about your catalog.");
     expect(ASK_GLOBEE.included).toBe("Included with Pro and Premium.");
     expect(ASK_GLOBEE.upgrade).toBe("Upgrade");

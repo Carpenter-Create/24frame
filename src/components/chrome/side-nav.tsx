@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Suspense, use, useRef } from "react";
+import { useRef } from "react";
 import { railDestinations, STAFF_RAIL_EYEBROW, type NavItem } from "@/lib/nav";
 import { HOUSE_RAIL_ACTIVE_CLASS, HOUSE_RAIL_IDLE_CLASS, HOUSE_RAIL_ITEM_CLASS } from "@/lib/house-shell";
 import { cn } from "@/lib/cn";
@@ -19,14 +19,12 @@ import { NavGlyph } from "./nav-glyph";
 // Fill active (75:5 / 61:2). Active = Sporty Blue icon+text + light-blue
 // pill wash. Inactive = ink. Header mark is BrandLogo (24Frame), not a C.
 // Social destinations use Social Figma V1 Phosphor via SocialIcon.
-// Collapsed mode is icon-only (labels/badges hidden; title tooltips; unread → accent dot).
+// Collapsed mode is icon-only (labels hidden; title tooltips). Open count lives on the header bell.
 export function SideNav({
-  messagesUnread,
   isGcStaff = false,
   collapsed = false,
   workspace = "aggregation",
 }: {
-  messagesUnread: Promise<number>;
   isGcStaff?: boolean;
   collapsed?: boolean;
   workspace?: WorkspaceMode;
@@ -94,19 +92,7 @@ export function SideNav({
 
   return (
     <nav className="flex flex-col gap-2 px-2" data-side-nav="">
-      {items.map((item) =>
-        row(
-          item,
-          item.href === "/messages" ? (
-            // Suspense so an unresolved badge never holds up the nav. Fallback is nothing
-            // — an empty slot that fills in, rather than a spinner that draws the eye to a
-            // decoration.
-            <Suspense fallback={null}>
-              <UnreadBadge count={messagesUnread} collapsed={collapsed} />
-            </Suspense>
-          ) : null,
-        ),
-      )}
+      {items.map((item) => row(item))}
       {staffItems.length > 0 ? (
         <>
           <div className="mx-1 my-2 border-t border-hairline" />
@@ -117,20 +103,5 @@ export function SideNav({
         </>
       ) : null}
     </nav>
-  );
-}
-
-// Unwraps the unread promise. Kept out of the critical render path because
-// my_unread_count calls member_can() per notification row; a badge should not be able to
-// delay the page it decorates.
-function UnreadBadge({ count, collapsed }: { count: Promise<number>; collapsed: boolean }) {
-  const unread = use(count);
-  if (unread <= 0) return null;
-  return collapsed ? (
-    <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-accent" />
-  ) : (
-    <span className="min-w-4 rounded-full bg-accent px-1.5 text-center t-label text-[var(--accent-contrast)]">
-      {unread > 9 ? "9+" : unread}
-    </span>
   );
 }

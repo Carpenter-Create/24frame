@@ -7,6 +7,7 @@ import {
   PaperPlaneTilt,
   Pulse,
   Sparkle,
+  Bell,
   SquaresFour,
   ChartBar,
   Storefront,
@@ -41,6 +42,7 @@ describe("client NAV", () => {
       "/dashboard",
       "/titles",
       "/attention",
+      "/activity",
       "/reports",
       "/messages",
     ]);
@@ -67,6 +69,7 @@ describe("client NAV", () => {
     expect(clientNavCurrent("/titles/abc").label).toBe("Titles");
     expect(clientNavCurrent("/attention").label).toBe("Recent activity");
     expect(clientNavCurrent("/catalog-health").label).toBe("Recent activity");
+    expect(clientNavCurrent("/activity").label).toBe("Activity");
     expect(clientNavCurrent("/reports").label).toBe("Reports");
     expect(clientNavCurrent("/analytics").label).toBe("Reports");
     expect(clientNavCurrent("/earn").label).toBe("Reports");
@@ -107,6 +110,7 @@ describe("client NAV", () => {
       SquaresFour,
       FilmSlate,
       Pulse,
+      Bell,
       ChartBar,
       Sparkle,
     ]);
@@ -155,6 +159,7 @@ describe("GC_NAV", () => {
       "Dashboard",
       "Titles",
       "Recent activity",
+      "Activity",
       "Reports",
       "Ask 24Frame AI",
       "Queue",
@@ -182,6 +187,7 @@ describe("mobileNavDestinations", () => {
       "Dashboard",
       "Titles",
       "Recent activity",
+      "Activity",
       "Reports",
       "Ask 24Frame AI",
     ]);
@@ -192,11 +198,12 @@ describe("mobileNavDestinations", () => {
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/gc/clients");
   });
 
-  it("gives staff the operator destinations plus the client five", () => {
+  it("gives staff the operator destinations plus the client destinations", () => {
     expect(mobileNavDestinations(true).map((item) => item.label)).toEqual([
       "Dashboard",
       "Titles",
       "Recent activity",
+      "Activity",
       "Reports",
       "Ask 24Frame AI",
       "Queue",

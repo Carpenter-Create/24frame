@@ -1,7 +1,12 @@
 import { Suspense } from "react";
 
 import { AppShell } from "@/components/chrome/app-shell";
-import { appShellUnread, enforceAppAccess, loadAppShellChrome } from "@/lib/app-shell-chrome";
+import {
+  appShellActivityItems,
+  appShellUnread,
+  enforceAppAccess,
+  loadAppShellChrome,
+} from "@/lib/app-shell-chrome";
 
 // Sync layout. Next 16: awaiting cookies() / uncached fetches in this file
 // blocks child loading.tsx — the leftover ≥1s on Social tab clicks after #284.
@@ -20,7 +25,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <Suspense fallback={null}>
         <AppAccessGate />
       </Suspense>
-      <AppShell chrome={chrome} messagesUnread={appShellUnread(chrome)}>
+      <AppShell
+        chrome={chrome}
+        messagesUnread={appShellUnread(chrome)}
+        activityItems={appShellActivityItems(chrome)}
+      >
         {children}
       </AppShell>
     </>
