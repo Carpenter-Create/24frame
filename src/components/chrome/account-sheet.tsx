@@ -43,10 +43,12 @@ import {
   ACCOUNT_SHEET_HEAD_CLASS,
   ACCOUNT_SHEET_HOST_CLASS,
   ACCOUNT_SHEET_ITEMS,
+  ACCOUNT_SHEET_LEFTOVER_CLASS,
   ACCOUNT_SHEET_LOGOUT_CLASS,
   ACCOUNT_SHEET_LOGOUT_STACK_CLASS,
   ACCOUNT_SHEET_PIN_CLASS,
   ACCOUNT_SHEET_SCROLL_CLASS,
+  ACCOUNT_SHEET_STAGE_CLASS,
   ACCOUNT_SHEET_SURFACE_CLASS,
   ACCOUNT_SHEET_VERSION_CLASS,
   accountSheetIdentity,
@@ -275,39 +277,44 @@ function AccountMenuBody({
   return (
     <>
       <MenuSurfaceAccent />
-      <div data-account-sheet-head="" className={ACCOUNT_SHEET_HEAD_CLASS}>
-        <IdentityBlock
-          avatarInitial={identity.avatarInitial}
-          photoUrl={identity.photoUrl}
-          name={identity.name}
-          email={identity.email}
-        />
-        <Close44
-          label={ACCOUNT_SHEET.close}
-          data-account-sheet-close=""
-          onClick={onClose}
-        />
+      <div data-account-sheet-stage="" className={ACCOUNT_SHEET_STAGE_CLASS}>
+        <div data-account-sheet-head="" className={ACCOUNT_SHEET_HEAD_CLASS}>
+          <IdentityBlock
+            avatarInitial={identity.avatarInitial}
+            photoUrl={identity.photoUrl}
+            name={identity.name}
+            email={identity.email}
+          />
+          <Close44
+            label={ACCOUNT_SHEET.close}
+            data-account-sheet-close=""
+            onClick={onClose}
+          />
+        </div>
+        <AppSheetHairline data-account-sheet-rule="" />
+        <div data-account-sheet-scroll="" className={ACCOUNT_SHEET_SCROLL_CLASS}>
+          <SheetGroup>{items}</SheetGroup>
+        </div>
       </div>
-      <AppSheetHairline data-account-sheet-rule="" />
-      <div data-account-sheet-scroll="" className={ACCOUNT_SHEET_SCROLL_CLASS}>
-        <SheetGroup>{items}</SheetGroup>
-      </div>
+      <div data-account-sheet-leftover="" className={ACCOUNT_SHEET_LEFTOVER_CLASS} />
       <AccountMenuPin onClose={onClose} className={ACCOUNT_SHEET_PIN_CLASS} />
     </>
   );
 }
 
 // Mobile 544:561 / 537:557 — avatar opens this sheet. Hamburger stays the nav sheet.
-// Quiet scrim; page stays under. 90% viewport, slides up. Hug is void.
-// Do not restyle to the desktop leftover dropdown.
+// Quiet scrim; page stays under. Content hug (h-auto), slides up.
+// Same sheet craft — not a new mini language. Do not restyle to
+// the desktop leftover dropdown chrome (264 / rounded-12).
 // One top row: Identity 48 + Close/44. Hairline — USER_MENU_ACTIONS.
 // Mercury: Profile, Settings. Theme is the header sun/moon, not a
 // menu row. 618:785 overlay is void. Closed
 // sheet stays 544:561 / 537:557.
-// Leftover under the last item is the 90% grow (open white). Log out,
+// Leftover under the last item is 48 house section air (--space-12),
+// shrink-0 — not leftover grow (open white). Log out,
 // hairline, footer are pin siblings. Hairline only under Log out.
 // Do not add a hairline above Log out. Item-list overflow lives on
-// the leftover pane — house nav destinations — so Refer cannot paint over Log out.
+// the scroll pane — house nav destinations — so Refer cannot paint over Log out.
 // Surface clips. 571:911 stays off.
 // Log out → hairline 24. Hairline → footer 24. Footer → bottom 32
 // (sheet pad B). Not 48/48/48.
