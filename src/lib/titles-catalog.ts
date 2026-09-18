@@ -63,6 +63,13 @@ export const TITLES_ROW_META_CLASS =
 
 export const TITLES_ROW_COPY_CLASS = "flex min-w-0 flex-col gap-[var(--space-1)]";
 
+// Staff /queue columns on the same row shell. Quiet meta — not a second list.
+export const TITLES_ROW_STAFF_CLASS =
+  "flex flex-col gap-[var(--space-1)] t-body-sm text-ink-3 md:flex-row md:items-center md:gap-[var(--space-6)]";
+
+export const TITLES_ROW_STAFF_CELL_CLASS =
+  "t-body-sm text-ink-3 md:w-[9.5rem] md:shrink-0 md:truncate";
+
 // Dashboard top-pill grammar on desktop. Phone is the compact period trigger —
 // not a wrapping ALL-CAPS chip wall.
 export const TITLES_FILTER_PILL_CLASS =

@@ -14,6 +14,8 @@ import {
   TITLES_ROW_COPY_CLASS,
   TITLES_ROW_META_CLASS,
   TITLES_ROW_NAME_CLASS,
+  TITLES_ROW_STAFF_CELL_CLASS,
+  TITLES_ROW_STAFF_CLASS,
   TITLES_LANDSCAPE_ART_CLASS,
   TITLES_THUMB_CLASS,
   TITLES_TITLE_DESKTOP_CLASS,
@@ -52,17 +54,22 @@ export function TitlesCatalogFrame({
 }
 
 export function TitlesCatalogHeader({
+  title = TITLES_CATALOG.title,
   q,
   status,
   action,
+  trailing,
 }: {
+  title?: string;
   q?: string;
   status?: CatalogStatusFilter;
   action?: React.ReactNode;
+  trailing?: React.ReactNode;
 }) {
   // Dashboard All time SoT: title cluster left, house select trailing on the
   // same identity row (desktop + phone). No count subtitle under Titles.
   // Phone trailing cluster is All + plus. Desktop header stays title · All.
+  // `title` lets staff Queue reuse this header without a second H1 grammar.
   const showStatus = typeof q === "string" && status != null;
   return (
     <header
@@ -72,14 +79,14 @@ export function TitlesCatalogHeader({
       <div className="min-w-0">
         <h1 data-titles-catalog-title="">
           <span data-titles-catalog-title-mobile="" className={TITLES_TITLE_MOBILE_CLASS}>
-            {TITLES_CATALOG.title}
+            {title}
           </span>
           <span data-titles-catalog-title-desktop="" className={TITLES_TITLE_DESKTOP_CLASS}>
-            {TITLES_CATALOG.title}
+            {title}
           </span>
         </h1>
       </div>
-      {showStatus || action ? (
+      {showStatus || action || trailing ? (
         <div
           className="flex w-auto shrink-0 items-center justify-end gap-[var(--space-2)]"
           data-titles-catalog-header-cluster=""
@@ -90,6 +97,11 @@ export function TitlesCatalogHeader({
               data-titles-catalog-filters=""
             >
               <TitlesCatalogStatusFilter q={q} status={status} />
+            </div>
+          ) : null}
+          {trailing ? (
+            <div className="shrink-0" data-titles-catalog-trailing="">
+              {trailing}
             </div>
           ) : null}
           {action ? (
@@ -244,6 +256,13 @@ function TitlesCatalogThumb({
   );
 }
 
+export type TitlesCatalogStaffCols = {
+  submitter: string;
+  submittedOn: string;
+  orgName?: string | null;
+  findings?: number;
+};
+
 export function TitlesCatalogListRow({
   href,
   title,
@@ -253,6 +272,7 @@ export function TitlesCatalogListRow({
   year,
   publicId,
   overflow,
+  staff,
 }: {
   href: string;
   title: string;
@@ -262,7 +282,30 @@ export function TitlesCatalogListRow({
   year?: string | null;
   publicId?: string | null;
   overflow?: React.ReactNode;
+  staff?: TitlesCatalogStaffCols;
 }) {
+  const quiet = [
+    year ? (
+      <span
+        key="year"
+        className="t-body-sm text-ink-3"
+        data-titles-catalog-year=""
+        data-titles-catalog-list-year=""
+      >
+        {year}
+      </span>
+    ) : null,
+    staff?.orgName ? (
+      <span key="org" data-titles-catalog-org="">
+        {staff.orgName}
+      </span>
+    ) : null,
+    publicId ? (
+      <span key="id" className="tabular-nums" data-titles-catalog-public-id="">
+        {publicId}
+      </span>
+    ) : null,
+  ].filter(Boolean);
   const body = (
     <>
       <TitlesCatalogThumb title={title} stillUrl={stillUrl} />
@@ -275,29 +318,36 @@ export function TitlesCatalogListRow({
           >
             {title}
           </span>
-          {year || publicId ? (
+          {quiet.length > 0 ? (
             <span className="t-body-sm text-ink-3">
-              {year ? (
-                <span
-                  className="t-body-sm text-ink-3"
-                  data-titles-catalog-year=""
-                  data-titles-catalog-list-year=""
-                >
-                  {year}
+              {quiet.map((part, index) => (
+                <span key={index === 0 ? "quiet-0" : `quiet-${index}`}>
+                  {index > 0 ? " · " : null}
+                  {part}
                 </span>
-              ) : null}
-              {year && publicId ? " · " : null}
-              {publicId ? (
-                <span
-                  className="tabular-nums"
-                  data-titles-catalog-public-id=""
-                >
-                  {publicId}
-                </span>
-              ) : null}
+              ))}
             </span>
           ) : null}
         </span>
+        {staff ? (
+          <span className={TITLES_ROW_STAFF_CLASS} data-titles-catalog-staff="">
+            <span
+              className={TITLES_ROW_STAFF_CELL_CLASS}
+              data-titles-catalog-submitter=""
+            >
+              {staff.submitter}
+            </span>
+            <span
+              className={TITLES_ROW_STAFF_CELL_CLASS}
+              data-titles-catalog-submitted=""
+            >
+              {staff.submittedOn}
+            </span>
+            {staff.findings && staff.findings > 0 ? (
+              <span data-titles-catalog-findings="">⚑ {staff.findings}</span>
+            ) : null}
+          </span>
+        ) : null}
         <TitleStatusPill status={status} liveCount={liveCount} />
       </span>
     </>

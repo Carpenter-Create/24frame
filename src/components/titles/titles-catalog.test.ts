@@ -62,7 +62,14 @@ function renderRow(props: {
   status: string;
   liveCount?: number;
   year?: string | null;
+  publicId?: string | null;
   overflow?: React.ReactNode;
+  staff?: {
+    submitter: string;
+    submittedOn: string;
+    orgName?: string | null;
+    findings?: number;
+  };
 }): string {
   return renderToStaticMarkup(createElement(TitlesCatalogListRow, props));
 }
@@ -208,6 +215,56 @@ describe("TitlesCatalogListRow craft", () => {
     expect(TITLE_STATUS_LABELS.submitted).toBe("Submitted");
   });
 
+  it("adds staff submitter, date, and findings on the same row shell", () => {
+    const html = renderRow({
+      href: "/gc/titles/1",
+      title: "Harbor Cut",
+      stillUrl: null,
+      status: "in_review",
+      year: "2019",
+      publicId: "GC-0001234",
+      staff: {
+        submitter: "Maya Chen",
+        submittedOn: "Mar 15, 2026",
+        orgName: "North",
+        findings: 2,
+      },
+    });
+    const row = openingTagWith(html, 'data-titles-catalog-list-row=""');
+    const submitter = openingTagWith(html, 'data-titles-catalog-submitter=""');
+    const submitted = openingTagWith(html, 'data-titles-catalog-submitted=""');
+
+    expect(row).toContain("flex flex-col");
+    expect(row).toContain("md:flex-row");
+    expect(html).toContain("data-titles-catalog-staff");
+    expect(html).toContain("Maya Chen");
+    expect(html).toContain("Mar 15, 2026");
+    expect(html).toContain("North");
+    expect(html).toContain("GC-0001234");
+    expect(html).toContain("data-titles-catalog-findings");
+    expect(html).toContain("⚑ 2");
+    expect(html).toContain("In review");
+    expect(submitter).toContain("t-body-sm");
+    expect(submitted).toContain("t-body-sm");
+    expect(html).not.toContain("data-titles-catalog-card");
+    expect(html).not.toContain("hover:border-accent");
+  });
+
+  it("omits staff columns on the client catalog row", () => {
+    const html = renderRow({
+      href: "/titles/1",
+      title: "Craft film",
+      stillUrl: null,
+      status: "live",
+      year: "2019",
+    });
+    expect(html).not.toContain("data-titles-catalog-staff");
+    expect(html).not.toContain("data-titles-catalog-submitter");
+    expect(html).not.toContain("data-titles-catalog-submitted");
+    expect(html).not.toContain("data-titles-catalog-findings");
+    expect(html).not.toContain("data-titles-catalog-org");
+  });
+
   it("shows a row overflow slot only when lifecycle flags allow it", () => {
     const withActions = renderRow({
       href: "/titles/1",
@@ -248,6 +305,23 @@ describe("TitlesCatalogFrame craft", () => {
 });
 
 describe("TitlesCatalogHeader type lock", () => {
+  it("can render a staff Queue title on the same header register", () => {
+    const html = renderToStaticMarkup(
+      createElement(TitlesCatalogHeader, {
+        title: "Queue",
+        trailing: createElement("a", { href: "/gc/deliveries" }, "Licensing Status"),
+      }),
+    );
+    const mobile = openingTagWith(html, 'data-titles-catalog-title-mobile=""');
+    const desktop = openingTagWith(html, 'data-titles-catalog-title-desktop=""');
+    expect(html).toContain("Queue");
+    expect(html).toContain("Licensing Status");
+    expect(html).toContain("data-titles-catalog-trailing");
+    expect(html).not.toContain("Titles");
+    expect(mobile).toContain("t-heading text-ink");
+    expect(desktop).toContain("t-title text-ink");
+  });
+
   it("matches the Dashboard page-title register", () => {
     const html = renderToStaticMarkup(createElement(TitlesCatalogHeader));
     const mobile = openingTagWith(html, 'data-titles-catalog-title-mobile=""');

@@ -135,6 +135,24 @@ describe("titles catalog scope", () => {
     expect(skeletons).not.toContain("h-8 w-24 md:hidden");
     expect(src("src/app/(app)/titles/loading.tsx")).toContain("CatalogSkeleton");
     expect(src("src/app/(app)/titles/[id]/loading.tsx")).toContain("TitleDetailSkeleton");
+    expect(src("src/app/(app)/(operator)/queue/loading.tsx")).toContain("CatalogSkeleton");
+  });
+
+  it("absorbs staff /queue into the Titles catalog list — no Card lookalike", () => {
+    const queue = src("src/app/(app)/(operator)/queue/page.tsx");
+    const catalog = src("src/components/titles/titles-catalog.tsx");
+    expect(queue).toContain("@/components/titles/titles-catalog");
+    expect(queue).toContain("@/lib/titles-catalog");
+    expect(queue).toContain("TitlesCatalogFrame");
+    expect(queue).toContain("TitlesCatalogList");
+    expect(queue).toContain("TitlesCatalogListRow");
+    expect(queue).toContain("staff=");
+    expect(queue).not.toContain("@/components/ui/card");
+    expect(queue).not.toContain("QueueRow");
+    expect(catalog).toContain("TitlesCatalogStaffCols");
+    expect(catalog).toContain("data-titles-catalog-submitter");
+    expect(catalog).toContain("data-titles-catalog-submitted");
+    expect(GC_NAV.find((item) => item.href === "/queue")?.label).toBe("Queue");
   });
 
   it("keeps house-shell language in titles comments — no reference-brand word", () => {
