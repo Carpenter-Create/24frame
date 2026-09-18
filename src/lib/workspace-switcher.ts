@@ -133,13 +133,54 @@ export const WORKSPACE_SWITCHER_CHEVRON_OPEN_CLASS = "opacity-100";
 export const WORKSPACE_SWITCHER_PILL_CHEVRON_CLASS =
   "size-4 shrink-0 text-ink-3 opacity-100";
 
-export const WORKSPACE_SWITCHER_PANEL_CLASS =
-  "absolute right-0 top-full z-50 mt-[var(--space-2)] flex min-w-[16rem] flex-col overflow-hidden rounded-[12px] border border-hairline bg-surface py-[var(--space-2)] shadow-none";
+// Portaled above dest chips + Education under-nav search. Header
+// backdrop-blur traps in-flow z-50 under those rows — do not keep
+// the menu `absolute` inside the lead stack. Gap is --space-2.
+export const WORKSPACE_SWITCHER_MENU_GAP_PX = 8;
 
-// Leading pill opens down-and-right so the menu does not clip the
-// left edge. Desktop trailing panel stays right-0.
-export const WORKSPACE_SWITCHER_PILL_PANEL_CLASS =
-  "absolute left-0 top-full z-50 mt-[var(--space-2)] flex min-w-[16rem] flex-col overflow-hidden rounded-[12px] border border-hairline bg-surface py-[var(--space-2)] shadow-none";
+export const WORKSPACE_SWITCHER_CHROME_CLEARANCE_SELECTOR =
+  "[data-house-phone-dest-chips-host], [data-house-under-nav]";
+
+export const WORKSPACE_SWITCHER_PANEL_SURFACE_CLASS =
+  "flex min-w-[16rem] flex-col overflow-hidden rounded-[12px] border border-hairline bg-surface py-[var(--space-2)] shadow-none";
+
+export const WORKSPACE_SWITCHER_PANEL_CLASS =
+  `fixed z-50 ${WORKSPACE_SWITCHER_PANEL_SURFACE_CLASS}`;
+
+export const WORKSPACE_SWITCHER_PILL_PANEL_CLASS = WORKSPACE_SWITCHER_PANEL_CLASS;
+
+export function workspaceSwitcherMenuTopPx(
+  triggerBottom: number,
+  chromeBottoms: readonly number[] = [],
+  gapPx: number = WORKSPACE_SWITCHER_MENU_GAP_PX,
+): number {
+  return Math.max(triggerBottom, ...chromeBottoms, 0) + gapPx;
+}
+
+export function workspaceSwitcherMenuStyle({
+  tone,
+  trigger,
+  chromeBottoms = [],
+  viewportWidth,
+}: {
+  tone: WorkspaceSwitcherTone;
+  trigger: { bottom: number; left: number; right: number };
+  chromeBottoms?: readonly number[];
+  viewportWidth: number;
+}): { top: number; left?: number; right?: number } {
+  const top = workspaceSwitcherMenuTopPx(trigger.bottom, chromeBottoms);
+  if (tone === "pill") return { top, left: trigger.left };
+  return { top, right: Math.max(0, viewportWidth - trigger.right) };
+}
+
+export function workspaceSwitcherChromeClearanceBottoms(
+  root: ParentNode | null | undefined = typeof document === "undefined" ? null : document,
+): number[] {
+  if (!root) return [];
+  return Array.from(root.querySelectorAll(WORKSPACE_SWITCHER_CHROME_CLEARANCE_SELECTOR)).map(
+    (node) => node.getBoundingClientRect().bottom,
+  );
+}
 
 export const WORKSPACE_SWITCHER_HEADER_CLASS =
   "px-[var(--space-4)] pb-[var(--space-1)] pt-[var(--space-2)] t-label text-ink-3";

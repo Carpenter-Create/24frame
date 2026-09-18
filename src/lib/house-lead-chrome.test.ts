@@ -364,4 +364,29 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(topBar).not.toContain("trailingNav");
     expect(topBar).not.toContain("MobileNav");
   });
+
+  it("keeps dest chips above Education search and the Workspaces menu above both", () => {
+    const html = renderToStaticMarkup(
+      createElement(HouseLeadChrome, {
+        workspace: "education",
+        destChips: createElement("nav", { "data-house-phone-dest-chips": "" }),
+        underNav: createElement(HouseLeadSearch, {
+          tone: "quiet",
+          inputId: "education-header-q-phone",
+        }),
+        accountMenu: createElement("div", { "data-user-menu-host": "" }),
+      }),
+    );
+    expect(html.indexOf("data-house-phone-dest-chips-host")).toBeGreaterThan(-1);
+    expect(html.indexOf("data-house-under-nav")).toBeGreaterThan(
+      html.indexOf("data-house-phone-dest-chips-host"),
+    );
+    expect(html.indexOf("data-education-header-search")).toBeGreaterThan(
+      html.indexOf("data-house-phone-dest-chips-host"),
+    );
+    expect(HOUSE_LEAD_STACK_CLASS).toContain("z-40");
+    expect(readFileSync("src/components/chrome/workspace-switcher.tsx", "utf8")).toContain(
+      "createPortal",
+    );
+  });
 });

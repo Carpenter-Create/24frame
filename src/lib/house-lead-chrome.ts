@@ -15,8 +15,10 @@
 // Social live explore search and Education quiet courses/videos
 // search share Facebook-compact geometry (04-facebook.png SoT)
 // via one HouseLeadSearch primitive — never twin files.
-// Phone Education search is a full-width row under this stack — not
-// in the top nav. Phone Social is a trailing magnifying-glass that
+// Phone Education search is a full-width row under dest chips — not
+// in the top nav. The Workspaces menu portals above this stack so it
+// cannot clip under dest chips or search (header backdrop-blur).
+// Phone Social is a trailing magnifying-glass that
 // opens a dedicated sheet. Aggregation mid-lead stays empty
 // (agg-search-no). Logo inset does not drift when the search slot is
 // empty. Do not invent a fourth product or an Aggregation search.

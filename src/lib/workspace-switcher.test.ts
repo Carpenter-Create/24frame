@@ -46,6 +46,10 @@ import {
   workspaceSwitcherOptionClass,
   workspaceSwitcherOptions,
   workspaceSwitcherPanelClass,
+  workspaceSwitcherMenuStyle,
+  workspaceSwitcherMenuTopPx,
+  WORKSPACE_SWITCHER_CHROME_CLEARANCE_SELECTOR,
+  WORKSPACE_SWITCHER_MENU_GAP_PX,
   workspaceSwitcherNextSegmentIndex,
   workspaceSwitcherSegmentClass,
   workspaceSwitcherSegmentLabel,
@@ -135,9 +139,11 @@ describe("workspace switcher lock", () => {
     expect(WORKSPACE_SWITCHER_HEADER_CLASS).toContain("t-label");
     expect(WORKSPACE_SWITCHER_HEADER_CLASS).toContain("text-ink-3");
     expect(WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS).toContain("truncate");
-    expect(WORKSPACE_SWITCHER_PANEL_CLASS).toContain("right-0");
+    expect(WORKSPACE_SWITCHER_PANEL_CLASS).toContain("fixed");
+    expect(WORKSPACE_SWITCHER_PANEL_CLASS).toContain("z-50");
     expect(WORKSPACE_SWITCHER_PANEL_CLASS).toContain("shadow-none");
-    expect(WORKSPACE_SWITCHER_PANEL_CLASS).not.toContain("left-0");
+    expect(WORKSPACE_SWITCHER_PANEL_CLASS).not.toContain("absolute");
+    expect(WORKSPACE_SWITCHER_PANEL_CLASS).not.toContain("top-full");
     for (const absent of WORKSPACE_SWITCHER_ABSENT) {
       expect(WORKSPACE_SWITCHER).not.toHaveProperty(absent);
     }
@@ -162,13 +168,42 @@ describe("workspace switcher lock", () => {
     expect(workspaceSwitcherTriggerClass("plain")).toBe(WORKSPACE_SWITCHER_TRIGGER_CLASS);
     expect(workspaceSwitcherPanelClass("pill")).toBe(WORKSPACE_SWITCHER_PILL_PANEL_CLASS);
     expect(workspaceSwitcherPanelClass()).toBe(WORKSPACE_SWITCHER_PANEL_CLASS);
+    expect(WORKSPACE_SWITCHER_PILL_PANEL_CLASS).toBe(WORKSPACE_SWITCHER_PANEL_CLASS);
+    expect(WORKSPACE_SWITCHER_PANEL_CLASS).toContain("fixed");
+    expect(WORKSPACE_SWITCHER_PANEL_CLASS).not.toContain("absolute");
     expect(workspaceSwitcherChevronClass(false, "pill")).toBe(WORKSPACE_SWITCHER_PILL_CHEVRON_CLASS);
     expect(workspaceSwitcherChevronClass(true, "pill")).toBe(WORKSPACE_SWITCHER_PILL_CHEVRON_CLASS);
     expect(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS).toContain("border-hairline");
     expect(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS).toContain("bg-surface-muted");
-    expect(WORKSPACE_SWITCHER_PILL_PANEL_CLASS).toContain("left-0");
-    expect(WORKSPACE_SWITCHER_PANEL_CLASS).toContain("right-0");
-    expect(WORKSPACE_SWITCHER_PANEL_CLASS).not.toContain("left-0");
+    expect(WORKSPACE_SWITCHER_PILL_PANEL_CLASS).toContain("fixed");
+    expect(WORKSPACE_SWITCHER_PANEL_CLASS).toContain("z-50");
+    expect(WORKSPACE_SWITCHER_PANEL_CLASS).not.toContain("absolute");
+  });
+
+  it("places the Workspaces menu below dest chips and Education search", () => {
+    expect(WORKSPACE_SWITCHER_CHROME_CLEARANCE_SELECTOR).toContain(
+      "data-house-phone-dest-chips-host",
+    );
+    expect(WORKSPACE_SWITCHER_CHROME_CLEARANCE_SELECTOR).toContain("data-house-under-nav");
+    expect(WORKSPACE_SWITCHER_MENU_GAP_PX).toBe(8);
+    expect(workspaceSwitcherMenuTopPx(56)).toBe(64);
+    expect(workspaceSwitcherMenuTopPx(56, [96, 140])).toBe(148);
+    expect(
+      workspaceSwitcherMenuStyle({
+        tone: "pill",
+        trigger: { bottom: 56, left: 24, right: 140 },
+        chromeBottoms: [120],
+        viewportWidth: 390,
+      }),
+    ).toEqual({ top: 128, left: 24 });
+    expect(
+      workspaceSwitcherMenuStyle({
+        tone: "plain",
+        trigger: { bottom: 56, left: 200, right: 360 },
+        chromeBottoms: [96],
+        viewportWidth: 390,
+      }),
+    ).toEqual({ top: 104, right: 30 });
   });
 
   it("keeps the existing workspace cookie write — no second scheme", () => {
@@ -248,6 +283,7 @@ describe("workspace switcher lock", () => {
       expect(className).toContain("overflow-visible");
     }
     expect(WORKSPACE_SWITCHER_PILL_PANEL_CLASS).toContain("overflow-hidden");
-    expect(WORKSPACE_SWITCHER_PILL_PANEL_CLASS).toContain("absolute");
+    expect(WORKSPACE_SWITCHER_PILL_PANEL_CLASS).toContain("fixed");
+    expect(WORKSPACE_SWITCHER_PILL_PANEL_CLASS).not.toContain("absolute");
   });
 });

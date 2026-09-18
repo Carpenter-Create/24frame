@@ -134,8 +134,9 @@ describe("Aggregation Dashboard mobile chrome — emblem left, dest chips under 
   it("keeps a quiet always-on chevron on the pill and the Workspaces menu", () => {
     expect(WORKSPACE_SWITCHER_PILL_CHEVRON_CLASS).toContain("opacity-100");
     expect(WORKSPACE_SWITCHER_PILL_CHEVRON_CLASS).not.toContain("opacity-0");
-    expect(WORKSPACE_SWITCHER_PILL_PANEL_CLASS).toContain("left-0");
-    expect(WORKSPACE_SWITCHER_PILL_PANEL_CLASS).not.toContain("right-0");
+    expect(WORKSPACE_SWITCHER_PILL_PANEL_CLASS).toContain("fixed");
+    expect(WORKSPACE_SWITCHER_PILL_PANEL_CLASS).toContain("z-50");
+    expect(WORKSPACE_SWITCHER_PILL_PANEL_CLASS).not.toContain("absolute");
     expect(WORKSPACE_SWITCHER.heading).toBe("Workspaces");
     const open = renderToStaticMarkup(
       createElement(WorkspaceSwitcher, {

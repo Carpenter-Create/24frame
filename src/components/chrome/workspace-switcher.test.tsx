@@ -56,12 +56,13 @@ describe("workspace switcher header control", () => {
     expect(topBarSrc).toContain("HouseLeadChrome");
     expect(topBarSrc).toContain('workspace="social"');
     expect(topBarSrc).toContain("<UserMenu");
-    const triggerSrc = src.slice(
-      src.indexOf("data-workspace-switcher-trigger"),
-      src.indexOf("data-workspace-switcher-popover"),
-    );
+    const triggerAt = src.lastIndexOf("data-workspace-switcher-trigger");
+    const triggerSrc = src.slice(triggerAt, src.indexOf("</button>", triggerAt));
     expect(triggerSrc).toContain("data-workspace-switcher-current");
     expect(triggerSrc).not.toContain("WorkspaceMark");
+    expect(src).toContain("createPortal");
+    expect(src).toContain("workspaceSwitcherMenuStyle");
+    expect(src).toContain("workspaceSwitcherChromeClearanceBottoms");
   });
 
   it("opens a quiet Workspaces heading, then Aggregation / Social / Education", () => {

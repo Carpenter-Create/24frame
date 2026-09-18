@@ -1,6 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from "react";
+import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import { CaretDown } from "@phosphor-icons/react";
 
@@ -33,7 +41,9 @@ import {
   type WorkspaceSwitcherPresentation,
   type WorkspaceSwitcherTone,
   workspaceSwitcherChevronClass,
+  workspaceSwitcherChromeClearanceBottoms,
   workspaceSwitcherMarkLetter,
+  workspaceSwitcherMenuStyle,
   workspaceSwitcherNextSegmentIndex,
   workspaceSwitcherOptionClass,
   workspaceSwitcherPanelClass,
@@ -163,10 +173,36 @@ export function WorkspaceSwitcher({
   const router = useRouter();
   const pathname = usePathname();
   const hostRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(defaultOpen);
+  const [panelStyle, setPanelStyle] = useState<CSSProperties>({});
   const pills = overviewLeadPills(options);
   const label = overviewTriggerLabel(pathname, workspaceModeLabel(current));
   const canSwitch = pills.length > 1;
+
+  useLayoutEffect(() => {
+    if (!open) return undefined;
+    const place = () => {
+      const trigger = triggerRef.current;
+      if (!trigger) return;
+      setPanelStyle(
+        workspaceSwitcherMenuStyle({
+          tone,
+          trigger: trigger.getBoundingClientRect(),
+          chromeBottoms: workspaceSwitcherChromeClearanceBottoms(),
+          viewportWidth: window.innerWidth,
+        }),
+      );
+    };
+    place();
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
+    return () => {
+      window.removeEventListener("resize", place);
+      window.removeEventListener("scroll", place, true);
+    };
+  }, [open, tone]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -174,8 +210,11 @@ export function WorkspaceSwitcher({
       if (event.key === "Escape") setOpen(false);
     };
     const onPointer = (event: MouseEvent) => {
+      const target = event.target as Node;
       const host = hostRef.current;
-      if (host && !host.contains(event.target as Node)) setOpen(false);
+      const panel = panelRef.current;
+      if (host?.contains(target) || panel?.contains(target)) return;
+      setOpen(false);
     };
     document.addEventListener("keydown", onKey);
     document.addEventListener("mousedown", onPointer);
@@ -205,6 +244,68 @@ export function WorkspaceSwitcher({
     );
   }
 
+  const panel = (
+    <div
+      ref={panelRef}
+      data-workspace-switcher-popover=""
+      className={workspaceSwitcherPanelClass(tone)}
+      style={panelStyle}
+    >
+      <div data-workspace-switcher-header="" className={WORKSPACE_SWITCHER_HEADER_CLASS}>
+        {WORKSPACE_SWITCHER.heading}
+      </div>
+      <div
+        role="listbox"
+        aria-label={WORKSPACE_SWITCHER.heading}
+        className="flex flex-col"
+      >
+        {pills.map((pill) => {
+          const selected = overviewLeadSelected(pill.id, pathname, current);
+          return (
+            <button
+              key={pill.id}
+              type="button"
+              role="option"
+              data-workspace-switcher-option={pill.id}
+              aria-selected={selected}
+              className={workspaceSwitcherOptionClass(selected)}
+              onClick={() => {
+                selectLeadPill(current, pill, options, router, pathname);
+                setOpen(false);
+              }}
+            >
+              {pill.id === "home" ? (
+                <span
+                  data-workspace-switcher-mark="home"
+                  className={WORKSPACE_SWITCHER_MARK_CLASS}
+                  aria-hidden="true"
+                />
+              ) : (
+                <WorkspaceMark mode={pill.id} />
+              )}
+              <span
+                data-workspace-switcher-option-label=""
+                className={WORKSPACE_SWITCHER_OPTION_LABEL_CLASS}
+              >
+                {pill.label}
+              </span>
+              <span
+                data-workspace-switcher-option-check=""
+                className={WORKSPACE_SWITCHER_OPTION_CHECK_GUTTER_CLASS}
+                aria-hidden="true"
+              >
+                <AppearanceCheck
+                  selected={selected}
+                  className={WORKSPACE_SWITCHER_OPTION_CHECK_CLASS}
+                />
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+
   return (
     <div
       ref={hostRef}
@@ -213,6 +314,7 @@ export function WorkspaceSwitcher({
       className={WORKSPACE_SWITCHER_HOST_CLASS}
     >
       <button
+        ref={triggerRef}
         type="button"
         data-workspace-switcher-trigger=""
         aria-label={WORKSPACE_SWITCHER.label}
@@ -231,65 +333,11 @@ export function WorkspaceSwitcher({
           weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
         />
       </button>
-      {open ? (
-        <div
-          data-workspace-switcher-popover=""
-          className={workspaceSwitcherPanelClass(tone)}
-        >
-          <div data-workspace-switcher-header="" className={WORKSPACE_SWITCHER_HEADER_CLASS}>
-            {WORKSPACE_SWITCHER.heading}
-          </div>
-          <div
-            role="listbox"
-            aria-label={WORKSPACE_SWITCHER.heading}
-            className="flex flex-col"
-          >
-            {pills.map((pill) => {
-              const selected = overviewLeadSelected(pill.id, pathname, current);
-              return (
-                <button
-                  key={pill.id}
-                  type="button"
-                  role="option"
-                  data-workspace-switcher-option={pill.id}
-                  aria-selected={selected}
-                  className={workspaceSwitcherOptionClass(selected)}
-                  onClick={() => {
-                    selectLeadPill(current, pill, options, router, pathname);
-                    setOpen(false);
-                  }}
-                >
-                  {pill.id === "home" ? (
-                    <span
-                      data-workspace-switcher-mark="home"
-                      className={WORKSPACE_SWITCHER_MARK_CLASS}
-                      aria-hidden="true"
-                    />
-                  ) : (
-                    <WorkspaceMark mode={pill.id} />
-                  )}
-                  <span
-                    data-workspace-switcher-option-label=""
-                    className={WORKSPACE_SWITCHER_OPTION_LABEL_CLASS}
-                  >
-                    {pill.label}
-                  </span>
-                  <span
-                    data-workspace-switcher-option-check=""
-                    className={WORKSPACE_SWITCHER_OPTION_CHECK_GUTTER_CLASS}
-                    aria-hidden="true"
-                  >
-                    <AppearanceCheck
-                      selected={selected}
-                      className={WORKSPACE_SWITCHER_OPTION_CHECK_CLASS}
-                    />
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      ) : null}
+      {open
+        ? typeof document !== "undefined"
+          ? createPortal(panel, document.body)
+          : panel
+        : null}
     </div>
   );
 }
