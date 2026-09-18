@@ -17,6 +17,7 @@ const AGGREGATION_PREFIXES = [
   "/overview",
   "/titles",
   "/attention",
+  "/activity",
   "/deliveries",
   "/catalog-health",
   "/reports",

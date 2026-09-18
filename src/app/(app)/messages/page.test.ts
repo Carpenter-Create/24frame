@@ -8,8 +8,6 @@ import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveOrgTier } from "@/lib/org-tier";
 import { ASK_GLOBEE } from "@/lib/ask-globee";
-import { UNPAGINATED_MAX } from "@/lib/list-bounds";
-import { MESSAGES_EMPTY, MESSAGES_TRUNCATED } from "@/lib/notifications";
 import MessagesPage from "./page";
 
 vi.mock("next/navigation", () => ({
@@ -297,42 +295,17 @@ describe("MessagesPage surfaces", () => {
     expectNoThreadFixture(html);
   });
 
-  it("keeps staff without a client org on the notification inbox", async () => {
+  it("sends staff without a client org to Activity, not the AI surface", async () => {
     const { rpc, from } = stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(ctx({ isGcStaff: true, hasOrg: false }) as never);
 
-    const html = await renderPage({ thread: THREAD, q: "What needs attention" });
-    expect(html).toContain("data-messages-inbox");
-    expect(html).toContain(MESSAGES_EMPTY);
-    expect(html).not.toContain("data-ask-globee-gate");
-    expectNoLanding(html);
-    expectNoThreadFixture(html);
-    expectNoCatalogLeak(html);
+    await expect(renderPage({ thread: THREAD, q: "What needs attention" })).rejects.toThrow(
+      "REDIRECT:/activity",
+    );
     expect(vi.mocked(getActiveOrgTier)).not.toHaveBeenCalled();
-    expect(rpc).toHaveBeenCalledWith("my_notifications", { p_limit: UNPAGINATED_MAX + 1 });
+    expect(rpc).not.toHaveBeenCalledWith("my_notifications", expect.anything());
     expect(rpc).not.toHaveBeenCalledWith("my_findings", expect.anything());
     expect(from).not.toHaveBeenCalledWith("ai_conversations");
-  });
-
-  it("does not offer Mark all read when the inbox probe overflowed", async () => {
-    stubClient({
-      notifications: Array.from({ length: UNPAGINATED_MAX + 1 }, (_, i) => ({
-        id: `aaaaaaaa-aaaa-4aaa-8aaa-${String(i).padStart(12, "0")}`,
-        org_id: "org-1",
-        kind: "title_rejected",
-        title: "Returned",
-        body: "fix chain of title",
-        source_refs: {},
-        created_at: "2026-09-01T00:00:00.000Z",
-        unread: true,
-      })),
-    });
-    vi.mocked(getOrgContext).mockResolvedValue(ctx({ isGcStaff: true, hasOrg: false }) as never);
-
-    const html = await renderPage();
-    expect(html).toContain('data-my-list-truncated="notifications"');
-    expect(html).toContain(MESSAGES_TRUNCATED);
-    expect(html).not.toContain("Mark all read");
   });
 
   it("treats staff with an active client org by that org's tier", async () => {

@@ -17,5 +17,6 @@ export async function markNotificationsRead(ids: string[]): Promise<{ error?: st
   if (error) return { error: error.message };
 
   revalidatePath("/messages");
+  revalidatePath("/activity");
   return {};
 }

@@ -43,7 +43,7 @@ export function askGlobeeChipMark(index: number): AskGlobeeChipMark | null {
 }
 
 export const ASK_GLOBEE = {
-  pageTitle: "Messages",
+  pageTitle: ASK_ASSISTANT,
   headline: ASK_ASSISTANT,
   // Leftover 7:73 greeting — do not render on landing. Do not invent a replacement.
   need: "What do you need?",
@@ -69,7 +69,7 @@ export const ASK_GLOBEE = {
   composerPlaceholder: "Ask a question or give a command.",
   // Landing 7:73 + 462:502 — same line, no period. Thread 247:295 keeps the period.
   composerPlaceholderMobile: "Ask a question or give a command",
-  globeeMark: "G",
+  globeeMark: "AI",
   copyLabel: "Copy",
   downloadLabel: "Download",
   downloadPdfLabel: "Download PDF",

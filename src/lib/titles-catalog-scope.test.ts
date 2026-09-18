@@ -16,6 +16,7 @@ const OTHER_PAGES = [
   "src/app/(app)/dashboard/page.tsx",
   "src/app/(app)/deliveries/page.tsx",
   "src/app/(app)/attention/page.tsx",
+  "src/app/(app)/activity/page.tsx",
   "src/app/(app)/messages/page.tsx",
   "src/app/(app)/(operator)/gc/titles/[id]/page.tsx",
   "src/app/(app)/titles/[id]/page.tsx",
@@ -139,6 +140,7 @@ describe("titles catalog scope", () => {
     expect(NAV.filter((item) => item.href === "/titles")).toHaveLength(1);
     expect(NAV.some((item) => /draft/i.test(item.label))).toBe(false);
     expect(NAV.find((item) => item.href === "/attention")?.label).toBe("Recent activity");
+    expect(NAV.find((item) => item.href === "/activity")?.label).toBe("Activity");
     expect(NAV.find((item) => item.href === "/deliveries")).toBeUndefined();
     expect(GC_NAV.some((item) => item.href === "/titles")).toBe(false);
   });

@@ -98,7 +98,7 @@ describe("Ask Globee relative time", () => {
     );
   });
 
-  it("attributes Globee with clock time, never the Winter Line fixture", () => {
+  it("attributes 24Frame AI with clock time, never the Winter Line fixture", () => {
     const line = formatAskGlobeeAttribution("2026-08-19T11:10:00.000Z");
     expect(line.startsWith(`${ASK_GLOBEE.attributionName} · `)).toBe(true);
     expect(line).toMatch(/ · \d{1,2}:\d{2} [AP]M$/);

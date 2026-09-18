@@ -217,6 +217,7 @@ describe("settings hub lock", () => {
       "Titles",
       "Deliveries",
       "Recent activity",
+      "Activity",
       "Ask 24Frame AI",
       "Queue",
       "Avails",

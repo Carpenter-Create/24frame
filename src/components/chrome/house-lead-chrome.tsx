@@ -1,9 +1,12 @@
 import Link from "next/link";
 
+import { ActivityBell } from "@/components/activity/activity-bell";
 import { BrandLogo } from "./brand-logo";
+import { AskAssistantHeaderLink } from "./ask-assistant-header";
 import { WorkspaceSwitcher } from "./workspace-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/cn";
+import type { ActivityItem } from "@/lib/activity";
 import {
   HOUSE_LEAD_CHROME_CLASS,
   HOUSE_LEAD_LOGO_CLASS,
@@ -28,6 +31,8 @@ export function HouseLeadChrome({
   search,
   phoneSearch,
   afterLead,
+  activityUnread = 0,
+  activityItems = [],
   accountMenu,
 }: {
   workspace: WorkspaceMode;
@@ -37,6 +42,8 @@ export function HouseLeadChrome({
   search?: React.ReactNode;
   phoneSearch?: React.ReactNode;
   afterLead?: React.ReactNode;
+  activityUnread?: Promise<number> | number;
+  activityItems?: Promise<ActivityItem[]> | ActivityItem[];
   accountMenu: React.ReactNode;
 }) {
   const social = workspace === "social";
@@ -105,7 +112,9 @@ export function HouseLeadChrome({
         >
           <WorkspaceSwitcher current={workspace} presentation="pills" />
         </div>
+        {settingsPage ? null : <AskAssistantHeaderLink />}
         <ThemeToggle />
+        <ActivityBell unread={activityUnread} items={activityItems} />
         {accountMenu}
       </div>
     </header>

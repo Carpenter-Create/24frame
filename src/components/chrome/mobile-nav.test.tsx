@@ -170,6 +170,7 @@ describe("MobileNavSheet", () => {
       "Dashboard",
       "Titles",
       "Recent activity",
+      "Activity",
       "Reports",
       "Ask 24Frame AI",
     ]);

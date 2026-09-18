@@ -18,7 +18,7 @@ export type NotificationEmailCopy = {
   subject: (ctx: { title: string }) => string;
   /** Paired CTA + path for the supplied context — the sender-facing deep-link API. */
   link: (ctx?: NotificationLinkCtx) => NotificationLink;
-  /** Path-only convenience for the Messages inbox; always delegates to `link`. */
+  /** Path-only convenience for the Activity inbox; always delegates to `link`. */
   path: (ctx?: NotificationLinkCtx) => string;
 };
 
@@ -41,8 +41,8 @@ function deliveryUpdateLink(ctx: NotificationLinkCtx = {}): NotificationLink {
 function titleRejectedLink(ctx: NotificationLinkCtx = {}): NotificationLink {
   return {
     cta: "Review and resubmit",
-    // Pre-existing contract: any truthy titleId deep-links; otherwise /messages.
-    path: ctx.titleId ? `/titles/${ctx.titleId}` : "/messages",
+    // Pre-existing contract: any truthy titleId deep-links; otherwise Activity.
+    path: ctx.titleId ? `/titles/${ctx.titleId}` : "/activity",
   };
 }
 

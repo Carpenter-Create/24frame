@@ -3,6 +3,7 @@ import "server-only";
 import type { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
 import { DETAIL_LIST, UNPAGINATED_MAX, splitProbe } from "@/lib/list-bounds";
+import { activityBellItems } from "@/lib/activity";
 import { normalizeMyDeliveries, type DeliveryBrowseRow } from "@/lib/deliveries-browse";
 
 type ServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -56,4 +57,12 @@ export async function loadMyNotifications(
   const limit = opts?.limit ?? MY_LIST_LIMIT;
   const { data } = await supabase.rpc("my_notifications", { p_limit: limit + 1 });
   return splitProbe(data as MyNotificationRow[] | null, limit);
+}
+
+/** Last five open alerts for the header bell. Same feed as /activity. */
+export async function loadActivityBellItems(
+  supabase: ServerClient,
+): Promise<MyNotificationRow[]> {
+  const loaded = await loadMyNotifications(supabase);
+  return activityBellItems(loaded.rows);
 }

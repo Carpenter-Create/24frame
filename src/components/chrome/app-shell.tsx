@@ -14,6 +14,7 @@ import { HouseLeadSearch } from "./house-lead-search";
 import { RailCollapse } from "./rail-collapse";
 import { AskAssistantChromeProvider } from "@/components/messages/ask-globee-chrome";
 import { cn } from "@/lib/cn";
+import type { ActivityItem } from "@/lib/activity";
 import type { AppShellChrome } from "@/lib/app-shell-chrome";
 import type { MessagesSurface } from "@/lib/ask-globee";
 import {
@@ -65,6 +66,7 @@ export function AppShell({
   name,
   photoUrl,
   messagesUnread,
+  activityItems = Promise.resolve([]),
   isGcStaff = false,
   defaultCollapsed = false,
   messagesSurface = "staff-inbox",
@@ -78,9 +80,10 @@ export function AppShell({
   photoUrl?: string | null;
   orgs?: Org[];
   activeOrgId?: string | null;
-  /** Promise, not a number — resolved inside SideNav's Suspense boundary so the
+  /** Promise, not a number — resolved inside HouseLeadChrome Suspense so the
    *  shell paints without waiting on the badge query. */
   messagesUnread: Promise<number>;
+  activityItems?: Promise<ActivityItem[]>;
   isGcStaff?: boolean;
   defaultCollapsed?: boolean;
   messagesSurface?: MessagesSurface;
@@ -153,6 +156,8 @@ export function AppShell({
             logoVisible="always"
             search={<HouseLeadSearch tone="live" />}
             phoneSearch={<HouseLeadSearch tone="live" presentation="icon" />}
+            activityUnread={messagesUnread}
+            activityItems={activityItems}
             accountMenu={
               <AccountMenuSlot chrome={chrome} email={email} name={name} photoUrl={photoUrl} />
             }
@@ -170,7 +175,6 @@ export function AppShell({
             <div className={cn("flex min-h-0 flex-1 flex-col", collapsed ? "gap-2 px-1 pb-2" : "gap-3 p-4")}>
               <div className="min-h-0 overflow-y-auto">
                 <SideNav
-                  messagesUnread={messagesUnread}
                   isGcStaff={false}
                   collapsed={collapsed}
                   workspace="social"
@@ -225,7 +229,6 @@ export function AppShell({
           ) : (
             <SideNavSlot
               chrome={chrome}
-              messagesUnread={messagesUnread}
               isGcStaff={isGcStaff}
               collapsed={collapsed}
               workspace={workspace}
@@ -277,6 +280,8 @@ export function AppShell({
             <MessagesHeaderSlot chrome={chrome} messagesSurface={messagesSurface} />
           ) : undefined
         }
+        activityUnread={messagesUnread}
+        activityItems={activityItems}
         accountMenu={
           <AccountMenuSlot chrome={chrome} email={email} name={name} photoUrl={photoUrl} />
         }
@@ -421,13 +426,11 @@ function ChromeCookieSync({
 
 function SideNavSlot({
   chrome,
-  messagesUnread,
   isGcStaff,
   collapsed,
   workspace,
 }: {
   chrome?: Promise<AppShellChrome>;
-  messagesUnread: Promise<number>;
   isGcStaff: boolean;
   collapsed: boolean;
   workspace: WorkspaceMode;
@@ -435,7 +438,6 @@ function SideNavSlot({
   if (!chrome) {
     return (
       <SideNav
-        messagesUnread={messagesUnread}
         isGcStaff={isGcStaff}
         collapsed={collapsed}
         workspace={workspace}
@@ -446,7 +448,6 @@ function SideNavSlot({
     <Suspense
       fallback={
         <SideNav
-          messagesUnread={messagesUnread}
           isGcStaff={isGcStaff}
           collapsed={collapsed}
           workspace={workspace}
@@ -455,7 +456,6 @@ function SideNavSlot({
     >
       <SideNavFromChrome
         chrome={chrome}
-        messagesUnread={messagesUnread}
         collapsed={collapsed}
         workspace={workspace}
       />
@@ -465,19 +465,16 @@ function SideNavSlot({
 
 function SideNavFromChrome({
   chrome,
-  messagesUnread,
   collapsed,
   workspace,
 }: {
   chrome: Promise<AppShellChrome>;
-  messagesUnread: Promise<number>;
   collapsed: boolean;
   workspace: WorkspaceMode;
 }) {
   const data = use(chrome);
   return (
     <SideNav
-      messagesUnread={messagesUnread}
       isGcStaff={data.isGcStaff}
       collapsed={collapsed}
       workspace={workspace}

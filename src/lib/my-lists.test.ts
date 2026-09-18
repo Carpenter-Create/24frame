@@ -8,6 +8,7 @@ import {
   MY_TITLE_DELIVERIES_LIMIT,
   loadMyDeliveries,
   loadMyFindings,
+  loadActivityBellItems,
   loadMyNotifications,
 } from "./my-lists";
 
@@ -113,6 +114,21 @@ describe("loadMyNotifications", () => {
     const out = await loadMyNotifications(client);
     expect(rpc).toHaveBeenCalledWith("my_notifications", { p_limit: UNPAGINATED_MAX + 1 });
     expect(out).toEqual({ rows: [], truncated: false });
+  });
+});
+
+describe("loadActivityBellItems", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("returns only the last five open rows from the same notifications feed", async () => {
+    const rows = Array.from({ length: 8 }, (_, i) => ({
+      id: String(i),
+      unread: i < 6,
+    }));
+    const { rpc, client } = stubRpc(rows);
+    const out = await loadActivityBellItems(client);
+    expect(rpc).toHaveBeenCalledWith("my_notifications", { p_limit: UNPAGINATED_MAX + 1 });
+    expect(out.map((row) => row.id)).toEqual(["0", "1", "2", "3", "4"]);
   });
 });
 

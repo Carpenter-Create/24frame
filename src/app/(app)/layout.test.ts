@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/app-shell-chrome", () => ({
   loadAppShellChrome: () => new Promise(() => {}),
   appShellUnread: () => new Promise(() => {}),
+  appShellActivityItems: () => new Promise(() => {}),
   enforceAppAccess: vi.fn(),
 }));
 vi.mock("@/components/chrome/app-shell", () => ({ AppShell: () => null }));
@@ -19,6 +20,7 @@ describe("AppLayout streaming shell", () => {
     expect(layoutSrc).toContain("export default function AppLayout");
     expect(layoutSrc).not.toContain("export default async function AppLayout");
     expect(layoutSrc).toContain("loadAppShellChrome()");
+    expect(layoutSrc).toContain("appShellActivityItems(chrome)");
     expect(layoutSrc).toContain("<AppShell");
     expect(layoutSrc).toContain("{children}");
   });

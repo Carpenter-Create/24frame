@@ -284,12 +284,20 @@ describe("workspace switcher placement", () => {
     expect(trailing).toContain('presentation="pills"');
     expect(trailing).not.toContain('tone="pill"');
     expect(trailing).toContain("WorkspaceSwitcher");
+    expect(trailing).toContain("<AskAssistantHeaderLink />");
     expect(trailing).toContain("<ThemeToggle />");
+    expect(trailing).toContain("<ActivityBell");
     expect(trailing).toContain("{accountMenu}");
     expect(trailing.indexOf("WorkspaceSwitcher")).toBeLessThan(
+      trailing.indexOf("<AskAssistantHeaderLink />"),
+    );
+    expect(trailing.indexOf("<AskAssistantHeaderLink />")).toBeLessThan(
       trailing.indexOf("<ThemeToggle />"),
     );
     expect(trailing.indexOf("<ThemeToggle />")).toBeLessThan(
+      trailing.indexOf("<ActivityBell"),
+    );
+    expect(trailing.indexOf("<ActivityBell")).toBeLessThan(
       trailing.indexOf("{accountMenu}"),
     );
     expect(leadSrc.indexOf("data-brand-emblem")).toBeLessThan(

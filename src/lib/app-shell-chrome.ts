@@ -4,10 +4,13 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { ACCOUNT_PHOTO_HREF } from "@/lib/account-avatar";
+import type { ActivityItem } from "@/lib/activity";
 import { resolveMessagesSurface, type MessagesSurface } from "@/lib/ask-globee";
+import { loadActivityBellItems } from "@/lib/my-lists";
 import { getActiveOrgTier } from "@/lib/org-tier";
 import { readSidebarCollapsed } from "@/lib/rail-collapse";
 import { hasAvatarObject } from "@/lib/s3-avatars";
+import { createClient } from "@/lib/supabase/server";
 import { getOrgContext, type OrgContext } from "@/lib/supabase/context";
 import { parseWorkspaceCookie, WORKSPACE_COOKIE, type WorkspaceMode } from "@/lib/workspace";
 
@@ -18,6 +21,7 @@ export type AppShellChrome = {
   orgs: { id: string; name: string }[];
   activeOrgId: string | null;
   unread: Promise<number>;
+  activityItems: Promise<ActivityItem[]>;
   isGcStaff: boolean;
   defaultCollapsed: boolean;
   messagesSurface: MessagesSurface;
@@ -53,6 +57,11 @@ export const loadAppShellChrome = cache(async (): Promise<AppShellChrome> => {
     orgs: ctx.orgs,
     activeOrgId: ctx.activeOrg?.id ?? null,
     unread: ctx.unread,
+    activityItems: Promise.resolve(
+      createClient()
+        .then((supabase) => loadActivityBellItems(supabase))
+        .then((rows) => rows as ActivityItem[]),
+    ).catch(() => []),
     isGcStaff: ctx.isGcStaff,
     defaultCollapsed: readSidebarCollapsed((name) => jar.get(name)?.value),
     messagesSurface: resolveMessagesSurface({
@@ -66,4 +75,10 @@ export const loadAppShellChrome = cache(async (): Promise<AppShellChrome> => {
 
 export function appShellUnread(chrome: Promise<AppShellChrome>): Promise<number> {
   return chrome.then((data) => data.unread);
+}
+
+export function appShellActivityItems(
+  chrome: Promise<AppShellChrome>,
+): Promise<ActivityItem[]> {
+  return chrome.then((data) => data.activityItems);
 }

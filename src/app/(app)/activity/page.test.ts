@@ -1,0 +1,149 @@
+import { renderToStaticMarkup } from "react-dom/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { ACTIVITY_PAGE } from "@/lib/activity";
+import { UNPAGINATED_MAX } from "@/lib/list-bounds";
+import { createClient } from "@/lib/supabase/server";
+import { getOrgContext } from "@/lib/supabase/context";
+import ActivityPage from "./page";
+
+vi.mock("next/navigation", () => ({
+  redirect: vi.fn((to: string) => {
+    throw new Error(`REDIRECT:${to}`);
+  }),
+  useRouter: () => ({ replace: vi.fn(), refresh: vi.fn(), prefetch: vi.fn(), push: vi.fn() }),
+  usePathname: () => "/activity",
+  useSearchParams: () => new URLSearchParams(),
+}));
+vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
+vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
+
+function ctx({
+  isGcStaff = false,
+  hasOrg = true,
+}: {
+  isGcStaff?: boolean;
+  hasOrg?: boolean;
+} = {}) {
+  const org = hasOrg ? { id: "org-1", name: "Meridian Pictures", status: "active" } : null;
+  return {
+    user: { id: "u1", email: "ada@example.com" },
+    rows: org ? [{ role: "account_owner", organizations: org }] : [],
+    orgs: org ? [{ id: org.id, name: org.name }] : [],
+    activeOrg: org,
+    activeRole: org ? "account_owner" : null,
+    canOperate: !!org,
+    isGcStaff,
+    unread: Promise.resolve(0),
+  };
+}
+
+const OPEN = {
+  id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+  org_id: "org-1",
+  kind: "title_rejected" as const,
+  title: "North Wind was returned",
+  body: "Chain of title is missing.",
+  source_refs: {},
+  created_at: "2026-09-12T12:00:00.000Z",
+  unread: true,
+};
+const DONE = {
+  id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
+  org_id: "org-1",
+  kind: "delivery_update" as const,
+  title: "Harbor Cut delivery update",
+  body: "Delivered to the channel.",
+  source_refs: {},
+  created_at: "2026-08-02T12:00:00.000Z",
+  unread: false,
+};
+
+function stubClient(notifications: unknown[] = [OPEN, DONE]) {
+  const rpc = vi.fn(async (name: string) => {
+    if (name === "my_notifications") return { data: notifications, error: null };
+    throw new Error(`unexpected rpc ${name}`);
+  });
+  vi.mocked(createClient).mockResolvedValue({ rpc } as never);
+  return { rpc };
+}
+
+async function renderPage(search: Record<string, string | string[] | undefined> = {}) {
+  const element = await ActivityPage({ searchParams: Promise.resolve(search) });
+  return renderToStaticMarkup(element);
+}
+
+describe("ActivityPage", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("defaults to the Open inbox, newest first, and hides Done", async () => {
+    stubClient();
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const html = await renderPage();
+    expect(html).toContain("data-activity-inbox");
+    expect(html).toContain(ACTIVITY_PAGE.title);
+    expect(html).toContain(ACTIVITY_PAGE.subtitle);
+    expect(html).toContain('data-activity-status-chip="open"');
+    expect(html).toContain('data-activity-status-chip="done"');
+    expect(html).toContain('data-activity-period-chip="ytd"');
+    expect(html).toContain('data-activity-period-chip="year"');
+    expect(html).toContain('data-activity-period-chip="quarter"');
+    expect(html).toContain('data-activity-period-chip="month"');
+    expect(html).toContain("North Wind was returned");
+    expect(html).not.toContain("Harbor Cut delivery update");
+    expect(html).toContain(ACTIVITY_PAGE.done);
+    expect(html).not.toContain("Mark as read");
+    expect(html).not.toContain("data-ask-globee-landing");
+    expect(html).not.toContain("data-messages-inbox");
+  });
+
+  it("shows Done history when status=done", async () => {
+    stubClient();
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const html = await renderPage({ status: "done" });
+    expect(html).toContain("Harbor Cut delivery update");
+    expect(html).not.toContain("North Wind was returned");
+  });
+
+  it("filters Open by a Reports period chip", async () => {
+    stubClient();
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const html = await renderPage({ period: "2026-08" });
+    expect(html).toContain(ACTIVITY_PAGE.emptyOpen);
+    expect(html).not.toContain("North Wind was returned");
+  });
+
+  it("keeps staff without a client org on Activity", async () => {
+    const { rpc } = stubClient([]);
+    vi.mocked(getOrgContext).mockResolvedValue(ctx({ isGcStaff: true, hasOrg: false }) as never);
+
+    const html = await renderPage();
+    expect(html).toContain("data-activity-inbox");
+    expect(html).toContain(ACTIVITY_PAGE.emptyOpen);
+    expect(rpc).toHaveBeenCalledWith("my_notifications", { p_limit: UNPAGINATED_MAX + 1 });
+  });
+
+  it("does not offer a complete list claim when the probe overflowed", async () => {
+    stubClient(
+      Array.from({ length: UNPAGINATED_MAX + 1 }, (_, i) => ({
+        ...OPEN,
+        id: `aaaaaaaa-aaaa-4aaa-8aaa-${String(i).padStart(12, "0")}`,
+      })),
+    );
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const html = await renderPage();
+    expect(html).toContain('data-my-list-truncated="notifications"');
+    expect(html).toContain(ACTIVITY_PAGE.truncated);
+  });
+
+  it("sends an unauthenticated visitor to login", async () => {
+    vi.mocked(getOrgContext).mockResolvedValue(null as never);
+    await expect(ActivityPage()).rejects.toThrow("REDIRECT:/login");
+  });
+});

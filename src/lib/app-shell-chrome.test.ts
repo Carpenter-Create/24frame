@@ -4,7 +4,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getOrgContext } from "@/lib/supabase/context";
 import { getActiveOrgTier } from "@/lib/org-tier";
 import { hasAvatarObject } from "@/lib/s3-avatars";
-import { appShellUnread, enforceAppAccess, loadAppShellChrome } from "@/lib/app-shell-chrome";
+import {
+  appShellActivityItems,
+  appShellUnread,
+  enforceAppAccess,
+  loadAppShellChrome,
+} from "@/lib/app-shell-chrome";
 
 vi.mock("next/navigation", () => ({
   redirect: vi.fn((to: string) => {
@@ -17,6 +22,11 @@ vi.mock("next/headers", () => ({
 vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
 vi.mock("@/lib/org-tier", () => ({ getActiveOrgTier: vi.fn(async () => null) }));
 vi.mock("@/lib/s3-avatars", () => ({ hasAvatarObject: vi.fn(async () => false) }));
+vi.mock("@/lib/supabase/server", () => ({
+  createClient: vi.fn(async () => ({
+    rpc: vi.fn(async () => ({ data: [], error: null })),
+  })),
+}));
 
 type Status = "registered" | "awaiting_payment" | "active";
 
@@ -97,6 +107,7 @@ describe("app shell chrome load", () => {
     expect(getActiveOrgTier).toHaveBeenCalledWith("org-1");
     expect(hasAvatarObject).toHaveBeenCalledWith("u1");
     await expect(appShellUnread(Promise.resolve(chrome))).resolves.toBe(0);
+    await expect(appShellActivityItems(Promise.resolve(chrome))).resolves.toEqual([]);
   });
 });
 
@@ -106,6 +117,7 @@ describe("Social nav no longer waits on the (app) layout waterfall", () => {
     expect(layoutSrc).not.toContain("export default async function AppLayout");
     expect(layoutSrc).toContain("loadAppShellChrome()");
     expect(layoutSrc).toContain("appShellUnread(chrome)");
+    expect(layoutSrc).toContain("appShellActivityItems(chrome)");
     expect(layoutSrc).toContain("<AppAccessGate");
     expect(layoutSrc).toContain("<Suspense fallback={null}>");
     expect(layoutSrc).toContain("{children}");
