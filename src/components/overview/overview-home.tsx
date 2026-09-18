@@ -28,6 +28,10 @@ import type { SocialHomeChat } from "@/lib/social-home-chats";
 import { socialDmHref, socialInitials } from "@/lib/social";
 import { cn } from "@/lib/cn";
 
+// Home IA v2 — five modules, positive first. This-week pulse folds
+// into Aggregation (top performing + net revenue / pulse). Social
+// stays avatars-only. House primitives only.
+
 export function OverviewHome({
   revenueCents,
   topTitles,
@@ -56,67 +60,6 @@ export function OverviewHome({
   return (
     <div data-overview="" className={cn("flex flex-col", DASHBOARD_SECTION_AIR_CLASS)}>
       <PageHeader title={OVERVIEW_PAGE.title} />
-
-      <OverviewModule
-        testId="needs-you"
-        title={OVERVIEW_PAGE.needsYou}
-        href={OVERVIEW_PAGE.needsYouHref}
-        empty={OVERVIEW_PAGE.needsYouEmpty}
-      >
-        {needsYou.length > 0 ? (
-          <ul className={DASHBOARD_ROW_LIST_CLASS}>
-            {needsYou.map((row) => (
-              <li key={row.id} className={DASHBOARD_ROW_CLASS}>
-                <Link href={row.href} className="t-body-sm font-medium text-ink">
-                  {row.what}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        ) : null}
-      </OverviewModule>
-
-      <OverviewModule
-        testId="week"
-        title={OVERVIEW_PAGE.thisWeek}
-        empty={OVERVIEW_PAGE.weekEmpty}
-      >
-        {weekPulse.length > 0 ? (
-          <ul className={DASHBOARD_ROW_LIST_CLASS}>
-            {weekPulse.map((row) => (
-              <li key={row.key} data-overview-week-row={row.key} className={DASHBOARD_ROW_CLASS}>
-                <span className="t-body-sm text-ink">{row.label}</span>
-                <span className="t-data t-body-sm text-ink-2">{row.count}</span>
-              </li>
-            ))}
-          </ul>
-        ) : null}
-      </OverviewModule>
-
-      <section data-overview-aggregation="" className={cn("flex flex-col", DASHBOARD_SECTION_AIR_CLASS)}>
-        <DashboardHomePanel aria-label={OVERVIEW_PAGE.revenue} data-overview-revenue="">
-          <div className={`flex items-center justify-between ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD_LIST}`}>
-            <p className={DASHBOARD_SECTION_TITLE_CLASS}>{OVERVIEW_PAGE.revenue}</p>
-            <TextAction href={OVERVIEW_PAGE.revenueHref}>{OVERVIEW_PAGE.aggregation}</TextAction>
-          </div>
-          <div className="border-t border-hairline px-[var(--space-4)] py-[var(--space-4)]">
-            {revenueCents === null ? (
-              <DashboardHomeEmpty>{OVERVIEW_PAGE.revenueEmpty}</DashboardHomeEmpty>
-            ) : (
-              <p data-overview-revenue-value="" className="t-display t-data text-ink">
-                {formatUsdCents(revenueCents)}
-              </p>
-            )}
-          </div>
-        </DashboardHomePanel>
-        <DashboardListPanel
-          label={OVERVIEW_PAGE.topPerforming}
-          empty={OVERVIEW_PAGE.topPerformingEmpty}
-          testId="overview-top-performing"
-        >
-          {topTitles.length > 0 ? <DashboardTitleRows items={topTitles} /> : undefined}
-        </DashboardListPanel>
-      </section>
 
       <OverviewModule
         testId="social"
@@ -172,6 +115,60 @@ export function OverviewHome({
                 coverUrl={courseCovers.get(course.id)}
                 metaLabel={courseMeta.get(course.id)}
               />
+            ))}
+          </ul>
+        ) : null}
+      </OverviewModule>
+
+      <section data-overview-aggregation="" className={cn("flex flex-col", DASHBOARD_SECTION_AIR_CLASS)}>
+        <DashboardListPanel
+          label={OVERVIEW_PAGE.topPerforming}
+          empty={OVERVIEW_PAGE.topPerformingEmpty}
+          testId="overview-top-performing"
+        >
+          {topTitles.length > 0 ? <DashboardTitleRows items={topTitles} /> : undefined}
+        </DashboardListPanel>
+        <DashboardHomePanel aria-label={OVERVIEW_PAGE.revenue} data-overview-revenue="">
+          <div className={`flex items-center justify-between ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD_LIST}`}>
+            <p className={DASHBOARD_SECTION_TITLE_CLASS}>{OVERVIEW_PAGE.revenue}</p>
+            <TextAction href={OVERVIEW_PAGE.revenueHref}>{OVERVIEW_PAGE.aggregation}</TextAction>
+          </div>
+          <div className="border-t border-hairline px-[var(--space-4)] py-[var(--space-4)]">
+            {revenueCents === null ? (
+              <DashboardHomeEmpty>{OVERVIEW_PAGE.revenueEmpty}</DashboardHomeEmpty>
+            ) : (
+              <p data-overview-revenue-value="" className="t-display t-data text-ink">
+                {formatUsdCents(revenueCents)}
+              </p>
+            )}
+          </div>
+          {weekPulse.length > 0 ? (
+            <ul data-overview-pulse="" className={DASHBOARD_ROW_LIST_CLASS}>
+              {weekPulse.map((row) => (
+                <li key={row.key} data-overview-week-row={row.key} className={DASHBOARD_ROW_CLASS}>
+                  <span className="t-body-sm text-ink">{row.label}</span>
+                  <span className="t-data t-body-sm text-ink-2">{row.count}</span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </DashboardHomePanel>
+      </section>
+
+      <OverviewModule
+        testId="needs-you"
+        title={OVERVIEW_PAGE.needsYou}
+        href={OVERVIEW_PAGE.needsYouHref}
+        empty={OVERVIEW_PAGE.needsYouEmpty}
+      >
+        {needsYou.length > 0 ? (
+          <ul className={DASHBOARD_ROW_LIST_CLASS}>
+            {needsYou.map((row) => (
+              <li key={row.id} className={DASHBOARD_ROW_CLASS}>
+                <Link href={row.href} className="t-body-sm font-medium text-ink">
+                  {row.what}
+                </Link>
+              </li>
             ))}
           </ul>
         ) : null}

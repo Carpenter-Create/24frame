@@ -202,6 +202,44 @@ describe("AppShell header", () => {
   });
 });
 
+describe("AppShell Home chrome", () => {
+  it("hides dest rails on /home and keeps them on workspace destinations", () => {
+    navigation.pathname = "/home";
+    const home = renderShell();
+    expect(home).toContain('data-home-chrome=""');
+    expect(home).toContain("data-app-home-frame");
+    expect(home).toContain("data-house-lead-chrome");
+    expect(home).toContain("data-workspace-switcher");
+    expect(home).toContain('data-workspace-switcher-segment="home"');
+    expect(home).toContain("data-brand-emblem");
+    expect(home).toContain("data-theme-toggle");
+    expect(home).toContain("data-activity-bell");
+    expect(home).toContain("data-user-menu-host");
+    expect(home).not.toContain("data-app-rail");
+    expect(home).not.toContain("data-side-nav");
+    expect(home).not.toContain("data-social-rail");
+    expect(home).not.toContain("Collapse sidebar");
+    expect(home).not.toContain("Expand sidebar");
+    expect(home).not.toContain("data-mobile-nav-trigger");
+    expect(home).toContain("--sidebar-width:0px");
+    expect(home).toContain("--sidebar-width-collapsed:0px");
+    expect(shellSrc).toContain("overviewHidesRail");
+    expect(shellSrc).toContain("OVERVIEW_RAIL_OFF_WIDTH");
+    expect(shellSrc).toContain("data-home-chrome");
+
+    navigation.pathname = "/overview";
+    expect(renderShell()).not.toContain("data-app-rail");
+
+    for (const path of ["/dashboard", "/social", "/social/courses"]) {
+      navigation.pathname = path;
+      const html = renderShell();
+      expect(html).toContain("data-app-rail");
+      expect(html).toContain("Collapse sidebar");
+      expect(html).not.toContain('data-home-chrome=""');
+    }
+  });
+});
+
 describe("AppShell Access rail and home frame", () => {
   it("uses a white 220 rail and the locked `/` page pad", () => {
     const tokens = readFileSync(
