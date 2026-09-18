@@ -8,9 +8,9 @@ Isolated AWS compute for Industry News RSS ingest.
 - EventBridge rule `24frame-news-ingest` `rate(30 minutes)` → this handler. DLQ `24frame-news-ingest-dlq`.
 - Not Supabase. Not Vercel cron. Not Aurora.
 
-Entry: `workers/news/handler.ts` calls `ingestNewsFeeds` in `src/lib/news-ingest.ts`. Fail-soft per source. RSS image first; OG-scrape the article when `image_url` is null (12s, desktop Chrome UA, fail-soft). Per-source CloudWatch counters: `ogAttempted`, `ogFilled`, `ogMiss`. Throws only when every live source failed so EventBridge can retry / DLQ.
+Entry: `workers/news/handler.ts` calls `ingestNewsFeeds` in `src/lib/news-ingest.ts`. Fail-soft per source. RSS image first; OG-scrape the article when `image_url` is null (12s, desktop Chrome UA, 1.5MB HTML cap, fail-soft). Override the cap with server-only `NEWS_OG_MAX_BYTES`. Per-source CloudWatch counters: `ogAttempted`, `ogFilled`, `ogMiss`. Throws only when every live source failed so EventBridge can retry / DLQ.
 
-**Code on `main` is not live Lambda.** After merging ingest or OG-scrape changes, founder / CoS must `esbuild` a fresh bundle and `aws lambda update-function-code` for `24frame-news-ingest`. See [`docs/infra/news-aws-setup.md`](../../docs/infra/news-aws-setup.md).
+**After merge, MUST redeploy Lambda `24frame-news-ingest`.** Merge ≠ live for ingest. Founder / CoS must `esbuild` a fresh bundle and `aws lambda update-function-code`. See [`docs/infra/news-aws-setup.md`](../../docs/infra/news-aws-setup.md).
 
 Founder-executed apply: [`docs/infra/news-aws-setup.md`](../../docs/infra/news-aws-setup.md). Do not create AWS from CI.
 
@@ -23,6 +23,7 @@ NEWS_AWS_REGION=us-west-2
 NEWS_DDB_TABLE=24frame-news-dev
 NEWS_AWS_ACCESS_KEY_ID=          # optional when the Lambda role is attached
 NEWS_AWS_SECRET_ACCESS_KEY=      # optional when the Lambda role is attached
+NEWS_OG_MAX_BYTES=               # optional; default 1500000. Server-only. Never NEXT_PUBLIC_.
 ```
 
 ## Local invoke (after founder apply)

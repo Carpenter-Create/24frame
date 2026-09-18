@@ -5,3 +5,15 @@ title = "globalcontent-dashboard"
 
 [extend]
 useDefault = true
+
+# Naming false positive: ASK_AI_RETURN_STORAGE_KEY = "24frame_ask_ai_return"
+# is a sessionStorage key name, not a credential. generic-api-key trips on _KEY.
+# CI full-history scans all fetched refs, so this lands here even when the
+# file is only on another branch. Narrow path + line regex AND.
+# Do not broaden. No inline gitleaks:allow.
+[[allowlists]]
+description = "Ask AI overlay sessionStorage key name — not a credential"
+paths = ['''src/lib/ask-ai-overlay\.ts''']
+regexes = ['''24frame_ask_ai_return''']
+regexTarget = "line"
+condition = "AND"

@@ -10,12 +10,24 @@ import { createNewsIngestStore, type NewsPersist } from "@/lib/news-store";
 export const NEWS_FEED_TIMEOUT_MS = 8_000;
 export const NEWS_FEED_MAX_BYTES = 1_500_000;
 export const NEWS_OG_TIMEOUT_MS = 12_000;
-export const NEWS_OG_MAX_BYTES = 512_000;
+/** Default OG HTML cap. THR pages are ~611KB; 512KB truncated before og:image. */
+export const NEWS_OG_MAX_BYTES = 1_500_000;
 export const NEWS_INGEST_CONCURRENCY = 3;
 export const NEWS_OG_CONCURRENCY = 4;
 /** Mainstream desktop Chrome — publishers gate on bot tokens like 24FrameNews/1.0. */
 export const NEWS_USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
+
+export type NewsEnvLike = Record<string, string | undefined>;
+
+/** `NEWS_OG_MAX_BYTES` env override (positive integer). Invalid/empty → default. */
+export function resolveNewsOgMaxBytes(env: NewsEnvLike = process.env): number {
+  const raw = env.NEWS_OG_MAX_BYTES?.trim();
+  if (!raw) return NEWS_OG_MAX_BYTES;
+  const parsed = Number.parseInt(raw, 10);
+  if (!Number.isFinite(parsed) || parsed < 1) return NEWS_OG_MAX_BYTES;
+  return parsed;
+}
 
 export type { NewsPersist };
 
@@ -75,11 +87,17 @@ export async function fetchNewsFeedXml(
 
 export async function fetchNewsArticleHtml(
   url: string,
-  init: { fetchImpl?: typeof fetch; timeoutMs?: number } = {},
+  init: {
+    fetchImpl?: typeof fetch;
+    timeoutMs?: number;
+    maxBytes?: number;
+    env?: NewsEnvLike;
+  } = {},
 ): Promise<string | null> {
   if (!/^https:\/\//i.test(url)) return null;
   const fetchImpl = init.fetchImpl ?? fetch;
   const timeoutMs = init.timeoutMs ?? NEWS_OG_TIMEOUT_MS;
+  const maxBytes = init.maxBytes ?? resolveNewsOgMaxBytes(init.env);
   const controller = new AbortController();
   let timer: ReturnType<typeof setTimeout> | undefined;
 
@@ -94,7 +112,7 @@ export async function fetchNewsArticleHtml(
     });
     if (!res.ok) return null;
     const buf = new Uint8Array(await res.arrayBuffer());
-    const slice = buf.byteLength > NEWS_OG_MAX_BYTES ? buf.subarray(0, NEWS_OG_MAX_BYTES) : buf;
+    const slice = buf.byteLength > maxBytes ? buf.subarray(0, maxBytes) : buf;
     return new TextDecoder("utf-8").decode(slice);
   })().catch(() => null);
 
@@ -118,12 +136,19 @@ export async function fillNewsOgImages(
     fetchHtml?: (url: string) => Promise<string | null>;
     fetchImpl?: typeof fetch;
     timeoutMs?: number;
+    maxBytes?: number;
+    env?: NewsEnvLike;
   } = {},
 ): Promise<NormalizedNewsItem[]> {
   const fetchHtml =
     init.fetchHtml ??
     ((url: string) =>
-      fetchNewsArticleHtml(url, { fetchImpl: init.fetchImpl, timeoutMs: init.timeoutMs }));
+      fetchNewsArticleHtml(url, {
+        fetchImpl: init.fetchImpl,
+        timeoutMs: init.timeoutMs,
+        maxBytes: init.maxBytes,
+        env: init.env,
+      }));
   const missing = items.filter((item) => !item.image_url);
   if (missing.length === 0) return items.map((item) => item);
 

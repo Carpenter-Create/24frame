@@ -44,7 +44,9 @@ describe("News AWS setup doc", () => {
     expect(existsSync("src/app/(app)/home/news/page.tsx")).toBe(true);
     expect(infra).toContain("Image backfill");
     expect(infra).toContain("update-function-code");
-    expect(infra).toContain("Code on `main` is **not** the live");
+    expect(infra).toContain("MUST redeploy Lambda `24frame-news-ingest`");
+    expect(infra).toContain("Merge ≠ live for ingest");
+    expect(envExample).toContain("NEWS_OG_MAX_BYTES=");
     expect(loadSrc).not.toMatch(/from ["']@\/lib\/supabase/);
   });
 });
