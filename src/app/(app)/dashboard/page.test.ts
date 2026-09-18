@@ -184,12 +184,13 @@ function expectCompanyAdminStructuralDelta(html: string) {
   expect(html).toContain("data-dashboard-period");
   expect(html).toContain("data-dashboard-period-current");
   expect(html).toContain("data-dashboard-period-chevron");
-  expect(html).toContain('data-dashboard-module="attention"');
-  expect(html).toContain("Attention");
+  expect(html).not.toContain('data-dashboard-module="attention"');
+  expect(html).not.toContain("Recent account activity");
   expect(html).toContain('data-dashboard-module="licensing-status"');
   expect(html).toContain(DASHBOARD_LICENSING.title);
   expect(html).not.toContain("data-dashboard-licensing-summary");
   expect(html).toContain('data-dashboard-module="recent-activity"');
+  expect(html).toContain(DASHBOARD_ADMIN.activity);
   expect(html).toContain("data-dashboard-top-performing");
   expect(html).toContain(DASHBOARD_HOME.topPerforming);
   expect(html).toContain('data-dashboard-top-pill="titles"');
@@ -746,7 +747,7 @@ describe("company admin Overview hero", () => {
     expect(html).not.toContain("data-dashboard-user");
     expect(html).toContain("data-dashboard-revenue");
     expect(html).toContain("data-dashboard-revenue-chart");
-    expect(html).toContain('data-dashboard-module="attention"');
+    expect(html).not.toContain('data-dashboard-module="attention"');
     expect(html).toContain('data-dashboard-module="licensing-status"');
     expect(html).toContain('data-dashboard-module="recent-activity"');
     expect(html).toContain("lg:grid-cols-5");
@@ -762,17 +763,15 @@ describe("company admin Overview hero", () => {
       html.indexOf("data-dashboard-overview-attention"),
     );
     expect(html.indexOf("data-dashboard-revenue")).toBeLessThan(
-      html.indexOf('data-dashboard-module="attention"'),
+      html.indexOf('data-dashboard-module="recent-activity"'),
     );
-    expect(html.indexOf('data-dashboard-module="attention"')).toBeLessThan(
+    expect(html.indexOf('data-dashboard-module="recent-activity"')).toBeLessThan(
       html.indexOf('data-dashboard-module="licensing-status"'),
     );
     expect(html.indexOf('data-dashboard-module="licensing-status"')).toBeLessThan(
       html.indexOf("data-dashboard-top-performing"),
     );
-    expect(html.indexOf("data-dashboard-top-performing")).toBeLessThan(
-      html.indexOf('data-dashboard-module="recent-activity"'),
-    );
+    expect(html.split('data-dashboard-module="recent-activity"').length - 1).toBe(1);
     expect(html.indexOf("data-dashboard-top-performing")).toBeLessThan(
       html.indexOf('data-dashboard-top-pill="titles"'),
     );
@@ -925,7 +924,7 @@ describe("company admin Overview hero", () => {
     expect(html).not.toContain(DASHBOARD_ADMIN.allCompany);
   });
 
-  it("maps findings into Attention and deliveries into nested Licensing status", async () => {
+  it("maps title and delivery events into Recent activity and deliveries into nested Licensing status", async () => {
     stubClient(
       [
         {
@@ -981,9 +980,15 @@ describe("company admin Overview hero", () => {
       ctx({ isGcStaff: false, orgStatus: "active", role: "account_owner" }) as never,
     );
     const html = renderToStaticMarkup(await DashboardPage({ searchParams: Promise.resolve({}) }));
-    expect(html).toContain('data-dashboard-module="attention"');
-    expect(html).toContain("Synopsis is required.");
-    expect(html).toContain("data-dashboard-attention-clock");
+    expect(html).toContain('data-dashboard-module="recent-activity"');
+    expect(html).toContain(DASHBOARD_ADMIN.activity);
+    expect(html).toContain(DASHBOARD_ADMIN.titleAdded);
+    expect(html).toContain(DASHBOARD_ADMIN.deliveryUpdated);
+    expect(html).not.toContain('data-dashboard-module="attention"');
+    expect(html).not.toContain("data-dashboard-attention-clock");
+    expect(html).not.toContain("Synopsis is required.");
+    expect(html).not.toContain(DASHBOARD_ADMIN.findingOpened);
+    expect(html).not.toContain("Recent account activity");
     expect(html).toContain('data-dashboard-module="licensing-status"');
     expect(html).toContain("Winter Light");
     expect(html).toContain("Endpoint A");

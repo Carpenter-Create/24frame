@@ -1,4 +1,4 @@
-import { DASHBOARD_HOME_STACK, type ClientHomeFinding, type ClientHomeTitle } from "@/lib/dashboard-home";
+import { DASHBOARD_HOME_STACK, type ClientHomeTitle } from "@/lib/dashboard-home";
 import { formatUsdCents } from "@/lib/finance";
 import { parseReportsUserId, reportsUserLabel, type ReportsUserOption } from "@/lib/reports";
 import { titleClientPath } from "@/lib/title-public-id";
@@ -18,7 +18,7 @@ export const DASHBOARD_ADMIN = {
   asOfPrefix: "As of",
   updatedPrefix: "Updated",
   updatedNone: "No closed statement.",
-  activity: "Recent account activity",
+  activity: "Recent activity",
   activityEmpty: "No account activity for this period.",
   viewAll: "View all",
   // Killed from Dashboard chrome after the 2026-09-16 Adam lock — tests lock absence.
@@ -651,7 +651,7 @@ function latestAuditEvent(
  * Stamp audit_log.actor + audit_log.at onto synthesized activity rows.
  * Missing or unresolved people stay a muted "?" — never an invented name.
  * Does not invent event types; copy grammar stays Title added / Delivery
- * updated / Finding opened.
+ * updated. Findings stay on /attention — not this feed.
  */
 export function applyActivityAudit(
   rows: readonly DashboardActivityRow[],
@@ -693,7 +693,6 @@ export function recentAccountActivity(input: {
     title: string;
     updated_at: string | null;
   }[];
-  findings: readonly ClientHomeFinding[];
   period: DashboardPeriod;
   userId: string | null;
 }): DashboardActivityRow[] {
@@ -728,25 +727,6 @@ export function recentAccountActivity(input: {
       at: row.updated_at,
       count: 1,
       detail: DASHBOARD_ADMIN.deliveryUpdated,
-      actorId: null,
-      actor: dashboardActivityActor(null),
-    });
-  }
-  for (const finding of input.findings) {
-    if (titleIds && !titleIds.has(finding.entity_id)) continue;
-    if (!finding.created_at || !isoInDashboardPeriod(finding.created_at, input.period)) continue;
-    const title = input.titles.find((row) => row.id === finding.entity_id);
-    if (!title) continue;
-    const findingId = finding.id?.trim();
-    rows.push({
-      id: findingId
-        ? `finding:${findingId}`
-        : `finding:${finding.entity_id}:${finding.created_at}`,
-      title: title.title,
-      href: activityHref(title.catalog_id),
-      at: finding.created_at,
-      count: 0,
-      detail: finding.message?.trim() || DASHBOARD_ADMIN.findingOpened,
       actorId: null,
       actor: dashboardActivityActor(null),
     });

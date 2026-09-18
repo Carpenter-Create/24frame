@@ -1,9 +1,7 @@
 import Link from "next/link";
 
-import { DashboardViewAll } from "@/components/dashboard/dashboard-view-alts";
 import { DashboardAdminControls } from "@/components/dashboard/dashboard-admin-controls";
 import { DashboardRevenueChart } from "@/components/dashboard/dashboard-revenue-chart";
-import { DashboardAttention } from "@/components/dashboard/dashboard-attention";
 import {
   DASHBOARD_ADMIN,
   dashboardAsOfLine,
@@ -39,7 +37,6 @@ import {
 } from "@/lib/dashboard-craft";
 import { DASHBOARD_FIXTURE, dashboardFixtureLabel } from "@/lib/dashboard-fixture";
 import { dashboardJustInDate, dashboardJustInTime } from "@/lib/dashboard-home";
-import type { AttentionSnapshot } from "@/lib/dashboard-attention";
 import { cn } from "@/lib/cn";
 
 export function DashboardFixtureBanner() {
@@ -145,10 +142,12 @@ export function DashboardRecentActivity({ items }: { items: readonly DashboardAc
     >
       <div className={cn("flex items-center justify-between", DASHBOARD_RELATED_GAP_CLASS, DASHBOARD_CARD_PAD_LIST)}>
         <p className={DASHBOARD_SECTION_TITLE_CLASS}>{DASHBOARD_ADMIN.activity}</p>
-        <DashboardViewAll href="/titles" />
       </div>
       {items.length === 0 ? (
-        <p className="border-t border-hairline px-[var(--space-4)] py-[var(--space-2)] t-body-sm text-ink-3">
+        <p
+          data-dashboard-activity-empty=""
+          className="border-t border-hairline px-[var(--space-4)] py-[var(--space-2)] t-body-sm text-ink-3"
+        >
           {DASHBOARD_ADMIN.activityEmpty}
         </p>
       ) : (
@@ -198,7 +197,7 @@ export function DashboardAdminHero({
   period,
   options,
   hero,
-  attention,
+  activity,
   fixture = false,
   periodMenuOpen = false,
 }: {
@@ -206,7 +205,7 @@ export function DashboardAdminHero({
   period: DashboardPeriod;
   options: readonly DashboardPeriodOption[];
   hero: DashboardRevenueHero;
-  attention: AttentionSnapshot;
+  activity: readonly DashboardActivityRow[];
   fixture?: boolean;
   periodMenuOpen?: boolean;
 }) {
@@ -228,7 +227,7 @@ export function DashboardAdminHero({
           <DashboardRevenueCard period={period} hero={hero} fixture={fixture} />
         </div>
         <div data-dashboard-overview-attention="" className={DASHBOARD_ADMIN_HERO_ATTENTION_CLASS}>
-          <DashboardAttention snapshot={attention} />
+          <DashboardRecentActivity items={activity} />
         </div>
       </div>
     </div>
