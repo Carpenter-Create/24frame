@@ -36,7 +36,8 @@ export const OVERVIEW_MODULE_ORDER = [
   "ai-next",
 ] as const;
 
-/** Phone-chrome width: dest rail is gone, header + main go full-canvas. */
+/** Phone-chrome / Home width: dest rail is gone; lead + main go full-canvas.
+ *  Home modules inset separately with --access-rail-width. */
 export const OVERVIEW_RAIL_OFF_WIDTH = "0px";
 
 export const OVERVIEW_PAGE = {

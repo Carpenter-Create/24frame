@@ -33,6 +33,8 @@ import {
   HOUSE_CHROME_GUTTER,
   HOUSE_CHROME_GUTTER_X_CLASS,
   HOUSE_CANVAS_X_CLASS,
+  HOUSE_ACCESS_RAIL_WIDTH,
+  HOUSE_HOME_RAIL_COLUMN_CLASS,
   HOUSE_RAIL_FLOAT_CLASS,
 } from "@/lib/house-shell";
 import { SOCIAL_PILL_ACTIVE_CLASS, SOCIAL_PILL_IDLE_CLASS } from "@/lib/social-chrome";
@@ -114,6 +116,7 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(tokens).toMatch(/--radius-lg:\s*16px;/);
     expect(tokens).toMatch(/--content-inset:\s*48px;/);
     expect(tokens).toMatch(/--chrome-gutter:\s*16px;/);
+    expect(tokens).toMatch(/--access-rail-width:\s*220px;/);
     expect(tokens).toContain("--accent-wash:");
     expect(tokens).toMatch(/Aggregation · Social · Education/);
     expect(tokens).not.toMatch(/--radius-lg:\s*14px;/);
@@ -137,6 +140,10 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(HOUSE_CHROME_GUTTER).toBe("var(--chrome-gutter)");
     expect(HOUSE_CHROME_GUTTER_X_CLASS).toBe("md:px-[var(--chrome-gutter)]");
     expect(HOUSE_CANVAS_X_CLASS).toBe("px-[var(--chrome-gutter)]");
+    expect(HOUSE_ACCESS_RAIL_WIDTH).toBe("var(--access-rail-width)");
+    expect(HOUSE_HOME_RAIL_COLUMN_CLASS).toBe(
+      "ml-[var(--access-rail-width)] w-[calc(100%-var(--access-rail-width))]",
+    );
     expect(HOUSE_RAIL_FLOAT_CLASS).toContain("left-[var(--chrome-gutter)]");
     expect(HOUSE_SEARCH_PILL_CLASS).toBe("rounded-full border-0 bg-surface-muted");
     expect(HOUSE_RAIL_ITEM_CLASS).toContain("rounded-full");
