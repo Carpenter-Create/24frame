@@ -53,5 +53,7 @@ describe("Home width lock (Figma SoT)", () => {
     expect(homeBranch).not.toContain("1080");
     expect(shell).toContain("data-home-chrome");
     expect(shell).toContain("overviewHidesRail");
+    expect(shell).toContain('const homePage = pathname === "/" || homeChrome');
+    expect(shell).not.toContain('pathname === "/dashboard" || homeChrome');
   });
 });

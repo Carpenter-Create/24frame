@@ -126,7 +126,9 @@ export function AppShell({
   // column share one right edge. Messages keeps `--content-inset` vertical.
   const titlesBleed = pathname === "/titles" || pathname === "/queue";
   const homeChrome = overviewHidesRail(pathname);
-  const homePage = pathname === "/" || pathname === "/dashboard" || homeChrome;
+  // Home (`/` + /home chrome) keeps the #406 full-width / rail-column canvas.
+  // Aggregation Dashboard uses the Education house measure — Adam 2026-09-18.
+  const homePage = pathname === "/" || homeChrome;
   const messagesPage = pathname === "/messages";
   const settingsPage = isSettingsPath(pathname);
   const socialChrome = workspace === "social" && !settingsPage && !homeChrome;
