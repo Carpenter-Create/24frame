@@ -51,6 +51,8 @@ describe("HousePageSearch", () => {
     expect(html).toContain("sr-only");
     expect(html).toContain("winter");
     expect(html).not.toContain("lucide");
+    expect(html).not.toContain("stroke-width");
+    expect(html).not.toContain("strokeWidth");
     expect(src).toContain('from "@phosphor-icons/react"');
     expect(src).toContain("MagnifyingGlass");
     expect(src).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
@@ -60,6 +62,8 @@ describe("HousePageSearch", () => {
     expect(src).toContain("<Input");
     expect(src).not.toContain("lucide-react");
     expect(src).not.toContain('from "lucide-react"');
+    expect(src).not.toContain("strokeWidth");
+    expect(src).not.toContain("stroke-width");
     expect(PHOSPHOR_CHROME_IDLE_WEIGHT).toBe("bold");
   });
 
