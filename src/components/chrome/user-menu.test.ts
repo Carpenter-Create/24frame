@@ -189,7 +189,7 @@ describe("UserMenu item lock (source)", () => {
     expect(USER_MENU.appearance).toBe("Appearance");
     expect(USER_MENU.workspace).toBe("Workspace");
     expect(USER_MENU_ABSENT).not.toContain("Appearance");
-    expect(USER_MENU_ACTIONS.map((item) => item.label)).not.toContain("Appearance");
+    expect(USER_MENU_ACTIONS.map((item) => item.label)).toContain("Appearance");
     expect(APPEARANCE.back).toBe("Back");
     expect(APPEARANCE.back).not.toBe("Back to main menu");
   });
@@ -198,6 +198,7 @@ describe("UserMenu item lock (source)", () => {
     expect(USER_MENU_ACTIONS.map((item) => item.label)).toEqual([
       "Profile",
       "Settings",
+      "Appearance",
     ]);
     expect(sheetSrc).toContain("ACCOUNT_SHEET_ITEMS.map");
     expect(sheetSrc.indexOf("DesktopAccountMenu")).toBeGreaterThan(-1);

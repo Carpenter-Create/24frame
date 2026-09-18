@@ -294,6 +294,10 @@ function AccountMenuItems({
   return (
     <>
       {ACCOUNT_SHEET_ITEMS.map((item) => {
+        if (item.kind === "appearance") {
+          if (!onAppearance) return null;
+          return <AccountAppearanceRow key={item.kind} onClick={onAppearance} />;
+        }
         const href = item.kind === "settings" ? settingsLandHref(pathname) : item.href;
         return (
           <SheetGroupItem
@@ -307,7 +311,6 @@ function AccountMenuItems({
           </SheetGroupItem>
         );
       })}
-      {onAppearance ? <AccountAppearanceRow onClick={onAppearance} /> : null}
     </>
   );
 }
@@ -410,8 +413,9 @@ function AccountMenuBody({
 // Quiet scrim; page stays under. Content hug (h-auto), slides up.
 // Same sheet craft — not a new mini language. Do not restyle to
 // the desktop leftover dropdown chrome (264 / rounded-12).
-// One top row: Identity 48 + Close/44. Hairline — USER_MENU_ACTIONS
-// then phone Appearance. Mercury: Profile, Settings, Appearance.
+// One top row: Identity 48 + Close/44. Hairline — USER_MENU_ACTIONS.
+// Mercury: Profile, Settings, Appearance (phone). Desktop hides
+// Appearance — header sun/moon stays.
 // Open Appearance replaces the list face on the same sheet. Back
 // is the house 16 tertiary chevron — Close stays Close. md+ theme
 // stays the header sun/moon. 618:785 overlay is void. Closed

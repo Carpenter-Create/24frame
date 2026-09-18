@@ -1,11 +1,11 @@
 // Account-menu copy and lock. Lives in lib/, not JSX.
 // One list for both instances: desktop panel and mobile sheet.
 // Chrome may differ (sheet vs fuller panel). Labels may not.
-// Mercury order: identity → Profile → Settings → Log out.
-// Workspace lives on the header switcher. Phone theme is the
-// avatar Appearance drill-in — not a USER_MENU_ACTIONS row, not
-// a page. md+ theme stays the header sun/moon. One Settings hub.
-// No forked Settings.
+// Mercury order: identity → Profile → Settings → Appearance →
+// Log out. Workspace lives on the header switcher. Appearance is
+// the existing in-menu submenu — not a page. Phone renders it.
+// Desktop hides it; md+ theme stays the header sun/moon. One
+// Settings hub. No forked Settings.
 // Profile is /settings/profile (You identity). Settings land href
 // is settingsLandHref(pathname) — do not invent /account/*.
 // Agreements / Refer stay /settings doors, not menu rows. Help
@@ -60,11 +60,14 @@ export type UserMenuLinkAction =
       href: typeof USER_MENU.settingsHref;
     };
 
-export type UserMenuAction = UserMenuLinkAction;
+export type UserMenuAction =
+  | UserMenuLinkAction
+  | { kind: "appearance"; label: typeof USER_MENU.appearance };
 
 export const USER_MENU_ACTIONS: readonly UserMenuAction[] = [
   { kind: "profile", label: USER_MENU.profile, href: USER_MENU.profileHref },
   { kind: "settings", label: USER_MENU.settings, href: USER_MENU.settingsHref },
+  { kind: "appearance", label: USER_MENU.appearance },
 ];
 
 export function userMenuVersion(): string {

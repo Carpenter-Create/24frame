@@ -64,12 +64,13 @@ export const ACCOUNT_SHEET_ABSENT = [
 ] as const;
 
 // One source, both instances. Sheet chrome may differ; labels may not.
-// Phone appends Appearance after this list — not a shared action.
+// Appearance is the existing in-menu submenu. Phone renders it.
+// Desktop skips the row — header sun/moon stays.
 export const ACCOUNT_SHEET_ITEMS = USER_MENU_ACTIONS;
 
-// Phone Appearance row — same house item as Profile / Settings.
-// Current gc-theme preference is the secondary line. Not a page.
-// Desktop keeps the header sun/moon. No flyout.
+// Existing Appearance row — current gc-theme preference as the
+// secondary line. Not a page. Desktop keeps the header sun/moon.
+// No flyout. Row uses the house sheet item class.
 export const ACCOUNT_MENU_APPEARANCE_COPY_CLASS =
   "flex min-w-0 flex-col items-start gap-[var(--space-2)]";
 

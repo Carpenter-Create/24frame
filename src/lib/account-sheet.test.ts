@@ -42,10 +42,12 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).toEqual([
       "profile",
       "settings",
+      "appearance",
     ]);
     expect(ACCOUNT_SHEET_ITEMS.map((item) => item.label)).toEqual([
       "Profile",
       "Settings",
+      "Appearance",
     ]);
     expect(ACCOUNT_SHEET_ITEMS[0]?.kind).toBe("profile");
     expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).not.toContain("workspace");
@@ -203,7 +205,7 @@ describe("account sheet lock", () => {
     expect(accountSheet).not.toHaveProperty("accountMenuAppearanceFlyoutAlign");
     expect(accountSheet).not.toHaveProperty("accountMenuAppearanceFlyoutRight");
     expect(ACCOUNT_SHEET_ABSENT).not.toContain("Appearance");
-    expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).not.toContain("appearance");
+    expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).toContain("appearance");
   });
 
   it("docks the desktop menu align-end to the avatar with 8px under the trigger", () => {

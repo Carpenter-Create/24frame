@@ -11,21 +11,21 @@ import {
 } from "./user-menu";
 
 describe("user menu lock", () => {
-  it("keeps Mercury order: Profile, Settings — Workspace and theme are not menu rows", () => {
+  it("keeps Mercury order: Profile, Settings, Appearance — Workspace is not a menu row", () => {
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).toEqual([
       "profile",
       "settings",
+      "appearance",
     ]);
     expect(USER_MENU_ACTIONS.map((item) => item.label)).toEqual([
       "Profile",
       "Settings",
+      "Appearance",
     ]);
     expect(USER_MENU.settings).toBe("Settings");
     expect(USER_MENU.settingsHref).toBe("/settings");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("workspace");
-    expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("appearance");
     expect(USER_MENU_ACTIONS.map((item) => item.label)).not.toContain("Workspace");
-    expect(USER_MENU_ACTIONS.map((item) => item.label)).not.toContain("Appearance");
   });
 
   it("points Profile and Settings at existing /settings doors — Appearance is not a page", () => {
@@ -52,11 +52,14 @@ describe("user menu lock", () => {
       label: "Settings",
       href: "/settings",
     });
-    expect(USER_MENU_ACTIONS).toHaveLength(2);
+    expect(USER_MENU_ACTIONS[2]).toEqual({
+      kind: "appearance",
+      label: "Appearance",
+    });
+    expect(USER_MENU_ACTIONS).toHaveLength(3);
     expect(USER_MENU_ABSENT).toContain("Workspace");
     expect(USER_MENU_ABSENT).toContain("Workspaces");
     expect(USER_MENU_ABSENT).not.toContain("Appearance");
-    expect(USER_MENU_ACTIONS.map((item) => item.label)).not.toContain("Appearance");
   });
 
   it("does not invent /account/appearance, /account/profile, Company, Phone, Job, or leftovers", () => {
@@ -67,6 +70,7 @@ describe("user menu lock", () => {
     }
     expect(labels).toContain("Profile");
     expect(labels).toContain("Settings");
+    expect(labels).toContain("Appearance");
     expect(labels).not.toContain("User Profile");
     expect(labels).not.toContain("Agreements");
     expect(labels).not.toContain("Help");
