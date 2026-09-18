@@ -21,11 +21,13 @@ import {
   HOUSE_LEAD_SEARCH_PILL_CLASS,
   HOUSE_LEAD_SEARCH_WIDTH_PX,
   HOUSE_LEAD_SHELL_CLASS,
+  HOUSE_LEAD_SLOT_CLASS,
   HOUSE_THEME_TOGGLE_CLASS,
 } from "@/lib/house-lead-chrome";
 import { HOUSE_HEADER_SEARCH_GAP_CLASS, HOUSE_SEARCH_PILL_CLASS } from "@/lib/house-shell";
 import { EDUCATION_SEARCH } from "@/lib/course-search";
 import { SOCIAL } from "@/lib/social";
+import { workspaceHome } from "@/lib/workspace";
 import {
   APP_HEADER_LEADING_CLASS,
   APP_HEADER_TRAILING_CLUSTER_CLASS,
@@ -51,7 +53,6 @@ function leadHtml(workspace: "aggregation" | "social" | "education") {
   return renderToStaticMarkup(
     createElement(HouseLeadChrome, {
       workspace,
-      logoVisible: workspace === "social" ? "always" : "desktop",
       search:
         workspace === "social"
           ? createElement(HouseLeadSearch, { tone: "live" })
@@ -310,5 +311,51 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(open).toContain("data-workspace-switcher-popover");
     expect(open).toContain('data-workspace-switcher-option="social"');
     expect(open).toContain('data-workspace-switcher-option="education"');
+  });
+
+  it("shows the phone emblem on every workspace — hamburger only on dest-rail", () => {
+    expect(leadSrc).toContain('logoVisible = "always"');
+    expect(leadSrc).toContain('logoVisible === "always" ? "flex" : "hidden md:flex"');
+    expect(shell).toContain('logoVisible="always"');
+    expect(shell).not.toContain('homeChrome ? "always" : "desktop"');
+    expect(topBar).toContain('logoVisible="always"');
+    expect(leadLib).toContain("Asset 8 emblem on every workspace");
+    expect(APP_HEADER_LEADING_CLASS).toContain("gap-[var(--space-3)]");
+    expect(APP_HEADER_LEADING_CLASS).not.toMatch(/(?:^|\s)(?:max-md:)?overflow-hidden(?:\s|$)/);
+
+    for (const workspace of ["aggregation", "social", "education"] as const) {
+      const destRail = workspace !== "social";
+      const html = renderToStaticMarkup(
+        createElement(HouseLeadChrome, {
+          workspace,
+          leadingNav: destRail
+            ? createElement("button", { "data-mobile-nav-trigger": "" })
+            : undefined,
+          accountMenu: createElement("div", { "data-user-menu-host": "" }),
+        }),
+      );
+      const leadClass = htmlClass(html, 'data-house-lead=""');
+      expect(leadClass).toContain("flex");
+      expect(leadClass).toContain(HOUSE_LEAD_SLOT_CLASS);
+      expect(leadClass).not.toMatch(/(?:^|\s)hidden(?:\s|$)/);
+      expect(html).toContain("data-brand-emblem");
+      expect(html).toContain("data-brand-logo");
+      expect(html).toContain('data-brand-logo-mark="emblem"');
+      expect(html).toContain("/brand/24frame-emblem.svg");
+      expect(html).toContain(`href="${workspaceHome(workspace)}"`);
+      if (destRail) {
+        expect(html).toContain("data-mobile-nav-trigger");
+        expect(html.indexOf("data-mobile-nav-trigger")).toBeLessThan(
+          html.indexOf("data-brand-emblem"),
+        );
+      } else {
+        expect(html).not.toContain("data-mobile-nav-trigger");
+      }
+    }
+
+    expect(shell).toContain("homeChrome ? undefined :");
+    expect(shell).toContain("<MobileNavSlot");
+    expect(topBar).not.toContain("leadingNav");
+    expect(topBar).not.toContain("MobileNav");
   });
 });

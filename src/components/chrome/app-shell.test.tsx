@@ -170,7 +170,10 @@ describe("AppShell header", () => {
       'data-photo="https://s3.example/signed-avatar"',
     );
     expect(shellSrc).toContain("Phone avatar opens 544:561");
-    expect(shellSrc).toContain("hamburger · gap 8 · one workspace");
+    expect(shellSrc).toContain("Asset 8 emblem on every workspace");
+    expect(shellSrc).toContain('logoVisible="always"');
+    expect(shellSrc).not.toContain('homeChrome ? "always" : "desktop"');
+    expect(leadSrc).toContain('logoVisible = "always"');
     expect(shellSrc).toContain("HouseLeadChrome");
     expect(leadSrc).toContain("WorkspaceSwitcher");
     expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} tone="pill" />');
@@ -246,6 +249,9 @@ describe("AppShell Home chrome", () => {
     expect(home).not.toContain("data-social-rail");
     expect(home).not.toContain("Collapse sidebar");
     expect(home).not.toContain("Expand sidebar");
+    expect(home).toContain("data-brand-logo");
+    expect(home).toContain('data-brand-logo-mark="emblem"');
+    expect(home).not.toMatch(/data-house-lead=""[^>]*\bhidden(?:\s|")/);
     expect(home).not.toContain("data-mobile-nav-trigger");
     expect(home).toContain("--sidebar-width:0px");
     expect(home).toContain("--sidebar-width-collapsed:0px");
@@ -432,6 +438,13 @@ describe("AppShell client mobile chrome", () => {
       /<aside class="[^"]*\bhidden\b[^"]*\bmd:flex\b[^"]*" data-app-rail=""/,
     );
     expect(html).toContain("data-mobile-nav-trigger");
+    expect(html).toContain("data-brand-emblem");
+    expect(html).toContain("data-brand-logo");
+    expect(html).toContain('data-brand-logo-mark="emblem"');
+    expect(html.indexOf("data-mobile-nav-trigger")).toBeLessThan(
+      html.indexOf("data-brand-emblem"),
+    );
+    expect(html).not.toMatch(/data-house-lead=""[^>]*\bhidden(?:\s|")/);
     expect(html).toContain("Open menu");
     expect(html).not.toContain("data-mobile-nav-sheet");
     expect(html).not.toContain("data-tab-bar");
@@ -790,6 +803,10 @@ describe("AppShell rail-collapse chevron", () => {
     expect(html).toContain(`data-rail-collapse="${RAIL_COLLAPSE_CHEVRON}"`);
     expect(html).toContain("Collapse sidebar");
     expect(html).not.toContain("data-mobile-nav-trigger");
+    expect(html).toContain("data-brand-emblem");
+    expect(html).toContain("data-brand-logo");
+    expect(html).toContain('data-brand-logo-mark="emblem"');
+    expect(html).not.toMatch(/data-house-lead=""[^>]*\bhidden(?:\s|")/);
     expect(html).toContain("24Frame");
     expect(shellSrc).toContain("AskAssistantChromeProvider");
     expect(shellSrc).toContain("<RailCollapse collapsed={collapsed} onToggle={toggle} />");
@@ -841,6 +858,14 @@ describe("AppShell rail-collapse chevron", () => {
       html.indexOf("data-user-menu-host"),
     );
     expect(html).toContain("data-app-header");
+    expect(html).toContain("data-mobile-nav-trigger");
+    expect(html).toContain("data-brand-emblem");
+    expect(html).toContain("data-brand-logo");
+    expect(html).toContain('data-brand-logo-mark="emblem"');
+    expect(html.indexOf("data-mobile-nav-trigger")).toBeLessThan(
+      html.indexOf("data-brand-emblem"),
+    );
+    expect(html).not.toMatch(/data-house-lead=""[^>]*\bhidden(?:\s|")/);
     expect(html).toContain('href="/social/courses"');
     expect(html).not.toContain("data-social-workspace");
     expect(html).not.toContain("data-social-top-bar");
