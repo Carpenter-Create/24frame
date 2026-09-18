@@ -89,13 +89,17 @@ describe("HomePage", () => {
     expect(html).toContain(`href="${NEWS_HREF}"`);
     expect(html).not.toMatch(/summary|rewrite|republish/i);
     expect(html).not.toContain('data-overview-module="week"');
+    expect(html).not.toContain("data-overview-aggregation");
+    expect(html).not.toContain("data-overview-top-performing");
+    expect(html).not.toContain("Top performing");
+    expect(html).toContain("data-overview-revenue-period");
+    expect(html.indexOf("data-overview-revenue")).toBeLessThan(
+      html.indexOf('data-overview-module="social"'),
+    );
     expect(html.indexOf('data-overview-module="social"')).toBeLessThan(
       html.indexOf('data-overview-module="education"'),
     );
     expect(html.indexOf('data-overview-module="education"')).toBeLessThan(
-      html.indexOf("data-overview-aggregation"),
-    );
-    expect(html.indexOf("data-overview-aggregation")).toBeLessThan(
       html.indexOf('data-overview-module="needs-you"'),
     );
     expect(html.indexOf('data-overview-module="needs-you"')).toBeLessThan(
@@ -105,6 +109,18 @@ describe("HomePage", () => {
       html.indexOf('data-overview-module="news"'),
     );
     expect(html).not.toContain("Globee");
+  });
+
+  it("applies the shared YTD period chip on Home", async () => {
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+    const html = renderToStaticMarkup(
+      await HomePage({ searchParams: Promise.resolve({ period: "ytd" }) }),
+    );
+    expect(html).toMatch(
+      /data-overview-revenue-period-chip="ytd"[^>]*aria-pressed="true"/,
+    );
+    expect(html).toContain("YTD");
+    expect(html).not.toContain("Top performing");
   });
 
   it("sends an unauthenticated visitor to login", async () => {

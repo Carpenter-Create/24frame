@@ -4,6 +4,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { OverviewHome } from "@/components/overview/overview-home";
+import { parseDashboardPeriod } from "@/lib/dashboard-admin";
 import {
   DASHBOARD_CARD_PAD,
   DASHBOARD_LICENSING_THUMB_CLASS,
@@ -39,10 +40,11 @@ const home = readFileSync("src/components/overview/overview-home.tsx", "utf8");
 const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
 
 function emptyHome(): string {
+  const now = new Date("2026-09-18T18:00:00.000Z");
   return renderToStaticMarkup(
     createElement(OverviewHome, {
       revenueCents: null,
-      topTitles: [],
+      period: parseDashboardPeriod("all", now),
       socialUnread: 0,
       socialChats: [],
       socialFaces: new Map(),
@@ -51,7 +53,7 @@ function emptyHome(): string {
       weekPulse: [],
       aiNext: [],
       news: [],
-      now: new Date("2026-09-18T18:00:00.000Z"),
+      now,
     }),
   );
 }
@@ -85,9 +87,9 @@ describe("Home News layout + register lock", () => {
     expect(OVERVIEW_HOME_LAYOUT_CLASS).toContain("grid-cols-1");
     expect(OVERVIEW_HOME_LAYOUT_CLASS).not.toContain("md:grid-cols");
     expect(OVERVIEW_PHONE_MODULE_ORDER).toEqual([
+      "revenue",
       "social",
       "education",
-      "aggregation",
       "needs-you",
       "ai-next",
       "news",
@@ -147,7 +149,13 @@ describe("Home News layout + register lock", () => {
     expect(html).toContain('data-overview-module="news"');
     expect(html).toContain("dashboard-home-panel");
     expect(html).toContain("No headlines from the last 90 days.");
-    expect(html.indexOf("data-overview-aggregation")).toBeLessThan(
+    expect(html.indexOf("data-overview-revenue")).toBeLessThan(
+      html.indexOf('data-overview-module="social"'),
+    );
+    expect(html.indexOf('data-overview-module="social"')).toBeLessThan(
+      html.indexOf('data-overview-module="education"'),
+    );
+    expect(html.indexOf('data-overview-module="education"')).toBeLessThan(
       html.indexOf('data-overview-module="needs-you"'),
     );
     expect(html.indexOf('data-overview-module="needs-you"')).toBeLessThan(

@@ -10,7 +10,6 @@ import {
 import { buildAttentionGlance } from "@/lib/dashboard-attention";
 import {
   clientHomeSnapshot,
-  topTitleActivity,
   type ClientHomeTitle,
 } from "@/lib/dashboard-home";
 import { canViewClientEarn } from "@/lib/finance";
@@ -44,7 +43,11 @@ type TitleRow = ClientHomeTitle & {
   catalog_id?: string | null;
 };
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams = Promise.resolve({}),
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+} = {}) {
   const supabase = await createClient();
   const ctx = await getOrgContext();
   if (!ctx) redirect("/login");
@@ -52,6 +55,8 @@ export default async function HomePage() {
   const org = ctx.activeOrg;
   const now = new Date();
   const since = overviewWeekSince(now.getTime());
+  const sp = await searchParams;
+  const period = parseDashboardPeriod(sp.period, now);
 
   const titlesPromise = org
     ? supabase
@@ -99,7 +104,7 @@ export default async function HomePage() {
         latestStatement: moneyLoaded.latestStatement,
       });
       const hero = buildDashboardRevenueHero({
-        period: parseDashboardPeriod("all", now),
+        period,
         points: revenuePointsFromLabels(money.chart ?? []),
         userId: null,
       });
@@ -130,7 +135,7 @@ export default async function HomePage() {
   return (
     <OverviewHome
       revenueCents={revenueCents}
-      topTitles={topTitleActivity(titles, deliveries.rows, now)}
+      period={period}
       socialUnread={overviewSocialUnreadTotal(inbox.rows)}
       socialChats={namedChats}
       socialFaces={faces}
