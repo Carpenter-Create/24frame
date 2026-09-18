@@ -193,14 +193,17 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS).not.toContain("min-h-[134px]");
   });
 
-  it("does not keep a menu theme row or flyout — theme is the header toggle", () => {
+  it("keeps phone Appearance copy classes and no desktop flyout", () => {
     expect(accountSheet).not.toHaveProperty("ACCOUNT_MENU_APPEARANCE_ROW_CLASS");
     expect(accountSheet).not.toHaveProperty("ACCOUNT_MENU_APPEARANCE_WASH_CLASS");
     expect(accountSheet).not.toHaveProperty("ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS");
-    expect(accountSheet).not.toHaveProperty("ACCOUNT_SHEET_APPEARANCE_COPY_CLASS");
+    expect(accountSheet).toHaveProperty("ACCOUNT_SHEET_APPEARANCE_COPY_CLASS");
+    expect(accountSheet).toHaveProperty("ACCOUNT_MENU_APPEARANCE_COPY_CLASS");
+    expect(accountSheet).toHaveProperty("ACCOUNT_MENU_APPEARANCE_MODE_CLASS");
     expect(accountSheet).not.toHaveProperty("accountMenuAppearanceFlyoutAlign");
     expect(accountSheet).not.toHaveProperty("accountMenuAppearanceFlyoutRight");
-    expect(ACCOUNT_SHEET_ABSENT).toContain("Appearance");
+    expect(ACCOUNT_SHEET_ABSENT).not.toContain("Appearance");
+    expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).not.toContain("appearance");
   });
 
   it("docks the desktop menu align-end to the avatar with 8px under the trigger", () => {
@@ -226,7 +229,7 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_SHEET_VERSION_CLASS).toContain("text-ink-3");
     expect(accountSheet).not.toHaveProperty("ACCOUNT_SHEET_LEGAL_CLASS");
     expect(ACCOUNT_SHEET_ABSENT).toContain("Legal");
-    expect(ACCOUNT_SHEET_ABSENT).toContain("Appearance");
+    expect(ACCOUNT_SHEET_ABSENT).not.toContain("Appearance");
   });
 });
 

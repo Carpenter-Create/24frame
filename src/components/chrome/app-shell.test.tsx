@@ -151,6 +151,7 @@ describe("AppShell header", () => {
     expect(shellSrc).not.toContain("ThemeGlyph");
     expect(leadSrc).toContain("ThemeToggle");
     expect(leadSrc).toContain("<ThemeToggle />");
+    expect(leadSrc).toContain("HOUSE_THEME_TOGGLE_HOST_CLASS");
     expect(leadSrc).toContain("<ActivityBell");
     expect(leadSrc).toContain("<AskAssistantHeaderLink");
     expect(shellSrc).not.toContain("<ActivityBell");

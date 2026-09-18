@@ -5,8 +5,9 @@
 // email initial when empty. Always render both fields. No dashes, no invented
 // local-part name. Items after the Identity hairline are
 // USER_MENU_ACTIONS — the same list on mobile and desktop.
-// Workspace is the header control, not this menu. Theme lives on
-// the header sun/moon — not a menu row, not a page. Destinations
+// Workspace is the header control, not this menu. Phone theme is
+// the avatar Appearance drill-in — not a USER_MENU_ACTIONS row,
+// not a page. md+ theme stays the header sun/moon. Destinations
 // use existing routes only — not /account/workspace or
 // /account/appearance. Company stays off this menu. Log out +
 // version are the footer group — not a
@@ -28,7 +29,7 @@
 // 264 wide. Leftover last-item → Log out is 48 (house section
 // air, --space-12). The 48 adds to the stack. Not 0. Not 134.
 // No h-[Npx]. No min-h. No 522 / 570 / 672 floor. Align-end.
-// 24 pad. 24 between Profile / Settings.
+// 24 pad. 24 between Profile / Settings. Appearance is phone-only.
 // Log out → hairline 24. Hairline → footer 24. Footer →
 // bottom 24. Labels stay one source.
 
@@ -60,11 +61,26 @@ export const ACCOUNT_SHEET_ABSENT = [
   "Phone",
   "Job",
   "Legal",
-  "Appearance",
 ] as const;
 
 // One source, both instances. Sheet chrome may differ; labels may not.
+// Phone appends Appearance after this list — not a shared action.
 export const ACCOUNT_SHEET_ITEMS = USER_MENU_ACTIONS;
+
+// Phone Appearance row — same house item as Profile / Settings.
+// Current gc-theme preference is the secondary line. Not a page.
+// Desktop keeps the header sun/moon. No flyout.
+export const ACCOUNT_MENU_APPEARANCE_COPY_CLASS =
+  "flex min-w-0 flex-col items-start gap-[var(--space-2)]";
+
+export const ACCOUNT_MENU_APPEARANCE_MODE_CLASS =
+  "t-body-sm leading-4 text-ink-2";
+
+export const ACCOUNT_MENU_APPEARANCE_HELPER_CLASS =
+  "t-body-sm leading-4 text-ink-2";
+
+export const ACCOUNT_SHEET_APPEARANCE_COPY_CLASS =
+  "flex min-w-0 flex-col items-start gap-[var(--space-2)]";
 
 // 544:561 / 537:557 — sides 24, bottom 32 (sheet pad B). 32 clear
 // under the 4px half-bar (padT 36 = 4+32) so the bar does not eat

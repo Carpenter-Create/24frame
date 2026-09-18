@@ -13,6 +13,7 @@ import {
   HOUSE_LEAD_SEARCH_DESKTOP_CLASS,
   HOUSE_LEAD_SEARCH_PHONE_CLASS,
   HOUSE_LEAD_SLOT_CLASS,
+  HOUSE_THEME_TOGGLE_HOST_CLASS,
 } from "@/lib/house-lead-chrome";
 import { PRODUCT_NAME } from "@/lib/product";
 import { workspaceHome, type WorkspaceMode } from "@/lib/workspace";
@@ -113,7 +114,9 @@ export function HouseLeadChrome({
           <WorkspaceSwitcher current={workspace} presentation="pills" />
         </div>
         {settingsPage ? null : <AskAssistantHeaderLink />}
-        <ThemeToggle />
+        <div className={HOUSE_THEME_TOGGLE_HOST_CLASS}>
+          <ThemeToggle />
+        </div>
         <ActivityBell unread={activityUnread} items={activityItems} />
         {accountMenu}
       </div>

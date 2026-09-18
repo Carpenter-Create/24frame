@@ -55,7 +55,8 @@ describe("user menu lock", () => {
     expect(USER_MENU_ACTIONS).toHaveLength(2);
     expect(USER_MENU_ABSENT).toContain("Workspace");
     expect(USER_MENU_ABSENT).toContain("Workspaces");
-    expect(USER_MENU_ABSENT).toContain("Appearance");
+    expect(USER_MENU_ABSENT).not.toContain("Appearance");
+    expect(USER_MENU_ACTIONS.map((item) => item.label)).not.toContain("Appearance");
   });
 
   it("does not invent /account/appearance, /account/profile, Company, Phone, Job, or leftovers", () => {

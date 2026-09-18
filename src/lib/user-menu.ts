@@ -2,9 +2,10 @@
 // One list for both instances: desktop panel and mobile sheet.
 // Chrome may differ (sheet vs fuller panel). Labels may not.
 // Mercury order: identity → Profile → Settings → Log out.
-// Workspace lives on the header switcher. Theme lives on the
-// header sun/moon, left of the avatar — not this menu. One
-// Settings hub. No forked Settings.
+// Workspace lives on the header switcher. Phone theme is the
+// avatar Appearance drill-in — not a USER_MENU_ACTIONS row, not
+// a page. md+ theme stays the header sun/moon. One Settings hub.
+// No forked Settings.
 // Profile is /settings/profile (You identity). Settings land href
 // is settingsLandHref(pathname) — do not invent /account/*.
 // Agreements / Refer stay /settings doors, not menu rows. Help
@@ -36,7 +37,6 @@ export const USER_MENU = {
 export const USER_MENU_ABSENT = [
   "Workspace",
   "Workspaces",
-  "Appearance",
   "Manage account",
   "Notifications",
   "Privacy",

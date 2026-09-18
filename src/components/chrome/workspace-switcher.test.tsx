@@ -288,6 +288,7 @@ describe("workspace switcher placement", () => {
     expect(trailing).not.toContain('tone="pill"');
     expect(trailing).toContain("WorkspaceSwitcher");
     expect(trailing).toContain("<AskAssistantHeaderLink />");
+    expect(trailing).toContain("HOUSE_THEME_TOGGLE_HOST_CLASS");
     expect(trailing).toContain("<ThemeToggle />");
     expect(trailing).toContain("<ActivityBell");
     expect(trailing).toContain("{accountMenu}");
@@ -295,6 +296,9 @@ describe("workspace switcher placement", () => {
       trailing.indexOf("<AskAssistantHeaderLink />"),
     );
     expect(trailing.indexOf("<AskAssistantHeaderLink />")).toBeLessThan(
+      trailing.indexOf("HOUSE_THEME_TOGGLE_HOST_CLASS"),
+    );
+    expect(trailing.indexOf("HOUSE_THEME_TOGGLE_HOST_CLASS")).toBeLessThan(
       trailing.indexOf("<ThemeToggle />"),
     );
     expect(trailing.indexOf("<ThemeToggle />")).toBeLessThan(

@@ -1,8 +1,8 @@
 // Theme preference copy. Lives in lib/, not JSX.
-// Header sun/moon is the control — not an account-menu row.
-// Existing gc-theme kinds stay light / dark / auto. Auto is
-// System default when a preference surface exists. Not a page.
-// Not radios. Not a route.
+// Phone avatar sheet is the preference surface — same-sheet
+// drill-in, System default / Dark / Light. md+ header sun/moon
+// stays. Existing gc-theme kinds stay light / dark / auto. Auto
+// is System default. Not a page. Not radios. Not a route.
 
 import { USER_MENU } from "@/lib/user-menu";
 import type { ThemePreference } from "@/lib/theme";

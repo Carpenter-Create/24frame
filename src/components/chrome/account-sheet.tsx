@@ -10,10 +10,12 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
-import { CaretRight, SignOut } from "@phosphor-icons/react";
+import { CaretLeft, CaretRight, SignOut } from "@phosphor-icons/react";
 
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
+import { AppearanceCheck } from "@/components/chrome/appearance-check";
+import { useThemePreference } from "@/components/theme-toggle";
 import { signOut } from "@/app/actions";
 import { accountPhotoSrc } from "@/lib/account-avatar";
 import {
@@ -38,7 +40,11 @@ import {
   ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS,
   accountMenuDropdownAlignEnd,
   type AccountMenuDropdownAlign,
+  ACCOUNT_MENU_APPEARANCE_COPY_CLASS,
+  ACCOUNT_MENU_APPEARANCE_HELPER_CLASS,
+  ACCOUNT_MENU_APPEARANCE_MODE_CLASS,
   ACCOUNT_SHEET,
+  ACCOUNT_SHEET_APPEARANCE_COPY_CLASS,
   ACCOUNT_SHEET_FOOTER_CLASS,
   ACCOUNT_SHEET_HEAD_CLASS,
   ACCOUNT_SHEET_HOST_CLASS,
@@ -54,7 +60,18 @@ import {
   accountSheetIdentity,
   destinationClickClosesSheet,
 } from "@/lib/account-sheet";
-import { APP_SHEET_SCRIM_CLASS, SHEET_GROUP_CHEVRON_CLASS } from "@/lib/house-sheet";
+import {
+  APPEARANCE,
+  APPEARANCE_FLYOUT_OPTIONS,
+  appearancePreferenceLabel,
+  type AccountMenuFace,
+} from "@/lib/appearance";
+import {
+  APP_SHEET_SCRIM_CLASS,
+  SHEET_GROUP_CHEVRON_CLASS,
+  SHEET_GROUP_ITEM_CLASS,
+} from "@/lib/house-sheet";
+import { applyDocumentThemePreference } from "@/lib/theme";
 import { settingsLandHref } from "@/lib/settings";
 import { USER_MENU, userMenuAvatarInitial, userMenuVersion } from "@/lib/user-menu";
 import { MenuSurfaceAccent } from "./menu-surface";
@@ -63,6 +80,10 @@ import { MenuSurfaceAccent } from "./menu-surface";
 // 84:46 is icon SSOT — not a restyle, not a Mercury escalation.
 function AccountRowChevron() {
   return <CaretRight className={SHEET_GROUP_CHEVRON_CLASS} weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />;
+}
+
+function AccountBackChevron() {
+  return <CaretLeft className={SHEET_GROUP_CHEVRON_CLASS} weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />;
 }
 
 function AccountMenuTrigger({
@@ -203,12 +224,72 @@ function AccountMenuPin({
   );
 }
 
+function AccountAppearanceRow({ onClick }: { onClick: () => void }) {
+  const preference = useThemePreference();
+
+  return (
+    <button
+      type="button"
+      data-sheet-group-item="appearance"
+      data-user-menu-item="appearance"
+      aria-expanded={false}
+      onClick={onClick}
+      className={SHEET_GROUP_ITEM_CLASS}
+    >
+      <span className={ACCOUNT_MENU_APPEARANCE_COPY_CLASS}>
+        <span>{USER_MENU.appearance}</span>
+        <span data-account-menu-appearance-mode="" className={ACCOUNT_MENU_APPEARANCE_MODE_CLASS}>
+          {appearancePreferenceLabel(preference)}
+        </span>
+      </span>
+      <AccountRowChevron />
+    </button>
+  );
+}
+
+/** Same-sheet drill-in. Replaces the list face. 618:785 overlay is void. */
+export function AccountSheetAppearance({
+  onBack,
+}: {
+  onBack: () => void;
+}) {
+  const preference = useThemePreference();
+
+  return (
+    <SheetGroup>
+      <SheetGroupItem item="back" onClick={onBack} label={APPEARANCE.back}>
+        <AccountBackChevron />
+      </SheetGroupItem>
+      {APPEARANCE_FLYOUT_OPTIONS.map((option) => (
+        <SheetGroupItem
+          key={option.kind}
+          item={option.kind}
+          pressed={preference === option.kind}
+          onClick={() => {
+            applyDocumentThemePreference(option.kind);
+          }}
+        >
+          <span className={ACCOUNT_SHEET_APPEARANCE_COPY_CLASS}>
+            <span>{option.label}</span>
+            {"helper" in option ? (
+              <span className={ACCOUNT_MENU_APPEARANCE_HELPER_CLASS}>{option.helper}</span>
+            ) : null}
+          </span>
+          <AppearanceCheck selected={preference === option.kind} />
+        </SheetGroupItem>
+      ))}
+    </SheetGroup>
+  );
+}
+
 function AccountMenuItems({
   pathname,
   onClose,
+  onAppearance,
 }: {
   pathname: string;
   onClose: () => void;
+  onAppearance?: () => void;
 }) {
   return (
     <>
@@ -226,6 +307,7 @@ function AccountMenuItems({
           </SheetGroupItem>
         );
       })}
+      {onAppearance ? <AccountAppearanceRow onClick={onAppearance} /> : null}
     </>
   );
 }
@@ -237,6 +319,8 @@ function AccountMenuBody({
   pathname,
   onClose,
   variant,
+  face = "main",
+  setFace,
 }: {
   email: string;
   name?: string | null;
@@ -244,10 +328,18 @@ function AccountMenuBody({
   pathname: string;
   onClose: () => void;
   variant: "sheet" | "dropdown";
+  face?: AccountMenuFace;
+  setFace?: (face: AccountMenuFace) => void;
 }) {
   const identity = accountSheetIdentity(email, name, photoUrl);
   const stacked = variant === "dropdown";
-  const items = <AccountMenuItems pathname={pathname} onClose={onClose} />;
+  const items = (
+    <AccountMenuItems
+      pathname={pathname}
+      onClose={onClose}
+      onAppearance={!stacked && setFace ? () => setFace("appearance") : undefined}
+    />
+  );
 
   if (stacked) {
     return (
@@ -274,6 +366,8 @@ function AccountMenuBody({
     );
   }
 
+  const appearance = face === "appearance";
+
   return (
     <>
       <MenuSurfaceAccent />
@@ -291,13 +385,23 @@ function AccountMenuBody({
             onClick={onClose}
           />
         </div>
-        <AppSheetHairline data-account-sheet-rule="" />
-        <div data-account-sheet-scroll="" className={ACCOUNT_SHEET_SCROLL_CLASS}>
-          <SheetGroup>{items}</SheetGroup>
-        </div>
+        {appearance ? (
+          <AccountSheetAppearance onBack={() => setFace?.("main")} />
+        ) : (
+          <>
+            <AppSheetHairline data-account-sheet-rule="" />
+            <div data-account-sheet-scroll="" className={ACCOUNT_SHEET_SCROLL_CLASS}>
+              <SheetGroup>{items}</SheetGroup>
+            </div>
+          </>
+        )}
       </div>
-      <div data-account-sheet-leftover="" className={ACCOUNT_SHEET_LEFTOVER_CLASS} />
-      <AccountMenuPin onClose={onClose} className={ACCOUNT_SHEET_PIN_CLASS} />
+      {appearance ? null : (
+        <>
+          <div data-account-sheet-leftover="" className={ACCOUNT_SHEET_LEFTOVER_CLASS} />
+          <AccountMenuPin onClose={onClose} className={ACCOUNT_SHEET_PIN_CLASS} />
+        </>
+      )}
     </>
   );
 }
@@ -306,9 +410,11 @@ function AccountMenuBody({
 // Quiet scrim; page stays under. Content hug (h-auto), slides up.
 // Same sheet craft — not a new mini language. Do not restyle to
 // the desktop leftover dropdown chrome (264 / rounded-12).
-// One top row: Identity 48 + Close/44. Hairline — USER_MENU_ACTIONS.
-// Mercury: Profile, Settings. Theme is the header sun/moon, not a
-// menu row. 618:785 overlay is void. Closed
+// One top row: Identity 48 + Close/44. Hairline — USER_MENU_ACTIONS
+// then phone Appearance. Mercury: Profile, Settings, Appearance.
+// Open Appearance replaces the list face on the same sheet. Back
+// is the house 16 tertiary chevron — Close stays Close. md+ theme
+// stays the header sun/moon. 618:785 overlay is void. Closed
 // sheet stays 544:561 / 537:557.
 // Leftover under the last item is 48 house section air (--space-12),
 // shrink-0 — not leftover grow (open white). Log out,
@@ -415,13 +521,16 @@ export function AccountSheet({
   photoUrl,
   pathname,
   onClose,
+  face: initialFace = "main",
 }: {
   email: string;
   name?: string | null;
   photoUrl?: string | null;
   pathname: string;
   onClose: () => void;
+  face?: AccountMenuFace;
 }) {
+  const [face, setFace] = useState<AccountMenuFace>(initialFace);
   useAccountMenuDismiss(onClose, true);
 
   return (
@@ -431,6 +540,7 @@ export function AccountSheet({
       aria-modal="true"
       aria-label={ACCOUNT_SHEET.sheet}
       data-account-sheet=""
+      data-account-menu-face={face}
       className={ACCOUNT_SHEET_HOST_CLASS}
     >
       <button
@@ -447,6 +557,8 @@ export function AccountSheet({
           photoUrl={photoUrl}
           pathname={pathname}
           onClose={onClose}
+          face={face}
+          setFace={setFace}
           variant="sheet"
         />
       </div>

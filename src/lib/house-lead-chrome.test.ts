@@ -23,6 +23,7 @@ import {
   HOUSE_LEAD_SHELL_CLASS,
   HOUSE_LEAD_SLOT_CLASS,
   HOUSE_THEME_TOGGLE_CLASS,
+  HOUSE_THEME_TOGGLE_HOST_CLASS,
 } from "@/lib/house-lead-chrome";
 import { HOUSE_HEADER_SEARCH_GAP_CLASS, HOUSE_SEARCH_PILL_CLASS } from "@/lib/house-shell";
 import { EDUCATION_SEARCH } from "@/lib/course-search";
@@ -167,7 +168,7 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(leadSrc).toContain("search ?");
   });
 
-  it("G7 keeps trailing workspace switcher + Ask 24Frame AI + sun/moon + bell + avatar on all three", () => {
+  it("G7 keeps trailing workspace switcher + Ask 24Frame AI + sun/moon (md+) + bell + avatar on all three", () => {
     for (const workspace of ["aggregation", "social", "education"] as const) {
       const html = leadHtml(workspace);
       expect(html).toContain("data-app-header-trailing");
@@ -195,7 +196,9 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(leadSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
     expect(leadSrc).toContain("<AskAssistantHeaderLink />");
     expect(leadSrc).toContain("<ThemeToggle />");
+    expect(leadSrc).toContain("HOUSE_THEME_TOGGLE_HOST_CLASS");
     expect(leadSrc).toContain("<ActivityBell");
+    expect(HOUSE_THEME_TOGGLE_HOST_CLASS).toBe("hidden md:contents");
     expect(HOUSE_THEME_TOGGLE_CLASS).toContain("size-8");
     expect(HOUSE_THEME_TOGGLE_CLASS).toContain("min-h-8");
     expect(HOUSE_THEME_TOGGLE_CLASS).toContain("min-w-8");

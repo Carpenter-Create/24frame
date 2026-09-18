@@ -5,7 +5,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
-import { HOUSE_THEME_TOGGLE_CLASS } from "@/lib/house-lead-chrome";
+import { HOUSE_THEME_TOGGLE_CLASS, HOUSE_THEME_TOGGLE_HOST_CLASS } from "@/lib/house-lead-chrome";
 import { HOUSE_ICON_BUTTON_CLASS } from "@/lib/house-shell";
 import { PHOSPHOR_CHROME_ICON_CLASS, PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import { THEME_TOGGLE, themeToggleLabel } from "@/lib/theme";
@@ -56,11 +56,16 @@ describe("header theme toggle", () => {
     expect(src).not.toContain("strokeWidth");
     expect(src).not.toContain("applyDocumentThemePreference");
     expect(leadSrc).toContain("<ThemeToggle />");
+    expect(leadSrc).toContain("HOUSE_THEME_TOGGLE_HOST_CLASS");
+    expect(HOUSE_THEME_TOGGLE_HOST_CLASS).toBe("hidden md:contents");
+    expect(leadSrc.indexOf("HOUSE_THEME_TOGGLE_HOST_CLASS")).toBeLessThan(
+      leadSrc.indexOf("<ThemeToggle />"),
+    );
     expect(leadSrc.indexOf("<ThemeToggle />")).toBeGreaterThan(
       leadSrc.indexOf('presentation="pills"'),
     );
     expect(leadSrc.indexOf("<AskAssistantHeaderLink />")).toBeLessThan(
-      leadSrc.indexOf("<ThemeToggle />"),
+      leadSrc.indexOf("className={HOUSE_THEME_TOGGLE_HOST_CLASS}"),
     );
     expect(leadSrc.indexOf("<ThemeToggle />")).toBeLessThan(leadSrc.indexOf("<ActivityBell"));
     expect(leadSrc.indexOf("<ActivityBell")).toBeLessThan(leadSrc.indexOf("{accountMenu}"));

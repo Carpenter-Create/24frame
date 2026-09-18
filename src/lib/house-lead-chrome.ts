@@ -2,7 +2,9 @@
 // Phone: Asset 8 emblem on every workspace (logoVisible always).
 // Dest-rail phone adds hamburger before the emblem — house gap
 // (--space-3). Emblem is a workspace-home link, not the rail.
-// [ Emblem (phone) / wordmark (md+) · fixed lead slot ] — [ optional search · same gap ] ····· [ switcher · Ask 24Frame AI · theme · bell · avatar ]
+// [ Emblem (phone) / wordmark (md+) · fixed lead slot ] — [ optional search · same gap ] ····· [ switcher · Ask 24Frame AI · theme (md+) · bell · avatar ]
+// Phone theme is the avatar Appearance drill-in — not this trailing
+// sun/moon. md+ keeps the header toggle. One house change.
 // Social live explore search and Education quiet courses/videos
 // search share Facebook-compact geometry (04-facebook.png SoT)
 // via one HouseLeadSearch primitive — never twin files.
@@ -52,5 +54,9 @@ export const HOUSE_LEAD_SEARCH_PILL_CLASS =
 // Header sun/moon · Ask · bell. Phone matches the 32 avatar so the
 // trailing cluster does not crush the lead mark. Desktop stays 32.
 // Circular quiet — no muted wash, no hairline box.
+// Host is hidden on max-md — phone Appearance owns theme. md:contents
+// keeps the button a trailing-cluster flex child on desktop.
+export const HOUSE_THEME_TOGGLE_HOST_CLASS = "hidden md:contents";
+
 export const HOUSE_THEME_TOGGLE_CLASS =
   `flex size-8 min-h-8 min-w-8 shrink-0 items-center justify-center overflow-visible ${HOUSE_ICON_BUTTON_CLASS} text-ink-3 transition-colors hover:text-ink`;
