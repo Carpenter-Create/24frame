@@ -27,7 +27,7 @@ export const OVERVIEW_HREF = "/home";
 export const OVERVIEW_LEGACY_HREF = "/overview";
 
 export const OVERVIEW_SOCIAL_DM_CAP = 5;
-export const OVERVIEW_EDUCATION_CAP = 5;
+export const OVERVIEW_EDUCATION_CAP = 3;
 export const OVERVIEW_AI_NEXT_CAP = 3;
 export const OVERVIEW_NEWS_CAP = NEWS_HOME_CAP;
 export const OVERVIEW_WEEK_MS = 7 * 24 * 60 * 60 * 1000;

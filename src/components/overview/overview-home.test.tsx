@@ -182,7 +182,8 @@ describe("OverviewHome", () => {
     expect(html).not.toMatch(/summary|rewrite|republish/i);
     expect(html.indexOf("data-overview-revenue")).toBeLessThan(html.indexOf("data-overview-pulse"));
     expect(html).toContain("data-overview-education-covers");
-    expect(html).toContain("lg:grid-cols-4");
+    expect(html).toContain("lg:grid-cols-3");
+    expect(html).not.toContain("lg:grid-cols-4");
     expect(html).not.toContain("lg:grid-cols-5");
     expect(html).toContain("Craft");
     expect(html).toContain('data-course-card-density="home"');

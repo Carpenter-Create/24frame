@@ -158,9 +158,9 @@ describe("Home module caps", () => {
     expect(OVERVIEW_PAGE.thisWeek).toBe("This week");
   });
 
-  it("caps Social DMs at 5, Education covers at 5, and 24Frame AI next-moves at 3", () => {
+  it("caps Social DMs at 5, Education covers at 3, and 24Frame AI next-moves at 3", () => {
     expect(OVERVIEW_SOCIAL_DM_CAP).toBe(5);
-    expect(OVERVIEW_EDUCATION_CAP).toBe(5);
+    expect(OVERVIEW_EDUCATION_CAP).toBe(3);
     expect(OVERVIEW_AI_NEXT_CAP).toBe(3);
     expect(OVERVIEW_NEWS_CAP).toBe(15);
     expect(overviewSocialChats([0, 1, 2, 3, 4, 5, 6])).toEqual([0, 1, 2, 3, 4]);
@@ -168,8 +168,6 @@ describe("Home module caps", () => {
       "a",
       "b",
       "c",
-      "d",
-      "e",
     ]);
     expect(
       overviewAiNextMoves(
