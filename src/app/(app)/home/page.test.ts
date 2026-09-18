@@ -50,11 +50,8 @@ vi.mock("@/lib/finance", async (importOriginal) => {
 vi.mock("@/lib/finance-recipient-load", () => ({
   loadRecipientDashboard: vi.fn(async () => null),
 }));
-vi.mock("@/lib/news-store", () => ({
+vi.mock("@/lib/news-load", () => ({
   loadHomeNews: vi.fn(async () => []),
-}));
-vi.mock("next/cache", () => ({
-  unstable_cache: (fn: () => Promise<unknown>) => fn,
 }));
 
 function ctx() {

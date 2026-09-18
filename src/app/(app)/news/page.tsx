@@ -1,11 +1,11 @@
-import { unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { PageHeader } from "@/components/ui/page-header";
 import { NewsRail } from "@/components/news/news-rail";
-import { NEWS_PAGE, NEWS_READ_REVALIDATE_SECONDS } from "@/lib/news";
-import { loadNewsHistory } from "@/lib/news-store";
+import { NEWS_PAGE } from "@/lib/news";
+import { loadNewsHistory } from "@/lib/news-load";
+import { createClient } from "@/lib/supabase/server";
 import { getOrgContext } from "@/lib/supabase/context";
 
 export default async function NewsPage() {
@@ -13,9 +13,8 @@ export default async function NewsPage() {
   if (!ctx) redirect("/login");
 
   const now = new Date();
-  const loaded = await unstable_cache(() => loadNewsHistory(now), ["news-history"], {
-    revalidate: NEWS_READ_REVALIDATE_SECONDS,
-  })();
+  const supabase = await createClient();
+  const loaded = await loadNewsHistory(supabase, now);
 
   return (
     <div data-news-history="">

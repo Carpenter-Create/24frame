@@ -1,4 +1,3 @@
-import { unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { OverviewHome } from "@/components/overview/overview-home";
@@ -19,8 +18,7 @@ import { buildClientFinanceDashboard } from "@/lib/finance-dashboard";
 import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 import { UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
 import { loadMyDeliveries, loadMyFindings } from "@/lib/my-lists";
-import { NEWS_READ_REVALIDATE_SECONDS } from "@/lib/news";
-import { loadHomeNews } from "@/lib/news-store";
+import { loadHomeNews } from "@/lib/news-load";
 import {
   OVERVIEW_SOCIAL_DM_CAP,
   overviewAiNextMoves,
@@ -70,9 +68,7 @@ export default async function HomePage() {
     org ? loadMyDeliveries(supabase) : Promise.resolve({ rows: [], truncated: false }),
     loadDiscoverableCourses(supabase),
     ensureOwnSocialProfile(supabase, ctx.user),
-    unstable_cache(() => loadHomeNews(now), ["home-news"], {
-      revalidate: NEWS_READ_REVALIDATE_SECONDS,
-    })(),
+    loadHomeNews(supabase, now),
   ]);
 
   const titles = (titleResult.data ?? []) as TitleRow[];
