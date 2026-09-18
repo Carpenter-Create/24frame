@@ -86,7 +86,7 @@ describe("SettingsHeaderBack", () => {
     expect(shellSrc).toContain("<SettingsHeaderBack />");
     expect(
       readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../lib/house-lead-chrome.ts"), "utf8"),
-    ).toContain("MOBILE_CHROME_LEAD_PAD_CLASS");
+    ).toContain("HOUSE_LEAD_PHONE_PAD_CLASS");
     expect(SETTINGS_HEADER_PAD_CLASS).toBe(MOBILE_CHROME_LEAD_PAD_CLASS);
     expect(shellSrc).toContain(
       "<MobileNavSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />",

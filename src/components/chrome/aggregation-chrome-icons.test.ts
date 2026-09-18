@@ -36,7 +36,7 @@ describe("Aggregation chrome Phosphor lock + Design miss list", () => {
     expect(shell).not.toContain("ChevronsLeft");
     expect(shell).not.toContain("ChevronsRight");
 
-    expect(account).not.toContain("CaretLeft");
+    expect(account).toContain("CaretLeft");
     expect(account).toContain("CaretRight");
     expect(account).toContain("SignOut");
     expect(account).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
