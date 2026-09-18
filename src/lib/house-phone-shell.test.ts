@@ -116,6 +116,7 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(aggLead).not.toContain("data-mobile-nav-trigger");
     expect(aggTrail).toContain("data-mobile-nav-trigger");
     expect(aggTrail).toContain("data-app-header-trailing-nav");
+    expect(aggTrail).toContain("md:hidden");
     expect(aggregation.indexOf("data-brand-emblem")).toBeLessThan(
       aggregation.indexOf("data-mobile-nav-trigger"),
     );

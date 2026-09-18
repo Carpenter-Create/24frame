@@ -358,6 +358,7 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
         const trailing = html.slice(html.indexOf("data-app-header-trailing"));
         expect(trailing).toContain("data-mobile-nav-trigger");
         expect(trailing).toContain("data-app-header-trailing-nav");
+        expect(htmlClass(html, "data-app-header-trailing-nav=")).toContain("md:hidden");
         expect(html.indexOf("data-brand-emblem")).toBeLessThan(
           html.indexOf("data-mobile-nav-trigger"),
         );

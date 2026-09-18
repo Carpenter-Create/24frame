@@ -103,7 +103,9 @@ export function HouseLeadChrome({
             </div>
           ) : null}
           {trailingNav ? (
-            <div data-app-header-trailing-nav="">{trailingNav}</div>
+            <div data-app-header-trailing-nav="" className="md:hidden">
+              {trailingNav}
+            </div>
           ) : null}
           <div
             data-app-header-workspace-desktop=""

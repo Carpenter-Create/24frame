@@ -45,6 +45,7 @@ describe("phone header grammar A — trim trailing", () => {
     expect(leadSrc).toContain("data-app-header-desktop-trailing");
     expect(leadSrc).toContain("APP_HEADER_DESKTOP_TRAILING_CLASS");
     expect(leadSrc).toContain("data-app-header-trailing-nav");
+    expect(leadSrc).toContain('data-app-header-trailing-nav="" className="md:hidden"');
     expect(leadSrc.indexOf("{trailingSearch")).toBeLessThan(
       leadSrc.indexOf("data-app-header-trailing-nav"),
     );
@@ -76,6 +77,7 @@ describe("phone header grammar A — trim trailing", () => {
     expect(leading).toContain("data-brand-emblem");
     expect(leading).not.toContain("data-mobile-nav-trigger");
     expect(trailing).toContain("data-app-header-trailing-nav");
+    expect(htmlClass(aggregation, "data-app-header-trailing-nav=")).toContain("md:hidden");
     expect(trailing).toContain("data-mobile-nav-trigger");
     expect(trailing).toContain("data-app-header-desktop-trailing");
     expect(trailing).toContain(APP_HEADER_DESKTOP_TRAILING_CLASS);
