@@ -72,11 +72,23 @@ describe("HomePage", () => {
     expect(html).toContain("Home");
     expect(html).not.toContain("Overview");
     expect(html).toContain(OVERVIEW_PAGE.needsYou);
-    expect(html).toContain(OVERVIEW_PAGE.thisWeek);
     expect(html).toContain(OVERVIEW_PAGE.revenue);
     expect(html).toContain(OVERVIEW_PAGE.social);
     expect(html).toContain(OVERVIEW_PAGE.education);
     expect(html).toContain(OVERVIEW_PAGE.aiNext);
+    expect(html).not.toContain('data-overview-module="week"');
+    expect(html.indexOf('data-overview-module="social"')).toBeLessThan(
+      html.indexOf('data-overview-module="education"'),
+    );
+    expect(html.indexOf('data-overview-module="education"')).toBeLessThan(
+      html.indexOf("data-overview-aggregation"),
+    );
+    expect(html.indexOf("data-overview-aggregation")).toBeLessThan(
+      html.indexOf('data-overview-module="needs-you"'),
+    );
+    expect(html.indexOf('data-overview-module="needs-you"')).toBeLessThan(
+      html.indexOf('data-overview-module="ai-next"'),
+    );
     expect(html).not.toContain("Globee");
   });
 

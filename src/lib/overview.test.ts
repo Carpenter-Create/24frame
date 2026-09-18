@@ -8,11 +8,14 @@ import {
   OVERVIEW_EDUCATION_CAP,
   OVERVIEW_HREF,
   OVERVIEW_LEGACY_HREF,
+  OVERVIEW_MODULE_ORDER,
   OVERVIEW_PAGE,
+  OVERVIEW_RAIL_OFF_WIDTH,
   OVERVIEW_SOCIAL_DM_CAP,
   isOverviewPath,
   overviewAiNextMoves,
   overviewEducationCourses,
+  overviewHidesRail,
   overviewLeadPills,
   overviewLeadSelected,
   overviewLeadShouldNavigate,
@@ -77,9 +80,32 @@ describe("Home lead pills", () => {
       false,
     );
   });
+
+  it("hides dest rails on Home and keeps them on workspace routes", () => {
+    expect(overviewHidesRail("/home")).toBe(true);
+    expect(overviewHidesRail("/home/x")).toBe(true);
+    expect(overviewHidesRail("/overview")).toBe(true);
+    expect(overviewHidesRail("/dashboard")).toBe(false);
+    expect(overviewHidesRail("/social")).toBe(false);
+    expect(overviewHidesRail("/social/courses")).toBe(false);
+    expect(overviewHidesRail("/titles")).toBe(false);
+    expect(overviewHidesRail("/settings")).toBe(false);
+    expect(OVERVIEW_RAIL_OFF_WIDTH).toBe("0px");
+  });
 });
 
 describe("Home module caps", () => {
+  it("locks positive-first Home modules and folds This week into Aggregation", () => {
+    expect(OVERVIEW_MODULE_ORDER).toEqual([
+      "social",
+      "education",
+      "aggregation",
+      "needs-you",
+      "ai-next",
+    ]);
+    expect(OVERVIEW_PAGE.thisWeek).toBe("This week");
+  });
+
   it("caps Social DMs at 5, Education covers at 5, and 24Frame AI next-moves at 3", () => {
     expect(OVERVIEW_SOCIAL_DM_CAP).toBe(5);
     expect(OVERVIEW_EDUCATION_CAP).toBe(5);

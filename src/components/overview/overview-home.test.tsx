@@ -3,8 +3,19 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { OverviewHome } from "./overview-home";
-import { OVERVIEW_PAGE } from "@/lib/overview";
+import { OVERVIEW_MODULE_ORDER, OVERVIEW_PAGE } from "@/lib/overview";
 import type { CourseRow } from "@/lib/courses";
+
+function moduleOrder(html: string): string[] {
+  const marks = [
+    { id: "social", at: html.indexOf('data-overview-module="social"') },
+    { id: "education", at: html.indexOf('data-overview-module="education"') },
+    { id: "aggregation", at: html.indexOf("data-overview-aggregation") },
+    { id: "needs-you", at: html.indexOf('data-overview-module="needs-you"') },
+    { id: "ai-next", at: html.indexOf('data-overview-module="ai-next"') },
+  ];
+  return marks.filter((mark) => mark.at >= 0).sort((a, b) => a.at - b.at).map((mark) => mark.id);
+}
 
 const COURSE: CourseRow = {
   id: "c1",
@@ -42,15 +53,15 @@ describe("OverviewHome", () => {
     expect(html).toContain(OVERVIEW_PAGE.title);
     expect(html).toContain("Home");
     expect(html).not.toContain("Overview");
-    expect(html).toContain('data-overview-module="needs-you"');
-    expect(html).toContain('data-overview-module="week"');
+    expect(moduleOrder(html)).toEqual([...OVERVIEW_MODULE_ORDER]);
+    expect(html).not.toContain('data-overview-module="week"');
     expect(html).toContain("data-overview-aggregation");
     expect(html).toContain("data-overview-revenue");
     expect(html).toContain('data-overview-module="social"');
     expect(html).toContain('data-overview-module="education"');
+    expect(html).toContain('data-overview-module="needs-you"');
     expect(html).toContain('data-overview-module="ai-next"');
     expect(html).toContain(OVERVIEW_PAGE.needsYou);
-    expect(html).toContain(OVERVIEW_PAGE.thisWeek);
     expect(html).toContain(OVERVIEW_PAGE.revenue);
     expect(html).toContain(OVERVIEW_PAGE.topPerforming);
     expect(html).toContain(OVERVIEW_PAGE.social);
@@ -58,7 +69,6 @@ describe("OverviewHome", () => {
     expect(html).toContain(OVERVIEW_PAGE.aiNext);
     expect(html).toContain(OVERVIEW_PAGE.aiAsk);
     expect(html).toContain(OVERVIEW_PAGE.needsYouEmpty);
-    expect(html).toContain(OVERVIEW_PAGE.weekEmpty);
     expect(html).toContain(OVERVIEW_PAGE.revenueEmpty);
     expect(html).toContain(OVERVIEW_PAGE.socialEmpty);
     expect(html).toContain(OVERVIEW_PAGE.educationEmpty);
@@ -108,6 +118,10 @@ describe("OverviewHome", () => {
     expect(html).toContain('data-overview-social-face="dm1"');
     expect(html).not.toContain("2 unread");
     expect(html).not.toContain("Overview");
+    expect(html).not.toContain('data-overview-module="week"');
+    expect(moduleOrder(html)).toEqual([...OVERVIEW_MODULE_ORDER]);
+    expect(html.indexOf("data-overview-aggregation")).toBeLessThan(html.indexOf("data-overview-pulse"));
+    expect(html.indexOf("data-overview-revenue")).toBeLessThan(html.indexOf("data-overview-pulse"));
     expect(html).toContain("data-overview-education-covers");
     expect(html).toContain("Craft");
     expect(html).toContain("3 lessons");
