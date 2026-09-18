@@ -102,8 +102,8 @@ export function OverviewHome({
               <Link
                 key={preset.grain}
                 href={overviewHref({ period: key })}
-                aria-pressed={on}
                 data-overview-revenue-period-chip={preset.grain}
+                aria-pressed={on}
                 className={cn(
                   REPORTS_PERIOD_CHIP_CLASS,
                   on ? REPORTS_PERIOD_CHIP_ON_CLASS : REPORTS_PERIOD_CHIP_OFF_CLASS,

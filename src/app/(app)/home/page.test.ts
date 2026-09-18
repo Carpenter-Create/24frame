@@ -116,9 +116,8 @@ describe("HomePage", () => {
     const html = renderToStaticMarkup(
       await HomePage({ searchParams: Promise.resolve({ period: "ytd" }) }),
     );
-    expect(html).toMatch(
-      /data-overview-revenue-period-chip="ytd"[^>]*aria-pressed="true"/,
-    );
+    const ytd = html.match(/<a[^>]*data-overview-revenue-period-chip="ytd"[^>]*>/);
+    expect(ytd?.[0]).toContain('aria-pressed="true"');
     expect(html).toContain("YTD");
     expect(html).not.toContain("Top performing");
   });

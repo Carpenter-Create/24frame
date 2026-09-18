@@ -32,6 +32,14 @@ function moduleChunk(html: string, testId: string): string {
   return html.slice(start, next >= 0 ? next : html.length);
 }
 
+function periodChipPressed(html: string, grain: string): boolean | null {
+  const match = html.match(
+    new RegExp(`<a[^>]*data-overview-revenue-period-chip="${grain}"[^>]*>`),
+  );
+  if (!match) return null;
+  return /aria-pressed="true"/.test(match[0]);
+}
+
 function moduleOrder(html: string): string[] {
   const marks = [
     { id: "revenue", at: html.indexOf("data-overview-revenue") },
@@ -163,12 +171,8 @@ describe("OverviewHome", () => {
       ),
     );
     expect(html).toContain('data-overview-revenue-period-chip="ytd"');
-    expect(html).toMatch(
-      /data-overview-revenue-period-chip="ytd"[^>]*aria-pressed="true"/,
-    );
-    expect(html).toMatch(
-      /data-overview-revenue-period-chip="all"[^>]*aria-pressed="false"/,
-    );
+    expect(periodChipPressed(html, "ytd")).toBe(true);
+    expect(periodChipPressed(html, "all")).toBe(false);
     expect(html).toContain(REPORTS_PAGE.ytd);
     expect(html).toContain(REPORTS_PAGE.month);
     expect(html).not.toContain("MTD");
