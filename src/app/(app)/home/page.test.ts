@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { loadDiscoverableCourses } from "@/lib/courses";
+import { NEWS_HREF, NEWS_PAGE } from "@/lib/news";
 import { OVERVIEW_PAGE } from "@/lib/overview";
 import { signedEducationCoverUrls } from "@/lib/s3-education";
 import { getOrgContext } from "@/lib/supabase/context";
@@ -49,6 +50,9 @@ vi.mock("@/lib/finance", async (importOriginal) => {
 vi.mock("@/lib/finance-recipient-load", () => ({
   loadRecipientDashboard: vi.fn(async () => null),
 }));
+vi.mock("@/lib/news-load", () => ({
+  loadHomeNews: vi.fn(async () => []),
+}));
 
 function ctx() {
   return {
@@ -79,7 +83,11 @@ describe("HomePage", () => {
     expect(html).toContain(OVERVIEW_PAGE.revenue);
     expect(html).toContain(OVERVIEW_PAGE.social);
     expect(html).toContain(OVERVIEW_PAGE.education);
+    expect(html).toContain(OVERVIEW_PAGE.news);
     expect(html).toContain(OVERVIEW_PAGE.aiNext);
+    expect(html).toContain(NEWS_PAGE.viewAll);
+    expect(html).toContain(`href="${NEWS_HREF}"`);
+    expect(html).not.toMatch(/summary|rewrite|republish/i);
     expect(html).not.toContain('data-overview-module="week"');
     expect(html.indexOf('data-overview-module="social"')).toBeLessThan(
       html.indexOf('data-overview-module="education"'),
@@ -88,6 +96,9 @@ describe("HomePage", () => {
       html.indexOf("data-overview-aggregation"),
     );
     expect(html.indexOf("data-overview-aggregation")).toBeLessThan(
+      html.indexOf('data-overview-module="news"'),
+    );
+    expect(html.indexOf('data-overview-module="news"')).toBeLessThan(
       html.indexOf('data-overview-module="needs-you"'),
     );
     expect(html.indexOf('data-overview-module="needs-you"')).toBeLessThan(

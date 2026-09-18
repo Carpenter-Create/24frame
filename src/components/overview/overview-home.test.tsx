@@ -5,8 +5,13 @@ import { describe, expect, it } from "vitest";
 import { OverviewHome } from "./overview-home";
 import type { CourseRow } from "@/lib/courses";
 import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
-import { OVERVIEW_EDUCATION_LABEL_CLASS, OVERVIEW_MODULE_ORDER, OVERVIEW_PAGE } from "@/lib/overview";
 import { DASHBOARD_SECTION_TITLE_CLASS } from "@/lib/dashboard-craft";
+import { NEWS_HREF, NEWS_PAGE } from "@/lib/news";
+import {
+  OVERVIEW_EDUCATION_LABEL_CLASS,
+  OVERVIEW_PHONE_MODULE_ORDER,
+  OVERVIEW_PAGE,
+} from "@/lib/overview";
 
 function moduleChunk(html: string, testId: string): string {
   const start = html.indexOf(`data-overview-module="${testId}"`);
@@ -22,6 +27,7 @@ function moduleOrder(html: string): string[] {
     { id: "social", at: html.indexOf('data-overview-module="social"') },
     { id: "education", at: html.indexOf('data-overview-module="education"') },
     { id: "aggregation", at: html.indexOf("data-overview-aggregation") },
+    { id: "news", at: html.indexOf('data-overview-module="news"') },
     { id: "needs-you", at: html.indexOf('data-overview-module="needs-you"') },
     { id: "ai-next", at: html.indexOf('data-overview-module="ai-next"') },
   ];
@@ -56,18 +62,26 @@ describe("OverviewHome", () => {
         needsYou: [],
         weekPulse: [],
         aiNext: [],
+        news: [],
+        now: new Date("2026-09-18T18:00:00.000Z"),
       }),
     );
     expect(html).toContain("data-overview");
     expect(html).toContain(OVERVIEW_PAGE.title);
     expect(html).toContain("Home");
     expect(html).not.toContain("Overview");
-    expect(moduleOrder(html)).toEqual([...OVERVIEW_MODULE_ORDER]);
+    expect(moduleOrder(html)).toEqual([...OVERVIEW_PHONE_MODULE_ORDER]);
     expect(html).not.toContain('data-overview-module="week"');
     expect(html).toContain("data-overview-aggregation");
     expect(html).toContain("data-overview-revenue");
+    expect(html).toContain("data-overview-news");
+    expect(html).toContain("data-overview-layout");
+    expect(html).toContain("lg:grid-cols-[minmax(0,1fr)_20rem]");
+    expect(html).toContain("gap-x-[var(--chrome-gutter)]");
+    expect(html).toContain("gap-y-[var(--space-6)]");
     expect(html).toContain('data-overview-module="social"');
     expect(html).toContain('data-overview-module="education"');
+    expect(html).toContain('data-overview-module="news"');
     expect(html).toContain('data-overview-module="needs-you"');
     expect(html).toContain('data-overview-module="ai-next"');
     expect(html).toContain(OVERVIEW_PAGE.needsYou);
@@ -75,6 +89,7 @@ describe("OverviewHome", () => {
     expect(html).toContain(OVERVIEW_PAGE.topPerforming);
     expect(html).toContain(OVERVIEW_PAGE.social);
     expect(html).toContain(OVERVIEW_PAGE.education);
+    expect(html).toContain(OVERVIEW_PAGE.news);
     expect(html).toContain(OVERVIEW_PAGE.aiNext);
     expect(html).toContain(OVERVIEW_PAGE.aiAsk);
     expect(html).toContain(`href="${OVERVIEW_PAGE.revenueHref}"`);
@@ -88,11 +103,16 @@ describe("OverviewHome", () => {
     expect(moduleChunk(html, "education")).not.toContain(DASHBOARD_SECTION_TITLE_CLASS);
     expect(moduleChunk(html, "needs-you")).not.toContain(TEXT_ACTION_CLASS);
     expect(moduleChunk(html, "ai-next")).toContain(TEXT_ACTION_CLASS);
+    expect(moduleChunk(html, "news")).toContain(TEXT_ACTION_CLASS);
     expect(html).toContain(OVERVIEW_PAGE.needsYouEmpty);
     expect(html).toContain(OVERVIEW_PAGE.revenueEmpty);
     expect(html).toContain(OVERVIEW_PAGE.socialEmpty);
     expect(html).toContain(OVERVIEW_PAGE.educationEmpty);
+    expect(html).toContain(OVERVIEW_PAGE.newsEmpty);
     expect(html).toContain(OVERVIEW_PAGE.aiNextEmpty);
+    expect(html).toContain(`href="${NEWS_HREF}"`);
+    expect(html).toContain(NEWS_PAGE.viewAll);
+    expect(html).not.toMatch(/summary|rewrite|republish/i);
     expect(html).not.toContain("Globee");
     expect(html).not.toContain("lesson_progress");
   });
@@ -122,6 +142,17 @@ describe("OverviewHome", () => {
         courses: [COURSE],
         needsYou: [{ id: "n1", what: "Synopsis is required.", href: "/titles/t1" }],
         weekPulse: [{ key: "titles", label: "1 title added", count: 1 }],
+        news: [
+          {
+            id: "n1",
+            title: "Harbor Cut lands a festival slot",
+            url: "https://variety.com/harbor-cut",
+            source: "variety",
+            published_at: "2026-09-17T12:00:00.000Z",
+            image_url: null,
+          },
+        ],
+        now: new Date("2026-09-18T18:00:00.000Z"),
         aiNext: [
           { id: "a1", title: "North Wind", reason: "Chain of title is missing.", status: "draft" },
           { id: "a2", title: "Winter Light", reason: null, status: "draft" },
@@ -137,8 +168,13 @@ describe("OverviewHome", () => {
     expect(html).not.toContain("2 unread");
     expect(html).not.toContain("Overview");
     expect(html).not.toContain('data-overview-module="week"');
-    expect(moduleOrder(html)).toEqual([...OVERVIEW_MODULE_ORDER]);
+    expect(moduleOrder(html)).toEqual([...OVERVIEW_PHONE_MODULE_ORDER]);
     expect(html.indexOf("data-overview-aggregation")).toBeLessThan(html.indexOf("data-overview-pulse"));
+    expect(html.indexOf("data-overview-aggregation")).toBeLessThan(html.indexOf("data-overview-news"));
+    expect(html.indexOf("data-overview-news")).toBeLessThan(html.indexOf('data-overview-module="needs-you"'));
+    expect(html).toContain("Harbor Cut lands a festival slot");
+    expect(html).toContain(`href="${NEWS_HREF}"`);
+    expect(html).not.toMatch(/summary|rewrite|republish/i);
     expect(html.indexOf("data-overview-revenue")).toBeLessThan(html.indexOf("data-overview-pulse"));
     expect(html).toContain("data-overview-education-covers");
     expect(html).toContain("Craft");
@@ -187,6 +223,8 @@ describe("OverviewHome", () => {
         needsYou: [],
         weekPulse: [],
         aiNext: [],
+        news: [],
+        now: new Date("2026-09-18T18:00:00.000Z"),
       }),
     );
     const education = moduleChunk(html, "education");
@@ -234,6 +272,8 @@ describe("OverviewHome", () => {
         needsYou: [],
         weekPulse: [],
         aiNext: [],
+        news: [],
+        now: new Date("2026-09-18T18:00:00.000Z"),
       }),
     );
     const education = moduleChunk(html, "education");

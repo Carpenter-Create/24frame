@@ -72,6 +72,24 @@ In the Slice 2 pull request — not production-applied.
 
 ---
 
+## Industry News AWS (authorized; not created)
+
+Adam lock: News storage + scheduled ingest are **AWS only** on the E8
+account in us-west-2. Dedicated `NEWS_AWS_*` / `NEWS_DDB_TABLE` —
+never reuse title, media, finance, or education credentials. Not
+Supabase tables/RPCs/storage. Not Vercel cron. Not Aurora (Secure
+Compute / app cutover is not done).
+
+App code + founder runbook live in-repo:
+[`docs/infra/news-aws-setup.md`](../infra/news-aws-setup.md). Dynamo
+tables, Lambda, EventBridge half-hour rule, SQS DLQ, and IAM are
+**not created**. Founder applies. Do not create from CI.
+
+Home reads twelve headlines; `/news` is the thirty-day window. Page
+requests never fan out RSS.
+
+---
+
 ## Not authority
 
 - [`docs/HANDOFF.md`](../HANDOFF.md) — historical handoff; preserve as evidence; do not act on its branch, SHA, production, or task statements without fresh verification.

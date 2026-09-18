@@ -10,6 +10,7 @@ import {
   DashboardListPanel,
   DashboardTitleRows,
 } from "@/components/dashboard/dashboard-modules";
+import { NewsRail } from "@/components/news/news-rail";
 import { PageHeader } from "@/components/ui/page-header";
 import type { CourseRow } from "@/lib/courses";
 import {
@@ -22,8 +23,16 @@ import {
 } from "@/lib/dashboard-craft";
 import type { ClientHomeDoNextItem, ClientHomeJustInItem, DashboardChangeRow } from "@/lib/dashboard-home";
 import { formatUsdCents } from "@/lib/finance";
+import type { NewsItem } from "@/lib/news";
 import {
+  OVERVIEW_AREA_AGGREGATION_CLASS,
+  OVERVIEW_AREA_AI_CLASS,
+  OVERVIEW_AREA_EDUCATION_CLASS,
+  OVERVIEW_AREA_NEEDS_CLASS,
+  OVERVIEW_AREA_NEWS_CLASS,
+  OVERVIEW_AREA_SOCIAL_CLASS,
   OVERVIEW_EDUCATION_LABEL_CLASS,
+  OVERVIEW_HOME_LAYOUT_CLASS,
   OVERVIEW_PAGE,
   overviewModuleHeaderAction,
 } from "@/lib/overview";
@@ -32,9 +41,10 @@ import type { SocialHomeChat } from "@/lib/social-home-chats";
 import { socialDmHref, socialInitials } from "@/lib/social";
 import { cn } from "@/lib/cn";
 
-// Home IA v2 — five modules, positive first. This-week pulse folds
-// into Aggregation (top performing + net revenue / pulse). Social
-// stays avatars-only. House primitives only.
+// Home IA v2 — left modules stay positive-first. News is the right
+// rail on desktop and a full-width stack after Aggregation on phone.
+// This-week pulse folds into Aggregation. Social stays avatars-only.
+// House primitives only. No News lookalike fork.
 
 export function OverviewHome({
   revenueCents,
@@ -48,6 +58,8 @@ export function OverviewHome({
   needsYou,
   weekPulse,
   aiNext,
+  news,
+  now,
 }: {
   revenueCents: number | null;
   topTitles: readonly ClientHomeJustInItem[];
@@ -60,11 +72,15 @@ export function OverviewHome({
   needsYou: readonly { id: string; what: string; href: string }[];
   weekPulse: readonly DashboardChangeRow[];
   aiNext: readonly ClientHomeDoNextItem[];
+  news: readonly NewsItem[];
+  now: Date;
 }) {
   return (
     <div data-overview="" className={cn("flex flex-col", DASHBOARD_SECTION_AIR_CLASS)}>
       <PageHeader title={OVERVIEW_PAGE.title} />
 
+      <div data-overview-layout="" className={OVERVIEW_HOME_LAYOUT_CLASS}>
+      <div className={OVERVIEW_AREA_SOCIAL_CLASS}>
       <OverviewModule
         testId="social"
         title={OVERVIEW_PAGE.social}
@@ -100,7 +116,9 @@ export function OverviewHome({
           </div>
         ) : null}
       </OverviewModule>
+      </div>
 
+      <div className={OVERVIEW_AREA_EDUCATION_CLASS}>
       <OverviewModule
         testId="education"
         title={OVERVIEW_PAGE.education}
@@ -125,8 +143,12 @@ export function OverviewHome({
           </ul>
         ) : null}
       </OverviewModule>
+      </div>
 
-      <section data-overview-aggregation="" className={cn("flex flex-col", DASHBOARD_SECTION_AIR_CLASS)}>
+      <section
+        data-overview-aggregation=""
+        className={cn(OVERVIEW_AREA_AGGREGATION_CLASS, "flex flex-col", DASHBOARD_SECTION_AIR_CLASS)}
+      >
         <DashboardListPanel
           label={OVERVIEW_PAGE.topPerforming}
           empty={OVERVIEW_PAGE.topPerformingEmpty}
@@ -161,6 +183,11 @@ export function OverviewHome({
         </DashboardHomePanel>
       </section>
 
+      <aside data-overview-news="" className={OVERVIEW_AREA_NEWS_CLASS}>
+        <NewsRail items={news} now={now} viewAll />
+      </aside>
+
+      <div className={OVERVIEW_AREA_NEEDS_CLASS}>
       <OverviewModule
         testId="needs-you"
         title={OVERVIEW_PAGE.needsYou}
@@ -179,7 +206,9 @@ export function OverviewHome({
           </ul>
         ) : null}
       </OverviewModule>
+      </div>
 
+      <div className={OVERVIEW_AREA_AI_CLASS}>
       <OverviewModule
         testId="ai-next"
         title={OVERVIEW_PAGE.aiNext}
@@ -203,6 +232,8 @@ export function OverviewHome({
           </ul>
         ) : null}
       </OverviewModule>
+      </div>
+      </div>
     </div>
   );
 }
