@@ -1,19 +1,23 @@
-# Home width lock (Figma SoT)
+# Home width lock
 
-Amended 2026-09-18. Design Figma confirmed.
+Amended 2026-09-18. Adam: reclaim Home left real estate; ease News off
+the right edge. Dest/Access rail stays off on Home.
 
 At the 1440 frame:
 
 | Surface | Measure |
 | --- | --- |
 | Header | Full-bleed 1440 / full viewport |
-| Phantom Access rail inset | 220px left |
-| Home content column | 1220px (1440 − 220). Same as Activity `main`. |
+| Left inset | 48px (`--content-inset`). House reading inset — not the 220 Access rail. |
+| Right inset | 16px (`--chrome-gutter`). Slight News outer breath. |
+| Home content column | 1376px (1440 − 48 − 16) |
 | Visible dest rail | Off |
-| Phone | Unchanged (rail tokens 0; existing max-md pad) |
+| Phone | Unchanged (existing max-md pad) |
 
-Do not center Home on the old page cap.
+Do not center Home on the old page cap. Do not change Aggregation’s
+real Access rail (`--sidebar-width` 220).
 
-Implementation: `--access-rail-width` insets the Home content frame while
-`--sidebar-width` stays `0px` so lead chrome stays full-bleed. The column
-is `calc(100% - 220px)` — 1220 at the 1440 stamp, matching Activity main.
+Implementation: Home content uses `--content-inset` left and
+`--chrome-gutter` right. `--sidebar-width` stays `0px` so lead chrome
+stays full-bleed. `--access-rail-width` remains the Access rail
+measure (220 / 0 on phone) and is not the Home canvas inset.

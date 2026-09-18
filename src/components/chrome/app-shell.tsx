@@ -64,8 +64,9 @@ type Org = { id: string; name: string };
 // Hamburger stays off. Avatar 32 stays.
 // /home: no dest rail (Adam 2026-09-18). Unify-lead chrome + modules
 // only. Aggregation · Social · Education rails return off Home.
-// Figma SoT (HOME-width-lock.md): phantom 220 inset + 1220 column at
-// 1440 — same as Activity main. Header full-bleed. No --page-max-width.
+// Home SoT (HOME-width-lock.md): 48 left (--content-inset) + 16 right
+// (--chrome-gutter) at 1440. Not the 220 Access rail. Header full-bleed.
+// No --page-max-width.
 export function AppShell({
   chrome,
   email = "",
@@ -126,8 +127,9 @@ export function AppShell({
   // column share one right edge. Messages keeps `--content-inset` vertical.
   const titlesBleed = pathname === "/titles" || pathname === "/queue";
   const homeChrome = overviewHidesRail(pathname);
-  // Home (`/` + /home chrome) keeps the #406 full-width / rail-column canvas.
-  // Aggregation Dashboard uses the Education house measure — Adam 2026-09-18.
+  // Home (`/` + /home chrome) stays off --page-max-width. /home uses the
+  // 48/16 house inset (HOME-width-lock.md). Aggregation Dashboard uses
+  // the Education house measure — Adam 2026-09-18.
   const homePage = pathname === "/" || homeChrome;
   const messagesPage = pathname === "/messages";
   const settingsPage = isSettingsPath(pathname);
@@ -320,8 +322,9 @@ export function AppShell({
           <div
             className={cn(
               "py-[var(--space-8)] max-md:px-[var(--space-6)] max-md:py-[var(--space-6)]",
-              homeChrome ? HOUSE_HOME_RAIL_COLUMN_CLASS : "w-full",
-              HOUSE_CANVAS_X_CLASS,
+              homeChrome
+                ? HOUSE_HOME_RAIL_COLUMN_CLASS
+                : cn("w-full", HOUSE_CANVAS_X_CLASS),
             )}
             data-app-home-frame=""
           >
