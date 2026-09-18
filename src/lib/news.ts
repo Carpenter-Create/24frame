@@ -2,8 +2,9 @@ import { DASHBOARD_HOME } from "@/lib/dashboard-home";
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
 import { NEWS_INGEST_FUNCTION, NEWS_INGEST_SCHEDULE } from "@/lib/news-aws";
 
-// Industry News — house SoT (Adam lock 2026-09-18).
-// Name: News. Home: latest 15 + View all. /home/news: 90-day history.
+// Industry news — house SoT (Adam lock 2026-09-18).
+// Name: Industry news. Route stays /home/news. Home: latest 15 +
+// View all. /home/news: 90-day history.
 // /news permanently redirects here. Home-owned only — not a workspace
 // pill, dest rail, or bottom-bar. Link-out cards only.
 // Allowlist verified 2026-09-18. Storage is AWS DynamoDB. Ingest is
@@ -26,7 +27,7 @@ export const NEWS_SOURCE_PARAM = "source";
 export const NEWS_SOURCE_ALL = "all";
 
 export const NEWS_PAGE = {
-  title: "News",
+  title: "Industry news",
   viewAll: DASHBOARD_HOME.viewAll,
   empty: "No headlines from the last 90 days.",
   subtitle: "Headlines from the last 90 days.",
@@ -38,7 +39,7 @@ export const NEWS_PAGE = {
   truncated: `Showing the first ${UNPAGINATED_MAX} headlines. More exist — this list is not complete.`,
 } as const;
 
-/** Home land crumb — News is a Home child, not a fifth workspace. */
+/** Home land crumb — Industry news is a Home child, not a fifth workspace. */
 export function newsHistoryBackLink(): { href: typeof NEWS_HOME_HREF; label: typeof NEWS_PAGE.back } {
   return { href: NEWS_PAGE.backHref, label: NEWS_PAGE.back };
 }

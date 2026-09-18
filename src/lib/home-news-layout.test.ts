@@ -9,6 +9,7 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
+import { NewsCard } from "@/components/news/news-card";
 import { OverviewHome } from "@/components/overview/overview-home";
 import { parseDashboardPeriod } from "@/lib/dashboard-admin";
 import {
@@ -120,7 +121,7 @@ describe("Home News layout + register lock", () => {
     expect(card).toContain("DASHBOARD_NEWS_HISTORY_THUMB_CLASS");
     expect(card).toContain("flex flex-col");
     expect(card).toContain("DASHBOARD_NEWS_HISTORY_ROW_CLASS");
-    expect(card).not.toContain("items-start");
+    expect(DASHBOARD_NEWS_HISTORY_ROW_CLASS).not.toContain("items-start");
     expect(card).not.toContain("DASHBOARD_LICENSING_THUMB_CLASS");
     expect(rail).toContain("DASHBOARD_NEWS_HISTORY_LIST_CLASS");
     expect(card).not.toMatch(/py-\[var\(--space-[123]\)\]/);
@@ -137,12 +138,18 @@ describe("Home News layout + register lock", () => {
     expect(DASHBOARD_NEWS_THUMB_CLASS).not.toContain("w-16");
     expect(DASHBOARD_NEWS_THUMB_CLASS).not.toContain("w-28");
     expect(DASHBOARD_NEWS_THUMB_CLASS).not.toContain("md:w-32");
+    expect(DASHBOARD_NEWS_HISTORY_THUMB_CLASS).toContain(DASHBOARD_NEWS_THUMB_CLASS);
     expect(DASHBOARD_NEWS_HISTORY_THUMB_CLASS).toContain("aspect-[16/9]");
-    expect(DASHBOARD_NEWS_HISTORY_THUMB_CLASS).toContain("w-40");
+    expect(DASHBOARD_NEWS_HISTORY_THUMB_CLASS).toMatch(/(?:^|\s)w-full(?:\s|$)/);
     expect(DASHBOARD_NEWS_HISTORY_THUMB_CLASS).toContain("md:w-80");
+    expect(DASHBOARD_NEWS_HISTORY_THUMB_CLASS).not.toContain("w-40");
     expect(DASHBOARD_NEWS_HISTORY_THUMB_CLASS).not.toContain("w-16");
     expect(DASHBOARD_NEWS_HISTORY_THUMB_CLASS).not.toContain("w-28");
-    expect(DASHBOARD_NEWS_HISTORY_ROW_CLASS).toContain("items-stretch");
+    expect(DASHBOARD_NEWS_HISTORY_ROW_CLASS).toContain("flex-col");
+    expect(DASHBOARD_NEWS_HISTORY_ROW_CLASS).toContain("md:flex-row");
+    expect(DASHBOARD_NEWS_HISTORY_ROW_CLASS).toContain("md:items-stretch");
+    expect(DASHBOARD_NEWS_HISTORY_ROW_CLASS).not.toMatch(/(?:^|\s)items-stretch(?:\s|$)/);
+    expect(DASHBOARD_NEWS_HISTORY_ROW_CLASS).not.toMatch(/(?:^|\s)flex-row(?:\s|$)/);
     expect(DASHBOARD_LICENSING_THUMB_CLASS).toContain("w-16");
     expect(DASHBOARD_LICENSING_THUMB_CLASS).not.toMatch(/(?:^|\s)w-full(?:\s|$)/);
     expect(DASHBOARD_MODULE_CARD_CLASS).toContain("bg-surface-muted");
@@ -155,6 +162,36 @@ describe("Home News layout + register lock", () => {
     expect(DASHBOARD_NEWS_HISTORY_COLUMN_CLASS).toBe("mx-auto w-full max-w-[840px]");
     expect(DASHBOARD_NEWS_HISTORY_COLUMN_CLASS).not.toContain("1376");
     expect(newsPage).toContain("DASHBOARD_NEWS_HISTORY_COLUMN_CLASS");
+  });
+
+  it("uses Home card / full-width thumb grammar on /home/news phone; md+ keeps the history row thumb", () => {
+    const html = renderToStaticMarkup(
+      createElement(NewsCard, {
+        item: {
+          id: "n1",
+          title: "Harbor Cut lands a festival slot",
+          url: "https://variety.com/harbor-cut",
+          source: "variety",
+          published_at: "2026-09-17T12:00:00.000Z",
+          image_url: "https://variety.com/thumbs/harbor.jpg",
+        },
+        now: new Date("2026-09-18T18:00:00.000Z"),
+        density: "history",
+      }),
+    );
+    expect(html).toContain('data-news-card-density="history"');
+    expect(html).toContain(DASHBOARD_MODULE_CARD_CLASS);
+    expect(html).toContain(DASHBOARD_NEWS_THUMB_CLASS.replaceAll("&", "&amp;"));
+    expect(html).toContain(DASHBOARD_NEWS_HISTORY_THUMB_CLASS.replaceAll("&", "&amp;"));
+    expect(html).toContain(DASHBOARD_NEWS_HISTORY_ROW_CLASS);
+    expect(html).toContain("flex-col");
+    expect(html).toContain("md:flex-row");
+    expect(html).toContain("md:w-80");
+    expect(html).not.toContain("w-40");
+    expect(html).toContain("data-news-outbound");
+    expect(html).toContain("data-house-action-arrow");
+    expect(html).not.toContain(DASHBOARD_LICENSING_THUMB_CLASS.replaceAll("&", "&amp;"));
+    expect(DASHBOARD_NEWS_HISTORY_THUMB_CLASS.startsWith(DASHBOARD_NEWS_THUMB_CLASS)).toBe(true);
   });
 
   it("keeps the News column when the rail is empty", () => {

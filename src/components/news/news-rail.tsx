@@ -9,10 +9,11 @@ import {
 import { NEWS_HREF, NEWS_PAGE, type NewsItem } from "@/lib/news";
 import { OVERVIEW_MODULE_NEST_CLASS } from "@/lib/overview";
 
-// Home News: same OverviewModule shell as Social/Education — header
-// (News + View all) lives inside the grey panel. Articles nest like
-// Education course tiles (no second grey card). History is dense
-// horizontal rows; source chips live in NewsHistory under the H1.
+// Home Industry news: same OverviewModule shell as Social/Education —
+// header (Industry news + View all) lives inside the grey panel. Articles nest like
+// Education course tiles (no second grey card). History shares
+// NewsCard: Home stack on phone, dense rows on md+. Source chips
+// live in NewsHistory under the H1.
 
 export function NewsRail({
   items,

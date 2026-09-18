@@ -181,7 +181,7 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(pageHeader).toContain("TEXT_ACTION_CLASS");
     expect(pageHeader).not.toContain("text-ink-3 transition-colors hover:text-ink-2");
     const back = renderToStaticMarkup(
-      createElement(PageHeader, { title: "News", backLink: { href: "/home", label: "Home" } }),
+      createElement(PageHeader, { title: "Industry news", backLink: { href: "/home", label: "Home" } }),
     );
     expect(back).toContain(TEXT_ACTION_CLASS);
     expect(back).toContain('href="/home"');
