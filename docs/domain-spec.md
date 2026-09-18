@@ -117,7 +117,7 @@ which role, the org carries the consequence. Same logic that removed the stakeho
 
 ### Tiers
 
-Three tiers: **Access** (free) · **Pro** (mid) · **Premium** (top).
+Three tiers: **Access** ($397/title) · **Pro** (mid) · **Premium** (top).
 
 ```sql
 create type tier_enum as enum ('access', 'pro', 'premium');
@@ -136,14 +136,14 @@ Each tier defines three things with **three different lifetimes** — do not sto
 | `features` | current tier, read live | No | Nobody asks what features they had last February. |
 | `annual_price` | subscription record (snapshotted at purchase) | No, but frozen | Repricing a tier must not change existing subs. |
 
-Term increments follow the tier, not the name: **Access = 1 year · Pro = 1 year · Premium = 2 years.**
-Annual price: **Access = $0 · Pro = $497/yr · Premium = $997/yr** (prices end in 7 — §7). Rate
-direction: Access gives GC the **highest** share; Premium the lowest. (75/25 was illustrative only.)
+Term increments follow the tier, not the name: **Access = 1 year · Pro = 1 year · Premium = 3 years.**
+Price: **Access = $397/title · Pro = $797/yr · Premium = $1,997/yr** (prices end in 7 — §7). Rate
+direction: Access/Pro give GC the **higher** share (20%); Premium the lowest (15%). Live `tier_revenue_share_bp` is 8000 / 8000 / 8500, matching the current sheet. (75/25 was illustrative only.)
 
-> **Premium is billed ANNUALLY inside a 2-year term (decided — §21.16, option B).** $997 is per
-> **year**, not for the whole term: $997 covering 24 months would be ~$498.50/yr — i.e. Pro with a
-> lock, which is not the product. So Premium has **two dates**: an annual charge at month 12 and term
-> expiry at month 24. `term_length_months = 24`, `annual_price` literally annual. This is the
+> **Premium is billed ANNUALLY inside a 3-year term (decided — §21.16, option B, term updated to the current sheet).** $1,997 is per
+> **year**, not for the whole term: $1,997 covering 36 months would be ~$665.67/yr — i.e. cheaper than Pro with a
+> lock, which is not the product. So Premium has annual charges at months 12 and 24, and term
+> expiry at month 36. App `TIER_META.termMonths = 36`. Live SQL still writes `term_length_months = 24` until the founder-approved SQL pack is applied. `annual_price` is literally annual. This is the
 > exception to §6's "one date" — see §6.
 
 ### contract_terms
@@ -225,9 +225,9 @@ the system.
 - **Term = the tier's increment, reset on any move.** Renewal cadence, **not a commitment lock.**
   Do not put commitment language in the contract — it won't be enforced.
 - **Billing anniversary vs. term boundary.** For **Access and Pro** (1-year term, annual billing)
-  they coincide — one date. For **Premium** they do **not**: it's billed annually inside a 2-year
-  term (§5, §21.16), so there are **two dates** — the annual charge at month 12 and term expiry at
-  month 24. Model both; don't assume the anniversary equals the term boundary.
+  they coincide — one date. For **Premium** they do **not**: it's billed annually inside a 3-year
+  term (§5, §21.16), so there are annual charges at months 12 and 24, and term expiry at
+  month 36. Model both; don't assume the anniversary equals the term boundary.
 - **Credit applies against future annual charges**, drawn down before new charges. **Open (§21.19):**
   on a downgrade to **Access** (no annual charge) the credit has nothing to draw against — decide what
   happens to it.
@@ -492,15 +492,23 @@ catastrophic here.** Titles, assets, and revenue belong to the **org**, not the 
 
 ## 12. Intake
 
-### Platform-ready materials — GC does not transcode
+### Platform-ready materials — no general-purpose / delivery transcoding
 
-**Clients deliver platform-ready materials.** GC runs no transcoding pipeline. Most premium
-vendors want a mezzanine master and encode themselves, so "platform-ready" is realistically
-**one correct master plus captions, artwork, and metadata to spec** — not 20 variants.
+**Clients deliver platform-ready materials.** GC does not provide general-purpose transcoding or
+delivery-encoding services. Most premium vendors want a mezzanine master and encode themselves, so
+"platform-ready" is realistically **one correct master plus captions, artwork, and metadata to
+spec** — not 20 variants.
 
-> **Consequence: intake QC is the only defense.** Not re-encoding means the client's mistake
-> becomes GC's rejection — days later, from a vendor's queue. QC findings (§19) are load-bearing,
-> not a nice-to-have. Automated QC tooling (Vidchecker, Baton class) is **buy, not build** (§21).
+> **Exception — internal viewing proxies.** GC generates one low-bitrate screener proxy per master,
+> for viewing and evaluation only. It is never delivered to a vendor and never satisfies a delivery
+> requirement. This is not a transcoding pipeline in the sense above: GC still does not re-encode
+> deliverables, and clients still deliver platform-ready masters. The client-supplied master remains
+> the delivery/source master; the generated H.264 proxy is a viewing derivative only.
+
+> **Consequence: intake QC is the only defense.** Not re-encoding deliverables means the client's
+> mistake becomes GC's rejection — days later, from a vendor's queue. QC findings (§19) are
+> load-bearing, not a nice-to-have. Automated QC tooling (Vidchecker, Baton class) is **buy, not
+> build** (§21).
 
 ### Order of operations
 
@@ -612,6 +620,40 @@ back catalog — those files require a **5–12 hour bulk restore before a downl
 > **Delivery needs a `restoring` state.** The vendor email cannot send until restore completes,
 > or you're mailing links that 404. Others work on GC's clock, so the wait is acceptable — but
 > the system must model it.
+
+### Buyer links → vendor attachment (post-pitch handoff)
+
+A client pitches a title to a buyer via a named `screener_view` portal link ("Tubi"). When the
+deal closes, the buyer needs the master, which is gated on that link's `vendor_id` pointing at a
+vendor with an active grant and delivery for the title. **A client can never set `vendor_id`
+themselves** — `vendors` is a GC-only roster, and exposing it to every client would reveal GC's
+whole distribution network. **GC attaches the vendor** (`attach_link_vendor` RPC,
+`20260806000400`) once the deal is confirmed.
+
+- **First attach vs. reassignment are not the same risk.** Reassigning a link that already
+  carries a different vendor is blocked unless the caller passes an explicit force flag — it
+  would otherwise silently move a buyer's pitch (and master access, once licensed) to another
+  company. A **first** attach (no vendor yet) gets the *same* explicit-confirmation treatment
+  when the chosen `(title, vendor)` pair **already has an active grant and delivery on record**
+  — that one click makes the unwatermarked master downloadable immediately, which is the
+  higher-consequence transition of the two, not the reassignment.
+- **Detach is unguarded.** Setting `vendor_id` back to null removes a link's ability to resolve
+  the master on its next read; it touches no grant, delivery, or title state, so it needs no
+  confirmation — the safe direction, matching rule 11 ("gate future actions, never retroactively
+  destroy state").
+- **Dead links (revoked or expired) refuse attach AND detach outright**, no force override —
+  neither can ever be resolved by a buyer again, so writing into one is pointless in either
+  direction.
+- **Audit approach:** the RPC does **not** use a whole-row audit trigger. `portal_links` carries
+  `share_token` (the live, un-hashed portal URL a buyer holds) and `recipient_name` (external-
+  party PII); a generic trigger would copy both into the append-only `audit_log`, which has
+  UPDATE/DELETE revoked at the permission level — permanently, with no purge path (the same
+  failure mode §18's `audit_log` already accepted once for `portal_sessions.token_hash`, and
+  fixed the same way). Instead, `attach_link_vendor` inserts exactly one hand-built row per
+  genuine transition — `entity = 'portal_links'`, `before`/`after` carrying `{"vendor_id": ...}`
+  only, `org_id` resolved via the link's own title (a one-hop lookup — the link itself has no
+  `org_id` column, but its title always belongs to one). No transition, no row: an idempotent
+  same-vendor re-attach or re-detach writes nothing.
 
 ---
 
@@ -758,8 +800,16 @@ and an audit log added in month eight has no history for months one through seve
 Never store a derived number without both. **The health score is a derived number (§19).**
 
 **Audit layer (append-only):** `audit_log` — `id`, `entity`, `entity_id`, `action`, `actor`, `at`,
-`before` (jsonb), `after` (jsonb). Trigger-populated. **UPDATE and DELETE revoked at the
-permission level.**
+`before` (jsonb), `after` (jsonb). Trigger-populated **by default** — but **not every table should
+get the generic whole-row trigger.** `before`/`after` are `to_jsonb()` of the row, and
+UPDATE/DELETE are revoked on `audit_log` itself, so anything written there is permanent with no
+purge path. `portal_sessions.token_hash` and `portal_links.share_token`/`recipient_name` both hit
+this: a session or portal-link credential, or an external party's name, copied into an
+unreachable, org-id-less audit row forever. Both were fixed the same way — **audit the
+transition, not the row**: a redacting/scoped trigger for `portal_sessions` (only the revocation
+transition, `token_hash` stripped), and one hand-built, field-scoped `audit_log` insert per
+genuine transition for `portal_links.vendor_id` (§13) rather than any trigger at all. **Before
+attaching the generic trigger to a new table, check what a live row actually contains.**
 
 > For manual delivery (§13) and rights entry (§9), `audit_log` **is** the provenance record —
 > the source is a person, not a document.
@@ -893,10 +943,8 @@ what Globee couldn't resolve**. Not a mailto link — a feature with a design.
 3. **Reinstatement (§8).** Lapsed → Access → pays two months later. Upgrade differential, or old
    tier resumes?
 4. **Does takedown end the licence (§11)?** Can a client re-submit later without signing again?
-5. **Revenue-share rates (§5) — prices SET, rates still OPEN.** Prices: **Access $0 · Pro $497/yr ·
-   Premium $997/yr** (test + live catalogs are separate; test uses these real numbers to surface
-   integer-cents rounding). **Still open:** the three revenue-share rates (Access highest GC share →
-   Premium lowest).
+5. **Revenue-share rates (§5) — prices and bp rates match the current Tier Plan Pricing sheet.** Prices: **Access $397/title · Pro $797/yr ·
+   Premium $1,997/yr**. Client share bp (already in `tier_revenue_share_bp`, confirmed): **Access 8000 · Pro 8000 · Premium 8500**. Counsel agreement text remains placeholder. This is a number sync, not Brief 2.
 6. **~~E-sign vendor~~ — CLOSED.** Clickwrap replaces e-sign; there is no vendor (§5). (Number kept,
    not renumbered, to preserve the §21.9 / §21.10 cross-references.)
 7. **Globee escalation reply path (§20)** — dashboard or email?
@@ -939,16 +987,16 @@ what Globee couldn't resolve**. Not a mailto link — a feature with a design.
     pre-agreed-consent question that clickwrap makes load-bearing.
 15. **Purge window `N` (§21.10 / §11).** How many days a title may sit rejected/abandoned at
     `in_review` before its S3 asset is purged. Founder decision.
-16. **Premium: 2-year term vs. annual charge (§5/§6) — DECIDED: option B.** Premium is billed
-    **annually** ($997/yr) inside a **2-year term** — two dates (annual charge at month 12, term
-    expiry at month 24). §6's "one date" is a documented exception for Premium (reworded in §6).
-    Stripe Premium Price = annual-recurring; `term_length_months = 24`.
+16. **Premium: multi-year term vs. annual charge (§5/§6) — DECIDED: option B; term length now 3 years to match the current sheet.** Premium is billed
+    **annually** ($1,997/yr) inside a **3-year term** — annual charges at months 12 and 24, term
+    expiry at month 36. §6's "one date" is a documented exception for Premium (reworded in §6).
+    Stripe Premium Price = annual-recurring; app `termMonths = 36`. Live SQL still writes `term_length_months = 24` until the founder-approved SQL pack is applied.
 17. **Downgrade credit basis for Premium (§6) — propose, not picked.** Voluntary downgrade credits
-    "unused prepaid value." For Premium (annual $997 charge inside a 2-year term), what's the base?
-    - **(a) Unused of the current ANNUAL charge** — pro-rate the most recent $997 by remaining days
+    "unused prepaid value." For Premium (annual $1,997 charge inside a 3-year term), what's the base?
+    - **(a) Unused of the current ANNUAL charge** — pro-rate the most recent $1,997 by remaining days
       in that 12-month billing period. Credits only what was actually prepaid; consistent with annual
       billing.
-    - **(b) Unused of the full 2-year TERM** — treats the 24-month term as the prepaid unit. But under
+    - **(b) Unused of the full 3-year TERM** — treats the 36-month term as the prepaid unit. But under
       annual billing only one year is paid at a time, so this either over-credits (year 2 isn't paid
       yet) or, if "prepaid" means "already charged," collapses back to (a).
     Founder decision. **Does not block this slice** — downgrade/credit is a later flow (§6 fees); the
@@ -1052,4 +1100,7 @@ queue** · notifications (Resend + in-app) · GC master queue · **Cloudflare Tu
   cross-project identity problem is unsolved — see the 24Frame repo's open items.
 
 **Out of scope entirely:** anything public-facing (that's `globalcontent-web`), any 24Frame
-functionality, mobile, transcoding.
+functionality, mobile, and general-purpose / delivery transcoding. The sole exception is the
+dedicated internal viewing screener-proxy pipeline (§12) — a browser-compatible viewing
+derivative from the client-supplied master; not platform delivery encoding, mezzanine/master
+preparation, client-requested format conversion, or arbitrary derivative creation.

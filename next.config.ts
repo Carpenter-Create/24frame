@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs/config";
 
 // Artwork is served from CloudFront in production and from presigned S3 in local/preview
 // (see lib/asset-url). next/image will only optimise a remote source whose host is listed
@@ -41,6 +42,13 @@ const nextConfig: NextConfig = {
     // but this is a Tier 3 app — if anything looks stale after a write, this flag is the
     // first thing to remove.
     staleTimes: { dynamic: 30 },
+    // Lets instrumentation-client.ts export onRouterTransitionStart so Sentry
+    // can attach client navigation spans. Off by default in Next 16.3.
+    instrumentationClientRouterTransitionEvents: true,
+    // Education staff uploads PUT server-side (avatars pattern). Cover ≤10MB,
+    // lesson source ≤2GB. Default 1MB would reject a valid file before attach.
+    // 3gb leaves FormData headroom over EDUCATION_VIDEO_MAX_BYTES.
+    serverActions: { bodySizeLimit: "3gb" },
   },
 
   images: {
@@ -57,6 +65,35 @@ const nextConfig: NextConfig = {
     // holding a derivative longer than its source URL stays valid.
     minimumCacheTTL: 3600,
   },
+
+  async redirects() {
+    return [
+      { source: "/", destination: "/dashboard", permanent: true },
+      { source: "/analytics", destination: "/reports", permanent: true },
+      { source: "/analytics/:path*", destination: "/reports/:path*", permanent: true },
+      { source: "/earn", destination: "/reports", permanent: true },
+      { source: "/earn/:path*", destination: "/reports/:path*", permanent: true },
+      { source: "/finance", destination: "/reports", permanent: true },
+      { source: "/finance/:path*", destination: "/reports/:path*", permanent: true },
+      { source: "/gc/education", destination: "/education", permanent: true },
+      { source: "/gc/education/:slug", destination: "/education/:slug", permanent: true },
+      { source: "/catalog-health", destination: "/attention", permanent: true },
+      { source: "/catalog-health/:path*", destination: "/attention/:path*", permanent: true },
+      { source: "/deliveries", destination: "/titles", permanent: true },
+      { source: "/deliveries/:path*", destination: "/titles/:path*", permanent: true },
+      { source: "/vendors", destination: "/channels", permanent: true },
+      { source: "/vendors/:path*", destination: "/channels/:path*", permanent: true },
+    ];
+  },
 };
 
-export default nextConfig;
+// Org/project slugs are public identifiers for the existing Sentry project.
+// DSN stays env-only. Source maps are off — no auth token, no CLI upload.
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG ?? "e8-holdings-llc",
+  project: process.env.SENTRY_PROJECT ?? "24frame",
+  silent: !process.env.CI,
+  telemetry: false,
+  sourcemaps: { disable: true },
+  tunnelRoute: "/sentry-tunnel",
+});

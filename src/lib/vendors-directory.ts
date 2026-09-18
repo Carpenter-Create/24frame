@@ -1,0 +1,126 @@
+import { CHANNELS_HREF } from "@/lib/channel-card";
+
+// Team /channels address book. Copy and list helpers live here, not in JSX.
+// The list page is identity + empty OR identity + card grid. Create is a
+// separate surface. Do not invent fixture channels. DB table stays vendors.
+
+export const CHANNELS_PAGE = {
+  title: "Channels",
+  identity: "Credentials are never stored here.",
+  emptyTitle: "No channels yet",
+  filterMiss: "No channels match this filter.",
+  addChannel: "Add channel",
+  addHref: `${CHANNELS_HREF}/new`,
+  statusFilterLabel: "Filter by status",
+} as const;
+
+/** @deprecated Use CHANNELS_PAGE — kept for leftover internal imports. */
+export const VENDORS_PAGE = CHANNELS_PAGE;
+
+export const VENDOR_MODE_LABELS: Record<"portal_upload" | "email", string> = {
+  portal_upload: "Portal upload",
+  email: "Email",
+};
+
+export type VendorDeliveryMode = keyof typeof VENDOR_MODE_LABELS;
+
+export type VendorDirectoryRow = {
+  id: string;
+  name: string;
+  deliveryMode: VendorDeliveryMode;
+  active: boolean;
+};
+
+export type ChannelCardTag = {
+  label: string;
+  tone: "neutral" | "active" | "muted";
+};
+
+/** Fields that belong on the create/edit form — never on the address-book page. */
+export const VENDOR_FORM_FIELD_LABELS = [
+  "Name",
+  "Delivery mode",
+  "Email recipients (comma-separated)",
+  "Email CC (comma-separated)",
+  "Email template",
+  "Company info (JSON, optional)",
+  "Export format spec (JSON, optional)",
+  "Active",
+  "Save channel",
+  "New channel",
+] as const;
+
+export function asVendorDirectoryRow(row: unknown): VendorDirectoryRow | null {
+  if (!row || typeof row !== "object") return null;
+  const r = row as Record<string, unknown>;
+  if (typeof r.id !== "string" || r.id.length === 0) return null;
+  if (typeof r.name !== "string" || r.name.length === 0) return null;
+  if (r.delivery_mode !== "portal_upload" && r.delivery_mode !== "email") return null;
+  if (typeof r.active !== "boolean") return null;
+  return {
+    id: r.id,
+    name: r.name,
+    deliveryMode: r.delivery_mode,
+    active: r.active,
+  };
+}
+
+/** Keep only real vendor rows. Empty or malformed payloads become an empty directory. */
+export function normalizeVendorDirectory(data: unknown): VendorDirectoryRow[] {
+  if (!Array.isArray(data)) return [];
+  const out: VendorDirectoryRow[] = [];
+  for (const row of data) {
+    const parsed = asVendorDirectoryRow(row);
+    if (parsed) out.push(parsed);
+  }
+  return out;
+}
+
+export function vendorDirectoryHref(row: VendorDirectoryRow): string {
+  return `${CHANNELS_HREF}/${row.id}`;
+}
+
+export function vendorDirectoryMeta(row: VendorDirectoryRow): string {
+  const mode = VENDOR_MODE_LABELS[row.deliveryMode];
+  return row.active ? mode : `${mode} · inactive`;
+}
+
+/** Real facets only — delivery mode + Active/Inactive. No invented genre tags. */
+export function channelCardTags(row: VendorDirectoryRow): ChannelCardTag[] {
+  return [
+    { label: VENDOR_MODE_LABELS[row.deliveryMode], tone: "neutral" },
+    row.active
+      ? { label: "Active", tone: "active" }
+      : { label: "Inactive", tone: "muted" },
+  ];
+}
+
+export const VENDOR_DIRECTORY_FILTERS = [
+  { key: "all", label: "All" },
+  { key: "active", label: "Active" },
+  { key: "inactive", label: "Inactive" },
+] as const;
+
+export type VendorDirectoryFilter = (typeof VENDOR_DIRECTORY_FILTERS)[number]["key"];
+
+export function parseVendorDirectoryFilter(value: string | undefined): VendorDirectoryFilter {
+  return VENDOR_DIRECTORY_FILTERS.some((option) => option.key === value)
+    ? (value as VendorDirectoryFilter)
+    : "all";
+}
+
+export function vendorDirectoryFilterLabel(status: VendorDirectoryFilter): string {
+  return (
+    VENDOR_DIRECTORY_FILTERS.find((option) => option.key === status)?.label ??
+    VENDOR_DIRECTORY_FILTERS[0].label
+  );
+}
+
+export function filterVendorDirectory(
+  rows: readonly VendorDirectoryRow[],
+  filter: VendorDirectoryFilter,
+): VendorDirectoryRow[] {
+  if (filter === "active") return rows.filter((row) => row.active);
+  if (filter === "inactive") return rows.filter((row) => !row.active);
+  return [...rows];
+}

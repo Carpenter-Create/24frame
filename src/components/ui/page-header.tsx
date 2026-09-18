@@ -31,7 +31,7 @@ export function PageHeader({ title, eyebrow, subtitle, backLink, actions, classN
           </Link>
         ) : null}
         {eyebrow ? <span className="t-label text-accent">{eyebrow}</span> : null}
-        <h1 className="t-subhead text-ink">{title}</h1>
+        <h1 className="t-title text-ink">{title}</h1>
         {subtitle ? <p className="t-body-sm text-ink-3">{subtitle}</p> : null}
       </div>
       {actions ? <div className="flex shrink-0 items-center gap-2">{actions}</div> : null}

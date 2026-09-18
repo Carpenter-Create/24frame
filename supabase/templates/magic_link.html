@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
+    <meta name="x-apple-disable-message-reformatting">
+    <title>Sign in to 24Frame</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    >
+    <style type="text/css">
+      a[x-apple-data-detectors],
+      a[x-apple-data-detectors]:hover,
+      a[x-apple-data-detectors]:focus,
+      a[x-apple-data-detectors]:visited,
+      a[x-apple-data-detectors]:active {
+        color: inherit !important;
+        text-decoration: none !important;
+        font-size: inherit !important;
+        font-family: inherit !important;
+        font-weight: inherit !important;
+        line-height: inherit !important;
+      }
+      .otp::before,
+      .otp::after {
+        content: "\200B";
+      }
+    </style>
+  </head>
+  <body style="margin:0;padding:0;background:#FAFAFB">
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#FAFAFB">
+      <tr>
+        <td align="center" style="padding:40px 20px">
+          <table
+            role="presentation"
+            cellpadding="0"
+            cellspacing="0"
+            width="600"
+            style="width:600px;max-width:600px;background:#ffffff;border:1px solid #E6E8EB;border-radius:14px"
+          >
+            <tr>
+              <td style="padding:48px 48px 40px;font-family:Geist,ui-sans-serif,-apple-system,system-ui,sans-serif">
+                <img
+                  src="https://app.24frame.co/email-mark-v2.png"
+                  width="88"
+                  height="88"
+                  alt="24Frame"
+                  style="display:block;border:0;width:88px;height:88px"
+                />
+                <p style="margin:16px 0 0;font-size:11px;line-height:16px;letter-spacing:0.16em;text-transform:uppercase;color:#3F4650">
+                  Built for the creator class.
+                </p>
+                <div style="margin:32px 0">
+                  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse">
+                    <tr>
+                      <td style="height:1px;background:#E6E8EB;font-size:0;line-height:0">&nbsp;</td>
+                    </tr>
+                  </table>
+                </div>
+                <p style="margin:0 0 12px;font-size:28px;line-height:34px;font-weight:600;color:#14171A">Sign in</p>
+                <p style="margin:0 0 28px;font-size:17px;line-height:26px;color:#3F4650">
+                  Use this link to sign in. If you didn't request this, you can ignore this message.
+                </p>
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin:0 0 28px">
+                  <tr>
+                    <td bgcolor="#1769FF" style="background:#1769FF;border-radius:8px">
+                      <a
+                        href="{{ .ConfirmationURL }}"
+                        style="display:inline-block;padding:16px 32px;font-family:Geist,ui-sans-serif,-apple-system,system-ui,sans-serif;font-size:16px;line-height:20px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:8px"
+                      >Sign in</a>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:0 0 8px;font-size:17px;line-height:26px;color:#3F4650">Or enter this code:</p>
+                <table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse">
+                  <tr>
+                    <td
+                      x-apple-data-detectors="false"
+                      style="font-size:24px;font-weight:600;letter-spacing:2px;color:#14171A;text-decoration:none"
+                    >
+                      <span
+                        class="otp"
+                        x-apple-data-detectors="false"
+                        style="color:#14171A;text-decoration:none;font-weight:600;font-size:24px;letter-spacing:2px"
+                      >&#8203;{{ .Token }}&#8203;</span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 48px 48px;font-family:Geist,ui-sans-serif,-apple-system,system-ui,sans-serif">
+                <p style="margin:8px 0 24px;font-size:15px">
+                  <a href="https://24frame.co" style="color:#1769FF;text-decoration:none">24frame.co</a>
+                </p>
+                <div style="margin:0 0 24px">
+                  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse">
+                    <tr>
+                      <td style="height:1px;background:#E6E8EB;font-size:0;line-height:0">&nbsp;</td>
+                    </tr>
+                  </table>
+                </div>
+                <p style="margin:0 0 6px;font-size:13px;line-height:20px;color:#9AA0A9">
+                  © 2026 Global Content Holdings LLC. All rights reserved.
+                </p>
+                <p style="margin:0 0 16px;font-size:13px;line-height:20px;color:#9AA0A9">
+                  3839 McKinney Ave, Suite 155 #2276, Dallas, TX 75204
+                </p>
+                <p style="margin:0;font-size:13px;line-height:20px">
+                  <a href="https://24frame.co/legal" style="color:#9AA0A9;text-decoration:none">Legal</a>
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

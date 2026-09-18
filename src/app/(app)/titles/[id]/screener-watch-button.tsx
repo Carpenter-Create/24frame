@@ -9,7 +9,7 @@ import { InlineNotice } from "@/components/ui/inline-notice";
 // Client screener preview — a rights holder watching their OWN title's screener. Fetches a
 // signed streaming URL from /api/screener/url (RLS-scoped to the caller's org, server-signed)
 // and plays it in a modal. View-only markup (controlsList=nodownload, no PiP) mirrors the
-// portal + GC players, minus their instrumentation. Styled as a play pill for the dark hero.
+// portal + GC players, minus their instrumentation. House secondary pill on the light hero.
 export function ScreenerWatchButton({ titleId }: { titleId: string }) {
   const [open, setOpen] = useState(false);
   const [src, setSrc] = useState<string | null>(null);
@@ -40,7 +40,7 @@ export function ScreenerWatchButton({ titleId }: { titleId: string }) {
       <button
         type="button"
         onClick={watch}
-        className="inline-flex w-fit items-center gap-2 rounded-full bg-band-ink px-4 py-2 t-body-sm font-medium text-band transition hover:-translate-y-px hover:opacity-90 active:translate-y-0"
+        className="inline-flex w-fit items-center gap-2 rounded-full border border-hairline bg-surface px-4 py-2 t-body-sm font-medium text-ink transition hover:bg-surface-muted"
       >
         <Play className="h-4 w-4 fill-current" strokeWidth={1.5} />
         Watch screener

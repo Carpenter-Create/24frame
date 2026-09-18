@@ -1,0 +1,232 @@
+import { z } from "zod";
+
+// Member post media rules. Keys live in posts.media (Pack 2 jsonb).
+// Objects go to 24frame-media-source-prod. Never title film keys,
+// never S3_BUCKET / gc-content-assets, never avatars/.
+// Stories stay on the 24frame-media-* stories lane; create is video-only.
+// Copy for these codes lives in SOCIAL.home / SOCIAL.stories.
+
+export type SocialMediaRuleError =
+  | "invalid"
+  | "limit"
+  | "forbidden"
+  | "type"
+  | "missing"
+  | "tooLarge";
+
+export const SOCIAL_MEDIA_KEY_PREFIX = "posts";
+export const SOCIAL_MEDIA_LANES = ["posts", "stories"] as const;
+export type SocialMediaLane = (typeof SOCIAL_MEDIA_LANES)[number];
+export const SOCIAL_MEDIA_MAX_ITEMS = 4;
+export const SOCIAL_STORY_MAX_ITEMS = 1;
+export const SOCIAL_IMAGE_MAX_BYTES = 10 * 1024 * 1024;
+export const SOCIAL_VIDEO_MAX_BYTES = 100 * 1024 * 1024;
+// Design 144:1218 copy mentioned “up to 15 seconds”. Not an Adam lock.
+// Do not add a story duration cap. Size/type bounds stay.
+export const SOCIAL_MEDIA_SIGNED_URL_TTL_SECONDS = 300;
+export const SOCIAL_MEDIA_PUT_TTL_SECONDS = 900;
+
+export const SOCIAL_IMAGE_CONTENT_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+] as const;
+export const SOCIAL_VIDEO_CONTENT_TYPES = [
+  "video/mp4",
+  "video/quicktime",
+  "video/webm",
+] as const;
+export const SOCIAL_MEDIA_CONTENT_TYPES = [
+  ...SOCIAL_IMAGE_CONTENT_TYPES,
+  ...SOCIAL_VIDEO_CONTENT_TYPES,
+] as const;
+
+export type SocialImageContentType = (typeof SOCIAL_IMAGE_CONTENT_TYPES)[number];
+export type SocialVideoContentType = (typeof SOCIAL_VIDEO_CONTENT_TYPES)[number];
+export type SocialMediaContentType = (typeof SOCIAL_MEDIA_CONTENT_TYPES)[number];
+export type SocialMediaKind = "image" | "video";
+
+export type SocialMediaItem = {
+  kind: SocialMediaKind;
+  key: string;
+  contentType: SocialMediaContentType;
+};
+
+export const SOCIAL_MEDIA_ACCEPT = SOCIAL_MEDIA_CONTENT_TYPES.join(",");
+
+export const TITLE_ASSET_BUCKET_NAME = "gc-content-assets";
+export const FORBIDDEN_MEDIA_KEY_MARKERS = [
+  "orgs/",
+  "titles/",
+  "avatars/",
+  "gc-content-assets",
+] as const;
+
+const uuidSchema = z.string().uuid();
+const EXT_BY_TYPE: Record<SocialMediaContentType, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/gif": "gif",
+  "video/mp4": "mp4",
+  "video/quicktime": "mov",
+  "video/webm": "webm",
+};
+
+const itemSchema = z.object({
+  kind: z.enum(["image", "video"]),
+  key: z.string().min(1).max(200),
+  contentType: z.enum(SOCIAL_MEDIA_CONTENT_TYPES),
+});
+
+export function isSocialMediaContentType(value: string): value is SocialMediaContentType {
+  return (SOCIAL_MEDIA_CONTENT_TYPES as readonly string[]).includes(value);
+}
+
+export function socialMediaKindFor(contentType: string): SocialMediaKind | null {
+  if ((SOCIAL_IMAGE_CONTENT_TYPES as readonly string[]).includes(contentType)) return "image";
+  if ((SOCIAL_VIDEO_CONTENT_TYPES as readonly string[]).includes(contentType)) return "video";
+  return null;
+}
+
+export function socialMediaMaxBytes(kind: SocialMediaKind): number {
+  return kind === "video" ? SOCIAL_VIDEO_MAX_BYTES : SOCIAL_IMAGE_MAX_BYTES;
+}
+
+export function isForbiddenMediaKey(key: string): boolean {
+  if (!key || key.includes("..") || key.includes("\\") || key.startsWith("/") || key.includes("//")) {
+    return true;
+  }
+  const lower = key.toLowerCase();
+  return FORBIDDEN_MEDIA_KEY_MARKERS.some((marker) => lower.includes(marker));
+}
+
+export function isForbiddenMediaBucket(bucket: string): boolean {
+  const name = bucket.trim().toLowerCase();
+  if (!name) return true;
+  if (name === TITLE_ASSET_BUCKET_NAME) return true;
+  if (name.includes("24frame-education") || name.includes("24frame-finance")) return true;
+  if (name === (process.env.S3_BUCKET ?? "").toLowerCase()) return true;
+  if (name === (process.env.S3_AVATARS_BUCKET ?? "").toLowerCase()) return true;
+  return false;
+}
+
+export function parseSocialMediaLane(raw: string | null | undefined): SocialMediaLane {
+  return raw === "stories" ? "stories" : "posts";
+}
+
+export function socialMediaObjectKey(
+  userId: string,
+  objectId: string,
+  contentType: string,
+  lane: SocialMediaLane = "posts",
+): string {
+  const user = uuidSchema.safeParse(userId);
+  const object = uuidSchema.safeParse(objectId);
+  if (!user.success || !object.success) {
+    throw new Error("Media key requires UUID user and object ids");
+  }
+  if (!isSocialMediaContentType(contentType)) {
+    throw new Error("Unsupported media content type");
+  }
+  return `${lane}/${user.data}/${object.data}.${EXT_BY_TYPE[contentType]}`;
+}
+
+export function isOwnedSocialMediaKey(
+  key: string,
+  userId: string,
+  lane: SocialMediaLane = "posts",
+): boolean {
+  if (isForbiddenMediaKey(key)) return false;
+  const user = uuidSchema.safeParse(userId);
+  if (!user.success) return false;
+  const match = key.match(
+    /^(posts|stories)\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})\.(jpg|jpeg|png|webp|gif|mp4|mov|webm)$/i,
+  );
+  return !!match && match[1] === lane && match[2] === user.data;
+}
+
+export function parsePostMedia(value: unknown): SocialMediaItem[] {
+  if (!Array.isArray(value)) return [];
+  const items: SocialMediaItem[] = [];
+  for (const raw of value.slice(0, SOCIAL_MEDIA_MAX_ITEMS)) {
+    const parsed = itemSchema.safeParse(raw);
+    if (!parsed.success) continue;
+    if (isForbiddenMediaKey(parsed.data.key)) continue;
+    if (socialMediaKindFor(parsed.data.contentType) !== parsed.data.kind) continue;
+    items.push(parsed.data);
+  }
+  return items;
+}
+
+export function ownedMediaItems(
+  value: unknown,
+  authorId: string,
+  lane: SocialMediaLane = "posts",
+): SocialMediaItem[] {
+  return parsePostMedia(value).filter((item) => isOwnedSocialMediaKey(item.key, authorId, lane));
+}
+
+export function mediaItemsForInsert(
+  raw: unknown,
+  userId: string,
+  lane: SocialMediaLane = "posts",
+): { ok: true; items: SocialMediaItem[] } | { ok: false; error: SocialMediaRuleError } {
+  if (raw == null || raw === "") return { ok: true, items: [] };
+  let parsed: unknown = raw;
+  if (typeof raw === "string") {
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      return { ok: false, error: "invalid" };
+    }
+  }
+  if (!Array.isArray(parsed)) return { ok: false, error: "invalid" };
+  const max = lane === "stories" ? SOCIAL_STORY_MAX_ITEMS : SOCIAL_MEDIA_MAX_ITEMS;
+  if (parsed.length > max) {
+    return { ok: false, error: "limit" };
+  }
+
+  const items: SocialMediaItem[] = [];
+  for (const rawItem of parsed) {
+    const item = itemSchema.safeParse(rawItem);
+    if (!item.success) return { ok: false, error: "invalid" };
+    if (isForbiddenMediaKey(item.data.key) || !isOwnedSocialMediaKey(item.data.key, userId, lane)) {
+      return { ok: false, error: "forbidden" };
+    }
+    if (socialMediaKindFor(item.data.contentType) !== item.data.kind) {
+      return { ok: false, error: "invalid" };
+    }
+    // Stories create is video-only. Posts still accept stills.
+    if (lane === "stories" && item.data.kind !== "video") {
+      return { ok: false, error: "type" };
+    }
+    items.push(item.data);
+  }
+  return { ok: true, items };
+}
+
+export function validateMediaUpload(input: {
+  contentType: string;
+  byteLength: number;
+  lane?: SocialMediaLane;
+}):
+  | { ok: true; kind: SocialMediaKind; contentType: SocialMediaContentType }
+  | { ok: false; error: SocialMediaRuleError } {
+  if (!isSocialMediaContentType(input.contentType)) {
+    return { ok: false, error: "type" };
+  }
+  const kind = socialMediaKindFor(input.contentType);
+  if (!kind) return { ok: false, error: "type" };
+  if (input.lane === "stories" && kind !== "video") {
+    return { ok: false, error: "type" };
+  }
+  if (!Number.isFinite(input.byteLength) || input.byteLength <= 0) {
+    return { ok: false, error: "missing" };
+  }
+  if (input.byteLength > socialMediaMaxBytes(kind)) {
+    return { ok: false, error: "tooLarge" };
+  }
+  return { ok: true, kind, contentType: input.contentType };
+}

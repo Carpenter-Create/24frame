@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InlineNotice } from "@/components/ui/inline-notice";
+import { PRODUCT_NAME } from "@/lib/product";
 import { createTitle } from "./actions";
 
 type ReleaseType = "new_release" | "re_release";
@@ -90,7 +91,7 @@ export function AddTitleForm({
           ))}
         </div>
         {needsOriginal ? null : (
-          <p className="t-body-sm text-ink-3">Global Content sets the release date.</p>
+          <p className="t-body-sm text-ink-3">{PRODUCT_NAME} sets the release date.</p>
         )}
       </div>
 

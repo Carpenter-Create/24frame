@@ -5,22 +5,36 @@ import { getOrgContext } from "@/lib/supabase/context";
 import { PageHeader } from "@/components/ui/page-header";
 import { MetadataForm } from "./metadata-form";
 import { METADATA_FIELDS } from "@/lib/metadata";
+import {
+  firstTitleMatch,
+  isCanonicalTitleSlug,
+  publicCatalogId,
+  titleClientPath,
+} from "@/lib/title-public-id";
 
 // Guided metadata form (§12 path 1). RLS-scoped; only operate-capable roles
 // (account_owner, delivery_ops — §4) edit; others get a read-only view.
 export default async function TitleMetadataPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+  const { id: slug } = await params;
   const supabase = await createClient();
   // Resolved once per request and shared with the layout above (React cache()).
   const ctx = await getOrgContext();
   if (!ctx) redirect("/login");
 
-  const { data: title } = await supabase
-    .from("titles")
-    .select("id, title, org_id")
-    .eq("id", id)
-    .maybeSingle();
+  const title = await firstTitleMatch(async (filter) => {
+    const { data } = await supabase
+      .from("titles")
+      .select("id, title, org_id, catalog_id")
+      .eq(filter.field, filter.value)
+      .maybeSingle();
+    return data;
+  }, slug);
   if (!title) notFound();
+
+  const publicId = publicCatalogId(title.catalog_id);
+  if (publicId && !isCanonicalTitleSlug(slug, title.catalog_id)) {
+    redirect(titleClientPath(title.catalog_id, "/metadata"));
+  }
 
   // The role in the org that owns THIS title -- not necessarily the active org.
   // ctx.rows already holds every active membership, so this needs no extra query.
@@ -30,7 +44,7 @@ export default async function TitleMetadataPage({ params }: { params: Promise<{ 
   const { data: row } = await supabase
     .from("title_metadata")
     .select("data")
-    .eq("title_id", id)
+    .eq("title_id", title.id)
     .maybeSingle();
   const data = (row?.data as Record<string, unknown> | null) ?? {};
 
@@ -39,7 +53,7 @@ export default async function TitleMetadataPage({ params }: { params: Promise<{ 
       <PageHeader
         title={title.title}
         subtitle="Metadata"
-        backLink={{ href: `/titles/${id}`, label: "Back to title" }}
+        backLink={{ href: titleClientPath(title.catalog_id), label: "Back to title" }}
       />
       {canOperate ? (
         <MetadataForm orgId={title.org_id} titleId={title.id} initial={data} />

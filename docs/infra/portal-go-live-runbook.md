@@ -2,13 +2,15 @@
 
 ## Context
 All six portal/findings/notifications slices are merged to `main` and green. Nothing code-blocks launch —
-what remains is **provisioning** (AWS CloudFront + S3 lifecycle + IAM, Resend, Vercel env + WAF) and the
+what remains is **provisioning** (AWS CloudFront + S3 lifecycle + IAM, SES Auth mail, Vercel env + WAF) and the
 manual end-to-end tests. This runbook is the ordered, paste-able CLI version with a fill-in table so you
 can run it top-to-bottom. Companion: `asset-portal-setup.md` (reference) and `portal-go-live-checklist.md`
 (the what/why index).
 
 **Prereqs:** `aws` CLI authenticated to the GC AWS account (`aws sts get-caller-identity` returns the GC
-account), plus `openssl`, `jq`, and the `vercel` CLI (`npm i -g vercel && vercel link`). Resend account created.
+account), plus `openssl`, `jq`, and the `vercel` CLI (`npm i -g vercel && vercel link`).
+Auth OTP is SES on verified `24frame.co` — see `auth-ses.md`. Resend is residual for
+GC-support/asset notification only.
 Nothing here deletes data — it creates new resources and sets env vars.
 
 ---
@@ -22,7 +24,7 @@ export BUCKET=<your real assets bucket>           # e.g. gc-content-assets-prod 
 export APEX=<your GC domain>                       # e.g. globalcontent.tv
 export PORTAL_SUBDOMAIN=links.$APEX               # the branded asset-download host
 export APP_ORIGIN=https://<your app origin>        # this app's own URL, e.g. https://app.$APEX (for PORTAL_BASE_URL)
-export SENDER=links@notifications.$APEX            # OTP "from" address (on a domain you'll verify in Resend)
+export SENDER=auth@24frame.co                      # Auth OTP From — never noreply; verified 24frame.co SES identity
 export HOSTED_ZONE_ID=<Route53 hosted zone id for $APEX>   # aws route53 list-hosted-zones
 export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 echo "acct=$ACCOUNT_ID bucket=$BUCKET subdomain=$PORTAL_SUBDOMAIN origin=$APP_ORIGIN"
@@ -33,35 +35,92 @@ CloudFront alias hosted-zone `Z2FDTNDATAQYW2`.
 ---
 
 ## STEP 1 — S3 lifecycle: masters → Glacier Flexible at 90 days
+Selection is by **object tag `gc-archive=master`**, not by prefix. `assetKey()` builds
+`orgs/<org>/titles/<title>/<kind>/<uuid>/<file>`, so `master` sits **mid-key**, and S3 lifecycle filters match
+on prefix only — a `"Prefix": "master/"` rule selects **zero objects** and archives nothing while showing a
+green, enabled rule in the console. The app tags masters at `CreateMultipartUpload` (`src/lib/s3.ts`,
+`ARCHIVE_TAG_KEY`/`ARCHIVE_TAG_VALUE`); only masters get the tag, so artwork, captions and screeners stay
+instant.
+
+This call **replaces the whole lifecycle configuration**, so the existing `abort-incomplete-multipart` rule
+from `asset-storage-setup.md` must be restated here or it is silently dropped.
+
 ```bash
 cat > /tmp/lifecycle.json <<JSON
-{ "Rules": [ {
-  "ID": "masters-to-glacier-90d",
-  "Status": "Enabled",
-  "Filter": { "Prefix": "master/" },
-  "Transitions": [ { "Days": 90, "StorageClass": "GLACIER" } ]
-} ] }
+{ "Rules": [
+  {
+    "ID": "abort-incomplete-multipart",
+    "Status": "Enabled",
+    "Filter": { "Prefix": "" },
+    "AbortIncompleteMultipartUpload": { "DaysAfterInitiation": 7 }
+  },
+  {
+    "ID": "masters-to-glacier-90d",
+    "Status": "Enabled",
+    "Filter": { "Tag": { "Key": "gc-archive", "Value": "master" } },
+    "Transitions": [ { "Days": 90, "StorageClass": "GLACIER" } ]
+  }
+] }
 JSON
 aws s3api put-bucket-lifecycle-configuration --bucket "$BUCKET" --lifecycle-configuration file:///tmp/lifecycle.json
-# verify:
+# verify BOTH rules came back:
 aws s3api get-bucket-lifecycle-configuration --bucket "$BUCKET"
 ```
-> The S3 key scheme is `orgs/<org>/titles/<title>/<kind>/...`, so the `master/` prefix must match how keys are
-> laid out. **Verify the real prefix** with `aws s3 ls s3://$BUCKET/ --recursive | head` and adjust the
-> `Prefix` if masters aren't top-level `master/` (an object-tag filter is the robust alternative). This is the
-> one value that couldn't be confirmed from the repo.
 
-## STEP 2 — IAM: add `s3:RestoreObject` (keep everything else; still no Delete)
+**Confirm the rule can actually see a master** — an enabled rule matching nothing looks identical to a working
+one, so check a real object carries the tag:
+
+```bash
+KEY=$(aws s3api list-objects-v2 --bucket "$BUCKET" --query \
+  "Contents[?contains(Key, '/master/')]|[0].Key" --output text)
+aws s3api get-object-tagging --bucket "$BUCKET" --key "$KEY"   # expect gc-archive=master
+```
+
+> **Backfill:** masters uploaded before the tagging commit (`111fbbe`) have no tag and will never transition.
+> Tag them once — this is additive, it writes no new objects and deletes nothing:
+> ```bash
+> aws s3api list-objects-v2 --bucket "$BUCKET" --query "Contents[?contains(Key, '/master/')].Key" \
+>   --output text | tr '\t' '\n' | while read -r k; do
+>     aws s3api put-object-tagging --bucket "$BUCKET" --key "$k" \
+>       --tagging 'TagSet=[{Key=gc-archive,Value=master}]'
+>   done
+> ```
+> Requires `s3:PutObjectTagging` (STEP 2) on whichever principal you run it as.
+
+## STEP 2 — IAM: add `s3:RestoreObject` + `s3:PutObjectTagging` + scoped title-prefix delete
+`PutObjectTagging` is required because the app now sets the archive tag on upload — without it, master uploads
+fail outright. `GetObjectTagging` is included so the verification step above works as the app user.
+
+Founder lock 2026-09-17: soft-deleted titles always purge `orgs/<orgId>/titles/<titleId>/`.
+`s3:DeleteObject` / `s3:DeleteObjects` + list are **prefix-scoped**. This is not a bucket wipe.
+
 ```bash
 cat > /tmp/gc-assets-s3.json <<JSON
-{ "Version": "2012-10-17", "Statement": [ {
-  "Effect": "Allow",
-  "Action": ["s3:PutObject","s3:GetObject","s3:ListMultipartUploadParts","s3:AbortMultipartUpload","s3:RestoreObject"],
-  "Resource": "arn:aws:s3:::$BUCKET/*"
-} ] }
+{ "Version": "2012-10-17", "Statement": [
+  {
+    "Sid": "TitleObjectReadWrite",
+    "Effect": "Allow",
+    "Action": ["s3:PutObject","s3:GetObject","s3:ListMultipartUploadParts","s3:AbortMultipartUpload","s3:RestoreObject","s3:PutObjectTagging","s3:GetObjectTagging"],
+    "Resource": "arn:aws:s3:::$BUCKET/*"
+  },
+  {
+    "Sid": "DeletedTitlePrefixList",
+    "Effect": "Allow",
+    "Action": ["s3:ListBucket"],
+    "Resource": "arn:aws:s3:::$BUCKET",
+    "Condition": { "StringLike": { "s3:prefix": ["orgs/*/titles/*"] } }
+  },
+  {
+    "Sid": "DeletedTitlePrefixPurge",
+    "Effect": "Allow",
+    "Action": ["s3:DeleteObject","s3:DeleteObjects"],
+    "Resource": "arn:aws:s3:::$BUCKET/orgs/*/titles/*"
+  }
+] }
 JSON
 aws iam put-user-policy --user-name gc-assets-app --policy-name gc-assets-s3 --policy-document file:///tmp/gc-assets-s3.json
-aws iam get-user-policy --user-name gc-assets-app --policy-name gc-assets-s3   # verify RestoreObject present, no DeleteObject
+# verify RestoreObject + PutObjectTagging + prefix-scoped DeleteObject (not $BUCKET/*):
+aws iam get-user-policy --user-name gc-assets-app --policy-name gc-assets-s3
 ```
 
 ## STEP 3 — ACM certificate for the portal subdomain (us-east-1)
@@ -155,23 +214,27 @@ curl -sI "https://$PORTAL_SUBDOMAIN/" | head -1   # expect an HTTP response from
 export CLOUDFRONT_DOMAIN="https://$PORTAL_SUBDOMAIN"
 ```
 
-## STEP 9 — Resend (domain verify is console; DNS via CLI) + API key
-Resend has no CLI, so:
-1. Resend dashboard → **Domains → Add** the sending domain (e.g. `notifications.$APEX`). It shows DKIM/SPF (and DMARC) records.
-2. Add those records in Route 53 (`aws route53 change-resource-record-sets ...`, one UPSERT per record), wait until Resend shows **Verified**.
-3. Resend dashboard → **API Keys → Create** a send-only key → copy it (that's `RESEND_API_KEY`).
+## STEP 9 — Auth OTP via SES us-west-2 (24frame.co)
+Portal OTP is Auth transactional mail. Do **not** send it through Resend.
+See [`auth-ses.md`](auth-ses.md). Founder provisions a dedicated SES IAM user
+(`24frame-auth-ses` suggested) in the E8 account and sets `SES_AWS_*` +
+`PORTAL_EMAIL_FROM`. Residual `RESEND_API_KEY` is GC-support/asset notification only.
 
-## STEP 10 — Set the 6 env vars (Vercel + local)
+## STEP 10 — Set env vars (Vercel + local)
 The private key is multiline — write it to Vercel from the file to preserve newlines:
 ```bash
 printf '%s' "$CLOUDFRONT_DOMAIN"      | vercel env add CLOUDFRONT_DOMAIN production
 printf '%s' "$PUBLIC_KEY_ID"          | vercel env add CLOUDFRONT_KEY_PAIR_ID production
 vercel env add CLOUDFRONT_PRIVATE_KEY production < /tmp/cf-portal-private.pem
-printf '%s' "<RESEND_API_KEY>"        | vercel env add RESEND_API_KEY production
+printf '%s' "us-west-2"               | vercel env add SES_AWS_REGION production
+printf '%s' "<SES_AWS_ACCESS_KEY_ID>" | vercel env add SES_AWS_ACCESS_KEY_ID production
+printf '%s' "<SES_AWS_SECRET_ACCESS_KEY>" | vercel env add SES_AWS_SECRET_ACCESS_KEY production
 printf '%s' "$SENDER"                 | vercel env add PORTAL_EMAIL_FROM production
 printf '%s' "$APP_ORIGIN"             | vercel env add PORTAL_BASE_URL production
+# residual — notification mail only, not Auth:
+# printf '%s' "<RESEND_API_KEY>"      | vercel env add RESEND_API_KEY production
 # repeat each for `preview` if you want the portal working in preview deploys.
-vercel env ls | grep -Ei 'cloudfront|resend|portal_'   # verify all six, none NEXT_PUBLIC_
+vercel env ls | grep -Ei 'cloudfront|ses_aws|portal_|resend'   # none NEXT_PUBLIC_
 # mirror the same 6 into your local .env.local for local testing, then:
 vercel --prod        # redeploy so the new env takes effect
 ```
@@ -180,8 +243,8 @@ Then **securely delete** the local PEM: `rm /tmp/cf-portal-private.pem` (it's no
 ## STEP 11 — Vercel WAF rate-limit on /api/portal/* (launch gate)
 Vercel Firewall is dashboard-managed: Vercel project → **Firewall** → **Add Rule** → **Rate Limit** →
 path `/api/portal/*` (or specifically `/api/portal/request-otp`), a sane per-IP limit (e.g. 20 req / 10 min),
-action **Deny/Challenge**. Enable it. **Do not send real recipients to the portal until this rule + a verified
-Resend domain are both live.**
+action **Deny/Challenge**. Enable it. **Do not send real recipients to the portal until this rule + SES Auth
+(`SES_AWS_*` / `PORTAL_EMAIL_FROM` on 24frame.co) are both live.**
 
 ---
 
@@ -198,5 +261,5 @@ Resend domain are both live.**
    delivery → a "delivery update" message appears.
 
 ## After go-live (optional code follow-ons, when you want them)
-- **Email channel for notifications** (Resend now on `main`): wire `create_notification` to also send email.
+- **Notification email residual:** GC-support/asset notification still uses Resend. Auth OTP is SES.
 - **Health score**: aggregate of findings, once you finalize the canonical metadata field list (§21.1).

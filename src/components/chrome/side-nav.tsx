@@ -3,77 +3,98 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Suspense, use, useRef } from "react";
-import { Inbox, Store, type LucideIcon } from "lucide-react";
-
-import { NAV } from "@/lib/nav";
+import { railDestinations, STAFF_RAIL_EYEBROW, type NavItem } from "@/lib/nav";
+import { HOUSE_RAIL_ACTIVE_CLASS, HOUSE_RAIL_IDLE_CLASS, HOUSE_RAIL_ITEM_CLASS } from "@/lib/house-shell";
 import { cn } from "@/lib/cn";
+import type { WorkspaceMode } from "@/lib/workspace";
+import { SocialIcon } from "@/components/social/social-icon";
+import {
+  SocialNavPendingProbe,
+  useSocialNavPending,
+} from "@/components/social/use-social-nav-pending";
+import { SOCIAL_ICON_SIZE_NAV, socialNavIconName } from "@/lib/social-icons";
+import { NavGlyph } from "./nav-glyph";
 
-// GC operator surfaces — shown only to GC staff, rendered INSIDE this same shell. The delivery
-// QUEUE is reached from the Queue's "Ready to deliver" section, not a second "Deliveries" here.
-const GC_NAV: { label: string; href: string; icon: LucideIcon }[] = [
-  { label: "Queue", href: "/queue", icon: Inbox },
-  { label: "Vendors", href: "/vendors", icon: Store },
-];
-
-// Tightened nav (2026-07-22): px-2.5 py-1.5, 16px icons, 13px medium text. Collapsed mode
-// renders an icon-only rail (labels/badges hidden; title tooltips; unread → accent dot).
+// Access rail: house --text-sm / t-body-sm labels, 16px Phosphor Bold idle /
+// Fill active (75:5 / 61:2). Active = Sporty Blue icon+text + light-blue
+// pill wash. Inactive = ink. Rail mark is BrandEmblem (24Frame), not a C.
+// Social destinations use Social Figma V1 Phosphor via SocialIcon.
+// Collapsed mode is icon-only (labels/badges hidden; title tooltips; unread → accent dot).
 export function SideNav({
   messagesUnread,
   isGcStaff = false,
   collapsed = false,
+  workspace = "aggregation",
 }: {
   messagesUnread: Promise<number>;
   isGcStaff?: boolean;
   collapsed?: boolean;
+  workspace?: WorkspaceMode;
 }) {
   const pathname = usePathname();
+  const social = workspace === "social";
+  const { activePath, markPending, pendingHref } = useSocialNavPending();
+  const pathForActive = social ? activePath : pathname;
 
   const router = useRouter();
   const warmed = useRef<Set<string>>(new Set());
   const warm = (href: string) => {
-    if (warmed.current.has(href)) return;
+    if (social || warmed.current.has(href)) return;
     warmed.current.add(href);
     router.prefetch(href);
   };
 
   const row = (
-    item: { label: string; href: string; icon: LucideIcon; exact?: boolean },
+    item: NavItem,
     badge: React.ReactNode = null,
   ) => {
-    const active = item.exact ? pathname === item.href : pathname.startsWith(item.href);
-    const Icon = item.icon;
+    const active = item.exact ? pathForActive === item.href : pathForActive.startsWith(item.href);
     return (
       <Link
         key={item.href}
         href={item.href}
-        // VIEWPORT prefetch off, HOVER prefetch on. The sidebar renders on every page, so
-        // viewport prefetch fired a full uncached render of EVERY destination on EVERY
-        // navigation — ~400 invocations in one short session, all contending with the
-        // navigation actually in flight. Hovering is a statement of intent: it warms the one
-        // destination you are about to click, so the click lands on data already fetched
-        // instead of paying ~360ms (network + render) with a skeleton in the meantime.
-        // Deduped per href so re-hovering does not re-fire.
-        prefetch={false}
-        onMouseEnter={() => warm(item.href)}
-        onFocus={() => warm(item.href)}
+        // Aggregation: VIEWPORT prefetch off, HOVER prefetch on. The sidebar
+        // renders on every page, so viewport prefetch fired a full uncached
+        // render of EVERY destination on EVERY navigation — ~400 invocations
+        // in one short session. Hovering warms the one destination you are
+        // about to click. Deduped per href so re-hovering does not re-fire.
+        // Social: VIEWPORT prefetch on. Desktop rail is four destinations
+        // plus local loading.tsx — not the Aggregation dashboard skeleton.
+        prefetch={social}
+        onMouseEnter={social ? undefined : () => warm(item.href)}
+        onFocus={social ? undefined : () => warm(item.href)}
+        onClick={social ? (event) => markPending(item.href, event) : undefined}
         title={collapsed ? item.label : undefined}
-        aria-label={collapsed ? item.label : undefined}
+        aria-label={item.ariaLabel ?? (collapsed ? item.label : undefined)}
+        data-social-rail-pending={social && pendingHref === item.href ? "" : undefined}
         className={cn(
-          "relative flex items-center rounded-[var(--radius-sm)] t-body-sm font-medium leading-5 transition-colors",
-          collapsed ? "justify-center px-0 py-2" : "gap-2.5 px-2.5 py-1.5",
-          active ? "bg-surface text-ink" : "text-ink-3 hover:bg-surface hover:text-ink-2",
+          HOUSE_RAIL_ITEM_CLASS,
+          collapsed ? "justify-center px-0 py-2" : "gap-2 px-2 py-2",
+          active ? HOUSE_RAIL_ACTIVE_CLASS : HOUSE_RAIL_IDLE_CLASS,
         )}
       >
-        <Icon className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+        {social ? <SocialNavPendingProbe href={item.href} onPending={markPending} /> : null}
+        {social ? (
+          <SocialIcon
+            name={socialNavIconName(item.href)}
+            active={active}
+            size={SOCIAL_ICON_SIZE_NAV}
+            className="shrink-0"
+          />
+        ) : (
+          <NavGlyph item={item} active={active} />
+        )}
         {!collapsed ? <span className="flex-1 truncate">{item.label}</span> : null}
         {badge}
       </Link>
     );
   };
 
+  const { items, staffItems } = railDestinations(isGcStaff, workspace);
+
   return (
-    <nav className={cn("flex flex-col gap-px", collapsed ? "px-1.5" : "px-2")}>
-      {NAV.map((item) =>
+    <nav className="flex flex-col gap-2 px-2" data-side-nav="">
+      {items.map((item) =>
         row(
           item,
           item.href === "/messages" ? (
@@ -86,13 +107,13 @@ export function SideNav({
           ) : null,
         ),
       )}
-      {isGcStaff ? (
+      {staffItems.length > 0 ? (
         <>
           <div className="mx-1 my-2 border-t border-hairline" />
           {!collapsed ? (
-            <span className="px-2.5 pb-1 t-label text-ink-3">Global Content</span>
+            <span className="px-2 pb-1 t-label text-ink-3">{STAFF_RAIL_EYEBROW}</span>
           ) : null}
-          {GC_NAV.map((item) => row(item))}
+          {staffItems.map((item) => row(item))}
         </>
       ) : null}
     </nav>

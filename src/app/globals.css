@@ -27,6 +27,7 @@
   --color-hairline: var(--border);
   --color-accent: var(--accent);
   --color-accent-contrast: var(--accent-contrast);
+  --color-accent-wash: var(--accent-wash);
   --color-band: var(--band);
   --color-band-ink: var(--band-ink);
 
@@ -38,6 +39,16 @@
   --color-border: var(--border);
 
   --font-sans: var(--font-geist-sans), "Geist", ui-sans-serif, -apple-system, system-ui, sans-serif;
+
+  /* Size utilities resolve to the house --text-* ladder in tokens.css.
+     No parallel px scale for xs / sm / base / lg / title / hero. */
+  --text-xs: var(--text-xs);
+  --text-sm: var(--text-sm);
+  --text-base: var(--text-base);
+  --text-lg: var(--text-lg);
+  --text-title: var(--text-title);
+  --text-hero: var(--text-hero);
+  --tracking-tight: var(--tracking-tight);
 }
 
 html {
@@ -54,6 +65,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-geist-sans), "Geist", ui-sans-serif, -apple-system, system-ui, sans-serif;
+  font-weight: var(--type-body-weight);
   line-height: 1.6;
   letter-spacing: -0.006em;
   -webkit-font-smoothing: antialiased;
@@ -61,90 +73,118 @@ body {
 }
 
 /* ============================================================
-   TYPE SYSTEM — one modular scale.
-   Geist Sans carries everything — headings, body, eyebrows, and figures
-   (figures use tabular-nums to align; no monospace face).
+   TYPE SYSTEM — one modular scale, bound to --text-* in tokens.css.
+   --text-hero / .t-display is the one large moment. Everything else
+   is a step down. Geist Sans carries headings, body, eyebrows, and
+   figures (tabular-nums; no monospace face).
    ============================================================ */
 @layer components {
+  /* Display / hero-value. Phone MOB-G-03 steps to --text-title; still this role. */
   .t-display {
     font-family: var(--font-sans);
-    font-size: clamp(2.5rem, 5.5vw, 4.75rem);
+    font-size: var(--text-hero);
     font-weight: 500;
     line-height: 1.04;
     letter-spacing: -0.035em;
+    font-variant-numeric: tabular-nums;
+  }
+  @media (max-width: 767px) {
+    .t-display {
+      font-size: var(--text-title);
+    }
   }
   .t-title {
     font-family: var(--font-sans);
-    font-size: clamp(2.125rem, 4.6vw, 3.5rem);
-    font-weight: 500;
-    line-height: 1.05;
-    letter-spacing: -0.03em;
+    font-size: var(--text-title);
+    font-weight: var(--type-title-weight);
+    line-height: 1.15;
+    letter-spacing: var(--tracking-tight);
   }
   .t-statement {
     font-family: var(--font-sans);
-    font-size: clamp(1.625rem, 3.6vw, 2.875rem);
-    font-weight: 500;
+    font-size: var(--text-title);
+    font-weight: var(--type-title-weight);
     line-height: 1.22;
-    letter-spacing: -0.02em;
+    letter-spacing: var(--tracking-tight);
   }
-  /* Section headings — Mercury register: clean sans, medium weight, sentence
-     case, tight tracking. */
+  /* Section headings — title role (480), sentence case, tight tracking.
+     Page titles, not the hero step. Do not bind 500-as-title. */
   .t-section {
     font-family: var(--font-sans);
-    font-size: clamp(1.875rem, 3.4vw, 2.875rem);
-    font-weight: 500;
-    line-height: 1.08;
-    letter-spacing: -0.025em;
+    font-size: var(--text-title);
+    font-weight: var(--type-title-weight);
+    line-height: 1.15;
+    letter-spacing: var(--tracking-tight);
   }
   .t-heading {
     font-family: var(--font-sans);
-    font-size: clamp(1.625rem, 3vw, 2.5rem);
-    font-weight: 500;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-  }
-  .t-subhead {
-    font-family: var(--font-sans);
-    font-size: clamp(1.0625rem, 1.5vw, 1.375rem);
+    font-size: var(--text-lg);
     font-weight: 500;
     line-height: 1.2;
     letter-spacing: -0.015em;
   }
+  .t-subhead {
+    font-family: var(--font-sans);
+    font-size: var(--text-lg);
+    font-weight: 500;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+  }
   .t-lead {
     font-family: var(--font-sans);
-    font-size: clamp(1rem, 1.35vw, 1.25rem);
-    font-weight: 400;
+    font-size: var(--text-lg);
+    font-weight: var(--type-body-weight);
     line-height: 1.55;
     letter-spacing: -0.01em;
   }
   .t-body {
     font-family: var(--font-sans);
-    font-size: 1rem;
-    font-weight: 400;
+    font-size: var(--text-base);
+    font-weight: var(--type-body-weight);
     line-height: 1.65;
   }
   .t-body-sm {
     font-family: var(--font-sans);
-    font-size: 0.875rem;
-    font-weight: 400;
+    font-size: var(--text-sm);
+    font-weight: var(--type-body-weight);
     line-height: 1.6;
+  }
+  /* Text-entry floor. iOS Safari zooms focused input/textarea under 16px.
+     px, not rem — a smaller root must not drop below the floor.
+     Use via Input/Textarea (or FORM_CONTROL_TEXT_CLASS). Not a display scale. */
+  .t-control {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
   }
   /* Eyebrows / kickers — Geist Sans, uppercase + tracked (matches globalcontent-web;
      the site moved off the mono "systems" register). Tint with text-accent per usage. */
   .t-label {
     font-family: var(--font-sans);
-    font-size: 0.6875rem;
+    font-size: var(--text-xs);
     font-weight: 600;
     line-height: 1;
     letter-spacing: 0.12em;
     text-transform: uppercase;
   }
   /* Figures — Geist Sans with tabular-nums so numbers align (NO monospace; the brand
-     moved away from Geist Mono). */
+     moved away from Geist Mono). Combined with .t-display, display tracking wins. */
   .t-data {
     font-family: var(--font-sans);
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.01em;
+  }
+  .t-display.t-data {
+    letter-spacing: -0.035em;
+  }
+  /* House card: hairline, 16 corner, no shadow. Page canvas is white.
+     Grey #F4F4F6 modules use --surface-muted when a module is needed. */
+  .card-surface {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: none;
   }
   /* Hide the scrollbar on streaming rails (keeps horizontal scroll, drops the chrome). */
   .no-scrollbar {
@@ -176,4 +216,45 @@ body {
     transition-duration: 0.001ms !important;
   }
   html { scroll-behavior: auto; }
+}
+
+/* App-sheet rise — housed for account + nav. Reduced-motion: no slide. */
+@keyframes app-sheet-rise {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes app-sheet-scrim-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.app-sheet-rise {
+  animation: app-sheet-rise var(--app-sheet-duration) var(--app-sheet-easing) both;
+}
+
+/* Desktop Identity panel enters from the right. Mobile keeps the bottom rise. */
+@keyframes account-sheet-enter {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@media (min-width: 768px) {
+  .account-sheet-surface.app-sheet-rise {
+    animation-name: account-sheet-enter;
+  }
+}
+
+.app-sheet-scrim-fade {
+  animation: app-sheet-scrim-fade var(--app-sheet-duration) var(--app-sheet-easing) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-sheet-rise,
+  .app-sheet-scrim-fade {
+    animation: none !important;
+  }
+  .app-sheet-rise {
+    transform: none;
+  }
 }

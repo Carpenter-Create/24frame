@@ -27,11 +27,14 @@
      checkpoint and is still pending; that does not block the accent.) */
   --accent: #1769ff;            /* Global Content — Sporty Blue */
   --accent-contrast: #ffffff;   /* white on the blue */
+  /* Light-blue pill wash for the active rail — Sporty Blue tint on white.
+     Type/icon stay #1769FF. Not a filled brand-blue chip. */
+  --accent-wash: color-mix(in srgb, var(--accent) 10%, var(--surface));
 
   /* --- Neutral ramp — LIGHT (default base) ---
      House greyscale canon: airy, neutral near-white. Colour comes only from the
      sparing accent. */
-  --bg:            #fafafb;         /* airy neutral near-white */
+  --bg:            #ffffff;         /* white page canvas — not a grey wash */
   --surface:       #ffffff;         /* elevated white */
   --surface-muted: #f4f4f6;         /* panel fill */
   --border:        #ecedf0;         /* hairline */
@@ -48,21 +51,30 @@
 
   /* --- NO status colors by default (greyscale + one accent). --- */
 
-  /* --- Type scale (tight; rem) --- */
-  --text-xs:   0.75rem;
-  --text-sm:   0.8125rem;
-  --text-base: 0.9375rem;
-  --text-lg:   1.0625rem;
-  --text-title:1.5rem;
-  --text-hero: 3rem;
+  /* --- Type scale (size, rem). House SSOT — one ladder for every workspace
+     (Aggregation · Social · Education). Geist face stays.
+     12 / 13 / 15 / 17 / 24 / 48. Do not reintroduce 11 / 20 / 40. --- */
+  --text-xs:   0.75rem;    /* 12 — .t-label / .card-meta */
+  --text-sm:   0.8125rem;  /* 13 — .t-body-sm / .data-text */
+  --text-base: 0.9375rem;  /* 15 — .t-body */
+  --text-lg:   1.0625rem;  /* 17 — .t-heading / .t-lead */
+  --text-title:1.5rem;     /* 24 — .t-title / .page-title */
+  --text-hero: 3rem;       /* 48 — .t-display / hero-value */
   --tracking-tight: -0.02em;
+  /* Role weights bind in globals .t-* (house-wide). Title 480 · body 420.
+     Do not override with font-normal (400-as-body) or font-medium (500-as-title).
+     No Dashboard-only token CSS. */
+  --type-title-weight: 480;
+  --type-body-weight: 420;
 
   /* --- Spacing (4px base) --- */
   --space-1: 0.25rem; --space-2: 0.5rem;  --space-3: 0.75rem; --space-4: 1rem;
-  --space-6: 1.5rem;  --space-8: 2rem;    --space-10: 2.5rem; --space-16: 4rem;
+  --space-6: 1.5rem;  --space-8: 2rem;    --space-10: 2.5rem; --space-12: 3rem; --space-16: 4rem;
 
-  /* --- Radius + hairline elevation --- */
-  --radius-sm: 6px; --radius: 10px; --radius-lg: 14px;
+  /* --- Radius + hairline elevation ---
+     --radius-lg is the house card corner (16). Shared on purpose — no
+     Dashboard-only radius fork. Controls stay on --radius / --radius-sm. */
+  --radius-sm: 6px; --radius: 10px; --radius-lg: 16px;
   --border-width: 1px;
 
   /* --- Layout --- */
@@ -73,11 +85,28 @@
      Ported from watershedportal's shell (proportions kept, vocabulary dropped —
      see docs/known-divergences.md D2). GC had no equivalents, so these fill the gap. */
   --header-height: 56px;
-  --sidebar-width: 190px;        /* tightened from 210 (2026-07-22) */
+  --sidebar-width: 220px;        /* Access rail — locked client `/` */
   --sidebar-width-collapsed: 60px;
+  /* Desktop chrome gutter — lead logo left · rail panel left · lead
+     trailing right · canvas right. Same value both sides. Not
+     --content-inset (page reading measure). */
+  --chrome-gutter: 16px;
   --content-inset: 48px;
   --content-inset-tablet: 32px;
   --page-max-width: 67.5rem;   /* 1080px — the single centered page cap */
+
+  /* App-sheet motion — nav hamburger and account share this. */
+  --app-sheet-duration: 320ms;
+  --app-sheet-easing: ease-out;
+}
+
+/* Phone chrome: persistent rail is gone. Width tokens collapse so header +
+   main go full-canvas. Desktop 1:2 rail stays 220 / 60 at md and up. */
+@media (max-width: 767px) {
+  :root {
+    --sidebar-width: 0px;
+    --sidebar-width-collapsed: 0px;
+  }
 }
 
 /* --- Neutral ramp — DARK (secondary; add class="dark") --- */

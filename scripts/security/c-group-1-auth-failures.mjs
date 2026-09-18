@@ -11,17 +11,14 @@
  *   * a "no difference" result is only evidence if the two sides were actually compared,
  *     so C2/C4 diff the full response objects rather than eyeballing a message.
  *
- * Usage: node scripts/security/c-group-1-auth-failures.mjs
+ * Usage: node scripts/security/run-local-harness.mjs c-group-1
  */
 import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
+import { loadHarnessConfig } from "./lib/local-harness-config.mjs";
 
-const URL_ = process.env.SUPABASE_URL ?? "http://127.0.0.1:54321";
-const ANON = process.env.SUPABASE_ANON_KEY ??
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0";
-const SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY ??
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU";
-const MAILPIT = process.env.MAILPIT_URL ?? "http://127.0.0.1:54324";
+const { supabaseUrl: URL_, supabaseAnonKey: ANON, supabaseServiceRoleKey: SERVICE } =
+  loadHarnessConfig(process.env);
 
 const admin = createClient(URL_, SERVICE, { auth: { persistSession: false } });
 const anon = () => createClient(URL_, ANON, { auth: { persistSession: false } });
@@ -64,11 +61,11 @@ async function main() {
         : `DIFFER.\n          known:   ${shape(rKnown)}\n          unknown: ${shape(rUnknown)}`);
 
     // The app layer must not reintroduce the difference either.
-    rec("C2b", "app layer returns one fixed string regardless (login/actions.ts:32,37)",
+    rec("C2b", "app layer returns one fixed string regardless (login/actions.ts)",
       "PASS",
-      `requestMagicLink returns "Check your email for a secure sign-in link." on success for both. ` +
-      `Caveat already logged as B9: line 36 returns error.message verbatim, so a future Supabase ` +
-      `error string could become a disclosure channel.`);
+      `requestMagicLink returns "Check your email for a secure sign-in link." on success. ` +
+      `Mint/send failures return the generic "Could not send the sign-in link. Please try again." ` +
+      `— the dashboard path no longer forwards Supabase error.message (B9 closed on this action).`);
   }
 
   // ── C3 ────────────────────────────────────────────────────────────────────

@@ -1,17 +1,34 @@
-# Single-package repo — this file holds pnpm settings (pnpm 11 moved them here
-# out of package.json).
+# Workspace root remains @24frame/dashboard (Vercel / root scripts).
+# Mobile is a second package so Expo can live here without moving the Next app.
+#
+# packages:
+#   apps/mobile = @24frame/mobile (Expo, iOS-first). Same 24Frame product.
+#
+# pnpm 11 keeps settings in this file (moved out of package.json).
+packages:
+  - "apps/mobile"
 #
 # Trusted native deps allowed to run install scripts:
 # sharp = image processing (Next.js image optimization),
-# unrs-resolver = eslint import resolver.
+# unrs-resolver = eslint import resolver,
+# esbuild = tsx binary for the finance worker (workers/finance/Dockerfile).
+#
+# @sentry/cli stays false: its postinstall downloads a native binary. Error
+# reporting does not need it. Source-map upload can be enabled later by
+# flipping this to true and setting SENTRY_AUTH_TOKEN — founder-gated.
 allowBuilds:
+  '@sentry/cli': false
+  esbuild: true
   sharp: true
   unrs-resolver: true
 
 # Transitive-only security floors (audit 2.1). None is a direct dependency, so they are
 # pinned here rather than added to package.json:
-#   postcss  >=8.5.18  arbitrary file read + path traversal (+ XSS in CSS stringify)
-#   sharp    >=0.35.0  inherited libvips CVE-2026-33327
+#   postcss      >=8.5.18  arbitrary file read + path traversal (+ XSS in CSS stringify)
+#   sharp        >=0.35.4  libheif GHSA-g89c-p67h-r497 / GHSA-2jg2-4ch7-h545 (was 0.35.0 for CVE-2026-33327)
+#   js-yaml      4.x <4.3.2 → ^4.3.2  (GHSA-2883-xcg3-v3hh; ESLint tooling only)
+#   browserslist 4.x <=4.28.6 → ^4.28.7 (GHSA-c83g-rgw3-j3cx, GHSA-73wf-gq98-2v4g; babel/next)
+#   nanoid       3.x <3.3.17 → ^3.3.17 (GHSA-2v37-7h3g-55p8; postcss → next/tailwind/geist/vite)
 #
 # brace-expansion — NOW ACTUALLY FIXED, no longer an accepted exception.
 #   Reached only as: exceljs > archiver > (archiver-utils|zip-stream) > glob@7 > minimatch@3,
@@ -38,10 +55,15 @@ allowBuilds:
 #   is still exceljs/archiver moving off glob@7.
 overrides:
   postcss: '>=8.5.18'
-  sharp: '>=0.35.0'
+  sharp: '>=0.35.4'
   brace-expansion@<1.1.18: '^1.1.18'
   brace-expansion@>=2.0.0 <2.1.4: '^2.1.4'
   brace-expansion@>=4.0.0 <5.0.9: '^5.0.9'
+  # Range-scoped within major — bare '>=' / unscoped caret can jump lines (see brace-expansion
+  # note above). js-yaml is only 4.x here; browserslist is only 4.x; nanoid is only 3.x via postcss.
+  js-yaml@>=4.0.0 <4.3.2: '^4.3.2'
+  browserslist@<=4.28.6: '^4.28.7'
+  nanoid@>=3.0.0 <3.3.17: '^3.3.17'
 
 # No auditConfig.ignoreGhsas. The brace-expansion exception that lived here is gone because
 # the advisory is fixed rather than tolerated — `pnpm audit --audit-level high` passes on its

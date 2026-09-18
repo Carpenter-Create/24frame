@@ -6,15 +6,15 @@
 > commands are in `asset-portal-setup.md`; this page is the ordered "what to do, in what order, and how
 > to know it worked."
 
-**Nothing here is destructive to existing data.** It stands up new AWS/Resend resources and sets env vars.
+**Nothing here is destructive to existing data.** It stands up new AWS resources and sets env vars. Auth OTP is SES (`docs/infra/auth-ses.md`). Resend is residual for GC-support/asset notification only.
 Do them in order — later steps depend on values from earlier ones.
 
 ---
 
 ## 0. Already done — nothing to do
-- **Cloudflare Turnstile** is already live (the login page uses it). `NEXT_PUBLIC_TURNSTILE_SITE_KEY` and
-  `TURNSTILE_SECRET_KEY` already exist in your envs — **no action.** The portal's OTP form and the abuse
-  caps use these same keys.
+- **Cloudflare Turnstile** is already live on the portal OTP form. `NEXT_PUBLIC_TURNSTILE_SITE_KEY` and
+  `TURNSTILE_SECRET_KEY` already exist in your envs — **no action.** Dashboard `/login` no longer reads
+  these keys; leave them in place for portal.
 
 ---
 
@@ -27,13 +27,29 @@ Do them in order — later steps depend on values from earlier ones.
 you also can't exercise the restore path.
 
 ## 2. AWS — IAM: add `s3:RestoreObject`
-**Do:** to the app's IAM policy (the one that already allows `s3:GetObject`/`PutObject`, no `DeleteObject`),
-add:
+**Do:** to the app's IAM policy (the one that already allows `s3:GetObject`/`PutObject`),
+add restore **and** the founder-lock 2026-09-17 title-prefix purge (not a bucket wipe):
 ```json
 { "Effect": "Allow", "Action": ["s3:RestoreObject"], "Resource": "arn:aws:s3:::<your-assets-bucket>/*" }
 ```
+```json
+{
+  "Effect": "Allow",
+  "Action": ["s3:ListBucket"],
+  "Resource": "arn:aws:s3:::<your-assets-bucket>",
+  "Condition": { "StringLike": { "s3:prefix": ["orgs/*/titles/*"] } }
+}
+```
+```json
+{
+  "Effect": "Allow",
+  "Action": ["s3:DeleteObject","s3:DeleteObjects"],
+  "Resource": "arn:aws:s3:::<your-assets-bucket>/orgs/*/titles/*"
+}
+```
 **Where:** IAM console → the app's policy → edit JSON.
-**Verify:** policy JSON contains `s3:RestoreObject`; still **no** `s3:DeleteObject`.
+**Verify:** policy JSON contains `s3:RestoreObject` and prefix-scoped `s3:DeleteObject` /
+`s3:DeleteObjects` on `orgs/*/titles/*` only — never `DeleteObject` on the whole bucket.
 
 ## 3. AWS — CloudFront distribution (private, signed) + subdomain
 Follow **`asset-portal-setup.md` §1–§5** (copy-paste CLI). In order:
@@ -48,11 +64,12 @@ Follow **`asset-portal-setup.md` §1–§5** (copy-paste CLI). In order:
 **Verify:** `https://<subdomain>/` resolves to CloudFront; a manually-signed URL for a known S3 key downloads.
 **Produces env:** `CLOUDFRONT_DOMAIN` (= `https://<subdomain>`), `CLOUDFRONT_KEY_PAIR_ID`, `CLOUDFRONT_PRIVATE_KEY`.
 
-## 4. Resend — account + verified sending domain
-Follow **`asset-portal-setup.md` §6**.
-**Do:** create/verify a **sending domain** in Resend (DNS records), create an **API key**.
-**Verify:** the domain shows "Verified" in Resend; a test send from `PORTAL_EMAIL_FROM` arrives.
-**Produces env:** `RESEND_API_KEY`, `PORTAL_EMAIL_FROM` (an address on the verified domain).
+## 4. Auth OTP mail — SES us-west-2 on 24frame.co
+Follow **`auth-ses.md`**. Portal OTP is Auth transactional mail, not Resend.
+**Do:** founder sets dedicated `SES_AWS_*` (us-west-2) + `PORTAL_EMAIL_FROM` on the verified `24frame.co` identity.
+**Verify:** `pnpm exec tsx scripts/email/ses-auth-smoke.ts --live --to <inbox>` arrives from `24frame.co`.
+**Produces env:** `SES_AWS_REGION`, `SES_AWS_ACCESS_KEY_ID`, `SES_AWS_SECRET_ACCESS_KEY`, `PORTAL_EMAIL_FROM`.
+**Residual:** `RESEND_API_KEY` / `ASSETS_EMAIL_FROM` remain for GC-support/asset notification only.
 
 ## 5. Set env vars — Vercel (all environments) + your local `.env.local`
 Set these **server-only** vars (none are `NEXT_PUBLIC_`):
@@ -62,12 +79,15 @@ Set these **server-only** vars (none are `NEXT_PUBLIC_`):
 | `CLOUDFRONT_DOMAIN` | step 3 | base URL for signed asset URLs |
 | `CLOUDFRONT_KEY_PAIR_ID` | step 3 | CloudFront public-key id |
 | `CLOUDFRONT_PRIVATE_KEY` | step 3 | PEM signing key (headers/footers + newlines preserved) |
-| `RESEND_API_KEY` | step 4 | send OTP email |
-| `PORTAL_EMAIL_FROM` | step 4 | verified-domain sender |
+| `SES_AWS_REGION` | step 4 | must be `us-west-2` |
+| `SES_AWS_ACCESS_KEY_ID` | step 4 | dedicated Auth SES IAM (not `AWS_*` / `FINANCE_AWS_*`) |
+| `SES_AWS_SECRET_ACCESS_KEY` | step 4 | dedicated Auth SES IAM |
+| `PORTAL_EMAIL_FROM` | step 4 | `24frame.co` sender for portal OTP |
+| `RESEND_API_KEY` | residual | GC-support/asset notification only — not Auth |
 | `PORTAL_BASE_URL` | this app's own origin (e.g. `https://app.globalcontent.<domain>`) | builds the `/portal/<token>` link GC pastes into email |
 
 **Where:** Vercel project → Settings → Environment Variables (Production + Preview). Mirror into `.env.local` for local testing.
-**Verify:** `vercel env ls` shows all six; none prefixed `NEXT_PUBLIC_`. Redeploy so they take effect.
+**Verify:** `vercel env ls` shows the CloudFront + SES Auth names; none prefixed `NEXT_PUBLIC_`. Redeploy so they take effect.
 
 ## 6. Vercel WAF — rate-limit the portal API (required, security)
 **Do:** add a **Firewall / WAF rate-limit rule** on `/api/portal/*` (per-IP + global). The app already has
@@ -96,6 +116,6 @@ nav unread badge; advance a delivery → a "delivery update" message appears.
 ---
 
 ## What unlocks after go-live (code work, when you're ready)
-- **Email channel for notifications** — now that Resend is on `main`, wire `create_notification` to also
-  send email (currently in-app only).
+- **Notification email residual** — GC-support/asset notification still uses Resend
+  (`RESEND_API_KEY`). Auth OTP is SES. Do not send Auth mail through Resend.
 - **Health score** — aggregate of findings, once you finalize the canonical metadata field list (§21.1).

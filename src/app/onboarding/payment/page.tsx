@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { PaymentCheckout } from "@/app/agreement/pay/payment-checkout";
+import { PRODUCT_NAME } from "@/lib/product";
 import { WizardFrame } from "../wizard-frame";
 
 // Step 4 — Payment (paid tiers only). On-domain embedded Payment Element. Only reachable for
@@ -26,7 +27,7 @@ export default async function PaymentStep() {
   return (
     <WizardFrame
       step={4}
-      eyebrow={`Global Content · ${org.name}`}
+      eyebrow={`${PRODUCT_NAME} · ${org.name}`}
       title="Complete your subscription"
       back="/onboarding/plan"
     >

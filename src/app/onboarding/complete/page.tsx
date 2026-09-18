@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { stripe } from "@/lib/stripe/server";
 import { CompletePoller } from "@/app/agreement/complete/complete-poller";
+import { PRODUCT_NAME } from "@/lib/product";
 import { WizardFrame } from "../wizard-frame";
 
 // Step 5 — Completion. Stripe return_url (on our domain). Confirms the session completed, then
@@ -22,7 +23,7 @@ export default async function CompleteStep({
   if (session.status !== "complete") redirect("/onboarding/payment");
 
   return (
-    <WizardFrame step={5} eyebrow="Global Content" title="You're all set">
+    <WizardFrame step={5} eyebrow={PRODUCT_NAME} title="You're all set">
       <CompletePoller />
     </WizardFrame>
   );

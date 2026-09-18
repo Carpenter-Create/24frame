@@ -1,118 +1,518 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, use, useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
-import { OrganizationSwitcher } from "./organization-switcher";
 import { UserMenu } from "./user-menu";
 import { SideNav } from "./side-nav";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { SettingsRail } from "./settings-rail";
+import { SettingsHeaderBack } from "./settings-header-back";
+import { MobileNav } from "./mobile-nav";
+import { MessagesAppHeader } from "./messages-app-header";
+import { EducationHeaderSearch } from "./education-header-search";
+import { HouseLeadChrome } from "./house-lead-chrome";
+import { RailCollapse } from "./rail-collapse";
+import { AskAssistantChromeProvider } from "@/components/messages/ask-globee-chrome";
 import { cn } from "@/lib/cn";
+import type { AppShellChrome } from "@/lib/app-shell-chrome";
+import type { MessagesSurface } from "@/lib/ask-globee";
+import {
+  RAIL_COLLAPSE_WIDTH_VAR,
+  RAIL_WIDTH_CLASS,
+  migrateSidebarCollapsedCookie,
+  persistSidebarCollapsed,
+} from "@/lib/rail-collapse";
+import { HOUSE_LEAD_SCROLL_CLASS, HOUSE_LEAD_SHELL_CLASS } from "@/lib/house-lead-chrome";
+import {
+  HOUSE_CANVAS_X_CLASS,
+  HOUSE_CHROME_GUTTER_X_CLASS,
+  HOUSE_PAGE_CANVAS_CLASS,
+  HOUSE_RAIL_FLOAT_CLASS,
+  HOUSE_RAIL_PANEL_CLASS,
+} from "@/lib/house-shell";
+import { isSettingsPath, SETTINGS_RAIL_PAD_CLASS } from "@/lib/settings";
+import {
+  SOCIAL_DESKTOP_FRAME_PAD_CLASS,
+  SOCIAL_RAIL_MAIN_OFFSET_CLASS,
+  SOCIAL_RAIL_PANEL_CLASS,
+  SOCIAL_RAIL_WIDTH_CLASS,
+  SOCIAL_TAB_BAR_MAIN_PAD_CLASS,
+} from "@/lib/social-chrome";
+import { resolveWorkspaceMode, type WorkspaceMode } from "@/lib/workspace";
+import { SocialMobileTabBar } from "@/components/social/social-mobile-tab-bar";
+import { SocialRailAccountChip } from "@/components/social/social-rail-extras";
+import {
+  SocialHeaderSearch,
+  SocialHeaderSearchPhone,
+} from "@/components/social/social-header-search";
 
 type Org = { id: string; name: string };
 
 // Shell composition ported from watershedportal, rethemed to GC tokens. Fixed sidebar +
-// sticky header + centered content frame. The sidebar collapses to an icon-only rail; the
+// viewport-pinned lead chrome + centered content frame. Page scroll lives
+// on main — not on a wrapper that includes the header (G9). The sidebar collapses to an icon-only rail; the
 // state persists in a cookie (read by the (app) layout → `defaultCollapsed`, so there's no
 // flash) and, when collapsed, overrides `--sidebar-width` so the header + main follow.
+// Phone: the rail is gone (hidden + width tokens collapse). A header hamburger opens a
+// bottom sheet — client destinations, or those plus staff destinations when
+// isGcStaff. Desktop 1:2 rail is unchanged.
+// Social mounts the same RailCollapse + cookie + width-var path as
+// Aggregation · Education. Do not pin Social expanded or invent a
+// Social-only chevron. /settings paths: the Access destinations leave.
+// One 220 rail (pad 16) occupies that slot — Settings title + You /
+// Social / Education / Aggregation. Not a second column. Collapse stays
+// off. Phone list is the same sections; pushed panes back to Settings.
+// Hamburger stays off. Avatar 32 stays.
 export function AppShell({
-  email,
-  orgs,
-  activeOrgId,
+  chrome,
+  email = "",
+  name,
+  photoUrl,
   messagesUnread,
   isGcStaff = false,
   defaultCollapsed = false,
+  messagesSurface = "staff-inbox",
+  defaultWorkspace = "aggregation",
   children,
 }: {
-  email: string;
-  orgs: Org[];
-  activeOrgId: string | null;
+  /** Layout chrome. Do not use() this at the AppShell top — that re-blocks {children}. */
+  chrome?: Promise<AppShellChrome>;
+  email?: string;
+  name?: string | null;
+  photoUrl?: string | null;
+  orgs?: Org[];
+  activeOrgId?: string | null;
   /** Promise, not a number — resolved inside SideNav's Suspense boundary so the
    *  shell paints without waiting on the badge query. */
   messagesUnread: Promise<number>;
   isGcStaff?: boolean;
   defaultCollapsed?: boolean;
+  messagesSurface?: MessagesSurface;
+  defaultWorkspace?: WorkspaceMode;
   children: React.ReactNode;
 }) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
+  const [workspaceCookie, setWorkspaceCookie] = useState(defaultWorkspace);
+  const cookiesApplied = useRef(false);
+  const collapseTouched = useRef(false);
   const pathname = usePathname();
-  // The catalog opts out of the centered width cap so its hero can bleed full-width
-  // (edge of sidebar → right edge). That page then manages its own content max-width.
-  const fullBleed = pathname === "/titles";
+  const workspace = resolveWorkspaceMode(pathname, workspaceCookie);
+  const applyChromeCookies = useCallback(
+    (next: { defaultCollapsed: boolean; defaultWorkspace: WorkspaceMode }) => {
+      if (cookiesApplied.current) return;
+      cookiesApplied.current = true;
+      if (!collapseTouched.current) {
+        setCollapsed(next.defaultCollapsed);
+      }
+      setWorkspaceCookie(next.defaultWorkspace);
+    },
+    [],
+  );
+  const cookieSync =
+    chrome ? (
+      <Suspense fallback={null}>
+        <ChromeCookieSync chrome={chrome} onCookies={applyChromeCookies} />
+      </Suspense>
+    ) : null;
+  // Catalog list pages opt out of the centered width cap so the shared
+  // Titles frame can own content max-width (edge of sidebar → right edge).
+  // /titles and staff /queue share that frame. Non-bleed pages share
+  // `--chrome-gutter` on the canvas x so the trailing chrome and content
+  // column share one right edge. Messages keeps `--content-inset` vertical.
+  const titlesBleed = pathname === "/titles" || pathname === "/queue";
+  const homePage = pathname === "/" || pathname === "/dashboard";
+  const messagesPage = pathname === "/messages";
+  const settingsPage = isSettingsPath(pathname);
+  const socialChrome = workspace === "social" && !settingsPage;
+
+  useEffect(() => {
+    migrateSidebarCollapsedCookie(collapsed);
+  }, [collapsed]);
 
   const toggle = () => {
+    collapseTouched.current = true;
     setCollapsed((c) => {
       const next = !c;
-      document.cookie = `gc_sidebar_collapsed=${next ? "1" : "0"}; path=/; max-age=31536000; samesite=lax`;
+      persistSidebarCollapsed(next);
       return next;
     });
   };
 
+  const collapseWidthStyle =
+    collapsed && !settingsPage
+      ? ({ "--sidebar-width": RAIL_COLLAPSE_WIDTH_VAR } as React.CSSProperties)
+      : undefined;
+
+  if (socialChrome) {
+    return (
+      <AskAssistantChromeProvider>
+        {cookieSync}
+        <div
+          className={cn(HOUSE_LEAD_SHELL_CLASS, HOUSE_PAGE_CANVAS_CLASS)}
+          data-social-workspace=""
+          style={collapseWidthStyle}
+        >
+          <HouseLeadChrome
+            workspace="social"
+            logoVisible="always"
+            search={<SocialHeaderSearch />}
+            phoneSearch={<SocialHeaderSearchPhone />}
+            accountMenu={
+              <AccountMenuSlot chrome={chrome} email={email} name={name} photoUrl={photoUrl} />
+            }
+          />
+          <aside
+            className={cn(
+              HOUSE_RAIL_FLOAT_CLASS,
+              collapsed ? RAIL_WIDTH_CLASS : SOCIAL_RAIL_WIDTH_CLASS,
+              SOCIAL_RAIL_PANEL_CLASS,
+            )}
+            data-app-rail=""
+            data-social-rail=""
+          >
+            <RailCollapse collapsed={collapsed} onToggle={toggle} />
+            <div className={cn("flex min-h-0 flex-1 flex-col", collapsed ? "gap-2 px-1 pb-2" : "gap-3 p-4")}>
+              <div className="min-h-0 overflow-y-auto">
+                <SideNav
+                  messagesUnread={messagesUnread}
+                  isGcStaff={false}
+                  collapsed={collapsed}
+                  workspace="social"
+                />
+              </div>
+              <div className="min-h-0 flex-1" />
+              <SocialRailAccountChipSlot
+                chrome={chrome}
+                name={name}
+                photoUrl={photoUrl}
+                collapsed={collapsed}
+              />
+            </div>
+          </aside>
+          <main
+            className={cn(HOUSE_LEAD_SCROLL_CLASS, collapsed ? undefined : SOCIAL_RAIL_MAIN_OFFSET_CLASS)}
+            style={collapsed ? { marginLeft: "var(--sidebar-width)" } : undefined}
+            data-app-social-frame=""
+            data-house-lead-scroll=""
+          >
+            <div className={cn(SOCIAL_DESKTOP_FRAME_PAD_CLASS, SOCIAL_TAB_BAR_MAIN_PAD_CLASS)}>{children}</div>
+          </main>
+          <SocialMobileTabBar />
+        </div>
+      </AskAssistantChromeProvider>
+    );
+  }
+
   return (
+    <AskAssistantChromeProvider>
+    {cookieSync}
     <div
-      className="min-h-dvh"
-      style={
-        collapsed
-          ? ({ "--sidebar-width": "var(--sidebar-width-collapsed)" } as React.CSSProperties)
-          : undefined
-      }
+      className={cn(HOUSE_LEAD_SHELL_CLASS, HOUSE_PAGE_CANVAS_CLASS)}
+      data-education-workspace={workspace === "education" ? "" : undefined}
+      style={collapseWidthStyle}
     >
       <aside
-        className="fixed left-0 top-0 z-30 flex h-dvh flex-col border-r border-hairline bg-surface-muted"
-        style={{ width: "var(--sidebar-width)" }}
+        className={cn(
+          HOUSE_RAIL_FLOAT_CLASS,
+          RAIL_WIDTH_CLASS,
+          HOUSE_RAIL_PANEL_CLASS,
+        )}
+        data-app-rail=""
+        data-settings-rail={settingsPage ? "" : undefined}
       >
+        {settingsPage ? null : <RailCollapse collapsed={collapsed} onToggle={toggle} />}
         <div
-          className={cn("flex items-center px-2", collapsed ? "justify-center" : "gap-2")}
-          style={{ height: "var(--header-height)" }}
+          className={cn("flex-1 overflow-y-auto", settingsPage ? SETTINGS_RAIL_PAD_CLASS : "pt-1")}
         >
-          {!collapsed ? (
-            <span className="flex-1 truncate pl-1 t-label text-ink-2">Global Content</span>
-          ) : null}
-          <button
-            type="button"
-            onClick={toggle}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            aria-pressed={collapsed}
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--radius-sm)] text-ink-3 transition-colors hover:bg-surface hover:text-ink-2"
-          >
-            {collapsed ? (
-              <PanelLeftOpen className="h-4 w-4" strokeWidth={1.5} />
-            ) : (
-              <PanelLeftClose className="h-4 w-4" strokeWidth={1.5} />
-            )}
-          </button>
-        </div>
-        <div className="flex-1 overflow-y-auto pt-1">
-          <SideNav messagesUnread={messagesUnread} isGcStaff={isGcStaff} collapsed={collapsed} />
+          {settingsPage ? (
+            <SettingsRail />
+          ) : (
+            <SideNavSlot
+              chrome={chrome}
+              messagesUnread={messagesUnread}
+              isGcStaff={isGcStaff}
+              collapsed={collapsed}
+              workspace={workspace}
+            />
+          )}
         </div>
       </aside>
 
-      <header
-        className="sticky top-0 z-40 flex items-center justify-between gap-4 border-b border-hairline bg-canvas/80 px-6 backdrop-blur"
-        style={{ height: "var(--header-height)", marginLeft: "var(--sidebar-width)" }}
-      >
-        <OrganizationSwitcher orgs={orgs} activeOrgId={activeOrgId} />
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
-          <UserMenu email={email} />
-        </div>
-      </header>
+      {/* Full-width top + dest side nav — same HouseLeadChrome as Social.
+          Access phone header is hamburger · gap 8 · one workspace
+          pill left, avatar alone right. Do not center the pill. Do
+          not cluster it with the avatar. Desktop keeps the trailing
+          switcher + avatar cluster. Brand sits on the full-width
+          top, not a second rail chrome. Period stays on the
+          Dashboard org row. No org switcher on any route.
+          Aggregation mid-lead stays empty. Education mounts a quiet
+          course/video search immediately right of the logo, same
+          Facebook-compact slot as Social live search. Search also
+          mounts on the Access `/messages` gate, and on mobile
+          `/titles` (528:542). Phone avatar opens 544:561. Hamburger
+          stays the nav sheet. Do not invent Move chrome or a
+          second phone switcher. Studio secondary rail stays HOLD. */}
+      <HouseLeadChrome
+        workspace={workspace}
+        settingsPage={settingsPage}
+        leadingNav={
+          settingsPage ? (
+            <SettingsHeaderBack />
+          ) : (
+            <MobileNavSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />
+          )
+        }
+        search={
+          workspace === "education" && !settingsPage ? (
+            <Suspense fallback={null}>
+              <EducationHeaderSearch />
+            </Suspense>
+          ) : undefined
+        }
+        phoneSearch={
+          workspace === "education" && !settingsPage ? (
+            <Suspense fallback={null}>
+              <EducationHeaderSearch inputId="education-header-q-phone" />
+            </Suspense>
+          ) : undefined
+        }
+        afterLead={
+          messagesPage ? (
+            <MessagesHeaderSlot chrome={chrome} messagesSurface={messagesSurface} />
+          ) : undefined
+        }
+        accountMenu={
+          <AccountMenuSlot chrome={chrome} email={email} name={name} photoUrl={photoUrl} />
+        }
+      />
 
       <main
+        className={HOUSE_LEAD_SCROLL_CLASS}
+        data-house-lead-scroll=""
         style={{
           marginLeft: "var(--sidebar-width)",
-          minHeight: "calc(100dvh - var(--header-height))",
         }}
       >
-        {fullBleed ? (
+        {titlesBleed ? (
           <div className="w-full pb-24">{children}</div>
+        ) : homePage ? (
+          <div
+            className={cn(
+              "w-full py-[var(--space-8)] max-md:px-[var(--space-6)] max-md:py-[var(--space-6)]",
+              HOUSE_CANVAS_X_CLASS,
+            )}
+            data-app-home-frame=""
+          >
+            {children}
+          </div>
+        ) : messagesPage ? (
+          <div
+            className={cn("w-full p-[var(--content-inset)]", HOUSE_CHROME_GUTTER_X_CLASS)}
+            data-app-messages-frame=""
+          >
+            {children}
+          </div>
         ) : (
-          <div className="mx-auto w-full px-6 pb-24 pt-8" style={{ maxWidth: "var(--page-max-width)" }}>
+          <div
+            className={cn("mx-auto w-full pb-24 pt-8", HOUSE_CANVAS_X_CLASS)}
+            style={{ maxWidth: "var(--page-max-width)" }}
+          >
             {children}
           </div>
         )}
       </main>
     </div>
+    </AskAssistantChromeProvider>
   );
+}
+
+function SocialRailAccountChipSlot({
+  chrome,
+  name,
+  photoUrl,
+  collapsed,
+}: {
+  chrome?: Promise<AppShellChrome>;
+  name?: string | null;
+  photoUrl?: string | null;
+  collapsed: boolean;
+}) {
+  if (!chrome) return <SocialRailAccountChip name={name} photoUrl={photoUrl} collapsed={collapsed} />;
+  return (
+    <Suspense fallback={<SocialRailAccountChip name={name} photoUrl={photoUrl} collapsed={collapsed} />}>
+      <SocialRailAccountChipFromChrome chrome={chrome} collapsed={collapsed} />
+    </Suspense>
+  );
+}
+
+function SocialRailAccountChipFromChrome({
+  chrome,
+  collapsed,
+}: {
+  chrome: Promise<AppShellChrome>;
+  collapsed: boolean;
+}) {
+  const data = use(chrome);
+  return <SocialRailAccountChip name={data.name} photoUrl={data.photoUrl} collapsed={collapsed} />;
+}
+
+function MessagesHeaderSlot({
+  chrome,
+  messagesSurface,
+}: {
+  chrome?: Promise<AppShellChrome>;
+  messagesSurface: MessagesSurface;
+}) {
+  if (!chrome) return <MessagesAppHeader surface={messagesSurface} />;
+  return (
+    <Suspense fallback={<MessagesAppHeader surface={messagesSurface} />}>
+      <MessagesHeaderFromChrome chrome={chrome} />
+    </Suspense>
+  );
+}
+
+function MessagesHeaderFromChrome({ chrome }: { chrome: Promise<AppShellChrome> }) {
+  const data = use(chrome);
+  return <MessagesAppHeader surface={data.messagesSurface} />;
+}
+
+function AccountMenuSlot({
+  chrome,
+  email,
+  name,
+  photoUrl,
+}: {
+  chrome?: Promise<AppShellChrome>;
+  email: string;
+  name?: string | null;
+  photoUrl?: string | null;
+}) {
+  if (!chrome) {
+    return <UserMenu email={email} name={name} photoUrl={photoUrl} />;
+  }
+  return (
+    <Suspense fallback={<UserMenu email={email} name={name} photoUrl={photoUrl} />}>
+      <UserMenuFromChrome chrome={chrome} />
+    </Suspense>
+  );
+}
+
+function UserMenuFromChrome({
+  chrome,
+}: {
+  chrome: Promise<AppShellChrome>;
+}) {
+  const data = use(chrome);
+  return <UserMenu email={data.email} name={data.name} photoUrl={data.photoUrl} />;
+}
+
+function ChromeCookieSync({
+  chrome,
+  onCookies,
+}: {
+  chrome: Promise<AppShellChrome>;
+  onCookies: (next: { defaultCollapsed: boolean; defaultWorkspace: WorkspaceMode }) => void;
+}) {
+  const data = use(chrome);
+  useEffect(() => {
+    onCookies({
+      defaultCollapsed: data.defaultCollapsed,
+      defaultWorkspace: data.defaultWorkspace,
+    });
+  }, [data.defaultCollapsed, data.defaultWorkspace, onCookies]);
+  return null;
+}
+
+function SideNavSlot({
+  chrome,
+  messagesUnread,
+  isGcStaff,
+  collapsed,
+  workspace,
+}: {
+  chrome?: Promise<AppShellChrome>;
+  messagesUnread: Promise<number>;
+  isGcStaff: boolean;
+  collapsed: boolean;
+  workspace: WorkspaceMode;
+}) {
+  if (!chrome) {
+    return (
+      <SideNav
+        messagesUnread={messagesUnread}
+        isGcStaff={isGcStaff}
+        collapsed={collapsed}
+        workspace={workspace}
+      />
+    );
+  }
+  return (
+    <Suspense
+      fallback={
+        <SideNav
+          messagesUnread={messagesUnread}
+          isGcStaff={isGcStaff}
+          collapsed={collapsed}
+          workspace={workspace}
+        />
+      }
+    >
+      <SideNavFromChrome
+        chrome={chrome}
+        messagesUnread={messagesUnread}
+        collapsed={collapsed}
+        workspace={workspace}
+      />
+    </Suspense>
+  );
+}
+
+function SideNavFromChrome({
+  chrome,
+  messagesUnread,
+  collapsed,
+  workspace,
+}: {
+  chrome: Promise<AppShellChrome>;
+  messagesUnread: Promise<number>;
+  collapsed: boolean;
+  workspace: WorkspaceMode;
+}) {
+  const data = use(chrome);
+  return (
+    <SideNav
+      messagesUnread={messagesUnread}
+      isGcStaff={data.isGcStaff}
+      collapsed={collapsed}
+      workspace={workspace}
+    />
+  );
+}
+
+function MobileNavSlot({
+  chrome,
+  isGcStaff,
+  workspace,
+}: {
+  chrome?: Promise<AppShellChrome>;
+  isGcStaff: boolean;
+  workspace: WorkspaceMode;
+}) {
+  if (!chrome) return <MobileNav isGcStaff={isGcStaff} workspace={workspace} />;
+  return (
+    <Suspense fallback={<MobileNav isGcStaff={isGcStaff} workspace={workspace} />}>
+      <MobileNavFromChrome chrome={chrome} workspace={workspace} />
+    </Suspense>
+  );
+}
+
+function MobileNavFromChrome({
+  chrome,
+  workspace,
+}: {
+  chrome: Promise<AppShellChrome>;
+  workspace: WorkspaceMode;
+}) {
+  const data = use(chrome);
+  return <MobileNav isGcStaff={data.isGcStaff} workspace={workspace} />;
 }

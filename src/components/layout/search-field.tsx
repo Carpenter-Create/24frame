@@ -4,10 +4,22 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 
+import { FORM_CONTROL_TEXT_CLASS } from "@/lib/form-control";
+import { HOUSE_SEARCH_PILL_CLASS } from "@/lib/house-shell";
+import { cn } from "@/lib/cn";
+
 // Debounced, URL-driven search (Visual/Metadata registers). Writes ?q= (preserving
 // other params) via router.replace so the server re-renders filtered results — no
 // client-side filtering, no scroll jump.
-export function SearchField({ placeholder = "Search titles" }: { placeholder?: string }) {
+// Header treatment: soft grey pill (#F4F4F6 / --surface-muted), quiet placeholder.
+export function SearchField({
+  placeholder = "Search titles...",
+  hint,
+}: {
+  placeholder?: string;
+  /** Visual-only kbd hint. Not a command palette. */
+  hint?: string;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -35,9 +47,24 @@ export function SearchField({ placeholder = "Search titles" }: { placeholder?: s
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder={placeholder}
-        aria-label="Search titles"
-        className="h-8 w-44 rounded-full border border-hairline bg-surface pl-8 pr-3 t-body-sm text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none sm:w-56"
+        aria-label={placeholder}
+        className={cn(
+          FORM_CONTROL_TEXT_CLASS,
+          "text-ink placeholder:text-ink-3 focus:border-transparent focus:outline-none",
+          hint
+            ? `h-8 w-56 pl-8 pr-12 sm:w-80 ${HOUSE_SEARCH_PILL_CLASS}`
+            : `h-8 w-44 pl-8 pr-3 sm:w-56 ${HOUSE_SEARCH_PILL_CLASS}`,
+        )}
       />
+      {hint ? (
+        <span
+          aria-hidden
+          data-search-hint=""
+          className="pointer-events-none absolute right-2 rounded-[var(--radius-sm)] border border-hairline bg-surface px-1.5 py-0.5 text-[length:var(--text-xs)] text-ink-3"
+        >
+          {hint}
+        </span>
+      ) : null}
     </label>
   );
 }

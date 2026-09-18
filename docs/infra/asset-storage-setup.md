@@ -1,5 +1,9 @@
 # Asset storage (S3) setup — run once per environment
 
+Title objects only. Avatars are a **dedicated** private bucket on this same AWS
+account — see [`avatar-storage-setup.md`](avatar-storage-setup.md). Do not write
+faces under `orgs/<org>/titles/...` or into this bucket.
+
 Prereqs: `aws` CLI authenticated to the GC AWS account; pick a region (e.g. us-east-1)
 and a globally-unique bucket name (e.g. `gc-content-assets-prod`).
 
@@ -37,18 +41,47 @@ and a globally-unique bucket name (e.g. `gc-content-assets-prod`).
       }]
     }'
 
-4) Least-privilege IAM user for the app (no DeleteObject — nothing is deleted):
+4) Least-privilege IAM user for the app. Founder lock 2026-09-17: **deleted title prefixes
+must be purged**. `s3:DeleteObject` / `s3:DeleteObjects` + list are granted on
+`orgs/*/titles/*` only — not a blanket bucket wipe. Avatars, education, social, and
+finance stay on their own clients and keep their own "no DeleteObject" posture.
 
     aws iam create-user --user-name gc-assets-app
     aws iam put-user-policy --user-name gc-assets-app --policy-name gc-assets-s3 --policy-document '{
       "Version": "2012-10-17",
-      "Statement": [{
-        "Effect": "Allow",
-        "Action": ["s3:PutObject","s3:GetObject","s3:ListMultipartUploadParts","s3:AbortMultipartUpload"],
-        "Resource": "arn:aws:s3:::'"$BUCKET"'/*"
-      }]
+      "Statement": [
+        {
+          "Sid": "TitleObjectReadWrite",
+          "Effect": "Allow",
+          "Action": ["s3:PutObject","s3:GetObject","s3:ListMultipartUploadParts","s3:AbortMultipartUpload"],
+          "Resource": "arn:aws:s3:::'"$BUCKET"'/*"
+        },
+        {
+          "Sid": "DeletedTitlePrefixList",
+          "Effect": "Allow",
+          "Action": ["s3:ListBucket"],
+          "Resource": "arn:aws:s3:::'"$BUCKET"'",
+          "Condition": {
+            "StringLike": { "s3:prefix": ["orgs/*/titles/*"] }
+          }
+        },
+        {
+          "Sid": "DeletedTitlePrefixPurge",
+          "Effect": "Allow",
+          "Action": ["s3:DeleteObject","s3:DeleteObjects"],
+          "Resource": "arn:aws:s3:::'"$BUCKET"'/orgs/*/titles/*"
+        }
+      ]
     }'
     aws iam create-access-key --user-name gc-assets-app   # capture AccessKeyId + SecretAccessKey
+
+`s3:DeleteObjects` is the batch API the app calls; IAM evaluates it as
+`s3:DeleteObject` on each key. Both names stay in the snippet so the founder lock
+is readable in the policy. `ListBucket` is a bucket-level action — its Resource
+is the bucket ARN, scoped by `s3:prefix`. Do not put `DeleteObject` on `$BUCKET/*`.
+Keep the existing unscoped `s3:ListBucket` on `gc-assets-mediaconvert` (HeadBucket
+for `headObjectMeta`); the prefix condition above is the delete-list scope, not a
+replacement for that grant.
 
 5) Set env vars (server-only) locally (`.env.local`) and in Vercel (all environments):
 

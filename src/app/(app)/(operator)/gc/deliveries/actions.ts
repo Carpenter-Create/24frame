@@ -16,11 +16,11 @@ export async function createDelivery(input: {
   vendorId: string;
   grantId: string;
   territory: string;
-}): Promise<{ error?: string }> {
+}): Promise<{ error?: string; id?: string }> {
   const supabase = await createClient();
   const user = await getAuthUser();
   if (!user) return { error: "Not authenticated." };
-  const { error } = await supabase.rpc("create_delivery", {
+  const { data, error } = await supabase.rpc("create_delivery", {
     p_title_id: input.titleId,
     p_vendor_id: input.vendorId,
     p_grant_id: input.grantId,
@@ -28,7 +28,20 @@ export async function createDelivery(input: {
   });
   if (error) return { error: error.message };
   revalidatePath("/gc/deliveries");
-  return {};
+  return { id: data ?? undefined };
+}
+
+export async function createDeliveries(input: {
+  vendorId: string;
+  items: { titleId: string; grantId: string; territory: string }[];
+}): Promise<{ ids?: string[]; error?: string }> {
+  const ids: string[] = [];
+  for (const item of input.items) {
+    const res = await createDelivery({ ...item, vendorId: input.vendorId });
+    if (res.error) return { ids, error: res.error };
+    if (res.id) ids.push(res.id);
+  }
+  return { ids };
 }
 
 // Revoke ONE recipient's portal session (D3). Distinct from revokePortalLink, which cuts
@@ -80,11 +93,12 @@ export async function setDeliveryStatus(
       });
       // §20 email leg: same message, to every active member of the org (best-effort).
       const copy = NOTIFICATION_EMAIL.delivery_update;
+      const { cta, path } = copy.link({ titleId: d.title_id });
       await sendOrgNotificationEmail(supabase, d.org_id, {
         subject: copy.subject({ title }),
         body,
-        ctaLabel: copy.cta,
-        ctaPath: copy.path({ titleId: d.title_id }),
+        ctaLabel: cta,
+        ctaPath: path,
       });
     }
   } catch (e) {

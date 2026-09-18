@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { HOUSE_FILTER_OFF_CLASS, HOUSE_FILTER_ON_CLASS } from "@/lib/house-shell";
 import { cn } from "@/lib/cn";
 
 // URL-driven filter chips (server component, no client JS). Active chip is a solid ink
@@ -24,9 +25,7 @@ export function StatusFilter<T extends string>({
             aria-current={active ? "true" : undefined}
             className={cn(
               "rounded-full px-3 py-1 t-label transition-colors",
-              active
-                ? "bg-ink text-canvas"
-                : "bg-surface-muted text-ink-2 hover:text-ink",
+              active ? HOUSE_FILTER_ON_CLASS : `${HOUSE_FILTER_OFF_CLASS} hover:text-ink`,
             )}
           >
             {o.label}

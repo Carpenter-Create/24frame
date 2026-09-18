@@ -1,38 +1,67 @@
 "use client";
 
-import Link from "next/link";
-import { FileText, LogOut } from "lucide-react";
-
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
 import { signOut } from "@/app/actions";
+import { accountPhotoSrc } from "@/lib/account-avatar";
+import { userMenuAvatarInitial, userMenuName } from "@/lib/user-menu";
+import { DesktopAccountMenu, MobileAccountMenu } from "./account-sheet";
+import { IdentityPhoto } from "./house";
 
-export function UserMenu({ email }: { email: string }) {
-  const initial = (email.charAt(0) || "?").toUpperCase();
+export function onUserMenuLogOut(): void {
+  void signOut();
+}
+
+export function UserMenuIdentity({
+  email,
+  name,
+  photoUrl,
+}: {
+  email: string;
+  name?: string | null;
+  photoUrl?: string | null;
+}) {
+  const displayName = userMenuName(name);
+  const initial = userMenuAvatarInitial(email);
+  const face = accountPhotoSrc(photoUrl);
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-muted t-body-sm font-medium text-ink-2 transition-colors hover:text-ink">
-        {initial}
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <div className="truncate px-2.5 py-1.5 t-body-sm text-ink-2">{email}</div>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href="/account/agreements">
-            <FileText className="h-4 w-4" strokeWidth={1.5} />
-            Agreements
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => signOut()}>
-          <LogOut className="h-4 w-4" strokeWidth={1.5} />
-          Sign out
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div
+      data-user-menu-identity=""
+      className="flex items-center gap-[var(--space-4)]"
+    >
+      <div
+        data-user-menu-avatar=""
+        data-identity-photo={face ? "" : undefined}
+        className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted t-body text-ink-2"
+      >
+        <IdentityPhoto avatarInitial={initial} photoUrl={photoUrl} />
+      </div>
+      <div className="min-w-0">
+        {displayName ? (
+          <div data-user-menu-name="" className="truncate t-body text-ink">
+            {displayName}
+          </div>
+        ) : null}
+        <div data-user-menu-email="" className="truncate t-body-sm text-ink-3">
+          {email}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function UserMenu({
+  email,
+  name,
+  photoUrl,
+}: {
+  email: string;
+  name?: string | null;
+  photoUrl?: string | null;
+}) {
+  return (
+    <>
+      <MobileAccountMenu email={email} name={name} photoUrl={photoUrl} />
+      <DesktopAccountMenu email={email} name={name} photoUrl={photoUrl} />
+    </>
   );
 }

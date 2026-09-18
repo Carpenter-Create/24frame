@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { PRODUCT_NAME } from "@/lib/product";
+
 // Full-screen onboarding chrome (no AppShell): GC wordmark + a thin proportional
 // progress bar + a titled content column. One decision per screen. Neutral tokens
 // only (no accent/purple on the progress fill) — accent is a placeholder pending logo.
@@ -24,7 +26,7 @@ export function WizardFrame({
   return (
     <div className="flex min-h-screen flex-col bg-surface">
       <header className="flex items-center justify-between gap-6 px-6 py-5">
-        <span className="t-label tracking-wide text-ink-2">GLOBAL CONTENT</span>
+        <span className="t-label tracking-wide text-ink-2">{PRODUCT_NAME}</span>
         <div
           className="h-1 w-40 overflow-hidden rounded-full bg-surface-muted"
           role="progressbar"

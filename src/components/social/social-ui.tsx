@@ -1,0 +1,532 @@
+import type { ReactNode } from "react";
+import Link from "next/link";
+
+import { TextAction } from "@/components/chrome/house";
+import { InlineNotice } from "@/components/ui/inline-notice";
+import { cn } from "@/lib/cn";
+import { IDENTITY_AVATAR_CLASS } from "@/lib/house-sheet";
+import {
+  SOCIAL_ACTION_CLASS,
+  SOCIAL_ACTION_SECONDARY_CLASS,
+  SOCIAL_AVATAR_LG_CLASS,
+  SOCIAL_AVATAR_PROFILE_CLASS,
+  SOCIAL_AVATAR_SM_CLASS,
+  SOCIAL_FEED_ROW_CLASS,
+  SOCIAL_HANDLE_PILL_CLASS,
+  SOCIAL_HIGHLIGHT_RING_CLASS,
+  SOCIAL_PROFILE_GRID_CLASS,
+  SOCIAL_PROFILE_TILE_CLASS,
+} from "@/lib/social-chrome";
+import {
+  displayHandle,
+  formatSocialCount,
+  SOCIAL,
+  SOCIAL_ROUTES,
+  socialGroupHref,
+  socialMemberHref,
+  socialInitials,
+  socialRelativeTime,
+} from "@/lib/social";
+import { SocialLikeButton } from "./social-forms";
+import { SocialEmpty } from "./social-empty";
+import { SocialIcon } from "./social-icon";
+
+export function SocialNeedProfile() {
+  return (
+    <div data-social-need-profile="" className="flex flex-col gap-[var(--space-2)]">
+      <SocialEmpty icon="user" title={SOCIAL.cta.needProfile} />
+      <TextAction href={SOCIAL_ROUTES.profile}>{SOCIAL.cta.profileHrefLabel}</TextAction>
+    </div>
+  );
+}
+
+export function SocialAvatar({
+  name,
+  photoUrl,
+  ring = null,
+  size = "md",
+}: {
+  name: string;
+  photoUrl?: string | null;
+  ring?: "unseen" | "live" | null;
+  size?: "sm" | "md" | "lg" | "profile";
+}) {
+  const box =
+    size === "lg"
+      ? SOCIAL_AVATAR_LG_CLASS
+      : size === "profile"
+        ? SOCIAL_AVATAR_PROFILE_CLASS
+        : size === "sm"
+          ? SOCIAL_AVATAR_SM_CLASS
+          : IDENTITY_AVATAR_CLASS;
+  return (
+    <div
+      data-social-avatar=""
+      data-social-avatar-ring={ring ?? undefined}
+      className={cn(
+        box,
+        photoUrl ? "overflow-hidden" : null,
+        ring ? "ring-2 ring-accent ring-offset-2 ring-offset-[var(--bg)]" : null,
+      )}
+    >
+      {photoUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the private avatars bucket
+        <img src={photoUrl} alt="" className="size-full object-cover" />
+      ) : (
+        socialInitials(name)
+      )}
+    </div>
+  );
+}
+
+export function SocialConversationFaces({
+  people,
+}: {
+  people: readonly { name: string; photoUrl?: string | null }[];
+}) {
+  if (people.length <= 1) {
+    const only = people[0];
+    return <SocialAvatar name={only?.name ?? "Member"} photoUrl={only?.photoUrl} />;
+  }
+
+  const shown = people.slice(0, 2);
+  return (
+    <div data-social-conversation-faces="" className="relative size-12 shrink-0">
+      <div className="absolute left-0 top-0 origin-top-left scale-75">
+        <SocialAvatar name={shown[0].name} photoUrl={shown[0].photoUrl} />
+      </div>
+      <div className="absolute right-0 bottom-0 origin-bottom-right scale-75">
+        <SocialAvatar name={shown[1].name} photoUrl={shown[1].photoUrl} />
+      </div>
+    </div>
+  );
+}
+
+export type SocialPostMediaItem = {
+  kind: "image" | "video";
+  url: string;
+};
+
+export type SocialPostCardModel = {
+  id: string;
+  body: string | null;
+  likeCount: number;
+  commentCount?: number;
+  liked: boolean;
+  createdAt: string;
+  authorId: string;
+  authorHandle: string | null;
+  authorName: string;
+  authorPhotoUrl: string | null;
+  groupSlug: string | null;
+  groupName: string | null;
+  canLike: boolean;
+  media: SocialPostMediaItem[];
+};
+
+export function SocialPostMedia({ items }: { items: readonly SocialPostMediaItem[] }) {
+  if (items.length === 0) return null;
+  return (
+    <div data-social-post-media="" className="flex flex-col gap-2">
+      {items.map((item) =>
+        item.kind === "video" ? (
+          <video
+            key={item.url}
+            data-social-post-video=""
+            controls
+            preload="metadata"
+            src={item.url}
+            className="h-[360px] w-full rounded-[8px] bg-surface-muted object-cover"
+          />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the member media lane
+          <img
+            key={item.url}
+            data-social-post-image=""
+            src={item.url}
+            alt=""
+            className="h-[360px] w-full rounded-[8px] bg-surface-muted object-cover"
+          />
+        ),
+      )}
+    </div>
+  );
+}
+
+export function SocialProfileIdentity({
+  name,
+  handle,
+  photoUrl,
+  bio,
+  ring = null,
+  photoAction,
+  stats,
+  actions,
+  children,
+}: {
+  name: string;
+  handle: string;
+  photoUrl?: string | null;
+  bio?: string | null;
+  ring?: "unseen" | "live" | null;
+  photoAction?: ReactNode;
+  stats?: { posts: number; followers: number; following: number };
+  actions?: () => ReactNode;
+  children?: ReactNode;
+}) {
+  const actionRow = actions ? (
+    <div className="flex w-full items-center gap-2 md:w-auto">
+      {actions()}
+      {photoAction}
+    </div>
+  ) : photoAction ? (
+    <div className="flex w-full items-center gap-2 md:w-auto">{photoAction}</div>
+  ) : null;
+
+  return (
+    <div data-social-profile-identity="" className="flex flex-col gap-3">
+      <div className="flex items-start gap-3 md:gap-4">
+        <SocialAvatar name={name} photoUrl={photoUrl} ring={ring} size="profile" />
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+            <div className="min-w-0">
+              <p className="text-[18px] font-semibold text-ink md:text-[22px]">{name}</p>
+              <p className={cn(SOCIAL_HANDLE_PILL_CLASS, "mt-1")}>{displayHandle(handle)}</p>
+            </div>
+            {actionRow ? <div className="hidden shrink-0 md:flex">{actionRow}</div> : null}
+          </div>
+          {bio?.trim() ? (
+            <p data-social-profile-bio="" className="hidden t-body text-ink whitespace-pre-wrap md:block">
+              {bio}
+            </p>
+          ) : null}
+          {stats ? (
+            <div data-social-profile-stats="" className="hidden flex-wrap gap-5 t-body md:flex">
+              <p>
+                <span className="font-semibold text-ink">{formatSocialCount(stats.posts)}</span>{" "}
+                <span className="text-ink-2">{SOCIAL.profile.postsStat}</span>
+              </p>
+              <p>
+                <span className="font-semibold text-ink">{formatSocialCount(stats.followers)}</span>{" "}
+                <span className="text-ink-2">{SOCIAL.profile.followersStat}</span>
+              </p>
+              <p>
+                <span className="font-semibold text-ink">{formatSocialCount(stats.following)}</span>{" "}
+                <span className="text-ink-2">{SOCIAL.profile.followingStat}</span>
+              </p>
+            </div>
+          ) : null}
+        </div>
+      </div>
+      {bio?.trim() ? (
+        <p data-social-profile-bio="" className="t-body-sm text-ink whitespace-pre-wrap md:hidden">
+          {bio}
+        </p>
+      ) : null}
+      {stats ? (
+        <div data-social-profile-stats="" className="flex flex-wrap gap-4 t-body-sm md:hidden">
+          <p>
+            <span className="font-semibold text-ink">{formatSocialCount(stats.posts)}</span>{" "}
+            <span className="text-ink-2">{SOCIAL.profile.postsStat}</span>
+          </p>
+          <p>
+            <span className="font-semibold text-ink">{formatSocialCount(stats.followers)}</span>{" "}
+            <span className="text-ink-2">{SOCIAL.profile.followersStat}</span>
+          </p>
+          <p>
+            <span className="font-semibold text-ink">{formatSocialCount(stats.following)}</span>{" "}
+            <span className="text-ink-2">{SOCIAL.profile.followingStat}</span>
+          </p>
+        </div>
+      ) : null}
+      {actionRow ? <div className="flex md:hidden">{actionRow}</div> : null}
+      {children}
+    </div>
+  );
+}
+
+export function SocialHighlights({
+  cards,
+}: {
+  cards: readonly { id: string; href: string; label: string; photoUrl?: string | null }[];
+}) {
+  if (cards.length === 0) return null;
+  return (
+    <div data-social-highlights="" className="flex flex-col gap-2">
+      <div className="flex gap-3 overflow-x-auto">
+        {cards.map((card) => (
+          <Link
+            key={card.id}
+            href={card.href}
+            data-social-highlight={card.id}
+            className="flex w-14 shrink-0 flex-col items-center gap-1"
+          >
+            <span className={SOCIAL_HIGHLIGHT_RING_CLASS}>
+              {card.photoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET
+                <img src={card.photoUrl} alt="" className="size-12 rounded-full object-cover" />
+              ) : (
+                <span className="block size-12 rounded-full bg-surface-muted" />
+              )}
+            </span>
+            <span className="w-full truncate text-center t-label text-ink">{card.label}</span>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function socialPostEngagement(post: SocialPostCardModel): string {
+  const likes = `${post.likeCount} ${SOCIAL.post.likes}`;
+  const comments = post.commentCount
+    ? ` · ${post.commentCount} ${SOCIAL.post.comments}`
+    : "";
+  return `${likes}${comments}`;
+}
+
+export function SocialAuthorHistory({
+  posts,
+  truncated,
+  emptyHint,
+  emptyAction,
+}: {
+  posts: readonly SocialPostCardModel[];
+  truncated: boolean;
+  emptyHint?: string;
+  emptyAction?: { href: string; label: string };
+}) {
+  const mediaPosts = posts.filter((post) => post.media.length > 0);
+  const textPosts = posts.filter((post) => post.media.length === 0);
+  return (
+    <div data-social-author-history="" className="flex flex-col gap-[var(--space-4)]">
+      {posts.length === 0 ? (
+        <div data-social-author-empty="">
+          <SocialEmpty
+            icon="image"
+            title={SOCIAL.profile.postsEmpty}
+            hint={emptyHint ?? SOCIAL.profile.postsEmptyHint}
+            action={emptyAction}
+          />
+        </div>
+      ) : (
+        <div data-social-author-posts="" className="flex flex-col gap-[var(--space-4)]">
+          {mediaPosts.length > 0 ? (
+            <div
+              data-social-profile-grid=""
+              className={SOCIAL_PROFILE_GRID_CLASS}
+            >
+              {mediaPosts.map((post) => {
+                const first = post.media[0];
+                return (
+                  <article
+                    key={post.id}
+                    data-social-post={post.id}
+                    className={SOCIAL_PROFILE_TILE_CLASS}
+                  >
+                    {first.kind === "video" ? (
+                      <video
+                        data-social-post-video=""
+                        preload="metadata"
+                        src={first.url}
+                        className="absolute inset-0 size-full object-cover"
+                      />
+                    ) : (
+                      // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET
+                      <img
+                        data-social-post-image=""
+                        src={first.url}
+                        alt=""
+                        className="absolute inset-0 size-full object-cover"
+                      />
+                    )}
+                    <p className="relative t-label font-medium uppercase tracking-[0.08em] text-ink-2">
+                      {first.kind === "video" ? SOCIAL.home.videoKind : SOCIAL.home.photoKind}
+                    </p>
+                    {post.body ? (
+                      <p className="relative line-clamp-2 t-body-sm text-ink">{post.body}</p>
+                    ) : null}
+                  </article>
+                );
+              })}
+            </div>
+          ) : null}
+          {textPosts.map((post) => (
+            <SocialPostCard key={post.id} post={post} />
+          ))}
+        </div>
+      )}
+      {truncated ? (
+        <InlineNotice data-social-author-truncated="">{SOCIAL.profile.postsTruncated}</InlineNotice>
+      ) : null}
+    </div>
+  );
+}
+
+export function socialAuthorPostCard(input: {
+  post: {
+    id: string;
+    body: string | null;
+    author_id: string;
+    like_count: number;
+    comment_count?: number;
+    created_at: string;
+  };
+  authorHandle: string;
+  authorName: string;
+  authorPhotoUrl: string | null;
+  liked: boolean;
+  canLike: boolean;
+  media: SocialPostMediaItem[];
+}): SocialPostCardModel {
+  return {
+    id: input.post.id,
+    body: input.post.body,
+    likeCount: input.post.like_count,
+    commentCount: input.post.comment_count,
+    liked: input.liked,
+    createdAt: input.post.created_at,
+    authorId: input.post.author_id,
+    authorHandle: input.authorHandle,
+    authorName: input.authorName,
+    authorPhotoUrl: input.authorPhotoUrl,
+    groupSlug: null,
+    groupName: null,
+    canLike: input.canLike,
+    media: input.media,
+  };
+}
+
+export function SocialPostCard({ post }: { post: SocialPostCardModel }) {
+  const media = post.media.length > 0;
+  const handle = post.authorHandle ? displayHandle(post.authorHandle).slice(1) : post.authorName;
+  return (
+    <article data-social-post={post.id}>
+      <div className={cn(SOCIAL_FEED_ROW_CLASS, "hidden md:flex")}>
+        <div className="flex items-center gap-2.5">
+          <SocialAvatar name={post.authorName} photoUrl={post.authorPhotoUrl} size="sm" />
+          <div className="min-w-0">
+            {post.authorHandle ? (
+              <Link href={socialMemberHref(post.authorHandle)} className="t-body-sm font-semibold text-ink">
+                {post.authorName}
+              </Link>
+            ) : (
+              <p className="t-body-sm font-semibold text-ink">{post.authorName}</p>
+            )}
+            <p className="t-label text-ink-2">
+              {socialRelativeTime(post.createdAt)}
+              {post.groupSlug && post.groupName ? (
+                <>
+                  {" · "}
+                  <Link href={socialGroupHref(post.groupSlug)} className="text-ink-2">
+                    {post.groupName}
+                  </Link>
+                </>
+              ) : (
+                <> · {SOCIAL.follow.following}</>
+              )}
+            </p>
+          </div>
+        </div>
+        {media ? <SocialPostMedia items={post.media} /> : null}
+        {post.body ? <p className="t-body text-ink whitespace-pre-wrap">{post.body}</p> : null}
+        <div className="flex items-center gap-2 t-label text-ink-2">
+          {media ? (
+            <span className="font-medium text-ink-3">
+              {post.media[0]?.kind === "video" ? SOCIAL.home.videoKind : SOCIAL.home.photoKind}
+            </span>
+          ) : (
+            <span className="font-medium text-ink-3">{SOCIAL.create.text}</span>
+          )}
+          {post.canLike ? (
+            <SocialLikeButton
+              postId={post.id}
+              liked={post.liked}
+              likeCount={post.likeCount}
+              groupSlug={post.groupSlug ?? undefined}
+            />
+          ) : (
+            <p>{socialPostEngagement(post)}</p>
+          )}
+        </div>
+      </div>
+      <div data-social-post-mobile="" className="flex flex-col bg-surface md:hidden">
+        <div className="flex items-center gap-2 px-3 py-2">
+          <SocialAvatar name={post.authorName} photoUrl={post.authorPhotoUrl} size="sm" />
+          {post.authorHandle ? (
+            <Link href={socialMemberHref(post.authorHandle)} className="t-body-sm font-semibold text-ink">
+              {handle}
+            </Link>
+          ) : (
+            <p className="t-body-sm font-semibold text-ink">{handle}</p>
+          )}
+        </div>
+        {media ? (
+          <div data-social-post-media="" className="-mx-0">
+            {post.media[0]?.kind === "video" ? (
+              <video
+                data-social-post-video=""
+                controls
+                preload="metadata"
+                src={post.media[0].url}
+                className="aspect-square w-full bg-surface-muted object-cover"
+              />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET
+              <img
+                data-social-post-image=""
+                src={post.media[0]?.url}
+                alt=""
+                className="aspect-square w-full bg-surface-muted object-cover"
+              />
+            )}
+          </div>
+        ) : null}
+        <div className="flex flex-col gap-1 px-3 pb-2.5 pt-2">
+          <div className="flex items-center gap-3.5">
+            {post.canLike ? (
+              <SocialLikeButton
+                postId={post.id}
+                liked={post.liked}
+                likeCount={post.likeCount}
+                groupSlug={post.groupSlug ?? undefined}
+                icon
+              />
+            ) : (
+              <SocialIcon name="heart" size={22} />
+            )}
+            <SocialIcon name="chat-circle" size={22} />
+            <SocialIcon name="paper-plane-tilt" size={22} />
+          </div>
+          <p className="t-body-sm font-semibold text-ink">
+            {post.likeCount} {SOCIAL.post.likes}
+          </p>
+          {post.body ? (
+            <p className="t-body-sm text-ink">
+              <span className="font-semibold">{handle} </span>
+              {post.body}
+            </p>
+          ) : null}
+          {post.commentCount ? (
+            <p className="t-body-sm text-ink-2">
+              {post.commentCount} {SOCIAL.post.comments}
+            </p>
+          ) : null}
+          <p className="text-[10px] font-medium uppercase tracking-[0.04em] text-ink-3">
+            {socialRelativeTime(post.createdAt)}
+          </p>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+export function SocialProfileActions({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  return <div className="flex flex-wrap items-center gap-[var(--space-2)]">{children}</div>;
+}
+
+export { SOCIAL_ACTION_CLASS, SOCIAL_ACTION_SECONDARY_CLASS };

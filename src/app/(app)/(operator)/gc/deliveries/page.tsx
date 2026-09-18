@@ -1,137 +1,158 @@
-import { createClient } from "@/lib/supabase/server";
-import { Card, CardBody } from "@/components/ui/card";
-import { DeliveryControls } from "./delivery-controls";
-import { NewDeliveryForm } from "./new-delivery-form";
-import { ExportPanel } from "./export-panel";
-import { PortalLinks, type Master, type PortalLink, type PortalSession, type PortalAccessEvent } from "./portal-links";
+import Link from "next/link";
+import { Suspense } from "react";
 
-export default async function GcDeliveriesPage() {
+import { createClient } from "@/lib/supabase/server";
+import { titleArtworkUrls } from "@/lib/artwork";
+import { SearchField } from "@/components/layout/search-field";
+import { InlineNotice } from "@/components/ui/inline-notice";
+import { LicensingStatusList } from "@/components/licensing/licensing-status-list";
+import {
+  TitlesCatalogEmpty,
+  TitlesCatalogFrame,
+  TitlesCatalogHeader,
+  TitlesCatalogToolbar,
+} from "@/components/titles/titles-catalog";
+import {
+  GC_DELIVERIES_EMPTY,
+  GC_DELIVERIES_TRUNCATED,
+  GC_LICENSING_STATUS,
+  filterLicensingGroups,
+  gcLicensingHasFilters,
+  gcLicensingShowAllHref,
+  groupLicensingTitles,
+  parseDeliveryStatusFilter,
+  parseGcLicensingChannelFilter,
+} from "@/lib/gc-deliveries";
+import {
+  loadGcDeliveryCompanions,
+  uniqueIds,
+} from "@/lib/gc-deliveries-companions";
+import { catalogSearchQuery } from "@/lib/titles-catalog";
+import { LIST_PAGE, UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
+
+import { LicensingStatusFilter } from "./licensing-status-filter";
+import { LicensingVendorFilter } from "./licensing-vendor-filter";
+
+export default async function GcDeliveriesPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+} = {}) {
+  const sp = await (searchParams ?? Promise.resolve({} as Record<string, string | string[] | undefined>));
+  const q = catalogSearchQuery(sp.q);
+  const statusFilter = parseDeliveryStatusFilter(sp.status);
+  const vendorFilter = parseGcLicensingChannelFilter(sp.channel, sp.vendor);
   const supabase = await createClient();
-  const { data: deliveries } = await supabase
+  let deliveriesQuery = supabase
     .from("deliveries")
-    .select("id, territory, status, vendor_id, title_id, titles(title, catalog_id), vendors(name), organizations(name)")
+    .select(
+      "id, territory, status, vendor_id, title_id, created_at, titles(title, catalog_id, release_date), vendors(name)",
+    )
     .order("created_at", { ascending: false });
+  if (statusFilter !== "all") {
+    deliveriesQuery = deliveriesQuery.eq("status", statusFilter);
+  }
+  if (vendorFilter) {
+    deliveriesQuery = deliveriesQuery.eq("vendor_id", vendorFilter);
+  }
+  const { data: deliveries } = await deliveriesQuery
+    // BOUNDED — all orgs; the largest list in the app.
+    .range(...rangeFor(LIST_PAGE));
   const list = deliveries ?? [];
 
-  // group deliveries → export options (endpoint → its titles)
-  const byVendor = new Map<string, { id: string; name: string; titles: Map<string, string> }>();
-  for (const d of list) {
-    if (!d.vendors || !d.titles) continue;
-    const v = byVendor.get(d.vendor_id) ?? { id: d.vendor_id, name: d.vendors.name, titles: new Map() };
-    v.titles.set(d.title_id, `${d.titles.catalog_id ?? ""} · ${d.titles.title}`);
-    byVendor.set(d.vendor_id, v);
-  }
-  const exportVendors = [...byVendor.values()].map((v) => ({
-    id: v.id, name: v.name, titles: [...v.titles].map(([id, label]) => ({ id, label })),
-  }));
-
-  // Only APPROVED titles are deliverable (assembly line: review → approved → deliver).
-  // A title reaches in_delivery only after GC approves it; live = already on ≥1 platform.
+  // Avails-sourced deliver pool: live (Approved) + in_delivery (ready).
+  // Parent identity is the Titles catalog row, not a Licensing-only card.
   const { data: titleRows } = await supabase
-    .from("titles").select("id, title, catalog_id").in("status", ["in_delivery", "live"]).order("title");
+    .from("titles")
+    .select("id, title, catalog_id, release_date")
+    .in("status", ["in_delivery", "live"])
+    .order("title")
+    .range(...rangeFor(UNPAGINATED_MAX));
   const { data: vendorRows } = await supabase
-    .from("vendors").select("id, name").eq("active", true).order("name");
-  const { data: grantRows } = await supabase
-    .from("rights_grants").select("id, title_id, rights_type, territory_mode, territories").is("effective_to", null);
-  const titleOpts = (titleRows ?? []).map((t) => ({ id: t.id, label: `${t.catalog_id} · ${t.title}` }));
+    .from("vendors")
+    .select("id, name")
+    .eq("active", true)
+    .order("name")
+    .range(...rangeFor(UNPAGINATED_MAX));
+  const companions = await loadGcDeliveryCompanions(supabase, {
+    formTitleIds: uniqueIds((titleRows ?? []).map((t) => t.id)),
+    pageTitleIds: [],
+    pageDeliveryIds: [],
+  });
   const vendorOpts = (vendorRows ?? []).map((v) => ({ id: v.id, name: v.name }));
-  const grantsByTitle: Record<string, { id: string; label: string }[]> = {};
-  for (const g of grantRows ?? []) {
-    (grantsByTitle[g.title_id] ??= []).push({
-      id: g.id,
-      label: `${g.rights_type} · ${g.territory_mode}${g.territories?.length ? " " + g.territories.join(",") : ""}`,
-    });
+  const titleIds = uniqueIds([
+    ...list.map((d) => d.title_id),
+    ...(titleRows ?? []).map((t) => t.id),
+  ]);
+  const artwork = await titleArtworkUrls(supabase, titleIds.slice(0, LIST_PAGE));
+  const stills = new Map<string, string | null>();
+  for (const id of titleIds) {
+    stills.set(id, artwork.get(id)?.banner ?? null);
   }
 
-  // Portal-link management (Task 10): master assets to link, this delivery's
-  // links, and the access-event log for those links. GC RLS (is_gc_staff) permits
-  // these SELECTs across all orgs — see 20260720000100_portal_gate.sql.
-  const { data: masterRows } = await supabase
-    .from("assets")
-    .select("id, title_id, original_filename, bytes")
-    .eq("kind", "master");
-  const mastersByTitle: Record<string, Master[]> = {};
-  for (const a of masterRows ?? []) {
-    (mastersByTitle[a.title_id] ??= []).push({
-      id: a.id, original_filename: a.original_filename, bytes: a.bytes,
-    });
-  }
+  const groups = filterLicensingGroups(
+    groupLicensingTitles({
+      deliveries: list,
+      titles: titleRows ?? [],
+      stills,
+    }),
+    { q, status: statusFilter, vendor: vendorFilter },
+  );
 
-  const { data: linkRows } = await supabase
-    .from("portal_links")
-    .select("id, delivery_id, asset_id, expires_at, revoked_at, created_at")
-    .eq("purpose", "master_download") // deliveries queue shows only delivery-scoped master links
-    .order("created_at", { ascending: false });
-  const linksByDelivery: Record<string, PortalLink[]> = {};
-  for (const l of linkRows ?? []) {
-    if (!l.delivery_id || !l.asset_id) continue; // master_download rows always set both
-    (linksByDelivery[l.delivery_id] ??= []).push({
-      id: l.id, asset_id: l.asset_id, expires_at: l.expires_at, revoked_at: l.revoked_at,
-    });
-  }
-
-  // Recipient sessions, so staff can cut one recipient without cutting the link. RLS on
-  // portal_sessions is gc_staff-only, so this returns nothing for anyone else.
-  const { data: sessionRows } = await supabase
-    .from("portal_sessions")
-    .select("id, link_id, name, company, email, expires_at, revoked_at")
-    .order("created_at", { ascending: false });
-  const sessions: PortalSession[] = sessionRows ?? [];
-
-  const { data: eventRows } = await supabase
-    .from("portal_access_events")
-    .select("link_id, event_type, email, company, occurred_at")
-    .order("occurred_at", { ascending: false });
-  const eventsByLink: Record<string, PortalAccessEvent[]> = {};
-  for (const e of eventRows ?? []) {
-    (eventsByLink[e.link_id] ??= []).push(e);
-  }
+  const grantsTruncated = companions.grants.truncated;
+  const filtered = gcLicensingHasFilters(statusFilter, vendorFilter) || q.trim() !== "";
+  const emptyCopy = q.trim()
+    ? GC_LICENSING_STATUS.searchMiss(q.trim())
+    : filtered
+      ? GC_LICENSING_STATUS.filterMiss
+      : GC_DELIVERIES_EMPTY.title;
+  const emptyHref = filtered ? gcLicensingShowAllHref() : GC_DELIVERIES_EMPTY.actionHref;
+  const emptyLabel = filtered ? GC_LICENSING_STATUS.showAll : GC_DELIVERIES_EMPTY.actionLabel;
 
   return (
-    <>
-      <h1 className="t-subhead text-ink pb-1">Deliveries</h1>
-      <p className="t-body-sm text-ink-3 pb-6">Placements across all clients. Status is set by hand.</p>
+    <TitlesCatalogFrame data-gc-licensing-status="">
+      <TitlesCatalogHeader
+        title={GC_LICENSING_STATUS.title}
+        filters={
+          <>
+            <LicensingStatusFilter status={statusFilter} vendor={vendorFilter} q={q} />
+            <LicensingVendorFilter
+              status={statusFilter}
+              vendor={vendorFilter}
+              vendors={vendorOpts}
+              q={q}
+            />
+          </>
+        }
+      />
 
-      <div className="mb-8 max-w-xl">
-        <NewDeliveryForm titles={titleOpts} vendors={vendorOpts} grantsByTitle={grantsByTitle} />
-      </div>
+      {grantsTruncated ? (
+        <InlineNotice tone="info" className="mb-4" data-gc-deliveries-truncated="grants">
+          {GC_DELIVERIES_TRUNCATED.grants}
+        </InlineNotice>
+      ) : null}
 
-      <div className="mb-8 max-w-xl">
-        <ExportPanel vendors={exportVendors} />
-      </div>
+      <TitlesCatalogToolbar
+        search={
+          <Suspense fallback={null}>
+            <SearchField placeholder={GC_LICENSING_STATUS.searchPlaceholder} />
+          </Suspense>
+        }
+      />
 
-      {list.length === 0 ? (
-        <Card><CardBody><p className="t-body-sm text-ink-3">No deliveries yet.</p></CardBody></Card>
+      {groups.length === 0 ? (
+        <TitlesCatalogEmpty data-gc-licensing-empty="">
+          {emptyCopy}{" "}
+          <Link
+            href={emptyHref}
+            className="t-body-sm text-accent transition-colors hover:underline"
+          >
+            {emptyLabel}
+          </Link>
+        </TitlesCatalogEmpty>
       ) : (
-        <div className="flex flex-col gap-2">
-          {list.map((d) => {
-            const links = linksByDelivery[d.id] ?? [];
-            const events = links.flatMap((l) => eventsByLink[l.id] ?? []);
-            return (
-              <Card key={d.id}>
-                <CardBody className="flex flex-col gap-3">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex flex-col gap-0.5">
-                      <span className="t-body font-medium text-ink">{d.titles?.title ?? "—"}</span>
-                      <span className="t-body-sm text-ink-3">
-                        {d.titles?.catalog_id} · {d.vendors?.name} · {d.territory} · {d.organizations?.name}
-                      </span>
-                    </div>
-                    <DeliveryControls deliveryId={d.id} status={d.status} />
-                  </div>
-                  <PortalLinks
-                    deliveryId={d.id}
-                    masters={mastersByTitle[d.title_id] ?? []}
-                    links={links}
-                    sessions={sessions}
-                    events={events}
-                  />
-                </CardBody>
-              </Card>
-            );
-          })}
-        </div>
+        <LicensingStatusList groups={groups} />
       )}
-    </>
+    </TitlesCatalogFrame>
   );
 }

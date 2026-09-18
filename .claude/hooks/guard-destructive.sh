@@ -40,6 +40,11 @@ patterns=(
   'supabase[[:space:]]+db[[:space:]]+reset'
   'supabase[[:space:]]+db[[:space:]]+push'
   'supabase[[:space:]]+migration[[:space:]]+up'
+  # psql, but only where it is being INVOKED: start of a line, or just after a shell separator
+  # (; & | ( or a backtick), allowing an optional path, a `sudo`, or VAR=value prefixes. That
+  # anchoring is the whole point — a bare 'psql' substring test would block `echo psql` and every
+  # runbook line that merely quotes a command, and a guard that cries wolf gets disabled.
+  '(^|[;&|(`])[[:space:]]*(sudo[[:space:]]+)?([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+)*([^[:space:]]*/)?psql([[:space:]]|$)'
   'git[[:space:]]+push[[:space:]].*--force'
   'git[[:space:]]+reset[[:space:]]+--hard'
 )

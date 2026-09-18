@@ -21,7 +21,8 @@ export async function POST(req: Request) {
   const email = parsed.data.email.trim().toLowerCase();
 
   // Layer 1 — Turnstile: this endpoint sends real email to a self-supplied address, so require a
-  // human challenge before any DB work (same pattern as /login's magic-link send).
+  // human challenge before any DB work. Dashboard /login does not use Turnstile;
+  // it rate-limits magic-link sends in app code instead.
   if (!(await verifyTurnstile(parsed.data.turnstileToken))) {
     return NextResponse.json({ error: "Verification failed" }, { status: 403 });
   }
@@ -80,6 +81,9 @@ export async function POST(req: Request) {
     code_hash: hashOtp(code, link.id),
     expires_at: new Date(Date.now() + PORTAL.otpTtlMinutes * 60_000).toISOString(),
   });
+  // AuthSesSuppressedError (and other SES send failures) propagate. This route
+  // does not distinguish mail failures for the buyer — portal-flow maps non-403/429
+  // to the expired/withdrawn string. See docs/infra/auth-ses.md.
   await sendOtpEmail(email, code);
   await admin.from("portal_access_events").insert({
     link_id: link.id, event_type: "otp_sent", email, name, company, ip, user_agent: ua,

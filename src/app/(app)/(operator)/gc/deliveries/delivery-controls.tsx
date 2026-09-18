@@ -4,14 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { InlineNotice } from "@/components/ui/inline-notice";
+import { DELIVERY_STATUS_ROW_LABELS, type DeliveryStatus } from "@/lib/titles";
 import { setDeliveryStatus } from "./actions";
-import type { Database } from "@/lib/supabase/database.types";
 
-type DeliveryStatus = Database["public"]["Enums"]["delivery_status"];
 const STATUSES: DeliveryStatus[] = ["pending", "delivered", "live", "rejected", "taken_down"];
-const LABELS: Record<DeliveryStatus, string> = {
-  pending: "Pending", delivered: "Delivered", live: "Live", rejected: "Rejected", taken_down: "Taken down",
-};
 
 export function DeliveryControls({ deliveryId, status }: { deliveryId: string; status: DeliveryStatus }) {
   const router = useRouter();
@@ -36,7 +32,7 @@ export function DeliveryControls({ deliveryId, status }: { deliveryId: string; s
         onChange={(e) => change(e.target.value as DeliveryStatus)}
         className="rounded-[var(--radius-sm)] border border-hairline bg-surface px-2 py-1 t-body-sm text-ink"
       >
-        {STATUSES.map((s) => <option key={s} value={s}>{LABELS[s]}</option>)}
+        {STATUSES.map((s) => <option key={s} value={s}>{DELIVERY_STATUS_ROW_LABELS[s]}</option>)}
       </select>
       {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
     </div>

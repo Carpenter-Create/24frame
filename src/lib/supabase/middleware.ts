@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { socialProfileRewriteTarget } from "@/lib/social";
+
 import type { Database } from "./database.types";
 
 // Refreshes the auth session on every request and gates protected routes.
@@ -40,14 +42,28 @@ export async function updateSession(request: NextRequest) {
     path.startsWith("/auth") ||
     path.startsWith("/portal") ||       // account-less asset-access portal (token-gated)
     path.startsWith("/api/portal") ||   // portal route handlers (token/OTP/session gated in-handler)
+    path.startsWith("/api/mobile") ||   // mobile sign-in mint/send (rate-limited in-handler)
     // Stripe webhook authenticates by signature, not a user session — must not be
     // redirected to /login (it has no cookies).
-    path === "/api/stripe/webhook";
+    path === "/api/stripe/webhook" ||
+    path === "/sentry-tunnel"; // Sentry tunnel; also excluded from the matcher
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  return response;
+  return applySocialVanityRewrite(request, response);
+}
+
+function applySocialVanityRewrite(request: NextRequest, response: NextResponse): NextResponse {
+  const internal = socialProfileRewriteTarget(request.nextUrl.pathname);
+  if (!internal) return response;
+  const url = request.nextUrl.clone();
+  url.pathname = internal;
+  const rewritten = NextResponse.rewrite(url, { request });
+  for (const cookie of response.cookies.getAll()) {
+    rewritten.cookies.set(cookie);
+  }
+  return rewritten;
 }
