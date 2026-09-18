@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { Sparkle } from "@phosphor-icons/react";
 
-import { HOUSE_THEME_TOGGLE_CLASS } from "@/lib/house-lead-chrome";
-import { PHOSPHOR_CHROME_ICON_CLASS, PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
+import {
+  HOUSE_HEADER_CHROME_ICON_CLASS,
+  HOUSE_HEADER_CHROME_ICON_WEIGHT,
+  HOUSE_THEME_TOGGLE_CLASS,
+} from "@/lib/house-lead-chrome";
 import { ASK_ASSISTANT } from "@/lib/product";
 
 // Shared header entry for Ask 24Frame AI. Same house icon hit as the
@@ -18,8 +21,8 @@ export function AskAssistantEntry() {
       className={HOUSE_THEME_TOGGLE_CLASS}
     >
       <Sparkle
-        className={PHOSPHOR_CHROME_ICON_CLASS}
-        weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
+        className={HOUSE_HEADER_CHROME_ICON_CLASS}
+        weight={HOUSE_HEADER_CHROME_ICON_WEIGHT}
         aria-hidden="true"
       />
     </Link>

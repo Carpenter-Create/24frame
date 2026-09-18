@@ -19,10 +19,13 @@ import {
   HOUSE_LEAD_SEARCH_DESKTOP_CLASS,
   HOUSE_LEAD_SEARCH_PILL_CLASS,
   HOUSE_LEAD_SEARCH_WIDTH_PX,
+  HOUSE_HEADER_CHROME_ICON_CLASS,
+  HOUSE_HEADER_CHROME_ICON_WEIGHT,
   HOUSE_HEADER_ICON_GHOST_CLASS,
   HOUSE_LEAD_SHELL_CLASS,
   HOUSE_THEME_TOGGLE_CLASS,
 } from "@/lib/house-lead-chrome";
+import { PHOSPHOR_CHROME_ICON_CLASS, PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import { HOUSE_HEADER_SEARCH_GAP_CLASS, HOUSE_SEARCH_PILL_CLASS } from "@/lib/house-shell";
 import { EDUCATION_SEARCH } from "@/lib/course-search";
 import { SOCIAL } from "@/lib/social";
@@ -200,6 +203,11 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(HOUSE_HEADER_ICON_GHOST_CLASS).toContain("rounded-full");
     expect(leadLib).toContain("HOUSE_HEADER_ICON_GHOST_CLASS");
     expect(leadLib).toContain("soft circular ghost");
+    expect(HOUSE_HEADER_CHROME_ICON_WEIGHT).toBe(PHOSPHOR_CHROME_IDLE_WEIGHT);
+    expect(HOUSE_HEADER_CHROME_ICON_CLASS).toBe(PHOSPHOR_CHROME_ICON_CLASS);
+    expect(HOUSE_HEADER_CHROME_ICON_WEIGHT).not.toBe("fill");
+    expect(HOUSE_HEADER_CHROME_ICON_WEIGHT).not.toBe("duotone");
+    expect(leadLib).toContain("HOUSE_HEADER_CHROME_ICON_WEIGHT");
   });
 
   it("G8 absorbs SocialTopBar — no drifted placement fork", () => {

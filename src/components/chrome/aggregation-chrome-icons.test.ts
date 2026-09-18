@@ -61,7 +61,7 @@ describe("Aggregation chrome Phosphor lock + Design miss list", () => {
     expect(themeToggle).toContain('from "@phosphor-icons/react"');
     expect(themeToggle).toContain("Sun");
     expect(themeToggle).toContain("Moon");
-    expect(themeToggle).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
+    expect(themeToggle).toContain("HOUSE_HEADER_CHROME_ICON_WEIGHT");
     expect(themeToggle).not.toContain("lucide-react");
     expect(themeToggle).not.toContain("strokeWidth");
     expect(themeToggle).not.toContain("stroke-width");

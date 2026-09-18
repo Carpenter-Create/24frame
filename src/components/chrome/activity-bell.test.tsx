@@ -15,7 +15,12 @@ import {
   ACTIVITY_HREF,
   type ActivityBellPreview,
 } from "@/lib/activity";
-import { HOUSE_HEADER_ICON_GHOST_CLASS } from "@/lib/house-lead-chrome";
+import {
+  HOUSE_HEADER_CHROME_ICON_CLASS,
+  HOUSE_HEADER_CHROME_ICON_WEIGHT,
+  HOUSE_HEADER_ICON_GHOST_CLASS,
+} from "@/lib/house-lead-chrome";
+import { PHOSPHOR_CHROME_ICON_CLASS, PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import { ASK_ASSISTANT } from "@/lib/product";
 
@@ -69,7 +74,15 @@ describe("ActivityBell", () => {
     expect(src).toContain("MenuSurfaceContent");
     expect(src).toContain('density="panel"');
     expect(src).toContain("TEXT_ACTION_CLASS");
-    expect(src).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
+    expect(src).toContain("HOUSE_HEADER_CHROME_ICON_WEIGHT");
+    expect(src).toContain("HOUSE_HEADER_CHROME_ICON_CLASS");
+    expect(src).not.toContain("strokeWidth");
+    expect(src).not.toContain("stroke-width");
+    expect(src).not.toContain('weight="fill"');
+    expect(src).not.toContain('weight="duotone"');
+    expect(src).not.toContain('weight="regular"');
+    expect(HOUSE_HEADER_CHROME_ICON_WEIGHT).toBe(PHOSPHOR_CHROME_IDLE_WEIGHT);
+    expect(HOUSE_HEADER_CHROME_ICON_CLASS).toBe(PHOSPHOR_CHROME_ICON_CLASS);
     expect(src).toContain("from \"@phosphor-icons/react\"");
     expect(src).toContain("<Bell");
     expect(src).toContain("<Checks");
@@ -126,6 +139,11 @@ describe("AskAssistantEntry", () => {
     expect(html).toContain(`aria-label="${ASK_ASSISTANT}"`);
     expect(html).toContain('href="/messages"');
     expect(html).not.toContain("Globee");
+    expect(html).not.toContain("stroke-width");
+    expect(html).toContain(HOUSE_HEADER_CHROME_ICON_CLASS);
     expect(ASK_ASSISTANT).toBe("Ask 24Frame AI");
+    const entrySrc = readFileSync(new URL("./ask-assistant-entry.tsx", import.meta.url), "utf8");
+    expect(entrySrc).toContain("HOUSE_HEADER_CHROME_ICON_WEIGHT");
+    expect(entrySrc).not.toContain("strokeWidth");
   });
 });

@@ -5,7 +5,11 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
-import { HOUSE_THEME_TOGGLE_CLASS } from "@/lib/house-lead-chrome";
+import {
+  HOUSE_HEADER_CHROME_ICON_CLASS,
+  HOUSE_HEADER_CHROME_ICON_WEIGHT,
+  HOUSE_THEME_TOGGLE_CLASS,
+} from "@/lib/house-lead-chrome";
 import { HOUSE_ICON_BUTTON_CLASS } from "@/lib/house-shell";
 import { PHOSPHOR_CHROME_ICON_CLASS, PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import { THEME_TOGGLE, themeToggleLabel } from "@/lib/theme";
@@ -36,6 +40,7 @@ describe("header theme toggle", () => {
     expect(html).not.toContain("strokeWidth");
     expect(html).toContain('fill="currentColor"');
     expect(html).toContain('viewBox="0 0 256 256"');
+    expect(html).toContain(HOUSE_HEADER_CHROME_ICON_CLASS);
     expect(html).toContain(PHOSPHOR_CHROME_ICON_CLASS);
     expect(themeToggleLabel("light")).toBe(THEME_TOGGLE.toDark);
     expect(themeToggleLabel("dark")).toBe(THEME_TOGGLE.toLight);
@@ -49,8 +54,9 @@ describe("header theme toggle", () => {
     expect(src).toContain("from \"@phosphor-icons/react\"");
     expect(src).toContain("Sun");
     expect(src).toContain("Moon");
-    expect(src).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
-    expect(src).toContain(`weight={PHOSPHOR_CHROME_IDLE_WEIGHT}`);
+    expect(src).toContain("HOUSE_HEADER_CHROME_ICON_WEIGHT");
+    expect(src).toContain(`weight={HOUSE_HEADER_CHROME_ICON_WEIGHT}`);
+    expect(HOUSE_HEADER_CHROME_ICON_WEIGHT).toBe(PHOSPHOR_CHROME_IDLE_WEIGHT);
     expect(PHOSPHOR_CHROME_IDLE_WEIGHT).toBe("bold");
     expect(src).not.toContain("strokeWidth");
     expect(src).not.toContain("applyDocumentThemePreference");

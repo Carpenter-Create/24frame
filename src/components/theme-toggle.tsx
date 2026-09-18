@@ -15,8 +15,11 @@ import {
   type Theme,
   type ThemePreference,
 } from "@/lib/theme";
-import { HOUSE_THEME_TOGGLE_CLASS } from "@/lib/house-lead-chrome";
-import { PHOSPHOR_CHROME_ICON_CLASS, PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
+import {
+  HOUSE_HEADER_CHROME_ICON_CLASS,
+  HOUSE_HEADER_CHROME_ICON_WEIGHT,
+  HOUSE_THEME_TOGGLE_CLASS,
+} from "@/lib/house-lead-chrome";
 
 // Reads the live `.dark` class on <html>. Light is the default base; the
 // no-flash script in layout.tsx applies a stored `gc-theme` before paint.
@@ -82,9 +85,10 @@ export function ThemeSync() {
   return null;
 }
 
-export function ThemeGlyph({ className = PHOSPHOR_CHROME_ICON_CLASS }: { className?: string }) {
+export function ThemeGlyph({ className = HOUSE_HEADER_CHROME_ICON_CLASS }: { className?: string }) {
   // Veritytuner IA only: sun while dark (tap → light), moon while
-  // light (tap → dark). House Phosphor Bold fill — not a stroke SVG.
+  // light (tap → dark). Same #391 Phosphor idle weight as the
+  // trailing bell and 24Frame AI marks — not a heavier cousin.
   const showSun = useTheme() === "dark";
   const Glyph = showSun ? Sun : Moon;
 
@@ -92,7 +96,7 @@ export function ThemeGlyph({ className = PHOSPHOR_CHROME_ICON_CLASS }: { classNa
     <Glyph
       data-theme-glyph={showSun ? "sun" : "moon"}
       className={className}
-      weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
+      weight={HOUSE_HEADER_CHROME_ICON_WEIGHT}
       aria-hidden="true"
     />
   );

@@ -26,13 +26,13 @@ import {
   type ActivityBellPreview,
   type ActivityItem,
 } from "@/lib/activity";
-import { HOUSE_HEADER_ICON_GHOST_CLASS } from "@/lib/house-lead-chrome";
-import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import {
-  PHOSPHOR_CHROME_ICON_CLASS,
-  PHOSPHOR_CHROME_IDLE_WEIGHT,
-  type PhosphorIcon,
-} from "@/lib/phosphor-icon";
+  HOUSE_HEADER_CHROME_ICON_CLASS,
+  HOUSE_HEADER_CHROME_ICON_WEIGHT,
+  HOUSE_HEADER_ICON_GHOST_CLASS,
+} from "@/lib/house-lead-chrome";
+import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
+import { type PhosphorIcon } from "@/lib/phosphor-icon";
 
 const KIND_GLYPH: Record<ReturnType<typeof activityKindGlyph>, PhosphorIcon> = {
   "film-slate": FilmSlate,
@@ -62,8 +62,8 @@ export function ActivityBell({
           className={`relative ${HOUSE_HEADER_ICON_GHOST_CLASS}`}
         >
           <Bell
-            className={PHOSPHOR_CHROME_ICON_CLASS}
-            weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
+            className={HOUSE_HEADER_CHROME_ICON_CLASS}
+            weight={HOUSE_HEADER_CHROME_ICON_WEIGHT}
             aria-hidden="true"
           />
           <Suspense fallback={null}>
@@ -161,8 +161,8 @@ function ActivityBellRow({ item }: { item: ActivityItem }) {
       <span data-activity-bell-plate="" className={ACTIVITY_BELL_PLATE_CLASS}>
         <Glyph
           data-activity-bell-kind={item.kind}
-          className={`${PHOSPHOR_CHROME_ICON_CLASS} text-ink-3`}
-          weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
+          className={`${HOUSE_HEADER_CHROME_ICON_CLASS} text-ink-3`}
+          weight={HOUSE_HEADER_CHROME_ICON_WEIGHT}
           aria-hidden="true"
         />
       </span>
@@ -219,8 +219,8 @@ function MarkAllDone({ ids }: { ids: string[] }) {
       className="flex size-8 items-center justify-center rounded-full text-ink-3 hover:bg-surface-muted hover:text-ink-2 disabled:opacity-50"
     >
       <Checks
-        className={PHOSPHOR_CHROME_ICON_CLASS}
-        weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
+        className={HOUSE_HEADER_CHROME_ICON_CLASS}
+        weight={HOUSE_HEADER_CHROME_ICON_WEIGHT}
         aria-hidden="true"
       />
     </button>

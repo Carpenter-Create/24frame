@@ -20,6 +20,7 @@
 
 import { HOUSE_CHROME_GUTTER_X_CLASS, HOUSE_HEADER_SEARCH_GAP_CLASS } from "@/lib/house-shell";
 import { MOBILE_CHROME_ICON_BUTTON_CLASS, MOBILE_CHROME_LEAD_PAD_CLASS } from "@/lib/mobile-chrome";
+import { PHOSPHOR_CHROME_ICON_CLASS, PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
 export const HOUSE_LEAD_SEARCH_WIDTH_PX = 240;
 
@@ -52,3 +53,9 @@ export const HOUSE_THEME_TOGGLE_CLASS =
 // second icon family. Theme toggle stays quiet.
 export const HOUSE_HEADER_ICON_GHOST_CLASS =
   `${HOUSE_THEME_TOGGLE_CLASS} hover:bg-surface-muted data-[state=open]:bg-surface-muted`;
+
+// Trailing cluster glyphs — 24Frame AI · theme · bell. Same #391
+// Phosphor idle weight and 16px box as the sun/moon. No fill, no
+// stroke-width, no heavier cousin. Optical match or fail craft.
+export const HOUSE_HEADER_CHROME_ICON_WEIGHT = PHOSPHOR_CHROME_IDLE_WEIGHT;
+export const HOUSE_HEADER_CHROME_ICON_CLASS = PHOSPHOR_CHROME_ICON_CLASS;
