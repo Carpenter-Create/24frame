@@ -5,7 +5,7 @@ import { ChannelCard } from "@/components/channels/channel-card";
 import { ChannelCardGrid } from "@/components/channels/channel-card-grid";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
-import { StatusFilter } from "@/components/layout/status-filter";
+import { cn } from "@/lib/cn";
 import { UNPAGINATED_MAX, rangeFor, splitProbe } from "@/lib/list-bounds";
 import {
   STAFF_DIRECTORY_COUNT_CLASS,
@@ -13,20 +13,19 @@ import {
   STAFF_DIRECTORY_STACK_CLASS,
   STAFF_DIRECTORY_TOOLBAR_CLASS,
   directoryCountLabel,
-  filterHref,
   searchParamString,
 } from "@/lib/staff-directory";
-import { CHANNELS_HREF } from "@/lib/channel-card";
 import { countLicensedTitlesByVendor } from "@/lib/vendor-profile";
 import {
   CHANNELS_PAGE,
-  VENDOR_DIRECTORY_FILTERS,
   channelCardTags,
   filterVendorDirectory,
   normalizeVendorDirectory,
   parseVendorDirectoryFilter,
   vendorDirectoryHref,
 } from "@/lib/vendors-directory";
+
+import { ChannelsStatusFilter } from "./channels-status-filter";
 
 export default async function GcChannelsPage({
   searchParams,
@@ -76,26 +75,28 @@ export default async function GcChannelsPage({
       <PageHeader
         title={CHANNELS_PAGE.title}
         subtitle={CHANNELS_PAGE.identity}
+        className="items-center"
         actions={
-          emptyDirectory ? undefined : (
-            <Link
-              href={CHANNELS_PAGE.addHref}
-              data-channels-add=""
-              className="t-body-sm text-accent transition-colors hover:underline"
-            >
-              {CHANNELS_PAGE.addChannel}
-            </Link>
-          )
+          <>
+            <ChannelsStatusFilter status={filter} />
+            {emptyDirectory ? null : (
+              <Link
+                href={CHANNELS_PAGE.addHref}
+                data-channels-add=""
+                className="t-body-sm text-accent transition-colors hover:underline"
+              >
+                {CHANNELS_PAGE.addChannel}
+              </Link>
+            )}
+          </>
         }
       />
 
       <div data-channels-directory="" className={STAFF_DIRECTORY_STACK_CLASS}>
-        <div data-channels-toolbar="" className={STAFF_DIRECTORY_TOOLBAR_CLASS}>
-          <StatusFilter
-            current={filter}
-            options={[...VENDOR_DIRECTORY_FILTERS]}
-            hrefFor={(key) => filterHref(CHANNELS_HREF, key)}
-          />
+        <div
+          data-channels-toolbar=""
+          className={cn(STAFF_DIRECTORY_TOOLBAR_CLASS, "justify-end")}
+        >
           <span data-channels-count="" className={STAFF_DIRECTORY_COUNT_CLASS}>
             {directoryCountLabel(cards.length, "channel", "channels")}
           </span>

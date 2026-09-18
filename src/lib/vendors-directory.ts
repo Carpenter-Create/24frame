@@ -11,6 +11,7 @@ export const CHANNELS_PAGE = {
   filterMiss: "No channels match this filter.",
   addChannel: "Add channel",
   addHref: `${CHANNELS_HREF}/new`,
+  statusFilterLabel: "Filter by status",
 } as const;
 
 /** @deprecated Use CHANNELS_PAGE — kept for leftover internal imports. */
@@ -106,6 +107,13 @@ export function parseVendorDirectoryFilter(value: string | undefined): VendorDir
   return VENDOR_DIRECTORY_FILTERS.some((option) => option.key === value)
     ? (value as VendorDirectoryFilter)
     : "all";
+}
+
+export function vendorDirectoryFilterLabel(status: VendorDirectoryFilter): string {
+  return (
+    VENDOR_DIRECTORY_FILTERS.find((option) => option.key === status)?.label ??
+    VENDOR_DIRECTORY_FILTERS[0].label
+  );
 }
 
 export function filterVendorDirectory(

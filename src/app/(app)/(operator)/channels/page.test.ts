@@ -9,6 +9,12 @@ import { GC_NAV, NAV } from "@/lib/nav";
 
 import GcChannelsPage from "./page";
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn() }),
+  usePathname: () => "/channels",
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 
 type VendorRow = {
@@ -68,16 +74,22 @@ describe("staff /channels card grid", () => {
     expect(html).toContain("data-channels-empty");
     expect(html).toContain("data-channels-add");
     expect(html).toContain("0 channels");
+    expect(html).toContain("data-house-page-select");
+    expect(html).toContain("data-channels-status-trigger");
+    expect(html).not.toContain('role="group"');
     expect(html).not.toContain("data-channels-grid");
     expect(html).not.toContain("data-staff-directory");
     expect(html).not.toContain("Vendors");
+    expect(pageSrc).toContain("ChannelsStatusFilter");
+    expect(pageSrc).not.toContain("@/components/layout/status-filter");
+    expect(pageSrc).not.toContain("import { StatusFilter }");
   });
 
   it("does not render VendorForm fields on the empty page", async () => {
     const html = await renderChannels([]);
 
     for (const label of VENDOR_FORM_FIELD_LABELS) {
-      if (label === "Active") continue; // directory filter chip, not the form checkbox
+      if (label === "Active") continue; // directory status option, not the form checkbox
       expect(html).not.toContain(label);
     }
     expect(html).not.toContain("Company info");
@@ -171,6 +183,27 @@ describe("staff /channels card grid", () => {
       if (label === "Active") continue;
       expect(html).not.toContain(label);
     }
+  });
+
+  it("filters the card grid by ?status= without a chip strip", async () => {
+    const inactive: VendorRow = {
+      id: "33333333-3333-4333-8333-333333333333",
+      name: "Northwind Partners",
+      delivery_mode: "portal_upload",
+      active: false,
+    };
+    stubClient([REAL_VENDOR, inactive]);
+    const html = renderToStaticMarkup(
+      await GcChannelsPage({ searchParams: Promise.resolve({ status: "active" }) }),
+    );
+
+    expect(html).toContain("data-channels-status-trigger");
+    expect(html).toContain("Acme Distribution");
+    expect(html).not.toContain("Northwind Partners");
+    expect(html).toContain("1 channel");
+    expect(html).not.toContain('role="group"');
+    expect(pageSrc).not.toContain("@/components/layout/status-filter");
+    expect(pageSrc).not.toContain("import { StatusFilter }");
   });
 
   it("does not invent fixture channels in the page source", () => {
