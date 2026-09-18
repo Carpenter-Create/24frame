@@ -2,6 +2,8 @@ import { DashboardHomeStatusPill } from "@/components/dashboard/dashboard-home";
 import {
   DASHBOARD_CARD_PAD,
   DASHBOARD_MODULE_CARD_CLASS,
+  DASHBOARD_NEWS_HISTORY_COPY_CLASS,
+  DASHBOARD_NEWS_HISTORY_ROW_CLASS,
   DASHBOARD_NEWS_HISTORY_THUMB_CLASS,
   DASHBOARD_NEWS_THUMB_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
@@ -12,8 +14,9 @@ import { socialRelativeTime } from "@/lib/social";
 
 // Link-out card: media plate · headline · source · relative time.
 // Home: stacked image-top tile inside OverviewModule (Education cover SoT).
-// History: dense horizontal row — thumb left, title + source · time right.
-// No summary. No rewrite.
+// History: dense horizontal row — large flush thumb left, title +
+// source · time right. Image leads; type is secondary. Grey plate
+// only when the article has no image. No summary. No rewrite.
 
 export function NewsCard({
   item,
@@ -37,11 +40,7 @@ export function NewsCard({
         target="_blank"
         rel="noopener noreferrer"
         data-news-link={item.id}
-        className={
-          history
-            ? `flex items-start ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD}`
-            : "flex flex-col"
-        }
+        className={history ? DASHBOARD_NEWS_HISTORY_ROW_CLASS : "flex flex-col"}
       >
         <div
           data-news-thumb=""
@@ -57,13 +56,15 @@ export function NewsCard({
           ) : null}
         </div>
         <div
-          className={cn(
-            "flex min-w-0 flex-col",
-            DASHBOARD_RELATED_GAP_CLASS,
-            !history && DASHBOARD_CARD_PAD,
-          )}
+          className={
+            history
+              ? DASHBOARD_NEWS_HISTORY_COPY_CLASS
+              : `flex min-w-0 flex-col ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD}`
+          }
         >
-          <p className="t-body-sm font-medium text-ink">{item.title}</p>
+          <p className={cn("font-medium text-ink", history ? "t-body" : "t-body-sm")}>
+            {item.title}
+          </p>
           <div className={`flex flex-wrap items-center ${DASHBOARD_RELATED_GAP_CLASS}`}>
             <DashboardHomeStatusPill label={newsSourceLabel(item.source)} />
             <time

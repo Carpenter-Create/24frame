@@ -59,7 +59,9 @@ describe("NewsHistory layout", () => {
     expect(html).toContain(DASHBOARD_NEWS_HISTORY_LIST_CLASS);
     expect(html).not.toContain("lg:grid-cols-2");
     expect(html).toContain('data-news-card-density="history"');
-    expect(html).toContain("items-start");
+    expect(html).toContain("items-stretch");
+    expect(html).toContain("w-40");
+    expect(html).toContain("md:w-80");
     expect(html).toContain(markupClass(DASHBOARD_NEWS_HISTORY_THUMB_CLASS));
     expect(html.indexOf("data-news-thumb")).toBeLessThan(html.indexOf("Harbor Cut lands a festival slot"));
     expect(html).toContain("data-news-source-chips");
