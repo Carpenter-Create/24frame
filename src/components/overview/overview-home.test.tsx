@@ -17,14 +17,16 @@ import { DASHBOARD_SECTION_TITLE_CLASS } from "@/lib/dashboard-craft";
 import { NEWS_HREF, NEWS_PAGE } from "@/lib/news";
 import {
   OVERVIEW_HREF,
-  OVERVIEW_PHONE_MODULE_ORDER,
   OVERVIEW_PAGE,
+  OVERVIEW_PHONE_MODULE_ORDER,
+  OVERVIEW_REVENUE_PERIOD_CLASS,
+  OVERVIEW_REVENUE_PERIOD_SELECT_CLASS,
 } from "@/lib/overview";
 import {
   REPORTS_PAGE,
   REPORTS_PERIOD_PRESETS,
 } from "@/lib/reports";
-import { REPORTS_PERIOD_CHIP_CLASS } from "@/lib/reports-craft";
+import { REPORTS_PERIOD_CHIP_CLASS, REPORTS_PERIOD_CLUSTER_CLASS } from "@/lib/reports-craft";
 
 function moduleLabelClass(html: string, testId: string): string {
   const chunk = moduleChunk(html, testId);
@@ -109,6 +111,13 @@ describe("OverviewHome", () => {
     expect(html).not.toContain("Top performing");
     expect(html).toContain("data-overview-revenue");
     expect(html).toContain("data-overview-revenue-period");
+    expect(html).toContain("data-overview-revenue-period-chips");
+    expect(html).toContain("data-overview-revenue-period-select");
+    expect(html).toContain("data-house-page-select");
+    expect(html).toContain(OVERVIEW_REVENUE_PERIOD_CLASS);
+    expect(html).toContain(OVERVIEW_REVENUE_PERIOD_SELECT_CLASS);
+    expect(html).toContain(REPORTS_PERIOD_CLUSTER_CLASS);
+    expect(html).not.toMatch(/data-overview-revenue-period="" class="[^"]*flex-wrap/);
     for (const preset of REPORTS_PERIOD_PRESETS) {
       expect(html).toContain(`data-overview-revenue-period-chip="${preset.grain}"`);
       expect(html).toContain(preset.label);
@@ -170,6 +179,19 @@ describe("OverviewHome", () => {
     expect(html).not.toMatch(/summary|rewrite|republish/i);
     expect(html).not.toContain("Globee");
     expect(html).not.toContain("lesson_progress");
+  });
+
+  it("keeps Net revenue period on one phone row via HousePageSelect, not a wrapping chip row", () => {
+    const html = renderToStaticMarkup(createElement(OverviewHome, homeProps()));
+    const src = readFileSync(new URL("./overview-home.tsx", import.meta.url), "utf8");
+    expect(html).toContain("data-overview-revenue-period-select");
+    expect(html).toContain("data-house-page-select");
+    expect(html).toContain(OVERVIEW_REVENUE_PERIOD_SELECT_CLASS);
+    expect(html).toContain(REPORTS_PERIOD_CLUSTER_CLASS);
+    expect(html).not.toMatch(/data-overview-revenue-period="" class="[^"]*flex-wrap/);
+    expect(src).not.toMatch(/data-overview-revenue-period=""[\s\S]*flex-wrap/);
+    expect(src).toContain("OverviewRevenuePeriodSelect");
+    expect(src).toContain("REPORTS_PERIOD_CLUSTER_CLASS");
   });
 
   it("selects the house YTD chip without inventing MTD", () => {
