@@ -41,12 +41,12 @@ describe("StaffDirectoryRow", () => {
         row={{
           id: "u1",
           name: "jane@acmefilms.com",
-          secondary: "Account owner",
-          trailing: "Aug 14, 2026",
+          secondary: "Account owner · Aug 14, 2026",
         }}
       />,
     );
     expect(html).toContain("jane@acmefilms.com");
+    expect(html).toContain("Account owner · Aug 14, 2026");
     expect(html).toContain("JA");
     expect(html).not.toContain("<a");
   });
@@ -68,6 +68,33 @@ describe("StaffDirectoryList", () => {
     expect(html).toContain("1 client");
     expect(html).toContain(STAFF_DIRECTORY_SURFACE_CLASS);
     expect(html).toContain("Acme Films");
+  });
+
+  it("nests seat rows under an org without a table", () => {
+    const html = renderToStaticMarkup(
+      <StaffDirectoryList
+        rows={[
+          {
+            id: "1",
+            name: "Acme Films",
+            secondary: "1 person · Pro",
+            trailing: "Active",
+            nested: [
+              {
+                id: "u1",
+                name: "jane@acmefilms.com",
+                secondary: "Account owner · Aug 14, 2026",
+              },
+            ],
+          },
+        ]}
+        countLabel="1 client"
+      />,
+    );
+    expect(html).toContain("jane@acmefilms.com");
+    expect(html).toContain("Account owner · Aug 14, 2026");
+    expect(html).toContain("data-staff-directory-nested");
+    expect(html).not.toContain("<table");
   });
 });
 

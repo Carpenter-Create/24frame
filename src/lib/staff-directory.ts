@@ -17,6 +17,8 @@ export const STAFF_DIRECTORY_COUNT_CLASS = "t-body-sm text-ink-3";
 export const STAFF_DIRECTORY_ROW_CLASS =
   "flex items-center gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-3)]";
 
+export const STAFF_DIRECTORY_NESTED_ROW_CLASS = "pl-[var(--space-10)]";
+
 export const STAFF_DIRECTORY_AVATAR_CLASS =
   "flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface t-body-sm font-medium text-ink-2";
 
@@ -49,6 +51,7 @@ export type StaffDirectoryRowModel = {
   trailing?: string | null;
   href?: string | null;
   photoUrl?: string | null;
+  nested?: StaffDirectoryRowModel[];
 };
 
 export type StaffDirectoryField = {

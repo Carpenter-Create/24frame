@@ -14,6 +14,7 @@ import {
   CLIENT_PROFILE,
   clientDirectorySecondary,
   clientOrgFields,
+  clientSeatSecondary,
   toClientOrgs,
   type ClientDirectoryRow,
 } from "@/lib/clients";
@@ -40,8 +41,7 @@ export default async function ClientOrgProfilePage({
   const people = org.seats.map((seat) => ({
     id: seat.userId,
     name: seat.email,
-    secondary: seat.role,
-    trailing: seat.lastSeen === "—" ? null : seat.lastSeen,
+    secondary: clientSeatSecondary(seat),
   }));
 
   return (

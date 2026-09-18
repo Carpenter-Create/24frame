@@ -291,7 +291,7 @@ describe("DashboardPage modes", () => {
     expect(html).toContain("bg-accent");
     expect(html).toContain("text-accent-contrast");
     expect(html).not.toContain(CLIENTS_PAGE.title);
-    expect(html).not.toContain(CLIENTS_PAGE.subtitle);
+    expect(html).not.toContain("Organizations with an active seat.");
     expect(html).toContain("lg:grid-cols-3");
     expect(html).toContain("lg:grid-cols-2");
     expect(html).not.toContain(dashboardAttentionSummary(1));
@@ -356,7 +356,7 @@ describe("DashboardPage modes", () => {
     expect(html).not.toContain("data-finance-glance");
     expect(html).not.toContain("data-finance-glance-stub");
     expect(html).not.toContain(FINANCE_PAGE.glance);
-    expect(html).not.toContain(CLIENTS_PAGE.subtitle);
+    expect(html).not.toContain("Organizations with an active seat.");
   });
 
   it("renders the GC-wide clients roster on Dashboard for staff with no client org", async () => {
@@ -371,7 +371,7 @@ describe("DashboardPage modes", () => {
     expect(rpc).toHaveBeenCalledWith("gc_client_directory", { p_limit: UNPAGINATED_MAX + 1 });
     expect(from).not.toHaveBeenCalledWith("titles");
     expect(html).toContain(CLIENTS_PAGE.title);
-    expect(html).toContain(CLIENTS_PAGE.subtitle);
+    expect(html).not.toContain("Organizations with an active seat.");
     expect(html).toContain(CLIENTS_PAGE.empty);
     expect(html).toContain("data-finance-glance-stub");
     expect(html).toContain(FINANCE_PAGE.glance);

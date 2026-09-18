@@ -52,12 +52,15 @@ describe("client org profile", () => {
     expect(html).toContain(CLIENT_PROFILE.peopleTitle);
     expect(html).toContain("jane@acmefilms.com");
     expect(html).toContain("sam@acmefilms.com");
-    expect(html).toContain("Account owner");
-    expect(html).toContain("Viewer");
+    expect(html).toContain("Account owner · Aug 14, 2026");
+    expect(html).toContain("Viewer · Aug 14, 2026");
     expect(html).toContain("2 people");
     expect(html).toContain("data-staff-directory-row");
     expect(html).toContain(CLIENTS_PAGE.title);
     expect(html).not.toContain("<table");
+    expect(html).not.toContain("EMAIL");
+    expect(html).not.toContain("ROLE");
+    expect(html).not.toContain("LAST SEEN");
   });
 
   it("404s when the org is not in the directory read", async () => {

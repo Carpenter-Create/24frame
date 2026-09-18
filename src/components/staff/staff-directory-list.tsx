@@ -43,6 +43,9 @@ export function StaffDirectoryList({
             {rows.map((row) => (
               <li key={row.id} className="border-b border-hairline last:border-b-0">
                 <StaffDirectoryRow row={row} />
+                {row.nested?.map((child) => (
+                  <StaffDirectoryRow key={child.id} row={child} nested />
+                ))}
               </li>
             ))}
           </ul>

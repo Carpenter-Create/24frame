@@ -42,7 +42,6 @@ export type ClientOrg = {
 
 export const CLIENTS_PAGE = {
   title: "Clients",
-  subtitle: "Organizations with an active seat.",
   empty: "No clients yet.",
 } as const;
 
@@ -62,6 +61,11 @@ export function clientOrgHref(orgId: string): string {
 export function clientDirectorySecondary(org: ClientOrg): string {
   const people = org.seats.length === 1 ? "1 person" : `${org.seats.length} people`;
   return org.tier === "—" ? people : `${people} · ${org.tier}`;
+}
+
+/** Seat social-row meta. Role and last seen stay one muted line — not a table. */
+export function clientSeatSecondary(seat: ClientSeat): string {
+  return `${seat.role} · ${seat.lastSeen}`;
 }
 
 export function clientOrgFields(org: ClientOrg): { label: string; value: string }[] {

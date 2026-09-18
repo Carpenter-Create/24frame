@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -46,6 +47,8 @@ describe("GcClientsPage read bound", () => {
     expect(html).toContain(CLIENTS_PAGE.empty);
     expect(html).toContain("data-staff-directory");
     expect(html).toContain("0 clients");
+    expect(html).not.toContain("Organizations with an active seat.");
+    expect(html).not.toContain("Every person holding an active seat");
     expect(html).not.toContain("No client organizations yet.");
     expect(html).not.toContain("Add");
     expect(html).not.toContain("View titles");
@@ -84,7 +87,22 @@ describe("GcClientsPage read bound", () => {
     expect(html).toContain("/gc/clients/22222222-2222-4222-8222-222222222222");
     expect(html).toContain("data-staff-directory-row");
     expect(html).toContain("AF");
+    expect(html).toContain("jane@acmefilms.com");
+    expect(html).toContain("Account owner · Aug 14, 2026");
+    expect(html).toContain("data-staff-directory-nested");
+    expect(html).not.toContain("Organizations with an active seat.");
     expect(html).not.toContain("<table");
-    expect(html).not.toContain("jane@acmefilms.com");
+    expect(html).not.toContain("EMAIL");
+    expect(html).not.toContain("ROLE");
+    expect(html).not.toContain("LAST SEEN");
+
+    const directorySrc = readFileSync(
+      "src/app/(app)/(operator)/gc/clients/clients-directory.tsx",
+      "utf8",
+    );
+    expect(directorySrc).toContain("StaffDirectoryList");
+    expect(directorySrc).toContain("clientSeatSecondary");
+    expect(directorySrc).not.toContain("subtitle=");
+    expect(directorySrc).not.toContain("<table");
   });
 });
