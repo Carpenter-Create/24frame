@@ -22,7 +22,6 @@ import {
   APP_HEADER_LEADING_CLASS,
   APP_HEADER_TRAILING_CLUSTER_CLASS,
   APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS,
-  APP_HEADER_WORKSPACE_PILL_HOST_CLASS,
 } from "@/lib/workspace-switcher";
 
 export function HouseLeadChrome({
@@ -30,6 +29,8 @@ export function HouseLeadChrome({
   settingsPage = false,
   logoVisible = "always",
   leadingNav,
+  trailingNav,
+  destChips,
   search,
   underNav,
   trailingSearch,
@@ -42,6 +43,8 @@ export function HouseLeadChrome({
   settingsPage?: boolean;
   logoVisible?: "always" | "desktop";
   leadingNav?: React.ReactNode;
+  trailingNav?: React.ReactNode;
+  destChips?: React.ReactNode;
   search?: React.ReactNode;
   underNav?: React.ReactNode;
   trailingSearch?: React.ReactNode;
@@ -93,18 +96,17 @@ export function HouseLeadChrome({
               </div>
             ) : null}
           </div>
-          <div
-            data-app-header-workspace-pill=""
-            className={APP_HEADER_WORKSPACE_PILL_HOST_CLASS}
-          >
-            <WorkspaceSwitcher current={workspace} tone="pill" />
-          </div>
           {afterLead}
         </div>
         <div data-app-header-trailing="" className={APP_HEADER_TRAILING_CLUSTER_CLASS}>
           {trailingSearch ? (
             <div data-social-header-actions={social ? "" : undefined}>
               {trailingSearch}
+            </div>
+          ) : null}
+          {trailingNav ? (
+            <div data-app-header-trailing-nav="" className="md:hidden">
+              {trailingNav}
             </div>
           ) : null}
           <div
@@ -124,6 +126,14 @@ export function HouseLeadChrome({
           {accountMenu}
         </div>
       </header>
+      {destChips ? (
+        <div
+          data-house-phone-dest-chips-host=""
+          className={HOUSE_LEAD_UNDER_NAV_CLASS}
+        >
+          {destChips}
+        </div>
+      ) : null}
       {underNav ? (
         <div
           data-house-under-nav=""

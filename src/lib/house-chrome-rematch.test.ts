@@ -102,7 +102,10 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(HOUSE_CONTROL_PILL_CLASS).toBe("rounded-full");
     expect(HOUSE_ICON_BUTTON_CLASS).toBe("rounded-full");
     expect(HOUSE_SEARCH_PILL_CLASS).toContain("rounded-full");
-    expect(shell).toContain("HOUSE_PAGE_CANVAS_CLASS");
+    expect(shell).toContain("HousePhoneAppShell");
+    expect(readFileSync("src/components/chrome/house-phone-app-shell.tsx", "utf8")).toContain(
+      "HOUSE_PAGE_CANVAS_CLASS",
+    );
     expect(globals).toMatch(/\.card-surface\s*\{[\s\S]*?box-shadow:\s*none/);
     expect(shell).not.toMatch(/shadow-(?:sm|md|lg|xl)/);
   });
@@ -195,12 +198,12 @@ describe("house chrome rematch miss list v1.1", () => {
   });
 
   it("keeps one phone workspace switcher, Staff on Aggregation, one Sporty Blue pill", () => {
-    expect(lead.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
+    expect(lead.match(/<WorkspaceSwitcher/g)?.length).toBe(1);
     expect(shell).toContain("<HouseLeadChrome");
     expect(topBar).toContain("<HouseLeadChrome");
     expect(lead).toContain('presentation="pills"');
-    expect(lead).toContain('tone="pill"');
-    expect(lead).toContain("APP_HEADER_WORKSPACE_PILL_HOST_CLASS");
+    expect(lead).not.toContain('tone="pill"');
+    expect(lead).not.toContain("APP_HEADER_WORKSPACE_PILL_HOST_CLASS");
     expect(lead).toContain("APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS");
     expect(nav).toContain('if (workspace === "social") return { items: SOCIAL_DESKTOP_NAV, staffItems: [] }');
     expect(sideNav).toContain("staffItems");

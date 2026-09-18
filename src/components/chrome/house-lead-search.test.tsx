@@ -105,9 +105,17 @@ describe("HouseLeadSearch — one SoT for Social live and Education quiet", () =
   it("reuses house pill tokens and does not absorb Titles SearchField", () => {
     expect(src).toContain("HOUSE_LEAD_SEARCH_PILL_CLASS");
     expect(src).toContain("HOUSE_SEARCH_PILL_CLASS");
+    expect(src).toContain('variant="bare"');
+    expect(src).not.toContain("caret-accent");
+    expect(src).not.toContain("focus:border-accent");
+    expect(src).not.toContain("focus:ring-accent");
+    expect(src).not.toContain("#1769");
     expect(src).not.toContain("@/components/layout/search-field");
     expect(src).not.toMatch(/(?:^|[^A-Za-z])SearchField(?:[^A-Za-z]|$)/);
     expect(pageSearch).toContain("HOUSE_SEARCH_PILL_CLASS");
     expect(pageSearch).toContain("HOUSE_LEAD_SEARCH_PILL_CLASS");
+    expect(pageSearch).toContain('variant="bare"');
+    expect(pageSearch).not.toContain("caret-accent");
+    expect(pageSearch).not.toContain("focus:border-accent");
   });
 });

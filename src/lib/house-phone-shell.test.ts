@@ -1,0 +1,387 @@
+import { createElement } from "react";
+import { existsSync, readFileSync } from "node:fs";
+import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it, vi } from "vitest";
+
+const navigation = vi.hoisted(() => ({ pathname: "/dashboard" }));
+
+vi.mock("next/navigation", () => ({
+  usePathname: () => navigation.pathname,
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(),
+}));
+
+vi.mock("next/link", async () => {
+  const React = await import("react");
+  function MockLink({
+    href,
+    children,
+    ...props
+  }: {
+    href: string;
+    children?: React.ReactNode;
+    prefetch?: boolean;
+  }) {
+    return React.createElement("a", { href, ...props }, children);
+  }
+  return { __esModule: true, default: MockLink };
+});
+
+import { HouseLeadChrome } from "@/components/chrome/house-lead-chrome";
+import { HousePhoneAppShell } from "@/components/chrome/house-phone-app-shell";
+import { HousePhoneBottomNav } from "@/components/chrome/house-phone-bottom-nav";
+import { HousePhoneDestChips } from "@/components/chrome/house-phone-dest-chips";
+import { HousePhoneTopChrome } from "@/components/chrome/house-phone-top-chrome";
+import { SocialTopBar } from "@/components/social/social-top-bar";
+import {
+  HOUSE_PHONE_BOTTOM_NAV,
+  HOUSE_PHONE_BOTTOM_NAV_CLASS,
+  HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS,
+  HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS,
+  HOUSE_PHONE_DEST_CHIPS,
+  HOUSE_PHONE_DEST_ITEM_OFF_CLASS,
+  HOUSE_PHONE_DEST_ITEM_ON_CLASS,
+  HOUSE_PHONE_WORKSPACE_TABS,
+  SOCIAL_PHONE_DESTS,
+  housePhoneDestinations,
+  housePhoneShowsDestChips,
+  housePhoneWorkspaceSelected,
+} from "@/lib/house-phone-shell";
+import { ASK_GLOBEE } from "@/lib/ask-globee";
+import { SOCIAL_ROUTES } from "@/lib/social";
+import {
+  APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS,
+} from "@/lib/workspace-switcher";
+
+const leadSrc = readFileSync("src/components/chrome/house-lead-chrome.tsx", "utf8");
+const shellSrc = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
+const phoneShellSrc = readFileSync("src/lib/house-phone-shell.ts", "utf8");
+
+function renderLead(workspace: "aggregation" | "social" | "education") {
+  return renderToStaticMarkup(
+    createElement(HouseLeadChrome, {
+      workspace,
+      destChips: createElement(HousePhoneDestChips, { workspace }),
+      trailingSearch:
+        workspace === "social"
+          ? createElement("button", { "data-social-header-search-icon": "" })
+          : undefined,
+      accountMenu: createElement("div", { "data-account-sheet-trigger": "" }),
+    }),
+  );
+}
+
+describe("phone app-shell Option 2 — workspace bottom bar", () => {
+  it("keeps phone top free of a workspace pill and desktop switcher in the header", () => {
+    expect(leadSrc).not.toContain("data-app-header-workspace-pill");
+    expect(leadSrc).not.toContain('tone="pill"');
+    expect(leadSrc).toContain('presentation="pills"');
+    expect(leadSrc).toContain("APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS");
+    expect(leadSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(1);
+    expect(APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS).toContain("hidden");
+    expect(APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS).toContain("md:contents");
+
+    const aggregation = renderToStaticMarkup(
+      createElement(HouseLeadChrome, {
+        workspace: "aggregation",
+        accountMenu: createElement("div", { "data-user-menu-host": "" }),
+      }),
+    );
+    expect(aggregation).not.toContain("data-app-header-workspace-pill");
+    expect(aggregation).not.toContain('data-workspace-switcher-tone="pill"');
+    expect(aggregation).toContain('data-workspace-switcher-presentation="pills"');
+    expect(aggregation).toContain("data-app-header-workspace-desktop");
+
+    const top = renderToStaticMarkup(
+      createElement(HousePhoneTopChrome, {
+        workspace: "social",
+        accountMenu: createElement("div", { "data-user-menu-host": "" }),
+      }),
+    );
+    expect(top).toContain("data-house-lead-chrome");
+    expect(top).not.toContain("data-app-header-workspace-pill");
+  });
+
+  it("keeps the emblem alone on the left and kills the hamburger on every workspace", () => {
+    expect(shellSrc).not.toContain("trailingNav=");
+    expect(shellSrc).not.toContain("MobileNav");
+    expect(shellSrc).toContain("destChips=");
+    expect(shellSrc).toContain("Emblem owns the left alone");
+    expect(existsSync("src/components/chrome/mobile-nav.tsx")).toBe(false);
+    expect(existsSync("src/components/social/social-phone-dests.tsx")).toBe(false);
+
+    for (const workspace of ["aggregation", "education", "social"] as const) {
+      const html = renderLead(workspace);
+      const lead = html.slice(
+        html.indexOf("data-app-header-leading"),
+        html.indexOf("data-app-header-trailing"),
+      );
+      expect(lead).toContain("data-brand-emblem");
+      expect(lead).not.toContain("data-mobile-nav-trigger");
+      expect(lead).not.toContain("data-house-phone-dest-chips");
+      expect(html).not.toContain("data-mobile-nav-trigger");
+      expect(html).not.toContain("Open menu");
+      expect(html).toContain("data-house-phone-dest-chips");
+      expect(html).toContain("data-activity-bell");
+      expect(html).toContain("data-account-sheet-trigger");
+      expect(html.indexOf("data-brand-emblem")).toBeLessThan(
+        html.indexOf("data-activity-bell"),
+      );
+      expect(html.indexOf("data-activity-bell")).toBeLessThan(
+        html.indexOf("data-account-sheet-trigger"),
+      );
+    }
+
+    const home = renderToStaticMarkup(
+      createElement(HouseLeadChrome, {
+        workspace: "aggregation",
+        accountMenu: createElement("div", { "data-account-sheet-trigger": "" }),
+      }),
+    );
+    expect(home).toContain("data-brand-emblem");
+    expect(home).not.toContain("data-mobile-nav-trigger");
+    expect(home).not.toContain("data-house-phone-dest-chips");
+
+    const social = renderLead("social");
+    expect(social.indexOf("data-social-header-search-icon")).toBeGreaterThan(
+      social.indexOf("data-app-header-trailing"),
+    );
+    expect(social.indexOf("data-social-header-search-icon")).toBeLessThan(
+      social.indexOf("data-activity-bell"),
+    );
+  });
+
+  it("ships exactly four phone workspace tabs in one shared bottom bar", () => {
+    expect(HOUSE_PHONE_WORKSPACE_TABS.map((tab) => tab.id)).toEqual([
+      "home",
+      "social",
+      "aggregation",
+      "education",
+    ]);
+    expect(HOUSE_PHONE_WORKSPACE_TABS.map((tab) => tab.label)).toEqual([
+      "Home",
+      "Social",
+      "Aggregation",
+      "Education",
+    ]);
+    expect(HOUSE_PHONE_WORKSPACE_TABS.map((tab) => tab.href)).toEqual([
+      "/home",
+      "/social",
+      "/dashboard",
+      "/social/courses",
+    ]);
+    expect(HOUSE_PHONE_BOTTOM_NAV.label).toBe("Workspaces");
+    expect(HOUSE_PHONE_BOTTOM_NAV_CLASS).toContain("md:hidden");
+    expect(HOUSE_PHONE_BOTTOM_NAV_CLASS).toContain("env(safe-area-inset-bottom)");
+    expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).toContain("rounded-[28px]");
+    expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).toContain("border-hairline");
+    expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).toContain("h-14");
+    expect(HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS).toContain("max-md:pb-");
+    expect(phoneShellSrc).toContain("Option 2");
+    expect(existsSync("src/components/social/social-mobile-tab-bar.tsx")).toBe(false);
+
+    navigation.pathname = "/dashboard";
+    const html = renderToStaticMarkup(
+      createElement(HousePhoneBottomNav, { workspace: "aggregation" }),
+    );
+    expect(html).toContain("data-house-phone-bottom-nav");
+    expect(html).toContain("data-house-phone-bottom-nav-pill");
+    expect(html.match(/data-house-phone-bottom-nav-item=/g)?.length).toBe(4);
+    expect(html).toContain('data-house-phone-bottom-nav-item="home"');
+    expect(html).toContain('data-house-phone-bottom-nav-item="social"');
+    expect(html).toContain('data-house-phone-bottom-nav-item="aggregation"');
+    expect(html).toContain('data-house-phone-bottom-nav-item="education"');
+    expect(html).not.toContain("data-social-tab-bar");
+    expect(html.indexOf('data-house-phone-bottom-nav-item="home"')).toBeLessThan(
+      html.indexOf('data-house-phone-bottom-nav-item="social"'),
+    );
+    expect(html.indexOf('data-house-phone-bottom-nav-item="social"')).toBeLessThan(
+      html.indexOf('data-house-phone-bottom-nav-item="aggregation"'),
+    );
+    expect(housePhoneWorkspaceSelected("aggregation", "/dashboard", "aggregation")).toBe(true);
+    expect(housePhoneWorkspaceSelected("home", "/home", "aggregation")).toBe(true);
+    expect(housePhoneWorkspaceSelected("social", "/social/explore", "social")).toBe(true);
+    expect(housePhoneWorkspaceSelected("education", "/social/courses", "education")).toBe(true);
+    expect(housePhoneWorkspaceSelected("aggregation", "/home", "aggregation")).toBe(false);
+  });
+
+  it("wires real dest lists into one under-top chip row and keeps Ask off the chips", () => {
+    expect(housePhoneShowsDestChips({ workspace: "aggregation" })).toBe(true);
+    expect(housePhoneShowsDestChips({ workspace: "education" })).toBe(true);
+    expect(housePhoneShowsDestChips({ workspace: "social" })).toBe(true);
+    expect(housePhoneShowsDestChips({ workspace: "aggregation", homeChrome: true })).toBe(false);
+    expect(housePhoneShowsDestChips({ workspace: "aggregation", settingsPage: true })).toBe(false);
+
+    expect(housePhoneDestinations(false, "aggregation").map((item) => item.label)).toEqual([
+      "Dashboard",
+      "Titles",
+      "Recent activity",
+      "Activity",
+      "Reports",
+    ]);
+    expect(housePhoneDestinations(true, "aggregation").map((item) => item.label)).toEqual([
+      "Dashboard",
+      "Titles",
+      "Recent activity",
+      "Activity",
+      "Reports",
+      "Queue",
+      "Avails",
+      "Licensing Status",
+      "Channels",
+      "Finance",
+      "Clients",
+    ]);
+    expect(housePhoneDestinations(false, "aggregation").map((item) => item.label)).not.toContain(
+      ASK_GLOBEE.headline,
+    );
+    expect(housePhoneDestinations(true, "aggregation").map((item) => item.href)).not.toContain(
+      "/messages",
+    );
+
+    expect(housePhoneDestinations(false, "education").map((item) => item.label)).toEqual([
+      "Education",
+    ]);
+    expect(housePhoneDestinations(true, "education").map((item) => item.label)).toEqual([
+      "Education",
+      "Manage courses",
+    ]);
+
+    expect(SOCIAL_PHONE_DESTS.map((item) => item.label)).toEqual([
+      "Explore",
+      "Create",
+      "Messages",
+      "Profile",
+    ]);
+    expect(housePhoneDestinations(false, "social").map((item) => item.href)).toEqual([
+      SOCIAL_ROUTES.explore,
+      SOCIAL_ROUTES.create,
+      SOCIAL_ROUTES.dms,
+      SOCIAL_ROUTES.profile,
+    ]);
+    expect(HOUSE_PHONE_DEST_CHIPS.label).toBe("Destinations");
+    expect(HOUSE_PHONE_DEST_ITEM_ON_CLASS).toContain("bg-ink");
+    expect(HOUSE_PHONE_DEST_ITEM_OFF_CLASS).toContain("bg-surface-muted");
+
+    navigation.pathname = "/titles";
+    const aggregation = renderToStaticMarkup(
+      createElement(HousePhoneDestChips, { workspace: "aggregation" }),
+    );
+    expect(aggregation).toContain("data-house-phone-dest-chips");
+    expect(aggregation).toContain('data-house-phone-dest-workspace="aggregation"');
+    expect(aggregation).toContain('data-house-phone-dest="Dashboard"');
+    expect(aggregation).toContain('data-house-phone-dest="Titles"');
+    expect(aggregation).not.toContain('data-house-phone-dest="Queue"');
+    expect(aggregation).not.toContain(ASK_GLOBEE.headline);
+    expect(aggregation).not.toContain("data-mobile-nav-trigger");
+
+    navigation.pathname = "/queue";
+    const staff = renderToStaticMarkup(
+      createElement(HousePhoneDestChips, { workspace: "aggregation", isGcStaff: true }),
+    );
+    expect(staff).toContain('data-house-phone-dest="Queue"');
+    expect(staff).toContain('data-house-phone-dest="Channels"');
+    expect(staff).not.toContain(ASK_GLOBEE.headline);
+
+    navigation.pathname = "/social/courses";
+    const education = renderToStaticMarkup(
+      createElement(HousePhoneDestChips, { workspace: "education" }),
+    );
+    expect(education).toContain('data-house-phone-dest-workspace="education"');
+    expect(education).toContain('data-house-phone-dest="Education"');
+    expect(education).not.toContain('data-house-phone-dest="Dashboard"');
+
+    navigation.pathname = "/social/explore";
+    const social = renderToStaticMarkup(
+      createElement(HousePhoneDestChips, { workspace: "social" }),
+    );
+    expect(social).toContain('data-house-phone-dest="Explore"');
+    expect(social).toContain('data-house-phone-dest="Create"');
+    expect(social).toContain('data-house-phone-dest="Messages"');
+    expect(social).toContain('data-house-phone-dest="Profile"');
+    expect(social).not.toContain('data-house-phone-dest="Home"');
+    expect(social).not.toContain("data-social-tab-bar");
+  });
+
+  it("mounts one HousePhoneAppShell on every workspace and keeps Social off a second float", () => {
+    expect(shellSrc).toContain("<HousePhoneAppShell");
+    expect(shellSrc.match(/<HousePhoneAppShell/g)?.length).toBe(2);
+    expect(shellSrc).not.toContain("SocialMobileTabBar");
+    expect(shellSrc).not.toContain("data-social-tab-bar");
+    expect(shellSrc).not.toContain("SocialPhoneDests");
+    expect(shellSrc).toContain("HousePhoneDestChips");
+    expect(shellSrc).toContain("HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS");
+
+    navigation.pathname = "/home";
+    const home = renderToStaticMarkup(
+      createElement(
+        HousePhoneAppShell,
+        { workspace: "aggregation" },
+        createElement(HouseLeadChrome, {
+          workspace: "aggregation",
+          accountMenu: createElement("div", { "data-user-menu-host": "" }),
+        }),
+      ),
+    );
+    expect(home).toContain("data-house-phone-app-shell");
+    expect(home).toContain("data-house-phone-bottom-nav");
+    expect(home).not.toContain("data-app-header-workspace-pill");
+    expect(home).not.toContain("data-social-tab-bar");
+    expect(home).not.toContain("data-house-phone-dest-chips");
+    expect(home).not.toContain("data-mobile-nav-trigger");
+    expect(home).toContain('data-workspace-switcher-presentation="pills"');
+
+    navigation.pathname = "/social";
+    const social = renderToStaticMarkup(
+      createElement(
+        HousePhoneAppShell,
+        { workspace: "social" },
+        createElement(HouseLeadChrome, {
+          workspace: "social",
+          destChips: createElement(HousePhoneDestChips, { workspace: "social" }),
+          accountMenu: createElement("div", { "data-user-menu-host": "" }),
+        }),
+      ),
+    );
+    expect(social).toContain("data-house-phone-bottom-nav");
+    expect(social).toContain("data-house-phone-dest-chips");
+    expect(social).toContain('data-house-phone-dest="Explore"');
+    expect(social).toContain('data-house-phone-dest="Create"');
+    expect(social).toContain('data-house-phone-dest="Messages"');
+    expect(social).toContain('data-house-phone-dest="Profile"');
+    expect(social).not.toContain("data-social-tab-bar");
+    expect(social).not.toContain('data-social-tab-item="Create"');
+    expect(social).not.toContain("data-app-header-workspace-pill");
+    expect((social.match(/data-house-phone-bottom-nav=""/g) ?? []).length).toBe(1);
+    expect((social.match(/data-house-phone-dest-chips=""/g) ?? []).length).toBe(1);
+
+    navigation.pathname = "/social/courses";
+    const education = renderToStaticMarkup(
+      createElement(
+        HousePhoneAppShell,
+        { workspace: "education" },
+        createElement(HouseLeadChrome, {
+          workspace: "education",
+          destChips: createElement(HousePhoneDestChips, { workspace: "education" }),
+          accountMenu: createElement("div", { "data-user-menu-host": "" }),
+        }),
+      ),
+    );
+    expect(education).toContain("data-house-phone-bottom-nav");
+    expect(education).toContain("data-house-phone-dest-chips");
+    expect(education).toContain('data-house-phone-dest="Education"');
+    expect(education).not.toContain("data-social-tab-bar");
+    expect(education).toContain('data-workspace-switcher-presentation="pills"');
+
+    const wrapped = renderToStaticMarkup(
+      createElement(
+        HousePhoneAppShell,
+        { workspace: "aggregation" },
+        createElement(SocialTopBar, { email: "ada@example.com" }),
+      ),
+    );
+    expect(wrapped).toContain("data-house-phone-app-shell");
+    expect(wrapped).toContain("data-house-phone-bottom-nav");
+    expect(wrapped).toContain("data-house-lead-chrome");
+  });
+});

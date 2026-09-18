@@ -10,8 +10,11 @@ export const FORM_CONTROL_TEXT_CLASS = "t-control";
 export const FORM_CONTROL_BOX_CLASS =
   "w-full rounded-[var(--radius-sm)] border border-hairline bg-surface px-3 py-2 text-ink outline-none transition-colors placeholder:text-ink-3 focus:border-accent";
 
+// House search / in-pill fields. Caret is ink — never Sporty Blue
+// (browser default / accent-color). No accent focus ring or thick
+// blue rectangle. Box fields keep focus:border-accent.
 export const FORM_CONTROL_BARE_CLASS =
-  "min-w-0 bg-transparent text-ink outline-none placeholder:text-ink-3";
+  "min-w-0 bg-transparent text-ink caret-ink accent-ink outline-none ring-0 focus:border-transparent focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 placeholder:text-ink-3";
 
 export type FormControlVariant = "box" | "bare";
 

@@ -92,7 +92,10 @@ describe("ask AI overlay URL", () => {
     const moduleSrc = readFileSync(new URL("../components/overview/overview-module.tsx", import.meta.url), "utf8");
     const sheetSrc = readFileSync(new URL("../components/chrome/account-sheet.tsx", import.meta.url), "utf8");
     const sideNavSrc = readFileSync(new URL("../components/chrome/side-nav.tsx", import.meta.url), "utf8");
-    const mobileNavSrc = readFileSync(new URL("../components/chrome/mobile-nav.tsx", import.meta.url), "utf8");
+    const destChipsSrc = readFileSync(
+      new URL("../components/chrome/house-phone-dest-chips.tsx", import.meta.url),
+      "utf8",
+    );
 
     expect(askAiOverlayHref("/home")).toBe("/home?ai=1");
     expect(askAiOverlayHref("/home")).not.toContain("/messages");
@@ -103,7 +106,9 @@ describe("ask AI overlay URL", () => {
     expect(sheetSrc).toContain("AskAiOpenButton");
     expect(sheetSrc).toContain('data-sheet-group-item="askAssistant"');
     expect(sideNavSrc).toContain("AskAiOpenButton");
-    expect(mobileNavSrc).toContain("AskAiOpenButton");
+    expect(destChipsSrc).toContain("housePhoneDestinations");
+    expect(destChipsSrc).not.toContain("AskAiOpenButton");
+    expect(destChipsSrc).not.toContain("/messages");
 
     expect(overlaySrc).not.toContain("NOOP_ASK_AI");
     expect(overlaySrc).not.toMatch(/value=\{NOOP_ASK_AI\}>\{children\}/);

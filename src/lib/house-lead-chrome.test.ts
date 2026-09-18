@@ -34,7 +34,6 @@ import {
   APP_HEADER_LEADING_CLASS,
   APP_HEADER_TRAILING_CLUSTER_CLASS,
   APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS,
-  APP_HEADER_WORKSPACE_PILL_HOST_CLASS,
   WORKSPACE_SWITCHER_HOST_CLASS,
 } from "@/lib/workspace-switcher";
 
@@ -194,7 +193,7 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
       );
       expect(html).not.toContain("stroke-width");
     }
-    expect(leadSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
+    expect(leadSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(1);
     expect(leadSrc).toContain("<AskAssistantHeaderLink />");
     expect(leadSrc).toContain("<ThemeToggle />");
     expect(leadSrc).toContain("<ActivityBell");
@@ -244,9 +243,11 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(HOUSE_LEAD_SHELL_CLASS).not.toContain("min-h-dvh");
     expect(leadLib).toContain("G9");
     expect(leadLib).toContain("not the scroll ancestor");
-    expect(shell).toContain("HOUSE_LEAD_SHELL_CLASS");
+    expect(readFileSync("src/components/chrome/house-phone-app-shell.tsx", "utf8")).toContain(
+      "HOUSE_LEAD_SHELL_CLASS",
+    );
     expect(shell).toContain("HOUSE_LEAD_SCROLL_CLASS");
-    expect(shell.match(/HOUSE_LEAD_SHELL_CLASS/g)?.length).toBe(3);
+    expect(shell).toContain("HousePhoneAppShell");
     expect(shell.match(/HOUSE_LEAD_SCROLL_CLASS/g)?.length).toBe(3);
     expect(shell.match(/data-house-lead-scroll/g)?.length).toBe(2);
     expect(shell).not.toContain("min-h-dvh");
@@ -256,7 +257,7 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(leadSrc).not.toContain("fixed inset-x-0");
   });
 
-  it("keeps phone emblem + workspace pill from overlapping the lead mark", () => {
+  it("keeps phone emblem from overlapping trailing chrome — no workspace pill", () => {
     expect(leadSrc).toContain("HOUSE_LEAD_STACK_CLASS");
     expect(leadSrc).toContain("data-house-lead-stack");
     expect(leadSrc).toContain("<BrandLogo />");
@@ -265,8 +266,7 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("gap-[var(--space-1)]");
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("md:gap-[var(--space-2)]");
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("max-md:shrink-0");
-    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).toBe("min-w-0 overflow-visible md:hidden");
-    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).not.toContain("shrink-0");
+    expect(leadSrc).not.toContain("APP_HEADER_WORKSPACE_PILL_HOST_CLASS");
     expect(APP_HEADER_LEADING_CLASS).not.toMatch(/(?:^|\s)(?:max-md:)?overflow-hidden(?:\s|$)/);
     expect(APP_HEADER_LEADING_CLASS).toContain("overflow-visible");
     expect(APP_HEADER_LEADING_CLASS).toContain("gap-[var(--space-3)]");
@@ -279,10 +279,8 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
       expect(html).toContain("/brand/24frame-emblem.svg");
       expect(html).toContain("/brand/24frame-logo-light.svg");
       expect(html).toContain("md:hidden");
+      expect(html).not.toContain("data-app-header-workspace-pill");
       expect(html.indexOf("data-brand-emblem")).toBeLessThan(
-        html.indexOf("data-app-header-workspace-pill"),
-      );
-      expect(html.indexOf("data-app-header-workspace-pill")).toBeLessThan(
         html.indexOf("data-app-header-trailing"),
       );
     }
@@ -298,11 +296,9 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     const ancestors = [
       htmlClass(html, 'data-app-header=""'),
       htmlClass(html, 'data-app-header-leading=""'),
-      htmlClass(html, 'data-app-header-workspace-pill=""'),
     ];
     expect(ancestors[0]).toBe(HOUSE_LEAD_CHROME_CLASS);
     expect(ancestors[1]).toBe(APP_HEADER_LEADING_CLASS);
-    expect(ancestors[2]).toBe(APP_HEADER_WORKSPACE_PILL_HOST_CLASS);
     for (const className of ancestors) {
       expect(className).not.toMatch(/(?:^|\s)(?:max-md:)?overflow-hidden(?:\s|$)/);
     }
@@ -321,24 +317,21 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(open).toContain('data-workspace-switcher-option="education"');
   });
 
-  it("shows the phone emblem on every workspace — hamburger only on dest-rail", () => {
+  it("shows the phone emblem on every workspace — no hamburger", () => {
     expect(leadSrc).toContain('logoVisible = "always"');
     expect(leadSrc).toContain('logoVisible === "always" ? "flex" : "hidden md:flex"');
     expect(shell).toContain('logoVisible="always"');
     expect(shell).not.toContain('homeChrome ? "always" : "desktop"');
     expect(topBar).toContain('logoVisible="always"');
     expect(leadLib).toContain("Asset 8 emblem on every workspace");
+    expect(leadLib).toContain("Emblem owns the phone left alone");
     expect(APP_HEADER_LEADING_CLASS).toContain("gap-[var(--space-3)]");
     expect(APP_HEADER_LEADING_CLASS).not.toMatch(/(?:^|\s)(?:max-md:)?overflow-hidden(?:\s|$)/);
 
     for (const workspace of ["aggregation", "social", "education"] as const) {
-      const destRail = workspace !== "social";
       const html = renderToStaticMarkup(
         createElement(HouseLeadChrome, {
           workspace,
-          leadingNav: destRail
-            ? createElement("button", { "data-mobile-nav-trigger": "" })
-            : undefined,
           accountMenu: createElement("div", { "data-user-menu-host": "" }),
         }),
       );
@@ -351,19 +344,49 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
       expect(html).toContain('data-brand-logo-mark="emblem"');
       expect(html).toContain("/brand/24frame-emblem.svg");
       expect(html).toContain(`href="${workspaceHome(workspace)}"`);
-      if (destRail) {
-        expect(html).toContain("data-mobile-nav-trigger");
-        expect(html.indexOf("data-mobile-nav-trigger")).toBeLessThan(
-          html.indexOf("data-brand-emblem"),
-        );
-      } else {
-        expect(html).not.toContain("data-mobile-nav-trigger");
-      }
+      const leading = html.slice(
+        html.indexOf("data-app-header-leading"),
+        html.indexOf("data-app-header-trailing"),
+      );
+      expect(leading).not.toContain("data-mobile-nav-trigger");
+      expect(leading.indexOf("data-brand-emblem")).toBeGreaterThan(-1);
+      expect(html).not.toContain("data-mobile-nav-trigger");
+      expect(html.indexOf("data-activity-bell")).toBeLessThan(
+        html.indexOf("data-user-menu-host"),
+      );
     }
 
-    expect(shell).toContain("homeChrome ? undefined :");
-    expect(shell).toContain("<MobileNavSlot");
+    expect(shell).toContain("settingsPage || homeChrome ? undefined");
+    expect(shell).toContain("destChips=");
+    expect(shell).toContain("<DestChipsSlot");
+    expect(shell).not.toContain("<MobileNavSlot");
     expect(topBar).not.toContain("leadingNav");
+    expect(topBar).not.toContain("trailingNav");
     expect(topBar).not.toContain("MobileNav");
+  });
+
+  it("keeps dest chips above Education search and the Workspaces menu above both", () => {
+    const html = renderToStaticMarkup(
+      createElement(HouseLeadChrome, {
+        workspace: "education",
+        destChips: createElement("nav", { "data-house-phone-dest-chips": "" }),
+        underNav: createElement(HouseLeadSearch, {
+          tone: "quiet",
+          inputId: "education-header-q-phone",
+        }),
+        accountMenu: createElement("div", { "data-user-menu-host": "" }),
+      }),
+    );
+    expect(html.indexOf("data-house-phone-dest-chips-host")).toBeGreaterThan(-1);
+    expect(html.indexOf("data-house-under-nav")).toBeGreaterThan(
+      html.indexOf("data-house-phone-dest-chips-host"),
+    );
+    expect(html.indexOf("data-education-header-search")).toBeGreaterThan(
+      html.indexOf("data-house-phone-dest-chips-host"),
+    );
+    expect(HOUSE_LEAD_STACK_CLASS).toContain("z-40");
+    expect(readFileSync("src/components/chrome/workspace-switcher.tsx", "utf8")).toContain(
+      "createPortal",
+    );
   });
 });

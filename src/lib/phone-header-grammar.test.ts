@@ -40,10 +40,18 @@ function htmlClass(html: string, attr: string): string {
 }
 
 describe("phone header grammar A — trim trailing", () => {
-  it("keeps phone trailing as Social search · bell · avatar", () => {
+  it("keeps phone trailing as search · bell · avatar", () => {
     expect(APP_HEADER_DESKTOP_TRAILING_CLASS).toBe("hidden md:contents");
     expect(leadSrc).toContain("data-app-header-desktop-trailing");
     expect(leadSrc).toContain("APP_HEADER_DESKTOP_TRAILING_CLASS");
+    expect(leadSrc).toContain("data-app-header-trailing-nav");
+    expect(leadSrc).toContain('data-app-header-trailing-nav="" className="md:hidden"');
+    expect(leadSrc.indexOf("{trailingSearch")).toBeLessThan(
+      leadSrc.indexOf("data-app-header-trailing-nav"),
+    );
+    expect(leadSrc.indexOf("data-app-header-trailing-nav")).toBeLessThan(
+      leadSrc.indexOf("data-app-header-desktop-trailing"),
+    );
     expect(leadSrc.indexOf("data-app-header-desktop-trailing")).toBeLessThan(
       leadSrc.indexOf("<AskAssistantHeaderLink"),
     );
@@ -57,10 +65,18 @@ describe("phone header grammar A — trim trailing", () => {
         accountMenu: createElement("div", { "data-user-menu-host": "" }),
       }),
     );
+    const leading = aggregation.slice(
+      aggregation.indexOf("data-app-header-leading"),
+      aggregation.indexOf("data-app-header-trailing"),
+    );
     const trailing = aggregation.slice(
       aggregation.indexOf("data-app-header-trailing"),
       aggregation.indexOf("</header>"),
     );
+    expect(leading).toContain("data-brand-emblem");
+    expect(leading).not.toContain("data-mobile-nav-trigger");
+    expect(trailing).not.toContain("data-mobile-nav-trigger");
+    expect(aggregation).not.toContain("data-mobile-nav-trigger");
     expect(trailing).toContain("data-app-header-desktop-trailing");
     expect(trailing).toContain(APP_HEADER_DESKTOP_TRAILING_CLASS);
     expect(trailing).toContain("data-ask-assistant-header");
@@ -72,9 +88,24 @@ describe("phone header grammar A — trim trailing", () => {
     );
     expect(trailing).not.toContain("data-social-header-actions");
 
+    const education = renderToStaticMarkup(
+      createElement(HouseLeadChrome, {
+        workspace: "education",
+        accountMenu: createElement("div", { "data-user-menu-host": "" }),
+      }),
+    );
+    const eduLead = education.slice(
+      education.indexOf("data-app-header-leading"),
+      education.indexOf("data-app-header-trailing"),
+    );
+    expect(eduLead).toContain("data-brand-emblem");
+    expect(eduLead).not.toContain("data-mobile-nav-trigger");
+    expect(education).not.toContain("data-mobile-nav-trigger");
+
     const social = renderToStaticMarkup(
       createElement(SocialTopBar, { email: "ada@example.com", name: "Ada" }),
     );
+    expect(social).not.toContain("data-mobile-nav-trigger");
     expect(social.indexOf("data-social-header-search-icon")).toBeGreaterThan(
       social.indexOf("data-app-header-trailing"),
     );
@@ -109,14 +140,12 @@ describe("phone header grammar A — trim trailing", () => {
     const html = renderToStaticMarkup(
       createElement(HouseLeadChrome, {
         workspace: "aggregation",
-        leadingNav: createElement("button", { "data-mobile-nav-trigger": "" }),
         accountMenu: createElement("div", { "data-user-menu-host": "" }),
       }),
     );
     for (const attr of [
       'data-app-header=""',
       'data-app-header-leading=""',
-      'data-app-header-workspace-pill=""',
     ]) {
       expect(htmlClass(html, attr)).not.toMatch(/(?:^|\s)(?:max-md:)?overflow-hidden(?:\s|$)/);
     }

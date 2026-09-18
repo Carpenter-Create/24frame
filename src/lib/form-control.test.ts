@@ -68,6 +68,14 @@ describe("form-control SoT", () => {
     expect(formControlClass("bare")).toContain("bg-transparent");
     expect(FORM_CONTROL_BOX_CLASS).not.toContain("t-body");
     expect(FORM_CONTROL_BARE_CLASS).not.toContain("t-body");
+    expect(FORM_CONTROL_BARE_CLASS).toContain("caret-ink");
+    expect(FORM_CONTROL_BARE_CLASS).toContain("accent-ink");
+    expect(FORM_CONTROL_BARE_CLASS).toContain("focus:outline-none");
+    expect(FORM_CONTROL_BARE_CLASS).toContain("focus:ring-0");
+    expect(FORM_CONTROL_BARE_CLASS).not.toContain("caret-accent");
+    expect(FORM_CONTROL_BARE_CLASS).not.toContain("focus:border-accent");
+    expect(FORM_CONTROL_BARE_CLASS).not.toContain("focus:ring-accent");
+    expect(FORM_CONTROL_BOX_CLASS).toContain("focus:border-accent");
   });
 
   it("puts Input and Textarea on the shared class so future fields inherit", () => {

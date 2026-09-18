@@ -1,18 +1,24 @@
 // Shared top lead chrome for Aggregation · Social · Education · Home.
 // Phone: Asset 8 emblem on every workspace (logoVisible always).
-// Dest-rail phone adds hamburger before the emblem — house gap
-// (--space-3). Emblem is a workspace-home link, not the rail.
-// Phone grammar A (Adam 2026-09-18):
-//   Left: [hamburger if Agg/Edu] [emblem] [workspace pill]
-//   Trailing: [search if Social] [bell] [avatar]
+// Emblem owns the phone left alone. No hamburger — leading or trailing.
+// Destinations live on HousePhoneDestChips under this stack.
+// Emblem is a workspace-home link, not the rail.
+// Phone grammar Option 2 dest-chip amend (Adam 2026-09-18):
+//   Left: [emblem]
+//   Under-top: dest chips on Agg / Edu / Social. Home has none.
+//   Trailing: [search if needed] [bell] [avatar]
+//   Bottom: HousePhoneBottomNav — Home · Social · Aggregation · Education
+// Phone top has no workspace pill. Bottom bar owns workspace switching.
 // Ask 24Frame AI and the sun/moon leave the phone trailing cluster
 // and live on the avatar sheet (Appearance drill-in + 24Frame AI).
 // Desktop md+ keeps switcher · Ask · theme · bell · avatar.
 // Social live explore search and Education quiet courses/videos
 // search share Facebook-compact geometry (04-facebook.png SoT)
 // via one HouseLeadSearch primitive — never twin files.
-// Phone Education search is a full-width row under this stack — not
-// in the top nav. Phone Social is a trailing magnifying-glass that
+// Phone Education search is a full-width row under dest chips — not
+// in the top nav. The Workspaces menu portals above this stack so it
+// cannot clip under dest chips or search (header backdrop-blur).
+// Phone Social is a trailing magnifying-glass that
 // opens a dedicated sheet. Aggregation mid-lead stays empty
 // (agg-search-no). Logo inset does not drift when the search slot is
 // empty. Do not invent a fourth product or an Aggregation search.
@@ -45,7 +51,7 @@ export const HOUSE_LEAD_SCROLL_CLASS =
   "min-h-0 flex-1 overflow-y-auto overscroll-contain";
 
 // Stack pins header + Education under-nav as one unit. Do not put
-// overflow-hidden on this row (#412) — the workspace pill menu must paint.
+// overflow-hidden on this row (#412).
 export const HOUSE_LEAD_STACK_CLASS = "sticky top-0 z-40 shrink-0";
 
 // Phone: --space-6 lead · --chrome-gutter trail. md+ uses chrome-gutter
