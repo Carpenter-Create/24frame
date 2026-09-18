@@ -140,18 +140,17 @@ describe("Dashboard type jobs", () => {
             { key: "2026-07", label: "2026-07", year: 2026, month: 7, netCents: 120_000_00 },
           ],
         },
-        activity: [
-          {
-            id: "title:a",
-            title: "Winter Light",
-            href: "/titles/24F-0001234",
-            at: "2026-09-12T15:04:00.000Z",
-            count: 1,
-            detail: DASHBOARD_ADMIN.titleAdded,
-            actorId: null,
-            actor: { id: null, initial: "?" },
-          },
-        ],
+        attention: {
+          rows: [
+            {
+              id: "f1",
+              what: "Synopsis is required.",
+              at: "2026-09-12T15:04:00.000Z",
+              href: "/titles/24F-0001234",
+              kind: "catalog",
+            },
+          ],
+        },
         fixture: true,
         periodMenuOpen: true,
       }),
@@ -174,7 +173,7 @@ describe("Dashboard type jobs", () => {
     expect(DASHBOARD_PERIOD_TRIGGER_CLASS).toContain("t-body-sm");
     expect(DASHBOARD_PERIOD_TRIGGER_CLASS).not.toContain("t-display");
     expect(html).toContain("t-body-sm text-ink-3");
-    expect(html).toContain("data-dashboard-activity-clock");
+    expect(html).toContain("data-dashboard-attention-clock");
     expect(html).not.toContain("t-display t-body-sm");
     expect(html).toContain("data-dashboard-fixture-banner");
     expect(html).toContain(DASHBOARD_FIXTURE.banner);

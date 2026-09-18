@@ -118,8 +118,9 @@ describe("licensing nested title → endpoint", () => {
     expect(titlesSrc).not.toMatch(/from\(["']licensing_/);
     expect(pageSrc).not.toMatch(/from\(["']licensing_/);
     expect(pageSrc).toContain("buildLicensingStatus");
-    expect(pageSrc).toContain("activity={adminActivity}");
+    expect(pageSrc).toContain("buildAttentionGlance");
     expect(pageSrc).not.toContain("DashboardRecentActivity");
+    expect(pageSrc).not.toContain("recentAccountActivity");
     expect(pageSrc).toContain("DashboardLicensingStatus");
     expect(pageSrc).not.toContain("licensing={licensing}");
   });

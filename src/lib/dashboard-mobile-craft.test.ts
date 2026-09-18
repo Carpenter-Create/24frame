@@ -120,7 +120,7 @@ describe("company-admin Dashboard mobile craft", () => {
     const chart = readFileSync("src/components/dashboard/dashboard-revenue-chart.tsx", "utf8");
     expect(DASHBOARD_FIXTURE_BANNER_CLASS).toContain("max-md:sticky");
     expect(hero).toContain("data-dashboard-fixture-banner");
-    expect(page).toContain("dashboardFixtureActivity");
+    expect(page).not.toContain("dashboardFixtureActivity");
     expect(page).toContain("DASHBOARD_FIXTURE_PLATFORMS");
     for (const src of [hero, controls, page, chart]) {
       expect(src).not.toContain("data-dashboard-period-grains");

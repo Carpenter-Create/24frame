@@ -53,7 +53,7 @@ function emptyHeroHtml() {
         compare: null,
         points: [],
       },
-      activity: [],
+      attention: { rows: [] },
       periodMenuOpen: true,
     }),
   );
@@ -173,7 +173,7 @@ describe("Aggregation Dashboard density delta after #332", () => {
             { key: "2026-07", label: "2026-07", year: 2026, month: 7, netCents: 120_000_00 },
           ],
         },
-        activity: [],
+        attention: { rows: [] },
         fixture: true,
       }),
     );

@@ -5,7 +5,7 @@ import {
 } from "@/lib/dashboard-home";
 import { titleClientPath } from "@/lib/title-public-id";
 
-// Company-admin `/dashboard` Attention glance. Catalog findings now.
+// Company-admin `/dashboard` Recent activity glance. Catalog findings now.
 // Contract kinds are craft-capable later — no contract schema invent.
 // Row = what + timestamp. Cap 5. View all → /attention. Not readiness buckets.
 
@@ -13,7 +13,7 @@ export const ATTENTION_HREF = "/attention";
 export const CATALOG_HEALTH_HREF = "/catalog-health";
 
 export const DASHBOARD_ATTENTION = {
-  title: "Attention",
+  title: "Recent activity",
   empty: "Nothing needs your attention right now.",
   viewAllHref: ATTENTION_HREF,
 } as const;

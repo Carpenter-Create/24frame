@@ -170,7 +170,7 @@ export const SETTINGS_HEADER_BACK_CLASS =
 export const SETTINGS_RAIL_ABSENT = [
   "Titles",
   "Deliveries",
-  "Attention",
+  "Recent activity",
   ASK_ASSISTANT,
   "Queue",
   "Avails",

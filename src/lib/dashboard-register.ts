@@ -6,9 +6,9 @@ import type { ReportsCountRow } from "@/lib/reports";
 
 // Company-admin `/dashboard` register rematches RL Overview
 // (`HeadlineStats` → taller Net revenue left, Recent activity glance
-// right — account announcements, not findings — Licensing status
-// full-width nested title→endpoint, `TopWorksCard` → Top titles,
-// `TerritoryMap` → Territories map/list/bars). One feed only. House
+// right — findings /attention queue — Licensing status full-width
+// nested title→endpoint, `TopWorksCard` → Top titles, `TerritoryMap`
+// → Territories map/list/bars). Recent account activity is gone. House
 // tokens only — Geist · Sporty Blue · hairline. 24Frame nouns only. No
 // Top works / sources / contributors / Exports. Coinbase quieter than
 // RL flourish.
