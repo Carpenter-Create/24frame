@@ -2,6 +2,7 @@ import { DashboardHomeStatusPill } from "@/components/dashboard/dashboard-home";
 import {
   DASHBOARD_CARD_PAD,
   DASHBOARD_MODULE_CARD_CLASS,
+  DASHBOARD_NEWS_HISTORY_THUMB_CLASS,
   DASHBOARD_NEWS_THUMB_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
 } from "@/lib/dashboard-craft";
@@ -10,9 +11,9 @@ import { newsSourceLabel, type NewsItem } from "@/lib/news";
 import { socialRelativeTime } from "@/lib/social";
 
 // Link-out card: media plate · headline · source · relative time.
-// History: discrete house module card. Home: nested tile inside the
-// shared OverviewModule shell (Education cover SoT — no second grey card).
-// No side thumb. No summary. No rewrite.
+// Home: stacked image-top tile inside OverviewModule (Education cover SoT).
+// History: dense horizontal row — thumb left, title + source · time right.
+// No summary. No rewrite.
 
 export function NewsCard({
   item,
@@ -24,6 +25,7 @@ export function NewsCard({
   density?: "home" | "history";
 }) {
   const home = density === "home";
+  const history = density === "history";
   return (
     <li
       data-news-card={item.id}
@@ -35,12 +37,16 @@ export function NewsCard({
         target="_blank"
         rel="noopener noreferrer"
         data-news-link={item.id}
-        className="flex flex-col"
+        className={
+          history
+            ? `flex items-start ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD}`
+            : "flex flex-col"
+        }
       >
         <div
           data-news-thumb=""
           className={cn(
-            DASHBOARD_NEWS_THUMB_CLASS,
+            history ? DASHBOARD_NEWS_HISTORY_THUMB_CLASS : DASHBOARD_NEWS_THUMB_CLASS,
             home && "rounded-[var(--radius)] border border-hairline",
           )}
         >
@@ -50,7 +56,13 @@ export function NewsCard({
             <img src={item.image_url} alt="" />
           ) : null}
         </div>
-        <div className={`flex min-w-0 flex-col ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD}`}>
+        <div
+          className={cn(
+            "flex min-w-0 flex-col",
+            DASHBOARD_RELATED_GAP_CLASS,
+            !history && DASHBOARD_CARD_PAD,
+          )}
+        >
           <p className="t-body-sm font-medium text-ink">{item.title}</p>
           <div className={`flex flex-wrap items-center ${DASHBOARD_RELATED_GAP_CLASS}`}>
             <DashboardHomeStatusPill label={newsSourceLabel(item.source)} />

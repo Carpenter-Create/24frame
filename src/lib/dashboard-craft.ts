@@ -121,9 +121,15 @@ export const DASHBOARD_LICENSING_THUMB_CLASS =
   "relative aspect-[16/9] w-16 shrink-0 overflow-hidden rounded-[var(--radius-sm)] bg-surface-muted [&_img]:h-full [&_img]:w-full [&_img]:object-cover [&_img]:object-center";
 
 // News media plate — full card width, 16:9 crop. Stacked above copy.
-// Not the licensing side thumb (w-16). Card overflow clips the top radius.
+// Home rail only. Not the licensing side thumb (w-16). Card overflow
+// clips the top radius.
 export const DASHBOARD_NEWS_THUMB_CLASS =
   "relative aspect-[16/9] w-full shrink-0 overflow-hidden bg-surface-muted [&_img]:h-full [&_img]:w-full [&_img]:object-cover [&_img]:object-center";
+
+// /home/news history row thumb — left plate, house radius, 16:9, ~112px.
+// Grey muted plate when the article has no image. Not the Home stack thumb.
+export const DASHBOARD_NEWS_HISTORY_THUMB_CLASS =
+  "relative aspect-[16/9] w-28 shrink-0 overflow-hidden rounded-[var(--radius)] bg-surface-muted [&_img]:h-full [&_img]:w-full [&_img]:object-cover [&_img]:object-center";
 
 export const DASHBOARD_LICENSING_NEST_CLASS =
   "px-[var(--space-4)] py-[var(--space-3)]";
@@ -137,8 +143,19 @@ export const DASHBOARD_ACTIVITY_AVATAR_CLASS =
 export const DASHBOARD_ADMIN_PAIR_CLASS =
   "grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-2";
 
-// /home/news desktop: same stacked cards on the house pair grid. Home rail stays one column.
-export const DASHBOARD_NEWS_HISTORY_LIST_CLASS = DASHBOARD_ADMIN_PAIR_CLASS;
+// /home/news: one dense full-width row per article. Home rail stays stacked.
+export const DASHBOARD_NEWS_HISTORY_LIST_CLASS = `flex flex-col ${DASHBOARD_RELATED_GAP_CLASS}`;
+
+// History page: list column + far-right Sources rail (same 20rem + chrome
+// gutter as the Home News rail). Phone stays one column — Sources is a
+// sheet / under-nav control, never a cramped second column.
+export const DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS =
+  "grid w-full grid-cols-1 items-start gap-x-[var(--chrome-gutter)] gap-y-[var(--space-6)] lg:grid-cols-[minmax(0,1fr)_20rem]";
+
+export const DASHBOARD_NEWS_SOURCES_RAIL_CLASS =
+  "hidden lg:block lg:sticky lg:top-[calc(var(--header-height)+var(--space-4))]";
+
+export const DASHBOARD_NEWS_SOURCES_PHONE_CLASS = "lg:hidden";
 
 export const DASHBOARD_VIEW_ALT_CLUSTER_CLASS =
   "flex items-center divide-x divide-hairline border border-hairline";

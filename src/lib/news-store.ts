@@ -260,7 +260,7 @@ export function dynamoNewsStore(env: NewsEnv = process.env): NewsStore {
       );
     },
     async purgeBefore() {
-      // Retention is Dynamo TTL (published_at + 30d). Query window also hides older rows.
+      // Retention is Dynamo TTL (published_at + 90d). Query window also hides older rows.
       return 0;
     },
   };

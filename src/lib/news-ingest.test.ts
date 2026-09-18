@@ -70,7 +70,7 @@ describe("ingestNewsFeeds", () => {
     expect((await persist.getHealth("variety"))?.last_success_at).toBe(NOW.toISOString());
   });
 
-  it("upserts the same canonical URL once and purges rows older than 30 days", async () => {
+  it("upserts the same canonical URL once and purges rows older than 90 days", async () => {
     const persist = memoryNewsStore();
     await persist.upsertItems(
       [
@@ -80,7 +80,7 @@ describe("ingestNewsFeeds", () => {
           title: "Old headline",
           url: "https://variety.com/old",
           canonical_url: "https://variety.com/old",
-          published_at: "2026-08-01T12:00:00.000Z",
+          published_at: "2026-06-01T12:00:00.000Z",
         },
       ],
       NOW,
@@ -96,7 +96,7 @@ describe("ingestNewsFeeds", () => {
       fetchOgHtml: async () => null,
     });
     expect(summary.purged).toBe(1);
-    expect(await persist.purgeBefore("2026-08-19T18:00:00.000Z")).toBe(0);
+    expect(await persist.purgeBefore("2026-06-20T18:00:00.000Z")).toBe(0);
     const rows = await persist.queryFeed({ limit: 20, now: NOW });
     expect(rows.filter((row) => row.url === "https://variety.com/live")).toHaveLength(1);
   });

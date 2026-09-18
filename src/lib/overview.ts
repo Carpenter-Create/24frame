@@ -17,7 +17,7 @@ import type { WorkspaceMode } from "@/lib/workspace";
 // Account Home is the leftmost unify-lead pill. Not a fourth product.
 // Not Social Home (`/social` feed). Aggregation · Social · Education
 // stay the three workspace destinations. /overview redirects to /home.
-// /home/news is Home-owned 30-day history — same Home chrome, not a fifth
+// /home/news is Home-owned 90-day history — same Home chrome, not a fifth
 // workspace and not an Aggregation / Social / Education destination.
 // /news permanently redirects there.
 // Home IA v2 (Adam 2026-09-18): no dest rail on /home — unify-lead

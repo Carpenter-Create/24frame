@@ -11,34 +11,40 @@ import { OVERVIEW_MODULE_NEST_CLASS } from "@/lib/overview";
 
 // Home News: same OverviewModule shell as Social/Education — header
 // (News + View all) lives inside the grey panel. Articles nest like
-// Education course tiles (no second grey card). History keeps discrete
-// house cards under the page H1.
+// Education course tiles (no second grey card). History is dense
+// horizontal rows; Sources rail/sheet lives in NewsHistory.
 
 export function NewsRail({
   items,
   now,
   viewAll = false,
   history = false,
+  empty = NEWS_PAGE.empty,
   testId = "news",
 }: {
   items: readonly NewsItem[];
   now: Date;
   viewAll?: boolean;
   history?: boolean;
+  empty?: string;
   testId?: string;
 }) {
   if (history) {
     return (
-      <section data-overview-module={testId} className={`flex flex-col ${DASHBOARD_SECTION_AIR_CLASS}`}>
+      <section
+        data-overview-module={testId}
+        data-news-history-main=""
+        className={`flex flex-col ${DASHBOARD_SECTION_AIR_CLASS}`}
+      >
         {items.length > 0 ? (
           <ul data-news-list="" className={DASHBOARD_NEWS_HISTORY_LIST_CLASS}>
             {items.map((item) => (
-              <NewsCard key={item.id} item={item} now={now} />
+              <NewsCard key={item.id} item={item} now={now} density="history" />
             ))}
           </ul>
         ) : (
           <div className={`${DASHBOARD_MODULE_CARD_CLASS} ${DASHBOARD_CARD_PAD}`}>
-            <p className="t-body-sm text-ink-3">{NEWS_PAGE.empty}</p>
+            <p className="t-body-sm text-ink-3">{empty}</p>
           </div>
         )}
       </section>
