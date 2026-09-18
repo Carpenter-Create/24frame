@@ -155,25 +155,35 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(leadSrc).toContain("search ?");
   });
 
-  it("G7 keeps trailing workspace switcher + sun/moon + avatar on all three", () => {
+  it("G7 keeps trailing workspace switcher + 24Frame AI + sun/moon + bell + avatar on all three", () => {
     for (const workspace of ["aggregation", "social", "education"] as const) {
       const html = leadHtml(workspace);
       expect(html).toContain("data-app-header-trailing");
       expect(html).toContain(APP_HEADER_TRAILING_CLUSTER_CLASS);
       expect(html).toContain(APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS);
       expect(html).toContain('data-workspace-switcher-presentation="pills"');
+      expect(html).toContain("data-ask-assistant-entry");
       expect(html).toContain("data-theme-toggle");
+      expect(html).toContain("data-activity-bell");
       expect(html).toContain("data-user-menu-host");
       expect(html.indexOf('data-workspace-switcher-presentation="pills"')).toBeLessThan(
+        html.indexOf("data-ask-assistant-entry"),
+      );
+      expect(html.indexOf("data-ask-assistant-entry")).toBeLessThan(
         html.indexOf("data-theme-toggle"),
       );
       expect(html.indexOf("data-theme-toggle")).toBeLessThan(
+        html.indexOf("data-activity-bell"),
+      );
+      expect(html.indexOf("data-activity-bell")).toBeLessThan(
         html.indexOf("data-user-menu-host"),
       );
       expect(html).not.toContain("stroke-width");
     }
     expect(leadSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
+    expect(leadSrc).toContain("<AskAssistantEntry />");
     expect(leadSrc).toContain("<ThemeToggle />");
+    expect(leadSrc).toContain("<ActivityBell");
     expect(HOUSE_THEME_TOGGLE_CLASS).toContain("size-[44px]");
     expect(HOUSE_THEME_TOGGLE_CLASS).toContain("min-h-[44px]");
     expect(HOUSE_THEME_TOGGLE_CLASS).toContain("md:size-8");

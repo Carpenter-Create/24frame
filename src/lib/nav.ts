@@ -22,6 +22,7 @@ import {
 } from "@phosphor-icons/react";
 
 import type { PhosphorIcon } from "@/lib/phosphor-icon";
+import { ACTIVITY, ACTIVITY_HREF } from "@/lib/activity";
 import { ASK_GLOBEE } from "@/lib/ask-globee";
 import { AVAILS_HREF, AVAILS_PAGE } from "@/lib/avails";
 import { FINANCE_PAGE } from "@/lib/finance";
@@ -57,13 +58,13 @@ export function isPhosphorNavItem(item: NavItem): item is PhosphorNavItem {
 }
 
 // GC's flat nav — only what exists or is v1-scoped. Settings stays deferred.
-// Ask Globee is the /messages destination (href unchanged). Reports is the
-// one client activity door. Staff ops stays on GC_NAV at /gc/finance.
+// Ask 24Frame AI is the /messages destination (href unchanged). Activity
+// is the durable account-alert door. Staff ops stays on GC_NAV at /gc/finance.
 // Glyphs: Figma 75:5 / 75:2 / 61:2 Phosphor Bold idle, Fill active.
 export const NAV: PhosphorNavItem[] = [
   { label: "Dashboard", href: "/dashboard", family: "phosphor", icon: SquaresFour, exact: true },
   { label: "Titles", href: "/titles", family: "phosphor", icon: FilmSlate },
-  { label: "Recent activity", href: "/attention", family: "phosphor", icon: Pulse },
+  { label: ACTIVITY.nav, href: ACTIVITY_HREF, family: "phosphor", icon: Pulse },
   {
     label: REPORTS_PAGE.title,
     href: REPORTS_HREF,
@@ -148,12 +149,6 @@ export const MOBILE_NAV = {
 export function isClientNavActive(pathname: string, item: NavItem): boolean {
   if (item.href === "/dashboard" && pathname === "/") return true;
   if (item.href === REPORTS_HREF && isLegacyReportsPath(pathname)) return true;
-  if (
-    item.href === "/attention" &&
-    (pathname === "/catalog-health" || pathname.startsWith("/catalog-health/"))
-  ) {
-    return true;
-  }
   return item.exact ? pathname === item.href : pathname.startsWith(item.href);
 }
 

@@ -52,8 +52,8 @@ describe("NOTIFICATION_EMAIL.title_rejected.link (sender-facing API)", () => {
       cta: "Review and resubmit",
       path: `/titles/${TITLE_ID}`,
     });
-    expect(link({})).toEqual({ cta: "Review and resubmit", path: "/messages" });
-    expect(link()).toEqual({ cta: "Review and resubmit", path: "/messages" });
+    expect(link({})).toEqual({ cta: "Review and resubmit", path: "/activity" });
+    expect(link()).toEqual({ cta: "Review and resubmit", path: "/activity" });
   });
 
   it("keeps the pre-existing truthy titleId contract (no UUID hardening)", () => {

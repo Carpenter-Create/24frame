@@ -156,6 +156,8 @@ export function AppShell({
             accountMenu={
               <AccountMenuSlot chrome={chrome} email={email} name={name} photoUrl={photoUrl} />
             }
+            activityPreview={chrome?.then((data) => data.activityPreview)}
+            activityOpenCount={messagesUnread}
           />
           <aside
             className={cn(
@@ -280,6 +282,8 @@ export function AppShell({
         accountMenu={
           <AccountMenuSlot chrome={chrome} email={email} name={name} photoUrl={photoUrl} />
         }
+        activityPreview={chrome?.then((data) => data.activityPreview)}
+        activityOpenCount={messagesUnread}
       />
 
       <main

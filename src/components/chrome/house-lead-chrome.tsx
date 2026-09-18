@@ -1,8 +1,11 @@
 import Link from "next/link";
 
+import { ActivityBell } from "./activity-bell";
+import { AskAssistantEntry } from "./ask-assistant-entry";
 import { BrandEmblem } from "./brand-emblem";
 import { WorkspaceSwitcher } from "./workspace-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
+import type { ActivityBellPreview } from "@/lib/activity";
 import { cn } from "@/lib/cn";
 import {
   HOUSE_LEAD_CHROME_CLASS,
@@ -29,6 +32,8 @@ export function HouseLeadChrome({
   phoneSearch,
   afterLead,
   accountMenu,
+  activityPreview,
+  activityOpenCount,
 }: {
   workspace: WorkspaceMode;
   settingsPage?: boolean;
@@ -38,6 +43,8 @@ export function HouseLeadChrome({
   phoneSearch?: React.ReactNode;
   afterLead?: React.ReactNode;
   accountMenu: React.ReactNode;
+  activityPreview?: Promise<ActivityBellPreview> | ActivityBellPreview;
+  activityOpenCount?: Promise<number> | number;
 }) {
   const social = workspace === "social";
   const education = workspace === "education" && !settingsPage;
@@ -105,7 +112,9 @@ export function HouseLeadChrome({
         >
           <WorkspaceSwitcher current={workspace} presentation="pills" />
         </div>
+        <AskAssistantEntry />
         <ThemeToggle />
+        <ActivityBell preview={activityPreview} openCount={activityOpenCount} />
         {accountMenu}
       </div>
     </header>

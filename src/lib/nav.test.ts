@@ -40,7 +40,7 @@ describe("client NAV", () => {
     expect(hrefs).toEqual([
       "/dashboard",
       "/titles",
-      "/attention",
+      "/activity",
       "/reports",
       "/messages",
     ]);
@@ -65,8 +65,9 @@ describe("client NAV", () => {
     expect(isClientNavActive("/titles", NAV[0])).toBe(false);
     expect(clientNavCurrent("/titles").label).toBe("Titles");
     expect(clientNavCurrent("/titles/abc").label).toBe("Titles");
-    expect(clientNavCurrent("/attention").label).toBe("Recent activity");
-    expect(clientNavCurrent("/catalog-health").label).toBe("Recent activity");
+    expect(clientNavCurrent("/activity").label).toBe("Activity");
+    expect(clientNavCurrent("/attention").label).toBe("Dashboard");
+    expect(clientNavCurrent("/catalog-health").label).toBe("Dashboard");
     expect(clientNavCurrent("/reports").label).toBe("Reports");
     expect(clientNavCurrent("/analytics").label).toBe("Reports");
     expect(clientNavCurrent("/earn").label).toBe("Reports");
@@ -154,7 +155,7 @@ describe("GC_NAV", () => {
     expect([...NAV, ...GC_NAV].map((item) => item.label)).toEqual([
       "Dashboard",
       "Titles",
-      "Recent activity",
+      "Activity",
       "Reports",
       "Ask 24Frame AI",
       "Queue",
@@ -181,7 +182,7 @@ describe("mobileNavDestinations", () => {
     expect(mobileNavDestinations(false).map((item) => item.label)).toEqual([
       "Dashboard",
       "Titles",
-      "Recent activity",
+      "Activity",
       "Reports",
       "Ask 24Frame AI",
     ]);
@@ -196,7 +197,7 @@ describe("mobileNavDestinations", () => {
     expect(mobileNavDestinations(true).map((item) => item.label)).toEqual([
       "Dashboard",
       "Titles",
-      "Recent activity",
+      "Activity",
       "Reports",
       "Ask 24Frame AI",
       "Queue",

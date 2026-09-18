@@ -97,7 +97,8 @@ export function SideNav({
       {items.map((item) =>
         row(
           item,
-          item.href === "/messages" ? (
+          item.href === "/activity" ? (
+            // Open-count badge. Activity owns account alerts; Messages is 24Frame AI.
             // Suspense so an unresolved badge never holds up the nav. Fallback is nothing
             // — an empty slot that fills in, rather than a spinner that draws the eye to a
             // decoration.

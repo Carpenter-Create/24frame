@@ -4,11 +4,19 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { ACCOUNT_PHOTO_HREF } from "@/lib/account-avatar";
+import {
+  ACTIVITY_BELL_FETCH,
+  activityBellPreviewFromNotifications,
+  EMPTY_ACTIVITY_BELL,
+  type ActivityBellPreview,
+} from "@/lib/activity";
 import { resolveMessagesSurface, type MessagesSurface } from "@/lib/ask-globee";
+import { loadMyNotifications } from "@/lib/my-lists";
 import { getActiveOrgTier } from "@/lib/org-tier";
 import { readSidebarCollapsed } from "@/lib/rail-collapse";
 import { hasAvatarObject } from "@/lib/s3-avatars";
 import { getOrgContext, type OrgContext } from "@/lib/supabase/context";
+import { createClient } from "@/lib/supabase/server";
 import { parseWorkspaceCookie, WORKSPACE_COOKIE, type WorkspaceMode } from "@/lib/workspace";
 
 export type AppShellChrome = {
@@ -18,6 +26,7 @@ export type AppShellChrome = {
   orgs: { id: string; name: string }[];
   activeOrgId: string | null;
   unread: Promise<number>;
+  activityPreview: Promise<ActivityBellPreview>;
   isGcStaff: boolean;
   defaultCollapsed: boolean;
   messagesSurface: MessagesSurface;
@@ -46,6 +55,11 @@ export const loadAppShellChrome = cache(async (): Promise<AppShellChrome> => {
     hasAvatarObject(ctx.user.id),
     ctx.activeOrg ? getActiveOrgTier(ctx.activeOrg.id) : Promise.resolve(null),
   ]);
+  const activityPreview: Promise<ActivityBellPreview> = Promise.resolve(
+    createClient()
+      .then((supabase) => loadMyNotifications(supabase, { limit: ACTIVITY_BELL_FETCH }))
+      .then((loaded) => activityBellPreviewFromNotifications(loaded.rows)),
+  ).catch(() => EMPTY_ACTIVITY_BELL);
   return {
     email: ctx.user.email,
     name: ctx.user.name,
@@ -53,6 +67,7 @@ export const loadAppShellChrome = cache(async (): Promise<AppShellChrome> => {
     orgs: ctx.orgs,
     activeOrgId: ctx.activeOrg?.id ?? null,
     unread: ctx.unread,
+    activityPreview,
     isGcStaff: ctx.isGcStaff,
     defaultCollapsed: readSidebarCollapsed((name) => jar.get(name)?.value),
     messagesSurface: resolveMessagesSurface({
@@ -66,4 +81,10 @@ export const loadAppShellChrome = cache(async (): Promise<AppShellChrome> => {
 
 export function appShellUnread(chrome: Promise<AppShellChrome>): Promise<number> {
   return chrome.then((data) => data.unread);
+}
+
+export function appShellActivityPreview(
+  chrome: Promise<AppShellChrome>,
+): Promise<ActivityBellPreview> {
+  return chrome.then((data) => data.activityPreview);
 }

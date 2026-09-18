@@ -14,18 +14,16 @@ import {
   type AskGlobeeStoredMessage,
 } from "@/lib/ask-globee-conversations";
 import { UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
-import { loadMyNotifications } from "@/lib/my-lists";
 import { userMenuAvatarInitial } from "@/lib/user-menu";
 import { AccessUpgradeGate } from "@/components/messages/access-upgrade-gate";
 import { AskGlobeeLanding } from "@/components/messages/ask-globee-landing";
 import { AskGlobeeThread } from "@/components/messages/ask-globee-thread";
-import { NotificationInbox } from "@/components/messages/notification-inbox";
 
-// Access `/messages` is the Ask Globee upgrade gate (Figma 305:320).
+// Access `/messages` is Ask 24Frame AI (Figma 305:320).
 // Pro/Premium see the 7:73 landing. Clock opens past org conversations;
 // plus is not on this empty home. Chip or composer send persists the user
 // turn, then 247:295 chrome on that thread. Staff without a client org
-// keep the inbox.
+// read account alerts on /activity — Messages is not the inbox.
 export default async function MessagesPage({
   searchParams = Promise.resolve({}),
 }: {
@@ -42,14 +40,7 @@ export default async function MessagesPage({
   });
 
   if (surface === "staff-inbox") {
-    const supabase = await createClient();
-    const notifications = await loadMyNotifications(supabase);
-    return (
-      <NotificationInbox
-        notifications={notifications.rows}
-        truncated={notifications.truncated}
-      />
-    );
+    redirect("/activity");
   }
 
   if (canRenderAskGlobeeLanding(surface) && ctx.activeOrg) {

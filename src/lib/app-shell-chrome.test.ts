@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getOrgContext } from "@/lib/supabase/context";
+import { createClient } from "@/lib/supabase/server";
 import { getActiveOrgTier } from "@/lib/org-tier";
 import { hasAvatarObject } from "@/lib/s3-avatars";
 import { appShellUnread, enforceAppAccess, loadAppShellChrome } from "@/lib/app-shell-chrome";
@@ -17,6 +18,11 @@ vi.mock("next/headers", () => ({
 vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
 vi.mock("@/lib/org-tier", () => ({ getActiveOrgTier: vi.fn(async () => null) }));
 vi.mock("@/lib/s3-avatars", () => ({ hasAvatarObject: vi.fn(async () => false) }));
+vi.mock("@/lib/supabase/server", () => ({
+  createClient: vi.fn(async () => ({
+    rpc: vi.fn(async () => ({ data: [], error: null })),
+  })),
+}));
 
 type Status = "registered" | "awaiting_payment" | "active";
 
@@ -90,6 +96,9 @@ describe("app shell chrome load", () => {
       ctx({ isGcStaff: false, orgStatus: "active" }) as never,
     );
     vi.mocked(hasAvatarObject).mockResolvedValue(true);
+    vi.mocked(createClient).mockResolvedValue({
+      rpc: vi.fn(async () => ({ data: [], error: null })),
+    } as never);
     const chrome = await loadAppShellChrome();
     expect(chrome.email).toBe("someone@example.com");
     expect(chrome.name).toBe("Ada");

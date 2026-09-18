@@ -1,21 +1,8 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { markActivityDone } from "@/app/(app)/activity/actions";
 
-import { createClient } from "@/lib/supabase/server";
-import { getAuthUser } from "@/lib/supabase/auth";
-
-// Mark the given notifications read for the current user (per-user read state).
-// Takes one or many ids — used by both "Mark all read" and per-message "Mark as read".
+// Staff inbox leftover. Activity owns the write path — Done ⇒ read.
 export async function markNotificationsRead(ids: string[]): Promise<{ error?: string }> {
-  if (ids.length === 0) return {};
-  const supabase = await createClient();
-  const user = await getAuthUser();
-  if (!user) return { error: "Not authenticated." };
-
-  const { error } = await supabase.rpc("mark_notifications_read", { p_ids: ids });
-  if (error) return { error: error.message };
-
-  revalidatePath("/messages");
-  return {};
+  return markActivityDone(ids);
 }

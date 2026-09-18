@@ -42,7 +42,7 @@ function titleRejectedLink(ctx: NotificationLinkCtx = {}): NotificationLink {
   return {
     cta: "Review and resubmit",
     // Pre-existing contract: any truthy titleId deep-links; otherwise /messages.
-    path: ctx.titleId ? `/titles/${ctx.titleId}` : "/messages",
+    path: ctx.titleId ? `/titles/${ctx.titleId}` : "/activity",
   };
 }
 
