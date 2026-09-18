@@ -4,7 +4,7 @@
 -- Health is service_role only. No summary / body / rewrite columns.
 
 begin;
-select plan(20);
+select plan(21);
 
 select set_config('t.reader', gen_random_uuid()::text, false);
 insert into auth.users (id) values (current_setting('t.reader')::uuid);
