@@ -2648,6 +2648,54 @@ export type Database = {
           },
         ]
       }
+      title_status_overrides: {
+        Row: {
+          actor: string | null
+          created_at: string
+          from_status: Database["public"]["Enums"]["title_status"]
+          id: string
+          org_id: string
+          reason: string
+          title_id: string
+          to_status: Database["public"]["Enums"]["title_status"]
+        }
+        Insert: {
+          actor?: string | null
+          created_at?: string
+          from_status: Database["public"]["Enums"]["title_status"]
+          id?: string
+          org_id: string
+          reason: string
+          title_id: string
+          to_status: Database["public"]["Enums"]["title_status"]
+        }
+        Update: {
+          actor?: string | null
+          created_at?: string
+          from_status?: Database["public"]["Enums"]["title_status"]
+          id?: string
+          org_id?: string
+          reason?: string
+          title_id?: string
+          to_status?: Database["public"]["Enums"]["title_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "title_status_overrides_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "title_status_overrides_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       titles: {
         Row: {
           archived_from: Database["public"]["Enums"]["title_status"] | null
@@ -3122,6 +3170,14 @@ export type Database = {
         Args: { p_capability: string; p_uid: string }
         Returns: boolean
       }
+      gc_set_title_status: {
+        Args: {
+          p_reason: string
+          p_status: Database["public"]["Enums"]["title_status"]
+          p_title_id: string
+        }
+        Returns: undefined
+      }
       gc_check_digit: { Args: { p_n: number }; Returns: number }
       gc_client_directory: {
         Args: { p_limit?: number }
@@ -3392,7 +3448,15 @@ export type Database = {
         Args: { p_title_id: string }
         Returns: undefined
       }
+      title_has_delivered_endpoint: {
+        Args: { p_title_id: string }
+        Returns: boolean
+      }
       title_has_reporting_activity: {
+        Args: { p_title_id: string }
+        Returns: boolean
+      }
+      title_status_override_locked: {
         Args: { p_title_id: string }
         Returns: boolean
       }
