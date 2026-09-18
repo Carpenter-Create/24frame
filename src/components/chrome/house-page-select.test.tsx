@@ -1,5 +1,5 @@
 import { createElement } from "react";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
@@ -51,5 +51,25 @@ describe("HousePageSelect", () => {
     expect(craft).toMatch(/Dashboard All time/i);
     expect(src).toContain("createPortal");
     expect(src).toContain("AppearanceCheck");
+  });
+
+  it("has no StatusFilter chip fork or unused SortControl twin", () => {
+    expect(existsSync("src/components/layout/status-filter.tsx")).toBe(false);
+    expect(existsSync("src/components/layout/sort-control.tsx")).toBe(false);
+
+    const lenses = [
+      "src/components/dashboard/dashboard-admin-controls.tsx",
+      "src/components/titles/titles-status-filter.tsx",
+      "src/app/(app)/(operator)/channels/channels-status-filter.tsx",
+      "src/app/(app)/(operator)/gc/deliveries/licensing-status-filter.tsx",
+      "src/app/(app)/(operator)/gc/clients/clients-status-filter.tsx",
+    ] as const;
+
+    for (const path of lenses) {
+      const src = readFileSync(path, "utf8");
+      expect(src, path).toContain("HousePageSelect");
+      expect(src, path).not.toContain("@/components/layout/status-filter");
+      expect(src, path).not.toContain("import { StatusFilter }");
+    }
   });
 });
