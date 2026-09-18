@@ -158,7 +158,7 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(sideNav).toContain("HOUSE_RAIL_IDLE_CLASS");
     expect(shell).toContain("HOUSE_PAGE_CANVAS_CLASS");
     expect(readFileSync("src/components/chrome/house-lead-chrome.tsx", "utf8")).toContain(
-      "<BrandEmblem />",
+      "<BrandLogo />",
     );
     expect(shell).not.toContain("BrandWordmark");
     expect(card).toContain("card-surface");
@@ -242,11 +242,11 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(title).not.toContain("t-subhead");
   });
 
-  it("keeps BrandEmblem language and bans the reference-brand word from shell comments", () => {
+  it("keeps BrandLogo language and bans the reference-brand word from shell comments", () => {
     expect(readFileSync("src/components/chrome/house-lead-chrome.tsx", "utf8")).toContain(
-      "<BrandEmblem />",
+      "<BrandLogo />",
     );
-    expect(sideNav).toContain("BrandEmblem");
+    expect(sideNav).toContain("BrandLogo");
     for (const path of HOUSE_SHELL_COMMENT_PATHS) {
       const src = readFileSync(path, "utf8");
       expect(src, path).not.toMatch(/Coinbase/i);

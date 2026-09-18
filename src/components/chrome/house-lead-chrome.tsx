@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { BrandEmblem } from "./brand-emblem";
+import { BrandLogo } from "./brand-logo";
 import { WorkspaceSwitcher } from "./workspace-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/cn";
@@ -69,7 +69,7 @@ export function HouseLeadChrome({
             data-brand-emblem=""
             className={HOUSE_LEAD_LOGO_CLASS}
           >
-            <BrandEmblem />
+            <BrandLogo />
           </Link>
           {search ? (
             <div

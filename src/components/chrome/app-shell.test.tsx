@@ -476,13 +476,16 @@ describe("AppShell rail-collapse chevron", () => {
     expect(shellSrc).not.toContain("collapsed={false}");
   });
 
-  it("shows Asset 8 emblem-only in expanded, collapsed, settings, and Social rails", () => {
+  it("shows the shared full wordmark in expanded, collapsed, settings, and Social rails", () => {
     navigation.pathname = "/";
     const expanded = renderShell();
     expect(expanded).toContain("data-brand-emblem");
+    expect(expanded).toContain("data-brand-logo");
+    expect(expanded).toContain("/brand/24frame-logo-light.svg");
+    expect(expanded).toContain("/brand/24frame-logo-dark.svg");
     expect(expanded).toContain('aria-label="24Frame"');
     expect(expanded).toContain('href="/dashboard"');
-    expect(expanded).toContain("data-brand-emblem-mark");
+    expect(expanded).not.toContain("data-brand-emblem-mark");
     expect(expanded).not.toContain("t-body font-medium text-ink");
     expect(shellSrc).not.toContain("24frame-wordmark");
     expect(shellSrc).not.toContain("BrandWordmark");

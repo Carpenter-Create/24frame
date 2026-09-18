@@ -80,7 +80,7 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(HOUSE_RAIL_FLOAT_CLASS).toContain("top-[calc(var(--header-height)+var(--chrome-gutter))]");
     expect(shell).not.toContain("border-r border-hairline");
     expect(shell).not.toMatch(/style=\{\{ height: "var\(--header-height\)", marginLeft: "var\(--sidebar-width\)" \}\}/);
-    expect(lead).toContain("<BrandEmblem />");
+    expect(lead).toContain("<BrandLogo />");
     expect(shell).toContain("<SideNav");
     expect(shell).not.toContain("StudioRail");
     expect(shell).not.toContain("data-studio-rail");
