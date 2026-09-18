@@ -30,6 +30,7 @@ import {
   APP_HEADER_TRAILING_CLUSTER_CLASS,
   APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS,
 } from "@/lib/workspace-switcher";
+import type { WorkspaceMode } from "@/lib/workspace";
 
 const leadLib = readFileSync("src/lib/house-lead-chrome.ts", "utf8");
 const leadSrc = readFileSync("src/components/chrome/house-lead-chrome.tsx", "utf8");
@@ -37,7 +38,7 @@ const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
 const topBar = readFileSync("src/components/social/social-top-bar.tsx", "utf8");
 const leadSearch = readFileSync("src/components/chrome/house-lead-search.tsx", "utf8");
 
-function leadHtml(workspace: "aggregation" | "social" | "education") {
+function leadHtml(workspace: WorkspaceMode) {
   return renderToStaticMarkup(
     createElement(HouseLeadChrome, {
       workspace,
@@ -156,8 +157,8 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(leadSrc).toContain("search ?");
   });
 
-  it("G7 keeps trailing workspace switcher + 24Frame AI + sun/moon + bell + avatar on all three", () => {
-    for (const workspace of ["aggregation", "social", "education"] as const) {
+  it("G7 keeps trailing workspace switcher + 24Frame AI + sun/moon + bell + avatar on all four", () => {
+    for (const workspace of ["overview", "aggregation", "social", "education"] as const) {
       const html = leadHtml(workspace);
       expect(html).toContain("data-app-header-trailing");
       expect(html).toContain(APP_HEADER_TRAILING_CLUSTER_CLASS);

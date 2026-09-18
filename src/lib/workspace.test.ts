@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   isEducationPath,
+  isOverviewPath,
   isSocialPath,
   parseWorkspaceCookie,
   resolveWorkspaceMode,
@@ -14,11 +15,14 @@ describe("workspace mode", () => {
   it("persists aggregation, social, or education in a cookie like the rail collapse", () => {
     expect(WORKSPACE_COOKIE).toBe("24frame_workspace");
     expect(parseWorkspaceCookie(undefined)).toBe("aggregation");
+    expect(parseWorkspaceCookie("overview")).toBe("overview");
     expect(parseWorkspaceCookie("social")).toBe("social");
     expect(parseWorkspaceCookie("education")).toBe("education");
     expect(parseWorkspaceCookie("nope")).toBe("aggregation");
     expect(workspaceCookieWrite("social")).toContain("24frame_workspace=social");
     expect(workspaceCookieWrite("education")).toContain("24frame_workspace=education");
+    expect(workspaceCookieWrite("overview")).toContain("24frame_workspace=overview");
+    expect(workspaceHome("overview")).toBe("/overview");
     expect(workspaceHome("social")).toBe("/social");
     expect(workspaceHome("education")).toBe("/social/courses");
     expect(workspaceHome("aggregation")).toBe("/dashboard");
@@ -26,6 +30,11 @@ describe("workspace mode", () => {
   });
 
   it("lets pathname win on destination routes and cookie win on shared ones", () => {
+    expect(isOverviewPath("/overview")).toBe(true);
+    expect(isOverviewPath("/overview/extra")).toBe(true);
+    expect(isOverviewPath("/dashboard")).toBe(false);
+    expect(resolveWorkspaceMode("/overview", "aggregation")).toBe("overview");
+    expect(resolveWorkspaceMode("/overview", "social")).toBe("overview");
     expect(resolveWorkspaceMode("/social", "aggregation")).toBe("social");
     expect(resolveWorkspaceMode("/social/dms/abc", "aggregation")).toBe("social");
     expect(resolveWorkspaceMode("/social/leaderboard", "aggregation")).toBe("social");

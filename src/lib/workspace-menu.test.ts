@@ -18,40 +18,47 @@ import {
 const here = dirname(fileURLToPath(import.meta.url));
 
 describe("workspace menu copy", () => {
-  it("lists Aggregation, Social, and Education on Route A /social/courses", () => {
+  it("lists Overview, Aggregation, Social, and Education on Route A /social/courses", () => {
     expect(WORKSPACE_MENU.title).toBe("Workspace");
     expect(WORKSPACE_MENU.title).toBe(USER_MENU.workspace);
     expect(WORKSPACE_MENU).not.toHaveProperty("back");
     expect(WORKSPACE_MENU).not.toHaveProperty("href");
     expect(WORKSPACE_MENU_CANDIDATES.map((option) => option.id)).toEqual([
+      "overview",
       "aggregation",
       "social",
       "education",
     ]);
     expect(WORKSPACE_MENU_CANDIDATES.map((option) => option.label)).toEqual([
+      "Overview",
       "Aggregation",
       "Social",
       "Education",
     ]);
+    expect(workspaceCandidateAccessible("overview")).toBe(true);
     expect(workspaceCandidateAccessible("aggregation")).toBe(true);
     expect(workspaceCandidateAccessible("social")).toBe(true);
     expect(workspaceCandidateAccessible("education")).toBe(true);
     expect(WORKSPACE_FLYOUT_OPTIONS.map((option) => option.mode)).toEqual([
+      "overview",
       "aggregation",
       "social",
       "education",
     ]);
     expect(WORKSPACE_FLYOUT_OPTIONS.map((option) => option.label)).toEqual([
+      "Overview",
       "Aggregation",
       "Social",
       "Education",
     ]);
     expect(availableWorkspaceOptions().map((option) => option.label)).toEqual([
+      "Overview",
       "Aggregation",
       "Social",
       "Education",
     ]);
     expect(availableWorkspaceOptions().map((option) => option.href)).toEqual([
+      "/overview",
       "/dashboard",
       "/social",
       "/social/courses",
@@ -65,6 +72,7 @@ describe("workspace menu copy", () => {
       false,
     );
     expect(WORKSPACE_MENU).not.toHaveProperty("href");
+    expect(workspaceModeLabel("overview")).toBe("Overview");
     expect(workspaceModeLabel("aggregation")).toBe("Aggregation");
     expect(workspaceModeLabel("social")).toBe("Social");
     expect(workspaceModeLabel("education")).toBe("Education");

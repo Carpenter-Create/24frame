@@ -21,9 +21,10 @@
 // lane (#320). No current-workspace identity header. No
 // Settings section — Settings stays on the avatar menu.
 //
-// Three workspaces only. Hide lanes the user/org lacks — no
+// Four workspaces. Hide lanes the user/org lacks — no
 // dead / grey-lie pills. Single option → static label. Labels
-// stay Aggregation · Social · Education at every breakpoint —
+// stay Overview · Aggregation · Social · Education at every breakpoint —
+// live unify-lead trailing cluster. Do not move the pills upper-left.
 // no Agg, Edu, or ellipsis-as-design. Tight width flexes the
 // trailing cluster (search yields); pills stay full words and
 // shrink-0. No All Accounts clone. No Referrals / billing.
@@ -73,6 +74,7 @@ export const WORKSPACE_SWITCHER_ABSENT = [
 export const WORKSPACE_SWITCHER_SHORT_LABELS = ["Agg", "Edu"] as const;
 
 export const WORKSPACE_SWITCHER_MARK = {
+  overview: "O",
   aggregation: "A",
   social: "S",
   education: "E",

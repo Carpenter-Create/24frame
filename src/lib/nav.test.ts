@@ -186,6 +186,12 @@ describe("mobileNavDestinations", () => {
       "Reports",
       "Ask 24Frame AI",
     ]);
+    expect(mobileNavDestinations(false, "overview").map((item) => item.href)).toEqual(
+      mobileNavDestinations(false, "aggregation").map((item) => item.href),
+    );
+    expect(railDestinations(false, "overview").items.map((item) => item.href)).toEqual(
+      railDestinations(false, "aggregation").items.map((item) => item.href),
+    );
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/queue");
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/avails");
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/vendors");

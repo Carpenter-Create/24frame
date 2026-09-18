@@ -1,15 +1,16 @@
-// One 24Frame account, three workspace destinations. Cookie persists the
+// One 24Frame account, four workspace destinations. Cookie persists the
 // last chosen mode the same way 24frame_sidebar_collapsed persists the
 // rail. Pathname still wins on destination routes so a /social bookmark
 // shows Social destinations even if the cookie still says aggregation.
-// Education consume land is Route A /social/courses. Staff CMS is
+// Overview is the cross-workspace pulse at /overview — not Aggregation
+// home. Education consume land is Route A /social/courses. Staff CMS is
 // /education under (operator). Member workspace home stays Route A.
 
 export const WORKSPACE_COOKIE = "24frame_workspace";
 
-export type WorkspaceMode = "aggregation" | "social" | "education";
+export type WorkspaceMode = "overview" | "aggregation" | "social" | "education";
 
-export const WORKSPACE_MODES = ["aggregation", "social", "education"] as const;
+export const WORKSPACE_MODES = ["overview", "aggregation", "social", "education"] as const;
 
 const AGGREGATION_PREFIXES = [
   "/dashboard",
@@ -30,15 +31,21 @@ const AGGREGATION_PREFIXES = [
 ] as const;
 
 export function parseWorkspaceCookie(value: string | undefined | null): WorkspaceMode {
+  if (value === "overview") return "overview";
   if (value === "social") return "social";
   if (value === "education") return "education";
   return "aggregation";
 }
 
 export function workspaceHome(mode: WorkspaceMode): string {
+  if (mode === "overview") return "/overview";
   if (mode === "social") return "/social";
   if (mode === "education") return "/social/courses";
   return "/dashboard";
+}
+
+export function isOverviewPath(pathname: string): boolean {
+  return pathname === "/overview" || pathname.startsWith("/overview/");
 }
 
 export function isEducationPath(pathname: string): boolean {
@@ -61,6 +68,7 @@ export function isAggregationPath(pathname: string): boolean {
 }
 
 export function resolveWorkspaceMode(pathname: string, cookie: WorkspaceMode): WorkspaceMode {
+  if (isOverviewPath(pathname)) return "overview";
   if (isEducationPath(pathname)) return "education";
   if (isSocialPath(pathname)) return "social";
   if (isAggregationPath(pathname)) return "aggregation";

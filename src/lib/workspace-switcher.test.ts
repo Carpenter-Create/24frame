@@ -66,11 +66,13 @@ describe("workspace switcher lock", () => {
 
   it("lists only accessible lanes on Route A /social/courses", () => {
     expect(workspaceSwitcherOptions().map((option) => option.label)).toEqual([
+      "Overview",
       "Aggregation",
       "Social",
       "Education",
     ]);
     expect(workspaceSwitcherOptions().map((option) => option.href)).toEqual([
+      "/overview",
       "/dashboard",
       "/social",
       "/social/courses",
@@ -126,10 +128,16 @@ describe("workspace switcher lock", () => {
   });
 
   it("uses leading row marks and a quiet Workspaces heading — no identity header or Settings", () => {
+    expect(workspaceSwitcherMarkLetter("overview")).toBe("O");
     expect(workspaceSwitcherMarkLetter("aggregation")).toBe("A");
     expect(workspaceSwitcherMarkLetter("social")).toBe("S");
     expect(workspaceSwitcherMarkLetter("education")).toBe("E");
-    expect(WORKSPACE_SWITCHER_MARK).toEqual({ aggregation: "A", social: "S", education: "E" });
+    expect(WORKSPACE_SWITCHER_MARK).toEqual({
+      overview: "O",
+      aggregation: "A",
+      social: "S",
+      education: "E",
+    });
     expect(WORKSPACE_SWITCHER_MARK_CLASS).toContain("size-6");
     expect(WORKSPACE_SWITCHER_HEADER_CLASS).toContain("t-label");
     expect(WORKSPACE_SWITCHER_HEADER_CLASS).toContain("text-ink-3");
@@ -196,6 +204,7 @@ describe("workspace switcher lock", () => {
   });
 
   it("keeps full workspace names on desktop pills — no Agg/Edu/ellipsis", () => {
+    expect(workspaceSwitcherSegmentLabel("overview")).toBe("Overview");
     expect(workspaceSwitcherSegmentLabel("aggregation")).toBe("Aggregation");
     expect(workspaceSwitcherSegmentLabel("social")).toBe("Social");
     expect(workspaceSwitcherSegmentLabel("education")).toBe("Education");
