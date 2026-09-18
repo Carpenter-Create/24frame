@@ -179,5 +179,5 @@ select is((select count(*) from public.title_status_overrides
             where title_id = current_setting('t.delivered')::uuid)::int,
   0, 'locked refusal does not write an override row');
 
-select * from finish();
+select finish();
 rollback;
