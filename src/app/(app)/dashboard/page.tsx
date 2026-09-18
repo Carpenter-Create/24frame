@@ -48,6 +48,7 @@ import {
   parseDashboardUserId,
   DASHBOARD_ACTIVITY_AUDIT_ACTIONS,
   DASHBOARD_ACTIVITY_AUDIT_ENTITIES,
+  activityAuditEntityIds,
   applyActivityAudit,
   recentAccountActivity,
   revenuePointsFromLabels,
@@ -222,15 +223,6 @@ export default async function DashboardPage({
       ...points.map((point) => ({ year: point.year, month: point.month })),
       ...(useFixture ? dashboardFixtureSources() : []),
     ];
-    const { data: auditRows } = await supabase
-      .from("audit_log")
-      .select("entity, entity_id, action, actor, at, after, before")
-      .eq("org_id", org.id)
-      .in("entity", [...DASHBOARD_ACTIVITY_AUDIT_ENTITIES])
-      .in("action", [...DASHBOARD_ACTIVITY_AUDIT_ACTIONS])
-      .order("at", { ascending: false })
-      .range(...rangeFor(UNPAGINATED_MAX));
-    const auditEvents: DashboardAuditEvent[] = auditRows ?? [];
     const report =
       moneyLoaded?.latestStatement && moneyLoaded.latestClosed?.closed_at
         ? {
@@ -239,14 +231,55 @@ export default async function DashboardPage({
             href: `${FINANCE_CLIENT_HREF}/${moneyLoaded.latestClosed.id}`,
           }
         : null;
+    // Status announcements join recently-touched titles, not a global audit
+    // slice — metadata saves must not evict a real before/after.status row.
+    const { data: touchedTitleRows } = await supabase
+      .from("titles")
+      .select("id")
+      .eq("org_id", org.id)
+      .order("updated_at", { ascending: false })
+      .range(...rangeFor(UNPAGINATED_MAX));
+    const touchedTitleIds = (touchedTitleRows ?? [])
+      .map((row) => row.id)
+      .filter((id): id is string => Boolean(id));
+    let statusEvents: DashboardAuditEvent[] = [];
+    if (touchedTitleIds.length > 0) {
+      const { data: statusRows } = await supabase
+        .from("audit_log")
+        .select("entity, entity_id, action, actor, at, after, before")
+        .eq("org_id", org.id)
+        .eq("entity", "titles")
+        .eq("action", "update")
+        .in("entity_id", touchedTitleIds)
+        .order("at", { ascending: false })
+        .range(...rangeFor(UNPAGINATED_MAX));
+      statusEvents = statusRows ?? [];
+    }
     const liveActivity = recentAccountActivity({
       titles,
       deliveries: deliveries.rows,
       period,
       userId,
-      events: auditEvents,
+      events: statusEvents,
       report,
     });
+    // Actor + exact time for Title added / Delivery updated — created_by
+    // is not the action. Query the feed's entity IDs so older insert/update
+    // rows still resolve after later metadata fills a recency window.
+    const auditEntityIds = activityAuditEntityIds(liveActivity);
+    let auditEvents: DashboardAuditEvent[] = statusEvents;
+    if (auditEntityIds.length > 0) {
+      const { data: auditRows } = await supabase
+        .from("audit_log")
+        .select("entity, entity_id, action, actor, at, after, before")
+        .eq("org_id", org.id)
+        .in("entity", [...DASHBOARD_ACTIVITY_AUDIT_ENTITIES])
+        .in("action", [...DASHBOARD_ACTIVITY_AUDIT_ACTIONS])
+        .in("entity_id", auditEntityIds)
+        .order("at", { ascending: false })
+        .range(...rangeFor(UNPAGINATED_MAX));
+      auditEvents = [...statusEvents, ...(auditRows ?? [])];
+    }
     const stampedActivity = applyActivityAudit(liveActivity, { events: auditEvents });
     const actorIds = [
       ...new Set(

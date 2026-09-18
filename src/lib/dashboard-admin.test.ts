@@ -479,4 +479,38 @@ describe("recent account activity", () => {
       }),
     ).toEqual([]);
   });
+
+  it("reads title status announcements from audit after when the title is not loaded", () => {
+    const rows = recentAccountActivity({
+      titles: [
+        {
+          id: "newer",
+          title: "Unused Draft",
+          status: "draft",
+          created_at: "2026-09-10T00:00:00.000Z",
+        },
+      ],
+      deliveries: [],
+      period: parseDashboardPeriod("all", now),
+      userId: null,
+      events: [
+        {
+          entity: "titles",
+          entity_id: "old",
+          action: "update",
+          actor: "sam",
+          at: "2026-09-08T16:00:00.000Z",
+          before: { status: "in_review" },
+          after: { status: "live", title: "Harbor Cut", catalog_id: "GC-0009999" },
+        },
+      ],
+    });
+    expect(rows.find((row) => row.kind === "title_status")).toMatchObject({
+      title: "Harbor Cut",
+      href: "/titles/24F-0009999",
+      detail: "status updated to Approved",
+      actorId: "sam",
+    });
+    expect(rows.some((row) => row.title === "Unused Draft")).toBe(true);
+  });
 });

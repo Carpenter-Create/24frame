@@ -1078,6 +1078,42 @@ describe("company admin Overview hero", () => {
     expect(html).not.toContain("Recent account activity");
   });
 
+  it("announces a status change for a title outside the created_at window from audit after", async () => {
+    stubClient(
+      [
+        {
+          id: "newer-draft",
+          title: "Unused Draft",
+          status: "draft",
+          created_at: "2026-09-10T00:00:00.000Z",
+        },
+      ],
+      [],
+      {
+        audit: [
+          {
+            entity: "titles",
+            entity_id: "old-title",
+            action: "update",
+            actor: "sam",
+            at: "2026-09-08T16:00:00.000Z",
+            before: { status: "in_review" },
+            after: { status: "live", title: "Harbor Cut", catalog_id: "GC-0009999" },
+          },
+        ],
+      },
+    );
+    vi.mocked(getOrgContext).mockResolvedValue(
+      ctx({ isGcStaff: false, orgStatus: "active", role: "account_owner" }) as never,
+    );
+    const html = renderToStaticMarkup(await DashboardPage({ searchParams: Promise.resolve({}) }));
+    expect(html).toContain("Harbor Cut");
+    expect(html).toContain("status updated to Approved");
+    expect(html).toContain("/titles/24F-0009999");
+    expect(html).toContain("Unused Draft");
+    expect(html).toContain(DASHBOARD_ADMIN.titleAdded);
+  });
+
   it("surfaces audit_log actor initials and exact timestamp without inventing people", async () => {
     const at = "2026-09-02T15:04:00.000Z";
     stubClient(

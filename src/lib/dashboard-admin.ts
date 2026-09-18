@@ -624,6 +624,19 @@ function activityAuditStatus(payload: unknown): string | null {
   return typeof status === "string" ? status : null;
 }
 
+function activityAuditTitleFields(payload: unknown): {
+  title: string | null;
+  catalogId: string | null;
+} {
+  if (!payload || typeof payload !== "object") {
+    return { title: null, catalogId: null };
+  }
+  const row = payload as { title?: unknown; catalog_id?: unknown };
+  const title = typeof row.title === "string" ? row.title.trim() : "";
+  const catalogId = typeof row.catalog_id === "string" ? row.catalog_id.trim() : "";
+  return { title: title || null, catalogId: catalogId || null };
+}
+
 export type DashboardActivityAuditTarget = {
   entity: DashboardActivityAuditEntity;
   entityId: string;
@@ -770,12 +783,14 @@ export function recentAccountActivity(input: {
     if (!after || after === before) continue;
     const statusLabel = dashboardTitleStatusLabel(after);
     if (!statusLabel) continue;
-    const title = input.titles.find((item) => item.id === entityId);
+    const listed = input.titles.find((item) => item.id === entityId);
+    const fromAfter = activityAuditTitleFields(event.after);
+    const title = listed?.title.trim() || fromAfter.title;
     if (!title) continue;
     rows.push({
       id: `title-status:${entityId}:${event.at}`,
-      title: title.title,
-      href: activityHref(title.catalog_id),
+      title,
+      href: activityHref(listed?.catalog_id ?? fromAfter.catalogId),
       at: event.at,
       count: 1,
       detail: dashboardTitleStatusUpdatedDetail(statusLabel),
