@@ -8,6 +8,7 @@ import {
   peekNewsReadCache,
   resetNewsReadCache,
 } from "./news-load";
+import { memoryNewsStore } from "./news-store";
 
 const NOW = new Date("2026-09-18T18:00:00.000Z");
 
@@ -16,24 +17,9 @@ function item(n: number, published_at: string, title = `Headline ${n}`) {
     id: `n${n}`,
     title,
     url: `https://variety.com/h${n}`,
-    source: "variety",
+    source: "variety" as const,
     published_at,
     image_url: null,
-  };
-}
-
-function fakeClient(result: { data: unknown; error: { message: string } | null }) {
-  const builder: Record<string, unknown> = {};
-  for (const method of ["select", "gte", "lte", "order"]) {
-    builder[method] = vi.fn(() => builder);
-  }
-  builder.range = vi.fn(async () => result);
-  return {
-    from: vi.fn((table: string) => {
-      if (table !== "news_items") throw new Error(`unexpected table ${table}`);
-      return builder;
-    }),
-    builder,
   };
 }
 
@@ -44,48 +30,55 @@ beforeEach(() => {
 
 describe("loadNewsItems", () => {
   it("caps Home at 12, hides rows outside 30 days, and does not fan out RSS", async () => {
-    const rows = [
+    const store = memoryNewsStore([
       ...Array.from({ length: 13 }, (_, i) => item(i + 1, "2026-09-17T12:00:00.000Z")),
       item(99, "2026-08-01T12:00:00.000Z"),
-    ];
-    const supabase = fakeClient({ data: rows, error: null });
-    const home = await loadHomeNews(supabase as never, NOW);
-    expect(home).toHaveLength(NEWS_HOME_CAP);
+    ]);
+    const home = await loadHomeNews(NOW, store);
+    expect(NEWS_HOME_CAP).toBe(12);
+    expect(home).toHaveLength(12);
     expect(home.every((row) => row.published_at >= "2026-08-19T18:00:00.000Z")).toBe(true);
     expect(home.some((row) => row.url.endsWith("/h99"))).toBe(false);
     expect(JSON.stringify(home)).not.toMatch(/summary/i);
-    expect(supabase.from).toHaveBeenCalledWith("news_items");
-    expect(supabase.from).toHaveBeenCalledTimes(1);
   });
 
   it("dedupes the same source title so Home is not spammed", async () => {
-    const supabase = fakeClient({
-      data: [
-        item(1, "2026-09-17T12:00:00.000Z", "Harbor Cut lands a festival slot"),
-        {
-          ...item(2, "2026-09-17T13:00:00.000Z", "Harbor Cut lands a festival slot"),
-          url: "https://variety.com/harbor-cut-alt",
-        },
-      ],
-      error: null,
-    });
-    const loaded = await loadNewsItems(supabase as never, { limit: 12, now: NOW });
+    const store = memoryNewsStore([
+      item(1, "2026-09-17T12:00:00.000Z", "Harbor Cut lands a festival slot"),
+      {
+        ...item(2, "2026-09-17T13:00:00.000Z", "Harbor Cut lands a festival slot"),
+        url: "https://variety.com/harbor-cut-alt",
+      },
+    ]);
+    const loaded = await loadNewsItems({ limit: 12, now: NOW, store });
     expect(loaded.rows).toHaveLength(1);
   });
 
   it("does not cache a failed read as empty news", async () => {
-    const failed = fakeClient({ data: null, error: { message: "boom" } });
-    const first = await loadNewsItems(failed as never, { limit: 12, now: NOW });
+    const store = {
+      queryFeed: vi.fn(async () => {
+        throw new Error("boom");
+      }),
+      upsertItems: vi.fn(),
+      getHealth: vi.fn(),
+      putHealth: vi.fn(),
+      purgeBefore: vi.fn(),
+    };
+    const first = await loadNewsItems({ limit: 12, now: NOW, store });
     expect(first.failed).toBe(true);
     expect(first.rows).toEqual([]);
     expect(peekNewsReadCache(newsReadCacheKey(12, NOW), NOW)).toBeNull();
 
-    const ok = fakeClient({
-      data: [item(1, "2026-09-17T12:00:00.000Z")],
-      error: null,
-    });
-    const second = await loadNewsItems(ok as never, { limit: 12, now: NOW });
+    store.queryFeed.mockResolvedValueOnce([item(1, "2026-09-17T12:00:00.000Z")]);
+    const second = await loadNewsItems({ limit: 12, now: NOW, store });
     expect(second.failed).toBe(false);
     expect(second.rows).toHaveLength(1);
+  });
+
+  it("fail-softs when NEWS_AWS is unset and no store is passed", async () => {
+    const loaded = await loadNewsItems({ limit: 12, now: NOW });
+    expect(loaded.failed).toBe(true);
+    expect(loaded.rows).toEqual([]);
+    expect(peekNewsReadCache(newsReadCacheKey(12, NOW), NOW)).toBeNull();
   });
 });

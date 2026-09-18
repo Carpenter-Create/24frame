@@ -1,16 +1,16 @@
 import { DASHBOARD_HOME } from "@/lib/dashboard-home";
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
+import { NEWS_INGEST_FUNCTION, NEWS_INGEST_SCHEDULE } from "@/lib/news-aws";
 
 // Industry News — house SoT (Adam lock 2026-09-18).
 // Name: News. Home: latest 12 + View all. /news: 30-day history.
 // Link-out cards only. Allowlist verified 2026-09-18.
-// Persistence is Supabase news_items. Ingest is the united Vercel
-// cron (CRON_SECRET), same array as transcode-poll / title-s3-purge.
-// Copy lives here.
+// Storage is AWS DynamoDB. Ingest is Lambda + EventBridge.
+// Not Supabase. Not Vercel cron. Copy lives here.
 
 export const NEWS_HREF = "/news";
-export const NEWS_INGEST_PATH = "/api/cron/news-ingest";
-export const NEWS_CRON_SCHEDULE = "*/30 * * * *";
+export const NEWS_INGEST_PATH = NEWS_INGEST_FUNCTION;
+export { NEWS_INGEST_SCHEDULE };
 export const NEWS_HOME_CAP = 12;
 export const NEWS_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 export const NEWS_READ_REVALIDATE_SECONDS = 60;
@@ -47,7 +47,7 @@ export type NewsSource = {
 };
 
 // Verified 2026-09-18. Kill switch: enabled: false skips ingest (deploy).
-// news_source_health.enabled = false is a second kill without a deploy.
+// Dynamo SOURCE#<id> HEALTH enabled=false is a second kill without a deploy.
 export const NEWS_SOURCES = [
   { id: "indiewire", label: "IndieWire", feedUrl: "https://www.indiewire.com/feed/", enabled: true },
   { id: "variety", label: "Variety", feedUrl: "https://variety.com/feed/", enabled: true },
@@ -136,6 +136,10 @@ export function newsWindowStart(now: Date): Date {
 export function newsInWindow(iso: string, now: Date): boolean {
   const at = Date.parse(iso);
   return Number.isFinite(at) && at >= newsWindowStart(now).getTime() && at <= now.getTime();
+}
+
+export function newsItemTtlEpoch(publishedAt: string): number {
+  return Math.floor((Date.parse(publishedAt) + NEWS_WINDOW_MS) / 1000);
 }
 
 export function newsTitleDedupeKey(source: string, title: string): string {

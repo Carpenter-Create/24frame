@@ -12,9 +12,6 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
-vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn(async () => ({})),
-}));
 vi.mock("@/lib/news-load", () => ({
   loadNewsHistory: vi.fn(),
 }));

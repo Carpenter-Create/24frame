@@ -1,22 +1,16 @@
-import {
-  NEWS_SOURCES,
-  newsSourceIsLive,
-  newsWindowStart,
-  type NewsSourceHealth,
-  type NewsSourceId,
-} from "@/lib/news";
-import { parseNewsFeed, type NormalizedNewsItem } from "@/lib/news-rss";
-import type { createAdminClient } from "@/lib/supabase/admin";
+import { NEWS_SOURCES, newsSourceIsLive, newsWindowStart, type NewsSourceId } from "@/lib/news";
+import { parseNewsFeed } from "@/lib/news-rss";
+import { createNewsIngestStore, type NewsPersist } from "@/lib/news-store";
 
-// Scheduled News ingest (Vercel cron + CRON_SECRET). Fail-soft per source.
-// Persist to news_items only — never fan-out RSS on a page read.
+// Scheduled News ingest (Lambda + EventBridge). Fail-soft per source.
+// Persist to DynamoDB only — never fan-out RSS on a page read.
 
 export const NEWS_FEED_TIMEOUT_MS = 8_000;
 export const NEWS_FEED_MAX_BYTES = 1_500_000;
 export const NEWS_INGEST_CONCURRENCY = 3;
 export const NEWS_USER_AGENT = "24FrameNews/1.0";
 
-type AdminClient = ReturnType<typeof createAdminClient>;
+export type { NewsPersist };
 
 export type NewsIngestSourceResult = {
   source: NewsSourceId;
@@ -34,13 +28,6 @@ export type NewsIngestSummary = {
   skipped: number;
   purged: number;
   results: NewsIngestSourceResult[];
-};
-
-export type NewsPersist = {
-  upsertItems: (items: readonly NormalizedNewsItem[], now: Date) => Promise<number>;
-  getHealth: (source: NewsSourceId) => Promise<NewsSourceHealth | null>;
-  putHealth: (row: NewsSourceHealth) => Promise<void>;
-  purgeBefore: (cutoffIso: string) => Promise<number>;
 };
 
 export async function fetchNewsFeedXml(
@@ -83,95 +70,6 @@ async function runBatched<T, R>(
   return results;
 }
 
-export function memoryNewsPersist(seed: readonly NormalizedNewsItem[] = []): NewsPersist {
-  const items = new Map<string, NormalizedNewsItem>();
-  const health = new Map<NewsSourceId, NewsSourceHealth>();
-  for (const item of seed) items.set(item.canonical_url, item);
-  return {
-    async upsertItems(rows) {
-      for (const row of rows) items.set(row.canonical_url, row);
-      return rows.length;
-    },
-    async getHealth(source) {
-      return health.get(source) ?? null;
-    },
-    async putHealth(row) {
-      health.set(row.source, row);
-    },
-    async purgeBefore(cutoffIso) {
-      let removed = 0;
-      for (const [key, row] of items) {
-        if (row.published_at < cutoffIso) {
-          items.delete(key);
-          removed += 1;
-        }
-      }
-      return removed;
-    },
-  };
-}
-
-export function supabaseNewsPersist(admin: AdminClient): NewsPersist {
-  return {
-    async upsertItems(rows, now) {
-      if (rows.length === 0) return 0;
-      const fetchedAt = now.toISOString();
-      const { error } = await admin.from("news_items").upsert(
-        rows.map((row) => ({
-          title: row.title,
-          url: row.url,
-          canonical_url: row.canonical_url,
-          source: row.source,
-          published_at: row.published_at,
-          image_url: row.image_url,
-          fetched_at: fetchedAt,
-        })),
-        { onConflict: "canonical_url" },
-      );
-      if (error) throw new Error(error.message);
-      return rows.length;
-    },
-    async getHealth(source) {
-      const { data, error } = await admin
-        .from("news_source_health")
-        .select("source, enabled, last_success_at, last_error, last_error_at")
-        .eq("source", source)
-        .maybeSingle();
-      if (error) throw new Error(error.message);
-      if (!data) return null;
-      return {
-        source,
-        enabled: data.enabled !== false,
-        last_success_at: data.last_success_at ?? null,
-        last_error: data.last_error ?? null,
-        last_error_at: data.last_error_at ?? null,
-      };
-    },
-    async putHealth(row) {
-      const { error } = await admin.from("news_source_health").upsert(
-        {
-          source: row.source,
-          enabled: row.enabled,
-          last_success_at: row.last_success_at,
-          last_error: row.last_error,
-          last_error_at: row.last_error_at,
-        },
-        { onConflict: "source" },
-      );
-      if (error) throw new Error(error.message);
-    },
-    async purgeBefore(cutoffIso) {
-      const { data, error } = await admin
-        .from("news_items")
-        .delete()
-        .lt("published_at", cutoffIso)
-        .select("id");
-      if (error) throw new Error(error.message);
-      return data?.length ?? 0;
-    },
-  };
-}
-
 async function markHealth(
   persist: NewsPersist,
   source: NewsSourceId,
@@ -194,12 +92,12 @@ async function markHealth(
 }
 
 export async function ingestNewsFeeds(input: {
-  persist: NewsPersist;
+  persist?: NewsPersist;
   now?: Date;
   fetchXml?: (url: string) => Promise<string>;
 }): Promise<NewsIngestSummary> {
   const now = input.now ?? new Date();
-  const persist = input.persist;
+  const persist = input.persist ?? createNewsIngestStore();
   const fetchXml = input.fetchXml ?? ((url: string) => fetchNewsFeedXml(url));
 
   const results = await runBatched(

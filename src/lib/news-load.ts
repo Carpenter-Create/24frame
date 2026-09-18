@@ -1,33 +1,18 @@
-import type { createClient } from "@/lib/supabase/server";
 import { probeRange, splitProbe, UNPAGINATED_MAX } from "@/lib/list-bounds";
 import {
   NEWS_HOME_CAP,
   NEWS_READ_REVALIDATE_SECONDS,
   dedupeNewsHeadlines,
-  isNewsSourceId,
   newsInWindow,
-  newsWindowStart,
   overviewNewsHeadlines,
   type NewsItem,
   type NewsListResult,
 } from "@/lib/news";
+import { isNewsAwsConfigured } from "@/lib/news-aws";
+import { createNewsAppStore, type NewsStore } from "@/lib/news-store";
 
-// Home + /news read news_items through the signed-in user client
-// (courses-shaped RLS: authenticated SELECT). Never fan out RSS here.
+// Home + /news read Dynamo through dedicated NEWS_AWS_*. Never fan out RSS.
 // Success-only process cache is the SWR equivalent — failures are not stored.
-
-type ServerClient = Awaited<ReturnType<typeof createClient>>;
-
-type NewsItemRow = {
-  id: string;
-  title: string;
-  url: string;
-  source: string;
-  published_at: string;
-  image_url: string | null;
-};
-
-const NEWS_ITEM_SELECT = "id, title, url, source, published_at, image_url";
 
 type NewsCacheEntry = { expiresAt: number; value: NewsListResult };
 
@@ -56,63 +41,39 @@ function rememberNewsRead(key: string, value: NewsListResult, now: Date): void {
   });
 }
 
-function rowToItem(row: NewsItemRow): NewsItem | null {
-  if (!isNewsSourceId(row.source)) return null;
-  return {
-    id: row.id,
-    title: row.title,
-    url: row.url,
-    source: row.source,
-    published_at: row.published_at,
-    image_url: row.image_url,
-  };
-}
-
-export async function loadNewsItems(
-  supabase: ServerClient,
-  input: { limit: number; now: Date },
-): Promise<NewsListResult> {
+export async function loadNewsItems(input: {
+  limit: number;
+  now: Date;
+  store?: NewsStore;
+}): Promise<NewsListResult> {
   const key = newsReadCacheKey(input.limit, input.now);
   const cached = peekNewsReadCache(key, input.now);
   if (cached) return cached;
 
-  const since = newsWindowStart(input.now).toISOString();
-  const until = input.now.toISOString();
-  const { data, error } = await supabase
-    .from("news_items")
-    .select(NEWS_ITEM_SELECT)
-    .gte("published_at", since)
-    .lte("published_at", until)
-    .order("published_at", { ascending: false })
-    .range(...probeRange(input.limit));
-
-  if (error) {
-    console.error(`[news:read] ${error.message}`);
+  if (!input.store && !isNewsAwsConfigured()) {
     return { rows: [], truncated: false, failed: true };
   }
 
-  const mapped = (data ?? [])
-    .map((row) => rowToItem(row as NewsItemRow))
-    .filter((row): row is NewsItem => row !== null)
-    .filter((row) => newsInWindow(row.published_at, input.now));
-  const unique = dedupeNewsHeadlines(mapped);
-  const { rows, truncated } = splitProbe(unique, input.limit);
-  const loaded = { rows, truncated, failed: false };
-  rememberNewsRead(key, loaded, input.now);
-  return loaded;
+  try {
+    const store = input.store ?? createNewsAppStore();
+    const [from, to] = probeRange(input.limit);
+    const fetched = await store.queryFeed({ limit: to - from + 1, now: input.now });
+    const unique = dedupeNewsHeadlines(fetched.filter((row) => newsInWindow(row.published_at, input.now)));
+    const { rows, truncated } = splitProbe(unique, input.limit);
+    const loaded = { rows, truncated, failed: false };
+    rememberNewsRead(key, loaded, input.now);
+    return loaded;
+  } catch (err) {
+    console.error(`[news:read] ${err instanceof Error ? err.message : err}`);
+    return { rows: [], truncated: false, failed: true };
+  }
 }
 
-export async function loadHomeNews(
-  supabase: ServerClient,
-  now: Date,
-): Promise<NewsItem[]> {
-  const loaded = await loadNewsItems(supabase, { limit: NEWS_HOME_CAP, now });
+export async function loadHomeNews(now: Date, store?: NewsStore): Promise<NewsItem[]> {
+  const loaded = await loadNewsItems({ limit: NEWS_HOME_CAP, now, store });
   return overviewNewsHeadlines(loaded.failed ? [] : loaded.rows);
 }
 
-export async function loadNewsHistory(
-  supabase: ServerClient,
-  now: Date,
-): Promise<NewsListResult> {
-  return loadNewsItems(supabase, { limit: UNPAGINATED_MAX, now });
+export async function loadNewsHistory(now: Date, store?: NewsStore): Promise<NewsListResult> {
+  return loadNewsItems({ limit: UNPAGINATED_MAX, now, store });
 }

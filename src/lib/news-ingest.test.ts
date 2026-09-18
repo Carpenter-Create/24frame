@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { NEWS_SOURCES } from "./news";
-import { ingestNewsFeeds, memoryNewsPersist, supabaseNewsPersist } from "./news-ingest";
+import { ingestNewsFeeds } from "./news-ingest";
 import type { NormalizedNewsItem } from "./news-rss";
+import { memoryNewsStore } from "./news-store";
 
 const NOW = new Date("2026-09-18T18:00:00.000Z");
 
@@ -30,7 +31,7 @@ function liveItem(): NormalizedNewsItem {
 
 describe("ingestNewsFeeds", () => {
   it("fails soft per source, skips a killed source, and upserts the rest", async () => {
-    const persist = memoryNewsPersist();
+    const persist = memoryNewsStore();
     await persist.putHealth({
       source: "indiewire",
       enabled: false,
@@ -58,16 +59,20 @@ describe("ingestNewsFeeds", () => {
   });
 
   it("upserts the same canonical URL once and purges rows older than 30 days", async () => {
-    const persist = memoryNewsPersist([
-      liveItem(),
-      {
-        ...liveItem(),
-        title: "Old headline",
-        url: "https://variety.com/old",
-        canonical_url: "https://variety.com/old",
-        published_at: "2026-08-01T12:00:00.000Z",
-      },
-    ]);
+    const persist = memoryNewsStore();
+    await persist.upsertItems(
+      [
+        liveItem(),
+        {
+          ...liveItem(),
+          title: "Old headline",
+          url: "https://variety.com/old",
+          canonical_url: "https://variety.com/old",
+          published_at: "2026-08-01T12:00:00.000Z",
+        },
+      ],
+      NOW,
+    );
     const first = liveItem();
     await persist.upsertItems([first], NOW);
     await persist.upsertItems([{ ...first, title: "Live item again" }], NOW);
@@ -75,36 +80,7 @@ describe("ingestNewsFeeds", () => {
     const summary = await ingestNewsFeeds({ persist, now: NOW, fetchXml });
     expect(summary.purged).toBe(1);
     expect(await persist.purgeBefore("2026-08-19T18:00:00.000Z")).toBe(0);
-  });
-});
-
-describe("supabaseNewsPersist", () => {
-  it("upserts on canonical_url and deletes rows older than the cutoff", async () => {
-    const upsert = vi.fn(async () => ({ error: null }));
-    const del = vi.fn(() => ({
-      lt: vi.fn(() => ({
-        select: vi.fn(async () => ({ data: [{ id: "old" }], error: null })),
-      })),
-    }));
-    const admin = {
-      from: vi.fn((table: string) => {
-        if (table === "news_items") return { upsert, delete: del };
-        throw new Error(`unexpected table ${table}`);
-      }),
-    };
-    const persist = supabaseNewsPersist(admin as never);
-    const row = liveItem();
-    expect(await persist.upsertItems([row, row], NOW)).toBe(2);
-    expect(upsert).toHaveBeenCalledWith(
-      expect.arrayContaining([
-        expect.objectContaining({
-          canonical_url: "https://variety.com/live",
-          title: "Live item",
-          fetched_at: NOW.toISOString(),
-        }),
-      ]),
-      { onConflict: "canonical_url" },
-    );
-    expect(await persist.purgeBefore("2026-08-19T18:00:00.000Z")).toBe(1);
+    const rows = await persist.queryFeed({ limit: 20, now: NOW });
+    expect(rows.filter((row) => row.url === "https://variety.com/live")).toHaveLength(1);
   });
 });

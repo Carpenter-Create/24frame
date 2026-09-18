@@ -1969,63 +1969,6 @@ export type Database = {
           },
         ]
       }
-      news_items: {
-        Row: {
-          canonical_url: string
-          fetched_at: string
-          id: string
-          image_url: string | null
-          published_at: string
-          source: string
-          title: string
-          url: string
-        }
-        Insert: {
-          canonical_url: string
-          fetched_at?: string
-          id?: string
-          image_url?: string | null
-          published_at: string
-          source: string
-          title: string
-          url: string
-        }
-        Update: {
-          canonical_url?: string
-          fetched_at?: string
-          id?: string
-          image_url?: string | null
-          published_at?: string
-          source?: string
-          title?: string
-          url?: string
-        }
-        Relationships: []
-      }
-      news_source_health: {
-        Row: {
-          enabled: boolean
-          last_error: string | null
-          last_error_at: string | null
-          last_success_at: string | null
-          source: string
-        }
-        Insert: {
-          enabled?: boolean
-          last_error?: string | null
-          last_error_at?: string | null
-          last_success_at?: string | null
-          source: string
-        }
-        Update: {
-          enabled?: boolean
-          last_error?: string | null
-          last_error_at?: string | null
-          last_success_at?: string | null
-          source?: string
-        }
-        Relationships: []
-      }
       notification_reads: {
         Row: {
           notification_id: string

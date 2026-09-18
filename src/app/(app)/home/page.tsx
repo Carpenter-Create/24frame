@@ -68,7 +68,7 @@ export default async function HomePage() {
     org ? loadMyDeliveries(supabase) : Promise.resolve({ rows: [], truncated: false }),
     loadDiscoverableCourses(supabase),
     ensureOwnSocialProfile(supabase, ctx.user),
-    loadHomeNews(supabase, now),
+    loadHomeNews(now),
   ]);
 
   const titles = (titleResult.data ?? []) as TitleRow[];

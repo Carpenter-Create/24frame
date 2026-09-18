@@ -5,7 +5,6 @@ import { PageHeader } from "@/components/ui/page-header";
 import { NewsRail } from "@/components/news/news-rail";
 import { NEWS_PAGE } from "@/lib/news";
 import { loadNewsHistory } from "@/lib/news-load";
-import { createClient } from "@/lib/supabase/server";
 import { getOrgContext } from "@/lib/supabase/context";
 
 export default async function NewsPage() {
@@ -13,8 +12,7 @@ export default async function NewsPage() {
   if (!ctx) redirect("/login");
 
   const now = new Date();
-  const supabase = await createClient();
-  const loaded = await loadNewsHistory(supabase, now);
+  const loaded = await loadNewsHistory(now);
 
   return (
     <div data-news-history="">

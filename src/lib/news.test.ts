@@ -1,8 +1,8 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
+import { NEWS_INGEST_FUNCTION, NEWS_INGEST_SCHEDULE } from "./news-aws";
 import {
-  NEWS_CRON_SCHEDULE,
   NEWS_HOME_CAP,
   NEWS_HREF,
   NEWS_INGEST_PATH,
@@ -12,6 +12,7 @@ import {
   NEWS_WINDOW_MS,
   dedupeNewsHeadlines,
   newsInWindow,
+  newsItemTtlEpoch,
   newsSourceIsLive,
   newsSourceLabel,
   newsWindowStart,
@@ -32,15 +33,15 @@ function item(n: number, published_at: string) {
 }
 
 describe("News SoT", () => {
-  it("locks the name, Home cap, 30-day window, house cron, and allowlist", () => {
+  it("locks the name, Home cap, 30-day window, EventBridge ingest, and allowlist", () => {
     expect(NEWS_PAGE.title).toBe("News");
     expect(NEWS_HREF).toBe("/news");
     expect(NEWS_PAGE.viewAll).toBe("View all");
     expect(NEWS_HOME_CAP).toBe(12);
     expect(NEWS_WINDOW_MS).toBe(30 * 24 * 60 * 60 * 1000);
     expect(NEWS_READ_REVALIDATE_SECONDS).toBe(60);
-    expect(NEWS_INGEST_PATH).toBe("/api/cron/news-ingest");
-    expect(NEWS_CRON_SCHEDULE).toBe("*/30 * * * *");
+    expect(NEWS_INGEST_PATH).toBe(NEWS_INGEST_FUNCTION);
+    expect(NEWS_INGEST_SCHEDULE).toBe("rate(30 minutes)");
     expect(NEWS_SOURCES.map((source) => source.label)).toEqual([
       "IndieWire",
       "Variety",
@@ -57,13 +58,12 @@ describe("News SoT", () => {
     expect(NEWS_SOURCES.every((source) => source.enabled)).toBe(true);
     expect(newsSourceLabel("variety")).toBe("Variety");
     expect(JSON.stringify(NEWS_PAGE)).not.toMatch(/summary|rewrite|republish/i);
-    const vercel = readFileSync("vercel.json", "utf8");
-    expect(vercel).toContain(NEWS_INGEST_PATH);
-    expect(vercel).toContain(NEWS_CRON_SCHEDULE);
-    expect(readFileSync("docs/scheduled/news-ingest.md", "utf8")).toContain(NEWS_INGEST_PATH);
+    expect(readFileSync("vercel.json", "utf8")).not.toContain("news-ingest");
+    expect(readFileSync("docs/infra/news-aws-setup.md", "utf8")).toContain(NEWS_INGEST_FUNCTION);
+    expect(readFileSync("docs/infra/news-aws-setup.md", "utf8")).toContain(NEWS_INGEST_SCHEDULE);
   });
 
-  it("caps Home at 12 and hides items outside the 30-day window", () => {
+  it("caps Home at 12, hides items outside 30 days, and stamps TTL", () => {
     const rows = Array.from({ length: 15 }, (_, i) =>
       item(i + 1, "2026-09-17T12:00:00.000Z"),
     );
@@ -76,6 +76,9 @@ describe("News SoT", () => {
     expect(newsInWindow("2026-08-19T18:00:00.000Z", NOW)).toBe(true);
     expect(newsInWindow("2026-08-18T17:59:59.000Z", NOW)).toBe(false);
     expect(newsInWindow("2026-09-19T00:00:00.000Z", NOW)).toBe(false);
+    expect(newsItemTtlEpoch("2026-09-17T12:00:00.000Z")).toBe(
+      Math.floor((Date.parse("2026-09-17T12:00:00.000Z") + NEWS_WINDOW_MS) / 1000),
+    );
   });
 
   it("skips a killed source and drops near-duplicate titles", () => {
