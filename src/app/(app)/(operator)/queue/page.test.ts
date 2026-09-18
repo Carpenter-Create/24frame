@@ -135,6 +135,50 @@ describe("GcQueuePage", () => {
     expect(LIST_PAGE).toBeGreaterThan(0);
   });
 
+  it("pages the bound by updated_at so a long-lived draft turned in today is in the window, then lists by submittedAt", async () => {
+    const { titlesChain } = stubClient({
+      titles: [
+        titleRow({
+          id: "fresh-stub",
+          title: "Fresh Stub",
+          created_at: "2026-09-01T00:00:00Z",
+          created_by: null,
+          catalog_id: "GC-0002002",
+          organizations: { name: "North" },
+        }),
+        titleRow({
+          id: "late-turn-in",
+          title: "Late Turn-in",
+          created_at: "2025-01-01T00:00:00Z",
+          created_by: "user-1",
+          catalog_id: "GC-0002001",
+        }),
+      ],
+      profiles: [{ id: "user-1", display_name: "Maya Chen" }],
+      audit: [
+        {
+          entity_id: "fresh-stub",
+          at: "2026-09-02T00:00:00Z",
+          after: { status: "in_review" },
+        },
+        {
+          entity_id: "late-turn-in",
+          at: "2026-09-18T00:00:00Z",
+          after: { status: "in_review" },
+        },
+      ],
+    });
+
+    const html = renderToStaticMarkup(await GcQueuePage());
+    const lateAt = html.indexOf("Late Turn-in");
+    const freshAt = html.indexOf("Fresh Stub");
+
+    expect(titlesChain.order).toHaveBeenCalledWith("updated_at", { ascending: false });
+    expect(lateAt).toBeGreaterThan(-1);
+    expect(freshAt).toBeGreaterThan(-1);
+    expect(lateAt).toBeLessThan(freshAt);
+  });
+
   it("renders one catalog empty surface with Nothing waiting.", async () => {
     stubClient();
     const html = renderToStaticMarkup(await GcQueuePage());

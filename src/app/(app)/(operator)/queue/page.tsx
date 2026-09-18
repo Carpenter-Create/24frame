@@ -34,7 +34,9 @@ export default async function GcQueuePage() {
     .select("id, title, catalog_id, status, created_at, created_by, release_date, organizations(name)")
     .in("status", [...QUEUE_ACTIVE_STATUSES])
     .is("deleted_at", null)
-    .order("created_at", { ascending: false })
+    // Bound by updated_at so a long-lived draft that just moved to in_review
+    // is in the page. created_at would fill the window with newer stubs.
+    .order("updated_at", { ascending: false })
     .range(...rangeFor(LIST_PAGE));
 
   const list = titles ?? [];
