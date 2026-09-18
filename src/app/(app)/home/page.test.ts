@@ -12,6 +12,9 @@ vi.mock("next/navigation", () => ({
   redirect: vi.fn((to: string) => {
     throw new Error(`REDIRECT:${to}`);
   }),
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn() }),
+  usePathname: () => "/home",
+  useSearchParams: () => new URLSearchParams(),
 }));
 vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({

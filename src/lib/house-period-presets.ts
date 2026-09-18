@@ -1,7 +1,7 @@
 // Period presets: desktop chip row (Reports cluster) + phone HousePageSelect
-// (Dashboard All time SoT). Never flex-wrap — phone is one trigger, not
-// All time · YTD · Year · Quarter · Month wrapping Month onto line 2.
-// Home Net revenue consumes this. Do not fork a Home-only chip row.
+// (Dashboard All time SoT). Phone is one trigger — Month must not sit
+// alone on a second line. Home Net revenue consumes this. Do not fork
+// a Home-only chip row.
 
 import { REPORTS_PERIOD_CLUSTER_CLASS } from "@/lib/reports-craft";
 
