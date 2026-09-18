@@ -38,6 +38,7 @@ export default async function ClientOrgProfilePage({
   const org = toClientOrgs(seats).find((row) => row.orgId === orgId);
   if (!org) notFound();
 
+  // Profile consumes seat StaffDirectory rows. The list page never nests these.
   const people = org.seats.map((seat) => ({
     id: seat.userId,
     name: seat.email,

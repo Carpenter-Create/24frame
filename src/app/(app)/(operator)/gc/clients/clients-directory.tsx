@@ -8,7 +8,6 @@ import {
   CLIENT_DIRECTORY_FILTERS,
   clientDirectorySecondary,
   clientOrgHref,
-  clientSeatSecondary,
   filterClientOrgs,
   toClientOrgs,
   type ClientDirectoryFilter,
@@ -25,6 +24,9 @@ import {
 // reuses this same surface as the staff home when the session has no client
 // org. The RPC re-checks is_gc_staff, so a direct call fails closed even if
 // a React tree renders this outside the (operator) layout.
+//
+// List consumes org StaffDirectory rows only. Seats stay on
+// /gc/clients/[orgId] — never nested under a list row.
 
 export async function GcClientsDirectory({
   statusFilter = "all",
@@ -47,11 +49,6 @@ export async function GcClientsDirectory({
     secondary: clientDirectorySecondary(org),
     trailing: org.status,
     href: clientOrgHref(org.orgId),
-    nested: org.seats.map((seat) => ({
-      id: seat.userId,
-      name: seat.email,
-      secondary: clientSeatSecondary(seat),
-    })),
   }));
 
   return (

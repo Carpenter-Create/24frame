@@ -59,7 +59,7 @@ describe("GcClientsPage read bound", () => {
     expect(surface).not.toContain("text-accent");
   });
 
-  it("renders organizations as the shared directory row", async () => {
+  it("renders organizations as the shared directory row without nested seats", async () => {
     const rpc = vi.fn(async () => ({
       data: [
         {
@@ -75,6 +75,19 @@ describe("GcClientsPage read bound", () => {
           term_expires_at: "2027-08-03T10:00:00Z",
           subscription_status: "active",
         },
+        {
+          user_id: "u2",
+          email: "sam@acmefilms.com",
+          org_id: "22222222-2222-4222-8222-222222222222",
+          organization: "Acme Films",
+          org_status: "active",
+          role: "viewer",
+          joined_at: "2026-08-03T10:00:00Z",
+          last_sign_in: "2026-08-14T09:00:00Z",
+          tier: "pro",
+          term_expires_at: "2027-08-03T10:00:00Z",
+          subscription_status: "active",
+        },
       ],
       error: null,
     }));
@@ -82,14 +95,15 @@ describe("GcClientsPage read bound", () => {
 
     const html = renderToStaticMarkup(await GcClientsPage());
     expect(html).toContain("Acme Films");
-    expect(html).toContain("1 person · Pro");
+    expect(html).toContain("2 people · Pro");
     expect(html).toContain("Active");
     expect(html).toContain("/gc/clients/22222222-2222-4222-8222-222222222222");
     expect(html).toContain("data-staff-directory-row");
     expect(html).toContain("AF");
-    expect(html).toContain("jane@acmefilms.com");
-    expect(html).toContain("Account owner · Aug 14, 2026");
-    expect(html).toContain("data-staff-directory-nested");
+    expect(html).not.toContain("jane@acmefilms.com");
+    expect(html).not.toContain("sam@acmefilms.com");
+    expect(html).not.toContain("Account owner · Aug 14, 2026");
+    expect(html).not.toContain("data-staff-directory-nested");
     expect(html).not.toContain("Organizations with an active seat.");
     expect(html).not.toContain("<table");
     expect(html).not.toContain("EMAIL");
@@ -101,7 +115,8 @@ describe("GcClientsPage read bound", () => {
       "utf8",
     );
     expect(directorySrc).toContain("StaffDirectoryList");
-    expect(directorySrc).toContain("clientSeatSecondary");
+    expect(directorySrc).not.toContain("clientSeatSecondary");
+    expect(directorySrc).not.toContain("nested:");
     expect(directorySrc).not.toContain("subtitle=");
     expect(directorySrc).not.toContain("<table");
   });

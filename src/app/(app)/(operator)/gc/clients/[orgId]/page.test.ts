@@ -56,6 +56,7 @@ describe("client org profile", () => {
     expect(html).toContain("Viewer · Aug 14, 2026");
     expect(html).toContain("2 people");
     expect(html).toContain("data-staff-directory-row");
+    expect(html).not.toContain("data-staff-directory-nested");
     expect(html).toContain(CLIENTS_PAGE.title);
     expect(html).not.toContain("<table");
     expect(html).not.toContain("EMAIL");
