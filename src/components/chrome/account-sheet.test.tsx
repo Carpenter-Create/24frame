@@ -392,6 +392,9 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(html).toContain('data-sheet-group-item="askAssistant"');
     expect(html).not.toContain('href="/messages"');
     expect(html).not.toContain(`href="${USER_MENU.askAssistantHref}"`);
+    expect(src).toContain("<AskAiOpenButton");
+    expect(src).toContain('data-sheet-group-item="askAssistant"');
+    expect(src).toContain("onClick={onClose}");
     expect(html).not.toContain(`href="${USER_MENU.agreementsHref}"`);
     expect(html).not.toContain(`href="${USER_MENU.helpHref}"`);
     expect(html).not.toContain(`href="${USER_MENU.referHref}"`);

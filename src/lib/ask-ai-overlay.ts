@@ -150,6 +150,34 @@ export function legacyAskAiFallbackPath(workspace: WorkspaceMode = "aggregation"
   return workspace === "aggregation" ? "/home" : workspaceHome(workspace);
 }
 
+/** Sheet/nav onClose may unmount the control. Open first so the commit survives. */
+export function fireAskAiOpenThen(
+  openAskAi: (threadId?: string | null) => void,
+  then?: () => void,
+  threadId?: string | null,
+): void {
+  openAskAi(threadId);
+  then?.();
+}
+
+export function askAiStateFromHref(href: string): AskAiOverlayState {
+  const query = href.indexOf("?");
+  return readAskAiOverlay(query >= 0 ? href.slice(query + 1) : "");
+}
+
+export function currentAskAiSearch(): string {
+  if (typeof window === "undefined") return "";
+  return window.location.search;
+}
+
+export function isAskAiDesktopViewport(
+  matchMedia: ((query: string) => { matches: boolean }) | undefined = typeof window === "undefined"
+    ? undefined
+    : window.matchMedia.bind(window),
+): boolean {
+  return Boolean(matchMedia?.("(min-width: 768px)").matches);
+}
+
 export function legacyAskAiInterceptHref(input: {
   threadId?: string | null;
   returnPath?: string | null;

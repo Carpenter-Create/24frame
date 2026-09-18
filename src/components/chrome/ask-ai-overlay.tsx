@@ -26,12 +26,17 @@ import {
   ASK_AI_OVERLAY_PHONE_CLASS,
   askAiCloseHref,
   askAiOverlayHref,
+  askAiStateFromHref,
+  currentAskAiSearch,
+  fireAskAiOpenThen,
+  isAskAiDesktopViewport,
   isLegacyAskAiPath,
   legacyAskAiFallbackPath,
   legacyAskAiInterceptHref,
   readAskAiOverlay,
   readAskAiReturnPath,
   rememberAskAiReturnPath,
+  type AskAiOverlayState,
 } from "@/lib/ask-ai-overlay";
 import { canRenderAskGlobeeLanding, type MessagesSurface } from "@/lib/ask-globee";
 import type { AskGlobeeHistoryRow, AskGlobeeStoredMessage } from "@/lib/ask-globee-conversations";
@@ -75,33 +80,75 @@ function workspaceCookieMode(): ReturnType<typeof parseWorkspaceCookie> {
   return parseWorkspaceCookie(match?.[1] ? decodeURIComponent(match[1]) : null);
 }
 
-const NOOP_ASK_AI: AskAiOverlayContextValue = {
-  open: false,
-  expanded: false,
-  threadId: null,
-  openAskAi: () => {},
-  closeAskAi: () => {},
-  toggleAskAiExpanded: () => {},
-};
-
 export function AskAiOverlayProvider({ children }: { children: ReactNode }) {
-  return (
-    <Suspense fallback={<AskAiOverlayContext.Provider value={NOOP_ASK_AI}>{children}</AskAiOverlayContext.Provider>}>
-      <AskAiOverlayBound>{children}</AskAiOverlayBound>
-    </Suspense>
-  );
-}
-
-function AskAiOverlayBound({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const router = useRouter();
+  const [optimistic, setOptimistic] = useState<AskAiOverlayState | null>(() => {
+    const url = readAskAiOverlay(currentAskAiSearch());
+    return url.open ? url : null;
+  });
   const [expanded, setExpanded] = useState(false);
-  const url = readAskAiOverlay(searchParams);
 
   useEffect(() => {
     rememberAskAiReturnPath(pathname);
   }, [pathname]);
+
+  const openAskAi = useCallback(
+    (threadId?: string | null) => {
+      if (isLegacyAskAiPath(pathname)) return;
+      const href = askAiOverlayHref(pathname, currentAskAiSearch(), threadId);
+      setOptimistic(askAiStateFromHref(href));
+      router.push(href);
+    },
+    [pathname, router],
+  );
+
+  const closeAskAi = useCallback(() => {
+    setExpanded(false);
+    setOptimistic({ open: false, threadId: null });
+    router.replace(askAiCloseHref(pathname, currentAskAiSearch()));
+  }, [pathname, router]);
+
+  const toggleAskAiExpanded = useCallback(() => {
+    setExpanded((current) => !current);
+  }, []);
+
+  const value = useMemo(
+    () => ({
+      open: Boolean(optimistic?.open) && !isLegacyAskAiPath(pathname),
+      expanded,
+      threadId: optimistic?.threadId ?? null,
+      openAskAi,
+      closeAskAi,
+      toggleAskAiExpanded,
+    }),
+    [closeAskAi, expanded, openAskAi, optimistic, pathname, toggleAskAiExpanded],
+  );
+
+  return (
+    <AskAiOverlayContext.Provider value={value}>
+      {children}
+      <Suspense fallback={<AskAiOverlayPanel />}>
+        <AskAiOverlayUrlBound optimistic={optimistic} onOptimistic={setOptimistic} />
+      </Suspense>
+    </AskAiOverlayContext.Provider>
+  );
+}
+
+function AskAiOverlayUrlBound({
+  optimistic,
+  onOptimistic,
+}: {
+  optimistic: AskAiOverlayState | null;
+  onOptimistic: (next: AskAiOverlayState | null) => void;
+}) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const parent = useAskAiOverlay();
+  const url = readAskAiOverlay(searchParams);
+  const open = (optimistic ? optimistic.open : url.open) && !isLegacyAskAiPath(pathname);
+  const threadId = optimistic ? optimistic.threadId : url.threadId;
 
   useEffect(() => {
     if (!isLegacyAskAiPath(pathname)) return;
@@ -111,41 +158,28 @@ function AskAiOverlayBound({ children }: { children: ReactNode }) {
       returnPath: readAskAiReturnPath(fallback),
       workspace: workspaceCookieMode(),
     });
+    onOptimistic(askAiStateFromHref(href));
     router.replace(href);
-  }, [pathname, router, searchParams, url.threadId]);
+  }, [onOptimistic, pathname, router, searchParams, url.threadId]);
 
-  const openAskAi = useCallback(
-    (threadId?: string | null) => {
-      if (isLegacyAskAiPath(pathname)) return;
-      router.push(askAiOverlayHref(pathname, searchParams, threadId));
-    },
-    [pathname, router, searchParams],
-  );
-
-  const closeAskAi = useCallback(() => {
-    setExpanded(false);
-    router.replace(askAiCloseHref(pathname, searchParams));
-  }, [pathname, router, searchParams]);
-
-  const toggleAskAiExpanded = useCallback(() => {
-    setExpanded((current) => !current);
-  }, []);
+  useEffect(() => {
+    if (!optimistic) return;
+    if (optimistic.open === url.open && optimistic.threadId === url.threadId) {
+      onOptimistic(null);
+    }
+  }, [onOptimistic, optimistic, url.open, url.threadId]);
 
   const value = useMemo(
     () => ({
-      open: url.open && !isLegacyAskAiPath(pathname),
-      expanded,
-      threadId: url.threadId,
-      openAskAi,
-      closeAskAi,
-      toggleAskAiExpanded,
+      ...parent,
+      open,
+      threadId,
     }),
-    [closeAskAi, expanded, openAskAi, pathname, toggleAskAiExpanded, url.open, url.threadId],
+    [open, parent, threadId],
   );
 
   return (
     <AskAiOverlayContext.Provider value={value}>
-      {children}
       <AskAiOverlayPanel />
     </AskAiOverlayContext.Provider>
   );
@@ -179,8 +213,9 @@ function AskAiOverlayPanel() {
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
-    if (open && !dialog.open) dialog.showModal();
-    if (!open && dialog.open) dialog.close();
+    const desktop = isAskAiDesktopViewport();
+    if (open && desktop && !dialog.open) dialog.showModal();
+    if ((!open || !desktop) && dialog.open) dialog.close();
   }, [open]);
 
   useEffect(() => {
@@ -262,6 +297,7 @@ function AskAiOverlayPanel() {
       aria-modal="true"
       aria-label={ASK_AI_OVERLAY.dialog}
       data-ask-ai-overlay=""
+      data-ask-ai-overlay-phone=""
       data-ask-ai-expanded="true"
       className="fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end md:hidden"
     >
@@ -324,8 +360,10 @@ export function AskAiOpenButton({
       data-ask-ai-open=""
       className={className}
       onClick={(event) => {
-        onClick?.(event);
-        if (!event.defaultPrevented) openAskAi(threadId);
+        fireAskAiOpenThen(
+          () => openAskAi(threadId),
+          () => onClick?.(event),
+        );
       }}
     >
       {children}

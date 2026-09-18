@@ -10,6 +10,9 @@ import {
   ASK_AI_RETURN_STORAGE,
   askAiCloseHref,
   askAiOverlayHref,
+  askAiStateFromHref,
+  fireAskAiOpenThen,
+  isAskAiDesktopViewport,
   isLegacyAskAiPath,
   legacyAskAiFallbackPath,
   legacyAskAiInterceptHref,
@@ -81,6 +84,48 @@ describe("ask AI overlay URL", () => {
     expect(memory.get(ASK_AI_RETURN_STORAGE)).toBe("/education");
     rememberAskAiReturnPath("/messages");
     expect(readAskAiReturnPath("/home")).toBe("/education");
+  });
+
+  it("chrome / Home / sheet openers write ?ai=1 on the current path — never /messages", () => {
+    const overlaySrc = readFileSync(new URL("../components/chrome/ask-ai-overlay.tsx", import.meta.url), "utf8");
+    const headerSrc = readFileSync(new URL("../components/chrome/ask-assistant-header.tsx", import.meta.url), "utf8");
+    const moduleSrc = readFileSync(new URL("../components/overview/overview-module.tsx", import.meta.url), "utf8");
+    const sheetSrc = readFileSync(new URL("../components/chrome/account-sheet.tsx", import.meta.url), "utf8");
+    const sideNavSrc = readFileSync(new URL("../components/chrome/side-nav.tsx", import.meta.url), "utf8");
+    const mobileNavSrc = readFileSync(new URL("../components/chrome/mobile-nav.tsx", import.meta.url), "utf8");
+
+    expect(askAiOverlayHref("/home")).toBe("/home?ai=1");
+    expect(askAiOverlayHref("/home")).not.toContain("/messages");
+    expect(askAiOverlayHref("/home")).not.toContain("/dashboard");
+    expect(headerSrc).toContain("AskAiOpenButton");
+    expect(moduleSrc).toContain("AskAiOpenButton");
+    expect(moduleSrc).toContain("data-overview-ai-ask");
+    expect(sheetSrc).toContain("AskAiOpenButton");
+    expect(sheetSrc).toContain('data-sheet-group-item="askAssistant"');
+    expect(sideNavSrc).toContain("AskAiOpenButton");
+    expect(mobileNavSrc).toContain("AskAiOpenButton");
+
+    expect(overlaySrc).not.toContain("NOOP_ASK_AI");
+    expect(overlaySrc).not.toMatch(/value=\{NOOP_ASK_AI\}>\{children\}/);
+    expect(overlaySrc).not.toMatch(/fallback=\{<AskAiOverlayContext\.Provider/);
+    expect(overlaySrc).not.toMatch(/fallback=\{[^;]{0,120}\{children\}/);
+
+    const openAt = overlaySrc.indexOf("openAskAi(threadId)");
+    const closeAt = overlaySrc.indexOf("onClick?.(event)");
+    expect(openAt).toBeGreaterThan(-1);
+    expect(closeAt).toBeGreaterThan(-1);
+    expect(openAt).toBeLessThan(closeAt);
+    expect(overlaySrc).toContain("data-ask-ai-overlay-phone");
+
+    const order: string[] = [];
+    fireAskAiOpenThen(
+      () => order.push(askAiOverlayHref("/home")),
+      () => order.push("close"),
+    );
+    expect(order).toEqual(["/home?ai=1", "close"]);
+    expect(askAiStateFromHref("/home?ai=1")).toEqual({ open: true, threadId: null });
+    expect(isAskAiDesktopViewport(() => ({ matches: false }))).toBe(false);
+    expect(isAskAiDesktopViewport(() => ({ matches: true }))).toBe(true);
   });
 
   it("does not name the return slot a KEY — generic-api-key false positive", () => {
