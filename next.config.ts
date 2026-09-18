@@ -83,6 +83,7 @@ const nextConfig: NextConfig = {
       { source: "/deliveries/:path*", destination: "/titles/:path*", permanent: true },
       { source: "/vendors", destination: "/channels", permanent: true },
       { source: "/vendors/:path*", destination: "/channels/:path*", permanent: true },
+      { source: "/news", destination: "/home/news", permanent: true },
     ];
   },
 };

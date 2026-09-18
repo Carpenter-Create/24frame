@@ -6,10 +6,12 @@ import {
   DashboardHomeEmpty,
   DashboardHomePanel,
 } from "@/components/dashboard/dashboard-home";
+
 import {
   DashboardListPanel,
   DashboardTitleRows,
 } from "@/components/dashboard/dashboard-modules";
+import { OverviewModule } from "@/components/overview/overview-module";
 import { NewsRail } from "@/components/news/news-rail";
 import { PageHeader } from "@/components/ui/page-header";
 import type { CourseRow } from "@/lib/courses";
@@ -31,10 +33,9 @@ import {
   OVERVIEW_AREA_NEEDS_CLASS,
   OVERVIEW_AREA_NEWS_CLASS,
   OVERVIEW_AREA_SOCIAL_CLASS,
-  OVERVIEW_EDUCATION_LABEL_CLASS,
   OVERVIEW_HOME_LAYOUT_CLASS,
+  OVERVIEW_MODULE_NEST_CLASS,
   OVERVIEW_PAGE,
-  overviewModuleHeaderAction,
 } from "@/lib/overview";
 import { SOCIAL_AVATAR_32_CLASS } from "@/lib/social-chrome";
 import type { SocialHomeChat } from "@/lib/social-home-chats";
@@ -88,7 +89,7 @@ export function OverviewHome({
         empty={OVERVIEW_PAGE.socialEmpty}
       >
         {socialChats.length > 0 ? (
-          <div className="flex flex-col gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-4)]">
+          <div className={`flex flex-col ${OVERVIEW_MODULE_NEST_CLASS}`}>
             <p data-overview-social-unread="" className="t-body-sm text-ink-2">
               {socialUnread} {OVERVIEW_PAGE.socialUnread}
             </p>
@@ -122,14 +123,13 @@ export function OverviewHome({
       <OverviewModule
         testId="education"
         title={OVERVIEW_PAGE.education}
-        titleClass={OVERVIEW_EDUCATION_LABEL_CLASS}
         href={OVERVIEW_PAGE.educationHref}
         empty={OVERVIEW_PAGE.educationEmpty}
       >
         {courses.length > 0 ? (
           <ul
             data-overview-education-covers=""
-            className="grid grid-cols-1 gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-3"
+            className={`grid grid-cols-1 ${OVERVIEW_MODULE_NEST_CLASS} sm:grid-cols-2 lg:grid-cols-3`}
           >
             {courses.map((course) => (
               <CourseCard
@@ -235,37 +235,5 @@ export function OverviewHome({
       </aside>
       </div>
     </div>
-  );
-}
-
-function OverviewModule({
-  testId,
-  title,
-  titleClass = DASHBOARD_SECTION_TITLE_CLASS,
-  href,
-  cta,
-  empty,
-  children,
-}: {
-  testId: string;
-  title: string;
-  titleClass?: string;
-  href?: string;
-  cta?: string;
-  empty: string;
-  children?: React.ReactNode;
-}) {
-  const hasBody = Boolean(children);
-  const action = overviewModuleHeaderAction(title, href, cta);
-  return (
-    <DashboardHomePanel aria-label={title} data-overview-module={testId}>
-      <div className={`flex items-center justify-between ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD_LIST}`}>
-        <p data-overview-module-label="" className={titleClass}>
-          {title}
-        </p>
-        {action ? <TextAction href={action.href}>{action.label}</TextAction> : null}
-      </div>
-      {hasBody ? children : <DashboardHomeEmpty>{empty}</DashboardHomeEmpty>}
-    </DashboardHomePanel>
   );
 }

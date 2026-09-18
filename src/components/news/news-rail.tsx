@@ -1,19 +1,18 @@
-import { TextAction } from "@/components/chrome/house";
+import { OverviewModule } from "@/components/overview/overview-module";
 import { NewsCard } from "@/components/news/news-card";
 import {
   DASHBOARD_CARD_PAD,
   DASHBOARD_MODULE_CARD_CLASS,
   DASHBOARD_NEWS_HISTORY_LIST_CLASS,
-  DASHBOARD_RELATED_GAP_CLASS,
   DASHBOARD_SECTION_AIR_CLASS,
-  DASHBOARD_SECTION_TITLE_CLASS,
 } from "@/lib/dashboard-craft";
 import { NEWS_HREF, NEWS_PAGE, type NewsItem } from "@/lib/news";
-import { overviewModuleHeaderAction } from "@/lib/overview";
+import { OVERVIEW_MODULE_NEST_CLASS } from "@/lib/overview";
 
-// Home News rail + /news history. Light section header; each article
-// is its own stacked house card. No outer panel slab. Home stays one
-// column. /news uses the house pair grid on desktop.
+// Home News: same OverviewModule shell as Social/Education — header
+// (News + View all) lives inside the grey panel. Articles nest like
+// Education course tiles (no second grey card). History keeps discrete
+// house cards under the page H1.
 
 export function NewsRail({
   items,
@@ -28,33 +27,39 @@ export function NewsRail({
   history?: boolean;
   testId?: string;
 }) {
-  const action = viewAll
-    ? overviewModuleHeaderAction(NEWS_PAGE.title, NEWS_HREF, NEWS_PAGE.viewAll)
-    : null;
-  const listClass = history
-    ? DASHBOARD_NEWS_HISTORY_LIST_CLASS
-    : `flex flex-col ${DASHBOARD_SECTION_AIR_CLASS}`;
+  if (history) {
+    return (
+      <section data-overview-module={testId} className={`flex flex-col ${DASHBOARD_SECTION_AIR_CLASS}`}>
+        {items.length > 0 ? (
+          <ul data-news-list="" className={DASHBOARD_NEWS_HISTORY_LIST_CLASS}>
+            {items.map((item) => (
+              <NewsCard key={item.id} item={item} now={now} />
+            ))}
+          </ul>
+        ) : (
+          <div className={`${DASHBOARD_MODULE_CARD_CLASS} ${DASHBOARD_CARD_PAD}`}>
+            <p className="t-body-sm text-ink-3">{NEWS_PAGE.empty}</p>
+          </div>
+        )}
+      </section>
+    );
+  }
+
   return (
-    <section
-      aria-label={NEWS_PAGE.title}
-      data-overview-module={testId}
-      className={`flex flex-col ${DASHBOARD_SECTION_AIR_CLASS}`}
+    <OverviewModule
+      testId={testId}
+      title={NEWS_PAGE.title}
+      href={viewAll ? NEWS_HREF : undefined}
+      cta={viewAll ? NEWS_PAGE.viewAll : undefined}
+      empty={NEWS_PAGE.empty}
     >
-      <div className={`flex items-center justify-between ${DASHBOARD_RELATED_GAP_CLASS}`}>
-        <p className={DASHBOARD_SECTION_TITLE_CLASS}>{NEWS_PAGE.title}</p>
-        {action ? <TextAction href={action.href}>{action.label}</TextAction> : null}
-      </div>
       {items.length > 0 ? (
-        <ul data-news-list="" className={listClass}>
+        <ul data-news-list="" className={`flex flex-col ${OVERVIEW_MODULE_NEST_CLASS}`}>
           {items.map((item) => (
-            <NewsCard key={item.id} item={item} now={now} />
+            <NewsCard key={item.id} item={item} now={now} density="home" />
           ))}
         </ul>
-      ) : (
-        <div className={`${DASHBOARD_MODULE_CARD_CLASS} ${DASHBOARD_CARD_PAD}`}>
-          <p className="t-body-sm text-ink-3">{NEWS_PAGE.empty}</p>
-        </div>
-      )}
-    </section>
+      ) : null}
+    </OverviewModule>
   );
 }

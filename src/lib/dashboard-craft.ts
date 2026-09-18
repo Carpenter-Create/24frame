@@ -137,7 +137,7 @@ export const DASHBOARD_ACTIVITY_AVATAR_CLASS =
 export const DASHBOARD_ADMIN_PAIR_CLASS =
   "grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-2";
 
-// /news desktop: same stacked cards on the house pair grid. Home rail stays one column.
+// /home/news desktop: same stacked cards on the house pair grid. Home rail stays one column.
 export const DASHBOARD_NEWS_HISTORY_LIST_CLASS = DASHBOARD_ADMIN_PAIR_CLASS;
 
 export const DASHBOARD_VIEW_ALT_CLUSTER_CLASS =

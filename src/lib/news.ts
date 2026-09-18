@@ -3,13 +3,15 @@ import { UNPAGINATED_MAX } from "@/lib/list-bounds";
 import { NEWS_INGEST_FUNCTION, NEWS_INGEST_SCHEDULE } from "@/lib/news-aws";
 
 // Industry News — house SoT (Adam lock 2026-09-18).
-// Name: News. Home: latest 15 + View all. /news: 30-day history.
-// Home-owned only — not a workspace pill, dest rail, or bottom-bar.
-// Link-out cards only. Allowlist verified 2026-09-18.
-// Storage is AWS DynamoDB. Ingest is Lambda + EventBridge.
-// Not Supabase. Not Vercel cron. Copy lives here.
+// Name: News. Home: latest 15 + View all. /home/news: 30-day history.
+// /news permanently redirects here. Home-owned only — not a workspace
+// pill, dest rail, or bottom-bar. Link-out cards only.
+// Allowlist verified 2026-09-18. Storage is AWS DynamoDB. Ingest is
+// Lambda + EventBridge. Not Supabase. Not Vercel cron. Copy lives here.
 
-export const NEWS_HREF = "/news";
+export const NEWS_HOME_HREF = "/home";
+export const NEWS_HREF = "/home/news";
+export const NEWS_LEGACY_HREF = "/news";
 export const NEWS_INGEST_PATH = NEWS_INGEST_FUNCTION;
 export { NEWS_INGEST_SCHEDULE };
 export const NEWS_HOME_CAP = 15;
@@ -21,8 +23,15 @@ export const NEWS_PAGE = {
   viewAll: DASHBOARD_HOME.viewAll,
   empty: "No headlines from the last 30 days.",
   subtitle: "Headlines from the last 30 days.",
+  back: "Home",
+  backHref: NEWS_HOME_HREF,
   truncated: `Showing the first ${UNPAGINATED_MAX} headlines. More exist — this list is not complete.`,
 } as const;
+
+/** Home land crumb — News is a Home child, not a fifth workspace. */
+export function newsHistoryBackLink(): { href: typeof NEWS_HOME_HREF; label: typeof NEWS_PAGE.back } {
+  return { href: NEWS_PAGE.backHref, label: NEWS_PAGE.back };
+}
 
 export const NEWS_SOURCE_IDS = [
   "indiewire",

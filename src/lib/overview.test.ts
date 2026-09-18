@@ -1,23 +1,26 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { ASSISTANT_NAME } from "@/lib/product";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { availableWorkspaceOptions } from "@/lib/workspace-menu";
+import { NEWS_HREF, NEWS_LEGACY_HREF } from "./news";
 import {
   OVERVIEW_AI_NEXT_CAP,
   OVERVIEW_EDUCATION_CAP,
-  OVERVIEW_EDUCATION_LABEL_CLASS,
   OVERVIEW_HREF,
   OVERVIEW_LEGACY_HREF,
   OVERVIEW_MODULE_ORDER,
   OVERVIEW_HOME_COLUMN_GUTTER,
   OVERVIEW_HOME_LAYOUT_CLASS,
+  OVERVIEW_MODULE_NEST_CLASS,
   OVERVIEW_NEWS_CAP,
   OVERVIEW_NEWS_RAIL_WIDTH,
   OVERVIEW_PAGE,
   OVERVIEW_PHONE_MODULE_ORDER,
   OVERVIEW_RAIL_OFF_WIDTH,
   OVERVIEW_SOCIAL_DM_CAP,
+  isHomeLandPath,
   isHomeOwnedPath,
   isNewsHistoryPath,
   isOverviewPath,
@@ -71,7 +74,12 @@ describe("Home lead pills", () => {
     expect(isOverviewPath("/overview/x")).toBe(true);
     expect(isOverviewPath("/dashboard")).toBe(false);
     expect(isOverviewPath("/social")).toBe(false);
-    expect(isOverviewPath("/news")).toBe(false);
+    expect(isOverviewPath(NEWS_LEGACY_HREF)).toBe(false);
+    expect(isOverviewPath(NEWS_HREF)).toBe(true);
+    expect(isHomeLandPath("/home")).toBe(true);
+    expect(isHomeLandPath("/overview")).toBe(true);
+    expect(isHomeLandPath(NEWS_HREF)).toBe(false);
+    expect(isHomeLandPath(NEWS_LEGACY_HREF)).toBe(false);
     expect(overviewLeadSelected("home", "/home", "aggregation")).toBe(true);
     expect(overviewLeadSelected("home", "/overview", "aggregation")).toBe(true);
     expect(overviewLeadSelected("aggregation", "/home", "aggregation")).toBe(false);
@@ -91,31 +99,41 @@ describe("Home lead pills", () => {
     );
   });
 
-  it("keeps /news on Home chrome — not a fifth workspace and not Aggregation", () => {
-    expect(isNewsHistoryPath("/news")).toBe(true);
-    expect(isNewsHistoryPath("/news/x")).toBe(true);
+  it("keeps /home/news on Home chrome — Home pill still navigates to /home", () => {
+    expect(NEWS_HREF).toBe("/home/news");
+    expect(isNewsHistoryPath(NEWS_HREF)).toBe(true);
+    expect(isNewsHistoryPath(`${NEWS_HREF}/x`)).toBe(true);
+    expect(isNewsHistoryPath(NEWS_LEGACY_HREF)).toBe(true);
     expect(isNewsHistoryPath("/home")).toBe(false);
-    expect(isHomeOwnedPath("/news")).toBe(true);
+    expect(isHomeOwnedPath(NEWS_HREF)).toBe(true);
     expect(isHomeOwnedPath("/home")).toBe(true);
     expect(isHomeOwnedPath("/dashboard")).toBe(false);
     expect(isHomeOwnedPath("/social")).toBe(false);
-    expect(overviewLeadSelected("home", "/news", "aggregation")).toBe(true);
-    expect(overviewLeadSelected("home", "/news", "social")).toBe(true);
-    expect(overviewLeadSelected("aggregation", "/news", "aggregation")).toBe(false);
-    expect(overviewLeadSelected("social", "/news", "social")).toBe(false);
-    expect(overviewLeadSelected("education", "/news", "education")).toBe(false);
-    expect(overviewTriggerLabel("/news", "Aggregation")).toBe("Home");
-    expect(overviewLeadShouldNavigate("/news", "aggregation", { id: "home" })).toBe(false);
-    expect(overviewLeadShouldNavigate("/news", "aggregation", { id: "aggregation" })).toBe(true);
+    expect(overviewLeadSelected("home", NEWS_HREF, "aggregation")).toBe(true);
+    expect(overviewLeadSelected("home", NEWS_HREF, "social")).toBe(true);
+    expect(overviewLeadSelected("aggregation", NEWS_HREF, "aggregation")).toBe(false);
+    expect(overviewLeadSelected("social", NEWS_HREF, "social")).toBe(false);
+    expect(overviewLeadSelected("education", NEWS_HREF, "education")).toBe(false);
+    expect(overviewTriggerLabel(NEWS_HREF, "Aggregation")).toBe("Home");
+    expect(overviewLeadShouldNavigate(NEWS_HREF, "aggregation", { id: "home" })).toBe(true);
+    expect(overviewLeadShouldNavigate(NEWS_LEGACY_HREF, "aggregation", { id: "home" })).toBe(true);
+    expect(overviewLeadShouldNavigate("/home", "aggregation", { id: "home" })).toBe(false);
+    expect(overviewLeadShouldNavigate(NEWS_HREF, "aggregation", { id: "aggregation" })).toBe(true);
     expect(overviewLeadPills().map((pill) => pill.id)).not.toContain("news");
-    expect(overviewLeadPills().some((pill) => pill.href === "/news")).toBe(false);
+    expect(overviewLeadPills()[0]?.href).toBe(OVERVIEW_HREF);
+    expect(overviewLeadPills().some((pill) => pill.href === NEWS_HREF)).toBe(false);
+    expect(overviewLeadPills().some((pill) => pill.href === NEWS_LEGACY_HREF)).toBe(false);
+    const switcher = readFileSync("src/components/chrome/workspace-switcher.tsx", "utf8");
+    expect(switcher).toContain("router.push(pill.href)");
+    expect(switcher).toContain("overviewLeadShouldNavigate");
   });
 
   it("hides dest rails on Home and keeps them on workspace routes", () => {
     expect(overviewHidesRail("/home")).toBe(true);
     expect(overviewHidesRail("/home/x")).toBe(true);
     expect(overviewHidesRail("/overview")).toBe(true);
-    expect(overviewHidesRail("/news")).toBe(true);
+    expect(overviewHidesRail(NEWS_HREF)).toBe(true);
+    expect(overviewHidesRail(NEWS_LEGACY_HREF)).toBe(true);
     expect(overviewHidesRail("/dashboard")).toBe(false);
     expect(overviewHidesRail("/social")).toBe(false);
     expect(overviewHidesRail("/social/courses")).toBe(false);
@@ -143,7 +161,7 @@ describe("Home module caps", () => {
       "news",
     ]);
     expect(OVERVIEW_PAGE.news).toBe("News");
-    expect(OVERVIEW_PAGE.newsHref).toBe("/news");
+    expect(OVERVIEW_PAGE.newsHref).toBe(NEWS_HREF);
     expect(OVERVIEW_PAGE.newsViewAll).toBe("View all");
     expect(OVERVIEW_HOME_LAYOUT_CLASS).toContain("'aggregation'_'needs'_'ai'_'news'");
     expect(OVERVIEW_NEWS_RAIL_WIDTH).toBe("20rem");
@@ -194,10 +212,21 @@ describe("Home module caps", () => {
     ).toEqual(["1 title added", "2 deliveries updated"]);
     expect(OVERVIEW_PAGE.educationEmpty).toBeTruthy();
     expect(JSON.stringify(OVERVIEW_PAGE)).not.toMatch(/lesson_progress/);
-    expect(OVERVIEW_EDUCATION_LABEL_CLASS).toBe("t-body-sm text-ink-2");
-    expect(OVERVIEW_EDUCATION_LABEL_CLASS).not.toContain("t-heading");
-    expect(OVERVIEW_EDUCATION_LABEL_CLASS).not.toContain("text-accent");
-    expect(OVERVIEW_EDUCATION_LABEL_CLASS).not.toContain("t-label");
+    expect(OVERVIEW_MODULE_NEST_CLASS).toBe(
+      "gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-4)]",
+    );
+    expect(readFileSync("src/lib/overview.ts", "utf8")).not.toContain(
+      "OVERVIEW_EDUCATION_LABEL_CLASS",
+    );
+    expect(readFileSync("src/components/overview/overview-module.tsx", "utf8")).toContain(
+      "DASHBOARD_SECTION_TITLE_CLASS",
+    );
+    expect(readFileSync("src/components/overview/overview-module.tsx", "utf8")).not.toContain(
+      "titleClass",
+    );
+    expect(readFileSync("src/components/overview/overview-home.tsx", "utf8")).not.toContain(
+      "titleClass",
+    );
   });
 });
 
@@ -217,8 +246,8 @@ describe("overviewModuleHeaderAction", () => {
     expect(
       overviewModuleHeaderAction("Net revenue", "/reports", "Aggregation"),
     ).toEqual({ href: "/reports", label: "Aggregation" });
-    expect(overviewModuleHeaderAction("News", "/news", "View all")).toEqual({
-      href: "/news",
+    expect(overviewModuleHeaderAction("News", NEWS_HREF, "View all")).toEqual({
+      href: NEWS_HREF,
       label: "View all",
     });
   });

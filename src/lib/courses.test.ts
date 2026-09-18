@@ -223,8 +223,11 @@ describe("course lock", () => {
     expect(readFileSync("src/app/(app)/home/page.tsx", "utf8")).toContain(
       "signedEducationCoverUrls",
     );
-    expect(readFileSync("src/components/overview/overview-home.tsx", "utf8")).toContain(
+    expect(readFileSync("src/components/overview/overview-home.tsx", "utf8")).not.toContain(
       "OVERVIEW_EDUCATION_LABEL_CLASS",
+    );
+    expect(readFileSync("src/components/overview/overview-home.tsx", "utf8")).not.toContain(
+      "titleClass",
     );
     expect(readFileSync("src/app/(app)/home/page.tsx", "utf8")).not.toContain("62");
     expect(lib).toContain("COURSE_GLANCE_PROGRESS_FILL_CLASS");

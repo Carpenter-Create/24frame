@@ -284,8 +284,8 @@ describe("AppShell Home chrome", () => {
     }
   });
 
-  it("keeps /news on Home chrome — no dest rail and no News workspace pill", () => {
-    navigation.pathname = "/news";
+  it("keeps /home/news on Home chrome — no dest rail and no News workspace pill", () => {
+    navigation.pathname = "/home/news";
     const news = renderShell();
     expect(news).toContain('data-home-chrome=""');
     expect(news).toContain("data-app-home-frame");

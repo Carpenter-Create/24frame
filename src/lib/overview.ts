@@ -8,7 +8,7 @@ import {
   type ClientHomeDoNextItem,
   type DashboardChangeRow,
 } from "@/lib/dashboard-home";
-import { NEWS_HOME_CAP, NEWS_HREF, NEWS_PAGE } from "@/lib/news";
+import { NEWS_HOME_CAP, NEWS_HREF, NEWS_LEGACY_HREF, NEWS_PAGE } from "@/lib/news";
 import { REPORTS_HREF } from "@/lib/reports";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { availableWorkspaceOptions, type WorkspaceMenuOption } from "@/lib/workspace-menu";
@@ -17,8 +17,9 @@ import type { WorkspaceMode } from "@/lib/workspace";
 // Account Home is the leftmost unify-lead pill. Not a fourth product.
 // Not Social Home (`/social` feed). Aggregation · Social · Education
 // stay the three workspace destinations. /overview redirects to /home.
-// /news is Home-owned 30-day history — same Home chrome, not a fifth
+// /home/news is Home-owned 30-day history — same Home chrome, not a fifth
 // workspace and not an Aggregation / Social / Education destination.
+// /news permanently redirects there.
 // Home IA v2 (Adam 2026-09-18): no dest rail on /home — unify-lead
 // chrome + five modules only. Rails return in Aggregation · Social ·
 // Education. Copy lives here, not JSX.
@@ -76,6 +77,10 @@ export const OVERVIEW_AREA_NEEDS_CLASS = "[grid-area:needs]";
 export const OVERVIEW_AREA_AI_CLASS = "[grid-area:ai]";
 export const OVERVIEW_AREA_NEWS_CLASS =
   "[grid-area:news] lg:sticky lg:top-[calc(var(--header-height)+var(--space-4))] lg:max-h-[calc(100dvh-var(--header-height)-var(--space-8))] lg:overflow-y-auto";
+
+/** Inner pad + gap for tiles inside a Home module shell (Education covers, News cards). */
+export const OVERVIEW_MODULE_NEST_CLASS =
+  "gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-4)]";
 export const OVERVIEW_RAIL_OFF_WIDTH = "0px";
 
 export const OVERVIEW_PAGE = {
@@ -108,10 +113,6 @@ export const OVERVIEW_PAGE = {
   aiAsk: ASK_ASSISTANT,
 } as const;
 
-// Figma Home Education module label — 13 / ink-2, not a heading and
-// not a Sporty Blue echo. Other Home modules stay section-title ink.
-export const OVERVIEW_EDUCATION_LABEL_CLASS = "t-body-sm text-ink-2";
-
 /** Header TextAction only when the label is distinct from the module title. */
 export function overviewModuleHeaderAction(
   title: string,
@@ -140,17 +141,22 @@ export function isOverviewPath(pathname: string): boolean {
   return isPrefixed(pathname, OVERVIEW_HREF) || isPrefixed(pathname, OVERVIEW_LEGACY_HREF);
 }
 
-/** Home-owned /news history. Not a workspace land and not Overview itself. */
+/** Home-owned /home/news history (and leftover /news). Not a workspace land. */
 export function isNewsHistoryPath(pathname: string): boolean {
-  return isPrefixed(pathname, NEWS_HREF);
+  return isPrefixed(pathname, NEWS_HREF) || isPrefixed(pathname, NEWS_LEGACY_HREF);
 }
 
-/** Home unify-lead chrome: /home, leftover /overview, and Home-owned /news. */
+/** Exact Home land — not a Home child such as /home/news. */
+export function isHomeLandPath(pathname: string): boolean {
+  return pathname === OVERVIEW_HREF || pathname === OVERVIEW_LEGACY_HREF;
+}
+
+/** Home unify-lead chrome: /home, leftover /overview, and Home-owned news. */
 export function isHomeOwnedPath(pathname: string): boolean {
   return isOverviewPath(pathname) || isNewsHistoryPath(pathname);
 }
 
-/** Dest rails stay off Home (+ /news). Aggregation · Social · Education keep today's rail. */
+/** Dest rails stay off Home (+ /home/news). Aggregation · Social · Education keep today's rail. */
 export function overviewHidesRail(pathname: string): boolean {
   return isHomeOwnedPath(pathname);
 }
@@ -185,12 +191,14 @@ export function overviewTriggerLabel(
   return isHomeOwnedPath(pathname) ? OVERVIEW_PAGE.title : workspaceLabel;
 }
 
-/** Idle pills always navigate — Home is not Aggregation home. */
+/** Idle pills always navigate. Home pill always goes to /home, including
+ *  from Home children such as /home/news — selected chrome is not a no-op. */
 export function overviewLeadShouldNavigate(
   pathname: string,
   workspace: WorkspaceMode,
   pill: Pick<OverviewLeadPill, "id">,
 ): boolean {
+  if (pill.id === "home") return !isHomeLandPath(pathname);
   return !overviewLeadSelected(pill.id, pathname, workspace);
 }
 
