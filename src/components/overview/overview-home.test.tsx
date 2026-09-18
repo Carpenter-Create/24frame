@@ -51,6 +51,28 @@ function periodChipPressed(html: string, grain: string): boolean | null {
   return /aria-pressed="true"/.test(match[0]);
 }
 
+function collectFunctionProps(node: unknown, found: string[] = []): string[] {
+  if (!node || typeof node !== "object") return found;
+  if (Array.isArray(node)) {
+    for (const child of node) collectFunctionProps(child, found);
+    return found;
+  }
+  const el = node as { type?: { name?: string; displayName?: string }; props?: Record<string, unknown> };
+  if (el.props) {
+    for (const [key, value] of Object.entries(el.props)) {
+      if (key === "children") {
+        collectFunctionProps(value, found);
+        continue;
+      }
+      if (typeof value === "function") {
+        const name = el.type?.displayName ?? el.type?.name ?? "anon";
+        found.push(`${name}.${key}`);
+      }
+    }
+  }
+  return found;
+}
+
 function moduleOrder(html: string): string[] {
   const marks = [
     { id: "revenue", at: html.indexOf("data-overview-revenue") },
@@ -217,6 +239,28 @@ describe("OverviewHome", () => {
     expect(homeSrc).not.toContain("flex-wrap");
     expect(homeSrc).not.toContain("overflow-x-auto");
     expect(html).toContain(REPORTS_PAGE.month);
+  });
+
+  it("does not pass a function into HousePeriodPresets — RSC cannot serialize chipAttrs", () => {
+    const tree = OverviewHome(homeProps());
+    const functions = collectFunctionProps(tree);
+    const html = renderToStaticMarkup(tree);
+    const homeSrc = readFileSync(new URL("./overview-home.tsx", import.meta.url), "utf8");
+    const presetsSrc = readFileSync(
+      new URL("../chrome/house-period-presets.tsx", import.meta.url),
+      "utf8",
+    );
+
+    expect(functions).toEqual([]);
+    expect(homeSrc).toContain('chipDataAttr="data-overview-revenue-period-chip"');
+    expect(homeSrc).not.toContain("chipAttrs");
+    expect(homeSrc).not.toMatch(/chipDataAttr=\{/);
+    expect(presetsSrc).toContain("chipDataAttr");
+    expect(presetsSrc).not.toContain("chipAttrs");
+    expect(html).toContain('data-overview-revenue-period-chip="all"');
+    for (const preset of REPORTS_PERIOD_PRESETS) {
+      expect(html).toContain(`data-overview-revenue-period-chip="${preset.grain}"`);
+    }
   });
 
   it("keeps the Home AI teaser as a quiet overlay opener — never a dest hop", () => {

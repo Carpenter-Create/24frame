@@ -23,6 +23,8 @@ describe("HousePeriodPresets craft", () => {
     expect(craft).not.toContain("flex-wrap");
     expect(src).toContain("HousePageSelect");
     expect(src).toContain("REPORTS_PERIOD_CHIP_CLASS");
+    expect(src).toContain("chipDataAttr");
+    expect(src).not.toContain("chipAttrs");
     expect(src).not.toContain("flex-wrap");
     expect(src).not.toContain("overflow-x-auto");
   });
