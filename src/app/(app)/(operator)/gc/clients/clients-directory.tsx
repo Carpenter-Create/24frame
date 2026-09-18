@@ -1,11 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { StatusFilter } from "@/components/layout/status-filter";
 import { StaffDirectoryList } from "@/components/staff/staff-directory-list";
 import {
   CLIENTS_PAGE,
-  CLIENT_DIRECTORY_FILTERS,
   clientDirectorySecondary,
   clientOrgHref,
   filterClientOrgs,
@@ -17,8 +15,9 @@ import { UNPAGINATED_MAX, splitProbe } from "@/lib/list-bounds";
 import {
   STAFF_DIRECTORY_EMPTY_CLASS,
   directoryCountLabel,
-  filterHref,
 } from "@/lib/staff-directory";
+
+import { ClientsStatusFilter } from "./clients-status-filter";
 
 // GC-wide client roster. /gc/clients is the dedicated operator URL; `/`
 // reuses this same surface as the staff home when the session has no client
@@ -27,6 +26,8 @@ import {
 //
 // List consumes org StaffDirectory rows only. Seats stay on
 // /gc/clients/[orgId] — never nested under a list row.
+// Status is HousePageSelect trailing on PageHeader (Dashboard All time SoT)
+// at every breakpoint — no chip-strip filter.
 
 export async function GcClientsDirectory({
   statusFilter = "all",
@@ -53,7 +54,11 @@ export async function GcClientsDirectory({
 
   return (
     <>
-      <PageHeader title={CLIENTS_PAGE.title} />
+      <PageHeader
+        title={CLIENTS_PAGE.title}
+        className={showFilters ? "items-center" : undefined}
+        actions={showFilters ? <ClientsStatusFilter status={statusFilter} /> : undefined}
+      />
 
       {truncated ? (
         <InlineNotice tone="error" className="mb-4">
@@ -64,15 +69,6 @@ export async function GcClientsDirectory({
       <StaffDirectoryList
         rows={rows}
         countLabel={directoryCountLabel(rows.length, "client", "clients")}
-        filters={
-          showFilters ? (
-            <StatusFilter
-              current={statusFilter}
-              options={[...CLIENT_DIRECTORY_FILTERS]}
-              hrefFor={(key) => filterHref("/gc/clients", key)}
-            />
-          ) : undefined
-        }
         empty={<p className={STAFF_DIRECTORY_EMPTY_CLASS}>{CLIENTS_PAGE.empty}</p>}
       />
     </>

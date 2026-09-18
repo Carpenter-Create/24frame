@@ -3,9 +3,14 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn() }),
+  usePathname: () => "/gc/clients",
+  useSearchParams: () => new URLSearchParams(),
+}));
 
 import { createClient } from "@/lib/supabase/server";
-import { CLIENTS_PAGE } from "@/lib/clients";
+import { CLIENTS_PAGE, CLIENT_DIRECTORY_FILTERS } from "@/lib/clients";
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
 
 import GcClientsPage from "./page";
@@ -47,6 +52,9 @@ describe("GcClientsPage read bound", () => {
     expect(html).toContain(CLIENTS_PAGE.empty);
     expect(html).toContain("data-staff-directory");
     expect(html).toContain("0 clients");
+    expect(html).toContain("data-house-page-select");
+    expect(html).toContain("data-gc-clients-status-trigger");
+    expect(html).not.toContain('role="group"');
     expect(html).not.toContain("Organizations with an active seat.");
     expect(html).not.toContain("Every person holding an active seat");
     expect(html).not.toContain("No client organizations yet.");
@@ -115,9 +123,21 @@ describe("GcClientsPage read bound", () => {
       "utf8",
     );
     expect(directorySrc).toContain("StaffDirectoryList");
+    expect(directorySrc).toContain("ClientsStatusFilter");
+    expect(directorySrc).toContain("PageHeader");
+    expect(directorySrc).not.toContain("StatusFilter");
     expect(directorySrc).not.toContain("clientSeatSecondary");
     expect(directorySrc).not.toContain("nested:");
     expect(directorySrc).not.toContain("subtitle=");
     expect(directorySrc).not.toContain("<table");
+    expect(html).toContain("data-house-page-select");
+    expect(html).toContain("data-gc-clients-status-trigger");
+    expect(html).toContain("data-staff-directory-count");
+    expect(html).toContain("1 client");
+    expect(html).not.toContain('role="group"');
+    expect(html).not.toContain("data-gc-clients-status-pills");
+    for (const { label } of CLIENT_DIRECTORY_FILTERS) {
+      expect(html).not.toContain(label.toUpperCase());
+    }
   });
 });

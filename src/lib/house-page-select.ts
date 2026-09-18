@@ -1,7 +1,8 @@
 // House standard for in-page filter/select menus.
 // SoT: Dashboard All time (period) — quiet trigger, desktop menu, phone bottom sheet,
 // trailing Sporty Blue check, flush-left labels. Hairline + air; no drop shadow.
-// Consumers: Dashboard period, Titles status filter. Do not invent a second grammar.
+// Consumers: Dashboard period, Titles status filter, Clients status filter.
+// Do not invent a second grammar.
 
 import { HOUSE_PERIOD_SELECTED_CLASS } from "@/lib/house-shell";
 

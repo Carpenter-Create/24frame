@@ -3,9 +3,11 @@ import { describe, expect, it } from "vitest";
 import { Constants } from "@/lib/supabase/database.types";
 import {
   CLIENTS_PAGE,
+  CLIENT_DIRECTORY_FILTERS,
   CLIENT_PROFILE,
   ORG_ROLE_LABELS,
   ORG_STATUS_LABELS,
+  clientDirectoryFilterLabel,
   clientDirectorySecondary,
   clientOrgFields,
   clientOrgHref,
@@ -40,7 +42,25 @@ describe("CLIENTS_PAGE copy", () => {
     expect(CLIENTS_PAGE.empty).toBe("No clients yet.");
     expect(CLIENTS_PAGE.empty.toLowerCase()).not.toContain("add");
     expect(CLIENTS_PAGE).not.toHaveProperty("subtitle");
+    expect(CLIENTS_PAGE.statusFilterLabel).toBe("Filter by status");
     expect(CLIENT_PROFILE.peopleTitle).toBe("People");
+  });
+
+  it("keeps sentence-case directory filter labels from ORG_STATUS_LABELS", () => {
+    expect(CLIENT_DIRECTORY_FILTERS.map((option) => option.label)).toEqual([
+      "All",
+      "Registered",
+      "Awaiting payment",
+      "Active",
+      "Payment lapsed",
+      "Closed",
+    ]);
+    expect(clientDirectoryFilterLabel("all")).toBe("All");
+    expect(clientDirectoryFilterLabel("awaiting_payment")).toBe("Awaiting payment");
+    expect(clientDirectoryFilterLabel("payment_lapsed")).toBe("Payment lapsed");
+    for (const { label } of CLIENT_DIRECTORY_FILTERS) {
+      expect(label).not.toBe(label.toUpperCase());
+    }
   });
 });
 
