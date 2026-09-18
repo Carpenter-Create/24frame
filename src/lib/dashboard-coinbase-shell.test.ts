@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
@@ -42,7 +42,8 @@ const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
 const lead = readFileSync("src/components/chrome/house-lead-chrome.tsx", "utf8");
 const sideNav = readFileSync("src/components/chrome/side-nav.tsx", "utf8");
 const search = readFileSync("src/components/layout/search-field.tsx", "utf8");
-const statusFilter = readFileSync("src/components/layout/status-filter.tsx", "utf8");
+const housePageSelect = readFileSync("src/lib/house-page-select.ts", "utf8");
+const period = readFileSync("src/components/dashboard/dashboard-admin-controls.tsx", "utf8");
 const page = readFileSync("src/app/(app)/dashboard/page.tsx", "utf8");
 
 describe("Coinbase shell rematch — Adam miss list v1", () => {
@@ -95,17 +96,19 @@ describe("Coinbase shell rematch — Adam miss list v1", () => {
     expect(DASHBOARD_SECTION_TITLE_CLASS).toBe("t-heading text-ink");
   });
 
-  it("reserves Sporty Blue fill for CTA / rail wash / links — filters are ink pills", () => {
+  it("reserves Sporty Blue fill for CTA / rail wash / links — period is HousePageSelect", () => {
     expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).toBe("bg-ink text-surface");
     expect(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS).toBe("bg-surface-muted text-ink");
     expect(DASHBOARD_PERIOD_TRIGGER_CLASS).toContain("bg-surface-muted");
     expect(DASHBOARD_PERIOD_TRIGGER_CLASS).not.toContain("bg-accent");
     expect(DASHBOARD_PERIOD_OPTION_SELECTED_CLASS).toBe("bg-surface-muted");
-    expect(statusFilter).toContain("HOUSE_FILTER_ON_CLASS");
-    expect(statusFilter).toContain("HOUSE_FILTER_OFF_CLASS");
+    expect(existsSync("src/components/layout/status-filter.tsx")).toBe(false);
+    expect(period).toContain("HousePageSelect");
+    expect(period).not.toContain("status-filter");
+    expect(housePageSelect).toContain("HOUSE_PERIOD_SELECTED_CLASS");
+    expect(housePageSelect).toMatch(/Dashboard All time/);
     expect(HOUSE_FILTER_ON_CLASS).toBe("bg-ink text-surface");
     expect(HOUSE_FILTER_OFF_CLASS).toBe("bg-surface-muted text-ink");
-    expect(statusFilter).not.toContain("bg-accent");
     const chart = readFileSync("src/components/dashboard/dashboard-revenue-chart.tsx", "utf8");
     expect(chart).toContain('className="block text-accent"');
     expect(chart).not.toMatch(/#[0-9a-fA-F]{6}/);

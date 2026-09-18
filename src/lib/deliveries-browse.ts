@@ -1,6 +1,6 @@
 // Pure helpers for the client /deliveries browse surface. URL parsing, row validation,
 // filter, sort, status-chip tone, page-view copy, and query construction — unit-tested in
-// isolation. The page composes DataTable / StatusFilter / EmptyState; this module never
+// isolation. The page composes DataTable / HousePageSelect / EmptyState; this module never
 // touches React or Supabase. RPC rows are untrusted until validated.
 
 import {
