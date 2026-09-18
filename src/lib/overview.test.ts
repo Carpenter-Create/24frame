@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { ASSISTANT_NAME } from "@/lib/product";
@@ -122,6 +123,9 @@ describe("Home lead pills", () => {
     expect(overviewLeadPills()[0]?.href).toBe(OVERVIEW_HREF);
     expect(overviewLeadPills().some((pill) => pill.href === NEWS_HREF)).toBe(false);
     expect(overviewLeadPills().some((pill) => pill.href === NEWS_LEGACY_HREF)).toBe(false);
+    const switcher = readFileSync("src/components/chrome/workspace-switcher.tsx", "utf8");
+    expect(switcher).toContain("router.push(OVERVIEW_HREF)");
+    expect(switcher).toContain("overviewLeadShouldNavigate");
   });
 
   it("hides dest rails on Home and keeps them on workspace routes", () => {

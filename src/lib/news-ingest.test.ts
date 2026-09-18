@@ -1,7 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { NEWS_SOURCES } from "./news";
-import { fillNewsOgImages, ingestNewsFeeds } from "./news-ingest";
+import {
+  NEWS_OG_CONCURRENCY,
+  NEWS_OG_TIMEOUT_MS,
+  fetchNewsArticleHtml,
+  fillNewsOgImages,
+  ingestNewsFeeds,
+} from "./news-ingest";
 import type { NormalizedNewsItem } from "./news-rss";
 import { memoryNewsStore } from "./news-store";
 
@@ -175,6 +181,60 @@ describe("ingest OG images", () => {
     expect(summary.results.find((row) => row.source === "hollywood-reporter")?.error).toBeUndefined();
     const rows = await persist.queryFeed({ limit: 20, now: NOW });
     expect(rows[0]?.image_url).toBeNull();
+  });
+
+  it("scrapes missing images independently — one miss does not drop a sibling hit", async () => {
+    const persist = memoryNewsStore();
+    const mixed = `<?xml version="1.0"?>
+<rss version="2.0">
+  <channel>
+    <item>
+      <title>Hit</title>
+      <link>https://hollywoodreporter.com/hit</link>
+      <pubDate>Thu, 17 Sep 2026 12:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Miss</title>
+      <link>https://hollywoodreporter.com/miss</link>
+      <pubDate>Thu, 17 Sep 2026 13:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>`;
+    const fetchOgHtml = vi.fn(async (url: string) => {
+      if (url === "https://hollywoodreporter.com/miss") throw new Error("timeout");
+      return `<meta property="og:image" content="https://thr.com/hit.jpg" />`;
+    });
+    const summary = await ingestNewsFeeds({
+      persist,
+      now: NOW,
+      fetchXml: async (url: string) =>
+        url === "https://www.hollywoodreporter.com/feed/" ? mixed : EMPTY_FEED,
+      fetchOgHtml,
+    });
+    expect(summary.failed).toBe(0);
+    const rows = await persist.queryFeed({ limit: 20, now: NOW });
+    expect(rows.find((row) => row.url === "https://hollywoodreporter.com/hit")?.image_url).toBe(
+      "https://thr.com/hit.jpg",
+    );
+    expect(rows.find((row) => row.url === "https://hollywoodreporter.com/miss")?.image_url).toBeNull();
+  });
+});
+
+describe("fetchNewsArticleHtml", () => {
+  it("uses a 4s hard timeout and fail-softs to null", async () => {
+    expect(NEWS_OG_TIMEOUT_MS).toBe(4_000);
+    expect(NEWS_OG_CONCURRENCY).toBe(4);
+    const html = await fetchNewsArticleHtml("https://hollywoodreporter.com/story", {
+      fetchImpl: async () => {
+        throw new Error("aborted");
+      },
+    });
+    expect(html).toBeNull();
+    expect(
+      await fetchNewsArticleHtml("https://hollywoodreporter.com/story", {
+        fetchImpl: async () => new Response("nope", { status: 503 }),
+      }),
+    ).toBeNull();
   });
 });
 

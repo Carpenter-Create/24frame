@@ -126,6 +126,13 @@ function firstImageUrl(block: string, base: string): string | null {
 
 const OG_IMAGE_KEYS = ["og:image", "og:image:url", "twitter:image", "twitter:image:src"] as const;
 
+function isUsableOgImage(canonical: string, pageUrl?: string): boolean {
+  if (!canonical.startsWith("https://")) return false;
+  if (!pageUrl) return true;
+  const page = canonicalizeNewsUrl(pageUrl);
+  return page !== canonical;
+}
+
 /** Article HTML only — og:image, then twitter:image. Not RSS description. */
 export function parseOgImageUrl(html: string, base?: string): string | null {
   const tags = html.match(/<meta\b[^>]*>/gi) ?? [];
@@ -140,7 +147,7 @@ export function parseOgImageUrl(html: string, base?: string): string | null {
     const raw = found.get(key);
     if (!raw) continue;
     const canonical = canonicalizeNewsUrl(raw, base);
-    if (canonical) return canonical;
+    if (canonical && isUsableOgImage(canonical, base)) return canonical;
   }
   return null;
 }

@@ -177,7 +177,12 @@ export async function ingestNewsFeeds(input: {
       try {
         const xml = await fetchXml(source.feedUrl);
         const parsed = parseNewsFeed(xml, source.id, now);
-        const items = await fillNewsOgImages(parsed, { fetchHtml: fetchOgHtml });
+        let items = parsed;
+        try {
+          items = await fillNewsOgImages(parsed, { fetchHtml: fetchOgHtml });
+        } catch {
+          items = parsed;
+        }
         const inserted = await persist.upsertItems(items, now);
         await markHealth(persist, source.id, { now });
         console.log(

@@ -120,6 +120,25 @@ describe("parseOgImageUrl", () => {
       ),
     ).toBe("https://hollywoodreporter.com/tw.jpg");
     expect(parseOgImageUrl("<html></html>", "https://hollywoodreporter.com/story")).toBeNull();
+    expect(
+      parseOgImageUrl(
+        `<meta content="https://thr.com/late.jpg" property="og:image" />`,
+        "https://hollywoodreporter.com/story",
+      ),
+    ).toBe("https://thr.com/late.jpg");
+  });
+
+  it("rejects data URLs, empty content, and same-as-page images", () => {
+    const page = "https://hollywoodreporter.com/story";
+    expect(parseOgImageUrl(`<meta property="og:image" content="data:image/png;base64,xxxx" />`, page)).toBeNull();
+    expect(parseOgImageUrl(`<meta property="og:image" content="" />`, page)).toBeNull();
+    expect(parseOgImageUrl(`<meta property="og:image" content="${page}" />`, page)).toBeNull();
+    expect(
+      parseOgImageUrl(
+        `<meta name="twitter:image:src" content="https://thr.com/tw-src.jpg" />`,
+        page,
+      ),
+    ).toBe("https://thr.com/tw-src.jpg");
   });
 });
 
