@@ -184,6 +184,33 @@ describe("ingest OG images", () => {
     expect(rows[0]?.image_url).toBeNull();
   });
 
+  it("does not clear a stored image when a later OG scrape fails", async () => {
+    const persist = memoryNewsStore();
+    const fetchXml = async (url: string) =>
+      url === "https://www.hollywoodreporter.com/feed/" ? FEED_NO_THUMB : EMPTY_FEED;
+    await ingestNewsFeeds({
+      persist,
+      now: NOW,
+      fetchXml,
+      fetchOgHtml: async () => `<meta property="og:image" content="https://thr.com/og.jpg" />`,
+    });
+    expect((await persist.queryFeed({ limit: 20, now: NOW }))[0]?.image_url).toBe(
+      "https://thr.com/og.jpg",
+    );
+
+    const summary = await ingestNewsFeeds({
+      persist,
+      now: NOW,
+      fetchXml,
+      fetchOgHtml: async () => {
+        throw new Error("timeout");
+      },
+    });
+    expect(summary.failed).toBe(0);
+    const rows = await persist.queryFeed({ limit: 20, now: NOW });
+    expect(rows[0]?.image_url).toBe("https://thr.com/og.jpg");
+  });
+
   it("scrapes missing images independently — one miss does not drop a sibling hit", async () => {
     const persist = memoryNewsStore();
     const mixed = `<?xml version="1.0"?>

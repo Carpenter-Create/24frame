@@ -56,6 +56,14 @@ type NewsItemRecord = {
   ttl: number;
 };
 
+/** Fail-soft scrape/RSS miss must not erase a thumb a prior run already stored. */
+function retainStoredNewsImage(
+  incoming: string | null,
+  existing: string | null | undefined,
+): string | null {
+  return incoming ?? existing ?? null;
+}
+
 type NewsHealthRecord = {
   pk: string;
   sk: string;
@@ -120,7 +128,7 @@ export function memoryNewsStore(seed: readonly NewsItem[] = []): NewsStore {
           source: row.source,
           source_name: newsSourceLabel(row.source),
           published_at: row.published_at,
-          image_url: row.image_url,
+          image_url: retainStoredNewsImage(row.image_url, items.get(row.canonical_url)?.image_url),
           fetched_at: fetchedAt,
           ttl: newsItemTtlEpoch(row.published_at),
         });
@@ -175,8 +183,21 @@ export function dynamoNewsStore(env: NewsEnv = process.env): NewsStore {
       const { table, doc } = newsClient(env);
       const fetchedAt = now.toISOString();
       await Promise.all(
-        rows.map((row) =>
-          doc.send(
+        rows.map(async (row) => {
+          let imageUrl = row.image_url;
+          if (!imageUrl) {
+            const { Item } = await doc.send(
+              new GetCommand({
+                TableName: table,
+                Key: { pk: newsItemPk(row.canonical_url), sk: NEWS_ITEM_SK },
+              }),
+            );
+            imageUrl = retainStoredNewsImage(
+              row.image_url,
+              (Item as NewsItemRecord | undefined)?.image_url,
+            );
+          }
+          await doc.send(
             new PutCommand({
               TableName: table,
               Item: {
@@ -191,13 +212,13 @@ export function dynamoNewsStore(env: NewsEnv = process.env): NewsStore {
                 source: row.source,
                 source_name: newsSourceLabel(row.source),
                 published_at: row.published_at,
-                image_url: row.image_url,
+                image_url: imageUrl,
                 fetched_at: fetchedAt,
                 ttl: newsItemTtlEpoch(row.published_at),
               } satisfies NewsItemRecord,
             }),
-          ),
-        ),
+          );
+        }),
       );
       return rows.length;
     },
