@@ -22,6 +22,7 @@ import {
   isDeliveryInProgress,
   normalizeMyDeliveries,
   parseDeliverySort,
+  deliveryStatusFilterLabel,
   parseDeliveryStatusFilter,
   sortDeliveries,
   type DeliveryBrowseRow,
@@ -103,6 +104,13 @@ describe("parseDeliveryStatusFilter", () => {
     expect(parseDeliveryStatusFilter("bogus")).toBe("all");
     expect(parseDeliveryStatusFilter(["live"])).toBe("all");
     expect(parseDeliveryStatusFilter(["live", "pending"])).toBe("all");
+  });
+
+  it("labels delivery status filters in sentence case", () => {
+    expect(deliveryStatusFilterLabel("all")).toBe("All");
+    expect(deliveryStatusFilterLabel("pending")).toBe("Pending");
+    expect(deliveryStatusFilterLabel("live")).toBe("Approved");
+    expect(deliveryStatusFilterLabel("taken_down")).toBe("Taken down");
   });
 });
 

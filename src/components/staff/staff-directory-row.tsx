@@ -27,19 +27,21 @@ export function StaffDirectoryRow({
 }) {
   const body = (
     <>
-      <span data-staff-directory-avatar="" className={STAFF_DIRECTORY_AVATAR_CLASS}>
-        {row.photoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element -- optional logo/face; initials remain the fallback
-          <img src={row.photoUrl} alt="" className="size-full object-cover" />
-        ) : (
-          directoryInitials(row.name)
-        )}
-      </span>
-      <span className={STAFF_DIRECTORY_COPY_CLASS}>
-        <span className={STAFF_DIRECTORY_NAME_CLASS}>{row.name}</span>
-        {row.secondary ? (
-          <span className={STAFF_DIRECTORY_SECONDARY_CLASS}>{row.secondary}</span>
-        ) : null}
+      <span className="flex min-w-0 items-center gap-[var(--space-3)]">
+        <span data-staff-directory-avatar="" className={STAFF_DIRECTORY_AVATAR_CLASS}>
+          {row.photoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- optional logo/face; initials remain the fallback
+            <img src={row.photoUrl} alt="" className="size-full object-cover" />
+          ) : (
+            directoryInitials(row.name)
+          )}
+        </span>
+        <span className={STAFF_DIRECTORY_COPY_CLASS}>
+          <span className={STAFF_DIRECTORY_NAME_CLASS}>{row.name}</span>
+          {row.secondary ? (
+            <span className={STAFF_DIRECTORY_SECONDARY_CLASS}>{row.secondary}</span>
+          ) : null}
+        </span>
       </span>
       {row.trailing ? (
         <span data-staff-directory-meta="" className={STAFF_DIRECTORY_TRAILING_CLASS}>

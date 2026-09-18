@@ -27,10 +27,12 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 vi.mock("./licensing-vendor-filter", () => ({
-  LicensingVendorFilter: () => null,
+  LicensingVendorFilter: () =>
+    createElement("div", { "data-gc-licensing-vendor": "" }, "All"),
 }));
 vi.mock("./licensing-status-filter", () => ({
-  LicensingStatusFilter: () => null,
+  LicensingStatusFilter: () =>
+    createElement("div", { "data-gc-licensing-status-compact": "" }, "Pending"),
 }));
 
 function stubClient(tables: Record<string, unknown[]> = {}) {
@@ -173,23 +175,24 @@ describe("staff /gc/deliveries licensing filters and craft", () => {
     expect(deliveriesChain.eq).not.toHaveBeenCalledWith("vendor_id", expect.anything());
   });
 
-  it("renders house status chips that preserve the channel filter", async () => {
-    const vendorId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
-    const html = await renderEmptyDeliveries({ status: "pending", channel: vendorId });
-    expect(html).toContain("data-gc-licensing-filters");
-    expect(html).toContain('aria-label="Filter by status"');
+  it("uses Titles chrome and HousePageSelect status — no StatusFilter chips", async () => {
+    const html = await renderEmptyDeliveries({ status: "pending" });
+    expect(html).toContain("data-titles-catalog");
+    expect(html).toContain("data-titles-catalog-header-row");
+    expect(html).toContain("data-titles-catalog-filters");
+    expect(html).toContain("data-titles-catalog-toolbar");
+    expect(html).toContain("data-gc-licensing-status-compact");
+    expect(html).toContain("data-gc-licensing-vendor");
     expect(html).toContain("Pending");
-    expect(html).toContain("Delivered");
-    expect(html).toContain("Approved");
-    expect(html).toContain("Rejected");
-    expect(html).toContain("Taken down");
-    expect(html).toContain(`/gc/deliveries?status=live&amp;channel=${vendorId}`);
-    expect(html).toContain(`/gc/deliveries?channel=${vendorId}`);
-    expect(pageSrc).toContain("StatusFilter");
-    expect(pageSrc).toContain("LicensingVendorFilter");
+    expect(pageSrc).toContain("TitlesCatalogFrame");
+    expect(pageSrc).toContain("TitlesCatalogHeader");
+    expect(pageSrc).toContain("TitlesCatalogToolbar");
     expect(pageSrc).toContain("LicensingStatusFilter");
-    expect(pageSrc).toContain("DELIVERY_STATUS_FILTERS");
-    expect(pageSrc).toContain("hidden md:flex");
+    expect(pageSrc).toContain("LicensingVendorFilter");
+    expect(pageSrc).not.toContain("import { StatusFilter }");
+    expect(pageSrc).not.toContain("data-gc-licensing-status-chips");
+    expect(pageSrc).not.toContain("hidden md:flex");
+    expect(pageSrc).not.toContain("@/components/layout/status-filter");
   });
 
   it("shows filter-miss copy and Show all when the lens is empty", async () => {

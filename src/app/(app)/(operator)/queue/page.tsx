@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Suspense } from "react";
 
 import { SearchField } from "@/components/layout/search-field";
@@ -126,18 +125,7 @@ export default async function GcQueuePage({
 
   return (
     <TitlesCatalogFrame empty={!hasQueue} data-queue-catalog="">
-      <TitlesCatalogHeader
-        title={QUEUE_PAGE.title}
-        trailing={
-          <Link
-            href={QUEUE_PAGE.licensingStatusHref}
-            className="t-body-sm text-accent transition-colors hover:underline"
-            data-queue-licensing-status=""
-          >
-            {QUEUE_PAGE.licensingStatus}
-          </Link>
-        }
-      />
+      <TitlesCatalogHeader title={QUEUE_PAGE.title} />
 
       {hasQueue ? (
         <TitlesCatalogToolbar

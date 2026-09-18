@@ -16,8 +16,6 @@ import type { TitleStatus } from "@/lib/titles";
 export const QUEUE_PAGE = {
   title: "Queue",
   empty: "Nothing waiting.",
-  licensingStatus: "Licensing Status",
-  licensingStatusHref: "/gc/deliveries",
 } as const;
 
 export const QUEUE_ACTIVE_STATUSES = ["in_review", "in_delivery"] as const satisfies readonly TitleStatus[];

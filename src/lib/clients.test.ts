@@ -6,6 +6,7 @@ import {
   CLIENT_PROFILE,
   ORG_ROLE_LABELS,
   ORG_STATUS_LABELS,
+  clientDirectoryFilterLabel,
   clientDirectorySecondary,
   clientOrgFields,
   clientOrgHref,
@@ -40,7 +41,11 @@ describe("CLIENTS_PAGE copy", () => {
     expect(CLIENTS_PAGE.empty).toBe("No clients yet.");
     expect(CLIENTS_PAGE.empty.toLowerCase()).not.toContain("add");
     expect(CLIENTS_PAGE).not.toHaveProperty("subtitle");
+    expect(CLIENTS_PAGE.statusFilterLabel).toBe("Filter by status");
     expect(CLIENT_PROFILE.peopleTitle).toBe("People");
+    expect(clientDirectoryFilterLabel("all")).toBe("All");
+    expect(clientDirectoryFilterLabel("active")).toBe(ORG_STATUS_LABELS.active);
+    expect(clientDirectoryFilterLabel("awaiting_payment")).toBe(ORG_STATUS_LABELS.awaiting_payment);
   });
 });
 

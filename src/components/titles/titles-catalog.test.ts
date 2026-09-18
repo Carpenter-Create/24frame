@@ -241,11 +241,22 @@ describe("TitlesCatalogListRow craft", () => {
     expect(html).toContain("Mar 15, 2026");
     expect(html).toContain("North");
     expect(html).toContain("GC-0001234");
+    expect(html).toContain("data-titles-catalog-org");
     expect(html).toContain("data-titles-catalog-findings");
     expect(html).toContain("⚑ 2");
     expect(html).toContain("In review");
     expect(submitter).toContain("t-body-sm");
     expect(submitted).toContain("t-body-sm");
+    expect(html).toContain("flex flex-col");
+    expect(html).toContain("hidden");
+    expect(html).toContain("md:inline");
+    const staffAt = html.indexOf("data-titles-catalog-staff");
+    const orgAt = html.indexOf("data-titles-catalog-org");
+    const yearAt = html.indexOf("data-titles-catalog-year");
+    expect(staffAt).toBeGreaterThan(-1);
+    expect(orgAt).toBeGreaterThan(staffAt);
+    expect(yearAt).toBeGreaterThan(-1);
+    expect(orgAt).toBeGreaterThan(yearAt);
     expect(html).not.toContain("data-titles-catalog-card");
     expect(html).not.toContain("hover:border-accent");
   });
@@ -309,14 +320,13 @@ describe("TitlesCatalogHeader type lock", () => {
     const html = renderToStaticMarkup(
       createElement(TitlesCatalogHeader, {
         title: "Queue",
-        trailing: createElement("a", { href: "/gc/deliveries" }, "Licensing Status"),
       }),
     );
     const mobile = openingTagWith(html, 'data-titles-catalog-title-mobile=""');
     const desktop = openingTagWith(html, 'data-titles-catalog-title-desktop=""');
     expect(html).toContain("Queue");
-    expect(html).toContain("Licensing Status");
-    expect(html).toContain("data-titles-catalog-trailing");
+    expect(html).not.toContain("Licensing Status");
+    expect(html).not.toContain("data-titles-catalog-trailing");
     expect(html).not.toContain("Titles");
     expect(mobile).toContain("t-heading text-ink");
     expect(desktop).toContain("t-title text-ink");

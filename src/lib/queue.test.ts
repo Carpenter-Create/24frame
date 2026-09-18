@@ -67,12 +67,13 @@ describe("staff queue helpers", () => {
     expect(first.has("t3")).toBe(false);
   });
 
-  it("keeps Queue nav and points the delivery CTA at Licensing Status", () => {
+  it("keeps Queue nav without a floating Licensing Status CTA", () => {
     expect(QUEUE_PAGE.title).toBe("Queue");
     expect(QUEUE_PAGE.empty).toBe("Nothing waiting.");
-    expect(QUEUE_PAGE.licensingStatus).toBe("Licensing Status");
-    expect(QUEUE_PAGE.licensingStatusHref).toBe("/gc/deliveries");
+    expect(QUEUE_PAGE).not.toHaveProperty("licensingStatus");
+    expect(QUEUE_PAGE).not.toHaveProperty("licensingStatusHref");
     expect(GC_NAV.find((item) => item.href === "/queue")?.label).toBe("Queue");
+    expect(GC_NAV.find((item) => item.href === "/gc/deliveries")?.label).toBe("Licensing Status");
     expect(queueOrgName("Meridian")).toBe("Meridian");
     expect(queueOrgName("")).toBe("—");
   });
