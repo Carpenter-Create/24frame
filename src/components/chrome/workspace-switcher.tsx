@@ -64,7 +64,7 @@ function selectLeadPill(
   pathname: string,
 ) {
   if (!overviewLeadShouldNavigate(pathname, current, pill)) return;
-  if (pill.id === "overview") {
+  if (pill.id === "home") {
     router.push(OVERVIEW_HREF);
     return;
   }
@@ -259,9 +259,9 @@ export function WorkspaceSwitcher({
                     setOpen(false);
                   }}
                 >
-                  {pill.id === "overview" ? (
+                  {pill.id === "home" ? (
                     <span
-                      data-workspace-switcher-mark="overview"
+                      data-workspace-switcher-mark="home"
                       className={WORKSPACE_SWITCHER_MARK_CLASS}
                       aria-hidden="true"
                     />

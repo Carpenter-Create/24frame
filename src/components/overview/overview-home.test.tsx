@@ -39,6 +39,9 @@ describe("OverviewHome", () => {
       }),
     );
     expect(html).toContain("data-overview");
+    expect(html).toContain(OVERVIEW_PAGE.title);
+    expect(html).toContain("Home");
+    expect(html).not.toContain("Overview");
     expect(html).toContain('data-overview-module="needs-you"');
     expect(html).toContain('data-overview-module="week"');
     expect(html).toContain("data-overview-aggregation");
@@ -103,6 +106,8 @@ describe("OverviewHome", () => {
     expect(html).toContain("data-overview-social-unread");
     expect(html).toContain("4");
     expect(html).toContain('data-overview-social-face="dm1"');
+    expect(html).not.toContain("2 unread");
+    expect(html).not.toContain("Overview");
     expect(html).toContain("data-overview-education-covers");
     expect(html).toContain("Craft");
     expect(html).toContain("3 lessons");
