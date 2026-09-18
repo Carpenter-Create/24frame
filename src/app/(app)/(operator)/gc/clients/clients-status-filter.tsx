@@ -9,7 +9,7 @@ import {
   clientDirectoryFilterLabel,
   parseClientDirectoryFilter,
   type ClientDirectoryFilter,
-} from "@/lib/clients";
+} from "@/lib/clients-filter";
 import { filterHref } from "@/lib/staff-directory";
 
 // Status lens — house-page-select consumer (Dashboard All time / Titles SoT).
