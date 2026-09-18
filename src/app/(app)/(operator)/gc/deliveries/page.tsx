@@ -1,26 +1,53 @@
 import Link from "next/link";
 
 import { createClient } from "@/lib/supabase/server";
-import { Card, CardBody } from "@/components/ui/card";
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { GC_DELIVERIES_EMPTY, GC_DELIVERIES_TRUNCATED } from "@/lib/gc-deliveries";
+import { StatusFilter } from "@/components/layout/status-filter";
+import {
+  GC_DELIVERIES_EMPTY,
+  GC_DELIVERIES_TRUNCATED,
+  GC_LICENSING_STATUS,
+  DELIVERY_STATUS_FILTERS,
+  gcLicensingHasFilters,
+  gcLicensingHref,
+  gcLicensingShowAllHref,
+  parseDeliveryStatusFilter,
+  parseGcLicensingVendorFilter,
+} from "@/lib/gc-deliveries";
 import {
   loadGcDeliveryCompanions,
   portalCompanionsTruncated,
   uniqueIds,
 } from "@/lib/gc-deliveries-companions";
+import { HOUSE_CARD_PAD, HOUSE_MODULE_CLASS, HOUSE_RELATED_GAP_CLASS } from "@/lib/house-shell";
+import { cn } from "@/lib/cn";
 import { DeliveryControls } from "./delivery-controls";
 import { NewDeliveryForm } from "./new-delivery-form";
 import { ExportPanel } from "./export-panel";
+import { LicensingVendorFilter } from "./licensing-vendor-filter";
 import { PortalLinks, type Master, type PortalLink, type PortalSession, type PortalAccessEvent } from "./portal-links";
 import { LIST_PAGE, UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
 
-export default async function GcDeliveriesPage() {
+export default async function GcDeliveriesPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+} = {}) {
+  const sp = await (searchParams ?? Promise.resolve({} as Record<string, string | string[] | undefined>));
+  const statusFilter = parseDeliveryStatusFilter(sp.status);
+  const vendorFilter = parseGcLicensingVendorFilter(sp.vendor);
   const supabase = await createClient();
-  const { data: deliveries } = await supabase
+  let deliveriesQuery = supabase
     .from("deliveries")
     .select("id, territory, status, vendor_id, title_id, titles(title, catalog_id), vendors(name), organizations(name)")
-    .order("created_at", { ascending: false })
+    .order("created_at", { ascending: false });
+  if (statusFilter !== "all") {
+    deliveriesQuery = deliveriesQuery.eq("status", statusFilter);
+  }
+  if (vendorFilter) {
+    deliveriesQuery = deliveriesQuery.eq("vendor_id", vendorFilter);
+  }
+  const { data: deliveries } = await deliveriesQuery
     // BOUNDED — all orgs; the largest list in the app.
     .range(...rangeFor(LIST_PAGE));
   const list = deliveries ?? [];
@@ -83,11 +110,15 @@ export default async function GcDeliveriesPage() {
   }
   const grantsTruncated = companions.grants.truncated;
   const portalTruncated = portalCompanionsTruncated(companions);
+  const filtered = gcLicensingHasFilters(statusFilter, vendorFilter);
+  const emptyCopy = filtered ? GC_LICENSING_STATUS.filterMiss : GC_DELIVERIES_EMPTY.title;
+  const emptyHref = filtered ? gcLicensingShowAllHref() : GC_DELIVERIES_EMPTY.actionHref;
+  const emptyLabel = filtered ? GC_LICENSING_STATUS.showAll : GC_DELIVERIES_EMPTY.actionLabel;
 
   return (
-    <>
-      <h1 className="t-subhead text-ink pb-1">Deliveries</h1>
-      <p className="t-body-sm text-ink-3 pb-6">Placements across all clients. Status is set by hand.</p>
+    <div data-gc-licensing-status="">
+      <h1 className="t-subhead text-ink pb-1">{GC_LICENSING_STATUS.title}</h1>
+      <p className="t-body-sm text-ink-3 pb-6">{GC_LICENSING_STATUS.intro}</p>
 
       {grantsTruncated ? (
         <InlineNotice tone="info" className="mb-4" data-gc-deliveries-truncated="grants">
@@ -109,26 +140,36 @@ export default async function GcDeliveriesPage() {
         </InlineNotice>
       ) : null}
 
+      <div
+        className={cn("flex flex-wrap items-center justify-between pb-4", HOUSE_RELATED_GAP_CLASS)}
+        data-gc-licensing-filters=""
+      >
+        <StatusFilter
+          current={statusFilter}
+          options={DELIVERY_STATUS_FILTERS}
+          hrefFor={(key) => gcLicensingHref(key, vendorFilter)}
+        />
+        <LicensingVendorFilter status={statusFilter} vendor={vendorFilter} vendors={vendorOpts} />
+      </div>
+
       {list.length === 0 ? (
-        <Card>
-          <CardBody>
-            <p className="t-body-sm text-ink-3">{GC_DELIVERIES_EMPTY.title}</p>
-            <Link
-              href={GC_DELIVERIES_EMPTY.actionHref}
-              className="t-body-sm text-accent transition-colors hover:underline"
-            >
-              {GC_DELIVERIES_EMPTY.actionLabel}
-            </Link>
-          </CardBody>
-        </Card>
+        <div className={cn(HOUSE_MODULE_CLASS, HOUSE_CARD_PAD)} data-gc-licensing-empty="">
+          <p className="t-body-sm text-ink-3">{emptyCopy}</p>
+          <Link
+            href={emptyHref}
+            className="t-body-sm text-accent transition-colors hover:underline"
+          >
+            {emptyLabel}
+          </Link>
+        </div>
       ) : (
         <div className="flex flex-col gap-2">
           {list.map((d) => {
             const links = linksByDelivery[d.id] ?? [];
             const events = links.flatMap((l) => eventsByLink[l.id] ?? []);
             return (
-              <Card key={d.id}>
-                <CardBody className="flex flex-col gap-3">
+              <article key={d.id} className={HOUSE_MODULE_CLASS} data-gc-licensing-row={d.id}>
+                <div className={cn(HOUSE_CARD_PAD, "flex flex-col gap-3")}>
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex flex-col gap-0.5">
                       <span className="t-body font-medium text-ink">{d.titles?.title ?? "—"}</span>
@@ -145,12 +186,12 @@ export default async function GcDeliveriesPage() {
                     sessions={sessions}
                     events={events}
                   />
-                </CardBody>
-              </Card>
+                </div>
+              </article>
             );
           })}
         </div>
       )}
-    </>
+    </div>
   );
 }

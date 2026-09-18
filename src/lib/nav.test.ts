@@ -138,11 +138,11 @@ describe("Ask Globee nav mark", () => {
 });
 
 describe("GC_NAV", () => {
-  it("adds staff-only GC Deliveries between Queue and Vendors, with Clients last", () => {
+  it("adds staff-only Licensing Status between Queue and Vendors, with Clients last", () => {
     expect(GC_NAV.map((item) => ({ label: item.label, href: item.href }))).toEqual([
       { label: "Queue", href: "/queue" },
       { label: "Avails", href: "/avails" },
-      { label: "24Frame Deliveries", href: "/gc/deliveries" },
+      { label: "Licensing Status", href: "/gc/deliveries" },
       { label: "Vendors", href: "/vendors" },
       { label: "Finance", href: "/gc/finance" },
       { label: "Clients", href: "/gc/clients" },
@@ -158,7 +158,7 @@ describe("GC_NAV", () => {
       "Ask 24Frame AI",
       "Queue",
       "Avails",
-      "24Frame Deliveries",
+      "Licensing Status",
       "Vendors",
       "Finance",
       "Clients",
@@ -199,7 +199,7 @@ describe("mobileNavDestinations", () => {
       "Ask 24Frame AI",
       "Queue",
       "Avails",
-      "24Frame Deliveries",
+      "Licensing Status",
       "Vendors",
       "Finance",
       "Clients",

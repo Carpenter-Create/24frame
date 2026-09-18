@@ -175,7 +175,7 @@ describe("staff rail and neighboring locks", () => {
       "Ask 24Frame AI",
       "Queue",
       "Avails",
-      "24Frame Deliveries",
+      "Licensing Status",
       "Vendors",
       "Finance",
       "Clients",
