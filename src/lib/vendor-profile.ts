@@ -113,7 +113,7 @@ export function vendorLicensedTitles(
       return {
         titleId,
         title: info.title,
-        href: `/titles/${titleId}`,
+        href: `/gc/titles/${titleId}`,
         secondary: bits.join(" · "),
       };
     })

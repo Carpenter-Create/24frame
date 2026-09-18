@@ -36,6 +36,7 @@ function row(over: Partial<ClientDirectoryRow> = {}): ClientDirectoryRow {
 describe("CLIENTS_PAGE copy", () => {
   it("locks the staff Clients empty line", () => {
     expect(CLIENTS_PAGE.empty).toBe("No clients yet.");
+    expect(CLIENTS_PAGE.filterMiss).toBe("No clients match this filter.");
     expect(CLIENTS_PAGE.empty.toLowerCase()).not.toContain("add");
     expect(CLIENTS_PAGE.subtitle).toBe("Organizations with an active seat.");
     expect(CLIENT_PROFILE.peopleTitle).toBe("People");

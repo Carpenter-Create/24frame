@@ -56,6 +56,35 @@ describe("GcClientsPage read bound", () => {
     expect(surface).not.toContain("text-accent");
   });
 
+  it("distinguishes a status filter miss from an empty book", async () => {
+    const rpc = vi.fn(async () => ({
+      data: [
+        {
+          user_id: "u1",
+          email: "jane@acmefilms.com",
+          org_id: "22222222-2222-4222-8222-222222222222",
+          organization: "Acme Films",
+          org_status: "active",
+          role: "account_owner",
+          joined_at: "2026-08-03T10:00:00Z",
+          last_sign_in: "2026-08-14T09:00:00Z",
+          tier: "pro",
+          term_expires_at: "2027-08-03T10:00:00Z",
+          subscription_status: "active",
+        },
+      ],
+      error: null,
+    }));
+    vi.mocked(createClient).mockResolvedValue({ rpc } as never);
+
+    const html = renderToStaticMarkup(
+      await GcClientsPage({ searchParams: Promise.resolve({ status: "closed" }) }),
+    );
+    expect(html).toContain(CLIENTS_PAGE.filterMiss);
+    expect(html).toContain("data-clients-filter-miss");
+    expect(html).not.toContain(CLIENTS_PAGE.empty);
+  });
+
   it("renders organizations as the shared directory row", async () => {
     const rpc = vi.fn(async () => ({
       data: [

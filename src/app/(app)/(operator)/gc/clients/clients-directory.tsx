@@ -39,7 +39,9 @@ export async function GcClientsDirectory({
   // orgs — the RPC returns seats.
   const { data } = await supabase.rpc("gc_client_directory", { p_limit: UNPAGINATED_MAX + 1 });
   const { rows: seats, truncated } = splitProbe(data as ClientDirectoryRow[] | null, UNPAGINATED_MAX);
-  const orgs = filterClientOrgs(toClientOrgs(seats), statusFilter);
+  const directory = toClientOrgs(seats);
+  const orgs = filterClientOrgs(directory, statusFilter);
+  const emptyDirectory = directory.length === 0;
   const rows = orgs.map((org) => ({
     id: org.orgId,
     name: org.organization,
@@ -70,7 +72,15 @@ export async function GcClientsDirectory({
             />
           ) : undefined
         }
-        empty={<p className={STAFF_DIRECTORY_EMPTY_CLASS}>{CLIENTS_PAGE.empty}</p>}
+        empty={
+          emptyDirectory ? (
+            <p className={STAFF_DIRECTORY_EMPTY_CLASS}>{CLIENTS_PAGE.empty}</p>
+          ) : (
+            <p data-clients-filter-miss="" className={STAFF_DIRECTORY_EMPTY_CLASS}>
+              {CLIENTS_PAGE.filterMiss}
+            </p>
+          )
+        }
       />
     </>
   );

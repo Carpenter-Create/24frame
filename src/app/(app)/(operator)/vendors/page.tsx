@@ -32,35 +32,44 @@ export default async function GcVendorsPage({
   const filter = parseVendorDirectoryFilter(searchParamString(sp.status));
 
   const supabase = await createClient();
-  const [{ data: vendors }, deliveryProbe] = await Promise.all([
-    supabase
-      .from("vendors")
-      .select("id, name, delivery_mode, active")
-      .order("name", { ascending: true })
-      .range(...rangeFor(UNPAGINATED_MAX)),
-    supabase
-      .from("deliveries")
-      .select("vendor_id, title_id, status")
-      .range(...rangeFor(UNPAGINATED_MAX + 1)),
-  ]);
-  const { rows: deliveryRows, truncated: titlesTruncated } = splitProbe(
-    deliveryProbe.data,
-    UNPAGINATED_MAX,
-  );
+  const { data: vendors } = await supabase
+    .from("vendors")
+    .select("id, name, delivery_mode, active")
+    .order("name", { ascending: true })
+    .range(...rangeFor(UNPAGINATED_MAX));
   const directory = normalizeVendorDirectory(vendors);
   const list = filterVendorDirectory(directory, filter);
-  const titleCounts = countLicensedTitlesByVendor(deliveryRows);
   const emptyDirectory = directory.length === 0;
 
+  // Probe each partner the same way the profile does. Deliveries are
+  // title × vendor × territory — a single global 500-row slice can miss a
+  // vendor entirely, then stamp every visible count with one truncated flag.
+  const titleMeta = new Map<string, { titles: number; truncated: boolean }>();
+  await Promise.all(
+    list.map(async (vn) => {
+      const probe = await supabase
+        .from("deliveries")
+        .select("vendor_id, title_id, status")
+        .eq("vendor_id", vn.id)
+        .range(...rangeFor(UNPAGINATED_MAX + 1));
+      const { rows, truncated } = splitProbe(probe.data, UNPAGINATED_MAX);
+      titleMeta.set(vn.id, {
+        titles: countLicensedTitlesByVendor(rows).get(vn.id) ?? 0,
+        truncated,
+      });
+    }),
+  );
+
   const rows = list.map((vn) => {
-    const titles = titleCounts.get(vn.id) ?? 0;
+    const meta = titleMeta.get(vn.id);
+    const titles = meta?.titles ?? 0;
     return {
       id: vn.id,
       name: vn.name,
       secondary: vendorDirectoryMeta(vn),
       trailing:
         titles > 0
-          ? directoryCountLabel(titles, "title", "titles", titlesTruncated)
+          ? directoryCountLabel(titles, "title", "titles", meta?.truncated ?? false)
           : null,
       href: vendorDirectoryHref(vn),
     };

@@ -65,7 +65,7 @@ describe("vendor licensed-title catalog SoT", () => {
     expect(catalog.map((row) => row.title)).toEqual(["Autumn Road", "Winter Light"]);
     expect(catalog[0]).toMatchObject({
       titleId: "t1",
-      href: "/titles/t1",
+      href: "/gc/titles/t1",
       secondary: "GC-1 · US, GB · Approved",
     });
     expect(catalog[1]?.secondary).toBe("GC-2 · CA · Pending");

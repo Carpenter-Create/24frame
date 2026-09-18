@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createClient } from "@/lib/supabase/server";
-import { UNPAGINATED_MAX } from "@/lib/list-bounds";
+import { UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
 import { VENDOR_FORM_FIELD_LABELS, VENDORS_PAGE } from "@/lib/vendors-directory";
 import { GC_NAV, NAV } from "@/lib/nav";
 
@@ -25,23 +25,42 @@ const REAL_VENDOR: VendorRow = {
   active: true,
 };
 
-function stubClient(rows: VendorRow[] | null, deliveries: unknown[] | null = []) {
+function stubClient(
+  rows: VendorRow[] | null,
+  deliveries: unknown[] | Record<string, unknown[]> | null = [],
+) {
   const vendorsChain = {
     select: vi.fn(() => vendorsChain),
     order: vi.fn(() => vendorsChain),
     range: vi.fn(async () => ({ data: rows, error: null })),
   };
-  const deliveriesChain = {
-    select: vi.fn(() => deliveriesChain),
-    range: vi.fn(async () => ({ data: deliveries, error: null })),
-  };
+  const deliveryEq = vi.fn();
+  const deliveryRange = vi.fn();
   const from = vi.fn((table: string) => {
     if (table === "vendors") return vendorsChain;
-    if (table === "deliveries") return deliveriesChain;
+    if (table === "deliveries") {
+      let vendorId = "";
+      const deliveriesChain = {
+        select: vi.fn(() => deliveriesChain),
+        eq: vi.fn((column: string, value: string) => {
+          deliveryEq(column, value);
+          if (column === "vendor_id") vendorId = value;
+          return deliveriesChain;
+        }),
+        range: vi.fn((...args: [number, number]) => {
+          deliveryRange(...args);
+          const data = Array.isArray(deliveries) || deliveries === null
+            ? deliveries
+            : (deliveries[vendorId] ?? []);
+          return Promise.resolve({ data, error: null });
+        }),
+      };
+      return deliveriesChain;
+    }
     throw new Error(`unexpected from(${table})`);
   });
   vi.mocked(createClient).mockResolvedValue({ from } as never);
-  return { from, vendorsChain, deliveriesChain };
+  return { from, vendorsChain, deliveryEq, deliveryRange };
 }
 
 async function renderVendors(rows: VendorRow[] | null = []) {
@@ -170,13 +189,39 @@ describe("staff /vendors address book", () => {
   });
 
   it("bounds the vendors read", async () => {
-    const { from, vendorsChain, deliveriesChain } = stubClient([]);
+    const { from, vendorsChain, deliveryEq, deliveryRange } = stubClient([REAL_VENDOR]);
     await GcVendorsPage();
     expect(from).toHaveBeenCalledWith("vendors");
     expect(from).toHaveBeenCalledWith("deliveries");
     expect(vendorsChain.range).toHaveBeenCalled();
-    expect(deliveriesChain.range).toHaveBeenCalled();
+    expect(deliveryEq).toHaveBeenCalledWith("vendor_id", REAL_VENDOR.id);
+    expect(deliveryRange).toHaveBeenCalledWith(...rangeFor(UNPAGINATED_MAX + 1));
     expect(UNPAGINATED_MAX).toBeGreaterThan(0);
+  });
+
+  it("counts licensed titles per vendor and does not stamp every row with one truncated flag", async () => {
+    const other: VendorRow = {
+      id: "33333333-3333-4333-8333-333333333333",
+      name: "Northwind Partners",
+      delivery_mode: "portal_upload",
+      active: true,
+    };
+    const overflow = Array.from({ length: UNPAGINATED_MAX + 1 }, (_, i) => ({
+      vendor_id: REAL_VENDOR.id,
+      title_id: `t-${i}`,
+      status: "live",
+    }));
+    const { deliveryEq } = stubClient([REAL_VENDOR, other], {
+      [REAL_VENDOR.id]: overflow,
+      [other.id]: [{ vendor_id: other.id, title_id: "only", status: "live" }],
+    });
+    const html = renderToStaticMarkup(await GcVendorsPage());
+
+    expect(deliveryEq).toHaveBeenCalledWith("vendor_id", REAL_VENDOR.id);
+    expect(deliveryEq).toHaveBeenCalledWith("vendor_id", other.id);
+    expect(html).toContain(`${UNPAGINATED_MAX}+ titles`);
+    expect(html).toContain("1 title");
+    expect(html).not.toContain("1+ title");
   });
 });
 

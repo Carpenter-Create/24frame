@@ -44,6 +44,7 @@ export const CLIENTS_PAGE = {
   title: "Clients",
   subtitle: "Organizations with an active seat.",
   empty: "No clients yet.",
+  filterMiss: "No clients match this filter.",
 } as const;
 
 export const CLIENT_PROFILE = {

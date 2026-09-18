@@ -77,7 +77,7 @@ describe("vendor profile", () => {
     expect(html).toContain(VENDOR_PROFILE.catalogTitle);
     expect(html).toContain("Autumn Road");
     expect(html).toContain("GC-1 · US · Approved");
-    expect(html).toContain("/titles/t1");
+    expect(html).toContain("/gc/titles/t1");
     expect(html).toContain(`/vendors/${VENDOR_ID}/edit`);
     expect(html).toContain(VENDORS_PAGE.title);
     expect(html).not.toContain("VendorForm");
