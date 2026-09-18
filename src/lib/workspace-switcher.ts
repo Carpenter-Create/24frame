@@ -28,7 +28,7 @@
 // no Agg, Edu, or ellipsis-as-design. Tight width flexes the
 // trailing cluster (search yields); pills stay full words and
 // shrink-0. No All Accounts clone. No Referrals / billing.
-// Staff Manage courses stays a Settings door — not a fourth
+// Staff Manage courses stays a Settings door — not a fifth
 // lane. Education land stays Route A /social/courses.
 // Education quiet top-bar search stays Education-only: phone
 // in the leading cluster, desktop in the shared mid-lead slot
