@@ -120,6 +120,11 @@ export const DASHBOARD_ADMIN_HERO_ATTENTION_CLASS =
 export const DASHBOARD_LICENSING_THUMB_CLASS =
   "relative aspect-[16/9] w-16 shrink-0 overflow-hidden rounded-[var(--radius-sm)] bg-surface-muted [&_img]:h-full [&_img]:w-full [&_img]:object-cover [&_img]:object-center";
 
+// News article thumb — larger than licensing (w-16). Phone module 112;
+// desktop rail and /news 128. 16:9 crop, house image-crop radius.
+export const DASHBOARD_NEWS_THUMB_CLASS =
+  "relative aspect-[16/9] w-28 shrink-0 overflow-hidden rounded-[var(--radius-sm)] bg-surface-muted md:w-32 [&_img]:h-full [&_img]:w-full [&_img]:object-cover [&_img]:object-center";
+
 export const DASHBOARD_LICENSING_NEST_CLASS =
   "px-[var(--space-4)] py-[var(--space-3)]";
 

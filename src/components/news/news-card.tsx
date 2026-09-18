@@ -1,19 +1,20 @@
 import { DashboardHomeStatusPill } from "@/components/dashboard/dashboard-home";
 import {
   DASHBOARD_CARD_PAD,
-  DASHBOARD_LICENSING_THUMB_CLASS,
+  DASHBOARD_MODULE_CARD_CLASS,
+  DASHBOARD_NEWS_THUMB_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
 } from "@/lib/dashboard-craft";
 import { newsSourceLabel, type NewsItem } from "@/lib/news";
 import { socialRelativeTime } from "@/lib/social";
 
 // Link-out card: title · thumbnail · source badge · relative time.
-// House card pad + related gap. Same card on Home and /news.
-// No summary. No rewrite.
+// House module surface + card pad + related gap. Same card on Home and /news.
+// News thumb is larger than licensing. No summary. No rewrite.
 
 export function NewsCard({ item, now }: { item: NewsItem; now: Date }) {
   return (
-    <li data-news-card={item.id}>
+    <li data-news-card={item.id} className={DASHBOARD_MODULE_CARD_CLASS}>
       <a
         href={item.url}
         target="_blank"
@@ -21,7 +22,7 @@ export function NewsCard({ item, now }: { item: NewsItem; now: Date }) {
         data-news-link={item.id}
         className={`flex items-start ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD}`}
       >
-        <div data-news-thumb="" className={DASHBOARD_LICENSING_THUMB_CLASS}>
+        <div data-news-thumb="" className={DASHBOARD_NEWS_THUMB_CLASS}>
           {item.image_url ? (
             // Publisher media URL from the feed enclosure — not next/image remotes.
             // eslint-disable-next-line @next/next/no-img-element

@@ -6,6 +6,9 @@ import { describe, expect, it } from "vitest";
 import { OverviewHome } from "@/components/overview/overview-home";
 import {
   DASHBOARD_CARD_PAD,
+  DASHBOARD_LICENSING_THUMB_CLASS,
+  DASHBOARD_MODULE_CARD_CLASS,
+  DASHBOARD_NEWS_THUMB_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
   DASHBOARD_SECTION_AIR_CLASS,
 } from "@/lib/dashboard-craft";
@@ -87,14 +90,31 @@ describe("Home News layout + register lock", () => {
   it("uses house card pad and section air — not a compressed News ticker", () => {
     expect(rail).toContain("DASHBOARD_SECTION_AIR_CLASS");
     expect(rail).not.toContain("DASHBOARD_ROW_LIST_CLASS");
+    expect(rail).not.toContain("DashboardHomePanel");
     expect(card).toContain("DASHBOARD_CARD_PAD");
     expect(card).toContain("DASHBOARD_RELATED_GAP_CLASS");
+    expect(card).toContain("DASHBOARD_MODULE_CARD_CLASS");
+    expect(card).toContain("DASHBOARD_NEWS_THUMB_CLASS");
+    expect(card).not.toContain("DASHBOARD_LICENSING_THUMB_CLASS");
     expect(card).not.toMatch(/py-\[var\(--space-[123]\)\]/);
     expect(card).not.toMatch(/\b(px|py|gap)-\[\d+(?:px|rem)\]/);
     expect(rail).not.toMatch(/\b(px|py|gap)-\[\d+(?:px|rem)\]/);
     expect(DASHBOARD_SECTION_AIR_CLASS).toBe("gap-[var(--space-6)]");
     expect(DASHBOARD_CARD_PAD).toBe("px-[var(--space-4)] py-[var(--space-4)]");
     expect(DASHBOARD_RELATED_GAP_CLASS).toBe("gap-[var(--space-2)]");
+  });
+
+  it("locks a News-specific thumb larger than licensing and keeps licensing at w-16", () => {
+    expect(DASHBOARD_NEWS_THUMB_CLASS).toContain("aspect-[16/9]");
+    expect(DASHBOARD_NEWS_THUMB_CLASS).toContain("w-28");
+    expect(DASHBOARD_NEWS_THUMB_CLASS).toContain("md:w-32");
+    expect(DASHBOARD_NEWS_THUMB_CLASS).toContain("rounded-[var(--radius-sm)]");
+    expect(DASHBOARD_NEWS_THUMB_CLASS).not.toContain("w-16");
+    expect(DASHBOARD_LICENSING_THUMB_CLASS).toContain("w-16");
+    expect(DASHBOARD_LICENSING_THUMB_CLASS).not.toContain("w-28");
+    expect(DASHBOARD_LICENSING_THUMB_CLASS).not.toContain("md:w-32");
+    expect(DASHBOARD_MODULE_CARD_CLASS).toContain("bg-surface-muted");
+    expect(DASHBOARD_MODULE_CARD_CLASS).toContain("rounded-[var(--radius-lg)]");
   });
 
   it("keeps the News column when the rail is empty", () => {

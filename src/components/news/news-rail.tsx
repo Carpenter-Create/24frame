@@ -1,11 +1,8 @@
 import { TextAction } from "@/components/chrome/house";
-import {
-  DashboardHomeEmpty,
-  DashboardHomePanel,
-} from "@/components/dashboard/dashboard-home";
 import { NewsCard } from "@/components/news/news-card";
 import {
-  DASHBOARD_CARD_PAD_LIST,
+  DASHBOARD_CARD_PAD,
+  DASHBOARD_MODULE_CARD_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
   DASHBOARD_SECTION_AIR_CLASS,
   DASHBOARD_SECTION_TITLE_CLASS,
@@ -13,7 +10,8 @@ import {
 import { NEWS_HREF, NEWS_PAGE, type NewsItem } from "@/lib/news";
 import { overviewModuleHeaderAction } from "@/lib/overview";
 
-// Home News rail + /news history. House panel + same card.
+// Home News rail + /news history. Light section header; each article
+// is its own house card. No outer panel slab.
 
 export function NewsRail({
   items,
@@ -30,8 +28,12 @@ export function NewsRail({
     ? overviewModuleHeaderAction(NEWS_PAGE.title, NEWS_HREF, NEWS_PAGE.viewAll)
     : null;
   return (
-    <DashboardHomePanel aria-label={NEWS_PAGE.title} data-overview-module={testId}>
-      <div className={`flex items-center justify-between ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD_LIST}`}>
+    <section
+      aria-label={NEWS_PAGE.title}
+      data-overview-module={testId}
+      className={`flex flex-col ${DASHBOARD_SECTION_AIR_CLASS}`}
+    >
+      <div className={`flex items-center justify-between ${DASHBOARD_RELATED_GAP_CLASS}`}>
         <p className={DASHBOARD_SECTION_TITLE_CLASS}>{NEWS_PAGE.title}</p>
         {action ? <TextAction href={action.href}>{action.label}</TextAction> : null}
       </div>
@@ -42,8 +44,10 @@ export function NewsRail({
           ))}
         </ul>
       ) : (
-        <DashboardHomeEmpty>{NEWS_PAGE.empty}</DashboardHomeEmpty>
+        <div className={`${DASHBOARD_MODULE_CARD_CLASS} ${DASHBOARD_CARD_PAD}`}>
+          <p className="t-body-sm text-ink-3">{NEWS_PAGE.empty}</p>
+        </div>
       )}
-    </DashboardHomePanel>
+    </section>
   );
 }
