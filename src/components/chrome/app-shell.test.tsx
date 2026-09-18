@@ -226,6 +226,13 @@ describe("AppShell Access rail and home frame", () => {
     expect(titles).not.toContain("Search titles...");
     expect(titles).not.toContain("⌘K");
 
+    navigation.pathname = "/queue";
+    const queue = renderShell();
+    expect(queue).toContain("w-full pb-24");
+    expect(queue).not.toContain("data-app-home-frame");
+    expect(queue).not.toContain("data-app-messages-frame");
+    expect(queue).not.toContain("pb-24 pt-8");
+
     navigation.pathname = "/deliveries";
     const deliveries = renderShell();
     expect(deliveries).toContain("px-[var(--chrome-gutter)]");

@@ -114,12 +114,12 @@ export function AppShell({
         <ChromeCookieSync chrome={chrome} onCookies={applyChromeCookies} />
       </Suspense>
     ) : null;
-  // The catalog opts out of the centered width cap so its hero can bleed full-width
-  // (edge of sidebar → right edge). That page then manages its own content max-width.
-  // Non-bleed pages share `--chrome-gutter` on the canvas x so the
-  // trailing chrome and content column share one right edge. Titles
-  // stay the bleed exception. Messages keeps `--content-inset` vertical.
-  const titlesBleed = pathname === "/titles";
+  // Catalog list pages opt out of the centered width cap so the shared
+  // Titles frame can own content max-width (edge of sidebar → right edge).
+  // /titles and staff /queue share that frame. Non-bleed pages share
+  // `--chrome-gutter` on the canvas x so the trailing chrome and content
+  // column share one right edge. Messages keeps `--content-inset` vertical.
+  const titlesBleed = pathname === "/titles" || pathname === "/queue";
   const homePage = pathname === "/" || pathname === "/dashboard";
   const messagesPage = pathname === "/messages";
   const settingsPage = isSettingsPath(pathname);
