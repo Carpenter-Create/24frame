@@ -26,7 +26,10 @@ import {
   OVERVIEW_NEWS_RAIL_WIDTH,
   OVERVIEW_PHONE_MODULE_ORDER,
   OVERVIEW_RAIL_OFF_WIDTH,
+  isHomeOwnedPath,
   overviewHidesRail,
+  overviewLeadPills,
+  overviewLeadSelected,
 } from "@/lib/overview";
 
 const card = readFileSync("src/components/news/news-card.tsx", "utf8");
@@ -61,6 +64,11 @@ describe("Home News layout + register lock", () => {
     expect(HOUSE_HOME_RAIL_COLUMN_CLASS).toContain("--chrome-gutter");
     expect(HOUSE_HOME_RAIL_COLUMN_CLASS).not.toContain("--access-rail-width");
     expect(overviewHidesRail("/home")).toBe(true);
+    expect(overviewHidesRail("/news")).toBe(true);
+    expect(isHomeOwnedPath("/news")).toBe(true);
+    expect(overviewLeadSelected("home", "/news", "aggregation")).toBe(true);
+    expect(overviewLeadSelected("aggregation", "/news", "aggregation")).toBe(false);
+    expect(overviewLeadPills().map((pill) => pill.id)).not.toContain("news");
     expect(OVERVIEW_RAIL_OFF_WIDTH).toBe("0px");
     expect(OVERVIEW_NEWS_RAIL_WIDTH).toBe("20rem");
     expect(OVERVIEW_HOME_COLUMN_GUTTER).toBe("var(--chrome-gutter)");

@@ -2,6 +2,8 @@
 // last chosen mode the same way 24frame_sidebar_collapsed persists the
 // rail. Pathname still wins on destination routes so a /social bookmark
 // shows Social destinations even if the cookie still says aggregation.
+// /news is Home-owned history: keep it aggregation-prefixed so a Social
+// cookie cannot steal chrome. Not a fifth workspace.
 // Education consume land is Route A /social/courses. Staff CMS is
 // /education under (operator). Member workspace home stays Route A.
 

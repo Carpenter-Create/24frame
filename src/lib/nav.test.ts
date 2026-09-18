@@ -57,6 +57,8 @@ describe("client NAV", () => {
     expect(hrefs).not.toContain("/channels");
     expect(hrefs).not.toContain("/gc/clients");
     expect(hrefs).not.toContain("/gc/finance");
+    expect(hrefs).not.toContain("/news");
+    expect(hrefs).not.toContain("/home");
   });
 
   it("marks Dashboard current on `/` and `/dashboard`, Reports on legacy activity paths", () => {
@@ -198,6 +200,7 @@ describe("mobileNavDestinations", () => {
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/vendors");
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/channels");
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/gc/clients");
+    expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/news");
   });
 
   it("gives staff the operator destinations plus the client destinations", () => {
@@ -241,6 +244,8 @@ describe("mobileNavDestinations", () => {
     expect(mobileNavDestinations(true, "social").map((item) => item.href)).not.toContain(
       "/social/leaderboard",
     );
+    expect(mobileNavDestinations(true, "social").map((item) => item.href)).not.toContain("/news");
+    expect(mobileNavDestinations(false, "education").map((item) => item.href)).not.toContain("/news");
     expect(EDUCATION_NAV.map((item) => ({ label: item.label, href: item.href }))).toEqual([
       { label: "Education", href: "/social/courses" },
     ]);
