@@ -16,6 +16,7 @@ export type RecipientPeriod = {
   opening_balance_cents: number;
   closing_balance_cents: number | null;
   threshold_cents: number | null;
+  closed_at?: string | null;
 };
 
 export async function loadRecipientPeriod(
@@ -113,7 +114,7 @@ export async function loadRecipientDashboard(orgId: string): Promise<{
     supabase
       .from("finance_periods")
       .select(
-        "id, org_id, period_year, period_month, status, opening_balance_cents, closing_balance_cents, threshold_cents",
+        "id, org_id, period_year, period_month, status, opening_balance_cents, closing_balance_cents, threshold_cents, closed_at",
       )
       .eq("org_id", orgId)
       .order("period_year", { ascending: false })

@@ -48,7 +48,6 @@ import {
   parseDashboardUserId,
   DASHBOARD_ACTIVITY_AUDIT_ACTIONS,
   DASHBOARD_ACTIVITY_AUDIT_ENTITIES,
-  activityAuditEntityIds,
   applyActivityAudit,
   recentAccountActivity,
   revenuePointsFromLabels,
@@ -78,14 +77,15 @@ import { HouseEmpty, TextAction } from "@/components/chrome/house";
 import { AGGREGATION_EMPTY } from "@/lib/aggregation-empty";
 import { DASHBOARD_SEEN_COOKIE, afterLastVisit, parseDashboardSeen } from "@/lib/dashboard-visit";
 import { countNamedRows, yearMonthFromIso } from "@/lib/reports";
-import { canViewClientEarn } from "@/lib/finance";
+import { canViewClientEarn, FINANCE_CLIENT_HREF } from "@/lib/finance";
 import { buildClientFinanceDashboard } from "@/lib/finance-dashboard";
 import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 
 // Company-admin `/dashboard` rematches Overview analytics structure inside
 // house tokens: unlabeled period chrome, taller Net revenue $ + scrub |
-// Recent activity glance (account announcements — Title added / Delivery
-// updated, never findings), then Licensing status full-width (nested
+// Recent activity glance (account announcements — title status updates,
+// performance report available, Title added / Delivery updated; never
+// findings), then Licensing status full-width (nested
 // title → endpoint), then one Top performing section (Titles / Platforms /
 // Territories pills). One activity feed only — the bottom Recent account
 // activity block is gone. 24Frame nouns only — never Top works, sources,
@@ -222,27 +222,31 @@ export default async function DashboardPage({
       ...points.map((point) => ({ year: point.year, month: point.month })),
       ...(useFixture ? dashboardFixtureSources() : []),
     ];
+    const { data: auditRows } = await supabase
+      .from("audit_log")
+      .select("entity, entity_id, action, actor, at, after, before")
+      .eq("org_id", org.id)
+      .in("entity", [...DASHBOARD_ACTIVITY_AUDIT_ENTITIES])
+      .in("action", [...DASHBOARD_ACTIVITY_AUDIT_ACTIONS])
+      .order("at", { ascending: false })
+      .range(...rangeFor(UNPAGINATED_MAX));
+    const auditEvents: DashboardAuditEvent[] = auditRows ?? [];
+    const report =
+      moneyLoaded?.latestStatement && moneyLoaded.latestClosed?.closed_at
+        ? {
+            id: moneyLoaded.latestClosed.id,
+            at: moneyLoaded.latestClosed.closed_at,
+            href: `${FINANCE_CLIENT_HREF}/${moneyLoaded.latestClosed.id}`,
+          }
+        : null;
     const liveActivity = recentAccountActivity({
       titles,
       deliveries: deliveries.rows,
       period,
       userId,
+      events: auditEvents,
+      report,
     });
-    // Actor + exact time come from audit_log — created_by is not the action.
-    const auditEntityIds = activityAuditEntityIds(liveActivity);
-    let auditEvents: DashboardAuditEvent[] = [];
-    if (auditEntityIds.length > 0) {
-      const { data: auditRows } = await supabase
-        .from("audit_log")
-        .select("entity, entity_id, action, actor, at")
-        .eq("org_id", org.id)
-        .in("entity", [...DASHBOARD_ACTIVITY_AUDIT_ENTITIES])
-        .in("action", [...DASHBOARD_ACTIVITY_AUDIT_ACTIONS])
-        .in("entity_id", auditEntityIds)
-        .order("at", { ascending: false })
-        .range(...rangeFor(UNPAGINATED_MAX));
-      auditEvents = auditRows ?? [];
-    }
     const stampedActivity = applyActivityAudit(liveActivity, { events: auditEvents });
     const actorIds = [
       ...new Set(

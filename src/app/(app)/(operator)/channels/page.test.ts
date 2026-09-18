@@ -195,7 +195,7 @@ describe("staff rail and neighboring locks", () => {
     expect([...NAV, ...GC_NAV].map((item) => item.label)).toEqual([
       "Dashboard",
       "Titles",
-      "Attention",
+      "Recent activity",
       "Reports",
       "Ask 24Frame AI",
       "Queue",

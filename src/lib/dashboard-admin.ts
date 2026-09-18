@@ -1,4 +1,8 @@
-import { DASHBOARD_HOME_STACK, type ClientHomeTitle } from "@/lib/dashboard-home";
+import {
+  DASHBOARD_HOME_STACK,
+  dashboardTitleStatusLabel,
+  type ClientHomeTitle,
+} from "@/lib/dashboard-home";
 import { formatUsdCents } from "@/lib/finance";
 import { parseReportsUserId, reportsUserLabel, type ReportsUserOption } from "@/lib/reports";
 import { titleClientPath } from "@/lib/title-public-id";
@@ -34,7 +38,13 @@ export const DASHBOARD_ADMIN = {
   titleAdded: "Title added",
   deliveryUpdated: "Delivery updated",
   findingOpened: "Finding opened",
+  performanceReportAvailable: "New performance report available",
+  titleStatusUpdated: "status updated to",
 } as const;
+
+export function dashboardTitleStatusUpdatedDetail(statusLabel: string): string {
+  return `${DASHBOARD_ADMIN.titleStatusUpdated} ${statusLabel}`;
+}
 
 export function isCompanyAdminRole(role: string | null | undefined): boolean {
   return role === "account_owner";
@@ -125,6 +135,14 @@ export type DashboardActivityActor = {
   initial: string;
 };
 
+export const DASHBOARD_ACTIVITY_KINDS = [
+  "title_added",
+  "delivery_updated",
+  "title_status",
+  "performance_report",
+] as const;
+export type DashboardActivityKind = (typeof DASHBOARD_ACTIVITY_KINDS)[number];
+
 export type DashboardActivityRow = {
   id: string;
   title: string;
@@ -134,6 +152,13 @@ export type DashboardActivityRow = {
   detail: string;
   actorId: string | null;
   actor: DashboardActivityActor;
+  kind: DashboardActivityKind;
+};
+
+export type DashboardActivityReport = {
+  id: string;
+  at: string;
+  href: string;
 };
 
 function scalarQuery(value: string | string[] | undefined): string | undefined {
@@ -577,7 +602,7 @@ export function dashboardActivityActor(
   return { id, initial: dashboardActivityInitial(name) };
 }
 
-export const DASHBOARD_ACTIVITY_AUDIT_ENTITIES = ["titles", "deliveries", "findings"] as const;
+export const DASHBOARD_ACTIVITY_AUDIT_ENTITIES = ["titles", "deliveries"] as const;
 export const DASHBOARD_ACTIVITY_AUDIT_ACTIONS = ["insert", "update"] as const;
 
 export type DashboardActivityAuditEntity = (typeof DASHBOARD_ACTIVITY_AUDIT_ENTITIES)[number];
@@ -589,7 +614,15 @@ export type DashboardAuditEvent = {
   action: string;
   actor: string | null;
   at: string;
+  after?: unknown;
+  before?: unknown;
 };
+
+function activityAuditStatus(payload: unknown): string | null {
+  if (!payload || typeof payload !== "object") return null;
+  const status = (payload as { status?: unknown }).status;
+  return typeof status === "string" ? status : null;
+}
 
 export type DashboardActivityAuditTarget = {
   entity: DashboardActivityAuditEntity;
@@ -598,6 +631,10 @@ export type DashboardActivityAuditTarget = {
 };
 
 export function activityRowEntity(rowId: string): DashboardActivityAuditTarget | null {
+  if (rowId.startsWith("title-status:")) {
+    const entityId = rowId.slice("title-status:".length).split(":")[0]?.trim();
+    return entityId ? { entity: "titles", entityId, action: "update" } : null;
+  }
   if (rowId.startsWith("title:")) {
     const entityId = rowId.slice("title:".length).trim();
     return entityId ? { entity: "titles", entityId, action: "insert" } : null;
@@ -605,12 +642,6 @@ export function activityRowEntity(rowId: string): DashboardActivityAuditTarget |
   if (rowId.startsWith("delivery:")) {
     const entityId = rowId.slice("delivery:".length).trim();
     return entityId ? { entity: "deliveries", entityId, action: "update" } : null;
-  }
-  if (rowId.startsWith("finding:")) {
-    const rest = rowId.slice("finding:".length).trim();
-    // finding:${id} only — composite title+created_at keys cannot join audit_log.
-    if (!rest || rest.includes(":")) return null;
-    return { entity: "findings", entityId: rest, action: "insert" };
   }
   return null;
 }
@@ -649,9 +680,9 @@ function latestAuditEvent(
 
 /**
  * Stamp audit_log.actor + audit_log.at onto synthesized activity rows.
- * Missing or unresolved people stay a muted "?" — never an invented name.
- * Does not invent event types; copy grammar stays Title added / Delivery
- * updated. Findings stay on /attention — not this feed.
+ * Status-change and report rows already carry their event clock — only
+ * resolve the actor initial. Missing people stay "?". Findings stay on
+ * /attention — not this feed.
  */
 export function applyActivityAudit(
   rows: readonly DashboardActivityRow[],
@@ -663,6 +694,10 @@ export function applyActivityAudit(
   const events = input.events ?? [];
   return rows
     .map((row) => {
+      if (row.kind === "title_status" || row.kind === "performance_report") {
+        const name = row.actorId ? (input.profileNames?.get(row.actorId) ?? null) : null;
+        return { ...row, actor: dashboardActivityActor(row.actorId, name) };
+      }
       const target = activityRowEntity(row.id);
       const event = target ? latestAuditEvent(events, target) : null;
       if (!event) return row;
@@ -695,6 +730,8 @@ export function recentAccountActivity(input: {
   }[];
   period: DashboardPeriod;
   userId: string | null;
+  events?: readonly DashboardAuditEvent[];
+  report?: DashboardActivityReport | null;
 }): DashboardActivityRow[] {
   const titleIds = dashboardUserTitleIds(input.titles, input.userId);
   const titles = filterDashboardTitles(input.titles, input.period, input.userId);
@@ -705,6 +742,48 @@ export function recentAccountActivity(input: {
   }
 
   const rows: DashboardActivityRow[] = [];
+  if (
+    input.report &&
+    !input.userId &&
+    isoInDashboardPeriod(input.report.at, input.period)
+  ) {
+    rows.push({
+      id: `report:${input.report.id}`,
+      title: "",
+      href: input.report.href,
+      at: input.report.at,
+      count: 1,
+      detail: DASHBOARD_ADMIN.performanceReportAvailable,
+      actorId: null,
+      actor: dashboardActivityActor(null),
+      kind: "performance_report",
+    });
+  }
+  for (const event of input.events ?? []) {
+    if (event.entity !== "titles" || event.action !== "update") continue;
+    const entityId = event.entity_id?.trim();
+    if (!entityId) continue;
+    if (titleIds && !titleIds.has(entityId)) continue;
+    if (!isoInDashboardPeriod(event.at, input.period)) continue;
+    const after = activityAuditStatus(event.after);
+    const before = activityAuditStatus(event.before);
+    if (!after || after === before) continue;
+    const statusLabel = dashboardTitleStatusLabel(after);
+    if (!statusLabel) continue;
+    const title = input.titles.find((item) => item.id === entityId);
+    if (!title) continue;
+    rows.push({
+      id: `title-status:${entityId}:${event.at}`,
+      title: title.title,
+      href: activityHref(title.catalog_id),
+      at: event.at,
+      count: 1,
+      detail: dashboardTitleStatusUpdatedDetail(statusLabel),
+      actorId: event.actor?.trim() || null,
+      actor: dashboardActivityActor(event.actor),
+      kind: "title_status",
+    });
+  }
   for (const title of titles) {
     rows.push({
       id: `title:${title.id}`,
@@ -715,6 +794,7 @@ export function recentAccountActivity(input: {
       detail: DASHBOARD_ADMIN.titleAdded,
       actorId: null,
       actor: dashboardActivityActor(null),
+      kind: "title_added",
     });
   }
   for (const row of deliveries) {
@@ -729,6 +809,7 @@ export function recentAccountActivity(input: {
       detail: DASHBOARD_ADMIN.deliveryUpdated,
       actorId: null,
       actor: dashboardActivityActor(null),
+      kind: "delivery_updated",
     });
   }
 

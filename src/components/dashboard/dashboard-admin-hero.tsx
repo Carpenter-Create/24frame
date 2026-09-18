@@ -162,14 +162,36 @@ export function DashboardRecentActivity({ items }: { items: readonly DashboardAc
                 {item.actor.initial}
               </span>
               <span className="min-w-0 flex-1">
-                <span className="t-body-sm text-ink-3">{item.detail}</span>
-                {" "}
-                <Link
-                  href={item.href}
-                  className="t-body-sm font-medium text-ink hover:text-ink-2"
-                >
-                  {item.title}
-                </Link>
+                {item.kind === "title_status" ? (
+                  <>
+                    <Link
+                      href={item.href}
+                      className="t-body-sm font-medium text-ink hover:text-ink-2"
+                    >
+                      {item.title}
+                    </Link>
+                    {" "}
+                    <span className="t-body-sm text-ink-3">{item.detail}</span>
+                  </>
+                ) : item.kind === "performance_report" ? (
+                  <Link
+                    href={item.href}
+                    className="t-body-sm font-medium text-ink hover:text-ink-2"
+                  >
+                    {item.detail}
+                  </Link>
+                ) : (
+                  <>
+                    <span className="t-body-sm text-ink-3">{item.detail}</span>
+                    {" "}
+                    <Link
+                      href={item.href}
+                      className="t-body-sm font-medium text-ink hover:text-ink-2"
+                    >
+                      {item.title}
+                    </Link>
+                  </>
+                )}
               </span>
               <time
                 className="shrink-0 text-right"

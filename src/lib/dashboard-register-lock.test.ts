@@ -62,6 +62,7 @@ function stubClient() {
   const financeChain = {
     select: vi.fn(() => financeChain),
     eq: vi.fn(() => financeChain),
+    in: vi.fn(() => financeChain),
     is: vi.fn(() => financeChain),
     order: vi.fn(() => financeChain),
     limit: vi.fn(() => financeChain),
@@ -222,6 +223,7 @@ describe("Aggregation Dashboard Coinbase register lock", () => {
     expect(DASHBOARD_ADMIN_STACK_CLASS).toBe("flex w-full flex-col gap-[var(--space-6)]");
     expect(page).toContain("DashboardTopPerforming");
     expect(page).toContain("recentAccountActivity");
+    expect(page).toContain("after, before");
     expect(page).not.toContain("buildAttentionGlance");
     expect(hero).toContain("DashboardRecentActivity");
     expect(hero).not.toContain("DashboardAttention");
