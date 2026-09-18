@@ -9,9 +9,12 @@ vi.mock("@/lib/supabase/auth", () => ({ getAuthUser: vi.fn() }));
 // revalidatePath touches Next's request-scoped cache store, which doesn't exist outside a real
 // request — irrelevant to the branching under test, so it's stubbed out rather than exercised.
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("@/lib/s3-title-purge", () => ({ purgeDeletedTitleStorage: vi.fn() }));
 
 import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/supabase/auth";
+import { purgeDeletedTitleStorage } from "@/lib/s3-title-purge";
+import { TITLE_LIFECYCLE } from "@/lib/titles-lifecycle";
 import { archiveTitle, createBuyerScreenerLink, deleteTitle, restoreTitle } from "./actions";
 
 type Candidate = { recipient_name: string; expires_at?: string };
@@ -52,12 +55,20 @@ function fakeQuery(rows: Candidate[], error: { message: string } | null = null) 
 // Unification (20260806000300): the collision check no longer looks up gc_staff or narrows by
 // created_by — one active link per (title, recipient), whoever created it — so this fake only
 // ever needs to answer for "portal_links".
-function fakeSupabase(opts: { candidates?: Candidate[]; rpcError?: string }) {
+function fakeSupabase(opts: {
+  candidates?: Candidate[];
+  rpcError?: string;
+  title?: { id: string; org_id: string } | null;
+}) {
   const rpc = vi.fn(async () =>
     opts.rpcError ? { data: null, error: { message: opts.rpcError } } : { data: "link-id", error: null },
   );
   const from = vi.fn((table: string) => {
     if (table === "portal_links") return fakeQuery(opts.candidates ?? []);
+    if (table === "titles") {
+      const row = opts.title === undefined ? { id: "title-1", org_id: "org-1" } : opts.title;
+      return fakeQuery(row ? [row as unknown as Candidate] : []);
+    }
     throw new Error(`fakeSupabase: unexpected table "${table}"`);
   });
   return { from, rpc };
@@ -144,13 +155,44 @@ describe("createBuyerScreenerLink — collision branching", () => {
 });
 
 describe("title delete / archive / restore actions", () => {
-  it("calls delete_title and returns the RPC error", async () => {
+  beforeEach(() => {
+    vi.mocked(purgeDeletedTitleStorage).mockReset();
+    vi.mocked(purgeDeletedTitleStorage).mockResolvedValue({ prefix: "p/", deleted: 0 });
+  });
+
+  it("calls delete_title and returns the RPC error without purging S3", async () => {
     const supabase = fakeSupabase({ rpcError: "Submitted titles cannot be deleted. Archive instead." });
     vi.mocked(createClient).mockResolvedValue(supabase as unknown as Awaited<ReturnType<typeof createClient>>);
 
     const res = await deleteTitle("title-1");
     expect(supabase.rpc).toHaveBeenCalledWith("delete_title", { p_title_id: "title-1" });
     expect(res.error).toBe("Submitted titles cannot be deleted. Archive instead.");
+    expect(purgeDeletedTitleStorage).not.toHaveBeenCalled();
+  });
+
+  it("invokes the shared prefix purge after a successful delete_title", async () => {
+    const supabase = fakeSupabase({
+      title: { id: "title-1", org_id: "org-1" },
+    });
+    vi.mocked(createClient).mockResolvedValue(supabase as unknown as Awaited<ReturnType<typeof createClient>>);
+
+    const res = await deleteTitle("title-1");
+    expect(res.error).toBeUndefined();
+    expect(purgeDeletedTitleStorage).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(purgeDeletedTitleStorage).mock.calls[0][0]).toEqual(
+      expect.objectContaining({ orgId: "org-1", titleId: "title-1" }),
+    );
+  });
+
+  it("fails closed when S3 purge throws after the row is already deleted", async () => {
+    const supabase = fakeSupabase({});
+    vi.mocked(createClient).mockResolvedValue(supabase as unknown as Awaited<ReturnType<typeof createClient>>);
+    vi.mocked(purgeDeletedTitleStorage).mockRejectedValueOnce(new Error("AccessDenied"));
+    vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const res = await deleteTitle("title-1");
+    expect(res.error).toBe(TITLE_LIFECYCLE.purgeFailed);
+    expect(supabase.rpc).toHaveBeenCalledWith("delete_title", { p_title_id: "title-1" });
   });
 
   it("calls archive_title and restore_title", async () => {

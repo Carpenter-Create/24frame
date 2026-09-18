@@ -234,7 +234,10 @@ restore. Add:
 { "Effect": "Allow", "Action": ["s3:RestoreObject"], "Resource": "arn:aws:s3:::<bucket>/*" }
 ```
 
-(HEAD uses the existing `s3:GetObject`. Still **no** `s3:DeleteObject`.)
+(HEAD uses the existing `s3:GetObject`. Title **delete** is the one founder-locked
+exception: `s3:DeleteObject` / `s3:DeleteObjects` on `orgs/*/titles/*` only — see
+[`asset-storage-setup.md`](asset-storage-setup.md). Avatars and other buckets stay
+without DeleteObject.)
 
 **Behavior:** on a portal access to an archived master, the route auto-initiates a
 **Standard** retrieval (`Days=7` temp copy) and returns "preparing (~3–5h)"; the

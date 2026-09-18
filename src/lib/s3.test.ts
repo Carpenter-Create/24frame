@@ -17,7 +17,7 @@ vi.mock("@aws-sdk/client-s3", async (importOriginal) => {
   };
 });
 
-import { parseRestore, headObjectMeta } from "./s3";
+import { parseRestore, headObjectMeta, purgeTitlePrefix } from "./s3";
 
 describe("parseRestore", () => {
   it("non-archived storage class is immediately available", () => {
@@ -107,5 +107,96 @@ describe("headObjectMeta", () => {
       etag: "abc123",
     });
     expect(mockSend).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("purgeTitlePrefix", () => {
+  const orgId = "550e8400-e29b-41d4-a716-446655440000";
+  const titleId = "11111111-2222-4333-8444-555555555555";
+  const prefix = `orgs/${orgId}/titles/${titleId}/`;
+
+  beforeEach(() => {
+    mockSend.mockReset();
+  });
+
+  it("lists then deletes every key under the title prefix", async () => {
+    mockSend
+      .mockResolvedValueOnce({
+        Contents: [{ Key: `${prefix}poster/a/p.jpg` }, { Key: `${prefix}master/b/m.mov` }],
+        IsTruncated: false,
+      })
+      .mockResolvedValueOnce({ Errors: [] });
+
+    await expect(purgeTitlePrefix(orgId, titleId)).resolves.toEqual({
+      prefix,
+      deleted: 2,
+    });
+    expect(mockSend).toHaveBeenCalledTimes(2);
+    const deleteInput = mockSend.mock.calls[1][0].input as {
+      Delete: { Objects: { Key: string }[] };
+    };
+    expect(deleteInput.Delete.Objects).toEqual([
+      { Key: `${prefix}poster/a/p.jpg` },
+      { Key: `${prefix}master/b/m.mov` },
+    ]);
+  });
+
+  it("is a success when the prefix is already empty", async () => {
+    mockSend.mockResolvedValueOnce({ Contents: [], IsTruncated: false });
+    await expect(purgeTitlePrefix(orgId, titleId)).resolves.toEqual({
+      prefix,
+      deleted: 0,
+    });
+    expect(mockSend).toHaveBeenCalledTimes(1);
+  });
+
+  it("pages ListObjectsV2 until the prefix is exhausted", async () => {
+    mockSend
+      .mockResolvedValueOnce({
+        Contents: [{ Key: `${prefix}a` }],
+        IsTruncated: true,
+        NextContinuationToken: "page-2",
+      })
+      .mockResolvedValueOnce({ Errors: [] })
+      .mockResolvedValueOnce({
+        Contents: [{ Key: `${prefix}b` }],
+        IsTruncated: false,
+      })
+      .mockResolvedValueOnce({ Errors: [] });
+
+    await expect(purgeTitlePrefix(orgId, titleId)).resolves.toEqual({
+      prefix,
+      deleted: 2,
+    });
+    expect(mockSend).toHaveBeenCalledTimes(4);
+  });
+
+  it("fails closed when DeleteObjects returns any error", async () => {
+    mockSend
+      .mockResolvedValueOnce({
+        Contents: [{ Key: `${prefix}poster/a/p.jpg` }],
+        IsTruncated: false,
+      })
+      .mockResolvedValueOnce({
+        Errors: [{ Key: `${prefix}poster/a/p.jpg`, Code: "AccessDenied", Message: "denied" }],
+      });
+
+    await expect(purgeTitlePrefix(orgId, titleId)).rejects.toThrow(/DeleteObjects failed/);
+  });
+
+  it("refuses a listed key that escaped the title prefix", async () => {
+    mockSend.mockResolvedValueOnce({
+      Contents: [{ Key: "orgs/other/titles/x/file" }],
+      IsTruncated: false,
+    });
+    await expect(purgeTitlePrefix(orgId, titleId)).rejects.toThrow(/outside title prefix/);
+    expect(mockSend).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not call S3 when the ids are not a title prefix", async () => {
+    await expect(purgeTitlePrefix("not-a-uuid", titleId)).rejects.toThrow(
+      /canonical org and title ids/,
+    );
+    expect(mockSend).not.toHaveBeenCalled();
   });
 });

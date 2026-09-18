@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
+import { isCanonicalUuid } from "@/lib/title-public-id";
 
 export const PART_SIZE = 64 * 1024 * 1024; // 64 MiB
 
@@ -99,6 +100,27 @@ export function assetKey(
 ): string {
   const safe = filename.replace(/[^A-Za-z0-9._-]/g, "_").slice(-120) || "file";
   return `orgs/${orgId}/titles/${titleId}/${kind}/${crypto.randomUUID()}/${safe}`;
+}
+
+// Prefix every title object shares. assetKey() appends kind/uuid/file under this.
+// Trailing slash is load-bearing: without it, ListObjectsV2 on
+// orgs/<org>/titles/<titleId> would also match a sibling title whose id
+// shared that string as a prefix.
+const TITLE_ASSET_PREFIX_RE =
+  /^orgs\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/titles\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/$/i;
+
+export function titleAssetPrefix(orgId: string, titleId: string): string {
+  if (!isCanonicalUuid(orgId) || !isCanonicalUuid(titleId)) {
+    throw new Error("Title asset prefix requires canonical org and title ids");
+  }
+  return `orgs/${orgId.toLowerCase()}/titles/${titleId.toLowerCase()}/`;
+}
+
+export function assertTitleAssetPrefix(prefix: string): string {
+  if (!TITLE_ASSET_PREFIX_RE.test(prefix)) {
+    throw new Error("Refusing to purge a non-title prefix");
+  }
+  return prefix;
 }
 
 // Authz for the route handlers: confirm the title is visible to the caller (RLS)

@@ -27,13 +27,29 @@ Do them in order — later steps depend on values from earlier ones.
 you also can't exercise the restore path.
 
 ## 2. AWS — IAM: add `s3:RestoreObject`
-**Do:** to the app's IAM policy (the one that already allows `s3:GetObject`/`PutObject`, no `DeleteObject`),
-add:
+**Do:** to the app's IAM policy (the one that already allows `s3:GetObject`/`PutObject`),
+add restore **and** the founder-lock 2026-09-17 title-prefix purge (not a bucket wipe):
 ```json
 { "Effect": "Allow", "Action": ["s3:RestoreObject"], "Resource": "arn:aws:s3:::<your-assets-bucket>/*" }
 ```
+```json
+{
+  "Effect": "Allow",
+  "Action": ["s3:ListBucket"],
+  "Resource": "arn:aws:s3:::<your-assets-bucket>",
+  "Condition": { "StringLike": { "s3:prefix": ["orgs/*/titles/*"] } }
+}
+```
+```json
+{
+  "Effect": "Allow",
+  "Action": ["s3:DeleteObject","s3:DeleteObjects"],
+  "Resource": "arn:aws:s3:::<your-assets-bucket>/orgs/*/titles/*"
+}
+```
 **Where:** IAM console → the app's policy → edit JSON.
-**Verify:** policy JSON contains `s3:RestoreObject`; still **no** `s3:DeleteObject`.
+**Verify:** policy JSON contains `s3:RestoreObject` and prefix-scoped `s3:DeleteObject` /
+`s3:DeleteObjects` on `orgs/*/titles/*` only — never `DeleteObject` on the whole bucket.
 
 ## 3. AWS — CloudFront distribution (private, signed) + subdomain
 Follow **`asset-portal-setup.md` §1–§5** (copy-paste CLI). In order:

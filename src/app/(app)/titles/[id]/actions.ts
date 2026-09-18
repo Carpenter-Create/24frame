@@ -10,6 +10,8 @@ import { resolveTerritories, type TerritoryMode } from "@/lib/territories";
 import type { RightsType } from "@/lib/rights";
 import { computeMetadataFindings, METADATA_LOGIC_VERSION } from "@/lib/metadata";
 import type { Json } from "@/lib/supabase/database.types";
+import { purgeDeletedTitleStorage } from "@/lib/s3-title-purge";
+import { TITLE_LIFECYCLE } from "@/lib/titles-lifecycle";
 
 // Add a rights grant (expand = insert) for a title in the active org. Territories
 // resolve to ISO codes server-side; the write goes through the add_rights_grant
@@ -247,12 +249,40 @@ export async function deleteTitle(titleId: string): Promise<{ error?: string }> 
   const user = await getAuthUser();
   if (!user) return { error: "Not authenticated." };
 
-  const { error } = await supabase.rpc("delete_title", { p_title_id: titleId });
+  // Capture org_id before delete_title hides the row from RLS. S3 purge
+  // runs after the RPC so authorization stays in the database; if purge
+  // fails the catalog change has already committed and the sweeper retries.
+  const { data: title, error: titleError } = await supabase
+    .from("titles")
+    .select("id, org_id")
+    .eq("id", titleId)
+    .maybeSingle();
+  if (titleError) return { error: titleError.message };
+  if (!title) return { error: "Title not found." };
+
+  const { error } = await supabase.rpc("delete_title", { p_title_id: title.id });
   if (error) return { error: error.message };
 
   revalidatePath("/titles");
   revalidatePath(`/titles/${titleId}`);
   revalidatePath("/titles", "layout");
+
+  try {
+    await purgeDeletedTitleStorage({
+      orgId: title.org_id,
+      titleId: title.id,
+      markPurged: async () => {
+        const marked = await supabase.rpc("mark_deleted_title_prefix_purged", {
+          p_title_id: title.id,
+        });
+        return { error: marked.error };
+      },
+    });
+  } catch (e) {
+    console.error("[title-s3-purge] delete path failed", e);
+    return { error: TITLE_LIFECYCLE.purgeFailed };
+  }
+
   return {};
 }
 

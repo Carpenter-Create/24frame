@@ -4,6 +4,8 @@ import {
   screenerKindFor,
   isPostApprovalTitleStatus,
   isClientViewableAssetKind,
+  titleAssetPrefix,
+  assertTitleAssetPrefix,
 } from "./assets";
 
 // screenerKindFor is the authorization rule BOTH /api/screener/url and the title page call.
@@ -74,6 +76,35 @@ describe("isPostApprovalTitleStatus", () => {
   // screenerKindFor and buyerActionsFor — not a change to this list's own meaning.
   it("still counts taken_down as post-approval — that fact hasn't changed, only who else gates on it", () => {
     expect(isPostApprovalTitleStatus("taken_down")).toBe(true);
+  });
+});
+
+describe("titleAssetPrefix", () => {
+  const orgId = "550e8400-e29b-41d4-a716-446655440000";
+  const titleId = "11111111-2222-4333-8444-555555555555";
+
+  it("builds orgs/<org>/titles/<title>/ with a trailing slash", () => {
+    expect(titleAssetPrefix(orgId, titleId)).toBe(`orgs/${orgId}/titles/${titleId}/`);
+    expect(titleAssetPrefix(orgId.toUpperCase(), titleId.toUpperCase())).toBe(
+      `orgs/${orgId}/titles/${titleId}/`,
+    );
+  });
+
+  it("refuses non-UUID ids so a sibling prefix cannot be constructed", () => {
+    expect(() => titleAssetPrefix("org", titleId)).toThrow(/canonical org and title ids/);
+    expect(() => titleAssetPrefix(orgId, "title")).toThrow(/canonical org and title ids/);
+    expect(() => titleAssetPrefix(`${orgId}/../avatars`, titleId)).toThrow(
+      /canonical org and title ids/,
+    );
+  });
+
+  it("assertTitleAssetPrefix admits only that exact prefix shape", () => {
+    const prefix = titleAssetPrefix(orgId, titleId);
+    expect(assertTitleAssetPrefix(prefix)).toBe(prefix);
+    expect(() => assertTitleAssetPrefix(prefix.slice(0, -1))).toThrow(/non-title prefix/);
+    expect(() => assertTitleAssetPrefix("avatars/u/avatar")).toThrow(/non-title prefix/);
+    expect(() => assertTitleAssetPrefix(`orgs/${orgId}/titles/`)).toThrow(/non-title prefix/);
+    expect(() => assertTitleAssetPrefix(`${prefix}poster/`)).toThrow(/non-title prefix/);
   });
 });
 

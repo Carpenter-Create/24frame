@@ -87,20 +87,39 @@ aws s3api get-object-tagging --bucket "$BUCKET" --key "$KEY"   # expect gc-archi
 > ```
 > Requires `s3:PutObjectTagging` (STEP 2) on whichever principal you run it as.
 
-## STEP 2 — IAM: add `s3:RestoreObject` + `s3:PutObjectTagging` (keep everything else; still no Delete)
+## STEP 2 — IAM: add `s3:RestoreObject` + `s3:PutObjectTagging` + scoped title-prefix delete
 `PutObjectTagging` is required because the app now sets the archive tag on upload — without it, master uploads
 fail outright. `GetObjectTagging` is included so the verification step above works as the app user.
 
+Founder lock 2026-09-17: soft-deleted titles always purge `orgs/<orgId>/titles/<titleId>/`.
+`s3:DeleteObject` / `s3:DeleteObjects` + list are **prefix-scoped**. This is not a bucket wipe.
+
 ```bash
 cat > /tmp/gc-assets-s3.json <<JSON
-{ "Version": "2012-10-17", "Statement": [ {
-  "Effect": "Allow",
-  "Action": ["s3:PutObject","s3:GetObject","s3:ListMultipartUploadParts","s3:AbortMultipartUpload","s3:RestoreObject","s3:PutObjectTagging","s3:GetObjectTagging"],
-  "Resource": "arn:aws:s3:::$BUCKET/*"
-} ] }
+{ "Version": "2012-10-17", "Statement": [
+  {
+    "Sid": "TitleObjectReadWrite",
+    "Effect": "Allow",
+    "Action": ["s3:PutObject","s3:GetObject","s3:ListMultipartUploadParts","s3:AbortMultipartUpload","s3:RestoreObject","s3:PutObjectTagging","s3:GetObjectTagging"],
+    "Resource": "arn:aws:s3:::$BUCKET/*"
+  },
+  {
+    "Sid": "DeletedTitlePrefixList",
+    "Effect": "Allow",
+    "Action": ["s3:ListBucket"],
+    "Resource": "arn:aws:s3:::$BUCKET",
+    "Condition": { "StringLike": { "s3:prefix": ["orgs/*/titles/*"] } }
+  },
+  {
+    "Sid": "DeletedTitlePrefixPurge",
+    "Effect": "Allow",
+    "Action": ["s3:DeleteObject","s3:DeleteObjects"],
+    "Resource": "arn:aws:s3:::$BUCKET/orgs/*/titles/*"
+  }
+] }
 JSON
 aws iam put-user-policy --user-name gc-assets-app --policy-name gc-assets-s3 --policy-document file:///tmp/gc-assets-s3.json
-# verify RestoreObject + PutObjectTagging present, no DeleteObject:
+# verify RestoreObject + PutObjectTagging + prefix-scoped DeleteObject (not $BUCKET/*):
 aws iam get-user-policy --user-name gc-assets-app --policy-name gc-assets-s3
 ```
 
