@@ -3,10 +3,14 @@ import { describe, expect, it, vi } from "vitest";
 import { NEWS_SOURCES } from "./news";
 import {
   NEWS_OG_CONCURRENCY,
+  NEWS_OG_MAX_BYTES,
   NEWS_OG_TIMEOUT_MS,
+  NEWS_USER_AGENT,
+  countNewsOgFill,
   fetchNewsArticleHtml,
   fillNewsOgImages,
   ingestNewsFeeds,
+  resolveNewsOgMaxBytes,
 } from "./news-ingest";
 import { loadHomeNews, loadNewsHistory, resetNewsReadCache } from "./news-load";
 import type { NormalizedNewsItem } from "./news-rss";
@@ -184,6 +188,56 @@ describe("ingest OG images", () => {
     expect(rows[0]?.image_url).toBeNull();
   });
 
+  it("counts ogAttempted, ogFilled, and ogMiss per source in the ingest log", async () => {
+    const persist = memoryNewsStore();
+    const mixed = `<?xml version="1.0"?>
+<rss version="2.0">
+  <channel>
+    <item>
+      <title>Hit</title>
+      <link>https://hollywoodreporter.com/hit</link>
+      <pubDate>Thu, 17 Sep 2026 12:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Miss</title>
+      <link>https://hollywoodreporter.com/miss</link>
+      <pubDate>Thu, 17 Sep 2026 13:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>`;
+    const logs: Array<Record<string, unknown>> = [];
+    const spy = vi.spyOn(console, "log").mockImplementation((msg: unknown) => {
+      if (typeof msg === "string") {
+        try {
+          logs.push(JSON.parse(msg) as Record<string, unknown>);
+        } catch {
+          /* ignore */
+        }
+      }
+    });
+    try {
+      const summary = await ingestNewsFeeds({
+        persist,
+        now: NOW,
+        fetchXml: async (url: string) =>
+          url === "https://www.hollywoodreporter.com/feed/" ? mixed : EMPTY_FEED,
+        fetchOgHtml: async (url: string) =>
+          url === "https://hollywoodreporter.com/miss"
+            ? null
+            : `<meta property="og:image" content="https://thr.com/hit.jpg" />`,
+      });
+      const hr = summary.results.find((row) => row.source === "hollywood-reporter");
+      expect(hr).toMatchObject({ ogAttempted: 2, ogFilled: 1, ogMiss: 1 });
+      const variety = summary.results.find((row) => row.source === "variety");
+      expect(variety).toMatchObject({ ogAttempted: 0, ogFilled: 0, ogMiss: 0 });
+      expect(
+        logs.find((row) => row.msg === "news ingest source" && row.source === "hollywood-reporter"),
+      ).toMatchObject({ ogAttempted: 2, ogFilled: 1, ogMiss: 1 });
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
   it("scrapes missing images independently — one miss does not drop a sibling hit", async () => {
     const persist = memoryNewsStore();
     const mixed = `<?xml version="1.0"?>
@@ -239,8 +293,9 @@ describe("ingest OG images", () => {
 });
 
 describe("fetchNewsArticleHtml", () => {
-  it("uses a 4s hard timeout and fail-softs to null", async () => {
-    expect(NEWS_OG_TIMEOUT_MS).toBe(4_000);
+  it("uses a 12s hard timeout and fail-softs to null", async () => {
+    expect(NEWS_OG_TIMEOUT_MS).toBe(12_000);
+    expect(NEWS_OG_MAX_BYTES).toBe(1_500_000);
     expect(NEWS_OG_CONCURRENCY).toBe(4);
     const html = await fetchNewsArticleHtml("https://hollywoodreporter.com/story", {
       fetchImpl: async () => {
@@ -254,6 +309,34 @@ describe("fetchNewsArticleHtml", () => {
       }),
     ).toBeNull();
     expect(await fetchNewsArticleHtml("http://hollywoodreporter.com/story")).toBeNull();
+  });
+
+  it("snapshots the desktop Chrome user-agent (publishers gate on bot UA)", () => {
+    expect(NEWS_USER_AGENT).toBe(
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    );
+    expect(NEWS_USER_AGENT).not.toContain("24FrameNews");
+  });
+
+  it("defaults NEWS_OG_MAX_BYTES to 1.5MB and honors a positive env override", () => {
+    expect(resolveNewsOgMaxBytes({})).toBe(1_500_000);
+    expect(resolveNewsOgMaxBytes({ NEWS_OG_MAX_BYTES: "2000000" })).toBe(2_000_000);
+    expect(resolveNewsOgMaxBytes({ NEWS_OG_MAX_BYTES: "nope" })).toBe(1_500_000);
+    expect(resolveNewsOgMaxBytes({ NEWS_OG_MAX_BYTES: "0" })).toBe(1_500_000);
+  });
+
+  it("keeps HTML past 512KB so a late og:image is still parsed", async () => {
+    const padding = `<!--${"x".repeat(520_000)}-->`;
+    const html = `<html><head></head><body>${padding}<meta property="og:image" content="https://thr.com/late.jpg" /></body></html>`;
+    const [kept] = await fillNewsOgImages([liveItem()], {
+      fetchImpl: async () => new Response(html, { status: 200 }),
+    });
+    expect(kept?.image_url).toBe("https://thr.com/late.jpg");
+    const [truncated] = await fillNewsOgImages([liveItem()], {
+      fetchImpl: async () => new Response(html, { status: 200 }),
+      maxBytes: 512_000,
+    });
+    expect(truncated?.image_url).toBeNull();
   });
 
   it("settles null when fetch hangs past the hard timeout", async () => {
@@ -272,6 +355,8 @@ describe("fillNewsOgImages", () => {
     const fetchImpl = vi.fn<typeof fetch>(async (input, init) => {
       expect(String(input)).toBe("https://variety.com/live");
       expect(init?.signal).toBeInstanceOf(AbortSignal);
+      const headers = new Headers(init?.headers);
+      expect(headers.get("user-agent")).toBe(NEWS_USER_AGENT);
       return new Response(
         `<html><head><meta property="og:image" content="//cdn.variety.com/live.jpg" /></head></html>`,
         { status: 200, headers: { "content-type": "text/html" } },
@@ -320,5 +405,20 @@ describe("fillNewsOgImages", () => {
     );
     expect(kept?.image_url).toBe("https://variety.com/thumbs/rss.jpg");
     expect(fetchHtml).not.toHaveBeenCalled();
+  });
+
+  it("counts only RSS-null items as OG attempts", () => {
+    expect(
+      countNewsOgFill(
+        [
+          { ...liveItem(), image_url: "https://variety.com/thumbs/rss.jpg" },
+          liveItem(),
+        ],
+        [
+          { ...liveItem(), image_url: "https://variety.com/thumbs/rss.jpg" },
+          { ...liveItem(), image_url: "https://variety.com/og.jpg" },
+        ],
+      ),
+    ).toEqual({ ogAttempted: 1, ogFilled: 1, ogMiss: 0 });
   });
 });

@@ -9,13 +9,33 @@ import { createNewsIngestStore, type NewsPersist } from "@/lib/news-store";
 
 export const NEWS_FEED_TIMEOUT_MS = 8_000;
 export const NEWS_FEED_MAX_BYTES = 1_500_000;
-export const NEWS_OG_TIMEOUT_MS = 4_000;
-export const NEWS_OG_MAX_BYTES = 512_000;
+export const NEWS_OG_TIMEOUT_MS = 12_000;
+/** Default OG HTML cap. THR pages are ~611KB; 512KB truncated before og:image. */
+export const NEWS_OG_MAX_BYTES = 1_500_000;
 export const NEWS_INGEST_CONCURRENCY = 3;
 export const NEWS_OG_CONCURRENCY = 4;
-export const NEWS_USER_AGENT = "24FrameNews/1.0";
+/** Mainstream desktop Chrome — publishers gate on bot tokens like 24FrameNews/1.0. */
+export const NEWS_USER_AGENT =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
+
+export type NewsEnvLike = Record<string, string | undefined>;
+
+/** `NEWS_OG_MAX_BYTES` env override (positive integer). Invalid/empty → default. */
+export function resolveNewsOgMaxBytes(env: NewsEnvLike = process.env): number {
+  const raw = env.NEWS_OG_MAX_BYTES?.trim();
+  if (!raw) return NEWS_OG_MAX_BYTES;
+  const parsed = Number.parseInt(raw, 10);
+  if (!Number.isFinite(parsed) || parsed < 1) return NEWS_OG_MAX_BYTES;
+  return parsed;
+}
 
 export type { NewsPersist };
+
+export type NewsOgCounters = {
+  ogAttempted: number;
+  ogFilled: number;
+  ogMiss: number;
+};
 
 export type NewsIngestSourceResult = {
   source: NewsSourceId;
@@ -23,6 +43,9 @@ export type NewsIngestSourceResult = {
   inserted: number;
   skipped?: boolean;
   error?: string;
+  ogAttempted?: number;
+  ogFilled?: number;
+  ogMiss?: number;
 };
 
 export type NewsIngestSummary = {
@@ -64,11 +87,17 @@ export async function fetchNewsFeedXml(
 
 export async function fetchNewsArticleHtml(
   url: string,
-  init: { fetchImpl?: typeof fetch; timeoutMs?: number } = {},
+  init: {
+    fetchImpl?: typeof fetch;
+    timeoutMs?: number;
+    maxBytes?: number;
+    env?: NewsEnvLike;
+  } = {},
 ): Promise<string | null> {
   if (!/^https:\/\//i.test(url)) return null;
   const fetchImpl = init.fetchImpl ?? fetch;
   const timeoutMs = init.timeoutMs ?? NEWS_OG_TIMEOUT_MS;
+  const maxBytes = init.maxBytes ?? resolveNewsOgMaxBytes(init.env);
   const controller = new AbortController();
   let timer: ReturnType<typeof setTimeout> | undefined;
 
@@ -83,7 +112,7 @@ export async function fetchNewsArticleHtml(
     });
     if (!res.ok) return null;
     const buf = new Uint8Array(await res.arrayBuffer());
-    const slice = buf.byteLength > NEWS_OG_MAX_BYTES ? buf.subarray(0, NEWS_OG_MAX_BYTES) : buf;
+    const slice = buf.byteLength > maxBytes ? buf.subarray(0, maxBytes) : buf;
     return new TextDecoder("utf-8").decode(slice);
   })().catch(() => null);
 
@@ -107,12 +136,19 @@ export async function fillNewsOgImages(
     fetchHtml?: (url: string) => Promise<string | null>;
     fetchImpl?: typeof fetch;
     timeoutMs?: number;
+    maxBytes?: number;
+    env?: NewsEnvLike;
   } = {},
 ): Promise<NormalizedNewsItem[]> {
   const fetchHtml =
     init.fetchHtml ??
     ((url: string) =>
-      fetchNewsArticleHtml(url, { fetchImpl: init.fetchImpl, timeoutMs: init.timeoutMs }));
+      fetchNewsArticleHtml(url, {
+        fetchImpl: init.fetchImpl,
+        timeoutMs: init.timeoutMs,
+        maxBytes: init.maxBytes,
+        env: init.env,
+      }));
   const missing = items.filter((item) => !item.image_url);
   if (missing.length === 0) return items.map((item) => item);
 
@@ -134,6 +170,24 @@ export async function fillNewsOgImages(
     if (item.image_url) return item;
     return { ...item, image_url: scraped.get(item.canonical_url) ?? null };
   });
+}
+
+const EMPTY_OG: NewsOgCounters = { ogAttempted: 0, ogFilled: 0, ogMiss: 0 };
+
+/** RSS-null items only. CloudWatch: ogAttempted / ogFilled / ogMiss per source. */
+export function countNewsOgFill(
+  before: readonly NormalizedNewsItem[],
+  after: readonly NormalizedNewsItem[],
+): NewsOgCounters {
+  const afterByUrl = new Map(after.map((item) => [item.canonical_url, item]));
+  let ogAttempted = 0;
+  let ogFilled = 0;
+  for (const item of before) {
+    if (item.image_url) continue;
+    ogAttempted += 1;
+    if (afterByUrl.get(item.canonical_url)?.image_url) ogFilled += 1;
+  }
+  return { ogAttempted, ogFilled, ogMiss: ogAttempted - ogFilled };
 }
 
 /** Sliding pool — a slow URL holds one slot, not the rest of the batch. */
@@ -206,8 +260,8 @@ export async function ingestNewsFeeds(input: {
     async (source): Promise<NewsIngestSourceResult> => {
       const health = await persist.getHealth(source.id);
       if (!newsSourceIsLive(source.id, health)) {
-        console.log(JSON.stringify({ msg: "news ingest skip", source: source.id }));
-        return { source: source.id, fetched: 0, inserted: 0, skipped: true };
+        console.log(JSON.stringify({ msg: "news ingest skip", source: source.id, ...EMPTY_OG }));
+        return { source: source.id, fetched: 0, inserted: 0, skipped: true, ...EMPTY_OG };
       }
       try {
         const xml = await fetchXml(source.feedUrl);
@@ -218,6 +272,7 @@ export async function ingestNewsFeeds(input: {
         } catch {
           items = parsed;
         }
+        const og = countNewsOgFill(parsed, items);
         const inserted = await persist.upsertItems(items, now);
         await markHealth(persist, source.id, { now });
         console.log(
@@ -226,14 +281,15 @@ export async function ingestNewsFeeds(input: {
             source: source.id,
             fetched: items.length,
             inserted,
+            ...og,
           }),
         );
-        return { source: source.id, fetched: items.length, inserted };
+        return { source: source.id, fetched: items.length, inserted, ...og };
       } catch (err) {
         const message = err instanceof Error ? err.message : "feed failed";
-        console.error(JSON.stringify({ msg: "news ingest fail", source: source.id, error: message }));
+        console.error(JSON.stringify({ msg: "news ingest fail", source: source.id, error: message, ...EMPTY_OG }));
         await markHealth(persist, source.id, { now, error: message });
-        return { source: source.id, fetched: 0, inserted: 0, error: message };
+        return { source: source.id, fetched: 0, inserted: 0, error: message, ...EMPTY_OG };
       }
     },
     NEWS_INGEST_CONCURRENCY,

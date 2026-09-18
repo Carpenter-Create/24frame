@@ -13,7 +13,10 @@ Auth stays Supabase Auth. The app **reads** DynamoDB on Home (15) and
 `/home/news` (90-day window; `/news` permanently redirects). Ingest
 **writes** DynamoDB. Page requests never fan out RSS. RSS media /
 enclosure first; when `image_url` is null, ingest OG-scrapes the
-article (`og:image` / `twitter:image`, 4s timeout, fail-soft).
+article (`og:image` / `twitter:image`, 12s timeout, desktop Chrome UA,
+1.5MB HTML cap, fail-soft). Override the cap with server-only
+`NEWS_OG_MAX_BYTES` (bytes, positive integer). Per-source CloudWatch
+counters: `ogAttempted`, `ogFilled`, `ogMiss`.
 
 ## Proposed resources (not created)
 
@@ -43,6 +46,7 @@ NEWS_AWS_REGION=us-west-2
 NEWS_AWS_ACCESS_KEY_ID=
 NEWS_AWS_SECRET_ACCESS_KEY=
 NEWS_DDB_TABLE=          # 24frame-news-dev / 24frame-news-prod
+NEWS_OG_MAX_BYTES=       # optional; default 1500000. Lambda only. Never NEXT_PUBLIC_.
 ```
 
 Names live in `.env.example`. Agents do not set values.
@@ -75,7 +79,8 @@ confirmed, founder applies in `405912452061` / `us-west-2`:
    `workers/news/handler.ts` (repo `tsx` + `@/` via a Lambda bundle,
    or a container image from repo root). Timeout 60s. Memory 256 MB
    is enough. Env: `NEWS_AWS_REGION=us-west-2`,
-   `NEWS_DDB_TABLE=24frame-news-prod` (or `-dev`). Prefer the
+   `NEWS_DDB_TABLE=24frame-news-prod` (or `-dev`). Optional
+   `NEWS_OG_MAX_BYTES` (default 1500000). Prefer the
    execution role over static keys on the function.
 5. **SQS** `24frame-news-ingest-dlq`. Attach as the Lambda
    asynchronous invocation DLQ (or EventBridge target DLQ).
@@ -114,6 +119,27 @@ Do **not** create these from this PR.
 **Kill a source.** Set `enabled: false` on that const row (deploy), or
 Put `SOURCE#<id>` / `HEALTH` with `enabled=false` (no deploy). Ingest
 skips it; existing rows age out via TTL / the 90-day query window.
+
+**After merge, MUST redeploy Lambda `24frame-news-ingest`.**
+Merge ≠ live for ingest. Code on `main` does not run until founder /
+CoS `esbuild` + `aws lambda update-function-code`. Do not create or
+mutate AWS from CI. Agents do not run this.
+
+```
+mkdir -p /tmp/news-ingest
+pnpm exec esbuild workers/news/handler.ts \
+  --bundle --platform=node --format=cjs --target=node20 \
+  --outfile=/tmp/news-ingest/index.js \
+  --alias:@=./src
+(cd /tmp/news-ingest && zip function.zip index.js)
+aws lambda update-function-code --region us-west-2 \
+  --function-name 24frame-news-ingest \
+  --zip-file fileb:///tmp/news-ingest/function.zip
+```
+
+OG per-article timeout is 12s (concurrency 4). HTML cap is 1.5MB
+(`NEWS_OG_MAX_BYTES` env override on the function). Function timeout
+stays 60s until founder bumps it after a CloudWatch timeout.
 
 **Trigger ingest.** After founder apply:
 
