@@ -119,7 +119,7 @@ describe("Home module caps", () => {
     expect(OVERVIEW_PAGE.news).toBe("News");
     expect(OVERVIEW_PAGE.newsHref).toBe("/news");
     expect(OVERVIEW_PAGE.newsViewAll).toBe("View all");
-    expect(OVERVIEW_HOME_LAYOUT_CLASS).toContain("'aggregation'_'news'_'needs'");
+    expect(OVERVIEW_HOME_LAYOUT_CLASS).toContain("'aggregation'_'news'_'needs'_'ai'");
     expect(OVERVIEW_HOME_LAYOUT_CLASS).toContain("lg:grid-cols-[minmax(0,1fr)_20rem]");
     expect(OVERVIEW_HOME_LAYOUT_CLASS).not.toContain("md:grid-cols");
     expect(OVERVIEW_PAGE.thisWeek).toBe("This week");

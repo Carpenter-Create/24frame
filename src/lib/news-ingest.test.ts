@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { NEWS_SOURCES } from "./news";
 import { ingestNewsFeeds } from "./news-ingest";
+import type { NormalizedNewsItem } from "./news-rss";
 
 const NOW = new Date("2026-09-18T18:00:00.000Z");
 
@@ -18,7 +19,7 @@ const FEED = `<?xml version="1.0"?>
 
 describe("ingestNewsFeeds", () => {
   it("fails soft per source and still persists the others", async () => {
-    const persist = vi.fn(async (items: { source: string }[]) => items.length);
+    const persist = vi.fn(async (items: readonly NormalizedNewsItem[]) => items.length);
     const fetchXml = vi.fn(async (url: string) => {
       if (url === "https://deadline.com/feed/") throw new Error("timeout");
       return FEED;

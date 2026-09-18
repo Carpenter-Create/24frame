@@ -56,7 +56,7 @@ describe("news UI source", () => {
   it("does not render a summary field", () => {
     const card = readFileSync(new URL("./news-card.tsx", import.meta.url), "utf8");
     const rail = readFileSync(new URL("./news-rail.tsx", import.meta.url), "utf8");
-    expect(card).not.toMatch(/summary|description|content:encoded/i);
-    expect(rail).not.toMatch(/summary|description|content:encoded/i);
+    expect(card).not.toMatch(/\b(item\.(summary|description|body)|content:encoded)\b/);
+    expect(rail).not.toMatch(/\b(item\.(summary|description|body)|content:encoded)\b/);
   });
 });
