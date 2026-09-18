@@ -18,23 +18,34 @@ type NewsCacheEntry = { expiresAt: number; value: NewsListResult };
 
 const newsReadCache = new Map<string, NewsCacheEntry>();
 
-export function newsReadCacheKey(limit: number, now: Date): string {
-  const bucket = Math.floor(now.getTime() / (NEWS_READ_REVALIDATE_SECONDS * 1000));
-  return `news:${limit}:${bucket}`;
+export function newsReadCacheKey(limit: number): string {
+  return `news:${limit}`;
+}
+
+export function newsReadCacheSize(): number {
+  return newsReadCache.size;
 }
 
 export function resetNewsReadCache(): void {
   newsReadCache.clear();
 }
 
+function pruneNewsReadCache(now: Date): void {
+  for (const [key, hit] of newsReadCache) {
+    if (hit.expiresAt <= now.getTime()) newsReadCache.delete(key);
+  }
+}
+
 export function peekNewsReadCache(key: string, now: Date): NewsListResult | null {
+  pruneNewsReadCache(now);
   const hit = newsReadCache.get(key);
-  if (!hit || hit.expiresAt <= now.getTime()) return null;
+  if (!hit) return null;
   return hit.value;
 }
 
 function rememberNewsRead(key: string, value: NewsListResult, now: Date): void {
   if (value.failed) return;
+  pruneNewsReadCache(now);
   newsReadCache.set(key, {
     expiresAt: now.getTime() + NEWS_READ_REVALIDATE_SECONDS * 1000,
     value,
@@ -46,7 +57,7 @@ export async function loadNewsItems(input: {
   now: Date;
   store?: NewsStore;
 }): Promise<NewsListResult> {
-  const key = newsReadCacheKey(input.limit, input.now);
+  const key = newsReadCacheKey(input.limit);
   const cached = peekNewsReadCache(key, input.now);
   if (cached) return cached;
 

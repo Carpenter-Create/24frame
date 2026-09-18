@@ -5,6 +5,7 @@ import {
   loadHomeNews,
   loadNewsItems,
   newsReadCacheKey,
+  newsReadCacheSize,
   peekNewsReadCache,
   resetNewsReadCache,
 } from "./news-load";
@@ -67,7 +68,7 @@ describe("loadNewsItems", () => {
     const first = await loadNewsItems({ limit: 12, now: NOW, store });
     expect(first.failed).toBe(true);
     expect(first.rows).toEqual([]);
-    expect(peekNewsReadCache(newsReadCacheKey(12, NOW), NOW)).toBeNull();
+    expect(peekNewsReadCache(newsReadCacheKey(12), NOW)).toBeNull();
 
     queryFeed.mockResolvedValueOnce([item(1, "2026-09-17T12:00:00.000Z")]);
     const second = await loadNewsItems({ limit: 12, now: NOW, store });
@@ -79,6 +80,18 @@ describe("loadNewsItems", () => {
     const loaded = await loadNewsItems({ limit: 12, now: NOW });
     expect(loaded.failed).toBe(true);
     expect(loaded.rows).toEqual([]);
-    expect(peekNewsReadCache(newsReadCacheKey(12, NOW), NOW)).toBeNull();
+    expect(peekNewsReadCache(newsReadCacheKey(12), NOW)).toBeNull();
+  });
+
+  it("keeps one live slot per limit and drops expired entries", async () => {
+    const store = memoryNewsStore([item(1, "2026-09-17T12:00:00.000Z")]);
+    await loadNewsItems({ limit: 12, now: NOW, store });
+    await loadNewsItems({ limit: 30, now: NOW, store });
+    expect(newsReadCacheSize()).toBe(2);
+    const later = new Date(NOW.getTime() + 61_000);
+    expect(peekNewsReadCache(newsReadCacheKey(12), later)).toBeNull();
+    expect(newsReadCacheSize()).toBe(0);
+    await loadNewsItems({ limit: 12, now: later, store });
+    expect(newsReadCacheSize()).toBe(1);
   });
 });
