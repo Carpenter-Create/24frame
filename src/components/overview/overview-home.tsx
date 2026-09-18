@@ -1,7 +1,8 @@
 import Link from "next/link";
 
-import { CourseCard } from "@/components/courses/course-card";
+import { HousePeriodPresets } from "@/components/chrome/house-period-presets";
 import { TextAction } from "@/components/chrome/house";
+import { CourseCard } from "@/components/courses/course-card";
 import {
   DashboardHomeEmpty,
   DashboardHomePanel,
@@ -10,7 +11,7 @@ import { OverviewModule } from "@/components/overview/overview-module";
 import { NewsRail } from "@/components/news/news-rail";
 import { PageHeader } from "@/components/ui/page-header";
 import type { CourseRow } from "@/lib/courses";
-import type { DashboardPeriod } from "@/lib/dashboard-admin";
+import { DASHBOARD_ADMIN, type DashboardPeriod } from "@/lib/dashboard-admin";
 import {
   DASHBOARD_CARD_PAD_LIST,
   DASHBOARD_RELATED_GAP_CLASS,
@@ -34,11 +35,6 @@ import {
   OVERVIEW_PAGE,
   overviewHref,
 } from "@/lib/overview";
-import {
-  REPORTS_PERIOD_CHIP_CLASS,
-  REPORTS_PERIOD_CHIP_OFF_CLASS,
-  REPORTS_PERIOD_CHIP_ON_CLASS,
-} from "@/lib/reports-craft";
 import { REPORTS_PERIOD_PRESETS, reportsPeriodPresetKey } from "@/lib/reports";
 import { SOCIAL_AVATAR_32_CLASS } from "@/lib/social-chrome";
 import type { SocialHomeChat } from "@/lib/social-home-chats";
@@ -48,8 +44,9 @@ import { cn } from "@/lib/cn";
 // Home IA v2 order rewrite — Net revenue first. News is the right
 // rail on desktop and the last full-width stack on phone (after AI).
 // This-week pulse stays with Net revenue. Social stays avatars-only.
-// Period chips are the Aggregation/Finance house presets — not a
-// Home lookalike. Top performing is not on Home.
+// Period presets share HousePeriodPresets (Reports chips on md+;
+// HousePageSelect on phone). Never a wrapping Home chip fork.
+// Top performing is not on Home.
 
 export function OverviewHome({
   revenueCents,
@@ -93,26 +90,20 @@ export function OverviewHome({
         </div>
         <div
           data-overview-revenue-period=""
-          className={`flex flex-wrap items-center ${DASHBOARD_RELATED_GAP_CLASS} px-[var(--space-4)]`}
+          className="px-[var(--space-4)]"
         >
-          {REPORTS_PERIOD_PRESETS.map((preset) => {
-            const on = period.kind === preset.grain;
-            const key = reportsPeriodPresetKey(preset.grain, now);
-            return (
-              <Link
-                key={preset.grain}
-                href={overviewHref({ period: key })}
-                data-overview-revenue-period-chip={preset.grain}
-                aria-pressed={on}
-                className={cn(
-                  REPORTS_PERIOD_CHIP_CLASS,
-                  on ? REPORTS_PERIOD_CHIP_ON_CLASS : REPORTS_PERIOD_CHIP_OFF_CLASS,
-                )}
-              >
-                {preset.label}
-              </Link>
-            );
-          })}
+          <HousePeriodPresets
+            value={period.kind}
+            items={REPORTS_PERIOD_PRESETS.map((preset) => ({
+              key: preset.grain,
+              label: preset.label,
+              href: overviewHref({ period: reportsPeriodPresetKey(preset.grain, now) }),
+            }))}
+            ariaLabel={DASHBOARD_ADMIN.period}
+            sheetTitle={DASHBOARD_ADMIN.period}
+            closeLabel={DASHBOARD_ADMIN.close}
+            chipAttrs={(key) => ({ "data-overview-revenue-period-chip": key })}
+          />
         </div>
         <div className="border-t border-hairline px-[var(--space-4)] py-[var(--space-4)]">
           {revenueCents === null ? (

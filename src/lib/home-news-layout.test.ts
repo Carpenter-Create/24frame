@@ -1,7 +1,13 @@
 import { existsSync, readFileSync } from "node:fs";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn() }),
+  usePathname: () => "/home",
+  useSearchParams: () => new URLSearchParams(),
+}));
 
 import { OverviewHome } from "@/components/overview/overview-home";
 import { parseDashboardPeriod } from "@/lib/dashboard-admin";

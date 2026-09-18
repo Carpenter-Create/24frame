@@ -59,6 +59,7 @@ describe("HousePageSelect", () => {
 
     const lenses = [
       "src/components/dashboard/dashboard-admin-controls.tsx",
+      "src/components/chrome/house-period-presets.tsx",
       "src/components/titles/titles-status-filter.tsx",
       "src/app/(app)/(operator)/channels/channels-status-filter.tsx",
       "src/app/(app)/(operator)/gc/deliveries/licensing-status-filter.tsx",

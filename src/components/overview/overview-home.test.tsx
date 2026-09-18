@@ -21,6 +21,10 @@ import {
   OVERVIEW_PAGE,
 } from "@/lib/overview";
 import {
+  HOUSE_PERIOD_PRESETS_CHIPS_CLASS,
+  HOUSE_PERIOD_PRESETS_PHONE_CLASS,
+} from "@/lib/house-period-presets";
+import {
   REPORTS_PAGE,
   REPORTS_PERIOD_PRESETS,
 } from "@/lib/reports";
@@ -109,6 +113,8 @@ describe("OverviewHome", () => {
     expect(html).not.toContain("Top performing");
     expect(html).toContain("data-overview-revenue");
     expect(html).toContain("data-overview-revenue-period");
+    expect(html).toContain("data-house-period-presets");
+    expect(html).toContain("data-house-page-select");
     for (const preset of REPORTS_PERIOD_PRESETS) {
       expect(html).toContain(`data-overview-revenue-period-chip="${preset.grain}"`);
       expect(html).toContain(preset.label);
@@ -186,6 +192,31 @@ describe("OverviewHome", () => {
     expect(html).toContain(REPORTS_PAGE.month);
     expect(html).not.toContain("MTD");
     expect(html).not.toContain("Top performing");
+  });
+
+  it("keeps phone Net revenue period on HousePageSelect — never a two-line wrap", () => {
+    const html = renderToStaticMarkup(createElement(OverviewHome, homeProps()));
+    const homeSrc = readFileSync(new URL("./overview-home.tsx", import.meta.url), "utf8");
+    const periodAt = html.indexOf("data-overview-revenue-period");
+    const periodChunk = html.slice(
+      periodAt,
+      html.indexOf('data-overview-module="social"'),
+    );
+
+    expect(periodAt).toBeGreaterThan(-1);
+    expect(periodChunk).toContain("data-house-period-presets-phone");
+    expect(periodChunk).toContain("data-house-page-select");
+    expect(periodChunk).toContain(HOUSE_PERIOD_PRESETS_PHONE_CLASS);
+    expect(periodChunk).toContain(HOUSE_PERIOD_PRESETS_CHIPS_CLASS);
+    expect(periodChunk).not.toContain("flex-wrap");
+    expect(HOUSE_PERIOD_PRESETS_CHIPS_CLASS).toContain("hidden");
+    expect(HOUSE_PERIOD_PRESETS_CHIPS_CLASS).toContain("md:flex");
+    expect(HOUSE_PERIOD_PRESETS_CHIPS_CLASS).not.toContain("flex-wrap");
+    expect(HOUSE_PERIOD_PRESETS_PHONE_CLASS).toBe("md:hidden");
+    expect(homeSrc).toContain("HousePeriodPresets");
+    expect(homeSrc).not.toContain("flex-wrap");
+    expect(homeSrc).not.toContain("overflow-x-auto");
+    expect(html).toContain(REPORTS_PAGE.month);
   });
 
   it("keeps the Home AI teaser as a quiet overlay opener — never a dest hop", () => {
