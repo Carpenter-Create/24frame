@@ -208,7 +208,7 @@ describe("workspace switcher header control", () => {
     const options = [
       ...html.matchAll(/data-workspace-switcher-option="([^"]+)"[^>]*>([\s\S]*?)<\/button>/g),
     ];
-    expect(options).toHaveLength(3);
+    expect(options).toHaveLength(4);
 
     for (const [, mode, body] of options) {
       const markAt = body.indexOf("data-workspace-switcher-mark");
