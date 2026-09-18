@@ -10,7 +10,7 @@ type Props = {
   /** Uppercase accent kicker above the title — the site's "THE PLATFORM" register. */
   eyebrow?: string;
   subtitle?: string;
-  backLink?: { href: string; label?: string };
+  backLink?: { href: string; label?: string; className?: string };
   actions?: React.ReactNode;
   className?: string;
 };
@@ -24,7 +24,10 @@ export function PageHeader({ title, eyebrow, subtitle, backLink, actions, classN
         {backLink ? (
           <Link
             href={backLink.href}
-            className="inline-flex items-center gap-1 t-body-sm text-ink-3 transition-colors hover:text-ink-2"
+            className={cn(
+              "inline-flex items-center gap-1",
+              backLink.className ?? "t-body-sm text-ink-3 transition-colors hover:text-ink-2",
+            )}
           >
             <ArrowLeft className="h-4 w-4" strokeWidth={1.5} />
             {backLink.label ?? "Back"}

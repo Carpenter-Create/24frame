@@ -1,4 +1,5 @@
 import { DASHBOARD_HOME } from "@/lib/dashboard-home";
+import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
 import { NEWS_INGEST_FUNCTION, NEWS_INGEST_SCHEDULE } from "@/lib/news-aws";
 
@@ -39,9 +40,18 @@ export const NEWS_PAGE = {
   truncated: `Showing the first ${UNPAGINATED_MAX} headlines. More exist — this list is not complete.`,
 } as const;
 
-/** Home land crumb — News is a Home child, not a fifth workspace. */
-export function newsHistoryBackLink(): { href: typeof NEWS_HOME_HREF; label: typeof NEWS_PAGE.back } {
-  return { href: NEWS_PAGE.backHref, label: NEWS_PAGE.back };
+/** Home land crumb — News is a Home child, not a fifth workspace.
+ *  House Text action (Sporty Blue) — same primitive as Home View all. */
+export function newsHistoryBackLink(): {
+  href: typeof NEWS_HOME_HREF;
+  label: typeof NEWS_PAGE.back;
+  className: typeof TEXT_ACTION_CLASS;
+} {
+  return {
+    href: NEWS_PAGE.backHref,
+    label: NEWS_PAGE.back,
+    className: TEXT_ACTION_CLASS,
+  };
 }
 
 export const NEWS_SOURCE_IDS = [

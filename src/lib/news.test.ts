@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
+import { TEXT_ACTION_CLASS } from "./house-sheet";
 import { NEWS_INGEST_FUNCTION, NEWS_INGEST_SCHEDULE } from "./news-aws";
 import {
   NEWS_HOME_CAP,
@@ -45,7 +46,11 @@ describe("News SoT", () => {
     expect(NEWS_LEGACY_HREF).toBe("/news");
     expect(NEWS_PAGE.back).toBe("Home");
     expect(NEWS_PAGE.backHref).toBe(NEWS_HOME_HREF);
-    expect(newsHistoryBackLink()).toEqual({ href: "/home", label: "Home" });
+    expect(newsHistoryBackLink()).toEqual({
+      href: "/home",
+      label: "Home",
+      className: TEXT_ACTION_CLASS,
+    });
     expect(NEWS_PAGE.viewAll).toBe("View all");
     expect(NEWS_PAGE.sources).toBe("Sources");
     expect(NEWS_PAGE.sourcesAll).toBe("All");

@@ -5,6 +5,7 @@ import {
   DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS,
   DASHBOARD_NEWS_HISTORY_LIST_CLASS,
 } from "@/lib/dashboard-craft";
+import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import { NEWS_HOME_HREF, NEWS_PAGE, newsHistoryBackLink } from "@/lib/news";
 import { loadNewsHistory } from "@/lib/news-load";
 import { OVERVIEW_HREF, OVERVIEW_PAGE } from "@/lib/overview";
@@ -63,7 +64,13 @@ describe("NewsPage", () => {
     expect(html).toContain("90 days");
     expect(html).toContain(`href="${NEWS_HOME_HREF}"`);
     expect(html).toContain(NEWS_PAGE.back);
-    expect(newsHistoryBackLink()).toEqual({ href: OVERVIEW_HREF, label: OVERVIEW_PAGE.title });
+    expect(html).toContain(TEXT_ACTION_CLASS);
+    expect(html).not.toContain("hover:text-ink-2");
+    expect(newsHistoryBackLink()).toEqual({
+      href: OVERVIEW_HREF,
+      label: OVERVIEW_PAGE.title,
+      className: TEXT_ACTION_CLASS,
+    });
     expect(NEWS_PAGE.back).toBe(OVERVIEW_PAGE.title);
     expect(html).toContain("Harbor Cut lands a festival slot");
     expect(html).toContain("https://variety.com/harbor-cut");
