@@ -2,9 +2,17 @@
 
 import { revalidatePath } from "next/cache";
 
+import { sendOrgNotificationEmail } from "@/lib/email";
 import { submitProxyJob } from "@/lib/mediaconvert";
 import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/supabase/auth";
+import type { Json } from "@/lib/supabase/database.types";
+import {
+  TITLE_STATUS_OVERRIDE,
+  titleStatusOverrideNotifyCopy,
+  titleStatusOverrideShouldNotify,
+} from "@/lib/title-status-override";
+import type { TitleStatus } from "@/lib/titles";
 import {
   TRANSCODE_RETRY_CONFLICT,
   TRANSCODE_RETRY_INELIGIBLE,
@@ -189,5 +197,73 @@ export async function retryTranscodeJob(input: {
   }
 
   revalidatePath(`/gc/titles/${input.titleId}`);
+  return {};
+}
+
+// GC sets any live title_status until delivery/reporting lock-in.
+// Gated at the DB by gc_set_title_status (is_gc_staff). Notify the org
+// when landing in draft or in_review — same title_rejected channel as
+// review reject. Best-effort after commit.
+export async function setGcTitleStatus(input: {
+  titleId: string;
+  status: TitleStatus;
+  reason: string;
+}): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const user = await getAuthUser();
+  if (!user) return { error: "Not authenticated." };
+
+  const reason = input.reason.trim();
+  if (!reason) return { error: TITLE_STATUS_OVERRIDE.reasonRequired };
+
+  const { error } = await supabase.rpc("gc_set_title_status", {
+    p_title_id: input.titleId,
+    p_status: input.status,
+    p_reason: reason,
+  });
+  if (error) return { error: error.message };
+
+  if (titleStatusOverrideShouldNotify(input.status)) {
+    try {
+      const { data: t } = await supabase
+        .from("titles")
+        .select("title, org_id")
+        .eq("id", input.titleId)
+        .maybeSingle();
+      if (t) {
+        const copy = titleStatusOverrideNotifyCopy(
+          input.status,
+          t.title,
+          reason,
+          input.titleId,
+        );
+        if (copy) {
+          await supabase.rpc("create_notification", {
+            p_org_id: t.org_id,
+            p_kind: copy.kind,
+            p_title: copy.title,
+            p_body: copy.body,
+            p_source_refs: {
+              title_id: input.titleId,
+              reason,
+              to_status: input.status,
+            } as Json,
+          });
+          await sendOrgNotificationEmail(supabase, t.org_id, {
+            subject: copy.subject,
+            body: copy.body,
+            ctaLabel: copy.cta,
+            ctaPath: copy.path,
+          });
+        }
+      }
+    } catch (e) {
+      console.error("[notifications] title status override notify failed", e);
+    }
+  }
+
+  revalidatePath(`/gc/titles/${input.titleId}`);
+  revalidatePath("/queue");
+  revalidatePath("/avails");
   return {};
 }

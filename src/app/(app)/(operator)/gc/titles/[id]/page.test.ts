@@ -38,6 +38,7 @@ vi.mock("@/app/(app)/(operator)/gc/review/screener-panel", () => ({
 }));
 vi.mock("./buyer-links", () => ({ BuyerLinks: () => null }));
 vi.mock("./transcode-panel", () => ({ TranscodePanel: () => null }));
+vi.mock("./gc-title-status-control", () => ({ GcTitleStatusControl: () => null }));
 
 // Spy on the production export while retaining its real implementation and markup.
 vi.mock("./gc-assets", async (importOriginal) => {
@@ -97,6 +98,15 @@ describe("GcTitleDetail transcode_jobs read (Task 6A)", () => {
     expect(pageSrc).toContain("title_has_reporting_activity");
     expect(pageSrc).toContain("titleName={t.title}");
     expect(pageSrc).not.toContain("StaffDelete");
+  });
+
+  it("mounts one house status control using the shared lock helper", () => {
+    expect(pageSrc).toContain("GcTitleStatusControl");
+    expect(pageSrc).toContain("titleStatusOverrideLocked");
+    expect(pageSrc).toContain("title_has_delivered_endpoint");
+    expect(pageSrc).toContain("locked={overrideLocked}");
+    expect(pageSrc).not.toContain("StaffStatus");
+    expect(pageSrc).not.toContain("gc_set_title_status");
   });
 });
 

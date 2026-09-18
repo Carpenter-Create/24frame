@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -77,5 +80,12 @@ describe("GcQueuePage", () => {
       from = marker + QUEUE_PAGE.empty.length;
     }
     expect(emptyCards).toBe(2);
+  });
+
+  it("does not add a status setter on queue rows — one control lives on title detail", () => {
+    const src = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "page.tsx"), "utf8");
+    expect(src).not.toContain("GcTitleStatusControl");
+    expect(src).not.toContain("setGcTitleStatus");
+    expect(src).not.toContain("gc_set_title_status");
   });
 });

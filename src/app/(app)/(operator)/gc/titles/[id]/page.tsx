@@ -21,6 +21,8 @@ import { UNPAGINATED_MAX, DETAIL_LIST, rangeFor } from "@/lib/list-bounds";
 import { isMasterLicensed, type DeliveryForLicenceCheck } from "@/lib/master-licence";
 import { TitleLifecycleControls } from "@/app/(app)/titles/[id]/title-lifecycle-controls";
 import { titleLifecycleFlags } from "@/lib/titles-lifecycle";
+import { titleStatusOverrideLocked } from "@/lib/title-status-override";
+import { GcTitleStatusControl } from "./gc-title-status-control";
 
 // The GC per-title detail = the internal review page (folds in /gc/review). Review actions
 // (approve/reject, same-work linking) show only while in_review; screener panel + metadata +
@@ -179,6 +181,14 @@ export default async function GcTitleDetail({ params }: { params: Promise<{ id: 
   const { data: hasReportingActivity } = needsReportingCheck
     ? await supabase.rpc("title_has_reporting_activity", { p_title_id: id })
     : { data: false };
+  const { data: hasDeliveredEndpoint } = await supabase.rpc("title_has_delivered_endpoint", {
+    p_title_id: id,
+  });
+  const overrideLocked = titleStatusOverrideLocked({
+    status: t.status as TitleStatus,
+    hasDeliveredEndpoint: hasDeliveredEndpoint === true,
+    hasReportingActivity: hasReportingActivity === true,
+  });
   const lifecycleFlags = titleLifecycleFlags(
     { isStaff: true, canOperate: canOperate === true },
     t.status as TitleStatus,
@@ -234,6 +244,18 @@ export default async function GcTitleDetail({ params }: { params: Promise<{ id: 
               releaseType={t.release_type as ReleaseType}
               originalReleaseDate={t.original_release_date}
               releaseDate={t.release_date}
+            />
+          </CardBody>
+        </Card>
+
+        {/* House status control — one setter, one RPC. Disabled after lock-in. */}
+        <Card>
+          <CardBody>
+            <GcTitleStatusControl
+              titleId={t.id}
+              titleName={t.title}
+              status={t.status as TitleStatus}
+              locked={overrideLocked}
             />
           </CardBody>
         </Card>
