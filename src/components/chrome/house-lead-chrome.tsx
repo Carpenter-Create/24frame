@@ -11,8 +11,9 @@ import {
   HOUSE_LEAD_CHROME_CLASS,
   HOUSE_LEAD_LOGO_CLASS,
   HOUSE_LEAD_SEARCH_DESKTOP_CLASS,
-  HOUSE_LEAD_SEARCH_PHONE_CLASS,
   HOUSE_LEAD_SLOT_CLASS,
+  HOUSE_LEAD_STACK_CLASS,
+  HOUSE_LEAD_UNDER_NAV_CLASS,
 } from "@/lib/house-lead-chrome";
 import { PRODUCT_NAME } from "@/lib/product";
 import { workspaceHome, type WorkspaceMode } from "@/lib/workspace";
@@ -29,7 +30,8 @@ export function HouseLeadChrome({
   logoVisible = "always",
   leadingNav,
   search,
-  phoneSearch,
+  underNav,
+  trailingSearch,
   afterLead,
   activityUnread = 0,
   activityItems = [],
@@ -40,7 +42,8 @@ export function HouseLeadChrome({
   logoVisible?: "always" | "desktop";
   leadingNav?: React.ReactNode;
   search?: React.ReactNode;
-  phoneSearch?: React.ReactNode;
+  underNav?: React.ReactNode;
+  trailingSearch?: React.ReactNode;
   afterLead?: React.ReactNode;
   activityUnread?: Promise<number> | number;
   activityItems?: Promise<ActivityItem[]> | ActivityItem[];
@@ -50,73 +53,80 @@ export function HouseLeadChrome({
   const education = workspace === "education" && !settingsPage;
 
   return (
-    <header
-      data-app-header=""
-      data-house-lead-chrome=""
-      data-house-full-width-top=""
-      data-social-top-bar={social ? "" : undefined}
-      className={HOUSE_LEAD_CHROME_CLASS}
-      style={{ height: "var(--header-height)" }}
-    >
-      <div data-app-header-leading="" className={APP_HEADER_LEADING_CLASS}>
-        {leadingNav}
-        <div
-          data-house-lead=""
-          data-app-header-brand-search=""
-          data-social-header-lead={social ? "" : undefined}
-          className={cn(
-            logoVisible === "always" ? "flex" : "hidden md:flex",
-            HOUSE_LEAD_SLOT_CLASS,
-          )}
-        >
-          <Link
-            href={workspaceHome(workspace)}
-            prefetch={social ? true : undefined}
-            aria-label={PRODUCT_NAME}
-            data-brand-emblem=""
-            className={HOUSE_LEAD_LOGO_CLASS}
+    <div data-house-lead-stack="" className={HOUSE_LEAD_STACK_CLASS}>
+      <header
+        data-app-header=""
+        data-house-lead-chrome=""
+        data-house-full-width-top=""
+        data-social-top-bar={social ? "" : undefined}
+        className={HOUSE_LEAD_CHROME_CLASS}
+        style={{ height: "var(--header-height)" }}
+      >
+        <div data-app-header-leading="" className={APP_HEADER_LEADING_CLASS}>
+          {leadingNav}
+          <div
+            data-house-lead=""
+            data-app-header-brand-search=""
+            data-social-header-lead={social ? "" : undefined}
+            className={cn(
+              logoVisible === "always" ? "flex" : "hidden md:flex",
+              HOUSE_LEAD_SLOT_CLASS,
+            )}
           >
-            <BrandLogo />
-          </Link>
-          {search ? (
-            <div
-              data-house-lead-search=""
-              data-education-header-search-host={education ? "desktop" : undefined}
-              className={HOUSE_LEAD_SEARCH_DESKTOP_CLASS}
+            <Link
+              href={workspaceHome(workspace)}
+              prefetch={social ? true : undefined}
+              aria-label={PRODUCT_NAME}
+              data-brand-emblem=""
+              className={HOUSE_LEAD_LOGO_CLASS}
             >
-              {search}
+              <BrandLogo />
+            </Link>
+            {search ? (
+              <div
+                data-house-lead-search=""
+                data-education-header-search-host={education ? "desktop" : undefined}
+                className={HOUSE_LEAD_SEARCH_DESKTOP_CLASS}
+              >
+                {search}
+              </div>
+            ) : null}
+          </div>
+          <div
+            data-app-header-workspace-pill=""
+            className={APP_HEADER_WORKSPACE_PILL_HOST_CLASS}
+          >
+            <WorkspaceSwitcher current={workspace} tone="pill" />
+          </div>
+          {afterLead}
+        </div>
+        <div data-app-header-trailing="" className={APP_HEADER_TRAILING_CLUSTER_CLASS}>
+          {trailingSearch ? (
+            <div data-social-header-actions={social ? "" : undefined}>
+              {trailingSearch}
             </div>
           ) : null}
-        </div>
-        <div
-          data-app-header-workspace-pill=""
-          className={APP_HEADER_WORKSPACE_PILL_HOST_CLASS}
-        >
-          <WorkspaceSwitcher current={workspace} tone="pill" />
-        </div>
-        {phoneSearch ? (
           <div
-            data-social-header-actions={social ? "" : undefined}
-            data-education-header-search-host={education ? "phone" : undefined}
-            className={education ? HOUSE_LEAD_SEARCH_PHONE_CLASS : undefined}
+            data-app-header-workspace-desktop=""
+            className={APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS}
           >
-            {phoneSearch}
+            <WorkspaceSwitcher current={workspace} presentation="pills" />
           </div>
-        ) : null}
-        {afterLead}
-      </div>
-      <div data-app-header-trailing="" className={APP_HEADER_TRAILING_CLUSTER_CLASS}>
-        <div
-          data-app-header-workspace-desktop=""
-          className={APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS}
-        >
-          <WorkspaceSwitcher current={workspace} presentation="pills" />
+          {settingsPage ? null : <AskAssistantHeaderLink />}
+          <ThemeToggle />
+          <ActivityBell unread={activityUnread} items={activityItems} />
+          {accountMenu}
         </div>
-        {settingsPage ? null : <AskAssistantHeaderLink />}
-        <ThemeToggle />
-        <ActivityBell unread={activityUnread} items={activityItems} />
-        {accountMenu}
-      </div>
-    </header>
+      </header>
+      {underNav ? (
+        <div
+          data-house-under-nav=""
+          data-education-header-search-host={education ? "phone" : undefined}
+          className={HOUSE_LEAD_UNDER_NAV_CLASS}
+        >
+          {underNav}
+        </div>
+      ) : null}
+    </div>
   );
 }

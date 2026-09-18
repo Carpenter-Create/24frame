@@ -125,7 +125,7 @@ describe("Aggregation Dashboard mobile chrome — Mercury leading pill", () => {
     expect(trailing).toContain("<WorkspaceSwitcher current={workspace} presentation=\"pills\" />");
     expect(trailing).not.toContain('tone="pill"');
     expect(trailing).toContain("{accountMenu}");
-    expect(trailing).not.toContain("HouseLeadSearch");
+    expect(trailing).toContain("{trailingSearch");
     expect(trailing).not.toContain("data-education-header-search-host");
     expect(trailing.indexOf("data-app-header-workspace-desktop")).toBeLessThan(
       trailing.indexOf("{accountMenu}"),

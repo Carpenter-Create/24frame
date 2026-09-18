@@ -33,16 +33,17 @@
 // shrink-0. No All Accounts clone. No Referrals / billing.
 // Staff Manage courses stays a Settings door — not a fourth
 // lane. Education land stays Route A /social/courses.
-// Education quiet top-bar search stays Education-only: phone
-// in the leading cluster, desktop in the shared mid-lead slot
-// (same Facebook-compact geometry as Social). Persist with
+// Education quiet search stays Education-only: phone in a
+// full-width row under HouseLeadChrome, desktop in the shared
+// mid-lead slot (same Facebook-compact geometry as Social).
+// Persist with
 // persistWorkspaceCookie — do not invent
 // a second cookie. Do not invent /education, /account/workspace,
 // or /settings/workspace.
 
 import {
   HOUSE_LEAD_SEARCH_DESKTOP_CLASS,
-  HOUSE_LEAD_SEARCH_PHONE_CLASS,
+  HOUSE_LEAD_UNDER_NAV_CLASS,
 } from "@/lib/house-lead-chrome";
 import {
   HOUSE_CONTROL_PILL_CLASS,
@@ -159,7 +160,7 @@ export const WORKSPACE_SWITCHER_OPTION_CHECK_CLASS = "text-accent";
 export const APP_HEADER_TRAILING_CLUSTER_CLASS =
   "flex min-w-0 items-center gap-[var(--space-1)] md:gap-[var(--space-2)] max-md:shrink-0";
 
-export const APP_HEADER_EDUCATION_SEARCH_PHONE_CLASS = HOUSE_LEAD_SEARCH_PHONE_CLASS;
+export const APP_HEADER_EDUCATION_SEARCH_PHONE_CLASS = HOUSE_LEAD_UNDER_NAV_CLASS;
 
 export const APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS = HOUSE_LEAD_SEARCH_DESKTOP_CLASS;
 

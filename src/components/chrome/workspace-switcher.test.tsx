@@ -304,10 +304,10 @@ describe("workspace switcher placement", () => {
       trailing.indexOf("{accountMenu}"),
     );
     expect(leadSrc.indexOf("data-brand-emblem")).toBeLessThan(
-      leadSrc.indexOf("data-social-header-actions"),
-    );
-    expect(leadSrc.indexOf("data-social-header-actions")).toBeLessThan(
       leadSrc.indexOf("data-app-header-trailing"),
+    );
+    expect(leadSrc.indexOf("data-app-header-trailing")).toBeLessThan(
+      leadSrc.indexOf("data-social-header-actions"),
     );
     expect(leadSrc.indexOf("data-app-header-trailing")).toBeLessThan(
       leadSrc.indexOf('presentation="pills"'),

@@ -179,10 +179,11 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
 
   it("rematches Social header Search, rail type, filters, and tab accent", () => {
     const leadSearch = readFileSync("src/components/chrome/house-lead-search.tsx", "utf8");
+    const searchSheet = readFileSync("src/components/social/social-search-sheet.tsx", "utf8");
     expect(leadSearch).toContain("HOUSE_SEARCH_PILL_CLASS");
     expect(leadSearch).toContain("placeholder:text-ink-3");
     expect(leadSearch).toContain("text-ink-3");
-    expect(leadSearch).toContain("text-ink-2");
+    expect(searchSheet).toContain("text-ink-2");
     expect(leadSearch).not.toContain("rounded-[10px]");
     expect(socialTopBar).toContain("HouseLeadChrome");
     expect(socialChrome).toContain("HOUSE_FILTER_ON_CLASS");

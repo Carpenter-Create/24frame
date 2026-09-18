@@ -3,8 +3,9 @@ import { SOCIAL_ROUTES } from "@/lib/social";
 import { EDUCATION_HREF } from "@/lib/education";
 
 // Quiet Education header search. Course + video only. Copy lives here,
-// not in JSX. Mounts in the shared mid-lead slot with Social live
-// Explore search (Facebook-compact). Aggregation keeps no top search.
+// not in JSX. Desktop mounts in the shared mid-lead slot with Social
+// live Explore search (Facebook-compact). Phone mounts in a full-width
+// row under HouseLeadChrome. Aggregation keeps no top search.
 // Do not reuse HousePageSearch — Education is a GET form, not in-page debounce.
 
 export const EDUCATION_SEARCH = {
