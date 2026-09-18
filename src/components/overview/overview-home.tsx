@@ -22,7 +22,7 @@ import {
 } from "@/lib/dashboard-craft";
 import type { ClientHomeDoNextItem, ClientHomeJustInItem, DashboardChangeRow } from "@/lib/dashboard-home";
 import { formatUsdCents } from "@/lib/finance";
-import { OVERVIEW_PAGE } from "@/lib/overview";
+import { OVERVIEW_PAGE, overviewModuleHeaderAction } from "@/lib/overview";
 import { SOCIAL_AVATAR_32_CLASS } from "@/lib/social-chrome";
 import type { SocialHomeChat } from "@/lib/social-home-chats";
 import { socialDmHref, socialInitials } from "@/lib/social";
@@ -217,11 +217,12 @@ function OverviewModule({
   children?: React.ReactNode;
 }) {
   const hasBody = Boolean(children);
+  const action = overviewModuleHeaderAction(title, href, cta);
   return (
     <DashboardHomePanel aria-label={title} data-overview-module={testId}>
       <div className={`flex items-center justify-between ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD_LIST}`}>
         <p className={DASHBOARD_SECTION_TITLE_CLASS}>{title}</p>
-        {href ? <TextAction href={href}>{cta ?? title}</TextAction> : null}
+        {action ? <TextAction href={action.href}>{action.label}</TextAction> : null}
       </div>
       {hasBody ? children : <DashboardHomeEmpty>{empty}</DashboardHomeEmpty>}
     </DashboardHomePanel>

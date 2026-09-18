@@ -14,6 +14,7 @@ import {
   OVERVIEW_SOCIAL_DM_CAP,
   isOverviewPath,
   overviewAiNextMoves,
+  overviewModuleHeaderAction,
   overviewEducationCourses,
   overviewHidesRail,
   overviewLeadPills,
@@ -143,5 +144,24 @@ describe("Home module caps", () => {
     ).toEqual(["1 title added", "2 deliveries updated"]);
     expect(OVERVIEW_PAGE.educationEmpty).toBeTruthy();
     expect(JSON.stringify(OVERVIEW_PAGE)).not.toMatch(/lesson_progress/);
+  });
+});
+
+describe("overviewModuleHeaderAction", () => {
+  it("drops a trailing label that matches or echoes the module title", () => {
+    expect(overviewModuleHeaderAction("Social", "/social/dms")).toBeNull();
+    expect(overviewModuleHeaderAction("Education", "/social/courses")).toBeNull();
+    expect(overviewModuleHeaderAction("Needs you", "/attention")).toBeNull();
+    expect(overviewModuleHeaderAction(" Social ", "/social/dms", "social")).toBeNull();
+    expect(overviewModuleHeaderAction("24Frame AI", undefined, "Ask 24Frame AI")).toBeNull();
+  });
+
+  it("keeps a distinct destination CTA", () => {
+    expect(
+      overviewModuleHeaderAction("24Frame AI", "/messages", "Ask 24Frame AI"),
+    ).toEqual({ href: "/messages", label: "Ask 24Frame AI" });
+    expect(
+      overviewModuleHeaderAction("Net revenue", "/reports", "Aggregation"),
+    ).toEqual({ href: "/reports", label: "Aggregation" });
   });
 });
