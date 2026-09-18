@@ -570,6 +570,7 @@ describe("AppShell rail-collapse chevron", () => {
           orgs: [],
           activeOrgId: null,
           unread: Promise.resolve(0),
+          activityItems: Promise.resolve([]),
           isGcStaff: true,
           defaultCollapsed: false,
           messagesSurface: "staff-inbox",
