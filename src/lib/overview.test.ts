@@ -162,7 +162,7 @@ describe("Home module caps", () => {
     expect(OVERVIEW_SOCIAL_DM_CAP).toBe(5);
     expect(OVERVIEW_EDUCATION_CAP).toBe(5);
     expect(OVERVIEW_AI_NEXT_CAP).toBe(3);
-    expect(OVERVIEW_NEWS_CAP).toBe(12);
+    expect(OVERVIEW_NEWS_CAP).toBe(15);
     expect(overviewSocialChats([0, 1, 2, 3, 4, 5, 6])).toEqual([0, 1, 2, 3, 4]);
     expect(overviewEducationCourses(["a", "b", "c", "d", "e", "f"])).toEqual([
       "a",

@@ -94,6 +94,10 @@ describe("Home News layout + register lock", () => {
     expect(shell).toContain("HOUSE_HOME_RAIL_COLUMN_CLASS");
     expect(shell).toContain('data-home-chrome={homeChrome ? "" : undefined}');
     expect(home).toContain("OVERVIEW_HOME_LAYOUT_CLASS");
+    expect(home).toContain("data-overview-education-covers");
+    expect(home).toContain("sm:grid-cols-2");
+    expect(home).toContain("lg:grid-cols-4");
+    expect(home).not.toContain("lg:grid-cols-5");
     expect(home).toContain("data-overview-news");
   });
 

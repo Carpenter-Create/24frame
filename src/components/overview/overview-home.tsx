@@ -129,7 +129,7 @@ export function OverviewHome({
         {courses.length > 0 ? (
           <ul
             data-overview-education-covers=""
-            className="grid grid-cols-1 gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-5"
+            className="grid grid-cols-1 gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-4"
           >
             {courses.map((course) => (
               <CourseCard

@@ -9,7 +9,7 @@ Do **not** create these resources from CI or from this repository.
 Names below are the proposed live set for Adam confirm, aligned with
 finance isolation in [`finance-aws-setup.md`](finance-aws-setup.md).
 
-Auth stays Supabase Auth. The app **reads** DynamoDB on Home (12) and
+Auth stays Supabase Auth. The app **reads** DynamoDB on Home (15) and
 `/news` (30-day window). Ingest **writes** DynamoDB. Page requests
 never fan out RSS.
 
@@ -100,7 +100,7 @@ Do **not** create these from this PR.
 
 1. EventBridge invoked Lambda in the last 30–60 minutes.
 2. CloudWatch log `{ "msg": "news ingest done", "failed": 0, ... }`.
-3. Home News rail shows up to 12 rows from Dynamo (not a live RSS pull).
+3. Home News rail shows up to 15 rows from Dynamo (not a live RSS pull).
 4. `/news` lists the same cards inside 30 days.
 5. DLQ depth is 0.
 
