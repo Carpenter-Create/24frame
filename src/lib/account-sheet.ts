@@ -5,9 +5,8 @@
 // email initial when empty. Always render both fields. No dashes, no invented
 // local-part name. Items after the Identity hairline are
 // USER_MENU_ACTIONS — the same list on mobile and desktop.
-// Workspace is the header control, not this menu. Desktop
-// Appearance is 613:888 beside — not a page. Mobile is a
-// same-sheet drill-in that replaces the list face. Destinations
+// Workspace is the header control, not this menu. Theme lives on
+// the header sun/moon — not a menu row, not a page. Destinations
 // use existing routes only — not /account/workspace or
 // /account/appearance. Company stays off this menu. Log out +
 // version are the footer group — not a
@@ -28,10 +27,9 @@
 // 264 wide. Leftover last-item → Log out is 48 (house section
 // air, --space-12). The 48 adds to the stack. Not 0. Not 134.
 // No h-[Npx]. No min-h. No 522 / 570 / 672 floor. Align-end.
-// 24 pad. 24 between Profile / Settings / Appearance.
+// 24 pad. 24 between Profile / Settings.
 // Log out → hairline 24. Hairline → footer 24. Footer →
-// bottom 24. 613:888 top is the open submenu row, offset 0. Labels
-// stay one source.
+// bottom 24. Labels stay one source.
 
 import { accountPhotoSrc } from "@/lib/account-avatar";
 import { ASK_ASSISTANT } from "@/lib/product";
@@ -60,6 +58,7 @@ export const ACCOUNT_SHEET_ABSENT = [
   "Phone",
   "Job",
   "Legal",
+  "Appearance",
 ] as const;
 
 // One source, both instances. Sheet chrome may differ; labels may not.
@@ -113,8 +112,8 @@ export const ACCOUNT_SHEET_VERSION_CLASS = "t-body-sm leading-4 text-ink-3";
 // 48 adds to the stack. NOT 0. NOT 134. NOT h-[Npx]. NOT
 // min-h. NOT 522. NOT 570. NOT 672. NOT 384. Align-end to the
 // avatar (right edge flush). 8px (--space-2) under the trigger.
-// Not a 90% sheet. 24 pad. 24 between Profile / Settings /
-// Appearance. No leftover grow. Pin Log out,
+// Not a 90% sheet. 24 pad. 24 between Profile / Settings.
+// No leftover grow. Pin Log out,
 // hairline, footer as siblings. Hairline only under Log out.
 // Log out → hairline 24. Hairline → footer 24. Do not hug the
 // rule. Pin gap is not (Log out+rule) → footer. Footer →
@@ -177,66 +176,6 @@ export const ACCOUNT_MENU_DROPDOWN_SCROLL_CLASS = "flex w-full shrink-0 flex-col
 // Not h-[48px]. Not leftover grow. Not a 570 / 672 floor.
 export const ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS =
   "h-[var(--space-12)] w-full shrink-0";
-
-// 586:768 Appearance row — pad T/B 16, L/R 0, r0. Wash full-bleed
-// on the 216 content row. Label x=0 with Profile / Help. Chevron
-// right edge 216. Appearance 15 + current mode 13. Chevron 16.
-// No inset card.
-export const ACCOUNT_MENU_APPEARANCE_ROW_CLASS =
-  "relative flex w-full items-center justify-between py-[var(--space-4)] text-left text-[length:var(--text-base)] font-normal leading-5 text-ink";
-
-export const ACCOUNT_MENU_APPEARANCE_WASH_CLASS =
-  "pointer-events-none absolute inset-y-0 -left-[var(--space-6)] -right-[var(--space-6)] z-0 bg-surface-muted";
-
-export const ACCOUNT_MENU_APPEARANCE_COPY_CLASS =
-  "relative z-10 flex min-w-0 flex-col items-start gap-[var(--space-2)]";
-
-export const ACCOUNT_MENU_APPEARANCE_CHEVRON_CLASS = "relative z-10 shrink-0";
-
-export const ACCOUNT_MENU_APPEARANCE_MODE_CLASS =
-  "t-body-sm leading-4 text-ink-2";
-
-// 613:888 — second 264 surface. Desktop: gap 8 left of the parent.
-// Top = Appearance row top, offset 0. Not parent menu top.
-// Row pad 16 / gap 8. r12 hairline. Not in-place. No purple.
-export const ACCOUNT_MENU_APPEARANCE_FLYOUT_GAP = "var(--space-2)" as const;
-
-export const ACCOUNT_MENU_APPEARANCE_FLYOUT_OFFSET = 0;
-
-export const ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS =
-  "flex w-[264px] max-w-full flex-col gap-[var(--space-2)] overflow-hidden rounded-[12px] border border-hairline bg-surface py-[var(--space-2)] shadow-none";
-
-export const ACCOUNT_MENU_APPEARANCE_FLYOUT_ROW_CLASS =
-  "flex w-full items-start gap-[var(--space-2)] p-[var(--space-4)] text-left text-[length:var(--text-base)] font-normal leading-5 text-ink";
-
-export const ACCOUNT_MENU_APPEARANCE_FLYOUT_HELPER_CLASS =
-  "t-body-sm leading-4 text-ink-2";
-
-export const ACCOUNT_MENU_APPEARANCE_FLYOUT_MARK_CLASS = "size-4 shrink-0";
-
-// Mobile Appearance drill-in — same sheet, replaces the list face.
-// House rows. Not 618:785. Not a card. Not 613:888.
-export const ACCOUNT_SHEET_APPEARANCE_COPY_CLASS =
-  "flex min-w-0 flex-col items-start gap-[var(--space-2)]";
-
-export const ACCOUNT_MENU_APPEARANCE_FLYOUT_HOST_CLASS =
-  "absolute z-10 w-[264px]";
-
-export function accountMenuAppearanceFlyoutAlign(
-  parent: Pick<AccountMenuDropdownAlign, "right">,
-  appearanceRow: Pick<DOMRect, "top">,
-): AccountMenuDropdownAlign {
-  return {
-    top: `${appearanceRow.top + ACCOUNT_MENU_APPEARANCE_FLYOUT_OFFSET}px`,
-    right: `calc(${parent.right} + ${ACCOUNT_MENU_DROPDOWN_WIDTH}px + ${ACCOUNT_MENU_APPEARANCE_FLYOUT_GAP})`,
-  };
-}
-
-export function accountMenuAppearanceFlyoutRight(
-  parent: Pick<AccountMenuDropdownAlign, "right">,
-): string {
-  return `calc(${parent.right} + ${ACCOUNT_MENU_DROPDOWN_WIDTH}px + ${ACCOUNT_MENU_APPEARANCE_FLYOUT_GAP})`;
-}
 
 export type AccountSheetIdentity = {
   avatarInitial: string;

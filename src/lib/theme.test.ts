@@ -12,7 +12,9 @@ import {
   nextTheme,
   preferenceFromStorage,
   resolveTheme,
+  THEME_TOGGLE,
   themeFromRoot,
+  themeToggleLabel,
   toggleDocumentTheme,
   toggleTheme,
   type ThemeRoot,
@@ -86,6 +88,13 @@ describe("theme toggle", () => {
 
   it("keeps the persisted key as gc-theme", () => {
     expect(THEME_STORAGE_KEY).toBe("gc-theme");
+  });
+
+  it("labels the header toggle as the destination, not the current mode", () => {
+    expect(THEME_TOGGLE.toDark).toBe("Switch to dark mode");
+    expect(THEME_TOGGLE.toLight).toBe("Switch to light mode");
+    expect(themeToggleLabel("light")).toBe("Switch to dark mode");
+    expect(themeToggleLabel("dark")).toBe("Switch to light mode");
   });
 
   it("toggleDocumentTheme still flips .dark + gc-theme", () => {

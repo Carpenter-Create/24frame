@@ -26,7 +26,7 @@
 //
 // Existing /settings/profile, /settings/agreements, /settings/refer
 // stay You doors. Company persist stays organizations.name.
-// Appearance stays in-menu. Help stays /help.
+// Theme lives on the header sun/moon. Help stays /help.
 //
 // 600:881 shell — one 220 rail occupies the Access slot on every
 // /settings path. Pad 16. Active wash follows the hub section.

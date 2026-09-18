@@ -1,13 +1,14 @@
 // Mercury workspace switcher. Lives in lib/, not JSX.
 // Phone Access / Aggregation: compact leading name+menu after the
-// hamburger (gap 8). Trailing avatar alone on phone — do not
-// cluster the compact pill with the avatar, do not center it.
-// Desktop md+ replaces the single-name+chevron trigger with a
-// sliding-pill cluster of available workspace names (Adam lock
-// 2026-09-17 “Try it”). Same house grammar as Top Performing:
-// active ink fill, idle muted grey. Trailing header cluster,
-// left of the avatar. Social uses the same split. Phone keeps
-// the compact name+menu — do not force three labels.
+// hamburger (gap 8). Trailing cluster on phone is sun/moon then
+// avatar — do not cluster the compact pill with that pair, do
+// not center it. Desktop md+ replaces the single-name+chevron
+// trigger with a sliding-pill cluster of available workspace
+// names (Adam lock 2026-09-17 “Try it”). Same house grammar as
+// Top Performing: active ink fill, idle muted grey. Trailing
+// header cluster: pills, then sun/moon, then avatar. Social
+// uses the same split. Phone keeps the compact name+menu — do
+// not force three labels.
 // No rail / header-lead #321 duplicate. Rail top-left stays the
 // static 24 brand. Social-only icons sit left of the Social slot
 // so the avatar x does not shift. Do not invent Move / search.

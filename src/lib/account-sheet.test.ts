@@ -3,16 +3,6 @@ import { describe, expect, it } from "vitest";
 import { USER_MENU, USER_MENU_ACTIONS } from "@/lib/user-menu";
 import * as accountSheet from "./account-sheet";
 import {
-  ACCOUNT_MENU_APPEARANCE_CHEVRON_CLASS,
-  ACCOUNT_MENU_APPEARANCE_COPY_CLASS,
-  ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS,
-  ACCOUNT_MENU_APPEARANCE_FLYOUT_GAP,
-  ACCOUNT_MENU_APPEARANCE_FLYOUT_HOST_CLASS,
-  ACCOUNT_MENU_APPEARANCE_FLYOUT_OFFSET,
-  accountMenuAppearanceFlyoutRight,
-  ACCOUNT_MENU_APPEARANCE_FLYOUT_ROW_CLASS,
-  ACCOUNT_MENU_APPEARANCE_ROW_CLASS,
-  ACCOUNT_MENU_APPEARANCE_WASH_CLASS,
   ACCOUNT_MENU_DROPDOWN_ALIGN,
   ACCOUNT_MENU_DROPDOWN_DISMISS_CLASS,
   ACCOUNT_MENU_DROPDOWN_GAP,
@@ -26,8 +16,6 @@ import {
   ACCOUNT_MENU_DROPDOWN_SCROLL_CLASS,
   ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS,
   ACCOUNT_MENU_DROPDOWN_WIDTH,
-  ACCOUNT_SHEET_APPEARANCE_COPY_CLASS,
-  accountMenuAppearanceFlyoutAlign,
   accountMenuDropdownAlignEnd,
   ACCOUNT_SHEET,
   ACCOUNT_SHEET_ABSENT,
@@ -51,12 +39,10 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).toEqual([
       "profile",
       "settings",
-      "appearance",
     ]);
     expect(ACCOUNT_SHEET_ITEMS.map((item) => item.label)).toEqual([
       "Profile",
       "Settings",
-      "Appearance",
     ]);
     expect(ACCOUNT_SHEET_ITEMS[0]?.kind).toBe("profile");
     expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).not.toContain("workspace");
@@ -193,50 +179,14 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS).not.toContain("min-h-[134px]");
   });
 
-  it("locks 586:768 Appearance wash and 613:888 as a second 264 surface", () => {
-    expect(ACCOUNT_MENU_APPEARANCE_ROW_CLASS).toContain("py-[var(--space-4)]");
-    expect(ACCOUNT_MENU_APPEARANCE_ROW_CLASS).not.toContain("px-");
-    expect(ACCOUNT_MENU_APPEARANCE_ROW_CLASS).not.toContain("rounded");
-    expect(ACCOUNT_MENU_APPEARANCE_WASH_CLASS).toContain("-left-[var(--space-6)]");
-    expect(ACCOUNT_MENU_APPEARANCE_WASH_CLASS).toContain("-right-[var(--space-6)]");
-    expect(ACCOUNT_MENU_APPEARANCE_WASH_CLASS).toContain("bg-surface-muted");
-    expect(ACCOUNT_MENU_APPEARANCE_WASH_CLASS).toContain("z-0");
-    expect(ACCOUNT_MENU_APPEARANCE_WASH_CLASS).not.toContain("rounded");
-    expect(ACCOUNT_MENU_APPEARANCE_WASH_CLASS).not.toContain("purple");
-    expect(ACCOUNT_MENU_APPEARANCE_COPY_CLASS).toContain("z-10");
-    expect(ACCOUNT_MENU_APPEARANCE_CHEVRON_CLASS).toContain("z-10");
-    expect(ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS).toContain("w-[264px]");
-    expect(ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS).toContain("rounded-[12px]");
-    expect(ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS).toContain("border-hairline");
-    expect(ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS).toContain("shadow-none");
-    expect(ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS).not.toMatch(/shadow-(?:sm|md|lg)|elevation/);
-    expect(ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS).toContain("gap-[var(--space-2)]");
-    expect(ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS).toContain("py-[var(--space-2)]");
-    expect(ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS).not.toContain("purple");
-    expect(ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS).not.toContain("violet");
-    expect(ACCOUNT_MENU_APPEARANCE_FLYOUT_ROW_CLASS).toContain("p-[var(--space-4)]");
-    expect(ACCOUNT_MENU_APPEARANCE_FLYOUT_ROW_CLASS).toContain("gap-[var(--space-2)]");
-    expect(ACCOUNT_MENU_APPEARANCE_FLYOUT_HOST_CLASS).toContain("absolute");
-    expect(ACCOUNT_MENU_APPEARANCE_FLYOUT_HOST_CLASS).toContain("w-[264px]");
-    expect(ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS).not.toContain("w-[342px]");
-    expect(ACCOUNT_SHEET_APPEARANCE_COPY_CLASS).toContain("flex-col");
-    expect(ACCOUNT_SHEET_APPEARANCE_COPY_CLASS).toContain("gap-[var(--space-2)]");
-    expect(ACCOUNT_SHEET_APPEARANCE_COPY_CLASS).not.toContain("purple");
-    expect(ACCOUNT_MENU_APPEARANCE_FLYOUT_GAP).toBe("var(--space-2)");
-    expect(ACCOUNT_MENU_APPEARANCE_FLYOUT_OFFSET).toBe(0);
-  });
-
-  it("sits the desktop 613:888 flyout on the Appearance row — offset 0, gap 8 left, 264", () => {
-    const parent = { top: "calc(44px + var(--space-2))", right: "16px" };
-    const row = { top: 313 };
-    const flyout = accountMenuAppearanceFlyoutAlign(parent, row);
-
-    expect(ACCOUNT_MENU_APPEARANCE_FLYOUT_OFFSET).toBe(0);
-    expect(flyout.top).toBe("313px");
-    expect(flyout.top).not.toBe(parent.top);
-    expect(flyout.right).toBe("calc(16px + 264px + var(--space-2))");
-    expect(flyout.right).toBe(accountMenuAppearanceFlyoutRight(parent));
-    expect(flyout.right).not.toBe(parent.right);
+  it("does not keep a menu theme row or flyout — theme is the header toggle", () => {
+    expect(accountSheet).not.toHaveProperty("ACCOUNT_MENU_APPEARANCE_ROW_CLASS");
+    expect(accountSheet).not.toHaveProperty("ACCOUNT_MENU_APPEARANCE_WASH_CLASS");
+    expect(accountSheet).not.toHaveProperty("ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS");
+    expect(accountSheet).not.toHaveProperty("ACCOUNT_SHEET_APPEARANCE_COPY_CLASS");
+    expect(accountSheet).not.toHaveProperty("accountMenuAppearanceFlyoutAlign");
+    expect(accountSheet).not.toHaveProperty("accountMenuAppearanceFlyoutRight");
+    expect(ACCOUNT_SHEET_ABSENT).toContain("Appearance");
   });
 
   it("docks the desktop menu align-end to the avatar with 8px under the trigger", () => {
@@ -262,6 +212,7 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_SHEET_VERSION_CLASS).toContain("text-ink-3");
     expect(accountSheet).not.toHaveProperty("ACCOUNT_SHEET_LEGAL_CLASS");
     expect(ACCOUNT_SHEET_ABSENT).toContain("Legal");
+    expect(ACCOUNT_SHEET_ABSENT).toContain("Appearance");
   });
 });
 
