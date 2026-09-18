@@ -113,17 +113,17 @@ export function AskAiOverlayProvider({ children }: { children: ReactNode }) {
     setExpanded((current) => !current);
   }, []);
 
-  const value = useMemo(
-    () => ({
-      open: Boolean(optimistic?.open) && !isLegacyAskAiPath(pathname),
+  const value = useMemo(() => {
+    const resolved = optimistic ?? readAskAiOverlay(currentAskAiSearch());
+    return {
+      open: resolved.open && !isLegacyAskAiPath(pathname),
       expanded,
-      threadId: optimistic?.threadId ?? null,
+      threadId: resolved.threadId,
       openAskAi,
       closeAskAi,
       toggleAskAiExpanded,
-    }),
-    [closeAskAi, expanded, openAskAi, optimistic, pathname, toggleAskAiExpanded],
-  );
+    };
+  }, [closeAskAi, expanded, openAskAi, optimistic, pathname, toggleAskAiExpanded]);
 
   return (
     <AskAiOverlayContext.Provider value={value}>
@@ -188,6 +188,7 @@ function AskAiOverlayUrlBound({
 function AskAiOverlayPanel() {
   const { open, expanded, threadId, closeAskAi, toggleAskAiExpanded } = useAskAiOverlay();
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const suppressViewportDialogCloseRef = useRef(false);
   const [surface, setSurface] = useState<MessagesSurface>("ask-globee-landing");
   const [initials, setInitials] = useState("?");
   const [conversations, setConversations] = useState<AskGlobeeHistoryRow[]>([]);
@@ -213,9 +214,20 @@ function AskAiOverlayPanel() {
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
-    const desktop = isAskAiDesktopViewport();
-    if (open && desktop && !dialog.open) dialog.showModal();
-    if ((!open || !desktop) && dialog.open) dialog.close();
+    const syncDialog = () => {
+      const desktop = isAskAiDesktopViewport();
+      if (open && desktop && !dialog.open) dialog.showModal();
+      if (open && !desktop && dialog.open) {
+        suppressViewportDialogCloseRef.current = true;
+        dialog.close();
+      }
+      if (!open && dialog.open) dialog.close();
+    };
+    syncDialog();
+    if (!open) return;
+    const media = window.matchMedia("(min-width: 768px)");
+    media.addEventListener("change", syncDialog);
+    return () => media.removeEventListener("change", syncDialog);
   }, [open]);
 
   useEffect(() => {
@@ -318,7 +330,13 @@ function AskAiOverlayPanel() {
     <>
       <dialog
         ref={dialogRef}
-        onClose={closeAskAi}
+        onClose={() => {
+          if (suppressViewportDialogCloseRef.current) {
+            suppressViewportDialogCloseRef.current = false;
+            return;
+          }
+          closeAskAi();
+        }}
         onClick={(event) => {
           if (event.target === dialogRef.current) closeAskAi();
         }}
