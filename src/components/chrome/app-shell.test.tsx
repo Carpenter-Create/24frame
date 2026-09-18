@@ -233,8 +233,12 @@ describe("AppShell Home chrome", () => {
     expect(home).toContain("data-app-home-frame");
     expect(homeFrameMarkup(home)).not.toContain("mx-auto");
     expect(homeFrameMarkup(home)).not.toContain("page-max-width");
-    expect(homeFrameMarkup(home)).toContain("ml-[var(--access-rail-width)]");
-    expect(homeFrameMarkup(home)).toContain("w-[calc(100%-var(--access-rail-width))]");
+    expect(homeFrameMarkup(home)).toContain("md:ml-[var(--content-inset)]");
+    expect(homeFrameMarkup(home)).toContain("md:mr-[var(--chrome-gutter)]");
+    expect(homeFrameMarkup(home)).toContain(
+      "md:w-[calc(100%-var(--content-inset)-var(--chrome-gutter))]",
+    );
+    expect(homeFrameMarkup(home)).not.toContain("access-rail-width");
     expect(homeFrameMarkup(home)).not.toContain("67.5rem");
     expect(homeFrameMarkup(home)).not.toContain("1080");
     expect(home).toContain("data-house-lead-chrome");
@@ -289,7 +293,7 @@ describe("AppShell Access rail and home frame", () => {
     );
     expect(tokens).toMatch(/--sidebar-width:\s*220px;/);
     expect(tokens).toMatch(/--access-rail-width:\s*220px;/);
-    expect(tokens).toMatch(/--home-content-width:\s*1220px;/);
+    expect(tokens).toMatch(/--home-content-width:\s*1376px;/);
     expect(tokens).toMatch(/--content-inset:\s*48px;/);
     expect(tokens).toMatch(/--chrome-gutter:\s*16px;/);
     expect(tokens).toMatch(/--header-height:\s*56px;/);
@@ -426,7 +430,7 @@ describe("AppShell client mobile chrome", () => {
     expect(tokens).toMatch(/--sidebar-width:\s*220px;/);
     expect(tokens).toMatch(/--sidebar-width-collapsed:\s*60px;/);
     expect(tokens).toMatch(/--access-rail-width:\s*220px;/);
-    expect(tokens).toMatch(/--home-content-width:\s*1220px;/);
+    expect(tokens).toMatch(/--home-content-width:\s*1376px;/);
     expect(tokens).toMatch(/@media \(max-width:\s*767px\)/);
     expect(tokens).toMatch(/--sidebar-width:\s*0px;/);
     expect(tokens).toMatch(/--sidebar-width-collapsed:\s*0px;/);

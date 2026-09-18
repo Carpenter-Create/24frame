@@ -304,7 +304,7 @@ describe("house chrome rematch miss list v1.1", () => {
     const leadLib = readFileSync("src/lib/house-lead-chrome.ts", "utf8");
     expect(tokens).toMatch(/--chrome-gutter:\s*16px;/);
     expect(tokens).toMatch(/--access-rail-width:\s*220px;/);
-    expect(tokens).toMatch(/--home-content-width:\s*1220px;/);
+    expect(tokens).toMatch(/--home-content-width:\s*1376px;/);
     expect(HOUSE_CHROME_GUTTER_X_CLASS).toBe("md:px-[var(--chrome-gutter)]");
     expect(HOUSE_CANVAS_X_CLASS).toBe("px-[var(--chrome-gutter)]");
     expect(HOUSE_RAIL_FLOAT_CLASS).toContain("left-[var(--chrome-gutter)]");

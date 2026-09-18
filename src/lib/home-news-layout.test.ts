@@ -9,7 +9,11 @@ import {
   DASHBOARD_RELATED_GAP_CLASS,
   DASHBOARD_SECTION_AIR_CLASS,
 } from "@/lib/dashboard-craft";
-import { HOME_ACCESS_RAIL_INSET_PX, HOME_CONTENT_COLUMN_PX } from "@/lib/home-width-lock";
+import {
+  HOME_CONTENT_COLUMN_PX,
+  HOME_LEFT_INSET_PX,
+  HOME_RIGHT_INSET_PX,
+} from "@/lib/home-width-lock";
 import { HOUSE_HOME_RAIL_COLUMN_CLASS } from "@/lib/house-shell";
 import {
   OVERVIEW_HOME_COLUMN_GUTTER,
@@ -45,9 +49,12 @@ function emptyHome(): string {
 
 describe("Home News layout + register lock", () => {
   it("keeps two-column desktop News and a phone stack after Aggregation", () => {
-    expect(HOME_ACCESS_RAIL_INSET_PX).toBe(220);
-    expect(HOME_CONTENT_COLUMN_PX).toBe(1220);
-    expect(HOUSE_HOME_RAIL_COLUMN_CLASS).toContain("--access-rail-width");
+    expect(HOME_LEFT_INSET_PX).toBe(48);
+    expect(HOME_RIGHT_INSET_PX).toBe(16);
+    expect(HOME_CONTENT_COLUMN_PX).toBe(1376);
+    expect(HOUSE_HOME_RAIL_COLUMN_CLASS).toContain("--content-inset");
+    expect(HOUSE_HOME_RAIL_COLUMN_CLASS).toContain("--chrome-gutter");
+    expect(HOUSE_HOME_RAIL_COLUMN_CLASS).not.toContain("--access-rail-width");
     expect(overviewHidesRail("/home")).toBe(true);
     expect(OVERVIEW_RAIL_OFF_WIDTH).toBe("0px");
     expect(OVERVIEW_NEWS_RAIL_WIDTH).toBe("20rem");

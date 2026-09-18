@@ -41,7 +41,7 @@ export const OVERVIEW_MODULE_ORDER = [
 
 /** Phone stack: News is full-width after Aggregation, before Needs you.
  *  Phone-chrome / Home width: dest rail is gone; lead + main go full-canvas.
- *  Home modules inset separately with --access-rail-width (1220 at 1440). */
+ *  Home modules inset separately (48 left + 16 right → 1376 at 1440). */
 export const OVERVIEW_PHONE_MODULE_ORDER = [
   "social",
   "education",
@@ -51,7 +51,7 @@ export const OVERVIEW_PHONE_MODULE_ORDER = [
   "ai-next",
 ] as const;
 
-/** Desktop News rail measure inside the 1220 Home column. */
+/** Desktop News rail measure inside the 1376 Home column. */
 export const OVERVIEW_NEWS_RAIL_WIDTH = "20rem";
 
 /** Main↔News gutter — same chrome gap as Aggregation main↔dest rail. */

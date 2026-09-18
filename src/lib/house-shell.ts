@@ -20,15 +20,15 @@ export const HOUSE_CHROME_GUTTER_X_CLASS = "md:px-[var(--chrome-gutter)]";
 
 export const HOUSE_CANVAS_X_CLASS = "px-[var(--chrome-gutter)]";
 
-/** Access rail measure. Home content uses this while --sidebar-width is 0. */
+/** Access rail measure. Aggregation uses --sidebar-width; this stays 220. */
 export const HOUSE_ACCESS_RAIL_WIDTH = "var(--access-rail-width)";
 
-/** Figma Home / Activity main column at 1440 (220 + 1220). */
+/** Home canvas at 1440: 48 left + 16 right + 1376 column. */
 export const HOUSE_HOME_CONTENT_WIDTH = "var(--home-content-width)";
 
-/** Home modules sit in the Activity-main column. Lead chrome stays full-bleed. */
+/** Home modules: content-inset left · chrome-gutter right. Lead stays full-bleed. */
 export const HOUSE_HOME_RAIL_COLUMN_CLASS =
-  "ml-[var(--access-rail-width)] w-[calc(100%-var(--access-rail-width))]";
+  "w-full md:ml-[var(--content-inset)] md:mr-[var(--chrome-gutter)] md:w-[calc(100%-var(--content-inset)-var(--chrome-gutter))]";
 
 export const HOUSE_RAIL_FLOAT_CLASS =
   "fixed left-[var(--chrome-gutter)] top-[calc(var(--header-height)+var(--chrome-gutter))] z-30 hidden h-[calc(100dvh-var(--header-height)-calc(var(--chrome-gutter)*2))] flex-col md:flex";
