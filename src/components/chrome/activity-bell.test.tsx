@@ -125,6 +125,11 @@ describe("ActivityBell", () => {
     expect(src).toContain("onPointerDown");
     expect(src).toContain("preventDefault");
     expect(src).toContain("open={open}");
+    expect(src).toContain("onClick={onNavigate}");
+    expect(src).toContain("setOpen(false)");
+    expect(src).toContain("forgetDone");
+    expect(src).toContain("const { error } = await markActivityDone");
+    expect(src).toContain("onUndo");
     expect(src).toContain("activityKindGlyph");
     expect(src).toContain("formatActivityRelativeTime");
     expect(src).toContain("FilmSlate");

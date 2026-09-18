@@ -73,6 +73,14 @@ export function ActivityBell({
     });
   }
 
+  function forgetDone(ids: readonly string[]) {
+    setDoneIds((prev) => {
+      const next = new Set(prev);
+      for (const id of ids) next.delete(id);
+      return next;
+    });
+  }
+
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
@@ -113,6 +121,8 @@ export function ActivityBell({
             preview={previewPromise}
             doneIds={doneIds}
             onDone={rememberDone}
+            onUndo={forgetDone}
+            onNavigate={() => setOpen(false)}
           />
         </Suspense>
       </MenuSurfaceContent>
@@ -147,10 +157,14 @@ function ActivityBellBody({
   preview,
   doneIds,
   onDone,
+  onUndo,
+  onNavigate,
 }: {
   preview: Promise<ActivityBellPreview>;
   doneIds: ReadonlySet<string>;
   onDone: (ids: readonly string[]) => void;
+  onUndo: (ids: readonly string[]) => void;
+  onNavigate: () => void;
 }) {
   const data = use(preview);
   const items = activityBellVisibleItems(data.items, doneIds);
@@ -160,7 +174,7 @@ function ActivityBellBody({
     <>
       <div data-activity-bell-head="" className={ACTIVITY_BELL_HEAD_CLASS}>
         <p className="t-heading text-ink">{ACTIVITY.title}</p>
-        {ids.length > 0 ? <MarkAllDone ids={ids} onDone={onDone} /> : null}
+        {ids.length > 0 ? <MarkAllDone ids={ids} onDone={onDone} onUndo={onUndo} /> : null}
       </div>
       {items.length === 0 ? (
         <p className="px-[var(--space-3)] py-[var(--space-2)] t-body-sm text-ink-3">
@@ -169,7 +183,13 @@ function ActivityBellBody({
       ) : (
         <div data-activity-bell-items="">
           {items.map((item) => (
-            <ActivityBellRow key={item.id} item={item} onDone={onDone} />
+            <ActivityBellRow
+              key={item.id}
+              item={item}
+              onDone={onDone}
+              onUndo={onUndo}
+              onNavigate={onNavigate}
+            />
           ))}
         </div>
       )}
@@ -178,6 +198,7 @@ function ActivityBellBody({
         <Link
           href={ACTIVITY_HREF}
           data-activity-bell-view-all=""
+          onClick={onNavigate}
           className={TEXT_ACTION_CLASS}
         >
           {ACTIVITY.viewAll}
@@ -190,9 +211,13 @@ function ActivityBellBody({
 function ActivityBellRow({
   item,
   onDone,
+  onUndo,
+  onNavigate,
 }: {
   item: ActivityItem;
   onDone: (ids: readonly string[]) => void;
+  onUndo: (ids: readonly string[]) => void;
+  onNavigate: () => void;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -200,7 +225,12 @@ function ActivityBellRow({
 
   return (
     <div data-activity-bell-row="" className={ACTIVITY_BELL_ROW_CLASS}>
-      <Link href={item.href} data-activity-bell-target="" className={ACTIVITY_BELL_TARGET_CLASS}>
+      <Link
+        href={item.href}
+        data-activity-bell-target=""
+        onClick={onNavigate}
+        className={ACTIVITY_BELL_TARGET_CLASS}
+      >
         <span data-activity-bell-plate="" className={ACTIVITY_BELL_PLATE_CLASS}>
           <Glyph
             data-activity-bell-kind={item.kind}
@@ -232,7 +262,11 @@ function ActivityBellRow({
           keepBellOpen(event);
           start(async () => {
             onDone([item.id]);
-            await markActivityDone([item.id]);
+            const { error } = await markActivityDone([item.id]);
+            if (error) {
+              onUndo([item.id]);
+              return;
+            }
             router.refresh();
           });
         }}
@@ -251,9 +285,11 @@ function ActivityBellRow({
 function MarkAllDone({
   ids,
   onDone,
+  onUndo,
 }: {
   ids: string[];
   onDone: (ids: readonly string[]) => void;
+  onUndo: (ids: readonly string[]) => void;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -267,7 +303,11 @@ function MarkAllDone({
         keepBellOpen(event);
         start(async () => {
           onDone(ids);
-          await markActivityDone(ids);
+          const { error } = await markActivityDone(ids);
+          if (error) {
+            onUndo(ids);
+            return;
+          }
           router.refresh();
         });
       }}
