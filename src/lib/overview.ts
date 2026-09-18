@@ -1,12 +1,14 @@
 import { ASK_ASSISTANT, ASSISTANT_NAME } from "@/lib/product";
 import { DASHBOARD_ADMIN } from "@/lib/dashboard-admin";
 import { DASHBOARD_ATTENTION } from "@/lib/dashboard-attention";
+import { DASHBOARD_SECTION_AIR_CLASS } from "@/lib/dashboard-craft";
 import {
   DASHBOARD_HOME,
   dashboardWhatChanged,
   type ClientHomeDoNextItem,
   type DashboardChangeRow,
 } from "@/lib/dashboard-home";
+import { NEWS_HOME_CAP, NEWS_HREF, NEWS_PAGE } from "@/lib/news";
 import { REPORTS_HREF } from "@/lib/reports";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { availableWorkspaceOptions, type WorkspaceMenuOption } from "@/lib/workspace-menu";
@@ -25,6 +27,7 @@ export const OVERVIEW_LEGACY_HREF = "/overview";
 export const OVERVIEW_SOCIAL_DM_CAP = 5;
 export const OVERVIEW_EDUCATION_CAP = 5;
 export const OVERVIEW_AI_NEXT_CAP = 3;
+export const OVERVIEW_NEWS_CAP = NEWS_HOME_CAP;
 export const OVERVIEW_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 /** Positive-first Home modules. This-week pulse folds into Aggregation. */
@@ -36,8 +39,32 @@ export const OVERVIEW_MODULE_ORDER = [
   "ai-next",
 ] as const;
 
-/** Phone-chrome / Home width: dest rail is gone; lead + main go full-canvas.
+/** Phone stack: News is full-width after Aggregation, before Needs you.
+ *  Phone-chrome / Home width: dest rail is gone; lead + main go full-canvas.
  *  Home modules inset separately with --access-rail-width (1220 at 1440). */
+export const OVERVIEW_PHONE_MODULE_ORDER = [
+  "social",
+  "education",
+  "aggregation",
+  "news",
+  "needs-you",
+  "ai-next",
+] as const;
+
+/** Desktop: News is the right rail. Phone uses the stacked areas. */
+export const OVERVIEW_HOME_LAYOUT_CLASS =
+  `grid w-full grid-cols-1 items-start ${DASHBOARD_SECTION_AIR_CLASS} ` +
+  `[grid-template-areas:'social'_'education'_'aggregation'_'news'_'needs'_'ai'] ` +
+  `lg:grid-cols-[minmax(0,1fr)_20rem] ` +
+  `lg:[grid-template-areas:'social_news'_'education_news'_'aggregation_news'_'needs_news'_'ai_news']`;
+
+export const OVERVIEW_AREA_SOCIAL_CLASS = "[grid-area:social]";
+export const OVERVIEW_AREA_EDUCATION_CLASS = "[grid-area:education]";
+export const OVERVIEW_AREA_AGGREGATION_CLASS = "[grid-area:aggregation]";
+export const OVERVIEW_AREA_NEEDS_CLASS = "[grid-area:needs]";
+export const OVERVIEW_AREA_AI_CLASS = "[grid-area:ai]";
+export const OVERVIEW_AREA_NEWS_CLASS =
+  "[grid-area:news] lg:sticky lg:top-[calc(var(--header-height)+var(--space-4))] lg:max-h-[calc(100dvh-var(--header-height)-var(--space-8))] lg:overflow-y-auto";
 export const OVERVIEW_RAIL_OFF_WIDTH = "0px";
 
 export const OVERVIEW_PAGE = {
@@ -57,6 +84,10 @@ export const OVERVIEW_PAGE = {
   socialHref: SOCIAL_ROUTES.dms,
   educationEmpty: SOCIAL.courses.empty,
   educationHref: SOCIAL_ROUTES.courses,
+  news: NEWS_PAGE.title,
+  newsEmpty: NEWS_PAGE.empty,
+  newsHref: NEWS_HREF,
+  newsViewAll: NEWS_PAGE.viewAll,
   needsYouEmpty: DASHBOARD_ATTENTION.empty,
   needsYouHref: DASHBOARD_ATTENTION.viewAllHref,
   weekEmpty: DASHBOARD_HOME.whatChangedEmpty,

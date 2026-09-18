@@ -18,6 +18,7 @@ import { buildClientFinanceDashboard } from "@/lib/finance-dashboard";
 import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 import { UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
 import { loadMyDeliveries, loadMyFindings } from "@/lib/my-lists";
+import { loadHomeNews } from "@/lib/news";
 import {
   OVERVIEW_SOCIAL_DM_CAP,
   overviewAiNextMoves,
@@ -61,12 +62,13 @@ export default async function HomePage() {
         .range(...rangeFor(UNPAGINATED_MAX))
     : Promise.resolve({ data: [] as TitleRow[] });
 
-  const [titleResult, findings, deliveries, coursesLoaded, profile] = await Promise.all([
+  const [titleResult, findings, deliveries, coursesLoaded, profile, news] = await Promise.all([
     titlesPromise,
     org ? loadMyFindings(supabase, { orgId: org.id }) : Promise.resolve({ rows: [], truncated: false }),
     org ? loadMyDeliveries(supabase) : Promise.resolve({ rows: [], truncated: false }),
     loadDiscoverableCourses(supabase),
     ensureOwnSocialProfile(supabase, ctx.user),
+    loadHomeNews(supabase, now),
   ]);
 
   const titles = (titleResult.data ?? []) as TitleRow[];
@@ -137,6 +139,8 @@ export default async function HomePage() {
       needsYou={attention.rows.map((row) => ({ id: row.id, what: row.what, href: row.href }))}
       weekPulse={weekPulse}
       aiNext={overviewAiNextMoves(snapshot.doNext)}
+      news={news}
+      now={now}
     />
   );
 }

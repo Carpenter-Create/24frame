@@ -10,7 +10,10 @@ import {
   OVERVIEW_HREF,
   OVERVIEW_LEGACY_HREF,
   OVERVIEW_MODULE_ORDER,
+  OVERVIEW_HOME_LAYOUT_CLASS,
+  OVERVIEW_NEWS_CAP,
   OVERVIEW_PAGE,
+  OVERVIEW_PHONE_MODULE_ORDER,
   OVERVIEW_RAIL_OFF_WIDTH,
   OVERVIEW_SOCIAL_DM_CAP,
   isOverviewPath,
@@ -105,6 +108,20 @@ describe("Home module caps", () => {
       "needs-you",
       "ai-next",
     ]);
+    expect(OVERVIEW_PHONE_MODULE_ORDER).toEqual([
+      "social",
+      "education",
+      "aggregation",
+      "news",
+      "needs-you",
+      "ai-next",
+    ]);
+    expect(OVERVIEW_PAGE.news).toBe("News");
+    expect(OVERVIEW_PAGE.newsHref).toBe("/news");
+    expect(OVERVIEW_PAGE.newsViewAll).toBe("View all");
+    expect(OVERVIEW_HOME_LAYOUT_CLASS).toContain("'aggregation'_'news'_'needs'");
+    expect(OVERVIEW_HOME_LAYOUT_CLASS).toContain("lg:grid-cols-[minmax(0,1fr)_20rem]");
+    expect(OVERVIEW_HOME_LAYOUT_CLASS).not.toContain("md:grid-cols");
     expect(OVERVIEW_PAGE.thisWeek).toBe("This week");
   });
 
@@ -112,6 +129,7 @@ describe("Home module caps", () => {
     expect(OVERVIEW_SOCIAL_DM_CAP).toBe(5);
     expect(OVERVIEW_EDUCATION_CAP).toBe(5);
     expect(OVERVIEW_AI_NEXT_CAP).toBe(3);
+    expect(OVERVIEW_NEWS_CAP).toBe(12);
     expect(overviewSocialChats([0, 1, 2, 3, 4, 5, 6])).toEqual([0, 1, 2, 3, 4]);
     expect(overviewEducationCourses(["a", "b", "c", "d", "e", "f"])).toEqual([
       "a",
@@ -168,5 +186,9 @@ describe("overviewModuleHeaderAction", () => {
     expect(
       overviewModuleHeaderAction("Net revenue", "/reports", "Aggregation"),
     ).toEqual({ href: "/reports", label: "Aggregation" });
+    expect(overviewModuleHeaderAction("News", "/news", "View all")).toEqual({
+      href: "/news",
+      label: "View all",
+    });
   });
 });
