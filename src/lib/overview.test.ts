@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { ASSISTANT_NAME } from "@/lib/product";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { availableWorkspaceOptions } from "@/lib/workspace-menu";
-import { NEWS_HREF, NEWS_LEGACY_HREF } from "./news";
+import { NEWS_HREF, NEWS_LEGACY_HREF, NEWS_PAGE } from "./news";
 import {
   OVERVIEW_AI_NEXT_CAP,
   OVERVIEW_EDUCATION_CAP,
@@ -161,7 +161,8 @@ describe("Home module caps", () => {
       "ai-next",
       "news",
     ]);
-    expect(OVERVIEW_PAGE.news).toBe("News");
+    expect(OVERVIEW_PAGE.news).toBe("Industry news");
+    expect(OVERVIEW_PAGE.news).toBe(NEWS_PAGE.title);
     expect(OVERVIEW_PAGE.newsHref).toBe(NEWS_HREF);
     expect(OVERVIEW_PAGE.newsViewAll).toBe("View all");
     expect(OVERVIEW_HOME_LAYOUT_CLASS).toContain("'revenue'_'social'_'education'_'needs'_'ai'_'news'");
@@ -259,7 +260,7 @@ describe("overviewModuleHeaderAction", () => {
     expect(
       overviewModuleHeaderAction("Net revenue", "/reports", "Aggregation"),
     ).toEqual({ href: "/reports", label: "Aggregation" });
-    expect(overviewModuleHeaderAction("News", NEWS_HREF, "View all")).toEqual({
+    expect(overviewModuleHeaderAction(NEWS_PAGE.title, NEWS_HREF, "View all")).toEqual({
       href: NEWS_HREF,
       label: "View all",
     });

@@ -121,24 +121,27 @@ export const DASHBOARD_LICENSING_THUMB_CLASS =
   "relative aspect-[16/9] w-16 shrink-0 overflow-hidden rounded-[var(--radius-sm)] bg-surface-muted [&_img]:h-full [&_img]:w-full [&_img]:object-cover [&_img]:object-center";
 
 // News media plate — full card width, 16:9 crop. Stacked above copy.
-// Home rail only. Not the licensing side thumb (w-16). Card overflow
-// clips the top radius.
+// Home rail always. /home/news phone (max-md) shares this plate —
+// not a lookalike fork. Not the licensing side thumb (w-16). Card
+// overflow clips the top radius.
 export const DASHBOARD_NEWS_THUMB_CLASS =
   "relative aspect-[16/9] w-full shrink-0 overflow-hidden bg-surface-muted [&_img]:h-full [&_img]:w-full [&_img]:object-cover [&_img]:object-center";
 
-// /home/news history row — image leads. Flush left plate, 16:9.
-// Phone 160 · desktop 320. Grey muted plate only when the article
-// has no image. Not the Home stack thumb. Not the licensing w-16.
+// /home/news history plate — same Home 16:9 full-bleed thumb on
+// phone (max-md). md+ keeps the focused dense row (320). Grey
+// muted plate only when the article has no image. Not a w-40
+// phone row. Not the licensing w-16.
 export const DASHBOARD_NEWS_HISTORY_THUMB_CLASS =
-  "relative aspect-[16/9] w-40 shrink-0 overflow-hidden bg-surface-muted md:w-80 [&_img]:h-full [&_img]:w-full [&_img]:object-cover [&_img]:object-center";
+  `${DASHBOARD_NEWS_THUMB_CLASS} md:w-80`;
 
-// History row: media flush to the card edge, copy padded and
-// vertically centered. Image scale is the read; type is secondary.
+// History: phone stacks like Home (image-top, flex-col, no link
+// gap). md+ is the dense image-led row — media flush left, copy
+// padded and vertically centered.
 export const DASHBOARD_NEWS_HISTORY_ROW_CLASS =
-  `flex items-stretch ${DASHBOARD_RELATED_GAP_CLASS}`;
+  `flex flex-col md:flex-row md:items-stretch md:${DASHBOARD_RELATED_GAP_CLASS}`;
 
 export const DASHBOARD_NEWS_HISTORY_COPY_CLASS =
-  `flex min-w-0 flex-1 flex-col justify-center ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD}`;
+  `flex min-w-0 flex-col ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD} md:flex-1 md:justify-center`;
 
 export const DASHBOARD_LICENSING_NEST_CLASS =
   "px-[var(--space-4)] py-[var(--space-3)]";
@@ -152,7 +155,8 @@ export const DASHBOARD_ACTIVITY_AVATAR_CLASS =
 export const DASHBOARD_ADMIN_PAIR_CLASS =
   "grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-2";
 
-// /home/news: one dense full-width row per article. Home rail stays stacked.
+// /home/news: stacked Home cards on phone; one dense full-width
+// row per article on md+. Home rail stays stacked.
 export const DASHBOARD_NEWS_HISTORY_LIST_CLASS = `flex flex-col ${DASHBOARD_RELATED_GAP_CLASS}`;
 
 // History page: source chips under the H1, then a focused reading

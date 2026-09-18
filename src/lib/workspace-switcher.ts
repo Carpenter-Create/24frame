@@ -76,6 +76,7 @@ export const WORKSPACE_SWITCHER_ABSENT = [
   "Courses",
   "Social workspace",
   "News",
+  "Industry news",
 ] as const;
 
 export const WORKSPACE_SWITCHER_SHORT_LABELS = ["Agg", "Edu"] as const;

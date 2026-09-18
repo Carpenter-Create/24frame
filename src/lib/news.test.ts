@@ -38,7 +38,8 @@ function item(n: number, published_at: string) {
 
 describe("News SoT", () => {
   it("locks the name, Home cap, 90-day window, EventBridge ingest, and allowlist", () => {
-    expect(NEWS_PAGE.title).toBe("News");
+    expect(NEWS_PAGE.title).toBe("Industry news");
+    expect(NEWS_PAGE.title).not.toBe("News");
     expect(NEWS_HOME_HREF).toBe("/home");
     expect(NEWS_HREF).toBe("/home/news");
     expect(NEWS_HREF.startsWith(`${NEWS_HOME_HREF}/`)).toBe(true);
