@@ -25,7 +25,7 @@ import type { PhosphorIcon } from "@/lib/phosphor-icon";
 import { ASK_GLOBEE } from "@/lib/ask-globee";
 import { AVAILS_HREF, AVAILS_PAGE } from "@/lib/avails";
 import { FINANCE_PAGE } from "@/lib/finance";
-import { PRODUCT_NAME } from "@/lib/product";
+import { GC_LICENSING_STATUS } from "@/lib/gc-deliveries";
 import { REPORTS_HREF, REPORTS_PAGE, isLegacyReportsPath } from "@/lib/reports";
 import type { WorkspaceMode } from "@/lib/workspace";
 import { EDUCATION_ADMIN, EDUCATION_HREF } from "@/lib/education";
@@ -126,7 +126,7 @@ export const STAFF_RAIL_EYEBROW = "Team";
 export const GC_NAV: PhosphorNavItem[] = [
   { label: "Queue", href: "/queue", family: "phosphor", icon: Tray },
   { label: AVAILS_PAGE.title, href: AVAILS_HREF, family: "phosphor", icon: CheckCircle },
-  { label: `${PRODUCT_NAME} Deliveries`, href: "/gc/deliveries", family: "phosphor", icon: PaperPlaneTilt },
+  { label: GC_LICENSING_STATUS.title, href: "/gc/deliveries", family: "phosphor", icon: PaperPlaneTilt },
   { label: "Vendors", href: "/vendors", family: "phosphor", icon: Storefront },
   {
     label: "Finance",

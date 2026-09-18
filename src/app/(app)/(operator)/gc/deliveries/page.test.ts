@@ -3,7 +3,12 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createClient } from "@/lib/supabase/server";
-import { GC_DELIVERIES_EMPTY, GC_DELIVERIES_TRUNCATED } from "@/lib/gc-deliveries";
+import {
+  GC_DELIVERIES_EMPTY,
+  GC_DELIVERIES_TRUNCATED,
+  GC_LICENSING_STATUS,
+} from "@/lib/gc-deliveries";
+import { HOUSE_MODULE_CLASS } from "@/lib/house-shell";
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
 import GcDeliveriesPage from "./page";
 
@@ -12,6 +17,9 @@ vi.mock("./new-delivery-form", () => ({ NewDeliveryForm: () => null }));
 vi.mock("./export-panel", () => ({ ExportPanel: () => null }));
 vi.mock("./delivery-controls", () => ({ DeliveryControls: () => null }));
 vi.mock("./portal-links", () => ({ PortalLinks: () => null }));
+vi.mock("./licensing-vendor-filter", () => ({
+  LicensingVendorFilter: () => null,
+}));
 
 function stubClient(tables: Record<string, unknown[]> = {}) {
   const from = vi.fn((table: string) => {
@@ -43,9 +51,13 @@ function stubEmptyClient() {
   return stubClient();
 }
 
-async function renderEmptyDeliveries() {
+async function renderEmptyDeliveries(
+  search: Record<string, string | string[] | undefined> = {},
+) {
   stubEmptyClient();
-  return renderToStaticMarkup(await GcDeliveriesPage());
+  return renderToStaticMarkup(
+    await GcDeliveriesPage({ searchParams: Promise.resolve(search) }),
+  );
 }
 
 const pageSrc = readFileSync("src/app/(app)/(operator)/gc/deliveries/page.tsx", "utf8");
@@ -55,12 +67,14 @@ const viewTitlesClass = "t-body-sm text-accent transition-colors hover:underline
 describe("staff /gc/deliveries empty copy", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("keeps the Deliveries title and locked empty line", async () => {
+  it("keeps the Licensing Status title and locked empty line", async () => {
     const html = await renderEmptyDeliveries();
 
-    expect(html).toContain(">Deliveries<");
-    expect(GC_DELIVERIES_EMPTY.title).toBe("No deliveries yet.");
-    expect(html).toContain("No deliveries yet.");
+    expect(html).toContain(`>${GC_LICENSING_STATUS.title}<`);
+    expect(html).toContain(GC_LICENSING_STATUS.intro);
+    expect(GC_DELIVERIES_EMPTY.title).toBe("No licensing status yet.");
+    expect(html).toContain("No licensing status yet.");
+    expect(html).toContain("data-gc-licensing-status");
   });
 
   it("renders View titles as Sporty Blue text, not a filled button", async () => {
@@ -96,6 +110,87 @@ describe("staff /gc/deliveries empty copy", () => {
     expect(vendors).toContain("VENDORS_PAGE");
     expect(pageSrc).not.toContain("EmptyState");
     expect(pageSrc).not.toContain("VENDORS_PAGE");
+  });
+});
+
+describe("staff /gc/deliveries licensing filters and craft", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("filters by live delivery status and vendor on the cross-org read", async () => {
+    const vendorId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+    const { from } = stubClient();
+    await GcDeliveriesPage({
+      searchParams: Promise.resolve({ status: "live", vendor: vendorId }),
+    });
+    expect(from).toHaveBeenCalledWith("deliveries");
+    const deliveriesChain = from.mock.results[0]?.value as {
+      eq: ReturnType<typeof vi.fn>;
+    };
+    expect(deliveriesChain.eq).toHaveBeenCalledWith("status", "live");
+    expect(deliveriesChain.eq).toHaveBeenCalledWith("vendor_id", vendorId);
+  });
+
+  it("does not constrain the deliveries read when filters are all", async () => {
+    const { from } = stubEmptyClient();
+    await renderToStaticMarkup(
+      await GcDeliveriesPage({ searchParams: Promise.resolve({}) }),
+    );
+    const deliveriesChain = from.mock.results[0]?.value as {
+      eq: ReturnType<typeof vi.fn>;
+    };
+    expect(deliveriesChain.eq).not.toHaveBeenCalledWith("status", expect.anything());
+    expect(deliveriesChain.eq).not.toHaveBeenCalledWith("vendor_id", expect.anything());
+  });
+
+  it("renders house status chips that preserve the vendor filter", async () => {
+    const vendorId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+    const html = await renderEmptyDeliveries({ status: "pending", vendor: vendorId });
+    expect(html).toContain("data-gc-licensing-filters");
+    expect(html).toContain('aria-label="Filter by status"');
+    expect(html).toContain("Pending");
+    expect(html).toContain("Delivered");
+    expect(html).toContain("Approved");
+    expect(html).toContain("Rejected");
+    expect(html).toContain("Taken down");
+    expect(html).toContain(`/gc/deliveries?status=live&amp;vendor=${vendorId}`);
+    expect(html).toContain(`/gc/deliveries?vendor=${vendorId}`);
+    expect(pageSrc).toContain("StatusFilter");
+    expect(pageSrc).toContain("LicensingVendorFilter");
+    expect(pageSrc).toContain("DELIVERY_STATUS_FILTERS");
+  });
+
+  it("shows filter-miss copy and Show all when the lens is empty", async () => {
+    const html = await renderEmptyDeliveries({ status: "rejected" });
+    expect(html).toContain(GC_LICENSING_STATUS.filterMiss);
+    expect(html).toContain(GC_LICENSING_STATUS.showAll);
+    expect(html).toContain('href="/gc/deliveries"');
+    expect(html).not.toContain("No licensing status yet.");
+  });
+
+  it("sits rows and empty on grey house modules, not white cards", async () => {
+    stubClient({
+      deliveries: [
+        {
+          id: "d1",
+          territory: "US",
+          status: "live",
+          vendor_id: "v1",
+          title_id: "t1",
+          titles: { title: "North Star", catalog_id: "GC-0000001" },
+          vendors: { name: "Acme Distribution" },
+          organizations: { name: "Example Org" },
+        },
+      ],
+    });
+    const html = renderToStaticMarkup(await GcDeliveriesPage());
+    expect(html).toContain(HOUSE_MODULE_CLASS);
+    expect(html).toContain('data-gc-licensing-row="d1"');
+    expect(html).toContain("North Star");
+    expect(html).toContain("Example Org");
+    expect(pageSrc).toContain("HOUSE_MODULE_CLASS");
+    expect(pageSrc).not.toContain("@/components/ui/card");
+    expect(pageSrc).not.toContain("card-surface");
+    expect(html).not.toContain("card-surface");
   });
 });
 
