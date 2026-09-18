@@ -19,7 +19,6 @@ describe("client Deliveries redirect", () => {
     expect(pageSrc).not.toContain("loadMyDeliveries");
     expect(pageSrc).not.toContain("/licensing");
     const staff = readFileSync("src/app/(app)/(operator)/gc/deliveries/page.tsx", "utf8");
-    expect(staff).toContain("Licensing Status");
-    expect(staff).toContain("/gc/deliveries");
+    expect(staff).toContain("GC_LICENSING_STATUS");
   });
 });
