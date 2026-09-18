@@ -1,8 +1,9 @@
 // House standard for in-page filter/select menus.
 // SoT: Dashboard All time (period) — quiet trigger, desktop menu, phone bottom sheet,
 // trailing Sporty Blue check, flush-left labels. Hairline + air; no drop shadow.
-// Consumers: Dashboard period, Titles / Channels / Licensing / Clients status
-// lenses. Do not invent a second grammar — never a StatusFilter chip fork.
+// Consumers: Dashboard period, Home Net revenue (phone), Titles / Channels /
+// Licensing / Clients status lenses. Do not invent a second grammar —
+// never a StatusFilter chip fork or a wrapping Home period row.
 
 import { HOUSE_PERIOD_SELECTED_CLASS } from "@/lib/house-shell";
 
