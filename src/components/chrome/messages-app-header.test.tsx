@@ -272,7 +272,7 @@ describe("MessagesAppHeader", () => {
     expect(src).not.toContain("strokeWidth={2}");
     expect((src.match(/<MoreHorizontal/g) ?? []).length).toBe(1);
     expect(shell).not.toContain("MessagesThreadOverflow");
-    expect(lead).toContain('<WorkspaceSwitcher current={workspace} tone="pill" />');
+    expect(lead).not.toContain('tone="pill"');
     expect(lead).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
     expect(leadLib).toContain("justify-end gap-4");
     expect(leadLib).toContain("HOUSE_LEAD_PHONE_PAD_CLASS");
@@ -348,7 +348,7 @@ describe("MessagesAppHeader", () => {
     expect(src.indexOf("data-ask-globee-download")).toBeLessThan(src.indexOf("<MoreHorizontal"));
     expect(lead).toContain("HOUSE_LEAD_CHROME_CLASS");
     expect(lead).toContain("APP_HEADER_LEADING_CLASS");
-    expect(lead).toContain('<WorkspaceSwitcher current={workspace} tone="pill" />');
+    expect(lead).not.toContain('tone="pill"');
     expect(lead).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
     expect(shell.indexOf("<MessagesAppHeader")).toBeLessThan(shell.indexOf("<UserMenu"));
     expect(tokens).toMatch(/--space-4:\s*1rem;/);

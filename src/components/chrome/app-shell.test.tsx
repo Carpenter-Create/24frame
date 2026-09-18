@@ -176,7 +176,7 @@ describe("AppShell header", () => {
     expect(leadSrc).toContain('logoVisible = "always"');
     expect(shellSrc).toContain("HouseLeadChrome");
     expect(leadSrc).toContain("WorkspaceSwitcher");
-    expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} tone="pill" />');
+    expect(leadSrc).not.toContain('tone="pill"');
     expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
     expect(html).toContain("data-workspace-switcher");
     expect(html).toContain("data-house-lead-scroll");
@@ -184,8 +184,8 @@ describe("AppShell header", () => {
     expect(html).toContain("overflow-hidden");
     expect(html).toContain("overflow-y-auto");
     expect(html).toContain("Aggregation");
-    expect((html.match(/data-workspace-switcher=""/g) ?? []).length).toBe(2);
-    expect(html).toContain('data-workspace-switcher-tone="pill"');
+    expect((html.match(/data-workspace-switcher=""/g) ?? []).length).toBe(1);
+    expect(html).not.toContain('data-workspace-switcher-tone="pill"');
     expect(html).toContain('data-workspace-switcher-presentation="pills"');
     expect(html).toContain("data-workspace-switcher-pills");
     expect(html).toContain('data-workspace-switcher-segment="home"');
@@ -195,12 +195,9 @@ describe("AppShell header", () => {
     expect(html.indexOf('data-workspace-switcher-segment="home"')).toBeLessThan(
       html.indexOf('data-workspace-switcher-segment="aggregation"'),
     );
-    expect(html).toContain("data-app-header-workspace-pill");
+    expect(html).not.toContain("data-app-header-workspace-pill");
     expect(html).not.toContain("data-workspace-switcher-rail");
     expect(html).not.toContain("data-workspace-switcher-lead");
-    expect(html.indexOf("data-app-header-workspace-pill")).toBeLessThan(
-      html.indexOf("data-user-menu-host"),
-    );
     expect(html.indexOf("data-workspace-switcher")).toBeLessThan(html.indexOf("data-user-menu-host"));
     expect(shellSrc).toContain("<MobileNavSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />");
     expect(shellSrc).not.toContain("AccountOverlay");
@@ -210,7 +207,7 @@ describe("AppShell header", () => {
   it("is avatar-only on every Access route — no org switcher", () => {
     expect(shellSrc).not.toContain("OrganizationSwitcher");
     expect(leadSrc).toContain("HOUSE_LEAD_CHROME_CLASS");
-    expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} tone="pill" />');
+    expect(leadSrc).not.toContain('tone="pill"');
     expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
 
     for (const path of ["/", "/titles", "/deliveries", "/catalog-health", "/messages"]) {
@@ -445,8 +442,11 @@ describe("AppShell client mobile chrome", () => {
     expect(html).toContain("data-brand-emblem");
     expect(html).toContain("data-brand-logo");
     expect(html).toContain('data-brand-logo-mark="emblem"');
-    expect(html.indexOf("data-mobile-nav-trigger")).toBeLessThan(
-      html.indexOf("data-brand-emblem"),
+    expect(html.indexOf("data-brand-emblem")).toBeLessThan(
+      html.indexOf("data-mobile-nav-trigger"),
+    );
+    expect(html.indexOf("data-mobile-nav-trigger")).toBeGreaterThan(
+      html.indexOf("data-app-header-trailing"),
     );
     expect(html).not.toMatch(/data-house-lead=""[^>]*\bhidden(?:\s|")/);
     expect(html).toContain("Open menu");
@@ -777,8 +777,10 @@ describe("AppShell rail-collapse chevron", () => {
     expect(html).toContain("data-social-top-bar");
     expect(html).toContain("data-workspace-switcher");
     expect(html).toContain("Social");
-    expect(html).toContain("data-social-tab-bar");
-    expect(html).toContain('data-social-tab-item="Create"');
+    expect(html).toContain("data-house-phone-bottom-nav");
+    expect(html).toContain("data-social-phone-dests");
+    expect(html).toContain('data-social-phone-dest="Create"');
+    expect(html).not.toContain("data-social-tab-bar");
     expect(html).toContain("destination-page");
     expect(html).toContain("data-app-social-frame");
     expect(html).toContain("data-house-lead-scroll");
@@ -797,12 +799,13 @@ describe("AppShell rail-collapse chevron", () => {
     expect(html).not.toContain("Destinations");
     expect(html).toContain("data-social-rail-account");
     expect(html).toContain("Ada Lovelace");
-    expect(html).toContain('data-social-tab-item="Create"');
+    expect(html).toContain('data-social-phone-dest="Create"');
     expect(html).not.toContain("data-social-mobile-pill");
     expect(html).not.toContain("data-social-create-fab");
     expect(html).not.toContain("data-social-mobile-dock");
-    expect(html).toContain("data-social-tab-bar");
-    expect(html).toContain("data-social-tab-item");
+    expect(html).not.toContain("data-social-tab-bar");
+    expect(html).toContain("data-house-phone-bottom-nav");
+    expect(html).toContain("data-social-phone-dests");
     expect(html).not.toContain("data-social-header-tray");
     expect(html).toContain(`data-rail-collapse="${RAIL_COLLAPSE_CHEVRON}"`);
     expect(html).toContain("Collapse sidebar");
@@ -835,7 +838,8 @@ describe("AppShell rail-collapse chevron", () => {
     expect(html).not.toContain("md:ml-[200px]");
     expect(html).toContain('aria-label="Ada Lovelace"');
     expect(html).toContain("data-app-social-frame");
-    expect(html).toContain("data-social-tab-bar");
+    expect(html).toContain("data-house-phone-bottom-nav");
+    expect(html).not.toContain("data-social-tab-bar");
     expect(html).not.toContain("data-mobile-nav-trigger");
   });
 
@@ -873,8 +877,11 @@ describe("AppShell rail-collapse chevron", () => {
     expect(html).toContain("data-brand-emblem");
     expect(html).toContain("data-brand-logo");
     expect(html).toContain('data-brand-logo-mark="emblem"');
-    expect(html.indexOf("data-mobile-nav-trigger")).toBeLessThan(
-      html.indexOf("data-brand-emblem"),
+    expect(html.indexOf("data-brand-emblem")).toBeLessThan(
+      html.indexOf("data-mobile-nav-trigger"),
+    );
+    expect(html.indexOf("data-mobile-nav-trigger")).toBeGreaterThan(
+      html.indexOf("data-app-header-trailing"),
     );
     expect(html).not.toMatch(/data-house-lead=""[^>]*\bhidden(?:\s|")/);
     expect(html).toContain('href="/social/courses"');

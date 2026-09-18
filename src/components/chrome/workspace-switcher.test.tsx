@@ -48,9 +48,9 @@ describe("workspace switcher header control", () => {
     expect(html).toContain(WORKSPACE_SWITCHER_CHEVRON_CLASS);
     expect(html).not.toContain('data-workspace-switcher-chevron-open');
     expect(html).not.toContain("/education");
-    expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} tone="pill" />');
+    expect(leadSrc).not.toContain('tone="pill"');
     expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
-    expect(leadSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
+    expect(leadSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(1);
     expect(shellSrc).not.toContain("data-workspace-switcher-rail");
     expect(shellSrc).not.toContain("data-workspace-switcher-lead");
     expect(leadSrc.indexOf("<WorkspaceSwitcher")).toBeLessThan(leadSrc.indexOf("{accountMenu}"));
@@ -260,25 +260,23 @@ describe("workspace switcher header control", () => {
 });
 
 describe("workspace switcher placement", () => {
-  it("puts the phone pill after the hamburger and keeps desktop + Social trailing", () => {
+  it("keeps desktop trailing switcher and drops the phone workspace pill", () => {
     expect(shellSrc).not.toContain("data-workspace-switcher-rail");
     expect(shellSrc).not.toContain("data-workspace-switcher-lead");
     expect(leadSrc).toContain("data-brand-emblem");
     expect(leadSrc).toContain("data-app-header-trailing");
-    expect(leadSrc).toContain("data-app-header-workspace-pill");
+    expect(leadSrc).not.toContain("data-app-header-workspace-pill");
     expect(leadSrc).toContain("APP_HEADER_LEADING_CLASS");
     expect(leadSrc).toContain("APP_HEADER_TRAILING_CLUSTER_CLASS");
-    expect(leadSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
+    expect(leadSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(1);
     expect(shellSrc).toContain("<HouseLeadChrome");
     expect(shellSrc).toContain("MobileNavSlot");
     const leading = leadSrc.slice(
       leadSrc.indexOf("data-app-header-leading"),
       leadSrc.indexOf("data-app-header-trailing"),
     );
-    expect(leading).toContain('tone="pill"');
-    expect(leading.indexOf("{leadingNav}")).toBeLessThan(
-      leading.indexOf("data-app-header-workspace-pill"),
-    );
+    expect(leading).not.toContain('tone="pill"');
+    expect(leading).not.toContain("WorkspaceSwitcher");
     const trailing = leadSrc.slice(
       leadSrc.indexOf("data-app-header-trailing"),
       leadSrc.indexOf("</header>"),
@@ -287,10 +285,14 @@ describe("workspace switcher placement", () => {
     expect(trailing).toContain('presentation="pills"');
     expect(trailing).not.toContain('tone="pill"');
     expect(trailing).toContain("WorkspaceSwitcher");
+    expect(trailing).toContain("{trailingNav}");
     expect(trailing).toContain("<AskAssistantHeaderLink />");
     expect(trailing).toContain("<ThemeToggle />");
     expect(trailing).toContain("<ActivityBell");
     expect(trailing).toContain("{accountMenu}");
+    expect(trailing.indexOf("{trailingNav}")).toBeLessThan(
+      trailing.indexOf("WorkspaceSwitcher"),
+    );
     expect(trailing.indexOf("WorkspaceSwitcher")).toBeLessThan(
       trailing.indexOf("<AskAssistantHeaderLink />"),
     );
@@ -315,23 +317,15 @@ describe("workspace switcher placement", () => {
     expect(topBarSrc).toContain("HouseLeadChrome");
     expect(topBarSrc).toContain('workspace="social"');
     expect(leadSrc).toContain("HOUSE_LEAD_CHROME_CLASS");
-    expect(leadSrc).toContain("APP_HEADER_WORKSPACE_PILL_HOST_CLASS");
-    expect(leadSrc.indexOf("data-brand-emblem")).toBeLessThan(
-      leadSrc.indexOf("data-app-header-workspace-pill"),
-    );
-    expect(leadSrc.indexOf("data-app-header-workspace-pill")).toBeLessThan(
-      leadSrc.indexOf("data-app-header-trailing"),
-    );
+    expect(leadSrc).not.toContain("APP_HEADER_WORKSPACE_PILL_HOST_CLASS");
   });
 
-  it("lets the phone pill yield so it cannot overlap the brand mark", () => {
-    expect(leadSrc).toContain("APP_HEADER_WORKSPACE_PILL_HOST_CLASS");
+  it("keeps the phone lead free of overflow-hidden so the emblem is not crushed", () => {
+    expect(leadSrc).not.toContain("APP_HEADER_WORKSPACE_PILL_HOST_CLASS");
     expect(leadSrc).toContain("APP_HEADER_LEADING_CLASS");
     expect(src).toContain("WORKSPACE_SWITCHER_HOST_CLASS");
     expect(leadSrc).toContain("<BrandLogo />");
     expect(leadSrc).not.toContain("BrandEmblem");
-    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).toBe("min-w-0 overflow-visible md:hidden");
-    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).not.toContain("shrink-0");
     expect(APP_HEADER_LEADING_CLASS).not.toMatch(/(?:^|\s)(?:max-md:)?overflow-hidden(?:\s|$)/);
     expect(APP_HEADER_LEADING_CLASS).toContain("overflow-visible");
     expect(APP_HEADER_LEADING_CLASS).toContain("gap-[var(--space-3)]");

@@ -97,7 +97,8 @@ export const NAV: Array<PhosphorNavItem | HouseAiNavItem> = [
   { label: ASK_GLOBEE.headline, href: "/messages", family: "house-ai" },
 ];
 
-// Social workspace rail. Mobile tab keeps five jobs (Create stays).
+// Social workspace rail. Phone local dests are in-page
+// (SocialPhoneDests: Explore / Create / Messages / Profile).
 // Desktop rail is Home / Explore / Messages / Profile — composer owns create.
 // Messages here is DMs — never /messages. Groups / Courses / Leaderboard
 // stay parked off this rail. Education land is house chrome + an
@@ -201,7 +202,7 @@ export function clientNavCurrent(pathname: string): NavItem {
 
 // Client phone sheet stays the Aggregation NAV destinations. Staff already use
 // those plus the operator set — do not leave them on a client-only menu.
-// Social mobile tab is Home / Explore / Create / Messages / Profile.
+// Social phone dests drop Home (workspace tab owns /social).
 // Desktop rail drops Create. Activity + Ask 24Frame AI stay Aggregation
 // rail destinations; header bell + house AI mark reach them from every shell.
 export function mobileNavDestinations(

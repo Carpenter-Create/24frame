@@ -23,12 +23,12 @@ import {
   migrateSidebarCollapsedCookie,
   persistSidebarCollapsed,
 } from "@/lib/rail-collapse";
-import { HOUSE_LEAD_SCROLL_CLASS, HOUSE_LEAD_SHELL_CLASS } from "@/lib/house-lead-chrome";
+import { HOUSE_LEAD_SCROLL_CLASS } from "@/lib/house-lead-chrome";
+import { HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS } from "@/lib/house-phone-shell";
 import {
   HOUSE_CANVAS_X_CLASS,
   HOUSE_CHROME_GUTTER_X_CLASS,
   HOUSE_HOME_RAIL_COLUMN_CLASS,
-  HOUSE_PAGE_CANVAS_CLASS,
   HOUSE_RAIL_FLOAT_CLASS,
   HOUSE_RAIL_PANEL_CLASS,
 } from "@/lib/house-shell";
@@ -38,11 +38,11 @@ import {
   SOCIAL_RAIL_MAIN_OFFSET_CLASS,
   SOCIAL_RAIL_PANEL_CLASS,
   SOCIAL_RAIL_WIDTH_CLASS,
-  SOCIAL_TAB_BAR_MAIN_PAD_CLASS,
 } from "@/lib/social-chrome";
 import { OVERVIEW_RAIL_OFF_WIDTH, overviewHidesRail } from "@/lib/overview";
 import { resolveWorkspaceMode, type WorkspaceMode } from "@/lib/workspace";
-import { SocialMobileTabBar } from "@/components/social/social-mobile-tab-bar";
+import { HousePhoneAppShell } from "./house-phone-app-shell";
+import { SocialPhoneDests } from "@/components/social/social-phone-dests";
 import { SocialRailAccountChip } from "@/components/social/social-rail-extras";
 
 type Org = { id: string; name: string };
@@ -161,8 +161,8 @@ export function AppShell({
     return (
       <AskAssistantChromeProvider>
         {cookieSync}
-        <div
-          className={cn(HOUSE_LEAD_SHELL_CLASS, HOUSE_PAGE_CANVAS_CLASS)}
+        <HousePhoneAppShell
+          workspace="social"
           data-social-workspace=""
           style={collapseWidthStyle}
         >
@@ -205,15 +205,26 @@ export function AppShell({
             </div>
           </aside>
           <main
-            className={cn(HOUSE_LEAD_SCROLL_CLASS, collapsed ? undefined : SOCIAL_RAIL_MAIN_OFFSET_CLASS)}
+            className={cn(
+              HOUSE_LEAD_SCROLL_CLASS,
+              HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS,
+              collapsed ? undefined : SOCIAL_RAIL_MAIN_OFFSET_CLASS,
+            )}
             style={collapsed ? { marginLeft: "var(--sidebar-width)" } : undefined}
             data-app-social-frame=""
             data-house-lead-scroll=""
           >
-            <div className={cn(SOCIAL_DESKTOP_FRAME_PAD_CLASS, SOCIAL_TAB_BAR_MAIN_PAD_CLASS)}>{children}</div>
+            <div
+              className={cn(
+                SOCIAL_DESKTOP_FRAME_PAD_CLASS,
+                "max-md:flex max-md:flex-col max-md:gap-[var(--space-4)]",
+              )}
+            >
+              <SocialPhoneDests />
+              {children}
+            </div>
           </main>
-          <SocialMobileTabBar />
-        </div>
+        </HousePhoneAppShell>
       </AskAssistantChromeProvider>
     );
   }
@@ -221,8 +232,8 @@ export function AppShell({
   return (
     <AskAssistantChromeProvider>
     {cookieSync}
-    <div
-      className={cn(HOUSE_LEAD_SHELL_CLASS, HOUSE_PAGE_CANVAS_CLASS)}
+    <HousePhoneAppShell
+      workspace={workspace}
       data-education-workspace={workspace === "education" ? "" : undefined}
       data-home-chrome={homeChrome ? "" : undefined}
       style={collapseWidthStyle}
@@ -257,14 +268,16 @@ export function AppShell({
 
       {/* Full-width top + dest side nav — same HouseLeadChrome as Social.
           Phone (Adam 2026-09-18): Asset 8 emblem on every workspace.
-          Dest-rail phone (Aggregation / Education) is hamburger ·
-          house gap · emblem · workspace pill. Home / Social: emblem
-          only — no hamburger. Trailing is Social search (if Social)
-          · bell · avatar. Ask + theme live on the avatar sheet.
-          Emblem links workspace home; it does not open the rail. Do
-          not center the pill. Do not cluster it with the avatar.
-          Desktop keeps Ask · theme · switcher + avatar. Brand sits
-          on the full-width top, not a second rail chrome. Period
+          Emblem owns the left alone. Dest-rail hamburger (Aggregation
+          / Education) sits in the trailing cluster — Apple grammar:
+          emblem ········ ☰ · bell · avatar. Home / Social: no
+          hamburger. Phone top has no workspace pill.
+          HousePhoneBottomNav switches Home · Social · Aggregation ·
+          Education. Trailing is search (if Social) · ☰ (if dest
+          rail) · bell · avatar. Ask + theme live on the avatar
+          sheet. Emblem links workspace home; it does not open the
+          rail. Desktop keeps Ask · theme · switcher + avatar. Brand
+          sits on the full-width top, not a second rail chrome. Period
           stays on the Dashboard org row.
           No org switcher on any route. Aggregation mid-lead stays
           empty. Education mounts a quiet course/video search
@@ -280,10 +293,9 @@ export function AppShell({
         workspace={workspace}
         settingsPage={settingsPage}
         logoVisible="always"
-        leadingNav={
-          settingsPage ? (
-            <SettingsHeaderBack />
-          ) : homeChrome ? undefined : (
+        leadingNav={settingsPage ? <SettingsHeaderBack /> : undefined}
+        trailingNav={
+          settingsPage || homeChrome ? undefined : (
             <MobileNavSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />
           )
         }
@@ -314,18 +326,18 @@ export function AppShell({
       />
 
       <main
-        className={HOUSE_LEAD_SCROLL_CLASS}
+        className={cn(HOUSE_LEAD_SCROLL_CLASS, HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS)}
         data-house-lead-scroll=""
         style={{
           marginLeft: "var(--sidebar-width)",
         }}
       >
         {titlesBleed ? (
-          <div className="w-full pb-24">{children}</div>
+          <div className="w-full pb-24 max-md:pb-0">{children}</div>
         ) : homePage ? (
           <div
             className={cn(
-              "py-[var(--space-8)] max-md:px-[var(--space-6)] max-md:py-[var(--space-6)]",
+              "py-[var(--space-8)] max-md:px-[var(--space-6)] max-md:pb-0 max-md:pt-[var(--space-6)]",
               homeChrome
                 ? HOUSE_HOME_RAIL_COLUMN_CLASS
                 : cn("w-full", HOUSE_CANVAS_X_CLASS),
@@ -336,21 +348,21 @@ export function AppShell({
           </div>
         ) : messagesPage ? (
           <div
-            className={cn("w-full p-[var(--content-inset)]", HOUSE_CHROME_GUTTER_X_CLASS)}
+            className={cn("w-full p-[var(--content-inset)] max-md:pb-0", HOUSE_CHROME_GUTTER_X_CLASS)}
             data-app-messages-frame=""
           >
             {children}
           </div>
         ) : (
           <div
-            className={cn("mx-auto w-full pb-24 pt-8", HOUSE_CANVAS_X_CLASS)}
+            className={cn("mx-auto w-full pb-24 pt-8 max-md:pb-0", HOUSE_CANVAS_X_CLASS)}
             style={{ maxWidth: "var(--page-max-width)" }}
           >
             {children}
           </div>
         )}
       </main>
-    </div>
+    </HousePhoneAppShell>
     </AskAssistantChromeProvider>
   );
 }

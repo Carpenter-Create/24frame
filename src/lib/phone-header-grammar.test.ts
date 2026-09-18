@@ -40,10 +40,17 @@ function htmlClass(html: string, attr: string): string {
 }
 
 describe("phone header grammar A — trim trailing", () => {
-  it("keeps phone trailing as Social search · bell · avatar", () => {
+  it("keeps phone trailing as search · dest hamburger · bell · avatar", () => {
     expect(APP_HEADER_DESKTOP_TRAILING_CLASS).toBe("hidden md:contents");
     expect(leadSrc).toContain("data-app-header-desktop-trailing");
     expect(leadSrc).toContain("APP_HEADER_DESKTOP_TRAILING_CLASS");
+    expect(leadSrc).toContain("data-app-header-trailing-nav");
+    expect(leadSrc.indexOf("{trailingSearch")).toBeLessThan(
+      leadSrc.indexOf("data-app-header-trailing-nav"),
+    );
+    expect(leadSrc.indexOf("data-app-header-trailing-nav")).toBeLessThan(
+      leadSrc.indexOf("data-app-header-desktop-trailing"),
+    );
     expect(leadSrc.indexOf("data-app-header-desktop-trailing")).toBeLessThan(
       leadSrc.indexOf("<AskAssistantHeaderLink"),
     );
@@ -54,27 +61,60 @@ describe("phone header grammar A — trim trailing", () => {
     const aggregation = renderToStaticMarkup(
       createElement(HouseLeadChrome, {
         workspace: "aggregation",
+        trailingNav: createElement("button", { "data-mobile-nav-trigger": "" }),
         accountMenu: createElement("div", { "data-user-menu-host": "" }),
       }),
+    );
+    const leading = aggregation.slice(
+      aggregation.indexOf("data-app-header-leading"),
+      aggregation.indexOf("data-app-header-trailing"),
     );
     const trailing = aggregation.slice(
       aggregation.indexOf("data-app-header-trailing"),
       aggregation.indexOf("</header>"),
     );
+    expect(leading).toContain("data-brand-emblem");
+    expect(leading).not.toContain("data-mobile-nav-trigger");
+    expect(trailing).toContain("data-app-header-trailing-nav");
+    expect(trailing).toContain("data-mobile-nav-trigger");
     expect(trailing).toContain("data-app-header-desktop-trailing");
     expect(trailing).toContain(APP_HEADER_DESKTOP_TRAILING_CLASS);
     expect(trailing).toContain("data-ask-assistant-header");
     expect(trailing).toContain("data-theme-toggle");
     expect(trailing).toContain("data-activity-bell");
     expect(trailing).toContain("data-user-menu-host");
+    expect(trailing.indexOf("data-mobile-nav-trigger")).toBeLessThan(
+      trailing.indexOf("data-activity-bell"),
+    );
     expect(trailing.indexOf("data-activity-bell")).toBeLessThan(
       trailing.indexOf("data-user-menu-host"),
     );
     expect(trailing).not.toContain("data-social-header-actions");
 
+    const education = renderToStaticMarkup(
+      createElement(HouseLeadChrome, {
+        workspace: "education",
+        trailingNav: createElement("button", { "data-mobile-nav-trigger": "" }),
+        accountMenu: createElement("div", { "data-user-menu-host": "" }),
+      }),
+    );
+    const eduLead = education.slice(
+      education.indexOf("data-app-header-leading"),
+      education.indexOf("data-app-header-trailing"),
+    );
+    expect(eduLead).toContain("data-brand-emblem");
+    expect(eduLead).not.toContain("data-mobile-nav-trigger");
+    expect(education.indexOf("data-mobile-nav-trigger")).toBeGreaterThan(
+      education.indexOf("data-app-header-trailing"),
+    );
+    expect(education.indexOf("data-mobile-nav-trigger")).toBeLessThan(
+      education.indexOf("data-activity-bell"),
+    );
+
     const social = renderToStaticMarkup(
       createElement(SocialTopBar, { email: "ada@example.com", name: "Ada" }),
     );
+    expect(social).not.toContain("data-mobile-nav-trigger");
     expect(social.indexOf("data-social-header-search-icon")).toBeGreaterThan(
       social.indexOf("data-app-header-trailing"),
     );
@@ -109,14 +149,13 @@ describe("phone header grammar A — trim trailing", () => {
     const html = renderToStaticMarkup(
       createElement(HouseLeadChrome, {
         workspace: "aggregation",
-        leadingNav: createElement("button", { "data-mobile-nav-trigger": "" }),
+        trailingNav: createElement("button", { "data-mobile-nav-trigger": "" }),
         accountMenu: createElement("div", { "data-user-menu-host": "" }),
       }),
     );
     for (const attr of [
       'data-app-header=""',
       'data-app-header-leading=""',
-      'data-app-header-workspace-pill=""',
     ]) {
       expect(htmlClass(html, attr)).not.toMatch(/(?:^|\s)(?:max-md:)?overflow-hidden(?:\s|$)/);
     }

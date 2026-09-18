@@ -75,7 +75,7 @@ const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
 const sideNav = readFileSync("src/components/chrome/side-nav.tsx", "utf8");
 const socialTopBar = readFileSync("src/components/social/social-top-bar.tsx", "utf8");
 const socialChrome = readFileSync("src/lib/social-chrome.ts", "utf8");
-const socialTabBar = readFileSync("src/components/social/social-mobile-tab-bar.tsx", "utf8");
+const socialPhoneDests = readFileSync("src/components/social/social-phone-dests.tsx", "utf8");
 const educationRail = readFileSync(
   "src/app/(app)/(operator)/education/education-course-rail.tsx",
   "utf8",
@@ -168,7 +168,10 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(DASHBOARD_PERIOD_OPTION_SELECTED_CLASS).toBe(HOUSE_PERIOD_SELECTED_CLASS);
     expect(sideNav).toContain("HOUSE_RAIL_ACTIVE_CLASS");
     expect(sideNav).toContain("HOUSE_RAIL_IDLE_CLASS");
-    expect(shell).toContain("HOUSE_PAGE_CANVAS_CLASS");
+    expect(shell).toContain("HousePhoneAppShell");
+    expect(readFileSync("src/components/chrome/house-phone-app-shell.tsx", "utf8")).toContain(
+      "HOUSE_PAGE_CANVAS_CLASS",
+    );
     expect(readFileSync("src/components/chrome/house-lead-chrome.tsx", "utf8")).toContain(
       "<BrandLogo />",
     );
@@ -213,7 +216,7 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(collapsedChip).toContain("justify-center");
     expect(collapsedChip).not.toContain("truncate t-body-sm");
 
-    expect(socialTabBar).toContain('active ? "text-accent" : "text-ink"');
+    expect(socialPhoneDests).toContain("text-accent");
   });
 
   it("rematches the Education course rail to the house active pill", () => {
