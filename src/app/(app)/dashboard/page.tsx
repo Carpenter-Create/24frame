@@ -10,10 +10,7 @@ import {
   DashboardOrgIdentity,
 } from "@/components/dashboard/dashboard-home";
 import { DashboardCatalogHero } from "@/components/dashboard/dashboard-catalog-hero";
-import {
-  DashboardAdminHero,
-  DashboardRecentActivity,
-} from "@/components/dashboard/dashboard-admin-hero";
+import { DashboardAdminHero } from "@/components/dashboard/dashboard-admin-hero";
 import {
   DashboardDeliveriesAction,
   DashboardFindingsGlance,
@@ -57,7 +54,7 @@ import {
   revenuePointsFromLabels,
   type DashboardAuditEvent,
 } from "@/lib/dashboard-admin";
-import { ATTENTION_HREF, buildAttentionGlance } from "@/lib/dashboard-attention";
+import { ATTENTION_HREF } from "@/lib/dashboard-attention";
 import { buildLicensingStatus } from "@/lib/dashboard-licensing";
 import { titleArtworkUrls } from "@/lib/artwork";
 import {
@@ -87,14 +84,16 @@ import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 
 // Company-admin `/dashboard` rematches Overview analytics structure inside
 // house tokens: unlabeled period chrome, taller Net revenue $ + scrub |
-// Attention glance, then Licensing status full-width (nested title →
-// endpoint), then one Top performing section (Titles / Platforms /
-// Territories pills), then Recent account activity full-width. 24Frame
-// nouns only — never Top works, sources, contributors, or Exports. Period
-// is chrome, not H1 — dominant read is the $. Phone (`< md`) is a
-// single-column stack — Net → Attention → Licensing → Top performing →
-// Recent. Find-user is gone on phone and md+; user scope lives on /reports
-// later. Leftover ?user= parsing stays inert for data only.
+// Recent activity glance (account announcements — Title added / Delivery
+// updated, never findings), then Licensing status full-width (nested
+// title → endpoint), then one Top performing section (Titles / Platforms /
+// Territories pills). One activity feed only — the bottom Recent account
+// activity block is gone. 24Frame nouns only — never Top works, sources,
+// contributors, or Exports. Period is chrome, not H1 — dominant read is
+// the $. Phone (`< md`) is a single-column stack — Net → Recent activity
+// → Licensing → Top performing. Findings stay on /attention. Find-user is
+// gone on phone and md+; user scope lives on /reports later. Leftover
+// ?user= parsing stays inert for data only.
 // Catalog-velocity strip is gone — Adam lock 2026-09-16. Licensing
 // readiness buckets are dead — Adam lock 2026-09-17. Company-admin also
 // drops Recent (the old just-in module), Do next, Deliveries needing
@@ -226,7 +225,6 @@ export default async function DashboardPage({
     const liveActivity = recentAccountActivity({
       titles,
       deliveries: deliveries.rows,
-      findings: findings.rows,
       period,
       userId,
     });
@@ -272,10 +270,6 @@ export default async function DashboardPage({
         ? dashboardFixtureActivity(period, now)
         : hydratedActivity;
 
-    const attention = buildAttentionGlance({
-      findings: findings.rows,
-      titles,
-    });
     const licensingBase = buildLicensingStatus({
       titles,
       deliveries: deliveries.rows,
@@ -301,7 +295,7 @@ export default async function DashboardPage({
         options={dashboardPeriodOptionsFor(period, now, monthSources)}
         hero={revenueHero}
         fixture={useFixture}
-        attention={attention}
+        activity={adminActivity}
       />
     );
   }
@@ -364,7 +358,6 @@ export default async function DashboardPage({
               periodLabel={period.label}
               updated={adminUpdated}
             />
-            <DashboardRecentActivity items={adminActivity} />
           </>
         ) : (
           <div className={DASHBOARD_ADMIN_PAIR_CLASS}>

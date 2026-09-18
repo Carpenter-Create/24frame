@@ -36,7 +36,7 @@ import {
   housePageSelectOptionClass,
 } from "@/lib/house-page-select";
 
-// Shared card fill for paired rows (Net | Attention) and other modules.
+// Shared card fill for paired rows (Net | Recent activity) and other modules.
 // h-full + flex-col: stretch the surface; content stays top-aligned.
 export const DASHBOARD_CARD_CLASS =
   `${HOUSE_MODULE_CLASS} dashboard-home-panel flex h-full flex-col overflow-hidden shadow-none`;
@@ -98,15 +98,14 @@ export const DASHBOARD_MOBILE_BREAKPOINT_CLASS = "max-md";
 export const DASHBOARD_ADMIN_CHROME_CLASS =
   "flex flex-row items-center justify-between gap-[var(--space-2)] md:flex-row md:items-start md:justify-between md:gap-[var(--space-6)]";
 
-// Desktop: taller Net revenue left (3) · Attention glance right (2).
+// Desktop: taller Net revenue left (3) · Recent activity glance right (2).
 // One height pair — lg stretch + shared cell/card h-full. Phone (`< md`)
-// stacks Revenue then Attention and stretches to the content column.
+// stacks Revenue then Recent activity and stretches to the content column.
 // items-start on a max-md flex-col is the cross-axis (width) and
 // shrink-wraps tiles, leaving a right gutter. max-md:items-stretch
 // fills the house page inset; heights stay content-sized (no equal
 // height pair below lg). md grid keeps items-start; lg stretches.
-// Licensing status is full-width under this pair, then Top performing,
-// then Recent activity.
+// Licensing status is full-width under this pair, then Top performing.
 export const DASHBOARD_ADMIN_OVERVIEW_CLASS =
   "grid w-full grid-cols-1 items-start gap-[var(--space-6)] max-md:flex max-md:w-full max-md:flex-col max-md:items-stretch lg:grid-cols-5 lg:items-stretch";
 

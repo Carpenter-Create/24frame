@@ -7,7 +7,6 @@ import { DASHBOARD_ADMIN, parseDashboardPeriod } from "@/lib/dashboard-admin";
 import { DASHBOARD_ACTIVITY_ROW_CLASS } from "@/lib/dashboard-craft";
 import { DASHBOARD_FIXTURE } from "@/lib/dashboard-fixture";
 import { dashboardJustInDate, dashboardJustInTime } from "@/lib/dashboard-home";
-import { DASHBOARD_ATTENTION } from "@/lib/dashboard-attention";
 import { DashboardAdminHero, DashboardRecentActivity } from "./dashboard-admin-hero";
 
 vi.mock("next/navigation", () => ({
@@ -16,9 +15,7 @@ vi.mock("next/navigation", () => ({
 
 const now = new Date("2026-09-16T12:00:00.000Z");
 
-const emptyAttention = {
-  rows: [],
-};
+const emptyActivity: never[] = [];
 
 describe("DashboardAdminHero", () => {
   it("uses MetricCard stack and Top-works density without RL brand or export", () => {
@@ -40,7 +37,7 @@ describe("DashboardAdminHero", () => {
           compare: null,
           points: [],
         },
-        attention: emptyAttention,
+        activity: emptyActivity,
         periodMenuOpen: true,
       }),
     );
@@ -58,10 +55,11 @@ describe("DashboardAdminHero", () => {
       html.indexOf("data-dashboard-overview-attention"),
     );
     expect(html.indexOf("data-dashboard-revenue")).toBeLessThan(
-      html.indexOf('data-dashboard-module="attention"'),
+      html.indexOf('data-dashboard-module="recent-activity"'),
     );
     expect(html).not.toContain('data-dashboard-module="licensing-status"');
-    expect(html).not.toContain('data-dashboard-module="recent-activity"');
+    expect(html).toContain('data-dashboard-module="recent-activity"');
+    expect(html).not.toContain('data-dashboard-module="attention"');
     expect(html).toContain("data-dashboard-mobile-stack");
     expect(html).toContain("data-dashboard-title-mobile");
     expect(html).toContain("data-dashboard-title-desktop");
@@ -69,9 +67,11 @@ describe("DashboardAdminHero", () => {
     expect(html).not.toMatch(/data-dashboard-title-desktop=""[^>]*>All time</);
     expect(html).not.toContain("data-dashboard-period-kicker");
     expect(html).toContain(DASHBOARD_ADMIN.revenue);
-    expect(html).toContain(DASHBOARD_ATTENTION.title);
+    expect(html).toContain(DASHBOARD_ADMIN.activity);
+    expect(html).toContain("Recent activity");
+    expect(html).not.toContain("Recent account activity");
     expect(html).not.toContain("Licensing status");
-    expect(html).not.toContain(DASHBOARD_ADMIN.activity);
+    expect(html).not.toContain(">Attention<");
     expect(html).toContain("Acme");
     expect(html).toContain("All time");
     expect(html).toContain("data-dashboard-period");
@@ -105,7 +105,7 @@ describe("DashboardAdminHero", () => {
             { key: "2026-07", label: "2026-07", year: 2026, month: 7, netCents: 120_000_00 },
           ],
         },
-        attention: emptyAttention,
+        activity: emptyActivity,
         fixture: true,
         periodMenuOpen: true,
       }),
@@ -118,11 +118,12 @@ describe("DashboardAdminHero", () => {
     expect(html).toContain("text-ink-3");
     expect(html).not.toContain("text-emerald");
     expect(html).not.toContain("text-rose");
-    expect(html).toContain(DASHBOARD_ATTENTION.empty);
+    expect(html).toContain(DASHBOARD_ADMIN.activityEmpty);
+    expect(html).toContain("data-dashboard-activity-empty");
     expect(html).not.toContain("Licensed");
   });
 
-  it("renders Recent account activity as social rows with actor and timestamp", () => {
+  it("renders Recent activity as social rows with actor and timestamp", () => {
     const at = "2026-09-02T15:04:00.000Z";
     const html = renderToStaticMarkup(
       createElement(DashboardRecentActivity, {
@@ -141,9 +142,11 @@ describe("DashboardAdminHero", () => {
       }),
     );
     expect(html).toContain('data-dashboard-module="recent-activity"');
+    expect(html).toContain(DASHBOARD_ADMIN.activity);
     expect(html).toContain("Winter Light");
     expect(html).toContain(DASHBOARD_ADMIN.titleAdded);
-    expect(html).toContain("data-dashboard-view-all");
+    expect(html).not.toContain("data-dashboard-view-all");
+    expect(html).not.toContain('href="/attention"');
     expect(html).toContain(DASHBOARD_ACTIVITY_ROW_CLASS);
     expect(html).toContain("data-dashboard-activity-actor");
     expect(html).toContain(">M<");
@@ -190,6 +193,9 @@ describe("DashboardAdminHero", () => {
     expect(craft).toContain("md:flex-row");
     expect(craft).not.toContain("sm:flex-row");
     expect(page).toContain("DashboardAdminHero");
-    expect(page).toContain("DashboardRecentActivity");
+    expect(page).toContain("activity={adminActivity}");
+    expect(page).not.toContain("DashboardRecentActivity");
+    expect(page).not.toContain("buildAttentionGlance");
+    expect(hero).toContain("DashboardRecentActivity");
   });
 });

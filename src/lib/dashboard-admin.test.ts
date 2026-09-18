@@ -246,7 +246,13 @@ describe("company admin revenue series", () => {
 });
 
 describe("recent account activity", () => {
-  it("lists real title, delivery, and finding events newest first", () => {
+  it("locks the dashboard feed title as Recent activity", () => {
+    expect(DASHBOARD_ADMIN.activity).toBe("Recent activity");
+    expect(DASHBOARD_ADMIN.activity).not.toBe("Recent account activity");
+    expect(DASHBOARD_ADMIN.activity).not.toBe("Attention");
+  });
+
+  it("lists real title and delivery events newest first — never findings", () => {
     const rows = recentAccountActivity({
       titles: [
         { id: "a", title: "Winter Light", status: "live", created_at: "2026-09-02T00:00:00.000Z", created_by: "maya" },
@@ -255,19 +261,10 @@ describe("recent account activity", () => {
       deliveries: [
         { delivery_id: "d1", title_id: "a", title: "Winter Light", updated_at: "2026-09-10T00:00:00.000Z" },
       ],
-      findings: [
-        {
-          org_id: "org-1",
-          entity_id: "a",
-          message: "Synopsis is required.",
-          created_at: "2026-09-11T00:00:00.000Z",
-        },
-      ],
       period: parseDashboardPeriod("all", now),
       userId: null,
     });
     expect(rows.map((row) => row.detail)).toEqual([
-      "Synopsis is required.",
       DASHBOARD_ADMIN.deliveryUpdated,
       DASHBOARD_ADMIN.titleAdded,
       DASHBOARD_ADMIN.titleAdded,
@@ -275,20 +272,21 @@ describe("recent account activity", () => {
     expect(rows.map((row) => row.title)).toEqual([
       "Winter Light",
       "Winter Light",
-      "Winter Light",
       "Older",
     ]);
-    expect(rows[2]?.count).toBe(1);
-    expect(rows.map((row) => row.actorId)).toEqual([null, null, null, null]);
+    expect(rows.some((row) => row.id.startsWith("finding:"))).toBe(false);
+    expect(rows.some((row) => row.detail === DASHBOARD_ADMIN.findingOpened)).toBe(false);
+    expect(rows.some((row) => row.detail === "Synopsis is required.")).toBe(false);
+    expect(rows[1]?.count).toBe(1);
+    expect(rows.map((row) => row.actorId)).toEqual([null, null, null]);
     expect(rows.every((row) => row.actor.initial === "?")).toBe(true);
-    expect(rows[2]?.href).toBe("/titles");
+    expect(rows[1]?.href).toBe("/titles");
     expect(
       recentAccountActivity({
         titles: [
           { id: "a", title: "Winter Light", status: "live", created_at: "2026-09-02T00:00:00.000Z", created_by: "maya" },
         ],
         deliveries: [],
-        findings: [],
         period: parseDashboardPeriod("all", now),
         userId: "other",
       }),
@@ -315,30 +313,14 @@ describe("recent account activity", () => {
           updated_at: "2026-09-10T00:00:00.000Z",
         },
       ],
-      findings: [
-        {
-          id: "f1",
-          org_id: "org-1",
-          entity_id: "a",
-          message: "Synopsis is required.",
-          created_at: "2026-09-11T00:00:00.000Z",
-        },
-      ],
       period: parseDashboardPeriod("all", now),
       userId: null,
     });
-    expect(activityDeliveryId(rows[1]?.id ?? "")).toBe("d1");
+    expect(activityDeliveryId(rows[0]?.id ?? "")).toBe("d1");
     expect(dashboardActivityInitial("Maya Chen")).toBe("M");
     expect(dashboardActivityInitial(null)).toBe("?");
     const hydrated = applyActivityAudit(rows, {
       events: [
-        {
-          entity: "findings",
-          entity_id: "f1",
-          action: "insert",
-          actor: null,
-          at: "2026-09-11T09:30:00.000Z",
-        },
         {
           entity: "deliveries",
           entity_id: "d1",
@@ -360,16 +342,14 @@ describe("recent account activity", () => {
       ]),
     });
     expect(hydrated.map((row) => row.actor)).toEqual([
-      { id: null, initial: "?" },
       { id: "sam", initial: "S" },
       { id: "maya", initial: "M" },
     ]);
     expect(hydrated.map((row) => row.at)).toEqual([
-      "2026-09-11T09:30:00.000Z",
       "2026-09-10T18:22:00.000Z",
       "2026-09-02T15:04:00.000Z",
     ]);
-    expect(hydrated[2]?.href).toBe("/titles/24F-0001234");
+    expect(hydrated[1]?.href).toBe("/titles/24F-0001234");
     expect(applyActivityAudit(rows, { events: [] }).every((row) => row.actor.initial === "?")).toBe(
       true,
     );
@@ -394,7 +374,6 @@ describe("recent account activity", () => {
         profileNames: new Map([["sam", "Sam Rivera"]]),
       }).map((row) => row.actor),
     ).toEqual([
-      { id: null, initial: "?" },
       { id: "sam", initial: "S" },
       { id: "unknown", initial: "?" },
     ]);
