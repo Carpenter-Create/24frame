@@ -165,6 +165,7 @@ function OverviewCourseCover({ course }: { course: OverviewCourse }) {
     <li className="min-w-0">
       <Link href={course.href} className="flex flex-col gap-[var(--space-2)]">
         <CourseCover title={course.title} src={course.coverUrl} />
+        <span className="t-body-sm text-ink">{course.title}</span>
         {percent ? (
           <span data-overview-course-percent="" className="flex flex-col gap-[var(--space-1)]">
             <span className="block h-1.5 overflow-hidden rounded-full bg-surface">
