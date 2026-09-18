@@ -11,6 +11,7 @@ const house = readFileSync("src/components/chrome/house.tsx", "utf8");
 const mobile = readFileSync("src/components/chrome/mobile-nav.tsx", "utf8");
 const messages = readFileSync("src/components/chrome/messages-app-header.tsx", "utf8");
 const socialTopBar = readFileSync("src/components/social/social-header-search.tsx", "utf8");
+const themeToggle = readFileSync("src/components/theme-toggle.tsx", "utf8");
 
 describe("Aggregation chrome Phosphor lock + Design miss list", () => {
   it("ships measured Phosphor glyphs only; leaves unmeasured chrome on Lucide", () => {
@@ -34,7 +35,7 @@ describe("Aggregation chrome Phosphor lock + Design miss list", () => {
     expect(shell).not.toContain("ChevronsLeft");
     expect(shell).not.toContain("ChevronsRight");
 
-    expect(account).toContain("CaretLeft");
+    expect(account).not.toContain("CaretLeft");
     expect(account).toContain("CaretRight");
     expect(account).toContain("SignOut");
     expect(account).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
@@ -55,6 +56,14 @@ describe("Aggregation chrome Phosphor lock + Design miss list", () => {
     expect(mobile).not.toContain("import { Menu }");
 
     expect(messages).toContain('from "lucide-react"');
+
+    expect(themeToggle).toContain('from "@phosphor-icons/react"');
+    expect(themeToggle).toContain("Sun");
+    expect(themeToggle).toContain("Moon");
+    expect(themeToggle).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
+    expect(themeToggle).not.toContain("lucide-react");
+    expect(themeToggle).not.toContain("strokeWidth");
+    expect(themeToggle).not.toContain("stroke-width");
   });
 
   it("leaves Social interiors on Social V1 SocialIcon; SOCIAL_NAV family stays Lucide fallback", () => {

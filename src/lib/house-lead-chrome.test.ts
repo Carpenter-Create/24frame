@@ -172,6 +172,7 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
       expect(html.indexOf("data-theme-toggle")).toBeLessThan(
         html.indexOf("data-user-menu-host"),
       );
+      expect(html).not.toContain("stroke-width");
     }
     expect(leadSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
     expect(leadSrc).toContain("<ThemeToggle />");
