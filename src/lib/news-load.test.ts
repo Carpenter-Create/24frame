@@ -30,14 +30,14 @@ beforeEach(() => {
 });
 
 describe("loadNewsItems", () => {
-  it("caps Home at 12, hides rows outside 30 days, and does not fan out RSS", async () => {
+  it("caps Home at 15, hides rows outside 30 days, and does not fan out RSS", async () => {
     const store = memoryNewsStore([
-      ...Array.from({ length: 13 }, (_, i) => item(i + 1, "2026-09-17T12:00:00.000Z")),
+      ...Array.from({ length: 16 }, (_, i) => item(i + 1, "2026-09-17T12:00:00.000Z")),
       item(99, "2026-08-01T12:00:00.000Z"),
     ]);
     const home = await loadHomeNews(NOW, store);
-    expect(NEWS_HOME_CAP).toBe(12);
-    expect(home).toHaveLength(12);
+    expect(NEWS_HOME_CAP).toBe(15);
+    expect(home).toHaveLength(15);
     expect(home.every((row) => row.published_at >= "2026-08-19T18:00:00.000Z")).toBe(true);
     expect(home.some((row) => row.url.endsWith("/h99"))).toBe(false);
     expect(JSON.stringify(home)).not.toMatch(/summary/i);

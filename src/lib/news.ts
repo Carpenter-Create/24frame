@@ -3,7 +3,7 @@ import { UNPAGINATED_MAX } from "@/lib/list-bounds";
 import { NEWS_INGEST_FUNCTION, NEWS_INGEST_SCHEDULE } from "@/lib/news-aws";
 
 // Industry News — house SoT (Adam lock 2026-09-18).
-// Name: News. Home: latest 12 + View all. /news: 30-day history.
+// Name: News. Home: latest 15 + View all. /news: 30-day history.
 // Home-owned only — not a workspace pill, dest rail, or bottom-bar.
 // Link-out cards only. Allowlist verified 2026-09-18.
 // Storage is AWS DynamoDB. Ingest is Lambda + EventBridge.
@@ -12,7 +12,7 @@ import { NEWS_INGEST_FUNCTION, NEWS_INGEST_SCHEDULE } from "@/lib/news-aws";
 export const NEWS_HREF = "/news";
 export const NEWS_INGEST_PATH = NEWS_INGEST_FUNCTION;
 export { NEWS_INGEST_SCHEDULE };
-export const NEWS_HOME_CAP = 12;
+export const NEWS_HOME_CAP = 15;
 export const NEWS_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 export const NEWS_READ_REVALIDATE_SECONDS = 60;
 

@@ -87,9 +87,9 @@ describe("Home News layout + register lock", () => {
       "social",
       "education",
       "aggregation",
-      "news",
       "needs-you",
       "ai-next",
+      "news",
     ]);
     expect(shell).toContain("HOUSE_HOME_RAIL_COLUMN_CLASS");
     expect(shell).toContain('data-home-chrome={homeChrome ? "" : undefined}');
@@ -138,8 +138,13 @@ describe("Home News layout + register lock", () => {
     expect(html).toContain("gap-x-[var(--chrome-gutter)]");
     expect(html).toContain("data-overview-news");
     expect(html).toContain("No headlines from the last 30 days.");
-    expect(html.indexOf("data-overview-aggregation")).toBeLessThan(html.indexOf("data-overview-news"));
-    expect(html.indexOf("data-overview-news")).toBeLessThan(html.indexOf('data-overview-module="needs-you"'));
+    expect(html.indexOf("data-overview-aggregation")).toBeLessThan(
+      html.indexOf('data-overview-module="needs-you"'),
+    );
+    expect(html.indexOf('data-overview-module="needs-you"')).toBeLessThan(
+      html.indexOf('data-overview-module="ai-next"'),
+    );
+    expect(html.indexOf('data-overview-module="ai-next"')).toBeLessThan(html.indexOf("data-overview-news"));
   });
 
   it("does not restore a Supabase News catalog or Vercel news cron", () => {

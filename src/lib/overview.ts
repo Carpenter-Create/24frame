@@ -41,16 +41,16 @@ export const OVERVIEW_MODULE_ORDER = [
   "ai-next",
 ] as const;
 
-/** Phone stack: News is full-width after Aggregation, before Needs you.
+/** Phone stack: News is last so Needs you + AI stay above the rail.
  *  Phone-chrome / Home width: dest rail is gone; lead + main go full-canvas.
  *  Home modules inset separately (48 left + 16 right → 1376 at 1440). */
 export const OVERVIEW_PHONE_MODULE_ORDER = [
   "social",
   "education",
   "aggregation",
-  "news",
   "needs-you",
   "ai-next",
+  "news",
 ] as const;
 
 /** Desktop News rail measure inside the 1376 Home column. */
@@ -65,7 +65,7 @@ export const OVERVIEW_HOME_COLUMN_GUTTER = HOUSE_CHROME_GUTTER;
 export const OVERVIEW_HOME_LAYOUT_CLASS =
   "grid w-full grid-cols-1 items-start " +
   "gap-y-[var(--space-6)] gap-x-[var(--chrome-gutter)] " +
-  "[grid-template-areas:'social'_'education'_'aggregation'_'news'_'needs'_'ai'] " +
+  "[grid-template-areas:'social'_'education'_'aggregation'_'needs'_'ai'_'news'] " +
   "lg:grid-cols-[minmax(0,1fr)_20rem] " +
   "lg:[grid-template-areas:'social_news'_'education_news'_'aggregation_news'_'needs_news'_'ai_news']";
 

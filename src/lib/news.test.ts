@@ -37,7 +37,7 @@ describe("News SoT", () => {
     expect(NEWS_PAGE.title).toBe("News");
     expect(NEWS_HREF).toBe("/news");
     expect(NEWS_PAGE.viewAll).toBe("View all");
-    expect(NEWS_HOME_CAP).toBe(12);
+    expect(NEWS_HOME_CAP).toBe(15);
     expect(NEWS_WINDOW_MS).toBe(30 * 24 * 60 * 60 * 1000);
     expect(NEWS_READ_REVALIDATE_SECONDS).toBe(60);
     expect(NEWS_INGEST_PATH).toBe(NEWS_INGEST_FUNCTION);
@@ -63,13 +63,13 @@ describe("News SoT", () => {
     expect(readFileSync("docs/infra/news-aws-setup.md", "utf8")).toContain(NEWS_INGEST_SCHEDULE);
   });
 
-  it("caps Home at 12, hides items outside 30 days, and stamps TTL", () => {
-    const rows = Array.from({ length: 15 }, (_, i) =>
+  it("caps Home at 15, hides items outside 30 days, and stamps TTL", () => {
+    const rows = Array.from({ length: 18 }, (_, i) =>
       item(i + 1, "2026-09-17T12:00:00.000Z"),
     );
-    expect(overviewNewsHeadlines(rows)).toHaveLength(12);
+    expect(overviewNewsHeadlines(rows)).toHaveLength(15);
     expect(overviewNewsHeadlines(rows).map((row) => row.id)).toEqual(
-      rows.slice(0, 12).map((row) => row.id),
+      rows.slice(0, 15).map((row) => row.id),
     );
     expect(newsWindowStart(NOW).toISOString()).toBe("2026-08-19T18:00:00.000Z");
     expect(newsInWindow("2026-09-01T00:00:00.000Z", NOW)).toBe(true);
