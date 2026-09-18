@@ -112,7 +112,10 @@ describe("OverviewHome", () => {
     expect(moduleChunk(html, "needs-you")).not.toContain(TEXT_ACTION_CLASS);
     expect(moduleChunk(html, "ai-next")).toContain(TEXT_ACTION_CLASS);
     expect(moduleChunk(html, "news")).toContain(TEXT_ACTION_CLASS);
-    expect(moduleChunk(html, "news")).toContain("dashboard-home-panel");
+    const newsAt = html.indexOf('data-overview-module="news"');
+    expect(html.slice(html.lastIndexOf("<section", newsAt), newsAt)).toContain(
+      "dashboard-home-panel",
+    );
     expect(html).toContain(OVERVIEW_PAGE.needsYouEmpty);
     expect(html).toContain(OVERVIEW_PAGE.revenueEmpty);
     expect(html).toContain(OVERVIEW_PAGE.socialEmpty);
