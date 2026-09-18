@@ -46,3 +46,9 @@ export const HOUSE_LEAD_SEARCH_PILL_CLASS =
 // the 32 avatar. Circular quiet — no muted wash, no hairline box.
 export const HOUSE_THEME_TOGGLE_CLASS =
   `${MOBILE_CHROME_ICON_BUTTON_CLASS} transition-colors hover:text-ink md:size-8 md:min-h-8 md:min-w-8`;
+
+// Bell (and any later header mark) may take a soft circular ghost.
+// Surface-muted wash on the same 44/32 hit — not a boxed hover, not a
+// second icon family. Theme toggle stays quiet.
+export const HOUSE_HEADER_ICON_GHOST_CLASS =
+  `${HOUSE_THEME_TOGGLE_CLASS} hover:bg-surface-muted`;

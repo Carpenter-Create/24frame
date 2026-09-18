@@ -33,7 +33,8 @@ export const ACTIVITY = {
   all: "All",
   markDone: "Mark done",
   markAllDone: "Mark all done",
-  viewAll: "View all",
+  view: "View",
+  viewAll: "View all activity →",
   bellLabel: "Activity",
   emptyOpen: "No open activity.",
   emptyDone: "No done activity for this period.",
@@ -178,3 +179,47 @@ export const ACTIVITY_PERIOD_PRESETS = REPORTS_PERIOD_PRESETS;
 export function activityPeriodPresetKey(grain: ReportsPeriodKind, now: Date): string {
   return parseReportsPeriod(grain === "all" ? "all" : grain, now).key;
 }
+
+export const ACTIVITY_KIND_GLYPH = {
+  title_rejected: "film-slate",
+  delivery_update: "paper-plane",
+} as const;
+
+export type ActivityKindGlyph = (typeof ACTIVITY_KIND_GLYPH)[NotificationKind];
+
+export function activityKindGlyph(kind: NotificationKind): ActivityKindGlyph {
+  return ACTIVITY_KIND_GLYPH[kind];
+}
+
+const MINUTE_MS = 60_000;
+const HOUR_MS = 60 * MINUTE_MS;
+const DAY_MS = 24 * HOUR_MS;
+
+export function formatActivityRelativeTime(iso: string, now = new Date()): string {
+  const then = Date.parse(iso);
+  if (!Number.isFinite(then)) return "";
+  const delta = now.getTime() - then;
+  if (delta < MINUTE_MS) return "Now";
+  if (delta < HOUR_MS) return `${Math.floor(delta / MINUTE_MS)}m`;
+  if (delta < DAY_MS) return `${Math.floor(delta / HOUR_MS)}h`;
+  const days = Math.floor(delta / DAY_MS);
+  if (days === 1) return "Yesterday";
+  if (days < 7) return `${days}d`;
+  return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(new Date(then));
+}
+
+export const ACTIVITY_BELL_ABSENT = [
+  "Unread",
+  "Resolved",
+  "Mark as read",
+  "Messages",
+] as const;
+
+export const ACTIVITY_BELL_MENU_CLASS = "min-w-[20rem] p-[var(--space-2)]";
+export const ACTIVITY_BELL_HEAD_CLASS =
+  "flex items-center justify-between gap-[var(--space-2)] px-[var(--space-3)] py-[var(--space-2)]";
+export const ACTIVITY_BELL_ROW_CLASS =
+  "flex items-start gap-[var(--space-3)] px-[var(--space-3)] py-[var(--space-2)]";
+export const ACTIVITY_BELL_DOT_CLASS = "size-2 shrink-0 rounded-full bg-accent";
+export const ACTIVITY_BELL_FOOTER_CLASS =
+  "px-[var(--space-3)] py-[var(--space-2)]";

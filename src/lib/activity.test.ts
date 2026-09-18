@@ -2,10 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import {
   ACTIVITY,
+  ACTIVITY_BELL_ABSENT,
   ACTIVITY_BELL_LIMIT,
   ACTIVITY_HREF,
+  ACTIVITY_KIND_GLYPH,
   ACTIVITY_PERIOD_PRESETS,
   activityBellItems,
+  activityKindGlyph,
   activityBellPreview,
   activityBellPreviewFromNotifications,
   activityEmptyCopy,
@@ -16,6 +19,7 @@ import {
   activityOpenCount,
   activityPeriodPresetKey,
   filterActivityItems,
+  formatActivityRelativeTime,
   isActivityOpen,
   parseActivityPeriod,
   parseActivityState,
@@ -48,7 +52,9 @@ describe("Activity SoT", () => {
     expect(ACTIVITY.nav).toBe("Activity");
     expect(ACTIVITY.title).toBe("Activity");
     expect(ACTIVITY.markDone).toBe("Mark done");
-    expect(ACTIVITY.viewAll).toBe("View all");
+    expect(ACTIVITY.view).toBe("View");
+    expect(ACTIVITY.done).toBe("Done");
+    expect(ACTIVITY.viewAll).toBe("View all activity →");
     expect(ACTIVITY_HREF).toBe("/activity");
     expect(ACTIVITY_BELL_LIMIT).toBe(5);
   });
@@ -139,6 +145,24 @@ describe("Activity SoT", () => {
     ]);
     expect(activityBellPreview(items, 9).openCount).toBe(9);
     expect(activityBellPreviewFromNotifications([row({ id: "n9", unread: false })]).items).toEqual([]);
+  });
+
+  it("maps kind glyphs and relative time for the bell rows", () => {
+    expect(activityKindGlyph("title_rejected")).toBe("film-slate");
+    expect(activityKindGlyph("delivery_update")).toBe("paper-plane");
+    expect(ACTIVITY_KIND_GLYPH.title_rejected).toBe("film-slate");
+    const now = new Date("2026-09-18T12:00:00.000Z");
+    expect(formatActivityRelativeTime("2026-09-18T11:59:30.000Z", now)).toBe("Now");
+    expect(formatActivityRelativeTime("2026-09-18T11:50:00.000Z", now)).toBe("10m");
+    expect(formatActivityRelativeTime("2026-09-18T09:00:00.000Z", now)).toBe("3h");
+    expect(formatActivityRelativeTime("2026-09-17T12:00:00.000Z", now)).toBe("Yesterday");
+    expect(formatActivityRelativeTime("2026-09-15T12:00:00.000Z", now)).toBe("3d");
+    expect(formatActivityRelativeTime("2026-08-01T12:00:00.000Z", now)).toBe("Aug 1");
+    expect(formatActivityRelativeTime("nope", now)).toBe("");
+  });
+
+  it("keeps filter tabs off the bell — Activity page owns Open / Done / All", () => {
+    expect(ACTIVITY_BELL_ABSENT).toEqual(["Unread", "Resolved", "Mark as read", "Messages"]);
   });
 
   it("reuses Reports period pills instead of inventing a second grain set", () => {

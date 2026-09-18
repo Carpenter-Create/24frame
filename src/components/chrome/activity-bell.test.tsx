@@ -3,7 +3,19 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
-import { ACTIVITY, ACTIVITY_HREF } from "@/lib/activity";
+import {
+  ACTIVITY,
+  ACTIVITY_BELL_ABSENT,
+  ACTIVITY_BELL_DOT_CLASS,
+  ACTIVITY_BELL_FOOTER_CLASS,
+  ACTIVITY_BELL_HEAD_CLASS,
+  ACTIVITY_BELL_MENU_CLASS,
+  ACTIVITY_BELL_ROW_CLASS,
+  ACTIVITY_HREF,
+  type ActivityBellPreview,
+} from "@/lib/activity";
+import { HOUSE_HEADER_ICON_GHOST_CLASS } from "@/lib/house-lead-chrome";
+import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import { ASK_ASSISTANT } from "@/lib/product";
 
 vi.mock("next/navigation", () => ({
@@ -30,21 +42,72 @@ const PREVIEW: ActivityBellPreview = {
   ],
 };
 
+const src = readFileSync(new URL("./activity-bell.tsx", import.meta.url), "utf8");
+
 describe("ActivityBell", () => {
   it("renders the house header bell with View all → /activity", () => {
     const html = renderToStaticMarkup(
       createElement(ActivityBell, { preview: PREVIEW, openCount: 3 }),
     );
-    const src = readFileSync(new URL("./activity-bell.tsx", import.meta.url), "utf8");
     expect(html).toContain('data-activity-bell=""');
     expect(html).toContain(`aria-label="${ACTIVITY.bellLabel}"`);
+    expect(html).toContain(HOUSE_HEADER_ICON_GHOST_CLASS);
     expect(src).toContain("data-activity-bell-badge");
     expect(src).toContain("ACTIVITY.viewAll");
     expect(src).toContain("ACTIVITY_HREF");
-    expect(src).toContain("ACTIVITY.markDone");
+    expect(src).toContain("ACTIVITY.done");
+    expect(src).toContain("ACTIVITY.view");
+    expect(src).toContain("ACTIVITY.markAllDone");
     expect(src).toContain("data-activity-bell-view-all");
     expect(html).not.toContain("Messages");
     expect(ACTIVITY_HREF).toBe("/activity");
+  });
+
+  it("uses shared header primitives — ghost hover, MenuSurface, no lookalike fork", () => {
+    expect(src).toContain("HOUSE_HEADER_ICON_GHOST_CLASS");
+    expect(src).toContain("MenuSurfaceContent");
+    expect(src).toContain('density="panel"');
+    expect(src).toContain("TEXT_ACTION_CLASS");
+    expect(src).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
+    expect(src).toContain("from \"@phosphor-icons/react\"");
+    expect(src).toContain("<Bell");
+    expect(src).not.toContain("DropdownMenuContent");
+    expect(src).not.toContain("gold");
+    expect(src).not.toContain("amber");
+    expect(src).not.toContain("royalogic");
+    expect(src).not.toContain("placeholder");
+    expect(ACTIVITY_BELL_MENU_CLASS).toContain("min-w-[20rem]");
+    expect(ACTIVITY_BELL_HEAD_CLASS).toContain("justify-between");
+    expect(ACTIVITY_BELL_ROW_CLASS).toContain("items-start");
+    expect(ACTIVITY_BELL_DOT_CLASS).toBe("size-2 shrink-0 rounded-full bg-accent");
+    expect(ACTIVITY_BELL_FOOTER_CLASS).toContain("px-[var(--space-3)]");
+    expect(TEXT_ACTION_CLASS).toContain("text-accent");
+  });
+
+  it("locks popover IA: Activity title, open rows, View + Done, footer, no filter tabs", () => {
+    expect(src).toContain("ACTIVITY.title");
+    expect(src).toContain("data-activity-bell-head");
+    expect(src).toContain("data-activity-bell-row");
+    expect(src).toContain("data-activity-bell-kind");
+    expect(src).toContain("data-activity-bell-time");
+    expect(src).toContain("data-activity-bell-dot");
+    expect(src).toContain("data-activity-bell-view");
+    expect(src).toContain("data-activity-bell-mark-done");
+    expect(src).toContain("data-activity-bell-mark-all-done");
+    expect(src).toContain("activityKindGlyph");
+    expect(src).toContain("formatActivityRelativeTime");
+    expect(src).toContain("FilmSlate");
+    expect(src).toContain("PaperPlaneTilt");
+    expect(ACTIVITY.title).toBe("Activity");
+    expect(ACTIVITY.view).toBe("View");
+    expect(ACTIVITY.done).toBe("Done");
+    expect(ACTIVITY.viewAll).toBe("View all activity →");
+    expect(ACTIVITY.markAllDone).toBe("Mark all done");
+    for (const absent of ACTIVITY_BELL_ABSENT) {
+      expect(src).not.toContain(absent);
+    }
+    expect(src).not.toContain("All/Unread");
+    expect(src).not.toContain("Resolved");
   });
 });
 

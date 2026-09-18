@@ -19,6 +19,7 @@ import {
   HOUSE_LEAD_SEARCH_DESKTOP_CLASS,
   HOUSE_LEAD_SEARCH_PILL_CLASS,
   HOUSE_LEAD_SEARCH_WIDTH_PX,
+  HOUSE_HEADER_ICON_GHOST_CLASS,
   HOUSE_LEAD_SHELL_CLASS,
   HOUSE_THEME_TOGGLE_CLASS,
 } from "@/lib/house-lead-chrome";
@@ -191,6 +192,12 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("purple");
     expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("violet");
     expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("border-hairline");
+    expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("hover:bg-surface-muted");
+    expect(HOUSE_HEADER_ICON_GHOST_CLASS).toContain(HOUSE_THEME_TOGGLE_CLASS);
+    expect(HOUSE_HEADER_ICON_GHOST_CLASS).toContain("hover:bg-surface-muted");
+    expect(HOUSE_HEADER_ICON_GHOST_CLASS).toContain("rounded-full");
+    expect(leadLib).toContain("HOUSE_HEADER_ICON_GHOST_CLASS");
+    expect(leadLib).toContain("soft circular ghost");
   });
 
   it("G8 absorbs SocialTopBar — no drifted placement fork", () => {

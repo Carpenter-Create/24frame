@@ -3,26 +3,40 @@
 import { Suspense, use, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Bell } from "@phosphor-icons/react";
+import { Bell, FilmSlate, PaperPlaneTilt } from "@phosphor-icons/react";
 
 import { markActivityDone } from "@/app/(app)/activity/actions";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  MenuSurfaceContent,
+  MenuSurfaceSeparator,
+} from "@/components/chrome/menu-surface";
+import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
   ACTIVITY,
+  ACTIVITY_BELL_DOT_CLASS,
+  ACTIVITY_BELL_FOOTER_CLASS,
+  ACTIVITY_BELL_HEAD_CLASS,
+  ACTIVITY_BELL_MENU_CLASS,
+  ACTIVITY_BELL_ROW_CLASS,
   ACTIVITY_HREF,
   EMPTY_ACTIVITY_BELL,
+  activityKindGlyph,
+  formatActivityRelativeTime,
   type ActivityBellPreview,
   type ActivityItem,
 } from "@/lib/activity";
-import { HOUSE_THEME_TOGGLE_CLASS } from "@/lib/house-lead-chrome";
-import { PHOSPHOR_CHROME_ICON_CLASS, PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
+import { HOUSE_HEADER_ICON_GHOST_CLASS } from "@/lib/house-lead-chrome";
+import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
+import {
+  PHOSPHOR_CHROME_ICON_CLASS,
+  PHOSPHOR_CHROME_IDLE_WEIGHT,
+  type PhosphorIcon,
+} from "@/lib/phosphor-icon";
+
+const KIND_GLYPH: Record<ReturnType<typeof activityKindGlyph>, PhosphorIcon> = {
+  "film-slate": FilmSlate,
+  "paper-plane": PaperPlaneTilt,
+};
 
 function asPromise<T>(value: T | Promise<T>): Promise<T> {
   return typeof value === "object" && value !== null && "then" in value
@@ -44,7 +58,7 @@ export function ActivityBell({
           type="button"
           data-activity-bell=""
           aria-label={ACTIVITY.bellLabel}
-          className={`relative ${HOUSE_THEME_TOGGLE_CLASS}`}
+          className={`relative ${HOUSE_HEADER_ICON_GHOST_CLASS}`}
         >
           <Bell
             className={PHOSPHOR_CHROME_ICON_CLASS}
@@ -58,22 +72,22 @@ export function ActivityBell({
           </Suspense>
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" data-activity-bell-menu="" className="min-w-[20rem]">
-        <DropdownMenuLabel>{ACTIVITY.title}</DropdownMenuLabel>
+      <MenuSurfaceContent
+        align="end"
+        density="panel"
+        data-activity-bell-menu=""
+        className={ACTIVITY_BELL_MENU_CLASS}
+      >
         <Suspense
           fallback={
-            <p className="px-2.5 py-1.5 t-body-sm text-ink-3">{ACTIVITY.emptyOpen}</p>
+            <p className="px-[var(--space-3)] py-[var(--space-2)] t-body-sm text-ink-3">
+              {ACTIVITY.emptyOpen}
+            </p>
           }
         >
-          <ActivityBellItems preview={asPromise(preview ?? EMPTY_ACTIVITY_BELL)} />
+          <ActivityBellBody preview={asPromise(preview ?? EMPTY_ACTIVITY_BELL)} />
         </Suspense>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href={ACTIVITY_HREF} data-activity-bell-view-all="">
-            {ACTIVITY.viewAll}
-          </Link>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
+      </MenuSurfaceContent>
     </DropdownMenu>
   );
 }
@@ -101,46 +115,106 @@ function ActivityBellBadge({ count }: { count: Promise<number> }) {
   );
 }
 
-function ActivityBellItems({ preview }: { preview: Promise<ActivityBellPreview> }) {
+function ActivityBellBody({ preview }: { preview: Promise<ActivityBellPreview> }) {
   const data = use(preview);
-  if (data.items.length === 0) {
-    return <p className="px-2.5 py-1.5 t-body-sm text-ink-3">{ACTIVITY.emptyOpen}</p>;
-  }
+  const ids = data.items.map((item) => item.id);
+
   return (
-    <div data-activity-bell-items="">
-      {data.items.map((item) => (
-        <ActivityBellRow key={item.id} item={item} />
-      ))}
-    </div>
+    <>
+      <div data-activity-bell-head="" className={ACTIVITY_BELL_HEAD_CLASS}>
+        <p className="t-heading text-ink">{ACTIVITY.title}</p>
+        {ids.length > 0 ? <MarkAllDone ids={ids} /> : null}
+      </div>
+      {data.items.length === 0 ? (
+        <p className="px-[var(--space-3)] py-[var(--space-2)] t-body-sm text-ink-3">
+          {ACTIVITY.emptyOpen}
+        </p>
+      ) : (
+        <div data-activity-bell-items="">
+          {data.items.map((item) => (
+            <ActivityBellRow key={item.id} item={item} />
+          ))}
+        </div>
+      )}
+      <MenuSurfaceSeparator />
+      <div className={ACTIVITY_BELL_FOOTER_CLASS}>
+        <Link
+          href={ACTIVITY_HREF}
+          data-activity-bell-view-all=""
+          className={TEXT_ACTION_CLASS}
+        >
+          {ACTIVITY.viewAll}
+        </Link>
+      </div>
+    </>
   );
 }
 
 function ActivityBellRow({ item }: { item: ActivityItem }) {
   const router = useRouter();
   const [pending, start] = useTransition();
+  const Glyph = KIND_GLYPH[activityKindGlyph(item.kind)];
 
   return (
-    <div data-activity-bell-row="" className="flex flex-col gap-1 px-2.5 py-1.5">
-      <Link href={item.href} className="t-body-sm font-medium text-ink hover:text-ink-2">
-        {item.title}
-      </Link>
-      <div className="flex items-center justify-between gap-2">
-        <span className="t-label text-ink-3">{item.kindLabel}</span>
-        <button
-          type="button"
-          data-activity-bell-mark-done=""
-          disabled={pending}
-          onClick={() =>
-            start(async () => {
-              await markActivityDone([item.id]);
-              router.refresh();
-            })
-          }
-          className="t-label text-ink-3 underline-offset-2 hover:text-ink-2 hover:underline disabled:opacity-50"
-        >
-          {ACTIVITY.markDone}
-        </button>
+    <div data-activity-bell-row="" className={ACTIVITY_BELL_ROW_CLASS}>
+      <Glyph
+        data-activity-bell-kind={item.kind}
+        className={`${PHOSPHOR_CHROME_ICON_CLASS} text-ink-3`}
+        weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
+        aria-hidden="true"
+      />
+      <div className="min-w-0 flex-1">
+        <div className="flex items-start justify-between gap-[var(--space-2)]">
+          <p className="min-w-0 t-body-sm text-ink">{item.title}</p>
+          <span className="flex shrink-0 items-center gap-[var(--space-2)]">
+            <time className="t-label text-ink-3" dateTime={item.at} data-activity-bell-time="">
+              {formatActivityRelativeTime(item.at)}
+            </time>
+            <span data-activity-bell-dot="" className={ACTIVITY_BELL_DOT_CLASS} aria-hidden />
+          </span>
+        </div>
+        <p className="t-body-sm text-ink-3">{item.body}</p>
+        <div className="flex items-center gap-[var(--space-4)] pt-[var(--space-1)]">
+          <Link href={item.href} data-activity-bell-view="" className={TEXT_ACTION_CLASS}>
+            {ACTIVITY.view}
+          </Link>
+          <button
+            type="button"
+            data-activity-bell-mark-done=""
+            disabled={pending}
+            onClick={() =>
+              start(async () => {
+                await markActivityDone([item.id]);
+                router.refresh();
+              })
+            }
+            className="t-label text-ink-3 underline-offset-2 hover:text-ink-2 hover:underline disabled:opacity-50"
+          >
+            {ACTIVITY.done}
+          </button>
+        </div>
       </div>
     </div>
+  );
+}
+
+function MarkAllDone({ ids }: { ids: string[] }) {
+  const router = useRouter();
+  const [pending, start] = useTransition();
+  return (
+    <button
+      type="button"
+      data-activity-bell-mark-all-done=""
+      disabled={pending}
+      onClick={() =>
+        start(async () => {
+          await markActivityDone(ids);
+          router.refresh();
+        })
+      }
+      className="t-label text-ink-3 underline-offset-2 hover:text-ink-2 hover:underline disabled:opacity-50"
+    >
+      {ACTIVITY.markAllDone}
+    </button>
   );
 }
