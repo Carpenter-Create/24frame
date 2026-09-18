@@ -47,6 +47,8 @@ describe("HousePageSearch", () => {
     expect(html).toContain(TITLES_CATALOG.searchPlaceholder);
     expect(html).toContain('type="search"');
     expect(html).toContain('id="house-page-search-q"');
+    expect(html).toContain('for="house-page-search-q"');
+    expect(html).toContain("sr-only");
     expect(html).toContain("winter");
     expect(html).not.toContain("lucide");
     expect(src).toContain('from "@phosphor-icons/react"');

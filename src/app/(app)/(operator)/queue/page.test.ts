@@ -250,8 +250,9 @@ describe("GcQueuePage", () => {
     expect(html).toContain("data-titles-catalog-toolbar");
     expect(html).toContain("data-titles-catalog-search");
     expect(html).toContain(TITLES_CATALOG.searchPlaceholder);
+    expect(html).toContain("data-house-page-search");
     expect(html).toContain('placeholder="Search titles..."');
-    expect(html).toContain('aria-label="Search titles..."');
+    expect(html).toContain(">Search titles...</label>");
     expect(html).toContain("Harbor Cut");
     expect(html).not.toContain("data-titles-catalog-filters");
     expect(html).not.toContain("data-add-title");
