@@ -96,13 +96,13 @@ describe("HomePage", () => {
       html.indexOf("data-overview-aggregation"),
     );
     expect(html.indexOf("data-overview-aggregation")).toBeLessThan(
-      html.indexOf('data-overview-module="news"'),
-    );
-    expect(html.indexOf('data-overview-module="news"')).toBeLessThan(
       html.indexOf('data-overview-module="needs-you"'),
     );
     expect(html.indexOf('data-overview-module="needs-you"')).toBeLessThan(
       html.indexOf('data-overview-module="ai-next"'),
+    );
+    expect(html.indexOf('data-overview-module="ai-next"')).toBeLessThan(
+      html.indexOf('data-overview-module="news"'),
     );
     expect(html).not.toContain("Globee");
   });
