@@ -109,8 +109,7 @@ describe("AttentionPage modes", () => {
 
     expect(rpc).toHaveBeenCalledWith("my_findings", { p_limit: UNPAGINATED_MAX + 1 });
     expect(html).toContain(ATTENTION_TITLE);
-    expect(html).toContain("Recent activity");
-    expect(html).not.toContain(">Attention<");
+    expect(html).toContain("Attention");
     expect(html).not.toContain("Catalog Health");
     expect(html).toContain("2 findings");
     expect(html).not.toContain(CATALOG_HEALTH_SUBTITLE);

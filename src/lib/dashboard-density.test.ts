@@ -3,7 +3,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
-import { DashboardAdminHero } from "@/components/dashboard/dashboard-admin-hero";
+import { DashboardAdminHero, DashboardRecentActivity } from "@/components/dashboard/dashboard-admin-hero";
 import { DashboardDoNext } from "@/components/dashboard/dashboard-home";
 import { DashboardFindingsGlance, DashboardTopTitles } from "@/components/dashboard/dashboard-modules";
 import { DASHBOARD_ADMIN, parseDashboardPeriod } from "@/lib/dashboard-admin";
@@ -54,7 +54,7 @@ function adminHero(compare: boolean) {
           { key: "2026-07", label: "2026-07", year: 2026, month: 7, netCents: 120_000_00 },
         ],
       },
-      attention: { rows: [] },
+      activity: [],
       fixture: true,
       periodMenuOpen: true,
     }),
@@ -124,12 +124,28 @@ describe("Dashboard Fidelity × Royalogic density", () => {
     const findings = renderToStaticMarkup(
       createElement(DashboardFindingsGlance, { count: 1, isPartial: false }),
     );
+    const activity = renderToStaticMarkup(
+      createElement(DashboardRecentActivity, {
+        items: [
+          {
+            id: "title:a",
+            title: "Winter Light",
+            href: "/titles/a",
+            at: "2026-09-02T00:00:00.000Z",
+            count: 3,
+            detail: DASHBOARD_ADMIN.titleAdded,
+            actorId: null,
+            actor: { id: null, initial: "?" },
+          },
+        ],
+      }),
+    );
 
     expect(DASHBOARD_SECTION_TITLE_CLASS).toBe("t-heading text-ink");
     expect(DASHBOARD_SECTION_TITLE_CLASS).not.toContain("t-label");
     expect(DASHBOARD_KICKER_CLASS).toBe("t-label text-ink-3");
     expect(hero).toContain(`t-heading text-ink">${DASHBOARD_ADMIN.revenue}`);
-    expect(hero).toContain(`t-heading text-ink">${DASHBOARD_HOME.findingsGlance}`);
+    expect(activity).toContain(`t-heading text-ink">${DASHBOARD_ADMIN.activity}`);
     expect(top).toContain(`t-heading text-ink">${DASHBOARD_HOME.topTitles}`);
     expect(doNext).toContain(`t-heading text-ink">${DASHBOARD_HOME.doNext}`);
     expect(findings).toContain(`t-heading text-ink">${DASHBOARD_HOME.findingsGlance}`);

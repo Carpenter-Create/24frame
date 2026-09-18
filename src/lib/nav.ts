@@ -63,7 +63,7 @@ export function isPhosphorNavItem(item: NavItem): item is PhosphorNavItem {
 export const NAV: PhosphorNavItem[] = [
   { label: "Dashboard", href: "/dashboard", family: "phosphor", icon: SquaresFour, exact: true },
   { label: "Titles", href: "/titles", family: "phosphor", icon: FilmSlate },
-  { label: "Recent activity", href: "/attention", family: "phosphor", icon: Pulse },
+  { label: "Attention", href: "/attention", family: "phosphor", icon: Pulse },
   {
     label: REPORTS_PAGE.title,
     href: REPORTS_HREF,

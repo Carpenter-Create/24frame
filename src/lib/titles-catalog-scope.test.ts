@@ -126,7 +126,7 @@ describe("titles catalog scope", () => {
   it("does not add a drafts nav item or move the catalog onto deliveries", () => {
     expect(NAV.filter((item) => item.href === "/titles")).toHaveLength(1);
     expect(NAV.some((item) => /draft/i.test(item.label))).toBe(false);
-    expect(NAV.find((item) => item.href === "/attention")?.label).toBe("Recent activity");
+    expect(NAV.find((item) => item.href === "/attention")?.label).toBe("Attention");
     expect(NAV.find((item) => item.href === "/deliveries")).toBeUndefined();
     expect(GC_NAV.some((item) => item.href === "/titles")).toBe(false);
   });

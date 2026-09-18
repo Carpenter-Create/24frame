@@ -216,7 +216,7 @@ describe("settings hub lock", () => {
     expect(SETTINGS_RAIL_ABSENT).toEqual([
       "Titles",
       "Deliveries",
-      "Recent activity",
+      "Attention",
       "Ask 24Frame AI",
       "Queue",
       "Avails",

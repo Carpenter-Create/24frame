@@ -18,6 +18,8 @@ export const DASHBOARD_ADMIN = {
   asOfPrefix: "As of",
   updatedPrefix: "Updated",
   updatedNone: "No closed statement.",
+  activity: "Recent activity",
+  activityEmpty: "No account activity for this period.",
   viewAll: "View all",
   // Killed from Dashboard chrome after the 2026-09-16 Adam lock — tests lock absence.
   findUser: "Find a user account",

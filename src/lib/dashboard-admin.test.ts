@@ -246,6 +246,12 @@ describe("company admin revenue series", () => {
 });
 
 describe("recent account activity", () => {
+  it("locks the dashboard feed title as Recent activity", () => {
+    expect(DASHBOARD_ADMIN.activity).toBe("Recent activity");
+    expect(DASHBOARD_ADMIN.activity).not.toBe("Recent account activity");
+    expect(DASHBOARD_ADMIN.activity).not.toBe("Attention");
+  });
+
   it("lists real title and delivery events newest first — never findings", () => {
     const rows = recentAccountActivity({
       titles: [

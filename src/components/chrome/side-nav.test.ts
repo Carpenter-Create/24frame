@@ -17,7 +17,7 @@ describe("SideNav Access rail", () => {
     expect(NAV.map((item) => item.label)).toEqual([
       "Dashboard",
       "Titles",
-      "Recent activity",
+      "Attention",
       "Reports",
       "Ask 24Frame AI",
     ]);

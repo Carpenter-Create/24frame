@@ -46,9 +46,15 @@ import {
   isCompanyAdminRole,
   parseDashboardPeriod,
   parseDashboardUserId,
+  DASHBOARD_ACTIVITY_AUDIT_ACTIONS,
+  DASHBOARD_ACTIVITY_AUDIT_ENTITIES,
+  activityAuditEntityIds,
+  applyActivityAudit,
+  recentAccountActivity,
   revenuePointsFromLabels,
+  type DashboardAuditEvent,
 } from "@/lib/dashboard-admin";
-import { ATTENTION_HREF, buildAttentionGlance } from "@/lib/dashboard-attention";
+import { ATTENTION_HREF } from "@/lib/dashboard-attention";
 import { buildLicensingStatus } from "@/lib/dashboard-licensing";
 import { titleArtworkUrls } from "@/lib/artwork";
 import {
@@ -60,6 +66,7 @@ import {
   DASHBOARD_FIXTURE_PLATFORMS,
   DASHBOARD_FIXTURE_POINTS,
   DASHBOARD_FIXTURE_TERRITORIES,
+  dashboardFixtureActivity,
   dashboardFixtureEnabled,
   dashboardFixtureSources,
   dashboardFixtureTopTitles,
@@ -77,15 +84,16 @@ import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 
 // Company-admin `/dashboard` rematches Overview analytics structure inside
 // house tokens: unlabeled period chrome, taller Net revenue $ + scrub |
-// Recent activity glance (findings /attention queue), then Licensing
-// status full-width (nested title → endpoint), then one Top performing
-// section (Titles / Platforms / Territories pills). The bottom Recent
-// account activity block is gone — delete, not rename. 24Frame nouns
-// only — never Top works, sources, contributors, or Exports. Period is
-// chrome, not H1 — dominant read is the $. Phone (`< md`) is a
-// single-column stack — Net → Recent activity → Licensing → Top
-// performing. Find-user is gone on phone and md+; user scope lives on
-// /reports later. Leftover ?user= parsing stays inert for data only.
+// Recent activity glance (account announcements — Title added / Delivery
+// updated, never findings), then Licensing status full-width (nested
+// title → endpoint), then one Top performing section (Titles / Platforms /
+// Territories pills). One activity feed only — the bottom Recent account
+// activity block is gone. 24Frame nouns only — never Top works, sources,
+// contributors, or Exports. Period is chrome, not H1 — dominant read is
+// the $. Phone (`< md`) is a single-column stack — Net → Recent activity
+// → Licensing → Top performing. Findings stay on /attention. Find-user is
+// gone on phone and md+; user scope lives on /reports later. Leftover
+// ?user= parsing stays inert for data only.
 // Catalog-velocity strip is gone — Adam lock 2026-09-16. Licensing
 // readiness buckets are dead — Adam lock 2026-09-17. Company-admin also
 // drops Recent (the old just-in module), Do next, Deliveries needing
@@ -184,6 +192,7 @@ export default async function DashboardPage({
   let adminHero = null;
   let useFixture = false;
   let adminUpdated: string | null = null;
+  let adminActivity: ReturnType<typeof recentAccountActivity> = [];
   let adminLicensing: ReturnType<typeof buildLicensingStatus> = { groups: [] };
   if (isAdmin) {
     const canReadMoney = !userId && canViewClientEarn({ isGcStaff: ctx.isGcStaff, role: ctx.activeRole });
@@ -213,10 +222,53 @@ export default async function DashboardPage({
       ...points.map((point) => ({ year: point.year, month: point.month })),
       ...(useFixture ? dashboardFixtureSources() : []),
     ];
-    const attention = buildAttentionGlance({
-      findings: findings.rows,
+    const liveActivity = recentAccountActivity({
       titles,
+      deliveries: deliveries.rows,
+      period,
+      userId,
     });
+    // Actor + exact time come from audit_log — created_by is not the action.
+    const auditEntityIds = activityAuditEntityIds(liveActivity);
+    let auditEvents: DashboardAuditEvent[] = [];
+    if (auditEntityIds.length > 0) {
+      const { data: auditRows } = await supabase
+        .from("audit_log")
+        .select("entity, entity_id, action, actor, at")
+        .eq("org_id", org.id)
+        .in("entity", [...DASHBOARD_ACTIVITY_AUDIT_ENTITIES])
+        .in("action", [...DASHBOARD_ACTIVITY_AUDIT_ACTIONS])
+        .in("entity_id", auditEntityIds)
+        .order("at", { ascending: false })
+        .range(...rangeFor(UNPAGINATED_MAX));
+      auditEvents = auditRows ?? [];
+    }
+    const stampedActivity = applyActivityAudit(liveActivity, { events: auditEvents });
+    const actorIds = [
+      ...new Set(
+        stampedActivity
+          .map((row) => row.actorId)
+          .filter((id): id is string => Boolean(id)),
+      ),
+    ];
+    let profileNames = new Map<string, string | null>();
+    if (actorIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, display_name")
+        .in("id", actorIds);
+      profileNames = new Map(
+        (profiles ?? []).map((row) => [row.id, row.display_name]),
+      );
+    }
+    const hydratedActivity = applyActivityAudit(liveActivity, {
+      events: auditEvents,
+      profileNames,
+    });
+    adminActivity =
+      useFixture && hydratedActivity.length === 0
+        ? dashboardFixtureActivity(period, now)
+        : hydratedActivity;
 
     const licensingBase = buildLicensingStatus({
       titles,
@@ -243,7 +295,7 @@ export default async function DashboardPage({
         options={dashboardPeriodOptionsFor(period, now, monthSources)}
         hero={revenueHero}
         fixture={useFixture}
-        attention={attention}
+        activity={adminActivity}
       />
     );
   }

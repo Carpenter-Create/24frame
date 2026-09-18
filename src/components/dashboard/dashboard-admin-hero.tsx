@@ -1,17 +1,21 @@
+import Link from "next/link";
+
 import { DashboardAdminControls } from "@/components/dashboard/dashboard-admin-controls";
 import { DashboardRevenueChart } from "@/components/dashboard/dashboard-revenue-chart";
-import { DashboardAttention } from "@/components/dashboard/dashboard-attention";
 import {
   DASHBOARD_ADMIN,
   dashboardAsOfLine,
   dashboardDeltaLine,
   dashboardHeroMoney,
   revenuePlayheadKey,
+  type DashboardActivityRow,
   type DashboardPeriod,
   type DashboardPeriodOption,
   type DashboardRevenueHero,
 } from "@/lib/dashboard-admin";
 import {
+  DASHBOARD_ACTIVITY_AVATAR_CLASS,
+  DASHBOARD_ACTIVITY_ROW_CLASS,
   DASHBOARD_ADMIN_CHROME_CLASS,
   DASHBOARD_ADMIN_HERO_ATTENTION_CLASS,
   DASHBOARD_ADMIN_HERO_REVENUE_CLASS,
@@ -19,6 +23,7 @@ import {
   DASHBOARD_ADMIN_STACK_CLASS,
   DASHBOARD_CARD_CLASS,
   DASHBOARD_CARD_PAD_HERO,
+  DASHBOARD_CARD_PAD_LIST,
   DASHBOARD_FIXTURE_BANNER_CLASS,
   DASHBOARD_HERO_ASOF_CLASS,
   DASHBOARD_HERO_DELTA_CLASS,
@@ -26,11 +31,12 @@ import {
   DASHBOARD_HERO_VALUE_CLASS,
   DASHBOARD_SECTION_TITLE_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
+  DASHBOARD_ROW_LIST_CLASS,
   DASHBOARD_TITLE_DESKTOP_CLASS,
   DASHBOARD_TITLE_MOBILE_CLASS,
 } from "@/lib/dashboard-craft";
 import { DASHBOARD_FIXTURE, dashboardFixtureLabel } from "@/lib/dashboard-fixture";
-import type { AttentionSnapshot } from "@/lib/dashboard-attention";
+import { dashboardJustInDate, dashboardJustInTime } from "@/lib/dashboard-home";
 import { cn } from "@/lib/cn";
 
 export function DashboardFixtureBanner() {
@@ -127,12 +133,71 @@ export function DashboardRevenueCard({
   );
 }
 
+export function DashboardRecentActivity({ items }: { items: readonly DashboardActivityRow[] }) {
+  return (
+    <section
+      aria-label={DASHBOARD_ADMIN.activity}
+      data-dashboard-module="recent-activity"
+      className={DASHBOARD_CARD_CLASS}
+    >
+      <div className={cn("flex items-center justify-between", DASHBOARD_RELATED_GAP_CLASS, DASHBOARD_CARD_PAD_LIST)}>
+        <p className={DASHBOARD_SECTION_TITLE_CLASS}>{DASHBOARD_ADMIN.activity}</p>
+      </div>
+      {items.length === 0 ? (
+        <p
+          data-dashboard-activity-empty=""
+          className="border-t border-hairline px-[var(--space-4)] py-[var(--space-2)] t-body-sm text-ink-3"
+        >
+          {DASHBOARD_ADMIN.activityEmpty}
+        </p>
+      ) : (
+        <ol className={DASHBOARD_ROW_LIST_CLASS}>
+          {items.map((item) => (
+            <li key={item.id} className={DASHBOARD_ACTIVITY_ROW_CLASS}>
+              <span
+                data-dashboard-activity-actor=""
+                aria-hidden
+                className={DASHBOARD_ACTIVITY_AVATAR_CLASS}
+              >
+                {item.actor.initial}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="t-body-sm text-ink-3">{item.detail}</span>
+                {" "}
+                <Link
+                  href={item.href}
+                  className="t-body-sm font-medium text-ink hover:text-ink-2"
+                >
+                  {item.title}
+                </Link>
+              </span>
+              <time
+                className="shrink-0 text-right"
+                dateTime={item.at}
+                data-dashboard-activity-time=""
+              >
+                <span className="block t-body-sm text-ink-3">{dashboardJustInDate(item.at)}</span>
+                <span
+                  data-dashboard-activity-clock=""
+                  className="block t-body-sm text-ink-3"
+                >
+                  {dashboardJustInTime(item.at)}
+                </span>
+              </time>
+            </li>
+          ))}
+        </ol>
+      )}
+    </section>
+  );
+}
+
 export function DashboardAdminHero({
   orgName,
   period,
   options,
   hero,
-  attention,
+  activity,
   fixture = false,
   periodMenuOpen = false,
 }: {
@@ -140,7 +205,7 @@ export function DashboardAdminHero({
   period: DashboardPeriod;
   options: readonly DashboardPeriodOption[];
   hero: DashboardRevenueHero;
-  attention: AttentionSnapshot;
+  activity: readonly DashboardActivityRow[];
   fixture?: boolean;
   periodMenuOpen?: boolean;
 }) {
@@ -162,7 +227,7 @@ export function DashboardAdminHero({
           <DashboardRevenueCard period={period} hero={hero} fixture={fixture} />
         </div>
         <div data-dashboard-overview-attention="" className={DASHBOARD_ADMIN_HERO_ATTENTION_CLASS}>
-          <DashboardAttention snapshot={attention} />
+          <DashboardRecentActivity items={activity} />
         </div>
       </div>
     </div>

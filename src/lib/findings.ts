@@ -7,9 +7,9 @@ export const FINDING_SEVERITY_LABEL: Record<"high" | "low", string> = {
   low: "Recommended",
 };
 
-// Recent activity = the single client-side findings/health overview.
-// Former Catalog Health route `/catalog-health` redirects here. Href stays /attention.
-export const ATTENTION_TITLE = "Recent activity";
+// Attention = the single client-side findings/health overview.
+// Former Catalog Health route `/catalog-health` redirects here.
+export const ATTENTION_TITLE = "Attention";
 export const ATTENTION_HREF = "/attention";
 export const CATALOG_HEALTH_HREF = "/catalog-health";
 export const CATALOG_HEALTH_TITLE = ATTENTION_TITLE;

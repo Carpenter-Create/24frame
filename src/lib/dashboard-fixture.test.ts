@@ -76,6 +76,6 @@ describe("dashboard craft fixture", () => {
     expect(page).toContain("dashboard-fixture");
     expect(page).toContain("dashboardFixtureEnabled");
     expect(page).toContain("DASHBOARD_FIXTURE_PLATFORMS");
-    expect(page).not.toContain("dashboardFixtureActivity");
+    expect(page).toContain("dashboardFixtureActivity");
   });
 });

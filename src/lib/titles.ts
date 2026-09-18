@@ -53,7 +53,7 @@ export const DELIVERY_STATUS_ROW_LABELS: Record<DeliveryStatus, string> = {
 export const TITLE_DETAIL = {
   relatedLabel: "Related",
   deliveriesLink: "Deliveries",
-  healthLink: "Recent activity",
+  healthLink: "Attention",
   playTrailer: "Play trailer",
   sectionSynopsis: "Synopsis",
   sectionMetadata: "Metadata",

@@ -19,7 +19,7 @@ describe("aggregation ops spine rematch", () => {
     expect(NAV.map((item) => item.label)).toEqual([
       "Dashboard",
       "Titles",
-      "Recent activity",
+      "Attention",
       "Reports",
       "Ask 24Frame AI",
     ]);
@@ -46,7 +46,7 @@ describe("aggregation ops spine rematch", () => {
       "Archived",
     ]);
     expect(FINDING_SEVERITY_LABEL).toEqual({ high: "Required", low: "Recommended" });
-    expect(CATALOG_HEALTH_TITLE).toBe("Recent activity");
+    expect(CATALOG_HEALTH_TITLE).toBe("Attention");
     expect(DELIVERIES_NO_DATA.actionHref).toBe("/titles");
   });
 

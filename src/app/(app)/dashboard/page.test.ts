@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createClient } from "@/lib/supabase/server";
 import { getOrgContext } from "@/lib/supabase/context";
 import { CLIENTS_PAGE, ORG_ROLE_LABELS, ORG_STATUS_LABELS } from "@/lib/clients";
-import { DASHBOARD_HOME, dashboardJustInDate } from "@/lib/dashboard-home";
+import { DASHBOARD_HOME, dashboardJustInDate, dashboardJustInTime } from "@/lib/dashboard-home";
 import { DASHBOARD_ADMIN } from "@/lib/dashboard-admin";
 import { DASHBOARD_LICENSING } from "@/lib/dashboard-licensing";
 import { DASHBOARD_CRAFT_FIXTURE_ENV, DASHBOARD_FIXTURE } from "@/lib/dashboard-fixture";
@@ -184,13 +184,14 @@ function expectCompanyAdminStructuralDelta(html: string) {
   expect(html).toContain("data-dashboard-period");
   expect(html).toContain("data-dashboard-period-current");
   expect(html).toContain("data-dashboard-period-chevron");
-  expect(html).toContain('data-dashboard-module="attention"');
-  expect(html).toContain("Recent activity");
+  expect(html).not.toContain('data-dashboard-module="attention"');
   expect(html).not.toContain("Recent account activity");
-  expect(html).not.toContain('data-dashboard-module="recent-activity"');
+  expect(html).not.toContain('href="/attention"');
   expect(html).toContain('data-dashboard-module="licensing-status"');
   expect(html).toContain(DASHBOARD_LICENSING.title);
   expect(html).not.toContain("data-dashboard-licensing-summary");
+  expect(html).toContain('data-dashboard-module="recent-activity"');
+  expect(html).toContain(DASHBOARD_ADMIN.activity);
   expect(html).toContain("data-dashboard-top-performing");
   expect(html).toContain(DASHBOARD_HOME.topPerforming);
   expect(html).toContain('data-dashboard-top-pill="titles"');
@@ -747,9 +748,9 @@ describe("company admin Overview hero", () => {
     expect(html).not.toContain("data-dashboard-user");
     expect(html).toContain("data-dashboard-revenue");
     expect(html).toContain("data-dashboard-revenue-chart");
-    expect(html).toContain('data-dashboard-module="attention"');
+    expect(html).not.toContain('data-dashboard-module="attention"');
     expect(html).toContain('data-dashboard-module="licensing-status"');
-    expect(html).not.toContain('data-dashboard-module="recent-activity"');
+    expect(html).toContain('data-dashboard-module="recent-activity"');
     expect(html).toContain("lg:grid-cols-5");
     expect(html).toContain("lg:items-stretch");
     expect(html).toContain("lg:col-span-3");
@@ -763,15 +764,15 @@ describe("company admin Overview hero", () => {
       html.indexOf("data-dashboard-overview-attention"),
     );
     expect(html.indexOf("data-dashboard-revenue")).toBeLessThan(
-      html.indexOf('data-dashboard-module="attention"'),
+      html.indexOf('data-dashboard-module="recent-activity"'),
     );
-    expect(html.indexOf('data-dashboard-module="attention"')).toBeLessThan(
+    expect(html.indexOf('data-dashboard-module="recent-activity"')).toBeLessThan(
       html.indexOf('data-dashboard-module="licensing-status"'),
     );
     expect(html.indexOf('data-dashboard-module="licensing-status"')).toBeLessThan(
       html.indexOf("data-dashboard-top-performing"),
     );
-    expect(html).not.toContain('data-dashboard-module="recent-activity"');
+    expect(html.split('data-dashboard-module="recent-activity"').length - 1).toBe(1);
     expect(html.indexOf("data-dashboard-top-performing")).toBeLessThan(
       html.indexOf('data-dashboard-top-pill="titles"'),
     );
@@ -790,8 +791,7 @@ describe("company admin Overview hero", () => {
     expect(html).toContain(DASHBOARD_ADMIN.revenue);
     expect(html).toContain("$0.00");
     expect(html).not.toContain(DASHBOARD_ADMIN.revenueEmpty);
-    expect(html).toContain("Recent activity");
-    expect(html).not.toContain("Recent account activity");
+    expect(html).toContain(DASHBOARD_ADMIN.activity);
     expect(html).toContain(DASHBOARD_ADMIN.allTime);
     expect(html).toContain(DASHBOARD_ADMIN.period);
     expect(html).toContain("data-dashboard-period-current");
@@ -807,8 +807,7 @@ describe("company admin Overview hero", () => {
     expectNoCatalogVelocityStrip(html);
     expect(html).toContain("data-dashboard-period");
     expect(html).toContain("data-dashboard-revenue");
-    expect(html).toContain('data-dashboard-module="attention"');
-    expect(html).not.toContain('data-dashboard-module="recent-activity"');
+    expect(html).toContain('data-dashboard-module="recent-activity"');
     expect(html).not.toContain("data-dashboard-reports-cta");
     expect(html).not.toContain(`href="${REPORTS_HREF}"`);
     expect(html).not.toContain(DASHBOARD_HOME.reportsCta);
@@ -982,13 +981,16 @@ describe("company admin Overview hero", () => {
       ctx({ isGcStaff: false, orgStatus: "active", role: "account_owner" }) as never,
     );
     const html = renderToStaticMarkup(await DashboardPage({ searchParams: Promise.resolve({}) }));
-    expect(html).toContain('data-dashboard-module="attention"');
-    expect(html).toContain("Recent activity");
-    expect(html).toContain("Synopsis is required.");
-    expect(html).toContain("data-dashboard-attention-clock");
-    expect(html).not.toContain('data-dashboard-module="recent-activity"');
+    expect(html).toContain('data-dashboard-module="recent-activity"');
+    expect(html).toContain(DASHBOARD_ADMIN.activity);
+    expect(html).toContain(DASHBOARD_ADMIN.titleAdded);
+    expect(html).toContain(DASHBOARD_ADMIN.deliveryUpdated);
+    expect(html).not.toContain('data-dashboard-module="attention"');
+    expect(html).not.toContain("data-dashboard-attention-clock");
+    expect(html).not.toContain("Synopsis is required.");
+    expect(html).not.toContain(DASHBOARD_ADMIN.findingOpened);
     expect(html).not.toContain("Recent account activity");
-    expect(html).not.toContain("data-dashboard-activity-actor");
+    expect(html).not.toContain('href="/attention"');
     expect(html).toContain('data-dashboard-module="licensing-status"');
     expect(html).toContain("Winter Light");
     expect(html).toContain("Endpoint A");
@@ -999,13 +1001,17 @@ describe("company admin Overview hero", () => {
     expect(html).toContain('data-status-progress-variant="off"');
     expect(html).not.toContain("data-dashboard-licensing-summary");
     expect(html).not.toContain("data-dashboard-licensing-pill");
+    expect(html).toContain("data-dashboard-activity-actor");
+    expect(html).toContain("data-dashboard-activity-clock");
+    expect(html).toContain("?");
     expect(html).not.toContain("Licensed");
     expect(html).not.toContain("Removed");
     expect(html).not.toContain("Sample licensing");
   });
 
-  it("does not render the deleted Recent account activity block or query audit actors", async () => {
-    const { from } = stubClient(
+  it("surfaces audit_log actor initials and exact timestamp without inventing people", async () => {
+    const at = "2026-09-02T15:04:00.000Z";
+    stubClient(
       [
         {
           id: "title-1",
@@ -1016,16 +1022,31 @@ describe("company admin Overview hero", () => {
           catalog_id: "GC-0001234",
         },
       ],
+      [],
+      {
+        audit: [
+          {
+            entity: "titles",
+            entity_id: "title-1",
+            action: "insert",
+            actor: "maya",
+            at,
+          },
+        ],
+        profiles: [{ id: "maya", display_name: "Maya Chen" }],
+      },
     );
     vi.mocked(getOrgContext).mockResolvedValue(
       ctx({ isGcStaff: false, orgStatus: "active", role: "account_owner" }) as never,
     );
     const html = renderToStaticMarkup(await DashboardPage({ searchParams: Promise.resolve({}) }));
-    expect(html).not.toContain("Recent account activity");
-    expect(html).not.toContain('data-dashboard-module="recent-activity"');
-    expect(html).not.toContain("data-dashboard-activity-actor");
-    expect(from).not.toHaveBeenCalledWith("audit_log");
-    expect(from).not.toHaveBeenCalledWith("profiles");
+    expect(html).toContain("data-dashboard-activity-actor");
+    expect(html).toContain(">M<");
+    expect(html).toContain("data-dashboard-activity-clock");
+    expect(html).toContain(dashboardJustInDate(at));
+    expect(html).toContain(dashboardJustInTime(at));
+    expect(html).not.toContain("Maya Chen");
+    expect(html).not.toContain("ignored-creator");
   });
 
   it("does not load org money when a user is scoped", async () => {

@@ -118,12 +118,13 @@ describe("Aggregation Dashboard Coinbase register lock", () => {
     );
     expect(html).toContain("data-dashboard-period-one");
     expect(html).not.toContain("data-dashboard-period-kicker");
-    expect(html).toContain('data-dashboard-module="attention"');
-    expect(html).toContain("Recent activity");
+    expect(html).not.toContain('data-dashboard-module="attention"');
     expect(html).not.toContain("Recent account activity");
-    expect(html).not.toContain('data-dashboard-module="recent-activity"');
     expect(html).toContain('data-dashboard-module="licensing-status"');
     expect(html).toContain("Licensing status");
+    expect(html).toContain('data-dashboard-module="recent-activity"');
+    expect(html).toContain(DASHBOARD_ADMIN.activity);
+    expect(html).toContain("Recent activity");
     expect(html).toContain("data-dashboard-top-performing");
     expect(html).toContain(DASHBOARD_HOME.topPerforming);
     expect(html).toContain(DASHBOARD_HOME.pillTitles);
@@ -151,12 +152,14 @@ describe("Aggregation Dashboard Coinbase register lock", () => {
     expect(html).toContain(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS);
     expect(html).toContain(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS);
     expect(html).toContain(`t-heading text-ink">${DASHBOARD_ADMIN.revenue}`);
+    expect(html).toContain(`t-heading text-ink">${DASHBOARD_ADMIN.activity}`);
     expect(html).toContain(`t-heading text-ink">Recent activity`);
     expect(html).not.toContain(`t-heading text-ink">Attention`);
     expect(html).not.toContain(`t-heading text-ink">Recent account activity`);
     expect(html).toContain(`t-heading text-ink">Licensing status`);
     expect(html).toContain(`t-heading text-ink">${DASHBOARD_HOME.topPerforming}`);
     expect(html).not.toContain(`t-label text-ink-3">${DASHBOARD_ADMIN.revenue}`);
+    expect(html).not.toContain(`t-label text-ink-3">${DASHBOARD_ADMIN.activity}`);
     expect(html).not.toContain(`t-label text-ink-3">Recent activity`);
     expect(html).not.toContain(`t-label text-ink-3">Attention`);
     expect(html).not.toContain(`t-label text-ink-3">Licensing status`);
@@ -206,23 +209,25 @@ describe("Aggregation Dashboard Coinbase register lock", () => {
     expect(html.indexOf("data-dashboard-overview-attention")).toBeLessThan(
       html.indexOf('data-dashboard-module="licensing-status"'),
     );
-    expect(html.indexOf('data-dashboard-module="attention"')).toBeLessThan(
+    expect(html.indexOf('data-dashboard-module="recent-activity"')).toBeLessThan(
       html.indexOf('data-dashboard-module="licensing-status"'),
     );
     expect(html.indexOf('data-dashboard-module="licensing-status"')).toBeLessThan(
       html.indexOf("data-dashboard-top-performing"),
     );
-    expect(html).not.toContain('data-dashboard-module="recent-activity"');
+    expect(html.split('data-dashboard-module="recent-activity"').length - 1).toBe(1);
     expect(DASHBOARD_RELATED_GAP_CLASS).toBe("gap-[var(--space-2)]");
     expect(DASHBOARD_CARD_PAD_HERO).toBe("px-[var(--space-4)] py-[var(--space-4)]");
     expect(DASHBOARD_SECTION_AIR_CLASS).toBe("gap-[var(--space-6)]");
     expect(DASHBOARD_ADMIN_STACK_CLASS).toBe("flex w-full flex-col gap-[var(--space-6)]");
     expect(page).toContain("DashboardTopPerforming");
+    expect(page).toContain("recentAccountActivity");
+    expect(page).not.toContain("buildAttentionGlance");
+    expect(hero).toContain("DashboardRecentActivity");
+    expect(hero).not.toContain("DashboardAttention");
     expect(page).not.toMatch(/isAdmin \? \(\s*<div className=\{DASHBOARD_ADMIN_PAIR_CLASS\}/);
     expect(html).not.toContain("lg:grid-cols-2");
-    expect(hero).toContain("DashboardAttention");
-    const attention = readFileSync("src/components/dashboard/dashboard-attention.tsx", "utf8");
-    expect(attention).toContain("DASHBOARD_ROW_LIST_CLASS");
+    expect(hero).toContain("DASHBOARD_ROW_LIST_CLASS");
     expect(craft).toContain("shadow-none");
   });
 });
