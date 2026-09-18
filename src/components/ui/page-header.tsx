@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { cn } from "@/lib/cn";
+import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 
 // Ported from watershedportal PageHeader — proportions kept, rethemed: GC `.t-*`
 // type (not the Watershed serif `.page-title`), token colors.
@@ -24,7 +25,7 @@ export function PageHeader({ title, eyebrow, subtitle, backLink, actions, classN
         {backLink ? (
           <Link
             href={backLink.href}
-            className="inline-flex items-center gap-1 t-body-sm text-ink-3 transition-colors hover:text-ink-2"
+            className={cn("inline-flex items-center gap-1", TEXT_ACTION_CLASS)}
           >
             <ArrowLeft className="h-4 w-4" strokeWidth={1.5} />
             {backLink.label ?? "Back"}

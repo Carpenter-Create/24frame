@@ -34,7 +34,6 @@ export const NEWS_PAGE = {
   backHref: NEWS_HOME_HREF,
   sources: "Sources",
   sourcesAll: "All",
-  sourcesClose: "Close",
   filterEmpty: "No headlines from the selected sources.",
   truncated: `Showing the first ${UNPAGINATED_MAX} headlines. More exist — this list is not complete.`,
 } as const;

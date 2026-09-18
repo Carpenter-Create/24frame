@@ -8,6 +8,7 @@ import {
   DASHBOARD_CARD_PAD,
   DASHBOARD_LICENSING_THUMB_CLASS,
   DASHBOARD_MODULE_CARD_CLASS,
+  DASHBOARD_NEWS_HISTORY_COLUMN_CLASS,
   DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS,
   DASHBOARD_NEWS_HISTORY_LIST_CLASS,
   DASHBOARD_NEWS_HISTORY_THUMB_CLASS,
@@ -36,6 +37,7 @@ import {
 const card = readFileSync("src/components/news/news-card.tsx", "utf8");
 const rail = readFileSync("src/components/news/news-rail.tsx", "utf8");
 const home = readFileSync("src/components/overview/overview-home.tsx", "utf8");
+const newsPage = readFileSync("src/app/(app)/home/news/page.tsx", "utf8");
 const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
 
 function emptyHome(): string {
@@ -134,8 +136,12 @@ describe("Home News layout + register lock", () => {
     expect(DASHBOARD_MODULE_CARD_CLASS).toContain("rounded-[var(--radius-lg)]");
     expect(DASHBOARD_NEWS_HISTORY_LIST_CLASS).toContain("flex flex-col");
     expect(DASHBOARD_NEWS_HISTORY_LIST_CLASS).not.toContain("lg:grid-cols-2");
-    expect(DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS).toContain("lg:grid-cols-[minmax(0,1fr)_20rem]");
+    expect(DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS).toContain("flex w-full flex-col");
+    expect(DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS).not.toContain("lg:grid-cols-[minmax(0,1fr)_20rem]");
     expect(DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS).not.toContain("lg:grid-cols-2");
+    expect(DASHBOARD_NEWS_HISTORY_COLUMN_CLASS).toBe("mx-auto w-full max-w-[840px]");
+    expect(DASHBOARD_NEWS_HISTORY_COLUMN_CLASS).not.toContain("1376");
+    expect(newsPage).toContain("DASHBOARD_NEWS_HISTORY_COLUMN_CLASS");
   });
 
   it("keeps the News column when the rail is empty", () => {

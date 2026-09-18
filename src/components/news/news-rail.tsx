@@ -12,7 +12,7 @@ import { OVERVIEW_MODULE_NEST_CLASS } from "@/lib/overview";
 // Home News: same OverviewModule shell as Social/Education — header
 // (News + View all) lives inside the grey panel. Articles nest like
 // Education course tiles (no second grey card). History is dense
-// horizontal rows; Sources rail/sheet lives in NewsHistory.
+// horizontal rows; source chips live in NewsHistory under the H1.
 
 export function NewsRail({
   items,

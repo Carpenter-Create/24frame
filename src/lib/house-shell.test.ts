@@ -39,6 +39,7 @@ import {
   HOUSE_HOME_RAIL_COLUMN_CLASS,
   HOUSE_RAIL_FLOAT_CLASS,
 } from "@/lib/house-shell";
+import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import { SOCIAL_PILL_ACTIVE_CLASS, SOCIAL_PILL_IDLE_CLASS } from "@/lib/social-chrome";
 
 vi.mock("next/navigation", () => ({
@@ -177,6 +178,14 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(card).toContain("HOUSE_CARD_PAD");
     expect(pageHeader).toContain("t-title text-ink");
     expect(pageHeader).not.toContain("t-subhead text-ink");
+    expect(pageHeader).toContain("TEXT_ACTION_CLASS");
+    expect(pageHeader).not.toContain("text-ink-3 transition-colors hover:text-ink-2");
+    const back = renderToStaticMarkup(
+      createElement(PageHeader, { title: "News", backLink: { href: "/home", label: "Home" } }),
+    );
+    expect(back).toContain(TEXT_ACTION_CLASS);
+    expect(back).toContain('href="/home"');
+    expect(back).toContain("Home");
   });
 
   it("rematches Social header Search, rail type, filters, and tab accent", () => {

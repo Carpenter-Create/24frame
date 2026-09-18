@@ -1,120 +1,32 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type MouseEvent, type ReactNode } from "react";
-import { createPortal } from "react-dom";
-import { CaretDown } from "@phosphor-icons/react";
+import type { MouseEvent } from "react";
 
-import { AppearanceCheck } from "@/components/chrome/appearance-check";
-import { Close44 } from "@/components/chrome/house";
-import { OverviewModule } from "@/components/overview/overview-module";
+import { cn } from "@/lib/cn";
 import {
-  DASHBOARD_NEWS_SOURCES_PHONE_CLASS,
-  DASHBOARD_NEWS_SOURCES_RAIL_CLASS,
+  DASHBOARD_NEWS_SOURCE_CHIP_CLASS,
+  DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS,
+  DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS,
+  DASHBOARD_NEWS_SOURCE_CHIPS_CLASS,
 } from "@/lib/dashboard-craft";
-import {
-  HOUSE_PAGE_SELECT_CHEVRON_CLASS,
-  HOUSE_PAGE_SELECT_OPTION_CHECK_CLASS,
-  HOUSE_PAGE_SELECT_OPTION_CHECK_GUTTER_CLASS,
-  HOUSE_PAGE_SELECT_OPTION_LABEL_CLASS,
-  HOUSE_PAGE_SELECT_SHEET_HOST_CLASS,
-  HOUSE_PAGE_SELECT_TRIGGER_CLASS,
-  HOUSE_PAGE_SELECT_TRIGGER_LABEL_CLASS,
-  housePageSelectOptionClass,
-} from "@/lib/house-page-select";
-import {
-  APP_SHEET_HEAD_CLASS,
-  APP_SHEET_SCRIM_CLASS,
-  APP_SHEET_SURFACE_CLASS,
-} from "@/lib/house-sheet";
 import {
   NEWS_PAGE,
   NEWS_SOURCE_ALL,
   NEWS_SOURCES,
   newsHistoryHref,
   newsSourceFilterIsAll,
-  newsSourceFilterLabel,
   toggleNewsSourceFilter,
   type NewsSourceId,
 } from "@/lib/news";
-import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
-// Sources lens for /home/news. Desktop: far-right OverviewModule rail.
-// Phone: under-nav trigger + house bottom sheet. Same All + source rows.
-// Multi-select writes ?source= comma-separated ids. Never a 2-col cram.
+// Sources lens for /home/news. House filter chips under the H1 —
+// All + one chip per allowlisted source. Same selected/idle grammar
+// as Aggregation / Activity status pills. Multi-select writes
+// ?source= comma-separated ids. Phone scrolls the row; never a
+// checkbox rail or a second bottom float.
 
-export function NewsSourcesRail({
-  selected,
-  onSelect,
-}: {
-  selected: readonly NewsSourceId[];
-  onSelect: (next: NewsSourceId[]) => void;
-}) {
-  return (
-    <aside data-news-sources-rail="" className={DASHBOARD_NEWS_SOURCES_RAIL_CLASS}>
-      <OverviewModule testId="news-sources" title={NEWS_PAGE.sources} empty={NEWS_PAGE.filterEmpty}>
-        <NewsSourcesOptions selected={selected} onSelect={onSelect} />
-      </OverviewModule>
-    </aside>
-  );
-}
-
-export function NewsSourcesPhone({
-  selected,
-  onSelect,
-  defaultOpen = false,
-}: {
-  selected: readonly NewsSourceId[];
-  onSelect: (next: NewsSourceId[]) => void;
-  defaultOpen?: boolean;
-}) {
-  const [open, setOpen] = useState(defaultOpen);
-
-  useEffect(() => {
-    if (!open) return undefined;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("keydown", onKey);
-    const previous = document.body.style.overflow;
-    if (typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches) {
-      document.body.style.overflow = "hidden";
-    }
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = previous;
-    };
-  }, [open]);
-
-  return (
-    <div data-news-sources-phone="" className={DASHBOARD_NEWS_SOURCES_PHONE_CLASS}>
-      <button
-        type="button"
-        data-news-sources-trigger=""
-        aria-label={NEWS_PAGE.sources}
-        aria-expanded={open}
-        aria-haspopup="dialog"
-        onClick={() => setOpen((next) => !next)}
-        className={HOUSE_PAGE_SELECT_TRIGGER_CLASS}
-      >
-        <span data-news-sources-current="" className={HOUSE_PAGE_SELECT_TRIGGER_LABEL_CLASS}>
-          {newsSourceFilterLabel(selected)}
-        </span>
-        <CaretDown
-          className={HOUSE_PAGE_SELECT_CHEVRON_CLASS}
-          weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
-        />
-      </button>
-      {open ? (
-        <NewsSourcesSheet onClose={() => setOpen(false)}>
-          <NewsSourcesOptions selected={selected} onSelect={onSelect} />
-        </NewsSourcesSheet>
-      ) : null}
-    </div>
-  );
-}
-
-export function NewsSourcesOptions({
+export function NewsSourceChips({
   selected,
   onSelect,
 }: {
@@ -126,10 +38,10 @@ export function NewsSourcesOptions({
     <div
       role="group"
       aria-label={NEWS_PAGE.sources}
-      data-news-sources-options=""
-      className="flex flex-col pb-[var(--space-4)]"
+      data-news-source-chips=""
+      className={DASHBOARD_NEWS_SOURCE_CHIPS_CLASS}
     >
-      <NewsSourceOption
+      <NewsSourceChip
         sourceId={NEWS_SOURCE_ALL}
         href={newsHistoryHref([])}
         selected={all}
@@ -137,7 +49,7 @@ export function NewsSourcesOptions({
         onPick={() => onSelect([])}
       />
       {NEWS_SOURCES.map((source) => (
-        <NewsSourceOption
+        <NewsSourceChip
           key={source.id}
           sourceId={source.id}
           href={newsHistoryHref(toggleNewsSourceFilter(selected, source.id))}
@@ -150,7 +62,7 @@ export function NewsSourcesOptions({
   );
 }
 
-function NewsSourceOption({
+function NewsSourceChip({
   sourceId,
   href,
   selected,
@@ -177,45 +89,13 @@ function NewsSourceOption({
       scroll={false}
       data-news-source-option={sourceId}
       aria-pressed={selected}
-      className={housePageSelectOptionClass(selected)}
+      className={cn(
+        DASHBOARD_NEWS_SOURCE_CHIP_CLASS,
+        selected ? DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS : DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS,
+      )}
       onClick={onClick}
     >
-      <span className={HOUSE_PAGE_SELECT_OPTION_LABEL_CLASS}>{label}</span>
-      <span className={HOUSE_PAGE_SELECT_OPTION_CHECK_GUTTER_CLASS} aria-hidden="true">
-        <AppearanceCheck selected={selected} className={HOUSE_PAGE_SELECT_OPTION_CHECK_CLASS} />
-      </span>
+      {label}
     </Link>
   );
-}
-
-function NewsSourcesSheet({
-  onClose,
-  children,
-}: {
-  onClose: () => void;
-  children: ReactNode;
-}) {
-  const sheet = (
-    <div
-      data-news-sources-sheet=""
-      role="dialog"
-      aria-label={NEWS_PAGE.sources}
-      className={HOUSE_PAGE_SELECT_SHEET_HOST_CLASS}
-    >
-      <button
-        type="button"
-        aria-label={NEWS_PAGE.sourcesClose}
-        className={APP_SHEET_SCRIM_CLASS}
-        onClick={onClose}
-      />
-      <div className={`${APP_SHEET_SURFACE_CLASS} relative z-10 shadow-none`}>
-        <div className={`${APP_SHEET_HEAD_CLASS} justify-between`}>
-          <p className="t-label text-ink-3">{NEWS_PAGE.sources}</p>
-          <Close44 label={NEWS_PAGE.sourcesClose} onClick={onClose} />
-        </div>
-        {children}
-      </div>
-    </div>
-  );
-  return typeof document !== "undefined" ? createPortal(sheet, document.body) : sheet;
 }
