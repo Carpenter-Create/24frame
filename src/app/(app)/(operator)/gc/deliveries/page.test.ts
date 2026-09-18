@@ -187,6 +187,7 @@ describe("staff /gc/deliveries licensing filters and craft", () => {
     expect(pageSrc).toContain("TitlesCatalogFrame");
     expect(pageSrc).toContain("TitlesCatalogHeader");
     expect(pageSrc).toContain("TitlesCatalogToolbar");
+    expect(pageSrc).toContain("HousePageSearch");
     expect(pageSrc).toContain("LicensingStatusFilter");
     expect(pageSrc).toContain("LicensingVendorFilter");
     expect(pageSrc).not.toContain("import { StatusFilter }");

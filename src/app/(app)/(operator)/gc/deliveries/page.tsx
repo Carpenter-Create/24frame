@@ -3,7 +3,7 @@ import { Suspense } from "react";
 
 import { createClient } from "@/lib/supabase/server";
 import { titleArtworkUrls } from "@/lib/artwork";
-import { SearchField } from "@/components/layout/search-field";
+import { HousePageSearch } from "@/components/chrome/house-page-search";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { LicensingStatusList } from "@/components/licensing/licensing-status-list";
 import {
@@ -135,7 +135,7 @@ export default async function GcDeliveriesPage({
       <TitlesCatalogToolbar
         search={
           <Suspense fallback={null}>
-            <SearchField placeholder={GC_LICENSING_STATUS.searchPlaceholder} />
+            <HousePageSearch placeholder={GC_LICENSING_STATUS.searchPlaceholder} />
           </Suspense>
         }
       />

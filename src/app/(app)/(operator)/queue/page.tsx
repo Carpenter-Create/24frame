@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { SearchField } from "@/components/layout/search-field";
+import { HousePageSearch } from "@/components/chrome/house-page-search";
 import { titleArtworkUrls } from "@/lib/artwork";
 import { createClient } from "@/lib/supabase/server";
 import { LIST_PAGE, UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
@@ -35,7 +35,7 @@ import {
 // Staff /queue is the Titles catalog list, scoped to active work across orgs.
 // RLS is_gc_staff is the cross-org read. Row status is the shared Titles
 // track — the setter stays on GC title detail. Search is the Titles catalog
-// toolbar SoT (`SearchField` + `?q=` + `filterTitles`) — not a Queue lookalike.
+// toolbar SoT (`HousePageSearch` + `?q=` + `filterTitles`) — not a Queue lookalike.
 
 export default async function GcQueuePage({
   searchParams,
@@ -131,7 +131,7 @@ export default async function GcQueuePage({
         <TitlesCatalogToolbar
           search={
             <Suspense fallback={null}>
-              <SearchField placeholder={TITLES_CATALOG.searchPlaceholder} />
+              <HousePageSearch placeholder={TITLES_CATALOG.searchPlaceholder} />
             </Suspense>
           }
         />

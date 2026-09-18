@@ -226,7 +226,7 @@ describe("GcQueuePage", () => {
     expect(src).toContain("@/components/titles/titles-catalog");
     expect(src).toContain("TitlesCatalogListRow");
     expect(src).toContain("TitlesCatalogToolbar");
-    expect(src).toContain("SearchField");
+    expect(src).toContain("HousePageSearch");
     expect(src).toContain("TITLES_CATALOG.searchPlaceholder");
     expect(src).toContain("filterTitles");
     expect(src).toContain("catalogSearchMissCopy");

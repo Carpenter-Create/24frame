@@ -148,7 +148,7 @@ export function TitlesCatalogToolbar({
     >
       {search ? (
         <div
-          className="min-w-0 w-full md:w-auto [&_input]:w-full [&_input]:sm:w-full md:[&_input]:w-56"
+          className="min-w-0 w-full md:w-56"
           data-titles-catalog-search=""
         >
           {search}

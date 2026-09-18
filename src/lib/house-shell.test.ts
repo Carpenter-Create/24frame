@@ -99,7 +99,7 @@ const HOUSE_SHELL_COMMENT_PATHS = [
   "src/app/(app)/(operator)/education/education-course-rail.tsx",
   "src/components/ui/card.tsx",
   "src/components/ui/page-header.tsx",
-  "src/components/layout/search-field.tsx",
+  "src/components/chrome/house-page-search.tsx",
   "src/components/chrome/house-page-select.tsx",
   "src/lib/house-page-select.ts",
 ] as const;

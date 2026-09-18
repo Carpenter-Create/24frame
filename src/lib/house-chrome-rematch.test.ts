@@ -328,7 +328,7 @@ describe("house chrome rematch miss list v1.1", () => {
   it("keeps house tokens, Titles content, and Delete/Archive unmixed", () => {
     expect(tokens).toMatch(/--accent:\s*#1769ff;/);
     expect(existsSync("src/app/tokens-social.css")).toBe(false);
-    expect(titlesPage).toContain("SearchField");
+    expect(titlesPage).toContain("HousePageSearch");
     expect(titlesCatalog).not.toMatch(/\bDelete\b/);
     expect(titlesPage).not.toMatch(/\bDelete\b/);
     expect(titlesPage).not.toMatch(/\bArchive\b/);
