@@ -64,12 +64,15 @@ export async function fetchNewsFeedXml(
 
 export async function fetchNewsArticleHtml(
   url: string,
-  init: { fetchImpl?: typeof fetch } = {},
+  init: { fetchImpl?: typeof fetch; timeoutMs?: number } = {},
 ): Promise<string | null> {
+  if (!/^https:\/\//i.test(url)) return null;
   const fetchImpl = init.fetchImpl ?? fetch;
+  const timeoutMs = init.timeoutMs ?? NEWS_OG_TIMEOUT_MS;
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), NEWS_OG_TIMEOUT_MS);
-  try {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
+  const work = (async (): Promise<string | null> => {
     const res = await fetchImpl(url, {
       signal: controller.signal,
       headers: {
@@ -82,10 +85,19 @@ export async function fetchNewsArticleHtml(
     const buf = new Uint8Array(await res.arrayBuffer());
     const slice = buf.byteLength > NEWS_OG_MAX_BYTES ? buf.subarray(0, NEWS_OG_MAX_BYTES) : buf;
     return new TextDecoder("utf-8").decode(slice);
-  } catch {
-    return null;
+  })().catch(() => null);
+
+  const timeout = new Promise<null>((resolve) => {
+    timer = setTimeout(() => {
+      controller.abort();
+      resolve(null);
+    }, timeoutMs);
+  });
+
+  try {
+    return await Promise.race([work, timeout]);
   } finally {
-    clearTimeout(timer);
+    if (timer) clearTimeout(timer);
   }
 }
 
@@ -94,15 +106,18 @@ export async function fillNewsOgImages(
   init: {
     fetchHtml?: (url: string) => Promise<string | null>;
     fetchImpl?: typeof fetch;
+    timeoutMs?: number;
   } = {},
 ): Promise<NormalizedNewsItem[]> {
   const fetchHtml =
-    init.fetchHtml ?? ((url: string) => fetchNewsArticleHtml(url, { fetchImpl: init.fetchImpl }));
+    init.fetchHtml ??
+    ((url: string) =>
+      fetchNewsArticleHtml(url, { fetchImpl: init.fetchImpl, timeoutMs: init.timeoutMs }));
   const missing = items.filter((item) => !item.image_url);
   if (missing.length === 0) return items.map((item) => item);
 
   const scraped = new Map<string, string | null>();
-  await runBatched(
+  await runPooled(
     missing,
     async (item) => {
       try {
@@ -119,6 +134,26 @@ export async function fillNewsOgImages(
     if (item.image_url) return item;
     return { ...item, image_url: scraped.get(item.canonical_url) ?? null };
   });
+}
+
+/** Sliding pool — a slow URL holds one slot, not the rest of the batch. */
+async function runPooled<T>(
+  items: readonly T[],
+  worker: (item: T) => Promise<void>,
+  concurrency: number,
+): Promise<void> {
+  if (items.length === 0) return;
+  let next = 0;
+  async function pump() {
+    while (next < items.length) {
+      const i = next;
+      next += 1;
+      await worker(items[i]!);
+    }
+  }
+  await Promise.all(
+    Array.from({ length: Math.min(Math.max(concurrency, 1), items.length) }, () => pump()),
+  );
 }
 
 async function runBatched<T, R>(

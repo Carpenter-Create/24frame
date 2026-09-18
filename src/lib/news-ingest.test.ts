@@ -8,6 +8,7 @@ import {
   fillNewsOgImages,
   ingestNewsFeeds,
 } from "./news-ingest";
+import { loadHomeNews, loadNewsHistory, resetNewsReadCache } from "./news-load";
 import type { NormalizedNewsItem } from "./news-rss";
 import { memoryNewsStore } from "./news-store";
 
@@ -218,6 +219,23 @@ describe("ingest OG images", () => {
     );
     expect(rows.find((row) => row.url === "https://hollywoodreporter.com/miss")?.image_url).toBeNull();
   });
+
+  it("persists scraped image_url so Home and history reads show the thumb", async () => {
+    resetNewsReadCache();
+    const persist = memoryNewsStore();
+    await ingestNewsFeeds({
+      persist,
+      now: NOW,
+      fetchXml: async (url: string) =>
+        url === "https://www.hollywoodreporter.com/feed/" ? FEED_NO_THUMB : EMPTY_FEED,
+      fetchOgHtml: async () =>
+        `<meta property="og:image" content="https://thr.com/og.jpg" />`,
+    });
+    const home = await loadHomeNews(NOW, persist);
+    const history = await loadNewsHistory(NOW, persist);
+    expect(home[0]?.image_url).toBe("https://thr.com/og.jpg");
+    expect(history.rows[0]?.image_url).toBe("https://thr.com/og.jpg");
+  });
 });
 
 describe("fetchNewsArticleHtml", () => {
@@ -235,6 +253,17 @@ describe("fetchNewsArticleHtml", () => {
         fetchImpl: async () => new Response("nope", { status: 503 }),
       }),
     ).toBeNull();
+    expect(await fetchNewsArticleHtml("http://hollywoodreporter.com/story")).toBeNull();
+  });
+
+  it("settles null when fetch hangs past the hard timeout", async () => {
+    const started = Date.now();
+    const html = await fetchNewsArticleHtml("https://hollywoodreporter.com/story", {
+      timeoutMs: 40,
+      fetchImpl: () => new Promise(() => {}),
+    });
+    expect(html).toBeNull();
+    expect(Date.now() - started).toBeLessThan(400);
   });
 });
 
@@ -251,6 +280,36 @@ describe("fillNewsOgImages", () => {
     const [row] = await fillNewsOgImages([liveItem()], { fetchImpl });
     expect(row?.image_url).toBe("https://cdn.variety.com/live.jpg");
     expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it("parses twitter:image when og:image is absent", async () => {
+    const fetchImpl = vi.fn<typeof fetch>(
+      async () => new Response(`<meta name="twitter:image" content="/tw.jpg" />`, { status: 200 }),
+    );
+    const [row] = await fillNewsOgImages([liveItem()], { fetchImpl });
+    expect(row?.image_url).toBe("https://variety.com/tw.jpg");
+  });
+
+  it("keeps a concurrency cap so one slow article does not pin the rest", async () => {
+    let inFlight = 0;
+    let maxInFlight = 0;
+    const items = Array.from({ length: 6 }, (_, i) => ({
+      ...liveItem(),
+      title: `Live ${i}`,
+      url: `https://variety.com/live-${i}`,
+      canonical_url: `https://variety.com/live-${i}`,
+    }));
+    await fillNewsOgImages(items, {
+      fetchHtml: async () => {
+        inFlight += 1;
+        maxInFlight = Math.max(maxInFlight, inFlight);
+        await new Promise((resolve) => setTimeout(resolve, 20));
+        inFlight -= 1;
+        return `<meta property="og:image" content="https://variety.com/x.jpg" />`;
+      },
+    });
+    expect(maxInFlight).toBeGreaterThan(1);
+    expect(maxInFlight).toBeLessThanOrEqual(NEWS_OG_CONCURRENCY);
   });
 
   it("skips items that already have image_url", async () => {
