@@ -78,5 +78,9 @@ export async function saveVendor(raw: unknown): Promise<{ error?: string }> {
   }
 
   revalidatePath("/vendors");
+  if (v.id) {
+    revalidatePath(`/vendors/${v.id}`);
+    revalidatePath(`/vendors/${v.id}/edit`);
+  }
   return {};
 }

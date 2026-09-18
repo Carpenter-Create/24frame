@@ -3,8 +3,14 @@ import { describe, expect, it } from "vitest";
 import { Constants } from "@/lib/supabase/database.types";
 import {
   CLIENTS_PAGE,
+  CLIENT_PROFILE,
   ORG_ROLE_LABELS,
   ORG_STATUS_LABELS,
+  clientDirectorySecondary,
+  clientOrgFields,
+  clientOrgHref,
+  filterClientOrgs,
+  parseClientDirectoryFilter,
   tierCell,
   toClientOrgs,
   type ClientDirectoryRow,
@@ -31,6 +37,8 @@ describe("CLIENTS_PAGE copy", () => {
   it("locks the staff Clients empty line", () => {
     expect(CLIENTS_PAGE.empty).toBe("No clients yet.");
     expect(CLIENTS_PAGE.empty.toLowerCase()).not.toContain("add");
+    expect(CLIENTS_PAGE.subtitle).toBe("Organizations with an active seat.");
+    expect(CLIENT_PROFILE.peopleTitle).toBe("People");
   });
 });
 
@@ -144,5 +152,28 @@ describe("toClientOrgs", () => {
   it("returns nothing when the RPC returned nothing", () => {
     expect(toClientOrgs(null)).toEqual([]);
     expect(toClientOrgs([])).toEqual([]);
+  });
+});
+
+describe("client directory profile helpers", () => {
+  it("builds the org href, quiet secondary, and known info fields", () => {
+    const [org] = toClientOrgs([row(), row({ user_id: "u2", email: "sam@acmefilms.com", role: "viewer" })]);
+    expect(clientOrgHref(org.orgId)).toBe(`/gc/clients/${org.orgId}`);
+    expect(clientDirectorySecondary(org)).toBe("2 people · Pro");
+    expect(clientOrgFields(org)).toEqual([
+      { label: "Status", value: "Active" },
+      { label: "Plan", value: "Pro" },
+      { label: "Term ends", value: "Aug 2027" },
+    ]);
+  });
+
+  it("filters orgs by status without merging names", () => {
+    const orgs = toClientOrgs([
+      row({ org_id: "one", org_status: "active" }),
+      row({ org_id: "two", organization: "Other", org_status: "registered", user_id: "u9" }),
+    ]);
+    expect(filterClientOrgs(orgs, "active")).toHaveLength(1);
+    expect(parseClientDirectoryFilter("payment_lapsed")).toBe("payment_lapsed");
+    expect(parseClientDirectoryFilter("nope")).toBe("all");
   });
 });

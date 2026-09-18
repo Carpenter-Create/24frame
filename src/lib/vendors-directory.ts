@@ -6,6 +6,7 @@ export const VENDORS_PAGE = {
   title: "Vendors",
   identity: "Credentials are never stored here.",
   emptyTitle: "No vendors yet",
+  filterMiss: "No vendors match this filter.",
   addVendor: "Add vendor",
   addHref: "/vendors/new",
 } as const;
@@ -71,4 +72,27 @@ export function vendorDirectoryHref(row: VendorDirectoryRow): string {
 export function vendorDirectoryMeta(row: VendorDirectoryRow): string {
   const mode = VENDOR_MODE_LABELS[row.deliveryMode];
   return row.active ? mode : `${mode} · inactive`;
+}
+
+export const VENDOR_DIRECTORY_FILTERS = [
+  { key: "all", label: "All" },
+  { key: "active", label: "Active" },
+  { key: "inactive", label: "Inactive" },
+] as const;
+
+export type VendorDirectoryFilter = (typeof VENDOR_DIRECTORY_FILTERS)[number]["key"];
+
+export function parseVendorDirectoryFilter(value: string | undefined): VendorDirectoryFilter {
+  return VENDOR_DIRECTORY_FILTERS.some((option) => option.key === value)
+    ? (value as VendorDirectoryFilter)
+    : "all";
+}
+
+export function filterVendorDirectory(
+  rows: readonly VendorDirectoryRow[],
+  filter: VendorDirectoryFilter,
+): VendorDirectoryRow[] {
+  if (filter === "active") return rows.filter((row) => row.active);
+  if (filter === "inactive") return rows.filter((row) => !row.active);
+  return [...rows];
 }

@@ -1,22 +1,53 @@
 import { createClient } from "@/lib/supabase/server";
-import { Card, CardBody } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { CLIENTS_PAGE, toClientOrgs, type ClientDirectoryRow } from "@/lib/clients";
+import { StatusFilter } from "@/components/layout/status-filter";
+import { StaffDirectoryList } from "@/components/staff/staff-directory-list";
+import {
+  CLIENTS_PAGE,
+  CLIENT_DIRECTORY_FILTERS,
+  clientDirectorySecondary,
+  clientOrgHref,
+  filterClientOrgs,
+  parseClientDirectoryFilter,
+  toClientOrgs,
+  type ClientDirectoryFilter,
+  type ClientDirectoryRow,
+} from "@/lib/clients";
 import { UNPAGINATED_MAX, splitProbe } from "@/lib/list-bounds";
+import {
+  STAFF_DIRECTORY_EMPTY_CLASS,
+  directoryCountLabel,
+  filterHref,
+} from "@/lib/staff-directory";
 
-// GC-wide client roster. /gc/clients is the dedicated operator URL; `/` reuses this
-// same surface as the staff home when the session has no client org. The RPC
-// re-checks is_gc_staff, so a direct call fails closed even if a React tree
-// renders this outside the (operator) layout.
-export async function GcClientsDirectory() {
+// GC-wide client roster. /gc/clients is the dedicated operator URL; `/`
+// reuses this same surface as the staff home when the session has no client
+// org. The RPC re-checks is_gc_staff, so a direct call fails closed even if
+// a React tree renders this outside the (operator) layout.
+
+export async function GcClientsDirectory({
+  statusFilter = "all",
+  showFilters = false,
+}: {
+  statusFilter?: ClientDirectoryFilter;
+  showFilters?: boolean;
+} = {}) {
   const supabase = await createClient();
 
-  // Probe one past the bound so truncation is VISIBLE rather than a short list that looks
-  // complete (src/lib/list-bounds.ts). The bound is on seats, not orgs — the RPC returns seats.
+  // Probe one past the bound so truncation is VISIBLE rather than a short list
+  // that looks complete (src/lib/list-bounds.ts). The bound is on seats, not
+  // orgs — the RPC returns seats.
   const { data } = await supabase.rpc("gc_client_directory", { p_limit: UNPAGINATED_MAX + 1 });
   const { rows: seats, truncated } = splitProbe(data as ClientDirectoryRow[] | null, UNPAGINATED_MAX);
-  const orgs = toClientOrgs(seats);
+  const orgs = filterClientOrgs(toClientOrgs(seats), statusFilter);
+  const rows = orgs.map((org) => ({
+    id: org.orgId,
+    name: org.organization,
+    secondary: clientDirectorySecondary(org),
+    trailing: org.status,
+    href: clientOrgHref(org.orgId),
+  }));
 
   return (
     <>
@@ -28,58 +59,20 @@ export async function GcClientsDirectory() {
         </InlineNotice>
       ) : null}
 
-      {orgs.length === 0 ? (
-        <Card>
-          <CardBody>
-            <p className="t-body-sm text-ink-3">{CLIENTS_PAGE.empty}</p>
-          </CardBody>
-        </Card>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {orgs.map((org) => (
-            <Card key={org.orgId}>
-              <CardBody className="flex flex-col gap-3">
-                {/* Org-level facts, stated once. Tier carries Stripe's status when abnormal. */}
-                <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                  <span className="t-body font-medium text-ink">{org.organization}</span>
-                  <span className="t-body-sm text-ink-2">
-                    {org.tier} · {org.status}
-                    {org.termEnds ? (
-                      <span className="text-ink-3"> · term ends {org.termEnds}</span>
-                    ) : null}
-                  </span>
-                </div>
-
-                {/* Seats. A real table so the header is associated with the cells. */}
-                <table className="w-full border-t border-hairline">
-                  <thead>
-                    <tr className="text-left">
-                      <th scope="col" className="t-label py-2 font-normal text-ink-3">
-                        Email
-                      </th>
-                      <th scope="col" className="t-label py-2 font-normal text-ink-3">
-                        Role
-                      </th>
-                      <th scope="col" className="t-label py-2 text-right font-normal text-ink-3">
-                        Last seen
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {org.seats.map((seat) => (
-                      <tr key={seat.userId}>
-                        <td className="t-body-sm py-1 text-ink">{seat.email}</td>
-                        <td className="t-body-sm py-1 text-ink-3">{seat.role}</td>
-                        <td className="t-body-sm py-1 text-right text-ink-3">{seat.lastSeen}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </CardBody>
-            </Card>
-          ))}
-        </div>
-      )}
+      <StaffDirectoryList
+        rows={rows}
+        countLabel={directoryCountLabel(rows.length, "client", "clients")}
+        filters={
+          showFilters ? (
+            <StatusFilter
+              current={statusFilter}
+              options={[...CLIENT_DIRECTORY_FILTERS]}
+              hrefFor={(key) => filterHref("/gc/clients", key)}
+            />
+          ) : undefined
+        }
+        empty={<p className={STAFF_DIRECTORY_EMPTY_CLASS}>{CLIENTS_PAGE.empty}</p>}
+      />
     </>
   );
 }

@@ -42,9 +42,36 @@ export type ClientOrg = {
 
 export const CLIENTS_PAGE = {
   title: "Clients",
-  subtitle: "Every person holding an active seat on a client organization.",
+  subtitle: "Organizations with an active seat.",
   empty: "No clients yet.",
 } as const;
+
+export const CLIENT_PROFILE = {
+  infoTitle: "Organization",
+  peopleTitle: "People",
+  peopleEmpty: "No people on this organization.",
+  status: "Status",
+  plan: "Plan",
+  termEnds: "Term ends",
+} as const;
+
+export function clientOrgHref(orgId: string): string {
+  return `/gc/clients/${orgId}`;
+}
+
+export function clientDirectorySecondary(org: ClientOrg): string {
+  const people = org.seats.length === 1 ? "1 person" : `${org.seats.length} people`;
+  return org.tier === "—" ? people : `${people} · ${org.tier}`;
+}
+
+export function clientOrgFields(org: ClientOrg): { label: string; value: string }[] {
+  const fields = [
+    { label: CLIENT_PROFILE.status, value: org.status },
+    { label: CLIENT_PROFILE.plan, value: org.tier },
+  ];
+  if (org.termEnds) fields.push({ label: CLIENT_PROFILE.termEnds, value: org.termEnds });
+  return fields;
+}
 
 // Role vocabulary matches the capability names in member_can, spelled for reading.
 export const ORG_ROLE_LABELS: Record<OrgRole, string> = {
@@ -64,6 +91,31 @@ export const ORG_STATUS_LABELS: Record<OrgStatus, string> = {
   payment_lapsed: "Payment lapsed",
   closed: "Closed",
 };
+
+export const CLIENT_DIRECTORY_FILTERS = [
+  { key: "all", label: "All" },
+  ...(Object.entries(ORG_STATUS_LABELS) as [OrgStatus, string][]).map(([key, label]) => ({
+    key,
+    label,
+  })),
+] as const;
+
+export type ClientDirectoryFilter = (typeof CLIENT_DIRECTORY_FILTERS)[number]["key"];
+
+export function parseClientDirectoryFilter(value: string | undefined): ClientDirectoryFilter {
+  return CLIENT_DIRECTORY_FILTERS.some((option) => option.key === value)
+    ? (value as ClientDirectoryFilter)
+    : "all";
+}
+
+export function filterClientOrgs(
+  orgs: readonly ClientOrg[],
+  filter: ClientDirectoryFilter,
+): ClientOrg[] {
+  if (filter === "all") return [...orgs];
+  const wanted = ORG_STATUS_LABELS[filter as OrgStatus];
+  return orgs.filter((org) => org.status === wanted);
+}
 
 const NO_VALUE = "—";
 
