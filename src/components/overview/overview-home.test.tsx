@@ -3,8 +3,18 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { OverviewHome } from "./overview-home";
-import { OVERVIEW_MODULE_ORDER, OVERVIEW_PAGE } from "@/lib/overview";
 import type { CourseRow } from "@/lib/courses";
+import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
+import { OVERVIEW_MODULE_ORDER, OVERVIEW_PAGE } from "@/lib/overview";
+
+function moduleChunk(html: string, testId: string): string {
+  const start = html.indexOf(`data-overview-module="${testId}"`);
+  if (start < 0) return "";
+  const next = html.indexOf("data-overview-module=", start + 1);
+  const aggregation = testId === "education" ? html.indexOf("data-overview-aggregation", start) : -1;
+  const cuts = [next, aggregation, html.length].filter((at) => at >= 0);
+  return html.slice(start, Math.min(...cuts));
+}
 
 function moduleOrder(html: string): string[] {
   const marks = [
@@ -68,6 +78,15 @@ describe("OverviewHome", () => {
     expect(html).toContain(OVERVIEW_PAGE.education);
     expect(html).toContain(OVERVIEW_PAGE.aiNext);
     expect(html).toContain(OVERVIEW_PAGE.aiAsk);
+    expect(html).toContain(`href="${OVERVIEW_PAGE.revenueHref}"`);
+    expect(html).toContain(`href="${OVERVIEW_PAGE.aiNextHref}"`);
+    expect(html).not.toContain(`href="${OVERVIEW_PAGE.socialHref}"`);
+    expect(html).not.toContain(`href="${OVERVIEW_PAGE.educationHref}"`);
+    expect(html).not.toContain(`href="${OVERVIEW_PAGE.needsYouHref}"`);
+    expect(moduleChunk(html, "social")).not.toContain(TEXT_ACTION_CLASS);
+    expect(moduleChunk(html, "education")).not.toContain(TEXT_ACTION_CLASS);
+    expect(moduleChunk(html, "needs-you")).not.toContain(TEXT_ACTION_CLASS);
+    expect(moduleChunk(html, "ai-next")).toContain(TEXT_ACTION_CLASS);
     expect(html).toContain(OVERVIEW_PAGE.needsYouEmpty);
     expect(html).toContain(OVERVIEW_PAGE.revenueEmpty);
     expect(html).toContain(OVERVIEW_PAGE.socialEmpty);
@@ -131,6 +150,14 @@ describe("OverviewHome", () => {
     expect(html).toContain('data-overview-ai-next="a2"');
     expect(html).toContain('data-overview-ai-next="a3"');
     expect(html).toContain("Ask 24Frame AI");
+    expect(html).toContain(`href="${OVERVIEW_PAGE.revenueHref}"`);
+    expect(html).toContain(`href="${OVERVIEW_PAGE.aiNextHref}"`);
+    expect(html).not.toContain(`href="${OVERVIEW_PAGE.socialHref}"`);
+    expect(html).not.toContain(`href="${OVERVIEW_PAGE.educationHref}"`);
+    expect(html).not.toContain(`href="${OVERVIEW_PAGE.needsYouHref}"`);
+    expect(moduleChunk(html, "social")).not.toContain(TEXT_ACTION_CLASS);
+    expect(moduleChunk(html, "education")).not.toContain(TEXT_ACTION_CLASS);
+    expect(moduleChunk(html, "needs-you")).not.toContain(TEXT_ACTION_CLASS);
     expect(html).not.toContain("%");
     expect(html).not.toContain("Globee");
   });

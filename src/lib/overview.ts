@@ -65,6 +65,18 @@ export const OVERVIEW_PAGE = {
   aiAsk: ASK_ASSISTANT,
 } as const;
 
+/** Header TextAction only when the label is distinct from the module title. */
+export function overviewModuleHeaderAction(
+  title: string,
+  href?: string,
+  cta?: string,
+): { href: string; label: string } | null {
+  if (!href) return null;
+  const label = (cta ?? title).trim();
+  if (label.toLowerCase() === title.trim().toLowerCase()) return null;
+  return { href, label };
+}
+
 export type OverviewLeadPillId = "home" | WorkspaceMode;
 
 export type OverviewLeadPill = {
