@@ -65,8 +65,8 @@ describe("client NAV", () => {
     expect(isClientNavActive("/titles", NAV[0])).toBe(false);
     expect(clientNavCurrent("/titles").label).toBe("Titles");
     expect(clientNavCurrent("/titles/abc").label).toBe("Titles");
-    expect(clientNavCurrent("/attention").label).toBe("Attention");
-    expect(clientNavCurrent("/catalog-health").label).toBe("Attention");
+    expect(clientNavCurrent("/attention").label).toBe("Recent activity");
+    expect(clientNavCurrent("/catalog-health").label).toBe("Recent activity");
     expect(clientNavCurrent("/reports").label).toBe("Reports");
     expect(clientNavCurrent("/analytics").label).toBe("Reports");
     expect(clientNavCurrent("/earn").label).toBe("Reports");
@@ -154,7 +154,7 @@ describe("GC_NAV", () => {
     expect([...NAV, ...GC_NAV].map((item) => item.label)).toEqual([
       "Dashboard",
       "Titles",
-      "Attention",
+      "Recent activity",
       "Reports",
       "Ask 24Frame AI",
       "Queue",
@@ -181,7 +181,7 @@ describe("mobileNavDestinations", () => {
     expect(mobileNavDestinations(false).map((item) => item.label)).toEqual([
       "Dashboard",
       "Titles",
-      "Attention",
+      "Recent activity",
       "Reports",
       "Ask 24Frame AI",
     ]);
@@ -196,7 +196,7 @@ describe("mobileNavDestinations", () => {
     expect(mobileNavDestinations(true).map((item) => item.label)).toEqual([
       "Dashboard",
       "Titles",
-      "Attention",
+      "Recent activity",
       "Reports",
       "Ask 24Frame AI",
       "Queue",

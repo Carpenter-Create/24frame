@@ -79,6 +79,8 @@ function stubClient(
       action: string;
       actor: string | null;
       at: string;
+      after?: unknown;
+      before?: unknown;
     }[];
     profiles?: { id: string; display_name: string | null }[];
     deliveries?: {
@@ -1007,6 +1009,73 @@ describe("company admin Overview hero", () => {
     expect(html).not.toContain("Licensed");
     expect(html).not.toContain("Removed");
     expect(html).not.toContain("Sample licensing");
+  });
+
+  it("maps title status updates and a closed performance report into Recent activity", async () => {
+    stubClient(
+      [
+        {
+          id: "11111111-1111-4111-8111-111111111111",
+          title: "Winter Light",
+          status: "live",
+          created_at: "2026-07-02T00:00:00.000Z",
+          catalog_id: "GC-0001234",
+        },
+      ],
+      [
+        {
+          id: "f1",
+          org_id: "org-1",
+          entity_id: "11111111-1111-4111-8111-111111111111",
+          severity: "high",
+          message: "Synopsis is required.",
+          created_at: "2026-09-12T15:04:00.000Z",
+        },
+      ],
+      {
+        audit: [
+          {
+            entity: "titles",
+            entity_id: "11111111-1111-4111-8111-111111111111",
+            action: "update",
+            actor: "sam",
+            at: "2026-09-08T16:00:00.000Z",
+            before: { status: "in_review" },
+            after: { status: "live" },
+          },
+        ],
+      },
+    );
+    vi.mocked(loadRecipientDashboard).mockResolvedValue({
+      periods: [],
+      latestClosed: {
+        id: "period-1",
+        org_id: "org-1",
+        period_year: 2026,
+        period_month: 8,
+        status: "closed",
+        opening_balance_cents: 0,
+        closing_balance_cents: 100,
+        threshold_cents: null,
+        closed_at: "2026-09-01T12:00:00.000Z",
+      },
+      latestStatement: { org: null } as never,
+      ledger: [],
+      clientRateBp: 8500,
+    });
+    vi.mocked(getOrgContext).mockResolvedValue(
+      ctx({ isGcStaff: false, orgStatus: "active", role: "account_owner" }) as never,
+    );
+    const html = renderToStaticMarkup(await DashboardPage({ searchParams: Promise.resolve({}) }));
+    expect(html).toContain('data-dashboard-module="recent-activity"');
+    expect(html).toContain("Winter Light");
+    expect(html).toContain("status updated to Approved");
+    expect(html).toContain(DASHBOARD_ADMIN.performanceReportAvailable);
+    expect(html).toContain('href="/reports/period-1"');
+    expect(html).not.toContain("Synopsis is required.");
+    expect(html).not.toContain(DASHBOARD_ADMIN.findingOpened);
+    expect(html).not.toContain('href="/attention"');
+    expect(html).not.toContain("Recent account activity");
   });
 
   it("surfaces audit_log actor initials and exact timestamp without inventing people", async () => {

@@ -136,6 +136,7 @@ describe("Dashboard Fidelity × Royalogic density", () => {
             detail: DASHBOARD_ADMIN.titleAdded,
             actorId: null,
             actor: { id: null, initial: "?" },
+            kind: "title_added",
           },
         ],
       }),

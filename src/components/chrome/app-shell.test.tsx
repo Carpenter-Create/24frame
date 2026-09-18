@@ -377,6 +377,7 @@ describe("AppShell /settings rail", () => {
     expect(html).not.toContain("Deliveries");
     expect(html).not.toContain("Catalog Health");
     expect(html).not.toContain("Attention");
+    expect(html).not.toContain("Recent activity");
     expect(html).not.toContain("Ask 24Frame AI");
     expect(html).not.toContain("Queue");
     expect(html).not.toContain("Expand sidebar");

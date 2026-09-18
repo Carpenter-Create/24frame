@@ -15,11 +15,11 @@ function src(rel: string): string {
 }
 
 describe("aggregation ops spine rematch", () => {
-  it("keeps Titles · Attention as distinct rail jobs", () => {
+  it("keeps Titles · Recent activity as distinct rail jobs", () => {
     expect(NAV.map((item) => item.label)).toEqual([
       "Dashboard",
       "Titles",
-      "Attention",
+      "Recent activity",
       "Reports",
       "Ask 24Frame AI",
     ]);

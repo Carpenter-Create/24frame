@@ -137,6 +137,7 @@ describe("DashboardAdminHero", () => {
             detail: DASHBOARD_ADMIN.titleAdded,
             actorId: "maya",
             actor: { id: "maya", initial: "M" },
+            kind: "title_added",
           },
         ],
       }),
@@ -159,6 +160,45 @@ describe("DashboardAdminHero", () => {
     );
     expect(html).not.toMatch(/data-dashboard-activity-clock=""[^>]*\bt-label\b/);
     expect(html).not.toContain("$");
+  });
+
+  it("renders title status and performance-report announcements, not findings", () => {
+    const html = renderToStaticMarkup(
+      createElement(DashboardRecentActivity, {
+        items: [
+          {
+            id: "title-status:a:2026-09-08T16:00:00.000Z",
+            title: "Winter Light",
+            href: "/titles/24F-0001234",
+            at: "2026-09-08T16:00:00.000Z",
+            count: 1,
+            detail: "status updated to Approved",
+            actorId: "sam",
+            actor: { id: "sam", initial: "S" },
+            kind: "title_status",
+          },
+          {
+            id: "report:period-1",
+            title: "",
+            href: "/reports/period-1",
+            at: "2026-09-01T12:00:00.000Z",
+            count: 1,
+            detail: DASHBOARD_ADMIN.performanceReportAvailable,
+            actorId: null,
+            actor: { id: null, initial: "?" },
+            kind: "performance_report",
+          },
+        ],
+      }),
+    );
+    expect(html).toContain("Winter Light");
+    expect(html).toContain("status updated to Approved");
+    expect(html.indexOf("Winter Light")).toBeLessThan(html.indexOf("status updated to Approved"));
+    expect(html).toContain(DASHBOARD_ADMIN.performanceReportAvailable);
+    expect(html).toContain('href="/reports/period-1"');
+    expect(html).not.toContain("Synopsis is required.");
+    expect(html).not.toContain('href="/attention"');
+    expect(html).not.toContain("data-dashboard-view-all");
   });
 
   it("does not mount Recharts or RevenueTimeline on the admin hero", () => {

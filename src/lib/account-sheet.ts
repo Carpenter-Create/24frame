@@ -44,7 +44,7 @@ export const ACCOUNT_SHEET_ABSENT = [
   "Dashboard",
   "Titles",
   "Deliveries",
-  "Attention",
+  "Recent activity",
   "Finance",
   ASK_ASSISTANT,
   "Queue",
