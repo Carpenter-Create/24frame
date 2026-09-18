@@ -55,6 +55,36 @@ describe("loadNewsItems", () => {
     expect(loaded.rows).toHaveLength(1);
   });
 
+  it("fills Home to 12 unique headlines when early titles collide", async () => {
+    const store = memoryNewsStore([
+      ...Array.from({ length: 5 }, (_, i) => ({
+        ...item(i + 1, `2026-09-17T${String(17 - i).padStart(2, "0")}:00:00.000Z`, "Harbor Cut lands a festival slot"),
+        url: `https://variety.com/harbor-cut-${i + 1}`,
+      })),
+      ...Array.from({ length: 12 }, (_, i) =>
+        item(i + 20, `2026-09-16T${String(20 - i).padStart(2, "0")}:00:00.000Z`),
+      ),
+    ]);
+    const home = await loadHomeNews(NOW, store);
+    expect(home).toHaveLength(12);
+  });
+
+  it("keeps truncated true when title collisions hide extra unique rows", async () => {
+    const store = memoryNewsStore([
+      item(1, "2026-09-17T12:00:00.000Z", "Harbor Cut lands a festival slot"),
+      {
+        ...item(2, "2026-09-17T11:00:00.000Z", "Harbor Cut lands a festival slot"),
+        url: "https://variety.com/harbor-cut-alt",
+      },
+      ...Array.from({ length: 12 }, (_, i) =>
+        item(i + 20, `2026-09-16T${String(20 - i).padStart(2, "0")}:00:00.000Z`),
+      ),
+    ]);
+    const loaded = await loadNewsItems({ limit: 12, now: NOW, store });
+    expect(loaded.rows).toHaveLength(12);
+    expect(loaded.truncated).toBe(true);
+  });
+
   it("does not cache a failed read as empty news", async () => {
     const queryFeed = vi.fn<(input: { limit: number; now: Date }) => Promise<NewsItem[]>>();
     queryFeed.mockRejectedValueOnce(new Error("boom"));

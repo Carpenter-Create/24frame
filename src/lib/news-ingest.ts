@@ -103,12 +103,12 @@ export async function ingestNewsFeeds(input: {
   const results = await runBatched(
     NEWS_SOURCES,
     async (source): Promise<NewsIngestSourceResult> => {
-      const health = await persist.getHealth(source.id);
-      if (!newsSourceIsLive(source.id, health)) {
-        console.log(JSON.stringify({ msg: "news ingest skip", source: source.id }));
-        return { source: source.id, fetched: 0, inserted: 0, skipped: true };
-      }
       try {
+        const health = await persist.getHealth(source.id);
+        if (!newsSourceIsLive(source.id, health)) {
+          console.log(JSON.stringify({ msg: "news ingest skip", source: source.id }));
+          return { source: source.id, fetched: 0, inserted: 0, skipped: true };
+        }
         const xml = await fetchXml(source.feedUrl);
         const items = parseNewsFeed(xml, source.id, now);
         const inserted = await persist.upsertItems(items, now);
@@ -125,7 +125,11 @@ export async function ingestNewsFeeds(input: {
       } catch (err) {
         const message = err instanceof Error ? err.message : "feed failed";
         console.error(JSON.stringify({ msg: "news ingest fail", source: source.id, error: message }));
-        await markHealth(persist, source.id, { now, error: message });
+        try {
+          await markHealth(persist, source.id, { now, error: message });
+        } catch {
+          // Health write must not fail the rest of the run.
+        }
         return { source: source.id, fetched: 0, inserted: 0, error: message };
       }
     },

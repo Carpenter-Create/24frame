@@ -58,6 +58,25 @@ describe("ingestNewsFeeds", () => {
     expect((await persist.getHealth("variety"))?.last_success_at).toBe(NOW.toISOString());
   });
 
+  it("fails soft when a health read throws so other sources still ingest", async () => {
+    const persist = memoryNewsStore();
+    const readHealth = persist.getHealth.bind(persist);
+    persist.getHealth = async (source) => {
+      if (source === "deadline") throw new Error("ProvisionedThroughputExceeded");
+      return readHealth(source);
+    };
+    const fetchXml = vi.fn(async () => FEED);
+    const summary = await ingestNewsFeeds({ persist, now: NOW, fetchXml });
+
+    expect(summary.failed).toBe(1);
+    expect(summary.results.find((row) => row.source === "deadline")?.error).toBe(
+      "ProvisionedThroughputExceeded",
+    );
+    expect(summary.inserted).toBeGreaterThan(0);
+    expect(fetchXml).toHaveBeenCalled();
+    expect((await persist.getHealth("variety"))?.last_success_at).toBe(NOW.toISOString());
+  });
+
   it("upserts the same canonical URL once and purges rows older than 30 days", async () => {
     const persist = memoryNewsStore();
     await persist.upsertItems(

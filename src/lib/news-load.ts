@@ -68,8 +68,15 @@ export async function loadNewsItems(input: {
   try {
     const store = input.store ?? createNewsAppStore();
     const [from, to] = probeRange(input.limit);
-    const fetched = await store.queryFeed({ limit: to - from + 1, now: input.now });
-    const unique = dedupeNewsHeadlines(fetched.filter((row) => newsInWindow(row.published_at, input.now)));
+    const probeLimit = to - from + 1;
+    let fetchLimit = probeLimit;
+    let unique: NewsItem[] = [];
+    for (;;) {
+      const fetched = await store.queryFeed({ limit: fetchLimit, now: input.now });
+      unique = dedupeNewsHeadlines(fetched.filter((row) => newsInWindow(row.published_at, input.now)));
+      if (unique.length >= probeLimit || fetched.length < fetchLimit) break;
+      fetchLimit += probeLimit;
+    }
     const { rows, truncated } = splitProbe(unique, input.limit);
     const loaded = { rows, truncated, failed: false };
     rememberNewsRead(key, loaded, input.now);
