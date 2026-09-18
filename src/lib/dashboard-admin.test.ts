@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { formatUsdCents } from "./finance";
+import { TITLE_STATUS_LABELS } from "./titles";
 import {
   DASHBOARD_ADMIN,
   DASHBOARD_HREF,
@@ -26,6 +27,7 @@ import {
   parseDashboardUserId,
   pointDelta,
   recentAccountActivity,
+  dashboardTitleStatusUpdatedDetail,
   revenueCompare,
   revenuePlayheadKey,
   dashboardDeltaLine,
@@ -250,6 +252,8 @@ describe("recent account activity", () => {
     expect(DASHBOARD_ADMIN.activity).toBe("Recent activity");
     expect(DASHBOARD_ADMIN.activity).not.toBe("Recent account activity");
     expect(DASHBOARD_ADMIN.activity).not.toBe("Attention");
+    expect(DASHBOARD_ADMIN.performanceReportAvailable).toBe("New performance report available");
+    expect(DASHBOARD_ADMIN.titleStatusUpdated).toBe("status updated to");
   });
 
   it("lists real title and delivery events newest first — never findings", () => {
@@ -378,5 +382,101 @@ describe("recent account activity", () => {
       { id: "unknown", initial: "?" },
     ]);
     expect(dashboardJustInTime("2026-09-02T15:04:00.000Z")).toMatch(/\d{1,2}:\d{2}/);
+  });
+
+  it("emits title status updates and performance reports from real account events", () => {
+    const rows = recentAccountActivity({
+      titles: [
+        {
+          id: "a",
+          title: "Winter Light",
+          status: "live",
+          created_at: "2026-07-02T00:00:00.000Z",
+          catalog_id: "GC-0001234",
+        },
+      ],
+      deliveries: [],
+      period: parseDashboardPeriod("all", now),
+      userId: null,
+      events: [
+        {
+          entity: "titles",
+          entity_id: "a",
+          action: "update",
+          actor: "sam",
+          at: "2026-09-08T16:00:00.000Z",
+          before: { status: "in_review" },
+          after: { status: "live" },
+        },
+        {
+          entity: "titles",
+          entity_id: "a",
+          action: "update",
+          actor: "sam",
+          at: "2026-09-07T16:00:00.000Z",
+          before: { status: "live" },
+          after: { status: "live" },
+        },
+        {
+          entity: "findings",
+          entity_id: "f1",
+          action: "insert",
+          actor: "maya",
+          at: "2026-09-09T16:00:00.000Z",
+          after: { message: "Synopsis is required." },
+        },
+      ],
+      report: {
+        id: "period-1",
+        at: "2026-09-01T12:00:00.000Z",
+        href: "/reports/period-1",
+      },
+    });
+    expect(rows.map((row) => row.kind)).toEqual([
+      "title_status",
+      "performance_report",
+      "title_added",
+    ]);
+    expect(rows[0]?.title).toBe("Winter Light");
+    expect(rows[0]?.detail).toBe(dashboardTitleStatusUpdatedDetail(TITLE_STATUS_LABELS.live));
+    expect(rows[0]?.detail).toBe("status updated to Approved");
+    expect(rows[1]?.detail).toBe(DASHBOARD_ADMIN.performanceReportAvailable);
+    expect(rows[1]?.href).toBe("/reports/period-1");
+    expect(rows.some((row) => row.kind === "title_status" && row.detail.includes("live"))).toBe(
+      false,
+    );
+    expect(rows.some((row) => row.id.startsWith("finding:"))).toBe(false);
+    expect(rows.some((row) => row.detail === "Synopsis is required.")).toBe(false);
+    expect(
+      recentAccountActivity({
+        titles: [
+          {
+            id: "a",
+            title: "Winter Light",
+            status: "live",
+            created_at: "2026-07-02T00:00:00.000Z",
+          },
+        ],
+        deliveries: [],
+        period: parseDashboardPeriod("all", now),
+        userId: "other",
+        events: [
+          {
+            entity: "titles",
+            entity_id: "a",
+            action: "update",
+            actor: "sam",
+            at: "2026-09-08T16:00:00.000Z",
+            before: { status: "in_review" },
+            after: { status: "live" },
+          },
+        ],
+        report: {
+          id: "period-1",
+          at: "2026-09-01T12:00:00.000Z",
+          href: "/reports/period-1",
+        },
+      }),
+    ).toEqual([]);
   });
 });

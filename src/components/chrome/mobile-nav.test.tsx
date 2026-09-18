@@ -169,7 +169,7 @@ describe("MobileNavSheet", () => {
     expect(NAV.map((item) => item.label)).toEqual([
       "Dashboard",
       "Titles",
-      "Attention",
+      "Recent activity",
       "Reports",
       "Ask 24Frame AI",
     ]);

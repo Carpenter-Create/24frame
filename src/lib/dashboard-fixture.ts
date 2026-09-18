@@ -69,11 +69,41 @@ export const DASHBOARD_FIXTURE_TERRITORIES: ReportsCountRow[] = [
 ];
 
 const FIXTURE_TITLES = [
-  { id: "fixture-title-1", title: "Sample title 01", count: 4, detail: DASHBOARD_ADMIN.titleAdded },
-  { id: "fixture-title-2", title: "Sample title 02", count: 2, detail: DASHBOARD_ADMIN.deliveryUpdated },
-  { id: "fixture-title-3", title: "Sample title 03", count: 3, detail: DASHBOARD_ADMIN.titleAdded },
-  { id: "fixture-title-4", title: "Sample title 04", count: 1, detail: DASHBOARD_ADMIN.titleAdded },
-  { id: "fixture-title-5", title: "Sample title 05", count: 2, detail: DASHBOARD_ADMIN.deliveryUpdated },
+  {
+    id: "fixture-title-1",
+    title: "Sample title 01",
+    count: 4,
+    detail: DASHBOARD_ADMIN.titleAdded,
+    kind: "title_added" as const,
+  },
+  {
+    id: "fixture-title-2",
+    title: "Sample title 02",
+    count: 2,
+    detail: DASHBOARD_ADMIN.deliveryUpdated,
+    kind: "delivery_updated" as const,
+  },
+  {
+    id: "fixture-title-3",
+    title: "Sample title 03",
+    count: 3,
+    detail: DASHBOARD_ADMIN.titleAdded,
+    kind: "title_added" as const,
+  },
+  {
+    id: "fixture-title-4",
+    title: "Sample title 04",
+    count: 1,
+    detail: DASHBOARD_ADMIN.titleAdded,
+    kind: "title_added" as const,
+  },
+  {
+    id: "fixture-title-5",
+    title: "Sample title 05",
+    count: 2,
+    detail: DASHBOARD_ADMIN.deliveryUpdated,
+    kind: "delivery_updated" as const,
+  },
 ] as const;
 
 export function dashboardFixtureLabel(value: string): string {
@@ -109,6 +139,7 @@ export function dashboardFixtureActivity(
         detail: title.detail,
         actorId: null,
         actor: { id: null, initial: "?" },
+        kind: title.kind,
       },
     ];
   });

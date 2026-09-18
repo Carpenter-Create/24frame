@@ -77,6 +77,7 @@ describe("Dashboard top-row height pair (Net | Recent activity)", () => {
         detail: DASHBOARD_ADMIN.titleAdded,
         actorId: null,
         actor: { id: null, initial: "?" },
+        kind: "title_added",
       },
     ]);
     expect(html).toContain('data-dashboard-module="recent-activity"');
