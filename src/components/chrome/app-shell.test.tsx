@@ -378,7 +378,11 @@ describe("AppShell /settings rail", () => {
     expect(html).not.toContain("Catalog Health");
     expect(html).not.toContain("Attention");
     expect(html).not.toContain("Recent activity");
-    expect(html).not.toContain("Ask 24Frame AI");
+    expect(html).toContain("data-ask-assistant-entry");
+    expect(html).toContain("data-activity-bell");
+    expect(html.slice(html.indexOf("data-settings-rail-nav"), html.indexOf("</nav>"))).not.toContain(
+      "Ask 24Frame AI",
+    );
     expect(html).not.toContain("Queue");
     expect(html).not.toContain("Expand sidebar");
     expect(html).not.toContain("Collapse sidebar");
@@ -562,6 +566,7 @@ describe("AppShell rail-collapse chevron", () => {
           orgs: [],
           activeOrgId: null,
           unread: Promise.resolve(0),
+          activityPreview: Promise.resolve({ items: [], openCount: 0 }),
           isGcStaff: true,
           defaultCollapsed: false,
           messagesSurface: "staff-inbox",

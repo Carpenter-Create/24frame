@@ -47,10 +47,16 @@ export type ActivityNotificationRow = {
   kind: NotificationKind;
   title: string;
   body: string;
-  source_refs: { title_id?: string } | null;
+  source_refs: unknown;
   created_at: string;
   unread: boolean;
 };
+
+function activityTitleId(sourceRefs: unknown): string | undefined {
+  if (!sourceRefs || typeof sourceRefs !== "object") return undefined;
+  const titleId = (sourceRefs as { title_id?: unknown }).title_id;
+  return typeof titleId === "string" ? titleId : undefined;
+}
 
 export type ActivityItem = {
   id: string;
@@ -98,12 +104,11 @@ export function activityHref(input: {
 }
 
 export function activityItemFromNotification(row: ActivityNotificationRow): ActivityItem {
-  const refs = row.source_refs ?? {};
   return {
     id: row.id,
     title: row.title,
     body: row.body,
-    href: NOTIFICATION_EMAIL[row.kind].path({ titleId: refs.title_id }),
+    href: NOTIFICATION_EMAIL[row.kind].path({ titleId: activityTitleId(row.source_refs) }),
     at: row.created_at,
     kind: row.kind,
     kindLabel: NOTIFICATION_KIND_LABEL[row.kind],

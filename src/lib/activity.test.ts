@@ -93,6 +93,9 @@ describe("Activity SoT", () => {
     expect(activityItemFromNotification(row({ id: "n3", source_refs: {} })).href).toBe(
       NOTIFICATION_EMAIL.delivery_update.path({}),
     );
+    expect(activityItemFromNotification(row({ id: "n4", source_refs: "nope" })).href).toBe(
+      NOTIFICATION_EMAIL.delivery_update.path({}),
+    );
   });
 
   it("filters Open vs Done vs All and applies Reports period grammar", () => {
