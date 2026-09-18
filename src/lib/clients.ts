@@ -1,8 +1,29 @@
 import type { Database } from "@/lib/supabase/database.types";
 import { TIER_META, type Tier } from "@/lib/agreements";
+import {
+  CLIENTS_PAGE,
+  CLIENT_DIRECTORY_FILTERS,
+  ORG_STATUS_LABELS,
+  clientDirectoryFilterLabel,
+  filterClientOrgs,
+  parseClientDirectoryFilter,
+  type ClientDirectoryFilter,
+  type OrgStatus,
+} from "./clients-filter";
+
+// Server/agreement directory logic. Client Components must import
+// clients-filter — this module pulls agreements (server-only).
 
 export type OrgRole = Database["public"]["Enums"]["org_role"];
-export type OrgStatus = Database["public"]["Enums"]["org_status"];
+export type { ClientDirectoryFilter, OrgStatus };
+export {
+  CLIENTS_PAGE,
+  CLIENT_DIRECTORY_FILTERS,
+  ORG_STATUS_LABELS,
+  clientDirectoryFilterLabel,
+  filterClientOrgs,
+  parseClientDirectoryFilter,
+};
 
 // One active seat on one client org, as returned by gc_client_directory().
 export type ClientDirectoryRow = {
@@ -39,12 +60,6 @@ export type ClientOrg = {
   termEnds: string | null;
   seats: ClientSeat[];
 };
-
-export const CLIENTS_PAGE = {
-  title: "Clients",
-  empty: "No clients yet.",
-  statusFilterLabel: "Filter by status",
-} as const;
 
 export const CLIENT_PROFILE = {
   infoTitle: "Organization",
@@ -86,45 +101,6 @@ export const ORG_ROLE_LABELS: Record<OrgRole, string> = {
   delivery_ops: "Delivery ops",
   viewer: "Viewer",
 };
-
-// Org lifecycle as GC sees it. Deliberately plain: an operator needs the state, not a
-// reassuring euphemism for it.
-export const ORG_STATUS_LABELS: Record<OrgStatus, string> = {
-  registered: "Registered",
-  awaiting_payment: "Awaiting payment",
-  active: "Active",
-  payment_lapsed: "Payment lapsed",
-  closed: "Closed",
-};
-
-export const CLIENT_DIRECTORY_FILTERS = [
-  { key: "all", label: "All" },
-  ...(Object.entries(ORG_STATUS_LABELS) as [OrgStatus, string][]).map(([key, label]) => ({
-    key,
-    label,
-  })),
-] as const;
-
-export type ClientDirectoryFilter = (typeof CLIENT_DIRECTORY_FILTERS)[number]["key"];
-
-export function parseClientDirectoryFilter(value: string | undefined): ClientDirectoryFilter {
-  return CLIENT_DIRECTORY_FILTERS.some((option) => option.key === value)
-    ? (value as ClientDirectoryFilter)
-    : "all";
-}
-
-export function clientDirectoryFilterLabel(status: ClientDirectoryFilter): string {
-  return CLIENT_DIRECTORY_FILTERS.find((option) => option.key === status)?.label ?? "All";
-}
-
-export function filterClientOrgs(
-  orgs: readonly ClientOrg[],
-  filter: ClientDirectoryFilter,
-): ClientOrg[] {
-  if (filter === "all") return [...orgs];
-  const wanted = ORG_STATUS_LABELS[filter as OrgStatus];
-  return orgs.filter((org) => org.status === wanted);
-}
 
 const NO_VALUE = "—";
 

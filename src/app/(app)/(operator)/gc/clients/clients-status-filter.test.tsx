@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
-import { CLIENTS_PAGE, ORG_STATUS_LABELS } from "@/lib/clients";
+import { CLIENTS_PAGE, ORG_STATUS_LABELS } from "@/lib/clients-filter";
 import { ClientsStatusFilter } from "./clients-status-filter";
 
 vi.mock("next/navigation", () => ({
