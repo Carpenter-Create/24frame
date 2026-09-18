@@ -26,8 +26,10 @@ import { HOUSE_HEADER_SEARCH_GAP_CLASS, HOUSE_SEARCH_PILL_CLASS } from "@/lib/ho
 import { EDUCATION_SEARCH } from "@/lib/course-search";
 import { SOCIAL } from "@/lib/social";
 import {
+  APP_HEADER_LEADING_CLASS,
   APP_HEADER_TRAILING_CLUSTER_CLASS,
   APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS,
+  APP_HEADER_WORKSPACE_PILL_HOST_CLASS,
 } from "@/lib/workspace-switcher";
 
 const leadLib = readFileSync("src/lib/house-lead-chrome.ts", "utf8");
@@ -184,9 +186,10 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(leadSrc).toContain("<AskAssistantHeaderLink />");
     expect(leadSrc).toContain("<ThemeToggle />");
     expect(leadSrc).toContain("<ActivityBell");
-    expect(HOUSE_THEME_TOGGLE_CLASS).toContain("size-[44px]");
-    expect(HOUSE_THEME_TOGGLE_CLASS).toContain("min-h-[44px]");
-    expect(HOUSE_THEME_TOGGLE_CLASS).toContain("md:size-8");
+    expect(HOUSE_THEME_TOGGLE_CLASS).toContain("size-8");
+    expect(HOUSE_THEME_TOGGLE_CLASS).toContain("min-h-8");
+    expect(HOUSE_THEME_TOGGLE_CLASS).toContain("min-w-8");
+    expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("size-[44px]");
     expect(HOUSE_THEME_TOGGLE_CLASS).toContain("rounded-full");
     expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("purple");
     expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("violet");
@@ -235,5 +238,32 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(shell).not.toContain("minHeight: \"calc(100dvh - var(--header-height))\"");
     expect(shell).not.toContain("data-aggregation-sticky");
     expect(leadSrc).not.toContain("fixed inset-x-0");
+  });
+
+  it("keeps phone emblem + workspace pill from overlapping the lead mark", () => {
+    expect(leadSrc).toContain("<BrandLogo />");
+    expect(leadSrc).not.toContain("BrandEmblem");
+    expect(leadSrc.match(/<BrandLogo/g)?.length).toBe(1);
+    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("gap-[var(--space-1)]");
+    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("md:gap-[var(--space-2)]");
+    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("max-md:shrink-0");
+    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).toBe("min-w-0 md:hidden");
+    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).not.toContain("shrink-0");
+    expect(APP_HEADER_LEADING_CLASS).toContain("max-md:overflow-hidden");
+    expect(APP_HEADER_LEADING_CLASS).toContain("min-w-0");
+    for (const workspace of ["aggregation", "social", "education"] as const) {
+      const html = leadHtml(workspace);
+      expect(html).toContain("data-brand-logo");
+      expect(html).toContain('data-brand-logo-mark="emblem"');
+      expect(html).toContain("/brand/24frame-emblem.svg");
+      expect(html).toContain("/brand/24frame-logo-light.svg");
+      expect(html).toContain("md:hidden");
+      expect(html.indexOf("data-brand-emblem")).toBeLessThan(
+        html.indexOf("data-app-header-workspace-pill"),
+      );
+      expect(html.indexOf("data-app-header-workspace-pill")).toBeLessThan(
+        html.indexOf("data-app-header-trailing"),
+      );
+    }
   });
 });

@@ -1,5 +1,5 @@
 // Shared top lead chrome for Aggregation · Social · Education.
-// [ Logo · fixed lead slot ] — [ optional search · same gap ] ····· [ switcher · Ask 24Frame AI · theme · bell · avatar ]
+// [ Emblem (phone) / wordmark (md+) · fixed lead slot ] — [ optional search · same gap ] ····· [ switcher · Ask 24Frame AI · theme · bell · avatar ]
 // Social live explore search and Education quiet courses/videos
 // search share Facebook-compact geometry (04-facebook.png SoT)
 // via one HouseLeadSearch primitive — never twin files.
@@ -18,8 +18,12 @@
 // scroll lives on main. Social + Education share this contract —
 // not an Aggregation-only sticky hack. Phone follows the same pin.
 
-import { HOUSE_CHROME_GUTTER_X_CLASS, HOUSE_HEADER_SEARCH_GAP_CLASS } from "@/lib/house-shell";
-import { MOBILE_CHROME_ICON_BUTTON_CLASS, MOBILE_CHROME_LEAD_PAD_CLASS } from "@/lib/mobile-chrome";
+import {
+  HOUSE_CHROME_GUTTER_X_CLASS,
+  HOUSE_HEADER_SEARCH_GAP_CLASS,
+  HOUSE_ICON_BUTTON_CLASS,
+} from "@/lib/house-shell";
+import { MOBILE_CHROME_LEAD_PAD_CLASS } from "@/lib/mobile-chrome";
 
 export const HOUSE_LEAD_SEARCH_WIDTH_PX = 240;
 
@@ -42,7 +46,8 @@ export const HOUSE_LEAD_SEARCH_PHONE_CLASS = "min-w-0 flex-1 md:hidden";
 export const HOUSE_LEAD_SEARCH_PILL_CLASS =
   "flex h-9 w-full min-w-0 items-center gap-2 px-3";
 
-// Header sun/moon. Phone uses the house 44 icon hit. Desktop matches
-// the 32 avatar. Circular quiet — no muted wash, no hairline box.
+// Header sun/moon · Ask · bell. Phone matches the 32 avatar so the
+// trailing cluster does not crush the lead mark. Desktop stays 32.
+// Circular quiet — no muted wash, no hairline box.
 export const HOUSE_THEME_TOGGLE_CLASS =
-  `${MOBILE_CHROME_ICON_BUTTON_CLASS} transition-colors hover:text-ink md:size-8 md:min-h-8 md:min-w-8`;
+  `flex size-8 min-h-8 min-w-8 shrink-0 items-center justify-center overflow-visible ${HOUSE_ICON_BUTTON_CLASS} text-ink-3 transition-colors hover:text-ink`;

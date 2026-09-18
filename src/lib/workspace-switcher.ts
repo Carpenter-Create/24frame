@@ -153,16 +153,18 @@ export const WORKSPACE_SWITCHER_OPTION_CHECK_GUTTER_CLASS = "size-4 shrink-0";
 export const WORKSPACE_SWITCHER_OPTION_CHECK_CLASS = "text-accent";
 
 export const APP_HEADER_TRAILING_CLUSTER_CLASS =
-  "flex min-w-0 items-center gap-[var(--space-2)] max-md:shrink-0";
+  "flex min-w-0 items-center gap-[var(--space-1)] md:gap-[var(--space-2)] max-md:shrink-0";
 
 export const APP_HEADER_EDUCATION_SEARCH_PHONE_CLASS = HOUSE_LEAD_SEARCH_PHONE_CLASS;
 
 export const APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS = HOUSE_LEAD_SEARCH_DESKTOP_CLASS;
 
 export const APP_HEADER_LEADING_CLASS =
-  "mr-auto flex min-w-0 flex-1 items-center gap-[var(--space-2)]";
+  "mr-auto flex min-w-0 flex-1 items-center gap-[var(--space-1)] md:gap-[var(--space-2)] max-md:overflow-hidden";
 
-export const APP_HEADER_WORKSPACE_PILL_HOST_CLASS = "shrink-0 md:hidden";
+// Phone pill yields (min-w-0 + truncate on the name) so it cannot
+// overlap the brand mark. Not shrink-0 — that was the crush.
+export const APP_HEADER_WORKSPACE_PILL_HOST_CLASS = "min-w-0 md:hidden";
 
 export const APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS = "hidden md:contents";
 

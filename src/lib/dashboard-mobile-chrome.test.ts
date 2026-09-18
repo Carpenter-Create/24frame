@@ -56,8 +56,11 @@ function chromeHtml() {
 describe("Aggregation Dashboard mobile chrome — Mercury leading pill", () => {
   it("puts a compact Aggregation pill after the hamburger — not centered, not with the avatar", () => {
     expect(APP_HEADER_LEADING_CLASS).toContain("gap-[var(--space-2)]");
+    expect(APP_HEADER_LEADING_CLASS).toContain("max-md:overflow-hidden");
     expect(APP_HEADER_LEADING_CLASS).not.toContain("justify-center");
     expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).toContain("md:hidden");
+    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).toContain("min-w-0");
+    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).not.toContain("shrink-0");
     expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).not.toContain("mx-auto");
     expect(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS).toContain("border-hairline");
     expect(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS).toContain("bg-surface-muted");
@@ -104,7 +107,8 @@ describe("Aggregation Dashboard mobile chrome — Mercury leading pill", () => {
 
   it("leaves the trailing avatar alone — no Aggregation+avatar phone cluster", () => {
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("shrink-0");
-    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("gap-[var(--space-2)]");
+    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("gap-[var(--space-1)]");
+    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("md:gap-[var(--space-2)]");
     expect(APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS).toContain("hidden");
     expect(APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS).toContain("md:contents");
     expect(leadSrc).toContain("data-app-header-trailing");

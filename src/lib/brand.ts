@@ -1,9 +1,10 @@
-// Brand marks. Header chrome uses the full 24Frame wordmark — Asset 4
-// (light, colored) and Asset 1 (dark, colored). Same SoT for
-// Aggregation · Social · Education · Overview. No workspace forks.
-// Favicon / apple / PWA is the 1080 PNG (Sporty Blue field, white 24 + corners).
-// That PNG supersedes Asset 10 SVG for favicon/PWA only.
-// Asset 8 emblem stays archived and unwired from the lead slot.
+// Brand marks. Phone lead (max-md / iPhone-class) uses Asset 8
+// emblem (`BRAND_EMBLEM_SRC`). md+ (iPad + desktop) uses the full
+// 24Frame wordmark — Asset 4 (light, colored) and Asset 1 (dark,
+// colored). Same SoT for Aggregation · Social · Education ·
+// Overview. No workspace forks. Favicon / apple / PWA is the 1080
+// PNG (Sporty Blue field, white 24 + corners). That PNG supersedes
+// Asset 10 SVG for favicon/PWA only.
 
 export const BRAND_LOGO_LIGHT_SRC = "/brand/24frame-logo-light.svg";
 export const BRAND_LOGO_DARK_SRC = "/brand/24frame-logo-dark.svg";
@@ -12,6 +13,10 @@ export const BRAND_LOGO_VIEWBOX = "0 0 1087.49 280.11";
 export const BRAND_LOGO_HEIGHT_PX = 24;
 
 export const BRAND_EMBLEM_SRC = "/brand/24frame-emblem.svg";
+/** Phone lead only. Hidden from the house `md` (768) split. */
+export const BRAND_PHONE_EMBLEM_CLASS = "h-5 w-auto md:hidden";
+/** Wordmark from `md` up. Hidden on phone. */
+export const BRAND_DESKTOP_WORDMARK_CLASS = "hidden h-5 w-auto md:h-6";
 export const BRAND_ICON_SRC = "/brand/24frame-favicon.png";
 export const BRAND_ICON_TYPE = "image/png";
 export const BRAND_ICON_SIZE = "1080x1080";
