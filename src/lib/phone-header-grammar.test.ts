@@ -10,7 +10,6 @@ vi.mock("next/navigation", () => ({
 }));
 
 import { HouseLeadChrome } from "@/components/chrome/house-lead-chrome";
-import { HouseLeadSearch } from "@/components/chrome/house-lead-search";
 import { AccountSheet, AccountMenuDropdown } from "@/components/chrome/account-sheet";
 import { SocialTopBar } from "@/components/social/social-top-bar";
 import {
