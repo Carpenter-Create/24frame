@@ -9,8 +9,8 @@ import { SettingsRail } from "./settings-rail";
 import { SettingsHeaderBack } from "./settings-header-back";
 import { MobileNav } from "./mobile-nav";
 import { MessagesAppHeader } from "./messages-app-header";
-import { EducationHeaderSearch } from "./education-header-search";
 import { HouseLeadChrome } from "./house-lead-chrome";
+import { HouseLeadSearch } from "./house-lead-search";
 import { RailCollapse } from "./rail-collapse";
 import { AskAssistantChromeProvider } from "@/components/messages/ask-globee-chrome";
 import { cn } from "@/lib/cn";
@@ -41,10 +41,6 @@ import {
 import { resolveWorkspaceMode, type WorkspaceMode } from "@/lib/workspace";
 import { SocialMobileTabBar } from "@/components/social/social-mobile-tab-bar";
 import { SocialRailAccountChip } from "@/components/social/social-rail-extras";
-import {
-  SocialHeaderSearch,
-  SocialHeaderSearchPhone,
-} from "@/components/social/social-header-search";
 
 type Org = { id: string; name: string };
 
@@ -155,8 +151,8 @@ export function AppShell({
           <HouseLeadChrome
             workspace="social"
             logoVisible="always"
-            search={<SocialHeaderSearch />}
-            phoneSearch={<SocialHeaderSearchPhone />}
+            search={<HouseLeadSearch tone="live" />}
+            phoneSearch={<HouseLeadSearch tone="live" presentation="icon" />}
             accountMenu={
               <AccountMenuSlot chrome={chrome} email={email} name={name} photoUrl={photoUrl} />
             }
@@ -265,14 +261,14 @@ export function AppShell({
         search={
           workspace === "education" && !settingsPage ? (
             <Suspense fallback={null}>
-              <EducationHeaderSearch />
+              <HouseLeadSearch tone="quiet" />
             </Suspense>
           ) : undefined
         }
         phoneSearch={
           workspace === "education" && !settingsPage ? (
             <Suspense fallback={null}>
-              <EducationHeaderSearch inputId="education-header-q-phone" />
+              <HouseLeadSearch tone="quiet" inputId="education-header-q-phone" />
             </Suspense>
           ) : undefined
         }

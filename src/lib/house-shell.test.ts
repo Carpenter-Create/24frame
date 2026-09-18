@@ -91,7 +91,7 @@ const HOUSE_SHELL_COMMENT_PATHS = [
   "src/components/chrome/app-shell.tsx",
   "src/components/chrome/side-nav.tsx",
   "src/components/social/social-top-bar.tsx",
-  "src/components/social/social-header-search.tsx",
+  "src/components/chrome/house-lead-search.tsx",
   "src/lib/house-lead-chrome.ts",
   "src/components/chrome/house-lead-chrome.tsx",
   "src/lib/social-chrome.ts",
@@ -168,12 +168,12 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
   });
 
   it("rematches Social header Search, rail type, filters, and tab accent", () => {
-    const socialSearch = readFileSync("src/components/social/social-header-search.tsx", "utf8");
-    expect(socialSearch).toContain("HOUSE_SEARCH_PILL_CLASS");
-    expect(socialSearch).toContain("placeholder:text-ink-3");
-    expect(socialSearch).toContain("text-ink-3");
-    expect(socialSearch).toContain("text-ink-2");
-    expect(socialSearch).not.toContain("rounded-[10px]");
+    const leadSearch = readFileSync("src/components/chrome/house-lead-search.tsx", "utf8");
+    expect(leadSearch).toContain("HOUSE_SEARCH_PILL_CLASS");
+    expect(leadSearch).toContain("placeholder:text-ink-3");
+    expect(leadSearch).toContain("text-ink-3");
+    expect(leadSearch).toContain("text-ink-2");
+    expect(leadSearch).not.toContain("rounded-[10px]");
     expect(socialTopBar).toContain("HouseLeadChrome");
     expect(socialChrome).toContain("HOUSE_FILTER_ON_CLASS");
     expect(SOCIAL_PILL_ACTIVE_CLASS).toBe(HOUSE_FILTER_ON_CLASS);

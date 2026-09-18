@@ -9,9 +9,8 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
-import { EducationHeaderSearch } from "@/components/chrome/education-header-search";
 import { HouseLeadChrome } from "@/components/chrome/house-lead-chrome";
-import { SocialHeaderSearch } from "@/components/social/social-header-search";
+import { HouseLeadSearch } from "@/components/chrome/house-lead-search";
 import { SocialTopBar } from "@/components/social/social-top-bar";
 import {
   HOUSE_LEAD_CHROME_CLASS,
@@ -35,8 +34,7 @@ const leadLib = readFileSync("src/lib/house-lead-chrome.ts", "utf8");
 const leadSrc = readFileSync("src/components/chrome/house-lead-chrome.tsx", "utf8");
 const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
 const topBar = readFileSync("src/components/social/social-top-bar.tsx", "utf8");
-const socialSearch = readFileSync("src/components/social/social-header-search.tsx", "utf8");
-const educationSearch = readFileSync("src/components/chrome/education-header-search.tsx", "utf8");
+const leadSearch = readFileSync("src/components/chrome/house-lead-search.tsx", "utf8");
 
 function leadHtml(workspace: "aggregation" | "social" | "education") {
   return renderToStaticMarkup(
@@ -45,9 +43,9 @@ function leadHtml(workspace: "aggregation" | "social" | "education") {
       logoVisible: workspace === "social" ? "always" : "desktop",
       search:
         workspace === "social"
-          ? createElement(SocialHeaderSearch)
+          ? createElement(HouseLeadSearch, { tone: "live" })
           : workspace === "education"
-            ? createElement(EducationHeaderSearch)
+            ? createElement(HouseLeadSearch, { tone: "quiet" })
             : undefined,
       accountMenu: createElement("div", { "data-user-menu-host": "" }),
     }),
@@ -98,9 +96,9 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(HOUSE_LEAD_SEARCH_WIDTH_PX).toBe(240);
     expect(HOUSE_LEAD_SEARCH_DESKTOP_CLASS).toBe("hidden w-[240px] shrink-0 md:flex");
     expect(leadLib).toContain("Facebook-compact");
-    expect(socialSearch).toContain("HOUSE_LEAD_SEARCH_PILL_CLASS");
-    expect(socialSearch).toContain("data-social-header-search");
-    expect(socialSearch).not.toContain("w-[420px]");
+    expect(leadSearch).toContain("HOUSE_LEAD_SEARCH_PILL_CLASS");
+    expect(leadSearch).toContain("data-social-header-search");
+    expect(leadSearch).not.toContain("w-[420px]");
 
     const social = leadHtml("social");
     expect(social).toContain("data-house-lead-search");
@@ -117,8 +115,8 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
   });
 
   it("G4 mounts Education quiet search with the same gap and width as Social", () => {
-    expect(educationSearch).toContain("HOUSE_LEAD_SEARCH_PILL_CLASS");
-    expect(educationSearch).not.toContain("w-[420px]");
+    expect(leadSearch).toContain("HOUSE_LEAD_SEARCH_PILL_CLASS");
+    expect(leadSearch).not.toContain("w-[420px]");
 
     const social = leadHtml("social");
     const education = leadHtml("education");

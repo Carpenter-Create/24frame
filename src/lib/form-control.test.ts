@@ -19,7 +19,7 @@ const socialEdit = readFileSync("src/components/social/social-profile-edit.tsx",
 const socialBio = readFileSync("src/components/social/social-profile-bio.tsx", "utf8");
 const socialForms = readFileSync("src/components/social/social-forms.tsx", "utf8");
 const socialExplore = readFileSync("src/app/(app)/social/explore/page.tsx", "utf8");
-const socialTopBar = readFileSync("src/components/social/social-header-search.tsx", "utf8");
+const houseLeadSearch = readFileSync("src/components/chrome/house-lead-search.tsx", "utf8");
 const housePageSearch = readFileSync("src/components/chrome/house-page-search.tsx", "utf8");
 
 function walkTsx(dir: string, acc: string[] = []): string[] {
@@ -108,8 +108,9 @@ describe("form-control SoT", () => {
     expect(socialForms).not.toContain("<textarea");
     expect(socialExplore).toContain("<Input");
     expect(socialExplore).toContain('id="social-explore-q"');
-    expect(socialTopBar).toContain("<Input");
-    expect(socialTopBar).toContain('id="social-header-q"');
+    expect(houseLeadSearch).toContain("<Input");
+    expect(houseLeadSearch).toContain("social-header-q");
+    expect(houseLeadSearch).toContain("id={inputId}");
     expect(housePageSearch).toContain("<Input");
     expect(housePageSearch).toContain('variant="bare"');
     expect(housePageSearch).not.toContain("t-body-sm");
