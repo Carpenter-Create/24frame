@@ -6,11 +6,11 @@ import { describe, expect, it } from "vitest";
 import { NewsCard } from "./news-card";
 import { NewsRail } from "./news-rail";
 import {
-  DASHBOARD_ADMIN_PAIR_CLASS,
   DASHBOARD_CARD_PAD,
   DASHBOARD_LICENSING_THUMB_CLASS,
   DASHBOARD_MODULE_CARD_CLASS,
   DASHBOARD_NEWS_HISTORY_LIST_CLASS,
+  DASHBOARD_NEWS_HISTORY_THUMB_CLASS,
   DASHBOARD_NEWS_THUMB_CLASS,
   DASHBOARD_SECTION_TITLE_CLASS,
 } from "@/lib/dashboard-craft";
@@ -40,7 +40,7 @@ function markupClass(value: string): string {
 }
 
 describe("NewsCard", () => {
-  it("stacks media, headline, then source and time on a discrete house card", () => {
+  it("uses a dense horizontal history row — thumb left, title and source right", () => {
     const html = renderToStaticMarkup(createElement(NewsCard, { item: ITEM, now: NOW }));
     expect(html).toContain("Harbor Cut lands a festival slot");
     expect(html).toContain("Variety");
@@ -49,15 +49,26 @@ describe("NewsCard", () => {
     expect(html).toContain("noopener");
     expect(html).toContain("https://variety.com/thumbs/harbor.jpg");
     expect(html).toContain("data-news-time");
+    expect(html).toContain('data-news-card-density="history"');
     expect(html).toContain(DASHBOARD_CARD_PAD);
     expect(html).toContain(DASHBOARD_MODULE_CARD_CLASS);
-    expect(html).toContain(markupClass(DASHBOARD_NEWS_THUMB_CLASS));
+    expect(html).toContain(markupClass(DASHBOARD_NEWS_HISTORY_THUMB_CLASS));
     expect(html).not.toContain(markupClass(DASHBOARD_LICENSING_THUMB_CLASS));
     expect(html.indexOf("data-news-thumb")).toBeLessThan(html.indexOf("Harbor Cut lands a festival slot"));
     expect(html.indexOf("Harbor Cut lands a festival slot")).toBeLessThan(html.indexOf("data-news-time"));
-    expect(html).toContain("flex flex-col");
-    expect(html).not.toContain("items-start");
+    expect(html).toContain("items-start");
     expect(html).not.toMatch(/summary|rewrite|republish/i);
+  });
+
+  it("keeps Home stacked image-top tiles", () => {
+    const html = renderToStaticMarkup(
+      createElement(NewsCard, { item: ITEM, now: NOW, density: "home" }),
+    );
+    expect(html).toContain('data-news-card-density="home"');
+    expect(html).toContain("flex flex-col");
+    expect(html).toContain(markupClass(DASHBOARD_NEWS_THUMB_CLASS));
+    expect(html).not.toContain(markupClass(DASHBOARD_NEWS_HISTORY_THUMB_CLASS));
+    expect(html).not.toContain("items-start");
   });
 });
 
@@ -95,15 +106,15 @@ describe("NewsRail", () => {
     expect(html).not.toContain("divide-y");
   });
 
-  it("uses the house pair grid on /home/news history — same stacked cards, no inner title", () => {
+  it("uses dense full-width history rows — no pair grid, no inner title", () => {
     const html = renderToStaticMarkup(
       createElement(NewsRail, { items: [ITEM, SECOND], now: NOW, history: true }),
     );
     expect(html).toContain(DASHBOARD_NEWS_HISTORY_LIST_CLASS);
-    expect(html).toContain("lg:grid-cols-2");
-    expect(html).toContain(markupClass(DASHBOARD_NEWS_THUMB_CLASS));
+    expect(html).not.toContain("lg:grid-cols-2");
+    expect(html).toContain(markupClass(DASHBOARD_NEWS_HISTORY_THUMB_CLASS));
+    expect(html).toContain("items-start");
     expect(html.indexOf("data-news-thumb")).toBeLessThan(html.indexOf("Harbor Cut lands a festival slot"));
-    expect(html).not.toContain("items-start");
     expect(html).not.toContain(DASHBOARD_SECTION_TITLE_CLASS);
     expect(html).not.toContain(NEWS_PAGE.title);
   });
@@ -128,12 +139,14 @@ describe("news UI source", () => {
     expect(card).not.toMatch(/\b(item\.(summary|description|body)|content:encoded)\b/);
     expect(rail).not.toMatch(/\b(item\.(summary|description|body)|content:encoded)\b/);
     expect(card).toContain("DASHBOARD_NEWS_THUMB_CLASS");
+    expect(card).toContain("DASHBOARD_NEWS_HISTORY_THUMB_CLASS");
     expect(card).toContain("DASHBOARD_MODULE_CARD_CLASS");
     expect(card).toContain("flex flex-col");
-    expect(card).not.toContain("items-start");
+    expect(card).toContain("items-start");
     expect(card).not.toContain("DASHBOARD_LICENSING_THUMB_CLASS");
     expect(rail).toContain("OverviewModule");
     expect(rail).toContain("DASHBOARD_NEWS_HISTORY_LIST_CLASS");
-    expect(DASHBOARD_NEWS_HISTORY_LIST_CLASS).toBe(DASHBOARD_ADMIN_PAIR_CLASS);
+    expect(DASHBOARD_NEWS_HISTORY_LIST_CLASS).toContain("flex flex-col");
+    expect(DASHBOARD_NEWS_HISTORY_LIST_CLASS).not.toContain("lg:grid-cols-2");
   });
 });

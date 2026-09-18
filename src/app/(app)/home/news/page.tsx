@@ -2,17 +2,23 @@ import { redirect } from "next/navigation";
 
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { PageHeader } from "@/components/ui/page-header";
-import { NewsRail } from "@/components/news/news-rail";
-import { NEWS_PAGE, newsHistoryBackLink } from "@/lib/news";
+import { NewsHistory } from "@/components/news/news-history";
+import { NEWS_PAGE, NEWS_SOURCE_PARAM, newsHistoryBackLink, parseNewsSourceFilter } from "@/lib/news";
 import { loadNewsHistory } from "@/lib/news-load";
 import { getOrgContext } from "@/lib/supabase/context";
 
-export default async function NewsPage() {
+export default async function NewsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const ctx = await getOrgContext();
   if (!ctx) redirect("/login");
 
   const now = new Date();
   const loaded = await loadNewsHistory(now);
+  const sp = await (searchParams ?? Promise.resolve({} as Record<string, string | string[] | undefined>));
+  const selected = parseNewsSourceFilter(sp[NEWS_SOURCE_PARAM]);
 
   return (
     <div data-news-history="">
@@ -26,7 +32,11 @@ export default async function NewsPage() {
           {NEWS_PAGE.truncated}
         </InlineNotice>
       ) : null}
-      <NewsRail items={loaded.failed ? [] : loaded.rows} now={now} history />
+      <NewsHistory
+        items={loaded.failed ? [] : loaded.rows}
+        now={now}
+        selected={selected}
+      />
     </div>
   );
 }

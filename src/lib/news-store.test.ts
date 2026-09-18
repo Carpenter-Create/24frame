@@ -18,7 +18,7 @@ function item(n: number, published_at: string): NormalizedNewsItem {
 }
 
 describe("memoryNewsStore", () => {
-  it("upserts the same canonical URL once and keeps Home at 15 inside 30 days", async () => {
+  it("upserts the same canonical URL once and keeps Home at 15 inside 90 days", async () => {
     const store = memoryNewsStore();
     const first = item(1, "2026-09-17T12:00:00.000Z");
     await store.upsertItems([first], NOW);
@@ -34,14 +34,14 @@ describe("memoryNewsStore", () => {
       item(i + 1, "2026-09-17T12:00:00.000Z"),
     );
     await store.upsertItems(batch, NOW);
-    await store.upsertItems([item(99, "2026-08-01T12:00:00.000Z")], NOW);
+    await store.upsertItems([item(99, "2026-06-01T12:00:00.000Z")], NOW);
     const home = await store.queryFeed({ limit: NEWS_HOME_CAP, now: NOW });
     expect(NEWS_HOME_CAP).toBe(15);
     expect(home).toHaveLength(15);
-    expect(home.every((row) => row.published_at >= "2026-08-19T18:00:00.000Z")).toBe(true);
+    expect(home.every((row) => row.published_at >= "2026-06-20T18:00:00.000Z")).toBe(true);
 
     const windowed = await store.queryFeed({ limit: 50, now: NOW });
     expect(windowed.some((row) => row.url.endsWith("/h99"))).toBe(false);
-    expect(await store.purgeBefore("2026-08-19T18:00:00.000Z")).toBe(1);
+    expect(await store.purgeBefore("2026-06-20T18:00:00.000Z")).toBe(1);
   });
 });

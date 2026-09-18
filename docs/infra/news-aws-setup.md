@@ -10,7 +10,7 @@ Names below are the proposed live set for Adam confirm, aligned with
 finance isolation in [`finance-aws-setup.md`](finance-aws-setup.md).
 
 Auth stays Supabase Auth. The app **reads** DynamoDB on Home (15) and
-`/home/news` (30-day window; `/news` permanently redirects). Ingest
+`/home/news` (90-day window; `/news` permanently redirects). Ingest
 **writes** DynamoDB. Page requests never fan out RSS. RSS media /
 enclosure first; when `image_url` is null, ingest OG-scrapes the
 article (`og:image` / `twitter:image`, 4s timeout, fail-soft).
@@ -25,7 +25,7 @@ article (`og:image` / `twitter:image`, 4s timeout, fail-soft).
 | Dev table | `24frame-news-dev` | Preview / local. |
 | Keys | `pk` + `sk` | Item: `ITEM#<canonical_url>` / `ITEM`. Health: `SOURCE#<id>` / `HEALTH`. |
 | GSI1 | `gsi1` on `gsi1pk` + `gsi1sk` | Feed: `FEED` / `<published_at>#<canonical_url>`. Home + `/home/news` Query. |
-| TTL | `ttl` epoch seconds | `published_at + 30 days`. Dynamo expires the row. |
+| TTL | `ttl` epoch seconds | `published_at + 90 days`. Dynamo expires the row. |
 | App IAM user | `24frame-news-app` | `NEWS_AWS_*` Query/Get on the table. Vercel Production + Preview. |
 | Ingest role | `24frame-news-ingest` | Lambda trust. Put/Get/Query on the table. |
 | Lambda | `24frame-news-ingest` | Node 20+. Handler `workers/news/handler.handler`. 60s timeout. |
@@ -102,8 +102,8 @@ Do **not** create these from this PR.
 
 1. EventBridge invoked Lambda in the last 30–60 minutes.
 2. CloudWatch log `{ "msg": "news ingest done", "failed": 0, ... }`.
-3. Home News rail shows up to 12 rows from Dynamo (not a live RSS pull).
-4. `/home/news` lists the same cards inside 30 days (`/news` → `/home/news`).
+3. Home News rail shows up to 15 rows from Dynamo (not a live RSS pull).
+4. `/home/news` lists dense history rows inside 90 days (`/news` → `/home/news`).
 5. DLQ depth is 0.
 
 ## Ops
@@ -113,7 +113,7 @@ Do **not** create these from this PR.
 
 **Kill a source.** Set `enabled: false` on that const row (deploy), or
 Put `SOURCE#<id>` / `HEALTH` with `enabled=false` (no deploy). Ingest
-skips it; existing rows age out via TTL / the 30-day query window.
+skips it; existing rows age out via TTL / the 90-day query window.
 
 **Trigger ingest.** After founder apply:
 

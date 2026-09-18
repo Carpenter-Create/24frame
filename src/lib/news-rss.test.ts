@@ -20,7 +20,7 @@ const RSS = `<?xml version="1.0"?>
     <item>
       <title>Old headline</title>
       <link>https://variety.com/old</link>
-      <pubDate>Thu, 01 Aug 2026 12:00:00 GMT</pubDate>
+      <pubDate>Mon, 01 Jun 2026 12:00:00 GMT</pubDate>
     </item>
     <item>
       <title>Same story again</title>

@@ -1,7 +1,10 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DASHBOARD_NEWS_HISTORY_LIST_CLASS } from "@/lib/dashboard-craft";
+import {
+  DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS,
+  DASHBOARD_NEWS_HISTORY_LIST_CLASS,
+} from "@/lib/dashboard-craft";
 import { NEWS_HOME_HREF, NEWS_PAGE, newsHistoryBackLink } from "@/lib/news";
 import { loadNewsHistory } from "@/lib/news-load";
 import { OVERVIEW_HREF, OVERVIEW_PAGE } from "@/lib/overview";
@@ -45,7 +48,7 @@ describe("NewsPage", () => {
     vi.clearAllMocks();
   });
 
-  it("renders the 30-day history with a Home crumb and no inner News rail title", async () => {
+  it("renders the 90-day history with a Home crumb, list + Sources rail, and no inner News title", async () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
     vi.mocked(loadNewsHistory).mockResolvedValue({
       rows: [ITEM],
@@ -53,10 +56,11 @@ describe("NewsPage", () => {
       failed: false,
     });
 
-    const html = renderToStaticMarkup(await NewsPage());
+    const html = renderToStaticMarkup(await NewsPage({ searchParams: Promise.resolve({}) }));
     expect(html).toContain("data-news-history");
     expect(html).toContain(NEWS_PAGE.title);
     expect(html).toContain(NEWS_PAGE.subtitle);
+    expect(html).toContain("90 days");
     expect(html).toContain(`href="${NEWS_HOME_HREF}"`);
     expect(html).toContain(NEWS_PAGE.back);
     expect(newsHistoryBackLink()).toEqual({ href: OVERVIEW_HREF, label: OVERVIEW_PAGE.title });
@@ -64,12 +68,31 @@ describe("NewsPage", () => {
     expect(html).toContain("Harbor Cut lands a festival slot");
     expect(html).toContain("https://variety.com/harbor-cut");
     expect(html).toContain("Variety");
+    expect(html).toContain(DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS);
     expect(html).toContain(DASHBOARD_NEWS_HISTORY_LIST_CLASS);
+    expect(html).toContain("data-news-sources-rail");
+    expect(html).toContain(NEWS_PAGE.sources);
     expect(html).toContain("flex flex-col");
     expect(html.indexOf("data-news-thumb")).toBeLessThan(html.indexOf("Harbor Cut lands a festival slot"));
+    expect(html).not.toContain("lg:grid-cols-2");
     expect(html).not.toMatch(/summary|rewrite|republish/i);
     expect(html).not.toContain(NEWS_PAGE.viewAll);
     expect(html.split(NEWS_PAGE.title).length - 1).toBe(1);
+  });
+
+  it("honors ?source= on first paint", async () => {
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+    vi.mocked(loadNewsHistory).mockResolvedValue({
+      rows: [ITEM],
+      truncated: false,
+      failed: false,
+    });
+
+    const html = renderToStaticMarkup(
+      await NewsPage({ searchParams: Promise.resolve({ source: "joblo" }) }),
+    );
+    expect(html).toContain(NEWS_PAGE.filterEmpty);
+    expect(html).not.toContain("Harbor Cut lands a festival slot");
   });
 
   it("sends an unauthenticated visitor to login", async () => {

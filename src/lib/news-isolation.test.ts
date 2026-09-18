@@ -26,6 +26,9 @@ describe("News AWS setup doc", () => {
     expect(current).toContain("Industry News AWS");
     expect(current).toContain("Not Vercel cron");
     expect(current).toContain("/home/news");
+    expect(current).toContain("ninety-day");
+    expect(infra).toContain("90-day window");
+    expect(infra).toContain("published_at + 90 days");
     expect(envExample).toContain("NEWS_AWS_ACCESS_KEY_ID=");
     expect(envExample).toContain("NEWS_DDB_TABLE=");
     expect(envExample).toContain("Never fall back to AWS_* / FINANCE_AWS_* /");
@@ -41,6 +44,8 @@ describe("News AWS setup doc", () => {
     expect(historySrc).not.toContain("loadNewsHistory(supabase");
     expect(historySrc).toContain("backLink");
     expect(historySrc).toContain("newsHistoryBackLink");
+    expect(historySrc).toContain("NewsHistory");
+    expect(historySrc).toContain("NEWS_SOURCE_PARAM");
     expect(existsSync("src/app/(app)/home/news/page.tsx")).toBe(true);
     expect(infra).toContain("Image backfill");
     expect(loadSrc).not.toMatch(/from ["']@\/lib\/supabase/);
