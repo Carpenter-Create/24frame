@@ -22,6 +22,7 @@ import {
   type OverviewCourse,
   type OverviewPulseModel,
 } from "@/lib/overview";
+import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { signedEducationCoverUrls } from "@/lib/s3-education";
 import { inboxPeerIds, socialCourseHref } from "@/lib/social";
 import { loadDmInbox } from "@/lib/social-dms";
@@ -79,8 +80,14 @@ export async function loadOverviewPulse(
   });
   const topTitles = topTitleActivity(titles, deliveries.rows, now);
   const socialUnread = inbox.rows.reduce((sum, row) => sum + (row.unread_count ?? 0), 0);
-  const peerIds = [...new Set(inbox.rows.flatMap((row) => inboxPeerIds(row)))];
-  const profiles = await loadProfilesByIds(supabase, peerIds);
+  const peerIds = [...new Set(inbox.rows.flatMap((row) => inboxPeerIds(row)))].slice(
+    0,
+    OVERVIEW_SOCIAL_AVATAR_LIMIT,
+  );
+  const [profiles, photos] = await Promise.all([
+    loadProfilesByIds(supabase, peerIds),
+    signedAvatarUrls(peerIds),
+  ]);
   const courses = overviewEducationItems(coursesLoaded.courses, OVERVIEW_EDUCATION_LIMIT);
   const covers = await signedEducationCoverUrls(courses);
   const courseItems: OverviewCourse[] = courses.map((course) => ({
@@ -124,6 +131,7 @@ export async function loadOverviewPulse(
       peerIds.map((id) => ({
         id,
         name: profiles.get(id)?.display_name ?? "",
+        photoUrl: photos.get(id) ?? null,
       })),
     ),
     courses: courseItems,

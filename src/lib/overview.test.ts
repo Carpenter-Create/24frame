@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { ASK_GLOBEE_TRY_PROMPTS } from "./ask-globee";
@@ -6,6 +7,8 @@ import {
   OVERVIEW_AI_CHIPS,
   OVERVIEW_EDUCATION_LIMIT,
   OVERVIEW_HREF,
+  OVERVIEW_SOCIAL_ABSENT,
+  OVERVIEW_SOCIAL_AVATAR_LIMIT,
   isoInPastDays,
   overviewCoursePercentLabel,
   overviewEducationItems,
@@ -59,8 +62,27 @@ describe("Overview pulse SoT", () => {
     expect(overviewInitials("Ada")).toBe("AD");
     expect(overviewInitials("  ")).toBe("");
     expect(overviewSocialAvatars([{ id: "1", name: "Jordan Kane" }, { id: "1", name: "Dup" }])).toEqual([
-      { id: "1", initials: "JK" },
+      { id: "1", name: "Jordan Kane", photoUrl: null },
     ]);
+    expect(
+      overviewSocialAvatars(
+        Array.from({ length: 7 }, (_, index) => ({
+          id: String(index),
+          name: `Peer ${index}`,
+          photoUrl: null,
+        })),
+      ),
+    ).toHaveLength(OVERVIEW_SOCIAL_AVATAR_LIMIT);
+    expect(OVERVIEW_SOCIAL_AVATAR_LIMIT).toBe(5);
+    for (const absent of OVERVIEW_SOCIAL_ABSENT) {
+      expect(JSON.stringify(OVERVIEW)).not.toContain(absent);
+    }
+    const loadSrc = readFileSync(new URL("./overview-load.ts", import.meta.url), "utf8");
+    expect(loadSrc).toContain("signedAvatarUrls");
+    expect(loadSrc).toContain("overviewSocialAvatars");
+    expect(loadSrc).not.toContain("last_message");
+    expect(loadSrc).not.toContain(".body");
+    expect(loadSrc).not.toContain("socialDmHref");
   });
 
   it("maps Needs you from Do next and builds This week from real counts", () => {

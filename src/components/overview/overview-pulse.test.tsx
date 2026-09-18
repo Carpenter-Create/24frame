@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
@@ -7,6 +8,8 @@ import { ASK_GLOBEE_TRY_PROMPTS } from "@/lib/ask-globee";
 import { OVERVIEW, OVERVIEW_AI_CHIPS, type OverviewPulseModel } from "@/lib/overview";
 
 import { OverviewPulse } from "./overview-pulse";
+
+const src = readFileSync(new URL("./overview-pulse.tsx", import.meta.url), "utf8");
 
 const EMPTY: OverviewPulseModel = {
   revenueCents: null,
@@ -51,7 +54,7 @@ describe("OverviewPulse", () => {
           ...EMPTY,
           socialEntered: true,
           socialUnread: 7,
-          socialAvatars: [{ id: "1", initials: "JK" }],
+          socialAvatars: [{ id: "1", name: "Jordan Kane", photoUrl: null }],
           courses: [
             {
               id: "c1",
@@ -68,11 +71,21 @@ describe("OverviewPulse", () => {
       }),
     );
     expect(html).toContain("data-overview-social");
+    expect(html).toContain("data-overview-social-avatars");
+    expect(html).toContain("data-social-avatar");
     expect(html).toContain("data-overview-education-covers");
     expect(html).toContain(OVERVIEW.openEducation);
+    expect(html).toContain(OVERVIEW.openSocial);
     expect(html).toContain("7 messages");
     expect(html).toContain("JK");
+    expect(html).not.toContain("Jordan Kane");
     expect(html).toContain("Catalog basics");
+    expect(html).not.toContain("last message");
+    expect(html).not.toContain("snippet");
+    expect(html).not.toContain("/social/dms/");
+    expect(src).toContain("SocialAvatar");
+    expect(src).not.toContain("SocialConversationFaces");
+    expect(src).not.toContain("StaffDirectory");
     expect(html).toContain("62% complete");
     expect(html).toContain("Horizon");
     expect(html).toContain("1 attention item open");

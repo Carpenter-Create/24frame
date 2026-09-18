@@ -15,11 +15,23 @@ import { WORKSPACE_EDUCATION_LABEL } from "@/lib/workspace-menu";
 // Overview workspace pulse. Deep links only — no invented money,
 // unread, or course percent. Education % renders only when a real
 // progress value is supplied; there is no lesson_progress SoT.
+//
+// Social strip is a Figma glance: identity faces + unread signal +
+// one CTA into Social. Not a mini-inbox — no per-DM rows, names,
+// last-message snippets, or thread hrefs.
 
 export const OVERVIEW_HREF = "/overview";
 export const OVERVIEW_EDUCATION_LIMIT = 5;
 export const OVERVIEW_SOCIAL_AVATAR_LIMIT = 5;
 export const OVERVIEW_NEED_LIMIT = 5;
+
+export const OVERVIEW_SOCIAL_ABSENT = [
+  "last message",
+  "snippet",
+  "preview",
+  "mini-inbox",
+  "Mark as read",
+] as const;
 
 export const OVERVIEW = {
   nav: "Overview",
@@ -73,7 +85,8 @@ export type OverviewNeedRow = {
 
 export type OverviewSocialAvatar = {
   id: string;
-  initials: string;
+  name: string;
+  photoUrl: string | null;
 };
 
 export type OverviewPulseModel = {
@@ -187,17 +200,17 @@ export function overviewThisWeekLine(input: {
 }
 
 export function overviewSocialAvatars(
-  names: readonly { id: string; name: string }[],
+  faces: readonly { id: string; name: string; photoUrl?: string | null }[],
   limit = OVERVIEW_SOCIAL_AVATAR_LIMIT,
 ): OverviewSocialAvatar[] {
   const seen = new Set<string>();
   const avatars: OverviewSocialAvatar[] = [];
-  for (const row of names) {
+  for (const row of faces) {
     if (seen.has(row.id)) continue;
-    const initials = overviewInitials(row.name);
-    if (!initials) continue;
+    const name = row.name.trim();
+    if (!name) continue;
     seen.add(row.id);
-    avatars.push({ id: row.id, initials });
+    avatars.push({ id: row.id, name, photoUrl: row.photoUrl ?? null });
     if (avatars.length >= limit) break;
   }
   return avatars;

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { CourseCover } from "@/components/courses/course-cover";
+import { SocialAvatar } from "@/components/social/social-ui";
 import { PageHeader } from "@/components/ui/page-header";
 import { DASHBOARD_HOME } from "@/lib/dashboard-home";
 import { DASHBOARD_HREF } from "@/lib/dashboard-admin";
@@ -67,12 +68,12 @@ export function OverviewPulse({ model }: { model: OverviewPulseModel }) {
             {model.socialAvatars.length > 0 ? (
               <div data-overview-social-avatars="" className="flex items-center gap-[var(--space-2)]">
                 {model.socialAvatars.map((avatar) => (
-                  <span
+                  <SocialAvatar
                     key={avatar.id}
-                    className="flex size-8 items-center justify-center rounded-full bg-surface t-label text-ink-2"
-                  >
-                    {avatar.initials}
-                  </span>
+                    name={avatar.name}
+                    photoUrl={avatar.photoUrl}
+                    size="sm"
+                  />
                 ))}
               </div>
             ) : null}
