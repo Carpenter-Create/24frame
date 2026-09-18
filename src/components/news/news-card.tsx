@@ -9,7 +9,7 @@ import { newsSourceLabel, type NewsItem } from "@/lib/news";
 import { socialRelativeTime } from "@/lib/social";
 
 // Link-out card: media plate · headline · source · relative time.
-// Vertical stack. House module surface. Same card on Home and /news.
+// Vertical stack. House module surface. Same card on Home and /home/news.
 // No side thumb. No summary. No rewrite.
 
 export function NewsCard({ item, now }: { item: NewsItem; now: Date }) {

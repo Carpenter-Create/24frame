@@ -5,8 +5,9 @@ import {
   isNewsSourceId,
 } from "@/lib/news";
 
-// RSS / Atom normalize for the News allowlist. Media/enclosure thumbs only.
-// Do not scrape item HTML. Do not rewrite titles.
+// RSS / Atom normalize for the News allowlist. Media/enclosure thumbs
+// first. When the feed has no image, ingest OG-scrapes the article URL.
+// Do not scrape RSS item description HTML. Do not rewrite titles.
 
 const TRACKING_PARAM = /^(utm_|fbclid|gclid|mc_cid|mc_eid|vero_id|icid)/i;
 const IMAGE_EXT = /\.(avif|gif|jpe?g|png|webp)(\?|$)/i;
@@ -118,6 +119,27 @@ function firstImageUrl(block: string, base: string): string | null {
     if (!url) continue;
     if (!looksLikeImage(url, attr(tag, "type"), attr(tag, "medium"))) continue;
     const canonical = canonicalizeNewsUrl(url, base);
+    if (canonical) return canonical;
+  }
+  return null;
+}
+
+const OG_IMAGE_KEYS = ["og:image", "og:image:url", "twitter:image", "twitter:image:src"] as const;
+
+/** Article HTML only — og:image, then twitter:image. Not RSS description. */
+export function parseOgImageUrl(html: string, base?: string): string | null {
+  const tags = html.match(/<meta\b[^>]*>/gi) ?? [];
+  const found = new Map<string, string>();
+  for (const tag of tags) {
+    const key = (attr(tag, "property") ?? attr(tag, "name") ?? "").trim().toLowerCase();
+    const content = attr(tag, "content");
+    if (!content || !OG_IMAGE_KEYS.includes(key as (typeof OG_IMAGE_KEYS)[number])) continue;
+    if (!found.has(key)) found.set(key, content);
+  }
+  for (const key of OG_IMAGE_KEYS) {
+    const raw = found.get(key);
+    if (!raw) continue;
+    const canonical = canonicalizeNewsUrl(raw, base);
     if (canonical) return canonical;
   }
   return null;

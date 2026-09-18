@@ -58,6 +58,7 @@ describe("client NAV", () => {
     expect(hrefs).not.toContain("/gc/clients");
     expect(hrefs).not.toContain("/gc/finance");
     expect(hrefs).not.toContain("/news");
+    expect(hrefs).not.toContain("/home/news");
     expect(hrefs).not.toContain("/home");
   });
 
@@ -201,6 +202,7 @@ describe("mobileNavDestinations", () => {
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/channels");
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/gc/clients");
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/news");
+    expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/home/news");
   });
 
   it("gives staff the operator destinations plus the client destinations", () => {
@@ -245,7 +247,9 @@ describe("mobileNavDestinations", () => {
       "/social/leaderboard",
     );
     expect(mobileNavDestinations(true, "social").map((item) => item.href)).not.toContain("/news");
+    expect(mobileNavDestinations(true, "social").map((item) => item.href)).not.toContain("/home/news");
     expect(mobileNavDestinations(false, "education").map((item) => item.href)).not.toContain("/news");
+    expect(mobileNavDestinations(false, "education").map((item) => item.href)).not.toContain("/home/news");
     expect(EDUCATION_NAV.map((item) => ({ label: item.label, href: item.href }))).toEqual([
       { label: "Education", href: "/social/courses" },
     ]);

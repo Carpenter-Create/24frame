@@ -11,7 +11,7 @@ import {
 import { isNewsAwsConfigured } from "@/lib/news-aws";
 import { createNewsAppStore, type NewsStore } from "@/lib/news-store";
 
-// Home + /news read Dynamo through dedicated NEWS_AWS_*. Never fan out RSS.
+// Home + /home/news read Dynamo through dedicated NEWS_AWS_*. Never fan out RSS.
 // Success-only process cache is the SWR equivalent — failures are not stored.
 
 type NewsCacheEntry = { expiresAt: number; value: NewsListResult };

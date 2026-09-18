@@ -6,6 +6,7 @@ import {
   NEWS_HOME_CAP,
   NEWS_HREF,
   NEWS_INGEST_PATH,
+  NEWS_LEGACY_HREF,
   NEWS_PAGE,
   NEWS_READ_REVALIDATE_SECONDS,
   NEWS_SOURCES,
@@ -35,8 +36,14 @@ function item(n: number, published_at: string) {
 describe("News SoT", () => {
   it("locks the name, Home cap, 30-day window, EventBridge ingest, and allowlist", () => {
     expect(NEWS_PAGE.title).toBe("News");
-    expect(NEWS_HREF).toBe("/news");
+    expect(NEWS_HREF).toBe("/home/news");
+    expect(NEWS_LEGACY_HREF).toBe("/news");
+    expect(NEWS_PAGE.back).toBe("Home");
     expect(NEWS_PAGE.viewAll).toBe("View all");
+    const nextConfig = readFileSync("next.config.ts", "utf8");
+    expect(nextConfig).toContain(
+      '{ source: "/news", destination: "/home/news", permanent: true }',
+    );
     expect(NEWS_HOME_CAP).toBe(15);
     expect(NEWS_WINDOW_MS).toBe(30 * 24 * 60 * 60 * 1000);
     expect(NEWS_READ_REVALIDATE_SECONDS).toBe(60);

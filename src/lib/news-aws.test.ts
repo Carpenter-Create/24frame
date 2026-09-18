@@ -26,7 +26,7 @@ const ingestSrc = readFileSync("src/lib/news-ingest.ts", "utf8");
 const loadSrc = readFileSync("src/lib/news-load.ts", "utf8");
 const handlerSrc = readFileSync("workers/news/handler.ts", "utf8");
 const homeSrc = readFileSync("src/app/(app)/home/page.tsx", "utf8");
-const historySrc = readFileSync("src/app/(app)/news/page.tsx", "utf8");
+const historySrc = readFileSync("src/app/(app)/home/news/page.tsx", "utf8");
 const vercel = readFileSync("vercel.json", "utf8");
 
 describe("News AWS isolation", () => {
@@ -87,5 +87,8 @@ describe("News AWS isolation", () => {
     expect(homeSrc).not.toMatch(/from ["']@\/lib\/news-ingest/);
     expect(historySrc).not.toMatch(/from ["']@\/lib\/news-ingest/);
     expect(loadSrc).not.toMatch(/fetchNewsFeedXml|parseNewsFeed/);
+    expect(ingestSrc).toContain("fillNewsOgImages");
+    expect(ingestSrc).toContain("parseOgImageUrl");
+    expect(ingestSrc).not.toContain("NEXT_PUBLIC_");
   });
 });

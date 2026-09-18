@@ -13,6 +13,7 @@ import {
   DASHBOARD_NEWS_HISTORY_LIST_CLASS,
   DASHBOARD_NEWS_THUMB_CLASS,
   DASHBOARD_SECTION_AIR_CLASS,
+  DASHBOARD_SECTION_TITLE_CLASS,
 } from "@/lib/dashboard-craft";
 import { NEWS_HREF, NEWS_PAGE, type NewsItem } from "@/lib/news";
 
@@ -91,7 +92,7 @@ describe("NewsRail", () => {
     expect(html).not.toContain("divide-y");
   });
 
-  it("uses the house pair grid on /news history — same stacked cards", () => {
+  it("uses the house pair grid on /home/news history — same stacked cards, no inner title", () => {
     const html = renderToStaticMarkup(
       createElement(NewsRail, { items: [ITEM, SECOND], now: NOW, history: true }),
     );
@@ -100,9 +101,11 @@ describe("NewsRail", () => {
     expect(html).toContain(markupClass(DASHBOARD_NEWS_THUMB_CLASS));
     expect(html.indexOf("data-news-thumb")).toBeLessThan(html.indexOf("Harbor Cut lands a festival slot"));
     expect(html).not.toContain("items-start");
+    expect(html).not.toContain(DASHBOARD_SECTION_TITLE_CLASS);
+    expect(html).not.toContain(NEWS_PAGE.title);
   });
 
-  it("uses the same empty door on Home and /news", () => {
+  it("uses the same empty door on Home and /home/news", () => {
     const html = renderToStaticMarkup(createElement(NewsRail, { items: [], now: NOW }));
     expect(html).toContain(NEWS_PAGE.empty);
     expect(html).toContain(DASHBOARD_MODULE_CARD_CLASS);

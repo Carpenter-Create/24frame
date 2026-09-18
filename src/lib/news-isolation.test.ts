@@ -7,7 +7,7 @@ const vercel = readFileSync("vercel.json", "utf8");
 const current = readFileSync("docs/status/CURRENT.md", "utf8");
 const types = readFileSync("src/lib/supabase/database.types.ts", "utf8");
 const homeSrc = readFileSync("src/app/(app)/home/page.tsx", "utf8");
-const historySrc = readFileSync("src/app/(app)/news/page.tsx", "utf8");
+const historySrc = readFileSync("src/app/(app)/home/news/page.tsx", "utf8");
 const loadSrc = readFileSync("src/lib/news-load.ts", "utf8");
 
 describe("News AWS setup doc", () => {
@@ -25,6 +25,7 @@ describe("News AWS setup doc", () => {
     expect(infra).toContain("What Adam must create");
     expect(current).toContain("Industry News AWS");
     expect(current).toContain("Not Vercel cron");
+    expect(current).toContain("/home/news");
     expect(envExample).toContain("NEWS_AWS_ACCESS_KEY_ID=");
     expect(envExample).toContain("NEWS_DDB_TABLE=");
     expect(envExample).toContain("Never fall back to AWS_* / FINANCE_AWS_* /");
@@ -38,6 +39,9 @@ describe("News AWS setup doc", () => {
     expect(types).not.toContain("news_source_health");
     expect(homeSrc).not.toContain("loadHomeNews(supabase");
     expect(historySrc).not.toContain("loadNewsHistory(supabase");
+    expect(historySrc).toContain("backLink");
+    expect(existsSync("src/app/(app)/home/news/page.tsx")).toBe(true);
+    expect(infra).toContain("Image backfill");
     expect(loadSrc).not.toMatch(/from ["']@\/lib\/supabase/);
   });
 });

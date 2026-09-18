@@ -9,9 +9,11 @@ Do **not** create these resources from CI or from this repository.
 Names below are the proposed live set for Adam confirm, aligned with
 finance isolation in [`finance-aws-setup.md`](finance-aws-setup.md).
 
-Auth stays Supabase Auth. The app **reads** DynamoDB on Home (12) and
-`/news` (30-day window). Ingest **writes** DynamoDB. Page requests
-never fan out RSS.
+Auth stays Supabase Auth. The app **reads** DynamoDB on Home (15) and
+`/home/news` (30-day window; `/news` permanently redirects). Ingest
+**writes** DynamoDB. Page requests never fan out RSS. RSS media /
+enclosure first; when `image_url` is null, ingest OG-scrapes the
+article (`og:image` / `twitter:image`, 4s timeout, fail-soft).
 
 ## Proposed resources (not created)
 
@@ -22,7 +24,7 @@ never fan out RSS.
 | Prod table | `24frame-news-prod` | Pay-per-request. TTL on `ttl`. |
 | Dev table | `24frame-news-dev` | Preview / local. |
 | Keys | `pk` + `sk` | Item: `ITEM#<canonical_url>` / `ITEM`. Health: `SOURCE#<id>` / `HEALTH`. |
-| GSI1 | `gsi1` on `gsi1pk` + `gsi1sk` | Feed: `FEED` / `<published_at>#<canonical_url>`. Home + `/news` Query. |
+| GSI1 | `gsi1` on `gsi1pk` + `gsi1sk` | Feed: `FEED` / `<published_at>#<canonical_url>`. Home + `/home/news` Query. |
 | TTL | `ttl` epoch seconds | `published_at + 30 days`. Dynamo expires the row. |
 | App IAM user | `24frame-news-app` | `NEWS_AWS_*` Query/Get on the table. Vercel Production + Preview. |
 | Ingest role | `24frame-news-ingest` | Lambda trust. Put/Get/Query on the table. |
@@ -101,7 +103,7 @@ Do **not** create these from this PR.
 1. EventBridge invoked Lambda in the last 30–60 minutes.
 2. CloudWatch log `{ "msg": "news ingest done", "failed": 0, ... }`.
 3. Home News rail shows up to 12 rows from Dynamo (not a live RSS pull).
-4. `/news` lists the same cards inside 30 days.
+4. `/home/news` lists the same cards inside 30 days (`/news` → `/home/news`).
 5. DLQ depth is 0.
 
 ## Ops
@@ -126,6 +128,14 @@ optional when using a role):
 ```
 pnpm exec tsx workers/news/handler.ts
 ```
+
+**Image backfill (one-shot).** Existing rows that ingested before OG
+scrape (Hollywood Reporter grey plates) pick up `image_url` on the
+next EventBridge run. Dynamo `PutItem` overwrites the item; ingest
+re-parses the live feed and OG-scrapes only when RSS still has no
+image. No console row edit. To run once without waiting for cron,
+use the invoke above. A scrape timeout or miss leaves the grey plate
+— it does not fail the source.
 
 ## Still founder-gated
 

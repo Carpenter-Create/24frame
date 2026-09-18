@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { NEWS_SOURCES } from "./news";
-import { canonicalizeNewsUrl, parseNewsDate, parseNewsFeed } from "./news-rss";
+import { canonicalizeNewsUrl, parseNewsDate, parseNewsFeed, parseOgImageUrl } from "./news-rss";
 
 const NOW = new Date("2026-09-18T18:00:00.000Z");
 
@@ -102,9 +102,31 @@ describe("parseNewsDate", () => {
   });
 });
 
+describe("parseOgImageUrl", () => {
+  it("prefers og:image, then twitter:image, and upgrades http", () => {
+    expect(
+      parseOgImageUrl(
+        `<html><head>
+          <meta name="twitter:image" content="http://www.thr.com/tw.jpg" />
+          <meta property="og:image" content="https://www.thr.com/og.jpg?utm_source=x" />
+        </head></html>`,
+        "https://hollywoodreporter.com/story",
+      ),
+    ).toBe("https://thr.com/og.jpg");
+    expect(
+      parseOgImageUrl(
+        `<meta name="twitter:image" content="/tw.jpg" />`,
+        "https://hollywoodreporter.com/story",
+      ),
+    ).toBe("https://hollywoodreporter.com/tw.jpg");
+    expect(parseOgImageUrl("<html></html>", "https://hollywoodreporter.com/story")).toBeNull();
+  });
+});
+
 describe("news-rss source", () => {
-  it("does not scrape HTML bodies for thumbs", () => {
+  it("does not scrape RSS description HTML for thumbs", () => {
     const src = readFileSync(new URL("./news-rss.ts", import.meta.url), "utf8");
     expect(src).not.toMatch(/content:encoded|description.*img|cheerio|jsdom/i);
+    expect(src).toContain("parseOgImageUrl");
   });
 });

@@ -11,9 +11,10 @@ import {
 import { NEWS_HREF, NEWS_PAGE, type NewsItem } from "@/lib/news";
 import { overviewModuleHeaderAction } from "@/lib/overview";
 
-// Home News rail + /news history. Light section header; each article
-// is its own stacked house card. No outer panel slab. Home stays one
-// column. /news uses the house pair grid on desktop.
+// Home News rail + /home/news history. Light section header on Home;
+// history is labeled by the page H1 only. Each article is its own
+// stacked house card. Home stays one column. History uses the house
+// pair grid on desktop.
 
 export function NewsRail({
   items,
@@ -36,14 +37,16 @@ export function NewsRail({
     : `flex flex-col ${DASHBOARD_SECTION_AIR_CLASS}`;
   return (
     <section
-      aria-label={NEWS_PAGE.title}
+      aria-label={history ? undefined : NEWS_PAGE.title}
       data-overview-module={testId}
       className={`flex flex-col ${DASHBOARD_SECTION_AIR_CLASS}`}
     >
-      <div className={`flex items-center justify-between ${DASHBOARD_RELATED_GAP_CLASS}`}>
-        <p className={DASHBOARD_SECTION_TITLE_CLASS}>{NEWS_PAGE.title}</p>
-        {action ? <TextAction href={action.href}>{action.label}</TextAction> : null}
-      </div>
+      {history ? null : (
+        <div className={`flex items-center justify-between ${DASHBOARD_RELATED_GAP_CLASS}`}>
+          <p className={DASHBOARD_SECTION_TITLE_CLASS}>{NEWS_PAGE.title}</p>
+          {action ? <TextAction href={action.href}>{action.label}</TextAction> : null}
+        </div>
+      )}
       {items.length > 0 ? (
         <ul data-news-list="" className={listClass}>
           {items.map((item) => (

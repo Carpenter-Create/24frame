@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { NEWS_SOURCES } from "./news";
-import { ingestNewsFeeds } from "./news-ingest";
+import { fillNewsOgImages, ingestNewsFeeds } from "./news-ingest";
 import type { NormalizedNewsItem } from "./news-rss";
 import { memoryNewsStore } from "./news-store";
 
@@ -44,7 +44,12 @@ describe("ingestNewsFeeds", () => {
       return FEED;
     });
 
-    const summary = await ingestNewsFeeds({ persist, now: NOW, fetchXml });
+    const summary = await ingestNewsFeeds({
+      persist,
+      now: NOW,
+      fetchXml,
+      fetchOgHtml: async () => null,
+    });
 
     expect(fetchXml).toHaveBeenCalledTimes(NEWS_SOURCES.length - 1);
     expect(fetchXml.mock.calls.flat()).not.toContain("https://www.indiewire.com/feed/");
@@ -77,10 +82,110 @@ describe("ingestNewsFeeds", () => {
     await persist.upsertItems([first], NOW);
     await persist.upsertItems([{ ...first, title: "Live item again" }], NOW);
     const fetchXml = vi.fn(async () => FEED);
-    const summary = await ingestNewsFeeds({ persist, now: NOW, fetchXml });
+    const summary = await ingestNewsFeeds({
+      persist,
+      now: NOW,
+      fetchXml,
+      fetchOgHtml: async () => null,
+    });
     expect(summary.purged).toBe(1);
     expect(await persist.purgeBefore("2026-08-19T18:00:00.000Z")).toBe(0);
     const rows = await persist.queryFeed({ limit: 20, now: NOW });
     expect(rows.filter((row) => row.url === "https://variety.com/live")).toHaveLength(1);
+  });
+});
+
+const EMPTY_FEED = `<?xml version="1.0"?><rss version="2.0"><channel></channel></rss>`;
+
+const FEED_WITH_THUMB = `<?xml version="1.0"?>
+<rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/">
+  <channel>
+    <item>
+      <title>Has RSS image</title>
+      <link>https://variety.com/has-thumb</link>
+      <pubDate>Thu, 17 Sep 2026 12:00:00 GMT</pubDate>
+      <media:thumbnail url="https://variety.com/thumbs/rss.jpg" />
+    </item>
+  </channel>
+</rss>`;
+
+const FEED_NO_THUMB = `<?xml version="1.0"?>
+<rss version="2.0">
+  <channel>
+    <item>
+      <title>Needs OG</title>
+      <link>https://hollywoodreporter.com/needs-og</link>
+      <pubDate>Thu, 17 Sep 2026 12:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>`;
+
+function varietyOnlyXml(feed: string) {
+  return async (url: string) => (url === "https://variety.com/feed/" ? feed : EMPTY_FEED);
+}
+
+describe("ingest OG images", () => {
+  it("does not scrape when RSS already has an image", async () => {
+    const persist = memoryNewsStore();
+    const fetchOgHtml = vi.fn(async () => {
+      throw new Error("should not scrape");
+    });
+    await ingestNewsFeeds({
+      persist,
+      now: NOW,
+      fetchXml: varietyOnlyXml(FEED_WITH_THUMB),
+      fetchOgHtml,
+    });
+    expect(fetchOgHtml).not.toHaveBeenCalled();
+    const rows = await persist.queryFeed({ limit: 20, now: NOW });
+    expect(rows[0]?.image_url).toBe("https://variety.com/thumbs/rss.jpg");
+  });
+
+  it("OG-scrapes when RSS has no image and stores the absolute https URL", async () => {
+    const persist = memoryNewsStore();
+    const fetchOgHtml = vi.fn(async (url: string) => {
+      expect(url).toBe("https://hollywoodreporter.com/needs-og");
+      return `<html><head><meta property="og:image" content="http://www.thr.com/og.jpg" /></head></html>`;
+    });
+    await ingestNewsFeeds({
+      persist,
+      now: NOW,
+      fetchXml: async (url: string) =>
+        url === "https://www.hollywoodreporter.com/feed/" ? FEED_NO_THUMB : EMPTY_FEED,
+      fetchOgHtml,
+    });
+    expect(fetchOgHtml).toHaveBeenCalledTimes(1);
+    const rows = await persist.queryFeed({ limit: 20, now: NOW });
+    expect(rows[0]?.image_url).toBe("https://thr.com/og.jpg");
+  });
+
+  it("keeps a grey plate when OG scrape fails and does not fail the source", async () => {
+    const persist = memoryNewsStore();
+    const fetchOgHtml = vi.fn(async () => {
+      throw new Error("timeout");
+    });
+    const summary = await ingestNewsFeeds({
+      persist,
+      now: NOW,
+      fetchXml: async (url: string) =>
+        url === "https://www.hollywoodreporter.com/feed/" ? FEED_NO_THUMB : EMPTY_FEED,
+      fetchOgHtml,
+    });
+    expect(summary.failed).toBe(0);
+    expect(summary.results.find((row) => row.source === "hollywood-reporter")?.error).toBeUndefined();
+    const rows = await persist.queryFeed({ limit: 20, now: NOW });
+    expect(rows[0]?.image_url).toBeNull();
+  });
+});
+
+describe("fillNewsOgImages", () => {
+  it("skips items that already have image_url", async () => {
+    const fetchHtml = vi.fn(async () => "<meta property=\"og:image\" content=\"https://x.com/x.jpg\" />");
+    const [kept] = await fillNewsOgImages(
+      [{ ...liveItem(), image_url: "https://variety.com/thumbs/rss.jpg" }],
+      { fetchHtml },
+    );
+    expect(kept?.image_url).toBe("https://variety.com/thumbs/rss.jpg");
+    expect(fetchHtml).not.toHaveBeenCalled();
   });
 });

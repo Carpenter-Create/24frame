@@ -1,13 +1,18 @@
 import { NEWS_SOURCES, newsSourceIsLive, newsWindowStart, type NewsSourceId } from "@/lib/news";
-import { parseNewsFeed } from "@/lib/news-rss";
+import { parseNewsFeed, parseOgImageUrl, type NormalizedNewsItem } from "@/lib/news-rss";
 import { createNewsIngestStore, type NewsPersist } from "@/lib/news-store";
 
 // Scheduled News ingest (Lambda + EventBridge). Fail-soft per source.
 // Persist to DynamoDB only — never fan-out RSS on a page read.
+// RSS media/enclosure first; OG-scrape the article only when image_url
+// is null. One bad article URL must not fail the source or the run.
 
 export const NEWS_FEED_TIMEOUT_MS = 8_000;
 export const NEWS_FEED_MAX_BYTES = 1_500_000;
+export const NEWS_OG_TIMEOUT_MS = 4_000;
+export const NEWS_OG_MAX_BYTES = 512_000;
 export const NEWS_INGEST_CONCURRENCY = 3;
+export const NEWS_OG_CONCURRENCY = 4;
 export const NEWS_USER_AGENT = "24FrameNews/1.0";
 
 export type { NewsPersist };
@@ -57,6 +62,65 @@ export async function fetchNewsFeedXml(
   }
 }
 
+export async function fetchNewsArticleHtml(
+  url: string,
+  init: { fetchImpl?: typeof fetch } = {},
+): Promise<string | null> {
+  const fetchImpl = init.fetchImpl ?? fetch;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), NEWS_OG_TIMEOUT_MS);
+  try {
+    const res = await fetchImpl(url, {
+      signal: controller.signal,
+      headers: {
+        accept: "text/html,application/xhtml+xml",
+        "user-agent": NEWS_USER_AGENT,
+      },
+      redirect: "follow",
+    });
+    if (!res.ok) return null;
+    const buf = new Uint8Array(await res.arrayBuffer());
+    const slice = buf.byteLength > NEWS_OG_MAX_BYTES ? buf.subarray(0, NEWS_OG_MAX_BYTES) : buf;
+    return new TextDecoder("utf-8").decode(slice);
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+export async function fillNewsOgImages(
+  items: readonly NormalizedNewsItem[],
+  init: {
+    fetchHtml?: (url: string) => Promise<string | null>;
+    fetchImpl?: typeof fetch;
+  } = {},
+): Promise<NormalizedNewsItem[]> {
+  const fetchHtml =
+    init.fetchHtml ?? ((url: string) => fetchNewsArticleHtml(url, { fetchImpl: init.fetchImpl }));
+  const missing = items.filter((item) => !item.image_url);
+  if (missing.length === 0) return items.map((item) => item);
+
+  const scraped = new Map<string, string | null>();
+  await runBatched(
+    missing,
+    async (item) => {
+      try {
+        const html = await fetchHtml(item.url);
+        scraped.set(item.canonical_url, html ? parseOgImageUrl(html, item.url) : null);
+      } catch {
+        scraped.set(item.canonical_url, null);
+      }
+    },
+    NEWS_OG_CONCURRENCY,
+  );
+
+  return items.map((item) => {
+    if (item.image_url) return item;
+    return { ...item, image_url: scraped.get(item.canonical_url) ?? null };
+  });
+}
+
 async function runBatched<T, R>(
   items: readonly T[],
   worker: (item: T) => Promise<R>,
@@ -95,10 +159,12 @@ export async function ingestNewsFeeds(input: {
   persist?: NewsPersist;
   now?: Date;
   fetchXml?: (url: string) => Promise<string>;
+  fetchOgHtml?: (url: string) => Promise<string | null>;
 }): Promise<NewsIngestSummary> {
   const now = input.now ?? new Date();
   const persist = input.persist ?? createNewsIngestStore();
   const fetchXml = input.fetchXml ?? ((url: string) => fetchNewsFeedXml(url));
+  const fetchOgHtml = input.fetchOgHtml;
 
   const results = await runBatched(
     NEWS_SOURCES,
@@ -110,7 +176,8 @@ export async function ingestNewsFeeds(input: {
       }
       try {
         const xml = await fetchXml(source.feedUrl);
-        const items = parseNewsFeed(xml, source.id, now);
+        const parsed = parseNewsFeed(xml, source.id, now);
+        const items = await fillNewsOgImages(parsed, { fetchHtml: fetchOgHtml });
         const inserted = await persist.upsertItems(items, now);
         await markHealth(persist, source.id, { now });
         console.log(
