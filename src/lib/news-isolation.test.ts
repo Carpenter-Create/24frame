@@ -40,6 +40,7 @@ describe("News AWS setup doc", () => {
     expect(homeSrc).not.toContain("loadHomeNews(supabase");
     expect(historySrc).not.toContain("loadNewsHistory(supabase");
     expect(historySrc).toContain("backLink");
+    expect(historySrc).toContain("newsHistoryBackLink");
     expect(existsSync("src/app/(app)/home/news/page.tsx")).toBe(true);
     expect(infra).toContain("Image backfill");
     expect(loadSrc).not.toMatch(/from ["']@\/lib\/supabase/);

@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DASHBOARD_NEWS_HISTORY_LIST_CLASS } from "@/lib/dashboard-craft";
-import { NEWS_PAGE } from "@/lib/news";
+import { NEWS_HOME_HREF, NEWS_PAGE, newsHistoryBackLink } from "@/lib/news";
 import { loadNewsHistory } from "@/lib/news-load";
 import { OVERVIEW_HREF, OVERVIEW_PAGE } from "@/lib/overview";
 import { getOrgContext } from "@/lib/supabase/context";
@@ -57,8 +57,9 @@ describe("NewsPage", () => {
     expect(html).toContain("data-news-history");
     expect(html).toContain(NEWS_PAGE.title);
     expect(html).toContain(NEWS_PAGE.subtitle);
-    expect(html).toContain(`href="${OVERVIEW_HREF}"`);
+    expect(html).toContain(`href="${NEWS_HOME_HREF}"`);
     expect(html).toContain(NEWS_PAGE.back);
+    expect(newsHistoryBackLink()).toEqual({ href: OVERVIEW_HREF, label: OVERVIEW_PAGE.title });
     expect(NEWS_PAGE.back).toBe(OVERVIEW_PAGE.title);
     expect(html).toContain("Harbor Cut lands a festival slot");
     expect(html).toContain("https://variety.com/harbor-cut");

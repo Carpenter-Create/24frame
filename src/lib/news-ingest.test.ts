@@ -239,6 +239,20 @@ describe("fetchNewsArticleHtml", () => {
 });
 
 describe("fillNewsOgImages", () => {
+  it("fetches article HTML and parses og:image through the real ingest helpers", async () => {
+    const fetchImpl = vi.fn<typeof fetch>(async (input, init) => {
+      expect(String(input)).toBe("https://variety.com/live");
+      expect(init?.signal).toBeInstanceOf(AbortSignal);
+      return new Response(
+        `<html><head><meta property="og:image" content="//cdn.variety.com/live.jpg" /></head></html>`,
+        { status: 200, headers: { "content-type": "text/html" } },
+      );
+    });
+    const [row] = await fillNewsOgImages([liveItem()], { fetchImpl });
+    expect(row?.image_url).toBe("https://cdn.variety.com/live.jpg");
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
   it("skips items that already have image_url", async () => {
     const fetchHtml = vi.fn(async () => "<meta property=\"og:image\" content=\"https://x.com/x.jpg\" />");
     const [kept] = await fillNewsOgImages(

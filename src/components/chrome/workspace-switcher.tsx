@@ -7,7 +7,6 @@ import { CaretDown } from "@phosphor-icons/react";
 import { AppearanceCheck } from "./appearance-check";
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import {
-  OVERVIEW_HREF,
   overviewLeadPills,
   overviewLeadSelected,
   overviewLeadShouldNavigate,
@@ -66,7 +65,7 @@ function selectLeadPill(
 ) {
   if (!overviewLeadShouldNavigate(pathname, current, pill)) return;
   if (pill.id === "home") {
-    router.push(OVERVIEW_HREF);
+    router.push(pill.href);
     return;
   }
   const option = options.find((row) => row.mode === pill.id);

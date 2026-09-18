@@ -3,9 +3,8 @@ import { redirect } from "next/navigation";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { PageHeader } from "@/components/ui/page-header";
 import { NewsRail } from "@/components/news/news-rail";
-import { NEWS_PAGE } from "@/lib/news";
+import { NEWS_PAGE, newsHistoryBackLink } from "@/lib/news";
 import { loadNewsHistory } from "@/lib/news-load";
-import { OVERVIEW_HREF } from "@/lib/overview";
 import { getOrgContext } from "@/lib/supabase/context";
 
 export default async function NewsPage() {
@@ -20,7 +19,7 @@ export default async function NewsPage() {
       <PageHeader
         title={NEWS_PAGE.title}
         subtitle={NEWS_PAGE.subtitle}
-        backLink={{ href: OVERVIEW_HREF, label: NEWS_PAGE.back }}
+        backLink={newsHistoryBackLink()}
       />
       {loaded.truncated ? (
         <InlineNotice tone="info" className="mb-4" data-my-list-truncated="news">

@@ -124,7 +124,13 @@ function firstImageUrl(block: string, base: string): string | null {
   return null;
 }
 
-const OG_IMAGE_KEYS = ["og:image", "og:image:url", "twitter:image", "twitter:image:src"] as const;
+const OG_IMAGE_KEYS = [
+  "og:image",
+  "og:image:url",
+  "og:image:secure_url",
+  "twitter:image",
+  "twitter:image:src",
+] as const;
 
 function isUsableOgImage(canonical: string, pageUrl?: string): boolean {
   if (!canonical.startsWith("https://")) return false;

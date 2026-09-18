@@ -9,6 +9,7 @@ import { NEWS_INGEST_FUNCTION, NEWS_INGEST_SCHEDULE } from "@/lib/news-aws";
 // Allowlist verified 2026-09-18. Storage is AWS DynamoDB. Ingest is
 // Lambda + EventBridge. Not Supabase. Not Vercel cron. Copy lives here.
 
+export const NEWS_HOME_HREF = "/home";
 export const NEWS_HREF = "/home/news";
 export const NEWS_LEGACY_HREF = "/news";
 export const NEWS_INGEST_PATH = NEWS_INGEST_FUNCTION;
@@ -23,8 +24,14 @@ export const NEWS_PAGE = {
   empty: "No headlines from the last 30 days.",
   subtitle: "Headlines from the last 30 days.",
   back: "Home",
+  backHref: NEWS_HOME_HREF,
   truncated: `Showing the first ${UNPAGINATED_MAX} headlines. More exist — this list is not complete.`,
 } as const;
+
+/** Home land crumb — News is a Home child, not a fifth workspace. */
+export function newsHistoryBackLink(): { href: typeof NEWS_HOME_HREF; label: typeof NEWS_PAGE.back } {
+  return { href: NEWS_PAGE.backHref, label: NEWS_PAGE.back };
+}
 
 export const NEWS_SOURCE_IDS = [
   "indiewire",

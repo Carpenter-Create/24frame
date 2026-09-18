@@ -124,7 +124,7 @@ describe("Home lead pills", () => {
     expect(overviewLeadPills().some((pill) => pill.href === NEWS_HREF)).toBe(false);
     expect(overviewLeadPills().some((pill) => pill.href === NEWS_LEGACY_HREF)).toBe(false);
     const switcher = readFileSync("src/components/chrome/workspace-switcher.tsx", "utf8");
-    expect(switcher).toContain("router.push(OVERVIEW_HREF)");
+    expect(switcher).toContain("router.push(pill.href)");
     expect(switcher).toContain("overviewLeadShouldNavigate");
   });
 

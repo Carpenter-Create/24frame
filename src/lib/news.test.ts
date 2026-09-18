@@ -4,10 +4,12 @@ import { describe, expect, it } from "vitest";
 import { NEWS_INGEST_FUNCTION, NEWS_INGEST_SCHEDULE } from "./news-aws";
 import {
   NEWS_HOME_CAP,
+  NEWS_HOME_HREF,
   NEWS_HREF,
   NEWS_INGEST_PATH,
   NEWS_LEGACY_HREF,
   NEWS_PAGE,
+  newsHistoryBackLink,
   NEWS_READ_REVALIDATE_SECONDS,
   NEWS_SOURCES,
   NEWS_WINDOW_MS,
@@ -36,9 +38,13 @@ function item(n: number, published_at: string) {
 describe("News SoT", () => {
   it("locks the name, Home cap, 30-day window, EventBridge ingest, and allowlist", () => {
     expect(NEWS_PAGE.title).toBe("News");
+    expect(NEWS_HOME_HREF).toBe("/home");
     expect(NEWS_HREF).toBe("/home/news");
+    expect(NEWS_HREF.startsWith(`${NEWS_HOME_HREF}/`)).toBe(true);
     expect(NEWS_LEGACY_HREF).toBe("/news");
     expect(NEWS_PAGE.back).toBe("Home");
+    expect(NEWS_PAGE.backHref).toBe(NEWS_HOME_HREF);
+    expect(newsHistoryBackLink()).toEqual({ href: "/home", label: "Home" });
     expect(NEWS_PAGE.viewAll).toBe("View all");
     const nextConfig = readFileSync("next.config.ts", "utf8");
     expect(nextConfig).toContain(

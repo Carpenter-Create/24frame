@@ -119,6 +119,12 @@ describe("parseOgImageUrl", () => {
         "https://hollywoodreporter.com/story",
       ),
     ).toBe("https://hollywoodreporter.com/tw.jpg");
+    expect(
+      parseOgImageUrl(
+        `<meta property="og:image" content="//cdn.thr.com/hero.jpg" />`,
+        "https://hollywoodreporter.com/story",
+      ),
+    ).toBe("https://cdn.thr.com/hero.jpg");
     expect(parseOgImageUrl("<html></html>", "https://hollywoodreporter.com/story")).toBeNull();
     expect(
       parseOgImageUrl(
