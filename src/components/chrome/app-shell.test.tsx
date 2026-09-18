@@ -91,6 +91,16 @@ function fulfilledChrome(data: AppShellChrome): Promise<AppShellChrome> {
   return chrome;
 }
 
+function homeFrameMarkup(html: string): string {
+  const attr = html.indexOf("data-app-home-frame");
+  expect(attr).toBeGreaterThan(-1);
+  const tagStart = html.lastIndexOf("<div", attr);
+  const tagEnd = html.indexOf(">", attr);
+  expect(tagStart).toBeGreaterThan(-1);
+  expect(tagEnd).toBeGreaterThan(tagStart);
+  return html.slice(tagStart, tagEnd + 1);
+}
+
 function renderShell(
   messagesSurface?: MessagesSurface,
   name?: string | null,
@@ -208,6 +218,8 @@ describe("AppShell Home chrome", () => {
     const home = renderShell();
     expect(home).toContain('data-home-chrome=""');
     expect(home).toContain("data-app-home-frame");
+    expect(homeFrameMarkup(home)).toContain("mx-auto");
+    expect(homeFrameMarkup(home)).toContain("max-width:var(--page-max-width)");
     expect(home).toContain("data-house-lead-chrome");
     expect(home).toContain("data-workspace-switcher");
     expect(home).toContain('data-workspace-switcher-segment="home"');
@@ -226,6 +238,14 @@ describe("AppShell Home chrome", () => {
     expect(shellSrc).toContain("overviewHidesRail");
     expect(shellSrc).toContain("OVERVIEW_RAIL_OFF_WIDTH");
     expect(shellSrc).toContain("data-home-chrome");
+    const homeBranch = shellSrc.slice(
+      shellSrc.indexOf(") : homePage ? ("),
+      shellSrc.indexOf(") : messagesPage ? ("),
+    );
+    expect(homeBranch).toContain("mx-auto");
+    expect(homeBranch).toContain('maxWidth: "var(--page-max-width)"');
+    expect(homeBranch).toContain("HOUSE_CANVAS_X_CLASS");
+    expect(homeBranch).toContain("data-app-home-frame");
 
     navigation.pathname = "/overview";
     expect(renderShell()).not.toContain("data-app-rail");
@@ -260,6 +280,10 @@ describe("AppShell Access rail and home frame", () => {
     expect(html).toContain("data-app-home-frame");
     expect(html).toContain("px-[var(--chrome-gutter)]");
     expect(html).toContain("py-[var(--space-8)]");
+    expect(homeFrameMarkup(html)).toContain("mx-auto");
+    expect(homeFrameMarkup(html)).toContain("max-width:var(--page-max-width)");
+    expect(tokens).toMatch(/--page-max-width:\s*67\.5rem;/);
+    expect(shellSrc).toContain('maxWidth: "var(--page-max-width)"');
     expect(html).not.toContain("px-6 pb-24 pt-8");
     expect(html).not.toContain("px-6 ");
     expect(html).not.toContain("Search");

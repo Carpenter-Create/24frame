@@ -311,9 +311,10 @@ export function AppShell({
         ) : homePage ? (
           <div
             className={cn(
-              "w-full py-[var(--space-8)] max-md:px-[var(--space-6)] max-md:py-[var(--space-6)]",
+              "mx-auto w-full py-[var(--space-8)] max-md:px-[var(--space-6)] max-md:py-[var(--space-6)]",
               HOUSE_CANVAS_X_CLASS,
             )}
+            style={{ maxWidth: "var(--page-max-width)" }}
             data-app-home-frame=""
           >
             {children}
