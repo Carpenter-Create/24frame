@@ -61,11 +61,11 @@ export const OVERVIEW_HOME_COLUMN_GUTTER = HOUSE_CHROME_GUTTER;
  *  Vertical air is house section (24). Column gutter is chrome (16).
  *  Empty News keeps the 20rem column — do not stretch main. */
 export const OVERVIEW_HOME_LAYOUT_CLASS =
-  `grid w-full grid-cols-1 items-start ` +
-  `gap-y-[var(--space-6)] gap-x-[var(--chrome-gutter)] ` +
-  `[grid-template-areas:'social'_'education'_'aggregation'_'news'_'needs'_'ai'] ` +
-  `lg:grid-cols-[minmax(0,1fr)_${OVERVIEW_NEWS_RAIL_WIDTH}] ` +
-  `lg:[grid-template-areas:'social_news'_'education_news'_'aggregation_news'_'needs_news'_'ai_news']`;
+  "grid w-full grid-cols-1 items-start " +
+  "gap-y-[var(--space-6)] gap-x-[var(--chrome-gutter)] " +
+  "[grid-template-areas:'social'_'education'_'aggregation'_'news'_'needs'_'ai'] " +
+  "lg:grid-cols-[minmax(0,1fr)_20rem] " +
+  "lg:[grid-template-areas:'social_news'_'education_news'_'aggregation_news'_'needs_news'_'ai_news']";
 
 export const OVERVIEW_AREA_SOCIAL_CLASS = "[grid-area:social]";
 export const OVERVIEW_AREA_EDUCATION_CLASS = "[grid-area:education]";
