@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { Suspense } from "react";
 
+import { SearchField } from "@/components/layout/search-field";
 import { titleArtworkUrls } from "@/lib/artwork";
 import { createClient } from "@/lib/supabase/server";
 import { LIST_PAGE, UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
@@ -12,7 +14,14 @@ import {
   queueSubmittedDateLabel,
   queueSubmitterLabel,
 } from "@/lib/queue";
-import { catalogReleaseYear, catalogStillSrc } from "@/lib/titles-catalog";
+import { filterTitles } from "@/lib/titles-browse";
+import {
+  TITLES_CATALOG,
+  catalogReleaseYear,
+  catalogSearchMissCopy,
+  catalogSearchQuery,
+  catalogStillSrc,
+} from "@/lib/titles-catalog";
 import { opsCatalogId } from "@/lib/title-public-id";
 import type { TitleStatus } from "@/lib/titles";
 import {
@@ -21,13 +30,21 @@ import {
   TitlesCatalogHeader,
   TitlesCatalogList,
   TitlesCatalogListRow,
+  TitlesCatalogToolbar,
 } from "@/components/titles/titles-catalog";
 
 // Staff /queue is the Titles catalog list, scoped to active work across orgs.
 // RLS is_gc_staff is the cross-org read. Row status is the shared Titles
-// track — the setter stays on GC title detail.
+// track — the setter stays on GC title detail. Search is the Titles catalog
+// toolbar SoT (`SearchField` + `?q=` + `filterTitles`) — not a Queue lookalike.
 
-export default async function GcQueuePage() {
+export default async function GcQueuePage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+} = {}) {
+  const sp = await (searchParams ?? Promise.resolve({} as Record<string, string | string[] | undefined>));
+  const q = catalogSearchQuery(sp.q);
   const supabase = await createClient();
   const { data: titles } = await supabase
     .from("titles")
@@ -98,8 +115,17 @@ export default async function GcQueuePage() {
   });
   rows.sort((a, b) => (a.submittedAt < b.submittedAt ? 1 : a.submittedAt > b.submittedAt ? -1 : 0));
 
+  const hasQueue = rows.length > 0;
+  const visible = filterTitles(rows, q);
+  const emptyCopy =
+    !hasQueue
+      ? QUEUE_PAGE.empty
+      : q.trim()
+        ? catalogSearchMissCopy(q)
+        : QUEUE_PAGE.empty;
+
   return (
-    <TitlesCatalogFrame empty={rows.length === 0} data-queue-catalog="">
+    <TitlesCatalogFrame empty={!hasQueue} data-queue-catalog="">
       <TitlesCatalogHeader
         title={QUEUE_PAGE.title}
         trailing={
@@ -113,11 +139,21 @@ export default async function GcQueuePage() {
         }
       />
 
-      {rows.length === 0 ? (
-        <TitlesCatalogEmpty>{QUEUE_PAGE.empty}</TitlesCatalogEmpty>
+      {hasQueue ? (
+        <TitlesCatalogToolbar
+          search={
+            <Suspense fallback={null}>
+              <SearchField placeholder={TITLES_CATALOG.searchPlaceholder} />
+            </Suspense>
+          }
+        />
+      ) : null}
+
+      {visible.length === 0 ? (
+        <TitlesCatalogEmpty>{emptyCopy}</TitlesCatalogEmpty>
       ) : (
         <TitlesCatalogList>
-          {rows.map((r) => (
+          {visible.map((r) => (
             <TitlesCatalogListRow
               key={r.key}
               href={r.href}

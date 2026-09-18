@@ -12,6 +12,8 @@ import { filterTitles, type BrowseTitle } from "@/lib/titles-browse";
 import {
   TITLES_CATALOG,
   catalogReleaseYear,
+  catalogSearchMissCopy,
+  catalogSearchQuery,
   catalogStillSrc,
   filterCatalogByStatus,
   parseCatalogStatusFilter,
@@ -45,7 +47,7 @@ export default async function TitlesPage({
 }) {
   const sp = await searchParams;
   const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
-  const q = (str(sp.q) ?? "").slice(0, 100);
+  const q = catalogSearchQuery(sp.q);
   const statusFilter = parseCatalogStatusFilter(str(sp.status));
 
   const supabase = await createClient();
@@ -126,7 +128,7 @@ export default async function TitlesPage({
         ? TITLES_CATALOG.empty
         : TITLES_CATALOG.emptyReadOnly
       : q.trim()
-        ? `${TITLES_CATALOG.searchMiss(q.trim())} ${TITLES_CATALOG.searchMissHint}`
+        ? catalogSearchMissCopy(q)
         : TITLES_CATALOG.statusMiss;
 
   return (
