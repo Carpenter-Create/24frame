@@ -36,7 +36,7 @@ const TITLES_COMMENT_PATHS = [
 ] as const;
 
 describe("titles catalog scope", () => {
-  it("keeps catalog search on /titles for phone and desktop", () => {
+  it("keeps catalog search on /titles and staff /queue — same toolbar SoT", () => {
     const catalogPage = src("src/app/(app)/titles/page.tsx");
     const homePage = src("src/app/(app)/dashboard/page.tsx");
     const shell = src("src/components/chrome/app-shell.tsx");
@@ -47,10 +47,20 @@ describe("titles catalog scope", () => {
     const landing = src("src/components/messages/ask-globee-landing.tsx");
     const messagesHeader = src("src/components/chrome/messages-app-header.tsx");
     const titleDetail = src("src/app/(app)/titles/[id]/page.tsx");
+    const queue = src("src/app/(app)/(operator)/queue/page.tsx");
 
     expect(catalogPage).toContain("SearchField");
     expect(catalogPage).toContain("TITLES_CATALOG.searchPlaceholder");
     expect(catalogPage).toContain("TitlesCatalogToolbar");
+    expect(catalogPage).toContain("catalogSearchQuery");
+    expect(catalogPage).toContain("catalogSearchMissCopy");
+    expect(queue).toContain("SearchField");
+    expect(queue).toContain("TITLES_CATALOG.searchPlaceholder");
+    expect(queue).toContain("TitlesCatalogToolbar");
+    expect(queue).toContain("filterTitles");
+    expect(queue).toContain("catalogSearchQuery");
+    expect(queue).toContain("catalogSearchMissCopy");
+    expect(queue).not.toContain("Search queue");
     expect(searchField).toContain("Search titles...");
     expect(shell).not.toContain("TitlesHeaderSearch");
     expect(shell).not.toContain("SearchField");
@@ -146,6 +156,8 @@ describe("titles catalog scope", () => {
     expect(queue).toContain("TitlesCatalogFrame");
     expect(queue).toContain("TitlesCatalogList");
     expect(queue).toContain("TitlesCatalogListRow");
+    expect(queue).toContain("TitlesCatalogToolbar");
+    expect(queue).toContain("SearchField");
     expect(queue).toContain("staff=");
     expect(queue).not.toContain("@/components/ui/card");
     expect(queue).not.toContain("QueueRow");

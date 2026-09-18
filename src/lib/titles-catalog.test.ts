@@ -22,6 +22,8 @@ import {
   catalogCountValue,
   catalogFilterHref,
   catalogReleaseYear,
+  catalogSearchMissCopy,
+  catalogSearchQuery,
   catalogStatusFilterLabel,
   catalogStatusMark,
   catalogStatusPillClass,
@@ -192,6 +194,19 @@ describe("catalog status filter", () => {
     expect(catalogFilterHref("winter", "live")).toBe("/titles?q=winter&status=live");
     expect(catalogFilterHref("", "all")).toBe("/titles");
     expect(catalogFilterHref("  ", "draft")).toBe("/titles?status=draft");
+  });
+});
+
+describe("catalog search SoT", () => {
+  it("caps URL q and keeps Titles search-miss grammar", () => {
+    expect(catalogSearchQuery("Harbor")).toBe("Harbor");
+    expect(catalogSearchQuery(["Winter", "ignored"])).toBe("Winter");
+    expect(catalogSearchQuery(undefined)).toBe("");
+    expect(catalogSearchQuery("x".repeat(120))).toHaveLength(100);
+    expect(TITLES_CATALOG.searchPlaceholder).toBe("Search titles...");
+    expect(TITLES_CATALOG.searchMiss("Harbor")).toBe("No titles match “Harbor”.");
+    expect(TITLES_CATALOG.searchMissHint).toBe("Try a different search.");
+    expect(catalogSearchMissCopy("  Harbor  ")).toBe("No titles match “Harbor”. Try a different search.");
   });
 });
 

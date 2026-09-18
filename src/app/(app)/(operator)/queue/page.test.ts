@@ -9,8 +9,14 @@ import { titleArtworkUrls } from "@/lib/artwork";
 import { createClient } from "@/lib/supabase/server";
 import { LIST_PAGE } from "@/lib/list-bounds";
 import { QUEUE_ACTIVE_STATUSES, QUEUE_PAGE } from "@/lib/queue";
+import { TITLES_CATALOG, catalogSearchMissCopy } from "@/lib/titles-catalog";
 import GcQueuePage from "./page";
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ refresh: vi.fn(), prefetch: vi.fn(), replace: vi.fn() }),
+  usePathname: () => "/queue",
+  useSearchParams: () => new URLSearchParams(),
+}));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/artwork", () => ({
   titleArtworkUrls: vi.fn(async () => new Map()),
@@ -94,6 +100,10 @@ function stubClient({
   });
   vi.mocked(createClient).mockResolvedValue({ from } as never);
   return { from, titlesChain, findingsChain, profilesChain, auditChain };
+}
+
+async function renderQueue(search: Record<string, string | string[] | undefined> = {}) {
+  return renderToStaticMarkup(await GcQueuePage({ searchParams: Promise.resolve(search) }));
 }
 
 /**
@@ -214,6 +224,11 @@ describe("GcQueuePage", () => {
     const src = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "page.tsx"), "utf8");
     expect(src).toContain("@/components/titles/titles-catalog");
     expect(src).toContain("TitlesCatalogListRow");
+    expect(src).toContain("TitlesCatalogToolbar");
+    expect(src).toContain("SearchField");
+    expect(src).toContain("TITLES_CATALOG.searchPlaceholder");
+    expect(src).toContain("filterTitles");
+    expect(src).toContain("catalogSearchMissCopy");
     expect(src).toContain("QUEUE_ACTIVE_STATUSES");
     expect(src).not.toContain("GcTitleStatusControl");
     expect(src).not.toContain("setGcTitleStatus");
@@ -221,5 +236,73 @@ describe("GcQueuePage", () => {
     expect(src).not.toContain("@/components/ui/card");
     expect(src).not.toContain("QueueRow");
     expect(src).not.toContain("Delivery queue");
+    expect(src).not.toContain("Search queue");
+  });
+
+  it("mounts the Titles Search titles toolbar when the queue has rows", async () => {
+    stubClient({ titles: [titleRow()] });
+    const html = await renderQueue();
+
+    expect(html).toContain(QUEUE_PAGE.title);
+    expect(html).toContain(QUEUE_PAGE.licensingStatus);
+    expect(html).toContain("data-queue-licensing-status");
+    expect(html).toContain("data-titles-catalog-toolbar");
+    expect(html).toContain("data-titles-catalog-search");
+    expect(html).toContain(TITLES_CATALOG.searchPlaceholder);
+    expect(html).toContain('placeholder="Search titles..."');
+    expect(html).toContain('aria-label="Search titles..."');
+    expect(html).toContain("Harbor Cut");
+    expect(html).not.toContain("data-titles-catalog-filters");
+    expect(html).not.toContain("data-add-title");
+  });
+
+  it("filters the queue by URL q without widening status scope", async () => {
+    const { titlesChain } = stubClient({
+      titles: [
+        titleRow({ id: "title-1", title: "Harbor Cut" }),
+        titleRow({
+          id: "title-2",
+          title: "Winter Light",
+          status: "in_delivery",
+          catalog_id: "GC-0001235",
+        }),
+      ],
+    });
+
+    const html = await renderQueue({ q: "winter" });
+
+    expect(titlesChain.in).toHaveBeenCalledWith("status", [...QUEUE_ACTIVE_STATUSES]);
+    expect(html).toContain("Winter Light");
+    expect(html).not.toContain("Harbor Cut");
+    expect(html).toContain("data-titles-catalog-toolbar");
+    expect(html).toContain(TITLES_CATALOG.searchPlaceholder);
+    expect(html.match(/data-titles-catalog-list-row=""/g) ?? []).toHaveLength(1);
+  });
+
+  it("uses Titles search-miss grammar when q matches nothing in the queue", async () => {
+    stubClient({ titles: [titleRow()] });
+    const html = await renderQueue({ q: "Meridian" });
+
+    expect(html).toContain(catalogSearchMissCopy("Meridian"));
+    expect(html).toContain(TITLES_CATALOG.searchMiss("Meridian"));
+    expect(html).toContain(TITLES_CATALOG.searchMissHint);
+    expect(html).toContain("data-titles-catalog-toolbar");
+    expect(html).toContain(TITLES_CATALOG.searchPlaceholder);
+    expect(html).toContain("titles-catalog-empty");
+    expect(html).not.toContain("Harbor Cut");
+    expect(html).not.toContain("Nothing matching");
+    expect(html).not.toContain(QUEUE_PAGE.empty);
+    expect(html).not.toContain("data-titles-catalog-list-row");
+  });
+
+  it("keeps Nothing waiting. and hides search when the queue itself is empty", async () => {
+    stubClient();
+    const html = await renderQueue({ q: "Harbor" });
+
+    expect(html).toContain(QUEUE_PAGE.empty);
+    expect(html).not.toContain(catalogSearchMissCopy("Harbor"));
+    expect(html).not.toContain("data-titles-catalog-toolbar");
+    expect(html).not.toContain("data-titles-catalog-search");
+    expect(html).not.toContain(TITLES_CATALOG.searchPlaceholder);
   });
 });

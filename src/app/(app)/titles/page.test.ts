@@ -8,7 +8,7 @@ import { getOrgContext } from "@/lib/supabase/context";
 import { LIST_PAGE } from "@/lib/list-bounds";
 import { TITLE_STATUS_LABELS, type TitleStatus } from "@/lib/titles";
 import { titleStatusProgress } from "@/lib/status-progress";
-import { TITLES_CATALOG } from "@/lib/titles-catalog";
+import { TITLES_CATALOG, catalogSearchMissCopy } from "@/lib/titles-catalog";
 import { NAV } from "@/lib/nav";
 import TitlesPage from "./page";
 
@@ -712,6 +712,25 @@ describe("client /titles catalog", () => {
     expect(archived).toContain(TITLE_STATUS_LABELS.archived);
     expect(archived).not.toContain("draft film");
     expect(archived.match(/data-titles-catalog-list-row=""/g) ?? []).toHaveLength(1);
+  });
+
+  it("filters by URL q and uses catalog search-miss grammar", async () => {
+    stubClient([
+      titleRow("live", 0, { title: "Harbor Cut", id: "title-harbor" }),
+      titleRow("draft", 1, { title: "Winter Light", id: "title-winter" }),
+    ]);
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const hit = await renderCatalog({ q: "winter" });
+    expect(hit).toContain("Winter Light");
+    expect(hit).not.toContain("Harbor Cut");
+    expect(hit).toContain(TITLES_CATALOG.searchPlaceholder);
+
+    const miss = await renderCatalog({ q: "Meridian" });
+    expect(miss).toContain(catalogSearchMissCopy("Meridian"));
+    expect(miss).toContain(TITLES_CATALOG.searchMissHint);
+    expect(miss).not.toContain("Harbor Cut");
+    expect(miss).not.toContain("Winter Light");
   });
 
   it("treats submitted and in_delivery as one Submitted lens", async () => {

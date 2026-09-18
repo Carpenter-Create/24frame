@@ -209,3 +209,14 @@ export function catalogFilterHref(q: string, status: CatalogStatusFilter): strin
   const qs = params.toString();
   return qs ? `/titles?${qs}` : "/titles";
 }
+
+/** URL `q` for catalog search. Same cap on /titles and staff /queue. */
+export function catalogSearchQuery(v: string | string[] | undefined): string {
+  const raw = Array.isArray(v) ? v[0] : v;
+  return (raw ?? "").slice(0, 100);
+}
+
+/** Titles search-miss line. Queue consumes this — do not fork Queue copy. */
+export function catalogSearchMissCopy(q: string): string {
+  return `${TITLES_CATALOG.searchMiss(q.trim())} ${TITLES_CATALOG.searchMissHint}`;
+}
