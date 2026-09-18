@@ -6,6 +6,7 @@ import { availableWorkspaceOptions } from "@/lib/workspace-menu";
 import {
   OVERVIEW_AI_NEXT_CAP,
   OVERVIEW_EDUCATION_CAP,
+  OVERVIEW_EDUCATION_LABEL_CLASS,
   OVERVIEW_HREF,
   OVERVIEW_LEGACY_HREF,
   OVERVIEW_MODULE_ORDER,
@@ -144,6 +145,10 @@ describe("Home module caps", () => {
     ).toEqual(["1 title added", "2 deliveries updated"]);
     expect(OVERVIEW_PAGE.educationEmpty).toBeTruthy();
     expect(JSON.stringify(OVERVIEW_PAGE)).not.toMatch(/lesson_progress/);
+    expect(OVERVIEW_EDUCATION_LABEL_CLASS).toBe("t-body-sm text-ink-2");
+    expect(OVERVIEW_EDUCATION_LABEL_CLASS).not.toContain("t-heading");
+    expect(OVERVIEW_EDUCATION_LABEL_CLASS).not.toContain("text-accent");
+    expect(OVERVIEW_EDUCATION_LABEL_CLASS).not.toContain("t-label");
   });
 });
 

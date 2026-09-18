@@ -5,7 +5,8 @@ import { describe, expect, it } from "vitest";
 import { OverviewHome } from "./overview-home";
 import type { CourseRow } from "@/lib/courses";
 import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
-import { OVERVIEW_MODULE_ORDER, OVERVIEW_PAGE } from "@/lib/overview";
+import { OVERVIEW_EDUCATION_LABEL_CLASS, OVERVIEW_MODULE_ORDER, OVERVIEW_PAGE } from "@/lib/overview";
+import { DASHBOARD_SECTION_TITLE_CLASS } from "@/lib/dashboard-craft";
 
 function moduleChunk(html: string, testId: string): string {
   const start = html.indexOf(`data-overview-module="${testId}"`);
@@ -83,6 +84,8 @@ describe("OverviewHome", () => {
     expect(html).not.toContain(`href="${OVERVIEW_PAGE.needsYouHref}"`);
     expect(moduleChunk(html, "social")).not.toContain(TEXT_ACTION_CLASS);
     expect(moduleChunk(html, "education")).not.toContain(TEXT_ACTION_CLASS);
+    expect(moduleChunk(html, "education")).toContain(OVERVIEW_EDUCATION_LABEL_CLASS);
+    expect(moduleChunk(html, "education")).not.toContain(DASHBOARD_SECTION_TITLE_CLASS);
     expect(moduleChunk(html, "needs-you")).not.toContain(TEXT_ACTION_CLASS);
     expect(moduleChunk(html, "ai-next")).toContain(TEXT_ACTION_CLASS);
     expect(html).toContain(OVERVIEW_PAGE.needsYouEmpty);
@@ -164,6 +167,8 @@ describe("OverviewHome", () => {
     expect(html).not.toContain(`href="${OVERVIEW_PAGE.needsYouHref}"`);
     expect(moduleChunk(html, "social")).not.toContain(TEXT_ACTION_CLASS);
     expect(moduleChunk(html, "education")).not.toContain(TEXT_ACTION_CLASS);
+    expect(moduleChunk(html, "education")).toContain(OVERVIEW_EDUCATION_LABEL_CLASS);
+    expect(moduleChunk(html, "education")).not.toContain(DASHBOARD_SECTION_TITLE_CLASS);
     expect(moduleChunk(html, "needs-you")).not.toContain(TEXT_ACTION_CLASS);
     expect(html).not.toContain("62%");
     expect(html).not.toContain("Globee");
@@ -189,9 +194,16 @@ describe("OverviewHome", () => {
     const titleAt = education.indexOf("data-course-cover-title");
     const coverCloseAt = education.indexOf("</div>", coverAt);
     const trackAt = education.indexOf("data-course-progress-track");
+    const labelAt = education.indexOf("data-overview-module-label");
     expect(education).toContain('data-course-card-density="home"');
+    expect(education).toContain('data-course-cover-tone="plate"');
+    expect(education).toContain("data-course-cover-band");
+    expect(education).toContain("data-course-cover-orb");
+    expect(education).not.toContain("<img");
+    expect(education).not.toContain('data-course-cover-tone="photo"');
     expect(titleAt).toBeGreaterThan(coverAt);
     expect(titleAt).toBeLessThan(coverCloseAt);
+    expect(education).toContain("text-accent-contrast");
     expect(trackAt).toBeGreaterThan(coverCloseAt);
     expect(education).toContain("40% complete");
     expect(education).toContain("width:40%");
@@ -200,5 +212,11 @@ describe("OverviewHome", () => {
     expect(education).not.toContain("t-body font-medium text-ink");
     expect(education).not.toContain("62%");
     expect(education).not.toContain("3 lessons");
+    expect(education).not.toContain("lesson");
+    expect(education).toContain(OVERVIEW_EDUCATION_LABEL_CLASS);
+    expect(education).not.toContain(DASHBOARD_SECTION_TITLE_CLASS);
+    expect(education).not.toContain(TEXT_ACTION_CLASS);
+    expect(labelAt).toBeGreaterThan(-1);
+    expect(labelAt).toBeLessThan(coverAt);
   });
 });

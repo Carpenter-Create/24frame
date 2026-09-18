@@ -212,6 +212,9 @@ describe("course lock", () => {
     expect(readFileSync("src/components/overview/overview-home.tsx", "utf8")).toContain(
       "progressPercent",
     );
+    expect(readFileSync("src/components/overview/overview-home.tsx", "utf8")).toContain(
+      "OVERVIEW_EDUCATION_LABEL_CLASS",
+    );
     expect(readFileSync("src/app/(app)/home/page.tsx", "utf8")).not.toContain("62");
     expect(lib).toContain("COURSE_GLANCE_PROGRESS_FILL_CLASS");
     expect(lib).toContain("bg-accent");
