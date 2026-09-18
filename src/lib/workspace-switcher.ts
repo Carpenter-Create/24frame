@@ -1,14 +1,15 @@
 // Mercury workspace switcher. Lives in lib/, not JSX.
-// Phone Access / Aggregation: compact leading name+menu after the
-// hamburger. Emblem ↔ pill air is --space-3 (12). Not --space-1.
-// Do not put overflow-hidden on the leading row or pill host —
-// the menu is absolute inside the host and must paint + receive
-// taps. Pill host min-w-0 is enough to truncate the name.
-// Phone trailing grammar A (Adam 2026-09-18): Social search icon
-// (if Social) · bell · avatar. Ask 24Frame AI and sun/moon leave
-// this cluster on max-md and live on the avatar sheet. Do not
-// cluster the compact pill with the trailing pair, do not center
-// it. Desktop md+ replaces the single-name+chevron trigger with a
+// Phone Option 2 + Apple addendum (Adam 2026-09-18): workspace
+// switching lives on HousePhoneBottomNav. Phone top has no
+// workspace pill. Emblem owns the left alone — hamburger is not
+// co-leading. Leading air (settings back ↔ emblem) is --space-3
+// (12). Not --space-1. Do not put overflow-hidden on the leading
+// row (#412).
+// Phone trailing: [search if Social] [☰ if dest rail] [bell]
+// [avatar], with --chrome-gutter so the avatar is not flush. Ask
+// 24Frame AI and sun/moon leave this cluster on max-md and live
+// on the avatar sheet. Do not center the dest hamburger.
+// Desktop md+ replaces the single-name+chevron trigger with a
 // sliding-pill cluster of available workspace names (Adam lock
 // 2026-09-17 “Try it”). Same house grammar as Top Performing:
 // active ink fill, idle muted grey. Desktop trailing: pills, then

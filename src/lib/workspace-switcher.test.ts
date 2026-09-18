@@ -143,7 +143,7 @@ describe("workspace switcher lock", () => {
     }
   });
 
-  it("reserves a phone leading pill after the hamburger and a desktop trailing cluster", () => {
+  it("reserves desktop trailing workspace pills — phone switching is the bottom bar", () => {
     expect(APP_HEADER_LEADING_CLASS).toContain("gap-[var(--space-3)]");
     expect(APP_HEADER_LEADING_CLASS).toContain("md:gap-[var(--space-2)]");
     expect(APP_HEADER_LEADING_CLASS).not.toContain("gap-[var(--space-1)]");

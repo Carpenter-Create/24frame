@@ -17,7 +17,6 @@ import {
   APP_HEADER_LEADING_CLASS,
   APP_HEADER_TRAILING_CLUSTER_CLASS,
   APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS,
-  APP_HEADER_WORKSPACE_PILL_HOST_CLASS,
   WORKSPACE_SWITCHER,
   WORKSPACE_SWITCHER_PILL_CHEVRON_CLASS,
   WORKSPACE_SWITCHER_PILL_PANEL_CLASS,
@@ -53,28 +52,23 @@ function chromeHtml() {
   );
 }
 
-describe("Aggregation Dashboard mobile chrome — Mercury leading pill", () => {
-  it("puts a compact Aggregation pill after the hamburger — not centered, not with the avatar", () => {
+describe("Aggregation Dashboard mobile chrome — emblem left, dest hamburger trailing", () => {
+  it("keeps the emblem alone on the lead — no workspace pill, hamburger not co-leading", () => {
     expect(APP_HEADER_LEADING_CLASS).toContain("gap-[var(--space-3)]");
     expect(APP_HEADER_LEADING_CLASS).toContain("md:gap-[var(--space-2)]");
     expect(APP_HEADER_LEADING_CLASS).not.toContain("gap-[var(--space-1)]");
     expect(APP_HEADER_LEADING_CLASS).not.toMatch(/(?:^|\s)(?:max-md:)?overflow-hidden(?:\s|$)/);
     expect(APP_HEADER_LEADING_CLASS).toContain("overflow-visible");
     expect(APP_HEADER_LEADING_CLASS).not.toContain("justify-center");
-    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).toContain("md:hidden");
-    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).toContain("min-w-0");
-    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).toContain("overflow-visible");
-    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).not.toContain("shrink-0");
-    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).not.toContain("mx-auto");
     expect(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS).toContain("border-hairline");
     expect(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS).toContain("bg-surface-muted");
     expect(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS).toContain("t-body-sm");
     expect(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS).toContain("text-ink");
     expect(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS).not.toMatch(/green|emerald|#00|#12|#1[Bb]|#1769FF/);
     expect(leadSrc).toContain("data-app-header-leading");
-    expect(leadSrc).toContain("data-app-header-workspace-pill");
+    expect(leadSrc).not.toContain("data-app-header-workspace-pill");
     expect(leadSrc).toContain("APP_HEADER_LEADING_CLASS");
-    expect(leadSrc).toContain('tone="pill"');
+    expect(leadSrc).not.toContain('tone="pill"');
     expect(shellSrc).toContain("MobileNavSlot");
     expect(shellSrc).toContain("<HouseLeadChrome");
     const header = leadSrc.slice(
@@ -89,25 +83,14 @@ describe("Aggregation Dashboard mobile chrome — Mercury leading pill", () => {
       header.indexOf("data-app-header-trailing"),
     );
     expect(leading).toContain("{leadingNav}");
-    expect(leading).toContain("data-app-header-workspace-pill");
-    expect(leading).toContain("<WorkspaceSwitcher current={workspace} tone=\"pill\" />");
+    expect(leading).not.toContain("data-app-header-workspace-pill");
+    expect(leading).not.toContain("WorkspaceSwitcher");
     expect(leading).not.toContain("{accountMenu}");
-    expect(leading.indexOf("{leadingNav}")).toBeLessThan(
-      leading.indexOf("data-app-header-workspace-pill"),
-    );
-    expect(leading.indexOf("data-app-header-workspace-pill")).toBeLessThan(
-      leading.indexOf("{afterLead}"),
-    );
+    expect(leading).not.toContain("{trailingNav}");
     expect(shellSrc).not.toContain("afterLead=");
     expect(shellSrc).not.toContain("MessagesHeaderSlot");
     expect(shellSrc).toContain("AskAiOverlayProvider");
-    const pillHtml = renderToStaticMarkup(
-      createElement(WorkspaceSwitcher, { current: "aggregation", tone: "pill" }),
-    );
-    expect(pillHtml).toContain('data-workspace-switcher-tone="pill"');
-    expect(pillHtml).toContain("Aggregation");
-    expect(pillHtml).toContain(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS);
-    expect(pillHtml).toContain("data-workspace-switcher-chevron");
+    expect(shellSrc).toContain("trailingNav=");
   });
 
   it("leaves the trailing avatar alone — no Aggregation+avatar phone cluster", () => {
@@ -127,13 +110,16 @@ describe("Aggregation Dashboard mobile chrome — Mercury leading pill", () => {
     expect(trailing).not.toContain('tone="pill"');
     expect(trailing).toContain("{accountMenu}");
     expect(trailing).toContain("{trailingSearch");
+    expect(trailing).toContain("{trailingNav}");
     expect(trailing).not.toContain("data-education-header-search-host");
+    expect(trailing.indexOf("{trailingNav}")).toBeLessThan(
+      trailing.indexOf("data-app-header-workspace-desktop"),
+    );
     expect(trailing.indexOf("data-app-header-workspace-desktop")).toBeLessThan(
       trailing.indexOf("{accountMenu}"),
     );
     expect(shellSrc).toContain("accountMenu=");
     expect(shellSrc).toContain("AccountMenuSlot");
-    expect(trailing).not.toContain("MobileNav");
     expect(trailing).not.toContain("data-dashboard-period");
     expect(trailing).not.toContain("Move");
     expect(shellSrc).not.toContain("data-header-move");

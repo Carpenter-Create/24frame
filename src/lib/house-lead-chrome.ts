@@ -1,10 +1,13 @@
 // Shared top lead chrome for Aggregation · Social · Education · Home.
 // Phone: Asset 8 emblem on every workspace (logoVisible always).
-// Dest-rail phone adds hamburger before the emblem — house gap
-// (--space-3). Emblem is a workspace-home link, not the rail.
-// Phone grammar A (Adam 2026-09-18):
-//   Left: [hamburger if Agg/Edu] [emblem] [workspace pill]
-//   Trailing: [search if Social] [bell] [avatar]
+// Emblem owns the phone left alone. Dest-rail hamburger (Aggregation
+// / Education) lives in the trailing cluster — Apple grammar, not
+// co-leading with the mark. Emblem is a workspace-home link, not the rail.
+// Phone grammar Option 2 + addendum (Adam 2026-09-18):
+//   Left: [emblem]
+//   Trailing: [search if Social] [☰ if Agg/Edu] [bell] [avatar]
+//   Bottom: HousePhoneBottomNav — Home · Social · Aggregation · Education
+// Phone top has no workspace pill. Bottom bar owns workspace switching.
 // Ask 24Frame AI and the sun/moon leave the phone trailing cluster
 // and live on the avatar sheet (Appearance drill-in + 24Frame AI).
 // Desktop md+ keeps switcher · Ask · theme · bell · avatar.
@@ -45,7 +48,7 @@ export const HOUSE_LEAD_SCROLL_CLASS =
   "min-h-0 flex-1 overflow-y-auto overscroll-contain";
 
 // Stack pins header + Education under-nav as one unit. Do not put
-// overflow-hidden on this row (#412) — the workspace pill menu must paint.
+// overflow-hidden on this row (#412).
 export const HOUSE_LEAD_STACK_CLASS = "sticky top-0 z-40 shrink-0";
 
 // Phone: --space-6 lead · --chrome-gutter trail. md+ uses chrome-gutter
