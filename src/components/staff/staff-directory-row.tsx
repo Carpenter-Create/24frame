@@ -5,6 +5,7 @@ import {
   STAFF_DIRECTORY_AVATAR_CLASS,
   STAFF_DIRECTORY_COPY_CLASS,
   STAFF_DIRECTORY_NAME_CLASS,
+  STAFF_DIRECTORY_NESTED_ROW_CLASS,
   STAFF_DIRECTORY_ROW_CLASS,
   STAFF_DIRECTORY_SECONDARY_CLASS,
   STAFF_DIRECTORY_TRAILING_CLASS,
@@ -17,9 +18,11 @@ import {
 
 export function StaffDirectoryRow({
   row,
+  nested = false,
   className,
 }: {
   row: StaffDirectoryRowModel;
+  nested?: boolean;
   className?: string;
 }) {
   const body = (
@@ -48,20 +51,30 @@ export function StaffDirectoryRow({
 
   const classes = cn(
     STAFF_DIRECTORY_ROW_CLASS,
+    nested ? STAFF_DIRECTORY_NESTED_ROW_CLASS : null,
     row.href ? "transition-colors hover:bg-surface/70" : null,
     className,
   );
 
   if (row.href) {
     return (
-      <Link data-staff-directory-row="" href={row.href} className={classes}>
+      <Link
+        data-staff-directory-row=""
+        data-staff-directory-nested={nested ? "" : undefined}
+        href={row.href}
+        className={classes}
+      >
         {body}
       </Link>
     );
   }
 
   return (
-    <div data-staff-directory-row="" className={classes}>
+    <div
+      data-staff-directory-row=""
+      data-staff-directory-nested={nested ? "" : undefined}
+      className={classes}
+    >
       {body}
     </div>
   );

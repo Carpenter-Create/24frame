@@ -9,6 +9,7 @@ import {
   clientDirectorySecondary,
   clientOrgFields,
   clientOrgHref,
+  clientSeatSecondary,
   filterClientOrgs,
   parseClientDirectoryFilter,
   tierCell,
@@ -34,10 +35,11 @@ function row(over: Partial<ClientDirectoryRow> = {}): ClientDirectoryRow {
 }
 
 describe("CLIENTS_PAGE copy", () => {
-  it("locks the staff Clients empty line", () => {
+  it("locks the staff Clients H1 and empty line with no subtitle", () => {
+    expect(CLIENTS_PAGE.title).toBe("Clients");
     expect(CLIENTS_PAGE.empty).toBe("No clients yet.");
     expect(CLIENTS_PAGE.empty.toLowerCase()).not.toContain("add");
-    expect(CLIENTS_PAGE.subtitle).toBe("Organizations with an active seat.");
+    expect(CLIENTS_PAGE).not.toHaveProperty("subtitle");
     expect(CLIENT_PROFILE.peopleTitle).toBe("People");
   });
 });
@@ -160,6 +162,7 @@ describe("client directory profile helpers", () => {
     const [org] = toClientOrgs([row(), row({ user_id: "u2", email: "sam@acmefilms.com", role: "viewer" })]);
     expect(clientOrgHref(org.orgId)).toBe(`/gc/clients/${org.orgId}`);
     expect(clientDirectorySecondary(org)).toBe("2 people · Pro");
+    expect(clientSeatSecondary(org.seats[0])).toBe("Account owner · Aug 14, 2026");
     expect(clientOrgFields(org)).toEqual([
       { label: "Status", value: "Active" },
       { label: "Plan", value: "Pro" },

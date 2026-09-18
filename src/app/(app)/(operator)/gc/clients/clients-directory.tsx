@@ -8,6 +8,7 @@ import {
   CLIENT_DIRECTORY_FILTERS,
   clientDirectorySecondary,
   clientOrgHref,
+  clientSeatSecondary,
   filterClientOrgs,
   toClientOrgs,
   type ClientDirectoryFilter,
@@ -46,11 +47,16 @@ export async function GcClientsDirectory({
     secondary: clientDirectorySecondary(org),
     trailing: org.status,
     href: clientOrgHref(org.orgId),
+    nested: org.seats.map((seat) => ({
+      id: seat.userId,
+      name: seat.email,
+      secondary: clientSeatSecondary(seat),
+    })),
   }));
 
   return (
     <>
-      <PageHeader title={CLIENTS_PAGE.title} subtitle={CLIENTS_PAGE.subtitle} />
+      <PageHeader title={CLIENTS_PAGE.title} />
 
       {truncated ? (
         <InlineNotice tone="error" className="mb-4">
