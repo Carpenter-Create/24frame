@@ -16,7 +16,7 @@ export function SocialTopBar({
       workspace="social"
       logoVisible="always"
       search={<HouseLeadSearch tone="live" />}
-      phoneSearch={<HouseLeadSearch tone="live" presentation="icon" />}
+      trailingSearch={<HouseLeadSearch tone="live" presentation="icon" />}
       accountMenu={<UserMenu email={email} name={name} photoUrl={photoUrl} />}
     />
   );

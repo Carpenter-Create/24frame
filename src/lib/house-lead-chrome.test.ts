@@ -22,6 +22,8 @@ import {
   HOUSE_LEAD_SEARCH_WIDTH_PX,
   HOUSE_LEAD_SHELL_CLASS,
   HOUSE_LEAD_SLOT_CLASS,
+  HOUSE_LEAD_STACK_CLASS,
+  HOUSE_LEAD_UNDER_NAV_CLASS,
   HOUSE_THEME_TOGGLE_CLASS,
 } from "@/lib/house-lead-chrome";
 import { HOUSE_HEADER_SEARCH_GAP_CLASS, HOUSE_SEARCH_PILL_CLASS } from "@/lib/house-shell";
@@ -226,9 +228,13 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
   });
 
   it("G9 pins the shared lead to the viewport — page scroll lives on main", () => {
-    expect(HOUSE_LEAD_CHROME_CLASS).toContain("sticky");
-    expect(HOUSE_LEAD_CHROME_CLASS).toContain("top-0");
-    expect(HOUSE_LEAD_CHROME_CLASS).toContain("shrink-0");
+    expect(HOUSE_LEAD_STACK_CLASS).toBe("sticky top-0 z-40 shrink-0");
+    expect(HOUSE_LEAD_STACK_CLASS).toContain("sticky");
+    expect(HOUSE_LEAD_STACK_CLASS).toContain("top-0");
+    expect(HOUSE_LEAD_STACK_CLASS).toContain("shrink-0");
+    expect(HOUSE_LEAD_CHROME_CLASS).not.toContain("sticky");
+    expect(HOUSE_LEAD_UNDER_NAV_CLASS).toContain("md:hidden");
+    expect(HOUSE_LEAD_UNDER_NAV_CLASS).not.toMatch(/(?:^|\s)(?:max-md:)?overflow-hidden(?:\s|$)/);
     expect(HOUSE_LEAD_SHELL_CLASS).toBe(
       "flex h-dvh flex-col overflow-hidden overscroll-none",
     );
@@ -251,6 +257,8 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
   });
 
   it("keeps phone emblem + workspace pill from overlapping the lead mark", () => {
+    expect(leadSrc).toContain("HOUSE_LEAD_STACK_CLASS");
+    expect(leadSrc).toContain("data-house-lead-stack");
     expect(leadSrc).toContain("<BrandLogo />");
     expect(leadSrc).not.toContain("BrandEmblem");
     expect(leadSrc.match(/<BrandLogo/g)?.length).toBe(1);

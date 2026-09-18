@@ -2,13 +2,15 @@
 // Phone: Asset 8 emblem on every workspace (logoVisible always).
 // Dest-rail phone adds hamburger before the emblem — house gap
 // (--space-3). Emblem is a workspace-home link, not the rail.
-// [ Emblem (phone) / wordmark (md+) · fixed lead slot ] — [ optional search · same gap ] ····· [ switcher · Ask 24Frame AI · theme · bell · avatar ]
+// [ Emblem (phone) / wordmark (md+) · fixed lead slot ] — [ optional desktop search · same gap ] ····· [ Social phone search icon · switcher · Ask 24Frame AI · theme · bell · avatar ]
 // Social live explore search and Education quiet courses/videos
 // search share Facebook-compact geometry (04-facebook.png SoT)
 // via one HouseLeadSearch primitive — never twin files.
-// Aggregation mid-lead stays empty (agg-search-no). Logo inset
-// does not drift when the search slot is empty. Do not invent a
-// fourth product or an Aggregation search.
+// Phone Education search is a full-width row under this stack — not
+// in the top nav. Phone Social is a trailing magnifying-glass that
+// opens a dedicated sheet. Aggregation mid-lead stays empty
+// (agg-search-no). Logo inset does not drift when the search slot is
+// empty. Do not invent a fourth product or an Aggregation search.
 //
 // G6 chrome gutter — logo left = rail left; trailing right = canvas
 // right. Desktop uses --chrome-gutter (not --content-inset). Phone
@@ -36,7 +38,11 @@ export const HOUSE_LEAD_SHELL_CLASS =
 export const HOUSE_LEAD_SCROLL_CLASS =
   "min-h-0 flex-1 overflow-y-auto overscroll-contain";
 
-export const HOUSE_LEAD_CHROME_CLASS = `sticky top-0 z-40 shrink-0 flex items-center justify-end gap-4 border-b border-hairline bg-surface/85 backdrop-blur ${MOBILE_CHROME_LEAD_PAD_CLASS} ${HOUSE_CHROME_GUTTER_X_CLASS}`;
+// Stack pins header + Education under-nav as one unit. Do not put
+// overflow-hidden on this row (#412) — the workspace pill menu must paint.
+export const HOUSE_LEAD_STACK_CLASS = "sticky top-0 z-40 shrink-0";
+
+export const HOUSE_LEAD_CHROME_CLASS = `flex items-center justify-end gap-4 border-b border-hairline bg-surface/85 backdrop-blur ${MOBILE_CHROME_LEAD_PAD_CLASS} ${HOUSE_CHROME_GUTTER_X_CLASS}`;
 
 export const HOUSE_LEAD_LOGO_CLASS = "inline-flex shrink-0 items-center";
 
@@ -44,7 +50,9 @@ export const HOUSE_LEAD_SLOT_CLASS = `min-w-0 items-center ${HOUSE_HEADER_SEARCH
 
 export const HOUSE_LEAD_SEARCH_DESKTOP_CLASS = "hidden w-[240px] shrink-0 md:flex";
 
-export const HOUSE_LEAD_SEARCH_PHONE_CLASS = "min-w-0 flex-1 md:hidden";
+export const HOUSE_LEAD_SEARCH_PHONE_CLASS = "w-full min-w-0 md:hidden";
+
+export const HOUSE_LEAD_UNDER_NAV_CLASS = `flex w-full items-center md:hidden border-b border-hairline bg-surface/85 backdrop-blur ${MOBILE_CHROME_LEAD_PAD_CLASS} ${HOUSE_CHROME_GUTTER_X_CLASS} py-[var(--space-2)]`;
 
 export const HOUSE_LEAD_SEARCH_PILL_CLASS =
   "flex h-9 w-full min-w-0 items-center gap-2 px-3";

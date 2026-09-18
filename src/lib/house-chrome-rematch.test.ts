@@ -60,6 +60,8 @@ const FUN_CHROME_PATHS = [
   "src/components/chrome/side-nav.tsx",
   "src/components/social/social-top-bar.tsx",
   "src/components/chrome/house-lead-search.tsx",
+  "src/components/social/social-search-sheet.tsx",
+  "src/lib/social-search.ts",
   "src/lib/social-chrome.ts",
   "src/lib/workspace-switcher.ts",
   "src/lib/mobile-chrome.ts",
@@ -166,16 +168,17 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(leading).toContain("data-app-header-brand-search");
     expect(leading).toContain("HOUSE_LEAD_SLOT_CLASS");
     expect(leading).toContain('data-education-header-search-host={education ? "desktop" : undefined}');
-    expect(leading).toContain('data-education-header-search-host={education ? "phone" : undefined}');
+    expect(leading).not.toContain('data-education-header-search-host={education ? "phone" : undefined}');
     expect(leading.indexOf("data-brand-emblem")).toBeLessThan(
       leading.indexOf('data-education-header-search-host={education ? "desktop" : undefined}'),
     );
-    expect(leading.indexOf('data-education-header-search-host={education ? "desktop" : undefined}')).toBeLessThan(
-      leading.indexOf('data-education-header-search-host={education ? "phone" : undefined}'),
-    );
+    expect(lead).toContain("data-house-under-nav");
+    expect(lead.indexOf("</header>")).toBeLessThan(lead.indexOf("data-house-under-nav"));
+    expect(lead).toContain('data-education-header-search-host={education ? "phone" : undefined}');
     expect(trailing).toContain('presentation="pills"');
     expect(trailing).toContain("{accountMenu}");
-    expect(trailing).not.toContain("HouseLeadSearch");
+    expect(trailing).toContain("{trailingSearch");
+    expect(trailing).toContain("data-social-header-actions");
     expect(trailing).not.toContain("data-education-header-search-host");
     expect(shell).not.toContain("SearchField");
   });
@@ -208,8 +211,10 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(mobileChrome).toContain("HOUSE_ICON_BUTTON_CLASS");
     expect(collapse).toContain("HOUSE_ICON_BUTTON_CLASS");
     expect(socialChrome).toContain("HOUSE_RAIL_PANEL_CLASS");
-    expect(leadSearch).toContain("HOUSE_ICON_BUTTON_CLASS");
     expect(leadSearch).toContain("HOUSE_SEARCH_PILL_CLASS");
+    expect(readFileSync("src/components/social/social-search-sheet.tsx", "utf8")).toContain(
+      "HOUSE_ICON_BUTTON_CLASS",
+    );
     expect(lead).toContain("ThemeToggle");
     expect(readFileSync("src/lib/house-lead-chrome.ts", "utf8")).toContain("HOUSE_THEME_TOGGLE_CLASS");
     expect(readFileSync("src/lib/house-lead-chrome.ts", "utf8")).toContain("HOUSE_ICON_BUTTON_CLASS");

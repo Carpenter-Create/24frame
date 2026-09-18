@@ -96,9 +96,10 @@ describe("HouseLeadSearch — one SoT for Social live and Education quiet", () =
     );
     expect(icon).toContain("data-house-lead-search-icon");
     expect(icon).toContain("data-social-header-search-icon");
-    expect(icon).toContain(`href="${SOCIAL_ROUTES.explore}"`);
     expect(icon).toContain(HOUSE_ICON_BUTTON_CLASS);
     expect(icon).not.toContain("data-house-lead-search-field");
+    expect(icon).not.toContain("data-social-search-sheet");
+    expect(icon).not.toContain(`href="${SOCIAL_ROUTES.explore}"`);
   });
 
   it("reuses house pill tokens and does not absorb Titles SearchField", () => {

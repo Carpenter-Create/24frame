@@ -63,6 +63,11 @@ describe("social copy lock", () => {
     expect(blob).not.toContain("Social-native");
     expect(blob).not.toContain("One clear next step");
     expect(SOCIAL.explore.subtitle).toContain(PRODUCT_NAME);
+    expect(SOCIAL.explore.recent).toBe("Recent");
+    expect(SOCIAL.explore.recentEmpty).toBe("No recent searches.");
+    expect(SOCIAL.explore.searchBack).toBe("Back");
+    expect(JSON.stringify(SOCIAL.explore)).not.toContain("Meta AI");
+    expect(JSON.stringify(SOCIAL.explore)).not.toContain("Search with Meta AI");
     expect(SOCIAL_ROUTES.explore).toBe("/social/explore");
     expect(SOCIAL_ROUTES.create).toBe("/social/create");
       expect(SOCIAL_ROUTES.stories).toBe("/social/stories");

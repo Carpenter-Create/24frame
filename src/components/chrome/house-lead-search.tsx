@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { MagnifyingGlass } from "@phosphor-icons/react";
 
@@ -11,16 +10,19 @@ import {
   educationSearchAction,
   parseEducationSearchQuery,
 } from "@/lib/course-search";
+import { SocialSearchSheet } from "@/components/social/social-search-sheet";
 import { HOUSE_LEAD_SEARCH_PILL_CLASS } from "@/lib/house-lead-chrome";
-import { HOUSE_ICON_BUTTON_CLASS, HOUSE_SEARCH_PILL_CLASS } from "@/lib/house-shell";
+import { HOUSE_SEARCH_PILL_CLASS } from "@/lib/house-shell";
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 
 // One mid-lead search SoT for Social live Explore and Education quiet
-// courses/videos. Slot into HouseLeadChrome search / phoneSearch.
-// Geometry is HOUSE_LEAD_SEARCH_PILL_CLASS + HOUSE_SEARCH_PILL_CLASS —
-// same tokens the Titles catalog search reuses. Do not fork the pill.
-// Do not import the catalog search control. Aggregation keeps no top search.
+// courses/videos. Slot into HouseLeadChrome search / underNav /
+// trailingSearch. Geometry is HOUSE_LEAD_SEARCH_PILL_CLASS +
+// HOUSE_SEARCH_PILL_CLASS — same tokens the Titles catalog search
+// reuses. Do not fork the pill. Do not import the catalog search
+// control. Aggregation keeps no top search. Phone Social icon opens
+// the dedicated sheet — do not Link the icon to Explore.
 
 export type HouseLeadSearchTone = "live" | "quiet";
 export type HouseLeadSearchPresentation = "field" | "icon";
@@ -32,6 +34,7 @@ export function HouseLeadSearch({
   placeholder,
   label,
   inputId,
+  autoFocus = false,
   className,
 }: {
   tone: HouseLeadSearchTone;
@@ -40,6 +43,7 @@ export function HouseLeadSearch({
   placeholder?: string;
   label?: string;
   inputId?: string;
+  autoFocus?: boolean;
   className?: string;
 }) {
   const live = tone === "live";
@@ -51,23 +55,18 @@ export function HouseLeadSearch({
 
   if (presentation === "icon") {
     return (
-      <Link
-        href={resolvedAction ?? SOCIAL_ROUTES.explore}
-        prefetch
-        aria-label={resolvedLabel}
-        data-house-lead-search-icon=""
-        data-social-header-search-icon={live ? "" : undefined}
-        className={cn(
-          "flex size-8 items-center justify-center text-ink-2 md:hidden",
-          HOUSE_ICON_BUTTON_CLASS,
-        )}
-      >
-        <MagnifyingGlass
-          className="size-5"
-          weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
-          aria-hidden
-        />
-      </Link>
+      <SocialSearchSheet
+        field={
+          <HouseLeadSearchField
+            tone="live"
+            action={resolvedAction ?? SOCIAL_ROUTES.explore}
+            placeholder={resolvedPlaceholder}
+            label={resolvedLabel}
+            inputId="social-search-sheet-q"
+            autoFocus
+          />
+        }
+      />
     );
   }
 
@@ -78,6 +77,7 @@ export function HouseLeadSearch({
         placeholder={resolvedPlaceholder}
         label={resolvedLabel}
         inputId={resolvedInputId}
+        autoFocus={autoFocus}
         className={className}
       />
     );
@@ -90,6 +90,7 @@ export function HouseLeadSearch({
       placeholder={resolvedPlaceholder}
       label={resolvedLabel}
       inputId={resolvedInputId}
+      autoFocus={autoFocus}
       className={className}
     />
   );
@@ -100,12 +101,14 @@ function QuietHouseLeadSearchField({
   placeholder,
   label,
   inputId,
+  autoFocus,
   className,
 }: {
   action?: string;
   placeholder: string;
   label: string;
   inputId: string;
+  autoFocus?: boolean;
   className?: string;
 }) {
   const pathname = usePathname();
@@ -120,6 +123,7 @@ function QuietHouseLeadSearchField({
       label={label}
       inputId={inputId}
       defaultValue={q}
+      autoFocus={autoFocus}
       className={className}
     />
   );
@@ -132,6 +136,7 @@ function HouseLeadSearchField({
   label,
   inputId,
   defaultValue,
+  autoFocus,
   className,
 }: {
   tone: HouseLeadSearchTone;
@@ -140,6 +145,7 @@ function HouseLeadSearchField({
   label: string;
   inputId: string;
   defaultValue?: string;
+  autoFocus?: boolean;
   className?: string;
 }) {
   return (
@@ -166,6 +172,7 @@ function HouseLeadSearchField({
         name="q"
         defaultValue={defaultValue}
         placeholder={placeholder}
+        autoFocus={autoFocus}
         className="h-full min-w-0 flex-1 placeholder:text-ink-3"
       />
     </form>

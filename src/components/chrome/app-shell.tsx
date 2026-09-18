@@ -168,7 +168,7 @@ export function AppShell({
             workspace="social"
             logoVisible="always"
             search={<HouseLeadSearch tone="live" />}
-            phoneSearch={<HouseLeadSearch tone="live" presentation="icon" />}
+            trailingSearch={<HouseLeadSearch tone="live" presentation="icon" />}
             activityUnread={messagesUnread}
             activityItems={activityItems}
             accountMenu={
@@ -264,8 +264,10 @@ export function AppShell({
           second rail chrome. Period stays on the Dashboard org row.
           No org switcher on any route. Aggregation mid-lead stays
           empty. Education mounts a quiet course/video search
-          immediately right of the logo, same Facebook-compact slot
-          as Social live search. Search also mounts on the Access
+          immediately right of the logo on desktop, same
+          Facebook-compact slot as Social live search. Phone
+          Education search sits in a full-width row under the lead —
+          not in the top nav. Search also mounts on the Access
           `/messages` gate, and on mobile `/titles` (528:542).
           Phone avatar opens 544:561. Hamburger stays the nav sheet.
           Do not invent Move chrome or a second phone switcher.
@@ -288,7 +290,7 @@ export function AppShell({
             </Suspense>
           ) : undefined
         }
-        phoneSearch={
+        underNav={
           workspace === "education" && !settingsPage ? (
             <Suspense fallback={null}>
               <HouseLeadSearch tone="quiet" inputId="education-header-q-phone" />
