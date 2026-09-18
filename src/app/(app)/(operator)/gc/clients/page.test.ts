@@ -125,7 +125,8 @@ describe("GcClientsPage read bound", () => {
     expect(directorySrc).toContain("StaffDirectoryList");
     expect(directorySrc).toContain("ClientsStatusFilter");
     expect(directorySrc).toContain("PageHeader");
-    expect(directorySrc).not.toContain("StatusFilter");
+    expect(directorySrc).not.toContain("<StatusFilter");
+    expect(directorySrc).not.toContain("@/components/layout/status-filter");
     expect(directorySrc).not.toContain("clientSeatSecondary");
     expect(directorySrc).not.toContain("nested:");
     expect(directorySrc).not.toContain("subtitle=");

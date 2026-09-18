@@ -53,7 +53,8 @@ describe("ClientsStatusFilter", () => {
     expect(src).toContain("HousePageSelect");
     expect(src).toContain("Dashboard All time");
     expect(src).toContain('menuAlign="end"');
-    expect(src).not.toContain("StatusFilter");
+    expect(src).not.toContain("<StatusFilter");
+    expect(src).not.toContain("@/components/layout/status-filter");
     expect(src).not.toMatch(/triggerClassName=/);
     expect(src).not.toMatch(/md:hidden/);
     expect(src).not.toMatch(/uppercase/);
