@@ -1,24 +1,36 @@
+import { createElement } from "react";
 import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { titleArtworkUrls } from "@/lib/artwork";
 import { createClient } from "@/lib/supabase/server";
 import {
   GC_DELIVERIES_EMPTY,
   GC_DELIVERIES_TRUNCATED,
   GC_LICENSING_STATUS,
 } from "@/lib/gc-deliveries";
-import { HOUSE_MODULE_CLASS } from "@/lib/house-shell";
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
 import GcDeliveriesPage from "./page";
 
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
-vi.mock("./new-delivery-form", () => ({ NewDeliveryForm: () => null }));
-vi.mock("./export-panel", () => ({ ExportPanel: () => null }));
-vi.mock("./delivery-controls", () => ({ DeliveryControls: () => null }));
-vi.mock("./portal-links", () => ({ PortalLinks: () => null }));
+vi.mock("@/lib/artwork", () => ({
+  titleArtworkUrls: vi.fn(async () => new Map()),
+}));
+vi.mock("next/image", () => ({
+  default: ({ src, className }: { src: string; className?: string }) =>
+    createElement("img", { src, className, alt: "" }),
+}));
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn() }),
+  usePathname: () => "/gc/deliveries",
+  useSearchParams: () => new URLSearchParams(),
+}));
 vi.mock("./licensing-vendor-filter", () => ({
   LicensingVendorFilter: () => null,
+}));
+vi.mock("./licensing-status-filter", () => ({
+  LicensingStatusFilter: () => null,
 }));
 
 function stubClient(tables: Record<string, unknown[]> = {}) {
@@ -65,13 +77,17 @@ const companionsSrc = readFileSync("src/lib/gc-deliveries-companions.ts", "utf8"
 const viewTitlesClass = "t-body-sm text-accent transition-colors hover:underline";
 
 describe("staff /gc/deliveries empty copy", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(titleArtworkUrls).mockResolvedValue(new Map());
+  });
 
   it("keeps the Licensing Status title and locked empty line", async () => {
     const html = await renderEmptyDeliveries();
 
-    expect(html).toContain(`>${GC_LICENSING_STATUS.title}<`);
-    expect(html).toContain(GC_LICENSING_STATUS.intro);
+    expect(html).toContain(GC_LICENSING_STATUS.title);
+    expect(html).not.toContain("Licensing status across all clients");
+    expect(html).not.toContain("Status is set by hand");
     expect(GC_DELIVERIES_EMPTY.title).toBe("No licensing status yet.");
     expect(html).toContain("No licensing status yet.");
     expect(html).toContain("data-gc-licensing-status");
@@ -114,7 +130,10 @@ describe("staff /gc/deliveries empty copy", () => {
 });
 
 describe("staff /gc/deliveries licensing filters and craft", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(titleArtworkUrls).mockResolvedValue(new Map());
+  });
 
   it("filters by live delivery status and vendor on the cross-org read", async () => {
     const vendorId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
@@ -156,7 +175,9 @@ describe("staff /gc/deliveries licensing filters and craft", () => {
     expect(html).toContain(`/gc/deliveries?vendor=${vendorId}`);
     expect(pageSrc).toContain("StatusFilter");
     expect(pageSrc).toContain("LicensingVendorFilter");
+    expect(pageSrc).toContain("LicensingStatusFilter");
     expect(pageSrc).toContain("DELIVERY_STATUS_FILTERS");
+    expect(pageSrc).toContain("hidden md:flex");
   });
 
   it("shows filter-miss copy and Show all when the lens is empty", async () => {
@@ -167,7 +188,7 @@ describe("staff /gc/deliveries licensing filters and craft", () => {
     expect(html).not.toContain("No licensing status yet.");
   });
 
-  it("sits rows and empty on grey house modules, not white cards", async () => {
+  it("does not ship create/export heroes or flat delivery cards", async () => {
     stubClient({
       deliveries: [
         {
@@ -176,21 +197,26 @@ describe("staff /gc/deliveries licensing filters and craft", () => {
           status: "live",
           vendor_id: "v1",
           title_id: "t1",
+          created_at: "2026-09-12T00:00:00.000Z",
           titles: { title: "North Star", catalog_id: "GC-0000001" },
           vendors: { name: "Acme Distribution" },
-          organizations: { name: "Example Org" },
         },
       ],
+      titles: [{ id: "t1", title: "North Star", catalog_id: "GC-0000001" }],
     });
     const html = renderToStaticMarkup(await GcDeliveriesPage());
-    expect(html).toContain(HOUSE_MODULE_CLASS);
-    expect(html).toContain('data-gc-licensing-row="d1"');
+    expect(html).toContain('data-gc-licensing-title="t1"');
     expect(html).toContain("North Star");
-    expect(html).toContain("Example Org");
-    expect(pageSrc).toContain("HOUSE_MODULE_CLASS");
+    expect(html).toContain("Acme Distribution");
+    expect(html).toContain("data-gc-licensing-indent");
+    expect(html).toContain("data-status-progress");
+    expect(html).not.toContain("Create delivery");
+    expect(html).not.toContain("Export metadata");
+    expect(html).not.toContain("New delivery");
+    expect(pageSrc).not.toContain("NewDeliveryForm");
+    expect(pageSrc).not.toContain("ExportPanel");
+    expect(pageSrc).not.toContain("HOUSE_MODULE_CLASS");
     expect(pageSrc).not.toContain("@/components/ui/card");
-    expect(pageSrc).not.toContain("card-surface");
-    expect(html).not.toContain("card-surface");
   });
 });
 
@@ -200,7 +226,10 @@ describe("staff /gc/deliveries licensing filters and craft", () => {
  * selects — those go through loadGcDeliveryCompanions (IN + probe).
  */
 describe("staff /gc/deliveries companion bounds", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(titleArtworkUrls).mockResolvedValue(new Map());
+  });
 
   it("does not query companion tables on the page, and leaves class 1 list bounds alone", () => {
     expect(pageSrc).toContain("loadGcDeliveryCompanions");
@@ -240,46 +269,5 @@ describe("staff /gc/deliveries companion bounds", () => {
     expect(html).toContain(GC_DELIVERIES_TRUNCATED.grants);
     expect(html).toContain('data-gc-deliveries-truncated="grants"');
     expect(html).not.toContain('data-gc-deliveries-truncated="companions"');
-  });
-
-  it("shows the portal notice when a page-scoped companion overflows", async () => {
-    stubClient({
-      deliveries: [
-        {
-          id: "d1",
-          territory: "US",
-          status: "live",
-          vendor_id: "v1",
-          title_id: "t1",
-          titles: { title: "North Star", catalog_id: "GC-0000001" },
-          vendors: { name: "Acme Distribution" },
-          organizations: { name: "Example Org" },
-        },
-      ],
-      portal_links: [
-        {
-          id: "l1",
-          delivery_id: "d1",
-          asset_id: "a1",
-          expires_at: "2026-09-01T00:00:00Z",
-          revoked_at: null,
-        },
-      ],
-      portal_sessions: Array.from({ length: UNPAGINATED_MAX + 1 }, (_, i) => ({
-        id: `s-${i}`,
-        link_id: "l1",
-        name: "A",
-        company: "B",
-        email: "a@example.com",
-        expires_at: "2026-09-01T00:00:00Z",
-        revoked_at: null,
-      })),
-    });
-
-    const html = renderToStaticMarkup(await GcDeliveriesPage());
-    expect(html).toContain(GC_DELIVERIES_TRUNCATED.companions);
-    expect(html).toContain('data-gc-deliveries-truncated="companions"');
-    expect(html).not.toContain('data-gc-deliveries-truncated="grants"');
-    expect(html).toContain("North Star");
   });
 });

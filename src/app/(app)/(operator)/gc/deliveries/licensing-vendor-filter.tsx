@@ -21,11 +21,13 @@ export function LicensingVendorFilter({
   status,
   vendor,
   vendors,
+  q = "",
   defaultOpen = false,
 }: {
   status: DeliveryStatusFilter;
   vendor: string | null;
   vendors: readonly GcLicensingVendor[];
+  q?: string;
   defaultOpen?: boolean;
 }) {
   const router = useRouter();
@@ -44,7 +46,7 @@ export function LicensingVendorFilter({
         defaultOpen={defaultOpen}
         menuAlign="end"
         onPick={(key) => {
-          router.replace(gcLicensingHref(status, parseGcLicensingVendorFilter(key)), {
+          router.replace(gcLicensingHref(status, parseGcLicensingVendorFilter(key), q), {
             scroll: false,
           });
         }}
