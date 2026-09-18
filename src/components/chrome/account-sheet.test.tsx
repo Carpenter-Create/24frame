@@ -46,7 +46,6 @@ import { APPEARANCE } from "@/lib/appearance";
 import {
   AccountMenuDropdown,
   AccountSheet,
-  AccountSheetAppearance,
   DesktopAccountMenu,
   MobileAccountMenu,
 } from "./account-sheet";
