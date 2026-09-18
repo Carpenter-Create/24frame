@@ -11,6 +11,7 @@ vi.mock("next/navigation", () => ({
 
 import { HouseLeadChrome } from "@/components/chrome/house-lead-chrome";
 import { HouseLeadSearch } from "@/components/chrome/house-lead-search";
+import { WorkspaceSwitcher } from "@/components/chrome/workspace-switcher";
 import { SocialTopBar } from "@/components/social/social-top-bar";
 import {
   HOUSE_LEAD_CHROME_CLASS,
@@ -30,6 +31,7 @@ import {
   APP_HEADER_TRAILING_CLUSTER_CLASS,
   APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS,
   APP_HEADER_WORKSPACE_PILL_HOST_CLASS,
+  WORKSPACE_SWITCHER_HOST_CLASS,
 } from "@/lib/workspace-switcher";
 
 const leadLib = readFileSync("src/lib/house-lead-chrome.ts", "utf8");
@@ -37,6 +39,13 @@ const leadSrc = readFileSync("src/components/chrome/house-lead-chrome.tsx", "utf
 const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
 const topBar = readFileSync("src/components/social/social-top-bar.tsx", "utf8");
 const leadSearch = readFileSync("src/components/chrome/house-lead-search.tsx", "utf8");
+
+function htmlClass(html: string, attr: string): string {
+  const start = html.indexOf(attr);
+  if (start < 0) return "";
+  const tag = html.slice(html.lastIndexOf("<", start), html.indexOf(">", start));
+  return tag.match(/class="([^"]*)"/)?.[1] ?? "";
+}
 
 function leadHtml(workspace: "aggregation" | "social" | "education") {
   return renderToStaticMarkup(
@@ -247,9 +256,12 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("gap-[var(--space-1)]");
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("md:gap-[var(--space-2)]");
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("max-md:shrink-0");
-    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).toBe("min-w-0 md:hidden");
+    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).toBe("min-w-0 overflow-visible md:hidden");
     expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).not.toContain("shrink-0");
-    expect(APP_HEADER_LEADING_CLASS).toContain("max-md:overflow-hidden");
+    expect(APP_HEADER_LEADING_CLASS).not.toMatch(/(?:^|\s)(?:max-md:)?overflow-hidden(?:\s|$)/);
+    expect(APP_HEADER_LEADING_CLASS).toContain("overflow-visible");
+    expect(APP_HEADER_LEADING_CLASS).toContain("gap-[var(--space-3)]");
+    expect(APP_HEADER_LEADING_CLASS).not.toContain("gap-[var(--space-1)]");
     expect(APP_HEADER_LEADING_CLASS).toContain("min-w-0");
     for (const workspace of ["aggregation", "social", "education"] as const) {
       const html = leadHtml(workspace);
@@ -265,5 +277,38 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
         html.indexOf("data-app-header-trailing"),
       );
     }
+  });
+
+  it("keeps the phone workspace panel out of overflow-hidden ancestors", () => {
+    const phoneGap = APP_HEADER_LEADING_CLASS.match(
+      /(?<![a-z0-9:-])gap-\[var\((--space-\d+)\)\]/,
+    )?.[1];
+    expect(Number(phoneGap?.replace("--space-", ""))).toBeGreaterThanOrEqual(2);
+
+    const html = leadHtml("aggregation");
+    const ancestors = [
+      htmlClass(html, 'data-app-header=""'),
+      htmlClass(html, 'data-app-header-leading=""'),
+      htmlClass(html, 'data-app-header-workspace-pill=""'),
+    ];
+    expect(ancestors[0]).toBe(HOUSE_LEAD_CHROME_CLASS);
+    expect(ancestors[1]).toBe(APP_HEADER_LEADING_CLASS);
+    expect(ancestors[2]).toBe(APP_HEADER_WORKSPACE_PILL_HOST_CLASS);
+    for (const className of ancestors) {
+      expect(className).not.toMatch(/(?:^|\s)(?:max-md:)?overflow-hidden(?:\s|$)/);
+    }
+
+    const open = renderToStaticMarkup(
+      createElement(WorkspaceSwitcher, {
+        current: "aggregation",
+        tone: "pill",
+        defaultOpen: true,
+      }),
+    );
+    expect(htmlClass(open, "data-workspace-switcher=")).toBe(WORKSPACE_SWITCHER_HOST_CLASS);
+    expect(htmlClass(open, "data-workspace-switcher=")).not.toMatch(/overflow-hidden/);
+    expect(open).toContain("data-workspace-switcher-popover");
+    expect(open).toContain('data-workspace-switcher-option="social"');
+    expect(open).toContain('data-workspace-switcher-option="education"');
   });
 });

@@ -1,6 +1,10 @@
 // Mercury workspace switcher. Lives in lib/, not JSX.
 // Phone Access / Aggregation: compact leading name+menu after the
-// hamburger (gap 8). Trailing cluster on phone is sun/moon then
+// hamburger. Emblem ↔ pill air is --space-3 (12). Not --space-1.
+// Do not put overflow-hidden on the leading row or pill host —
+// the menu is absolute inside the host and must paint + receive
+// taps. Pill host min-w-0 is enough to truncate the name.
+// Trailing cluster on phone is sun/moon then
 // avatar — do not cluster the compact pill with that pair, do
 // not center it. Desktop md+ replaces the single-name+chevron
 // trigger with a sliding-pill cluster of available workspace
@@ -160,11 +164,14 @@ export const APP_HEADER_EDUCATION_SEARCH_PHONE_CLASS = HOUSE_LEAD_SEARCH_PHONE_C
 export const APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS = HOUSE_LEAD_SEARCH_DESKTOP_CLASS;
 
 export const APP_HEADER_LEADING_CLASS =
-  "mr-auto flex min-w-0 flex-1 items-center gap-[var(--space-1)] md:gap-[var(--space-2)] max-md:overflow-hidden";
+  "mr-auto flex min-w-0 flex-1 items-center gap-[var(--space-3)] md:gap-[var(--space-2)] overflow-visible";
 
 // Phone pill yields (min-w-0 + truncate on the name) so it cannot
 // overlap the brand mark. Not shrink-0 — that was the crush.
-export const APP_HEADER_WORKSPACE_PILL_HOST_CLASS = "min-w-0 md:hidden";
+// overflow-visible: the open menu must not live under a clip.
+export const APP_HEADER_WORKSPACE_PILL_HOST_CLASS = "min-w-0 overflow-visible md:hidden";
+
+export const WORKSPACE_SWITCHER_HOST_CLASS = "relative min-w-0 overflow-visible";
 
 export const APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS = "hidden md:contents";
 
