@@ -13,7 +13,9 @@ Auth stays Supabase Auth. The app **reads** DynamoDB on Home (15) and
 `/home/news` (30-day window; `/news` permanently redirects). Ingest
 **writes** DynamoDB. Page requests never fan out RSS. RSS media /
 enclosure first; when `image_url` is null, ingest OG-scrapes the
-article (`og:image` / `twitter:image`, 4s timeout, fail-soft).
+article (`og:image` / `twitter:image`, 12s timeout, desktop Chrome UA,
+fail-soft). Per-source CloudWatch counters: `ogAttempted`, `ogFilled`,
+`ogMiss`.
 
 ## Proposed resources (not created)
 
@@ -114,6 +116,26 @@ Do **not** create these from this PR.
 **Kill a source.** Set `enabled: false` on that const row (deploy), or
 Put `SOURCE#<id>` / `HEALTH` with `enabled=false` (no deploy). Ingest
 skips it; existing rows age out via TTL / the 30-day query window.
+
+**Deploy ingest / OG changes.** Code on `main` is **not** the live
+Lambda. After merging ingest or OG-scrape changes, founder / CoS must
+rebuild the bundle and update the function. Do not create or mutate
+AWS from CI. Agents do not run this.
+
+```
+mkdir -p /tmp/news-ingest
+pnpm exec esbuild workers/news/handler.ts \
+  --bundle --platform=node --format=cjs --target=node20 \
+  --outfile=/tmp/news-ingest/index.js \
+  --alias:@=./src
+(cd /tmp/news-ingest && zip function.zip index.js)
+aws lambda update-function-code --region us-west-2 \
+  --function-name 24frame-news-ingest \
+  --zip-file fileb:///tmp/news-ingest/function.zip
+```
+
+OG per-article timeout is 12s (concurrency 4). Function timeout stays
+60s until founder bumps it after a CloudWatch timeout.
 
 **Trigger ingest.** After founder apply:
 

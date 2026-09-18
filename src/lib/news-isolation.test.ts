@@ -43,6 +43,8 @@ describe("News AWS setup doc", () => {
     expect(historySrc).toContain("newsHistoryBackLink");
     expect(existsSync("src/app/(app)/home/news/page.tsx")).toBe(true);
     expect(infra).toContain("Image backfill");
+    expect(infra).toContain("update-function-code");
+    expect(infra).toContain("Code on `main` is **not** the live");
     expect(loadSrc).not.toMatch(/from ["']@\/lib\/supabase/);
   });
 });

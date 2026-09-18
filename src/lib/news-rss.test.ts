@@ -134,6 +134,21 @@ describe("parseOgImageUrl", () => {
     ).toBe("https://thr.com/late.jpg");
   });
 
+  it("decodes HTML entities in og:image URLs before canonicalize", () => {
+    expect(
+      parseOgImageUrl(
+        `<meta property="og:image" content="https://www.hollywoodreporter.com/wp-content/uploads/foo.jpg?w=1296&#038;h=730&#038;crop=1" />`,
+        "https://hollywoodreporter.com/story",
+      ),
+    ).toBe("https://hollywoodreporter.com/wp-content/uploads/foo.jpg?crop=1&h=730&w=1296");
+    expect(
+      parseOgImageUrl(
+        `<meta property="og:image" content="https://filmthreat.com/img.jpg?w=800&amp;h=450" />`,
+        "https://filmthreat.com/story",
+      ),
+    ).toBe("https://filmthreat.com/img.jpg?h=450&w=800");
+  });
+
   it("rejects data URLs, empty content, and same-as-page images", () => {
     const page = "https://hollywoodreporter.com/story";
     expect(parseOgImageUrl(`<meta property="og:image" content="data:image/png;base64,xxxx" />`, page)).toBeNull();

@@ -152,7 +152,9 @@ export function parseOgImageUrl(html: string, base?: string): string | null {
   for (const key of OG_IMAGE_KEYS) {
     const raw = found.get(key);
     if (!raw) continue;
-    const canonical = canonicalizeNewsUrl(raw, base);
+    // attr() already decodeNewsText's content; decode again so &#038; / &amp;
+    // cannot survive into canonicalize (URL would treat # as a hash).
+    const canonical = canonicalizeNewsUrl(decodeNewsText(raw), base);
     if (canonical && isUsableOgImage(canonical, base)) return canonical;
   }
   return null;

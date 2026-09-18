@@ -8,7 +8,9 @@ Isolated AWS compute for Industry News RSS ingest.
 - EventBridge rule `24frame-news-ingest` `rate(30 minutes)` → this handler. DLQ `24frame-news-ingest-dlq`.
 - Not Supabase. Not Vercel cron. Not Aurora.
 
-Entry: `workers/news/handler.ts` calls `ingestNewsFeeds` in `src/lib/news-ingest.ts`. Fail-soft per source. RSS image first; OG-scrape the article when `image_url` is null (4s, fail-soft). Throws only when every live source failed so EventBridge can retry / DLQ.
+Entry: `workers/news/handler.ts` calls `ingestNewsFeeds` in `src/lib/news-ingest.ts`. Fail-soft per source. RSS image first; OG-scrape the article when `image_url` is null (12s, desktop Chrome UA, fail-soft). Per-source CloudWatch counters: `ogAttempted`, `ogFilled`, `ogMiss`. Throws only when every live source failed so EventBridge can retry / DLQ.
+
+**Code on `main` is not live Lambda.** After merging ingest or OG-scrape changes, founder / CoS must `esbuild` a fresh bundle and `aws lambda update-function-code` for `24frame-news-ingest`. See [`docs/infra/news-aws-setup.md`](../../docs/infra/news-aws-setup.md).
 
 Founder-executed apply: [`docs/infra/news-aws-setup.md`](../../docs/infra/news-aws-setup.md). Do not create AWS from CI.
 

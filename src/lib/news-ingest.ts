@@ -9,13 +9,21 @@ import { createNewsIngestStore, type NewsPersist } from "@/lib/news-store";
 
 export const NEWS_FEED_TIMEOUT_MS = 8_000;
 export const NEWS_FEED_MAX_BYTES = 1_500_000;
-export const NEWS_OG_TIMEOUT_MS = 4_000;
+export const NEWS_OG_TIMEOUT_MS = 12_000;
 export const NEWS_OG_MAX_BYTES = 512_000;
 export const NEWS_INGEST_CONCURRENCY = 3;
 export const NEWS_OG_CONCURRENCY = 4;
-export const NEWS_USER_AGENT = "24FrameNews/1.0";
+/** Mainstream desktop Chrome — publishers gate on bot tokens like 24FrameNews/1.0. */
+export const NEWS_USER_AGENT =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 
 export type { NewsPersist };
+
+export type NewsOgCounters = {
+  ogAttempted: number;
+  ogFilled: number;
+  ogMiss: number;
+};
 
 export type NewsIngestSourceResult = {
   source: NewsSourceId;
@@ -23,6 +31,9 @@ export type NewsIngestSourceResult = {
   inserted: number;
   skipped?: boolean;
   error?: string;
+  ogAttempted?: number;
+  ogFilled?: number;
+  ogMiss?: number;
 };
 
 export type NewsIngestSummary = {
@@ -136,6 +147,24 @@ export async function fillNewsOgImages(
   });
 }
 
+const EMPTY_OG: NewsOgCounters = { ogAttempted: 0, ogFilled: 0, ogMiss: 0 };
+
+/** RSS-null items only. CloudWatch: ogAttempted / ogFilled / ogMiss per source. */
+export function countNewsOgFill(
+  before: readonly NormalizedNewsItem[],
+  after: readonly NormalizedNewsItem[],
+): NewsOgCounters {
+  const afterByUrl = new Map(after.map((item) => [item.canonical_url, item]));
+  let ogAttempted = 0;
+  let ogFilled = 0;
+  for (const item of before) {
+    if (item.image_url) continue;
+    ogAttempted += 1;
+    if (afterByUrl.get(item.canonical_url)?.image_url) ogFilled += 1;
+  }
+  return { ogAttempted, ogFilled, ogMiss: ogAttempted - ogFilled };
+}
+
 /** Sliding pool — a slow URL holds one slot, not the rest of the batch. */
 async function runPooled<T>(
   items: readonly T[],
@@ -206,8 +235,8 @@ export async function ingestNewsFeeds(input: {
     async (source): Promise<NewsIngestSourceResult> => {
       const health = await persist.getHealth(source.id);
       if (!newsSourceIsLive(source.id, health)) {
-        console.log(JSON.stringify({ msg: "news ingest skip", source: source.id }));
-        return { source: source.id, fetched: 0, inserted: 0, skipped: true };
+        console.log(JSON.stringify({ msg: "news ingest skip", source: source.id, ...EMPTY_OG }));
+        return { source: source.id, fetched: 0, inserted: 0, skipped: true, ...EMPTY_OG };
       }
       try {
         const xml = await fetchXml(source.feedUrl);
@@ -218,6 +247,7 @@ export async function ingestNewsFeeds(input: {
         } catch {
           items = parsed;
         }
+        const og = countNewsOgFill(parsed, items);
         const inserted = await persist.upsertItems(items, now);
         await markHealth(persist, source.id, { now });
         console.log(
@@ -226,14 +256,15 @@ export async function ingestNewsFeeds(input: {
             source: source.id,
             fetched: items.length,
             inserted,
+            ...og,
           }),
         );
-        return { source: source.id, fetched: items.length, inserted };
+        return { source: source.id, fetched: items.length, inserted, ...og };
       } catch (err) {
         const message = err instanceof Error ? err.message : "feed failed";
-        console.error(JSON.stringify({ msg: "news ingest fail", source: source.id, error: message }));
+        console.error(JSON.stringify({ msg: "news ingest fail", source: source.id, error: message, ...EMPTY_OG }));
         await markHealth(persist, source.id, { now, error: message });
-        return { source: source.id, fetched: 0, inserted: 0, error: message };
+        return { source: source.id, fetched: 0, inserted: 0, error: message, ...EMPTY_OG };
       }
     },
     NEWS_INGEST_CONCURRENCY,
