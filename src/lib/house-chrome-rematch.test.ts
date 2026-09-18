@@ -68,6 +68,7 @@ const FUN_CHROME_PATHS = [
   "src/components/chrome/rail-collapse.tsx",
   "src/lib/settings.ts",
   "src/components/chrome/education-header-search.tsx",
+  "src/components/theme-toggle.tsx",
 ] as const;
 
 describe("house chrome rematch miss list v1.1", () => {
@@ -211,6 +212,9 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(socialChrome).toContain("HOUSE_RAIL_PANEL_CLASS");
     expect(socialSearch).toContain("HOUSE_ICON_BUTTON_CLASS");
     expect(socialSearch).toContain("HOUSE_SEARCH_PILL_CLASS");
+    expect(lead).toContain("ThemeToggle");
+    expect(readFileSync("src/lib/house-lead-chrome.ts", "utf8")).toContain("HOUSE_THEME_TOGGLE_CLASS");
+    expect(readFileSync("src/lib/house-lead-chrome.ts", "utf8")).toContain("MOBILE_CHROME_ICON_BUTTON_CLASS");
   });
 
   it("uses one rounded register on Aggregation, Social, and Education", () => {

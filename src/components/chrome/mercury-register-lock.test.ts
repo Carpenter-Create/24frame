@@ -50,6 +50,7 @@ describe("Adam Mercury register lock", () => {
     expect(USER_MENU_ACTIONS.map((item) => item.kind)[0]).toBe("profile");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)[1]).toBe("settings");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("workspace");
+    expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("appearance");
     expect(SETTINGS_HUB_NAV.map((item) => item.label)).toEqual([
       "You",
       "Social",

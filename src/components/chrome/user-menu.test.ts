@@ -154,14 +154,14 @@ describe("UserMenu item lock (source)", () => {
     expect(sheetSrc).toContain("DesktopAccountMenu");
     expect(sheetSrc).toContain("MobileAccountMenu");
     expect(sheetSrc).toContain('data-user-menu-item="logOut"');
-    expect(sheetSrc).toContain('setFace(face === "appearance" ? "main" : "appearance")');
+    expect(sheetSrc).not.toContain('setFace(face === "appearance" ? "main" : "appearance")');
     expect(sheetSrc).not.toContain('setFace(face === "workspace" ? "main" : "workspace")');
-    expect(sheetSrc).toContain('setFace("appearance")');
+    expect(sheetSrc).not.toContain('setFace("appearance")');
     expect(sheetSrc).not.toContain('setFace("workspace")');
-    expect(sheetSrc).toContain('onBack={() => setFace("main")}');
     expect(sheetSrc).not.toContain("onUserMenuAppearance");
     expect(sheetSrc).not.toContain("toggleDocumentTheme");
     expect(sheetSrc).not.toContain("ThemeGlyph");
+    expect(sheetSrc).not.toContain("ThemeToggle");
     expect(sheetSrc).not.toContain("/account/appearance");
     expect(sheetSrc).not.toContain("/account/workspace");
     expect(sheetSrc).not.toContain("AccountWorkspaceRow");
@@ -187,6 +187,7 @@ describe("UserMenu item lock (source)", () => {
     expect(USER_MENU).not.toHaveProperty("companyProfileHref");
     expect(USER_MENU.appearance).toBe("Appearance");
     expect(USER_MENU.workspace).toBe("Workspace");
+    expect(USER_MENU_ABSENT).toContain("Appearance");
     expect(APPEARANCE.back).toBe("Back");
     expect(APPEARANCE.back).not.toBe("Back to main menu");
   });
@@ -195,7 +196,6 @@ describe("UserMenu item lock (source)", () => {
     expect(USER_MENU_ACTIONS.map((item) => item.label)).toEqual([
       "Profile",
       "Settings",
-      "Appearance",
     ]);
     expect(sheetSrc).toContain("ACCOUNT_SHEET_ITEMS.map");
     expect(sheetSrc.indexOf("DesktopAccountMenu")).toBeGreaterThan(-1);
@@ -224,22 +224,24 @@ describe("UserMenu actions", () => {
     expect(sheetSrc).not.toContain("admin@ccbfg.com");
   });
 
-  it("opens System default / Dark / Light on 613:888 — selected is a quiet 16 check", () => {
-    expect(sheetSrc).toContain('data-account-menu-face={face}');
-    expect(sheetSrc).toContain("AccountAppearanceFlyout");
-    expect(sheetSrc).toContain("APPEARANCE_FLYOUT_OPTIONS.map");
-    expect(sheetSrc).toContain("AppearanceCheck");
-    expect(sheetSrc).toContain("applyDocumentThemePreference");
-    expect(sheetSrc).toContain("accountMenuAppearanceFlyoutAlign");
-    expect(sheetSrc).toContain("CaretLeft");
-    expect(sheetSrc).not.toContain("ChevronLeft");
-    expect(sheetSrc).toContain("AccountBackChevron");
-    expect(sheetSrc).toContain("APPEARANCE.back");
+  it("keeps theme off the avatar menu — header sun/moon owns the flip", () => {
+    expect(sheetSrc).not.toContain("data-account-menu-face");
+    expect(sheetSrc).not.toContain("AccountAppearanceFlyout");
+    expect(sheetSrc).not.toContain("AccountSheetAppearance");
+    expect(sheetSrc).not.toContain("AccountAppearanceRow");
+    expect(sheetSrc).not.toContain("APPEARANCE_FLYOUT_OPTIONS.map");
+    expect(sheetSrc).not.toContain("AppearanceCheck");
+    expect(sheetSrc).not.toContain("applyDocumentThemePreference");
+    expect(sheetSrc).not.toContain("accountMenuAppearanceFlyoutAlign");
+    expect(sheetSrc).not.toContain("CaretLeft");
+    expect(sheetSrc).not.toContain("AccountBackChevron");
+    expect(sheetSrc).not.toContain("APPEARANCE.back");
     expect(sheetSrc).not.toContain("APPEARANCE_OPTIONS.map");
     expect(sheetSrc).not.toContain("Back to main menu");
     expect(sheetSrc).not.toContain('type="radio"');
     expect(sheetSrc).not.toContain("radiogroup");
     expect(sheetSrc).not.toContain("ThemeGlyph");
+    expect(sheetSrc).not.toContain("ThemeToggle");
     expect(sheetSrc).not.toContain("/account/appearance");
     expect(sheetSrc).not.toContain("purple");
     expect(sheetSrc).not.toContain("violet");
@@ -250,12 +252,15 @@ describe("UserMenu actions", () => {
 });
 
 describe("UserMenu Mercury quiet craft", () => {
-  it("does not restore a standalone header sun", () => {
+  it("keeps theme off the avatar menu — HouseLeadChrome mounts the header toggle", () => {
     const shellSrc = readFileSync(join(here, "app-shell.tsx"), "utf8");
+    const leadSrc = readFileSync(join(here, "house-lead-chrome.tsx"), "utf8");
     expect(shellSrc).not.toContain("ThemeToggle");
     expect(shellSrc).not.toContain("theme-toggle");
     expect(shellSrc).not.toContain("ThemeGlyph");
     expect(menuSrc).not.toContain("ThemeToggle");
     expect(menuSrc).not.toContain("ThemeGlyph");
+    expect(leadSrc).toContain("ThemeToggle");
+    expect(leadSrc).toContain("<ThemeToggle />");
   });
 });

@@ -21,6 +21,7 @@ import {
   HOUSE_LEAD_SEARCH_PILL_CLASS,
   HOUSE_LEAD_SEARCH_WIDTH_PX,
   HOUSE_LEAD_SHELL_CLASS,
+  HOUSE_THEME_TOGGLE_CLASS,
 } from "@/lib/house-lead-chrome";
 import { HOUSE_HEADER_SEARCH_GAP_CLASS, HOUSE_SEARCH_PILL_CLASS } from "@/lib/house-shell";
 import { EDUCATION_SEARCH } from "@/lib/course-search";
@@ -156,19 +157,32 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(leadSrc).toContain("search ?");
   });
 
-  it("G7 keeps trailing workspace switcher + avatar on all three", () => {
+  it("G7 keeps trailing workspace switcher + sun/moon + avatar on all three", () => {
     for (const workspace of ["aggregation", "social", "education"] as const) {
       const html = leadHtml(workspace);
       expect(html).toContain("data-app-header-trailing");
       expect(html).toContain(APP_HEADER_TRAILING_CLUSTER_CLASS);
       expect(html).toContain(APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS);
       expect(html).toContain('data-workspace-switcher-presentation="pills"');
+      expect(html).toContain("data-theme-toggle");
       expect(html).toContain("data-user-menu-host");
       expect(html.indexOf('data-workspace-switcher-presentation="pills"')).toBeLessThan(
+        html.indexOf("data-theme-toggle"),
+      );
+      expect(html.indexOf("data-theme-toggle")).toBeLessThan(
         html.indexOf("data-user-menu-host"),
       );
+      expect(html).not.toContain("stroke-width");
     }
     expect(leadSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
+    expect(leadSrc).toContain("<ThemeToggle />");
+    expect(HOUSE_THEME_TOGGLE_CLASS).toContain("size-[44px]");
+    expect(HOUSE_THEME_TOGGLE_CLASS).toContain("min-h-[44px]");
+    expect(HOUSE_THEME_TOGGLE_CLASS).toContain("md:size-8");
+    expect(HOUSE_THEME_TOGGLE_CLASS).toContain("rounded-full");
+    expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("purple");
+    expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("violet");
+    expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("border-hairline");
   });
 
   it("G8 absorbs SocialTopBar — no drifted placement fork", () => {

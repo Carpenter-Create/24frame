@@ -114,17 +114,21 @@ function renderShell(
 }
 
 describe("AppShell header", () => {
-  it("no longer mounts a standalone sun or theme toggle", () => {
+  it("mounts the header sun/moon between workspace names and the avatar", () => {
     navigation.pathname = "/";
     const html = renderShell();
     expect(html).toContain("data-user-menu-host");
-    expect(html).not.toContain("Switch to dark mode");
+    expect(html).toContain("data-theme-toggle");
+    expect(html).toContain("Switch to dark mode");
     expect(html).not.toContain("Switch to light mode");
-    expect(html).not.toContain("theme-toggle");
+    expect(html.indexOf("data-workspace-switcher")).toBeLessThan(html.indexOf("data-theme-toggle"));
+    expect(html.indexOf("data-theme-toggle")).toBeLessThan(html.indexOf("data-user-menu-host"));
     expect(html).not.toContain("ThemeToggle");
     expect(shellSrc).not.toContain("ThemeToggle");
     expect(shellSrc).not.toContain("theme-toggle");
     expect(shellSrc).not.toContain("ThemeGlyph");
+    expect(leadSrc).toContain("ThemeToggle");
+    expect(leadSrc).toContain("<ThemeToggle />");
     expect(shellSrc).not.toMatch(/bell|⌘K|CommandK|command-k/i);
     expect(shellSrc).not.toContain("SearchField");
     expect(shellSrc).not.toContain("TitlesHeaderSearch");
@@ -443,6 +447,7 @@ describe("AppShell rail-collapse chevron", () => {
       expect(html).toContain('fill="currentColor"');
       expect(html).not.toContain("lucide-");
       expect(html).not.toContain("stroke-width");
+      expect(html).toContain("data-theme-toggle");
       expect(html).toContain(`data-rail-collapse="${RAIL_COLLAPSE_CHEVRON}"`);
       expect(html).toContain(RAIL_COLLAPSE_CHEVRON_CLASS);
       expect(html).toContain(RAIL_COLLAPSE_CHEVRON_ICON_CLASS);
@@ -507,6 +512,7 @@ describe("AppShell rail-collapse chevron", () => {
       expect(html).toContain('fill="currentColor"');
       expect(html).not.toContain("lucide-");
       expect(html).not.toContain("stroke-width");
+      expect(html).toContain("data-theme-toggle");
       expect(html).toContain(`data-rail-collapse="${RAIL_COLLAPSE_CHEVRON}"`);
       expect(html).toContain(RAIL_COLLAPSE_EXPAND_ROW_CLASS);
       expect(html).toContain(RAIL_COLLAPSE_CHEVRON_CLASS);

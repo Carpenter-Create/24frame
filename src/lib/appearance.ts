@@ -1,11 +1,8 @@
-// Account-menu Appearance. Lives in lib/, not JSX.
-// 613:888 — System default + helper / Dark / Light. Selected is a
-// quiet 16 check. Not a page. Not radios. Existing gc-theme kinds
-// stay light / dark / auto — auto is System default on the surface.
-// Desktop: second 264 surface, gap 8 left of 586:768. Mobile is a
-// same-sheet drill-in — Open Appearance replaces the list face;
-// house 16 tertiary Back returns to main. 618:785 overlay is void.
-// Not a route. Not a second sheet. Not a card on the sheet.
+// Theme preference copy. Lives in lib/, not JSX.
+// Header sun/moon is the control — not an account-menu row.
+// Existing gc-theme kinds stay light / dark / auto. Auto is
+// System default when a preference surface exists. Not a page.
+// Not radios. Not a route.
 
 import { USER_MENU } from "@/lib/user-menu";
 import type { ThemePreference } from "@/lib/theme";

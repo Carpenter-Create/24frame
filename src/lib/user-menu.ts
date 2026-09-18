@@ -1,15 +1,14 @@
 // Account-menu copy and lock. Lives in lib/, not JSX.
 // One list for both instances: desktop panel and mobile sheet.
 // Chrome may differ (sheet vs fuller panel). Labels may not.
-// Mercury order: identity → Profile → Settings → Appearance →
-// Log out. Workspace lives on the header switcher, left of
-// the avatar — not this menu. One Settings hub. No forked
-// Settings.
+// Mercury order: identity → Profile → Settings → Log out.
+// Workspace lives on the header switcher. Theme lives on the
+// header sun/moon, left of the avatar — not this menu. One
+// Settings hub. No forked Settings.
 // Profile is /settings/profile (You identity). Settings land href
 // is settingsLandHref(pathname) — do not invent /account/*.
 // Agreements / Refer stay /settings doors, not menu rows. Help
-// stays /help. Company stays off this menu. Appearance stays an
-// in-menu submenu — not a page. Do not invent
+// stays /help. Company stays off this menu. Do not invent
 // /account/workspace, /settings/workspace, /account/appearance,
 // or /settings/appearance. Legal is parked. Do not invent
 // Phone, Job, Notifications, Privacy, Manage account, or a name
@@ -37,6 +36,7 @@ export const USER_MENU = {
 export const USER_MENU_ABSENT = [
   "Workspace",
   "Workspaces",
+  "Appearance",
   "Manage account",
   "Notifications",
   "Privacy",
@@ -60,14 +60,11 @@ export type UserMenuLinkAction =
       href: typeof USER_MENU.settingsHref;
     };
 
-export type UserMenuAction =
-  | UserMenuLinkAction
-  | { kind: "appearance"; label: typeof USER_MENU.appearance };
+export type UserMenuAction = UserMenuLinkAction;
 
 export const USER_MENU_ACTIONS: readonly UserMenuAction[] = [
   { kind: "profile", label: USER_MENU.profile, href: USER_MENU.profileHref },
   { kind: "settings", label: USER_MENU.settings, href: USER_MENU.settingsHref },
-  { kind: "appearance", label: USER_MENU.appearance },
 ];
 
 export function userMenuVersion(): string {

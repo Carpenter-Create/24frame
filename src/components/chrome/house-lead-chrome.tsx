@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { BrandEmblem } from "./brand-emblem";
 import { WorkspaceSwitcher } from "./workspace-switcher";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/cn";
 import {
   HOUSE_LEAD_CHROME_CLASS,
@@ -104,6 +105,7 @@ export function HouseLeadChrome({
         >
           <WorkspaceSwitcher current={workspace} presentation="pills" />
         </div>
+        <ThemeToggle />
         {accountMenu}
       </div>
     </header>

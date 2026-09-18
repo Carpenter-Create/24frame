@@ -122,3 +122,12 @@ export function subscribeThemePreference(callback: () => void): () => void {
 export function themePreferenceSnapshot(): ThemePreference {
   return preferenceFromStorage(documentStorage());
 }
+
+export const THEME_TOGGLE = {
+  toLight: "Switch to light mode",
+  toDark: "Switch to dark mode",
+} as const;
+
+export function themeToggleLabel(current: Theme): string {
+  return current === "dark" ? THEME_TOGGLE.toLight : THEME_TOGGLE.toDark;
+}

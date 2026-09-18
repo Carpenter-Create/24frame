@@ -1,5 +1,5 @@
 // Shared top lead chrome for Aggregation · Social · Education.
-// [ Logo · fixed lead slot ] — [ optional search · same gap ] ····· [ switcher · avatar ]
+// [ Logo · fixed lead slot ] — [ optional search · same gap ] ····· [ switcher · theme · avatar ]
 // Social live explore search and Education quiet courses/videos
 // search share Facebook-compact geometry (04-facebook.png SoT).
 // Aggregation mid-lead stays empty (agg-search-no). Logo inset
@@ -18,7 +18,7 @@
 // not an Aggregation-only sticky hack. Phone follows the same pin.
 
 import { HOUSE_CHROME_GUTTER_X_CLASS, HOUSE_HEADER_SEARCH_GAP_CLASS } from "@/lib/house-shell";
-import { MOBILE_CHROME_LEAD_PAD_CLASS } from "@/lib/mobile-chrome";
+import { MOBILE_CHROME_ICON_BUTTON_CLASS, MOBILE_CHROME_LEAD_PAD_CLASS } from "@/lib/mobile-chrome";
 
 export const HOUSE_LEAD_SEARCH_WIDTH_PX = 240;
 
@@ -40,3 +40,8 @@ export const HOUSE_LEAD_SEARCH_PHONE_CLASS = "min-w-0 flex-1 md:hidden";
 
 export const HOUSE_LEAD_SEARCH_PILL_CLASS =
   "flex h-9 w-full min-w-0 items-center gap-2 px-3";
+
+// Header sun/moon. Phone uses the house 44 icon hit. Desktop matches
+// the 32 avatar. Circular quiet — no muted wash, no hairline box.
+export const HOUSE_THEME_TOGGLE_CLASS =
+  `${MOBILE_CHROME_ICON_BUTTON_CLASS} transition-colors hover:text-ink md:size-8 md:min-h-8 md:min-w-8`;
