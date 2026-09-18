@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { DASHBOARD_NEWS_HISTORY_LIST_CLASS } from "@/lib/dashboard-craft";
 import { NEWS_PAGE } from "@/lib/news";
 import { loadNewsHistory } from "@/lib/news-load";
 import { getOrgContext } from "@/lib/supabase/context";
@@ -58,6 +59,9 @@ describe("NewsPage", () => {
     expect(html).toContain("Harbor Cut lands a festival slot");
     expect(html).toContain("https://variety.com/harbor-cut");
     expect(html).toContain("Variety");
+    expect(html).toContain(DASHBOARD_NEWS_HISTORY_LIST_CLASS);
+    expect(html).toContain("flex flex-col");
+    expect(html.indexOf("data-news-thumb")).toBeLessThan(html.indexOf("Harbor Cut lands a festival slot"));
     expect(html).not.toMatch(/summary|rewrite|republish/i);
     expect(html).not.toContain(NEWS_PAGE.viewAll);
   });

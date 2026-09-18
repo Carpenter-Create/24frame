@@ -8,9 +8,9 @@ import {
 import { newsSourceLabel, type NewsItem } from "@/lib/news";
 import { socialRelativeTime } from "@/lib/social";
 
-// Link-out card: title · thumbnail · source badge · relative time.
-// House module surface + card pad + related gap. Same card on Home and /news.
-// News thumb is larger than licensing. No summary. No rewrite.
+// Link-out card: media plate · headline · source · relative time.
+// Vertical stack. House module surface. Same card on Home and /news.
+// No side thumb. No summary. No rewrite.
 
 export function NewsCard({ item, now }: { item: NewsItem; now: Date }) {
   return (
@@ -20,7 +20,7 @@ export function NewsCard({ item, now }: { item: NewsItem; now: Date }) {
         target="_blank"
         rel="noopener noreferrer"
         data-news-link={item.id}
-        className={`flex items-start ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD}`}
+        className="flex flex-col"
       >
         <div data-news-thumb="" className={DASHBOARD_NEWS_THUMB_CLASS}>
           {item.image_url ? (
@@ -29,9 +29,9 @@ export function NewsCard({ item, now }: { item: NewsItem; now: Date }) {
             <img src={item.image_url} alt="" />
           ) : null}
         </div>
-        <div className="min-w-0 flex-1">
+        <div className={`flex min-w-0 flex-col ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD}`}>
           <p className="t-body-sm font-medium text-ink">{item.title}</p>
-          <div className="mt-[var(--space-2)] flex flex-wrap items-center gap-[var(--space-2)]">
+          <div className={`flex flex-wrap items-center ${DASHBOARD_RELATED_GAP_CLASS}`}>
             <DashboardHomeStatusPill label={newsSourceLabel(item.source)} />
             <time
               dateTime={item.published_at}

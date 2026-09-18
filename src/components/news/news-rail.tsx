@@ -3,6 +3,7 @@ import { NewsCard } from "@/components/news/news-card";
 import {
   DASHBOARD_CARD_PAD,
   DASHBOARD_MODULE_CARD_CLASS,
+  DASHBOARD_NEWS_HISTORY_LIST_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
   DASHBOARD_SECTION_AIR_CLASS,
   DASHBOARD_SECTION_TITLE_CLASS,
@@ -11,22 +12,28 @@ import { NEWS_HREF, NEWS_PAGE, type NewsItem } from "@/lib/news";
 import { overviewModuleHeaderAction } from "@/lib/overview";
 
 // Home News rail + /news history. Light section header; each article
-// is its own house card. No outer panel slab.
+// is its own stacked house card. No outer panel slab. Home stays one
+// column. /news uses the house pair grid on desktop.
 
 export function NewsRail({
   items,
   now,
   viewAll = false,
+  history = false,
   testId = "news",
 }: {
   items: readonly NewsItem[];
   now: Date;
   viewAll?: boolean;
+  history?: boolean;
   testId?: string;
 }) {
   const action = viewAll
     ? overviewModuleHeaderAction(NEWS_PAGE.title, NEWS_HREF, NEWS_PAGE.viewAll)
     : null;
+  const listClass = history
+    ? DASHBOARD_NEWS_HISTORY_LIST_CLASS
+    : `flex flex-col ${DASHBOARD_SECTION_AIR_CLASS}`;
   return (
     <section
       aria-label={NEWS_PAGE.title}
@@ -38,7 +45,7 @@ export function NewsRail({
         {action ? <TextAction href={action.href}>{action.label}</TextAction> : null}
       </div>
       {items.length > 0 ? (
-        <ul data-news-list="" className={`flex flex-col ${DASHBOARD_SECTION_AIR_CLASS}`}>
+        <ul data-news-list="" className={listClass}>
           {items.map((item) => (
             <NewsCard key={item.id} item={item} now={now} />
           ))}

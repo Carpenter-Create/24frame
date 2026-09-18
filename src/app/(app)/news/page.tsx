@@ -22,7 +22,7 @@ export default async function NewsPage() {
           {NEWS_PAGE.truncated}
         </InlineNotice>
       ) : null}
-      <NewsRail items={loaded.failed ? [] : loaded.rows} now={now} />
+      <NewsRail items={loaded.failed ? [] : loaded.rows} now={now} history />
     </div>
   );
 }

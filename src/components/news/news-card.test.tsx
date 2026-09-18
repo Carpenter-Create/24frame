@@ -6,9 +6,11 @@ import { describe, expect, it } from "vitest";
 import { NewsCard } from "./news-card";
 import { NewsRail } from "./news-rail";
 import {
+  DASHBOARD_ADMIN_PAIR_CLASS,
   DASHBOARD_CARD_PAD,
   DASHBOARD_LICENSING_THUMB_CLASS,
   DASHBOARD_MODULE_CARD_CLASS,
+  DASHBOARD_NEWS_HISTORY_LIST_CLASS,
   DASHBOARD_NEWS_THUMB_CLASS,
   DASHBOARD_SECTION_AIR_CLASS,
 } from "@/lib/dashboard-craft";
@@ -37,7 +39,7 @@ function markupClass(value: string): string {
 }
 
 describe("NewsCard", () => {
-  it("is a discrete house card with title, larger thumb, source badge, and relative time", () => {
+  it("stacks media, headline, then source and time on a discrete house card", () => {
     const html = renderToStaticMarkup(createElement(NewsCard, { item: ITEM, now: NOW }));
     expect(html).toContain("Harbor Cut lands a festival slot");
     expect(html).toContain("Variety");
@@ -50,6 +52,10 @@ describe("NewsCard", () => {
     expect(html).toContain(DASHBOARD_MODULE_CARD_CLASS);
     expect(html).toContain(markupClass(DASHBOARD_NEWS_THUMB_CLASS));
     expect(html).not.toContain(markupClass(DASHBOARD_LICENSING_THUMB_CLASS));
+    expect(html.indexOf("data-news-thumb")).toBeLessThan(html.indexOf("Harbor Cut lands a festival slot"));
+    expect(html.indexOf("Harbor Cut lands a festival slot")).toBeLessThan(html.indexOf("data-news-time"));
+    expect(html).toContain("flex flex-col");
+    expect(html).not.toContain("items-start");
     expect(html).not.toMatch(/summary|rewrite|republish/i);
   });
 });
@@ -67,6 +73,7 @@ describe("NewsRail", () => {
     expect(html).toContain(DASHBOARD_SECTION_AIR_CLASS);
     expect(html).toContain(DASHBOARD_MODULE_CARD_CLASS);
     expect(html).toContain(markupClass(DASHBOARD_NEWS_THUMB_CLASS));
+    expect(html).not.toContain("lg:grid-cols-2");
     expect(html).not.toContain("dashboard-home-panel");
     expect(html).not.toContain("divide-y");
     expect(html).not.toMatch(/summary|rewrite|republish/i);
@@ -82,6 +89,17 @@ describe("NewsRail", () => {
     expect(html).toContain(DASHBOARD_SECTION_AIR_CLASS);
     expect(html).not.toContain("dashboard-home-panel");
     expect(html).not.toContain("divide-y");
+  });
+
+  it("uses the house pair grid on /news history — same stacked cards", () => {
+    const html = renderToStaticMarkup(
+      createElement(NewsRail, { items: [ITEM, SECOND], now: NOW, history: true }),
+    );
+    expect(html).toContain(DASHBOARD_NEWS_HISTORY_LIST_CLASS);
+    expect(html).toContain("lg:grid-cols-2");
+    expect(html).toContain(markupClass(DASHBOARD_NEWS_THUMB_CLASS));
+    expect(html.indexOf("data-news-thumb")).toBeLessThan(html.indexOf("Harbor Cut lands a festival slot"));
+    expect(html).not.toContain("items-start");
   });
 
   it("uses the same empty door on Home and /news", () => {
@@ -101,7 +119,11 @@ describe("news UI source", () => {
     expect(rail).not.toMatch(/\b(item\.(summary|description|body)|content:encoded)\b/);
     expect(card).toContain("DASHBOARD_NEWS_THUMB_CLASS");
     expect(card).toContain("DASHBOARD_MODULE_CARD_CLASS");
+    expect(card).toContain("flex flex-col");
+    expect(card).not.toContain("items-start");
     expect(card).not.toContain("DASHBOARD_LICENSING_THUMB_CLASS");
     expect(rail).not.toContain("DashboardHomePanel");
+    expect(rail).toContain("DASHBOARD_NEWS_HISTORY_LIST_CLASS");
+    expect(DASHBOARD_NEWS_HISTORY_LIST_CLASS).toBe(DASHBOARD_ADMIN_PAIR_CLASS);
   });
 });

@@ -5,9 +5,11 @@ import { describe, expect, it } from "vitest";
 
 import { OverviewHome } from "@/components/overview/overview-home";
 import {
+  DASHBOARD_ADMIN_PAIR_CLASS,
   DASHBOARD_CARD_PAD,
   DASHBOARD_LICENSING_THUMB_CLASS,
   DASHBOARD_MODULE_CARD_CLASS,
+  DASHBOARD_NEWS_HISTORY_LIST_CLASS,
   DASHBOARD_NEWS_THUMB_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
   DASHBOARD_SECTION_AIR_CLASS,
@@ -95,7 +97,10 @@ describe("Home News layout + register lock", () => {
     expect(card).toContain("DASHBOARD_RELATED_GAP_CLASS");
     expect(card).toContain("DASHBOARD_MODULE_CARD_CLASS");
     expect(card).toContain("DASHBOARD_NEWS_THUMB_CLASS");
+    expect(card).toContain("flex flex-col");
+    expect(card).not.toContain("items-start");
     expect(card).not.toContain("DASHBOARD_LICENSING_THUMB_CLASS");
+    expect(rail).toContain("DASHBOARD_NEWS_HISTORY_LIST_CLASS");
     expect(card).not.toMatch(/py-\[var\(--space-[123]\)\]/);
     expect(card).not.toMatch(/\b(px|py|gap)-\[\d+(?:px|rem)\]/);
     expect(rail).not.toMatch(/\b(px|py|gap)-\[\d+(?:px|rem)\]/);
@@ -104,17 +109,18 @@ describe("Home News layout + register lock", () => {
     expect(DASHBOARD_RELATED_GAP_CLASS).toBe("gap-[var(--space-2)]");
   });
 
-  it("locks a News-specific thumb larger than licensing and keeps licensing at w-16", () => {
+  it("locks a full-width News media plate and keeps licensing at w-16", () => {
     expect(DASHBOARD_NEWS_THUMB_CLASS).toContain("aspect-[16/9]");
-    expect(DASHBOARD_NEWS_THUMB_CLASS).toContain("w-28");
-    expect(DASHBOARD_NEWS_THUMB_CLASS).toContain("md:w-32");
-    expect(DASHBOARD_NEWS_THUMB_CLASS).toContain("rounded-[var(--radius-sm)]");
+    expect(DASHBOARD_NEWS_THUMB_CLASS).toMatch(/(?:^|\s)w-full(?:\s|$)/);
     expect(DASHBOARD_NEWS_THUMB_CLASS).not.toContain("w-16");
+    expect(DASHBOARD_NEWS_THUMB_CLASS).not.toContain("w-28");
+    expect(DASHBOARD_NEWS_THUMB_CLASS).not.toContain("md:w-32");
     expect(DASHBOARD_LICENSING_THUMB_CLASS).toContain("w-16");
-    expect(DASHBOARD_LICENSING_THUMB_CLASS).not.toContain("w-28");
-    expect(DASHBOARD_LICENSING_THUMB_CLASS).not.toContain("md:w-32");
+    expect(DASHBOARD_LICENSING_THUMB_CLASS).not.toMatch(/(?:^|\s)w-full(?:\s|$)/);
     expect(DASHBOARD_MODULE_CARD_CLASS).toContain("bg-surface-muted");
     expect(DASHBOARD_MODULE_CARD_CLASS).toContain("rounded-[var(--radius-lg)]");
+    expect(DASHBOARD_NEWS_HISTORY_LIST_CLASS).toBe(DASHBOARD_ADMIN_PAIR_CLASS);
+    expect(DASHBOARD_NEWS_HISTORY_LIST_CLASS).toContain("lg:grid-cols-2");
   });
 
   it("keeps the News column when the rail is empty", () => {
