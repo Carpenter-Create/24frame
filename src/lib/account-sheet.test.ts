@@ -23,10 +23,13 @@ import {
   ACCOUNT_SHEET_HEAD_CLASS,
   ACCOUNT_SHEET_HOST_CLASS,
   ACCOUNT_SHEET_ITEMS,
+  ACCOUNT_SHEET_LEFTOVER,
+  ACCOUNT_SHEET_LEFTOVER_CLASS,
   ACCOUNT_SHEET_LOGOUT_CLASS,
   ACCOUNT_SHEET_LOGOUT_STACK_CLASS,
   ACCOUNT_SHEET_PIN_CLASS,
   ACCOUNT_SHEET_SCROLL_CLASS,
+  ACCOUNT_SHEET_STAGE_CLASS,
   ACCOUNT_SHEET_SURFACE_CLASS,
   ACCOUNT_SHEET_VERSION_CLASS,
   accountSheetIdentity,
@@ -78,11 +81,11 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_SHEET_HOST_CLASS).toContain("justify-end");
     expect(ACCOUNT_SHEET_HOST_CLASS).not.toContain("md:flex-row");
     expect(ACCOUNT_SHEET_HOST_CLASS).not.toContain("md:items-end");
-    expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain("h-[90dvh]");
-    expect(ACCOUNT_SHEET_SURFACE_CLASS).not.toContain("h-auto");
-    expect(ACCOUNT_SHEET_SURFACE_CLASS).not.toContain("max-h-[90dvh]");
+    expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain("h-auto");
+    expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain("max-h-[90dvh]");
+    expect(ACCOUNT_SHEET_SURFACE_CLASS.split(" ")).not.toContain("h-[90dvh]");
     expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain("px-[var(--space-6)]");
-    expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain("gap-[var(--space-6)]");
+    expect(ACCOUNT_SHEET_SURFACE_CLASS).not.toContain("gap-[var(--space-6)]");
     expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain("pb-[var(--space-8)]");
     expect(ACCOUNT_SHEET_SURFACE_CLASS).not.toContain("pb-[var(--space-12)]");
     expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain("pt-[calc(4px+var(--space-8))]");
@@ -94,11 +97,22 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_SHEET_HEAD_CLASS).toContain("min-h-12");
     expect(ACCOUNT_SHEET_HEAD_CLASS).toContain("justify-between");
     expect(ACCOUNT_SHEET_HEAD_CLASS).toContain("items-center");
-    expect(ACCOUNT_SHEET_SCROLL_CLASS).toContain("flex-1");
+    expect(ACCOUNT_SHEET_STAGE_CLASS).toContain("gap-[var(--space-6)]");
+    expect(ACCOUNT_SHEET_STAGE_CLASS).toContain("min-h-0");
+    expect(ACCOUNT_SHEET_STAGE_CLASS).not.toContain("flex-1");
+    expect(ACCOUNT_SHEET_SCROLL_CLASS).not.toContain("flex-1");
     expect(ACCOUNT_SHEET_SCROLL_CLASS).toContain("min-h-0");
     expect(ACCOUNT_SHEET_SCROLL_CLASS).not.toContain("min-h-[var(--space-12)]");
     expect(ACCOUNT_SHEET_SCROLL_CLASS).toContain("overflow-y-auto");
     expect(ACCOUNT_SHEET_SCROLL_CLASS).toContain("overscroll-contain");
+    expect(ACCOUNT_SHEET_LEFTOVER).toBe(48);
+    expect(ACCOUNT_SHEET_LEFTOVER).toBe(ACCOUNT_MENU_DROPDOWN_LEFTOVER);
+    expect(ACCOUNT_SHEET_LEFTOVER_CLASS).toBe(ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS);
+    expect(ACCOUNT_SHEET_LEFTOVER_CLASS).toContain("h-[var(--space-12)]");
+    expect(ACCOUNT_SHEET_LEFTOVER_CLASS).toContain("shrink-0");
+    expect(ACCOUNT_SHEET_LEFTOVER_CLASS).not.toContain("flex-1");
+    expect(ACCOUNT_SHEET_LEFTOVER_CLASS).not.toContain("h-[48px]");
+    expect(ACCOUNT_SHEET_LEFTOVER_CLASS).not.toMatch(/h-\[\d+px\]/);
     expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain("overflow-hidden");
     expect(ACCOUNT_SHEET_SURFACE_CLASS).not.toContain("overflow-y-auto");
     expect(ACCOUNT_SHEET_LOGOUT_CLASS).toContain("text-accent");

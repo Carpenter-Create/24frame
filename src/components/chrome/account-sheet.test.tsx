@@ -25,9 +25,11 @@ import {
   ACCOUNT_SHEET_HEAD_CLASS,
   ACCOUNT_SHEET_HOST_CLASS,
   ACCOUNT_SHEET_ITEMS,
+  ACCOUNT_SHEET_LEFTOVER_CLASS,
   ACCOUNT_SHEET_LOGOUT_CLASS,
   ACCOUNT_SHEET_PIN_CLASS,
   ACCOUNT_SHEET_SCROLL_CLASS,
+  ACCOUNT_SHEET_STAGE_CLASS,
   ACCOUNT_SHEET_SURFACE_CLASS,
   ACCOUNT_SHEET_VERSION_CLASS,
 } from "@/lib/account-sheet";
@@ -176,9 +178,9 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(scrimClass).toContain(APP_SHEET_SCRIM_FADE_CLASS);
     expect(surfaceClass).toBe(ACCOUNT_SHEET_SURFACE_CLASS);
     expect(surfaceClass).toContain(APP_SHEET_RISE_CLASS);
-    expect(surfaceClass).toContain("h-[90dvh]");
-    expect(surfaceClass).not.toContain("h-auto");
-    expect(surfaceClass).not.toContain("max-h-[90dvh]");
+    expect(surfaceClass).toContain("h-auto");
+    expect(surfaceClass).toContain("max-h-[90dvh]");
+    expect(surfaceClass.split(" ")).not.toContain("h-[90dvh]");
     expect(surfaceClass).toContain("rounded-t-[16px]");
     expect(surfaceClass).toContain("bg-surface");
     expect(surfaceClass).toContain("px-[var(--space-6)]");
@@ -268,7 +270,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(attrClass(html, "data-account-sheet-head")).toContain("justify-between");
   });
 
-  it("keeps the Identity half-bar on the 90% sheet — no theme drill-in", () => {
+  it("keeps the Identity half-bar on the hug sheet — no theme drill-in", () => {
     const main = renderSheet();
     const accent = attrClass(main, "data-menu-surface-accent");
 
@@ -436,7 +438,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(src).toContain("settingsLandHref(pathname)");
   });
 
-  it("keeps Log out with the footer — leftover is the 90% grow, hairline only under Log out", () => {
+  it("keeps Log out with the footer — leftover is 48 house air, hairline only under Log out", () => {
     const html = renderSheet();
     const scrollEnd = html.indexOf("data-account-sheet-scroll");
     const logout = html.indexOf('data-sheet-group-item="logOut"');
@@ -446,6 +448,8 @@ describe("AccountSheet 544:561 / 537:557", () => {
     const legal = html.indexOf("data-account-sheet-legal");
     const pinClass = attrClass(html, "data-account-sheet-pin");
     const scrollClass = attrClass(html, "data-account-sheet-scroll");
+    const leftoverClass = attrClass(html, "data-account-sheet-leftover");
+    const stageClass = attrClass(html, "data-account-sheet-stage");
     const groupEnd = html.indexOf("</div>", html.indexOf('data-sheet-group-item="settings"'));
 
     expect(html).not.toContain("data-account-sheet-logout-rule");
@@ -458,17 +462,26 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(groupEnd).toBeLessThan(logout);
     expect(html.slice(html.indexOf("data-account-sheet-scroll"), logout)).not.toContain("Log out");
     expect(html.slice(html.indexOf("data-account-sheet-scroll"), logout)).not.toContain("v0.1.0");
-    expect(scrollClass).toContain("flex-1");
+    expect(scrollClass).not.toContain("flex-1");
     expect(scrollClass).toContain("min-h-0");
     expect(scrollClass).not.toContain("min-h-[var(--space-12)]");
     expect(scrollClass).toContain("overflow-y-auto");
     expect(scrollClass).toContain("overscroll-contain");
+    expect(leftoverClass).toBe(ACCOUNT_SHEET_LEFTOVER_CLASS);
+    expect(leftoverClass).toBe(ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS);
+    expect(leftoverClass).toContain("h-[var(--space-12)]");
+    expect(leftoverClass).toContain("shrink-0");
+    expect(leftoverClass).not.toContain("flex-1");
+    expect(leftoverClass).not.toContain("h-[48px]");
+    expect(stageClass).toBe(ACCOUNT_SHEET_STAGE_CLASS);
+    expect(stageClass).toContain("gap-[var(--space-6)]");
+    expect(stageClass).not.toContain("flex-1");
     expect(attrClass(html, "data-account-sheet-surface")).toContain("overflow-hidden");
     expect(attrClass(html, "data-account-sheet-surface")).not.toContain("overflow-y-auto");
-    expect(attrClass(html, "data-account-sheet-surface")).toContain("h-[90dvh]");
-    expect(attrClass(html, "data-account-sheet-surface")).not.toContain("h-auto");
-    expect(attrClass(html, "data-account-sheet-surface")).not.toContain("max-h-[90dvh]");
-    expect(attrClass(html, "data-account-sheet-surface")).toContain("gap-[var(--space-6)]");
+    expect(attrClass(html, "data-account-sheet-surface")).toContain("h-auto");
+    expect(attrClass(html, "data-account-sheet-surface")).toContain("max-h-[90dvh]");
+    expect(attrClass(html, "data-account-sheet-surface").split(" ")).not.toContain("h-[90dvh]");
+    expect(attrClass(html, "data-account-sheet-surface")).not.toContain("gap-[var(--space-6)]");
     expect(pinClass).toBe(ACCOUNT_SHEET_PIN_CLASS);
     expect(pinClass).toContain("gap-[var(--space-6)]");
     expect(pinClass).not.toContain("gap-[var(--space-12)]");
@@ -476,6 +489,8 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(attrClass(html, "data-account-sheet-surface")).not.toContain("pb-[var(--space-12)]");
     const lastItem = html.indexOf('data-sheet-group-item="settings"');
     const betweenLastItemAndLogout = html.slice(lastItem, logout);
+    expect(betweenLastItemAndLogout).toContain("data-account-sheet-leftover");
+    expect(betweenLastItemAndLogout).not.toContain("data-account-menu-leftover");
     expect(betweenLastItemAndLogout).not.toContain("data-account-sheet-footer-rule");
     expect(betweenLastItemAndLogout).not.toContain("bg-hairline");
     expect(html.slice(logout, footer)).toContain("data-account-sheet-footer-rule");
@@ -522,29 +537,38 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(attrClass(html, "data-account-sheet-version")).toContain("text-ink-3");
   });
 
-  it("keeps the last item and Log out as separate rows — leftover pane scrolls, pin does not stack", () => {
+  it("keeps the last item and Log out as separate rows — leftover is 48, pin does not stack", () => {
     const html = renderSheet();
     const scrollClass = attrClass(html, "data-account-sheet-scroll");
+    const leftoverClass = attrClass(html, "data-account-sheet-leftover");
     const surfaceClass = attrClass(html, "data-account-sheet-surface");
     const pinClass = attrClass(html, "data-account-sheet-pin");
     const lastItem = html.indexOf('data-sheet-group-item="settings"');
     const logout = html.indexOf('data-sheet-group-item="logOut"');
     const scroll = html.indexOf("data-account-sheet-scroll");
+    const leftover = html.indexOf("data-account-sheet-leftover");
     const pin = html.indexOf("data-account-sheet-pin");
     const betweenLastItemAndLogout = html.slice(lastItem, logout);
 
     expect(lastItem).toBeGreaterThan(-1);
     expect(logout).toBeGreaterThan(lastItem);
-    expect(pin).toBeGreaterThan(scroll);
-    expect(html.slice(scroll, logout)).toContain("Settings");
-    expect(html.slice(scroll, logout)).not.toContain("Appearance");
+    expect(leftover).toBeGreaterThan(scroll);
+    expect(pin).toBeGreaterThan(leftover);
+    expect(html.slice(scroll, leftover)).toContain("Settings");
+    expect(html.slice(scroll, leftover)).not.toContain("Appearance");
     expect(html.slice(scroll, pin)).not.toContain("Log out");
     expect(html.slice(pin)).toContain("Log out");
+    expect(betweenLastItemAndLogout).toContain("data-account-sheet-leftover");
     expect(betweenLastItemAndLogout).not.toContain("data-account-sheet-footer-rule");
     expect(scrollClass).toBe(ACCOUNT_SHEET_SCROLL_CLASS);
     expect(scrollClass).toContain("overflow-y-auto");
+    expect(scrollClass).not.toContain("flex-1");
+    expect(leftoverClass).toBe(ACCOUNT_SHEET_LEFTOVER_CLASS);
+    expect(leftoverClass).toContain("shrink-0");
+    expect(leftoverClass).not.toContain("flex-1");
     expect(surfaceClass).toContain("overflow-hidden");
     expect(surfaceClass).not.toContain("overflow-y-auto");
+    expect(surfaceClass.split(" ")).not.toContain("h-[90dvh]");
     expect(pinClass).toBe(ACCOUNT_SHEET_PIN_CLASS);
     expect(pinClass).toContain("shrink-0");
     expect(src).toContain("house nav destinations");
