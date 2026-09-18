@@ -34,7 +34,6 @@ describe("OverviewHome", () => {
         courseCovers: new Map(),
         courseMeta: new Map(),
         needsYou: [],
-        weekPulse: [],
         aiNext: [],
       }),
     );
@@ -42,15 +41,27 @@ describe("OverviewHome", () => {
     expect(html).toContain(OVERVIEW_PAGE.title);
     expect(html).toContain("Home");
     expect(html).not.toContain("Overview");
-    expect(html).toContain('data-overview-module="needs-you"');
-    expect(html).toContain('data-overview-module="week"');
-    expect(html).toContain("data-overview-aggregation");
-    expect(html).toContain("data-overview-revenue");
     expect(html).toContain('data-overview-module="social"');
     expect(html).toContain('data-overview-module="education"');
+    expect(html).toContain("data-overview-aggregation");
+    expect(html).toContain("data-overview-revenue");
+    expect(html).toContain('data-overview-module="needs-you"');
     expect(html).toContain('data-overview-module="ai-next"');
+    expect(html).not.toContain('data-overview-module="week"');
+    expect(html.indexOf('data-overview-module="social"')).toBeLessThan(
+      html.indexOf('data-overview-module="education"'),
+    );
+    expect(html.indexOf('data-overview-module="education"')).toBeLessThan(
+      html.indexOf("data-overview-aggregation"),
+    );
+    expect(html.indexOf("data-overview-aggregation")).toBeLessThan(
+      html.indexOf('data-overview-module="needs-you"'),
+    );
+    expect(html.indexOf('data-overview-module="needs-you"')).toBeLessThan(
+      html.indexOf('data-overview-module="ai-next"'),
+    );
     expect(html).toContain(OVERVIEW_PAGE.needsYou);
-    expect(html).toContain(OVERVIEW_PAGE.thisWeek);
+    expect(html).not.toContain(OVERVIEW_PAGE.thisWeek);
     expect(html).toContain(OVERVIEW_PAGE.revenue);
     expect(html).toContain(OVERVIEW_PAGE.topPerforming);
     expect(html).toContain(OVERVIEW_PAGE.social);
@@ -58,7 +69,7 @@ describe("OverviewHome", () => {
     expect(html).toContain(OVERVIEW_PAGE.aiNext);
     expect(html).toContain(OVERVIEW_PAGE.aiAsk);
     expect(html).toContain(OVERVIEW_PAGE.needsYouEmpty);
-    expect(html).toContain(OVERVIEW_PAGE.weekEmpty);
+    expect(html).not.toContain(OVERVIEW_PAGE.weekEmpty);
     expect(html).toContain(OVERVIEW_PAGE.revenueEmpty);
     expect(html).toContain(OVERVIEW_PAGE.socialEmpty);
     expect(html).toContain(OVERVIEW_PAGE.educationEmpty);
@@ -67,7 +78,7 @@ describe("OverviewHome", () => {
     expect(html).not.toContain("lesson_progress");
   });
 
-  it("shows Social unread + faces, Education covers, week pulse, and three AI next-moves", () => {
+  it("shows Social unread + faces, Education covers, and three AI next-moves", () => {
     const html = renderToStaticMarkup(
       createElement(OverviewHome, {
         revenueCents: 100_000,
@@ -93,7 +104,6 @@ describe("OverviewHome", () => {
         courseCovers: new Map([["c1", "https://cover"]]),
         courseMeta: new Map([["c1", "3 lessons"]]),
         needsYou: [{ id: "n1", what: "Synopsis is required.", href: "/titles/t1" }],
-        weekPulse: [{ key: "titles", label: "1 title added", count: 1 }],
         aiNext: [
           { id: "a1", title: "North Wind", reason: "Chain of title is missing.", status: "draft" },
           { id: "a2", title: "Winter Light", reason: null, status: "draft" },
@@ -112,7 +122,7 @@ describe("OverviewHome", () => {
     expect(html).toContain("Craft");
     expect(html).toContain("3 lessons");
     expect(html).toContain("Synopsis is required.");
-    expect(html).toContain('data-overview-week-row="titles"');
+    expect(html).not.toContain('data-overview-week-row="titles"');
     expect(html).toContain('data-overview-ai-next="a1"');
     expect(html).toContain('data-overview-ai-next="a2"');
     expect(html).toContain('data-overview-ai-next="a3"');

@@ -15,7 +15,9 @@ import type { WorkspaceMode } from "@/lib/workspace";
 // Account Home is the leftmost unify-lead pill. Not a fourth product.
 // Not Social Home (`/social` feed). Aggregation · Social · Education
 // stay the three workspace destinations. /overview redirects to /home.
-// Copy lives here, not JSX.
+// Home IA v2: no dest rail on `/home`. Module order is Social →
+// Education → Aggregation → Needs you → 24Frame AI. Copy lives here,
+// not JSX.
 
 export const OVERVIEW_HREF = "/home";
 export const OVERVIEW_LEGACY_HREF = "/overview";
@@ -24,6 +26,15 @@ export const OVERVIEW_SOCIAL_DM_CAP = 5;
 export const OVERVIEW_EDUCATION_CAP = 5;
 export const OVERVIEW_AI_NEXT_CAP = 3;
 export const OVERVIEW_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
+/** Home IA v2 module stack. Not Social `/social` Home. */
+export const OVERVIEW_MODULE_ORDER = [
+  "social",
+  "education",
+  "aggregation",
+  "needs-you",
+  "ai-next",
+] as const;
 
 export const OVERVIEW_PAGE = {
   title: "Home",
@@ -65,6 +76,11 @@ function isPrefixed(pathname: string, href: string): boolean {
 
 export function isOverviewPath(pathname: string): boolean {
   return isPrefixed(pathname, OVERVIEW_HREF) || isPrefixed(pathname, OVERVIEW_LEGACY_HREF);
+}
+
+/** Home workspace: no dest rail. Rails return on Aggregation / Social / Education. */
+export function overviewHidesRail(pathname: string): boolean {
+  return isOverviewPath(pathname);
 }
 
 export function overviewLeadPills(

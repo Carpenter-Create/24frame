@@ -72,7 +72,7 @@ describe("HomePage", () => {
     expect(html).toContain("Home");
     expect(html).not.toContain("Overview");
     expect(html).toContain(OVERVIEW_PAGE.needsYou);
-    expect(html).toContain(OVERVIEW_PAGE.thisWeek);
+    expect(html).not.toContain(OVERVIEW_PAGE.thisWeek);
     expect(html).toContain(OVERVIEW_PAGE.revenue);
     expect(html).toContain(OVERVIEW_PAGE.social);
     expect(html).toContain(OVERVIEW_PAGE.education);

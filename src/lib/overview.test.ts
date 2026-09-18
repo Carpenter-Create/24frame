@@ -11,8 +11,10 @@ import {
   OVERVIEW_PAGE,
   OVERVIEW_SOCIAL_DM_CAP,
   isOverviewPath,
+  OVERVIEW_MODULE_ORDER,
   overviewAiNextMoves,
   overviewEducationCourses,
+  overviewHidesRail,
   overviewLeadPills,
   overviewLeadSelected,
   overviewLeadShouldNavigate,
@@ -76,6 +78,25 @@ describe("Home lead pills", () => {
     expect(overviewLeadShouldNavigate("/dashboard", "aggregation", { id: "aggregation" })).toBe(
       false,
     );
+  });
+
+  it("hides the dest rail on Home and returns it on Aggregation / Social / Education", () => {
+    expect(overviewHidesRail("/home")).toBe(true);
+    expect(overviewHidesRail("/home/x")).toBe(true);
+    expect(overviewHidesRail("/overview")).toBe(true);
+    expect(overviewHidesRail("/dashboard")).toBe(false);
+    expect(overviewHidesRail("/titles")).toBe(false);
+    expect(overviewHidesRail("/social")).toBe(false);
+    expect(overviewHidesRail("/social/dms")).toBe(false);
+    expect(overviewHidesRail("/social/courses")).toBe(false);
+    expect(overviewHidesRail("/education")).toBe(false);
+    expect(OVERVIEW_MODULE_ORDER).toEqual([
+      "social",
+      "education",
+      "aggregation",
+      "needs-you",
+      "ai-next",
+    ]);
   });
 });
 

@@ -39,6 +39,7 @@ import {
   SOCIAL_RAIL_WIDTH_CLASS,
   SOCIAL_TAB_BAR_MAIN_PAD_CLASS,
 } from "@/lib/social-chrome";
+import { overviewHidesRail } from "@/lib/overview";
 import { resolveWorkspaceMode, type WorkspaceMode } from "@/lib/workspace";
 import { SocialMobileTabBar } from "@/components/social/social-mobile-tab-bar";
 import { SocialRailAccountChip } from "@/components/social/social-rail-extras";
@@ -60,6 +61,10 @@ type Org = { id: string; name: string };
 // Social / Education / Aggregation. Not a second column. Collapse stays
 // off. Phone list is the same sections; pushed panes back to Settings.
 // Hamburger stays off. Avatar 32 stays.
+// Home (`/home`, leftover `/overview`) is not a dest workspace: no
+// Aggregation / Social / Education rail. Width tokens collapse to 0
+// like phone so header + main go full-canvas. Rails return on those
+// three destinations.
 export function AppShell({
   chrome,
   email = "",
@@ -122,6 +127,7 @@ export function AppShell({
   const homePage = pathname === "/" || pathname === "/dashboard";
   const messagesPage = pathname === "/messages";
   const settingsPage = isSettingsPath(pathname);
+  const homeWorkspace = overviewHidesRail(pathname) && !settingsPage;
   const socialChrome = workspace === "social" && !settingsPage;
 
   useEffect(() => {
@@ -137,8 +143,9 @@ export function AppShell({
     });
   };
 
-  const collapseWidthStyle =
-    collapsed && !settingsPage
+  const collapseWidthStyle = homeWorkspace
+    ? ({ "--sidebar-width": "0px", "--sidebar-width-collapsed": "0px" } as React.CSSProperties)
+    : collapsed && !settingsPage
       ? ({ "--sidebar-width": RAIL_COLLAPSE_WIDTH_VAR } as React.CSSProperties)
       : undefined;
 
@@ -209,8 +216,10 @@ export function AppShell({
     <div
       className={cn(HOUSE_LEAD_SHELL_CLASS, HOUSE_PAGE_CANVAS_CLASS)}
       data-education-workspace={workspace === "education" ? "" : undefined}
+      data-home-workspace={homeWorkspace ? "" : undefined}
       style={collapseWidthStyle}
     >
+      {homeWorkspace ? null : (
       <aside
         className={cn(
           HOUSE_RAIL_FLOAT_CLASS,
@@ -236,6 +245,7 @@ export function AppShell({
           )}
         </div>
       </aside>
+      )}
 
       {/* Full-width top + dest side nav — same HouseLeadChrome as Social.
           Access phone header is hamburger · gap 8 · one workspace
@@ -257,7 +267,7 @@ export function AppShell({
         leadingNav={
           settingsPage ? (
             <SettingsHeaderBack />
-          ) : (
+          ) : homeWorkspace ? undefined : (
             <MobileNavSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />
           )
         }

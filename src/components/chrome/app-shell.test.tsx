@@ -422,6 +422,48 @@ describe("AppShell /settings rail", () => {
     }
   });
 
+  it("suppresses every dest rail on Home and restores rails on destination workspaces", () => {
+    expect(shellSrc).toContain("overviewHidesRail");
+    expect(shellSrc).toContain("data-home-workspace");
+
+    navigation.pathname = "/home";
+    const home = renderShell();
+    expect(home).toContain('data-home-workspace=""');
+    expect(home).toContain("data-app-header");
+    expect(home).toContain("data-workspace-switcher");
+    expect(home).not.toContain("data-app-rail");
+    expect(home).not.toContain("data-side-nav");
+    expect(home).not.toContain("data-social-rail");
+    expect(home).not.toContain("data-mobile-nav-trigger");
+    expect(home).not.toContain("Collapse sidebar");
+    expect(home).not.toContain("Expand sidebar");
+    expect(home).toContain("--sidebar-width:0px");
+    expect(home).toContain("--sidebar-width-collapsed:0px");
+
+    navigation.pathname = "/overview";
+    expect(renderShell()).not.toContain("data-app-rail");
+
+    navigation.pathname = "/dashboard";
+    const aggregation = renderShell();
+    expect(aggregation).toContain("data-app-rail");
+    expect(aggregation).toContain("data-side-nav");
+    expect(aggregation).not.toContain("data-home-workspace");
+    expect(aggregation).toContain("Collapse sidebar");
+
+    navigation.pathname = "/social";
+    const social = renderShell();
+    expect(social).toContain("data-social-rail");
+    expect(social).toContain("data-app-rail");
+    expect(social).not.toContain("data-home-workspace");
+
+    navigation.pathname = "/social/courses";
+    const education = renderShell();
+    expect(education).toContain("data-education-workspace");
+    expect(education).toContain("data-app-rail");
+    expect(education).toContain("data-side-nav");
+    expect(education).not.toContain("data-home-workspace");
+  });
+
   it("keeps the focused 220 rail on every /settings path", () => {
     for (const path of [
       "/settings/you",

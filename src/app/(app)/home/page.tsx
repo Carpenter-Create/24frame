@@ -22,11 +22,8 @@ import {
   OVERVIEW_SOCIAL_DM_CAP,
   overviewAiNextMoves,
   overviewEducationCourses,
-  overviewInWeek,
   overviewSocialChats,
   overviewSocialUnreadTotal,
-  overviewWeekPulse,
-  overviewWeekSince,
 } from "@/lib/overview";
 import { signedEducationCoverUrls } from "@/lib/s3-education";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
@@ -50,7 +47,6 @@ export default async function HomePage() {
 
   const org = ctx.activeOrg;
   const now = new Date();
-  const since = overviewWeekSince(now.getTime());
 
   const titlesPromise = org
     ? supabase
@@ -79,11 +75,6 @@ export default async function HomePage() {
     findingsIsPartial: findings.truncated,
   });
   const attention = buildAttentionGlance({ findings: findings.rows, titles });
-  const weekPulse = overviewWeekPulse({
-    titlesAdded: titles.filter((title) => overviewInWeek(title.created_at, since)).length,
-    deliveriesUpdated: deliveries.rows.filter((row) => overviewInWeek(row.updated_at, since)).length,
-    findingsOpened: findings.rows.filter((row) => overviewInWeek(row.created_at ?? null, since)).length,
-  });
 
   let revenueCents: number | null = null;
   if (org && canViewClientEarn({ isGcStaff: ctx.isGcStaff, role: ctx.activeRole })) {
@@ -145,7 +136,6 @@ export default async function HomePage() {
       courseCovers={covers}
       courseMeta={meta}
       needsYou={attention.rows.map((row) => ({ id: row.id, what: row.what, href: row.href }))}
-      weekPulse={weekPulse}
       aiNext={overviewAiNextMoves(snapshot.doNext)}
     />
   );
