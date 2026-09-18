@@ -9,13 +9,15 @@ import {
   courseGlancePlateClass,
   courseGlanceProgressLabel,
   courseGlanceProgressPercent,
+  courseHomeCoverTone,
   type CourseCardDensity,
   type CourseRow,
 } from "@/lib/courses";
 import { socialCourseHref } from "@/lib/social";
 
 // Discover: 16:9 cover + title + quiet lesson meta.
-// Home glance: color plate + in-cover title + Sporty Blue progress.
+// Home glance: signed photo + below-cover title + progress.
+// Plate/orb + in-plate title only when no signed cover.
 // One primitive — density, not a twin. No Social engagement chrome.
 
 export function CourseCard({
@@ -32,6 +34,8 @@ export function CourseCard({
   progressPercent?: number | null;
 }) {
   const home = density === "home";
+  const tone = home ? courseHomeCoverTone(coverUrl) : "photo";
+  const plate = tone === "plate";
   const percent = courseGlanceProgressPercent(progressPercent);
   const progressLabel = courseGlanceProgressLabel(percent);
 
@@ -43,11 +47,11 @@ export function CourseCard({
       >
         <CourseCover
           title={course.title}
-          src={home ? null : coverUrl}
-          tone={home ? "plate" : "photo"}
-          plateClass={home ? courseGlancePlateClass(course.id) : undefined}
+          src={coverUrl}
+          tone={tone}
+          plateClass={plate ? courseGlancePlateClass(course.id) : undefined}
         >
-          {home ? (
+          {plate ? (
             <span data-course-cover-title="" className={COURSE_GLANCE_TITLE_CLASS}>
               {course.title}
             </span>
@@ -55,6 +59,9 @@ export function CourseCard({
         </CourseCover>
         {home ? (
           <div data-course-progress="" className="flex flex-col gap-[var(--space-2)]">
+            {!plate ? (
+              <span className="t-body font-medium text-ink">{course.title}</span>
+            ) : null}
             <div
               data-course-progress-track=""
               role="progressbar"

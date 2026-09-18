@@ -28,6 +28,7 @@ import {
   overviewWeekPulse,
   overviewWeekSince,
 } from "@/lib/overview";
+import { signedEducationCoverUrls } from "@/lib/s3-education";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { loadProfilesByIds } from "@/lib/social-feed";
 import { socialHomeChats } from "@/lib/social-home-chats";
@@ -120,6 +121,9 @@ export default async function HomePage() {
   );
 
   const courses = overviewEducationCourses(coursesLoaded.failed ? [] : coursesLoaded.courses);
+  const courseCovers = coursesLoaded.failed
+    ? new Map<string, string>()
+    : await signedEducationCoverUrls(courses);
 
   return (
     <OverviewHome
@@ -129,6 +133,7 @@ export default async function HomePage() {
       socialChats={namedChats}
       socialFaces={faces}
       courses={courses}
+      courseCovers={courseCovers}
       needsYou={attention.rows.map((row) => ({ id: row.id, what: row.what, href: row.href }))}
       weekPulse={weekPulse}
       aiNext={overviewAiNextMoves(snapshot.doNext)}

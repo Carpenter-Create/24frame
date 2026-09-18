@@ -31,8 +31,9 @@ export const COURSE_COVER_ASPECT_CLASS = "aspect-video";
 export const COURSE_CARD_DENSITIES = ["discover", "home"] as const;
 export type CourseCardDensity = (typeof COURSE_CARD_DENSITIES)[number];
 
-// Home Education glance plates — Figma Home module. Cycle is
-// deterministic from course id. Hex lives in tokens.css only.
+// Home Education glance plates — empty-cover fallback only.
+// Real signed covers use the same 16:9 photo path as discover.
+// Cycle is deterministic from course id. Hex lives in tokens.css only.
 export const COURSE_GLANCE_PLATE_CLASSES = [
   "bg-course-plate-1",
   "bg-course-plate-2",
@@ -69,6 +70,12 @@ export function courseGlancePlateClass(
   courseId: string,
 ): (typeof COURSE_GLANCE_PLATE_CLASSES)[number] {
   return COURSE_GLANCE_PLATE_CLASSES[courseGlancePlateIndex(courseId)]!;
+}
+
+// Home density: photo when a signed cover exists. Plate/orb only
+// when cover_key is missing or signing failed.
+export function courseHomeCoverTone(coverUrl?: string | null): "photo" | "plate" {
+  return coverUrl ? "photo" : "plate";
 }
 
 export function courseGlanceProgressPercent(raw: number | null | undefined): number {

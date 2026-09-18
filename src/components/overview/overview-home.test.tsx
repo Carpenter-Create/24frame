@@ -153,7 +153,7 @@ describe("OverviewHome", () => {
     expect(html).toContain("width:0%");
     expect(html).toContain("bg-accent");
     expect(html).not.toContain("3 lessons");
-    expect(html).not.toContain("https://cover");
+    expect(html).not.toContain("https://cover.example");
     expect(html).toContain("Synopsis is required.");
     expect(html).toContain('data-overview-week-row="titles"');
     expect(html).toContain('data-overview-ai-next="a1"');
@@ -218,5 +218,44 @@ describe("OverviewHome", () => {
     expect(education).not.toContain(TEXT_ACTION_CLASS);
     expect(labelAt).toBeGreaterThan(-1);
     expect(labelAt).toBeLessThan(coverAt);
+  });
+
+  it("uses the signed Education cover on Home and keeps the title below the photo", () => {
+    const html = renderToStaticMarkup(
+      createElement(OverviewHome, {
+        revenueCents: null,
+        topTitles: [],
+        socialUnread: 0,
+        socialChats: [],
+        socialFaces: new Map(),
+        courses: [COURSE],
+        courseCovers: new Map([["c1", "https://cover.example/photo.jpg"]]),
+        courseProgress: new Map([["c1", 40]]),
+        needsYou: [],
+        weekPulse: [],
+        aiNext: [],
+      }),
+    );
+    const education = moduleChunk(html, "education");
+    const coverAt = education.indexOf("data-course-cover=");
+    const coverCloseAt = education.indexOf("</div>", coverAt);
+    const belowTitleAt = education.indexOf("t-body font-medium text-ink");
+    const trackAt = education.indexOf("data-course-progress-track");
+    expect(education).toContain('data-course-card-density="home"');
+    expect(education).toContain('data-course-cover-tone="photo"');
+    expect(education).toContain("https://cover.example/photo.jpg");
+    expect(education).toContain("<img");
+    expect(education).not.toContain('data-course-cover-tone="plate"');
+    expect(education).not.toContain("data-course-cover-title");
+    expect(education).not.toContain("data-course-cover-orb");
+    expect(education).not.toContain("data-course-cover-band");
+    expect(belowTitleAt).toBeGreaterThan(coverCloseAt);
+    expect(trackAt).toBeGreaterThan(belowTitleAt);
+    expect(education).toContain("40% complete");
+    expect(education).toContain("width:40%");
+    expect(education).not.toContain("3 lessons");
+    expect(education).not.toContain("lesson");
+    expect(education).toContain(OVERVIEW_EDUCATION_LABEL_CLASS);
+    expect(education).not.toContain(TEXT_ACTION_CLASS);
   });
 });

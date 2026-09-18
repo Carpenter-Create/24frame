@@ -10,6 +10,7 @@ import {
   courseGlancePlateClass,
   courseGlanceProgressLabel,
   courseGlanceProgressPercent,
+  courseHomeCoverTone,
   courseDiscoverMetaLabel,
   courseHref,
   courseLessonDurationLabel,
@@ -130,6 +131,10 @@ describe("placeholder outline", () => {
     expect(courseGlanceProgressLabel(40)).toBe("40% complete");
     expect(courseGlanceProgressLabel(62)).toBe("62% complete");
     expect(courseGlanceProgressLabel(62)).not.toBe(courseGlanceProgressLabel(0));
+    expect(courseHomeCoverTone("https://cover.example/photo.jpg")).toBe("photo");
+    expect(courseHomeCoverTone(null)).toBe("plate");
+    expect(courseHomeCoverTone(undefined)).toBe("plate");
+    expect(courseHomeCoverTone("")).toBe("plate");
   });
 });
 
@@ -210,7 +215,13 @@ describe("course lock", () => {
       'density="home"',
     );
     expect(readFileSync("src/components/overview/overview-home.tsx", "utf8")).toContain(
+      "coverUrl",
+    );
+    expect(readFileSync("src/components/overview/overview-home.tsx", "utf8")).toContain(
       "progressPercent",
+    );
+    expect(readFileSync("src/app/(app)/home/page.tsx", "utf8")).toContain(
+      "signedEducationCoverUrls",
     );
     expect(readFileSync("src/components/overview/overview-home.tsx", "utf8")).toContain(
       "OVERVIEW_EDUCATION_LABEL_CLASS",

@@ -43,6 +43,7 @@ export function OverviewHome({
   socialChats,
   socialFaces,
   courses,
+  courseCovers,
   courseProgress,
   needsYou,
   weekPulse,
@@ -54,6 +55,7 @@ export function OverviewHome({
   socialChats: readonly SocialHomeChat[];
   socialFaces: ReadonlyMap<string, string | null>;
   courses: readonly CourseRow[];
+  courseCovers?: ReadonlyMap<string, string>;
   courseProgress?: ReadonlyMap<string, number>;
   needsYou: readonly { id: string; what: string; href: string }[];
   weekPulse: readonly DashboardChangeRow[];
@@ -115,6 +117,7 @@ export function OverviewHome({
               <CourseCard
                 key={course.id}
                 course={course}
+                coverUrl={courseCovers?.get(course.id)}
                 density="home"
                 progressPercent={courseProgress?.get(course.id)}
               />
