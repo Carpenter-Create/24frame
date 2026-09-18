@@ -6,6 +6,7 @@ import {
   parseWorkspaceCookie,
   resolveWorkspaceMode,
   WORKSPACE_COOKIE,
+  WORKSPACE_MODES,
   workspaceCookieWrite,
   workspaceHome,
 } from "./workspace";
@@ -13,6 +14,8 @@ import {
 describe("workspace mode", () => {
   it("persists aggregation, social, or education in a cookie like the rail collapse", () => {
     expect(WORKSPACE_COOKIE).toBe("24frame_workspace");
+    expect(WORKSPACE_MODES).toEqual(["aggregation", "social", "education"]);
+    expect(WORKSPACE_MODES).not.toContain("news");
     expect(parseWorkspaceCookie(undefined)).toBe("aggregation");
     expect(parseWorkspaceCookie("social")).toBe("social");
     expect(parseWorkspaceCookie("education")).toBe("education");
@@ -46,6 +49,7 @@ describe("workspace mode", () => {
     expect(resolveWorkspaceMode("/activity", "social")).toBe("aggregation");
     expect(resolveWorkspaceMode("/news", "social")).toBe("aggregation");
     expect(resolveWorkspaceMode("/news", "education")).toBe("aggregation");
+    expect(resolveWorkspaceMode("/news", "aggregation")).toBe("aggregation");
     expect(resolveWorkspaceMode("/messages", "social")).toBe("aggregation");
     expect(resolveWorkspaceMode("/titles/1", "social")).toBe("aggregation");
     expect(resolveWorkspaceMode("/", "social")).toBe("aggregation");

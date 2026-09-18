@@ -5,7 +5,12 @@ import { describe, expect, it } from "vitest";
 
 import { OverviewHome } from "@/components/overview/overview-home";
 import {
+  DASHBOARD_ADMIN_PAIR_CLASS,
   DASHBOARD_CARD_PAD,
+  DASHBOARD_LICENSING_THUMB_CLASS,
+  DASHBOARD_MODULE_CARD_CLASS,
+  DASHBOARD_NEWS_HISTORY_LIST_CLASS,
+  DASHBOARD_NEWS_THUMB_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
   DASHBOARD_SECTION_AIR_CLASS,
 } from "@/lib/dashboard-craft";
@@ -21,7 +26,10 @@ import {
   OVERVIEW_NEWS_RAIL_WIDTH,
   OVERVIEW_PHONE_MODULE_ORDER,
   OVERVIEW_RAIL_OFF_WIDTH,
+  isHomeOwnedPath,
   overviewHidesRail,
+  overviewLeadPills,
+  overviewLeadSelected,
 } from "@/lib/overview";
 
 const card = readFileSync("src/components/news/news-card.tsx", "utf8");
@@ -56,6 +64,11 @@ describe("Home News layout + register lock", () => {
     expect(HOUSE_HOME_RAIL_COLUMN_CLASS).toContain("--chrome-gutter");
     expect(HOUSE_HOME_RAIL_COLUMN_CLASS).not.toContain("--access-rail-width");
     expect(overviewHidesRail("/home")).toBe(true);
+    expect(overviewHidesRail("/news")).toBe(true);
+    expect(isHomeOwnedPath("/news")).toBe(true);
+    expect(overviewLeadSelected("home", "/news", "aggregation")).toBe(true);
+    expect(overviewLeadSelected("aggregation", "/news", "aggregation")).toBe(false);
+    expect(overviewLeadPills().map((pill) => pill.id)).not.toContain("news");
     expect(OVERVIEW_RAIL_OFF_WIDTH).toBe("0px");
     expect(OVERVIEW_NEWS_RAIL_WIDTH).toBe("20rem");
     expect(OVERVIEW_HOME_COLUMN_GUTTER).toBe("var(--chrome-gutter)");
@@ -87,14 +100,35 @@ describe("Home News layout + register lock", () => {
   it("uses house card pad and section air — not a compressed News ticker", () => {
     expect(rail).toContain("DASHBOARD_SECTION_AIR_CLASS");
     expect(rail).not.toContain("DASHBOARD_ROW_LIST_CLASS");
+    expect(rail).not.toContain("DashboardHomePanel");
     expect(card).toContain("DASHBOARD_CARD_PAD");
     expect(card).toContain("DASHBOARD_RELATED_GAP_CLASS");
+    expect(card).toContain("DASHBOARD_MODULE_CARD_CLASS");
+    expect(card).toContain("DASHBOARD_NEWS_THUMB_CLASS");
+    expect(card).toContain("flex flex-col");
+    expect(card).not.toContain("items-start");
+    expect(card).not.toContain("DASHBOARD_LICENSING_THUMB_CLASS");
+    expect(rail).toContain("DASHBOARD_NEWS_HISTORY_LIST_CLASS");
     expect(card).not.toMatch(/py-\[var\(--space-[123]\)\]/);
     expect(card).not.toMatch(/\b(px|py|gap)-\[\d+(?:px|rem)\]/);
     expect(rail).not.toMatch(/\b(px|py|gap)-\[\d+(?:px|rem)\]/);
     expect(DASHBOARD_SECTION_AIR_CLASS).toBe("gap-[var(--space-6)]");
     expect(DASHBOARD_CARD_PAD).toBe("px-[var(--space-4)] py-[var(--space-4)]");
     expect(DASHBOARD_RELATED_GAP_CLASS).toBe("gap-[var(--space-2)]");
+  });
+
+  it("locks a full-width News media plate and keeps licensing at w-16", () => {
+    expect(DASHBOARD_NEWS_THUMB_CLASS).toContain("aspect-[16/9]");
+    expect(DASHBOARD_NEWS_THUMB_CLASS).toMatch(/(?:^|\s)w-full(?:\s|$)/);
+    expect(DASHBOARD_NEWS_THUMB_CLASS).not.toContain("w-16");
+    expect(DASHBOARD_NEWS_THUMB_CLASS).not.toContain("w-28");
+    expect(DASHBOARD_NEWS_THUMB_CLASS).not.toContain("md:w-32");
+    expect(DASHBOARD_LICENSING_THUMB_CLASS).toContain("w-16");
+    expect(DASHBOARD_LICENSING_THUMB_CLASS).not.toMatch(/(?:^|\s)w-full(?:\s|$)/);
+    expect(DASHBOARD_MODULE_CARD_CLASS).toContain("bg-surface-muted");
+    expect(DASHBOARD_MODULE_CARD_CLASS).toContain("rounded-[var(--radius-lg)]");
+    expect(DASHBOARD_NEWS_HISTORY_LIST_CLASS).toBe(DASHBOARD_ADMIN_PAIR_CLASS);
+    expect(DASHBOARD_NEWS_HISTORY_LIST_CLASS).toContain("lg:grid-cols-2");
   });
 
   it("keeps the News column when the rail is empty", () => {

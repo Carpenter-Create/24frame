@@ -283,6 +283,24 @@ describe("AppShell Home chrome", () => {
       expect(html).not.toContain('data-home-chrome=""');
     }
   });
+
+  it("keeps /news on Home chrome — no dest rail and no News workspace pill", () => {
+    navigation.pathname = "/news";
+    const news = renderShell();
+    expect(news).toContain('data-home-chrome=""');
+    expect(news).toContain("data-app-home-frame");
+    expect(news).toContain('data-workspace-switcher-segment="home"');
+    expect(news).toMatch(/data-workspace-switcher-segment="home"[^>]*aria-selected="true"/);
+    expect(news).toMatch(/data-workspace-switcher-segment="aggregation"[^>]*aria-selected="false"/);
+    expect(news).not.toContain('data-workspace-switcher-segment="news"');
+    expect(news).not.toContain("data-app-rail");
+    expect(news).not.toContain("data-side-nav");
+    expect(news).not.toContain("data-social-rail");
+    expect(news).not.toContain("data-social-tab-bar");
+    expect(news).not.toContain("data-mobile-nav-trigger");
+    expect(news).toContain("--sidebar-width:0px");
+    expect(homeFrameMarkup(news)).toContain("md:ml-[var(--content-inset)]");
+  });
 });
 
 describe("AppShell Access rail and home frame", () => {

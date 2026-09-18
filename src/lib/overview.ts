@@ -17,6 +17,8 @@ import type { WorkspaceMode } from "@/lib/workspace";
 // Account Home is the leftmost unify-lead pill. Not a fourth product.
 // Not Social Home (`/social` feed). Aggregation · Social · Education
 // stay the three workspace destinations. /overview redirects to /home.
+// /news is Home-owned 30-day history — same Home chrome, not a fifth
+// workspace and not an Aggregation / Social / Education destination.
 // Home IA v2 (Adam 2026-09-18): no dest rail on /home — unify-lead
 // chrome + five modules only. Rails return in Aggregation · Social ·
 // Education. Copy lives here, not JSX.
@@ -138,9 +140,19 @@ export function isOverviewPath(pathname: string): boolean {
   return isPrefixed(pathname, OVERVIEW_HREF) || isPrefixed(pathname, OVERVIEW_LEGACY_HREF);
 }
 
-/** Dest rails stay off Home. Aggregation · Social · Education keep today's rail. */
+/** Home-owned /news history. Not a workspace land and not Overview itself. */
+export function isNewsHistoryPath(pathname: string): boolean {
+  return isPrefixed(pathname, NEWS_HREF);
+}
+
+/** Home unify-lead chrome: /home, leftover /overview, and Home-owned /news. */
+export function isHomeOwnedPath(pathname: string): boolean {
+  return isOverviewPath(pathname) || isNewsHistoryPath(pathname);
+}
+
+/** Dest rails stay off Home (+ /news). Aggregation · Social · Education keep today's rail. */
 export function overviewHidesRail(pathname: string): boolean {
-  return isOverviewPath(pathname);
+  return isHomeOwnedPath(pathname);
 }
 
 export function overviewLeadPills(
@@ -161,7 +173,7 @@ export function overviewLeadSelected(
   pathname: string,
   workspace: WorkspaceMode,
 ): boolean {
-  const onHome = isOverviewPath(pathname);
+  const onHome = isHomeOwnedPath(pathname);
   if (pillId === "home") return onHome;
   return !onHome && workspace === pillId;
 }
@@ -170,7 +182,7 @@ export function overviewTriggerLabel(
   pathname: string,
   workspaceLabel: string,
 ): string {
-  return isOverviewPath(pathname) ? OVERVIEW_PAGE.title : workspaceLabel;
+  return isHomeOwnedPath(pathname) ? OVERVIEW_PAGE.title : workspaceLabel;
 }
 
 /** Idle pills always navigate — Home is not Aggregation home. */

@@ -18,6 +18,8 @@ import {
   OVERVIEW_PHONE_MODULE_ORDER,
   OVERVIEW_RAIL_OFF_WIDTH,
   OVERVIEW_SOCIAL_DM_CAP,
+  isHomeOwnedPath,
+  isNewsHistoryPath,
   isOverviewPath,
   overviewAiNextMoves,
   overviewModuleHeaderAction,
@@ -69,6 +71,7 @@ describe("Home lead pills", () => {
     expect(isOverviewPath("/overview/x")).toBe(true);
     expect(isOverviewPath("/dashboard")).toBe(false);
     expect(isOverviewPath("/social")).toBe(false);
+    expect(isOverviewPath("/news")).toBe(false);
     expect(overviewLeadSelected("home", "/home", "aggregation")).toBe(true);
     expect(overviewLeadSelected("home", "/overview", "aggregation")).toBe(true);
     expect(overviewLeadSelected("aggregation", "/home", "aggregation")).toBe(false);
@@ -88,10 +91,31 @@ describe("Home lead pills", () => {
     );
   });
 
+  it("keeps /news on Home chrome — not a fifth workspace and not Aggregation", () => {
+    expect(isNewsHistoryPath("/news")).toBe(true);
+    expect(isNewsHistoryPath("/news/x")).toBe(true);
+    expect(isNewsHistoryPath("/home")).toBe(false);
+    expect(isHomeOwnedPath("/news")).toBe(true);
+    expect(isHomeOwnedPath("/home")).toBe(true);
+    expect(isHomeOwnedPath("/dashboard")).toBe(false);
+    expect(isHomeOwnedPath("/social")).toBe(false);
+    expect(overviewLeadSelected("home", "/news", "aggregation")).toBe(true);
+    expect(overviewLeadSelected("home", "/news", "social")).toBe(true);
+    expect(overviewLeadSelected("aggregation", "/news", "aggregation")).toBe(false);
+    expect(overviewLeadSelected("social", "/news", "social")).toBe(false);
+    expect(overviewLeadSelected("education", "/news", "education")).toBe(false);
+    expect(overviewTriggerLabel("/news", "Aggregation")).toBe("Home");
+    expect(overviewLeadShouldNavigate("/news", "aggregation", { id: "home" })).toBe(false);
+    expect(overviewLeadShouldNavigate("/news", "aggregation", { id: "aggregation" })).toBe(true);
+    expect(overviewLeadPills().map((pill) => pill.id)).not.toContain("news");
+    expect(overviewLeadPills().some((pill) => pill.href === "/news")).toBe(false);
+  });
+
   it("hides dest rails on Home and keeps them on workspace routes", () => {
     expect(overviewHidesRail("/home")).toBe(true);
     expect(overviewHidesRail("/home/x")).toBe(true);
     expect(overviewHidesRail("/overview")).toBe(true);
+    expect(overviewHidesRail("/news")).toBe(true);
     expect(overviewHidesRail("/dashboard")).toBe(false);
     expect(overviewHidesRail("/social")).toBe(false);
     expect(overviewHidesRail("/social/courses")).toBe(false);

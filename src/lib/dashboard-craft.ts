@@ -120,6 +120,11 @@ export const DASHBOARD_ADMIN_HERO_ATTENTION_CLASS =
 export const DASHBOARD_LICENSING_THUMB_CLASS =
   "relative aspect-[16/9] w-16 shrink-0 overflow-hidden rounded-[var(--radius-sm)] bg-surface-muted [&_img]:h-full [&_img]:w-full [&_img]:object-cover [&_img]:object-center";
 
+// News media plate — full card width, 16:9 crop. Stacked above copy.
+// Not the licensing side thumb (w-16). Card overflow clips the top radius.
+export const DASHBOARD_NEWS_THUMB_CLASS =
+  "relative aspect-[16/9] w-full shrink-0 overflow-hidden bg-surface-muted [&_img]:h-full [&_img]:w-full [&_img]:object-cover [&_img]:object-center";
+
 export const DASHBOARD_LICENSING_NEST_CLASS =
   "px-[var(--space-4)] py-[var(--space-3)]";
 
@@ -131,6 +136,9 @@ export const DASHBOARD_ACTIVITY_AVATAR_CLASS =
 
 export const DASHBOARD_ADMIN_PAIR_CLASS =
   "grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-2";
+
+// /news desktop: same stacked cards on the house pair grid. Home rail stays one column.
+export const DASHBOARD_NEWS_HISTORY_LIST_CLASS = DASHBOARD_ADMIN_PAIR_CLASS;
 
 export const DASHBOARD_VIEW_ALT_CLUSTER_CLASS =
   "flex items-center divide-x divide-hairline border border-hairline";
