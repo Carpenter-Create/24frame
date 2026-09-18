@@ -30,10 +30,7 @@ vi.mock("@/lib/my-lists", () => ({
 }));
 vi.mock("@/lib/courses", () => ({
   loadDiscoverableCourses: vi.fn(async () => ({ courses: [], failed: false })),
-  loadDiscoverableCourseMeta: vi.fn(async () => new Map()),
-  courseDiscoverMetaLabel: () => null,
 }));
-vi.mock("@/lib/s3-education", () => ({ signedEducationCoverUrls: vi.fn(async () => new Map()) }));
 vi.mock("@/lib/s3-avatars", () => ({ signedAvatarUrls: vi.fn(async () => new Map()) }));
 vi.mock("@/lib/social-feed", () => ({ loadProfilesByIds: vi.fn(async () => new Map()) }));
 vi.mock("@/lib/social-dms", () => ({ loadDmInbox: vi.fn(async () => ({ rows: [], truncated: false })) }));

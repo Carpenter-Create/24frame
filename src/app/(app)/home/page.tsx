@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { OverviewHome } from "@/components/overview/overview-home";
-import { courseDiscoverMetaLabel, loadDiscoverableCourseMeta, loadDiscoverableCourses } from "@/lib/courses";
+import { loadDiscoverableCourses } from "@/lib/courses";
 import {
   buildDashboardRevenueHero,
   parseDashboardPeriod,
@@ -28,7 +28,6 @@ import {
   overviewWeekPulse,
   overviewWeekSince,
 } from "@/lib/overview";
-import { signedEducationCoverUrls } from "@/lib/s3-education";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { loadProfilesByIds } from "@/lib/social-feed";
 import { socialHomeChats } from "@/lib/social-home-chats";
@@ -121,18 +120,6 @@ export default async function HomePage() {
   );
 
   const courses = overviewEducationCourses(coursesLoaded.failed ? [] : coursesLoaded.courses);
-  const [covers, meta] = coursesLoaded.failed
-    ? [new Map<string, string>(), new Map<string, string | null>()]
-    : await Promise.all([
-        signedEducationCoverUrls(courses),
-        loadDiscoverableCourseMeta(supabase, [...courses]).then((loaded) => {
-          const labels = new Map<string, string | null>();
-          for (const course of courses) {
-            labels.set(course.id, courseDiscoverMetaLabel(loaded.get(course.id) ?? { lessonCount: 0, durationSeconds: null }));
-          }
-          return labels;
-        }),
-      ]);
 
   return (
     <OverviewHome
@@ -142,8 +129,6 @@ export default async function HomePage() {
       socialChats={namedChats}
       socialFaces={faces}
       courses={courses}
-      courseCovers={covers}
-      courseMeta={meta}
       needsYou={attention.rows.map((row) => ({ id: row.id, what: row.what, href: row.href }))}
       weekPulse={weekPulse}
       aiNext={overviewAiNextMoves(snapshot.doNext)}

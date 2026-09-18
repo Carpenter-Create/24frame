@@ -39,8 +39,7 @@ export function OverviewHome({
   socialChats,
   socialFaces,
   courses,
-  courseCovers,
-  courseMeta,
+  courseProgress,
   needsYou,
   weekPulse,
   aiNext,
@@ -51,8 +50,7 @@ export function OverviewHome({
   socialChats: readonly SocialHomeChat[];
   socialFaces: ReadonlyMap<string, string | null>;
   courses: readonly CourseRow[];
-  courseCovers: ReadonlyMap<string, string>;
-  courseMeta: ReadonlyMap<string, string | null>;
+  courseProgress?: ReadonlyMap<string, number>;
   needsYou: readonly { id: string; what: string; href: string }[];
   weekPulse: readonly DashboardChangeRow[];
   aiNext: readonly ClientHomeDoNextItem[];
@@ -106,14 +104,14 @@ export function OverviewHome({
         {courses.length > 0 ? (
           <ul
             data-overview-education-covers=""
-            className="grid grid-cols-1 gap-[var(--space-4)] px-[var(--space-4)] py-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-5"
+            className="grid grid-cols-1 gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-5"
           >
             {courses.map((course) => (
               <CourseCard
                 key={course.id}
                 course={course}
-                coverUrl={courseCovers.get(course.id)}
-                metaLabel={courseMeta.get(course.id)}
+                density="home"
+                progressPercent={courseProgress?.get(course.id)}
               />
             ))}
           </ul>

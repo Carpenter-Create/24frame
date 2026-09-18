@@ -30,6 +30,11 @@
   --color-accent-wash: var(--accent-wash);
   --color-band: var(--band);
   --color-band-ink: var(--band-ink);
+  --color-course-plate-1: var(--course-plate-1);
+  --color-course-plate-2: var(--course-plate-2);
+  --color-course-plate-3: var(--course-plate-3);
+  --color-course-plate-4: var(--course-plate-4);
+  --color-course-plate-5: var(--course-plate-5);
 
   /* Kept for the foundation error/404 pages. */
   --color-bg: var(--bg);

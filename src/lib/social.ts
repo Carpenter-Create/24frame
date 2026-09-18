@@ -546,6 +546,7 @@ export const SOCIAL = {
     modules: "Modules",
     lessonOne: "1 lesson",
     lessons: "lessons",
+    progressComplete: "complete",
     error: "Education could not be loaded.",
     detailError: "This course could not be loaded.",
     retry: "Retry",

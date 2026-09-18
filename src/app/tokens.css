@@ -30,6 +30,13 @@
   /* Light-blue pill wash for the active rail — Sporty Blue tint on white.
      Type/icon stay #1769FF. Not a filled brand-blue chip. */
   --accent-wash: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  /* Home Education glance plates — Figma Home module SoT. Deterministic
+     course-id cycle. Not a product accent; Sporty Blue stays --accent. */
+  --course-plate-1: #1f3873;
+  --course-plate-2: #2e5952;
+  --course-plate-3: #592e47;
+  --course-plate-4: #47472e;
+  --course-plate-5: #264761;
 
   /* --- Neutral ramp — LIGHT (default base) ---
      House greyscale canon: airy, neutral near-white. Colour comes only from the

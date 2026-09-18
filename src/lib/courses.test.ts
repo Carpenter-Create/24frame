@@ -5,7 +5,11 @@ import { PRODUCT_NAME } from "@/lib/product";
 import { SOCIAL, SOCIAL_ROUTES, socialCourseHref } from "@/lib/social";
 import {
   COURSE_COVER_ASPECT_CLASS,
+  COURSE_GLANCE_PLATE_CLASSES,
   courseAccessGranted,
+  courseGlancePlateClass,
+  courseGlanceProgressLabel,
+  courseGlanceProgressPercent,
   courseDiscoverMetaLabel,
   courseHref,
   courseLessonDurationLabel,
@@ -105,6 +109,28 @@ describe("placeholder outline", () => {
       ),
     ).toBe("2 lessons · 1m 30s");
   });
+
+  it("maps Home glance plates from course id and does not invent percent", () => {
+    expect(COURSE_GLANCE_PLATE_CLASSES).toEqual([
+      "bg-course-plate-1",
+      "bg-course-plate-2",
+      "bg-course-plate-3",
+      "bg-course-plate-4",
+      "bg-course-plate-5",
+    ]);
+    expect(courseGlancePlateClass("c1")).toBe(courseGlancePlateClass("c1"));
+    expect(COURSE_GLANCE_PLATE_CLASSES).toContain(courseGlancePlateClass("c1"));
+    expect(courseGlanceProgressPercent(undefined)).toBe(0);
+    expect(courseGlanceProgressPercent(null)).toBe(0);
+    expect(courseGlanceProgressPercent(Number.NaN)).toBe(0);
+    expect(courseGlanceProgressPercent(-4)).toBe(0);
+    expect(courseGlanceProgressPercent(140)).toBe(100);
+    expect(courseGlanceProgressPercent(40.4)).toBe(40);
+    expect(courseGlanceProgressLabel(undefined as unknown as number)).toBe("0% complete");
+    expect(courseGlanceProgressLabel(40)).toBe("40% complete");
+    expect(courseGlanceProgressLabel(62)).toBe("62% complete");
+    expect(courseGlanceProgressLabel(62)).not.toBe(courseGlanceProgressLabel(0));
+  });
 });
 
 describe("course routes and copy", () => {
@@ -120,6 +146,7 @@ describe("course routes and copy", () => {
     expect(SOCIAL.courses.playlist).toBe("Playlist");
     expect(SOCIAL.courses.lessonOne).toBe("1 lesson");
     expect(SOCIAL.courses.lessons).toBe("lessons");
+    expect(SOCIAL.courses.progressComplete).toBe("complete");
     expect(SOCIAL.courses.error).toBe("Education could not be loaded.");
     expect(SOCIAL.courses.denied).toBe("This course is not available.");
     expect(SOCIAL.courses.denied).not.toMatch(/LOCKED|Buy|price/i);
@@ -176,6 +203,18 @@ describe("course lock", () => {
     expect(readFileSync("src/components/courses/course-card.tsx", "utf8")).toContain(
       "data-course-card-meta",
     );
+    expect(readFileSync("src/components/courses/course-card.tsx", "utf8")).toContain(
+      "data-course-progress-track",
+    );
+    expect(readFileSync("src/components/overview/overview-home.tsx", "utf8")).toContain(
+      'density="home"',
+    );
+    expect(readFileSync("src/components/overview/overview-home.tsx", "utf8")).toContain(
+      "progressPercent",
+    );
+    expect(readFileSync("src/app/(app)/home/page.tsx", "utf8")).not.toContain("62");
+    expect(lib).toContain("COURSE_GLANCE_PROGRESS_FILL_CLASS");
+    expect(lib).toContain("bg-accent");
     expect(readFileSync("src/components/courses/course-lesson-player.tsx", "utf8")).toContain(
       "data-course-playback",
     );

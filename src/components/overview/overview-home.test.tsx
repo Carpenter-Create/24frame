@@ -52,8 +52,6 @@ describe("OverviewHome", () => {
         socialChats: [],
         socialFaces: new Map(),
         courses: [],
-        courseCovers: new Map(),
-        courseMeta: new Map(),
         needsYou: [],
         weekPulse: [],
         aiNext: [],
@@ -119,8 +117,6 @@ describe("OverviewHome", () => {
         ],
         socialFaces: new Map(),
         courses: [COURSE],
-        courseCovers: new Map([["c1", "https://cover"]]),
-        courseMeta: new Map([["c1", "3 lessons"]]),
         needsYou: [{ id: "n1", what: "Synopsis is required.", href: "/titles/t1" }],
         weekPulse: [{ key: "titles", label: "1 title added", count: 1 }],
         aiNext: [
@@ -143,7 +139,18 @@ describe("OverviewHome", () => {
     expect(html.indexOf("data-overview-revenue")).toBeLessThan(html.indexOf("data-overview-pulse"));
     expect(html).toContain("data-overview-education-covers");
     expect(html).toContain("Craft");
-    expect(html).toContain("3 lessons");
+    expect(html).toContain('data-course-card-density="home"');
+    expect(html).toContain("data-course-cover-title");
+    expect(html).toContain('data-course-cover-tone="plate"');
+    expect(html).toContain("data-course-progress");
+    expect(html).toContain("data-course-progress-track");
+    expect(html).toContain("data-course-progress-fill");
+    expect(html).toContain("data-course-progress-caption");
+    expect(html).toContain("0% complete");
+    expect(html).toContain("width:0%");
+    expect(html).toContain("bg-accent");
+    expect(html).not.toContain("3 lessons");
+    expect(html).not.toContain("https://cover");
     expect(html).toContain("Synopsis is required.");
     expect(html).toContain('data-overview-week-row="titles"');
     expect(html).toContain('data-overview-ai-next="a1"');
@@ -158,7 +165,40 @@ describe("OverviewHome", () => {
     expect(moduleChunk(html, "social")).not.toContain(TEXT_ACTION_CLASS);
     expect(moduleChunk(html, "education")).not.toContain(TEXT_ACTION_CLASS);
     expect(moduleChunk(html, "needs-you")).not.toContain(TEXT_ACTION_CLASS);
-    expect(html).not.toContain("%");
+    expect(html).not.toContain("62%");
     expect(html).not.toContain("Globee");
+  });
+
+  it("renders the Figma progress bar from real course percent and does not invent 62%", () => {
+    const html = renderToStaticMarkup(
+      createElement(OverviewHome, {
+        revenueCents: null,
+        topTitles: [],
+        socialUnread: 0,
+        socialChats: [],
+        socialFaces: new Map(),
+        courses: [COURSE],
+        courseProgress: new Map([["c1", 40]]),
+        needsYou: [],
+        weekPulse: [],
+        aiNext: [],
+      }),
+    );
+    const education = moduleChunk(html, "education");
+    const coverAt = education.indexOf("data-course-cover=");
+    const titleAt = education.indexOf("data-course-cover-title");
+    const coverCloseAt = education.indexOf("</div>", coverAt);
+    const trackAt = education.indexOf("data-course-progress-track");
+    expect(education).toContain('data-course-card-density="home"');
+    expect(titleAt).toBeGreaterThan(coverAt);
+    expect(titleAt).toBeLessThan(coverCloseAt);
+    expect(trackAt).toBeGreaterThan(coverCloseAt);
+    expect(education).toContain("40% complete");
+    expect(education).toContain("width:40%");
+    expect(education).toContain("bg-accent");
+    expect(education).toContain("bg-hairline");
+    expect(education).not.toContain("t-body font-medium text-ink");
+    expect(education).not.toContain("62%");
+    expect(education).not.toContain("3 lessons");
   });
 });
