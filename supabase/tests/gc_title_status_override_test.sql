@@ -3,7 +3,7 @@
 -- lock-in blocks; archive_title still works when locked.
 
 begin;
-select plan(20);
+select plan(21);
 
 select set_config('t.org', gen_random_uuid()::text, false);
 select set_config('t.owner', gen_random_uuid()::text, false);
