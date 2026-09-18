@@ -25,18 +25,23 @@ const REAL_VENDOR: VendorRow = {
   active: true,
 };
 
-function stubClient(rows: VendorRow[] | null) {
+function stubClient(rows: VendorRow[] | null, deliveries: unknown[] | null = []) {
   const vendorsChain = {
     select: vi.fn(() => vendorsChain),
     order: vi.fn(() => vendorsChain),
     range: vi.fn(async () => ({ data: rows, error: null })),
   };
+  const deliveriesChain = {
+    select: vi.fn(() => deliveriesChain),
+    range: vi.fn(async () => ({ data: deliveries, error: null })),
+  };
   const from = vi.fn((table: string) => {
     if (table === "vendors") return vendorsChain;
+    if (table === "deliveries") return deliveriesChain;
     throw new Error(`unexpected from(${table})`);
   });
   vi.mocked(createClient).mockResolvedValue({ from } as never);
-  return { from, vendorsChain };
+  return { from, vendorsChain, deliveriesChain };
 }
 
 async function renderVendors(rows: VendorRow[] | null = []) {
@@ -62,14 +67,16 @@ describe("staff /vendors address book", () => {
     expect(html).toContain(`href="${VENDORS_PAGE.addHref}"`);
     expect(html).toContain("data-vendors-empty");
     expect(html).toContain("data-vendors-add");
+    expect(html).toContain("data-staff-directory");
+    expect(html).toContain("0 vendors");
     expect(html).not.toContain("data-vendors-directory");
-    expect(html.toLowerCase()).not.toContain("directory");
   });
 
   it("does not render VendorForm fields on the empty page", async () => {
     const html = await renderVendors([]);
 
     for (const label of VENDOR_FORM_FIELD_LABELS) {
+      if (label === "Active") continue; // directory filter chip, not the form checkbox
       expect(html).not.toContain(label);
     }
     expect(html).not.toContain("Company info");
@@ -79,18 +86,19 @@ describe("staff /vendors address book", () => {
     expect(pageSrc).not.toContain("New vendor");
   });
 
-  it("uses the locked empty chrome: white r12 hairline, 48 circle, 24 storefront", async () => {
+  it("uses the Coinbase grey holding surface and the vendors empty chrome", async () => {
     const html = await renderVendors([]);
 
-    expect(html).toContain("rounded-[12px]");
-    expect(html).toContain("border-hairline");
-    expect(html).toContain("bg-surface");
+    expect(html).toContain("rounded-[var(--radius-lg)]");
+    expect(html).toContain("bg-surface-muted");
     expect(html).toContain("size-12");
     expect(html).toContain("size-6");
     expect(html).toContain("stroke-width=\"1.33\"");
     expect(html).not.toContain("border-dashed");
     expect(pageSrc).not.toContain("EmptyState");
+    expect(pageSrc).not.toContain("Card");
     expect(pageSrc).toContain("PageHeader");
+    expect(pageSrc).toContain("StaffDirectoryList");
   });
 
   it("renders empty Add vendor as Sporty Blue text, matching Titles empty action", async () => {
@@ -135,17 +143,22 @@ describe("staff /vendors address book", () => {
     };
     const html = await renderVendors([REAL_VENDOR, inactive]);
 
-    expect(html).toContain("data-vendors-directory");
+    expect(html).toContain("data-staff-directory");
+    expect(html).toContain("data-staff-directory-row");
     expect(html).not.toContain("data-vendors-empty=\"\"");
-    expect(html).not.toContain("data-vendors-add=\"\"");
+    expect(html).toContain("data-vendors-add=\"\"");
     expect(html).toContain("Acme Distribution");
     expect(html).toContain("Northwind Partners");
     expect(html).toContain(`/vendors/${REAL_VENDOR.id}`);
     expect(html).toContain(`/vendors/${inactive.id}`);
     expect(html).toContain("Email");
     expect(html).toContain("Portal upload · inactive");
+    expect(html).toContain("AD");
+    expect(html).toContain("NP");
+    expect(html).toContain("2 vendors");
     expect(html).toContain(VENDORS_PAGE.identity);
     for (const label of VENDOR_FORM_FIELD_LABELS) {
+      if (label === "Active") continue;
       expect(html).not.toContain(label);
     }
   });
@@ -157,10 +170,12 @@ describe("staff /vendors address book", () => {
   });
 
   it("bounds the vendors read", async () => {
-    const { from, vendorsChain } = stubClient([]);
+    const { from, vendorsChain, deliveriesChain } = stubClient([]);
     await GcVendorsPage();
     expect(from).toHaveBeenCalledWith("vendors");
+    expect(from).toHaveBeenCalledWith("deliveries");
     expect(vendorsChain.range).toHaveBeenCalled();
+    expect(deliveriesChain.range).toHaveBeenCalled();
     expect(UNPAGINATED_MAX).toBeGreaterThan(0);
   });
 });
@@ -200,6 +215,12 @@ describe("staff rail and neighboring locks", () => {
     expect(pageSrc).not.toContain("ask-globee");
     expect(pageSrc).not.toContain("TITLES_CATALOG");
     expect(readFileSync("src/app/(app)/(operator)/vendors/new/page.tsx", "utf8")).toContain(
+      "VendorForm",
+    );
+    expect(readFileSync("src/app/(app)/(operator)/vendors/[id]/edit/page.tsx", "utf8")).toContain(
+      "VendorForm",
+    );
+    expect(readFileSync("src/app/(app)/(operator)/vendors/[id]/page.tsx", "utf8")).not.toContain(
       "VendorForm",
     );
   });

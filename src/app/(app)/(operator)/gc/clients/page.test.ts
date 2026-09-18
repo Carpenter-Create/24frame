@@ -39,18 +39,52 @@ describe("GcClientsPage read bound", () => {
 
     const html = renderToStaticMarkup(await GcClientsPage());
     const emptyStart = html.indexOf(CLIENTS_PAGE.empty);
-    const cardStart = html.lastIndexOf("<div", emptyStart);
-    const cardEnd = html.indexOf("</div></div>", emptyStart);
-    const card = html.slice(cardStart, cardEnd);
+    const surfaceStart = html.lastIndexOf("<div", emptyStart);
+    const surface = html.slice(surfaceStart, html.indexOf(CLIENTS_PAGE.empty) + CLIENTS_PAGE.empty.length);
 
     expect(html).toContain(CLIENTS_PAGE.title);
     expect(html).toContain(CLIENTS_PAGE.empty);
+    expect(html).toContain("data-staff-directory");
+    expect(html).toContain("0 clients");
     expect(html).not.toContain("No client organizations yet.");
     expect(html).not.toContain("Add");
     expect(html).not.toContain("View titles");
-    expect(card).toContain(CLIENTS_PAGE.empty);
-    expect(card).not.toContain("<a");
-    expect(card).not.toContain("bg-accent");
-    expect(card).not.toContain("text-accent");
+    expect(html).not.toContain("<table");
+    expect(surface).toContain(CLIENTS_PAGE.empty);
+    expect(surface).not.toContain("<a");
+    expect(surface).not.toContain("bg-accent");
+    expect(surface).not.toContain("text-accent");
+  });
+
+  it("renders organizations as the shared directory row", async () => {
+    const rpc = vi.fn(async () => ({
+      data: [
+        {
+          user_id: "u1",
+          email: "jane@acmefilms.com",
+          org_id: "22222222-2222-4222-8222-222222222222",
+          organization: "Acme Films",
+          org_status: "active",
+          role: "account_owner",
+          joined_at: "2026-08-03T10:00:00Z",
+          last_sign_in: "2026-08-14T09:00:00Z",
+          tier: "pro",
+          term_expires_at: "2027-08-03T10:00:00Z",
+          subscription_status: "active",
+        },
+      ],
+      error: null,
+    }));
+    vi.mocked(createClient).mockResolvedValue({ rpc } as never);
+
+    const html = renderToStaticMarkup(await GcClientsPage());
+    expect(html).toContain("Acme Films");
+    expect(html).toContain("1 person · Pro");
+    expect(html).toContain("Active");
+    expect(html).toContain("/gc/clients/22222222-2222-4222-8222-222222222222");
+    expect(html).toContain("data-staff-directory-row");
+    expect(html).toContain("AF");
+    expect(html).not.toContain("<table");
+    expect(html).not.toContain("jane@acmefilms.com");
   });
 });

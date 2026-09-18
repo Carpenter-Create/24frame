@@ -5,7 +5,9 @@ import {
   VENDOR_FORM_FIELD_LABELS,
   VENDORS_PAGE,
   asVendorDirectoryRow,
+  filterVendorDirectory,
   normalizeVendorDirectory,
+  parseVendorDirectoryFilter,
   vendorDirectoryHref,
   vendorDirectoryMeta,
 } from "./vendors-directory";
@@ -15,6 +17,7 @@ describe("VENDORS_PAGE lock copy", () => {
     expect(VENDORS_PAGE.title).toBe("Vendors");
     expect(VENDORS_PAGE.identity).toBe("Credentials are never stored here.");
     expect(VENDORS_PAGE.emptyTitle).toBe("No vendors yet");
+    expect(VENDORS_PAGE.filterMiss).toBe("No vendors match this filter.");
     expect(VENDORS_PAGE).not.toHaveProperty("emptySupport");
     expect(VENDORS_PAGE.addVendor).toBe("Add vendor");
     expect(VENDORS_PAGE.addHref).toBe("/vendors/new");
@@ -68,6 +71,16 @@ describe("vendor directory rows", () => {
         active: true,
       },
     ]);
+  });
+
+  it("filters active and inactive without inventing rows", () => {
+    const row = asVendorDirectoryRow(real);
+    if (!row) throw new Error("expected row");
+    const inactive = { ...row, active: false };
+    expect(filterVendorDirectory([row, inactive], "active")).toEqual([row]);
+    expect(filterVendorDirectory([row, inactive], "inactive")).toEqual([inactive]);
+    expect(parseVendorDirectoryFilter("inactive")).toBe("inactive");
+    expect(parseVendorDirectoryFilter("nope")).toBe("all");
   });
 
   it("builds the edit href and directory meta from the row", () => {

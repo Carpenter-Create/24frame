@@ -53,11 +53,11 @@ export function VendorForm({ initial }: { initial?: VendorInitial }) {
       setSaving(false);
       return;
     }
-    // Create lives on /vendors/new and edit on /vendors/[id]; both leave after
+    // Create lives on /vendors/new and edit on /vendors/[id]/edit; both leave after
     // save. Reset create state in case the form stays mounted during the push.
     setSaving(false);
     if (!initial?.id) setV(EMPTY);
-    router.push("/vendors");
+    router.push(v.id ? `/vendors/${v.id}` : "/vendors");
     router.refresh();
   }
 
