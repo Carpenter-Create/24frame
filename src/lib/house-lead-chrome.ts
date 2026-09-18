@@ -1,11 +1,12 @@
 // Shared top lead chrome for Aggregation · Social · Education · Home.
 // Phone: Asset 8 emblem on every workspace (logoVisible always).
-// Emblem owns the phone left alone. Dest-rail hamburger (Aggregation
-// / Education) lives in the trailing cluster — Apple grammar, not
-// co-leading with the mark. Emblem is a workspace-home link, not the rail.
-// Phone grammar Option 2 + addendum (Adam 2026-09-18):
+// Emblem owns the phone left alone. No hamburger — leading or trailing.
+// Destinations live on HousePhoneDestChips under this stack.
+// Emblem is a workspace-home link, not the rail.
+// Phone grammar Option 2 dest-chip amend (Adam 2026-09-18):
 //   Left: [emblem]
-//   Trailing: [search if Social] [☰ if Agg/Edu] [bell] [avatar]
+//   Under-top: dest chips on Agg / Edu / Social. Home has none.
+//   Trailing: [search if needed] [bell] [avatar]
 //   Bottom: HousePhoneBottomNav — Home · Social · Aggregation · Education
 // Phone top has no workspace pill. Bottom bar owns workspace switching.
 // Ask 24Frame AI and the sun/moon leave the phone trailing cluster

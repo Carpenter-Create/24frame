@@ -30,6 +30,7 @@ export function HouseLeadChrome({
   logoVisible = "always",
   leadingNav,
   trailingNav,
+  destChips,
   search,
   underNav,
   trailingSearch,
@@ -43,6 +44,7 @@ export function HouseLeadChrome({
   logoVisible?: "always" | "desktop";
   leadingNav?: React.ReactNode;
   trailingNav?: React.ReactNode;
+  destChips?: React.ReactNode;
   search?: React.ReactNode;
   underNav?: React.ReactNode;
   trailingSearch?: React.ReactNode;
@@ -124,6 +126,14 @@ export function HouseLeadChrome({
           {accountMenu}
         </div>
       </header>
+      {destChips ? (
+        <div
+          data-house-phone-dest-chips-host=""
+          className={HOUSE_LEAD_UNDER_NAV_CLASS}
+        >
+          {destChips}
+        </div>
+      ) : null}
       {underNav ? (
         <div
           data-house-under-nav=""

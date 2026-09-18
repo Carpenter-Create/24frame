@@ -317,7 +317,7 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(open).toContain('data-workspace-switcher-option="education"');
   });
 
-  it("shows the phone emblem on every workspace — hamburger only on dest-rail trailing", () => {
+  it("shows the phone emblem on every workspace — no hamburger", () => {
     expect(leadSrc).toContain('logoVisible = "always"');
     expect(leadSrc).toContain('logoVisible === "always" ? "flex" : "hidden md:flex"');
     expect(shell).toContain('logoVisible="always"');
@@ -329,13 +329,9 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(APP_HEADER_LEADING_CLASS).not.toMatch(/(?:^|\s)(?:max-md:)?overflow-hidden(?:\s|$)/);
 
     for (const workspace of ["aggregation", "social", "education"] as const) {
-      const destRail = workspace !== "social";
       const html = renderToStaticMarkup(
         createElement(HouseLeadChrome, {
           workspace,
-          trailingNav: destRail
-            ? createElement("button", { "data-mobile-nav-trigger": "" })
-            : undefined,
           accountMenu: createElement("div", { "data-user-menu-host": "" }),
         }),
       );
@@ -354,28 +350,16 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
       );
       expect(leading).not.toContain("data-mobile-nav-trigger");
       expect(leading.indexOf("data-brand-emblem")).toBeGreaterThan(-1);
-      if (destRail) {
-        const trailing = html.slice(html.indexOf("data-app-header-trailing"));
-        expect(trailing).toContain("data-mobile-nav-trigger");
-        expect(trailing).toContain("data-app-header-trailing-nav");
-        expect(htmlClass(html, "data-app-header-trailing-nav=")).toContain("md:hidden");
-        expect(html.indexOf("data-brand-emblem")).toBeLessThan(
-          html.indexOf("data-mobile-nav-trigger"),
-        );
-        expect(html.indexOf("data-mobile-nav-trigger")).toBeLessThan(
-          html.indexOf("data-activity-bell"),
-        );
-        expect(html.indexOf("data-activity-bell")).toBeLessThan(
-          html.indexOf("data-user-menu-host"),
-        );
-      } else {
-        expect(html).not.toContain("data-mobile-nav-trigger");
-      }
+      expect(html).not.toContain("data-mobile-nav-trigger");
+      expect(html.indexOf("data-activity-bell")).toBeLessThan(
+        html.indexOf("data-user-menu-host"),
+      );
     }
 
     expect(shell).toContain("settingsPage || homeChrome ? undefined");
-    expect(shell).toContain("trailingNav=");
-    expect(shell).toContain("<MobileNavSlot");
+    expect(shell).toContain("destChips=");
+    expect(shell).toContain("<DestChipsSlot");
+    expect(shell).not.toContain("<MobileNavSlot");
     expect(topBar).not.toContain("leadingNav");
     expect(topBar).not.toContain("trailingNav");
     expect(topBar).not.toContain("MobileNav");

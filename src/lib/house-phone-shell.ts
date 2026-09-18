@@ -1,17 +1,30 @@
-// Shared phone app-shell — Option 2 (Adam lock 2026-09-18).
+// Shared phone app-shell — Option 2 (Adam lock 2026-09-18, dest-chip amend).
 // One primitive for Home · Social · Aggregation · Education.
 // Desktop header + desktop workspace switcher stay on HouseLeadChrome.
-// Phone top drops the workspace pill. Bottom bar owns workspace
-// switching. Dest-rail hamburger (Agg/Edu) is trailing — emblem
-// owns the left alone (Apple addendum). Social's old floating tab
-// bar is gone — local Social dests live in-page (SocialPhoneDests),
-// not a second float.
+// Phone top: emblem alone on the left. No workspace pill. No hamburger
+// — leading or trailing. Trailing is search (when needed) · bell ·
+// avatar. Ask + theme stay on the avatar sheet.
+// Destinations that used to live in the Agg/Edu hamburger (and Social’s
+// second float) live on one under-top HousePhoneDestChips row.
+// Home has no dest chip row. Desktop left rails stay.
+// Bottom bar owns workspace switching only.
 // Craft matches Social's former float: hairline pill, r28, safe-area.
 // Not a Meta skin. Tokens only.
 
 import { BookOpen, House, SquaresFour, Users } from "@phosphor-icons/react";
 
-import { SOCIAL_NAV } from "@/lib/nav";
+import {
+  HOUSE_CONTROL_PILL_CLASS,
+  HOUSE_FILTER_OFF_CLASS,
+  HOUSE_FILTER_ON_CLASS,
+} from "@/lib/house-shell";
+import {
+  isClientNavActive,
+  isHouseAiNavItem,
+  isSocialTabActive,
+  mobileNavDestinations,
+  type NavItem,
+} from "@/lib/nav";
 import {
   OVERVIEW_HREF,
   OVERVIEW_PAGE,
@@ -65,6 +78,10 @@ export const HOUSE_PHONE_BOTTOM_NAV = {
   label: "Workspaces",
 } as const;
 
+export const HOUSE_PHONE_DEST_CHIPS = {
+  label: "Destinations",
+} as const;
+
 /** Phone-only float. Safe-area inset. Content pad is HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS. */
 export const HOUSE_PHONE_BOTTOM_NAV_CLASS =
   "fixed inset-x-0 bottom-0 z-40 flex justify-center px-[var(--space-4)] pb-[max(12px,env(safe-area-inset-bottom))] md:hidden";
@@ -84,12 +101,24 @@ export const HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS =
   "max-md:pb-[calc(5.5rem+env(safe-area-inset-bottom))]";
 
 export const HOUSE_PHONE_DESTS_CLASS =
-  "flex gap-[var(--space-2)] overflow-x-auto md:hidden";
+  "flex w-full min-w-0 gap-[var(--space-2)] overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:hidden";
 
-export const HOUSE_PHONE_DEST_ITEM_CLASS =
-  "inline-flex shrink-0 items-center gap-[var(--space-2)] rounded-full bg-surface-muted px-[var(--space-3)] py-[var(--space-2)] t-body-sm";
+export const HOUSE_PHONE_DEST_ITEM_CLASS = `inline-flex shrink-0 items-center gap-[var(--space-1)] ${HOUSE_CONTROL_PILL_CLASS} px-[var(--space-3)] py-[var(--space-1)] t-body-sm`;
 
-export const SOCIAL_PHONE_DESTS = SOCIAL_NAV.filter((item) => item.href !== SOCIAL_ROUTES.home);
+export const HOUSE_PHONE_DEST_ITEM_ON_CLASS = `${HOUSE_FILTER_ON_CLASS} font-medium`;
+
+export const HOUSE_PHONE_DEST_ITEM_OFF_CLASS = HOUSE_FILTER_OFF_CLASS;
+
+export function housePhoneDestItemClass(active: boolean): string {
+  return `${HOUSE_PHONE_DEST_ITEM_CLASS} ${
+    active ? HOUSE_PHONE_DEST_ITEM_ON_CLASS : HOUSE_PHONE_DEST_ITEM_OFF_CLASS
+  }`;
+}
+
+/** Social phone dests drop Home — the workspace tab owns /social. */
+export const SOCIAL_PHONE_DESTS = mobileNavDestinations(false, "social").filter(
+  (item) => item.href !== SOCIAL_ROUTES.home,
+);
 
 export function housePhoneWorkspaceSelected(
   id: HousePhoneWorkspaceId,
@@ -107,4 +136,43 @@ export function housePhoneWorkspaceHref(id: HousePhoneWorkspaceId): string {
 export function persistHousePhoneWorkspace(id: HousePhoneWorkspaceId): void {
   if (id === "home") return;
   persistWorkspaceCookie(id);
+}
+
+export function housePhoneShowsDestChips({
+  workspace,
+  homeChrome = false,
+  settingsPage = false,
+}: {
+  workspace: WorkspaceMode;
+  homeChrome?: boolean;
+  settingsPage?: boolean;
+}): boolean {
+  if (homeChrome || settingsPage) return false;
+  return workspace === "social" || workspace === "aggregation" || workspace === "education";
+}
+
+export function housePhoneDestinations(
+  isGcStaff: boolean,
+  workspace: WorkspaceMode,
+): NavItem[] {
+  return mobileNavDestinations(isGcStaff, workspace).filter((item) => {
+    if (isHouseAiNavItem(item)) return false;
+    if (workspace === "social" && item.href === SOCIAL_ROUTES.home) return false;
+    return true;
+  });
+}
+
+export function housePhoneDestActive(
+  pathname: string,
+  item: NavItem,
+  workspace: WorkspaceMode,
+): boolean {
+  if (workspace === "social") return isSocialTabActive(pathname, item);
+  return isClientNavActive(pathname, item);
+}
+
+export function housePhoneDestChipsLabel(workspace: WorkspaceMode): string {
+  if (workspace === "social") return WORKSPACE_SOCIAL_LABEL;
+  if (workspace === "education") return WORKSPACE_EDUCATION_LABEL;
+  return WORKSPACE_AGGREGATION_LABEL;
 }

@@ -148,7 +148,7 @@ describe("Social nav no longer waits on the (app) layout waterfall", () => {
     expect(shellSrc).not.toContain("SocialTopBarFromChrome");
     expect(shellSrc).toContain("SocialRailAccountChipFromChrome");
     expect(shellSrc).toContain("SideNavFromChrome");
-    expect(shellSrc).toContain("MobileNavFromChrome");
+    expect(shellSrc).toContain("DestChipsFromChrome");
     expect(shellSrc).toContain("ChromeCookieSync");
     expect(shellSrc).toContain("data.isGcStaff");
     expect(shellSrc).toContain("data.defaultCollapsed");

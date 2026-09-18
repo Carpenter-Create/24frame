@@ -27,7 +27,7 @@ import {
 const here = dirname(fileURLToPath(import.meta.url));
 const houseSrc = readFileSync(join(here, "house.tsx"), "utf8");
 const accountSrc = readFileSync(join(here, "account-sheet.tsx"), "utf8");
-const navSrc = readFileSync(join(here, "mobile-nav.tsx"), "utf8");
+const destsSrc = readFileSync(join(here, "house-phone-dest-chips.tsx"), "utf8");
 const headerSrc = readFileSync(join(here, "messages-app-header.tsx"), "utf8");
 
 describe("house primitives", () => {
@@ -78,16 +78,16 @@ describe("house primitives", () => {
     expect(houseSrc).not.toContain("544:592");
   });
 
-  it("is consumed by the account sheet and nav sheet — not restyled per page", () => {
+  it("is consumed by the account sheet — dest chips are not an app-sheet", () => {
     expect(accountSrc).toContain("from \"./house\"");
     expect(accountSrc).toContain("<Close44");
     expect(accountSrc).toContain("<IdentityBlock");
     expect(accountSrc).not.toContain("<TextAction");
     expect(accountSrc).toContain("<SheetGroup");
-    expect(navSrc).toContain("from \"./house\"");
-    expect(navSrc).toContain("<Close44");
-    expect(navSrc).toContain("<AppSheetSurface");
-    expect(navSrc).not.toContain("rounded-t-[24px]");
+    expect(destsSrc).not.toContain("from \"./house\"");
+    expect(destsSrc).not.toContain("<Close44");
+    expect(destsSrc).not.toContain("<AppSheetSurface");
+    expect(destsSrc).not.toContain("rounded-t-[24px]");
     expect(headerSrc).not.toContain("from \"./house\"");
     expect(headerSrc).toContain("from \"./menu-surface\"");
     expect(headerSrc).toContain("<ThreadPopoverContent");
@@ -98,11 +98,11 @@ describe("house primitives", () => {
     expect(houseSrc).not.toContain("THREAD_POPOVER_CONTENT_CLASS");
     expect(houseSrc).not.toContain("min-w-[17.5rem]");
     expect(accountSrc).not.toMatch(/duration-\d|ease-out|ease-in|animate-|translateY|@keyframes|bounce/i);
-    expect(navSrc).not.toMatch(/duration-\d|ease-out|ease-in|animate-|translateY|@keyframes|bounce/i);
+    expect(destsSrc).not.toMatch(/duration-\d|ease-out|ease-in|animate-|translateY|@keyframes|bounce/i);
     expect(accountSrc).not.toContain(`${APP_SHEET_MOTION_DURATION_MS}`);
-    expect(navSrc).not.toContain(`${APP_SHEET_MOTION_DURATION_MS}`);
+    expect(destsSrc).not.toContain(`${APP_SHEET_MOTION_DURATION_MS}`);
     expect(accountSrc).not.toContain(APP_SHEET_MOTION_EASING);
-    expect(navSrc).not.toContain(APP_SHEET_MOTION_EASING);
+    expect(destsSrc).not.toContain(APP_SHEET_MOTION_EASING);
   });
 
   it("shows the signed face when one exists and keeps the initial when empty", () => {

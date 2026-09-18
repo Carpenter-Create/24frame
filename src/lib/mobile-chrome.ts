@@ -1,8 +1,9 @@
-// Shared mobile chrome for the header hamburger and the Ask Globee
-// history clock. One lead pad, one 44 hit, one 16 tertiary glyph.
-// Hamburger (84:240 / 82:13) is Phosphor List Bold. The Ask Globee
-// clock stays Lucide 1.33 until a measured rematch.
-// Measured 2026-09-10 from app-shell / mobile-nav / ask-globee-landing:
+// Shared mobile chrome for the Ask Globee history clock. One lead pad,
+// one 44 hit, one 16 tertiary glyph. The dest hamburger is gone —
+// destinations live on HousePhoneDestChips. The Ask Globee clock stays
+// Lucide 1.33 until a measured rematch. MOBILE_CHROME_HAMBURGER_*
+// tokens remain so the clock keeps the locked 44/16 column.
+// Measured 2026-09-10 from app-shell / ask-globee-landing:
 //
 //   Header pad (max-md)     --space-6          24px
 //   Hamburger (was)         size-4 + Menu 16   hit 16 · glyph center 32

@@ -52,8 +52,8 @@ function chromeHtml() {
   );
 }
 
-describe("Aggregation Dashboard mobile chrome — emblem left, dest hamburger trailing", () => {
-  it("keeps the emblem alone on the lead — no workspace pill, hamburger not co-leading", () => {
+describe("Aggregation Dashboard mobile chrome — emblem left, dest chips under top", () => {
+  it("keeps the emblem alone on the lead — no workspace pill, no hamburger", () => {
     expect(APP_HEADER_LEADING_CLASS).toContain("gap-[var(--space-3)]");
     expect(APP_HEADER_LEADING_CLASS).toContain("md:gap-[var(--space-2)]");
     expect(APP_HEADER_LEADING_CLASS).not.toContain("gap-[var(--space-1)]");
@@ -69,7 +69,8 @@ describe("Aggregation Dashboard mobile chrome — emblem left, dest hamburger tr
     expect(leadSrc).not.toContain("data-app-header-workspace-pill");
     expect(leadSrc).toContain("APP_HEADER_LEADING_CLASS");
     expect(leadSrc).not.toContain('tone="pill"');
-    expect(shellSrc).toContain("MobileNavSlot");
+    expect(shellSrc).not.toContain("MobileNavSlot");
+    expect(shellSrc).toContain("DestChipsSlot");
     expect(shellSrc).toContain("<HouseLeadChrome");
     const header = leadSrc.slice(
       leadSrc.indexOf("data-app-header="),
@@ -90,7 +91,8 @@ describe("Aggregation Dashboard mobile chrome — emblem left, dest hamburger tr
     expect(shellSrc).not.toContain("afterLead=");
     expect(shellSrc).not.toContain("MessagesHeaderSlot");
     expect(shellSrc).toContain("AskAiOverlayProvider");
-    expect(shellSrc).toContain("trailingNav=");
+    expect(shellSrc).toContain("destChips=");
+    expect(shellSrc).not.toContain("trailingNav=");
   });
 
   it("leaves the trailing avatar alone — no Aggregation+avatar phone cluster", () => {
