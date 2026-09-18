@@ -207,7 +207,7 @@ describe("Ask Globee send helpers", () => {
 
   it("opens a persisted thread by id, never a ?q= rewrite", () => {
     expect(isAskGlobeeThreadId(THREAD)).toBe(true);
-    expect(askGlobeeThreadHref(THREAD)).toBe(`/messages?thread=${THREAD}`);
+    expect(askGlobeeThreadHref(THREAD)).toBe(`?ai=${THREAD}`);
     expect(askGlobeeThreadHref("What needs attention")).toBeNull();
     expect(askGlobeeThreadHref("   ")).toBeNull();
     expect(readAskGlobeeThreadId({ thread: THREAD })).toBe(THREAD);
@@ -215,7 +215,7 @@ describe("Ask Globee send helpers", () => {
     expect(readAskGlobeeThreadId({ thread: "not-a-uuid" })).toBeNull();
     expect(readAskGlobeeThreadId({ q: "What needs attention" })).toBeNull();
     expect(readAskGlobeePrompt({ q: "What needs attention" })).toBe("What needs attention");
-    expect(askGlobeeLandingHref()).toBe("/messages");
+    expect(askGlobeeLandingHref()).toBe("?ai=1");
     expect(askGlobeeSelectedChip("  what needs attention  ")).toBe("What needs attention");
     expect(askGlobeeSelectedChip("unmapped")).toBeNull();
     expect(askGlobeeUsesModel("How many titles are in my catalog?")).toBe(true);

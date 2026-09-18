@@ -24,7 +24,7 @@ describe("NavGlyph", () => {
   });
 
   it("renders the house AI mark for the Ask 24Frame AI row", () => {
-    const ask = NAV.find((item) => item.href === "/messages");
+    const ask = NAV.find((item) => item.family === "house-ai");
     expect(ask).toBeDefined();
     const html = renderToStaticMarkup(<NavGlyph item={ask!} active={false} />);
     expect(html).toContain("data-house-ai-mark");

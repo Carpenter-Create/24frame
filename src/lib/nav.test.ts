@@ -15,7 +15,6 @@ import {
   Wallet,
 } from "@phosphor-icons/react";
 
-import { ASK_GLOBEE } from "@/lib/ask-globee";
 import {
   GC_NAV,
   NAV,
@@ -44,7 +43,7 @@ describe("client NAV", () => {
       "/attention",
       "/activity",
       "/reports",
-      "/messages",
+      "?ai=1",
     ]);
     expect(hrefs).not.toContain("/deliveries");
     expect(hrefs).not.toContain("/catalog-health");
@@ -79,16 +78,16 @@ describe("client NAV", () => {
     expect(clientNavCurrent("/earn/abc").label).toBe("Reports");
     expect(clientNavCurrent("/finance").label).toBe("Reports");
     expect(clientNavCurrent("/finance/abc").label).toBe("Reports");
-    expect(clientNavCurrent("/messages").label).toBe("Ask 24Frame AI");
-    expect(clientNavCurrent("/messages").label).toBe(ASK_GLOBEE.headline);
+    expect(clientNavCurrent("/messages").label).toBe("Dashboard");
+    expect(isClientNavActive("/home", NAV.find((item) => item.family === "house-ai")!)).toBe(false);
     expect(clientNavCurrent("/queue").label).toBe("Dashboard");
   });
 
-  it("keeps /messages as Ask 24Frame AI with the house sparkle cluster, not Phosphor/Lucide sparkles or the bee", () => {
-    const dest = NAV.find((item) => item.href === "/messages");
+  it("keeps Ask 24Frame AI as the house sparkle overlay trigger, not a workspace dest", () => {
+    const dest = NAV.find((item) => item.family === "house-ai");
     expect(dest).toBeDefined();
     expect(dest?.label).toBe("Ask 24Frame AI");
-    expect(dest?.href).toBe("/messages");
+    expect(dest?.href).toBe("?ai=1");
     expect(dest?.family).toBe("house-ai");
     expect(dest && isHouseAiNavItem(dest)).toBe(true);
     expect(dest && "icon" in dest).toBe(false);
@@ -123,7 +122,7 @@ describe("client NAV", () => {
       Wallet,
       Users,
     ]);
-    expect(NAV.filter((item) => item.href !== "/messages").every((item) => item.family === "phosphor")).toBe(
+    expect(NAV.filter((item) => item.family !== "house-ai").every((item) => item.family === "phosphor")).toBe(
       true,
     );
     expect(NAV.filter(isHouseAiNavItem)).toHaveLength(1);

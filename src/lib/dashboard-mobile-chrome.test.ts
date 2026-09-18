@@ -98,8 +98,9 @@ describe("Aggregation Dashboard mobile chrome — Mercury leading pill", () => {
     expect(leading.indexOf("data-app-header-workspace-pill")).toBeLessThan(
       leading.indexOf("{afterLead}"),
     );
-    expect(shellSrc).toContain("afterLead=");
-    expect(shellSrc).toContain("MessagesHeaderSlot");
+    expect(shellSrc).not.toContain("afterLead=");
+    expect(shellSrc).not.toContain("MessagesHeaderSlot");
+    expect(shellSrc).toContain("AskAiOverlayProvider");
     const pillHtml = renderToStaticMarkup(
       createElement(WorkspaceSwitcher, { current: "aggregation", tone: "pill" }),
     );

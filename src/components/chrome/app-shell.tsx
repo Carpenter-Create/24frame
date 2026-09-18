@@ -8,11 +8,11 @@ import { SideNav } from "./side-nav";
 import { SettingsRail } from "./settings-rail";
 import { SettingsHeaderBack } from "./settings-header-back";
 import { MobileNav } from "./mobile-nav";
-import { MessagesAppHeader } from "./messages-app-header";
 import { HouseLeadChrome } from "./house-lead-chrome";
 import { HouseLeadSearch } from "./house-lead-search";
 import { RailCollapse } from "./rail-collapse";
 import { AskAssistantChromeProvider } from "@/components/messages/ask-globee-chrome";
+import { AskAiOverlayProvider } from "./ask-ai-overlay";
 import { cn } from "@/lib/cn";
 import type { ActivityItem } from "@/lib/activity";
 import type { AppShellChrome } from "@/lib/app-shell-chrome";
@@ -26,7 +26,6 @@ import {
 import { HOUSE_LEAD_SCROLL_CLASS, HOUSE_LEAD_SHELL_CLASS } from "@/lib/house-lead-chrome";
 import {
   HOUSE_CANVAS_X_CLASS,
-  HOUSE_CHROME_GUTTER_X_CLASS,
   HOUSE_HOME_RAIL_COLUMN_CLASS,
   HOUSE_PAGE_CANVAS_CLASS,
   HOUSE_RAIL_FLOAT_CLASS,
@@ -76,7 +75,6 @@ export function AppShell({
   activityItems = Promise.resolve([]),
   isGcStaff = false,
   defaultCollapsed = false,
-  messagesSurface = "staff-inbox",
   defaultWorkspace = "aggregation",
   children,
 }: {
@@ -93,6 +91,7 @@ export function AppShell({
   activityItems?: Promise<ActivityItem[]>;
   isGcStaff?: boolean;
   defaultCollapsed?: boolean;
+  /** Kept for callers. Overlay owns AI chrome; leftover /messages intercepts. */
   messagesSurface?: MessagesSurface;
   defaultWorkspace?: WorkspaceMode;
   children: React.ReactNode;
@@ -131,7 +130,6 @@ export function AppShell({
   // 48/16 house inset (HOME-width-lock.md). Aggregation Dashboard uses
   // the Education house measure — Adam 2026-09-18.
   const homePage = pathname === "/" || homeChrome;
-  const messagesPage = pathname === "/messages";
   const settingsPage = isSettingsPath(pathname);
   const socialChrome = workspace === "social" && !settingsPage && !homeChrome;
 
@@ -159,6 +157,7 @@ export function AppShell({
 
   if (socialChrome) {
     return (
+      <AskAiOverlayProvider>
       <AskAssistantChromeProvider>
         {cookieSync}
         <div
@@ -215,10 +214,12 @@ export function AppShell({
           <SocialMobileTabBar />
         </div>
       </AskAssistantChromeProvider>
+      </AskAiOverlayProvider>
     );
   }
 
   return (
+    <AskAiOverlayProvider>
     <AskAssistantChromeProvider>
     {cookieSync}
     <div
@@ -272,7 +273,7 @@ export function AppShell({
           Facebook-compact slot as Social live search. Phone
           Education search sits in a full-width row under the lead —
           not in the top nav. Search also mounts on the Access
-          `/messages` gate, and on mobile `/titles` (528:542).
+          leftover `/messages` intercept, and on mobile `/titles` (528:542).
           Phone avatar opens 544:561. Hamburger stays the nav sheet.
           Do not invent Move chrome or a second phone switcher.
           Studio secondary rail stays HOLD. */}
@@ -299,11 +300,6 @@ export function AppShell({
             <Suspense fallback={null}>
               <HouseLeadSearch tone="quiet" inputId="education-header-q-phone" />
             </Suspense>
-          ) : undefined
-        }
-        afterLead={
-          messagesPage ? (
-            <MessagesHeaderSlot chrome={chrome} messagesSurface={messagesSurface} />
           ) : undefined
         }
         activityUnread={messagesUnread}
@@ -334,13 +330,6 @@ export function AppShell({
           >
             {children}
           </div>
-        ) : messagesPage ? (
-          <div
-            className={cn("w-full p-[var(--content-inset)]", HOUSE_CHROME_GUTTER_X_CLASS)}
-            data-app-messages-frame=""
-          >
-            {children}
-          </div>
         ) : (
           <div
             className={cn("mx-auto w-full pb-24 pt-8", HOUSE_CANVAS_X_CLASS)}
@@ -352,6 +341,7 @@ export function AppShell({
       </main>
     </div>
     </AskAssistantChromeProvider>
+    </AskAiOverlayProvider>
   );
 }
 
@@ -383,26 +373,6 @@ function SocialRailAccountChipFromChrome({
 }) {
   const data = use(chrome);
   return <SocialRailAccountChip name={data.name} photoUrl={data.photoUrl} collapsed={collapsed} />;
-}
-
-function MessagesHeaderSlot({
-  chrome,
-  messagesSurface,
-}: {
-  chrome?: Promise<AppShellChrome>;
-  messagesSurface: MessagesSurface;
-}) {
-  if (!chrome) return <MessagesAppHeader surface={messagesSurface} />;
-  return (
-    <Suspense fallback={<MessagesAppHeader surface={messagesSurface} />}>
-      <MessagesHeaderFromChrome chrome={chrome} />
-    </Suspense>
-  );
-}
-
-function MessagesHeaderFromChrome({ chrome }: { chrome: Promise<AppShellChrome> }) {
-  const data = use(chrome);
-  return <MessagesAppHeader surface={data.messagesSurface} />;
 }
 
 function AccountMenuSlot({

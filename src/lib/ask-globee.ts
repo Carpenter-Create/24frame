@@ -135,6 +135,8 @@ export function readAskGlobeePrompt(
 export function readAskGlobeeThreadId(
   search: { get(name: string): string | null } | Record<string, string | string[] | undefined>,
 ): string | null {
+  const overlay = readSearchValue(search, "ai");
+  if (overlay && isAskGlobeeThreadId(overlay)) return overlay;
   const value = readSearchValue(search, ASK_GLOBEE_THREAD_QUERY);
   return value && isAskGlobeeThreadId(value) ? value : null;
 }
@@ -142,11 +144,11 @@ export function readAskGlobeeThreadId(
 export function askGlobeeThreadHref(threadId: string): string | null {
   const next = threadId.trim();
   if (!isAskGlobeeThreadId(next)) return null;
-  return `/messages?${ASK_GLOBEE_THREAD_QUERY}=${encodeURIComponent(next)}`;
+  return `?ai=${encodeURIComponent(next)}`;
 }
 
 export function askGlobeeLandingHref(): string {
-  return "/messages";
+  return "?ai=1";
 }
 
 export function askGlobeeComposerSubmit(prompt: string): string | null {

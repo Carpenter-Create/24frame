@@ -379,7 +379,8 @@ describe("messages clash lock", () => {
     expect(home).not.toContain('"/messages"');
     expect(dms).toContain("loadDmInbox");
     expect(dmLoaders).toContain("get_dm_inbox");
-    expect(messages).toContain("AskGlobeeLanding");
+    expect(messages).toContain("AskAiLegacyIntercept");
+    expect(messages).not.toContain("AskGlobeeLanding");
     expect(messages).not.toContain("get_dm_inbox");
     expect(messages).not.toContain("open_or_get_direct_conversation");
   });

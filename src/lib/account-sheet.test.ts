@@ -74,7 +74,7 @@ describe("account sheet lock", () => {
       USER_MENU.settingsHref,
       USER_MENU.askAssistantHref,
     ]);
-    expect(USER_MENU.askAssistantHref).toBe("/messages");
+    expect(USER_MENU.askAssistantHref).toBe("?ai=1");
     expect(hrefs).not.toContain("/account/company");
     expect(hrefs.join(" ")).not.toMatch(/notifications|phone|job/i);
     expect(hrefs).toContain("/settings/profile");

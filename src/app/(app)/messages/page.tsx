@@ -1,29 +1,13 @@
 import { redirect } from "next/navigation";
 
-import { createClient } from "@/lib/supabase/server";
 import { getOrgContext } from "@/lib/supabase/context";
 import { getActiveOrgTier } from "@/lib/org-tier";
-import {
-  canRenderAskGlobeeLanding,
-  readAskGlobeeThreadId,
-  resolveMessagesSurface,
-} from "@/lib/ask-globee";
-import {
-  sortAskGlobeeHistory,
-  type AskGlobeeHistoryRow,
-  type AskGlobeeStoredMessage,
-} from "@/lib/ask-globee-conversations";
-import { UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
-import { userMenuAvatarInitial } from "@/lib/user-menu";
-import { AccessUpgradeGate } from "@/components/messages/access-upgrade-gate";
-import { AskGlobeeLanding } from "@/components/messages/ask-globee-landing";
-import { AskGlobeeThread } from "@/components/messages/ask-globee-thread";
+import { readAskGlobeeThreadId, resolveMessagesSurface } from "@/lib/ask-globee";
+import { AskAiLegacyIntercept } from "./ask-ai-legacy-intercept";
 
-// Access `/messages` is the Ask 24Frame AI upgrade gate (Figma 305:320).
-// Pro/Premium see the 7:73 landing. Clock opens past org conversations;
-// plus is not on this empty home. Chip or composer send persists the user
-// turn, then 247:295 chrome on that thread. Staff without a client org
-// use /activity — not this AI surface.
+// Leftover `/messages` is not an AI workspace. Staff without a client
+// org still go to /activity. Everyone else is intercepted onto the
+// prior workspace path with the 24Frame AI overlay open.
 export default async function MessagesPage({
   searchParams = Promise.resolve({}),
 }: {
@@ -43,54 +27,5 @@ export default async function MessagesPage({
     redirect("/activity");
   }
 
-  if (canRenderAskGlobeeLanding(surface) && ctx.activeOrg) {
-    const threadId = readAskGlobeeThreadId(await searchParams);
-    const supabase = await createClient();
-    const org = ctx.activeOrg;
-
-    if (threadId) {
-      const { data: conversationRow } = await supabase
-        .from("ai_conversations")
-        .select("id, title, pinned_at, created_at, updated_at")
-        .eq("id", threadId)
-        .eq("org_id", org.id)
-        .maybeSingle();
-      const conversation = conversationRow as AskGlobeeHistoryRow | null;
-      if (conversation) {
-        const { data: messageRows } = await supabase
-          .from("ai_conversation_messages")
-          .select("id, role, body, lead, follow, thumbs, created_at")
-          .eq("conversation_id", conversation.id)
-          .eq("org_id", org.id)
-          .order("created_at", { ascending: true })
-          .range(...rangeFor(UNPAGINATED_MAX));
-        const { data: historyRows } = await supabase
-          .from("ai_conversations")
-          .select("id, title, pinned_at, created_at, updated_at")
-          .eq("org_id", org.id)
-          .range(...rangeFor(UNPAGINATED_MAX));
-        return (
-          <AskGlobeeThread
-            initials={userMenuAvatarInitial(ctx.user.email)}
-            conversation={conversation}
-            messages={(messageRows ?? []) as AskGlobeeStoredMessage[]}
-            conversations={sortAskGlobeeHistory((historyRows ?? []) as AskGlobeeHistoryRow[])}
-          />
-        );
-      }
-    }
-
-    const { data: historyRows } = await supabase
-      .from("ai_conversations")
-      .select("id, title, pinned_at, created_at, updated_at")
-      .eq("org_id", org.id)
-      .range(...rangeFor(UNPAGINATED_MAX));
-    return (
-      <AskGlobeeLanding
-        conversations={sortAskGlobeeHistory((historyRows ?? []) as AskGlobeeHistoryRow[])}
-      />
-    );
-  }
-
-  return <AccessUpgradeGate />;
+  return <AskAiLegacyIntercept threadId={readAskGlobeeThreadId(await searchParams)} />;
 }

@@ -35,7 +35,7 @@ describe("user menu lock", () => {
       "appearance",
     ]);
     expect(USER_MENU.askAssistant).toBe(ASSISTANT_NAME);
-    expect(USER_MENU.askAssistantHref).toBe("/messages");
+    expect(USER_MENU.askAssistantHref).toBe("?ai=1");
   });
 
   it("points Profile and Settings at existing /settings doors — Appearance is not a page", () => {

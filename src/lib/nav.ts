@@ -71,7 +71,8 @@ export function isHouseAiNavItem(item: NavItem): item is HouseAiNavItem {
 
 // GC's flat nav — only what exists or is v1-scoped. Settings stays deferred.
 // Activity is the account-alert log (/activity). Recent activity stays
-// catalog findings (/attention). Ask 24Frame AI is /messages.
+// catalog findings (/attention). Ask 24Frame AI is the shell overlay
+// (`?ai=1`), never a workspace destination.
 // Reports is the one client activity door. Staff ops stays on GC_NAV
 // at /gc/finance. Glyphs: Figma 75:5 / 75:2 / 61:2 Phosphor Bold idle,
 // Fill active. Ask 24Frame AI is the house sparkle cluster (HouseAiMark),
@@ -94,7 +95,7 @@ export const NAV: Array<PhosphorNavItem | HouseAiNavItem> = [
     icon: ChartBar,
     ariaLabel: REPORTS_PAGE.navAria,
   },
-  { label: ASK_GLOBEE.headline, href: "/messages", family: "house-ai" },
+  { label: ASK_GLOBEE.headline, href: "?ai=1", family: "house-ai" },
 ];
 
 // Social workspace rail. Mobile tab keeps five jobs (Create stays).
@@ -169,6 +170,7 @@ export const MOBILE_NAV = {
 } as const;
 
 export function isClientNavActive(pathname: string, item: NavItem): boolean {
+  if (isHouseAiNavItem(item)) return false;
   if (item.href === "/dashboard" && pathname === "/") return true;
   if (item.href === REPORTS_HREF && isLegacyReportsPath(pathname)) return true;
   if (
@@ -202,8 +204,8 @@ export function clientNavCurrent(pathname: string): NavItem {
 // Client phone sheet stays the Aggregation NAV destinations. Staff already use
 // those plus the operator set — do not leave them on a client-only menu.
 // Social mobile tab is Home / Explore / Create / Messages / Profile.
-// Desktop rail drops Create. Activity + Ask 24Frame AI stay Aggregation
-// rail destinations; header bell + house AI mark reach them from every shell.
+// Desktop rail drops Create. Activity stays an Aggregation rail
+// destination. Ask 24Frame AI is the same overlay as the header mark.
 export function mobileNavDestinations(
   isGcStaff: boolean,
   workspace: WorkspaceMode = "aggregation",

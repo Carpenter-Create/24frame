@@ -69,7 +69,7 @@ import {
   appearancePreferenceLabel,
   type AccountMenuFace,
 } from "@/lib/appearance";
-import { APP_SHEET_SCRIM_CLASS, SHEET_GROUP_CHEVRON_CLASS } from "@/lib/house-sheet";
+import { APP_SHEET_SCRIM_CLASS, SHEET_GROUP_CHEVRON_CLASS, SHEET_GROUP_ITEM_CLASS } from "@/lib/house-sheet";
 import { applyDocumentThemePreference } from "@/lib/theme";
 import { settingsLandHref } from "@/lib/settings";
 import {
@@ -79,6 +79,7 @@ import {
   userMenuVersion,
 } from "@/lib/user-menu";
 import { MenuSurfaceAccent } from "./menu-surface";
+import { AskAiOpenButton } from "./ask-ai-overlay";
 
 // Glyph-only. Live sheet/dropdown layout, IA, and chrome stay.
 // 84:46 is icon SSOT — not a restyle, not a Mercury escalation.
@@ -313,6 +314,20 @@ function AccountMenuItems({
       {items.map((item) => {
         if (item.kind === "appearance") {
           return <AccountAppearanceRow key={item.kind} onClick={() => onAppearance?.()} />;
+        }
+        if (item.kind === "askAssistant") {
+          return (
+            <AskAiOpenButton
+              key={item.kind}
+              data-sheet-group-item="askAssistant"
+              data-user-menu-item="askAssistant"
+              className={SHEET_GROUP_ITEM_CLASS}
+              onClick={onClose}
+            >
+              {item.label}
+              <AccountRowChevron />
+            </AskAiOpenButton>
+          );
         }
         const href = item.kind === "settings" ? settingsLandHref(pathname) : item.href;
         return (

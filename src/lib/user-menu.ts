@@ -29,7 +29,7 @@ export const USER_MENU = {
   agreementsHref: "/settings/agreements",
   appearance: "Appearance",
   askAssistant: ASSISTANT_NAME,
-  askAssistantHref: "/messages",
+  askAssistantHref: "?ai=1",
   help: "Help",
   helpHref: "/help",
   refer: "Refer a friend",

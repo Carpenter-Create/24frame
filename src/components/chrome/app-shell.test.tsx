@@ -20,6 +20,13 @@ vi.mock("@/app/(app)/messages/ask-globee-actions", () => ({
   renameAskGlobeeConversation: vi.fn(),
   pinAskGlobeeConversation: vi.fn(),
   deleteAskGlobeeConversation: vi.fn(),
+  loadAskAiOverlay: vi.fn(async () => ({
+    surface: "ask-globee-landing",
+    initials: "A",
+    conversations: [],
+    conversation: null,
+    messages: [],
+  })),
 }));
 vi.mock("./organization-switcher", () => ({
   OrganizationSwitcher: () => createElement("div", { "data-org-switcher": "" }),
@@ -262,10 +269,8 @@ describe("AppShell Home chrome", () => {
     expect(shellSrc).toContain("overviewHidesRail");
     expect(shellSrc).toContain("OVERVIEW_RAIL_OFF_WIDTH");
     expect(shellSrc).toContain("data-home-chrome");
-    const homeBranch = shellSrc.slice(
-      shellSrc.indexOf(") : homePage ? ("),
-      shellSrc.indexOf(") : messagesPage ? ("),
-    );
+    const homeStart = shellSrc.indexOf(") : homePage ? (");
+    const homeBranch = shellSrc.slice(homeStart, shellSrc.indexOf(") : (", homeStart + 1));
     expect(homeBranch).not.toContain("mx-auto");
     expect(homeBranch).not.toContain("page-max-width");
     expect(homeBranch).toContain("HOUSE_HOME_RAIL_COLUMN_CLASS");
@@ -401,40 +406,27 @@ describe("AppShell Access rail and home frame", () => {
     expect(shellSrc).not.toContain('pathname === "/dashboard" || homeChrome');
   });
 
-  it("gives `/messages` the 48 inset and restores Search only for the Access gate", () => {
+  it("mounts 24Frame AI as a shell overlay — leftover /messages is not an AI land", () => {
+    expect(shellSrc).toContain("AskAiOverlayProvider");
+    expect(shellSrc).not.toContain("data-app-messages-frame");
+    expect(shellSrc).not.toContain("MessagesHeaderSlot");
+    expect(shellSrc).not.toContain("messagesPage");
+
     navigation.pathname = "/messages";
-    const inbox = renderShell("staff-inbox");
-    expect(inbox).toContain("data-app-messages-frame");
-    expect(inbox).toContain("data-app-header-leading");
-    expect(inbox).toContain("p-[var(--content-inset)]");
-    expect(inbox).toContain("md:px-[var(--chrome-gutter)]");
-    expect(inbox).not.toContain("data-app-home-frame");
-    expect(inbox).not.toContain("data-header-search");
-    expect(inbox).not.toContain("⌘K");
+    const leftover = renderShell("ask-globee-landing");
+    expect(leftover).not.toContain("data-app-messages-frame");
+    expect(leftover).not.toContain("data-header-search");
+    expect(leftover).not.toContain("data-header-thread");
+    expect(leftover).not.toContain("⌘K");
+    expect(leftover).toContain("data-ask-assistant-header");
 
-    const gate = renderShell("access-gate");
-    expect(gate).toContain("data-header-search");
-    expect(gate).toContain("⌘K");
-    expect(gate).not.toContain("data-header-thread");
-
-    const landing = renderShell("ask-globee-landing");
-    expect(landing).not.toContain("data-header-search");
-    expect(landing).not.toContain("data-header-thread");
-    expect(landing).not.toContain("⌘K");
-
-    const thread = renderShell("ask-globee-thread");
-    expect(thread).toContain("data-header-thread");
-    expect(thread).not.toContain("data-header-search");
-    expect(thread).not.toContain("⌘K");
-
+    navigation.pathname = "/home";
+    expect(renderShell("ask-globee-landing")).toContain("data-ask-assistant-header");
     navigation.pathname = "/";
     expect(renderShell("access-gate")).not.toContain("data-header-search");
     expect(renderShell("access-gate")).not.toContain("data-titles-header-search");
     navigation.pathname = "/titles";
     expect(renderShell("access-gate")).not.toContain("data-header-search");
-    expect(renderShell("access-gate")).not.toContain("data-titles-header-search");
-    navigation.pathname = "/titles/title-1";
-    expect(renderShell("access-gate")).not.toContain("data-titles-header-search");
     expect(shellSrc).not.toContain("SearchField");
   });
 });
@@ -487,21 +479,16 @@ describe("AppShell client mobile chrome", () => {
     expect(layoutSrc).not.toMatch(/key=\{ctx/);
   });
 
-  it("keeps mobile chrome on Ask Globee without restoring Search, and keeps the Access gate", () => {
+  it("keeps mobile chrome when leftover /messages intercepts — Search stays off the page header", () => {
     navigation.pathname = "/messages";
-    const landing = renderShell("ask-globee-landing");
-    expect(landing).toContain("data-mobile-nav-trigger");
-    expect(landing).toContain("data-app-header");
-    expect(landing).not.toContain("data-header-search");
-    expect(landing).not.toContain("⌘K");
-    expect(landing).toMatch(
+    const leftover = renderShell("ask-globee-landing");
+    expect(leftover).toContain("data-mobile-nav-trigger");
+    expect(leftover).toContain("data-app-header");
+    expect(leftover).not.toContain("data-header-search");
+    expect(leftover).not.toContain("⌘K");
+    expect(leftover).toMatch(
       /<aside class="[^"]*\bhidden\b[^"]*\bmd:flex\b[^"]*" data-app-rail=""/,
     );
-
-    const gate = renderShell("access-gate");
-    expect(gate).toContain("data-mobile-nav-trigger");
-    expect(gate).toContain("data-header-search");
-    expect(gate).toContain("⌘K");
   });
 });
 
@@ -534,6 +521,8 @@ describe("AppShell /settings rail", () => {
     expect(html).not.toContain("Attention");
     expect(html).not.toContain("Recent activity");
     expect(html).not.toContain("Ask 24Frame AI");
+    expect(html).not.toContain("data-side-nav-ask-ai");
+    expect(html).not.toContain("data-mobile-nav-ask-ai");
     expect(html).not.toContain("Queue");
     expect(html).not.toContain("Expand sidebar");
     expect(html).not.toContain("Collapse sidebar");

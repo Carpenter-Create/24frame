@@ -1,4 +1,8 @@
+"use client";
+
+import { AskAiOpenButton } from "@/components/chrome/ask-ai-overlay";
 import { TextAction } from "@/components/chrome/house";
+import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import {
   DashboardHomeEmpty,
   DashboardHomePanel,
@@ -37,7 +41,15 @@ export function OverviewModule({
         <p data-overview-module-label="" className={DASHBOARD_SECTION_TITLE_CLASS}>
           {title}
         </p>
-        {action ? <TextAction href={action.href}>{action.label}</TextAction> : null}
+        {action ? (
+          action.href.startsWith("?ai=") ? (
+            <AskAiOpenButton className={TEXT_ACTION_CLASS} data-overview-ai-ask="">
+              {action.label}
+            </AskAiOpenButton>
+          ) : (
+            <TextAction href={action.href}>{action.label}</TextAction>
+          )
+        ) : null}
       </div>
       {hasBody ? children : <DashboardHomeEmpty>{empty}</DashboardHomeEmpty>}
     </DashboardHomePanel>

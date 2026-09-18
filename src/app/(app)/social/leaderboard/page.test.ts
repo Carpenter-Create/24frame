@@ -243,7 +243,8 @@ describe("messages clash lock", () => {
     const messages = readFileSync("src/app/(app)/messages/page.tsx", "utf8");
     expect(page).not.toContain('"/messages"');
     expect(page).not.toContain("rebuild_leaderboards");
-    expect(messages).toContain("AskGlobeeLanding");
+    expect(messages).toContain("AskAiLegacyIntercept");
+    expect(messages).not.toContain("AskGlobeeLanding");
     expect(messages).not.toContain("leaderboard_entries");
   });
 });

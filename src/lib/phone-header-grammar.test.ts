@@ -130,7 +130,7 @@ describe("phone header grammar A — trim trailing", () => {
       "appearance",
     ]);
     expect(USER_MENU.askAssistant).toBe(ASSISTANT_NAME);
-    expect(USER_MENU.askAssistantHref).toBe("/messages");
+    expect(USER_MENU.askAssistantHref).toBe("?ai=1");
     expect(ACCOUNT_SHEET_PHONE_ITEMS).toBe(USER_MENU_PHONE_ACTIONS);
     expect(ACCOUNT_SHEET_ITEMS).toBe(USER_MENU_ACTIONS);
     expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).toEqual(["profile", "settings"]);
@@ -147,7 +147,8 @@ describe("phone header grammar A — trim trailing", () => {
     expect(sheet).toContain('data-sheet-group-item="askAssistant"');
     expect(sheet).toContain('data-sheet-group-item="appearance"');
     expect(sheet).toContain(ASSISTANT_NAME);
-    expect(sheet).toContain('href="/messages"');
+    expect(sheet).toContain('data-sheet-group-item="askAssistant"');
+    expect(sheet).not.toContain('href="/messages"');
     expect(sheet).toContain(USER_MENU.appearance);
     expect(sheet).toContain("data-account-menu-appearance-mode");
     expect(sheetSrc).toContain("AccountSheetAppearance");

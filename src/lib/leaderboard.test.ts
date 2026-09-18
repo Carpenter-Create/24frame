@@ -61,7 +61,7 @@ describe("leaderboard formatting", () => {
 });
 
 describe("leaderboard stay on materialized rows", () => {
-  it("never calls rebuild from the app and leaves /messages as Ask 24Frame AI", () => {
+  it("never calls rebuild from the app and leaves Ask 24Frame AI off the leaderboard", () => {
     const page = readFileSync("src/app/(app)/social/leaderboard/page.tsx", "utf8");
     const lib = readFileSync("src/lib/leaderboard.ts", "utf8");
     const actions = readFileSync("src/app/(app)/social/actions.ts", "utf8");
@@ -75,7 +75,8 @@ describe("leaderboard stay on materialized rows", () => {
     expect(lib).not.toContain("rebuild_leaderboards");
     expect(actions).not.toContain("rebuild_leaderboards");
     expect(actions).not.toContain("leaderboard_entries");
-    expect(messages).toContain("AskGlobeeLanding");
+    expect(messages).toContain("AskAiLegacyIntercept");
+    expect(messages).not.toContain("AskGlobeeLanding");
     expect(messages).not.toContain("leaderboard");
     expect(ASK_GLOBEE.headline).toBe("Ask 24Frame AI");
     expect(lib).not.toMatch(/from ["']@24frame\/shared["']/);

@@ -56,10 +56,8 @@ describe("Home width lock", () => {
       "w-full md:ml-[var(--content-inset)] md:mr-[var(--chrome-gutter)] md:w-[calc(100%-var(--content-inset)-var(--chrome-gutter))]",
     );
     expect(HOUSE_HOME_RAIL_COLUMN_CLASS).not.toContain("--access-rail-width");
-    const homeBranch = shell.slice(
-      shell.indexOf(") : homePage ? ("),
-      shell.indexOf(") : messagesPage ? ("),
-    );
+    const homeStart = shell.indexOf(") : homePage ? (");
+    const homeBranch = shell.slice(homeStart, shell.indexOf(") : (", homeStart + 1));
     expect(homeBranch).toContain("HOUSE_HOME_RAIL_COLUMN_CLASS");
     expect(homeBranch).not.toContain("page-max-width");
     expect(homeBranch).not.toContain("mx-auto");

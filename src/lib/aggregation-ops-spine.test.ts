@@ -30,7 +30,7 @@ describe("aggregation ops spine rematch", () => {
       "/attention",
       "/activity",
       "/reports",
-      "/messages",
+      "?ai=1",
     ]);
     expect(NAV.map((item) => item.href)).not.toContain("/deliveries");
     expect(NAV.map((item) => item.href)).not.toContain("/catalog-health");

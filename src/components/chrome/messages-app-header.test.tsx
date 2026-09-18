@@ -77,7 +77,8 @@ describe("MessagesAppHeader", () => {
     expect(html).toContain("data-header-thread");
     expect(html).toContain("What needs attention");
     expect(html).toContain("data-ask-globee-history-title");
-    expect(html).toContain(`href="/messages"`);
+    expect(html).toContain('href="?ai=1"');
+    expect(html).not.toContain('href="/messages"');
     expect(html).toContain(ASK_GLOBEE.backLabel);
     expect(html).toContain(ASK_GLOBEE.downloadLabel);
     expect(html).toContain("data-ask-globee-download");
