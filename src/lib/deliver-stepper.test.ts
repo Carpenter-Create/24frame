@@ -16,7 +16,7 @@ const TITLE_A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1";
 const TITLE_B = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1";
 
 describe("Deliver Option B stepper", () => {
-  it("locks Vendor → Rights → Territory → Done with Sporty Blue fill", () => {
+  it("locks Channel → Rights → Territory → Done with Sporty Blue fill", () => {
     expect(DELIVER_STEPPER_STEPS.map((step) => step.key)).toEqual([
       "vendor",
       "rights",
@@ -29,6 +29,15 @@ describe("Deliver Option B stepper", () => {
     expect(deliverProgressFilled("done")).toBe(4);
     expect(DELIVER_PROGRESS_SEG_ON_CLASS).toContain("bg-accent");
     expect(DELIVER_PROGRESS_SEG_ON_CLASS).not.toContain("#635BFF");
+    expect(DELIVER_STEPPER_STEPS.map((step) => step.label)).toEqual([
+      "Channel",
+      "Rights",
+      "Territory",
+      "Done",
+    ]);
+    expect(DELIVER_STEPPER.progressCaption).toBe("1 Channel · 2 Rights · 3 Territory · 4 Done");
+    expect(DELIVER_STEPPER.vendorQuestion).toBe("Which channel for these titles?");
+    expect(DELIVER_STEPPER.noVendors).toBe("No active channels.");
     expect(DELIVER_STEPPER.download).toBe("Download metadata sheet");
     expect(DELIVER_STEPPER.successId("abc")).toBe("ID · abc");
   });

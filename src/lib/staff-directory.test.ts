@@ -32,7 +32,7 @@ describe("staff directory primitive", () => {
   });
 
   it("drops the all-filter query string and keeps others", () => {
-    expect(filterHref("/vendors", "all")).toBe("/vendors");
+    expect(filterHref("/channels", "all")).toBe("/channels");
     expect(filterHref("/gc/clients", "active")).toBe("/gc/clients?status=active");
   });
 

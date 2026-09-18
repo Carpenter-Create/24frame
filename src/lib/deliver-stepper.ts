@@ -6,11 +6,11 @@ import { describeTerritory, ISO_COUNTRIES } from "@/lib/territories";
 
 // Option B — Stripe-air stepper. Calm focused card, house Sporty Blue
 // progress (Titles status-track register). No Stripe purple/logo/type.
-// Step order is locked: Vendor → Rights (per title) → Territory (per title)
-// → Success. One decision per step.
+// Step order is locked: Channel → Rights (per title) → Territory (per title)
+// → Success. One decision per step. Step key stays vendor internally.
 
 export const DELIVER_STEPPER_STEPS = [
-  { key: "vendor", label: "Vendor" },
+  { key: "vendor", label: "Channel" },
   { key: "rights", label: "Rights" },
   { key: "territory", label: "Territory" },
   { key: "done", label: "Done" },
@@ -19,11 +19,11 @@ export const DELIVER_STEPPER_STEPS = [
 export type DeliverStepperStep = (typeof DELIVER_STEPPER_STEPS)[number]["key"];
 
 export const DELIVER_STEPPER = {
-  progressCaption: "1 Vendor · 2 Rights · 3 Territory · 4 Done",
-  vendorQuestion: "Which vendor for these titles?",
-  vendorQuestionPhone: "Which vendor?",
+  progressCaption: "1 Channel · 2 Rights · 3 Territory · 4 Done",
+  vendorQuestion: "Which channel for these titles?",
+  vendorQuestionPhone: "Which channel?",
   vendorHint: (n: number) =>
-    n === 1 ? "1 title selected · one vendor per delivery" : `${n} titles selected · one vendor per delivery`,
+    n === 1 ? "1 title selected · one channel per delivery" : `${n} titles selected · one channel per delivery`,
   rightsQuestion: "Which rights grant?",
   rightsHint: (title: string, index: number, total: number) =>
     total > 1 ? `${title} · ${index + 1} of ${total}` : title,
@@ -38,7 +38,7 @@ export const DELIVER_STEPPER = {
   done: "Done",
   doneHint: "Returns to Licensing Status",
   listHref: "/gc/deliveries",
-  noVendors: "No active vendors.",
+  noVendors: "No active channels.",
   noGrants: "No active grants on this title.",
   noTitles: "Select at least one title to deliver.",
 } as const;

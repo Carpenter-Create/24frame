@@ -127,7 +127,7 @@ export const GC_NAV: PhosphorNavItem[] = [
   { label: "Queue", href: "/queue", family: "phosphor", icon: Tray },
   { label: AVAILS_PAGE.title, href: AVAILS_HREF, family: "phosphor", icon: CheckCircle },
   { label: GC_LICENSING_STATUS.title, href: "/gc/deliveries", family: "phosphor", icon: PaperPlaneTilt },
-  { label: "Vendors", href: "/vendors", family: "phosphor", icon: Storefront },
+  { label: "Channels", href: "/channels", family: "phosphor", icon: Storefront },
   {
     label: "Finance",
     href: "/gc/finance",

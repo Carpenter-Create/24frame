@@ -20,6 +20,7 @@ import {
   licensingDeliverVisible,
   licensingTitleMeta,
   parseDeliveryStatusFilter,
+  parseGcLicensingChannelFilter,
   parseGcLicensingVendorFilter,
 } from "./gc-deliveries";
 
@@ -29,7 +30,8 @@ describe("GC_LICENSING_STATUS copy", () => {
   it("locks staff nav, H1, and empty strings on Licensing Status", () => {
     expect(GC_LICENSING_STATUS.title).toBe("Licensing Status");
     expect(GC_LICENSING_STATUS).not.toHaveProperty("intro");
-    expect(GC_LICENSING_STATUS.searchPlaceholder).toBe("Search titles or vendors");
+    expect(GC_LICENSING_STATUS.searchPlaceholder).toBe("Search titles or channels");
+    expect(GC_LICENSING_STATUS.vendorFilterLabel).toBe("Filter by channel");
     expect(GC_LICENSING_STATUS.empty).toBe("No licensing status yet.");
     expect(GC_DELIVERIES_EMPTY.title).toBe(GC_LICENSING_STATUS.empty);
     expect(GC_DELIVERIES_EMPTY.actionLabel).toBe("View titles");
@@ -68,14 +70,18 @@ describe("staff licensing filters", () => {
     expect(buildGcLicensingQuery({ status: "all", vendor: null })).toBe("");
     expect(buildGcLicensingQuery({ status: "live", vendor: null })).toBe("?status=live");
     expect(buildGcLicensingQuery({ status: "all", vendor: VENDOR_ID })).toBe(
-      `?vendor=${VENDOR_ID}`,
+      `?channel=${VENDOR_ID}`,
     );
     expect(gcLicensingHref("pending", VENDOR_ID, "finals")).toBe(
-      `/gc/deliveries?q=finals&status=pending&vendor=${VENDOR_ID}`,
+      `/gc/deliveries?q=finals&status=pending&channel=${VENDOR_ID}`,
     );
     expect(gcLicensingHref("pending", VENDOR_ID)).toBe(
-      `/gc/deliveries?status=pending&vendor=${VENDOR_ID}`,
+      `/gc/deliveries?status=pending&channel=${VENDOR_ID}`,
     );
+    expect(parseGcLicensingChannelFilter(VENDOR_ID)).toBe(VENDOR_ID);
+    expect(parseGcLicensingChannelFilter(undefined, VENDOR_ID)).toBe(VENDOR_ID);
+    expect(parseGcLicensingChannelFilter("all", VENDOR_ID)).toBe(VENDOR_ID);
+    expect(parseGcLicensingChannelFilter(undefined, undefined)).toBeNull();
     expect(gcLicensingShowAllHref()).toBe("/gc/deliveries");
     expect(gcLicensingHasFilters("all", null)).toBe(false);
     expect(gcLicensingHasFilters("live", null)).toBe(true);
@@ -142,7 +148,7 @@ describe("licensing title groups", () => {
       "Acme Distribution",
       "Northwind",
     ]);
-    expect(licensingTitleMeta(groups[0])).toContain("2 vendors");
+    expect(licensingTitleMeta(groups[0])).toContain("2 channels");
     expect(licensingTitleMeta(groups[0])).toContain("last activity");
     expect(LICENSING_VENDOR_INDENT_CLASS).toContain("--space-6");
     expect(licensingDeliverVisible(0)).toBe(false);

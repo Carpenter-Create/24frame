@@ -1,6 +1,7 @@
 import { HOUSE_MODULE_CLASS } from "@/lib/house-shell";
 
-// One Circle-style directory primitive for staff Vendors + Clients.
+// One Circle-style directory primitive for staff Clients (and profile rows).
+// Team Channels index is ChannelCardGrid — do not route it back through this.
 // Grammar (Circle Manage audience SoT): circular avatar, bold name,
 // muted secondary, optional trailing meta. Filter chips + count sit
 // above a grey Coinbase holding surface. Do not fork a second row.

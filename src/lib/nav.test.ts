@@ -52,6 +52,7 @@ describe("client NAV", () => {
     expect(hrefs).not.toContain("/queue");
     expect(hrefs).not.toContain("/avails");
     expect(hrefs).not.toContain("/vendors");
+    expect(hrefs).not.toContain("/channels");
     expect(hrefs).not.toContain("/gc/clients");
     expect(hrefs).not.toContain("/gc/finance");
   });
@@ -138,12 +139,12 @@ describe("Ask Globee nav mark", () => {
 });
 
 describe("GC_NAV", () => {
-  it("adds staff-only Licensing Status between Queue and Vendors, with Clients last", () => {
+  it("adds staff-only Licensing Status between Queue and Channels, with Clients last", () => {
     expect(GC_NAV.map((item) => ({ label: item.label, href: item.href }))).toEqual([
       { label: "Queue", href: "/queue" },
       { label: "Avails", href: "/avails" },
       { label: "Licensing Status", href: "/gc/deliveries" },
-      { label: "Vendors", href: "/vendors" },
+      { label: "Channels", href: "/channels" },
       { label: "Finance", href: "/gc/finance" },
       { label: "Clients", href: "/gc/clients" },
     ]);
@@ -159,7 +160,7 @@ describe("GC_NAV", () => {
       "Queue",
       "Avails",
       "Licensing Status",
-      "Vendors",
+      "Channels",
       "Finance",
       "Clients",
     ]);
@@ -187,6 +188,7 @@ describe("mobileNavDestinations", () => {
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/queue");
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/avails");
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/vendors");
+    expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/channels");
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/gc/clients");
   });
 
@@ -200,7 +202,7 @@ describe("mobileNavDestinations", () => {
       "Queue",
       "Avails",
       "Licensing Status",
-      "Vendors",
+      "Channels",
       "Finance",
       "Clients",
     ]);

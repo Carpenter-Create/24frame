@@ -26,7 +26,7 @@ export default async function EditVendorPage({
       <PageHeader
         title={vn.name}
         subtitle={VENDOR_PROFILE.editVendor}
-        backLink={{ href: `/vendors/${vn.id}`, label: vn.name }}
+        backLink={{ href: `/channels/${vn.id}`, label: vn.name }}
       />
       <VendorForm
         initial={{

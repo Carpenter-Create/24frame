@@ -117,15 +117,15 @@ describe("staff /gc/deliveries empty copy", () => {
     expect(link).not.toContain("inline-flex");
   });
 
-  it("does not restyle client /deliveries or vendors", () => {
+  it("does not restyle client /deliveries or team Channels", () => {
     const clientDeliveries = readFileSync("src/app/(app)/deliveries/page.tsx", "utf8");
-    const vendors = readFileSync("src/app/(app)/(operator)/vendors/page.tsx", "utf8");
+    const channels = readFileSync("src/app/(app)/(operator)/channels/page.tsx", "utf8");
 
     expect(clientDeliveries).toContain('redirect("/titles")');
     expect(clientDeliveries).not.toContain("EmptyState");
-    expect(vendors).toContain("VENDORS_PAGE");
+    expect(channels).toContain("CHANNELS_PAGE");
     expect(pageSrc).not.toContain("EmptyState");
-    expect(pageSrc).not.toContain("VENDORS_PAGE");
+    expect(pageSrc).not.toContain("CHANNELS_PAGE");
   });
 });
 
@@ -139,13 +139,25 @@ describe("staff /gc/deliveries licensing filters and craft", () => {
     const vendorId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
     const { from } = stubClient();
     await GcDeliveriesPage({
-      searchParams: Promise.resolve({ status: "live", vendor: vendorId }),
+      searchParams: Promise.resolve({ status: "live", channel: vendorId }),
     });
     expect(from).toHaveBeenCalledWith("deliveries");
     const deliveriesChain = from.mock.results[0]?.value as {
       eq: ReturnType<typeof vi.fn>;
     };
     expect(deliveriesChain.eq).toHaveBeenCalledWith("status", "live");
+    expect(deliveriesChain.eq).toHaveBeenCalledWith("vendor_id", vendorId);
+  });
+
+  it("still reads a legacy ?vendor= filter", async () => {
+    const vendorId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+    const { from } = stubClient();
+    await GcDeliveriesPage({
+      searchParams: Promise.resolve({ status: "live", vendor: vendorId }),
+    });
+    const deliveriesChain = from.mock.results[0]?.value as {
+      eq: ReturnType<typeof vi.fn>;
+    };
     expect(deliveriesChain.eq).toHaveBeenCalledWith("vendor_id", vendorId);
   });
 
@@ -161,9 +173,9 @@ describe("staff /gc/deliveries licensing filters and craft", () => {
     expect(deliveriesChain.eq).not.toHaveBeenCalledWith("vendor_id", expect.anything());
   });
 
-  it("renders house status chips that preserve the vendor filter", async () => {
+  it("renders house status chips that preserve the channel filter", async () => {
     const vendorId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
-    const html = await renderEmptyDeliveries({ status: "pending", vendor: vendorId });
+    const html = await renderEmptyDeliveries({ status: "pending", channel: vendorId });
     expect(html).toContain("data-gc-licensing-filters");
     expect(html).toContain('aria-label="Filter by status"');
     expect(html).toContain("Pending");
@@ -171,8 +183,8 @@ describe("staff /gc/deliveries licensing filters and craft", () => {
     expect(html).toContain("Approved");
     expect(html).toContain("Rejected");
     expect(html).toContain("Taken down");
-    expect(html).toContain(`/gc/deliveries?status=live&amp;vendor=${vendorId}`);
-    expect(html).toContain(`/gc/deliveries?vendor=${vendorId}`);
+    expect(html).toContain(`/gc/deliveries?status=live&amp;channel=${vendorId}`);
+    expect(html).toContain(`/gc/deliveries?channel=${vendorId}`);
     expect(pageSrc).toContain("StatusFilter");
     expect(pageSrc).toContain("LicensingVendorFilter");
     expect(pageSrc).toContain("LicensingStatusFilter");

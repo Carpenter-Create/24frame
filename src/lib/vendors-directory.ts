@@ -1,15 +1,20 @@
-// Staff /vendors address book. Copy and list helpers live here, not in JSX.
-// The list page is identity + empty OR identity + directory. Create is a
-// separate surface. Do not invent fixture vendors.
+import { CHANNELS_HREF } from "@/lib/channel-card";
 
-export const VENDORS_PAGE = {
-  title: "Vendors",
+// Team /channels address book. Copy and list helpers live here, not in JSX.
+// The list page is identity + empty OR identity + card grid. Create is a
+// separate surface. Do not invent fixture channels. DB table stays vendors.
+
+export const CHANNELS_PAGE = {
+  title: "Channels",
   identity: "Credentials are never stored here.",
-  emptyTitle: "No vendors yet",
-  filterMiss: "No vendors match this filter.",
-  addVendor: "Add vendor",
-  addHref: "/vendors/new",
+  emptyTitle: "No channels yet",
+  filterMiss: "No channels match this filter.",
+  addChannel: "Add channel",
+  addHref: `${CHANNELS_HREF}/new`,
 } as const;
+
+/** @deprecated Use CHANNELS_PAGE — kept for leftover internal imports. */
+export const VENDORS_PAGE = CHANNELS_PAGE;
 
 export const VENDOR_MODE_LABELS: Record<"portal_upload" | "email", string> = {
   portal_upload: "Portal upload",
@@ -25,6 +30,11 @@ export type VendorDirectoryRow = {
   active: boolean;
 };
 
+export type ChannelCardTag = {
+  label: string;
+  tone: "neutral" | "active" | "muted";
+};
+
 /** Fields that belong on the create/edit form — never on the address-book page. */
 export const VENDOR_FORM_FIELD_LABELS = [
   "Name",
@@ -35,8 +45,8 @@ export const VENDOR_FORM_FIELD_LABELS = [
   "Company info (JSON, optional)",
   "Export format spec (JSON, optional)",
   "Active",
-  "Save vendor",
-  "New vendor",
+  "Save channel",
+  "New channel",
 ] as const;
 
 export function asVendorDirectoryRow(row: unknown): VendorDirectoryRow | null {
@@ -66,12 +76,22 @@ export function normalizeVendorDirectory(data: unknown): VendorDirectoryRow[] {
 }
 
 export function vendorDirectoryHref(row: VendorDirectoryRow): string {
-  return `/vendors/${row.id}`;
+  return `${CHANNELS_HREF}/${row.id}`;
 }
 
 export function vendorDirectoryMeta(row: VendorDirectoryRow): string {
   const mode = VENDOR_MODE_LABELS[row.deliveryMode];
   return row.active ? mode : `${mode} · inactive`;
+}
+
+/** Real facets only — delivery mode + Active/Inactive. No invented genre tags. */
+export function channelCardTags(row: VendorDirectoryRow): ChannelCardTag[] {
+  return [
+    { label: VENDOR_MODE_LABELS[row.deliveryMode], tone: "neutral" },
+    row.active
+      ? { label: "Active", tone: "active" }
+      : { label: "Inactive", tone: "muted" },
+  ];
 }
 
 export const VENDOR_DIRECTORY_FILTERS = [
