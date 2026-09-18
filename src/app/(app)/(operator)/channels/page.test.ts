@@ -81,7 +81,8 @@ describe("staff /channels card grid", () => {
     expect(html).not.toContain("data-staff-directory");
     expect(html).not.toContain("Vendors");
     expect(pageSrc).toContain("ChannelsStatusFilter");
-    expect(pageSrc).not.toContain("StatusFilter");
+    expect(pageSrc).not.toContain("@/components/layout/status-filter");
+    expect(pageSrc).not.toContain("import { StatusFilter }");
   });
 
   it("does not render VendorForm fields on the empty page", async () => {
@@ -201,7 +202,8 @@ describe("staff /channels card grid", () => {
     expect(html).not.toContain("Northwind Partners");
     expect(html).toContain("1 channel");
     expect(html).not.toContain('role="group"');
-    expect(pageSrc).not.toContain("StatusFilter");
+    expect(pageSrc).not.toContain("@/components/layout/status-filter");
+    expect(pageSrc).not.toContain("import { StatusFilter }");
   });
 
   it("does not invent fixture channels in the page source", () => {
