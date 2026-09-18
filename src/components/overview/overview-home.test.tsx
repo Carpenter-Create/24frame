@@ -272,6 +272,8 @@ describe("OverviewHome", () => {
         needsYou: [],
         weekPulse: [],
         aiNext: [],
+        news: [],
+        now: new Date("2026-09-18T18:00:00.000Z"),
       }),
     );
     const education = moduleChunk(html, "education");
