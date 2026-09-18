@@ -22,7 +22,7 @@ describe("product chrome lock", () => {
     expect(AGGREGATION_WORKSPACE).toBe("aggregation workspace");
     expect(COMPANY_AGGREGATION_WORKSPACE).toBe("company aggregation workspace");
     expect(SOCIAL_WORKSPACE).toBe("Social workspace");
-    expect(WORKSPACE_OVERVIEW_LABEL).toBe("Overview");
+    expect(WORKSPACE_OVERVIEW_LABEL).toBe("Home");
     expect(WORKSPACE_AGGREGATION_LABEL).toBe("Aggregation");
     expect(WORKSPACE_SOCIAL_LABEL).toBe("Social");
     expect(PRODUCT_NAME).not.toBe("24frame");

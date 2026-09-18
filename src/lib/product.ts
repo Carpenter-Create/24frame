@@ -2,11 +2,12 @@
 // and download brand hang off these. Identifiers stay (ask-globee,
 // /messages, is_gc_staff). Parent entity is Holdings LLC only.
 //
-// One 24Frame account. Four workspace destinations: Overview (pulse),
+// One 24Frame account. Four workspace destinations: Home (pulse),
 // Aggregation (catalog), Social (creator profile, groups, posts, DMs),
 // and Education consume (Route A /social/courses). Staff CMS is
 // /education under (operator). /messages stays Ask 24Frame AI. Org
-// invite stays Aggregation. Overview is a door, not a fifth brand pillar.
+// invite stays Aggregation. Home is a door, not a fifth brand pillar.
+// Not Social Home (`/social`).
 
 export const PRODUCT_NAME = "24Frame";
 export const ASSISTANT_NAME = "24Frame AI";
@@ -15,6 +16,6 @@ export const PARENT_ENTITY = "Global Content Holdings LLC";
 export const AGGREGATION_WORKSPACE = "aggregation workspace";
 export const COMPANY_AGGREGATION_WORKSPACE = "company aggregation workspace";
 export const SOCIAL_WORKSPACE = "Social workspace";
-export const WORKSPACE_OVERVIEW_LABEL = "Overview";
+export const WORKSPACE_OVERVIEW_LABEL = "Home";
 export const WORKSPACE_AGGREGATION_LABEL = "Aggregation";
 export const WORKSPACE_SOCIAL_LABEL = "Social";

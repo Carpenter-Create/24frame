@@ -2,9 +2,10 @@
 // last chosen mode the same way 24frame_sidebar_collapsed persists the
 // rail. Pathname still wins on destination routes so a /social bookmark
 // shows Social destinations even if the cookie still says aggregation.
-// Overview is the cross-workspace pulse at /overview — not Aggregation
-// home. Education consume land is Route A /social/courses. Staff CMS is
-// /education under (operator). Member workspace home stays Route A.
+// Home is the cross-workspace pulse at /home — not Aggregation
+// dashboard and not Social Home (`/social`). Education consume land is
+// Route A /social/courses. Staff CMS is /education under (operator).
+// Member workspace home stays Route A. /overview redirects to /home.
 
 export const WORKSPACE_COOKIE = "24frame_workspace";
 
@@ -38,14 +39,19 @@ export function parseWorkspaceCookie(value: string | undefined | null): Workspac
 }
 
 export function workspaceHome(mode: WorkspaceMode): string {
-  if (mode === "overview") return "/overview";
+  if (mode === "overview") return "/home";
   if (mode === "social") return "/social";
   if (mode === "education") return "/social/courses";
   return "/dashboard";
 }
 
 export function isOverviewPath(pathname: string): boolean {
-  return pathname === "/overview" || pathname.startsWith("/overview/");
+  return (
+    pathname === "/home" ||
+    pathname.startsWith("/home/") ||
+    pathname === "/overview" ||
+    pathname.startsWith("/overview/")
+  );
 }
 
 export function isEducationPath(pathname: string): boolean {

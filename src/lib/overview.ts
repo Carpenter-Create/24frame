@@ -12,7 +12,7 @@ import {
 } from "@/lib/product";
 import { WORKSPACE_EDUCATION_LABEL } from "@/lib/workspace-menu";
 
-// Overview workspace pulse. Deep links only — no invented money,
+// Home workspace pulse. Deep links only — no invented money,
 // unread, or course percent. Education % renders only when a real
 // progress value is supplied; there is no lesson_progress SoT.
 //
@@ -22,7 +22,7 @@ import { WORKSPACE_EDUCATION_LABEL } from "@/lib/workspace-menu";
 // mock already shows them; 1:4 / 1:120 do not. Pills stay in the
 // live unify-lead trailing cluster — never a content-row fork.
 
-export const OVERVIEW_HREF = "/overview";
+export const OVERVIEW_HREF = "/home";
 export const OVERVIEW_EDUCATION_LIMIT = 5;
 export const OVERVIEW_SOCIAL_AVATAR_LIMIT = 5;
 export const OVERVIEW_NEED_LIMIT = 5;
@@ -36,8 +36,8 @@ export const OVERVIEW_SOCIAL_ABSENT = [
 ] as const;
 
 export const OVERVIEW = {
-  nav: "Overview",
-  title: "Overview",
+  nav: "Home",
+  title: "Home",
   subtitle: "Cross-workspace pulse · deep links only",
   aggregation: WORKSPACE_AGGREGATION_LABEL,
   social: WORKSPACE_SOCIAL_LABEL,
@@ -62,7 +62,7 @@ export const OVERVIEW = {
   enterEducation: "Enter Education",
   needsYouEmpty: "Nothing needs you right now.",
   thisWeekEmpty: "No pulse for this week yet.",
-  noOrg: "Choose an organization to read Overview.",
+  noOrg: "Choose an organization to read Home.",
 } as const;
 
 export const OVERVIEW_AI_CHIPS = ASK_GLOBEE_TRY_PROMPTS.map((label) => ({

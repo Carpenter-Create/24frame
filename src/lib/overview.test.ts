@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { ASK_GLOBEE_TRY_PROMPTS } from "./ask-globee";
+import { SOCIAL_ROUTES } from "./social";
 import {
   OVERVIEW,
   OVERVIEW_AI_CHIPS,
@@ -23,9 +24,14 @@ import {
 } from "./overview";
 
 describe("Overview pulse SoT", () => {
-  it("keeps Overview as a pulse door with deep-link copy only", () => {
-    expect(OVERVIEW_HREF).toBe("/overview");
-    expect(OVERVIEW.title).toBe("Overview");
+  it("keeps Home as a pulse door with deep-link copy only", () => {
+    expect(OVERVIEW_HREF).toBe("/home");
+    expect(OVERVIEW_HREF).not.toBe(SOCIAL_ROUTES.home);
+    expect(OVERVIEW.title).toBe("Home");
+    expect(OVERVIEW.nav).toBe("Home");
+    const nextConfig = readFileSync(new URL("../../next.config.ts", import.meta.url), "utf8");
+    expect(nextConfig).toContain('source: "/overview"');
+    expect(nextConfig).toContain('destination: "/home"');
     expect(OVERVIEW.subtitle).toBe("Cross-workspace pulse · deep links only");
     expect(OVERVIEW.openDashboard).toBe("Open Dashboard →");
     expect(OVERVIEW.openSocial).toBe("Open Social →");

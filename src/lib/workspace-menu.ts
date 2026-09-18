@@ -5,7 +5,7 @@
 // accessible lanes. Pills stay in that live unify-lead
 // placement — do not move the cluster upper-left.
 // Not a page. Not a route. Not an account-menu row. Miss-list
-// is Overview | Aggregation | Social | Education. Member
+// is Home | Aggregation | Social | Education. Member
 // Education land is Route A /social/courses. Do not send
 // members to /education (staff CMS), /account/workspace, or
 // /settings/workspace. Staff Manage courses in Settings is a

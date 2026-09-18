@@ -23,7 +23,7 @@
 //
 // Four workspaces. Hide lanes the user/org lacks — no
 // dead / grey-lie pills. Single option → static label. Labels
-// stay Overview · Aggregation · Social · Education at every breakpoint —
+// stay Home · Aggregation · Social · Education at every breakpoint —
 // live unify-lead trailing cluster. Do not move the pills upper-left.
 // no Agg, Edu, or ellipsis-as-design. Tight width flexes the
 // trailing cluster (search yields); pills stay full words and
@@ -74,7 +74,7 @@ export const WORKSPACE_SWITCHER_ABSENT = [
 export const WORKSPACE_SWITCHER_SHORT_LABELS = ["Agg", "Edu"] as const;
 
 export const WORKSPACE_SWITCHER_MARK = {
-  overview: "O",
+  overview: "H",
   aggregation: "A",
   social: "S",
   education: "E",

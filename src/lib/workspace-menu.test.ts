@@ -18,7 +18,7 @@ import {
 const here = dirname(fileURLToPath(import.meta.url));
 
 describe("workspace menu copy", () => {
-  it("lists Overview, Aggregation, Social, and Education on Route A /social/courses", () => {
+  it("lists Home, Aggregation, Social, and Education on Route A /social/courses", () => {
     expect(WORKSPACE_MENU.title).toBe("Workspace");
     expect(WORKSPACE_MENU.title).toBe(USER_MENU.workspace);
     expect(WORKSPACE_MENU).not.toHaveProperty("back");
@@ -30,7 +30,7 @@ describe("workspace menu copy", () => {
       "education",
     ]);
     expect(WORKSPACE_MENU_CANDIDATES.map((option) => option.label)).toEqual([
-      "Overview",
+      "Home",
       "Aggregation",
       "Social",
       "Education",
@@ -46,19 +46,19 @@ describe("workspace menu copy", () => {
       "education",
     ]);
     expect(WORKSPACE_FLYOUT_OPTIONS.map((option) => option.label)).toEqual([
-      "Overview",
+      "Home",
       "Aggregation",
       "Social",
       "Education",
     ]);
     expect(availableWorkspaceOptions().map((option) => option.label)).toEqual([
-      "Overview",
+      "Home",
       "Aggregation",
       "Social",
       "Education",
     ]);
     expect(availableWorkspaceOptions().map((option) => option.href)).toEqual([
-      "/overview",
+      "/home",
       "/dashboard",
       "/social",
       "/social/courses",
@@ -72,7 +72,7 @@ describe("workspace menu copy", () => {
       false,
     );
     expect(WORKSPACE_MENU).not.toHaveProperty("href");
-    expect(workspaceModeLabel("overview")).toBe("Overview");
+    expect(workspaceModeLabel("overview")).toBe("Home");
     expect(workspaceModeLabel("aggregation")).toBe("Aggregation");
     expect(workspaceModeLabel("social")).toBe("Social");
     expect(workspaceModeLabel("education")).toBe("Education");

@@ -62,7 +62,7 @@ describe("workspace switcher header control", () => {
     expect(triggerSrc).not.toContain("WorkspaceMark");
   });
 
-  it("opens a quiet Workspaces heading, then Overview / Aggregation / Social / Education", () => {
+  it("opens a quiet Workspaces heading, then Home / Aggregation / Social / Education", () => {
     const html = renderToStaticMarkup(
       <WorkspaceSwitcher current="social" defaultOpen />,
     );
@@ -80,7 +80,7 @@ describe("workspace switcher header control", () => {
     expect(html).toContain('data-workspace-switcher-option="aggregation"');
     expect(html).toContain('data-workspace-switcher-option="social"');
     expect(html).toContain('data-workspace-switcher-option="education"');
-    expect(html).toContain("Overview");
+    expect(html).toContain("Home");
     expect(html).toContain("Aggregation");
     expect(html).toContain("Social");
     expect(html).toContain("Education");
@@ -116,7 +116,7 @@ describe("workspace switcher header control", () => {
     expect(html).toContain('data-workspace-switcher-segment="aggregation"');
     expect(html).toContain('data-workspace-switcher-segment="social"');
     expect(html).toContain('data-workspace-switcher-segment="education"');
-    expect(html).toContain("Overview");
+    expect(html).toContain("Home");
     expect(html).toContain("Aggregation");
     expect(html).toContain("Social");
     expect(html).toContain("Education");
