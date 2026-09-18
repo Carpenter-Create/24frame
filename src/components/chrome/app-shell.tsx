@@ -259,11 +259,13 @@ export function AppShell({
           Phone (Adam 2026-09-18): Asset 8 emblem on every workspace.
           Dest-rail phone (Aggregation / Education) is hamburger ·
           house gap · emblem · workspace pill. Home / Social: emblem
-          only — no hamburger. Emblem links workspace home; it does
-          not open the rail. Do not center the pill. Do not cluster
-          it with the avatar. Desktop keeps the trailing switcher +
-          avatar cluster. Brand sits on the full-width top, not a
-          second rail chrome. Period stays on the Dashboard org row.
+          only — no hamburger. Trailing is Social search (if Social)
+          · bell · avatar. Ask + theme live on the avatar sheet.
+          Emblem links workspace home; it does not open the rail. Do
+          not center the pill. Do not cluster it with the avatar.
+          Desktop keeps Ask · theme · switcher + avatar. Brand sits
+          on the full-width top, not a second rail chrome. Period
+          stays on the Dashboard org row.
           No org switcher on any route. Aggregation mid-lead stays
           empty. Education mounts a quiet course/video search
           immediately right of the logo on desktop, same

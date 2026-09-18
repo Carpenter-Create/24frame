@@ -4,15 +4,17 @@
 // Do not put overflow-hidden on the leading row or pill host —
 // the menu is absolute inside the host and must paint + receive
 // taps. Pill host min-w-0 is enough to truncate the name.
-// Trailing cluster on phone is sun/moon then
-// avatar — do not cluster the compact pill with that pair, do
-// not center it. Desktop md+ replaces the single-name+chevron
-// trigger with a sliding-pill cluster of available workspace
-// names (Adam lock 2026-09-17 “Try it”). Same house grammar as
-// Top Performing: active ink fill, idle muted grey. Trailing
-// header cluster: pills, then sun/moon, then avatar. Social
-// uses the same split. Phone keeps the compact name+menu — do
-// not force three labels.
+// Phone trailing grammar A (Adam 2026-09-18): Social search icon
+// (if Social) · bell · avatar. Ask 24Frame AI and sun/moon leave
+// this cluster on max-md and live on the avatar sheet. Do not
+// cluster the compact pill with the trailing pair, do not center
+// it. Desktop md+ replaces the single-name+chevron trigger with a
+// sliding-pill cluster of available workspace names (Adam lock
+// 2026-09-17 “Try it”). Same house grammar as Top Performing:
+// active ink fill, idle muted grey. Desktop trailing: pills, then
+// Ask, then sun/moon, then bell, then avatar. Social uses the same
+// split. Phone keeps the compact name+menu — do not force three
+// labels.
 // No rail / header-lead #321 duplicate. Rail top-left stays the
 // static 24 brand. Social-only icons sit left of the Social slot
 // so the avatar x does not shift. Do not invent Move / search.
@@ -159,6 +161,11 @@ export const WORKSPACE_SWITCHER_OPTION_CHECK_CLASS = "text-accent";
 
 export const APP_HEADER_TRAILING_CLUSTER_CLASS =
   "flex min-w-0 items-center gap-[var(--space-1)] md:gap-[var(--space-2)] max-md:shrink-0";
+
+// Ask + theme stay in the desktop trailing cluster. Phone hides
+// this wrap (`hidden`) so md+ `contents` keeps Ask · theme as
+// flex siblings of bell · avatar.
+export const APP_HEADER_DESKTOP_TRAILING_CLASS = "hidden md:contents";
 
 export const APP_HEADER_EDUCATION_SEARCH_PHONE_CLASS = HOUSE_LEAD_UNDER_NAV_CLASS;
 

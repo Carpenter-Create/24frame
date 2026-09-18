@@ -3,12 +3,14 @@
 // Identity is avatar + name + email from the same values /settings/profile
 // would show. Photo is the signed avatars/{user-id}/avatar face, or the
 // email initial when empty. Always render both fields. No dashes, no invented
-// local-part name. Items after the Identity hairline are
-// USER_MENU_ACTIONS — the same list on mobile and desktop.
-// Workspace is the header control, not this menu. Theme lives on
-// the header sun/moon — not a menu row, not a page. Destinations
-// use existing routes only — not /account/workspace or
-// /account/appearance. Company stays off this menu. Log out +
+// local-part name. Desktop items after the Identity hairline are
+// USER_MENU_ACTIONS. Phone uses USER_MENU_PHONE_ACTIONS
+// (Profile · Settings · 24Frame AI · Appearance). Workspace is
+// the header control, not this menu. Desktop theme stays the
+// header sun/moon. Phone Appearance is the same-sheet drill-in —
+// not a page. Destinations use existing routes only — not
+// /account/workspace or /account/appearance. Company stays off
+// this menu. Log out +
 // version are the footer group — not a
 // packed list row. Hairline only under Log out. No hairline above
 // Log out. #209 #210 #211 hug / hairline-sandwich stay void on
@@ -34,7 +36,12 @@
 
 import { accountPhotoSrc } from "@/lib/account-avatar";
 import { ASK_ASSISTANT } from "@/lib/product";
-import { USER_MENU_ACTIONS, userMenuAvatarInitial, userMenuName } from "@/lib/user-menu";
+import {
+  USER_MENU_ACTIONS,
+  USER_MENU_PHONE_ACTIONS,
+  userMenuAvatarInitial,
+  userMenuName,
+} from "@/lib/user-menu";
 
 export const ACCOUNT_SHEET = {
   close: "Close account",
@@ -60,11 +67,12 @@ export const ACCOUNT_SHEET_ABSENT = [
   "Phone",
   "Job",
   "Legal",
-  "Appearance",
 ] as const;
 
-// One source, both instances. Sheet chrome may differ; labels may not.
+// Desktop panel. Phone sheet uses ACCOUNT_SHEET_PHONE_ITEMS.
 export const ACCOUNT_SHEET_ITEMS = USER_MENU_ACTIONS;
+
+export const ACCOUNT_SHEET_PHONE_ITEMS = USER_MENU_PHONE_ACTIONS;
 
 // 544:561 / 537:557 — sides 24, bottom 32 (sheet pad B). 32 clear
 // under the 4px half-bar (padT 36 = 4+32) so the bar does not eat
@@ -193,6 +201,31 @@ export const ACCOUNT_MENU_DROPDOWN_SCROLL_CLASS = "flex w-full shrink-0 flex-col
 // Not h-[48px]. Not leftover grow. Not a 570 / 672 floor.
 export const ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS =
   "h-[var(--space-12)] w-full shrink-0";
+
+// Phone Appearance row — same pad as sheet items. Current mode
+// under the label. Chevron 16. No inset card. Desktop does not
+// mount this row.
+export const ACCOUNT_MENU_APPEARANCE_ROW_CLASS =
+  "relative flex w-full items-center justify-between py-[var(--space-4)] text-left text-[length:var(--text-base)] font-normal leading-5 text-ink";
+
+export const ACCOUNT_MENU_APPEARANCE_COPY_CLASS =
+  "relative z-10 flex min-w-0 flex-col items-start gap-[var(--space-2)]";
+
+export const ACCOUNT_MENU_APPEARANCE_CHEVRON_CLASS = "relative z-10 shrink-0";
+
+export const ACCOUNT_MENU_APPEARANCE_MODE_CLASS =
+  "t-body-sm leading-4 text-ink-2";
+
+export const ACCOUNT_MENU_APPEARANCE_FLYOUT_HELPER_CLASS =
+  "t-body-sm leading-4 text-ink-2";
+
+export const ACCOUNT_MENU_APPEARANCE_FLYOUT_ROW_CLASS =
+  "flex w-full items-start gap-[var(--space-2)] p-[var(--space-4)] text-left text-[length:var(--text-base)] font-normal leading-5 text-ink";
+
+// Mobile Appearance drill-in — same sheet, replaces the list face.
+// House rows. Not 618:785. Not a card. Not 613:888.
+export const ACCOUNT_SHEET_APPEARANCE_COPY_CLASS =
+  "flex min-w-0 flex-col items-start gap-[var(--space-2)]";
 
 export type AccountSheetIdentity = {
   avatarInitial: string;

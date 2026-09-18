@@ -4,14 +4,16 @@ import {
   USER_MENU,
   USER_MENU_ABSENT,
   USER_MENU_ACTIONS,
+  USER_MENU_PHONE_ACTIONS,
   userMenuAvatarInitial,
   userMenuName,
   userMenuPanel,
   userMenuVersion,
 } from "./user-menu";
+import { ASSISTANT_NAME } from "./product";
 
 describe("user menu lock", () => {
-  it("keeps Mercury order: Profile, Settings — Workspace and theme are not menu rows", () => {
+  it("keeps desktop Mercury order: Profile, Settings — phone adds 24Frame AI + Appearance", () => {
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).toEqual([
       "profile",
       "settings",
@@ -26,6 +28,14 @@ describe("user menu lock", () => {
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("appearance");
     expect(USER_MENU_ACTIONS.map((item) => item.label)).not.toContain("Workspace");
     expect(USER_MENU_ACTIONS.map((item) => item.label)).not.toContain("Appearance");
+    expect(USER_MENU_PHONE_ACTIONS.map((item) => item.kind)).toEqual([
+      "profile",
+      "settings",
+      "askAssistant",
+      "appearance",
+    ]);
+    expect(USER_MENU.askAssistant).toBe(ASSISTANT_NAME);
+    expect(USER_MENU.askAssistantHref).toBe("/messages");
   });
 
   it("points Profile and Settings at existing /settings doors — Appearance is not a page", () => {
@@ -55,7 +65,7 @@ describe("user menu lock", () => {
     expect(USER_MENU_ACTIONS).toHaveLength(2);
     expect(USER_MENU_ABSENT).toContain("Workspace");
     expect(USER_MENU_ABSENT).toContain("Workspaces");
-    expect(USER_MENU_ABSENT).toContain("Appearance");
+    expect(USER_MENU_ABSENT).not.toContain("Appearance");
   });
 
   it("does not invent /account/appearance, /account/profile, Company, Phone, Job, or leftovers", () => {
