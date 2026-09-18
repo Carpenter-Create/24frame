@@ -51,10 +51,10 @@ type Org = { id: string; name: string };
 // on main — not on a wrapper that includes the header (G9). The sidebar collapses to an icon-only rail; the
 // state persists in a cookie (read by the (app) layout → `defaultCollapsed`, so there's no
 // flash) and, when collapsed, overrides `--sidebar-width` so the header + main follow.
-// Phone: the rail is gone (hidden + width tokens collapse). Destinations
+// Phone: the rail is gone (hidden + width tokens collapse). Local dests
 // that used to live in the hamburger live on HousePhoneDestChips under
-// the top — client destinations, or those plus staff destinations when
-// isGcStaff. No hamburger. Desktop 1:2 rail is unchanged.
+// the top — client dests, or those plus staff dests when isGcStaff. No
+// hamburger. Desktop 1:2 rail is unchanged.
 // Social mounts the same RailCollapse + cookie + width-var path as
 // Aggregation · Education. Do not pin Social expanded or invent a
 // Social-only chevron. /settings paths: the Access destinations leave.
@@ -262,9 +262,9 @@ export function AppShell({
       )}
 
       {/* Full-width top + dest side nav — same HouseLeadChrome as Social.
-          Phone (Adam 2026-09-18 dest-chip amend): Asset 8 emblem on
-          every workspace. Emblem owns the left alone. No hamburger.
-          Destinations that used to live in the Agg/Edu hamburger live
+          Phone (Adam 2026-09-18 dest-chip amend): Asset 8 emblem on every workspace.
+          Emblem owns the left alone. No hamburger.
+          Local dests that used to live in the Agg/Edu hamburger live
           on HousePhoneDestChips under the top. Home has no dest chip
           row. Phone top has no workspace pill.
           HousePhoneBottomNav switches Home · Social · Aggregation ·
