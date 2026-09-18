@@ -31,7 +31,7 @@ export function HousePeriodPresets({
   closeLabel = "Close",
   defaultOpen = false,
   menuAlign = "start",
-  chipAttrs,
+  chipDataAttr,
 }: {
   value: string;
   items: readonly HousePeriodPresetItem[];
@@ -40,7 +40,8 @@ export function HousePeriodPresets({
   closeLabel?: string;
   defaultOpen?: boolean;
   menuAlign?: "start" | "end";
-  chipAttrs?: (key: string) => Record<string, string | undefined>;
+  /** Serializable chip data-* name. Never a function — RSC cannot pass one here. */
+  chipDataAttr?: string;
 }) {
   const router = useRouter();
   const current = items.find((item) => item.key === value);
@@ -69,7 +70,7 @@ export function HousePeriodPresets({
                 REPORTS_PERIOD_CHIP_CLASS,
                 on ? REPORTS_PERIOD_CHIP_ON_CLASS : REPORTS_PERIOD_CHIP_OFF_CLASS,
               )}
-              {...chipAttrs?.(item.key)}
+              {...(chipDataAttr ? { [chipDataAttr]: item.key } : {})}
             >
               {item.label}
             </Link>

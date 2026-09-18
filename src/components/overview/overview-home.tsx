@@ -102,7 +102,7 @@ export function OverviewHome({
             ariaLabel={DASHBOARD_ADMIN.period}
             sheetTitle={DASHBOARD_ADMIN.period}
             closeLabel={DASHBOARD_ADMIN.close}
-            chipAttrs={(key) => ({ "data-overview-revenue-period-chip": key })}
+            chipDataAttr="data-overview-revenue-period-chip"
           />
         </div>
         <div className="border-t border-hairline px-[var(--space-4)] py-[var(--space-4)]">

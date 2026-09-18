@@ -28,7 +28,7 @@ describe("HousePeriodPresets", () => {
         items: ITEMS,
         ariaLabel: "Period",
         defaultOpen: true,
-        chipAttrs: (key) => ({ "data-overview-revenue-period-chip": key }),
+        chipDataAttr: "data-overview-revenue-period-chip",
       }),
     );
 
