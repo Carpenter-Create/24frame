@@ -1,18 +1,17 @@
 import { DASHBOARD_HOME } from "@/lib/dashboard-home";
-import { UNPAGINATED_MAX, probeRange, splitProbe } from "@/lib/list-bounds";
-import type { createClient } from "@/lib/supabase/server";
+import { UNPAGINATED_MAX } from "@/lib/list-bounds";
+import { NEWS_INGEST_FUNCTION } from "@/lib/news-aws";
 
 // Industry News — house SoT (Adam lock 2026-09-18).
 // Name: News. Home: latest 12 + View all. /news: 30-day history.
-// Link-out cards only. Allowlist verified 2026-09-18. Copy lives here.
-
-type ServerClient = Awaited<ReturnType<typeof createClient>>;
+// Link-out cards only. Allowlist verified 2026-09-18. Storage is AWS
+// DynamoDB — not Supabase. Copy lives here.
 
 export const NEWS_HREF = "/news";
-export const NEWS_INGEST_PATH = "/api/cron/news-ingest";
+export const NEWS_INGEST_PATH = NEWS_INGEST_FUNCTION;
 export const NEWS_HOME_CAP = 12;
 export const NEWS_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
-export const NEWS_CARD_SELECT = "id, title, url, source, published_at, image_url";
+export const NEWS_READ_REVALIDATE_SECONDS = 60;
 
 export const NEWS_PAGE = {
   title: "News",
@@ -42,34 +41,44 @@ export type NewsSource = {
   id: NewsSourceId;
   label: string;
   feedUrl: string;
+  enabled: boolean;
 };
 
-// Verified 2026-09-18. Do not add a feed that is not on this list.
+// Verified 2026-09-18. Kill switch: enabled: false skips ingest.
+// Dynamo source health enabled=false is a second kill without a deploy.
 export const NEWS_SOURCES = [
-  { id: "indiewire", label: "IndieWire", feedUrl: "https://www.indiewire.com/feed/" },
-  { id: "variety", label: "Variety", feedUrl: "https://variety.com/feed/" },
-  { id: "deadline", label: "Deadline", feedUrl: "https://deadline.com/feed/" },
+  { id: "indiewire", label: "IndieWire", feedUrl: "https://www.indiewire.com/feed/", enabled: true },
+  { id: "variety", label: "Variety", feedUrl: "https://variety.com/feed/", enabled: true },
+  { id: "deadline", label: "Deadline", feedUrl: "https://deadline.com/feed/", enabled: true },
   {
     id: "hollywood-reporter",
     label: "Hollywood Reporter",
     feedUrl: "https://www.hollywoodreporter.com/feed/",
+    enabled: true,
   },
-  { id: "tvline", label: "TVLine", feedUrl: "https://www.tvline.com/feed/" },
-  { id: "no-film-school", label: "No Film School", feedUrl: "https://nofilmschool.com/rss.xml" },
+  { id: "tvline", label: "TVLine", feedUrl: "https://www.tvline.com/feed/", enabled: true },
+  {
+    id: "no-film-school",
+    label: "No Film School",
+    feedUrl: "https://nofilmschool.com/rss.xml",
+    enabled: true,
+  },
   {
     id: "filmmaker-magazine",
     label: "Filmmaker Magazine",
     feedUrl: "https://filmmakermagazine.com/feed/",
+    enabled: true,
   },
-  { id: "moviemaker", label: "MovieMaker", feedUrl: "https://www.moviemaker.com/feed/" },
-  { id: "joblo", label: "JoBlo", feedUrl: "https://www.joblo.com/feed/" },
-  { id: "film-threat", label: "Film Threat", feedUrl: "https://filmthreat.com/feed/" },
+  { id: "moviemaker", label: "MovieMaker", feedUrl: "https://www.moviemaker.com/feed/", enabled: true },
+  { id: "joblo", label: "JoBlo", feedUrl: "https://www.joblo.com/feed/", enabled: true },
+  { id: "film-threat", label: "Film Threat", feedUrl: "https://filmthreat.com/feed/", enabled: true },
   {
     id: "screen-daily",
     label: "Screen Daily",
     feedUrl: "https://www.screendaily.com/45202.rss",
+    enabled: true,
   },
-] as const satisfies readonly NewsSource[];
+] satisfies readonly NewsSource[];
 
 const SOURCE_BY_ID = new Map<NewsSourceId, NewsSource>(
   NEWS_SOURCES.map((source) => [source.id, source]),
@@ -109,33 +118,4 @@ export function newsInWindow(iso: string, now: Date): boolean {
 
 export function overviewNewsHeadlines<T>(rows: readonly T[], cap = NEWS_HOME_CAP): T[] {
   return rows.slice(0, cap);
-}
-
-export async function loadNewsItems(
-  supabase: ServerClient,
-  input: { limit: number; now: Date },
-): Promise<NewsListResult> {
-  const cutoff = newsWindowStart(input.now).toISOString();
-  const { data, error } = await supabase
-    .from("news_items")
-    .select(NEWS_CARD_SELECT)
-    .gte("published_at", cutoff)
-    .lte("published_at", input.now.toISOString())
-    .order("published_at", { ascending: false })
-    .range(...probeRange(input.limit));
-  if (error) return { rows: [], truncated: false, failed: true };
-  const { rows, truncated } = splitProbe((data ?? []) as NewsItem[], input.limit);
-  return { rows, truncated, failed: false };
-}
-
-export async function loadHomeNews(supabase: ServerClient, now: Date): Promise<NewsItem[]> {
-  const loaded = await loadNewsItems(supabase, { limit: NEWS_HOME_CAP, now });
-  return overviewNewsHeadlines(loaded.failed ? [] : loaded.rows);
-}
-
-export async function loadNewsHistory(
-  supabase: ServerClient,
-  now: Date,
-): Promise<NewsListResult> {
-  return loadNewsItems(supabase, { limit: UNPAGINATED_MAX, now });
 }

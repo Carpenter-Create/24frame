@@ -1,13 +1,9 @@
-import "server-only";
-
 import { NEWS_SOURCES, type NewsSourceId } from "@/lib/news";
 import { parseNewsFeed, type NormalizedNewsItem } from "@/lib/news-rss";
-import type { createAdminClient } from "@/lib/supabase/admin";
+import { createNewsStore, newsSourceIsLive, type NewsStore } from "@/lib/news-store";
 
-// Scheduled News ingest. Fail-soft per source. Persist only — never
-// fan-out RSS on a page read. Service-role writes; unique URL skip.
-
-type AdminClient = ReturnType<typeof createAdminClient>;
+// Scheduled News ingest (Lambda + EventBridge). Fail-soft per source.
+// Persist to DynamoDB only — never fan-out RSS on a page read.
 
 export const NEWS_FEED_TIMEOUT_MS = 8_000;
 export const NEWS_FEED_MAX_BYTES = 1_500_000;
@@ -18,6 +14,7 @@ export type NewsIngestSourceResult = {
   source: NewsSourceId;
   fetched: number;
   inserted: number;
+  skipped?: boolean;
   error?: string;
 };
 
@@ -26,6 +23,7 @@ export type NewsIngestSummary = {
   fetched: number;
   inserted: number;
   failed: number;
+  skipped: number;
   results: NewsIngestSourceResult[];
 };
 
@@ -56,29 +54,6 @@ export async function fetchNewsFeedXml(
   }
 }
 
-export async function persistNewsItems(
-  supabase: AdminClient,
-  items: readonly NormalizedNewsItem[],
-): Promise<number> {
-  if (items.length === 0) return 0;
-  const { data, error } = await supabase
-    .from("news_items")
-    .upsert(
-      items.map((item) => ({
-        title: item.title,
-        url: item.url,
-        canonical_url: item.canonical_url,
-        source: item.source,
-        published_at: item.published_at,
-        image_url: item.image_url,
-      })),
-      { onConflict: "canonical_url", ignoreDuplicates: true },
-    )
-    .select("id");
-  if (error) throw new Error(error.message);
-  return data?.length ?? 0;
-}
-
 async function runBatched<T, R>(
   items: readonly T[],
   worker: (item: T) => Promise<R>,
@@ -92,27 +67,63 @@ async function runBatched<T, R>(
   return results;
 }
 
+async function markHealth(
+  store: NewsStore,
+  source: NewsSourceId,
+  patch: Partial<Pick<NewsIngestSourceResult, "error">> & { now: Date },
+): Promise<void> {
+  const prior = (await store.getHealth(source)) ?? {
+    source,
+    enabled: true,
+    last_success_at: null,
+    last_error: null,
+    last_error_at: null,
+  };
+  const at = patch.now.toISOString();
+  await store.putHealth({
+    ...prior,
+    last_success_at: patch.error ? prior.last_success_at : at,
+    last_error: patch.error ?? null,
+    last_error_at: patch.error ? at : null,
+  });
+}
+
 export async function ingestNewsFeeds(input: {
-  supabase: AdminClient;
+  store?: NewsStore;
   now?: Date;
   fetchXml?: (url: string) => Promise<string>;
   persist?: (items: readonly NormalizedNewsItem[]) => Promise<number>;
 }): Promise<NewsIngestSummary> {
   const now = input.now ?? new Date();
+  const store = input.store ?? createNewsStore();
   const fetchXml = input.fetchXml ?? ((url: string) => fetchNewsFeedXml(url));
-  const persist = input.persist ?? ((items: readonly NormalizedNewsItem[]) => persistNewsItems(input.supabase, items));
+  const persist = input.persist ?? ((items: readonly NormalizedNewsItem[]) => store.putItems(items, now));
 
   const results = await runBatched(
     NEWS_SOURCES,
     async (source): Promise<NewsIngestSourceResult> => {
+      if (!(await newsSourceIsLive(store, source.id))) {
+        console.log(JSON.stringify({ msg: "news ingest skip", source: source.id }));
+        return { source: source.id, fetched: 0, inserted: 0, skipped: true };
+      }
       try {
         const xml = await fetchXml(source.feedUrl);
         const items = parseNewsFeed(xml, source.id, now);
         const inserted = await persist(items);
+        await markHealth(store, source.id, { now });
+        console.log(
+          JSON.stringify({
+            msg: "news ingest source",
+            source: source.id,
+            fetched: items.length,
+            inserted,
+          }),
+        );
         return { source: source.id, fetched: items.length, inserted };
       } catch (err) {
         const message = err instanceof Error ? err.message : "feed failed";
-        console.error(`[news:ingest] ${source.id} failed: ${message}`);
+        console.error(JSON.stringify({ msg: "news ingest fail", source: source.id, error: message }));
+        await markHealth(store, source.id, { now, error: message });
         return { source: source.id, fetched: 0, inserted: 0, error: message };
       }
     },
@@ -124,6 +135,7 @@ export async function ingestNewsFeeds(input: {
     fetched: results.reduce((sum, row) => sum + row.fetched, 0),
     inserted: results.reduce((sum, row) => sum + row.inserted, 0),
     failed: results.filter((row) => row.error).length,
+    skipped: results.filter((row) => row.skipped).length,
     results,
   };
 }

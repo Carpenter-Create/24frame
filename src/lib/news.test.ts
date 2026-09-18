@@ -1,19 +1,21 @@
 import { readFileSync } from "node:fs";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
+import { NEWS_INGEST_FUNCTION } from "./news-aws";
 import {
   NEWS_HOME_CAP,
   NEWS_HREF,
   NEWS_INGEST_PATH,
   NEWS_PAGE,
+  NEWS_READ_REVALIDATE_SECONDS,
   NEWS_SOURCES,
   NEWS_WINDOW_MS,
-  loadNewsItems,
   newsInWindow,
   newsSourceLabel,
   newsWindowStart,
   overviewNewsHeadlines,
 } from "./news";
+import { loadNewsItems, memoryNewsStore } from "./news-store";
 
 const NOW = new Date("2026-09-18T18:00:00.000Z");
 
@@ -35,7 +37,8 @@ describe("News SoT", () => {
     expect(NEWS_PAGE.viewAll).toBe("View all");
     expect(NEWS_HOME_CAP).toBe(12);
     expect(NEWS_WINDOW_MS).toBe(30 * 24 * 60 * 60 * 1000);
-    expect(NEWS_INGEST_PATH).toBe("/api/cron/news-ingest");
+    expect(NEWS_READ_REVALIDATE_SECONDS).toBe(60);
+    expect(NEWS_INGEST_PATH).toBe(NEWS_INGEST_FUNCTION);
     expect(NEWS_SOURCES.map((source) => source.label)).toEqual([
       "IndieWire",
       "Variety",
@@ -49,10 +52,11 @@ describe("News SoT", () => {
       "Film Threat",
       "Screen Daily",
     ]);
+    expect(NEWS_SOURCES.every((source) => source.enabled)).toBe(true);
     expect(newsSourceLabel("variety")).toBe("Variety");
     expect(JSON.stringify(NEWS_PAGE)).not.toMatch(/summary|rewrite|republish/i);
-    expect(readFileSync("vercel.json", "utf8")).toContain(NEWS_INGEST_PATH);
-    expect(readFileSync("vercel.json", "utf8")).toContain('"*/30 * * * *"');
+    expect(readFileSync("vercel.json", "utf8")).not.toContain("news-ingest");
+    expect(readFileSync("docs/infra/news-aws-setup.md", "utf8")).toContain(NEWS_INGEST_FUNCTION);
   });
 
   it("caps Home at 12 and hides items outside the 30-day window", () => {
@@ -72,24 +76,11 @@ describe("News SoT", () => {
 });
 
 describe("loadNewsItems", () => {
-  it("asks the table for the window and bound, and does not fan out RSS", async () => {
-    const rows = Array.from({ length: 13 }, (_, i) => item(i + 1, "2026-09-17T12:00:00.000Z"));
-    const range = vi.fn(async () => ({ data: rows, error: null }));
-    const supabase = {
-      from: vi.fn(() => ({
-        select: vi.fn(() => ({
-          gte: vi.fn(() => ({
-            lte: vi.fn(() => ({
-              order: vi.fn(() => ({ range })),
-            })),
-          })),
-        })),
-      })),
-    };
-
-    const loaded = await loadNewsItems(supabase as never, { limit: 12, now: NOW });
-    expect(supabase.from).toHaveBeenCalledWith("news_items");
-    expect(range).toHaveBeenCalledWith(0, 12);
+  it("reads the store window and does not fan out RSS", async () => {
+    const store = memoryNewsStore(
+      Array.from({ length: 13 }, (_, i) => item(i + 1, "2026-09-17T12:00:00.000Z")),
+    );
+    const loaded = await loadNewsItems({ limit: 12, now: NOW, store });
     expect(loaded.rows).toHaveLength(12);
     expect(loaded.truncated).toBe(true);
     expect(loaded.failed).toBe(false);

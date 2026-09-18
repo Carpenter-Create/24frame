@@ -1969,39 +1969,6 @@ export type Database = {
           },
         ]
       }
-      news_items: {
-        Row: {
-          canonical_url: string
-          fetched_at: string
-          id: string
-          image_url: string | null
-          published_at: string
-          source: string
-          title: string
-          url: string
-        }
-        Insert: {
-          canonical_url: string
-          fetched_at?: string
-          id?: string
-          image_url?: string | null
-          published_at: string
-          source: string
-          title: string
-          url: string
-        }
-        Update: {
-          canonical_url?: string
-          fetched_at?: string
-          id?: string
-          image_url?: string | null
-          published_at?: string
-          source?: string
-          title?: string
-          url?: string
-        }
-        Relationships: []
-      }
       notification_reads: {
         Row: {
           notification_id: string

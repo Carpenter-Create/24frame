@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { NEWS_PAGE } from "@/lib/news";
-import { loadNewsHistory } from "@/lib/news";
+import { loadNewsHistory } from "@/lib/news-store";
 import { getOrgContext } from "@/lib/supabase/context";
 import NewsPage from "./page";
 
@@ -11,14 +11,13 @@ vi.mock("next/navigation", () => ({
     throw new Error(`REDIRECT:${to}`);
   }),
 }));
-vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
-vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn(async () => ({})),
+vi.mock("next/cache", () => ({
+  unstable_cache: (fn: () => Promise<unknown>) => fn,
 }));
-vi.mock("@/lib/news", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/lib/news")>();
-  return { ...actual, loadNewsHistory: vi.fn() };
-});
+vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
+vi.mock("@/lib/news-store", () => ({
+  loadNewsHistory: vi.fn(),
+}));
 
 function ctx() {
   return {

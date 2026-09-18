@@ -50,10 +50,12 @@ vi.mock("@/lib/finance", async (importOriginal) => {
 vi.mock("@/lib/finance-recipient-load", () => ({
   loadRecipientDashboard: vi.fn(async () => null),
 }));
-vi.mock("@/lib/news", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/lib/news")>();
-  return { ...actual, loadHomeNews: vi.fn(async () => []) };
-});
+vi.mock("@/lib/news-store", () => ({
+  loadHomeNews: vi.fn(async () => []),
+}));
+vi.mock("next/cache", () => ({
+  unstable_cache: (fn: () => Promise<unknown>) => fn,
+}));
 
 function ctx() {
   return {
