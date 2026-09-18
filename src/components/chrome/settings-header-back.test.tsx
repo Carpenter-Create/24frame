@@ -89,7 +89,7 @@ describe("SettingsHeaderBack", () => {
     ).toContain("HOUSE_LEAD_PHONE_PAD_CLASS");
     expect(SETTINGS_HEADER_PAD_CLASS).toBe(MOBILE_CHROME_LEAD_PAD_CLASS);
     expect(shellSrc).toContain(
-      "<MobileNavSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />",
+      "<DestChipsSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />",
     );
     expect(accountSrc).toContain("flex h-8 w-8 items-center justify-center rounded-full");
     expect(accountSrc).toContain("md:hidden");

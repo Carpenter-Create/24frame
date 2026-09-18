@@ -1,14 +1,15 @@
 // Mercury workspace switcher. Lives in lib/, not JSX.
-// Phone Option 2 + Apple addendum (Adam 2026-09-18): workspace
+// Phone Option 2 dest-chip amend (Adam 2026-09-18): workspace
 // switching lives on HousePhoneBottomNav. Phone top has no
-// workspace pill. Emblem owns the left alone — hamburger is not
-// co-leading. Leading air (settings back ↔ emblem) is --space-3
+// workspace pill. Emblem owns the left alone — no hamburger,
+// leading or trailing. Destinations live on HousePhoneDestChips
+// under the top. Leading air (settings back ↔ emblem) is --space-3
 // (12). Not --space-1. Do not put overflow-hidden on the leading
 // row (#412).
-// Phone trailing: [search if Social] [☰ if dest rail] [bell]
-// [avatar], with --chrome-gutter so the avatar is not flush. Ask
-// 24Frame AI and sun/moon leave this cluster on max-md and live
-// on the avatar sheet. Do not center the dest hamburger.
+// Phone trailing: [search if needed] [bell] [avatar], with
+// --chrome-gutter so the avatar is not flush. Ask 24Frame AI and
+// sun/moon leave this cluster on max-md and live on the avatar
+// sheet. Do not reintroduce a dest hamburger.
 // Desktop md+ replaces the single-name+chevron trigger with a
 // sliding-pill cluster of available workspace names (Adam lock
 // 2026-09-17 “Try it”). Same house grammar as Top Performing:

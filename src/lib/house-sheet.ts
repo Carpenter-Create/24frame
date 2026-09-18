@@ -33,8 +33,8 @@ export const SHEET_GROUP_LABEL_CLASS =
 export const SHEET_GROUP_ITEM_CLASS =
   "flex w-full items-center justify-between text-[length:var(--text-base)] font-normal leading-5 text-ink";
 
-// App-sheet motion — one duration/easing for the nav hamburger and the
-// account instance. Rise from the bottom, ease-out, no bounce. Reduced
+// App-sheet motion — one duration/easing for the account instance.
+// Rise from the bottom, ease-out, no bounce. Reduced
 // motion skips the slide. Do not restyle per page.
 export const APP_SHEET_MOTION_DURATION_MS = 320;
 export const APP_SHEET_MOTION_EASING = "ease-out";

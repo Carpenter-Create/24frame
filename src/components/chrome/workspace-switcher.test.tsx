@@ -269,7 +269,7 @@ describe("workspace switcher placement", () => {
     expect(leadSrc).toContain("APP_HEADER_TRAILING_CLUSTER_CLASS");
     expect(leadSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(1);
     expect(shellSrc).toContain("<HouseLeadChrome");
-    expect(shellSrc).toContain("MobileNavSlot");
+    expect(shellSrc).toContain("DestChipsSlot");
     const leading = leadSrc.slice(
       leadSrc.indexOf("data-app-header-leading"),
       leadSrc.indexOf("data-app-header-trailing"),

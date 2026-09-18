@@ -23,12 +23,12 @@ const here = dirname(fileURLToPath(import.meta.url));
 const tokens = readFileSync(join(here, "../app/tokens.css"), "utf8");
 const shellSrc = readFileSync(join(here, "../components/chrome/app-shell.tsx"), "utf8");
 const leadLibSrc = readFileSync(join(here, "house-lead-chrome.ts"), "utf8");
-const navSrc = readFileSync(join(here, "../components/chrome/mobile-nav.tsx"), "utf8");
+const destsSrc = readFileSync(join(here, "../components/chrome/house-phone-dest-chips.tsx"), "utf8");
 const landingSrc = readFileSync(join(here, "../components/messages/ask-globee-landing.tsx"), "utf8");
 const threadSrc = readFileSync(join(here, "../components/messages/ask-globee-thread.tsx"), "utf8");
 
-describe("mobile chrome hamburger / clock lock", () => {
-  it("shares lead inset, 44 hit, and 16 glyph between hamburger and clock", () => {
+describe("mobile chrome clock lock", () => {
+  it("shares lead inset, 44 hit, and 16 glyph for the Ask Globee clock", () => {
     expect(tokens).toMatch(/--space-6:\s*1\.5rem/);
     expect(tokens).toMatch(/--content-inset:\s*48px;/);
     expect(MOBILE_CHROME_LEAD_PAD_PX).toBe(24);
@@ -67,19 +67,16 @@ describe("mobile chrome hamburger / clock lock", () => {
     expect(clockCenter).toBe(hamburgerCenter);
   });
 
-  it("is consumed by the header hamburger and the Ask Globee clock, not the thread", () => {
+  it("is consumed by the Ask Globee clock, not dest chips or the thread", () => {
     expect(leadLibSrc).toContain("HOUSE_LEAD_PHONE_PAD_CLASS");
     expect(leadLibSrc).toContain("HOUSE_PHONE_TRAILING_GUTTER_CLASS");
     expect(leadLibSrc).toContain("HOUSE_CHROME_GUTTER_X_CLASS");
     expect(shellSrc).toContain('data-app-messages-frame=""');
     expect(shellSrc).toContain("p-[var(--content-inset)]");
 
-    expect(navSrc).toContain("MOBILE_CHROME_HAMBURGER_BUTTON_CLASS");
-    expect(navSrc).toContain("MOBILE_CHROME_ICON_CLASS");
-    expect(navSrc).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
-    expect(navSrc).not.toContain("MOBILE_CHROME_ICON_STROKE");
-    expect(navSrc).toContain("data-mobile-nav-trigger");
-    expect(navSrc).not.toContain("flex size-4 shrink-0 items-center justify-center text-ink-3 md:hidden");
+    expect(destsSrc).not.toContain("MOBILE_CHROME_HAMBURGER_BUTTON_CLASS");
+    expect(destsSrc).not.toContain("data-mobile-nav-trigger");
+    expect(destsSrc).toContain("data-house-phone-dest-chips");
 
     expect(landingSrc).toContain("ASK_GLOBEE_CLOCK_BUTTON_CLASS");
     expect(landingSrc).toContain("MOBILE_CHROME_CLOCK_DOCK_CLASS");

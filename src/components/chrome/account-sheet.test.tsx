@@ -53,7 +53,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const src = readFileSync(join(here, "account-sheet.tsx"), "utf8");
 const houseSrc = readFileSync(join(here, "house.tsx"), "utf8");
 const menuSrc = readFileSync(join(here, "user-menu.tsx"), "utf8");
-const navSrc = readFileSync(join(here, "mobile-nav.tsx"), "utf8");
+const destsSrc = readFileSync(join(here, "house-phone-dest-chips.tsx"), "utf8");
 const headerSrc = readFileSync(join(here, "messages-app-header.tsx"), "utf8");
 const landingSrc = readFileSync(join(here, "../messages/ask-globee-landing.tsx"), "utf8");
 const tokens = readFileSync(join(here, "../../app/tokens.css"), "utf8");
@@ -648,20 +648,21 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(appearance).not.toContain("purple");
   });
 
-  it("does not restyle Ask Globee landing or merge account into the hamburger sheet", () => {
+  it("does not restyle Ask Globee landing or merge account into dest chips", () => {
     expect(headerSrc).toContain("531:542");
     expect(headerSrc).not.toContain("544:561");
     expect(headerSrc).not.toContain("account-sheet");
     expect(landingSrc).not.toContain("account-sheet");
     expect(landingSrc).not.toContain("AccountSheet");
     expect(landingSrc).not.toContain("544:561");
-    expect(navSrc).toContain("data-mobile-nav-sheet");
-    expect(navSrc).toContain("AppSheetSurface");
-    expect(navSrc).toContain("Close44");
-    expect(navSrc).not.toContain("ACCOUNT");
-    expect(navSrc).not.toContain("Manage account");
-    expect(navSrc).not.toContain("User Profile");
-    expect(navSrc).not.toContain("Company Profile");
+    expect(destsSrc).toContain("data-house-phone-dest-chips");
+    expect(destsSrc).not.toContain("data-mobile-nav-sheet");
+    expect(destsSrc).not.toContain("AppSheetSurface");
+    expect(destsSrc).not.toContain("Close44");
+    expect(destsSrc).not.toContain("ACCOUNT");
+    expect(destsSrc).not.toContain("Manage account");
+    expect(destsSrc).not.toContain("User Profile");
+    expect(destsSrc).not.toContain("Company Profile");
     expect(menuSrc).toContain("MobileAccountMenu");
     expect(menuSrc).toContain("DesktopAccountMenu");
     expect(src).not.toContain("531:542");

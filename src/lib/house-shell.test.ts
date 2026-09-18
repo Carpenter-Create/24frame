@@ -75,7 +75,7 @@ const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
 const sideNav = readFileSync("src/components/chrome/side-nav.tsx", "utf8");
 const socialTopBar = readFileSync("src/components/social/social-top-bar.tsx", "utf8");
 const socialChrome = readFileSync("src/lib/social-chrome.ts", "utf8");
-const socialPhoneDests = readFileSync("src/components/social/social-phone-dests.tsx", "utf8");
+const destChips = readFileSync("src/lib/house-phone-shell.ts", "utf8");
 const educationRail = readFileSync(
   "src/app/(app)/(operator)/education/education-course-rail.tsx",
   "utf8",
@@ -216,7 +216,8 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(collapsedChip).toContain("justify-center");
     expect(collapsedChip).not.toContain("truncate t-body-sm");
 
-    expect(socialPhoneDests).toContain("text-accent");
+    expect(destChips).toContain("HOUSE_FILTER_ON_CLASS");
+    expect(destChips).toContain("HOUSE_FILTER_OFF_CLASS");
   });
 
   it("rematches the Education course rail to the house active pill", () => {

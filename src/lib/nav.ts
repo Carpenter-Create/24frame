@@ -97,8 +97,8 @@ export const NAV: Array<PhosphorNavItem | HouseAiNavItem> = [
   { label: ASK_GLOBEE.headline, href: "/messages", family: "house-ai" },
 ];
 
-// Social workspace rail. Phone local dests are in-page
-// (SocialPhoneDests: Explore / Create / Messages / Profile).
+// Social workspace rail. Phone local dests are HousePhoneDestChips
+// under the top (Explore / Create / Messages / Profile).
 // Desktop rail is Home / Explore / Messages / Profile — composer owns create.
 // Messages here is DMs — never /messages. Groups / Courses / Leaderboard
 // stay parked off this rail. Education land is house chrome + an
@@ -162,7 +162,9 @@ export const GC_NAV: PhosphorNavItem[] = [
   { label: "Clients", href: "/gc/clients", family: "phosphor", icon: Users },
 ];
 
-// Phone sheet copy. Client sheet is NAV only. Staff sheet is NAV + GC_NAV.
+// Phone dest-chip copy leftover. Hamburger sheet is gone — dests live
+// on HousePhoneDestChips. Keep labels so account-sheet tests can still
+// prove the avatar sheet is not a Menu overlay.
 export const MOBILE_NAV = {
   open: "Open menu",
   close: "Close menu",
@@ -200,11 +202,12 @@ export function clientNavCurrent(pathname: string): NavItem {
   return NAV.find((item) => isClientNavActive(pathname, item)) ?? NAV[0];
 }
 
-// Client phone sheet stays the Aggregation NAV destinations. Staff already use
-// those plus the operator set — do not leave them on a client-only menu.
+// Phone dest chips use this list (HousePhoneDestChips filters Ask AI so
+// chips cannot hop to Aggregation /messages). Staff already use the
+// operator set — do not leave them on a client-only row.
 // Social phone dests drop Home (workspace tab owns /social).
 // Desktop rail drops Create. Activity + Ask 24Frame AI stay Aggregation
-// rail destinations; header bell + house AI mark reach them from every shell.
+// rail destinations; header bell + avatar Ask reach them from every shell.
 export function mobileNavDestinations(
   isGcStaff: boolean,
   workspace: WorkspaceMode = "aggregation",
