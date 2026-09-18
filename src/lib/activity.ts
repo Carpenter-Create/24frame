@@ -14,6 +14,7 @@ import { socialRelativeTime } from "@/lib/social";
 // Open = unread. Done = read. Complete = Done = read — one state.
 // Not Messages. Not Ask 24Frame AI. Not /attention catalog findings.
 // Bell popover is Open only — no All / Unread / Resolved tabs.
+// Row body links to the item. X marks done. No View / Done / Mark all.
 // Copy lives here, not JSX.
 
 export const ACTIVITY_HREF = "/activity";
@@ -24,9 +25,8 @@ export const ACTIVITY_PAGE = {
   subtitle: `Account alerts from ${PRODUCT_NAME}.`,
   open: "Open",
   done: "Done",
-  view: "View",
+  dismiss: "Mark done",
   viewAll: "View all activity",
-  markAllDone: "Mark all done",
   emptyOpen: "Nothing open.",
   emptyDone: "Nothing done yet.",
   truncated: `Showing the first ${UNPAGINATED_MAX} alerts. More exist — this list is not complete.`,
@@ -111,10 +111,6 @@ export function activityItemHref(item: Pick<ActivityItem, "kind" | "source_refs"
 
 export function activityRelativeTime(iso: string, now = Date.now()): string {
   return socialRelativeTime(iso, now);
-}
-
-export function activityBellOpenIds(items: readonly Pick<ActivityItem, "id">[]): string[] {
-  return items.map((item) => item.id);
 }
 
 export function activityEmptyCopy(status: ActivityStatus): string {

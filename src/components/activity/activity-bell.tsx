@@ -3,7 +3,7 @@
 import { Suspense, use, useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Bell, FilmSlate, PaperPlaneTilt } from "@phosphor-icons/react";
+import { Bell, FilmSlate, PaperPlaneTilt, X } from "@phosphor-icons/react";
 
 import { markNotificationsRead } from "@/app/(app)/messages/actions";
 import {
@@ -118,12 +118,11 @@ function ActivityBellChrome({
         >
           <div
             data-activity-bell-header=""
-            className="flex items-center justify-between gap-[var(--space-3)] border-b border-hairline px-[var(--space-4)] py-[var(--space-3)]"
+            className="border-b border-hairline px-[var(--space-4)] py-[var(--space-3)]"
           >
             <p data-activity-bell-title="" className="t-body-sm font-medium text-ink">
               {ACTIVITY_PAGE.title}
             </p>
-            {items.length > 0 ? <BellMarkAllDone ids={items.map((item) => item.id)} /> : null}
           </div>
           {items.length === 0 ? (
             <p className="px-[var(--space-4)] py-[var(--space-4)] t-body-sm text-ink-3">
@@ -140,40 +139,37 @@ function ActivityBellChrome({
                     key={item.id}
                     data-activity-bell-item={item.id}
                     data-activity-bell-kind={kind}
-                    className="flex items-start gap-[var(--space-3)] border-b border-hairline px-[var(--space-4)] py-[var(--space-3)]"
+                    className="flex items-start gap-[var(--space-2)] border-b border-hairline px-[var(--space-4)] py-[var(--space-3)]"
                   >
-                    <KindIcon
-                      data-activity-bell-type-icon={kind}
-                      className={cn(PHOSPHOR_CHROME_ICON_CLASS, "mt-0.5 text-ink-3")}
-                      weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="t-body-sm font-medium text-ink">{item.title}</p>
-                      <p
-                        data-activity-bell-detail=""
-                        className="truncate t-label text-ink-3"
-                      >
-                        {item.body}
-                      </p>
-                      <p data-activity-bell-time="" className="t-label text-ink-3">
-                        {activityRelativeTime(item.created_at, now)}
-                      </p>
-                    </div>
-                    <span
-                      data-activity-bell-open-dot=""
-                      aria-hidden="true"
-                      className={ACTIVITY_BELL_OPEN_DOT_CLASS}
-                    />
-                    <div className="flex shrink-0 flex-col items-end gap-[var(--space-1)]">
-                      <Link
-                        href={href}
-                        data-activity-bell-view=""
-                        className="t-label text-accent"
-                      >
-                        {ACTIVITY_PAGE.view}
-                      </Link>
-                      <BellMarkDone id={item.id} />
-                    </div>
+                    <Link
+                      href={href}
+                      data-activity-bell-item-link=""
+                      className="flex min-w-0 flex-1 items-start gap-[var(--space-3)]"
+                    >
+                      <KindIcon
+                        data-activity-bell-type-icon={kind}
+                        className={cn(PHOSPHOR_CHROME_ICON_CLASS, "mt-0.5 text-ink-3")}
+                        weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="t-body-sm font-medium text-ink">{item.title}</p>
+                        <p
+                          data-activity-bell-detail=""
+                          className="truncate t-label text-ink-3"
+                        >
+                          {item.body}
+                        </p>
+                        <p data-activity-bell-time="" className="t-label text-ink-3">
+                          {activityRelativeTime(item.created_at, now)}
+                        </p>
+                      </div>
+                      <span
+                        data-activity-bell-open-dot=""
+                        aria-hidden="true"
+                        className={ACTIVITY_BELL_OPEN_DOT_CLASS}
+                      />
+                    </Link>
+                    <BellDismiss id={item.id} />
                   </li>
                 );
               })}
@@ -225,45 +221,24 @@ function ActivityBellTrigger({
   );
 }
 
-function BellMarkDone({ id }: { id: string }) {
-  return <BellMarkRead ids={[id]} label={ACTIVITY_PAGE.done} dataAttr="data-activity-bell-done" />;
-}
-
-function BellMarkAllDone({ ids }: { ids: string[] }) {
-  return (
-    <BellMarkRead
-      ids={ids}
-      label={ACTIVITY_PAGE.markAllDone}
-      dataAttr="data-activity-bell-mark-all"
-    />
-  );
-}
-
-function BellMarkRead({
-  ids,
-  label,
-  dataAttr,
-}: {
-  ids: string[];
-  label: string;
-  dataAttr: "data-activity-bell-done" | "data-activity-bell-mark-all";
-}) {
+function BellDismiss({ id }: { id: string }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   return (
     <button
       type="button"
-      {...{ [dataAttr]: "" }}
+      data-activity-bell-dismiss=""
+      aria-label={ACTIVITY_PAGE.dismiss}
       disabled={pending}
       onClick={() =>
         start(async () => {
-          await markNotificationsRead(ids);
+          await markNotificationsRead([id]);
           router.refresh();
         })
       }
-      className="shrink-0 t-label text-ink-3 underline-offset-2 hover:text-ink-2 hover:underline disabled:opacity-50"
+      className="mt-0.5 shrink-0 text-ink-3 hover:text-ink-2 disabled:opacity-50"
     >
-      {label}
+      <X className={PHOSPHOR_CHROME_ICON_CLASS} weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
     </button>
   );
 }

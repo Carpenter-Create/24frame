@@ -153,7 +153,9 @@ describe("Activity bell cap", () => {
     expect(activityItemHref(OPEN_NEW)).toBe("/activity");
     expect(activityRelativeTime("2026-09-18T11:00:00.000Z", NOW.getTime())).toBe("1h");
     expect(ACTIVITY_PAGE.viewAll).toBe("View all activity");
-    expect(ACTIVITY_PAGE.markAllDone).toBe("Mark all done");
+    expect(ACTIVITY_PAGE.dismiss).toBe("Mark done");
+    expect(ACTIVITY_PAGE).not.toHaveProperty("view");
+    expect(ACTIVITY_PAGE).not.toHaveProperty("markAllDone");
     expect(ACTIVITY_BELL_TRIGGER_CLASS).toContain("hover:bg-surface-muted");
     expect(ACTIVITY_BELL_TRIGGER_CLASS).toContain("rounded-full");
     expect(ACTIVITY_BELL_TRIGGER_OPEN_CLASS).toBe("bg-surface-muted");
