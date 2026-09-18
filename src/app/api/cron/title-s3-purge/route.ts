@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
+  IN_FLIGHT_TRANSCODE_STATUSES,
   pendingTitlePrefixesFromRows,
   pendingTitlePurgeRange,
   purgeDeletedTitleStorage,
@@ -56,6 +57,15 @@ export async function GET(req: Request) {
     purgeDeletedTitleStorage({
       orgId: candidate.orgId,
       titleId: candidate.titleId,
+      hasInFlightWrites: async () => {
+        const { count, error: jobsError } = await supabase
+          .from("transcode_jobs")
+          .select("id", { count: "exact", head: true })
+          .eq("title_id", candidate.titleId)
+          .in("status", [...IN_FLIGHT_TRANSCODE_STATUSES]);
+        if (jobsError) throw new Error(jobsError.message);
+        return (count ?? 0) > 0;
+      },
       markPurged: async () => {
         const marked = await supabase.rpc("mark_deleted_title_prefix_purged", {
           p_title_id: candidate.titleId,

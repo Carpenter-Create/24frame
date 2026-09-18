@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   pendingTitlePrefixesFromRows,
@@ -17,14 +17,22 @@ vi.mock("./s3", () => ({
 const ORG = "550e8400-e29b-41d4-a716-446655440000";
 const TITLE = "11111111-2222-4333-8444-555555555555";
 
+beforeEach(() => {
+  purgeTitlePrefix.mockReset();
+});
+
 describe("purgeDeletedTitleStorage", () => {
-  it("marks assets purged only after S3 succeeds", async () => {
-    purgeTitlePrefix.mockResolvedValueOnce({ prefix: "p/", deleted: 1 });
+  it("marks assets purged only after S3 succeeds and no in-flight writes remain", async () => {
+    purgeTitlePrefix
+      .mockResolvedValueOnce({ prefix: "p/", deleted: 1 })
+      .mockResolvedValueOnce({ prefix: "p/", deleted: 0 });
     const markPurged = vi.fn(async () => ({ error: null }));
+    const hasInFlightWrites = vi.fn(async () => false);
 
     await expect(
-      purgeDeletedTitleStorage({ orgId: ORG, titleId: TITLE, markPurged }),
+      purgeDeletedTitleStorage({ orgId: ORG, titleId: TITLE, markPurged, hasInFlightWrites }),
     ).resolves.toEqual({ prefix: "p/", deleted: 1 });
+    expect(purgeTitlePrefix).toHaveBeenCalledTimes(2);
     expect(purgeTitlePrefix).toHaveBeenCalledWith(ORG, TITLE);
     expect(markPurged).toHaveBeenCalledTimes(1);
   });
@@ -32,19 +40,51 @@ describe("purgeDeletedTitleStorage", () => {
   it("does not mark when S3 purge fails", async () => {
     purgeTitlePrefix.mockRejectedValueOnce(new Error("S3 down"));
     const markPurged = vi.fn(async () => ({ error: null }));
+    const hasInFlightWrites = vi.fn(async () => false);
 
     await expect(
-      purgeDeletedTitleStorage({ orgId: ORG, titleId: TITLE, markPurged }),
+      purgeDeletedTitleStorage({ orgId: ORG, titleId: TITLE, markPurged, hasInFlightWrites }),
     ).rejects.toThrow("S3 down");
+    expect(markPurged).not.toHaveBeenCalled();
+    expect(hasInFlightWrites).not.toHaveBeenCalled();
+  });
+
+  it("does not mark while a transcode job can still write the prefix", async () => {
+    purgeTitlePrefix.mockResolvedValueOnce({ prefix: "p/", deleted: 1 });
+    const markPurged = vi.fn(async () => ({ error: null }));
+    const hasInFlightWrites = vi.fn(async () => true);
+
+    await expect(
+      purgeDeletedTitleStorage({ orgId: ORG, titleId: TITLE, markPurged, hasInFlightWrites }),
+    ).resolves.toEqual({ prefix: "p/", deleted: 1 });
+    expect(purgeTitlePrefix).toHaveBeenCalledTimes(1);
+    expect(markPurged).not.toHaveBeenCalled();
+  });
+
+  it("does not mark when a confirm pass still races an in-flight write", async () => {
+    purgeTitlePrefix
+      .mockResolvedValueOnce({ prefix: "p/", deleted: 0 })
+      .mockResolvedValueOnce({ prefix: "p/", deleted: 1 });
+    const markPurged = vi.fn(async () => ({ error: null }));
+    const hasInFlightWrites = vi
+      .fn()
+      .mockResolvedValueOnce(false)
+      .mockResolvedValueOnce(true);
+
+    await expect(
+      purgeDeletedTitleStorage({ orgId: ORG, titleId: TITLE, markPurged, hasInFlightWrites }),
+    ).resolves.toEqual({ prefix: "p/", deleted: 1 });
+    expect(purgeTitlePrefix).toHaveBeenCalledTimes(2);
     expect(markPurged).not.toHaveBeenCalled();
   });
 
   it("fails closed when the mark RPC errors after S3 success", async () => {
-    purgeTitlePrefix.mockResolvedValueOnce({ prefix: "p/", deleted: 0 });
+    purgeTitlePrefix.mockResolvedValue({ prefix: "p/", deleted: 0 });
     const markPurged = vi.fn(async () => ({ error: { message: "mark failed" } }));
+    const hasInFlightWrites = vi.fn(async () => false);
 
     await expect(
-      purgeDeletedTitleStorage({ orgId: ORG, titleId: TITLE, markPurged }),
+      purgeDeletedTitleStorage({ orgId: ORG, titleId: TITLE, markPurged, hasInFlightWrites }),
     ).rejects.toThrow("mark failed");
   });
 });

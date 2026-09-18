@@ -5,7 +5,9 @@ import { probeRange, UNPAGINATED_MAX } from "@/lib/list-bounds";
 
 // Shared deleted-title S3 purge. deleteTitle and the sweeper both call this.
 // S3 list+delete lives in s3.ts (existing titles client — no fork). This file
-// sequences purge → mark so a prefix is never reported clean with live keys.
+// sequences purge → confirm → mark so a prefix is never reported clean while
+// MediaConvert can still write under it. s3_purged_at stays null until then;
+// the sweeper retries unmarked rows.
 
 export type PendingTitlePrefix = {
   orgId: string;
@@ -22,17 +24,34 @@ export type SweepDeletedTitlePrefixesResult = {
   failed: number;
 };
 
+// submitted/running MediaConvert jobs still write under the title prefix after
+// delete_title. Matching the mark RPC gate keeps the sweeper retrying.
+export const IN_FLIGHT_TRANSCODE_STATUSES = ["submitted", "running"] as const;
+
 export async function purgeDeletedTitleStorage(input: {
   orgId: string;
   titleId: string;
   markPurged: () => Promise<TitlePrefixMarkResult>;
+  hasInFlightWrites: () => Promise<boolean>;
 }): Promise<{ prefix: string; deleted: number }> {
-  const result = await purgeTitlePrefix(input.orgId, input.titleId);
+  const first = await purgeTitlePrefix(input.orgId, input.titleId);
+  if (await input.hasInFlightWrites()) {
+    return first;
+  }
+
+  // First list can return empty while AWS still writes the screener. A confirm
+  // pass deletes that object once the job is no longer in-flight.
+  const confirm = await purgeTitlePrefix(input.orgId, input.titleId);
+  const deleted = first.deleted + confirm.deleted;
+  if (await input.hasInFlightWrites()) {
+    return { prefix: confirm.prefix, deleted };
+  }
+
   const marked = await input.markPurged();
   if (marked.error) {
     throw new Error(marked.error.message);
   }
-  return result;
+  return { prefix: confirm.prefix, deleted };
 }
 
 export function pendingTitlePurgeRange(): [number, number] {

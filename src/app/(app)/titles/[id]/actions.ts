@@ -10,7 +10,10 @@ import { resolveTerritories, type TerritoryMode } from "@/lib/territories";
 import type { RightsType } from "@/lib/rights";
 import { computeMetadataFindings, METADATA_LOGIC_VERSION } from "@/lib/metadata";
 import type { Json } from "@/lib/supabase/database.types";
-import { purgeDeletedTitleStorage } from "@/lib/s3-title-purge";
+import {
+  IN_FLIGHT_TRANSCODE_STATUSES,
+  purgeDeletedTitleStorage,
+} from "@/lib/s3-title-purge";
 import { TITLE_LIFECYCLE } from "@/lib/titles-lifecycle";
 
 // Add a rights grant (expand = insert) for a title in the active org. Territories
@@ -271,6 +274,15 @@ export async function deleteTitle(titleId: string): Promise<{ error?: string }> 
     await purgeDeletedTitleStorage({
       orgId: title.org_id,
       titleId: title.id,
+      hasInFlightWrites: async () => {
+        const { count, error: jobsError } = await supabase
+          .from("transcode_jobs")
+          .select("id", { count: "exact", head: true })
+          .eq("title_id", title.id)
+          .in("status", [...IN_FLIGHT_TRANSCODE_STATUSES]);
+        if (jobsError) throw new Error(jobsError.message);
+        return (count ?? 0) > 0;
+      },
       markPurged: async () => {
         const marked = await supabase.rpc("mark_deleted_title_prefix_purged", {
           p_title_id: title.id,
