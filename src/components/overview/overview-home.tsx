@@ -7,6 +7,7 @@ import {
   DashboardHomePanel,
 } from "@/components/dashboard/dashboard-home";
 import { OverviewModule } from "@/components/overview/overview-module";
+import { OverviewRevenuePeriodSelect } from "@/components/overview/overview-revenue-period";
 import { NewsRail } from "@/components/news/news-rail";
 import { PageHeader } from "@/components/ui/page-header";
 import type { CourseRow } from "@/lib/courses";
@@ -32,12 +33,14 @@ import {
   OVERVIEW_HOME_LAYOUT_CLASS,
   OVERVIEW_MODULE_NEST_CLASS,
   OVERVIEW_PAGE,
+  OVERVIEW_REVENUE_PERIOD_CLASS,
   overviewHref,
 } from "@/lib/overview";
 import {
   REPORTS_PERIOD_CHIP_CLASS,
   REPORTS_PERIOD_CHIP_OFF_CLASS,
   REPORTS_PERIOD_CHIP_ON_CLASS,
+  REPORTS_PERIOD_CLUSTER_CLASS,
 } from "@/lib/reports-craft";
 import { REPORTS_PERIOD_PRESETS, reportsPeriodPresetKey } from "@/lib/reports";
 import { SOCIAL_AVATAR_32_CLASS } from "@/lib/social-chrome";
@@ -48,8 +51,9 @@ import { cn } from "@/lib/cn";
 // Home IA v2 order rewrite — Net revenue first. News is the right
 // rail on desktop and the last full-width stack on phone (after AI).
 // This-week pulse stays with Net revenue. Social stays avatars-only.
-// Period chips are the Aggregation/Finance house presets — not a
-// Home lookalike. Top performing is not on Home.
+// Period: Reports chips on desktop; HousePageSelect on phone
+// (Dashboard All time SoT). Never a wrapping Home chip row.
+// Top performing is not on Home.
 
 export function OverviewHome({
   revenueCents,
@@ -93,26 +97,32 @@ export function OverviewHome({
         </div>
         <div
           data-overview-revenue-period=""
-          className={`flex flex-wrap items-center ${DASHBOARD_RELATED_GAP_CLASS} px-[var(--space-4)]`}
+          className={OVERVIEW_REVENUE_PERIOD_CLASS}
         >
-          {REPORTS_PERIOD_PRESETS.map((preset) => {
-            const on = period.kind === preset.grain;
-            const key = reportsPeriodPresetKey(preset.grain, now);
-            return (
-              <Link
-                key={preset.grain}
-                href={overviewHref({ period: key })}
-                data-overview-revenue-period-chip={preset.grain}
-                aria-pressed={on}
-                className={cn(
-                  REPORTS_PERIOD_CHIP_CLASS,
-                  on ? REPORTS_PERIOD_CHIP_ON_CLASS : REPORTS_PERIOD_CHIP_OFF_CLASS,
-                )}
-              >
-                {preset.label}
-              </Link>
-            );
-          })}
+          <div
+            data-overview-revenue-period-chips=""
+            className={REPORTS_PERIOD_CLUSTER_CLASS}
+          >
+            {REPORTS_PERIOD_PRESETS.map((preset) => {
+              const on = period.kind === preset.grain;
+              const key = reportsPeriodPresetKey(preset.grain, now);
+              return (
+                <Link
+                  key={preset.grain}
+                  href={overviewHref({ period: key })}
+                  data-overview-revenue-period-chip={preset.grain}
+                  aria-pressed={on}
+                  className={cn(
+                    REPORTS_PERIOD_CHIP_CLASS,
+                    on ? REPORTS_PERIOD_CHIP_ON_CLASS : REPORTS_PERIOD_CHIP_OFF_CLASS,
+                  )}
+                >
+                  {preset.label}
+                </Link>
+              );
+            })}
+          </div>
+          <OverviewRevenuePeriodSelect period={period} now={now} />
         </div>
         <div className="border-t border-hairline px-[var(--space-4)] py-[var(--space-4)]">
           {revenueCents === null ? (

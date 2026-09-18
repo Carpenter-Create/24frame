@@ -89,6 +89,13 @@ export const OVERVIEW_MODULE_NEST_CLASS =
   "gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-4)]";
 export const OVERVIEW_RAIL_OFF_WIDTH = "0px";
 
+/** Home Net revenue period host. Never flex-wrap — phone uses HousePageSelect. */
+export const OVERVIEW_REVENUE_PERIOD_CLASS = "px-[var(--space-4)]";
+
+/** Phone-only host for HousePageSelect (Dashboard All time SoT). Desktop chips stay
+ *  on REPORTS_PERIOD_CLUSTER_CLASS (`hidden md:flex`). */
+export const OVERVIEW_REVENUE_PERIOD_SELECT_CLASS = "md:hidden";
+
 export const OVERVIEW_PAGE = {
   title: "Home",
   needsYou: "Needs you",

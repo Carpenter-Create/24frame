@@ -19,6 +19,8 @@ import {
   OVERVIEW_PAGE,
   OVERVIEW_PHONE_MODULE_ORDER,
   OVERVIEW_RAIL_OFF_WIDTH,
+  OVERVIEW_REVENUE_PERIOD_CLASS,
+  OVERVIEW_REVENUE_PERIOD_SELECT_CLASS,
   OVERVIEW_SOCIAL_DM_CAP,
   isHomeLandPath,
   overviewHref,
@@ -228,6 +230,9 @@ describe("Home module caps", () => {
     expect(OVERVIEW_MODULE_NEST_CLASS).toBe(
       "gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-4)]",
     );
+    expect(OVERVIEW_REVENUE_PERIOD_CLASS).toBe("px-[var(--space-4)]");
+    expect(OVERVIEW_REVENUE_PERIOD_CLASS).not.toMatch(/\bflex-wrap\b/);
+    expect(OVERVIEW_REVENUE_PERIOD_SELECT_CLASS).toBe("md:hidden");
     expect(readFileSync("src/lib/overview.ts", "utf8")).not.toContain(
       "OVERVIEW_EDUCATION_LABEL_CLASS",
     );

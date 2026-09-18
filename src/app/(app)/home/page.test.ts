@@ -12,6 +12,8 @@ vi.mock("next/navigation", () => ({
   redirect: vi.fn((to: string) => {
     throw new Error(`REDIRECT:${to}`);
   }),
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn() }),
+  usePathname: () => "/home",
 }));
 vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({
@@ -93,6 +95,8 @@ describe("HomePage", () => {
     expect(html).not.toContain("data-overview-top-performing");
     expect(html).not.toContain("Top performing");
     expect(html).toContain("data-overview-revenue-period");
+    expect(html).toContain("data-overview-revenue-period-select");
+    expect(html).toContain("data-house-page-select");
     expect(html.indexOf("data-overview-revenue")).toBeLessThan(
       html.indexOf('data-overview-module="social"'),
     );
