@@ -32,6 +32,10 @@ const SECOND: NewsItem = {
   url: "https://deadline.com/north-wind",
 };
 
+function markupClass(value: string): string {
+  return value.replaceAll("&", "&amp;");
+}
+
 describe("NewsCard", () => {
   it("is a discrete house card with title, larger thumb, source badge, and relative time", () => {
     const html = renderToStaticMarkup(createElement(NewsCard, { item: ITEM, now: NOW }));
@@ -44,8 +48,8 @@ describe("NewsCard", () => {
     expect(html).toContain("data-news-time");
     expect(html).toContain(DASHBOARD_CARD_PAD);
     expect(html).toContain(DASHBOARD_MODULE_CARD_CLASS);
-    expect(html).toContain(DASHBOARD_NEWS_THUMB_CLASS);
-    expect(html).not.toContain(DASHBOARD_LICENSING_THUMB_CLASS);
+    expect(html).toContain(markupClass(DASHBOARD_NEWS_THUMB_CLASS));
+    expect(html).not.toContain(markupClass(DASHBOARD_LICENSING_THUMB_CLASS));
     expect(html).not.toMatch(/summary|rewrite|republish/i);
   });
 });
@@ -62,7 +66,7 @@ describe("NewsRail", () => {
     expect(html).toContain("Harbor Cut lands a festival slot");
     expect(html).toContain(DASHBOARD_SECTION_AIR_CLASS);
     expect(html).toContain(DASHBOARD_MODULE_CARD_CLASS);
-    expect(html).toContain(DASHBOARD_NEWS_THUMB_CLASS);
+    expect(html).toContain(markupClass(DASHBOARD_NEWS_THUMB_CLASS));
     expect(html).not.toContain("dashboard-home-panel");
     expect(html).not.toContain("divide-y");
     expect(html).not.toMatch(/summary|rewrite|republish/i);
