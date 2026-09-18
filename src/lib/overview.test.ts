@@ -138,14 +138,14 @@ describe("Home module caps", () => {
       "social",
       "education",
       "aggregation",
-      "news",
       "needs-you",
       "ai-next",
+      "news",
     ]);
     expect(OVERVIEW_PAGE.news).toBe("News");
     expect(OVERVIEW_PAGE.newsHref).toBe("/news");
     expect(OVERVIEW_PAGE.newsViewAll).toBe("View all");
-    expect(OVERVIEW_HOME_LAYOUT_CLASS).toContain("'aggregation'_'news'_'needs'_'ai'");
+    expect(OVERVIEW_HOME_LAYOUT_CLASS).toContain("'aggregation'_'needs'_'ai'_'news'");
     expect(OVERVIEW_NEWS_RAIL_WIDTH).toBe("20rem");
     expect(OVERVIEW_HOME_COLUMN_GUTTER).toBe("var(--chrome-gutter)");
     expect(OVERVIEW_HOME_LAYOUT_CLASS).toContain("lg:grid-cols-[minmax(0,1fr)_20rem]");
@@ -158,18 +158,16 @@ describe("Home module caps", () => {
     expect(OVERVIEW_PAGE.thisWeek).toBe("This week");
   });
 
-  it("caps Social DMs at 5, Education covers at 5, and 24Frame AI next-moves at 3", () => {
+  it("caps Social DMs at 5, Education covers at 3, and 24Frame AI next-moves at 3", () => {
     expect(OVERVIEW_SOCIAL_DM_CAP).toBe(5);
-    expect(OVERVIEW_EDUCATION_CAP).toBe(5);
+    expect(OVERVIEW_EDUCATION_CAP).toBe(3);
     expect(OVERVIEW_AI_NEXT_CAP).toBe(3);
-    expect(OVERVIEW_NEWS_CAP).toBe(12);
+    expect(OVERVIEW_NEWS_CAP).toBe(15);
     expect(overviewSocialChats([0, 1, 2, 3, 4, 5, 6])).toEqual([0, 1, 2, 3, 4]);
     expect(overviewEducationCourses(["a", "b", "c", "d", "e", "f"])).toEqual([
       "a",
       "b",
       "c",
-      "d",
-      "e",
     ]);
     expect(
       overviewAiNextMoves(

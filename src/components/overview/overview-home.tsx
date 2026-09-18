@@ -42,7 +42,7 @@ import { socialDmHref, socialInitials } from "@/lib/social";
 import { cn } from "@/lib/cn";
 
 // Home IA v2 — left modules stay positive-first. News is the right
-// rail on desktop and a full-width stack after Aggregation on phone.
+// rail on desktop and the last full-width stack on phone (after AI).
 // This-week pulse folds into Aggregation. Social stays avatars-only.
 // House primitives only. No News lookalike fork.
 
@@ -129,7 +129,7 @@ export function OverviewHome({
         {courses.length > 0 ? (
           <ul
             data-overview-education-covers=""
-            className="grid grid-cols-1 gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-5"
+            className="grid grid-cols-1 gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-3"
           >
             {courses.map((course) => (
               <CourseCard
@@ -183,10 +183,6 @@ export function OverviewHome({
         </DashboardHomePanel>
       </section>
 
-      <aside data-overview-news="" className={OVERVIEW_AREA_NEWS_CLASS}>
-        <NewsRail items={news} now={now} viewAll />
-      </aside>
-
       <div className={OVERVIEW_AREA_NEEDS_CLASS}>
       <OverviewModule
         testId="needs-you"
@@ -233,6 +229,10 @@ export function OverviewHome({
         ) : null}
       </OverviewModule>
       </div>
+
+      <aside data-overview-news="" className={OVERVIEW_AREA_NEWS_CLASS}>
+        <NewsRail items={news} now={now} viewAll />
+      </aside>
       </div>
     </div>
   );

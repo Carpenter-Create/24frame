@@ -170,13 +170,21 @@ describe("OverviewHome", () => {
     expect(html).not.toContain('data-overview-module="week"');
     expect(moduleOrder(html)).toEqual([...OVERVIEW_PHONE_MODULE_ORDER]);
     expect(html.indexOf("data-overview-aggregation")).toBeLessThan(html.indexOf("data-overview-pulse"));
-    expect(html.indexOf("data-overview-aggregation")).toBeLessThan(html.indexOf("data-overview-news"));
-    expect(html.indexOf("data-overview-news")).toBeLessThan(html.indexOf('data-overview-module="needs-you"'));
+    expect(html.indexOf("data-overview-aggregation")).toBeLessThan(
+      html.indexOf('data-overview-module="needs-you"'),
+    );
+    expect(html.indexOf('data-overview-module="needs-you"')).toBeLessThan(
+      html.indexOf('data-overview-module="ai-next"'),
+    );
+    expect(html.indexOf('data-overview-module="ai-next"')).toBeLessThan(html.indexOf("data-overview-news"));
     expect(html).toContain("Harbor Cut lands a festival slot");
     expect(html).toContain(`href="${NEWS_HREF}"`);
     expect(html).not.toMatch(/summary|rewrite|republish/i);
     expect(html.indexOf("data-overview-revenue")).toBeLessThan(html.indexOf("data-overview-pulse"));
     expect(html).toContain("data-overview-education-covers");
+    expect(html).toContain("lg:grid-cols-3");
+    expect(html).not.toContain("lg:grid-cols-4");
+    expect(html).not.toContain("lg:grid-cols-5");
     expect(html).toContain("Craft");
     expect(html).toContain('data-course-card-density="home"');
     expect(html).toContain("data-course-cover-title");
