@@ -5,9 +5,9 @@ import {
 } from "@/lib/courses";
 import { cn } from "@/lib/cn";
 
-// 16:9 house cover. Discover: signed photo or quiet empty.
-// Home glance: solid plate + orb motif. Letter monograms are out.
-// No shadows.
+// 16:9 house cover. Discover and Home photo: signed photo or quiet empty.
+// Home glance fallback: solid plate + orb when no signed cover.
+// Letter monograms are out. No shadows. A real src never yields a plate.
 
 export function CourseCover({
   src,
@@ -23,11 +23,11 @@ export function CourseCover({
   className?: string;
   children?: React.ReactNode;
 }) {
-  const plate = tone === "plate";
+  const plate = tone === "plate" && !src;
   return (
     <div
       data-course-cover=""
-      data-course-cover-tone={tone}
+      data-course-cover-tone={plate ? "plate" : "photo"}
       aria-hidden={plate || src ? undefined : true}
       className={cn(
         "relative w-full overflow-hidden rounded-[var(--radius)]",

@@ -1,7 +1,9 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { loadDiscoverableCourses } from "@/lib/courses";
 import { OVERVIEW_PAGE } from "@/lib/overview";
+import { signedEducationCoverUrls } from "@/lib/s3-education";
 import { getOrgContext } from "@/lib/supabase/context";
 import HomePage from "./page";
 
@@ -28,9 +30,14 @@ vi.mock("@/lib/my-lists", () => ({
   loadMyFindings: vi.fn(async () => ({ rows: [], truncated: false })),
   loadMyDeliveries: vi.fn(async () => ({ rows: [], truncated: false })),
 }));
-vi.mock("@/lib/courses", () => ({
-  loadDiscoverableCourses: vi.fn(async () => ({ courses: [], failed: false })),
-}));
+vi.mock("@/lib/courses", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/courses")>();
+  return {
+    ...actual,
+    loadDiscoverableCourses: vi.fn(async () => ({ courses: [], failed: false })),
+  };
+});
+vi.mock("@/lib/s3-education", () => ({ signedEducationCoverUrls: vi.fn(async () => new Map()) }));
 vi.mock("@/lib/s3-avatars", () => ({ signedAvatarUrls: vi.fn(async () => new Map()) }));
 vi.mock("@/lib/social-feed", () => ({ loadProfilesByIds: vi.fn(async () => new Map()) }));
 vi.mock("@/lib/social-dms", () => ({ loadDmInbox: vi.fn(async () => ({ rows: [], truncated: false })) }));
@@ -92,5 +99,38 @@ describe("HomePage", () => {
   it("sends an unauthenticated visitor to login", async () => {
     vi.mocked(getOrgContext).mockResolvedValue(null as never);
     await expect(HomePage()).rejects.toThrow("REDIRECT:/login");
+  });
+
+  it("signs Education covers and renders the photo on Home glance", async () => {
+    const course = {
+      id: "c1",
+      slug: "catalog-basics",
+      title: "Catalog basics",
+      description: null,
+      cover_key: "cover.jpg",
+      is_flagship_free: true,
+      price_cents: null,
+      catalog_code: "EDU-1",
+      status: "published" as const,
+      position: 1,
+      instructor_id: null,
+      created_at: "2026-09-01T12:00:00.000Z",
+    };
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+    vi.mocked(loadDiscoverableCourses).mockResolvedValue({ courses: [course], failed: false });
+    vi.mocked(signedEducationCoverUrls).mockResolvedValue(
+      new Map([["c1", "https://cover.example/photo.jpg"]]),
+    );
+
+    const html = renderToStaticMarkup(await HomePage());
+
+    expect(signedEducationCoverUrls).toHaveBeenCalledWith([course]);
+    expect(html).toContain('data-course-card-density="home"');
+    expect(html).toContain('data-course-cover-tone="photo"');
+    expect(html).toContain("https://cover.example/photo.jpg");
+    expect(html).toContain("<img");
+    expect(html).not.toContain('data-course-cover-tone="plate"');
+    expect(html).not.toContain("data-course-cover-orb");
+    expect(html).not.toContain("3 lessons");
   });
 });
