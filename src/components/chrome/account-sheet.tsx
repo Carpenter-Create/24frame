@@ -135,7 +135,10 @@ export function AccountSheetAppearance({
   return (
     <SheetGroup>
       <SheetGroupItem item="back" onClick={onBack} label={APPEARANCE.back}>
-        <AccountBackChevron />
+        <span className="flex items-center gap-[var(--space-2)]">
+          <AccountBackChevron />
+          {APPEARANCE.back}
+        </span>
       </SheetGroupItem>
       {APPEARANCE_FLYOUT_OPTIONS.map((option) => (
         <SheetGroupItem
