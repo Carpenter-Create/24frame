@@ -218,8 +218,12 @@ describe("AppShell Home chrome", () => {
     const home = renderShell();
     expect(home).toContain('data-home-chrome=""');
     expect(home).toContain("data-app-home-frame");
-    expect(homeFrameMarkup(home)).toContain("mx-auto");
-    expect(homeFrameMarkup(home)).toContain("max-width:var(--page-max-width)");
+    expect(homeFrameMarkup(home)).not.toContain("mx-auto");
+    expect(homeFrameMarkup(home)).not.toContain("page-max-width");
+    expect(homeFrameMarkup(home)).toContain("ml-[var(--access-rail-width)]");
+    expect(homeFrameMarkup(home)).toContain("w-[calc(100%-var(--access-rail-width))]");
+    expect(homeFrameMarkup(home)).not.toContain("67.5rem");
+    expect(homeFrameMarkup(home)).not.toContain("1080");
     expect(home).toContain("data-house-lead-chrome");
     expect(home).toContain("data-workspace-switcher");
     expect(home).toContain('data-workspace-switcher-segment="home"');
@@ -242,8 +246,9 @@ describe("AppShell Home chrome", () => {
       shellSrc.indexOf(") : homePage ? ("),
       shellSrc.indexOf(") : messagesPage ? ("),
     );
-    expect(homeBranch).toContain("mx-auto");
-    expect(homeBranch).toContain('maxWidth: "var(--page-max-width)"');
+    expect(homeBranch).not.toContain("mx-auto");
+    expect(homeBranch).not.toContain("page-max-width");
+    expect(homeBranch).toContain("HOUSE_HOME_RAIL_COLUMN_CLASS");
     expect(homeBranch).toContain("HOUSE_CANVAS_X_CLASS");
     expect(homeBranch).toContain("data-app-home-frame");
 
@@ -267,6 +272,8 @@ describe("AppShell Access rail and home frame", () => {
       "utf8",
     );
     expect(tokens).toMatch(/--sidebar-width:\s*220px;/);
+    expect(tokens).toMatch(/--access-rail-width:\s*220px;/);
+    expect(tokens).toMatch(/--home-content-width:\s*1220px;/);
     expect(tokens).toMatch(/--content-inset:\s*48px;/);
     expect(tokens).toMatch(/--chrome-gutter:\s*16px;/);
     expect(tokens).toMatch(/--header-height:\s*56px;/);
@@ -280,8 +287,9 @@ describe("AppShell Access rail and home frame", () => {
     expect(html).toContain("data-app-home-frame");
     expect(html).toContain("px-[var(--chrome-gutter)]");
     expect(html).toContain("py-[var(--space-8)]");
-    expect(homeFrameMarkup(html)).toContain("mx-auto");
-    expect(homeFrameMarkup(html)).toContain("max-width:var(--page-max-width)");
+    expect(homeFrameMarkup(html)).not.toContain("mx-auto");
+    expect(homeFrameMarkup(html)).not.toContain("page-max-width");
+    expect(homeFrameMarkup(html)).not.toContain("access-rail-width");
     expect(tokens).toMatch(/--page-max-width:\s*67\.5rem;/);
     expect(shellSrc).toContain('maxWidth: "var(--page-max-width)"');
     expect(html).not.toContain("px-6 pb-24 pt-8");
@@ -373,9 +381,12 @@ describe("AppShell client mobile chrome", () => {
     );
     expect(tokens).toMatch(/--sidebar-width:\s*220px;/);
     expect(tokens).toMatch(/--sidebar-width-collapsed:\s*60px;/);
+    expect(tokens).toMatch(/--access-rail-width:\s*220px;/);
+    expect(tokens).toMatch(/--home-content-width:\s*1220px;/);
     expect(tokens).toMatch(/@media \(max-width:\s*767px\)/);
     expect(tokens).toMatch(/--sidebar-width:\s*0px;/);
     expect(tokens).toMatch(/--sidebar-width-collapsed:\s*0px;/);
+    expect(tokens).toMatch(/--access-rail-width:\s*0px;/);
 
     navigation.pathname = "/";
     const html = renderShell();

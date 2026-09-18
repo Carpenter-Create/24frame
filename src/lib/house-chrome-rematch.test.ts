@@ -298,6 +298,8 @@ describe("house chrome rematch miss list v1.1", () => {
   it("locks lead ↔ rail chrome gutter (G6)", () => {
     const leadLib = readFileSync("src/lib/house-lead-chrome.ts", "utf8");
     expect(tokens).toMatch(/--chrome-gutter:\s*16px;/);
+    expect(tokens).toMatch(/--access-rail-width:\s*220px;/);
+    expect(tokens).toMatch(/--home-content-width:\s*1220px;/);
     expect(HOUSE_CHROME_GUTTER_X_CLASS).toBe("md:px-[var(--chrome-gutter)]");
     expect(HOUSE_CANVAS_X_CLASS).toBe("px-[var(--chrome-gutter)]");
     expect(HOUSE_RAIL_FLOAT_CLASS).toContain("left-[var(--chrome-gutter)]");
@@ -311,6 +313,7 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(lead).not.toContain("md:pl-5");
     expect(shell.match(/HOUSE_RAIL_FLOAT_CLASS/g)?.length).toBe(3);
     expect(shell).toContain("HOUSE_CANVAS_X_CLASS");
+    expect(shell).toContain("HOUSE_HOME_RAIL_COLUMN_CLASS");
     expect(shell).toContain("HOUSE_CHROME_GUTTER_X_CLASS");
     expect(shell).not.toContain("left-4 ");
     expect(shell).not.toContain("md:px-[var(--content-inset)]");

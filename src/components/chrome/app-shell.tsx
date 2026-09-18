@@ -27,6 +27,7 @@ import { HOUSE_LEAD_SCROLL_CLASS, HOUSE_LEAD_SHELL_CLASS } from "@/lib/house-lea
 import {
   HOUSE_CANVAS_X_CLASS,
   HOUSE_CHROME_GUTTER_X_CLASS,
+  HOUSE_HOME_RAIL_COLUMN_CLASS,
   HOUSE_PAGE_CANVAS_CLASS,
   HOUSE_RAIL_FLOAT_CLASS,
   HOUSE_RAIL_PANEL_CLASS,
@@ -63,6 +64,8 @@ type Org = { id: string; name: string };
 // Hamburger stays off. Avatar 32 stays.
 // /home: no dest rail (Adam 2026-09-18). Unify-lead chrome + modules
 // only. Aggregation · Social · Education rails return off Home.
+// Figma SoT (HOME-width-lock.md): phantom 220 inset + 1220 column at
+// 1440 — same as Activity main. Header full-bleed. No --page-max-width.
 export function AppShell({
   chrome,
   email = "",
@@ -311,10 +314,10 @@ export function AppShell({
         ) : homePage ? (
           <div
             className={cn(
-              "mx-auto w-full py-[var(--space-8)] max-md:px-[var(--space-6)] max-md:py-[var(--space-6)]",
+              "py-[var(--space-8)] max-md:px-[var(--space-6)] max-md:py-[var(--space-6)]",
+              homeChrome ? HOUSE_HOME_RAIL_COLUMN_CLASS : "w-full",
               HOUSE_CANVAS_X_CLASS,
             )}
-            style={{ maxWidth: "var(--page-max-width)" }}
             data-app-home-frame=""
           >
             {children}
