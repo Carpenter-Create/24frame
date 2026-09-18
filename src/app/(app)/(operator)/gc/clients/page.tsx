@@ -8,7 +8,7 @@ export default async function GcClientsPage({
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 } = {}) {
-  const sp = await (searchParams ?? Promise.resolve({}));
+  const sp = await (searchParams ?? Promise.resolve({} as Record<string, string | string[] | undefined>));
   return GcClientsDirectory({
     showFilters: true,
     statusFilter: parseClientDirectoryFilter(searchParamString(sp.status)),

@@ -65,7 +65,7 @@ export function clientDirectorySecondary(org: ClientOrg): string {
 }
 
 export function clientOrgFields(org: ClientOrg): { label: string; value: string }[] {
-  const fields = [
+  const fields: { label: string; value: string }[] = [
     { label: CLIENT_PROFILE.status, value: org.status },
     { label: CLIENT_PROFILE.plan, value: org.tier },
   ];

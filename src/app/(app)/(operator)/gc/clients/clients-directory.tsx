@@ -9,7 +9,6 @@ import {
   clientDirectorySecondary,
   clientOrgHref,
   filterClientOrgs,
-  parseClientDirectoryFilter,
   toClientOrgs,
   type ClientDirectoryFilter,
   type ClientDirectoryRow,

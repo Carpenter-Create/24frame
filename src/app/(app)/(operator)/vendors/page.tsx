@@ -28,7 +28,7 @@ export default async function GcVendorsPage({
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 } = {}) {
-  const sp = await (searchParams ?? Promise.resolve({}));
+  const sp = await (searchParams ?? Promise.resolve({} as Record<string, string | string[] | undefined>));
   const filter = parseVendorDirectoryFilter(searchParamString(sp.status));
 
   const supabase = await createClient();
