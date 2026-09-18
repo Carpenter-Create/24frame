@@ -47,6 +47,7 @@ describe("workspace mode", () => {
     expect(resolveWorkspaceMode("/titles/1", "social")).toBe("aggregation");
     expect(resolveWorkspaceMode("/", "social")).toBe("aggregation");
     expect(resolveWorkspaceMode("/dashboard", "social")).toBe("aggregation");
+    expect(resolveWorkspaceMode("/overview", "social")).toBe("aggregation");
     expect(resolveWorkspaceMode("/reports", "social")).toBe("aggregation");
     expect(resolveWorkspaceMode("/analytics", "social")).toBe("aggregation");
     expect(resolveWorkspaceMode("/earn", "social")).toBe("aggregation");

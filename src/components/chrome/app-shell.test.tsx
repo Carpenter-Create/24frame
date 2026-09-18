@@ -160,9 +160,13 @@ describe("AppShell header", () => {
     expect(html).toContain('data-workspace-switcher-tone="pill"');
     expect(html).toContain('data-workspace-switcher-presentation="pills"');
     expect(html).toContain("data-workspace-switcher-pills");
+    expect(html).toContain('data-workspace-switcher-segment="overview"');
     expect(html).toContain('data-workspace-switcher-segment="aggregation"');
     expect(html).toContain('data-workspace-switcher-segment="social"');
     expect(html).toContain('data-workspace-switcher-segment="education"');
+    expect(html.indexOf('data-workspace-switcher-segment="overview"')).toBeLessThan(
+      html.indexOf('data-workspace-switcher-segment="aggregation"'),
+    );
     expect(html).toContain("data-app-header-workspace-pill");
     expect(html).not.toContain("data-workspace-switcher-rail");
     expect(html).not.toContain("data-workspace-switcher-lead");

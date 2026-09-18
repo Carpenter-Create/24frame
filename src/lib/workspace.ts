@@ -13,6 +13,7 @@ export const WORKSPACE_MODES = ["aggregation", "social", "education"] as const;
 
 const AGGREGATION_PREFIXES = [
   "/dashboard",
+  "/overview",
   "/titles",
   "/attention",
   "/deliveries",

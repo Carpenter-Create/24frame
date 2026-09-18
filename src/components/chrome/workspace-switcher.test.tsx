@@ -76,9 +76,14 @@ describe("workspace switcher header control", () => {
     expect(html).not.toContain('href="/settings/aggregation"');
     expect(html).not.toContain('href="/settings/social"');
     expect(html).not.toContain('href="/settings/education"');
+    expect(html).toContain('data-workspace-switcher-option="overview"');
     expect(html).toContain('data-workspace-switcher-option="aggregation"');
     expect(html).toContain('data-workspace-switcher-option="social"');
     expect(html).toContain('data-workspace-switcher-option="education"');
+    expect(html.indexOf('data-workspace-switcher-option="overview"')).toBeLessThan(
+      html.indexOf('data-workspace-switcher-option="aggregation"'),
+    );
+    expect(html).toContain("Overview");
     expect(html).toContain("Aggregation");
     expect(html).toContain("Social");
     expect(html).toContain("Education");
@@ -110,9 +115,14 @@ describe("workspace switcher header control", () => {
     expect(html).toContain('data-workspace-switcher-presentation="pills"');
     expect(html).toContain("data-workspace-switcher-pills");
     expect(html).toContain(WORKSPACE_SWITCHER_SEGMENTS_CLASS);
+    expect(html).toContain('data-workspace-switcher-segment="overview"');
     expect(html).toContain('data-workspace-switcher-segment="aggregation"');
     expect(html).toContain('data-workspace-switcher-segment="social"');
     expect(html).toContain('data-workspace-switcher-segment="education"');
+    expect(html.indexOf('data-workspace-switcher-segment="overview"')).toBeLessThan(
+      html.indexOf('data-workspace-switcher-segment="aggregation"'),
+    );
+    expect(html).toContain("Overview");
     expect(html).toContain("Aggregation");
     expect(html).toContain("Social");
     expect(html).toContain("Education");
@@ -144,17 +154,19 @@ describe("workspace switcher header control", () => {
     }
   });
 
-  it("collapses desktop pills to a static label when only one lane is reachable", () => {
+  it("keeps Overview leftmost when only one workspace lane is reachable", () => {
     const [only] = availableWorkspaceOptions();
     expect(only).toBeDefined();
     const html = renderToStaticMarkup(
       <WorkspaceSwitcher current={only!.mode} options={[only!]} presentation="pills" />,
     );
     expect(html).toContain('data-workspace-switcher-presentation="pills"');
-    expect(html).toContain("data-workspace-switcher-current");
-    expect(html).toContain(only!.label);
-    expect(html).not.toContain("data-workspace-switcher-pills");
-    expect(html).not.toContain("data-workspace-switcher-segment");
+    expect(html).toContain("data-workspace-switcher-pills");
+    expect(html).toContain('data-workspace-switcher-segment="overview"');
+    expect(html).toContain(`data-workspace-switcher-segment="${only!.mode}"`);
+    expect(html.indexOf('data-workspace-switcher-segment="overview"')).toBeLessThan(
+      html.indexOf(`data-workspace-switcher-segment="${only!.mode}"`),
+    );
     expect(html).not.toContain("data-workspace-switcher-trigger");
     expect(html).not.toContain("data-workspace-switcher-chevron");
   });
@@ -164,13 +176,14 @@ describe("workspace switcher header control", () => {
     const html = renderToStaticMarkup(
       <WorkspaceSwitcher current="aggregation" options={reachable} presentation="pills" />,
     );
+    expect(html).toContain('data-workspace-switcher-segment="overview"');
     expect(html).toContain('data-workspace-switcher-segment="aggregation"');
     expect(html).toContain('data-workspace-switcher-segment="social"');
     expect(html).not.toContain('data-workspace-switcher-segment="education"');
     expect(html).not.toContain("Education");
   });
 
-  it("drops the chevron when only one workspace is reachable", () => {
+  it("keeps the chevron so Overview stays reachable when only one workspace is listed", () => {
     const [only] = availableWorkspaceOptions();
     expect(only).toBeDefined();
     const html = renderToStaticMarkup(
@@ -179,11 +192,9 @@ describe("workspace switcher header control", () => {
     expect(html).toContain("data-workspace-switcher");
     expect(html).toContain("data-workspace-switcher-current");
     expect(html).toContain(only!.label);
-    expect(html).not.toContain("data-workspace-switcher-mark");
-    expect(html).not.toContain("data-workspace-switcher-chevron");
-    expect(html).not.toContain("data-workspace-switcher-trigger");
+    expect(html).toContain("data-workspace-switcher-chevron");
+    expect(html).toContain("data-workspace-switcher-trigger");
     expect(html).not.toContain("data-workspace-switcher-popover");
-    expect(html).not.toContain("<svg");
   });
 
   it("reveals the chevron only while the menu is open", () => {
@@ -204,7 +215,13 @@ describe("workspace switcher header control", () => {
     const options = [
       ...html.matchAll(/data-workspace-switcher-option="([^"]+)"[^>]*>([\s\S]*?)<\/button>/g),
     ];
-    expect(options).toHaveLength(3);
+    expect(options).toHaveLength(4);
+    expect(options.map((row) => row[1])).toEqual([
+      "overview",
+      "aggregation",
+      "social",
+      "education",
+    ]);
 
     for (const [, mode, body] of options) {
       const markAt = body.indexOf("data-workspace-switcher-mark");
