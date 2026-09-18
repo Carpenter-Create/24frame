@@ -13,7 +13,6 @@ import {
   Pulse,
   ChartBar,
   Wallet,
-  Sparkle,
   Bell,
   Tray,
   CheckCircle,
@@ -52,10 +51,22 @@ export type LucideNavItem = {
   ariaLabel?: string;
 };
 
-export type NavItem = PhosphorNavItem | LucideNavItem;
+export type HouseAiNavItem = {
+  label: string;
+  href: string;
+  family: "house-ai";
+  exact?: boolean;
+  ariaLabel?: string;
+};
+
+export type NavItem = PhosphorNavItem | LucideNavItem | HouseAiNavItem;
 
 export function isPhosphorNavItem(item: NavItem): item is PhosphorNavItem {
   return item.family === "phosphor";
+}
+
+export function isHouseAiNavItem(item: NavItem): item is HouseAiNavItem {
+  return item.family === "house-ai";
 }
 
 // GC's flat nav — only what exists or is v1-scoped. Settings stays deferred.
@@ -63,8 +74,9 @@ export function isPhosphorNavItem(item: NavItem): item is PhosphorNavItem {
 // catalog findings (/attention). Ask 24Frame AI is /messages.
 // Reports is the one client activity door. Staff ops stays on GC_NAV
 // at /gc/finance. Glyphs: Figma 75:5 / 75:2 / 61:2 Phosphor Bold idle,
-// Fill active.
-export const NAV: PhosphorNavItem[] = [
+// Fill active. Ask 24Frame AI is the house sparkle cluster (HouseAiMark),
+// not a Phosphor catalog glyph.
+export const NAV: Array<PhosphorNavItem | HouseAiNavItem> = [
   { label: "Dashboard", href: "/dashboard", family: "phosphor", icon: SquaresFour, exact: true },
   { label: "Titles", href: "/titles", family: "phosphor", icon: FilmSlate },
   { label: "Recent activity", href: "/attention", family: "phosphor", icon: Pulse },
@@ -82,7 +94,7 @@ export const NAV: PhosphorNavItem[] = [
     icon: ChartBar,
     ariaLabel: REPORTS_PAGE.navAria,
   },
-  { label: ASK_GLOBEE.headline, href: "/messages", family: "phosphor", icon: Sparkle },
+  { label: ASK_GLOBEE.headline, href: "/messages", family: "house-ai" },
 ];
 
 // Social workspace rail. Mobile tab keeps five jobs (Create stays).
@@ -191,7 +203,7 @@ export function clientNavCurrent(pathname: string): NavItem {
 // those plus the operator set — do not leave them on a client-only menu.
 // Social mobile tab is Home / Explore / Create / Messages / Profile.
 // Desktop rail drops Create. Activity + Ask 24Frame AI stay Aggregation
-// rail destinations; header bell + sparkle reach them from every shell.
+// rail destinations; header bell + house AI mark reach them from every shell.
 export function mobileNavDestinations(
   isGcStaff: boolean,
   workspace: WorkspaceMode = "aggregation",

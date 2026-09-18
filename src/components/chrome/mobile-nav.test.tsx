@@ -260,6 +260,7 @@ describe("MobileNavSheet", () => {
       expect(row).toContain('fill="currentColor"');
       expect(row).not.toContain('stroke-width="1.33"');
       if (item.href === "/messages") {
+        expect(row).toContain("data-house-ai-mark");
         expect(row).not.toContain("lucide-sparkles");
         expect(row).not.toContain("ask-globee-16.png");
         expect(row).not.toContain("data-ask-globee-nav-mark");

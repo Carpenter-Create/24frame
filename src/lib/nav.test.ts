@@ -1,12 +1,10 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { Bot, MessageSquare, Sparkle as LucideSparkle, Sparkles } from "lucide-react";
 import {
   BookOpen,
   FilmSlate,
   PaperPlaneTilt,
   Pulse,
-  Sparkle,
   Bell,
   SquaresFour,
   ChartBar,
@@ -26,6 +24,8 @@ import {
   STAFF_RAIL_EYEBROW,
   clientNavCurrent,
   isClientNavActive,
+  isHouseAiNavItem,
+  isPhosphorNavItem,
   isSocialTabActive,
   EDUCATION_MANAGE_NAV,
   EDUCATION_NAV,
@@ -81,23 +81,22 @@ describe("client NAV", () => {
     expect(clientNavCurrent("/queue").label).toBe("Dashboard");
   });
 
-  it("keeps /messages as Ask Globee with Phosphor Sparkle, not Messages or the bee", () => {
+  it("keeps /messages as Ask 24Frame AI with the house sparkle cluster, not Phosphor/Lucide sparkles or the bee", () => {
     const dest = NAV.find((item) => item.href === "/messages");
     expect(dest).toBeDefined();
     expect(dest?.label).toBe("Ask 24Frame AI");
     expect(dest?.href).toBe("/messages");
-    expect(dest?.family).toBe("phosphor");
-    expect(dest?.icon).toBe(Sparkle);
-    expect(dest?.icon).not.toBe(LucideSparkle);
-    expect(dest?.icon).not.toBe(Sparkles);
-    expect(dest?.icon).not.toBe(MessageSquare);
-    expect(dest?.icon).not.toBe(Bot);
+    expect(dest?.family).toBe("house-ai");
+    expect(dest && isHouseAiNavItem(dest)).toBe(true);
+    expect(dest && "icon" in dest).toBe(false);
     expect(NAV.map((item) => item.label)).not.toContain("Messages");
     expect(NAV.map((item) => item.label)).not.toContain("Groups");
     expect(NAV.map((item) => item.label)).not.toContain("Casting");
     expect(NAV.map((item) => item.label)).not.toContain("Social");
-    expect(navSrc).toContain("icon: Sparkle");
+    expect(navSrc).toContain('family: "house-ai"');
+    expect(navSrc).not.toContain("icon: Sparkle");
     expect(navSrc).not.toContain("icon: Sparkles");
+    expect(navSrc).not.toContain("Sparkle");
     expect(navSrc).not.toContain("markSrc");
     expect(navSrc).not.toContain("ASK_GLOBEE_NAV_MARK");
     expect(navSrc).not.toContain("isNavImageItem");
@@ -105,14 +104,13 @@ describe("client NAV", () => {
     expect(navSrc).not.toContain("NavImageItem");
   });
 
-  it("locks Aggregation rail glyphs to Phosphor 75:5 / 61:2 — SOCIAL_NAV family stays Lucide", () => {
-    expect(NAV.map((item) => item.icon)).toEqual([
+  it("locks Aggregation rail glyphs to Phosphor 75:5 / 61:2 except the house AI mark — SOCIAL_NAV family stays Lucide", () => {
+    expect(NAV.filter(isPhosphorNavItem).map((item) => item.icon)).toEqual([
       SquaresFour,
       FilmSlate,
       Pulse,
       Bell,
       ChartBar,
-      Sparkle,
     ]);
     expect(GC_NAV.map((item) => item.icon)).toEqual([
       Tray,
@@ -122,13 +120,17 @@ describe("client NAV", () => {
       Wallet,
       Users,
     ]);
-    expect(NAV.every((item) => item.family === "phosphor")).toBe(true);
+    expect(NAV.filter((item) => item.href !== "/messages").every((item) => item.family === "phosphor")).toBe(
+      true,
+    );
+    expect(NAV.filter(isHouseAiNavItem)).toHaveLength(1);
     expect(GC_NAV.every((item) => item.family === "phosphor")).toBe(true);
     expect(SOCIAL_NAV.every((item) => item.family === "lucide")).toBe(true);
     expect(navSrc).not.toContain("LayoutDashboard");
     expect(navSrc).not.toContain("Clapperboard");
     expect(navSrc).toContain("family: \"phosphor\"");
     expect(navSrc).toContain("family: \"lucide\"");
+    expect(navSrc).toContain("family: \"house-ai\"");
   });
 });
 

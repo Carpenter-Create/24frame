@@ -19,6 +19,19 @@ describe("NavGlyph", () => {
     expect(active).not.toContain("stroke-width");
     expect(src).toContain("PhosphorChromeIcon");
     expect(src).toContain('item.family === "lucide"');
+    expect(src).toContain('item.family === "house-ai"');
+    expect(src).toContain("HouseAiMark");
+  });
+
+  it("renders the house AI mark for the Ask 24Frame AI row", () => {
+    const ask = NAV.find((item) => item.href === "/messages");
+    expect(ask).toBeDefined();
+    const html = renderToStaticMarkup(<NavGlyph item={ask!} active={false} />);
+    expect(html).toContain("data-house-ai-mark");
+    expect(html).toContain('fill="currentColor"');
+    expect(html).toContain("size-4");
+    expect(html).not.toContain("lucide-");
+    expect(html).not.toContain("stroke-width");
   });
 
   it("falls back to Lucide for SOCIAL_NAV family items", () => {
