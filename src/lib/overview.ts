@@ -17,8 +17,10 @@ import { WORKSPACE_EDUCATION_LABEL } from "@/lib/workspace-menu";
 // progress value is supplied; there is no lesson_progress SoT.
 //
 // Social strip is a Figma glance: identity faces + unread signal +
-// one CTA into Social. Not a mini-inbox — no per-DM rows, names,
-// last-message snippets, or thread hrefs.
+// one CTA into Social. Not a mini-inbox — no per-DM rows, last-message
+// snippets, or thread hrefs. Names stay off unless a register-true
+// mock already shows them; 1:4 / 1:120 do not. Pills stay in the
+// live unify-lead trailing cluster — never a content-row fork.
 
 export const OVERVIEW_HREF = "/overview";
 export const OVERVIEW_EDUCATION_LIMIT = 5;

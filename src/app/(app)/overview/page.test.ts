@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -58,6 +59,9 @@ describe("OverviewPage", () => {
     expect(html).toContain("data-overview-pulse");
     expect(html).toContain(OVERVIEW.title);
     expect(html).not.toContain("Globee");
+    expect(html).not.toContain("data-workspace-switcher");
+    const pageSrc = readFileSync(new URL("./page.tsx", import.meta.url), "utf8");
+    expect(pageSrc).not.toContain("WorkspaceSwitcher");
   });
 
   it("asks for an organization when the seat has none", async () => {
