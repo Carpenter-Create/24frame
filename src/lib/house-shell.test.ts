@@ -32,6 +32,7 @@ import {
   HOUSE_SECTION_AIR_CLASS,
   HOUSE_CHROME_GUTTER,
   HOUSE_CHROME_GUTTER_X_CLASS,
+  HOUSE_PHONE_TRAILING_GUTTER_CLASS,
   HOUSE_CANVAS_X_CLASS,
   HOUSE_ACCESS_RAIL_WIDTH,
   HOUSE_HOME_CONTENT_WIDTH,
@@ -141,6 +142,7 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(HOUSE_HEADER_SEARCH_GAP_CLASS).toBe("gap-[var(--space-4)]");
     expect(HOUSE_CHROME_GUTTER).toBe("var(--chrome-gutter)");
     expect(HOUSE_CHROME_GUTTER_X_CLASS).toBe("md:px-[var(--chrome-gutter)]");
+    expect(HOUSE_PHONE_TRAILING_GUTTER_CLASS).toBe("max-md:pr-[var(--chrome-gutter)]");
     expect(HOUSE_CANVAS_X_CLASS).toBe("px-[var(--chrome-gutter)]");
     expect(HOUSE_ACCESS_RAIL_WIDTH).toBe("var(--access-rail-width)");
     expect(HOUSE_HOME_CONTENT_WIDTH).toBe("var(--home-content-width)");

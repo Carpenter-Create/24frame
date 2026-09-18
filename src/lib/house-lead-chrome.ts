@@ -2,7 +2,12 @@
 // Phone: Asset 8 emblem on every workspace (logoVisible always).
 // Dest-rail phone adds hamburger before the emblem — house gap
 // (--space-3). Emblem is a workspace-home link, not the rail.
-// [ Emblem (phone) / wordmark (md+) · fixed lead slot ] — [ optional desktop search · same gap ] ····· [ Social phone search icon · switcher · Ask 24Frame AI · theme · bell · avatar ]
+// Phone grammar A (Adam 2026-09-18):
+//   Left: [hamburger if Agg/Edu] [emblem] [workspace pill]
+//   Trailing: [search if Social] [bell] [avatar]
+// Ask 24Frame AI and the sun/moon leave the phone trailing cluster
+// and live on the avatar sheet (Appearance drill-in + 24Frame AI).
+// Desktop md+ keeps switcher · Ask · theme · bell · avatar.
 // Social live explore search and Education quiet courses/videos
 // search share Facebook-compact geometry (04-facebook.png SoT)
 // via one HouseLeadSearch primitive — never twin files.
@@ -14,8 +19,9 @@
 //
 // G6 chrome gutter — logo left = rail left; trailing right = canvas
 // right. Desktop uses --chrome-gutter (not --content-inset). Phone
-// keeps MOBILE_CHROME_LEAD_PAD_CLASS. Collapsed icon rail still
-// shares the same left gutter.
+// left keeps --space-6; phone right uses --chrome-gutter so the
+// avatar is not flush. Collapsed icon rail still shares the same
+// left gutter.
 //
 // G9 — lead chrome stays pinned to the viewport. Mac rubber-band /
 // pull-down overscroll must not carry the header. Document/body is
@@ -27,8 +33,8 @@ import {
   HOUSE_CHROME_GUTTER_X_CLASS,
   HOUSE_HEADER_SEARCH_GAP_CLASS,
   HOUSE_ICON_BUTTON_CLASS,
+  HOUSE_PHONE_TRAILING_GUTTER_CLASS,
 } from "@/lib/house-shell";
-import { MOBILE_CHROME_LEAD_PAD_CLASS } from "@/lib/mobile-chrome";
 
 export const HOUSE_LEAD_SEARCH_WIDTH_PX = 240;
 
@@ -42,7 +48,12 @@ export const HOUSE_LEAD_SCROLL_CLASS =
 // overflow-hidden on this row (#412) — the workspace pill menu must paint.
 export const HOUSE_LEAD_STACK_CLASS = "sticky top-0 z-40 shrink-0";
 
-export const HOUSE_LEAD_CHROME_CLASS = `flex items-center justify-end gap-4 border-b border-hairline bg-surface/85 backdrop-blur ${MOBILE_CHROME_LEAD_PAD_CLASS} ${HOUSE_CHROME_GUTTER_X_CLASS}`;
+// Phone: --space-6 lead · --chrome-gutter trail. md+ uses chrome-gutter
+// both sides. Do not put overflow-hidden on this row (#412).
+export const HOUSE_LEAD_PHONE_PAD_CLASS =
+  `max-md:pl-[var(--space-6)] ${HOUSE_PHONE_TRAILING_GUTTER_CLASS}`;
+
+export const HOUSE_LEAD_CHROME_CLASS = `flex items-center justify-end gap-4 border-b border-hairline bg-surface/85 backdrop-blur ${HOUSE_LEAD_PHONE_PAD_CLASS} ${HOUSE_CHROME_GUTTER_X_CLASS}`;
 
 export const HOUSE_LEAD_LOGO_CLASS = "inline-flex shrink-0 items-center";
 
@@ -52,7 +63,7 @@ export const HOUSE_LEAD_SEARCH_DESKTOP_CLASS = "hidden w-[240px] shrink-0 md:fle
 
 export const HOUSE_LEAD_SEARCH_PHONE_CLASS = "w-full min-w-0 md:hidden";
 
-export const HOUSE_LEAD_UNDER_NAV_CLASS = `flex w-full items-center md:hidden border-b border-hairline bg-surface/85 backdrop-blur ${MOBILE_CHROME_LEAD_PAD_CLASS} ${HOUSE_CHROME_GUTTER_X_CLASS} py-[var(--space-2)]`;
+export const HOUSE_LEAD_UNDER_NAV_CLASS = `flex w-full items-center md:hidden border-b border-hairline bg-surface/85 backdrop-blur ${HOUSE_LEAD_PHONE_PAD_CLASS} ${HOUSE_CHROME_GUTTER_X_CLASS} py-[var(--space-2)]`;
 
 export const HOUSE_LEAD_SEARCH_PILL_CLASS =
   "flex h-9 w-full min-w-0 items-center gap-2 px-3";

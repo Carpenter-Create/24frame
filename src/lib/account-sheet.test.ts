@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { USER_MENU, USER_MENU_ACTIONS } from "@/lib/user-menu";
+import { USER_MENU, USER_MENU_ACTIONS, USER_MENU_PHONE_ACTIONS } from "@/lib/user-menu";
+import { ASSISTANT_NAME } from "@/lib/product";
 import * as accountSheet from "./account-sheet";
 import {
   ACCOUNT_MENU_DROPDOWN_ALIGN,
@@ -23,6 +24,7 @@ import {
   ACCOUNT_SHEET_HEAD_CLASS,
   ACCOUNT_SHEET_HOST_CLASS,
   ACCOUNT_SHEET_ITEMS,
+  ACCOUNT_SHEET_PHONE_ITEMS,
   ACCOUNT_SHEET_LEFTOVER,
   ACCOUNT_SHEET_LEFTOVER_CLASS,
   ACCOUNT_SHEET_LOGOUT_CLASS,
@@ -37,8 +39,9 @@ import {
 } from "./account-sheet";
 
 describe("account sheet lock", () => {
-  it("uses the same USER_MENU_ACTIONS list as the desktop menu", () => {
+  it("uses USER_MENU_ACTIONS on desktop and phone extras on the sheet", () => {
     expect(ACCOUNT_SHEET_ITEMS).toBe(USER_MENU_ACTIONS);
+    expect(ACCOUNT_SHEET_PHONE_ITEMS).toBe(USER_MENU_PHONE_ACTIONS);
     expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).toEqual([
       "profile",
       "settings",
@@ -47,8 +50,15 @@ describe("account sheet lock", () => {
       "Profile",
       "Settings",
     ]);
+    expect(ACCOUNT_SHEET_PHONE_ITEMS.map((item) => item.kind)).toEqual([
+      "profile",
+      "settings",
+      "askAssistant",
+      "appearance",
+    ]);
     expect(ACCOUNT_SHEET_ITEMS[0]?.kind).toBe("profile");
     expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).not.toContain("workspace");
+    expect(USER_MENU.askAssistant).toBe(ASSISTANT_NAME);
   });
 
   it("wires only existing routes — Appearance is not a page", () => {
@@ -59,6 +69,12 @@ describe("account sheet lock", () => {
     ]);
     expect(USER_MENU).not.toHaveProperty("appearanceHref");
     expect(hrefs).not.toContain("/account/appearance");
+    expect(ACCOUNT_SHEET_PHONE_ITEMS.flatMap((item) => ("href" in item ? [item.href] : []))).toEqual([
+      USER_MENU.profileHref,
+      USER_MENU.settingsHref,
+      USER_MENU.askAssistantHref,
+    ]);
+    expect(USER_MENU.askAssistantHref).toBe("/messages");
     expect(hrefs).not.toContain("/account/company");
     expect(hrefs.join(" ")).not.toMatch(/notifications|phone|job/i);
     expect(hrefs).toContain("/settings/profile");
@@ -193,14 +209,14 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS).not.toContain("min-h-[134px]");
   });
 
-  it("does not keep a menu theme row or flyout — theme is the header toggle", () => {
-    expect(accountSheet).not.toHaveProperty("ACCOUNT_MENU_APPEARANCE_ROW_CLASS");
+  it("keeps phone Appearance tokens and no desktop flyout align", () => {
+    expect(accountSheet).toHaveProperty("ACCOUNT_MENU_APPEARANCE_ROW_CLASS");
+    expect(accountSheet).toHaveProperty("ACCOUNT_SHEET_APPEARANCE_COPY_CLASS");
     expect(accountSheet).not.toHaveProperty("ACCOUNT_MENU_APPEARANCE_WASH_CLASS");
     expect(accountSheet).not.toHaveProperty("ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS");
-    expect(accountSheet).not.toHaveProperty("ACCOUNT_SHEET_APPEARANCE_COPY_CLASS");
     expect(accountSheet).not.toHaveProperty("accountMenuAppearanceFlyoutAlign");
     expect(accountSheet).not.toHaveProperty("accountMenuAppearanceFlyoutRight");
-    expect(ACCOUNT_SHEET_ABSENT).toContain("Appearance");
+    expect(ACCOUNT_SHEET_ABSENT).not.toContain("Appearance");
   });
 
   it("docks the desktop menu align-end to the avatar with 8px under the trigger", () => {
@@ -226,7 +242,7 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_SHEET_VERSION_CLASS).toContain("text-ink-3");
     expect(accountSheet).not.toHaveProperty("ACCOUNT_SHEET_LEGAL_CLASS");
     expect(ACCOUNT_SHEET_ABSENT).toContain("Legal");
-    expect(ACCOUNT_SHEET_ABSENT).toContain("Appearance");
+    expect(ACCOUNT_SHEET_ABSENT).not.toContain("Appearance");
   });
 });
 

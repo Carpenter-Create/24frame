@@ -18,6 +18,9 @@ export const HOUSE_CHROME_GUTTER = "var(--chrome-gutter)";
 
 export const HOUSE_CHROME_GUTTER_X_CLASS = "md:px-[var(--chrome-gutter)]";
 
+/** Phone header right air — avatar is not flush to the viewport. */
+export const HOUSE_PHONE_TRAILING_GUTTER_CLASS = "max-md:pr-[var(--chrome-gutter)]";
+
 export const HOUSE_CANVAS_X_CLASS = "px-[var(--chrome-gutter)]";
 
 /** Access rail measure. Aggregation uses --sidebar-width; this stays 220. */

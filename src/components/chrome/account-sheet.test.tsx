@@ -270,7 +270,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(attrClass(html, "data-account-sheet-head")).toContain("justify-between");
   });
 
-  it("keeps the Identity half-bar on the hug sheet — no theme drill-in", () => {
+  it("keeps the Identity half-bar on the hug sheet — Appearance is a list row", () => {
     const main = renderSheet();
     const accent = attrClass(main, "data-menu-surface-accent");
 
@@ -284,11 +284,12 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(accent).not.toContain("bg-hairline");
     expect(main).toContain("data-identity-block");
     expect(main).toContain("data-account-sheet-close");
+    expect(main).toContain('data-account-menu-face="main"');
+    expect(main).toContain('data-sheet-group-item="appearance"');
     expect(main).not.toContain("data-account-menu-appearance-flyout");
-    expect(main).not.toContain("data-account-menu-face");
     expect(src).toContain("<MenuSurfaceAccent");
     expect(src).not.toContain('{face === "main" ? <MenuSurfaceAccent /> : null}');
-    expect(src).not.toContain("AccountSheetAppearance");
+    expect(src).toContain("AccountSheetAppearance");
     expect(src).not.toContain("Adam Carpenter");
     expect(src).not.toContain("admin@ccbfg.com");
   });
@@ -358,7 +359,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(empty).not.toContain("<img");
   });
 
-  it("lists Profile, then Settings — then Log out with the footer", () => {
+  it("lists Profile, Settings, 24Frame AI, Appearance — then Log out with the footer", () => {
     const html = renderSheet();
     const group = html.slice(html.indexOf("data-sheet-group"));
     const profileClass = attrClass(html, 'data-sheet-group-item="profile"');
@@ -373,19 +374,22 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(html).not.toContain("data-sheet-group-label");
     expect(html).not.toContain(">ACCOUNT<");
     expect(html).not.toContain("Workspace");
-    expect(html).not.toContain("Appearance");
     expect(group.indexOf("Profile")).toBeLessThan(group.indexOf("Settings"));
-    expect(html.indexOf("Settings")).toBeLessThan(html.indexOf("Log out"));
+    expect(group.indexOf("Settings")).toBeLessThan(group.indexOf("24Frame AI"));
+    expect(group.indexOf("24Frame AI")).toBeLessThan(group.indexOf("Appearance"));
+    expect(html.indexOf("Appearance")).toBeLessThan(html.indexOf("Log out"));
     expect(html).not.toContain('data-sheet-group-item="workspace"');
     expect(html).toContain('data-sheet-group-item="profile"');
     expect(html).toContain('data-sheet-group-item="settings"');
-    expect(html).not.toContain('data-sheet-group-item="appearance"');
+    expect(html).toContain('data-sheet-group-item="askAssistant"');
+    expect(html).toContain('data-sheet-group-item="appearance"');
     expect(html).not.toContain('data-sheet-group-item="agreements"');
     expect(html).not.toContain('data-sheet-group-item="help"');
     expect(html).not.toContain('data-sheet-group-item="refer"');
     expect(html).toContain('data-sheet-group-item="logOut"');
     expect(html).toContain(`href="${USER_MENU.profileHref}"`);
     expect(html).toContain('href="/settings/aggregation"');
+    expect(html).toContain(`href="${USER_MENU.askAssistantHref}"`);
     expect(html).not.toContain(`href="${USER_MENU.agreementsHref}"`);
     expect(html).not.toContain(`href="${USER_MENU.helpHref}"`);
     expect(html).not.toContain(`href="${USER_MENU.referHref}"`);
@@ -419,7 +423,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(html).not.toContain("stroke-width");
     expect(html).not.toContain("lucide-");
     expect(html).not.toContain("ThemeGlyph");
-    expect(html).not.toContain("data-account-menu-appearance-mode");
+    expect(html).toContain("data-account-menu-appearance-mode");
     expect(html).not.toContain("data-account-menu-appearance-flyout");
     expect(html).not.toContain("data-account-sheet-appearance-stack");
     expect(html).not.toContain("data-account-sheet-appearance-flyout-host");
@@ -543,7 +547,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     const leftoverClass = attrClass(html, "data-account-sheet-leftover");
     const surfaceClass = attrClass(html, "data-account-sheet-surface");
     const pinClass = attrClass(html, "data-account-sheet-pin");
-    const lastItem = html.indexOf('data-sheet-group-item="settings"');
+    const lastItem = html.indexOf('data-sheet-group-item="appearance"');
     const logout = html.indexOf('data-sheet-group-item="logOut"');
     const scroll = html.indexOf("data-account-sheet-scroll");
     const leftover = html.indexOf("data-account-sheet-leftover");
@@ -555,7 +559,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(leftover).toBeGreaterThan(scroll);
     expect(pin).toBeGreaterThan(leftover);
     expect(html.slice(scroll, leftover)).toContain("Settings");
-    expect(html.slice(scroll, leftover)).not.toContain("Appearance");
+    expect(html.slice(scroll, leftover)).toContain("Appearance");
     expect(html.slice(scroll, pin)).not.toContain("Log out");
     expect(html.slice(pin)).toContain("Log out");
     expect(betweenLastItemAndLogout).toContain("data-account-sheet-leftover");
@@ -578,6 +582,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
   it("does not dump the rail, Ask Globee chrome, or Adobe leftovers", () => {
     const html = renderSheet();
     for (const item of [...NAV, ...GC_NAV]) {
+      if (item.href === "/messages") continue;
       expect(html).not.toContain(item.label);
       if (item.href !== "/") expect(html).not.toContain(`href="${item.href}"`);
     }
@@ -596,43 +601,51 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(src).not.toContain("type=\"radio\"");
   });
 
-  it("does not open a theme drill-in — header sun/moon owns the flip", () => {
+  it("opens phone Appearance as a same-sheet drill-in — not a page or desktop flyout", () => {
     const sheet = renderSheet();
+    const appearance = renderToStaticMarkup(
+      <AccountSheet
+        email="ada@example.com"
+        pathname="/"
+        onClose={() => undefined}
+        face="appearance"
+      />,
+    );
 
     expect(sheet).toContain("data-identity-block");
     expect(sheet).toContain("data-account-sheet-close");
     expect(sheet).toContain('data-sheet-group-item="profile"');
     expect(sheet).toContain('data-sheet-group-item="settings"');
+    expect(sheet).toContain('data-sheet-group-item="askAssistant"');
+    expect(sheet).toContain('data-sheet-group-item="appearance"');
+    expect(sheet).toContain('data-account-menu-face="main"');
     expect(sheet).not.toContain('data-sheet-group-item="back"');
-    expect(sheet).not.toContain('data-sheet-group-item="appearance"');
     expect(sheet).not.toContain('data-sheet-group-item="light"');
-    expect(sheet).not.toContain('data-sheet-group-item="dark"');
-    expect(sheet).not.toContain('data-sheet-group-item="auto"');
     expect(sheet).not.toContain("data-account-menu-appearance-flyout");
-    expect(sheet).not.toContain("data-account-sheet-appearance-stack");
-    expect(sheet).not.toContain("data-account-sheet-appearance-flyout-host");
-    expect(sheet).not.toContain("data-account-menu-appearance-wash");
-    expect(sheet).not.toContain("data-appearance-check");
-    expect(sheet).not.toContain("System default");
-    expect(sheet).not.toContain("Appearance");
-    expect(sheet).not.toContain("ThemeGlyph");
-    expect(sheet).not.toContain("purple");
-    expect(sheet).not.toContain("violet");
-    expect(sheet).not.toContain('type="radio"');
-    expect(sheet).not.toContain('role="radiogroup"');
     expect(sheet).not.toContain("/account/appearance");
-    expect(sheet).not.toContain("w-[342px]");
-    expect(src).not.toContain("AccountSheetAppearance");
+    expect(src).toContain("AccountSheetAppearance");
+    expect(src).toContain("AccountBackChevron");
+    expect(src).toContain("CaretLeft");
+    expect(src).toContain("APPEARANCE.back");
+    expect(src).toContain("applyDocumentThemePreference");
+    expect(src).toContain("AppearanceCheck");
+    expect(src).toContain("ACCOUNT_SHEET_APPEARANCE_COPY_CLASS");
     expect(src).not.toContain("AccountAppearanceFlyout");
-    expect(src).not.toContain("AccountBackChevron");
-    expect(src).not.toContain("CaretLeft");
-    expect(src).not.toContain("APPEARANCE.back");
-    expect(src).not.toContain("applyDocumentThemePreference");
-    expect(src).not.toContain("AppearanceCheck");
-    expect(src).not.toContain("ACCOUNT_SHEET_APPEARANCE_COPY_CLASS");
     expect(src).not.toContain("Back to main menu");
     expect(src).toContain("618:785 overlay is void");
     expect(src).not.toContain("w-[342px]");
+
+    expect(appearance).toContain('data-account-menu-face="appearance"');
+    expect(appearance).toContain('data-sheet-group-item="back"');
+    expect(appearance).toContain('data-sheet-group-item="auto"');
+    expect(appearance).toContain('data-sheet-group-item="dark"');
+    expect(appearance).toContain('data-sheet-group-item="light"');
+    expect(appearance).toContain("System default");
+    expect(appearance).toContain("data-appearance-check");
+    expect(appearance).not.toContain('data-sheet-group-item="profile"');
+    expect(appearance).not.toContain("Log out");
+    expect(appearance).not.toContain('type="radio"');
+    expect(appearance).not.toContain("purple");
   });
 
   it("does not restyle Ask Globee landing or merge account into the hamburger sheet", () => {
@@ -916,7 +929,7 @@ describe("AccountMenuDropdown 629:795", () => {
     expect(src).not.toContain("accountMenuAppearanceFlyoutAlign");
     expect(src).not.toContain("appearanceRowRef");
     expect(src).not.toContain("AccountAppearanceFlyout");
-    expect(src).not.toContain("data-account-menu-appearance-chevron");
+    expect(main).not.toContain("data-account-menu-appearance-chevron");
   });
 
   it("opens from the desktop avatar and does not reuse the 90% sheet", () => {
