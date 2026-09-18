@@ -28,6 +28,58 @@ export const COURSE_MEMBER_SELECT =
 
 export const COURSE_COVER_ASPECT_CLASS = "aspect-video";
 
+export const COURSE_CARD_DENSITIES = ["discover", "home"] as const;
+export type CourseCardDensity = (typeof COURSE_CARD_DENSITIES)[number];
+
+// Home Education glance plates — Figma Home module. Cycle is
+// deterministic from course id. Hex lives in tokens.css only.
+export const COURSE_GLANCE_PLATE_CLASSES = [
+  "bg-course-plate-1",
+  "bg-course-plate-2",
+  "bg-course-plate-3",
+  "bg-course-plate-4",
+  "bg-course-plate-5",
+] as const;
+
+export const COURSE_GLANCE_TITLE_CLASS =
+  "absolute bottom-[var(--space-3)] left-[var(--space-3)] max-w-[calc(100%-var(--space-6))] text-[length:var(--text-xs)] leading-none text-accent-contrast";
+
+export const COURSE_GLANCE_BAND_CLASS =
+  "absolute inset-x-0 top-0 h-10 bg-accent-contrast/[0.08]";
+
+export const COURSE_GLANCE_ORB_CLASS =
+  "absolute right-[var(--space-4)] top-7 size-14 rounded-full bg-accent-contrast/10";
+
+export const COURSE_GLANCE_PROGRESS_TRACK_CLASS =
+  "h-1.5 w-full overflow-hidden rounded-full bg-hairline";
+
+export const COURSE_GLANCE_PROGRESS_FILL_CLASS = "h-full rounded-full bg-accent";
+
+export const COURSE_GLANCE_PROGRESS_CAPTION_CLASS = "t-body-sm text-ink-2";
+
+export function courseGlancePlateIndex(courseId: string): number {
+  let hash = 0;
+  for (const ch of courseId) {
+    hash = (hash + ch.charCodeAt(0)) % COURSE_GLANCE_PLATE_CLASSES.length;
+  }
+  return hash;
+}
+
+export function courseGlancePlateClass(
+  courseId: string,
+): (typeof COURSE_GLANCE_PLATE_CLASSES)[number] {
+  return COURSE_GLANCE_PLATE_CLASSES[courseGlancePlateIndex(courseId)]!;
+}
+
+export function courseGlanceProgressPercent(raw: number | null | undefined): number {
+  if (raw == null || !Number.isFinite(raw)) return 0;
+  return Math.min(100, Math.max(0, Math.round(raw)));
+}
+
+export function courseGlanceProgressLabel(percent: number): string {
+  return `${courseGlanceProgressPercent(percent)}% ${SOCIAL.courses.progressComplete}`;
+}
+
 export type CourseModuleRow = {
   id: string;
   course_id: string;

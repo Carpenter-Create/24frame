@@ -22,7 +22,11 @@ import {
 } from "@/lib/dashboard-craft";
 import type { ClientHomeDoNextItem, ClientHomeJustInItem, DashboardChangeRow } from "@/lib/dashboard-home";
 import { formatUsdCents } from "@/lib/finance";
-import { OVERVIEW_PAGE, overviewModuleHeaderAction } from "@/lib/overview";
+import {
+  OVERVIEW_EDUCATION_LABEL_CLASS,
+  OVERVIEW_PAGE,
+  overviewModuleHeaderAction,
+} from "@/lib/overview";
 import { SOCIAL_AVATAR_32_CLASS } from "@/lib/social-chrome";
 import type { SocialHomeChat } from "@/lib/social-home-chats";
 import { socialDmHref, socialInitials } from "@/lib/social";
@@ -39,8 +43,7 @@ export function OverviewHome({
   socialChats,
   socialFaces,
   courses,
-  courseCovers,
-  courseMeta,
+  courseProgress,
   needsYou,
   weekPulse,
   aiNext,
@@ -51,8 +54,7 @@ export function OverviewHome({
   socialChats: readonly SocialHomeChat[];
   socialFaces: ReadonlyMap<string, string | null>;
   courses: readonly CourseRow[];
-  courseCovers: ReadonlyMap<string, string>;
-  courseMeta: ReadonlyMap<string, string | null>;
+  courseProgress?: ReadonlyMap<string, number>;
   needsYou: readonly { id: string; what: string; href: string }[];
   weekPulse: readonly DashboardChangeRow[];
   aiNext: readonly ClientHomeDoNextItem[];
@@ -100,20 +102,21 @@ export function OverviewHome({
       <OverviewModule
         testId="education"
         title={OVERVIEW_PAGE.education}
+        titleClass={OVERVIEW_EDUCATION_LABEL_CLASS}
         href={OVERVIEW_PAGE.educationHref}
         empty={OVERVIEW_PAGE.educationEmpty}
       >
         {courses.length > 0 ? (
           <ul
             data-overview-education-covers=""
-            className="grid grid-cols-1 gap-[var(--space-4)] px-[var(--space-4)] py-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-5"
+            className="grid grid-cols-1 gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-5"
           >
             {courses.map((course) => (
               <CourseCard
                 key={course.id}
                 course={course}
-                coverUrl={courseCovers.get(course.id)}
-                metaLabel={courseMeta.get(course.id)}
+                density="home"
+                progressPercent={courseProgress?.get(course.id)}
               />
             ))}
           </ul>
@@ -204,6 +207,7 @@ export function OverviewHome({
 function OverviewModule({
   testId,
   title,
+  titleClass = DASHBOARD_SECTION_TITLE_CLASS,
   href,
   cta,
   empty,
@@ -211,6 +215,7 @@ function OverviewModule({
 }: {
   testId: string;
   title: string;
+  titleClass?: string;
   href?: string;
   cta?: string;
   empty: string;
@@ -221,7 +226,9 @@ function OverviewModule({
   return (
     <DashboardHomePanel aria-label={title} data-overview-module={testId}>
       <div className={`flex items-center justify-between ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD_LIST}`}>
-        <p className={DASHBOARD_SECTION_TITLE_CLASS}>{title}</p>
+        <p data-overview-module-label="" className={titleClass}>
+          {title}
+        </p>
         {action ? <TextAction href={action.href}>{action.label}</TextAction> : null}
       </div>
       {hasBody ? children : <DashboardHomeEmpty>{empty}</DashboardHomeEmpty>}

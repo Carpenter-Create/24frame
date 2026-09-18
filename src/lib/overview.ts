@@ -66,6 +66,10 @@ export const OVERVIEW_PAGE = {
   aiAsk: ASK_ASSISTANT,
 } as const;
 
+// Figma Home Education module label — 13 / ink-2, not a heading and
+// not a Sporty Blue echo. Other Home modules stay section-title ink.
+export const OVERVIEW_EDUCATION_LABEL_CLASS = "t-body-sm text-ink-2";
+
 /** Header TextAction only when the label is distinct from the module title. */
 export function overviewModuleHeaderAction(
   title: string,
