@@ -64,8 +64,8 @@ type Org = { id: string; name: string };
 // Hamburger stays off. Avatar 32 stays.
 // /home: no dest rail (Adam 2026-09-18). Unify-lead chrome + modules
 // only. Aggregation · Social · Education rails return off Home.
-// Home content insets with --access-rail-width so the column matches
-// rail pages. Do not re-center on --page-max-width.
+// Figma SoT (HOME-width-lock.md): phantom 220 inset + 1220 column at
+// 1440 — same as Activity main. Header full-bleed. No --page-max-width.
 export function AppShell({
   chrome,
   email = "",

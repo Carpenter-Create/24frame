@@ -37,7 +37,7 @@ export const OVERVIEW_MODULE_ORDER = [
 ] as const;
 
 /** Phone-chrome / Home width: dest rail is gone; lead + main go full-canvas.
- *  Home modules inset separately with --access-rail-width. */
+ *  Home modules inset separately with --access-rail-width (1220 at 1440). */
 export const OVERVIEW_RAIL_OFF_WIDTH = "0px";
 
 export const OVERVIEW_PAGE = {

@@ -91,6 +91,8 @@
      --sidebar-width for full-bleed lead chrome; content insets
      with this so modules share the rail-page column. */
   --access-rail-width: 220px;
+  /* Figma Home / Activity main at 1440: 220 + 1220. Not --page-max-width. */
+  --home-content-width: 1220px;
   /* Desktop chrome gutter — lead logo left · rail panel left · lead
      trailing right · canvas right. Same value both sides. Not
      --content-inset (page reading measure). */

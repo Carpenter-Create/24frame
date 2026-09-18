@@ -23,7 +23,10 @@ export const HOUSE_CANVAS_X_CLASS = "px-[var(--chrome-gutter)]";
 /** Access rail measure. Home content uses this while --sidebar-width is 0. */
 export const HOUSE_ACCESS_RAIL_WIDTH = "var(--access-rail-width)";
 
-/** Home modules sit in the rail-page column. Lead chrome stays full-bleed. */
+/** Figma Home / Activity main column at 1440 (220 + 1220). */
+export const HOUSE_HOME_CONTENT_WIDTH = "var(--home-content-width)";
+
+/** Home modules sit in the Activity-main column. Lead chrome stays full-bleed. */
 export const HOUSE_HOME_RAIL_COLUMN_CLASS =
   "ml-[var(--access-rail-width)] w-[calc(100%-var(--access-rail-width))]";
 
