@@ -23,6 +23,7 @@ import {
 import {
   WORKSPACE_SWITCHER,
   WORKSPACE_SWITCHER_HEADER_CLASS,
+  WORKSPACE_SWITCHER_HOST_CLASS,
   WORKSPACE_SWITCHER_MARK_CLASS,
   WORKSPACE_SWITCHER_OPTION_CHECK_CLASS,
   WORKSPACE_SWITCHER_OPTION_CHECK_GUTTER_CLASS,
@@ -210,7 +211,7 @@ export function WorkspaceSwitcher({
       ref={hostRef}
       data-workspace-switcher=""
       data-workspace-switcher-tone={tone}
-      className="relative min-w-0"
+      className={WORKSPACE_SWITCHER_HOST_CLASS}
     >
       <button
         type="button"

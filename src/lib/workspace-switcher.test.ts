@@ -20,6 +20,7 @@ import {
   WORKSPACE_SWITCHER_CHEVRON_CLASS,
   WORKSPACE_SWITCHER_CHEVRON_OPEN_CLASS,
   WORKSPACE_SWITCHER_HEADER_CLASS,
+  WORKSPACE_SWITCHER_HOST_CLASS,
   WORKSPACE_SWITCHER_MARK,
   WORKSPACE_SWITCHER_MARK_CLASS,
   WORKSPACE_SWITCHER_OPTION_CHECK_CLASS,
@@ -143,10 +144,16 @@ describe("workspace switcher lock", () => {
   });
 
   it("reserves a phone leading pill after the hamburger and a desktop trailing cluster", () => {
-    expect(APP_HEADER_LEADING_CLASS).toContain("gap-[var(--space-2)]");
-    expect(APP_HEADER_LEADING_CLASS).toContain("max-md:overflow-hidden");
-    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).toBe("min-w-0 md:hidden");
+    expect(APP_HEADER_LEADING_CLASS).toContain("gap-[var(--space-3)]");
+    expect(APP_HEADER_LEADING_CLASS).toContain("md:gap-[var(--space-2)]");
+    expect(APP_HEADER_LEADING_CLASS).not.toContain("gap-[var(--space-1)]");
+    expect(APP_HEADER_LEADING_CLASS).not.toMatch(/(?:^|\s)(?:max-md:)?overflow-hidden(?:\s|$)/);
+    expect(APP_HEADER_LEADING_CLASS).toContain("overflow-visible");
+    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).toBe("min-w-0 overflow-visible md:hidden");
     expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).not.toContain("shrink-0");
+    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).not.toMatch(/overflow-hidden/);
+    expect(WORKSPACE_SWITCHER_HOST_CLASS).toBe("relative min-w-0 overflow-visible");
+    expect(WORKSPACE_SWITCHER_HOST_CLASS).not.toMatch(/overflow-hidden/);
     expect(APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS).toBe("hidden md:contents");
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("shrink-0");
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("gap-[var(--space-1)]");
@@ -221,5 +228,26 @@ describe("workspace switcher lock", () => {
     expect(workspaceSwitcherNextSegmentIndex(0, 3, 1)).toBe(1);
     expect(workspaceSwitcherNextSegmentIndex(2, 3, 1)).toBe(0);
     expect(workspaceSwitcherNextSegmentIndex(0, 3, -1)).toBe(2);
+  });
+
+  it("keeps the phone pill menu out of overflow-hidden ancestors and emblem air ≥ space-2", () => {
+    const phoneGap = APP_HEADER_LEADING_CLASS.match(
+      /(?<![a-z0-9:-])gap-\[var\((--space-\d+)\)\]/,
+    )?.[1];
+    expect(phoneGap).toBeTruthy();
+    expect(Number(phoneGap?.replace("--space-", ""))).toBeGreaterThanOrEqual(2);
+    expect(phoneGap).not.toBe("--space-1");
+    expect(phoneGap).toBe("--space-3");
+
+    for (const className of [
+      APP_HEADER_LEADING_CLASS,
+      APP_HEADER_WORKSPACE_PILL_HOST_CLASS,
+      WORKSPACE_SWITCHER_HOST_CLASS,
+    ]) {
+      expect(className).not.toMatch(/(?:^|\s)(?:max-md:)?overflow-hidden(?:\s|$)/);
+      expect(className).toContain("overflow-visible");
+    }
+    expect(WORKSPACE_SWITCHER_PILL_PANEL_CLASS).toContain("overflow-hidden");
+    expect(WORKSPACE_SWITCHER_PILL_PANEL_CLASS).toContain("absolute");
   });
 });

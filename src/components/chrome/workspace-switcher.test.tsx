@@ -327,11 +327,15 @@ describe("workspace switcher placement", () => {
   it("lets the phone pill yield so it cannot overlap the brand mark", () => {
     expect(leadSrc).toContain("APP_HEADER_WORKSPACE_PILL_HOST_CLASS");
     expect(leadSrc).toContain("APP_HEADER_LEADING_CLASS");
+    expect(src).toContain("WORKSPACE_SWITCHER_HOST_CLASS");
     expect(leadSrc).toContain("<BrandLogo />");
     expect(leadSrc).not.toContain("BrandEmblem");
-    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).toBe("min-w-0 md:hidden");
+    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).toBe("min-w-0 overflow-visible md:hidden");
     expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).not.toContain("shrink-0");
-    expect(APP_HEADER_LEADING_CLASS).toContain("max-md:overflow-hidden");
+    expect(APP_HEADER_LEADING_CLASS).not.toMatch(/(?:^|\s)(?:max-md:)?overflow-hidden(?:\s|$)/);
+    expect(APP_HEADER_LEADING_CLASS).toContain("overflow-visible");
+    expect(APP_HEADER_LEADING_CLASS).toContain("gap-[var(--space-3)]");
+    expect(APP_HEADER_LEADING_CLASS).not.toContain("gap-[var(--space-1)]");
     expect(APP_HEADER_LEADING_CLASS).toContain("min-w-0");
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("max-md:shrink-0");
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("gap-[var(--space-1)]");

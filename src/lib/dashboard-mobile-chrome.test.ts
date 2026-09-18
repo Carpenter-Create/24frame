@@ -55,11 +55,15 @@ function chromeHtml() {
 
 describe("Aggregation Dashboard mobile chrome — Mercury leading pill", () => {
   it("puts a compact Aggregation pill after the hamburger — not centered, not with the avatar", () => {
-    expect(APP_HEADER_LEADING_CLASS).toContain("gap-[var(--space-2)]");
-    expect(APP_HEADER_LEADING_CLASS).toContain("max-md:overflow-hidden");
+    expect(APP_HEADER_LEADING_CLASS).toContain("gap-[var(--space-3)]");
+    expect(APP_HEADER_LEADING_CLASS).toContain("md:gap-[var(--space-2)]");
+    expect(APP_HEADER_LEADING_CLASS).not.toContain("gap-[var(--space-1)]");
+    expect(APP_HEADER_LEADING_CLASS).not.toMatch(/(?:^|\s)(?:max-md:)?overflow-hidden(?:\s|$)/);
+    expect(APP_HEADER_LEADING_CLASS).toContain("overflow-visible");
     expect(APP_HEADER_LEADING_CLASS).not.toContain("justify-center");
     expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).toContain("md:hidden");
     expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).toContain("min-w-0");
+    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).toContain("overflow-visible");
     expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).not.toContain("shrink-0");
     expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).not.toContain("mx-auto");
     expect(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS).toContain("border-hairline");
