@@ -68,8 +68,10 @@ export default async function GcDeliveriesPage({
   // A title reaches in_delivery only after GC approves it; live = already on ≥1 platform.
   const { data: titleRows } = await supabase
     .from("titles").select("id, title, catalog_id").in("status", ["in_delivery", "live"]).order("title").range(...rangeFor(UNPAGINATED_MAX));
+  // Create-form vendors stay active-only. The licensing lens needs inactive
+  // partners too — their rows still exist on this page after deactivation.
   const { data: vendorRows } = await supabase
-    .from("vendors").select("id, name").eq("active", true).order("name").range(...rangeFor(UNPAGINATED_MAX));
+    .from("vendors").select("id, name, active").order("name").range(...rangeFor(UNPAGINATED_MAX));
   // Companions were unbounded: PostgREST max_rows=1000 returned a short list that
   // looked finished. Class 2: IN the page/picker ids (already ≤200 / ≤500) + probe
   // so truncation is visible. Class 1 deliveries/titles/vendors bounds stay as-is.
@@ -79,7 +81,8 @@ export default async function GcDeliveriesPage({
     pageDeliveryIds: uniqueIds(list.map((d) => d.id)),
   });
   const titleOpts = (titleRows ?? []).map((t) => ({ id: t.id, label: `${t.catalog_id} · ${t.title}` }));
-  const vendorOpts = (vendorRows ?? []).map((v) => ({ id: v.id, name: v.name }));
+  const vendorOpts = (vendorRows ?? []).filter((v) => v.active).map((v) => ({ id: v.id, name: v.name }));
+  const vendorFilterOpts = (vendorRows ?? []).map((v) => ({ id: v.id, name: v.name }));
   const grantsByTitle: Record<string, { id: string; label: string }[]> = {};
   for (const g of companions.grants.rows) {
     (grantsByTitle[g.title_id] ??= []).push({
@@ -149,7 +152,7 @@ export default async function GcDeliveriesPage({
           options={DELIVERY_STATUS_FILTERS}
           hrefFor={(key) => gcLicensingHref(key, vendorFilter)}
         />
-        <LicensingVendorFilter status={statusFilter} vendor={vendorFilter} vendors={vendorOpts} />
+        <LicensingVendorFilter status={statusFilter} vendor={vendorFilter} vendors={vendorFilterOpts} />
       </div>
 
       {list.length === 0 ? (

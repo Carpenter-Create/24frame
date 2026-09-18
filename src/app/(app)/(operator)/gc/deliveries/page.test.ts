@@ -12,13 +12,26 @@ import { HOUSE_MODULE_CLASS } from "@/lib/house-shell";
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
 import GcDeliveriesPage from "./page";
 
+const capturedVendors = vi.hoisted(() => ({
+  form: [] as { id: string; name: string }[],
+  filter: [] as { id: string; name: string }[],
+}));
+
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
-vi.mock("./new-delivery-form", () => ({ NewDeliveryForm: () => null }));
+vi.mock("./new-delivery-form", () => ({
+  NewDeliveryForm: (props: { vendors: { id: string; name: string }[] }) => {
+    capturedVendors.form = props.vendors;
+    return null;
+  },
+}));
 vi.mock("./export-panel", () => ({ ExportPanel: () => null }));
 vi.mock("./delivery-controls", () => ({ DeliveryControls: () => null }));
 vi.mock("./portal-links", () => ({ PortalLinks: () => null }));
 vi.mock("./licensing-vendor-filter", () => ({
-  LicensingVendorFilter: () => null,
+  LicensingVendorFilter: (props: { vendors: { id: string; name: string }[] }) => {
+    capturedVendors.filter = props.vendors;
+    return null;
+  },
 }));
 
 function stubClient(tables: Record<string, unknown[]> = {}) {
@@ -114,7 +127,11 @@ describe("staff /gc/deliveries empty copy", () => {
 });
 
 describe("staff /gc/deliveries licensing filters and craft", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    capturedVendors.form = [];
+    capturedVendors.filter = [];
+  });
 
   it("filters by live delivery status and vendor on the cross-org read", async () => {
     const vendorId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
@@ -140,6 +157,24 @@ describe("staff /gc/deliveries licensing filters and craft", () => {
     };
     expect(deliveriesChain.eq).not.toHaveBeenCalledWith("status", expect.anything());
     expect(deliveriesChain.eq).not.toHaveBeenCalledWith("vendor_id", expect.anything());
+  });
+
+  it("fills the vendor lens from all partners, not the active-only create list", async () => {
+    const activeId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+    const inactiveId = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+    stubClient({
+      vendors: [
+        { id: activeId, name: "Active Partner", active: true },
+        { id: inactiveId, name: "Inactive Partner", active: false },
+      ],
+    });
+    await renderToStaticMarkup(await GcDeliveriesPage());
+    expect(capturedVendors.form).toEqual([{ id: activeId, name: "Active Partner" }]);
+    expect(capturedVendors.filter).toEqual([
+      { id: activeId, name: "Active Partner" },
+      { id: inactiveId, name: "Inactive Partner" },
+    ]);
+    expect(pageSrc).not.toContain('.eq("active", true)');
   });
 
   it("renders house status chips that preserve the vendor filter", async () => {
