@@ -2,11 +2,18 @@ import { describe, expect, it } from "vitest";
 
 import {
   ACTIVITY_BELL_OPEN_CAP,
+  ACTIVITY_BELL_OPEN_DOT_CLASS,
+  ACTIVITY_BELL_TRIGGER_CLASS,
+  ACTIVITY_BELL_TRIGGER_OPEN_CLASS,
   ACTIVITY_HREF,
+  ACTIVITY_KIND_ICON,
   ACTIVITY_PAGE,
   activityBellItems,
   activityEmptyCopy,
   activityHref,
+  activityItemHref,
+  activityKindIcon,
+  activityRelativeTime,
   filterActivityItems,
   isActivityOpen,
   parseActivityPeriod,
@@ -137,5 +144,19 @@ describe("Activity bell cap", () => {
       "4",
     ]);
     expect(activityBellItems([{ id: "done", unread: false }])).toEqual([]);
+  });
+
+  it("maps house type icons and reuses Social relative time", () => {
+    expect(activityKindIcon("title_rejected")).toBe("film-slate");
+    expect(activityKindIcon("delivery_update")).toBe("paper-plane-tilt");
+    expect(ACTIVITY_KIND_ICON.title_rejected).toBe("film-slate");
+    expect(activityItemHref(OPEN_NEW)).toBe("/activity");
+    expect(activityRelativeTime("2026-09-18T11:00:00.000Z", NOW.getTime())).toBe("1h");
+    expect(ACTIVITY_PAGE.viewAll).toBe("View all activity");
+    expect(ACTIVITY_PAGE.markAllDone).toBe("Mark all done");
+    expect(ACTIVITY_BELL_TRIGGER_CLASS).toContain("hover:bg-surface-muted");
+    expect(ACTIVITY_BELL_TRIGGER_CLASS).toContain("rounded-full");
+    expect(ACTIVITY_BELL_TRIGGER_OPEN_CLASS).toBe("bg-surface-muted");
+    expect(ACTIVITY_BELL_OPEN_DOT_CLASS).toContain("bg-accent");
   });
 });
