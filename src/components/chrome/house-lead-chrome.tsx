@@ -26,7 +26,7 @@ import {
 export function HouseLeadChrome({
   workspace,
   settingsPage = false,
-  logoVisible = "desktop",
+  logoVisible = "always",
   leadingNav,
   search,
   phoneSearch,

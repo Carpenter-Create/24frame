@@ -254,23 +254,26 @@ export function AppShell({
       )}
 
       {/* Full-width top + dest side nav — same HouseLeadChrome as Social.
-          Access phone header is hamburger · gap 8 · one workspace
-          pill left, avatar alone right. Do not center the pill. Do
-          not cluster it with the avatar. Desktop keeps the trailing
-          switcher + avatar cluster. Brand sits on the full-width
-          top, not a second rail chrome. Period stays on the
-          Dashboard org row. No org switcher on any route.
-          Aggregation mid-lead stays empty. Education mounts a quiet
-          course/video search immediately right of the logo, same
-          Facebook-compact slot as Social live search. Search also
-          mounts on the Access `/messages` gate, and on mobile
-          `/titles` (528:542). Phone avatar opens 544:561. Hamburger
-          stays the nav sheet. Do not invent Move chrome or a
-          second phone switcher. Studio secondary rail stays HOLD. */}
+          Phone (Adam 2026-09-18): Asset 8 emblem on every workspace.
+          Dest-rail phone (Aggregation / Education) is hamburger ·
+          house gap · emblem · workspace pill. Home / Social: emblem
+          only — no hamburger. Emblem links workspace home; it does
+          not open the rail. Do not center the pill. Do not cluster
+          it with the avatar. Desktop keeps the trailing switcher +
+          avatar cluster. Brand sits on the full-width top, not a
+          second rail chrome. Period stays on the Dashboard org row.
+          No org switcher on any route. Aggregation mid-lead stays
+          empty. Education mounts a quiet course/video search
+          immediately right of the logo, same Facebook-compact slot
+          as Social live search. Search also mounts on the Access
+          `/messages` gate, and on mobile `/titles` (528:542).
+          Phone avatar opens 544:561. Hamburger stays the nav sheet.
+          Do not invent Move chrome or a second phone switcher.
+          Studio secondary rail stays HOLD. */}
       <HouseLeadChrome
         workspace={workspace}
         settingsPage={settingsPage}
-        logoVisible={homeChrome ? "always" : "desktop"}
+        logoVisible="always"
         leadingNav={
           settingsPage ? (
             <SettingsHeaderBack />

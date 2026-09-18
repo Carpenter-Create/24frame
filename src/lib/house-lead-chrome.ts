@@ -1,4 +1,7 @@
-// Shared top lead chrome for Aggregation · Social · Education.
+// Shared top lead chrome for Aggregation · Social · Education · Home.
+// Phone: Asset 8 emblem on every workspace (logoVisible always).
+// Dest-rail phone adds hamburger before the emblem — house gap
+// (--space-3). Emblem is a workspace-home link, not the rail.
 // [ Emblem (phone) / wordmark (md+) · fixed lead slot ] — [ optional search · same gap ] ····· [ switcher · Ask 24Frame AI · theme · bell · avatar ]
 // Social live explore search and Education quiet courses/videos
 // search share Facebook-compact geometry (04-facebook.png SoT)
