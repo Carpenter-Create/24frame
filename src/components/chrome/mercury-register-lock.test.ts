@@ -134,10 +134,12 @@ describe("Adam Mercury register lock", () => {
     const nav = src("src/lib/nav.ts");
     expect(nav).toContain('family: "lucide"');
     expect(nav).toContain("SOCIAL_NAV");
-    // Social chrome rematch is Social Figma V1 SocialIcon — this PR
-    // does not rewrite Social interiors; it only swaps Aggregation glyphs.
-    expect(src("src/components/social/social-header-search.tsx")).toContain("SocialIcon");
-    expect(src("src/components/social/social-header-search.tsx")).not.toContain("lucide-react");
+    // Social interiors stay on Social Figma V1 SocialIcon. House lead
+    // search is shared chrome — Phosphor, not a Social interior fork.
+    expect(src("src/components/social/social-home-composer.tsx")).toContain("SocialIcon");
+    expect(src("src/components/chrome/house-lead-search.tsx")).toContain("MagnifyingGlass");
+    expect(src("src/components/chrome/house-lead-search.tsx")).not.toContain("lucide-react");
+    expect(src("src/components/chrome/house-lead-search.tsx")).not.toContain("SocialIcon");
     expect(src("src/components/social/social-top-bar.tsx")).not.toContain("lucide-react");
     expect(src("src/app/(app)/social/profile/page.tsx")).not.toContain("AccountProfileForm");
   });

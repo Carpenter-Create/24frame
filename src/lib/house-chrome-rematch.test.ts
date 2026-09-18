@@ -9,7 +9,7 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
-import { EducationHeaderSearch } from "@/components/chrome/education-header-search";
+import { HouseLeadSearch } from "@/components/chrome/house-lead-search";
 import { SocialTopBar } from "@/components/social/social-top-bar";
 import {
   HOUSE_CONTROL_PILL_CLASS,
@@ -40,7 +40,7 @@ const globals = readFileSync("src/app/globals.css", "utf8");
 const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
 const lead = readFileSync("src/components/chrome/house-lead-chrome.tsx", "utf8");
 const topBar = readFileSync("src/components/social/social-top-bar.tsx", "utf8");
-const socialSearch = readFileSync("src/components/social/social-header-search.tsx", "utf8");
+const leadSearch = readFileSync("src/components/chrome/house-lead-search.tsx", "utf8");
 const sideNav = readFileSync("src/components/chrome/side-nav.tsx", "utf8");
 const titlesPage = readFileSync("src/app/(app)/titles/page.tsx", "utf8");
 const titlesCatalog = readFileSync("src/lib/titles-catalog.ts", "utf8");
@@ -51,7 +51,6 @@ const collapse = readFileSync("src/lib/rail-collapse.ts", "utf8");
 const socialChrome = readFileSync("src/lib/social-chrome.ts", "utf8");
 const houseShell = readFileSync("src/lib/house-shell.ts", "utf8");
 const settings = readFileSync("src/lib/settings.ts", "utf8");
-const educationSearch = readFileSync("src/components/chrome/education-header-search.tsx", "utf8");
 
 const FUN_CHROME_PATHS = [
   "src/lib/house-shell.ts",
@@ -60,14 +59,13 @@ const FUN_CHROME_PATHS = [
   "src/components/chrome/house-lead-chrome.tsx",
   "src/components/chrome/side-nav.tsx",
   "src/components/social/social-top-bar.tsx",
-  "src/components/social/social-header-search.tsx",
+  "src/components/chrome/house-lead-search.tsx",
   "src/lib/social-chrome.ts",
   "src/lib/workspace-switcher.ts",
   "src/lib/mobile-chrome.ts",
   "src/lib/rail-collapse.ts",
   "src/components/chrome/rail-collapse.tsx",
   "src/lib/settings.ts",
-  "src/components/chrome/education-header-search.tsx",
   "src/components/theme-toggle.tsx",
 ] as const;
 
@@ -109,20 +107,20 @@ describe("house chrome rematch miss list v1.1", () => {
 
   it("keeps Aggregation without top search, Education quiet, Social live", () => {
     expect(shell).not.toContain("SearchField");
-    expect(shell).toContain("EducationHeaderSearch");
+    expect(shell).toContain("HouseLeadSearch");
     expect(shell).toContain('workspace === "education" && !settingsPage');
     expect(lead).toContain('data-education-header-search-host={education ? "desktop" : undefined}');
     expect(lead).toContain('data-education-header-search-host={education ? "phone" : undefined}');
-    expect(socialSearch).toContain("data-social-header-search");
-    expect(socialSearch).toContain("HOUSE_SEARCH_PILL_CLASS");
+    expect(leadSearch).toContain("data-social-header-search");
+    expect(leadSearch).toContain("HOUSE_SEARCH_PILL_CLASS");
 
-    const education = renderToStaticMarkup(createElement(EducationHeaderSearch));
+    const education = renderToStaticMarkup(createElement(HouseLeadSearch, { tone: "quiet" }));
     expect(education).toContain("data-education-header-search");
     expect(education).toContain(HOUSE_SEARCH_PILL_CLASS);
     expect(education).toContain(EDUCATION_SEARCH.placeholder);
     expect(education).toContain('action="/social/courses"');
-    expect(educationSearch).not.toContain("md:w-[420px]");
-    expect(educationSearch).not.toContain("md:flex-none");
+    expect(leadSearch).not.toContain("md:w-[420px]");
+    expect(leadSearch).not.toContain("md:flex-none");
   });
 
   it("places Social and Education search beside the logo — not center-floating", () => {
@@ -177,7 +175,7 @@ describe("house chrome rematch miss list v1.1", () => {
     );
     expect(trailing).toContain('presentation="pills"');
     expect(trailing).toContain("{accountMenu}");
-    expect(trailing).not.toContain("EducationHeaderSearch");
+    expect(trailing).not.toContain("HouseLeadSearch");
     expect(trailing).not.toContain("data-education-header-search-host");
     expect(shell).not.toContain("SearchField");
   });
@@ -210,8 +208,8 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(mobileChrome).toContain("HOUSE_ICON_BUTTON_CLASS");
     expect(collapse).toContain("HOUSE_ICON_BUTTON_CLASS");
     expect(socialChrome).toContain("HOUSE_RAIL_PANEL_CLASS");
-    expect(socialSearch).toContain("HOUSE_ICON_BUTTON_CLASS");
-    expect(socialSearch).toContain("HOUSE_SEARCH_PILL_CLASS");
+    expect(leadSearch).toContain("HOUSE_ICON_BUTTON_CLASS");
+    expect(leadSearch).toContain("HOUSE_SEARCH_PILL_CLASS");
     expect(lead).toContain("ThemeToggle");
     expect(readFileSync("src/lib/house-lead-chrome.ts", "utf8")).toContain("HOUSE_THEME_TOGGLE_CLASS");
     expect(readFileSync("src/lib/house-lead-chrome.ts", "utf8")).toContain("MOBILE_CHROME_ICON_BUTTON_CLASS");
@@ -246,7 +244,7 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(tokens).toMatch(/--accent:\s*#1769ff;/);
     expect(tokens).not.toMatch(/#f97316|#ea580c|#ff6a00|#ff7a00/i);
     expect(settings).toContain("rounded-full");
-    expect(educationSearch).toContain("HOUSE_SEARCH_PILL_CLASS");
+    expect(leadSearch).toContain("HOUSE_SEARCH_PILL_CLASS");
     for (const path of FUN_CHROME_PATHS) {
       const src = readFileSync(path, "utf8");
       expect(src, path).not.toMatch(/Royalogic/i);

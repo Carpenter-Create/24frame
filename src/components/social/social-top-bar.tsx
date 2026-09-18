@@ -1,9 +1,6 @@
 import { HouseLeadChrome } from "@/components/chrome/house-lead-chrome";
+import { HouseLeadSearch } from "@/components/chrome/house-lead-search";
 import { UserMenu } from "@/components/chrome/user-menu";
-import {
-  SocialHeaderSearch,
-  SocialHeaderSearchPhone,
-} from "@/components/social/social-header-search";
 
 export function SocialTopBar({
   email,
@@ -18,8 +15,8 @@ export function SocialTopBar({
     <HouseLeadChrome
       workspace="social"
       logoVisible="always"
-      search={<SocialHeaderSearch />}
-      phoneSearch={<SocialHeaderSearchPhone />}
+      search={<HouseLeadSearch tone="live" />}
+      phoneSearch={<HouseLeadSearch tone="live" presentation="icon" />}
       accountMenu={<UserMenu email={email} name={name} photoUrl={photoUrl} />}
     />
   );

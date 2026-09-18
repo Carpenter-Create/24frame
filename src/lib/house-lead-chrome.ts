@@ -1,7 +1,8 @@
 // Shared top lead chrome for Aggregation · Social · Education.
 // [ Logo · fixed lead slot ] — [ optional search · same gap ] ····· [ switcher · theme · avatar ]
 // Social live explore search and Education quiet courses/videos
-// search share Facebook-compact geometry (04-facebook.png SoT).
+// search share Facebook-compact geometry (04-facebook.png SoT)
+// via one HouseLeadSearch primitive — never twin files.
 // Aggregation mid-lead stays empty (agg-search-no). Logo inset
 // does not drift when the search slot is empty. Do not invent a
 // fourth product or an Aggregation search.

@@ -302,11 +302,11 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(stories).not.toContain("SocialMobileDock");
     expect(storyViewer).not.toContain("SocialMobileDock");
     expect(topBar).not.toContain("data-social-header-tray");
-    expect(topBar).toContain("SocialHeaderSearch");
+    expect(topBar).toContain("HouseLeadSearch");
     expect(topBar).not.toContain("data-social-mobile-pill");
-    const socialSearch = readFileSync("src/components/social/social-header-search.tsx", "utf8");
-    expect(socialSearch).toContain("data-social-header-search");
-    expect(socialSearch).toContain("prefetch");
+    const leadSearch = readFileSync("src/components/chrome/house-lead-search.tsx", "utf8");
+    expect(leadSearch).toContain("data-social-header-search");
+    expect(leadSearch).toContain("prefetch");
     expect(readFileSync("src/lib/nav.ts", "utf8")).not.toContain("SOCIAL_MOBILE_PILL");
     expect(tabBar).toContain("data-social-tab-bar");
     expect(tabBar).toContain("data-social-tab-pill");
