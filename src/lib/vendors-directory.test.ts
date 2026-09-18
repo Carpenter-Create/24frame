@@ -9,6 +9,7 @@ import {
   filterVendorDirectory,
   normalizeVendorDirectory,
   parseVendorDirectoryFilter,
+  vendorDirectoryFilterLabel,
   vendorDirectoryHref,
   vendorDirectoryMeta,
 } from "./vendors-directory";
@@ -22,6 +23,7 @@ describe("CHANNELS_PAGE lock copy", () => {
     expect(CHANNELS_PAGE).not.toHaveProperty("emptySupport");
     expect(CHANNELS_PAGE.addChannel).toBe("Add channel");
     expect(CHANNELS_PAGE.addHref).toBe("/channels/new");
+    expect(CHANNELS_PAGE.statusFilterLabel).toBe("Filter by status");
     expect(JSON.stringify(CHANNELS_PAGE)).not.toContain("GC distribution partners.");
     expect(JSON.stringify(CHANNELS_PAGE)).not.toContain("Add your first partner.");
     expect(JSON.stringify(CHANNELS_PAGE)).not.toContain("Vendors");
@@ -84,6 +86,16 @@ describe("channel directory rows", () => {
     expect(filterVendorDirectory([row, inactive], "inactive")).toEqual([inactive]);
     expect(parseVendorDirectoryFilter("inactive")).toBe("inactive");
     expect(parseVendorDirectoryFilter("nope")).toBe("all");
+    expect(vendorDirectoryFilterLabel("all")).toBe("All");
+    expect(vendorDirectoryFilterLabel("active")).toBe("Active");
+    expect(vendorDirectoryFilterLabel("inactive")).toBe("Inactive");
+    for (const { label } of [
+      { label: vendorDirectoryFilterLabel("all") },
+      { label: vendorDirectoryFilterLabel("active") },
+      { label: vendorDirectoryFilterLabel("inactive") },
+    ]) {
+      expect(label).not.toBe(label.toUpperCase());
+    }
   });
 
   it("builds the channel href, meta, and real tags only", () => {
