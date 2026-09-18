@@ -19,8 +19,8 @@ import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 // One mid-lead search SoT for Social live Explore and Education quiet
 // courses/videos. Slot into HouseLeadChrome search / phoneSearch.
 // Geometry is HOUSE_LEAD_SEARCH_PILL_CLASS + HOUSE_SEARCH_PILL_CLASS —
-// same tokens SearchField reuses. Do not fork the pill. Do not reuse
-// Titles SearchField. Aggregation keeps no top search.
+// same tokens the Titles catalog search reuses. Do not fork the pill.
+// Do not import the catalog search control. Aggregation keeps no top search.
 
 export type HouseLeadSearchTone = "live" | "quiet";
 export type HouseLeadSearchPresentation = "field" | "icon";
