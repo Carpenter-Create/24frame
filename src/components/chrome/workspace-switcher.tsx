@@ -1,11 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { CaretDown } from "@phosphor-icons/react";
 
 import { AppearanceCheck } from "./appearance-check";
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
+import {
+  OVERVIEW_HREF,
+  overviewLeadPills,
+  overviewLeadSelected,
+  overviewLeadShouldNavigate,
+  overviewTriggerLabel,
+  type OverviewLeadPill,
+} from "@/lib/overview";
 import { persistWorkspaceCookie, workspaceHome, type WorkspaceMode } from "@/lib/workspace";
 import {
   availableWorkspaceOptions,
@@ -32,8 +40,6 @@ import {
   workspaceSwitcherSegmentClass,
   workspaceSwitcherSegmentLabel,
   workspaceSwitcherSegmentTabIndex,
-  workspaceSwitcherShowsChevron,
-  workspaceSwitcherShowsSegments,
   workspaceSwitcherStaticClass,
   workspaceSwitcherTriggerClass,
 } from "@/lib/workspace-switcher";
@@ -50,13 +56,22 @@ function WorkspaceMark({ mode }: { mode: WorkspaceMode }) {
   );
 }
 
-function selectWorkspace(
+function selectLeadPill(
   current: WorkspaceMode,
-  option: WorkspaceMenuOption,
+  pill: OverviewLeadPill,
+  options: readonly WorkspaceMenuOption[],
   router: ReturnType<typeof useRouter>,
+  pathname: string,
 ) {
+  if (!overviewLeadShouldNavigate(pathname, current, pill)) return;
+  if (pill.id === "home") {
+    router.push(OVERVIEW_HREF);
+    return;
+  }
+  const option = options.find((row) => row.mode === pill.id);
+  if (!option) return;
   persistWorkspaceCookie(option.mode);
-  if (current !== option.mode) router.push(workspaceHome(option.mode));
+  router.push(workspaceHome(option.mode));
 }
 
 function WorkspaceSwitcherPills({
@@ -67,16 +82,18 @@ function WorkspaceSwitcherPills({
   options: readonly WorkspaceMenuOption[];
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const pills = overviewLeadPills(options);
   const segmentRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const label = workspaceSwitcherSegmentLabel(current);
-  const canSwitch = workspaceSwitcherShowsSegments(options);
+  const label = overviewTriggerLabel(pathname, workspaceSwitcherSegmentLabel(current));
+  const canSwitch = pills.length > 1;
 
   function onSegmentKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>, index: number) {
     if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
     event.preventDefault();
     const next = workspaceSwitcherNextSegmentIndex(
       index,
-      options.length,
+      pills.length,
       event.key === "ArrowRight" ? 1 : -1,
     );
     segmentRefs.current[next]?.focus();
@@ -105,24 +122,24 @@ function WorkspaceSwitcherPills({
       aria-label={WORKSPACE_SWITCHER.label}
       className={WORKSPACE_SWITCHER_SEGMENTS_CLASS}
     >
-      {options.map((option, index) => {
-        const selected = current === option.mode;
+      {pills.map((pill, index) => {
+        const selected = overviewLeadSelected(pill.id, pathname, current);
         return (
           <button
-            key={option.mode}
+            key={pill.id}
             ref={(node) => {
               segmentRefs.current[index] = node;
             }}
             type="button"
             role="tab"
-            data-workspace-switcher-segment={option.mode}
+            data-workspace-switcher-segment={pill.id}
             aria-selected={selected}
             tabIndex={workspaceSwitcherSegmentTabIndex(selected)}
             className={workspaceSwitcherSegmentClass(selected)}
-            onClick={() => selectWorkspace(current, option, router)}
+            onClick={() => selectLeadPill(current, pill, options, router, pathname)}
             onKeyDown={(event) => onSegmentKeyDown(event, index)}
           >
-            {workspaceSwitcherSegmentLabel(option.mode)}
+            {pill.label}
           </button>
         );
       })}
@@ -144,10 +161,12 @@ export function WorkspaceSwitcher({
   presentation?: WorkspaceSwitcherPresentation;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const hostRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(defaultOpen);
-  const label = workspaceModeLabel(current);
-  const canSwitch = workspaceSwitcherShowsChevron(options);
+  const pills = overviewLeadPills(options);
+  const label = overviewTriggerLabel(pathname, workspaceModeLabel(current));
+  const canSwitch = pills.length > 1;
 
   useEffect(() => {
     if (!open) return undefined;
@@ -225,27 +244,35 @@ export function WorkspaceSwitcher({
             aria-label={WORKSPACE_SWITCHER.heading}
             className="flex flex-col"
           >
-            {options.map((option) => {
-              const selected = current === option.mode;
+            {pills.map((pill) => {
+              const selected = overviewLeadSelected(pill.id, pathname, current);
               return (
                 <button
-                  key={option.mode}
+                  key={pill.id}
                   type="button"
                   role="option"
-                  data-workspace-switcher-option={option.mode}
+                  data-workspace-switcher-option={pill.id}
                   aria-selected={selected}
                   className={workspaceSwitcherOptionClass(selected)}
                   onClick={() => {
-                    selectWorkspace(current, option, router);
+                    selectLeadPill(current, pill, options, router, pathname);
                     setOpen(false);
                   }}
                 >
-                  <WorkspaceMark mode={option.mode} />
+                  {pill.id === "home" ? (
+                    <span
+                      data-workspace-switcher-mark="home"
+                      className={WORKSPACE_SWITCHER_MARK_CLASS}
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <WorkspaceMark mode={pill.id} />
+                  )}
                   <span
                     data-workspace-switcher-option-label=""
                     className={WORKSPACE_SWITCHER_OPTION_LABEL_CLASS}
                   >
-                    {option.label}
+                    {pill.label}
                   </span>
                   <span
                     data-workspace-switcher-option-check=""
