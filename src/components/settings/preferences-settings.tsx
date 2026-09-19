@@ -1,11 +1,17 @@
 import Link from "next/link";
 
-import { AppearancePreferences } from "@/components/settings/appearance-preferences";
+import {
+  AppearancePreferences,
+  AppearanceThemeRow,
+} from "@/components/settings/appearance-preferences";
 import { NotificationPreferences } from "@/components/settings/notification-preferences";
-import type { NotificationPrefs } from "@/lib/notification-prefs";
+import { SettingsDrillRow } from "@/components/settings/settings-drill";
 import { SettingsPageLead } from "@/components/settings/settings-page-lead";
+import type { NotificationPrefs } from "@/lib/notification-prefs";
+import { NOTIFICATION_PREFS } from "@/lib/notification-prefs";
 import {
   SETTINGS,
+  SETTINGS_DRILL_LIST_CLASS,
   SETTINGS_PANE_CLASS,
   SETTINGS_QUIET_ROW_CLASS,
   SETTINGS_SECTION_CLASS,
@@ -17,6 +23,10 @@ import {
 // matrix. Never a You / Social / Education / Aggregation spine.
 // Education staff get a quiet Manage courses row linking out to
 // /education. Members never see it. Not a CMS. Not GC Staff admin.
+//
+// Mobile: Coinbase drill-in. Theme and Notifications are one-row
+// summaries. Instant switches stay on the Notifications pane.
+// Desktop keeps the on-page Appearance card and matrix.
 
 export function PreferencesSettings({
   isGcStaff = false,
@@ -34,8 +44,18 @@ export function PreferencesSettings({
           title={settingsPaneTitle("preferences")}
           pathname={SETTINGS.preferencesHref}
         />
-        <AppearancePreferences />
-        <NotificationPreferences initialPrefs={prefs} />
+        <div data-settings-pref-index="" className={`md:hidden ${SETTINGS_DRILL_LIST_CLASS}`}>
+          <AppearanceThemeRow />
+          <SettingsDrillRow
+            kind="notifications"
+            label={NOTIFICATION_PREFS.title}
+            href={SETTINGS.notificationsHref}
+          />
+        </div>
+        <div className={`hidden md:block ${SETTINGS_SECTION_CLASS}`}>
+          <AppearancePreferences />
+          <NotificationPreferences initialPrefs={prefs} />
+        </div>
         {showManage ? (
           <Link
             href={SETTINGS.manageCoursesHref}

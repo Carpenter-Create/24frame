@@ -38,6 +38,7 @@ export async function saveAccountName(name: unknown): Promise<{ error?: string }
 
   revalidatePath("/settings");
   revalidatePath("/settings/profile");
+  revalidatePath("/settings/profile/name");
   revalidatePath("/");
   return {};
 }

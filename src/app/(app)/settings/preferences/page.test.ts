@@ -64,12 +64,20 @@ describe("SettingsPreferencesPage", () => {
     expect(html).toContain(SETTINGS.preferences);
     expect(paneSrc).toContain("settingsPaneTitle");
     expect(paneSrc).not.toContain("SETTINGS.title");
+    expect(html).toContain('data-settings-pref-index=""');
+    expect(html).toContain('data-settings-drill-row="theme"');
+    expect(html).toContain(`href="${SETTINGS.themeHref}"`);
+    expect(html).toContain('data-settings-drill-row="notifications"');
+    expect(html).toContain(`href="${SETTINGS.notificationsHref}"`);
+    expect(html).toContain("md:hidden");
+    expect(html).toContain("hidden md:block");
     expect(html).toContain('data-settings-section="appearance"');
     expect(html).toContain('data-settings-appearance=""');
     expect(html).toContain(APPEARANCE.title);
     expect(html).toContain(APPEARANCE.systemDefault);
     expect(html).toContain(APPEARANCE.dark);
     expect(html).toContain(APPEARANCE.light);
+    expect(html).toContain(SETTINGS.theme);
     expect(html).toContain('data-settings-section="notifications"');
     expect(html).toContain('data-settings-notification-matrix=""');
     expect(html).toContain(NOTIFICATION_PREFS.title);
@@ -108,7 +116,9 @@ describe("SettingsPreferencesPage", () => {
     expect(pageSrc).not.toContain("education-forms");
     expect(paneSrc).toContain("SETTINGS.manageCourses");
     expect(paneSrc).toContain("AppearancePreferences");
+    expect(paneSrc).toContain("AppearanceThemeRow");
     expect(paneSrc).toContain("NotificationPreferences");
+    expect(paneSrc).toContain("SettingsDrillRow");
   });
 
   it("shows staff Manage courses as a quiet row to /education", async () => {

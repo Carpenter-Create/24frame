@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -19,45 +19,18 @@ import { saveAccountName, uploadAccountPhoto } from "./actions";
 // Name writes user_metadata.display_name. Email is the session login email
 // and is not changed here (auth gate). Photo PUTs to the dedicated avatars
 // bucket under avatars/{user-id}/avatar — not the title bucket.
-export function AccountProfileForm({
-  name,
-  email,
-  photoUrl,
-}: {
-  name: string;
-  email: string;
-  photoUrl: string | null;
-}) {
+// AccountNameForm is the SoT mutate body — desktop Profile and the
+// mobile Name drill-in pane share it.
+
+export function AccountPhotoField({ photoUrl }: { photoUrl: string | null }) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
-  const [value, setValue] = useState(name);
-  const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
-  const [saved, setSaved] = useState(false);
-
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = e.currentTarget;
-    setSaving(true);
-    setError("");
-    setSaved(false);
-    const res = await saveAccountName(value);
-    if (res.error) {
-      setError(res.error);
-      setSaving(false);
-      return;
-    }
-    setSaving(false);
-    setSaved(true);
-    form.querySelector<HTMLInputElement>("#account-name")?.blur();
-    router.refresh();
-  }
 
   async function onPick(file: File | undefined) {
     if (!file) return;
     setError("");
-    setSaved(false);
     if (!isAvatarContentType(file.type)) {
       setError(ACCOUNT_PROFILE.photoType);
       return;
@@ -80,8 +53,8 @@ export function AccountProfileForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-[var(--space-4)]" data-account-profile-form="">
-      <div className="flex items-center gap-[var(--space-2)]" data-account-photo="">
+    <div className="flex flex-col gap-[var(--space-2)]" data-account-photo="">
+      <div className="flex items-center gap-[var(--space-2)]">
         <div className={ACCOUNT_PHOTO_CIRCLE_CLASS} data-account-photo-circle="" aria-hidden={photoUrl ? undefined : true}>
           {photoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the private avatars bucket
@@ -106,8 +79,50 @@ export function AccountProfileForm({
           onChange={(e) => void onPick(e.target.files?.[0])}
         />
       </div>
+      {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
+    </div>
+  );
+}
+
+export function AccountNameForm({
+  name,
+  labeled = true,
+}: {
+  name: string;
+  labeled?: boolean;
+}) {
+  const router = useRouter();
+  const [value, setValue] = useState(name);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [saved, setSaved] = useState(false);
+
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    setSaving(true);
+    setError("");
+    setSaved(false);
+    const res = await saveAccountName(value);
+    if (res.error) {
+      setError(res.error);
+      setSaving(false);
+      return;
+    }
+    setSaving(false);
+    setSaved(true);
+    form.querySelector<HTMLInputElement>("#account-name")?.blur();
+    router.refresh();
+  }
+
+  return (
+    <form
+      onSubmit={onSubmit}
+      className="flex flex-col gap-[var(--space-4)]"
+      data-account-name-form=""
+    >
       <div className="flex flex-col gap-[var(--space-2)]">
-        <Label htmlFor="account-name">{ACCOUNT_PROFILE.nameLabel}</Label>
+        {labeled ? <Label htmlFor="account-name">{ACCOUNT_PROFILE.nameLabel}</Label> : null}
         <Input
           id="account-name"
           name="name"
@@ -120,23 +135,46 @@ export function AccountProfileForm({
           autoComplete="name"
         />
       </div>
-      <div className="flex flex-col gap-[var(--space-2)]">
-        <Label htmlFor="account-email">{ACCOUNT_PROFILE.emailLabel}</Label>
-        <Input
-          id="account-email"
-          name="email"
-          type="email"
-          value={email}
-          readOnly
-          aria-readonly="true"
-        />
-        <p className="t-body-sm text-ink-3">{ACCOUNT_PROFILE.emailHint}</p>
-      </div>
       <Button type="submit" disabled={saving} className="self-start">
         {saving ? ACCOUNT_PROFILE.saving : ACCOUNT_PROFILE.save}
       </Button>
       {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
       {saved ? <InlineNotice>{ACCOUNT_PROFILE.saved}</InlineNotice> : null}
     </form>
+  );
+}
+
+export function AccountEmailField({ email }: { email: string }) {
+  return (
+    <div className="flex flex-col gap-[var(--space-2)]" data-account-email="">
+      <Label htmlFor="account-email">{ACCOUNT_PROFILE.emailLabel}</Label>
+      <Input
+        id="account-email"
+        name="email"
+        type="email"
+        value={email}
+        readOnly
+        aria-readonly="true"
+      />
+      <p className="t-body-sm text-ink-3">{ACCOUNT_PROFILE.emailHint}</p>
+    </div>
+  );
+}
+
+export function AccountProfileForm({
+  name,
+  email,
+  photoUrl,
+}: {
+  name: string;
+  email: string;
+  photoUrl: string | null;
+}) {
+  return (
+    <div className="flex flex-col gap-[var(--space-4)]" data-account-profile-form="">
+      <AccountPhotoField photoUrl={photoUrl} />
+      <AccountNameForm name={name} />
+      <AccountEmailField email={email} />
+    </div>
   );
 }

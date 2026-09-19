@@ -16,15 +16,21 @@
 // account, existing org_role). House grant/comp is staff-only on
 // /gc/clients — never a customer Settings directory.
 // Preferences holds Appearance (same gc-theme SoT as the header
-// sun/moon) and the notification matrix. Leftover workspace prefs
-// may appear as optional subsections only — never as a You / Social /
-// Education / Aggregation spine.
+// sun/moon) and the notification matrix. Mobile Preferences is a
+// Coinbase drill-in: Theme and Notifications are rows; edit panes
+// live at /theme and /notifications. Desktop keeps the on-page
+// card and matrix. Leftover workspace prefs may appear as optional
+// subsections only — never as a You / Social / Education /
+// Aggregation spine.
 //
 // Canonical paths only (hard-cut — no users yet, no redirects):
 //   /settings → hub (mobile list) / Profile pane (desktop)
 //   /settings/profile
+//   /settings/profile/name
 //   /settings/organization
 //   /settings/preferences
+//   /settings/preferences/theme
+//   /settings/preferences/notifications
 // Retired /settings/you|social|education|aggregation and ?section=
 // aliases are gone. Dead paths 404. Do not add a redirect table.
 //
@@ -63,6 +69,11 @@ export const SETTINGS = {
   preferencesHref: "/settings/preferences",
   manageCourses: "Manage courses",
   manageCoursesHref: EDUCATION_MANAGE_HREF,
+  theme: "Theme",
+  themeHref: "/settings/preferences/theme",
+  themeHelper: "Choose Light, Dark, or System default.",
+  notificationsHref: "/settings/preferences/notifications",
+  profileNameHref: "/settings/profile/name",
   organizationEmpty: "No rights holder on this account.",
   company: "Company",
   team: "Team",
@@ -146,11 +157,21 @@ export const SETTINGS_SECTION_CLASS = "flex flex-col gap-[var(--space-6)]";
 export const SETTINGS_QUIET_ROW_CLASS =
   "flex items-center justify-between t-body leading-5 text-ink";
 
+// Coinbase drill-in grammar — label · muted value · chevron. Whole
+// row tappable. Read-only rows drop the chevron. Shared with Rights
+// Holder / Legal Entities so those panes do not fork a lookalike.
+export const SETTINGS_DRILL_LIST_CLASS = "flex flex-col";
+export const SETTINGS_DRILL_ROW_CLASS =
+  "flex w-full items-center justify-between gap-[var(--space-4)] py-[var(--space-3)] text-left t-body leading-5 text-ink";
+export const SETTINGS_DRILL_COPY_CLASS = "flex min-w-0 flex-col gap-[var(--space-1)]";
+export const SETTINGS_DRILL_VALUE_CLASS = "t-body-sm text-ink-3";
+
 // Compact Dialog form density — labeled fields + DialogFooter.
 // Mutate surfaces on Settings use this, not a stacked page form.
 export const SETTINGS_DIALOG_FORM_CLASS = "flex flex-col gap-[var(--space-3)]";
 export const SETTINGS_DIALOG_FIELD_CLASS = "flex flex-col gap-[var(--space-2)]";
 export const SETTINGS_DIALOG_HELP_CLASS = "t-body-sm text-ink-3";
+export const SETTINGS_EDIT_HELPER_CLASS = SETTINGS_DIALOG_HELP_CLASS;
 
 // Preferences Appearance — house muted module + pad 16. Same surface
 // as dashboard / directory modules. Not card-surface (Profile /
@@ -162,10 +183,11 @@ export const SETTINGS_PREF_TITLE_CLASS = "t-heading text-ink";
 // Mobile Settings page-lead back = News PageHeader ArrowLeft SoT.
 // settingsHeaderBack() is the routing SoT: hub → Back (client history
 // when there is an in-app referrer; dashboard land only as fallback),
-// pushed pane → Settings. Hidden at md, where the Settings rail stays.
-// Do not hard-label the hub "Home" — Settings is account chrome from
-// any surface, not a Home-owned workspace. News stays "Home".
-// Do not put a caret in HouseLeadChrome. Do not fork a third back glyph.
+// hub section → Settings, drill-in pane → parent section. Hidden at
+// md, where the Settings rail stays. Do not hard-label the hub "Home"
+// — Settings is account chrome from any surface, not a Home-owned
+// workspace. News stays "Home". Do not put a caret in HouseLeadChrome.
+// Do not fork a third back glyph.
 export const SETTINGS_HEADER_PAD_CLASS = MOBILE_CHROME_LEAD_PAD_CLASS;
 export const SETTINGS_PAGE_LEAD_BACK_CLASS = "md:hidden";
 
@@ -209,12 +231,27 @@ export function settingsManageCoursesVisible(isGcStaff: boolean): boolean {
   return isGcStaff === true;
 }
 
+/** Parent label for a Settings drill-in (`/settings/{section}/{field}`). */
+export function settingsDrillParentLabel(parentHref: string): string {
+  if (parentHref === SETTINGS.profileHref) return SETTINGS.profile;
+  if (parentHref === SETTINGS.organizationHref) return SETTINGS.organization;
+  if (parentHref === SETTINGS.preferencesHref) return SETTINGS.preferences;
+  if (parentHref === SETTINGS.agreementsHref) return SETTINGS.agreements;
+  if (parentHref === SETTINGS.referHref) return SETTINGS.refer;
+  return SETTINGS.title;
+}
+
 export function settingsHeaderBack(pathname: string | null | undefined): {
   href: string;
   label: string;
 } {
   if (!pathname || pathname === SETTINGS.href) {
     return { href: SETTINGS.dashboardHref, label: SETTINGS.back };
+  }
+  const parts = pathname.split("/").filter(Boolean);
+  if (parts[0] === "settings" && parts.length >= 3) {
+    const parent = `/${parts[0]}/${parts[1]}`;
+    return { href: parent, label: settingsDrillParentLabel(parent) };
   }
   return { href: SETTINGS.href, label: SETTINGS.title };
 }

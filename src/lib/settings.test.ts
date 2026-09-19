@@ -21,6 +21,9 @@ import {
   SETTINGS_DIALOG_FIELD_CLASS,
   SETTINGS_DIALOG_FORM_CLASS,
   SETTINGS_DIALOG_HELP_CLASS,
+  SETTINGS_DRILL_ROW_CLASS,
+  SETTINGS_DRILL_VALUE_CLASS,
+  SETTINGS_EDIT_HELPER_CLASS,
   SETTINGS_PANE_TITLE_CLASS,
   SETTINGS_PREF_BLOCK_CLASS,
   SETTINGS_PREF_TITLE_CLASS,
@@ -28,6 +31,7 @@ import {
   SETTINGS_RAIL_CHEVRON_CLASS,
   SETTINGS_RAIL_PAD_CLASS,
   isSettingsPath,
+  settingsDrillParentLabel,
   settingsHeaderBack,
   settingsHubHasInAppReferrer,
   settingsHubNav,
@@ -68,6 +72,11 @@ describe("settings hub lock", () => {
     expect(SETTINGS.organizationHref).toBe("/settings/organization");
     expect(SETTINGS.preferences).toBe("Preferences");
     expect(SETTINGS.preferencesHref).toBe("/settings/preferences");
+    expect(SETTINGS.theme).toBe("Theme");
+    expect(SETTINGS.themeHref).toBe("/settings/preferences/theme");
+    expect(SETTINGS.themeHelper).toBe("Choose Light, Dark, or System default.");
+    expect(SETTINGS.notificationsHref).toBe("/settings/preferences/notifications");
+    expect(SETTINGS.profileNameHref).toBe("/settings/profile/name");
     expect(SETTINGS).not.toHaveProperty("sectionQuery");
     expect(SETTINGS.agreements).toBe("Agreements");
     expect(SETTINGS.agreementsHref).toBe("/settings/agreements");
@@ -117,6 +126,9 @@ describe("settings hub lock", () => {
     expect(settingsHubSection("/settings/refer")).toBe("profile");
     expect(settingsHubSection("/settings/organization")).toBe("organization");
     expect(settingsHubSection("/settings/preferences")).toBe("preferences");
+    expect(settingsHubSection("/settings/preferences/theme")).toBe("preferences");
+    expect(settingsHubSection("/settings/preferences/notifications")).toBe("preferences");
+    expect(settingsHubSection("/settings/profile/name")).toBe("profile");
     expect(settingsHubSection("")).toBe("profile");
     expect(settingsHubSection(null)).toBe("profile");
   });
@@ -252,6 +264,24 @@ describe("settings hub lock", () => {
       href: "/settings",
       label: "Settings",
     });
+    expect(settingsHeaderBack("/settings/preferences/theme")).toEqual({
+      href: "/settings/preferences",
+      label: "Preferences",
+    });
+    expect(settingsHeaderBack("/settings/preferences/notifications")).toEqual({
+      href: "/settings/preferences",
+      label: "Preferences",
+    });
+    expect(settingsHeaderBack("/settings/profile/name")).toEqual({
+      href: "/settings/profile",
+      label: "Profile",
+    });
+    expect(settingsHeaderBack("/settings/organization/entities")).toEqual({
+      href: "/settings/organization",
+      label: "Rights Holder",
+    });
+    expect(settingsDrillParentLabel("/settings/preferences")).toBe("Preferences");
+    expect(settingsDrillParentLabel("/settings/unknown")).toBe("Settings");
     expect(SETTINGS.dashboardHref).toBe("/aggregation/dashboard");
     expect(SETTINGS_PAGE_LEAD_BACK_CLASS).toBe("md:hidden");
     expect(SETTINGS_PAGE_LEAD_BACK_CLASS).not.toContain("absolute");
@@ -294,6 +324,10 @@ describe("settings hub lock", () => {
     expect(SETTINGS_DIALOG_HELP_CLASS).toBe("t-body-sm text-ink-3");
     expect(SETTINGS_DIALOG_FORM_CLASS).not.toContain("space-4");
     expect(SETTINGS_DIALOG_FORM_CLASS).not.toContain("space-6");
+    expect(SETTINGS_EDIT_HELPER_CLASS).toBe(SETTINGS_DIALOG_HELP_CLASS);
+    expect(SETTINGS_DRILL_ROW_CLASS).toContain("justify-between");
+    expect(SETTINGS_DRILL_VALUE_CLASS).toBe("t-body-sm text-ink-3");
+    expect(SETTINGS_DRILL_ROW_CLASS).not.toContain("#");
   });
 
   it("keeps Appearance on the house muted module — not a new surface", () => {

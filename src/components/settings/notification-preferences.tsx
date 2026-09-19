@@ -93,8 +93,10 @@ function SectionHead({ label }: { label: string }) {
 
 export function NotificationPreferences({
   initialPrefs,
+  showIntro = true,
 }: {
   initialPrefs: NotificationPrefs;
+  showIntro?: boolean;
 }) {
   const [prefs, setPrefs] = useState(initialPrefs);
   const [saving, setSaving] = useState(false);
@@ -122,10 +124,12 @@ export function NotificationPreferences({
   return (
     <section data-settings-section="notifications" className={SETTINGS_SECTION_CLASS}>
       <div data-settings-notification-wrap="" className={NOTIFICATION_PREF_WRAP_CLASS}>
-        <div className={NOTIFICATION_PREF_INTRO_CLASS}>
-          <h3 className={NOTIFICATION_PREF_TITLE_CLASS}>{NOTIFICATION_PREFS.title}</h3>
-          <p className="t-body-sm text-ink-3">{NOTIFICATION_PREFS.helper}</p>
-        </div>
+        {showIntro ? (
+          <div className={NOTIFICATION_PREF_INTRO_CLASS}>
+            <h3 className={NOTIFICATION_PREF_TITLE_CLASS}>{NOTIFICATION_PREFS.title}</h3>
+            <p className="t-body-sm text-ink-3">{NOTIFICATION_PREFS.helper}</p>
+          </div>
+        ) : null}
         <div data-settings-notification-matrix="" className={NOTIFICATION_PREF_MATRIX_CLASS}>
           {NOTIFICATION_PREF_GROUPS.flatMap((group) =>
             group.sections.map((section) => (
