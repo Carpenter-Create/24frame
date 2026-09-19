@@ -84,14 +84,16 @@ export const HOUSE_PERIOD_SELECTED_CLASS = "bg-surface-muted";
 
 // Segmented track — one continuous muted bar with a sliding solid accent thumb.
 // Shared grammar for workspace pills and Top Performing Titles|Platforms|Territories.
+// No track padding: first/last items sit flush to the track edges so the thumb
+// reaches the full pill radius when the first or last segment is selected.
 export const HOUSE_SEGMENTED_TRACK_CLASS =
-  "relative flex shrink-0 items-center rounded-full bg-surface-muted px-[var(--space-1)]";
+  "relative flex shrink-0 items-center rounded-full bg-surface-muted";
 
 export const HOUSE_SEGMENTED_THUMB_CLASS =
-  "pointer-events-none absolute rounded-full bg-accent transition-[left,width] duration-200 ease-out motion-reduce:transition-none";
+  "pointer-events-none absolute inset-y-0 rounded-full bg-accent transition-[left,width] duration-200 ease-out motion-reduce:transition-none";
 
 export const HOUSE_SEGMENTED_ITEM_BASE_CLASS =
-  "relative z-10 shrink-0 cursor-pointer select-none whitespace-nowrap rounded-full px-[var(--space-3)] py-[var(--space-1)] t-body-sm transition-colors duration-200 motion-reduce:transition-none";
+  "relative z-10 shrink-0 cursor-pointer select-none whitespace-nowrap rounded-full px-[var(--space-4)] py-[var(--space-2)] t-body-sm transition-colors duration-200 motion-reduce:transition-none";
 
 export const HOUSE_SEGMENTED_ITEM_ON_CLASS = "text-white";
 
