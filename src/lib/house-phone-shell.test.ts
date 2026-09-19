@@ -47,6 +47,7 @@ import {
   HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT,
   HOUSE_PHONE_CHROME_ICON_CLASS,
   HOUSE_PHONE_CHROME_ICON_WEIGHT,
+  HOUSE_PHONE_CHROME_IDLE_INK_CLASS,
   HOUSE_PHONE_BOTTOM_NAV_ITEM_OFF_CLASS,
   HOUSE_PHONE_BOTTOM_NAV_ITEM_ON_CLASS,
   HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS,
@@ -276,8 +277,14 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(HOUSE_PHONE_CHROME_ICON_WEIGHT).toBe("regular");
     expect(HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT).toBe(HOUSE_PHONE_CHROME_ICON_WEIGHT);
     expect(HOUSE_HEADER_TRAILING_ICON_CLASS).toBe("size-6 shrink-0 md:size-4");
-    expect(HOUSE_HEADER_TRAILING_PHONE_CLASS).toBe("size-6 shrink-0 md:size-4 md:hidden");
+    expect(HOUSE_HEADER_TRAILING_PHONE_CLASS).toBe(
+      "size-6 shrink-0 md:size-4 md:hidden text-ink-2",
+    );
+    expect(HOUSE_HEADER_TRAILING_PHONE_CLASS).toContain(HOUSE_PHONE_CHROME_IDLE_INK_CLASS);
     expect(HOUSE_HEADER_TRAILING_DESKTOP_CLASS).toBe("size-4 shrink-0 hidden md:block");
+    expect(HOUSE_HEADER_TRAILING_DESKTOP_CLASS).not.toContain(
+      HOUSE_PHONE_CHROME_IDLE_INK_CLASS,
+    );
     expect(bottomNavSrc).toContain("HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS");
     expect(bottomNavSrc).toContain("HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT");
     expect(bottomNavSrc).not.toContain("PhosphorChromeIcon");
@@ -318,6 +325,10 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     );
     expect(searchSheetSrc).toContain("HOUSE_PHONE_CHROME_ICON_CLASS");
     expect(searchSheetSrc).toContain("HOUSE_PHONE_CHROME_ICON_WEIGHT");
+    // Phone search glyph rides the same idle-ink SoT — no ink drift
+    // across AI / bell / search in the phone top trailing cluster.
+    expect(searchSheetSrc).toContain("HOUSE_PHONE_CHROME_IDLE_INK_CLASS");
+    expect(searchSheetSrc).not.toMatch(/\btext-ink-2\b/);
     expect(accountSheetSrc).not.toContain("HOUSE_PHONE_CHROME_ICON_CLASS");
     expect(accountSheetSrc).not.toContain("HOUSE_HEADER_TRAILING_ICON_CLASS");
     expect(accountSheetSrc).not.toContain("HOUSE_HEADER_TRAILING_PHONE_CLASS");
@@ -337,6 +348,20 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(trailing).toContain("md:size-4");
     expect(trailing).toContain('data-house-ai-mark-register="stroke"');
     expect(trailing).toContain('data-house-ai-mark-register="fill"');
+    // Ink parity — the phone AI mark + bell must render on the same idle
+    // ink as the bottom bar off state. Regular weight on ink-3 reads
+    // visibly lighter than the same glyph on ink-2. #442 shipped weight
+    // + stroke register, this line locks the ink so the two Regular
+    // clusters actually match optically on Production.
+    expect(HOUSE_HEADER_TRAILING_PHONE_CLASS).toContain(HOUSE_PHONE_CHROME_IDLE_INK_CLASS);
+    expect(HOUSE_PHONE_BOTTOM_NAV_ITEM_OFF_CLASS).toBe(HOUSE_PHONE_CHROME_IDLE_INK_CLASS);
+    expect(HOUSE_HEADER_TRAILING_DESKTOP_CLASS).not.toContain(HOUSE_PHONE_CHROME_IDLE_INK_CLASS);
+    expect(trailing).toContain(HOUSE_PHONE_CHROME_IDLE_INK_CLASS);
+    // Ink override lives on the phone-only class (md:hidden), so desktop
+    // stays on HOUSE_THEME_TOGGLE_CLASS text-ink-3 / hover:text-ink.
+    expect(HOUSE_THEME_TOGGLE_CLASS).toContain("text-ink-3");
+    expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("text-ink-2");
+    expect(phoneShellSrc).toContain("HOUSE_PHONE_CHROME_IDLE_INK_CLASS");
   });
 
   it("puts a light house chip behind the active glyph only", () => {
@@ -352,6 +377,8 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS).not.toContain("bg-ink");
     expect(HOUSE_PHONE_BOTTOM_NAV_ITEM_ON_CLASS).toBe("text-accent");
     expect(HOUSE_PHONE_BOTTOM_NAV_ITEM_OFF_CLASS).toBe("text-ink-2");
+    expect(HOUSE_PHONE_CHROME_IDLE_INK_CLASS).toBe("text-ink-2");
+    expect(HOUSE_PHONE_BOTTOM_NAV_ITEM_OFF_CLASS).toBe(HOUSE_PHONE_CHROME_IDLE_INK_CLASS);
     expect(bottomNavSrc).toContain("data-house-phone-bottom-nav-chip");
     expect(bottomNavSrc).toContain("HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS");
 

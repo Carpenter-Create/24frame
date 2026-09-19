@@ -16,7 +16,10 @@
 // float. Active tab is a light surface-muted pill behind the glyph.
 // Inactive sit bare. Stroke is Regular at size-6 / 24px — one register
 // for the Mercury bar and the phone-top AI/bell cluster. Not Bold/Fill
-// heavy. Active ink is accent on the chip; idle is ink-2.
+// heavy. Active ink is accent on the chip; idle is ink-2 on both the
+// bar off state and the top trailing (AI + bell + phone search) via
+// HOUSE_PHONE_CHROME_IDLE_INK_CLASS — Regular on ink-3 optically drifts
+// lighter than the same glyph on ink-2, which is what #442 left over.
 // House tokens only. Hide on scroll-down / show on scroll-up via
 // social-tab-bar-scroll. Content pad stays when the bar hides.
 // Not a Meta skin. Not Mercury lavender.
@@ -108,23 +111,31 @@ export const HOUSE_PHONE_BOTTOM_NAV_ITEM_CLASS =
 
 export const HOUSE_PHONE_BOTTOM_NAV_ITEM_ON_CLASS = "text-accent";
 
-export const HOUSE_PHONE_BOTTOM_NAV_ITEM_OFF_CLASS = "text-ink-2";
-
-/** Soft light pill behind the selected glyph. Scales with the 24px box. */
-export const HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS =
-  "flex h-12 min-w-14 items-center justify-center rounded-full bg-surface-muted";
-
 /** Phone chrome glyphs — Mercury bottom bar + top trailing cluster. 24px box. */
 export const HOUSE_PHONE_CHROME_ICON_CLASS = "size-6 shrink-0";
 
 /** One phone chrome stroke register — bottom bar + top trailing. Not Bold/Fill. */
 export const HOUSE_PHONE_CHROME_ICON_WEIGHT = "regular" satisfies IconWeight;
 
+/** Idle ink shared by the phone top trailing cluster and the phone bottom bar
+ *  off state. Perceived stroke weight is not just line thickness — a Regular
+ *  glyph on ink-3 reads visibly lighter than the same glyph on ink-2 sitting
+ *  in the Mercury bar. One ink SoT is what makes the two Regular clusters
+ *  read as one register (#442 shipped weight+stroke, this locks the ink). */
+export const HOUSE_PHONE_CHROME_IDLE_INK_CLASS = "text-ink-2";
+
+export const HOUSE_PHONE_BOTTOM_NAV_ITEM_OFF_CLASS = HOUSE_PHONE_CHROME_IDLE_INK_CLASS;
+
+/** Soft light pill behind the selected glyph. Scales with the 24px box. */
+export const HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS =
+  "flex h-12 min-w-14 items-center justify-center rounded-full bg-surface-muted";
+
 /** Phone 24px; desktop header keeps the 16px phosphor chrome box. */
 export const HOUSE_HEADER_TRAILING_ICON_CLASS = `${HOUSE_PHONE_CHROME_ICON_CLASS} md:size-4`;
 
-/** Phone header trailing instance — Regular size-6. Hidden from md+. */
-export const HOUSE_HEADER_TRAILING_PHONE_CLASS = `${HOUSE_HEADER_TRAILING_ICON_CLASS} md:hidden`;
+/** Phone header trailing instance — Regular size-6 on bottom-bar idle ink.
+ *  Hidden from md+, so the ink override does not touch desktop text-ink-3. */
+export const HOUSE_HEADER_TRAILING_PHONE_CLASS = `${HOUSE_HEADER_TRAILING_ICON_CLASS} md:hidden ${HOUSE_PHONE_CHROME_IDLE_INK_CLASS}`;
 
 /** Desktop header trailing instance — 16px phosphor idle / filled AI. */
 export const HOUSE_HEADER_TRAILING_DESKTOP_CLASS = `${PHOSPHOR_CHROME_ICON_CLASS} hidden md:block`;

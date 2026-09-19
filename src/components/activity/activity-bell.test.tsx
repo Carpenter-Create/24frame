@@ -29,6 +29,7 @@ import {
   HOUSE_HEADER_TRAILING_DESKTOP_CLASS,
   HOUSE_HEADER_TRAILING_PHONE_CLASS,
   HOUSE_PHONE_CHROME_ICON_WEIGHT,
+  HOUSE_PHONE_CHROME_IDLE_INK_CLASS,
 } from "@/lib/house-phone-shell";
 import {
   APP_SHEET_RISE_CLASS,
@@ -210,8 +211,14 @@ describe("ActivityBell", () => {
   it("matches #391 chrome idle weight on theme and the desktop bell", () => {
     expect(PHOSPHOR_CHROME_IDLE_WEIGHT).toBe("bold");
     expect(PHOSPHOR_CHROME_ICON_CLASS).toBe("size-4 shrink-0");
-    expect(HOUSE_HEADER_TRAILING_PHONE_CLASS).toBe("size-6 shrink-0 md:size-4 md:hidden");
+    expect(HOUSE_HEADER_TRAILING_PHONE_CLASS).toBe(
+      "size-6 shrink-0 md:size-4 md:hidden text-ink-2",
+    );
+    // Phone bell rides bottom-bar idle ink; desktop bell stays on the
+    // HOUSE_THEME_TOGGLE_CLASS text-ink-3 / hover:text-ink from #442.
+    expect(HOUSE_HEADER_TRAILING_PHONE_CLASS).toContain(HOUSE_PHONE_CHROME_IDLE_INK_CLASS);
     expect(HOUSE_HEADER_TRAILING_DESKTOP_CLASS).toBe("size-4 shrink-0 hidden md:block");
+    expect(HOUSE_HEADER_TRAILING_DESKTOP_CLASS).not.toContain(HOUSE_PHONE_CHROME_IDLE_INK_CLASS);
     expect(themeSrc).toContain("PHOSPHOR_CHROME_ICON_CLASS");
     expect(bellSrc).toContain("HOUSE_HEADER_TRAILING_PHONE_CLASS");
     expect(bellSrc).toContain("HOUSE_HEADER_TRAILING_DESKTOP_CLASS");

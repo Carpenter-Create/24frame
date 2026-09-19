@@ -11,6 +11,7 @@ import {
 import {
   HOUSE_HEADER_TRAILING_DESKTOP_CLASS,
   HOUSE_HEADER_TRAILING_PHONE_CLASS,
+  HOUSE_PHONE_CHROME_IDLE_INK_CLASS,
 } from "@/lib/house-phone-shell";
 import { PHOSPHOR_CHROME_ICON_CLASS } from "@/lib/phosphor-icon";
 import { AskAssistantHeaderLink } from "./ask-assistant-header";
@@ -64,6 +65,11 @@ describe("HouseAiMark", () => {
     expect(html).toContain(`stroke-width="${HOUSE_AI_MARK_REGULAR_STROKE_WIDTH}"`);
     expect(html).toContain("size-6");
     expect(html).toContain("md:hidden");
+    // Ink parity — phone AI stroke rides the bottom-bar idle ink so the
+    // sparkles read at the same optical weight as the Mercury Regular
+    // glyphs sitting below. Desktop fill keeps HOUSE_THEME_TOGGLE_CLASS.
+    expect(html).toContain(HOUSE_PHONE_CHROME_IDLE_INK_CLASS);
+    expect(HOUSE_PHONE_CHROME_IDLE_INK_CLASS).toBe("text-ink-2");
     expect(html.match(/<path /g)?.length).toBe(3);
     for (const d of HOUSE_AI_MARK_PATHS) {
       expect(html).toContain(`d="${d}"`);
