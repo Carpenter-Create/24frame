@@ -20,9 +20,7 @@ describe("legacy /news", () => {
     expect(pageSrc).toContain("NEWS_HREF");
     expect(pageSrc).not.toContain("NewsRail");
     expect(pageSrc).not.toContain("loadNewsHistory");
-    const nextConfig = readFileSync("next.config.ts", "utf8");
-    expect(nextConfig).toContain(
-      '{ source: "/news", destination: "/home/news", permanent: true }',
-    );
+    const redirects = readFileSync("src/lib/workspace-redirects.ts", "utf8");
+    expect(redirects).toContain('hop("/news", `${HOME_ROOT}/news`)');
   });
 });

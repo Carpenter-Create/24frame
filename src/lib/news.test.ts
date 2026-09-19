@@ -51,10 +51,8 @@ describe("News SoT", () => {
     expect(NEWS_PAGE.sources).toBe("Sources");
     expect(NEWS_PAGE.sourcesAll).toBe("All");
     expect(NEWS_PAGE.filterEmpty).toBe("No headlines from the selected sources.");
-    const nextConfig = readFileSync("next.config.ts", "utf8");
-    expect(nextConfig).toContain(
-      '{ source: "/news", destination: "/home/news", permanent: true }',
-    );
+    const redirects = readFileSync("src/lib/workspace-redirects.ts", "utf8");
+    expect(redirects).toContain('hop("/news", `${HOME_ROOT}/news`)');
     expect(NEWS_HOME_CAP).toBe(15);
     expect(NEWS_WINDOW_DAYS).toBe(90);
     expect(NEWS_WINDOW_MS).toBe(90 * 24 * 60 * 60 * 1000);

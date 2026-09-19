@@ -107,7 +107,7 @@ describe("MessagesPage leftover intercept", () => {
     const { from, rpc } = stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(ctx({ isGcStaff: true, hasOrg: false }) as never);
 
-    await expect(renderPage({ thread: THREAD })).rejects.toThrow("REDIRECT:/activity");
+    await expect(renderPage({ thread: THREAD })).rejects.toThrow("REDIRECT:/aggregation/activity");
     expect(vi.mocked(getActiveOrgTier)).not.toHaveBeenCalled();
     expect(from).not.toHaveBeenCalledWith("ai_conversations");
     expect(rpc).not.toHaveBeenCalled();

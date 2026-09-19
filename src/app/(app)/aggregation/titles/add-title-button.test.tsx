@@ -14,8 +14,8 @@ import { AddTitleButton } from "./add-title-button";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const src = readFileSync(join(here, "add-title-button.tsx"), "utf8");
-const tokens = readFileSync(join(here, "../../tokens.css"), "utf8");
-const globals = readFileSync(join(here, "../../globals.css"), "utf8");
+const tokens = readFileSync(join(here, "../../../tokens.css"), "utf8");
+const globals = readFileSync(join(here, "../../../globals.css"), "utf8");
 
 function openingTagWith(html: string, marker: string): string {
   const at = html.indexOf(marker);

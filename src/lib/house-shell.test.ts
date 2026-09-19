@@ -44,7 +44,7 @@ import { SOCIAL_PILL_ACTIVE_CLASS, SOCIAL_PILL_IDLE_CLASS } from "@/lib/social-c
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
-  usePathname: () => "/education/orientation",
+  usePathname: () => "/education/manage/orientation",
   useSearchParams: () => new URLSearchParams(),
 }));
 

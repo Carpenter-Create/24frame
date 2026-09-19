@@ -212,8 +212,8 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(HOUSE_PHONE_WORKSPACE_TABS.map((tab) => tab.href)).toEqual([
       "/home",
       "/social",
-      "/dashboard",
-      "/social/courses",
+      "/aggregation/dashboard",
+      "/education",
     ]);
     expect(HOUSE_PHONE_WORKSPACE_TABS.map((tab) => tab.icon)).toEqual([
       House,

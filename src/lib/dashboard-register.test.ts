@@ -299,12 +299,12 @@ describe("dashboard register chrome", () => {
     expect(titles).toContain('data-dashboard-view-alt="bars"');
     expect(titles).not.toContain('data-dashboard-view-alt="map"');
     expect(titles).toContain("data-dashboard-view-all-arrow");
-    expect(titles).toContain('href="/titles"');
+    expect(titles).toContain('href="/aggregation/titles"');
     expect(titles).not.toContain("Window A");
     expect(platforms).toContain('data-dashboard-view="list"');
     expect(platforms).toContain("Window A");
     expect(platforms).toContain('data-dashboard-ranked-grammar="grade"');
-    expect(platforms).toContain('href="/titles"');
+    expect(platforms).toContain('href="/aggregation/titles"');
     expect(territories).toContain('data-dashboard-view="map"');
     expect(territories).toContain("data-dashboard-territory-map");
     expect(territories).toContain('data-dashboard-territory-scale="overview"');

@@ -543,7 +543,7 @@ describe("AppShell /settings rail", () => {
     expect(html).not.toContain("data-mobile-nav-trigger");
     expect(html).not.toContain("data-house-phone-dest-chips");
     expect(html).toContain("data-settings-header-back");
-    expect(html).toContain('href="/"');
+    expect(html).toContain('href="/aggregation/dashboard"');
     expect(html).not.toContain("Search");
     expect(html).not.toContain("data-header-search");
     expect(html).not.toContain("data-titles-header-search");

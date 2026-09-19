@@ -94,8 +94,8 @@ describe("AvailsPage", () => {
     expect(html).toContain("aspect-[16/9]");
     expect(html).toContain("Approved one");
     expect(html).toContain("Approved two");
-    expect(html).toContain('href="/gc/titles/live-1"');
-    expect(html).toContain('href="/gc/titles/live-2"');
+    expect(html).toContain('href="/aggregation/gc/titles/live-1"');
+    expect(html).toContain('href="/aggregation/gc/titles/live-2"');
     expect(html).toContain("https://cdn/wide.jpg");
     expect(html).not.toContain("https://cdn/poster.jpg");
     expect(html).not.toContain("data-status-progress");

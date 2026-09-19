@@ -353,7 +353,7 @@ describe("recent account activity", () => {
       "2026-09-10T18:22:00.000Z",
       "2026-09-02T15:04:00.000Z",
     ]);
-    expect(hydrated[1]?.href).toBe("/titles/24F-0001234");
+    expect(hydrated[1]?.href).toBe("/aggregation/titles/24F-0001234");
     expect(applyActivityAudit(rows, { events: [] }).every((row) => row.actor.initial === "?")).toBe(
       true,
     );

@@ -93,7 +93,7 @@ describe("licensing nested title → endpoint", () => {
     expect(snapshot.groups.map((group) => group.id)).toEqual(["t3", "t2", "t1"]);
     expect(snapshot.groups.some((group) => group.id === "t4")).toBe(false);
     const north = snapshot.groups[0];
-    expect(north.href).toBe("/titles/24F-0001236");
+    expect(north.href).toBe("/aggregation/titles/24F-0001236");
     expect(north.endpoints.map((row) => row.deliveryId)).toEqual(["d-new", "d-new-2"]);
     expect(north.endpoints[0]).toMatchObject({
       endpoint: "Endpoint C",

@@ -75,7 +75,7 @@ describe("menu surface chrome lock", () => {
       join(here, "../components/dashboard/dashboard-home.tsx"),
       "utf8",
     );
-    const page = readFileSync(join(here, "../app/(app)/dashboard/page.tsx"), "utf8");
+    const page = readFileSync(join(here, "../app/(app)/aggregation/dashboard/page.tsx"), "utf8");
     const card = readFileSync(join(here, "../components/ui/card.tsx"), "utf8");
     expect(dashboard).not.toContain("MENU_SURFACE_ACCENT");
     expect(dashboard).not.toContain("data-menu-surface-accent");

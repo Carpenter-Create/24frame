@@ -16,7 +16,7 @@ const src = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "title-li
 const pageSrc = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "page.tsx"), "utf8");
 const listSrc = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../page.tsx"), "utf8");
 const gcSrc = readFileSync(
-  join(dirname(fileURLToPath(import.meta.url)), "../../(operator)/gc/titles/[id]/page.tsx"),
+  join(dirname(fileURLToPath(import.meta.url)), "../../../(operator)/aggregation/gc/titles/[id]/page.tsx"),
   "utf8",
 );
 

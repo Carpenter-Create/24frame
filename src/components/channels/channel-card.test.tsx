@@ -53,11 +53,9 @@ describe("ChannelCard house IA", () => {
     expect(html).toContain("gap-[var(--space-6)]");
   });
 
-  it("keeps /vendors as a permanent redirect to /channels", () => {
-    const src = readFileSync("next.config.ts", "utf8");
-    expect(src).toContain('{ source: "/vendors", destination: "/channels", permanent: true }');
-    expect(src).toContain(
-      '{ source: "/vendors/:path*", destination: "/channels/:path*", permanent: true }',
-    );
+  it("keeps /vendors as a permanent redirect to /aggregation/channels", () => {
+    const src = readFileSync("src/lib/workspace-redirects.ts", "utf8");
+    expect(src).toContain('hop("/vendors", CHANNELS)');
+    expect(src).toContain('hop("/vendors/:path*", `${CHANNELS}/:path*`)');
   });
 });

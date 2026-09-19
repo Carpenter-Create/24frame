@@ -200,7 +200,7 @@ describe("staff /gc/deliveries licensing filters and craft", () => {
     const html = await renderEmptyDeliveries({ status: "rejected" });
     expect(html).toContain(GC_LICENSING_STATUS.filterMiss);
     expect(html).toContain(GC_LICENSING_STATUS.showAll);
-    expect(html).toContain('href="/gc/deliveries"');
+    expect(html).toContain('href="/aggregation/gc/deliveries"');
     expect(html).not.toContain("No licensing status yet.");
   });
 

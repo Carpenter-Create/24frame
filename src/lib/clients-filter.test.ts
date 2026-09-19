@@ -14,7 +14,7 @@ import {
 
 const filterSrc = readFileSync(new URL("./clients-filter.ts", import.meta.url), "utf8");
 const statusFilterSrc = readFileSync(
-  new URL("../app/(app)/(operator)/gc/clients/clients-status-filter.tsx", import.meta.url),
+  new URL("../app/(app)/(operator)/aggregation/gc/clients/clients-status-filter.tsx", import.meta.url),
   "utf8",
 );
 

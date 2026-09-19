@@ -107,7 +107,7 @@ describe("title status override copy + notify", () => {
       body: '"Harbor Cut" was returned for amendment: needs stills',
       subject: '"Harbor Cut" was returned for amendment',
       cta: "Review and resubmit",
-      path: "/titles/t1",
+      path: "/aggregation/titles/t1",
     });
     expect(titleStatusOverrideNotifyCopy("in_review", "Harbor Cut", "recheck chain", "t1")).toEqual({
       kind: "title_rejected",
@@ -115,7 +115,7 @@ describe("title status override copy + notify", () => {
       body: '"Harbor Cut" needs review: recheck chain',
       subject: '"Harbor Cut" needs review',
       cta: "Review and resubmit",
-      path: "/titles/t1",
+      path: "/aggregation/titles/t1",
     });
   });
 });
@@ -125,7 +125,7 @@ describe("G6 Avails stay Approved-derived", () => {
     const dir = dirname(fileURLToPath(import.meta.url));
     const helper = readFileSync(join(dir, "title-status-override.ts"), "utf8");
     const availsPage = readFileSync(
-      join(dir, "../app/(app)/(operator)/avails/page.tsx"),
+      join(dir, "../app/(app)/(operator)/aggregation/avails/page.tsx"),
       "utf8",
     );
     expect(helper).not.toContain("/avails");

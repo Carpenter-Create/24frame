@@ -1086,7 +1086,7 @@ describe("company admin Overview hero", () => {
     expect(html).toContain("Winter Light");
     expect(html).toContain("status updated to Approved");
     expect(html).toContain(DASHBOARD_ADMIN.performanceReportAvailable);
-    expect(html).toContain('href="/reports/period-1"');
+    expect(html).toContain('href="/aggregation/reports/period-1"');
     expect(html).not.toContain("Synopsis is required.");
     expect(html).not.toContain(DASHBOARD_ADMIN.findingOpened);
     expect(html).not.toContain('href="/attention"');
