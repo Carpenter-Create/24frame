@@ -14,8 +14,9 @@
 // floating pill, house surface fill, hairline, restrained
 // --elevation-float. No frost. No satellite FAB. No second
 // float. Active tab is a light surface-muted pill behind the glyph.
-// Inactive sit bare. Stroke is Regular at size-6 / 24px (bell box,
-// not Bold/Fill heavy). Active ink is accent on the chip; idle is ink-2.
+// Inactive sit bare. Stroke is Regular at size-6 / 24px — one register
+// for the Mercury bar and the phone-top AI/bell cluster. Not Bold/Fill
+// heavy. Active ink is accent on the chip; idle is ink-2.
 // House tokens only. Hide on scroll-down / show on scroll-up via
 // social-tab-bar-scroll. Content pad stays when the bar hides.
 // Not a Meta skin. Not Mercury lavender.
@@ -40,7 +41,7 @@ import {
   overviewLeadSelected,
   type OverviewLeadPillId,
 } from "@/lib/overview";
-import type { PhosphorIcon } from "@/lib/phosphor-icon";
+import { PHOSPHOR_CHROME_ICON_CLASS, type PhosphorIcon } from "@/lib/phosphor-icon";
 import { SOCIAL_ROUTES } from "@/lib/social";
 import {
   WORKSPACE_AGGREGATION_LABEL,
@@ -116,13 +117,22 @@ export const HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS =
 /** Phone chrome glyphs — Mercury bottom bar + top trailing cluster. 24px box. */
 export const HOUSE_PHONE_CHROME_ICON_CLASS = "size-6 shrink-0";
 
+/** One phone chrome stroke register — bottom bar + top trailing. Not Bold/Fill. */
+export const HOUSE_PHONE_CHROME_ICON_WEIGHT = "regular" satisfies IconWeight;
+
 /** Phone 24px; desktop header keeps the 16px phosphor chrome box. */
 export const HOUSE_HEADER_TRAILING_ICON_CLASS = `${HOUSE_PHONE_CHROME_ICON_CLASS} md:size-4`;
+
+/** Phone header trailing instance — Regular size-6. Hidden from md+. */
+export const HOUSE_HEADER_TRAILING_PHONE_CLASS = `${HOUSE_HEADER_TRAILING_ICON_CLASS} md:hidden`;
+
+/** Desktop header trailing instance — 16px phosphor idle / filled AI. */
+export const HOUSE_HEADER_TRAILING_DESKTOP_CLASS = `${PHOSPHOR_CHROME_ICON_CLASS} hidden md:block`;
 
 /** Same size-6 box as the phone-top AI/bell. Regular stroke, not Bold/Fill. */
 export const HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS = HOUSE_PHONE_CHROME_ICON_CLASS;
 
-export const HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT = "regular" satisfies IconWeight;
+export const HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT = HOUSE_PHONE_CHROME_ICON_WEIGHT;
 
 /** Clears the float once on main. Do not stack a second phone bottom pad on children.
  *  Pad stays when the bar hides so scroll-hide does not jump the page. */

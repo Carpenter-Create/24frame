@@ -4,7 +4,10 @@ import { useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { CaretLeft, MagnifyingGlass, X } from "@phosphor-icons/react";
 
-import { HOUSE_PHONE_CHROME_ICON_CLASS } from "@/lib/house-phone-shell";
+import {
+  HOUSE_PHONE_CHROME_ICON_CLASS,
+  HOUSE_PHONE_CHROME_ICON_WEIGHT,
+} from "@/lib/house-phone-shell";
 import { HOUSE_ICON_BUTTON_CLASS } from "@/lib/house-shell";
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import { SOCIAL } from "@/lib/social";
@@ -65,7 +68,7 @@ export function SocialSearchSheet({
       >
         <MagnifyingGlass
           className={HOUSE_PHONE_CHROME_ICON_CLASS}
-          weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
+          weight={HOUSE_PHONE_CHROME_ICON_WEIGHT}
           aria-hidden
         />
       </button>

@@ -27,7 +27,11 @@ import {
   activityRelativeTime,
   type ActivityItem,
 } from "@/lib/activity";
-import { HOUSE_HEADER_TRAILING_ICON_CLASS } from "@/lib/house-phone-shell";
+import {
+  HOUSE_HEADER_TRAILING_DESKTOP_CLASS,
+  HOUSE_HEADER_TRAILING_PHONE_CLASS,
+  HOUSE_PHONE_CHROME_ICON_WEIGHT,
+} from "@/lib/house-phone-shell";
 import { APP_SHEET_SCRIM_CLASS } from "@/lib/house-sheet";
 import { PHOSPHOR_CHROME_ICON_CLASS, PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import { REPORTS_USER_PANEL_CLASS } from "@/lib/reports-craft";
@@ -121,6 +125,7 @@ function ActivityBellTriggers({
         <ActivityBellTrigger
           count={count}
           open={phoneOpen}
+          register="phone"
           aria-expanded={phoneOpen}
           aria-controls="activity-bell-sheet"
           onClick={onPhoneClick}
@@ -130,6 +135,7 @@ function ActivityBellTriggers({
         <ActivityBellTrigger
           count={count}
           open={desktopOpen}
+          register="desktop"
           aria-expanded={desktopOpen}
           aria-controls="activity-bell-popover"
           onClick={onDesktopClick}
@@ -175,6 +181,7 @@ function ActivityBellPhone({
       <ActivityBellTrigger
         count={count}
         open={open}
+        register="phone"
         aria-expanded={open}
         aria-controls="activity-bell-sheet"
         onClick={() => setOpen((next) => !next)}
@@ -221,6 +228,7 @@ function ActivityBellDesktop({
       <ActivityBellTrigger
         count={count}
         open={open}
+        register="desktop"
         aria-expanded={open}
         aria-controls="activity-bell-popover"
         onClick={() => setOpen((next) => !next)}
@@ -373,11 +381,14 @@ function ActivityBellFeed({
 function ActivityBellTrigger({
   count,
   open = false,
+  register = "desktop",
   ...props
 }: {
   count: number;
   open?: boolean;
+  register?: "phone" | "desktop";
 } & React.ComponentProps<"button">) {
+  const phone = register === "phone";
   return (
     <button
       type="button"
@@ -390,7 +401,10 @@ function ActivityBellTrigger({
       )}
       {...props}
     >
-      <Bell className={HOUSE_HEADER_TRAILING_ICON_CLASS} weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
+      <Bell
+        className={phone ? HOUSE_HEADER_TRAILING_PHONE_CLASS : HOUSE_HEADER_TRAILING_DESKTOP_CLASS}
+        weight={phone ? HOUSE_PHONE_CHROME_ICON_WEIGHT : PHOSPHOR_CHROME_IDLE_WEIGHT}
+      />
       {count > 0 ? (
         <span
           data-activity-bell-badge=""

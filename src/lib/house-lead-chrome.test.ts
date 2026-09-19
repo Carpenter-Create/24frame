@@ -191,7 +191,9 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
       expect(html.indexOf("data-activity-bell")).toBeLessThan(
         html.indexOf("data-user-menu-host"),
       );
-      expect(html).not.toContain("stroke-width");
+      expect(html).not.toContain("lucide-");
+      expect(html).not.toContain('stroke-width="1.33"');
+      expect(html).toContain('data-house-ai-mark-register="stroke"');
     }
     expect(leadSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(1);
     expect(leadSrc).toContain("<AskAssistantHeaderLink />");

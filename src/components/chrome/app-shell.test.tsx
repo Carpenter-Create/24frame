@@ -600,7 +600,7 @@ describe("AppShell rail-collapse chevron", () => {
       expect(html).toContain('viewBox="0 0 256 256"');
       expect(html).toContain('fill="currentColor"');
       expect(html).not.toContain("lucide-");
-      expect(html).not.toContain("stroke-width");
+      expect(html).not.toContain('stroke-width="1.33"');
       expect(html).toContain("data-theme-toggle");
       expect(html).toContain(`data-rail-collapse="${RAIL_COLLAPSE_CHEVRON}"`);
       expect(html).toContain(RAIL_COLLAPSE_CHEVRON_CLASS);
@@ -668,7 +668,7 @@ describe("AppShell rail-collapse chevron", () => {
       expect(html).toContain('viewBox="0 0 256 256"');
       expect(html).toContain('fill="currentColor"');
       expect(html).not.toContain("lucide-");
-      expect(html).not.toContain("stroke-width");
+      expect(html).not.toContain('stroke-width="1.33"');
       expect(html).toContain("data-theme-toggle");
       expect(html).toContain(`data-rail-collapse="${RAIL_COLLAPSE_CHEVRON}"`);
       expect(html).toContain(RAIL_COLLAPSE_EXPAND_ROW_CLASS);

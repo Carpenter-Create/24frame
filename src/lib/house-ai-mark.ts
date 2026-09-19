@@ -5,6 +5,12 @@
 
 export const HOUSE_AI_MARK_SRC = "/brand/24frame-ai-mark.svg";
 export const HOUSE_AI_MARK_VIEWBOX = "62 42 146 146";
+export const HOUSE_AI_MARK_VIEWBOX_SIZE = 146;
+
+/** Phosphor Regular is 16 on a 256 viewBox. Same optical on the house mark. */
+export const HOUSE_AI_MARK_REGULAR_STROKE_WIDTH = (16 * HOUSE_AI_MARK_VIEWBOX_SIZE) / 256;
+
+export type HouseAiMarkRegister = "fill" | "stroke";
 
 export const HOUSE_AI_MARK_PATHS = [
   "M113 76L126.44 102.56L150 116L126.44 129.44L113 156L99.56 129.44L76 116L99.56 102.56Z",
