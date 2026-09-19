@@ -12,12 +12,13 @@ import { cn } from "@/lib/cn";
 // (the video player) without touching the default form width.
 //
 // `h-fit` is the confirm-air lock: `m-auto` without it stretches the panel to the
-// viewport (tall empty body). `overflow-visible` lets the house form Select
-// Listbox paint past the panel — UA dialog overflow would clip it.
+// viewport (tall empty body). Do not set overflow here — UA `dialog:modal`
+// scrolls tall panels (Education, xl video). Settings dialogs that host the
+// house Select pass overflow-visible so the Listbox can paint past the panel.
 // Footer chrome is DialogFooter — not a per-surface gap.
 
 export const DIALOG_PANEL_CLASS =
-  "m-auto h-fit overflow-visible rounded-[var(--radius-lg)] border border-hairline bg-surface p-0 text-ink shadow-[var(--elevation)] backdrop:bg-black/40 backdrop:backdrop-blur-sm";
+  "m-auto h-fit rounded-[var(--radius-lg)] border border-hairline bg-surface p-0 text-ink shadow-[var(--elevation)] backdrop:bg-black/40 backdrop:backdrop-blur-sm";
 
 export const DIALOG_HEADER_CLASS =
   "flex items-center justify-between border-b border-hairline px-5 py-3";
@@ -45,12 +46,14 @@ export function Dialog({
   onClose,
   title,
   size = "md",
+  className,
   children,
 }: {
   open: boolean;
   onClose: () => void;
   title: string;
   size?: keyof typeof DIALOG_SIZES;
+  className?: string;
   children: ReactNode;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -70,7 +73,7 @@ export function Dialog({
         if (e.target === ref.current) onClose(); // click on the backdrop (the dialog element itself)
       }}
       data-dialog-size={size}
-      className={cn(DIALOG_PANEL_CLASS, DIALOG_SIZES[size])}
+      className={cn(DIALOG_PANEL_CLASS, DIALOG_SIZES[size], className)}
     >
       <div className={DIALOG_HEADER_CLASS}>
         <h2 className="t-body font-medium text-ink">{title}</h2>

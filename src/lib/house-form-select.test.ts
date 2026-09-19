@@ -51,10 +51,12 @@ describe("house form Select SoT", () => {
     expect(selectSrc).not.toContain("<select");
     expect(invite).toContain('import { Select } from "@/components/ui/select"');
     expect(invite).toContain('id="team-invite-role"');
+    expect(invite).toContain('className="overflow-visible"');
     expect(invite).not.toContain("<select");
     expect(invite).not.toContain("formControlClass");
     expect(entities).toContain('import { Select } from "@/components/ui/select"');
     expect(entities).toContain('id="entity-type"');
+    expect(entities).toContain('className="overflow-visible"');
     expect(entities).not.toContain("<select");
     expect(entities).not.toContain("formControlClass");
   });

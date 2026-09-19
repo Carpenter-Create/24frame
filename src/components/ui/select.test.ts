@@ -54,6 +54,8 @@ describe("Select", () => {
     expect(src).toContain("CaretDown");
     expect(src).toContain("weight={PHOSPHOR_CHROME_IDLE_WEIGHT}");
     expect(src).toContain("AppearanceCheck");
+    expect(src).toContain("preventDefault");
+    expect(src).toContain("stopPropagation");
     expect(src).not.toContain("<select");
     expect(src).not.toContain("createPortal");
     expect(PHOSPHOR_CHROME_IDLE_WEIGHT).toBe("bold");

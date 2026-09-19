@@ -184,6 +184,7 @@ export function LegalEntitiesSection({
           onClose={closeModal}
           title={mode === "edit" ? LEGAL_ENTITIES.edit : LEGAL_ENTITIES.add}
           size="md"
+          className="overflow-visible"
         >
           <form
             onSubmit={onSubmit}

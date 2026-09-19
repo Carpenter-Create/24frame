@@ -44,7 +44,10 @@ export function Select({
   useEffect(() => {
     if (!open) return undefined;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      event.stopPropagation();
+      setOpen(false);
     };
     const onPointer = (event: MouseEvent) => {
       const host = hostRef.current;

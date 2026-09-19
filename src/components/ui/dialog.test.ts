@@ -20,7 +20,7 @@ describe("dialog confirm grammar", () => {
   it("hugs content — m-auto without h-fit stretches into a tall empty panel", () => {
     expect(DIALOG_PANEL_CLASS).toContain("m-auto");
     expect(DIALOG_PANEL_CLASS).toContain("h-fit");
-    expect(DIALOG_PANEL_CLASS).toContain("overflow-visible");
+    expect(DIALOG_PANEL_CLASS).not.toContain("overflow-visible");
     expect(DIALOG_PANEL_CLASS).toContain("backdrop:bg-black/40");
     expect(DIALOG_PANEL_CLASS).toContain("backdrop:backdrop-blur-sm");
     expect(DIALOG_BODY_CLASS).toBe("px-5 py-3");
@@ -32,6 +32,7 @@ describe("dialog confirm grammar", () => {
     expect(DIALOG_SIZES.sm).toBe("w-[min(92vw,22rem)]");
     expect(src).toContain("export function DialogFooter");
     expect(src).toContain("data-dialog-size");
+    expect(src).toContain("DIALOG_SIZES[size], className");
   });
 
   it("puts confirm footers on DialogFooter + Button, not a Titles-only height hack", () => {

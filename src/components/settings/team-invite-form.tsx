@@ -161,6 +161,7 @@ export function TeamInviteForm({
           onClose={closeInvite}
           title={ACCOUNT_INVITE.invite}
           size="md"
+          className="overflow-visible"
         >
           <form
             onSubmit={onSubmit}
