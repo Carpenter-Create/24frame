@@ -27,7 +27,7 @@ vi.mock("next/link", async () => {
   return { __esModule: true, default: MockLink };
 });
 
-import { BookOpen, FilmStrip, Handshake, House, SquaresFour, Users } from "@phosphor-icons/react";
+import { BookOpen, FilmStrip, House, SquaresFour, Users } from "@phosphor-icons/react";
 
 import { HouseLeadChrome } from "@/components/chrome/house-lead-chrome";
 import { HousePhoneAppShell } from "@/components/chrome/house-phone-app-shell";
@@ -69,6 +69,7 @@ import {
   HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS,
   HOUSE_THEME_TOGGLE_CLASS,
 } from "@/lib/house-lead-chrome";
+import { CO_PRODUCTIONS_ICON } from "@/lib/co-productions";
 import { PHOSPHOR_CHROME_ICON_CLASS } from "@/lib/phosphor-icon";
 import { SOCIAL_ROUTES } from "@/lib/social";
 import {
@@ -223,7 +224,7 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
       Users,
       FilmStrip,
       BookOpen,
-      Handshake,
+      CO_PRODUCTIONS_ICON,
     ]);
     expect(HOUSE_PHONE_WORKSPACE_TABS.find((tab) => tab.id === "aggregation")?.icon).toBe(
       FilmStrip,
@@ -251,7 +252,12 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS).toContain("max-md:pb-");
     expect(phoneShellSrc).toContain("Option 2");
     expect(phoneShellSrc).toContain("FilmStrip");
-    expect(phoneShellSrc).toContain("Handshake");
+    expect(phoneShellSrc).toContain("CO_PRODUCTIONS_ICON");
+    expect(phoneShellSrc).not.toMatch(/\bHandshake\b/);
+    expect(phoneShellSrc).not.toMatch(/\bCamera\b/);
+    expect(phoneShellSrc).not.toContain("VideoCamera");
+    expect(phoneShellSrc).not.toContain("FilmSlate");
+    expect(phoneShellSrc).not.toContain("HandshakeSimple");
     expect(phoneShellSrc).toContain('id === "home" || id === "co-productions"');
     expect(phoneShellSrc).not.toContain("SquaresFour");
     expect(existsSync("src/components/social/social-mobile-tab-bar.tsx")).toBe(false);
