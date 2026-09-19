@@ -2,7 +2,6 @@ import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { MOBILE_CHROME_LEAD_PAD_CLASS } from "./mobile-chrome";
-import { SOCIAL_ROUTES } from "./social";
 import { USER_MENU, USER_MENU_ACTIONS } from "./user-menu";
 import {
   SETTINGS,
@@ -145,10 +144,14 @@ describe("settings hub lock", () => {
     expect(SETTINGS_RAIL_ABSENT).toContain("Manage courses");
   });
 
-  it("deep-links Edit public profile to the existing Social editor", () => {
-    expect(SETTINGS.editPublicProfile).toBe("Edit public profile");
-    expect(SETTINGS.editPublicProfileHref).toBe("/social/profile/edit");
-    expect(SETTINGS.editPublicProfileHref).toBe(SOCIAL_ROUTES.profileEdit);
+  it("does not keep an Edit public profile Settings door", () => {
+    expect(SETTINGS).not.toHaveProperty("editPublicProfile");
+    expect(SETTINGS).not.toHaveProperty("editPublicProfileHref");
+    expect(SETTINGS_ABSENT).toContain("Edit public profile");
+    const settingsSrc = readFileSync("src/lib/settings.ts", "utf8");
+    expect(settingsSrc).not.toContain("editPublicProfile");
+    expect(settingsSrc).not.toContain("editPublicProfileHref");
+    expect(settingsSrc).not.toContain("SOCIAL_ROUTES");
   });
 
   it("does not invent Phone, Job, or the old email helper", () => {

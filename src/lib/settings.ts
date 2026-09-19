@@ -9,9 +9,9 @@
 //   Profile · Organization · Preferences
 // Same URLs regardless of active workspace. Do not keep You / Social /
 // Education / Aggregation as the IA spine.
-// Profile is identity + sign-in already in product (name / photo /
-// sign-in email). Edit public profile deep-links to the existing
-// Social editor — do not duplicate that editor here.
+// Profile is account identity only (name / photo / sign-in email +
+// Save). Public / Social profile is Social-owned — edit it from
+// Social, not from a Settings door.
 // Organization holds the company profile (moved from Aggregation
 // settings). Org Team / invite / roles are out of scope this PR —
 // this section hosts Team next.
@@ -48,7 +48,6 @@
 import { MOBILE_CHROME_LEAD_PAD_CLASS } from "@/lib/mobile-chrome";
 import { ASK_ASSISTANT } from "@/lib/product";
 import { EDUCATION_MANAGE_HREF } from "@/lib/education";
-import { SOCIAL_ROUTES } from "@/lib/social";
 import { DASHBOARD_HREF } from "@/lib/dashboard-admin";
 import { USER_MENU } from "@/lib/user-menu";
 
@@ -63,8 +62,6 @@ export const SETTINGS = {
   preferencesHref: "/settings/preferences",
   manageCourses: "Manage courses",
   manageCoursesHref: EDUCATION_MANAGE_HREF,
-  editPublicProfile: "Edit public profile",
-  editPublicProfileHref: SOCIAL_ROUTES.profileEdit,
   organizationEmpty: "No organization on this account.",
   company: "Company",
   agreements: USER_MENU.agreements,
@@ -83,6 +80,7 @@ export const SETTINGS_ABSENT = [
   "Job",
   "Used to sign in.",
   "Name and email on this account.",
+  "Edit public profile",
 ] as const;
 
 export type SettingsHubSection = "profile" | "organization" | "preferences";

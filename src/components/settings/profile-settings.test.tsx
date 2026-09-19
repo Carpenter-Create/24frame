@@ -45,7 +45,7 @@ describe("ProfileSettings", () => {
     vi.mocked(signedAvatarUrl).mockResolvedValue(null);
   });
 
-  it("shows identity already in product and deep-links Edit public profile", async () => {
+  it("shows account identity only — no Edit public profile door", async () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx(null) as never);
     const html = renderToStaticMarkup(await ProfileSettings());
     expect(html).toContain('data-settings-hub="profile"');
@@ -57,9 +57,13 @@ describe("ProfileSettings", () => {
     expect(src).not.toContain("SETTINGS.title");
     expect(html).toContain(ACCOUNT_PROFILE.emailHint);
     expect(html).toContain("ada@example.com");
-    expect(html).toContain(SETTINGS.editPublicProfile);
-    expect(html).toContain(`href="${SETTINGS.editPublicProfileHref}"`);
-    expect(html).toContain('data-settings-edit-public-profile=""');
+    expect(html).toContain(ACCOUNT_PROFILE.save);
+    expect(html).not.toContain("Edit public profile");
+    expect(html).not.toContain("/social/profile/edit");
+    expect(html).not.toContain("data-settings-edit-public-profile");
+    expect(src).not.toContain("editPublicProfile");
+    expect(src).not.toContain("SETTINGS_QUIET_ROW_CLASS");
+    expect(src).not.toContain("next/link");
     expect(html).not.toContain('data-settings-section="company"');
     expect(html).not.toContain("data-company-profile-form");
     expect(src).not.toContain("CompanyProfileForm");
