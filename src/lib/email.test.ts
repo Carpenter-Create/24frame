@@ -8,7 +8,7 @@ import {
   EMAIL_ACCENT,
   EMAIL_ADDRESS,
   EMAIL_BODY_SIZE,
-  EMAIL_COPYRIGHT,
+  emailCopyright,
   EMAIL_FORMAT_DETECTION,
   EMAIL_GEIST_HREF,
   EMAIL_HEADLINE_SIZE,
@@ -90,7 +90,7 @@ describe("buildOtpEmail", () => {
     expect(html).toContain(EMAIL_SITE_URL);
     expect(html).toContain(EMAIL_SITE_LABEL);
     expect(html).toContain(`color:${SPORTY_BLUE}`);
-    expect(html).toContain(EMAIL_COPYRIGHT);
+    expect(html).toContain(emailCopyright());
     expect(html).toContain(EMAIL_ADDRESS);
     expect(html).not.toMatch(/background:\s*#1769FF/i);
     expect(html).not.toMatch(/border-radius:\s*999px/);
@@ -117,7 +117,7 @@ describe("buildNotificationEmail", () => {
     expect(html).toContain(`style="color:${SPORTY_BLUE};text-decoration:none"`);
     expect(html).toContain(EMAIL_LOGO_URL);
     expect(html).toContain(EMAIL_SITE_LABEL);
-    expect(html).toContain(EMAIL_COPYRIGHT);
+    expect(html).toContain(emailCopyright());
     expect(html).not.toMatch(/background:\s*#1769FF/i);
     expect(html).not.toMatch(/border-radius:\s*999px/);
     expect(productResidue(html)).not.toMatch(/\bGC\b|globalcontent/i);
@@ -138,7 +138,7 @@ describe("buildMagicLinkEmail", () => {
     expect(html).toContain(`href="${signInUrl.replaceAll("&", "&amp;")}"`);
     expect(html).toContain(EMAIL_LOGO_URL);
     expect(html).toContain(EMAIL_SITE_LABEL);
-    expect(html).toContain(EMAIL_COPYRIGHT);
+    expect(html).toContain(emailCopyright());
     expect(html).toContain(EMAIL_ADDRESS);
     expect(html).not.toContain("{{ .Token }}");
     expect(html).not.toMatch(/enter this code/i);
@@ -213,7 +213,8 @@ describe("Auth magic-link template", () => {
     expect(html).toContain("https://24frame.co");
     expect(html).toContain("24frame.co");
     expect(html).toContain("https://24frame.co/legal");
-    expect(html).toContain("© 2026 Global Content Holdings LLC. All rights reserved.");
+    expect(html).toContain(emailCopyright());
+    expect(html).not.toContain("© 2026 Global Content Holdings LLC. All rights reserved.");
     expect(html).toContain("3839 McKinney Ave, Suite 155 #2276, Dallas, TX 75204");
     expect(html).toContain("#FAFAFB");
     expect(html).toContain("max-width:600px");

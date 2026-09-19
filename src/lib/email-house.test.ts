@@ -14,7 +14,7 @@ import {
   EMAIL_BUTTON_RADIUS,
   EMAIL_CARD_RADIUS,
   EMAIL_CARD_WIDTH,
-  EMAIL_COPYRIGHT,
+  emailCopyright,
   EMAIL_FORMAT_DETECTION,
   EMAIL_GEIST_HREF,
   EMAIL_HEADLINE_SIZE,
@@ -54,7 +54,7 @@ function assertHouseChrome(html: string) {
   expect(html).toContain('alt="24Frame"');
   expect(html).not.toContain("Built for the creator class.");
   expect(html).not.toContain("Radically different film distribution.");
-  expect(html).toContain(`color:${EMAIL_TERTIARY}">${EMAIL_COPYRIGHT}`);
+  expect(html).toContain(`color:${EMAIL_TERTIARY}">${emailCopyright()}`);
   expect(EMAIL_BODY).toBe("#3F4650");
   expect(EMAIL_TERTIARY).toBe("#9AA0A9");
   expect(html).toContain(EMAIL_SITE_URL);
@@ -64,7 +64,8 @@ function assertHouseChrome(html: string) {
   expect(html).toContain(`max-width:${EMAIL_CARD_WIDTH}px`);
   expect(html).toContain(`border-radius:${EMAIL_CARD_RADIUS}`);
   expect(html).toContain(`border:1px solid ${EMAIL_BORDER}`);
-  expect(html).toContain(EMAIL_COPYRIGHT);
+  expect(html).toContain(emailCopyright());
+  expect(html).not.toContain("© 2026 Global Content Holdings LLC. All rights reserved.");
   expect(html).toContain(EMAIL_ADDRESS);
   expect(html).toContain(EMAIL_LEGAL_URL);
   expect(html).toContain(EMAIL_GEIST_HREF);
@@ -76,6 +77,22 @@ function assertHouseChrome(html: string) {
   expect(productResidue(html)).not.toMatch(/Global Content(?! Holdings LLC)/);
   assertFormatDetectionWellFormed(html);
 }
+
+describe("emailCopyright", () => {
+  it("names 24Frame as a division of the parent and uses the given year", () => {
+    expect(emailCopyright(2026)).toBe(
+      "© 2026 24Frame, a division of Global Content Holdings LLC. All rights reserved.",
+    );
+    expect(emailCopyright(2027)).toBe(
+      "© 2027 24Frame, a division of Global Content Holdings LLC. All rights reserved.",
+    );
+    expect(emailCopyright()).toBe(
+      `© ${new Date().getFullYear()} 24Frame, a division of Global Content Holdings LLC. All rights reserved.`,
+    );
+    expect(emailCopyright()).not.toMatch(/© \d{4} Global Content Holdings LLC\. All rights reserved\./);
+    expect(emailCopyright()).not.toContain("24frame,");
+  });
+});
 
 describe("wrapHouseEmail", () => {
   it("does not render an unapproved slogan under the mark", () => {

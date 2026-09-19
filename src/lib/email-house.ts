@@ -34,7 +34,11 @@ export const EMAIL_SITE_LABEL = "24frame.co";
 export const EMAIL_LEGAL_URL = "https://24frame.co/legal";
 // No slogan under the mark (Adam lock 2026-09-19). Empty until founder locks one.
 // Legal/footer stay tertiary.
-export const EMAIL_COPYRIGHT = `© 2026 ${PARENT_ENTITY}. All rights reserved.`;
+// Copyright (Adam lock 2026-09-19): product + parent. Year is the calendar
+// year at wrap/send — do not freeze a stale year in the house wrap.
+export function emailCopyright(year = new Date().getFullYear()): string {
+  return `© ${year} ${PRODUCT_NAME}, a division of ${PARENT_ENTITY}. All rights reserved.`;
+}
 export const EMAIL_ADDRESS = "3839 McKinney Ave, Suite 155 #2276, Dallas, TX 75204";
 export const EMAIL_GEIST_HREF =
   "https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap";
@@ -125,7 +129,7 @@ export function wrapHouseEmail(innerHtml: string): string {
     `<tr><td style="padding:0 48px 48px;font-family:${FONT}">` +
     `<p style="margin:8px 0 24px;font-size:15px"><a href="${EMAIL_SITE_URL}" style="color:${EMAIL_ACCENT};text-decoration:none">${EMAIL_SITE_LABEL}</a></p>` +
     `<div style="margin:0 0 24px">${hairline()}</div>` +
-    `<p style="margin:0 0 6px;font-size:13px;line-height:20px;color:${EMAIL_TERTIARY}">${EMAIL_COPYRIGHT}</p>` +
+    `<p style="margin:0 0 6px;font-size:13px;line-height:20px;color:${EMAIL_TERTIARY}">${emailCopyright()}</p>` +
     `<p style="margin:0 0 16px;font-size:13px;line-height:20px;color:${EMAIL_TERTIARY}">${EMAIL_ADDRESS}</p>` +
     `<p style="margin:0;font-size:13px;line-height:20px"><a href="${EMAIL_LEGAL_URL}" style="color:${EMAIL_TERTIARY};text-decoration:none">Legal</a></p>` +
     `</td></tr></table>` +
