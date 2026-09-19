@@ -302,7 +302,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
       html.indexOf("data-identity-block"),
       html.indexOf("data-account-sheet-rule"),
     );
-    const profileClass = attrClass(html, 'data-sheet-group-item="profile"');
+    const settingsClass = attrClass(html, 'data-sheet-group-item="settings"');
     const nameClass = attrClass(html, "data-identity-name");
     const emailClass = attrClass(html, "data-identity-email");
 
@@ -320,12 +320,14 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(nameClass).not.toContain("text-accent");
     expect(emailClass).toContain("t-body-sm");
     expect(emailClass).toContain("text-ink-3");
-    expect(html).toContain(USER_MENU.profile);
-    expect(html).toContain(`href="${USER_MENU.profileHref}"`);
-    expect(profileClass).toBe(SHEET_GROUP_ITEM_CLASS);
+    expect(html).not.toContain(USER_MENU.profile);
+    expect(html).not.toContain(`href="${USER_MENU.profileHref}"`);
+    expect(html).toContain(USER_MENU.settings);
+    expect(html).toContain(`href="${USER_MENU.settingsHref}"`);
+    expect(settingsClass).toBe(SHEET_GROUP_ITEM_CLASS);
     expect(src).toContain("<IdentityBlock");
     expect(html.indexOf("data-identity-block")).toBeLessThan(html.indexOf("data-account-sheet-rule"));
-    expect(html.indexOf("data-account-sheet-rule")).toBeLessThan(html.indexOf('data-sheet-group-item="profile"'));
+    expect(html.indexOf("data-account-sheet-rule")).toBeLessThan(html.indexOf('data-sheet-group-item="settings"'));
     expect(html).toContain("data-account-sheet-rule");
     expect(attrClass(html, "data-account-sheet-rule")).toContain("bg-hairline");
   });
@@ -361,10 +363,9 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(empty).not.toContain("<img");
   });
 
-  it("lists Profile, Settings, Appearance — then Log out with the footer", () => {
+  it("lists Settings, Appearance — then Log out with the footer", () => {
     const html = renderSheet();
     const group = html.slice(html.indexOf("data-sheet-group"));
-    const profileClass = attrClass(html, 'data-sheet-group-item="profile"');
     const settingsClass = attrClass(html, 'data-sheet-group-item="settings"');
     const logOutClass = attrClass(html, 'data-sheet-group-item="logOut"');
 
@@ -376,12 +377,12 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(html).not.toContain("data-sheet-group-label");
     expect(html).not.toContain(">ACCOUNT<");
     expect(html).not.toContain("Workspace");
-    expect(group.indexOf("Profile")).toBeLessThan(group.indexOf("Settings"));
+    expect(group).not.toContain("Profile");
     expect(group.indexOf("Settings")).toBeLessThan(group.indexOf("Appearance"));
     expect(html.indexOf("Appearance")).toBeLessThan(html.indexOf("Log out"));
     expect(html).not.toContain("24Frame AI");
     expect(html).not.toContain('data-sheet-group-item="workspace"');
-    expect(html).toContain('data-sheet-group-item="profile"');
+    expect(html).not.toContain('data-sheet-group-item="profile"');
     expect(html).toContain('data-sheet-group-item="settings"');
     expect(html).not.toContain('data-sheet-group-item="askAssistant"');
     expect(html).toContain('data-sheet-group-item="appearance"');
@@ -389,7 +390,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(html).not.toContain('data-sheet-group-item="help"');
     expect(html).not.toContain('data-sheet-group-item="refer"');
     expect(html).toContain('data-sheet-group-item="logOut"');
-    expect(html).toContain(`href="${USER_MENU.profileHref}"`);
+    expect(html).not.toContain(`href="${USER_MENU.profileHref}"`);
     expect(html).toContain('data-sheet-group-item="settings"');
     expect(html).toContain('href="/settings"');
     expect(html).not.toContain('href="/messages"');
@@ -403,24 +404,23 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(html).not.toContain("/account/appearance");
     expect(html).not.toContain("/account/company");
     expect(html).not.toContain('href="/account/profile"');
-    expect(html).toContain("/settings/profile");
+    expect(html).not.toContain("/settings/profile");
     expect(ACCOUNT_SHEET_ITEMS).toBeDefined();
     expect(src).toContain('from "@/app/actions"');
     expect(src).toContain("void signOut()");
     expect(src).toContain("settingsLandHref");
     expect(src).toContain("<SheetGroupItem");
     expect(src).not.toContain("<TextAction");
-    expect(profileClass).toBe(settingsClass);
-    expect(profileClass).toBe(SHEET_GROUP_ITEM_CLASS);
+    expect(settingsClass).toBe(SHEET_GROUP_ITEM_CLASS);
     expect(html).not.toContain("data-account-menu-workspace-mode");
     expect(html).not.toContain("Aggregation");
     expect(html).not.toContain("data-account-menu-workspace-flyout");
     expect(html).not.toContain("Education");
-    expect(profileClass).toContain("text-[length:var(--text-base)]");
-    expect(profileClass).toContain("font-normal");
-    expect(profileClass).toContain("text-ink");
-    expect(profileClass).not.toContain("t-body-sm");
-    expect(profileClass).not.toContain("text-accent");
+    expect(settingsClass).toContain("text-[length:var(--text-base)]");
+    expect(settingsClass).toContain("font-normal");
+    expect(settingsClass).toContain("text-ink");
+    expect(settingsClass).not.toContain("t-body-sm");
+    expect(settingsClass).not.toContain("text-accent");
     expect(logOutClass).toBe(ACCOUNT_SHEET_LOGOUT_CLASS);
     expect(logOutClass).toContain("text-accent");
     expect(logOutClass).not.toContain("text-ink ");
@@ -623,7 +623,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
 
     expect(sheet).toContain("data-identity-block");
     expect(sheet).toContain("data-account-sheet-close");
-    expect(sheet).toContain('data-sheet-group-item="profile"');
+    expect(sheet).not.toContain('data-sheet-group-item="profile"');
     expect(sheet).toContain('data-sheet-group-item="settings"');
     expect(sheet).not.toContain('data-sheet-group-item="askAssistant"');
     expect(sheet).toContain('data-sheet-group-item="appearance"');
@@ -927,7 +927,8 @@ describe("AccountMenuDropdown 629:795", () => {
     expect(accent).toContain("bg-accent");
     expect(accent).not.toContain("#1769");
     expect(main).toContain("data-identity-block");
-    expect(main).toContain('data-sheet-group-item="profile"');
+    expect(main).not.toContain('data-sheet-group-item="profile"');
+    expect(main).toContain('data-sheet-group-item="settings"');
     expect(main).not.toContain("data-account-sheet-close");
     expect(main).not.toContain("data-account-menu-appearance-flyout");
     expect(main).not.toContain("data-user-menu-appearance-flyout-host");

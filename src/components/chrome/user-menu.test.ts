@@ -176,7 +176,7 @@ describe("UserMenu item lock (source)", () => {
     expect(sheetSrc).not.toContain("/account/company");
   });
 
-  it("keeps Profile on /settings/profile and Appearance off any page door", () => {
+  it("keeps Profile as a Settings pane href and Appearance off any page door", () => {
     expect(USER_MENU.profileHref).toBe("/settings/profile");
     expect(USER_MENU.profile).toBe("Profile");
     expect(USER_MENU.settings).toBe("Settings");
@@ -195,10 +195,8 @@ describe("UserMenu item lock (source)", () => {
   });
 
   it("desktop panel items are the same list as mobile", () => {
-    expect(USER_MENU_ACTIONS.map((item) => item.label)).toEqual([
-      "Profile",
-      "Settings",
-    ]);
+    expect(USER_MENU_ACTIONS.map((item) => item.label)).toEqual(["Settings"]);
+    expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("profile");
     expect(sheetSrc).toContain("ACCOUNT_SHEET_ITEMS");
     expect(sheetSrc).toContain("ACCOUNT_SHEET_PHONE_ITEMS");
     expect(sheetSrc.indexOf("DesktopAccountMenu")).toBeGreaterThan(-1);

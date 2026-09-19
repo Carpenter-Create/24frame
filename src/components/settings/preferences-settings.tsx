@@ -1,6 +1,8 @@
 import Link from "next/link";
 
-import { HouseEmpty } from "@/components/chrome/house";
+import { AppearancePreferences } from "@/components/settings/appearance-preferences";
+import { NotificationPreferences } from "@/components/settings/notification-preferences";
+import type { NotificationPrefs } from "@/lib/notification-prefs";
 import {
   SETTINGS,
   SETTINGS_PANE_CLASS,
@@ -9,14 +11,17 @@ import {
   settingsManageCoursesVisible,
 } from "@/lib/settings";
 
-// Preferences pane — leftover workspace prefs as optional subsections
-// only. Never a You / Social / Education / Aggregation spine.
+// Preferences pane — Appearance (gc-theme SoT) + notification
+// matrix. Never a You / Social / Education / Aggregation spine.
 // Education staff get a quiet Manage courses row linking out to
 // /education. Members never see it. Not a CMS. Not GC Staff admin.
+
 export function PreferencesSettings({
   isGcStaff = false,
+  prefs,
 }: {
   isGcStaff?: boolean;
+  prefs: NotificationPrefs;
 }) {
   const showManage = settingsManageCoursesVisible(isGcStaff);
 
@@ -25,6 +30,8 @@ export function PreferencesSettings({
       <section data-settings-section="preferences" className={SETTINGS_SECTION_CLASS}>
         <h1 className="t-section text-ink">{SETTINGS.title}</h1>
         <h2 className="t-section text-ink">{SETTINGS.preferences}</h2>
+        <AppearancePreferences />
+        <NotificationPreferences initialPrefs={prefs} />
         {showManage ? (
           <Link
             href={SETTINGS.manageCoursesHref}
@@ -34,7 +41,6 @@ export function PreferencesSettings({
             {SETTINGS.manageCourses}
           </Link>
         ) : null}
-        <HouseEmpty>{SETTINGS.preferencesEmpty}</HouseEmpty>
       </section>
     </div>
   );

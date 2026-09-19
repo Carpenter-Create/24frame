@@ -5,7 +5,8 @@
 // email initial when empty. Always render both fields. No dashes, no invented
 // local-part name. Desktop items after the Identity hairline are
 // USER_MENU_ACTIONS. Phone uses USER_MENU_PHONE_ACTIONS
-// (Profile · Settings · Appearance). 24Frame AI is the header
+// (Settings · Appearance). Profile is a Settings pane, not a
+// menu row. 24Frame AI is the header
 // sparkle only — not a menu row. Workspace is
 // the header control, not this menu. Desktop theme stays the
 // header sun/moon. Phone Appearance is the same-sheet drill-in —
@@ -31,7 +32,7 @@
 // 264 wide. Leftover last-item → Log out is 48 (house section
 // air, --space-12). The 48 adds to the stack. Not 0. Not 134.
 // No h-[Npx]. No min-h. No 522 / 570 / 672 floor. Align-end.
-// 24 pad. 24 between Profile / Settings.
+// 24 pad. 24 between Settings rows.
 // Log out → hairline 24. Hairline → footer 24. Footer →
 // bottom 24. Labels stay one source.
 

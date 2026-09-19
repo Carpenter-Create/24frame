@@ -203,7 +203,6 @@ describe("phone header grammar A — trim trailing", () => {
 
   it("keeps phone Appearance on the avatar sheet — 24Frame AI stays header-only", () => {
     expect(USER_MENU_PHONE_ACTIONS.map((item) => item.kind)).toEqual([
-      "profile",
       "settings",
       "appearance",
     ]);
@@ -211,7 +210,7 @@ describe("phone header grammar A — trim trailing", () => {
     expect(USER_MENU).not.toHaveProperty("askAssistantHref");
     expect(ACCOUNT_SHEET_PHONE_ITEMS).toBe(USER_MENU_PHONE_ACTIONS);
     expect(ACCOUNT_SHEET_ITEMS).toBe(USER_MENU_ACTIONS);
-    expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).toEqual(["profile", "settings"]);
+    expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).toEqual(["settings"]);
 
     const sheet = renderToStaticMarkup(
       createElement(AccountSheet, {
@@ -220,7 +219,7 @@ describe("phone header grammar A — trim trailing", () => {
         onClose: () => undefined,
       }),
     );
-    expect(sheet).toContain('data-sheet-group-item="profile"');
+    expect(sheet).not.toContain('data-sheet-group-item="profile"');
     expect(sheet).toContain('data-sheet-group-item="settings"');
     expect(sheet).not.toContain('data-sheet-group-item="askAssistant"');
     expect(sheet).toContain('data-sheet-group-item="appearance"');
@@ -239,7 +238,7 @@ describe("phone header grammar A — trim trailing", () => {
         onClose: () => undefined,
       }),
     );
-    expect(dropdown).toContain('data-sheet-group-item="profile"');
+    expect(dropdown).not.toContain('data-sheet-group-item="profile"');
     expect(dropdown).toContain('data-sheet-group-item="settings"');
     expect(dropdown).not.toContain('data-sheet-group-item="askAssistant"');
     expect(dropdown).not.toContain('data-sheet-group-item="appearance"');
