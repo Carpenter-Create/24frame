@@ -76,11 +76,17 @@ describe("legal entities copy", () => {
     expect(ENTITY_LIST_GRID_CLASS).not.toContain("max-content");
     expect(ENTITY_LIST_HEADER_CLASS).toContain("max-md:hidden");
     expect(ENTITY_LIST_FIELD_CLASS).toContain("flex-col");
+    expect(ENTITY_LIST_FIELD_CLASS).toContain("w-full");
+    expect(ENTITY_LIST_FIELD_CLASS).toContain("items-stretch");
+    expect(ENTITY_LIST_FIELD_CLASS).not.toContain("items-start");
     expect(ENTITY_LIST_FIELD_CLASS).toContain("md:block");
     expect(ENTITY_LIST_FIELD_LABEL_CLASS).toContain("md:hidden");
     expect(ENTITY_LIST_NAME_CLASS).toContain("flex-wrap");
+    expect(ENTITY_LIST_NAME_CLASS).toContain("w-full");
     expect(ENTITY_LIST_ACTIONS_CLASS).toContain("md:justify-self-end");
     expect(ENTITY_LIST_VALUE_CLASS).toContain("break-words");
+    expect(ENTITY_LIST_VALUE_CLASS).toContain("min-w-0");
+    expect(ENTITY_LIST_VALUE_CLASS).toContain("max-w-full");
     expect(ENTITY_LIST_VALUE_CLASS).not.toContain("truncate");
     expect(ENTITY_LIST_EMPTY_CLASS).not.toContain("truncate");
     expect(entityJurisdictionClass("Delaware")).toBe(ENTITY_LIST_VALUE_CLASS);
@@ -111,6 +117,10 @@ describe("legal entities copy", () => {
     expect(ENTITY_LIST_GRID_CLASS).toMatch(/grid-cols-1/);
     expect(ENTITY_LIST_GRID_CLASS).toMatch(/md:grid-cols-\[/);
     expect(ENTITY_LIST_GRID_CLASS).toMatch(/2fr/);
+    expect(ENTITY_LIST_FIELD_CLASS).toContain("w-full");
+    expect(ENTITY_LIST_FIELD_CLASS).toContain("items-stretch");
+    expect(ENTITY_LIST_VALUE_CLASS).toContain("min-w-0");
+    expect(ENTITY_LIST_VALUE_CLASS).toContain("max-w-full");
   });
 
   it("has scope selector copy", () => {

@@ -91,17 +91,19 @@ export const ENTITY_LIST_ROW_CLASS =
   `${ENTITY_LIST_GRID_CLASS} py-[var(--space-4)]`;
 
 export const ENTITY_LIST_NAME_CLASS =
-  "flex min-w-0 flex-wrap items-center gap-[var(--space-2)]";
+  "flex min-w-0 w-full flex-wrap items-center gap-[var(--space-2)]";
 
 export const ENTITY_LIST_FIELD_CLASS =
-  "flex min-w-0 flex-col items-start gap-[var(--space-1)] md:block";
+  "flex min-w-0 w-full flex-col items-stretch gap-[var(--space-1)] md:block";
 
 export const ENTITY_LIST_FIELD_LABEL_CLASS = "t-label text-ink-3 md:hidden";
 
 export const ENTITY_LIST_ACTIONS_CLASS = "justify-self-start md:justify-self-end";
 
-export const ENTITY_LIST_VALUE_CLASS = "t-body text-ink whitespace-normal break-words";
-export const ENTITY_LIST_EMPTY_CLASS = "t-body text-ink-3 whitespace-normal break-words";
+export const ENTITY_LIST_VALUE_CLASS =
+  "min-w-0 max-w-full t-body text-ink whitespace-normal break-words";
+export const ENTITY_LIST_EMPTY_CLASS =
+  "min-w-0 max-w-full t-body text-ink-3 whitespace-normal break-words";
 
 export const ENTITY_SCOPE = {
   all: "All entities",
