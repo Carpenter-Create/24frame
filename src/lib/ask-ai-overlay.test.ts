@@ -2,7 +2,6 @@ import { readFileSync } from "node:fs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
-  ASK_AI_LEGACY_PATH,
   ASK_AI_OPEN_VALUE,
   ASK_AI_OVERLAY,
   ASK_AI_OVERLAY_BODY_CLASS,
@@ -28,9 +27,6 @@ import {
   askAiStateFromHref,
   fireAskAiOpenThen,
   isAskAiDesktopViewport,
-  isLegacyAskAiPath,
-  legacyAskAiFallbackPath,
-  legacyAskAiInterceptHref,
   readAskAiOverlay,
   readAskAiReturnPath,
   rememberAskAiReturnPath,
@@ -64,10 +60,6 @@ describe("ask AI overlay URL", () => {
     );
     expect(askAiOverlayHref("/home", "", THREAD)).toBe(`/home?ai=${THREAD}`);
     expect(askAiOverlayHref("/home", "ai=1", THREAD)).toBe(`/home?ai=${THREAD}`);
-    expect(askAiOverlayHref("/messages", "thread=" + THREAD, THREAD)).toBe(`/messages?ai=${THREAD}`);
-    expect(isLegacyAskAiPath(ASK_AI_LEGACY_PATH)).toBe(true);
-    expect(isLegacyAskAiPath("/messages/extra")).toBe(true);
-    expect(isLegacyAskAiPath("/home")).toBe(false);
     expect(ASK_AI_QUERY).toBe("ai");
     expect(ASK_AI_OPEN_VALUE).toBe("1");
     expect(ASK_AI_OVERLAY.dialog).toBe("Ask 24Frame AI");
@@ -124,20 +116,9 @@ describe("ask AI overlay URL", () => {
     expect(askAiCloseHref("/social", { ai: THREAD })).toBe("/social");
   });
 
-  it("intercepts leftover /messages onto the prior workspace path", () => {
-    expect(legacyAskAiFallbackPath("aggregation")).toBe("/home");
-    expect(legacyAskAiFallbackPath("social")).toBe("/social");
-    expect(legacyAskAiFallbackPath("education")).toBe("/education");
-    expect(legacyAskAiInterceptHref({})).toBe("/home?ai=1");
-    expect(legacyAskAiInterceptHref({ returnPath: "/social", threadId: THREAD })).toBe(
-      `/social?ai=${THREAD}`,
-    );
-    expect(legacyAskAiInterceptHref({ returnPath: "/messages", workspace: "social" })).toBe(
-      "/social?ai=1",
-    );
+  it("remembers the current workspace path for overlay return", () => {
     rememberAskAiReturnPath("/education");
     expect(memory.get(ASK_AI_RETURN_STORAGE)).toBe("/education");
-    rememberAskAiReturnPath("/messages");
     expect(readAskAiReturnPath("/home")).toBe("/education");
   });
 

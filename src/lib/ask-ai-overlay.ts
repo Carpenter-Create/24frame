@@ -1,6 +1,5 @@
 import { ASK_ASSISTANT } from "@/lib/product";
 import { isAskGlobeeThreadId } from "@/lib/ask-globee";
-import { workspaceHome, type WorkspaceMode } from "@/lib/workspace";
 
 // Mercury Command overlay — 24Frame AI is never a workspace destination.
 // Universal header access on every house chrome path. Open state lives
@@ -12,7 +11,6 @@ import { workspaceHome, type WorkspaceMode } from "@/lib/workspace";
 
 export const ASK_AI_QUERY = "ai";
 export const ASK_AI_OPEN_VALUE = "1";
-export const ASK_AI_LEGACY_PATH = "/messages";
 export const ASK_AI_RETURN_STORAGE = "frame_ask_ai_return";
 
 export const ASK_AI_OVERLAY = {
@@ -171,10 +169,6 @@ export function readAskAiOverlay(
   return { open: true, threadId: null };
 }
 
-export function isLegacyAskAiPath(pathname: string): boolean {
-  return pathname === ASK_AI_LEGACY_PATH || pathname.startsWith(`${ASK_AI_LEGACY_PATH}/`);
-}
-
 export function askAiOverlayHref(
   pathname: string,
   search?:
@@ -213,19 +207,15 @@ export function askAiCloseHref(
 
 export function rememberAskAiReturnPath(pathname: string): void {
   if (typeof sessionStorage === "undefined") return;
-  if (!pathname || isLegacyAskAiPath(pathname)) return;
+  if (!pathname) return;
   sessionStorage.setItem(ASK_AI_RETURN_STORAGE, pathname);
 }
 
 export function readAskAiReturnPath(fallback: string): string {
   if (typeof sessionStorage === "undefined") return fallback;
   const stored = sessionStorage.getItem(ASK_AI_RETURN_STORAGE)?.trim() ?? "";
-  if (!stored || isLegacyAskAiPath(stored)) return fallback;
+  if (!stored) return fallback;
   return stored;
-}
-
-export function legacyAskAiFallbackPath(workspace: WorkspaceMode = "aggregation"): string {
-  return workspace === "aggregation" ? "/home" : workspaceHome(workspace);
 }
 
 /** Sheet/nav onClose may unmount the control. Open first so the commit survives. */
@@ -256,19 +246,3 @@ export function isAskAiDesktopViewport(
   return Boolean(matchMedia?.("(min-width: 768px)").matches);
 }
 
-export function legacyAskAiInterceptHref(input: {
-  threadId?: string | null;
-  returnPath?: string | null;
-  workspace?: WorkspaceMode;
-  search?:
-    | { get(name: string): string | null; toString(): string }
-    | Record<string, string | string[] | undefined>
-    | string
-    | null;
-}): string {
-  const fallback = legacyAskAiFallbackPath(input.workspace);
-  const returnPath = input.returnPath?.trim();
-  const path =
-    returnPath && !isLegacyAskAiPath(returnPath) ? returnPath.split("?")[0] || fallback : fallback;
-  return askAiOverlayHref(path, input.search, input.threadId);
-}

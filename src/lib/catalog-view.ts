@@ -1,6 +1,6 @@
 // Pure helpers for URL-driven, server-rendered collections (layout standard). No React,
 // no client state — sorting happens on the server from the URL, so these are unit-tested
-// in isolation and shared by every DataTable surface.
+// in isolation and shared by list surfaces.
 
 export type SortDir = "asc" | "desc";
 export type Sort = { key: string; dir: SortDir };

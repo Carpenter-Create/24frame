@@ -83,9 +83,6 @@ export const SETTINGS_ABSENT = [
 
 export type SettingsHubSection = "profile" | "organization" | "preferences";
 
-/** @deprecated Use SettingsHubSection. Old You doors wash Profile. */
-export type SettingsSection = SettingsHubSection | "agreements" | "refer";
-
 export type SettingsRailKind = SettingsHubSection;
 
 export const SETTINGS_HUB_ORDER = [
@@ -125,9 +122,6 @@ export function settingsHubNav(): readonly SettingsHubNavItem[] {
 
 /** Desktop rail + mobile list. Profile · Organization · Preferences. */
 export const SETTINGS_HUB_NAV = settingsHubNav();
-
-/** @deprecated Hub rail is SETTINGS_HUB_NAV. Kept for Profile-door tests. */
-export const SETTINGS_LOCAL_NAV = SETTINGS_HUB_NAV;
 
 // Rail chrome — 220 slot, pad 16, 8 between rows. Do not put Titles,
 // Appearance, Workspace, Account, Users, API, Team, or Manage courses here.
@@ -183,10 +177,6 @@ export function isSettingsPath(pathname: string): boolean {
   return pathname === SETTINGS.href || pathname.startsWith(`${SETTINGS.href}/`);
 }
 
-export function settingsSectionHref(section: SettingsHubSection): string {
-  return SETTINGS_HUB_HREFS[section];
-}
-
 /** Account-menu Settings door. Always the hub — never a workspace land. */
 export function settingsLandHref(pathname?: string | null): string {
   void pathname;
@@ -227,11 +217,6 @@ function pathSection(pathname: string): SettingsHubSection {
 export function settingsHubSection(pathname: string | null | undefined): SettingsHubSection {
   if (!pathname) return "profile";
   return pathSection(pathname);
-}
-
-/** Path doors. Unknown /settings paths open Profile. */
-export function settingsSection(pathname: string | null | undefined): SettingsHubSection {
-  return settingsHubSection(pathname);
 }
 
 /** Active follows the hub section. */
