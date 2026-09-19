@@ -25,6 +25,7 @@ function stubMemberCan(allowed: boolean) {
   const rpc = vi.fn(async (name: string) => {
     if (name === "member_can") return { data: allowed, error: null };
     if (name === "org_team" || name === "org_pending_invites") return { data: [], error: null };
+    if (name === "org_legal_entities") return { data: [], error: null };
     throw new Error(`unexpected rpc(${name})`);
   });
   vi.mocked(createClient).mockResolvedValue({ rpc } as never);
@@ -111,11 +112,13 @@ describe("SettingsOrganizationPage", () => {
               role: "viewer",
               expires_at: "2026-10-03T00:00:00Z",
               created_at: "2026-09-19T00:00:00Z",
+              entity_scope: "all",
             },
           ],
           error: null,
         };
       }
+      if (name === "org_legal_entities") return { data: [], error: null };
       throw new Error(`unexpected rpc(${name})`);
     });
     vi.mocked(createClient).mockResolvedValue({ rpc } as never);

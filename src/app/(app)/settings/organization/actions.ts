@@ -9,17 +9,22 @@ import {
   revokeInviteSchema,
   teamInviteSchema,
 } from "@/lib/account-invite";
-import { LEGAL_ENTITIES, ENTITY_TYPES } from "@/lib/legal-entities";
+import { LEGAL_ENTITIES } from "@/lib/legal-entities";
 import { inviteAcceptUrl, mintInviteToken } from "@/lib/account-invite-token";
 import { sendTeamInviteEmail } from "@/lib/email";
 import { isAuthSesSuppressedError } from "@/lib/auth-ses";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 
+const ENTITY_TYPE_VALUES = [
+  "sole_prop", "llc", "corporation", "partnership",
+  "trust", "nonprofit", "individual", "other",
+] as const;
+
 const addEntitySchema = z.object({
   orgId: z.string().uuid(),
   name: z.string().trim().min(1).max(200),
-  entityType: z.enum(ENTITY_TYPES as [string, ...string[]]).default("other"),
+  entityType: z.enum(ENTITY_TYPE_VALUES).default("other"),
   jurisdiction: z.string().trim().max(200).optional(),
 });
 

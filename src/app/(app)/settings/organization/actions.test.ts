@@ -71,6 +71,8 @@ describe("inviteTeamMember", () => {
       p_email: "teammate@acme.com",
       p_role: "viewer",
       p_token_hash: "a".repeat(64),
+      p_entity_scope: "all",
+      p_entity_ids: undefined,
     });
     expect(sendTeamInviteEmail).toHaveBeenCalledWith(
       "teammate@acme.com",
