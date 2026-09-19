@@ -209,7 +209,7 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
       "Social",
       "Aggregation",
       "Education",
-      "Co-productions",
+      "Co-Productions",
     ]);
     expect(HOUSE_PHONE_WORKSPACE_TABS.map((tab) => tab.href)).toEqual([
       "/home",
@@ -380,7 +380,7 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(html).not.toContain('weight="bold"');
     expect(html).not.toContain('weight="fill"');
     expect(bottomNavSrc).toContain("weight={HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT}");
-    for (const label of ["Home", "Social", "Aggregation", "Education", "Co-productions"]) {
+    for (const label of ["Home", "Social", "Aggregation", "Education", "Co-Productions"]) {
       expect(html).toContain(`aria-label="${label}"`);
       expect(html).not.toContain(`>${label}<`);
     }

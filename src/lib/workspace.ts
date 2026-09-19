@@ -22,7 +22,7 @@
 // Founder lock 2026-09-19: signed-in default land is /home
 // (AUTH_DEFAULT_NEXT). `/` hops to that SoT — not Aggregation dashboard.
 //
-// Adam lock 2026-09-19: Co-productions is /co-productions — Home-pattern
+// Adam lock 2026-09-19: Co-Productions is /co-productions — Home-pattern
 // lead land, not a workspace cookie mode. Do not add it to WorkspaceMode
 // or WORKSPACE_MODES.
 

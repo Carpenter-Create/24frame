@@ -42,7 +42,7 @@ import {
 } from "./overview";
 
 describe("Home lead pills", () => {
-  it("inserts Home leftmost and Co-productions last without inventing a fourth workspace product", () => {
+  it("inserts Home leftmost and Co-Productions last without inventing a fourth workspace product", () => {
     const pills = overviewLeadPills();
     expect(pills.map((pill) => pill.id)).toEqual([
       "home",
@@ -173,7 +173,7 @@ describe("Home lead pills", () => {
     expect(OVERVIEW_RAIL_OFF_WIDTH).toBe("0px");
   });
 
-  it("selects only Co-productions on /co-productions and hides the dest rail", () => {
+  it("selects only Co-Productions on /co-productions and hides the dest rail", () => {
     expect(overviewLeadSelected("co-productions", CO_PRODUCTIONS_HREF, "aggregation")).toBe(true);
     expect(overviewLeadSelected("co-productions", `${CO_PRODUCTIONS_HREF}/x`, "social")).toBe(true);
     expect(overviewLeadSelected("home", CO_PRODUCTIONS_HREF, "aggregation")).toBe(false);

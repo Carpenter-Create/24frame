@@ -17,7 +17,7 @@ import { isSettingsPath } from "@/lib/settings";
 import { availableWorkspaceOptions, type WorkspaceMenuOption } from "@/lib/workspace-menu";
 import type { WorkspaceMode } from "@/lib/workspace";
 
-// Account Home is the leftmost unify-lead pill. Co-productions is the
+// Account Home is the leftmost unify-lead pill. Co-Productions is the
 // rightmost (Adam 2026-09-19). Neither is a WorkspaceMode. Not Social
 // Home (`/social` feed). Aggregation · Social · Education stay the
 // three workspace destinations. /home/news is Home-owned 90-day
@@ -194,7 +194,7 @@ export function isHomeOwnedPath(pathname: string): boolean {
   return isOverviewPath(pathname) || isNewsHistoryPath(pathname);
 }
 
-/** Dest rails stay off Home (+ /home/news) and Co-productions. Aggregation · Social · Education keep today's rail. */
+/** Dest rails stay off Home (+ /home/news) and Co-Productions. Aggregation · Social · Education keep today's rail. */
 export function overviewHidesRail(pathname: string): boolean {
   return isHomeOwnedPath(pathname) || isCoProductionsPath(pathname);
 }
@@ -218,7 +218,7 @@ export function overviewLeadSelected(
   pathname: string,
   workspace: WorkspaceMode,
 ): boolean {
-  // Settings is a universal hub — not Home, not Co-productions, and
+  // Settings is a universal hub — not Home, not Co-Productions, and
   // not a workspace land. /settings/* must not light any lead pill.
   // The workspace cookie stays; leaving Settings returns to that land.
   if (isSettingsPath(pathname)) return false;
