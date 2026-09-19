@@ -68,7 +68,11 @@ NEWS_OG_MAX_BYTES=       # optional; default 1500000. Lambda only. Never NEXT_PU
 # Thumb mirror — existing title-asset names. No NEWS_S3_* / new secret shape.
 # Lambda execution role does PutObject (not static title keys).
 S3_BUCKET=               # same Vercel title bucket (e.g. gc-content-assets-prod)
-AWS_REGION=us-east-1     # title bucket region. Dynamo stays NEWS_AWS_REGION=us-west-2.
+AWS_REGION=              # Vercel / local title app: us-east-1. Lambda: reserved to
+                         # the function region (us-west-2) — do not try to override
+                         # it to the title bucket region on 24frame-news-ingest.
+                         # Dynamo stays NEWS_AWS_REGION=us-west-2. putObjectBytes
+                         # follows S3 region redirects to the us-east-1 title bucket.
 CLOUDFRONT_DOMAIN=       # same Vercel title CF (e.g. https://delivery.globalcontent.co)
 ```
 
@@ -106,9 +110,11 @@ confirmed, founder applies in `405912452061` / `us-west-2`:
    is enough. Env: `NEWS_AWS_REGION=us-west-2`,
    `NEWS_DDB_TABLE=24frame-news-prod` (or `-dev`). Optional
    `NEWS_OG_MAX_BYTES` (default 1500000). Thumb mirror:
-   `S3_BUCKET`, `AWS_REGION=us-east-1` (title bucket region),
-   `CLOUDFRONT_DOMAIN`. Prefer the execution role over static keys
-   on the function.
+   `S3_BUCKET` and `CLOUDFRONT_DOMAIN` (same title names). Do
+   **not** set `AWS_REGION` on the function — Lambda reserves it
+   to `us-west-2`. `putObjectBytes` follows S3 region redirects
+   so PutObject to the us-east-1 title bucket succeeds. Prefer
+   the execution role over static keys on the function.
 5. **SQS** `24frame-news-ingest-dlq`. Attach as the Lambda
    asynchronous invocation DLQ (or EventBridge target DLQ).
 6. **EventBridge** rule `24frame-news-ingest` `rate(30 minutes)`

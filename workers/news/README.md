@@ -26,7 +26,7 @@ NEWS_AWS_ACCESS_KEY_ID=          # optional when the Lambda role is attached
 NEWS_AWS_SECRET_ACCESS_KEY=      # optional when the Lambda role is attached
 NEWS_OG_MAX_BYTES=               # optional; default 1500000. Server-only. Never NEXT_PUBLIC_.
 S3_BUCKET=                       # title assets. Prefix news-thumbs/.
-AWS_REGION=us-east-1             # title bucket region
+AWS_REGION=                      # Lambda reserved us-west-2; Vercel/local us-east-1
 CLOUDFRONT_DOMAIN=               # title CF, unsigned news-thumbs/* behavior
 ```
 
