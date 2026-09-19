@@ -1,5 +1,9 @@
 # Out-of-Repo Checklist — Results
 
+> **Not live status (P3-8).** July 2026 out-of-repo record. Historical evidence
+> only. Current operating posture: [`docs/status/CURRENT.md`](docs/status/CURRENT.md).
+> Do not treat `SECURITY-STATUS.md` as live picture.
+
 *Companion record for `out-of-repo-checklist.md`. Closes out `security-remediation-plan.md` §4.*
 
 **Repo:** `Carpenter-Create/globalcontent-dashboard` · default branch `main`

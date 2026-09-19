@@ -1,5 +1,9 @@
 # Global Content Dashboard — Security Audit, Pass 3
 
+> **Not live status (P3-8).** July 2026 audit record. Historical evidence only.
+> Current operating posture: [`docs/status/CURRENT.md`](docs/status/CURRENT.md).
+> Do not use this file for merge, production, or RLS decisions.
+
 **Repo:** `globalcontent-dashboard` (Tier 3) · **Branch:** `security-audit-2026-07-26`
 **Date:** 2026-07-26 · **Row definitions:** `security-coverage-matrix.md` (Part 1)
 **Scope:** the eight items requested. Migrations applied to the **local** database only;

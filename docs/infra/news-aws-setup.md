@@ -10,7 +10,8 @@ Names below are the proposed live set for Adam confirm, aligned with
 finance isolation in [`finance-aws-setup.md`](finance-aws-setup.md).
 
 Auth stays Supabase Auth. The app **reads** DynamoDB on Home (15) and
-`/home/news` (90-day window; `/news` permanently redirects). Ingest
+`/home/news` (90-day window). Retired `/news` 404s — no leftover
+redirect. Ingest
 **writes** DynamoDB. Page requests never fan out RSS. RSS media /
 enclosure first; when `image_url` is null, ingest OG-scrapes the
 article (`og:image` / `twitter:image`, 12s timeout, desktop Chrome UA,
@@ -155,7 +156,7 @@ Do **not** create these from this PR.
 1. EventBridge invoked Lambda in the last 30–60 minutes.
 2. CloudWatch log `{ "msg": "news ingest done", "failed": 0, ... }`.
 3. Home News rail shows up to 15 rows from Dynamo (not a live RSS pull).
-4. `/home/news` lists dense history rows inside 90 days (`/news` → `/home/news`).
+4. `/home/news` lists dense history rows inside 90 days. Retired `/news` 404s.
 5. DLQ depth is 0.
 
 ## Ops

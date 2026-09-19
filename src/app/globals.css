@@ -3,8 +3,9 @@
 
 /* ============================================================
    GLOBAL CONTENT — house design system foundation.
-   Greyscale neutral ramp + exactly ONE accent (a neutral
-   PLACEHOLDER until the brand accent is set — founder checkpoint).
+   Greyscale neutral ramp + exactly ONE accent: Sporty Blue
+   (confirmed 2026-07-18). Logo/wordmark accent remains a
+   founder checkpoint — do not pick a new hex.
    Light is the default base; dark is secondary (.dark class).
    House tokens (tokens.css) drive both modes.
    ============================================================ */
