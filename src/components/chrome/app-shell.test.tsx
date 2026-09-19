@@ -572,6 +572,7 @@ describe("AppShell /settings rail", () => {
     expect(html).not.toContain("data-mobile-nav-trigger");
     expect(html).not.toContain("data-house-phone-dest-chips");
     expect(html).toContain("data-settings-header-back");
+    expect(html).toContain('data-settings-header-back-when="hub"');
     expect(html).toContain('href="/aggregation/dashboard"');
     expect(html).not.toContain("Search");
     expect(html).not.toContain("data-header-search");
@@ -580,7 +581,7 @@ describe("AppShell /settings rail", () => {
     expect(html.match(/data-settings-rail=""/g) ?? []).toHaveLength(1);
     expect(shellSrc).toContain("isSettingsPath");
     expect(shellSrc).toContain("SettingsRail");
-    expect(shellSrc).toContain("SettingsHeaderBack");
+    expect(shellSrc).toContain('<SettingsHeaderBack when="hub" />');
     expect(shellSrc).toContain("SETTINGS_RAIL_PAD_CLASS");
     expect(shellSrc).toContain("collapsed && !settingsPage");
     expect(shellSrc).not.toContain("SettingsLocalNav");
@@ -620,8 +621,7 @@ describe("AppShell /settings rail", () => {
       expect(html).not.toContain("data-side-nav");
       expect(html).not.toContain("data-mobile-nav-trigger");
       expect(html).not.toContain("data-house-phone-dest-chips");
-      expect(html).toContain("data-settings-header-back");
-      expect(html).toContain('href="/settings"');
+      expect(html).not.toContain("data-settings-header-back");
       expect(html).not.toContain("Collapse sidebar");
       expect(html).not.toContain(`data-rail-collapse="${RAIL_COLLAPSE_CHEVRON}"`);
     }

@@ -64,9 +64,10 @@ type Org = { id: string; name: string };
 // Social mounts the same RailCollapse + cookie + width-var path as
 // Aggregation · Education. Do not pin Social expanded or invent a
 // Social-only chevron. /settings paths: the Access destinations leave.
-// One 220 rail (pad 16) occupies that slot — Settings title + You /
-// Social / Education / Aggregation. Not a second column. Collapse stays
-// off. Phone list is the same sections; pushed panes back to Settings.
+// One 220 rail (pad 16) occupies that slot — Settings title + Profile /
+// Organization / Preferences. Not a second column. Collapse stays
+// off. Phone list is the same sections. Hub Home stays in this header.
+// Pushed panes inherit the blue Settings back from settings/layout.
 // Hamburger stays off. Avatar 32 stays.
 // /home: no dest rail (Adam 2026-09-18). Unify-lead chrome + modules
 // only. Aggregation · Social · Education rails return off Home.
@@ -310,7 +311,7 @@ export function AppShell({
         workspace={workspace}
         settingsPage={settingsPage}
         logoVisible="always"
-        leadingNav={settingsPage ? <SettingsHeaderBack /> : undefined}
+        leadingNav={settingsPage ? <SettingsHeaderBack when="hub" /> : undefined}
         destChips={
           settingsPage || homeChrome ? undefined : (
             <DestChipsSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />

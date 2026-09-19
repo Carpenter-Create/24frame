@@ -9,6 +9,7 @@ import {
   HOUSE_RAIL_ITEM_CLASS,
   HOUSE_RAIL_TITLE_CLASS,
 } from "./house-shell";
+import { TEXT_ACTION_CLASS } from "./house-sheet";
 import { MOBILE_CHROME_LEAD_PAD_CLASS } from "./mobile-chrome";
 import { USER_MENU, USER_MENU_ACTIONS } from "./user-menu";
 import {
@@ -18,6 +19,7 @@ import {
   SETTINGS_HUB_ORDER,
   SETTINGS_HEADER_BACK_CLASS,
   SETTINGS_HEADER_PAD_CLASS,
+  SETTINGS_PANE_BACK_CLASS,
   SETTINGS_DIALOG_FIELD_CLASS,
   SETTINGS_DIALOG_FORM_CLASS,
   SETTINGS_DIALOG_HELP_CLASS,
@@ -29,6 +31,7 @@ import {
   SETTINGS_RAIL_PAD_CLASS,
   isSettingsPath,
   settingsHeaderBack,
+  settingsHeaderBackWhen,
   settingsHubNav,
   settingsHubSection,
   settingsLandHref,
@@ -219,9 +222,30 @@ describe("settings hub lock", () => {
       href: "/settings",
       label: "Settings",
     });
+    expect(settingsHeaderBack("/settings/organization")).toEqual({
+      href: "/settings",
+      label: "Settings",
+    });
+    expect(settingsHeaderBack("/settings/agreements")).toEqual({
+      href: "/settings",
+      label: "Settings",
+    });
+    expect(settingsHeaderBack("/settings/refer")).toEqual({
+      href: "/settings",
+      label: "Settings",
+    });
+    expect(settingsHeaderBackWhen("/settings")).toBe("hub");
+    expect(settingsHeaderBackWhen("/settings/preferences")).toBe("pane");
+    expect(settingsHeaderBackWhen("/settings/profile")).toBe("pane");
+    expect(settingsHeaderBackWhen("/settings/organization")).toBe("pane");
+    expect(settingsHeaderBackWhen("/settings/agreements")).toBe("pane");
+    expect(settingsHeaderBackWhen("/settings/refer")).toBe("pane");
     expect(SETTINGS_HEADER_BACK_CLASS).toBe(
-      "flex items-center gap-[var(--space-2)] t-body md:hidden",
+      "flex items-center gap-[var(--space-2)] t-body text-accent md:hidden",
     );
+    expect(SETTINGS_HEADER_BACK_CLASS).toContain("text-accent");
+    expect(TEXT_ACTION_CLASS).toContain("text-accent");
+    expect(SETTINGS_PANE_BACK_CLASS).toBe("mb-[var(--space-3)]");
     expect(SETTINGS_HEADER_PAD_CLASS).toBe(MOBILE_CHROME_LEAD_PAD_CLASS);
     expect(SETTINGS_HEADER_PAD_CLASS).toBe("px-[var(--space-6)]");
     expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("t-body-sm");

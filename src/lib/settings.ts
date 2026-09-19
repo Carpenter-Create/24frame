@@ -157,11 +157,16 @@ export const SETTINGS_PREF_BLOCK_CLASS =
   `${HOUSE_MODULE_CLASS} ${HOUSE_CARD_PAD} flex flex-col gap-[var(--space-3)]`;
 export const SETTINGS_PREF_TITLE_CLASS = "t-heading text-ink";
 
-// 623:785 — phone header left slot. Hub list back is Home. Pushed
-// section back is Settings (list). Hidden at md, where the rail stays.
+// Phone Settings back. Hub list Home stays in the header lead slot.
+// Pushed panes inherit a house back (accent caret + Settings) from
+// the Settings layout — not a per-page copy, not a second header
+// control next to the emblem. Hidden at md, where the rail stays.
+// t-body keeps Coinbase density; text-accent is the house link ink
+// (same Sporty Blue as TEXT_ACTION_CLASS). Not t-body-sm Mercury.
 export const SETTINGS_HEADER_PAD_CLASS = MOBILE_CHROME_LEAD_PAD_CLASS;
 export const SETTINGS_HEADER_BACK_CLASS =
-  "flex items-center gap-[var(--space-2)] t-body md:hidden";
+  "flex items-center gap-[var(--space-2)] t-body text-accent md:hidden";
+export const SETTINGS_PANE_BACK_CLASS = "mb-[var(--space-3)]";
 
 export const SETTINGS_RAIL_ABSENT = [
   "Titles",
@@ -211,6 +216,14 @@ export function settingsHeaderBack(pathname: string | null | undefined): {
     return { href: SETTINGS.dashboardHref, label: SETTINGS.dashboard };
   }
   return { href: SETTINGS.href, label: SETTINGS.title };
+}
+
+/** Hub list uses the header slot. Pushed panes use the Settings layout. */
+export function settingsHeaderBackWhen(
+  pathname: string | null | undefined,
+): "hub" | "pane" {
+  if (!pathname || pathname === SETTINGS.href) return "hub";
+  return "pane";
 }
 
 function pathSection(pathname: string): SettingsHubSection {
