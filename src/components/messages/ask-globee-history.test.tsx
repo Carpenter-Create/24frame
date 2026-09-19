@@ -45,6 +45,13 @@ describe("AskGlobeeHistoryPanel", () => {
 
     expect(html).toContain("data-ask-globee-history-popover");
     expect(html).toContain("w-[384px]");
+    expect(html).toContain("max-md:w-full");
+    expect(html).toContain("max-md:max-w-none");
+    expect(html).toContain("max-md:rounded-none");
+    expect(html).toContain("max-md:border-0");
+    expect(html).toContain("data-ask-globee-history-list");
+    expect(html).toContain("max-md:overflow-y-scroll");
+    expect(html).toContain("max-md:[touch-action:pan-y]");
     expect(html).toContain("border-hairline");
     expect(html).toContain("rounded-[12px]");
     expect(html).toContain("p-[var(--space-6)]");
@@ -72,6 +79,10 @@ describe("AskGlobeeHistoryPanel", () => {
     expect(html).not.toContain("Get support");
     expect(src).toContain("shadow-none");
     expect(src).toContain("conversations");
+    expect(src).toContain("ASK_AI_OVERLAY_PHONE_HISTORY_CLASS");
+    expect(src).toContain("ASK_AI_OVERLAY_PHONE_HISTORY_LIST_CLASS");
+    expect(src).toContain("max-md:hidden");
+    expect(src).toContain("[data-ask-ai-overlay-phone-history]");
     expect(src).not.toMatch(/title:\s*"What's blocking/);
   });
 

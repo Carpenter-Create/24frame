@@ -31,6 +31,8 @@ import {
   setAskGlobeeThumb,
 } from "@/app/(app)/messages/ask-globee-actions";
 import { Input } from "@/components/ui/input";
+import { ASK_AI_OVERLAY_PHONE_SCROLL_CLASS } from "@/lib/ask-ai-overlay";
+import { cn } from "@/lib/cn";
 import { useAskGlobeeChrome } from "./ask-globee-chrome";
 import { AskGlobeeThinking } from "./ask-globee-thinking";
 
@@ -235,7 +237,11 @@ export function AskGlobeeThread({
         <div
           ref={conversationRef}
           data-ask-globee-conversation=""
-          className="flex min-h-0 flex-1 flex-col-reverse gap-[var(--space-6)] overflow-auto px-[var(--content-inset)]"
+          className={cn(
+            "flex min-h-0 flex-1 flex-col-reverse gap-[var(--space-6)] overflow-auto px-[var(--content-inset)]",
+            ASK_AI_OVERLAY_PHONE_SCROLL_CLASS,
+            "max-md:px-[var(--space-4)]",
+          )}
         >
           {thinking && pendingPrompt ? (
             <div

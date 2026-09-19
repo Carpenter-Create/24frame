@@ -44,8 +44,11 @@ import {
   ASK_AI_OVERLAY_DESKTOP_DOCK_CLASS,
   ASK_AI_OVERLAY_EXPAND_CLASS,
   ASK_AI_OVERLAY_MARK_CLASS,
+  ASK_AI_OVERLAY_PHONE_CLOCK_DOCK_CLASS,
   ASK_AI_OVERLAY_PHONE_COMPACT_CLASS,
   ASK_AI_OVERLAY_PHONE_EXPANDED_CLASS,
+  ASK_AI_OVERLAY_PHONE_HISTORY_HOST_CLASS,
+  ASK_AI_OVERLAY_PHONE_SCROLL_CLASS,
   askAiCloseHref,
   askAiOverlayDesktopClass,
   askAiOverlayHref,
@@ -328,8 +331,18 @@ describe("AskAiOverlay", () => {
     );
 
     expect(overlaySrc).toContain("ASK_AI_OVERLAY_BODY_CLASS");
+    expect(overlaySrc).toContain("AskAiOverlayBody");
+    expect(overlaySrc).toContain("data-ask-ai-overlay-phone-history");
+    expect(overlaySrc).toContain("ASK_AI_OVERLAY_PHONE_HISTORY_HOST_CLASS");
+    expect(overlaySrc).toContain("overscroll-none");
+    expect(overlaySrc).toContain("pointer-events-auto");
     expect(ASK_AI_OVERLAY_BODY_CLASS).toContain("overflow-hidden");
     expect(ASK_AI_OVERLAY_BODY_CLASS).not.toContain("overflow-auto");
+    expect(ASK_AI_OVERLAY_PHONE_SCROLL_CLASS).toContain("max-md:overflow-y-scroll");
+    expect(ASK_AI_OVERLAY_PHONE_SCROLL_CLASS).toContain("max-md:[touch-action:pan-y]");
+    expect(ASK_AI_OVERLAY_PHONE_HISTORY_HOST_CLASS).toContain("max-md:flex");
+    expect(ASK_AI_OVERLAY_PHONE_CLOCK_DOCK_CLASS).toContain("max-md:left-[var(--space-4)]");
+    expect(ASK_AI_OVERLAY_PHONE_COMPACT_CLASS).toContain("overscroll-none");
     expect(landingSrc).toContain("flex-col-reverse");
     expect(landingSrc).not.toContain("justify-center gap-[var(--space-12)]");
     expect(landingSrc).not.toContain("justify-end gap-[var(--space-12)]");
