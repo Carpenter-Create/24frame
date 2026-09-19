@@ -1,7 +1,7 @@
-// You / /settings/profile identity helpers. Copy lives here, not in
-// JSX. Name is user_metadata.display_name (already written at org
+// Profile / /settings/profile identity helpers. Copy lives here, not
+// in JSX. Name is user_metadata.display_name (already written at org
 // create). Email is auth.users — shown, not changed. Company name is
-// organizations.name and now lives on /settings/aggregation.
+// organizations.name and now lives on /settings/organization.
 // /account/company redirects. Company stays off the rail and the
 // Identity menu. Logo / description / mailing address / website /
 // LinkedIn / socials are not in the schema — do not invent them.
@@ -11,7 +11,7 @@ import { z } from "zod";
 import { COMPANY_AGGREGATION_WORKSPACE } from "@/lib/product";
 import { USER_MENU, userMenuName } from "@/lib/user-menu";
 
-// Identity menu label is Profile. Company is the Aggregation pane —
+// Identity menu label is Profile. Company is the Organization pane —
 // not a rail row.
 
 /** Conservative bound — same ceiling as other person/company name writes. */

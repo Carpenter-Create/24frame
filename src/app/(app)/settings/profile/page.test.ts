@@ -9,12 +9,12 @@ const here = dirname(fileURLToPath(import.meta.url));
 const pageSrc = readFileSync(join(here, "page.tsx"), "utf8");
 
 describe("SettingsProfilePage", () => {
-  it("is the Profile menu door into You identity — company lives on Aggregation", () => {
-    expect(pageSrc).toContain("YouSettings");
+  it("is the Profile door into identity — company lives on Organization", () => {
+    expect(pageSrc).toContain("ProfileSettings");
     expect(pageSrc).not.toContain("CompanyProfileForm");
     expect(pageSrc).not.toContain("member_can");
     expect(pageSrc).not.toContain("SettingsRail");
     expect(SETTINGS.profileHref).toBe("/settings/profile");
-    expect(SETTINGS.aggregationHref).toBe("/settings/aggregation");
+    expect(SETTINGS.organizationHref).toBe("/settings/organization");
   });
 });

@@ -70,7 +70,7 @@ describe("SettingsHeaderBack", () => {
   });
 
   it("pushes back to Settings from a section pane", () => {
-    navigation.pathname = "/settings/education";
+    navigation.pathname = "/settings/preferences";
     const html = renderToStaticMarkup(<SettingsHeaderBack />);
     expect(html).toContain(`href="${SETTINGS.href}"`);
     expect(html).toContain(SETTINGS.title);

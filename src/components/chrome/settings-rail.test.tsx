@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
-const navigation = vi.hoisted(() => ({ pathname: "/settings/you" }));
+const navigation = vi.hoisted(() => ({ pathname: "/settings/profile" }));
 
 vi.mock("next/navigation", () => ({
   usePathname: () => navigation.pathname,
@@ -24,8 +24,8 @@ import { SettingsRail } from "./settings-rail";
 const src = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "settings-rail.tsx"), "utf8");
 
 describe("SettingsRail", () => {
-  it("is Settings title + You / Social / Education / Aggregation", () => {
-    navigation.pathname = "/settings/you";
+  it("is Settings title + Profile / Organization / Preferences", () => {
+    navigation.pathname = "/settings/profile";
     const html = renderToStaticMarkup(<SettingsRail />);
     expect(html).toContain('data-settings-rail-nav=""');
     expect(html).toContain('data-settings-rail-title=""');
@@ -45,6 +45,7 @@ describe("SettingsRail", () => {
     expect(html).toContain(SETTINGS_RAIL_ACTIVE_CLASS);
     expect(src).toContain("settingsHubSection(usePathname())");
     expect(src).not.toContain("persistWorkspaceCookie");
+    expect(src).not.toContain("availableWorkspaceOptions");
     expect(src).not.toContain("ChevronLeft");
     expect(src).not.toContain("lucide-react");
     expect(src).not.toContain("t-body-sm");
@@ -52,25 +53,29 @@ describe("SettingsRail", () => {
   });
 
   it("washes the hub section that matches the path", () => {
-    navigation.pathname = "/settings/education";
-    const education = renderToStaticMarkup(<SettingsRail />);
-    expect(education).toMatch(
-      /data-settings-rail-item="education"[^>]*aria-current="page"/,
+    navigation.pathname = "/settings/preferences";
+    const preferences = renderToStaticMarkup(<SettingsRail />);
+    expect(preferences).toMatch(
+      /data-settings-rail-item="preferences"[^>]*aria-current="page"/,
     );
-    expect(education).not.toMatch(
-      /data-settings-rail-item="you"[^>]*aria-current="page"/,
+    expect(preferences).not.toMatch(
+      /data-settings-rail-item="profile"[^>]*aria-current="page"/,
     );
 
     navigation.pathname = "/settings/profile";
-    const you = renderToStaticMarkup(<SettingsRail />);
-    expect(you).toMatch(/data-settings-rail-item="you"[^>]*aria-current="page"/);
-    expect(you).not.toMatch(
-      /data-settings-rail-item="education"[^>]*aria-current="page"/,
+    const profile = renderToStaticMarkup(<SettingsRail />);
+    expect(profile).toMatch(/data-settings-rail-item="profile"[^>]*aria-current="page"/);
+    expect(profile).not.toMatch(
+      /data-settings-rail-item="preferences"[^>]*aria-current="page"/,
     );
+
+    navigation.pathname = "/settings/agreements";
+    const agreements = renderToStaticMarkup(<SettingsRail />);
+    expect(agreements).toMatch(/data-settings-rail-item="profile"[^>]*aria-current="page"/);
   });
 
   it("does not invent Account / Users / API or the Access destinations", () => {
-    navigation.pathname = "/settings/you";
+    navigation.pathname = "/settings/profile";
     const html = renderToStaticMarkup(<SettingsRail />);
     for (const absent of SETTINGS_RAIL_ABSENT) {
       expect(html).not.toContain(absent);

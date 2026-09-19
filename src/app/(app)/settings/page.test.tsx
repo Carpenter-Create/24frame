@@ -9,8 +9,8 @@ vi.mock("next/navigation", () => ({
     throw new Error(`REDIRECT:${to}`);
   }),
 }));
-vi.mock("@/components/settings/you-settings", () => ({
-  YouSettings: () => <div data-settings-hub="you" />,
+vi.mock("@/components/settings/profile-settings", () => ({
+  ProfileSettings: () => <div data-settings-hub="profile" />,
 }));
 
 import SettingsPage from "./page";
@@ -18,27 +18,18 @@ import SettingsPage from "./page";
 const here = dirname(fileURLToPath(import.meta.url));
 
 describe("SettingsPage", () => {
-  it("redirects ?section= to the path contract", async () => {
-    await expect(
-      SettingsPage({ searchParams: Promise.resolve({ section: "education" }) }),
-    ).rejects.toThrow("REDIRECT:/settings/education");
-    await expect(
-      SettingsPage({ searchParams: Promise.resolve({ section: "social" }) }),
-    ).rejects.toThrow("REDIRECT:/settings/social");
-  });
-
-  it("renders the mobile list and desktop You — not a Profile redirect", async () => {
+  it("renders the mobile list and desktop Profile — no query or legacy redirect", async () => {
     const pageSrc = readFileSync(join(here, "page.tsx"), "utf8");
-    const html = renderToStaticMarkup(
-      await SettingsPage({ searchParams: Promise.resolve({}) }),
-    );
+    const html = renderToStaticMarkup(await SettingsPage());
     expect(html).toContain("data-settings-hub-list");
     expect(html).toContain("md:hidden");
     expect(html).toContain("hidden md:block");
-    expect(html).toContain('data-settings-hub="you"');
-    expect(pageSrc).toContain("settingsPathFromQuery");
+    expect(html).toContain('data-settings-hub="profile"');
     expect(pageSrc).toContain("SettingsHubList");
-    expect(pageSrc).toContain("YouSettings");
+    expect(pageSrc).toContain("ProfileSettings");
+    expect(pageSrc).not.toContain("settingsPathFromQuery");
+    expect(pageSrc).not.toContain("permanentRedirect");
+    expect(pageSrc).not.toContain("searchParams");
     expect(pageSrc).not.toContain("SETTINGS.profileHref");
   });
 });

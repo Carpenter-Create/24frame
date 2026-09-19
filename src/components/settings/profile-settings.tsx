@@ -8,20 +8,20 @@ import { getOrgContext } from "@/lib/supabase/context";
 import { userMenuName } from "@/lib/user-menu";
 import { AccountProfileForm } from "@/app/(app)/account/account-profile-form";
 
-// You pane — identity + sign-in already in product. Edit public
+// Profile pane — identity + sign-in already in product. Edit public
 // profile deep-links to the existing Social editor. Not a second
-// profile product. Company lives on Aggregation.
-export async function YouSettings() {
+// profile product. Company lives on Organization.
+export async function ProfileSettings() {
   const ctx = await getOrgContext();
   if (!ctx) redirect("/login");
 
   const photoUrl = await signedAvatarUrl(ctx.user.id);
 
   return (
-    <div data-settings-page="" data-settings-hub="you" className={SETTINGS_PANE_CLASS}>
-      <section data-settings-section="you" className={SETTINGS_SECTION_CLASS}>
+    <div data-settings-page="" data-settings-hub="profile" className={SETTINGS_PANE_CLASS}>
+      <section data-settings-section="profile" className={SETTINGS_SECTION_CLASS}>
         <h1 className="t-section text-ink">{SETTINGS.title}</h1>
-        <h2 className="t-section text-ink">{SETTINGS.you}</h2>
+        <h2 className="t-section text-ink">{SETTINGS.profile}</h2>
         <Card>
           <CardBody>
             <AccountProfileForm

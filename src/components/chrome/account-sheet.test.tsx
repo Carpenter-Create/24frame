@@ -390,7 +390,8 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(html).not.toContain('data-sheet-group-item="refer"');
     expect(html).toContain('data-sheet-group-item="logOut"');
     expect(html).toContain(`href="${USER_MENU.profileHref}"`);
-    expect(html).toContain('href="/settings/aggregation"');
+    expect(html).toContain('data-sheet-group-item="settings"');
+    expect(html).toContain('href="/settings"');
     expect(html).toContain('data-sheet-group-item="askAssistant"');
     expect(html).not.toContain('href="/messages"');
     expect(html).not.toContain(`href="${USER_MENU.askAssistantHref}"`);
@@ -439,13 +440,16 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(html).not.toContain("Auto");
   });
 
-  it("lands Settings on the current workspace section", () => {
-    const education = renderSheet("ada@example.com", null, null, "/social/courses");
-    const social = renderSheet("ada@example.com", null, null, "/social");
-    const help = renderSheet("ada@example.com", null, null, "/help");
-    expect(education).toContain('href="/settings/education"');
-    expect(social).toContain('href="/settings/social"');
-    expect(help).toContain('href="/settings/you"');
+  it("opens Settings on the universal hub from every workspace", () => {
+    for (const path of ["/", "/social", "/social/courses", "/help", "/settings/profile"]) {
+      const html = renderSheet("ada@example.com", null, null, path);
+      expect(html).toContain('data-sheet-group-item="settings"');
+      expect(html).toContain('href="/settings"');
+      expect(html).not.toContain('href="/settings/education"');
+      expect(html).not.toContain('href="/settings/social"');
+      expect(html).not.toContain('href="/settings/you"');
+      expect(html).not.toContain('href="/settings/aggregation"');
+    }
     expect(src).toContain("settingsLandHref(pathname)");
   });
 

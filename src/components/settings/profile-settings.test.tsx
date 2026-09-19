@@ -8,7 +8,7 @@ import { ACCOUNT_PROFILE } from "@/lib/account-profile";
 import { SETTINGS, SETTINGS_ABSENT } from "@/lib/settings";
 import { getOrgContext } from "@/lib/supabase/context";
 import { signedAvatarUrl } from "@/lib/s3-avatars";
-import { YouSettings } from "./you-settings";
+import { ProfileSettings } from "./profile-settings";
 
 vi.mock("next/navigation", () => ({
   redirect: vi.fn((to: string) => {
@@ -37,9 +37,9 @@ function ctx(name: string | null, email = "ada@example.com") {
 }
 
 const here = dirname(fileURLToPath(import.meta.url));
-const src = readFileSync(join(here, "you-settings.tsx"), "utf8");
+const src = readFileSync(join(here, "profile-settings.tsx"), "utf8");
 
-describe("YouSettings", () => {
+describe("ProfileSettings", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(signedAvatarUrl).mockResolvedValue(null);
@@ -47,10 +47,10 @@ describe("YouSettings", () => {
 
   it("shows identity already in product and deep-links Edit public profile", async () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx(null) as never);
-    const html = renderToStaticMarkup(await YouSettings());
-    expect(html).toContain('data-settings-hub="you"');
+    const html = renderToStaticMarkup(await ProfileSettings());
+    expect(html).toContain('data-settings-hub="profile"');
     expect(html).toContain(SETTINGS.title);
-    expect(html).toContain(SETTINGS.you);
+    expect(html).toContain(SETTINGS.profile);
     expect(html).toContain(ACCOUNT_PROFILE.emailHint);
     expect(html).toContain("ada@example.com");
     expect(html).toContain(SETTINGS.editPublicProfile);
@@ -67,6 +67,6 @@ describe("YouSettings", () => {
 
   it("sends an unauthenticated visitor to login", async () => {
     vi.mocked(getOrgContext).mockResolvedValue(null as never);
-    await expect(YouSettings()).rejects.toThrow("REDIRECT:/login");
+    await expect(ProfileSettings()).rejects.toThrow("REDIRECT:/login");
   });
 });
