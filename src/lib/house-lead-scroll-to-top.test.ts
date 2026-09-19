@@ -1,0 +1,142 @@
+import { readFileSync } from "node:fs";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/home",
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(),
+}));
+
+import { HousePhoneAppShell } from "@/components/chrome/house-phone-app-shell";
+import {
+  HOUSE_LEAD_SCROLL_TO_TOP,
+  HOUSE_LEAD_SCROLL_TO_TOP_MEDIA,
+  HOUSE_LEAD_SCROLL_TO_TOP_MIN_HEIGHT,
+  HOUSE_LEAD_SCROLL_TO_TOP_OFFSET,
+  HOUSE_LEAD_SCROLL_TO_TOP_SELECTOR,
+  houseLeadScrollToTopIsTap,
+} from "./house-lead-scroll-to-top";
+import { HOUSE_LEAD_SCROLL_CLASS, HOUSE_LEAD_SHELL_CLASS } from "./house-lead-chrome";
+
+const shellSrc = readFileSync(
+  "src/components/chrome/house-phone-app-shell.tsx",
+  "utf8",
+);
+const componentSrc = readFileSync(
+  "src/components/chrome/house-lead-scroll-to-top.tsx",
+  "utf8",
+);
+const libSrc = readFileSync("src/lib/house-lead-scroll-to-top.ts", "utf8");
+const appShellSrc = readFileSync(
+  "src/components/chrome/app-shell.tsx",
+  "utf8",
+);
+
+describe("HouseLeadScrollToTop — iOS status-bar tap contract", () => {
+  it("keeps the G9 nested scroll contract on `[data-house-lead-scroll]`", () => {
+    // Bridge does not flip the shell scroll ancestor — main stays the
+    // scrolling element that Home / Aggregation / Social / Education
+    // read. If G9 changes, this bridge stops being the right fix.
+    expect(HOUSE_LEAD_SHELL_CLASS).toBe(
+      "flex h-dvh flex-col overflow-hidden overscroll-none",
+    );
+    expect(HOUSE_LEAD_SCROLL_CLASS).toBe(
+      "min-h-0 flex-1 overflow-y-auto overscroll-contain",
+    );
+    expect(appShellSrc.match(/data-house-lead-scroll/g)?.length).toBe(2);
+    expect(HOUSE_LEAD_SCROLL_TO_TOP_SELECTOR).toBe("[data-house-lead-scroll]");
+    expect(HOUSE_LEAD_SCROLL_TO_TOP.selector).toBe("[data-house-lead-scroll]");
+  });
+
+  it("locks the 1px window headroom · coarse-pointer gate · scroll-to-0 tap signal", () => {
+    expect(HOUSE_LEAD_SCROLL_TO_TOP_OFFSET).toBe(1);
+    expect(HOUSE_LEAD_SCROLL_TO_TOP_MIN_HEIGHT).toBe("calc(100dvh + 1px)");
+    expect(HOUSE_LEAD_SCROLL_TO_TOP_MEDIA).toBe("(pointer: coarse)");
+    expect(HOUSE_LEAD_SCROLL_TO_TOP).toEqual({
+      selector: HOUSE_LEAD_SCROLL_TO_TOP_SELECTOR,
+      offset: HOUSE_LEAD_SCROLL_TO_TOP_OFFSET,
+      media: HOUSE_LEAD_SCROLL_TO_TOP_MEDIA,
+      minHeight: HOUSE_LEAD_SCROLL_TO_TOP_MIN_HEIGHT,
+    });
+  });
+
+  it("only treats a window scroll to 0 as a status-bar tap", () => {
+    expect(houseLeadScrollToTopIsTap(0)).toBe(true);
+    // Any other position — including the held headroom — leaves the
+    // bridge inert. This is what stops a normal shell / inner scroll
+    // from being interpreted as a status-bar tap.
+    expect(houseLeadScrollToTopIsTap(HOUSE_LEAD_SCROLL_TO_TOP_OFFSET)).toBe(
+      false,
+    );
+    expect(houseLeadScrollToTopIsTap(2)).toBe(false);
+    expect(houseLeadScrollToTopIsTap(1200)).toBe(false);
+  });
+
+  it("mounts inside HousePhoneAppShell so every workspace answers a tap", () => {
+    // Every house lead shell (Aggregation / Social / Education / Home)
+    // mounts through HousePhoneAppShell — the bridge lives there so
+    // there is no Home-only fork.
+    expect(shellSrc).toContain('from "./house-lead-scroll-to-top"');
+    expect(shellSrc).toContain("<HouseLeadScrollToTop />");
+    expect(shellSrc.match(/<HouseLeadScrollToTop/g)?.length).toBe(1);
+
+    const html = renderToStaticMarkup(
+      createElement(HousePhoneAppShell, { workspace: "aggregation" }, null),
+    );
+    // Component renders null (client effect only) — server output
+    // stays clean. What we lock is that HousePhoneAppShell contains
+    // its wiring and no lookalike phone-only shell is introduced.
+    expect(html).toContain("data-house-phone-app-shell");
+    expect(html).toContain("data-house-phone-bottom-nav");
+  });
+
+  it("uses matchMedia, window.scrollTo, and the [data-house-lead-scroll] selector", () => {
+    expect(componentSrc).toContain('"use client"');
+    expect(componentSrc).toContain("useEffect");
+    expect(componentSrc).toContain("window.matchMedia");
+    expect(componentSrc).toContain("HOUSE_LEAD_SCROLL_TO_TOP_MEDIA");
+    expect(componentSrc).toContain("window.scrollTo(0, HOUSE_LEAD_SCROLL_TO_TOP_OFFSET)");
+    expect(componentSrc).toContain(
+      'document\n        .querySelectorAll<HTMLElement>(HOUSE_LEAD_SCROLL_TO_TOP_SELECTOR)',
+    );
+    expect(componentSrc).toContain(
+      'scroller.scrollTo({ top: 0, behavior: "smooth" })',
+    );
+    expect(componentSrc).toContain(
+      "root.style.minHeight = HOUSE_LEAD_SCROLL_TO_TOP_MIN_HEIGHT",
+    );
+    expect(componentSrc).toContain("previousMinHeight");
+    expect(componentSrc).toContain("passive: true");
+    expect(componentSrc).toContain("removeEventListener");
+    // Coarse-pointer gate keeps desktop unchanged.
+    expect(componentSrc).toContain(
+      "if (!window.matchMedia(HOUSE_LEAD_SCROLL_TO_TOP_MEDIA).matches) return;",
+    );
+    expect(libSrc).toContain("Adam");
+    expect(libSrc).toContain("2026-09-19");
+    expect(libSrc).toContain("house-united");
+    expect(libSrc).toContain("G9");
+    // Do not silently invert the scroll contract. If the shell moves
+    // to document-scroll, this bridge is no longer the right fix and
+    // the failing G9 assertion above will catch it first.
+    expect(libSrc).not.toContain("no lookalike phone-only shell");
+  });
+
+  it("keeps the bottom-nav scroll-hide reading the same nested scroller", () => {
+    // Bottom nav hides on scroll-down of `[data-house-lead-scroll]`.
+    // The bridge must not change that read path — a workspace fork
+    // there would drop the hide behavior on Home.
+    const bottomNav = readFileSync(
+      "src/components/chrome/house-phone-bottom-nav.tsx",
+      "utf8",
+    );
+    expect(bottomNav).toContain(
+      'document.querySelector<HTMLElement>("[data-house-lead-scroll]")',
+    );
+    expect(bottomNav).toContain(
+      "readY = () => (scroller ? scroller.scrollTop : window.scrollY)",
+    );
+  });
+});
