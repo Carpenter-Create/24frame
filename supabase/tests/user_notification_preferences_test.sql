@@ -39,7 +39,7 @@ select is(
 select lives_ok(
   format(
     $$ update public.user_notification_preferences
-       set prefs = jsonb_set(prefs, '{course_updated,email}', 'true'::jsonb)
+       set prefs = prefs || '{"course_updated":{"in_app":true,"email":true}}'::jsonb
        where user_id = %L $$,
     current_setting('t.userA')
   ),
