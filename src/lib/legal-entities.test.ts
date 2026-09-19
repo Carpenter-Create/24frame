@@ -59,8 +59,12 @@ describe("legal entities copy", () => {
     expect(ENTITY_LIST_ROW_CLASS).toContain("grid");
     expect(ENTITY_LIST_HEADER_CLASS).toContain(ENTITY_LIST_GRID_CLASS);
     expect(ENTITY_LIST_ROW_CLASS).toContain(ENTITY_LIST_GRID_CLASS);
-    expect(ENTITY_LIST_GRID_CLASS).toContain("minmax(8rem,1.2fr)");
-    expect(ENTITY_LIST_GRID_CLASS).toContain("gap-x-[var(--space-3)]");
+    expect(ENTITY_LIST_HEADER_CLASS).toContain("t-label");
+    expect(ENTITY_LIST_HEADER_CLASS).toContain("text-ink-3");
+    expect(ENTITY_LIST_GRID_CLASS).toContain("w-max");
+    expect(ENTITY_LIST_GRID_CLASS).toContain("max-content");
+    expect(ENTITY_LIST_GRID_CLASS).not.toContain("fr");
+    expect(ENTITY_LIST_GRID_CLASS).toContain("gap-x-[var(--space-6)]");
     expect(entityJurisdictionClass("Delaware")).toBe(ENTITY_LIST_VALUE_CLASS);
     expect(entityJurisdictionClass(null)).toBe(ENTITY_LIST_EMPTY_CLASS);
     expect(entityJurisdictionClass("  ")).toBe(ENTITY_LIST_EMPTY_CLASS);

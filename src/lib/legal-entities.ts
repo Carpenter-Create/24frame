@@ -73,10 +73,12 @@ export const LEGAL_ENTITIES = {
 } as const;
 
 // Team list density — one shared grid for header + rows. Four columns:
-// Name · Type · Jurisdiction · Actions. Values share primary ink.
-// Empty jurisdiction is a muted em dash. Not a data-grid library.
+// Name · Type · Jurisdiction · Actions. Content-sized tracks so Type /
+// Jurisdiction / Actions do not stretch across the card (the #502
+// cavern). Values share primary ink. Empty jurisdiction is a muted
+// em dash. Not a data-grid library.
 export const ENTITY_LIST_GRID_CLASS =
-  "min-w-[28rem] grid grid-cols-[minmax(8rem,1.2fr)_minmax(5.5rem,0.7fr)_minmax(6.5rem,1fr)_auto] items-center gap-x-[var(--space-3)] px-0";
+  "w-max max-w-full grid grid-cols-[minmax(10rem,max-content)_minmax(5.5rem,max-content)_minmax(7rem,max-content)_max-content] items-center gap-x-[var(--space-6)] px-0";
 
 export const ENTITY_LIST_HEADER_CLASS =
   `${ENTITY_LIST_GRID_CLASS} py-[var(--space-3)] t-label text-ink-3`;
