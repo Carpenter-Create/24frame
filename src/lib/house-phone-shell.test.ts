@@ -603,31 +603,31 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
 
     expect(SOCIAL_PHONE_DESTS.map((item) => item.label)).toEqual([
       "Feed",
+      "Profile",
       "Explore",
       "Create",
       "Messages",
-      "Profile",
     ]);
     expect(SOCIAL_PHONE_DESTS.map((item) => item.href)).toEqual([
       SOCIAL_ROUTES.home,
+      SOCIAL_ROUTES.profile,
       SOCIAL_ROUTES.explore,
       SOCIAL_ROUTES.create,
       SOCIAL_ROUTES.dms,
-      SOCIAL_ROUTES.profile,
     ]);
     expect(housePhoneDestinations(false, "social").map((item) => item.label)).toEqual([
       "Feed",
+      "Profile",
       "Explore",
       "Create",
       "Messages",
-      "Profile",
     ]);
     expect(housePhoneDestinations(false, "social").map((item) => item.href)).toEqual([
       SOCIAL_ROUTES.home,
+      SOCIAL_ROUTES.profile,
       SOCIAL_ROUTES.explore,
       SOCIAL_ROUTES.create,
       SOCIAL_ROUTES.dms,
-      SOCIAL_ROUTES.profile,
     ]);
     expect(HOUSE_PHONE_DEST_CHIPS.label).toBe("Destinations");
     expect(HOUSE_PHONE_DEST_ITEM_ON_CLASS).toContain("bg-accent");
