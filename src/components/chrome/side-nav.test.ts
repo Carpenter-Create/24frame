@@ -7,6 +7,7 @@ import {
   HOUSE_RAIL_ACTIVE_CLASS,
   HOUSE_RAIL_IDLE_CLASS,
   HOUSE_RAIL_ITEM_CLASS,
+  HOUSE_RAIL_TITLE_CLASS,
 } from "@/lib/house-shell";
 import { NAV } from "@/lib/nav";
 
@@ -85,5 +86,12 @@ describe("SideNav Access rail", () => {
     expect(navSrc).not.toContain("bg-surface-muted font-medium text-ink");
     expect(navSrc).not.toContain('active ? "bg-surface text-ink"');
     expect(navSrc).not.toContain("BrandWordmark");
+  });
+
+  it("uses the shared HOUSE_RAIL_TITLE_CLASS for the staff eyebrow", () => {
+    expect(navSrc).toContain("HOUSE_RAIL_TITLE_CLASS");
+    expect(navSrc).toContain("className={HOUSE_RAIL_TITLE_CLASS}");
+    expect(HOUSE_RAIL_TITLE_CLASS).toBe("px-2 pb-1 t-label text-ink-3");
+    expect(navSrc).not.toContain('"px-2 pb-1 t-label text-ink-3"');
   });
 });
