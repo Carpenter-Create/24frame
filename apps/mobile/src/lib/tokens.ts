@@ -1,13 +1,14 @@
-// Port of src/app/tokens.css. Values stay on the house register.
+// Port of src/app/tokens.css. Values stay on the house register —
+// entire platform, not Aggregation-only (Adam 2026-09-19 type pass A).
 // Accent is the confirmed Sporty Blue — not a new mobile palette.
 
 export const tokens = {
   bg: "#fafafb",
   surface: "#ffffff",
-  text: "#14171a",
+  text: "#0A0B0D",
   body: "#2b2f36",
-  textSecondary: "#5e646e",
-  textTertiary: "#9aa0a9",
+  textSecondary: "#3D4450",
+  textTertiary: "#6B7280",
   border: "#ecedf0",
   accent: "#1769ff",
   accentContrast: "#ffffff",
