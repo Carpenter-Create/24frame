@@ -70,12 +70,13 @@
   --text-title:1.5rem;     /* 24 — .t-title / .page-title */
   --text-hero: 3rem;       /* 48 — .t-display / hero-value */
   --tracking-tight: -0.02em;
-  /* Role weights bind in globals .t-* (house-wide). Title 600 · body 500.
-     Display 600 · heading/subhead 500 (Coinbase-pop A2). Adam 2026-09-19.
-     Do not override with font-normal (400-as-body) or restore 480-as-title.
-     No Dashboard-only token CSS. */
-  --type-title-weight: 600;
-  --type-body-weight: 500;
+  /* Role weights bind in globals .t-* (house-wide). Title 480 · body 420
+     (pre-A delta restored — Coinbase-pop A3). Display 600 · heading/subhead
+     500 (A2). Adam 2026-09-19: body 420, title the +60 difference.
+     Do not override with font-normal (400-as-body) or restore A/A2 interim
+     body 500 / title 600 as current SoT. No Dashboard-only token CSS. */
+  --type-title-weight: 480;
+  --type-body-weight: 420;
 
   /* --- Spacing (4px base) --- */
   --space-1: 0.25rem; --space-2: 0.5rem;  --space-3: 0.75rem; --space-4: 1rem;

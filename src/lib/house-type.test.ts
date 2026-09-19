@@ -80,12 +80,13 @@ describe("house type ladder", () => {
 
 describe("house type roles", () => {
   it("locks display / title / label / body weights, tracking, and leading", () => {
-    // Adam 2026-09-19 Coinbase-pop A2 — display 600 · heading/subhead 500 ·
-    // title 600 · body 500. A over-bolded heroes/headings uniformly.
-    expect(tokens).toMatch(/--type-title-weight:\s*600;/);
-    expect(tokens).toMatch(/--type-body-weight:\s*500;/);
-    expect(tokens).not.toMatch(/--type-title-weight:\s*480;/);
-    expect(tokens).not.toMatch(/--type-body-weight:\s*420;/);
+    // Adam 2026-09-19 Coinbase-pop A3 — title 480 · body 420 (pre-A delta).
+    // Display 600 · heading/subhead 500 stay from A2. A/A2 600/500 were
+    // interim body/title SoT — ban them here.
+    expect(tokens).toMatch(/--type-title-weight:\s*480;/);
+    expect(tokens).toMatch(/--type-body-weight:\s*420;/);
+    expect(tokens).not.toMatch(/--type-title-weight:\s*600;/);
+    expect(tokens).not.toMatch(/--type-body-weight:\s*500;/);
     expect(tokens).not.toMatch(/--type-body-weight:\s*400;/);
     expect(tokens).toMatch(/--tracking-tight:\s*-0\.02em;/);
 
@@ -109,6 +110,9 @@ describe("house type roles", () => {
     expect(globals).toMatch(/\.t-body\s*\{[\s\S]*?font-weight:\s*var\(--type-body-weight\)/);
     expect(globals).toMatch(/\.t-body-sm\s*\{[\s\S]*?font-weight:\s*var\(--type-body-weight\)/);
     expect(globals).toMatch(/\.t-lead\s*\{[\s\S]*?font-weight:\s*var\(--type-body-weight\)/);
+    expect(globals).toMatch(
+      /^body\s*\{[\s\S]*?font-weight:\s*var\(--type-body-weight\)/m,
+    );
     expect(globals).toMatch(/\.t-data\s*\{[\s\S]*?font-variant-numeric:\s*tabular-nums/);
     expect(globals).toMatch(/\.t-display\.t-data\s*\{[\s\S]*?letter-spacing:\s*-0\.035em/);
     expect(globals).toMatch(
@@ -140,7 +144,7 @@ describe("house type roles", () => {
     expect(globals).not.toMatch(/-moz-osx-font-smoothing:\s*grayscale;/);
   });
 
-  it("kills 400-as-body and 480-as-title drift on shared house chrome", () => {
+  it("kills 400-as-body and Tailwind title-weight overrides on shared house chrome", () => {
     for (const path of HOUSE_ROLE_PATHS) {
       const src = readFileSync(path, "utf8");
       expect(src, path).not.toMatch(BODY_400_DRIFT);
@@ -148,8 +152,8 @@ describe("house type roles", () => {
     }
   });
 
-  it("sizes the rail to house body 500 — not t-body-sm + idle font-normal", () => {
-    // Coinbase-pop A2: rail dinky was 13px + forced 400 against body 500.
+  it("sizes the rail to house body 420 — not t-body-sm + idle font-normal", () => {
+    // Coinbase-pop A2 size + A3 weight: rail is 15px t-body, inherits 420.
     expect(HOUSE_RAIL_ITEM_CLASS).toMatch(/(?:^|[\s"])t-body(?:[\s"]|$)/);
     expect(HOUSE_RAIL_ITEM_CLASS).not.toContain("t-body-sm");
     expect(HOUSE_RAIL_IDLE_CLASS).not.toContain("font-normal");

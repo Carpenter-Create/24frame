@@ -65,7 +65,7 @@ export const HOUSE_RAIL_TITLE_CLASS = "px-2 pb-1 t-label text-ink-3";
 export const HOUSE_RAIL_ITEM_CLASS =
   "relative flex items-center rounded-full t-body leading-4 transition-colors";
 
-// Active = wash + accent. Idle inherits body 500 — no font-normal (400).
+// Active = wash + accent. Idle inherits body 420 — no font-normal (400).
 // Differentiate by color only; do not bold the rail (Coinbase-pop A2).
 export const HOUSE_RAIL_ACTIVE_CLASS = "bg-accent-wash text-accent";
 
