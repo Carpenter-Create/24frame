@@ -3,7 +3,7 @@
 -- Fail-closed: viewer cannot invite; non-staff cannot grant; email must match.
 
 begin;
-select plan(28);
+select plan(29);
 
 select set_config('t.org',          gen_random_uuid()::text, false);
 select set_config('t.org_b',        gen_random_uuid()::text, false);
