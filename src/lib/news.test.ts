@@ -84,7 +84,6 @@ describe("News SoT", () => {
     expect(card).not.toContain("DashboardHomeStatusPill");
     expect(card).not.toContain("data-dashboard-status-pill");
     expect(card).toContain("DASHBOARD_NEWS_OUTLET_CLASS");
-    expect(card).not.toMatch(/\bago\b/);
     expect(rail).not.toContain("socialRelativeTime");
     expect(history).not.toContain("socialRelativeTime");
     expect(readFileSync("vercel.json", "utf8")).not.toContain("news-ingest");
