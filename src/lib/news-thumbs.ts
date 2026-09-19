@@ -6,6 +6,7 @@ import {
   KNOWN_JOBLO_OG,
   type NormalizedNewsItem,
 } from "@/lib/news-rss";
+import { newsEgressFetch, type NewsDnsLookup } from "@/lib/news-egress";
 import { putObjectBytes } from "@/lib/s3-put";
 
 // Mirror publisher thumbs onto the title-asset bucket (`S3_BUCKET`) under
@@ -122,6 +123,7 @@ export async function fetchNewsThumbBytes(
   url: string,
   init: {
     fetchImpl?: typeof fetch;
+    lookup?: NewsDnsLookup;
     timeoutMs?: number;
     maxBytes?: number;
     userAgent?: string;
@@ -130,21 +132,23 @@ export async function fetchNewsThumbBytes(
   if (!/^https:\/\//i.test(url)) {
     throw new Error("thumb URL must be https");
   }
-  const fetchImpl = init.fetchImpl ?? fetch;
   const timeoutMs = init.timeoutMs ?? NEWS_THUMB_TIMEOUT_MS;
   const maxBytes = init.maxBytes ?? NEWS_THUMB_MAX_BYTES;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const res = await fetchImpl(url, {
-      signal: controller.signal,
-      headers: {
-        accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
-        "user-agent":
-          init.userAgent ??
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    const res = await newsEgressFetch(url, {
+      fetchImpl: init.fetchImpl,
+      lookup: init.lookup,
+      request: {
+        signal: controller.signal,
+        headers: {
+          accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+          "user-agent":
+            init.userAgent ??
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+        },
       },
-      redirect: "follow",
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const contentType = res.headers.get("content-type");
@@ -171,6 +175,7 @@ export async function mirrorNewsImageUrl(
     canonicalUrl: string;
     remoteUrl: string;
     fetchImpl?: typeof fetch;
+    lookup?: NewsDnsLookup;
     putObject?: PutNewsThumbObject;
     env?: NewsEnvLike;
   },
@@ -184,7 +189,10 @@ export async function mirrorNewsImageUrl(
     return { url: remote, mirrored: false, error: "mirror env unset" };
   }
   try {
-    const fetched = await fetchNewsThumbBytes(remote, { fetchImpl: input.fetchImpl });
+    const fetched = await fetchNewsThumbBytes(remote, {
+      fetchImpl: input.fetchImpl,
+      lookup: input.lookup,
+    });
     const key = newsThumbObjectKey(input.source, input.canonicalUrl, fetched.ext);
     const put = input.putObject ?? putObjectBytes;
     await put(key, fetched.body, fetched.contentType);
