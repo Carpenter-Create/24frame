@@ -11,9 +11,10 @@ import {
   NOTIFICATION_PREF_EVENTS,
   NOTIFICATION_PREF_SECTION_CLASS,
   NOTIFICATION_PREF_SWITCH_TRACK_CLASS,
+  NOTIFICATION_PREF_WRAP_CLASS,
   NOTIFICATION_PREFS,
 } from "@/lib/notification-prefs";
-import { SETTINGS, SETTINGS_PREF_BLOCK_CLASS } from "@/lib/settings";
+import { SETTINGS } from "@/lib/settings";
 import { getOrgContext } from "@/lib/supabase/context";
 import SettingsPreferencesPage from "./page";
 
@@ -88,10 +89,14 @@ describe("SettingsPreferencesPage", () => {
     expect(html).toContain(NOTIFICATION_PREFS.groups.education);
     expect(html).toContain(NOTIFICATION_PREFS.groups.account);
     expect(html).toContain(NOTIFICATION_PREFS.groups.reporting);
-    expect(html).toContain(SETTINGS_PREF_BLOCK_CLASS);
     expect(html).toContain(APPEARANCE_SETTINGS_CARD_CLASS);
+    expect(html).toContain(NOTIFICATION_PREF_WRAP_CLASS);
+    expect(html).toContain('data-settings-notification-wrap=""');
     expect(html).toContain(NOTIFICATION_PREF_SECTION_CLASS);
     expect(html).toContain(HOUSE_MODULE_CLASS);
+    expect(NOTIFICATION_PREF_SECTION_CLASS).not.toContain(HOUSE_MODULE_CLASS);
+    expect(html).toContain("divide-y divide-hairline");
+    expect(html).toContain("py-[var(--space-8)]");
     expect(html).toContain(NOTIFICATION_PREF_SWITCH_TRACK_CLASS);
     expect(html).toContain("h-5 w-9");
     expect(html).not.toContain("h-6 w-10");

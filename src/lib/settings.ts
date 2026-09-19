@@ -149,9 +149,9 @@ export const SETTINGS_SECTION_CLASS = "flex flex-col gap-[var(--space-6)]";
 export const SETTINGS_QUIET_ROW_CLASS =
   "flex items-center justify-between t-body leading-5 text-ink";
 
-// Preferences blocks — house muted module + pad 16. Same surface as
-// dashboard / directory modules. Not a new fill. Not card-surface
-// (white + hairline) — that is the Profile / Organization form frame.
+// Preferences Appearance — house muted module + pad 16. Same surface
+// as dashboard / directory modules. Not card-surface (Profile /
+// Organization form frame). Notification groups are not this card.
 export const SETTINGS_PREF_BLOCK_CLASS =
   `${HOUSE_MODULE_CLASS} ${HOUSE_CARD_PAD} flex flex-col gap-[var(--space-3)]`;
 export const SETTINGS_PREF_TITLE_CLASS = "t-heading text-ink";

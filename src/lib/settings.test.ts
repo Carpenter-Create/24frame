@@ -224,7 +224,7 @@ describe("settings hub lock", () => {
     expect(SETTINGS_RAIL_TITLE_CLASS).toBe("t-section text-ink");
   });
 
-  it("sections Preferences blocks on the house muted module — not a new surface", () => {
+  it("keeps Appearance on the house muted module — not a new surface", () => {
     expect(SETTINGS_PREF_BLOCK_CLASS).toContain(HOUSE_MODULE_CLASS);
     expect(SETTINGS_PREF_BLOCK_CLASS).toContain(HOUSE_CARD_PAD);
     expect(SETTINGS_PREF_BLOCK_CLASS).toContain("gap-[var(--space-3)]");

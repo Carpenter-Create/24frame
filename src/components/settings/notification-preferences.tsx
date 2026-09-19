@@ -9,7 +9,6 @@ import {
   NOTIFICATION_PREF_CHANNEL_HEAD_CLASS,
   NOTIFICATION_PREF_CHANNELS,
   NOTIFICATION_PREF_GROUPS,
-  NOTIFICATION_PREF_GROUP_CLASS,
   NOTIFICATION_PREF_HEAD_CLASS,
   NOTIFICATION_PREF_INTRO_CLASS,
   NOTIFICATION_PREF_LIST_CLASS,
@@ -17,6 +16,7 @@ import {
   NOTIFICATION_PREF_ROW_CLASS,
   NOTIFICATION_PREF_SECTION_CLASS,
   NOTIFICATION_PREF_TITLE_CLASS,
+  NOTIFICATION_PREF_WRAP_CLASS,
   NOTIFICATION_PREF_SWITCH_OFF_CLASS,
   NOTIFICATION_PREF_SWITCH_ON_CLASS,
   NOTIFICATION_PREF_SWITCH_THUMB_CLASS,
@@ -121,20 +121,17 @@ export function NotificationPreferences({
 
   return (
     <section data-settings-section="notifications" className={SETTINGS_SECTION_CLASS}>
-      <div className={NOTIFICATION_PREF_INTRO_CLASS}>
-        <h3 className={NOTIFICATION_PREF_TITLE_CLASS}>{NOTIFICATION_PREFS.title}</h3>
-        <p className="t-body-sm text-ink-3">{NOTIFICATION_PREFS.helper}</p>
-      </div>
-      <div data-settings-notification-matrix="" className={NOTIFICATION_PREF_MATRIX_CLASS}>
-        {NOTIFICATION_PREF_GROUPS.map((group) => (
-          <div
-            key={group.id}
-            data-settings-notification-group={group.id}
-            className={NOTIFICATION_PREF_GROUP_CLASS}
-          >
-            {group.sections.map((section) => (
+      <div data-settings-notification-wrap="" className={NOTIFICATION_PREF_WRAP_CLASS}>
+        <div className={NOTIFICATION_PREF_INTRO_CLASS}>
+          <h3 className={NOTIFICATION_PREF_TITLE_CLASS}>{NOTIFICATION_PREFS.title}</h3>
+          <p className="t-body-sm text-ink-3">{NOTIFICATION_PREFS.helper}</p>
+        </div>
+        <div data-settings-notification-matrix="" className={NOTIFICATION_PREF_MATRIX_CLASS}>
+          {NOTIFICATION_PREF_GROUPS.flatMap((group) =>
+            group.sections.map((section) => (
               <div
                 key={section.id}
+                data-settings-notification-group={group.id}
                 data-settings-notification-section={section.id}
                 className={NOTIFICATION_PREF_SECTION_CLASS}
               >
@@ -161,9 +158,9 @@ export function NotificationPreferences({
                   ))}
                 </div>
               </div>
-            ))}
-          </div>
-        ))}
+            )),
+          )}
+        </div>
       </div>
       {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
     </section>
