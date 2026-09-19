@@ -5,6 +5,7 @@ import {
   ASK_AI_LEGACY_PATH,
   ASK_AI_OPEN_VALUE,
   ASK_AI_OVERLAY,
+  ASK_AI_OVERLAY_BODY_CLASS,
   ASK_AI_OVERLAY_EXPAND_CLASS,
   ASK_AI_OVERLAY_MARK_CLASS,
   ASK_AI_QUERY,
@@ -60,6 +61,10 @@ describe("ask AI overlay URL", () => {
     expect(askAiOverlayPhoneClass(true)).toContain("h-dvh");
     expect(ASK_AI_OVERLAY_EXPAND_CLASS).not.toContain("hidden");
     expect(ASK_AI_OVERLAY_EXPAND_CLASS).not.toContain("md:flex");
+    expect(ASK_AI_OVERLAY_BODY_CLASS).toContain("overflow-hidden");
+    expect(ASK_AI_OVERLAY_BODY_CLASS).toContain("[&_[data-ask-globee-landing]]:h-full");
+    expect(ASK_AI_OVERLAY_BODY_CLASS).toContain("[&_[data-ask-globee-thread]]:h-full");
+    expect(ASK_AI_OVERLAY_BODY_CLASS).not.toContain("overflow-auto");
   });
 
   it("reads open + thread from the current search and closes back to the same path", () => {

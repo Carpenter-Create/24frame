@@ -197,18 +197,28 @@ describe("AskGlobeeThread", () => {
     expect(visibleText(html)).toContain("Harbor Cut — Synopsis is required.");
     expect(html).toContain('data-ask-globee-turn=""');
     expect(html).toContain("gap-[var(--space-6)]");
-    expect(html).toContain("border-t border-hairline");
-    expect(html).toContain("pt-[var(--space-6)]");
+    expect(html).toContain("border-b border-hairline");
+    expect(html).toContain("pb-[var(--space-6)]");
     expect(html).not.toContain("gap-[var(--space-16)]");
     expect(html).not.toContain("pt-[var(--space-3)]");
     expect(html.match(/data-ask-globee-turn=""/g)?.length).toBe(2);
-    expect(html.match(/border-t border-hairline/g)?.length).toBe(1);
-    expect(html.match(/pt-\[var\(--space-6\)\]/g)?.length).toBe(1);
+    expect(html.match(/border-b border-hairline/g)?.length).toBe(1);
+    expect(html.match(/pb-\[var\(--space-6\)\]/g)?.length).toBe(1);
     expect(src).toContain(
-      "flex flex-col gap-[var(--space-6)] border-t border-hairline pt-[var(--space-6)]",
+      "flex flex-col gap-[var(--space-6)] border-b border-hairline pb-[var(--space-6)]",
     );
-    expect(src).toContain('className="flex flex-1 flex-col gap-[var(--space-6)] px-[var(--content-inset)]"');
+    expect(src).toContain(
+      "flex min-h-0 flex-1 flex-col-reverse gap-[var(--space-6)] overflow-auto px-[var(--content-inset)]",
+    );
+    expect(src).not.toContain("flex-1 flex-col gap-[var(--space-6)] px-[var(--content-inset)]");
     expect(src).not.toMatch(/border-t border-hairline"/);
+    const conversation = html.slice(
+      html.indexOf("data-ask-globee-conversation"),
+      html.indexOf("data-ask-globee-composer"),
+    );
+    expect(conversation.indexOf("What is blocking a title")).toBeLessThan(
+      conversation.indexOf("What needs attention"),
+    );
   });
 
   it("keeps a follow-up on the same thread instead of opening a new one", () => {
@@ -263,6 +273,21 @@ describe("AskGlobeeThread", () => {
     expect(src).toContain("latestTurnRef");
     expect(src).toContain("scrollIntoView");
     expect(src).toContain("useRef");
+    expect(src).toContain("flex-col-reverse");
+    expect(src).toContain("[...turns].reverse()");
+  });
+
+  it("stacks history upward so the newest turn sits nearest the composer", () => {
+    const html = renderThread([]);
+
+    expect(html).toContain("data-ask-globee-conversation");
+    expect(html).toContain("data-ask-globee-composer");
+    expect(html).toContain("flex-col-reverse");
+    expect(html.indexOf("data-ask-globee-conversation")).toBeLessThan(
+      html.indexOf("data-ask-globee-composer"),
+    );
+    expect(src).toContain("h-full min-h-0 flex-1 flex-col");
+    expect(src).toContain("flex shrink-0 justify-center");
   });
 
   it("kills the composer inner focus ring without restyling the pill hairline", () => {

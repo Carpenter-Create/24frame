@@ -30,20 +30,16 @@ const CHIP_MARK_ICON: Record<AskGlobeeChipMark, LucideIcon> = {
   send: Send,
 };
 
-// Figma 7:73 landing chrome (Design 2026-08-22 proto), shared with mobile 462:502
-// tokens: no-period placeholder, Sporty Blue 24 submit, wash chips, 48 between
-// headline / composer / chips on desktop. Chip click fills, selects, and sends
-// the same prompt as free text. Submit persists the user turn, then navigates
-// to the thread. Quiet clock 16 (top-left, tertiary) opens past conversations.
-// Mobile shares the hamburger's 44 hit and --space-6 lead so the glyphs
-// optically align. Desktop stays size-4 at left-0.
-// No plus on this empty home. No HISTORY list. No invented titles. Well pad
-// and ask stack use house 48 (--space-12). Composer is 640×56 r28 pad 16 —
-// not a full pill. Thinking chrome (427:352 empty lead + fetching…) is on
-// the conversation page, never this landing.
-// Mobile 462:502 only (max-md): centered stack, chips above the composer,
-// full-width chip column. Desktop 7:73 is headline, then composer, then chips
-// (md:order). Drop "What do you need?". No Beta. No Mercury. No Circle brand fill.
+// Overlay landing, Mercury bottom-up: clock docks top-left; headline and
+// chips sit above a pinned composer. Empty/new chat anchors to the bottom
+// (justify-end), not a top-down empty header. Chip click fills, selects,
+// and sends the same prompt as free text. Submit persists the user turn,
+// then opens the thread on the current path. Quiet clock 16 opens past
+// conversations. Mobile 44 hit / --space-6 lead. Desktop size-4 at left-0.
+// No plus. No HISTORY list. No invented titles. House 48 (--space-12).
+// Composer is 640x56 r28 pad 16. Thinking chrome stays on the thread.
+// Chips above the composer on every viewport. Drop "What do you need?".
+// No Beta. No Mercury brand colors. No Circle brand fill.
 export function AskGlobeeLanding({
   conversations = [],
 }: {
@@ -75,7 +71,7 @@ export function AskGlobeeLanding({
   return (
     <div
       data-ask-globee-landing=""
-      className="relative flex min-h-[min(36rem,calc(100dvh-var(--header-height)-var(--content-inset)*2))] flex-col items-center p-[var(--space-12)] max-md:px-[var(--space-4)]"
+      className="relative flex h-full min-h-0 flex-1 flex-col items-center p-[var(--space-12)] max-md:px-[var(--space-4)]"
     >
       <div className={MOBILE_CHROME_CLOCK_DOCK_CLASS}>
         <AskGlobeeHistoryPopover
@@ -96,91 +92,86 @@ export function AskGlobeeLanding({
         </AskGlobeeHistoryPopover>
       </div>
 
-      <div className="flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-12)]">
+      <div className="flex w-full min-h-0 flex-1 flex-col items-center justify-end gap-[var(--space-12)] overflow-auto">
         <h1 data-ask-globee-headline="" className="t-display text-center text-ink">
           {ASK_GLOBEE.headline}
         </h1>
 
-        <div className="flex w-full flex-col items-center max-md:gap-[var(--space-12)] md:contents">
-          <div
-            data-ask-globee-try=""
-            className="flex w-full max-w-[640px] flex-col items-center gap-[var(--space-4)] md:order-3"
-          >
-            <p className="t-label text-ink-3">{ASK_GLOBEE.tryLabel}</p>
-            <div className="flex flex-wrap justify-center gap-[var(--space-2)] max-md:w-full max-md:flex-col max-md:items-stretch">
-              {ASK_GLOBEE.tryPrompts.map((label, index) => {
-                const pressed = selected === label;
-                const mark = askGlobeeChipMark(index);
-                const MarkIcon = mark ? CHIP_MARK_ICON[mark] : null;
-                return (
-                  <button
-                    key={label}
-                    type="button"
-                    data-ask-globee-chip=""
-                    data-ask-globee-chip-mark={mark ?? undefined}
-                    aria-pressed={pressed}
-                    onClick={() => {
-                      const activation = askGlobeeChipActivation(label);
-                      setPrompt(activation.prompt);
-                      void send(activation.send);
-                    }}
-                    className="inline-flex items-center gap-[var(--space-2)] rounded-full border-0 bg-surface-muted px-[var(--space-4)] py-[var(--space-2)] t-body-sm text-ink"
-                  >
-                    {MarkIcon ? (
-                      <MarkIcon
-                        aria-hidden="true"
-                        className="size-4 text-ink-3"
-                        strokeWidth={1.33}
-                      />
-                    ) : null}
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
+        <div
+          data-ask-globee-try=""
+          className="flex w-full max-w-[640px] flex-col items-center gap-[var(--space-4)]"
+        >
+          <p className="t-label text-ink-3">{ASK_GLOBEE.tryLabel}</p>
+          <div className="flex flex-wrap justify-center gap-[var(--space-2)] max-md:w-full max-md:flex-col max-md:items-stretch">
+            {ASK_GLOBEE.tryPrompts.map((label, index) => {
+              const pressed = selected === label;
+              const mark = askGlobeeChipMark(index);
+              const MarkIcon = mark ? CHIP_MARK_ICON[mark] : null;
+              return (
+                <button
+                  key={label}
+                  type="button"
+                  data-ask-globee-chip=""
+                  data-ask-globee-chip-mark={mark ?? undefined}
+                  aria-pressed={pressed}
+                  onClick={() => {
+                    const activation = askGlobeeChipActivation(label);
+                    setPrompt(activation.prompt);
+                    void send(activation.send);
+                  }}
+                  className="inline-flex items-center gap-[var(--space-2)] rounded-full border-0 bg-surface-muted px-[var(--space-4)] py-[var(--space-2)] t-body-sm text-ink"
+                >
+                  {MarkIcon ? (
+                    <MarkIcon
+                      aria-hidden="true"
+                      className="size-4 text-ink-3"
+                      strokeWidth={1.33}
+                    />
+                  ) : null}
+                  {label}
+                </button>
+              );
+            })}
           </div>
-
-          <form
-            data-ask-globee-composer=""
-            className="flex w-full justify-center md:order-2"
-            onSubmit={(event) => {
-              event.preventDefault();
-              const next = askGlobeeComposerSubmit(prompt);
-              if (next) void send(next);
-            }}
-          >
-            <label className="flex h-14 w-full max-w-[640px] items-center justify-between rounded-[28px] border border-hairline bg-surface px-[var(--space-4)]">
-              <span className="sr-only">{ASK_GLOBEE.composerPlaceholderMobile}</span>
-              <Input
-                variant="bare"
-                type="text"
-                name="prompt"
-                value={prompt}
-                onChange={(event) => setPrompt(event.target.value)}
-                placeholder={ASK_GLOBEE.composerPlaceholderMobile}
-                autoComplete="off"
-                className="flex-1 text-left focus:outline-none"
-              />
-              <button
-                type="submit"
-                aria-label={ASK_GLOBEE.sendLabel}
-                className="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent text-accent-contrast"
-              >
-                <ArrowRight className="size-4" strokeWidth={1.33} />
-              </button>
-            </label>
-          </form>
-
-          {error ? (
-            <p
-              data-ask-globee-error=""
-              className="t-body-sm text-center text-ink-2 md:order-2"
-            >
-              {error}
-            </p>
-          ) : null}
         </div>
       </div>
+
+      <form
+        data-ask-globee-composer=""
+        className="mt-[var(--space-12)] flex w-full shrink-0 justify-center"
+        onSubmit={(event) => {
+          event.preventDefault();
+          const next = askGlobeeComposerSubmit(prompt);
+          if (next) void send(next);
+        }}
+      >
+        <label className="flex h-14 w-full max-w-[640px] items-center justify-between rounded-[28px] border border-hairline bg-surface px-[var(--space-4)]">
+          <span className="sr-only">{ASK_GLOBEE.composerPlaceholderMobile}</span>
+          <Input
+            variant="bare"
+            type="text"
+            name="prompt"
+            value={prompt}
+            onChange={(event) => setPrompt(event.target.value)}
+            placeholder={ASK_GLOBEE.composerPlaceholderMobile}
+            autoComplete="off"
+            className="flex-1 text-left focus:outline-none"
+          />
+          <button
+            type="submit"
+            aria-label={ASK_GLOBEE.sendLabel}
+            className="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent text-accent-contrast"
+          >
+            <ArrowRight className="size-4" strokeWidth={1.33} />
+          </button>
+        </label>
+      </form>
+
+      {error ? (
+        <p data-ask-globee-error="" className="mt-[var(--space-2)] t-body-sm text-center text-ink-2">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }

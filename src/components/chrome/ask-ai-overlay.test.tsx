@@ -39,6 +39,7 @@ vi.mock("@/app/(app)/messages/ask-globee-actions", () => ({
 
 import {
   ASK_AI_OVERLAY,
+  ASK_AI_OVERLAY_BODY_CLASS,
   ASK_AI_OVERLAY_EXPAND_CLASS,
   ASK_AI_OVERLAY_MARK_CLASS,
   ASK_AI_OVERLAY_PHONE_COMPACT_CLASS,
@@ -295,6 +296,46 @@ describe("AskAiOverlay", () => {
     expect(askAiOverlayHref("/dashboard")).toBe("/dashboard?ai=1");
     expect(askAiOverlayHref("/social")).not.toContain("/messages");
     expect(askAiOverlayHref("/social")).not.toContain("/ai");
+  });
+
+  it("anchors overlay chat bottom-up like Mercury, not a top-down empty header", () => {
+    const overlaySrc = readFileSync(new URL("./ask-ai-overlay.tsx", import.meta.url), "utf8");
+    const landingSrc = readFileSync(
+      new URL("../messages/ask-globee-landing.tsx", import.meta.url),
+      "utf8",
+    );
+    const threadSrc = readFileSync(
+      new URL("../messages/ask-globee-thread.tsx", import.meta.url),
+      "utf8",
+    );
+
+    expect(overlaySrc).toContain("ASK_AI_OVERLAY_BODY_CLASS");
+    expect(ASK_AI_OVERLAY_BODY_CLASS).toContain("overflow-hidden");
+    expect(ASK_AI_OVERLAY_BODY_CLASS).not.toContain("overflow-auto");
+    expect(landingSrc).toContain("justify-end");
+    expect(landingSrc).not.toContain("justify-center gap-[var(--space-12)]");
+    expect(landingSrc.indexOf("data-ask-globee-try=")).toBeLessThan(
+      landingSrc.indexOf("data-ask-globee-composer="),
+    );
+    expect(threadSrc).toContain("flex-col-reverse");
+    expect(threadSrc).toContain("[...turns].reverse()");
+    expect(threadSrc).toContain("shrink-0");
+    expect(threadSrc.indexOf("data-ask-globee-conversation")).toBeLessThan(
+      threadSrc.indexOf("data-ask-globee-composer="),
+    );
+
+    navigation.pathname = "/home";
+    navigation.search = "ai=1";
+    const html = renderOverlay();
+    expect(html).toContain("data-ask-ai-overlay-body");
+    expect(html).toContain("data-ask-globee-landing");
+    expect(html).toContain("justify-end");
+    expect(html.indexOf("data-ask-globee-headline")).toBeLessThan(
+      html.indexOf("data-ask-globee-composer"),
+    );
+    expect(html.indexOf("data-ask-globee-try")).toBeLessThan(
+      html.indexOf("data-ask-globee-composer"),
+    );
   });
 
   it("keeps the live opener when search params suspend — children never remount under NOOP", () => {

@@ -224,29 +224,50 @@ export function AskGlobeeThread({
     }
   }
 
+  const reversedTurns = [...turns].reverse();
+
   return (
-    <div data-ask-globee-thread="" className="flex min-h-[min(36rem,calc(100dvh-var(--header-height)-var(--content-inset)*2))] flex-col">
-      <div className="flex flex-1 flex-col gap-[var(--space-4)]">
+    <div data-ask-globee-thread="" className="flex h-full min-h-0 flex-1 flex-col">
+      <div className="flex min-h-0 flex-1 flex-col gap-[var(--space-4)]">
         <div
           data-ask-globee-conversation=""
-          className="flex flex-1 flex-col gap-[var(--space-6)] px-[var(--content-inset)]"
+          className="flex min-h-0 flex-1 flex-col-reverse gap-[var(--space-6)] overflow-auto px-[var(--content-inset)]"
         >
-          {turns.map((turn, index) => {
-            const isLastPersisted = index === turns.length - 1;
+          {thinking && pendingPrompt ? (
+            <div
+              ref={latestTurnRef}
+              data-ask-globee-turn=""
+              data-ask-globee-thread-end=""
+              className="flex flex-col gap-[var(--space-6)]"
+            >
+              <div data-ask-globee-user-row="" className="flex items-start gap-[var(--space-2)]">
+                <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-surface-muted text-[length:var(--text-xs)] font-medium text-ink">
+                  {initials}
+                </div>
+                <div className="rounded-[var(--radius-lg)] bg-surface-muted p-[var(--space-4)]">
+                  <p className="t-body text-ink">{pendingPrompt}</p>
+                </div>
+              </div>
+              <AskGlobeeThinking phase={thinkingPhase} />
+            </div>
+          ) : null}
+
+          {reversedTurns.map((turn, index) => {
+            const isNewestPersisted = index === 0;
             const showOpenThinking =
               thinking &&
               !pendingPrompt &&
-              isLastPersisted &&
+              isNewestPersisted &&
               !turn.some((message) => message.role === "globee");
             return (
               <div
                 key={turn[0]?.id ?? String(index)}
-                ref={isLastPersisted && !pendingPrompt ? latestTurnRef : undefined}
+                ref={isNewestPersisted && !pendingPrompt ? latestTurnRef : undefined}
                 data-ask-globee-turn=""
-                data-ask-globee-thread-end={isLastPersisted && !pendingPrompt ? "" : undefined}
+                data-ask-globee-thread-end={isNewestPersisted && !pendingPrompt ? "" : undefined}
                 className={
-                  index > 0
-                    ? "flex flex-col gap-[var(--space-6)] border-t border-hairline pt-[var(--space-6)]"
+                  pendingPrompt || index > 0
+                    ? "flex flex-col gap-[var(--space-6)] border-b border-hairline pb-[var(--space-6)]"
                     : "flex flex-col gap-[var(--space-6)]"
                 }
               >
@@ -335,33 +356,11 @@ export function AskGlobeeThread({
             );
           })}
 
-          {thinking && pendingPrompt ? (
-            <div
-              ref={latestTurnRef}
-              data-ask-globee-turn=""
-              data-ask-globee-thread-end=""
-              className={
-                turns.length > 0
-                  ? "flex flex-col gap-[var(--space-6)] border-t border-hairline pt-[var(--space-6)]"
-                  : "flex flex-col gap-[var(--space-6)]"
-              }
-            >
-              <div data-ask-globee-user-row="" className="flex items-start gap-[var(--space-2)]">
-                <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-surface-muted text-[length:var(--text-xs)] font-medium text-ink">
-                  {initials}
-                </div>
-                <div className="rounded-[var(--radius-lg)] bg-surface-muted p-[var(--space-4)]">
-                  <p className="t-body text-ink">{pendingPrompt}</p>
-                </div>
-              </div>
-              <AskGlobeeThinking phase={thinkingPhase} />
-            </div>
-          ) : null}
         </div>
 
         <form
           data-ask-globee-composer=""
-          className="flex justify-center"
+          className="flex shrink-0 justify-center"
           onSubmit={(event) => {
             event.preventDefault();
             const next = askGlobeeComposerSubmit(draft);

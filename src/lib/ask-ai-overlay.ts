@@ -45,6 +45,11 @@ export const ASK_AI_OVERLAY_PHONE_EXPANDED_CLASS =
 export const ASK_AI_OVERLAY_EXPAND_CLASS =
   "flex size-[44px] items-center justify-center text-ink-3";
 
+// Overlay body fills the window. Landing/thread own the scroll so empty
+// chat and history sit bottom-up (composer pinned, newest nearest it).
+export const ASK_AI_OVERLAY_BODY_CLASS =
+  "flex min-h-0 flex-1 flex-col overflow-hidden [&_[data-ask-globee-gate]]:h-full [&_[data-ask-globee-gate]]:min-h-0 [&_[data-ask-globee-landing]]:h-full [&_[data-ask-globee-landing]]:min-h-0 [&_[data-ask-globee-thread]]:h-full [&_[data-ask-globee-thread]]:min-h-0";
+
 export function askAiOverlayPhoneClass(expanded: boolean): string {
   return expanded ? ASK_AI_OVERLAY_PHONE_EXPANDED_CLASS : ASK_AI_OVERLAY_PHONE_COMPACT_CLASS;
 }

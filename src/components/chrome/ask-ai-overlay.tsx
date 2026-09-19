@@ -20,6 +20,7 @@ import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import { cn } from "@/lib/cn";
 import {
   ASK_AI_OVERLAY,
+  ASK_AI_OVERLAY_BODY_CLASS,
   ASK_AI_OVERLAY_COMPACT_CLASS,
   ASK_AI_OVERLAY_EXPAND_CLASS,
   ASK_AI_OVERLAY_EXPANDED_CLASS,
@@ -246,7 +247,7 @@ function AskAiOverlayPanel() {
     >
       <div
         data-ask-ai-overlay-body=""
-        className="flex min-h-0 flex-1 flex-col overflow-auto [&_[data-ask-globee-gate]]:min-h-0 [&_[data-ask-globee-landing]]:min-h-0 [&_[data-ask-globee-thread]]:min-h-0"
+        className={ASK_AI_OVERLAY_BODY_CLASS}
       >
         {showThread ? (
           <div data-ask-ai-overlay-thread-chrome="" className="shrink-0 px-[var(--space-4)] pt-[var(--space-2)]">
