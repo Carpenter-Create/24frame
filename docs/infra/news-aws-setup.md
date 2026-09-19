@@ -163,6 +163,25 @@ image. No console row edit. To run once without waiting for cron,
 use the invoke above. A scrape timeout or miss leaves the grey plate
 — it does not fail the source.
 
+**JoBlo thumbs (apex host).** Cards hotlink `image_url`. JoBlo apex
+media (`https://joblo.com/wp-content/...`) 404s; `www.joblo.com` is
+200. Ingest now writes www at RSS/OG time. After Lambda redeploy,
+existing Dynamo rows still need a rewrite (merge ≠ live, and items
+that left the RSS window are not re-upserted). CoS only — dry-run
+default:
+
+```
+# rewrite apex image_url → www; print remaining nulls
+pnpm exec tsx scripts/news/backfill-joblo-image-urls.ts
+# apply PutItem (same pk / canonical_url)
+pnpm exec tsx scripts/news/backfill-joblo-image-urls.ts --apply
+# optional: fill the known Flood OG when image_url is null
+pnpm exec tsx scripts/news/backfill-joblo-image-urls.ts --apply --fill-known
+```
+
+Then invoke ingest once to soak new JoBlo items and OG-scrape remaining
+nulls still in the live feed. Do not proxy through CloudFront for this.
+
 ## Still founder-gated
 
 1. Creating the table, Lambda, EventBridge rule, DLQ, and IAM.
