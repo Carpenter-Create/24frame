@@ -23,7 +23,7 @@ import {
 import type { ClientHomeDoNextItem, DashboardChangeRow } from "@/lib/dashboard-home";
 import { formatUsdCents } from "@/lib/finance";
 import type { NewsItem } from "@/lib/news";
-import { homeGreeting } from "@/lib/home-greeting";
+import { HOME_GREETING_TIME_ZONE, homeGreeting, homeGreetingDate } from "@/lib/home-greeting";
 import {
   OVERVIEW_AREA_AI_CLASS,
   OVERVIEW_AREA_EDUCATION_CLASS,
@@ -84,7 +84,10 @@ export function OverviewHome({
 }) {
   return (
     <div data-overview="" className={cn("flex flex-col", DASHBOARD_SECTION_AIR_CLASS)}>
-      <PageHeader title={homeGreeting({ firstName, displayName })} />
+      <PageHeader
+        title={homeGreeting({ firstName, displayName })}
+        subtitle={homeGreetingDate(now, HOME_GREETING_TIME_ZONE)}
+      />
 
       <div data-overview-layout="" className={OVERVIEW_HOME_LAYOUT_CLASS}>
       <div className={OVERVIEW_AREA_REVENUE_CLASS}>

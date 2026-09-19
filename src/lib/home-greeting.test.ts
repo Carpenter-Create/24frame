@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { HOME_GREETING_BARE, homeGreeting, homeGreetingFirst } from "./home-greeting";
+import {
+  HOME_GREETING_BARE,
+  HOME_GREETING_TIME_ZONE,
+  homeGreeting,
+  homeGreetingDate,
+  homeGreetingFirst,
+} from "./home-greeting";
 
 describe("homeGreeting", () => {
   it("locks Hi, {First} from a given name, then the display-name token", () => {
@@ -23,5 +29,30 @@ describe("homeGreeting", () => {
     expect(homeGreeting()).not.toBe("Home");
     expect(homeGreeting({ displayName: "Ada Lovelace" })).not.toContain("undefined");
     expect(homeGreeting({ displayName: "Ada Lovelace" })).not.toContain("@");
+  });
+});
+
+describe("homeGreetingDate", () => {
+  const now = new Date("2026-09-18T18:00:00.000Z");
+
+  it("locks weekday + month + day in America/Chicago — no year, no clock", () => {
+    expect(HOME_GREETING_TIME_ZONE).toBe("America/Chicago");
+    expect(homeGreetingDate(now, HOME_GREETING_TIME_ZONE)).toBe("Friday, September 18");
+    expect(homeGreetingDate(now)).toBe("Friday, September 18");
+    expect(homeGreetingDate(now)).not.toContain("2026");
+    expect(homeGreetingDate(now)).not.toMatch(/\d{1,2}:\d{2}/);
+    expect(homeGreetingDate(now)).not.toMatch(/AM|PM|Good morning/i);
+  });
+
+  it("stays on the Chicago calendar day when UTC has already rolled", () => {
+    const lateChicagoFriday = new Date("2026-09-19T04:00:00.000Z");
+    const chicagoSaturday = new Date("2026-09-19T05:00:00.000Z");
+    expect(homeGreetingDate(lateChicagoFriday, HOME_GREETING_TIME_ZONE)).toBe(
+      "Friday, September 18",
+    );
+    expect(homeGreetingDate(chicagoSaturday, HOME_GREETING_TIME_ZONE)).toBe(
+      "Saturday, September 19",
+    );
+    expect(homeGreetingDate(lateChicagoFriday, "UTC")).toBe("Saturday, September 19");
   });
 });
