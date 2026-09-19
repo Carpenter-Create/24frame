@@ -56,7 +56,7 @@
 // /settings path. Pad 16. Active wash follows the hub section.
 // Rail keeps house Settings title + Profile · Organization · Preferences · Security.
 // Body H1 is the hub section only — never repeat Settings in the pane.
-// House muted wash. Sporty Blue only (no new brand colors).
+// Selected wash uses house workspace-rail SoT (accent-wash + accent text).
 // Desktop: section rail + pane. Mobile: list → push.
 // Spacing 8 / 16 / 24 / 48 (Mercury density). Design polish may follow.
 
@@ -145,7 +145,7 @@ const SETTINGS_HUB_ALL: readonly SettingsHubNavItem[] = SETTINGS_HUB_ORDER.map((
   href: SETTINGS_HUB_HREFS[kind],
 }));
 
-/** Universal hub. Same sections from every workspace. */
+/** Universal hub. Same four sections from every workspace. */
 export function settingsHubNav(): readonly SettingsHubNavItem[] {
   return SETTINGS_HUB_ALL;
 }
