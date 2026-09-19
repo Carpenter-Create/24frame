@@ -513,13 +513,17 @@ describe("AppShell /settings rail", () => {
     expect(html).toContain("data-user-menu-host");
     expect(html).toContain("Home");
     expect(html).toContain("Settings");
-    expect(html).toContain("Profile");
-    expect(html).toContain("Organization");
-    expect(html).toContain("Preferences");
-    expect(html).not.toContain(">You<");
-    expect(html).not.toContain(">Social<");
-    expect(html).not.toContain(">Education<");
-    expect(html).not.toContain(">Aggregation<");
+    const settingsRail = html.slice(
+      html.indexOf("data-settings-rail"),
+      html.indexOf("data-house-lead-stack"),
+    );
+    expect(settingsRail).toContain("Profile");
+    expect(settingsRail).toContain("Organization");
+    expect(settingsRail).toContain("Preferences");
+    expect(settingsRail).not.toContain("You");
+    expect(settingsRail).not.toContain("Social");
+    expect(settingsRail).not.toContain("Education");
+    expect(settingsRail).not.toContain("Aggregation");
     expect(html).not.toContain("Agreements");
     expect(html).not.toContain("Refer a friend");
     expect(html).not.toContain("data-side-nav");

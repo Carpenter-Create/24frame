@@ -68,7 +68,8 @@ describe("SettingsOrganizationPage", () => {
     expect(html).not.toContain("Team");
     expect(paneSrc).toContain("CompanyProfileForm");
     expect(paneSrc).toContain("member_can");
-    expect(paneSrc).toContain("hosts Team next");
+    expect(paneSrc).toContain("out of scope");
+    expect(paneSrc).toContain("Team next");
   });
 
   it("houses Organization empty when there is no org", async () => {
