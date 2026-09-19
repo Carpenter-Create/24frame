@@ -2675,7 +2675,7 @@ export type Database = {
       security_events: {
         Row: {
           id: string
-          org_id: string
+          org_id: string | null
           actor_user_id: string | null
           event_kind: Database["public"]["Enums"]["security_event_kind"]
           occurred_at: string
@@ -2687,7 +2687,7 @@ export type Database = {
         }
         Insert: {
           id?: string
-          org_id: string
+          org_id?: string | null
           actor_user_id?: string | null
           event_kind: Database["public"]["Enums"]["security_event_kind"]
           occurred_at?: string
@@ -2699,7 +2699,7 @@ export type Database = {
         }
         Update: {
           id?: string
-          org_id?: string
+          org_id?: string | null
           actor_user_id?: string | null
           event_kind?: Database["public"]["Enums"]["security_event_kind"]
           occurred_at?: string

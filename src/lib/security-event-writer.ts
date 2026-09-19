@@ -4,7 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { parseSourceLabel, type SecurityEventKind } from "@/lib/security-events";
 
 type RecordSecurityEventParams = {
-  orgId: string;
+  orgId: string | null;
   actorUserId: string | null;
   eventKind: SecurityEventKind;
   ip: string | null;
@@ -89,4 +89,21 @@ export async function recordSignOutEvent(
       }),
     ),
   );
+}
+
+/** Record a failed sign-in. Anonymous — no user or org resolved.
+ *  org_id NULL rows are GC-staff-only via RLS (audit_log pattern). */
+export async function recordFailedSignIn(
+  ip: string | null,
+  userAgent: string | null,
+  reason?: string,
+): Promise<void> {
+  await recordSecurityEvent({
+    orgId: null,
+    actorUserId: null,
+    eventKind: "failed_sign_in",
+    ip,
+    userAgent,
+    metadata: reason ? { reason } : null,
+  });
 }
