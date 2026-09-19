@@ -161,7 +161,7 @@ export const SETTINGS_PREF_TITLE_CLASS = "t-heading text-ink";
 
 // Mobile Settings page-lead back = News PageHeader ArrowLeft SoT.
 // settingsHeaderBack() is the routing SoT: hub → Back (client history
-// when there is an in-app referrer; dashboard land only as fallback),
+// when this tab has a prior entry; dashboard land only as fallback),
 // pushed pane → Settings. Hidden at md, where the Settings rail stays.
 // Do not hard-label the hub "Home" — Settings is account chrome from
 // any surface, not a Home-owned workspace. News stays "Home".
@@ -219,17 +219,9 @@ export function settingsHeaderBack(pathname: string | null | undefined): {
   return { href: SETTINGS.href, label: SETTINGS.title };
 }
 
-/** Same-origin document.referrer = usable in-app history for hub Back. */
-export function settingsHubHasInAppReferrer(
-  referrer: string | null | undefined,
-  origin: string,
-): boolean {
-  if (!referrer || !origin) return false;
-  try {
-    return new URL(referrer).origin === origin;
-  } catch {
-    return false;
-  }
+/** Session history longer than this entry = usable in-app Back. */
+export function settingsHubHasInAppHistory(historyLength: number): boolean {
+  return Number.isFinite(historyLength) && historyLength > 1;
 }
 
 function pathSection(pathname: string): SettingsHubSection {

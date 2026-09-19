@@ -7,11 +7,11 @@ import { PageHeaderBackLink } from "@/components/ui/page-header";
 import {
   SETTINGS,
   settingsHeaderBack,
-  settingsHubHasInAppReferrer,
+  settingsHubHasInAppHistory,
 } from "@/lib/settings";
 
 // Hub Back — account chrome from any surface. Prefer in-app history;
-// dashboard land only when referrer is missing or off-origin.
+// dashboard land only when this tab has nowhere to go back.
 export function SettingsHubBackLink({ className }: { className?: string }) {
   const router = useRouter();
   const back = settingsHeaderBack(SETTINGS.href);
@@ -21,7 +21,7 @@ export function SettingsHubBackLink({ className }: { className?: string }) {
     if (event.button !== 0 || event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) {
       return;
     }
-    if (settingsHubHasInAppReferrer(document.referrer, window.location.origin)) {
+    if (settingsHubHasInAppHistory(window.history.length)) {
       event.preventDefault();
       router.back();
     }

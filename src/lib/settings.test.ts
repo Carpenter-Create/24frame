@@ -29,7 +29,7 @@ import {
   SETTINGS_RAIL_PAD_CLASS,
   isSettingsPath,
   settingsHeaderBack,
-  settingsHubHasInAppReferrer,
+  settingsHubHasInAppHistory,
   settingsHubNav,
   settingsHubSection,
   settingsLandHref,
@@ -267,17 +267,12 @@ describe("settings hub lock", () => {
     expect(settingsSrc).not.toContain("hub → Home");
   });
 
-  it("uses in-app referrer for hub Back and falls back off-origin", () => {
-    const origin = "https://app.24frame.co";
-    expect(settingsHubHasInAppReferrer(`${origin}/social`, origin)).toBe(true);
-    expect(settingsHubHasInAppReferrer(`${origin}/home`, origin)).toBe(true);
-    expect(settingsHubHasInAppReferrer(`${origin}/settings/profile`, origin)).toBe(true);
-    expect(settingsHubHasInAppReferrer("https://example.com/social", origin)).toBe(false);
-    expect(settingsHubHasInAppReferrer("", origin)).toBe(false);
-    expect(settingsHubHasInAppReferrer(null, origin)).toBe(false);
-    expect(settingsHubHasInAppReferrer(undefined, origin)).toBe(false);
-    expect(settingsHubHasInAppReferrer(`${origin}/home`, "")).toBe(false);
-    expect(settingsHubHasInAppReferrer("not a url", origin)).toBe(false);
+  it("uses session history for hub Back and falls back on a lone entry", () => {
+    expect(settingsHubHasInAppHistory(2)).toBe(true);
+    expect(settingsHubHasInAppHistory(3)).toBe(true);
+    expect(settingsHubHasInAppHistory(1)).toBe(false);
+    expect(settingsHubHasInAppHistory(0)).toBe(false);
+    expect(settingsHubHasInAppHistory(Number.NaN)).toBe(false);
   });
 
   it("titles the body pane with the hub section — never SETTINGS.title", () => {
