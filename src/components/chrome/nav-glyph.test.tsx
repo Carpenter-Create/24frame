@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 
-import { NAV, SOCIAL_NAV } from "@/lib/nav";
+import { NAV, SOCIAL_NAV, type HouseAiNavItem } from "@/lib/nav";
 import { NavGlyph } from "./nav-glyph";
 
 const src = readFileSync("src/components/chrome/nav-glyph.tsx", "utf8");
@@ -23,10 +23,10 @@ describe("NavGlyph", () => {
     expect(src).toContain("HouseAiMark");
   });
 
-  it("renders the house AI mark for the Ask 24Frame AI row", () => {
-    const ask = NAV.find((item) => item.family === "house-ai");
-    expect(ask).toBeDefined();
-    const html = renderToStaticMarkup(<NavGlyph item={ask!} active={false} />);
+  it("renders the house AI mark for the overlay family — not a rail dest", () => {
+    expect(NAV.every((item) => item.family === "phosphor")).toBe(true);
+    const ask: HouseAiNavItem = { label: "Ask 24Frame AI", href: "?ai=1", family: "house-ai" };
+    const html = renderToStaticMarkup(<NavGlyph item={ask} active={false} />);
     expect(html).toContain("data-house-ai-mark");
     expect(html).toContain('fill="currentColor"');
     expect(html).toContain("size-4");

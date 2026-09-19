@@ -13,7 +13,7 @@ import { AskAiOpenButton } from "./ask-ai-overlay";
 // Home, Social, Education, and Aggregation open one panel via
 // AskAiOpenButton → openAskAi → current path + overlay query.
 // Never a workspace hop. Glyph is the house Adam sparkle cluster.
-// Phone trailing is Regular-stroke; desktop/rail stay filled.
+// Phone trailing is Regular-stroke; desktop header stays filled.
 export function AskAssistantHeaderLink() {
   return (
     <AskAiOpenButton

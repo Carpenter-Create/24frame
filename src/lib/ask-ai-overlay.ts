@@ -5,9 +5,10 @@ import { workspaceHome, type WorkspaceMode } from "@/lib/workspace";
 // Mercury Command overlay — 24Frame AI is never a workspace destination.
 // Universal header access on every house chrome path. Open state lives
 // on the current path as `?ai=1` (landing) or `?ai=<uuid>` (thread).
-// Starts as a floating window/sheet; expand/collapse is overlay-scoped
-// (not a routed full page). Back/close strips the param and leaves
-// the underlying view.
+// Desktop starts as a bottom-right floating window over the current
+// page; expand is a near-fullscreen overlay on the same surface.
+// Phone stays bottom-sheet ↔ expand. Never a routed `/messages` land.
+// Back/close strips the param and leaves the underlying view.
 
 export const ASK_AI_QUERY = "ai";
 export const ASK_AI_OPEN_VALUE = "1";
@@ -27,10 +28,34 @@ export const ASK_AI_OVERLAY = {
 export const ASK_AI_OVERLAY_MARK_CLASS = "size-8 shrink-0 text-accent";
 
 export const ASK_AI_OVERLAY_COMPACT_CLASS =
-  "flex h-[min(36rem,70dvh)] w-[min(92vw,40rem)] max-w-[40rem] flex-col overflow-hidden";
+  "flex h-[min(36rem,70dvh)] w-[min(28rem,calc(100vw-var(--space-12)))] flex-col overflow-hidden";
 
 export const ASK_AI_OVERLAY_EXPANDED_CLASS =
-  "flex h-[min(94dvh,calc(100dvh-var(--space-8)))] w-[min(96vw,80rem)] max-w-[80rem] flex-col overflow-hidden";
+  "flex h-full w-full flex-col overflow-hidden";
+
+export const ASK_AI_OVERLAY_DESKTOP_SURFACE_CLASS =
+  "rounded-[var(--radius-lg)] border border-hairline bg-surface text-ink shadow-[var(--elevation-float)]";
+
+export const ASK_AI_OVERLAY_DESKTOP_DOCK_CLASS =
+  "pointer-events-auto absolute bottom-[var(--space-6)] right-[var(--space-6)]";
+
+export const ASK_AI_OVERLAY_DESKTOP_EXPAND_INSET_CLASS =
+  "pointer-events-auto absolute inset-[var(--space-4)]";
+
+export const ASK_AI_OVERLAY_DESKTOP_HOST_COMPACT_CLASS =
+  "pointer-events-none fixed inset-0 z-50 hidden md:block";
+
+export const ASK_AI_OVERLAY_DESKTOP_HOST_EXPANDED_CLASS =
+  "fixed inset-0 z-50 hidden md:block";
+
+export const ASK_AI_OVERLAY_DESKTOP_SCRIM_CLASS =
+  "absolute inset-0 bg-ink/24";
+
+export const ASK_AI_OVERLAY_DESKTOP_COMPACT_CLASS =
+  `${ASK_AI_OVERLAY_DESKTOP_SURFACE_CLASS} ${ASK_AI_OVERLAY_COMPACT_CLASS} ${ASK_AI_OVERLAY_DESKTOP_DOCK_CLASS}`;
+
+export const ASK_AI_OVERLAY_DESKTOP_EXPANDED_CLASS =
+  `${ASK_AI_OVERLAY_DESKTOP_SURFACE_CLASS} ${ASK_AI_OVERLAY_EXPANDED_CLASS} ${ASK_AI_OVERLAY_DESKTOP_EXPAND_INSET_CLASS}`;
 
 export const ASK_AI_OVERLAY_PHONE_CLASS =
   "flex w-full flex-col overflow-hidden border-0";
@@ -52,6 +77,14 @@ export const ASK_AI_OVERLAY_BODY_CLASS =
 
 export function askAiOverlayPhoneClass(expanded: boolean): string {
   return expanded ? ASK_AI_OVERLAY_PHONE_EXPANDED_CLASS : ASK_AI_OVERLAY_PHONE_COMPACT_CLASS;
+}
+
+export function askAiOverlayDesktopClass(expanded: boolean): string {
+  return expanded ? ASK_AI_OVERLAY_DESKTOP_EXPANDED_CLASS : ASK_AI_OVERLAY_DESKTOP_COMPACT_CLASS;
+}
+
+export function askAiOverlayDesktopHostClass(expanded: boolean): string {
+  return expanded ? ASK_AI_OVERLAY_DESKTOP_HOST_EXPANDED_CLASS : ASK_AI_OVERLAY_DESKTOP_HOST_COMPACT_CLASS;
 }
 
 export type AskAiOverlayState = {

@@ -18,7 +18,7 @@ import { NavGlyph } from "./nav-glyph";
 
 // One under-top dest chip row for Aggregation · Education · Social.
 // Real dest lists from mobileNavDestinations — Ask 24Frame AI stays
-// off the chips (avatar sheet / overlay; no Agg hop). Home has no row.
+// off the chips (header / overlay; no Agg hop). Home has no row.
 // Scroll-x when the list overflows. House filter selected, not a
 // second bottom float and not a Meta skin. Desktop rail is unchanged.
 

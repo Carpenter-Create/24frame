@@ -23,7 +23,6 @@ import {
 
 import type { PhosphorIcon } from "@/lib/phosphor-icon";
 import { ACTIVITY_HREF, ACTIVITY_PAGE } from "@/lib/activity";
-import { ASK_GLOBEE } from "@/lib/ask-globee";
 import { AVAILS_HREF, AVAILS_PAGE } from "@/lib/avails";
 import { FINANCE_PAGE } from "@/lib/finance";
 import { GC_LICENSING_STATUS } from "@/lib/gc-deliveries";
@@ -72,12 +71,13 @@ export function isHouseAiNavItem(item: NavItem): item is HouseAiNavItem {
 // GC's flat nav — only what exists or is v1-scoped. Settings stays deferred.
 // Activity is the account-alert log (/activity). Recent activity stays
 // catalog findings (/attention). Ask 24Frame AI is the shell overlay
-// (`?ai=1`), never a workspace destination.
+// (`?ai=1`), never a workspace destination and never an Aggregation
+// rail row. Desktop entry is the header HouseAiMark only.
 // Reports is the one client activity door. Staff ops stays on GC_NAV
 // at /gc/finance. Glyphs: Figma 75:5 / 75:2 / 61:2 Phosphor Bold idle,
-// Fill active. Ask 24Frame AI is the house sparkle cluster (HouseAiMark),
-// not a Phosphor catalog glyph.
-export const NAV: Array<PhosphorNavItem | HouseAiNavItem> = [
+// Fill active. Overlay chrome still uses the house sparkle cluster
+// (HouseAiMark), not a Phosphor catalog glyph.
+export const NAV: PhosphorNavItem[] = [
   { label: "Dashboard", href: "/dashboard", family: "phosphor", icon: SquaresFour, exact: true },
   { label: "Titles", href: "/titles", family: "phosphor", icon: FilmSlate },
   { label: "Recent activity", href: "/attention", family: "phosphor", icon: Pulse },
@@ -95,7 +95,6 @@ export const NAV: Array<PhosphorNavItem | HouseAiNavItem> = [
     icon: ChartBar,
     ariaLabel: REPORTS_PAGE.navAria,
   },
-  { label: ASK_GLOBEE.headline, href: "?ai=1", family: "house-ai" },
 ];
 
 // Social workspace rail. Phone local dests are HousePhoneDestChips
@@ -204,13 +203,13 @@ export function clientNavCurrent(pathname: string): NavItem {
   return NAV.find((item) => isClientNavActive(pathname, item)) ?? NAV[0];
 }
 
-// Phone dest chips use this list (HousePhoneDestChips filters Ask AI so
-// chips cannot hop to Aggregation /messages). Staff already use the
-// operator set — do not leave them on a client-only row.
-// Social phone dests keep the feed pill (relabelled Feed on phone;
-// desktop rail keeps Home) so /social is reachable from the chip row.
-// Desktop rail drops Create. Activity stays an Aggregation rail
-// destination. Ask 24Frame AI is the same overlay as the header mark.
+// Phone dest chips use this list (HousePhoneDestChips still filters
+// house-ai so a leftover overlay trigger cannot become a dest chip).
+// Staff already use the operator set — do not leave them on a
+// client-only row. Social phone dests keep the feed pill (relabelled
+// Feed on phone; desktop rail keeps Home) so /social is reachable
+// from the chip row. Desktop rail drops Create. Activity stays an
+// Aggregation rail destination. Ask 24Frame AI is header + overlay.
 export function mobileNavDestinations(
   isGcStaff: boolean,
   workspace: WorkspaceMode = "aggregation",
