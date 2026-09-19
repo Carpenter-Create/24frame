@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { MouseEventHandler } from "react";
 import { ArrowLeft } from "@phosphor-icons/react/ssr";
 
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
@@ -8,18 +9,24 @@ import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 
 // Ported from watershedportal PageHeader — proportions kept, rethemed: GC `.t-*`
 // type (not the Watershed serif `.page-title`), token colors.
+
+/** 12px air between back link and title. Settings + News share this SoT. */
+export const PAGE_LEAD_STACK_CLASS = "flex flex-col gap-3";
+
 export type PageHeaderBackLinkProps = {
   href: string;
   label?: string;
   className?: string;
+  onClick?: MouseEventHandler<HTMLAnchorElement>;
 };
 
 // House SoT page-lead back — News / PageHeader ArrowLeft, not a chrome caret.
 // Settings page-lead reuses this; do not fork a third back glyph.
-export function PageHeaderBackLink({ href, label, className }: PageHeaderBackLinkProps) {
+export function PageHeaderBackLink({ href, label, className, onClick }: PageHeaderBackLinkProps) {
   return (
     <Link
       href={href}
+      onClick={onClick}
       className={cn("inline-flex items-center gap-1", TEXT_ACTION_CLASS, className)}
     >
       <ArrowLeft className="h-4 w-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
@@ -43,7 +50,7 @@ type Props = {
 export function PageHeader({ title, eyebrow, subtitle, backLink, actions, className }: Props) {
   return (
     <div className={cn("flex items-start justify-between gap-4 pb-6", className)}>
-      <div className="flex flex-col gap-1">
+      <div className={PAGE_LEAD_STACK_CLASS}>
         {backLink ? <PageHeaderBackLink href={backLink.href} label={backLink.label} /> : null}
         {eyebrow ? <span className="t-label text-accent">{eyebrow}</span> : null}
         <h1 className="t-title text-ink">{title}</h1>

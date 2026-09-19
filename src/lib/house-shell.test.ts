@@ -8,7 +8,7 @@ import { SocialRailAccountChip } from "@/components/social/social-rail-extras";
 import { HouseLeadChrome } from "@/components/chrome/house-lead-chrome";
 import { HouseLeadSearch } from "@/components/chrome/house-lead-search";
 import { UserMenu } from "@/components/chrome/user-menu";
-import { PageHeader } from "@/components/ui/page-header";
+import { PAGE_LEAD_STACK_CLASS, PageHeader } from "@/components/ui/page-header";
 import {
   DASHBOARD_CARD_PAD,
   DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS,
@@ -232,12 +232,16 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(pageHeader).toContain("TEXT_ACTION_CLASS");
     expect(pageHeader).toContain("PageHeaderBackLink");
     expect(pageHeader).toContain("ArrowLeft");
+    expect(pageHeader).toContain("PAGE_LEAD_STACK_CLASS");
+    expect(PAGE_LEAD_STACK_CLASS).toBe("flex flex-col gap-3");
+    expect(pageHeader).not.toContain("flex flex-col gap-1");
     expect(pageHeader).not.toContain("CaretLeft");
     expect(pageHeader).not.toContain("text-ink-3 transition-colors hover:text-ink-2");
     const back = renderToStaticMarkup(
       createElement(PageHeader, { title: "Industry news", backLink: { href: "/home", label: "Home" } }),
     );
     expect(back).toContain(TEXT_ACTION_CLASS);
+    expect(back).toContain(PAGE_LEAD_STACK_CLASS);
     expect(back).toContain('href="/home"');
     expect(back).toContain("Home");
   });

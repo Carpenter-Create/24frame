@@ -3,9 +3,9 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
-import { PageHeaderBackLink } from "@/components/ui/page-header";
+import { PAGE_LEAD_STACK_CLASS, PageHeaderBackLink } from "@/components/ui/page-header";
 import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import {
   SETTINGS,
@@ -14,13 +14,19 @@ import {
 } from "@/lib/settings";
 import { SettingsPageLead } from "./settings-page-lead";
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ back: vi.fn(), push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
+}));
+
 const here = dirname(fileURLToPath(import.meta.url));
 const src = readFileSync(join(here, "settings-page-lead.tsx"), "utf8");
+const hubBackSrc = readFileSync(join(here, "settings-hub-back-link.tsx"), "utf8");
 const pageHeaderSrc = readFileSync(join(here, "../ui/page-header.tsx"), "utf8");
 const shellSrc = readFileSync(join(here, "../chrome/app-shell.tsx"), "utf8");
 const hubSrc = readFileSync(join(here, "../chrome/settings-hub-list.tsx"), "utf8");
 const railSrc = readFileSync(join(here, "../chrome/settings-rail.tsx"), "utf8");
 const leadChromeSrc = readFileSync(join(here, "../chrome/house-lead-chrome.tsx"), "utf8");
+const newsSrc = readFileSync("src/lib/news.ts", "utf8");
 
 const SETTINGS_PANES = [
   "src/components/chrome/settings-hub-list.tsx",
@@ -32,7 +38,7 @@ const SETTINGS_PANES = [
 ] as const;
 
 describe("SettingsPageLead", () => {
-  it("reuses News PageHeader ArrowLeft — Home on the hub, Settings on a pane", () => {
+  it("reuses News PageHeader ArrowLeft — Back on the hub, Settings on a pane", () => {
     const hub = renderToStaticMarkup(
       createElement(SettingsPageLead, { title: SETTINGS.title, pathname: SETTINGS.href }),
     );
@@ -40,10 +46,12 @@ describe("SettingsPageLead", () => {
     expect(hub).toContain('data-settings-page-lead=""');
     expect(hub).toContain(`href="${hubBack.href}"`);
     expect(hub).toContain(hubBack.label);
+    expect(hub).not.toContain(">Home<");
     expect(hub).toContain(TEXT_ACTION_CLASS);
     expect(hub).toContain(SETTINGS_PAGE_LEAD_BACK_CLASS);
+    expect(hub).toContain(PAGE_LEAD_STACK_CLASS);
     expect(hub).toMatch(/<h1[^>]*>Settings<\/h1>/);
-    expect(hubBack).toEqual({ href: SETTINGS.dashboardHref, label: "Home" });
+    expect(hubBack).toEqual({ href: SETTINGS.dashboardHref, label: "Back" });
 
     const pane = renderToStaticMarkup(
       createElement(SettingsPageLead, {
@@ -54,19 +62,26 @@ describe("SettingsPageLead", () => {
     const paneBack = settingsHeaderBack(SETTINGS.organizationHref);
     expect(pane).toContain(`href="${paneBack.href}"`);
     expect(pane).toContain(paneBack.label);
+    expect(pane).toContain(PAGE_LEAD_STACK_CLASS);
     expect(pane).toMatch(/<h1[^>]*>Rights Holder<\/h1>/);
     expect(paneBack).toEqual({ href: SETTINGS.href, label: SETTINGS.title });
 
     expect(src).toContain("PageHeaderBackLink");
+    expect(src).toContain("SettingsHubBackLink");
     expect(src).toContain("settingsHeaderBack");
+    expect(src).toContain("PAGE_LEAD_STACK_CLASS");
     expect(src).toContain("SETTINGS_PAGE_LEAD_BACK_CLASS");
     expect(src).toContain("SETTINGS_PANE_TITLE_CLASS");
+    expect(src).not.toContain("flex flex-col gap-1");
     expect(src).not.toContain("CaretLeft");
     expect(src).not.toContain("SettingsHeaderBack");
     expect(pageHeaderSrc).toContain("ArrowLeft");
     expect(pageHeaderSrc).toContain("TEXT_ACTION_CLASS");
     expect(pageHeaderSrc).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
+    expect(pageHeaderSrc).toContain("PAGE_LEAD_STACK_CLASS");
+    expect(pageHeaderSrc).not.toContain("flex flex-col gap-1");
     expect(pageHeaderSrc).not.toContain("CaretLeft");
+    expect(PAGE_LEAD_STACK_CLASS).toBe("flex flex-col gap-3");
     expect(SETTINGS_PAGE_LEAD_BACK_CLASS).toBe("md:hidden");
   });
 
@@ -97,5 +112,20 @@ describe("SettingsPageLead", () => {
     expect(backLink).toContain(TEXT_ACTION_CLASS);
     expect(backLink).toContain("Home");
     expect(backLink).toContain('href="/home"');
+    expect(newsSrc).toContain('back: "Home"');
+  });
+
+  it("hub Back uses in-app history and dashboard fallback — still PageHeader ArrowLeft", () => {
+    expect(hubBackSrc).toContain('"use client"');
+    expect(hubBackSrc).toContain("PageHeaderBackLink");
+    expect(hubBackSrc).toContain("useRouter");
+    expect(hubBackSrc).toContain("router.back()");
+    expect(hubBackSrc).toContain("settingsHubHasInAppReferrer");
+    expect(hubBackSrc).toContain("settingsHeaderBack");
+    expect(hubBackSrc).toContain("document.referrer");
+    expect(hubBackSrc).not.toContain('label: "Home"');
+    expect(hubBackSrc).not.toContain('"Home"');
+    expect(src).toContain("SettingsHubBackLink");
+    expect(src).toContain("SETTINGS.href");
   });
 });

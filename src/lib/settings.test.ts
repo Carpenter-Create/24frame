@@ -29,6 +29,7 @@ import {
   SETTINGS_RAIL_PAD_CLASS,
   isSettingsPath,
   settingsHeaderBack,
+  settingsHubHasInAppReferrer,
   settingsHubNav,
   settingsHubSection,
   settingsLandHref,
@@ -73,6 +74,7 @@ describe("settings hub lock", () => {
     expect(SETTINGS.agreementsEmpty).toBe("No agreements on this account.");
     expect(SETTINGS.refer).toBe("Refer a friend");
     expect(SETTINGS.referHref).toBe("/settings/refer");
+    expect(SETTINGS.back).toBe("Back");
     expect(SETTINGS.dashboard).toBe("Home");
     expect(SETTINGS.dashboardHref).toBe("/aggregation/dashboard");
     expect(SETTINGS.company).toBe("Company");
@@ -160,6 +162,7 @@ describe("settings hub lock", () => {
     expect(SETTINGS).not.toHaveProperty("editPublicProfile");
     expect(SETTINGS).not.toHaveProperty("editPublicProfileHref");
     expect(SETTINGS_ABSENT).toContain("Edit public profile");
+    expect(SETTINGS_ABSENT).toContain("Home");
     const settingsSrc = readFileSync("src/lib/settings.ts", "utf8");
     expect(settingsSrc).not.toContain("editPublicProfile");
     expect(settingsSrc).not.toContain("editPublicProfileHref");
@@ -209,11 +212,18 @@ describe("settings hub lock", () => {
     expect(settingsRailActive("organization", "profile")).toBe(false);
   });
 
-  it("backs the page-lead Home on the hub and Settings on a pushed pane", () => {
+  it("backs the page-lead Back on the hub and Settings on a pushed pane", () => {
     expect(settingsHeaderBack("/settings")).toEqual({
       href: SETTINGS.dashboardHref,
-      label: "Home",
+      label: "Back",
     });
+    expect(settingsHeaderBack("/settings").label).not.toBe("Home");
+    expect(settingsHeaderBack("/settings").label).not.toBe(SETTINGS.dashboard);
+    expect(settingsHeaderBack(null)).toEqual({
+      href: SETTINGS.dashboardHref,
+      label: SETTINGS.back,
+    });
+    expect(SETTINGS_ABSENT).toContain("Home");
     expect(settingsHeaderBack("/settings/preferences")).toEqual({
       href: "/settings",
       label: "Settings",
@@ -253,6 +263,21 @@ describe("settings hub lock", () => {
     expect(settingsSrc).not.toContain("accent caret");
     expect(settingsSrc).not.toContain("emblem stays");
     expect(settingsSrc).toContain("News PageHeader ArrowLeft");
+    expect(settingsSrc).toContain("hub → Back");
+    expect(settingsSrc).not.toContain("hub → Home");
+  });
+
+  it("uses in-app referrer for hub Back and falls back off-origin", () => {
+    const origin = "https://app.24frame.co";
+    expect(settingsHubHasInAppReferrer(`${origin}/social`, origin)).toBe(true);
+    expect(settingsHubHasInAppReferrer(`${origin}/home`, origin)).toBe(true);
+    expect(settingsHubHasInAppReferrer(`${origin}/settings/profile`, origin)).toBe(true);
+    expect(settingsHubHasInAppReferrer("https://example.com/social", origin)).toBe(false);
+    expect(settingsHubHasInAppReferrer("", origin)).toBe(false);
+    expect(settingsHubHasInAppReferrer(null, origin)).toBe(false);
+    expect(settingsHubHasInAppReferrer(undefined, origin)).toBe(false);
+    expect(settingsHubHasInAppReferrer(`${origin}/home`, "")).toBe(false);
+    expect(settingsHubHasInAppReferrer("not a url", origin)).toBe(false);
   });
 
   it("titles the body pane with the hub section — never SETTINGS.title", () => {
