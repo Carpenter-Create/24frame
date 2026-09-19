@@ -24,6 +24,7 @@ vi.mock("@/app/(app)/messages/ask-globee-actions", () => ({
   loadAskAiOverlay: vi.fn(async () => ({
     surface: "ask-globee-landing",
     initials: "A",
+    displayName: "Ada Lovelace",
     conversations: [],
     conversation: null,
     messages: [],
@@ -343,9 +344,15 @@ describe("AskAiOverlay", () => {
     expect(ASK_AI_OVERLAY_PHONE_HISTORY_HOST_CLASS).toContain("max-md:flex");
     expect(ASK_AI_OVERLAY_PHONE_CLOCK_DOCK_CLASS).toContain("max-md:left-[var(--space-4)]");
     expect(ASK_AI_OVERLAY_PHONE_COMPACT_CLASS).toContain("overscroll-none");
-    expect(landingSrc).toContain("flex-col-reverse");
+    expect(landingSrc).not.toContain("flex-col-reverse");
+    expect(landingSrc).toContain("data-ask-globee-greeting=");
+    expect(landingSrc).not.toContain("data-ask-globee-headline=");
+    expect(landingSrc).toContain("ASK_AI_OVERLAY_PHONE_SCROLL_CLASS");
     expect(landingSrc).not.toContain("justify-center gap-[var(--space-12)]");
     expect(landingSrc).not.toContain("justify-end gap-[var(--space-12)]");
+    expect(landingSrc.indexOf("data-ask-globee-greeting=")).toBeLessThan(
+      landingSrc.indexOf("data-ask-globee-try="),
+    );
     expect(landingSrc.indexOf("data-ask-globee-try=")).toBeLessThan(
       landingSrc.indexOf("data-ask-globee-composer="),
     );
@@ -361,13 +368,41 @@ describe("AskAiOverlay", () => {
     const html = renderOverlay();
     expect(html).toContain("data-ask-ai-overlay-body");
     expect(html).toContain("data-ask-globee-landing");
-    expect(html).toContain("flex-col-reverse");
-    expect(html.indexOf("data-ask-globee-headline")).toBeLessThan(
+    expect(html).toContain("data-ask-globee-greeting");
+    expect(html).not.toContain("data-ask-globee-headline");
+    expect(html.indexOf("data-ask-globee-greeting")).toBeLessThan(
       html.indexOf("data-ask-globee-composer"),
     );
     expect(html.indexOf("data-ask-globee-try")).toBeLessThan(
       html.indexOf("data-ask-globee-composer"),
     );
+  });
+
+  it("puts history in header chrome and conversation label, not a clipped left-edge clock", () => {
+    const overlaySrc = readFileSync(new URL("./ask-ai-overlay.tsx", import.meta.url), "utf8");
+    const landingSrc = readFileSync(
+      new URL("../messages/ask-globee-landing.tsx", import.meta.url),
+      "utf8",
+    );
+
+    expect(overlaySrc).toContain("AskGlobeeHistoryClock");
+    expect(overlaySrc).toContain("ASK_GLOBEE.newConversationLabel");
+    expect(overlaySrc).not.toContain("MOBILE_CHROME_CLOCK_DOCK_CLASS");
+    expect(landingSrc).not.toContain("data-ask-globee-clock");
+    expect(landingSrc).not.toContain("MOBILE_CHROME_CLOCK_DOCK_CLASS");
+    expect(landingSrc).not.toContain("absolute left-0");
+
+    navigation.pathname = "/home";
+    navigation.search = "ai=1";
+    const html = renderOverlay();
+    expect(html).toContain("data-ask-ai-overlay-chrome");
+    expect(html).toContain("data-ask-globee-clock");
+    expect(html).toContain(ASK_GLOBEE.newConversationLabel);
+    expect(html).toContain(ASK_GLOBEE.pastConversationsLabel);
+    expect(html).toContain(ASK_GLOBEE.greetingAsk);
+    expect(html).not.toContain('data-ask-globee-headline=""');
+    expect(html.indexOf("data-ask-ai-overlay-chrome")).toBeLessThan(html.indexOf("data-ask-globee-clock"));
+    expect(html.indexOf("data-ask-globee-clock")).toBeLessThan(html.indexOf("data-ask-ai-expand"));
   });
 
   it("keeps the live opener when search params suspend — children never remount under NOOP", () => {

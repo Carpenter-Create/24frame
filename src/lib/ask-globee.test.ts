@@ -7,6 +7,7 @@ import {
   askGlobeeChipActivation,
   askGlobeeComposerSubmit,
   askGlobeeConversationTitle,
+  askGlobeeLandingGreeting,
   askGlobeeLandingHref,
   askGlobeeSelectedChip,
   ASK_GLOBEE_FETCHING_HOLD_MS,
@@ -42,9 +43,22 @@ describe("Ask Globee copy lock", () => {
     expect(ASK_GLOBEE.upgradeHref).toBe(USER_MENU.agreementsHref);
   });
 
-  it("keeps the 7:73 leftover greeting as a do-not-render lock and generic try chips", () => {
+  it("keeps leftover 7:73 lines as do-not-render locks and the Mercury-direct greeting", () => {
     expect(ASK_GLOBEE.need).toBe("What do you need?");
     expect(ASK_GLOBEE.tryLabel).toBe("Try one of these");
+    expect(ASK_GLOBEE.greetingAsk).toBe("How can I be helpful?");
+    expect(askGlobeeLandingGreeting({ firstName: "Ada", displayName: "Ada Lovelace" })).toBe(
+      "Hi, Ada. How can I be helpful?",
+    );
+    expect(askGlobeeLandingGreeting({ displayName: "Ada Lovelace" })).toBe(
+      "Hi, Ada. How can I be helpful?",
+    );
+    expect(askGlobeeLandingGreeting({})).toBe("How can I be helpful?");
+    expect(askGlobeeLandingGreeting({ displayName: "ada@example.com" })).toBe(
+      "How can I be helpful?",
+    );
+    expect(askGlobeeLandingGreeting({ firstName: "Ada" })).not.toContain("Hey");
+    expect(askGlobeeLandingGreeting({ firstName: "Ada" })).not.toContain(ASK_GLOBEE.headline);
     expect(ASK_GLOBEE.historyLabel).toBe("History");
     expect(ASK_GLOBEE.historySearchPlaceholder).toBe("Search past conversations");
     expect(ASK_GLOBEE.thisWeekLabel).toBe("This week");

@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
+import { Clock } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { ASK_GLOBEE, askGlobeeThreadHref } from "@/lib/ask-globee";
@@ -15,6 +16,11 @@ import {
   groupAskGlobeeHistory,
   type AskGlobeeHistoryRow,
 } from "@/lib/ask-globee-conversations";
+import {
+  MOBILE_CHROME_ICON_BUTTON_CLASS,
+  MOBILE_CHROME_ICON_CLASS,
+  MOBILE_CHROME_ICON_STROKE,
+} from "@/lib/mobile-chrome";
 import { cn } from "@/lib/cn";
 import { useAskGlobeeChrome } from "./ask-globee-chrome";
 
@@ -133,12 +139,14 @@ export function AskGlobeeHistoryPopover({
   currentId = null,
   open,
   onOpenChange,
+  align = "start",
   children,
 }: {
   conversations: AskGlobeeHistoryRow[];
   currentId?: string | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  align?: "start" | "end";
   children: ReactNode;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -172,10 +180,51 @@ export function AskGlobeeHistoryPopover({
     <div ref={rootRef} className="relative">
       {children}
       {open ? (
-        <div className="absolute left-0 top-full z-50 mt-[var(--space-2)] max-md:hidden">
+        <div
+          className={cn(
+            "absolute top-full z-50 mt-[var(--space-2)] max-md:hidden",
+            align === "end" ? "right-0" : "left-0",
+          )}
+        >
           <AskGlobeeHistoryPanel conversations={conversations} currentId={currentId} />
         </div>
       ) : null}
     </div>
+  );
+}
+
+/** Header-chrome history control. 44 hit, fully on-screen — never a left-edge dock. */
+export function AskGlobeeHistoryClock({
+  conversations,
+  currentId = null,
+  open,
+  onOpenChange,
+  align = "end",
+}: {
+  conversations: AskGlobeeHistoryRow[];
+  currentId?: string | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  align?: "start" | "end";
+}) {
+  return (
+    <AskGlobeeHistoryPopover
+      conversations={conversations}
+      currentId={currentId}
+      open={open}
+      onOpenChange={onOpenChange}
+      align={align}
+    >
+      <button
+        type="button"
+        data-ask-globee-clock=""
+        aria-label={ASK_GLOBEE.pastConversationsLabel}
+        aria-expanded={open}
+        onClick={() => onOpenChange(!open)}
+        className={MOBILE_CHROME_ICON_BUTTON_CLASS}
+      >
+        <Clock className={MOBILE_CHROME_ICON_CLASS} strokeWidth={MOBILE_CHROME_ICON_STROKE} />
+      </button>
+    </AskGlobeeHistoryPopover>
   );
 }

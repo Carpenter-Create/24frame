@@ -118,6 +118,7 @@ export async function startAskGlobeeConversation(
 export async function loadAskAiOverlay(threadId?: string | null): Promise<{
   surface: MessagesSurface;
   initials: string;
+  displayName: string | null;
   conversations: AskGlobeeHistoryRow[];
   conversation: AskGlobeeHistoryRow | null;
   messages: AskGlobeeStoredMessage[];
@@ -126,12 +127,14 @@ export async function loadAskAiOverlay(threadId?: string | null): Promise<{
   const empty = {
     surface: "access-gate" as const,
     initials: "?",
+    displayName: null as string | null,
     conversations: [] as AskGlobeeHistoryRow[],
     conversation: null,
     messages: [] as AskGlobeeStoredMessage[],
   };
   if (!ctx) return empty;
   const initials = userMenuAvatarInitial(ctx.user.email);
+  const displayName = ctx.user.name ?? null;
   const tier = ctx.activeOrg ? await getActiveOrgTier(ctx.activeOrg.id) : null;
   const surface = resolveMessagesSurface({
     isGcStaff: ctx.isGcStaff,
@@ -139,7 +142,7 @@ export async function loadAskAiOverlay(threadId?: string | null): Promise<{
     tier,
   });
   if (!canRenderAskGlobeeLanding(surface) || !ctx.activeOrg) {
-    return { ...empty, surface, initials };
+    return { ...empty, surface, initials, displayName };
   }
 
   const supabase = await createClient();
@@ -152,7 +155,7 @@ export async function loadAskAiOverlay(threadId?: string | null): Promise<{
   const conversations = sortAskGlobeeHistory((historyRows ?? []) as AskGlobeeHistoryRow[]);
   const nextThread = threadId && isAskGlobeeThreadId(threadId) ? threadId : null;
   if (!nextThread) {
-    return { surface, initials, conversations, conversation: null, messages: [] };
+    return { surface, initials, displayName, conversations, conversation: null, messages: [] };
   }
 
   const { data: conversationRow } = await supabase
@@ -163,7 +166,7 @@ export async function loadAskAiOverlay(threadId?: string | null): Promise<{
     .maybeSingle();
   const conversation = (conversationRow as AskGlobeeHistoryRow | null) ?? null;
   if (!conversation) {
-    return { surface, initials, conversations, conversation: null, messages: [] };
+    return { surface, initials, displayName, conversations, conversation: null, messages: [] };
   }
   const { data: messageRows } = await supabase
     .from("ai_conversation_messages")
@@ -175,6 +178,7 @@ export async function loadAskAiOverlay(threadId?: string | null): Promise<{
   return {
     surface,
     initials,
+    displayName,
     conversations,
     conversation,
     messages: (messageRows ?? []) as AskGlobeeStoredMessage[],

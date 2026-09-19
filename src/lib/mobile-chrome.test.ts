@@ -28,6 +28,7 @@ const overlaySrc = readFileSync(join(here, "../components/chrome/ask-ai-overlay.
 const leadLibSrc = readFileSync(join(here, "house-lead-chrome.ts"), "utf8");
 const destsSrc = readFileSync(join(here, "../components/chrome/house-phone-dest-chips.tsx"), "utf8");
 const landingSrc = readFileSync(join(here, "../components/messages/ask-globee-landing.tsx"), "utf8");
+const historySrc = readFileSync(join(here, "../components/messages/ask-globee-history.tsx"), "utf8");
 const threadSrc = readFileSync(join(here, "../components/messages/ask-globee-thread.tsx"), "utf8");
 
 describe("mobile chrome clock lock", () => {
@@ -83,14 +84,19 @@ describe("mobile chrome clock lock", () => {
     expect(destsSrc).not.toContain("data-mobile-nav-trigger");
     expect(destsSrc).toContain("data-house-phone-dest-chips");
 
-    expect(landingSrc).toContain("ASK_GLOBEE_CLOCK_BUTTON_CLASS");
-    expect(landingSrc).toContain("ASK_AI_OVERLAY_PHONE_CLOCK_DOCK_CLASS");
+    expect(landingSrc).not.toContain("ASK_GLOBEE_CLOCK_BUTTON_CLASS");
     expect(landingSrc).not.toContain("MOBILE_CHROME_CLOCK_DOCK_CLASS");
-    expect(landingSrc).toContain("MOBILE_CHROME_ICON_CLASS");
-    expect(landingSrc).toContain("MOBILE_CHROME_ICON_STROKE");
-    expect(landingSrc).toContain("data-ask-globee-clock");
+    expect(landingSrc).not.toContain("ASK_AI_OVERLAY_PHONE_CLOCK_DOCK_CLASS");
+    expect(landingSrc).not.toContain("data-ask-globee-clock");
+    expect(landingSrc).toContain("ASK_AI_OVERLAY_PHONE_SCROLL_CLASS");
     expect(landingSrc).not.toContain("absolute left-0 top-0");
-    expect(landingSrc).not.toContain('className="flex size-4 items-center justify-center text-ink-3"');
+    expect(overlaySrc).toContain("AskGlobeeHistoryClock");
+    expect(overlaySrc).not.toContain("MOBILE_CHROME_CLOCK_DOCK_CLASS");
+    expect(historySrc).toContain("AskGlobeeHistoryClock");
+    expect(historySrc).toContain("data-ask-globee-clock");
+    expect(historySrc).toContain("MOBILE_CHROME_ICON_BUTTON_CLASS");
+    expect(historySrc).toContain("MOBILE_CHROME_ICON_CLASS");
+    expect(historySrc).toContain("MOBILE_CHROME_ICON_STROKE");
 
     expect(threadSrc).not.toContain("data-ask-globee-clock");
     expect(threadSrc).not.toContain("MOBILE_CHROME_CLOCK_DOCK_CLASS");

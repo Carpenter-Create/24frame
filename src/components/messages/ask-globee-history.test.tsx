@@ -5,7 +5,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { ASK_GLOBEE } from "@/lib/ask-globee";
-import { AskGlobeeHistoryPanel } from "./ask-globee-history";
+import { AskGlobeeHistoryClock, AskGlobeeHistoryPanel } from "./ask-globee-history";
 
 function visible(html: string): string {
   return html.replaceAll("&#x27;", "'");
@@ -102,5 +102,22 @@ describe("AskGlobeeHistoryPanel", () => {
     expect(html).not.toContain("Harbor Lights");
     expect(html).not.toContain("Get support");
     expect(html).not.toContain(ASK_GLOBEE.historyLabel);
+  });
+
+  it("renders the header history clock fully on-screen, aligned to the trailing chrome", () => {
+    const html = visible(
+      renderToStaticMarkup(
+        <AskGlobeeHistoryClock conversations={[]} open={false} onOpenChange={() => {}} />,
+      ),
+    );
+
+    expect(html).toContain('data-ask-globee-clock=""');
+    expect(html).toContain(ASK_GLOBEE.pastConversationsLabel);
+    expect(html).toContain("size-[44px]");
+    expect(html).not.toContain("md:size-4");
+    expect(html).not.toContain("absolute left-0 top-0");
+    expect(src).toContain('align === "end" ? "right-0" : "left-0"');
+    expect(src).toContain("AskGlobeeHistoryClock");
+    expect(src).toContain("MOBILE_CHROME_ICON_BUTTON_CLASS");
   });
 });

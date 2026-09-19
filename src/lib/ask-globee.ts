@@ -1,4 +1,5 @@
 import { ASK_ASSISTANT, ASSISTANT_NAME } from "@/lib/product";
+import { HOME_GREETING_BARE, homeGreetingFirst } from "@/lib/home-greeting";
 import { USER_MENU } from "@/lib/user-menu";
 
 // Ask Globee copy and gating. Lives in lib/, not JSX.
@@ -47,7 +48,10 @@ export const ASK_GLOBEE = {
   headline: ASK_ASSISTANT,
   // Leftover 7:73 greeting — do not render on landing. Do not invent a replacement.
   need: "What do you need?",
+  // Leftover 7:73 marketing label — do not render. Chips stack under the greeting.
   tryLabel: "Try one of these",
+  // Mercury-direct landing. House "Hi" + first name, never Hey / invented names.
+  greetingAsk: "How can I be helpful?",
   tryPrompts: ASK_GLOBEE_TRY_PROMPTS,
   historyLabel: "History",
   historySearchPlaceholder: "Search past conversations",
@@ -149,6 +153,15 @@ export function askGlobeeThreadHref(threadId: string): string | null {
 
 export function askGlobeeLandingHref(): string {
   return "?ai=1";
+}
+
+/** `Hi, {First}. How can I be helpful?` when a first name exists; otherwise the ask. */
+export function askGlobeeLandingGreeting(input: {
+  firstName?: string | null;
+  displayName?: string | null;
+} = {}): string {
+  const first = homeGreetingFirst(input);
+  return first ? `${HOME_GREETING_BARE}, ${first}. ${ASK_GLOBEE.greetingAsk}` : ASK_GLOBEE.greetingAsk;
 }
 
 export function askGlobeeComposerSubmit(prompt: string): string | null {

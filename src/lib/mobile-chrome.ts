@@ -1,10 +1,11 @@
-// Shared mobile chrome for the Ask overlay history clock. One 44 hit,
-// one 16 tertiary glyph. The dest hamburger is gone — destinations live
-// on HousePhoneDestChips. The clock stays Lucide 1.33 until a measured
-// rematch. MOBILE_CHROME_HAMBURGER_* tokens remain so the clock keeps
-// the locked 44/16 hit. Not Close/44 — that object is a muted circle.
-// Desktop clock stays size-4 at left-0. Phone dock is overlay SoT
-// (sheet pad, not the retired /messages -24px content-inset pull).
+// Shared mobile chrome tokens for the Ask overlay history clock. One 44
+// hit, one 16 tertiary glyph. History lives in overlay header chrome
+// (AskGlobeeHistoryClock) — never an absolute left-edge dock. Phone
+// history is the #457 in-sheet surface. The dest hamburger is gone.
+// The clock stays Lucide 1.33 until a measured rematch.
+// MOBILE_CHROME_HAMBURGER_* and CLOCK_DOCK tokens remain so the locked
+// 44/16 sheet-pad math stays testable. Not Close/44 — that object is a
+// muted circle. Do not restore size-4 at left-0; that clips the glyph.
 
 import { HOUSE_ICON_BUTTON_CLASS } from "@/lib/house-shell";
 
