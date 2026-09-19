@@ -17,7 +17,9 @@
 
 import { z } from "zod";
 
+import { HOUSE_CARD_PAD, HOUSE_MODULE_CLASS, HOUSE_SECTION_AIR_CLASS } from "@/lib/house-shell";
 import type { NotificationKind } from "@/lib/notifications";
+import { SETTINGS_PREF_TITLE_CLASS } from "@/lib/settings";
 
 export const NOTIFICATION_PREF_EVENTS = [
   "title_returned",
@@ -224,20 +226,31 @@ export const NOTIFICATION_PREF_GROUPS: readonly {
   },
 ];
 
-export const NOTIFICATION_PREF_MATRIX_CLASS = "flex flex-col gap-[var(--space-6)]";
-export const NOTIFICATION_PREF_GROUP_CLASS = "flex flex-col gap-[var(--space-4)]";
-export const NOTIFICATION_PREF_SECTION_CLASS = "flex flex-col gap-[var(--space-2)]";
+// One soft plate around Notifications. Groups inside are titles +
+// hairline + air — not a muted card per group (Adam lock).
+export const NOTIFICATION_PREF_WRAP_CLASS =
+  `${HOUSE_MODULE_CLASS} ${HOUSE_CARD_PAD} flex flex-col ${HOUSE_SECTION_AIR_CLASS}`;
+export const NOTIFICATION_PREF_INTRO_CLASS = "flex flex-col gap-[var(--space-2)]";
+export const NOTIFICATION_PREF_MATRIX_CLASS = "flex flex-col divide-y divide-hairline";
+export const NOTIFICATION_PREF_SECTION_CLASS =
+  "flex flex-col gap-[var(--space-3)] py-[var(--space-8)] first:pt-0 last:pb-0";
+export const NOTIFICATION_PREF_TITLE_CLASS = SETTINGS_PREF_TITLE_CLASS;
 export const NOTIFICATION_PREF_HEAD_CLASS =
-  "grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-[var(--space-4)] t-body-sm text-ink-3";
+  "grid grid-cols-[minmax(0,1fr)_auto_auto] items-end gap-[var(--space-4)]";
+export const NOTIFICATION_PREF_CHANNEL_HEAD_CLASS = "t-body-sm text-ink-3";
+export const NOTIFICATION_PREF_LIST_CLASS = "flex flex-col";
 export const NOTIFICATION_PREF_ROW_CLASS =
-  "grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-[var(--space-4)] t-body text-ink";
-export const NOTIFICATION_PREF_CHANNEL_CLASS = "flex w-14 justify-center";
+  "grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-[var(--space-4)] py-[var(--space-3)] t-body text-ink";
+export const NOTIFICATION_PREF_CHANNEL_CLASS = "flex w-12 justify-center";
+// Compact house switch. Track 20×36, thumb 16. Off inset 2 → on
+// translate 36 − 16 − 2 = 18. Accent on. Off wash reads on the
+// one muted plate. No second Switch.
 export const NOTIFICATION_PREF_SWITCH_TRACK_CLASS =
-  "relative inline-flex h-6 w-10 shrink-0 items-center rounded-full transition-colors";
+  "relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors";
 export const NOTIFICATION_PREF_SWITCH_ON_CLASS = "bg-accent";
-export const NOTIFICATION_PREF_SWITCH_OFF_CLASS = "bg-surface-muted";
+export const NOTIFICATION_PREF_SWITCH_OFF_CLASS = "bg-ink-3/40";
 export const NOTIFICATION_PREF_SWITCH_THUMB_CLASS =
-  "inline-block size-5 rounded-full bg-surface transition-transform";
+  "inline-block size-4 rounded-full bg-surface transition-transform";
 export const NOTIFICATION_PREF_SWITCH_THUMB_ON_CLASS = "translate-x-[18px]";
 export const NOTIFICATION_PREF_SWITCH_THUMB_OFF_CLASS = "translate-x-0.5";
 

@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
+import { HOUSE_CARD_PAD, HOUSE_MODULE_CLASS } from "./house-shell";
 import { MOBILE_CHROME_LEAD_PAD_CLASS } from "./mobile-chrome";
 import { USER_MENU, USER_MENU_ACTIONS } from "./user-menu";
 import {
@@ -15,6 +16,8 @@ import {
   SETTINGS_RAIL_CHEVRON_CLASS,
   SETTINGS_RAIL_ITEM_CLASS,
   SETTINGS_PANE_TITLE_CLASS,
+  SETTINGS_PREF_BLOCK_CLASS,
+  SETTINGS_PREF_TITLE_CLASS,
   SETTINGS_RAIL_PAD_CLASS,
   SETTINGS_RAIL_TITLE_CLASS,
   isSettingsPath,
@@ -222,6 +225,15 @@ describe("settings hub lock", () => {
     expect(settingsPaneTitle("profile")).not.toBe(SETTINGS.title);
     expect(SETTINGS_PANE_TITLE_CLASS).toBe("t-section text-ink");
     expect(SETTINGS_RAIL_TITLE_CLASS).toBe("t-section text-ink");
+  });
+
+  it("keeps Appearance on the house muted module — not a new surface", () => {
+    expect(SETTINGS_PREF_BLOCK_CLASS).toContain(HOUSE_MODULE_CLASS);
+    expect(SETTINGS_PREF_BLOCK_CLASS).toContain(HOUSE_CARD_PAD);
+    expect(SETTINGS_PREF_BLOCK_CLASS).toContain("gap-[var(--space-3)]");
+    expect(SETTINGS_PREF_BLOCK_CLASS).not.toContain("card-surface");
+    expect(SETTINGS_PREF_TITLE_CLASS).toBe("t-heading text-ink");
+    expect(SETTINGS_PREF_TITLE_CLASS).not.toContain("t-section");
   });
 
   it("locks the settings rail on 220 pad 16, 15 Regular, house wash", () => {
