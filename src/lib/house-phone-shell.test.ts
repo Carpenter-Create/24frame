@@ -36,7 +36,9 @@ import { HousePhoneDestChips } from "@/components/chrome/house-phone-dest-chips"
 import { HousePhoneTopChrome } from "@/components/chrome/house-phone-top-chrome";
 import { SocialTopBar } from "@/components/social/social-top-bar";
 import {
+  HOUSE_HEADER_TRAILING_DESKTOP_CLASS,
   HOUSE_HEADER_TRAILING_ICON_CLASS,
+  HOUSE_HEADER_TRAILING_PHONE_CLASS,
   HOUSE_PHONE_BOTTOM_NAV,
   HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS,
   HOUSE_PHONE_BOTTOM_NAV_CLASS,
@@ -44,6 +46,7 @@ import {
   HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS,
   HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT,
   HOUSE_PHONE_CHROME_ICON_CLASS,
+  HOUSE_PHONE_CHROME_ICON_WEIGHT,
   HOUSE_PHONE_BOTTOM_NAV_ITEM_OFF_CLASS,
   HOUSE_PHONE_BOTTOM_NAV_ITEM_ON_CLASS,
   HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS,
@@ -270,8 +273,11 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS).toBe(HOUSE_PHONE_CHROME_ICON_CLASS);
     expect(HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS).not.toBe(PHOSPHOR_CHROME_ICON_CLASS);
     expect(PHOSPHOR_CHROME_ICON_CLASS).toBe("size-4 shrink-0");
-    expect(HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT).toBe("regular");
+    expect(HOUSE_PHONE_CHROME_ICON_WEIGHT).toBe("regular");
+    expect(HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT).toBe(HOUSE_PHONE_CHROME_ICON_WEIGHT);
     expect(HOUSE_HEADER_TRAILING_ICON_CLASS).toBe("size-6 shrink-0 md:size-4");
+    expect(HOUSE_HEADER_TRAILING_PHONE_CLASS).toBe("size-6 shrink-0 md:size-4 md:hidden");
+    expect(HOUSE_HEADER_TRAILING_DESKTOP_CLASS).toBe("size-4 shrink-0 hidden md:block");
     expect(bottomNavSrc).toContain("HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS");
     expect(bottomNavSrc).toContain("HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT");
     expect(bottomNavSrc).not.toContain("PhosphorChromeIcon");
@@ -300,11 +306,19 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
   });
 
   it("uses one 24px SoT for phone trailing chrome without ballooning the avatar", () => {
-    expect(askHeaderSrc).toContain("HOUSE_HEADER_TRAILING_ICON_CLASS");
-    expect(bellSrc).toContain("HOUSE_HEADER_TRAILING_ICON_CLASS");
+    expect(askHeaderSrc).toContain("HOUSE_HEADER_TRAILING_PHONE_CLASS");
+    expect(askHeaderSrc).toContain("HOUSE_HEADER_TRAILING_DESKTOP_CLASS");
+    expect(askHeaderSrc).toContain('register="stroke"');
+    expect(askHeaderSrc).toContain('register="fill"');
+    expect(bellSrc).toContain("HOUSE_HEADER_TRAILING_PHONE_CLASS");
+    expect(bellSrc).toContain("HOUSE_HEADER_TRAILING_DESKTOP_CLASS");
+    expect(bellSrc).toContain("HOUSE_PHONE_CHROME_ICON_WEIGHT");
+    expect(bellSrc).toContain("weight={HOUSE_PHONE_CHROME_ICON_WEIGHT}");
     expect(searchSheetSrc).toContain("HOUSE_PHONE_CHROME_ICON_CLASS");
+    expect(searchSheetSrc).toContain("HOUSE_PHONE_CHROME_ICON_WEIGHT");
     expect(accountSheetSrc).not.toContain("HOUSE_PHONE_CHROME_ICON_CLASS");
     expect(accountSheetSrc).not.toContain("HOUSE_HEADER_TRAILING_ICON_CLASS");
+    expect(accountSheetSrc).not.toContain("HOUSE_HEADER_TRAILING_PHONE_CLASS");
     expect(HOUSE_THEME_TOGGLE_CLASS).toContain("size-8");
     expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("size-6");
 
@@ -315,9 +329,12 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     );
     expect(trailing).toContain("data-ask-assistant-header");
     expect(trailing).toContain("data-activity-bell");
-    expect(trailing).toContain(HOUSE_HEADER_TRAILING_ICON_CLASS);
+    expect(trailing).toContain(HOUSE_HEADER_TRAILING_PHONE_CLASS);
+    expect(trailing).toContain(HOUSE_HEADER_TRAILING_DESKTOP_CLASS);
     expect(trailing).toContain("size-6");
     expect(trailing).toContain("md:size-4");
+    expect(trailing).toContain('data-house-ai-mark-register="stroke"');
+    expect(trailing).toContain('data-house-ai-mark-register="fill"');
   });
 
   it("puts a light house chip behind the active glyph only", () => {
