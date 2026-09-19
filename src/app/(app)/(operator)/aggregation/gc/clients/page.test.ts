@@ -131,6 +131,11 @@ describe("GcClientsPage read bound", () => {
     expect(directorySrc).not.toContain("nested:");
     expect(directorySrc).not.toContain("subtitle=");
     expect(directorySrc).not.toContain("<table");
+    expect(directorySrc).not.toContain("Card");
+    expect(directorySrc).not.toContain("HouseGrantForm");
+    expect(readFileSync("src/app/(app)/(operator)/aggregation/gc/clients/page.tsx", "utf8")).toContain(
+      "HouseGrantSection",
+    );
     expect(html).toContain("data-titles-catalog-header-row");
     expect(html).toContain("data-gc-clients-status-compact");
     expect(html).toContain("data-house-page-select");

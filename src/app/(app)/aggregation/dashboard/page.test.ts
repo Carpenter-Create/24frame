@@ -146,7 +146,6 @@ function stubClient(
     if (name === "my_findings") return { data: findings, error: null };
     if (name === "my_deliveries") return { data: extras.deliveries ?? [], error: null };
     if (name === "gc_client_directory") return { data: [], error: null };
-    if (name === "pending_house_grants") return { data: [], error: null };
     throw new Error(`unexpected rpc(${name})`);
   });
   vi.mocked(createClient).mockResolvedValue({ from, rpc } as never);
