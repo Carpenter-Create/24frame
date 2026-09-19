@@ -82,6 +82,8 @@ export const SETTINGS = {
   organizationEmpty: "No rights holder on this account.",
   company: "Company",
   team: "Team",
+  roles: "Roles",
+  rolesHref: "/settings/organization/roles",
   agreements: USER_MENU.agreements,
   agreementsHref: USER_MENU.agreementsHref,
   agreementsEmpty: "No agreements on this account.",

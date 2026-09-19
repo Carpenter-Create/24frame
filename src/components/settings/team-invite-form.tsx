@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import {
+  SETTINGS,
   SETTINGS_DIALOG_ERROR_CLASS,
   SETTINGS_DIALOG_FIELD_CLASS,
   SETTINGS_DIALOG_FOOTER_CLASS,
@@ -68,12 +69,14 @@ export function TeamInviteForm({
   members,
   pending,
   entities = [],
+  currentUserId,
 }: {
   orgId: string;
   canInvite: boolean;
   members: TeamMemberRow[];
   pending: TeamPendingRow[];
   entities?: LegalEntityRow[];
+  currentUserId?: string;
 }) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<OrgRole>(TEAM_INVITE_DEFAULT_ROLE);
@@ -162,12 +165,16 @@ export function TeamInviteForm({
         ) : (
           rows.map((row) => {
             const name = teamRowLabel(row);
+            const you =
+              currentUserId && row.key === currentUserId
+                ? ` ${ACCOUNT_INVITE.youSuffix}`
+                : "";
             return (
               <SettingsGroupRow key={row.key}>
                 <div data-invite-status={row.status}>
                   <SettingsDrillRow
                     kind={`team-${row.key}`}
-                    label={name}
+                    label={`${name}${you}`}
                     value={teamRowMeta(row)}
                     readOnly
                     leading={
@@ -198,6 +205,14 @@ export function TeamInviteForm({
             );
           })
         )}
+        <SettingsGroupRow>
+          <SettingsDrillRow
+            kind="roles"
+            label={ACCOUNT_INVITE.rolesLink}
+            href={SETTINGS.rolesHref}
+            itemAttr="data-roles-link"
+          />
+        </SettingsGroupRow>
         {canInvite ? (
           <SettingsGroupRow>
             <SettingsDrillRow

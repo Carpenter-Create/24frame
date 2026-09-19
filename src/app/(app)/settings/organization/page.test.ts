@@ -89,11 +89,55 @@ describe("SettingsOrganizationPage", () => {
     expect(html).toContain('data-settings-drill-row="entity-add"');
     expect(html).not.toContain("card-surface");
     expect(html).toContain(SETTINGS_CONTENT_MEASURE_CLASS);
+    expect(html).toContain("data-roles-link");
+    expect(html).toContain(SETTINGS.rolesHref);
     expect(paneSrc).toContain("CompanyProfileForm");
     expect(paneSrc).toContain("TeamInviteForm");
     expect(paneSrc).toContain("member_can");
     expect(paneSrc).not.toContain("out of scope");
     expect(paneSrc).not.toContain("<Card>");
+  });
+
+  it("opens Roles from a Team drill row and keeps Invite inside the group", async () => {
+    vi.mocked(getOrgContext).mockResolvedValue(ctx(true) as never);
+    const html = renderToStaticMarkup(await SettingsOrganizationPage());
+    expect(html).toContain("data-roles-link");
+    expect(html).toContain(ACCOUNT_INVITE.rolesLink);
+    expect(html).toContain(SETTINGS.rolesHref);
+    expect(html).toContain("data-team-invite-cta");
+    expect(html).toContain(ACCOUNT_INVITE.invite);
+    expect(html).not.toContain("data-team-list-head");
+    expect(html).not.toContain("Invite a user");
+  });
+
+  it("shows (you) suffix for the current user in the team list", async () => {
+    const rpc = vi.fn(async (name: string) => {
+      if (name === "member_can") return { data: true, error: null };
+      if (name === "org_team") {
+        return {
+          data: [
+            {
+              user_id: "u1",
+              email: "ada@example.com",
+              role: "account_owner",
+              status: "active",
+              joined_at: "2026-01-01T00:00:00Z",
+              display_name: "Ada",
+              invited_at: null,
+            },
+          ],
+          error: null,
+        };
+      }
+      if (name === "org_pending_invites") return { data: [], error: null };
+      if (name === "org_legal_entities") return { data: [], error: null };
+      throw new Error(`unexpected rpc(${name})`);
+    });
+    vi.mocked(createClient).mockResolvedValue({ rpc } as never);
+    vi.mocked(getOrgContext).mockResolvedValue(ctx(true) as never);
+
+    const html = renderToStaticMarkup(await SettingsOrganizationPage());
+    expect(html).toContain("(you)");
   });
 
   it("shows Invited on pending and Accepted on members", async () => {
@@ -157,7 +201,6 @@ describe("SettingsOrganizationPage", () => {
     expect(html).not.toContain("Removed");
     expect(html).not.toContain("Needs review");
     expect(html).not.toContain("Ownership");
-    expect(html).not.toContain("Invite a user");
     const memberStart = html.indexOf("ada@example.com");
     const memberRow = html.slice(html.lastIndexOf("<li", memberStart), html.indexOf("</li>", memberStart));
     expect(memberRow).not.toContain(ACCOUNT_INVITE.revoke);

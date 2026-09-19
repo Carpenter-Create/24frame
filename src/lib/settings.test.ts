@@ -103,6 +103,8 @@ describe("settings hub lock", () => {
     expect(SETTINGS.dashboardHref).toBe("/aggregation/dashboard");
     expect(SETTINGS.company).toBe("Company");
     expect(SETTINGS.team).toBe("Team");
+    expect(SETTINGS.roles).toBe("Roles");
+    expect(SETTINGS.rolesHref).toBe("/settings/organization/roles");
     expect(SETTINGS).not.toHaveProperty("companyHref");
     expect(SETTINGS).not.toHaveProperty("teamHref");
     expect(SETTINGS).not.toHaveProperty("youHref");
@@ -142,6 +144,7 @@ describe("settings hub lock", () => {
     expect(settingsHubSection("/settings/organization")).toBe("organization");
     expect(settingsHubSection("/settings/organization/company")).toBe("organization");
     expect(settingsHubSection("/settings/organization/entities/new")).toBe("organization");
+    expect(settingsHubSection("/settings/organization/roles")).toBe("organization");
     expect(settingsHubSection("/settings/preferences")).toBe("preferences");
     expect(settingsHubSection("/settings/preferences/theme")).toBe("preferences");
     expect(settingsHubSection("/settings/preferences/notifications")).toBe("preferences");
