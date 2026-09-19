@@ -216,8 +216,10 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
 
   it("evens phone trailing AI · bell · avatar with one gap token and hugged hits", () => {
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("size-4");
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("box-content");
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("p-[var(--space-2)]");
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("-mx-[var(--space-2)]");
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("md:box-border");
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("md:size-8");
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("md:p-0");
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("md:mx-0");

@@ -85,13 +85,14 @@ export const HOUSE_LEAD_SEARCH_PILL_CLASS =
 // not equal air: 16px AI/bell/search glyphs sat in size-8 hits
 // (8px pad each side) beside a 32px avatar disk. The two glyphs
 // grouped tighter than glyph-to-disk. Phone hit hugs the 16px
-// glyph; the 32px tap is padding cancelled from the flex flow with
-// -mx so APP_HEADER_TRAILING_CLUSTER_CLASS gap is edge-to-edge.
+// glyph; box-content lets the 32px tap grow outside size-4
+// (preflight is border-box). -mx cancels that pad from the flex
+// flow so APP_HEADER_TRAILING_CLUSTER_CLASS gap is edge-to-edge.
 // Desktop stays the 32 circle. Glyph size is unchanged (size-4
 // header, size-6 Mercury bottom). Circular quiet — no muted wash,
 // no hairline box.
 export const HOUSE_HEADER_TRAILING_HIT_CLASS =
-  `flex size-4 min-h-4 min-w-4 shrink-0 items-center justify-center overflow-visible p-[var(--space-2)] -mx-[var(--space-2)] ${HOUSE_ICON_BUTTON_CLASS} md:size-8 md:min-h-8 md:min-w-8 md:p-0 md:mx-0`;
+  `flex size-4 min-h-4 min-w-4 shrink-0 items-center justify-center overflow-visible box-content p-[var(--space-2)] -mx-[var(--space-2)] ${HOUSE_ICON_BUTTON_CLASS} md:box-border md:size-8 md:min-h-8 md:min-w-8 md:p-0 md:mx-0`;
 
 // Wrappers around phone-only trailing controls must not generate a
 // box — the hit's -mx only evens the cluster if the button is the
