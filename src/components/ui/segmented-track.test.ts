@@ -12,6 +12,8 @@ describe("SegmentedTrack slide SoT", () => {
     expect(src).toContain("readSegmentedThumbFlight");
     expect(src).toContain("startSegmentedThumbFlight");
     expect(src).toContain("projectSegmentedThumbFlight");
+    expect(src).toContain("segmentedThumbRestoreSource");
+    expect(src).toContain("writeSegmentedThumbPainted");
     expect(src).toContain("scheduleSegmentedThumbRestore");
     expect(src).toContain("remainingMs");
     expect(src).toContain("onClickCapture");

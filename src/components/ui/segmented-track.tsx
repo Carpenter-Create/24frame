@@ -20,9 +20,12 @@ import {
   readSegmentedThumbFlight,
   scheduleSegmentedThumbRestore,
   segmentedItemIndexFromEventTarget,
+  segmentedThumbFirstPaintBox,
   segmentedThumbNeedsRestore,
+  segmentedThumbRestoreSource,
   segmentedThumbStyle,
   startSegmentedThumbFlight,
+  writeSegmentedThumbPainted,
   type SegmentedThumbBox,
 } from "@/lib/segmented-track";
 
@@ -63,13 +66,8 @@ export function SegmentedTrack({
   const [visualIndex, setVisualIndex] = useState(activeIndex);
   const [thumbStyle, setThumbStyle] = useState<CSSProperties>(() => {
     if (!persistKey) return { opacity: 0 };
-    const flight = readSegmentedThumbFlight(persistKey);
-    if (!flight) return { opacity: 0 };
-    const view = projectSegmentedThumbFlight(
-      flight,
-      typeof performance === "undefined" ? 0 : performance.now(),
-    );
-    return segmentedThumbStyle(view.box);
+    const box = segmentedThumbFirstPaintBox(persistKey);
+    return box ? segmentedThumbStyle(box) : { opacity: 0 };
   });
 
   useLayoutEffect(() => {
@@ -95,12 +93,20 @@ export function SegmentedTrack({
     let cancelRestore: (() => void) | undefined;
     if (!placedRef.current) {
       placedRef.current = true;
-      const flight = persistKey ? readSegmentedThumbFlight(persistKey) : undefined;
-      const view = flight ? projectSegmentedThumbFlight(flight, now) : undefined;
-      if (view && !view.done && segmentedThumbNeedsRestore(view.box, next)) {
-        apply(view.box, true);
+      const restore = persistKey
+        ? segmentedThumbRestoreSource(persistKey, next, now)
+        : undefined;
+      if (persistKey && restore) {
+        apply(restore.box, true);
+        startSegmentedThumbFlight(
+          persistKey,
+          restore.box,
+          next,
+          now,
+          restore.remainingMs,
+        );
         cancelRestore = scheduleSegmentedThumbRestore(
-          (box) => apply(box, false, view.remainingMs),
+          (box) => apply(box, false, restore.remainingMs),
           next,
         );
       } else {
@@ -124,6 +130,10 @@ export function SegmentedTrack({
 
     return () => {
       cancelRestore?.();
+      if (!persistKey) return;
+      const thumb = track.querySelector("[data-segmented-thumb]");
+      if (!thumb) return;
+      writeSegmentedThumbPainted(persistKey, measureSegmentedBox(track, thumb));
     };
   }, [visualIndex, persistKey]);
 

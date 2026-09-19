@@ -11,10 +11,13 @@ import {
   readSegmentedThumbCache,
   scheduleSegmentedThumbRestore,
   SEGMENTED_TRACK_PERSIST,
+  segmentedThumbFirstPaintBox,
   segmentedThumbNeedsRestore,
+  segmentedThumbRestoreSource,
   segmentedThumbStyle,
   startSegmentedThumbFlight,
   writeSegmentedThumbCache,
+  writeSegmentedThumbPainted,
 } from "./segmented-track";
 
 afterEach(() => {
@@ -52,6 +55,27 @@ describe("segmented track persist cache", () => {
     clearSegmentedThumbCache(SEGMENTED_TRACK_PERSIST.workspace);
     expect(readSegmentedThumbCache(SEGMENTED_TRACK_PERSIST.workspace)).toBeUndefined();
     expect(readSegmentedThumbCache(SEGMENTED_TRACK_PERSIST.period)?.width).toBe(32);
+  });
+
+  it("restores a remount that never started a flight from the last painted box", () => {
+    writeSegmentedThumbCache(SEGMENTED_TRACK_PERSIST.workspace, {
+      left: 24,
+      width: 88,
+    });
+    expect(segmentedThumbFirstPaintBox(SEGMENTED_TRACK_PERSIST.workspace, 0)).toEqual({
+      left: 24,
+      width: 88,
+    });
+    expect(
+      segmentedThumbRestoreSource(
+        SEGMENTED_TRACK_PERSIST.workspace,
+        { left: 120, width: 72 },
+        0,
+      ),
+    ).toEqual({
+      box: { left: 24, width: 88 },
+      remainingMs: HOUSE_SEGMENTED_THUMB_DURATION_MS,
+    });
   });
 });
 
@@ -139,5 +163,63 @@ describe("segmented thumb geometry", () => {
     const painted = readSegmentedThumbCache(SEGMENTED_TRACK_PERSIST.workspace, 5_080);
     expect(painted?.left).toBeGreaterThan(from.left);
     expect(painted?.left).toBeLessThan(to.left);
+
+    writeSegmentedThumbPainted(SEGMENTED_TRACK_PERSIST.workspace, from);
+    const live = segmentedThumbFirstPaintBox(SEGMENTED_TRACK_PERSIST.workspace, 5_080);
+    expect(live?.left).toBeGreaterThan(from.left);
+    expect(live?.left).toBeLessThan(to.left);
+    expect(
+      segmentedThumbRestoreSource(SEGMENTED_TRACK_PERSIST.workspace, to, 5_080)?.remainingMs,
+    ).toBe(HOUSE_SEGMENTED_THUMB_DURATION_MS - 80);
+  });
+
+  it("restores a settled remount from the last painted box, not a snap to next", () => {
+    const from = { left: 0, width: 48 };
+    const to = { left: 120, width: 96 };
+    const next = { left: 240, width: 64 };
+    startSegmentedThumbFlight(
+      SEGMENTED_TRACK_PERSIST.workspace,
+      from,
+      to,
+      1_000,
+    );
+    writeSegmentedThumbPainted(SEGMENTED_TRACK_PERSIST.workspace, to);
+
+    const settledAt = 1_000 + HOUSE_SEGMENTED_THUMB_DURATION_MS;
+    expect(segmentedThumbFirstPaintBox(SEGMENTED_TRACK_PERSIST.workspace, settledAt)).toEqual(
+      to,
+    );
+    expect(
+      segmentedThumbRestoreSource(SEGMENTED_TRACK_PERSIST.workspace, next, settledAt),
+    ).toEqual({
+      box: to,
+      remainingMs: HOUSE_SEGMENTED_THUMB_DURATION_MS,
+    });
+    expect(
+      segmentedThumbRestoreSource(SEGMENTED_TRACK_PERSIST.workspace, to, settledAt),
+    ).toBeUndefined();
+  });
+
+  it("slides from the last painted lane after a completed hop remounts at the destination", () => {
+    const from = { left: 0, width: 48 };
+    const to = { left: 120, width: 96 };
+    startSegmentedThumbFlight(
+      SEGMENTED_TRACK_PERSIST.workspace,
+      from,
+      to,
+      1_000,
+    );
+    writeSegmentedThumbPainted(SEGMENTED_TRACK_PERSIST.workspace, from);
+
+    const settledAt = 1_000 + HOUSE_SEGMENTED_THUMB_DURATION_MS;
+    expect(segmentedThumbFirstPaintBox(SEGMENTED_TRACK_PERSIST.workspace, settledAt)).toEqual(
+      from,
+    );
+    expect(
+      segmentedThumbRestoreSource(SEGMENTED_TRACK_PERSIST.workspace, to, settledAt),
+    ).toEqual({
+      box: from,
+      remainingMs: HOUSE_SEGMENTED_THUMB_DURATION_MS,
+    });
   });
 });

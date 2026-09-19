@@ -3,7 +3,8 @@
 // remount the track (workspace Social fork, period query commits)
 // would otherwise snap. A module flight stores from/to + start time
 // so the next mount can paint the in-flight box and finish the glide
-// with the remaining duration.
+// with the remaining duration. After the flight settles, the last
+// painted box is still restored so remounts slide instead of snapping.
 
 import {
   HOUSE_SEGMENTED_THUMB_DURATION_MS,
@@ -39,11 +40,26 @@ export const SEGMENTED_TRACK_PERSIST = {
 } as const;
 
 const thumbFlights = new Map<string, SegmentedThumbFlight>();
+const thumbPainted = new Map<string, SegmentedThumbBox>();
 
 export function readSegmentedThumbFlight(
   persistKey: string,
 ): SegmentedThumbFlight | undefined {
   return thumbFlights.get(persistKey);
+}
+
+export function readSegmentedThumbPainted(
+  persistKey: string,
+): SegmentedThumbBox | undefined {
+  return thumbPainted.get(persistKey);
+}
+
+export function writeSegmentedThumbPainted(
+  persistKey: string,
+  box: SegmentedThumbBox,
+): void {
+  if (!isUsableSegmentedThumbBox(box)) return;
+  thumbPainted.set(persistKey, box);
 }
 
 export function writeSegmentedThumbFlight(
@@ -76,14 +92,17 @@ export function writeSegmentedThumbCache(
     startedAt: 0,
     durationMs: 0,
   });
+  thumbPainted.set(persistKey, box);
 }
 
 export function clearSegmentedThumbCache(persistKey?: string): void {
   if (persistKey) {
     thumbFlights.delete(persistKey);
+    thumbPainted.delete(persistKey);
     return;
   }
   thumbFlights.clear();
+  thumbPainted.clear();
 }
 
 export function isUsableSegmentedThumbBox(box: SegmentedThumbBox): boolean {
@@ -182,6 +201,31 @@ export function startSegmentedThumbFlight(
   const flight = { from, to, startedAt, durationMs };
   writeSegmentedThumbFlight(persistKey, flight);
   return flight;
+}
+
+export function segmentedThumbFirstPaintBox(
+  persistKey: string,
+  now = typeof performance === "undefined" ? 0 : performance.now(),
+): SegmentedThumbBox | undefined {
+  const flight = thumbFlights.get(persistKey);
+  const view = flight ? projectSegmentedThumbFlight(flight, now) : undefined;
+  if (view && !view.done) return view.box;
+  return thumbPainted.get(persistKey) ?? view?.box;
+}
+
+export function segmentedThumbRestoreSource(
+  persistKey: string,
+  next: SegmentedThumbBox,
+  now = typeof performance === "undefined" ? 0 : performance.now(),
+): { box: SegmentedThumbBox; remainingMs: number } | undefined {
+  const from = segmentedThumbFirstPaintBox(persistKey, now);
+  if (!from || !segmentedThumbNeedsRestore(from, next)) return undefined;
+  const flight = thumbFlights.get(persistKey);
+  const view = flight ? projectSegmentedThumbFlight(flight, now) : undefined;
+  return {
+    box: from,
+    remainingMs: view && !view.done ? view.remainingMs : HOUSE_SEGMENTED_THUMB_DURATION_MS,
+  };
 }
 
 export function segmentedThumbNeedsRestore(
