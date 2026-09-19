@@ -104,7 +104,14 @@ describe("NewsRail", () => {
     expect(html).toContain('data-overview-module="news"');
     expect(html).toContain(NEWS_PAGE.title);
     expect(html).toContain(DASHBOARD_SECTION_TITLE_CLASS);
+    // Industry news is the one Home gray module that keeps the words
+    // in its trailing slot (Adam interrupt 2026-09-19). The trailing
+    // is TextAction "View all" — not the glyph the other Home modules
+    // now use.
     expect(html).toContain(NEWS_PAGE.viewAll);
+    expect(html).toContain(`>${NEWS_PAGE.viewAll}<`);
+    expect(html).toContain("data-overview-module-text");
+    expect(html).not.toContain("data-overview-module-arrow");
     expect(html).toContain(`aria-label="${NEWS_PAGE.title}"`);
     expect(html).toContain("data-news-outbound");
     expect(html).toContain(`href="${NEWS_HREF}"`);

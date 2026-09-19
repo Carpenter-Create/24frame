@@ -14,6 +14,12 @@ import { OVERVIEW_MODULE_NEST_CLASS } from "@/lib/overview";
 // Education course tiles (no second grey card). History shares
 // NewsCard: Home stack on phone, dense rows on md+. Source chips
 // live in NewsHistory under the H1.
+//
+// Trailing header CTA (Adam interrupt 2026-09-19): Industry news is
+// the one Home gray module that keeps the words "View all" — the
+// other Home modules swap to glyph-only HouseActionArrow. NewsRail
+// therefore passes `trailingText` so OverviewModule renders TextAction
+// instead of the arrow, matching today's News SoT.
 
 export function NewsRail({
   items,
@@ -59,6 +65,7 @@ export function NewsRail({
       href={viewAll ? NEWS_HREF : undefined}
       cta={viewAll ? NEWS_PAGE.viewAll : undefined}
       empty={NEWS_PAGE.empty}
+      trailingText
     >
       {items.length > 0 ? (
         <ul data-news-list="" className={`flex flex-col ${OVERVIEW_MODULE_NEST_CLASS}`}>
