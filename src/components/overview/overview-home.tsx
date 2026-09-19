@@ -23,6 +23,7 @@ import {
 import type { ClientHomeDoNextItem, DashboardChangeRow } from "@/lib/dashboard-home";
 import { formatUsdCents } from "@/lib/finance";
 import type { NewsItem } from "@/lib/news";
+import { homeGreeting } from "@/lib/home-greeting";
 import {
   OVERVIEW_AREA_AI_CLASS,
   OVERVIEW_AREA_EDUCATION_CLASS,
@@ -49,6 +50,8 @@ import { cn } from "@/lib/cn";
 // Top performing is not on Home.
 
 export function OverviewHome({
+  firstName,
+  displayName,
   revenueCents,
   period,
   socialUnread,
@@ -63,6 +66,8 @@ export function OverviewHome({
   news,
   now,
 }: {
+  firstName?: string | null;
+  displayName?: string | null;
   revenueCents: number | null;
   period: DashboardPeriod;
   socialUnread: number;
@@ -79,7 +84,7 @@ export function OverviewHome({
 }) {
   return (
     <div data-overview="" className={cn("flex flex-col", DASHBOARD_SECTION_AIR_CLASS)}>
-      <PageHeader title={OVERVIEW_PAGE.title} />
+      <PageHeader title={homeGreeting({ firstName, displayName })} />
 
       <div data-overview-layout="" className={OVERVIEW_HOME_LAYOUT_CLASS}>
       <div className={OVERVIEW_AREA_REVENUE_CLASS}>

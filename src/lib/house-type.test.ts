@@ -124,11 +124,10 @@ describe("Dashboard type jobs", () => {
 
   it("binds hero $, title, kickers, period, rows, and sample banner to house roles", () => {
     const identity = renderToStaticMarkup(
-      createElement(DashboardOrgIdentity, { name: "Acme" }),
+      createElement(DashboardOrgIdentity),
     );
     const html = renderToStaticMarkup(
       createElement(DashboardAdminHero, {
-        orgName: "Acme",
         period: parseDashboardPeriod("all", now),
         options: [{ key: "all", label: "All time", group: "all" }],
         hero: {
@@ -158,7 +157,7 @@ describe("Dashboard type jobs", () => {
       }),
     );
 
-    expect(identity).toMatch(/<h1 class="t-title text-ink">Acme<\/h1>/);
+    expect(identity).toMatch(/<h1 class="t-title text-ink">Aggregation<\/h1>/);
     expect(html).toMatch(/data-dashboard-title-desktop="" class="[^"]*t-title text-ink[^"]*"/);
     expect(html).toMatch(/data-dashboard-stat="revenue"[^>]*t-display t-data/);
     expect(html).toContain("data-dashboard-revenue-compare");

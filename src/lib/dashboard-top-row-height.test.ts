@@ -28,7 +28,6 @@ const hero = readFileSync("src/components/dashboard/dashboard-admin-hero.tsx", "
 function renderHero(rows: DashboardActivityRow[]) {
   return renderToStaticMarkup(
     createElement(DashboardAdminHero, {
-      orgName: "Acme",
       period: parseDashboardPeriod("all", now),
       options: [{ key: "all", label: "All time", group: "all" }],
       hero: {

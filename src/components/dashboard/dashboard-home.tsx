@@ -11,6 +11,7 @@ import {
   DASHBOARD_ROW_CLASS,
   DASHBOARD_ROW_LIST_CLASS,
 } from "@/lib/dashboard-craft";
+import { AGGREGATION_LEAD_TITLE } from "@/lib/aggregation-lead-title";
 import { DASHBOARD_ATTENTION_CLEAR } from "@/lib/findings";
 import {
   DASHBOARD_HOME,
@@ -87,10 +88,10 @@ export function DashboardHomeEmpty({
   );
 }
 
-export function DashboardOrgIdentity({ name }: { name: string }) {
+export function DashboardOrgIdentity() {
   return (
     <header className="dashboard-home-identity min-w-0">
-      <h1 className="t-title text-ink">{name}</h1>
+      <h1 className="t-title text-ink">{AGGREGATION_LEAD_TITLE}</h1>
     </header>
   );
 }

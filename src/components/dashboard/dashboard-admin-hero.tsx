@@ -35,6 +35,7 @@ import {
   DASHBOARD_TITLE_DESKTOP_CLASS,
   DASHBOARD_TITLE_MOBILE_CLASS,
 } from "@/lib/dashboard-craft";
+import { AGGREGATION_LEAD_TITLE } from "@/lib/aggregation-lead-title";
 import { DASHBOARD_FIXTURE, dashboardFixtureLabel } from "@/lib/dashboard-fixture";
 import { dashboardJustInDate, dashboardJustInTime } from "@/lib/dashboard-home";
 import { cn } from "@/lib/cn";
@@ -52,12 +53,10 @@ export function DashboardFixtureBanner() {
 }
 
 export function DashboardAdminChrome({
-  orgName,
   periodKey,
   options,
   periodMenuOpen = false,
 }: {
-  orgName: string;
   periodKey: string;
   options: readonly DashboardPeriodOption[];
   periodMenuOpen?: boolean;
@@ -71,10 +70,10 @@ export function DashboardAdminChrome({
       <header className="min-w-0">
         <h1 data-dashboard-title="">
           <span data-dashboard-title-mobile="" className={DASHBOARD_TITLE_MOBILE_CLASS}>
-            {orgName}
+            {AGGREGATION_LEAD_TITLE}
           </span>
           <span data-dashboard-title-desktop="" className={DASHBOARD_TITLE_DESKTOP_CLASS}>
-            {orgName}
+            {AGGREGATION_LEAD_TITLE}
           </span>
         </h1>
       </header>
@@ -215,7 +214,6 @@ export function DashboardRecentActivity({ items }: { items: readonly DashboardAc
 }
 
 export function DashboardAdminHero({
-  orgName,
   period,
   options,
   hero,
@@ -223,7 +221,6 @@ export function DashboardAdminHero({
   fixture = false,
   periodMenuOpen = false,
 }: {
-  orgName: string;
   period: DashboardPeriod;
   options: readonly DashboardPeriodOption[];
   hero: DashboardRevenueHero;
@@ -235,7 +232,6 @@ export function DashboardAdminHero({
     <div data-dashboard-admin-hero="" className={DASHBOARD_ADMIN_STACK_CLASS}>
       {fixture ? <DashboardFixtureBanner /> : null}
       <DashboardAdminChrome
-        orgName={orgName}
         periodKey={period.key}
         options={options}
         periodMenuOpen={periodMenuOpen}

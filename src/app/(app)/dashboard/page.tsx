@@ -294,7 +294,6 @@ export default async function DashboardPage({
     adminUpdated = revenueHero.updated;
     adminHero = (
       <DashboardAdminHero
-        orgName={org.name}
         period={period}
         options={dashboardPeriodOptionsFor(period, now, monthSources)}
         hero={revenueHero}
@@ -324,7 +323,7 @@ export default async function DashboardPage({
       {adminHero ?? (
         <>
           <div className="flex flex-col gap-[var(--space-6)] sm:flex-row sm:items-center sm:justify-between">
-            <DashboardOrgIdentity name={org.name} />
+            <DashboardOrgIdentity />
             <DashboardHomePillLink href={ATTENTION_HREF}>
               {DASHBOARD_HOME.catalogHealthCta}
             </DashboardHomePillLink>

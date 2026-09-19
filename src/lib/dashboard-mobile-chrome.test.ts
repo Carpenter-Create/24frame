@@ -44,7 +44,6 @@ const switcherSrc = readFileSync("src/lib/workspace-switcher.ts", "utf8");
 function chromeHtml() {
   return renderToStaticMarkup(
     createElement(DashboardAdminChrome, {
-      orgName: "GCNH, LLC",
       periodKey: parseDashboardPeriod("all", now).key,
       options,
       periodMenuOpen: true,
@@ -173,8 +172,9 @@ describe("Aggregation Dashboard mobile chrome — org-row Period", () => {
     const html = chromeHtml();
     expect(html).toContain("data-dashboard-identity-row");
     expect(html).toContain("data-dashboard-title-mobile");
-    expect(html).toContain("GCNH, LLC");
-    expect(html).toMatch(/data-dashboard-title-desktop=""[^>]*>GCNH, LLC</);
+    expect(html).toContain("Aggregation");
+    expect(html).not.toContain("GCNH, LLC");
+    expect(html).toMatch(/data-dashboard-title-desktop=""[^>]*>Aggregation</);
     expect(html).not.toMatch(/data-dashboard-title-desktop=""[^>]*>All time</);
     expect(html).toContain("data-dashboard-period");
     expect(html).toContain("data-dashboard-period-one");

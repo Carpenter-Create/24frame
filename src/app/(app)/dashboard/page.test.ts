@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getOrgContext } from "@/lib/supabase/context";
 import { CLIENTS_PAGE, ORG_ROLE_LABELS, ORG_STATUS_LABELS } from "@/lib/clients";
 import { DASHBOARD_HOME, dashboardJustInDate, dashboardJustInTime } from "@/lib/dashboard-home";
+import { AGGREGATION_LEAD_TITLE } from "@/lib/aggregation-lead-title";
 import { DASHBOARD_ADMIN } from "@/lib/dashboard-admin";
 import { DASHBOARD_LICENSING } from "@/lib/dashboard-licensing";
 import { DASHBOARD_CRAFT_FIXTURE_ENV, DASHBOARD_FIXTURE } from "@/lib/dashboard-fixture";
@@ -167,7 +168,12 @@ function expectNoCatalogVelocityStrip(html: string) {
 /** Company-admin structural delta — Adam lock 2026-09-16 via CoS. */
 function expectCompanyAdminStructuralDelta(html: string) {
   expectNoCatalogVelocityStrip(html);
-  expect(html).toMatch(/data-dashboard-title-desktop="" class="[^"]*max-md:hidden[^"]*">Acme</);
+  expect(html).toMatch(
+    new RegExp(
+      `data-dashboard-title-desktop="" class="[^"]*max-md:hidden[^"]*">${AGGREGATION_LEAD_TITLE}<`,
+    ),
+  );
+  expect(html).not.toMatch(/data-dashboard-title-desktop=""[^>]*>Acme</);
   expect(html).not.toMatch(/data-dashboard-title-desktop=""[^>]*>All time</);
   expect(html).not.toContain("data-dashboard-period-kicker");
   expect(html).not.toContain("data-dashboard-just-in");
@@ -259,8 +265,9 @@ describe("DashboardPage modes", () => {
       p_org_id: "org-1",
     });
     expect(rpc).not.toHaveBeenCalledWith("gc_client_directory", expect.anything());
-    expect(html).toContain("Acme");
-    expect(html).toMatch(/<h1 class="t-title text-ink">Acme<\/h1>/);
+    expect(html).toContain(AGGREGATION_LEAD_TITLE);
+    expect(html).toMatch(/<h1 class="t-title text-ink">Aggregation<\/h1>/);
+    expect(html).not.toMatch(/<h1 class="t-title text-ink">Acme<\/h1>/);
     expect(html).not.toMatch(/<h1[^>]*t-display/);
     expect(html).not.toContain(ORG_STATUS_LABELS.active);
     expect(html).not.toContain(ORG_ROLE_LABELS.account_owner);
@@ -463,7 +470,8 @@ describe("client home information model", () => {
     expect(statValue(html, "catalog")).toBe("2");
     expect(statValue(html, "needsAttention")).toBe("1");
     expect(statValue(html, "live")).toBe("1");
-    expect(html).toMatch(/<h1 class="t-title text-ink">Acme<\/h1>/);
+    expect(html).toMatch(/<h1 class="t-title text-ink">Aggregation<\/h1>/);
+    expect(html).not.toMatch(/<h1 class="t-title text-ink">Acme<\/h1>/);
     expect(html).toMatch(/data-dashboard-stat="catalog"[^>]*t-display t-data/);
     expect(html).toMatch(/data-dashboard-stat="needsAttention"[^>]*t-title t-data/);
     expect(html).toMatch(/data-dashboard-stat="live"/);
@@ -917,7 +925,12 @@ describe("company admin Overview hero", () => {
     const html = renderToStaticMarkup(
       await DashboardPage({ searchParams: Promise.resolve({ period: "Q32026" }) }),
     );
-    expect(html).toMatch(/data-dashboard-title-desktop="" class="[^"]*max-md:hidden[^"]*">Acme</);
+    expect(html).toMatch(
+      new RegExp(
+        `data-dashboard-title-desktop="" class="[^"]*max-md:hidden[^"]*">${AGGREGATION_LEAD_TITLE}<`,
+      ),
+    );
+    expect(html).not.toMatch(/data-dashboard-title-desktop=""[^>]*>Acme</);
     expect(html).not.toMatch(/data-dashboard-title-desktop=""[^>]*>Q3 2026</);
     expect(html).toContain("Q3 2026");
     expect(html).not.toContain('value="Q32026"');
