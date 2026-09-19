@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,6 +63,7 @@ export function TeamInviteForm({
   const [revoking, setRevoking] = useState<string | null>(null);
   const [hiddenIds, setHiddenIds] = useState<string[]>([]);
   const [inviteOpen, setInviteOpen] = useState(members.length === 0 && pending.length === 0);
+  const router = useRouter();
 
   const visiblePending = pending.filter((row) => !hiddenIds.includes(row.id));
   const rows = toTeamListRows(members, visiblePending);
@@ -83,6 +85,7 @@ export function TeamInviteForm({
     setSaving(false);
     setSent(true);
     setInviteOpen(false);
+    router.refresh();
   }
 
   async function onRevoke(id: string) {
@@ -91,7 +94,10 @@ export function TeamInviteForm({
     setError("");
     const res = await revokeTeamInvite({ id });
     if (res.error) setError(res.error);
-    else setHiddenIds((current) => [...current, id]);
+    else {
+      setHiddenIds((current) => [...current, id]);
+      router.refresh();
+    }
     setRevoking(null);
   }
 

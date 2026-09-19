@@ -56,6 +56,7 @@ describe("account invite SoT", () => {
     expect(teamForm).toContain("data-invite-date");
     expect(teamForm).toContain("data-team-list");
     expect(teamForm).toContain("data-team-invite-cta");
+    expect(teamForm).toContain("router.refresh()");
     expect(teamForm).not.toMatch(/Withdrawn|Removed/);
     expect(teamIdentityName("  Ada  ")).toBe("Ada");
     expect(teamIdentityName("")).toBeNull();
@@ -90,6 +91,7 @@ describe("account invite SoT", () => {
     expect(grantForm).toContain("inviteStatusFromRow(row.status)");
     expect(grantForm).toContain("canGrant && invited");
     expect(grantForm).toContain("hiddenIds");
+    expect(grantForm).toContain("router.refresh()");
     expect(grantForm).toContain("inviteDateLabel");
     expect(grantForm).toContain("data-invite-date");
     expect(grantForm).not.toMatch(/Withdrawn|Removed/);

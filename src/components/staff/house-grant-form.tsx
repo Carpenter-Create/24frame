@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,6 +52,7 @@ export function HouseGrantForm({
   const [revoking, setRevoking] = useState<string | null>(null);
   const [hiddenIds, setHiddenIds] = useState<string[]>([]);
   const visibleGrants = grants.filter((row) => !hiddenIds.includes(row.id));
+  const router = useRouter();
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -69,6 +71,7 @@ export function HouseGrantForm({
     setTier(HOUSE_GRANT_DEFAULT_TIER);
     setSaving(false);
     setSent(true);
+    router.refresh();
   }
 
   async function onRevoke(id: string) {
@@ -76,7 +79,10 @@ export function HouseGrantForm({
     setError("");
     const res = await revokeHouseGrant({ id });
     if (res.error) setError(res.error);
-    else setHiddenIds((current) => [...current, id]);
+    else {
+      setHiddenIds((current) => [...current, id]);
+      router.refresh();
+    }
     setRevoking(null);
   }
 
