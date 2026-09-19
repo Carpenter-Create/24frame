@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
 
 import { authDisplayName } from "@/lib/account-profile";
+import { safeAuthCallbackNext } from "@/lib/auth-callback-next";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { createClient } from "@/lib/supabase/server";
 
@@ -9,7 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 // verifyOtp shape, then redirects into the app (or back to /login on failure).
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
-  const next = searchParams.get("next") ?? "/";
+  const next = safeAuthCallbackNext(searchParams.get("next"));
   const code = searchParams.get("code");
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;

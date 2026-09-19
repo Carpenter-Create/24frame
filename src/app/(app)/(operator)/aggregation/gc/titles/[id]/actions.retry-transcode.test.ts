@@ -27,6 +27,7 @@ import {
   TRANSCODE_RETRY_UNAUTHENTICATED,
 } from "@/lib/transcode-jobs";
 
+import { titleOpsPath } from "@/lib/title-public-id";
 import { retryTranscodeJob } from "./actions";
 
 const USER = { id: "gc-ops-1", email: "ops@globalcontent.co" };
@@ -366,6 +367,6 @@ describe("retryTranscodeJob — source of truth + sequence", () => {
     const submitOrder = vi.mocked(submitProxyJob).mock.invocationCallOrder[0];
     expect(gcOrder).toBeLessThan(submitOrder);
     expect(submitOrder).toBeLessThan(createOrder);
-    expect(revalidatePath).toHaveBeenCalledWith(`/gc/titles/${TITLE_ID}`);
+    expect(revalidatePath).toHaveBeenCalledWith(titleOpsPath(TITLE_ID));
   });
 });
