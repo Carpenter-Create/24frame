@@ -18,7 +18,12 @@ import {
 import {
   LEGAL_ENTITIES,
   ENTITY_TYPES,
+  ENTITY_LIST_ACTIONS_CLASS,
+  ENTITY_LIST_CLASS,
+  ENTITY_LIST_FIELD_CLASS,
+  ENTITY_LIST_FIELD_LABEL_CLASS,
   ENTITY_LIST_HEADER_CLASS,
+  ENTITY_LIST_NAME_CLASS,
   ENTITY_LIST_ROW_CLASS,
   ENTITY_LIST_VALUE_CLASS,
   entityTypeLabel,
@@ -131,12 +136,12 @@ export function LegalEntitiesSection({
       {entities.length === 0 ? (
         <p className="t-body text-ink-2">{LEGAL_ENTITIES.empty}</p>
       ) : (
-        <div data-entity-list="" className="overflow-x-auto">
+        <div data-entity-list="" className={ENTITY_LIST_CLASS}>
           <div className={ENTITY_LIST_HEADER_CLASS} data-entity-list-head="">
             <span>{LEGAL_ENTITIES.nameColumn}</span>
             <span>{LEGAL_ENTITIES.typeColumn}</span>
             <span>{LEGAL_ENTITIES.jurisdictionColumn}</span>
-            <span className="justify-self-end">{LEGAL_ENTITIES.actionsColumn}</span>
+            <span className={ENTITY_LIST_ACTIONS_CLASS}>{LEGAL_ENTITIES.actionsColumn}</span>
           </div>
           <ul className="flex flex-col divide-y divide-hairline border-t border-hairline">
             {entities.map((entity) => (
@@ -145,19 +150,29 @@ export function LegalEntitiesSection({
                 data-entity-id={entity.id}
                 className={ENTITY_LIST_ROW_CLASS}
               >
-                <span className="flex min-w-0 items-center gap-[var(--space-2)]">
+                <span data-entity-field="name" className={ENTITY_LIST_NAME_CLASS}>
                   <span className={ENTITY_LIST_VALUE_CLASS}>{entity.name}</span>
                   {entity.isDefault ? (
                     <StatusChip label={LEGAL_ENTITIES.default} tone="neutral" />
                   ) : null}
                 </span>
-                <span className={ENTITY_LIST_VALUE_CLASS}>
-                  {entityTypeLabel(entity.entityType)}
+                <span data-entity-field="type" className={ENTITY_LIST_FIELD_CLASS}>
+                  <span className={ENTITY_LIST_FIELD_LABEL_CLASS}>
+                    {LEGAL_ENTITIES.typeColumn}
+                  </span>
+                  <span className={ENTITY_LIST_VALUE_CLASS}>
+                    {entityTypeLabel(entity.entityType)}
+                  </span>
                 </span>
-                <span className={entityJurisdictionClass(entity.jurisdiction)}>
-                  {entityJurisdictionLabel(entity.jurisdiction)}
+                <span data-entity-field="jurisdiction" className={ENTITY_LIST_FIELD_CLASS}>
+                  <span className={ENTITY_LIST_FIELD_LABEL_CLASS}>
+                    {LEGAL_ENTITIES.jurisdictionColumn}
+                  </span>
+                  <span className={entityJurisdictionClass(entity.jurisdiction)}>
+                    {entityJurisdictionLabel(entity.jurisdiction)}
+                  </span>
                 </span>
-                <span className="justify-self-end">
+                <span data-entity-field="actions" className={ENTITY_LIST_ACTIONS_CLASS}>
                   {canManage ? (
                     <Button
                       type="button"

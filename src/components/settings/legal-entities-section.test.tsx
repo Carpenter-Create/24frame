@@ -3,7 +3,10 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  ENTITY_LIST_CLASS,
   ENTITY_LIST_EMPTY_CLASS,
+  ENTITY_LIST_FIELD_CLASS,
+  ENTITY_LIST_FIELD_LABEL_CLASS,
   ENTITY_LIST_VALUE_CLASS,
   LEGAL_ENTITIES,
   type LegalEntityRow,
@@ -36,6 +39,15 @@ const ENTITIES: LegalEntityRow[] = [
     isDefault: false,
     status: "active",
     createdAt: "2026-02-01T00:00:00Z",
+  },
+  {
+    id: "ent-3",
+    name: "North Atlantic Documentary Holdings Limited Partnership of Newfoundland",
+    entityType: "partnership",
+    jurisdiction: "Newfoundland and Labrador, Canada",
+    isDefault: false,
+    status: "active",
+    createdAt: "2026-03-01T00:00:00Z",
   },
 ];
 
@@ -82,13 +94,47 @@ describe("LegalEntitiesSection table", () => {
     expect(src).toContain("data-entity-edit");
     expect(src).toContain("data-entity-edit-form");
     expect(src).toContain("updateLegalEntity");
+    expect(src).toContain("ENTITY_LIST_CLASS");
     expect(src).toContain("ENTITY_LIST_HEADER_CLASS");
     expect(src).toContain("ENTITY_LIST_ROW_CLASS");
     expect(src).toContain("ENTITY_LIST_VALUE_CLASS");
+    expect(src).toContain("ENTITY_LIST_FIELD_CLASS");
+    expect(src).toContain("ENTITY_LIST_FIELD_LABEL_CLASS");
     expect(src).toContain("LEGAL_ENTITIES.actionsColumn");
+    expect(src).toContain("data-entity-field");
     expect(src).toContain("<Dialog");
     expect(src).toContain("DialogFooter");
     expect(src).not.toContain("flex flex-col gap-[var(--space-4)]");
+    expect(src).not.toContain("overflow-x-auto");
+    expect(src).not.toContain("truncate");
+    expect(src).not.toContain("ellipsis");
+  });
+
+  it("stacks fields with phone labels and keeps long name/jurisdiction in full", () => {
+    const html = renderToStaticMarkup(
+      <LegalEntitiesSection orgId="org-1" canManage entities={ENTITIES} />,
+    );
+    expect(html).toContain(ENTITY_LIST_CLASS);
+    expect(html).toContain(ENTITY_LIST_FIELD_CLASS);
+    expect(html).toContain(ENTITY_LIST_FIELD_LABEL_CLASS);
+    expect(html).toContain('data-entity-field="name"');
+    expect(html).toContain('data-entity-field="type"');
+    expect(html).toContain('data-entity-field="jurisdiction"');
+    expect(html).toContain('data-entity-field="actions"');
+    expect(html).toContain(
+      "North Atlantic Documentary Holdings Limited Partnership of Newfoundland",
+    );
+    expect(html).toContain("Newfoundland and Labrador, Canada");
+    expect(html).toContain("Partnership");
+    const longStart = html.indexOf(
+      "North Atlantic Documentary Holdings Limited Partnership of Newfoundland",
+    );
+    const longRow = html.slice(html.lastIndexOf("<li", longStart), html.indexOf("</li>", longStart));
+    expect(longRow).toContain(ENTITY_LIST_FIELD_LABEL_CLASS);
+    expect(longRow).toContain(LEGAL_ENTITIES.typeColumn);
+    expect(longRow).toContain(LEGAL_ENTITIES.jurisdictionColumn);
+    expect(longRow).not.toContain("truncate");
+    expect(html).not.toContain("overflow-x-auto");
   });
 
   it("uses primary ink for name/type/jurisdiction and a muted em dash when empty", () => {
