@@ -157,11 +157,12 @@ describe("phone header grammar A — trim trailing", () => {
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("max-md:shrink-0");
   });
 
-  it("keeps phone trailing AI · bell · avatar on one gap and matched hit padding", () => {
+  it("keeps phone trailing AI · bell · avatar on one gap without collapsing hits", () => {
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("gap-[var(--space-2)]");
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).not.toContain("gap-[var(--space-1)]");
     expect(HOUSE_THEME_TOGGLE_CLASS).toContain(HOUSE_HEADER_TRAILING_HIT_CLASS);
-    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("-mx-[var(--space-2)]");
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).not.toMatch(/-m[xlr]-/);
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).not.toContain("p-[var(--space-2)]");
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("size-4");
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("md:size-8");
     expect(HOUSE_HEADER_TRAILING_AVATAR_CLASS).toContain("h-8 w-8");

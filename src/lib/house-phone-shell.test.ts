@@ -404,7 +404,8 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("size-6");
     expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("size-5");
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("size-4");
-    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("-mx-[var(--space-2)]");
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).not.toMatch(/-m[xlr]-/);
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).not.toContain("p-[var(--space-2)]");
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("md:size-8");
     expect(HOUSE_HEADER_TRAILING_AVATAR_CLASS).toContain("h-8 w-8");
     expect(HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS).toBe("contents md:hidden");
