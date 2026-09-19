@@ -176,7 +176,7 @@ describe("GcClientsPage read bound", () => {
         status: "pending",
         org_id: null,
         expires_at: "2026-10-03T00:00:00Z",
-        created_at: "2026-09-19T00:00:00Z",
+        created_at: "2026-09-17T00:00:00Z",
         accepted_at: null,
       },
       {
@@ -207,6 +207,11 @@ describe("GcClientsPage read bound", () => {
     expect(html).toContain(HOUSE_GRANT.accepted);
     expect(html).toContain("/aggregation/gc/clients/33333333-3333-4333-8333-333333333333");
     expect(html).toContain(HOUSE_GRANT.revoke);
+    expect(html).toContain("Sep 17, 2026");
+    expect(html).toContain("Sep 19, 2026");
+    expect(html).toContain("data-invite-date");
+    expect(html).not.toContain("Withdrawn");
+    expect(html).not.toContain("Removed");
     const acceptedStart = html.indexOf("accepted@test.example");
     const acceptedRow = html.slice(acceptedStart, html.indexOf("</li>", acceptedStart));
     expect(acceptedRow).not.toContain(HOUSE_GRANT.revoke);

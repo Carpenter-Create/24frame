@@ -13,6 +13,7 @@ import {
   HOUSE_GRANT,
   HOUSE_GRANT_DEFAULT_TIER,
   grantTierLabel,
+  inviteDateLabel,
   inviteStatusFromRow,
   inviteStatusLabel,
   type GrantTier,
@@ -29,6 +30,7 @@ export type HouseGrantRow = {
   tier: GrantTier;
   status: "pending" | "accepted";
   orgHref: string | null;
+  at: string | null;
 };
 
 export function HouseGrantForm({
@@ -105,6 +107,9 @@ export function HouseGrantForm({
                     label={inviteStatusLabel(inviteStatusFromRow(row.status))}
                     tone={invited ? "neutral" : "active"}
                   />
+                  <span className="t-body-sm text-ink-3" data-invite-date="">
+                    {inviteDateLabel(row.at)}
+                  </span>
                   {canGrant && invited ? (
                     <Button
                       type="button"

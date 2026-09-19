@@ -12,6 +12,7 @@ import {
   ACCOUNT_INVITE,
   TEAM_INVITE_DEFAULT_ROLE,
   TEAM_INVITE_ROLES,
+  inviteDateLabel,
   teamRoleLabel,
   type OrgRole,
 } from "@/lib/account-invite";
@@ -21,12 +22,14 @@ export type TeamMemberRow = {
   userId: string;
   email: string;
   role: OrgRole;
+  acceptedAt: string;
 };
 
 export type TeamPendingRow = {
   id: string;
   email: string;
   role: OrgRole;
+  sentAt: string;
 };
 
 export function TeamInviteForm({
@@ -89,6 +92,9 @@ export function TeamInviteForm({
               <span className="t-body text-ink">{member.email}</span>
               <span className="flex items-center gap-[var(--space-3)]">
                 <StatusChip label={ACCOUNT_INVITE.accepted} tone="active" />
+                <span className="t-body-sm text-ink-3" data-invite-date="">
+                  {inviteDateLabel(member.acceptedAt)}
+                </span>
                 <span className="t-body-sm text-ink-3">{teamRoleLabel(member.role)}</span>
               </span>
             </li>
@@ -102,6 +108,9 @@ export function TeamInviteForm({
               <span className="t-body text-ink-2">{invite.email}</span>
               <span className="flex items-center gap-[var(--space-3)]">
                 <StatusChip label={ACCOUNT_INVITE.invited} tone="neutral" />
+                <span className="t-body-sm text-ink-3" data-invite-date="">
+                  {inviteDateLabel(invite.sentAt)}
+                </span>
                 <span className="t-body-sm text-ink-3">{teamRoleLabel(invite.role)}</span>
                 {canInvite ? (
                   <Button

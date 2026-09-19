@@ -14,7 +14,17 @@ Existing SoT, extended — not forked:
 | Plan / entitlement | `contract_terms.tier` |
 | Pending email invite | `account_invites` |
 
-`account_invites` is email-first (the user may not exist yet). Status changes only — never deleted. `token_hash` is SHA-256 of the raw token; the raw token is emailed and never stored. Authenticated SELECT is column-enumerated and omits `token_hash` (a table-level GRANT would still expose it).
+`account_invites` is email-first (the user may not exist yet). Status changes only — never deleted. Withdraw and expire drop the row from Team pending / house-grant lists; no Removed or Withdrawn chip, no Settings history rail. `token_hash` is SHA-256 of the raw token; the raw token is emailed and never stored. Authenticated SELECT is column-enumerated and omits `token_hash` (a table-level GRANT would still expose it).
+
+`tg_audit_account_invites` writes `audit_log` on send (insert), accept, revoke, and expire (status updates). Payloads strip `token_hash`.
+
+Visible dates use house craft (`dateStyle: medium`, UTC):
+
+| Row | Date SoT |
+| --- | --- |
+| Invited / pending | `account_invites.created_at` |
+| Team member (Accepted) | `memberships.created_at` via `org_team.joined_at` |
+| Accepted house grant | `account_invites.accepted_at` |
 
 Two kinds, one table:
 

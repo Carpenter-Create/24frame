@@ -126,6 +126,11 @@ describe("SettingsOrganizationPage", () => {
     expect(html).toContain(ACCOUNT_INVITE.accepted);
     expect(html).toContain(ACCOUNT_INVITE.invited);
     expect(html).toContain(ACCOUNT_INVITE.revoke);
+    expect(html).toContain("Jan 1, 2026");
+    expect(html).toContain("Sep 19, 2026");
+    expect(html).toContain("data-invite-date");
+    expect(html).not.toContain("Withdrawn");
+    expect(html).not.toContain("Removed");
     const memberStart = html.indexOf("ada@example.com");
     const memberRow = html.slice(memberStart, html.indexOf("</li>", memberStart));
     expect(memberRow).not.toContain(ACCOUNT_INVITE.revoke);

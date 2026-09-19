@@ -63,6 +63,20 @@ export function inviteStatusFromRow(status: "pending" | "accepted"): InviteStatu
   return status === "accepted" ? "accepted" : "invited";
 }
 
+// House date craft: short, same day for every reader. Sent = created_at.
+// Accepted = accepted_at on the invite, or membership joined_at. No twin clock.
+const INVITE_DATE_FMT = new Intl.DateTimeFormat("en-US", {
+  dateStyle: "medium",
+  timeZone: "UTC",
+});
+
+export function inviteDateLabel(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "—";
+  return INVITE_DATE_FMT.format(date);
+}
+
 export const ACCOUNT_INVITE = {
   team: "Team",
   teamEmpty: "No other people on this team.",

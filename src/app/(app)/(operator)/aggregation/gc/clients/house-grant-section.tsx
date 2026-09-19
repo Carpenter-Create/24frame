@@ -31,6 +31,7 @@ export async function HouseGrantSection() {
     tier: row.tier as GrantTier,
     status: (row.status === "accepted" ? "accepted" : "pending") as "pending" | "accepted",
     orgHref: row.status === "accepted" && row.org_id ? clientOrgHref(row.org_id) : null,
+    at: row.status === "accepted" ? row.accepted_at : row.created_at,
   }));
 
   return (

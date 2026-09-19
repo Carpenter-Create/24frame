@@ -19,6 +19,7 @@ import {
   grantTierLabel,
   houseGrantSchema,
   inviteAcceptPath,
+  inviteDateLabel,
   inviteEmailSubject,
   inviteEmailsMatch,
   inviteStatusFromRow,
@@ -50,6 +51,12 @@ describe("account invite SoT", () => {
     expect(teamForm).not.toContain("ACCOUNT_INVITE.pending");
     expect(teamForm).toContain("canInvite ? (");
     expect(teamForm).toContain("onRevoke(invite.id)");
+    expect(teamForm).toContain("inviteDateLabel");
+    expect(teamForm).toContain("data-invite-date");
+    expect(teamForm).not.toMatch(/Withdrawn|Removed/);
+    expect(inviteDateLabel("2026-09-19T00:00:00Z")).toBe("Sep 19, 2026");
+    expect(inviteDateLabel(null)).toBe("—");
+    expect(inviteDateLabel("nope")).toBe("—");
   });
 
   it("keeps house grant on the existing tier enum", () => {
@@ -67,6 +74,9 @@ describe("account invite SoT", () => {
     expect(grantForm).not.toContain("revoking === row.id ? HOUSE_GRANT.granting");
     expect(grantForm).toContain("inviteStatusFromRow(row.status)");
     expect(grantForm).toContain("canGrant && invited");
+    expect(grantForm).toContain("inviteDateLabel");
+    expect(grantForm).toContain("data-invite-date");
+    expect(grantForm).not.toMatch(/Withdrawn|Removed/);
     expect(HOUSE_GRANT.invited).toBe(INVITE_STATUS.invited);
     expect(HOUSE_GRANT.accepted).toBe(INVITE_STATUS.accepted);
     expect(HOUSE_GRANT.empty).toBe("No grants yet.");
@@ -130,5 +140,8 @@ describe("account invite SoT", () => {
     expect(migration).toContain("grant select (");
     expect(migration).toMatch(/grant select \(\s*id, kind, status, email/);
     expect(migration).not.toMatch(/grant select \([^)]*token_hash/);
+    expect(migration).toContain("tg_audit_account_invites");
+    expect(migration).toContain("to_jsonb(new) - 'token_hash'");
+    expect(migration).toContain("to_jsonb(old) - 'token_hash'");
   });
 });

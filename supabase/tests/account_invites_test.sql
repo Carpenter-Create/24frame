@@ -3,7 +3,7 @@
 -- Fail-closed: viewer cannot invite; non-staff cannot grant; email must match.
 
 begin;
-select plan(32);
+select plan(42);
 
 select set_config('t.org',          gen_random_uuid()::text, false);
 select set_config('t.org_b',        gen_random_uuid()::text, false);
@@ -12,12 +12,14 @@ select set_config('t.viewer',       gen_random_uuid()::text, false);
 select set_config('t.invitee',      gen_random_uuid()::text, false);
 select set_config('t.grant_user',   gen_random_uuid()::text, false);
 select set_config('t.outsider',     gen_random_uuid()::text, false);
+select set_config('t.expiree',      gen_random_uuid()::text, false);
 select set_config('t.gc_owner',     gen_random_uuid()::text, false);
 select set_config('t.gc_ops',       gen_random_uuid()::text, false);
 select set_config('t.gc_legal',     gen_random_uuid()::text, false);
 select set_config('t.hash_team',    repeat('ab', 32), false);
 select set_config('t.hash_team2',   repeat('cd', 32), false);
 select set_config('t.hash_grant',   repeat('ef', 32), false);
+select set_config('t.hash_exp',     repeat('11', 32), false);
 select set_config('t.hash_bad',     repeat('00', 32), false);
 
 insert into auth.users (id, email) values
@@ -26,6 +28,7 @@ insert into auth.users (id, email) values
   (current_setting('t.invitee')::uuid,    'invitee@test.example'),
   (current_setting('t.grant_user')::uuid, 'grant@test.example'),
   (current_setting('t.outsider')::uuid,   'outsider@test.example'),
+  (current_setting('t.expiree')::uuid,    'expiree@test.example'),
   (current_setting('t.gc_owner')::uuid,   'gc-owner@test.example'),
   (current_setting('t.gc_ops')::uuid,     'gc-ops@test.example'),
   (current_setting('t.gc_legal')::uuid,   'gc-legal@test.example');
@@ -90,6 +93,22 @@ select is(
   'team',
   'team invite kind');
 
+select is(
+  (select action from public.audit_log
+    where entity = 'account_invites'
+      and entity_id = current_setting('t.invite_id')::uuid
+      and action = 'insert'),
+  'insert',
+  'send writes audit_log insert');
+
+select is(
+  (select (after ? 'token_hash') from public.audit_log
+    where entity = 'account_invites'
+      and entity_id = current_setting('t.invite_id')::uuid
+      and action = 'insert'),
+  false,
+  'audit insert redacts token_hash');
+
 select throws_ok(
   format(
     $$ select public.invite_org_member(%L::uuid, 'invitee@test.example', 'viewer', %L) $$,
@@ -146,6 +165,22 @@ select is(
   'accepted',
   'invite marked accepted');
 
+select is(
+  (select after->>'status' from public.audit_log
+    where entity = 'account_invites'
+      and entity_id = current_setting('t.invite_id')::uuid
+      and action = 'update'),
+  'accepted',
+  'accept writes audit_log update');
+
+select is(
+  (select (after ? 'token_hash') or (before ? 'token_hash') from public.audit_log
+    where entity = 'account_invites'
+      and entity_id = current_setting('t.invite_id')::uuid
+      and action = 'update'),
+  false,
+  'audit accept redacts token_hash');
+
 select throws_ok(
   format($$ select public.accept_account_invite(%L) $$, current_setting('t.hash_team')),
   'P0001', 'Invite is no longer pending', 'replay accept fails');
@@ -181,6 +216,66 @@ select is(
   (select status::text from public.account_invites where id = current_setting('t.invite_id2')::uuid),
   'revoked',
   'revoked invite is not deleted');
+
+select is(
+  (select count(*)::int from public.org_pending_invites(current_setting('t.org')::uuid)
+    where id = current_setting('t.invite_id2')::uuid),
+  0,
+  'revoked invite leaves the pending list');
+
+select is(
+  (select after->>'status' from public.audit_log
+    where entity = 'account_invites'
+      and entity_id = current_setting('t.invite_id2')::uuid
+      and action = 'update'),
+  'revoked',
+  'revoke writes audit_log update');
+
+-- ===== Expired invite leaves the list and is audited =====
+select set_config('t.invite_exp',
+  (select public.invite_org_member(
+    current_setting('t.org')::uuid,
+    'expiree@test.example',
+    'viewer',
+    current_setting('t.hash_exp')
+  )::text),
+  true);
+
+reset role;
+update public.account_invites
+  set expires_at = now() - interval '1 hour'
+  where id = current_setting('t.invite_exp')::uuid;
+set local role authenticated;
+
+select set_config('request.jwt.claims',
+  json_build_object('sub', current_setting('t.expiree'), 'role', 'authenticated')::text, true);
+
+select throws_ok(
+  format($$ select public.accept_account_invite(%L) $$, current_setting('t.hash_exp')),
+  'P0001', 'Invite has expired', 'expired accept fails');
+
+select set_config('request.jwt.claims',
+  json_build_object('sub', current_setting('t.owner'), 'role', 'authenticated')::text, true);
+
+select is(
+  (select status::text from public.account_invites where id = current_setting('t.invite_exp')::uuid),
+  'expired',
+  'expired invite is not deleted');
+
+select is(
+  (select count(*)::int from public.org_pending_invites(current_setting('t.org')::uuid)
+    where id = current_setting('t.invite_exp')::uuid),
+  0,
+  'expired invite leaves the pending list');
+
+select is(
+  (select after->>'status' from public.audit_log
+    where entity = 'account_invites'
+      and entity_id = current_setting('t.invite_exp')::uuid
+      and action = 'update'
+      and after->>'status' = 'expired'),
+  'expired',
+  'expire writes audit_log update');
 
 -- ===== House grant authz =====
 select set_config('request.jwt.claims',

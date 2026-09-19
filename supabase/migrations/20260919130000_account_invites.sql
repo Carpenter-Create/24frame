@@ -21,7 +21,10 @@
 --   Peek: knowledge of token_hash (anon + authenticated). Hash is the
 --     capability; raw token never stored.
 --   Team roster / pending team invites: member_can(uid, org, 'view').
---   Pending house grants: is_gc_staff.
+--   House grant history: is_gc_staff — pending + accepted only.
+--   Revoked / expired stay in the table (status change). Lists drop them.
+--   audit_log via tg_audit_account_invites: send / accept / revoke / expire.
+--   token_hash is stripped from audit payloads.
 --
 -- ENTITLEMENT: contract_terms.tier remains the plan SoT. House grant
 -- writes a term on accept (no Stripe subscription). trigger = signup
@@ -584,6 +587,9 @@ revoke execute on function public.org_pending_invites(uuid, integer)
 grant execute on function public.org_pending_invites(uuid, integer)
   to authenticated;
 
+comment on function public.org_pending_invites(uuid, integer) is
+  'Pending team invites only (Invited). Revoked and expired stay in account_invites and leave this list.';
+
 create or replace function public.house_grants(p_limit integer default 500)
   returns table (
     id          uuid,
@@ -622,4 +628,4 @@ grant execute on function public.house_grants(integer)
   to authenticated;
 
 comment on function public.house_grants(integer) is
-  'Staff grant history: pending (Invited) + accepted. Not a platform user directory. Never returns token_hash.';
+  'Staff grant history: pending (Invited) + accepted. Revoked and expired stay in the table and leave this list. Not a platform user directory. Never returns token_hash.';

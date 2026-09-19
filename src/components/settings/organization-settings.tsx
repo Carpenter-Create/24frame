@@ -24,8 +24,8 @@ export async function OrganizationSettings() {
 
   let canEditCompany = false;
   let canInvite = false;
-  let members: { userId: string; email: string; role: OrgRole }[] = [];
-  let pending: { id: string; email: string; role: OrgRole }[] = [];
+  let members: { userId: string; email: string; role: OrgRole; acceptedAt: string }[] = [];
+  let pending: { id: string; email: string; role: OrgRole; sentAt: string }[] = [];
 
   if (ctx.activeOrg) {
     const supabase = await createClient();
@@ -50,11 +50,13 @@ export async function OrganizationSettings() {
       userId: row.user_id,
       email: row.email ?? "—",
       role: row.role,
+      acceptedAt: row.joined_at,
     }));
     pending = (pendingRes.data ?? []).map((row) => ({
       id: row.id,
       email: row.email,
       role: row.role,
+      sentAt: row.created_at,
     }));
   }
 
