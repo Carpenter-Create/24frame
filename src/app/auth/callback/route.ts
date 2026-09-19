@@ -3,7 +3,7 @@ import type { EmailOtpType } from "@supabase/supabase-js";
 
 import { authDisplayName } from "@/lib/account-profile";
 import { safeAuthCallbackNext } from "@/lib/auth-callback-next";
-import { recordSignInEvent } from "@/lib/security-event-writer";
+import { recordFailedSignIn, recordSignInEvent } from "@/lib/security-event-writer";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { createClient } from "@/lib/supabase/server";
 
@@ -35,6 +35,7 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}${next}`);
     }
     console.error(`[auth] code exchange failed (status ${error.status ?? "?"}): ${error.message}`);
+    await recordFailedSignIn(ip, userAgent, "code_exchange_failed").catch(() => {});
   } else if (tokenHash && type) {
     const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
     if (!error) {
@@ -45,8 +46,10 @@ export async function GET(request: Request) {
     console.error(
       `[auth] verifyOtp type=${type} failed (status ${error.status ?? "?"}): ${error.message}`,
     );
+    await recordFailedSignIn(ip, userAgent, "otp_verify_failed").catch(() => {});
   } else {
     console.error("[auth] callback reached with neither code nor token_hash+type");
+    await recordFailedSignIn(ip, userAgent, "no_credential").catch(() => {});
   }
 
   return NextResponse.redirect(`${origin}/login?error=auth`);
