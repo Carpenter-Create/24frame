@@ -6,12 +6,17 @@ import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { ASK_GLOBEE, askGlobeeThreadHref } from "@/lib/ask-globee";
 import {
+  ASK_AI_OVERLAY_PHONE_HISTORY_CLASS,
+  ASK_AI_OVERLAY_PHONE_HISTORY_LIST_CLASS,
+} from "@/lib/ask-ai-overlay";
+import {
   filterAskGlobeeHistory,
   formatAskGlobeeHistoryTime,
   groupAskGlobeeHistory,
   type AskGlobeeHistoryRow,
 } from "@/lib/ask-globee-conversations";
 import { cn } from "@/lib/cn";
+import { useAskGlobeeChrome } from "./ask-globee-chrome";
 
 // Hairline history popover. Real org conversations only. Empty is empty.
 
@@ -26,15 +31,19 @@ export function AskGlobeeHistoryPanel({
 }) {
   const searchId = useId();
   const [query, setQuery] = useState("");
+  const { setHistoryOpen } = useAskGlobeeChrome();
   const filtered = filterAskGlobeeHistory(conversations, query);
   const { thisWeek, allThreads } = groupAskGlobeeHistory(filtered, now);
 
   return (
     <div
       data-ask-globee-history-popover=""
-      className="flex w-[384px] flex-col gap-[var(--space-6)] rounded-[12px] border border-hairline bg-surface p-[var(--space-6)] shadow-none"
+      className={cn(
+        "flex w-[384px] flex-col gap-[var(--space-6)] rounded-[12px] border border-hairline bg-surface p-[var(--space-6)] shadow-none",
+        ASK_AI_OVERLAY_PHONE_HISTORY_CLASS,
+      )}
     >
-      <label className="block">
+      <label className="block max-md:shrink-0">
         <span className="sr-only">{ASK_GLOBEE.historySearchPlaceholder}</span>
         <Input
           variant="bare"
@@ -49,12 +58,26 @@ export function AskGlobeeHistoryPanel({
         />
       </label>
 
-      {thisWeek.length > 0 ? (
-        <HistoryGroup label={ASK_GLOBEE.thisWeekLabel} rows={thisWeek} currentId={currentId} now={now} />
-      ) : null}
-      {allThreads.length > 0 ? (
-        <HistoryGroup label={ASK_GLOBEE.allThreadsLabel} rows={allThreads} currentId={currentId} now={now} />
-      ) : null}
+      <div data-ask-globee-history-list="" className={ASK_AI_OVERLAY_PHONE_HISTORY_LIST_CLASS}>
+        {thisWeek.length > 0 ? (
+          <HistoryGroup
+            label={ASK_GLOBEE.thisWeekLabel}
+            rows={thisWeek}
+            currentId={currentId}
+            now={now}
+            onSelect={() => setHistoryOpen(false)}
+          />
+        ) : null}
+        {allThreads.length > 0 ? (
+          <HistoryGroup
+            label={ASK_GLOBEE.allThreadsLabel}
+            rows={allThreads}
+            currentId={currentId}
+            now={now}
+            onSelect={() => setHistoryOpen(false)}
+          />
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -64,11 +87,13 @@ function HistoryGroup({
   rows,
   currentId,
   now,
+  onSelect,
 }: {
   label: string;
   rows: AskGlobeeHistoryRow[];
   currentId: string | null;
   now?: Date;
+  onSelect?: () => void;
 }) {
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
@@ -84,6 +109,7 @@ function HistoryGroup({
                 href={href}
                 data-ask-globee-history-row=""
                 data-ask-globee-history-current={current ? "" : undefined}
+                onClick={onSelect}
                 className={cn(
                   "flex items-center justify-between gap-[var(--space-4)] px-[var(--space-3)] py-[var(--space-2)]",
                   current ? "border border-hairline bg-transparent" : null,
@@ -121,7 +147,14 @@ export function AskGlobeeHistoryPopover({
     if (!open) return;
     function onPointerDown(event: PointerEvent) {
       const root = rootRef.current;
-      if (!root || !(event.target instanceof Node) || root.contains(event.target)) return;
+      if (!(event.target instanceof Node)) return;
+      if (root?.contains(event.target)) return;
+      if (
+        event.target instanceof Element &&
+        event.target.closest("[data-ask-ai-overlay-phone-history], [data-ask-globee-history-popover]")
+      ) {
+        return;
+      }
       onOpenChange(false);
     }
     function onKeyDown(event: KeyboardEvent) {
@@ -139,7 +172,7 @@ export function AskGlobeeHistoryPopover({
     <div ref={rootRef} className="relative">
       {children}
       {open ? (
-        <div className="absolute left-0 top-full z-50 mt-[var(--space-2)]">
+        <div className="absolute left-0 top-full z-50 mt-[var(--space-2)] max-md:hidden">
           <AskGlobeeHistoryPanel conversations={conversations} currentId={currentId} />
         </div>
       ) : null}

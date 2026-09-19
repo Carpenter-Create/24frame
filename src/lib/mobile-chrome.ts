@@ -1,25 +1,15 @@
-// Shared mobile chrome for the Ask Globee history clock. One lead pad,
-// one 44 hit, one 16 tertiary glyph. The dest hamburger is gone —
-// destinations live on HousePhoneDestChips. The Ask Globee clock stays
-// Lucide 1.33 until a measured rematch. MOBILE_CHROME_HAMBURGER_*
-// tokens remain so the clock keeps the locked 44/16 column.
-// Measured 2026-09-10 from app-shell / ask-globee-landing:
-//
-//   Header pad (max-md)     --space-6          24px
-//   Hamburger (was)         size-4 + Menu 16   hit 16 · glyph center 32
-//   Messages frame          --content-inset    48px
-//   Landing clock dock      absolute left-0    ignores landing px
-//   Clock (was)             size-4 + Clock 16  hit 16 · glyph center 56
-//   Delta                   24px (clock right of hamburger)
-//   Clip                    16 glyph in 16 hit shears the lucide stroke
-//
-// Fix: expand BOTH hits to 44 (RL #344 lesson) and pull the clock dock
-// to the header lead so the 16 glyphs share one column. Not Close/44 —
-// that object is a muted circle. Desktop clock stays size-4 at left-0.
+// Shared mobile chrome for the Ask overlay history clock. One 44 hit,
+// one 16 tertiary glyph. The dest hamburger is gone — destinations live
+// on HousePhoneDestChips. The clock stays Lucide 1.33 until a measured
+// rematch. MOBILE_CHROME_HAMBURGER_* tokens remain so the clock keeps
+// the locked 44/16 hit. Not Close/44 — that object is a muted circle.
+// Desktop clock stays size-4 at left-0. Phone dock is overlay SoT
+// (sheet pad, not the retired /messages -24px content-inset pull).
 
 import { HOUSE_ICON_BUTTON_CLASS } from "@/lib/house-shell";
 
 export const MOBILE_CHROME_LEAD_PAD_PX = 24;
+export const MOBILE_CHROME_SHEET_PAD_PX = 16;
 export const MOBILE_CHROME_MESSAGES_FRAME_PAD_PX = 48;
 export const MOBILE_CHROME_ICON_HIT_PX = 44;
 export const MOBILE_CHROME_ICON_GLYPH_PX = 16;
@@ -37,15 +27,14 @@ export const MOBILE_CHROME_HAMBURGER_BUTTON_CLASS = `${MOBILE_CHROME_ICON_BUTTON
 /** Desktop keeps the locked size-4 clock. Mobile uses the shared 44 hit. */
 export const ASK_GLOBEE_CLOCK_BUTTON_CLASS = `${MOBILE_CHROME_ICON_BUTTON_CLASS} md:size-4 md:min-h-4 md:min-w-4`;
 
-/** Desktop left-0. Mobile: header lead minus messages-frame inset. */
+/** Desktop left-0. Phone: sheet pad — not content-inset −24px (clips off-screen). */
 export const MOBILE_CHROME_CLOCK_DOCK_CLASS =
-  "absolute top-0 left-0 max-md:left-[calc(var(--space-6)-var(--content-inset))]";
+  "absolute top-0 left-0 max-md:left-[var(--space-4)]";
 
 export function mobileChromeClockDockOffsetPx(
-  leadPadPx = MOBILE_CHROME_LEAD_PAD_PX,
-  framePadPx = MOBILE_CHROME_MESSAGES_FRAME_PAD_PX,
+  sheetPadPx = MOBILE_CHROME_SHEET_PAD_PX,
 ): number {
-  return leadPadPx - framePadPx;
+  return sheetPadPx;
 }
 
 export function mobileChromeGlyphCenterPx(

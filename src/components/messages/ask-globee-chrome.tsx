@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 
 import type { AskGlobeeHistoryRow, AskGlobeeStoredMessage } from "@/lib/ask-globee-conversations";
 
@@ -14,6 +14,8 @@ type AskGlobeeChromeContextValue = {
   setChrome: (next: AskGlobeeChromeState | null) => void;
   conversations: AskGlobeeHistoryRow[];
   setConversations: (next: AskGlobeeHistoryRow[]) => void;
+  historyOpen: boolean;
+  setHistoryOpen: Dispatch<SetStateAction<boolean>>;
 };
 
 const AskGlobeeChromeContext = createContext<AskGlobeeChromeContextValue>({
@@ -21,6 +23,8 @@ const AskGlobeeChromeContext = createContext<AskGlobeeChromeContextValue>({
   setChrome: () => {},
   conversations: [],
   setConversations: () => {},
+  historyOpen: false,
+  setHistoryOpen: () => {},
 });
 
 export function AskAssistantChromeProvider({
@@ -34,9 +38,10 @@ export function AskAssistantChromeProvider({
 }) {
   const [chrome, setChrome] = useState<AskGlobeeChromeState | null>(initialChrome);
   const [conversations, setConversations] = useState<AskGlobeeHistoryRow[]>(initialConversations);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const value = useMemo(
-    () => ({ chrome, setChrome, conversations, setConversations }),
-    [chrome, conversations],
+    () => ({ chrome, setChrome, conversations, setConversations, historyOpen, setHistoryOpen }),
+    [chrome, conversations, historyOpen],
   );
   return <AskGlobeeChromeContext.Provider value={value}>{children}</AskGlobeeChromeContext.Provider>;
 }

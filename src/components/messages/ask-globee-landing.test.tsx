@@ -293,7 +293,8 @@ describe("AskGlobeeLanding", () => {
     expect(html).toContain("rounded-[28px]");
     expect(html).toContain('data-ask-globee-clock=""');
     expect(src).toContain("MOBILE_CHROME_ICON_CLASS");
-    expect(src).toContain("MOBILE_CHROME_CLOCK_DOCK_CLASS");
+    expect(src).toContain("ASK_AI_OVERLAY_PHONE_CLOCK_DOCK_CLASS");
+    expect(src).toContain("ASK_AI_OVERLAY_PHONE_SCROLL_CLASS");
     expect(src).not.toContain("absolute left-0 top-0");
     expect(src).not.toContain("Plus");
     expect(html).not.toContain("data-ask-globee-new");

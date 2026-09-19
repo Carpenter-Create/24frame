@@ -57,7 +57,7 @@ function MessagesThreadHeader({ title }: { title: string }) {
   const { chrome, setChrome, conversations } = useAskGlobeeChrome();
   const [renameOpen, setRenameOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [historyOpen, setHistoryOpen] = useState(false);
+  const { historyOpen, setHistoryOpen } = useAskGlobeeChrome();
   const [renameValue, setRenameValue] = useState(title);
   const pinned = !!chrome?.pinned_at;
   const threadTitle = chrome?.title ?? title;

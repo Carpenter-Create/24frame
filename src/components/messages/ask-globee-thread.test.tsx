@@ -210,6 +210,8 @@ describe("AskGlobeeThread", () => {
     expect(src).toContain(
       "flex min-h-0 flex-1 flex-col-reverse gap-[var(--space-6)] overflow-auto px-[var(--content-inset)]",
     );
+    expect(src).toContain("ASK_AI_OVERLAY_PHONE_SCROLL_CLASS");
+    expect(src).toContain("max-md:px-[var(--space-4)]");
     expect(src).not.toContain("flex-1 flex-col gap-[var(--space-6)] px-[var(--content-inset)]");
     expect(src).not.toMatch(/border-t border-hairline"/);
     const conversation = html.slice(
