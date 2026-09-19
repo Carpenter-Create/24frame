@@ -13,9 +13,9 @@ import { socialRelativeTime } from "@/lib/social";
 // Activity is the durable account-alert log. One feed: notifications.
 // Open = unread. Done = read. Complete = Done = read — one state.
 // Not Messages. Not Ask 24Frame AI. Not /attention catalog findings.
-// Bell popover is Open only — no All / Unread / Resolved tabs.
-// Row body links to the item. X marks done. No View / Done / Mark all.
-// Copy lives here, not JSX.
+// Desktop popover / phone house sheet is Open only — no All / Unread /
+// Resolved tabs. Row body links to the item. X marks done. No View /
+// Done / Mark all. Copy lives here, not JSX.
 
 export const ACTIVITY_HREF = "/activity";
 export const ACTIVITY_BELL_OPEN_CAP = 5;
@@ -32,6 +32,7 @@ export const ACTIVITY_PAGE = {
   truncated: `Showing the first ${UNPAGINATED_MAX} alerts. More exist — this list is not complete.`,
   bellLabel: "Activity",
   bellEmpty: "Nothing open.",
+  close: "Close activity",
   navAria: "Activity",
 } as const;
 
