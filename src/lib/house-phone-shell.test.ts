@@ -291,7 +291,7 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(html).not.toContain("size-4");
     expect(html).not.toContain('weight="bold"');
     expect(html).not.toContain('weight="fill"');
-    expect(html).toContain('weight="regular"');
+    expect(bottomNavSrc).toContain("weight={HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT}");
     for (const label of ["Home", "Social", "Aggregation", "Education"]) {
       expect(html).toContain(`aria-label="${label}"`);
       expect(html).not.toContain(`>${label}<`);
