@@ -141,6 +141,7 @@ describe("account invite SoT", () => {
     expect(migration).toMatch(/grant select \(\s*id, kind, status, email/);
     expect(migration).not.toMatch(/grant select \([^)]*token_hash/);
     expect(migration).toContain("tg_audit_account_invites");
+    expect(migration).toContain("expire_stale_account_invites");
     expect(migration).toContain("to_jsonb(new) - 'token_hash'");
     expect(migration).toContain("to_jsonb(old) - 'token_hash'");
   });

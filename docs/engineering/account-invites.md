@@ -16,7 +16,7 @@ Existing SoT, extended — not forked:
 
 `account_invites` is email-first (the user may not exist yet). Status changes only — never deleted. Withdraw and expire drop the row from Team pending / house-grant lists; no Removed or Withdrawn chip, no Settings history rail. `token_hash` is SHA-256 of the raw token; the raw token is emailed and never stored. Authenticated SELECT is column-enumerated and omits `token_hash` (a table-level GRANT would still expose it).
 
-`tg_audit_account_invites` writes `audit_log` on send (insert), accept, revoke, and expire (status updates). Payloads strip `token_hash`.
+`tg_audit_account_invites` writes `audit_log` on send (insert), accept, revoke, and expire (status updates). Payloads strip `token_hash`. Expire is stamped by `expire_stale_account_invites` on list/peek/invite (a RAISE inside `accept` would roll the same statement back).
 
 Visible dates use house craft (`dateStyle: medium`, UTC):
 

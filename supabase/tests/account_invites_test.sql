@@ -258,15 +258,15 @@ select set_config('request.jwt.claims',
   json_build_object('sub', current_setting('t.owner'), 'role', 'authenticated')::text, true);
 
 select is(
-  (select status::text from public.account_invites where id = current_setting('t.invite_exp')::uuid),
-  'expired',
-  'expired invite is not deleted');
-
-select is(
   (select count(*)::int from public.org_pending_invites(current_setting('t.org')::uuid)
     where id = current_setting('t.invite_exp')::uuid),
   0,
   'expired invite leaves the pending list');
+
+select is(
+  (select status::text from public.account_invites where id = current_setting('t.invite_exp')::uuid),
+  'expired',
+  'expired invite is not deleted');
 
 select is(
   (select after->>'status' from public.audit_log

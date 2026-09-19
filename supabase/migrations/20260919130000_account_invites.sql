@@ -172,6 +172,26 @@ revoke execute on function public.account_invite_normalize_email(text)
 grant execute on function public.account_invite_normalize_email(text)
   to authenticated, service_role;
 
+-- Persist expired on committed reads/writes. accept() cannot: a RAISE
+-- rolls the same statement back, so list/peek/invite must stamp it.
+create or replace function public.expire_stale_account_invites()
+  returns void
+  language plpgsql security definer set search_path = public
+as $$
+begin
+  update public.account_invites
+    set status = 'expired'
+  where status = 'pending'
+    and expires_at <= now();
+end;
+$$;
+
+revoke execute on function public.expire_stale_account_invites()
+  from public, anon, authenticated;
+
+comment on function public.expire_stale_account_invites() is
+  'Marks pending invites past expires_at as expired. Called from list/peek/invite RPCs so the row and audit_log survive. Not granted to clients.';
+
 create or replace function public.invite_org_member(
   p_org uuid,
   p_email text,
@@ -198,6 +218,7 @@ begin
   if not public.member_can(v_uid, p_org, 'manage_team') then
     raise exception 'Not authorized';
   end if;
+  perform public.expire_stale_account_invites();
   if exists (
     select 1 from auth.users u
     where u.id = v_uid and lower(u.email) = v_email
@@ -270,6 +291,7 @@ begin
   if v_email is null or v_email !~* '^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$' then
     raise exception 'Email is required';
   end if;
+  perform public.expire_stale_account_invites();
   if exists (
     select 1 from auth.users u
     where u.id = v_uid and lower(u.email) = v_email
@@ -331,14 +353,13 @@ begin
     return;
   end if;
 
+  perform public.expire_stale_account_invites();
+
   return query
     select
       i.id,
       i.kind,
-      case
-        when i.status = 'pending' and i.expires_at <= now() then 'expired'::public.account_invite_status
-        else i.status
-      end,
+      i.status,
       i.email,
       coalesce(o.name, i.org_name),
       i.role,
@@ -570,6 +591,8 @@ begin
     raise exception 'Not authorized';
   end if;
 
+  perform public.expire_stale_account_invites();
+
   return query
     select i.id, i.email, i.role, i.expires_at, i.created_at
     from public.account_invites i
@@ -607,6 +630,8 @@ as $$
 begin
   if auth.uid() is null then raise exception 'Not authenticated'; end if;
   if not public.is_gc_staff(auth.uid()) then raise exception 'Not authorized'; end if;
+
+  perform public.expire_stale_account_invites();
 
   return query
     select i.id, i.email, i.org_name, i.tier, i.status, i.org_id,
