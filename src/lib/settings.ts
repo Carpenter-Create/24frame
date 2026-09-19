@@ -128,17 +128,13 @@ export const SETTINGS_HUB_NAV = settingsHubNav();
 
 // Rail chrome — 220 slot, pad 16, 8 between rows. Do not put Titles,
 // Appearance, Workspace, Account, Users, API, Team, or Manage courses here.
+// Item / active / idle / title tokens come from HOUSE_RAIL_* in house-shell.ts.
+// Settings is not a workspace but its rail shares the house rail SoT —
+// do not fork accent, pill, or title tokens here.
 export const SETTINGS_RAIL_PAD_CLASS = "p-[var(--space-4)]";
 export const SETTINGS_RAIL_NAV_CLASS = "flex flex-col gap-[var(--space-2)]";
-export const SETTINGS_RAIL_ITEM_CLASS =
-  "flex items-center rounded-full px-[var(--space-2)] py-[var(--space-2)] t-body leading-5";
 export const SETTINGS_RAIL_DASHBOARD_CLASS = "gap-[var(--space-2)]";
-export const SETTINGS_RAIL_ACTIVE_CLASS = "bg-surface-muted text-ink";
-export const SETTINGS_RAIL_IDLE_CLASS =
-  "text-ink-2 hover:bg-surface-muted hover:text-ink";
 export const SETTINGS_RAIL_CHEVRON_CLASS = "size-4 shrink-0";
-/** House Settings rail title — keep existing t-section treatment. */
-export const SETTINGS_RAIL_TITLE_CLASS = "t-section text-ink";
 /** Body page title. Hub section only. */
 export const SETTINGS_PANE_TITLE_CLASS = "t-section text-ink";
 

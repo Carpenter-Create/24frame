@@ -28,6 +28,7 @@ import {
   HOUSE_RAIL_IDLE_CLASS,
   HOUSE_RAIL_ITEM_CLASS,
   HOUSE_RAIL_PANEL_CLASS,
+  HOUSE_RAIL_TITLE_CLASS,
   HOUSE_RELATED_GAP_CLASS,
   HOUSE_HEADER_SEARCH_GAP_CLASS,
   HOUSE_SEARCH_PILL_CLASS,
@@ -286,5 +287,35 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
       const src = readFileSync(path, "utf8");
       expect(src, path).not.toMatch(/Coinbase/i);
     }
+  });
+
+  it("unifies the Settings rail onto the house workspace-rail SoT — no fork", () => {
+    const settingsRail = readFileSync("src/components/chrome/settings-rail.tsx", "utf8");
+    const settingsLib = readFileSync("src/lib/settings.ts", "utf8");
+
+    expect(settingsRail).toContain("HOUSE_RAIL_ITEM_CLASS");
+    expect(settingsRail).toContain("HOUSE_RAIL_ACTIVE_CLASS");
+    expect(settingsRail).toContain("HOUSE_RAIL_IDLE_CLASS");
+    expect(settingsRail).toContain("HOUSE_RAIL_TITLE_CLASS");
+
+    expect(settingsRail).not.toContain("SETTINGS_RAIL_ITEM_CLASS");
+    expect(settingsRail).not.toContain("SETTINGS_RAIL_ACTIVE_CLASS");
+    expect(settingsRail).not.toContain("SETTINGS_RAIL_IDLE_CLASS");
+    expect(settingsRail).not.toContain("SETTINGS_RAIL_TITLE_CLASS");
+
+    expect(settingsLib).not.toContain("SETTINGS_RAIL_ITEM_CLASS");
+    expect(settingsLib).not.toContain("SETTINGS_RAIL_ACTIVE_CLASS");
+    expect(settingsLib).not.toContain("SETTINGS_RAIL_IDLE_CLASS");
+    expect(settingsLib).not.toContain("SETTINGS_RAIL_TITLE_CLASS");
+
+    expect(HOUSE_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash font-medium text-accent");
+    expect(HOUSE_RAIL_IDLE_CLASS).toBe("font-normal text-ink hover:bg-surface-muted");
+    expect(HOUSE_RAIL_TITLE_CLASS).toBe("px-2 pb-1 t-label text-ink-3");
+    expect(HOUSE_RAIL_ITEM_CLASS).toContain("t-body-sm");
+    expect(HOUSE_RAIL_ITEM_CLASS).toContain("rounded-full");
+
+    expect(sideNav).toContain("HOUSE_RAIL_TITLE_CLASS");
+    expect(sideNav).toContain("className={HOUSE_RAIL_TITLE_CLASS}");
+    expect(sideNav).not.toContain('"px-2 pb-1 t-label text-ink-3"');
   });
 });

@@ -57,6 +57,8 @@ export const HOUSE_SECTION_AIR_CLASS = "gap-[var(--space-6)]";
 // the compact under-nav search; do not invent a desktop mid-bar.
 export const HOUSE_HEADER_SEARCH_GAP_CLASS = "gap-[var(--space-4)]";
 
+export const HOUSE_RAIL_TITLE_CLASS = "px-2 pb-1 t-label text-ink-3";
+
 export const HOUSE_RAIL_ITEM_CLASS =
   "relative flex items-center rounded-full t-body-sm leading-4 transition-colors";
 
