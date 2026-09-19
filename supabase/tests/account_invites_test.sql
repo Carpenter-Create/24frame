@@ -303,7 +303,8 @@ select set_config('request.jwt.claims',
 select throws_ok(
   $$ select token_hash from public.account_invites $$,
   '42501',
-  'token_hash column is revoked from authenticated'
+  'permission denied for table account_invites',
+  'token_hash is not selectable by authenticated'
 );
 
 -- peek by hash works without leaking other rows
