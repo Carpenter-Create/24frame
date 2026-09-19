@@ -587,7 +587,6 @@ describe("AccountSheet 544:561 / 537:557", () => {
   it("does not dump the rail, Ask Globee chrome, or Adobe leftovers", () => {
     const html = renderSheet();
     for (const item of [...NAV, ...GC_NAV]) {
-      if (item.family === "house-ai") continue;
       expect(html).not.toContain(item.label);
       if (item.href !== "/") expect(html).not.toContain(`href="${item.href}"`);
     }

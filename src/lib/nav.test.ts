@@ -84,7 +84,7 @@ describe("client NAV", () => {
   });
 
   it("keeps Ask 24Frame AI off the Aggregation rail — overlay trigger, not a dest", () => {
-    expect(NAV.find((item) => item.family === "house-ai")).toBeUndefined();
+    expect(NAV.some(isHouseAiNavItem)).toBe(false);
     expect(NAV.map((item) => item.label)).not.toContain("Ask 24Frame AI");
     expect(NAV.map((item) => item.href)).not.toContain("?ai=1");
     expect(NAV.filter(isHouseAiNavItem)).toHaveLength(0);
