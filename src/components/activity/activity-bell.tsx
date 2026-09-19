@@ -139,9 +139,8 @@ function ActivityBellTriggers({
   );
 }
 
-function useActivityBellSheetDismiss(open: boolean, onClose: () => void) {
+function useActivityBellSheetDismiss(onClose: () => void) {
   useEffect(() => {
-    if (!open) return undefined;
     function onKey(event: KeyboardEvent) {
       if (event.key === "Escape") onClose();
     }
@@ -152,7 +151,7 @@ function useActivityBellSheetDismiss(open: boolean, onClose: () => void) {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = previous;
     };
-  }, [open, onClose]);
+  }, [onClose]);
 }
 
 function ActivityBellPhone({
@@ -168,7 +167,6 @@ function ActivityBellPhone({
 }) {
   const [open, setOpen] = useState(defaultOpen);
   const close = useCallback(() => setOpen(false), []);
-  useActivityBellSheetDismiss(open, close);
 
   const sheet = open ? <ActivityBellSheet items={items} now={now} onClose={close} /> : null;
 
@@ -260,6 +258,8 @@ export function ActivityBellSheet({
   now?: number;
   onClose: () => void;
 }) {
+  useActivityBellSheetDismiss(onClose);
+
   return (
     <div
       id="activity-bell-sheet"
