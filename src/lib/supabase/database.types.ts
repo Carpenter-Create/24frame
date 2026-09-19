@@ -2431,6 +2431,53 @@ export type Database = {
           },
         ]
       }
+      security_events: {
+        Row: {
+          id: string
+          org_id: string
+          actor_user_id: string | null
+          event_kind: Database["public"]["Enums"]["security_event_kind"]
+          occurred_at: string
+          ip: string | null
+          user_agent: string | null
+          source_label: string | null
+          country: string | null
+          metadata: Json | null
+        }
+        Insert: {
+          id?: string
+          org_id: string
+          actor_user_id?: string | null
+          event_kind: Database["public"]["Enums"]["security_event_kind"]
+          occurred_at?: string
+          ip?: string | null
+          user_agent?: string | null
+          source_label?: string | null
+          country?: string | null
+          metadata?: Json | null
+        }
+        Update: {
+          id?: string
+          org_id?: string
+          actor_user_id?: string | null
+          event_kind?: Database["public"]["Enums"]["security_event_kind"]
+          occurred_at?: string
+          ip?: string | null
+          user_agent?: string | null
+          source_label?: string | null
+          country?: string | null
+          metadata?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "security_events_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       source_documents: {
         Row: {
           content_hash: string
@@ -3619,6 +3666,14 @@ export type Database = {
         | "home_video"
         | "mod"
       screener_event: "play" | "pause" | "seek" | "progress" | "ended"
+      security_event_kind:
+        | "sign_in"
+        | "sign_out"
+        | "failed_sign_in"
+        | "invite_sent"
+        | "invite_accepted"
+        | "invite_withdrawn"
+        | "role_change"
       screener_source: "master" | "dedicated"
       term_trigger_enum:
         | "signup"
@@ -3896,6 +3951,15 @@ export const Constants = {
         "mod",
       ],
       screener_event: ["play", "pause", "seek", "progress", "ended"],
+      security_event_kind: [
+        "sign_in",
+        "sign_out",
+        "failed_sign_in",
+        "invite_sent",
+        "invite_accepted",
+        "invite_withdrawn",
+        "role_change",
+      ],
       screener_source: ["master", "dedicated"],
       term_trigger_enum: [
         "signup",
