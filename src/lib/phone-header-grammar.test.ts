@@ -205,12 +205,13 @@ describe("phone header grammar A — trim trailing", () => {
     expect(USER_MENU_PHONE_ACTIONS.map((item) => item.kind)).toEqual([
       "settings",
       "appearance",
+      "help",
     ]);
     expect(USER_MENU).not.toHaveProperty("askAssistant");
     expect(USER_MENU).not.toHaveProperty("askAssistantHref");
     expect(ACCOUNT_SHEET_PHONE_ITEMS).toBe(USER_MENU_PHONE_ACTIONS);
     expect(ACCOUNT_SHEET_ITEMS).toBe(USER_MENU_ACTIONS);
-    expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).toEqual(["settings"]);
+    expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).toEqual(["settings", "help"]);
 
     const sheet = renderToStaticMarkup(
       createElement(AccountSheet, {
@@ -223,6 +224,8 @@ describe("phone header grammar A — trim trailing", () => {
     expect(sheet).toContain('data-sheet-group-item="settings"');
     expect(sheet).not.toContain('data-sheet-group-item="askAssistant"');
     expect(sheet).toContain('data-sheet-group-item="appearance"');
+    expect(sheet).toContain('data-sheet-group-item="help"');
+    expect(sheet).toContain(USER_MENU.help);
     expect(sheet).not.toContain(ASSISTANT_NAME);
     expect(sheet).not.toContain('href="/messages"');
     expect(sheet).toContain(USER_MENU.appearance);
@@ -242,6 +245,8 @@ describe("phone header grammar A — trim trailing", () => {
     expect(dropdown).toContain('data-sheet-group-item="settings"');
     expect(dropdown).not.toContain('data-sheet-group-item="askAssistant"');
     expect(dropdown).not.toContain('data-sheet-group-item="appearance"');
+    expect(dropdown).toContain('data-sheet-group-item="help"');
+    expect(dropdown).toContain(USER_MENU.help);
     expect(dropdown).not.toContain(ASSISTANT_NAME);
     expect(dropdown).not.toContain(USER_MENU.appearance);
   });

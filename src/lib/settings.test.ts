@@ -183,10 +183,14 @@ describe("settings hub lock", () => {
     expect(SETTINGS_HUB_NAV.map((item) => item.label)).not.toContain("Aggregation");
     expect(SETTINGS.agreementsEmpty).not.toMatch(/accepted yet|download|view agreement/i);
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).toContain("settings");
+    expect(USER_MENU_ACTIONS.map((item) => item.kind)).toContain("help");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("profile");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("agreements");
-    expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("help");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("refer");
+    expect(SETTINGS_HUB_NAV.map((item) => item.label)).not.toContain("Get Help");
+    expect(SETTINGS_HUB_NAV.map((item) => item.label)).not.toContain("Give feedback");
+    expect(SETTINGS_ABSENT).toContain("Get Help");
+    expect(SETTINGS_ABSENT).toContain("Give feedback");
   });
 
   it("treats every /settings path as the focused shell", () => {

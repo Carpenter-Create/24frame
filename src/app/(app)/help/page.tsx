@@ -1,13 +1,15 @@
-import { PageHeader } from "@/components/ui/page-header";
-import { HouseEmpty } from "@/components/chrome/house";
-import { HELP } from "@/lib/help";
+import { HelpPageLead } from "@/components/help/help-page-lead";
+import { HelpStack } from "@/components/help/help-stack";
+import { HELP, HELP_PAGE_CLASS, HELP_SECTION_CLASS } from "@/lib/help";
 
-// House empty. Door only — do not invent a help product.
+// Get Help index. Rows + chevrons. Not a Settings hub pane.
 export default function HelpPage() {
   return (
-    <>
-      <PageHeader title={HELP.title} />
-      <HouseEmpty>{HELP.empty}</HouseEmpty>
-    </>
+    <div data-help-page="" className={HELP_PAGE_CLASS}>
+      <section data-help-section="index" className={HELP_SECTION_CLASS}>
+        <HelpPageLead title={HELP.title} helper={HELP.helper} pathname={HELP.href} />
+        <HelpStack />
+      </section>
+    </div>
   );
 }

@@ -35,7 +35,8 @@
 // Existing /settings/agreements, /settings/refer stay Profile doors.
 // Company persist stays organizations.name.
 // Theme SoT is gc-theme — header sun/moon and Preferences Appearance
-// share it. Help stays /help.
+// share it. Get Help / Give feedback stay on /help — never Settings
+// hub chrome.
 //
 // 600:881 shell — one 220 rail occupies the Access slot on every
 // /settings path. Pad 16. Active wash follows the hub section.
@@ -85,6 +86,8 @@ export const SETTINGS_ABSENT = [
   "Name and email on this account.",
   "Edit public profile",
   "Home",
+  "Get Help",
+  "Give feedback",
 ] as const;
 
 export type SettingsHubSection = "profile" | "organization" | "preferences";

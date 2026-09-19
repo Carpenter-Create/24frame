@@ -1,8 +1,8 @@
 // Account-menu copy and lock. Lives in lib/, not JSX.
-// Desktop panel: identity → Settings → Log out.
-// Phone sheet (grammar A): identity → Settings → Appearance →
-// Log out. Chrome may differ (sheet vs fuller panel). Labels
-// may not fork on the shared rows.
+// Desktop panel: identity → Settings — Get Help → Log out.
+// Phone sheet (Apple door): identity → Settings → Appearance —
+// Get Help → Log out. Chrome may differ (full-bleed sheet vs
+// 264 dropdown). Labels may not fork on the shared rows.
 // 24Frame AI is the header sparkle only — not a menu row.
 // Workspace lives on the header switcher. Desktop theme stays
 // the header sun/moon. Phone Appearance is the pre-#391
@@ -11,12 +11,14 @@
 // Profile is a Settings hub pane (/settings/profile), not a
 // second avatar-menu door. Settings land href is
 // settingsLandHref() — always /settings. Do not invent /account/*.
-// Agreements / Refer stay /settings doors, not menu rows. Help
-// stays /help. Company stays off this menu. Do not invent
-// /account/workspace, /settings/workspace, /account/appearance,
-// or /settings/appearance. Legal is parked. Do not invent
-// Phone, Job, Notifications, Privacy, Manage account, or a name
-// derived from the email local-part.
+// Agreements / Refer stay /settings doors, not menu rows. Get Help
+// is the avatar-menu footer door — /help. Give feedback lives on
+// /help/feedback, not Settings. Company stays off this menu. Do
+// not invent /account/workspace, /settings/workspace,
+// /account/appearance, /settings/appearance, or /account/feedback.
+// Legal is parked. Do not invent Phone, Job, Notifications,
+// Privacy, Manage account, or a name derived from the email
+// local-part.
 
 import { version as APP_VERSION } from "../../package.json";
 import { ASK_ASSISTANT, ASSISTANT_NAME } from "@/lib/product";
@@ -30,7 +32,7 @@ export const USER_MENU = {
   agreements: "Agreements",
   agreementsHref: "/settings/agreements",
   appearance: "Appearance",
-  help: "Help",
+  help: "Get Help",
   helpHref: "/help",
   refer: "Refer a friend",
   referHref: "/settings/refer",
@@ -54,23 +56,41 @@ export const USER_MENU_ABSENT = [
   ASK_ASSISTANT,
 ] as const;
 
-export type UserMenuLinkAction = {
+export type UserMenuSettingsAction = {
   kind: "settings";
   label: typeof USER_MENU.settings;
   href: typeof USER_MENU.settingsHref;
 };
 
+export type UserMenuHelpAction = {
+  kind: "help";
+  label: typeof USER_MENU.help;
+  href: typeof USER_MENU.helpHref;
+};
+
+export type UserMenuLinkAction = UserMenuSettingsAction | UserMenuHelpAction;
+
 export type UserMenuAction =
   | UserMenuLinkAction
   | { kind: "appearance"; label: typeof USER_MENU.appearance };
 
-export const USER_MENU_ACTIONS: readonly UserMenuLinkAction[] = [
+export const USER_MENU_PRIMARY_ACTIONS: readonly UserMenuSettingsAction[] = [
   { kind: "settings", label: USER_MENU.settings, href: USER_MENU.settingsHref },
 ];
 
+export const USER_MENU_HELP_ACTIONS: readonly UserMenuHelpAction[] = [
+  { kind: "help", label: USER_MENU.help, href: USER_MENU.helpHref },
+];
+
+export const USER_MENU_ACTIONS: readonly UserMenuLinkAction[] = [
+  ...USER_MENU_PRIMARY_ACTIONS,
+  ...USER_MENU_HELP_ACTIONS,
+];
+
 export const USER_MENU_PHONE_ACTIONS: readonly UserMenuAction[] = [
-  ...USER_MENU_ACTIONS,
+  ...USER_MENU_PRIMARY_ACTIONS,
   { kind: "appearance", label: USER_MENU.appearance },
+  ...USER_MENU_HELP_ACTIONS,
 ];
 
 export function userMenuVersion(): string {

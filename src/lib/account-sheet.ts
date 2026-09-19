@@ -4,15 +4,17 @@
 // would show. Photo is the signed avatars/{user-id}/avatar face, or the
 // email initial when empty. Always render both fields. No dashes, no invented
 // local-part name. Desktop items after the Identity hairline are
-// USER_MENU_ACTIONS. Phone uses USER_MENU_PHONE_ACTIONS
-// (Settings · Appearance). Profile is a Settings pane, not a
-// menu row. 24Frame AI is the header
+// USER_MENU_ACTIONS (Settings — Get Help). Phone uses
+// USER_MENU_PHONE_ACTIONS (Settings · Appearance — Get Help).
+// Hairline before Get Help. Profile is a Settings pane, not a
+// menu row. Give feedback lives on /help/feedback, not this
+// menu and not Settings. 24Frame AI is the header
 // sparkle only — not a menu row. Workspace is
 // the header control, not this menu. Desktop theme stays the
 // header sun/moon. Phone Appearance is the same-sheet drill-in —
 // not a page. Destinations use existing routes only — not
-// /account/workspace or /account/appearance. Company stays off
-// this menu. Log out +
+// /account/workspace, /account/appearance, or /account/feedback.
+// Company stays off this menu. Log out +
 // version are the footer group — not a
 // packed list row. Hairline only under Log out. No hairline above
 // Log out. #209 #210 #211 hug / hairline-sandwich stay void on

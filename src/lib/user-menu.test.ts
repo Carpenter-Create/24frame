@@ -13,11 +13,13 @@ import {
 import { ASSISTANT_NAME } from "./product";
 
 describe("user menu lock", () => {
-  it("keeps desktop Mercury order: Settings — phone adds Appearance only", () => {
-    expect(USER_MENU_ACTIONS.map((item) => item.kind)).toEqual(["settings"]);
-    expect(USER_MENU_ACTIONS.map((item) => item.label)).toEqual(["Settings"]);
+  it("keeps desktop Mercury order: Settings — Get Help; phone adds Appearance", () => {
+    expect(USER_MENU_ACTIONS.map((item) => item.kind)).toEqual(["settings", "help"]);
+    expect(USER_MENU_ACTIONS.map((item) => item.label)).toEqual(["Settings", "Get Help"]);
     expect(USER_MENU.settings).toBe("Settings");
     expect(USER_MENU.settingsHref).toBe("/settings");
+    expect(USER_MENU.help).toBe("Get Help");
+    expect(USER_MENU.helpHref).toBe("/help");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("profile");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("workspace");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("appearance");
@@ -28,6 +30,7 @@ describe("user menu lock", () => {
     expect(USER_MENU_PHONE_ACTIONS.map((item) => item.kind)).toEqual([
       "settings",
       "appearance",
+      "help",
     ]);
     expect(USER_MENU_PHONE_ACTIONS.map((item) => item.kind)).not.toContain("askAssistant");
     expect(USER_MENU_PHONE_ACTIONS.map((item) => item.label)).not.toContain(ASSISTANT_NAME);
@@ -54,7 +57,12 @@ describe("user menu lock", () => {
       label: "Settings",
       href: "/settings",
     });
-    expect(USER_MENU_ACTIONS).toHaveLength(1);
+    expect(USER_MENU_ACTIONS[1]).toEqual({
+      kind: "help",
+      label: "Get Help",
+      href: "/help",
+    });
+    expect(USER_MENU_ACTIONS).toHaveLength(2);
     expect(USER_MENU_ABSENT).toContain("Workspace");
     expect(USER_MENU_ABSENT).toContain("Workspaces");
     expect(USER_MENU_ABSENT).toContain(ASSISTANT_NAME);
@@ -69,11 +77,13 @@ describe("user menu lock", () => {
     }
     expect(labels).not.toContain("Profile");
     expect(labels).toContain("Settings");
+    expect(labels).toContain("Get Help");
     expect(labels).not.toContain("User Profile");
     expect(labels).not.toContain("Agreements");
     expect(labels).not.toContain("Help");
+    expect(labels).not.toContain("Give feedback");
     expect(labels).not.toContain("Refer a friend");
-    expect(hrefs).toEqual(["/settings"]);
+    expect(hrefs).toEqual(["/settings", "/help"]);
     expect(hrefs).not.toContain("/account/appearance");
     expect(hrefs).not.toContain("/account/profile");
     expect(hrefs).not.toContain("/account/company");

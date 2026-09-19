@@ -195,7 +195,7 @@ describe("UserMenu item lock (source)", () => {
   });
 
   it("desktop panel items are the same list as mobile", () => {
-    expect(USER_MENU_ACTIONS.map((item) => item.label)).toEqual(["Settings"]);
+    expect(USER_MENU_ACTIONS.map((item) => item.label)).toEqual(["Settings", "Get Help"]);
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("profile");
     expect(sheetSrc).toContain("ACCOUNT_SHEET_ITEMS");
     expect(sheetSrc).toContain("ACCOUNT_SHEET_PHONE_ITEMS");
