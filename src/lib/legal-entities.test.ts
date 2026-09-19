@@ -1,5 +1,11 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
+import {
+  HOUSE_PHONE_STACK_CLASS,
+  HOUSE_PHONE_WRAP_CLASS,
+  housePhoneForbidsTruncate,
+} from "./house-phone-stack";
 import {
   ENTITY_TYPE_LABELS,
   ENTITY_TYPES,
@@ -97,7 +103,7 @@ describe("legal entities copy", () => {
     expect(ENTITY_LIST_EMPTY_CLASS).toContain("text-ink-3");
   });
 
-  it("keeps phone stack + desktop spread as one SoT — no truncate", () => {
+  it("keeps phone stack + desktop spread as one SoT — house gospel never truncate", () => {
     const layout = [
       ENTITY_LIST_CLASS,
       ENTITY_LIST_GRID_CLASS,
@@ -110,10 +116,10 @@ describe("legal entities copy", () => {
       ENTITY_LIST_VALUE_CLASS,
       ENTITY_LIST_EMPTY_CLASS,
     ].join(" ");
-    expect(layout).not.toContain("truncate");
-    expect(layout).not.toContain("ellipsis");
-    expect(layout).not.toContain("overflow-x-auto");
-    expect(layout).not.toContain("text-ellipsis");
+    expect(housePhoneForbidsTruncate(layout)).toBe(true);
+    expect(ENTITY_LIST_FIELD_CLASS).toContain(HOUSE_PHONE_STACK_CLASS);
+    expect(ENTITY_LIST_VALUE_CLASS).toContain(HOUSE_PHONE_WRAP_CLASS);
+    expect(ENTITY_LIST_EMPTY_CLASS).toContain(HOUSE_PHONE_WRAP_CLASS);
     expect(ENTITY_LIST_GRID_CLASS).toMatch(/grid-cols-1/);
     expect(ENTITY_LIST_GRID_CLASS).toMatch(/md:grid-cols-\[/);
     expect(ENTITY_LIST_GRID_CLASS).toMatch(/2fr/);
@@ -121,6 +127,10 @@ describe("legal entities copy", () => {
     expect(ENTITY_LIST_FIELD_CLASS).toContain("items-stretch");
     expect(ENTITY_LIST_VALUE_CLASS).toContain("min-w-0");
     expect(ENTITY_LIST_VALUE_CLASS).toContain("max-w-full");
+    const src = readFileSync("src/lib/legal-entities.ts", "utf8");
+    expect(src).toContain("HOUSE_PHONE_WRAP_CLASS");
+    expect(src).toContain("HOUSE_PHONE_STACK_CLASS");
+    expect(src).toContain("house gospel 2026-09-19");
   });
 
   it("has scope selector copy", () => {

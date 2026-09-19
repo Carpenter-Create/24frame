@@ -1,3 +1,7 @@
+import {
+  HOUSE_PHONE_STACK_CLASS,
+  HOUSE_PHONE_WRAP_CLASS,
+} from "@/lib/house-phone-stack";
 import type { Database } from "@/lib/supabase/database.types";
 
 // Legal entities. Copy and types live here, not in JSX.
@@ -75,10 +79,10 @@ export const LEGAL_ENTITIES = {
 // One SoT for header + rows. Four cells: Name + Default · Type ·
 // Jurisdiction · Actions. Desktop (md+): fr tracks fill the card so
 // columns breathe — Adam 2026-09-19 lock, reversing the #504 hug.
-// Phone: one stacked block per entity (label/value). Full text, wrap
-// OK, no truncate / no horizontal squeeze. Header is desktop-only.
-// Values share primary ink. Empty jurisdiction is a muted em dash.
-// Not a data-grid library.
+// Phone: house gospel 2026-09-19 — never truncate, stack vertically.
+// One stacked block per entity (label/value). Full text, wrap OK.
+// Header is desktop-only. Values share primary ink. Empty
+// jurisdiction is a muted em dash. Not a data-grid library.
 export const ENTITY_LIST_CLASS = "w-full";
 
 export const ENTITY_LIST_GRID_CLASS =
@@ -94,16 +98,14 @@ export const ENTITY_LIST_NAME_CLASS =
   "flex min-w-0 w-full flex-wrap items-center gap-[var(--space-2)]";
 
 export const ENTITY_LIST_FIELD_CLASS =
-  "flex min-w-0 w-full flex-col items-stretch gap-[var(--space-1)] md:block";
+  `${HOUSE_PHONE_STACK_CLASS} gap-[var(--space-1)] md:block`;
 
 export const ENTITY_LIST_FIELD_LABEL_CLASS = "t-label text-ink-3 md:hidden";
 
 export const ENTITY_LIST_ACTIONS_CLASS = "justify-self-start md:justify-self-end";
 
-export const ENTITY_LIST_VALUE_CLASS =
-  "min-w-0 max-w-full t-body text-ink whitespace-normal break-words";
-export const ENTITY_LIST_EMPTY_CLASS =
-  "min-w-0 max-w-full t-body text-ink-3 whitespace-normal break-words";
+export const ENTITY_LIST_VALUE_CLASS = `${HOUSE_PHONE_WRAP_CLASS} t-body text-ink`;
+export const ENTITY_LIST_EMPTY_CLASS = `${HOUSE_PHONE_WRAP_CLASS} t-body text-ink-3`;
 
 export const ENTITY_SCOPE = {
   all: "All entities",
