@@ -272,7 +272,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(attrClass(html, "data-account-sheet-head")).toContain("justify-between");
   });
 
-  it("keeps the Identity half-bar on the hug sheet — Appearance is a list row", () => {
+  it("keeps the Identity half-bar on the hug sheet — theme is not a list row", () => {
     const main = renderSheet();
     const accent = attrClass(main, "data-menu-surface-accent");
 
@@ -287,11 +287,11 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(main).toContain("data-identity-block");
     expect(main).toContain("data-account-sheet-close");
     expect(main).toContain('data-account-menu-face="main"');
-    expect(main).toContain('data-sheet-group-item="appearance"');
+    expect(main).not.toContain('data-sheet-group-item="appearance"');
     expect(main).not.toContain("data-account-menu-appearance-flyout");
     expect(src).toContain("<MenuSurfaceAccent");
     expect(src).not.toContain('{face === "main" ? <MenuSurfaceAccent /> : null}');
-    expect(src).toContain("AccountSheetAppearance");
+    expect(src).not.toContain("AccountSheetAppearance");
     expect(src).not.toContain("Adam Carpenter");
     expect(src).not.toContain("admin@ccbfg.com");
   });
@@ -363,7 +363,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(empty).not.toContain("<img");
   });
 
-  it("lists Settings, Appearance — Get Help, then Log out with the footer", () => {
+  it("lists Settings — Get Help, then Log out with the footer", () => {
     const html = renderSheet();
     const group = html.slice(html.indexOf("data-sheet-group"));
     const settingsClass = attrClass(html, 'data-sheet-group-item="settings"');
@@ -378,19 +378,19 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(html).not.toContain(">ACCOUNT<");
     expect(html).not.toContain("Workspace");
     expect(group).not.toContain("Profile");
-    expect(group.indexOf("Settings")).toBeLessThan(group.indexOf("Appearance"));
-    expect(group.indexOf("Appearance")).toBeLessThan(group.indexOf("Get Help"));
+    expect(group).not.toContain("Appearance");
+    expect(group.indexOf("Settings")).toBeLessThan(group.indexOf("Get Help"));
     expect(html.indexOf("Get Help")).toBeLessThan(html.indexOf("Log out"));
     expect(html).not.toContain("24Frame AI");
     expect(html).not.toContain('data-sheet-group-item="workspace"');
     expect(html).not.toContain('data-sheet-group-item="profile"');
     expect(html).toContain('data-sheet-group-item="settings"');
     expect(html).not.toContain('data-sheet-group-item="askAssistant"');
-    expect(html).toContain('data-sheet-group-item="appearance"');
+    expect(html).not.toContain('data-sheet-group-item="appearance"');
     expect(html).not.toContain('data-sheet-group-item="agreements"');
     expect(html).toContain('data-sheet-group-item="help"');
     expect(html).toContain("data-account-sheet-help-rule");
-    expect(html.indexOf('data-sheet-group-item="appearance"')).toBeLessThan(
+    expect(html.indexOf('data-sheet-group-item="settings"')).toBeLessThan(
       html.indexOf("data-account-sheet-help-rule"),
     );
     expect(html.indexOf("data-account-sheet-help-rule")).toBeLessThan(
@@ -440,7 +440,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(html).not.toContain("stroke-width");
     expect(html).not.toContain("lucide-");
     expect(html).not.toContain("ThemeGlyph");
-    expect(html).toContain("data-account-menu-appearance-mode");
+    expect(html).not.toContain("data-account-menu-appearance-mode");
     expect(html).not.toContain("data-account-menu-appearance-flyout");
     expect(html).not.toContain("data-account-sheet-appearance-stack");
     expect(html).not.toContain("data-account-sheet-appearance-flyout-host");
@@ -462,7 +462,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(src).toContain("settingsLandHref(pathname)");
   });
 
-  it("keeps Log out with the footer — leftover is 48 house air, hairline only under Log out", () => {
+  it("keeps Log out with the footer — leftover is 24 house air, hairline only under Log out", () => {
     const html = renderSheet();
     const scrollEnd = html.indexOf("data-account-sheet-scroll");
     const logout = html.indexOf('data-sheet-group-item="logOut"');
@@ -493,7 +493,8 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(scrollClass).toContain("overscroll-contain");
     expect(leftoverClass).toBe(ACCOUNT_SHEET_LEFTOVER_CLASS);
     expect(leftoverClass).toBe(ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS);
-    expect(leftoverClass).toContain("h-[var(--space-12)]");
+    expect(leftoverClass).toContain("h-[var(--space-6)]");
+    expect(leftoverClass).not.toContain("h-[var(--space-12)]");
     expect(leftoverClass).toContain("shrink-0");
     expect(leftoverClass).not.toContain("flex-1");
     expect(leftoverClass).not.toContain("h-[48px]");
@@ -507,7 +508,8 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(attrClass(html, "data-account-sheet-surface").split(" ")).not.toContain("h-[90dvh]");
     expect(attrClass(html, "data-account-sheet-surface")).not.toContain("gap-[var(--space-6)]");
     expect(pinClass).toBe(ACCOUNT_SHEET_PIN_CLASS);
-    expect(pinClass).toContain("gap-[var(--space-6)]");
+    expect(pinClass).toContain("gap-[var(--space-4)]");
+    expect(pinClass).not.toContain("gap-[var(--space-6)]");
     expect(pinClass).not.toContain("gap-[var(--space-12)]");
     expect(attrClass(html, "data-account-sheet-surface")).toContain("pb-[var(--space-8)]");
     expect(attrClass(html, "data-account-sheet-surface")).not.toContain("pb-[var(--space-12)]");
@@ -541,8 +543,8 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(src).toContain("571:911 stays off");
     expect(src).toContain("618:785 overlay");
     expect(src).toContain("is void");
-    expect(src).toContain("Log out → hairline 24");
-    expect(src).toContain("Hairline → footer 24");
+    expect(src).toContain("Log out → hairline 16");
+    expect(src).toContain("Hairline → footer 16");
     expect(src).toContain("Footer → bottom 32");
     expect(src).toContain("Refer cannot paint over Log out");
     expect(src).not.toContain("Log out → hairline 48");
@@ -561,7 +563,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(attrClass(html, "data-account-sheet-version")).toContain("text-ink-3");
   });
 
-  it("keeps the last item and Log out as separate rows — leftover is 48, pin does not stack", () => {
+  it("keeps the last item and Log out as separate rows — leftover is 24, pin does not stack", () => {
     const html = renderSheet();
     const scrollClass = attrClass(html, "data-account-sheet-scroll");
     const leftoverClass = attrClass(html, "data-account-sheet-leftover");
@@ -579,7 +581,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(leftover).toBeGreaterThan(scroll);
     expect(pin).toBeGreaterThan(leftover);
     expect(html.slice(scroll, leftover)).toContain("Settings");
-    expect(html.slice(scroll, leftover)).toContain("Appearance");
+    expect(html.slice(scroll, leftover)).not.toContain("Appearance");
     expect(html.slice(scroll, leftover)).toContain("Get Help");
     expect(html.slice(scroll, pin)).not.toContain("Log out");
     expect(html.slice(pin)).toContain("Log out");
@@ -621,51 +623,36 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(src).not.toContain("type=\"radio\"");
   });
 
-  it("opens phone Appearance as a same-sheet drill-in — not a page or desktop flyout", () => {
+  it("keeps theme off the phone sheet — Settings Preferences is the SoT", () => {
     const sheet = renderSheet();
-    const appearance = renderToStaticMarkup(
-      <AccountSheet
-        email="ada@example.com"
-        pathname="/"
-        onClose={() => undefined}
-        face="appearance"
-      />,
-    );
 
     expect(sheet).toContain("data-identity-block");
     expect(sheet).toContain("data-account-sheet-close");
     expect(sheet).not.toContain('data-sheet-group-item="profile"');
     expect(sheet).toContain('data-sheet-group-item="settings"');
     expect(sheet).not.toContain('data-sheet-group-item="askAssistant"');
-    expect(sheet).toContain('data-sheet-group-item="appearance"');
+    expect(sheet).not.toContain('data-sheet-group-item="appearance"');
     expect(sheet).toContain('data-account-menu-face="main"');
     expect(sheet).not.toContain('data-sheet-group-item="back"');
     expect(sheet).not.toContain('data-sheet-group-item="light"');
     expect(sheet).not.toContain("data-account-menu-appearance-flyout");
     expect(sheet).not.toContain("/account/appearance");
-    expect(src).toContain("AccountSheetAppearance");
-    expect(src).toContain("AccountBackChevron");
-    expect(src).toContain("CaretLeft");
-    expect(src).toContain("APPEARANCE.back");
-    expect(src).toContain("applyDocumentThemePreference");
-    expect(src).toContain("AppearanceCheck");
-    expect(src).toContain("ACCOUNT_SHEET_APPEARANCE_COPY_CLASS");
+    expect(src).not.toContain("AccountSheetAppearance");
+    expect(src).not.toContain("AccountBackChevron");
+    expect(src).not.toContain("CaretLeft");
+    expect(src).not.toContain("APPEARANCE.back");
+    expect(src).not.toContain("applyDocumentThemePreference");
+    expect(src).not.toContain("AppearanceCheck");
+    expect(src).not.toContain("ACCOUNT_SHEET_APPEARANCE_COPY_CLASS");
     expect(src).not.toContain("AccountAppearanceFlyout");
     expect(src).not.toContain("Back to main menu");
     expect(src).toContain("618:785 overlay is void");
     expect(src).not.toContain("w-[342px]");
-
-    expect(appearance).toContain('data-account-menu-face="appearance"');
-    expect(appearance).toContain('data-sheet-group-item="back"');
-    expect(appearance).toContain('data-sheet-group-item="auto"');
-    expect(appearance).toContain('data-sheet-group-item="dark"');
-    expect(appearance).toContain('data-sheet-group-item="light"');
-    expect(appearance).toContain("System default");
-    expect(appearance).toContain("data-appearance-check");
-    expect(appearance).not.toContain('data-sheet-group-item="profile"');
-    expect(appearance).not.toContain("Log out");
-    expect(appearance).not.toContain('type="radio"');
-    expect(appearance).not.toContain("purple");
+    expect(sheet).toContain("Log out");
+    expect(sheet).not.toContain("System default");
+    expect(sheet).not.toContain("data-appearance-check");
+    expect(sheet).not.toContain('type="radio"');
+    expect(sheet).not.toContain("purple");
   });
 
   it("does not restyle Ask Globee landing or merge account into dest chips", () => {
@@ -691,7 +678,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
 });
 
 describe("AccountMenuDropdown 629:795", () => {
-  it("hugs the stack — leftover 48 house air, not a 90% sheet and not a tall right takeover", () => {
+  it("hugs the stack — leftover 24 house air, not a 90% sheet and not a tall right takeover", () => {
     const html = renderDropdown("ada@example.com", "Ada Lovelace");
     const hostClass = attrClass(html, 'data-user-menu-desktop-panel=""');
     const surfaceClass = attrClass(html, "data-user-menu-desktop-surface");
@@ -749,7 +736,8 @@ describe("AccountMenuDropdown 629:795", () => {
     expect(scrollClass).toContain("shrink-0");
     expect(scrollClass).not.toContain("flex-1");
     expect(attrClass(html, "data-account-menu-leftover")).toBe(ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS);
-    expect(attrClass(html, "data-account-menu-leftover")).toContain("h-[var(--space-12)]");
+    expect(attrClass(html, "data-account-menu-leftover")).toContain("h-[var(--space-6)]");
+    expect(attrClass(html, "data-account-menu-leftover")).not.toContain("h-[var(--space-12)]");
     expect(attrClass(html, "data-account-menu-leftover")).toContain("shrink-0");
     expect(attrClass(html, "data-account-menu-leftover")).not.toMatch(/h-\[\d+px\]/);
     expect(attrClass(html, "data-account-menu-leftover")).not.toContain("h-[48px]");
@@ -825,7 +813,7 @@ describe("AccountMenuDropdown 629:795", () => {
     expect(empty).not.toContain("<img");
   });
 
-  it("keeps 24 between items — leftover last-item → Log out is 48, hairline only under Log out", () => {
+  it("keeps a tight item stack — leftover last-item → Log out is 24, hairline only under Log out", () => {
     const html = renderDropdown();
     const surfaceClass = attrClass(html, "data-user-menu-desktop-surface");
     const scrollClass = attrClass(html, "data-account-sheet-scroll");
@@ -862,17 +850,19 @@ describe("AccountMenuDropdown 629:795", () => {
     expect(scrollClass).toContain("shrink-0");
     expect(scrollClass).not.toContain("flex-1");
     expect(scrollClass).not.toContain("overflow-y-auto");
-    expect(groupClass).toContain("gap-[var(--space-6)]");
-    expect(groupClass).not.toContain("gap-[var(--space-4)]");
+    expect(groupClass).toContain("gap-[var(--space-3)]");
+    expect(groupClass).not.toContain("gap-[var(--space-6)]");
     expect(pinClass).toBe(ACCOUNT_MENU_DROPDOWN_PIN_CLASS);
     expect(pinClass).not.toContain("mt-");
-    expect(pinClass).toContain("gap-[var(--space-6)]");
+    expect(pinClass).toContain("gap-[var(--space-4)]");
+    expect(pinClass).not.toContain("gap-[var(--space-6)]");
     expect(pinClass).not.toContain("gap-[var(--space-12)]");
     expect(lastItem).toBeGreaterThan(-1);
     expect(logout).toBeGreaterThan(lastItem);
     expect(betweenLastItemAndLogout).toContain("data-account-menu-leftover");
     expect(attrClass(html, "data-account-menu-leftover")).toBe(ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS);
-    expect(attrClass(html, "data-account-menu-leftover")).toContain("h-[var(--space-12)]");
+    expect(attrClass(html, "data-account-menu-leftover")).toContain("h-[var(--space-6)]");
+    expect(attrClass(html, "data-account-menu-leftover")).not.toContain("h-[var(--space-12)]");
     expect(attrClass(html, "data-account-menu-leftover")).not.toContain("h-[48px]");
     expect(attrClass(html, "data-account-menu-leftover")).not.toContain("flex-1");
     expect(footerRule).toBeGreaterThan(logout);

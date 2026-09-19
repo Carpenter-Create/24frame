@@ -27,6 +27,7 @@ export function SettingsDrillRow({
   readOnly = false,
   helper,
   badge,
+  itemAttr,
 }: {
   label: string;
   value?: string;
@@ -35,8 +36,10 @@ export function SettingsDrillRow({
   readOnly?: boolean;
   helper?: string;
   badge?: ReactNode;
+  itemAttr?: string;
 }) {
   const canOpen = Boolean(href) && !readOnly;
+  const extra = itemAttr ? { [itemAttr]: kind } : undefined;
   const body = (
     <>
       <span className={SETTINGS_DRILL_COPY_CLASS}>
@@ -65,6 +68,7 @@ export function SettingsDrillRow({
       <Link
         href={href}
         data-settings-drill-row={kind}
+        {...extra}
         className={SETTINGS_DRILL_ROW_CLASS}
       >
         {body}
@@ -76,6 +80,7 @@ export function SettingsDrillRow({
     <div
       data-settings-drill-row={kind}
       data-settings-drill-readonly=""
+      {...extra}
       className={SETTINGS_DRILL_ROW_CLASS}
     >
       {body}

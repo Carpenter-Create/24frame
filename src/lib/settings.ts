@@ -158,19 +158,28 @@ export const SETTINGS_RAIL_CHEVRON_CLASS = "size-4 shrink-0";
 /** Body page title. Hub section only. */
 export const SETTINGS_PANE_TITLE_CLASS = "t-section text-ink";
 
-export const SETTINGS_PANE_CLASS = "flex flex-col gap-[var(--space-12)]";
+export const SETTINGS_PANE_CLASS = "flex flex-col gap-[var(--space-6)]";
 export const SETTINGS_SECTION_CLASS = "flex flex-col gap-[var(--space-6)]";
 export const SETTINGS_QUIET_ROW_CLASS =
   "flex items-center justify-between t-body leading-5 text-ink";
+/** Quiet section label under a page title — not a second h1. */
+export const SETTINGS_SECTION_LABEL_CLASS = "t-label text-ink-3";
 
 // Coinbase drill-in grammar — label · muted value · chevron. Whole
 // row tappable. Read-only rows drop the chevron. Shared SoT for
-// Profile, Preferences, and Rights Holder / Legal Entities.
+// Settings index, Profile, Preferences, Rights Holder / Legal
+// Entities, and Get Help. Do not fork a lookalike row.
 export const SETTINGS_DRILL_LIST_CLASS = "flex flex-col";
 export const SETTINGS_DRILL_ROW_CLASS =
   "flex w-full items-center justify-between gap-[var(--space-4)] py-[var(--space-3)] text-left t-body leading-5 text-ink";
 export const SETTINGS_DRILL_COPY_CLASS = "flex min-w-0 flex-col gap-[var(--space-1)]";
 export const SETTINGS_DRILL_VALUE_CLASS = "t-body-sm text-ink-3";
+
+// RH index cards stay on desktop. Phone drops the frame so the
+// grouped list is the surface — not a website card stack.
+export const SETTINGS_INDEX_CARD_CLASS =
+  "max-md:!border-0 max-md:!bg-transparent max-md:!rounded-none";
+export const SETTINGS_INDEX_CARD_BODY_CLASS = "max-md:!p-0";
 
 // Compact Dialog form density — labeled fields + DialogFooter.
 // Mutate surfaces on Settings use this, not a stacked page form.

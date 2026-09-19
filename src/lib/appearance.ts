@@ -1,17 +1,13 @@
 // Theme preference copy. Lives in lib/, not JSX.
-// One SoT: gc-theme via lib/theme.ts. Header sun/moon, phone
-// sheet drill-in, and Settings → Preferences Appearance all
-// read/write that key. Do not invent a second store. Phone
-// grammar A keeps the pre-#391 Appearance drill-in on the
-// avatar sheet — not a page, not radios, not a route.
+// One SoT: gc-theme via lib/theme.ts. Header sun/moon and
+// Settings → Preferences Theme all read/write that key. Do
+// not invent a second store. Theme is not an avatar-menu row.
 // Existing kinds stay light / dark / auto. Auto is System
 // default on every preference surface.
 
 import { SETTINGS_PREF_BLOCK_CLASS, SETTINGS_PREF_TITLE_CLASS } from "@/lib/settings";
 import { USER_MENU } from "@/lib/user-menu";
 import type { ThemePreference } from "@/lib/theme";
-
-export type AccountMenuFace = "main" | "appearance";
 
 export const APPEARANCE = {
   title: USER_MENU.appearance,

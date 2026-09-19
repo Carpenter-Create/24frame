@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { DASHBOARD_HREF } from "./dashboard-admin";
-import { HELP, HELP_ABSENT, HELP_STACK, HELP_TITLE_CLASS, helpHeaderBack, isHelpPath } from "./help";
-import { SETTINGS_HUB_NAV, SETTINGS_PANE_TITLE_CLASS } from "./settings";
+import { HELP, HELP_ABSENT, HELP_ROW_CLASS, HELP_STACK, HELP_STACK_CLASS, HELP_TITLE_CLASS, helpHeaderBack, isHelpPath } from "./help";
+import { SETTINGS_DRILL_LIST_CLASS, SETTINGS_DRILL_ROW_CLASS, SETTINGS_HUB_NAV, SETTINGS_PANE_TITLE_CLASS } from "./settings";
 import { USER_MENU, USER_MENU_ACTIONS } from "./user-menu";
 
 describe("help stack lock", () => {
@@ -88,5 +88,7 @@ describe("help stack lock", () => {
     });
     expect(HELP.back).toBe("Back");
     expect(HELP_TITLE_CLASS).toBe(SETTINGS_PANE_TITLE_CLASS);
+    expect(HELP_STACK_CLASS).toBe(SETTINGS_DRILL_LIST_CLASS);
+    expect(HELP_ROW_CLASS).toBe(SETTINGS_DRILL_ROW_CLASS);
   });
 });

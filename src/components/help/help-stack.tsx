@@ -1,26 +1,21 @@
-import Link from "next/link";
-import { CaretRight } from "@phosphor-icons/react/ssr";
+import { SettingsDrillRow } from "@/components/settings/settings-drill";
+import { HELP_STACK, HELP_STACK_CLASS } from "@/lib/help";
 
-import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
-import { HELP_ROW_CLASS, HELP_STACK, HELP_STACK_CLASS } from "@/lib/help";
-import { SHEET_GROUP_CHEVRON_CLASS } from "@/lib/house-sheet";
-
-// Coinbase-style Get Help rows. Same chevron register as the
-// account sheet. Destinations live on HELP_STACK — one SoT.
+// Get Help rows — same SettingsDrillRow grammar as Settings.
+// Short list. Not a second Settings hub. Destinations live on
+// HELP_STACK — one SoT.
 
 export function HelpStack() {
   return (
     <nav data-help-stack="" className={HELP_STACK_CLASS}>
       {HELP_STACK.map((item) => (
-        <Link
+        <SettingsDrillRow
           key={item.kind}
+          kind={item.kind}
+          label={item.label}
           href={item.href}
-          data-help-stack-item={item.kind}
-          className={HELP_ROW_CLASS}
-        >
-          {item.label}
-          <CaretRight className={SHEET_GROUP_CHEVRON_CLASS} weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
-        </Link>
+          itemAttr="data-help-stack-item"
+        />
       ))}
     </nav>
   );

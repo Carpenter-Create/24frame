@@ -201,12 +201,12 @@ describe("phone header grammar A — trim trailing", () => {
     }
   });
 
-  it("keeps phone Appearance on the avatar sheet — 24Frame AI stays header-only", () => {
+  it("keeps the same Settings — Get Help stack on phone and desktop — 24Frame AI stays header-only", () => {
     expect(USER_MENU_PHONE_ACTIONS.map((item) => item.kind)).toEqual([
       "settings",
-      "appearance",
       "help",
     ]);
+    expect(USER_MENU_PHONE_ACTIONS).toBe(USER_MENU_ACTIONS);
     expect(USER_MENU).not.toHaveProperty("askAssistant");
     expect(USER_MENU).not.toHaveProperty("askAssistantHref");
     expect(ACCOUNT_SHEET_PHONE_ITEMS).toBe(USER_MENU_PHONE_ACTIONS);
@@ -223,15 +223,15 @@ describe("phone header grammar A — trim trailing", () => {
     expect(sheet).not.toContain('data-sheet-group-item="profile"');
     expect(sheet).toContain('data-sheet-group-item="settings"');
     expect(sheet).not.toContain('data-sheet-group-item="askAssistant"');
-    expect(sheet).toContain('data-sheet-group-item="appearance"');
+    expect(sheet).not.toContain('data-sheet-group-item="appearance"');
     expect(sheet).toContain('data-sheet-group-item="help"');
     expect(sheet).toContain(USER_MENU.help);
     expect(sheet).not.toContain(ASSISTANT_NAME);
     expect(sheet).not.toContain('href="/messages"');
-    expect(sheet).toContain(USER_MENU.appearance);
-    expect(sheet).toContain("data-account-menu-appearance-mode");
-    expect(sheetSrc).toContain("AccountSheetAppearance");
-    expect(sheetSrc).toContain("applyDocumentThemePreference");
+    expect(sheet).not.toContain(USER_MENU.appearance);
+    expect(sheet).not.toContain("data-account-menu-appearance-mode");
+    expect(sheetSrc).not.toContain("AccountSheetAppearance");
+    expect(sheetSrc).not.toContain("applyDocumentThemePreference");
     expect(sheetSrc).not.toContain("/account/appearance");
 
     const dropdown = renderToStaticMarkup(

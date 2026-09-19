@@ -39,16 +39,15 @@ import {
 } from "./account-sheet";
 
 describe("account sheet lock", () => {
-  it("uses USER_MENU_ACTIONS on desktop and phone extras on the sheet", () => {
+  it("uses the same Settings — Get Help stack on desktop and the phone sheet", () => {
     expect(ACCOUNT_SHEET_ITEMS).toBe(USER_MENU_ACTIONS);
     expect(ACCOUNT_SHEET_PHONE_ITEMS).toBe(USER_MENU_PHONE_ACTIONS);
+    expect(ACCOUNT_SHEET_PHONE_ITEMS).toBe(ACCOUNT_SHEET_ITEMS);
     expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).toEqual(["settings", "help"]);
     expect(ACCOUNT_SHEET_ITEMS.map((item) => item.label)).toEqual(["Settings", "Get Help"]);
-    expect(ACCOUNT_SHEET_PHONE_ITEMS.map((item) => item.kind)).toEqual([
-      "settings",
-      "appearance",
-      "help",
-    ]);
+    expect(ACCOUNT_SHEET_PHONE_ITEMS.map((item) => item.kind)).toEqual(["settings", "help"]);
+    expect(ACCOUNT_SHEET_PHONE_ITEMS.map((item) => item.kind)).not.toContain("appearance");
+    expect(ACCOUNT_SHEET_PHONE_ITEMS.map((item) => item.label)).not.toContain("Appearance");
     expect(ACCOUNT_SHEET_ITEMS[0]?.kind).toBe("settings");
     expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).not.toContain("profile");
     expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).not.toContain("workspace");
@@ -115,19 +114,22 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_SHEET_SCROLL_CLASS).not.toContain("min-h-[var(--space-12)]");
     expect(ACCOUNT_SHEET_SCROLL_CLASS).toContain("overflow-y-auto");
     expect(ACCOUNT_SHEET_SCROLL_CLASS).toContain("overscroll-contain");
-    expect(ACCOUNT_SHEET_LEFTOVER).toBe(48);
+    expect(ACCOUNT_SHEET_LEFTOVER).toBe(24);
     expect(ACCOUNT_SHEET_LEFTOVER).toBe(ACCOUNT_MENU_DROPDOWN_LEFTOVER);
     expect(ACCOUNT_SHEET_LEFTOVER_CLASS).toBe(ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS);
-    expect(ACCOUNT_SHEET_LEFTOVER_CLASS).toContain("h-[var(--space-12)]");
+    expect(ACCOUNT_SHEET_LEFTOVER_CLASS).toContain("h-[var(--space-6)]");
+    expect(ACCOUNT_SHEET_LEFTOVER_CLASS).not.toContain("h-[var(--space-12)]");
     expect(ACCOUNT_SHEET_LEFTOVER_CLASS).toContain("shrink-0");
     expect(ACCOUNT_SHEET_LEFTOVER_CLASS).not.toContain("flex-1");
     expect(ACCOUNT_SHEET_LEFTOVER_CLASS).not.toContain("h-[48px]");
+    expect(ACCOUNT_SHEET_LEFTOVER_CLASS).not.toContain("h-[24px]");
     expect(ACCOUNT_SHEET_LEFTOVER_CLASS).not.toMatch(/h-\[\d+px\]/);
     expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain("overflow-hidden");
     expect(ACCOUNT_SHEET_SURFACE_CLASS).not.toContain("overflow-y-auto");
     expect(ACCOUNT_SHEET_LOGOUT_CLASS).toContain("text-accent");
     expect(ACCOUNT_SHEET_LOGOUT_CLASS).not.toContain("text-ink");
-    expect(ACCOUNT_SHEET_PIN_CLASS).toContain("gap-[var(--space-6)]");
+    expect(ACCOUNT_SHEET_PIN_CLASS).toContain("gap-[var(--space-4)]");
+    expect(ACCOUNT_SHEET_PIN_CLASS).not.toContain("gap-[var(--space-6)]");
     expect(ACCOUNT_SHEET_PIN_CLASS).not.toContain("gap-[var(--space-12)]");
     expect(ACCOUNT_SHEET_PIN_CLASS).toContain("shrink-0");
     expect(ACCOUNT_SHEET_LOGOUT_STACK_CLASS).toBe("flex w-full shrink-0 flex-col");
@@ -135,7 +137,7 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_SHEET_LOGOUT_STACK_CLASS).not.toContain("hairline");
   });
 
-  it("locks the 629:795 desktop dropdown to a 264 content hug — leftover 48", () => {
+  it("locks the 629:795 desktop dropdown to a 264 content hug — leftover 24", () => {
     expect(ACCOUNT_MENU_DROPDOWN_WIDTH).toBe(264);
     expect(ACCOUNT_MENU_DROPDOWN_HOST_CLASS).toBe("fixed inset-0 z-50");
     expect(ACCOUNT_MENU_DROPDOWN_HOST_CLASS).not.toContain("justify-end");
@@ -181,10 +183,11 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_MENU_DROPDOWN_IDENTITY_CLASS).toContain("break-words");
     expect(ACCOUNT_MENU_DROPDOWN_IDENTITY_CLASS).not.toContain("truncate");
     expect(ACCOUNT_MENU_DROPDOWN_IDENTITY_CLASS).not.toContain("ellipsis");
-    expect(ACCOUNT_MENU_DROPDOWN_GROUP_CLASS).toContain("gap-[var(--space-6)]");
-    expect(ACCOUNT_MENU_DROPDOWN_GROUP_CLASS).not.toContain("gap-[var(--space-4)]");
+    expect(ACCOUNT_MENU_DROPDOWN_GROUP_CLASS).toContain("gap-[var(--space-3)]");
+    expect(ACCOUNT_MENU_DROPDOWN_GROUP_CLASS).not.toContain("gap-[var(--space-6)]");
     expect(ACCOUNT_MENU_DROPDOWN_PIN_CLASS).not.toContain("mt-");
-    expect(ACCOUNT_MENU_DROPDOWN_PIN_CLASS).toContain("gap-[var(--space-6)]");
+    expect(ACCOUNT_MENU_DROPDOWN_PIN_CLASS).toContain("gap-[var(--space-4)]");
+    expect(ACCOUNT_MENU_DROPDOWN_PIN_CLASS).not.toContain("gap-[var(--space-6)]");
     expect(ACCOUNT_MENU_DROPDOWN_PIN_CLASS).not.toContain("gap-[var(--space-12)]");
     expect(ACCOUNT_MENU_DROPDOWN_PIN_CLASS).not.toContain("hairline");
     expect(ACCOUNT_MENU_DROPDOWN_SCROLL_CLASS).toContain("shrink-0");
@@ -193,8 +196,9 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_MENU_DROPDOWN_SCROLL_CLASS).not.toContain("overflow-y-auto");
     expect(ACCOUNT_MENU_DROPDOWN_SURFACE_CLASS).not.toContain("h-[48px]");
     expect(accountSheet).not.toHaveProperty("ACCOUNT_MENU_DROPDOWN_HEIGHT");
-    expect(ACCOUNT_MENU_DROPDOWN_LEFTOVER).toBe(48);
-    expect(ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS).toContain("h-[var(--space-12)]");
+    expect(ACCOUNT_MENU_DROPDOWN_LEFTOVER).toBe(24);
+    expect(ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS).toContain("h-[var(--space-6)]");
+    expect(ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS).not.toContain("h-[var(--space-12)]");
     expect(ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS).toContain("shrink-0");
     expect(ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS).not.toMatch(/h-\[\d+px\]/);
     expect(ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS).not.toContain("h-[48px]");
@@ -203,9 +207,9 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS).not.toContain("min-h-[134px]");
   });
 
-  it("keeps phone Appearance tokens and no desktop flyout align", () => {
-    expect(accountSheet).toHaveProperty("ACCOUNT_MENU_APPEARANCE_ROW_CLASS");
-    expect(accountSheet).toHaveProperty("ACCOUNT_SHEET_APPEARANCE_COPY_CLASS");
+  it("keeps theme off the avatar menu — Settings Preferences is the SoT", () => {
+    expect(accountSheet).not.toHaveProperty("ACCOUNT_MENU_APPEARANCE_ROW_CLASS");
+    expect(accountSheet).not.toHaveProperty("ACCOUNT_SHEET_APPEARANCE_COPY_CLASS");
     expect(accountSheet).not.toHaveProperty("ACCOUNT_MENU_APPEARANCE_WASH_CLASS");
     expect(accountSheet).not.toHaveProperty("ACCOUNT_MENU_APPEARANCE_FLYOUT_CLASS");
     expect(accountSheet).not.toHaveProperty("accountMenuAppearanceFlyoutAlign");

@@ -1,23 +1,19 @@
 "use client";
 
-import Link from "next/link";
-import { CaretRight } from "@phosphor-icons/react";
-
-import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
-
 import { SettingsPageLead } from "@/components/settings/settings-page-lead";
+import { SettingsDrillRow } from "@/components/settings/settings-drill";
 import { cn } from "@/lib/cn";
 import {
   SETTINGS,
+  SETTINGS_DRILL_LIST_CLASS,
   SETTINGS_HUB_NAV,
   SETTINGS_PANE_CLASS,
-  SETTINGS_QUIET_ROW_CLASS,
-  SETTINGS_RAIL_CHEVRON_CLASS,
   SETTINGS_SECTION_CLASS,
 } from "@/lib/settings";
 
 // Mobile Settings list → push. Same section order as the desktop
-// rail. Hidden at md, where the rail stays.
+// rail. SettingsDrillRow SoT — label · chevron. Hidden at md,
+// where the rail stays.
 export function SettingsHubList({
   className,
 }: {
@@ -31,20 +27,15 @@ export function SettingsHubList({
     >
       <section data-settings-section="list" className={SETTINGS_SECTION_CLASS}>
         <SettingsPageLead title={SETTINGS.title} pathname={SETTINGS.href} />
-        <nav data-settings-hub-list-nav="" className="flex flex-col gap-[var(--space-6)]">
+        <nav data-settings-hub-list-nav="" className={SETTINGS_DRILL_LIST_CLASS}>
           {SETTINGS_HUB_NAV.map((item) => (
-            <Link
+            <SettingsDrillRow
               key={item.kind}
+              kind={item.kind}
+              label={item.label}
               href={item.href}
-              data-settings-hub-list-item={item.kind}
-              className={SETTINGS_QUIET_ROW_CLASS}
-            >
-              {item.label}
-              <CaretRight
-                className={SETTINGS_RAIL_CHEVRON_CLASS}
-                weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
-              />
-            </Link>
+              itemAttr="data-settings-hub-list-item"
+            />
           ))}
         </nav>
       </section>

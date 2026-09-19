@@ -47,6 +47,19 @@ describe("SettingsDrillRow", () => {
     expect(html).not.toContain("<a");
   });
 
+  it("can carry a surface item attr — hub and Help keep their data hooks", () => {
+    const html = renderToStaticMarkup(
+      createElement(SettingsDrillRow, {
+        kind: "profile",
+        label: SETTINGS.profile,
+        href: SETTINGS.profileHref,
+        itemAttr: "data-settings-hub-list-item",
+      }),
+    );
+    expect(html).toContain('data-settings-drill-row="profile"');
+    expect(html).toContain('data-settings-hub-list-item="profile"');
+  });
+
   it("keeps an optional badge on the label — Rights Holder default chip", () => {
     const html = renderToStaticMarkup(
       createElement(SettingsDrillRow, {

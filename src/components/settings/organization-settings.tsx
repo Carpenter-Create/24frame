@@ -6,8 +6,11 @@ import { LegalEntitiesSection } from "@/components/settings/legal-entities-secti
 import { TeamInviteForm } from "@/components/settings/team-invite-form";
 import { Card, CardBody } from "@/components/ui/card";
 import { COMPANY_PROFILE_CARD_BODY_CLASS } from "@/lib/account-profile";
+import { cn } from "@/lib/cn";
 import {
   SETTINGS,
+  SETTINGS_INDEX_CARD_BODY_CLASS,
+  SETTINGS_INDEX_CARD_CLASS,
   SETTINGS_PANE_CLASS,
   SETTINGS_SECTION_CLASS,
   settingsPaneTitle,
@@ -87,8 +90,8 @@ export async function OrganizationSettings() {
               data-settings-section="company"
               className={SETTINGS_SECTION_CLASS}
             >
-              <Card>
-                <CardBody className={COMPANY_PROFILE_CARD_BODY_CLASS}>
+              <Card className={SETTINGS_INDEX_CARD_CLASS}>
+                <CardBody className={cn(COMPANY_PROFILE_CARD_BODY_CLASS, SETTINGS_INDEX_CARD_BODY_CLASS)}>
                   <CompanyProfileForm
                     orgId={ctx.activeOrg.id}
                     name={ctx.activeOrg.name}
@@ -101,8 +104,8 @@ export async function OrganizationSettings() {
               data-settings-section="entities"
               className={SETTINGS_SECTION_CLASS}
             >
-              <Card>
-                <CardBody>
+              <Card className={SETTINGS_INDEX_CARD_CLASS}>
+                <CardBody className={SETTINGS_INDEX_CARD_BODY_CLASS}>
                   <LegalEntitiesSection
                     orgId={ctx.activeOrg.id}
                     canManage={canEditCompany}
@@ -115,8 +118,8 @@ export async function OrganizationSettings() {
               data-settings-section="team"
               className={SETTINGS_SECTION_CLASS}
             >
-              <Card>
-                <CardBody>
+              <Card className={SETTINGS_INDEX_CARD_CLASS}>
+                <CardBody className={SETTINGS_INDEX_CARD_BODY_CLASS}>
                   <TeamInviteForm
                     orgId={ctx.activeOrg.id}
                     canInvite={canInvite}

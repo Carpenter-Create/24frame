@@ -13,7 +13,7 @@ import { StatusChip } from "@/components/layout/status-chip";
 import {
   SETTINGS_DIALOG_FIELD_CLASS,
   SETTINGS_DIALOG_FORM_CLASS,
-  SETTINGS_PANE_TITLE_CLASS,
+  SETTINGS_SECTION_LABEL_CLASS,
 } from "@/lib/settings";
 import {
   ACCOUNT_INVITE,
@@ -147,7 +147,7 @@ export function TeamInviteForm({
   return (
     <div data-settings-team="" className="flex flex-col gap-[var(--space-6)]">
       <div className="flex items-center justify-between gap-[var(--space-4)]">
-        <h2 className={SETTINGS_PANE_TITLE_CLASS}>{ACCOUNT_INVITE.team}</h2>
+        <h2 className={SETTINGS_SECTION_LABEL_CLASS}>{ACCOUNT_INVITE.team}</h2>
         {canInvite ? (
           <Button type="button" data-team-invite-cta="" onClick={openInvite}>
             {ACCOUNT_INVITE.invite}
