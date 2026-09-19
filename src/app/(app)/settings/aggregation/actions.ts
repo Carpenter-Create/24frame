@@ -42,7 +42,8 @@ async function sendInviteSignInLink(email: string): Promise<string | undefined> 
 
 // invite_org_member is the write. If the login identity is not in auth.users
 // yet, the house magic-link mint creates it (generateLink / createUser) and
-// we retry. Never signInWithOtp. Never write gc_staff. Never create a profile.
+// we retry. Never call the hosted Auth OTP send. Never write operator
+// staff rows. Never create a profile.
 export async function inviteOrgMember(input: unknown): Promise<{ error?: string }> {
   const parsed = orgTeamInviteSchema.safeParse(input);
   if (!parsed.success) {

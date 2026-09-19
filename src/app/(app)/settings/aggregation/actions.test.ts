@@ -35,8 +35,8 @@ function ctx() {
 
 function inviteClient({
   canManage = true,
-  first = { data: MEMBER_ID, error: null as { message: string } | null },
-  second = { data: MEMBER_ID, error: null as { message: string } | null },
+  first = { data: MEMBER_ID as string | null, error: null as { message: string } | null },
+  second = { data: MEMBER_ID as string | null, error: null as { message: string } | null },
 } = {}) {
   let inviteCalls = 0;
   const rpc = vi.fn(async (name: string, args: { p_capability?: string }) => {

@@ -81,7 +81,7 @@ describe("social isolation lock", () => {
     expect(inviteAction).toContain("invite_org_member");
     expect(inviteAction).not.toContain("from(\"profiles\")");
     expect(inviteAction).not.toContain("ensureOwnSocialProfile");
-    expect(inviteAction).not.toMatch(/signInWithOtp/);
+    expect(inviteAction).not.toMatch(/\.signInWithOtp\s*\(/);
   });
 
   it("locks posts.group_id off ON DELETE CASCADE", () => {

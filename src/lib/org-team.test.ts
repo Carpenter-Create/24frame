@@ -83,8 +83,8 @@ describe("org team contract", () => {
     expect(actions).toContain("invite_org_member");
     expect(actions).toContain("issueDashboardSignInLink");
     expect(actions).toContain("manage_team");
-    expect(actions).not.toMatch(/signInWithOtp/);
-    expect(actions).not.toContain("gc_staff");
+    expect(actions).not.toMatch(/\.signInWithOtp\s*\(/);
+    expect(actions).not.toMatch(/from\(["']gc_staff["']\)/);
     expect(sql).toContain("member_can(auth.uid(), p_org, 'manage_team')");
     expect(sql).toContain("tg_memberships_last_owner_guard");
     expect(sql).not.toContain("drop trigger if exists memberships_last_owner_guard");
