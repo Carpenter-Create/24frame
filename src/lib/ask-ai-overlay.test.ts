@@ -141,7 +141,7 @@ describe("ask AI overlay URL", () => {
     expect(readAskAiReturnPath("/home")).toBe("/education");
   });
 
-  it("chrome / Home / sheet openers write ?ai=1 on the current path — never /messages", () => {
+  it("chrome / Home openers write ?ai=1 on the current path — never /messages", () => {
     const overlaySrc = readFileSync(new URL("../components/chrome/ask-ai-overlay.tsx", import.meta.url), "utf8");
     const headerSrc = readFileSync(new URL("../components/chrome/ask-assistant-header.tsx", import.meta.url), "utf8");
     const moduleSrc = readFileSync(new URL("../components/overview/overview-module.tsx", import.meta.url), "utf8");
@@ -163,8 +163,8 @@ describe("ask AI overlay URL", () => {
     expect(headerSrc).not.toContain("/ai");
     expect(moduleSrc).toContain("AskAiOpenButton");
     expect(moduleSrc).toContain("data-overview-ai-ask");
-    expect(sheetSrc).toContain("AskAiOpenButton");
-    expect(sheetSrc).toContain('data-sheet-group-item="askAssistant"');
+    expect(sheetSrc).not.toContain("AskAiOpenButton");
+    expect(sheetSrc).not.toContain('data-sheet-group-item="askAssistant"');
     expect(sideNavSrc).not.toContain("AskAiOpenButton");
     expect(sideNavSrc).not.toContain("data-side-nav-ask-ai");
     expect(destChipsSrc).toContain("housePhoneDestinations");

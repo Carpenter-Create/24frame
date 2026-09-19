@@ -5,7 +5,8 @@
 // email initial when empty. Always render both fields. No dashes, no invented
 // local-part name. Desktop items after the Identity hairline are
 // USER_MENU_ACTIONS. Phone uses USER_MENU_PHONE_ACTIONS
-// (Profile · Settings · 24Frame AI · Appearance). Workspace is
+// (Profile · Settings · Appearance). 24Frame AI is the header
+// sparkle only — not a menu row. Workspace is
 // the header control, not this menu. Desktop theme stays the
 // header sun/moon. Phone Appearance is the same-sheet drill-in —
 // not a page. Destinations use existing routes only — not
@@ -35,7 +36,7 @@
 // bottom 24. Labels stay one source.
 
 import { accountPhotoSrc } from "@/lib/account-avatar";
-import { ASK_ASSISTANT } from "@/lib/product";
+import { ASK_ASSISTANT, ASSISTANT_NAME } from "@/lib/product";
 import {
   USER_MENU_ACTIONS,
   USER_MENU_PHONE_ACTIONS,
@@ -56,6 +57,7 @@ export const ACCOUNT_SHEET_ABSENT = [
   "Activity",
   "Finance",
   ASK_ASSISTANT,
+  ASSISTANT_NAME,
   "Queue",
   "Avails",
   "Manage account",

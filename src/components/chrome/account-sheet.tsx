@@ -70,7 +70,7 @@ import {
   type AccountMenuFace,
 } from "@/lib/appearance";
 import { HOUSE_HEADER_TRAILING_AVATAR_CLASS } from "@/lib/house-lead-chrome";
-import { APP_SHEET_SCRIM_CLASS, SHEET_GROUP_CHEVRON_CLASS, SHEET_GROUP_ITEM_CLASS } from "@/lib/house-sheet";
+import { APP_SHEET_SCRIM_CLASS, SHEET_GROUP_CHEVRON_CLASS } from "@/lib/house-sheet";
 import { applyDocumentThemePreference } from "@/lib/theme";
 import { settingsLandHref } from "@/lib/settings";
 import {
@@ -80,7 +80,6 @@ import {
   userMenuVersion,
 } from "@/lib/user-menu";
 import { MenuSurfaceAccent } from "./menu-surface";
-import { AskAiOpenButton } from "./ask-ai-overlay";
 
 // Glyph-only. Live sheet/dropdown layout, IA, and chrome stay.
 // 84:46 is icon SSOT — not a restyle, not a Mercury escalation.
@@ -316,20 +315,6 @@ function AccountMenuItems({
         if (item.kind === "appearance") {
           return <AccountAppearanceRow key={item.kind} onClick={() => onAppearance?.()} />;
         }
-        if (item.kind === "askAssistant") {
-          return (
-            <AskAiOpenButton
-              key={item.kind}
-              data-sheet-group-item="askAssistant"
-              data-user-menu-item="askAssistant"
-              className={SHEET_GROUP_ITEM_CLASS}
-              onClick={onClose}
-            >
-              {item.label}
-              <AccountRowChevron />
-            </AskAiOpenButton>
-          );
-        }
         const href = item.kind === "settings" ? settingsLandHref(pathname) : item.href;
         return (
           <SheetGroupItem
@@ -445,7 +430,7 @@ function AccountMenuBody({
 // Same sheet craft — not a new mini language. Do not restyle to
 // the desktop leftover dropdown chrome (264 / rounded-12).
 // One top row: Identity 48 + Close/44. Hairline — phone items.
-// Mercury phone: Profile, Settings, 24Frame AI, Appearance.
+// Mercury phone: Profile, Settings, Appearance.
 // Appearance is the same-sheet drill-in. Desktop theme stays the
 // header sun/moon. 618:785 overlay is void. Closed
 // sheet stays 544:561 / 537:557.

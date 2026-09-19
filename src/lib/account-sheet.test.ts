@@ -53,12 +53,12 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_SHEET_PHONE_ITEMS.map((item) => item.kind)).toEqual([
       "profile",
       "settings",
-      "askAssistant",
       "appearance",
     ]);
     expect(ACCOUNT_SHEET_ITEMS[0]?.kind).toBe("profile");
     expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).not.toContain("workspace");
-    expect(USER_MENU.askAssistant).toBe(ASSISTANT_NAME);
+    expect(ACCOUNT_SHEET_PHONE_ITEMS.map((item) => item.kind)).not.toContain("askAssistant");
+    expect(ACCOUNT_SHEET_PHONE_ITEMS.map((item) => item.label)).not.toContain(ASSISTANT_NAME);
   });
 
   it("wires only existing routes — Appearance is not a page", () => {
@@ -72,9 +72,8 @@ describe("account sheet lock", () => {
     expect(ACCOUNT_SHEET_PHONE_ITEMS.flatMap((item) => ("href" in item ? [item.href] : []))).toEqual([
       USER_MENU.profileHref,
       USER_MENU.settingsHref,
-      USER_MENU.askAssistantHref,
     ]);
-    expect(USER_MENU.askAssistantHref).toBe("?ai=1");
+    expect(USER_MENU).not.toHaveProperty("askAssistantHref");
     expect(hrefs).not.toContain("/account/company");
     expect(hrefs.join(" ")).not.toMatch(/notifications|phone|job/i);
     expect(hrefs).toContain("/settings/profile");

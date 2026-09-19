@@ -13,7 +13,7 @@ import {
 import { ASSISTANT_NAME } from "./product";
 
 describe("user menu lock", () => {
-  it("keeps desktop Mercury order: Profile, Settings — phone adds 24Frame AI + Appearance", () => {
+  it("keeps desktop Mercury order: Profile, Settings — phone adds Appearance only", () => {
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).toEqual([
       "profile",
       "settings",
@@ -26,16 +26,18 @@ describe("user menu lock", () => {
     expect(USER_MENU.settingsHref).toBe("/settings");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("workspace");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("appearance");
+    expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("askAssistant");
     expect(USER_MENU_ACTIONS.map((item) => item.label)).not.toContain("Workspace");
     expect(USER_MENU_ACTIONS.map((item) => item.label)).not.toContain("Appearance");
     expect(USER_MENU_PHONE_ACTIONS.map((item) => item.kind)).toEqual([
       "profile",
       "settings",
-      "askAssistant",
       "appearance",
     ]);
-    expect(USER_MENU.askAssistant).toBe(ASSISTANT_NAME);
-    expect(USER_MENU.askAssistantHref).toBe("?ai=1");
+    expect(USER_MENU_PHONE_ACTIONS.map((item) => item.kind)).not.toContain("askAssistant");
+    expect(USER_MENU_PHONE_ACTIONS.map((item) => item.label)).not.toContain(ASSISTANT_NAME);
+    expect(USER_MENU).not.toHaveProperty("askAssistant");
+    expect(USER_MENU).not.toHaveProperty("askAssistantHref");
   });
 
   it("points Profile and Settings at existing /settings doors — Appearance is not a page", () => {
@@ -65,6 +67,7 @@ describe("user menu lock", () => {
     expect(USER_MENU_ACTIONS).toHaveLength(2);
     expect(USER_MENU_ABSENT).toContain("Workspace");
     expect(USER_MENU_ABSENT).toContain("Workspaces");
+    expect(USER_MENU_ABSENT).toContain(ASSISTANT_NAME);
     expect(USER_MENU_ABSENT).not.toContain("Appearance");
   });
 
