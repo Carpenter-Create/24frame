@@ -16,7 +16,7 @@ import { applyDocumentThemePreference, type ThemePreference } from "@/lib/theme"
 import { cn } from "@/lib/cn";
 
 // Settings Appearance — same gc-theme SoT as the header sun/moon
-// and the phone sheet drill-in. Do not write localStorage here.
+// and the phone sheet drill-in. Writes go through theme.ts only.
 
 export function AppearancePreferences() {
   const preference = useThemePreference();

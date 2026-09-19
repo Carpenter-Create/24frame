@@ -886,7 +886,7 @@ describe("AccountMenuDropdown 629:795", () => {
     const html = renderDropdown();
 
     expect(html).not.toContain("Workspace");
-    expect(html).toContain("Profile");
+    expect(html).not.toContain("Profile");
     expect(html).toContain("Settings");
     expect(html).not.toContain("Appearance");
     expect(html).not.toContain("Agreements");
