@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import AggregationRootPage from "./page";
+import SignedInRootPage from "./page";
 
 vi.mock("next/navigation", () => ({
   redirect: vi.fn((to: string) => {
@@ -8,10 +8,10 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-describe("Aggregation root", () => {
+describe("signed-in root", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("sends `/` to Dashboard", () => {
-    expect(() => AggregationRootPage()).toThrow("REDIRECT:/aggregation/dashboard");
+  it("sends `/` to /home", () => {
+    expect(() => SignedInRootPage()).toThrow("REDIRECT:/home");
   });
 });

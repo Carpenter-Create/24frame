@@ -1,9 +1,13 @@
 // Auth callback `next` allowlist (P0-1). Same-origin path-relative
 // only. Reject protocol-relative, backslash, userinfo `@`, and
-// schemes. Default `/`. Do not use `new URL(next, origin)` — that
-// accepts `//evil`.
+// schemes. Do not use `new URL(next, origin)` — that accepts `//evil`.
+//
+// Founder lock 2026-09-19: missing, unsafe, or leftover `/` land on
+// /home. Preserve a safe allowlisted `next` when present.
 
-const DEFAULT_NEXT = "/";
+import { HOME_ROOT } from "@/lib/workspace";
+
+export const AUTH_DEFAULT_NEXT = HOME_ROOT;
 
 function hasControlChars(value: string): boolean {
   for (let i = 0; i < value.length; i += 1) {
@@ -22,15 +26,26 @@ function isSafePathRelative(value: string): boolean {
   return true;
 }
 
+function isLeftoverRoot(value: string): boolean {
+  return value === "/" || value.startsWith("/?");
+}
+
+function defaultAuthLand(value: string): string {
+  if (value.startsWith("/?")) return `${AUTH_DEFAULT_NEXT}${value.slice(1)}`;
+  return AUTH_DEFAULT_NEXT;
+}
+
 export function safeAuthCallbackNext(raw: string | null | undefined): string {
-  if (!raw) return DEFAULT_NEXT;
-  if (!isSafePathRelative(raw)) return DEFAULT_NEXT;
+  if (!raw) return AUTH_DEFAULT_NEXT;
+  if (isLeftoverRoot(raw)) return defaultAuthLand(raw);
+  if (!isSafePathRelative(raw)) return AUTH_DEFAULT_NEXT;
   let decoded = raw;
   try {
     decoded = decodeURIComponent(raw);
   } catch {
-    return DEFAULT_NEXT;
+    return AUTH_DEFAULT_NEXT;
   }
-  if (decoded !== raw && !isSafePathRelative(decoded)) return DEFAULT_NEXT;
+  if (decoded !== raw && !isSafePathRelative(decoded)) return AUTH_DEFAULT_NEXT;
+  if (isLeftoverRoot(decoded)) return defaultAuthLand(decoded);
   return raw;
 }

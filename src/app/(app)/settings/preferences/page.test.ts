@@ -4,6 +4,12 @@ import { fileURLToPath } from "node:url";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { APPEARANCE } from "@/lib/appearance";
+import {
+  NOTIFICATION_PREF_DEFAULTS,
+  NOTIFICATION_PREF_EVENTS,
+  NOTIFICATION_PREFS,
+} from "@/lib/notification-prefs";
 import { SETTINGS } from "@/lib/settings";
 import { getOrgContext } from "@/lib/supabase/context";
 import SettingsPreferencesPage from "./page";
@@ -14,6 +20,14 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
+vi.mock("@/app/(app)/settings/preferences/actions", () => ({
+  loadOwnNotificationPrefs: vi.fn(async () => NOTIFICATION_PREF_DEFAULTS),
+  saveNotificationPref: vi.fn(),
+}));
+vi.mock("./actions", () => ({
+  loadOwnNotificationPrefs: vi.fn(async () => NOTIFICATION_PREF_DEFAULTS),
+  saveNotificationPref: vi.fn(),
+}));
 
 function ctx(isGcStaff: boolean) {
   return {
@@ -37,21 +51,41 @@ describe("SettingsPreferencesPage", () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx(false) as never);
   });
 
-  it("shows HouseEmpty prefs and hides Manage courses from members", async () => {
+  it("shows Appearance and the notification matrix — not an empty pane", async () => {
     const html = renderToStaticMarkup(await SettingsPreferencesPage());
     expect(html).toContain('data-settings-hub="preferences"');
     expect(html).toContain(SETTINGS.title);
     expect(html).toContain(SETTINGS.preferences);
-    expect(html).toContain(SETTINGS.preferencesEmpty);
-    expect(html).toContain("data-house-empty");
+    expect(html).toContain('data-settings-section="appearance"');
+    expect(html).toContain('data-settings-appearance=""');
+    expect(html).toContain(APPEARANCE.title);
+    expect(html).toContain(APPEARANCE.systemDefault);
+    expect(html).toContain(APPEARANCE.dark);
+    expect(html).toContain(APPEARANCE.light);
+    expect(html).toContain('data-settings-section="notifications"');
+    expect(html).toContain('data-settings-notification-matrix=""');
+    expect(html).toContain(NOTIFICATION_PREFS.title);
+    expect(html).toContain(NOTIFICATION_PREFS.inApp);
+    expect(html).toContain(NOTIFICATION_PREFS.email);
+    for (const event of NOTIFICATION_PREF_EVENTS) {
+      expect(html).toContain(`data-settings-notification-row="${event}"`);
+      expect(html).toContain(NOTIFICATION_PREFS.events[event]);
+    }
+    expect(html).not.toContain("data-house-empty");
+    expect(html).not.toContain("No preferences on this account.");
     expect(html).not.toContain(SETTINGS.manageCourses);
     expect(html).not.toContain('href="/education"');
     expect(html).not.toContain("CreateCourseForm");
-    expect(html).not.toContain("Social");
-    expect(html).not.toContain("Education");
-    expect(html).not.toContain("Aggregation");
+    expect(html).toContain(NOTIFICATION_PREFS.groups.aggregation);
+    expect(html).toContain(NOTIFICATION_PREFS.groups.social);
+    expect(html).toContain(NOTIFICATION_PREFS.groups.education);
+    expect(html).toContain(NOTIFICATION_PREFS.groups.account);
+    expect(html).toContain(NOTIFICATION_PREFS.groups.reporting);
+    expect(html).not.toContain("CreateCourseForm");
     expect(pageSrc).not.toContain("education-forms");
     expect(paneSrc).toContain("SETTINGS.manageCourses");
+    expect(paneSrc).toContain("AppearancePreferences");
+    expect(paneSrc).toContain("NotificationPreferences");
   });
 
   it("shows staff Manage courses as a quiet row to /education", async () => {
@@ -62,7 +96,8 @@ describe("SettingsPreferencesPage", () => {
     expect(html).toContain(`href="${SETTINGS.manageCoursesHref}"`);
     expect(html).toContain('href="/education/manage"');
     expect(html).not.toContain("/gc/education");
-    expect(html).toContain(SETTINGS.preferencesEmpty);
+    expect(html).toContain('data-settings-notification-matrix=""');
+    expect(html).not.toContain("data-house-empty");
   });
 
   it("sends an unauthenticated visitor to login", async () => {

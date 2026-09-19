@@ -18,8 +18,9 @@
 // and /education/[slug] forced that one documented staff subpath).
 //
 // Adam amend 2026-09-18: no leftover redirects. 24Frame has no users
-// yet. Hard-cut to these prefixes only. `/` is signed-in Aggregation
-// land (same home as /aggregation/dashboard), not a leftover hop.
+// yet. Hard-cut to these prefixes only.
+// Founder lock 2026-09-19: signed-in default land is /home
+// (AUTH_DEFAULT_NEXT). `/` hops to that SoT — not Aggregation dashboard.
 
 export const WORKSPACE_COOKIE = "24frame_workspace";
 

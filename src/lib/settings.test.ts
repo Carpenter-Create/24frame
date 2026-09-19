@@ -161,6 +161,7 @@ describe("settings hub lock", () => {
     expect(SETTINGS_HUB_NAV.map((item) => item.label)).not.toContain("Aggregation");
     expect(SETTINGS.agreementsEmpty).not.toMatch(/accepted yet|download|view agreement/i);
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).toContain("settings");
+    expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("profile");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("agreements");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("help");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("refer");

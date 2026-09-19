@@ -13,24 +13,19 @@ import {
 import { ASSISTANT_NAME } from "./product";
 
 describe("user menu lock", () => {
-  it("keeps desktop Mercury order: Profile, Settings — phone adds Appearance only", () => {
-    expect(USER_MENU_ACTIONS.map((item) => item.kind)).toEqual([
-      "profile",
-      "settings",
-    ]);
-    expect(USER_MENU_ACTIONS.map((item) => item.label)).toEqual([
-      "Profile",
-      "Settings",
-    ]);
+  it("keeps desktop Mercury order: Settings — phone adds Appearance only", () => {
+    expect(USER_MENU_ACTIONS.map((item) => item.kind)).toEqual(["settings"]);
+    expect(USER_MENU_ACTIONS.map((item) => item.label)).toEqual(["Settings"]);
     expect(USER_MENU.settings).toBe("Settings");
     expect(USER_MENU.settingsHref).toBe("/settings");
+    expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("profile");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("workspace");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("appearance");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("askAssistant");
+    expect(USER_MENU_ACTIONS.map((item) => item.label)).not.toContain("Profile");
     expect(USER_MENU_ACTIONS.map((item) => item.label)).not.toContain("Workspace");
     expect(USER_MENU_ACTIONS.map((item) => item.label)).not.toContain("Appearance");
     expect(USER_MENU_PHONE_ACTIONS.map((item) => item.kind)).toEqual([
-      "profile",
       "settings",
       "appearance",
     ]);
@@ -40,7 +35,7 @@ describe("user menu lock", () => {
     expect(USER_MENU).not.toHaveProperty("askAssistantHref");
   });
 
-  it("points Profile and Settings at existing /settings doors — Appearance is not a page", () => {
+  it("keeps Profile as a Settings pane href — Appearance is not a page", () => {
     expect(USER_MENU.profileHref).toBe("/settings/profile");
     expect(USER_MENU.settingsHref).toBe("/settings");
     expect(USER_MENU.agreementsHref).toBe("/settings/agreements");
@@ -55,16 +50,11 @@ describe("user menu lock", () => {
     expect(USER_MENU.appearance).toBe("Appearance");
     expect(USER_MENU.workspace).toBe("Workspace");
     expect(USER_MENU_ACTIONS[0]).toEqual({
-      kind: "profile",
-      label: "Profile",
-      href: "/settings/profile",
-    });
-    expect(USER_MENU_ACTIONS[1]).toEqual({
       kind: "settings",
       label: "Settings",
       href: "/settings",
     });
-    expect(USER_MENU_ACTIONS).toHaveLength(2);
+    expect(USER_MENU_ACTIONS).toHaveLength(1);
     expect(USER_MENU_ABSENT).toContain("Workspace");
     expect(USER_MENU_ABSENT).toContain("Workspaces");
     expect(USER_MENU_ABSENT).toContain(ASSISTANT_NAME);
@@ -77,13 +67,13 @@ describe("user menu lock", () => {
     for (const absent of USER_MENU_ABSENT) {
       expect(labels).not.toContain(absent);
     }
-    expect(labels).toContain("Profile");
+    expect(labels).not.toContain("Profile");
     expect(labels).toContain("Settings");
     expect(labels).not.toContain("User Profile");
     expect(labels).not.toContain("Agreements");
     expect(labels).not.toContain("Help");
     expect(labels).not.toContain("Refer a friend");
-    expect(hrefs).toEqual(["/settings/profile", "/settings"]);
+    expect(hrefs).toEqual(["/settings"]);
     expect(hrefs).not.toContain("/account/appearance");
     expect(hrefs).not.toContain("/account/profile");
     expect(hrefs).not.toContain("/account/company");

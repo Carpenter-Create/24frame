@@ -115,7 +115,7 @@ describe("auth callback failure logging", () => {
     );
   });
 
-  it("allowlists path-relative next and defaults off-origin values to / (P0-1)", async () => {
+  it("allowlists path-relative next and defaults missing or off-origin values to /home (P0-1)", async () => {
     mockAuth();
     const ok = await GET(
       new Request(
@@ -123,6 +123,16 @@ describe("auth callback failure logging", () => {
       ),
     );
     expect(ok.headers.get("location")).toBe("https://app.test/home?ai=1");
+
+    mockAuth();
+    const missing = await GET(new Request(`https://app.test/auth/callback?code=${CODE}`));
+    expect(missing.headers.get("location")).toBe("https://app.test/home");
+
+    mockAuth();
+    const leftover = await GET(
+      new Request(`https://app.test/auth/callback?code=${CODE}&next=/`),
+    );
+    expect(leftover.headers.get("location")).toBe("https://app.test/home");
 
     for (const next of [
       "//evil.example",
@@ -138,7 +148,7 @@ describe("auth callback failure logging", () => {
           `https://app.test/auth/callback?code=${CODE}&next=${encodeURIComponent(next)}`,
         ),
       );
-      expect(res.headers.get("location"), next).toBe("https://app.test/");
+      expect(res.headers.get("location"), next).toBe("https://app.test/home");
     }
   });
 });

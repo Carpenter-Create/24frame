@@ -15,8 +15,10 @@
 // Organization holds the company profile (moved from Aggregation
 // settings). Org Team / invite / roles are out of scope this PR —
 // this section hosts Team next.
-// Preferences may hold leftover workspace prefs as optional
-// subsections only — never as top-level workspace product settings.
+// Preferences holds Appearance (same gc-theme SoT as the header
+// sun/moon) and the notification matrix. Leftover workspace prefs
+// may appear as optional subsections only — never as a You / Social /
+// Education / Aggregation spine.
 //
 // Canonical paths only (hard-cut — no users yet, no redirects):
 //   /settings → hub (mobile list) / Profile pane (desktop)
@@ -32,7 +34,8 @@
 //
 // Existing /settings/agreements, /settings/refer stay Profile doors.
 // Company persist stays organizations.name.
-// Theme lives on the header sun/moon. Help stays /help.
+// Theme SoT is gc-theme — header sun/moon and Preferences Appearance
+// share it. Help stays /help.
 //
 // 600:881 shell — one 220 rail occupies the Access slot on every
 // /settings path. Pad 16. Active wash follows the hub section.
@@ -61,7 +64,6 @@ export const SETTINGS = {
   editPublicProfile: "Edit public profile",
   editPublicProfileHref: SOCIAL_ROUTES.profileEdit,
   organizationEmpty: "No organization on this account.",
-  preferencesEmpty: "No preferences on this account.",
   company: "Company",
   agreements: USER_MENU.agreements,
   agreementsHref: USER_MENU.agreementsHref,

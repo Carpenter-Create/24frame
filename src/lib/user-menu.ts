@@ -1,14 +1,15 @@
 // Account-menu copy and lock. Lives in lib/, not JSX.
-// Desktop panel: identity → Profile → Settings → Log out.
-// Phone sheet (grammar A): identity → Profile → Settings →
-// Appearance → Log out. Chrome may differ (sheet vs fuller
-// panel). Labels may not fork on the shared rows.
+// Desktop panel: identity → Settings → Log out.
+// Phone sheet (grammar A): identity → Settings → Appearance →
+// Log out. Chrome may differ (sheet vs fuller panel). Labels
+// may not fork on the shared rows.
 // 24Frame AI is the header sparkle only — not a menu row.
 // Workspace lives on the header switcher. Desktop theme stays
 // the header sun/moon. Phone Appearance is the pre-#391
 // same-sheet drill-in — not a page. One Settings hub. No
 // forked Settings.
-// Profile is /settings/profile (identity). Settings land href is
+// Profile is a Settings hub pane (/settings/profile), not a
+// second avatar-menu door. Settings land href is
 // settingsLandHref() — always /settings. Do not invent /account/*.
 // Agreements / Refer stay /settings doors, not menu rows. Help
 // stays /help. Company stays off this menu. Do not invent
@@ -53,24 +54,17 @@ export const USER_MENU_ABSENT = [
   ASK_ASSISTANT,
 ] as const;
 
-export type UserMenuLinkAction =
-  | {
-      kind: "profile";
-      label: typeof USER_MENU.profile;
-      href: typeof USER_MENU.profileHref;
-    }
-  | {
-      kind: "settings";
-      label: typeof USER_MENU.settings;
-      href: typeof USER_MENU.settingsHref;
-    };
+export type UserMenuLinkAction = {
+  kind: "settings";
+  label: typeof USER_MENU.settings;
+  href: typeof USER_MENU.settingsHref;
+};
 
 export type UserMenuAction =
   | UserMenuLinkAction
   | { kind: "appearance"; label: typeof USER_MENU.appearance };
 
 export const USER_MENU_ACTIONS: readonly UserMenuLinkAction[] = [
-  { kind: "profile", label: USER_MENU.profile, href: USER_MENU.profileHref },
   { kind: "settings", label: USER_MENU.settings, href: USER_MENU.settingsHref },
 ];
 

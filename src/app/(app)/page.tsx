@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
 
-import { workspaceHome } from "@/lib/workspace";
+import { AUTH_DEFAULT_NEXT } from "@/lib/auth-callback-next";
 
-// Signed-in default land is Aggregation home. Not a leftover flat-path hop.
-export default function AggregationRootPage() {
-  redirect(workspaceHome("aggregation"));
+// Signed-in default land is /home (AUTH_DEFAULT_NEXT). `/` hops to
+// that SoT — not Aggregation dashboard.
+export default function SignedInRootPage() {
+  redirect(AUTH_DEFAULT_NEXT);
 }
