@@ -24,6 +24,10 @@ import {
   HOUSE_LEAD_SLOT_CLASS,
   HOUSE_LEAD_STACK_CLASS,
   HOUSE_LEAD_UNDER_NAV_CLASS,
+  HOUSE_HEADER_TRAILING_AVATAR_CLASS,
+  HOUSE_HEADER_TRAILING_HIT_CLASS,
+  HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS,
+  HOUSE_HEADER_TRAILING_SLOT_CLASS,
   HOUSE_THEME_TOGGLE_CLASS,
 } from "@/lib/house-lead-chrome";
 import { HOUSE_HEADER_SEARCH_GAP_CLASS, HOUSE_SEARCH_PILL_CLASS } from "@/lib/house-shell";
@@ -199,6 +203,7 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(leadSrc).toContain("<AskAssistantHeaderLink />");
     expect(leadSrc).toContain("<ThemeToggle />");
     expect(leadSrc).toContain("<ActivityBell");
+    expect(HOUSE_THEME_TOGGLE_CLASS).toContain(HOUSE_HEADER_TRAILING_HIT_CLASS);
     expect(HOUSE_THEME_TOGGLE_CLASS).toContain("size-8");
     expect(HOUSE_THEME_TOGGLE_CLASS).toContain("min-h-8");
     expect(HOUSE_THEME_TOGGLE_CLASS).toContain("min-w-8");
@@ -207,6 +212,28 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("purple");
     expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("violet");
     expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("border-hairline");
+  });
+
+  it("evens phone trailing AI · bell · avatar with one gap token and hugged hits", () => {
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("size-4");
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("p-[var(--space-2)]");
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("-mx-[var(--space-2)]");
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("md:size-8");
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("md:p-0");
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("md:mx-0");
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).not.toContain("size-6");
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).not.toContain("size-5");
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).not.toContain("size-[44px]");
+    expect(HOUSE_HEADER_TRAILING_AVATAR_CLASS).toContain("h-8 w-8");
+    expect(HOUSE_HEADER_TRAILING_AVATAR_CLASS).not.toContain("p-[");
+    expect(HOUSE_HEADER_TRAILING_AVATAR_CLASS).not.toContain("-mx-");
+    expect(HOUSE_HEADER_TRAILING_AVATAR_CLASS).not.toContain("ml-");
+    expect(HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS).toBe("contents md:hidden");
+    expect(HOUSE_HEADER_TRAILING_SLOT_CLASS).toBe("contents");
+    expect(leadSrc).toContain("HOUSE_HEADER_TRAILING_SLOT_CLASS");
+    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toBe(
+      "flex min-w-0 items-center gap-[var(--space-2)] max-md:shrink-0",
+    );
   });
 
   it("G8 absorbs SocialTopBar — no drifted placement fork", () => {
@@ -265,8 +292,9 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(leadSrc).toContain("<BrandLogo />");
     expect(leadSrc).not.toContain("BrandEmblem");
     expect(leadSrc.match(/<BrandLogo/g)?.length).toBe(1);
-    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("gap-[var(--space-1)]");
-    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("md:gap-[var(--space-2)]");
+    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("gap-[var(--space-2)]");
+    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).not.toContain("gap-[var(--space-1)]");
+    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).not.toContain("md:gap-");
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("max-md:shrink-0");
     expect(leadSrc).not.toContain("APP_HEADER_WORKSPACE_PILL_HOST_CLASS");
     expect(APP_HEADER_LEADING_CLASS).not.toMatch(/(?:^|\s)(?:max-md:)?overflow-hidden(?:\s|$)/);

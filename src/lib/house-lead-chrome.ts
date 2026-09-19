@@ -7,6 +7,8 @@
 //   Left: [emblem]
 //   Under-top: dest chips on Agg / Edu / Social. Home has none.
 //   Trailing: [search if needed] [24Frame AI] [bell] [avatar]
+//   Trailing rhythm: one --space-2 gap; phone icon hits hug the
+//   16px glyph (HOUSE_HEADER_TRAILING_HIT_CLASS). Avatar stays 32.
 //   Bottom: HousePhoneBottomNav — Home · Social · Aggregation · Education
 // Phone top has no workspace pill. Bottom bar owns workspace switching.
 // 24Frame AI sits immediately left of the notification bell on every
@@ -79,8 +81,29 @@ export const HOUSE_LEAD_UNDER_NAV_CLASS = `flex w-full items-center md:hidden bo
 export const HOUSE_LEAD_SEARCH_PILL_CLASS =
   "flex h-9 w-full min-w-0 items-center gap-2 px-3";
 
-// Header sun/moon · Ask · bell. Phone matches the 32 avatar so the
-// trailing cluster does not crush the lead mark. Desktop stays 32.
-// Circular quiet — no muted wash, no hairline box.
+// Phone trailing optical rhythm (Adam 2026-09-19). Equal CSS gap was
+// not equal air: 16px AI/bell/search glyphs sat in size-8 hits
+// (8px pad each side) beside a 32px avatar disk. The two glyphs
+// grouped tighter than glyph-to-disk. Phone hit hugs the 16px
+// glyph; the 32px tap is padding cancelled from the flex flow with
+// -mx so APP_HEADER_TRAILING_CLUSTER_CLASS gap is edge-to-edge.
+// Desktop stays the 32 circle. Glyph size is unchanged (size-4
+// header, size-6 Mercury bottom). Circular quiet — no muted wash,
+// no hairline box.
+export const HOUSE_HEADER_TRAILING_HIT_CLASS =
+  `flex size-4 min-h-4 min-w-4 shrink-0 items-center justify-center overflow-visible p-[var(--space-2)] -mx-[var(--space-2)] ${HOUSE_ICON_BUTTON_CLASS} md:size-8 md:min-h-8 md:min-w-8 md:p-0 md:mx-0`;
+
+// Wrappers around phone-only trailing controls must not generate a
+// box — the hit's -mx only evens the cluster if the button is the
+// flex item.
+export const HOUSE_HEADER_TRAILING_SLOT_CLASS = "contents";
+
+export const HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS = "contents md:hidden";
+
+// Avatar disk is the 32 visual. No extra pad — the shared cluster
+// gap is the only air to AI / bell / search.
+export const HOUSE_HEADER_TRAILING_AVATAR_CLASS =
+  "flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-muted t-body-sm font-medium text-ink-2";
+
 export const HOUSE_THEME_TOGGLE_CLASS =
-  `flex size-8 min-h-8 min-w-8 shrink-0 items-center justify-center overflow-visible ${HOUSE_ICON_BUTTON_CLASS} text-ink-3 transition-colors hover:text-ink`;
+  `${HOUSE_HEADER_TRAILING_HIT_CLASS} text-ink-3 transition-colors hover:text-ink`;

@@ -32,6 +32,7 @@ vi.mock("next/link", async () => {
 
 import { HouseLeadSearch } from "@/components/chrome/house-lead-search";
 import { HOUSE_LEAD_SEARCH_PILL_CLASS } from "@/lib/house-lead-chrome";
+import { HOUSE_HEADER_TRAILING_HIT_CLASS } from "@/lib/house-lead-chrome";
 import { HOUSE_ICON_BUTTON_CLASS, HOUSE_SEARCH_PILL_CLASS } from "@/lib/house-shell";
 import { EDUCATION_SEARCH } from "@/lib/course-search";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
@@ -96,6 +97,7 @@ describe("HouseLeadSearch — one SoT for Social live and Education quiet", () =
     );
     expect(icon).toContain("data-house-lead-search-icon");
     expect(icon).toContain("data-social-header-search-icon");
+    expect(icon).toContain(HOUSE_HEADER_TRAILING_HIT_CLASS);
     expect(icon).toContain(HOUSE_ICON_BUTTON_CLASS);
     expect(icon).not.toContain("data-house-lead-search-field");
     expect(icon).not.toContain("data-social-search-sheet");

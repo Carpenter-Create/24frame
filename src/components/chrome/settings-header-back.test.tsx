@@ -10,6 +10,7 @@ vi.mock("next/navigation", () => ({
   usePathname: () => navigation.pathname,
 }));
 
+import { HOUSE_HEADER_TRAILING_AVATAR_CLASS } from "@/lib/house-lead-chrome";
 import { MOBILE_CHROME_LEAD_PAD_CLASS } from "@/lib/mobile-chrome";
 import {
   SETTINGS,
@@ -91,7 +92,8 @@ describe("SettingsHeaderBack", () => {
     expect(shellSrc).toContain(
       "<DestChipsSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />",
     );
-    expect(accountSrc).toContain("flex h-8 w-8 items-center justify-center rounded-full");
+    expect(accountSrc).toContain("HOUSE_HEADER_TRAILING_AVATAR_CLASS");
+    expect(HOUSE_HEADER_TRAILING_AVATAR_CLASS).toContain("h-8 w-8");
     expect(accountSrc).toContain("md:hidden");
     expect(railSrc).toContain("SETTINGS_HUB_NAV");
     expect(railSrc).not.toContain("SettingsHeaderBack");
