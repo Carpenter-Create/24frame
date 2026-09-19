@@ -12,6 +12,7 @@ import {
   type PutNewsThumbObject,
 } from "@/lib/news-thumbs";
 import { isFilmOrTvTopic } from "@/lib/news-topic";
+import { newsEgressFetch, type NewsDnsLookup } from "@/lib/news-egress";
 
 // Scheduled News ingest (Lambda + EventBridge). Fail-soft per source.
 // Persist to DynamoDB only — never fan-out RSS on a page read.
@@ -88,19 +89,21 @@ export type NewsIngestSummary = {
 
 export async function fetchNewsFeedXml(
   url: string,
-  init: { fetchImpl?: typeof fetch } = {},
+  init: { fetchImpl?: typeof fetch; lookup?: NewsDnsLookup } = {},
 ): Promise<string> {
-  const fetchImpl = init.fetchImpl ?? fetch;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), NEWS_FEED_TIMEOUT_MS);
   try {
-    const res = await fetchImpl(url, {
-      signal: controller.signal,
-      headers: {
-        accept: "application/rss+xml, application/atom+xml, application/xml, text/xml",
-        "user-agent": NEWS_USER_AGENT,
+    const res = await newsEgressFetch(url, {
+      fetchImpl: init.fetchImpl,
+      lookup: init.lookup,
+      request: {
+        signal: controller.signal,
+        headers: {
+          accept: "application/rss+xml, application/atom+xml, application/xml, text/xml",
+          "user-agent": NEWS_USER_AGENT,
+        },
       },
-      redirect: "follow",
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const buf = new Uint8Array(await res.arrayBuffer());
@@ -117,26 +120,29 @@ export async function fetchNewsArticleHtml(
   url: string,
   init: {
     fetchImpl?: typeof fetch;
+    lookup?: NewsDnsLookup;
     timeoutMs?: number;
     maxBytes?: number;
     env?: NewsEnvLike;
   } = {},
 ): Promise<string | null> {
   if (!/^https:\/\//i.test(url)) return null;
-  const fetchImpl = init.fetchImpl ?? fetch;
   const timeoutMs = init.timeoutMs ?? NEWS_OG_TIMEOUT_MS;
   const maxBytes = init.maxBytes ?? resolveNewsOgMaxBytes(init.env);
   const controller = new AbortController();
   let timer: ReturnType<typeof setTimeout> | undefined;
 
   const work = (async (): Promise<string | null> => {
-    const res = await fetchImpl(url, {
-      signal: controller.signal,
-      headers: {
-        accept: "text/html,application/xhtml+xml",
-        "user-agent": NEWS_USER_AGENT,
+    const res = await newsEgressFetch(url, {
+      fetchImpl: init.fetchImpl,
+      lookup: init.lookup,
+      request: {
+        signal: controller.signal,
+        headers: {
+          accept: "text/html,application/xhtml+xml",
+          "user-agent": NEWS_USER_AGENT,
+        },
       },
-      redirect: "follow",
     });
     if (!res.ok) return null;
     const buf = new Uint8Array(await res.arrayBuffer());
@@ -163,6 +169,7 @@ export async function fillNewsOgImages(
   init: {
     fetchHtml?: (url: string) => Promise<string | null>;
     fetchImpl?: typeof fetch;
+    lookup?: NewsDnsLookup;
     timeoutMs?: number;
     maxBytes?: number;
     env?: NewsEnvLike;
@@ -173,6 +180,7 @@ export async function fillNewsOgImages(
     ((url: string) =>
       fetchNewsArticleHtml(url, {
         fetchImpl: init.fetchImpl,
+        lookup: init.lookup,
         timeoutMs: init.timeoutMs,
         maxBytes: init.maxBytes,
         env: init.env,
