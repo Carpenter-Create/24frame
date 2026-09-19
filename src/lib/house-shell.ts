@@ -85,7 +85,7 @@ export const HOUSE_PERIOD_SELECTED_CLASS = "bg-surface-muted";
 // Segmented track — one continuous muted bar with a sliding solid accent thumb.
 // Shared grammar for workspace pills and Top Performing Titles|Platforms|Territories.
 export const HOUSE_SEGMENTED_TRACK_CLASS =
-  "relative flex shrink-0 items-center rounded-full bg-surface-muted p-[var(--space-1)]";
+  "relative flex shrink-0 items-center rounded-full bg-surface-muted px-[var(--space-1)]";
 
 export const HOUSE_SEGMENTED_THUMB_CLASS =
   "pointer-events-none absolute rounded-full bg-accent transition-[left,width] duration-200 ease-out motion-reduce:transition-none";
