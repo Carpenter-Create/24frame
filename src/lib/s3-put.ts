@@ -14,8 +14,12 @@ function requireTitleBucket(): { region: string; bucket: string } {
   return { region, bucket };
 }
 
+// News Lambda runs in us-west-2; AWS reserves AWS_REGION to that function
+// region, so the client cannot be pointed at us-east-1 via env. The title
+// bucket stays us-east-1. followRegionRedirects retries PermanentRedirect
+// against x-amz-bucket-region so PutObject still succeeds.
 function titleAssetsClient(region: string): S3Client {
-  titleS3 ??= new S3Client({ region });
+  titleS3 ??= new S3Client({ region, followRegionRedirects: true });
   return titleS3;
 }
 

@@ -143,5 +143,6 @@ describe("news-thumbs house SoT", () => {
     expect(s3Src).toContain("export { putObjectBytes }");
     expect(putSrc).toContain("PutObjectCommand");
     expect(putSrc).toContain("S3_BUCKET");
+    expect(putSrc).toContain("followRegionRedirects: true");
   });
 });
