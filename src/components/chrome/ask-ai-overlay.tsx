@@ -12,6 +12,7 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
+import dynamic from "next/dynamic";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowsIn, ArrowsOut } from "@phosphor-icons/react";
 
@@ -42,14 +43,28 @@ import type { AskGlobeeHistoryRow, AskGlobeeStoredMessage } from "@/lib/ask-glob
 import { loadAskAiOverlay } from "@/app/(app)/aggregation/messages/ask-globee-actions";
 import { DIALOG_HEADER_CLASS } from "@/components/ui/dialog";
 import { APP_SHEET_SCRIM_CLASS } from "@/lib/house-sheet";
-import { AccessUpgradeGate } from "@/components/messages/access-upgrade-gate";
-import { AskGlobeeLanding } from "@/components/messages/ask-globee-landing";
-import { AskGlobeeThread } from "@/components/messages/ask-globee-thread";
-import { AskGlobeeHistoryClock, AskGlobeeHistoryPanel } from "@/components/messages/ask-globee-history";
 import { AskAssistantChromeProvider, useAskGlobeeChrome } from "@/components/messages/ask-globee-chrome";
 import { Close44 } from "./house";
 import { HouseAiMark } from "./house-ai-mark";
-import { MessagesAppHeader } from "./messages-app-header";
+
+const AskGlobeeLanding = dynamic(() =>
+  import("@/components/messages/ask-globee-landing").then((m) => m.AskGlobeeLanding),
+);
+const AskGlobeeThread = dynamic(() =>
+  import("@/components/messages/ask-globee-thread").then((m) => m.AskGlobeeThread),
+);
+const AskGlobeeHistoryClock = dynamic(() =>
+  import("@/components/messages/ask-globee-history").then((m) => m.AskGlobeeHistoryClock),
+);
+const AskGlobeeHistoryPanel = dynamic(() =>
+  import("@/components/messages/ask-globee-history").then((m) => m.AskGlobeeHistoryPanel),
+);
+const AccessUpgradeGate = dynamic(() =>
+  import("@/components/messages/access-upgrade-gate").then((m) => m.AccessUpgradeGate),
+);
+const MessagesAppHeader = dynamic(() =>
+  import("./messages-app-header").then((m) => m.MessagesAppHeader),
+);
 
 type AskAiOverlayContextValue = {
   open: boolean;
