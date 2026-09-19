@@ -100,8 +100,9 @@ export const NAV: PhosphorNavItem[] = [
 ];
 
 // Social workspace rail. Phone local dests are HousePhoneDestChips
-// under the top (Explore / Create / Messages / Profile).
-// Desktop rail is Home / Explore / Messages / Profile — composer owns create.
+// under the top (Feed / Profile / Explore / Create / Messages).
+// Desktop rail is Home / Profile / Explore / Messages — composer owns create.
+// Profile second (Adam 2026-09-19) — phone reach; avatar remains account menu.
 // Messages here is DMs — never /messages. Groups / Courses / Leaderboard
 // stay parked off this rail. Education land is house chrome + an
 // Education rail on Route A — not Aggregation destinations, not STAFF,
@@ -110,10 +111,10 @@ export const NAV: PhosphorNavItem[] = [
 // Social interiors stay SocialIcon (Social Figma V1).
 export const SOCIAL_NAV: PhosphorNavItem[] = [
   { label: "Home", href: SOCIAL_ROUTES.home, family: "phosphor", icon: House, exact: true },
+  { label: "Profile", href: SOCIAL_ROUTES.profile, family: "phosphor", icon: User },
   { label: "Explore", href: SOCIAL_ROUTES.explore, family: "phosphor", icon: Compass },
   { label: "Create", href: SOCIAL_ROUTES.create, family: "phosphor", icon: Plus },
   { label: "Messages", href: SOCIAL_ROUTES.dms, family: "phosphor", icon: ChatCircle },
-  { label: "Profile", href: SOCIAL_ROUTES.profile, family: "phosphor", icon: User },
 ];
 
 export const SOCIAL_DESKTOP_NAV: PhosphorNavItem[] = SOCIAL_NAV.filter(
