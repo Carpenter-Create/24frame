@@ -13,9 +13,9 @@ import {
 } from "@/lib/settings";
 
 // Phone Settings left slot. Hub list → Home. Pushed section →
-// Settings list. 16 Phosphor caret-left Bold + 15 Regular, gap 8.
-// Color is SETTINGS_HEADER_BACK_CLASS (text-accent). No glyph override.
-// Hidden at md, where the rail stays.
+// Settings list. Accent caret only — label is aria, not visible type.
+// 16 Phosphor caret-left Bold. Same hit as trailing AI/bell.
+// Absolute so the 24 emblem stays put. Hidden at md, where the rail stays.
 export function SettingsHeaderBack() {
   const back = settingsHeaderBack(usePathname());
 
@@ -23,13 +23,13 @@ export function SettingsHeaderBack() {
     <Link
       href={back.href}
       data-settings-header-back=""
+      aria-label={back.label}
       className={SETTINGS_HEADER_BACK_CLASS}
     >
       <CaretLeft
         className={SETTINGS_RAIL_CHEVRON_CLASS}
         weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
       />
-      {back.label}
     </Link>
   );
 }
