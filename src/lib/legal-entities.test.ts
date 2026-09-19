@@ -1,12 +1,23 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
+import {
+  HOUSE_PHONE_STACK_CLASS,
+  HOUSE_PHONE_WRAP_CLASS,
+  housePhoneForbidsTruncate,
+} from "./house-phone-stack";
 import {
   ENTITY_TYPE_LABELS,
   ENTITY_TYPES,
   ENTITY_SCOPE_LABELS,
+  ENTITY_LIST_ACTIONS_CLASS,
+  ENTITY_LIST_CLASS,
   ENTITY_LIST_EMPTY_CLASS,
+  ENTITY_LIST_FIELD_CLASS,
+  ENTITY_LIST_FIELD_LABEL_CLASS,
   ENTITY_LIST_GRID_CLASS,
   ENTITY_LIST_HEADER_CLASS,
+  ENTITY_LIST_NAME_CLASS,
   ENTITY_LIST_ROW_CLASS,
   ENTITY_LIST_VALUE_CLASS,
   LEGAL_ENTITIES,
@@ -61,16 +72,65 @@ describe("legal entities copy", () => {
     expect(ENTITY_LIST_ROW_CLASS).toContain(ENTITY_LIST_GRID_CLASS);
     expect(ENTITY_LIST_HEADER_CLASS).toContain("t-label");
     expect(ENTITY_LIST_HEADER_CLASS).toContain("text-ink-3");
-    expect(ENTITY_LIST_GRID_CLASS).toContain("w-max");
-    expect(ENTITY_LIST_GRID_CLASS).toContain("max-content");
-    expect(ENTITY_LIST_GRID_CLASS).not.toContain("fr");
-    expect(ENTITY_LIST_GRID_CLASS).toContain("gap-x-[var(--space-6)]");
+    expect(ENTITY_LIST_CLASS).toBe("w-full");
+    expect(ENTITY_LIST_CLASS).not.toContain("overflow-x-auto");
+    expect(ENTITY_LIST_GRID_CLASS).toContain("w-full");
+    expect(ENTITY_LIST_GRID_CLASS).toContain("grid-cols-1");
+    expect(ENTITY_LIST_GRID_CLASS).toContain("md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_auto]");
+    expect(ENTITY_LIST_GRID_CLASS).toContain("md:gap-x-[var(--space-6)]");
+    expect(ENTITY_LIST_GRID_CLASS).not.toContain("w-max");
+    expect(ENTITY_LIST_GRID_CLASS).not.toContain("max-content");
+    expect(ENTITY_LIST_HEADER_CLASS).toContain("max-md:hidden");
+    expect(ENTITY_LIST_FIELD_CLASS).toContain("flex-col");
+    expect(ENTITY_LIST_FIELD_CLASS).toContain("w-full");
+    expect(ENTITY_LIST_FIELD_CLASS).toContain("items-stretch");
+    expect(ENTITY_LIST_FIELD_CLASS).not.toContain("items-start");
+    expect(ENTITY_LIST_FIELD_CLASS).toContain("md:block");
+    expect(ENTITY_LIST_FIELD_LABEL_CLASS).toContain("md:hidden");
+    expect(ENTITY_LIST_NAME_CLASS).toContain("flex-wrap");
+    expect(ENTITY_LIST_NAME_CLASS).toContain("w-full");
+    expect(ENTITY_LIST_ACTIONS_CLASS).toContain("md:justify-self-end");
+    expect(ENTITY_LIST_VALUE_CLASS).toContain("break-words");
+    expect(ENTITY_LIST_VALUE_CLASS).toContain("min-w-0");
+    expect(ENTITY_LIST_VALUE_CLASS).toContain("max-w-full");
+    expect(ENTITY_LIST_VALUE_CLASS).not.toContain("truncate");
+    expect(ENTITY_LIST_EMPTY_CLASS).not.toContain("truncate");
     expect(entityJurisdictionClass("Delaware")).toBe(ENTITY_LIST_VALUE_CLASS);
     expect(entityJurisdictionClass(null)).toBe(ENTITY_LIST_EMPTY_CLASS);
     expect(entityJurisdictionClass("  ")).toBe(ENTITY_LIST_EMPTY_CLASS);
     expect(ENTITY_LIST_VALUE_CLASS).toContain("text-ink");
     expect(ENTITY_LIST_VALUE_CLASS).not.toContain("text-ink-3");
     expect(ENTITY_LIST_EMPTY_CLASS).toContain("text-ink-3");
+  });
+
+  it("keeps phone stack + desktop spread as one SoT — house gospel never truncate", () => {
+    const layout = [
+      ENTITY_LIST_CLASS,
+      ENTITY_LIST_GRID_CLASS,
+      ENTITY_LIST_HEADER_CLASS,
+      ENTITY_LIST_ROW_CLASS,
+      ENTITY_LIST_NAME_CLASS,
+      ENTITY_LIST_FIELD_CLASS,
+      ENTITY_LIST_FIELD_LABEL_CLASS,
+      ENTITY_LIST_ACTIONS_CLASS,
+      ENTITY_LIST_VALUE_CLASS,
+      ENTITY_LIST_EMPTY_CLASS,
+    ].join(" ");
+    expect(housePhoneForbidsTruncate(layout)).toBe(true);
+    expect(ENTITY_LIST_FIELD_CLASS).toContain(HOUSE_PHONE_STACK_CLASS);
+    expect(ENTITY_LIST_VALUE_CLASS).toContain(HOUSE_PHONE_WRAP_CLASS);
+    expect(ENTITY_LIST_EMPTY_CLASS).toContain(HOUSE_PHONE_WRAP_CLASS);
+    expect(ENTITY_LIST_GRID_CLASS).toMatch(/grid-cols-1/);
+    expect(ENTITY_LIST_GRID_CLASS).toMatch(/md:grid-cols-\[/);
+    expect(ENTITY_LIST_GRID_CLASS).toMatch(/2fr/);
+    expect(ENTITY_LIST_FIELD_CLASS).toContain("w-full");
+    expect(ENTITY_LIST_FIELD_CLASS).toContain("items-stretch");
+    expect(ENTITY_LIST_VALUE_CLASS).toContain("min-w-0");
+    expect(ENTITY_LIST_VALUE_CLASS).toContain("max-w-full");
+    const src = readFileSync("src/lib/legal-entities.ts", "utf8");
+    expect(src).toContain("HOUSE_PHONE_WRAP_CLASS");
+    expect(src).toContain("HOUSE_PHONE_STACK_CLASS");
+    expect(src).toContain("house gospel 2026-09-19");
   });
 
   it("has scope selector copy", () => {

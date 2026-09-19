@@ -175,6 +175,7 @@ canon docs into `docs/`.
 
 - **Design tokens only.** Never hardcode hex. Real GC accent is a **founder checkpoint** pending the logo.
 - **Logic in `lib/`, not components.** Copy lives in `lib/` content modules, not inline in JSX.
+- **Phone:** never truncate information — stack vertically. House gospel 2026-09-19.
 
 ## Conventions
 

@@ -1,3 +1,7 @@
+import {
+  HOUSE_PHONE_STACK_CLASS,
+  HOUSE_PHONE_WRAP_CLASS,
+} from "@/lib/house-phone-stack";
 import type { Database } from "@/lib/supabase/database.types";
 
 // Legal entities. Copy and types live here, not in JSX.
@@ -72,22 +76,36 @@ export const LEGAL_ENTITIES = {
   forbidden: "Only the account owner can manage legal entities.",
 } as const;
 
-// Team list density — one shared grid for header + rows. Four columns:
-// Name · Type · Jurisdiction · Actions. Content-sized tracks so Type /
-// Jurisdiction / Actions do not stretch across the card (the #502
-// cavern). Values share primary ink. Empty jurisdiction is a muted
-// em dash. Not a data-grid library.
+// One SoT for header + rows. Four cells: Name + Default · Type ·
+// Jurisdiction · Actions. Desktop (md+): fr tracks fill the card so
+// columns breathe — Adam 2026-09-19 lock, reversing the #504 hug.
+// Phone: house gospel 2026-09-19 — never truncate, stack vertically.
+// One stacked block per entity (label/value). Full text, wrap OK.
+// Header is desktop-only. Values share primary ink. Empty
+// jurisdiction is a muted em dash. Not a data-grid library.
+export const ENTITY_LIST_CLASS = "w-full";
+
 export const ENTITY_LIST_GRID_CLASS =
-  "w-max max-w-full grid grid-cols-[minmax(10rem,max-content)_minmax(5.5rem,max-content)_minmax(7rem,max-content)_max-content] items-center gap-x-[var(--space-6)] px-0";
+  "grid w-full grid-cols-1 items-start gap-y-[var(--space-2)] px-0 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_auto] md:items-center md:gap-x-[var(--space-6)] md:gap-y-0";
 
 export const ENTITY_LIST_HEADER_CLASS =
-  `${ENTITY_LIST_GRID_CLASS} py-[var(--space-3)] t-label text-ink-3`;
+  `${ENTITY_LIST_GRID_CLASS} max-md:hidden py-[var(--space-3)] t-label text-ink-3`;
 
 export const ENTITY_LIST_ROW_CLASS =
   `${ENTITY_LIST_GRID_CLASS} py-[var(--space-4)]`;
 
-export const ENTITY_LIST_VALUE_CLASS = "t-body text-ink";
-export const ENTITY_LIST_EMPTY_CLASS = "t-body text-ink-3";
+export const ENTITY_LIST_NAME_CLASS =
+  "flex min-w-0 w-full flex-wrap items-center gap-[var(--space-2)]";
+
+export const ENTITY_LIST_FIELD_CLASS =
+  `${HOUSE_PHONE_STACK_CLASS} gap-[var(--space-1)] md:block`;
+
+export const ENTITY_LIST_FIELD_LABEL_CLASS = "t-label text-ink-3 md:hidden";
+
+export const ENTITY_LIST_ACTIONS_CLASS = "justify-self-start md:justify-self-end";
+
+export const ENTITY_LIST_VALUE_CLASS = `${HOUSE_PHONE_WRAP_CLASS} t-body text-ink`;
+export const ENTITY_LIST_EMPTY_CLASS = `${HOUSE_PHONE_WRAP_CLASS} t-body text-ink-3`;
 
 export const ENTITY_SCOPE = {
   all: "All entities",

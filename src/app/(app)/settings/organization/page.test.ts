@@ -242,6 +242,10 @@ describe("SettingsOrganizationPage", () => {
     expect(companyForm).toContain("data-company-edit");
     expect(entities).toContain("data-entity-add-cta");
     expect(entities).toContain("data-entity-edit");
+    expect(entities).toContain("ENTITY_LIST_CLASS");
+    expect(entities).toContain("data-entity-field");
+    expect(entities).not.toContain("overflow-x-auto");
+    expect(entities).not.toContain("truncate");
     expect(team).toContain("data-team-invite-cta");
     expect(paneSrc).toContain("<Card>");
     expect(paneSrc).toContain("COMPANY_PROFILE_CARD_BODY_CLASS");
