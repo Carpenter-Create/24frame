@@ -346,6 +346,7 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(open).toContain("data-workspace-switcher-popover");
     expect(open).toContain('data-workspace-switcher-option="social"');
     expect(open).toContain('data-workspace-switcher-option="education"');
+    expect(open).toContain('data-workspace-switcher-option="co-productions"');
   });
 
   it("shows the phone emblem on every workspace — no hamburger", () => {

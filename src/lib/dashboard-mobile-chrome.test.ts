@@ -150,6 +150,7 @@ describe("Aggregation Dashboard mobile chrome — emblem left, dest chips under 
     expect(open).toContain('data-workspace-switcher-option="aggregation"');
     expect(open).toContain('data-workspace-switcher-option="social"');
     expect(open).toContain('data-workspace-switcher-option="education"');
+    expect(open).toContain('data-workspace-switcher-option="co-productions"');
     expect(open).toContain(WORKSPACE_SWITCHER_PILL_PANEL_CLASS);
     expect(switcherSrc).toContain("Mercury");
     expect(switcherSrc).toContain("Workspaces");

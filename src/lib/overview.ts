@@ -10,18 +10,19 @@ import {
 } from "@/lib/dashboard-home";
 import { NEWS_HOME_CAP, NEWS_HREF, NEWS_PAGE } from "@/lib/news";
 import { REPORTS_HREF, REPORTS_PERIOD_ALL } from "@/lib/reports";
+import { CO_PRODUCTIONS_HREF, CO_PRODUCTIONS_LABEL, isCoProductionsPath } from "@/lib/co-productions";
 import { EDUCATION_HREF } from "@/lib/education";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { isSettingsPath } from "@/lib/settings";
 import { availableWorkspaceOptions, type WorkspaceMenuOption } from "@/lib/workspace-menu";
 import type { WorkspaceMode } from "@/lib/workspace";
 
-// Account Home is the leftmost unify-lead pill. Not a fourth product.
-// Not Social Home (`/social` feed). Aggregation · Social · Education
-// stay the three workspace destinations. /home/news is Home-owned
-// 90-day history — same Home chrome, not a fifth workspace and not
-// an Aggregation / Social / Education destination. No leftover
-// /overview or /news hops.
+// Account Home is the leftmost unify-lead pill. Co-productions is the
+// rightmost (Adam 2026-09-19). Neither is a WorkspaceMode. Not Social
+// Home (`/social` feed). Aggregation · Social · Education stay the
+// three workspace destinations. /home/news is Home-owned 90-day
+// history — same Home chrome, not a workspace and not an Aggregation /
+// Social / Education destination. No leftover /overview or /news hops.
 // Home IA v2 (Adam 2026-09-18): no dest rail on /home — unify-lead
 // chrome. Same-day order rewrite: Net revenue first, then Social ·
 // Education · Needs you. Top performing is not on Home. News stays
@@ -162,7 +163,7 @@ export function overviewModuleHeaderAction(
   return { href, label };
 }
 
-export type OverviewLeadPillId = "home" | WorkspaceMode;
+export type OverviewLeadPillId = "home" | WorkspaceMode | "co-productions";
 
 export type OverviewLeadPill = {
   id: OverviewLeadPillId;
@@ -193,9 +194,9 @@ export function isHomeOwnedPath(pathname: string): boolean {
   return isOverviewPath(pathname) || isNewsHistoryPath(pathname);
 }
 
-/** Dest rails stay off Home (+ /home/news). Aggregation · Social · Education keep today's rail. */
+/** Dest rails stay off Home (+ /home/news) and Co-productions. Aggregation · Social · Education keep today's rail. */
 export function overviewHidesRail(pathname: string): boolean {
-  return isHomeOwnedPath(pathname);
+  return isHomeOwnedPath(pathname) || isCoProductionsPath(pathname);
 }
 
 export function overviewLeadPills(
@@ -208,6 +209,7 @@ export function overviewLeadPills(
       label: option.label,
       href: option.href,
     })),
+    { id: "co-productions", label: CO_PRODUCTIONS_LABEL, href: CO_PRODUCTIONS_HREF },
   ];
 }
 
@@ -216,10 +218,12 @@ export function overviewLeadSelected(
   pathname: string,
   workspace: WorkspaceMode,
 ): boolean {
-  // Settings is a universal hub — not Home and not a workspace land.
-  // /settings/* must not light Home / Aggregation / Social / Education.
+  // Settings is a universal hub — not Home, not Co-productions, and
+  // not a workspace land. /settings/* must not light any lead pill.
   // The workspace cookie stays; leaving Settings returns to that land.
   if (isSettingsPath(pathname)) return false;
+  if (isCoProductionsPath(pathname)) return pillId === "co-productions";
+  if (pillId === "co-productions") return false;
   const onHome = isHomeOwnedPath(pathname);
   if (pillId === "home") return onHome;
   return !onHome && workspace === pillId;
@@ -238,6 +242,7 @@ export function overviewTriggerLabel(
   pathname: string,
   workspaceLabel: string,
 ): string {
+  if (isCoProductionsPath(pathname)) return CO_PRODUCTIONS_LABEL;
   return isHomeOwnedPath(pathname) ? OVERVIEW_PAGE.title : workspaceLabel;
 }
 
@@ -249,6 +254,7 @@ export function overviewLeadShouldNavigate(
   pill: Pick<OverviewLeadPill, "id">,
 ): boolean {
   if (pill.id === "home") return !isHomeLandPath(pathname);
+  if (pill.id === "co-productions") return !isCoProductionsPath(pathname);
   return !overviewLeadSelected(pill.id, pathname, workspace);
 }
 

@@ -1,5 +1,5 @@
 // Shared phone app-shell — Option 2 (Adam lock 2026-09-18, dest-chip amend).
-// One primitive for Home · Social · Aggregation · Education.
+// One primitive for Home · Social · Aggregation · Education · Co-productions.
 // Desktop header + desktop workspace switcher stay on HouseLeadChrome.
 // Phone top: emblem alone on the left. No workspace pill. No hamburger
 // — leading or trailing. Trailing is search (when needed) · 24Frame AI
@@ -37,7 +37,7 @@
 // social-tab-bar-scroll. Content pad stays when the bar hides.
 // Not a Meta skin. Not Mercury lavender.
 
-import { BookOpen, FilmStrip, House, Users, type IconWeight } from "@phosphor-icons/react";
+import { BookOpen, FilmStrip, Handshake, House, Users, type IconWeight } from "@phosphor-icons/react";
 
 import {
   HOUSE_CONTROL_PILL_CLASS,
@@ -51,6 +51,7 @@ import {
   mobileNavDestinations,
   type NavItem,
 } from "@/lib/nav";
+import { CO_PRODUCTIONS_HREF, CO_PRODUCTIONS_LABEL } from "@/lib/co-productions";
 import {
   OVERVIEW_HREF,
   OVERVIEW_PAGE,
@@ -97,6 +98,12 @@ export const HOUSE_PHONE_WORKSPACE_TABS = [
     label: WORKSPACE_EDUCATION_LABEL,
     href: WORKSPACE_EDUCATION_HREF,
     icon: BookOpen,
+  },
+  {
+    id: "co-productions" as const,
+    label: CO_PRODUCTIONS_LABEL,
+    href: CO_PRODUCTIONS_HREF,
+    icon: Handshake,
   },
 ] as const satisfies readonly HousePhoneWorkspaceTab[];
 
@@ -223,7 +230,7 @@ export function housePhoneWorkspaceHref(id: HousePhoneWorkspaceId): string {
 }
 
 export function persistHousePhoneWorkspace(id: HousePhoneWorkspaceId): void {
-  if (id === "home") return;
+  if (id === "home" || id === "co-productions") return;
   persistWorkspaceCookie(id);
 }
 

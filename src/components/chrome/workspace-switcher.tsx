@@ -78,7 +78,7 @@ function selectLeadPill(
   pathname: string,
 ) {
   if (!overviewLeadShouldNavigate(pathname, current, pill)) return;
-  if (pill.id === "home") {
+  if (pill.id === "home" || pill.id === "co-productions") {
     router.push(pill.href);
     return;
   }
@@ -293,9 +293,9 @@ export function WorkspaceSwitcher({
                 setOpen(false);
               }}
             >
-              {pill.id === "home" ? (
+              {pill.id === "home" || pill.id === "co-productions" ? (
                 <span
-                  data-workspace-switcher-mark="home"
+                  data-workspace-switcher-mark={pill.id}
                   className={WORKSPACE_SWITCHER_MARK_CLASS}
                   aria-hidden="true"
                 />

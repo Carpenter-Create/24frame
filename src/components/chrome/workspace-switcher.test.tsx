@@ -81,14 +81,19 @@ describe("workspace switcher header control", () => {
     expect(html).toContain('data-workspace-switcher-option="aggregation"');
     expect(html).toContain('data-workspace-switcher-option="social"');
     expect(html).toContain('data-workspace-switcher-option="education"');
+    expect(html).toContain('data-workspace-switcher-option="co-productions"');
     expect(html.indexOf('data-workspace-switcher-option="home"')).toBeLessThan(
       html.indexOf('data-workspace-switcher-option="aggregation"'),
+    );
+    expect(html.indexOf('data-workspace-switcher-option="education"')).toBeLessThan(
+      html.indexOf('data-workspace-switcher-option="co-productions"'),
     );
     expect(html).toContain("Home");
     expect(html).not.toContain("Overview");
     expect(html).toContain("Aggregation");
     expect(html).toContain("Social");
     expect(html).toContain("Education");
+    expect(html).toContain("Co-productions");
     expect(html).not.toContain("/education");
     expect(html).not.toContain("/account/workspace");
     for (const absent of WORKSPACE_SWITCHER_ABSENT) {
@@ -131,14 +136,19 @@ describe("workspace switcher header control", () => {
     expect(html).toContain('data-workspace-switcher-segment="aggregation"');
     expect(html).toContain('data-workspace-switcher-segment="social"');
     expect(html).toContain('data-workspace-switcher-segment="education"');
+    expect(html).toContain('data-workspace-switcher-segment="co-productions"');
     expect(html.indexOf('data-workspace-switcher-segment="home"')).toBeLessThan(
       html.indexOf('data-workspace-switcher-segment="aggregation"'),
+    );
+    expect(html.indexOf('data-workspace-switcher-segment="education"')).toBeLessThan(
+      html.indexOf('data-workspace-switcher-segment="co-productions"'),
     );
     expect(html).toContain("Home");
     expect(html).not.toContain("Overview");
     expect(html).toContain("Aggregation");
     expect(html).toContain("Social");
     expect(html).toContain("Education");
+    expect(html).toContain("Co-productions");
     expect(html).not.toMatch(/>\s*Agg\s*</);
     expect(html).not.toMatch(/>\s*Edu\s*</);
     expect(html).toContain('role="tablist"');
@@ -201,6 +211,8 @@ describe("workspace switcher header control", () => {
     expect(html).toContain('data-workspace-switcher-segment="social"');
     expect(html).not.toContain('data-workspace-switcher-segment="education"');
     expect(html).not.toContain("Education");
+    expect(html).toContain('data-workspace-switcher-segment="co-productions"');
+    expect(html).toContain("Co-productions");
   });
 
   it("keeps the chevron so Home stays reachable when only one workspace is listed", () => {
@@ -235,12 +247,13 @@ describe("workspace switcher header control", () => {
     const options = [
       ...html.matchAll(/data-workspace-switcher-option="([^"]+)"[^>]*>([\s\S]*?)<\/button>/g),
     ];
-    expect(options).toHaveLength(4);
+    expect(options).toHaveLength(5);
     expect(options.map((row) => row[1])).toEqual([
       "home",
       "aggregation",
       "social",
       "education",
+      "co-productions",
     ]);
 
     for (const [, mode, body] of options) {

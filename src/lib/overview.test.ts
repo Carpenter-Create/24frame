@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { ASSISTANT_NAME } from "@/lib/product";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { availableWorkspaceOptions } from "@/lib/workspace-menu";
+import { CO_PRODUCTIONS_HREF, CO_PRODUCTIONS_LABEL } from "./co-productions";
 import { NEWS_HREF, NEWS_PAGE } from "./news";
 import {
   OVERVIEW_AI_NEXT_CAP,
@@ -41,18 +42,24 @@ import {
 } from "./overview";
 
 describe("Home lead pills", () => {
-  it("inserts Home leftmost without inventing a fourth workspace product", () => {
+  it("inserts Home leftmost and Co-productions last without inventing a fourth workspace product", () => {
     const pills = overviewLeadPills();
     expect(pills.map((pill) => pill.id)).toEqual([
       "home",
       "aggregation",
       "social",
       "education",
+      "co-productions",
     ]);
     expect(pills[0]).toEqual({
       id: "home",
       label: OVERVIEW_PAGE.title,
       href: OVERVIEW_HREF,
+    });
+    expect(pills[pills.length - 1]).toEqual({
+      id: "co-productions",
+      label: CO_PRODUCTIONS_LABEL,
+      href: CO_PRODUCTIONS_HREF,
     });
     expect(availableWorkspaceOptions().map((option) => option.mode)).toEqual([
       "aggregation",
@@ -80,6 +87,7 @@ describe("Home lead pills", () => {
     expect(overviewLeadSelected("home", "/home", "aggregation")).toBe(true);
     expect(overviewLeadSelected("home", "/overview", "aggregation")).toBe(false);
     expect(overviewLeadSelected("aggregation", "/home", "aggregation")).toBe(false);
+    expect(overviewLeadSelected("co-productions", "/home", "aggregation")).toBe(false);
     expect(overviewLeadSelected("aggregation", "/aggregation/dashboard", "aggregation")).toBe(true);
     expect(overviewLeadSelected("social", "/social", "social")).toBe(true);
     expect(overviewTriggerLabel("/home", "Social")).toBe("Home");
@@ -104,14 +112,17 @@ describe("Home lead pills", () => {
       expect(overviewLeadSelected("aggregation", path, "aggregation")).toBe(false);
       expect(overviewLeadSelected("social", path, "social")).toBe(false);
       expect(overviewLeadSelected("education", path, "education")).toBe(false);
+      expect(overviewLeadSelected("co-productions", path, "aggregation")).toBe(false);
       expect(overviewLeadShouldNavigate(path, "aggregation", { id: "aggregation" })).toBe(true);
       expect(overviewLeadShouldNavigate(path, "social", { id: "home" })).toBe(true);
+      expect(overviewLeadShouldNavigate(path, "aggregation", { id: "co-productions" })).toBe(true);
       expect(overviewLeadActiveIndex(path, "aggregation", pills)).toBe(-1);
       expect(overviewLeadActiveIndex(path, "social", pills)).toBe(-1);
       expect(overviewLeadActiveIndex(path, "education", pills)).toBe(-1);
     }
     expect(overviewLeadActiveIndex("/home", "aggregation", pills)).toBe(0);
     expect(overviewLeadActiveIndex("/aggregation/dashboard", "aggregation", pills)).toBe(1);
+    expect(overviewLeadActiveIndex(CO_PRODUCTIONS_HREF, "aggregation", pills)).toBe(4);
     const switcher = readFileSync("src/components/chrome/workspace-switcher.tsx", "utf8");
     expect(switcher).toContain("overviewLeadActiveIndex");
     expect(switcher).toContain("activeIndex={activeIndex}");
@@ -135,6 +146,7 @@ describe("Home lead pills", () => {
     expect(overviewLeadSelected("aggregation", NEWS_HREF, "aggregation")).toBe(false);
     expect(overviewLeadSelected("social", NEWS_HREF, "social")).toBe(false);
     expect(overviewLeadSelected("education", NEWS_HREF, "education")).toBe(false);
+    expect(overviewLeadSelected("co-productions", NEWS_HREF, "aggregation")).toBe(false);
     expect(overviewTriggerLabel(NEWS_HREF, "Aggregation")).toBe("Home");
     expect(overviewLeadShouldNavigate(NEWS_HREF, "aggregation", { id: "home" })).toBe(true);
     expect(overviewLeadShouldNavigate("/home", "aggregation", { id: "home" })).toBe(false);
@@ -159,6 +171,27 @@ describe("Home lead pills", () => {
     expect(overviewHidesRail("/aggregation/titles")).toBe(false);
     expect(overviewHidesRail("/settings")).toBe(false);
     expect(OVERVIEW_RAIL_OFF_WIDTH).toBe("0px");
+  });
+
+  it("selects only Co-productions on /co-productions and hides the dest rail", () => {
+    expect(overviewLeadSelected("co-productions", CO_PRODUCTIONS_HREF, "aggregation")).toBe(true);
+    expect(overviewLeadSelected("co-productions", `${CO_PRODUCTIONS_HREF}/x`, "social")).toBe(true);
+    expect(overviewLeadSelected("home", CO_PRODUCTIONS_HREF, "aggregation")).toBe(false);
+    expect(overviewLeadSelected("aggregation", CO_PRODUCTIONS_HREF, "aggregation")).toBe(false);
+    expect(overviewLeadSelected("social", CO_PRODUCTIONS_HREF, "social")).toBe(false);
+    expect(overviewLeadSelected("education", CO_PRODUCTIONS_HREF, "education")).toBe(false);
+    expect(overviewLeadSelected("co-productions", "/home", "aggregation")).toBe(false);
+    expect(overviewLeadSelected("co-productions", "/education", "education")).toBe(false);
+    expect(overviewTriggerLabel(CO_PRODUCTIONS_HREF, "Aggregation")).toBe(CO_PRODUCTIONS_LABEL);
+    expect(overviewLeadShouldNavigate(CO_PRODUCTIONS_HREF, "aggregation", { id: "co-productions" })).toBe(
+      false,
+    );
+    expect(overviewLeadShouldNavigate("/home", "aggregation", { id: "co-productions" })).toBe(true);
+    expect(overviewLeadShouldNavigate(CO_PRODUCTIONS_HREF, "aggregation", { id: "home" })).toBe(true);
+    expect(overviewHidesRail(CO_PRODUCTIONS_HREF)).toBe(true);
+    expect(overviewHidesRail(`${CO_PRODUCTIONS_HREF}/x`)).toBe(true);
+    expect(overviewLeadActiveIndex(CO_PRODUCTIONS_HREF, "aggregation")).toBe(4);
+    expect(overviewLeadActiveIndex(CO_PRODUCTIONS_HREF, "education")).toBe(4);
   });
 });
 
