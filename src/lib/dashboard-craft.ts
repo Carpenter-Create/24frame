@@ -159,10 +159,10 @@ export const DASHBOARD_ADMIN_PAIR_CLASS =
 // row per article on md+. Home rail stays stacked.
 export const DASHBOARD_NEWS_HISTORY_LIST_CLASS = `flex flex-col ${DASHBOARD_RELATED_GAP_CLASS}`;
 
-// History page: source chips under the H1, then a focused reading
-// list. No right Sources rail. Phone uses the same chip row
+// History page: sticky H1 + chips, then a focused reading list.
+// No right Sources rail. Phone uses the same chip row
 // (horizontal scroll) — never a second bottom float or a cramped
-// second column.
+// second column. Pin lives on NewsStickyHeader, not this class.
 export const DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS =
   `flex w-full flex-col ${DASHBOARD_SECTION_AIR_CLASS}`;
 

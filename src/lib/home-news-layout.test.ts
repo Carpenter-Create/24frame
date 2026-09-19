@@ -202,6 +202,7 @@ describe("Home News layout + register lock", () => {
     expect(html).toContain("data-overview-news");
     expect(html).toContain('data-overview-module="news"');
     expect(html).toContain("dashboard-home-panel");
+    expect(html).toContain('data-news-sticky-header="rail"');
     expect(html).toContain("No headlines from the last 90 days.");
     expect(html.indexOf("data-overview-revenue")).toBeLessThan(
       html.indexOf('data-overview-module="social"'),

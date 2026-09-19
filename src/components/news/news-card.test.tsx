@@ -15,6 +15,11 @@ import {
   DASHBOARD_SECTION_TITLE_CLASS,
 } from "@/lib/dashboard-craft";
 import { NEWS_HREF, NEWS_PAGE, type NewsItem } from "@/lib/news";
+import {
+  NEWS_STICKY_PIN_CLASS,
+  NEWS_STICKY_RAIL_PANEL_CLASS,
+  NEWS_STICKY_RAIL_SURFACE_CLASS,
+} from "@/lib/news-sticky";
 import { OVERVIEW_MODULE_NEST_CLASS } from "@/lib/overview";
 
 const NOW = new Date("2026-09-18T18:00:00.000Z");
@@ -143,6 +148,15 @@ describe("NewsRail", () => {
     expect(html.indexOf(NEWS_PAGE.title)).toBeLessThan(html.indexOf("Harbor Cut lands a festival slot"));
     expect(html).toContain('data-news-card-density="home"');
     expect(html).toContain(OVERVIEW_MODULE_NEST_CLASS);
+    expect(html).toContain('data-news-sticky-header="rail"');
+    expect(html).toContain(NEWS_STICKY_PIN_CLASS);
+    expect(html).toContain(NEWS_STICKY_RAIL_SURFACE_CLASS);
+    expect(html).toContain(NEWS_STICKY_RAIL_PANEL_CLASS);
+    expect(html).not.toContain('data-news-sticky-header="page"');
+    expect(html.split("data-news-sticky-header=").length - 1).toBe(1);
+    expect(html.indexOf("data-news-sticky-header")).toBeLessThan(
+      html.indexOf("Harbor Cut lands a festival slot"),
+    );
     expect(html).toContain("Harbor Cut lands a festival slot");
     expect(html).toContain(markupClass(DASHBOARD_NEWS_THUMB_CLASS));
     expect(html).not.toContain("lg:grid-cols-2");
@@ -177,6 +191,7 @@ describe("NewsRail", () => {
     expect(html.indexOf("data-news-thumb")).toBeLessThan(html.indexOf("Harbor Cut lands a festival slot"));
     expect(html).not.toContain(DASHBOARD_SECTION_TITLE_CLASS);
     expect(html).not.toContain(NEWS_PAGE.title);
+    expect(html).not.toContain("data-news-sticky-header");
   });
 
   it("keeps Home empty copy inside the same shell + header", () => {
@@ -187,6 +202,7 @@ describe("NewsRail", () => {
     expect(html).toContain(NEWS_PAGE.title);
     expect(html).toContain(NEWS_PAGE.viewAll);
     expect(html).toContain(NEWS_PAGE.empty);
+    expect(html).toContain('data-news-sticky-header="rail"');
     expect(html.indexOf("dashboard-home-panel")).toBeLessThan(html.indexOf(NEWS_PAGE.title));
     expect(html.indexOf(NEWS_PAGE.title)).toBeLessThan(html.indexOf(NEWS_PAGE.empty));
   });

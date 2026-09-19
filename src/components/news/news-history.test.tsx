@@ -2,6 +2,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
+import { PageHeader } from "@/components/ui/page-header";
 import { NewsHistory } from "./news-history";
 import { NewsRail } from "./news-rail";
 import {
@@ -19,6 +20,10 @@ import {
 } from "@/lib/dashboard-craft";
 import { HOUSE_FILTER_OFF_CLASS, HOUSE_FILTER_ON_CLASS } from "@/lib/house-shell";
 import { NEWS_PAGE, NEWS_SOURCES, type NewsItem } from "@/lib/news";
+import {
+  NEWS_STICKY_PAGE_SURFACE_CLASS,
+  NEWS_STICKY_PIN_CLASS,
+} from "@/lib/news-sticky";
 
 const NOW = new Date("2026-09-18T18:00:00.000Z");
 
@@ -74,6 +79,16 @@ describe("NewsHistory layout", () => {
     expect(html).not.toMatch(/\b(Read|Open|Visit)\b/);
     expect(html.indexOf("data-news-thumb")).toBeLessThan(html.indexOf("Harbor Cut lands a festival slot"));
     expect(html).toContain("data-news-source-chips");
+    expect(html).toContain('data-news-sticky-header="page"');
+    expect(html).toContain(NEWS_STICKY_PIN_CLASS);
+    expect(html).toContain(NEWS_STICKY_PAGE_SURFACE_CLASS);
+    expect(html.split("data-news-sticky-header=").length - 1).toBe(1);
+    expect(html.indexOf("data-news-sticky-header")).toBeLessThan(
+      html.indexOf("data-news-source-chips"),
+    );
+    expect(html.indexOf("data-news-source-chips")).toBeLessThan(
+      html.indexOf("data-news-history-main"),
+    );
     expect(html).toContain(DASHBOARD_NEWS_SOURCE_CHIPS_CLASS);
     expect(html).toContain("overflow-x-auto");
     expect(html).toContain("no-scrollbar");
@@ -100,6 +115,35 @@ describe("NewsHistory layout", () => {
     expect(html).not.toContain('data-overview-module="news-sources"');
     expect(html).not.toContain("type=\"checkbox\"");
     expect(html).not.toContain("AppearanceCheck");
+  });
+
+  it("pins back + title + subtitle + chips in one sticky block — no leftover header", () => {
+    const html = renderToStaticMarkup(
+      createElement(NewsHistory, {
+        items: [VARIETY],
+        now: NOW,
+        selected: [],
+        heading: createElement(PageHeader, {
+          title: NEWS_PAGE.title,
+          subtitle: NEWS_PAGE.subtitle,
+          backLink: { href: "/home", label: NEWS_PAGE.back },
+          className: "pb-0",
+        }),
+      }),
+    );
+    expect(html).toContain('data-news-sticky-header="page"');
+    expect(html.split("data-news-sticky-header=").length - 1).toBe(1);
+    expect(html.split(NEWS_PAGE.title).length - 1).toBe(1);
+    expect(html).toContain(NEWS_PAGE.subtitle);
+    expect(html).toContain(NEWS_PAGE.back);
+    expect(html).toContain('href="/home"');
+    expect(html).toContain("data-news-source-chips");
+    expect(html.indexOf("data-news-sticky-header")).toBeLessThan(html.indexOf(NEWS_PAGE.back));
+    expect(html.indexOf(NEWS_PAGE.back)).toBeLessThan(html.indexOf(NEWS_PAGE.title));
+    expect(html.indexOf(NEWS_PAGE.title)).toBeLessThan(html.indexOf(NEWS_PAGE.subtitle));
+    expect(html.indexOf(NEWS_PAGE.subtitle)).toBeLessThan(html.indexOf("data-news-source-chips"));
+    expect(html.indexOf("data-news-source-chips")).toBeLessThan(html.indexOf("Harbor Cut lands a festival slot"));
+    expect(html).not.toContain('data-news-sticky-header="rail"');
   });
 
   it("filters All / one / multi and shows empty copy in the list column", () => {
@@ -170,6 +214,8 @@ describe("Home News rail stays stacked", () => {
     expect(html).toContain('data-news-card-density="home"');
     expect(html).not.toContain("data-news-history-layout");
     expect(html).not.toContain("data-news-source-chips");
+    expect(html).not.toContain('data-news-sticky-header="page"');
+    expect(html).toContain('data-news-sticky-header="rail"');
     expect(html).not.toContain("data-news-sources-rail");
     expect(html).not.toContain("data-news-sources-phone");
     expect(html).not.toContain(markupClass(DASHBOARD_NEWS_HISTORY_THUMB_CLASS));
