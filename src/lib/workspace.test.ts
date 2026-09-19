@@ -60,7 +60,10 @@ describe("workspace mode", () => {
     expect(resolveWorkspaceMode("/titles", "social")).toBe("social");
     expect(resolveWorkspaceMode("/dashboard", "education")).toBe("education");
     expect(resolveWorkspaceMode("/reports", "education")).toBe("education");
+    expect(resolveWorkspaceMode("/settings", "social")).toBe("social");
     expect(resolveWorkspaceMode("/settings/profile", "social")).toBe("social");
+    expect(resolveWorkspaceMode("/settings/organization", "education")).toBe("education");
+    expect(resolveWorkspaceMode("/settings/preferences", "education")).toBe("education");
     expect(resolveWorkspaceMode("/settings/profile", "education")).toBe("education");
     expect(resolveWorkspaceMode("/help", "aggregation")).toBe("aggregation");
     expect(resolveWorkspaceMode("/help", "education")).toBe("education");

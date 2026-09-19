@@ -15,13 +15,16 @@ import {
   SETTINGS_RAIL_ACTIVE_CLASS,
   SETTINGS_RAIL_CHEVRON_CLASS,
   SETTINGS_RAIL_ITEM_CLASS,
+  SETTINGS_PANE_TITLE_CLASS,
   SETTINGS_RAIL_PAD_CLASS,
+  SETTINGS_RAIL_TITLE_CLASS,
   isSettingsPath,
   settingsHeaderBack,
   settingsHubNav,
   settingsHubSection,
   settingsLandHref,
   settingsManageCoursesVisible,
+  settingsPaneTitle,
   settingsRailActive,
 } from "./settings";
 
@@ -207,6 +210,17 @@ describe("settings hub lock", () => {
     expect(SETTINGS_HEADER_PAD_CLASS).toBe("px-[var(--space-6)]");
     expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("t-body-sm");
     expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("t-title");
+  });
+
+  it("titles the body pane with the hub section — rail Settings stays quiet", () => {
+    expect(settingsPaneTitle("profile")).toBe("Profile");
+    expect(settingsPaneTitle("organization")).toBe("Organization");
+    expect(settingsPaneTitle("preferences")).toBe("Preferences");
+    expect(settingsPaneTitle("profile")).not.toBe(SETTINGS.title);
+    expect(SETTINGS_PANE_TITLE_CLASS).toBe("t-section text-ink");
+    expect(SETTINGS_RAIL_TITLE_CLASS).toBe("t-body text-ink-3");
+    expect(SETTINGS_RAIL_TITLE_CLASS).not.toContain("t-section");
+    expect(SETTINGS_PANE_TITLE_CLASS).not.toBe(SETTINGS_RAIL_TITLE_CLASS);
   });
 
   it("locks the settings rail on 220 pad 16, 15 Regular, house wash", () => {

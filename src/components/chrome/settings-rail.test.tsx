@@ -24,7 +24,7 @@ import { SettingsRail } from "./settings-rail";
 const src = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "settings-rail.tsx"), "utf8");
 
 describe("SettingsRail", () => {
-  it("is Settings title + Profile / Organization / Preferences", () => {
+  it("is quiet Settings context + Profile / Organization / Preferences", () => {
     navigation.pathname = "/settings/profile";
     const html = renderToStaticMarkup(<SettingsRail />);
     expect(html).toContain('data-settings-rail-nav=""');
@@ -32,6 +32,8 @@ describe("SettingsRail", () => {
     expect(html).toContain(SETTINGS.title);
     expect(html).toContain(SETTINGS_RAIL_NAV_CLASS);
     expect(html).toContain(SETTINGS_RAIL_TITLE_CLASS);
+    expect(SETTINGS_RAIL_TITLE_CLASS).toBe("t-body text-ink-3");
+    expect(SETTINGS_RAIL_TITLE_CLASS).not.toContain("t-section");
     for (const item of SETTINGS_HUB_NAV) {
       expect(html).toContain(`data-settings-rail-item="${item.kind}"`);
       expect(html).toContain(`href="${item.href}"`);

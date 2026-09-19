@@ -10,9 +10,9 @@ import {
   SETTINGS,
   SETTINGS_HUB_NAV,
   SETTINGS_PANE_CLASS,
+  SETTINGS_PANE_TITLE_CLASS,
   SETTINGS_QUIET_ROW_CLASS,
   SETTINGS_RAIL_CHEVRON_CLASS,
-  SETTINGS_RAIL_TITLE_CLASS,
   SETTINGS_SECTION_CLASS,
 } from "@/lib/settings";
 
@@ -30,7 +30,7 @@ export function SettingsHubList({
       className={cn(SETTINGS_PANE_CLASS, className)}
     >
       <section data-settings-section="list" className={SETTINGS_SECTION_CLASS}>
-        <h1 className={SETTINGS_RAIL_TITLE_CLASS}>{SETTINGS.title}</h1>
+        <h1 className={SETTINGS_PANE_TITLE_CLASS}>{SETTINGS.title}</h1>
         <nav data-settings-hub-list-nav="" className="flex flex-col gap-[var(--space-6)]">
           {SETTINGS_HUB_NAV.map((item) => (
             <Link

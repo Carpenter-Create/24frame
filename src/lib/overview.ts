@@ -12,6 +12,7 @@ import { NEWS_HOME_CAP, NEWS_HREF, NEWS_PAGE } from "@/lib/news";
 import { REPORTS_HREF, REPORTS_PERIOD_ALL } from "@/lib/reports";
 import { EDUCATION_HREF } from "@/lib/education";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
+import { isSettingsPath } from "@/lib/settings";
 import { availableWorkspaceOptions, type WorkspaceMenuOption } from "@/lib/workspace-menu";
 import type { WorkspaceMode } from "@/lib/workspace";
 
@@ -215,6 +216,10 @@ export function overviewLeadSelected(
   pathname: string,
   workspace: WorkspaceMode,
 ): boolean {
+  // Settings is a universal hub — not Home and not a workspace land.
+  // /settings/* must not light Home / Aggregation / Social / Education.
+  // The workspace cookie stays; leaving Settings returns to that land.
+  if (isSettingsPath(pathname)) return false;
   const onHome = isHomeOwnedPath(pathname);
   if (pillId === "home") return onHome;
   return !onHome && workspace === pillId;

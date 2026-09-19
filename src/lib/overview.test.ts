@@ -90,6 +90,23 @@ describe("Home lead pills", () => {
     ).toBe(false);
   });
 
+  it("leaves every unify-lead pill idle on Settings — cookie workspace is not selected", () => {
+    const paths = [
+      "/settings",
+      "/settings/profile",
+      "/settings/organization",
+      "/settings/preferences",
+    ] as const;
+    for (const path of paths) {
+      expect(overviewLeadSelected("home", path, "aggregation")).toBe(false);
+      expect(overviewLeadSelected("aggregation", path, "aggregation")).toBe(false);
+      expect(overviewLeadSelected("social", path, "social")).toBe(false);
+      expect(overviewLeadSelected("education", path, "education")).toBe(false);
+      expect(overviewLeadShouldNavigate(path, "aggregation", { id: "aggregation" })).toBe(true);
+      expect(overviewLeadShouldNavigate(path, "social", { id: "home" })).toBe(true);
+    }
+  });
+
   it("keeps /home/news on Home chrome — Home pill still navigates to /home", () => {
     expect(NEWS_HREF).toBe("/home/news");
     expect(isNewsHistoryPath(NEWS_HREF)).toBe(true);

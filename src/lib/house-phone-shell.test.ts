@@ -273,6 +273,10 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(housePhoneWorkspaceSelected("social", "/social/explore", "social")).toBe(true);
     expect(housePhoneWorkspaceSelected("education", "/education", "education")).toBe(true);
     expect(housePhoneWorkspaceSelected("aggregation", "/home", "aggregation")).toBe(false);
+    expect(housePhoneWorkspaceSelected("aggregation", "/settings/profile", "aggregation")).toBe(false);
+    expect(housePhoneWorkspaceSelected("social", "/settings", "social")).toBe(false);
+    expect(housePhoneWorkspaceSelected("home", "/settings/preferences", "aggregation")).toBe(false);
+    expect(housePhoneWorkspaceSelected("education", "/settings/organization", "education")).toBe(false);
   });
 
   it("splits phone chrome size SoT — bottom nav size-6, header trailing size-4, no alias", () => {
