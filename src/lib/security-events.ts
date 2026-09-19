@@ -1,6 +1,6 @@
 // Security event types, UA parsing, and copy for Settings → Security.
 //
-// UA parsing produces Mercury-style source labels like:
+// UA parsing produces source labels like the reference screenshot:
 //   "Chrome (macOS, 10.15.7)" or "iOS App (iOS, 26.6.2)"
 // Never invent a device or platform that isn't in the raw user-agent.
 
@@ -38,6 +38,7 @@ export const SECURITY_PAGE = {
   title: "Security",
   href: "/settings/security",
   subtitle: "Activity history for your organization.",
+  historyHeading: "Activity history from all users",
   emptyState: "No security events recorded yet.",
 } as const;
 
@@ -63,7 +64,7 @@ const OS_PATTERNS: [RegExp, (m: RegExpMatchArray) => string][] = [
   [/Linux/, () => "Linux"],
 ];
 
-/** Parse a raw user-agent into a Mercury-style source label.
+/** Parse a raw user-agent into a browser+OS source label.
  *  Returns null for empty/unparseable strings. */
 export function parseSourceLabel(ua: string | null | undefined): string | null {
   if (!ua) return null;
@@ -92,28 +93,7 @@ export function parseSourceLabel(ua: string | null | undefined): string | null {
 }
 
 // ---------------------------------------------------------------------------
-// Event kind → pill styling
+// Event icon class — plain inline icon next to the label (reference grammar).
+// No pill. No colored background. Icon inherits text color.
 // ---------------------------------------------------------------------------
-
-export type SecurityEventPillTone = "neutral" | "success" | "warning";
-
-export function securityEventPillTone(kind: SecurityEventKind): SecurityEventPillTone {
-  switch (kind) {
-    case "sign_in":
-    case "invite_accepted":
-      return "success";
-    case "failed_sign_in":
-      return "warning";
-    default:
-      return "neutral";
-  }
-}
-
-export const SECURITY_PILL_CLASSES: Record<SecurityEventPillTone, string> = {
-  neutral: "bg-surface-muted text-ink-2",
-  success: "bg-surface-muted text-ink",
-  warning: "bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-200",
-} as const;
-
-export const SECURITY_PILL_BASE_CLASS =
-  "inline-flex items-center rounded-full px-2 py-0.5 t-body-sm leading-5";
+export const SECURITY_EVENT_ICON_CLASS = "size-4 shrink-0";
