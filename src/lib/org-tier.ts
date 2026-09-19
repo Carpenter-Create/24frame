@@ -10,7 +10,7 @@ import { isAskGlobeeTier, type AskGlobeeTier } from "@/lib/ask-globee";
 //    account_owner, accountant, legal, and GC staff (view_financial / is_gc_staff).
 //    viewer and delivery_ops are blocked (financial_access_test).
 // 2. Fallback: latest contract_assents → source_documents.raw.tier, already read
-//    on /account/agreements. source_documents_select uses 'view', so every member
+//    on /settings/agreements. source_documents_select uses 'view', so every member
 //    can read the accepted-agreement tier.
 //
 // A missing or unreadable tier is null — callers treat that as the Access gate.

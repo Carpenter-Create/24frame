@@ -35,13 +35,13 @@ describe("house primitives", () => {
     const close = renderToStaticMarkup(
       <Close44 label="Close account" onClick={() => undefined} />,
     );
-    const action = renderToStaticMarkup(<TextAction href="/account">Manage account</TextAction>);
+    const action = renderToStaticMarkup(<TextAction href="/settings">Manage account</TextAction>);
     const identity = renderToStaticMarkup(
       <IdentityBlock avatarInitial="A" name="" email="ada@example.com" />,
     );
     const group = renderToStaticMarkup(
       <SheetGroup label="ACCOUNT">
-        <SheetGroupItem item="agreements" href="/account/agreements">
+        <SheetGroupItem item="agreements" href="/settings/agreements">
           Agreements
         </SheetGroupItem>
       </SheetGroup>,
@@ -58,7 +58,7 @@ describe("house primitives", () => {
     expect(close).not.toContain("lucide-");
     expect(houseSrc).toContain('<X className="size-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />');
     expect(action).toContain(TEXT_ACTION_CLASS);
-    expect(action).toContain('href="/account"');
+    expect(action).toContain('href="/settings"');
     expect(identity).toContain("data-identity-avatar");
     expect(identity).toContain("data-identity-name");
     expect(identity).toContain("ada@example.com");

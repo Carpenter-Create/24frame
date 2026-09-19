@@ -98,31 +98,31 @@ Use the Access client mailbox. Magic-link only. No live card.
 
 | | |
 | --- | --- |
-| **Path** | `/titles` |
+| **Path** | `/aggregation/titles` (retired `/titles` 404s) |
 | **Role** | client Access |
-| **Action** | Open `/titles`. |
-| **Expected** | Page heading **Titles** loads without an error page. Empty catalog is Pass. |
-| **Fail** | Error page, unexpected redirect, or a blank/broken render. |
+| **Action** | Open `/titles` first — expect 404, no hop. Then open `/aggregation/titles`. |
+| **Expected** | Retired door 404s. Live path heading **Titles** loads without an error page. Empty catalog is Pass. |
+| **Fail** | Redirect from `/titles`, error page, unexpected hop, or a blank/broken render. |
 
-### 6. Deliveries
+### 6. Activity
 
 | | |
 | --- | --- |
-| **Path** | `/deliveries` |
+| **Path** | `/aggregation/activity` (retired `/deliveries` 404s) |
 | **Role** | client Access |
-| **Action** | Open `/deliveries`. |
-| **Expected** | Page heading **Deliveries** loads without an error page. Empty list is Pass. |
-| **Fail** | Error page, unexpected redirect, or a blank/broken render. |
+| **Action** | Open `/deliveries` first — expect 404, no hop. Then open `/aggregation/activity`. |
+| **Expected** | Retired door 404s. Live path heading **Activity** loads without an error page. Empty list is Pass. Client licensing nest stays on Dashboard — there is no client `/deliveries` land. |
+| **Fail** | Redirect from `/deliveries`, error page, unexpected hop, or a blank/broken render. |
 
-### 7. Catalog Health
+### 7. Attention
 
 | | |
 | --- | --- |
-| **Path** | `/catalog-health` |
+| **Path** | `/aggregation/attention` (retired `/catalog-health` 404s) |
 | **Role** | client Access |
-| **Action** | Open `/catalog-health`. |
-| **Expected** | Page heading **Catalog Health** loads without an error page. |
-| **Fail** | Error page, unexpected redirect, or a blank/broken render. |
+| **Action** | Open `/catalog-health` first — expect 404, no hop. Then open `/aggregation/attention`. |
+| **Expected** | Retired door 404s. Live path heading **Attention** loads without an error page. |
+| **Fail** | Redirect from `/catalog-health`, error page, unexpected hop, or a blank/broken render. |
 
 ### 8. Retired `/messages` (hard-404)
 
@@ -148,10 +148,10 @@ Use the Access client mailbox. Magic-link only. No live card.
 
 | | |
 | --- | --- |
-| **Path** | `/titles` |
+| **Path** | `/aggregation/titles` |
 | **Role** | client Access, Operate (`account_owner` or `delivery_ops`) |
-| **Action** | On `/titles`, use **Title** → **Add a title**. Enter a working title. Leave release as **New release**. Submit **Add title**. Do **not** submit the title to `in_review` unless you explicitly choose to; default is leave as draft. Do not upload assets, open portal/AWS steps, or name vendors. |
-| **Expected** | The new stub appears on `/titles`. Committed evidence must be exactly: “Title stub successfully created; production identifier retained privately by founder and not committed to the repository.” |
+| **Action** | On `/aggregation/titles`, use **Title** → **Add a title**. Enter a working title. Leave release as **New release**. Submit **Add title**. Do **not** submit the title to `in_review` unless you explicitly choose to; default is leave as draft. Do not upload assets, open portal/AWS steps, or name vendors. |
+| **Expected** | The new stub appears on `/aggregation/titles`. Committed evidence must be exactly: “Title stub successfully created; production identifier retained privately by founder and not committed to the repository.” |
 | **Fail** | Create errors, the Operate control is missing for an Operate role, or the title is advanced to `in_review` without an explicit founder choice. |
 
 ### 11. Sign out
@@ -184,37 +184,37 @@ Use the staff mailbox. Do not use this session for check 16.
 
 | | |
 | --- | --- |
-| **Path** | `/queue` |
+| **Path** | `/aggregation/queue` (retired `/queue` 404s) |
 | **Role** | `gc_staff` |
-| **Action** | Open `/queue`. |
-| **Expected** | Page heading **Queue** loads without an error page. Empty sections are Pass. |
-| **Fail** | Error page, redirect to `/` or `/login`, or a blank/broken render. |
+| **Action** | Open `/queue` first — expect 404, no hop. Then open `/aggregation/queue`. |
+| **Expected** | Retired door 404s. Live path heading **Queue** loads without an error page. Empty sections are Pass. |
+| **Fail** | Redirect from `/queue`, error page, redirect to `/` or `/login`, or a blank/broken render. |
 
-### 14. GC deliveries
+### 14. Licensing Status
 
 | | |
 | --- | --- |
-| **Path** | `/gc/deliveries` |
+| **Path** | `/aggregation/gc/deliveries` (retired `/gc/deliveries` 404s) |
 | **Role** | `gc_staff` |
-| **Action** | Open `/gc/deliveries`. Load only. Do not create deliveries, generate portal links, or export. |
-| **Expected** | Page heading **Deliveries** loads without an error page. Empty list is Pass. |
-| **Fail** | Error page, redirect to `/` or `/login`, or a blank/broken render. |
+| **Action** | Open `/gc/deliveries` first — expect 404, no hop. Then open `/aggregation/gc/deliveries`. Load only. Do not create deliveries, generate portal links, or export. |
+| **Expected** | Retired door 404s. Live path heading **Licensing Status** loads without an error page. Empty list is Pass. |
+| **Fail** | Redirect from `/gc/deliveries`, error page, redirect to `/` or `/login`, or a blank/broken render. |
 
-### 15. Vendors
+### 15. Channels
 
 | | |
 | --- | --- |
-| **Path** | `/vendors` |
+| **Path** | `/aggregation/channels` (retired `/vendors` 404s) |
 | **Role** | `gc_staff` |
-| **Action** | Open `/vendors`. Load only. Do not create or edit vendors. Do not record vendor names in the repository. |
-| **Expected** | Page heading **Vendors** loads without an error page. Empty list is Pass. |
-| **Fail** | Error page, redirect to `/` or `/login`, or a blank/broken render. |
+| **Action** | Open `/vendors` first — expect 404, no hop. Then open `/aggregation/channels`. Load only. Do not create or edit channels. Do not record channel names in the repository. |
+| **Expected** | Retired door 404s. Live path heading **Channels** loads without an error page. Empty list is Pass. Schema table stays `vendors`. |
+| **Fail** | Redirect from `/vendors`, error page, redirect to `/` or `/login`, or a blank/broken render. |
 
 ### 16. Operator routes refused (negative)
 
 | | |
 | --- | --- |
-| **Path** | `/queue`, `/gc/deliveries`, `/vendors` |
+| **Path** | `/aggregation/queue`, `/aggregation/gc/deliveries`, `/aggregation/channels` |
 | **Role** | unauthenticated-or-client (not `gc_staff`) |
 | **Action** | Sign out of the staff session first, or use a separate browser profile. From a **logged-out** session and/or the **Access client** session, open each operator path above. Do **not** use a staff session for this check. |
 | **Expected** | Each path is refused: logged-out → redirect to `/login`; client session → redirect to `/` (or not found). The operator page heading must not render. |

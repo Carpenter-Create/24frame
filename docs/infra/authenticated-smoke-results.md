@@ -1,5 +1,12 @@
 # Authenticated production smoke — results
 
+> **Historical evidence (P3-3).** The 2026-08-15 path cells used retired IA
+> (`/titles`, `/deliveries`, `/catalog-health`, `/messages`, `/account/agreements`,
+> `/queue`, `/gc/deliveries`, `/vendors`). Those doors now 404. Live first-segment
+> paths are in [`authenticated-smoke-runbook.md`](authenticated-smoke-runbook.md).
+> Do not treat the table below as current IA. A later founder run must use the
+> updated runbook.
+
 Founder-recorded sanitized evidence for the 2026-08-15 America/Chicago run of [`authenticated-smoke-runbook.md`](authenticated-smoke-runbook.md).
 
 **Cursor and Codex must not execute the runbook against production.** This file is the place the founder records what happened so a later reviewer can determine pass/fail without memory.
