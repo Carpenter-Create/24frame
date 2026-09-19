@@ -234,7 +234,8 @@ export function settingsLegacyRedirect(pathname: string | null | undefined): str
 }
 
 /** Account-menu Settings door. Always the hub — never a workspace land. */
-export function settingsLandHref(_pathname?: string | null): string {
+export function settingsLandHref(pathname?: string | null): string {
+  void pathname;
   return SETTINGS.href;
 }
 
