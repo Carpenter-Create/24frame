@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { NEWS_SOURCES } from "./news";
 import {
   canonicalizeNewsImageUrl,
+  newsCardImageUrl,
   canonicalizeNewsUrl,
   newsOgFetchUrl,
   parseNewsDate,
@@ -80,6 +81,11 @@ describe("canonicalizeNewsImageUrl", () => {
       "https://cdn.joblo.com/thumbs/x.jpg",
     );
     expect(canonicalizeNewsImageUrl(null)).toBeNull();
+    expect(newsCardImageUrl(floodApex)).toBe(floodWww);
+    expect(
+      newsCardImageUrl("https://delivery.globalcontent.co/news-thumbs/joblo/abc.jpg"),
+    ).toBe("https://delivery.globalcontent.co/news-thumbs/joblo/abc.jpg");
+    expect(newsCardImageUrl(null)).toBeNull();
   });
 
   it("collapses a doubled www.joblo.com host in the path", () => {

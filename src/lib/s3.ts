@@ -11,6 +11,7 @@ import {
   ListObjectsV2Command,
   DeleteObjectsCommand,
 } from "@aws-sdk/client-s3";
+export { putObjectBytes } from "@/lib/s3-put";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { assertTitleAssetPrefix, titleAssetPrefix } from "@/lib/assets";

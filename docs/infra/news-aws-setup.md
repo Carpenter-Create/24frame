@@ -14,9 +14,15 @@ Auth stays Supabase Auth. The app **reads** DynamoDB on Home (15) and
 **writes** DynamoDB. Page requests never fan out RSS. RSS media /
 enclosure first; when `image_url` is null, ingest OG-scrapes the
 article (`og:image` / `twitter:image`, 12s timeout, desktop Chrome UA,
-1.5MB HTML cap, fail-soft). Override the cap with server-only
-`NEWS_OG_MAX_BYTES` (bytes, positive integer). Per-source CloudWatch
-counters: `ogAttempted`, `ogFilled`, `ogMiss`, `droppedByTopic`.
+1.5MB HTML cap, fail-soft). **JoBlo always OG-scrapes** even when the
+RSS enclosure exists (enclosure has been wrong/apex). After a remote
+`image_url` is resolved, ingest **mirrors bytes** to the title-asset
+bucket prefix `news-thumbs/` (`S3_BUCKET` + house `putObjectBytes`)
+and persists the unsigned `CLOUDFRONT_DOMAIN` URL. A mirror miss
+keeps the canonicalized remote URL — never blank a good thumb.
+Override the OG cap with server-only `NEWS_OG_MAX_BYTES` (bytes,
+positive integer). Per-source CloudWatch counters: `ogAttempted`,
+`ogFilled`, `ogMiss`, `droppedByTopic`, `mirrored`, `mirrorFailed`.
 
 Feed is **film + tv only**. Cross-beat trades (Hollywood Reporter,
 Variety, Deadline) ingest **section RSS** — never the site-wide feed
@@ -58,6 +64,12 @@ NEWS_AWS_ACCESS_KEY_ID=
 NEWS_AWS_SECRET_ACCESS_KEY=
 NEWS_DDB_TABLE=          # 24frame-news-dev / 24frame-news-prod
 NEWS_OG_MAX_BYTES=       # optional; default 1500000. Lambda only. Never NEXT_PUBLIC_.
+
+# Thumb mirror — existing title-asset names. No NEWS_S3_* / new secret shape.
+# Lambda execution role does PutObject (not static title keys).
+S3_BUCKET=               # same Vercel title bucket (e.g. gc-content-assets-prod)
+AWS_REGION=us-east-1     # title bucket region. Dynamo stays NEWS_AWS_REGION=us-west-2.
+CLOUDFRONT_DOMAIN=       # same Vercel title CF (e.g. https://delivery.globalcontent.co)
 ```
 
 Names live in `.env.example`. Agents do not set values.
@@ -84,15 +96,19 @@ confirmed, founder applies in `405912452061` / `us-west-2`:
    `NEXT_PUBLIC_`.
 3. **IAM role** `24frame-news-ingest` (trust `lambda.amazonaws.com`)
    with `dynamodb:PutItem`, `dynamodb:GetItem`, `dynamodb:Query` on
-   the table + GSI, plus CloudWatch logs. No S3. No finance/education
-   tables. No `sts:AssumeRole` into other product roles.
+   the table + GSI, CloudWatch logs, and **prefix-scoped**
+   `s3:PutObject` / `s3:GetObject` on `$S3_BUCKET/news-thumbs/*`.
+   No finance/education/media buckets. No title `orgs/` prefix. No
+   `sts:AssumeRole` into other product roles.
 4. **Lambda** `24frame-news-ingest`. Package
    `workers/news/handler.ts` (repo `tsx` + `@/` via a Lambda bundle,
    or a container image from repo root). Timeout 60s. Memory 256 MB
    is enough. Env: `NEWS_AWS_REGION=us-west-2`,
    `NEWS_DDB_TABLE=24frame-news-prod` (or `-dev`). Optional
-   `NEWS_OG_MAX_BYTES` (default 1500000). Prefer the
-   execution role over static keys on the function.
+   `NEWS_OG_MAX_BYTES` (default 1500000). Thumb mirror:
+   `S3_BUCKET`, `AWS_REGION=us-east-1` (title bucket region),
+   `CLOUDFRONT_DOMAIN`. Prefer the execution role over static keys
+   on the function.
 5. **SQS** `24frame-news-ingest-dlq`. Attach as the Lambda
    asynchronous invocation DLQ (or EventBridge target DLQ).
 6. **EventBridge** rule `24frame-news-ingest` `rate(30 minutes)`
@@ -110,6 +126,20 @@ dynamodb:GetItem, dynamodb:Query
 dynamodb:GetItem, dynamodb:PutItem, dynamodb:Query
   arn:aws:dynamodb:us-west-2:405912452061:table/24frame-news-prod
   arn:aws:dynamodb:us-west-2:405912452061:table/24frame-news-prod/index/gsi1
+
+# Thumb mirror — title bucket, prefix only. Founder fills $S3_BUCKET.
+# Example prod: arn:aws:s3:::gc-content-assets-prod/news-thumbs/*
+s3:PutObject, s3:GetObject
+  arn:aws:s3:::$S3_BUCKET/news-thumbs/*
+
+# If the title bucket account is not 405912452061, add a bucket policy
+# allowing Principal arn:aws:iam::405912452061:role/24frame-news-ingest
+# on that same Resource. Do not invent a new AWS account.
+
+# CloudFront (title distribution / $CLOUDFRONT_DOMAIN): cache behavior
+# path pattern news-thumbs/* with Restrict viewer access = No (unsigned).
+# Origin stays the title bucket + OAC. Cards persist and load that URL.
+# Do not store signed URLs in Dynamo.
 ```
 
 Do **not** create these from this PR.
@@ -184,24 +214,27 @@ image. No console row edit. To run once without waiting for cron,
 use the invoke above. A scrape timeout or miss leaves the grey plate
 — it does not fail the source.
 
-**JoBlo thumbs (apex host).** Cards hotlink `image_url`. JoBlo apex
-media (`https://joblo.com/wp-content/...`) 404s; `www.joblo.com` is
-200. Ingest now writes www at RSS/OG time. After Lambda redeploy,
-existing Dynamo rows still need a rewrite (merge ≠ live, and items
-that left the RSS window are not re-upserted). CoS only — dry-run
-default:
+**JoBlo / news thumbs (mirror).** Cards load our CloudFront URL, not
+the publisher CDN. Ingest canonicalizes JoBlo apex → www, force-OGs
+JoBlo, then PutObject to `$S3_BUCKET/news-thumbs/{source}/{hash}.{ext}`
+and writes `https://$CLOUDFRONT_DOMAIN/news-thumbs/...`. After Lambda
+redeploy, existing Dynamo rows still hotlink remotes until backfill
+(merge ≠ live, and items that left the RSS window are not re-upserted).
+CoS only — dry-run default:
 
 ```
-# rewrite apex image_url → www; print remaining nulls
+# preview apex→www + planned CF URLs; no PutObject / PutItem
 pnpm exec tsx scripts/news/backfill-joblo-image-urls.ts
-# apply PutItem (same pk / canonical_url)
+# apply mirror + PutItem (same pk / canonical_url)
 pnpm exec tsx scripts/news/backfill-joblo-image-urls.ts --apply
-# optional: fill the known Flood OG when image_url is null
+# optional: fill the known Flood OG when image_url is null, then mirror
 pnpm exec tsx scripts/news/backfill-joblo-image-urls.ts --apply --fill-known
+# optional: every source that still has a remote thumb
+pnpm exec tsx scripts/news/backfill-joblo-image-urls.ts --all-sources
 ```
 
-Then invoke ingest once to soak new JoBlo items and OG-scrape remaining
-nulls still in the live feed. Do not proxy through CloudFront for this.
+Then invoke ingest once to soak new items. Live backfill and Lambda
+redeploy stay CoS/founder — not this merge.
 
 **Music / other row purge (one-shot).** Rows that ingested before the
 topic gate landed can be evicted without waiting for TTL. Dry-run

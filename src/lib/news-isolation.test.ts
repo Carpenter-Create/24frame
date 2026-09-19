@@ -48,6 +48,10 @@ describe("News AWS setup doc", () => {
     expect(historySrc).toContain("NEWS_SOURCE_PARAM");
     expect(existsSync("src/app/(app)/home/news/page.tsx")).toBe(true);
     expect(infra).toContain("Image backfill");
+    expect(infra).toContain("news-thumbs/");
+    expect(infra).toContain("S3_BUCKET");
+    expect(infra).toContain("CLOUDFRONT_DOMAIN");
+    expect(infra).toContain("s3:PutObject");
     expect(infra).toContain("update-function-code");
     expect(infra).toContain("MUST redeploy Lambda `24frame-news-ingest`");
     expect(infra).toContain("Merge ≠ live for ingest");

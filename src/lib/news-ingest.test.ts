@@ -10,8 +10,10 @@ import {
   fetchNewsArticleHtml,
   fillNewsOgImages,
   ingestNewsFeeds,
+  newsItemNeedsOg,
   resolveNewsOgMaxBytes,
 } from "./news-ingest";
+import { newsThumbObjectKey } from "./news-thumbs";
 import { loadHomeNews, loadNewsHistory, resetNewsReadCache } from "./news-load";
 import type { NormalizedNewsItem } from "./news-rss";
 import { memoryNewsStore } from "./news-store";
@@ -473,6 +475,65 @@ describe("ingest OG images", () => {
     expect(rows[0]?.url).toBe("https://joblo.com/zach-cregger-the-flood-2001-influence");
     expect(rows[0]?.image_url).toBe(floodWww);
   });
+
+  it("mirrors a resolved thumb to CloudFront and persists that URL", async () => {
+    const persist = memoryNewsStore();
+    const putThumb = vi.fn(async () => undefined);
+    const prevCf = process.env.CLOUDFRONT_DOMAIN;
+    process.env.CLOUDFRONT_DOMAIN = "https://delivery.globalcontent.co";
+    try {
+      await ingestNewsFeeds({
+        persist,
+        now: NOW,
+        fetchXml: async (url: string) => (url === THR_MOVIES_FEED ? FEED_NO_THUMB : EMPTY_FEED),
+        fetchOgHtml: async () => `<meta property="og:image" content="https://thr.com/og.jpg" />`,
+        fetchThumb: async () =>
+          new Response(new Uint8Array(64).fill(1), {
+            status: 200,
+            headers: { "content-type": "image/jpeg" },
+          }),
+        putThumb,
+      });
+    } finally {
+      if (prevCf === undefined) delete process.env.CLOUDFRONT_DOMAIN;
+      else process.env.CLOUDFRONT_DOMAIN = prevCf;
+    }
+    const rows = await persist.queryFeed({ limit: 20, now: NOW });
+    const key = newsThumbObjectKey(
+      "hollywood-reporter",
+      "https://hollywoodreporter.com/movies/movie-news/needs-og",
+      "jpg",
+    );
+    expect(putThumb).toHaveBeenCalledTimes(1);
+    expect(rows[0]?.image_url).toBe(`https://delivery.globalcontent.co/${key}`);
+  });
+
+  it("keeps the remote thumb when the mirror PutObject fails", async () => {
+    const persist = memoryNewsStore();
+    const prevCf = process.env.CLOUDFRONT_DOMAIN;
+    process.env.CLOUDFRONT_DOMAIN = "https://delivery.globalcontent.co";
+    try {
+      await ingestNewsFeeds({
+        persist,
+        now: NOW,
+        fetchXml: async (url: string) => (url === THR_MOVIES_FEED ? FEED_NO_THUMB : EMPTY_FEED),
+        fetchOgHtml: async () => `<meta property="og:image" content="https://thr.com/og.jpg" />`,
+        fetchThumb: async () =>
+          new Response(new Uint8Array(64).fill(1), {
+            status: 200,
+            headers: { "content-type": "image/jpeg" },
+          }),
+        putThumb: async () => {
+          throw new Error("AccessDenied");
+        },
+      });
+    } finally {
+      if (prevCf === undefined) delete process.env.CLOUDFRONT_DOMAIN;
+      else process.env.CLOUDFRONT_DOMAIN = prevCf;
+    }
+    const rows = await persist.queryFeed({ limit: 20, now: NOW });
+    expect(rows[0]?.image_url).toBe("https://thr.com/og.jpg");
+  });
 });
 
 describe("fetchNewsArticleHtml", () => {
@@ -580,8 +641,10 @@ describe("fillNewsOgImages", () => {
     expect(maxInFlight).toBeLessThanOrEqual(NEWS_OG_CONCURRENCY);
   });
 
-  it("skips items that already have image_url", async () => {
-    const fetchHtml = vi.fn(async () => "<meta property=\"og:image\" content=\"https://x.com/x.jpg\" />");
+  it("skips non-JoBlo items that already have image_url", async () => {
+    const fetchHtml = vi.fn(async () => {
+      throw new Error("should not scrape");
+    });
     const [kept] = await fillNewsOgImages(
       [{ ...liveItem(), image_url: "https://variety.com/thumbs/rss.jpg" }],
       { fetchHtml },
@@ -590,9 +653,10 @@ describe("fillNewsOgImages", () => {
     expect(fetchHtml).not.toHaveBeenCalled();
   });
 
-  it("rewrites an existing JoBlo apex image_url without scraping", async () => {
-    const fetchHtml = vi.fn(async () => {
-      throw new Error("should not scrape");
+  it("force-OGs JoBlo even when the RSS enclosure exists", async () => {
+    const fetchHtml = vi.fn(async (url: string) => {
+      expect(url).toBe("https://www.joblo.com/zach-cregger-the-flood-2001-influence");
+      return `<meta property="og:image" content="https://www.joblo.com/wp-content/uploads/2026/09/zach-cregger-the-flood-2001.jpg" />`;
     });
     const [kept] = await fillNewsOgImages(
       [
@@ -602,19 +666,25 @@ describe("fillNewsOgImages", () => {
           canonical_url: "https://joblo.com/zach-cregger-the-flood-2001-influence",
           source: "joblo",
           published_at: "2026-09-17T12:00:00.000Z",
-          image_url: "https://joblo.com/wp-content/uploads/2026/09/zach-cregger-the-flood-2001.jpg",
+          image_url: "https://joblo.com/wp-content/uploads/2026/09/wrong-enclosure.jpg",
           topic: "film",
         },
       ],
       { fetchHtml },
     );
+    expect(fetchHtml).toHaveBeenCalledTimes(1);
     expect(kept?.image_url).toBe(
       "https://www.joblo.com/wp-content/uploads/2026/09/zach-cregger-the-flood-2001.jpg",
     );
-    expect(fetchHtml).not.toHaveBeenCalled();
+    expect(newsItemNeedsOg({ source: "joblo", image_url: "https://www.joblo.com/x.jpg" })).toBe(
+      true,
+    );
+    expect(newsItemNeedsOg({ source: "variety", image_url: "https://variety.com/x.jpg" })).toBe(
+      false,
+    );
   });
 
-  it("counts only RSS-null items as OG attempts", () => {
+  it("counts RSS-null items and JoBlo force-OG as OG attempts", () => {
     expect(
       countNewsOgFill(
         [
@@ -624,6 +694,33 @@ describe("fillNewsOgImages", () => {
         [
           { ...liveItem(), image_url: "https://variety.com/thumbs/rss.jpg" },
           { ...liveItem(), image_url: "https://variety.com/og.jpg" },
+        ],
+      ),
+    ).toEqual({ ogAttempted: 1, ogFilled: 1, ogMiss: 0 });
+    expect(
+      countNewsOgFill(
+        [
+          {
+            title: "Flood influence",
+            url: "https://joblo.com/zach-cregger-the-flood-2001-influence",
+            canonical_url: "https://joblo.com/zach-cregger-the-flood-2001-influence",
+            source: "joblo",
+            published_at: "2026-09-17T12:00:00.000Z",
+            image_url: "https://www.joblo.com/wp-content/uploads/wrong.jpg",
+            topic: "film",
+          },
+        ],
+        [
+          {
+            title: "Flood influence",
+            url: "https://joblo.com/zach-cregger-the-flood-2001-influence",
+            canonical_url: "https://joblo.com/zach-cregger-the-flood-2001-influence",
+            source: "joblo",
+            published_at: "2026-09-17T12:00:00.000Z",
+            image_url:
+              "https://www.joblo.com/wp-content/uploads/2026/09/zach-cregger-the-flood-2001.jpg",
+            topic: "film",
+          },
         ],
       ),
     ).toEqual({ ogAttempted: 1, ogFilled: 1, ogMiss: 0 });

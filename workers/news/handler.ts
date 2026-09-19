@@ -1,8 +1,10 @@
 // 24Frame News ingest Lambda. EventBridge rule 24frame-news-ingest.
 // NEWS_AWS_REGION + NEWS_DDB_TABLE required. Static NEWS_AWS_* keys are
 // optional when the Lambda execution role is attached.
-// Never AWS_* / FINANCE_AWS_* / MEDIA_AWS_* / SES_AWS_* / EDUCATION_AWS_*.
-// Founder-applied — see docs/infra/news-aws-setup.md. Do not create AWS from CI.
+// Dynamo never AWS_* / FINANCE_AWS_* / MEDIA_AWS_* / SES_AWS_* / EDUCATION_AWS_*.
+// Thumb mirror reuses title S3_BUCKET + AWS_REGION + CLOUDFRONT_DOMAIN
+// (house putObjectBytes). No NEWS_S3_*. Founder-applied — see
+// docs/infra/news-aws-setup.md. Do not create AWS from CI.
 
 import { ingestNewsFeeds } from "../../src/lib/news-ingest";
 import { createNewsIngestStore } from "../../src/lib/news-store";

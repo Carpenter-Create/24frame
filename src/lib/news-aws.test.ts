@@ -89,6 +89,8 @@ describe("News AWS isolation", () => {
     expect(loadSrc).not.toMatch(/fetchNewsFeedXml|parseNewsFeed/);
     expect(ingestSrc).toContain("fillNewsOgImages");
     expect(ingestSrc).toContain("parseOgImageUrl");
+    expect(ingestSrc).toContain("mirrorNewsItemImages");
+    expect(ingestSrc).toContain("newsItemNeedsOg");
     expect(ingestSrc).not.toContain("NEXT_PUBLIC_");
   });
 });

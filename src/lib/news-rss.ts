@@ -61,6 +61,23 @@ export function canonicalizeNewsImageUrl(url: string | null): string | null {
   return preferJobloWwwHost(url);
 }
 
+/**
+ * Card SoT: prefer a mirrored `news-thumbs/` URL. Rewrite JoBlo apex if a
+ * legacy publisher URL still slips through. Does not invent a host.
+ */
+export function newsCardImageUrl(url: string | null): string | null {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    if (parsed.pathname === "/news-thumbs" || parsed.pathname.startsWith("/news-thumbs/")) {
+      return url;
+    }
+  } catch {
+    return canonicalizeNewsImageUrl(url);
+  }
+  return canonicalizeNewsImageUrl(url);
+}
+
 /** Fetch JoBlo over www. Article identity still strips www via canonicalizeNewsUrl (stable Dynamo keys). */
 export function newsOgFetchUrl(articleUrl: string): string {
   return preferJobloWwwHost(articleUrl);
