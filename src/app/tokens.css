@@ -129,7 +129,8 @@
 
 /* --- Neutral ramp — DARK (secondary; add class="dark") --- */
 .dark {
-  --bg:            #0f1114;
+  /* Adam trial 2026-09-19 brand canvas; surfaces unchanged pending glance. */
+  --bg:            #050835;
   --surface:       #1e2126;
   --surface-muted: #25292f;
   --border:        #2a2f34;
