@@ -25,6 +25,7 @@ vi.mock("next/dynamic", async () => {
   const thread = await import("@/components/messages/ask-globee-thread");
   const history = await import("@/components/messages/ask-globee-history");
   const gate = await import("@/components/messages/access-upgrade-gate");
+  const header = await import("./messages-app-header");
   return {
     default: (loader: () => Promise<unknown>) => {
       const src = String(loader);
@@ -37,6 +38,9 @@ vi.mock("next/dynamic", async () => {
         return thread.AskGlobeeThread;
       }
       if (src.includes("AccessUpgradeGate")) return gate.AccessUpgradeGate;
+      if (src.includes("messages-app-header") || src.includes("MessagesAppHeader")) {
+        return header.MessagesAppHeader;
+      }
       return function DynamicUnresolved() {
         return null;
       };
@@ -130,6 +134,7 @@ describe("AskAiOverlay", () => {
     expect(overlaySrc).not.toMatch(/from "@\/components\/messages\/ask-globee-landing"/);
     expect(overlaySrc).not.toMatch(/from "@\/components\/messages\/ask-globee-thread"/);
     expect(overlaySrc).not.toMatch(/from "@\/components\/messages\/ask-globee-history"/);
+    expect(overlaySrc).not.toMatch(/from "\.\/messages-app-header"/);
     expect(overlaySrc).toContain("askAiOverlayHref(pathname, currentAskAiSearch(), threadId)");
     expect(overlaySrc).toContain("router.push(href)");
     expect(overlaySrc).not.toContain('router.push("/messages")');

@@ -46,7 +46,6 @@ import { APP_SHEET_SCRIM_CLASS } from "@/lib/house-sheet";
 import { AskAssistantChromeProvider, useAskGlobeeChrome } from "@/components/messages/ask-globee-chrome";
 import { Close44 } from "./house";
 import { HouseAiMark } from "./house-ai-mark";
-import { MessagesAppHeader } from "./messages-app-header";
 
 const AskGlobeeLanding = dynamic(() =>
   import("@/components/messages/ask-globee-landing").then((m) => m.AskGlobeeLanding),
@@ -62,6 +61,9 @@ const AskGlobeeHistoryPanel = dynamic(() =>
 );
 const AccessUpgradeGate = dynamic(() =>
   import("@/components/messages/access-upgrade-gate").then((m) => m.AccessUpgradeGate),
+);
+const MessagesAppHeader = dynamic(() =>
+  import("./messages-app-header").then((m) => m.MessagesAppHeader),
 );
 
 type AskAiOverlayContextValue = {
