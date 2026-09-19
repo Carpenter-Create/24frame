@@ -29,7 +29,8 @@
 --   CREATE TYPE + TABLE + COLUMN + INDEX + TRIGGER + POLICY + FUNCTION.
 --   ALTER TABLE titles ADD COLUMN, ALTER TABLE memberships ADD COLUMN,
 --   ALTER TABLE account_invites ADD COLUMN.
---   DROP FUNCTION (replaced overloads of create_title, invite_org_member).
+--   DROP FUNCTION (replaced overloads of create_title, invite_org_member,
+--     org_team, org_pending_invites -- return type changed, requires drop).
 --   No DROP of existing tables. No row deletes. Forward-only.
 -- ROLLBACK: drop new functions, policies, triggers, columns, tables, types.
 -- ============================================================================
@@ -756,6 +757,10 @@ $$;
 -- ----------------------------------------------------------------------------
 -- 10h. UPDATED org_team: include entity_scope
 -- ----------------------------------------------------------------------------
+-- Postgres cannot CREATE OR REPLACE when the returns-table shape changes.
+-- Drop existing overloads first.
+drop function if exists public.org_team(uuid, integer);
+drop function if exists public.org_team(uuid);
 
 create or replace function public.org_team(p_org uuid, p_limit integer default 500)
   returns table (
@@ -818,6 +823,9 @@ $$;
 -- ----------------------------------------------------------------------------
 -- 10i. UPDATED org_pending_invites: include entity_scope
 -- ----------------------------------------------------------------------------
+-- Same treatment: returns-table shape changed, so drop first.
+drop function if exists public.org_pending_invites(uuid, integer);
+drop function if exists public.org_pending_invites(uuid);
 
 create or replace function public.org_pending_invites(p_org uuid, p_limit integer default 500)
   returns table (
