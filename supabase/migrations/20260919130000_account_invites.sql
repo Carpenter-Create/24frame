@@ -137,7 +137,7 @@ revoke execute on function public.tg_audit_account_invites()
   from public, anon, authenticated, service_role;
 
 alter table public.account_invites enable row level security;
-revoke all on public.account_invites from anon, public;
+revoke all on public.account_invites from public, anon, authenticated;
 -- Table-level GRANT SELECT includes every column; REVOKE on one
 -- column does not punch a hole in that grant. Enumerate instead.
 grant select (
