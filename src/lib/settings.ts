@@ -167,8 +167,8 @@ export const SETTINGS_SECTION_LABEL_CLASS = "t-label text-ink-3";
 
 // Coinbase drill-in grammar — label · muted value · chevron. Whole
 // row tappable. Read-only rows drop the chevron. Shared SoT for
-// Settings index, Profile, Preferences, Rights Holder / Legal
-// Entities, and Get Help. Do not fork a lookalike row.
+// Settings index, Profile, Preferences, Rights Holder / Legal Entities,
+// and Get Help. Do not fork a lookalike row.
 export const SETTINGS_DRILL_LIST_CLASS = "flex flex-col";
 export const SETTINGS_DRILL_ROW_CLASS =
   "flex w-full items-center justify-between gap-[var(--space-4)] py-[var(--space-3)] text-left t-body leading-5 text-ink";
