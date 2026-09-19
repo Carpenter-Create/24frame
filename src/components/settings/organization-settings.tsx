@@ -104,23 +104,31 @@ export async function OrganizationSettings() {
               data-settings-section="entities"
               className={SETTINGS_SECTION_CLASS}
             >
-              <LegalEntitiesSection
-                orgId={ctx.activeOrg.id}
-                canManage={canEditCompany}
-                entities={entities}
-              />
+              <Card>
+                <CardBody>
+                  <LegalEntitiesSection
+                    orgId={ctx.activeOrg.id}
+                    canManage={canEditCompany}
+                    entities={entities}
+                  />
+                </CardBody>
+              </Card>
             </section>
             <section
               data-settings-section="team"
               className={SETTINGS_SECTION_CLASS}
             >
-              <TeamInviteForm
-                orgId={ctx.activeOrg.id}
-                canInvite={canInvite}
-                members={members}
-                pending={pending}
-                entities={entities}
-              />
+              <Card>
+                <CardBody>
+                  <TeamInviteForm
+                    orgId={ctx.activeOrg.id}
+                    canInvite={canInvite}
+                    members={members}
+                    pending={pending}
+                    entities={entities}
+                  />
+                </CardBody>
+              </Card>
             </section>
           </>
         ) : (

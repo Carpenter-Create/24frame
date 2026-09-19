@@ -3,7 +3,7 @@
 -- backfill, titles FK, membership scope, and scope-aware queries.
 
 begin;
-select plan(15);
+select plan(19);
 
 -- ===== Setup: create a user =====
 select set_config('t.user_a', gen_random_uuid()::text, false);
@@ -96,6 +96,28 @@ select is(
      where id = current_setting('t.entity_b')::uuid),
   'Delaware',
   'new entity has the specified jurisdiction');
+
+-- 4b. update_legal_entity writes name/type/jurisdiction; keeps is_default.
+select lives_ok(
+  $$ select public.update_legal_entity(
+    current_setting('t.entity_b')::uuid,
+    'Test LLC Updated',
+    'corporation'::public.entity_type,
+    'California'
+  ) $$,
+  'owner can update a legal entity');
+
+select is(
+  (select name from public.legal_entities
+     where id = current_setting('t.entity_b')::uuid),
+  'Test LLC Updated',
+  'update_legal_entity writes the new name');
+
+select is(
+  (select is_default::text from public.legal_entities
+     where id = current_setting('t.entity_b')::uuid),
+  'false',
+  'update_legal_entity does not change is_default');
 
 -- 5. create_title can specify a legal entity.
 select set_config('t.title_b',
@@ -221,6 +243,18 @@ select is(
   )),
   1,
   'scoped_title_ids returns only entity_b titles for scoped user');
+
+-- 15. viewer cannot update a legal entity.
+select throws_ok(
+  $$ select public.update_legal_entity(
+    current_setting('t.entity_b')::uuid,
+    'Hijack',
+    'llc'::public.entity_type,
+    'Delaware'
+  ) $$,
+  'P0001',
+  'Not authorized',
+  'viewer cannot update a legal entity');
 
 reset role;
 select * from finish();

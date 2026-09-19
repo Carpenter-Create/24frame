@@ -28,6 +28,14 @@ const addEntitySchema = z.object({
   jurisdiction: z.string().trim().max(200).optional(),
 });
 
+const updateEntitySchema = z.object({
+  orgId: z.string().uuid(),
+  entityId: z.string().uuid(),
+  name: z.string().trim().min(1).max(200),
+  entityType: z.enum(ENTITY_TYPE_VALUES).default("other"),
+  jurisdiction: z.string().trim().max(200).optional(),
+});
+
 export async function inviteTeamMember(input: unknown): Promise<{ error?: string }> {
   const ctx = await getOrgContext();
   if (!ctx) return { error: ACCOUNT_INVITE.signedOut };
@@ -111,6 +119,33 @@ export async function addLegalEntity(input: unknown): Promise<{ error?: string }
     p_jurisdiction: parsed.data.jurisdiction || undefined,
   });
   if (error) return { error: error.message || LEGAL_ENTITIES.addFailed };
+
+  revalidatePath("/settings/organization");
+  return {};
+}
+
+export async function updateLegalEntity(input: unknown): Promise<{ error?: string }> {
+  const ctx = await getOrgContext();
+  if (!ctx) return { error: LEGAL_ENTITIES.signedOut };
+
+  const parsed = updateEntitySchema.safeParse(input);
+  if (!parsed.success) return { error: LEGAL_ENTITIES.nameRequired };
+
+  const supabase = await createClient();
+  const { data: canManage, error: canError } = await supabase.rpc("member_can", {
+    p_uid: ctx.user.id,
+    p_org: parsed.data.orgId,
+    p_capability: "manage_settings",
+  });
+  if (canError || canManage !== true) return { error: LEGAL_ENTITIES.forbidden };
+
+  const { error } = await supabase.rpc("update_legal_entity", {
+    p_entity_id: parsed.data.entityId,
+    p_name: parsed.data.name,
+    p_entity_type: parsed.data.entityType,
+    p_jurisdiction: parsed.data.jurisdiction ?? "",
+  });
+  if (error) return { error: error.message || LEGAL_ENTITIES.updateFailed };
 
   revalidatePath("/settings/organization");
   return {};

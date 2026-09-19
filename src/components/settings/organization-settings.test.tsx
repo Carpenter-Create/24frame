@@ -8,7 +8,17 @@ describe("organization settings hosts Team", () => {
     const pane = readFileSync("src/components/settings/organization-settings.tsx", "utf8");
     const settings = readFileSync("src/lib/settings.ts", "utf8");
     expect(pane).toContain("data-settings-section=\"team\"");
+    expect(pane).toContain("data-settings-section=\"entities\"");
     expect(pane).toContain("TeamInviteForm");
+    expect(pane).toContain("LegalEntitiesSection");
+    expect(pane).toContain("<Card>");
+    expect(pane).toContain("CardBody");
+    const companyCard = pane.indexOf("data-settings-section=\"company\"");
+    const entitiesCard = pane.indexOf("data-settings-section=\"entities\"");
+    const teamCard = pane.indexOf("data-settings-section=\"team\"");
+    expect(pane.slice(companyCard, entitiesCard)).toContain("<Card>");
+    expect(pane.slice(entitiesCard, teamCard)).toContain("<Card>");
+    expect(pane.slice(teamCard)).toContain("<Card>");
     expect(SETTINGS.team).toBe("Team");
     expect(settings).toContain("Team invite");
     expect(settings).toContain("/gc/clients");

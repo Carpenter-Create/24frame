@@ -51,16 +51,33 @@ export const LEGAL_ENTITIES = {
   add: "Add entity",
   adding: "Adding...",
   added: "Entity added.",
+  edit: "Edit",
+  save: "Save",
+  saving: "Saving…",
+  cancel: "Cancel",
   nameLabel: "Entity name",
   typeLabel: "Entity type",
   jurisdictionLabel: "Jurisdiction",
   jurisdictionHint: "State, country, or governing body. Optional.",
+  nameColumn: "Name",
+  typeColumn: "Type",
+  jurisdictionColumn: "Jurisdiction",
+  emptyJurisdiction: "\u2014",
   nameRequired: "Entity name is required.",
   default: "Default",
   addFailed: "Could not add the entity.",
+  updateFailed: "Could not update the entity.",
   signedOut: "Not authenticated.",
   forbidden: "Only the account owner can manage legal entities.",
 } as const;
+
+// Team list density — header row + divided rows. Four columns:
+// Name · Type · Jurisdiction · Actions. Not a data-grid library.
+export const ENTITY_LIST_HEADER_CLASS =
+  "min-w-[36rem] grid grid-cols-[minmax(12rem,2fr)_minmax(8rem,1fr)_minmax(8rem,1fr)_auto] items-center gap-x-[var(--space-4)] px-0 py-[var(--space-3)] t-label text-ink-3";
+
+export const ENTITY_LIST_ROW_CLASS =
+  "min-w-[36rem] grid grid-cols-[minmax(12rem,2fr)_minmax(8rem,1fr)_minmax(8rem,1fr)_auto] items-center gap-x-[var(--space-4)] px-0 py-[var(--space-4)]";
 
 export const ENTITY_SCOPE = {
   all: "All entities",
@@ -72,6 +89,11 @@ export const ENTITY_SCOPE = {
 
 export function entityTypeLabel(type: EntityType): string {
   return ENTITY_TYPE_LABELS[type];
+}
+
+export function entityJurisdictionLabel(value: string | null | undefined): string {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : LEGAL_ENTITIES.emptyJurisdiction;
 }
 
 export function entityScopeLabel(scope: EntityScope): string {

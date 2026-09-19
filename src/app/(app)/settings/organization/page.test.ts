@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { COMPANY_PROFILE } from "@/lib/account-profile";
 import { ACCOUNT_INVITE } from "@/lib/account-invite";
+import { LEGAL_ENTITIES } from "@/lib/legal-entities";
 import { SETTINGS } from "@/lib/settings";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
@@ -179,5 +180,47 @@ describe("SettingsOrganizationPage", () => {
     expect(html).toContain(COMPANY_PROFILE.forbidden);
     const companyHtml = html.slice(html.indexOf("data-company-profile-form"));
     expect(companyHtml).not.toContain(`>${COMPANY_PROFILE.save}<`);
+  });
+
+  it("wraps Rights Holder modules in the same Card and shows Legal Entities as a table", async () => {
+    const rpc = vi.fn(async (name: string) => {
+      if (name === "member_can") return { data: true, error: null };
+      if (name === "org_team" || name === "org_pending_invites") return { data: [], error: null };
+      if (name === "org_legal_entities") {
+        return {
+          data: [
+            {
+              id: "ent-1",
+              name: "Acme LLC",
+              entity_type: "llc",
+              jurisdiction: "Delaware",
+              is_default: true,
+              status: "active",
+              created_at: "2026-01-01T00:00:00Z",
+            },
+          ],
+          error: null,
+        };
+      }
+      throw new Error(`unexpected rpc(${name})`);
+    });
+    vi.mocked(createClient).mockResolvedValue({ rpc } as never);
+    vi.mocked(getOrgContext).mockResolvedValue(ctx(true) as never);
+    const html = renderToStaticMarkup(await SettingsOrganizationPage());
+    expect(html.match(/card-surface/g)?.length).toBe(3);
+    expect(html).toContain("data-settings-section=\"entities\"");
+    expect(html).toContain("data-entity-list");
+    expect(html).toContain("data-entity-list-head");
+    expect(html).toContain(LEGAL_ENTITIES.nameColumn);
+    expect(html).toContain(LEGAL_ENTITIES.typeColumn);
+    expect(html).toContain(LEGAL_ENTITIES.jurisdictionColumn);
+    expect(html).toContain(LEGAL_ENTITIES.edit);
+    expect(html).toContain("data-entity-edit");
+    expect(html).toContain("Acme LLC");
+    expect(html).toContain("Delaware");
+    expect(html).toContain(LEGAL_ENTITIES.default);
+    expect(html).toMatch(/<h2[^>]*>Legal Entities<\/h2>/);
+    expect(html).toMatch(/<h2[^>]*>Team<\/h2>/);
+    expect(html).not.toMatch(/<h2[^>]*>Rights Holder<\/h2>/);
   });
 });

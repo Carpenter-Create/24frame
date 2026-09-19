@@ -3254,6 +3254,15 @@ export type Database = {
         }
         Returns: string
       }
+      update_legal_entity: {
+        Args: {
+          p_entity_id: string
+          p_name: string
+          p_entity_type?: Database["public"]["Enums"]["entity_type"]
+          p_jurisdiction?: string
+        }
+        Returns: undefined
+      }
       create_title: {
         Args: {
           p_org_id: string

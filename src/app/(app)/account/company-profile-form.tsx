@@ -1,13 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { ACCOUNT_NAME_MAX, COMPANY_PROFILE } from "@/lib/account-profile";
+import {
+  ACCOUNT_NAME_MAX,
+  COMPANY_PROFILE,
+  COMPANY_PROFILE_SAVED_MS,
+} from "@/lib/account-profile";
 import { saveCompanyName } from "./actions";
 
 // organizations.name. member_can(manage_settings) is the write gate
@@ -26,6 +30,12 @@ export function CompanyProfileForm({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (!saved) return;
+    const id = window.setTimeout(() => setSaved(false), COMPANY_PROFILE_SAVED_MS);
+    return () => window.clearTimeout(id);
+  }, [saved]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
