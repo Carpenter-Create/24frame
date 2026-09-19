@@ -165,6 +165,8 @@ describe("ask AI overlay URL", () => {
     expect(overlaySrc).toContain("data-ask-ai-overlay-phone");
     expect(overlaySrc).toContain("data-ask-ai-overlay-phone-history");
     expect(overlaySrc).toContain("AskGlobeeHistoryPanel");
+    expect(overlaySrc).toContain('import dynamic from "next/dynamic"');
+    expect(overlaySrc).not.toMatch(/from "@\/components\/messages\/ask-globee-landing"/);
     expect(overlaySrc).toContain("ASK_AI_OVERLAY_PHONE_HISTORY_HOST_CLASS");
     expect(overlaySrc).not.toContain("ASK_AI_OVERLAY_PHONE_HISTORY_COVER_CLASS");
     expect(overlaySrc).toContain("overscroll-none");
