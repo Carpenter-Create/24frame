@@ -157,7 +157,8 @@ pnpm exec tsx workers/news/handler.ts
 
 **Image backfill (one-shot).** Existing rows that ingested before OG
 scrape (Hollywood Reporter grey plates) pick up `image_url` on the
-next EventBridge run. Dynamo `PutItem` overwrites the item; ingest
+next EventBridge run. Dynamo `PutItem` replaces the item, but a null/empty incoming
+`image_url` preserves an existing thumb (`mergeNewsImageUrl`). Ingest
 re-parses the live feed and OG-scrapes only when RSS still has no
 image. No console row edit. To run once without waiting for cron,
 use the invoke above. A scrape timeout or miss leaves the grey plate

@@ -30,7 +30,7 @@ import {
   type NewsSourceHealth,
   type NewsSourceId,
 } from "@/lib/news";
-import type { NormalizedNewsItem } from "@/lib/news-rss";
+import { mergeNewsImageUrl, type NormalizedNewsItem } from "@/lib/news-rss";
 
 export type NewsPersist = {
   upsertItems: (items: readonly NormalizedNewsItem[], now: Date) => Promise<number>;
@@ -108,6 +108,7 @@ export function memoryNewsStore(seed: readonly NewsItem[] = []): NewsStore {
     async upsertItems(rows, now = new Date()) {
       const fetchedAt = now.toISOString();
       for (const row of rows) {
+        const prior = items.get(row.canonical_url);
         items.set(row.canonical_url, {
           pk: newsItemPk(row.canonical_url),
           sk: NEWS_ITEM_SK,
@@ -120,7 +121,7 @@ export function memoryNewsStore(seed: readonly NewsItem[] = []): NewsStore {
           source: row.source,
           source_name: newsSourceLabel(row.source),
           published_at: row.published_at,
-          image_url: row.image_url,
+          image_url: mergeNewsImageUrl(prior?.image_url, row.image_url),
           fetched_at: fetchedAt,
           ttl: newsItemTtlEpoch(row.published_at),
         });
@@ -174,14 +175,24 @@ export function dynamoNewsStore(env: NewsEnv = process.env): NewsStore {
       if (rows.length === 0) return 0;
       const { table, doc } = newsClient(env);
       const fetchedAt = now.toISOString();
+      // Get then merge — unconditional PutItem used to wipe a good thumb when OG missed.
       await Promise.all(
-        rows.map((row) =>
-          doc.send(
+        rows.map(async (row) => {
+          const pk = newsItemPk(row.canonical_url);
+          const sk = NEWS_ITEM_SK;
+          const { Item } = await doc.send(
+            new GetCommand({
+              TableName: table,
+              Key: { pk, sk },
+            }),
+          );
+          const existing = (Item as NewsItemRecord | undefined)?.image_url ?? null;
+          await doc.send(
             new PutCommand({
               TableName: table,
               Item: {
-                pk: newsItemPk(row.canonical_url),
-                sk: NEWS_ITEM_SK,
+                pk,
+                sk,
                 gsi1pk: NEWS_FEED_PK,
                 gsi1sk: newsFeedSk(row.published_at, row.canonical_url),
                 id: row.canonical_url,
@@ -191,13 +202,13 @@ export function dynamoNewsStore(env: NewsEnv = process.env): NewsStore {
                 source: row.source,
                 source_name: newsSourceLabel(row.source),
                 published_at: row.published_at,
-                image_url: row.image_url,
+                image_url: mergeNewsImageUrl(existing, row.image_url),
                 fetched_at: fetchedAt,
                 ttl: newsItemTtlEpoch(row.published_at),
               } satisfies NewsItemRecord,
             }),
-          ),
-        ),
+          );
+        }),
       );
       return rows.length;
     },

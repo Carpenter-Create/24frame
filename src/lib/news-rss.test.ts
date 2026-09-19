@@ -5,6 +5,7 @@ import { NEWS_SOURCES } from "./news";
 import {
   canonicalizeNewsImageUrl,
   canonicalizeNewsUrl,
+  mergeNewsImageUrl,
   newsOgFetchUrl,
   parseNewsDate,
   parseNewsFeed,
@@ -90,6 +91,19 @@ describe("canonicalizeNewsImageUrl", () => {
       "https://www.joblo.com/zach-cregger-the-flood-2001-influence",
     );
     expect(newsOgFetchUrl("https://variety.com/live")).toBe("https://variety.com/live");
+  });
+
+  it("mergeNewsImageUrl preserves a stored thumb and replaces only when incoming is non-empty", () => {
+    expect(mergeNewsImageUrl(floodWww, null)).toBe(floodWww);
+    expect(mergeNewsImageUrl(floodWww, "")).toBe(floodWww);
+    expect(mergeNewsImageUrl(floodWww, "   ")).toBe(floodWww);
+    expect(mergeNewsImageUrl(floodWww, "https://variety.com/thumbs/harbor.jpg")).toBe(
+      "https://variety.com/thumbs/harbor.jpg",
+    );
+    expect(mergeNewsImageUrl(null, null)).toBeNull();
+    expect(mergeNewsImageUrl(undefined, "  https://www.joblo.com/x.jpg  ")).toBe(
+      "https://www.joblo.com/x.jpg",
+    );
   });
 
   it("plans apex rewrite and the known Flood OG fill without touching other hosts", () => {
@@ -274,5 +288,6 @@ describe("news-rss source", () => {
     const src = readFileSync(new URL("./news-rss.ts", import.meta.url), "utf8");
     expect(src).not.toMatch(/content:encoded|description.*img|cheerio|jsdom/i);
     expect(src).toContain("parseOgImageUrl");
+    expect(src).toContain("export function mergeNewsImageUrl");
   });
 });

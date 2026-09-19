@@ -59,6 +59,16 @@ export function newsOgFetchUrl(articleUrl: string): string {
   return preferJobloWwwHost(articleUrl);
 }
 
+/** Persist rule: a later null/empty miss must not wipe a stored thumb. Non-empty incoming replaces. */
+export function mergeNewsImageUrl(
+  existing: string | null | undefined,
+  incoming: string | null | undefined,
+): string | null {
+  const next = incoming?.trim() || null;
+  if (next) return next;
+  return existing?.trim() || null;
+}
+
 function preferJobloWwwHost(url: string): string {
   let parsed: URL;
   try {
