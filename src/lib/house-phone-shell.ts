@@ -37,7 +37,7 @@
 // social-tab-bar-scroll. Content pad stays when the bar hides.
 // Not a Meta skin. Not Mercury lavender.
 
-import { BookOpen, FilmStrip, Handshake, House, Users, type IconWeight } from "@phosphor-icons/react";
+import { BookOpen, FilmStrip, House, Users, type IconWeight } from "@phosphor-icons/react";
 
 import {
   HOUSE_CONTROL_PILL_CLASS,
@@ -51,7 +51,7 @@ import {
   mobileNavDestinations,
   type NavItem,
 } from "@/lib/nav";
-import { CO_PRODUCTIONS_HREF, CO_PRODUCTIONS_LABEL } from "@/lib/co-productions";
+import { CO_PRODUCTIONS_HREF, CO_PRODUCTIONS_ICON, CO_PRODUCTIONS_LABEL } from "@/lib/co-productions";
 import {
   OVERVIEW_HREF,
   OVERVIEW_PAGE,
@@ -103,7 +103,7 @@ export const HOUSE_PHONE_WORKSPACE_TABS = [
     id: "co-productions" as const,
     label: CO_PRODUCTIONS_LABEL,
     href: CO_PRODUCTIONS_HREF,
-    icon: Handshake,
+    icon: CO_PRODUCTIONS_ICON,
   },
 ] as const satisfies readonly HousePhoneWorkspaceTab[];
 
