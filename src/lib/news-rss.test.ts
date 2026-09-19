@@ -156,6 +156,7 @@ describe("parseNewsFeed", () => {
       source: "variety",
       published_at: "2026-09-17T12:00:00.000Z",
       image_url: "https://variety.com/thumbs/harbor.jpg",
+      topic: "film",
     });
     expect(JSON.stringify(items)).not.toContain("scrape.jpg");
     expect(JSON.stringify(items)).not.toContain("A long rewrite");
@@ -172,6 +173,7 @@ describe("parseNewsFeed", () => {
         source: "deadline",
         published_at: "2026-09-16T09:00:00.000Z",
         image_url: "https://deadline.com/img/exclusive.png",
+        topic: "other",
       },
     ]);
     expect(JSON.stringify(items)).not.toContain("Do not republish");
@@ -180,6 +182,28 @@ describe("parseNewsFeed", () => {
   it("does not invent a source outside the allowlist", () => {
     expect(parseNewsFeed(RSS, "variety", NOW)[0]?.source).toBe("variety");
     expect(NEWS_SOURCES).toHaveLength(11);
+  });
+
+  it("stamps a topic on every parsed item — RSS category signals count", () => {
+    const xml = `<?xml version="1.0"?>
+<rss version="2.0">
+  <channel>
+    <item>
+      <title>Chris Brown sued over 2024 after-party incident</title>
+      <link>https://www.hollywoodreporter.com/music/music-news/chris-brown-2024-lawsuit/</link>
+      <pubDate>Thu, 17 Sep 2026 12:00:00 GMT</pubDate>
+      <category>Music</category>
+    </item>
+    <item>
+      <title>Zach Cregger's 'The Flood' lands a summer 2027 slot</title>
+      <link>https://www.hollywoodreporter.com/movies/movie-news/zach-cregger-the-flood/</link>
+      <pubDate>Thu, 17 Sep 2026 13:00:00 GMT</pubDate>
+      <category>Movies</category>
+    </item>
+  </channel>
+</rss>`;
+    const items = parseNewsFeed(xml, "hollywood-reporter", NOW);
+    expect(items.map((item) => item.topic)).toEqual(["music", "film"]);
   });
 
   it("rewrites JoBlo RSS enclosure thumbs from apex to www", () => {

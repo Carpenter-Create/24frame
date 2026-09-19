@@ -31,6 +31,7 @@ import {
   type NewsSourceId,
 } from "@/lib/news";
 import type { NormalizedNewsItem } from "@/lib/news-rss";
+import type { NewsTopic } from "@/lib/news-topic";
 
 export type NewsPersist = {
   upsertItems: (items: readonly NormalizedNewsItem[], now: Date) => Promise<number>;
@@ -54,6 +55,12 @@ type NewsItemRecord = {
   image_url: string | null;
   fetched_at: string;
   ttl: number;
+  /**
+   * Ingest topic (`film` / `tv`). Persisted for the same-day music
+   * purge script + future filtering. Older rows without the field are
+   * unaffected — reads never require it.
+   */
+  topic?: NewsTopic;
 };
 
 type NewsHealthRecord = {
@@ -139,6 +146,7 @@ export function memoryNewsStore(seed: readonly NewsItem[] = []): NewsStore {
           image_url: mergeNewsImageUrl(prior?.image_url, row.image_url),
           fetched_at: fetchedAt,
           ttl: newsItemTtlEpoch(row.published_at),
+          topic: row.topic,
         });
       }
       return rows.length;
@@ -229,6 +237,7 @@ export function dynamoNewsStore(env: NewsEnv = process.env): NewsStore {
                 image_url: mergeNewsImageUrl(existing, row.image_url),
                 fetched_at: fetchedAt,
                 ttl: newsItemTtlEpoch(row.published_at),
+                topic: row.topic,
               } satisfies NewsItemRecord,
             }),
           );

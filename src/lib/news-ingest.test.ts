@@ -22,23 +22,31 @@ const FEED = `<?xml version="1.0"?>
 <rss version="2.0">
   <channel>
     <item>
-      <title>Live item</title>
-      <link>https://variety.com/live</link>
+      <title>Live film item</title>
+      <link>https://variety.com/2026/film/news/live-item/</link>
       <pubDate>Thu, 17 Sep 2026 12:00:00 GMT</pubDate>
     </item>
   </channel>
 </rss>`;
 
+const VARIETY_FILM_FEED = "https://variety.com/v/film/feed/";
+const VARIETY_TV_FEED = "https://variety.com/v/tv/feed/";
+const DEADLINE_FILM_FEED = "https://deadline.com/v/film/feed/";
+const THR_MOVIES_FEED = "https://www.hollywoodreporter.com/movies/feed/";
+
 function liveItem(): NormalizedNewsItem {
   return {
-    title: "Live item",
-    url: "https://variety.com/live",
-    canonical_url: "https://variety.com/live",
+    title: "Live film item",
+    url: "https://variety.com/2026/film/news/live-item",
+    canonical_url: "https://variety.com/2026/film/news/live-item",
     source: "variety",
     published_at: "2026-09-17T12:00:00.000Z",
     image_url: null,
+    topic: "film",
   };
 }
+
+const EXPECTED_FEED_CALLS = NEWS_SOURCES.reduce((sum, row) => sum + row.feedUrls.length, 0);
 
 describe("ingestNewsFeeds", () => {
   it("fails soft per source, skips a killed source, and upserts the rest", async () => {
@@ -51,7 +59,7 @@ describe("ingestNewsFeeds", () => {
       last_error_at: null,
     });
     const fetchXml = vi.fn(async (url: string) => {
-      if (url === "https://deadline.com/feed/") throw new Error("timeout");
+      if (url === DEADLINE_FILM_FEED) throw new Error("timeout");
       return FEED;
     });
 
@@ -62,7 +70,8 @@ describe("ingestNewsFeeds", () => {
       fetchOgHtml: async () => null,
     });
 
-    expect(fetchXml).toHaveBeenCalledTimes(NEWS_SOURCES.length - 1);
+    const indiewireFeeds = NEWS_SOURCES.find((row) => row.id === "indiewire")?.feedUrls.length ?? 0;
+    expect(fetchXml).toHaveBeenCalledTimes(EXPECTED_FEED_CALLS - indiewireFeeds);
     expect(fetchXml.mock.calls.flat()).not.toContain("https://www.indiewire.com/feed/");
     expect(summary.sources).toBe(11);
     expect(summary.failed).toBe(1);
@@ -82,8 +91,8 @@ describe("ingestNewsFeeds", () => {
         {
           ...liveItem(),
           title: "Old headline",
-          url: "https://variety.com/old",
-          canonical_url: "https://variety.com/old",
+          url: "https://variety.com/2026/film/news/old",
+          canonical_url: "https://variety.com/2026/film/news/old",
           published_at: "2026-06-01T12:00:00.000Z",
         },
       ],
@@ -102,7 +111,113 @@ describe("ingestNewsFeeds", () => {
     expect(summary.purged).toBe(1);
     expect(await persist.purgeBefore("2026-06-20T18:00:00.000Z")).toBe(0);
     const rows = await persist.queryFeed({ limit: 20, now: NOW });
-    expect(rows.filter((row) => row.url === "https://variety.com/live")).toHaveLength(1);
+    expect(rows.filter((row) => row.url === liveItem().url)).toHaveLength(1);
+  });
+
+  it("drops music/other candidates at the topic gate before Dynamo write", async () => {
+    const persist = memoryNewsStore();
+    const mixed = `<?xml version="1.0"?>
+<rss version="2.0">
+  <channel>
+    <item>
+      <title>Chris Brown sued over 2024 after-party incident</title>
+      <link>https://www.hollywoodreporter.com/music/music-news/chris-brown-2024-lawsuit/</link>
+      <pubDate>Thu, 17 Sep 2026 12:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Zach Cregger's 'The Flood' lands a summer 2027 slot</title>
+      <link>https://www.hollywoodreporter.com/movies/movie-news/zach-cregger-the-flood-2027/</link>
+      <pubDate>Thu, 17 Sep 2026 13:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>`;
+    const summary = await ingestNewsFeeds({
+      persist,
+      now: NOW,
+      fetchXml: async (url: string) => (url === THR_MOVIES_FEED ? mixed : EMPTY_FEED),
+      fetchOgHtml: async () => null,
+    });
+    const hr = summary.results.find((row) => row.source === "hollywood-reporter");
+    expect(hr?.droppedByTopic).toBeGreaterThanOrEqual(1);
+    expect(hr?.fetched).toBe(1);
+    const rows = await persist.queryFeed({ limit: 20, now: NOW });
+    const urls = rows.map((row) => row.url);
+    expect(urls).toContain("https://hollywoodreporter.com/movies/movie-news/zach-cregger-the-flood-2027");
+    expect(urls.some((url) => url.includes("/music/"))).toBe(false);
+  });
+
+  it("iterates every configured feed URL per source and merges parsed items", async () => {
+    const persist = memoryNewsStore();
+    const filmXml = `<?xml version="1.0"?>
+<rss version="2.0">
+  <channel>
+    <item>
+      <title>Studio picks up remake rights</title>
+      <link>https://variety.com/2026/film/news/studio-remake/</link>
+      <pubDate>Thu, 17 Sep 2026 12:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>`;
+    const tvXml = `<?xml version="1.0"?>
+<rss version="2.0">
+  <channel>
+    <item>
+      <title>Streamer renews limited series for season two</title>
+      <link>https://variety.com/2026/tv/news/streamer-renews-series/</link>
+      <pubDate>Thu, 17 Sep 2026 13:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>`;
+    const fetchXml = vi.fn(async (url: string) => {
+      if (url === VARIETY_FILM_FEED) return filmXml;
+      if (url === VARIETY_TV_FEED) return tvXml;
+      return EMPTY_FEED;
+    });
+    await ingestNewsFeeds({
+      persist,
+      now: NOW,
+      fetchXml,
+      fetchOgHtml: async () => null,
+    });
+    expect(fetchXml.mock.calls.map((call) => call[0])).toEqual(
+      expect.arrayContaining([VARIETY_FILM_FEED, VARIETY_TV_FEED]),
+    );
+    const rows = await persist.queryFeed({ limit: 20, now: NOW });
+    const varietyUrls = rows.filter((row) => row.source === "variety").map((row) => row.url);
+    expect(varietyUrls).toEqual(
+      expect.arrayContaining([
+        "https://variety.com/2026/film/news/studio-remake",
+        "https://variety.com/2026/tv/news/streamer-renews-series",
+      ]),
+    );
+  });
+
+  it("keeps the source healthy when one section feed fails and another succeeds", async () => {
+    const persist = memoryNewsStore();
+    const filmXml = `<?xml version="1.0"?>
+<rss version="2.0">
+  <channel>
+    <item>
+      <title>Studio picks up remake rights</title>
+      <link>https://variety.com/2026/film/news/studio-remake/</link>
+      <pubDate>Thu, 17 Sep 2026 12:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>`;
+    const summary = await ingestNewsFeeds({
+      persist,
+      now: NOW,
+      fetchXml: async (url: string) => {
+        if (url === VARIETY_FILM_FEED) return filmXml;
+        if (url === VARIETY_TV_FEED) throw new Error("timeout");
+        return EMPTY_FEED;
+      },
+      fetchOgHtml: async () => null,
+    });
+    const variety = summary.results.find((row) => row.source === "variety");
+    expect(variety?.error).toBeUndefined();
+    expect(variety?.fetched).toBeGreaterThan(0);
+    expect((await persist.getHealth("variety"))?.last_success_at).toBe(NOW.toISOString());
   });
 });
 
@@ -113,7 +228,7 @@ const FEED_WITH_THUMB = `<?xml version="1.0"?>
   <channel>
     <item>
       <title>Has RSS image</title>
-      <link>https://variety.com/has-thumb</link>
+      <link>https://variety.com/2026/film/news/has-thumb/</link>
       <pubDate>Thu, 17 Sep 2026 12:00:00 GMT</pubDate>
       <media:thumbnail url="https://variety.com/thumbs/rss.jpg" />
     </item>
@@ -125,14 +240,14 @@ const FEED_NO_THUMB = `<?xml version="1.0"?>
   <channel>
     <item>
       <title>Needs OG</title>
-      <link>https://hollywoodreporter.com/needs-og</link>
+      <link>https://hollywoodreporter.com/movies/movie-news/needs-og/</link>
       <pubDate>Thu, 17 Sep 2026 12:00:00 GMT</pubDate>
     </item>
   </channel>
 </rss>`;
 
 function varietyOnlyXml(feed: string) {
-  return async (url: string) => (url === "https://variety.com/feed/" ? feed : EMPTY_FEED);
+  return async (url: string) => (url === VARIETY_FILM_FEED ? feed : EMPTY_FEED);
 }
 
 describe("ingest OG images", () => {
@@ -155,14 +270,14 @@ describe("ingest OG images", () => {
   it("OG-scrapes when RSS has no image and stores the absolute https URL", async () => {
     const persist = memoryNewsStore();
     const fetchOgHtml = vi.fn(async (url: string) => {
-      expect(url).toBe("https://hollywoodreporter.com/needs-og");
+      expect(url).toBe("https://hollywoodreporter.com/movies/movie-news/needs-og");
       return `<html><head><meta property="og:image" content="http://www.thr.com/og.jpg" /></head></html>`;
     });
     await ingestNewsFeeds({
       persist,
       now: NOW,
       fetchXml: async (url: string) =>
-        url === "https://www.hollywoodreporter.com/feed/" ? FEED_NO_THUMB : EMPTY_FEED,
+        url === THR_MOVIES_FEED ? FEED_NO_THUMB : EMPTY_FEED,
       fetchOgHtml,
     });
     expect(fetchOgHtml).toHaveBeenCalledTimes(1);
@@ -179,7 +294,7 @@ describe("ingest OG images", () => {
       persist,
       now: NOW,
       fetchXml: async (url: string) =>
-        url === "https://www.hollywoodreporter.com/feed/" ? FEED_NO_THUMB : EMPTY_FEED,
+        url === THR_MOVIES_FEED ? FEED_NO_THUMB : EMPTY_FEED,
       fetchOgHtml,
     });
     expect(summary.failed).toBe(0);
@@ -195,12 +310,12 @@ describe("ingest OG images", () => {
   <channel>
     <item>
       <title>Hit</title>
-      <link>https://hollywoodreporter.com/hit</link>
+      <link>https://hollywoodreporter.com/movies/movie-news/hit/</link>
       <pubDate>Thu, 17 Sep 2026 12:00:00 GMT</pubDate>
     </item>
     <item>
       <title>Miss</title>
-      <link>https://hollywoodreporter.com/miss</link>
+      <link>https://hollywoodreporter.com/movies/movie-news/miss/</link>
       <pubDate>Thu, 17 Sep 2026 13:00:00 GMT</pubDate>
     </item>
   </channel>
@@ -219,10 +334,9 @@ describe("ingest OG images", () => {
       const summary = await ingestNewsFeeds({
         persist,
         now: NOW,
-        fetchXml: async (url: string) =>
-          url === "https://www.hollywoodreporter.com/feed/" ? mixed : EMPTY_FEED,
+        fetchXml: async (url: string) => (url === THR_MOVIES_FEED ? mixed : EMPTY_FEED),
         fetchOgHtml: async (url: string) =>
-          url === "https://hollywoodreporter.com/miss"
+          url === "https://hollywoodreporter.com/movies/movie-news/miss"
             ? null
             : `<meta property="og:image" content="https://thr.com/hit.jpg" />`,
       });
@@ -245,33 +359,34 @@ describe("ingest OG images", () => {
   <channel>
     <item>
       <title>Hit</title>
-      <link>https://hollywoodreporter.com/hit</link>
+      <link>https://hollywoodreporter.com/movies/movie-news/hit/</link>
       <pubDate>Thu, 17 Sep 2026 12:00:00 GMT</pubDate>
     </item>
     <item>
       <title>Miss</title>
-      <link>https://hollywoodreporter.com/miss</link>
+      <link>https://hollywoodreporter.com/movies/movie-news/miss/</link>
       <pubDate>Thu, 17 Sep 2026 13:00:00 GMT</pubDate>
     </item>
   </channel>
 </rss>`;
     const fetchOgHtml = vi.fn(async (url: string) => {
-      if (url === "https://hollywoodreporter.com/miss") throw new Error("timeout");
+      if (url === "https://hollywoodreporter.com/movies/movie-news/miss") throw new Error("timeout");
       return `<meta property="og:image" content="https://thr.com/hit.jpg" />`;
     });
     const summary = await ingestNewsFeeds({
       persist,
       now: NOW,
-      fetchXml: async (url: string) =>
-        url === "https://www.hollywoodreporter.com/feed/" ? mixed : EMPTY_FEED,
+      fetchXml: async (url: string) => (url === THR_MOVIES_FEED ? mixed : EMPTY_FEED),
       fetchOgHtml,
     });
     expect(summary.failed).toBe(0);
     const rows = await persist.queryFeed({ limit: 20, now: NOW });
-    expect(rows.find((row) => row.url === "https://hollywoodreporter.com/hit")?.image_url).toBe(
-      "https://thr.com/hit.jpg",
-    );
-    expect(rows.find((row) => row.url === "https://hollywoodreporter.com/miss")?.image_url).toBeNull();
+    expect(
+      rows.find((row) => row.url === "https://hollywoodreporter.com/movies/movie-news/hit")?.image_url,
+    ).toBe("https://thr.com/hit.jpg");
+    expect(
+      rows.find((row) => row.url === "https://hollywoodreporter.com/movies/movie-news/miss")?.image_url,
+    ).toBeNull();
   });
 
   it("persists scraped image_url so Home and history reads show the thumb", async () => {
@@ -280,8 +395,7 @@ describe("ingest OG images", () => {
     await ingestNewsFeeds({
       persist,
       now: NOW,
-      fetchXml: async (url: string) =>
-        url === "https://www.hollywoodreporter.com/feed/" ? FEED_NO_THUMB : EMPTY_FEED,
+      fetchXml: async (url: string) => (url === THR_MOVIES_FEED ? FEED_NO_THUMB : EMPTY_FEED),
       fetchOgHtml: async () =>
         `<meta property="og:image" content="https://thr.com/og.jpg" />`,
     });
@@ -421,7 +535,7 @@ describe("fetchNewsArticleHtml", () => {
 describe("fillNewsOgImages", () => {
   it("fetches article HTML and parses og:image through the real ingest helpers", async () => {
     const fetchImpl = vi.fn<typeof fetch>(async (input, init) => {
-      expect(String(input)).toBe("https://variety.com/live");
+      expect(String(input)).toBe(liveItem().url);
       expect(init?.signal).toBeInstanceOf(AbortSignal);
       const headers = new Headers(init?.headers);
       expect(headers.get("user-agent")).toBe(NEWS_USER_AGENT);
@@ -488,6 +602,7 @@ describe("fillNewsOgImages", () => {
           source: "joblo",
           published_at: "2026-09-17T12:00:00.000Z",
           image_url: "https://joblo.com/wp-content/uploads/2026/09/zach-cregger-the-flood-2001.jpg",
+          topic: "film",
         },
       ],
       { fetchHtml },

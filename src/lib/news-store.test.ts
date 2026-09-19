@@ -15,6 +15,7 @@ function item(n: number, published_at: string): NormalizedNewsItem {
     source: "variety",
     published_at,
     image_url: null,
+    topic: "film",
   };
 }
 

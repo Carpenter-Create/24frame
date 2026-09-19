@@ -7,6 +7,7 @@ import {
   type NormalizedNewsItem,
 } from "@/lib/news-rss";
 import { createNewsIngestStore, type NewsPersist } from "@/lib/news-store";
+import { isFilmOrTvTopic } from "@/lib/news-topic";
 
 // Scheduled News ingest (Lambda + EventBridge). Fail-soft per source.
 // Persist to DynamoDB only — never fan-out RSS on a page read.
@@ -52,6 +53,8 @@ export type NewsIngestSourceResult = {
   ogAttempted?: number;
   ogFilled?: number;
   ogMiss?: number;
+  /** Music / other candidates dropped by the topic gate before Dynamo write. */
+  droppedByTopic?: number;
 };
 
 export type NewsIngestSummary = {
@@ -259,6 +262,37 @@ async function markHealth(
   });
 }
 
+/**
+ * Fetch every feed URL configured for one source and merge the parsed
+ * items. If every URL fails, the outer catch marks the source unhealthy.
+ * Partial success (one section feed up, another down) still ingests.
+ */
+async function fetchSourceItems(
+  source: (typeof NEWS_SOURCES)[number],
+  now: Date,
+  fetchXml: (url: string) => Promise<string>,
+): Promise<{ items: NormalizedNewsItem[]; errors: string[]; ok: number }> {
+  const urls = source.feedUrls;
+  const errors: string[] = [];
+  let ok = 0;
+  const merged = new Map<string, NormalizedNewsItem>();
+
+  for (const url of urls) {
+    try {
+      const xml = await fetchXml(url);
+      const parsed = parseNewsFeed(xml, source.id, now, url);
+      ok += 1;
+      for (const item of parsed) {
+        if (!merged.has(item.canonical_url)) merged.set(item.canonical_url, item);
+      }
+    } catch (err) {
+      errors.push(err instanceof Error ? err.message : "feed failed");
+    }
+  }
+
+  return { items: [...merged.values()], errors, ok };
+}
+
 export async function ingestNewsFeeds(input: {
   persist?: NewsPersist;
   now?: Date;
@@ -279,15 +313,20 @@ export async function ingestNewsFeeds(input: {
         return { source: source.id, fetched: 0, inserted: 0, skipped: true, ...EMPTY_OG };
       }
       try {
-        const xml = await fetchXml(source.feedUrl);
-        const parsed = parseNewsFeed(xml, source.id, now);
-        let items = parsed;
-        try {
-          items = await fillNewsOgImages(parsed, { fetchHtml: fetchOgHtml });
-        } catch {
-          items = parsed;
+        const fetched = await fetchSourceItems(source, now, fetchXml);
+        if (fetched.ok === 0) {
+          const message = fetched.errors[0] ?? "feed failed";
+          throw new Error(message);
         }
-        const og = countNewsOgFill(parsed, items);
+        const kept = fetched.items.filter((item) => isFilmOrTvTopic(item.topic));
+        const droppedByTopic = fetched.items.length - kept.length;
+        let items = kept;
+        try {
+          items = await fillNewsOgImages(kept, { fetchHtml: fetchOgHtml });
+        } catch {
+          items = kept;
+        }
+        const og = countNewsOgFill(kept, items);
         const inserted = await persist.upsertItems(canonicalizeNewsItemImages(items), now);
         await markHealth(persist, source.id, { now });
         console.log(
@@ -296,15 +335,37 @@ export async function ingestNewsFeeds(input: {
             source: source.id,
             fetched: items.length,
             inserted,
+            droppedByTopic,
             ...og,
           }),
         );
-        return { source: source.id, fetched: items.length, inserted, ...og };
+        return {
+          source: source.id,
+          fetched: items.length,
+          inserted,
+          droppedByTopic,
+          ...og,
+        };
       } catch (err) {
         const message = err instanceof Error ? err.message : "feed failed";
-        console.error(JSON.stringify({ msg: "news ingest fail", source: source.id, error: message, ...EMPTY_OG }));
+        console.error(
+          JSON.stringify({
+            msg: "news ingest fail",
+            source: source.id,
+            error: message,
+            droppedByTopic: 0,
+            ...EMPTY_OG,
+          }),
+        );
         await markHealth(persist, source.id, { now, error: message });
-        return { source: source.id, fetched: 0, inserted: 0, error: message, ...EMPTY_OG };
+        return {
+          source: source.id,
+          fetched: 0,
+          inserted: 0,
+          error: message,
+          droppedByTopic: 0,
+          ...EMPTY_OG,
+        };
       }
     },
     NEWS_INGEST_CONCURRENCY,

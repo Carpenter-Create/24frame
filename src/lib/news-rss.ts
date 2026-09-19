@@ -4,6 +4,7 @@ import {
   type NewsSourceId,
   isNewsSourceId,
 } from "@/lib/news";
+import { classifyNewsTopic, type NewsTopic } from "@/lib/news-topic";
 
 // RSS / Atom normalize for the News allowlist. Media/enclosure thumbs
 // first. When the feed has no image, ingest OG-scrapes the article URL.
@@ -21,6 +22,12 @@ export type NormalizedNewsItem = {
   source: NewsSourceId;
   published_at: string;
   image_url: string | null;
+  /**
+   * Ingest-only classification. Music / other is dropped by the topic
+   * gate before Dynamo write. Reads never see the raw value — the
+   * store persists it only when film / tv passes the gate.
+   */
+  topic: NewsTopic;
 };
 
 export function canonicalizeNewsUrl(raw: string, base?: string): string | null {
@@ -234,14 +241,34 @@ export function parseNewsDate(raw: string | null): string | null {
   return new Date(at).toISOString();
 }
 
+/** Read every RSS `<category>` / Atom `<category term="..."/>` on the block. */
+function itemCategories(block: string): string[] {
+  const out: string[] = [];
+  const tags = block.match(/<category\b[^>]*(?:\/>|>[\s\S]*?<\/category>)/gi) ?? [];
+  for (const tag of tags) {
+    const term = attr(tag, "term") ?? attr(tag, "label");
+    if (term) {
+      out.push(term);
+      continue;
+    }
+    const body = tag.match(/>([\s\S]*?)<\/category>/i)?.[1];
+    const text = body ? decodeNewsText(body) : "";
+    if (text) out.push(text);
+  }
+  return out;
+}
+
 export function parseNewsFeed(
   xml: string,
   source: NewsSourceId,
   now = new Date(),
+  baseUrl?: string,
 ): NormalizedNewsItem[] {
   if (!isNewsSourceId(source)) return [];
   const allow = NEWS_SOURCES.find((row) => row.id === source);
   if (!allow) return [];
+  const base = baseUrl ?? allow.feedUrls[0];
+  if (!base) return [];
   const cutoff = now.getTime() - NEWS_WINDOW_MS;
   const blocks = [...xml.matchAll(/<(item|entry)\b[^>]*>([\s\S]*?)<\/\1>/gi)];
   const seen = new Set<string>();
@@ -258,20 +285,23 @@ export function parseNewsFeed(
     if (!title || !href || !published) continue;
     const publishedMs = Date.parse(published);
     if (publishedMs < cutoff || publishedMs > now.getTime() + 60_000) continue;
-    const canonical = canonicalizeNewsUrl(href, allow.feedUrl);
+    const canonical = canonicalizeNewsUrl(href, base);
     if (!canonical) continue;
     if (seen.has(canonical)) continue;
     const titleKey = `${source}:${title.toLowerCase()}`;
     if (titles.has(titleKey)) continue;
     seen.add(canonical);
     titles.add(titleKey);
+    const categories = itemCategories(block);
+    const topic = classifyNewsTopic({ title, url: canonical, categories, source });
     items.push({
       title,
       url: canonical,
       canonical_url: canonical,
       source,
       published_at: published,
-      image_url: firstImageUrl(block, allow.feedUrl),
+      image_url: firstImageUrl(block, base),
+      topic,
     });
   }
 

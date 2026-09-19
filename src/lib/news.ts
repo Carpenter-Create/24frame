@@ -63,42 +63,92 @@ export type NewsSourceId = (typeof NEWS_SOURCE_IDS)[number];
 export type NewsSource = {
   id: NewsSourceId;
   label: string;
-  feedUrl: string;
+  /**
+   * One or more verified feed URLs for this outlet. Cross-beat trades
+   * (THR, Variety, Deadline) point at section feeds so music and other
+   * beats never reach the ingest topic gate. Film-first trades keep
+   * one on-beat feed. Order is stable — first URL is the identity /
+   * canonicalize base and Dynamo does not care about later duplicates.
+   */
+  feedUrls: readonly string[];
   enabled: boolean;
 };
 
-// Verified 2026-09-18. Kill switch: enabled: false skips ingest (deploy).
+// Verified 2026-09-19. Kill switch: enabled: false skips ingest (deploy).
 // Dynamo SOURCE#<id> HEALTH enabled=false is a second kill without a deploy.
+// Cross-beat trades are film + tv section RSS — never the site-wide feed —
+// so music and other beats stop upstream of the topic gate.
 export const NEWS_SOURCES = [
-  { id: "indiewire", label: "IndieWire", feedUrl: "https://www.indiewire.com/feed/", enabled: true },
-  { id: "variety", label: "Variety", feedUrl: "https://variety.com/feed/", enabled: true },
-  { id: "deadline", label: "Deadline", feedUrl: "https://deadline.com/feed/", enabled: true },
+  {
+    id: "indiewire",
+    label: "IndieWire",
+    feedUrls: ["https://www.indiewire.com/feed/"],
+    enabled: true,
+  },
+  {
+    id: "variety",
+    label: "Variety",
+    feedUrls: [
+      "https://variety.com/v/film/feed/",
+      "https://variety.com/v/tv/feed/",
+    ],
+    enabled: true,
+  },
+  {
+    id: "deadline",
+    label: "Deadline",
+    feedUrls: ["https://deadline.com/v/film/feed/"],
+    enabled: true,
+  },
   {
     id: "hollywood-reporter",
     label: "Hollywood Reporter",
-    feedUrl: "https://www.hollywoodreporter.com/feed/",
+    feedUrls: [
+      "https://www.hollywoodreporter.com/movies/feed/",
+      "https://www.hollywoodreporter.com/tv/feed/",
+    ],
     enabled: true,
   },
-  { id: "tvline", label: "TVLine", feedUrl: "https://www.tvline.com/feed/", enabled: true },
+  {
+    id: "tvline",
+    label: "TVLine",
+    feedUrls: ["https://www.tvline.com/feed/"],
+    enabled: true,
+  },
   {
     id: "no-film-school",
     label: "No Film School",
-    feedUrl: "https://nofilmschool.com/rss.xml",
+    feedUrls: ["https://nofilmschool.com/rss.xml"],
     enabled: true,
   },
   {
     id: "filmmaker-magazine",
     label: "Filmmaker Magazine",
-    feedUrl: "https://filmmakermagazine.com/feed/",
+    feedUrls: ["https://filmmakermagazine.com/feed/"],
     enabled: true,
   },
-  { id: "moviemaker", label: "MovieMaker", feedUrl: "https://www.moviemaker.com/feed/", enabled: true },
-  { id: "joblo", label: "JoBlo", feedUrl: "https://www.joblo.com/feed/", enabled: true },
-  { id: "film-threat", label: "Film Threat", feedUrl: "https://filmthreat.com/feed/", enabled: true },
+  {
+    id: "moviemaker",
+    label: "MovieMaker",
+    feedUrls: ["https://www.moviemaker.com/feed/"],
+    enabled: true,
+  },
+  {
+    id: "joblo",
+    label: "JoBlo",
+    feedUrls: ["https://www.joblo.com/feed/"],
+    enabled: true,
+  },
+  {
+    id: "film-threat",
+    label: "Film Threat",
+    feedUrls: ["https://filmthreat.com/feed/"],
+    enabled: true,
+  },
   {
     id: "screen-daily",
     label: "Screen Daily",
-    feedUrl: "https://www.screendaily.com/45202.rss",
+    feedUrls: ["https://www.screendaily.com/45202.rss"],
     enabled: true,
   },
 ] satisfies readonly NewsSource[];
