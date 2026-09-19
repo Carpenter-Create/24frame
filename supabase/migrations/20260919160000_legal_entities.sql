@@ -157,6 +157,30 @@ update public.titles t
 alter table public.titles
   alter column legal_entity_id set not null;
 
+-- Default-entity trigger: any INSERT that omits legal_entity_id (or sets it
+-- NULL) gets the org's default entity automatically. One SoT path so that
+-- existing pgTAP fixtures and direct inserts (e.g. service-role backfills)
+-- never violate the NOT NULL constraint.
+create or replace function public.tg_titles_default_legal_entity()
+  returns trigger
+  language plpgsql security definer set search_path = public
+as $$
+begin
+  if new.legal_entity_id is null then
+    new.legal_entity_id := public.ensure_default_legal_entity(new.org_id);
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists titles_default_legal_entity on public.titles;
+create trigger titles_default_legal_entity
+  before insert on public.titles
+  for each row execute function public.tg_titles_default_legal_entity();
+
+revoke execute on function public.tg_titles_default_legal_entity()
+  from public, anon, authenticated, service_role;
+
 -- ----------------------------------------------------------------------------
 -- 5. MEMBERSHIPS: entity_scope
 -- ----------------------------------------------------------------------------
