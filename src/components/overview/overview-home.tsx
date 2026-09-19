@@ -243,7 +243,7 @@ export function OverviewHome({
       </div>
 
       <aside data-overview-news="" className={OVERVIEW_AREA_NEWS_CLASS}>
-        <NewsRail items={news} viewAll />
+        <NewsRail items={news} now={now} viewAll />
       </aside>
       </div>
   );

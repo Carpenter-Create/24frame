@@ -15,13 +15,15 @@ import {
   DASHBOARD_NEWS_THUMB_CLASS,
   DASHBOARD_SECTION_TITLE_CLASS,
 } from "@/lib/dashboard-craft";
-import { NEWS_HREF, NEWS_PAGE, type NewsItem } from "@/lib/news";
+import { NEWS_HREF, NEWS_PAGE, newsItemMetaLabel, type NewsItem } from "@/lib/news";
 import {
   NEWS_STICKY_PIN_CLASS,
   NEWS_STICKY_RAIL_PANEL_CLASS,
   NEWS_STICKY_RAIL_SURFACE_CLASS,
 } from "@/lib/news-sticky";
 import { OVERVIEW_MODULE_NEST_CLASS } from "@/lib/overview";
+
+const NOW = new Date("2026-09-18T18:00:00.000Z");
 
 const ITEM: NewsItem = {
   id: "n1",
@@ -45,19 +47,20 @@ function markupClass(value: string): string {
 
 describe("NewsCard", () => {
   it("uses Home card / full-width thumb grammar on phone; md+ keeps the history row thumb", () => {
-    const html = renderToStaticMarkup(createElement(NewsCard, { item: ITEM }));
+    const html = renderToStaticMarkup(createElement(NewsCard, { item: ITEM, now: NOW }));
     expect(html).toContain("Harbor Cut lands a festival slot");
-    expect(html).toContain("Variety");
+    expect(html).toContain("Variety · Sep 17");
+    expect(html).not.toContain("Variety · Sep 17, 2026");
     expect(html).toContain("https://variety.com/harbor-cut");
     expect(html).toContain('target="_blank"');
     expect(html).toContain("noopener");
     expect(html).toContain("https://variety.com/thumbs/harbor.jpg");
     expect(html).not.toContain("data-news-time");
     expect(html).not.toMatch(/\b(\d+[mhd]|ago|Yesterday|Just now)\b/);
-    expect(html).toContain('data-news-outlet=""');
+    expect(html).toContain('data-news-meta=""');
     expect(html).toContain(DASHBOARD_NEWS_OUTLET_CLASS);
     expect(html).not.toContain("data-dashboard-status-pill");
-    const outletOpen = html.match(/data-news-outlet=""[^>]*>/)?.[0] ?? "";
+    const outletOpen = html.match(/data-news-meta=""[^>]*>/)?.[0] ?? "";
     expect(outletOpen).toContain("t-body-sm");
     expect(outletOpen).toContain("text-ink-3");
     expect(outletOpen).not.toMatch(/rounded|border|bg-|px-|py-/);
@@ -90,6 +93,7 @@ describe("NewsCard", () => {
           ...ITEM,
           image_url: "https://joblo.com/wp-content/uploads/2026/09/thumb.jpg",
         },
+        now: NOW,
       }),
     );
     expect(apex).toContain("https://www.joblo.com/wp-content/uploads/2026/09/thumb.jpg");
@@ -100,6 +104,7 @@ describe("NewsCard", () => {
           ...ITEM,
           image_url: "https://delivery.globalcontent.co/news-thumbs/joblo/abc.jpg",
         },
+        now: NOW,
       }),
     );
     expect(mirrored).toContain("https://delivery.globalcontent.co/news-thumbs/joblo/abc.jpg");
@@ -107,7 +112,7 @@ describe("NewsCard", () => {
 
   it("keeps a grey plate and no img when the article has no image", () => {
     const html = renderToStaticMarkup(
-      createElement(NewsCard, { item: { ...ITEM, image_url: null } }),
+      createElement(NewsCard, { item: { ...ITEM, image_url: null }, now: NOW }),
     );
     expect(html).toContain("data-news-thumb");
     expect(html).toContain("bg-surface-muted");
@@ -116,11 +121,11 @@ describe("NewsCard", () => {
 
   it("keeps Home stacked image-top tiles", () => {
     const html = renderToStaticMarkup(
-      createElement(NewsCard, { item: ITEM, density: "home" }),
+      createElement(NewsCard, { item: ITEM, now: NOW, density: "home" }),
     );
     expect(html).toContain('data-news-card-density="home"');
-    expect(html).toContain("Variety");
-    expect(html).toContain('data-news-outlet=""');
+    expect(html).toContain("Variety · Sep 17");
+    expect(html).toContain('data-news-meta=""');
     expect(html).not.toContain("data-dashboard-status-pill");
     expect(html).toContain("flex flex-col");
     expect(html).toContain(markupClass(DASHBOARD_NEWS_THUMB_CLASS));
@@ -130,12 +135,24 @@ describe("NewsCard", () => {
     expect(html).toContain("data-house-action-arrow");
     expect(html).not.toMatch(/\b(Read|Open|Visit)\b/);
   });
+
+  it("shows the prior-year calendar date on the same muted meta line", () => {
+    const html = renderToStaticMarkup(
+      createElement(NewsCard, {
+        item: { ...ITEM, published_at: "2025-09-17T12:00:00.000Z" },
+        now: NOW,
+      }),
+    );
+    expect(html).toContain("Variety · Sep 17, 2025");
+    expect(html).not.toMatch(/\b(\d+[mhd]|ago|Yesterday|Just now)\b/);
+    expect(html).toContain('data-news-meta=""');
+  });
 });
 
 describe("NewsRail", () => {
   it("puts Industry news + View all inside the shared Home module shell", () => {
     const html = renderToStaticMarkup(
-      createElement(NewsRail, { items: [ITEM], viewAll: true }),
+      createElement(NewsRail, { items: [ITEM], now: NOW, viewAll: true }),
     );
     expect(html).toContain("dashboard-home-panel");
     expect(html).toContain('data-overview-module="news"');
@@ -174,7 +191,7 @@ describe("NewsRail", () => {
 
   it("nests Home articles inside the shell — no second grey card", () => {
     const html = renderToStaticMarkup(
-      createElement(NewsRail, { items: [ITEM, SECOND], viewAll: true }),
+      createElement(NewsRail, { items: [ITEM, SECOND], now: NOW, viewAll: true }),
     );
     expect(html).toContain("dashboard-home-panel");
     expect(html).toContain('data-news-card="n1"');
@@ -186,7 +203,7 @@ describe("NewsRail", () => {
 
   it("uses Home-card history items — no pair grid, no inner title", () => {
     const html = renderToStaticMarkup(
-      createElement(NewsRail, { items: [ITEM, SECOND], history: true }),
+      createElement(NewsRail, { items: [ITEM, SECOND], now: NOW, history: true }),
     );
     expect(html).toContain(DASHBOARD_NEWS_HISTORY_LIST_CLASS);
     expect(html).not.toContain("lg:grid-cols-2");
@@ -204,7 +221,7 @@ describe("NewsRail", () => {
 
   it("keeps Home empty copy inside the same shell + header", () => {
     const html = renderToStaticMarkup(
-      createElement(NewsRail, { items: [], viewAll: true }),
+      createElement(NewsRail, { items: [], now: NOW, viewAll: true }),
     );
     expect(html).toContain("dashboard-home-panel");
     expect(html).toContain(NEWS_PAGE.title);
@@ -232,10 +249,13 @@ describe("news UI source", () => {
     expect(card).toContain("data-news-outbound");
     expect(card).not.toContain("socialRelativeTime");
     expect(card).not.toContain("data-news-time");
+    expect(card).not.toContain("socialRelativeTime");
+    expect(card).toContain("newsItemMetaLabel");
     expect(card).not.toContain("DashboardHomeStatusPill");
     expect(card).not.toContain("data-dashboard-status-pill");
     expect(card).toContain("DASHBOARD_NEWS_OUTLET_CLASS");
-    expect(card).toContain("data-news-outlet");
+    expect(card).toContain("data-news-meta");
+    expect(newsItemMetaLabel(ITEM.source, ITEM.published_at, NOW)).toBe("Variety · Sep 17");
     expect(DASHBOARD_NEWS_OUTLET_CLASS).toBe("t-body-sm text-ink-3");
     expect(DASHBOARD_NEWS_OUTLET_CLASS).not.toMatch(/rounded|border|bg-/);
     expect(card).not.toContain("DASHBOARD_LICENSING_THUMB_CLASS");

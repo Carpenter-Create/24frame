@@ -19,9 +19,10 @@ import { NEWS_INGEST_FUNCTION, NEWS_INGEST_SCHEDULE } from "@/lib/news-aws";
 // list; NEWS_SOURCE_IDS is derived. Do not hard-code a second order.
 // Standing lock (Adam 2026-09-19): Industry news items never show
 // relative time / minute counts (no 29m, 2h, 3d, "ago", "Just now").
-// Row outlet is muted text only — no pill/badge/chip chrome. Home
-// module + /home/news share NewsCard — one SoT. Do not add a clock
-// or a lookalike chip back.
+// Row meta is muted text: outlet · absolute calendar date from
+// published_at (Sep 19, or Sep 19, 2025 if prior year). No pill /
+// chip chrome. Home module + /home/news share NewsCard — one SoT.
+// Do not add a relative clock or a lookalike chip back.
 
 export const NEWS_HOME_HREF = "/home";
 export const NEWS_HREF = "/home/news";
@@ -195,6 +196,36 @@ export function isNewsSourceId(value: string): value is NewsSourceId {
 
 export function newsSourceLabel(source: string): string {
   return SOURCE_BY_ID.get(source as NewsSourceId)?.label ?? source;
+}
+
+/** House middot between outlet and absolute date. One SoT. */
+export const NEWS_ITEM_META_SEP = " · ";
+
+const NEWS_ITEM_DATE_UTC = { timeZone: "UTC" } as const;
+
+/**
+ * Absolute calendar date from published_at. Same UTC year as now →
+ * `Sep 19`. Prior (or later) year → `Sep 19, 2025`. Invalid ISO →
+ * empty — never invent. Not a relative clock.
+ */
+export function newsItemDateLabel(iso: string, now: Date): string {
+  const at = Date.parse(iso);
+  if (!Number.isFinite(at)) return "";
+  const date = new Date(at);
+  const sameYear = date.getUTCFullYear() === now.getUTCFullYear();
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    timeZone: NEWS_ITEM_DATE_UTC.timeZone,
+    ...(sameYear ? {} : { year: "numeric" }),
+  }).format(date);
+}
+
+/** `Variety · Sep 19` — outlet then date. Date omitted when unpublished/invalid. */
+export function newsItemMetaLabel(source: string, publishedAt: string, now: Date): string {
+  const outlet = newsSourceLabel(source);
+  const date = newsItemDateLabel(publishedAt, now);
+  return date ? `${outlet}${NEWS_ITEM_META_SEP}${date}` : outlet;
 }
 
 export function newsSourceConstEnabled(source: NewsSourceId): boolean {

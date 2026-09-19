@@ -39,6 +39,7 @@ export default async function NewsPage({
           ) : null
         }
         items={loaded.failed ? [] : loaded.rows}
+        now={now}
         selected={selected}
       />
     </div>

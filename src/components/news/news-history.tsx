@@ -32,16 +32,19 @@ import {
 
 export function NewsHistory({
   items,
+  now,
   selected: initialSelected,
   heading,
   notice,
 }: {
   items: readonly NewsItem[];
+  now: Date | string;
   selected: readonly NewsSourceId[];
   heading?: ReactNode;
   notice?: ReactNode;
 }) {
   const [selected, setSelected] = useState<NewsSourceId[]>([...initialSelected]);
+  const at = now instanceof Date ? now : new Date(now);
   const visible = filterNewsBySources(items, selected);
 
   function onSelect(next: NewsSourceId[]) {
@@ -66,6 +69,7 @@ export function NewsHistory({
         {notice}
         <NewsRail
           items={visible}
+          now={at}
           history
           empty={newsHistoryEmptyCopy(items, visible)}
         />

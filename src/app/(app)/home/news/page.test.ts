@@ -69,8 +69,8 @@ describe("NewsPage", () => {
     expect(NEWS_PAGE.back).toBe(OVERVIEW_PAGE.title);
     expect(html).toContain("Harbor Cut lands a festival slot");
     expect(html).toContain("https://variety.com/harbor-cut");
-    expect(html).toContain("Variety");
-    expect(html).toContain('data-news-outlet=""');
+    expect(html).toMatch(/Variety · Sep 17/);
+    expect(html).toContain('data-news-meta=""');
     expect(html).not.toContain("data-news-time");
     expect(html).not.toMatch(/\b(\d+[mhd]|ago|Yesterday|Just now)\b/);
     expect(html).not.toContain("data-dashboard-status-pill");

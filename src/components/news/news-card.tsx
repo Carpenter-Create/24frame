@@ -10,10 +10,10 @@ import {
   DASHBOARD_RELATED_GAP_CLASS,
 } from "@/lib/dashboard-craft";
 import { cn } from "@/lib/cn";
-import { newsSourceLabel, type NewsItem } from "@/lib/news";
+import { newsItemMetaLabel, type NewsItem } from "@/lib/news";
 import { newsCardImageUrl } from "@/lib/news-rss";
 
-// Link-out card: media plate · headline · muted outlet text.
+// Link-out card: media plate · headline · muted outlet · absolute date.
 // No relative time (standing: never add 29m / 2h / 3d / ago).
 // No outlet chip / badge (Adam lock 2026-09-19).
 // Home: stacked image-top tile inside OverviewModule (Education cover SoT).
@@ -23,9 +23,11 @@ import { newsCardImageUrl } from "@/lib/news-rss";
 
 export function NewsCard({
   item,
+  now,
   density = "history",
 }: {
   item: NewsItem;
+  now: Date;
   density?: "home" | "history";
 }) {
   const home = density === "home";
@@ -74,8 +76,8 @@ export function NewsCard({
             <span className="min-w-0 flex-1">{item.title}</span>
             <HouseActionArrow data-news-outbound="" />
           </p>
-          <p data-news-outlet="" className={DASHBOARD_NEWS_OUTLET_CLASS}>
-            {newsSourceLabel(item.source)}
+          <p data-news-meta="" className={DASHBOARD_NEWS_OUTLET_CLASS}>
+            {newsItemMetaLabel(item.source, item.published_at, now)}
           </p>
         </div>
       </a>

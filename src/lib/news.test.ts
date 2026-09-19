@@ -19,6 +19,9 @@ import {
   newsInWindow,
   newsItemTtlEpoch,
   newsSourceIsLive,
+  NEWS_ITEM_META_SEP,
+  newsItemDateLabel,
+  newsItemMetaLabel,
   newsSourceLabel,
   newsWindowStart,
   overviewNewsHeadlines,
@@ -81,9 +84,22 @@ describe("News SoT", () => {
     const history = readFileSync("src/components/news/news-history.tsx", "utf8");
     expect(card).not.toContain("socialRelativeTime");
     expect(card).not.toContain("data-news-time");
+    expect(card).toContain("newsItemMetaLabel");
     expect(card).not.toContain("DashboardHomeStatusPill");
     expect(card).not.toContain("data-dashboard-status-pill");
     expect(card).toContain("DASHBOARD_NEWS_OUTLET_CLASS");
+    expect(card).toContain("data-news-meta");
+    expect(NEWS_ITEM_META_SEP).toBe(" · ");
+    expect(newsItemDateLabel("2026-09-17T12:00:00.000Z", NOW)).toBe("Sep 17");
+    expect(newsItemDateLabel("2025-09-17T12:00:00.000Z", NOW)).toBe("Sep 17, 2025");
+    expect(newsItemDateLabel("not-a-date", NOW)).toBe("");
+    expect(newsItemMetaLabel("variety", "2026-09-17T12:00:00.000Z", NOW)).toBe(
+      "Variety · Sep 17",
+    );
+    expect(newsItemMetaLabel("variety", "2025-09-17T12:00:00.000Z", NOW)).toBe(
+      "Variety · Sep 17, 2025",
+    );
+    expect(newsItemMetaLabel("variety", "not-a-date", NOW)).toBe("Variety");
     expect(rail).not.toContain("socialRelativeTime");
     expect(history).not.toContain("socialRelativeTime");
     expect(readFileSync("vercel.json", "utf8")).not.toContain("news-ingest");

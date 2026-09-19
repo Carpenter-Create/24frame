@@ -149,9 +149,9 @@ export const DASHBOARD_NEWS_HISTORY_ROW_CLASS =
 export const DASHBOARD_NEWS_HISTORY_COPY_CLASS =
   `flex min-w-0 flex-col ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD} md:flex-1 md:justify-center`;
 
-// Row outlet name — house muted meta type only (Adam lock 2026-09-19).
-// Not a status pill, filter chip, or lookalike badge. Filter pills
-// above the list stay on DASHBOARD_NEWS_SOURCE_CHIP_*.
+// Row meta (outlet · absolute date) — house muted type only
+// (Adam lock 2026-09-19). Not a status pill, filter chip, or
+// lookalike badge. Filter pills stay on DASHBOARD_NEWS_SOURCE_CHIP_*.
 export const DASHBOARD_NEWS_OUTLET_CLASS = DASHBOARD_RANKED_META_CLASS;
 
 export const DASHBOARD_LICENSING_NEST_CLASS =
