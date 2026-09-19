@@ -107,6 +107,7 @@ export async function saveCompanyName(input: unknown): Promise<{ error?: string 
 
   revalidatePath("/settings");
   revalidatePath("/settings/organization");
+  revalidatePath("/settings/organization/company");
   revalidatePath("/settings/profile");
   revalidatePath("/");
   return {};

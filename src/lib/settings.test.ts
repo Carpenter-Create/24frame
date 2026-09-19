@@ -125,6 +125,8 @@ describe("settings hub lock", () => {
     expect(settingsHubSection("/settings/agreements")).toBe("profile");
     expect(settingsHubSection("/settings/refer")).toBe("profile");
     expect(settingsHubSection("/settings/organization")).toBe("organization");
+    expect(settingsHubSection("/settings/organization/company")).toBe("organization");
+    expect(settingsHubSection("/settings/organization/entities/new")).toBe("organization");
     expect(settingsHubSection("/settings/preferences")).toBe("preferences");
     expect(settingsHubSection("/settings/preferences/theme")).toBe("preferences");
     expect(settingsHubSection("/settings/preferences/notifications")).toBe("preferences");
@@ -284,6 +286,18 @@ describe("settings hub lock", () => {
       href: "/settings/organization",
       label: "Rights Holder",
     });
+    expect(settingsHeaderBack("/settings/organization/company")).toEqual({
+      href: SETTINGS.organizationHref,
+      label: SETTINGS.organization,
+    });
+    expect(settingsHeaderBack("/settings/organization/entities/new")).toEqual({
+      href: SETTINGS.organizationHref,
+      label: SETTINGS.organization,
+    });
+    expect(settingsHeaderBack("/settings/organization/entities/ent-1")).toEqual({
+      href: SETTINGS.organizationHref,
+      label: SETTINGS.organization,
+    });
     expect(settingsDrillParentLabel("/settings/preferences")).toBe("Preferences");
     expect(settingsDrillParentLabel("/settings/unknown")).toBe("Settings");
     expect(SETTINGS.dashboardHref).toBe("/aggregation/dashboard");
@@ -320,6 +334,17 @@ describe("settings hub lock", () => {
     expect(settingsPaneTitle("preferences")).toBe("Preferences");
     expect(settingsPaneTitle("profile")).not.toBe(SETTINGS.title);
     expect(SETTINGS_PANE_TITLE_CLASS).toBe("t-section text-ink");
+  });
+
+  it("locks Coinbase mobile Settings drill-row tokens — one house SoT", () => {
+    expect(SETTINGS_DRILL_ROW_CLASS).toContain("justify-between");
+    expect(SETTINGS_DRILL_ROW_CLASS).toContain("t-body");
+    expect(SETTINGS_DRILL_VALUE_CLASS).toBe("t-body-sm text-ink-3");
+    expect(SETTINGS_DRILL_ROW_CLASS).not.toContain("truncate");
+    expect(SETTINGS_DRILL_VALUE_CLASS).not.toContain("truncate");
+    const settingsSrc = readFileSync("src/lib/settings.ts", "utf8");
+    expect(settingsSrc).toContain("Shared SoT for Profile, Preferences, and Rights Holder");
+    expect(settingsSrc).not.toContain("companyHref");
   });
 
   it("keeps Settings Dialog forms compact — not a stacked page form", () => {

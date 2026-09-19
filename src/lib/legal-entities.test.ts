@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
+import { COMPANY_PROFILE_VIEW_CLASS } from "./account-profile";
 import {
   HOUSE_PHONE_STACK_CLASS,
   HOUSE_PHONE_WRAP_CLASS,
@@ -10,22 +11,24 @@ import {
   ENTITY_TYPE_LABELS,
   ENTITY_TYPES,
   ENTITY_SCOPE_LABELS,
+  ENTITY_EDIT_HREF_BASE,
   ENTITY_LIST_ACTIONS_CLASS,
   ENTITY_LIST_CLASS,
-  ENTITY_LIST_EMPTY_CLASS,
-  ENTITY_LIST_FIELD_CLASS,
-  ENTITY_LIST_FIELD_LABEL_CLASS,
-  ENTITY_LIST_GRID_CLASS,
-  ENTITY_LIST_HEADER_CLASS,
+  ENTITY_LIST_ITEMS_CLASS,
+  ENTITY_LIST_META_CLASS,
   ENTITY_LIST_NAME_CLASS,
+  ENTITY_LIST_NAME_ROW_CLASS,
   ENTITY_LIST_ROW_CLASS,
   ENTITY_LIST_VALUE_CLASS,
+  ENTITY_META_SEP,
   LEGAL_ENTITIES,
   ENTITY_SCOPE,
+  entityEditHref,
   entityTypeLabel,
   entityScopeLabel,
-  entityJurisdictionClass,
   entityJurisdictionLabel,
+  entityMetaLine,
+  mapOrgLegalEntity,
 } from "./legal-entities";
 
 describe("legal entities copy", () => {
@@ -47,9 +50,12 @@ describe("legal entities copy", () => {
     expect(ENTITY_SCOPE_LABELS.selected).toBe("Selected entities");
   });
 
-  it("has management copy", () => {
+  it("has management copy and Coinbase drill-in hrefs", () => {
     expect(LEGAL_ENTITIES.title).toBe("Legal Entities");
     expect(LEGAL_ENTITIES.add).toBe("Add entity");
+    expect(LEGAL_ENTITIES.editTitle).toBe("Legal entity");
+    expect(LEGAL_ENTITIES.helper).toContain("jurisdiction");
+    expect(LEGAL_ENTITIES.addHelper).toContain("new legal entity");
     expect(LEGAL_ENTITIES.nameLabel).toBe("Entity name");
     expect(LEGAL_ENTITIES.typeLabel).toBe("Entity type");
     expect(LEGAL_ENTITIES.default).toBe("Default");
@@ -58,79 +64,13 @@ describe("legal entities copy", () => {
     expect(LEGAL_ENTITIES.edit).toBe("Edit");
     expect(LEGAL_ENTITIES.save).toBe("Save");
     expect(LEGAL_ENTITIES.cancel).toBe("Cancel");
-    expect(LEGAL_ENTITIES.nameColumn).toBe("Name");
-    expect(LEGAL_ENTITIES.typeColumn).toBe("Type");
-    expect(LEGAL_ENTITIES.jurisdictionColumn).toBe("Jurisdiction");
-    expect(LEGAL_ENTITIES.actionsColumn).toBe("Actions");
+    expect(LEGAL_ENTITIES.addHref).toBe("/settings/organization/entities/new");
+    expect(ENTITY_EDIT_HREF_BASE).toBe("/settings/organization/entities");
+    expect(entityEditHref("ent-1")).toBe("/settings/organization/entities/ent-1");
     expect(LEGAL_ENTITIES.updateFailed).toContain("update");
     expect(entityJurisdictionLabel(null)).toBe(LEGAL_ENTITIES.emptyJurisdiction);
     expect(entityJurisdictionLabel("  ")).toBe(LEGAL_ENTITIES.emptyJurisdiction);
     expect(entityJurisdictionLabel("Delaware")).toBe("Delaware");
-    expect(ENTITY_LIST_HEADER_CLASS).toContain("t-label");
-    expect(ENTITY_LIST_ROW_CLASS).toContain("grid");
-    expect(ENTITY_LIST_HEADER_CLASS).toContain(ENTITY_LIST_GRID_CLASS);
-    expect(ENTITY_LIST_ROW_CLASS).toContain(ENTITY_LIST_GRID_CLASS);
-    expect(ENTITY_LIST_HEADER_CLASS).toContain("t-label");
-    expect(ENTITY_LIST_HEADER_CLASS).toContain("text-ink-3");
-    expect(ENTITY_LIST_CLASS).toBe("w-full");
-    expect(ENTITY_LIST_CLASS).not.toContain("overflow-x-auto");
-    expect(ENTITY_LIST_GRID_CLASS).toContain("w-full");
-    expect(ENTITY_LIST_GRID_CLASS).toContain("grid-cols-1");
-    expect(ENTITY_LIST_GRID_CLASS).toContain("md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_auto]");
-    expect(ENTITY_LIST_GRID_CLASS).toContain("md:gap-x-[var(--space-6)]");
-    expect(ENTITY_LIST_GRID_CLASS).not.toContain("w-max");
-    expect(ENTITY_LIST_GRID_CLASS).not.toContain("max-content");
-    expect(ENTITY_LIST_HEADER_CLASS).toContain("max-md:hidden");
-    expect(ENTITY_LIST_FIELD_CLASS).toContain("flex-col");
-    expect(ENTITY_LIST_FIELD_CLASS).toContain("w-full");
-    expect(ENTITY_LIST_FIELD_CLASS).toContain("items-stretch");
-    expect(ENTITY_LIST_FIELD_CLASS).not.toContain("items-start");
-    expect(ENTITY_LIST_FIELD_CLASS).toContain("md:block");
-    expect(ENTITY_LIST_FIELD_LABEL_CLASS).toContain("md:hidden");
-    expect(ENTITY_LIST_NAME_CLASS).toContain("flex-wrap");
-    expect(ENTITY_LIST_NAME_CLASS).toContain("w-full");
-    expect(ENTITY_LIST_ACTIONS_CLASS).toContain("md:justify-self-end");
-    expect(ENTITY_LIST_VALUE_CLASS).toContain("break-words");
-    expect(ENTITY_LIST_VALUE_CLASS).toContain("min-w-0");
-    expect(ENTITY_LIST_VALUE_CLASS).toContain("max-w-full");
-    expect(ENTITY_LIST_VALUE_CLASS).not.toContain("truncate");
-    expect(ENTITY_LIST_EMPTY_CLASS).not.toContain("truncate");
-    expect(entityJurisdictionClass("Delaware")).toBe(ENTITY_LIST_VALUE_CLASS);
-    expect(entityJurisdictionClass(null)).toBe(ENTITY_LIST_EMPTY_CLASS);
-    expect(entityJurisdictionClass("  ")).toBe(ENTITY_LIST_EMPTY_CLASS);
-    expect(ENTITY_LIST_VALUE_CLASS).toContain("text-ink");
-    expect(ENTITY_LIST_VALUE_CLASS).not.toContain("text-ink-3");
-    expect(ENTITY_LIST_EMPTY_CLASS).toContain("text-ink-3");
-  });
-
-  it("keeps phone stack + desktop spread as one SoT — house gospel never truncate", () => {
-    const layout = [
-      ENTITY_LIST_CLASS,
-      ENTITY_LIST_GRID_CLASS,
-      ENTITY_LIST_HEADER_CLASS,
-      ENTITY_LIST_ROW_CLASS,
-      ENTITY_LIST_NAME_CLASS,
-      ENTITY_LIST_FIELD_CLASS,
-      ENTITY_LIST_FIELD_LABEL_CLASS,
-      ENTITY_LIST_ACTIONS_CLASS,
-      ENTITY_LIST_VALUE_CLASS,
-      ENTITY_LIST_EMPTY_CLASS,
-    ].join(" ");
-    expect(housePhoneForbidsTruncate(layout)).toBe(true);
-    expect(ENTITY_LIST_FIELD_CLASS).toContain(HOUSE_PHONE_STACK_CLASS);
-    expect(ENTITY_LIST_VALUE_CLASS).toContain(HOUSE_PHONE_WRAP_CLASS);
-    expect(ENTITY_LIST_EMPTY_CLASS).toContain(HOUSE_PHONE_WRAP_CLASS);
-    expect(ENTITY_LIST_GRID_CLASS).toMatch(/grid-cols-1/);
-    expect(ENTITY_LIST_GRID_CLASS).toMatch(/md:grid-cols-\[/);
-    expect(ENTITY_LIST_GRID_CLASS).toMatch(/2fr/);
-    expect(ENTITY_LIST_FIELD_CLASS).toContain("w-full");
-    expect(ENTITY_LIST_FIELD_CLASS).toContain("items-stretch");
-    expect(ENTITY_LIST_VALUE_CLASS).toContain("min-w-0");
-    expect(ENTITY_LIST_VALUE_CLASS).toContain("max-w-full");
-    const src = readFileSync("src/lib/legal-entities.ts", "utf8");
-    expect(src).toContain("HOUSE_PHONE_WRAP_CLASS");
-    expect(src).toContain("HOUSE_PHONE_STACK_CLASS");
-    expect(src).toContain("house gospel 2026-09-19");
   });
 
   it("has scope selector copy", () => {
@@ -138,5 +78,79 @@ describe("legal entities copy", () => {
     expect(ENTITY_SCOPE.all).toBe("All entities");
     expect(ENTITY_SCOPE.selected).toBe("Selected entities");
     expect(ENTITY_SCOPE.entityPickerLabel).toBe("Select entities");
+  });
+});
+
+describe("legal entity list craft — compact meta + mobile drill-in", () => {
+  it("joins type · jurisdiction as one muted line — no empty-dash leftover", () => {
+    expect(ENTITY_META_SEP).toBe(" · ");
+    expect(entityMetaLine("llc", "Wyoming")).toBe("LLC · Wyoming");
+    expect(entityMetaLine("llc", "Delaware")).toBe("LLC · Delaware");
+    expect(entityMetaLine("trust", null)).toBe("Trust");
+    expect(entityMetaLine("trust", "  ")).toBe("Trust");
+    expect(entityMetaLine("partnership", "Newfoundland and Labrador, Canada")).toBe(
+      "Partnership · Newfoundland and Labrador, Canada",
+    );
+  });
+
+  it("maps org RPC rows and keeps desktop name-row Edit on Company Name grammar", () => {
+    expect(ENTITY_LIST_NAME_ROW_CLASS).toBe(COMPANY_PROFILE_VIEW_CLASS);
+    expect(
+      mapOrgLegalEntity({
+        id: "ent-1",
+        name: "Acme LLC",
+        entity_type: "llc",
+        jurisdiction: "Wyoming",
+        is_default: true,
+        status: "active",
+        created_at: "2026-01-01T00:00:00Z",
+      }),
+    ).toEqual({
+      id: "ent-1",
+      name: "Acme LLC",
+      entityType: "llc",
+      jurisdiction: "Wyoming",
+      isDefault: true,
+      status: "active",
+      createdAt: "2026-01-01T00:00:00Z",
+    });
+  });
+
+  it("reads as list rows — tight name→meta stack, not a typed field form", () => {
+    expect(ENTITY_LIST_CLASS).toBe("w-full");
+    expect(ENTITY_LIST_ITEMS_CLASS).toContain("divide-y");
+    expect(ENTITY_LIST_ROW_CLASS).toContain(HOUSE_PHONE_STACK_CLASS);
+    expect(ENTITY_LIST_ROW_CLASS).toContain("gap-[var(--space-1)]");
+    expect(ENTITY_LIST_ROW_CLASS).not.toContain("grid-cols");
+    expect(ENTITY_LIST_VALUE_CLASS).toContain("t-body");
+    expect(ENTITY_LIST_META_CLASS).toContain("t-body-sm");
+    expect(ENTITY_LIST_META_CLASS).toContain("text-ink-3");
+    expect(ENTITY_LIST_NAME_CLASS).toContain("min-w-0");
+    expect(ENTITY_LIST_ACTIONS_CLASS).toBe("shrink-0");
+    const src = readFileSync("src/lib/legal-entities.ts", "utf8");
+    expect(src).toContain("Coinbase mobile Settings");
+    expect(src).toContain("Type · Jurisdiction");
+    expect(src).not.toContain("ENTITY_LIST_GRID_CLASS");
+    expect(src).not.toContain("ENTITY_LIST_HEADER_CLASS");
+    expect(src).not.toContain("ENTITY_LIST_FIELD_LABEL_CLASS");
+  });
+
+  it("keeps phone wrap as one SoT — house gospel never truncate", () => {
+    const layout = [
+      ENTITY_LIST_CLASS,
+      ENTITY_LIST_ITEMS_CLASS,
+      ENTITY_LIST_ROW_CLASS,
+      ENTITY_LIST_NAME_ROW_CLASS,
+      ENTITY_LIST_NAME_CLASS,
+      ENTITY_LIST_ACTIONS_CLASS,
+      ENTITY_LIST_VALUE_CLASS,
+      ENTITY_LIST_META_CLASS,
+    ].join(" ");
+    expect(housePhoneForbidsTruncate(layout)).toBe(true);
+    expect(ENTITY_LIST_VALUE_CLASS).toContain(HOUSE_PHONE_WRAP_CLASS);
+    expect(ENTITY_LIST_META_CLASS).toContain(HOUSE_PHONE_WRAP_CLASS);
+    const src = readFileSync("src/lib/legal-entities.ts", "utf8");
+    expect(src).toContain("HOUSE_PHONE_WRAP_CLASS");
+    expect(src).toContain("never truncates");
   });
 });

@@ -28,6 +28,9 @@
 //   /settings/profile
 //   /settings/profile/name
 //   /settings/organization
+//   /settings/organization/company
+//   /settings/organization/entities/new
+//   /settings/organization/entities/[id]
 //   /settings/preferences
 //   /settings/preferences/theme
 //   /settings/preferences/notifications
@@ -161,8 +164,8 @@ export const SETTINGS_QUIET_ROW_CLASS =
   "flex items-center justify-between t-body leading-5 text-ink";
 
 // Coinbase drill-in grammar — label · muted value · chevron. Whole
-// row tappable. Read-only rows drop the chevron. Shared with Rights
-// Holder / Legal Entities so those panes do not fork a lookalike.
+// row tappable. Read-only rows drop the chevron. Shared SoT for
+// Profile, Preferences, and Rights Holder / Legal Entities.
 export const SETTINGS_DRILL_LIST_CLASS = "flex flex-col";
 export const SETTINGS_DRILL_ROW_CLASS =
   "flex w-full items-center justify-between gap-[var(--space-4)] py-[var(--space-3)] text-left t-body leading-5 text-ink";

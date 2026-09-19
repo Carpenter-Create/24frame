@@ -56,6 +56,9 @@ export const LEGAL_ENTITIES = {
   adding: "Adding...",
   added: "Entity added.",
   edit: "Edit",
+  editTitle: "Legal entity",
+  helper: "Name, type, and jurisdiction for this legal entity.",
+  addHelper: "Name, type, and jurisdiction for a new legal entity.",
   save: "Save",
   saving: "Saving…",
   cancel: "Cancel",
@@ -74,38 +77,45 @@ export const LEGAL_ENTITIES = {
   updateFailed: "Could not update the entity.",
   signedOut: "Not authenticated.",
   forbidden: "Only the account owner can manage legal entities.",
+  addHref: "/settings/organization/entities/new",
 } as const;
 
-// One SoT for header + rows. Four cells: Name + Default · Type ·
-// Jurisdiction · Actions. Desktop (md+): fr tracks fill the card so
-// columns breathe — Adam 2026-09-19 lock, reversing the #504 hug.
-// Phone: house gospel 2026-09-19 — never truncate, stack vertically.
-// One stacked block per entity (label/value). Full text, wrap OK.
-// Header is desktop-only. Values share primary ink. Empty
-// jurisdiction is a muted em dash. Not a data-grid library.
+export const ENTITY_EDIT_HREF_BASE = "/settings/organization/entities";
+
+export function entityEditHref(id: string): string {
+  return `${ENTITY_EDIT_HREF_BASE}/${id}`;
+}
+
+// One SoT for Rights Holder Legal Entities.
+// Adam 2026-09-19 Coinbase mobile Settings: index is summary only —
+// name (+ DEFAULT) · muted `Type · Jurisdiction` · CaretRight.
+// Whole row drills in. Add entity drills to an add pane. Not a
+// modal on mobile. Not a tall TYPE / JURISDICTION mini-form. Not
+// a trailing Edit orphan under meta.
+// Desktop: card + modal for now (same compact meta, name-row Edit).
+// Phone never truncates. Card chrome: “Legal Entities” + Add entity.
 export const ENTITY_LIST_CLASS = "w-full";
 
-export const ENTITY_LIST_GRID_CLASS =
-  "grid w-full grid-cols-1 items-start gap-y-[var(--space-2)] px-0 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_auto] md:items-center md:gap-x-[var(--space-6)] md:gap-y-0";
-
-export const ENTITY_LIST_HEADER_CLASS =
-  `${ENTITY_LIST_GRID_CLASS} max-md:hidden py-[var(--space-3)] t-label text-ink-3`;
+export const ENTITY_LIST_ITEMS_CLASS =
+  "flex flex-col divide-y divide-hairline border-t border-hairline";
 
 export const ENTITY_LIST_ROW_CLASS =
-  `${ENTITY_LIST_GRID_CLASS} py-[var(--space-4)]`;
+  `${HOUSE_PHONE_STACK_CLASS} gap-[var(--space-1)] py-[var(--space-4)]`;
+
+export const ENTITY_LIST_NAME_ROW_CLASS =
+  "flex items-start justify-between gap-[var(--space-4)]";
 
 export const ENTITY_LIST_NAME_CLASS =
-  "flex min-w-0 w-full flex-wrap items-center gap-[var(--space-2)]";
+  "flex min-w-0 flex-wrap items-center gap-[var(--space-2)]";
 
-export const ENTITY_LIST_FIELD_CLASS =
-  `${HOUSE_PHONE_STACK_CLASS} gap-[var(--space-1)] md:block`;
-
-export const ENTITY_LIST_FIELD_LABEL_CLASS = "t-label text-ink-3 md:hidden";
-
-export const ENTITY_LIST_ACTIONS_CLASS = "justify-self-start md:justify-self-end";
+export const ENTITY_LIST_ACTIONS_CLASS = "shrink-0";
 
 export const ENTITY_LIST_VALUE_CLASS = `${HOUSE_PHONE_WRAP_CLASS} t-body text-ink`;
-export const ENTITY_LIST_EMPTY_CLASS = `${HOUSE_PHONE_WRAP_CLASS} t-body text-ink-3`;
+
+export const ENTITY_LIST_META_CLASS =
+  `${HOUSE_PHONE_WRAP_CLASS} t-body-sm text-ink-3`;
+
+export const ENTITY_META_SEP = " · ";
 
 export const ENTITY_SCOPE = {
   all: "All entities",
@@ -124,10 +134,35 @@ export function entityJurisdictionLabel(value: string | null | undefined): strin
   return trimmed ? trimmed : LEGAL_ENTITIES.emptyJurisdiction;
 }
 
-export function entityJurisdictionClass(value: string | null | undefined): string {
-  return value?.trim() ? ENTITY_LIST_VALUE_CLASS : ENTITY_LIST_EMPTY_CLASS;
+export function entityMetaLine(
+  type: EntityType,
+  jurisdiction?: string | null,
+): string {
+  const typeLabel = entityTypeLabel(type);
+  const place = jurisdiction?.trim();
+  return place ? `${typeLabel}${ENTITY_META_SEP}${place}` : typeLabel;
 }
 
 export function entityScopeLabel(scope: EntityScope): string {
   return ENTITY_SCOPE_LABELS[scope];
+}
+
+export function mapOrgLegalEntity(row: {
+  id: string;
+  name: string;
+  entity_type: EntityType;
+  jurisdiction: string | null;
+  is_default: boolean;
+  status: EntityStatus;
+  created_at: string;
+}): LegalEntityRow {
+  return {
+    id: row.id,
+    name: row.name,
+    entityType: row.entity_type,
+    jurisdiction: row.jurisdiction,
+    isDefault: row.is_default,
+    status: row.status,
+    createdAt: row.created_at,
+  };
 }

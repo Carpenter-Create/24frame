@@ -49,6 +49,7 @@ export const ACCOUNT_PROFILE = {
 export const COMPANY_PROFILE = {
   title: "Company",
   href: "/settings/organization",
+  editHref: "/settings/organization/company",
   subtitle: `Name of the ${COMPANY_AGGREGATION_WORKSPACE} on this account.`,
   nameLabel: "Company name",
   nameRequired: "Company name is required.",
@@ -66,8 +67,9 @@ export const COMPANY_PROFILE = {
 /** Saved. notice auto-clears. Typing already clears immediately. */
 export const COMPANY_PROFILE_SAVED_MS = 2800;
 
-// Rights Holder company name — read-only row in the house Card.
-// Edit opens the house Dialog. Not an in-page form.
+// Rights Holder company name. Desktop: read-only row in the house
+// Card; Edit opens the house Dialog. Mobile: Coinbase drill row →
+// /settings/organization/company pane. One SoT form body.
 export const COMPANY_PROFILE_VIEW_CLASS =
   "flex items-start justify-between gap-[var(--space-4)]";
 export const COMPANY_PROFILE_COPY_CLASS =

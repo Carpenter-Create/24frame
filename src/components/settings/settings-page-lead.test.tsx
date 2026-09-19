@@ -37,6 +37,15 @@ const SETTINGS_PANES = [
   "src/app/(app)/settings/refer/page.tsx",
 ] as const;
 
+const SETTINGS_EDIT_PANES = [
+  "src/app/(app)/settings/profile/name/page.tsx",
+  "src/app/(app)/settings/preferences/theme/page.tsx",
+  "src/app/(app)/settings/preferences/notifications/page.tsx",
+  "src/app/(app)/settings/organization/company/page.tsx",
+  "src/app/(app)/settings/organization/entities/new/page.tsx",
+  "src/app/(app)/settings/organization/entities/[entityId]/page.tsx",
+] as const;
+
 describe("SettingsPageLead", () => {
   it("reuses News PageHeader ArrowLeft — Back on the hub, Settings on a pane", () => {
     const hub = renderToStaticMarkup(
@@ -83,6 +92,17 @@ describe("SettingsPageLead", () => {
     expect(pageHeaderSrc).not.toContain("CaretLeft");
     expect(PAGE_LEAD_STACK_CLASS).toBe("flex flex-col gap-3");
     expect(SETTINGS_PAGE_LEAD_BACK_CLASS).toBe("md:hidden");
+
+    const editLead = renderToStaticMarkup(
+      createElement(SettingsPageLead, {
+        title: "Company name",
+        pathname: "/settings/organization/company",
+        helper: "Name of the company aggregation workspace on this account.",
+      }),
+    );
+    expect(editLead).toContain("data-settings-page-lead-helper");
+    expect(editLead).toContain("Rights Holder");
+    expect(editLead).toMatch(/<h1[^>]*>Company name<\/h1>/);
   });
 
   it("mounts an optional helper under the title for drill-in panes", () => {
@@ -121,6 +141,16 @@ describe("SettingsPageLead", () => {
     expect(railSrc).not.toContain("SettingsPageLead");
     expect(leadChromeSrc).not.toContain("SettingsHeaderBack");
     expect(leadChromeSrc).not.toContain("CaretLeft");
+    const editPane = readFileSync(join(here, "settings-drill.tsx"), "utf8");
+    expect(editPane).toContain("SettingsPageLead");
+    expect(editPane).toContain("helper");
+    for (const path of SETTINGS_EDIT_PANES) {
+      const page = readFileSync(path, "utf8");
+      expect(page).toContain("SettingsEditPane");
+      expect(page).not.toContain("SettingsHeaderBack");
+      expect(page).not.toContain("CaretLeft");
+      expect(page).not.toContain("@phosphor-icons/react");
+    }
     const backLink = renderToStaticMarkup(
       createElement(PageHeaderBackLink, { href: "/home", label: "Home" }),
     );
