@@ -39,6 +39,7 @@ export const ACTIVITY_PAGE = {
 // House circular icon hit + soft ghost wash on hover / open.
 // Phone hug lives on HOUSE_HEADER_TRAILING_HIT_CLASS (via theme
 // toggle) so the bell is a flex sibling of Ask and the avatar.
+// That hug is the size-4 box — not padding cancelled with -mx.
 // Sporty Blue stays off the trigger — accent is the open-row dot.
 export const ACTIVITY_BELL_TRIGGER_CLASS =
   `${HOUSE_THEME_TOGGLE_CLASS} relative hover:bg-surface-muted`;

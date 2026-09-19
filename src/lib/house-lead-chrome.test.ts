@@ -214,13 +214,11 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("border-hairline");
   });
 
-  it("evens phone trailing AI · bell · avatar with one gap token and hugged hits", () => {
+  it("evens phone trailing AI · bell · avatar with one gap and no overlapping hits", () => {
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("size-4");
-    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("p-[var(--space-2)]");
-    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("-mx-[var(--space-2)]");
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("md:size-8");
-    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("md:p-0");
-    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("md:mx-0");
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).not.toMatch(/-m[xlr]-/);
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).not.toContain("p-[var(--space-2)]");
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).not.toContain("size-6");
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).not.toContain("size-5");
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).not.toContain("size-[44px]");
