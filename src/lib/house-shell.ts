@@ -70,4 +70,27 @@ export const HOUSE_FILTER_ON_CLASS = "bg-ink text-surface";
 
 export const HOUSE_FILTER_OFF_CLASS = "bg-surface-muted text-ink";
 
+// Standalone filter pill base — individual rounded pills with gap between.
+// Used by news source chips, titles catalog filters, and other non-track pill rows.
+export const HOUSE_FILTER_PILL_CLASS =
+  "rounded-full px-[var(--space-4)] py-[var(--space-2)] t-body-sm";
+
+export const HOUSE_FILTER_PILL_CLUSTER_CLASS =
+  "flex items-center gap-[var(--space-2)]";
+
 export const HOUSE_PERIOD_SELECTED_CLASS = "bg-surface-muted";
+
+// Segmented track — one continuous muted bar with a sliding dark thumb.
+// Shared grammar for workspace pills and Top Performing Titles|Platforms|Territories.
+export const HOUSE_SEGMENTED_TRACK_CLASS =
+  "relative flex shrink-0 items-center rounded-full bg-surface-muted p-[var(--space-1)]";
+
+export const HOUSE_SEGMENTED_THUMB_CLASS =
+  "pointer-events-none absolute rounded-full bg-ink transition-[left,width] duration-200 ease-out motion-reduce:transition-none";
+
+export const HOUSE_SEGMENTED_ITEM_BASE_CLASS =
+  "relative z-10 shrink-0 cursor-pointer select-none whitespace-nowrap rounded-full px-[var(--space-3)] py-[var(--space-1)] t-body-sm transition-colors duration-200 motion-reduce:transition-none";
+
+export const HOUSE_SEGMENTED_ITEM_ON_CLASS = "text-surface";
+
+export const HOUSE_SEGMENTED_ITEM_OFF_CLASS = "text-ink";
