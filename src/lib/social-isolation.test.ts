@@ -66,6 +66,8 @@ describe("social isolation lock", () => {
     const orgCreate = readFileSync("src/app/actions.ts", "utf8");
     const identity = readFileSync("supabase/migrations/20260912033234_identity_spine.sql", "utf8");
     const profile = readFileSync("src/lib/social-profile.ts", "utf8");
+    const inviteSql = readFileSync("supabase/migrations/20260919120000_invite_org_member.sql", "utf8");
+    const inviteAction = readFileSync("src/app/(app)/settings/aggregation/actions.ts", "utf8");
     expect(orgCreate).toContain("create_org_and_membership");
     expect(orgCreate).not.toContain("from(\"profiles\")");
     expect(orgCreate).not.toContain("ensureOwnSocialProfile");
@@ -73,6 +75,13 @@ describe("social isolation lock", () => {
     expect(identity).toContain("Mapping C: no trigger on auth.users, memberships, or organizations that");
     expect(profile).toContain("never an invitee");
     expect(profile).toContain("user.id");
+    expect(inviteSql).toContain("invite_org_member");
+    expect(inviteSql).not.toContain("insert into public.profiles");
+    expect(inviteSql).not.toMatch(/into public\.gc_staff|update public\.gc_staff/);
+    expect(inviteAction).toContain("invite_org_member");
+    expect(inviteAction).not.toContain("from(\"profiles\")");
+    expect(inviteAction).not.toContain("ensureOwnSocialProfile");
+    expect(inviteAction).not.toMatch(/signInWithOtp/);
   });
 
   it("locks posts.group_id off ON DELETE CASCADE", () => {

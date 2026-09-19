@@ -9,7 +9,7 @@
 // (name / photo / sign-in email). Edit public profile deep-links to the
 // existing Social editor — do not duplicate that editor here.
 // Workspace panes are mode prefs only. HouseEmpty if none exist yet.
-// Aggregation holds the existing company Settings surface.
+// Aggregation holds the company Settings surface and Org Team.
 //
 // Context land contract:
 //   Path: /settings/{you|social|education|aggregation}
@@ -72,6 +72,7 @@ export const SETTINGS = {
   profile: USER_MENU.profile,
   profileHref: USER_MENU.profileHref,
   company: "Company",
+  team: "Team",
   agreements: USER_MENU.agreements,
   agreementsHref: USER_MENU.agreementsHref,
   agreementsEmpty: "No agreements on this account.",
@@ -144,7 +145,8 @@ export const SETTINGS_HUB_NAV = settingsHubNav();
 export const SETTINGS_LOCAL_NAV = SETTINGS_HUB_NAV;
 
 // Rail chrome — 220 slot, pad 16, 8 between rows. Do not put Titles,
-// Appearance, Workspace, Account, Users, API, or Manage courses here.
+// Appearance, Workspace, Account, Users, API, Company, Team, or
+// Manage courses here.
 export const SETTINGS_RAIL_PAD_CLASS = "p-[var(--space-4)]";
 export const SETTINGS_RAIL_NAV_CLASS = "flex flex-col gap-[var(--space-2)]";
 export const SETTINGS_RAIL_ITEM_CLASS =
@@ -184,6 +186,7 @@ export const SETTINGS_RAIL_ABSENT = [
   "Appearance",
   "Workspace",
   "Company",
+  SETTINGS.team,
   SETTINGS.manageCourses,
   "Home",
 ] as const;

@@ -3231,6 +3231,15 @@ export type Database = {
         Args: { p_group: string; p_user: string }
         Returns: boolean
       }
+      invite_org_member: {
+        Args: {
+          p_email: string
+          p_org: string
+          p_role: Database["public"]["Enums"]["org_role"]
+          p_status?: Database["public"]["Enums"]["membership_status"]
+        }
+        Returns: string
+      }
       lapse_org: {
         Args: { p_first_failure: string; p_org: string }
         Returns: string
@@ -3312,6 +3321,17 @@ export type Database = {
       org_notification_recipients: {
         Args: { p_org_id: string }
         Returns: string[]
+      }
+      org_team_directory: {
+        Args: { p_limit?: number; p_org: string }
+        Returns: {
+          display_name: string | null
+          email: string
+          membership_id: string
+          role: Database["public"]["Enums"]["org_role"]
+          status: Database["public"]["Enums"]["membership_status"]
+          user_id: string
+        }[]
       }
       portal_resolve_download: {
         Args: { p_session_token_hash: string }

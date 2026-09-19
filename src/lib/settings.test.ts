@@ -55,7 +55,9 @@ describe("settings hub lock", () => {
     expect(SETTINGS.dashboard).toBe("Home");
     expect(SETTINGS.dashboardHref).toBe("/");
     expect(SETTINGS.company).toBe("Company");
+    expect(SETTINGS.team).toBe("Team");
     expect(SETTINGS).not.toHaveProperty("companyHref");
+    expect(SETTINGS).not.toHaveProperty("teamHref");
     expect(SETTINGS.profileHref).toBe(USER_MENU.profileHref);
     expect(SETTINGS.agreementsHref).toBe(USER_MENU.agreementsHref);
     expect(SETTINGS.referHref).toBe(USER_MENU.referHref);
@@ -230,6 +232,7 @@ describe("settings hub lock", () => {
       "Appearance",
       "Workspace",
       "Company",
+      "Team",
       "Manage courses",
       "Home",
     ]);
