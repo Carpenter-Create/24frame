@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { HousePeriodPresets } from "@/components/chrome/house-period-presets";
-import { TextAction } from "@/components/chrome/house";
+import { HouseActionArrow } from "@/components/chrome/house-action-arrow";
 import { CourseCard } from "@/components/courses/course-card";
 import {
   DashboardHomeEmpty,
@@ -32,6 +32,7 @@ import {
   OVERVIEW_AREA_REVENUE_CLASS,
   OVERVIEW_AREA_SOCIAL_CLASS,
   OVERVIEW_HOME_LAYOUT_CLASS,
+  OVERVIEW_MODULE_ARROW_CLASS,
   OVERVIEW_MODULE_NEST_CLASS,
   OVERVIEW_PAGE,
   overviewHref,
@@ -94,7 +95,14 @@ export function OverviewHome({
       <DashboardHomePanel aria-label={OVERVIEW_PAGE.revenue} data-overview-revenue="">
         <div className={`flex items-center justify-between ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD_LIST}`}>
           <p className={DASHBOARD_SECTION_TITLE_CLASS}>{OVERVIEW_PAGE.revenue}</p>
-          <TextAction href={OVERVIEW_PAGE.revenueHref}>{OVERVIEW_PAGE.aggregation}</TextAction>
+          <Link
+            href={OVERVIEW_PAGE.revenueHref}
+            aria-label={OVERVIEW_PAGE.aggregation}
+            data-overview-revenue-arrow=""
+            className={OVERVIEW_MODULE_ARROW_CLASS}
+          >
+            <HouseActionArrow />
+          </Link>
         </div>
         <div
           data-overview-revenue-period=""

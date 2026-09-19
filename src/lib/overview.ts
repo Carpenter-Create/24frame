@@ -87,6 +87,13 @@ export const OVERVIEW_AREA_NEWS_CLASS =
 /** Inner pad + gap for tiles inside a Home module shell (Education covers, News cards). */
 export const OVERVIEW_MODULE_NEST_CLASS =
   "gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-4)]";
+
+/** Overview/Home trailing arrow tap target. Home-scoped helper — do not
+ *  export as a global affordance. Glyph is HouseActionArrow (16 · Sporty
+ *  Blue). Wrapper centers the glyph in an 8-token square so a phone tap
+ *  hits accent-color easily without inventing a second arrow primitive. */
+export const OVERVIEW_MODULE_ARROW_CLASS =
+  "inline-flex size-8 items-center justify-center text-accent";
 export const OVERVIEW_RAIL_OFF_WIDTH = "0px";
 
 export const OVERVIEW_PAGE = {
@@ -128,7 +135,13 @@ export function overviewHref(input: { period?: string } = {}): string {
   return query ? `${OVERVIEW_HREF}?${query}` : OVERVIEW_HREF;
 }
 
-/** Header TextAction only when the label is distinct from the module title. */
+/** Header trailing arrow — glyph-only HouseActionArrow (Adam 2026-09-19).
+ *  Home gray module headers no longer trail with a word ("Aggregation",
+ *  "View all", "Ask …"). Every module with an `href` now surfaces a house
+ *  blue ArrowRight glyph in the trailing slot; the visible label survives
+ *  only as the arrow's `aria-label` (screen readers still hear the
+ *  destination). `label` therefore defaults to the module title when the
+ *  caller does not pass a distinct `cta`. */
 export function overviewModuleHeaderAction(
   title: string,
   href?: string,
@@ -136,7 +149,6 @@ export function overviewModuleHeaderAction(
 ): { href: string; label: string } | null {
   if (!href) return null;
   const label = (cta ?? title).trim();
-  if (label.toLowerCase() === title.trim().toLowerCase()) return null;
   return { href, label };
 }
 

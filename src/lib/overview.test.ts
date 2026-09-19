@@ -245,15 +245,32 @@ describe("Home module caps", () => {
 });
 
 describe("overviewModuleHeaderAction", () => {
-  it("drops a trailing label that matches or echoes the module title", () => {
-    expect(overviewModuleHeaderAction("Social", "/social/dms")).toBeNull();
-    expect(overviewModuleHeaderAction("Education", "/social/courses")).toBeNull();
-    expect(overviewModuleHeaderAction("Needs you", "/attention")).toBeNull();
-    expect(overviewModuleHeaderAction(" Social ", "/social/dms", "social")).toBeNull();
+  it("returns null only when the module has no href — arrow needs a destination", () => {
+    expect(overviewModuleHeaderAction("24Frame AI", undefined)).toBeNull();
     expect(overviewModuleHeaderAction("24Frame AI", undefined, "Ask 24Frame AI")).toBeNull();
+    expect(overviewModuleHeaderAction("Anything", "")).toBeNull();
   });
 
-  it("keeps a distinct destination CTA", () => {
+  it("labels the trailing arrow with the module title when no cta is provided", () => {
+    expect(overviewModuleHeaderAction("Social", "/social/dms")).toEqual({
+      href: "/social/dms",
+      label: "Social",
+    });
+    expect(overviewModuleHeaderAction("Education", "/social/courses")).toEqual({
+      href: "/social/courses",
+      label: "Education",
+    });
+    expect(overviewModuleHeaderAction("Needs you", "/attention")).toEqual({
+      href: "/attention",
+      label: "Needs you",
+    });
+    expect(overviewModuleHeaderAction(" Social ", "/social/dms", "social")).toEqual({
+      href: "/social/dms",
+      label: "social",
+    });
+  });
+
+  it("prefers a distinct destination cta for the aria-label", () => {
     expect(
       overviewModuleHeaderAction("24Frame AI", "?ai=1", "Ask 24Frame AI"),
     ).toEqual({ href: "?ai=1", label: "Ask 24Frame AI" });

@@ -13,11 +13,13 @@ import { OverviewHome } from "./overview-home";
 import type { CourseRow } from "@/lib/courses";
 import { parseDashboardPeriod } from "@/lib/dashboard-admin";
 import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
+import { HOUSE_ACTION_ARROW_CLASS } from "@/components/chrome/house-action-arrow";
 import { DASHBOARD_SECTION_TITLE_CLASS } from "@/lib/dashboard-craft";
 import { NEWS_HREF, NEWS_PAGE } from "@/lib/news";
 import { HOME_GREETING_TIME_ZONE, homeGreeting, homeGreetingDate } from "@/lib/home-greeting";
 import {
   OVERVIEW_HREF,
+  OVERVIEW_MODULE_ARROW_CLASS,
   OVERVIEW_PHONE_MODULE_ORDER,
   OVERVIEW_PAGE,
 } from "@/lib/overview";
@@ -222,21 +224,34 @@ describe("OverviewHome", () => {
     expect(html).toContain(OVERVIEW_PAGE.aiAsk);
     expect(html).toContain(`href="${OVERVIEW_PAGE.revenueHref}"`);
     expect(html).toContain("data-overview-ai-ask");
+    expect(html).toContain("data-overview-revenue-arrow");
+    expect(html).toContain("data-overview-module-arrow");
+    expect(html).toContain("data-house-action-arrow");
+    expect(html).toContain(HOUSE_ACTION_ARROW_CLASS);
+    expect(html).toContain(OVERVIEW_MODULE_ARROW_CLASS);
     expect(html).not.toContain('href="/messages"');
     expect(html).not.toContain(`href="${OVERVIEW_PAGE.aiNextHref}"`);
-    expect(html).not.toContain(`href="${OVERVIEW_PAGE.socialHref}"`);
-    expect(html).not.toContain(`href="${OVERVIEW_PAGE.educationHref}"`);
-    expect(html).not.toContain(`href="${OVERVIEW_PAGE.needsYouHref}"`);
+    expect(html).toContain(`href="${OVERVIEW_PAGE.socialHref}"`);
+    expect(html).toContain(`href="${OVERVIEW_PAGE.educationHref}"`);
+    expect(html).toContain(`href="${OVERVIEW_PAGE.needsYouHref}"`);
+    expect(html).not.toContain(`>${OVERVIEW_PAGE.aggregation}<`);
+    expect(html).not.toContain(`>${OVERVIEW_PAGE.aiAsk}<`);
+    expect(html).not.toContain(`>${NEWS_PAGE.viewAll}<`);
     expect(moduleChunk(html, "social")).not.toContain(TEXT_ACTION_CLASS);
     expect(moduleChunk(html, "education")).not.toContain(TEXT_ACTION_CLASS);
+    expect(moduleChunk(html, "social")).toContain("data-house-action-arrow");
+    expect(moduleChunk(html, "education")).toContain("data-house-action-arrow");
+    expect(moduleChunk(html, "news")).toContain("data-house-action-arrow");
+    expect(moduleChunk(html, "needs-you")).toContain("data-house-action-arrow");
+    expect(moduleChunk(html, "ai-next")).toContain("data-house-action-arrow");
     expect(moduleLabelClass(html, "education")).toBe(DASHBOARD_SECTION_TITLE_CLASS);
     expect(moduleLabelClass(html, "social")).toBe(DASHBOARD_SECTION_TITLE_CLASS);
     expect(moduleLabelClass(html, "news")).toBe(DASHBOARD_SECTION_TITLE_CLASS);
     expect(moduleLabelClass(html, "needs-you")).toBe(DASHBOARD_SECTION_TITLE_CLASS);
     expect(moduleLabelClass(html, "ai-next")).toBe(DASHBOARD_SECTION_TITLE_CLASS);
     expect(moduleChunk(html, "needs-you")).not.toContain(TEXT_ACTION_CLASS);
-    expect(moduleChunk(html, "ai-next")).toContain(TEXT_ACTION_CLASS);
-    expect(moduleChunk(html, "news")).toContain(TEXT_ACTION_CLASS);
+    expect(moduleChunk(html, "ai-next")).not.toContain(TEXT_ACTION_CLASS);
+    expect(moduleChunk(html, "news")).not.toContain(TEXT_ACTION_CLASS);
     const newsAt = html.indexOf('data-overview-module="news"');
     expect(html.slice(html.lastIndexOf("<section", newsAt), newsAt)).toContain(
       "dashboard-home-panel",
@@ -330,16 +345,19 @@ describe("OverviewHome", () => {
     expect(needsAt).toBeGreaterThan(revenueAt);
     expect(aiAt).toBeGreaterThan(needsAt);
     expect(ai).toContain(OVERVIEW_PAGE.aiNext);
-    expect(ai).toContain(OVERVIEW_PAGE.aiAsk);
     expect(ai).toContain("data-overview-ai-ask");
+    expect(ai).toContain(`aria-label="${OVERVIEW_PAGE.aiAsk}"`);
     expect(ai).toContain("<button");
-    expect(ai).toContain(TEXT_ACTION_CLASS);
+    expect(ai).toContain("data-house-action-arrow");
+    expect(ai).not.toContain(TEXT_ACTION_CLASS);
+    expect(ai).not.toContain(`>${OVERVIEW_PAGE.aiAsk}<`);
     expect(ai).not.toContain('href="/messages"');
     expect(ai).not.toContain('href="/dashboard"');
     expect(ai).not.toContain(`href="${OVERVIEW_PAGE.aiNextHref}"`);
     expect(html).not.toMatch(/promo|banner|shouty|maximize your/i);
     expect(moduleSrc).toContain("AskAiOpenButton");
     expect(moduleSrc).toContain("data-overview-ai-ask");
+    expect(moduleSrc).toContain("HouseActionArrow");
     expect(homeSrc).toContain('testId="ai-next"');
     expect(homeSrc).toContain("OVERVIEW_PAGE.aiAsk");
   });
@@ -430,13 +448,19 @@ describe("OverviewHome", () => {
     expect(html).toContain('data-overview-ai-next="a2"');
     expect(html).toContain('data-overview-ai-next="a3"');
     expect(html).toContain("Ask 24Frame AI");
+    expect(html).toContain(`aria-label="${OVERVIEW_PAGE.aiAsk}"`);
     expect(html).toContain(`href="${OVERVIEW_PAGE.revenueHref}"`);
     expect(html).toContain("data-overview-ai-ask");
+    expect(html).toContain("data-overview-revenue-arrow");
+    expect(html).toContain("data-overview-module-arrow");
+    expect(html).toContain("data-house-action-arrow");
     expect(html).not.toContain('href="/messages"');
     expect(html).not.toContain(`href="${OVERVIEW_PAGE.aiNextHref}"`);
-    expect(html).not.toContain(`href="${OVERVIEW_PAGE.socialHref}"`);
-    expect(html).not.toContain(`href="${OVERVIEW_PAGE.educationHref}"`);
-    expect(html).not.toContain(`href="${OVERVIEW_PAGE.needsYouHref}"`);
+    expect(html).toContain(`href="${OVERVIEW_PAGE.socialHref}"`);
+    expect(html).toContain(`href="${OVERVIEW_PAGE.educationHref}"`);
+    expect(html).toContain(`href="${OVERVIEW_PAGE.needsYouHref}"`);
+    expect(html).not.toContain(`>${OVERVIEW_PAGE.aiAsk}<`);
+    expect(html).not.toContain(`>${OVERVIEW_PAGE.aggregation}<`);
     expect(moduleChunk(html, "social")).not.toContain(TEXT_ACTION_CLASS);
     expect(moduleChunk(html, "education")).not.toContain(TEXT_ACTION_CLASS);
     expect(moduleLabelClass(html, "education")).toBe(DASHBOARD_SECTION_TITLE_CLASS);

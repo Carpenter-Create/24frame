@@ -1,8 +1,9 @@
 "use client";
 
+import Link from "next/link";
+
 import { AskAiOpenButton } from "@/components/chrome/ask-ai-overlay";
-import { TextAction } from "@/components/chrome/house";
-import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
+import { HouseActionArrow } from "@/components/chrome/house-action-arrow";
 import {
   DashboardHomeEmpty,
   DashboardHomePanel,
@@ -12,11 +13,20 @@ import {
   DASHBOARD_RELATED_GAP_CLASS,
   DASHBOARD_SECTION_TITLE_CLASS,
 } from "@/lib/dashboard-craft";
-import { overviewModuleHeaderAction } from "@/lib/overview";
+import {
+  overviewModuleHeaderAction,
+  OVERVIEW_MODULE_ARROW_CLASS,
+} from "@/lib/overview";
 
 // Shared Home module shell — Social · Education · Industry news · Needs you · AI.
 // Net revenue uses the dashboard panel + house period chips, not this shell.
 // Header chrome lives inside the grey panel. Do not float a title on page white.
+// Trailing header CTA is now a glyph-only HouseActionArrow (Adam
+// 2026-09-19). The destination label survives as the arrow's
+// aria-label. Ask 24Frame AI stays as an AskAiOpenButton — content
+// swaps from the word "Ask …" to the same house arrow. Global
+// TextAction is left alone; Dashboard's ranked View-all keeps its
+// word + arrow pattern.
 
 export function OverviewModule({
   testId,
@@ -43,11 +53,23 @@ export function OverviewModule({
         </p>
         {action ? (
           action.href.startsWith("?ai=") ? (
-            <AskAiOpenButton className={TEXT_ACTION_CLASS} data-overview-ai-ask="">
-              {action.label}
+            <AskAiOpenButton
+              aria-label={action.label}
+              data-overview-ai-ask=""
+              data-overview-module-arrow=""
+              className={OVERVIEW_MODULE_ARROW_CLASS}
+            >
+              <HouseActionArrow />
             </AskAiOpenButton>
           ) : (
-            <TextAction href={action.href}>{action.label}</TextAction>
+            <Link
+              href={action.href}
+              aria-label={action.label}
+              data-overview-module-arrow=""
+              className={OVERVIEW_MODULE_ARROW_CLASS}
+            >
+              <HouseActionArrow />
+            </Link>
           )
         ) : null}
       </div>
