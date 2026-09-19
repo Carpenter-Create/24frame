@@ -71,6 +71,7 @@ export const SETTINGS = {
   agreementsEmpty: "No agreements on this account.",
   refer: USER_MENU.refer,
   referHref: USER_MENU.referHref,
+  back: "Back",
   dashboard: "Home",
   dashboardHref: DASHBOARD_HREF,
 } as const;
@@ -83,6 +84,7 @@ export const SETTINGS_ABSENT = [
   "Used to sign in.",
   "Name and email on this account.",
   "Edit public profile",
+  "Home",
 ] as const;
 
 export type SettingsHubSection = "profile" | "organization" | "preferences";
@@ -158,9 +160,12 @@ export const SETTINGS_PREF_BLOCK_CLASS =
 export const SETTINGS_PREF_TITLE_CLASS = "t-heading text-ink";
 
 // Mobile Settings page-lead back = News PageHeader ArrowLeft SoT.
-// settingsHeaderBack() is the routing SoT: hub → Home, pushed pane →
-// Settings. Hidden at md, where the Settings rail stays. Do not put
-// a caret in HouseLeadChrome. Do not fork a third back glyph.
+// settingsHeaderBack() is the routing SoT: hub → Back (client history
+// when there is an in-app referrer; dashboard land only as fallback),
+// pushed pane → Settings. Hidden at md, where the Settings rail stays.
+// Do not hard-label the hub "Home" — Settings is account chrome from
+// any surface, not a Home-owned workspace. News stays "Home".
+// Do not put a caret in HouseLeadChrome. Do not fork a third back glyph.
 export const SETTINGS_HEADER_PAD_CLASS = MOBILE_CHROME_LEAD_PAD_CLASS;
 export const SETTINGS_PAGE_LEAD_BACK_CLASS = "md:hidden";
 
@@ -209,9 +214,22 @@ export function settingsHeaderBack(pathname: string | null | undefined): {
   label: string;
 } {
   if (!pathname || pathname === SETTINGS.href) {
-    return { href: SETTINGS.dashboardHref, label: SETTINGS.dashboard };
+    return { href: SETTINGS.dashboardHref, label: SETTINGS.back };
   }
   return { href: SETTINGS.href, label: SETTINGS.title };
+}
+
+/** Same-origin document.referrer = usable in-app history for hub Back. */
+export function settingsHubHasInAppReferrer(
+  referrer: string | null | undefined,
+  origin: string,
+): boolean {
+  if (!referrer || !origin) return false;
+  try {
+    return new URL(referrer).origin === origin;
+  } catch {
+    return false;
+  }
 }
 
 function pathSection(pathname: string): SettingsHubSection {

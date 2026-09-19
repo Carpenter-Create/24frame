@@ -8,6 +8,7 @@ vi.mock("next/navigation", () => ({
   redirect: vi.fn((to: string) => {
     throw new Error(`REDIRECT:${to}`);
   }),
+  useRouter: () => ({ back: vi.fn(), push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
 }));
 vi.mock("@/components/settings/profile-settings", () => ({
   ProfileSettings: () => <div data-settings-hub="profile" />,
