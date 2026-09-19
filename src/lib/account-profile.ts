@@ -45,7 +45,7 @@ export const ACCOUNT_PROFILE = {
 
 export const COMPANY_PROFILE = {
   title: "Company",
-  href: "/account/company",
+  href: "/settings/organization",
   subtitle: `Name of the ${COMPANY_AGGREGATION_WORKSPACE} on this account.`,
   nameLabel: "Company name",
   nameRequired: "Company name is required.",

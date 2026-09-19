@@ -23,8 +23,6 @@ import {
   settingsLandHref,
   settingsManageCoursesVisible,
   settingsRailActive,
-  settingsSection,
-  settingsSectionHref,
 } from "./settings";
 
 const RETIRED_SETTINGS_PATHS = [
@@ -94,9 +92,6 @@ describe("settings hub lock", () => {
       "/settings/organization",
       "/settings/preferences",
     ]);
-    expect(settingsSectionHref("profile")).toBe("/settings/profile");
-    expect(settingsSectionHref("organization")).toBe("/settings/organization");
-    expect(settingsSectionHref("preferences")).toBe("/settings/preferences");
   });
 
   it("opens a hub section from the path — agreements / refer wash Profile", () => {
@@ -106,10 +101,8 @@ describe("settings hub lock", () => {
     expect(settingsHubSection("/settings/refer")).toBe("profile");
     expect(settingsHubSection("/settings/organization")).toBe("organization");
     expect(settingsHubSection("/settings/preferences")).toBe("preferences");
-    expect(settingsSection("/settings/organization")).toBe("organization");
-    expect(settingsSection("/settings/preferences")).toBe("preferences");
-    expect(settingsSection("")).toBe("profile");
-    expect(settingsSection(null)).toBe("profile");
+    expect(settingsHubSection("")).toBe("profile");
+    expect(settingsHubSection(null)).toBe("profile");
   });
 
   it("hard-cuts retired workspace-spine paths — no redirect table", () => {

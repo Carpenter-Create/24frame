@@ -2,7 +2,7 @@ import { PRODUCT_NAME } from "@/lib/product";
 import { aggregationPath } from "@/lib/workspace";
 
 // Staff ops copy + client recipient copy. Ops write path stays /aggregation/gc/finance.
-// Recipient read path is /aggregation/reports (legacy /earn* /finance* /reports redirect).
+// Recipient read path is /aggregation/reports. Retired /earn* /finance* /reports 404.
 // Official complementary-split lock: display client % and remainder only. Do
 // not invent a second fee field.
 

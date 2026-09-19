@@ -2,7 +2,8 @@ import { CHANNELS_HREF } from "@/lib/channel-card";
 
 // Team /channels address book. Copy and list helpers live here, not in JSX.
 // The list page is identity + empty OR identity + card grid. Create is a
-// separate surface. Do not invent fixture channels. DB table stays vendors.
+// separate surface. Do not invent fixture channels. DB table stays
+// vendors (schema SoT). UI copy is channel.
 
 export const CHANNELS_PAGE = {
   title: "Channels",
@@ -13,9 +14,6 @@ export const CHANNELS_PAGE = {
   addHref: `${CHANNELS_HREF}/new`,
   statusFilterLabel: "Filter by status",
 } as const;
-
-/** @deprecated Use CHANNELS_PAGE — kept for leftover internal imports. */
-export const VENDORS_PAGE = CHANNELS_PAGE;
 
 export const VENDOR_MODE_LABELS: Record<"portal_upload" | "email", string> = {
   portal_upload: "Portal upload",

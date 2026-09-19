@@ -21,7 +21,7 @@ export function PosterGridSkeleton({ count = 8 }: { count?: number }) {
   );
 }
 
-// A table skeleton (matches DataTable rows).
+// A table skeleton (matches house list rows).
 export function TableSkeleton({ rows = 6 }: { rows?: number }) {
   return (
     <div className="overflow-hidden rounded-[var(--radius-lg)] border border-hairline">
