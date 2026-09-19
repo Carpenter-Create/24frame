@@ -7,7 +7,6 @@ import {
   NEWS_HOME_HREF,
   NEWS_HREF,
   NEWS_INGEST_PATH,
-  NEWS_LEGACY_HREF,
   NEWS_PAGE,
   newsHistoryBackLink,
   NEWS_READ_REVALIDATE_SECONDS,
@@ -43,7 +42,6 @@ describe("News SoT", () => {
     expect(NEWS_HOME_HREF).toBe("/home");
     expect(NEWS_HREF).toBe("/home/news");
     expect(NEWS_HREF.startsWith(`${NEWS_HOME_HREF}/`)).toBe(true);
-    expect(NEWS_LEGACY_HREF).toBe("/news");
     expect(NEWS_PAGE.back).toBe("Home");
     expect(NEWS_PAGE.backHref).toBe(NEWS_HOME_HREF);
     expect(newsHistoryBackLink()).toEqual({ href: "/home", label: "Home" });
@@ -51,10 +49,6 @@ describe("News SoT", () => {
     expect(NEWS_PAGE.sources).toBe("Sources");
     expect(NEWS_PAGE.sourcesAll).toBe("All");
     expect(NEWS_PAGE.filterEmpty).toBe("No headlines from the selected sources.");
-    const nextConfig = readFileSync("next.config.ts", "utf8");
-    expect(nextConfig).toContain(
-      '{ source: "/news", destination: "/home/news", permanent: true }',
-    );
     expect(NEWS_HOME_CAP).toBe(15);
     expect(NEWS_WINDOW_DAYS).toBe(90);
     expect(NEWS_WINDOW_MS).toBe(90 * 24 * 60 * 60 * 1000);

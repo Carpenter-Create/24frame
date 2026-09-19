@@ -12,7 +12,7 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn() }),
   useSearchParams: () => new URLSearchParams(),
 }));
-vi.mock("@/app/(app)/messages/ask-globee-actions", () => ({
+vi.mock("@/app/(app)/aggregation/messages/ask-globee-actions", () => ({
   startAskGlobeeConversation: vi.fn(),
   appendAskGlobeeTurn: vi.fn(),
   completeAskGlobeeTurn: vi.fn(),
@@ -218,7 +218,7 @@ describe("AppShell header", () => {
     expect(leadSrc).not.toContain('tone="pill"');
     expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
 
-    for (const path of ["/", "/titles", "/deliveries", "/catalog-health", "/messages"]) {
+    for (const path of ["/", "/aggregation/titles", "/aggregation/attention", "/aggregation/messages"]) {
       navigation.pathname = path;
       const html = renderShell();
       expect(html).not.toContain("data-org-switcher");
@@ -276,10 +276,7 @@ describe("AppShell Home chrome", () => {
     expect(homeBranch).toContain("HOUSE_CANVAS_X_CLASS");
     expect(homeBranch).toContain("data-app-home-frame");
 
-    navigation.pathname = "/overview";
-    expect(renderShell()).not.toContain("data-app-rail");
-
-    for (const path of ["/dashboard", "/social", "/social/courses"]) {
+    for (const path of ["/aggregation/dashboard", "/social", "/education"]) {
       navigation.pathname = path;
       const html = renderShell();
       expect(html).toContain("data-app-rail");
@@ -341,7 +338,7 @@ describe("AppShell Access rail and home frame", () => {
   });
 
   it("does not restyle the titles bleed or other page frames", () => {
-    navigation.pathname = "/titles";
+    navigation.pathname = "/aggregation/titles";
     const titles = renderShell();
     expect(titles).toContain("w-full pb-24");
     expect(titles).not.toContain("data-app-home-frame");
@@ -351,23 +348,23 @@ describe("AppShell Access rail and home frame", () => {
     expect(titles).not.toContain("Search titles...");
     expect(titles).not.toContain("⌘K");
 
-    navigation.pathname = "/queue";
+    navigation.pathname = "/aggregation/queue";
     const queue = renderShell();
     expect(queue).toContain("w-full pb-24");
     expect(queue).not.toContain("data-app-home-frame");
     expect(queue).not.toContain("data-app-messages-frame");
     expect(queue).not.toContain("pb-24 pt-8");
 
-    navigation.pathname = "/deliveries";
-    const deliveries = renderShell();
-    expect(deliveries).toContain("px-[var(--chrome-gutter)]");
-    expect(deliveries).toContain("pb-24 pt-8");
-    expect(deliveries).not.toContain("px-6 pb-24 pt-8");
-    expect(deliveries).not.toContain("data-app-home-frame");
-    expect(deliveries).not.toContain("data-app-messages-frame");
-    expect(deliveries).not.toContain("data-org-switcher");
+    navigation.pathname = "/aggregation/activity";
+    const activity = renderShell();
+    expect(activity).toContain("px-[var(--chrome-gutter)]");
+    expect(activity).toContain("pb-24 pt-8");
+    expect(activity).not.toContain("px-6 pb-24 pt-8");
+    expect(activity).not.toContain("data-app-home-frame");
+    expect(activity).not.toContain("data-app-messages-frame");
+    expect(activity).not.toContain("data-org-switcher");
 
-    navigation.pathname = "/catalog-health";
+    navigation.pathname = "/aggregation/attention";
     const health = renderShell();
     expect(health).toContain("px-[var(--chrome-gutter)]");
     expect(health).toContain("pb-24 pt-8");
@@ -378,7 +375,7 @@ describe("AppShell Access rail and home frame", () => {
   });
 
   it("gives Aggregation Dashboard the Education content measure", () => {
-    navigation.pathname = "/dashboard";
+    navigation.pathname = "/aggregation/dashboard";
     const dashboard = renderShell();
     const dashboardCanvas = houseMeasureMarkup(dashboard);
     expect(dashboard).not.toContain("data-app-home-frame");
@@ -391,7 +388,7 @@ describe("AppShell Access rail and home frame", () => {
     expect(dashboard).toContain("data-app-rail");
     expect(dashboard).not.toContain('data-home-chrome=""');
 
-    navigation.pathname = "/social/courses";
+    navigation.pathname = "/education";
     const education = renderShell();
     const educationCanvas = houseMeasureMarkup(education);
     expect(education).not.toContain("data-app-home-frame");
@@ -411,20 +408,20 @@ describe("AppShell Access rail and home frame", () => {
     expect(shellSrc).not.toContain("MessagesHeaderSlot");
     expect(shellSrc).not.toContain("messagesPage");
 
-    navigation.pathname = "/messages";
-    const leftover = renderShell("ask-globee-landing");
-    expect(leftover).not.toContain("data-app-messages-frame");
-    expect(leftover).not.toContain("data-header-search");
-    expect(leftover).not.toContain("data-header-thread");
-    expect(leftover).not.toContain("⌘K");
-    expect(leftover).toContain("data-ask-assistant-header");
+    navigation.pathname = "/aggregation/messages";
+    const messages = renderShell("ask-globee-landing");
+    expect(messages).not.toContain("data-app-messages-frame");
+    expect(messages).not.toContain("data-header-search");
+    expect(messages).not.toContain("data-header-thread");
+    expect(messages).not.toContain("⌘K");
+    expect(messages).toContain("data-ask-assistant-header");
 
     navigation.pathname = "/home";
     expect(renderShell("ask-globee-landing")).toContain("data-ask-assistant-header");
     navigation.pathname = "/";
     expect(renderShell("access-gate")).not.toContain("data-header-search");
     expect(renderShell("access-gate")).not.toContain("data-titles-header-search");
-    navigation.pathname = "/titles";
+    navigation.pathname = "/aggregation/titles";
     expect(renderShell("access-gate")).not.toContain("data-header-search");
     expect(shellSrc).not.toContain("SearchField");
   });
@@ -483,8 +480,8 @@ describe("AppShell client mobile chrome", () => {
     expect(layoutSrc).not.toMatch(/key=\{ctx/);
   });
 
-  it("keeps mobile chrome when leftover /messages intercepts — Search stays off the page header", () => {
-    navigation.pathname = "/messages";
+  it("keeps mobile chrome on Aggregation messages — Search stays off the page header", () => {
+    navigation.pathname = "/aggregation/messages";
     const leftover = renderShell("ask-globee-landing");
     expect(leftover).not.toContain("data-mobile-nav-trigger");
     expect(leftover).toContain("data-house-phone-dest-chips");
@@ -543,7 +540,7 @@ describe("AppShell /settings rail", () => {
     expect(html).not.toContain("data-mobile-nav-trigger");
     expect(html).not.toContain("data-house-phone-dest-chips");
     expect(html).toContain("data-settings-header-back");
-    expect(html).toContain('href="/"');
+    expect(html).toContain('href="/aggregation/dashboard"');
     expect(html).not.toContain("Search");
     expect(html).not.toContain("data-header-search");
     expect(html).not.toContain("data-titles-header-search");
@@ -560,7 +557,7 @@ describe("AppShell /settings rail", () => {
   });
 
   it("keeps the Access rail on neighboring routes", () => {
-    for (const path of ["/", "/titles", "/deliveries", "/catalog-health", "/messages", "/help"]) {
+    for (const path of ["/", "/aggregation/titles", "/aggregation/attention", "/aggregation/messages", "/help"]) {
       navigation.pathname = path;
       const html = renderShell();
       expect(html).toContain("data-side-nav");
@@ -601,7 +598,7 @@ describe("AppShell /settings rail", () => {
 
 describe("AppShell rail-collapse chevron", () => {
   it("uses CaretDoubleLeft Bold in the expanded header row with house tokens", () => {
-    for (const path of ["/", "/social", "/social/courses"]) {
+    for (const path of ["/", "/social", "/education"]) {
       navigation.pathname = path;
       const html = renderShell();
       expect(html).toContain("Collapse sidebar");
@@ -646,7 +643,7 @@ describe("AppShell rail-collapse chevron", () => {
     expect(expanded).toContain("/brand/24frame-logo-light.svg");
     expect(expanded).toContain("/brand/24frame-logo-dark.svg");
     expect(expanded).toContain('aria-label="24Frame"');
-    expect(expanded).toContain('href="/dashboard"');
+    expect(expanded).toContain('href="/aggregation/dashboard"');
     expect(expanded).not.toContain("data-brand-emblem-mark");
     expect(expanded).not.toContain("t-body font-medium text-ink");
     expect(shellSrc).not.toContain("24frame-wordmark");
@@ -655,7 +652,7 @@ describe("AppShell rail-collapse chevron", () => {
     const collapsed = renderShell(undefined, undefined, true);
     expect(collapsed).toContain("data-brand-emblem");
     expect(collapsed).toContain('aria-label="24Frame"');
-    expect(collapsed).toContain('href="/dashboard"');
+    expect(collapsed).toContain('href="/aggregation/dashboard"');
 
     navigation.pathname = "/social";
     const social = renderShell();
@@ -665,11 +662,11 @@ describe("AppShell rail-collapse chevron", () => {
     navigation.pathname = "/settings";
     const settings = renderShell();
     expect(settings).toContain("data-brand-emblem");
-    expect(settings).toContain('href="/dashboard"');
+    expect(settings).toContain('href="/aggregation/dashboard"');
   });
 
   it("puts CaretDoubleRight Bold on a separate expand row when collapsed", () => {
-    for (const path of ["/", "/social", "/social/courses"]) {
+    for (const path of ["/", "/social", "/education"]) {
       navigation.pathname = path;
       const html = renderShell(undefined, undefined, true);
       expect(html).toContain("Expand sidebar");
@@ -872,8 +869,8 @@ describe("AppShell rail-collapse chevron", () => {
     expect(html).not.toContain("data-mobile-nav-trigger");
   });
 
-  it("uses house chrome on Education courses routes — no Social feed chrome", () => {
-    navigation.pathname = "/social/courses";
+  it("uses house chrome on Education routes — no Social feed chrome", () => {
+    navigation.pathname = "/education";
     const html = renderShell();
     expect(html).toContain("data-education-workspace");
     expect(html).toContain('data-workspace="education"');
@@ -915,14 +912,14 @@ describe("AppShell rail-collapse chevron", () => {
       html.indexOf("data-app-header-trailing"),
     );
     expect(html).not.toMatch(/data-house-lead=""[^>]*\bhidden(?:\s|")/);
-    expect(html).toContain('href="/social/courses"');
+    expect(html).toContain('href="/education"');
     expect(html).not.toContain("data-social-workspace");
     expect(html).not.toContain("data-social-top-bar");
     expect(html).not.toContain("data-social-tab-bar");
     expect(html).not.toContain("data-social-rail");
     expect(html).not.toContain('data-social-tab-item="Create"');
 
-    navigation.pathname = "/social/courses/welcome-to-24frame";
+    navigation.pathname = "/education/welcome-to-24frame";
     const detail = renderShell();
     expect(detail).toContain("data-education-workspace");
     expect(detail).toContain('data-workspace="education"');

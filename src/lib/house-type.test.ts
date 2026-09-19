@@ -24,7 +24,7 @@ const DASHBOARD_CHROME_PATHS = [
   "src/app/tokens.css",
   "src/app/globals.css",
   "src/lib/dashboard-craft.ts",
-  "src/app/(app)/dashboard/page.tsx",
+  "src/app/(app)/aggregation/dashboard/page.tsx",
   ...readdirSync("src/components/dashboard")
     .filter((name) => name.endsWith(".ts") || name.endsWith(".tsx"))
     .map((name) => join("src/components/dashboard", name)),

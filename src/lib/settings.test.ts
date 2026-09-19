@@ -60,7 +60,7 @@ describe("settings hub lock", () => {
     expect(SETTINGS.refer).toBe("Refer a friend");
     expect(SETTINGS.referHref).toBe("/settings/refer");
     expect(SETTINGS.dashboard).toBe("Home");
-    expect(SETTINGS.dashboardHref).toBe("/");
+    expect(SETTINGS.dashboardHref).toBe("/aggregation/dashboard");
     expect(SETTINGS.company).toBe("Company");
     expect(SETTINGS).not.toHaveProperty("companyHref");
     expect(SETTINGS).not.toHaveProperty("youHref");
@@ -127,7 +127,7 @@ describe("settings hub lock", () => {
   });
 
   it("opens Settings on the universal hub from every workspace", () => {
-    expect(settingsLandHref("/social/courses")).toBe("/settings");
+    expect(settingsLandHref("/education")).toBe("/settings");
     expect(settingsLandHref("/social")).toBe("/settings");
     expect(settingsLandHref("/")).toBe("/settings");
     expect(settingsLandHref("/help")).toBe("/settings");
@@ -139,7 +139,7 @@ describe("settings hub lock", () => {
 
   it("keeps Manage courses staff-only and linked to /education", () => {
     expect(SETTINGS.manageCourses).toBe("Manage courses");
-    expect(SETTINGS.manageCoursesHref).toBe("/education");
+    expect(SETTINGS.manageCoursesHref).toBe("/education/manage");
     expect(settingsManageCoursesVisible(true)).toBe(true);
     expect(settingsManageCoursesVisible(false)).toBe(false);
     expect(SETTINGS_RAIL_ABSENT).toContain("Manage courses");
@@ -190,7 +190,10 @@ describe("settings hub lock", () => {
   });
 
   it("backs the phone header Home on the list and Settings on a pushed pane", () => {
-    expect(settingsHeaderBack("/settings")).toEqual({ href: "/", label: "Home" });
+    expect(settingsHeaderBack("/settings")).toEqual({
+      href: SETTINGS.dashboardHref,
+      label: "Home",
+    });
     expect(settingsHeaderBack("/settings/preferences")).toEqual({
       href: "/settings",
       label: "Settings",

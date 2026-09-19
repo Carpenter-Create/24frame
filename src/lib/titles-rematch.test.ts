@@ -12,11 +12,11 @@ function src(rel: string): string {
   return readFileSync(join(ROOT, rel), "utf8");
 }
 
-const titlesPage = src("src/app/(app)/titles/page.tsx");
+const titlesPage = src("src/app/(app)/aggregation/titles/page.tsx");
 const titlesCatalog = src("src/components/titles/titles-catalog.tsx");
-const titleDetail = src("src/app/(app)/titles/[id]/page.tsx");
+const titleDetail = src("src/app/(app)/aggregation/titles/[id]/page.tsx");
 const titleHero = src("src/components/layout/title-hero.tsx");
-const metadataPage = src("src/app/(app)/titles/[id]/metadata/page.tsx");
+const metadataPage = src("src/app/(app)/aggregation/titles/[id]/metadata/page.tsx");
 
 describe("titles rematch miss list v1 — P0 gates", () => {
   it("G1: Titles H1 has no catalog-count subtitle", () => {

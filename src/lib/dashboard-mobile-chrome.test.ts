@@ -25,7 +25,7 @@ import {
 import { WorkspaceSwitcher } from "@/components/chrome/workspace-switcher";
 
 vi.mock("next/navigation", () => ({
-  usePathname: () => "/dashboard",
+  usePathname: () => "/aggregation/dashboard",
   useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
 }));
 

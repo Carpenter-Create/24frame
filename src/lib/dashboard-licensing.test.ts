@@ -8,7 +8,7 @@ import {
 } from "./dashboard-licensing";
 
 const titlesSrc = readFileSync("src/lib/dashboard-licensing.ts", "utf8");
-const pageSrc = readFileSync("src/app/(app)/dashboard/page.tsx", "utf8");
+const pageSrc = readFileSync("src/app/(app)/aggregation/dashboard/page.tsx", "utf8");
 
 function delivery(partial: {
   delivery_id: string;
@@ -28,7 +28,7 @@ function delivery(partial: {
 describe("licensing nested title → endpoint", () => {
   it("locks composition copy and cap — no readiness buckets", () => {
     expect(DASHBOARD_LICENSING.title).toBe("Licensing status");
-    expect(DASHBOARD_LICENSING.viewAllHref).toBe("/titles");
+    expect(DASHBOARD_LICENSING.viewAllHref).toBe("/aggregation/titles");
     expect(DASHBOARD_LICENSING.empty).toBe("No submissions yet.");
     expect(DASHBOARD_LICENSING_TITLE_CAP).toBe(3);
     expect(titlesSrc).not.toContain("Ready");
@@ -93,7 +93,7 @@ describe("licensing nested title → endpoint", () => {
     expect(snapshot.groups.map((group) => group.id)).toEqual(["t3", "t2", "t1"]);
     expect(snapshot.groups.some((group) => group.id === "t4")).toBe(false);
     const north = snapshot.groups[0];
-    expect(north.href).toBe("/titles/24F-0001236");
+    expect(north.href).toBe("/aggregation/titles/24F-0001236");
     expect(north.endpoints.map((row) => row.deliveryId)).toEqual(["d-new", "d-new-2"]);
     expect(north.endpoints[0]).toMatchObject({
       endpoint: "Endpoint C",

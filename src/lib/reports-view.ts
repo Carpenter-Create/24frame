@@ -13,6 +13,7 @@ import {
   type ReportsPeriod,
   type ReportsUserOption,
 } from "@/lib/reports";
+import { TITLES_HREF } from "@/lib/title-public-id";
 import { DELIVERY_STATUS_ROW_LABELS, type DeliveryStatus } from "@/lib/titles";
 
 export type ReportsTitle = ClientHomeTitle & { created_by?: string | null };
@@ -186,7 +187,7 @@ export function reportsDetailRows(input: {
     .map((title) => ({
       id: title.id,
       title: title.title,
-      href: `/titles/${title.id}`,
+      href: `${TITLES_HREF}/${title.id}`,
       user: title.created_by ? labels.get(title.created_by) ?? null : null,
       status: dashboardTitleStatusLabel(title.status),
       deliveries: deliveryCounts.get(title.id) ?? 0,

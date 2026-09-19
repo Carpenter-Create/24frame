@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import DashboardPage from "@/app/(app)/dashboard/page";
+import DashboardPage from "@/app/(app)/aggregation/dashboard/page";
 import { DASHBOARD_ADMIN } from "@/lib/dashboard-admin";
 import {
   DASHBOARD_ADMIN_STACK_CLASS,
@@ -106,7 +106,7 @@ describe("Aggregation Dashboard Coinbase register lock", () => {
 
   it("locks G1–G5 and Must 1–8 on the remaining spine only", async () => {
     const html = renderToStaticMarkup(await DashboardPage({ searchParams: Promise.resolve({}) }));
-    const page = readFileSync("src/app/(app)/dashboard/page.tsx", "utf8");
+    const page = readFileSync("src/app/(app)/aggregation/dashboard/page.tsx", "utf8");
     const hero = readFileSync("src/components/dashboard/dashboard-admin-hero.tsx", "utf8");
     const craft = readFileSync("src/lib/dashboard-craft.ts", "utf8");
 

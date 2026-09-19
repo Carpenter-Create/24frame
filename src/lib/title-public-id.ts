@@ -1,6 +1,10 @@
+import { aggregationPath } from "@/lib/workspace";
+
 // Client Aggregation catalog ID. Same titles.catalog_no as ops `GC-#######`,
 // different public prefix. UUID stays the primary key and never belongs in a
 // client title URL. Stored catalog_id is the generated ops form (GC- + digits).
+
+export const TITLES_HREF = aggregationPath("titles");
 
 export const CLIENT_CATALOG_PREFIX = "24F";
 export const OPS_CATALOG_PREFIX = "GC";
@@ -38,8 +42,12 @@ export function titleClientPath(
   extra = "",
 ): string {
   const pub = publicCatalogId(storedCatalogId);
-  if (!pub) return extra ? `/titles${extra}` : "/titles";
-  return `/titles/${pub}${extra}`;
+  if (!pub) return extra ? `${TITLES_HREF}${extra}` : TITLES_HREF;
+  return `${TITLES_HREF}/${pub}${extra}`;
+}
+
+export function titleOpsPath(titleId: string, extra = ""): string {
+  return `${aggregationPath("gc/titles", titleId)}${extra}`;
 }
 
 export function isCanonicalTitleSlug(

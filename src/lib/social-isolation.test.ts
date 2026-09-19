@@ -39,8 +39,8 @@ describe("social isolation lock", () => {
     expect(board).toContain('from "@/lib/social-session"');
     expect(board).not.toContain("@/lib/supabase/admin");
     expect(board).not.toContain("rebuild_leaderboards");
-    const list = readFileSync("src/app/(app)/social/courses/page.tsx", "utf8");
-    const detail = readFileSync("src/app/(app)/social/courses/[slug]/page.tsx", "utf8");
+    const list = readFileSync("src/app/(app)/education/page.tsx", "utf8");
+    const detail = readFileSync("src/app/(app)/education/[slug]/page.tsx", "utf8");
     expect(list).toContain('from "@/lib/social-session"');
     expect(detail).toContain('from "@/lib/social-session"');
     expect(list).not.toContain("@/lib/supabase/admin");

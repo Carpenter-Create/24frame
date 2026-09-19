@@ -60,7 +60,7 @@ describe("SettingsPreferencesPage", () => {
     expect(html).toContain(SETTINGS.manageCourses);
     expect(html).toContain('data-settings-manage-courses=""');
     expect(html).toContain(`href="${SETTINGS.manageCoursesHref}"`);
-    expect(html).toContain('href="/education"');
+    expect(html).toContain('href="/education/manage"');
     expect(html).not.toContain("/gc/education");
     expect(html).toContain(SETTINGS.preferencesEmpty);
   });

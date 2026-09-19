@@ -191,9 +191,9 @@ describe("catalog status filter", () => {
   });
 
   it("preserves search when building a status href", () => {
-    expect(catalogFilterHref("winter", "live")).toBe("/titles?q=winter&status=live");
-    expect(catalogFilterHref("", "all")).toBe("/titles");
-    expect(catalogFilterHref("  ", "draft")).toBe("/titles?status=draft");
+    expect(catalogFilterHref("winter", "live")).toBe("/aggregation/titles?q=winter&status=live");
+    expect(catalogFilterHref("", "all")).toBe("/aggregation/titles");
+    expect(catalogFilterHref("  ", "draft")).toBe("/aggregation/titles?status=draft");
   });
 });
 

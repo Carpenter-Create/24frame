@@ -1,11 +1,12 @@
 import { financeExportHref, financePeriodLabel } from "@/lib/finance";
+import { aggregationPath } from "@/lib/workspace";
 
 // Reports is the Aggregation deep-dive surface. Copy lives here, not JSX.
 // Period + download rematch Overview composition only — no foreign brand or data.
 // No ledger math. Download reuses the existing closed-period export.
 // Find-user / export stay on Reports. Dashboard keeps one quiet Period.
 
-export const REPORTS_HREF = "/reports";
+export const REPORTS_HREF = aggregationPath("reports");
 
 export const REPORTS_PAGE = {
   title: "Reports",
@@ -406,13 +407,3 @@ export function countNamedRows(
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 }
 
-export function isLegacyReportsPath(pathname: string): boolean {
-  return (
-    pathname === "/analytics" ||
-    pathname.startsWith("/analytics/") ||
-    pathname === "/earn" ||
-    pathname.startsWith("/earn/") ||
-    pathname === "/finance" ||
-    pathname.startsWith("/finance/")
-  );
-}

@@ -1,6 +1,5 @@
 import type { CourseOutlineModule } from "@/lib/courses";
-import { SOCIAL_ROUTES } from "@/lib/social";
-import { EDUCATION_HREF } from "@/lib/education";
+import { EDUCATION_HREF, EDUCATION_MANAGE_HREF } from "@/lib/education";
 
 // Quiet Education header search. Course + video only. Copy lives here,
 // not in JSX. Desktop mounts in the shared mid-lead slot with Social
@@ -18,11 +17,13 @@ export function parseEducationSearchQuery(raw: string | null | undefined): strin
 }
 
 export function educationSearchAction(pathname: string): string {
-  if (pathname === EDUCATION_HREF || pathname.startsWith(`${EDUCATION_HREF}/`)) {
-    return EDUCATION_HREF;
+  if (pathname === EDUCATION_MANAGE_HREF || pathname.startsWith(`${EDUCATION_MANAGE_HREF}/`)) {
+    return EDUCATION_MANAGE_HREF;
   }
-  if (pathname.startsWith(`${SOCIAL_ROUTES.courses}/`)) return pathname;
-  return SOCIAL_ROUTES.courses;
+  if (pathname === EDUCATION_HREF || pathname.startsWith(`${EDUCATION_HREF}/`)) {
+    return pathname === EDUCATION_HREF ? EDUCATION_HREF : pathname;
+  }
+  return EDUCATION_HREF;
 }
 
 export function educationSearchHaystack(

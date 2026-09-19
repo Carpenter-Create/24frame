@@ -1,3 +1,4 @@
+import { aggregationPath } from "@/lib/workspace";
 import type { Database } from "@/lib/supabase/database.types";
 import { TIER_META, type Tier } from "@/lib/agreements";
 import {
@@ -70,8 +71,10 @@ export const CLIENT_PROFILE = {
   termEnds: "Term ends",
 } as const;
 
+export const GC_CLIENTS_HREF = aggregationPath("gc/clients");
+
 export function clientOrgHref(orgId: string): string {
-  return `/gc/clients/${orgId}`;
+  return `${GC_CLIENTS_HREF}/${orgId}`;
 }
 
 export function clientDirectorySecondary(org: ClientOrg): string {

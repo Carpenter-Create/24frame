@@ -47,7 +47,7 @@ import {
   deleteAskGlobeeConversation,
   pinAskGlobeeConversation,
   renameAskGlobeeConversation,
-} from "@/app/(app)/messages/ask-globee-actions";
+} from "@/app/(app)/aggregation/messages/ask-globee-actions";
 
 // Desktop 247:295 keeps PDF + ··· in the right cluster, 16 from the avatar.
 // Mobile 531:542 hides the PDF tray; Download PDF lives in the existing ···

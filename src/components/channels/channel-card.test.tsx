@@ -1,4 +1,3 @@
-import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
@@ -53,11 +52,4 @@ describe("ChannelCard house IA", () => {
     expect(html).toContain("gap-[var(--space-6)]");
   });
 
-  it("keeps /vendors as a permanent redirect to /channels", () => {
-    const src = readFileSync("next.config.ts", "utf8");
-    expect(src).toContain('{ source: "/vendors", destination: "/channels", permanent: true }');
-    expect(src).toContain(
-      '{ source: "/vendors/:path*", destination: "/channels/:path*", permanent: true }',
-    );
-  });
 });

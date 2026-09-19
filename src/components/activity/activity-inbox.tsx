@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardBody } from "@/components/ui/card";
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { MessageLink } from "@/app/(app)/messages/message-link";
+import { MessageLink } from "@/app/(app)/aggregation/messages/message-link";
 import { cn } from "@/lib/cn";
 import {
   ACTIVITY_PAGE,

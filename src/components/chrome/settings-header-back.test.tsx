@@ -49,7 +49,7 @@ describe("SettingsHeaderBack", () => {
     expect(html).not.toContain('stroke-width="1.33"');
     expect(html).not.toContain("lucide-chevron-left");
     expect(html).not.toContain("lucide-");
-    expect(SETTINGS.dashboardHref).toBe("/");
+    expect(SETTINGS.dashboardHref).toBe("/aggregation/dashboard");
     expect(SETTINGS_HEADER_BACK_CLASS).toContain("gap-[var(--space-2)]");
     expect(SETTINGS_HEADER_BACK_CLASS).toContain("t-body");
     expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("font-normal");

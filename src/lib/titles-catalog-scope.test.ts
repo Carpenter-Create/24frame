@@ -13,13 +13,12 @@ function src(rel: string): string {
 }
 
 const OTHER_PAGES = [
-  "src/app/(app)/dashboard/page.tsx",
-  "src/app/(app)/deliveries/page.tsx",
-  "src/app/(app)/attention/page.tsx",
-  "src/app/(app)/activity/page.tsx",
-  "src/app/(app)/messages/page.tsx",
-  "src/app/(app)/(operator)/gc/titles/[id]/page.tsx",
-  "src/app/(app)/titles/[id]/page.tsx",
+  "src/app/(app)/aggregation/dashboard/page.tsx",
+  "src/app/(app)/aggregation/attention/page.tsx",
+  "src/app/(app)/aggregation/activity/page.tsx",
+  "src/app/(app)/aggregation/messages/page.tsx",
+  "src/app/(app)/(operator)/aggregation/gc/titles/[id]/page.tsx",
+  "src/app/(app)/aggregation/titles/[id]/page.tsx",
   "src/components/dashboard/dashboard-home.tsx",
   "src/components/ui/card.tsx",
   "src/components/layout/data-table.tsx",
@@ -30,26 +29,26 @@ const TITLES_COMMENT_PATHS = [
   "src/lib/titles-catalog.ts",
   "src/lib/titles-lifecycle.ts",
   "src/components/titles/titles-catalog.tsx",
-  "src/app/(app)/titles/page.tsx",
-  "src/app/(app)/titles/[id]/page.tsx",
+  "src/app/(app)/aggregation/titles/page.tsx",
+  "src/app/(app)/aggregation/titles/[id]/page.tsx",
   "src/components/layout/title-hero.tsx",
-  "src/app/(app)/titles/add-title-button.tsx",
+  "src/app/(app)/aggregation/titles/add-title-button.tsx",
 ] as const;
 
 describe("titles catalog scope", () => {
   it("keeps catalog search on /titles and staff /queue — same toolbar SoT", () => {
-    const catalogPage = src("src/app/(app)/titles/page.tsx");
-    const homePage = src("src/app/(app)/dashboard/page.tsx");
+    const catalogPage = src("src/app/(app)/aggregation/titles/page.tsx");
+    const homePage = src("src/app/(app)/aggregation/dashboard/page.tsx");
     const shell = src("src/components/chrome/app-shell.tsx");
     const housePageSearch = src("src/components/chrome/house-page-search.tsx");
-    const messagesPage = src("src/app/(app)/messages/page.tsx");
+    const messagesPage = src("src/app/(app)/aggregation/messages/page.tsx");
     const accessGate = src("src/components/messages/access-upgrade-gate.tsx");
     const thread = src("src/components/messages/ask-globee-thread.tsx");
     const landing = src("src/components/messages/ask-globee-landing.tsx");
     const messagesHeader = src("src/components/chrome/messages-app-header.tsx");
-    const titleDetail = src("src/app/(app)/titles/[id]/page.tsx");
-    const queue = src("src/app/(app)/(operator)/queue/page.tsx");
-    const deliveries = src("src/app/(app)/(operator)/gc/deliveries/page.tsx");
+    const titleDetail = src("src/app/(app)/aggregation/titles/[id]/page.tsx");
+    const queue = src("src/app/(app)/(operator)/aggregation/queue/page.tsx");
+    const deliveries = src("src/app/(app)/(operator)/aggregation/gc/deliveries/page.tsx");
 
     expect(catalogPage).toContain("HousePageSearch");
     expect(catalogPage).toContain("TITLES_CATALOG.searchPlaceholder");
@@ -107,8 +106,8 @@ describe("titles catalog scope", () => {
     const catalog = src("src/components/titles/titles-catalog.tsx");
     const catalogLib = src("src/lib/titles-catalog.ts");
     const home = src("src/components/dashboard/dashboard-home.tsx");
-    const titleDetail = src("src/app/(app)/titles/[id]/page.tsx");
-    const homePage = src("src/app/(app)/dashboard/page.tsx");
+    const titleDetail = src("src/app/(app)/aggregation/titles/[id]/page.tsx");
+    const homePage = src("src/app/(app)/aggregation/dashboard/page.tsx");
 
     expect(catalog).toContain("px-[var(--space-4)]");
     expect(catalog).toContain("titles-catalog-list");
@@ -129,20 +128,20 @@ describe("titles catalog scope", () => {
   });
 
   it("deep-links title detail into Titles and Attention", () => {
-    const titleDetail = src("src/app/(app)/titles/[id]/page.tsx");
-    expect(titleDetail).toContain('href="/titles"');
-    expect(titleDetail).toContain('href="/attention"');
+    const titleDetail = src("src/app/(app)/aggregation/titles/[id]/page.tsx");
+    expect(titleDetail).toContain("backHref={TITLES_HREF}");
+    expect(titleDetail).toContain("href={ATTENTION_HREF}");
     expect(titleDetail).toContain("data-title-ops-links");
     expect(titleDetail).toContain("TITLE_DETAIL");
   });
 
   it("does not add a drafts nav item or move the catalog onto deliveries", () => {
-    expect(NAV.filter((item) => item.href === "/titles")).toHaveLength(1);
+    expect(NAV.filter((item) => item.href === "/aggregation/titles")).toHaveLength(1);
     expect(NAV.some((item) => /draft/i.test(item.label))).toBe(false);
-    expect(NAV.find((item) => item.href === "/attention")?.label).toBe("Recent activity");
-    expect(NAV.find((item) => item.href === "/activity")?.label).toBe("Activity");
+    expect(NAV.find((item) => item.href === "/aggregation/attention")?.label).toBe("Recent activity");
+    expect(NAV.find((item) => item.href === "/aggregation/activity")?.label).toBe("Activity");
     expect(NAV.find((item) => item.href === "/deliveries")).toBeUndefined();
-    expect(GC_NAV.some((item) => item.href === "/titles")).toBe(false);
+    expect(GC_NAV.some((item) => item.href === "/aggregation/titles")).toBe(false);
   });
 
   it("loads landscape row skeletons, not a poster grid", () => {
@@ -157,13 +156,13 @@ describe("titles catalog scope", () => {
     expect(skeletons).not.toContain("aspect-[2/3]");
     expect(skeletons).toContain("size-[44px]");
     expect(skeletons).not.toContain("h-8 w-24 md:hidden");
-    expect(src("src/app/(app)/titles/loading.tsx")).toContain("CatalogSkeleton");
-    expect(src("src/app/(app)/titles/[id]/loading.tsx")).toContain("TitleDetailSkeleton");
-    expect(src("src/app/(app)/(operator)/queue/loading.tsx")).toContain("CatalogSkeleton");
+    expect(src("src/app/(app)/aggregation/titles/loading.tsx")).toContain("CatalogSkeleton");
+    expect(src("src/app/(app)/aggregation/titles/[id]/loading.tsx")).toContain("TitleDetailSkeleton");
+    expect(src("src/app/(app)/(operator)/aggregation/queue/loading.tsx")).toContain("CatalogSkeleton");
   });
 
   it("absorbs staff /queue into the Titles catalog list — no Card lookalike", () => {
-    const queue = src("src/app/(app)/(operator)/queue/page.tsx");
+    const queue = src("src/app/(app)/(operator)/aggregation/queue/page.tsx");
     const catalog = src("src/components/titles/titles-catalog.tsx");
     expect(queue).toContain("@/components/titles/titles-catalog");
     expect(queue).toContain("@/lib/titles-catalog");
@@ -178,7 +177,7 @@ describe("titles catalog scope", () => {
     expect(catalog).toContain("TitlesCatalogStaffCols");
     expect(catalog).toContain("data-titles-catalog-submitter");
     expect(catalog).toContain("data-titles-catalog-submitted");
-    expect(GC_NAV.find((item) => item.href === "/queue")?.label).toBe("Queue");
+    expect(GC_NAV.find((item) => item.href === "/aggregation/queue")?.label).toBe("Queue");
   });
 
   it("keeps house-shell language in titles comments — no reference-brand word", () => {

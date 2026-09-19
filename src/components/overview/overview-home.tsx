@@ -21,6 +21,7 @@ import {
   DASHBOARD_SECTION_TITLE_CLASS,
 } from "@/lib/dashboard-craft";
 import type { ClientHomeDoNextItem, DashboardChangeRow } from "@/lib/dashboard-home";
+import { TITLES_HREF } from "@/lib/title-public-id";
 import { formatUsdCents } from "@/lib/finance";
 import type { NewsItem } from "@/lib/news";
 import { HOME_GREETING_TIME_ZONE, homeGreeting, homeGreetingDate } from "@/lib/home-greeting";
@@ -241,7 +242,7 @@ export function OverviewHome({
             {aiNext.map((row) => (
               <li key={row.id} data-overview-ai-next={row.id} className={DASHBOARD_ROW_CLASS}>
                 <Link
-                  href={`/titles/${row.id}`}
+                  href={`${TITLES_HREF}/${row.id}`}
                   className="min-w-0 truncate t-body-sm font-medium text-ink"
                 >
                   {row.title}

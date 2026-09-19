@@ -7,7 +7,7 @@ describe("settings hub isolation", () => {
   it("does not implement Education CMS inside Settings — staff door is a href only", () => {
     const pane = readFileSync("src/components/settings/preferences-settings.tsx", "utf8");
     const preferencesPage = readFileSync("src/app/(app)/settings/preferences/page.tsx", "utf8");
-    expect(SETTINGS.manageCoursesHref).toBe("/education");
+    expect(SETTINGS.manageCoursesHref).toBe("/education/manage");
     expect(pane).toContain("SETTINGS.manageCoursesHref");
     expect(pane).toContain("data-settings-manage-courses");
     expect(pane).not.toContain("education-forms");
@@ -17,8 +17,8 @@ describe("settings hub isolation", () => {
     expect(preferencesPage).not.toContain("@/lib/education-admin");
     expect(preferencesPage).not.toContain("(operator)/education");
     expect(pane).not.toContain("(operator)/education");
-    expect(existsSync("src/app/(app)/education/page.tsx")).toBe(false);
-    expect(existsSync("src/app/(app)/(operator)/education/page.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/education/page.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/(operator)/education/manage/page.tsx")).toBe(true);
   });
 
   it("never shows Manage courses to members", () => {

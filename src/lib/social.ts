@@ -41,7 +41,6 @@ export const SOCIAL_ROUTES = {
   profileByHandle: "/social/u",
   groups: "/social/groups",
   groupsNew: "/social/groups/new",
-  courses: "/social/courses",
   leaderboard: "/social/leaderboard",
   dms: "/social/dms",
 } as const;
@@ -161,9 +160,6 @@ export function socialDmHref(id: string): string {
   return `${SOCIAL_ROUTES.dms}/${encodeURIComponent(id)}`;
 }
 
-export function socialCourseHref(slug: string): string {
-  return `${SOCIAL_ROUTES.courses}/${encodeURIComponent(slug)}`;
-}
 
 export function socialStoryHref(id: string): string {
   return `${SOCIAL_ROUTES.stories}/${encodeURIComponent(id)}`;

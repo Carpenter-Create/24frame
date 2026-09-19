@@ -40,10 +40,10 @@ describe("public / ops catalog prefix split", () => {
 
 describe("titleClientPath", () => {
   it("builds /titles/24F-####### and never a UUID path", () => {
-    expect(titleClientPath("GC-0001234")).toBe("/titles/24F-0001234");
-    expect(titleClientPath("GC-0001234", "/metadata")).toBe("/titles/24F-0001234/metadata");
-    expect(titleClientPath(UUID)).toBe("/titles");
-    expect(titleClientPath(null)).toBe("/titles");
+    expect(titleClientPath("GC-0001234")).toBe("/aggregation/titles/24F-0001234");
+    expect(titleClientPath("GC-0001234", "/metadata")).toBe("/aggregation/titles/24F-0001234/metadata");
+    expect(titleClientPath(UUID)).toBe("/aggregation/titles");
+    expect(titleClientPath(null)).toBe("/aggregation/titles");
     expect(titleClientPath(UUID)).not.toContain(UUID);
   });
 

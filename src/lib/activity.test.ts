@@ -151,7 +151,7 @@ describe("Activity bell cap", () => {
     expect(activityKindIcon("title_rejected")).toBe("film-slate");
     expect(activityKindIcon("delivery_update")).toBe("paper-plane-tilt");
     expect(ACTIVITY_KIND_ICON.title_rejected).toBe("film-slate");
-    expect(activityItemHref(OPEN_NEW)).toBe("/activity");
+    expect(activityItemHref(OPEN_NEW)).toBe("/aggregation/activity");
     expect(activityRelativeTime("2026-09-18T11:00:00.000Z", NOW.getTime())).toBe("1h");
     expect(ACTIVITY_PAGE.viewAll).toBe("View all activity");
     expect(ACTIVITY_PAGE.dismiss).toBe("Mark done");

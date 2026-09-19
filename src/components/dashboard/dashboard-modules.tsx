@@ -15,6 +15,8 @@ import {
   DASHBOARD_ROW_CLASS,
   DASHBOARD_ROW_LIST_CLASS,
 } from "@/lib/dashboard-craft";
+import { ATTENTION_HREF } from "@/lib/findings";
+import { TITLES_HREF } from "@/lib/title-public-id";
 import {
   DASHBOARD_HOME,
   dashboardCatalogValue,
@@ -69,7 +71,7 @@ export function DashboardTitleRows({ items }: { items: readonly ClientHomeJustIn
           >
             <span className={`flex min-w-0 flex-wrap items-center ${DASHBOARD_RELATED_GAP_CLASS}`}>
               <Link
-                href={`/titles/${item.id}`}
+                href={`${TITLES_HREF}/${item.id}`}
                 className="t-body-sm font-medium text-ink transition-colors hover:text-ink-2"
               >
                 {item.title}
@@ -103,7 +105,7 @@ export function DashboardDeliveriesAction({ rows }: { rows: readonly DashboardDe
               className={DASHBOARD_ROW_CLASS}
             >
               <Link
-                href={`/titles/${row.title_id}`}
+                href={`${TITLES_HREF}/${row.title_id}`}
                 className="t-body-sm font-medium text-ink transition-colors hover:text-ink-2"
               >
                 {row.title}
@@ -130,7 +132,7 @@ export function DashboardFindingsGlance({
     <DashboardHomePanel aria-label={DASHBOARD_HOME.findingsGlance} data-dashboard-module="findings-glance">
       <div className={`flex items-center justify-between ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD_LIST}`}>
         <p className={DASHBOARD_SECTION_TITLE_CLASS}>{DASHBOARD_HOME.findingsGlance}</p>
-        <TextAction href="/attention">{DASHBOARD_HOME.findingsGlanceCta}</TextAction>
+        <TextAction href={ATTENTION_HREF}>{DASHBOARD_HOME.findingsGlanceCta}</TextAction>
       </div>
       <div className="border-t border-hairline px-[var(--space-4)] py-[var(--space-4)]">
         <p

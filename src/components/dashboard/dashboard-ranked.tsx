@@ -24,6 +24,7 @@ import {
   DASHBOARD_TOP_PILL_CLUSTER_CLASS,
 } from "@/lib/dashboard-craft";
 import { DASHBOARD_HOME } from "@/lib/dashboard-home";
+import { TITLES_HREF } from "@/lib/title-public-id";
 import { preserveWindowScroll } from "@/lib/dashboard-scroll";
 import {
   DASHBOARD_LIST_DEFAULT_LIMIT,
@@ -317,7 +318,7 @@ export function DashboardTopTitles({
       empty={DASHBOARD_HOME.topTitlesEmpty}
       rows={rankedRowsFromTitles(items)}
       testId="top-titles"
-      viewAllHref="/titles"
+      viewAllHref={TITLES_HREF}
       modes={["list", "bars"]}
       defaultMode="bars"
       periodLabel={periodLabel}
@@ -343,7 +344,7 @@ const TOP_PERFORMING_PANES: Record<
   titles: {
     label: DASHBOARD_HOME.pillTitles,
     empty: DASHBOARD_HOME.topTitlesEmpty,
-    href: "/titles",
+    href: TITLES_HREF,
     testId: "top-titles",
     modes: ["list", "bars"],
     defaultMode: "list",
@@ -353,7 +354,7 @@ const TOP_PERFORMING_PANES: Record<
   platforms: {
     label: DASHBOARD_HOME.pillPlatforms,
     empty: DASHBOARD_HOME.platformsEmpty,
-    href: "/titles",
+    href: TITLES_HREF,
     testId: "platforms",
     modes: ["list", "bars"],
     defaultMode: "list",
@@ -363,7 +364,7 @@ const TOP_PERFORMING_PANES: Record<
   territories: {
     label: DASHBOARD_HOME.pillTerritories,
     empty: DASHBOARD_HOME.territoriesEmpty,
-    href: "/titles",
+    href: TITLES_HREF,
     testId: "territories",
     modes: ["map", "list", "bars"],
     defaultMode: "map",

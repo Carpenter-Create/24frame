@@ -3,7 +3,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
-import { EducationCourseRail } from "@/app/(app)/(operator)/education/education-course-rail";
+import { EducationCourseRail } from "@/app/(app)/(operator)/education/manage/education-course-rail";
 import { SocialRailAccountChip } from "@/components/social/social-rail-extras";
 import { SocialTopBar } from "@/components/social/social-top-bar";
 import { PageHeader } from "@/components/ui/page-header";
@@ -44,11 +44,11 @@ import { SOCIAL_PILL_ACTIVE_CLASS, SOCIAL_PILL_IDLE_CLASS } from "@/lib/social-c
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
-  usePathname: () => "/education/orientation",
+  usePathname: () => "/education/manage/orientation",
   useSearchParams: () => new URLSearchParams(),
 }));
 
-vi.mock("@/app/(app)/(operator)/education/actions", () => ({
+vi.mock("@/app/(app)/(operator)/education/manage/actions", () => ({
   reorderEducationCourses: vi.fn(),
   createEducationCourse: vi.fn(),
   uploadEducationCover: vi.fn(),
@@ -78,11 +78,11 @@ const socialTopBar = readFileSync("src/components/social/social-top-bar.tsx", "u
 const socialChrome = readFileSync("src/lib/social-chrome.ts", "utf8");
 const destChips = readFileSync("src/lib/house-phone-shell.ts", "utf8");
 const educationRail = readFileSync(
-  "src/app/(app)/(operator)/education/education-course-rail.tsx",
+  "src/app/(app)/(operator)/education/manage/education-course-rail.tsx",
   "utf8",
 );
 const educationShell = readFileSync(
-  "src/app/(app)/(operator)/education/education-shell.tsx",
+  "src/app/(app)/(operator)/education/manage/education-shell.tsx",
   "utf8",
 );
 const card = readFileSync("src/components/ui/card.tsx", "utf8");
@@ -100,8 +100,8 @@ const HOUSE_SHELL_COMMENT_PATHS = [
   "src/lib/house-lead-chrome.ts",
   "src/components/chrome/house-lead-chrome.tsx",
   "src/lib/social-chrome.ts",
-  "src/app/(app)/(operator)/education/education-shell.tsx",
-  "src/app/(app)/(operator)/education/education-course-rail.tsx",
+  "src/app/(app)/(operator)/education/manage/education-shell.tsx",
+  "src/app/(app)/(operator)/education/manage/education-course-rail.tsx",
   "src/components/ui/card.tsx",
   "src/components/ui/page-header.tsx",
   "src/components/chrome/house-page-search.tsx",

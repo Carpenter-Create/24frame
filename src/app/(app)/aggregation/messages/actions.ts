@@ -1,0 +1,24 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+
+import { ACTIVITY_HREF } from "@/lib/activity";
+import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/supabase/auth";
+import { aggregationPath } from "@/lib/workspace";
+
+// Mark the given notifications read for the current user (per-user read state).
+// Takes one or many ids — used by both "Mark all read" and per-message "Mark as read".
+export async function markNotificationsRead(ids: string[]): Promise<{ error?: string }> {
+  if (ids.length === 0) return {};
+  const supabase = await createClient();
+  const user = await getAuthUser();
+  if (!user) return { error: "Not authenticated." };
+
+  const { error } = await supabase.rpc("mark_notifications_read", { p_ids: ids });
+  if (error) return { error: error.message };
+
+  revalidatePath(aggregationPath("messages"));
+  revalidatePath(ACTIVITY_HREF);
+  return {};
+}

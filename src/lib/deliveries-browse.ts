@@ -1,4 +1,4 @@
-// Pure helpers for the client /deliveries browse surface. URL parsing, row validation,
+// Pure helpers for the client Titles delivery browse surface. URL parsing, row validation,
 // filter, sort, status-chip tone, page-view copy, and query construction — unit-tested in
 // isolation. The page composes DataTable / HousePageSelect / EmptyState; this module never
 // touches React or Supabase. RPC rows are untrusted until validated.
@@ -11,6 +11,7 @@ import {
   type SortDir,
 } from "@/lib/catalog-view";
 import { DETAIL_LIST, UNPAGINATED_MAX } from "@/lib/list-bounds";
+import { TITLES_HREF } from "@/lib/title-public-id";
 import { DELIVERY_STATUS_ROW_LABELS, type DeliveryStatus } from "@/lib/titles";
 
 export type DeliveryBrowseRow = {
@@ -123,7 +124,7 @@ export function normalizeMyDeliveries(data: unknown): DeliveryBrowseRow[] {
 }
 
 export function deliveryTitleHref(row: { title_id: string }): string {
-  return `/titles/${row.title_id}`;
+  return `${TITLES_HREF}/${row.title_id}`;
 }
 
 export type DeliveryTitleRow = {
@@ -246,7 +247,7 @@ export const DELIVERIES_NO_DATA = {
   title: "No deliveries yet",
   description: "Placements appear here once a title is delivered to a platform.",
   actionLabel: "View titles",
-  actionHref: "/titles",
+  actionHref: TITLES_HREF,
 } as const;
 
 export const DELIVERIES_FILTER_MISS = {
@@ -344,7 +345,7 @@ export function sortDeliveries(
   });
 }
 
-/** Build /deliveries querystring; omits default status/sort for a clean canonical URL. */
+/** Build Titles querystring; omits default status/sort for a clean canonical URL. */
 export function buildDeliveriesQuery(opts: {
   status: DeliveryStatusFilter;
   sort: Sort;
@@ -371,7 +372,7 @@ export function deliveriesStatusHref(
     sort: currentSort,
     override: { status: nextStatus },
   });
-  return `/deliveries${q}`;
+  return `${TITLES_HREF}${q}`;
 }
 
 export function deliveriesSortHref(
@@ -387,7 +388,7 @@ export function deliveriesSortHref(
     sort: currentSort,
     override: { sort: next },
   });
-  return `/deliveries${q}`;
+  return `${TITLES_HREF}${q}`;
 }
 
 /** Filter-miss "Show all" destination while preserving the active sort. */

@@ -566,8 +566,8 @@ describe("Titles catalog phone CTA cluster", () => {
 describe("Titles catalog has no stray FAB", () => {
   it("keeps Sporty Blue Add Title in header/toolbar chrome and no fixed list/up control", () => {
     const catalog = readFileSync(join(ROOT, "src/components/titles/titles-catalog.tsx"), "utf8");
-    const page = readFileSync(join(ROOT, "src/app/(app)/titles/page.tsx"), "utf8");
-    const add = readFileSync(join(ROOT, "src/app/(app)/titles/add-title-button.tsx"), "utf8");
+    const page = readFileSync(join(ROOT, "src/app/(app)/aggregation/titles/page.tsx"), "utf8");
+    const add = readFileSync(join(ROOT, "src/app/(app)/aggregation/titles/add-title-button.tsx"), "utf8");
 
     expect(catalog).not.toMatch(/fixed[\s\S]{0,80}(bottom|right)/);
     expect(catalog).not.toContain("data-titles-catalog-fab");

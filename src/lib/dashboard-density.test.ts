@@ -33,7 +33,7 @@ vi.mock("next/navigation", () => ({
 const now = new Date("2026-09-16T12:00:00.000Z");
 const tokens = readFileSync("src/app/tokens.css", "utf8");
 const heroSrc = readFileSync("src/components/dashboard/dashboard-admin-hero.tsx", "utf8");
-const pageSrc = readFileSync("src/app/(app)/dashboard/page.tsx", "utf8");
+const pageSrc = readFileSync("src/app/(app)/aggregation/dashboard/page.tsx", "utf8");
 const craftSrc = readFileSync("src/lib/dashboard-craft.ts", "utf8");
 
 function adminHero(compare: boolean) {

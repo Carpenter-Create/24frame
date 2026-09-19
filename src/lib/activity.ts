@@ -9,6 +9,7 @@ import {
   type ReportsPeriod,
 } from "@/lib/reports";
 import { socialRelativeTime } from "@/lib/social";
+import { aggregationPath } from "@/lib/workspace";
 
 // Activity is the durable account-alert log. One feed: notifications.
 // Open = unread. Done = read. Complete = Done = read — one state.
@@ -17,7 +18,7 @@ import { socialRelativeTime } from "@/lib/social";
 // Resolved tabs. Row body links to the item. X marks done. No View /
 // Done / Mark all. Copy lives here, not JSX.
 
-export const ACTIVITY_HREF = "/activity";
+export const ACTIVITY_HREF = aggregationPath("activity");
 export const ACTIVITY_BELL_OPEN_CAP = 5;
 
 export const ACTIVITY_PAGE = {

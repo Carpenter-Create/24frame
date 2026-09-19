@@ -4,7 +4,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/navigation", () => ({
-  usePathname: () => "/social/courses",
+  usePathname: () => "/education",
   useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn() }),
   useSearchParams: () => new URLSearchParams(),
 }));
@@ -42,7 +42,7 @@ const lead = readFileSync("src/components/chrome/house-lead-chrome.tsx", "utf8")
 const topBar = readFileSync("src/components/social/social-top-bar.tsx", "utf8");
 const leadSearch = readFileSync("src/components/chrome/house-lead-search.tsx", "utf8");
 const sideNav = readFileSync("src/components/chrome/side-nav.tsx", "utf8");
-const titlesPage = readFileSync("src/app/(app)/titles/page.tsx", "utf8");
+const titlesPage = readFileSync("src/app/(app)/aggregation/titles/page.tsx", "utf8");
 const titlesCatalog = readFileSync("src/lib/titles-catalog.ts", "utf8");
 const nav = readFileSync("src/lib/nav.ts", "utf8");
 const switcher = readFileSync("src/lib/workspace-switcher.ts", "utf8");
@@ -123,7 +123,7 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(education).toContain("data-education-header-search");
     expect(education).toContain(HOUSE_SEARCH_PILL_CLASS);
     expect(education).toContain(EDUCATION_SEARCH.placeholder);
-    expect(education).toContain('action="/social/courses"');
+    expect(education).toContain('action="/education"');
     expect(leadSearch).not.toContain("md:w-[420px]");
     expect(leadSearch).not.toContain("md:flex-none");
   });

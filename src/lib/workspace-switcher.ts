@@ -40,7 +40,7 @@
 // trailing cluster (search yields); pills stay full words and
 // shrink-0. No All Accounts clone. No Referrals / billing.
 // Staff Manage courses stays a Settings door — not a fourth
-// lane. Education land stays Route A /social/courses.
+// lane. Education land is /education. Staff CMS is /education/manage.
 // Education quiet search stays Education-only: phone in a
 // full-width row under HouseLeadChrome, desktop in the shared
 // mid-lead slot (same Facebook-compact geometry as Social).

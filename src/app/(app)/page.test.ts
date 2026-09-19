@@ -12,6 +12,6 @@ describe("Aggregation root", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("sends `/` to Dashboard", () => {
-    expect(() => AggregationRootPage()).toThrow("REDIRECT:/dashboard");
+    expect(() => AggregationRootPage()).toThrow("REDIRECT:/aggregation/dashboard");
   });
 });

@@ -109,7 +109,7 @@ describe("social copy lock", () => {
     expect(SOCIAL.dms.addPeople).toBe("Add people");
     expect(SOCIAL_ROUTES.dms).toBe("/social/dms");
     expect(SOCIAL_ROUTES.leaderboard).toBe("/social/leaderboard");
-    expect(SOCIAL_ROUTES.courses).toBe("/social/courses");
+    expect(SOCIAL_ROUTES).not.toHaveProperty("courses");
     expect(SOCIAL_ROUTES.home).toBe("/social");
     expect(SOCIAL_ROUTES.profileByHandle).toBe("/social/u");
     expect(SOCIAL.profile.handlePlaceholder).toBe("Set your handle");

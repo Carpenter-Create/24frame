@@ -68,7 +68,7 @@ describe("vendor licensed-title catalog SoT", () => {
     expect(catalog.map((row) => row.title)).toEqual(["Autumn Road", "Winter Light"]);
     expect(catalog[0]).toMatchObject({
       titleId: "t1",
-      href: "/titles/t1",
+      href: "/aggregation/titles/t1",
       secondary: "GC-1 · US, GB · Approved",
     });
     expect(catalog[1]?.secondary).toBe("GC-2 · CA · Pending");
@@ -78,7 +78,7 @@ describe("vendor licensed-title catalog SoT", () => {
 describe("vendor profile fields", () => {
   it("keeps edit on a dedicated route under the profile", () => {
     expect(vendorEditHref("11111111-1111-4111-8111-111111111111")).toBe(
-      "/channels/11111111-1111-4111-8111-111111111111/edit",
+      "/aggregation/channels/11111111-1111-4111-8111-111111111111/edit",
     );
   });
 

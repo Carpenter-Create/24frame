@@ -100,14 +100,14 @@ describe("StaffDirectoryList", () => {
 
 describe("house law — one directory primitive", () => {
   it("stays the Clients directory primitive — Channels uses its own card/detail", () => {
-    const channels = readFileSync("src/app/(app)/(operator)/channels/page.tsx", "utf8");
-    const channelProfile = readFileSync("src/app/(app)/(operator)/channels/[id]/page.tsx", "utf8");
+    const channels = readFileSync("src/app/(app)/(operator)/aggregation/channels/page.tsx", "utf8");
+    const channelProfile = readFileSync("src/app/(app)/(operator)/aggregation/channels/[id]/page.tsx", "utf8");
     const clients = readFileSync(
-      "src/app/(app)/(operator)/gc/clients/clients-directory.tsx",
+      "src/app/(app)/(operator)/aggregation/gc/clients/clients-directory.tsx",
       "utf8",
     );
     const clientProfile = readFileSync(
-      "src/app/(app)/(operator)/gc/clients/[orgId]/page.tsx",
+      "src/app/(app)/(operator)/aggregation/gc/clients/[orgId]/page.tsx",
       "utf8",
     );
 

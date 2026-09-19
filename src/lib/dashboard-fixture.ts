@@ -9,6 +9,7 @@ import {
 } from "@/lib/dashboard-admin";
 import type { DashboardRankedTitle } from "@/lib/dashboard-home";
 import type { ReportsCountRow } from "@/lib/reports";
+import { TITLES_HREF } from "@/lib/title-public-id";
 
 // Craft-settlement fixture for company-admin `/dashboard` only.
 // Labeled always. Staff/admin + env gate. Strip after Mac PASS.
@@ -133,7 +134,7 @@ export function dashboardFixtureActivity(
       {
         id: title.id,
         title: dashboardFixtureLabel(title.title),
-        href: "/titles",
+        href: TITLES_HREF,
         at,
         count: title.count,
         detail: title.detail,

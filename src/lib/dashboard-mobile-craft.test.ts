@@ -59,7 +59,7 @@ describe("company-admin Dashboard mobile craft", () => {
 
   it("stretches the phone overview + stack to the content column — shared tokens only", () => {
     const hero = readFileSync("src/components/dashboard/dashboard-admin-hero.tsx", "utf8");
-    const page = readFileSync("src/app/(app)/dashboard/page.tsx", "utf8");
+    const page = readFileSync("src/app/(app)/aggregation/dashboard/page.tsx", "utf8");
     const attention = readFileSync("src/components/dashboard/dashboard-attention.tsx", "utf8");
     const licensing = readFileSync("src/components/dashboard/dashboard-licensing-status.tsx", "utf8");
     const ranked = readFileSync("src/components/dashboard/dashboard-ranked.tsx", "utf8");
@@ -116,7 +116,7 @@ describe("company-admin Dashboard mobile craft", () => {
   it("keeps Sample banner + populated fixture rules and kills RL / export / chips", () => {
     const hero = readFileSync("src/components/dashboard/dashboard-admin-hero.tsx", "utf8");
     const controls = readFileSync("src/components/dashboard/dashboard-admin-controls.tsx", "utf8");
-    const page = readFileSync("src/app/(app)/dashboard/page.tsx", "utf8");
+    const page = readFileSync("src/app/(app)/aggregation/dashboard/page.tsx", "utf8");
     const chart = readFileSync("src/components/dashboard/dashboard-revenue-chart.tsx", "utf8");
     expect(DASHBOARD_FIXTURE_BANNER_CLASS).toContain("max-md:sticky");
     expect(hero).toContain("data-dashboard-fixture-banner");

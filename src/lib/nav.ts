@@ -24,12 +24,26 @@ import {
 import type { PhosphorIcon } from "@/lib/phosphor-icon";
 import { ACTIVITY_HREF, ACTIVITY_PAGE } from "@/lib/activity";
 import { AVAILS_HREF, AVAILS_PAGE } from "@/lib/avails";
-import { FINANCE_PAGE } from "@/lib/finance";
-import { GC_LICENSING_STATUS } from "@/lib/gc-deliveries";
-import { REPORTS_HREF, REPORTS_PAGE, isLegacyReportsPath } from "@/lib/reports";
-import type { WorkspaceMode } from "@/lib/workspace";
-import { EDUCATION_ADMIN, EDUCATION_HREF } from "@/lib/education";
+import { FINANCE_HREF, FINANCE_PAGE } from "@/lib/finance";
+import { CHANNELS_HREF } from "@/lib/channel-card";
+import { DASHBOARD_HREF } from "@/lib/dashboard-admin";
+import {
+  EDUCATION_ADMIN,
+  EDUCATION_HREF,
+  EDUCATION_MANAGE_HREF,
+} from "@/lib/education";
+import { ATTENTION_HREF } from "@/lib/findings";
+import { GC_DELIVERIES_HREF, GC_LICENSING_STATUS } from "@/lib/gc-deliveries";
+import { QUEUE_HREF } from "@/lib/queue";
+import { REPORTS_HREF, REPORTS_PAGE } from "@/lib/reports";
 import { SOCIAL_ROUTES } from "@/lib/social";
+import { TITLES_HREF } from "@/lib/title-public-id";
+import {
+  aggregationPath,
+  isAggregationNavActive,
+  isEducationManagePath,
+  type WorkspaceMode,
+} from "@/lib/workspace";
 import { WORKSPACE_EDUCATION_LABEL } from "@/lib/workspace-menu";
 
 export type PhosphorNavItem = {
@@ -78,9 +92,9 @@ export function isHouseAiNavItem(item: NavItem): item is HouseAiNavItem {
 // Fill active. Overlay chrome still uses the house sparkle cluster
 // (HouseAiMark), not a Phosphor catalog glyph.
 export const NAV: PhosphorNavItem[] = [
-  { label: "Dashboard", href: "/dashboard", family: "phosphor", icon: SquaresFour, exact: true },
-  { label: "Titles", href: "/titles", family: "phosphor", icon: FilmSlate },
-  { label: "Recent activity", href: "/attention", family: "phosphor", icon: Pulse },
+  { label: "Dashboard", href: DASHBOARD_HREF, family: "phosphor", icon: SquaresFour, exact: true },
+  { label: "Titles", href: TITLES_HREF, family: "phosphor", icon: FilmSlate },
+  { label: "Recent activity", href: ATTENTION_HREF, family: "phosphor", icon: Pulse },
   {
     label: ACTIVITY_PAGE.title,
     href: ACTIVITY_HREF,
@@ -118,13 +132,13 @@ export const SOCIAL_DESKTOP_NAV: LucideNavItem[] = SOCIAL_NAV.filter(
   (item) => item.href !== SOCIAL_ROUTES.create,
 );
 
-// Member Education rail. Browse stays Route A /social/courses.
-// Staff CMS is /education (operator-gated) via EDUCATION_MANAGE_NAV —
+// Member Education rail. Browse is /education.
+// Staff CMS is /education/manage (operator-gated) via EDUCATION_MANAGE_NAV —
 // never a member manage destination on this rail.
 export const EDUCATION_NAV: PhosphorNavItem[] = [
   {
     label: WORKSPACE_EDUCATION_LABEL,
-    href: SOCIAL_ROUTES.courses,
+    href: EDUCATION_HREF,
     family: "phosphor",
     icon: BookOpen,
   },
@@ -136,7 +150,7 @@ export const EDUCATION_NAV: PhosphorNavItem[] = [
 export const EDUCATION_MANAGE_NAV: PhosphorNavItem[] = [
   {
     label: EDUCATION_ADMIN.manage,
-    href: EDUCATION_HREF,
+    href: EDUCATION_MANAGE_HREF,
     family: "phosphor",
     icon: BookOpen,
   },
@@ -148,18 +162,18 @@ export const STAFF_RAIL_EYEBROW = "Team";
 // Staff-only operator surfaces. Rendered by SideNav only when isGcStaff is true;
 // the (operator) layout remains the authorization gate for these hrefs.
 export const GC_NAV: PhosphorNavItem[] = [
-  { label: "Queue", href: "/queue", family: "phosphor", icon: Tray },
+  { label: "Queue", href: QUEUE_HREF, family: "phosphor", icon: Tray },
   { label: AVAILS_PAGE.title, href: AVAILS_HREF, family: "phosphor", icon: CheckCircle },
-  { label: GC_LICENSING_STATUS.title, href: "/gc/deliveries", family: "phosphor", icon: PaperPlaneTilt },
-  { label: "Channels", href: "/channels", family: "phosphor", icon: Storefront },
+  { label: GC_LICENSING_STATUS.title, href: GC_DELIVERIES_HREF, family: "phosphor", icon: PaperPlaneTilt },
+  { label: "Channels", href: CHANNELS_HREF, family: "phosphor", icon: Storefront },
   {
     label: "Finance",
-    href: "/gc/finance",
+    href: FINANCE_HREF,
     family: "phosphor",
     icon: Wallet,
     ariaLabel: FINANCE_PAGE.navAria,
   },
-  { label: "Clients", href: "/gc/clients", family: "phosphor", icon: Users },
+  { label: "Clients", href: aggregationPath("gc/clients"), family: "phosphor", icon: Users },
 ];
 
 // Phone dest-chip copy leftover. Hamburger sheet is gone — dests live
@@ -173,12 +187,16 @@ export const MOBILE_NAV = {
 
 export function isClientNavActive(pathname: string, item: NavItem): boolean {
   if (isHouseAiNavItem(item)) return false;
-  if (item.href === "/dashboard" && pathname === "/") return true;
-  if (item.href === REPORTS_HREF && isLegacyReportsPath(pathname)) return true;
-  if (
-    item.href === "/attention" &&
-    (pathname === "/catalog-health" || pathname.startsWith("/catalog-health/"))
-  ) {
+  if (item.href === EDUCATION_MANAGE_HREF) {
+    return isEducationManagePath(pathname);
+  }
+  if (item.href === EDUCATION_HREF) {
+    return (
+      !isEducationManagePath(pathname) &&
+      (pathname === EDUCATION_HREF || pathname.startsWith(`${EDUCATION_HREF}/`))
+    );
+  }
+  if (isAggregationNavActive(pathname, item.href, item.exact)) {
     return true;
   }
   return item.exact ? pathname === item.href : pathname.startsWith(item.href);

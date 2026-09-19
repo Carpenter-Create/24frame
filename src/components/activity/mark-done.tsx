@@ -3,7 +3,7 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 
-import { markNotificationsRead } from "@/app/(app)/messages/actions";
+import { markNotificationsRead } from "@/app/(app)/aggregation/messages/actions";
 import { ACTIVITY_PAGE } from "@/lib/activity";
 
 // Complete = Done = read. One RPC, one state.

@@ -3,14 +3,14 @@ import {
   type ClientHomeFinding,
   type ClientHomeTitle,
 } from "@/lib/dashboard-home";
-import { titleClientPath } from "@/lib/title-public-id";
+import { TITLES_HREF, titleClientPath } from "@/lib/title-public-id";
+import { aggregationPath } from "@/lib/workspace";
 
-// Company-admin `/dashboard` Attention glance. Catalog findings now.
+// Company-admin `/aggregation/dashboard` Attention glance. Catalog findings now.
 // Contract kinds are craft-capable later — no contract schema invent.
-// Row = what + timestamp. Cap 5. View all → /attention. Not readiness buckets.
+// Row = what + timestamp. Cap 5. View all → Attention. Not readiness buckets.
 
-export const ATTENTION_HREF = "/attention";
-export const CATALOG_HEALTH_HREF = "/catalog-health";
+export const ATTENTION_HREF = aggregationPath("attention");
 
 export const DASHBOARD_ATTENTION = {
   title: "Attention",
@@ -71,7 +71,7 @@ export function buildAttentionGlance(input: {
           at,
           href: title
             ? titleClientPath(title.catalog_id)
-            : `/titles/${finding.entity_id}`,
+            : `${TITLES_HREF}/${finding.entity_id}`,
           kind: "catalog",
         },
       ];

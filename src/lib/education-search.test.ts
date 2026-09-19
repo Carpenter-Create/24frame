@@ -16,11 +16,9 @@ describe("Education quiet search", () => {
     expect(EDUCATION_SEARCH.label).toBe("Search courses and videos");
     expect(EDUCATION_SEARCH.placeholder).toBe("Search courses and videos");
     expect(educationSearchAction("/education")).toBe("/education");
-    expect(educationSearchAction("/education/orientation")).toBe("/education");
-    expect(educationSearchAction("/social/courses")).toBe("/social/courses");
-    expect(educationSearchAction("/social/courses/orientation")).toBe(
-      "/social/courses/orientation",
-    );
+    expect(educationSearchAction("/education/orientation")).toBe("/education/orientation");
+    expect(educationSearchAction("/education/manage")).toBe("/education/manage");
+    expect(educationSearchAction("/social/explore")).toBe("/education");
     expect(parseEducationSearchQuery("  cut  ")).toBe("cut");
     expect(parseEducationSearchQuery(null)).toBe("");
   });

@@ -32,7 +32,7 @@ const REPORTS_SRC_PATHS = [
   "src/lib/reports-craft.ts",
   "src/lib/reports-view.ts",
   "src/lib/reports-fixture.ts",
-  "src/app/(app)/reports/page.tsx",
+  "src/app/(app)/aggregation/reports/page.tsx",
   ...readdirSync("src/components/reports")
     .filter((name) => name.endsWith(".ts") || name.endsWith(".tsx"))
     .map((name) => join("src/components/reports", name)),
@@ -50,9 +50,9 @@ function emptyHero() {
 
 describe("Aggregation Reports miss list v1.1", () => {
   it("keeps Find-user and Download off Dashboard and on Reports", () => {
-    const dashboard = readFileSync("src/app/(app)/dashboard/page.tsx", "utf8");
+    const dashboard = readFileSync("src/app/(app)/aggregation/dashboard/page.tsx", "utf8");
     const dashControls = readFileSync("src/components/dashboard/dashboard-admin-controls.tsx", "utf8");
-    const reportsPage = readFileSync("src/app/(app)/reports/page.tsx", "utf8");
+    const reportsPage = readFileSync("src/app/(app)/aggregation/reports/page.tsx", "utf8");
     expect(dashboard).not.toContain("data-reports-download");
     expect(dashboard).not.toContain("data-reports-user");
     expect(dashControls).not.toContain("data-dashboard-user");

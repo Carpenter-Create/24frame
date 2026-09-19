@@ -67,27 +67,6 @@ const nextConfig: NextConfig = {
     // holding a derivative longer than its source URL stays valid.
     minimumCacheTTL: 3600,
   },
-
-  async redirects() {
-    return [
-      { source: "/", destination: "/dashboard", permanent: true },
-      { source: "/analytics", destination: "/reports", permanent: true },
-      { source: "/analytics/:path*", destination: "/reports/:path*", permanent: true },
-      { source: "/earn", destination: "/reports", permanent: true },
-      { source: "/earn/:path*", destination: "/reports/:path*", permanent: true },
-      { source: "/finance", destination: "/reports", permanent: true },
-      { source: "/finance/:path*", destination: "/reports/:path*", permanent: true },
-      { source: "/gc/education", destination: "/education", permanent: true },
-      { source: "/gc/education/:slug", destination: "/education/:slug", permanent: true },
-      { source: "/catalog-health", destination: "/attention", permanent: true },
-      { source: "/catalog-health/:path*", destination: "/attention/:path*", permanent: true },
-      { source: "/deliveries", destination: "/titles", permanent: true },
-      { source: "/deliveries/:path*", destination: "/titles/:path*", permanent: true },
-      { source: "/vendors", destination: "/channels", permanent: true },
-      { source: "/vendors/:path*", destination: "/channels/:path*", permanent: true },
-      { source: "/news", destination: "/home/news", permanent: true },
-    ];
-  },
 };
 
 // Org/project slugs are public identifiers for the existing Sentry project.

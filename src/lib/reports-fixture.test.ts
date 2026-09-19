@@ -55,7 +55,7 @@ describe("reports craft fixture", () => {
     const download = readFileSync("src/lib/reports.ts", "utf8");
     expect(reports).not.toContain("reports-fixture");
     expect(download).not.toContain("REPORTS_FIXTURE_POINTS");
-    expect(readFileSync("src/app/(app)/reports/page.tsx", "utf8")).toContain("reports-fixture");
-    expect(readFileSync("src/app/(app)/reports/page.tsx", "utf8")).not.toContain("dashboard-fixture");
+    expect(readFileSync("src/app/(app)/aggregation/reports/page.tsx", "utf8")).toContain("reports-fixture");
+    expect(readFileSync("src/app/(app)/aggregation/reports/page.tsx", "utf8")).not.toContain("dashboard-fixture");
   });
 });

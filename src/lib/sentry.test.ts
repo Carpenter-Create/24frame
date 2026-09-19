@@ -186,11 +186,11 @@ describe("Sentry wiring contract", () => {
     expect(readFileSync("src/app/error.tsx", "utf8")).toContain("captureException");
     expect(readFileSync("src/app/(app)/error.tsx", "utf8")).toContain("captureException");
     expect(readFileSync("src/app/global-error.tsx", "utf8")).toContain("captureException");
-    expect(readFileSync("src/app/(app)/social/courses/error.tsx", "utf8")).toContain(
+    expect(readFileSync("src/app/(app)/education/error.tsx", "utf8")).toContain(
       "captureException",
     );
     expect(
-      readFileSync("src/app/(app)/social/courses/[slug]/error.tsx", "utf8"),
+      readFileSync("src/app/(app)/education/[slug]/error.tsx", "utf8"),
     ).toContain("captureException");
   });
 });

@@ -10,9 +10,9 @@ import {
   MESSAGES_TRUNCATED,
 } from "@/lib/notifications";
 import type { Database } from "@/lib/supabase/database.types";
-import { MarkAllRead } from "@/app/(app)/messages/mark-all-read";
-import { MarkRead } from "@/app/(app)/messages/mark-read";
-import { MessageLink } from "@/app/(app)/messages/message-link";
+import { MarkAllRead } from "@/app/(app)/aggregation/messages/mark-all-read";
+import { MarkRead } from "@/app/(app)/aggregation/messages/mark-read";
+import { MessageLink } from "@/app/(app)/aggregation/messages/message-link";
 
 type InboxNotification = Database["public"]["Functions"]["my_notifications"]["Returns"][number];
 

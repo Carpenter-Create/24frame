@@ -2,6 +2,7 @@ import { isJustIn } from "@/lib/releases";
 import { isoInReportsPeriod, parseReportsPeriod } from "@/lib/reports";
 import { TITLE_STATUS_LABELS, type TitleStatus } from "@/lib/titles";
 import { TITLES_CATALOG } from "@/lib/titles-catalog";
+import { TITLES_HREF } from "@/lib/title-public-id";
 
 // Client `/dashboard` portfolio copy and snapshot derivation. Lives in lib/, not JSX.
 // Identity on Dashboard is the real org name only — no status, role, or term line.
@@ -14,7 +15,7 @@ export const DASHBOARD_HOME = {
   justInEmpty: "No titles added recently.",
   catalogEmpty: "The catalog is empty.",
   addTitle: TITLES_CATALOG.addTitle,
-  addTitleHref: "/titles",
+  addTitleHref: TITLES_HREF,
   catalogHealthCta: "Attention",
   catalog: "Catalog",
   needsAttention: "Needs attention",

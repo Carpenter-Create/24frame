@@ -29,7 +29,7 @@ import {
   appendAskGlobeeTurn,
   completeAskGlobeeTurn,
   setAskGlobeeThumb,
-} from "@/app/(app)/messages/ask-globee-actions";
+} from "@/app/(app)/aggregation/messages/ask-globee-actions";
 import { Input } from "@/components/ui/input";
 import { ASK_AI_OVERLAY_PHONE_SCROLL_CLASS } from "@/lib/ask-ai-overlay";
 import { cn } from "@/lib/cn";

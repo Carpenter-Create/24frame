@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { ACTIVITY_HREF } from "./activity";
+import { TITLES_HREF } from "./title-public-id";
 import { MESSAGES_SUBTITLE, NOTIFICATION_EMAIL } from "./notifications";
 
 const TITLE_ID = "aaaaaaaa-1111-4111-8111-111111111111";
@@ -9,24 +11,24 @@ describe("NOTIFICATION_EMAIL.delivery_update.link (sender-facing API)", () => {
 
   it("pairs title path with View title when titleId is a valid UUID", () => {
     expect(link({ titleId: TITLE_ID })).toEqual({
-      path: `/titles/${TITLE_ID}`,
+      path: `${TITLES_HREF}/${TITLE_ID}`,
       cta: "View title",
     });
     expect(link({ titleId: TITLE_ID.toUpperCase() })).toEqual({
-      path: `/titles/${TITLE_ID.toUpperCase()}`,
+      path: `${TITLES_HREF}/${TITLE_ID.toUpperCase()}`,
       cta: "View title",
     });
   });
 
   it("pairs /titles with View your titles when titleId is absent", () => {
-    expect(link({})).toEqual({ path: "/titles", cta: "View your titles" });
-    expect(link()).toEqual({ path: "/titles", cta: "View your titles" });
+    expect(link({})).toEqual({ path: TITLES_HREF, cta: "View your titles" });
+    expect(link()).toEqual({ path: TITLES_HREF, cta: "View your titles" });
   });
 
   it("pairs /titles with View your titles for unsafe titleId values", () => {
     for (const titleId of ["../admin", "not-a-uuid", `${TITLE_ID}/extra`, ""]) {
       expect(link({ titleId })).toEqual({
-        path: "/titles",
+        path: TITLES_HREF,
         cta: "View your titles",
       });
     }
@@ -50,17 +52,17 @@ describe("NOTIFICATION_EMAIL.title_rejected.link (sender-facing API)", () => {
     expect(subject({ title: "North Wind" })).toBe('"North Wind" was returned for revision');
     expect(link({ titleId: TITLE_ID })).toEqual({
       cta: "Review and resubmit",
-      path: `/titles/${TITLE_ID}`,
+      path: `${TITLES_HREF}/${TITLE_ID}`,
     });
-    expect(link({})).toEqual({ cta: "Review and resubmit", path: "/activity" });
-    expect(link()).toEqual({ cta: "Review and resubmit", path: "/activity" });
+    expect(link({})).toEqual({ cta: "Review and resubmit", path: ACTIVITY_HREF });
+    expect(link()).toEqual({ cta: "Review and resubmit", path: ACTIVITY_HREF });
   });
 
   it("keeps the pre-existing truthy titleId contract (no UUID hardening)", () => {
     // Prior behavior: any truthy string was interpolated. Must not regress to UUID-only.
     expect(link({ titleId: "not-a-uuid" })).toEqual({
       cta: "Review and resubmit",
-      path: "/titles/not-a-uuid",
+      path: `${TITLES_HREF}/not-a-uuid`,
     });
   });
 

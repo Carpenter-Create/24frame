@@ -25,11 +25,11 @@ describe("aggregation ops spine rematch", () => {
     ]);
     expect(NAV.map((item) => item.label)).not.toContain("Ask 24Frame AI");
     expect(NAV.map((item) => item.href)).toEqual([
-      "/dashboard",
-      "/titles",
-      "/attention",
-      "/activity",
-      "/reports",
+      "/aggregation/dashboard",
+      "/aggregation/titles",
+      "/aggregation/attention",
+      "/aggregation/activity",
+      "/aggregation/reports",
     ]);
     expect(NAV.map((item) => item.href)).not.toContain("?ai=1");
     expect(NAV.map((item) => item.href)).not.toContain("/deliveries");
@@ -49,13 +49,12 @@ describe("aggregation ops spine rematch", () => {
     ]);
     expect(FINDING_SEVERITY_LABEL).toEqual({ high: "Required", low: "Recommended" });
     expect(CATALOG_HEALTH_TITLE).toBe("Attention");
-    expect(DELIVERIES_NO_DATA.actionHref).toBe("/titles");
+    expect(DELIVERIES_NO_DATA.actionHref).toBe("/aggregation/titles");
   });
 
   it("does not invent analytics, period, or create-delivery chrome on the three ops routes", () => {
-    const titles = src("src/app/(app)/titles/page.tsx");
-    const deliveries = src("src/app/(app)/deliveries/page.tsx");
-    const health = src("src/app/(app)/attention/page.tsx");
+    const titles = src("src/app/(app)/aggregation/titles/page.tsx");
+    const health = src("src/app/(app)/aggregation/attention/page.tsx");
 
     for (const page of [titles, health]) {
       expect(page).not.toMatch(/\bDownload\b/);
@@ -67,7 +66,6 @@ describe("aggregation ops spine rematch", () => {
       expect(page).not.toContain("Create delivery");
     }
     expect(titles).toContain("AddTitleButton");
-    expect(deliveries).toContain('redirect("/titles")');
     expect(health).toContain("catalogHealthTitleHref");
     expect(health).toContain("FindingRows");
     expect(health).toContain("ATTENTION_TITLE");

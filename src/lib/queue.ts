@@ -1,5 +1,6 @@
 import { CATALOG_LIFECYCLE_STATES } from "@/lib/titles-catalog";
 import type { TitleStatus } from "@/lib/titles";
+import { aggregationPath } from "@/lib/workspace";
 
 // Staff /queue copy and staff-column helpers. The page consumes the Titles
 // catalog list primitive — this file does not own a second row grammar.
@@ -12,6 +13,8 @@ import type { TitleStatus } from "@/lib/titles";
 //
 // Submitter: titles.created_by → profiles.display_name. profiles has no
 // email column, so a missing name is "—", not a guessed address.
+
+export const QUEUE_HREF = aggregationPath("queue");
 
 export const QUEUE_PAGE = {
   title: "Queue",

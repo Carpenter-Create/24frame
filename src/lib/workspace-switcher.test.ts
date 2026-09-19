@@ -69,23 +69,23 @@ describe("workspace switcher lock", () => {
     expect(USER_MENU).not.toHaveProperty("workspaceHref");
   });
 
-  it("lists only accessible lanes on Route A /social/courses", () => {
+  it("lists only accessible lanes on Route A /education", () => {
     expect(workspaceSwitcherOptions().map((option) => option.label)).toEqual([
       "Aggregation",
       "Social",
       "Education",
     ]);
     expect(workspaceSwitcherOptions().map((option) => option.href)).toEqual([
-      "/dashboard",
+      "/aggregation/dashboard",
       "/social",
-      "/social/courses",
+      "/education",
     ]);
     expect(availableWorkspaceOptions().map((option) => option.href)).toEqual(
       workspaceSwitcherOptions().map((option) => option.href),
     );
-    expect(WORKSPACE_EDUCATION_HREF).toBe("/social/courses");
-    expect(workspaceHome("education")).toBe("/social/courses");
-    expect(workspaceHome("education")).not.toBe("/education");
+    expect(WORKSPACE_EDUCATION_HREF).toBe("/education");
+    expect(workspaceHome("education")).toBe("/education");
+    expect(workspaceHome("education")).not.toBe("/social/courses");
   });
 
   it("hides the chevron when only one workspace is reachable", () => {
@@ -209,7 +209,7 @@ describe("workspace switcher lock", () => {
 
   it("keeps the existing workspace cookie write — no second scheme", () => {
     expect(persistWorkspaceCookie.name).toBe("persistWorkspaceCookie");
-    expect(workspaceHome("aggregation")).toBe("/dashboard");
+    expect(workspaceHome("aggregation")).toBe("/aggregation/dashboard");
     expect(workspaceHome("social")).toBe("/social");
   });
 

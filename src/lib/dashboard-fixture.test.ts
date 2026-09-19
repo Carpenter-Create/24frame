@@ -68,7 +68,7 @@ describe("dashboard craft fixture", () => {
     const reportsView = readFileSync("src/lib/reports-view.ts", "utf8");
     const finance = readFileSync("src/lib/finance.ts", "utf8");
     const financeDashboard = readFileSync("src/lib/finance-dashboard.ts", "utf8");
-    const page = readFileSync("src/app/(app)/dashboard/page.tsx", "utf8");
+    const page = readFileSync("src/app/(app)/aggregation/dashboard/page.tsx", "utf8");
     for (const src of [reports, reportsView, finance, financeDashboard]) {
       expect(src).not.toContain("dashboard-fixture");
       expect(src).not.toContain("DASHBOARD_FIXTURE");

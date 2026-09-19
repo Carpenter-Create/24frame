@@ -45,9 +45,9 @@ describe("Deliver Option B stepper", () => {
   it("parses selected title ids and builds the deliver href", () => {
     expect(parseDeliverTitleIds(`${TITLE_A},${TITLE_B},not-an-id`)).toEqual([TITLE_A, TITLE_B]);
     expect(deliverStepperHref([TITLE_A, TITLE_B])).toBe(
-      `/gc/deliveries/deliver?titles=${TITLE_A},${TITLE_B}`,
+      `/aggregation/gc/deliveries/deliver?titles=${TITLE_A},${TITLE_B}`,
     );
-    expect(deliverStepperHref([])).toBe("/gc/deliveries");
+    expect(deliverStepperHref([])).toBe("/aggregation/gc/deliveries");
   });
 
   it("labels grants from house rights + territory, and cards only for short include lists", () => {
