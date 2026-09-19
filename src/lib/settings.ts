@@ -39,7 +39,7 @@
 //
 // 600:881 shell — one 220 rail occupies the Access slot on every
 // /settings path. Pad 16. Active wash follows the hub section.
-// Rail Settings is muted context (Mercury quiet back), not a page H1.
+// Rail keeps house Settings title + Profile · Organization · Preferences.
 // Body H1 is the hub section only — never repeat Settings in the pane.
 // House muted wash. Sporty Blue only (no new brand colors).
 // Desktop: section rail + pane. Mobile: list → push.
@@ -138,8 +138,8 @@ export const SETTINGS_RAIL_ACTIVE_CLASS = "bg-surface-muted text-ink";
 export const SETTINGS_RAIL_IDLE_CLASS =
   "text-ink-2 hover:bg-surface-muted hover:text-ink";
 export const SETTINGS_RAIL_CHEVRON_CLASS = "size-4 shrink-0";
-/** Quiet Settings context on the rail — not a competing page H1. */
-export const SETTINGS_RAIL_TITLE_CLASS = "t-body text-ink-3";
+/** House Settings rail title — keep existing t-section treatment. */
+export const SETTINGS_RAIL_TITLE_CLASS = "t-section text-ink";
 /** Body page title. Hub section only. */
 export const SETTINGS_PANE_TITLE_CLASS = "t-section text-ink";
 

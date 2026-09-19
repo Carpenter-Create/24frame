@@ -212,15 +212,13 @@ describe("settings hub lock", () => {
     expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("t-title");
   });
 
-  it("titles the body pane with the hub section — rail Settings stays quiet", () => {
+  it("titles the body pane with the hub section — never SETTINGS.title", () => {
     expect(settingsPaneTitle("profile")).toBe("Profile");
     expect(settingsPaneTitle("organization")).toBe("Organization");
     expect(settingsPaneTitle("preferences")).toBe("Preferences");
     expect(settingsPaneTitle("profile")).not.toBe(SETTINGS.title);
     expect(SETTINGS_PANE_TITLE_CLASS).toBe("t-section text-ink");
-    expect(SETTINGS_RAIL_TITLE_CLASS).toBe("t-body text-ink-3");
-    expect(SETTINGS_RAIL_TITLE_CLASS).not.toContain("t-section");
-    expect(SETTINGS_PANE_TITLE_CLASS).not.toBe(SETTINGS_RAIL_TITLE_CLASS);
+    expect(SETTINGS_RAIL_TITLE_CLASS).toBe("t-section text-ink");
   });
 
   it("locks the settings rail on 220 pad 16, 15 Regular, house wash", () => {
