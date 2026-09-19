@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { AskAiOpenButton } from "@/components/chrome/ask-ai-overlay";
 import { HouseActionArrow } from "@/components/chrome/house-action-arrow";
+import { TextAction } from "@/components/chrome/house";
 import {
   DashboardHomeEmpty,
   DashboardHomePanel,
@@ -21,12 +22,17 @@ import {
 // Shared Home module shell — Social · Education · Industry news · Needs you · AI.
 // Net revenue uses the dashboard panel + house period chips, not this shell.
 // Header chrome lives inside the grey panel. Do not float a title on page white.
-// Trailing header CTA is now a glyph-only HouseActionArrow (Adam
+// Trailing header CTA is a glyph-only HouseActionArrow (Adam
 // 2026-09-19). The destination label survives as the arrow's
 // aria-label. Ask 24Frame AI stays as an AskAiOpenButton — content
-// swaps from the word "Ask …" to the same house arrow. Global
-// TextAction is left alone; Dashboard's ranked View-all keeps its
-// word + arrow pattern.
+// swaps from the word "Ask …" to the same house arrow.
+//
+// Industry news is the one Home exception (Adam interrupt 2026-09-19):
+// NewsRail passes `trailingText` so the module keeps the "View all"
+// words in the trailing slot — text TextAction, not the glyph. Every
+// other Home gray module (Net revenue · Social · Education · Ask
+// 24Frame AI · Needs you) trails with the arrow. Global TextAction
+// and DashboardViewAll are untouched.
 
 export function OverviewModule({
   testId,
@@ -35,6 +41,7 @@ export function OverviewModule({
   cta,
   empty,
   children,
+  trailingText = false,
 }: {
   testId: string;
   title: string;
@@ -42,6 +49,9 @@ export function OverviewModule({
   cta?: string;
   empty: string;
   children?: React.ReactNode;
+  /** News-only opt-in — keeps the "View all" words in the trailing
+   *  slot instead of swapping to the glyph. Do not spread. */
+  trailingText?: boolean;
 }) {
   const hasBody = Boolean(children);
   const action = overviewModuleHeaderAction(title, href, cta);
@@ -52,7 +62,11 @@ export function OverviewModule({
           {title}
         </p>
         {action ? (
-          action.href.startsWith("?ai=") ? (
+          trailingText ? (
+            <TextAction href={action.href} data-overview-module-text="">
+              {action.label}
+            </TextAction>
+          ) : action.href.startsWith("?ai=") ? (
             <AskAiOpenButton
               aria-label={action.label}
               data-overview-ai-ask=""

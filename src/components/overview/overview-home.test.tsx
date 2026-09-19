@@ -236,12 +236,19 @@ describe("OverviewHome", () => {
     expect(html).toContain(`href="${OVERVIEW_PAGE.needsYouHref}"`);
     expect(html).not.toContain(`>${OVERVIEW_PAGE.aggregation}<`);
     expect(html).not.toContain(`>${OVERVIEW_PAGE.aiAsk}<`);
-    expect(html).not.toContain(`>${NEWS_PAGE.viewAll}<`);
+    // Industry news is the one Home gray module that keeps the words
+    // in its trailing slot (Adam interrupt 2026-09-19). Individual
+    // news cards keep their own outbound HouseActionArrow — that is
+    // out of scope; what this locks is that the module HEADER trails
+    // with a TextAction, not the glyph.
+    expect(moduleChunk(html, "news")).toContain(`>${NEWS_PAGE.viewAll}<`);
+    expect(moduleChunk(html, "news")).toContain(TEXT_ACTION_CLASS);
+    expect(moduleChunk(html, "news")).toContain("data-overview-module-text");
+    expect(moduleChunk(html, "news")).not.toContain("data-overview-module-arrow");
     expect(moduleChunk(html, "social")).not.toContain(TEXT_ACTION_CLASS);
     expect(moduleChunk(html, "education")).not.toContain(TEXT_ACTION_CLASS);
     expect(moduleChunk(html, "social")).toContain("data-house-action-arrow");
     expect(moduleChunk(html, "education")).toContain("data-house-action-arrow");
-    expect(moduleChunk(html, "news")).toContain("data-house-action-arrow");
     expect(moduleChunk(html, "needs-you")).toContain("data-house-action-arrow");
     expect(moduleChunk(html, "ai-next")).toContain("data-house-action-arrow");
     expect(moduleLabelClass(html, "education")).toBe(DASHBOARD_SECTION_TITLE_CLASS);
@@ -251,7 +258,6 @@ describe("OverviewHome", () => {
     expect(moduleLabelClass(html, "ai-next")).toBe(DASHBOARD_SECTION_TITLE_CLASS);
     expect(moduleChunk(html, "needs-you")).not.toContain(TEXT_ACTION_CLASS);
     expect(moduleChunk(html, "ai-next")).not.toContain(TEXT_ACTION_CLASS);
-    expect(moduleChunk(html, "news")).not.toContain(TEXT_ACTION_CLASS);
     const newsAt = html.indexOf('data-overview-module="news"');
     expect(html.slice(html.lastIndexOf("<section", newsAt), newsAt)).toContain(
       "dashboard-home-panel",
@@ -461,6 +467,12 @@ describe("OverviewHome", () => {
     expect(html).toContain(`href="${OVERVIEW_PAGE.needsYouHref}"`);
     expect(html).not.toContain(`>${OVERVIEW_PAGE.aiAsk}<`);
     expect(html).not.toContain(`>${OVERVIEW_PAGE.aggregation}<`);
+    // Industry news exception (Adam interrupt 2026-09-19): still text.
+    // Cards keep their own outbound arrow — out of scope.
+    expect(moduleChunk(html, "news")).toContain(`>${NEWS_PAGE.viewAll}<`);
+    expect(moduleChunk(html, "news")).toContain(TEXT_ACTION_CLASS);
+    expect(moduleChunk(html, "news")).toContain("data-overview-module-text");
+    expect(moduleChunk(html, "news")).not.toContain("data-overview-module-arrow");
     expect(moduleChunk(html, "social")).not.toContain(TEXT_ACTION_CLASS);
     expect(moduleChunk(html, "education")).not.toContain(TEXT_ACTION_CLASS);
     expect(moduleLabelClass(html, "education")).toBe(DASHBOARD_SECTION_TITLE_CLASS);
