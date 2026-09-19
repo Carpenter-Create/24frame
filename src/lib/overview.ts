@@ -225,6 +225,23 @@ export function overviewLeadSelected(
   return !onHome && workspace === pillId;
 }
 
+/** Keyboard tab-stop for unify-lead pills. Same as selected except
+ *  when every pill is idle (Settings): the first pill stays in the
+ *  tab order so the desktop cluster remains reachable. Visual wash
+ *  still uses overviewLeadSelected. */
+export function overviewLeadTabStop(
+  pillId: OverviewLeadPillId,
+  pathname: string,
+  workspace: WorkspaceMode,
+  pills: readonly Pick<OverviewLeadPill, "id">[] = overviewLeadPills(),
+): boolean {
+  if (overviewLeadSelected(pillId, pathname, workspace)) return true;
+  const anySelected = pills.some((pill) =>
+    overviewLeadSelected(pill.id, pathname, workspace),
+  );
+  return !anySelected && pills[0]?.id === pillId;
+}
+
 export function overviewTriggerLabel(
   pathname: string,
   workspaceLabel: string,

@@ -18,6 +18,7 @@ import {
   overviewLeadPills,
   overviewLeadSelected,
   overviewLeadShouldNavigate,
+  overviewLeadTabStop,
   overviewTriggerLabel,
   type OverviewLeadPill,
 } from "@/lib/overview";
@@ -134,6 +135,7 @@ function WorkspaceSwitcherPills({
     >
       {pills.map((pill, index) => {
         const selected = overviewLeadSelected(pill.id, pathname, current);
+        const tabStop = overviewLeadTabStop(pill.id, pathname, current, pills);
         return (
           <button
             key={pill.id}
@@ -144,7 +146,7 @@ function WorkspaceSwitcherPills({
             role="tab"
             data-workspace-switcher-segment={pill.id}
             aria-selected={selected}
-            tabIndex={workspaceSwitcherSegmentTabIndex(selected)}
+            tabIndex={workspaceSwitcherSegmentTabIndex(tabStop)}
             className={workspaceSwitcherSegmentClass(selected)}
             onClick={() => selectLeadPill(current, pill, options, router, pathname)}
             onKeyDown={(event) => onSegmentKeyDown(event, index)}

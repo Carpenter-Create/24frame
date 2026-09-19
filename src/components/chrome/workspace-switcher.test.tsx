@@ -2,10 +2,12 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+const navigation = vi.hoisted(() => ({ pathname: "/" }));
 
 vi.mock("next/navigation", () => ({
-  usePathname: () => "/",
+  usePathname: () => navigation.pathname,
   useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn() }),
 }));
 
@@ -36,6 +38,10 @@ const sheetSrc = readFileSync(join(here, "account-sheet.tsx"), "utf8");
 const userMenuSrc = readFileSync(join(here, "../../lib/user-menu.ts"), "utf8");
 
 describe("workspace switcher header control", () => {
+  afterEach(() => {
+    navigation.pathname = "/";
+  });
+
   it("shows the workspace name only on the trigger — no leading mark", () => {
     const html = renderToStaticMarkup(<WorkspaceSwitcher current="aggregation" />);
     expect(html).toContain("data-workspace-switcher");
@@ -152,9 +158,29 @@ describe("workspace switcher header control", () => {
     expect(src).not.toContain('"Agg"');
     expect(src).not.toContain('"Edu"');
     expect(src).not.toContain("ellipsis");
+    expect(src).toContain("overviewLeadTabStop");
     for (const absent of WORKSPACE_SWITCHER_ABSENT) {
       expect(html).not.toContain(absent);
     }
+  });
+
+  it("keeps the first idle Settings pill in the tab order", () => {
+    navigation.pathname = "/settings";
+    const html = renderToStaticMarkup(
+      <WorkspaceSwitcher current="aggregation" presentation="pills" />,
+    );
+    const segments = [
+      ...html.matchAll(
+        /data-workspace-switcher-segment="([^"]+)"[^>]*aria-selected="([^"]+)"[^>]*tabindex="([^"]+)"/g,
+      ),
+    ];
+    expect(segments.map((row) => [row[1], row[2], row[3]])).toEqual([
+      ["home", "false", "0"],
+      ["aggregation", "false", "-1"],
+      ["social", "false", "-1"],
+      ["education", "false", "-1"],
+    ]);
+    expect(html).not.toContain(WORKSPACE_SWITCHER_SEGMENT_ON_CLASS);
   });
 
   it("keeps Home leftmost when only one workspace lane is reachable", () => {

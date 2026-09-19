@@ -31,6 +31,7 @@ import {
   overviewLeadPills,
   overviewLeadSelected,
   overviewLeadShouldNavigate,
+  overviewLeadTabStop,
   overviewSocialChats,
   overviewSocialUnreadTotal,
   overviewTriggerLabel,
@@ -77,9 +78,13 @@ describe("Home lead pills", () => {
     expect(isHomeLandPath("/overview")).toBe(false);
     expect(isHomeLandPath(NEWS_HREF)).toBe(false);
     expect(overviewLeadSelected("home", "/home", "aggregation")).toBe(true);
+    expect(overviewLeadTabStop("home", "/home", "aggregation")).toBe(true);
     expect(overviewLeadSelected("home", "/overview", "aggregation")).toBe(false);
     expect(overviewLeadSelected("aggregation", "/home", "aggregation")).toBe(false);
+    expect(overviewLeadTabStop("aggregation", "/home", "aggregation")).toBe(false);
     expect(overviewLeadSelected("aggregation", "/aggregation/dashboard", "aggregation")).toBe(true);
+    expect(overviewLeadTabStop("aggregation", "/aggregation/dashboard", "aggregation")).toBe(true);
+    expect(overviewLeadTabStop("home", "/aggregation/dashboard", "aggregation")).toBe(false);
     expect(overviewLeadSelected("social", "/social", "social")).toBe(true);
     expect(overviewTriggerLabel("/home", "Social")).toBe("Home");
     expect(overviewTriggerLabel("/social", "Social")).toBe("Social");
@@ -104,6 +109,10 @@ describe("Home lead pills", () => {
       expect(overviewLeadSelected("education", path, "education")).toBe(false);
       expect(overviewLeadShouldNavigate(path, "aggregation", { id: "aggregation" })).toBe(true);
       expect(overviewLeadShouldNavigate(path, "social", { id: "home" })).toBe(true);
+      expect(overviewLeadTabStop("home", path, "aggregation")).toBe(true);
+      expect(overviewLeadTabStop("aggregation", path, "aggregation")).toBe(false);
+      expect(overviewLeadTabStop("social", path, "social")).toBe(false);
+      expect(overviewLeadTabStop("education", path, "education")).toBe(false);
     }
   });
 
@@ -132,6 +141,7 @@ describe("Home lead pills", () => {
     const switcher = readFileSync("src/components/chrome/workspace-switcher.tsx", "utf8");
     expect(switcher).toContain("router.push(pill.href)");
     expect(switcher).toContain("overviewLeadShouldNavigate");
+    expect(switcher).toContain("overviewLeadTabStop");
   });
 
   it("hides dest rails on Home and keeps them on workspace routes", () => {
