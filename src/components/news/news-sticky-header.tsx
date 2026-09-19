@@ -14,7 +14,7 @@ export function NewsStickyHeader({
   className,
 }: {
   surface: NewsStickySurface;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   className?: string;
 }) {
   return (
