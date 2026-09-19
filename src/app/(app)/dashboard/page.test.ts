@@ -359,7 +359,9 @@ describe("DashboardPage modes", () => {
       p_org_id: "org-1",
     });
     expect(rpc).not.toHaveBeenCalledWith("gc_client_directory", expect.anything());
-    expect(html).toContain("Acme");
+    expect(html).toContain(AGGREGATION_LEAD_TITLE);
+    expect(html).toMatch(/<h1 class="t-title text-ink">Aggregation<\/h1>/);
+    expect(html).not.toMatch(/<h1 class="t-title text-ink">Acme<\/h1>/);
     expect(html).toContain("data-dashboard-overview-row");
     expect(html).toContain("data-dashboard-hero");
     expect(html).toContain("data-dashboard-reports-cta");
