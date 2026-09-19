@@ -1,4 +1,3 @@
-import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -38,7 +37,7 @@ describe("CoProductionsPage", () => {
   });
 
   it("renders the house empty stub from lib copy — no form, no dead CTA", async () => {
-    const html = renderToStaticMarkup(createElement(await CoProductionsPage()));
+    const html = renderToStaticMarkup(await CoProductionsPage());
     expect(html).toContain(CO_PRODUCTIONS_PAGE.title);
     expect(html).toContain(CO_PRODUCTIONS_PAGE.synopsis);
     expect(html).toContain("border-dashed");
