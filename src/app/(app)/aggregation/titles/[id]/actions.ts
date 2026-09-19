@@ -11,6 +11,7 @@ import type { RightsType } from "@/lib/rights";
 import { computeMetadataFindings, METADATA_LOGIC_VERSION } from "@/lib/metadata";
 import type { Json } from "@/lib/supabase/database.types";
 import { purgeDeletedTitleStorage } from "@/lib/s3-title-purge";
+import { TITLES_HREF } from "@/lib/title-public-id";
 import { TITLE_LIFECYCLE } from "@/lib/titles-lifecycle";
 
 // Add a rights grant (expand = insert) for a title in the active org. Territories
@@ -51,8 +52,8 @@ export async function addRights(input: {
   });
   if (error) return { error: error.message };
 
-  revalidatePath(`/titles/${input.titleId}`);
-  revalidatePath("/titles", "layout");
+  revalidatePath(`${TITLES_HREF}/${input.titleId}`);
+  revalidatePath(TITLES_HREF, "layout");
   return {};
 }
 
@@ -73,8 +74,8 @@ export async function setScreenerSource(input: {
   });
   if (error) return { error: error.message };
 
-  revalidatePath(`/titles/${input.titleId}`);
-  revalidatePath("/titles", "layout");
+  revalidatePath(`${TITLES_HREF}/${input.titleId}`);
+  revalidatePath(TITLES_HREF, "layout");
   return {};
 }
 
@@ -100,8 +101,8 @@ export async function setTitleReleaseInfo(input: {
   });
   if (error) return { error: error.message };
 
-  revalidatePath(`/titles/${input.titleId}`);
-  revalidatePath("/titles", "layout");
+  revalidatePath(`${TITLES_HREF}/${input.titleId}`);
+  revalidatePath(TITLES_HREF, "layout");
   return {};
 }
 
@@ -137,8 +138,8 @@ export async function submitTitle(
     console.error("[findings] reconcile after submit failed", e);
   }
 
-  revalidatePath(`/titles/${titleId}`);
-  revalidatePath("/titles", "layout");
+  revalidatePath(`${TITLES_HREF}/${titleId}`);
+  revalidatePath(TITLES_HREF, "layout");
   return {};
 }
 
@@ -222,8 +223,8 @@ export async function createBuyerScreenerLink(input: {
   if (error) return { error: error.message };
 
   const base = process.env.PORTAL_BASE_URL?.replace(/\/+$/, "") ?? "";
-  revalidatePath(`/titles/${input.titleId}`);
-  revalidatePath("/titles", "layout");
+  revalidatePath(`${TITLES_HREF}/${input.titleId}`);
+  revalidatePath(TITLES_HREF, "layout");
   return { url: `${base}/portal/${token}` };
 }
 
@@ -239,8 +240,8 @@ export async function revokeBuyerScreenerLink(input: {
   const { error } = await supabase.rpc("revoke_portal_link", { p_link_id: input.linkId });
   if (error) return { error: error.message };
 
-  revalidatePath(`/titles/${input.titleId}`);
-  revalidatePath("/titles", "layout");
+  revalidatePath(`${TITLES_HREF}/${input.titleId}`);
+  revalidatePath(TITLES_HREF, "layout");
   return {};
 }
 
@@ -263,9 +264,9 @@ export async function deleteTitle(titleId: string): Promise<{ error?: string }> 
   const { error } = await supabase.rpc("delete_title", { p_title_id: title.id });
   if (error) return { error: error.message };
 
-  revalidatePath("/titles");
-  revalidatePath(`/titles/${titleId}`);
-  revalidatePath("/titles", "layout");
+  revalidatePath(TITLES_HREF);
+  revalidatePath(`${TITLES_HREF}/${titleId}`);
+  revalidatePath(TITLES_HREF, "layout");
 
   try {
     await purgeDeletedTitleStorage({
@@ -294,9 +295,9 @@ export async function archiveTitle(titleId: string): Promise<{ error?: string }>
   const { error } = await supabase.rpc("archive_title", { p_title_id: titleId });
   if (error) return { error: error.message };
 
-  revalidatePath("/titles");
-  revalidatePath(`/titles/${titleId}`);
-  revalidatePath("/titles", "layout");
+  revalidatePath(TITLES_HREF);
+  revalidatePath(`${TITLES_HREF}/${titleId}`);
+  revalidatePath(TITLES_HREF, "layout");
   return {};
 }
 
@@ -308,8 +309,8 @@ export async function restoreTitle(titleId: string): Promise<{ error?: string }>
   const { error } = await supabase.rpc("restore_title", { p_title_id: titleId });
   if (error) return { error: error.message };
 
-  revalidatePath("/titles");
-  revalidatePath(`/titles/${titleId}`);
-  revalidatePath("/titles", "layout");
+  revalidatePath(TITLES_HREF);
+  revalidatePath(`${TITLES_HREF}/${titleId}`);
+  revalidatePath(TITLES_HREF, "layout");
   return {};
 }

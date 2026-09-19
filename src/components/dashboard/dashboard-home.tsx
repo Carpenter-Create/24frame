@@ -12,6 +12,7 @@ import {
   DASHBOARD_ROW_LIST_CLASS,
 } from "@/lib/dashboard-craft";
 import { AGGREGATION_LEAD_TITLE } from "@/lib/aggregation-lead-title";
+import { TITLES_HREF } from "@/lib/title-public-id";
 import { DASHBOARD_ATTENTION_CLEAR } from "@/lib/findings";
 import {
   DASHBOARD_HOME,
@@ -175,7 +176,7 @@ export function DashboardDoNext({
               >
                 <div className="min-w-0">
                   <Link
-                    href={`/titles/${item.id}`}
+                    href={`${TITLES_HREF}/${item.id}`}
                     className="t-body-sm font-medium text-ink transition-colors hover:text-ink-2"
                   >
                     {item.title}
@@ -235,7 +236,7 @@ export function DashboardJustIn({
                   className={cn("flex min-w-0 flex-wrap items-center", DASHBOARD_RELATED_GAP_CLASS)}
                 >
                   <Link
-                    href={`/titles/${t.id}`}
+                    href={`${TITLES_HREF}/${t.id}`}
                     className="t-body-sm font-medium text-ink transition-colors hover:text-ink-2"
                   >
                     {t.title}

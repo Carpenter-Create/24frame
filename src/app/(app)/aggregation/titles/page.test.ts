@@ -327,10 +327,10 @@ describe("client /titles catalog", () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
     const html = await renderCatalog();
 
-    expect(html).toContain('href="/titles/24F-0"');
+    expect(html).toContain('href="/aggregation/titles/24F-0"');
     expect(html).toContain("data-titles-catalog-public-id");
     expect(html).toContain("24F-0");
-    expect(html).not.toContain("/titles/uuid-live");
+    expect(html).not.toContain("/aggregation/titles/uuid-live");
     expect(html).not.toContain("GC-0");
   });
 
@@ -511,8 +511,8 @@ describe("client /titles catalog", () => {
   });
 
   it("does not split drafts onto another nav item", () => {
-    const titleItems = NAV.filter((item) => item.href === "/titles" || /draft/i.test(item.label));
-    expect(titleItems).toEqual([expect.objectContaining({ label: "Titles", href: "/titles" })]);
+    const titleItems = NAV.filter((item) => item.href === "/aggregation/titles" || /draft/i.test(item.label));
+    expect(titleItems).toEqual([expect.objectContaining({ label: "Titles", href: "/aggregation/titles" })]);
     expect(NAV.some((item) => item.href === "/deliveries" && /draft|title/i.test(item.label))).toBe(
       false,
     );

@@ -9,7 +9,7 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/messages",
   useSearchParams: () => new URLSearchParams(),
 }));
-vi.mock("@/app/(app)/messages/ask-globee-actions", () => ({
+vi.mock("@/app/(app)/aggregation/messages/ask-globee-actions", () => ({
   startAskGlobeeConversation: vi.fn(),
 }));
 

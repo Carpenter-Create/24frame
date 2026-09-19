@@ -286,7 +286,7 @@ describe("DashboardPage modes", () => {
     expect(html).not.toContain("data-finance-glance");
     expect(html).not.toContain("data-finance-glance-stub");
     expect(html).toContain("dashboard-home-pill");
-    expect(html).toContain('href="/attention"');
+    expect(html).toContain('href="/aggregation/attention"');
     expect(html).toContain("h-9");
     expect(html).toContain("size-[14px]");
     expect(html).toContain(DASHBOARD_HOME.catalogEmpty);
@@ -626,10 +626,10 @@ describe("client home copy lock", () => {
     expect(html).toContain("The catalog is empty.");
     expect(html.split("The catalog is empty.").length - 1).toBe(1);
     expect(html.split("Add Title").length - 1).toBe(1);
-    expect(html).toContain('href="/titles"');
+    expect(html).toContain('href="/aggregation/titles"');
     expect(link).toContain("data-dashboard-add-title");
     expect(link).toContain("Add Title");
-    expect(link).toContain('href="/titles"');
+    expect(link).toContain('href="/aggregation/titles"');
     expect(link).toContain("t-body-sm");
     expect(link).toContain("text-accent");
     expect(link).toContain("hover:underline");

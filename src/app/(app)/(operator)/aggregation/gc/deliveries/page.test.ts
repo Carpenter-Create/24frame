@@ -103,8 +103,8 @@ describe("staff /gc/deliveries empty copy", () => {
     const link = html.slice(addStart, addEnd);
 
     expect(GC_DELIVERIES_EMPTY.actionLabel).toBe("View titles");
-    expect(GC_DELIVERIES_EMPTY.actionHref).toBe("/titles");
-    expect(html).toContain('href="/titles"');
+    expect(GC_DELIVERIES_EMPTY.actionHref).toBe("/aggregation/titles");
+    expect(html).toContain('href="/aggregation/titles"');
     expect(html).toContain("View titles");
     expect(pageSrc).toContain(viewTitlesClass);
     expect(link).toContain("t-body-sm");

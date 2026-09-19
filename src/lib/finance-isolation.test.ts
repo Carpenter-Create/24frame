@@ -66,7 +66,7 @@ describe("title isolation", () => {
 
 describe("mapping C — finance stays Aggregation", () => {
   it("puts recipient Reports on client Aggregation NAV and keeps ops on GC_NAV", () => {
-    expect(NAV.map((item) => item.href)).toContain("/reports");
+    expect(NAV.map((item) => item.href)).toContain("/aggregation/reports");
     expect(NAV.map((item) => item.href)).not.toContain("/earn");
     expect(NAV.map((item) => item.href)).not.toContain("/finance");
     expect(NAV.map((item) => item.href)).not.toContain("/gc/finance");

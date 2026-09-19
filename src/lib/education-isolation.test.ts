@@ -63,7 +63,7 @@ describe("education isolation", () => {
     expect(WORKSPACE_REDIRECTS.some((row) => row.source === "/social/courses" && row.destination === EDUCATION_HREF)).toBe(true);
     const nextConfig = readFileSync("next.config.ts", "utf8");
     expect(nextConfig).toContain("WORKSPACE_REDIRECTS");
-    expect(nextConfig).toContain("permanent");
+    expect(readFileSync("src/lib/workspace-redirects.ts", "utf8")).toContain("permanent: true");
   });
 
   it("keeps Education copy off SaaS and buy language", () => {

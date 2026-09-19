@@ -12,7 +12,7 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn() }),
   useSearchParams: () => new URLSearchParams(),
 }));
-vi.mock("@/app/(app)/messages/ask-globee-actions", () => ({
+vi.mock("@/app/(app)/aggregation/messages/ask-globee-actions", () => ({
   startAskGlobeeConversation: vi.fn(),
   appendAskGlobeeTurn: vi.fn(),
   completeAskGlobeeTurn: vi.fn(),
@@ -646,7 +646,7 @@ describe("AppShell rail-collapse chevron", () => {
     expect(expanded).toContain("/brand/24frame-logo-light.svg");
     expect(expanded).toContain("/brand/24frame-logo-dark.svg");
     expect(expanded).toContain('aria-label="24Frame"');
-    expect(expanded).toContain('href="/dashboard"');
+    expect(expanded).toContain('href="/aggregation/dashboard"');
     expect(expanded).not.toContain("data-brand-emblem-mark");
     expect(expanded).not.toContain("t-body font-medium text-ink");
     expect(shellSrc).not.toContain("24frame-wordmark");
@@ -655,7 +655,7 @@ describe("AppShell rail-collapse chevron", () => {
     const collapsed = renderShell(undefined, undefined, true);
     expect(collapsed).toContain("data-brand-emblem");
     expect(collapsed).toContain('aria-label="24Frame"');
-    expect(collapsed).toContain('href="/dashboard"');
+    expect(collapsed).toContain('href="/aggregation/dashboard"');
 
     navigation.pathname = "/social";
     const social = renderShell();
@@ -665,7 +665,7 @@ describe("AppShell rail-collapse chevron", () => {
     navigation.pathname = "/settings";
     const settings = renderShell();
     expect(settings).toContain("data-brand-emblem");
-    expect(settings).toContain('href="/dashboard"');
+    expect(settings).toContain('href="/aggregation/dashboard"');
   });
 
   it("puts CaretDoubleRight Bold on a separate expand row when collapsed", () => {
@@ -915,7 +915,7 @@ describe("AppShell rail-collapse chevron", () => {
       html.indexOf("data-app-header-trailing"),
     );
     expect(html).not.toMatch(/data-house-lead=""[^>]*\bhidden(?:\s|")/);
-    expect(html).toContain('href="/social/courses"');
+    expect(html).toContain('href="/education"');
     expect(html).not.toContain("data-social-workspace");
     expect(html).not.toContain("data-social-top-bar");
     expect(html).not.toContain("data-social-tab-bar");

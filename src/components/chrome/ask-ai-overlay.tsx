@@ -43,7 +43,7 @@ import {
 } from "@/lib/ask-ai-overlay";
 import { ASK_GLOBEE, canRenderAskGlobeeLanding, type MessagesSurface } from "@/lib/ask-globee";
 import type { AskGlobeeHistoryRow, AskGlobeeStoredMessage } from "@/lib/ask-globee-conversations";
-import { loadAskAiOverlay } from "@/app/(app)/messages/ask-globee-actions";
+import { loadAskAiOverlay } from "@/app/(app)/aggregation/messages/ask-globee-actions";
 import { parseWorkspaceCookie } from "@/lib/workspace";
 import { DIALOG_HEADER_CLASS } from "@/components/ui/dialog";
 import { APP_SHEET_SCRIM_CLASS } from "@/lib/house-sheet";

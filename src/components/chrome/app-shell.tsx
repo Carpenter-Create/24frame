@@ -39,6 +39,8 @@ import {
   SOCIAL_RAIL_WIDTH_CLASS,
 } from "@/lib/social-chrome";
 import { OVERVIEW_RAIL_OFF_WIDTH, overviewHidesRail } from "@/lib/overview";
+import { QUEUE_HREF } from "@/lib/queue";
+import { TITLES_HREF } from "@/lib/title-public-id";
 import { resolveWorkspaceMode, type WorkspaceMode } from "@/lib/workspace";
 import { HousePhoneAppShell } from "./house-phone-app-shell";
 import { SocialRailAccountChip } from "@/components/social/social-rail-extras";
@@ -124,7 +126,11 @@ export function AppShell({
   // /titles and staff /queue share that frame. Non-bleed pages share
   // `--chrome-gutter` on the canvas x so the trailing chrome and content
   // column share one right edge. Messages keeps `--content-inset` vertical.
-  const titlesBleed = pathname === "/titles" || pathname === "/queue";
+  const titlesBleed =
+    pathname === TITLES_HREF ||
+    pathname === "/titles" ||
+    pathname === QUEUE_HREF ||
+    pathname === "/queue";
   const homeChrome = overviewHidesRail(pathname);
   // Home (`/` + /home chrome) stays off --page-max-width. /home uses the
   // 48/16 house inset (HOME-width-lock.md). Aggregation Dashboard uses

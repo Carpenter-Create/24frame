@@ -15,7 +15,7 @@ import {
   askGlobeeThreadHref,
   type AskGlobeeChipMark,
 } from "@/lib/ask-globee";
-import { startAskGlobeeConversation } from "@/app/(app)/messages/ask-globee-actions";
+import { startAskGlobeeConversation } from "@/app/(app)/aggregation/messages/ask-globee-actions";
 import { Input } from "@/components/ui/input";
 import { ASK_AI_OVERLAY_PHONE_SCROLL_CLASS } from "@/lib/ask-ai-overlay";
 

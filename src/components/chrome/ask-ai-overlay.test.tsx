@@ -20,7 +20,7 @@ vi.mock("next/navigation", () => ({
   }),
   useSearchParams: () => new URLSearchParams(navigation.search),
 }));
-vi.mock("@/app/(app)/messages/ask-globee-actions", () => ({
+vi.mock("@/app/(app)/aggregation/messages/ask-globee-actions", () => ({
   loadAskAiOverlay: vi.fn(async () => ({
     surface: "ask-globee-landing",
     initials: "A",

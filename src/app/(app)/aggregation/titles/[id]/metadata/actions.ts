@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { parseMetadata, computeMetadataFindings, METADATA_LOGIC_VERSION } from "@/lib/metadata";
 import type { Json } from "@/lib/supabase/database.types";
+import { TITLES_HREF } from "@/lib/title-public-id";
 
 // Save (upsert) title metadata. Validates against the canonical zod schema
 // (the validator decides) then writes via the set_title_metadata RPC.
@@ -43,8 +44,8 @@ export async function saveMetadata(
     console.error("[findings] reconcile after metadata save failed", e);
   }
 
-  revalidatePath(`/titles/${titleId}`);
-  revalidatePath(`/titles/${titleId}/metadata`);
-  revalidatePath("/titles", "layout");
+  revalidatePath(`${TITLES_HREF}/${titleId}`);
+  revalidatePath(`${TITLES_HREF}/${titleId}/metadata`);
+  revalidatePath(TITLES_HREF, "layout");
   return {};
 }

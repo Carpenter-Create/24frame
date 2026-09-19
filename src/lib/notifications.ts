@@ -1,5 +1,9 @@
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
 import { PRODUCT_NAME } from "@/lib/product";
+import { TITLES_HREF } from "@/lib/title-public-id";
+import { aggregationPath } from "@/lib/workspace";
+
+const ACTIVITY_PATH = aggregationPath("activity");
 
 // Notification copy + labels (§20 GC-Support in-app push). Copy in lib/, not JSX.
 
@@ -33,16 +37,16 @@ function isSafeTitleId(titleId: string | undefined): titleId is string {
 
 function deliveryUpdateLink(ctx: NotificationLinkCtx = {}): NotificationLink {
   if (isSafeTitleId(ctx.titleId)) {
-    return { cta: "View title", path: `/titles/${ctx.titleId}` };
+    return { cta: "View title", path: `${TITLES_HREF}/${ctx.titleId}` };
   }
-  return { cta: "View your titles", path: "/titles" };
+  return { cta: "View your titles", path: TITLES_HREF };
 }
 
 function titleRejectedLink(ctx: NotificationLinkCtx = {}): NotificationLink {
   return {
     cta: "Review and resubmit",
     // Pre-existing contract: any truthy titleId deep-links; otherwise Activity.
-    path: ctx.titleId ? `/titles/${ctx.titleId}` : "/activity",
+    path: ctx.titleId ? `${TITLES_HREF}/${ctx.titleId}` : ACTIVITY_PATH,
   };
 }
 

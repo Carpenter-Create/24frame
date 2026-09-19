@@ -284,7 +284,7 @@ describe("recent account activity", () => {
     expect(rows[1]?.count).toBe(1);
     expect(rows.map((row) => row.actorId)).toEqual([null, null, null]);
     expect(rows.every((row) => row.actor.initial === "?")).toBe(true);
-    expect(rows[1]?.href).toBe("/titles");
+    expect(rows[1]?.href).toBe("/aggregation/titles");
     expect(
       recentAccountActivity({
         titles: [

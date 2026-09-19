@@ -474,11 +474,11 @@ describe("client home type locks", () => {
     const html = renderToStaticMarkup(
       createElement(
         DashboardHomePillLink,
-        { href: "/attention" } as { href: string; children: string },
+        { href: "/aggregation/attention" } as { href: string; children: string },
         DASHBOARD_HOME.catalogHealthCta,
       ),
     );
-    expect(html).toContain('href="/attention"');
+    expect(html).toContain('href="/aggregation/attention"');
     expect(html).toContain(DASHBOARD_HOME.catalogHealthCta);
     expect(html).toContain("h-9");
     expect(html).toContain("t-body-sm");
@@ -498,7 +498,7 @@ describe("client home copy lock", () => {
     expect(DASHBOARD_HOME.catalogEmpty).toBe("The catalog is empty.");
     expect(DASHBOARD_HOME.addTitle).toBe("Add Title");
     expect(DASHBOARD_HOME.addTitle).toBe(TITLES_CATALOG.addTitle);
-    expect(DASHBOARD_HOME.addTitleHref).toBe("/titles");
+    expect(DASHBOARD_HOME.addTitleHref).toBe("/aggregation/titles");
   });
 
   it("does not keep Added-this-month / In-pipeline catalog-velocity copy or helpers", () => {
@@ -530,7 +530,7 @@ describe("client home copy lock", () => {
     expect(html.split(DASHBOARD_HOME.addTitle).length - 1).toBe(1);
     expect(html).not.toContain(DASHBOARD_HOME.justInEmpty);
     expect(html).not.toContain("Just in");
-    expect(link).toContain('href="/titles"');
+    expect(link).toContain('href="/aggregation/titles"');
     expect(link).toContain(DASHBOARD_HOME.addTitle);
     expect(link).toContain("t-body-sm");
     expect(link).toContain("text-accent");

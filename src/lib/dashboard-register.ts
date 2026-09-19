@@ -1,5 +1,6 @@
 import { DASHBOARD_ADMIN } from "@/lib/dashboard-admin";
 import { DASHBOARD_HOME, rankedBarPercent } from "@/lib/dashboard-home";
+import { TITLES_HREF } from "@/lib/title-public-id";
 import { isoAlpha2FromNumeric, isoNumericForAlpha2 } from "@/lib/iso3166-numeric";
 import { ISO_COUNTRIES } from "@/lib/territories";
 import type { ReportsCountRow } from "@/lib/reports";
@@ -186,7 +187,7 @@ export function rankedRowsFromTitles(
     key: item.id,
     label: item.title,
     count: item.count,
-    href: `/titles/${item.id}`,
+    href: `${TITLES_HREF}/${item.id}`,
   }));
 }
 

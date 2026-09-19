@@ -26,10 +26,10 @@ const SOCIAL_NAV_PAGES = [
 ] as const;
 
 const AGGREGATION_PAGE_MODULES = [
-  "@/app/(app)/dashboard/page",
-  "@/app/(app)/titles/page",
-  "@/app/(app)/messages/page",
-  "@/app/(app)/reports/page",
+  "@/app/(app)/aggregation/dashboard/page",
+  "@/app/(app)/aggregation/titles/page",
+  "@/app/(app)/aggregation/messages/page",
+  "@/app/(app)/aggregation/reports/page",
   "@/app/(app)/deliveries/page",
 ] as const;
 

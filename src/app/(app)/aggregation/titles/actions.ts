@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/supabase/auth";
+import { TITLES_HREF } from "@/lib/title-public-id";
 
 // Create a title stub (§12) for the active org. Goes through the create_title
 // SECURITY DEFINER RPC — the client never writes the titles table directly, and
@@ -29,6 +30,6 @@ export async function createTitle(
   });
   if (error) return { error: error.message };
 
-  revalidatePath("/titles");
+  revalidatePath(TITLES_HREF);
   return {};
 }

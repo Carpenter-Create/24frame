@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import DashboardPage from "@/app/(app)/dashboard/page";
+import DashboardPage from "@/app/(app)/aggregation/dashboard/page";
 import { DASHBOARD_ADMIN } from "@/lib/dashboard-admin";
 import {
   DASHBOARD_ADMIN_STACK_CLASS,

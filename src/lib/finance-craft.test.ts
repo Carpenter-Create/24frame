@@ -54,7 +54,7 @@ describe("finance visual craft register", () => {
   });
 
   it("keeps Reports on the client rail and Finance on STAFF ops", () => {
-    const client = NAV.find((item) => item.href === "/reports");
+    const client = NAV.find((item) => item.href === "/aggregation/reports");
     const staff = GC_NAV.find((item) => item.href === "/aggregation/gc/finance");
     expect(client?.label).toBe("Reports");
     expect(staff?.label).toBe("Finance");

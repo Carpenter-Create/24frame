@@ -1,4 +1,5 @@
 import { CHANNELS_HREF } from "@/lib/channel-card";
+import { TITLES_HREF } from "@/lib/title-public-id";
 import { ACTIVE_DELIVERY_STATUSES_LIST } from "@/lib/master-licence";
 import { primitiveInfoFields, type StaffDirectoryField } from "@/lib/staff-directory";
 import { ISO_COUNTRIES } from "@/lib/territories";
@@ -159,7 +160,7 @@ export function vendorLicensedTitles(
       return {
         titleId,
         title: info.title,
-        href: `/titles/${titleId}`,
+        href: `${TITLES_HREF}/${titleId}`,
         secondary: bits.join(" · "),
       };
     })

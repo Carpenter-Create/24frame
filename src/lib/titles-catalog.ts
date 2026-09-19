@@ -3,6 +3,7 @@ import {
   HOUSE_FILTER_ON_CLASS,
   HOUSE_PERIOD_SELECTED_CLASS,
 } from "@/lib/house-shell";
+import { TITLES_HREF } from "@/lib/title-public-id";
 import { TITLE_STATUS_LABELS, type TitleStatus } from "@/lib/titles";
 
 // Client `/titles` catalog copy and list helpers. Lives in lib/, not JSX.
@@ -216,7 +217,7 @@ export function catalogFilterHref(q: string, status: CatalogStatusFilter): strin
   if (q.trim()) params.set("q", q.trim());
   if (status !== "all") params.set("status", status);
   const qs = params.toString();
-  return qs ? `/titles?${qs}` : "/titles";
+  return qs ? `${TITLES_HREF}?${qs}` : TITLES_HREF;
 }
 
 /** URL `q` for catalog search. Same cap on /titles and staff /queue. */

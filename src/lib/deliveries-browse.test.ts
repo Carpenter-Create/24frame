@@ -203,7 +203,7 @@ describe("asDeliveryBrowseRow / normalizeMyDeliveries", () => {
 
 describe("page-view helpers (consumed by /deliveries)", () => {
   it("builds the exact title destination for a validated row", () => {
-    expect(deliveryTitleHref(rows[1])).toBe(`/titles/${ID.t2}`);
+    expect(deliveryTitleHref(rows[1])).toBe(`/aggregation/titles/${ID.t2}`);
   });
 
   it("exposes the approved no-data empty-state copy and /titles action", () => {
@@ -211,7 +211,7 @@ describe("page-view helpers (consumed by /deliveries)", () => {
       title: "No deliveries yet",
       description: "Placements appear here once a title is delivered to a platform.",
       actionLabel: "View titles",
-      actionHref: "/titles",
+      actionHref: "/aggregation/titles",
     });
   });
 

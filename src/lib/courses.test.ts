@@ -246,7 +246,6 @@ describe("course lock", () => {
     expect(migration).not.toContain("media_asset_id uuid");
     expect(migration).not.toMatch(/create table if not exists public\.lesson_progress/);
     expect(() => readFileSync("src/app/(app)/education/new/page.tsx")).toThrow();
-    expect(() => readFileSync("src/app/(app)/education/page.tsx")).toThrow();
     expect(() =>
       readFileSync("src/app/(app)/education/lessons/[id]/page.tsx"),
     ).toThrow();

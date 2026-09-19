@@ -318,7 +318,7 @@ export function DashboardTopTitles({
       empty={DASHBOARD_HOME.topTitlesEmpty}
       rows={rankedRowsFromTitles(items)}
       testId="top-titles"
-      viewAllHref="/titles"
+      viewAllHref={TITLES_HREF}
       modes={["list", "bars"]}
       defaultMode="bars"
       periodLabel={periodLabel}

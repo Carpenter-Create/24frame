@@ -115,7 +115,7 @@ describe("Social courses list", () => {
     expect(html).not.toContain("Courses");
     expect(html).not.toContain("Social+Education");
     expect(html).toContain("Welcome to 24Frame");
-    expect(html).toContain("/social/courses/welcome-to-24frame");
+    expect(html).toContain("/education/welcome-to-24frame");
     expect(html).toContain("data-course-grid");
     expect(html).toContain("data-course-card");
     expect(html).toContain("data-course-cover");

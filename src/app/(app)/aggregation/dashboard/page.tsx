@@ -54,6 +54,7 @@ import {
   type DashboardAuditEvent,
 } from "@/lib/dashboard-admin";
 import { ATTENTION_HREF } from "@/lib/dashboard-attention";
+import { TITLES_HREF } from "@/lib/title-public-id";
 import { buildLicensingStatus } from "@/lib/dashboard-licensing";
 import { titleArtworkUrls } from "@/lib/artwork";
 import {
@@ -72,7 +73,7 @@ import {
 } from "@/lib/dashboard-fixture";
 import { UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
 import { loadMyDeliveries, loadMyFindings } from "@/lib/my-lists";
-import { GcClientsDirectory } from "@/app/(app)/(operator)/gc/clients/clients-directory";
+import { GcClientsDirectory } from "@/app/(app)/(operator)/aggregation/gc/clients/clients-directory";
 import { HouseEmpty, TextAction } from "@/components/chrome/house";
 import { AGGREGATION_EMPTY } from "@/lib/aggregation-empty";
 import { DASHBOARD_SEEN_COOKIE, afterLastVisit, parseDashboardSeen } from "@/lib/dashboard-visit";
@@ -369,14 +370,14 @@ export default async function DashboardPage({
               empty={DASHBOARD_HOME.platformsEmpty}
               rows={livePlatforms}
               testId="platforms"
-              viewAllHref="/titles"
+              viewAllHref={TITLES_HREF}
             />
             <DashboardRankedBars
               label={DASHBOARD_HOME.territories}
               empty={DASHBOARD_HOME.territoriesEmpty}
               rows={liveTerritories}
               testId="territories"
-              viewAllHref="/titles"
+              viewAllHref={TITLES_HREF}
               territory
             />
           </div>

@@ -27,13 +27,13 @@ vi.mock("@/lib/supabase/auth", () => ({ getAuthUser: vi.fn() }));
 // panels are inert here so this test fails only on title-page asset wiring regressions.
 vi.mock("@/components/findings/findings-card", () => ({ FindingsCard: () => null }));
 vi.mock("./release-date-control", () => ({ ReleaseDateControl: () => null }));
-vi.mock("@/app/(app)/(operator)/gc/review/review-controls", () => ({
+vi.mock("@/app/(app)/(operator)/aggregation/gc/review/review-controls", () => ({
   ReviewControls: () => null,
 }));
-vi.mock("@/app/(app)/(operator)/gc/review/link-controls", () => ({
+vi.mock("@/app/(app)/(operator)/aggregation/gc/review/link-controls", () => ({
   LinkControls: () => null,
 }));
-vi.mock("@/app/(app)/(operator)/gc/review/screener-panel", () => ({
+vi.mock("@/app/(app)/(operator)/aggregation/gc/review/screener-panel", () => ({
   ScreenerPanel: () => null,
 }));
 vi.mock("./buyer-links", () => ({ BuyerLinks: () => null }));

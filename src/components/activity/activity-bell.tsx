@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Bell, FilmSlate, PaperPlaneTilt, X } from "@phosphor-icons/react";
 
-import { markNotificationsRead } from "@/app/(app)/messages/actions";
+import { markNotificationsRead } from "@/app/(app)/aggregation/messages/actions";
 import { AppSheetHairline, Close44 } from "@/components/chrome/house";
 import { MenuSurfaceAccent } from "@/components/chrome/menu-surface";
 import {

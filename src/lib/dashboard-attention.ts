@@ -3,7 +3,7 @@ import {
   type ClientHomeFinding,
   type ClientHomeTitle,
 } from "@/lib/dashboard-home";
-import { titleClientPath } from "@/lib/title-public-id";
+import { TITLES_HREF, titleClientPath } from "@/lib/title-public-id";
 import { aggregationPath } from "@/lib/workspace";
 
 // Company-admin `/aggregation/dashboard` Attention glance. Catalog findings now.
@@ -72,7 +72,7 @@ export function buildAttentionGlance(input: {
           at,
           href: title
             ? titleClientPath(title.catalog_id)
-            : `/titles/${finding.entity_id}`,
+            : `${TITLES_HREF}/${finding.entity_id}`,
           kind: "catalog",
         },
       ];

@@ -302,7 +302,7 @@ export default async function TitleDetailPage({ params }: { params: Promise<{ id
     <>
       <TitleHero
         title={title.title}
-        backHref="/titles"
+        backHref={TITLES_HREF}
         backLabel="Titles"
         status={title.status}
         liveCount={liveCount}

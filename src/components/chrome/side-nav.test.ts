@@ -23,11 +23,11 @@ describe("SideNav Access rail", () => {
     ]);
     expect(NAV.map((item) => item.label)).not.toContain("Ask 24Frame AI");
     expect(NAV.map((item) => item.href)).toEqual([
-      "/dashboard",
-      "/titles",
-      "/attention",
-      "/activity",
-      "/reports",
+      "/aggregation/dashboard",
+      "/aggregation/titles",
+      "/aggregation/attention",
+      "/aggregation/activity",
+      "/aggregation/reports",
     ]);
     expect(NAV.map((item) => item.href)).not.toContain("?ai=1");
     expect(navSrc).not.toContain("AskAiOpenButton");

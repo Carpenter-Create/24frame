@@ -130,19 +130,19 @@ describe("titles catalog scope", () => {
 
   it("deep-links title detail into Titles and Attention", () => {
     const titleDetail = src("src/app/(app)/aggregation/titles/[id]/page.tsx");
-    expect(titleDetail).toContain('href="/titles"');
-    expect(titleDetail).toContain('href="/attention"');
+    expect(titleDetail).toContain("backHref={TITLES_HREF}");
+    expect(titleDetail).toContain("href={ATTENTION_HREF}");
     expect(titleDetail).toContain("data-title-ops-links");
     expect(titleDetail).toContain("TITLE_DETAIL");
   });
 
   it("does not add a drafts nav item or move the catalog onto deliveries", () => {
-    expect(NAV.filter((item) => item.href === "/titles")).toHaveLength(1);
+    expect(NAV.filter((item) => item.href === "/aggregation/titles")).toHaveLength(1);
     expect(NAV.some((item) => /draft/i.test(item.label))).toBe(false);
-    expect(NAV.find((item) => item.href === "/attention")?.label).toBe("Recent activity");
-    expect(NAV.find((item) => item.href === "/activity")?.label).toBe("Activity");
+    expect(NAV.find((item) => item.href === "/aggregation/attention")?.label).toBe("Recent activity");
+    expect(NAV.find((item) => item.href === "/aggregation/activity")?.label).toBe("Activity");
     expect(NAV.find((item) => item.href === "/deliveries")).toBeUndefined();
-    expect(GC_NAV.some((item) => item.href === "/titles")).toBe(false);
+    expect(GC_NAV.some((item) => item.href === "/aggregation/titles")).toBe(false);
   });
 
   it("loads landscape row skeletons, not a poster grid", () => {
@@ -178,7 +178,7 @@ describe("titles catalog scope", () => {
     expect(catalog).toContain("TitlesCatalogStaffCols");
     expect(catalog).toContain("data-titles-catalog-submitter");
     expect(catalog).toContain("data-titles-catalog-submitted");
-    expect(GC_NAV.find((item) => item.href === "/queue")?.label).toBe("Queue");
+    expect(GC_NAV.find((item) => item.href === "/aggregation/queue")?.label).toBe("Queue");
   });
 
   it("keeps house-shell language in titles comments — no reference-brand word", () => {

@@ -190,7 +190,10 @@ describe("settings hub lock", () => {
   });
 
   it("backs the phone header Home on the list and Settings on a pushed pane", () => {
-    expect(settingsHeaderBack("/settings")).toEqual({ href: "/", label: "Home" });
+    expect(settingsHeaderBack("/settings")).toEqual({
+      href: SETTINGS.dashboardHref,
+      label: "Home",
+    });
     expect(settingsHeaderBack("/settings/preferences")).toEqual({
       href: "/settings",
       label: "Settings",

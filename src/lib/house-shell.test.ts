@@ -3,7 +3,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
-import { EducationCourseRail } from "@/app/(app)/(operator)/education/education-course-rail";
+import { EducationCourseRail } from "@/app/(app)/(operator)/education/manage/education-course-rail";
 import { SocialRailAccountChip } from "@/components/social/social-rail-extras";
 import { SocialTopBar } from "@/components/social/social-top-bar";
 import { PageHeader } from "@/components/ui/page-header";
@@ -48,7 +48,7 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
-vi.mock("@/app/(app)/(operator)/education/actions", () => ({
+vi.mock("@/app/(app)/(operator)/education/manage/actions", () => ({
   reorderEducationCourses: vi.fn(),
   createEducationCourse: vi.fn(),
   uploadEducationCover: vi.fn(),

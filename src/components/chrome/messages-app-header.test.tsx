@@ -8,7 +8,7 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/messages",
   useSearchParams: () => new URLSearchParams(navigation.search),
 }));
-vi.mock("@/app/(app)/messages/ask-globee-actions", () => ({
+vi.mock("@/app/(app)/aggregation/messages/ask-globee-actions", () => ({
   startAskGlobeeConversation: vi.fn(),
   appendAskGlobeeTurn: vi.fn(),
   completeAskGlobeeTurn: vi.fn(),

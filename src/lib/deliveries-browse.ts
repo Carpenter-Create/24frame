@@ -11,6 +11,7 @@ import {
   type SortDir,
 } from "@/lib/catalog-view";
 import { DETAIL_LIST, UNPAGINATED_MAX } from "@/lib/list-bounds";
+import { TITLES_HREF } from "@/lib/title-public-id";
 import { DELIVERY_STATUS_ROW_LABELS, type DeliveryStatus } from "@/lib/titles";
 
 export type DeliveryBrowseRow = {
@@ -123,7 +124,7 @@ export function normalizeMyDeliveries(data: unknown): DeliveryBrowseRow[] {
 }
 
 export function deliveryTitleHref(row: { title_id: string }): string {
-  return `/titles/${row.title_id}`;
+  return `${TITLES_HREF}/${row.title_id}`;
 }
 
 export type DeliveryTitleRow = {
@@ -246,7 +247,7 @@ export const DELIVERIES_NO_DATA = {
   title: "No deliveries yet",
   description: "Placements appear here once a title is delivered to a platform.",
   actionLabel: "View titles",
-  actionHref: "/titles",
+  actionHref: TITLES_HREF,
 } as const;
 
 export const DELIVERIES_FILTER_MISS = {

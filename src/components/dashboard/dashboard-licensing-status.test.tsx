@@ -41,7 +41,7 @@ describe("DashboardLicensingStatus", () => {
     );
     expect(html).toContain('data-dashboard-module="licensing-status"');
     expect(html).toContain(DASHBOARD_LICENSING.title);
-    expect(html).toContain('href="/titles"');
+    expect(html).toContain('href="/aggregation/titles"');
     expect(html).not.toContain('href="/catalog-health"');
     expect(html).not.toContain('href="/licensing"');
     expect(html).toContain("Winter Light");

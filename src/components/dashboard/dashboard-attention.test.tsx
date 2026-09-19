@@ -26,7 +26,7 @@ describe("DashboardAttention", () => {
     );
     expect(html).toContain('data-dashboard-module="attention"');
     expect(html).toContain(DASHBOARD_ATTENTION.title);
-    expect(html).toContain('href="/attention"');
+    expect(html).toContain('href="/aggregation/attention"');
     expect(html).toContain("Synopsis is required.");
     expect(html).toContain("data-dashboard-attention-what");
     expect(html).toContain("data-dashboard-attention-time");
