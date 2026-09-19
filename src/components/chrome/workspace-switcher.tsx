@@ -17,6 +17,7 @@ import { SegmentedTrack } from "@/components/ui/segmented-track";
 import { SEGMENTED_TRACK_PERSIST } from "@/lib/segmented-track";
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import {
+  overviewLeadActiveIndex,
   overviewLeadPills,
   overviewLeadSelected,
   overviewLeadShouldNavigate,
@@ -104,12 +105,10 @@ function WorkspaceSwitcherPills({
   } | null>(null);
   const label = overviewTriggerLabel(pathname, workspaceSwitcherSegmentLabel(current));
   const canSwitch = pills.length > 1;
-  const routeIndex = pills.findIndex((pill) =>
-    overviewLeadSelected(pill.id, pathname, current),
-  );
+  const routeIndex = overviewLeadActiveIndex(pathname, current, pills);
   const pendingIndex =
     pending && pending.pathname === pathname ? pending.index : null;
-  const activeIndex = pendingIndex ?? (routeIndex >= 0 ? routeIndex : 0);
+  const activeIndex = pendingIndex ?? routeIndex;
 
   function onSegmentKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>, index: number) {
     if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;

@@ -225,6 +225,15 @@ export function overviewLeadSelected(
   return !onHome && workspace === pillId;
 }
 
+/** Selected unify-lead index, or -1 when none (Settings). Do not coerce to 0. */
+export function overviewLeadActiveIndex(
+  pathname: string,
+  workspace: WorkspaceMode,
+  pills: readonly Pick<OverviewLeadPill, "id">[] = overviewLeadPills(),
+): number {
+  return pills.findIndex((pill) => overviewLeadSelected(pill.id, pathname, workspace));
+}
+
 export function overviewTriggerLabel(
   pathname: string,
   workspaceLabel: string,

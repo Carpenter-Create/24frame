@@ -41,6 +41,7 @@ import {
   HOUSE_SEGMENTED_THUMB_DURATION_MS,
   HOUSE_SEGMENTED_THUMB_EASE,
   HOUSE_SEGMENTED_TRACK_CLASS,
+  houseSegmentedThumbHidden,
   HOUSE_CHROME_GUTTER,
   HOUSE_CHROME_GUTTER_X_CLASS,
   HOUSE_PHONE_TRAILING_GUTTER_CLASS,
@@ -192,6 +193,16 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(DASHBOARD_SECTION_AIR_CLASS).toBe(HOUSE_SECTION_AIR_CLASS);
     expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).toBe(HOUSE_SEGMENTED_ITEM_ON_CLASS);
     expect(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS).toBe(HOUSE_SEGMENTED_ITEM_OFF_CLASS);
+    expect(HOUSE_SEGMENTED_ITEM_ON_CLASS).toBe("text-white");
+    expect(HOUSE_SEGMENTED_ITEM_OFF_CLASS).toBe("text-ink-2");
+    expect(houseSegmentedThumbHidden(-1)).toBe(true);
+    expect(houseSegmentedThumbHidden(0)).toBe(false);
+    expect(readFileSync("src/lib/house-shell.ts", "utf8")).toMatch(
+      /Idle = muted secondary; active = white on accent thumb/,
+    );
+    expect(readFileSync("src/components/ui/segmented-track.tsx", "utf8")).toContain(
+      "setThumbStyle({ opacity: 0 })",
+    );
     expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).toBe(HOUSE_FILTER_ON_CLASS);
     expect(DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS).toBe(HOUSE_FILTER_OFF_CLASS);
     expect(DASHBOARD_PERIOD_OPTION_SELECTED_CLASS).toBe(HOUSE_PERIOD_SELECTED_CLASS);
