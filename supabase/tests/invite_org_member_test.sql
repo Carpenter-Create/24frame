@@ -167,20 +167,22 @@ select throws_like(
   '%no active account owner%',
   'sole owner cannot remove themselves');
 
--- With a second active owner, removal is allowed.
+-- With a second active owner, the remaining owner may remove the first.
+-- Assert as postgres: the removed actor no longer has member_can('view').
 reset role;
 insert into public.memberships (org_id, user_id, role, status) values
   (current_setting('t.org')::uuid, current_setting('t.owner_b')::uuid, 'account_owner', 'active');
 
 set local role authenticated;
 select set_config('request.jwt.claims',
-  json_build_object('sub', current_setting('t.owner'), 'role', 'authenticated')::text, true);
+  json_build_object('sub', current_setting('t.owner_b'), 'role', 'authenticated')::text, true);
 
 update public.memberships
    set status = 'removed'
  where org_id = current_setting('t.org')::uuid
    and user_id = current_setting('t.owner')::uuid;
 
+reset role;
 select is(
   (select status from public.memberships
      where org_id = current_setting('t.org')::uuid
