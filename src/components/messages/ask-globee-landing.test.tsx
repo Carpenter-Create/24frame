@@ -17,6 +17,7 @@ import {
   ASK_GLOBEE,
   ASK_GLOBEE_CHIP_MARKS,
   askGlobeeChipMark,
+  askGlobeeLandingGreeting,
 } from "@/lib/ask-globee";
 import { AskGlobeeLanding } from "./ask-globee-landing";
 
@@ -30,24 +31,29 @@ const tokens = readFileSync(join(here, "../../app/tokens.css"), "utf8");
 const THREAD = "2f1c8b6a-4d3e-4a11-9c22-7b8e1d0a5f44";
 
 describe("AskGlobeeLanding", () => {
-  it("locks the 7:73 landing chrome without fixture History rows", () => {
-    const html = visible(renderToStaticMarkup(<AskGlobeeLanding />));
+  it("opens Mercury-direct: greeting + stacked chips + composer, no mega-title", () => {
+    const html = visible(renderToStaticMarkup(<AskGlobeeLanding displayName="Ada Lovelace" />));
 
     expect(html).toContain('data-ask-globee-landing=""');
-    expect(html).toContain("t-display");
-    expect(html).toContain(ASK_GLOBEE.headline);
+    expect(html).toContain('data-ask-globee-greeting=""');
+    expect(html).toContain("t-title");
+    expect(html).toContain(askGlobeeLandingGreeting({ displayName: "Ada Lovelace" }));
+    expect(html).toContain("Hi, Ada. How can I be helpful?");
+    expect(html).not.toContain("t-display");
+    expect(html).not.toContain('data-ask-globee-headline=""');
+    expect(html).not.toContain(ASK_GLOBEE.headline);
     expect(html).not.toContain(ASK_GLOBEE.need);
+    expect(html).not.toContain(ASK_GLOBEE.tryLabel);
     expect(html).toContain(ASK_GLOBEE.composerPlaceholderMobile);
     expect(html).not.toContain(ASK_GLOBEE.composerPlaceholder);
     expect(html).toContain("max-w-[640px]");
     expect(html).toContain("h-14");
     expect(html).toContain("rounded-[28px]");
     expect(html).toContain("px-[var(--space-4)]");
-    expect(html).toContain(ASK_GLOBEE.tryLabel);
     expect(html).toContain('data-ask-globee-chip=""');
     expect(html).toContain("aria-pressed");
-    expect(html).toContain('data-ask-globee-clock=""');
-    expect(html).toContain(ASK_GLOBEE.pastConversationsLabel);
+    expect(html).not.toContain('data-ask-globee-clock=""');
+    expect(html).not.toContain(ASK_GLOBEE.pastConversationsLabel);
     expect(html).not.toContain("data-ask-globee-download");
     expect(html).not.toContain(ASK_GLOBEE.downloadLabel);
     expect(src).not.toContain("Download");
@@ -99,54 +105,36 @@ describe("AskGlobeeLanding", () => {
     expect(src).not.toContain("emptyBlocking");
   });
 
-  it("keeps clock on landing, drops plus, and never lists HISTORY rows", () => {
-    const html = visible(
-      renderToStaticMarkup(
-        <AskGlobeeLanding
-          conversations={[
-            {
-              id: THREAD,
-              title: "How many titles are in this catalog",
-              pinned_at: "2026-08-19T12:00:00.000Z",
-              created_at: "2026-08-19T11:00:00.000Z",
-              updated_at: "2026-08-19T12:00:00.000Z",
-            },
-          ]}
-        />,
-      ),
-    );
-    expect(html).toContain("data-ask-globee-clock");
-    expect(html).toContain("size-4");
-    expect(html).toContain("size-[44px]");
-    expect(src).toContain("ASK_GLOBEE_CLOCK_BUTTON_CLASS");
-    expect(src).toContain("MOBILE_CHROME_ICON_CLASS");
-    expect(src).toContain("MOBILE_CHROME_ICON_STROKE");
-    expect(src).toContain("text-ink-3");
+  it("drops landing clock, plus, and HISTORY rows — history is overlay chrome", () => {
+    const html = visible(renderToStaticMarkup(<AskGlobeeLanding />));
+    expect(html).not.toContain("data-ask-globee-clock");
     expect(html).not.toContain("data-ask-globee-new");
     expect(html).not.toContain(ASK_GLOBEE.newConversationLabel);
-    expect(html).toContain(ASK_GLOBEE.headline);
+    expect(html).toContain(askGlobeeLandingGreeting());
+    expect(html).not.toContain(ASK_GLOBEE.headline);
     expect(html).not.toContain(ASK_GLOBEE.need);
-    expect(html).toContain(ASK_GLOBEE.tryLabel);
+    expect(html).not.toContain(ASK_GLOBEE.tryLabel);
     for (const label of ASK_GLOBEE.tryPrompts) {
       expect(html).toContain(label);
     }
     expect(html).not.toContain("data-ask-globee-history-popover");
     expect(html).not.toContain("data-ask-globee-history-row");
     expect(html).not.toContain(ASK_GLOBEE.historyLabel);
-    expect(html).not.toContain("How many titles are in this catalog");
+    expect(html).not.toContain(THREAD);
     expect(html).not.toContain("Winter Line");
     expect(html).not.toContain("Harbor Lights");
     expect(html).not.toContain("Get support");
-    expect(src).toContain("AskGlobeeHistoryPopover");
-    expect(src).toContain("conversations={conversations}");
-    expect(src).toContain("Clock");
-    expect(src).toContain("strokeWidth={1.33}");
+    expect(src).not.toContain("AskGlobeeHistoryPopover");
+    expect(src).not.toContain("conversations={conversations}");
+    expect(src).not.toContain("Clock");
     expect(src).not.toContain("Plus");
     expect(src).not.toContain("data-ask-globee-new");
     expect(src).not.toContain("ASK_GLOBEE.newConversationLabel");
     expect(src).not.toContain("askGlobeeLandingHref");
     expect(src).not.toContain("ASK_GLOBEE.historyLabel");
     expect(src).not.toContain("data-ask-globee-history-row");
+    expect(src).not.toContain("MOBILE_CHROME_CLOCK_DOCK_CLASS");
+    expect(src).not.toContain("ASK_GLOBEE_CLOCK_BUTTON_CLASS");
   });
 
   it("does not restore header Search or the Access upgrade card", () => {
@@ -190,51 +178,45 @@ describe("AskGlobeeLanding", () => {
     expect(src).not.toMatch(/setTimeout|sleep\(/);
   });
 
-  it("locks 7:73 greeting, well, composer, and chip geometry on the house 8/16/24/48 scale", () => {
+  it("locks greeting, stacked chips, and composer on the house 8/16/24/48 scale", () => {
     const html = renderToStaticMarkup(<AskGlobeeLanding />);
 
     expect(tokens).toContain("--space-12: 3rem;");
     expect(src).toContain(
-      "relative flex h-full min-h-0 flex-1 flex-col items-center p-[var(--space-12)]",
+      "flex h-full min-h-0 flex-1 flex-col px-[var(--space-6)] pb-[var(--space-6)] pt-[var(--space-4)]",
     );
-    expect(src).toContain(
-      "flex w-full min-h-0 flex-1 flex-col-reverse overflow-auto",
-    );
+    expect(src).toContain("flex w-full min-h-0 flex-1 flex-col overflow-auto");
+    expect(src).not.toContain("flex-col-reverse");
     expect(src).not.toContain("justify-center gap-[var(--space-12)]");
     expect(src).not.toContain("justify-end gap-[var(--space-12)]");
-    expect(src).not.toContain("flex flex-col items-center gap-[var(--space-6)]");
+    expect(src).not.toContain("p-[var(--space-12)]");
     expect(html).not.toContain("t-body text-center text-ink-2");
     expect(html).not.toContain(ASK_GLOBEE.need);
     expect(src).toContain(
       "flex h-14 w-full max-w-[640px] items-center justify-between rounded-[28px] border border-hairline bg-surface px-[var(--space-4)]",
     );
-    expect(src).toContain(
-      "inline-flex items-center gap-[var(--space-2)] rounded-full border-0 bg-surface-muted px-[var(--space-4)] py-[var(--space-2)] t-body-sm text-ink",
-    );
+    expect(src).toContain("ASK_GLOBEE_LANDING_CHIP_CLASS");
+    expect(src).toContain("flex w-full items-center justify-start");
     expect(src).toContain("shrink-0");
     expect(src).not.toContain("md:order-2");
     expect(src).not.toContain("md:order-3");
     expect(src).not.toContain("md:contents");
+    expect(src.indexOf("data-ask-globee-greeting=")).toBeLessThan(
+      src.indexOf("data-ask-globee-try="),
+    );
     expect(src.indexOf("data-ask-globee-try=")).toBeLessThan(
       src.indexOf("data-ask-globee-composer="),
     );
-    expect(src.indexOf("data-ask-globee-headline=")).toBeLessThan(
-      src.indexOf("data-ask-globee-composer="),
-    );
-    expect(src).not.toContain("gap-[var(--space-8)]");
-    expect(src).not.toContain("rounded-full border border-hairline bg-surface px-[var(--space-4)]");
-    expect(src).not.toContain("p-[var(--space-8)]");
-    expect(src).not.toContain("p-[var(--space-10)]");
     expect(src).not.toContain("rounded-[12px]");
     expect(src).not.toContain("rounded-[20px]");
     expect(src).not.toContain("rounded-[32px]");
     expect(src).not.toContain("rounded-[40px]");
     expect(html).not.toContain("data-ask-globee-new");
     expect(html).not.toContain(ASK_GLOBEE.historyLabel);
-    expect(html).toContain('data-ask-globee-clock=""');
+    expect(html).not.toContain('data-ask-globee-clock=""');
   });
 
-  it("locks desktop 7:73 tokens so a mobile-only revert fails", () => {
+  it("locks desktop tokens so a mobile-only revert fails", () => {
     const html = visible(renderToStaticMarkup(<AskGlobeeLanding />));
 
     expect(src).toContain(
@@ -245,16 +227,15 @@ describe("AskGlobeeLanding", () => {
     expect(src).toContain("border-0 bg-surface-muted");
     expect(src).not.toContain("max-md:border-0");
     expect(src).not.toContain("max-md:bg-surface-muted");
-    expect(src).toContain("gap-[var(--space-4)]");
-    expect(src).not.toContain("md:order-3");
-    expect(src).not.toContain("max-md:gap-[var(--space-4)]");
     expect(src).toContain("placeholder={ASK_GLOBEE.composerPlaceholderMobile}");
     expect(src).not.toContain("placeholder={ASK_GLOBEE.composerPlaceholder}");
     expect(src).not.toContain("ASK_GLOBEE.need");
+    expect(src).not.toContain("ASK_GLOBEE.tryLabel");
     expect(src).not.toContain("max-md:hidden");
     expect(html).toContain(ASK_GLOBEE.composerPlaceholderMobile);
     expect(html).not.toContain(ASK_GLOBEE.composerPlaceholder);
     expect(html).not.toContain(ASK_GLOBEE.need);
+    expect(html).not.toContain(ASK_GLOBEE.tryLabel);
     expect(html).not.toContain("Beta");
     expect(src).toContain("text-left");
     expect(src).toContain("<Input");
@@ -266,12 +247,13 @@ describe("AskGlobeeLanding", () => {
     expect(tokens).toContain("--surface-muted: #f4f4f6;");
   });
 
-  it("locks 462:502 mobile stack, quiet chip marks, and unchanged copy", () => {
-    const html = visible(renderToStaticMarkup(<AskGlobeeLanding />));
+  it("locks stacked chip marks, greeting copy, and unchanged prompts", () => {
+    const html = visible(renderToStaticMarkup(<AskGlobeeLanding displayName="Ada" />));
 
     expect(ASK_GLOBEE.headline).toBe("Ask 24Frame AI");
     expect(ASK_GLOBEE.need).toBe("What do you need?");
     expect(ASK_GLOBEE.tryLabel).toBe("Try one of these");
+    expect(ASK_GLOBEE.greetingAsk).toBe("How can I be helpful?");
     expect(ASK_GLOBEE.tryPrompts).toEqual([
       "What needs attention",
       "What is blocking a title",
@@ -284,17 +266,19 @@ describe("AskGlobeeLanding", () => {
     expect(askGlobeeChipMark(1)).toBe("slash");
     expect(askGlobeeChipMark(2)).toBe("send");
     expect(askGlobeeChipMark(3)).toBeNull();
-    expect(html).toContain(ASK_GLOBEE.headline);
+    expect(html).toContain("Hi, Ada. How can I be helpful?");
+    expect(html).not.toContain(ASK_GLOBEE.headline);
     expect(html).not.toContain(ASK_GLOBEE.need);
-    expect(html).toContain(ASK_GLOBEE.tryLabel);
+    expect(html).not.toContain(ASK_GLOBEE.tryLabel);
     expect(html).not.toContain(ASK_GLOBEE.composerPlaceholder);
     expect(html).toContain(ASK_GLOBEE.composerPlaceholderMobile);
     expect(html).toContain("h-14");
     expect(html).toContain("rounded-[28px]");
-    expect(html).toContain('data-ask-globee-clock=""');
-    expect(src).toContain("MOBILE_CHROME_ICON_CLASS");
-    expect(src).toContain("ASK_AI_OVERLAY_PHONE_CLOCK_DOCK_CLASS");
+    expect(html).not.toContain('data-ask-globee-clock=""');
+    expect(src).not.toContain("MOBILE_CHROME_ICON_CLASS");
+    expect(src).not.toContain("MOBILE_CHROME_CLOCK_DOCK_CLASS");
     expect(src).toContain("ASK_AI_OVERLAY_PHONE_SCROLL_CLASS");
+    expect(src).not.toContain("ASK_AI_OVERLAY_PHONE_CLOCK_DOCK_CLASS");
     expect(src).not.toContain("absolute left-0 top-0");
     expect(src).not.toContain("Plus");
     expect(html).not.toContain("data-ask-globee-new");
@@ -309,13 +293,13 @@ describe("AskGlobeeLanding", () => {
     expect(src).toContain("Slash");
     expect(src).toContain("Send");
     expect(src).toContain("strokeWidth={1.33}");
-    expect(src).toContain("size-4 text-ink-3");
+    expect(src).toContain("size-4 shrink-0 text-ink-3");
     expect(src).not.toContain("size-4 text-accent");
     expect(src).not.toContain("fill-");
     expect(src).toContain("max-md:px-[var(--space-4)]");
-    expect(src).toContain("max-md:w-full max-md:flex-col max-md:items-stretch");
-    expect(src).toContain("flex-col-reverse overflow-auto");
-    expect(src).toContain("mt-[var(--space-12)] flex w-full shrink-0 justify-center");
+    expect(src).toContain("flex w-full flex-col items-stretch gap-[var(--space-2)]");
+    expect(src).not.toContain("flex-col-reverse overflow-auto");
+    expect(src).toContain("mt-[var(--space-6)] flex w-full shrink-0 justify-center");
     expect(src).toContain(
       "flex size-6 shrink-0 items-center justify-center rounded-full bg-accent text-accent-contrast",
     );

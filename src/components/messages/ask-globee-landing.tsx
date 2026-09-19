@@ -2,32 +2,22 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/cn";
-import { ArrowRight, CircleAlert, Clock, Send, Slash, type LucideIcon } from "lucide-react";
+import { ArrowRight, CircleAlert, Send, Slash, type LucideIcon } from "lucide-react";
 
+import { cn } from "@/lib/cn";
 import {
   ASK_GLOBEE,
   askGlobeeChipActivation,
   askGlobeeChipMark,
   askGlobeeComposerSubmit,
+  askGlobeeLandingGreeting,
   askGlobeeSelectedChip,
   askGlobeeThreadHref,
   type AskGlobeeChipMark,
 } from "@/lib/ask-globee";
-import { type AskGlobeeHistoryRow } from "@/lib/ask-globee-conversations";
 import { startAskGlobeeConversation } from "@/app/(app)/messages/ask-globee-actions";
 import { Input } from "@/components/ui/input";
-import {
-  ASK_AI_OVERLAY_PHONE_CLOCK_DOCK_CLASS,
-  ASK_AI_OVERLAY_PHONE_SCROLL_CLASS,
-} from "@/lib/ask-ai-overlay";
-import {
-  ASK_GLOBEE_CLOCK_BUTTON_CLASS,
-  MOBILE_CHROME_ICON_CLASS,
-  MOBILE_CHROME_ICON_STROKE,
-} from "@/lib/mobile-chrome";
-import { useAskGlobeeChrome } from "./ask-globee-chrome";
-import { AskGlobeeHistoryPopover } from "./ask-globee-history";
+import { ASK_AI_OVERLAY_PHONE_SCROLL_CLASS } from "@/lib/ask-ai-overlay";
 
 const CHIP_MARK_ICON: Record<AskGlobeeChipMark, LucideIcon> = {
   alert: CircleAlert,
@@ -35,27 +25,31 @@ const CHIP_MARK_ICON: Record<AskGlobeeChipMark, LucideIcon> = {
   send: Send,
 };
 
-// Overlay landing, Mercury bottom-up: clock docks top-left; headline and
-// chips sit above a pinned composer. Empty/new chat anchors to the bottom
-// (flex-col-reverse), not a top-down empty header. Chip click fills, selects,
-// and sends the same prompt as free text. Submit persists the user turn,
-// then opens the thread on the current path. Quiet clock 16 opens past
-// conversations. Mobile 44 hit inside sheet pad. Desktop size-4 at left-0.
-// No plus. No HISTORY list. No invented titles. House 48 (--space-12).
+export const ASK_GLOBEE_LANDING_CHIP_CLASS =
+  "flex w-full items-center justify-start gap-[var(--space-2)] rounded-full border-0 bg-surface-muted px-[var(--space-4)] py-[var(--space-3)] text-left t-body-sm text-ink";
+
+// Overlay landing, Mercury-direct: greeting + stacked full-width chips +
+// pinned composer. No second brand headline. No "Try one of these" label.
+// History lives in overlay header chrome — never an absolute left-edge clock.
+// Phone scroller keeps #457 overflow-y-scroll / pan-y / overscroll-contain.
+// Chip click fills, selects, and sends the same prompt as free text. Submit
+// persists the user turn, then opens the thread on the current path.
 // Composer is 640x56 r28 pad 16. Thinking chrome stays on the thread.
-// Chips above the composer on every viewport. Drop "What do you need?".
-// No Beta. No Mercury brand colors. No Circle brand fill.
+// No plus. No HISTORY list. No invented titles. No Beta. No Mercury brand
+// colors. No Circle brand fill.
 export function AskGlobeeLanding({
-  conversations = [],
+  firstName = null,
+  displayName = null,
 }: {
-  conversations?: AskGlobeeHistoryRow[];
+  firstName?: string | null;
+  displayName?: string | null;
 }) {
   const router = useRouter();
   const [prompt, setPrompt] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { historyOpen, setHistoryOpen } = useAskGlobeeChrome();
   const selected = askGlobeeSelectedChip(prompt);
+  const greeting = askGlobeeLandingGreeting({ firstName, displayName });
 
   const send = async (value: string) => {
     if (pending) return;
@@ -76,81 +70,57 @@ export function AskGlobeeLanding({
   return (
     <div
       data-ask-globee-landing=""
-      className="relative flex h-full min-h-0 flex-1 flex-col items-center p-[var(--space-12)] max-md:px-[var(--space-4)]"
+      className="flex h-full min-h-0 flex-1 flex-col px-[var(--space-6)] pb-[var(--space-6)] pt-[var(--space-4)] max-md:px-[var(--space-4)]"
     >
-      <div className={ASK_AI_OVERLAY_PHONE_CLOCK_DOCK_CLASS}>
-        <AskGlobeeHistoryPopover
-          conversations={conversations}
-          open={historyOpen}
-          onOpenChange={setHistoryOpen}
-        >
-          <button
-            type="button"
-            data-ask-globee-clock=""
-            aria-label={ASK_GLOBEE.pastConversationsLabel}
-            aria-expanded={historyOpen}
-            onClick={() => setHistoryOpen((open) => !open)}
-            className={ASK_GLOBEE_CLOCK_BUTTON_CLASS}
-          >
-            <Clock className={MOBILE_CHROME_ICON_CLASS} strokeWidth={MOBILE_CHROME_ICON_STROKE} />
-          </button>
-        </AskGlobeeHistoryPopover>
-      </div>
-
       <div
         className={cn(
-          "flex w-full min-h-0 flex-1 flex-col-reverse overflow-auto",
+          "flex w-full min-h-0 flex-1 flex-col overflow-auto",
           ASK_AI_OVERLAY_PHONE_SCROLL_CLASS,
         )}
       >
-        <div className="flex w-full flex-col items-center gap-[var(--space-12)]">
-        <h1 data-ask-globee-headline="" className="t-display text-center text-ink">
-          {ASK_GLOBEE.headline}
+        <h1 data-ask-globee-greeting="" className="t-title text-ink">
+          {greeting}
         </h1>
 
         <div
           data-ask-globee-try=""
-          className="flex w-full max-w-[640px] flex-col items-center gap-[var(--space-4)]"
+          className="mt-[var(--space-6)] flex w-full flex-col items-stretch gap-[var(--space-2)]"
         >
-          <p className="t-label text-ink-3">{ASK_GLOBEE.tryLabel}</p>
-          <div className="flex flex-wrap justify-center gap-[var(--space-2)] max-md:w-full max-md:flex-col max-md:items-stretch">
-            {ASK_GLOBEE.tryPrompts.map((label, index) => {
-              const pressed = selected === label;
-              const mark = askGlobeeChipMark(index);
-              const MarkIcon = mark ? CHIP_MARK_ICON[mark] : null;
-              return (
-                <button
-                  key={label}
-                  type="button"
-                  data-ask-globee-chip=""
-                  data-ask-globee-chip-mark={mark ?? undefined}
-                  aria-pressed={pressed}
-                  onClick={() => {
-                    const activation = askGlobeeChipActivation(label);
-                    setPrompt(activation.prompt);
-                    void send(activation.send);
-                  }}
-                  className="inline-flex items-center gap-[var(--space-2)] rounded-full border-0 bg-surface-muted px-[var(--space-4)] py-[var(--space-2)] t-body-sm text-ink"
-                >
-                  {MarkIcon ? (
-                    <MarkIcon
-                      aria-hidden="true"
-                      className="size-4 text-ink-3"
-                      strokeWidth={1.33}
-                    />
-                  ) : null}
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+          {ASK_GLOBEE.tryPrompts.map((label, index) => {
+            const pressed = selected === label;
+            const mark = askGlobeeChipMark(index);
+            const MarkIcon = mark ? CHIP_MARK_ICON[mark] : null;
+            return (
+              <button
+                key={label}
+                type="button"
+                data-ask-globee-chip=""
+                data-ask-globee-chip-mark={mark ?? undefined}
+                aria-pressed={pressed}
+                onClick={() => {
+                  const activation = askGlobeeChipActivation(label);
+                  setPrompt(activation.prompt);
+                  void send(activation.send);
+                }}
+                className={ASK_GLOBEE_LANDING_CHIP_CLASS}
+              >
+                {MarkIcon ? (
+                  <MarkIcon
+                    aria-hidden="true"
+                    className="size-4 shrink-0 text-ink-3"
+                    strokeWidth={1.33}
+                  />
+                ) : null}
+                {label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       <form
         data-ask-globee-composer=""
-        className="mt-[var(--space-12)] flex w-full shrink-0 justify-center"
+        className="mt-[var(--space-6)] flex w-full shrink-0 justify-center"
         onSubmit={(event) => {
           event.preventDefault();
           const next = askGlobeeComposerSubmit(prompt);

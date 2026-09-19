@@ -248,7 +248,7 @@ describe("staff rail and neighboring locks", () => {
     const nav = readFileSync("src/components/chrome/side-nav.tsx", "utf8");
     const home = readFileSync("src/app/(app)/dashboard/page.tsx", "utf8");
 
-    expect(ask).toContain("Overlay landing, Mercury bottom-up");
+    expect(ask).toContain("Overlay landing, Mercury-direct");
     expect(ask).toContain("rounded-[28px]");
     expect(deliveries).toContain('redirect("/titles")');
     expect(deliveries).not.toContain("EmptyState");

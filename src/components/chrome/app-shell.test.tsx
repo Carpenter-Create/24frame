@@ -23,6 +23,7 @@ vi.mock("@/app/(app)/messages/ask-globee-actions", () => ({
   loadAskAiOverlay: vi.fn(async () => ({
     surface: "ask-globee-landing",
     initials: "A",
+    displayName: "Ada Lovelace",
     conversations: [],
     conversation: null,
     messages: [],
