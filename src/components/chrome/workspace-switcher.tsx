@@ -98,17 +98,18 @@ function WorkspaceSwitcherPills({
   const pathname = usePathname();
   const pills = overviewLeadPills(options);
   const segmentRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const [pendingIndex, setPendingIndex] = useState<number | null>(null);
+  const [pending, setPending] = useState<{
+    index: number;
+    pathname: string;
+  } | null>(null);
   const label = overviewTriggerLabel(pathname, workspaceSwitcherSegmentLabel(current));
   const canSwitch = pills.length > 1;
   const routeIndex = pills.findIndex((pill) =>
     overviewLeadSelected(pill.id, pathname, current),
   );
+  const pendingIndex =
+    pending && pending.pathname === pathname ? pending.index : null;
   const activeIndex = pendingIndex ?? (routeIndex >= 0 ? routeIndex : 0);
-
-  useEffect(() => {
-    setPendingIndex(null);
-  }, [pathname, current]);
 
   function onSegmentKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>, index: number) {
     if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
@@ -163,7 +164,7 @@ function WorkspaceSwitcherPills({
             tabIndex={workspaceSwitcherSegmentTabIndex(selected)}
             className={workspaceSwitcherSegmentClass(selected)}
             onClick={() => {
-              setPendingIndex(index);
+              setPending({ index, pathname });
               selectLeadPill(current, pill, options, router, pathname);
             }}
             onKeyDown={(event) => onSegmentKeyDown(event, index)}

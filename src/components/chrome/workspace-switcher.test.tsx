@@ -161,7 +161,7 @@ describe("workspace switcher header control", () => {
     expect(src).toContain("workspaceSwitcherNextSegmentIndex");
     expect(src).toContain("SegmentedTrack");
     expect(src).toContain("SEGMENTED_TRACK_PERSIST.workspace");
-    expect(src).toContain("setPendingIndex");
+    expect(src).toContain("setPending");
     expect(src).not.toContain('"Agg"');
     expect(src).not.toContain('"Edu"');
     expect(src).not.toContain("ellipsis");
