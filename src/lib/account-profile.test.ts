@@ -19,7 +19,7 @@ import { accountSheetIdentity } from "./account-sheet";
 const here = dirname(fileURLToPath(import.meta.url));
 const actionSrc = readFileSync(join(here, "../app/(app)/account/actions.ts"), "utf8");
 const authSrc = readFileSync(join(here, "./supabase/auth.ts"), "utf8");
-const pageSrc = readFileSync(join(here, "../components/settings/you-settings.tsx"), "utf8");
+const pageSrc = readFileSync(join(here, "../components/settings/profile-settings.tsx"), "utf8");
 const layoutSrc = readFileSync(join(here, "../app/(app)/layout.tsx"), "utf8");
 const formSrc = readFileSync(join(here, "../app/(app)/account/account-profile-form.tsx"), "utf8");
 const companyFormSrc = readFileSync(

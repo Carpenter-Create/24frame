@@ -428,8 +428,8 @@ describe("Social Home miss list v1 P0 lock", () => {
   });
 
   it("keeps Social Figma and Settings Mercury on separate registers", () => {
-    const settingsProfile = readFileSync("src/components/settings/you-settings.tsx", "utf8");
-    const settingsAggregation = readFileSync("src/components/settings/aggregation-settings.tsx", "utf8");
+    const settingsProfile = readFileSync("src/components/settings/profile-settings.tsx", "utf8");
+    const settingsAggregation = readFileSync("src/components/settings/organization-settings.tsx", "utf8");
     const accountSheet = readFileSync("src/components/chrome/account-sheet.tsx", "utf8");
     const userMenu = readFileSync("src/components/chrome/user-menu.tsx", "utf8");
     const settingsRail = readFileSync("src/components/chrome/settings-rail.tsx", "utf8");

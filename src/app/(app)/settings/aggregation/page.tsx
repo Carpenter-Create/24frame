@@ -1,11 +1,7 @@
-import { redirect } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 
-import { AggregationSettings } from "@/components/settings/aggregation-settings";
-import { settingsCanAccessSection } from "@/lib/settings";
-import { availableWorkspaceOptions } from "@/lib/workspace-menu";
+import { SETTINGS } from "@/lib/settings";
 
-export default async function SettingsAggregationPage() {
-  const lanes = availableWorkspaceOptions().map((option) => option.mode);
-  if (!settingsCanAccessSection("aggregation", lanes)) redirect("/settings/you");
-  return AggregationSettings();
+export default function SettingsAggregationRedirectPage() {
+  permanentRedirect(SETTINGS.organizationHref);
 }

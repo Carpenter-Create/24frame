@@ -1,11 +1,12 @@
-import { redirect } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 
 import { SettingsHubList } from "@/components/chrome/settings-hub-list";
-import { YouSettings } from "@/components/settings/you-settings";
+import { ProfileSettings } from "@/components/settings/profile-settings";
 import { settingsPathFromQuery } from "@/lib/settings";
 
-// Settings hub. Query ?section= redirects to the path contract.
-// Desktop: You pane (rail sits in the Access slot). Mobile: list → push.
+// Settings hub. Query ?section= permanently redirects to the path
+// contract. Desktop: Profile pane (rail sits in the Access slot).
+// Mobile: list → push.
 export default async function SettingsPage({
   searchParams,
 }: {
@@ -14,13 +15,13 @@ export default async function SettingsPage({
   const sp = await searchParams;
   const raw = Array.isArray(sp.section) ? sp.section[0] : sp.section;
   const land = settingsPathFromQuery(raw);
-  if (land) redirect(land);
+  if (land) permanentRedirect(land);
 
   return (
     <>
       <SettingsHubList className="md:hidden" />
       <div className="hidden md:block">
-        <YouSettings />
+        <ProfileSettings />
       </div>
     </>
   );

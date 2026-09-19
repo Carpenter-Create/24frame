@@ -295,9 +295,9 @@ describe("account sheet identity", () => {
 describe("account sheet destination close", () => {
   it("closes immediately only on the same href", () => {
     expect(destinationClickClosesSheet("/settings/profile", "/settings/profile")).toBe(true);
-    expect(destinationClickClosesSheet("/settings/education", "/settings/education")).toBe(true);
+    expect(destinationClickClosesSheet("/settings/preferences", "/settings/preferences")).toBe(true);
     expect(destinationClickClosesSheet("/settings/profile", "/settings/you")).toBe(false);
-    expect(destinationClickClosesSheet("/", "/settings/aggregation")).toBe(false);
+    expect(destinationClickClosesSheet("/", "/settings/organization")).toBe(false);
     expect(destinationClickClosesSheet("/help", "/help")).toBe(true);
     expect(destinationClickClosesSheet("/settings/profile", "/help")).toBe(false);
   });

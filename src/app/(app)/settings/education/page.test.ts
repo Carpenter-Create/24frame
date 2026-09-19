@@ -1,69 +1,16 @@
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-import { renderToStaticMarkup } from "react-dom/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { SETTINGS } from "@/lib/settings";
-import { getOrgContext } from "@/lib/supabase/context";
-import SettingsEducationPage from "./page";
+import SettingsEducationRedirectPage from "./page";
 
 vi.mock("next/navigation", () => ({
-  redirect: vi.fn((to: string) => {
+  permanentRedirect: vi.fn((to: string) => {
     throw new Error(`REDIRECT:${to}`);
   }),
 }));
-vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
 
-function ctx(isGcStaff: boolean) {
-  return {
-    user: { id: "u1", email: "ada@example.com", name: "Ada" },
-    rows: [],
-    orgs: [],
-    activeOrg: null,
-    activeRole: null,
-    canOperate: true,
-    isGcStaff,
-    unread: Promise.resolve(0),
-  };
-}
-
-const here = dirname(fileURLToPath(import.meta.url));
-const pageSrc = readFileSync(join(here, "page.tsx"), "utf8");
-const paneSrc = readFileSync("src/components/settings/workspace-empty-settings.tsx", "utf8");
-
-describe("SettingsEducationPage", () => {
-  beforeEach(() => {
-    vi.mocked(getOrgContext).mockResolvedValue(ctx(false) as never);
-  });
-
-  it("shows HouseEmpty prefs and hides Manage courses from members", async () => {
-    const html = renderToStaticMarkup(await SettingsEducationPage());
-    expect(html).toContain('data-settings-hub="education"');
-    expect(html).toContain(SETTINGS.title);
-    expect(html).toContain(SETTINGS.education);
-    expect(html).toContain(SETTINGS.educationEmpty);
-    expect(html).toContain("data-house-empty");
-    expect(html).not.toContain(SETTINGS.manageCourses);
-    expect(html).not.toContain('href="/education"');
-    expect(html).not.toContain("CreateCourseForm");
-    expect(pageSrc).not.toContain("education-forms");
-    expect(paneSrc).toContain("SETTINGS.manageCourses");
-  });
-
-  it("shows staff Manage courses as a quiet row to /education", async () => {
-    vi.mocked(getOrgContext).mockResolvedValue(ctx(true) as never);
-    const html = renderToStaticMarkup(await SettingsEducationPage());
-    expect(html).toContain(SETTINGS.manageCourses);
-    expect(html).toContain('data-settings-manage-courses=""');
-    expect(html).toContain(`href="${SETTINGS.manageCoursesHref}"`);
-    expect(html).toContain('href="/education"');
-    expect(html).not.toContain("/gc/education");
-    expect(html).toContain(SETTINGS.educationEmpty);
-  });
-
-  it("sends an unauthenticated visitor to login", async () => {
-    vi.mocked(getOrgContext).mockResolvedValue(null as never);
-    await expect(SettingsEducationPage()).rejects.toThrow("REDIRECT:/login");
+describe("SettingsEducationRedirectPage", () => {
+  it("permanently redirects education → preferences", () => {
+    expect(() => SettingsEducationRedirectPage()).toThrow(`REDIRECT:${SETTINGS.preferencesHref}`);
   });
 });

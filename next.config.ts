@@ -84,6 +84,52 @@ const nextConfig: NextConfig = {
       { source: "/vendors", destination: "/channels", permanent: true },
       { source: "/vendors/:path*", destination: "/channels/:path*", permanent: true },
       { source: "/news", destination: "/home/news", permanent: true },
+      { source: "/settings/you", destination: "/settings/profile", permanent: true },
+      { source: "/settings/social", destination: "/settings/preferences", permanent: true },
+      { source: "/settings/education", destination: "/settings/preferences", permanent: true },
+      { source: "/settings/aggregation", destination: "/settings/organization", permanent: true },
+      {
+        source: "/settings",
+        has: [{ type: "query", key: "section", value: "you" }],
+        destination: "/settings/profile",
+        permanent: true,
+      },
+      {
+        source: "/settings",
+        has: [{ type: "query", key: "section", value: "social" }],
+        destination: "/settings/preferences",
+        permanent: true,
+      },
+      {
+        source: "/settings",
+        has: [{ type: "query", key: "section", value: "education" }],
+        destination: "/settings/preferences",
+        permanent: true,
+      },
+      {
+        source: "/settings",
+        has: [{ type: "query", key: "section", value: "aggregation" }],
+        destination: "/settings/organization",
+        permanent: true,
+      },
+      {
+        source: "/settings",
+        has: [{ type: "query", key: "section", value: "profile" }],
+        destination: "/settings/profile",
+        permanent: true,
+      },
+      {
+        source: "/settings",
+        has: [{ type: "query", key: "section", value: "organization" }],
+        destination: "/settings/organization",
+        permanent: true,
+      },
+      {
+        source: "/settings",
+        has: [{ type: "query", key: "section", value: "preferences" }],
+        destination: "/settings/preferences",
+        permanent: true,
+      },
     ];
   },
 };

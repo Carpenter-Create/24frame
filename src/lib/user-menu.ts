@@ -7,8 +7,8 @@
 // the header sun/moon. Phone Appearance is the pre-#391
 // same-sheet drill-in — not a page. One Settings hub. No
 // forked Settings.
-// Profile is /settings/profile (You identity). Settings land href
-// is settingsLandHref(pathname) — do not invent /account/*.
+// Profile is /settings/profile (identity). Settings land href is
+// settingsLandHref() — always /settings. Do not invent /account/*.
 // Agreements / Refer stay /settings doors, not menu rows. Help
 // stays /help. Company stays off this menu. Do not invent
 // /account/workspace, /settings/workspace, /account/appearance,

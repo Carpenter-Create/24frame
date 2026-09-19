@@ -21,6 +21,8 @@ const settingsPages = [
   "src/app/(app)/settings/page.tsx",
   "src/app/(app)/settings/loading.tsx",
   "src/app/(app)/settings/profile/page.tsx",
+  "src/app/(app)/settings/organization/page.tsx",
+  "src/app/(app)/settings/preferences/page.tsx",
   "src/app/(app)/settings/you/page.tsx",
   "src/app/(app)/settings/social/page.tsx",
   "src/app/(app)/settings/education/page.tsx",
@@ -52,10 +54,9 @@ describe("Adam Mercury register lock", () => {
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("workspace");
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("appearance");
     expect(SETTINGS_HUB_NAV.map((item) => item.label)).toEqual([
-      "You",
-      "Social",
-      "Education",
-      "Aggregation",
+      "Profile",
+      "Organization",
+      "Preferences",
     ]);
     expect(src("src/components/chrome/house-lead-chrome.tsx")).toContain("WorkspaceSwitcher");
     expect(src("src/components/chrome/app-shell.tsx")).toContain("HouseLeadChrome");

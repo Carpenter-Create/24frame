@@ -513,10 +513,13 @@ describe("AppShell /settings rail", () => {
     expect(html).toContain("data-user-menu-host");
     expect(html).toContain("Home");
     expect(html).toContain("Settings");
-    expect(html).toContain("You");
-    expect(html).toContain("Social");
-    expect(html).toContain("Education");
-    expect(html).toContain("Aggregation");
+    expect(html).toContain("Profile");
+    expect(html).toContain("Organization");
+    expect(html).toContain("Preferences");
+    expect(html).not.toContain(">You<");
+    expect(html).not.toContain(">Social<");
+    expect(html).not.toContain(">Education<");
+    expect(html).not.toContain(">Aggregation<");
     expect(html).not.toContain("Agreements");
     expect(html).not.toContain("Refer a friend");
     expect(html).not.toContain("data-side-nav");
@@ -568,18 +571,19 @@ describe("AppShell /settings rail", () => {
 
   it("keeps the focused 220 rail on every /settings path", () => {
     for (const path of [
-      "/settings/you",
-      "/settings/social",
-      "/settings/education",
-      "/settings/aggregation",
       "/settings/profile",
+      "/settings/organization",
+      "/settings/preferences",
+      "/settings/agreements",
+      "/settings/refer",
     ]) {
       navigation.pathname = path;
       const html = renderShell();
       expect(html).toContain('data-settings-rail=""');
       expect(html).toContain("data-settings-rail-nav");
-      expect(html).toContain("You");
-      expect(html).toContain("Education");
+      expect(html).toContain("Profile");
+      expect(html).toContain("Organization");
+      expect(html).toContain("Preferences");
       expect(html).not.toContain("data-side-nav");
       expect(html).not.toContain("data-mobile-nav-trigger");
       expect(html).not.toContain("data-house-phone-dest-chips");

@@ -14,24 +14,15 @@ import {
   SETTINGS_RAIL_CHEVRON_CLASS,
   SETTINGS_RAIL_TITLE_CLASS,
   SETTINGS_SECTION_CLASS,
-  settingsHubNav,
 } from "@/lib/settings";
-import { availableWorkspaceOptions } from "@/lib/workspace-menu";
 
 // Mobile Settings list → push. Same section order as the desktop
 // rail. Hidden at md, where the rail stays.
 export function SettingsHubList({
-  lanes,
   className,
 }: {
-  lanes?: readonly ("aggregation" | "social" | "education")[];
   className?: string;
 }) {
-  const items = lanes
-    ? settingsHubNav(lanes)
-    : settingsHubNav(availableWorkspaceOptions().map((option) => option.mode));
-  const nav = items.length > 0 ? items : SETTINGS_HUB_NAV;
-
   return (
     <div
       data-settings-page=""
@@ -41,7 +32,7 @@ export function SettingsHubList({
       <section data-settings-section="list" className={SETTINGS_SECTION_CLASS}>
         <h1 className={SETTINGS_RAIL_TITLE_CLASS}>{SETTINGS.title}</h1>
         <nav data-settings-hub-list-nav="" className="flex flex-col gap-[var(--space-6)]">
-          {nav.map((item) => (
+          {SETTINGS_HUB_NAV.map((item) => (
             <Link
               key={item.kind}
               href={item.href}

@@ -1,5 +1,7 @@
-import { YouSettings } from "@/components/settings/you-settings";
+import { permanentRedirect } from "next/navigation";
 
-export default async function SettingsYouPage() {
-  return YouSettings();
+import { SETTINGS } from "@/lib/settings";
+
+export default function SettingsYouRedirectPage() {
+  permanentRedirect(SETTINGS.profileHref);
 }

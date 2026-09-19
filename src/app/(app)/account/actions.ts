@@ -37,7 +37,6 @@ export async function saveAccountName(name: unknown): Promise<{ error?: string }
   if (refreshError) return { error: refreshError.message || ACCOUNT_PROFILE.saveFailed };
 
   revalidatePath("/settings");
-  revalidatePath("/settings/you");
   revalidatePath("/settings/profile");
   revalidatePath("/");
   return {};
@@ -64,7 +63,6 @@ export async function uploadAccountPhoto(formData: FormData): Promise<{ error?: 
   }
 
   revalidatePath("/settings");
-  revalidatePath("/settings/you");
   revalidatePath("/settings/profile");
   revalidatePath("/social");
   revalidatePath("/social/profile");
@@ -107,7 +105,7 @@ export async function saveCompanyName(input: unknown): Promise<{ error?: string 
   if (!data) return { error: COMPANY_PROFILE.forbidden };
 
   revalidatePath("/settings");
-  revalidatePath("/settings/aggregation");
+  revalidatePath("/settings/organization");
   revalidatePath("/settings/profile");
   revalidatePath("/");
   return {};
