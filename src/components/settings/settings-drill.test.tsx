@@ -51,16 +51,13 @@ describe("SettingsDrillRow", () => {
 describe("SettingsEditPane", () => {
   it("is back · title · helper · children — page-lead SoT", () => {
     const html = renderToStaticMarkup(
-      createElement(
-        SettingsEditPane,
-        {
-          title: SETTINGS.theme,
-          helper: SETTINGS.themeHelper,
-          pathname: SETTINGS.themeHref,
-          hub: "preferences",
-        },
-        createElement("div", { "data-theme-control": "" }, "picker"),
-      ),
+      createElement(SettingsEditPane, {
+        title: SETTINGS.theme,
+        helper: SETTINGS.themeHelper,
+        pathname: SETTINGS.themeHref,
+        hub: "preferences",
+        children: createElement("div", { "data-theme-control": "" }, "picker"),
+      }),
     );
     expect(html).toContain('data-settings-edit-pane=""');
     expect(html).toContain('data-settings-hub="preferences"');
