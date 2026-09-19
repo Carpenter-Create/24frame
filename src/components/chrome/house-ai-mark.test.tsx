@@ -77,7 +77,10 @@ describe("HouseAiMark", () => {
     expect(html).toContain('fill="none"');
     expect(html).toContain('stroke="currentColor"');
     expect(html).toContain(`stroke-width="${HOUSE_AI_MARK_REGULAR_STROKE_WIDTH}"`);
-    expect(html).toContain("size-6");
+    // Phone header trailing renders at 20px (size-5); Mercury bar 24px
+    // (size-6) is a separate SoT and must not appear on the AI mark.
+    expect(html).toContain("size-5");
+    expect(html).not.toContain("size-6");
     expect(html).toContain("md:hidden");
     // Ink parity — phone AI stroke rides the bottom-bar idle ink so the
     // sparkles read at the same optical weight as the Mercury Regular
@@ -106,7 +109,10 @@ describe("HouseAiMark", () => {
     expect(header).toContain("data-house-ai-mark");
     expect(header).toContain(HOUSE_HEADER_TRAILING_PHONE_CLASS);
     expect(header).toContain(HOUSE_HEADER_TRAILING_DESKTOP_CLASS);
-    expect(header).toContain("size-6");
+    // Phone header trailing renders at 20px (size-5); the Mercury bar
+    // 24px (size-6) sits on a separate SoT.
+    expect(header).toContain("size-5");
+    expect(header).not.toContain("size-6");
     expect(header).toContain("md:size-4");
     expect(header).toContain('data-house-ai-mark-register="stroke"');
     expect(header).toContain('data-house-ai-mark-register="fill"');

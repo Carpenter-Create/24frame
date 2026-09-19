@@ -211,8 +211,11 @@ describe("ActivityBell", () => {
   it("matches #391 chrome idle weight on theme and the desktop bell", () => {
     expect(PHOSPHOR_CHROME_IDLE_WEIGHT).toBe("bold");
     expect(PHOSPHOR_CHROME_ICON_CLASS).toBe("size-4 shrink-0");
+    // Phone header trailing sits on the 20px SoT — 24px was the pre-#447
+    // read that made AI + bell tower over the emblem. Mutation to
+    // size-6 (the Mercury bar box) fails here.
     expect(HOUSE_HEADER_TRAILING_PHONE_CLASS).toBe(
-      "size-6 shrink-0 md:size-4 md:hidden text-ink-2",
+      "size-5 shrink-0 md:size-4 md:hidden text-ink-2",
     );
     // Phone bell rides bottom-bar idle ink; desktop bell stays on the
     // HOUSE_THEME_TOGGLE_CLASS text-ink-3 / hover:text-ink from #442.
