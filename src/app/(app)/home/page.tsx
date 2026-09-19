@@ -1,13 +1,19 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 
-import { OverviewHome } from "@/components/overview/overview-home";
+import { HomeOverviewSkeleton, OverviewHome } from "@/components/overview/overview-home";
+import { PageHeader } from "@/components/ui/page-header";
 import { loadDiscoverableCourses } from "@/lib/courses";
 import {
   buildDashboardRevenueHero,
   parseDashboardPeriod,
   revenuePointsFromLabels,
+  type DashboardPeriod,
 } from "@/lib/dashboard-admin";
 import { buildAttentionGlance } from "@/lib/dashboard-attention";
+import {
+  DASHBOARD_SECTION_AIR_CLASS,
+} from "@/lib/dashboard-craft";
 import {
   clientHomeSnapshot,
   type ClientHomeTitle,
@@ -15,6 +21,7 @@ import {
 import { canViewClientEarn } from "@/lib/finance";
 import { buildClientFinanceDashboard } from "@/lib/finance-dashboard";
 import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
+import { HOME_GREETING_TIME_ZONE, homeGreeting, homeGreetingDate } from "@/lib/home-greeting";
 import { UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
 import { loadMyDeliveries, loadMyFindings } from "@/lib/my-lists";
 import { loadHomeNews } from "@/lib/news-load";
@@ -36,27 +43,52 @@ import { inboxPeerIds } from "@/lib/social";
 import { loadDmInbox } from "@/lib/social-dms";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { createClient } from "@/lib/supabase/server";
-import { getOrgContext } from "@/lib/supabase/context";
+import { getOrgContext, type OrgContext } from "@/lib/supabase/context";
+import { cn } from "@/lib/cn";
 
 type TitleRow = ClientHomeTitle & {
   created_by?: string | null;
   catalog_id?: string | null;
 };
 
+/** R2 — chrome + greeting paint; modules stream in the same OverviewHome SoT. */
 export default async function HomePage({
   searchParams = Promise.resolve({}),
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 } = {}) {
-  const supabase = await createClient();
   const ctx = await getOrgContext();
   if (!ctx) redirect("/login");
 
-  const org = ctx.activeOrg;
   const now = new Date();
-  const since = overviewWeekSince(now.getTime());
   const sp = await searchParams;
   const period = parseDashboardPeriod(sp.period, now);
+
+  return (
+    <div data-overview="" className={cn("flex flex-col", DASHBOARD_SECTION_AIR_CLASS)}>
+      <PageHeader
+        title={homeGreeting({ displayName: ctx.user.name })}
+        subtitle={homeGreetingDate(now, HOME_GREETING_TIME_ZONE)}
+      />
+      <Suspense fallback={<HomeOverviewSkeleton />}>
+        <HomeOverview ctx={ctx} period={period} now={now} />
+      </Suspense>
+    </div>
+  );
+}
+
+export async function HomeOverview({
+  ctx,
+  period,
+  now,
+}: {
+  ctx: OrgContext;
+  period: DashboardPeriod;
+  now: Date;
+}) {
+  const supabase = await createClient();
+  const org = ctx.activeOrg;
+  const since = overviewWeekSince(now.getTime());
 
   const titlesPromise = org
     ? supabase
@@ -134,6 +166,7 @@ export default async function HomePage({
 
   return (
     <OverviewHome
+      hideHeader
       displayName={ctx.user.name}
       revenueCents={revenueCents}
       period={period}

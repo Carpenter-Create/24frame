@@ -3,12 +3,13 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { loadDiscoverableCourses } from "@/lib/courses";
+import { parseDashboardPeriod } from "@/lib/dashboard-admin";
 import { NEWS_HREF, NEWS_PAGE } from "@/lib/news";
 import { HOME_GREETING_TIME_ZONE, homeGreeting, homeGreetingDate } from "@/lib/home-greeting";
 import { OVERVIEW_PAGE } from "@/lib/overview";
 import { signedEducationCoverUrls } from "@/lib/s3-education";
 import { getOrgContext } from "@/lib/supabase/context";
-import HomePage from "./page";
+import HomePage, { HomeOverview } from "./page";
 
 vi.mock("next/navigation", () => ({
   redirect: vi.fn((to: string) => {
@@ -77,17 +78,28 @@ describe("HomePage", () => {
     vi.clearAllMocks();
   });
 
-  it("renders the Home modules for a signed-in account", async () => {
+  it("paints greeting immediately and streams modules behind Suspense (R2)", async () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
     const date = homeGreetingDate(new Date(), HOME_GREETING_TIME_ZONE);
-    const html = renderToStaticMarkup(await HomePage());
-    expect(html).toContain("data-overview");
-    expect(html).toContain(homeGreeting());
-    expect(html).toMatch(/<h1 class="t-title text-ink">Hi<\/h1>/);
-    expect(html).toContain(`<p class="t-body-sm text-ink-3">${date}</p>`);
-    expect(html).not.toMatch(/<h1 class="t-title text-ink">Home<\/h1>/);
-    expect(html).not.toContain("ada@example.com");
-    expect(html).not.toContain("Overview");
+    const page = renderToStaticMarkup(await HomePage());
+    expect(page).toContain("data-overview");
+    expect(page).toContain(homeGreeting());
+    expect(page).toMatch(/<h1 class="t-title text-ink">Hi<\/h1>/);
+    expect(page).toContain(`<p class="t-body-sm text-ink-3">${date}</p>`);
+    expect(page).toContain("data-overview-skeleton");
+    expect(page).not.toMatch(/<h1 class="t-title text-ink">Home<\/h1>/);
+    expect(page).not.toContain("ada@example.com");
+    expect(readFileSync("src/app/(app)/home/page.tsx", "utf8")).toContain("<Suspense");
+    expect(readFileSync("src/app/(app)/home/page.tsx", "utf8")).toContain("HomeOverviewSkeleton");
+
+    const now = new Date();
+    const html = renderToStaticMarkup(
+      await HomeOverview({
+        ctx: ctx() as never,
+        period: parseDashboardPeriod(undefined, now),
+        now,
+      }),
+    );
     expect(html).toContain(OVERVIEW_PAGE.needsYou);
     expect(html).toContain(OVERVIEW_PAGE.revenue);
     expect(html).toContain(OVERVIEW_PAGE.social);
@@ -140,8 +152,13 @@ describe("HomePage", () => {
 
   it("applies the shared YTD period chip on Home", async () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+    const now = new Date();
     const html = renderToStaticMarkup(
-      await HomePage({ searchParams: Promise.resolve({ period: "ytd" }) }),
+      await HomeOverview({
+        ctx: ctx() as never,
+        period: parseDashboardPeriod("ytd", now),
+        now,
+      }),
     );
     const ytd = html.match(/<a[^>]*data-overview-revenue-period-chip="ytd"[^>]*>/);
     expect(ytd?.[0]).toContain('aria-pressed="true"');
@@ -175,7 +192,14 @@ describe("HomePage", () => {
       new Map([["c1", "https://cover.example/photo.jpg"]]),
     );
 
-    const html = renderToStaticMarkup(await HomePage());
+    const now = new Date();
+    const html = renderToStaticMarkup(
+      await HomeOverview({
+        ctx: ctx() as never,
+        period: parseDashboardPeriod(undefined, now),
+        now,
+      }),
+    );
 
     expect(signedEducationCoverUrls).toHaveBeenCalledWith([course]);
     expect(html).toContain('data-course-card-density="home"');

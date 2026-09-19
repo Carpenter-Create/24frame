@@ -9,6 +9,7 @@ import {
 } from "@/components/dashboard/dashboard-home";
 import { OverviewModule } from "@/components/overview/overview-module";
 import { NewsRail } from "@/components/news/news-rail";
+import { Skeleton } from "@/components/layout/skeleton";
 import { PageHeader } from "@/components/ui/page-header";
 import type { CourseRow } from "@/lib/courses";
 import { DASHBOARD_ADMIN, type DashboardPeriod } from "@/lib/dashboard-admin";
@@ -67,6 +68,7 @@ export function OverviewHome({
   aiNext,
   news,
   now,
+  hideHeader = false,
 }: {
   firstName?: string | null;
   displayName?: string | null;
@@ -83,14 +85,9 @@ export function OverviewHome({
   aiNext: readonly ClientHomeDoNextItem[];
   news: readonly NewsItem[];
   now: Date;
+  hideHeader?: boolean;
 }) {
-  return (
-    <div data-overview="" className={cn("flex flex-col", DASHBOARD_SECTION_AIR_CLASS)}>
-      <PageHeader
-        title={homeGreeting({ firstName, displayName })}
-        subtitle={homeGreetingDate(now, HOME_GREETING_TIME_ZONE)}
-      />
-
+  const modules = (
       <div data-overview-layout="" className={OVERVIEW_HOME_LAYOUT_CLASS}>
       <div className={OVERVIEW_AREA_REVENUE_CLASS}>
       <DashboardHomePanel aria-label={OVERVIEW_PAGE.revenue} data-overview-revenue="">
@@ -259,6 +256,43 @@ export function OverviewHome({
         <NewsRail items={news} now={now} viewAll />
       </aside>
       </div>
+  );
+
+  if (hideHeader) return modules;
+
+  return (
+    <div data-overview="" className={cn("flex flex-col", DASHBOARD_SECTION_AIR_CLASS)}>
+      <PageHeader
+        title={homeGreeting({ firstName, displayName })}
+        subtitle={homeGreetingDate(now, HOME_GREETING_TIME_ZONE)}
+      />
+      {modules}
+    </div>
+  );
+}
+
+/** Same grid as live Home so streamed modules do not reflow the chrome. */
+export function HomeOverviewSkeleton() {
+  return (
+    <div data-overview-layout="" data-overview-skeleton="" className={OVERVIEW_HOME_LAYOUT_CLASS}>
+      <div className={OVERVIEW_AREA_REVENUE_CLASS}>
+        <Skeleton className="h-40 w-full" />
+      </div>
+      <div className={OVERVIEW_AREA_SOCIAL_CLASS}>
+        <Skeleton className="h-24 w-full" />
+      </div>
+      <div className={OVERVIEW_AREA_EDUCATION_CLASS}>
+        <Skeleton className="h-24 w-full" />
+      </div>
+      <div className={OVERVIEW_AREA_NEEDS_CLASS}>
+        <Skeleton className="h-24 w-full" />
+      </div>
+      <div className={OVERVIEW_AREA_AI_CLASS}>
+        <Skeleton className="h-24 w-full" />
+      </div>
+      <aside className={OVERVIEW_AREA_NEWS_CLASS}>
+        <Skeleton className="h-64 w-full" />
+      </aside>
     </div>
   );
 }
