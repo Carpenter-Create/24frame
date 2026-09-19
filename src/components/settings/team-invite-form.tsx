@@ -4,12 +4,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { StatusChip } from "@/components/layout/status-chip";
 import { formControlClass } from "@/lib/form-control";
-import { SETTINGS_PANE_TITLE_CLASS } from "@/lib/settings";
+import {
+  SETTINGS_DIALOG_FIELD_CLASS,
+  SETTINGS_DIALOG_FORM_CLASS,
+  SETTINGS_PANE_TITLE_CLASS,
+} from "@/lib/settings";
 import {
   ACCOUNT_INVITE,
   TEAM_INVITE_DEFAULT_ROLE,
@@ -73,7 +78,7 @@ export function TeamInviteForm({
   const [sent, setSent] = useState(false);
   const [revoking, setRevoking] = useState<string | null>(null);
   const [hiddenIds, setHiddenIds] = useState<string[]>([]);
-  const [inviteOpen, setInviteOpen] = useState(members.length === 0 && pending.length === 0);
+  const [inviteOpen, setInviteOpen] = useState(false);
   const router = useRouter();
 
   const visiblePending = pending.filter((row) => !hiddenIds.includes(row.id));
@@ -84,6 +89,18 @@ export function TeamInviteForm({
     setSelectedEntityIds((prev) =>
       prev.includes(id) ? prev.filter((eid) => eid !== id) : [...prev, id],
     );
+  }
+
+  function openInvite() {
+    setError("");
+    setSent(false);
+    setInviteOpen(true);
+  }
+
+  function closeInvite() {
+    setInviteOpen(false);
+    setSaving(false);
+    setError("");
   }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -132,82 +149,99 @@ export function TeamInviteForm({
       <div className="flex items-center justify-between gap-[var(--space-4)]">
         <h2 className={SETTINGS_PANE_TITLE_CLASS}>{ACCOUNT_INVITE.team}</h2>
         {canInvite ? (
-          <Button type="button" data-team-invite-cta="" onClick={() => setInviteOpen(true)}>
+          <Button type="button" data-team-invite-cta="" onClick={openInvite}>
             {ACCOUNT_INVITE.invite}
           </Button>
         ) : null}
       </div>
 
-      {canInvite && inviteOpen ? (
-        <form onSubmit={onSubmit} className="flex flex-col gap-[var(--space-4)]" data-team-invite-form="">
-          <div className="flex flex-col gap-[var(--space-2)]">
-            <Label htmlFor="team-invite-email">{ACCOUNT_INVITE.emailLabel}</Label>
-            <Input
-              id="team-invite-email"
-              name="email"
-              type="email"
-              autoComplete="off"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                setSent(false);
-              }}
-              required
-            />
-          </div>
-          <div className="flex flex-col gap-[var(--space-2)]">
-            <Label htmlFor="team-invite-role">{ACCOUNT_INVITE.roleLabel}</Label>
-            <select
-              id="team-invite-role"
-              name="role"
-              className={formControlClass("box")}
-              value={role}
-              onChange={(e) => setRole(e.target.value as OrgRole)}
-            >
-              {TEAM_INVITE_ROLES.map((value) => (
-                <option key={value} value={value}>
-                  {teamRoleLabel(value)}
-                </option>
-              ))}
-            </select>
-          </div>
-          {showEntityScope ? (
-            <>
-              <div className="flex flex-col gap-[var(--space-2)]">
-                <Label htmlFor="team-invite-scope">{ENTITY_SCOPE.scopeLabel}</Label>
-                <select
-                  id="team-invite-scope"
-                  name="entityScope"
-                  className={formControlClass("box")}
-                  value={entityScope}
-                  onChange={(e) => setEntityScope(e.target.value as EntityScope)}
-                >
-                  <option value="all">{entityScopeLabel("all")}</option>
-                  <option value="selected">{entityScopeLabel("selected")}</option>
-                </select>
-                <p className="t-body-sm text-ink-3">{ENTITY_SCOPE.scopeHint}</p>
-              </div>
-              {entityScope === "selected" ? (
-                <fieldset className="flex flex-col gap-[var(--space-2)]" data-entity-picker="">
-                  <legend className="t-label text-ink-3">{ENTITY_SCOPE.entityPickerLabel}</legend>
-                  {entities.map((entity) => (
-                    <label key={entity.id} className="flex items-center gap-2 t-body-sm text-ink-2">
-                      <input
-                        type="checkbox"
-                        checked={selectedEntityIds.includes(entity.id)}
-                        onChange={() => toggleEntity(entity.id)}
-                      />
-                      {entity.name}
-                    </label>
-                  ))}
-                </fieldset>
-              ) : null}
-            </>
-          ) : null}
-          <Button type="submit" disabled={saving} className="self-start">
-            {saving ? ACCOUNT_INVITE.inviting : ACCOUNT_INVITE.invite}
-          </Button>
-        </form>
+      {canInvite ? (
+        <Dialog
+          open={inviteOpen}
+          onClose={closeInvite}
+          title={ACCOUNT_INVITE.invite}
+          size="md"
+        >
+          <form
+            onSubmit={onSubmit}
+            className={SETTINGS_DIALOG_FORM_CLASS}
+            data-team-invite-form=""
+          >
+            <div className={SETTINGS_DIALOG_FIELD_CLASS}>
+              <Label htmlFor="team-invite-email">{ACCOUNT_INVITE.emailLabel}</Label>
+              <Input
+                id="team-invite-email"
+                name="email"
+                type="email"
+                autoComplete="off"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setSent(false);
+                }}
+                required
+              />
+            </div>
+            <div className={SETTINGS_DIALOG_FIELD_CLASS}>
+              <Label htmlFor="team-invite-role">{ACCOUNT_INVITE.roleLabel}</Label>
+              <select
+                id="team-invite-role"
+                name="role"
+                className={formControlClass("box")}
+                value={role}
+                onChange={(e) => setRole(e.target.value as OrgRole)}
+              >
+                {TEAM_INVITE_ROLES.map((value) => (
+                  <option key={value} value={value}>
+                    {teamRoleLabel(value)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {showEntityScope ? (
+              <>
+                <div className={SETTINGS_DIALOG_FIELD_CLASS}>
+                  <Label htmlFor="team-invite-scope">{ENTITY_SCOPE.scopeLabel}</Label>
+                  <select
+                    id="team-invite-scope"
+                    name="entityScope"
+                    className={formControlClass("box")}
+                    value={entityScope}
+                    onChange={(e) => setEntityScope(e.target.value as EntityScope)}
+                  >
+                    <option value="all">{entityScopeLabel("all")}</option>
+                    <option value="selected">{entityScopeLabel("selected")}</option>
+                  </select>
+                  <p className="t-body-sm text-ink-3">{ENTITY_SCOPE.scopeHint}</p>
+                </div>
+                {entityScope === "selected" ? (
+                  <fieldset className="flex flex-col gap-[var(--space-2)]" data-entity-picker="">
+                    <legend className="t-label text-ink-3">{ENTITY_SCOPE.entityPickerLabel}</legend>
+                    {entities.map((entity) => (
+                      <label key={entity.id} className="flex items-center gap-2 t-body-sm text-ink-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedEntityIds.includes(entity.id)}
+                          onChange={() => toggleEntity(entity.id)}
+                        />
+                        {entity.name}
+                      </label>
+                    ))}
+                  </fieldset>
+                ) : null}
+              </>
+            ) : null}
+            {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
+            <DialogFooter>
+              <Button type="button" variant="secondary" disabled={saving} onClick={closeInvite}>
+                {ACCOUNT_INVITE.cancel}
+              </Button>
+              <Button type="submit" disabled={saving}>
+                {saving ? ACCOUNT_INVITE.inviting : ACCOUNT_INVITE.invite}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Dialog>
       ) : null}
 
       {canInvite ? null : (
@@ -278,7 +312,7 @@ export function TeamInviteForm({
         </div>
       )}
 
-      {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
+      {error && !inviteOpen ? <InlineNotice tone="error">{error}</InlineNotice> : null}
       {sent ? <InlineNotice>{ACCOUNT_INVITE.sent}</InlineNotice> : null}
     </div>
   );

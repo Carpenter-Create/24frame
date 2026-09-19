@@ -4,12 +4,16 @@ import {
   ENTITY_TYPE_LABELS,
   ENTITY_TYPES,
   ENTITY_SCOPE_LABELS,
+  ENTITY_LIST_EMPTY_CLASS,
+  ENTITY_LIST_GRID_CLASS,
   ENTITY_LIST_HEADER_CLASS,
   ENTITY_LIST_ROW_CLASS,
+  ENTITY_LIST_VALUE_CLASS,
   LEGAL_ENTITIES,
   ENTITY_SCOPE,
   entityTypeLabel,
   entityScopeLabel,
+  entityJurisdictionClass,
   entityJurisdictionLabel,
 } from "./legal-entities";
 
@@ -52,6 +56,14 @@ describe("legal entities copy", () => {
     expect(entityJurisdictionLabel("Delaware")).toBe("Delaware");
     expect(ENTITY_LIST_HEADER_CLASS).toContain("t-label");
     expect(ENTITY_LIST_ROW_CLASS).toContain("grid");
+    expect(ENTITY_LIST_HEADER_CLASS).toContain(ENTITY_LIST_GRID_CLASS);
+    expect(ENTITY_LIST_ROW_CLASS).toContain(ENTITY_LIST_GRID_CLASS);
+    expect(entityJurisdictionClass("Delaware")).toBe(ENTITY_LIST_VALUE_CLASS);
+    expect(entityJurisdictionClass(null)).toBe(ENTITY_LIST_EMPTY_CLASS);
+    expect(entityJurisdictionClass("  ")).toBe(ENTITY_LIST_EMPTY_CLASS);
+    expect(ENTITY_LIST_VALUE_CLASS).toContain("text-ink");
+    expect(ENTITY_LIST_VALUE_CLASS).not.toContain("text-ink-3");
+    expect(ENTITY_LIST_EMPTY_CLASS).toContain("text-ink-3");
   });
 
   it("has scope selector copy", () => {

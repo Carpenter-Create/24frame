@@ -2,7 +2,12 @@ import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
-import { LEGAL_ENTITIES, type LegalEntityRow } from "@/lib/legal-entities";
+import {
+  ENTITY_LIST_EMPTY_CLASS,
+  ENTITY_LIST_VALUE_CLASS,
+  LEGAL_ENTITIES,
+  type LegalEntityRow,
+} from "@/lib/legal-entities";
 import { LegalEntitiesSection } from "./legal-entities-section";
 
 vi.mock("next/navigation", () => ({
@@ -70,7 +75,7 @@ describe("LegalEntitiesSection table", () => {
     expect(html).not.toContain("data-entity-add-cta");
   });
 
-  it("keeps add as a CTA and Edit as a row action — no modal fork", () => {
+  it("keeps add as a CTA and Edit as a row action — mutate in house Dialog", () => {
     const src = readFileSync("src/components/settings/legal-entities-section.tsx", "utf8");
     expect(src).toContain("data-entity-add-cta");
     expect(src).toContain("data-entity-edit");
@@ -78,7 +83,21 @@ describe("LegalEntitiesSection table", () => {
     expect(src).toContain("updateLegalEntity");
     expect(src).toContain("ENTITY_LIST_HEADER_CLASS");
     expect(src).toContain("ENTITY_LIST_ROW_CLASS");
-    expect(src).not.toContain("Dialog");
-    expect(src).not.toContain("modal");
+    expect(src).toContain("ENTITY_LIST_VALUE_CLASS");
+    expect(src).toContain("<Dialog");
+    expect(src).toContain("DialogFooter");
+    expect(src).not.toContain("flex flex-col gap-[var(--space-4)]");
+  });
+
+  it("uses primary ink for name/type/jurisdiction and a muted em dash when empty", () => {
+    const html = renderToStaticMarkup(
+      <LegalEntitiesSection orgId="org-1" canManage entities={ENTITIES} />,
+    );
+    expect(html).toContain(ENTITY_LIST_VALUE_CLASS);
+    expect(html).toContain(ENTITY_LIST_EMPTY_CLASS);
+    const trustStart = html.indexOf("Acme Trust");
+    const trustRow = html.slice(html.lastIndexOf("<li", trustStart), html.indexOf("</li>", trustStart));
+    expect(trustRow).toContain(ENTITY_LIST_EMPTY_CLASS);
+    expect(trustRow).toContain(LEGAL_ENTITIES.emptyJurisdiction);
   });
 });

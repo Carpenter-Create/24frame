@@ -56,6 +56,10 @@ describe("account invite SoT", () => {
     expect(teamForm).toContain("data-invite-date");
     expect(teamForm).toContain("data-team-list");
     expect(teamForm).toContain("data-team-invite-cta");
+    expect(teamForm).toContain("<Dialog");
+    expect(teamForm).toContain("DialogFooter");
+    expect(teamForm).not.toContain("flex flex-col gap-[var(--space-4)]");
+    expect(ACCOUNT_INVITE.cancel).toBe("Cancel");
     expect(teamForm).toContain("router.refresh()");
     expect(teamForm).not.toMatch(/Withdrawn|Removed/);
     expect(teamIdentityName("  Ada  ")).toBe("Ada");

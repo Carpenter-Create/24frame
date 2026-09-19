@@ -4,6 +4,7 @@ import { HouseEmpty } from "@/components/chrome/house";
 import { Card, CardBody } from "@/components/ui/card";
 import { TeamInviteForm } from "@/components/settings/team-invite-form";
 import { LegalEntitiesSection } from "@/components/settings/legal-entities-section";
+import { COMPANY_PROFILE_CARD_BODY_CLASS } from "@/lib/account-profile";
 import {
   SETTINGS,
   SETTINGS_PANE_CLASS,
@@ -91,7 +92,7 @@ export async function OrganizationSettings() {
               className={SETTINGS_SECTION_CLASS}
             >
               <Card>
-                <CardBody>
+                <CardBody className={COMPANY_PROFILE_CARD_BODY_CLASS}>
                   <CompanyProfileForm
                     orgId={ctx.activeOrg.id}
                     name={ctx.activeOrg.name}
