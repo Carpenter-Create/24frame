@@ -1,10 +1,11 @@
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { inflateSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 
 import * as emailHouse from "./email-house";
 import {
+  applyEmailCopyright,
   EMAIL_ACCENT,
   EMAIL_ADDRESS,
   EMAIL_BG,
@@ -14,7 +15,9 @@ import {
   EMAIL_BUTTON_RADIUS,
   EMAIL_CARD_RADIUS,
   EMAIL_CARD_WIDTH,
+  EMAIL_COPYRIGHT_YEAR_TOKEN,
   emailCopyright,
+  emailCopyrightPlaceholder,
   EMAIL_FORMAT_DETECTION,
   EMAIL_GEIST_HREF,
   EMAIL_HEADLINE_SIZE,
@@ -92,6 +95,16 @@ describe("emailCopyright", () => {
     expect(emailCopyright()).not.toMatch(/© \d{4} Global Content Holdings LLC\. All rights reserved\./);
     expect(emailCopyright()).not.toContain("24frame,");
   });
+
+  it("keeps wrapHouseEmail on the live year, not a frozen literal in src", () => {
+    const html = wrapHouseEmail("<p>Inner</p>");
+    expect(html).toContain(emailCopyright());
+    expect(html).toContain(String(new Date().getFullYear()));
+    const src = readFileSync(resolve(__dirname, "./email-house.ts"), "utf8");
+    expect(src).toContain("emailCopyright()");
+    expect(src).not.toMatch(/© 2026/);
+    expect(src).not.toContain("export const EMAIL_COPYRIGHT =");
+  });
 });
 
 describe("wrapHouseEmail", () => {
@@ -136,6 +149,29 @@ describe("wrapHouseEmail", () => {
     expect(html).not.toContain("Sign in to 24Frame");
     expect(html).not.toMatch(/border-radius:\s*999px/);
     expect(html).not.toMatch(/<img[^>]*#1769FF/i);
+  });
+});
+
+describe("Auth email HTML twins", () => {
+  const templatesDir = resolve(__dirname, "../../supabase/templates");
+
+  it("stores a year placeholder and syncs it from emailCopyright()", () => {
+    const raw = readFileSync(resolve(templatesDir, "magic_link.html"), "utf8");
+    expect(raw).toContain(emailCopyrightPlaceholder());
+    expect(raw).toContain(EMAIL_COPYRIGHT_YEAR_TOKEN);
+    expect(raw).not.toMatch(/© \d{4}/);
+    expect(applyEmailCopyright(raw)).toContain(emailCopyright());
+    expect(applyEmailCopyright(raw, 2027)).toContain(emailCopyright(2027));
+    expect(() => applyEmailCopyright("<p>no placeholder</p>")).toThrow(/placeholder/);
+  });
+
+  it("has no frozen © 2026 in email templates", () => {
+    const files = readdirSync(templatesDir).filter((name) => name.endsWith(".html"));
+    expect(files.length).toBeGreaterThan(0);
+    for (const name of files) {
+      const html = readFileSync(resolve(templatesDir, name), "utf8");
+      expect(html).not.toContain("© 2026");
+    }
   });
 });
 

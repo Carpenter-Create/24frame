@@ -8,7 +8,9 @@ import {
   EMAIL_ACCENT,
   EMAIL_ADDRESS,
   EMAIL_BODY_SIZE,
+  applyEmailCopyright,
   emailCopyright,
+  emailCopyrightPlaceholder,
   EMAIL_FORMAT_DETECTION,
   EMAIL_GEIST_HREF,
   EMAIL_HEADLINE_SIZE,
@@ -213,7 +215,9 @@ describe("Auth magic-link template", () => {
     expect(html).toContain("https://24frame.co");
     expect(html).toContain("24frame.co");
     expect(html).toContain("https://24frame.co/legal");
-    expect(html).toContain(emailCopyright());
+    expect(html).toContain(emailCopyrightPlaceholder());
+    expect(html).not.toMatch(/© \d{4}/);
+    expect(applyEmailCopyright(html)).toContain(emailCopyright());
     expect(html).not.toContain("© 2026 Global Content Holdings LLC. All rights reserved.");
     expect(html).toContain("3839 McKinney Ave, Suite 155 #2276, Dallas, TX 75204");
     expect(html).toContain("#FAFAFB");
