@@ -7,12 +7,19 @@ import {
   type NormalizedNewsItem,
 } from "@/lib/news-rss";
 import { createNewsIngestStore, type NewsPersist } from "@/lib/news-store";
+import {
+  mirrorNewsItemImages,
+  type PutNewsThumbObject,
+} from "@/lib/news-thumbs";
 import { isFilmOrTvTopic } from "@/lib/news-topic";
 
 // Scheduled News ingest (Lambda + EventBridge). Fail-soft per source.
 // Persist to DynamoDB only — never fan-out RSS on a page read.
-// RSS media/enclosure first; OG-scrape the article only when image_url
-// is null. One bad article URL must not fail the source or the run.
+// RSS media/enclosure first; OG-scrape when image_url is null. JoBlo
+// always OG-scrapes (enclosure has been wrong/apex). After a remote
+// image_url is resolved, mirror bytes to S3_BUCKET/news-thumbs/ and
+// persist the CloudFront URL. Mirror miss keeps the remote URL.
+// One bad article URL must not fail the source or the run.
 
 export const NEWS_FEED_TIMEOUT_MS = 8_000;
 export const NEWS_FEED_MAX_BYTES = 1_500_000;
@@ -44,6 +51,16 @@ export type NewsOgCounters = {
   ogMiss: number;
 };
 
+export type NewsMirrorCounters = {
+  mirrored: number;
+  mirrorFailed: number;
+};
+
+/** JoBlo enclosure has been wrong/apex — always scrape OG even when RSS has a thumb. */
+export function newsItemNeedsOg(item: Pick<NormalizedNewsItem, "source" | "image_url">): boolean {
+  return !item.image_url || item.source === "joblo";
+}
+
 export type NewsIngestSourceResult = {
   source: NewsSourceId;
   fetched: number;
@@ -55,6 +72,8 @@ export type NewsIngestSourceResult = {
   ogMiss?: number;
   /** Music / other candidates dropped by the topic gate before Dynamo write. */
   droppedByTopic?: number;
+  mirrored?: number;
+  mirrorFailed?: number;
 };
 
 export type NewsIngestSummary = {
@@ -158,12 +177,12 @@ export async function fillNewsOgImages(
         maxBytes: init.maxBytes,
         env: init.env,
       }));
-  const missing = items.filter((item) => !item.image_url);
-  if (missing.length === 0) return canonicalizeNewsItemImages(items);
+  const candidates = items.filter((item) => newsItemNeedsOg(item));
+  if (candidates.length === 0) return canonicalizeNewsItemImages(items);
 
   const scraped = new Map<string, string | null>();
   await runPooled(
-    missing,
+    candidates,
     async (item) => {
       try {
         const html = await fetchHtml(newsOgFetchUrl(item.url));
@@ -177,8 +196,9 @@ export async function fillNewsOgImages(
 
   return canonicalizeNewsItemImages(
     items.map((item) => {
-      if (item.image_url) return item;
-      return { ...item, image_url: scraped.get(item.canonical_url) ?? null };
+      const og = scraped.get(item.canonical_url);
+      if (og) return { ...item, image_url: og };
+      return item;
     }),
   );
 }
@@ -191,8 +211,9 @@ function canonicalizeNewsItemImages(items: readonly NormalizedNewsItem[]): Norma
 }
 
 const EMPTY_OG: NewsOgCounters = { ogAttempted: 0, ogFilled: 0, ogMiss: 0 };
+const EMPTY_MIRROR: NewsMirrorCounters = { mirrored: 0, mirrorFailed: 0 };
 
-/** RSS-null items only. CloudWatch: ogAttempted / ogFilled / ogMiss per source. */
+/** RSS-null items, plus JoBlo force-OG. CloudWatch: ogAttempted / ogFilled / ogMiss. */
 export function countNewsOgFill(
   before: readonly NormalizedNewsItem[],
   after: readonly NormalizedNewsItem[],
@@ -201,9 +222,12 @@ export function countNewsOgFill(
   let ogAttempted = 0;
   let ogFilled = 0;
   for (const item of before) {
-    if (item.image_url) continue;
+    if (!newsItemNeedsOg(item)) continue;
     ogAttempted += 1;
-    if (afterByUrl.get(item.canonical_url)?.image_url) ogFilled += 1;
+    const next = afterByUrl.get(item.canonical_url)?.image_url;
+    if (!next) continue;
+    const prior = canonicalizeNewsImageUrl(item.image_url);
+    if (!prior || next !== prior) ogFilled += 1;
   }
   return { ogAttempted, ogFilled, ogMiss: ogAttempted - ogFilled };
 }
@@ -298,6 +322,8 @@ export async function ingestNewsFeeds(input: {
   now?: Date;
   fetchXml?: (url: string) => Promise<string>;
   fetchOgHtml?: (url: string) => Promise<string | null>;
+  fetchThumb?: typeof fetch;
+  putThumb?: PutNewsThumbObject;
 }): Promise<NewsIngestSummary> {
   const now = input.now ?? new Date();
   const persist = input.persist ?? createNewsIngestStore();
@@ -309,8 +335,22 @@ export async function ingestNewsFeeds(input: {
     async (source): Promise<NewsIngestSourceResult> => {
       const health = await persist.getHealth(source.id);
       if (!newsSourceIsLive(source.id, health)) {
-        console.log(JSON.stringify({ msg: "news ingest skip", source: source.id, ...EMPTY_OG }));
-        return { source: source.id, fetched: 0, inserted: 0, skipped: true, ...EMPTY_OG };
+        console.log(
+          JSON.stringify({
+            msg: "news ingest skip",
+            source: source.id,
+            ...EMPTY_OG,
+            ...EMPTY_MIRROR,
+          }),
+        );
+        return {
+          source: source.id,
+          fetched: 0,
+          inserted: 0,
+          skipped: true,
+          ...EMPTY_OG,
+          ...EMPTY_MIRROR,
+        };
       }
       try {
         const fetched = await fetchSourceItems(source, now, fetchXml);
@@ -327,6 +367,26 @@ export async function ingestNewsFeeds(input: {
           items = kept;
         }
         const og = countNewsOgFill(kept, items);
+        let mirrored = 0;
+        let mirrorFailed = 0;
+        try {
+          const mirroredBatch = await mirrorNewsItemImages(items, {
+            fetchImpl: input.fetchThumb,
+            putObject: input.putThumb,
+          });
+          items = mirroredBatch.items;
+          mirrored = mirroredBatch.counters.mirrored;
+          mirrorFailed = mirroredBatch.counters.mirrorFailed;
+        } catch (err) {
+          mirrorFailed = items.filter((item) => item.image_url).length;
+          console.error(
+            JSON.stringify({
+              msg: "news thumb mirror fail",
+              source: source.id,
+              error: err instanceof Error ? err.message : "mirror failed",
+            }),
+          );
+        }
         const inserted = await persist.upsertItems(canonicalizeNewsItemImages(items), now);
         await markHealth(persist, source.id, { now });
         console.log(
@@ -336,6 +396,8 @@ export async function ingestNewsFeeds(input: {
             fetched: items.length,
             inserted,
             droppedByTopic,
+            mirrored,
+            mirrorFailed,
             ...og,
           }),
         );
@@ -344,6 +406,8 @@ export async function ingestNewsFeeds(input: {
           fetched: items.length,
           inserted,
           droppedByTopic,
+          mirrored,
+          mirrorFailed,
           ...og,
         };
       } catch (err) {
@@ -355,6 +419,7 @@ export async function ingestNewsFeeds(input: {
             error: message,
             droppedByTopic: 0,
             ...EMPTY_OG,
+            ...EMPTY_MIRROR,
           }),
         );
         await markHealth(persist, source.id, { now, error: message });
@@ -365,6 +430,7 @@ export async function ingestNewsFeeds(input: {
           error: message,
           droppedByTopic: 0,
           ...EMPTY_OG,
+          ...EMPTY_MIRROR,
         };
       }
     },

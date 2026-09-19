@@ -1,12 +1,14 @@
-// Founder/CoS one-shot. JoBlo apex media 404s; rewrite image_url to www.
-// Does not change article canonical_url / Dynamo pk (identity stays apex).
-// Dry-run default. Never run from CI. Never print NEWS_AWS_* values.
+// Founder/CoS one-shot. Rewrite JoBlo apex → www, then mirror remote
+// thumbs to S3_BUCKET/news-thumbs/ and persist the CloudFront URL.
+// Dry-run default. Never run from CI. Never print NEWS_AWS_* / AWS_* values.
 //
 //   pnpm exec tsx scripts/news/backfill-joblo-image-urls.ts
 //   pnpm exec tsx scripts/news/backfill-joblo-image-urls.ts --apply
 //   pnpm exec tsx scripts/news/backfill-joblo-image-urls.ts --apply --fill-known
+//   pnpm exec tsx scripts/news/backfill-joblo-image-urls.ts --all-sources
 //
-// Needs NEWS_AWS_REGION + NEWS_DDB_TABLE (+ static keys unless a role is attached).
+// Dynamo: NEWS_AWS_REGION + NEWS_DDB_TABLE (+ static keys unless a role).
+// Mirror: title S3_BUCKET + AWS_REGION + CLOUDFRONT_DOMAIN (house putObjectBytes).
 
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
@@ -25,7 +27,7 @@ import {
   requireNewsEnv,
 } from "../../src/lib/news-aws";
 import { newsWindowStart } from "../../src/lib/news";
-import { planJobloImageUrl } from "../../src/lib/news-rss";
+import { backfillNewsThumbUrls } from "../../src/lib/news-thumbs";
 
 type NewsItemRecord = {
   pk: string;
@@ -39,6 +41,7 @@ type NewsItemRecord = {
 async function main(): Promise<void> {
   const apply = process.argv.includes("--apply");
   const fillKnown = process.argv.includes("--fill-known");
+  const allSources = process.argv.includes("--all-sources");
   if (!isNewsIngestConfigured()) {
     throw new Error("NEWS_AWS_REGION / NEWS_DDB_TABLE environment variables are not set");
   }
@@ -79,53 +82,38 @@ async function main(): Promise<void> {
     startKey = page.LastEvaluatedKey;
   } while (startKey);
 
-  const joblo = rows.filter((row) => row.source === "joblo");
-  let rewrite = 0;
-  let filled = 0;
-  let unchanged = 0;
-  const stillNull: string[] = [];
+  const selected = allSources ? rows : rows.filter((row) => row.source === "joblo");
 
-  console.log("24Frame JoBlo image_url backfill");
+  console.log("24Frame news thumb backfill");
   console.log(`table: ${table}`);
   console.log(`mode: ${apply ? "apply" : "dry-run"}`);
-  console.log(`joblo rows: ${joblo.length}`);
+  console.log(`scope: ${allSources ? "all sources with remote thumbs" : "joblo"}`);
+  console.log(`rows: ${selected.length}`);
 
-  for (const row of joblo) {
-    const url = row.url ?? row.canonical_url ?? "";
-    const plan = planJobloImageUrl({
-      url,
-      image_url: row.image_url ?? null,
-      fillKnown,
-    });
-    if (plan.action === "unchanged") {
-      unchanged += 1;
-      continue;
-    }
-    if (plan.action === "still-null") {
-      stillNull.push(url);
-      continue;
-    }
-    console.log(`${plan.action}: ${url}`);
-    console.log(`  ${row.image_url ?? "(null)"} → ${plan.next}`);
-    if (apply) {
+  const summary = await backfillNewsThumbUrls({
+    apply,
+    fillKnown,
+    allSources,
+    rows: selected,
+    writeItem: async (row) => {
+      const prior = selected.find((item) => item.pk && item.canonical_url === row.canonical_url) ?? row;
       await doc.send(
         new PutCommand({
           TableName: table,
-          Item: { ...row, image_url: plan.next },
+          Item: { ...prior, ...row },
         }),
       );
-    }
-    if (plan.action === "rewrite") rewrite += 1;
-    if (plan.action === "fill-known") filled += 1;
-  }
+    },
+  });
 
-  console.log(`rewrite: ${rewrite}`);
-  console.log(`fill-known: ${filled}`);
-  console.log(`unchanged: ${unchanged}`);
-  console.log(`still-null: ${stillNull.length}`);
-  for (const url of stillNull) console.log(`  null: ${url}`);
-  if (!apply && rewrite + filled > 0) {
-    console.log("Re-run with --apply to PutItem. Then invoke 24frame-news-ingest once.");
+  console.log(`rewrite: ${summary.rewrite}`);
+  console.log(`fill-known: ${summary.filled}`);
+  console.log(`mirror: ${summary.mirrored}`);
+  console.log(`unchanged: ${summary.unchanged}`);
+  console.log(`still-null: ${summary.stillNull}`);
+  console.log(`wrote: ${summary.wrote}`);
+  if (!apply && summary.rewrite + summary.filled + summary.mirrored > 0) {
+    console.log("Re-run with --apply to PutObject + PutItem. Then invoke 24frame-news-ingest once.");
   }
 }
 

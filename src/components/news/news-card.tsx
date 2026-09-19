@@ -11,6 +11,7 @@ import {
 } from "@/lib/dashboard-craft";
 import { cn } from "@/lib/cn";
 import { newsSourceLabel, type NewsItem } from "@/lib/news";
+import { newsCardImageUrl } from "@/lib/news-rss";
 import { socialRelativeTime } from "@/lib/social";
 
 // Link-out card: media plate · headline · source · relative time.
@@ -30,6 +31,7 @@ export function NewsCard({
 }) {
   const home = density === "home";
   const history = density === "history";
+  const imageUrl = newsCardImageUrl(item.image_url);
   return (
     <li
       data-news-card={item.id}
@@ -50,10 +52,11 @@ export function NewsCard({
             home && "rounded-[var(--radius)] border border-hairline",
           )}
         >
-          {item.image_url ? (
-            // Publisher media URL from the feed enclosure — not next/image remotes.
+          {imageUrl ? (
+            // Mirrored CloudFront URL (or canonicalized publisher URL on miss).
+            // Raw <img> — not next/image unless house SoT switches cards.
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={item.image_url} alt="" />
+            <img src={imageUrl} alt="" />
           ) : null}
         </div>
         <div

@@ -53,6 +53,8 @@ const nextConfig: NextConfig = {
 
   images: {
     remotePatterns: [
+      // Title assets + news thumbs (`news-thumbs/` on the same CF host).
+      // Cards today use raw <img>; keep the host allowlisted if they switch.
       { protocol: "https", hostname: cloudfrontHost },
       // Local/preview presigned S3. Both addressing styles, dev bucket only — the prod
       // bucket is never served directly, it is CloudFront + OAC only.

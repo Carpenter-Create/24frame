@@ -71,6 +71,30 @@ describe("NewsCard", () => {
     expect(html).not.toMatch(/summary|rewrite|republish/i);
   });
 
+  it("rewrites a legacy JoBlo apex thumb and prefers a mirrored news-thumbs URL", () => {
+    const apex = renderToStaticMarkup(
+      createElement(NewsCard, {
+        item: {
+          ...ITEM,
+          image_url: "https://joblo.com/wp-content/uploads/2026/09/thumb.jpg",
+        },
+        now: NOW,
+      }),
+    );
+    expect(apex).toContain("https://www.joblo.com/wp-content/uploads/2026/09/thumb.jpg");
+    expect(apex).not.toContain("https://joblo.com/wp-content/uploads/2026/09/thumb.jpg");
+    const mirrored = renderToStaticMarkup(
+      createElement(NewsCard, {
+        item: {
+          ...ITEM,
+          image_url: "https://delivery.globalcontent.co/news-thumbs/joblo/abc.jpg",
+        },
+        now: NOW,
+      }),
+    );
+    expect(mirrored).toContain("https://delivery.globalcontent.co/news-thumbs/joblo/abc.jpg");
+  });
+
   it("keeps a grey plate and no img when the article has no image", () => {
     const html = renderToStaticMarkup(
       createElement(NewsCard, { item: { ...ITEM, image_url: null }, now: NOW }),
@@ -174,6 +198,7 @@ describe("news UI source", () => {
     const rail = readFileSync(new URL("./news-rail.tsx", import.meta.url), "utf8");
     expect(card).not.toMatch(/\b(item\.(summary|description|body)|content:encoded)\b/);
     expect(rail).not.toMatch(/\b(item\.(summary|description|body)|content:encoded)\b/);
+    expect(card).toContain("newsCardImageUrl");
     expect(card).toContain("DASHBOARD_NEWS_THUMB_CLASS");
     expect(card).toContain("DASHBOARD_NEWS_HISTORY_THUMB_CLASS");
     expect(card).toContain("DASHBOARD_MODULE_CARD_CLASS");
