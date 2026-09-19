@@ -207,8 +207,12 @@ describe("AppShell header", () => {
     expect(html).toContain('data-workspace-switcher-segment="aggregation"');
     expect(html).toContain('data-workspace-switcher-segment="social"');
     expect(html).toContain('data-workspace-switcher-segment="education"');
+    expect(html).toContain('data-workspace-switcher-segment="co-productions"');
     expect(html.indexOf('data-workspace-switcher-segment="home"')).toBeLessThan(
       html.indexOf('data-workspace-switcher-segment="aggregation"'),
+    );
+    expect(html.indexOf('data-workspace-switcher-segment="education"')).toBeLessThan(
+      html.indexOf('data-workspace-switcher-segment="co-productions"'),
     );
     expect(html).not.toContain("data-app-header-workspace-pill");
     expect(html).not.toContain("data-workspace-switcher-rail");
@@ -308,6 +312,27 @@ describe("AppShell Home chrome", () => {
     expect(news).not.toContain("data-mobile-nav-trigger");
     expect(news).toContain("--sidebar-width:0px");
     expect(homeFrameMarkup(news)).toContain("md:ml-[var(--content-inset)]");
+  });
+
+  it("keeps /co-productions on unify-lead chrome — no dest rail, Co-productions pill only", () => {
+    navigation.pathname = "/co-productions";
+    const page = renderShell();
+    expect(page).toContain('data-home-chrome=""');
+    expect(page).toContain("data-app-home-frame");
+    expect(page).toContain('data-workspace-switcher-segment="co-productions"');
+    expect(page).toMatch(
+      /data-workspace-switcher-segment="co-productions"[^>]*aria-selected="true"/,
+    );
+    expect(page).toMatch(/data-workspace-switcher-segment="home"[^>]*aria-selected="false"/);
+    expect(page).toMatch(
+      /data-workspace-switcher-segment="aggregation"[^>]*aria-selected="false"/,
+    );
+    expect(page).toMatch(/data-workspace-switcher-segment="education"[^>]*aria-selected="false"/);
+    expect(page).not.toContain("data-app-rail");
+    expect(page).not.toContain("data-side-nav");
+    expect(page).not.toContain("data-social-rail");
+    expect(page).not.toContain("data-house-phone-dest-chips");
+    expect(page).toContain("--sidebar-width:0px");
   });
 });
 

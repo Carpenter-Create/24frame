@@ -67,5 +67,7 @@ describe("workspace mode", () => {
     expect(resolveWorkspaceMode("/settings/profile", "education")).toBe("education");
     expect(resolveWorkspaceMode("/help", "aggregation")).toBe("aggregation");
     expect(resolveWorkspaceMode("/help", "education")).toBe("education");
+    expect(resolveWorkspaceMode("/co-productions", "social")).toBe("social");
+    expect(resolveWorkspaceMode("/co-productions", "education")).toBe("education");
   });
 });

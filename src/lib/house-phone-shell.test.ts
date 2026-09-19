@@ -27,7 +27,7 @@ vi.mock("next/link", async () => {
   return { __esModule: true, default: MockLink };
 });
 
-import { BookOpen, FilmStrip, House, SquaresFour, Users } from "@phosphor-icons/react";
+import { BookOpen, FilmStrip, Handshake, House, SquaresFour, Users } from "@phosphor-icons/react";
 
 import { HouseLeadChrome } from "@/components/chrome/house-lead-chrome";
 import { HousePhoneAppShell } from "@/components/chrome/house-phone-app-shell";
@@ -196,30 +196,34 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     );
   });
 
-  it("ships exactly four phone workspace tabs in one shared bottom bar", () => {
+  it("ships exactly five phone workspace tabs in one shared bottom bar", () => {
     expect(HOUSE_PHONE_WORKSPACE_TABS.map((tab) => tab.id)).toEqual([
       "home",
       "social",
       "aggregation",
       "education",
+      "co-productions",
     ]);
     expect(HOUSE_PHONE_WORKSPACE_TABS.map((tab) => tab.label)).toEqual([
       "Home",
       "Social",
       "Aggregation",
       "Education",
+      "Co-productions",
     ]);
     expect(HOUSE_PHONE_WORKSPACE_TABS.map((tab) => tab.href)).toEqual([
       "/home",
       "/social",
       "/aggregation/dashboard",
       "/education",
+      "/co-productions",
     ]);
     expect(HOUSE_PHONE_WORKSPACE_TABS.map((tab) => tab.icon)).toEqual([
       House,
       Users,
       FilmStrip,
       BookOpen,
+      Handshake,
     ]);
     expect(HOUSE_PHONE_WORKSPACE_TABS.find((tab) => tab.id === "aggregation")?.icon).toBe(
       FilmStrip,
@@ -247,6 +251,8 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS).toContain("max-md:pb-");
     expect(phoneShellSrc).toContain("Option 2");
     expect(phoneShellSrc).toContain("FilmStrip");
+    expect(phoneShellSrc).toContain("Handshake");
+    expect(phoneShellSrc).toContain('id === "home" || id === "co-productions"');
     expect(phoneShellSrc).not.toContain("SquaresFour");
     expect(existsSync("src/components/social/social-mobile-tab-bar.tsx")).toBe(false);
 
@@ -256,11 +262,12 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     );
     expect(html).toContain("data-house-phone-bottom-nav");
     expect(html).toContain("data-house-phone-bottom-nav-pill");
-    expect(html.match(/data-house-phone-bottom-nav-item=/g)?.length).toBe(4);
+    expect(html.match(/data-house-phone-bottom-nav-item=/g)?.length).toBe(5);
     expect(html).toContain('data-house-phone-bottom-nav-item="home"');
     expect(html).toContain('data-house-phone-bottom-nav-item="social"');
     expect(html).toContain('data-house-phone-bottom-nav-item="aggregation"');
     expect(html).toContain('data-house-phone-bottom-nav-item="education"');
+    expect(html).toContain('data-house-phone-bottom-nav-item="co-productions"');
     expect(html).not.toContain("data-social-tab-bar");
     expect(html.indexOf('data-house-phone-bottom-nav-item="home"')).toBeLessThan(
       html.indexOf('data-house-phone-bottom-nav-item="social"'),
@@ -272,11 +279,16 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(housePhoneWorkspaceSelected("home", "/home", "aggregation")).toBe(true);
     expect(housePhoneWorkspaceSelected("social", "/social/explore", "social")).toBe(true);
     expect(housePhoneWorkspaceSelected("education", "/education", "education")).toBe(true);
+    expect(housePhoneWorkspaceSelected("co-productions", "/co-productions", "aggregation")).toBe(true);
+    expect(housePhoneWorkspaceSelected("home", "/co-productions", "aggregation")).toBe(false);
+    expect(housePhoneWorkspaceSelected("education", "/co-productions", "education")).toBe(false);
+    expect(housePhoneWorkspaceSelected("co-productions", "/home", "aggregation")).toBe(false);
     expect(housePhoneWorkspaceSelected("aggregation", "/home", "aggregation")).toBe(false);
     expect(housePhoneWorkspaceSelected("aggregation", "/settings/profile", "aggregation")).toBe(false);
     expect(housePhoneWorkspaceSelected("social", "/settings", "social")).toBe(false);
     expect(housePhoneWorkspaceSelected("home", "/settings/preferences", "aggregation")).toBe(false);
     expect(housePhoneWorkspaceSelected("education", "/settings/organization", "education")).toBe(false);
+    expect(housePhoneWorkspaceSelected("co-productions", "/settings", "aggregation")).toBe(false);
   });
 
   it("splits phone chrome size SoT — bottom nav size-6, header trailing size-4, no alias", () => {
@@ -368,7 +380,7 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(html).not.toContain('weight="bold"');
     expect(html).not.toContain('weight="fill"');
     expect(bottomNavSrc).toContain("weight={HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT}");
-    for (const label of ["Home", "Social", "Aggregation", "Education"]) {
+    for (const label of ["Home", "Social", "Aggregation", "Education", "Co-productions"]) {
       expect(html).toContain(`aria-label="${label}"`);
       expect(html).not.toContain(`>${label}<`);
     }
@@ -506,6 +518,16 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
       home.indexOf('data-house-phone-bottom-nav-item="social"'),
     );
     expect(homeActive).toContain("data-house-phone-bottom-nav-chip");
+
+    navigation.pathname = "/co-productions";
+    const copro = renderToStaticMarkup(
+      createElement(HousePhoneBottomNav, { workspace: "aggregation" }),
+    );
+    expect(copro.match(/data-house-phone-bottom-nav-chip=/g)?.length).toBe(1);
+    const coproActive = copro.slice(
+      copro.indexOf('data-house-phone-bottom-nav-item="co-productions"'),
+    );
+    expect(coproActive).toContain("data-house-phone-bottom-nav-chip");
   });
 
   it("hides the shared phone bottom bar with social-tab-bar-scroll", () => {
