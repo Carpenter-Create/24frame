@@ -517,7 +517,9 @@ begin
   delete from public.portal_links where title_id = %L::uuid;
   delete from public.assets where org_id = %L::uuid;
   delete from public.titles where id = %L::uuid;
+  delete from public.membership_entity_grants where membership_id in (select id from public.memberships where org_id = %L::uuid);
   delete from public.memberships where org_id = %L::uuid;
+  delete from public.legal_entities where org_id = %L::uuid;
   delete from public.gc_staff where user_id = %L::uuid;
   delete from public.organizations where id = %L::uuid;
   delete from public.vendors where id in (%L::uuid, %L::uuid);
@@ -530,6 +532,8 @@ $q$,
   current_setting('scc.title'),
   current_setting('scc.org'),
   current_setting('scc.title'),
+  current_setting('scc.org'),
+  current_setting('scc.org'),
   current_setting('scc.org'),
   current_setting('scc.gc'),
   current_setting('scc.org'),
