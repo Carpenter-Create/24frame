@@ -9,6 +9,7 @@ import { InlineNotice } from "@/components/ui/inline-notice";
 import { StatusChip } from "@/components/layout/status-chip";
 import { formControlClass } from "@/lib/form-control";
 import {
+  ACCOUNT_INVITE,
   GRANT_TIER_LABELS,
   HOUSE_GRANT,
   HOUSE_GRANT_DEFAULT_TIER,
@@ -30,7 +31,8 @@ export type HouseGrantRow = {
   tier: GrantTier;
   status: "pending" | "accepted";
   orgHref: string | null;
-  at: string | null;
+  sentAt: string | null;
+  acceptedAt: string | null;
 };
 
 export function HouseGrantForm({
@@ -47,6 +49,8 @@ export function HouseGrantForm({
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
   const [revoking, setRevoking] = useState<string | null>(null);
+  const [hiddenIds, setHiddenIds] = useState<string[]>([]);
+  const visibleGrants = grants.filter((row) => !hiddenIds.includes(row.id));
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -72,16 +76,17 @@ export function HouseGrantForm({
     setError("");
     const res = await revokeHouseGrant({ id });
     if (res.error) setError(res.error);
+    else setHiddenIds((current) => [...current, id]);
     setRevoking(null);
   }
 
   return (
     <div data-house-grant="" className="flex flex-col gap-[var(--space-4)]">
-      {grants.length === 0 ? (
+      {visibleGrants.length === 0 ? (
         <p className="t-body text-ink-2">{HOUSE_GRANT.empty}</p>
       ) : (
         <ul className="flex flex-col gap-[var(--space-3)]">
-          {grants.map((row) => {
+          {visibleGrants.map((row) => {
             const invited = row.status === "pending";
             return (
               <li
@@ -107,8 +112,11 @@ export function HouseGrantForm({
                     label={inviteStatusLabel(inviteStatusFromRow(row.status))}
                     tone={invited ? "neutral" : "active"}
                   />
-                  <span className="t-body-sm text-ink-3" data-invite-date="">
-                    {inviteDateLabel(row.at)}
+                  <span className="t-body-sm text-ink-3" data-invite-date="sent">
+                    {ACCOUNT_INVITE.sentColumn} {inviteDateLabel(row.sentAt)}
+                  </span>
+                  <span className="t-body-sm text-ink-3" data-invite-date="accepted">
+                    {ACCOUNT_INVITE.acceptedColumn} {inviteDateLabel(row.acceptedAt)}
                   </span>
                   {canGrant && invited ? (
                     <Button

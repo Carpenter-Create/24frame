@@ -24,7 +24,14 @@ export async function OrganizationSettings() {
 
   let canEditCompany = false;
   let canInvite = false;
-  let members: { userId: string; email: string; role: OrgRole; acceptedAt: string }[] = [];
+  let members: {
+    userId: string;
+    email: string;
+    role: OrgRole;
+    name: string | null;
+    sentAt: string | null;
+    acceptedAt: string;
+  }[] = [];
   let pending: { id: string; email: string; role: OrgRole; sentAt: string }[] = [];
 
   if (ctx.activeOrg) {
@@ -50,6 +57,8 @@ export async function OrganizationSettings() {
       userId: row.user_id,
       email: row.email ?? "—",
       role: row.role,
+      name: row.display_name,
+      sentAt: row.invited_at,
       acceptedAt: row.joined_at,
     }));
     pending = (pendingRes.data ?? []).map((row) => ({
@@ -84,17 +93,12 @@ export async function OrganizationSettings() {
               data-settings-section="team"
               className={SETTINGS_SECTION_CLASS}
             >
-              <h2 className={SETTINGS_PANE_TITLE_CLASS}>{SETTINGS.team}</h2>
-              <Card>
-                <CardBody>
-                  <TeamInviteForm
-                    orgId={ctx.activeOrg.id}
-                    canInvite={canInvite}
-                    members={members}
-                    pending={pending}
-                  />
-                </CardBody>
-              </Card>
+              <TeamInviteForm
+                orgId={ctx.activeOrg.id}
+                canInvite={canInvite}
+                members={members}
+                pending={pending}
+              />
             </section>
           </>
         ) : (

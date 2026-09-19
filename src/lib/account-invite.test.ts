@@ -24,8 +24,11 @@ import {
   inviteEmailsMatch,
   inviteStatusFromRow,
   inviteStatusLabel,
+  teamIdentityName,
   teamInviteSchema,
   teamRoleLabel,
+  teamRowInitials,
+  toTeamListRows,
 } from "./account-invite";
 
 describe("account invite SoT", () => {
@@ -44,16 +47,28 @@ describe("account invite SoT", () => {
     expect(inviteStatusFromRow("pending")).toBe("invited");
     expect(inviteStatusFromRow("accepted")).toBe("accepted");
     const teamForm = readFileSync("src/components/settings/team-invite-form.tsx", "utf8");
-    expect(teamForm).toContain("ACCOUNT_INVITE.invited");
-    expect(teamForm).toContain("ACCOUNT_INVITE.accepted");
-    expect(teamForm).toContain('data-invite-status="invited"');
-    expect(teamForm).toContain('data-invite-status="accepted"');
+    expect(teamForm).toContain("inviteStatusLabel(row.status)");
+    expect(teamForm).toContain("data-invite-status={row.status}");
     expect(teamForm).not.toContain("ACCOUNT_INVITE.pending");
-    expect(teamForm).toContain("canInvite ? (");
-    expect(teamForm).toContain("onRevoke(invite.id)");
+    expect(teamForm).toContain("canInvite && row.withdrawId");
+    expect(teamForm).toContain("onRevoke(row.withdrawId)");
     expect(teamForm).toContain("inviteDateLabel");
     expect(teamForm).toContain("data-invite-date");
+    expect(teamForm).toContain("data-team-list");
+    expect(teamForm).toContain("data-team-invite-cta");
     expect(teamForm).not.toMatch(/Withdrawn|Removed/);
+    expect(teamIdentityName("  Ada  ")).toBe("Ada");
+    expect(teamIdentityName("")).toBeNull();
+    expect(teamRowInitials("Ada Lovelace", "ada@example.com")).toBe("AL");
+    expect(teamRowInitials(null, "pat@example.com")).toBe("PA");
+    const list = toTeamListRows(
+      [{ userId: "u1", email: "ada@example.com", role: "account_owner", name: "Ada", sentAt: "2026-01-01", acceptedAt: "2026-01-02" }],
+      [{ id: "inv-1", email: "pat@example.com", role: "viewer", sentAt: "2026-09-19" }],
+    );
+    expect(list[0]?.status).toBe("invited");
+    expect(list[0]?.acceptedAt).toBeNull();
+    expect(list[1]?.status).toBe("accepted");
+    expect(list[1]?.name).toBe("Ada");
     expect(inviteDateLabel("2026-09-19T00:00:00Z")).toBe("Sep 19, 2026");
     expect(inviteDateLabel(null)).toBe("—");
     expect(inviteDateLabel("nope")).toBe("—");
@@ -74,6 +89,7 @@ describe("account invite SoT", () => {
     expect(grantForm).not.toContain("revoking === row.id ? HOUSE_GRANT.granting");
     expect(grantForm).toContain("inviteStatusFromRow(row.status)");
     expect(grantForm).toContain("canGrant && invited");
+    expect(grantForm).toContain("hiddenIds");
     expect(grantForm).toContain("inviteDateLabel");
     expect(grantForm).toContain("data-invite-date");
     expect(grantForm).not.toMatch(/Withdrawn|Removed/);

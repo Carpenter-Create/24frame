@@ -74,6 +74,7 @@ describe("SettingsOrganizationPage", () => {
     expect(html).not.toContain("Add user");
     expect(html).toContain(SETTINGS.team);
     expect(html).toContain("data-settings-section=\"team\"");
+    expect(html).toContain("data-team-invite-cta");
     expect(html).toContain("data-team-invite-form");
     expect(html).toContain(ACCOUNT_INVITE.invite);
     expect(paneSrc).toContain("CompanyProfileForm");
@@ -94,6 +95,8 @@ describe("SettingsOrganizationPage", () => {
               role: "account_owner",
               status: "active",
               joined_at: "2026-01-01T00:00:00Z",
+              display_name: "Ada",
+              invited_at: "2025-12-20T00:00:00Z",
             },
           ],
           error: null,
@@ -121,6 +124,13 @@ describe("SettingsOrganizationPage", () => {
     const html = renderToStaticMarkup(await SettingsOrganizationPage());
     expect(html).toContain("ada@example.com");
     expect(html).toContain("pat@example.com");
+    expect(html).toContain("Ada");
+    expect(html).toContain("data-team-list");
+    expect(html).toContain("data-team-invite-cta");
+    expect(html).toContain(ACCOUNT_INVITE.nameColumn);
+    expect(html).toContain(ACCOUNT_INVITE.statusColumn);
+    expect(html).toContain(ACCOUNT_INVITE.sentColumn);
+    expect(html).toContain(ACCOUNT_INVITE.acceptedColumn);
     expect(html).toContain('data-invite-status="accepted"');
     expect(html).toContain('data-invite-status="invited"');
     expect(html).toContain(ACCOUNT_INVITE.accepted);
@@ -128,12 +138,21 @@ describe("SettingsOrganizationPage", () => {
     expect(html).toContain(ACCOUNT_INVITE.revoke);
     expect(html).toContain("Jan 1, 2026");
     expect(html).toContain("Sep 19, 2026");
+    expect(html).toContain("Dec 20, 2025");
     expect(html).toContain("data-invite-date");
     expect(html).not.toContain("Withdrawn");
     expect(html).not.toContain("Removed");
+    expect(html).not.toContain("Needs review");
+    expect(html).not.toContain("Ownership");
+    expect(html).not.toContain("Invite a user");
     const memberStart = html.indexOf("ada@example.com");
-    const memberRow = html.slice(memberStart, html.indexOf("</li>", memberStart));
+    const memberRow = html.slice(html.lastIndexOf("<li", memberStart), html.indexOf("</li>", memberStart));
     expect(memberRow).not.toContain(ACCOUNT_INVITE.revoke);
+    expect(memberRow).toContain("Jan 1, 2026");
+    const pendingStart = html.indexOf("pat@example.com");
+    const pendingRow = html.slice(html.lastIndexOf("<li", pendingStart), html.indexOf("</li>", pendingStart));
+    expect(pendingRow).toContain(ACCOUNT_INVITE.revoke);
+    expect(pendingRow).toContain("—");
   });
 
   it("houses Organization empty when there is no org", async () => {

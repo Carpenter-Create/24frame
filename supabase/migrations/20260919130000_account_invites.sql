@@ -535,11 +535,13 @@ grant execute on function public.revoke_account_invite(uuid)
 
 create or replace function public.org_team(p_org uuid, p_limit integer default 500)
   returns table (
-    user_id    uuid,
-    email      text,
-    role       public.org_role,
-    status     public.membership_status,
-    joined_at  timestamptz
+    user_id      uuid,
+    email        text,
+    role         public.org_role,
+    status       public.membership_status,
+    joined_at    timestamptz,
+    display_name text,
+    invited_at   timestamptz
   )
   language plpgsql security definer set search_path = public
 as $$
@@ -551,9 +553,27 @@ begin
   end if;
 
   return query
-    select m.user_id, u.email::text, m.role, m.status, m.created_at
+    select
+      m.user_id,
+      u.email::text,
+      m.role,
+      m.status,
+      m.created_at,
+      nullif(btrim(p.display_name), ''),
+      inv.created_at
     from public.memberships m
     join auth.users u on u.id = m.user_id
+    left join public.profiles p on p.id = m.user_id
+    left join lateral (
+      select i.created_at
+      from public.account_invites i
+      where i.kind = 'team'
+        and i.org_id = p_org
+        and i.status = 'accepted'
+        and (i.accepted_by = m.user_id or i.email = lower(u.email::text))
+      order by i.accepted_at desc nulls last
+      limit 1
+    ) inv on true
     where m.org_id = p_org
       and m.status = 'active'
     order by

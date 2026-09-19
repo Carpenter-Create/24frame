@@ -11,7 +11,7 @@ vi.mock("@/lib/supabase/auth", () => ({ getAuthUser: vi.fn() }));
 import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { CLIENTS_PAGE } from "@/lib/clients";
-import { HOUSE_GRANT } from "@/lib/account-invite";
+import { ACCOUNT_INVITE, HOUSE_GRANT } from "@/lib/account-invite";
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
 
 import GcClientsPage from "./page";
@@ -209,7 +209,10 @@ describe("GcClientsPage read bound", () => {
     expect(html).toContain(HOUSE_GRANT.revoke);
     expect(html).toContain("Sep 17, 2026");
     expect(html).toContain("Sep 19, 2026");
-    expect(html).toContain("data-invite-date");
+    expect(html).toContain('data-invite-date="sent"');
+    expect(html).toContain('data-invite-date="accepted"');
+    expect(html).toContain(ACCOUNT_INVITE.sentColumn);
+    expect(html).toContain(ACCOUNT_INVITE.acceptedColumn);
     expect(html).not.toContain("Withdrawn");
     expect(html).not.toContain("Removed");
     const acceptedStart = html.indexOf("accepted@test.example");

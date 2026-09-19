@@ -3429,7 +3429,9 @@ export type Database = {
       org_team: {
         Args: { p_limit?: number; p_org: string }
         Returns: {
+          display_name: string | null
           email: string
+          invited_at: string | null
           joined_at: string
           role: Database["public"]["Enums"]["org_role"]
           status: Database["public"]["Enums"]["membership_status"]

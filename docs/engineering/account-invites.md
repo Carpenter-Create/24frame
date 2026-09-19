@@ -39,7 +39,7 @@ Two kinds, one table:
 | House grant / withdraw | `is_gc_staff` AND `gc_can(operate)` — house owner + delivery ops. Legal / accountant cannot. UI hides Grant account unless operate. Actions return SoT `forbidden`, not raw SQL. |
 | Accept | Authenticated session whose email matches the invite (case-normalized). Wrong session sees `wrongEmail` + magic-link for the invited email. After accept, `setActiveOrg` writes `gc_active_org`. |
 | Peek | Knowledge of `token_hash` (public `/invite/accept`) |
-| Team roster | `member_can(view)` on that org. Members = Accepted. Pending rows = Invited. |
+| Team roster | `member_can(view)` on that org. One Team list (Mercury Users pattern, house craft): identity · role · Invited/Accepted · sent · accepted. |
 | Grant history | `is_gc_staff` — `house_grants` lists pending (Invited) and accepted. Accepted orgs also land in the clients directory. |
 
 Viewers cannot invite. Client Settings never lists all platform users.

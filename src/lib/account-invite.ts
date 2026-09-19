@@ -3,6 +3,8 @@ import { z } from "zod";
 import { ACCOUNT_NAME_MAX } from "@/lib/account-profile";
 import { ORG_ROLE_LABELS, type OrgRole } from "@/lib/org-roles";
 import { PRODUCT_NAME } from "@/lib/product";
+import { directoryInitials } from "@/lib/staff-directory";
+import { userMenuName } from "@/lib/user-menu";
 
 export type { OrgRole };
 
@@ -86,7 +88,11 @@ export const ACCOUNT_INVITE = {
   inviting: "Sending…",
   sent: "Invite sent.",
   emailLabel: "Email",
+  nameColumn: "Name",
   roleLabel: "Role",
+  statusColumn: "Status",
+  sentColumn: "Sent",
+  acceptedColumn: "Accepted",
   revoke: "Withdraw",
   revoking: "Withdrawing…",
   revoked: "Invite withdrawn.",
@@ -144,7 +150,82 @@ export const ACCOUNT_INVITE_ABSENT = [
   "referral code",
   "Go use a code",
   "marketing site",
+  "Needs review",
+  "Ownership",
+  "Invite a user",
+  "Platform Users",
 ] as const;
+
+export const TEAM_LIST_HEADER_CLASS =
+  "min-w-[44rem] grid grid-cols-[minmax(12rem,2fr)_repeat(4,minmax(5.5rem,1fr))_auto] items-center gap-x-[var(--space-4)] px-0 py-[var(--space-3)] t-label text-ink-3";
+
+export const TEAM_LIST_ROW_CLASS =
+  "min-w-[44rem] grid grid-cols-[minmax(12rem,2fr)_repeat(4,minmax(5.5rem,1fr))_auto] items-center gap-x-[var(--space-4)] px-0 py-[var(--space-4)]";
+
+export const TEAM_LIST_AVATAR_CLASS =
+  "flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted t-body-sm font-medium text-ink-2";
+
+export const TEAM_ROLE_PILL_CLASS =
+  "inline-flex items-center whitespace-nowrap rounded-full bg-surface-muted px-2.5 py-1 t-label text-ink-2";
+
+export type TeamListRow = {
+  key: string;
+  email: string;
+  name: string | null;
+  role: OrgRole;
+  status: InviteStatus;
+  sentAt: string | null;
+  acceptedAt: string | null;
+  withdrawId: string | null;
+};
+
+export function teamIdentityName(name: string | null | undefined): string | null {
+  return userMenuName(name);
+}
+
+export function teamRowInitials(name: string | null | undefined, email: string): string {
+  return directoryInitials(teamIdentityName(name) || email);
+}
+
+export function toTeamListRows(
+  members: ReadonlyArray<{
+    userId: string;
+    email: string;
+    role: OrgRole;
+    name?: string | null;
+    sentAt?: string | null;
+    acceptedAt: string;
+  }>,
+  pending: ReadonlyArray<{
+    id: string;
+    email: string;
+    role: OrgRole;
+    sentAt: string;
+  }>,
+): TeamListRow[] {
+  return [
+    ...pending.map((invite) => ({
+      key: invite.id,
+      email: invite.email,
+      name: null,
+      role: invite.role,
+      status: "invited" as const,
+      sentAt: invite.sentAt,
+      acceptedAt: null,
+      withdrawId: invite.id,
+    })),
+    ...members.map((member) => ({
+      key: member.userId,
+      email: member.email,
+      name: teamIdentityName(member.name),
+      role: member.role,
+      status: "accepted" as const,
+      sentAt: member.sentAt ?? null,
+      acceptedAt: member.acceptedAt,
+      withdrawId: null,
+    })),
+  ];
+}
 
 const emailSchema = z
   .string()

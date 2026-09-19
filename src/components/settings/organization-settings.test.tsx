@@ -9,7 +9,6 @@ describe("organization settings hosts Team", () => {
     const settings = readFileSync("src/lib/settings.ts", "utf8");
     expect(pane).toContain("data-settings-section=\"team\"");
     expect(pane).toContain("TeamInviteForm");
-    expect(pane).toContain("SETTINGS.team");
     expect(SETTINGS.team).toBe("Team");
     expect(settings).toContain("Team invite");
     expect(settings).toContain("/gc/clients");
