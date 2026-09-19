@@ -180,12 +180,12 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
       expect(html).toContain("data-activity-bell");
       expect(html).toContain("data-user-menu-host");
       expect(html.indexOf('data-workspace-switcher-presentation="pills"')).toBeLessThan(
-        html.indexOf("data-ask-assistant-header"),
-      );
-      expect(html.indexOf("data-ask-assistant-header")).toBeLessThan(
         html.indexOf("data-theme-toggle"),
       );
       expect(html.indexOf("data-theme-toggle")).toBeLessThan(
+        html.indexOf("data-ask-assistant-header"),
+      );
+      expect(html.indexOf("data-ask-assistant-header")).toBeLessThan(
         html.indexOf("data-activity-bell"),
       );
       expect(html.indexOf("data-activity-bell")).toBeLessThan(

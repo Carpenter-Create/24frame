@@ -59,10 +59,10 @@ describe("header theme toggle", () => {
     expect(leadSrc.indexOf("<ThemeToggle />")).toBeGreaterThan(
       leadSrc.indexOf('presentation="pills"'),
     );
-    expect(leadSrc.indexOf("<AskAssistantHeaderLink />")).toBeLessThan(
-      leadSrc.indexOf("<ThemeToggle />"),
+    expect(leadSrc.indexOf("<ThemeToggle />")).toBeLessThan(
+      leadSrc.indexOf("<AskAssistantHeaderLink />"),
     );
-    expect(leadSrc.indexOf("<ThemeToggle />")).toBeLessThan(leadSrc.indexOf("<ActivityBell"));
+    expect(leadSrc.indexOf("<AskAssistantHeaderLink />")).toBeLessThan(leadSrc.indexOf("<ActivityBell"));
     expect(leadSrc.indexOf("<ActivityBell")).toBeLessThan(leadSrc.indexOf("{accountMenu}"));
   });
 });

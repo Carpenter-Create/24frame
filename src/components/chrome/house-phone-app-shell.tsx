@@ -6,7 +6,8 @@ import { HousePhoneBottomNav } from "./house-phone-bottom-nav";
 
 // One phone shell primitive. Both Social and Access trees mount this
 // so workspace tabs cannot fork. Desktop is unchanged — the bottom
-// nav is md:hidden.
+// nav is md:hidden. Hide-on-scroll lives on HousePhoneBottomNav
+// (social-tab-bar-scroll) for every workspace that uses this shell.
 
 export function HousePhoneAppShell({
   workspace,

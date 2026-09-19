@@ -119,9 +119,9 @@ export function HouseLeadChrome({
             data-app-header-desktop-trailing=""
             className={APP_HEADER_DESKTOP_TRAILING_CLASS}
           >
-            {settingsPage ? null : <AskAssistantHeaderLink />}
             <ThemeToggle />
           </div>
+          {settingsPage ? null : <AskAssistantHeaderLink />}
           <ActivityBell unread={activityUnread} items={activityItems} />
           {accountMenu}
         </div>

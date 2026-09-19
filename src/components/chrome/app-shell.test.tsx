@@ -148,9 +148,9 @@ describe("AppShell header", () => {
     expect(html).toContain("data-theme-toggle");
     expect(html).toContain("Switch to dark mode");
     expect(html).not.toContain("Switch to light mode");
-    expect(html.indexOf("data-workspace-switcher")).toBeLessThan(html.indexOf("data-ask-assistant-header"));
-    expect(html.indexOf("data-ask-assistant-header")).toBeLessThan(html.indexOf("data-theme-toggle"));
-    expect(html.indexOf("data-theme-toggle")).toBeLessThan(html.indexOf("data-activity-bell"));
+    expect(html.indexOf("data-workspace-switcher")).toBeLessThan(html.indexOf("data-theme-toggle"));
+    expect(html.indexOf("data-theme-toggle")).toBeLessThan(html.indexOf("data-ask-assistant-header"));
+    expect(html.indexOf("data-ask-assistant-header")).toBeLessThan(html.indexOf("data-activity-bell"));
     expect(html.indexOf("data-activity-bell")).toBeLessThan(html.indexOf("data-user-menu-host"));
     expect(html).not.toContain("ThemeToggle");
     expect(shellSrc).not.toContain("ThemeToggle");

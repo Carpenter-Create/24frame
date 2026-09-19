@@ -2,16 +2,21 @@
 // One primitive for Home · Social · Aggregation · Education.
 // Desktop header + desktop workspace switcher stay on HouseLeadChrome.
 // Phone top: emblem alone on the left. No workspace pill. No hamburger
-// — leading or trailing. Trailing is search (when needed) · bell ·
-// avatar. Ask + theme stay on the avatar sheet.
+// — leading or trailing. Trailing is search (when needed) · 24Frame AI
+// · bell · avatar. Theme stays desktop-only. Avatar-sheet AI may stay
+// as a secondary door.
 // Destinations that used to live in the Agg/Edu hamburger (and Social’s
 // second float) live on one under-top HousePhoneDestChips row.
 // Home has no dest chip row. Desktop left rails stay.
-// Bottom bar owns workspace switching only.
-// Craft matches Social's former float: hairline pill, r28, safe-area.
+// Bottom bar owns workspace switching only. Glyphs only — no labels.
+// Aggregation is films (FilmStrip), not a grid. Optical register is
+// the phone-top bell: PhosphorChromeIcon, Bold idle / Fill active,
+// size-4. Hide on scroll-down / show on scroll-up via
+// social-tab-bar-scroll, same float as prior Social. Safe-area stays.
+// Content pad stays when the bar hides so the page does not jump.
 // Not a Meta skin. Tokens only.
 
-import { BookOpen, House, SquaresFour, Users } from "@phosphor-icons/react";
+import { BookOpen, FilmStrip, House, Users } from "@phosphor-icons/react";
 
 import {
   HOUSE_CONTROL_PILL_CLASS,
@@ -31,7 +36,7 @@ import {
   overviewLeadSelected,
   type OverviewLeadPillId,
 } from "@/lib/overview";
-import type { PhosphorIcon } from "@/lib/phosphor-icon";
+import { PHOSPHOR_CHROME_ICON_CLASS, type PhosphorIcon } from "@/lib/phosphor-icon";
 import { SOCIAL_ROUTES } from "@/lib/social";
 import {
   WORKSPACE_AGGREGATION_LABEL,
@@ -64,7 +69,7 @@ export const HOUSE_PHONE_WORKSPACE_TABS = [
     id: "aggregation" as const,
     label: WORKSPACE_AGGREGATION_LABEL,
     href: workspaceHome("aggregation"),
-    icon: SquaresFour,
+    icon: FilmStrip,
   },
   {
     id: "education" as const,
@@ -84,7 +89,9 @@ export const HOUSE_PHONE_DEST_CHIPS = {
 
 /** Phone-only float. Safe-area inset. Content pad is HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS. */
 export const HOUSE_PHONE_BOTTOM_NAV_CLASS =
-  "fixed inset-x-0 bottom-0 z-40 flex justify-center px-[var(--space-4)] pb-[max(12px,env(safe-area-inset-bottom))] md:hidden";
+  "fixed inset-x-0 bottom-0 z-40 flex justify-center px-[var(--space-4)] pb-[max(12px,env(safe-area-inset-bottom))] transition-transform duration-200 ease-out md:hidden";
+
+export const HOUSE_PHONE_BOTTOM_NAV_HIDDEN_CLASS = "pointer-events-none translate-y-full";
 
 export const HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS =
   "flex h-14 w-full max-w-[420px] items-center rounded-[28px] border border-hairline bg-surface px-1";
@@ -92,11 +99,13 @@ export const HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS =
 export const HOUSE_PHONE_BOTTOM_NAV_ROW_CLASS = "flex h-12 w-full items-center";
 
 export const HOUSE_PHONE_BOTTOM_NAV_ITEM_CLASS =
-  "flex h-full min-w-0 flex-1 flex-col items-center justify-center gap-[2px] px-1 t-label";
+  "flex h-full min-w-0 flex-1 items-center justify-center px-1";
 
-export const HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS = "size-5 shrink-0";
+/** Same size-4 register as the phone-top notification bell. Do not thicken. */
+export const HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS = PHOSPHOR_CHROME_ICON_CLASS;
 
-/** Clears the float once on main. Do not stack a second phone bottom pad on children. */
+/** Clears the float once on main. Do not stack a second phone bottom pad on children.
+ *  Pad stays when the bar hides so scroll-hide does not jump the page. */
 export const HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS =
   "max-md:pb-[calc(5.5rem+env(safe-area-inset-bottom))]";
 

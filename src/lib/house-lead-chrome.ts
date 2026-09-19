@@ -6,12 +6,14 @@
 // Phone grammar Option 2 dest-chip amend (Adam 2026-09-18):
 //   Left: [emblem]
 //   Under-top: dest chips on Agg / Edu / Social. Home has none.
-//   Trailing: [search if needed] [bell] [avatar]
+//   Trailing: [search if needed] [24Frame AI] [bell] [avatar]
 //   Bottom: HousePhoneBottomNav — Home · Social · Aggregation · Education
 // Phone top has no workspace pill. Bottom bar owns workspace switching.
-// Ask 24Frame AI and the sun/moon leave the phone trailing cluster
-// and live on the avatar sheet (Appearance drill-in + 24Frame AI).
-// Desktop md+ keeps switcher · Ask · theme · bell · avatar.
+// 24Frame AI sits immediately left of the notification bell and opens
+// the Mercury ?ai=1 overlay. Avatar-sheet AI may stay as a secondary
+// door. Sun/moon stays desktop-only (hidden on phone).
+// Desktop md+ keeps switcher · theme · Ask · bell · avatar. The Ask
+// control is shared so phone and desktop do not fork a second mark.
 // Social live explore search and Education quiet courses/videos
 // search share Facebook-compact geometry (04-facebook.png SoT)
 // via one HouseLeadSearch primitive — never twin files.

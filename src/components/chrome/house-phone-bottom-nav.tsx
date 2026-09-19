@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -7,6 +8,7 @@ import { cn } from "@/lib/cn";
 import {
   HOUSE_PHONE_BOTTOM_NAV,
   HOUSE_PHONE_BOTTOM_NAV_CLASS,
+  HOUSE_PHONE_BOTTOM_NAV_HIDDEN_CLASS,
   HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS,
   HOUSE_PHONE_BOTTOM_NAV_ITEM_CLASS,
   HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS,
@@ -16,7 +18,38 @@ import {
   persistHousePhoneWorkspace,
 } from "@/lib/house-phone-shell";
 import { PhosphorChromeIcon } from "@/lib/phosphor-icon";
+import {
+  createSocialTabBarScrollTracker,
+  stepSocialTabBarScroll,
+} from "@/lib/social-tab-bar-scroll";
 import { resolveWorkspaceMode } from "@/lib/workspace";
+
+// Prior Social float: hide on scroll-down, show on scroll-up.
+// G9 page scroll lives on main (`[data-house-lead-scroll]`), not window.
+// Shared across every workspace that mounts this bar.
+
+function useHousePhoneBottomNavHidden() {
+  const [hidden, setHidden] = useState(false);
+
+  useEffect(() => {
+    const scroller = document.querySelector<HTMLElement>("[data-house-lead-scroll]");
+    const readY = () => (scroller ? scroller.scrollTop : window.scrollY);
+    const target: EventTarget = scroller ?? window;
+    let tracker = createSocialTabBarScrollTracker(readY());
+
+    const onScroll = () => {
+      const next = stepSocialTabBarScroll(tracker, readY());
+      const changed = next.state !== tracker.state;
+      tracker = next;
+      if (changed) setHidden(next.state === "hidden");
+    };
+
+    target.addEventListener("scroll", onScroll, { passive: true });
+    return () => target.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return hidden;
+}
 
 export function HousePhoneBottomNav({
   workspace,
@@ -24,12 +57,15 @@ export function HousePhoneBottomNav({
   workspace: ReturnType<typeof resolveWorkspaceMode>;
 }) {
   const pathname = usePathname();
+  const hidden = useHousePhoneBottomNavHidden();
 
   return (
     <nav
       data-house-phone-bottom-nav=""
+      data-house-phone-bottom-nav-hidden={hidden ? "" : undefined}
       aria-label={HOUSE_PHONE_BOTTOM_NAV.label}
-      className={HOUSE_PHONE_BOTTOM_NAV_CLASS}
+      aria-hidden={hidden || undefined}
+      className={cn(HOUSE_PHONE_BOTTOM_NAV_CLASS, hidden && HOUSE_PHONE_BOTTOM_NAV_HIDDEN_CLASS)}
     >
       <div data-house-phone-bottom-nav-pill="" className={HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS}>
         <div className={HOUSE_PHONE_BOTTOM_NAV_ROW_CLASS}>
@@ -40,12 +76,14 @@ export function HousePhoneBottomNav({
                 key={tab.id}
                 href={tab.href}
                 prefetch
+                aria-label={tab.label}
                 aria-current={active ? "page" : undefined}
+                tabIndex={hidden ? -1 : undefined}
                 data-house-phone-bottom-nav-item={tab.id}
                 onClick={() => persistHousePhoneWorkspace(tab.id)}
                 className={cn(
                   HOUSE_PHONE_BOTTOM_NAV_ITEM_CLASS,
-                  active ? "font-medium text-accent" : "font-normal text-ink-2",
+                  active ? "text-accent" : "text-ink-2",
                 )}
               >
                 <PhosphorChromeIcon
@@ -53,7 +91,6 @@ export function HousePhoneBottomNav({
                   active={active}
                   className={HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS}
                 />
-                <span className="max-w-full truncate">{tab.label}</span>
               </Link>
             );
           })}

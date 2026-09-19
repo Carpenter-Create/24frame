@@ -40,7 +40,7 @@ function htmlClass(html: string, attr: string): string {
 }
 
 describe("phone header grammar A — trim trailing", () => {
-  it("keeps phone trailing as search · bell · avatar", () => {
+  it("keeps phone trailing as search · AI · bell · avatar", () => {
     expect(APP_HEADER_DESKTOP_TRAILING_CLASS).toBe("hidden md:contents");
     expect(leadSrc).toContain("data-app-header-desktop-trailing");
     expect(leadSrc).toContain("APP_HEADER_DESKTOP_TRAILING_CLASS");
@@ -53,11 +53,14 @@ describe("phone header grammar A — trim trailing", () => {
       leadSrc.indexOf("data-app-header-desktop-trailing"),
     );
     expect(leadSrc.indexOf("data-app-header-desktop-trailing")).toBeLessThan(
-      leadSrc.indexOf("<AskAssistantHeaderLink"),
+      leadSrc.indexOf("<ThemeToggle"),
     );
-    expect(leadSrc.indexOf("<AskAssistantHeaderLink")).toBeLessThan(leadSrc.indexOf("<ThemeToggle"));
-    expect(leadSrc.indexOf("<ThemeToggle")).toBeLessThan(leadSrc.indexOf("<ActivityBell"));
+    expect(leadSrc.indexOf("<ThemeToggle")).toBeLessThan(leadSrc.indexOf("<AskAssistantHeaderLink"));
+    expect(leadSrc.indexOf("<AskAssistantHeaderLink")).toBeLessThan(leadSrc.indexOf("<ActivityBell"));
     expect(leadSrc.indexOf("<ActivityBell")).toBeLessThan(leadSrc.indexOf("{accountMenu}"));
+    expect(leadSrc.indexOf("<AskAssistantHeaderLink")).toBeGreaterThan(
+      leadSrc.lastIndexOf("data-app-header-desktop-trailing"),
+    );
 
     const aggregation = renderToStaticMarkup(
       createElement(HouseLeadChrome, {
@@ -83,9 +86,21 @@ describe("phone header grammar A — trim trailing", () => {
     expect(trailing).toContain("data-theme-toggle");
     expect(trailing).toContain("data-activity-bell");
     expect(trailing).toContain("data-user-menu-host");
+    expect(trailing.indexOf("data-ask-assistant-header")).toBeLessThan(
+      trailing.indexOf("data-activity-bell"),
+    );
     expect(trailing.indexOf("data-activity-bell")).toBeLessThan(
       trailing.indexOf("data-user-menu-host"),
     );
+    expect(trailing.indexOf("data-theme-toggle")).toBeLessThan(
+      trailing.indexOf("data-ask-assistant-header"),
+    );
+    const askToBell = trailing.slice(
+      trailing.indexOf("data-ask-assistant-header"),
+      trailing.indexOf("data-activity-bell"),
+    );
+    expect(askToBell).not.toContain("data-theme-toggle");
+    expect(askToBell).not.toContain("data-user-menu-host");
     expect(trailing).not.toContain("data-social-header-actions");
 
     const education = renderToStaticMarkup(
@@ -110,6 +125,9 @@ describe("phone header grammar A — trim trailing", () => {
       social.indexOf("data-app-header-trailing"),
     );
     expect(social.indexOf("data-social-header-search-icon")).toBeLessThan(
+      social.indexOf("data-ask-assistant-header"),
+    );
+    expect(social.indexOf("data-ask-assistant-header")).toBeLessThan(
       social.indexOf("data-activity-bell"),
     );
     expect(social.indexOf("data-activity-bell")).toBeLessThan(
