@@ -8,7 +8,7 @@ Isolated AWS compute for Industry News RSS ingest.
 - EventBridge rule `24frame-news-ingest` `rate(30 minutes)` → this handler. DLQ `24frame-news-ingest-dlq`.
 - Not Supabase. Not Vercel cron. Not Aurora.
 
-Entry: `workers/news/handler.ts` calls `ingestNewsFeeds` in `src/lib/news-ingest.ts`. Fail-soft per source. RSS image first; OG-scrape the article when `image_url` is null (12s, desktop Chrome UA, 1.5MB HTML cap, fail-soft). Override the cap with server-only `NEWS_OG_MAX_BYTES`. Per-source CloudWatch counters: `ogAttempted`, `ogFilled`, `ogMiss`. Throws only when every live source failed so EventBridge can retry / DLQ.
+Entry: `workers/news/handler.ts` calls `ingestNewsFeeds` in `src/lib/news-ingest.ts`. Fail-soft per source. Cross-beat trades (THR, Variety, Deadline) ingest **film + tv section RSS** — never the site-wide feed. An ingest **topic gate** (`src/lib/news-topic.ts`) drops music / other before Dynamo write on every path. RSS image first; OG-scrape the article when `image_url` is null (12s, desktop Chrome UA, 1.5MB HTML cap, fail-soft). Override the cap with server-only `NEWS_OG_MAX_BYTES`. Per-source CloudWatch counters: `ogAttempted`, `ogFilled`, `ogMiss`, `droppedByTopic`. Throws only when every live source failed so EventBridge can retry / DLQ.
 
 **After merge, MUST redeploy Lambda `24frame-news-ingest`.** Merge ≠ live for ingest. Founder / CoS must `esbuild` a fresh bundle and `aws lambda update-function-code`. See [`docs/infra/news-aws-setup.md`](../../docs/infra/news-aws-setup.md).
 
