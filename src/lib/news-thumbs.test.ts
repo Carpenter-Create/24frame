@@ -60,8 +60,7 @@ describe("mirrorNewsImageUrl", () => {
     });
     const key = newsThumbObjectKey("joblo", FLOOD_CANON, "jpg");
     expect(putObject).toHaveBeenCalledTimes(1);
-    expect(putObject.mock.calls[0]?.[0]).toBe(key);
-    expect(putObject.mock.calls[0]?.[2]).toBe("image/jpeg");
+    expect(putObject).toHaveBeenCalledWith(key, expect.any(Uint8Array), "image/jpeg");
     expect(result.mirrored).toBe(true);
     expect(result.url).toBe(`${CF}/${key}`);
   });
