@@ -103,13 +103,42 @@ describe("auth callback failure logging", () => {
   it("stays silent and forwards on success", async () => {
     mockAuth();
 
-    const res = await GET(new Request(`https://app.test/auth/callback?code=${CODE}&next=/queue`));
+    const res = await GET(
+      new Request(`https://app.test/auth/callback?code=${CODE}&next=/aggregation/queue`),
+    );
 
-    expect(res.headers.get("location")).toBe("https://app.test/queue");
+    expect(res.headers.get("location")).toBe("https://app.test/aggregation/queue");
     expect(errorSpy).not.toHaveBeenCalled();
     expect(ensureOwnSocialProfile).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ id: "u1", email: "ada@example.com", name: "Ada" }),
     );
+  });
+
+  it("allowlists path-relative next and defaults off-origin values to / (P0-1)", async () => {
+    mockAuth();
+    const ok = await GET(
+      new Request(
+        `https://app.test/auth/callback?code=${CODE}&next=${encodeURIComponent("/home?ai=1")}`,
+      ),
+    );
+    expect(ok.headers.get("location")).toBe("https://app.test/home?ai=1");
+
+    for (const next of [
+      "//evil.example",
+      "https://evil.example",
+      "/@attacker",
+      "/\\evil.example",
+      "/%2F%2Fevil.example",
+      "queue",
+    ]) {
+      mockAuth();
+      const res = await GET(
+        new Request(
+          `https://app.test/auth/callback?code=${CODE}&next=${encodeURIComponent(next)}`,
+        ),
+      );
+      expect(res.headers.get("location"), next).toBe("https://app.test/");
+    }
   });
 });
