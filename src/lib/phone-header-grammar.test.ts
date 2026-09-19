@@ -101,6 +101,10 @@ describe("phone header grammar A — trim trailing", () => {
     );
     expect(askToBell).not.toContain("data-theme-toggle");
     expect(askToBell).not.toContain("data-user-menu-host");
+    expect(trailing).toContain("data-ask-ai-open");
+    expect(trailing).not.toContain('href="/messages"');
+    expect(trailing).not.toContain('href="/dashboard"');
+    expect(trailing).not.toContain('href="/ai"');
     expect(trailing).not.toContain("data-social-header-actions");
 
     const education = renderToStaticMarkup(

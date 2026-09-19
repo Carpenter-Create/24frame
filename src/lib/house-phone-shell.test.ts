@@ -130,6 +130,9 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
       expect(html).not.toContain("Open menu");
       expect(html).toContain("data-house-phone-dest-chips");
       expect(html).toContain("data-ask-assistant-header");
+      expect(html).toContain("data-ask-ai-open");
+      expect(html).not.toContain('href="/messages"');
+      expect(html).not.toContain('href="/ai"');
       expect(html).toContain("data-activity-bell");
       expect(html).toContain("data-account-sheet-trigger");
       expect(html.indexOf("data-brand-emblem")).toBeLessThan(

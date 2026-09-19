@@ -101,6 +101,11 @@ describe("ask AI overlay URL", () => {
     expect(askAiOverlayHref("/home")).not.toContain("/messages");
     expect(askAiOverlayHref("/home")).not.toContain("/dashboard");
     expect(headerSrc).toContain("AskAiOpenButton");
+    expect(headerSrc).not.toContain("next/link");
+    expect(headerSrc).not.toMatch(/\bhref\b/);
+    expect(headerSrc).not.toContain("/messages");
+    expect(headerSrc).not.toContain("/dashboard");
+    expect(headerSrc).not.toContain("/ai");
     expect(moduleSrc).toContain("AskAiOpenButton");
     expect(moduleSrc).toContain("data-overview-ai-ask");
     expect(sheetSrc).toContain("AskAiOpenButton");
