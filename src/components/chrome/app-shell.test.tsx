@@ -218,7 +218,7 @@ describe("AppShell header", () => {
     expect(leadSrc).not.toContain('tone="pill"');
     expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
 
-    for (const path of ["/", "/aggregation/titles", "/aggregation/attention", "/aggregation/messages"]) {
+    for (const path of ["/", "/aggregation/titles", "/aggregation/attention", "/aggregation/activity"]) {
       navigation.pathname = path;
       const html = renderShell();
       expect(html).not.toContain("data-org-switcher");
@@ -408,13 +408,13 @@ describe("AppShell Access rail and home frame", () => {
     expect(shellSrc).not.toContain("MessagesHeaderSlot");
     expect(shellSrc).not.toContain("messagesPage");
 
-    navigation.pathname = "/aggregation/messages";
-    const messages = renderShell("ask-globee-landing");
-    expect(messages).not.toContain("data-app-messages-frame");
-    expect(messages).not.toContain("data-header-search");
-    expect(messages).not.toContain("data-header-thread");
-    expect(messages).not.toContain("⌘K");
-    expect(messages).toContain("data-ask-assistant-header");
+    navigation.pathname = "/aggregation/activity";
+    const activity = renderShell("ask-globee-landing");
+    expect(activity).not.toContain("data-app-messages-frame");
+    expect(activity).not.toContain("data-header-search");
+    expect(activity).not.toContain("data-header-thread");
+    expect(activity).not.toContain("⌘K");
+    expect(activity).toContain("data-ask-assistant-header");
 
     navigation.pathname = "/home";
     expect(renderShell("ask-globee-landing")).toContain("data-ask-assistant-header");
@@ -480,8 +480,8 @@ describe("AppShell client mobile chrome", () => {
     expect(layoutSrc).not.toMatch(/key=\{ctx/);
   });
 
-  it("keeps mobile chrome on Aggregation messages — Search stays off the page header", () => {
-    navigation.pathname = "/aggregation/messages";
+  it("keeps mobile chrome on Aggregation activity — Search stays off the page header", () => {
+    navigation.pathname = "/aggregation/activity";
     const leftover = renderShell("ask-globee-landing");
     expect(leftover).not.toContain("data-mobile-nav-trigger");
     expect(leftover).toContain("data-house-phone-dest-chips");
@@ -557,7 +557,7 @@ describe("AppShell /settings rail", () => {
   });
 
   it("keeps the Access rail on neighboring routes", () => {
-    for (const path of ["/", "/aggregation/titles", "/aggregation/attention", "/aggregation/messages", "/help"]) {
+    for (const path of ["/", "/aggregation/titles", "/aggregation/attention", "/aggregation/activity", "/help"]) {
       navigation.pathname = path;
       const html = renderShell();
       expect(html).toContain("data-side-nav");

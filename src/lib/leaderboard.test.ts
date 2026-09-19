@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { ASK_GLOBEE } from "@/lib/ask-globee";
@@ -65,7 +65,6 @@ describe("leaderboard stay on materialized rows", () => {
     const page = readFileSync("src/app/(app)/social/leaderboard/page.tsx", "utf8");
     const lib = readFileSync("src/lib/leaderboard.ts", "utf8");
     const actions = readFileSync("src/app/(app)/social/actions.ts", "utf8");
-    const messages = readFileSync("src/app/(app)/aggregation/messages/page.tsx", "utf8");
     expect(page).toContain("loadLeaderboardBoard");
     expect(page).toContain("leaderboardHref");
     expect(lib).toContain("SOCIAL_ROUTES.leaderboard");
@@ -75,9 +74,10 @@ describe("leaderboard stay on materialized rows", () => {
     expect(lib).not.toContain("rebuild_leaderboards");
     expect(actions).not.toContain("rebuild_leaderboards");
     expect(actions).not.toContain("leaderboard_entries");
-    expect(messages).toContain("AskAiLegacyIntercept");
-    expect(messages).not.toContain("AskGlobeeLanding");
-    expect(messages).not.toContain("leaderboard");
+    expect(existsSync("src/app/(app)/aggregation/messages/page.tsx")).toBe(false);
+    expect(existsSync("src/app/(app)/aggregation/messages/ask-ai-legacy-intercept.tsx")).toBe(
+      false,
+    );
     expect(ASK_GLOBEE.headline).toBe("Ask 24Frame AI");
     expect(lib).not.toMatch(/from ["']@24frame\/shared["']/);
     expect(page).not.toContain("—");

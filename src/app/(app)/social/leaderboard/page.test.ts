@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -240,11 +240,11 @@ describe("Social leaderboard", () => {
 describe("messages clash lock", () => {
   it("does not steal /messages for the leaderboard", () => {
     const page = readFileSync("src/app/(app)/social/leaderboard/page.tsx", "utf8");
-    const messages = readFileSync("src/app/(app)/aggregation/messages/page.tsx", "utf8");
     expect(page).not.toContain('"/messages"');
     expect(page).not.toContain("rebuild_leaderboards");
-    expect(messages).toContain("AskAiLegacyIntercept");
-    expect(messages).not.toContain("AskGlobeeLanding");
-    expect(messages).not.toContain("leaderboard_entries");
+    expect(existsSync("src/app/(app)/aggregation/messages/page.tsx")).toBe(false);
+    expect(existsSync("src/app/(app)/aggregation/messages/ask-ai-legacy-intercept.tsx")).toBe(
+      false,
+    );
   });
 });

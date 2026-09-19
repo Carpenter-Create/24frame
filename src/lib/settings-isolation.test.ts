@@ -37,5 +37,9 @@ describe("settings hub isolation", () => {
     expect(SETTINGS.href).toBe("/settings");
     expect(SETTINGS.profileHref).toBe("/settings/profile");
     expect(existsSync("src/app/(app)/settings/you/page.tsx")).toBe(false);
+    expect(existsSync("src/app/(app)/account/page.tsx")).toBe(false);
+    expect(existsSync("src/app/(app)/account/agreements/page.tsx")).toBe(false);
+    expect(existsSync("src/app/(app)/account/company/page.tsx")).toBe(false);
+    expect(existsSync("src/app/(app)/refer/page.tsx")).toBe(false);
   });
 });

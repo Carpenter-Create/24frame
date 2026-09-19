@@ -16,7 +16,6 @@ const OTHER_PAGES = [
   "src/app/(app)/aggregation/dashboard/page.tsx",
   "src/app/(app)/aggregation/attention/page.tsx",
   "src/app/(app)/aggregation/activity/page.tsx",
-  "src/app/(app)/aggregation/messages/page.tsx",
   "src/app/(app)/(operator)/aggregation/gc/titles/[id]/page.tsx",
   "src/app/(app)/aggregation/titles/[id]/page.tsx",
   "src/components/dashboard/dashboard-home.tsx",
@@ -41,7 +40,6 @@ describe("titles catalog scope", () => {
     const homePage = src("src/app/(app)/aggregation/dashboard/page.tsx");
     const shell = src("src/components/chrome/app-shell.tsx");
     const housePageSearch = src("src/components/chrome/house-page-search.tsx");
-    const messagesPage = src("src/app/(app)/aggregation/messages/page.tsx");
     const accessGate = src("src/components/messages/access-upgrade-gate.tsx");
     const thread = src("src/components/messages/ask-globee-thread.tsx");
     const landing = src("src/components/messages/ask-globee-landing.tsx");
@@ -81,8 +79,6 @@ describe("titles catalog scope", () => {
     expect(titleDetail).not.toContain("TitlesHeaderSearch");
     expect(titleDetail).not.toContain("AddTitleButton");
     expect(titleDetail).not.toContain("data-add-title");
-    expect(messagesPage).not.toContain("SearchField");
-    expect(messagesPage).not.toContain("HousePageSearch");
     expect(accessGate).not.toContain("SearchField");
     expect(accessGate).not.toContain("HousePageSearch");
     expect(thread).not.toContain("SearchField");
