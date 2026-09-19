@@ -4,6 +4,9 @@ vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/social-profile", () => ({
   ensureOwnSocialProfile: vi.fn(),
 }));
+vi.mock("@/lib/security-event-writer", () => ({
+  recordSignInEvent: vi.fn(async () => {}),
+}));
 
 import { createClient } from "@/lib/supabase/server";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";

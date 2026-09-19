@@ -3,6 +3,7 @@ import type { EmailOtpType } from "@supabase/supabase-js";
 
 import { authDisplayName } from "@/lib/account-profile";
 import { safeAuthCallbackNext } from "@/lib/auth-callback-next";
+import { recordSignInEvent } from "@/lib/security-event-writer";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { createClient } from "@/lib/supabase/server";
 
@@ -14,6 +15,9 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
+
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+  const userAgent = request.headers.get("user-agent");
 
   const supabase = await createClient();
 
@@ -27,6 +31,7 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
       await ensureSessionProfile(supabase);
+      await recordSignInForSession(supabase, ip, userAgent);
       return NextResponse.redirect(`${origin}${next}`);
     }
     console.error(`[auth] code exchange failed (status ${error.status ?? "?"}): ${error.message}`);
@@ -34,6 +39,7 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
     if (!error) {
       await ensureSessionProfile(supabase);
+      await recordSignInForSession(supabase, ip, userAgent);
       return NextResponse.redirect(`${origin}${next}`);
     }
     console.error(
@@ -44,6 +50,24 @@ export async function GET(request: Request) {
   }
 
   return NextResponse.redirect(`${origin}/login?error=auth`);
+}
+
+async function recordSignInForSession(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  ip: string | null,
+  userAgent: string | null,
+) {
+  try {
+    const { data } = await supabase.auth.getUser();
+    if (data.user) {
+      await recordSignInEvent(data.user.id, ip, userAgent);
+    }
+  } catch (err) {
+    console.error(
+      "[auth] security event recording failed",
+      err instanceof Error ? err.message : err,
+    );
+  }
 }
 
 async function ensureSessionProfile(supabase: Awaited<ReturnType<typeof createClient>>) {
