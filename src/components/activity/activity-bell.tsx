@@ -27,6 +27,7 @@ import {
   activityRelativeTime,
   type ActivityItem,
 } from "@/lib/activity";
+import { HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS } from "@/lib/house-lead-chrome";
 import {
   HOUSE_HEADER_TRAILING_DESKTOP_CLASS,
   HOUSE_HEADER_TRAILING_PHONE_CLASS,
@@ -121,7 +122,7 @@ function ActivityBellTriggers({
 }) {
   return (
     <>
-      <div data-activity-bell-phone="" className="md:hidden">
+      <div data-activity-bell-phone="" className={HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS}>
         <ActivityBellTrigger
           count={count}
           open={phoneOpen}
@@ -177,7 +178,7 @@ function ActivityBellPhone({
   const sheet = open ? <ActivityBellSheet items={items} now={now} onClose={close} /> : null;
 
   return (
-    <div data-activity-bell-phone="" className="md:hidden">
+    <div data-activity-bell-phone="" className={HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS}>
       <ActivityBellTrigger
         count={count}
         open={open}

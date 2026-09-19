@@ -26,6 +26,10 @@ import {
   activityRelativeTime,
 } from "@/lib/activity";
 import {
+  HOUSE_HEADER_TRAILING_HIT_CLASS,
+  HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS,
+} from "@/lib/house-lead-chrome";
+import {
   HOUSE_HEADER_TRAILING_DESKTOP_CLASS,
   HOUSE_HEADER_TRAILING_PHONE_CLASS,
   HOUSE_PHONE_CHROME_ICON_WEIGHT,
@@ -114,8 +118,10 @@ describe("ActivityBell", () => {
     expect(html).toContain("data-activity-bell-badge");
     expect(html).toContain("3");
     expect(html).toContain(ACTIVITY_BELL_TRIGGER_CLASS);
+    expect(html).toContain(HOUSE_HEADER_TRAILING_HIT_CLASS);
     expect(html).toContain("data-activity-bell-phone");
     expect(html).toContain("data-activity-bell-desktop");
+    expect(html).toContain(HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS);
     expect(html).toContain("md:hidden");
     expect(html).toContain("hidden md:block");
     expect(html).not.toContain("data-activity-bell-open");

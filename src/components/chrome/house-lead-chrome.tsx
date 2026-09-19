@@ -8,6 +8,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/cn";
 import type { ActivityItem } from "@/lib/activity";
 import {
+  HOUSE_HEADER_TRAILING_SLOT_CLASS,
   HOUSE_LEAD_CHROME_CLASS,
   HOUSE_LEAD_LOGO_CLASS,
   HOUSE_LEAD_SEARCH_DESKTOP_CLASS,
@@ -100,7 +101,10 @@ export function HouseLeadChrome({
         </div>
         <div data-app-header-trailing="" className={APP_HEADER_TRAILING_CLUSTER_CLASS}>
           {trailingSearch ? (
-            <div data-social-header-actions={social ? "" : undefined}>
+            <div
+              data-social-header-actions={social ? "" : undefined}
+              className={HOUSE_HEADER_TRAILING_SLOT_CLASS}
+            >
               {trailingSearch}
             </div>
           ) : null}

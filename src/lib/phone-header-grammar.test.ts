@@ -13,9 +13,13 @@ import { HouseLeadChrome } from "@/components/chrome/house-lead-chrome";
 import { AccountSheet, AccountMenuDropdown } from "@/components/chrome/account-sheet";
 import { SocialTopBar } from "@/components/social/social-top-bar";
 import {
+  HOUSE_HEADER_TRAILING_AVATAR_CLASS,
+  HOUSE_HEADER_TRAILING_HIT_CLASS,
+  HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS,
   HOUSE_LEAD_CHROME_CLASS,
   HOUSE_LEAD_PHONE_PAD_CLASS,
   HOUSE_LEAD_STACK_CLASS,
+  HOUSE_THEME_TOGGLE_CLASS,
 } from "@/lib/house-lead-chrome";
 import { HOUSE_PHONE_TRAILING_GUTTER_CLASS } from "@/lib/house-shell";
 import { ASSISTANT_NAME } from "@/lib/product";
@@ -151,6 +155,22 @@ describe("phone header grammar A — trim trailing", () => {
     expect(HOUSE_LEAD_CHROME_CLASS).not.toContain("px-[var(--space-6)]");
     expect(leadLib).toContain("HOUSE_PHONE_TRAILING_GUTTER_CLASS");
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("max-md:shrink-0");
+  });
+
+  it("keeps phone trailing AI · bell · avatar on one gap and matched hit padding", () => {
+    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("gap-[var(--space-2)]");
+    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).not.toContain("gap-[var(--space-1)]");
+    expect(HOUSE_THEME_TOGGLE_CLASS).toContain(HOUSE_HEADER_TRAILING_HIT_CLASS);
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("-mx-[var(--space-2)]");
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("size-4");
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("md:size-8");
+    expect(HOUSE_HEADER_TRAILING_AVATAR_CLASS).toContain("h-8 w-8");
+    expect(HOUSE_HEADER_TRAILING_AVATAR_CLASS).not.toContain("-mx-");
+    expect(HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS).toBe("contents md:hidden");
+    expect(sheetSrc).toContain("HOUSE_HEADER_TRAILING_AVATAR_CLASS");
+    expect(readFileSync("src/components/activity/activity-bell.tsx", "utf8")).toContain(
+      "HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS",
+    );
   });
 
   it("does not reintroduce lead-row overflow-hidden from #412", () => {

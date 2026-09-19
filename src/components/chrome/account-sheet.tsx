@@ -69,6 +69,7 @@ import {
   appearancePreferenceLabel,
   type AccountMenuFace,
 } from "@/lib/appearance";
+import { HOUSE_HEADER_TRAILING_AVATAR_CLASS } from "@/lib/house-lead-chrome";
 import { APP_SHEET_SCRIM_CLASS, SHEET_GROUP_CHEVRON_CLASS, SHEET_GROUP_ITEM_CLASS } from "@/lib/house-sheet";
 import { applyDocumentThemePreference } from "@/lib/theme";
 import { settingsLandHref } from "@/lib/settings";
@@ -486,7 +487,7 @@ export function MobileAccountMenu({
         onOpen={openMenu}
         triggerAttr="data-account-sheet-trigger"
         controlsId="account-sheet"
-        className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-muted t-body-sm font-medium text-ink-2 md:hidden"
+        className={`${HOUSE_HEADER_TRAILING_AVATAR_CLASS} md:hidden`}
       />
       {sheet && typeof document !== "undefined" ? createPortal(sheet, document.body) : sheet}
     </>
@@ -538,7 +539,7 @@ export function DesktopAccountMenu({
         triggerRef={triggerRef}
         triggerAttr="data-user-menu-trigger"
         controlsId="account-menu-dropdown"
-        className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-muted t-body-sm font-medium text-ink-2 transition-colors hover:text-ink"
+        className={`${HOUSE_HEADER_TRAILING_AVATAR_CLASS} transition-colors hover:text-ink`}
       />
       {dropdown && typeof document !== "undefined"
         ? createPortal(dropdown, document.body)

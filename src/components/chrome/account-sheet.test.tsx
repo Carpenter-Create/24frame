@@ -41,6 +41,7 @@ import {
   SHEET_GROUP_CHEVRON_CLASS,
   SHEET_GROUP_ITEM_CLASS,
 } from "@/lib/house-sheet";
+import { HOUSE_HEADER_TRAILING_AVATAR_CLASS } from "@/lib/house-lead-chrome";
 import { USER_MENU, userMenuVersion } from "@/lib/user-menu";
 import {
   AccountMenuDropdown,
@@ -125,6 +126,7 @@ describe("MobileAccountMenu trigger", () => {
     expect(html).toContain(ACCOUNT_SHEET.sheet);
     expect(html).toContain('aria-expanded="false"');
     expect(html).toContain("md:hidden");
+    expect(html).toContain(HOUSE_HEADER_TRAILING_AVATAR_CLASS);
     expect(html).toContain("h-8 w-8");
     expect(html).toContain("rounded-full");
     expect(html).toContain("bg-surface-muted");

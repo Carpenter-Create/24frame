@@ -7,10 +7,12 @@
 // (12). Not --space-1. Do not put overflow-hidden on the leading
 // row (#412).
 // Phone trailing: [search if needed] [24Frame AI] [bell] [avatar],
-// with --chrome-gutter so the avatar is not flush. Sun/moon stays
-// desktop-only. Ask 24Frame AI is shared immediately left of the
-// bell and opens the Mercury overlay. Avatar-sheet AI may stay as
-// a secondary door. Do not reintroduce a dest hamburger.
+// with --chrome-gutter so the avatar is not flush. Cluster gap is
+// --space-2 on every breakpoint; phone AI/bell/search hug the 16px
+// glyph so that gap is optical, not 16-in-32 vs a 32 disk. Sun/moon
+// stays desktop-only. Ask 24Frame AI is shared immediately left of
+// the bell and opens the Mercury overlay. Avatar-sheet AI may stay
+// as a secondary door. Do not reintroduce a dest hamburger.
 // Desktop md+ replaces the single-name+chevron trigger with a
 // sliding-pill cluster of available workspace names (Adam lock
 // 2026-09-17 “Try it”). Same house grammar as Top Performing:
@@ -205,8 +207,12 @@ export const WORKSPACE_SWITCHER_OPTION_CHECK_GUTTER_CLASS = "size-4 shrink-0";
 
 export const WORKSPACE_SWITCHER_OPTION_CHECK_CLASS = "text-accent";
 
+// One gap token on every breakpoint. Phone optical evenness comes
+// from HOUSE_HEADER_TRAILING_HIT_CLASS hugging the 16px glyphs —
+// do not fork a tighter phone gap to "fix" AI↔bell. Desktop md+
+// stays --space-2 as before.
 export const APP_HEADER_TRAILING_CLUSTER_CLASS =
-  "flex min-w-0 items-center gap-[var(--space-1)] md:gap-[var(--space-2)] max-md:shrink-0";
+  "flex min-w-0 items-center gap-[var(--space-2)] max-md:shrink-0";
 
 // Theme stays in the desktop trailing cluster. Phone hides this
 // wrap (`hidden`) so md+ `contents` keeps theme as a flex sibling

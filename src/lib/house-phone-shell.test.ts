@@ -63,7 +63,12 @@ import {
   housePhoneWorkspaceSelected,
 } from "@/lib/house-phone-shell";
 import { ASK_GLOBEE } from "@/lib/ask-globee";
-import { HOUSE_THEME_TOGGLE_CLASS } from "@/lib/house-lead-chrome";
+import {
+  HOUSE_HEADER_TRAILING_AVATAR_CLASS,
+  HOUSE_HEADER_TRAILING_HIT_CLASS,
+  HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS,
+  HOUSE_THEME_TOGGLE_CLASS,
+} from "@/lib/house-lead-chrome";
 import { PHOSPHOR_CHROME_ICON_CLASS } from "@/lib/phosphor-icon";
 import { SOCIAL_ROUTES } from "@/lib/social";
 import {
@@ -373,6 +378,7 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(askHeaderSrc).toContain('register="fill"');
     expect(bellSrc).toContain("HOUSE_HEADER_TRAILING_PHONE_CLASS");
     expect(bellSrc).toContain("HOUSE_HEADER_TRAILING_DESKTOP_CLASS");
+    expect(bellSrc).toContain("HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS");
     expect(bellSrc).toContain("HOUSE_PHONE_CHROME_ICON_WEIGHT");
     expect(bellSrc).toContain(
       "weight={phone ? HOUSE_PHONE_CHROME_ICON_WEIGHT : PHOSPHOR_CHROME_IDLE_WEIGHT}",
@@ -385,14 +391,23 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     // Phone search glyph rides the same idle-ink SoT — no ink drift
     // across AI / bell / search in the phone top trailing cluster.
     expect(searchSheetSrc).toContain("HOUSE_PHONE_CHROME_IDLE_INK_CLASS");
+    expect(searchSheetSrc).toContain("HOUSE_HEADER_TRAILING_HIT_CLASS");
     expect(searchSheetSrc).not.toMatch(/\btext-ink-2\b/);
     expect(accountSheetSrc).not.toContain("HOUSE_PHONE_CHROME_ICON_CLASS");
     expect(accountSheetSrc).not.toContain("HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS");
     expect(accountSheetSrc).not.toContain("HOUSE_HEADER_TRAILING_ICON_CLASS");
     expect(accountSheetSrc).not.toContain("HOUSE_HEADER_TRAILING_PHONE_CLASS");
+    expect(accountSheetSrc).toContain("HOUSE_HEADER_TRAILING_AVATAR_CLASS");
+    expect(accountSheetSrc).not.toContain("HOUSE_HEADER_TRAILING_HIT_CLASS");
+    expect(HOUSE_THEME_TOGGLE_CLASS).toContain(HOUSE_HEADER_TRAILING_HIT_CLASS);
     expect(HOUSE_THEME_TOGGLE_CLASS).toContain("size-8");
     expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("size-6");
     expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("size-5");
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("size-4");
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("-mx-[var(--space-2)]");
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("md:size-8");
+    expect(HOUSE_HEADER_TRAILING_AVATAR_CLASS).toContain("h-8 w-8");
+    expect(HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS).toBe("contents md:hidden");
 
     const lead = renderLead("social");
     const trailing = lead.slice(
