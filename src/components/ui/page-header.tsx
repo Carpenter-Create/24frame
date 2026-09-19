@@ -14,7 +14,7 @@ export type PageHeaderBackLinkProps = {
   className?: string;
 };
 
-// House SoT page-lead back — News / PageHeader ArrowLeft. Not CaretLeft.
+// House SoT page-lead back — News / PageHeader ArrowLeft, not a chrome caret.
 // Settings page-lead reuses this; do not fork a third back glyph.
 export function PageHeaderBackLink({ href, label, className }: PageHeaderBackLinkProps) {
   return (
