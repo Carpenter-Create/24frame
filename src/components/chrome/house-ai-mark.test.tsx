@@ -77,8 +77,9 @@ describe("HouseAiMark", () => {
     expect(html).toContain('fill="none"');
     expect(html).toContain('stroke="currentColor"');
     expect(html).toContain(`stroke-width="${HOUSE_AI_MARK_REGULAR_STROKE_WIDTH}"`);
-    // Phone header trailing renders at 20px (size-5); Mercury bar 24px
-    // (size-6) is a separate SoT and must not appear on the AI mark.
+    // Phone chrome ships one 20px SoT — Adam #448 pulled Mercury bar
+    // and header trailing onto size-5 together. size-6 must not
+    // appear on the AI mark.
     expect(html).toContain("size-5");
     expect(html).not.toContain("size-6");
     expect(html).toContain("md:hidden");
@@ -109,8 +110,9 @@ describe("HouseAiMark", () => {
     expect(header).toContain("data-house-ai-mark");
     expect(header).toContain(HOUSE_HEADER_TRAILING_PHONE_CLASS);
     expect(header).toContain(HOUSE_HEADER_TRAILING_DESKTOP_CLASS);
-    // Phone header trailing renders at 20px (size-5); the Mercury bar
-    // 24px (size-6) sits on a separate SoT.
+    // Phone header trailing renders at 20px (size-5) — same shared
+    // SoT as the Mercury bar (Adam #448). size-6 is retired from
+    // phone chrome.
     expect(header).toContain("size-5");
     expect(header).not.toContain("size-6");
     expect(header).toContain("md:size-4");

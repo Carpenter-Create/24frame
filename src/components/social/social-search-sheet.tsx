@@ -5,7 +5,7 @@ import Link from "next/link";
 import { CaretLeft, MagnifyingGlass, X } from "@phosphor-icons/react";
 
 import {
-  HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS,
+  HOUSE_PHONE_CHROME_ICON_CLASS,
   HOUSE_PHONE_CHROME_ICON_WEIGHT,
   HOUSE_PHONE_CHROME_IDLE_INK_CLASS,
 } from "@/lib/house-phone-shell";
@@ -68,7 +68,7 @@ export function SocialSearchSheet({
         onClick={() => setOpen(true)}
       >
         <MagnifyingGlass
-          className={HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS}
+          className={HOUSE_PHONE_CHROME_ICON_CLASS}
           weight={HOUSE_PHONE_CHROME_ICON_WEIGHT}
           aria-hidden
         />
