@@ -60,6 +60,8 @@ describe("settings hub lock", () => {
     expect(SETTINGS.organizationHref).toBe("/settings/organization");
     expect(SETTINGS.preferences).toBe("Preferences");
     expect(SETTINGS.preferencesHref).toBe("/settings/preferences");
+    expect(SETTINGS.security).toBe("Security");
+    expect(SETTINGS.securityHref).toBe("/settings/security");
     expect(SETTINGS).not.toHaveProperty("sectionQuery");
     expect(SETTINGS.agreements).toBe("Agreements");
     expect(SETTINGS.agreementsHref).toBe("/settings/agreements");
@@ -79,23 +81,26 @@ describe("settings hub lock", () => {
     expect(SETTINGS.referHref).toBe(USER_MENU.referHref);
   });
 
-  it("locks section order Profile · Organization · Preferences", () => {
-    expect(SETTINGS_HUB_ORDER).toEqual(["profile", "organization", "preferences"]);
+  it("locks section order Profile · Organization · Preferences · Security", () => {
+    expect(SETTINGS_HUB_ORDER).toEqual(["profile", "organization", "preferences", "security"]);
     expect(settingsHubNav()).toEqual(SETTINGS_HUB_NAV);
     expect(SETTINGS_HUB_NAV.map((item) => item.kind)).toEqual([
       "profile",
       "organization",
       "preferences",
+      "security",
     ]);
     expect(SETTINGS_HUB_NAV.map((item) => item.label)).toEqual([
       "Profile",
       "Organization",
       "Preferences",
+      "Security",
     ]);
     expect(SETTINGS_HUB_NAV.map((item) => item.href)).toEqual([
       "/settings/profile",
       "/settings/organization",
       "/settings/preferences",
+      "/settings/security",
     ]);
   });
 
@@ -106,6 +111,7 @@ describe("settings hub lock", () => {
     expect(settingsHubSection("/settings/refer")).toBe("profile");
     expect(settingsHubSection("/settings/organization")).toBe("organization");
     expect(settingsHubSection("/settings/preferences")).toBe("preferences");
+    expect(settingsHubSection("/settings/security")).toBe("security");
     expect(settingsHubSection("")).toBe("profile");
     expect(settingsHubSection(null)).toBe("profile");
   });
@@ -181,6 +187,7 @@ describe("settings hub lock", () => {
     expect(isSettingsPath("/settings/profile")).toBe(true);
     expect(isSettingsPath("/settings/organization")).toBe(true);
     expect(isSettingsPath("/settings/preferences")).toBe(true);
+    expect(isSettingsPath("/settings/security")).toBe(true);
     expect(isSettingsPath("/settings/agreements")).toBe(true);
     expect(isSettingsPath("/")).toBe(false);
     expect(isSettingsPath("/titles")).toBe(false);
@@ -192,8 +199,10 @@ describe("settings hub lock", () => {
   it("washes the current hub section", () => {
     expect(settingsRailActive("profile", "profile")).toBe(true);
     expect(settingsRailActive("preferences", "preferences")).toBe(true);
+    expect(settingsRailActive("security", "security")).toBe(true);
     expect(settingsRailActive("profile", "preferences")).toBe(false);
     expect(settingsRailActive("organization", "profile")).toBe(false);
+    expect(settingsRailActive("security", "profile")).toBe(false);
   });
 
   it("backs the phone header Home on the list and Settings on a pushed pane", () => {
@@ -222,6 +231,7 @@ describe("settings hub lock", () => {
     expect(settingsPaneTitle("profile")).toBe("Profile");
     expect(settingsPaneTitle("organization")).toBe("Organization");
     expect(settingsPaneTitle("preferences")).toBe("Preferences");
+    expect(settingsPaneTitle("security")).toBe("Security");
     expect(settingsPaneTitle("profile")).not.toBe(SETTINGS.title);
     expect(SETTINGS_PANE_TITLE_CLASS).toBe("t-section text-ink");
     expect(SETTINGS_RAIL_TITLE_CLASS).toBe("t-section text-ink");

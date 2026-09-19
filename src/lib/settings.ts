@@ -61,6 +61,8 @@ export const SETTINGS = {
   organizationHref: "/settings/organization",
   preferences: "Preferences",
   preferencesHref: "/settings/preferences",
+  security: "Security",
+  securityHref: "/settings/security",
   manageCourses: "Manage courses",
   manageCoursesHref: EDUCATION_MANAGE_HREF,
   organizationEmpty: "No organization on this account.",
@@ -84,7 +86,7 @@ export const SETTINGS_ABSENT = [
   "Edit public profile",
 ] as const;
 
-export type SettingsHubSection = "profile" | "organization" | "preferences";
+export type SettingsHubSection = "profile" | "organization" | "preferences" | "security";
 
 export type SettingsRailKind = SettingsHubSection;
 
@@ -92,18 +94,21 @@ export const SETTINGS_HUB_ORDER = [
   "profile",
   "organization",
   "preferences",
+  "security",
 ] as const satisfies readonly SettingsHubSection[];
 
 export const SETTINGS_HUB_HREFS = {
   profile: SETTINGS.profileHref,
   organization: SETTINGS.organizationHref,
   preferences: SETTINGS.preferencesHref,
+  security: SETTINGS.securityHref,
 } as const;
 
 export const SETTINGS_HUB_LABELS = {
   profile: SETTINGS.profile,
   organization: SETTINGS.organization,
   preferences: SETTINGS.preferences,
+  security: SETTINGS.security,
 } as const;
 
 export type SettingsHubNavItem = {
@@ -222,6 +227,12 @@ function pathSection(pathname: string): SettingsHubSection {
     || pathname.startsWith(`${SETTINGS.preferencesHref}/`)
   ) {
     return "preferences";
+  }
+  if (
+    pathname === SETTINGS.securityHref
+    || pathname.startsWith(`${SETTINGS.securityHref}/`)
+  ) {
+    return "security";
   }
   return "profile";
 }
