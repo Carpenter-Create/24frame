@@ -54,10 +54,12 @@ import {
   HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS,
   HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS,
   HOUSE_PHONE_DEST_CHIPS,
+  HOUSE_PHONE_DEST_ITEM_CLASS,
   HOUSE_PHONE_DEST_ITEM_OFF_CLASS,
   HOUSE_PHONE_DEST_ITEM_ON_CLASS,
   HOUSE_PHONE_WORKSPACE_TABS,
   SOCIAL_PHONE_DESTS,
+  housePhoneDestItemClass,
   housePhoneDestinations,
   housePhoneShowsDestChips,
   housePhoneWorkspaceSelected,
@@ -622,8 +624,20 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
       SOCIAL_ROUTES.profile,
     ]);
     expect(HOUSE_PHONE_DEST_CHIPS.label).toBe("Destinations");
-    expect(HOUSE_PHONE_DEST_ITEM_ON_CLASS).toContain("bg-ink");
+    expect(HOUSE_PHONE_DEST_ITEM_ON_CLASS).toContain("bg-accent");
+    expect(HOUSE_PHONE_DEST_ITEM_ON_CLASS).toContain("text-white");
+    expect(HOUSE_PHONE_DEST_ITEM_ON_CLASS).not.toContain("bg-ink");
+    expect(HOUSE_PHONE_DEST_ITEM_ON_CLASS).not.toContain("bg-black");
     expect(HOUSE_PHONE_DEST_ITEM_OFF_CLASS).toContain("bg-surface-muted");
+    expect(HOUSE_PHONE_DEST_ITEM_CLASS).toContain("min-h-9");
+    expect(HOUSE_PHONE_DEST_ITEM_CLASS).toContain("py-[var(--space-2)]");
+    expect(HOUSE_PHONE_DEST_ITEM_CLASS).not.toContain("py-[var(--space-1)]");
+    expect(housePhoneDestItemClass(true)).toContain("bg-accent");
+    expect(housePhoneDestItemClass(true)).toContain("text-white");
+    expect(housePhoneDestItemClass(true)).toContain("min-h-9");
+    expect(housePhoneDestItemClass(true)).not.toContain("bg-ink");
+    expect(housePhoneDestItemClass(false)).toContain("bg-surface-muted");
+    expect(housePhoneDestItemClass(false)).not.toContain("bg-accent");
 
     navigation.pathname = "/aggregation/titles";
     const aggregation = renderToStaticMarkup(
@@ -679,6 +693,11 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(socialFeed).not.toMatch(
       /<a[^>]+href="\/social\/explore"[^>]*aria-current="page"/,
     );
+    expect(socialFeed).toContain("bg-accent");
+    expect(socialFeed).toContain("text-white");
+    expect(socialFeed).toContain("min-h-9");
+    expect(socialFeed).not.toContain("bg-ink");
+    expect(socialFeed).not.toContain("bg-black");
 
     navigation.pathname = "/social/create";
     const socialCreate = renderToStaticMarkup(
