@@ -290,6 +290,36 @@ describe("ingest OG images", () => {
     expect(home[0]?.image_url).toBe("https://thr.com/og.jpg");
     expect(history.rows[0]?.image_url).toBe("https://thr.com/og.jpg");
   });
+
+  it("fetches JoBlo OG over www and stores the www media URL", async () => {
+    const persist = memoryNewsStore();
+    const floodFeed = `<?xml version="1.0"?>
+<rss version="2.0">
+  <channel>
+    <item>
+      <title>Flood influence</title>
+      <link>https://joblo.com/zach-cregger-the-flood-2001-influence</link>
+      <pubDate>Thu, 17 Sep 2026 12:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>`;
+    const fetchOgHtml = vi.fn(async (url: string) => {
+      expect(url).toBe("https://www.joblo.com/zach-cregger-the-flood-2001-influence");
+      return `<meta property="og:image" content="https://www.joblo.com/wp-content/uploads/2026/09/zach-cregger-the-flood-2001.jpg" />`;
+    });
+    await ingestNewsFeeds({
+      persist,
+      now: NOW,
+      fetchXml: async (url: string) => (url === "https://www.joblo.com/feed/" ? floodFeed : EMPTY_FEED),
+      fetchOgHtml,
+    });
+    expect(fetchOgHtml).toHaveBeenCalledTimes(1);
+    const rows = await persist.queryFeed({ limit: 20, now: NOW });
+    expect(rows[0]?.url).toBe("https://joblo.com/zach-cregger-the-flood-2001-influence");
+    expect(rows[0]?.image_url).toBe(
+      "https://www.joblo.com/wp-content/uploads/2026/09/zach-cregger-the-flood-2001.jpg",
+    );
+  });
 });
 
 describe("fetchNewsArticleHtml", () => {
@@ -404,6 +434,29 @@ describe("fillNewsOgImages", () => {
       { fetchHtml },
     );
     expect(kept?.image_url).toBe("https://variety.com/thumbs/rss.jpg");
+    expect(fetchHtml).not.toHaveBeenCalled();
+  });
+
+  it("rewrites an existing JoBlo apex image_url without scraping", async () => {
+    const fetchHtml = vi.fn(async () => {
+      throw new Error("should not scrape");
+    });
+    const [kept] = await fillNewsOgImages(
+      [
+        {
+          title: "Flood influence",
+          url: "https://joblo.com/zach-cregger-the-flood-2001-influence",
+          canonical_url: "https://joblo.com/zach-cregger-the-flood-2001-influence",
+          source: "joblo",
+          published_at: "2026-09-17T12:00:00.000Z",
+          image_url: "https://joblo.com/wp-content/uploads/2026/09/zach-cregger-the-flood-2001.jpg",
+        },
+      ],
+      { fetchHtml },
+    );
+    expect(kept?.image_url).toBe(
+      "https://www.joblo.com/wp-content/uploads/2026/09/zach-cregger-the-flood-2001.jpg",
+    );
     expect(fetchHtml).not.toHaveBeenCalled();
   });
 

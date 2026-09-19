@@ -8,6 +8,7 @@ import {
 // RSS / Atom normalize for the News allowlist. Media/enclosure thumbs
 // first. When the feed has no image, ingest OG-scrapes the article URL.
 // Do not scrape RSS item description HTML. Do not rewrite titles.
+// JoBlo media: persist www.joblo.com (apex 404s). Article identity still strips www.
 
 const TRACKING_PARAM = /^(utm_|fbclid|gclid|mc_cid|mc_eid|vero_id|icid)/i;
 const IMAGE_EXT = /\.(avif|gif|jpe?g|png|webp)(\?|$)/i;
@@ -42,6 +43,57 @@ export function canonicalizeNewsUrl(raw: string, base?: string): string | null {
   const path = parsed.pathname.replace(/\/+$/, "") || "/";
   const query = parsed.searchParams.toString();
   return `https://${parsed.hostname}${path}${query ? `?${query}` : ""}`;
+}
+
+const JOBLO_APEX_HOST = "joblo.com";
+const JOBLO_WWW_HOST = "www.joblo.com";
+
+/** JoBlo apex media 404s. www serves 200 (incl. Referer app.24frame.co). Other hosts unchanged. */
+export function canonicalizeNewsImageUrl(url: string | null): string | null {
+  if (!url) return null;
+  return preferJobloWwwHost(url);
+}
+
+/** Fetch JoBlo over www. Article identity still strips www via canonicalizeNewsUrl (stable Dynamo keys). */
+export function newsOgFetchUrl(articleUrl: string): string {
+  return preferJobloWwwHost(articleUrl);
+}
+
+function preferJobloWwwHost(url: string): string {
+  let parsed: URL;
+  try {
+    parsed = new URL(url.trim());
+  } catch {
+    return url;
+  }
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return url;
+  if (parsed.hostname.toLowerCase() !== JOBLO_APEX_HOST) return url;
+  parsed.protocol = "https:";
+  parsed.hostname = JOBLO_WWW_HOST;
+  return parsed.href;
+}
+
+/** Proven OG on the www Flood article. CoS backfill only — not inventing thumbs. */
+export const KNOWN_JOBLO_OG: Record<string, string> = {
+  "https://joblo.com/zach-cregger-the-flood-2001-influence":
+    "https://www.joblo.com/wp-content/uploads/2026/09/zach-cregger-the-flood-2001.jpg",
+};
+
+export function planJobloImageUrl(row: {
+  url: string;
+  image_url: string | null;
+  fillKnown?: boolean;
+}): { next: string | null; action: "rewrite" | "fill-known" | "unchanged" | "still-null" } {
+  const rewritten = canonicalizeNewsImageUrl(row.image_url);
+  if (rewritten && rewritten !== row.image_url) {
+    return { next: rewritten, action: "rewrite" };
+  }
+  if (row.image_url) return { next: row.image_url, action: "unchanged" };
+  if (row.fillKnown) {
+    const known = KNOWN_JOBLO_OG[row.url];
+    if (known) return { next: known, action: "fill-known" };
+  }
+  return { next: null, action: "still-null" };
 }
 
 export function decodeNewsText(raw: string): string {
@@ -119,7 +171,7 @@ function firstImageUrl(block: string, base: string): string | null {
     if (!url) continue;
     if (!looksLikeImage(url, attr(tag, "type"), attr(tag, "medium"))) continue;
     const canonical = canonicalizeNewsUrl(url, base);
-    if (canonical) return canonical;
+    if (canonical) return canonicalizeNewsImageUrl(canonical);
   }
   return null;
 }
@@ -155,7 +207,7 @@ export function parseOgImageUrl(html: string, base?: string): string | null {
     // attr() already decodeNewsText's content; decode again so &#038; / &amp;
     // cannot survive into canonicalize (URL would treat # as a hash).
     const canonical = canonicalizeNewsUrl(decodeNewsText(raw), base);
-    if (canonical && isUsableOgImage(canonical, base)) return canonical;
+    if (canonical && isUsableOgImage(canonical, base)) return canonicalizeNewsImageUrl(canonical);
   }
   return null;
 }

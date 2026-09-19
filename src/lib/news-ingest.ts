@@ -1,5 +1,11 @@
 import { NEWS_SOURCES, newsSourceIsLive, newsWindowStart, type NewsSourceId } from "@/lib/news";
-import { parseNewsFeed, parseOgImageUrl, type NormalizedNewsItem } from "@/lib/news-rss";
+import {
+  canonicalizeNewsImageUrl,
+  newsOgFetchUrl,
+  parseNewsFeed,
+  parseOgImageUrl,
+  type NormalizedNewsItem,
+} from "@/lib/news-rss";
 import { createNewsIngestStore, type NewsPersist } from "@/lib/news-store";
 
 // Scheduled News ingest (Lambda + EventBridge). Fail-soft per source.
@@ -150,14 +156,14 @@ export async function fillNewsOgImages(
         env: init.env,
       }));
   const missing = items.filter((item) => !item.image_url);
-  if (missing.length === 0) return items.map((item) => item);
+  if (missing.length === 0) return canonicalizeNewsItemImages(items);
 
   const scraped = new Map<string, string | null>();
   await runPooled(
     missing,
     async (item) => {
       try {
-        const html = await fetchHtml(item.url);
+        const html = await fetchHtml(newsOgFetchUrl(item.url));
         scraped.set(item.canonical_url, html ? parseOgImageUrl(html, item.url) : null);
       } catch {
         scraped.set(item.canonical_url, null);
@@ -166,10 +172,19 @@ export async function fillNewsOgImages(
     NEWS_OG_CONCURRENCY,
   );
 
-  return items.map((item) => {
-    if (item.image_url) return item;
-    return { ...item, image_url: scraped.get(item.canonical_url) ?? null };
-  });
+  return canonicalizeNewsItemImages(
+    items.map((item) => {
+      if (item.image_url) return item;
+      return { ...item, image_url: scraped.get(item.canonical_url) ?? null };
+    }),
+  );
+}
+
+function canonicalizeNewsItemImages(items: readonly NormalizedNewsItem[]): NormalizedNewsItem[] {
+  return items.map((item) => ({
+    ...item,
+    image_url: canonicalizeNewsImageUrl(item.image_url),
+  }));
 }
 
 const EMPTY_OG: NewsOgCounters = { ogAttempted: 0, ogFilled: 0, ogMiss: 0 };
@@ -273,7 +288,7 @@ export async function ingestNewsFeeds(input: {
           items = parsed;
         }
         const og = countNewsOgFill(parsed, items);
-        const inserted = await persist.upsertItems(items, now);
+        const inserted = await persist.upsertItems(canonicalizeNewsItemImages(items), now);
         await markHealth(persist, source.id, { now });
         console.log(
           JSON.stringify({
