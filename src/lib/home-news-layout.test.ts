@@ -83,11 +83,11 @@ describe("Home News layout + register lock", () => {
     expect(overviewLeadSelected("aggregation", "/home/news", "aggregation")).toBe(false);
     expect(overviewLeadPills().map((pill) => pill.id)).not.toContain("news");
     expect(OVERVIEW_RAIL_OFF_WIDTH).toBe("0px");
-    expect(OVERVIEW_NEWS_RAIL_WIDTH).toBe("20rem");
+    expect(OVERVIEW_NEWS_RAIL_WIDTH).toBe("22rem");
     expect(OVERVIEW_HOME_COLUMN_GUTTER).toBe("var(--chrome-gutter)");
-    expect(OVERVIEW_HOME_LAYOUT_CLASS).toContain("lg:grid-cols-[minmax(0,1fr)_20rem]");
+    expect(OVERVIEW_HOME_LAYOUT_CLASS).toContain("lg:grid-cols-[minmax(0,1fr)_22rem]");
     expect(readFileSync("src/lib/overview.ts", "utf8")).toContain(
-      "lg:grid-cols-[minmax(0,1fr)_20rem]",
+      "lg:grid-cols-[minmax(0,1fr)_22rem]",
     );
     expect(readFileSync("src/lib/overview.ts", "utf8")).not.toContain(
       "${OVERVIEW_NEWS_RAIL_WIDTH}",
@@ -157,7 +157,7 @@ describe("Home News layout + register lock", () => {
     expect(DASHBOARD_NEWS_HISTORY_LIST_CLASS).toContain("flex flex-col");
     expect(DASHBOARD_NEWS_HISTORY_LIST_CLASS).not.toContain("lg:grid-cols-2");
     expect(DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS).toContain("flex w-full flex-col");
-    expect(DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS).not.toContain("lg:grid-cols-[minmax(0,1fr)_20rem]");
+    expect(DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS).not.toContain("lg:grid-cols-[minmax(0,1fr)_22rem]");
     expect(DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS).not.toContain("lg:grid-cols-2");
     expect(DASHBOARD_NEWS_HISTORY_COLUMN_CLASS).toBe("mx-auto w-full max-w-[840px]");
     expect(DASHBOARD_NEWS_HISTORY_COLUMN_CLASS).not.toContain("1376");
@@ -197,7 +197,7 @@ describe("Home News layout + register lock", () => {
   it("keeps the News column when the rail is empty", () => {
     const html = emptyHome();
     expect(html).toContain("data-overview-layout");
-    expect(html).toContain("lg:grid-cols-[minmax(0,1fr)_20rem]");
+    expect(html).toContain("lg:grid-cols-[minmax(0,1fr)_22rem]");
     expect(html).toContain("gap-x-[var(--chrome-gutter)]");
     expect(html).toContain("data-overview-news");
     expect(html).toContain('data-overview-module="news"');

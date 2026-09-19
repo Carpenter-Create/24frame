@@ -171,9 +171,9 @@ describe("Home module caps", () => {
     expect(overviewHref()).toBe(OVERVIEW_HREF);
     expect(overviewHref({ period: "all" })).toBe(OVERVIEW_HREF);
     expect(overviewHref({ period: "ytd" })).toBe(`${OVERVIEW_HREF}?period=ytd`);
-    expect(OVERVIEW_NEWS_RAIL_WIDTH).toBe("20rem");
+    expect(OVERVIEW_NEWS_RAIL_WIDTH).toBe("22rem");
     expect(OVERVIEW_HOME_COLUMN_GUTTER).toBe("var(--chrome-gutter)");
-    expect(OVERVIEW_HOME_LAYOUT_CLASS).toContain("lg:grid-cols-[minmax(0,1fr)_20rem]");
+    expect(OVERVIEW_HOME_LAYOUT_CLASS).toContain("lg:grid-cols-[minmax(0,1fr)_22rem]");
     expect(OVERVIEW_HOME_LAYOUT_CLASS).toContain("gap-x-[var(--chrome-gutter)]");
     expect(OVERVIEW_HOME_LAYOUT_CLASS).toContain("gap-y-[var(--space-6)]");
     expect(OVERVIEW_HOME_LAYOUT_CLASS).not.toMatch(/(?:^| )gap-\[var\(--space-6\)\]/);

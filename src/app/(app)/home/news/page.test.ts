@@ -80,7 +80,7 @@ describe("NewsPage", () => {
     expect(html).toContain(NEWS_PAGE.sources);
     expect(html).not.toContain("data-news-sources-rail");
     expect(html).not.toContain("data-news-sources-phone");
-    expect(html).not.toContain("lg:grid-cols-[minmax(0,1fr)_20rem]");
+    expect(html).not.toContain("lg:grid-cols-[minmax(0,1fr)_22rem]");
     expect(html).toContain("flex flex-col");
     expect(html.indexOf("data-news-thumb")).toBeLessThan(html.indexOf("Harbor Cut lands a festival slot"));
     expect(html).not.toContain("lg:grid-cols-2");

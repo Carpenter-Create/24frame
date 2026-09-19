@@ -60,20 +60,21 @@ export const OVERVIEW_PHONE_MODULE_ORDER = [
   "news",
 ] as const;
 
-/** Desktop News rail measure inside the 1376 Home column. */
-export const OVERVIEW_NEWS_RAIL_WIDTH = "20rem";
+/** Desktop News rail measure inside the 1376 Home column.
+ *  Adam 2026-09-18: 20rem → 22rem — modest news bump, left stack shrinks. */
+export const OVERVIEW_NEWS_RAIL_WIDTH = "22rem";
 
 /** Main↔News gutter — same chrome gap as Aggregation main↔dest rail. */
 export const OVERVIEW_HOME_COLUMN_GUTTER = HOUSE_CHROME_GUTTER;
 
 /** Desktop: News is the right rail. Phone uses the stacked areas.
  *  Vertical air is house section (24). Column gutter is chrome (16).
- *  Empty News keeps the 20rem column — do not stretch main. */
+ *  Empty News keeps the 22rem column — do not stretch main. */
 export const OVERVIEW_HOME_LAYOUT_CLASS =
   "grid w-full grid-cols-1 items-start " +
   "gap-y-[var(--space-6)] gap-x-[var(--chrome-gutter)] " +
   "[grid-template-areas:'revenue'_'social'_'education'_'needs'_'ai'_'news'] " +
-  "lg:grid-cols-[minmax(0,1fr)_20rem] " +
+  "lg:grid-cols-[minmax(0,1fr)_22rem] " +
   "lg:[grid-template-areas:'revenue_news'_'social_news'_'education_news'_'needs_news'_'ai_news']";
 
 export const OVERVIEW_AREA_REVENUE_CLASS = "[grid-area:revenue]";

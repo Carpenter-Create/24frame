@@ -55,7 +55,7 @@ describe("NewsHistory layout", () => {
     );
     expect(html).toContain("data-news-history-layout");
     expect(html).toContain(DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS);
-    expect(html).not.toContain("lg:grid-cols-[minmax(0,1fr)_20rem]");
+    expect(html).not.toContain("lg:grid-cols-[minmax(0,1fr)_22rem]");
     expect(html).toContain("data-news-history-main");
     expect(html).toContain(DASHBOARD_NEWS_HISTORY_LIST_CLASS);
     expect(html).not.toContain("lg:grid-cols-2");
