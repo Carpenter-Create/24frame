@@ -37,9 +37,13 @@ import { HousePhoneTopChrome } from "@/components/chrome/house-phone-top-chrome"
 import { SocialTopBar } from "@/components/social/social-top-bar";
 import {
   HOUSE_PHONE_BOTTOM_NAV,
+  HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS,
   HOUSE_PHONE_BOTTOM_NAV_CLASS,
   HOUSE_PHONE_BOTTOM_NAV_HIDDEN_CLASS,
   HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS,
+  HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT,
+  HOUSE_PHONE_BOTTOM_NAV_ITEM_OFF_CLASS,
+  HOUSE_PHONE_BOTTOM_NAV_ITEM_ON_CLASS,
   HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS,
   HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS,
   HOUSE_PHONE_DEST_CHIPS,
@@ -211,6 +215,7 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(HOUSE_PHONE_BOTTOM_NAV_CLASS).toContain("transition-transform");
     expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).toContain("rounded-[28px]");
     expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).toContain("border-hairline");
+    expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).toContain("shadow-[var(--elevation)]");
     expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).toContain("h-14");
     expect(HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS).toContain("max-md:pb-");
     expect(phoneShellSrc).toContain("Option 2");
@@ -243,16 +248,19 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(housePhoneWorkspaceSelected("aggregation", "/home", "aggregation")).toBe(false);
   });
 
-  it("keeps bottom workspace tabs glyph-only on the bell register", () => {
+  it("keeps bottom workspace tabs glyph-only on a thin size-4 stroke", () => {
     expect(HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS).toBe(PHOSPHOR_CHROME_ICON_CLASS);
     expect(HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS).toBe("size-4 shrink-0");
-    expect(bottomNavSrc).toContain("PhosphorChromeIcon");
+    expect(HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT).toBe("regular");
     expect(bottomNavSrc).toContain("HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS");
+    expect(bottomNavSrc).toContain("HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT");
+    expect(bottomNavSrc).not.toContain("PhosphorChromeIcon");
     expect(bottomNavSrc).not.toContain("size-5");
     expect(phoneShellSrc).not.toContain("size-5");
+    expect(phoneShellSrc).not.toContain("bold");
+    expect(phoneShellSrc).not.toContain('"fill"');
     expect(bottomNavSrc).toContain("aria-label={tab.label}");
     expect(bottomNavSrc).not.toContain("{tab.label}</span>");
-    expect(bottomNavSrc).not.toContain("<span");
 
     navigation.pathname = "/dashboard";
     const html = renderToStaticMarkup(
@@ -263,6 +271,49 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
       expect(html).not.toContain(`>${label}<`);
     }
     expect(html).toContain('aria-label="Workspaces"');
+  });
+
+  it("puts a light house chip behind the active glyph only", () => {
+    expect(HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS).toContain("bg-surface-muted");
+    expect(HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS).toContain("rounded-[var(--radius)]");
+    expect(HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS).not.toContain("#");
+    expect(HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS).not.toContain("bg-accent");
+    expect(HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS).not.toContain("bg-ink");
+    expect(HOUSE_PHONE_BOTTOM_NAV_ITEM_ON_CLASS).toBe("text-accent");
+    expect(HOUSE_PHONE_BOTTOM_NAV_ITEM_OFF_CLASS).toBe("text-ink-2");
+    expect(bottomNavSrc).toContain("data-house-phone-bottom-nav-chip");
+    expect(bottomNavSrc).toContain("HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS");
+
+    navigation.pathname = "/dashboard";
+    const aggregation = renderToStaticMarkup(
+      createElement(HousePhoneBottomNav, { workspace: "aggregation" }),
+    );
+    expect(aggregation.match(/data-house-phone-bottom-nav-chip=/g)?.length).toBe(1);
+    const aggItem = aggregation.slice(
+      aggregation.indexOf('data-house-phone-bottom-nav-item="aggregation"'),
+      aggregation.indexOf('data-house-phone-bottom-nav-item="education"'),
+    );
+    expect(aggItem).toContain("data-house-phone-bottom-nav-chip");
+    expect(aggItem).toContain("data-house-phone-bottom-nav-item-active");
+    expect(aggregation).toContain('data-house-phone-bottom-nav-item-active=""');
+    const homeItem = aggregation.slice(
+      aggregation.indexOf('data-house-phone-bottom-nav-item="home"'),
+      aggregation.indexOf('data-house-phone-bottom-nav-item="social"'),
+    );
+    expect(homeItem).not.toContain("data-house-phone-bottom-nav-chip");
+    expect(homeItem).not.toContain("data-house-phone-bottom-nav-item-active");
+
+    navigation.pathname = "/home";
+    const home = renderToStaticMarkup(
+      createElement(HousePhoneBottomNav, { workspace: "aggregation" }),
+    );
+    expect(home.match(/data-house-phone-bottom-nav-chip=/g)?.length).toBe(1);
+    expect(home).toContain('data-house-phone-bottom-nav-item-active=""');
+    const homeActive = home.slice(
+      home.indexOf('data-house-phone-bottom-nav-item="home"'),
+      home.indexOf('data-house-phone-bottom-nav-item="social"'),
+    );
+    expect(homeActive).toContain("data-house-phone-bottom-nav-chip");
   });
 
   it("hides the shared phone bottom bar with social-tab-bar-scroll", () => {

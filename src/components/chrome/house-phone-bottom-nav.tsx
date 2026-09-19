@@ -7,17 +7,20 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 import {
   HOUSE_PHONE_BOTTOM_NAV,
+  HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS,
   HOUSE_PHONE_BOTTOM_NAV_CLASS,
   HOUSE_PHONE_BOTTOM_NAV_HIDDEN_CLASS,
   HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS,
+  HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT,
   HOUSE_PHONE_BOTTOM_NAV_ITEM_CLASS,
+  HOUSE_PHONE_BOTTOM_NAV_ITEM_OFF_CLASS,
+  HOUSE_PHONE_BOTTOM_NAV_ITEM_ON_CLASS,
   HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS,
   HOUSE_PHONE_BOTTOM_NAV_ROW_CLASS,
   HOUSE_PHONE_WORKSPACE_TABS,
   housePhoneWorkspaceSelected,
   persistHousePhoneWorkspace,
 } from "@/lib/house-phone-shell";
-import { PhosphorChromeIcon } from "@/lib/phosphor-icon";
 import {
   createSocialTabBarScrollTracker,
   stepSocialTabBarScroll,
@@ -71,6 +74,13 @@ export function HousePhoneBottomNav({
         <div className={HOUSE_PHONE_BOTTOM_NAV_ROW_CLASS}>
           {HOUSE_PHONE_WORKSPACE_TABS.map((tab) => {
             const active = housePhoneWorkspaceSelected(tab.id, pathname, workspace);
+            const Glyph = tab.icon;
+            const glyph = (
+              <Glyph
+                className={HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS}
+                weight={HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT}
+              />
+            );
             return (
               <Link
                 key={tab.id}
@@ -80,17 +90,25 @@ export function HousePhoneBottomNav({
                 aria-current={active ? "page" : undefined}
                 tabIndex={hidden ? -1 : undefined}
                 data-house-phone-bottom-nav-item={tab.id}
+                data-house-phone-bottom-nav-item-active={active ? "" : undefined}
                 onClick={() => persistHousePhoneWorkspace(tab.id)}
                 className={cn(
                   HOUSE_PHONE_BOTTOM_NAV_ITEM_CLASS,
-                  active ? "text-accent" : "text-ink-2",
+                  active
+                    ? HOUSE_PHONE_BOTTOM_NAV_ITEM_ON_CLASS
+                    : HOUSE_PHONE_BOTTOM_NAV_ITEM_OFF_CLASS,
                 )}
               >
-                <PhosphorChromeIcon
-                  icon={tab.icon}
-                  active={active}
-                  className={HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS}
-                />
+                {active ? (
+                  <span
+                    data-house-phone-bottom-nav-chip=""
+                    className={HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS}
+                  >
+                    {glyph}
+                  </span>
+                ) : (
+                  glyph
+                )}
               </Link>
             );
           })}
