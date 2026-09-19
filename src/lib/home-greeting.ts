@@ -1,11 +1,13 @@
-// Home page H1 greeting. Workspace pill and bottom-nav stay "Home"
-// (`OVERVIEW_PAGE.title`). Session SoT is AuthUser.name — the same
-// user_metadata.display_name avatar / account already read. Never invent
-// a name from the email local-part.
+// Home page H1 greeting + quiet date line. Workspace pill and
+// bottom-nav stay "Home" (`OVERVIEW_PAGE.title`). Session SoT is
+// AuthUser.name — the same user_metadata.display_name avatar / account
+// already read. Never invent a name from the email local-part. Date is
+// weekday + month + day in America/Chicago — no year, no clock.
 
 import { userMenuName } from "@/lib/user-menu";
 
 export const HOME_GREETING_BARE = "Hi";
+export const HOME_GREETING_TIME_ZONE = "America/Chicago";
 
 function personGivenName(value: string | null | undefined): string | null {
   const name = userMenuName(value);
@@ -34,4 +36,17 @@ export function homeGreeting(input: {
 } = {}): string {
   const first = homeGreetingFirst(input);
   return first ? `${HOME_GREETING_BARE}, ${first}` : HOME_GREETING_BARE;
+}
+
+/** `Friday, September 18` in product-local TZ. No year, no clock. */
+export function homeGreetingDate(
+  now: Date,
+  timeZone: string = HOME_GREETING_TIME_ZONE,
+): string {
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    timeZone,
+  }).format(now);
 }

@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { loadDiscoverableCourses } from "@/lib/courses";
 import { NEWS_HREF, NEWS_PAGE } from "@/lib/news";
-import { homeGreeting } from "@/lib/home-greeting";
+import { HOME_GREETING_TIME_ZONE, homeGreeting, homeGreetingDate } from "@/lib/home-greeting";
 import { OVERVIEW_PAGE } from "@/lib/overview";
 import { signedEducationCoverUrls } from "@/lib/s3-education";
 import { getOrgContext } from "@/lib/supabase/context";
@@ -79,10 +79,12 @@ describe("HomePage", () => {
 
   it("renders the Home modules for a signed-in account", async () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+    const date = homeGreetingDate(new Date(), HOME_GREETING_TIME_ZONE);
     const html = renderToStaticMarkup(await HomePage());
     expect(html).toContain("data-overview");
     expect(html).toContain(homeGreeting());
     expect(html).toMatch(/<h1 class="t-title text-ink">Hi<\/h1>/);
+    expect(html).toContain(`<p class="t-body-sm text-ink-3">${date}</p>`);
     expect(html).not.toMatch(/<h1 class="t-title text-ink">Home<\/h1>/);
     expect(html).not.toContain("ada@example.com");
     expect(html).not.toContain("Overview");
@@ -120,11 +122,16 @@ describe("HomePage", () => {
 
   it("greets the signed-in account by first name on the Home H1", async () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx({ name: "Ada Lovelace" }) as never);
+    const date = homeGreetingDate(new Date(), HOME_GREETING_TIME_ZONE);
     const html = renderToStaticMarkup(await HomePage());
     expect(html).toContain(homeGreeting({ displayName: "Ada Lovelace" }));
     expect(html).toMatch(/<h1 class="t-title text-ink">Hi, Ada<\/h1>/);
+    expect(html).toContain(`<p class="t-body-sm text-ink-3">${date}</p>`);
+    expect(html).not.toContain(`${date}, 2026`);
+    expect(html).not.toMatch(/Good morning/i);
     expect(html).not.toMatch(/<h1 class="t-title text-ink">Home<\/h1>/);
     expect(html).not.toContain("undefined");
+    expect(html).not.toContain("ada@example.com");
     expect(OVERVIEW_PAGE.title).toBe("Home");
     expect(readFileSync("src/app/(app)/home/page.tsx", "utf8")).toContain(
       "displayName={ctx.user.name}",

@@ -15,7 +15,7 @@ import { parseDashboardPeriod } from "@/lib/dashboard-admin";
 import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import { DASHBOARD_SECTION_TITLE_CLASS } from "@/lib/dashboard-craft";
 import { NEWS_HREF, NEWS_PAGE } from "@/lib/news";
-import { homeGreeting } from "@/lib/home-greeting";
+import { HOME_GREETING_TIME_ZONE, homeGreeting, homeGreetingDate } from "@/lib/home-greeting";
 import {
   OVERVIEW_HREF,
   OVERVIEW_PHONE_MODULE_ORDER,
@@ -139,13 +139,37 @@ describe("OverviewHome", () => {
     expect(named).toMatch(/<h1 class="t-title text-ink">Hi, Ada<\/h1>/);
     expect(given).toMatch(/<h1 class="t-title text-ink">Hi, Ada<\/h1>/);
     expect(missing).toMatch(/<h1 class="t-title text-ink">Hi<\/h1>/);
+    expect(named).toContain(
+      `<p class="t-body-sm text-ink-3">${homeGreetingDate(NOW, HOME_GREETING_TIME_ZONE)}</p>`,
+    );
+    expect(named).toContain("Friday, September 18");
+    expect(named).not.toContain("Friday, September 18, 2026");
+    expect(named).not.toMatch(/Good morning/i);
     expect(named).not.toMatch(/<h1 class="t-title text-ink">Home<\/h1>/);
     expect(named).not.toContain("undefined");
     expect(named).not.toContain("ada@");
     expect(OVERVIEW_PAGE.title).toBe("Home");
     const homeSrc = readFileSync(new URL("./overview-home.tsx", import.meta.url), "utf8");
     expect(homeSrc).toContain("homeGreeting({ firstName, displayName })");
+    expect(homeSrc).toContain("homeGreetingDate(now, HOME_GREETING_TIME_ZONE)");
     expect(homeSrc).not.toContain("title={OVERVIEW_PAGE.title}");
+  });
+
+  it("keeps the date on the Home header only — not under Social or Education", () => {
+    const html = renderToStaticMarkup(
+      createElement(OverviewHome, homeProps({ displayName: "Ada Lovelace" })),
+    );
+    const date = homeGreetingDate(NOW, HOME_GREETING_TIME_ZONE);
+    const h1At = html.indexOf('<h1 class="t-title text-ink">Hi, Ada</h1>');
+    const dateAt = html.indexOf(`<p class="t-body-sm text-ink-3">${date}</p>`);
+    expect(date).toBe("Friday, September 18");
+    expect(h1At).toBeGreaterThan(-1);
+    expect(dateAt).toBeGreaterThan(h1At);
+    expect(html.indexOf(`<p class="t-body-sm text-ink-3">${date}</p>`, dateAt + 1)).toBe(-1);
+    expect(moduleChunk(html, "social")).not.toContain(date);
+    expect(moduleChunk(html, "education")).not.toContain(date);
+    expect(moduleLabelClass(html, "social")).not.toContain("t-title");
+    expect(html).not.toMatch(/<h2[^>]*>Friday, September 18<\/h2>/);
   });
 
   it("renders locked modules with empty doors and 24Frame AI, not Globee", () => {
@@ -153,6 +177,9 @@ describe("OverviewHome", () => {
     expect(html).toContain("data-overview");
     expect(html).toContain(homeGreeting());
     expect(html).toMatch(/<h1 class="t-title text-ink">Hi<\/h1>/);
+    expect(html).toContain(
+      `<p class="t-body-sm text-ink-3">${homeGreetingDate(NOW, HOME_GREETING_TIME_ZONE)}</p>`,
+    );
     expect(html).not.toMatch(/<h1 class="t-title text-ink">Home<\/h1>/);
     expect(html).not.toContain("Overview");
     expect(moduleOrder(html)).toEqual([...OVERVIEW_PHONE_MODULE_ORDER]);
