@@ -18,6 +18,7 @@ import {
   activityItemHref,
   activityRelativeTime,
 } from "@/lib/activity";
+import { HOUSE_HEADER_TRAILING_ICON_CLASS } from "@/lib/house-phone-shell";
 import { PHOSPHOR_CHROME_ICON_CLASS, PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
 const NOW = Date.parse("2026-09-18T12:00:00.000Z");
@@ -109,16 +110,20 @@ describe("ActivityBell", () => {
   it("matches #391 chrome idle weight on theme and bell", () => {
     expect(PHOSPHOR_CHROME_IDLE_WEIGHT).toBe("bold");
     expect(PHOSPHOR_CHROME_ICON_CLASS).toBe("size-4 shrink-0");
+    expect(HOUSE_HEADER_TRAILING_ICON_CLASS).toBe("size-6 shrink-0 md:size-4");
+    expect(themeSrc).toContain("PHOSPHOR_CHROME_ICON_CLASS");
+    expect(bellSrc).toContain("HOUSE_HEADER_TRAILING_ICON_CLASS");
+    expect(bellSrc).toContain("PHOSPHOR_CHROME_ICON_CLASS");
     for (const src of [themeSrc, bellSrc]) {
       expect(src).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
-      expect(src).toContain("PHOSPHOR_CHROME_ICON_CLASS");
       expect(src).toContain("weight={PHOSPHOR_CHROME_IDLE_WEIGHT}");
       expect(src).not.toContain('weight="fill"');
       expect(src).not.toContain('weight="duotone"');
       expect(src).not.toContain("size-5");
-      expect(src).not.toContain("size-6");
       expect(src).not.toContain("strokeWidth");
     }
+    expect(themeSrc).not.toContain("size-6");
+    expect(bellSrc).not.toContain('"size-6');
   });
 
   it("uses the house AI mark on the 24Frame AI header slot — not Phosphor Sparkle", () => {

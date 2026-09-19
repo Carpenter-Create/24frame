@@ -7,6 +7,7 @@ import {
   HOUSE_AI_MARK_SRC,
   HOUSE_AI_MARK_VIEWBOX,
 } from "@/lib/house-ai-mark";
+import { HOUSE_HEADER_TRAILING_ICON_CLASS } from "@/lib/house-phone-shell";
 import { PHOSPHOR_CHROME_ICON_CLASS } from "@/lib/phosphor-icon";
 import { AskAssistantHeaderLink } from "./ask-assistant-header";
 import { HouseAiMark } from "./house-ai-mark";
@@ -57,6 +58,10 @@ describe("HouseAiMark", () => {
     const header = renderToStaticMarkup(<AskAssistantHeaderLink />);
     expect(header).toContain("data-ask-assistant-header");
     expect(header).toContain("data-house-ai-mark");
+    expect(header).toContain(HOUSE_HEADER_TRAILING_ICON_CLASS);
+    expect(header).toContain("size-6");
+    expect(header).toContain("md:size-4");
     expect(header).not.toContain("lucide-");
+    expect(headerSrc).toContain("HOUSE_HEADER_TRAILING_ICON_CLASS");
   });
 });

@@ -17,6 +17,7 @@ import {
   activityRelativeTime,
   type ActivityItem,
 } from "@/lib/activity";
+import { HOUSE_HEADER_TRAILING_ICON_CLASS } from "@/lib/house-phone-shell";
 import { PHOSPHOR_CHROME_ICON_CLASS, PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import { REPORTS_USER_PANEL_CLASS } from "@/lib/reports-craft";
 import { cn } from "@/lib/cn";
@@ -208,7 +209,7 @@ function ActivityBellTrigger({
       )}
       {...props}
     >
-      <Bell className={PHOSPHOR_CHROME_ICON_CLASS} weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
+      <Bell className={HOUSE_HEADER_TRAILING_ICON_CLASS} weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
       {count > 0 ? (
         <span
           data-activity-bell-badge=""

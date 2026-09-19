@@ -2,6 +2,7 @@
 
 import { ASK_GLOBEE } from "@/lib/ask-globee";
 import { HOUSE_THEME_TOGGLE_CLASS } from "@/lib/house-lead-chrome";
+import { HOUSE_HEADER_TRAILING_ICON_CLASS } from "@/lib/house-phone-shell";
 import { HouseAiMark } from "./house-ai-mark";
 import { AskAiOpenButton } from "./ask-ai-overlay";
 
@@ -16,7 +17,7 @@ export function AskAssistantHeaderLink() {
       data-ask-assistant-header=""
       className={HOUSE_THEME_TOGGLE_CLASS}
     >
-      <HouseAiMark />
+      <HouseAiMark className={HOUSE_HEADER_TRAILING_ICON_CLASS} />
     </AskAiOpenButton>
   );
 }
