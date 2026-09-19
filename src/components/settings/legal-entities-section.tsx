@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { StatusChip } from "@/components/layout/status-chip";
-import { formControlClass } from "@/lib/form-control";
+import { Select } from "@/components/ui/select";
 import {
   SETTINGS_DIALOG_FIELD_CLASS,
   SETTINGS_DIALOG_FORM_CLASS,
@@ -205,19 +205,17 @@ export function LegalEntitiesSection({
             </div>
             <div className={SETTINGS_DIALOG_FIELD_CLASS}>
               <Label htmlFor="entity-type">{LEGAL_ENTITIES.typeLabel}</Label>
-              <select
+              <Select
                 id="entity-type"
                 name="entityType"
-                className={formControlClass("box")}
                 value={entityType}
-                onChange={(e) => setEntityType(e.target.value as EntityType)}
-              >
-                {ENTITY_TYPES.map((value) => (
-                  <option key={value} value={value}>
-                    {entityTypeLabel(value)}
-                  </option>
-                ))}
-              </select>
+                aria-label={LEGAL_ENTITIES.typeLabel}
+                options={ENTITY_TYPES.map((value) => ({
+                  value,
+                  label: entityTypeLabel(value),
+                }))}
+                onChange={(next) => setEntityType(next as EntityType)}
+              />
             </div>
             <div className={SETTINGS_DIALOG_FIELD_CLASS}>
               <Label htmlFor="entity-jurisdiction">{LEGAL_ENTITIES.jurisdictionLabel}</Label>
