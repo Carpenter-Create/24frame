@@ -12,7 +12,7 @@ import {
 describe("co-productions SoT", () => {
   it("locks the portal path and hyphenated Adam label", () => {
     expect(CO_PRODUCTIONS_HREF).toBe("/co-productions");
-    expect(CO_PRODUCTIONS_LABEL).toBe("Co-productions");
+    expect(CO_PRODUCTIONS_LABEL).toBe("Co-Productions");
     expect(CO_PRODUCTIONS_PAGE.title).toBe(CO_PRODUCTIONS_LABEL);
     expect(CO_PRODUCTIONS_PAGE.synopsis).toContain("co-invested originals");
     expect(CO_PRODUCTIONS_PAGE.synopsis).toContain("inquiry form");

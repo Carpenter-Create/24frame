@@ -93,7 +93,7 @@ describe("workspace switcher header control", () => {
     expect(html).toContain("Aggregation");
     expect(html).toContain("Social");
     expect(html).toContain("Education");
-    expect(html).toContain("Co-productions");
+    expect(html).toContain("Co-Productions");
     expect(html).not.toContain("/education");
     expect(html).not.toContain("/account/workspace");
     for (const absent of WORKSPACE_SWITCHER_ABSENT) {
@@ -148,7 +148,7 @@ describe("workspace switcher header control", () => {
     expect(html).toContain("Aggregation");
     expect(html).toContain("Social");
     expect(html).toContain("Education");
-    expect(html).toContain("Co-productions");
+    expect(html).toContain("Co-Productions");
     expect(html).not.toMatch(/>\s*Agg\s*</);
     expect(html).not.toMatch(/>\s*Edu\s*</);
     expect(html).toContain('role="tablist"');
@@ -212,7 +212,7 @@ describe("workspace switcher header control", () => {
     expect(html).not.toContain('data-workspace-switcher-segment="education"');
     expect(html).not.toContain("Education");
     expect(html).toContain('data-workspace-switcher-segment="co-productions"');
-    expect(html).toContain("Co-productions");
+    expect(html).toContain("Co-Productions");
   });
 
   it("keeps the chevron so Home stays reachable when only one workspace is listed", () => {

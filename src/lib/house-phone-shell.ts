@@ -1,5 +1,5 @@
 // Shared phone app-shell — Option 2 (Adam lock 2026-09-18, dest-chip amend).
-// One primitive for Home · Social · Aggregation · Education · Co-productions.
+// One primitive for Home · Social · Aggregation · Education · Co-Productions.
 // Desktop header + desktop workspace switcher stay on HouseLeadChrome.
 // Phone top: emblem alone on the left. No workspace pill. No hamburger
 // — leading or trailing. Trailing is search (when needed) · 24Frame AI

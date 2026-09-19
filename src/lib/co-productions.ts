@@ -1,4 +1,4 @@
-// Co-productions — Home-pattern lead land (Adam lock 2026-09-19).
+// Co-Productions — Home-pattern lead land (Adam lock 2026-09-19).
 // Own path. Not a WorkspaceMode. Not a dest-rail workspace. Not a
 // cookie. Lights only under /co-productions. Settings and other hubs
 // must not light it.
@@ -8,7 +8,7 @@
 // TODO: tier gate — pill is visible to all authenticated users for now.
 
 export const CO_PRODUCTIONS_HREF = "/co-productions";
-export const CO_PRODUCTIONS_LABEL = "Co-productions";
+export const CO_PRODUCTIONS_LABEL = "Co-Productions";
 
 export const CO_PRODUCTIONS_PAGE = {
   title: CO_PRODUCTIONS_LABEL,

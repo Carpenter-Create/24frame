@@ -314,7 +314,7 @@ describe("AppShell Home chrome", () => {
     expect(homeFrameMarkup(news)).toContain("md:ml-[var(--content-inset)]");
   });
 
-  it("keeps /co-productions on unify-lead chrome — no dest rail, Co-productions pill only", () => {
+  it("keeps /co-productions on unify-lead chrome — no dest rail, Co-Productions pill only", () => {
     navigation.pathname = "/co-productions";
     const page = renderShell();
     expect(page).toContain('data-home-chrome=""');
