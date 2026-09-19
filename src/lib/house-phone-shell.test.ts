@@ -333,6 +333,7 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(bottomNavSrc).toContain("stepSocialTabBarScroll");
     expect(bottomNavSrc).toContain("[data-house-lead-scroll]");
     expect(bottomNavSrc).toContain("useHousePhoneBottomNavHidden(pathname)");
+    expect(bottomNavSrc).toContain("nav.path !== pathname");
     expect(bottomNavSrc).toContain("}, [pathname]);");
     expect(bottomNavSrc).toContain("data-house-phone-bottom-nav-hidden");
     expect(phoneAppShellSrc).toContain("HousePhoneBottomNav");

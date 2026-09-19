@@ -32,10 +32,12 @@ import { resolveWorkspaceMode } from "@/lib/workspace";
 // Shared across every workspace that mounts this bar.
 
 function useHousePhoneBottomNavHidden(pathname: string) {
-  const [hidden, setHidden] = useState(false);
+  const [nav, setNav] = useState({ path: pathname, hidden: false });
+  if (nav.path !== pathname) {
+    setNav({ path: pathname, hidden: false });
+  }
 
   useEffect(() => {
-    setHidden(false);
     const scroller = document.querySelector<HTMLElement>("[data-house-lead-scroll]");
     const readY = () => (scroller ? scroller.scrollTop : window.scrollY);
     const target: EventTarget = scroller ?? window;
@@ -45,14 +47,20 @@ function useHousePhoneBottomNavHidden(pathname: string) {
       const next = stepSocialTabBarScroll(tracker, readY());
       const changed = next.state !== tracker.state;
       tracker = next;
-      if (changed) setHidden(next.state === "hidden");
+      if (changed) {
+        setNav((current) =>
+          current.path !== pathname
+            ? current
+            : { path: pathname, hidden: next.state === "hidden" },
+        );
+      }
     };
 
     target.addEventListener("scroll", onScroll, { passive: true });
     return () => target.removeEventListener("scroll", onScroll);
   }, [pathname]);
 
-  return hidden;
+  return nav.path === pathname ? nav.hidden : false;
 }
 
 export function HousePhoneBottomNav({
