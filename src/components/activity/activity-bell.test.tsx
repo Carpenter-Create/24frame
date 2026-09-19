@@ -205,7 +205,7 @@ describe("ActivityBell", () => {
     expect(bellSrc).toContain("APP_SHEET_SCRIM_CLASS");
     expect(bellSrc).toContain("<Close44");
     expect(bellSrc).toContain("<MenuSurfaceAccent");
-    expect(bellSrc).toContain("md:hidden");
+    expect(bellSrc).toContain("HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS");
     expect(bellSrc).toContain("hidden md:block");
     expect(bellSrc).toContain("REPORTS_USER_PANEL_CLASS");
     expect(bellSrc).toContain("event.key === \"Escape\"");

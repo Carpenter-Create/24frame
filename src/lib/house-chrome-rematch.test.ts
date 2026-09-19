@@ -216,7 +216,7 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(socialChrome).toContain("HOUSE_RAIL_PANEL_CLASS");
     expect(leadSearch).toContain("HOUSE_SEARCH_PILL_CLASS");
     expect(readFileSync("src/components/social/social-search-sheet.tsx", "utf8")).toContain(
-      "HOUSE_ICON_BUTTON_CLASS",
+      "HOUSE_HEADER_TRAILING_HIT_CLASS",
     );
     expect(lead).toContain("ThemeToggle");
     expect(readFileSync("src/lib/house-lead-chrome.ts", "utf8")).toContain("HOUSE_THEME_TOGGLE_CLASS");
