@@ -207,7 +207,7 @@ describe("OverviewHome", () => {
     expect(html).toContain(`href="${OVERVIEW_HREF}?period=ytd"`);
     expect(html).toContain("data-overview-news");
     expect(html).toContain("data-overview-layout");
-    expect(html).toContain("lg:grid-cols-[minmax(0,1fr)_20rem]");
+    expect(html).toContain("lg:grid-cols-[minmax(0,1fr)_22rem]");
     expect(html).toContain("gap-x-[var(--chrome-gutter)]");
     expect(html).toContain("gap-y-[var(--space-6)]");
     expect(html).toContain('data-overview-module="social"');
