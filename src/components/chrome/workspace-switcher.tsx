@@ -160,7 +160,7 @@ function WorkspaceSwitcherPills({
             data-segmented-item=""
             data-workspace-switcher-segment={pill.id}
             aria-selected={selected}
-            tabIndex={workspaceSwitcherSegmentTabIndex(selected)}
+            tabIndex={workspaceSwitcherSegmentTabIndex(selected, index, activeIndex)}
             className={workspaceSwitcherSegmentClass(selected)}
             onClick={() => {
               setPending({ index, pathname });

@@ -314,8 +314,14 @@ export function workspaceSwitcherSegmentLabel(mode: WorkspaceMode): string {
   return workspaceModeLabel(mode);
 }
 
-export function workspaceSwitcherSegmentTabIndex(selected: boolean): number {
-  return selected ? 0 : -1;
+export function workspaceSwitcherSegmentTabIndex(
+  selected: boolean,
+  index = 0,
+  activeIndex = 0,
+): number {
+  if (selected) return 0;
+  if (activeIndex < 0 && index === 0) return 0;
+  return -1;
 }
 
 export function workspaceSwitcherNextSegmentIndex(

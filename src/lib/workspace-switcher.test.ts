@@ -270,6 +270,8 @@ describe("workspace switcher lock", () => {
     expect(APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS).not.toContain("md:max-w-[420px]");
     expect(workspaceSwitcherSegmentTabIndex(true)).toBe(0);
     expect(workspaceSwitcherSegmentTabIndex(false)).toBe(-1);
+    expect(workspaceSwitcherSegmentTabIndex(false, 0, -1)).toBe(0);
+    expect(workspaceSwitcherSegmentTabIndex(false, 1, -1)).toBe(-1);
     expect(workspaceSwitcherNextSegmentIndex(0, 3, 1)).toBe(1);
     expect(workspaceSwitcherNextSegmentIndex(2, 3, 1)).toBe(0);
     expect(workspaceSwitcherNextSegmentIndex(0, 3, -1)).toBe(2);

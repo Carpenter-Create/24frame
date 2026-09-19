@@ -86,6 +86,7 @@ export function SegmentedTrack({
     const active = items[visualIndex];
     if (houseSegmentedThumbHidden(visualIndex) || !active) {
       lastBoxRef.current = undefined;
+      placedRef.current = false;
       setThumbStyle({ opacity: 0 });
       return undefined;
     }

@@ -19,6 +19,7 @@ describe("SegmentedTrack slide SoT", () => {
     expect(src).toContain("data-segmented-persist");
     expect(src).toContain("transition: \"none\"");
     expect(src).toContain("houseSegmentedThumbHidden");
+    expect(src).toContain("placedRef.current = false");
     expect(src).toContain("setThumbStyle({ opacity: 0 })");
     expect(src).not.toContain("transition-opacity");
     expect(HOUSE_SEGMENTED_THUMB_CLASS).toContain("transition-[left,width]");
