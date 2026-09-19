@@ -16,8 +16,8 @@ import {
   DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS,
   DASHBOARD_NEWS_SOURCE_CHIPS_CLASS,
 } from "@/lib/dashboard-craft";
-import { HOUSE_FILTER_OFF_CLASS, HOUSE_FILTER_ON_CLASS, HOUSE_FILTER_PILL_CLASS } from "@/lib/house-shell";
-import { NEWS_PAGE, NEWS_SOURCES, type NewsItem } from "@/lib/news";
+import { HOUSE_FILTER_OFF_CLASS, HOUSE_FILTER_PILL_CLASS, HOUSE_SEGMENTED_ITEM_ON_CLASS } from "@/lib/house-shell";
+import { NEWS_PAGE, NEWS_SOURCES, compareNewsSourceLabel, type NewsItem } from "@/lib/news";
 import {
   NEWS_STICKY_PAGE_SURFACE_CLASS,
   NEWS_STICKY_PIN_CLASS,
@@ -108,11 +108,26 @@ describe("NewsHistory layout", () => {
     expect(html).toContain(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS);
     expect(html).toContain(DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS);
     expect(DASHBOARD_NEWS_SOURCE_CHIP_CLASS).toContain(HOUSE_FILTER_PILL_CLASS);
-    expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).toBe(HOUSE_FILTER_ON_CLASS);
+    expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).toBe(`bg-accent ${HOUSE_SEGMENTED_ITEM_ON_CLASS}`);
+    expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).toContain("bg-accent");
+    expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).not.toContain("bg-ink");
     expect(DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS).toBe(HOUSE_FILTER_OFF_CLASS);
     expect(html).toContain(NEWS_PAGE.sourcesAll);
     expect(html.indexOf('data-news-source-option="all"')).toBeLessThan(
-      html.indexOf('data-news-source-option="indiewire"'),
+      html.indexOf(`data-news-source-option="${NEWS_SOURCES[0]?.id}"`),
+    );
+    const pillIds = ["all", ...NEWS_SOURCES.map((source) => source.id)];
+    for (let i = 0; i < pillIds.length - 1; i += 1) {
+      const current = pillIds[i];
+      const next = pillIds[i + 1];
+      expect(current).toBeTruthy();
+      expect(next).toBeTruthy();
+      expect(html.indexOf(`data-news-source-option="${current}"`)).toBeLessThan(
+        html.indexOf(`data-news-source-option="${next}"`),
+      );
+    }
+    expect(NEWS_SOURCES.map((source) => source.label)).toEqual(
+      [...NEWS_SOURCES].map((source) => source.label).sort(compareNewsSourceLabel),
     );
     for (const source of NEWS_SOURCES) {
       expect(html).toContain(source.label);
@@ -181,7 +196,7 @@ describe("NewsHistory layout", () => {
     );
     expect(one).toContain("Harbor Cut lands a festival slot");
     expect(one).not.toContain("North Wind books a limited run");
-    expect(one).toContain('href="/home/news?source=variety,deadline"');
+    expect(one).toContain('href="/home/news?source=deadline,variety"');
     expect(one).toContain('href="/home/news"');
     expect(one).toMatch(
       /data-news-source-option="variety"[^>]*aria-pressed="true"|aria-pressed="true"[^>]*data-news-source-option="variety"/,

@@ -14,7 +14,6 @@
 import {
   HOUSE_CARD_PAD,
   HOUSE_FILTER_OFF_CLASS,
-  HOUSE_FILTER_ON_CLASS,
   HOUSE_FILTER_PILL_CLASS,
   HOUSE_FILTER_PILL_CLUSTER_CLASS,
   HOUSE_MODULE_CLASS,
@@ -205,15 +204,16 @@ export const DASHBOARD_TOP_PILL_BUTTON_ON_CLASS = HOUSE_SEGMENTED_ITEM_ON_CLASS;
 
 export const DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS = HOUSE_SEGMENTED_ITEM_OFF_CLASS;
 
-// /home/news source chips reuse the standalone house filter pill (ink selected /
-// muted idle). Row scrolls horizontally when the allowlist overflows.
-// Not a segmented track — individual pills with gap.
+// /home/news source chips reuse the standalone house filter pill shape
+// and muted idle surface. Selected is the workspace Home accent fill
+// (bg-accent + segmented on-label) — not filter ink. Not a segmented
+// track: individual pills with gap (multi-select cannot share one thumb).
 export const DASHBOARD_NEWS_SOURCE_CHIPS_CLASS =
   `${HOUSE_FILTER_PILL_CLUSTER_CLASS} no-scrollbar w-full flex-nowrap overflow-x-auto`;
 
 export const DASHBOARD_NEWS_SOURCE_CHIP_CLASS = `${HOUSE_FILTER_PILL_CLASS} shrink-0 whitespace-nowrap`;
 
-export const DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS = HOUSE_FILTER_ON_CLASS;
+export const DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS = `bg-accent ${HOUSE_SEGMENTED_ITEM_ON_CLASS}`;
 
 export const DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS = HOUSE_FILTER_OFF_CLASS;
 

@@ -73,7 +73,9 @@ export const HOUSE_FILTER_ON_CLASS = "bg-ink text-surface";
 export const HOUSE_FILTER_OFF_CLASS = "bg-surface-muted text-ink";
 
 // Standalone filter pill base — individual rounded pills with gap between.
-// Used by news source chips, titles catalog filters, and other non-track pill rows.
+// News source chips reuse the shape + idle surface; selected is accent
+// (workspace Home segmented fill), not HOUSE_FILTER_ON ink. Titles
+// catalog and dest chips still use ink selected.
 export const HOUSE_FILTER_PILL_CLASS =
   "rounded-full px-[var(--space-4)] py-[var(--space-2)] t-body-sm";
 

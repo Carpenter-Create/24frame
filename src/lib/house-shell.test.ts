@@ -203,7 +203,9 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(readFileSync("src/components/ui/segmented-track.tsx", "utf8")).toContain(
       "setThumbStyle({ opacity: 0 })",
     );
-    expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).toBe(HOUSE_FILTER_ON_CLASS);
+    expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).toBe(`bg-accent ${HOUSE_SEGMENTED_ITEM_ON_CLASS}`);
+    expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).toContain("bg-accent");
+    expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).not.toContain("bg-ink");
     expect(DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS).toBe(HOUSE_FILTER_OFF_CLASS);
     expect(DASHBOARD_PERIOD_OPTION_SELECTED_CLASS).toBe(HOUSE_PERIOD_SELECTED_CLASS);
     expect(sideNav).toContain("HOUSE_RAIL_ACTIVE_CLASS");

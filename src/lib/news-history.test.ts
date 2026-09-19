@@ -49,21 +49,21 @@ describe("news history source filter URL", () => {
   });
 
   it("parses multi via comma-separated or repeated params and canonicalizes order", () => {
-    expect(parseNewsSourceFilter("deadline,variety")).toEqual(["variety", "deadline"]);
-    expect(parseNewsSourceFilter(["deadline", "variety"])).toEqual(["variety", "deadline"]);
+    expect(parseNewsSourceFilter("deadline,variety")).toEqual(["deadline", "variety"]);
+    expect(parseNewsSourceFilter(["deadline", "variety"])).toEqual(["deadline", "variety"]);
     expect(parseNewsSourceFilter("variety,deadline,not-a-source")).toEqual([
-      "variety",
       "deadline",
+      "variety",
     ]);
     expect(newsHistoryHref(["deadline", "variety"])).toBe(
-      `${NEWS_HREF}?source=variety,deadline`,
+      `${NEWS_HREF}?source=deadline,variety`,
     );
-    expect(newsSourceFilterLabel(["variety", "deadline"])).toBe("Variety, Deadline");
+    expect(newsSourceFilterLabel(["variety", "deadline"])).toBe("Deadline, Variety");
   });
 
   it("toggles All → one → multi → All", () => {
     expect(toggleNewsSourceFilter([], "variety")).toEqual(["variety"]);
-    expect(toggleNewsSourceFilter(["variety"], "deadline")).toEqual(["variety", "deadline"]);
+    expect(toggleNewsSourceFilter(["variety"], "deadline")).toEqual(["deadline", "variety"]);
     expect(toggleNewsSourceFilter(["variety", "deadline"], "variety")).toEqual(["deadline"]);
     expect(toggleNewsSourceFilter(["deadline"], "deadline")).toEqual([]);
     expect(canonicalizeNewsSourceFilter([...NEWS_SOURCE_IDS])).toEqual([]);

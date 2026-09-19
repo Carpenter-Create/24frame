@@ -10,9 +10,11 @@ import {
   NEWS_PAGE,
   newsHistoryBackLink,
   NEWS_READ_REVALIDATE_SECONDS,
+  NEWS_SOURCE_IDS,
   NEWS_SOURCES,
   NEWS_WINDOW_DAYS,
   NEWS_WINDOW_MS,
+  compareNewsSourceLabel,
   dedupeNewsHeadlines,
   newsInWindow,
   newsItemTtlEpoch,
@@ -56,18 +58,21 @@ describe("News SoT", () => {
     expect(NEWS_INGEST_PATH).toBe(NEWS_INGEST_FUNCTION);
     expect(NEWS_INGEST_SCHEDULE).toBe("rate(30 minutes)");
     expect(NEWS_SOURCES.map((source) => source.label)).toEqual([
-      "IndieWire",
-      "Variety",
       "Deadline",
-      "Hollywood Reporter",
-      "TVLine",
-      "No Film School",
-      "Filmmaker Magazine",
-      "MovieMaker",
-      "JoBlo",
       "Film Threat",
+      "Filmmaker Magazine",
+      "Hollywood Reporter",
+      "IndieWire",
+      "JoBlo",
+      "MovieMaker",
+      "No Film School",
       "Screen Daily",
+      "TVLine",
+      "Variety",
     ]);
+    expect(NEWS_SOURCE_IDS).toEqual(NEWS_SOURCES.map((source) => source.id));
+    expect(compareNewsSourceLabel("tvline", "TVLine")).toBe(0);
+    expect(compareNewsSourceLabel("Deadline", "filmmaker magazine")).toBeLessThan(0);
     expect(NEWS_SOURCES.every((source) => source.enabled)).toBe(true);
     expect(newsSourceLabel("variety")).toBe("Variety");
     expect(JSON.stringify(NEWS_PAGE)).not.toMatch(/summary|rewrite|republish/i);

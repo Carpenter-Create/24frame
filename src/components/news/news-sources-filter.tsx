@@ -21,10 +21,10 @@ import {
 } from "@/lib/news";
 
 // Sources lens for /home/news. House filter chips under the H1 —
-// All + one chip per allowlisted source. Same selected/idle grammar
-// as Aggregation / Activity status pills. Multi-select writes
-// ?source= comma-separated ids. Phone scrolls the row; never a
-// checkbox rail or a second bottom float.
+// All first, then NEWS_SOURCES (A–Z by label). Selected is accent
+// blue (workspace Home segmented fill), idle is muted surface.
+// Multi-select writes ?source= comma-separated ids. Phone scrolls
+// the row; never a checkbox rail or a second bottom float.
 
 export function NewsSourceChips({
   selected,

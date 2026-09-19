@@ -10,9 +10,13 @@ import { NEWS_INGEST_FUNCTION, NEWS_INGEST_SCHEDULE } from "@/lib/news-aws";
 // Allowlist verified 2026-09-18. Storage is AWS DynamoDB. Ingest is
 // Lambda + EventBridge. Not Supabase. Not Vercel cron. Copy lives here.
 // History filter URL: ?source=<id>,<id> (comma-separated allowlist ids,
-// NEWS_SOURCE_IDS order). Repeated ?source=a&source=b is accepted.
-// Absent / empty / all / only-invalid = All sources. Canonical write
-// is one comma-separated `source` param so refresh/share keep the lens.
+// A–Z by display label — same order as NEWS_SOURCES / pills). Repeated
+// ?source=a&source=b is accepted. Absent / empty / all / only-invalid
+// = All sources. Canonical write is one comma-separated `source` param
+// so refresh/share keep the lens.
+// Pill order (Adam lock 2026-09-19): All first, then outlets A–Z
+// case-insensitive by label. One SoT — NEWS_SOURCES is that sorted
+// list; NEWS_SOURCE_IDS is derived. Do not hard-code a second order.
 
 export const NEWS_HOME_HREF = "/home";
 export const NEWS_HREF = "/home/news";
@@ -43,41 +47,12 @@ export function newsHistoryBackLink(): { href: typeof NEWS_HOME_HREF; label: typ
   return { href: NEWS_PAGE.backHref, label: NEWS_PAGE.back };
 }
 
-export const NEWS_SOURCE_IDS = [
-  "indiewire",
-  "variety",
-  "deadline",
-  "hollywood-reporter",
-  "tvline",
-  "no-film-school",
-  "filmmaker-magazine",
-  "moviemaker",
-  "joblo",
-  "film-threat",
-  "screen-daily",
-] as const;
+/** Case-insensitive A–Z by display label. Pill + filter URL SoT. */
+export function compareNewsSourceLabel(a: string, b: string): number {
+  return a.localeCompare(b, "en", { sensitivity: "base" });
+}
 
-export type NewsSourceId = (typeof NEWS_SOURCE_IDS)[number];
-
-export type NewsSource = {
-  id: NewsSourceId;
-  label: string;
-  /**
-   * One or more verified feed URLs for this outlet. Cross-beat trades
-   * (THR, Variety, Deadline) point at section feeds so music and other
-   * beats never reach the ingest topic gate. Film-first trades keep
-   * one on-beat feed. Order is stable — first URL is the identity /
-   * canonicalize base and Dynamo does not care about later duplicates.
-   */
-  feedUrls: readonly string[];
-  enabled: boolean;
-};
-
-// Verified 2026-09-19. Kill switch: enabled: false skips ingest (deploy).
-// Dynamo SOURCE#<id> HEALTH enabled=false is a second kill without a deploy.
-// Cross-beat trades are film + tv section RSS — never the site-wide feed —
-// so music and other beats stop upstream of the topic gate.
-export const NEWS_SOURCES = [
+const NEWS_SOURCE_DEFS = [
   {
     id: "indiewire",
     label: "IndieWire",
@@ -150,7 +125,37 @@ export const NEWS_SOURCES = [
     feedUrls: ["https://www.screendaily.com/45202.rss"],
     enabled: true,
   },
-] satisfies readonly NewsSource[];
+] as const;
+
+export type NewsSourceId = (typeof NEWS_SOURCE_DEFS)[number]["id"];
+
+export type NewsSource = {
+  id: NewsSourceId;
+  label: string;
+  /**
+   * One or more verified feed URLs for this outlet. Cross-beat trades
+   * (THR, Variety, Deadline) point at section feeds so music and other
+   * beats never reach the ingest topic gate. Film-first trades keep
+   * one on-beat feed. Order is stable — first URL is the identity /
+   * canonicalize base and Dynamo does not care about later duplicates.
+   */
+  feedUrls: readonly string[];
+  enabled: boolean;
+};
+
+// Verified 2026-09-19. Kill switch: enabled: false skips ingest (deploy).
+// Dynamo SOURCE#<id> HEALTH enabled=false is a second kill without a deploy.
+// Cross-beat trades are film + tv section RSS — never the site-wide feed —
+// so music and other beats stop upstream of the topic gate.
+// Exported order is A–Z by label (Adam lock 2026-09-19). Defs above
+// may stay in ingest-discovery order — do not read that as pill order.
+export const NEWS_SOURCES: readonly NewsSource[] = [...NEWS_SOURCE_DEFS].sort(
+  (a, b) => compareNewsSourceLabel(a.label, b.label),
+);
+
+export const NEWS_SOURCE_IDS: readonly NewsSourceId[] = NEWS_SOURCES.map(
+  (source) => source.id,
+);
 
 const SOURCE_BY_ID = new Map<NewsSourceId, NewsSource>(
   NEWS_SOURCES.map((source) => [source.id, source]),
