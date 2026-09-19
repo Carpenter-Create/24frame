@@ -1,8 +1,9 @@
 // Account-menu copy and lock. Lives in lib/, not JSX.
 // Desktop panel: identity → Profile → Settings → Log out.
 // Phone sheet (grammar A): identity → Profile → Settings →
-// 24Frame AI → Appearance → Log out. Chrome may differ (sheet
-// vs fuller panel). Labels may not fork on the shared rows.
+// Appearance → Log out. Chrome may differ (sheet vs fuller
+// panel). Labels may not fork on the shared rows.
+// 24Frame AI is the header sparkle only — not a menu row.
 // Workspace lives on the header switcher. Desktop theme stays
 // the header sun/moon. Phone Appearance is the pre-#391
 // same-sheet drill-in — not a page. One Settings hub. No
@@ -17,7 +18,7 @@
 // derived from the email local-part.
 
 import { version as APP_VERSION } from "../../package.json";
-import { ASSISTANT_NAME } from "@/lib/product";
+import { ASK_ASSISTANT, ASSISTANT_NAME } from "@/lib/product";
 
 export const USER_MENU = {
   workspace: "Workspace",
@@ -28,8 +29,6 @@ export const USER_MENU = {
   agreements: "Agreements",
   agreementsHref: "/settings/agreements",
   appearance: "Appearance",
-  askAssistant: ASSISTANT_NAME,
-  askAssistantHref: "?ai=1",
   help: "Help",
   helpHref: "/help",
   refer: "Refer a friend",
@@ -50,6 +49,8 @@ export const USER_MENU_ABSENT = [
   "Phone",
   "Job",
   "Legal",
+  ASSISTANT_NAME,
+  ASK_ASSISTANT,
 ] as const;
 
 export type UserMenuLinkAction =
@@ -62,11 +63,6 @@ export type UserMenuLinkAction =
       kind: "settings";
       label: typeof USER_MENU.settings;
       href: typeof USER_MENU.settingsHref;
-    }
-  | {
-      kind: "askAssistant";
-      label: typeof USER_MENU.askAssistant;
-      href: typeof USER_MENU.askAssistantHref;
     };
 
 export type UserMenuAction =
@@ -80,7 +76,6 @@ export const USER_MENU_ACTIONS: readonly UserMenuLinkAction[] = [
 
 export const USER_MENU_PHONE_ACTIONS: readonly UserMenuAction[] = [
   ...USER_MENU_ACTIONS,
-  { kind: "askAssistant", label: USER_MENU.askAssistant, href: USER_MENU.askAssistantHref },
   { kind: "appearance", label: USER_MENU.appearance },
 ];
 

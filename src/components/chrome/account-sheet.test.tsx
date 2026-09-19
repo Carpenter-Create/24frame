@@ -361,7 +361,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(empty).not.toContain("<img");
   });
 
-  it("lists Profile, Settings, 24Frame AI, Appearance — then Log out with the footer", () => {
+  it("lists Profile, Settings, Appearance — then Log out with the footer", () => {
     const html = renderSheet();
     const group = html.slice(html.indexOf("data-sheet-group"));
     const profileClass = attrClass(html, 'data-sheet-group-item="profile"');
@@ -377,13 +377,13 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(html).not.toContain(">ACCOUNT<");
     expect(html).not.toContain("Workspace");
     expect(group.indexOf("Profile")).toBeLessThan(group.indexOf("Settings"));
-    expect(group.indexOf("Settings")).toBeLessThan(group.indexOf("24Frame AI"));
-    expect(group.indexOf("24Frame AI")).toBeLessThan(group.indexOf("Appearance"));
+    expect(group.indexOf("Settings")).toBeLessThan(group.indexOf("Appearance"));
     expect(html.indexOf("Appearance")).toBeLessThan(html.indexOf("Log out"));
+    expect(html).not.toContain("24Frame AI");
     expect(html).not.toContain('data-sheet-group-item="workspace"');
     expect(html).toContain('data-sheet-group-item="profile"');
     expect(html).toContain('data-sheet-group-item="settings"');
-    expect(html).toContain('data-sheet-group-item="askAssistant"');
+    expect(html).not.toContain('data-sheet-group-item="askAssistant"');
     expect(html).toContain('data-sheet-group-item="appearance"');
     expect(html).not.toContain('data-sheet-group-item="agreements"');
     expect(html).not.toContain('data-sheet-group-item="help"');
@@ -392,11 +392,10 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(html).toContain(`href="${USER_MENU.profileHref}"`);
     expect(html).toContain('data-sheet-group-item="settings"');
     expect(html).toContain('href="/settings"');
-    expect(html).toContain('data-sheet-group-item="askAssistant"');
     expect(html).not.toContain('href="/messages"');
-    expect(html).not.toContain(`href="${USER_MENU.askAssistantHref}"`);
-    expect(src).toContain("<AskAiOpenButton");
-    expect(src).toContain('data-sheet-group-item="askAssistant"');
+    expect(html).not.toContain('href="?ai=1"');
+    expect(src).not.toContain("<AskAiOpenButton");
+    expect(src).not.toContain('data-sheet-group-item="askAssistant"');
     expect(src).toContain("onClick={onClose}");
     expect(html).not.toContain(`href="${USER_MENU.agreementsHref}"`);
     expect(html).not.toContain(`href="${USER_MENU.helpHref}"`);
@@ -626,7 +625,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(sheet).toContain("data-account-sheet-close");
     expect(sheet).toContain('data-sheet-group-item="profile"');
     expect(sheet).toContain('data-sheet-group-item="settings"');
-    expect(sheet).toContain('data-sheet-group-item="askAssistant"');
+    expect(sheet).not.toContain('data-sheet-group-item="askAssistant"');
     expect(sheet).toContain('data-sheet-group-item="appearance"');
     expect(sheet).toContain('data-account-menu-face="main"');
     expect(sheet).not.toContain('data-sheet-group-item="back"');

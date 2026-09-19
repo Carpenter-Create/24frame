@@ -194,15 +194,14 @@ describe("phone header grammar A — trim trailing", () => {
     }
   });
 
-  it("moves phone Ask + Appearance onto the avatar sheet, not the desktop panel", () => {
+  it("keeps phone Appearance on the avatar sheet — 24Frame AI stays header-only", () => {
     expect(USER_MENU_PHONE_ACTIONS.map((item) => item.kind)).toEqual([
       "profile",
       "settings",
-      "askAssistant",
       "appearance",
     ]);
-    expect(USER_MENU.askAssistant).toBe(ASSISTANT_NAME);
-    expect(USER_MENU.askAssistantHref).toBe("?ai=1");
+    expect(USER_MENU).not.toHaveProperty("askAssistant");
+    expect(USER_MENU).not.toHaveProperty("askAssistantHref");
     expect(ACCOUNT_SHEET_PHONE_ITEMS).toBe(USER_MENU_PHONE_ACTIONS);
     expect(ACCOUNT_SHEET_ITEMS).toBe(USER_MENU_ACTIONS);
     expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).toEqual(["profile", "settings"]);
@@ -216,10 +215,9 @@ describe("phone header grammar A — trim trailing", () => {
     );
     expect(sheet).toContain('data-sheet-group-item="profile"');
     expect(sheet).toContain('data-sheet-group-item="settings"');
-    expect(sheet).toContain('data-sheet-group-item="askAssistant"');
+    expect(sheet).not.toContain('data-sheet-group-item="askAssistant"');
     expect(sheet).toContain('data-sheet-group-item="appearance"');
-    expect(sheet).toContain(ASSISTANT_NAME);
-    expect(sheet).toContain('data-sheet-group-item="askAssistant"');
+    expect(sheet).not.toContain(ASSISTANT_NAME);
     expect(sheet).not.toContain('href="/messages"');
     expect(sheet).toContain(USER_MENU.appearance);
     expect(sheet).toContain("data-account-menu-appearance-mode");
