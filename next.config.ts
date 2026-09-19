@@ -18,6 +18,12 @@ const cloudfrontHost = (() => {
 })();
 
 const nextConfig: NextConfig = {
+  // `next dev`/`next build` otherwise inject a managed "nextjs-agent-rules" block into
+  // the tracked, governance-budgeted AGENTS.md (and CLAUDE.md) on every run, dirtying the
+  // working tree and threatening the `pnpm governance` AGENTS.md word/byte budget. This
+  // repo's agent governance is authored by hand, so opt out of the generated block.
+  agentRules: false,
+
   // Next serves its dev origin as localhost; without this, hitting the app via
   // 127.0.0.1 is treated as cross-origin and dev resources (incl. client hydration)
   // are blocked — the widget/hydration then silently fails. Allow both in dev.
