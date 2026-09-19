@@ -8,11 +8,12 @@ vi.mock("next/navigation", () => ({
 
 import { HousePeriodPresets } from "./house-period-presets";
 import {
-  HOUSE_PERIOD_PRESETS_CHIPS_CLASS,
   HOUSE_PERIOD_PRESETS_PHONE_CLASS,
 } from "@/lib/house-period-presets";
+import {
+  HOUSE_SEGMENTED_ITEM_BASE_CLASS,
+} from "@/lib/house-shell";
 import { REPORTS_PAGE, REPORTS_PERIOD_PRESETS } from "@/lib/reports";
-import { REPORTS_PERIOD_CHIP_CLASS } from "@/lib/reports-craft";
 
 const ITEMS = REPORTS_PERIOD_PRESETS.map((preset) => ({
   key: preset.grain,
@@ -21,7 +22,7 @@ const ITEMS = REPORTS_PERIOD_PRESETS.map((preset) => ({
 }));
 
 describe("HousePeriodPresets", () => {
-  it("renders desktop chips plus a phone HousePageSelect — no two-line wrap", () => {
+  it("renders a segmented track on desktop plus a phone HousePageSelect", () => {
     const html = renderToStaticMarkup(
       createElement(HousePeriodPresets, {
         value: "all",
@@ -38,9 +39,12 @@ describe("HousePeriodPresets", () => {
     expect(html).toContain("data-house-page-select");
     expect(html).toContain("data-house-page-select-trigger");
     expect(html).toContain("data-house-page-select-sheet");
-    expect(html).toContain(HOUSE_PERIOD_PRESETS_CHIPS_CLASS);
+    expect(html).toContain("rounded-full");
+    expect(html).toContain("bg-surface-muted");
     expect(html).toContain(HOUSE_PERIOD_PRESETS_PHONE_CLASS);
-    expect(html).toContain(REPORTS_PERIOD_CHIP_CLASS);
+    expect(html).toContain(HOUSE_SEGMENTED_ITEM_BASE_CLASS);
+    expect(html).toContain("data-segmented-thumb");
+    expect(html).toContain("data-segmented-item");
     expect(html).toContain(REPORTS_PAGE.allTime);
     expect(html).toContain(REPORTS_PAGE.ytd);
     expect(html).toContain(REPORTS_PAGE.year);

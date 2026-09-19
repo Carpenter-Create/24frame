@@ -5,6 +5,7 @@ import { useState } from "react";
 import { DashboardRankedRows } from "@/components/dashboard/dashboard-ranked";
 import { DashboardViewAll, DashboardViewAlts } from "@/components/dashboard/dashboard-view-alts";
 import { DashboardTerritoryMap } from "@/components/dashboard/dashboard-territory-map";
+import { SegmentedTrack } from "@/components/ui/segmented-track";
 import {
   DASHBOARD_CARD_PAD_LIST,
   DASHBOARD_MODULE_CARD_CLASS,
@@ -14,6 +15,7 @@ import {
   DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_ON_CLASS,
   DASHBOARD_TOP_PILL_CLUSTER_CLASS,
+  DASHBOARD_TOP_PILL_THUMB_CLASS,
 } from "@/lib/dashboard-craft";
 import type { DashboardRankedTitle } from "@/lib/dashboard-home";
 import { TITLES_HREF } from "@/lib/title-public-id";
@@ -109,7 +111,12 @@ export function ReportsTopPerforming({
           ) : null}
         </div>
         <div className={cn("flex min-w-0 flex-wrap items-center", DASHBOARD_RELATED_GAP_CLASS)}>
-          <div data-reports-top-pills="" className={DASHBOARD_TOP_PILL_CLUSTER_CLASS}>
+          <SegmentedTrack
+            activeIndex={pills.indexOf(active)}
+            trackClass={DASHBOARD_TOP_PILL_CLUSTER_CLASS}
+            thumbClass={DASHBOARD_TOP_PILL_THUMB_CLASS}
+            data-reports-top-pills=""
+          >
             {pills.map((id) => {
               const on = id === active;
               const item = PANES[id];
@@ -118,6 +125,7 @@ export function ReportsTopPerforming({
                   key={id}
                   type="button"
                   aria-pressed={on}
+                  data-segmented-item=""
                   data-reports-top-pill={id}
                   className={cn(
                     DASHBOARD_TOP_PILL_BUTTON_CLASS,
@@ -129,7 +137,7 @@ export function ReportsTopPerforming({
                 </button>
               );
             })}
-          </div>
+          </SegmentedTrack>
           <DashboardViewAlts
             modes={["list", "bars"]}
             mode={mode}

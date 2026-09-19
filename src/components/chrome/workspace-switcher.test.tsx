@@ -110,13 +110,22 @@ describe("workspace switcher header control", () => {
     expect(src).toContain("Escape");
   });
 
-  it("renders desktop sliding pills for available lanes only", () => {
+  it("renders desktop sliding pills in a single track with a sliding thumb", () => {
     const html = renderToStaticMarkup(
       <WorkspaceSwitcher current="social" presentation="pills" />,
     );
     expect(html).toContain('data-workspace-switcher-presentation="pills"');
     expect(html).toContain("data-workspace-switcher-pills");
     expect(html).toContain(WORKSPACE_SWITCHER_SEGMENTS_CLASS);
+    expect(html).toContain("data-segmented-thumb");
+    expect(html).toContain("data-segmented-item");
+    expect(WORKSPACE_SWITCHER_SEGMENTS_CLASS).toContain("bg-surface-muted");
+    expect(WORKSPACE_SWITCHER_SEGMENTS_CLASS).toContain("rounded-full");
+    expect(WORKSPACE_SWITCHER_SEGMENTS_CLASS).not.toContain("gap-[var(--space-2)]");
+    const thumbAt = html.indexOf("data-segmented-thumb");
+    const firstItemAt = html.indexOf("data-segmented-item");
+    expect(thumbAt).toBeGreaterThan(-1);
+    expect(firstItemAt).toBeGreaterThan(thumbAt);
     expect(html).toContain('data-workspace-switcher-segment="home"');
     expect(html).toContain('data-workspace-switcher-segment="aggregation"');
     expect(html).toContain('data-workspace-switcher-segment="social"');
@@ -149,6 +158,7 @@ describe("workspace switcher header control", () => {
     expect(src).toContain("ArrowRight");
     expect(src).toContain("ArrowLeft");
     expect(src).toContain("workspaceSwitcherNextSegmentIndex");
+    expect(src).toContain("SegmentedTrack");
     expect(src).not.toContain('"Agg"');
     expect(src).not.toContain('"Edu"');
     expect(src).not.toContain("ellipsis");

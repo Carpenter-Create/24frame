@@ -7,6 +7,7 @@ import { CaretDown } from "@phosphor-icons/react";
 
 import { Close44 } from "@/components/chrome/house";
 import { AppearanceCheck } from "@/components/chrome/appearance-check";
+import { SegmentedTrack } from "@/components/ui/segmented-track";
 import { Input } from "@/components/ui/input";
 import {
   DASHBOARD_PERIOD_CHEVRON_CLASS,
@@ -35,15 +36,18 @@ import {
   type ReportsUserOption,
 } from "@/lib/reports";
 import {
+  HOUSE_SEGMENTED_ITEM_BASE_CLASS,
+  HOUSE_SEGMENTED_ITEM_OFF_CLASS,
+  HOUSE_SEGMENTED_ITEM_ON_CLASS,
+  HOUSE_SEGMENTED_THUMB_CLASS,
+  HOUSE_SEGMENTED_TRACK_CLASS,
+} from "@/lib/house-shell";
+import {
   REPORTS_CONTROLS_CLASS,
   REPORTS_DOWNLOAD_CLASS,
   REPORTS_DOWNLOAD_OFF_CLASS,
   REPORTS_DOWNLOAD_PRIMARY_OFF_CLASS,
-  REPORTS_PERIOD_CHIP_CLASS,
-  REPORTS_PERIOD_CHIP_OFF_CLASS,
-  REPORTS_PERIOD_CHIP_ON_CLASS,
   REPORTS_PERIOD_CHIP_STUB_CLASS,
-  REPORTS_PERIOD_CLUSTER_CLASS,
   REPORTS_PERIOD_TRIGGER_CLASS,
   REPORTS_RELATED_GAP_CLASS,
   REPORTS_USER_PANEL_CLASS,
@@ -158,7 +162,12 @@ function ReportsPeriodCluster({
 
   return (
     <div data-reports-period="" className={cn("min-w-0", REPORTS_RELATED_GAP_CLASS, "flex items-center")}>
-      <div data-reports-period-cluster="" className={REPORTS_PERIOD_CLUSTER_CLASS}>
+      <SegmentedTrack
+        activeIndex={REPORTS_PERIOD_PRESETS.findIndex((p) => p.grain === selectedGrain)}
+        trackClass={cn(HOUSE_SEGMENTED_TRACK_CLASS, "hidden md:flex")}
+        thumbClass={HOUSE_SEGMENTED_THUMB_CLASS}
+        data-reports-period-cluster=""
+      >
         {REPORTS_PERIOD_PRESETS.map((preset) => {
           const on = selectedGrain === preset.grain;
           const option = options.find((row) => row.group === preset.grain);
@@ -167,11 +176,12 @@ function ReportsPeriodCluster({
             <button
               key={preset.grain}
               type="button"
+              data-segmented-item=""
               data-reports-period-chip={preset.grain}
               aria-pressed={on}
               className={cn(
-                REPORTS_PERIOD_CHIP_CLASS,
-                on ? REPORTS_PERIOD_CHIP_ON_CLASS : REPORTS_PERIOD_CHIP_OFF_CLASS,
+                HOUSE_SEGMENTED_ITEM_BASE_CLASS,
+                on ? HOUSE_SEGMENTED_ITEM_ON_CLASS : HOUSE_SEGMENTED_ITEM_OFF_CLASS,
               )}
               onClick={() => onPick(key)}
             >
@@ -183,11 +193,11 @@ function ReportsPeriodCluster({
           data-reports-period-custom=""
           data-reports-period-stub=""
           title={REPORTS_PAGE.customStub}
-          className={cn(REPORTS_PERIOD_CHIP_CLASS, REPORTS_PERIOD_CHIP_STUB_CLASS)}
+          className={cn(HOUSE_SEGMENTED_ITEM_BASE_CLASS, REPORTS_PERIOD_CHIP_STUB_CLASS)}
         >
           {REPORTS_PAGE.custom}
         </span>
-      </div>
+      </SegmentedTrack>
       <button
         type="button"
         data-reports-period-trigger=""

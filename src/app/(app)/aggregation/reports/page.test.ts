@@ -9,10 +9,12 @@ import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 import { loadMyDeliveries } from "@/lib/my-lists";
 import { REPORTS_PAGE } from "@/lib/reports";
 import {
+  HOUSE_SEGMENTED_ITEM_BASE_CLASS,
+  HOUSE_SEGMENTED_ITEM_ON_CLASS,
+} from "@/lib/house-shell";
+import {
   REPORTS_CHART_EMPTY_CLASS,
   REPORTS_DOWNLOAD_CLASS,
-  REPORTS_PERIOD_CHIP_CLASS,
-  REPORTS_PERIOD_CHIP_ON_CLASS,
   REPORTS_TITLE_DESKTOP_CLASS,
 } from "@/lib/reports-craft";
 import { REPORTS_CRAFT_FIXTURE_ENV, REPORTS_FIXTURE } from "@/lib/reports-fixture";
@@ -104,8 +106,8 @@ describe("ReportsPage", () => {
     expect(html).toContain(REPORTS_PAGE.topTitlesEmpty);
     expect(html).toContain(REPORTS_PAGE.detailEmpty);
     expect(html).toContain(REPORTS_TITLE_DESKTOP_CLASS);
-    expect(html).toContain(REPORTS_PERIOD_CHIP_CLASS);
-    expect(html).toContain(REPORTS_PERIOD_CHIP_ON_CLASS);
+    expect(html).toContain(HOUSE_SEGMENTED_ITEM_BASE_CLASS);
+    expect(html).toContain(HOUSE_SEGMENTED_ITEM_ON_CLASS);
     expect(html).toContain(REPORTS_CHART_EMPTY_CLASS);
     expect(html).not.toContain("data-reports-empty");
     expect(html).not.toContain("Top works");

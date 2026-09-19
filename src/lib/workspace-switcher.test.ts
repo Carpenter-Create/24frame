@@ -213,22 +213,23 @@ describe("workspace switcher lock", () => {
     expect(workspaceHome("social")).toBe("/social");
   });
 
-  it("uses Top Performing house grammar for desktop sliding pills", () => {
+  it("uses segmented track grammar for desktop sliding pills", () => {
     expect(WORKSPACE_SWITCHER_SEGMENTS_CLASS).toContain("flex");
     expect(WORKSPACE_SWITCHER_SEGMENTS_CLASS).toContain("items-center");
-    expect(WORKSPACE_SWITCHER_SEGMENTS_CLASS).toContain(DASHBOARD_TOP_PILL_CLUSTER_CLASS.slice("flex ".length));
+    expect(WORKSPACE_SWITCHER_SEGMENTS_CLASS).toBe(DASHBOARD_TOP_PILL_CLUSTER_CLASS);
+    expect(WORKSPACE_SWITCHER_SEGMENTS_CLASS).toContain("rounded-full");
+    expect(WORKSPACE_SWITCHER_SEGMENTS_CLASS).toContain("bg-surface-muted");
     expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("rounded-full");
-    expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("px-[var(--space-4)]");
-    expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("py-[var(--space-2)]");
+    expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("px-[var(--space-3)]");
+    expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("py-[var(--space-1)]");
     expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("t-body-sm");
-    expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).toBe("flex items-center gap-[var(--space-2)]");
-    expect(DASHBOARD_TOP_PILL_BUTTON_CLASS).toBe(
-      "rounded-full px-[var(--space-4)] py-[var(--space-2)] t-body-sm",
-    );
+    expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("transition-colors");
+    expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("motion-reduce:transition-none");
+    expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toBe(DASHBOARD_TOP_PILL_BUTTON_CLASS);
     expect(WORKSPACE_SWITCHER_SEGMENT_ON_CLASS).toBe(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS);
     expect(WORKSPACE_SWITCHER_SEGMENT_OFF_CLASS).toBe(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS);
-    expect(WORKSPACE_SWITCHER_SEGMENT_ON_CLASS).toBe("bg-ink text-surface");
-    expect(WORKSPACE_SWITCHER_SEGMENT_OFF_CLASS).toBe("bg-surface-muted text-ink");
+    expect(WORKSPACE_SWITCHER_SEGMENT_ON_CLASS).toBe("text-white");
+    expect(WORKSPACE_SWITCHER_SEGMENT_OFF_CLASS).toBe("text-ink");
     expect(WORKSPACE_SWITCHER_SEGMENTS_CLASS).not.toContain("divide-x");
     expect(WORKSPACE_SWITCHER_SEGMENT_ON_CLASS).not.toContain("text-accent");
     expect(workspaceSwitcherShowsSegments()).toBe(true);

@@ -1,6 +1,6 @@
 "use client";
 
-// Shared period-preset chrome. Desktop: Reports chip cluster.
+// Shared period-preset chrome. Desktop: segmented track.
 // Phone: HousePageSelect (Dashboard All time SoT). Never a wrapping
 // chip row. Home Net revenue uses this — do not invent a second grammar.
 
@@ -8,18 +8,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { HousePageSelect } from "@/components/chrome/house-page-select";
+import { SegmentedTrack } from "@/components/ui/segmented-track";
 import { cn } from "@/lib/cn";
 import {
-  HOUSE_PERIOD_PRESETS_CHIPS_CLASS,
+  HOUSE_SEGMENTED_ITEM_BASE_CLASS,
+  HOUSE_SEGMENTED_ITEM_OFF_CLASS,
+  HOUSE_SEGMENTED_ITEM_ON_CLASS,
+  HOUSE_SEGMENTED_THUMB_CLASS,
+  HOUSE_SEGMENTED_TRACK_CLASS,
+} from "@/lib/house-shell";
+import {
   HOUSE_PERIOD_PRESETS_HOST_CLASS,
   HOUSE_PERIOD_PRESETS_PHONE_CLASS,
   type HousePeriodPresetItem,
 } from "@/lib/house-period-presets";
-import {
-  REPORTS_PERIOD_CHIP_CLASS,
-  REPORTS_PERIOD_CHIP_OFF_CLASS,
-  REPORTS_PERIOD_CHIP_ON_CLASS,
-} from "@/lib/reports-craft";
 
 export type { HousePeriodPresetItem };
 
@@ -54,9 +56,11 @@ export function HousePeriodPresets({
 
   return (
     <div data-house-period-presets="" className={HOUSE_PERIOD_PRESETS_HOST_CLASS}>
-      <div
+      <SegmentedTrack
+        activeIndex={items.findIndex((item) => item.key === value)}
+        trackClass={cn(HOUSE_SEGMENTED_TRACK_CLASS, "hidden md:flex")}
+        thumbClass={HOUSE_SEGMENTED_THUMB_CLASS}
         data-house-period-presets-chips=""
-        className={HOUSE_PERIOD_PRESETS_CHIPS_CLASS}
       >
         {items.map((item) => {
           const on = item.key === value;
@@ -65,10 +69,11 @@ export function HousePeriodPresets({
               key={item.key}
               href={item.href}
               aria-pressed={on}
+              data-segmented-item=""
               data-house-period-presets-chip={item.key}
               className={cn(
-                REPORTS_PERIOD_CHIP_CLASS,
-                on ? REPORTS_PERIOD_CHIP_ON_CLASS : REPORTS_PERIOD_CHIP_OFF_CLASS,
+                HOUSE_SEGMENTED_ITEM_BASE_CLASS,
+                on ? HOUSE_SEGMENTED_ITEM_ON_CLASS : HOUSE_SEGMENTED_ITEM_OFF_CLASS,
               )}
               {...(chipDataAttr ? { [chipDataAttr]: item.key } : {})}
             >
@@ -76,7 +81,7 @@ export function HousePeriodPresets({
             </Link>
           );
         })}
-      </div>
+      </SegmentedTrack>
       <div
         data-house-period-presets-phone=""
         className={HOUSE_PERIOD_PRESETS_PHONE_CLASS}

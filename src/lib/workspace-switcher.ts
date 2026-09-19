@@ -55,8 +55,11 @@ import {
 } from "@/lib/house-lead-chrome";
 import {
   HOUSE_CONTROL_PILL_CLASS,
-  HOUSE_FILTER_OFF_CLASS,
-  HOUSE_FILTER_ON_CLASS,
+  HOUSE_SEGMENTED_ITEM_BASE_CLASS,
+  HOUSE_SEGMENTED_ITEM_OFF_CLASS,
+  HOUSE_SEGMENTED_ITEM_ON_CLASS,
+  HOUSE_SEGMENTED_THUMB_CLASS,
+  HOUSE_SEGMENTED_TRACK_CLASS,
 } from "@/lib/house-shell";
 import { USER_MENU } from "@/lib/user-menu";
 import {
@@ -112,20 +115,21 @@ export const WORKSPACE_SWITCHER_STATIC_CLASS =
 export const WORKSPACE_SWITCHER_PILL_STATIC_CLASS =
   `flex min-w-0 items-center gap-[var(--space-2)] ${HOUSE_CONTROL_PILL_CLASS} border border-hairline bg-surface-muted px-[var(--space-2)] py-[var(--space-1)] t-body-sm font-medium text-ink`;
 
-// Desktop md+ sliding pills — Top Performing house grammar, not a
-// Sporty Blue strip. Full words only — shrink-0, no truncate.
+// Desktop md+ segmented track — one continuous muted bar with a
+// sliding dark thumb. Same grammar as Top Performing pills.
+// Full words only — shrink-0, no truncate.
 // Hide unavailable lanes in the caller options.
-export const WORKSPACE_SWITCHER_SEGMENTS_CLASS =
-  "flex shrink-0 items-center gap-[var(--space-2)]";
+export const WORKSPACE_SWITCHER_SEGMENTS_CLASS = HOUSE_SEGMENTED_TRACK_CLASS;
 
-export const WORKSPACE_SWITCHER_SEGMENT_CLASS =
-  "shrink-0 whitespace-nowrap rounded-full px-[var(--space-4)] py-[var(--space-2)] t-body-sm";
+export const WORKSPACE_SWITCHER_SEGMENTS_THUMB_CLASS = HOUSE_SEGMENTED_THUMB_CLASS;
+
+export const WORKSPACE_SWITCHER_SEGMENT_CLASS = HOUSE_SEGMENTED_ITEM_BASE_CLASS;
 
 export const WORKSPACE_SWITCHER_SEGMENT_LABEL_CLASS = "whitespace-nowrap";
 
-export const WORKSPACE_SWITCHER_SEGMENT_ON_CLASS = HOUSE_FILTER_ON_CLASS;
+export const WORKSPACE_SWITCHER_SEGMENT_ON_CLASS = HOUSE_SEGMENTED_ITEM_ON_CLASS;
 
-export const WORKSPACE_SWITCHER_SEGMENT_OFF_CLASS = HOUSE_FILTER_OFF_CLASS;
+export const WORKSPACE_SWITCHER_SEGMENT_OFF_CLASS = HOUSE_SEGMENTED_ITEM_OFF_CLASS;
 
 // Hidden at rest on md+. Desktop hover / keyboard focus reveals it.
 // Open state adds opacity-100. Phone pill chevron stays visible so

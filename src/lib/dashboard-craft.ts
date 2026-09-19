@@ -15,9 +15,16 @@ import {
   HOUSE_CARD_PAD,
   HOUSE_FILTER_OFF_CLASS,
   HOUSE_FILTER_ON_CLASS,
+  HOUSE_FILTER_PILL_CLASS,
+  HOUSE_FILTER_PILL_CLUSTER_CLASS,
   HOUSE_MODULE_CLASS,
   HOUSE_RELATED_GAP_CLASS,
   HOUSE_SECTION_AIR_CLASS,
+  HOUSE_SEGMENTED_ITEM_BASE_CLASS,
+  HOUSE_SEGMENTED_ITEM_OFF_CLASS,
+  HOUSE_SEGMENTED_ITEM_ON_CLASS,
+  HOUSE_SEGMENTED_THUMB_CLASS,
+  HOUSE_SEGMENTED_TRACK_CLASS,
 } from "@/lib/house-shell";
 
 import {
@@ -184,29 +191,31 @@ export const DASHBOARD_VIEW_ALT_BUTTON_ON_CLASS = "text-accent";
 export const DASHBOARD_VIEW_ALL_CLASS =
   "inline-flex items-center gap-[var(--space-2)] t-body-sm text-accent";
 
-// Top performing pills — house separate rounded pills with gap.
-// Active: ink fill + canvas label. Idle: muted fill + ink label.
-// Not a segmented strip. Sporty Blue stays on View all / view-alt glyphs only.
-export const DASHBOARD_TOP_PILL_CLUSTER_CLASS =
-  "flex items-center gap-[var(--space-2)]";
+// Top performing segmented track — one continuous muted bar with a
+// sliding dark thumb. Same grammar as workspace pills.
+// Active: ink thumb + canvas label. Idle: transparent + ink label.
+// Sporty Blue stays on View all / view-alt glyphs only.
+export const DASHBOARD_TOP_PILL_CLUSTER_CLASS = HOUSE_SEGMENTED_TRACK_CLASS;
 
-export const DASHBOARD_TOP_PILL_BUTTON_CLASS =
-  "rounded-full px-[var(--space-4)] py-[var(--space-2)] t-body-sm";
+export const DASHBOARD_TOP_PILL_THUMB_CLASS = HOUSE_SEGMENTED_THUMB_CLASS;
 
-export const DASHBOARD_TOP_PILL_BUTTON_ON_CLASS = HOUSE_FILTER_ON_CLASS;
+export const DASHBOARD_TOP_PILL_BUTTON_CLASS = HOUSE_SEGMENTED_ITEM_BASE_CLASS;
 
-export const DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS = HOUSE_FILTER_OFF_CLASS;
+export const DASHBOARD_TOP_PILL_BUTTON_ON_CLASS = HOUSE_SEGMENTED_ITEM_ON_CLASS;
 
-// /home/news source chips reuse the house filter pill (ink selected /
+export const DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS = HOUSE_SEGMENTED_ITEM_OFF_CLASS;
+
+// /home/news source chips reuse the standalone house filter pill (ink selected /
 // muted idle). Row scrolls horizontally when the allowlist overflows.
+// Not a segmented track — individual pills with gap.
 export const DASHBOARD_NEWS_SOURCE_CHIPS_CLASS =
-  `${DASHBOARD_TOP_PILL_CLUSTER_CLASS} no-scrollbar w-full flex-nowrap overflow-x-auto`;
+  `${HOUSE_FILTER_PILL_CLUSTER_CLASS} no-scrollbar w-full flex-nowrap overflow-x-auto`;
 
-export const DASHBOARD_NEWS_SOURCE_CHIP_CLASS = `${DASHBOARD_TOP_PILL_BUTTON_CLASS} shrink-0 whitespace-nowrap`;
+export const DASHBOARD_NEWS_SOURCE_CHIP_CLASS = `${HOUSE_FILTER_PILL_CLASS} shrink-0 whitespace-nowrap`;
 
-export const DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS = DASHBOARD_TOP_PILL_BUTTON_ON_CLASS;
+export const DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS = HOUSE_FILTER_ON_CLASS;
 
-export const DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS = DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS;
+export const DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS = HOUSE_FILTER_OFF_CLASS;
 
 // Map unmount is taller than Titles/Platforms lists. Do not let the
 // departing map become the scroll anchor (html scroll-behavior: smooth

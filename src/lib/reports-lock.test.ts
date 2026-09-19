@@ -14,10 +14,12 @@ import {
   reportsPeriodOptions,
 } from "@/lib/reports";
 import {
+  HOUSE_SEGMENTED_ITEM_BASE_CLASS,
+  HOUSE_SEGMENTED_ITEM_ON_CLASS,
+} from "@/lib/house-shell";
+import {
   REPORTS_CHART_HEIGHT_DESKTOP,
   REPORTS_DOWNLOAD_CLASS,
-  REPORTS_PERIOD_CHIP_CLASS,
-  REPORTS_PERIOD_CHIP_ON_CLASS,
   REPORTS_TITLE_DESKTOP_CLASS,
 } from "@/lib/reports-craft";
 
@@ -88,11 +90,11 @@ describe("Aggregation Reports miss list v1.1", () => {
     expect(html).toContain('data-reports-period-chip="year"');
     expect(html).toContain("data-reports-period-custom");
     expect(html).toContain(REPORTS_PAGE.customStub);
-    expect(html).toContain(REPORTS_PERIOD_CHIP_CLASS);
-    expect(html).toContain(REPORTS_PERIOD_CHIP_ON_CLASS);
-    expect(REPORTS_PERIOD_CHIP_CLASS).toContain("bg-surface-muted");
-    expect(REPORTS_PERIOD_CHIP_CLASS).not.toContain("bg-accent");
-    expect(REPORTS_PERIOD_CHIP_ON_CLASS).toBe("text-accent");
+    expect(html).toContain(HOUSE_SEGMENTED_ITEM_BASE_CLASS);
+    expect(html).toContain(HOUSE_SEGMENTED_ITEM_ON_CLASS);
+    expect(html).toContain("data-segmented-thumb");
+    expect(HOUSE_SEGMENTED_ITEM_ON_CLASS).toBe("text-white");
+    expect(HOUSE_SEGMENTED_ITEM_BASE_CLASS).not.toContain("bg-accent");
     expect(html).toContain("data-reports-period-trigger");
     expect(html).not.toContain("<select");
     const sheet = renderToStaticMarkup(

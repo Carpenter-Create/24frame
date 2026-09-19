@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardBody } from "@/components/ui/card";
 import { InlineNotice } from "@/components/ui/inline-notice";
+import { SegmentedTrack } from "@/components/ui/segmented-track";
 import { MessageLink } from "@/app/(app)/aggregation/messages/message-link";
 import { cn } from "@/lib/cn";
 import {
@@ -17,7 +18,15 @@ import {
   DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_ON_CLASS,
   DASHBOARD_TOP_PILL_CLUSTER_CLASS,
+  DASHBOARD_TOP_PILL_THUMB_CLASS,
 } from "@/lib/dashboard-craft";
+import {
+  HOUSE_SEGMENTED_ITEM_BASE_CLASS,
+  HOUSE_SEGMENTED_ITEM_OFF_CLASS,
+  HOUSE_SEGMENTED_ITEM_ON_CLASS,
+  HOUSE_SEGMENTED_TRACK_CLASS,
+  HOUSE_SEGMENTED_THUMB_CLASS,
+} from "@/lib/house-shell";
 import { NOTIFICATION_EMAIL, NOTIFICATION_KIND_LABEL } from "@/lib/notifications";
 import {
   REPORTS_PERIOD_PRESETS,
@@ -25,10 +34,6 @@ import {
   type ReportsPeriod,
 } from "@/lib/reports";
 import {
-  REPORTS_PERIOD_CHIP_CLASS,
-  REPORTS_PERIOD_CHIP_OFF_CLASS,
-  REPORTS_PERIOD_CHIP_ON_CLASS,
-  REPORTS_PERIOD_CLUSTER_CLASS,
   REPORTS_RELATED_GAP_CLASS,
 } from "@/lib/reports-craft";
 import { MarkDone } from "./mark-done";
@@ -54,7 +59,12 @@ export function ActivityInbox({
       <PageHeader title={ACTIVITY_PAGE.title} subtitle={ACTIVITY_PAGE.subtitle} />
 
       <div data-activity-filters="" className={cn("flex flex-col pb-6", REPORTS_RELATED_GAP_CLASS)}>
-        <div data-activity-status="" className={DASHBOARD_TOP_PILL_CLUSTER_CLASS}>
+        <SegmentedTrack
+          activeIndex={(["open", "done"] as const).indexOf(status)}
+          trackClass={DASHBOARD_TOP_PILL_CLUSTER_CLASS}
+          thumbClass={DASHBOARD_TOP_PILL_THUMB_CLASS}
+          data-activity-status=""
+        >
           {(["open", "done"] as const).map((key) => {
             const on = status === key;
             return (
@@ -62,6 +72,7 @@ export function ActivityInbox({
                 key={key}
                 href={activityHref({ status: key, period: period.key })}
                 aria-pressed={on}
+                data-segmented-item=""
                 data-activity-status-chip={key}
                 className={cn(
                   DASHBOARD_TOP_PILL_BUTTON_CLASS,
@@ -72,8 +83,13 @@ export function ActivityInbox({
               </Link>
             );
           })}
-        </div>
-        <div data-activity-period="" className={REPORTS_PERIOD_CLUSTER_CLASS}>
+        </SegmentedTrack>
+        <SegmentedTrack
+          activeIndex={REPORTS_PERIOD_PRESETS.findIndex((p) => p.grain === period.kind)}
+          trackClass={cn(HOUSE_SEGMENTED_TRACK_CLASS, "hidden md:flex")}
+          thumbClass={HOUSE_SEGMENTED_THUMB_CLASS}
+          data-activity-period=""
+        >
           {REPORTS_PERIOD_PRESETS.map((preset) => {
             const on = period.kind === preset.grain;
             const key = reportsPeriodPresetKey(preset.grain, now);
@@ -82,17 +98,18 @@ export function ActivityInbox({
                 key={preset.grain}
                 href={activityHref({ status, period: key })}
                 aria-pressed={on}
+                data-segmented-item=""
                 data-activity-period-chip={preset.grain}
                 className={cn(
-                  REPORTS_PERIOD_CHIP_CLASS,
-                  on ? REPORTS_PERIOD_CHIP_ON_CLASS : REPORTS_PERIOD_CHIP_OFF_CLASS,
+                  HOUSE_SEGMENTED_ITEM_BASE_CLASS,
+                  on ? HOUSE_SEGMENTED_ITEM_ON_CLASS : HOUSE_SEGMENTED_ITEM_OFF_CLASS,
                 )}
               >
                 {preset.label}
               </Link>
             );
           })}
-        </div>
+        </SegmentedTrack>
       </div>
 
       {truncated ? (

@@ -1,6 +1,7 @@
 import {
   HOUSE_FILTER_OFF_CLASS,
   HOUSE_FILTER_ON_CLASS,
+  HOUSE_FILTER_PILL_CLASS,
   HOUSE_PERIOD_SELECTED_CLASS,
 } from "@/lib/house-shell";
 import { TITLES_HREF } from "@/lib/title-public-id";
@@ -80,10 +81,9 @@ export type TitlesCatalogStaffCols = {
   findings?: number;
 };
 
-// Dashboard top-pill grammar on desktop. Phone is the compact period trigger —
+// Standalone house filter pill on desktop. Phone is the compact period trigger —
 // not a wrapping ALL-CAPS chip wall.
-export const TITLES_FILTER_PILL_CLASS =
-  "rounded-full px-[var(--space-4)] py-[var(--space-2)] t-body-sm";
+export const TITLES_FILTER_PILL_CLASS = HOUSE_FILTER_PILL_CLASS;
 export const TITLES_FILTER_PILL_ON_CLASS = HOUSE_FILTER_ON_CLASS;
 export const TITLES_FILTER_PILL_OFF_CLASS = HOUSE_FILTER_OFF_CLASS;
 export const TITLES_FILTER_DESKTOP_CLUSTER_CLASS =
