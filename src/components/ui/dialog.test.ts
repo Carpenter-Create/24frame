@@ -20,6 +20,7 @@ describe("dialog confirm grammar", () => {
   it("hugs content — m-auto without h-fit stretches into a tall empty panel", () => {
     expect(DIALOG_PANEL_CLASS).toContain("m-auto");
     expect(DIALOG_PANEL_CLASS).toContain("h-fit");
+    expect(DIALOG_PANEL_CLASS).toContain("overflow-visible");
     expect(DIALOG_PANEL_CLASS).toContain("backdrop:bg-black/40");
     expect(DIALOG_PANEL_CLASS).toContain("backdrop:backdrop-blur-sm");
     expect(DIALOG_BODY_CLASS).toBe("px-5 py-3");

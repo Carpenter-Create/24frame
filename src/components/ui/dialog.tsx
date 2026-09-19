@@ -12,10 +12,12 @@ import { cn } from "@/lib/cn";
 // (the video player) without touching the default form width.
 //
 // `h-fit` is the confirm-air lock: `m-auto` without it stretches the panel to the
-// viewport (tall empty body). Footer chrome is DialogFooter — not a per-surface gap.
+// viewport (tall empty body). `overflow-visible` lets the house form Select
+// Listbox paint past the panel — UA dialog overflow would clip it.
+// Footer chrome is DialogFooter — not a per-surface gap.
 
 export const DIALOG_PANEL_CLASS =
-  "m-auto h-fit rounded-[var(--radius-lg)] border border-hairline bg-surface p-0 text-ink shadow-[var(--elevation)] backdrop:bg-black/40 backdrop:backdrop-blur-sm";
+  "m-auto h-fit overflow-visible rounded-[var(--radius-lg)] border border-hairline bg-surface p-0 text-ink shadow-[var(--elevation)] backdrop:bg-black/40 backdrop:backdrop-blur-sm";
 
 export const DIALOG_HEADER_CLASS =
   "flex items-center justify-between border-b border-hairline px-5 py-3";

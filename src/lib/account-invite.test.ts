@@ -58,6 +58,9 @@ describe("account invite SoT", () => {
     expect(teamForm).toContain("data-team-invite-cta");
     expect(teamForm).toContain("<Dialog");
     expect(teamForm).toContain("DialogFooter");
+    expect(teamForm).toContain('import { Select } from "@/components/ui/select"');
+    expect(teamForm).toContain('id="team-invite-role"');
+    expect(teamForm).not.toContain("<select");
     expect(teamForm).not.toContain("flex flex-col gap-[var(--space-4)]");
     expect(ACCOUNT_INVITE.cancel).toBe("Cancel");
     expect(teamForm).toContain("router.refresh()");

@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { StatusChip } from "@/components/layout/status-chip";
-import { formControlClass } from "@/lib/form-control";
 import {
   SETTINGS_DIALOG_FIELD_CLASS,
   SETTINGS_DIALOG_FORM_CLASS,
@@ -184,34 +184,33 @@ export function TeamInviteForm({
             </div>
             <div className={SETTINGS_DIALOG_FIELD_CLASS}>
               <Label htmlFor="team-invite-role">{ACCOUNT_INVITE.roleLabel}</Label>
-              <select
+              <Select
                 id="team-invite-role"
                 name="role"
-                className={formControlClass("box")}
                 value={role}
-                onChange={(e) => setRole(e.target.value as OrgRole)}
-              >
-                {TEAM_INVITE_ROLES.map((value) => (
-                  <option key={value} value={value}>
-                    {teamRoleLabel(value)}
-                  </option>
-                ))}
-              </select>
+                aria-label={ACCOUNT_INVITE.roleLabel}
+                options={TEAM_INVITE_ROLES.map((value) => ({
+                  value,
+                  label: teamRoleLabel(value),
+                }))}
+                onChange={(next) => setRole(next as OrgRole)}
+              />
             </div>
             {showEntityScope ? (
               <>
                 <div className={SETTINGS_DIALOG_FIELD_CLASS}>
                   <Label htmlFor="team-invite-scope">{ENTITY_SCOPE.scopeLabel}</Label>
-                  <select
+                  <Select
                     id="team-invite-scope"
                     name="entityScope"
-                    className={formControlClass("box")}
                     value={entityScope}
-                    onChange={(e) => setEntityScope(e.target.value as EntityScope)}
-                  >
-                    <option value="all">{entityScopeLabel("all")}</option>
-                    <option value="selected">{entityScopeLabel("selected")}</option>
-                  </select>
+                    aria-label={ENTITY_SCOPE.scopeLabel}
+                    options={[
+                      { value: "all", label: entityScopeLabel("all") },
+                      { value: "selected", label: entityScopeLabel("selected") },
+                    ]}
+                    onChange={(next) => setEntityScope(next as EntityScope)}
+                  />
                   <p className="t-body-sm text-ink-3">{ENTITY_SCOPE.scopeHint}</p>
                 </div>
                 {entityScope === "selected" ? (

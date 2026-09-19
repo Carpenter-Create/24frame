@@ -88,6 +88,9 @@ describe("LegalEntitiesSection table", () => {
     expect(src).toContain("LEGAL_ENTITIES.actionsColumn");
     expect(src).toContain("<Dialog");
     expect(src).toContain("DialogFooter");
+    expect(src).toContain('import { Select } from "@/components/ui/select"');
+    expect(src).toContain('id="entity-type"');
+    expect(src).not.toContain("<select");
     expect(src).not.toContain("flex flex-col gap-[var(--space-4)]");
   });
 
