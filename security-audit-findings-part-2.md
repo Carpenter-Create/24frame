@@ -1,5 +1,9 @@
 # Global Content Dashboard — Security Coverage Matrix, Part 2 Results
 
+> **Not live status (P3-8).** July 2026 audit record. Historical evidence only.
+> Current operating posture: [`docs/status/CURRENT.md`](docs/status/CURRENT.md).
+> Do not use this file for merge, production, or RLS decisions.
+
 **Repo:** `globalcontent-dashboard` (Tier 3) · **Branch:** `security-audit-2026-07-26`
 **Date:** 2026-07-26 · **HEAD at audit:** `2759214` (the Part 1 commit)
 **Scope:** Sections J, K, L, M, O assessed with Status + cited Evidence. Section N output as an

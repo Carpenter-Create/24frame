@@ -1,5 +1,12 @@
 # Port inventory: watershedportal → Global Content distribution dashboard
 
+> **Historical survey (P3-9).** Watershed-port planning evidence — not live
+> 24Frame IA. This repo has no `src/components/account/**` (account forms live
+> under `src/app/(app)/account/`). This repo’s `.github/workflows/ci.yml` does
+> not commit an anon JWT (that finding is about the *source* Watershed repo).
+> `OrganizationSwitcher` was deleted in the 2026-09-19 hygiene cut. Do not
+> treat the tables below as current file paths.
+
 > Survey only — no code was copied. Classifications: **AS-IS** (infra, no domain/brand coupling) · **EDITS** (right shape, wrong specifics) · **NO** (Watershed domain/brand/palette/copy/business logic) · **MISSING** (dashboard needs it; watershedportal has no equivalent).
 > Scope note: watershedportal is mid-migration. `packages/db/` (Aurora, Drizzle) is canonical; `supabase/migrations/` is Auth-only legacy. Tables below are the canonical Aurora schema unless marked *legacy*.
 >

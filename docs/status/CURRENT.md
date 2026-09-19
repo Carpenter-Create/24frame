@@ -85,8 +85,9 @@ App code + founder runbook live in-repo:
 tables, Lambda, EventBridge half-hour rule, SQS DLQ, and IAM are
 **not created**. Founder applies. Do not create from CI.
 
-Home reads fifteen headlines; `/home/news` is the ninety-day window
-(`/news` permanently redirects). Page requests never fan out RSS.
+Home reads fifteen headlines; `/home/news` is the ninety-day window.
+Retired `/news` 404s — no leftover redirect. Page requests never fan
+out RSS.
 
 ---
 

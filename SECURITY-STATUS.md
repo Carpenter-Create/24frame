@@ -1,7 +1,12 @@
 # Security work — where everything actually stands
 
+> **Not live status (P3-8).** Snapshot from July 2026. Table counts, repo name
+> (`globalcontent-dashboard`), and “no pass” lines are historical evidence only.
+> Current operating posture: [`docs/status/CURRENT.md`](docs/status/CURRENT.md).
+> Do not use this file for merge, production, or RLS decisions.
+
 *Generated 2026-07-27; refreshed after the `20260726*` batch reached production. All figures from
-live checks.*
+live checks at that date.*
 *Supersedes nothing; the audit findings files remain the record of what was found and how.*
 
 ---

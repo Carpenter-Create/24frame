@@ -1,5 +1,10 @@
 # Global Content Dashboard — Security Coverage Matrix Results
 
+> **Not live status (P3-8).** July 2026 audit record. Repo name
+> `globalcontent-dashboard` and table/RLS counts are historical evidence only.
+> Current operating posture: [`docs/status/CURRENT.md`](docs/status/CURRENT.md).
+> Do not use this file for merge, production, or RLS decisions.
+
 **Repo:** `globalcontent-dashboard` (Tier 3) · **Branch:** `security-audit-2026-07-26`
 **Date:** 2026-07-26 · **HEAD:** `7a3b5e3` (`feat(shell): tighter sidebar + collapse-to-rail chevron (#39)`)
 **Scope:** every row of `security-coverage-matrix.md`, assessed against this repo only.
