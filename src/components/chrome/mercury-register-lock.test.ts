@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -135,7 +135,7 @@ describe("Adam Mercury register lock", () => {
     expect(src("src/components/chrome/house-lead-search.tsx")).toContain("MagnifyingGlass");
     expect(src("src/components/chrome/house-lead-search.tsx")).not.toContain("lucide-react");
     expect(src("src/components/chrome/house-lead-search.tsx")).not.toContain("SocialIcon");
-    expect(src("src/components/social/social-top-bar.tsx")).not.toContain("lucide-react");
+    expect(existsSync("src/components/social/social-top-bar.tsx")).toBe(false);
     expect(src("src/app/(app)/social/profile/page.tsx")).not.toContain("AccountProfileForm");
   });
 });

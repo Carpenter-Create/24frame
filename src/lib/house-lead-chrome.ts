@@ -17,8 +17,8 @@
 // house chrome path (Home · Social · Aggregation · Education ·
 // Settings). It opens the Mercury ?ai=1 overlay window — never a
 // workspace hop. Expand/collapse stays overlay-scoped. Close strips
-// ?ai=1 and leaves the current path. Avatar-sheet AI may stay as a
-// secondary door. Sun/moon stays desktop-only (hidden on phone).
+// ?ai=1 and leaves the current path. Ask AI is header + Home module
+// only (#465). Sun/moon stays desktop-only (hidden on phone).
 // Desktop md+ keeps switcher · theme · Ask · bell · avatar. The Ask
 // control is shared so phone and desktop do not fork a second mark.
 // Social live explore search and Education quiet courses/videos

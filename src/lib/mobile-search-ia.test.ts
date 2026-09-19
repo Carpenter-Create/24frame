@@ -27,7 +27,7 @@ vi.mock("next/link", async () => {
 import { HouseLeadChrome } from "@/components/chrome/house-lead-chrome";
 import { HouseLeadSearch } from "@/components/chrome/house-lead-search";
 import { SocialSearchSheet } from "@/components/social/social-search-sheet";
-import { SocialTopBar } from "@/components/social/social-top-bar";
+import { UserMenu } from "@/components/chrome/user-menu";
 import {
   HOUSE_LEAD_SEARCH_DESKTOP_CLASS,
   HOUSE_LEAD_SEARCH_PILL_CLASS,
@@ -137,7 +137,13 @@ describe("mobile search IA — Education under-nav + Social icon sheet", () => {
 
   it("puts the Social phone search in the trailing cluster as an icon", () => {
     const html = renderToStaticMarkup(
-      createElement(SocialTopBar, { email: "ada@example.com", name: "Ada" }),
+      createElement(HouseLeadChrome, {
+        workspace: "social",
+        logoVisible: "always",
+        search: createElement(HouseLeadSearch, { tone: "live" }),
+        trailingSearch: createElement(HouseLeadSearch, { tone: "live", presentation: "icon" }),
+        accountMenu: createElement(UserMenu, { email: "ada@example.com", name: "Ada" }),
+      }),
     );
     expect(html).toContain("data-social-header-search-icon");
     expect(html).toContain("data-social-header-actions");

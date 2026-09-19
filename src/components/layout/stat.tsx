@@ -1,7 +1,7 @@
 import { cn } from "@/lib/cn";
 
-// The ONE stat/KPI primitive (layout standard). Reconciles the old unused StatTile
-// and the hero's inline HeroStat into a single component that works on both the light
+// The ONE stat/KPI primitive (layout standard). Reconciles the hero's
+// inline HeroStat into a single component that works on both the light
 // surface and the charcoal band (surface='band'). Figures are always tabular (t-data)
 // and align on a grid — ledger-grade, per the Mercury/Coinbase bar.
 

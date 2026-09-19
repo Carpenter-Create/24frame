@@ -58,7 +58,8 @@ import {
 } from "@/lib/ask-ai-overlay";
 import { ASK_GLOBEE } from "@/lib/ask-globee";
 import { HouseLeadChrome } from "./house-lead-chrome";
-import { SocialTopBar } from "@/components/social/social-top-bar";
+import { HouseLeadSearch } from "./house-lead-search";
+import { UserMenu } from "./user-menu";
 import { AskAiOpenButton, AskAiOverlayProvider, useAskAiOverlay } from "./ask-ai-overlay";
 import { AskAssistantHeaderLink } from "./ask-assistant-header";
 
@@ -242,7 +243,13 @@ describe("AskAiOverlay", () => {
       createElement(
         AskAiOverlayProvider,
         null,
-        createElement(SocialTopBar, { email: "ada@example.com", name: "Ada" }),
+        createElement(HouseLeadChrome, {
+          workspace: "social",
+          logoVisible: "always",
+          search: createElement(HouseLeadSearch, { tone: "live" }),
+          trailingSearch: createElement(HouseLeadSearch, { tone: "live", presentation: "icon" }),
+          accountMenu: createElement(UserMenu, { email: "ada@example.com", name: "Ada" }),
+        }),
       ),
     );
     expect(social).toContain("data-ask-assistant-header");

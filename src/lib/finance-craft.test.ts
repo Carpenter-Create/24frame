@@ -12,13 +12,12 @@ import {
 import { GC_NAV, NAV } from "./nav";
 
 const glance = readFileSync("src/components/dashboard/dashboard-finance-glance.tsx", "utf8");
-const dashboard = readFileSync("src/components/finance/client-finance-dashboard.tsx", "utf8");
 const period = readFileSync("src/components/finance/client-period-dashboard.tsx", "utf8");
 const meters = readFileSync("src/components/finance/finance-meters.tsx", "utf8");
 const statementPage = readFileSync("src/app/(app)/aggregation/reports/[periodId]/page.tsx", "utf8");
 const switcher = readFileSync("src/lib/workspace-switcher.ts", "utf8");
 
-const clientSurfaces = [glance, dashboard, period, meters, statementPage];
+const clientSurfaces = [glance, period, meters, statementPage];
 
 describe("finance visual craft register", () => {
   it("keeps house 8/16/24/48 and kills band/shadow/orphan gaps on client purse surfaces", () => {
@@ -36,9 +35,7 @@ describe("finance visual craft register", () => {
     expect(FINANCE_CHART_VIEW_HEIGHT).toBe(148);
     expect(FINANCE_DOWNLOAD_CLASS).toContain("bg-accent");
     expect(glance).toContain("DashboardHomePanel");
-    expect(dashboard).toContain("data-finance-hero");
-    expect(dashboard).toContain("data-finance-contract-strip");
-    expect(dashboard).toContain("data-finance-history-chevron");
+    expect(period).toContain("data-finance-contract-strip");
     expect(period).toContain("data-finance-statement-doc");
     expect(period).toContain("data-finance-close-outcome");
     expect(statementPage).toContain("data-finance-download");
@@ -48,7 +45,6 @@ describe("finance visual craft register", () => {
 
   it("does not reopen workspace switcher chrome", () => {
     expect(glance).not.toContain("workspace-switcher");
-    expect(dashboard).not.toContain("workspace-switcher");
     expect(period).not.toContain("workspace-switcher");
     expect(switcher).toContain("APP_HEADER_TRAILING_CLUSTER_CLASS");
   });

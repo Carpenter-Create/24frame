@@ -40,7 +40,6 @@ const manifestSrc = readFileSync("src/app/manifest.ts", "utf8");
 const shellSrc = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
 const leadSrc = readFileSync("src/components/chrome/house-lead-chrome.tsx", "utf8");
 const logoSrc = readFileSync("src/components/chrome/brand-logo.tsx", "utf8");
-const topBarSrc = readFileSync("src/components/social/social-top-bar.tsx", "utf8");
 
 const PNG_SIG = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
 
@@ -100,8 +99,7 @@ describe("full 24Frame wordmark header lock", () => {
     expect(shellSrc).not.toContain("24frame-logo-");
     expect(shellSrc).not.toContain("{PRODUCT_NAME}</span>");
     expect(shellSrc).not.toContain("BrandWordmark");
-    expect(topBarSrc).not.toContain("BrandLogo");
-    expect(topBarSrc).not.toContain("24frame-logo-");
+    expect(existsSync("src/components/social/social-top-bar.tsx")).toBe(false);
     expect(layoutSrc).toContain("BRAND_ICON_SRC");
     expect(layoutSrc).toContain("BRAND_ICON_TYPE");
     expect(layoutSrc).toContain("BRAND_ICON_SIZE");
