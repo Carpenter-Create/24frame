@@ -148,7 +148,7 @@ describe("house primitives", () => {
     expect(sameOrigin).toContain(`src="${ACCOUNT_PHOTO_HREF}"`);
     expect(sameOrigin).not.toContain(">A<");
     expect(sameOrigin).not.toContain("?");
-    expect(sameOrigin).toContain('fetchpriority="high"');
+    expect(sameOrigin).toContain('fetchPriority="high"');
     expect(houseSrc).toContain('fetchPriority="high"');
   });
 });

@@ -36,7 +36,9 @@ export function stickyAccountChromeIdentity(partial: {
   const name =
     typeof partial.name === "string" && partial.name.trim().length > 0
       ? partial.name
-      : (session?.name ?? partial.name);
+      : session
+        ? session.name
+        : partial.name;
   const photoUrl = accountPhotoSrc(partial.photoUrl) ?? session?.photoUrl ?? null;
   return { email, name, photoUrl };
 }

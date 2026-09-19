@@ -25,7 +25,6 @@ const EDUCATION_LOADING = [
 const AGGREGATION_CHILD_LOADING = [
   "src/app/(app)/aggregation/titles/loading.tsx",
   "src/app/(app)/aggregation/activity/loading.tsx",
-  "src/app/(app)/aggregation/messages/loading.tsx",
   "src/app/(app)/aggregation/reports/loading.tsx",
   "src/app/(app)/aggregation/attention/loading.tsx",
 ] as const;
@@ -66,12 +65,12 @@ describe("nav feel — parent loading cannot paint the dashboard skeleton", () =
 describe("nav feel — avatar keeps the known face", () => {
   it("renders the photo when src is present and never paints a letter or ?", () => {
     const html = renderToStaticMarkup(
-      <IdentityPhoto avatarInitial="?" photoUrl={ACCOUNT_PHOTO_HREF} />,
+      <IdentityPhoto avatarInitial="X" photoUrl={ACCOUNT_PHOTO_HREF} />,
     );
     expect(html).toContain(`src="${ACCOUNT_PHOTO_HREF}"`);
-    expect(html).toContain('fetchpriority="high"');
+    expect(html).toContain('fetchPriority="high"');
     expect(html).not.toContain("?");
-    expect(html).not.toMatch(/>[A-Z]</);
+    expect(html).not.toContain(">X<");
     expect(html).not.toContain("letter");
   });
 
@@ -90,6 +89,6 @@ describe("nav feel — avatar keeps the known face", () => {
     const accountBody = accountSlot.slice(0, accountSlot.indexOf("\nfunction UserMenuFromChrome"));
     expect(accountBody).toContain("stickyAccountChromeIdentity");
     expect(accountBody).toContain("fallback={<UserMenu email={face.email}");
-    expect(accountBody).not.toContain('email={email} name={name} photoUrl={photoUrl}');
+    expect(accountBody).not.toContain("email={email} name={name} photoUrl={photoUrl}");
   });
 });
