@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-import { HOUSE_CARD_PAD, HOUSE_MODULE_CLASS } from "./house-shell";
+import { HOUSE_CARD_PAD, HOUSE_MODULE_CLASS, HOUSE_RAIL_ACTIVE_CLASS } from "./house-shell";
 import { MOBILE_CHROME_LEAD_PAD_CLASS } from "./mobile-chrome";
 import { USER_MENU, USER_MENU_ACTIONS } from "./user-menu";
 import {
@@ -252,8 +252,8 @@ describe("settings hub lock", () => {
     expect(SETTINGS_RAIL_ITEM_CLASS).not.toContain("font-normal");
     expect(SETTINGS_RAIL_ITEM_CLASS).not.toContain("t-body-sm");
     expect(SETTINGS_RAIL_CHEVRON_CLASS).toBe("size-4 shrink-0");
-    expect(SETTINGS_RAIL_ACTIVE_CLASS).toContain("bg-surface-muted");
-    expect(SETTINGS_RAIL_ACTIVE_CLASS).not.toMatch(/accent|purple|blue/);
+    expect(SETTINGS_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash font-medium text-accent");
+    expect(SETTINGS_RAIL_ACTIVE_CLASS).toBe(HOUSE_RAIL_ACTIVE_CLASS);
     expect(SETTINGS_RAIL_ABSENT).toEqual([
       "Titles",
       "Deliveries",
