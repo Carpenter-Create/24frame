@@ -51,7 +51,7 @@ describe("Adam Mercury register lock", () => {
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("appearance");
     expect(SETTINGS_HUB_NAV.map((item) => item.label)).toEqual([
       "Profile",
-      "Organization",
+      "Rights Holder",
       "Preferences",
     ]);
     expect(src("src/components/chrome/house-lead-chrome.tsx")).toContain("WorkspaceSwitcher");

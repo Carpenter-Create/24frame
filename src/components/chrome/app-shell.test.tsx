@@ -522,7 +522,7 @@ describe("AppShell /settings rail", () => {
       html.indexOf("data-house-lead-stack"),
     );
     expect(settingsRail).toContain("Profile");
-    expect(settingsRail).toContain("Organization");
+    expect(settingsRail).toContain("Rights Holder");
     expect(settingsRail).toContain("Preferences");
     expect(settingsRail).not.toContain("You");
     expect(settingsRail).not.toContain("Social");
@@ -590,7 +590,7 @@ describe("AppShell /settings rail", () => {
       expect(html).toContain('data-settings-rail=""');
       expect(html).toContain("data-settings-rail-nav");
       expect(html).toContain("Profile");
-      expect(html).toContain("Organization");
+      expect(html).toContain("Rights Holder");
       expect(html).toContain("Preferences");
       expect(html).not.toContain("data-side-nav");
       expect(html).not.toContain("data-mobile-nav-trigger");

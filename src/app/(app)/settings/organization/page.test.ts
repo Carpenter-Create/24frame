@@ -25,6 +25,7 @@ function stubMemberCan(allowed: boolean) {
   const rpc = vi.fn(async (name: string) => {
     if (name === "member_can") return { data: allowed, error: null };
     if (name === "org_team" || name === "org_pending_invites") return { data: [], error: null };
+    if (name === "org_legal_entities") return { data: [], error: null };
     throw new Error(`unexpected rpc(${name})`);
   });
   vi.mocked(createClient).mockResolvedValue({ rpc } as never);
@@ -57,9 +58,9 @@ describe("SettingsOrganizationPage", () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx(true) as never);
     const html = renderToStaticMarkup(await SettingsOrganizationPage());
     expect(html).toContain('data-settings-hub="organization"');
-    expect(html).toMatch(/<h1[^>]*>Organization<\/h1>/);
+    expect(html).toMatch(/<h1[^>]*>Rights Holder<\/h1>/);
     expect(html).not.toMatch(/<h1[^>]*>Settings<\/h1>/);
-    expect(html).not.toMatch(/<h2[^>]*>Organization<\/h2>/);
+    expect(html).not.toMatch(/<h2[^>]*>Rights Holder<\/h2>/);
     expect(html).not.toMatch(/<h3[^>]*>Company<\/h3>/);
     expect(html).toContain(SETTINGS.organization);
     expect(html).toContain(COMPANY_PROFILE.nameLabel);
@@ -111,11 +112,13 @@ describe("SettingsOrganizationPage", () => {
               role: "viewer",
               expires_at: "2026-10-03T00:00:00Z",
               created_at: "2026-09-19T00:00:00Z",
+              entity_scope: "all",
             },
           ],
           error: null,
         };
       }
+      if (name === "org_legal_entities") return { data: [], error: null };
       throw new Error(`unexpected rpc(${name})`);
     });
     vi.mocked(createClient).mockResolvedValue({ rpc } as never);

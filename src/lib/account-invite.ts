@@ -110,7 +110,7 @@ export const HOUSE_GRANT = {
   invited: INVITE_STATUS.invited,
   accepted: INVITE_STATUS.accepted,
   emailLabel: "Email",
-  orgLabel: "Organization",
+  orgLabel: "Rights Holder",
   tierLabel: "Plan",
   grant: "Grant",
   granting: "Sending…",
@@ -120,7 +120,7 @@ export const HOUSE_GRANT = {
   forbidden: "Only house staff can grant an account.",
   signedOut: "Not authenticated.",
   invalidEmail: "Enter a valid email address.",
-  invalidOrg: "Organization name is required.",
+  invalidOrg: "Rights holder name is required.",
   invalidTier: "Choose a plan.",
   sendFailed: "Could not send the grant.",
   revokeFailed: "Could not withdraw the grant.",
@@ -237,6 +237,8 @@ export const teamInviteSchema = z.object({
   orgId: z.string().uuid(),
   email: emailSchema,
   role: z.enum(TEAM_INVITE_ROLES),
+  entityScope: z.enum(["all", "selected"] as const).default("all"),
+  entityIds: z.array(z.string().uuid()).optional(),
 });
 
 export const houseGrantSchema = z.object({
