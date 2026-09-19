@@ -86,6 +86,8 @@ export function IdentityPhoto({
       src={face}
       alt=""
       className="size-full object-cover"
+      fetchPriority="high"
+      decoding="async"
       onError={() => setBrokenSrc(face)}
     />
   );

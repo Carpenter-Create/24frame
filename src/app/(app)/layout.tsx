@@ -12,6 +12,9 @@ import {
 // blocks child loading.tsx — the leftover ≥1s on Social tab clicks after #284.
 // Chrome data starts here as a promise. Access gates run in a sibling Suspense.
 // The page slot is not behind S3 Head or getActiveOrgTier.
+// No (app)/loading.tsx — that Suspense fallback painted DashboardSkeleton
+// over every Social / Education / Aggregation child hop. Destination
+// loading.tsx files own body skeletons; chrome stays mounted.
 
 async function AppAccessGate() {
   await enforceAppAccess();

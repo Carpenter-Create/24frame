@@ -43,6 +43,11 @@ import { QUEUE_HREF } from "@/lib/queue";
 import { TITLES_HREF } from "@/lib/title-public-id";
 import { resolveWorkspaceMode, type WorkspaceMode } from "@/lib/workspace";
 import { HousePhoneAppShell } from "./house-phone-app-shell";
+import {
+  rememberAccountChromeIdentity,
+  stickyAccountChromeIdentity,
+  type AccountChromeIdentity,
+} from "@/lib/account-chrome-identity";
 import { SocialRailAccountChip } from "@/components/social/social-rail-extras";
 
 type Org = { id: string; name: string };
@@ -100,6 +105,9 @@ export function AppShell({
 }) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const [workspaceCookie, setWorkspaceCookie] = useState(defaultWorkspace);
+  const [identity, setIdentity] = useState(() =>
+    stickyAccountChromeIdentity({ email, name, photoUrl }),
+  );
   const cookiesApplied = useRef(false);
   const collapseTouched = useRef(false);
   const pathname = usePathname();
@@ -115,10 +123,17 @@ export function AppShell({
     },
     [],
   );
+  const applyChromeIdentity = useCallback((next: AccountChromeIdentity) => {
+    setIdentity(rememberAccountChromeIdentity(next));
+  }, []);
   const cookieSync =
     chrome ? (
       <Suspense fallback={null}>
-        <ChromeCookieSync chrome={chrome} onCookies={applyChromeCookies} />
+        <ChromeCookieSync
+          chrome={chrome}
+          onCookies={applyChromeCookies}
+          onIdentity={applyChromeIdentity}
+        />
       </Suspense>
     ) : null;
   // Catalog list pages opt out of the centered width cap so the shared
@@ -176,7 +191,12 @@ export function AppShell({
             activityUnread={messagesUnread}
             activityItems={activityItems}
             accountMenu={
-              <AccountMenuSlot chrome={chrome} email={email} name={name} photoUrl={photoUrl} />
+              <AccountMenuSlot
+                chrome={chrome}
+                email={identity.email}
+                name={identity.name}
+                photoUrl={identity.photoUrl}
+              />
             }
           />
           <aside
@@ -200,8 +220,8 @@ export function AppShell({
               <div className="min-h-0 flex-1" />
               <SocialRailAccountChipSlot
                 chrome={chrome}
-                name={name}
-                photoUrl={photoUrl}
+                name={identity.name}
+                photoUrl={identity.photoUrl}
                 collapsed={collapsed}
               />
             </div>
@@ -313,7 +333,12 @@ export function AppShell({
         activityUnread={messagesUnread}
         activityItems={activityItems}
         accountMenu={
-          <AccountMenuSlot chrome={chrome} email={email} name={name} photoUrl={photoUrl} />
+          <AccountMenuSlot
+            chrome={chrome}
+            email={identity.email}
+            name={identity.name}
+            photoUrl={identity.photoUrl}
+          />
         }
       />
 
@@ -364,9 +389,14 @@ function SocialRailAccountChipSlot({
   photoUrl?: string | null;
   collapsed: boolean;
 }) {
-  if (!chrome) return <SocialRailAccountChip name={name} photoUrl={photoUrl} collapsed={collapsed} />;
+  const face = stickyAccountChromeIdentity({ name, photoUrl });
+  if (!chrome) {
+    return <SocialRailAccountChip name={face.name} photoUrl={face.photoUrl} collapsed={collapsed} />;
+  }
   return (
-    <Suspense fallback={<SocialRailAccountChip name={name} photoUrl={photoUrl} collapsed={collapsed} />}>
+    <Suspense
+      fallback={<SocialRailAccountChip name={face.name} photoUrl={face.photoUrl} collapsed={collapsed} />}
+    >
       <SocialRailAccountChipFromChrome chrome={chrome} collapsed={collapsed} />
     </Suspense>
   );
@@ -380,6 +410,11 @@ function SocialRailAccountChipFromChrome({
   collapsed: boolean;
 }) {
   const data = use(chrome);
+  rememberAccountChromeIdentity({
+    email: data.email,
+    name: data.name,
+    photoUrl: data.photoUrl,
+  });
   return <SocialRailAccountChip name={data.name} photoUrl={data.photoUrl} collapsed={collapsed} />;
 }
 
@@ -394,11 +429,12 @@ function AccountMenuSlot({
   name?: string | null;
   photoUrl?: string | null;
 }) {
+  const face = stickyAccountChromeIdentity({ email, name, photoUrl });
   if (!chrome) {
-    return <UserMenu email={email} name={name} photoUrl={photoUrl} />;
+    return <UserMenu email={face.email} name={face.name} photoUrl={face.photoUrl} />;
   }
   return (
-    <Suspense fallback={<UserMenu email={email} name={name} photoUrl={photoUrl} />}>
+    <Suspense fallback={<UserMenu email={face.email} name={face.name} photoUrl={face.photoUrl} />}>
       <UserMenuFromChrome chrome={chrome} />
     </Suspense>
   );
@@ -410,15 +446,22 @@ function UserMenuFromChrome({
   chrome: Promise<AppShellChrome>;
 }) {
   const data = use(chrome);
+  rememberAccountChromeIdentity({
+    email: data.email,
+    name: data.name,
+    photoUrl: data.photoUrl,
+  });
   return <UserMenu email={data.email} name={data.name} photoUrl={data.photoUrl} />;
 }
 
 function ChromeCookieSync({
   chrome,
   onCookies,
+  onIdentity,
 }: {
   chrome: Promise<AppShellChrome>;
   onCookies: (next: { defaultCollapsed: boolean; defaultWorkspace: WorkspaceMode }) => void;
+  onIdentity: (next: AccountChromeIdentity) => void;
 }) {
   const data = use(chrome);
   useEffect(() => {
@@ -426,7 +469,20 @@ function ChromeCookieSync({
       defaultCollapsed: data.defaultCollapsed,
       defaultWorkspace: data.defaultWorkspace,
     });
-  }, [data.defaultCollapsed, data.defaultWorkspace, onCookies]);
+    onIdentity({
+      email: data.email,
+      name: data.name,
+      photoUrl: data.photoUrl,
+    });
+  }, [
+    data.defaultCollapsed,
+    data.defaultWorkspace,
+    data.email,
+    data.name,
+    data.photoUrl,
+    onCookies,
+    onIdentity,
+  ]);
   return null;
 }
 
