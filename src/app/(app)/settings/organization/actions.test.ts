@@ -14,7 +14,7 @@ import { headers } from "next/headers";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 import { sendTeamInviteEmail } from "@/lib/email";
-import { inviteTeamMember } from "./actions";
+import { inviteTeamMember, addLegalEntity } from "./actions";
 
 const ORG = "22222222-2222-4222-8222-222222222222";
 
@@ -78,5 +78,56 @@ describe("inviteTeamMember", () => {
       "teammate@acme.com",
       "https://app.24frame.co/invite/accept?token=raw-token",
     );
+  });
+});
+
+describe("addLegalEntity", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("refuses a signed-out caller", async () => {
+    vi.mocked(getOrgContext).mockResolvedValue(null);
+    await expect(
+      addLegalEntity({ orgId: ORG, name: "Test LLC" }),
+    ).resolves.toEqual({ error: "Not authenticated." });
+  });
+
+  it("refuses without manage_settings", async () => {
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+    const rpc = vi.fn(async (name: string) => {
+      if (name === "member_can") return { data: false, error: null };
+      return { data: null, error: null };
+    });
+    vi.mocked(createClient).mockResolvedValue({ rpc } as never);
+    await expect(
+      addLegalEntity({ orgId: ORG, name: "Test LLC" }),
+    ).resolves.toEqual({ error: "Only the account owner can manage legal entities." });
+  });
+
+  it("creates entity when authorized", async () => {
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+    const rpc = vi.fn(async (name: string) => {
+      if (name === "member_can") return { data: true, error: null };
+      if (name === "create_legal_entity") return { data: "entity-1", error: null };
+      return { data: null, error: null };
+    });
+    vi.mocked(createClient).mockResolvedValue({ rpc } as never);
+    await expect(
+      addLegalEntity({ orgId: ORG, name: "Test LLC", entityType: "llc" }),
+    ).resolves.toEqual({});
+    expect(rpc).toHaveBeenCalledWith("create_legal_entity", {
+      p_org_id: ORG,
+      p_name: "Test LLC",
+      p_entity_type: "llc",
+      p_jurisdiction: undefined,
+    });
+  });
+
+  it("rejects empty name", async () => {
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+    await expect(
+      addLegalEntity({ orgId: ORG, name: "" }),
+    ).resolves.toEqual({ error: "Entity name is required." });
   });
 });
