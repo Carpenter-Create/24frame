@@ -91,9 +91,14 @@ export const OVERVIEW_MODULE_NEST_CLASS =
 /** Overview/Home trailing arrow tap target. Home-scoped helper — do not
  *  export as a global affordance. Glyph is HouseActionArrow (16 · Sporty
  *  Blue). Wrapper centers the glyph in an 8-token square so a phone tap
- *  hits accent-color easily without inventing a second arrow primitive. */
+ *  hits accent-color easily without inventing a second arrow primitive.
+ *
+ *  `shrink-0` keeps the anchor from collapsing under a long module
+ *  title in the header's `flex justify-between` row — without it,
+ *  Safari squeezed the anchor to 0 width and the glyph vanished (Adam
+ *  Production report 2026-09-19). */
 export const OVERVIEW_MODULE_ARROW_CLASS =
-  "inline-flex size-8 items-center justify-center text-accent";
+  "inline-flex size-8 shrink-0 items-center justify-center text-accent";
 export const OVERVIEW_RAIL_OFF_WIDTH = "0px";
 
 export const OVERVIEW_PAGE = {

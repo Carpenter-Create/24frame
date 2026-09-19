@@ -229,6 +229,15 @@ describe("OverviewHome", () => {
     expect(html).toContain("data-house-action-arrow");
     expect(html).toContain(HOUSE_ACTION_ARROW_CLASS);
     expect(html).toContain(OVERVIEW_MODULE_ARROW_CLASS);
+    // `shrink-0` is what stops Safari from squeezing the arrow anchor
+    // to zero width in the header's `flex justify-between` row —
+    // without it Adam reported the glyph missing on Production.
+    expect(OVERVIEW_MODULE_ARROW_CLASS).toContain("shrink-0");
+    expect(OVERVIEW_MODULE_ARROW_CLASS).toContain("inline-flex");
+    expect(OVERVIEW_MODULE_ARROW_CLASS).toContain("size-8");
+    expect(OVERVIEW_MODULE_ARROW_CLASS).toContain("items-center");
+    expect(OVERVIEW_MODULE_ARROW_CLASS).toContain("justify-center");
+    expect(OVERVIEW_MODULE_ARROW_CLASS).toContain("text-accent");
     expect(html).not.toContain('href="/messages"');
     expect(html).not.toContain(`href="${OVERVIEW_PAGE.aiNextHref}"`);
     expect(html).toContain(`href="${OVERVIEW_PAGE.socialHref}"`);
