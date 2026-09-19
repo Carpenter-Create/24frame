@@ -75,12 +75,16 @@ describe("house type ladder", () => {
 
 describe("house type roles", () => {
   it("locks display / title / label / body weights, tracking, and leading", () => {
-    expect(tokens).toMatch(/--type-title-weight:\s*480;/);
-    expect(tokens).toMatch(/--type-body-weight:\s*420;/);
+    // Adam 2026-09-19 Coinbase-pop A — title 600 · body 500 · display 700.
+    expect(tokens).toMatch(/--type-title-weight:\s*600;/);
+    expect(tokens).toMatch(/--type-body-weight:\s*500;/);
+    expect(tokens).not.toMatch(/--type-title-weight:\s*480;/);
+    expect(tokens).not.toMatch(/--type-body-weight:\s*420;/);
+    expect(tokens).not.toMatch(/--type-body-weight:\s*400;/);
     expect(tokens).toMatch(/--tracking-tight:\s*-0\.02em;/);
 
     expect(globals).toMatch(
-      /\.t-display\s*\{[\s\S]*?font-size:\s*var\(--text-hero\)[\s\S]*?font-weight:\s*500[\s\S]*?line-height:\s*1\.04[\s\S]*?letter-spacing:\s*-0\.035em[\s\S]*?font-variant-numeric:\s*tabular-nums/,
+      /\.t-display\s*\{[\s\S]*?font-size:\s*var\(--text-hero\)[\s\S]*?font-weight:\s*700[\s\S]*?line-height:\s*1\.04[\s\S]*?letter-spacing:\s*-0\.035em[\s\S]*?font-variant-numeric:\s*tabular-nums/,
     );
     expect(globals).toMatch(
       /\.t-title\s*\{[\s\S]*?font-weight:\s*var\(--type-title-weight\)[\s\S]*?line-height:\s*1\.15[\s\S]*?letter-spacing:\s*var\(--tracking-tight\)/,
@@ -94,6 +98,8 @@ describe("house type roles", () => {
     expect(globals).toMatch(
       /\.t-label\s*\{[\s\S]*?font-weight:\s*600[\s\S]*?letter-spacing:\s*0\.12em[\s\S]*?text-transform:\s*uppercase/,
     );
+    expect(globals).toMatch(/\.t-heading\s*\{[\s\S]*?font-weight:\s*600/);
+    expect(globals).toMatch(/\.t-subhead\s*\{[\s\S]*?font-weight:\s*600/);
     expect(globals).toMatch(/\.t-body\s*\{[\s\S]*?font-weight:\s*var\(--type-body-weight\)/);
     expect(globals).toMatch(/\.t-body-sm\s*\{[\s\S]*?font-weight:\s*var\(--type-body-weight\)/);
     expect(globals).toMatch(/\.t-lead\s*\{[\s\S]*?font-weight:\s*var\(--type-body-weight\)/);
@@ -102,15 +108,32 @@ describe("house type roles", () => {
     expect(globals).toMatch(
       /@media \(max-width: 767px\)\s*\{\s*\.t-display\s*\{[\s\S]*?font-size:\s*var\(--text-title\)/,
     );
+    expect(globals).not.toMatch(/\.t-display\s*\{[^}]*font-weight:\s*500/);
     expect(globals).not.toMatch(/\.t-title\s*\{[^}]*font-weight:\s*500/);
     expect(globals).not.toMatch(/\.t-section\s*\{[^}]*font-weight:\s*500/);
     expect(globals).not.toMatch(/\.t-statement\s*\{[^}]*font-weight:\s*500/);
+    expect(globals).not.toMatch(/\.t-heading\s*\{[^}]*font-weight:\s*500/);
+    expect(globals).not.toMatch(/\.t-subhead\s*\{[^}]*font-weight:\s*500/);
     expect(globals).not.toMatch(/\.t-body\s*\{[^}]*font-weight:\s*400/);
     expect(globals).not.toMatch(/\.t-body-sm\s*\{[^}]*font-weight:\s*400/);
     expect(globals).not.toMatch(/\.t-lead\s*\{[^}]*font-weight:\s*400/);
   });
 
-  it("kills 400-as-body and 500-as-title drift on shared house chrome", () => {
+  it("locks light-mode ink and body subpixel smoothing (Coinbase-pop A)", () => {
+    expect(tokens).toMatch(/--text:\s*#0A0B0D;/);
+    expect(tokens).toMatch(/--text-secondary:\s*#3D4450;/);
+    expect(tokens).toMatch(/--text-tertiary:\s*#6B7280;/);
+    expect(tokens).not.toMatch(/--text:\s*#14171a;/i);
+    expect(tokens).not.toMatch(/--text-secondary:\s*#5e646e;/i);
+    expect(tokens).not.toMatch(/--text-tertiary:\s*#9aa0a9;/i);
+
+    expect(globals).toMatch(/-webkit-font-smoothing:\s*auto;/);
+    expect(globals).toMatch(/-moz-osx-font-smoothing:\s*auto;/);
+    expect(globals).not.toMatch(/-webkit-font-smoothing:\s*antialiased;/);
+    expect(globals).not.toMatch(/-moz-osx-font-smoothing:\s*grayscale;/);
+  });
+
+  it("kills 400-as-body and 480-as-title drift on shared house chrome", () => {
     for (const path of HOUSE_ROLE_PATHS) {
       const src = readFileSync(path, "utf8");
       expect(src, path).not.toMatch(BODY_400_DRIFT);

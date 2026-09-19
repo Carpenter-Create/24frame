@@ -51,7 +51,7 @@ describe("Coinbase shell rematch — Adam miss list v1", () => {
     expect(tokens).toMatch(/--bg:\s*#ffffff;/);
     expect(tokens).toMatch(/--surface:\s*#ffffff;/);
     expect(tokens).toMatch(/--surface-muted:\s*#f4f4f6;/);
-    expect(tokens).toMatch(/--text:\s*#14171a;/);
+    expect(tokens).toMatch(/--text:\s*#0A0B0D;/);
     expect(tokens).toMatch(/--accent:\s*#1769ff;/);
     expect(tokens).toMatch(/--radius-lg:\s*16px;/);
     expect(tokens).not.toMatch(/--radius-lg:\s*14px;/);
