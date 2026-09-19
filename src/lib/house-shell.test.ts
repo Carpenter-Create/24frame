@@ -345,11 +345,14 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(sideNav).toContain("BrandLogo");
     for (const path of HOUSE_SHELL_COMMENT_PATHS) {
       const src = readFileSync(path, "utf8");
-      // Lock citation "Coinbase-pop A" / "Coinbase-pop A2" (Adam 2026-09-19)
+      // Lock citation "Coinbase-pop A" / "A2" / "A3" (Adam 2026-09-19)
       // may appear in tokens/globals; the product/shell still must not name
       // the reference brand.
       expect(
-        src.replaceAll("Coinbase-pop A2", "").replaceAll("Coinbase-pop A", ""),
+        src
+          .replaceAll("Coinbase-pop A3", "")
+          .replaceAll("Coinbase-pop A2", "")
+          .replaceAll("Coinbase-pop A", ""),
         path,
       ).not.toMatch(/Coinbase/i);
     }
