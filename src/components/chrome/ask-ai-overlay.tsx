@@ -21,9 +21,10 @@ import { cn } from "@/lib/cn";
 import {
   ASK_AI_OVERLAY,
   ASK_AI_OVERLAY_COMPACT_CLASS,
+  ASK_AI_OVERLAY_EXPAND_CLASS,
   ASK_AI_OVERLAY_EXPANDED_CLASS,
   ASK_AI_OVERLAY_MARK_CLASS,
-  ASK_AI_OVERLAY_PHONE_CLASS,
+  askAiOverlayPhoneClass,
   askAiCloseHref,
   askAiOverlayHref,
   askAiStateFromHref,
@@ -110,6 +111,7 @@ export function AskAiOverlayProvider({ children }: { children: ReactNode }) {
   }, [pathname, router]);
 
   const toggleAskAiExpanded = useCallback(() => {
+    // Overlay-scoped. Do not push a route or change the workspace path.
     setExpanded((current) => !current);
   }, []);
 
@@ -278,7 +280,7 @@ function AskAiOverlayPanel() {
           aria-pressed={expanded}
           aria-label={expanded ? ASK_AI_OVERLAY.collapse : ASK_AI_OVERLAY.expand}
           onClick={toggleAskAiExpanded}
-          className="hidden size-[44px] items-center justify-center text-ink-3 md:flex"
+          className={ASK_AI_OVERLAY_EXPAND_CLASS}
         >
           {expanded ? (
             <ArrowsIn className="size-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
@@ -298,7 +300,7 @@ function AskAiOverlayPanel() {
       aria-label={ASK_AI_OVERLAY.dialog}
       data-ask-ai-overlay=""
       data-ask-ai-overlay-phone=""
-      data-ask-ai-expanded="true"
+      data-ask-ai-expanded={expanded ? "true" : undefined}
       className="fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end md:hidden"
     >
       <button
@@ -307,7 +309,7 @@ function AskAiOverlayPanel() {
         className={APP_SHEET_SCRIM_CLASS}
         onClick={closeAskAi}
       />
-      <div className={cn("relative z-10 bg-surface", ASK_AI_OVERLAY_PHONE_CLASS)}>
+      <div className={cn("relative z-10 bg-surface", askAiOverlayPhoneClass(expanded))}>
         {chrome}
         {body}
       </div>

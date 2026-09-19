@@ -5,11 +5,13 @@ import {
   ASK_AI_LEGACY_PATH,
   ASK_AI_OPEN_VALUE,
   ASK_AI_OVERLAY,
+  ASK_AI_OVERLAY_EXPAND_CLASS,
   ASK_AI_OVERLAY_MARK_CLASS,
   ASK_AI_QUERY,
   ASK_AI_RETURN_STORAGE,
   askAiCloseHref,
   askAiOverlayHref,
+  askAiOverlayPhoneClass,
   askAiStateFromHref,
   fireAskAiOpenThen,
   isAskAiDesktopViewport,
@@ -54,6 +56,10 @@ describe("ask AI overlay URL", () => {
     expect(ASK_AI_QUERY).toBe("ai");
     expect(ASK_AI_OPEN_VALUE).toBe("1");
     expect(ASK_AI_OVERLAY.dialog).toBe("Ask 24Frame AI");
+    expect(askAiOverlayPhoneClass(false)).toContain("70dvh");
+    expect(askAiOverlayPhoneClass(true)).toContain("h-dvh");
+    expect(ASK_AI_OVERLAY_EXPAND_CLASS).not.toContain("hidden");
+    expect(ASK_AI_OVERLAY_EXPAND_CLASS).not.toContain("md:flex");
   });
 
   it("reads open + thread from the current search and closes back to the same path", () => {

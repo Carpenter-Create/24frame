@@ -9,9 +9,12 @@
 //   Trailing: [search if needed] [24Frame AI] [bell] [avatar]
 //   Bottom: HousePhoneBottomNav — Home · Social · Aggregation · Education
 // Phone top has no workspace pill. Bottom bar owns workspace switching.
-// 24Frame AI sits immediately left of the notification bell and opens
-// the Mercury ?ai=1 overlay. Avatar-sheet AI may stay as a secondary
-// door. Sun/moon stays desktop-only (hidden on phone).
+// 24Frame AI sits immediately left of the notification bell on every
+// house chrome path (Home · Social · Aggregation · Education ·
+// Settings). It opens the Mercury ?ai=1 overlay window — never a
+// workspace hop. Expand/collapse stays overlay-scoped. Close strips
+// ?ai=1 and leaves the current path. Avatar-sheet AI may stay as a
+// secondary door. Sun/moon stays desktop-only (hidden on phone).
 // Desktop md+ keeps switcher · theme · Ask · bell · avatar. The Ask
 // control is shared so phone and desktop do not fork a second mark.
 // Social live explore search and Education quiet courses/videos

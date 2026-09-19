@@ -524,7 +524,9 @@ describe("AppShell /settings rail", () => {
     expect(html).not.toContain("Catalog Health");
     expect(html).not.toContain("Attention");
     expect(html).not.toContain("Recent activity");
-    expect(html).not.toContain("Ask 24Frame AI");
+    const rail = html.slice(html.indexOf("data-settings-rail"), html.indexOf("data-house-lead-stack"));
+    expect(rail).not.toContain("Ask 24Frame AI");
+    expect(html).toContain("data-ask-assistant-header");
     expect(html).not.toContain("data-side-nav-ask-ai");
     expect(html).not.toContain("data-mobile-nav-ask-ai");
     expect(html).not.toContain("Queue");

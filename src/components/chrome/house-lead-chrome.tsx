@@ -121,7 +121,7 @@ export function HouseLeadChrome({
           >
             <ThemeToggle />
           </div>
-          {settingsPage ? null : <AskAssistantHeaderLink />}
+          <AskAssistantHeaderLink />
           <ActivityBell unread={activityUnread} items={activityItems} />
           {accountMenu}
         </div>
