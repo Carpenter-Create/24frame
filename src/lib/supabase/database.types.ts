@@ -40,6 +40,7 @@ export type Database = {
           accepted_by: string | null
           created_at: string
           email: string
+          entity_scope: Database["public"]["Enums"]["entity_scope"]
           expires_at: string
           id: string
           invited_by: string
@@ -58,6 +59,7 @@ export type Database = {
           accepted_by?: string | null
           created_at?: string
           email: string
+          entity_scope?: Database["public"]["Enums"]["entity_scope"]
           expires_at: string
           id?: string
           invited_by: string
@@ -76,6 +78,7 @@ export type Database = {
           accepted_by?: string | null
           created_at?: string
           email?: string
+          entity_scope?: Database["public"]["Enums"]["entity_scope"]
           expires_at?: string
           id?: string
           invited_by?: string
@@ -1783,6 +1786,122 @@ export type Database = {
           },
         ]
       }
+      legal_entities: {
+        Row: {
+          created_at: string
+          entity_type: Database["public"]["Enums"]["entity_type"]
+          id: string
+          is_default: boolean
+          jurisdiction: string | null
+          name: string
+          org_id: string
+          status: Database["public"]["Enums"]["entity_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          entity_type?: Database["public"]["Enums"]["entity_type"]
+          id?: string
+          is_default?: boolean
+          jurisdiction?: string | null
+          name: string
+          org_id: string
+          status?: Database["public"]["Enums"]["entity_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          entity_type?: Database["public"]["Enums"]["entity_type"]
+          id?: string
+          is_default?: boolean
+          jurisdiction?: string | null
+          name?: string
+          org_id?: string
+          status?: Database["public"]["Enums"]["entity_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_entities_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      membership_entity_grants: {
+        Row: {
+          created_at: string
+          id: string
+          legal_entity_id: string
+          membership_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          legal_entity_id: string
+          membership_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          legal_entity_id?: string
+          membership_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "membership_entity_grants_membership_id_fkey"
+            columns: ["membership_id"]
+            isOneToOne: false
+            referencedRelation: "memberships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "membership_entity_grants_legal_entity_id_fkey"
+            columns: ["legal_entity_id"]
+            isOneToOne: false
+            referencedRelation: "legal_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invite_entity_grants: {
+        Row: {
+          created_at: string
+          id: string
+          invite_id: string
+          legal_entity_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invite_id: string
+          legal_entity_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invite_id?: string
+          legal_entity_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invite_entity_grants_invite_id_fkey"
+            columns: ["invite_id"]
+            isOneToOne: false
+            referencedRelation: "account_invites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invite_entity_grants_legal_entity_id_fkey"
+            columns: ["legal_entity_id"]
+            isOneToOne: false
+            referencedRelation: "legal_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sales_imports: {
         Row: {
           content_hash: string
@@ -1999,6 +2118,7 @@ export type Database = {
       memberships: {
         Row: {
           created_at: string
+          entity_scope: Database["public"]["Enums"]["entity_scope"]
           id: string
           org_id: string
           role: Database["public"]["Enums"]["org_role"]
@@ -2008,6 +2128,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          entity_scope?: Database["public"]["Enums"]["entity_scope"]
           id?: string
           org_id: string
           role: Database["public"]["Enums"]["org_role"]
@@ -2017,6 +2138,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          entity_scope?: Database["public"]["Enums"]["entity_scope"]
           id?: string
           org_id?: string
           role?: Database["public"]["Enums"]["org_role"]
@@ -2771,6 +2893,7 @@ export type Database = {
           deleted_at: string | null
           deleted_by: string | null
           id: string
+          legal_entity_id: string
           org_id: string
           original_release_date: string | null
           release_date: string | null
@@ -2791,6 +2914,7 @@ export type Database = {
           deleted_at?: string | null
           deleted_by?: string | null
           id?: string
+          legal_entity_id: string
           org_id: string
           original_release_date?: string | null
           release_date?: string | null
@@ -2811,6 +2935,7 @@ export type Database = {
           deleted_at?: string | null
           deleted_by?: string | null
           id?: string
+          legal_entity_id?: string
           org_id?: string
           original_release_date?: string | null
           release_date?: string | null
@@ -3120,12 +3245,22 @@ export type Database = {
         }
         Returns: string
       }
+      create_legal_entity: {
+        Args: {
+          p_org_id: string
+          p_name: string
+          p_entity_type?: Database["public"]["Enums"]["entity_type"]
+          p_jurisdiction?: string
+        }
+        Returns: string
+      }
       create_title: {
         Args: {
           p_org_id: string
           p_original_release_date?: string
           p_release_type: Database["public"]["Enums"]["release_type"]
           p_title: string
+          p_legal_entity_id?: string
         }
         Returns: string
       }
@@ -3327,6 +3462,8 @@ export type Database = {
           p_org: string
           p_role: Database["public"]["Enums"]["org_role"]
           p_token_hash: string
+          p_entity_scope?: Database["public"]["Enums"]["entity_scope"]
+          p_entity_ids?: string[]
         }
         Returns: string
       }
@@ -3351,7 +3488,15 @@ export type Database = {
         Args: { p_capability: string; p_org: string; p_uid: string }
         Returns: boolean
       }
+      member_can_entity: {
+        Args: { p_uid: string; p_org: string; p_entity: string }
+        Returns: boolean
+      }
       member_tier_rank: { Args: { p_user: string }; Returns: number }
+      my_entity_ids: {
+        Args: { p_org: string }
+        Returns: { id: string }[]
+      }
       meets_group_access: {
         Args: { p_group: string; p_user: string }
         Returns: boolean
@@ -3416,11 +3561,24 @@ export type Database = {
         Args: { p_org_id: string }
         Returns: string[]
       }
+      org_legal_entities: {
+        Args: { p_org: string }
+        Returns: {
+          created_at: string
+          entity_type: Database["public"]["Enums"]["entity_type"]
+          id: string
+          is_default: boolean
+          jurisdiction: string | null
+          name: string
+          status: Database["public"]["Enums"]["entity_status"]
+        }[]
+      }
       org_pending_invites: {
         Args: { p_limit?: number; p_org: string }
         Returns: {
           created_at: string
           email: string
+          entity_scope: Database["public"]["Enums"]["entity_scope"]
           expires_at: string
           id: string
           role: Database["public"]["Enums"]["org_role"]
@@ -3431,6 +3589,7 @@ export type Database = {
         Returns: {
           display_name: string | null
           email: string
+          entity_scope: Database["public"]["Enums"]["entity_scope"]
           invited_at: string | null
           joined_at: string
           role: Database["public"]["Enums"]["org_role"]
@@ -3546,6 +3705,10 @@ export type Database = {
           watched_pct: number
         }[]
       }
+      scoped_title_ids: {
+        Args: { p_uid: string; p_org: string }
+        Returns: { id: string }[]
+      }
       set_delivery_status: {
         Args: {
           p_delivery_id: string
@@ -3647,6 +3810,9 @@ export type Database = {
     Enums: {
       account_invite_kind: "team" | "house_grant"
       account_invite_status: "pending" | "accepted" | "revoked" | "expired"
+      entity_scope: "all" | "selected"
+      entity_status: "active" | "archived"
+      entity_type: "sole_prop" | "llc" | "corporation" | "partnership" | "trust" | "nonprofit" | "individual" | "other"
       account_status: "active" | "deactivated" | "pending_deletion" | "erased"
       app_role: "member" | "moderator" | "admin"
       asset_kind:
@@ -3917,6 +4083,18 @@ export const Constants = {
       account_invite_kind: ["team", "house_grant"],
       account_invite_status: ["pending", "accepted", "revoked", "expired"],
       account_status: ["active", "deactivated", "pending_deletion", "erased"],
+      entity_scope: ["all", "selected"],
+      entity_status: ["active", "archived"],
+      entity_type: [
+        "sole_prop",
+        "llc",
+        "corporation",
+        "partnership",
+        "trust",
+        "nonprofit",
+        "individual",
+        "other",
+      ],
       app_role: ["member", "moderator", "admin"],
       asset_kind: [
         "master",
