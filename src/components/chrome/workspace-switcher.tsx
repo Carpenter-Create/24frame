@@ -13,6 +13,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { CaretDown } from "@phosphor-icons/react";
 
 import { AppearanceCheck } from "./appearance-check";
+import { SegmentedTrack } from "@/components/ui/segmented-track";
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import {
   overviewLeadPills,
@@ -37,6 +38,7 @@ import {
   WORKSPACE_SWITCHER_OPTION_LABEL_CLASS,
   WORKSPACE_SWITCHER_SEGMENT_LABEL_CLASS,
   WORKSPACE_SWITCHER_SEGMENTS_CLASS,
+  WORKSPACE_SWITCHER_SEGMENTS_THUMB_CLASS,
   WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS,
   type WorkspaceSwitcherPresentation,
   type WorkspaceSwitcherTone,
@@ -97,6 +99,9 @@ function WorkspaceSwitcherPills({
   const segmentRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const label = overviewTriggerLabel(pathname, workspaceSwitcherSegmentLabel(current));
   const canSwitch = pills.length > 1;
+  const activeIndex = pills.findIndex((pill) =>
+    overviewLeadSelected(pill.id, pathname, current),
+  );
 
   function onSegmentKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>, index: number) {
     if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
@@ -124,13 +129,15 @@ function WorkspaceSwitcherPills({
   }
 
   return (
-    <div
+    <SegmentedTrack
+      activeIndex={activeIndex >= 0 ? activeIndex : 0}
+      trackClass={WORKSPACE_SWITCHER_SEGMENTS_CLASS}
+      thumbClass={WORKSPACE_SWITCHER_SEGMENTS_THUMB_CLASS}
       data-workspace-switcher=""
       data-workspace-switcher-presentation="pills"
       data-workspace-switcher-pills=""
       role="tablist"
       aria-label={WORKSPACE_SWITCHER.label}
-      className={WORKSPACE_SWITCHER_SEGMENTS_CLASS}
     >
       {pills.map((pill, index) => {
         const selected = overviewLeadSelected(pill.id, pathname, current);
@@ -142,6 +149,7 @@ function WorkspaceSwitcherPills({
             }}
             type="button"
             role="tab"
+            data-segmented-item=""
             data-workspace-switcher-segment={pill.id}
             aria-selected={selected}
             tabIndex={workspaceSwitcherSegmentTabIndex(selected)}
@@ -153,7 +161,7 @@ function WorkspaceSwitcherPills({
           </button>
         );
       })}
-    </div>
+    </SegmentedTrack>
   );
 }
 

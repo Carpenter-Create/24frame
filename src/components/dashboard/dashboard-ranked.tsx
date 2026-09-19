@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { DashboardViewAll, DashboardViewAlts } from "@/components/dashboard/dashboard-view-alts";
 import { DashboardTerritoryMap } from "@/components/dashboard/dashboard-territory-map";
+import { SegmentedTrack } from "@/components/ui/segmented-track";
 import {
   DASHBOARD_CARD_PAD_LIST,
   DASHBOARD_SECTION_TITLE_CLASS,
@@ -22,6 +23,7 @@ import {
   DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_ON_CLASS,
   DASHBOARD_TOP_PILL_CLUSTER_CLASS,
+  DASHBOARD_TOP_PILL_THUMB_CLASS,
 } from "@/lib/dashboard-craft";
 import { DASHBOARD_HOME } from "@/lib/dashboard-home";
 import { TITLES_HREF } from "@/lib/title-public-id";
@@ -388,6 +390,7 @@ export function DashboardTopPerforming({
   updated?: string | null;
   defaultPill?: DashboardTopPill;
 }) {
+  const pillKeys = Object.keys(TOP_PERFORMING_PANES) as DashboardTopPill[];
   const start = TOP_PERFORMING_PANES[defaultPill] ? defaultPill : "titles";
   const [pill, setPill] = useState<DashboardTopPill>(start);
   const pane = TOP_PERFORMING_PANES[pill];
@@ -435,8 +438,13 @@ export function DashboardTopPerforming({
           ) : null}
         </div>
         <div className={cn("flex min-w-0 flex-wrap items-center", DASHBOARD_RELATED_GAP_CLASS)}>
-          <div data-dashboard-top-pills="" className={DASHBOARD_TOP_PILL_CLUSTER_CLASS}>
-            {(Object.keys(TOP_PERFORMING_PANES) as DashboardTopPill[]).map((id) => {
+          <SegmentedTrack
+            activeIndex={pillKeys.indexOf(pill)}
+            trackClass={DASHBOARD_TOP_PILL_CLUSTER_CLASS}
+            thumbClass={DASHBOARD_TOP_PILL_THUMB_CLASS}
+            data-dashboard-top-pills=""
+          >
+            {pillKeys.map((id) => {
               const on = id === pill;
               const item = TOP_PERFORMING_PANES[id];
               return (
@@ -444,6 +452,7 @@ export function DashboardTopPerforming({
                   key={id}
                   type="button"
                   aria-pressed={on}
+                  data-segmented-item=""
                   data-dashboard-top-pill={id}
                   data-dashboard-ranked={id === pill ? undefined : item.testId}
                   {...(id === "territories" ? { "data-dashboard-territory": "" } : {})}
@@ -457,7 +466,7 @@ export function DashboardTopPerforming({
                 </button>
               );
             })}
-          </div>
+          </SegmentedTrack>
           <DashboardViewAlts
             modes={pane.modes}
             mode={view}

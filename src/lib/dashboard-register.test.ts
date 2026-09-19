@@ -261,11 +261,12 @@ describe("dashboard register chrome", () => {
     expect(DASHBOARD_HOME.pillTitles).toBe("Titles");
     expect(DASHBOARD_HOME.pillPlatforms).toBe("Platforms");
     expect(DASHBOARD_HOME.pillTerritories).toBe("Territories");
-    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).toBe("bg-ink text-surface");
+    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).toBe("text-surface");
     expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).not.toContain("text-accent");
-    expect(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS).toBe("bg-surface-muted text-ink");
+    expect(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS).toBe("text-ink");
     expect(DASHBOARD_TOP_PILL_BUTTON_CLASS).toContain("rounded-full");
-    expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).toContain("gap-[var(--space-2)]");
+    expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).toContain("rounded-full");
+    expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).toContain("bg-surface-muted");
     expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).not.toContain("divide-x");
     expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).not.toContain("border-hairline");
     expect(DASHBOARD_SECTION_TITLE_CLASS).toBe("t-heading text-ink");
