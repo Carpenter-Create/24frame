@@ -24,4 +24,16 @@ describe("homeGreeting", () => {
     expect(homeGreeting({ displayName: "Ada Lovelace" })).not.toContain("undefined");
     expect(homeGreeting({ displayName: "Ada Lovelace" })).not.toContain("@");
   });
+
+  it("does not greet from createOrg's org-name mirror", () => {
+    expect(homeGreeting({ displayName: "Acme Films", orgNames: ["Acme Films"] })).toBe("Hi");
+    expect(homeGreeting({ displayName: "GCNH, LLC", orgNames: ["GCNH, LLC"] })).toBe("Hi");
+    expect(homeGreetingFirst({ displayName: "Acme Films", orgNames: ["Acme Films"] })).toBeNull();
+    expect(
+      homeGreeting({ displayName: "Ada Lovelace", orgNames: ["Acme Films"] }),
+    ).toBe("Hi, Ada");
+    expect(
+      homeGreeting({ firstName: "Ada", displayName: "Acme Films", orgNames: ["Acme Films"] }),
+    ).toBe("Hi, Ada");
+  });
 });

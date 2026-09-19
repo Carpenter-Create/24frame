@@ -129,6 +129,18 @@ describe("HomePage", () => {
     expect(readFileSync("src/app/(app)/home/page.tsx", "utf8")).toContain(
       "displayName={ctx.user.name}",
     );
+    expect(readFileSync("src/app/(app)/home/page.tsx", "utf8")).toContain(
+      "orgNames={ctx.orgs.map((row) => row.name)}",
+    );
+  });
+
+  it("does not greet from the createOrg org-name mirror on the Home H1", async () => {
+    vi.mocked(getOrgContext).mockResolvedValue(ctx({ name: "Meridian" }) as never);
+    const html = renderToStaticMarkup(await HomePage());
+    expect(html).toContain(homeGreeting({ displayName: "Meridian", orgNames: ["Meridian"] }));
+    expect(html).toMatch(/<h1 class="t-title text-ink">Hi<\/h1>/);
+    expect(html).not.toMatch(/<h1 class="t-title text-ink">Hi, Meridian<\/h1>/);
+    expect(html).not.toMatch(/<h1 class="t-title text-ink">Home<\/h1>/);
   });
 
   it("applies the shared YTD period chip on Home", async () => {

@@ -136,15 +136,23 @@ describe("OverviewHome", () => {
     const missing = renderToStaticMarkup(
       createElement(OverviewHome, homeProps({ displayName: "ada@example.com" })),
     );
+    const orgMirror = renderToStaticMarkup(
+      createElement(
+        OverviewHome,
+        homeProps({ displayName: "Acme Films", orgNames: ["Acme Films"] }),
+      ),
+    );
     expect(named).toMatch(/<h1 class="t-title text-ink">Hi, Ada<\/h1>/);
     expect(given).toMatch(/<h1 class="t-title text-ink">Hi, Ada<\/h1>/);
     expect(missing).toMatch(/<h1 class="t-title text-ink">Hi<\/h1>/);
+    expect(orgMirror).toMatch(/<h1 class="t-title text-ink">Hi<\/h1>/);
+    expect(orgMirror).not.toMatch(/<h1 class="t-title text-ink">Hi, Acme<\/h1>/);
     expect(named).not.toMatch(/<h1 class="t-title text-ink">Home<\/h1>/);
     expect(named).not.toContain("undefined");
     expect(named).not.toContain("ada@");
     expect(OVERVIEW_PAGE.title).toBe("Home");
     const homeSrc = readFileSync(new URL("./overview-home.tsx", import.meta.url), "utf8");
-    expect(homeSrc).toContain("homeGreeting({ firstName, displayName })");
+    expect(homeSrc).toContain("homeGreeting({ firstName, displayName, orgNames })");
     expect(homeSrc).not.toContain("title={OVERVIEW_PAGE.title}");
   });
 

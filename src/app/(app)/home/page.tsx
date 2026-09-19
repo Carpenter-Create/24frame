@@ -135,6 +135,7 @@ export default async function HomePage({
   return (
     <OverviewHome
       displayName={ctx.user.name}
+      orgNames={ctx.orgs.map((row) => row.name)}
       revenueCents={revenueCents}
       period={period}
       socialUnread={overviewSocialUnreadTotal(inbox.rows)}

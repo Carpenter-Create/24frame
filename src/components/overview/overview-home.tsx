@@ -52,6 +52,7 @@ import { cn } from "@/lib/cn";
 export function OverviewHome({
   firstName,
   displayName,
+  orgNames,
   revenueCents,
   period,
   socialUnread,
@@ -68,6 +69,7 @@ export function OverviewHome({
 }: {
   firstName?: string | null;
   displayName?: string | null;
+  orgNames?: readonly (string | null | undefined)[];
   revenueCents: number | null;
   period: DashboardPeriod;
   socialUnread: number;
@@ -84,7 +86,7 @@ export function OverviewHome({
 }) {
   return (
     <div data-overview="" className={cn("flex flex-col", DASHBOARD_SECTION_AIR_CLASS)}>
-      <PageHeader title={homeGreeting({ firstName, displayName })} />
+      <PageHeader title={homeGreeting({ firstName, displayName, orgNames })} />
 
       <div data-overview-layout="" className={OVERVIEW_HOME_LAYOUT_CLASS}>
       <div className={OVERVIEW_AREA_REVENUE_CLASS}>
