@@ -22,6 +22,8 @@ function ctx(over: Record<string, unknown> = {}) {
   return {
     user: { id: "owner-1", email: "owner@test.example" },
     isGcStaff: false,
+    activeOrg: { id: ORG, name: "Global Content Holdings LLC", status: "active" },
+    orgs: [{ id: ORG, name: "Global Content Holdings LLC" }],
     ...over,
   };
 }
@@ -77,6 +79,64 @@ describe("inviteTeamMember", () => {
     expect(sendTeamInviteEmail).toHaveBeenCalledWith(
       "teammate@acme.com",
       "https://app.24frame.co/invite/accept?token=raw-token",
+      "Global Content Holdings LLC",
+      "Viewer",
+    );
+  });
+
+  it("fails closed when the org name is missing", async () => {
+    vi.mocked(getOrgContext).mockResolvedValue(
+      ctx({ activeOrg: null, orgs: [] }) as never,
+    );
+    const from = vi.fn(() => ({
+      select: () => ({
+        eq: () => ({
+          maybeSingle: async () => ({ data: { name: "  " }, error: null }),
+        }),
+      }),
+    }));
+    const rpc = vi.fn(async (name: string) => {
+      if (name === "member_can") return { data: true, error: null };
+      if (name === "invite_org_member") return { data: "invite-1", error: null };
+      return { data: null, error: null };
+    });
+    vi.mocked(createClient).mockResolvedValue({ rpc, from } as never);
+    await expect(
+      inviteTeamMember({ orgId: ORG, email: "a@b.co", role: "viewer" }),
+    ).resolves.toEqual({ error: "Could not send the invite." });
+    expect(sendTeamInviteEmail).not.toHaveBeenCalled();
+    expect(rpc).not.toHaveBeenCalledWith("invite_org_member", expect.anything());
+  });
+
+  it("loads the org name from the database when context has none", async () => {
+    vi.mocked(getOrgContext).mockResolvedValue(
+      ctx({ activeOrg: null, orgs: [] }) as never,
+    );
+    const from = vi.fn(() => ({
+      select: () => ({
+        eq: () => ({
+          maybeSingle: async () => ({
+            data: { name: "North Wind Pictures" },
+            error: null,
+          }),
+        }),
+      }),
+    }));
+    const rpc = vi.fn(async (name: string) => {
+      if (name === "member_can") return { data: true, error: null };
+      if (name === "invite_org_member") return { data: "invite-1", error: null };
+      return { data: null, error: null };
+    });
+    vi.mocked(createClient).mockResolvedValue({ rpc, from } as never);
+    vi.mocked(sendTeamInviteEmail).mockResolvedValue(undefined);
+    await expect(
+      inviteTeamMember({ orgId: ORG, email: "a@b.co", role: "account_owner" }),
+    ).resolves.toEqual({});
+    expect(sendTeamInviteEmail).toHaveBeenCalledWith(
+      "a@b.co",
+      "https://app.24frame.co/invite/accept?token=raw-token",
+      "North Wind Pictures",
+      "Account owner",
     );
   });
 });

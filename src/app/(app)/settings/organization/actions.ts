@@ -2,18 +2,22 @@
 
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 import {
   ACCOUNT_INVITE,
+  resolveTeamInviteOrgName,
   revokeInviteSchema,
   teamInviteSchema,
+  teamRoleLabel,
 } from "@/lib/account-invite";
 import { LEGAL_ENTITIES } from "@/lib/legal-entities";
 import { inviteAcceptUrl, mintInviteToken } from "@/lib/account-invite-token";
 import { sendTeamInviteEmail } from "@/lib/email";
 import { isAuthSesSuppressedError } from "@/lib/auth-ses";
-import { getOrgContext } from "@/lib/supabase/context";
+import { getOrgContext, type OrgContext } from "@/lib/supabase/context";
+import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 
 const ENTITY_TYPE_VALUES = [
@@ -55,6 +59,9 @@ export async function inviteTeamMember(input: unknown): Promise<{ error?: string
   });
   if (canError || canInvite !== true) return { error: ACCOUNT_INVITE.forbidden };
 
+  const orgName = await loadTeamInviteOrgName(ctx, supabase, parsed.data.orgId);
+  if (!orgName) return { error: ACCOUNT_INVITE.sendFailed };
+
   const { token, tokenHash } = mintInviteToken();
   const { data: inviteId, error } = await supabase.rpc("invite_org_member", {
     p_org: parsed.data.orgId,
@@ -68,7 +75,12 @@ export async function inviteTeamMember(input: unknown): Promise<{ error?: string
 
   const hdrs = await headers();
   try {
-    await sendTeamInviteEmail(parsed.data.email, inviteAcceptUrl(token, hdrs.get("origin")));
+    await sendTeamInviteEmail(
+      parsed.data.email,
+      inviteAcceptUrl(token, hdrs.get("origin")),
+      orgName,
+      teamRoleLabel(parsed.data.role),
+    );
   } catch (err) {
     await Promise.resolve(supabase.rpc("revoke_account_invite", { p_id: inviteId })).catch(
       () => undefined,
@@ -149,4 +161,22 @@ export async function updateLegalEntity(input: unknown): Promise<{ error?: strin
 
   revalidatePath("/settings/organization");
   return {};
+}
+
+async function loadTeamInviteOrgName(
+  ctx: OrgContext,
+  supabase: SupabaseClient<Database>,
+  orgId: string,
+): Promise<string | null> {
+  const fromCtx =
+    resolveTeamInviteOrgName(ctx.orgs.find((org) => org.id === orgId)?.name) ??
+    (ctx.activeOrg?.id === orgId ? resolveTeamInviteOrgName(ctx.activeOrg.name) : null);
+  if (fromCtx) return fromCtx;
+
+  const { data } = await supabase
+    .from("organizations")
+    .select("name")
+    .eq("id", orgId)
+    .maybeSingle();
+  return resolveTeamInviteOrgName(data?.name);
 }

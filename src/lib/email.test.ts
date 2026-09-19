@@ -17,7 +17,6 @@ import {
   EMAIL_LOGO_URL,
   EMAIL_SITE_LABEL,
   EMAIL_SITE_URL,
-  EMAIL_SLOGAN,
 } from "./email-house";
 
 const SPORTY_BLUE = "#1769FF";
@@ -208,10 +207,8 @@ describe("Auth magic-link template", () => {
     expect(EMAIL_LOGO_URL).toBe("https://app.24frame.co/email-mark-v2.png");
     expect(html).toContain('alt="24Frame"');
     expect(html).not.toMatch(/<img[^>]*#1769FF/i);
-    expect(html).toContain(EMAIL_SLOGAN);
-    expect(html).toContain("Built for the creator class.");
-    expect(html).toMatch(/color:#3F4650[\s\S]{0,80}Built for the creator class\./);
-    expect(html).not.toMatch(/color:#9AA0A9[\s\S]{0,80}Built for the creator class\./);
+    expect(html).not.toContain("Built for the creator class.");
+    expect(html).not.toContain("EMAIL_SLOGAN");
     expect(html).not.toContain("Radically different film distribution.");
     expect(html).toContain("https://24frame.co");
     expect(html).toContain("24frame.co");
@@ -235,15 +232,48 @@ describe("Auth magic-link template", () => {
 describe("account invite mail", () => {
   const acceptUrl = "https://app.24frame.co/invite/accept?token=test-token";
 
-  it("sends a team accept link, not a marketing code", () => {
-    const { subject, text, html } = buildTeamInviteEmail(acceptUrl);
-    expect(subject).toBe("Join a team on 24Frame");
-    expect(text).toContain(acceptUrl);
+  it("sends a team accept link that names the org and role", () => {
+    const orgName = "Global Content Holdings LLC";
+    const roleLabel = "Account owner";
+    const { subject, text, html } = buildTeamInviteEmail(acceptUrl, orgName, roleLabel);
+    expect(subject).toBe("Join Global Content Holdings LLC on 24Frame");
+    expect(subject).not.toContain("Join a team on");
+    expect(text).toBe(
+      "You have been invited to join Global Content Holdings LLC on 24Frame as Account owner.\n\n" +
+        `Accept the invite: ${acceptUrl}\n`,
+    );
+    expect(html).toContain(">Join Global Content Holdings LLC</p>");
+    expect(html).toContain(
+      "You have been invited to join Global Content Holdings LLC on 24Frame as Account owner.",
+    );
+    expect(html).not.toContain("Join a team");
+    expect(html).not.toContain("join a team");
+    expect(html).not.toContain("Built for the creator class.");
     expect(html).toContain(">Accept invite</a>");
     expect(html).toContain(`href="${acceptUrl}"`);
     expect(text.toLowerCase()).not.toMatch(/invite code|promo code|referral code/);
     expect(html.toLowerCase()).not.toMatch(/seamless|frictionless|elevate|amplify/);
     expect(productResidue(html)).not.toMatch(/\bGC\b|globalcontent/i);
+  });
+
+  it("escapes org name and role in team invite HTML", () => {
+    const { subject, text, html } = buildTeamInviteEmail(
+      acceptUrl,
+      `Acme <script>alert(1)</script>`,
+      `Viewer "lead"`,
+    );
+    expect(subject).toBe(`Join Acme <script>alert(1)</script> on 24Frame`);
+    expect(text).toContain(`join Acme <script>alert(1)</script> on 24Frame as Viewer "lead"`);
+    expect(html).toContain("Join Acme &lt;script&gt;alert(1)&lt;/script&gt;");
+    expect(html).toContain("as Viewer &quot;lead&quot;");
+    expect(html).not.toContain("<script>alert(1)</script>");
+  });
+
+  it("fails closed when the org name or role is missing", () => {
+    expect(() => buildTeamInviteEmail(acceptUrl, "  ", "Viewer")).toThrow(
+      /organization name/,
+    );
+    expect(() => buildTeamInviteEmail(acceptUrl, "Acme", "   ")).toThrow(/role label/);
   });
 
   it("sends a house grant accept link", () => {

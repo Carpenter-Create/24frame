@@ -33,6 +33,10 @@ describe("InviteAcceptPage", () => {
     );
     expect(html).toContain(ACCOUNT_INVITE_ACCEPT.accept);
     expect(html).toContain("data-invite-accept-form");
+    expect(html).toContain(
+      "You have been invited to join Acme on 24Frame as Viewer.",
+    );
+    expect(html).not.toContain("this team");
     expect(html).not.toContain(ACCOUNT_INVITE_ACCEPT.wrongEmail);
     expect(html).not.toContain("data-invite-signin-form");
   });

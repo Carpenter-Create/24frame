@@ -22,6 +22,9 @@ import {
   inviteDateLabel,
   inviteEmailSubject,
   inviteEmailsMatch,
+  resolveTeamInviteOrgName,
+  teamInviteAcceptBody,
+  teamInviteBody,
   inviteStatusFromRow,
   inviteStatusLabel,
   teamIdentityName,
@@ -144,7 +147,7 @@ describe("account invite SoT", () => {
   });
 
   it("does not keep a marketing invite-code path", () => {
-    const blob = `${ACCOUNT_INVITE.team} ${ACCOUNT_INVITE.invite} ${HOUSE_GRANT.title} ${ACCOUNT_INVITE_ACCEPT.title} ${inviteEmailSubject("team")} ${inviteEmailSubject("house_grant")}`;
+    const blob = `${ACCOUNT_INVITE.team} ${ACCOUNT_INVITE.invite} ${HOUSE_GRANT.title} ${ACCOUNT_INVITE_ACCEPT.title} ${inviteEmailSubject("team", "Global Content Holdings LLC")} ${inviteEmailSubject("house_grant")}`;
     for (const absent of ACCOUNT_INVITE_ABSENT) {
       expect(blob.toLowerCase()).not.toContain(absent.toLowerCase());
     }
@@ -166,5 +169,32 @@ describe("account invite SoT", () => {
     expect(migration).toContain("expire_stale_account_invites");
     expect(migration).toContain("to_jsonb(new) - 'token_hash'");
     expect(migration).toContain("to_jsonb(old) - 'token_hash'");
+  });
+
+  it("names the org in the team invite subject and accept body", () => {
+    expect(resolveTeamInviteOrgName("  Global Content Holdings LLC  ")).toBe(
+      "Global Content Holdings LLC",
+    );
+    expect(resolveTeamInviteOrgName("   ")).toBeNull();
+    expect(inviteEmailSubject("team", "Global Content Holdings LLC")).toBe(
+      "Join Global Content Holdings LLC on 24Frame",
+    );
+    expect(inviteEmailSubject("team", "Global Content Holdings LLC")).not.toContain(
+      "Join a team on",
+    );
+    expect(inviteEmailSubject("house_grant")).toBe("Your 24Frame account");
+    expect(() => inviteEmailSubject("team", "   ")).toThrow(/organization name/);
+    expect(teamInviteBody("Global Content Holdings LLC", "Account owner")).toBe(
+      "You have been invited to join Global Content Holdings LLC on 24Frame as Account owner.",
+    );
+    expect(teamInviteAcceptBody("Global Content Holdings LLC", "Account owner")).toBe(
+      "You have been invited to join Global Content Holdings LLC on 24Frame as Account owner.",
+    );
+    expect(teamInviteAcceptBody("Acme", null)).toBe(
+      "You have been invited to join Acme on 24Frame.",
+    );
+    expect(teamInviteAcceptBody(null, "Viewer")).toBe("");
+    expect(teamRoleLabel("account_owner")).toBe("Account owner");
+    expect(teamRoleLabel("delivery_ops")).toBe("Delivery ops");
   });
 });

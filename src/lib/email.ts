@@ -46,8 +46,13 @@ export async function sendSignInWithCodeEmail(
   await sendAuthSesEmail({ to, subject, text, html });
 }
 
-export async function sendTeamInviteEmail(to: string, acceptUrl: string): Promise<void> {
-  const { subject, text, html } = buildTeamInviteEmail(acceptUrl);
+export async function sendTeamInviteEmail(
+  to: string,
+  acceptUrl: string,
+  orgName: string,
+  roleLabel: string,
+): Promise<void> {
+  const { subject, text, html } = buildTeamInviteEmail(acceptUrl, orgName, roleLabel);
   await sendAuthSesEmail({ to, subject, text, html });
 }
 

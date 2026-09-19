@@ -32,9 +32,8 @@ export const EMAIL_BUTTON_RADIUS = "8px";
 export const EMAIL_SITE_URL = "https://24frame.co";
 export const EMAIL_SITE_LABEL = "24frame.co";
 export const EMAIL_LEGAL_URL = "https://24frame.co/legal";
-// Creator-class register (Adam 2026-09-14). Slogan ink is body, not tertiary —
-// #9AA0A9 failed contrast on the uppercase line. Legal/footer stay tertiary.
-export const EMAIL_SLOGAN = "Built for the creator class.";
+// No slogan under the mark (Adam lock 2026-09-19). Empty until founder locks one.
+// Legal/footer stay tertiary.
 export const EMAIL_COPYRIGHT = `© 2026 ${PARENT_ENTITY}. All rights reserved.`;
 export const EMAIL_ADDRESS = "3839 McKinney Ave, Suite 155 #2276, Dallas, TX 75204";
 export const EMAIL_GEIST_HREF =
@@ -120,7 +119,6 @@ export function wrapHouseEmail(innerHtml: string): string {
     `<table role="presentation" cellpadding="0" cellspacing="0" width="${EMAIL_CARD_WIDTH}" style="width:${EMAIL_CARD_WIDTH}px;max-width:${EMAIL_CARD_WIDTH}px;background:${EMAIL_SURFACE};border:1px solid ${EMAIL_BORDER};border-radius:${EMAIL_CARD_RADIUS}">` +
     `<tr><td style="padding:48px 48px 40px;font-family:${FONT}">` +
     `<img src="${EMAIL_LOGO_URL}" width="${EMAIL_LOGO_DISPLAY}" height="${EMAIL_LOGO_DISPLAY}" alt="${PRODUCT_NAME}" style="display:block;border:0;width:${EMAIL_LOGO_DISPLAY}px;height:${EMAIL_LOGO_DISPLAY}px" />` +
-    `<p style="margin:16px 0 0;font-size:11px;line-height:16px;letter-spacing:0.16em;text-transform:uppercase;color:${EMAIL_BODY}">${EMAIL_SLOGAN}</p>` +
     `<div style="margin:32px 0">${hairline()}</div>` +
     innerHtml +
     `</td></tr>` +
