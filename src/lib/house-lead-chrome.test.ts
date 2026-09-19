@@ -260,6 +260,8 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(HOUSE_LEAD_STACK_CLASS).toContain("shrink-0");
     expect(HOUSE_LEAD_CHROME_CLASS).not.toContain("sticky");
     expect(HOUSE_LEAD_UNDER_NAV_CLASS).toContain("md:hidden");
+    expect(HOUSE_LEAD_UNDER_NAV_CLASS).toContain("py-[var(--space-3)]");
+    expect(HOUSE_LEAD_UNDER_NAV_CLASS).not.toContain("py-[var(--space-2)]");
     expect(HOUSE_LEAD_UNDER_NAV_CLASS).not.toMatch(/(?:^|\s)(?:max-md:)?overflow-hidden(?:\s|$)/);
     expect(HOUSE_LEAD_SHELL_CLASS).toBe(
       "flex h-dvh flex-col overflow-hidden overscroll-none",
