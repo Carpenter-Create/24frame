@@ -5,6 +5,7 @@ import { CaretRight } from "@phosphor-icons/react";
 
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
+import { SettingsPageLead } from "@/components/settings/settings-page-lead";
 import { cn } from "@/lib/cn";
 import {
   SETTINGS,
@@ -29,7 +30,7 @@ export function SettingsHubList({
       className={cn(SETTINGS_PANE_CLASS, className)}
     >
       <section data-settings-section="list" className={SETTINGS_SECTION_CLASS}>
-        <h1 className="t-section text-ink">{SETTINGS.title}</h1>
+        <SettingsPageLead title={SETTINGS.title} pathname={SETTINGS.href} />
         <nav data-settings-hub-list-nav="" className="flex flex-col gap-[var(--space-6)]">
           {SETTINGS_HUB_NAV.map((item) => (
             <Link

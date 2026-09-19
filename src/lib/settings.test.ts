@@ -9,7 +9,6 @@ import {
   HOUSE_RAIL_ITEM_CLASS,
   HOUSE_RAIL_TITLE_CLASS,
 } from "./house-shell";
-import { HOUSE_HEADER_TRAILING_HIT_CLASS } from "./house-lead-chrome";
 import { MOBILE_CHROME_LEAD_PAD_CLASS } from "./mobile-chrome";
 import { USER_MENU, USER_MENU_ACTIONS } from "./user-menu";
 import {
@@ -17,8 +16,8 @@ import {
   SETTINGS_ABSENT,
   SETTINGS_HUB_NAV,
   SETTINGS_HUB_ORDER,
-  SETTINGS_HEADER_BACK_CLASS,
   SETTINGS_HEADER_PAD_CLASS,
+  SETTINGS_PAGE_LEAD_BACK_CLASS,
   SETTINGS_DIALOG_FIELD_CLASS,
   SETTINGS_DIALOG_FORM_CLASS,
   SETTINGS_DIALOG_HELP_CLASS,
@@ -210,7 +209,7 @@ describe("settings hub lock", () => {
     expect(settingsRailActive("organization", "profile")).toBe(false);
   });
 
-  it("backs the phone header Home on the list and Settings on a pushed pane", () => {
+  it("backs the page-lead Home on the hub and Settings on a pushed pane", () => {
     expect(settingsHeaderBack("/settings")).toEqual({
       href: SETTINGS.dashboardHref,
       label: "Home",
@@ -243,21 +242,17 @@ describe("settings hub lock", () => {
       href: "/settings",
       label: "Settings",
     });
-    expect(SETTINGS_HEADER_BACK_CLASS).toBe(
-      `${HOUSE_HEADER_TRAILING_HIT_CLASS} absolute left-[var(--space-2)] top-1/2 -translate-y-1/2 text-accent md:hidden`,
-    );
-    expect(SETTINGS_HEADER_BACK_CLASS).toContain(HOUSE_HEADER_TRAILING_HIT_CLASS);
-    expect(SETTINGS_HEADER_BACK_CLASS).toContain("absolute");
-    expect(SETTINGS_HEADER_BACK_CLASS).toContain("text-accent");
-    expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("text-ink");
-    expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("text-ink-2");
-    expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("text-ink-3");
+    expect(SETTINGS.dashboardHref).toBe("/aggregation/dashboard");
+    expect(SETTINGS_PAGE_LEAD_BACK_CLASS).toBe("md:hidden");
+    expect(SETTINGS_PAGE_LEAD_BACK_CLASS).not.toContain("absolute");
+    expect(SETTINGS_PAGE_LEAD_BACK_CLASS).not.toContain("text-accent");
     expect(SETTINGS_HEADER_PAD_CLASS).toBe(MOBILE_CHROME_LEAD_PAD_CLASS);
     expect(SETTINGS_HEADER_PAD_CLASS).toBe("px-[var(--space-6)]");
-    expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("t-body");
-    expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("t-body-sm");
-    expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("t-title");
-    expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("gap-[var(--space-2)]");
+    const settingsSrc = readFileSync("src/lib/settings.ts", "utf8");
+    expect(settingsSrc).not.toContain("SETTINGS_HEADER_BACK_CLASS");
+    expect(settingsSrc).not.toContain("accent caret");
+    expect(settingsSrc).not.toContain("emblem stays");
+    expect(settingsSrc).toContain("News PageHeader ArrowLeft");
   });
 
   it("titles the body pane with the hub section — never SETTINGS.title", () => {

@@ -1,14 +1,14 @@
 import { redirect } from "next/navigation";
 
 import { HouseEmpty } from "@/components/chrome/house";
-import { Card, CardBody } from "@/components/ui/card";
-import { TeamInviteForm } from "@/components/settings/team-invite-form";
+import { SettingsPageLead } from "@/components/settings/settings-page-lead";
 import { LegalEntitiesSection } from "@/components/settings/legal-entities-section";
+import { TeamInviteForm } from "@/components/settings/team-invite-form";
+import { Card, CardBody } from "@/components/ui/card";
 import { COMPANY_PROFILE_CARD_BODY_CLASS } from "@/lib/account-profile";
 import {
   SETTINGS,
   SETTINGS_PANE_CLASS,
-  SETTINGS_PANE_TITLE_CLASS,
   SETTINGS_SECTION_CLASS,
   settingsPaneTitle,
 } from "@/lib/settings";
@@ -84,7 +84,10 @@ export async function OrganizationSettings() {
   return (
     <div data-settings-page="" data-settings-hub="organization" className={SETTINGS_PANE_CLASS}>
       <section data-settings-section="organization" className={SETTINGS_SECTION_CLASS}>
-        <h1 className={SETTINGS_PANE_TITLE_CLASS}>{settingsPaneTitle("organization")}</h1>
+        <SettingsPageLead
+          title={settingsPaneTitle("organization")}
+          pathname={SETTINGS.organizationHref}
+        />
         {ctx.activeOrg ? (
           <>
             <section

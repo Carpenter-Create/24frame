@@ -3,7 +3,8 @@ import { describe, expect, it } from "vitest";
 
 const rail = readFileSync("src/lib/nav.ts", "utf8");
 const settingsRail = readFileSync("src/components/chrome/settings-rail.tsx", "utf8");
-const settingsBack = readFileSync("src/components/chrome/settings-header-back.tsx", "utf8");
+const settingsLead = readFileSync("src/components/settings/settings-page-lead.tsx", "utf8");
+const pageHeader = readFileSync("src/components/ui/page-header.tsx", "utf8");
 const collapse = readFileSync("src/components/chrome/rail-collapse.tsx", "utf8");
 const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
 const account = readFileSync("src/components/chrome/account-sheet.tsx", "utf8");
@@ -20,9 +21,13 @@ describe("Aggregation chrome Phosphor lock + Design miss list", () => {
     expect(rail).toContain("SquaresFour");
     expect(rail).toContain("FilmSlate");
     expect(rail).toContain("PaperPlaneTilt");
-    expect(settingsBack).toContain("CaretLeft");
+    expect(pageHeader).toContain("ArrowLeft");
+    expect(pageHeader).not.toContain("CaretLeft");
+    expect(settingsLead).toContain("PageHeaderBackLink");
+    expect(settingsLead).not.toContain("CaretLeft");
     expect(settingsRail).not.toContain("lucide-react");
-    expect(settingsBack).not.toContain("lucide-react");
+    expect(settingsLead).not.toContain("lucide-react");
+    expect(shell).not.toContain("SettingsHeaderBack");
 
     expect(collapse).toContain('from "@phosphor-icons/react"');
     expect(collapse).toContain("CaretDoubleLeft");

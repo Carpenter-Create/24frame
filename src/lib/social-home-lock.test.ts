@@ -432,7 +432,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     const accountSheet = readFileSync("src/components/chrome/account-sheet.tsx", "utf8");
     const userMenu = readFileSync("src/components/chrome/user-menu.tsx", "utf8");
     const settingsRail = readFileSync("src/components/chrome/settings-rail.tsx", "utf8");
-    const settingsBack = readFileSync("src/components/chrome/settings-header-back.tsx", "utf8");
+    const settingsLead = readFileSync("src/components/settings/settings-page-lead.tsx", "utf8");
     const sideNav = readFileSync("src/components/chrome/side-nav.tsx", "utf8");
     const publicProfile = readFileSync("src/app/(app)/social/u/[handle]/page.tsx", "utf8");
     const socialStories = readFileSync("src/app/(app)/social/stories/page.tsx", "utf8");
@@ -450,8 +450,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     }
     expect(settingsProfile).toContain("AccountProfileForm");
     expect(settingsAggregation).toContain("CompanyProfileForm");
-    expect(settingsBack).toContain("CaretLeft");
-    expect(settingsBack).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
+    expect(settingsLead).toContain("PageHeaderBackLink");
+    expect(settingsLead).not.toContain("CaretLeft");
     expect(sideNav).toContain("SocialIcon");
     expect(sideNav).toContain("<NavGlyph item={item} active={active} />");
     expect(home).not.toContain("PageHeader");

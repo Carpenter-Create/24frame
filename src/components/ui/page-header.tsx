@@ -8,6 +8,26 @@ import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 
 // Ported from watershedportal PageHeader — proportions kept, rethemed: GC `.t-*`
 // type (not the Watershed serif `.page-title`), token colors.
+export type PageHeaderBackLinkProps = {
+  href: string;
+  label?: string;
+  className?: string;
+};
+
+// House SoT page-lead back — News / PageHeader ArrowLeft, not a chrome caret.
+// Settings page-lead reuses this; do not fork a third back glyph.
+export function PageHeaderBackLink({ href, label, className }: PageHeaderBackLinkProps) {
+  return (
+    <Link
+      href={href}
+      className={cn("inline-flex items-center gap-1", TEXT_ACTION_CLASS, className)}
+    >
+      <ArrowLeft className="h-4 w-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
+      {label ?? "Back"}
+    </Link>
+  );
+}
+
 type Props = {
   title: string;
   /** Uppercase accent kicker above the title — the site's "THE PLATFORM" register. */
@@ -24,15 +44,7 @@ export function PageHeader({ title, eyebrow, subtitle, backLink, actions, classN
   return (
     <div className={cn("flex items-start justify-between gap-4 pb-6", className)}>
       <div className="flex flex-col gap-1">
-        {backLink ? (
-          <Link
-            href={backLink.href}
-            className={cn("inline-flex items-center gap-1", TEXT_ACTION_CLASS)}
-          >
-            <ArrowLeft className="h-4 w-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
-            {backLink.label ?? "Back"}
-          </Link>
-        ) : null}
+        {backLink ? <PageHeaderBackLink href={backLink.href} label={backLink.label} /> : null}
         {eyebrow ? <span className="t-label text-accent">{eyebrow}</span> : null}
         <h1 className="t-title text-ink">{title}</h1>
         {subtitle ? <p className="t-body-sm text-ink-3">{subtitle}</p> : null}
