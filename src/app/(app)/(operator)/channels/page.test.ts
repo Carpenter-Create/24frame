@@ -231,7 +231,6 @@ describe("staff rail and neighboring locks", () => {
       "Recent activity",
       "Activity",
       "Reports",
-      "Ask 24Frame AI",
       "Queue",
       "Avails",
       "Licensing Status",
@@ -239,6 +238,7 @@ describe("staff rail and neighboring locks", () => {
       "Finance",
       "Clients",
     ]);
+    expect([...NAV, ...GC_NAV].map((item) => item.label)).not.toContain("Ask 24Frame AI");
   });
 
   it("does not restyle Ask Globee, client home, Access, /titles, or /deliveries", () => {

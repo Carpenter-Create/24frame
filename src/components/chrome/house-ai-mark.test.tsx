@@ -91,12 +91,13 @@ describe("HouseAiMark", () => {
     expect(html).not.toContain("Sparkle");
   });
 
-  it("is the only 24Frame AI chrome glyph — header, rail, and mobile sheet", () => {
+  it("is the only 24Frame AI chrome glyph — header and overlay, not the rail", () => {
     expect(headerSrc).toContain("<HouseAiMark");
     expect(headerSrc).toContain('register="stroke"');
     expect(headerSrc).toContain('register="fill"');
     expect(headerSrc).not.toContain("Sparkle");
     expect(navSrc).toContain('family: "house-ai"');
+    expect(navSrc).not.toContain('href: "?ai=1"');
     expect(navSrc).not.toContain("Sparkle");
     expect(glyphSrc).toContain("<HouseAiMark");
     expect(glyphSrc).not.toContain("Sparkle");

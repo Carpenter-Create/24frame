@@ -2,9 +2,9 @@ import type { NavItem } from "@/lib/nav";
 import { PhosphorChromeIcon } from "@/lib/phosphor-icon";
 import { HouseAiMark } from "./house-ai-mark";
 
-// Aggregation: Phosphor Bold idle / Fill active. Ask 24Frame AI uses
-// the house sparkle cluster. SOCIAL_NAV family stays Lucide fallback;
-// Social chrome rematch is SocialIcon.
+// Aggregation: Phosphor Bold idle / Fill active. House-ai family is
+// overlay/header chrome, not a rail row. SOCIAL_NAV family stays
+// Lucide fallback; Social chrome rematch is SocialIcon.
 export function NavGlyph({ item, active }: { item: NavItem; active: boolean }) {
   if (item.family === "lucide") {
     const Icon = item.icon;

@@ -6,11 +6,17 @@ import {
   ASK_AI_OPEN_VALUE,
   ASK_AI_OVERLAY,
   ASK_AI_OVERLAY_BODY_CLASS,
+  ASK_AI_OVERLAY_COMPACT_CLASS,
+  ASK_AI_OVERLAY_DESKTOP_COMPACT_CLASS,
+  ASK_AI_OVERLAY_DESKTOP_DOCK_CLASS,
+  ASK_AI_OVERLAY_DESKTOP_EXPANDED_CLASS,
   ASK_AI_OVERLAY_EXPAND_CLASS,
   ASK_AI_OVERLAY_MARK_CLASS,
   ASK_AI_QUERY,
   ASK_AI_RETURN_STORAGE,
   askAiCloseHref,
+  askAiOverlayDesktopClass,
+  askAiOverlayDesktopHostClass,
   askAiOverlayHref,
   askAiOverlayPhoneClass,
   askAiStateFromHref,
@@ -59,6 +65,16 @@ describe("ask AI overlay URL", () => {
     expect(ASK_AI_OVERLAY.dialog).toBe("Ask 24Frame AI");
     expect(askAiOverlayPhoneClass(false)).toContain("70dvh");
     expect(askAiOverlayPhoneClass(true)).toContain("h-dvh");
+    expect(askAiOverlayDesktopClass(false)).toBe(ASK_AI_OVERLAY_DESKTOP_COMPACT_CLASS);
+    expect(askAiOverlayDesktopClass(true)).toBe(ASK_AI_OVERLAY_DESKTOP_EXPANDED_CLASS);
+    expect(askAiOverlayDesktopClass(false)).toContain(ASK_AI_OVERLAY_DESKTOP_DOCK_CLASS);
+    expect(askAiOverlayDesktopClass(false)).toContain("bottom-[var(--space-6)]");
+    expect(askAiOverlayDesktopClass(false)).toContain("right-[var(--space-6)]");
+    expect(askAiOverlayDesktopClass(false)).not.toContain("m-auto");
+    expect(askAiOverlayDesktopClass(true)).toContain("inset-[var(--space-4)]");
+    expect(askAiOverlayDesktopHostClass(false)).toContain("pointer-events-none");
+    expect(askAiOverlayDesktopHostClass(true)).not.toContain("pointer-events-none");
+    expect(ASK_AI_OVERLAY_COMPACT_CLASS).not.toContain("40rem");
     expect(ASK_AI_OVERLAY_EXPAND_CLASS).not.toContain("hidden");
     expect(ASK_AI_OVERLAY_EXPAND_CLASS).not.toContain("md:flex");
     expect(ASK_AI_OVERLAY_BODY_CLASS).toContain("overflow-hidden");
@@ -121,7 +137,8 @@ describe("ask AI overlay URL", () => {
     expect(moduleSrc).toContain("data-overview-ai-ask");
     expect(sheetSrc).toContain("AskAiOpenButton");
     expect(sheetSrc).toContain('data-sheet-group-item="askAssistant"');
-    expect(sideNavSrc).toContain("AskAiOpenButton");
+    expect(sideNavSrc).not.toContain("AskAiOpenButton");
+    expect(sideNavSrc).not.toContain("data-side-nav-ask-ai");
     expect(destChipsSrc).toContain("housePhoneDestinations");
     expect(destChipsSrc).not.toContain("AskAiOpenButton");
     expect(destChipsSrc).not.toContain("/messages");
@@ -137,6 +154,10 @@ describe("ask AI overlay URL", () => {
     expect(closeAt).toBeGreaterThan(-1);
     expect(openAt).toBeLessThan(closeAt);
     expect(overlaySrc).toContain("data-ask-ai-overlay-phone");
+    expect(overlaySrc).toContain("data-ask-ai-overlay-desktop");
+    expect(overlaySrc).not.toContain("showModal");
+    expect(overlaySrc).not.toContain("<dialog");
+    expect(overlaySrc).not.toContain("m-auto");
 
     const order: string[] = [];
     fireAskAiOpenThen(

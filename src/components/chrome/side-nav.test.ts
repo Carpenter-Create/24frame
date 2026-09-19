@@ -20,16 +20,19 @@ describe("SideNav Access rail", () => {
       "Recent activity",
       "Activity",
       "Reports",
-      "Ask 24Frame AI",
     ]);
+    expect(NAV.map((item) => item.label)).not.toContain("Ask 24Frame AI");
     expect(NAV.map((item) => item.href)).toEqual([
       "/dashboard",
       "/titles",
       "/attention",
       "/activity",
       "/reports",
-      "?ai=1",
     ]);
+    expect(NAV.map((item) => item.href)).not.toContain("?ai=1");
+    expect(navSrc).not.toContain("AskAiOpenButton");
+    expect(navSrc).not.toContain("data-side-nav-ask-ai");
+    expect(navSrc).not.toContain("isHouseAiNavItem");
   });
 
   it("uses house --text-sm / t-body-sm labels, 16px Phosphor Bold/Fill, and an 8px item gap", () => {

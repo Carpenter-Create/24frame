@@ -40,11 +40,14 @@ vi.mock("@/app/(app)/messages/ask-globee-actions", () => ({
 import {
   ASK_AI_OVERLAY,
   ASK_AI_OVERLAY_BODY_CLASS,
+  ASK_AI_OVERLAY_DESKTOP_COMPACT_CLASS,
+  ASK_AI_OVERLAY_DESKTOP_DOCK_CLASS,
   ASK_AI_OVERLAY_EXPAND_CLASS,
   ASK_AI_OVERLAY_MARK_CLASS,
   ASK_AI_OVERLAY_PHONE_COMPACT_CLASS,
   ASK_AI_OVERLAY_PHONE_EXPANDED_CLASS,
   askAiCloseHref,
+  askAiOverlayDesktopClass,
   askAiOverlayHref,
   askAiOverlayPhoneClass,
   fireAskAiOpenThen,
@@ -149,6 +152,7 @@ describe("AskAiOverlay", () => {
     expect(html).toContain('data-sheet-group-item="askAssistant"');
     expect(html).toContain("data-ask-ai-overlay");
     expect(html).toContain("data-ask-ai-overlay-phone");
+    expect(html).toContain("data-ask-ai-overlay-desktop");
     expect(html).not.toContain('href="/messages"');
     expect(html).not.toContain('href="/dashboard"');
     expect(askAiOverlayHref("/home")).toBe("/home?ai=1");
@@ -175,10 +179,15 @@ describe("AskAiOverlay", () => {
     const open = renderOverlay();
     expect(open).toContain("data-ask-ai-overlay");
     expect(open).toContain("data-ask-ai-overlay-phone");
+    expect(open).toContain("data-ask-ai-overlay-desktop");
     expect(open).toContain("data-ask-ai-close");
     expect(open).toContain(ASK_AI_OVERLAY.dialog);
     expect(open).toContain("data-house-ai-mark");
     expect(open).toContain(ASK_AI_OVERLAY_MARK_CLASS);
+    expect(open).toContain(ASK_AI_OVERLAY_DESKTOP_COMPACT_CLASS);
+    expect(open).toContain(ASK_AI_OVERLAY_DESKTOP_DOCK_CLASS);
+    expect(open).not.toContain("<dialog");
+    expect(open).not.toContain("m-auto");
     expect(open).toContain("t-heading");
     expect(open).toContain("data-page");
     expect(open).toContain("md:hidden");
@@ -193,6 +202,7 @@ describe("AskAiOverlay", () => {
     expect(closed).not.toContain(ASK_AI_OVERLAY.dialog);
     expect(closed).not.toContain("data-ask-ai-close");
     expect(closed).not.toContain("data-ask-ai-overlay-phone");
+    expect(closed).not.toContain("data-ask-ai-overlay-desktop");
   });
 
   it("header AI is on every house chrome path and opens the same overlay window", () => {
@@ -249,9 +259,14 @@ describe("AskAiOverlay", () => {
     expect(overlaySrc).toContain("toggleAskAiExpanded");
     expect(overlaySrc).toContain("setExpanded(false)");
     expect(overlaySrc).toContain("askAiOverlayPhoneClass(expanded)");
+    expect(overlaySrc).toContain("askAiOverlayDesktopClass(expanded)");
     expect(overlaySrc).toContain("ASK_AI_OVERLAY_EXPAND_CLASS");
+    expect(overlaySrc).not.toContain("showModal");
+    expect(overlaySrc).not.toContain("<dialog");
     expect(overlaySrc).not.toContain("hidden size-[44px]");
     expect(overlaySrc).not.toContain('data-ask-ai-expanded="true"');
+    expect(askAiOverlayDesktopClass(false)).toBe(ASK_AI_OVERLAY_DESKTOP_COMPACT_CLASS);
+    expect(askAiOverlayDesktopClass(false)).toContain("bottom-[var(--space-6)]");
     expect(ASK_AI_OVERLAY_EXPAND_CLASS).toContain("flex");
     expect(ASK_AI_OVERLAY_EXPAND_CLASS).not.toContain("hidden");
     expect(ASK_AI_OVERLAY_EXPAND_CLASS).not.toContain("md:flex");
@@ -278,9 +293,11 @@ describe("AskAiOverlay", () => {
       createElement(AskAiOverlayProvider, null, createElement(BindOverlayControls)),
     );
     expect(open).toContain("data-ask-ai-overlay-phone");
+    expect(open).toContain("data-ask-ai-overlay-desktop");
     expect(open).toContain("data-ask-ai-expand");
     expect(open).toContain(ASK_AI_OVERLAY.expand);
     expect(open).toContain(ASK_AI_OVERLAY_PHONE_COMPACT_CLASS);
+    expect(open).toContain(ASK_AI_OVERLAY_DESKTOP_COMPACT_CLASS);
     expect(open).not.toContain('data-ask-ai-expanded="true"');
     expect(open).toContain("data-ask-assistant-header");
 

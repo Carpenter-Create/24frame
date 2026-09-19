@@ -7,7 +7,6 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
   type ComponentProps,
   type ReactNode,
@@ -21,10 +20,11 @@ import { cn } from "@/lib/cn";
 import {
   ASK_AI_OVERLAY,
   ASK_AI_OVERLAY_BODY_CLASS,
-  ASK_AI_OVERLAY_COMPACT_CLASS,
+  ASK_AI_OVERLAY_DESKTOP_SCRIM_CLASS,
   ASK_AI_OVERLAY_EXPAND_CLASS,
-  ASK_AI_OVERLAY_EXPANDED_CLASS,
   ASK_AI_OVERLAY_MARK_CLASS,
+  askAiOverlayDesktopClass,
+  askAiOverlayDesktopHostClass,
   askAiOverlayPhoneClass,
   askAiCloseHref,
   askAiOverlayHref,
@@ -191,7 +191,6 @@ function AskAiOverlayUrlBound({
 
 function AskAiOverlayPanel() {
   const { open, expanded, threadId, closeAskAi, toggleAskAiExpanded } = useAskAiOverlay();
-  const dialogRef = useRef<HTMLDialogElement>(null);
   const [surface, setSurface] = useState<MessagesSurface>("ask-globee-landing");
   const [initials, setInitials] = useState("?");
   const [conversations, setConversations] = useState<AskGlobeeHistoryRow[]>([]);
@@ -215,21 +214,24 @@ function AskAiOverlayPanel() {
   }, [open, threadId]);
 
   useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    const desktop = isAskAiDesktopViewport();
-    if (open && desktop && !dialog.open) dialog.showModal();
-    if ((!open || !desktop) && dialog.open) dialog.close();
-  }, [open]);
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeAskAi();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [closeAskAi, open]);
 
   useEffect(() => {
     if (!open) return;
+    const desktop = isAskAiDesktopViewport();
+    if (desktop && !expanded) return;
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = previous;
     };
-  }, [open]);
+  }, [expanded, open]);
 
   const threadSurface: MessagesSurface =
     threadId && conversation ? "ask-globee-thread" : surface;
@@ -318,29 +320,41 @@ function AskAiOverlayPanel() {
     </div>
   ) : null;
 
-  return (
-    <>
-      <dialog
-        ref={dialogRef}
-        onClose={closeAskAi}
-        onClick={(event) => {
-          if (event.target === dialogRef.current) closeAskAi();
-        }}
-        aria-label={open ? ASK_AI_OVERLAY.dialog : undefined}
-        data-ask-ai-overlay=""
-        data-ask-ai-expanded={open && expanded ? "true" : undefined}
-        hidden={!open}
-        className={cn(
-          "hidden max-md:hidden md:flex m-auto rounded-[var(--radius-lg)] border border-hairline bg-surface p-0 text-ink shadow-[var(--elevation)] backdrop:bg-black/40 backdrop:backdrop-blur-sm",
-          expanded ? ASK_AI_OVERLAY_EXPANDED_CLASS : ASK_AI_OVERLAY_COMPACT_CLASS,
-        )}
-      >
-        {open ? chrome : null}
+  const desktop = open ? (
+    <div
+      role="dialog"
+      aria-modal={expanded}
+      aria-label={ASK_AI_OVERLAY.dialog}
+      data-ask-ai-overlay=""
+      data-ask-ai-overlay-desktop=""
+      data-ask-ai-expanded={expanded ? "true" : undefined}
+      className={askAiOverlayDesktopHostClass(expanded)}
+    >
+      {expanded ? (
+        <button
+          type="button"
+          aria-label={ASK_AI_OVERLAY.collapse}
+          data-ask-ai-desktop-scrim=""
+          className={ASK_AI_OVERLAY_DESKTOP_SCRIM_CLASS}
+          onClick={toggleAskAiExpanded}
+        />
+      ) : null}
+      <div className={cn("relative z-10", askAiOverlayDesktopClass(expanded))}>
+        {chrome}
         {body}
-      </dialog>
-      {phone && typeof document !== "undefined" ? createPortal(phone, document.body) : phone}
-    </>
-  );
+      </div>
+    </div>
+  ) : null;
+
+  const overlay =
+    desktop || phone ? (
+      <>
+        {desktop}
+        {phone}
+      </>
+    ) : null;
+
+  return overlay && typeof document !== "undefined" ? createPortal(overlay, document.body) : overlay;
 }
 
 type AskAiOpenButtonProps = ComponentProps<"button"> & {

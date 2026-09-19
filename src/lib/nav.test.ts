@@ -43,8 +43,8 @@ describe("client NAV", () => {
       "/attention",
       "/activity",
       "/reports",
-      "?ai=1",
     ]);
+    expect(hrefs).not.toContain("?ai=1");
     expect(hrefs).not.toContain("/deliveries");
     expect(hrefs).not.toContain("/catalog-health");
     expect(hrefs).not.toContain("/");
@@ -79,23 +79,21 @@ describe("client NAV", () => {
     expect(clientNavCurrent("/finance").label).toBe("Reports");
     expect(clientNavCurrent("/finance/abc").label).toBe("Reports");
     expect(clientNavCurrent("/messages").label).toBe("Dashboard");
-    expect(isClientNavActive("/home", NAV.find((item) => item.family === "house-ai")!)).toBe(false);
+    expect(NAV.every((item) => !isHouseAiNavItem(item))).toBe(true);
     expect(clientNavCurrent("/queue").label).toBe("Dashboard");
   });
 
-  it("keeps Ask 24Frame AI as the house sparkle overlay trigger, not a workspace dest", () => {
-    const dest = NAV.find((item) => item.family === "house-ai");
-    expect(dest).toBeDefined();
-    expect(dest?.label).toBe("Ask 24Frame AI");
-    expect(dest?.href).toBe("?ai=1");
-    expect(dest?.family).toBe("house-ai");
-    expect(dest && isHouseAiNavItem(dest)).toBe(true);
-    expect(dest && "icon" in dest).toBe(false);
+  it("keeps Ask 24Frame AI off the Aggregation rail — overlay trigger, not a dest", () => {
+    expect(NAV.find((item) => item.family === "house-ai")).toBeUndefined();
+    expect(NAV.map((item) => item.label)).not.toContain("Ask 24Frame AI");
+    expect(NAV.map((item) => item.href)).not.toContain("?ai=1");
+    expect(NAV.filter(isHouseAiNavItem)).toHaveLength(0);
     expect(NAV.map((item) => item.label)).not.toContain("Messages");
     expect(NAV.map((item) => item.label)).not.toContain("Groups");
     expect(NAV.map((item) => item.label)).not.toContain("Casting");
     expect(NAV.map((item) => item.label)).not.toContain("Social");
     expect(navSrc).toContain('family: "house-ai"');
+    expect(navSrc).toContain("never an Aggregation");
     expect(navSrc).not.toContain("icon: Sparkle");
     expect(navSrc).not.toContain("icon: Sparkles");
     expect(navSrc).not.toContain("Sparkle");
@@ -122,10 +120,8 @@ describe("client NAV", () => {
       Wallet,
       Users,
     ]);
-    expect(NAV.filter((item) => item.family !== "house-ai").every((item) => item.family === "phosphor")).toBe(
-      true,
-    );
-    expect(NAV.filter(isHouseAiNavItem)).toHaveLength(1);
+    expect(NAV.every((item) => item.family === "phosphor")).toBe(true);
+    expect(NAV.filter(isHouseAiNavItem)).toHaveLength(0);
     expect(GC_NAV.every((item) => item.family === "phosphor")).toBe(true);
     expect(SOCIAL_NAV.every((item) => item.family === "lucide")).toBe(true);
     expect(navSrc).not.toContain("LayoutDashboard");
@@ -165,7 +161,6 @@ describe("GC_NAV", () => {
       "Recent activity",
       "Activity",
       "Reports",
-      "Ask 24Frame AI",
       "Queue",
       "Avails",
       "Licensing Status",
@@ -173,6 +168,7 @@ describe("GC_NAV", () => {
       "Finance",
       "Clients",
     ]);
+    expect([...NAV, ...GC_NAV].map((item) => item.label)).not.toContain("Ask 24Frame AI");
     expect(GC_NAV.map((item) => item.label)).not.toContain("Earn");
     expect(STAFF_RAIL_EYEBROW).toBe("Team");
     expect(STAFF_RAIL_EYEBROW).not.toBe("Staff");
@@ -193,8 +189,8 @@ describe("mobileNavDestinations", () => {
       "Recent activity",
       "Activity",
       "Reports",
-      "Ask 24Frame AI",
     ]);
+    expect(mobileNavDestinations(false).map((item) => item.label)).not.toContain("Ask 24Frame AI");
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/queue");
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/avails");
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/vendors");
@@ -211,7 +207,6 @@ describe("mobileNavDestinations", () => {
       "Recent activity",
       "Activity",
       "Reports",
-      "Ask 24Frame AI",
       "Queue",
       "Avails",
       "Licensing Status",
@@ -219,6 +214,7 @@ describe("mobileNavDestinations", () => {
       "Finance",
       "Clients",
     ]);
+    expect(mobileNavDestinations(true).map((item) => item.label)).not.toContain("Ask 24Frame AI");
   });
 
   it("shows Social destinations only in Social mode — DMs are not /messages", () => {
