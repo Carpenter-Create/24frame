@@ -97,7 +97,7 @@ describe("Coinbase shell rematch — Adam miss list v1", () => {
   });
 
   it("reserves Sporty Blue fill for CTA / rail wash / links — period is HousePageSelect", () => {
-    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).toBe("text-surface");
+    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).toBe("text-white");
     expect(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS).toBe("text-ink");
     expect(DASHBOARD_PERIOD_TRIGGER_CLASS).toContain("bg-surface-muted");
     expect(DASHBOARD_PERIOD_TRIGGER_CLASS).not.toContain("bg-accent");

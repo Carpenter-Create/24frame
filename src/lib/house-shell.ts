@@ -86,11 +86,11 @@ export const HOUSE_SEGMENTED_TRACK_CLASS =
   "relative flex shrink-0 items-center rounded-full bg-surface-muted p-[var(--space-1)]";
 
 export const HOUSE_SEGMENTED_THUMB_CLASS =
-  "pointer-events-none absolute rounded-full bg-ink transition-[left,width] duration-200 ease-out motion-reduce:transition-none";
+  "pointer-events-none absolute rounded-full bg-accent transition-[left,width] duration-200 ease-out motion-reduce:transition-none";
 
 export const HOUSE_SEGMENTED_ITEM_BASE_CLASS =
   "relative z-10 shrink-0 cursor-pointer select-none whitespace-nowrap rounded-full px-[var(--space-3)] py-[var(--space-1)] t-body-sm transition-colors duration-200 motion-reduce:transition-none";
 
-export const HOUSE_SEGMENTED_ITEM_ON_CLASS = "text-surface";
+export const HOUSE_SEGMENTED_ITEM_ON_CLASS = "text-white";
 
 export const HOUSE_SEGMENTED_ITEM_OFF_CLASS = "text-ink";

@@ -261,7 +261,7 @@ describe("dashboard register chrome", () => {
     expect(DASHBOARD_HOME.pillTitles).toBe("Titles");
     expect(DASHBOARD_HOME.pillPlatforms).toBe("Platforms");
     expect(DASHBOARD_HOME.pillTerritories).toBe("Territories");
-    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).toBe("text-surface");
+    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).toBe("text-white");
     expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).not.toContain("text-accent");
     expect(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS).toBe("text-ink");
     expect(DASHBOARD_TOP_PILL_BUTTON_CLASS).toContain("rounded-full");
