@@ -24,14 +24,16 @@ import {
   OVERVIEW_PAGE,
 } from "@/lib/overview";
 import {
-  HOUSE_PERIOD_PRESETS_CHIPS_CLASS,
   HOUSE_PERIOD_PRESETS_PHONE_CLASS,
 } from "@/lib/house-period-presets";
+import {
+  HOUSE_SEGMENTED_ITEM_BASE_CLASS,
+  HOUSE_SEGMENTED_TRACK_CLASS,
+} from "@/lib/house-shell";
 import {
   REPORTS_PAGE,
   REPORTS_PERIOD_PRESETS,
 } from "@/lib/reports";
-import { REPORTS_PERIOD_CHIP_CLASS } from "@/lib/reports-craft";
 
 function moduleLabelClass(html: string, testId: string): string {
   const chunk = moduleChunk(html, testId);
@@ -177,7 +179,7 @@ describe("OverviewHome", () => {
     expect(html).toContain(REPORTS_PAGE.quarter);
     expect(html).toContain(REPORTS_PAGE.month);
     expect(html).not.toContain("MTD");
-    expect(html).toContain(REPORTS_PERIOD_CHIP_CLASS);
+    expect(html).toContain(HOUSE_SEGMENTED_ITEM_BASE_CLASS);
     expect(html).toContain(`href="${OVERVIEW_HREF}?period=ytd"`);
     expect(html).toContain("data-overview-news");
     expect(html).toContain("data-overview-layout");
@@ -292,11 +294,14 @@ describe("OverviewHome", () => {
     expect(periodChunk).toContain("data-house-period-presets-phone");
     expect(periodChunk).toContain("data-house-page-select");
     expect(periodChunk).toContain(HOUSE_PERIOD_PRESETS_PHONE_CLASS);
-    expect(periodChunk).toContain(HOUSE_PERIOD_PRESETS_CHIPS_CLASS);
+    expect(periodChunk).toContain("rounded-full");
+    expect(periodChunk).toContain("bg-surface-muted");
+    expect(periodChunk).toContain("data-segmented-thumb");
+    expect(periodChunk).toContain("data-segmented-item");
     expect(periodChunk).not.toContain("flex-wrap");
-    expect(HOUSE_PERIOD_PRESETS_CHIPS_CLASS).toContain("hidden");
-    expect(HOUSE_PERIOD_PRESETS_CHIPS_CLASS).toContain("md:flex");
-    expect(HOUSE_PERIOD_PRESETS_CHIPS_CLASS).not.toContain("flex-wrap");
+    expect(HOUSE_SEGMENTED_TRACK_CLASS).toContain("flex");
+    expect(HOUSE_SEGMENTED_TRACK_CLASS).toContain("rounded-full");
+    expect(HOUSE_SEGMENTED_TRACK_CLASS).not.toContain("flex-wrap");
     expect(HOUSE_PERIOD_PRESETS_PHONE_CLASS).toBe("md:hidden");
     expect(homeSrc).toContain("HousePeriodPresets");
     expect(homeSrc).not.toContain("flex-wrap");
