@@ -14,7 +14,7 @@ Existing SoT, extended — not forked:
 | Plan / entitlement | `contract_terms.tier` |
 | Pending email invite | `account_invites` |
 
-`account_invites` is email-first (the user may not exist yet). Status changes only — never deleted. `token_hash` is SHA-256 of the raw token; the raw token is emailed and never stored. Authenticated SELECT on `token_hash` is revoked.
+`account_invites` is email-first (the user may not exist yet). Status changes only — never deleted. `token_hash` is SHA-256 of the raw token; the raw token is emailed and never stored. Authenticated SELECT is column-enumerated and omits `token_hash` (a table-level GRANT would still expose it).
 
 Two kinds, one table:
 

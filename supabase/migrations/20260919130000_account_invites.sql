@@ -138,8 +138,13 @@ revoke execute on function public.tg_audit_account_invites()
 
 alter table public.account_invites enable row level security;
 revoke all on public.account_invites from anon, public;
-grant select on public.account_invites to authenticated;
-revoke select (token_hash) on public.account_invites from authenticated;
+-- Table-level GRANT SELECT includes every column; REVOKE on one
+-- column does not punch a hole in that grant. Enumerate instead.
+grant select (
+  id, kind, status, email, org_id, role, tier, org_name,
+  invited_by, expires_at, accepted_at, accepted_by, revoked_at,
+  created_at, updated_at
+) on public.account_invites to authenticated;
 grant select on public.account_invites to service_role;
 
 drop policy if exists account_invites_select on public.account_invites;

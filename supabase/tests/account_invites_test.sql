@@ -235,28 +235,36 @@ select lives_ok(
   format($$ select public.accept_account_invite(%L) $$, current_setting('t.hash_grant')),
   'grant user accepts house grant');
 
+-- Accepted house_grant rows stay kind=house_grant (staff-only SELECT).
+-- Assert through the new owner's own membership / org / terms, not the invite.
 select is(
   (select m.role::text
      from public.memberships m
-     join public.account_invites i on i.org_id = m.org_id
-    where i.id = current_setting('t.grant_id')::uuid
-      and m.user_id = current_setting('t.grant_user')::uuid),
+    where m.user_id = current_setting('t.grant_user')::uuid
+      and m.role = 'account_owner'
+      and m.status = 'active'),
   'account_owner',
   'comp accept creates account_owner membership');
+
+select set_config('t.grant_org',
+  (select m.org_id::text
+     from public.memberships m
+    where m.user_id = current_setting('t.grant_user')::uuid
+      and m.role = 'account_owner'
+      and m.status = 'active'),
+  true);
 
 select is(
   (select o.status::text
      from public.organizations o
-     join public.account_invites i on i.org_id = o.id
-    where i.id = current_setting('t.grant_id')::uuid),
+    where o.id = current_setting('t.grant_org')::uuid),
   'active',
   'comp org is active');
 
 select is(
   (select t.tier::text
      from public.contract_terms t
-     join public.account_invites i on i.org_id = t.org_id
-    where i.id = current_setting('t.grant_id')::uuid
+    where t.org_id = current_setting('t.grant_org')::uuid
       and t.effective_to is null),
   'pro',
   'comp writes contract_terms.tier = pro');
@@ -264,16 +272,14 @@ select is(
 select is(
   (select t.revenue_share_rate_bp
      from public.contract_terms t
-     join public.account_invites i on i.org_id = t.org_id
-    where i.id = current_setting('t.grant_id')::uuid
+    where t.org_id = current_setting('t.grant_org')::uuid
       and t.effective_to is null),
   public.tier_revenue_share_bp('pro'),
   'comp snapshots the live tier rate');
 
 select is(
   (select count(*)::int from public.subscriptions s
-     join public.account_invites i on i.org_id = s.org_id
-    where i.id = current_setting('t.grant_id')::uuid),
+    where s.org_id = current_setting('t.grant_org')::uuid),
   0,
   'comp does not invent a Stripe subscription');
 
@@ -281,12 +287,12 @@ select is(
 select lives_ok(
   format(
     $$ select public.invite_org_member(
-         (select org_id from public.account_invites where id = %L::uuid),
+         %L::uuid,
          'teammate@test.example',
          'viewer',
          %L
        ) $$,
-    current_setting('t.grant_id'), current_setting('t.hash_bad')
+    current_setting('t.grant_org'), current_setting('t.hash_bad')
   ),
   'comp account owner can invite their own team');
 

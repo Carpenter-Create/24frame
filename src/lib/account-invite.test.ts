@@ -78,6 +78,8 @@ describe("account invite SoT", () => {
     expect(migration).toContain("gc_can(v_uid, 'operate')");
     expect(migration).not.toContain("invite_code");
     expect(migration).not.toContain("promo_code");
-    expect(migration).toContain("revoke select (token_hash)");
+    expect(migration).toContain("grant select (");
+    expect(migration).toMatch(/grant select \(\s*id, kind, status, email/);
+    expect(migration).not.toMatch(/grant select \([^)]*token_hash/);
   });
 });
