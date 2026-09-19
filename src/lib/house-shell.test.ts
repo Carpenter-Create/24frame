@@ -197,7 +197,10 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(leadSearch).toContain("HOUSE_SEARCH_PILL_CLASS");
     expect(leadSearch).toContain("placeholder:text-ink-3");
     expect(leadSearch).toContain("text-ink-3");
-    expect(searchSheet).toContain("text-ink-2");
+    // Phone search glyph rides the shared HOUSE_PHONE_CHROME_IDLE_INK_CLASS
+    // ("text-ink-2") so it matches the bottom-bar off state — no ink drift
+    // across search / AI / bell in the phone top trailing cluster.
+    expect(searchSheet).toContain("HOUSE_PHONE_CHROME_IDLE_INK_CLASS");
     expect(leadSearch).not.toContain("rounded-[10px]");
     expect(socialTopBar).toContain("HouseLeadChrome");
     expect(socialChrome).toContain("HOUSE_FILTER_ON_CLASS");

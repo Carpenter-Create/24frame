@@ -7,6 +7,7 @@ import { CaretLeft, MagnifyingGlass, X } from "@phosphor-icons/react";
 import {
   HOUSE_PHONE_CHROME_ICON_CLASS,
   HOUSE_PHONE_CHROME_ICON_WEIGHT,
+  HOUSE_PHONE_CHROME_IDLE_INK_CLASS,
 } from "@/lib/house-phone-shell";
 import { HOUSE_ICON_BUTTON_CLASS } from "@/lib/house-shell";
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
@@ -61,7 +62,7 @@ export function SocialSearchSheet({
         data-house-lead-search-icon=""
         data-social-header-search-icon=""
         className={cn(
-          "flex size-8 items-center justify-center text-ink-2 md:hidden",
+          `flex size-8 items-center justify-center ${HOUSE_PHONE_CHROME_IDLE_INK_CLASS} md:hidden`,
           HOUSE_ICON_BUTTON_CLASS,
         )}
         onClick={() => setOpen(true)}

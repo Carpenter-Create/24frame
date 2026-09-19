@@ -7,10 +7,12 @@ import {
   HOUSE_AI_MARK_REGULAR_STROKE_WIDTH,
   HOUSE_AI_MARK_SRC,
   HOUSE_AI_MARK_VIEWBOX,
+  HOUSE_AI_MARK_VIEWBOX_SIZE,
 } from "@/lib/house-ai-mark";
 import {
   HOUSE_HEADER_TRAILING_DESKTOP_CLASS,
   HOUSE_HEADER_TRAILING_PHONE_CLASS,
+  HOUSE_PHONE_CHROME_IDLE_INK_CLASS,
 } from "@/lib/house-phone-shell";
 import { PHOSPHOR_CHROME_ICON_CLASS } from "@/lib/phosphor-icon";
 import { AskAssistantHeaderLink } from "./ask-assistant-header";
@@ -54,7 +56,20 @@ describe("HouseAiMark", () => {
   });
 
   it("strokes the same paths at Regular optical for the phone header register", () => {
-    expect(HOUSE_AI_MARK_REGULAR_STROKE_WIDTH).toBe((16 * 146) / 256);
+    // Optical Regular — bumped 25% over pure Phosphor Regular (16 on 256)
+    // to compensate for `strokeLinejoin="round"` softening on the sparkle
+    // arms' ~59° tips. Still well below Phosphor Bold (24 on 256), so the
+    // AI mark sits at Regular-optical parity with the Mercury bar — never
+    // Bold, never fill. See src/lib/house-ai-mark.ts for the derivation.
+    expect(HOUSE_AI_MARK_REGULAR_STROKE_WIDTH).toBe(
+      (20 * HOUSE_AI_MARK_VIEWBOX_SIZE) / 256,
+    );
+    expect(HOUSE_AI_MARK_REGULAR_STROKE_WIDTH).toBeGreaterThan(
+      (16 * HOUSE_AI_MARK_VIEWBOX_SIZE) / 256,
+    );
+    expect(HOUSE_AI_MARK_REGULAR_STROKE_WIDTH).toBeLessThan(
+      (24 * HOUSE_AI_MARK_VIEWBOX_SIZE) / 256,
+    );
     const html = renderToStaticMarkup(
       <HouseAiMark className={HOUSE_HEADER_TRAILING_PHONE_CLASS} register="stroke" />,
     );
@@ -64,6 +79,11 @@ describe("HouseAiMark", () => {
     expect(html).toContain(`stroke-width="${HOUSE_AI_MARK_REGULAR_STROKE_WIDTH}"`);
     expect(html).toContain("size-6");
     expect(html).toContain("md:hidden");
+    // Ink parity — phone AI stroke rides the bottom-bar idle ink so the
+    // sparkles read at the same optical weight as the Mercury Regular
+    // glyphs sitting below. Desktop fill keeps HOUSE_THEME_TOGGLE_CLASS.
+    expect(html).toContain(HOUSE_PHONE_CHROME_IDLE_INK_CLASS);
+    expect(HOUSE_PHONE_CHROME_IDLE_INK_CLASS).toBe("text-ink-2");
     expect(html.match(/<path /g)?.length).toBe(3);
     for (const d of HOUSE_AI_MARK_PATHS) {
       expect(html).toContain(`d="${d}"`);
