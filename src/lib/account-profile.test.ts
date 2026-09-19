@@ -38,9 +38,8 @@ describe("account profile copy", () => {
     expect(COMPANY_PROFILE.subtitle).toBe(
       "Name of the company aggregation workspace on this account.",
     );
-    expect(COMPANY_PROFILE.href).toBe("/account/company");
+    expect(COMPANY_PROFILE.href).toBe("/settings/organization");
     expect(ACCOUNT_PROFILE.href).toBe(USER_MENU.profileHref);
-    expect(COMPANY_PROFILE.href).toBe("/account/company");
     expect(ACCOUNT_PROFILE).not.toHaveProperty("subtitle");
     expect(ACCOUNT_PROFILE.uploadPhoto).toBe("Upload photo");
     expect(ACCOUNT_PROFILE.emailHint).toBe("Sign-in email. It cannot be changed here.");

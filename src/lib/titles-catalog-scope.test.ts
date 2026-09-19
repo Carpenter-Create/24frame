@@ -20,8 +20,6 @@ const OTHER_PAGES = [
   "src/app/(app)/aggregation/titles/[id]/page.tsx",
   "src/components/dashboard/dashboard-home.tsx",
   "src/components/ui/card.tsx",
-  "src/components/layout/data-table.tsx",
-  "src/components/layout/banner-card.tsx",
 ] as const;
 
 const TITLES_COMMENT_PATHS = [

@@ -33,18 +33,13 @@ import {
   currentAskAiSearch,
   fireAskAiOpenThen,
   isAskAiDesktopViewport,
-  isLegacyAskAiPath,
-  legacyAskAiFallbackPath,
-  legacyAskAiInterceptHref,
   readAskAiOverlay,
-  readAskAiReturnPath,
   rememberAskAiReturnPath,
   type AskAiOverlayState,
 } from "@/lib/ask-ai-overlay";
 import { ASK_GLOBEE, canRenderAskGlobeeLanding, type MessagesSurface } from "@/lib/ask-globee";
 import type { AskGlobeeHistoryRow, AskGlobeeStoredMessage } from "@/lib/ask-globee-conversations";
 import { loadAskAiOverlay } from "@/app/(app)/aggregation/messages/ask-globee-actions";
-import { parseWorkspaceCookie } from "@/lib/workspace";
 import { DIALOG_HEADER_CLASS } from "@/components/ui/dialog";
 import { APP_SHEET_SCRIM_CLASS } from "@/lib/house-sheet";
 import { AccessUpgradeGate } from "@/components/messages/access-upgrade-gate";
@@ -78,12 +73,6 @@ export function useAskAiOverlay() {
   return useContext(AskAiOverlayContext);
 }
 
-function workspaceCookieMode(): ReturnType<typeof parseWorkspaceCookie> {
-  if (typeof document === "undefined") return "aggregation";
-  const match = document.cookie.match(/(?:^|; )24frame_workspace=([^;]*)/);
-  return parseWorkspaceCookie(match?.[1] ? decodeURIComponent(match[1]) : null);
-}
-
 export function AskAiOverlayProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -99,7 +88,6 @@ export function AskAiOverlayProvider({ children }: { children: ReactNode }) {
 
   const openAskAi = useCallback(
     (threadId?: string | null) => {
-      if (isLegacyAskAiPath(pathname)) return;
       setExpanded(false);
       const href = askAiOverlayHref(pathname, currentAskAiSearch(), threadId);
       setOptimistic(askAiStateFromHref(href));
@@ -121,14 +109,14 @@ export function AskAiOverlayProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(
     () => ({
-      open: Boolean(optimistic?.open) && !isLegacyAskAiPath(pathname),
+      open: Boolean(optimistic?.open),
       expanded,
       threadId: optimistic?.threadId ?? null,
       openAskAi,
       closeAskAi,
       toggleAskAiExpanded,
     }),
-    [closeAskAi, expanded, openAskAi, optimistic, pathname, toggleAskAiExpanded],
+    [closeAskAi, expanded, openAskAi, optimistic, toggleAskAiExpanded],
   );
 
   return (
@@ -148,25 +136,11 @@ function AskAiOverlayUrlBound({
   optimistic: AskAiOverlayState | null;
   onOptimistic: (next: AskAiOverlayState | null) => void;
 }) {
-  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const router = useRouter();
   const parent = useAskAiOverlay();
   const url = readAskAiOverlay(searchParams);
-  const open = (optimistic ? optimistic.open : url.open) && !isLegacyAskAiPath(pathname);
+  const open = optimistic ? optimistic.open : url.open;
   const threadId = optimistic ? optimistic.threadId : url.threadId;
-
-  useEffect(() => {
-    if (!isLegacyAskAiPath(pathname)) return;
-    const fallback = legacyAskAiFallbackPath(workspaceCookieMode());
-    const href = legacyAskAiInterceptHref({
-      threadId: url.threadId ?? searchParams.get("thread"),
-      returnPath: readAskAiReturnPath(fallback),
-      workspace: workspaceCookieMode(),
-    });
-    onOptimistic(askAiStateFromHref(href));
-    router.replace(href);
-  }, [onOptimistic, pathname, router, searchParams, url.threadId]);
 
   useEffect(() => {
     if (!optimistic) return;
