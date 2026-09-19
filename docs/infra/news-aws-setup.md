@@ -16,7 +16,18 @@ enclosure first; when `image_url` is null, ingest OG-scrapes the
 article (`og:image` / `twitter:image`, 12s timeout, desktop Chrome UA,
 1.5MB HTML cap, fail-soft). Override the cap with server-only
 `NEWS_OG_MAX_BYTES` (bytes, positive integer). Per-source CloudWatch
-counters: `ogAttempted`, `ogFilled`, `ogMiss`.
+counters: `ogAttempted`, `ogFilled`, `ogMiss`, `droppedByTopic`.
+
+Feed is **film + tv only**. Cross-beat trades (Hollywood Reporter,
+Variety, Deadline) ingest **section RSS** — never the site-wide feed
+— so music and other beats do not enter the pipeline. Film-first
+trades (IndieWire, JoBlo, No Film School, Filmmaker Magazine,
+MovieMaker, Film Threat, Screen Daily) and tv-first (TVLine) keep one
+on-beat feed each. A second **ingest topic gate** in
+`src/lib/news-topic.ts` re-classifies every candidate (URL path →
+host → RSS categories → title tokens → on-beat source default) and
+drops music / other before Dynamo write. Adam glance: hard-refresh
+Home; music headlines stop appearing.
 
 ## Proposed resources (not created)
 
@@ -114,11 +125,21 @@ Do **not** create these from this PR.
 ## Ops
 
 **Add a source.** Append one row to `NEWS_SOURCES` in `src/lib/news.ts`
-(id, label, verified feed URL, `enabled: true`). Do not invent a feed.
+(id, label, verified `feedUrls` array, `enabled: true`). Prefer one
+source id with multiple **section** feed URLs (film + tv) over the
+site-wide feed. Do not invent a feed.
 
 **Kill a source.** Set `enabled: false` on that const row (deploy), or
 Put `SOURCE#<id>` / `HEALTH` with `enabled=false` (no deploy). Ingest
 skips it; existing rows age out via TTL / the 90-day query window.
+
+**Topic gate.** `src/lib/news-topic.ts` classifies every candidate as
+`film` / `tv` / `music` / `other`. Only `film` + `tv` reach the store.
+Per-source CloudWatch counter `droppedByTopic` reports how many
+candidates the gate rejected on the last run. A Hollywood Reporter
+music URL (e.g. Chris Brown) stays out even if the section feed
+routing regresses; a THR movies URL passes. Adjust heuristics by
+editing the token / segment lists — do not disable the gate.
 
 **After merge, MUST redeploy Lambda `24frame-news-ingest`.**
 Merge ≠ live for ingest. Code on `main` does not run until founder /
@@ -181,6 +202,22 @@ pnpm exec tsx scripts/news/backfill-joblo-image-urls.ts --apply --fill-known
 
 Then invoke ingest once to soak new JoBlo items and OG-scrape remaining
 nulls still in the live feed. Do not proxy through CloudFront for this.
+
+**Music / other row purge (one-shot).** Rows that ingested before the
+topic gate landed can be evicted without waiting for TTL. Dry-run
+default. CoS only:
+
+```
+# preview rows the current classifier drops
+pnpm exec tsx scripts/news/purge-music-rows.ts
+# DeleteItem the drop set (identity: pk = ITEM#<canonical_url>)
+pnpm exec tsx scripts/news/purge-music-rows.ts --apply
+```
+
+The next scheduled Lambda invoke does the rest — section feeds and
+the gate keep music from re-entering. If a live feed still lists a
+music item (Hollywood Reporter section RSS occasionally cross-posts),
+the gate drops it on write.
 
 ## Still founder-gated
 

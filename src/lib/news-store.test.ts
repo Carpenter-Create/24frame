@@ -15,6 +15,7 @@ function item(n: number, published_at: string): NormalizedNewsItem {
     source: "variety",
     published_at,
     image_url: null,
+    topic: "film",
   };
 }
 
@@ -58,6 +59,7 @@ function floodItem(image_url: string | null): NormalizedNewsItem {
     source: "joblo",
     published_at: "2026-09-17T12:00:00.000Z",
     image_url,
+    topic: "film",
   };
 }
 
