@@ -14,7 +14,7 @@ import {
   NOTIFICATION_PREF_WRAP_CLASS,
   NOTIFICATION_PREFS,
 } from "@/lib/notification-prefs";
-import { SETTINGS } from "@/lib/settings";
+import { SETTINGS, SETTINGS_CONTENT_MEASURE_CLASS } from "@/lib/settings";
 import { getOrgContext } from "@/lib/supabase/context";
 import SettingsPreferencesPage from "./page";
 
@@ -71,6 +71,10 @@ describe("SettingsPreferencesPage", () => {
     expect(html).toContain(`href="${SETTINGS.notificationsHref}"`);
     expect(html).toContain("md:hidden");
     expect(html).toContain("hidden md:block");
+    expect(html).toContain('data-settings-pref-desktop=""');
+    expect(html).toContain(SETTINGS_CONTENT_MEASURE_CLASS);
+    expect(paneSrc).toContain("SETTINGS_CONTENT_MEASURE_CLASS");
+    expect(paneSrc).toContain("constrained measure");
     expect(html).toContain('data-settings-section="appearance"');
     expect(html).toContain('data-settings-appearance=""');
     expect(html).toContain(APPEARANCE.title);

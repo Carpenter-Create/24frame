@@ -11,6 +11,7 @@ import type { NotificationPrefs } from "@/lib/notification-prefs";
 import { NOTIFICATION_PREFS } from "@/lib/notification-prefs";
 import {
   SETTINGS,
+  SETTINGS_CONTENT_MEASURE_CLASS,
   SETTINGS_DRILL_LIST_CLASS,
   SETTINGS_PANE_CLASS,
   SETTINGS_QUIET_ROW_CLASS,
@@ -26,7 +27,9 @@ import {
 //
 // Mobile: Coinbase drill-in. Theme and Notifications are one-row
 // summaries. Instant switches stay on the Notifications pane.
-// Desktop keeps the on-page Appearance card and matrix.
+// Desktop keeps the on-page Appearance card and matrix inside
+// SETTINGS_CONTENT_MEASURE_CLASS — constrained measure, not
+// full-bleed rows.
 
 export function PreferencesSettings({
   isGcStaff = false,
@@ -52,7 +55,10 @@ export function PreferencesSettings({
             href={SETTINGS.notificationsHref}
           />
         </div>
-        <div className={`hidden md:block ${SETTINGS_SECTION_CLASS}`}>
+        <div
+          data-settings-pref-desktop=""
+          className={`hidden md:block ${SETTINGS_SECTION_CLASS} ${SETTINGS_CONTENT_MEASURE_CLASS}`}
+        >
           <AppearancePreferences />
           <NotificationPreferences initialPrefs={prefs} />
         </div>
