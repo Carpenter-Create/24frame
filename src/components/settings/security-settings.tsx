@@ -1,12 +1,19 @@
-import { HouseEmpty } from "@/components/chrome/house";
-import { cn } from "@/lib/cn";
 import {
+  Envelope,
+  EnvelopeOpen,
+  SignIn,
+  SignOut,
+  UserMinus,
+  UserSwitch,
+  Warning,
+} from "@phosphor-icons/react/ssr";
+
+import { HouseEmpty } from "@/components/chrome/house";
+import {
+  SECURITY_EVENT_ICON_CLASS,
   SECURITY_EVENT_LABELS,
   SECURITY_HISTORY_COLUMNS,
   SECURITY_PAGE,
-  SECURITY_PILL_BASE_CLASS,
-  SECURITY_PILL_CLASSES,
-  securityEventPillTone,
   type SecurityEventKind,
 } from "@/lib/security-events";
 import {
@@ -28,7 +35,6 @@ export type SecurityEventRow = {
 const DATE_FMT = new Intl.DateTimeFormat("en-US", {
   month: "2-digit",
   day: "2-digit",
-  year: "numeric",
   hour: "numeric",
   minute: "2-digit",
   hour12: true,
@@ -48,6 +54,26 @@ function formatIp(ip: string | null, country: string | null): string {
   return ip;
 }
 
+function EventIcon({ kind }: { kind: SecurityEventKind }) {
+  const cls = SECURITY_EVENT_ICON_CLASS;
+  switch (kind) {
+    case "sign_in":
+      return <SignIn className={cls} />;
+    case "sign_out":
+      return <SignOut className={cls} />;
+    case "failed_sign_in":
+      return <Warning className={cls} />;
+    case "invite_sent":
+      return <Envelope className={cls} />;
+    case "invite_accepted":
+      return <EnvelopeOpen className={cls} />;
+    case "invite_withdrawn":
+      return <UserMinus className={cls} />;
+    case "role_change":
+      return <UserSwitch className={cls} />;
+  }
+}
+
 export function SecuritySettings({ events }: { events: SecurityEventRow[] }) {
   return (
     <div data-settings-page="" data-settings-hub="security" className={SETTINGS_PANE_CLASS}>
@@ -57,56 +83,52 @@ export function SecuritySettings({ events }: { events: SecurityEventRow[] }) {
         {events.length === 0 ? (
           <HouseEmpty>{SECURITY_PAGE.emptyState}</HouseEmpty>
         ) : (
-          <div className="overflow-x-auto">
-            <table data-security-history="" className="w-full text-left">
-              <thead>
-                <tr className="border-b border-hairline">
-                  {SECURITY_HISTORY_COLUMNS.map((col) => (
-                    <th
-                      key={col}
-                      className="whitespace-nowrap px-[var(--space-3)] py-[var(--space-3)] t-body-sm font-medium text-ink-3"
-                    >
-                      {col}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {events.map((ev) => {
-                  const tone = securityEventPillTone(ev.event_kind);
-                  return (
+          <>
+            <h2 className="t-body font-medium text-ink">{SECURITY_PAGE.historyHeading}</h2>
+            <div className="overflow-x-auto">
+              <table data-security-history="" className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-hairline">
+                    {SECURITY_HISTORY_COLUMNS.map((col) => (
+                      <th
+                        key={col}
+                        className="whitespace-nowrap px-0 py-[var(--space-3)] pr-[var(--space-6)] t-body-sm font-medium text-ink-3"
+                      >
+                        {col}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {events.map((ev) => (
                     <tr
                       key={ev.id}
                       className="border-b border-hairline last:border-b-0"
                     >
-                      <td className="whitespace-nowrap px-[var(--space-3)] py-[var(--space-3)] t-body-sm text-ink">
+                      <td className="whitespace-nowrap px-0 py-[var(--space-3)] pr-[var(--space-6)] t-body-sm text-ink">
                         {formatEventDate(ev.occurred_at)}
                       </td>
-                      <td className="px-[var(--space-3)] py-[var(--space-3)] t-body-sm text-ink">
+                      <td className="px-0 py-[var(--space-3)] pr-[var(--space-6)] t-body-sm text-ink">
                         {ev.actor_name ?? "—"}
                       </td>
-                      <td className="px-[var(--space-3)] py-[var(--space-3)]">
-                        <span
-                          className={cn(
-                            SECURITY_PILL_BASE_CLASS,
-                            SECURITY_PILL_CLASSES[tone],
-                          )}
-                        >
+                      <td className="px-0 py-[var(--space-3)] pr-[var(--space-6)]">
+                        <span className="inline-flex items-center gap-[var(--space-2)] t-body-sm text-ink">
+                          <EventIcon kind={ev.event_kind} />
                           {SECURITY_EVENT_LABELS[ev.event_kind]}
                         </span>
                       </td>
-                      <td className="px-[var(--space-3)] py-[var(--space-3)] t-body-sm text-ink-2">
+                      <td className="px-0 py-[var(--space-3)] pr-[var(--space-6)] t-body-sm text-ink">
                         {ev.source_label ?? "—"}
                       </td>
-                      <td className="whitespace-nowrap px-[var(--space-3)] py-[var(--space-3)] t-body-sm text-ink-2">
+                      <td className="whitespace-nowrap px-0 py-[var(--space-3)] t-body-sm text-ink-2">
                         {formatIp(ev.ip, ev.country)}
                       </td>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </section>
     </div>

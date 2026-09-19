@@ -3,13 +3,11 @@ import { describe, expect, it } from "vitest";
 
 import {
   parseSourceLabel,
+  SECURITY_EVENT_ICON_CLASS,
   SECURITY_EVENT_KINDS,
   SECURITY_EVENT_LABELS,
   SECURITY_HISTORY_COLUMNS,
   SECURITY_PAGE,
-  SECURITY_PILL_BASE_CLASS,
-  SECURITY_PILL_CLASSES,
-  securityEventPillTone,
 } from "./security-events";
 
 describe("security events", () => {
@@ -53,26 +51,31 @@ describe("security events", () => {
     expect(SECURITY_PAGE.title).toBe("Security");
     expect(SECURITY_PAGE.href).toBe("/settings/security");
     expect(SECURITY_PAGE.subtitle).toBe("Activity history for your organization.");
+    expect(SECURITY_PAGE.historyHeading).toBe("Activity history from all users");
     expect(SECURITY_PAGE.emptyState).toBe("No security events recorded yet.");
   });
 
   it("does not use Mercury skin tokens or hardcoded hex", () => {
     const src = readFileSync("src/lib/security-events.ts", "utf8");
     expect(src).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
-    expect(SECURITY_PILL_BASE_CLASS).not.toMatch(/mercury/i);
-    for (const cls of Object.values(SECURITY_PILL_CLASSES)) {
-      expect(cls).not.toMatch(/#[0-9a-fA-F]{3,8}/);
-    }
+    expect(src).not.toMatch(/mercury/i);
   });
 
-  it("assigns pill tones per event kind", () => {
-    expect(securityEventPillTone("sign_in")).toBe("success");
-    expect(securityEventPillTone("invite_accepted")).toBe("success");
-    expect(securityEventPillTone("failed_sign_in")).toBe("warning");
-    expect(securityEventPillTone("sign_out")).toBe("neutral");
-    expect(securityEventPillTone("invite_sent")).toBe("neutral");
-    expect(securityEventPillTone("invite_withdrawn")).toBe("neutral");
-    expect(securityEventPillTone("role_change")).toBe("neutral");
+  it("uses plain icon+label for events — no pill backgrounds", () => {
+    const src = readFileSync("src/lib/security-events.ts", "utf8");
+    expect(src).not.toContain("SECURITY_PILL");
+    expect(src).not.toContain("rounded-full");
+    expect(src).not.toContain("bg-amber");
+    expect(SECURITY_EVENT_ICON_CLASS).toBe("size-4 shrink-0");
+  });
+
+  it("uses Phosphor SSR icons in the component — not invented glyphs", () => {
+    const component = readFileSync("src/components/settings/security-settings.tsx", "utf8");
+    expect(component).toContain("@phosphor-icons/react/ssr");
+    expect(component).toContain("SignIn");
+    expect(component).toContain("SignOut");
+    expect(component).toContain("Warning");
+    expect(component).not.toContain("SECURITY_PILL");
   });
 });
 
