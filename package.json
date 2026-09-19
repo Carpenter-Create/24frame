@@ -17,7 +17,9 @@
     "governance:check": "pnpm run governance:check:policy && pnpm run governance:archive-test",
     "governance:ci:scans": "node scripts/governance/scan-secrets.mjs --canary && node scripts/governance/scan-secrets.mjs --mode full-history",
     "governance": "pnpm run governance:check && node scripts/governance/scan-secrets.mjs --mode staged",
-    "governance:ci": "pnpm run governance:check && pnpm run governance:ci:scans"
+    "governance:ci": "pnpm run governance:check && pnpm run governance:ci:scans",
+    "hygiene:bundle-grep": "node scripts/security/client-bundle-grep.mjs",
+    "hygiene:bundle-report": "node scripts/hygiene/bundle-report.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.1134.0",
