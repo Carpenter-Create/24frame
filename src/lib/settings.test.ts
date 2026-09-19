@@ -193,6 +193,9 @@ describe("settings hub lock", () => {
     expect(isSettingsPath("/settings/organization")).toBe(true);
     expect(isSettingsPath("/settings/preferences")).toBe(true);
     expect(isSettingsPath("/settings/agreements")).toBe(true);
+    expect(isSettingsPath("/settings/security")).toBe(true);
+    expect(isSettingsPath("/settings/team")).toBe(true);
+    expect(isSettingsPath("/settings/future-pane")).toBe(true);
     expect(isSettingsPath("/")).toBe(false);
     expect(isSettingsPath("/titles")).toBe(false);
     expect(isSettingsPath("/help")).toBe(false);
@@ -225,6 +228,18 @@ describe("settings hub lock", () => {
       label: "Settings",
     });
     expect(settingsHeaderBack("/settings/agreements")).toEqual({
+      href: "/settings",
+      label: "Settings",
+    });
+    expect(settingsHeaderBack("/settings/security")).toEqual({
+      href: "/settings",
+      label: "Settings",
+    });
+    expect(settingsHeaderBack("/settings/team")).toEqual({
+      href: "/settings",
+      label: "Settings",
+    });
+    expect(settingsHeaderBack("/settings/future-pane")).toEqual({
       href: "/settings",
       label: "Settings",
     });

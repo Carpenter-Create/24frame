@@ -147,6 +147,8 @@ export function AppShell({
   // 48/16 house inset (HOME-width-lock.md). Aggregation Dashboard uses
   // the Education house measure — Adam 2026-09-18.
   const homePage = pathname === "/" || homeChrome;
+  // Mobile Settings detail back = house SoT. isSettingsPath lights
+  // SettingsHeaderBack for every current and future /settings/* route.
   const settingsPage = isSettingsPath(pathname);
   const socialChrome = workspace === "social" && !settingsPage && !homeChrome;
 
@@ -310,6 +312,9 @@ export function AppShell({
         workspace={workspace}
         settingsPage={settingsPage}
         logoVisible="always"
+        // Mobile Settings detail back = house SoT. isSettingsPath
+        // mounts SettingsHeaderBack once; every current and future
+        // /settings/* route inherits. No per-page copy.
         leadingNav={settingsPage ? <SettingsHeaderBack /> : undefined}
         destChips={
           settingsPage || homeChrome ? undefined : (

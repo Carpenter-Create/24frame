@@ -158,10 +158,12 @@ export const SETTINGS_PREF_BLOCK_CLASS =
   `${HOUSE_MODULE_CLASS} ${HOUSE_CARD_PAD} flex flex-col gap-[var(--space-3)]`;
 export const SETTINGS_PREF_TITLE_CLASS = "t-heading text-ink";
 
-// 623:785 — phone header left slot. Hub list back is Home. Pushed
-// section back is Settings (list). Hidden at md, where the rail stays.
-// Adam lock (widget): accent caret only — no Settings label. Same
-// 16 hit as trailing AI/bell. Absolute so the 24 emblem does not shift.
+// Mobile Settings detail back = house SoT. AppShell mounts one
+// SettingsHeaderBack for every isSettingsPath — current panes and
+// any future /settings/* route. No per-page copy. Hub list back is
+// Home. Pushed pane back is Settings (href). Accent caret only; 16
+// hit matches trailing AI/bell; absolute so the 24 emblem stays put.
+// Hidden at md, where the rail stays.
 export const SETTINGS_HEADER_PAD_CLASS = MOBILE_CHROME_LEAD_PAD_CLASS;
 export const SETTINGS_HEADER_BACK_CLASS =
   `${HOUSE_HEADER_TRAILING_HIT_CLASS} absolute left-[var(--space-2)] top-1/2 -translate-y-1/2 text-accent md:hidden`;

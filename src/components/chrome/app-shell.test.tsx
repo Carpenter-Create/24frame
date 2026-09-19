@@ -609,6 +609,8 @@ describe("AppShell /settings rail", () => {
       "/settings/preferences",
       "/settings/agreements",
       "/settings/refer",
+      "/settings/security",
+      "/settings/team",
     ]) {
       navigation.pathname = path;
       const html = renderShell();

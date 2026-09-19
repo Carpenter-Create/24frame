@@ -98,6 +98,9 @@ describe("SettingsHeaderBack", () => {
       "/settings/preferences",
       "/settings/agreements",
       "/settings/refer",
+      "/settings/security",
+      "/settings/team",
+      "/settings/future-pane",
     ]) {
       navigation.pathname = pathname;
       const html = renderToStaticMarkup(<SettingsHeaderBack />);
@@ -115,7 +118,10 @@ describe("SettingsHeaderBack", () => {
     expect(src).not.toContain("/settings/agreements");
     expect(src).not.toContain("/settings/refer");
     expect(src).not.toContain("Appearance");
+    expect(shellSrc).toContain("isSettingsPath");
+    expect(shellSrc).toContain("leadingNav={settingsPage ? <SettingsHeaderBack /> : undefined}");
     expect(shellSrc).toContain("<SettingsHeaderBack />");
+    expect(shellSrc).toContain("Mobile Settings detail back = house SoT");
     expect(
       readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../lib/house-lead-chrome.ts"), "utf8"),
     ).toContain("HOUSE_LEAD_PHONE_PAD_CLASS");
@@ -129,5 +135,18 @@ describe("SettingsHeaderBack", () => {
     expect(railSrc).toContain("SETTINGS_HUB_NAV");
     expect(railSrc).not.toContain("SettingsHeaderBack");
     expect(railSrc).not.toContain("623:785");
+    for (const path of [
+      "src/app/(app)/settings/page.tsx",
+      "src/app/(app)/settings/profile/page.tsx",
+      "src/app/(app)/settings/organization/page.tsx",
+      "src/app/(app)/settings/preferences/page.tsx",
+      "src/app/(app)/settings/agreements/page.tsx",
+      "src/app/(app)/settings/refer/page.tsx",
+    ]) {
+      const page = readFileSync(path, "utf8");
+      expect(page).not.toContain("SettingsHeaderBack");
+      expect(page).not.toContain("data-settings-header-back");
+      expect(page).not.toContain("CaretLeft");
+    }
   });
 });

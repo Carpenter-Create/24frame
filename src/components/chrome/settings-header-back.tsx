@@ -12,10 +12,9 @@ import {
   settingsHeaderBack,
 } from "@/lib/settings";
 
-// Phone Settings left slot. Hub list → Home. Pushed section →
-// Settings list. Accent caret only — label is aria, not visible type.
-// 16 Phosphor caret-left Bold. Same hit as trailing AI/bell.
-// Absolute so the 24 emblem stays put. Hidden at md, where the rail stays.
+// Mobile Settings detail back = house SoT. AppShell mounts this
+// once for every isSettingsPath. Accent caret only — label is aria.
+// 16 Phosphor caret-left Bold. Absolute so the 24 emblem stays put.
 export function SettingsHeaderBack() {
   const back = settingsHeaderBack(usePathname());
 
