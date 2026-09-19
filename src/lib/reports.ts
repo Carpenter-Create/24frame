@@ -12,7 +12,7 @@ export const REPORTS_PAGE = {
   title: "Reports",
   subtitle: "Activity across Aggregation.",
   empty: "No report data for this period yet.",
-  noOrg: "Choose an organization to read reports.",
+  noOrg: "Choose a rights holder to read reports.",
   allTime: "All time",
   thisMonth: "This month",
   ytd: "YTD",

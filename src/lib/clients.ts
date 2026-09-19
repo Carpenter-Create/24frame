@@ -64,9 +64,9 @@ export type ClientOrg = {
 };
 
 export const CLIENT_PROFILE = {
-  infoTitle: "Organization",
+  infoTitle: "Rights Holder",
   peopleTitle: "People",
-  peopleEmpty: "No people on this organization.",
+  peopleEmpty: "No people on this rights holder.",
   status: "Status",
   plan: "Plan",
   termEnds: "Term ends",

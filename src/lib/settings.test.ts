@@ -60,7 +60,7 @@ describe("settings hub lock", () => {
     expect(SETTINGS.href).toBe(USER_MENU.settingsHref);
     expect(SETTINGS.profile).toBe("Profile");
     expect(SETTINGS.profileHref).toBe("/settings/profile");
-    expect(SETTINGS.organization).toBe("Organization");
+    expect(SETTINGS.organization).toBe("Rights Holder");
     expect(SETTINGS.organizationHref).toBe("/settings/organization");
     expect(SETTINGS.preferences).toBe("Preferences");
     expect(SETTINGS.preferencesHref).toBe("/settings/preferences");
@@ -95,7 +95,7 @@ describe("settings hub lock", () => {
     ]);
     expect(SETTINGS_HUB_NAV.map((item) => item.label)).toEqual([
       "Profile",
-      "Organization",
+      "Rights Holder",
       "Preferences",
     ]);
     expect(SETTINGS_HUB_NAV.map((item) => item.href)).toEqual([
@@ -227,7 +227,7 @@ describe("settings hub lock", () => {
 
   it("titles the body pane with the hub section — never SETTINGS.title", () => {
     expect(settingsPaneTitle("profile")).toBe("Profile");
-    expect(settingsPaneTitle("organization")).toBe("Organization");
+    expect(settingsPaneTitle("organization")).toBe("Rights Holder");
     expect(settingsPaneTitle("preferences")).toBe("Preferences");
     expect(settingsPaneTitle("profile")).not.toBe(SETTINGS.title);
     expect(SETTINGS_PANE_TITLE_CLASS).toBe("t-section text-ink");

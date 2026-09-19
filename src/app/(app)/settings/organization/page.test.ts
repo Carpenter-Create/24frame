@@ -57,9 +57,9 @@ describe("SettingsOrganizationPage", () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx(true) as never);
     const html = renderToStaticMarkup(await SettingsOrganizationPage());
     expect(html).toContain('data-settings-hub="organization"');
-    expect(html).toMatch(/<h1[^>]*>Organization<\/h1>/);
+    expect(html).toMatch(/<h1[^>]*>Rights Holder<\/h1>/);
     expect(html).not.toMatch(/<h1[^>]*>Settings<\/h1>/);
-    expect(html).not.toMatch(/<h2[^>]*>Organization<\/h2>/);
+    expect(html).not.toMatch(/<h2[^>]*>Rights Holder<\/h2>/);
     expect(html).not.toMatch(/<h3[^>]*>Company<\/h3>/);
     expect(html).toContain(SETTINGS.organization);
     expect(html).toContain(COMPANY_PROFILE.nameLabel);
