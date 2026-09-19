@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -32,7 +32,6 @@ const here = dirname(fileURLToPath(import.meta.url));
 const src = readFileSync(join(here, "workspace-switcher.tsx"), "utf8");
 const shellSrc = readFileSync(join(here, "app-shell.tsx"), "utf8");
 const leadSrc = readFileSync(join(here, "house-lead-chrome.tsx"), "utf8");
-const topBarSrc = readFileSync(join(here, "../social/social-top-bar.tsx"), "utf8");
 const sheetSrc = readFileSync(join(here, "account-sheet.tsx"), "utf8");
 const userMenuSrc = readFileSync(join(here, "../../lib/user-menu.ts"), "utf8");
 
@@ -53,9 +52,8 @@ describe("workspace switcher header control", () => {
     expect(shellSrc).not.toContain("data-workspace-switcher-rail");
     expect(shellSrc).not.toContain("data-workspace-switcher-lead");
     expect(leadSrc.indexOf("<WorkspaceSwitcher")).toBeLessThan(leadSrc.indexOf("{accountMenu}"));
-    expect(topBarSrc).toContain("HouseLeadChrome");
-    expect(topBarSrc).toContain('workspace="social"');
-    expect(topBarSrc).toContain("<UserMenu");
+    expect(existsSync("src/components/social/social-top-bar.tsx")).toBe(false);
+    expect(leadSrc).toContain("HouseLeadChrome");
     const triggerAt = src.lastIndexOf("data-workspace-switcher-trigger");
     const triggerSrc = src.slice(triggerAt, src.indexOf("</button>", triggerAt));
     expect(triggerSrc).toContain("data-workspace-switcher-current");
@@ -315,8 +313,7 @@ describe("workspace switcher placement", () => {
     expect(leadSrc.indexOf("data-app-header-trailing")).toBeLessThan(
       leadSrc.indexOf('presentation="pills"'),
     );
-    expect(topBarSrc).toContain("HouseLeadChrome");
-    expect(topBarSrc).toContain('workspace="social"');
+    expect(existsSync("src/components/social/social-top-bar.tsx")).toBe(false);
     expect(leadSrc).toContain("HOUSE_LEAD_CHROME_CLASS");
     expect(leadSrc).not.toContain("APP_HEADER_WORKSPACE_PILL_HOST_CLASS");
   });

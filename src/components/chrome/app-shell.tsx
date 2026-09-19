@@ -272,8 +272,8 @@ export function AppShell({
           row. Phone top has no workspace pill.
           HousePhoneBottomNav switches Home · Social · Aggregation ·
           Education. Trailing is search (if needed) · 24Frame AI ·
-          bell · avatar. Theme stays desktop-only. Avatar-sheet AI
-          may stay as a secondary door. Emblem links workspace
+          bell · avatar. Theme stays desktop-only. Ask AI is header
+          + Home module only (#465). Emblem links workspace
           home; it does not open the rail. Desktop keeps Ask · theme ·
           switcher + avatar. Brand sits on the full-width top, not a
           second rail chrome. Period stays on the Dashboard org row.

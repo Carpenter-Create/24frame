@@ -290,7 +290,7 @@ describe("Social Home miss list v1 P0 lock", () => {
 
   it("drops the Social floating tab bar and keeps the Mercury floating dock gone", () => {
     const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
-    const topBar = readFileSync("src/components/social/social-top-bar.tsx", "utf8");
+    expect(existsSync("src/components/social/social-top-bar.tsx")).toBe(false);
     const dests = readFileSync("src/components/chrome/house-phone-dest-chips.tsx", "utf8");
     const storyViewer = readFileSync("src/app/(app)/social/stories/[id]/page.tsx", "utf8");
     expect(existsSync("src/components/social/social-mobile-dock.tsx")).toBe(false);
@@ -308,9 +308,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(profile).not.toContain("SocialMobileDock");
     expect(stories).not.toContain("SocialMobileDock");
     expect(storyViewer).not.toContain("SocialMobileDock");
-    expect(topBar).not.toContain("data-social-header-tray");
-    expect(topBar).toContain("HouseLeadSearch");
-    expect(topBar).not.toContain("data-social-mobile-pill");
+    expect(shell).not.toContain("data-social-header-tray");
     const leadSearch = readFileSync("src/components/chrome/house-lead-search.tsx", "utf8");
     expect(leadSearch).toContain("data-social-header-search");
     expect(leadSearch).toContain("SocialSearchSheet");

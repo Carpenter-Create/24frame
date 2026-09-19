@@ -12,7 +12,7 @@ vi.mock("next/navigation", () => ({
 import { HouseLeadChrome } from "@/components/chrome/house-lead-chrome";
 import { HouseLeadSearch } from "@/components/chrome/house-lead-search";
 import { WorkspaceSwitcher } from "@/components/chrome/workspace-switcher";
-import { SocialTopBar } from "@/components/social/social-top-bar";
+import { UserMenu } from "@/components/chrome/user-menu";
 import {
   HOUSE_LEAD_CHROME_CLASS,
   HOUSE_LEAD_LOGO_CLASS,
@@ -44,7 +44,6 @@ import {
 const leadLib = readFileSync("src/lib/house-lead-chrome.ts", "utf8");
 const leadSrc = readFileSync("src/components/chrome/house-lead-chrome.tsx", "utf8");
 const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
-const topBar = readFileSync("src/components/social/social-top-bar.tsx", "utf8");
 const leadSearch = readFileSync("src/components/chrome/house-lead-search.tsx", "utf8");
 
 function htmlClass(html: string, attr: string): string {
@@ -70,14 +69,13 @@ function leadHtml(workspace: "aggregation" | "social" | "education") {
 }
 
 describe("house lead chrome — unify-lead-now G1–G9", () => {
-  it("G1 ships one shared lead primitive — AppShell and SocialTopBar both mount it", () => {
+  it("G1 ships one shared lead primitive — AppShell mounts it; SocialTopBar is gone", () => {
     expect(existsSync("src/components/chrome/house-lead-chrome.tsx")).toBe(true);
+    expect(existsSync("src/components/social/social-top-bar.tsx")).toBe(false);
     expect(shell).toContain("<HouseLeadChrome");
     expect(shell.match(/<HouseLeadChrome/g)?.length).toBe(2);
-    expect(topBar).toContain("<HouseLeadChrome");
-    expect(topBar).not.toContain("md:pl-5");
-    expect(topBar).not.toContain("justify-between");
-    expect(topBar).not.toContain("w-[420px]");
+    expect(leadSrc).not.toContain("md:pl-5");
+    expect(leadSrc).not.toContain("w-[420px]");
     expect(leadSrc).toContain("data-house-lead-chrome");
     expect(leadSrc).toContain("HOUSE_LEAD_CHROME_CLASS");
     expect(leadSrc).toContain("HOUSE_LEAD_LOGO_CLASS");
@@ -234,17 +232,20 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     );
   });
 
-  it("G8 absorbs SocialTopBar — no drifted placement fork", () => {
-    expect(topBar).toContain("HouseLeadChrome");
-    expect(topBar).toContain('workspace="social"');
-    expect(topBar).not.toContain("pl-3");
-    expect(topBar).not.toContain("md:pl-5");
+  it("G8 absorbs SocialTopBar — wrapper gone, no drifted placement fork", () => {
+    expect(existsSync("src/components/social/social-top-bar.tsx")).toBe(false);
     expect(shell).not.toContain("SocialTopBarFromChrome");
     expect(shell).not.toContain("SocialTopBarSlot");
     expect(shell).toContain("Do not use() this at the AppShell top");
 
     const absorbed = renderToStaticMarkup(
-      createElement(SocialTopBar, { email: "ada@example.com", name: "Ada" }),
+      createElement(HouseLeadChrome, {
+        workspace: "social",
+        logoVisible: "always",
+        search: createElement(HouseLeadSearch, { tone: "live" }),
+        trailingSearch: createElement(HouseLeadSearch, { tone: "live", presentation: "icon" }),
+        accountMenu: createElement(UserMenu, { email: "ada@example.com", name: "Ada" }),
+      }),
     );
     expect(absorbed).toContain("data-house-lead-chrome");
     expect(absorbed).toContain("data-social-top-bar");
@@ -352,7 +353,6 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(leadSrc).toContain('logoVisible === "always" ? "flex" : "hidden md:flex"');
     expect(shell).toContain('logoVisible="always"');
     expect(shell).not.toContain('homeChrome ? "always" : "desktop"');
-    expect(topBar).toContain('logoVisible="always"');
     expect(leadLib).toContain("Asset 8 emblem on every workspace");
     expect(leadLib).toContain("Emblem owns the phone left alone");
     expect(APP_HEADER_LEADING_CLASS).toContain("gap-[var(--space-3)]");
@@ -390,9 +390,7 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(shell).toContain("destChips=");
     expect(shell).toContain("<DestChipsSlot");
     expect(shell).not.toContain("<MobileNavSlot");
-    expect(topBar).not.toContain("leadingNav");
-    expect(topBar).not.toContain("trailingNav");
-    expect(topBar).not.toContain("MobileNav");
+    expect(existsSync("src/components/social/social-top-bar.tsx")).toBe(false);
   });
 
   it("keeps dest chips above Education search and the Workspaces menu above both", () => {

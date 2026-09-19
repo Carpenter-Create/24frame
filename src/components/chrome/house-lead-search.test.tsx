@@ -39,7 +39,6 @@ import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 
 const src = readFileSync("src/components/chrome/house-lead-search.tsx", "utf8");
 const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
-const topBar = readFileSync("src/components/social/social-top-bar.tsx", "utf8");
 const pageSearch = readFileSync("src/components/chrome/house-page-search.tsx", "utf8");
 
 describe("HouseLeadSearch — one SoT for Social live and Education quiet", () => {
@@ -53,8 +52,8 @@ describe("HouseLeadSearch — one SoT for Social live and Education quiet", () =
     expect(shell).toContain("HouseLeadSearch");
     expect(shell).not.toContain("SocialHeaderSearch");
     expect(shell).not.toContain("EducationHeaderSearch");
-    expect(topBar).toContain("HouseLeadSearch");
-    expect(topBar).not.toContain("SocialHeaderSearch");
+    expect(existsSync("src/components/social/social-top-bar.tsx")).toBe(false);
+    expect(shell).toContain("HouseLeadSearch");
   });
 
   it("G2 keeps live Explore submit empty and quiet Education bound to the current q", () => {

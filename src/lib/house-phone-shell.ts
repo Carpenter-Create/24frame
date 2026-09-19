@@ -3,8 +3,8 @@
 // Desktop header + desktop workspace switcher stay on HouseLeadChrome.
 // Phone top: emblem alone on the left. No workspace pill. No hamburger
 // — leading or trailing. Trailing is search (when needed) · 24Frame AI
-// · bell · avatar. Theme stays desktop-only. Avatar-sheet AI may stay
-// as a secondary door.
+// · bell · avatar. Theme stays desktop-only. Ask AI is header + Home
+// module only (#465).
 // Destinations that used to live in the Agg/Edu hamburger (and Social’s
 // second float) live on one under-top HousePhoneDestChips row.
 // Home has no dest chip row. Desktop left rails stay.

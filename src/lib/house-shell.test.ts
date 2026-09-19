@@ -5,7 +5,9 @@ import { describe, expect, it, vi } from "vitest";
 
 import { EducationCourseRail } from "@/app/(app)/(operator)/education/manage/education-course-rail";
 import { SocialRailAccountChip } from "@/components/social/social-rail-extras";
-import { SocialTopBar } from "@/components/social/social-top-bar";
+import { HouseLeadChrome } from "@/components/chrome/house-lead-chrome";
+import { HouseLeadSearch } from "@/components/chrome/house-lead-search";
+import { UserMenu } from "@/components/chrome/user-menu";
 import { PageHeader } from "@/components/ui/page-header";
 import {
   DASHBOARD_CARD_PAD,
@@ -74,7 +76,6 @@ const tokens = readFileSync("src/app/tokens.css", "utf8");
 const globals = readFileSync("src/app/globals.css", "utf8");
 const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
 const sideNav = readFileSync("src/components/chrome/side-nav.tsx", "utf8");
-const socialTopBar = readFileSync("src/components/social/social-top-bar.tsx", "utf8");
 const socialChrome = readFileSync("src/lib/social-chrome.ts", "utf8");
 const destChips = readFileSync("src/lib/house-phone-shell.ts", "utf8");
 const educationRail = readFileSync(
@@ -95,7 +96,6 @@ const HOUSE_SHELL_COMMENT_PATHS = [
   "src/app/globals.css",
   "src/components/chrome/app-shell.tsx",
   "src/components/chrome/side-nav.tsx",
-  "src/components/social/social-top-bar.tsx",
   "src/components/chrome/house-lead-search.tsx",
   "src/lib/house-lead-chrome.ts",
   "src/components/chrome/house-lead-chrome.tsx",
@@ -202,14 +202,20 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     // across search / AI / bell in the phone top trailing cluster.
     expect(searchSheet).toContain("HOUSE_PHONE_CHROME_IDLE_INK_CLASS");
     expect(leadSearch).not.toContain("rounded-[10px]");
-    expect(socialTopBar).toContain("HouseLeadChrome");
+    expect(existsSync("src/components/social/social-top-bar.tsx")).toBe(false);
     expect(socialChrome).toContain("HOUSE_FILTER_ON_CLASS");
     expect(SOCIAL_PILL_ACTIVE_CLASS).toBe(HOUSE_FILTER_ON_CLASS);
     expect(SOCIAL_PILL_IDLE_CLASS).toBe(HOUSE_FILTER_OFF_CLASS);
     expect(SOCIAL_PILL_ACTIVE_CLASS).not.toContain("bg-accent");
 
     const header = renderToStaticMarkup(
-      createElement(SocialTopBar, { email: "ada@example.com", name: "Ada" }),
+      createElement(HouseLeadChrome, {
+        workspace: "social",
+        logoVisible: "always",
+        search: createElement(HouseLeadSearch, { tone: "live" }),
+        trailingSearch: createElement(HouseLeadSearch, { tone: "live", presentation: "icon" }),
+        accountMenu: createElement(UserMenu, { email: "ada@example.com", name: "Ada" }),
+      }),
     );
     expect(header).toContain("data-social-header-search");
     expect(header).toContain(HOUSE_SEARCH_PILL_CLASS);

@@ -9,8 +9,9 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
+import { HouseLeadChrome } from "@/components/chrome/house-lead-chrome";
 import { HouseLeadSearch } from "@/components/chrome/house-lead-search";
-import { SocialTopBar } from "@/components/social/social-top-bar";
+import { UserMenu } from "@/components/chrome/user-menu";
 import {
   HOUSE_CONTROL_PILL_CLASS,
   HOUSE_FILTER_ON_CLASS,
@@ -39,7 +40,6 @@ const tokens = readFileSync("src/app/tokens.css", "utf8");
 const globals = readFileSync("src/app/globals.css", "utf8");
 const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
 const lead = readFileSync("src/components/chrome/house-lead-chrome.tsx", "utf8");
-const topBar = readFileSync("src/components/social/social-top-bar.tsx", "utf8");
 const leadSearch = readFileSync("src/components/chrome/house-lead-search.tsx", "utf8");
 const sideNav = readFileSync("src/components/chrome/side-nav.tsx", "utf8");
 const titlesPage = readFileSync("src/app/(app)/aggregation/titles/page.tsx", "utf8");
@@ -58,7 +58,6 @@ const FUN_CHROME_PATHS = [
   "src/components/chrome/app-shell.tsx",
   "src/components/chrome/house-lead-chrome.tsx",
   "src/components/chrome/side-nav.tsx",
-  "src/components/social/social-top-bar.tsx",
   "src/components/chrome/house-lead-search.tsx",
   "src/components/social/social-search-sheet.tsx",
   "src/lib/social-search.ts",
@@ -148,7 +147,13 @@ describe("house chrome rematch miss list v1.1", () => {
     );
 
     const social = renderToStaticMarkup(
-      createElement(SocialTopBar, { email: "ada@example.com", name: "Ada" }),
+      createElement(HouseLeadChrome, {
+        workspace: "social",
+        logoVisible: "always",
+        search: createElement(HouseLeadSearch, { tone: "live" }),
+        trailingSearch: createElement(HouseLeadSearch, { tone: "live", presentation: "icon" }),
+        accountMenu: createElement(UserMenu, { email: "ada@example.com", name: "Ada" }),
+      }),
     );
     expect(social).toContain("data-social-header-lead");
     expect(social).toContain(HOUSE_HEADER_SEARCH_GAP_CLASS);
@@ -187,10 +192,17 @@ describe("house chrome rematch miss list v1.1", () => {
   });
 
   it("removes the Social Messages icon from the top bar — side nav only", () => {
-    expect(topBar).not.toContain("data-social-header-tray");
-    expect(topBar).not.toContain("SOCIAL_ROUTES.dms");
+    expect(existsSync("src/components/social/social-top-bar.tsx")).toBe(false);
+    expect(lead).not.toContain("data-social-header-tray");
+    expect(lead).not.toContain("SOCIAL_ROUTES.dms");
     const header = renderToStaticMarkup(
-      createElement(SocialTopBar, { email: "ada@example.com", name: "Ada" }),
+      createElement(HouseLeadChrome, {
+        workspace: "social",
+        logoVisible: "always",
+        search: createElement(HouseLeadSearch, { tone: "live" }),
+        trailingSearch: createElement(HouseLeadSearch, { tone: "live", presentation: "icon" }),
+        accountMenu: createElement(UserMenu, { email: "ada@example.com", name: "Ada" }),
+      }),
     );
     expect(header).toContain("data-social-header-search");
     expect(header).not.toContain("data-social-header-tray");
@@ -200,7 +212,7 @@ describe("house chrome rematch miss list v1.1", () => {
   it("keeps one phone workspace switcher, Staff on Aggregation, one Sporty Blue pill", () => {
     expect(lead.match(/<WorkspaceSwitcher/g)?.length).toBe(1);
     expect(shell).toContain("<HouseLeadChrome");
-    expect(topBar).toContain("<HouseLeadChrome");
+    expect(existsSync("src/components/social/social-top-bar.tsx")).toBe(false);
     expect(lead).toContain('presentation="pills"');
     expect(lead).not.toContain('tone="pill"');
     expect(lead).not.toContain("APP_HEADER_WORKSPACE_PILL_HOST_CLASS");
