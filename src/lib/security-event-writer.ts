@@ -1,5 +1,7 @@
 import "server-only";
 
+import { isIP } from "node:net";
+
 import { createAdminClient } from "@/lib/supabase/admin";
 import { parseSourceLabel, type SecurityEventKind } from "@/lib/security-events";
 
@@ -13,6 +15,16 @@ type RecordSecurityEventParams = {
   metadata?: Record<string, string | number | boolean | null> | null;
 };
 
+/** First XFF hop when it is a real inet value; otherwise null.
+ *  Empty / "unknown" / non-IP strings are invalid for `inet` and would
+ *  drop the whole security_events row. */
+export function toInetOrNull(ip: string | null | undefined): string | null {
+  if (!ip) return null;
+  const first = ip.split(",")[0]?.trim() ?? "";
+  if (!first || first.length > 45) return null;
+  return isIP(first) ? first : null;
+}
+
 /** Insert a security event row via service-role. Fire-and-forget safe —
  *  failures are logged but never surface to the user. */
 export async function recordSecurityEvent(params: RecordSecurityEventParams): Promise<void> {
@@ -23,7 +35,7 @@ export async function recordSecurityEvent(params: RecordSecurityEventParams): Pr
       org_id: params.orgId,
       actor_user_id: params.actorUserId,
       event_kind: params.eventKind,
-      ip: params.ip,
+      ip: toInetOrNull(params.ip),
       user_agent: params.userAgent,
       source_label: sourceLabel,
       country: params.country ?? null,

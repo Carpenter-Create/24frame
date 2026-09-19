@@ -46,11 +46,11 @@ export const SECURITY_PAGE = {
 // ---------------------------------------------------------------------------
 
 const BROWSER_PATTERNS: [RegExp, string][] = [
-  [/Edg(?:e|A)?\/[\d.]+/, "Edge"],
+  [/Edg(?:e|A|iOS)?\/[\d.]+/, "Edge"],
   [/OPR\/[\d.]+|Opera\/[\d.]+/, "Opera"],
-  [/Chrome\/[\d.]+/, "Chrome"],
+  [/(?:Chrome|CriOS)\/[\d.]+/, "Chrome"],
+  [/(?:Firefox|FxiOS)\/[\d.]+/, "Firefox"],
   [/Safari\/[\d.]+/, "Safari"],
-  [/Firefox\/[\d.]+/, "Firefox"],
 ];
 
 const OS_PATTERNS: [RegExp, (m: RegExpMatchArray) => string][] = [
@@ -117,3 +117,24 @@ export const SECURITY_PILL_CLASSES: Record<SecurityEventPillTone, string> = {
 
 export const SECURITY_PILL_BASE_CLASS =
   "inline-flex items-center rounded-full px-2 py-0.5 t-body-sm leading-5";
+
+// UTC so a shared org history reads the same for every member, and so the
+// clock is labeled — Vercel formats without a zone as a local-looking AM/PM.
+const SECURITY_EVENT_DATE_FMT = new Intl.DateTimeFormat("en-US", {
+  month: "2-digit",
+  day: "2-digit",
+  year: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: true,
+  timeZone: "UTC",
+  timeZoneName: "short",
+});
+
+export function formatSecurityEventDate(iso: string): string {
+  try {
+    return SECURITY_EVENT_DATE_FMT.format(new Date(iso));
+  } catch {
+    return iso;
+  }
+}

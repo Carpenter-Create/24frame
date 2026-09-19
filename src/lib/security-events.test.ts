@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import {
+  formatSecurityEventDate,
   parseSourceLabel,
   SECURITY_EVENT_KINDS,
   SECURITY_EVENT_LABELS,
@@ -125,6 +126,30 @@ describe("parseSourceLabel", () => {
     ).toBe("Chrome (Android, 14)");
   });
 
+  it("parses Chrome on iOS (CriOS, not the compatibility Safari token)", () => {
+    expect(
+      parseSourceLabel(
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/126.0.6478.54 Mobile/15E148 Safari/604.1",
+      ),
+    ).toBe("Chrome (iOS, 17.5.1)");
+  });
+
+  it("parses Firefox on iOS (FxiOS, not the compatibility Safari token)", () => {
+    expect(
+      parseSourceLabel(
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/127.0 Mobile/15E148 Safari/605.1.15",
+      ),
+    ).toBe("Firefox (iOS, 17.5.1)");
+  });
+
+  it("parses Edge on iOS (EdgiOS, not the compatibility Safari token)", () => {
+    expect(
+      parseSourceLabel(
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) EdgiOS/126.0.2592.67 Version/17.0 Mobile/15E148 Safari/604.1",
+      ),
+    ).toBe("Edge (iOS, 17.5.1)");
+  });
+
   it("parses Firefox on Linux", () => {
     expect(
       parseSourceLabel(
@@ -141,6 +166,16 @@ describe("parseSourceLabel", () => {
 
   it("returns null for unrecognizable UA", () => {
     expect(parseSourceLabel("curl/7.0")).toBeNull();
+  });
+});
+
+describe("formatSecurityEventDate", () => {
+  it("formats in UTC with a zone label", () => {
+    expect(formatSecurityEventDate("2026-09-19T17:28:00.000Z")).toBe("09/19/2026, 5:28 PM UTC");
+  });
+
+  it("returns the raw value when the timestamp is unparseable", () => {
+    expect(formatSecurityEventDate("not-a-date")).toBe("not-a-date");
   });
 });
 

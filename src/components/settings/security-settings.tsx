@@ -1,6 +1,7 @@
 import { HouseEmpty } from "@/components/chrome/house";
 import { cn } from "@/lib/cn";
 import {
+  formatSecurityEventDate,
   SECURITY_EVENT_LABELS,
   SECURITY_HISTORY_COLUMNS,
   SECURITY_PAGE,
@@ -24,23 +25,6 @@ export type SecurityEventRow = {
   ip: string | null;
   country: string | null;
 };
-
-const DATE_FMT = new Intl.DateTimeFormat("en-US", {
-  month: "2-digit",
-  day: "2-digit",
-  year: "numeric",
-  hour: "numeric",
-  minute: "2-digit",
-  hour12: true,
-});
-
-function formatEventDate(iso: string): string {
-  try {
-    return DATE_FMT.format(new Date(iso));
-  } catch {
-    return iso;
-  }
-}
 
 function formatIp(ip: string | null, country: string | null): string {
   if (!ip) return "—";
@@ -80,7 +64,7 @@ export function SecuritySettings({ events }: { events: SecurityEventRow[] }) {
                       className="border-b border-hairline last:border-b-0"
                     >
                       <td className="whitespace-nowrap px-[var(--space-3)] py-[var(--space-3)] t-body-sm text-ink">
-                        {formatEventDate(ev.occurred_at)}
+                        {formatSecurityEventDate(ev.occurred_at)}
                       </td>
                       <td className="px-[var(--space-3)] py-[var(--space-3)] t-body-sm text-ink">
                         {ev.actor_name ?? "—"}

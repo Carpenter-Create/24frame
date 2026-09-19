@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { recordSignOutEvent } from "@/lib/security-event-writer";
+import { recordSignOutEvent, toInetOrNull } from "@/lib/security-event-writer";
 import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/supabase/auth";
 
@@ -39,7 +39,7 @@ export async function signOut() {
   const user = await getAuthUser();
   if (user) {
     const hdrs = await headers();
-    const ip = hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+    const ip = toInetOrNull(hdrs.get("x-forwarded-for"));
     const userAgent = hdrs.get("user-agent");
     try {
       await recordSignOutEvent(user.id, ip, userAgent);

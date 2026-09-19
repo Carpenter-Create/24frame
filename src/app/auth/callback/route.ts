@@ -3,7 +3,7 @@ import type { EmailOtpType } from "@supabase/supabase-js";
 
 import { authDisplayName } from "@/lib/account-profile";
 import { safeAuthCallbackNext } from "@/lib/auth-callback-next";
-import { recordSignInEvent } from "@/lib/security-event-writer";
+import { recordSignInEvent, toInetOrNull } from "@/lib/security-event-writer";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { createClient } from "@/lib/supabase/server";
 
@@ -16,7 +16,7 @@ export async function GET(request: Request) {
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
 
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+  const ip = toInetOrNull(request.headers.get("x-forwarded-for"));
   const userAgent = request.headers.get("user-agent");
 
   const supabase = await createClient();

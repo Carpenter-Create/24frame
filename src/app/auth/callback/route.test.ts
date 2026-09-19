@@ -6,6 +6,7 @@ vi.mock("@/lib/social-profile", () => ({
 }));
 vi.mock("@/lib/security-event-writer", () => ({
   recordSignInEvent: vi.fn(async () => {}),
+  toInetOrNull: (ip: string | null | undefined) => ip ?? null,
 }));
 
 import { createClient } from "@/lib/supabase/server";
