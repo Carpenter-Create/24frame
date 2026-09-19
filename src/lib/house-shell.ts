@@ -6,10 +6,13 @@
 // rail is an r16 panel (not a sharp strip), search and nav are pills,
 // icon hits are circles, top-bar controls are pills. Active rail is
 // Sporty Blue tint wash + accent type. Header Search is a quiet muted
-// pill. Content-filter selected is ink; period chips stay muted.
+// pill. Status / create-kind filter selected stays ink. Standalone
+// dest and news source pills selected are accent fill + white label —
+// same selected grammar as the house segmented thumb (desktop Home
+// workspace pills). Period chips stay muted.
 // Sporty Blue fill is reserved for the primary CTA, the selected rail
-// pill, and links. Stay on the social/fun chrome lane — do not flatten
-// toward a professional register.
+// pill, dest/news selected pills, and links. Stay on the social/fun chrome lane
+// — do not flatten toward a professional register.
 
 export const HOUSE_PAGE_CANVAS_CLASS = "bg-bg";
 
@@ -71,6 +74,12 @@ export const HOUSE_SEARCH_PILL_CLASS = "rounded-full border-0 bg-surface-muted";
 export const HOUSE_FILTER_ON_CLASS = "bg-ink text-surface";
 
 export const HOUSE_FILTER_OFF_CLASS = "bg-surface-muted text-ink";
+
+// Standalone selected pill — accent fill + white label/icon.
+// Same selected grammar as HOUSE_SEGMENTED_THUMB + HOUSE_SEGMENTED_ITEM_ON.
+// Phone dest chips and news source chips. Not HOUSE_FILTER_ON_CLASS
+// (ink) — that stays status / create-kind pills. Adam lock 2026-09-19.
+export const HOUSE_PILL_SELECTED_CLASS = "bg-accent text-white";
 
 // Standalone filter pill base — individual rounded pills with gap between.
 // Used by news source chips, titles catalog filters, and other non-track pill rows.

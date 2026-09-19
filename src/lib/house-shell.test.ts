@@ -23,6 +23,7 @@ import {
   HOUSE_CARD_PAD,
   HOUSE_FILTER_OFF_CLASS,
   HOUSE_FILTER_ON_CLASS,
+  HOUSE_PILL_SELECTED_CLASS,
   HOUSE_MODULE_CLASS,
   HOUSE_PAGE_CANVAS_CLASS,
   HOUSE_PERIOD_SELECTED_CLASS,
@@ -167,6 +168,8 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(HOUSE_RAIL_IDLE_CLASS).toBe("font-normal text-ink hover:bg-surface-muted");
     expect(HOUSE_FILTER_ON_CLASS).toBe("bg-ink text-surface");
     expect(HOUSE_FILTER_OFF_CLASS).toBe("bg-surface-muted text-ink");
+    expect(HOUSE_PILL_SELECTED_CLASS).toBe("bg-accent text-white");
+    expect(HOUSE_PILL_SELECTED_CLASS).not.toContain("bg-ink");
     expect(HOUSE_PERIOD_SELECTED_CLASS).toBe("bg-surface-muted");
     expect(HOUSE_SEGMENTED_TRACK_CLASS).toContain("rounded-full");
     expect(HOUSE_SEGMENTED_TRACK_CLASS).toContain("bg-surface-muted");
@@ -203,7 +206,9 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(readFileSync("src/components/ui/segmented-track.tsx", "utf8")).toContain(
       "setThumbStyle({ opacity: 0 })",
     );
-    expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).toBe(HOUSE_FILTER_ON_CLASS);
+    expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).toBe(HOUSE_PILL_SELECTED_CLASS);
+    expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).toBe("bg-accent text-white");
+    expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).toBe(`bg-accent ${HOUSE_SEGMENTED_ITEM_ON_CLASS}`);
     expect(DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS).toBe(HOUSE_FILTER_OFF_CLASS);
     expect(DASHBOARD_PERIOD_OPTION_SELECTED_CLASS).toBe(HOUSE_PERIOD_SELECTED_CLASS);
     expect(sideNav).toContain("HOUSE_RAIL_ACTIVE_CLASS");
@@ -273,8 +278,14 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(collapsedChip).toContain("justify-center");
     expect(collapsedChip).not.toContain("truncate t-body-sm");
 
-    expect(destChips).toContain("HOUSE_FILTER_ON_CLASS");
+    expect(destChips).toContain("HOUSE_PILL_SELECTED_CLASS");
+    expect(destChips).not.toContain("HOUSE_FILTER_ON_CLASS");
     expect(destChips).toContain("HOUSE_FILTER_OFF_CLASS");
+    expect(destChips).toContain("min-h-9");
+    expect(destChips).toContain("py-[var(--space-2)]");
+    expect(HOUSE_PILL_SELECTED_CLASS).toBe("bg-accent text-white");
+    expect(HOUSE_PILL_SELECTED_CLASS).toBe(`bg-accent ${HOUSE_SEGMENTED_ITEM_ON_CLASS}`);
+    expect(HOUSE_PILL_SELECTED_CLASS).not.toContain("bg-ink");
   });
 
   it("rematches the Education course rail to the house active pill", () => {

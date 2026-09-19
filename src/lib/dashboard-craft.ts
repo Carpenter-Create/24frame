@@ -9,12 +9,13 @@
 // Period is chrome, not H1. Dominant read stays the $.
 // Page title is black sentence-case. Section titles are t-heading ink.
 // View-alt selected is Sporty Blue glyph weight, not a filled chip.
-// Content-filter selected is ink #14171A + white type — not Sporty Blue fill.
+// Status / kind filter selected is ink. Dest and news source pills
+// selected are accent fill + white label (HOUSE_PILL_SELECTED_CLASS).
 
 import {
   HOUSE_CARD_PAD,
   HOUSE_FILTER_OFF_CLASS,
-  HOUSE_FILTER_ON_CLASS,
+  HOUSE_PILL_SELECTED_CLASS,
   HOUSE_FILTER_PILL_CLASS,
   HOUSE_FILTER_PILL_CLUSTER_CLASS,
   HOUSE_MODULE_CLASS,
@@ -205,15 +206,17 @@ export const DASHBOARD_TOP_PILL_BUTTON_ON_CLASS = HOUSE_SEGMENTED_ITEM_ON_CLASS;
 
 export const DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS = HOUSE_SEGMENTED_ITEM_OFF_CLASS;
 
-// /home/news source chips reuse the standalone house filter pill (ink selected /
-// muted idle). Row scrolls horizontally when the allowlist overflows.
-// Not a segmented track — individual pills with gap.
+// /home/news source chips reuse the standalone house pill (accent
+// selected / muted idle — Adam lock, same selected grammar as dest
+// chips and the house segmented thumb). Row scrolls horizontally
+// when the allowlist overflows. Not a segmented track — individual
+// pills with gap.
 export const DASHBOARD_NEWS_SOURCE_CHIPS_CLASS =
   `${HOUSE_FILTER_PILL_CLUSTER_CLASS} no-scrollbar w-full flex-nowrap overflow-x-auto`;
 
 export const DASHBOARD_NEWS_SOURCE_CHIP_CLASS = `${HOUSE_FILTER_PILL_CLASS} shrink-0 whitespace-nowrap`;
 
-export const DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS = HOUSE_FILTER_ON_CLASS;
+export const DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS = HOUSE_PILL_SELECTED_CLASS;
 
 export const DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS = HOUSE_FILTER_OFF_CLASS;
 

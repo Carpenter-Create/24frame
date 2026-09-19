@@ -16,7 +16,7 @@ import {
   DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS,
   DASHBOARD_NEWS_SOURCE_CHIPS_CLASS,
 } from "@/lib/dashboard-craft";
-import { HOUSE_FILTER_OFF_CLASS, HOUSE_FILTER_ON_CLASS, HOUSE_FILTER_PILL_CLASS } from "@/lib/house-shell";
+import { HOUSE_FILTER_OFF_CLASS, HOUSE_FILTER_PILL_CLASS, HOUSE_PILL_SELECTED_CLASS } from "@/lib/house-shell";
 import { NEWS_PAGE, NEWS_SOURCES, type NewsItem } from "@/lib/news";
 import {
   NEWS_STICKY_PAGE_SURFACE_CLASS,
@@ -108,7 +108,9 @@ describe("NewsHistory layout", () => {
     expect(html).toContain(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS);
     expect(html).toContain(DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS);
     expect(DASHBOARD_NEWS_SOURCE_CHIP_CLASS).toContain(HOUSE_FILTER_PILL_CLASS);
-    expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).toBe(HOUSE_FILTER_ON_CLASS);
+    expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).toBe(HOUSE_PILL_SELECTED_CLASS);
+    expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).toBe("bg-accent text-white");
+    expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).not.toContain("bg-ink");
     expect(DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS).toBe(HOUSE_FILTER_OFF_CLASS);
     expect(html).toContain(NEWS_PAGE.sourcesAll);
     expect(html.indexOf('data-news-source-option="all"')).toBeLessThan(

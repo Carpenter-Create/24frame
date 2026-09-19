@@ -42,7 +42,7 @@ import { BookOpen, FilmStrip, House, Users, type IconWeight } from "@phosphor-ic
 import {
   HOUSE_CONTROL_PILL_CLASS,
   HOUSE_FILTER_OFF_CLASS,
-  HOUSE_FILTER_ON_CLASS,
+  HOUSE_PILL_SELECTED_CLASS,
 } from "@/lib/house-shell";
 import {
   isClientNavActive,
@@ -193,9 +193,13 @@ export const HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS =
 export const HOUSE_PHONE_DESTS_CLASS =
   "flex w-full min-w-0 gap-[var(--space-2)] overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:hidden";
 
-export const HOUSE_PHONE_DEST_ITEM_CLASS = `inline-flex shrink-0 items-center gap-[var(--space-1)] ${HOUSE_CONTROL_PILL_CLASS} px-[var(--space-3)] py-[var(--space-1)] t-body-sm`;
+// Coinbase register density (Adam 2026-09-19): a little taller than
+// the first dest-chip ship — min-h-9 + space-2 pad. Calm, not chunky.
+// Selected is accent fill + white label/icon (HOUSE_PILL_SELECTED_CLASS),
+// not ink. Idle stays muted track. One SoT; every workspace inherits.
+export const HOUSE_PHONE_DEST_ITEM_CLASS = `inline-flex min-h-9 shrink-0 items-center gap-[var(--space-1)] ${HOUSE_CONTROL_PILL_CLASS} px-[var(--space-3)] py-[var(--space-2)] t-body-sm`;
 
-export const HOUSE_PHONE_DEST_ITEM_ON_CLASS = `${HOUSE_FILTER_ON_CLASS} font-medium`;
+export const HOUSE_PHONE_DEST_ITEM_ON_CLASS = `${HOUSE_PILL_SELECTED_CLASS} font-medium`;
 
 export const HOUSE_PHONE_DEST_ITEM_OFF_CLASS = HOUSE_FILTER_OFF_CLASS;
 
