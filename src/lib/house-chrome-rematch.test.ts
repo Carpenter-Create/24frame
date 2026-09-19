@@ -34,7 +34,6 @@ import {
   SOCIAL_FOR_YOU_CARD_CLASS,
   SOCIAL_RAIL_WIDTH_CLASS,
 } from "@/lib/social-chrome";
-import { SETTINGS_RAIL_ITEM_CLASS } from "@/lib/settings";
 
 const tokens = readFileSync("src/app/tokens.css", "utf8");
 const globals = readFileSync("src/app/globals.css", "utf8");
@@ -241,7 +240,7 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(SOCIAL_RAIL_WIDTH_CLASS).toBe("w-[calc(200px-var(--chrome-gutter))]");
     expect(SOCIAL_ACCOUNT_CHIP_CLASS).toContain(HOUSE_MODULE_CLASS);
     expect(SOCIAL_FOR_YOU_CARD_CLASS).toContain(HOUSE_MODULE_CLASS);
-    expect(SETTINGS_RAIL_ITEM_CLASS).toContain("rounded-full");
+    expect(HOUSE_RAIL_ITEM_CLASS).toContain("rounded-full");
     expect(switcher).toContain("HOUSE_CONTROL_PILL_CLASS");
     expect(mobileChrome).toContain("HOUSE_ICON_BUTTON_CLASS");
     expect(collapse).toContain("HOUSE_ICON_BUTTON_CLASS");
@@ -263,7 +262,7 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(HOUSE_MODULE_CLASS).toContain("rounded-[var(--radius-lg)]");
     expect(tokens).toMatch(/--accent:\s*#1769ff;/);
     expect(tokens).not.toMatch(/#f97316|#ea580c|#ff6a00|#ff7a00/i);
-    expect(settings).toContain("rounded-full");
+    expect(settings).toContain("house-shell.ts");
     expect(leadSearch).toContain("HOUSE_SEARCH_PILL_CLASS");
     for (const path of FUN_CHROME_PATHS) {
       const src = readFileSync(path, "utf8");

@@ -10,8 +10,8 @@ import {
   SETTINGS_HEADER_BACK_CLASS,
   SETTINGS_HUB_NAV,
   SETTINGS_RAIL_CHEVRON_CLASS,
-  SETTINGS_RAIL_ITEM_CLASS,
 } from "@/lib/settings";
+import { HOUSE_RAIL_ITEM_CLASS } from "@/lib/house-shell";
 import { ACCOUNT_SHEET_ITEMS } from "@/lib/account-sheet";
 import { SHEET_GROUP_CHEVRON_CLASS } from "@/lib/house-sheet";
 import { RAIL_COLLAPSE_CHEVRON_ICON_CLASS } from "@/lib/rail-collapse";
@@ -68,7 +68,7 @@ describe("Adam Mercury register lock", () => {
     }
     expect(SHEET_GROUP_CHEVRON_CLASS).toBe("size-4 shrink-0 text-ink-3");
     expect(SETTINGS_RAIL_CHEVRON_CLASS).toBe("size-4 shrink-0");
-    expect(SETTINGS_RAIL_ITEM_CLASS).toContain("t-body");
+    expect(HOUSE_RAIL_ITEM_CLASS).toContain("t-body-sm");
     expect(SETTINGS_HEADER_BACK_CLASS).toContain("md:hidden");
     expect(RAIL_COLLAPSE_CHEVRON_ICON_CLASS).toBe("h-4 w-4");
     expect(src("src/components/chrome/account-sheet.tsx")).toContain(

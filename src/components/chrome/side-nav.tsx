@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useRef } from "react";
 import { railDestinations, STAFF_RAIL_EYEBROW, type NavItem } from "@/lib/nav";
-import { HOUSE_RAIL_ACTIVE_CLASS, HOUSE_RAIL_IDLE_CLASS, HOUSE_RAIL_ITEM_CLASS } from "@/lib/house-shell";
+import { HOUSE_RAIL_ACTIVE_CLASS, HOUSE_RAIL_IDLE_CLASS, HOUSE_RAIL_ITEM_CLASS, HOUSE_RAIL_TITLE_CLASS } from "@/lib/house-shell";
 import { cn } from "@/lib/cn";
 import type { WorkspaceMode } from "@/lib/workspace";
 import { SocialIcon } from "@/components/social/social-icon";
@@ -97,7 +97,7 @@ export function SideNav({
         <>
           <div className="mx-1 my-2 border-t border-hairline" />
           {!collapsed ? (
-            <span className="px-2 pb-1 t-label text-ink-3">{STAFF_RAIL_EYEBROW}</span>
+            <span className={HOUSE_RAIL_TITLE_CLASS}>{STAFF_RAIL_EYEBROW}</span>
           ) : null}
           {staffItems.map((item) => row(item))}
         </>

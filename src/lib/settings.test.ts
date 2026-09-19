@@ -1,7 +1,14 @@
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-import { HOUSE_CARD_PAD, HOUSE_MODULE_CLASS } from "./house-shell";
+import {
+  HOUSE_CARD_PAD,
+  HOUSE_MODULE_CLASS,
+  HOUSE_RAIL_ACTIVE_CLASS,
+  HOUSE_RAIL_IDLE_CLASS,
+  HOUSE_RAIL_ITEM_CLASS,
+  HOUSE_RAIL_TITLE_CLASS,
+} from "./house-shell";
 import { MOBILE_CHROME_LEAD_PAD_CLASS } from "./mobile-chrome";
 import { USER_MENU, USER_MENU_ACTIONS } from "./user-menu";
 import {
@@ -11,15 +18,12 @@ import {
   SETTINGS_HUB_ORDER,
   SETTINGS_HEADER_BACK_CLASS,
   SETTINGS_HEADER_PAD_CLASS,
-  SETTINGS_RAIL_ABSENT,
-  SETTINGS_RAIL_ACTIVE_CLASS,
-  SETTINGS_RAIL_CHEVRON_CLASS,
-  SETTINGS_RAIL_ITEM_CLASS,
   SETTINGS_PANE_TITLE_CLASS,
   SETTINGS_PREF_BLOCK_CLASS,
   SETTINGS_PREF_TITLE_CLASS,
+  SETTINGS_RAIL_ABSENT,
+  SETTINGS_RAIL_CHEVRON_CLASS,
   SETTINGS_RAIL_PAD_CLASS,
-  SETTINGS_RAIL_TITLE_CLASS,
   isSettingsPath,
   settingsHeaderBack,
   settingsHubNav,
@@ -227,7 +231,6 @@ describe("settings hub lock", () => {
     expect(settingsPaneTitle("preferences")).toBe("Preferences");
     expect(settingsPaneTitle("profile")).not.toBe(SETTINGS.title);
     expect(SETTINGS_PANE_TITLE_CLASS).toBe("t-section text-ink");
-    expect(SETTINGS_RAIL_TITLE_CLASS).toBe("t-section text-ink");
   });
 
   it("keeps Appearance on the house muted module — not a new surface", () => {
@@ -239,14 +242,20 @@ describe("settings hub lock", () => {
     expect(SETTINGS_PREF_TITLE_CLASS).not.toContain("t-section");
   });
 
-  it("locks the settings rail on 220 pad 16, 15 Regular, house wash", () => {
+  it("locks the settings rail on 220 pad 16 and house workspace-rail SoT", () => {
     expect(SETTINGS_RAIL_PAD_CLASS).toBe("p-[var(--space-4)]");
-    expect(SETTINGS_RAIL_ITEM_CLASS).toContain("t-body");
-    expect(SETTINGS_RAIL_ITEM_CLASS).not.toContain("font-normal");
-    expect(SETTINGS_RAIL_ITEM_CLASS).not.toContain("t-body-sm");
     expect(SETTINGS_RAIL_CHEVRON_CLASS).toBe("size-4 shrink-0");
-    expect(SETTINGS_RAIL_ACTIVE_CLASS).toContain("bg-surface-muted");
-    expect(SETTINGS_RAIL_ACTIVE_CLASS).not.toMatch(/accent|purple|blue/);
+    const settingsSrc = readFileSync("src/lib/settings.ts", "utf8");
+    expect(settingsSrc).not.toContain("SETTINGS_RAIL_ITEM_CLASS");
+    expect(settingsSrc).not.toContain("SETTINGS_RAIL_ACTIVE_CLASS");
+    expect(settingsSrc).not.toContain("SETTINGS_RAIL_IDLE_CLASS");
+    expect(settingsSrc).not.toContain("SETTINGS_RAIL_TITLE_CLASS");
+    expect(settingsSrc).toContain("house-shell.ts");
+    expect(HOUSE_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash font-medium text-accent");
+    expect(HOUSE_RAIL_IDLE_CLASS).toBe("font-normal text-ink hover:bg-surface-muted");
+    expect(HOUSE_RAIL_ITEM_CLASS).toContain("t-body-sm");
+    expect(HOUSE_RAIL_ITEM_CLASS).toContain("rounded-full");
+    expect(HOUSE_RAIL_TITLE_CLASS).toContain("t-label");
     expect(SETTINGS_RAIL_ABSENT).toEqual([
       "Titles",
       "Deliveries",
