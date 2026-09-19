@@ -68,7 +68,8 @@ describe("Adam Mercury register lock", () => {
     }
     expect(SHEET_GROUP_CHEVRON_CLASS).toBe("size-4 shrink-0 text-ink-3");
     expect(SETTINGS_RAIL_CHEVRON_CLASS).toBe("size-4 shrink-0");
-    expect(HOUSE_RAIL_ITEM_CLASS).toContain("t-body-sm");
+    expect(HOUSE_RAIL_ITEM_CLASS).toContain("t-body");
+    expect(HOUSE_RAIL_ITEM_CLASS).not.toContain("t-body-sm");
     expect(SETTINGS_PAGE_LEAD_BACK_CLASS).toBe("md:hidden");
     expect(SETTINGS_PAGE_LEAD_BACK_CLASS).not.toContain("absolute");
     expect(SETTINGS_PAGE_LEAD_BACK_CLASS).not.toContain("text-ink");

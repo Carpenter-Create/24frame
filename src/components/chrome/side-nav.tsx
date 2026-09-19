@@ -15,7 +15,7 @@ import {
 import { SOCIAL_ICON_SIZE_NAV, socialNavIconName } from "@/lib/social-icons";
 import { NavGlyph } from "./nav-glyph";
 
-// Access rail: house --text-sm / t-body-sm labels, 16px Phosphor Bold idle /
+// Access rail: house --text-base / t-body labels, 16px Phosphor Bold idle /
 // Fill active (75:5 / 61:2). Active = Sporty Blue icon+text + light-blue
 // pill wash. Inactive = ink. Header mark is BrandLogo (24Frame), not a C.
 // Social destinations use Social Figma V1 Phosphor via SocialIcon.

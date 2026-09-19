@@ -12,6 +12,11 @@ import {
   DASHBOARD_FIXTURE_BANNER_CLASS,
   DASHBOARD_PERIOD_TRIGGER_CLASS,
 } from "@/lib/dashboard-craft";
+import {
+  HOUSE_RAIL_ACTIVE_CLASS,
+  HOUSE_RAIL_IDLE_CLASS,
+  HOUSE_RAIL_ITEM_CLASS,
+} from "@/lib/house-shell";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
@@ -75,7 +80,8 @@ describe("house type ladder", () => {
 
 describe("house type roles", () => {
   it("locks display / title / label / body weights, tracking, and leading", () => {
-    // Adam 2026-09-19 Coinbase-pop A — title 600 · body 500 · display 700.
+    // Adam 2026-09-19 Coinbase-pop A2 — display 600 · heading/subhead 500 ·
+    // title 600 · body 500. A over-bolded heroes/headings uniformly.
     expect(tokens).toMatch(/--type-title-weight:\s*600;/);
     expect(tokens).toMatch(/--type-body-weight:\s*500;/);
     expect(tokens).not.toMatch(/--type-title-weight:\s*480;/);
@@ -84,7 +90,7 @@ describe("house type roles", () => {
     expect(tokens).toMatch(/--tracking-tight:\s*-0\.02em;/);
 
     expect(globals).toMatch(
-      /\.t-display\s*\{[\s\S]*?font-size:\s*var\(--text-hero\)[\s\S]*?font-weight:\s*700[\s\S]*?line-height:\s*1\.04[\s\S]*?letter-spacing:\s*-0\.035em[\s\S]*?font-variant-numeric:\s*tabular-nums/,
+      /\.t-display\s*\{[\s\S]*?font-size:\s*var\(--text-hero\)[\s\S]*?font-weight:\s*600[\s\S]*?line-height:\s*1\.04[\s\S]*?letter-spacing:\s*-0\.035em[\s\S]*?font-variant-numeric:\s*tabular-nums/,
     );
     expect(globals).toMatch(
       /\.t-title\s*\{[\s\S]*?font-weight:\s*var\(--type-title-weight\)[\s\S]*?line-height:\s*1\.15[\s\S]*?letter-spacing:\s*var\(--tracking-tight\)/,
@@ -98,8 +104,8 @@ describe("house type roles", () => {
     expect(globals).toMatch(
       /\.t-label\s*\{[\s\S]*?font-weight:\s*600[\s\S]*?letter-spacing:\s*0\.12em[\s\S]*?text-transform:\s*uppercase/,
     );
-    expect(globals).toMatch(/\.t-heading\s*\{[\s\S]*?font-weight:\s*600/);
-    expect(globals).toMatch(/\.t-subhead\s*\{[\s\S]*?font-weight:\s*600/);
+    expect(globals).toMatch(/\.t-heading\s*\{[\s\S]*?font-weight:\s*500/);
+    expect(globals).toMatch(/\.t-subhead\s*\{[\s\S]*?font-weight:\s*500/);
     expect(globals).toMatch(/\.t-body\s*\{[\s\S]*?font-weight:\s*var\(--type-body-weight\)/);
     expect(globals).toMatch(/\.t-body-sm\s*\{[\s\S]*?font-weight:\s*var\(--type-body-weight\)/);
     expect(globals).toMatch(/\.t-lead\s*\{[\s\S]*?font-weight:\s*var\(--type-body-weight\)/);
@@ -108,12 +114,13 @@ describe("house type roles", () => {
     expect(globals).toMatch(
       /@media \(max-width: 767px\)\s*\{\s*\.t-display\s*\{[\s\S]*?font-size:\s*var\(--text-title\)/,
     );
+    expect(globals).not.toMatch(/\.t-display\s*\{[^}]*font-weight:\s*700/);
     expect(globals).not.toMatch(/\.t-display\s*\{[^}]*font-weight:\s*500/);
     expect(globals).not.toMatch(/\.t-title\s*\{[^}]*font-weight:\s*500/);
     expect(globals).not.toMatch(/\.t-section\s*\{[^}]*font-weight:\s*500/);
     expect(globals).not.toMatch(/\.t-statement\s*\{[^}]*font-weight:\s*500/);
-    expect(globals).not.toMatch(/\.t-heading\s*\{[^}]*font-weight:\s*500/);
-    expect(globals).not.toMatch(/\.t-subhead\s*\{[^}]*font-weight:\s*500/);
+    expect(globals).not.toMatch(/\.t-heading\s*\{[^}]*font-weight:\s*600/);
+    expect(globals).not.toMatch(/\.t-subhead\s*\{[^}]*font-weight:\s*600/);
     expect(globals).not.toMatch(/\.t-body\s*\{[^}]*font-weight:\s*400/);
     expect(globals).not.toMatch(/\.t-body-sm\s*\{[^}]*font-weight:\s*400/);
     expect(globals).not.toMatch(/\.t-lead\s*\{[^}]*font-weight:\s*400/);
@@ -139,6 +146,15 @@ describe("house type roles", () => {
       expect(src, path).not.toMatch(BODY_400_DRIFT);
       expect(src, path).not.toMatch(TITLE_500_DRIFT);
     }
+  });
+
+  it("sizes the rail to house body 500 — not t-body-sm + idle font-normal", () => {
+    // Coinbase-pop A2: rail dinky was 13px + forced 400 against body 500.
+    expect(HOUSE_RAIL_ITEM_CLASS).toMatch(/(?:^|[\s"])t-body(?:[\s"]|$)/);
+    expect(HOUSE_RAIL_ITEM_CLASS).not.toContain("t-body-sm");
+    expect(HOUSE_RAIL_IDLE_CLASS).not.toContain("font-normal");
+    expect(HOUSE_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash text-accent");
+    expect(HOUSE_RAIL_ACTIVE_CLASS).not.toMatch(/font-(?:normal|medium|semibold|bold)/);
   });
 });
 

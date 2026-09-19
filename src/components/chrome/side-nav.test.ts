@@ -36,16 +36,17 @@ describe("SideNav Access rail", () => {
     expect(navSrc).not.toContain("isHouseAiNavItem");
   });
 
-  it("uses house --text-sm / t-body-sm labels, 16px Phosphor Bold/Fill, and an 8px item gap", () => {
+  it("uses house --text-base / t-body labels, 16px Phosphor Bold/Fill, and an 8px item gap", () => {
     const tokens = readFileSync("src/app/tokens.css", "utf8");
     const globals = readFileSync("src/app/globals.css", "utf8");
     expect(navSrc).toContain("HOUSE_RAIL_ITEM_CLASS");
-    expect(navSrc).toContain("house --text-sm / t-body-sm labels");
-    expect(tokens).toMatch(/--text-sm:\s*0\.8125rem;/);
-    expect(globals).toMatch(/\.t-body-sm\s*\{[\s\S]*?font-size:\s*var\(--text-sm\)/);
-    expect(HOUSE_RAIL_ITEM_CLASS).toContain("t-body-sm leading-4");
+    expect(navSrc).toContain("house --text-base / t-body labels");
+    expect(tokens).toMatch(/--text-base:\s*0\.9375rem;/);
+    expect(globals).toMatch(/\.t-body\s*\{[\s\S]*?font-size:\s*var\(--text-base\)/);
+    expect(HOUSE_RAIL_ITEM_CLASS).toContain("t-body leading-4");
+    expect(HOUSE_RAIL_ITEM_CLASS).not.toContain("t-body-sm");
     expect(HOUSE_RAIL_ITEM_CLASS).not.toContain("text-[0.875rem]");
-    expect(HOUSE_RAIL_ITEM_CLASS).not.toMatch(/(?:^|[\s"])t-body(?:[\s"]|$)/);
+    expect(HOUSE_RAIL_ITEM_CLASS).toMatch(/(?:^|[\s"])t-body(?:[\s"]|$)/);
     expect(navSrc).not.toContain("text-[0.875rem]");
     expect(navSrc).toContain("<NavGlyph item={item} active={active} />");
     expect(navSrc).toContain("16px Phosphor Bold idle");
@@ -80,8 +81,10 @@ describe("SideNav Access rail", () => {
     expect(navSrc).toContain("HOUSE_RAIL_ACTIVE_CLASS");
     expect(navSrc).toContain("HOUSE_RAIL_IDLE_CLASS");
     expect(HOUSE_RAIL_ITEM_CLASS).toContain("rounded-full");
-    expect(HOUSE_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash font-medium text-accent");
-    expect(HOUSE_RAIL_IDLE_CLASS).toBe("font-normal text-ink hover:bg-surface-muted");
+    expect(HOUSE_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash text-accent");
+    expect(HOUSE_RAIL_ACTIVE_CLASS).not.toMatch(/font-(?:normal|medium|semibold|bold)/);
+    expect(HOUSE_RAIL_IDLE_CLASS).toBe("text-ink hover:bg-surface-muted");
+    expect(HOUSE_RAIL_IDLE_CLASS).not.toContain("font-normal");
     expect(navSrc).not.toContain("font-normal text-ink-2");
     expect(navSrc).not.toContain("bg-surface-muted font-medium text-ink");
     expect(navSrc).not.toContain('active ? "bg-surface text-ink"');
