@@ -1,8 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { recordSignOutEvent } from "@/lib/security-event-writer";
 import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/supabase/auth";
 
@@ -34,6 +36,17 @@ export async function createOrg(name: string): Promise<{ error?: string }> {
 
 export async function signOut() {
   const supabase = await createClient();
+  const user = await getAuthUser();
+  if (user) {
+    const hdrs = await headers();
+    const ip = hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+    const userAgent = hdrs.get("user-agent");
+    try {
+      await recordSignOutEvent(user.id, ip, userAgent);
+    } catch (err) {
+      console.error("[auth] sign-out security event failed", err instanceof Error ? err.message : err);
+    }
+  }
   await supabase.auth.signOut();
   redirect("/login");
 }

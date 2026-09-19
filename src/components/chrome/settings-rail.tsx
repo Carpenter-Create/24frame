@@ -17,8 +17,8 @@ import {
 } from "@/lib/settings";
 
 // Settings hub rail — occupies the 220 Access slot. Title Settings.
-// Profile · Organization · Preferences. House muted wash. Not a
-// workspace switch. Same URLs from every workspace.
+// Profile · Organization · Preferences · Security. House muted wash.
+// Not a workspace switch. Same URLs from every workspace.
 // 75:132 — 16 Phosphor caret lives on the phone back, not these rows.
 export function SettingsRail() {
   const section = settingsHubSection(usePathname());
