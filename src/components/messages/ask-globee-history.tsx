@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { Clock } from "lucide-react";
+import { Clock } from "@phosphor-icons/react";
 
 import { Input } from "@/components/ui/input";
 import { ASK_GLOBEE, askGlobeeThreadHref } from "@/lib/ask-globee";
@@ -19,8 +19,8 @@ import {
 import {
   MOBILE_CHROME_ICON_BUTTON_CLASS,
   MOBILE_CHROME_ICON_CLASS,
-  MOBILE_CHROME_ICON_STROKE,
 } from "@/lib/mobile-chrome";
+import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import { cn } from "@/lib/cn";
 import { useAskGlobeeChrome } from "./ask-globee-chrome";
 
@@ -223,7 +223,7 @@ export function AskGlobeeHistoryClock({
         onClick={() => onOpenChange(!open)}
         className={MOBILE_CHROME_ICON_BUTTON_CLASS}
       >
-        <Clock className={MOBILE_CHROME_ICON_CLASS} strokeWidth={MOBILE_CHROME_ICON_STROKE} />
+        <Clock className={MOBILE_CHROME_ICON_CLASS} weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
       </button>
     </AskGlobeeHistoryPopover>
   );

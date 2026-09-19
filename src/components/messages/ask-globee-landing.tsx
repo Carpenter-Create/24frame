@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, CircleAlert, Send, Slash, type LucideIcon } from "lucide-react";
+import { ArrowRight, PaperPlaneTilt, Prohibit, WarningCircle } from "@phosphor-icons/react";
 
 import { cn } from "@/lib/cn";
 import {
@@ -18,11 +18,12 @@ import {
 import { startAskGlobeeConversation } from "@/app/(app)/aggregation/messages/ask-globee-actions";
 import { Input } from "@/components/ui/input";
 import { ASK_AI_OVERLAY_PHONE_SCROLL_CLASS } from "@/lib/ask-ai-overlay";
+import { PHOSPHOR_CHROME_IDLE_WEIGHT, type PhosphorIcon } from "@/lib/phosphor-icon";
 
-const CHIP_MARK_ICON: Record<AskGlobeeChipMark, LucideIcon> = {
-  alert: CircleAlert,
-  slash: Slash,
-  send: Send,
+const CHIP_MARK_ICON: Record<AskGlobeeChipMark, PhosphorIcon> = {
+  alert: WarningCircle,
+  slash: Prohibit,
+  send: PaperPlaneTilt,
 };
 
 export const ASK_GLOBEE_LANDING_CHIP_CLASS =
@@ -108,7 +109,7 @@ export function AskGlobeeLanding({
                   <MarkIcon
                     aria-hidden="true"
                     className="size-4 shrink-0 text-ink-3"
-                    strokeWidth={1.33}
+                    weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
                   />
                 ) : null}
                 {label}
@@ -144,7 +145,7 @@ export function AskGlobeeLanding({
             aria-label={ASK_GLOBEE.sendLabel}
             className="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent text-accent-contrast"
           >
-            <ArrowRight className="size-4" strokeWidth={1.33} />
+            <ArrowRight className="size-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
           </button>
         </label>
       </form>

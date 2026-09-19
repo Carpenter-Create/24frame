@@ -492,7 +492,8 @@ describe("AskGlobeeThread", () => {
     expect(actions).toContain("gap-[var(--space-2)]");
     expect(actions).toContain("size-4");
     expect(actions).toContain("text-ink-3");
-    expect(actions).toContain("stroke-width=\"1.33\"");
+    expect(actions).toContain('fill="currentColor"');
+    expect(actions).not.toContain("stroke-width=\"1.33\"");
     expect(actions).not.toContain("gap-[var(--space-4)]");
     expect(src).toContain('className="flex size-4 items-center justify-center text-ink-3"');
   });

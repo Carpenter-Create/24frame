@@ -106,7 +106,8 @@ describe("staff /channels card grid", () => {
     expect(html).toContain("bg-surface-muted");
     expect(html).toContain("size-12");
     expect(html).toContain("size-6");
-    expect(html).toContain("stroke-width=\"1.33\"");
+    expect(html).toContain('fill="currentColor"');
+    expect(html).not.toContain("stroke-width=\"1.33\"");
     expect(html).not.toContain("border-dashed");
     expect(html).not.toContain("#635BFF");
     expect(pageSrc).not.toContain("EmptyState");

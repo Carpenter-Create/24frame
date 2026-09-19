@@ -3,7 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronDown, ChevronRight, GripVertical } from "lucide-react";
+import { CaretDown, CaretRight, DotsSixVertical } from "@phosphor-icons/react";
+
+import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
 import { HouseEmpty } from "@/components/chrome/house";
 import { Button } from "@/components/ui/button";
@@ -210,7 +212,7 @@ export function EducationCourseOverview({
                   >
                     <div className="flex items-center gap-[var(--space-2)] border-b border-hairline px-[var(--space-4)] py-[var(--space-3)]">
                       <span data-education-drag="module" className="text-ink-3" aria-hidden>
-                        <GripVertical className="h-4 w-4" strokeWidth={1.5} />
+                        <DotsSixVertical className="h-4 w-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
                       </span>
                       <button
                         type="button"
@@ -219,9 +221,9 @@ export function EducationCourseOverview({
                         aria-expanded={open}
                       >
                         {open ? (
-                          <ChevronDown className="h-4 w-4 shrink-0 text-ink-3" strokeWidth={1.5} />
+                          <CaretDown className="h-4 w-4 shrink-0 text-ink-3" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
                         ) : (
-                          <ChevronRight className="h-4 w-4 shrink-0 text-ink-3" strokeWidth={1.5} />
+                          <CaretRight className="h-4 w-4 shrink-0 text-ink-3" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
                         )}
                         <span className="truncate t-body font-medium text-ink">{module.title}</span>
                       </button>
@@ -261,7 +263,7 @@ export function EducationCourseOverview({
                                 }`}
                               >
                                 <span data-education-drag="lesson" className="text-ink-3" aria-hidden>
-                                  <GripVertical className="h-4 w-4" strokeWidth={1.5} />
+                                  <DotsSixVertical className="h-4 w-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
                                 </span>
                                 <span className="min-w-0 flex-1">
                                   <span className="block truncate t-body text-ink">{lesson.title}</span>

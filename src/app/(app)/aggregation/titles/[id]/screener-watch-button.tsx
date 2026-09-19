@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Play, Loader2 } from "lucide-react";
+import { CircleNotch, Play } from "@phosphor-icons/react";
+
+import { PHOSPHOR_CHROME_ACTIVE_WEIGHT, PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
 import { Dialog } from "@/components/ui/dialog";
 import { InlineNotice } from "@/components/ui/inline-notice";
@@ -42,14 +44,14 @@ export function ScreenerWatchButton({ titleId }: { titleId: string }) {
         onClick={watch}
         className="inline-flex w-fit items-center gap-2 rounded-full border border-hairline bg-surface px-4 py-2 t-body-sm font-medium text-ink transition hover:bg-surface-muted"
       >
-        <Play className="h-4 w-4 fill-current" strokeWidth={1.5} />
+        <Play className="h-4 w-4" weight={PHOSPHOR_CHROME_ACTIVE_WEIGHT} />
         Watch screener
       </button>
 
       <Dialog open={open} onClose={() => setOpen(false)} title="Screener" size="xl">
         {state === "loading" ? (
           <div className="flex items-center gap-2 py-6 text-ink-3">
-            <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.5} />
+            <CircleNotch className="h-4 w-4 animate-spin" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
             <span className="t-body-sm">Preparing the screener…</span>
           </div>
         ) : null}

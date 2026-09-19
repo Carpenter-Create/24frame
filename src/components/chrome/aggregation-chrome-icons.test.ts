@@ -15,7 +15,7 @@ const leadSearch = readFileSync("src/components/chrome/house-lead-search.tsx", "
 const themeToggle = readFileSync("src/components/theme-toggle.tsx", "utf8");
 
 describe("Aggregation chrome Phosphor lock + Design miss list", () => {
-  it("ships measured Phosphor glyphs only; leaves unmeasured chrome on Lucide", () => {
+  it("ships measured Phosphor glyphs only; no Lucide leftovers", () => {
     expect(rail).toContain('family: "phosphor"');
     expect(rail).toContain("SquaresFour");
     expect(rail).toContain("FilmSlate");
@@ -57,7 +57,8 @@ describe("Aggregation chrome Phosphor lock + Design miss list", () => {
     expect(dests).not.toContain("import { Menu }");
     expect(dests).not.toContain("import { List }");
 
-    expect(messages).toContain('from "lucide-react"');
+    expect(messages).not.toContain('from "lucide-react"');
+    expect(messages).toContain('from "@phosphor-icons/react"');
 
     expect(themeToggle).toContain('from "@phosphor-icons/react"');
     expect(themeToggle).toContain("Sun");
@@ -68,13 +69,14 @@ describe("Aggregation chrome Phosphor lock + Design miss list", () => {
     expect(themeToggle).not.toContain("stroke-width");
   });
 
-  it("leaves Social interiors on Social V1 SocialIcon; SOCIAL_NAV family stays Lucide fallback", () => {
+  it("leaves Social interiors on Social V1 SocialIcon; SOCIAL_NAV dests are house Phosphor", () => {
     expect(socialComposer).toContain("SocialIcon");
     expect(socialComposer).not.toContain('from "lucide-react"');
     expect(leadSearch).toContain("MagnifyingGlass");
     expect(leadSearch).not.toContain('from "lucide-react"');
     expect(leadSearch).not.toContain("SocialIcon");
-    expect(rail).toContain('family: "lucide"');
+    expect(rail).not.toContain('family: "lucide"');
     expect(rail).toContain("SOCIAL_NAV");
+    expect(rail).toContain("ChatCircle");
   });
 });

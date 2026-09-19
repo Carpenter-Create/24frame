@@ -127,8 +127,9 @@ describe("Adam Mercury register lock", () => {
     }
 
     const nav = src("src/lib/nav.ts");
-    expect(nav).toContain('family: "lucide"');
+    expect(nav).not.toContain('family: "lucide"');
     expect(nav).toContain("SOCIAL_NAV");
+    expect(nav).toContain('family: "phosphor"');
     // Social interiors stay on Social Figma V1 SocialIcon. House lead
     // search is shared chrome — Phosphor, not a Social interior fork.
     expect(src("src/components/social/social-home-composer.tsx")).toContain("SocialIcon");

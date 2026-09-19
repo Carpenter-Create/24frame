@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { ArrowLeft, Camera } from "lucide-react";
+import { ArrowLeft, Camera } from "@phosphor-icons/react";
+
+import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
 import { Artwork } from "./artwork";
 import { StatusProgressTrack } from "@/components/ui/status-progress-track";
@@ -44,7 +46,7 @@ export function TitleHero({
         href={backHref}
         className="inline-flex w-fit items-center gap-1 t-body-sm text-ink-2 transition-colors hover:text-ink"
       >
-        <ArrowLeft className="h-4 w-4" strokeWidth={1.5} />
+        <ArrowLeft className="h-4 w-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
         {backLabel}
       </Link>
 
@@ -77,7 +79,7 @@ export function TitleHero({
               className="absolute inset-0 flex items-center justify-center bg-surface-muted"
               data-title-hero-empty-art=""
             >
-              <Camera className="h-8 w-8 text-ink-3" strokeWidth={1.5} aria-hidden />
+              <Camera className="h-8 w-8 text-ink-3" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} aria-hidden />
             </div>
           )}
         </div>

@@ -8,7 +8,7 @@ import {
   Copy,
   ThumbsDown,
   ThumbsUp,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 
 import {
   ASK_GLOBEE,
@@ -33,6 +33,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { ASK_AI_OVERLAY_PHONE_SCROLL_CLASS } from "@/lib/ask-ai-overlay";
 import { cn } from "@/lib/cn";
+import { PHOSPHOR_CHROME_ACTIVE_WEIGHT, PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import { useAskGlobeeChrome } from "./ask-globee-chrome";
 import { AskGlobeeThinking } from "./ask-globee-thinking";
 
@@ -317,9 +318,9 @@ export function AskGlobeeThread({
                           onClick={() => copyAnswer(message)}
                         >
                           {copiedId === message.id ? (
-                            <Check className="size-4" strokeWidth={1.33} data-ask-globee-copied="" />
+                            <Check className="size-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} data-ask-globee-copied="" />
                           ) : (
-                            <Copy className="size-4" strokeWidth={1.33} />
+                            <Copy className="size-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
                           )}
                         </ThreadIconButton>
                         <ThreadIconButton
@@ -335,8 +336,11 @@ export function AskGlobeeThread({
                         >
                           <ThumbsUp
                             className="size-4"
-                            strokeWidth={1.33}
-                            fill={thumbsFor(message) === "up" ? "currentColor" : "none"}
+                            weight={
+                              thumbsFor(message) === "up"
+                                ? PHOSPHOR_CHROME_ACTIVE_WEIGHT
+                                : PHOSPHOR_CHROME_IDLE_WEIGHT
+                            }
                           />
                         </ThreadIconButton>
                         <ThreadIconButton
@@ -352,8 +356,11 @@ export function AskGlobeeThread({
                         >
                           <ThumbsDown
                             className="size-4"
-                            strokeWidth={1.33}
-                            fill={thumbsFor(message) === "down" ? "currentColor" : "none"}
+                            weight={
+                              thumbsFor(message) === "down"
+                                ? PHOSPHOR_CHROME_ACTIVE_WEIGHT
+                                : PHOSPHOR_CHROME_IDLE_WEIGHT
+                            }
                           />
                         </ThreadIconButton>
                       </div>
@@ -433,7 +440,7 @@ export function AskGlobeeThread({
                 aria-label={ASK_GLOBEE.sendLabel}
                 className="flex size-4 shrink-0 items-center justify-center text-ink-3"
               >
-                <ArrowRight className="size-4" strokeWidth={1.33} />
+                <ArrowRight className="size-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
               </button>
             </label>
           )}

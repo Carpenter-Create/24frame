@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { Camera } from "lucide-react";
+import { Camera } from "@phosphor-icons/react";
+
+import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
 import { Artwork } from "@/components/layout/artwork";
 import { TitlesCatalogStatusFilter } from "@/components/titles/titles-status-filter";
@@ -245,7 +247,7 @@ export function TitlesLandscapeArt({
           className="absolute inset-0 flex items-center justify-center bg-surface-muted"
           data-titles-catalog-empty-art=""
         >
-          <Camera className="h-4 w-4 text-ink-3" strokeWidth={1.5} aria-hidden />
+          <Camera className="h-4 w-4 text-ink-3" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} aria-hidden />
         </div>
       )}
     </div>

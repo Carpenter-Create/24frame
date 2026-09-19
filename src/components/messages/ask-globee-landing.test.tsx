@@ -61,7 +61,8 @@ describe("AskGlobeeLanding", () => {
     expect(html).not.toContain(ASK_GLOBEE.newConversationLabel);
     expect(html).not.toContain('href="/messages"');
     expect(html).toContain("text-ink-3");
-    expect(html).toContain("stroke-width=\"1.33\"");
+    expect(html).toContain('fill="currentColor"');
+    expect(html).not.toContain("stroke-width=\"1.33\"");
     for (const label of ASK_GLOBEE.tryPrompts) {
       expect(html).toContain(label);
     }
@@ -289,10 +290,11 @@ describe("AskGlobeeLanding", () => {
     expect(html).toContain('data-ask-globee-chip-mark="alert"');
     expect(html).toContain('data-ask-globee-chip-mark="slash"');
     expect(html).toContain('data-ask-globee-chip-mark="send"');
-    expect(src).toContain("CircleAlert");
-    expect(src).toContain("Slash");
-    expect(src).toContain("Send");
-    expect(src).toContain("strokeWidth={1.33}");
+    expect(src).toContain("WarningCircle");
+    expect(src).toContain("Prohibit");
+    expect(src).toContain("PaperPlaneTilt");
+    expect(src).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
+    expect(src).not.toContain("strokeWidth={1.33}");
     expect(src).toContain("size-4 shrink-0 text-ink-3");
     expect(src).not.toContain("size-4 text-accent");
     expect(src).not.toContain("fill-");

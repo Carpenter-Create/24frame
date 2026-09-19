@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { MoreHorizontal } from "lucide-react";
+import { DotsThree } from "@phosphor-icons/react";
+
+import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogFooter } from "@/components/ui/dialog";
@@ -76,7 +78,7 @@ export function TitleLifecycleControls({
               HOUSE_ICON_BUTTON_CLASS,
             )}
           >
-            <MoreHorizontal className="size-4" strokeWidth={1.33} />
+            <DotsThree className="size-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
           </button>
         </DropdownMenuTrigger>
         <MenuSurfaceContent align="end" data-title-lifecycle-menu-surface="">

@@ -18,7 +18,7 @@ describe("NavGlyph", () => {
     expect(idle).not.toContain("lucide-");
     expect(active).not.toContain("stroke-width");
     expect(src).toContain("PhosphorChromeIcon");
-    expect(src).toContain('item.family === "lucide"');
+    expect(src).not.toContain('item.family === "lucide"');
     expect(src).toContain('item.family === "house-ai"');
     expect(src).toContain("HouseAiMark");
   });
@@ -34,10 +34,11 @@ describe("NavGlyph", () => {
     expect(html).not.toContain("stroke-width");
   });
 
-  it("falls back to Lucide for SOCIAL_NAV family items", () => {
+  it("renders SOCIAL_NAV dests as house Phosphor, not Lucide", () => {
     const html = renderToStaticMarkup(<NavGlyph item={SOCIAL_NAV[0]} active />);
-    expect(html).toContain("lucide-");
-    expect(html).toContain('stroke-width="1.33"');
-    expect(src).toContain("strokeWidth={1.33}");
+    expect(html).not.toContain("lucide-");
+    expect(html).not.toContain("stroke-width");
+    expect(html).toContain('fill="currentColor"');
+    expect(src).not.toContain("strokeWidth={1.33}");
   });
 });

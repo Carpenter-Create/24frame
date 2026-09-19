@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { Activity } from "lucide-react";
+import { Pulse } from "@phosphor-icons/react";
+
+import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
 import { cn } from "@/lib/cn";
 import {
@@ -57,7 +59,7 @@ export function DashboardHomePillLink({
         className,
       )}
     >
-      <Activity className="size-[14px]" strokeWidth={1.33} aria-hidden />
+      <Pulse className="size-[14px]" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} aria-hidden />
       {children}
     </Link>
   );
