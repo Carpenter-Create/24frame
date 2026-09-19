@@ -1,38 +1,40 @@
 import { describe, expect, it } from "vitest";
 
-import { safeAuthCallbackNext } from "./auth-callback-next";
+import { AUTH_DEFAULT_NEXT, safeAuthCallbackNext } from "./auth-callback-next";
 
 describe("safeAuthCallbackNext (P0-1)", () => {
-  it("allows same-origin path-relative URLs and defaults to /", () => {
-    expect(safeAuthCallbackNext(null)).toBe("/");
-    expect(safeAuthCallbackNext(undefined)).toBe("/");
-    expect(safeAuthCallbackNext("")).toBe("/");
-    expect(safeAuthCallbackNext("/")).toBe("/");
+  it("allows same-origin path-relative URLs and defaults to /home", () => {
+    expect(AUTH_DEFAULT_NEXT).toBe("/home");
+    expect(safeAuthCallbackNext(null)).toBe("/home");
+    expect(safeAuthCallbackNext(undefined)).toBe("/home");
+    expect(safeAuthCallbackNext("")).toBe("/home");
+    expect(safeAuthCallbackNext("/")).toBe("/home");
+    expect(safeAuthCallbackNext("/?ai=1")).toBe("/home?ai=1");
     expect(safeAuthCallbackNext("/aggregation/queue")).toBe("/aggregation/queue");
     expect(safeAuthCallbackNext("/home?ai=1")).toBe("/home?ai=1");
     expect(safeAuthCallbackNext("/settings/profile")).toBe("/settings/profile");
   });
 
   it("rejects protocol-relative, backslash, @, and schemes", () => {
-    expect(safeAuthCallbackNext("//evil.example")).toBe("/");
-    expect(safeAuthCallbackNext("//evil.example/phish")).toBe("/");
-    expect(safeAuthCallbackNext("https://evil.example")).toBe("/");
-    expect(safeAuthCallbackNext("http://evil.example")).toBe("/");
-    expect(safeAuthCallbackNext("javascript:alert(1)")).toBe("/");
-    expect(safeAuthCallbackNext("\\\\evil.example")).toBe("/");
-    expect(safeAuthCallbackNext("/\\evil.example")).toBe("/");
-    expect(safeAuthCallbackNext("/foo\\bar")).toBe("/");
-    expect(safeAuthCallbackNext("/@attacker")).toBe("/");
-    expect(safeAuthCallbackNext("/queue@evil.example")).toBe("/");
-    expect(safeAuthCallbackNext("queue")).toBe("/");
-    expect(safeAuthCallbackNext("aggregation/queue")).toBe("/");
+    expect(safeAuthCallbackNext("//evil.example")).toBe("/home");
+    expect(safeAuthCallbackNext("//evil.example/phish")).toBe("/home");
+    expect(safeAuthCallbackNext("https://evil.example")).toBe("/home");
+    expect(safeAuthCallbackNext("http://evil.example")).toBe("/home");
+    expect(safeAuthCallbackNext("javascript:alert(1)")).toBe("/home");
+    expect(safeAuthCallbackNext("\\\\evil.example")).toBe("/home");
+    expect(safeAuthCallbackNext("/\\evil.example")).toBe("/home");
+    expect(safeAuthCallbackNext("/foo\\bar")).toBe("/home");
+    expect(safeAuthCallbackNext("/@attacker")).toBe("/home");
+    expect(safeAuthCallbackNext("/queue@evil.example")).toBe("/home");
+    expect(safeAuthCallbackNext("queue")).toBe("/home");
+    expect(safeAuthCallbackNext("aggregation/queue")).toBe("/home");
   });
 
   it("rejects encoded and control-character bypasses", () => {
-    expect(safeAuthCallbackNext("/%2F%2Fevil.example")).toBe("/");
-    expect(safeAuthCallbackNext("/%5Cevil.example")).toBe("/");
-    expect(safeAuthCallbackNext("/%40attacker")).toBe("/");
-    expect(safeAuthCallbackNext("/queue%0d%0aLocation:%20https://evil.example")).toBe("/");
-    expect(safeAuthCallbackNext("/que\nue")).toBe("/");
+    expect(safeAuthCallbackNext("/%2F%2Fevil.example")).toBe("/home");
+    expect(safeAuthCallbackNext("/%5Cevil.example")).toBe("/home");
+    expect(safeAuthCallbackNext("/%40attacker")).toBe("/home");
+    expect(safeAuthCallbackNext("/queue%0d%0aLocation:%20https://evil.example")).toBe("/home");
+    expect(safeAuthCallbackNext("/que\nue")).toBe("/home");
   });
 });

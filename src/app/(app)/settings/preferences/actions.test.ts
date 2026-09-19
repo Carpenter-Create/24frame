@@ -62,27 +62,29 @@ describe("notification pref actions", () => {
     await expect(loadOwnNotificationPrefs()).resolves.toEqual(NOTIFICATION_PREF_DEFAULTS);
   });
 
-  it("loads a stored email-off title/queue cell", async () => {
-    prefsClient({ row: { title_queue_email: false } });
+  it("loads a stored email-off title-returned cell", async () => {
+    prefsClient({ row: { prefs: { title_returned: { email: false } } } });
     const prefs = await loadOwnNotificationPrefs();
-    expect(prefs.title_queue.email).toBe(false);
-    expect(prefs.title_queue.in_app).toBe(true);
+    expect(prefs.title_returned.email).toBe(false);
+    expect(prefs.title_returned.in_app).toBe(true);
   });
 
-  it("upserts the patched row for the signed-in user", async () => {
+  it("upserts the patched jsonb row for the signed-in user", async () => {
     const client = prefsClient();
     const res = await saveNotificationPref({
-      event: "activity_mentions",
+      event: "mention",
       channel: "email",
       enabled: true,
     });
     expect(res.error).toBeUndefined();
-    expect(res.prefs?.activity_mentions.email).toBe(true);
+    expect(res.prefs?.mention.email).toBe(true);
     expect(client.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
         user_id: USER.id,
-        activity_mentions_email: true,
-        title_queue_email: true,
+        prefs: expect.objectContaining({
+          mention: { in_app: true, email: true },
+          title_returned: { in_app: true, email: true },
+        }),
       }),
       { onConflict: "user_id" },
     );

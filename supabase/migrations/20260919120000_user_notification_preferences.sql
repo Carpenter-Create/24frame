@@ -2,10 +2,10 @@
 -- 20260919120000_user_notification_preferences.sql
 --
 -- INTENT: durable per-user notification channel prefs for Settings →
--- Preferences. One row per auth user. Missing row = app defaults
--- (in-app on; email on for title/queue, delivery/review, team invites;
--- email off for activity/mentions and course updates). Theme stays
--- gc-theme localStorage — this table is notifications only.
+-- Preferences. One row per auth user. prefs jsonb holds the 26 locked
+-- event keys (in_app / email). Missing row or empty object = app
+-- defaults in lib/notification-prefs.ts. Theme stays gc-theme
+-- localStorage — this table is notifications only.
 --
 -- Write model: the signed-in user SELECT/INSERT/UPDATE their own row
 -- via RLS. No DELETE (golden rule 2). No service-role write path.
@@ -21,17 +21,10 @@
 
 create table if not exists public.user_notification_preferences (
   user_id uuid primary key references auth.users(id) on delete restrict,
-  title_queue_in_app boolean not null default true,
-  title_queue_email boolean not null default true,
-  delivery_review_in_app boolean not null default true,
-  delivery_review_email boolean not null default true,
-  activity_mentions_in_app boolean not null default true,
-  activity_mentions_email boolean not null default false,
-  education_in_app boolean not null default true,
-  education_email boolean not null default false,
-  team_invites_in_app boolean not null default true,
-  team_invites_email boolean not null default true,
-  updated_at timestamptz not null default now()
+  prefs jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now(),
+  constraint user_notification_preferences_prefs_object
+    check (jsonb_typeof(prefs) = 'object')
 );
 
 alter table public.user_notification_preferences enable row level security;

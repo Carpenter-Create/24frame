@@ -1,14 +1,18 @@
-// Per-user notification preference SoT. Copy and defaults live here,
-// not in JSX. Emitters check isNotificationChannelOn later.
+// Per-user notification preference SoT. Copy, keys, and defaults
+// live here, not in JSX. Emitters check isNotificationChannelOn later.
+//
+// Founder lock 2026-09-19: 26 concrete event rows, not coarse buckets.
+// Groups: Aggregation (Reporting under Aggregation) · Social ·
+// Education · Account.
 //
 // Defaults (missing row = these values):
 //   in-app on for every event
-//   email on for title/queue, delivery/review, and team invites
-//     (matches the live GC-Support email fan-out for title_rejected
-//     and delivery_update; invites are email-first)
-//   email off for activity/mentions and course updates (no emitters yet)
+//   email on for live ops, money, reporting, DMs, invites, role,
+//     security, and billing
+//   email off for social engagement, title notes, license, and
+//     education (no emitters yet)
 //
-// Persistence: public.user_notification_preferences (one row / user).
+// Persistence: public.user_notification_preferences.prefs jsonb.
 // Theme stays gc-theme localStorage — do not store appearance here.
 
 import { z } from "zod";
@@ -16,11 +20,32 @@ import { z } from "zod";
 import type { NotificationKind } from "@/lib/notifications";
 
 export const NOTIFICATION_PREF_EVENTS = [
-  "title_queue",
-  "delivery_review",
-  "activity_mentions",
-  "education",
-  "team_invites",
+  "title_returned",
+  "title_status",
+  "delivery_status",
+  "title_assigned",
+  "title_comment",
+  "license_status",
+  "payout_statement",
+  "reporting_ready",
+  "reporting_anomaly",
+  "reporting_deadline",
+  "dm_received",
+  "mention",
+  "post_liked",
+  "post_commented",
+  "new_follower",
+  "post_shared",
+  "story_reply",
+  "course_available",
+  "course_updated",
+  "lesson_due",
+  "course_completed",
+  "course_announcement",
+  "team_invite",
+  "role_changed",
+  "security_signin",
+  "billing_change",
 ] as const;
 
 export type NotificationPrefEvent = (typeof NOTIFICATION_PREF_EVENTS)[number];
@@ -44,24 +69,164 @@ export const NOTIFICATION_PREFS = {
   signedOut: "Sign in to change notification preferences.",
   invalid: "That preference could not be saved.",
   saveFailed: "Notification preferences could not be saved.",
+  groups: {
+    aggregation: "Aggregation",
+    reporting: "Reporting",
+    social: "Social",
+    education: "Education",
+    account: "Account",
+  },
   events: {
-    title_queue: "Title and queue status",
-    delivery_review: "Delivery and review",
-    activity_mentions: "Activity and mentions",
-    education: "Course updates",
-    team_invites: "Team and org invites",
+    title_returned: "Title returned for revision",
+    title_status: "Title status change",
+    delivery_status: "Delivery status change",
+    title_assigned: "Title assigned to you / needs your action",
+    title_comment: "Comment or note on a title you’re on",
+    license_status: "License / deal status change on your title",
+    payout_statement: "Payout / statement ready",
+    reporting_ready: "Report ready / new reporting data available",
+    reporting_anomaly: "Reporting anomaly or threshold breach",
+    reporting_deadline: "Reporting deadline / submission reminder",
+    dm_received: "Direct message received",
+    mention: "Someone mentioned you",
+    post_liked: "Someone liked your post",
+    post_commented: "Someone commented on your post",
+    new_follower: "New follower",
+    post_shared: "Someone shared your post",
+    story_reply: "Story reply",
+    course_available: "New course available",
+    course_updated: "Course you’re in was updated",
+    lesson_due: "Assignment / lesson due reminder",
+    course_completed: "Course completed / certificate ready",
+    course_announcement: "Instructor announcement on an enrolled course",
+    team_invite: "Team invite received",
+    role_changed: "Your role changed",
+    security_signin: "Security: new sign-in / password change",
+    billing_change: "Billing / plan change on your org",
   },
 } as const;
 
+const EMAIL_ON = { in_app: true, email: true } as const;
+const EMAIL_OFF = { in_app: true, email: false } as const;
+
 export const NOTIFICATION_PREF_DEFAULTS: NotificationPrefs = {
-  title_queue: { in_app: true, email: true },
-  delivery_review: { in_app: true, email: true },
-  activity_mentions: { in_app: true, email: false },
-  education: { in_app: true, email: false },
-  team_invites: { in_app: true, email: true },
+  title_returned: EMAIL_ON,
+  title_status: EMAIL_ON,
+  delivery_status: EMAIL_ON,
+  title_assigned: EMAIL_ON,
+  title_comment: EMAIL_OFF,
+  license_status: EMAIL_OFF,
+  payout_statement: EMAIL_ON,
+  reporting_ready: EMAIL_ON,
+  reporting_anomaly: EMAIL_ON,
+  reporting_deadline: EMAIL_ON,
+  dm_received: EMAIL_ON,
+  mention: EMAIL_OFF,
+  post_liked: EMAIL_OFF,
+  post_commented: EMAIL_OFF,
+  new_follower: EMAIL_OFF,
+  post_shared: EMAIL_OFF,
+  story_reply: EMAIL_OFF,
+  course_available: EMAIL_OFF,
+  course_updated: EMAIL_OFF,
+  lesson_due: EMAIL_OFF,
+  course_completed: EMAIL_OFF,
+  course_announcement: EMAIL_OFF,
+  team_invite: EMAIL_ON,
+  role_changed: EMAIL_ON,
+  security_signin: EMAIL_ON,
+  billing_change: EMAIL_ON,
 };
 
-export const NOTIFICATION_PREF_MATRIX_CLASS = "flex flex-col gap-[var(--space-2)]";
+export type NotificationPrefGroupId = "aggregation" | "social" | "education" | "account";
+
+export type NotificationPrefSection = {
+  id: string;
+  label: string;
+  events: readonly NotificationPrefEvent[];
+};
+
+export const NOTIFICATION_PREF_GROUPS: readonly {
+  id: NotificationPrefGroupId;
+  label: string;
+  sections: readonly NotificationPrefSection[];
+}[] = [
+  {
+    id: "aggregation",
+    label: NOTIFICATION_PREFS.groups.aggregation,
+    sections: [
+      {
+        id: "aggregation",
+        label: NOTIFICATION_PREFS.groups.aggregation,
+        events: [
+          "title_returned",
+          "title_status",
+          "delivery_status",
+          "title_assigned",
+          "title_comment",
+          "license_status",
+          "payout_statement",
+        ],
+      },
+      {
+        id: "reporting",
+        label: NOTIFICATION_PREFS.groups.reporting,
+        events: ["reporting_ready", "reporting_anomaly", "reporting_deadline"],
+      },
+    ],
+  },
+  {
+    id: "social",
+    label: NOTIFICATION_PREFS.groups.social,
+    sections: [
+      {
+        id: "social",
+        label: NOTIFICATION_PREFS.groups.social,
+        events: [
+          "dm_received",
+          "mention",
+          "post_liked",
+          "post_commented",
+          "new_follower",
+          "post_shared",
+          "story_reply",
+        ],
+      },
+    ],
+  },
+  {
+    id: "education",
+    label: NOTIFICATION_PREFS.groups.education,
+    sections: [
+      {
+        id: "education",
+        label: NOTIFICATION_PREFS.groups.education,
+        events: [
+          "course_available",
+          "course_updated",
+          "lesson_due",
+          "course_completed",
+          "course_announcement",
+        ],
+      },
+    ],
+  },
+  {
+    id: "account",
+    label: NOTIFICATION_PREFS.groups.account,
+    sections: [
+      {
+        id: "account",
+        label: NOTIFICATION_PREFS.groups.account,
+        events: ["team_invite", "role_changed", "security_signin", "billing_change"],
+      },
+    ],
+  },
+];
+
+export const NOTIFICATION_PREF_MATRIX_CLASS = "flex flex-col gap-[var(--space-6)]";
+export const NOTIFICATION_PREF_GROUP_CLASS = "flex flex-col gap-[var(--space-4)]";
+export const NOTIFICATION_PREF_SECTION_CLASS = "flex flex-col gap-[var(--space-2)]";
 export const NOTIFICATION_PREF_HEAD_CLASS =
   "grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-[var(--space-4)] t-body-sm text-ink-3";
 export const NOTIFICATION_PREF_ROW_CLASS =
@@ -75,13 +240,6 @@ export const NOTIFICATION_PREF_SWITCH_THUMB_CLASS =
   "inline-block size-5 rounded-full bg-surface transition-transform";
 export const NOTIFICATION_PREF_SWITCH_THUMB_ON_CLASS = "translate-x-[18px]";
 export const NOTIFICATION_PREF_SWITCH_THUMB_OFF_CLASS = "translate-x-0.5";
-
-export function notificationPrefColumn(
-  event: NotificationPrefEvent,
-  channel: NotificationPrefChannel,
-): `${NotificationPrefEvent}_${NotificationPrefChannel}` {
-  return `${event}_${channel}`;
-}
 
 export function isNotificationChannelOn(
   prefs: NotificationPrefs,
@@ -107,9 +265,11 @@ export function withNotificationPref(
 }
 
 export function notificationPrefEventForKind(kind: NotificationKind): NotificationPrefEvent {
-  if (kind === "delivery_update") return "delivery_review";
-  return "title_queue";
+  if (kind === "delivery_update") return "delivery_status";
+  return "title_returned";
 }
+
+export const NOTIFICATION_PREF_TITLE_STATUS_EVENT = "title_status" satisfies NotificationPrefEvent;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -119,15 +279,21 @@ function readBoolean(value: unknown, fallback: boolean): boolean {
   return typeof value === "boolean" ? value : fallback;
 }
 
+function readChannelPrefs(value: unknown, fallback: NotificationChannelPrefs): NotificationChannelPrefs {
+  if (!isRecord(value)) return fallback;
+  return {
+    in_app: readBoolean(value.in_app, fallback.in_app),
+    email: readBoolean(value.email, fallback.email),
+  };
+}
+
 /** Missing or partial rows wash to defaults. Unknown keys are ignored. */
 export function parseNotificationPrefsRow(row: unknown): NotificationPrefs {
   const source = isRecord(row) ? row : {};
+  const nested = isRecord(source.prefs) ? source.prefs : source;
   const prefs = { ...NOTIFICATION_PREF_DEFAULTS };
   for (const event of NOTIFICATION_PREF_EVENTS) {
-    prefs[event] = {
-      in_app: readBoolean(source[notificationPrefColumn(event, "in_app")], prefs[event].in_app),
-      email: readBoolean(source[notificationPrefColumn(event, "email")], prefs[event].email),
-    };
+    prefs[event] = readChannelPrefs(nested[event], prefs[event]);
   }
   return prefs;
 }
@@ -135,32 +301,8 @@ export function parseNotificationPrefsRow(row: unknown): NotificationPrefs {
 export function notificationPrefsToRow(
   userId: string,
   prefs: NotificationPrefs,
-): {
-  user_id: string;
-  title_queue_in_app: boolean;
-  title_queue_email: boolean;
-  delivery_review_in_app: boolean;
-  delivery_review_email: boolean;
-  activity_mentions_in_app: boolean;
-  activity_mentions_email: boolean;
-  education_in_app: boolean;
-  education_email: boolean;
-  team_invites_in_app: boolean;
-  team_invites_email: boolean;
-} {
-  return {
-    user_id: userId,
-    title_queue_in_app: prefs.title_queue.in_app,
-    title_queue_email: prefs.title_queue.email,
-    delivery_review_in_app: prefs.delivery_review.in_app,
-    delivery_review_email: prefs.delivery_review.email,
-    activity_mentions_in_app: prefs.activity_mentions.in_app,
-    activity_mentions_email: prefs.activity_mentions.email,
-    education_in_app: prefs.education.in_app,
-    education_email: prefs.education.email,
-    team_invites_in_app: prefs.team_invites.in_app,
-    team_invites_email: prefs.team_invites.email,
-  };
+): { user_id: string; prefs: NotificationPrefs } {
+  return { user_id: userId, prefs };
 }
 
 export const notificationPrefWriteSchema = z.object({

@@ -7,10 +7,12 @@ import { cn } from "@/lib/cn";
 import {
   NOTIFICATION_PREF_CHANNEL_CLASS,
   NOTIFICATION_PREF_CHANNELS,
-  NOTIFICATION_PREF_EVENTS,
+  NOTIFICATION_PREF_GROUPS,
+  NOTIFICATION_PREF_GROUP_CLASS,
   NOTIFICATION_PREF_HEAD_CLASS,
   NOTIFICATION_PREF_MATRIX_CLASS,
   NOTIFICATION_PREF_ROW_CLASS,
+  NOTIFICATION_PREF_SECTION_CLASS,
   NOTIFICATION_PREF_SWITCH_OFF_CLASS,
   NOTIFICATION_PREF_SWITCH_ON_CLASS,
   NOTIFICATION_PREF_SWITCH_THUMB_CLASS,
@@ -69,6 +71,19 @@ function PrefSwitch({
   );
 }
 
+function ChannelHead() {
+  return (
+    <div className={NOTIFICATION_PREF_HEAD_CLASS}>
+      <span />
+      {NOTIFICATION_PREF_CHANNELS.map((channel) => (
+        <span key={channel} className={NOTIFICATION_PREF_CHANNEL_CLASS}>
+          {channel === "in_app" ? NOTIFICATION_PREFS.inApp : NOTIFICATION_PREFS.email}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 export function NotificationPreferences({
   initialPrefs,
 }: {
@@ -102,30 +117,40 @@ export function NotificationPreferences({
       <h3 className="t-section text-ink">{NOTIFICATION_PREFS.title}</h3>
       <p className="t-body-sm text-ink-3">{NOTIFICATION_PREFS.helper}</p>
       <div data-settings-notification-matrix="" className={NOTIFICATION_PREF_MATRIX_CLASS}>
-        <div className={NOTIFICATION_PREF_HEAD_CLASS}>
-          <span />
-          {NOTIFICATION_PREF_CHANNELS.map((channel) => (
-            <span key={channel} className={NOTIFICATION_PREF_CHANNEL_CLASS}>
-              {channel === "in_app" ? NOTIFICATION_PREFS.inApp : NOTIFICATION_PREFS.email}
-            </span>
-          ))}
-        </div>
-        {NOTIFICATION_PREF_EVENTS.map((event) => (
+        {NOTIFICATION_PREF_GROUPS.map((group) => (
           <div
-            key={event}
-            data-settings-notification-row={event}
-            className={NOTIFICATION_PREF_ROW_CLASS}
+            key={group.id}
+            data-settings-notification-group={group.id}
+            className={NOTIFICATION_PREF_GROUP_CLASS}
           >
-            <span>{NOTIFICATION_PREFS.events[event]}</span>
-            {NOTIFICATION_PREF_CHANNELS.map((channel) => (
-              <PrefSwitch
-                key={channel}
-                event={event}
-                channel={channel}
-                on={isNotificationChannelOn(prefs, event, channel)}
-                disabled={saving}
-                onToggle={onToggle}
-              />
+            {group.sections.map((section) => (
+              <div
+                key={section.id}
+                data-settings-notification-section={section.id}
+                className={NOTIFICATION_PREF_SECTION_CLASS}
+              >
+                <h4 className="t-section text-ink">{section.label}</h4>
+                <ChannelHead />
+                {section.events.map((event) => (
+                  <div
+                    key={event}
+                    data-settings-notification-row={event}
+                    className={NOTIFICATION_PREF_ROW_CLASS}
+                  >
+                    <span>{NOTIFICATION_PREFS.events[event]}</span>
+                    {NOTIFICATION_PREF_CHANNELS.map((channel) => (
+                      <PrefSwitch
+                        key={channel}
+                        event={event}
+                        channel={channel}
+                        on={isNotificationChannelOn(prefs, event, channel)}
+                        disabled={saving}
+                        onToggle={onToggle}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
             ))}
           </div>
         ))}

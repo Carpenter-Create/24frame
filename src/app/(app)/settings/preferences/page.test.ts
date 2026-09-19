@@ -76,9 +76,12 @@ describe("SettingsPreferencesPage", () => {
     expect(html).not.toContain(SETTINGS.manageCourses);
     expect(html).not.toContain('href="/education"');
     expect(html).not.toContain("CreateCourseForm");
-    expect(html).not.toContain("Social");
-    expect(html).not.toContain("Education");
-    expect(html).not.toContain("Aggregation");
+    expect(html).toContain(NOTIFICATION_PREFS.groups.aggregation);
+    expect(html).toContain(NOTIFICATION_PREFS.groups.social);
+    expect(html).toContain(NOTIFICATION_PREFS.groups.education);
+    expect(html).toContain(NOTIFICATION_PREFS.groups.account);
+    expect(html).toContain(NOTIFICATION_PREFS.groups.reporting);
+    expect(html).not.toContain("CreateCourseForm");
     expect(pageSrc).not.toContain("education-forms");
     expect(paneSrc).toContain("SETTINGS.manageCourses");
     expect(paneSrc).toContain("AppearancePreferences");

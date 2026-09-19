@@ -21,24 +21,25 @@ select set_config(
 
 select lives_ok(
   format(
-    $$ insert into public.user_notification_preferences (user_id, title_queue_email)
-       values (%L, false) $$,
+    $$ insert into public.user_notification_preferences (user_id, prefs)
+       values (%L, '{"title_returned":{"in_app":true,"email":false}}'::jsonb) $$,
     current_setting('t.userA')
   ),
   'user A can insert own notification prefs'
 );
 
 select is(
-  (select title_queue_email from public.user_notification_preferences
+  (select prefs -> 'title_returned' ->> 'email'
+     from public.user_notification_preferences
     where user_id = current_setting('t.userA')::uuid),
-  false,
+  'false',
   'user A can read own notification prefs'
 );
 
 select lives_ok(
   format(
     $$ update public.user_notification_preferences
-       set education_email = true
+       set prefs = jsonb_set(prefs, '{course_updated,email}', 'true'::jsonb)
        where user_id = %L $$,
     current_setting('t.userA')
   ),
@@ -46,9 +47,10 @@ select lives_ok(
 );
 
 select is(
-  (select education_email from public.user_notification_preferences
+  (select prefs -> 'course_updated' ->> 'email'
+     from public.user_notification_preferences
     where user_id = current_setting('t.userA')::uuid),
-  true,
+  'true',
   'user A update landed'
 );
 
@@ -78,7 +80,7 @@ select is(
 select lives_ok(
   format(
     $$ update public.user_notification_preferences
-       set title_queue_email = true
+       set prefs = '{"title_returned":{"email":true}}'::jsonb
        where user_id = %L $$,
     current_setting('t.userA')
   ),
@@ -103,9 +105,10 @@ select set_config(
 );
 
 select is(
-  (select title_queue_email from public.user_notification_preferences
+  (select prefs -> 'title_returned' ->> 'email'
+     from public.user_notification_preferences
     where user_id = current_setting('t.userA')::uuid),
-  false,
+  'false',
   'user B could not flip user A email pref'
 );
 

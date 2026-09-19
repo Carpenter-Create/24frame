@@ -2850,44 +2850,17 @@ export type Database = {
       }
       user_notification_preferences: {
         Row: {
-          activity_mentions_email: boolean
-          activity_mentions_in_app: boolean
-          delivery_review_email: boolean
-          delivery_review_in_app: boolean
-          education_email: boolean
-          education_in_app: boolean
-          team_invites_email: boolean
-          team_invites_in_app: boolean
-          title_queue_email: boolean
-          title_queue_in_app: boolean
+          prefs: Json
           updated_at: string
           user_id: string
         }
         Insert: {
-          activity_mentions_email?: boolean
-          activity_mentions_in_app?: boolean
-          delivery_review_email?: boolean
-          delivery_review_in_app?: boolean
-          education_email?: boolean
-          education_in_app?: boolean
-          team_invites_email?: boolean
-          team_invites_in_app?: boolean
-          title_queue_email?: boolean
-          title_queue_in_app?: boolean
+          prefs?: Json
           updated_at?: string
           user_id: string
         }
         Update: {
-          activity_mentions_email?: boolean
-          activity_mentions_in_app?: boolean
-          delivery_review_email?: boolean
-          delivery_review_in_app?: boolean
-          education_email?: boolean
-          education_in_app?: boolean
-          team_invites_email?: boolean
-          team_invites_in_app?: boolean
-          title_queue_email?: boolean
-          title_queue_in_app?: boolean
+          prefs?: Json
           updated_at?: string
           user_id?: string
         }
