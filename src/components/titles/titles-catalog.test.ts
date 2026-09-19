@@ -572,8 +572,10 @@ describe("Titles catalog has no stray FAB", () => {
     expect(catalog).not.toMatch(/fixed[\s\S]{0,80}(bottom|right)/);
     expect(catalog).not.toContain("data-titles-catalog-fab");
     expect(catalog).not.toContain("ArrowUp");
-    expect(catalog).not.toContain("@phosphor-icons");
-    expect(catalog).not.toContain("from \"lucide-react\";\nimport { List");
+    expect(catalog).toContain('from "@phosphor-icons/react/ssr"');
+    expect(catalog).toContain("Camera");
+    expect(catalog).not.toContain("from \"lucide-react\"");
+    expect(catalog).not.toMatch(/import \{[^}]*\bList\b/);
     expect(page).not.toContain("data-titles-catalog-fab");
     expect(page).not.toMatch(/fixed[\s\S]{0,80}(bottom|right)/);
     expect(page).toContain('appearance="icon"');

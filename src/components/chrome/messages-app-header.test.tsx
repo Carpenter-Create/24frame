@@ -96,21 +96,21 @@ describe("MessagesAppHeader", () => {
     expect(html).not.toContain("t-title");
     expect(src).toContain("Download");
     expect(src).toContain("saveAskGlobeeDownload");
-    expect(src).toContain("strokeWidth={1.33}");
+    expect(src).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
     expect(src).toContain("AskGlobeeHistoryPopover");
-    expect(src).toContain("ChevronDown");
-    expect(src).toContain("ChevronUp");
+    expect(src).toContain("CaretDown");
+    expect(src).toContain("CaretUp");
     expect(html).toContain('aria-expanded="false"');
     expect(src).toContain("historyOpen ? (");
-    expect(src).toContain("<ChevronDown");
+    expect(src).toContain("<CaretDown");
     expect(src).toContain("truncate t-heading text-ink max-md:hidden");
     expect(src).toContain(
       'className="flex min-w-0 flex-1 items-center gap-[var(--space-4)]"',
     );
     expect(src).toContain("data-ask-globee-header-chrome");
     expect(src).toContain("flex shrink-0 items-center gap-[var(--space-4)]");
-    expect(src).toContain("<Download className=\"size-4\" strokeWidth={1.33} />");
-    expect(src).toContain("<MoreHorizontal className=\"size-4\" strokeWidth={1.33} />");
+    expect(src).toContain('<DownloadSimple className="size-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />');
+    expect(src).toContain('<DotsThree className="size-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />');
     expect(src).not.toContain("truncate t-body-sm text-ink");
     expect(src).not.toContain("size-5");
     expect(src).not.toContain("size-6");
@@ -247,16 +247,16 @@ describe("MessagesAppHeader", () => {
     expect(src.indexOf("data-ask-globee-title-cluster")).toBeLessThan(
       src.indexOf("data-ask-globee-header-chrome"),
     );
-    expect(src.indexOf("<MoreHorizontal")).toBeGreaterThan(
+    expect(src.indexOf("<DotsThree")).toBeGreaterThan(
       src.indexOf("data-ask-globee-header-chrome"),
     );
-    expect(src.indexOf("<MoreHorizontal")).toBeGreaterThan(
+    expect(src.indexOf("<DotsThree")).toBeGreaterThan(
       src.lastIndexOf("</AskGlobeeHistoryPopover>"),
     );
     expect(src).toContain('className="hidden size-4 shrink-0 items-center justify-center text-ink-3 md:flex"');
     expect(src).toContain('className="flex size-4 shrink-0 items-center justify-center text-ink-3"');
-    expect(src).toContain('<ChevronDown className="size-4 shrink-0 text-ink-3" strokeWidth={1.33} />');
-    expect(src).toContain('<MoreHorizontal className="size-4" strokeWidth={1.33} />');
+    expect(src).toContain('<CaretDown className="size-4 shrink-0 text-ink-3" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />');
+    expect(src).toContain('<DotsThree className="size-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />');
     expect(src).toContain("ASK_GLOBEE.downloadPdfLabel");
     expect(src).toContain("<ThreadPopoverContent");
     expect(src).toContain("<ThreadPopoverItem");
@@ -271,7 +271,7 @@ describe("MessagesAppHeader", () => {
     expect(src).toContain("text-ink-3");
     expect(src).not.toContain("font-bold");
     expect(src).not.toContain("strokeWidth={2}");
-    expect((src.match(/<MoreHorizontal/g) ?? []).length).toBe(1);
+    expect((src.match(/<DotsThree/g) ?? []).length).toBe(1);
     expect(shell).not.toContain("MessagesThreadOverflow");
     expect(lead).not.toContain('tone="pill"');
     expect(lead).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
@@ -336,8 +336,8 @@ describe("MessagesAppHeader", () => {
     expect(titleClusterStart).toBeGreaterThan(-1);
     expect(chromeStart).toBeGreaterThan(titleClusterStart);
     expect(html.slice(titleClusterStart, chromeStart)).toContain("data-ask-globee-history-title");
-    expect(src.indexOf("<ChevronDown")).toBeGreaterThan(src.indexOf("data-ask-globee-title-cluster"));
-    expect(src.indexOf("<ChevronDown")).toBeLessThan(src.indexOf("data-ask-globee-header-chrome"));
+    expect(src.indexOf("<CaretDown")).toBeGreaterThan(src.indexOf("data-ask-globee-title-cluster"));
+    expect(src.indexOf("<CaretDown")).toBeLessThan(src.indexOf("data-ask-globee-header-chrome"));
     expect(html.slice(titleClusterStart, chromeStart)).not.toContain(ASK_GLOBEE.downloadLabel);
     expect(html.slice(titleClusterStart, chromeStart)).not.toContain(ASK_GLOBEE.moreLabel);
     expect(html.slice(chromeStart)).toContain(ASK_GLOBEE.downloadLabel);
@@ -346,7 +346,7 @@ describe("MessagesAppHeader", () => {
       html.slice(chromeStart).indexOf(ASK_GLOBEE.moreLabel),
     );
     expect(src).toContain('className="hidden size-4 shrink-0 items-center justify-center text-ink-3 md:flex"');
-    expect(src.indexOf("data-ask-globee-download")).toBeLessThan(src.indexOf("<MoreHorizontal"));
+    expect(src.indexOf("data-ask-globee-download")).toBeLessThan(src.indexOf("<DotsThree"));
     expect(lead).toContain("HOUSE_LEAD_CHROME_CLASS");
     expect(lead).toContain("APP_HEADER_LEADING_CLASS");
     expect(lead).not.toContain('tone="pill"');

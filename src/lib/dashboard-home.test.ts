@@ -486,7 +486,8 @@ describe("client home type locks", () => {
     expect(html).toContain("bg-accent");
     expect(html).toContain("text-accent-contrast");
     expect(html).toContain("size-[14px]");
-    expect(html).toContain("stroke-width=\"1.33\"");
+    expect(html).toContain('fill="currentColor"');
+    expect(html).not.toContain("stroke-width=\"1.33\"");
     expect(html).not.toContain("Meridian");
   });
 });

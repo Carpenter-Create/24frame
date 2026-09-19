@@ -12,7 +12,6 @@ import {
   MOBILE_CHROME_ICON_CLASS,
   MOBILE_CHROME_ICON_GLYPH_PX,
   MOBILE_CHROME_ICON_HIT_PX,
-  MOBILE_CHROME_ICON_STROKE,
   MOBILE_CHROME_LEAD_PAD_CLASS,
   MOBILE_CHROME_LEAD_PAD_PX,
   MOBILE_CHROME_MESSAGES_FRAME_PAD_PX,
@@ -39,7 +38,6 @@ describe("mobile chrome clock lock", () => {
     expect(MOBILE_CHROME_MESSAGES_FRAME_PAD_PX).toBe(48);
     expect(MOBILE_CHROME_ICON_HIT_PX).toBe(44);
     expect(MOBILE_CHROME_ICON_GLYPH_PX).toBe(16);
-    expect(MOBILE_CHROME_ICON_STROKE).toBe(1.33);
 
     expect(MOBILE_CHROME_LEAD_PAD_CLASS).toBe("px-[var(--space-6)]");
     expect(MOBILE_CHROME_ICON_BUTTON_CLASS).toContain("size-[44px]");
@@ -96,7 +94,7 @@ describe("mobile chrome clock lock", () => {
     expect(historySrc).toContain("data-ask-globee-clock");
     expect(historySrc).toContain("MOBILE_CHROME_ICON_BUTTON_CLASS");
     expect(historySrc).toContain("MOBILE_CHROME_ICON_CLASS");
-    expect(historySrc).toContain("MOBILE_CHROME_ICON_STROKE");
+    expect(historySrc).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
 
     expect(threadSrc).not.toContain("data-ask-globee-clock");
     expect(threadSrc).not.toContain("MOBILE_CHROME_CLOCK_DOCK_CLASS");

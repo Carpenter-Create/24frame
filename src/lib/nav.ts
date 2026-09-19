@@ -1,12 +1,9 @@
 import {
   House,
-  UserRound,
   Compass,
   Plus,
-  MessageCircle,
-  type LucideIcon,
-} from "lucide-react";
-import {
+  ChatCircle,
+  User,
   SquaresFour,
   FilmSlate,
   PaperPlaneTilt,
@@ -55,15 +52,6 @@ export type PhosphorNavItem = {
   ariaLabel?: string;
 };
 
-export type LucideNavItem = {
-  label: string;
-  href: string;
-  family: "lucide";
-  icon: LucideIcon;
-  exact?: boolean;
-  ariaLabel?: string;
-};
-
 export type HouseAiNavItem = {
   label: string;
   href: string;
@@ -72,7 +60,7 @@ export type HouseAiNavItem = {
   ariaLabel?: string;
 };
 
-export type NavItem = PhosphorNavItem | LucideNavItem | HouseAiNavItem;
+export type NavItem = PhosphorNavItem | HouseAiNavItem;
 
 export function isPhosphorNavItem(item: NavItem): item is PhosphorNavItem {
   return item.family === "phosphor";
@@ -118,17 +106,17 @@ export const NAV: PhosphorNavItem[] = [
 // stay parked off this rail. Education land is house chrome + an
 // Education rail on Route A — not Aggregation destinations, not STAFF,
 // not Social feed chrome. Phosphor house glyphs only; no Education-only
-// icon family. SOCIAL_NAV family stays Lucide for NavGlyph fallback.
-// Social chrome rematch is SocialIcon (Social Figma V1).
-export const SOCIAL_NAV: LucideNavItem[] = [
-  { label: "Home", href: SOCIAL_ROUTES.home, family: "lucide", icon: House, exact: true },
-  { label: "Explore", href: SOCIAL_ROUTES.explore, family: "lucide", icon: Compass },
-  { label: "Create", href: SOCIAL_ROUTES.create, family: "lucide", icon: Plus },
-  { label: "Messages", href: SOCIAL_ROUTES.dms, family: "lucide", icon: MessageCircle },
-  { label: "Profile", href: SOCIAL_ROUTES.profile, family: "lucide", icon: UserRound },
+// icon family. SOCIAL_NAV uses the same Phosphor family as Aggregation.
+// Social interiors stay SocialIcon (Social Figma V1).
+export const SOCIAL_NAV: PhosphorNavItem[] = [
+  { label: "Home", href: SOCIAL_ROUTES.home, family: "phosphor", icon: House, exact: true },
+  { label: "Explore", href: SOCIAL_ROUTES.explore, family: "phosphor", icon: Compass },
+  { label: "Create", href: SOCIAL_ROUTES.create, family: "phosphor", icon: Plus },
+  { label: "Messages", href: SOCIAL_ROUTES.dms, family: "phosphor", icon: ChatCircle },
+  { label: "Profile", href: SOCIAL_ROUTES.profile, family: "phosphor", icon: User },
 ];
 
-export const SOCIAL_DESKTOP_NAV: LucideNavItem[] = SOCIAL_NAV.filter(
+export const SOCIAL_DESKTOP_NAV: PhosphorNavItem[] = SOCIAL_NAV.filter(
   (item) => item.href !== SOCIAL_ROUTES.create,
 );
 

@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Download, Loader2 } from "lucide-react";
+import { CircleNotch, DownloadSimple } from "@phosphor-icons/react";
+
+import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
 import { Button } from "@/components/ui/button";
 import { isClientViewableAssetKind } from "@/lib/assets";
@@ -62,9 +64,9 @@ export function AssetDownloadButton({ assetId, kind }: { assetId: string; kind: 
         className="w-full justify-center"
       >
         {state === "loading" ? (
-          <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.5} />
+          <CircleNotch className="h-4 w-4 animate-spin" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
         ) : (
-          <Download className="h-4 w-4" strokeWidth={1.5} />
+          <DownloadSimple className="h-4 w-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
         )}
         {state === "loading" ? "Preparing…" : "View & download"}
       </Button>

@@ -101,7 +101,7 @@ describe("client NAV", () => {
     expect(navSrc).not.toContain("NavImageItem");
   });
 
-  it("locks Aggregation rail glyphs to Phosphor 75:5 / 61:2 except the house AI mark — SOCIAL_NAV family stays Lucide", () => {
+  it("locks Aggregation rail glyphs to Phosphor 75:5 / 61:2 except the house AI mark — SOCIAL_NAV is Phosphor", () => {
     expect(NAV.filter(isPhosphorNavItem).map((item) => item.icon)).toEqual([
       SquaresFour,
       FilmSlate,
@@ -120,11 +120,11 @@ describe("client NAV", () => {
     expect(NAV.every((item) => item.family === "phosphor")).toBe(true);
     expect(NAV.filter(isHouseAiNavItem)).toHaveLength(0);
     expect(GC_NAV.every((item) => item.family === "phosphor")).toBe(true);
-    expect(SOCIAL_NAV.every((item) => item.family === "lucide")).toBe(true);
+    expect(SOCIAL_NAV.every((item) => item.family === "phosphor")).toBe(true);
     expect(navSrc).not.toContain("LayoutDashboard");
     expect(navSrc).not.toContain("Clapperboard");
     expect(navSrc).toContain("family: \"phosphor\"");
-    expect(navSrc).toContain("family: \"lucide\"");
+    expect(navSrc).not.toContain("family: \"lucide\"");
     expect(navSrc).toContain("family: \"house-ai\"");
   });
 });

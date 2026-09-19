@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "@phosphor-icons/react/ssr";
+
+import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
 import { cn } from "@/lib/cn";
 import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
@@ -27,7 +29,7 @@ export function PageHeader({ title, eyebrow, subtitle, backLink, actions, classN
             href={backLink.href}
             className={cn("inline-flex items-center gap-1", TEXT_ACTION_CLASS)}
           >
-            <ArrowLeft className="h-4 w-4" strokeWidth={1.5} />
+            <ArrowLeft className="h-4 w-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
             {backLink.label ?? "Back"}
           </Link>
         ) : null}

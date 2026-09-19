@@ -2,7 +2,7 @@
 // hit, one 16 tertiary glyph. History lives in overlay header chrome
 // (AskGlobeeHistoryClock) — never an absolute left-edge dock. Phone
 // history is the #457 in-sheet surface. The dest hamburger is gone.
-// The clock stays Lucide 1.33 until a measured rematch.
+// The clock is house Phosphor (Bold idle).
 // MOBILE_CHROME_HAMBURGER_* and CLOCK_DOCK tokens remain so the locked
 // 44/16 sheet-pad math stays testable. Not Close/44 — that object is a
 // muted circle. Do not restore size-4 at left-0; that clips the glyph.
@@ -14,7 +14,6 @@ export const MOBILE_CHROME_SHEET_PAD_PX = 16;
 export const MOBILE_CHROME_MESSAGES_FRAME_PAD_PX = 48;
 export const MOBILE_CHROME_ICON_HIT_PX = 44;
 export const MOBILE_CHROME_ICON_GLYPH_PX = 16;
-export const MOBILE_CHROME_ICON_STROKE = 1.33;
 
 export const MOBILE_CHROME_LEAD_PAD_CLASS = "px-[var(--space-6)]";
 

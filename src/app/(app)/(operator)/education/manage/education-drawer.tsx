@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { X } from "lucide-react";
+import { X } from "@phosphor-icons/react";
+
+import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
 import { cn } from "@/lib/cn";
 
@@ -51,7 +53,7 @@ export function EducationDrawer({
             aria-label="Close"
             className="text-ink-3 transition-colors hover:text-ink"
           >
-            <X className="h-4 w-4" strokeWidth={1.5} />
+            <X className="h-4 w-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
           </button>
         </div>
         <div className="flex-1 overflow-y-auto px-[var(--space-6)] py-[var(--space-6)]">{children}</div>

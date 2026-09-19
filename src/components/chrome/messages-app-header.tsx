@@ -4,15 +4,15 @@ import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  ChevronDown,
-  ChevronLeft,
-  ChevronUp,
-  Download,
-  MoreHorizontal,
-  Pencil,
-  Pin,
-  Trash2,
-} from "lucide-react";
+  CaretDown,
+  CaretLeft,
+  CaretUp,
+  DotsThree,
+  DownloadSimple,
+  PencilSimple,
+  PushPin,
+  Trash,
+} from "@phosphor-icons/react";
 
 import { HousePageSearch } from "@/components/chrome/house-page-search";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,7 @@ import {
   THREAD_POPOVER_DELETE_ICON_CLASS,
   THREAD_POPOVER_ICON_CLASS,
 } from "@/lib/house-sheet";
+import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import { Input } from "@/components/ui/input";
 import {
   ASK_GLOBEE,
@@ -87,7 +88,7 @@ function MessagesThreadHeader({ title }: { title: string }) {
           aria-label={ASK_GLOBEE.backLabel}
           className="flex size-4 shrink-0 items-center justify-center text-ink max-md:text-ink-3"
         >
-          <ChevronLeft className="size-4" strokeWidth={1.33} />
+          <CaretLeft className="size-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
         </Link>
         <AskGlobeeHistoryPopover
           conversations={conversations}
@@ -106,9 +107,9 @@ function MessagesThreadHeader({ title }: { title: string }) {
             <span className="min-w-0 truncate t-heading text-ink max-md:hidden">{threadTitle}</span>
             <span className="min-w-0 truncate t-body text-ink md:hidden">{threadTitle}</span>
             {historyOpen ? (
-              <ChevronUp className="size-4 shrink-0 text-ink-3" strokeWidth={1.33} />
+              <CaretUp className="size-4 shrink-0 text-ink-3" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
             ) : (
-              <ChevronDown className="size-4 shrink-0 text-ink-3" strokeWidth={1.33} />
+              <CaretDown className="size-4 shrink-0 text-ink-3" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
             )}
           </button>
         </AskGlobeeHistoryPopover>
@@ -124,7 +125,7 @@ function MessagesThreadHeader({ title }: { title: string }) {
           onClick={downloadThread}
           className="hidden size-4 shrink-0 items-center justify-center text-ink-3 md:flex"
         >
-          <Download className="size-4" strokeWidth={1.33} />
+          <DownloadSimple className="size-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
         </button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -133,12 +134,12 @@ function MessagesThreadHeader({ title }: { title: string }) {
               aria-label={ASK_GLOBEE.moreLabel}
               className="flex size-4 shrink-0 items-center justify-center text-ink-3"
             >
-              <MoreHorizontal className="size-4" strokeWidth={1.33} />
+              <DotsThree className="size-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
             </button>
           </DropdownMenuTrigger>
           <ThreadPopoverContent align="end">
             <ThreadPopoverItem onSelect={downloadThread}>
-              <Download className={THREAD_POPOVER_ICON_CLASS} strokeWidth={1.33} />
+              <DownloadSimple className={THREAD_POPOVER_ICON_CLASS} weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
               {ASK_GLOBEE.downloadPdfLabel}
             </ThreadPopoverItem>
             <ThreadPopoverItem
@@ -147,7 +148,7 @@ function MessagesThreadHeader({ title }: { title: string }) {
                 setRenameOpen(true);
               }}
             >
-              <Pencil className={THREAD_POPOVER_ICON_CLASS} strokeWidth={1.33} />
+              <PencilSimple className={THREAD_POPOVER_ICON_CLASS} weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
               {ASK_GLOBEE.renameLabel}
             </ThreadPopoverItem>
             <ThreadPopoverItem
@@ -161,12 +162,12 @@ function MessagesThreadHeader({ title }: { title: string }) {
                 });
               }}
             >
-              <Pin className={THREAD_POPOVER_ICON_CLASS} strokeWidth={1.33} />
+              <PushPin className={THREAD_POPOVER_ICON_CLASS} weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
               {pinned ? ASK_GLOBEE.unpinLabel : ASK_GLOBEE.pinLabel}
             </ThreadPopoverItem>
             <ThreadPopoverSeparator />
             <ThreadPopoverItem danger onSelect={() => setDeleteOpen(true)}>
-              <Trash2 className={THREAD_POPOVER_DELETE_ICON_CLASS} strokeWidth={1.33} />
+              <Trash className={THREAD_POPOVER_DELETE_ICON_CLASS} weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
               {ASK_GLOBEE.deleteLabel}
             </ThreadPopoverItem>
           </ThreadPopoverContent>

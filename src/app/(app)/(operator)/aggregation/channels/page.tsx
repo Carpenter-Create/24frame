@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { Store } from "lucide-react";
+import { Storefront } from "@phosphor-icons/react/ssr";
+
+import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
 import { ChannelCard } from "@/components/channels/channel-card";
 import { ChannelCardGrid } from "@/components/channels/channel-card-grid";
@@ -114,7 +116,7 @@ export default async function GcChannelsPage({
             className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] bg-surface-muted px-[var(--space-6)] py-[var(--space-12)] text-center"
           >
             <span className="flex size-12 items-center justify-center rounded-full bg-surface-muted text-ink-3">
-              <Store className="size-6" strokeWidth={1.33} />
+              <Storefront className="size-6" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
             </span>
             <p className="t-body font-medium text-ink">{CHANNELS_PAGE.emptyTitle}</p>
             <Link

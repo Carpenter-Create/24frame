@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { GripVertical } from "lucide-react";
+import { DotsSixVertical } from "@phosphor-icons/react";
+
+import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
 import type { EducationAdminCourseRow, InstructorRow } from "@/lib/education-admin";
 import { educationManageCourseHref, moveOrderedIds } from "@/lib/education";
@@ -73,7 +75,7 @@ export function EducationCourseRail({
             >
               <div className="flex items-center gap-[var(--space-2)]">
                 <span data-education-drag="course" className="text-ink-3" aria-hidden>
-                  <GripVertical className="h-4 w-4" strokeWidth={1.5} />
+                  <DotsSixVertical className="h-4 w-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
                 </span>
                 <Link
                   href={href}

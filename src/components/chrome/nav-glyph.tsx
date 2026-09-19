@@ -2,14 +2,10 @@ import type { NavItem } from "@/lib/nav";
 import { PhosphorChromeIcon } from "@/lib/phosphor-icon";
 import { HouseAiMark } from "./house-ai-mark";
 
-// Aggregation: Phosphor Bold idle / Fill active. House-ai family is
-// overlay/header chrome, not a rail row. SOCIAL_NAV family stays
-// Lucide fallback; Social chrome rematch is SocialIcon.
+// One icon package. Aggregation + Social dests: Phosphor Bold idle /
+// Fill active. House-ai family is overlay/header chrome, not a rail row.
+// Social interiors stay SocialIcon (same Phosphor package, V1 sizes).
 export function NavGlyph({ item, active }: { item: NavItem; active: boolean }) {
-  if (item.family === "lucide") {
-    const Icon = item.icon;
-    return <Icon className="size-4 shrink-0" strokeWidth={1.33} />;
-  }
   if (item.family === "house-ai") {
     return <HouseAiMark />;
   }
