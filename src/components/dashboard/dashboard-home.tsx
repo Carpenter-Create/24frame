@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Pulse } from "@phosphor-icons/react";
+import { Pulse } from "@phosphor-icons/react/ssr";
 
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 

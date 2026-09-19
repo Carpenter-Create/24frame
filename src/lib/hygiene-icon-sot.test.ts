@@ -20,4 +20,21 @@ describe("one icon SoT (P2-2 rematch)", () => {
     expect(glyph).not.toContain("lucide");
     expect(glyph).toContain("PhosphorChromeIcon");
   });
+
+  it("RSC glyph renders import Phosphor SSR, not the context entry", () => {
+    const rscGlyphFiles = [
+      "src/components/ui/page-header.tsx",
+      "src/components/titles/titles-catalog.tsx",
+      "src/components/layout/title-hero.tsx",
+      "src/components/dashboard/dashboard-home.tsx",
+      "src/components/dashboard/dashboard-licensing-status.tsx",
+      "src/app/(app)/(operator)/aggregation/channels/page.tsx",
+    ];
+    for (const path of rscGlyphFiles) {
+      const src = readFileSync(path, "utf8");
+      expect(src, path).toContain('from "@phosphor-icons/react/ssr"');
+      expect(src, path).not.toMatch(/from ["']@phosphor-icons\/react["']/);
+      expect(src, path).not.toContain("lucide-react");
+    }
+  });
 });
