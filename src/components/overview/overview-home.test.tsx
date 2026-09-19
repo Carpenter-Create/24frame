@@ -228,6 +228,11 @@ describe("OverviewHome", () => {
     expect(moduleChunk(html, "news")).toContain(TEXT_ACTION_CLASS);
     expect(moduleChunk(html, "news")).toContain("data-overview-module-text");
     expect(moduleChunk(html, "news")).not.toContain("data-overview-module-arrow");
+    expect(moduleChunk(html, "news")).toContain('data-news-sticky-header="rail"');
+    expect(moduleChunk(html, "social")).not.toContain("data-news-sticky-header");
+    expect(moduleChunk(html, "education")).not.toContain("data-news-sticky-header");
+    expect(moduleChunk(html, "needs-you")).not.toContain("data-news-sticky-header");
+    expect(moduleChunk(html, "ai-next")).not.toContain("data-news-sticky-header");
     expect(moduleChunk(html, "social")).not.toContain(TEXT_ACTION_CLASS);
     expect(moduleChunk(html, "education")).not.toContain(TEXT_ACTION_CLASS);
     expect(moduleChunk(html, "social")).toContain("data-house-action-arrow");
@@ -456,6 +461,8 @@ describe("OverviewHome", () => {
     expect(moduleChunk(html, "news")).toContain(TEXT_ACTION_CLASS);
     expect(moduleChunk(html, "news")).toContain("data-overview-module-text");
     expect(moduleChunk(html, "news")).not.toContain("data-overview-module-arrow");
+    expect(moduleChunk(html, "news")).toContain('data-news-sticky-header="rail"');
+    expect(moduleChunk(html, "social")).not.toContain("data-news-sticky-header");
     expect(moduleChunk(html, "social")).not.toContain(TEXT_ACTION_CLASS);
     expect(moduleChunk(html, "education")).not.toContain(TEXT_ACTION_CLASS);
     expect(moduleLabelClass(html, "education")).toBe(DASHBOARD_SECTION_TITLE_CLASS);

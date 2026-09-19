@@ -9,11 +9,13 @@ import {
   DashboardHomeEmpty,
   DashboardHomePanel,
 } from "@/components/dashboard/dashboard-home";
+import { NewsStickyHeader } from "@/components/news/news-sticky-header";
 import {
   DASHBOARD_CARD_PAD_LIST,
   DASHBOARD_RELATED_GAP_CLASS,
   DASHBOARD_SECTION_TITLE_CLASS,
 } from "@/lib/dashboard-craft";
+import { NEWS_STICKY_RAIL_PANEL_CLASS } from "@/lib/news-sticky";
 import {
   overviewModuleHeaderAction,
   OVERVIEW_MODULE_ARROW_CLASS,
@@ -33,6 +35,11 @@ import {
 // other Home gray module (Net revenue · Social · Education · Ask
 // 24Frame AI · Needs you) trails with the arrow. Global TextAction
 // and DashboardViewAll are untouched.
+//
+// News also pins that header while the rail list scrolls (Adam
+// 2026-09-19). `stickyHeader` wraps the same row in NewsStickyHeader
+// and lifts overflow-hidden on the panel. Do not spread to other
+// Home modules.
 
 export function OverviewModule({
   testId,
@@ -42,6 +49,7 @@ export function OverviewModule({
   empty,
   children,
   trailingText = false,
+  stickyHeader = false,
 }: {
   testId: string;
   title: string;
@@ -52,41 +60,51 @@ export function OverviewModule({
   /** News-only opt-in — keeps the "View all" words in the trailing
    *  slot instead of swapping to the glyph. Do not spread. */
   trailingText?: boolean;
+  /** News-only opt-in — pin Industry news + View all while cards
+   *  scroll. Uses the shared NewsStickyHeader SoT. Do not spread. */
+  stickyHeader?: boolean;
 }) {
   const hasBody = Boolean(children);
   const action = overviewModuleHeaderAction(title, href, cta);
+  const header = (
+    <div className={`flex items-center justify-between ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD_LIST}`}>
+      <p data-overview-module-label="" className={DASHBOARD_SECTION_TITLE_CLASS}>
+        {title}
+      </p>
+      {action ? (
+        trailingText ? (
+          <TextAction href={action.href} data-overview-module-text="">
+            {action.label}
+          </TextAction>
+        ) : action.href.startsWith("?ai=") ? (
+          <AskAiOpenButton
+            aria-label={action.label}
+            data-overview-ai-ask=""
+            data-overview-module-arrow=""
+            className={OVERVIEW_MODULE_ARROW_CLASS}
+          >
+            <HouseActionArrow />
+          </AskAiOpenButton>
+        ) : (
+          <Link
+            href={action.href}
+            aria-label={action.label}
+            data-overview-module-arrow=""
+            className={OVERVIEW_MODULE_ARROW_CLASS}
+          >
+            <HouseActionArrow />
+          </Link>
+        )
+      ) : null}
+    </div>
+  );
   return (
-    <DashboardHomePanel aria-label={title} data-overview-module={testId}>
-      <div className={`flex items-center justify-between ${DASHBOARD_RELATED_GAP_CLASS} ${DASHBOARD_CARD_PAD_LIST}`}>
-        <p data-overview-module-label="" className={DASHBOARD_SECTION_TITLE_CLASS}>
-          {title}
-        </p>
-        {action ? (
-          trailingText ? (
-            <TextAction href={action.href} data-overview-module-text="">
-              {action.label}
-            </TextAction>
-          ) : action.href.startsWith("?ai=") ? (
-            <AskAiOpenButton
-              aria-label={action.label}
-              data-overview-ai-ask=""
-              data-overview-module-arrow=""
-              className={OVERVIEW_MODULE_ARROW_CLASS}
-            >
-              <HouseActionArrow />
-            </AskAiOpenButton>
-          ) : (
-            <Link
-              href={action.href}
-              aria-label={action.label}
-              data-overview-module-arrow=""
-              className={OVERVIEW_MODULE_ARROW_CLASS}
-            >
-              <HouseActionArrow />
-            </Link>
-          )
-        ) : null}
-      </div>
+    <DashboardHomePanel
+      aria-label={title}
+      data-overview-module={testId}
+      className={stickyHeader ? NEWS_STICKY_RAIL_PANEL_CLASS : undefined}
+    >
+      {stickyHeader ? <NewsStickyHeader surface="rail">{header}</NewsStickyHeader> : header}
       {hasBody ? children : <DashboardHomeEmpty>{empty}</DashboardHomeEmpty>}
     </DashboardHomePanel>
   );

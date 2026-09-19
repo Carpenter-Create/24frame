@@ -20,6 +20,10 @@ import { OVERVIEW_MODULE_NEST_CLASS } from "@/lib/overview";
 // other Home modules swap to glyph-only HouseActionArrow. NewsRail
 // therefore passes `trailingText` so OverviewModule renders TextAction
 // instead of the arrow, matching today's News SoT.
+//
+// `stickyHeader` pins that same row while the rail list scrolls —
+// shared NewsStickyHeader, not a rail-only sticky fork. History
+// mode has no module header; /home/news pins title + chips instead.
 
 export function NewsRail({
   items,
@@ -66,6 +70,7 @@ export function NewsRail({
       cta={viewAll ? NEWS_PAGE.viewAll : undefined}
       empty={NEWS_PAGE.empty}
       trailingText
+      stickyHeader
     >
       {items.length > 0 ? (
         <ul data-news-list="" className={`flex flex-col ${OVERVIEW_MODULE_NEST_CLASS}`}>

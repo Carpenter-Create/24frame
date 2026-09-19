@@ -82,6 +82,9 @@ export const OVERVIEW_AREA_SOCIAL_CLASS = "[grid-area:social]";
 export const OVERVIEW_AREA_EDUCATION_CLASS = "[grid-area:education]";
 export const OVERVIEW_AREA_NEEDS_CLASS = "[grid-area:needs]";
 export const OVERVIEW_AREA_AI_CLASS = "[grid-area:ai]";
+// Desktop News rail: page-sticky column + own scroller. The module
+// header pins at top-0 *inside* this overflow — do not add a second
+// sticky offset here. Phone uses the page scroller (no lg:overflow).
 export const OVERVIEW_AREA_NEWS_CLASS =
   "[grid-area:news] lg:sticky lg:top-[calc(var(--header-height)+var(--space-4))] lg:max-h-[calc(100dvh-var(--header-height)-var(--space-8))] lg:overflow-y-auto";
 
