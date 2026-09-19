@@ -11,16 +11,19 @@ import {
 
 import {
   HOUSE_SEGMENTED_THUMB_CLASS,
+  HOUSE_SEGMENTED_THUMB_DURATION_MS,
   HOUSE_SEGMENTED_TRACK_CLASS,
 } from "@/lib/house-shell";
 import {
   measureSegmentedBox,
-  readSegmentedThumbCache,
+  projectSegmentedThumbFlight,
+  readSegmentedThumbFlight,
   scheduleSegmentedThumbRestore,
   segmentedItemIndexFromEventTarget,
   segmentedThumbNeedsRestore,
   segmentedThumbStyle,
-  writeSegmentedThumbCache,
+  startSegmentedThumbFlight,
+  type SegmentedThumbBox,
 } from "@/lib/segmented-track";
 
 export interface SegmentedTrackProps
@@ -30,6 +33,18 @@ export interface SegmentedTrackProps
   trackClass?: string;
   thumbClass?: string;
   children: ReactNode;
+}
+
+function thumbCss(
+  box: SegmentedThumbBox,
+  snap = false,
+  durationMs?: number,
+): CSSProperties {
+  if (snap) return { ...segmentedThumbStyle(box), transition: "none" };
+  if (durationMs != null) {
+    return { ...segmentedThumbStyle(box), transitionDuration: `${durationMs}ms` };
+  }
+  return segmentedThumbStyle(box);
 }
 
 export function SegmentedTrack({
@@ -44,10 +59,17 @@ export function SegmentedTrack({
   const trackRef = useRef<HTMLDivElement>(null);
   const placedRef = useRef(false);
   const routeIndexRef = useRef(activeIndex);
+  const lastBoxRef = useRef<SegmentedThumbBox | undefined>(undefined);
   const [visualIndex, setVisualIndex] = useState(activeIndex);
   const [thumbStyle, setThumbStyle] = useState<CSSProperties>(() => {
-    const cached = persistKey ? readSegmentedThumbCache(persistKey) : undefined;
-    return cached ? segmentedThumbStyle(cached) : { opacity: 0 };
+    if (!persistKey) return { opacity: 0 };
+    const flight = readSegmentedThumbFlight(persistKey);
+    if (!flight) return { opacity: 0 };
+    const view = projectSegmentedThumbFlight(
+      flight,
+      typeof performance === "undefined" ? 0 : performance.now(),
+    );
+    return segmentedThumbStyle(view.box);
   });
 
   useLayoutEffect(() => {
@@ -64,34 +86,44 @@ export function SegmentedTrack({
     if (!active) return undefined;
 
     const next = measureSegmentedBox(track, active);
-    const apply = (box: typeof next, snap = false) => {
-      setThumbStyle(
-        snap
-          ? { ...segmentedThumbStyle(box), transition: "none" }
-          : segmentedThumbStyle(box),
-      );
+    const now = typeof performance === "undefined" ? 0 : performance.now();
+    const apply = (box: SegmentedThumbBox, snap = false, durationMs?: number) => {
+      lastBoxRef.current = box;
+      setThumbStyle(thumbCss(box, snap, durationMs));
     };
 
     let cancelRestore: (() => void) | undefined;
     if (!placedRef.current) {
       placedRef.current = true;
-      const cached = persistKey ? readSegmentedThumbCache(persistKey) : undefined;
-      if (cached && segmentedThumbNeedsRestore(cached, next)) {
-        apply(cached, true);
-        cancelRestore = scheduleSegmentedThumbRestore((box) => apply(box), next);
+      const flight = persistKey ? readSegmentedThumbFlight(persistKey) : undefined;
+      const view = flight ? projectSegmentedThumbFlight(flight, now) : undefined;
+      if (view && !view.done && segmentedThumbNeedsRestore(view.box, next)) {
+        apply(view.box, true);
+        cancelRestore = scheduleSegmentedThumbRestore(
+          (box) => apply(box, false, view.remainingMs),
+          next,
+        );
       } else {
         apply(next, true);
       }
     } else {
+      const flight = persistKey ? readSegmentedThumbFlight(persistKey) : undefined;
+      const view = flight ? projectSegmentedThumbFlight(flight, now) : undefined;
+      const from = view && !view.done ? view.box : lastBoxRef.current;
+      if (persistKey && from && segmentedThumbNeedsRestore(from, next)) {
+        startSegmentedThumbFlight(
+          persistKey,
+          from,
+          next,
+          now,
+          HOUSE_SEGMENTED_THUMB_DURATION_MS,
+        );
+      }
       apply(next);
     }
 
     return () => {
       cancelRestore?.();
-      if (!persistKey) return;
-      const thumb = track.querySelector("[data-segmented-thumb]");
-      if (!thumb) return;
-      writeSegmentedThumbCache(persistKey, measureSegmentedBox(track, thumb));
     };
   }, [visualIndex, persistKey]);
 

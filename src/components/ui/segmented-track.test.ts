@@ -9,9 +9,11 @@ const lib = readFileSync("src/lib/segmented-track.ts", "utf8");
 describe("SegmentedTrack slide SoT", () => {
   it("slides left/width, restores a cached box across remount, and commits the click before the route", () => {
     expect(src).toContain("persistKey");
-    expect(src).toContain("readSegmentedThumbCache");
-    expect(src).toContain("writeSegmentedThumbCache");
+    expect(src).toContain("readSegmentedThumbFlight");
+    expect(src).toContain("startSegmentedThumbFlight");
+    expect(src).toContain("projectSegmentedThumbFlight");
     expect(src).toContain("scheduleSegmentedThumbRestore");
+    expect(src).toContain("remainingMs");
     expect(src).toContain("onClickCapture");
     expect(src).toContain("setVisualIndex");
     expect(src).toContain("data-segmented-persist");

@@ -1,14 +1,19 @@
 import { afterEach, describe, expect, it } from "vitest";
 
+import { HOUSE_SEGMENTED_THUMB_DURATION_MS } from "./house-shell";
 import {
   clearSegmentedThumbCache,
+  cubicBezierProgress,
   isUsableSegmentedThumbBox,
   measureSegmentedBox,
+  mixSegmentedThumbBox,
+  projectSegmentedThumbFlight,
   readSegmentedThumbCache,
   scheduleSegmentedThumbRestore,
   SEGMENTED_TRACK_PERSIST,
   segmentedThumbNeedsRestore,
   segmentedThumbStyle,
+  startSegmentedThumbFlight,
   writeSegmentedThumbCache,
 } from "./segmented-track";
 
@@ -95,5 +100,44 @@ describe("segmented thumb geometry", () => {
 
     cancel();
     expect(cancelled).toContain(1);
+  });
+
+  it("interpolates left and width together and keeps remaining time on remount", () => {
+    const from = { left: 0, width: 48 };
+    const to = { left: 120, width: 96 };
+    expect(mixSegmentedThumbBox(from, to, 0.5)).toEqual({ left: 60, width: 72 });
+
+    const mid = projectSegmentedThumbFlight(
+      {
+        from,
+        to,
+        startedAt: 1_000,
+        durationMs: HOUSE_SEGMENTED_THUMB_DURATION_MS,
+      },
+      1_000 + HOUSE_SEGMENTED_THUMB_DURATION_MS / 2,
+    );
+    expect(mid.done).toBe(false);
+    expect(mid.remainingMs).toBe(HOUSE_SEGMENTED_THUMB_DURATION_MS / 2);
+    expect(mid.box.left).toBeGreaterThan(60);
+    expect(mid.box.left).toBeLessThan(120);
+    expect(mid.box.width).toBeGreaterThan(72);
+    expect(mid.box.width).toBeLessThan(96);
+    expect(cubicBezierProgress(0.5)).toBeGreaterThan(0.5);
+
+    const done = projectSegmentedThumbFlight(
+      {
+        from,
+        to,
+        startedAt: 1_000,
+        durationMs: HOUSE_SEGMENTED_THUMB_DURATION_MS,
+      },
+      1_000 + HOUSE_SEGMENTED_THUMB_DURATION_MS,
+    );
+    expect(done).toEqual({ box: to, remainingMs: 0, done: true });
+
+    startSegmentedThumbFlight(SEGMENTED_TRACK_PERSIST.workspace, from, to, 5_000);
+    const painted = readSegmentedThumbCache(SEGMENTED_TRACK_PERSIST.workspace, 5_080);
+    expect(painted?.left).toBeGreaterThan(from.left);
+    expect(painted?.left).toBeLessThan(to.left);
   });
 });

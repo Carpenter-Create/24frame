@@ -88,6 +88,10 @@ export const HOUSE_PERIOD_SELECTED_CLASS = "bg-surface-muted";
 // reaches the full pill radius when the first or last segment is selected.
 // Slide is left/width, not opacity: 320ms ease into rest. Remount
 // persistence lives in SegmentedTrack. Do not fork a second workspace chrome.
+export const HOUSE_SEGMENTED_THUMB_DURATION_MS = 320;
+
+export const HOUSE_SEGMENTED_THUMB_EASE = [0.22, 1, 0.36, 1] as const;
+
 export const HOUSE_SEGMENTED_TRACK_CLASS =
   "relative flex shrink-0 items-center rounded-full bg-surface-muted";
 

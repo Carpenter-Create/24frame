@@ -38,6 +38,8 @@ import {
   HOUSE_SEGMENTED_ITEM_OFF_CLASS,
   HOUSE_SEGMENTED_ITEM_ON_CLASS,
   HOUSE_SEGMENTED_THUMB_CLASS,
+  HOUSE_SEGMENTED_THUMB_DURATION_MS,
+  HOUSE_SEGMENTED_THUMB_EASE,
   HOUSE_SEGMENTED_TRACK_CLASS,
   HOUSE_CHROME_GUTTER,
   HOUSE_CHROME_GUTTER_X_CLASS,
@@ -170,8 +172,14 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(HOUSE_SEGMENTED_TRACK_CLASS).not.toContain("p-[");
     expect(HOUSE_SEGMENTED_THUMB_CLASS).toContain("inset-y-0");
     expect(HOUSE_SEGMENTED_THUMB_CLASS).toContain("transition-[left,width]");
-    expect(HOUSE_SEGMENTED_THUMB_CLASS).toContain("duration-[320ms]");
-    expect(HOUSE_SEGMENTED_THUMB_CLASS).toContain("ease-[cubic-bezier(0.22,1,0.36,1)]");
+    expect(HOUSE_SEGMENTED_THUMB_DURATION_MS).toBe(320);
+    expect(HOUSE_SEGMENTED_THUMB_EASE).toEqual([0.22, 1, 0.36, 1]);
+    expect(HOUSE_SEGMENTED_THUMB_CLASS).toContain(
+      `duration-[${HOUSE_SEGMENTED_THUMB_DURATION_MS}ms]`,
+    );
+    expect(HOUSE_SEGMENTED_THUMB_CLASS).toContain(
+      `ease-[cubic-bezier(${HOUSE_SEGMENTED_THUMB_EASE.join(",")})]`,
+    );
     expect(HOUSE_SEGMENTED_THUMB_CLASS).toContain("bg-accent");
     expect(HOUSE_SEGMENTED_THUMB_CLASS).not.toContain("duration-200");
     expect(HOUSE_SEGMENTED_THUMB_CLASS).not.toContain("transition-opacity");
