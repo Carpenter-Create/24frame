@@ -7,8 +7,19 @@ export const HOUSE_AI_MARK_SRC = "/brand/24frame-ai-mark.svg";
 export const HOUSE_AI_MARK_VIEWBOX = "62 42 146 146";
 export const HOUSE_AI_MARK_VIEWBOX_SIZE = 146;
 
-/** Phosphor Regular is 16 on a 256 viewBox. Same optical on the house mark. */
-export const HOUSE_AI_MARK_REGULAR_STROKE_WIDTH = (16 * HOUSE_AI_MARK_VIEWBOX_SIZE) / 256;
+/** Phone-header Regular-optical stroke width for the Adam sparkles.
+ *  Phosphor Regular is 16 on a 256 viewBox (fill-based, whole-shape mass).
+ *  Our mark strokes a diamond outline with `strokeLinejoin="round"` and
+ *  the sparkle arms meet at a ~59° tip, so the outer arc softens the
+ *  geometric point and a pure 16-optical stroke reads visibly thinner
+ *  than a Phosphor Regular filled outline sitting at the same 24px box.
+ *  Bump to 20 on 256 (25% over Regular, still nowhere near Bold at 24)
+ *  so the stroked sparkles land at Regular-optical parity with the
+ *  Mercury bottom-bar glyphs — never Bold, never fill. #442 landed
+ *  weight + register but held pure Regular here; Adam's Production
+ *  hard-refresh (uploads/phone-header-ai-bell-fail.png) needs the
+ *  compensating optical bump on top of the shared idle-ink change. */
+export const HOUSE_AI_MARK_REGULAR_STROKE_WIDTH = (20 * HOUSE_AI_MARK_VIEWBOX_SIZE) / 256;
 
 export type HouseAiMarkRegister = "fill" | "stroke";
 
