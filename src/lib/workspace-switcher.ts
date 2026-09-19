@@ -117,6 +117,7 @@ export const WORKSPACE_SWITCHER_PILL_STATIC_CLASS =
 
 // Desktop md+ segmented track — one continuous muted bar with a
 // sliding dark thumb. Same grammar as Top Performing pills.
+// Persist key keeps that thumb alive across workspace route remounts.
 // Full words only — shrink-0, no truncate.
 // Hide unavailable lanes in the caller options.
 export const WORKSPACE_SWITCHER_SEGMENTS_CLASS = HOUSE_SEGMENTED_TRACK_CLASS;

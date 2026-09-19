@@ -45,6 +45,7 @@ describe("HousePeriodPresets", () => {
     expect(html).toContain(HOUSE_SEGMENTED_ITEM_BASE_CLASS);
     expect(html).toContain("data-segmented-thumb");
     expect(html).toContain("data-segmented-item");
+    expect(html).toContain('data-segmented-persist="house-period-presets"');
     expect(html).toContain(REPORTS_PAGE.allTime);
     expect(html).toContain(REPORTS_PAGE.ytd);
     expect(html).toContain(REPORTS_PAGE.year);

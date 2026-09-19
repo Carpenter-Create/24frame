@@ -86,6 +86,8 @@ export const HOUSE_PERIOD_SELECTED_CLASS = "bg-surface-muted";
 // Shared grammar for workspace pills and Top Performing Titles|Platforms|Territories.
 // No track padding: first/last items sit flush to the track edges so the thumb
 // reaches the full pill radius when the first or last segment is selected.
+// Slide is left/width, not opacity. Remount persistence lives in
+// SegmentedTrack. Do not fork a second workspace chrome.
 export const HOUSE_SEGMENTED_TRACK_CLASS =
   "relative flex shrink-0 items-center rounded-full bg-surface-muted";
 

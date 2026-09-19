@@ -14,6 +14,7 @@ import { CaretDown } from "@phosphor-icons/react";
 
 import { AppearanceCheck } from "./appearance-check";
 import { SegmentedTrack } from "@/components/ui/segmented-track";
+import { SEGMENTED_TRACK_PERSIST } from "@/lib/segmented-track";
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import {
   overviewLeadPills,
@@ -97,11 +98,17 @@ function WorkspaceSwitcherPills({
   const pathname = usePathname();
   const pills = overviewLeadPills(options);
   const segmentRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const [pendingIndex, setPendingIndex] = useState<number | null>(null);
   const label = overviewTriggerLabel(pathname, workspaceSwitcherSegmentLabel(current));
   const canSwitch = pills.length > 1;
-  const activeIndex = pills.findIndex((pill) =>
+  const routeIndex = pills.findIndex((pill) =>
     overviewLeadSelected(pill.id, pathname, current),
   );
+  const activeIndex = pendingIndex ?? (routeIndex >= 0 ? routeIndex : 0);
+
+  useEffect(() => {
+    setPendingIndex(null);
+  }, [pathname, current]);
 
   function onSegmentKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>, index: number) {
     if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
@@ -130,7 +137,8 @@ function WorkspaceSwitcherPills({
 
   return (
     <SegmentedTrack
-      activeIndex={activeIndex >= 0 ? activeIndex : 0}
+      activeIndex={activeIndex}
+      persistKey={SEGMENTED_TRACK_PERSIST.workspace}
       trackClass={WORKSPACE_SWITCHER_SEGMENTS_CLASS}
       thumbClass={WORKSPACE_SWITCHER_SEGMENTS_THUMB_CLASS}
       data-workspace-switcher=""
@@ -140,7 +148,7 @@ function WorkspaceSwitcherPills({
       aria-label={WORKSPACE_SWITCHER.label}
     >
       {pills.map((pill, index) => {
-        const selected = overviewLeadSelected(pill.id, pathname, current);
+        const selected = index === activeIndex;
         return (
           <button
             key={pill.id}
@@ -154,7 +162,10 @@ function WorkspaceSwitcherPills({
             aria-selected={selected}
             tabIndex={workspaceSwitcherSegmentTabIndex(selected)}
             className={workspaceSwitcherSegmentClass(selected)}
-            onClick={() => selectLeadPill(current, pill, options, router, pathname)}
+            onClick={() => {
+              setPendingIndex(index);
+              selectLeadPill(current, pill, options, router, pathname);
+            }}
             onKeyDown={(event) => onSegmentKeyDown(event, index)}
           >
             {pill.label}

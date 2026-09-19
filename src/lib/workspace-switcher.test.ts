@@ -33,6 +33,7 @@ import {
   WORKSPACE_SWITCHER_PILL_PANEL_CLASS,
   WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS,
   WORKSPACE_SWITCHER_SEGMENTS_CLASS,
+  WORKSPACE_SWITCHER_SEGMENTS_THUMB_CLASS,
   WORKSPACE_SWITCHER_SEGMENT_CLASS,
   WORKSPACE_SWITCHER_SEGMENT_LABEL_CLASS,
   WORKSPACE_SWITCHER_SEGMENT_OFF_CLASS,
@@ -231,6 +232,10 @@ describe("workspace switcher lock", () => {
     expect(WORKSPACE_SWITCHER_SEGMENT_ON_CLASS).toBe("text-white");
     expect(WORKSPACE_SWITCHER_SEGMENT_OFF_CLASS).toBe("text-ink");
     expect(WORKSPACE_SWITCHER_SEGMENTS_CLASS).not.toContain("divide-x");
+    expect(WORKSPACE_SWITCHER_SEGMENTS_THUMB_CLASS).toContain("transition-[left,width]");
+    expect(WORKSPACE_SWITCHER_SEGMENTS_THUMB_CLASS).toContain("inset-y-0");
+    expect(WORKSPACE_SWITCHER_SEGMENTS_THUMB_CLASS).not.toContain("transition-opacity");
+    expect(WORKSPACE_SWITCHER_SEGMENTS_THUMB_CLASS).not.toContain("p-[");
     expect(WORKSPACE_SWITCHER_SEGMENT_ON_CLASS).not.toContain("text-accent");
     expect(workspaceSwitcherShowsSegments()).toBe(true);
     expect(workspaceSwitcherShowsSegments(workspaceSwitcherOptions().slice(0, 1))).toBe(false);

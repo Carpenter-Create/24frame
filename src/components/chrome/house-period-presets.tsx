@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { HousePageSelect } from "@/components/chrome/house-page-select";
 import { SegmentedTrack } from "@/components/ui/segmented-track";
 import { cn } from "@/lib/cn";
+import { SEGMENTED_TRACK_PERSIST } from "@/lib/segmented-track";
 import {
   HOUSE_SEGMENTED_ITEM_BASE_CLASS,
   HOUSE_SEGMENTED_ITEM_OFF_CLASS,
@@ -58,6 +59,7 @@ export function HousePeriodPresets({
     <div data-house-period-presets="" className={HOUSE_PERIOD_PRESETS_HOST_CLASS}>
       <SegmentedTrack
         activeIndex={items.findIndex((item) => item.key === value)}
+        persistKey={SEGMENTED_TRACK_PERSIST.period}
         trackClass={cn(HOUSE_SEGMENTED_TRACK_CLASS, "hidden md:flex")}
         thumbClass={HOUSE_SEGMENTED_THUMB_CLASS}
         data-house-period-presets-chips=""
