@@ -1,6 +1,6 @@
 // /settings/refer — house empty page. Copy lives here, not in JSX.
 // Door only. Do not invent a referral program, rewards, or product.
-// /refer is the old door and redirects here.
+// Retired /refer 404s. No leftover hop.
 
 import { USER_MENU } from "@/lib/user-menu";
 

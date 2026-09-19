@@ -39,6 +39,10 @@ const RETIRED_SETTINGS_PAGES = [
   "src/app/(app)/settings/social/page.tsx",
   "src/app/(app)/settings/education/page.tsx",
   "src/app/(app)/settings/aggregation/page.tsx",
+  "src/app/(app)/account/page.tsx",
+  "src/app/(app)/account/agreements/page.tsx",
+  "src/app/(app)/account/company/page.tsx",
+  "src/app/(app)/refer/page.tsx",
 ] as const;
 
 describe("settings hub lock", () => {

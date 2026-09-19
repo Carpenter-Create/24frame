@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { renderServerMarkup } from "@/lib/render-server-markup";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -375,13 +375,12 @@ describe("messages clash lock", () => {
     const home = readFileSync("src/app/(app)/social/page.tsx", "utf8");
     const dms = readFileSync("src/app/(app)/social/dms/page.tsx", "utf8");
     const dmLoaders = readFileSync("src/lib/social-dms.ts", "utf8");
-    const messages = readFileSync("src/app/(app)/aggregation/messages/page.tsx", "utf8");
     expect(home).not.toContain('"/messages"');
     expect(dms).toContain("loadDmInbox");
     expect(dmLoaders).toContain("get_dm_inbox");
-    expect(messages).toContain("AskAiLegacyIntercept");
-    expect(messages).not.toContain("AskGlobeeLanding");
-    expect(messages).not.toContain("get_dm_inbox");
-    expect(messages).not.toContain("open_or_get_direct_conversation");
+    expect(existsSync("src/app/(app)/aggregation/messages/page.tsx")).toBe(false);
+    expect(existsSync("src/app/(app)/aggregation/messages/ask-ai-legacy-intercept.tsx")).toBe(
+      false,
+    );
   });
 });

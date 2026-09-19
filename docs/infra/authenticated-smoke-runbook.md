@@ -124,25 +124,25 @@ Use the Access client mailbox. Magic-link only. No live card.
 | **Expected** | Page heading **Catalog Health** loads without an error page. |
 | **Fail** | Error page, unexpected redirect, or a blank/broken render. |
 
-### 8. Messages
+### 8. Retired `/messages` (hard-404)
 
 | | |
 | --- | --- |
-| **Path** | `/messages` |
+| **Path** | `/messages` and `/aggregation/messages` |
 | **Role** | client Access |
-| **Action** | Open `/messages`. |
-| **Expected** | Page heading **Messages** loads without an error page. |
-| **Fail** | Error page, unexpected redirect, or a blank/broken render. |
+| **Action** | Open `/messages`, then `/aggregation/messages`. |
+| **Expected** | Each path 404s. No hop to Activity or the Ask-AI overlay. Live notification log is `/aggregation/activity`. Ask 24Frame AI opens from the header / Home module (`?ai=`). |
+| **Fail** | Redirect, overlay intercept, or a rendered Messages / AI land. |
 
 ### 9. Agreements list
 
 | | |
 | --- | --- |
-| **Path** | `/account/agreements` |
+| **Path** | `/settings/agreements` (retired `/account/agreements` 404s) |
 | **Role** | client Access |
-| **Action** | Open `/account/agreements`. |
-| **Expected** | Page heading **Agreements**. The list includes the Access assent (label of the form “Access agreement”). Do not download or paste agreement text, hashes, or document identifiers into the repository. |
-| **Fail** | Error page, empty list when Access was accepted in this or a prior setup, or a non-Access assent shown as the only record when Access was the accepted tier. |
+| **Action** | Open `/account/agreements` first — expect 404, no hop. Then open `/settings/agreements`. |
+| **Expected** | Retired door 404s. Live path heading **Agreements**. The list includes the Access assent (label of the form “Access agreement”). Do not download or paste agreement text, hashes, or document identifiers into the repository. |
+| **Fail** | Redirect from `/account/agreements`, error page on `/settings/agreements`, empty list when Access was accepted in this or a prior setup, or a non-Access assent shown as the only record when Access was the accepted tier. |
 
 ### 10. Title stub (Operate role)
 

@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -168,7 +168,6 @@ describe("Social courses list", () => {
 describe("course list lock", () => {
   it("does not add a create form or steal /messages", () => {
     const page = readFileSync("src/app/(app)/education/page.tsx", "utf8");
-    const messages = readFileSync("src/app/(app)/aggregation/messages/page.tsx", "utf8");
     expect(page).not.toContain('"/messages"');
     expect(page).not.toContain("createSocialCourse");
     expect(page).not.toContain("SocialAvatar");
@@ -183,8 +182,9 @@ describe("course list lock", () => {
     expect(readFileSync("src/app/(app)/education/error.tsx", "utf8")).toContain(
       "data-course-retry",
     );
-    expect(messages).toContain("AskAiLegacyIntercept");
-    expect(messages).not.toContain("AskGlobeeLanding");
-    expect(messages).not.toContain("from(\"courses\")");
+    expect(existsSync("src/app/(app)/aggregation/messages/page.tsx")).toBe(false);
+    expect(existsSync("src/app/(app)/aggregation/messages/ask-ai-legacy-intercept.tsx")).toBe(
+      false,
+    );
   });
 });

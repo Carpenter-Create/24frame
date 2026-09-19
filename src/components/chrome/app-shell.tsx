@@ -283,7 +283,7 @@ export function AppShell({
           Facebook-compact slot as Social live search. Phone
           Education search sits in a full-width row under the dest
           chips — not in the top nav. Search also mounts on the Access
-          leftover `/messages` intercept, and on mobile `/titles` (528:542).
+          leftover `/messages` path (retired — 404), and on mobile `/titles` (528:542).
           Phone avatar opens 544:561. Do not invent Move chrome or a
           second phone switcher. Studio secondary rail stays HOLD. */}
       <HouseLeadChrome
