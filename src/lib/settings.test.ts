@@ -69,7 +69,9 @@ describe("settings hub lock", () => {
     expect(SETTINGS.dashboard).toBe("Home");
     expect(SETTINGS.dashboardHref).toBe("/aggregation/dashboard");
     expect(SETTINGS.company).toBe("Company");
+    expect(SETTINGS.team).toBe("Team");
     expect(SETTINGS).not.toHaveProperty("companyHref");
+    expect(SETTINGS).not.toHaveProperty("teamHref");
     expect(SETTINGS).not.toHaveProperty("youHref");
     expect(SETTINGS).not.toHaveProperty("socialHref");
     expect(SETTINGS).not.toHaveProperty("educationHref");
@@ -163,6 +165,7 @@ describe("settings hub lock", () => {
       expect(blob).not.toContain(absent);
     }
     expect(SETTINGS_HUB_NAV.map((item) => item.label)).not.toContain("Company");
+    expect(SETTINGS_HUB_NAV.map((item) => item.label)).not.toContain("Team");
     expect(SETTINGS_HUB_NAV.map((item) => item.kind)).not.toContain("company");
     expect(SETTINGS_HUB_NAV.map((item) => item.label)).not.toContain("You");
     expect(SETTINGS_HUB_NAV.map((item) => item.label)).not.toContain("Social");

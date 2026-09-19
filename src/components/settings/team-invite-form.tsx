@@ -1,0 +1,226 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { InlineNotice } from "@/components/ui/inline-notice";
+import { StatusChip } from "@/components/layout/status-chip";
+import { formControlClass } from "@/lib/form-control";
+import { SETTINGS_PANE_TITLE_CLASS } from "@/lib/settings";
+import {
+  ACCOUNT_INVITE,
+  TEAM_INVITE_DEFAULT_ROLE,
+  TEAM_INVITE_ROLES,
+  TEAM_LIST_AVATAR_CLASS,
+  TEAM_LIST_HEADER_CLASS,
+  TEAM_LIST_ROW_CLASS,
+  TEAM_ROLE_PILL_CLASS,
+  inviteDateLabel,
+  inviteStatusLabel,
+  teamIdentityName,
+  teamRoleLabel,
+  teamRowInitials,
+  toTeamListRows,
+  type OrgRole,
+} from "@/lib/account-invite";
+import { inviteTeamMember, revokeTeamInvite } from "@/app/(app)/settings/organization/actions";
+
+export type TeamMemberRow = {
+  userId: string;
+  email: string;
+  role: OrgRole;
+  name: string | null;
+  sentAt: string | null;
+  acceptedAt: string;
+};
+
+export type TeamPendingRow = {
+  id: string;
+  email: string;
+  role: OrgRole;
+  sentAt: string;
+};
+
+export function TeamInviteForm({
+  orgId,
+  canInvite,
+  members,
+  pending,
+}: {
+  orgId: string;
+  canInvite: boolean;
+  members: TeamMemberRow[];
+  pending: TeamPendingRow[];
+}) {
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState<OrgRole>(TEAM_INVITE_DEFAULT_ROLE);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [sent, setSent] = useState(false);
+  const [revoking, setRevoking] = useState<string | null>(null);
+  const [hiddenIds, setHiddenIds] = useState<string[]>([]);
+  const [inviteOpen, setInviteOpen] = useState(members.length === 0 && pending.length === 0);
+  const router = useRouter();
+
+  const visiblePending = pending.filter((row) => !hiddenIds.includes(row.id));
+  const rows = toTeamListRows(members, visiblePending);
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!canInvite) return;
+    setSaving(true);
+    setError("");
+    setSent(false);
+    const res = await inviteTeamMember({ orgId, email, role });
+    if (res.error) {
+      setError(res.error);
+      setSaving(false);
+      return;
+    }
+    setEmail("");
+    setRole(TEAM_INVITE_DEFAULT_ROLE);
+    setSaving(false);
+    setSent(true);
+    setInviteOpen(false);
+    router.refresh();
+  }
+
+  async function onRevoke(id: string) {
+    if (!canInvite) return;
+    setRevoking(id);
+    setError("");
+    const res = await revokeTeamInvite({ id });
+    if (res.error) setError(res.error);
+    else {
+      setHiddenIds((current) => [...current, id]);
+      router.refresh();
+    }
+    setRevoking(null);
+  }
+
+  return (
+    <div data-settings-team="" className="flex flex-col gap-[var(--space-6)]">
+      <div className="flex items-center justify-between gap-[var(--space-4)]">
+        <h2 className={SETTINGS_PANE_TITLE_CLASS}>{ACCOUNT_INVITE.team}</h2>
+        {canInvite ? (
+          <Button type="button" data-team-invite-cta="" onClick={() => setInviteOpen(true)}>
+            {ACCOUNT_INVITE.invite}
+          </Button>
+        ) : null}
+      </div>
+
+      {canInvite && inviteOpen ? (
+        <form onSubmit={onSubmit} className="flex flex-col gap-[var(--space-4)]" data-team-invite-form="">
+          <div className="flex flex-col gap-[var(--space-2)]">
+            <Label htmlFor="team-invite-email">{ACCOUNT_INVITE.emailLabel}</Label>
+            <Input
+              id="team-invite-email"
+              name="email"
+              type="email"
+              autoComplete="off"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setSent(false);
+              }}
+              required
+            />
+          </div>
+          <div className="flex flex-col gap-[var(--space-2)]">
+            <Label htmlFor="team-invite-role">{ACCOUNT_INVITE.roleLabel}</Label>
+            <select
+              id="team-invite-role"
+              name="role"
+              className={formControlClass("box")}
+              value={role}
+              onChange={(e) => setRole(e.target.value as OrgRole)}
+            >
+              {TEAM_INVITE_ROLES.map((value) => (
+                <option key={value} value={value}>
+                  {teamRoleLabel(value)}
+                </option>
+              ))}
+            </select>
+          </div>
+          <Button type="submit" disabled={saving} className="self-start">
+            {saving ? ACCOUNT_INVITE.inviting : ACCOUNT_INVITE.invite}
+          </Button>
+        </form>
+      ) : null}
+
+      {canInvite ? null : (
+        <p className="t-body-sm text-ink-3">{ACCOUNT_INVITE.forbidden}</p>
+      )}
+
+      {rows.length === 0 ? (
+        <p className="t-body text-ink-2">{ACCOUNT_INVITE.teamEmpty}</p>
+      ) : (
+        <div data-team-list="" className="overflow-x-auto">
+          <div className={TEAM_LIST_HEADER_CLASS} data-team-list-head="">
+            <span>{ACCOUNT_INVITE.nameColumn}</span>
+            <span>{ACCOUNT_INVITE.roleLabel}</span>
+            <span>{ACCOUNT_INVITE.statusColumn}</span>
+            <span>{ACCOUNT_INVITE.sentColumn}</span>
+            <span>{ACCOUNT_INVITE.acceptedColumn}</span>
+            <span />
+          </div>
+          <ul className="flex flex-col divide-y divide-hairline border-t border-hairline">
+            {rows.map((row) => {
+              const name = teamIdentityName(row.name);
+              return (
+                <li
+                  key={row.key}
+                  data-invite-status={row.status}
+                  className={TEAM_LIST_ROW_CLASS}
+                >
+                  <span className="flex min-w-0 items-center gap-[var(--space-3)]">
+                    <span className={TEAM_LIST_AVATAR_CLASS} data-team-avatar="">
+                      {teamRowInitials(name, row.email)}
+                    </span>
+                    <span className="flex min-w-0 flex-col">
+                      <span className="t-body text-ink">{name ?? row.email}</span>
+                      {name ? (
+                        <span className="t-body-sm text-ink-3">{row.email}</span>
+                      ) : null}
+                    </span>
+                  </span>
+                  <span className={TEAM_ROLE_PILL_CLASS}>{teamRoleLabel(row.role)}</span>
+                  <StatusChip
+                    label={inviteStatusLabel(row.status)}
+                    tone={row.status === "accepted" ? "active" : "neutral"}
+                  />
+                  <span className="t-body-sm text-ink-3" data-invite-date="sent">
+                    {inviteDateLabel(row.sentAt)}
+                  </span>
+                  <span className="t-body-sm text-ink-3" data-invite-date="accepted">
+                    {inviteDateLabel(row.acceptedAt)}
+                  </span>
+                  <span className="justify-self-end">
+                    {canInvite && row.withdrawId ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        disabled={revoking === row.withdrawId}
+                        onClick={() => {
+                          if (row.withdrawId) onRevoke(row.withdrawId);
+                        }}
+                      >
+                        {revoking === row.withdrawId ? ACCOUNT_INVITE.revoking : ACCOUNT_INVITE.revoke}
+                      </Button>
+                    ) : null}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
+      {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
+      {sent ? <InlineNotice>{ACCOUNT_INVITE.sent}</InlineNotice> : null}
+    </div>
+  );
+}

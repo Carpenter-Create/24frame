@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { buildMagicLinkEmail, buildNotificationEmail, buildOtpEmail, buildSignInWithCodeEmail } from "./email";
+import { buildHouseGrantEmail, buildTeamInviteEmail } from "./email-invite-templates";
 import {
   EMAIL_ACCENT,
   EMAIL_ADDRESS,
@@ -228,5 +229,29 @@ describe("Auth magic-link template", () => {
     expect(html).not.toMatch(/border-radius:\s*999px/);
     expect(productResidue(html)).not.toMatch(/\bGC\b|globalcontent/i);
     expect(html.toLowerCase()).not.toMatch(/seamless|frictionless|elevate|amplify/);
+  });
+});
+
+describe("account invite mail", () => {
+  const acceptUrl = "https://app.24frame.co/invite/accept?token=test-token";
+
+  it("sends a team accept link, not a marketing code", () => {
+    const { subject, text, html } = buildTeamInviteEmail(acceptUrl);
+    expect(subject).toBe("Join a team on 24Frame");
+    expect(text).toContain(acceptUrl);
+    expect(html).toContain(">Accept invite</a>");
+    expect(html).toContain(`href="${acceptUrl}"`);
+    expect(text.toLowerCase()).not.toMatch(/invite code|promo code|referral code/);
+    expect(html.toLowerCase()).not.toMatch(/seamless|frictionless|elevate|amplify/);
+    expect(productResidue(html)).not.toMatch(/\bGC\b|globalcontent/i);
+  });
+
+  it("sends a house grant accept link", () => {
+    const { subject, text, html } = buildHouseGrantEmail(acceptUrl);
+    expect(subject).toBe("Your 24Frame account");
+    expect(text).toContain(acceptUrl);
+    expect(html).toContain(">Accept invite</a>");
+    expect(html.toLowerCase()).not.toMatch(/invite code|promo code/);
+    expect(productResidue(html)).not.toMatch(/\bGC\b|globalcontent/i);
   });
 });

@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { COMPANY_PROFILE } from "@/lib/account-profile";
+import { ACCOUNT_INVITE } from "@/lib/account-invite";
 import { SETTINGS } from "@/lib/settings";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
@@ -22,8 +23,9 @@ vi.mock("@/app/(app)/account/actions", () => ({
 
 function stubMemberCan(allowed: boolean) {
   const rpc = vi.fn(async (name: string) => {
-    if (name !== "member_can") throw new Error(`unexpected rpc(${name})`);
-    return { data: allowed, error: null };
+    if (name === "member_can") return { data: allowed, error: null };
+    if (name === "org_team" || name === "org_pending_invites") return { data: [], error: null };
+    throw new Error(`unexpected rpc(${name})`);
   });
   vi.mocked(createClient).mockResolvedValue({ rpc } as never);
   return rpc;
@@ -70,12 +72,87 @@ describe("SettingsOrganizationPage", () => {
     expect(html).toContain(COMPANY_PROFILE.save);
     expect(html).not.toContain(SETTINGS.manageCourses);
     expect(html).not.toContain("Add user");
-    expect(html).not.toContain("Invite");
-    expect(html).not.toContain("Team");
+    expect(html).toContain(SETTINGS.team);
+    expect(html).toContain("data-settings-section=\"team\"");
+    expect(html).toContain("data-team-invite-cta");
+    expect(html).toContain("data-team-invite-form");
+    expect(html).toContain(ACCOUNT_INVITE.invite);
     expect(paneSrc).toContain("CompanyProfileForm");
+    expect(paneSrc).toContain("TeamInviteForm");
     expect(paneSrc).toContain("member_can");
-    expect(paneSrc).toContain("out of scope");
-    expect(paneSrc).toContain("Team next");
+    expect(paneSrc).not.toContain("out of scope");
+  });
+
+  it("shows Invited on pending and Accepted on members", async () => {
+    const rpc = vi.fn(async (name: string) => {
+      if (name === "member_can") return { data: true, error: null };
+      if (name === "org_team") {
+        return {
+          data: [
+            {
+              user_id: "u1",
+              email: "ada@example.com",
+              role: "account_owner",
+              status: "active",
+              joined_at: "2026-01-01T00:00:00Z",
+              display_name: "Ada",
+              invited_at: "2025-12-20T00:00:00Z",
+            },
+          ],
+          error: null,
+        };
+      }
+      if (name === "org_pending_invites") {
+        return {
+          data: [
+            {
+              id: "inv-1",
+              email: "pat@example.com",
+              role: "viewer",
+              expires_at: "2026-10-03T00:00:00Z",
+              created_at: "2026-09-19T00:00:00Z",
+            },
+          ],
+          error: null,
+        };
+      }
+      throw new Error(`unexpected rpc(${name})`);
+    });
+    vi.mocked(createClient).mockResolvedValue({ rpc } as never);
+    vi.mocked(getOrgContext).mockResolvedValue(ctx(true) as never);
+
+    const html = renderToStaticMarkup(await SettingsOrganizationPage());
+    expect(html).toContain("ada@example.com");
+    expect(html).toContain("pat@example.com");
+    expect(html).toContain("Ada");
+    expect(html).toContain("data-team-list");
+    expect(html).toContain("data-team-invite-cta");
+    expect(html).toContain(ACCOUNT_INVITE.nameColumn);
+    expect(html).toContain(ACCOUNT_INVITE.statusColumn);
+    expect(html).toContain(ACCOUNT_INVITE.sentColumn);
+    expect(html).toContain(ACCOUNT_INVITE.acceptedColumn);
+    expect(html).toContain('data-invite-status="accepted"');
+    expect(html).toContain('data-invite-status="invited"');
+    expect(html).toContain(ACCOUNT_INVITE.accepted);
+    expect(html).toContain(ACCOUNT_INVITE.invited);
+    expect(html).toContain(ACCOUNT_INVITE.revoke);
+    expect(html).toContain("Jan 1, 2026");
+    expect(html).toContain("Sep 19, 2026");
+    expect(html).toContain("Dec 20, 2025");
+    expect(html).toContain("data-invite-date");
+    expect(html).not.toContain("Withdrawn");
+    expect(html).not.toContain("Removed");
+    expect(html).not.toContain("Needs review");
+    expect(html).not.toContain("Ownership");
+    expect(html).not.toContain("Invite a user");
+    const memberStart = html.indexOf("ada@example.com");
+    const memberRow = html.slice(html.lastIndexOf("<li", memberStart), html.indexOf("</li>", memberStart));
+    expect(memberRow).not.toContain(ACCOUNT_INVITE.revoke);
+    expect(memberRow).toContain("Jan 1, 2026");
+    const pendingStart = html.indexOf("pat@example.com");
+    const pendingRow = html.slice(html.lastIndexOf("<li", pendingStart), html.indexOf("</li>", pendingStart));
+    expect(pendingRow).toContain(ACCOUNT_INVITE.revoke);
+    expect(pendingRow).toContain("—");
   });
 
   it("houses Organization empty when there is no org", async () => {

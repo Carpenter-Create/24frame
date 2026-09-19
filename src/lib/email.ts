@@ -8,11 +8,13 @@ import {
   buildSignInWithCodeEmail,
   escapeEmailHtml,
 } from "@/lib/email-auth-templates";
+import { buildHouseGrantEmail, buildTeamInviteEmail } from "@/lib/email-invite-templates";
 import { EMAIL_BODY, housePrimaryLink, wrapHouseEmail } from "@/lib/email-house";
 import { PRODUCT_NAME } from "@/lib/product";
 import type { Database } from "@/lib/supabase/database.types";
 
 export { buildMagicLinkEmail, buildOtpEmail, buildSignInWithCodeEmail } from "@/lib/email-auth-templates";
+export { buildHouseGrantEmail, buildTeamInviteEmail } from "@/lib/email-invite-templates";
 
 // Auth transactional mail (magic link / OTP / verification) sends via SES us-west-2
 // on the verified 24frame.co identity. From-address is PORTAL_EMAIL_FROM /
@@ -41,6 +43,16 @@ export async function sendSignInWithCodeEmail(
   code: string,
 ): Promise<void> {
   const { subject, text, html } = buildSignInWithCodeEmail(signInUrl, code);
+  await sendAuthSesEmail({ to, subject, text, html });
+}
+
+export async function sendTeamInviteEmail(to: string, acceptUrl: string): Promise<void> {
+  const { subject, text, html } = buildTeamInviteEmail(acceptUrl);
+  await sendAuthSesEmail({ to, subject, text, html });
+}
+
+export async function sendHouseGrantEmail(to: string, acceptUrl: string): Promise<void> {
+  const { subject, text, html } = buildHouseGrantEmail(acceptUrl);
   await sendAuthSesEmail({ to, subject, text, html });
 }
 

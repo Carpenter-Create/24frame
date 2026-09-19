@@ -34,6 +34,71 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_invites: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          kind: Database["public"]["Enums"]["account_invite_kind"]
+          org_id: string | null
+          org_name: string | null
+          revoked_at: string | null
+          role: Database["public"]["Enums"]["org_role"] | null
+          status: Database["public"]["Enums"]["account_invite_status"]
+          tier: Database["public"]["Enums"]["tier_enum"] | null
+          token_hash: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          invited_by: string
+          kind: Database["public"]["Enums"]["account_invite_kind"]
+          org_id?: string | null
+          org_name?: string | null
+          revoked_at?: string | null
+          role?: Database["public"]["Enums"]["org_role"] | null
+          status?: Database["public"]["Enums"]["account_invite_status"]
+          tier?: Database["public"]["Enums"]["tier_enum"] | null
+          token_hash: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          kind?: Database["public"]["Enums"]["account_invite_kind"]
+          org_id?: string | null
+          org_name?: string | null
+          revoked_at?: string | null
+          role?: Database["public"]["Enums"]["org_role"] | null
+          status?: Database["public"]["Enums"]["account_invite_status"]
+          tier?: Database["public"]["Enums"]["tier_enum"] | null
+          token_hash?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_invites_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assets: {
         Row: {
           bytes: number
@@ -2937,6 +3002,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_account_invite: { Args: { p_token_hash: string }; Returns: Json }
+      account_invite_normalize_email: { Args: { p_email: string }; Returns: string }
       archive_title: { Args: { p_title_id: string }; Returns: undefined }
       accept_terms: {
         Args: {
@@ -3188,6 +3255,15 @@ export type Database = {
         Args: { p_capability: string; p_uid: string }
         Returns: boolean
       }
+      grant_house_account: {
+        Args: {
+          p_email: string
+          p_org_name: string
+          p_tier: Database["public"]["Enums"]["tier_enum"]
+          p_token_hash: string
+        }
+        Returns: string
+      }
       gc_set_title_status: {
         Args: {
           p_reason: string
@@ -3245,6 +3321,15 @@ export type Database = {
         Returns: boolean
       }
       is_gc_staff: { Args: { p_uid: string }; Returns: boolean }
+      invite_org_member: {
+        Args: {
+          p_email: string
+          p_org: string
+          p_role: Database["public"]["Enums"]["org_role"]
+          p_token_hash: string
+        }
+        Returns: string
+      }
       is_group_member: {
         Args: { p_group: string; p_user: string }
         Returns: boolean
@@ -3331,6 +3416,55 @@ export type Database = {
         Args: { p_org_id: string }
         Returns: string[]
       }
+      org_pending_invites: {
+        Args: { p_limit?: number; p_org: string }
+        Returns: {
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          role: Database["public"]["Enums"]["org_role"]
+        }[]
+      }
+      org_team: {
+        Args: { p_limit?: number; p_org: string }
+        Returns: {
+          display_name: string | null
+          email: string
+          invited_at: string | null
+          joined_at: string
+          role: Database["public"]["Enums"]["org_role"]
+          status: Database["public"]["Enums"]["membership_status"]
+          user_id: string
+        }[]
+      }
+      peek_account_invite: {
+        Args: { p_token_hash: string }
+        Returns: {
+          email: string
+          expires_at: string
+          id: string
+          kind: Database["public"]["Enums"]["account_invite_kind"]
+          org_name: string | null
+          role: Database["public"]["Enums"]["org_role"] | null
+          status: Database["public"]["Enums"]["account_invite_status"]
+          tier: Database["public"]["Enums"]["tier_enum"] | null
+        }[]
+      }
+      house_grants: {
+        Args: { p_limit?: number }
+        Returns: {
+          accepted_at: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          org_id: string | null
+          org_name: string
+          status: Database["public"]["Enums"]["account_invite_status"]
+          tier: Database["public"]["Enums"]["tier_enum"]
+        }[]
+      }
       portal_resolve_download: {
         Args: { p_session_token_hash: string }
         Returns: {
@@ -3384,6 +3518,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      revoke_account_invite: { Args: { p_id: string }; Returns: undefined }
       revoke_portal_link: { Args: { p_link_id: string }; Returns: undefined }
       revoke_portal_session: {
         Args: { p_session_id: string }
@@ -3510,6 +3645,8 @@ export type Database = {
       }
     }
     Enums: {
+      account_invite_kind: "team" | "house_grant"
+      account_invite_status: "pending" | "accepted" | "revoked" | "expired"
       account_status: "active" | "deactivated" | "pending_deletion" | "erased"
       app_role: "member" | "moderator" | "admin"
       asset_kind:
@@ -3777,6 +3914,8 @@ export const Constants = {
   },
   public: {
     Enums: {
+      account_invite_kind: ["team", "house_grant"],
+      account_invite_status: ["pending", "accepted", "revoked", "expired"],
       account_status: ["active", "deactivated", "pending_deletion", "erased"],
       app_role: ["member", "moderator", "admin"],
       asset_kind: [

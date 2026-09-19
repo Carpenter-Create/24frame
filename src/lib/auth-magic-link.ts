@@ -2,6 +2,7 @@ import "server-only";
 
 import type { EmailOtpType } from "@supabase/supabase-js";
 
+import { safeAuthCallbackNext } from "@/lib/auth-callback-next";
 import { sendMagicLinkEmail, sendSignInWithCodeEmail } from "@/lib/email";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -56,10 +57,12 @@ export function buildDashboardCallbackUrl(
   origin: string,
   hashedToken: string,
   verifyType: VerifyType,
+  next?: string,
 ): string {
   const url = new URL("/auth/callback", `${stripSlash(origin)}/`);
   url.searchParams.set("token_hash", hashedToken);
   url.searchParams.set("type", verifyType);
+  if (next) url.searchParams.set("next", next);
   return url.toString();
 }
 
@@ -101,9 +104,12 @@ async function mintSignInGrant(
 async function mintDashboardSignInGrant(args: {
   email: string;
   requestOrigin: string | null;
+  next?: string;
 }): Promise<{ origin: string; hashedToken: string; emailOtp: string; signInUrl: string }> {
   const origin = resolveDashboardOrigin(args.requestOrigin);
-  const redirectTo = `${origin}/auth/callback`;
+  const next = args.next ? safeAuthCallbackNext(args.next) : "/";
+  const redirectTo =
+    next === "/" ? `${origin}/auth/callback` : `${origin}/auth/callback?next=${encodeURIComponent(next)}`;
   const admin = createAdminClient();
 
   let minted = await mintSignInGrant(admin, args.email, redirectTo);
@@ -126,7 +132,12 @@ async function mintDashboardSignInGrant(args: {
     origin,
     hashedToken: minted.hashedToken,
     emailOtp: minted.emailOtp,
-    signInUrl: buildDashboardCallbackUrl(origin, minted.hashedToken, "email"),
+    signInUrl: buildDashboardCallbackUrl(
+      origin,
+      minted.hashedToken,
+      "email",
+      next === "/" ? undefined : next,
+    ),
   };
 }
 
@@ -134,6 +145,7 @@ async function mintDashboardSignInGrant(args: {
 export async function issueDashboardSignInLink(args: {
   email: string;
   requestOrigin: string | null;
+  next?: string;
 }): Promise<void> {
   const grant = await mintDashboardSignInGrant(args);
   await sendMagicLinkEmail(args.email, grant.signInUrl);

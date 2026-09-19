@@ -82,6 +82,14 @@ describe("buildDashboardCallbackUrl", () => {
       `https://app.24frame.co/auth/callback?token_hash=${HASH}&type=email`,
     );
   });
+
+  it("appends a same-origin next path for invite accept", () => {
+    expect(
+      buildDashboardCallbackUrl("https://app.24frame.co", HASH, "email", "/invite/accept?token=abc"),
+    ).toBe(
+      `https://app.24frame.co/auth/callback?token_hash=${HASH}&type=email&next=%2Finvite%2Faccept%3Ftoken%3Dabc`,
+    );
+  });
 });
 
 describe("issueDashboardSignInLink", () => {
@@ -91,6 +99,19 @@ describe("issueDashboardSignInLink", () => {
     vi.stubEnv("PORTAL_BASE_URL", "https://app.24frame.co");
     vi.mocked(sendMagicLinkEmail).mockResolvedValue(undefined);
     vi.mocked(sendSignInWithCodeEmail).mockResolvedValue(undefined);
+  });
+
+  it("puts invite next on the dashboard sign-in URL", async () => {
+    fakeAdmin();
+    await issueDashboardSignInLink({
+      email: EMAIL,
+      requestOrigin: "https://app.24frame.co",
+      next: "/invite/accept?token=abc",
+    });
+    expect(sendMagicLinkEmail).toHaveBeenCalledWith(
+      EMAIL,
+      `https://app.24frame.co/auth/callback?token_hash=${HASH}&type=email&next=%2Finvite%2Faccept%3Ftoken%3Dabc`,
+    );
   });
 
   it("mints a magiclink token for an existing user and sends link-only mail", async () => {
