@@ -9,13 +9,14 @@
 // second float) live on one under-top HousePhoneDestChips row.
 // Home has no dest chip row. Desktop left rails stay.
 // Bottom bar owns workspace switching only. Glyphs only — no labels.
-// Aggregation is films (FilmStrip), not a grid. Craft is Mercury’s
-// modern float (reference, not a pixel clone): hairline pill, soft
-// elevation, safe-area, icons only. Active tab is a light
-// surface-muted rounded chip behind the glyph. Inactive sit bare.
-// Stroke is Regular at size-4 (bell box, not Bold/Fill heavy).
-// Active ink is accent on the chip; idle is ink-2. House tokens
-// only. Hide on scroll-down / show on scroll-up via
+// Aggregation is films (FilmStrip), not a grid. Craft is Elevated
+// Mercury (reference, not a pixel clone, not Nextdoor frost): one
+// floating pill, house surface fill, hairline, restrained
+// --elevation-float. No frost. No satellite FAB. No second
+// float. Active tab is a light surface-muted pill behind the glyph.
+// Inactive sit bare. Stroke is Regular at size-4 (bell box, not
+// Bold/Fill heavy). Active ink is accent on the chip; idle is ink-2.
+// House tokens only. Hide on scroll-down / show on scroll-up via
 // social-tab-bar-scroll. Content pad stays when the bar hides.
 // Not a Meta skin. Not Mercury lavender.
 
@@ -97,7 +98,7 @@ export const HOUSE_PHONE_BOTTOM_NAV_CLASS =
 export const HOUSE_PHONE_BOTTOM_NAV_HIDDEN_CLASS = "pointer-events-none translate-y-full";
 
 export const HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS =
-  "flex h-14 w-full max-w-[420px] items-center rounded-[28px] border border-hairline bg-surface px-2 shadow-[var(--elevation)]";
+  "flex h-14 w-full max-w-[420px] items-center rounded-[28px] border border-hairline bg-surface px-2 shadow-[var(--elevation-float)]";
 
 export const HOUSE_PHONE_BOTTOM_NAV_ROW_CLASS = "flex h-12 w-full items-center";
 
@@ -108,9 +109,9 @@ export const HOUSE_PHONE_BOTTOM_NAV_ITEM_ON_CLASS = "text-accent";
 
 export const HOUSE_PHONE_BOTTOM_NAV_ITEM_OFF_CLASS = "text-ink-2";
 
-/** Light chip behind the selected glyph. House muted, not a brand fill. */
+/** Soft light pill behind the selected glyph. House muted, not a brand fill. */
 export const HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS =
-  "flex h-10 min-w-12 items-center justify-center rounded-[var(--radius)] bg-surface-muted";
+  "flex h-10 min-w-12 items-center justify-center rounded-full bg-surface-muted";
 
 /** Same size-4 box as the phone-top bell. Regular stroke, not Bold/Fill. */
 export const HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS = PHOSPHOR_CHROME_ICON_CLASS;

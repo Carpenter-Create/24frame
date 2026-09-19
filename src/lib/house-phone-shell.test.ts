@@ -67,6 +67,7 @@ const shellSrc = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
 const phoneShellSrc = readFileSync("src/lib/house-phone-shell.ts", "utf8");
 const bottomNavSrc = readFileSync("src/components/chrome/house-phone-bottom-nav.tsx", "utf8");
 const phoneAppShellSrc = readFileSync("src/components/chrome/house-phone-app-shell.tsx", "utf8");
+const tokensSrc = readFileSync("src/app/tokens.css", "utf8");
 
 function renderLead(workspace: "aggregation" | "social" | "education") {
   return renderToStaticMarkup(
@@ -215,8 +216,17 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(HOUSE_PHONE_BOTTOM_NAV_CLASS).toContain("transition-transform");
     expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).toContain("rounded-[28px]");
     expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).toContain("border-hairline");
-    expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).toContain("shadow-[var(--elevation)]");
+    expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).toContain("bg-surface");
+    expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).toContain("shadow-[var(--elevation-float)]");
+    expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).not.toContain("backdrop-blur");
+    expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).not.toContain("bg-surface/");
+    expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).not.toMatch(/shadow-\[var\(--elevation\)\]/);
     expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).toContain("h-14");
+    expect(tokensSrc).toContain("--elevation-float:");
+    expect(bottomNavSrc).not.toContain("backdrop-blur");
+    expect(bottomNavSrc).not.toContain("fixed right-");
+    expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).not.toContain("blur");
+    expect(phoneShellSrc).toContain("not Nextdoor frost");
     expect(HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS).toContain("max-md:pb-");
     expect(phoneShellSrc).toContain("Option 2");
     expect(phoneShellSrc).toContain("FilmStrip");
@@ -275,7 +285,8 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
 
   it("puts a light house chip behind the active glyph only", () => {
     expect(HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS).toContain("bg-surface-muted");
-    expect(HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS).toContain("rounded-[var(--radius)]");
+    expect(HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS).toContain("rounded-full");
+    expect(HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS).not.toContain("rounded-[var(--radius)]");
     expect(HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS).not.toContain("#");
     expect(HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS).not.toContain("bg-accent");
     expect(HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS).not.toContain("bg-ink");
@@ -321,6 +332,8 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(bottomNavSrc).toContain("createSocialTabBarScrollTracker");
     expect(bottomNavSrc).toContain("stepSocialTabBarScroll");
     expect(bottomNavSrc).toContain("[data-house-lead-scroll]");
+    expect(bottomNavSrc).toContain("useHousePhoneBottomNavHidden(pathname)");
+    expect(bottomNavSrc).toContain("}, [pathname]);");
     expect(bottomNavSrc).toContain("data-house-phone-bottom-nav-hidden");
     expect(phoneAppShellSrc).toContain("HousePhoneBottomNav");
     expect(phoneAppShellSrc).toContain("social-tab-bar-scroll");

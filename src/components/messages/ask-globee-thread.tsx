@@ -111,6 +111,7 @@ export function AskGlobeeThread({
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [thumbOverrides, setThumbOverrides] = useState<Record<string, AskGlobeeThumb | null>>({});
   const latestTurnRef = useRef<HTMLDivElement>(null);
+  const conversationRef = useRef<HTMLDivElement>(null);
   const copiedTimerRef = useRef<number>(0);
   const cancelledRef = useRef(false);
   const completingIdRef = useRef<string | null>(null);
@@ -160,8 +161,10 @@ export function AskGlobeeThread({
   }, []);
 
   useEffect(() => {
-    latestTurnRef.current?.scrollIntoView();
-  }, [messages]);
+    const pane = conversationRef.current;
+    if (!pane) return;
+    pane.scrollTop = 0;
+  }, [messages, pendingPrompt]);
 
   const openTurnKey = thinking
     ? (pendingPrompt ?? messages.at(-1)?.id ?? "pending")
@@ -230,6 +233,7 @@ export function AskGlobeeThread({
     <div data-ask-globee-thread="" className="flex h-full min-h-0 flex-1 flex-col">
       <div className="flex min-h-0 flex-1 flex-col gap-[var(--space-4)]">
         <div
+          ref={conversationRef}
           data-ask-globee-conversation=""
           className="flex min-h-0 flex-1 flex-col-reverse gap-[var(--space-6)] overflow-auto px-[var(--content-inset)]"
         >

@@ -32,7 +32,7 @@ const CHIP_MARK_ICON: Record<AskGlobeeChipMark, LucideIcon> = {
 
 // Overlay landing, Mercury bottom-up: clock docks top-left; headline and
 // chips sit above a pinned composer. Empty/new chat anchors to the bottom
-// (justify-end), not a top-down empty header. Chip click fills, selects,
+// (flex-col-reverse), not a top-down empty header. Chip click fills, selects,
 // and sends the same prompt as free text. Submit persists the user turn,
 // then opens the thread on the current path. Quiet clock 16 opens past
 // conversations. Mobile 44 hit / --space-6 lead. Desktop size-4 at left-0.
@@ -92,7 +92,8 @@ export function AskGlobeeLanding({
         </AskGlobeeHistoryPopover>
       </div>
 
-      <div className="flex w-full min-h-0 flex-1 flex-col items-center justify-end gap-[var(--space-12)] overflow-auto">
+      <div className="flex w-full min-h-0 flex-1 flex-col-reverse overflow-auto">
+        <div className="flex w-full flex-col items-center gap-[var(--space-12)]">
         <h1 data-ask-globee-headline="" className="t-display text-center text-ink">
           {ASK_GLOBEE.headline}
         </h1>
@@ -133,6 +134,7 @@ export function AskGlobeeLanding({
               );
             })}
           </div>
+        </div>
         </div>
       </div>
 

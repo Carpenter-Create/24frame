@@ -198,9 +198,10 @@ describe("AskGlobeeLanding", () => {
       "relative flex h-full min-h-0 flex-1 flex-col items-center p-[var(--space-12)]",
     );
     expect(src).toContain(
-      "flex w-full min-h-0 flex-1 flex-col items-center justify-end gap-[var(--space-12)] overflow-auto",
+      "flex w-full min-h-0 flex-1 flex-col-reverse overflow-auto",
     );
     expect(src).not.toContain("justify-center gap-[var(--space-12)]");
+    expect(src).not.toContain("justify-end gap-[var(--space-12)]");
     expect(src).not.toContain("flex flex-col items-center gap-[var(--space-6)]");
     expect(html).not.toContain("t-body text-center text-ink-2");
     expect(html).not.toContain(ASK_GLOBEE.need);
@@ -312,7 +313,7 @@ describe("AskGlobeeLanding", () => {
     expect(src).not.toContain("fill-");
     expect(src).toContain("max-md:px-[var(--space-4)]");
     expect(src).toContain("max-md:w-full max-md:flex-col max-md:items-stretch");
-    expect(src).toContain("gap-[var(--space-12)] overflow-auto");
+    expect(src).toContain("flex-col-reverse overflow-auto");
     expect(src).toContain("mt-[var(--space-12)] flex w-full shrink-0 justify-center");
     expect(src).toContain(
       "flex size-6 shrink-0 items-center justify-center rounded-full bg-accent text-accent-contrast",

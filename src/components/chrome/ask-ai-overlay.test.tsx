@@ -247,6 +247,7 @@ describe("AskAiOverlay", () => {
   it("expand/collapse stays overlay-scoped and phone starts as a sheet", () => {
     const overlaySrc = readFileSync(new URL("./ask-ai-overlay.tsx", import.meta.url), "utf8");
     expect(overlaySrc).toContain("toggleAskAiExpanded");
+    expect(overlaySrc).toContain("setExpanded(false)");
     expect(overlaySrc).toContain("askAiOverlayPhoneClass(expanded)");
     expect(overlaySrc).toContain("ASK_AI_OVERLAY_EXPAND_CLASS");
     expect(overlaySrc).not.toContain("hidden size-[44px]");
@@ -312,8 +313,9 @@ describe("AskAiOverlay", () => {
     expect(overlaySrc).toContain("ASK_AI_OVERLAY_BODY_CLASS");
     expect(ASK_AI_OVERLAY_BODY_CLASS).toContain("overflow-hidden");
     expect(ASK_AI_OVERLAY_BODY_CLASS).not.toContain("overflow-auto");
-    expect(landingSrc).toContain("justify-end");
+    expect(landingSrc).toContain("flex-col-reverse");
     expect(landingSrc).not.toContain("justify-center gap-[var(--space-12)]");
+    expect(landingSrc).not.toContain("justify-end gap-[var(--space-12)]");
     expect(landingSrc.indexOf("data-ask-globee-try=")).toBeLessThan(
       landingSrc.indexOf("data-ask-globee-composer="),
     );
@@ -329,7 +331,7 @@ describe("AskAiOverlay", () => {
     const html = renderOverlay();
     expect(html).toContain("data-ask-ai-overlay-body");
     expect(html).toContain("data-ask-globee-landing");
-    expect(html).toContain("justify-end");
+    expect(html).toContain("flex-col-reverse");
     expect(html.indexOf("data-ask-globee-headline")).toBeLessThan(
       html.indexOf("data-ask-globee-composer"),
     );

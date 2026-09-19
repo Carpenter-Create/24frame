@@ -31,10 +31,11 @@ import { resolveWorkspaceMode } from "@/lib/workspace";
 // G9 page scroll lives on main (`[data-house-lead-scroll]`), not window.
 // Shared across every workspace that mounts this bar.
 
-function useHousePhoneBottomNavHidden() {
+function useHousePhoneBottomNavHidden(pathname: string) {
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
+    setHidden(false);
     const scroller = document.querySelector<HTMLElement>("[data-house-lead-scroll]");
     const readY = () => (scroller ? scroller.scrollTop : window.scrollY);
     const target: EventTarget = scroller ?? window;
@@ -49,7 +50,7 @@ function useHousePhoneBottomNavHidden() {
 
     target.addEventListener("scroll", onScroll, { passive: true });
     return () => target.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [pathname]);
 
   return hidden;
 }
@@ -60,7 +61,7 @@ export function HousePhoneBottomNav({
   workspace: ReturnType<typeof resolveWorkspaceMode>;
 }) {
   const pathname = usePathname();
-  const hidden = useHousePhoneBottomNavHidden();
+  const hidden = useHousePhoneBottomNavHidden(pathname);
 
   return (
     <nav

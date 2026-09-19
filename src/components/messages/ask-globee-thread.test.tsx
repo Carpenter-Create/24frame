@@ -271,7 +271,9 @@ describe("AskGlobeeThread", () => {
 
     expect(html).toContain('data-ask-globee-thread-end=""');
     expect(src).toContain("latestTurnRef");
-    expect(src).toContain("scrollIntoView");
+    expect(src).toContain("conversationRef");
+    expect(src).toContain("pane.scrollTop = 0");
+    expect(src).not.toContain("scrollIntoView");
     expect(src).toContain("useRef");
     expect(src).toContain("flex-col-reverse");
     expect(src).toContain("[...turns].reverse()");

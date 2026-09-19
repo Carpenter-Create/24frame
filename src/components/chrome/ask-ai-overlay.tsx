@@ -98,6 +98,7 @@ export function AskAiOverlayProvider({ children }: { children: ReactNode }) {
   const openAskAi = useCallback(
     (threadId?: string | null) => {
       if (isLegacyAskAiPath(pathname)) return;
+      setExpanded(false);
       const href = askAiOverlayHref(pathname, currentAskAiSearch(), threadId);
       setOptimistic(askAiStateFromHref(href));
       router.push(href);
