@@ -28,6 +28,7 @@ import {
   overviewModuleHeaderAction,
   overviewEducationCourses,
   overviewHidesRail,
+  overviewLeadActiveIndex,
   overviewLeadPills,
   overviewLeadSelected,
   overviewLeadShouldNavigate,
@@ -97,6 +98,7 @@ describe("Home lead pills", () => {
       "/settings/organization",
       "/settings/preferences",
     ] as const;
+    const pills = overviewLeadPills();
     for (const path of paths) {
       expect(overviewLeadSelected("home", path, "aggregation")).toBe(false);
       expect(overviewLeadSelected("aggregation", path, "aggregation")).toBe(false);
@@ -104,7 +106,18 @@ describe("Home lead pills", () => {
       expect(overviewLeadSelected("education", path, "education")).toBe(false);
       expect(overviewLeadShouldNavigate(path, "aggregation", { id: "aggregation" })).toBe(true);
       expect(overviewLeadShouldNavigate(path, "social", { id: "home" })).toBe(true);
+      expect(overviewLeadActiveIndex(path, "aggregation", pills)).toBe(-1);
+      expect(overviewLeadActiveIndex(path, "social", pills)).toBe(-1);
+      expect(overviewLeadActiveIndex(path, "education", pills)).toBe(-1);
     }
+    expect(overviewLeadActiveIndex("/home", "aggregation", pills)).toBe(0);
+    expect(overviewLeadActiveIndex("/aggregation/dashboard", "aggregation", pills)).toBe(1);
+    const switcher = readFileSync("src/components/chrome/workspace-switcher.tsx", "utf8");
+    expect(switcher).toContain("overviewLeadActiveIndex");
+    expect(switcher).toContain("activeIndex={activeIndex}");
+    expect(switcher).toContain("persistKey={SEGMENTED_TRACK_PERSIST.workspace}");
+    expect(switcher).not.toContain("activeIndex >= 0 ? activeIndex : 0");
+    expect(switcher).not.toContain("routeIndex >= 0 ? routeIndex : 0");
   });
 
   it("keeps /home/news on Home chrome — Home pill still navigates to /home", () => {

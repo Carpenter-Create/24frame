@@ -263,7 +263,7 @@ describe("dashboard register chrome", () => {
     expect(DASHBOARD_HOME.pillTerritories).toBe("Territories");
     expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).toBe("text-white");
     expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).not.toContain("text-accent");
-    expect(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS).toBe("text-ink");
+    expect(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS).toBe("text-ink-2");
     expect(DASHBOARD_TOP_PILL_BUTTON_CLASS).toContain("rounded-full");
     expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).toContain("rounded-full");
     expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).toContain("bg-surface-muted");

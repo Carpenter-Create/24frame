@@ -230,7 +230,7 @@ describe("workspace switcher lock", () => {
     expect(WORKSPACE_SWITCHER_SEGMENT_ON_CLASS).toBe(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS);
     expect(WORKSPACE_SWITCHER_SEGMENT_OFF_CLASS).toBe(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS);
     expect(WORKSPACE_SWITCHER_SEGMENT_ON_CLASS).toBe("text-white");
-    expect(WORKSPACE_SWITCHER_SEGMENT_OFF_CLASS).toBe("text-ink");
+    expect(WORKSPACE_SWITCHER_SEGMENT_OFF_CLASS).toBe("text-ink-2");
     expect(WORKSPACE_SWITCHER_SEGMENTS_CLASS).not.toContain("divide-x");
     expect(WORKSPACE_SWITCHER_SEGMENTS_THUMB_CLASS).toContain("transition-[left,width]");
     expect(WORKSPACE_SWITCHER_SEGMENTS_THUMB_CLASS).toContain("duration-[320ms]");

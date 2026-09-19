@@ -162,6 +162,10 @@ describe("workspace switcher header control", () => {
     expect(src).toContain("SegmentedTrack");
     expect(src).toContain("SEGMENTED_TRACK_PERSIST.workspace");
     expect(src).toContain("setPending");
+    expect(src).toContain("overviewLeadActiveIndex");
+    expect(src).toContain("activeIndex={activeIndex}");
+    expect(src).not.toContain("activeIndex >= 0 ? activeIndex : 0");
+    expect(src).not.toContain("routeIndex >= 0 ? routeIndex : 0");
     expect(src).not.toContain('"Agg"');
     expect(src).not.toContain('"Edu"');
     expect(src).not.toContain("ellipsis");

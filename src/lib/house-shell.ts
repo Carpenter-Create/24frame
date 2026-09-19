@@ -103,4 +103,10 @@ export const HOUSE_SEGMENTED_ITEM_BASE_CLASS =
 
 export const HOUSE_SEGMENTED_ITEM_ON_CLASS = "text-white";
 
-export const HOUSE_SEGMENTED_ITEM_OFF_CLASS = "text-ink";
+// Idle = muted secondary; active = white on accent thumb.
+export const HOUSE_SEGMENTED_ITEM_OFF_CLASS = "text-ink-2";
+
+/** Hide the accent thumb when no segment is selected (activeIndex < 0). */
+export function houseSegmentedThumbHidden(activeIndex: number): boolean {
+  return activeIndex < 0;
+}

@@ -13,6 +13,7 @@ import {
   HOUSE_SEGMENTED_THUMB_CLASS,
   HOUSE_SEGMENTED_THUMB_DURATION_MS,
   HOUSE_SEGMENTED_TRACK_CLASS,
+  houseSegmentedThumbHidden,
 } from "@/lib/house-shell";
 import {
   measureSegmentedBox,
@@ -62,7 +63,7 @@ export function SegmentedTrack({
   const lastBoxRef = useRef<SegmentedThumbBox | undefined>(undefined);
   const [visualIndex, setVisualIndex] = useState(activeIndex);
   const [thumbStyle, setThumbStyle] = useState<CSSProperties>(() => {
-    if (!persistKey) return { opacity: 0 };
+    if (houseSegmentedThumbHidden(activeIndex) || !persistKey) return { opacity: 0 };
     const flight = readSegmentedThumbFlight(persistKey);
     if (!flight) return { opacity: 0 };
     const view = projectSegmentedThumbFlight(
@@ -83,7 +84,11 @@ export function SegmentedTrack({
     if (!track) return undefined;
     const items = track.querySelectorAll<HTMLElement>("[data-segmented-item]");
     const active = items[visualIndex];
-    if (!active) return undefined;
+    if (houseSegmentedThumbHidden(visualIndex) || !active) {
+      lastBoxRef.current = undefined;
+      setThumbStyle({ opacity: 0 });
+      return undefined;
+    }
 
     const next = measureSegmentedBox(track, active);
     const now = typeof performance === "undefined" ? 0 : performance.now();
