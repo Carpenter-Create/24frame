@@ -18,9 +18,10 @@ export const HOUSE_AI_MARK_VIEWBOX_SIZE = 146;
  *  Phosphor Regular bell sitting next to them — never Bold, never fill.
  *  The ratio is size-independent, so the same 20/256 constant carries
  *  Adam's target-size shifts: #447 rendered at the Mercury 24px box,
- *  #449 dropped the phone header to the 16px desktop-chrome optical
- *  and the bump still holds because it compensates for the geometric
- *  tip softening rather than a specific pixel width. */
+ *  #449 briefly split the phone header down to 16px, #450
+ *  (authoritative) pulled both surfaces to 20px. The bump holds at
+ *  every step because it compensates for the geometric tip softening
+ *  rather than a specific pixel width. */
 export const HOUSE_AI_MARK_REGULAR_STROKE_WIDTH = (20 * HOUSE_AI_MARK_VIEWBOX_SIZE) / 256;
 
 export type HouseAiMarkRegister = "fill" | "stroke";
