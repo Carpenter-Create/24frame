@@ -315,7 +315,7 @@ function AccountMenuItems({
         if (item.kind === "appearance") {
           return <AccountAppearanceRow key={item.kind} onClick={() => onAppearance?.()} />;
         }
-        const href = item.kind === "settings" ? settingsLandHref(pathname) : item.href;
+        const href = settingsLandHref(pathname);
         return (
           <SheetGroupItem
             key={item.kind}
