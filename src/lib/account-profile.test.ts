@@ -160,12 +160,19 @@ describe("account field 16px lock", () => {
     expect(companyFormSrc).toContain("<Input");
     expect(companyFormSrc).not.toContain("ACCOUNT_FIELD_CLASS");
     expect(companyFormSrc).toContain('#company-name")?.blur()');
+    expect(companyFormSrc).toContain("<Dialog");
+    expect(companyFormSrc).toContain("DialogFooter");
+    expect(companyFormSrc).toContain("data-company-edit");
+    expect(companyFormSrc).toContain("COMPANY_PROFILE_VIEW_CLASS");
+    expect(companyFormSrc).not.toContain("flex flex-col gap-[var(--space-4)]");
   });
 });
 
 describe("company Saved notice", () => {
   it("auto-clears after a short delay and on a new edit", () => {
     expect(COMPANY_PROFILE.saved).toBe("Saved.");
+    expect(COMPANY_PROFILE.edit).toBe("Edit");
+    expect(COMPANY_PROFILE.cancel).toBe("Cancel");
     expect(COMPANY_PROFILE_SAVED_MS).toBe(2800);
     expect(companyFormSrc).toContain("COMPANY_PROFILE_SAVED_MS");
     expect(companyFormSrc).toContain("setTimeout");

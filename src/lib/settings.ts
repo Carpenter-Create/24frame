@@ -144,6 +144,12 @@ export const SETTINGS_SECTION_CLASS = "flex flex-col gap-[var(--space-6)]";
 export const SETTINGS_QUIET_ROW_CLASS =
   "flex items-center justify-between t-body leading-5 text-ink";
 
+// Compact Dialog form density — labeled fields + DialogFooter.
+// Mutate surfaces on Settings use this, not a stacked page form.
+export const SETTINGS_DIALOG_FORM_CLASS = "flex flex-col gap-[var(--space-3)]";
+export const SETTINGS_DIALOG_FIELD_CLASS = "flex flex-col gap-[var(--space-2)]";
+export const SETTINGS_DIALOG_HELP_CLASS = "t-body-sm text-ink-3";
+
 // Preferences Appearance — house muted module + pad 16. Same surface
 // as dashboard / directory modules. Not card-surface (Profile /
 // Organization form frame). Notification groups are not this card.

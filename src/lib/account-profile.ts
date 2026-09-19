@@ -49,6 +49,8 @@ export const COMPANY_PROFILE = {
   subtitle: `Name of the ${COMPANY_AGGREGATION_WORKSPACE} on this account.`,
   nameLabel: "Company name",
   nameRequired: "Company name is required.",
+  edit: "Edit",
+  cancel: "Cancel",
   save: "Save",
   saving: "Saving…",
   saved: "Saved.",
@@ -60,6 +62,14 @@ export const COMPANY_PROFILE = {
 
 /** Saved. notice auto-clears. Typing already clears immediately. */
 export const COMPANY_PROFILE_SAVED_MS = 2800;
+
+// Rights Holder company name — read-only row in the house Card.
+// Edit opens the house Dialog. Not an in-page form.
+export const COMPANY_PROFILE_VIEW_CLASS =
+  "flex items-start justify-between gap-[var(--space-4)]";
+export const COMPANY_PROFILE_COPY_CLASS =
+  "flex min-w-0 flex-col gap-[var(--space-1)]";
+export const COMPANY_PROFILE_CARD_BODY_CLASS = "py-[var(--space-3)]";
 
 export const accountNameSchema = z
   .string()

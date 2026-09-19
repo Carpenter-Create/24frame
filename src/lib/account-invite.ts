@@ -87,6 +87,7 @@ export const ACCOUNT_INVITE = {
   invite: "Invite",
   inviting: "Sending…",
   sent: "Invite sent.",
+  cancel: "Cancel",
   emailLabel: "Email",
   nameColumn: "Name",
   roleLabel: "Role",

@@ -69,8 +69,11 @@ describe("SettingsOrganizationPage", () => {
     expect(paneSrc).toContain("settingsPaneTitle");
     expect(paneSrc).not.toContain("SETTINGS.title");
     expect(paneSrc).not.toContain("SETTINGS.company");
+    expect(html).toContain("data-company-profile");
     expect(html).toContain("data-company-profile-form");
+    expect(html).toContain("data-company-edit");
     expect(html).toContain("Acme");
+    expect(html).toContain(COMPANY_PROFILE.edit);
     expect(html).toContain(COMPANY_PROFILE.save);
     expect(html).not.toContain(SETTINGS.manageCourses);
     expect(html).not.toContain("Add user");
@@ -178,8 +181,9 @@ describe("SettingsOrganizationPage", () => {
       p_capability: "manage_settings",
     });
     expect(html).toContain(COMPANY_PROFILE.forbidden);
-    const companyHtml = html.slice(html.indexOf("data-company-profile-form"));
-    expect(companyHtml).not.toContain(`>${COMPANY_PROFILE.save}<`);
+    expect(html).not.toContain("data-company-edit");
+    expect(html).not.toContain("data-company-profile-form");
+    expect(html).not.toContain(`>${COMPANY_PROFILE.save}<`);
   });
 
   it("wraps Rights Holder modules in the same Card and shows Legal Entities as a table", async () => {
@@ -214,6 +218,7 @@ describe("SettingsOrganizationPage", () => {
     expect(html).toContain(LEGAL_ENTITIES.nameColumn);
     expect(html).toContain(LEGAL_ENTITIES.typeColumn);
     expect(html).toContain(LEGAL_ENTITIES.jurisdictionColumn);
+    expect(html).toContain(LEGAL_ENTITIES.actionsColumn);
     expect(html).toContain(LEGAL_ENTITIES.edit);
     expect(html).toContain("data-entity-edit");
     expect(html).toContain("Acme LLC");
@@ -222,5 +227,23 @@ describe("SettingsOrganizationPage", () => {
     expect(html).toMatch(/<h2[^>]*>Legal Entities<\/h2>/);
     expect(html).toMatch(/<h2[^>]*>Team<\/h2>/);
     expect(html).not.toMatch(/<h2[^>]*>Rights Holder<\/h2>/);
+  });
+
+  it("mutates Company, Legal Entities, and Team through house Dialog — not in-page forms", () => {
+    const companyForm = readFileSync("src/app/(app)/account/company-profile-form.tsx", "utf8");
+    const entities = readFileSync("src/components/settings/legal-entities-section.tsx", "utf8");
+    const team = readFileSync("src/components/settings/team-invite-form.tsx", "utf8");
+    for (const src of [companyForm, entities, team]) {
+      expect(src).toContain("<Dialog");
+      expect(src).toContain("DialogFooter");
+      expect(src).toContain("SETTINGS_DIALOG_FORM_CLASS");
+      expect(src).not.toContain("flex flex-col gap-[var(--space-4)]");
+    }
+    expect(companyForm).toContain("data-company-edit");
+    expect(entities).toContain("data-entity-add-cta");
+    expect(entities).toContain("data-entity-edit");
+    expect(team).toContain("data-team-invite-cta");
+    expect(paneSrc).toContain("<Card>");
+    expect(paneSrc).toContain("COMPANY_PROFILE_CARD_BODY_CLASS");
   });
 });

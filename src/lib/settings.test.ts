@@ -18,6 +18,9 @@ import {
   SETTINGS_HUB_ORDER,
   SETTINGS_HEADER_BACK_CLASS,
   SETTINGS_HEADER_PAD_CLASS,
+  SETTINGS_DIALOG_FIELD_CLASS,
+  SETTINGS_DIALOG_FORM_CLASS,
+  SETTINGS_DIALOG_HELP_CLASS,
   SETTINGS_PANE_TITLE_CLASS,
   SETTINGS_PREF_BLOCK_CLASS,
   SETTINGS_PREF_TITLE_CLASS,
@@ -231,6 +234,14 @@ describe("settings hub lock", () => {
     expect(settingsPaneTitle("preferences")).toBe("Preferences");
     expect(settingsPaneTitle("profile")).not.toBe(SETTINGS.title);
     expect(SETTINGS_PANE_TITLE_CLASS).toBe("t-section text-ink");
+  });
+
+  it("keeps Settings Dialog forms compact — not a stacked page form", () => {
+    expect(SETTINGS_DIALOG_FORM_CLASS).toBe("flex flex-col gap-[var(--space-3)]");
+    expect(SETTINGS_DIALOG_FIELD_CLASS).toBe("flex flex-col gap-[var(--space-2)]");
+    expect(SETTINGS_DIALOG_HELP_CLASS).toBe("t-body-sm text-ink-3");
+    expect(SETTINGS_DIALOG_FORM_CLASS).not.toContain("space-4");
+    expect(SETTINGS_DIALOG_FORM_CLASS).not.toContain("space-6");
   });
 
   it("keeps Appearance on the house muted module — not a new surface", () => {

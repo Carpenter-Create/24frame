@@ -62,6 +62,7 @@ export const LEGAL_ENTITIES = {
   nameColumn: "Name",
   typeColumn: "Type",
   jurisdictionColumn: "Jurisdiction",
+  actionsColumn: "Actions",
   emptyJurisdiction: "\u2014",
   nameRequired: "Entity name is required.",
   default: "Default",
@@ -71,13 +72,22 @@ export const LEGAL_ENTITIES = {
   forbidden: "Only the account owner can manage legal entities.",
 } as const;
 
-// Team list density — header row + divided rows. Four columns:
-// Name · Type · Jurisdiction · Actions. Not a data-grid library.
+// Team list density — one shared grid for header + rows. Four columns:
+// Name · Type · Jurisdiction · Actions. Content-sized tracks so Type /
+// Jurisdiction / Actions do not stretch across the card (the #502
+// cavern). Values share primary ink. Empty jurisdiction is a muted
+// em dash. Not a data-grid library.
+export const ENTITY_LIST_GRID_CLASS =
+  "w-max max-w-full grid grid-cols-[minmax(10rem,max-content)_minmax(5.5rem,max-content)_minmax(7rem,max-content)_max-content] items-center gap-x-[var(--space-6)] px-0";
+
 export const ENTITY_LIST_HEADER_CLASS =
-  "min-w-[36rem] grid grid-cols-[minmax(12rem,2fr)_minmax(8rem,1fr)_minmax(8rem,1fr)_auto] items-center gap-x-[var(--space-4)] px-0 py-[var(--space-3)] t-label text-ink-3";
+  `${ENTITY_LIST_GRID_CLASS} py-[var(--space-3)] t-label text-ink-3`;
 
 export const ENTITY_LIST_ROW_CLASS =
-  "min-w-[36rem] grid grid-cols-[minmax(12rem,2fr)_minmax(8rem,1fr)_minmax(8rem,1fr)_auto] items-center gap-x-[var(--space-4)] px-0 py-[var(--space-4)]";
+  `${ENTITY_LIST_GRID_CLASS} py-[var(--space-4)]`;
+
+export const ENTITY_LIST_VALUE_CLASS = "t-body text-ink";
+export const ENTITY_LIST_EMPTY_CLASS = "t-body text-ink-3";
 
 export const ENTITY_SCOPE = {
   all: "All entities",
@@ -94,6 +104,10 @@ export function entityTypeLabel(type: EntityType): string {
 export function entityJurisdictionLabel(value: string | null | undefined): string {
   const trimmed = value?.trim();
   return trimmed ? trimmed : LEGAL_ENTITIES.emptyJurisdiction;
+}
+
+export function entityJurisdictionClass(value: string | null | undefined): string {
+  return value?.trim() ? ENTITY_LIST_VALUE_CLASS : ENTITY_LIST_EMPTY_CLASS;
 }
 
 export function entityScopeLabel(scope: EntityScope): string {
