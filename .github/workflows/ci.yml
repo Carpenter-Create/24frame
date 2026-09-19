@@ -148,6 +148,12 @@ jobs:
       - name: Cross-org isolation (B3)
         run: node scripts/security/run-local-harness.mjs b3
 
+      # Auth-failure cases against the same local stack (C2/C4/C8…).
+      # DB + Auth only — no Next process. portal + client-assets stay off
+      # this job: they need APP_URL and a running app (P3 isolation note).
+      - name: Auth failure cases (C group 1)
+        run: node scripts/security/run-local-harness.mjs c-group-1
+
       # Exits non-zero if any path can deliver a title that never passed chain-of-title
       # review.
       #
