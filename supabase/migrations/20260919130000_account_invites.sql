@@ -1,5 +1,5 @@
 -- ============================================================================
--- 20260919120000_account_invites.sql
+-- 20260919130000_account_invites.sql
 --
 -- INTENT: one SoT for pending account invites — team seats and house
 -- grant/comp. Does not fork memberships, org_role, gc_staff, or

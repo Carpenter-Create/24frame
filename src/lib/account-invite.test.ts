@@ -70,7 +70,7 @@ describe("account invite SoT", () => {
     for (const absent of ACCOUNT_INVITE_ABSENT) {
       expect(blob.toLowerCase()).not.toContain(absent.toLowerCase());
     }
-    const migration = readFileSync("supabase/migrations/20260919120000_account_invites.sql", "utf8");
+    const migration = readFileSync("supabase/migrations/20260919130000_account_invites.sql", "utf8");
     expect(migration).toContain("invite_org_member");
     expect(migration).toContain("grant_house_account");
     expect(migration).toContain("accept_account_invite");
