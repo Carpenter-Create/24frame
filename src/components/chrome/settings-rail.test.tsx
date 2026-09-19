@@ -32,6 +32,7 @@ describe("SettingsRail", () => {
     expect(html).toContain(SETTINGS.title);
     expect(html).toContain(SETTINGS_RAIL_NAV_CLASS);
     expect(html).toContain(SETTINGS_RAIL_TITLE_CLASS);
+    expect(SETTINGS_RAIL_TITLE_CLASS).toBe("t-section text-ink");
     for (const item of SETTINGS_HUB_NAV) {
       expect(html).toContain(`data-settings-rail-item="${item.kind}"`);
       expect(html).toContain(`href="${item.href}"`);

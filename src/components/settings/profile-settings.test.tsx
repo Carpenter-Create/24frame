@@ -49,8 +49,12 @@ describe("ProfileSettings", () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx(null) as never);
     const html = renderToStaticMarkup(await ProfileSettings());
     expect(html).toContain('data-settings-hub="profile"');
-    expect(html).toContain(SETTINGS.title);
+    expect(html).toMatch(/<h1[^>]*>Profile<\/h1>/);
+    expect(html).not.toMatch(/<h1[^>]*>Settings<\/h1>/);
+    expect(html).not.toMatch(/<h2[^>]*>Profile<\/h2>/);
     expect(html).toContain(SETTINGS.profile);
+    expect(src).toContain("settingsPaneTitle");
+    expect(src).not.toContain("SETTINGS.title");
     expect(html).toContain(ACCOUNT_PROFILE.emailHint);
     expect(html).toContain("ada@example.com");
     expect(html).toContain(SETTINGS.editPublicProfile);

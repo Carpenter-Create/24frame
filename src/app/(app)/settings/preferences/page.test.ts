@@ -54,8 +54,12 @@ describe("SettingsPreferencesPage", () => {
   it("shows Appearance and the notification matrix — not an empty pane", async () => {
     const html = renderToStaticMarkup(await SettingsPreferencesPage());
     expect(html).toContain('data-settings-hub="preferences"');
-    expect(html).toContain(SETTINGS.title);
+    expect(html).toMatch(/<h1[^>]*>Preferences<\/h1>/);
+    expect(html).not.toMatch(/<h1[^>]*>Settings<\/h1>/);
+    expect(html).not.toMatch(/<h2[^>]*>Preferences<\/h2>/);
     expect(html).toContain(SETTINGS.preferences);
+    expect(paneSrc).toContain("settingsPaneTitle");
+    expect(paneSrc).not.toContain("SETTINGS.title");
     expect(html).toContain('data-settings-section="appearance"');
     expect(html).toContain('data-settings-appearance=""');
     expect(html).toContain(APPEARANCE.title);

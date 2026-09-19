@@ -39,6 +39,8 @@
 //
 // 600:881 shell — one 220 rail occupies the Access slot on every
 // /settings path. Pad 16. Active wash follows the hub section.
+// Rail keeps house Settings title + Profile · Organization · Preferences.
+// Body H1 is the hub section only — never repeat Settings in the pane.
 // House muted wash. Sporty Blue only (no new brand colors).
 // Desktop: section rail + pane. Mobile: list → push.
 // Spacing 8 / 16 / 24 / 48 (Mercury density). Design polish may follow.
@@ -136,7 +138,10 @@ export const SETTINGS_RAIL_ACTIVE_CLASS = "bg-surface-muted text-ink";
 export const SETTINGS_RAIL_IDLE_CLASS =
   "text-ink-2 hover:bg-surface-muted hover:text-ink";
 export const SETTINGS_RAIL_CHEVRON_CLASS = "size-4 shrink-0";
+/** House Settings rail title — keep existing t-section treatment. */
 export const SETTINGS_RAIL_TITLE_CLASS = "t-section text-ink";
+/** Body page title. Hub section only. */
+export const SETTINGS_PANE_TITLE_CLASS = "t-section text-ink";
 
 export const SETTINGS_PANE_CLASS = "flex flex-col gap-[var(--space-12)]";
 export const SETTINGS_SECTION_CLASS = "flex flex-col gap-[var(--space-6)]";
@@ -219,6 +224,11 @@ function pathSection(pathname: string): SettingsHubSection {
 export function settingsHubSection(pathname: string | null | undefined): SettingsHubSection {
   if (!pathname) return "profile";
   return pathSection(pathname);
+}
+
+/** Body page title — hub section only. Never SETTINGS.title. */
+export function settingsPaneTitle(section: SettingsHubSection): string {
+  return SETTINGS_HUB_LABELS[section];
 }
 
 /** Active follows the hub section. */

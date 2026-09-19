@@ -2,7 +2,13 @@ import { redirect } from "next/navigation";
 
 import { HouseEmpty } from "@/components/chrome/house";
 import { Card, CardBody } from "@/components/ui/card";
-import { SETTINGS, SETTINGS_PANE_CLASS, SETTINGS_SECTION_CLASS } from "@/lib/settings";
+import {
+  SETTINGS,
+  SETTINGS_PANE_CLASS,
+  SETTINGS_PANE_TITLE_CLASS,
+  SETTINGS_SECTION_CLASS,
+  settingsPaneTitle,
+} from "@/lib/settings";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 import { CompanyProfileForm } from "@/app/(app)/account/company-profile-form";
@@ -28,14 +34,12 @@ export async function OrganizationSettings() {
   return (
     <div data-settings-page="" data-settings-hub="organization" className={SETTINGS_PANE_CLASS}>
       <section data-settings-section="organization" className={SETTINGS_SECTION_CLASS}>
-        <h1 className="t-section text-ink">{SETTINGS.title}</h1>
-        <h2 className="t-section text-ink">{SETTINGS.organization}</h2>
+        <h1 className={SETTINGS_PANE_TITLE_CLASS}>{settingsPaneTitle("organization")}</h1>
         {ctx.activeOrg ? (
           <section
             data-settings-section="company"
             className={SETTINGS_SECTION_CLASS}
           >
-            <h3 className="t-section text-ink">{SETTINGS.company}</h3>
             <Card>
               <CardBody>
                 <CompanyProfileForm
