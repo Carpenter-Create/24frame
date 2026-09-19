@@ -234,7 +234,7 @@ export async function completeAskGlobeeTurn(
   });
   if (globeeError) return { error: globeeError.message };
 
-  revalidatePath("/messages");
+  revalidatePath("/", "layout");
   return {};
 }
 
@@ -291,7 +291,7 @@ export async function appendAskGlobeeTurn(
   });
   if (globeeError) return { error: globeeError.message };
 
-  revalidatePath("/messages");
+  revalidatePath("/", "layout");
   return {};
 }
 
@@ -319,7 +319,7 @@ export async function setAskGlobeeThumb(
     .eq("id", messageId)
     .eq("org_id", gate.ctx.activeOrg.id);
   if (error) return { error: error.message };
-  revalidatePath("/messages");
+  revalidatePath("/", "layout");
   return { thumbs };
 }
 
@@ -343,7 +343,7 @@ export async function renameAskGlobeeConversation(
     .maybeSingle();
   if (error) return { error: error.message };
   if (!data) return { error: "Conversation not found." };
-  revalidatePath("/messages");
+  revalidatePath("/", "layout");
   return { title: next };
 }
 
@@ -366,7 +366,7 @@ export async function pinAskGlobeeConversation(
     .maybeSingle();
   if (error) return { error: error.message };
   if (!data) return { error: "Conversation not found." };
-  revalidatePath("/messages");
+  revalidatePath("/", "layout");
   return { pinnedAt };
 }
 
@@ -387,6 +387,6 @@ export async function deleteAskGlobeeConversation(
     .maybeSingle();
   if (error) return { error: error.message };
   if (!data) return { error: "Conversation not found." };
-  revalidatePath("/messages");
+  revalidatePath("/", "layout");
   return {};
 }

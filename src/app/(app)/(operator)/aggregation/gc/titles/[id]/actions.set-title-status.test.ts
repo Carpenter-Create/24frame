@@ -12,7 +12,10 @@ import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { revalidatePath } from "next/cache";
 import { sendOrgNotificationEmail } from "@/lib/email";
+import { AVAILS_HREF } from "@/lib/avails";
+import { QUEUE_HREF } from "@/lib/queue";
 import { TITLE_STATUS_OVERRIDE } from "@/lib/title-status-override";
+import { titleOpsPath } from "@/lib/title-public-id";
 import { setGcTitleStatus } from "./actions";
 
 const TITLE_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
@@ -122,9 +125,9 @@ describe("setGcTitleStatus", () => {
         body: '"Harbor Cut" was returned for amendment: needs stills',
       }),
     );
-    expect(revalidatePath).toHaveBeenCalledWith(`/gc/titles/${TITLE_ID}`);
-    expect(revalidatePath).toHaveBeenCalledWith("/queue");
-    expect(revalidatePath).toHaveBeenCalledWith("/avails");
+    expect(revalidatePath).toHaveBeenCalledWith(titleOpsPath(TITLE_ID));
+    expect(revalidatePath).toHaveBeenCalledWith(QUEUE_HREF);
+    expect(revalidatePath).toHaveBeenCalledWith(AVAILS_HREF);
   });
 
   it("notifies on in_review landing and not on in_delivery", async () => {
@@ -179,7 +182,7 @@ describe("setGcTitleStatus", () => {
       reason: "needs stills",
     });
     expect(ok).toEqual({});
-    expect(revalidatePath).toHaveBeenCalledWith(`/gc/titles/${TITLE_ID}`);
+    expect(revalidatePath).toHaveBeenCalledWith(titleOpsPath(TITLE_ID));
   });
 
   it("keeps review_title as the review writer — this action is the one RPC path", () => {
