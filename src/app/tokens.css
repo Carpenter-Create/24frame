@@ -71,8 +71,9 @@
   --text-hero: 3rem;       /* 48 — .t-display / hero-value */
   --tracking-tight: -0.02em;
   /* Role weights bind in globals .t-* (house-wide). Title 600 · body 500.
-     Adam 2026-09-19 type pass A. Do not override with font-normal
-     (400-as-body) or restore 480-as-title. No Dashboard-only token CSS. */
+     Display 600 · heading/subhead 500 (Coinbase-pop A2). Adam 2026-09-19.
+     Do not override with font-normal (400-as-body) or restore 480-as-title.
+     No Dashboard-only token CSS. */
   --type-title-weight: 600;
   --type-body-weight: 500;
 

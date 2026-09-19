@@ -63,11 +63,13 @@ export const HOUSE_HEADER_SEARCH_GAP_CLASS = "gap-[var(--space-4)]";
 export const HOUSE_RAIL_TITLE_CLASS = "px-2 pb-1 t-label text-ink-3";
 
 export const HOUSE_RAIL_ITEM_CLASS =
-  "relative flex items-center rounded-full t-body-sm leading-4 transition-colors";
+  "relative flex items-center rounded-full t-body leading-4 transition-colors";
 
-export const HOUSE_RAIL_ACTIVE_CLASS = "bg-accent-wash font-medium text-accent";
+// Active = wash + accent. Idle inherits body 500 — no font-normal (400).
+// Differentiate by color only; do not bold the rail (Coinbase-pop A2).
+export const HOUSE_RAIL_ACTIVE_CLASS = "bg-accent-wash text-accent";
 
-export const HOUSE_RAIL_IDLE_CLASS = "font-normal text-ink hover:bg-surface-muted";
+export const HOUSE_RAIL_IDLE_CLASS = "text-ink hover:bg-surface-muted";
 
 export const HOUSE_SEARCH_PILL_CLASS = "rounded-full border-0 bg-surface-muted";
 

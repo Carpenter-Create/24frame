@@ -218,7 +218,7 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(lead).toContain("APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS");
     expect(nav).toContain('if (workspace === "social") return { items: SOCIAL_DESKTOP_NAV, staffItems: [] }');
     expect(sideNav).toContain("staffItems");
-    expect(HOUSE_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash font-medium text-accent");
+    expect(HOUSE_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash text-accent");
     expect(HOUSE_FILTER_ON_CLASS).toBe("bg-ink text-surface");
     expect(switcher).toContain("HOUSE_CONTROL_PILL_CLASS");
     expect(switcher).not.toContain("rounded-[var(--radius-sm)]");
@@ -253,7 +253,8 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(shell).toContain("data-social-workspace");
     expect(lead).toContain("data-house-full-width-top");
     expect(HOUSE_RAIL_ITEM_CLASS).toContain("rounded-full");
-    expect(HOUSE_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash font-medium text-accent");
+    expect(HOUSE_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash text-accent");
+    expect(HOUSE_RAIL_ACTIVE_CLASS).not.toMatch(/font-(?:normal|medium|semibold|bold)/);
     expect(HOUSE_RAIL_ACTIVE_CLASS).not.toContain("bg-ink");
     expect(HOUSE_RAIL_ACTIVE_CLASS).not.toMatch(/(?:^|[\s"])bg-accent(?:[\s"]|$)/);
     expect(HOUSE_SEARCH_PILL_CLASS).toContain("rounded-full");

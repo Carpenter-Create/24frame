@@ -164,8 +164,12 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(HOUSE_RAIL_FLOAT_CLASS).toContain("left-[var(--chrome-gutter)]");
     expect(HOUSE_SEARCH_PILL_CLASS).toBe("rounded-full border-0 bg-surface-muted");
     expect(HOUSE_RAIL_ITEM_CLASS).toContain("rounded-full");
-    expect(HOUSE_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash font-medium text-accent");
-    expect(HOUSE_RAIL_IDLE_CLASS).toBe("font-normal text-ink hover:bg-surface-muted");
+    expect(HOUSE_RAIL_ITEM_CLASS).toContain("t-body leading-4");
+    expect(HOUSE_RAIL_ITEM_CLASS).not.toContain("t-body-sm");
+    expect(HOUSE_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash text-accent");
+    expect(HOUSE_RAIL_ACTIVE_CLASS).not.toMatch(/font-(?:normal|medium|semibold|bold)/);
+    expect(HOUSE_RAIL_IDLE_CLASS).toBe("text-ink hover:bg-surface-muted");
+    expect(HOUSE_RAIL_IDLE_CLASS).not.toContain("font-normal");
     expect(HOUSE_FILTER_ON_CLASS).toBe("bg-ink text-surface");
     expect(HOUSE_FILTER_OFF_CLASS).toBe("bg-surface-muted text-ink");
     expect(HOUSE_PILL_SELECTED_CLASS).toBe("bg-accent text-white");
@@ -337,9 +341,13 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(sideNav).toContain("BrandLogo");
     for (const path of HOUSE_SHELL_COMMENT_PATHS) {
       const src = readFileSync(path, "utf8");
-      // Lock citation "Coinbase-pop A" (Adam 2026-09-19) may appear in
-      // globals.css; the product/shell still must not name the reference brand.
-      expect(src.replaceAll("Coinbase-pop A", ""), path).not.toMatch(/Coinbase/i);
+      // Lock citation "Coinbase-pop A" / "Coinbase-pop A2" (Adam 2026-09-19)
+      // may appear in tokens/globals; the product/shell still must not name
+      // the reference brand.
+      expect(
+        src.replaceAll("Coinbase-pop A2", "").replaceAll("Coinbase-pop A", ""),
+        path,
+      ).not.toMatch(/Coinbase/i);
     }
   });
 
@@ -362,10 +370,13 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(settingsLib).not.toContain("SETTINGS_RAIL_IDLE_CLASS");
     expect(settingsLib).not.toContain("SETTINGS_RAIL_TITLE_CLASS");
 
-    expect(HOUSE_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash font-medium text-accent");
-    expect(HOUSE_RAIL_IDLE_CLASS).toBe("font-normal text-ink hover:bg-surface-muted");
+    expect(HOUSE_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash text-accent");
+    expect(HOUSE_RAIL_ACTIVE_CLASS).not.toMatch(/font-(?:normal|medium|semibold|bold)/);
+    expect(HOUSE_RAIL_IDLE_CLASS).toBe("text-ink hover:bg-surface-muted");
+    expect(HOUSE_RAIL_IDLE_CLASS).not.toContain("font-normal");
     expect(HOUSE_RAIL_TITLE_CLASS).toBe("px-2 pb-1 t-label text-ink-3");
-    expect(HOUSE_RAIL_ITEM_CLASS).toContain("t-body-sm");
+    expect(HOUSE_RAIL_ITEM_CLASS).toContain("t-body leading-4");
+    expect(HOUSE_RAIL_ITEM_CLASS).not.toContain("t-body-sm");
     expect(HOUSE_RAIL_ITEM_CLASS).toContain("rounded-full");
 
     expect(sideNav).toContain("HOUSE_RAIL_TITLE_CLASS");

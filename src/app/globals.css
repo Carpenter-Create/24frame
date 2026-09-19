@@ -91,7 +91,7 @@ body {
   .t-display {
     font-family: var(--font-sans);
     font-size: var(--text-hero);
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.04;
     letter-spacing: -0.035em;
     font-variant-numeric: tabular-nums;
@@ -127,14 +127,14 @@ body {
   .t-heading {
     font-family: var(--font-sans);
     font-size: var(--text-lg);
-    font-weight: 600;
+    font-weight: 500;
     line-height: 1.2;
     letter-spacing: -0.015em;
   }
   .t-subhead {
     font-family: var(--font-sans);
     font-size: var(--text-lg);
-    font-weight: 600;
+    font-weight: 500;
     line-height: 1.25;
     letter-spacing: -0.015em;
   }
