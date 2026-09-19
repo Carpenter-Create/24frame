@@ -10,7 +10,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { StatusChip } from "@/components/layout/status-chip";
 import { cn } from "@/lib/cn";
-import { SETTINGS_DRILL_LIST_CLASS, SETTINGS_PANE_TITLE_CLASS } from "@/lib/settings";
+import { SETTINGS_DRILL_LIST_CLASS, SETTINGS_SECTION_LABEL_CLASS } from "@/lib/settings";
 import {
   LEGAL_ENTITIES,
   ENTITY_LIST_ACTIONS_CLASS,
@@ -60,7 +60,7 @@ export function LegalEntitiesSection({
   return (
     <div data-settings-entities="" className="flex flex-col gap-[var(--space-6)]">
       <div className="flex items-center justify-between gap-[var(--space-4)]">
-        <h2 className={SETTINGS_PANE_TITLE_CLASS}>{LEGAL_ENTITIES.title}</h2>
+        <h2 className={SETTINGS_SECTION_LABEL_CLASS}>{LEGAL_ENTITIES.title}</h2>
         {canManage ? (
           <>
             <Button

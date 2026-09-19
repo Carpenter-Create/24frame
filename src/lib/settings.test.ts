@@ -24,7 +24,11 @@ import {
   SETTINGS_DRILL_ROW_CLASS,
   SETTINGS_DRILL_VALUE_CLASS,
   SETTINGS_EDIT_HELPER_CLASS,
+  SETTINGS_INDEX_CARD_BODY_CLASS,
+  SETTINGS_INDEX_CARD_CLASS,
+  SETTINGS_PANE_CLASS,
   SETTINGS_PANE_TITLE_CLASS,
+  SETTINGS_SECTION_LABEL_CLASS,
   SETTINGS_PREF_BLOCK_CLASS,
   SETTINGS_PREF_TITLE_CLASS,
   SETTINGS_RAIL_ABSENT,
@@ -345,7 +349,13 @@ describe("settings hub lock", () => {
     const settingsSrc = readFileSync("src/lib/settings.ts", "utf8");
     expect(settingsSrc).toContain("Shared SoT for");
     expect(settingsSrc).toContain("Rights Holder / Legal Entities");
+    expect(settingsSrc).toContain("Get Help");
     expect(settingsSrc).not.toContain("companyHref");
+    expect(SETTINGS_PANE_CLASS).toBe("flex flex-col gap-[var(--space-6)]");
+    expect(SETTINGS_PANE_CLASS).not.toContain("space-12");
+    expect(SETTINGS_SECTION_LABEL_CLASS).toBe("t-label text-ink-3");
+    expect(SETTINGS_INDEX_CARD_CLASS).toContain("max-md:!border-0");
+    expect(SETTINGS_INDEX_CARD_BODY_CLASS).toBe("max-md:!p-0");
   });
 
   it("keeps Settings Dialog forms compact — not a stacked page form", () => {

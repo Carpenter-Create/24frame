@@ -19,10 +19,10 @@ import { SETTINGS, SETTINGS_SECTION_CLASS } from "@/lib/settings";
 import { applyDocumentThemePreference, type ThemePreference } from "@/lib/theme";
 import { cn } from "@/lib/cn";
 
-// Settings Appearance — same gc-theme SoT as the header sun/moon
-// and the phone sheet drill-in. Writes go through theme.ts only.
-// Mobile Preferences shows a Theme row; the picker lives on the
-// Theme edit pane. Desktop keeps this card on Preferences.
+// Settings Appearance — same gc-theme SoT as the header sun/moon.
+// Writes go through theme.ts only. Mobile Preferences shows a
+// Theme row; the picker lives on the Theme edit pane. Desktop
+// keeps this card on Preferences. Theme is not an avatar-menu row.
 
 export function AppearanceThemePicker() {
   const preference = useThemePreference();

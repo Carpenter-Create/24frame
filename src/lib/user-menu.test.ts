@@ -13,7 +13,7 @@ import {
 import { ASSISTANT_NAME } from "./product";
 
 describe("user menu lock", () => {
-  it("keeps desktop Mercury order: Settings — Get Help; phone adds Appearance", () => {
+  it("keeps one Apple stack on phone and desktop: Settings — Get Help", () => {
     expect(USER_MENU_ACTIONS.map((item) => item.kind)).toEqual(["settings", "help"]);
     expect(USER_MENU_ACTIONS.map((item) => item.label)).toEqual(["Settings", "Get Help"]);
     expect(USER_MENU.settings).toBe("Settings");
@@ -27,11 +27,10 @@ describe("user menu lock", () => {
     expect(USER_MENU_ACTIONS.map((item) => item.label)).not.toContain("Profile");
     expect(USER_MENU_ACTIONS.map((item) => item.label)).not.toContain("Workspace");
     expect(USER_MENU_ACTIONS.map((item) => item.label)).not.toContain("Appearance");
-    expect(USER_MENU_PHONE_ACTIONS.map((item) => item.kind)).toEqual([
-      "settings",
-      "appearance",
-      "help",
-    ]);
+    expect(USER_MENU_PHONE_ACTIONS).toBe(USER_MENU_ACTIONS);
+    expect(USER_MENU_PHONE_ACTIONS.map((item) => item.kind)).toEqual(["settings", "help"]);
+    expect(USER_MENU_PHONE_ACTIONS.map((item) => item.kind)).not.toContain("appearance");
+    expect(USER_MENU_PHONE_ACTIONS.map((item) => item.label)).not.toContain("Appearance");
     expect(USER_MENU_PHONE_ACTIONS.map((item) => item.kind)).not.toContain("askAssistant");
     expect(USER_MENU_PHONE_ACTIONS.map((item) => item.label)).not.toContain(ASSISTANT_NAME);
     expect(USER_MENU).not.toHaveProperty("askAssistant");

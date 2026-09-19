@@ -11,12 +11,10 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
-import { CaretLeft, CaretRight, SignOut } from "@phosphor-icons/react";
+import { CaretRight, SignOut } from "@phosphor-icons/react";
 
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
-import { AppearanceCheck } from "./appearance-check";
-import { useThemePreference } from "@/components/theme-toggle";
 import { signOut } from "@/app/actions";
 import { accountPhotoSrc } from "@/lib/account-avatar";
 import {
@@ -28,11 +26,6 @@ import {
   SheetGroupItem,
 } from "./house";
 import {
-  ACCOUNT_MENU_APPEARANCE_CHEVRON_CLASS,
-  ACCOUNT_MENU_APPEARANCE_COPY_CLASS,
-  ACCOUNT_MENU_APPEARANCE_FLYOUT_HELPER_CLASS,
-  ACCOUNT_MENU_APPEARANCE_MODE_CLASS,
-  ACCOUNT_MENU_APPEARANCE_ROW_CLASS,
   ACCOUNT_MENU_DROPDOWN_ALIGN,
   ACCOUNT_MENU_DROPDOWN_DISMISS_CLASS,
   ACCOUNT_MENU_DROPDOWN_GROUP_CLASS,
@@ -47,8 +40,8 @@ import {
   accountMenuDropdownAlignEnd,
   type AccountMenuDropdownAlign,
   ACCOUNT_SHEET,
-  ACCOUNT_SHEET_APPEARANCE_COPY_CLASS,
   ACCOUNT_SHEET_FOOTER_CLASS,
+  ACCOUNT_SHEET_GROUP_CLASS,
   ACCOUNT_SHEET_HEAD_CLASS,
   ACCOUNT_SHEET_HOST_CLASS,
   ACCOUNT_SHEET_ITEMS,
@@ -64,15 +57,8 @@ import {
   accountSheetIdentity,
   destinationClickClosesSheet,
 } from "@/lib/account-sheet";
-import {
-  APPEARANCE,
-  APPEARANCE_FLYOUT_OPTIONS,
-  appearancePreferenceLabel,
-  type AccountMenuFace,
-} from "@/lib/appearance";
 import { HOUSE_HEADER_TRAILING_AVATAR_CLASS } from "@/lib/house-lead-chrome";
 import { APP_SHEET_SCRIM_CLASS, SHEET_GROUP_CHEVRON_CLASS } from "@/lib/house-sheet";
-import { applyDocumentThemePreference } from "@/lib/theme";
 import { settingsLandHref } from "@/lib/settings";
 import {
   USER_MENU,
@@ -86,79 +72,6 @@ import { MenuSurfaceAccent } from "./menu-surface";
 // 84:46 is icon SSOT — not a restyle, not a Mercury escalation.
 function AccountRowChevron() {
   return <CaretRight className={SHEET_GROUP_CHEVRON_CLASS} weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />;
-}
-
-function AccountAppearanceChevron() {
-  return (
-    <span
-      data-account-menu-appearance-chevron=""
-      className={ACCOUNT_MENU_APPEARANCE_CHEVRON_CLASS}
-    >
-      <AccountRowChevron />
-    </span>
-  );
-}
-
-function AccountBackChevron() {
-  return <CaretLeft className={SHEET_GROUP_CHEVRON_CLASS} weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />;
-}
-
-function AccountAppearanceRow({ onClick }: { onClick: () => void }) {
-  const preference = useThemePreference();
-
-  return (
-    <button
-      type="button"
-      data-sheet-group-item="appearance"
-      data-user-menu-item="appearance"
-      aria-expanded={false}
-      onClick={onClick}
-      className={ACCOUNT_MENU_APPEARANCE_ROW_CLASS}
-    >
-      <span className={ACCOUNT_MENU_APPEARANCE_COPY_CLASS}>
-        <span>{USER_MENU.appearance}</span>
-        <span data-account-menu-appearance-mode="" className={ACCOUNT_MENU_APPEARANCE_MODE_CLASS}>
-          {appearancePreferenceLabel(preference)}
-        </span>
-      </span>
-      <AccountAppearanceChevron />
-    </button>
-  );
-}
-
-/** Same-sheet drill-in. Replaces the list face. 618:785 overlay is void. */
-export function AccountSheetAppearance({
-  onBack,
-}: {
-  onBack: () => void;
-}) {
-  const preference = useThemePreference();
-
-  return (
-    <SheetGroup>
-      <SheetGroupItem item="back" onClick={onBack} label={APPEARANCE.back}>
-        <AccountBackChevron />
-      </SheetGroupItem>
-      {APPEARANCE_FLYOUT_OPTIONS.map((option) => (
-        <SheetGroupItem
-          key={option.kind}
-          item={option.kind}
-          pressed={preference === option.kind}
-          onClick={() => {
-            applyDocumentThemePreference(option.kind);
-          }}
-        >
-          <span className={ACCOUNT_SHEET_APPEARANCE_COPY_CLASS}>
-            <span>{option.label}</span>
-            {"helper" in option ? (
-              <span className={ACCOUNT_MENU_APPEARANCE_FLYOUT_HELPER_CLASS}>{option.helper}</span>
-            ) : null}
-          </span>
-          <AppearanceCheck selected={preference === option.kind} />
-        </SheetGroupItem>
-      ))}
-    </SheetGroup>
-  );
 }
 
 function AccountMenuTrigger({
@@ -299,8 +212,7 @@ function AccountMenuPin({
   );
 }
 
-function accountMenuItemHref(item: UserMenuAction, pathname: string): string | null {
-  if (item.kind === "appearance") return null;
+function accountMenuItemHref(item: UserMenuAction, pathname: string): string {
   if (item.kind === "settings") return settingsLandHref(pathname);
   return item.href;
 }
@@ -309,12 +221,10 @@ function AccountMenuItems({
   pathname,
   onClose,
   items,
-  onAppearance,
 }: {
   pathname: string;
   onClose: () => void;
   items: readonly UserMenuAction[];
-  onAppearance?: () => void;
 }) {
   return (
     <>
@@ -324,18 +234,7 @@ function AccountMenuItems({
           item.kind === "help" && previous && previous.kind !== "help" ? (
             <AppSheetHairline data-account-sheet-help-rule="" />
           ) : null;
-
-        if (item.kind === "appearance") {
-          return (
-            <Fragment key={item.kind}>
-              {helpRule}
-              <AccountAppearanceRow onClick={() => onAppearance?.()} />
-            </Fragment>
-          );
-        }
-
         const href = accountMenuItemHref(item, pathname);
-        if (!href) return null;
 
         return (
           <Fragment key={item.kind}>
@@ -362,8 +261,6 @@ function AccountMenuBody({
   pathname,
   onClose,
   variant,
-  face = "main",
-  setFace,
 }: {
   email: string;
   name?: string | null;
@@ -371,8 +268,6 @@ function AccountMenuBody({
   pathname: string;
   onClose: () => void;
   variant: "sheet" | "dropdown";
-  face?: AccountMenuFace;
-  setFace?: (face: AccountMenuFace) => void;
 }) {
   const identity = accountSheetIdentity(email, name, photoUrl);
   const stacked = variant === "dropdown";
@@ -381,7 +276,6 @@ function AccountMenuBody({
       pathname={pathname}
       onClose={onClose}
       items={stacked ? ACCOUNT_SHEET_ITEMS : ACCOUNT_SHEET_PHONE_ITEMS}
-      onAppearance={stacked ? undefined : () => setFace?.("appearance")}
     />
   );
 
@@ -427,23 +321,13 @@ function AccountMenuBody({
             onClick={onClose}
           />
         </div>
-        {face === "appearance" ? (
-          <AccountSheetAppearance onBack={() => setFace?.("main")} />
-        ) : (
-          <>
-            <AppSheetHairline data-account-sheet-rule="" />
-            <div data-account-sheet-scroll="" className={ACCOUNT_SHEET_SCROLL_CLASS}>
-              <SheetGroup>{items}</SheetGroup>
-            </div>
-          </>
-        )}
+        <AppSheetHairline data-account-sheet-rule="" />
+        <div data-account-sheet-scroll="" className={ACCOUNT_SHEET_SCROLL_CLASS}>
+          <SheetGroup className={ACCOUNT_SHEET_GROUP_CLASS}>{items}</SheetGroup>
+        </div>
       </div>
-      {face === "appearance" ? null : (
-        <>
-          <div data-account-sheet-leftover="" className={ACCOUNT_SHEET_LEFTOVER_CLASS} />
-          <AccountMenuPin onClose={onClose} className={ACCOUNT_SHEET_PIN_CLASS} />
-        </>
-      )}
+      <div data-account-sheet-leftover="" className={ACCOUNT_SHEET_LEFTOVER_CLASS} />
+      <AccountMenuPin onClose={onClose} className={ACCOUNT_SHEET_PIN_CLASS} />
     </>
   );
 }
@@ -454,17 +338,17 @@ function AccountMenuBody({
 // (h-auto), slides up. Same sheet craft — not a new mini language.
 // Do not restyle to the desktop leftover dropdown chrome
 // (264 / rounded-12). One top row: Identity 48 + Close/44.
-// Hairline — phone items. Settings · Appearance — Get Help.
-// Appearance is the same-sheet drill-in. Desktop theme stays the
+// Hairline — phone items. Settings — Get Help.
+// Theme SoT is Settings Preferences. Desktop theme stays the
 // header sun/moon. 618:785 overlay is void. Closed
 // sheet stays 544:561 / 537:557.
-// Leftover under the last item is 48 house section air (--space-12),
+// Leftover under the last item is 24 house row air (--space-6),
 // shrink-0 — not leftover grow (open white). Log out,
 // hairline, footer are pin siblings. Hairline only under Log out.
 // Do not add a hairline above Log out. Item-list overflow lives on
 // the scroll pane — house nav destinations — so Refer cannot paint over Log out.
 // Surface clips. 571:911 stays off.
-// Log out → hairline 24. Hairline → footer 24. Footer → bottom 32
+// Log out → hairline 16. Hairline → footer 16. Footer → bottom 32
 // (sheet pad B). Not 48/48/48.
 export function MobileAccountMenu({
   email,
@@ -506,14 +390,14 @@ export function MobileAccountMenu({
 // Desktop 629:795 — same destinations as mobile (Settings,
 // Get Help). 264. Height is
 // relative to the stack (h-auto hug). Leftover last-item →
-// Log out is 48 (house --space-12). The 48 adds to the stack.
+// Log out is 24 (house --space-6). The 24 adds to the stack.
 // Not 0. Not 134. No h-[Npx]. No min-h. No 522 / 570 / 672
 // floor. Align-end to the avatar (right edge flush). 8px under
-// the trigger. Close killed. Stacked identity. 24 pad. 24
-// between Profile / Settings. No leftover grow. Pin
+// the trigger. Close killed. Stacked identity. 24 pad.
+// Tight Settings / Get Help. No leftover grow. Pin
 // Log out, hairline, footer as siblings.
-// Hairline only under Log out. Log out → hairline 24. Hairline →
-// footer 24. Do not hug the rule. Footer → bottom 24. Not a 90%
+// Hairline only under Log out. Log out → hairline 16. Hairline →
+// footer 16. Do not hug the rule. Footer → bottom 24. Not a 90%
 // sheet. Not a tall right takeover.
 export function DesktopAccountMenu({
   email,
@@ -564,16 +448,13 @@ export function AccountSheet({
   photoUrl,
   pathname,
   onClose,
-  face: initialFace = "main",
 }: {
   email: string;
   name?: string | null;
   photoUrl?: string | null;
   pathname: string;
   onClose: () => void;
-  face?: AccountMenuFace;
 }) {
-  const [face, setFace] = useState<AccountMenuFace>(initialFace);
   useAccountMenuDismiss(onClose, true);
 
   return (
@@ -583,7 +464,7 @@ export function AccountSheet({
       aria-modal="true"
       aria-label={ACCOUNT_SHEET.sheet}
       data-account-sheet=""
-      data-account-menu-face={face}
+      data-account-menu-face="main"
       className={ACCOUNT_SHEET_HOST_CLASS}
     >
       <button
@@ -601,8 +482,6 @@ export function AccountSheet({
           pathname={pathname}
           onClose={onClose}
           variant="sheet"
-          face={face}
-          setFace={setFace}
         />
       </div>
     </div>

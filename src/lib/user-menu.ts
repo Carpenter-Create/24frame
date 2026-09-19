@@ -1,12 +1,11 @@
 // Account-menu copy and lock. Lives in lib/, not JSX.
-// Desktop panel: identity → Settings — Get Help → Log out.
-// Phone sheet (Apple door): identity → Settings → Appearance —
-// Get Help → Log out. Chrome may differ (full-bleed sheet vs
-// 264 dropdown). Labels may not fork on the shared rows.
+// Apple door — phone sheet and desktop 264 share one stack:
+// identity → Settings → Get Help → Log out. Chrome may differ
+// (full-bleed sheet vs dropdown). Labels may not fork.
 // 24Frame AI is the header sparkle only — not a menu row.
-// Workspace lives on the header switcher. Desktop theme stays
-// the header sun/moon. Phone Appearance is the pre-#391
-// same-sheet drill-in — not a page. One Settings hub. No
+// Workspace lives on the header switcher. Theme SoT is Settings
+// Preferences (and the desktop header sun/moon). Do not put a
+// second Appearance row on this menu. One Settings hub. No
 // forked Settings.
 // Profile is a Settings hub pane (/settings/profile), not a
 // second avatar-menu door. Settings land href is
@@ -70,9 +69,7 @@ export type UserMenuHelpAction = {
 
 export type UserMenuLinkAction = UserMenuSettingsAction | UserMenuHelpAction;
 
-export type UserMenuAction =
-  | UserMenuLinkAction
-  | { kind: "appearance"; label: typeof USER_MENU.appearance };
+export type UserMenuAction = UserMenuLinkAction;
 
 export const USER_MENU_PRIMARY_ACTIONS: readonly UserMenuSettingsAction[] = [
   { kind: "settings", label: USER_MENU.settings, href: USER_MENU.settingsHref },
@@ -87,11 +84,8 @@ export const USER_MENU_ACTIONS: readonly UserMenuLinkAction[] = [
   ...USER_MENU_HELP_ACTIONS,
 ];
 
-export const USER_MENU_PHONE_ACTIONS: readonly UserMenuAction[] = [
-  ...USER_MENU_PRIMARY_ACTIONS,
-  { kind: "appearance", label: USER_MENU.appearance },
-  ...USER_MENU_HELP_ACTIONS,
-];
+// Same IA on phone and desktop. Theme lives in Settings Preferences.
+export const USER_MENU_PHONE_ACTIONS: readonly UserMenuAction[] = USER_MENU_ACTIONS;
 
 export function userMenuVersion(): string {
   return `${USER_MENU.versionPrefix}${APP_VERSION}`;

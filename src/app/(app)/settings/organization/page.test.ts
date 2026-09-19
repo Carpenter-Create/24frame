@@ -253,7 +253,8 @@ describe("SettingsOrganizationPage", () => {
     expect(team).toContain("<Dialog");
     expect(team).toContain("DialogFooter");
     expect(team).toContain("data-team-invite-cta");
-    expect(paneSrc).toContain("<Card>");
+    expect(paneSrc).toContain("<Card className={SETTINGS_INDEX_CARD_CLASS}>");
     expect(paneSrc).toContain("COMPANY_PROFILE_CARD_BODY_CLASS");
+    expect(paneSrc).toContain("SETTINGS_INDEX_CARD_CLASS");
   });
 });

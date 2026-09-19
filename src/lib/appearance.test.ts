@@ -62,7 +62,7 @@ describe("appearance copy", () => {
     expect(APPEARANCE_FLYOUT_OPTIONS.map((option) => option.label)).not.toContain("Auto");
   });
 
-  it("shares gc-theme with the header toggle and phone sheet — no second store", () => {
+  it("shares gc-theme with the header toggle and Settings Preferences — no second store", () => {
     expect(THEME_STORAGE_KEY).toBe("gc-theme");
     expect(themeSrc).toContain("THEME_STORAGE_KEY");
     expect(themeSrc).toContain("applyDocumentThemePreference");
@@ -73,8 +73,8 @@ describe("appearance copy", () => {
     expect(prefsSrc).toContain("AppearanceThemeRow");
     expect(prefsSrc).not.toContain("localStorage.setItem");
     expect(prefsSrc).not.toContain("THEME_STORAGE_KEY");
-    expect(sheetSrc).toContain("applyDocumentThemePreference");
-    expect(sheetSrc).toContain("APPEARANCE_FLYOUT_OPTIONS");
+    expect(sheetSrc).not.toContain("applyDocumentThemePreference");
+    expect(sheetSrc).not.toContain("APPEARANCE_FLYOUT_OPTIONS");
     expect(existsSync(join(here, "../app/(app)/settings/appearance/page.tsx"))).toBe(false);
   });
 

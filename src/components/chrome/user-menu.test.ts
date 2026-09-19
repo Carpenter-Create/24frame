@@ -167,8 +167,8 @@ describe("UserMenu item lock (source)", () => {
     expect(sheetSrc).not.toContain("AccountWorkspaceRow");
     expect(sheetSrc).not.toContain("AccountWorkspaceFlyout");
     expect(sheetSrc).not.toContain("type=\"radio\"");
-    expect(sheetSrc).toContain('setFace?.("appearance")');
-    expect(sheetSrc).toContain("AccountSheetAppearance");
+    expect(sheetSrc).not.toContain('setFace?.("appearance")');
+    expect(sheetSrc).not.toContain("AccountSheetAppearance");
     for (const absent of USER_MENU_ABSENT) {
       expect(sheetSrc).not.toContain(absent);
     }
@@ -190,6 +190,7 @@ describe("UserMenu item lock (source)", () => {
     expect(USER_MENU.appearance).toBe("Appearance");
     expect(USER_MENU.workspace).toBe("Workspace");
     expect(USER_MENU_ABSENT).not.toContain("Appearance");
+    expect(USER_MENU_ACTIONS.map((item) => item.kind)).not.toContain("appearance");
     expect(APPEARANCE.back).toBe("Back");
     expect(APPEARANCE.back).not.toBe("Back to main menu");
   });
@@ -225,16 +226,16 @@ describe("UserMenu actions", () => {
     expect(sheetSrc).not.toContain("admin@ccbfg.com");
   });
 
-  it("restores phone Appearance as the same-sheet drill-in — desktop stays header toggle", () => {
+  it("keeps theme off the avatar sheet — desktop header toggle stays the chrome SoT", () => {
     expect(sheetSrc).toContain("data-account-menu-face");
-    expect(sheetSrc).toContain("AccountSheetAppearance");
-    expect(sheetSrc).toContain("AccountAppearanceRow");
-    expect(sheetSrc).toContain("APPEARANCE_FLYOUT_OPTIONS.map");
-    expect(sheetSrc).toContain("AppearanceCheck");
-    expect(sheetSrc).toContain("applyDocumentThemePreference");
-    expect(sheetSrc).toContain("CaretLeft");
-    expect(sheetSrc).toContain("AccountBackChevron");
-    expect(sheetSrc).toContain("APPEARANCE.back");
+    expect(sheetSrc).not.toContain("AccountSheetAppearance");
+    expect(sheetSrc).not.toContain("AccountAppearanceRow");
+    expect(sheetSrc).not.toContain("APPEARANCE_FLYOUT_OPTIONS.map");
+    expect(sheetSrc).not.toContain("AppearanceCheck");
+    expect(sheetSrc).not.toContain("applyDocumentThemePreference");
+    expect(sheetSrc).not.toContain("CaretLeft");
+    expect(sheetSrc).not.toContain("AccountBackChevron");
+    expect(sheetSrc).not.toContain("APPEARANCE.back");
     expect(sheetSrc).not.toContain("AccountAppearanceFlyout");
     expect(sheetSrc).not.toContain("accountMenuAppearanceFlyoutAlign");
     expect(sheetSrc).not.toContain("APPEARANCE_OPTIONS.map");

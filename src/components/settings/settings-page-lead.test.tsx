@@ -123,6 +123,9 @@ describe("SettingsPageLead", () => {
   it("is the one title-block SoT — hub and every pane mount it, chrome does not", () => {
     expect(hubSrc).toContain("SettingsPageLead");
     expect(hubSrc).toContain("SETTINGS.href");
+    expect(hubSrc).toContain("SettingsDrillRow");
+    expect(hubSrc).toContain("SETTINGS_DRILL_LIST_CLASS");
+    expect(hubSrc).not.toContain("SETTINGS_QUIET_ROW_CLASS");
     expect(hubSrc).not.toContain("<h1");
     for (const path of SETTINGS_PANES) {
       const page = readFileSync(path, "utf8");

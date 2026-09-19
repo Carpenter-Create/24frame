@@ -3,16 +3,15 @@
 // Identity is avatar + name + email from the same values /settings/profile
 // would show. Photo is the signed avatars/{user-id}/avatar face, or the
 // email initial when empty. Always render both fields. No dashes, no invented
-// local-part name. Desktop items after the Identity hairline are
-// USER_MENU_ACTIONS (Settings — Get Help). Phone uses
-// USER_MENU_PHONE_ACTIONS (Settings · Appearance — Get Help).
-// Hairline before Get Help. Profile is a Settings pane, not a
+// local-part name. Phone sheet and desktop 264 share one stack:
+// USER_MENU_ACTIONS (Settings — Get Help). Hairline before Get Help.
+// Profile is a Settings pane, not a
 // menu row. Give feedback lives on /help/feedback, not this
 // menu and not Settings. 24Frame AI is the header
 // sparkle only — not a menu row. Workspace is
-// the header control, not this menu. Desktop theme stays the
-// header sun/moon. Phone Appearance is the same-sheet drill-in —
-// not a page. Destinations use existing routes only — not
+// the header control, not this menu. Theme SoT is Settings
+// Preferences (desktop header sun/moon may stay). Destinations
+// use existing routes only — not
 // /account/workspace, /account/appearance, or /account/feedback.
 // Company stays off this menu. Log out +
 // version are the footer group — not a
@@ -20,22 +19,22 @@
 // Log out. #209 #210 #211 hug / hairline-sandwich stay void on
 // mobile. Both instances hug the stack. 384 is void. 618:785 overlay
 // is void.
-// Mobile hugs content (h-auto) — leftover above Log out is 48
-// house section air (--space-12), shrink-0. Not flex-1 leftover
+// Mobile hugs content (h-auto) — leftover above Log out is 24
+// house row air (--space-6), shrink-0. Not flex-1 leftover
 // grow (open white). Not a forced 90% floor. Log out, hairline,
 // footer stay at the bottom. Item-list overflow lives on the
 // scroll pane — same containment as house nav destinations — so
 // Refer cannot paint over the pin. Surface clips. Do not put
-// overflow-y-auto on the surface. Log out → hairline 24. Hairline
-// → footer 24. Footer → bottom 32 (sheet pad B). Not 48/48/48.
+// overflow-y-auto on the surface. Log out → hairline 16. Hairline
+// → footer 16. Footer → bottom 32 (sheet pad B). Not 48/48/48.
 // No hairline above Log out. 571:911 stays off. Closed sheet is
 // 544:561 / 537:557.
 // Desktop 629:795 height is relative to the stack (content hug).
-// 264 wide. Leftover last-item → Log out is 48 (house section
-// air, --space-12). The 48 adds to the stack. Not 0. Not 134.
+// 264 wide. Leftover last-item → Log out is 24 (house row
+// air, --space-6). The 24 adds to the stack. Not 0. Not 134.
 // No h-[Npx]. No min-h. No 522 / 570 / 672 floor. Align-end.
-// 24 pad. 24 between Settings rows.
-// Log out → hairline 24. Hairline → footer 24. Footer →
+// 24 pad. Tight item stack — not a tall empty sheet.
+// Log out → hairline 16. Hairline → footer 16. Footer →
 // bottom 24. Labels stay one source.
 
 import { accountPhotoSrc } from "@/lib/account-avatar";
@@ -74,7 +73,7 @@ export const ACCOUNT_SHEET_ABSENT = [
   "Legal",
 ] as const;
 
-// Desktop panel. Phone sheet uses ACCOUNT_SHEET_PHONE_ITEMS.
+// Desktop panel. Phone sheet uses the same IA.
 export const ACCOUNT_SHEET_ITEMS = USER_MENU_ACTIONS;
 
 export const ACCOUNT_SHEET_PHONE_ITEMS = USER_MENU_PHONE_ACTIONS;
@@ -83,7 +82,7 @@ export const ACCOUNT_SHEET_PHONE_ITEMS = USER_MENU_PHONE_ACTIONS;
 // under the 4px half-bar (padT 36 = 4+32) so the bar does not eat
 // the top air. Height from the stack (h-auto hug). max-h-[90dvh]
 // is the overflow ceiling — not a forced 90% floor. Leftover
-// above Log out is 48 house air, shrink-0. Identity 48 + Close/44
+// above Log out is 24 house air, shrink-0. Identity 48 + Close/44
 // one row. Desktop 629:795 hug does not use this surface.
 export const ACCOUNT_SHEET_HOST_CLASS =
   "fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end";
@@ -95,7 +94,7 @@ export const ACCOUNT_SHEET_HEAD_CLASS =
   "flex min-h-12 w-full shrink-0 items-center justify-between";
 
 // Stage owns the 24 between Identity / hairline / items. Surface
-// has no gap — leftover 48 sits between stage and pin, same as
+// has no gap — leftover 24 sits between stage and pin, same as
 // desktop. min-h-0 so the item list can shrink when the hug hits
 // the viewport ceiling.
 export const ACCOUNT_SHEET_STAGE_CLASS =
@@ -108,25 +107,30 @@ export const ACCOUNT_SHEET_STAGE_CLASS =
 export const ACCOUNT_SHEET_SCROLL_CLASS =
   "flex min-h-0 w-full flex-col overflow-y-auto overscroll-contain";
 
-// House section air — --space-12 is 48. Adds to the hug stack.
-// Not h-[48px]. Not leftover grow. Same air as desktop leftover.
-export const ACCOUNT_SHEET_LEFTOVER = 48;
+// Apple density — 12 between Settings / hairline / Get Help.
+// Not 24 section air. Same class on phone and the 264.
+export const ACCOUNT_SHEET_GROUP_CLASS =
+  "flex w-full flex-col items-start gap-[var(--space-3)]";
+
+// House row air — --space-6 is 24. Adds to the hug stack.
+// Not h-[24px]. Not leftover grow. Same air as desktop leftover.
+export const ACCOUNT_SHEET_LEFTOVER = 24;
 
 export const ACCOUNT_SHEET_LEFTOVER_CLASS =
-  "h-[var(--space-12)] w-full shrink-0";
+  "h-[var(--space-6)] w-full shrink-0";
 
 export const ACCOUNT_SHEET_LOGOUT_CLASS =
   "flex items-center gap-[var(--space-2)] text-[length:var(--text-base)] font-normal leading-5 text-accent";
 
 // Mobile pin — Log out, hairline, footer are siblings. Log out →
-// hairline 24. Hairline → footer 24. Footer → bottom 32 (sheet
-// pad B). Not 48/48/48. Leftover above Log out is 48 house air,
+// hairline 16. Hairline → footer 16. Footer → bottom 32 (sheet
+// pad B). Not 48/48/48. Leftover above Log out is 24 house air,
 // shrink-0 — not leftover grow. Do not put Log out in the item
 // group. Pin gap is not (Log out+rule) → footer. Hairline only
 // under Log out. Item overflow stays on the scroll pane so Refer
 // cannot stack on this pin. 571:911 stays off.
 export const ACCOUNT_SHEET_PIN_CLASS =
-  "flex w-full shrink-0 flex-col gap-[var(--space-6)]";
+  "flex w-full shrink-0 flex-col gap-[var(--space-4)]";
 
 // Log out only. Hairline is the next pin sibling — do not hug the rule.
 export const ACCOUNT_SHEET_LOGOUT_STACK_CLASS = "flex w-full shrink-0 flex-col";
@@ -138,14 +142,14 @@ export const ACCOUNT_SHEET_FOOTER_CLASS =
 export const ACCOUNT_SHEET_VERSION_CLASS = "t-body-sm leading-4 text-ink-3";
 
 // 629:795 — 264. Height is relative to the stack (h-auto hug).
-// Leftover last-item → Log out is 48 (house --space-12). The
-// 48 adds to the stack. NOT 0. NOT 134. NOT h-[Npx]. NOT
+// Leftover last-item → Log out is 24 (house --space-6). The
+// 24 adds to the stack. NOT 0. NOT 134. NOT h-[Npx]. NOT
 // min-h. NOT 522. NOT 570. NOT 672. NOT 384. Align-end to the
 // avatar (right edge flush). 8px (--space-2) under the trigger.
-// Not a 90% sheet. 24 pad. 24 between Profile / Settings.
+// Not a 90% sheet. 24 pad. Tight Settings / Get Help stack.
 // No leftover grow. Pin Log out,
 // hairline, footer as siblings. Hairline only under Log out.
-// Log out → hairline 24. Hairline → footer 24. Do not hug the
+// Log out → hairline 16. Hairline → footer 16. Do not hug the
 // rule. Pin gap is not (Log out+rule) → footer. Footer →
 // bottom 24. padT 28 (4 bar + 24 air).
 // Not a tall right takeover. Close killed — dismiss on outside click
@@ -154,7 +158,7 @@ export const ACCOUNT_SHEET_VERSION_CLASS = "t-body-sm leading-4 text-ink-3";
 // trigger — not --header-height / --content-inset, which sat the 264
 // a full avatar-width left (menu right = avatar left).
 export const ACCOUNT_MENU_DROPDOWN_WIDTH = 264;
-export const ACCOUNT_MENU_DROPDOWN_LEFTOVER = 48;
+export const ACCOUNT_MENU_DROPDOWN_LEFTOVER = 24;
 
 export const ACCOUNT_MENU_DROPDOWN_HOST_CLASS = "fixed inset-0 z-50";
 
@@ -190,47 +194,20 @@ export const ACCOUNT_MENU_DROPDOWN_IDENTITY_CLASS =
 export const ACCOUNT_MENU_DROPDOWN_STAGE_CLASS =
   "flex w-full shrink-0 flex-col gap-[var(--space-6)]";
 
-export const ACCOUNT_MENU_DROPDOWN_GROUP_CLASS =
-  "flex w-full flex-col items-start gap-[var(--space-6)]";
+export const ACCOUNT_MENU_DROPDOWN_GROUP_CLASS = ACCOUNT_SHEET_GROUP_CLASS;
 
-// Desktop pin — Log out → hairline 24. Hairline → footer 24.
-// Leftover last-item → Log out is 48 house section air, not
+// Desktop pin — Log out → hairline 16. Hairline → footer 16.
+// Leftover last-item → Log out is 24 house row air, not
 // leftover grow, not a packed 24 list row. Pin is not the item
 // group. Pin gap is not (Log out+rule) → footer.
 export const ACCOUNT_MENU_DROPDOWN_PIN_CLASS =
-  "flex w-full shrink-0 flex-col gap-[var(--space-6)]";
+  "flex w-full shrink-0 flex-col gap-[var(--space-4)]";
 
 export const ACCOUNT_MENU_DROPDOWN_SCROLL_CLASS = "flex w-full shrink-0 flex-col";
 
-// House section air — --space-12 is 48. Adds to the hug stack.
-// Not h-[48px]. Not leftover grow. Not a 570 / 672 floor.
-export const ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS =
-  "h-[var(--space-12)] w-full shrink-0";
-
-// Phone Appearance row — same pad as sheet items. Current mode
-// under the label. Chevron 16. No inset card. Desktop does not
-// mount this row.
-export const ACCOUNT_MENU_APPEARANCE_ROW_CLASS =
-  "relative flex w-full items-center justify-between py-[var(--space-4)] text-left text-[length:var(--text-base)] font-normal leading-5 text-ink";
-
-export const ACCOUNT_MENU_APPEARANCE_COPY_CLASS =
-  "relative z-10 flex min-w-0 flex-col items-start gap-[var(--space-2)]";
-
-export const ACCOUNT_MENU_APPEARANCE_CHEVRON_CLASS = "relative z-10 shrink-0";
-
-export const ACCOUNT_MENU_APPEARANCE_MODE_CLASS =
-  "t-body-sm leading-4 text-ink-2";
-
-export const ACCOUNT_MENU_APPEARANCE_FLYOUT_HELPER_CLASS =
-  "t-body-sm leading-4 text-ink-2";
-
-export const ACCOUNT_MENU_APPEARANCE_FLYOUT_ROW_CLASS =
-  "flex w-full items-start gap-[var(--space-2)] p-[var(--space-4)] text-left text-[length:var(--text-base)] font-normal leading-5 text-ink";
-
-// Mobile Appearance drill-in — same sheet, replaces the list face.
-// House rows. Not 618:785. Not a card. Not 613:888.
-export const ACCOUNT_SHEET_APPEARANCE_COPY_CLASS =
-  "flex min-w-0 flex-col items-start gap-[var(--space-2)]";
+// House row air — --space-6 is 24. Adds to the hug stack.
+// Not h-[24px]. Not leftover grow. Not a 570 / 672 floor.
+export const ACCOUNT_MENU_DROPDOWN_LEFTOVER_CLASS = ACCOUNT_SHEET_LEFTOVER_CLASS;
 
 export type AccountSheetIdentity = {
   avatarInitial: string;
