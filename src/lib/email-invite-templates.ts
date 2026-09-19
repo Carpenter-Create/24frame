@@ -9,22 +9,38 @@ import {
   wrapHouseEmail,
 } from "@/lib/email-house";
 import { escapeEmailHtml } from "@/lib/email-auth-templates";
-import { inviteEmailSubject } from "@/lib/account-invite";
+import {
+  inviteEmailSubject,
+  resolveTeamInviteOrgName,
+  teamInviteBody,
+  teamInviteHeadline,
+} from "@/lib/account-invite";
 import { PRODUCT_NAME } from "@/lib/product";
 
-export function buildTeamInviteEmail(acceptUrl: string): {
+export function buildTeamInviteEmail(
+  acceptUrl: string,
+  orgName: string,
+  roleLabel: string,
+): {
   subject: string;
   text: string;
   html: string;
 } {
-  const subject = inviteEmailSubject("team");
-  const text =
-    `You have been invited to join a team on ${PRODUCT_NAME}.\n\n` +
-    `Accept the invite: ${acceptUrl}\n`;
+  const name = resolveTeamInviteOrgName(orgName);
+  const role = roleLabel.trim();
+  if (!name) {
+    throw new Error("Team invite requires an organization name");
+  }
+  if (!role) {
+    throw new Error("Team invite requires a role label");
+  }
+  const subject = inviteEmailSubject("team", name);
+  const body = teamInviteBody(name, role);
+  const text = `${body}\n\nAccept the invite: ${acceptUrl}\n`;
   const html = wrapHouseEmail(
-    `<p style="margin:0 0 12px;font-size:${EMAIL_HEADLINE_SIZE}px;line-height:${EMAIL_HEADLINE_LINE}px;font-weight:600;color:${EMAIL_INK}">Join a team</p>` +
+    `<p style="margin:0 0 12px;font-size:${EMAIL_HEADLINE_SIZE}px;line-height:${EMAIL_HEADLINE_LINE}px;font-weight:600;color:${EMAIL_INK}">${escapeEmailHtml(teamInviteHeadline(name))}</p>` +
       `<p style="margin:0 0 28px;font-size:${EMAIL_BODY_SIZE}px;line-height:${EMAIL_BODY_LINE}px;color:${EMAIL_BODY}">` +
-      `You have been invited to join a team on ${escapeEmailHtml(PRODUCT_NAME)}.` +
+      `${escapeEmailHtml(body)}` +
       `</p>` +
       housePrimaryButton(escapeEmailHtml(acceptUrl), "Accept invite"),
   );

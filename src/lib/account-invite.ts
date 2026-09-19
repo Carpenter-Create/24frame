@@ -129,7 +129,6 @@ export const HOUSE_GRANT = {
 
 export const ACCOUNT_INVITE_ACCEPT = {
   title: "Accept invite",
-  teamBody: "You have been invited to join this team.",
   grantBody: "You have been granted an account.",
   accept: "Accept",
   accepting: "Accepting…",
@@ -284,8 +283,40 @@ export function grantTierLabel(tier: GrantTier): string {
   return GRANT_TIER_LABELS[tier];
 }
 
-export function inviteEmailSubject(kind: "team" | "house_grant"): string {
-  return kind === "house_grant"
-    ? `Your ${PRODUCT_NAME} account`
-    : `Join a team on ${PRODUCT_NAME}`;
+// Rights Holder display name — organizations.name, same label as Settings.
+export function resolveTeamInviteOrgName(name: string | null | undefined): string | null {
+  const trimmed = name?.trim() ?? "";
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+export function teamInviteHeadline(orgName: string): string {
+  return `Join ${orgName}`;
+}
+
+export function teamInviteBody(orgName: string, roleLabel: string): string {
+  return `You have been invited to join ${orgName} on ${PRODUCT_NAME} as ${roleLabel}.`;
+}
+
+export function teamInviteAcceptBody(
+  orgName: string | null | undefined,
+  roleLabel: string | null | undefined,
+): string {
+  const name = resolveTeamInviteOrgName(orgName);
+  const role = roleLabel?.trim() ?? "";
+  if (name && role) return teamInviteBody(name, role);
+  if (name) return `You have been invited to join ${name} on ${PRODUCT_NAME}.`;
+  return "";
+}
+
+export function inviteEmailSubject(kind: "house_grant"): string;
+export function inviteEmailSubject(kind: "team", orgName: string): string;
+export function inviteEmailSubject(kind: "team" | "house_grant", orgName?: string): string {
+  if (kind === "house_grant") {
+    return `Your ${PRODUCT_NAME} account`;
+  }
+  const name = resolveTeamInviteOrgName(orgName);
+  if (!name) {
+    throw new Error("Team invite subject requires an organization name");
+  }
+  return `Join ${name} on ${PRODUCT_NAME}`;
 }

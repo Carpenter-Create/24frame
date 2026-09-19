@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { inflateSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 
+import * as emailHouse from "./email-house";
 import {
   EMAIL_ACCENT,
   EMAIL_ADDRESS,
@@ -13,7 +14,7 @@ import {
   EMAIL_BUTTON_RADIUS,
   EMAIL_CARD_RADIUS,
   EMAIL_CARD_WIDTH,
-  EMAIL_COPYRIGHT,
+  emailCopyright,
   EMAIL_FORMAT_DETECTION,
   EMAIL_GEIST_HREF,
   EMAIL_HEADLINE_SIZE,
@@ -23,7 +24,6 @@ import {
   EMAIL_LOGO_URL,
   EMAIL_SITE_LABEL,
   EMAIL_SITE_URL,
-  EMAIL_SLOGAN,
   EMAIL_TERTIARY,
   houseOtpCode,
   housePrimaryButton,
@@ -52,12 +52,9 @@ function assertHouseChrome(html: string) {
   expect(EMAIL_ACCENT).toBe(SPORTY_BLUE);
   expect(html).toContain(EMAIL_LOGO_URL);
   expect(html).toContain('alt="24Frame"');
-  expect(EMAIL_SLOGAN).toBe("Built for the creator class.");
-  expect(html).toContain(EMAIL_SLOGAN);
+  expect(html).not.toContain("Built for the creator class.");
   expect(html).not.toContain("Radically different film distribution.");
-  expect(html).toContain(`color:${EMAIL_BODY}">${EMAIL_SLOGAN}`);
-  expect(html).not.toContain(`color:${EMAIL_TERTIARY}">${EMAIL_SLOGAN}`);
-  expect(html).toContain(`color:${EMAIL_TERTIARY}">${EMAIL_COPYRIGHT}`);
+  expect(html).toContain(`color:${EMAIL_TERTIARY}">${emailCopyright()}`);
   expect(EMAIL_BODY).toBe("#3F4650");
   expect(EMAIL_TERTIARY).toBe("#9AA0A9");
   expect(html).toContain(EMAIL_SITE_URL);
@@ -67,7 +64,8 @@ function assertHouseChrome(html: string) {
   expect(html).toContain(`max-width:${EMAIL_CARD_WIDTH}px`);
   expect(html).toContain(`border-radius:${EMAIL_CARD_RADIUS}`);
   expect(html).toContain(`border:1px solid ${EMAIL_BORDER}`);
-  expect(html).toContain(EMAIL_COPYRIGHT);
+  expect(html).toContain(emailCopyright());
+  expect(html).not.toContain("© 2026 Global Content Holdings LLC. All rights reserved.");
   expect(html).toContain(EMAIL_ADDRESS);
   expect(html).toContain(EMAIL_LEGAL_URL);
   expect(html).toContain(EMAIL_GEIST_HREF);
@@ -80,7 +78,30 @@ function assertHouseChrome(html: string) {
   assertFormatDetectionWellFormed(html);
 }
 
+describe("emailCopyright", () => {
+  it("names 24Frame as a division of the parent and uses the given year", () => {
+    expect(emailCopyright(2026)).toBe(
+      "© 2026 24Frame, a division of Global Content Holdings LLC. All rights reserved.",
+    );
+    expect(emailCopyright(2027)).toBe(
+      "© 2027 24Frame, a division of Global Content Holdings LLC. All rights reserved.",
+    );
+    expect(emailCopyright()).toBe(
+      `© ${new Date().getFullYear()} 24Frame, a division of Global Content Holdings LLC. All rights reserved.`,
+    );
+    expect(emailCopyright()).not.toMatch(/© \d{4} Global Content Holdings LLC\. All rights reserved\./);
+    expect(emailCopyright()).not.toContain("24frame,");
+  });
+});
+
 describe("wrapHouseEmail", () => {
+  it("does not render an unapproved slogan under the mark", () => {
+    const html = wrapHouseEmail("<p>Inner</p>");
+    expect(html).not.toContain("Built for the creator class.");
+    expect(html).not.toContain("creator class");
+    expect(emailHouse).not.toHaveProperty("EMAIL_SLOGAN");
+  });
+
   it("uses the Coinbase-scale house shell with a black frame mark and well-formed format-detection", () => {
     const html = wrapHouseEmail(`<p style="color:${EMAIL_INK}">Inner</p>`);
     assertHouseChrome(html);
@@ -89,7 +110,7 @@ describe("wrapHouseEmail", () => {
     expect(EMAIL_LOGO_DISPLAY).toBe(88);
     expect(EMAIL_HEADLINE_SIZE).toBeGreaterThan(23);
     expect(EMAIL_BODY_SIZE).toBeGreaterThan(15);
-    expect(html).toMatch(/font-size:11px[\s\S]*text-transform:uppercase/);
+    expect(html).not.toMatch(/font-size:11px[\s\S]*text-transform:uppercase/);
     expect(html).toContain("x-apple-disable-message-reformatting");
     expect(html).toContain("a[x-apple-data-detectors]");
     expect(EMAIL_LOGO_URL).toBe("https://app.24frame.co/email-mark-v2.png");

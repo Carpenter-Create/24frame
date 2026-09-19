@@ -2,6 +2,7 @@ import {
   ACCOUNT_INVITE_ACCEPT,
   grantTierLabel,
   inviteEmailsMatch,
+  teamInviteAcceptBody,
   teamRoleLabel,
 } from "@/lib/account-invite";
 import { hashToken } from "@/lib/portal";
@@ -50,7 +51,7 @@ export default async function InviteAcceptPage({
       : ACCOUNT_INVITE_ACCEPT.grantBody;
   } else {
     const role = invite.role ? teamRoleLabel(invite.role) : "";
-    body = [ACCOUNT_INVITE_ACCEPT.teamBody, invite.org_name, role].filter(Boolean).join(" · ");
+    body = teamInviteAcceptBody(invite.org_name, role) || ACCOUNT_INVITE_ACCEPT.title;
   }
 
   const pending = invite?.status === "pending";
