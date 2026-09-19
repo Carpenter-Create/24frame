@@ -254,7 +254,7 @@ function AskAiOverlayPanel() {
         showLanding={showLanding}
         showGate={showGate}
         conversations={conversations}
-        currentId={conversation?.id ?? null}
+        currentId={threadId}
         initials={initials}
         conversation={conversation}
         messages={messages}
