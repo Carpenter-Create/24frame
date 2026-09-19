@@ -3,7 +3,14 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { ACCOUNT_INVITE_ACCEPT, acceptInviteSchema, inviteAcceptPath } from "@/lib/account-invite";
+import { setActiveOrg } from "@/app/(app)/actions";
+import {
+  ACCOUNT_INVITE_ACCEPT,
+  acceptedInviteOrgId,
+  acceptInviteSchema,
+  inviteAcceptPath,
+  inviteEmailsMatch,
+} from "@/lib/account-invite";
 import { hashToken } from "@/lib/portal";
 import {
   DASHBOARD_SIGN_IN_RATE_LIMITED,
@@ -30,11 +37,31 @@ export async function acceptAccountInvite(input: unknown): Promise<{ error?: str
   const parsed = acceptInviteSchema.safeParse(input);
   if (!parsed.success) return { error: ACCOUNT_INVITE_ACCEPT.missing };
 
+  const tokenHash = hashToken(parsed.data.token);
   const supabase = await createClient();
-  const { error } = await supabase.rpc("accept_account_invite", {
-    p_token_hash: hashToken(parsed.data.token),
+  const { data: peek } = await supabase.rpc("peek_account_invite", {
+    p_token_hash: tokenHash,
   });
-  if (error) return { error: error.message || ACCOUNT_INVITE_ACCEPT.failed };
+  const invite = peek?.[0];
+  if (!invite || invite.status !== "pending") {
+    return { error: ACCOUNT_INVITE_ACCEPT.missing };
+  }
+  if (!inviteEmailsMatch(user.email, invite.email)) {
+    return { error: ACCOUNT_INVITE_ACCEPT.wrongEmail };
+  }
+
+  const { data, error } = await supabase.rpc("accept_account_invite", {
+    p_token_hash: tokenHash,
+  });
+  if (error) {
+    if (error.message === ACCOUNT_INVITE_ACCEPT.wrongEmail) {
+      return { error: ACCOUNT_INVITE_ACCEPT.wrongEmail };
+    }
+    return { error: ACCOUNT_INVITE_ACCEPT.failed };
+  }
+
+  const orgId = acceptedInviteOrgId(data);
+  if (orgId) await setActiveOrg(orgId);
 
   redirect("/settings/organization");
 }

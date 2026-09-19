@@ -18,7 +18,9 @@ export type GrantTier = "access" | "pro" | "premium";
 //   Team invite/revoke — member_can(manage_team) = account_owner
 //     of that org (gc_account_owner via gc_can).
 //   House grant/revoke — is_gc_staff AND gc_can(operate).
-//   Accept — session email must match the invite.
+//     UI hides Grant account unless gc_can(operate).
+//   Accept — session email must match the invite (case-normalized).
+//   After accept, set gc_active_org via setActiveOrg (existing cookie SoT).
 //
 // Defaults: team role viewer (least seat). Grant tier access (least plan).
 // TTL 14 days. Stripe checkout for comps is deferred — the term row is
@@ -73,6 +75,7 @@ export const HOUSE_GRANT = {
   granting: "Sending…",
   sent: "Grant sent.",
   revoke: "Withdraw",
+  revoking: "Withdrawing…",
   forbidden: "Only house staff can grant an account.",
   signedOut: "Not authenticated.",
   invalidEmail: "Enter a valid email address.",
@@ -140,6 +143,18 @@ export const revokeInviteSchema = z.object({
 
 export function inviteAcceptPath(token: string): string {
   return `/invite/accept?token=${encodeURIComponent(token)}`;
+}
+
+export function inviteEmailsMatch(sessionEmail: string, inviteEmail: string): boolean {
+  const session = sessionEmail.trim().toLowerCase();
+  const invited = inviteEmail.trim().toLowerCase();
+  return session.length > 0 && session === invited;
+}
+
+export function acceptedInviteOrgId(data: unknown): string | null {
+  if (!data || typeof data !== "object") return null;
+  const orgId = "org_id" in data ? data.org_id : null;
+  return typeof orgId === "string" && orgId.length > 0 ? orgId : null;
 }
 
 export function teamRoleLabel(role: OrgRole): string {

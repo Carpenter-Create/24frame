@@ -1,4 +1,9 @@
-import { ACCOUNT_INVITE_ACCEPT, grantTierLabel, teamRoleLabel } from "@/lib/account-invite";
+import {
+  ACCOUNT_INVITE_ACCEPT,
+  grantTierLabel,
+  inviteEmailsMatch,
+  teamRoleLabel,
+} from "@/lib/account-invite";
 import { hashToken } from "@/lib/portal";
 import { PRODUCT_NAME } from "@/lib/product";
 import { getAuthUser } from "@/lib/supabase/auth";
@@ -48,7 +53,8 @@ export default async function InviteAcceptPage({
     body = [ACCOUNT_INVITE_ACCEPT.teamBody, invite.org_name, role].filter(Boolean).join(" · ");
   }
 
-  const canAccept = invite?.status === "pending";
+  const pending = invite?.status === "pending";
+  const emailMatch = pending && inviteEmailsMatch(user?.email ?? "", invite.email);
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-8 px-6 py-16">
@@ -57,8 +63,13 @@ export default async function InviteAcceptPage({
         <h1 className="t-subhead text-ink">{ACCOUNT_INVITE_ACCEPT.title}</h1>
         <p className="t-body text-ink-2">{body}</p>
       </div>
-      {canAccept ? (
-        <InviteAcceptForm token={token} email={invite.email} signedIn={!!user} />
+      {pending ? (
+        <InviteAcceptForm
+          token={token}
+          email={invite.email}
+          signedIn={!!user}
+          emailMatch={emailMatch}
+        />
       ) : null}
     </main>
   );

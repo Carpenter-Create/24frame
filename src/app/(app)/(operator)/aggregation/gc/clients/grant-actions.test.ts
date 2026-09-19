@@ -14,7 +14,8 @@ import { headers } from "next/headers";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 import { sendHouseGrantEmail } from "@/lib/email";
-import { grantHouseAccount } from "./grant-actions";
+import { HOUSE_GRANT } from "@/lib/account-invite";
+import { grantHouseAccount, revokeHouseGrant } from "./grant-actions";
 
 describe("grantHouseAccount", () => {
   beforeEach(() => {
@@ -35,12 +36,30 @@ describe("grantHouseAccount", () => {
     expect(createClient).not.toHaveBeenCalled();
   });
 
-  it("grants and sends accept mail for staff", async () => {
+  it("refuses staff without gc_can(operate) before grant RPC", async () => {
+    vi.mocked(getOrgContext).mockResolvedValue({
+      user: { id: "legal-1", email: "legal@test.example" },
+      isGcStaff: true,
+    } as never);
+    const rpc = vi.fn(async (name: string) => {
+      if (name === "gc_can") return { data: false, error: null };
+      return { data: null, error: null };
+    });
+    vi.mocked(createClient).mockResolvedValue({ rpc } as never);
+    await expect(
+      grantHouseAccount({ email: "grant@test.example", orgName: "Comp Films", tier: "pro" }),
+    ).resolves.toEqual({ error: HOUSE_GRANT.forbidden });
+    expect(rpc).toHaveBeenCalledWith("gc_can", { p_uid: "legal-1", p_capability: "operate" });
+    expect(rpc).not.toHaveBeenCalledWith("grant_house_account", expect.anything());
+  });
+
+  it("grants and sends accept mail for operate staff", async () => {
     vi.mocked(getOrgContext).mockResolvedValue({
       user: { id: "staff-1", email: "ops@test.example" },
       isGcStaff: true,
     } as never);
     const rpc = vi.fn(async (name: string) => {
+      if (name === "gc_can") return { data: true, error: null };
       if (name === "grant_house_account") return { data: "grant-1", error: null };
       return { data: null, error: null };
     });
@@ -49,6 +68,7 @@ describe("grantHouseAccount", () => {
     await expect(
       grantHouseAccount({ email: "grant@test.example", orgName: "Comp Films", tier: "pro" }),
     ).resolves.toEqual({});
+    expect(rpc).toHaveBeenCalledWith("gc_can", { p_uid: "staff-1", p_capability: "operate" });
     expect(rpc).toHaveBeenCalledWith("grant_house_account", {
       p_email: "grant@test.example",
       p_org_name: "Comp Films",
@@ -56,5 +76,23 @@ describe("grantHouseAccount", () => {
       p_token_hash: "b".repeat(64),
     });
     expect(sendHouseGrantEmail).toHaveBeenCalled();
+  });
+
+  it("maps SQL Not authorized on revoke to SoT copy", async () => {
+    vi.mocked(getOrgContext).mockResolvedValue({
+      user: { id: "staff-1", email: "ops@test.example" },
+      isGcStaff: true,
+    } as never);
+    const rpc = vi.fn(async (name: string) => {
+      if (name === "gc_can") return { data: true, error: null };
+      if (name === "revoke_account_invite") {
+        return { data: null, error: { message: "Not authorized" } };
+      }
+      return { data: null, error: null };
+    });
+    vi.mocked(createClient).mockResolvedValue({ rpc } as never);
+    await expect(revokeHouseGrant({ id: "22222222-2222-4222-8222-222222222222" })).resolves.toEqual({
+      error: HOUSE_GRANT.forbidden,
+    });
   });
 });

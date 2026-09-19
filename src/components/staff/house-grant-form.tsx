@@ -90,7 +90,7 @@ export function HouseGrantForm({
                   disabled={revoking === row.id}
                   onClick={() => onRevoke(row.id)}
                 >
-                  {revoking === row.id ? HOUSE_GRANT.granting : HOUSE_GRANT.revoke}
+                  {revoking === row.id ? HOUSE_GRANT.revoking : HOUSE_GRANT.revoke}
                 </Button>
               ) : null}
             </li>

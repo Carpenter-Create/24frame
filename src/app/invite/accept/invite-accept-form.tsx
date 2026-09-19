@@ -17,16 +17,19 @@ export function InviteAcceptForm({
   token,
   email,
   signedIn,
+  emailMatch,
 }: {
   token: string;
   email: string;
   signedIn: boolean;
+  emailMatch: boolean;
 }) {
   const [error, setError] = useState("");
   const [accepting, setAccepting] = useState(false);
   const [signInState, signInAction, signInPending] = useActionState(requestInviteSignIn, INITIAL);
 
   async function onAccept() {
+    if (!emailMatch) return;
     setAccepting(true);
     setError("");
     const res = await acceptAccountInvite({ token });
@@ -36,12 +39,14 @@ export function InviteAcceptForm({
     }
   }
 
-  if (!signedIn) {
+  if (!signedIn || !emailMatch) {
     return (
-      <form action={signInAction} className="flex flex-col gap-[var(--space-4)]">
+      <form action={signInAction} className="flex flex-col gap-[var(--space-4)]" data-invite-signin-form="">
         <input type="hidden" name="email" value={email} />
         <input type="hidden" name="token" value={token} />
-        <p className="t-body-sm text-ink-2">{ACCOUNT_INVITE_ACCEPT.signInHint}</p>
+        <p className="t-body-sm text-ink-2">
+          {signedIn ? ACCOUNT_INVITE_ACCEPT.wrongEmail : ACCOUNT_INVITE_ACCEPT.signInHint}
+        </p>
         <Button type="submit" disabled={signInPending} className="self-start">
           {signInPending ? ACCOUNT_INVITE_ACCEPT.accepting : ACCOUNT_INVITE_ACCEPT.signIn}
         </Button>
@@ -53,7 +58,7 @@ export function InviteAcceptForm({
   }
 
   return (
-    <div className="flex flex-col gap-[var(--space-4)]">
+    <div className="flex flex-col gap-[var(--space-4)]" data-invite-accept-form="">
       <Button type="button" disabled={accepting} onClick={onAccept} className="self-start">
         {accepting ? ACCOUNT_INVITE_ACCEPT.accepting : ACCOUNT_INVITE_ACCEPT.accept}
       </Button>

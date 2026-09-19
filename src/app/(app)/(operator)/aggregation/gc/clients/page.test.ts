@@ -6,9 +6,12 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
 }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
+vi.mock("@/lib/supabase/auth", () => ({ getAuthUser: vi.fn() }));
 
 import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/supabase/auth";
 import { CLIENTS_PAGE } from "@/lib/clients";
+import { HOUSE_GRANT } from "@/lib/account-invite";
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
 
 import GcClientsPage from "./page";
@@ -19,7 +22,10 @@ import GcClientsPage from "./page";
  * to prevent. This asserts the page asks for one more than it shows.
  */
 describe("GcClientsPage read bound", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(getAuthUser).mockResolvedValue({ id: "staff-1", email: "ops@test.example" });
+  });
 
   it("probes one row past the cap so truncation can be detected", async () => {
     const rpc = vi.fn(async () => ({ data: [], error: null }));
@@ -92,6 +98,7 @@ describe("GcClientsPage read bound", () => {
       },
     ];
     const rpc = vi.fn(async (name: string) => {
+      if (name === "gc_can") return { data: true, error: null };
       if (name === "pending_house_grants") return { data: [], error: null };
       return { data: seats, error: null };
     });
@@ -115,6 +122,7 @@ describe("GcClientsPage read bound", () => {
     expect(html).not.toContain("LAST SEEN");
     expect(html).toContain("Grant account");
     expect(html).toContain("data-house-grant-form");
+    expect(rpc).toHaveBeenCalledWith("gc_can", { p_uid: "staff-1", p_capability: "operate" });
     expect(rpc).toHaveBeenCalledWith("pending_house_grants", { p_limit: UNPAGINATED_MAX + 1 });
 
     const directorySrc = readFileSync(
@@ -141,5 +149,20 @@ describe("GcClientsPage read bound", () => {
     expect(html).toContain("data-house-page-select");
     expect(html).not.toContain("REGISTERED");
     expect(html).not.toContain("AWAITING PAYMENT");
+  });
+
+  it("hides Grant account when gc_can(operate) is false", async () => {
+    const rpc = vi.fn(async (name: string) => {
+      if (name === "gc_can") return { data: false, error: null };
+      return { data: [], error: null };
+    });
+    vi.mocked(createClient).mockResolvedValue({ rpc } as never);
+
+    const html = renderToStaticMarkup(await GcClientsPage());
+    expect(html).toContain(CLIENTS_PAGE.empty);
+    expect(html).not.toContain(HOUSE_GRANT.title);
+    expect(html).not.toContain("data-house-grant-form");
+    expect(rpc).toHaveBeenCalledWith("gc_can", { p_uid: "staff-1", p_capability: "operate" });
+    expect(rpc).not.toHaveBeenCalledWith("pending_house_grants", expect.anything());
   });
 });

@@ -4,6 +4,7 @@ vi.mock("next/headers", () => ({ headers: vi.fn() }));
 vi.mock("next/navigation", () => ({ redirect: (path: string) => { throw new Error(`REDIRECT:${path}`); } }));
 vi.mock("@/lib/supabase/auth", () => ({ getAuthUser: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
+vi.mock("@/app/(app)/actions", () => ({ setActiveOrg: vi.fn() }));
 vi.mock("@/lib/auth-magic-link", () => ({
   DASHBOARD_SIGN_IN_SENT: "Check your email for a secure sign-in link.",
   DASHBOARD_SIGN_IN_SEND_FAILED: "Could not send the sign-in link. Please try again.",
@@ -21,6 +22,8 @@ vi.mock("@/lib/portal", () => ({ hashToken: () => "c".repeat(64) }));
 import { headers } from "next/headers";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
+import { setActiveOrg } from "@/app/(app)/actions";
+import { ACCOUNT_INVITE_ACCEPT } from "@/lib/account-invite";
 import { issueDashboardSignInLink } from "@/lib/auth-magic-link";
 import { acceptAccountInvite, requestInviteSignIn } from "./actions";
 
@@ -34,14 +37,39 @@ describe("acceptAccountInvite", () => {
     });
   });
 
-  it("accepts and lands on Organization", async () => {
-    vi.mocked(getAuthUser).mockResolvedValue({ id: "u1", email: "invitee@test.example" });
-    const rpc = vi.fn(async () => ({ data: { org_id: "org-1" }, error: null }));
+  it("refuses a wrong-session email before accept RPC", async () => {
+    vi.mocked(getAuthUser).mockResolvedValue({ id: "u1", email: "other@test.example" });
+    const rpc = vi.fn(async (name: string) => {
+      if (name === "peek_account_invite") {
+        return { data: [{ email: "invitee@test.example", status: "pending" }], error: null };
+      }
+      return { data: null, error: null };
+    });
+    vi.mocked(createClient).mockResolvedValue({ rpc } as never);
+    await expect(acceptAccountInvite({ token: "a".repeat(24) })).resolves.toEqual({
+      error: ACCOUNT_INVITE_ACCEPT.wrongEmail,
+    });
+    expect(rpc).not.toHaveBeenCalledWith("accept_account_invite", expect.anything());
+    expect(setActiveOrg).not.toHaveBeenCalled();
+  });
+
+  it("accepts, selects the new org, and lands on Organization", async () => {
+    vi.mocked(getAuthUser).mockResolvedValue({ id: "u1", email: "Invitee@test.example" });
+    const rpc = vi.fn(async (name: string) => {
+      if (name === "peek_account_invite") {
+        return { data: [{ email: "invitee@test.example", status: "pending" }], error: null };
+      }
+      if (name === "accept_account_invite") {
+        return { data: { org_id: "org-new", kind: "house_grant" }, error: null };
+      }
+      return { data: null, error: null };
+    });
     vi.mocked(createClient).mockResolvedValue({ rpc } as never);
     await expect(acceptAccountInvite({ token: "a".repeat(24) })).rejects.toThrow(
       "REDIRECT:/settings/organization",
     );
     expect(rpc).toHaveBeenCalledWith("accept_account_invite", { p_token_hash: "c".repeat(64) });
+    expect(setActiveOrg).toHaveBeenCalledWith("org-new");
   });
 });
 

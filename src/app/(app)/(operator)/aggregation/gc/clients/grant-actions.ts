@@ -11,10 +11,23 @@ import { GC_CLIENTS_HREF } from "@/lib/clients";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 
-export async function grantHouseAccount(input: unknown): Promise<{ error?: string }> {
+async function assertHouseGrantOperate(): Promise<{ error?: string }> {
   const ctx = await getOrgContext();
   if (!ctx) return { error: HOUSE_GRANT.signedOut };
   if (!ctx.isGcStaff) return { error: HOUSE_GRANT.forbidden };
+
+  const supabase = await createClient();
+  const { data: canOperate, error } = await supabase.rpc("gc_can", {
+    p_uid: ctx.user.id,
+    p_capability: "operate",
+  });
+  if (error || canOperate !== true) return { error: HOUSE_GRANT.forbidden };
+  return {};
+}
+
+export async function grantHouseAccount(input: unknown): Promise<{ error?: string }> {
+  const gate = await assertHouseGrantOperate();
+  if (gate.error) return { error: gate.error };
 
   const parsed = houseGrantSchema.safeParse(input);
   if (!parsed.success) {
@@ -32,7 +45,10 @@ export async function grantHouseAccount(input: unknown): Promise<{ error?: strin
     p_tier: parsed.data.tier,
     p_token_hash: tokenHash,
   });
-  if (error || !inviteId) return { error: error?.message || HOUSE_GRANT.sendFailed };
+  if (error || !inviteId) {
+    if (error?.message === "Not authorized") return { error: HOUSE_GRANT.forbidden };
+    return { error: HOUSE_GRANT.sendFailed };
+  }
 
   const hdrs = await headers();
   try {
@@ -51,16 +67,18 @@ export async function grantHouseAccount(input: unknown): Promise<{ error?: strin
 }
 
 export async function revokeHouseGrant(input: unknown): Promise<{ error?: string }> {
-  const ctx = await getOrgContext();
-  if (!ctx) return { error: HOUSE_GRANT.signedOut };
-  if (!ctx.isGcStaff) return { error: HOUSE_GRANT.forbidden };
+  const gate = await assertHouseGrantOperate();
+  if (gate.error) return { error: gate.error };
 
   const parsed = revokeInviteSchema.safeParse(input);
   if (!parsed.success) return { error: HOUSE_GRANT.revokeFailed };
 
   const supabase = await createClient();
   const { error } = await supabase.rpc("revoke_account_invite", { p_id: parsed.data.id });
-  if (error) return { error: error.message || HOUSE_GRANT.revokeFailed };
+  if (error) {
+    if (error.message === "Not authorized") return { error: HOUSE_GRANT.forbidden };
+    return { error: HOUSE_GRANT.revokeFailed };
+  }
 
   revalidatePath(GC_CLIENTS_HREF);
   return {};

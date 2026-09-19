@@ -14,10 +14,12 @@ import {
   TEAM_INVITE_DEFAULT_ROLE,
   TEAM_INVITE_ROLES,
   acceptInviteSchema,
+  acceptedInviteOrgId,
   grantTierLabel,
   houseGrantSchema,
   inviteAcceptPath,
   inviteEmailSubject,
+  inviteEmailsMatch,
   teamInviteSchema,
   teamRoleLabel,
 } from "./account-invite";
@@ -41,6 +43,21 @@ describe("account invite SoT", () => {
     expect(HOUSE_GRANT_DEFAULT_TIER).toBe("access");
     expect(HOUSE_GRANT.title).toBe("Grant account");
     expect(HOUSE_GRANT.forbidden).toMatch(/house staff/i);
+    expect(HOUSE_GRANT.revoking).toBe("Withdrawing…");
+    expect(HOUSE_GRANT.revoking).not.toBe(HOUSE_GRANT.granting);
+    const grantForm = readFileSync("src/components/staff/house-grant-form.tsx", "utf8");
+    expect(grantForm).toContain("HOUSE_GRANT.revoking");
+    expect(grantForm).not.toContain("revoking === row.id ? HOUSE_GRANT.granting");
+  });
+
+  it("matches invite emails case-insensitively and reads accept org_id", () => {
+    expect(inviteEmailsMatch("Invitee@Test.Example", "invitee@test.example")).toBe(true);
+    expect(inviteEmailsMatch("other@test.example", "invitee@test.example")).toBe(false);
+    expect(inviteEmailsMatch("", "invitee@test.example")).toBe(false);
+    expect(inviteEmailsMatch("  ", "invitee@test.example")).toBe(false);
+    expect(acceptedInviteOrgId({ org_id: "org-new", kind: "house_grant" })).toBe("org-new");
+    expect(acceptedInviteOrgId({ kind: "team" })).toBeNull();
+    expect(ACCOUNT_INVITE_ACCEPT.wrongEmail).toMatch(/invited email/i);
   });
 
   it("validates invite input at the edge", () => {

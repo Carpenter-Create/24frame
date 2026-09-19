@@ -26,8 +26,8 @@ Two kinds, one table:
 | Action | Who |
 | --- | --- |
 | Team invite / withdraw | `member_can(manage_team)` — account owner of that org; `gc_account_owner` via `gc_can` |
-| House grant / withdraw | `is_gc_staff` AND `gc_can(operate)` — house owner + delivery ops. Legal / accountant cannot. |
-| Accept | Authenticated session whose `auth.users.email` matches the invite |
+| House grant / withdraw | `is_gc_staff` AND `gc_can(operate)` — house owner + delivery ops. Legal / accountant cannot. UI hides Grant account unless operate. Actions return SoT `forbidden`, not raw SQL. |
+| Accept | Authenticated session whose email matches the invite (case-normalized). Wrong session sees `wrongEmail` + magic-link for the invited email. After accept, `setActiveOrg` writes `gc_active_org`. |
 | Peek | Knowledge of `token_hash` (public `/invite/accept`) |
 | Team roster | `member_can(view)` on that org |
 | Pending grants list | `is_gc_staff` |
