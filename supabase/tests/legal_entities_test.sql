@@ -3,7 +3,7 @@
 -- backfill, titles FK, membership scope, and scope-aware queries.
 
 begin;
-select plan(16);
+select plan(15);
 
 -- ===== Setup: create a user =====
 select set_config('t.user_a', gen_random_uuid()::text, false);
