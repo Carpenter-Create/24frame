@@ -154,6 +154,7 @@ describe("Activity bell cap", () => {
     expect(activityRelativeTime("2026-09-18T11:00:00.000Z", NOW.getTime())).toBe("1h");
     expect(ACTIVITY_PAGE.viewAll).toBe("View all activity");
     expect(ACTIVITY_PAGE.dismiss).toBe("Mark done");
+    expect(ACTIVITY_PAGE.close).toBe("Close activity");
     expect(ACTIVITY_PAGE).not.toHaveProperty("view");
     expect(ACTIVITY_PAGE).not.toHaveProperty("markAllDone");
     expect(ACTIVITY_BELL_TRIGGER_CLASS).toContain("hover:bg-surface-muted");
