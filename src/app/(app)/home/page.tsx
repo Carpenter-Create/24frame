@@ -166,8 +166,6 @@ export async function HomeOverview({
 
   return (
     <OverviewHome
-      hideHeader
-      displayName={ctx.user.name}
       revenueCents={revenueCents}
       period={period}
       socialUnread={overviewSocialUnreadTotal(inbox.rows)}

@@ -146,7 +146,7 @@ describe("HomePage", () => {
     expect(html).not.toContain("ada@example.com");
     expect(OVERVIEW_PAGE.title).toBe("Home");
     expect(readFileSync("src/app/(app)/home/page.tsx", "utf8")).toContain(
-      "displayName={ctx.user.name}",
+      "homeGreeting({ displayName: ctx.user.name })",
     );
   });
 
