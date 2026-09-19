@@ -534,6 +534,49 @@ describe("ingest OG images", () => {
     const rows = await persist.queryFeed({ limit: 20, now: NOW });
     expect(rows[0]?.image_url).toBe("https://thr.com/og.jpg");
   });
+
+  it("does not overwrite a stored CloudFront thumb when remirror fails", async () => {
+    const persist = memoryNewsStore();
+    const key = newsThumbObjectKey(
+      "hollywood-reporter",
+      "https://hollywoodreporter.com/movies/movie-news/needs-og",
+      "jpg",
+    );
+    const cfUrl = `https://delivery.globalcontent.co/${key}`;
+    await persist.upsertItems(
+      [
+        {
+          title: "Needs OG",
+          url: "https://hollywoodreporter.com/movies/movie-news/needs-og",
+          canonical_url: "https://hollywoodreporter.com/movies/movie-news/needs-og",
+          source: "hollywood-reporter",
+          published_at: "2026-09-17T12:00:00.000Z",
+          image_url: cfUrl,
+          topic: "film",
+        },
+      ],
+      NOW,
+    );
+    const prevCf = process.env.CLOUDFRONT_DOMAIN;
+    process.env.CLOUDFRONT_DOMAIN = "https://delivery.globalcontent.co";
+    try {
+      await ingestNewsFeeds({
+        persist,
+        now: NOW,
+        fetchXml: async (url: string) => (url === THR_MOVIES_FEED ? FEED_NO_THUMB : EMPTY_FEED),
+        fetchOgHtml: async () => `<meta property="og:image" content="https://thr.com/og.jpg" />`,
+        fetchThumb: async () => new Response("nope", { status: 403 }),
+        putThumb: async () => {
+          throw new Error("AccessDenied");
+        },
+      });
+    } finally {
+      if (prevCf === undefined) delete process.env.CLOUDFRONT_DOMAIN;
+      else process.env.CLOUDFRONT_DOMAIN = prevCf;
+    }
+    const rows = await persist.queryFeed({ limit: 20, now: NOW });
+    expect(rows[0]?.image_url).toBe(cfUrl);
+  });
 });
 
 describe("fetchNewsArticleHtml", () => {

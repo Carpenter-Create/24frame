@@ -77,6 +77,15 @@ describe("mergeNewsImageUrl", () => {
     expect(mergeNewsImageUrl(FLOOD_WWW, next)).toBe(next);
     expect(mergeNewsImageUrl(null, FLOOD_WWW)).toBe(FLOOD_WWW);
   });
+
+  it("keeps a stored CloudFront thumb when incoming is a remirror-miss remote", () => {
+    const cf = "https://delivery.globalcontent.co/news-thumbs/joblo/abc.jpg";
+    expect(mergeNewsImageUrl(cf, FLOOD_WWW)).toBe(cf);
+    expect(mergeNewsImageUrl(cf, null)).toBe(cf);
+    expect(mergeNewsImageUrl(cf, "https://delivery.globalcontent.co/news-thumbs/joblo/def.jpg")).toBe(
+      "https://delivery.globalcontent.co/news-thumbs/joblo/def.jpg",
+    );
+  });
 });
 
 describe("memoryNewsStore image_url merge", () => {
@@ -98,11 +107,24 @@ describe("memoryNewsStore image_url merge", () => {
     const rows = await store.queryFeed({ limit: 20, now: NOW });
     expect(rows[0]?.image_url).toBe(next);
   });
+
+  it("upsert with a remirror-miss remote does not overwrite a CloudFront thumb", async () => {
+    const store = memoryNewsStore();
+    const cf = "https://delivery.globalcontent.co/news-thumbs/joblo/abc.jpg";
+    await store.upsertItems([floodItem(cf)], NOW);
+    await store.upsertItems([floodItem(FLOOD_WWW)], NOW);
+    const rows = await store.queryFeed({ limit: 20, now: NOW });
+    expect(rows[0]?.image_url).toBe(cf);
+  });
 });
 
 describe("news-store source", () => {
   it("both persist stores merge image_url through mergeNewsImageUrl", () => {
     const src = readFileSync(new URL("./news-store.ts", import.meta.url), "utf8");
     expect([...src.matchAll(/image_url:\s*mergeNewsImageUrl\(/g)]).toHaveLength(2);
+    expect(src).not.toMatch(
+      /const existing = normalizeNewsImageUrl\(row\.image_url\)\s*\?\s*null/,
+    );
+    expect(src).toContain("isMirroredNewsThumbUrl(incoming)");
   });
 });

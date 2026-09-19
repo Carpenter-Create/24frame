@@ -31,6 +31,7 @@ import {
   type NewsSourceId,
 } from "@/lib/news";
 import type { NormalizedNewsItem } from "@/lib/news-rss";
+import { isMirroredNewsThumbUrl } from "@/lib/news-thumbs";
 import type { NewsTopic } from "@/lib/news-topic";
 
 export type NewsPersist = {
@@ -82,14 +83,22 @@ function normalizeNewsImageUrl(url: string | null | undefined): string | null {
   return trimmed ? trimmed : null;
 }
 
-/** Keep a stored thumb when a later ingest has no image. Never write null over a good URL. */
+/**
+ * Keep a stored thumb when a later ingest has no image. Never write null
+ * over a good URL. Never replace a CloudFront thumb with a remirror-miss
+ * publisher URL — scheduled ingest always starts from the live RSS/OG URL.
+ */
 export function mergeNewsImageUrl(
   existing: string | null | undefined,
   incoming: string | null | undefined,
 ): string | null {
   const next = normalizeNewsImageUrl(incoming);
+  const prior = normalizeNewsImageUrl(existing);
+  if (prior && isMirroredNewsThumbUrl(prior) && !isMirroredNewsThumbUrl(next)) {
+    return prior;
+  }
   if (next) return next;
-  return normalizeNewsImageUrl(existing);
+  return prior;
 }
 
 function recordToItem(row: NewsItemRecord): NewsItem | null {
@@ -216,9 +225,11 @@ export function dynamoNewsStore(env: NewsEnv = process.env): NewsStore {
       const fetchedAt = now.toISOString();
       await Promise.all(
         rows.map(async (row) => {
-          const existing = normalizeNewsImageUrl(row.image_url)
-            ? null
-            : await existingNewsImageUrl(doc, table, row.canonical_url);
+          const incoming = normalizeNewsImageUrl(row.image_url);
+          const existing =
+            incoming && isMirroredNewsThumbUrl(incoming)
+              ? null
+              : await existingNewsImageUrl(doc, table, row.canonical_url);
           await doc.send(
             new PutCommand({
               TableName: table,
