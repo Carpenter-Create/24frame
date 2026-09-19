@@ -455,12 +455,28 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     ]);
 
     expect(SOCIAL_PHONE_DESTS.map((item) => item.label)).toEqual([
+      "Feed",
+      "Explore",
+      "Create",
+      "Messages",
+      "Profile",
+    ]);
+    expect(SOCIAL_PHONE_DESTS.map((item) => item.href)).toEqual([
+      SOCIAL_ROUTES.home,
+      SOCIAL_ROUTES.explore,
+      SOCIAL_ROUTES.create,
+      SOCIAL_ROUTES.dms,
+      SOCIAL_ROUTES.profile,
+    ]);
+    expect(housePhoneDestinations(false, "social").map((item) => item.label)).toEqual([
+      "Feed",
       "Explore",
       "Create",
       "Messages",
       "Profile",
     ]);
     expect(housePhoneDestinations(false, "social").map((item) => item.href)).toEqual([
+      SOCIAL_ROUTES.home,
       SOCIAL_ROUTES.explore,
       SOCIAL_ROUTES.create,
       SOCIAL_ROUTES.dms,
@@ -502,12 +518,36 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     const social = renderToStaticMarkup(
       createElement(HousePhoneDestChips, { workspace: "social" }),
     );
+    expect(social).toContain('data-house-phone-dest="Feed"');
     expect(social).toContain('data-house-phone-dest="Explore"');
     expect(social).toContain('data-house-phone-dest="Create"');
     expect(social).toContain('data-house-phone-dest="Messages"');
     expect(social).toContain('data-house-phone-dest="Profile"');
     expect(social).not.toContain('data-house-phone-dest="Home"');
+    expect(social.indexOf('data-house-phone-dest="Feed"')).toBeLessThan(
+      social.indexOf('data-house-phone-dest="Explore"'),
+    );
+    expect(social).toContain(`href="${SOCIAL_ROUTES.home}"`);
     expect(social).not.toContain("data-social-tab-bar");
+
+    navigation.pathname = SOCIAL_ROUTES.home;
+    const socialFeed = renderToStaticMarkup(
+      createElement(HousePhoneDestChips, { workspace: "social" }),
+    );
+    expect(socialFeed).toMatch(
+      /<a[^>]+href="\/social"[^>]*aria-current="page"[^>]*data-house-phone-dest="Feed"/,
+    );
+    expect(socialFeed).not.toMatch(
+      /<a[^>]+href="\/social\/explore"[^>]*aria-current="page"/,
+    );
+
+    navigation.pathname = "/social/create";
+    const socialCreate = renderToStaticMarkup(
+      createElement(HousePhoneDestChips, { workspace: "social" }),
+    );
+    expect(socialCreate).not.toMatch(
+      /<a[^>]+href="\/social"[^>]*aria-current="page"/,
+    );
   });
 
   it("mounts one HousePhoneAppShell on every workspace and keeps Social off a second float", () => {
@@ -552,10 +592,15 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     );
     expect(social).toContain("data-house-phone-bottom-nav");
     expect(social).toContain("data-house-phone-dest-chips");
+    expect(social).toContain('data-house-phone-dest="Feed"');
     expect(social).toContain('data-house-phone-dest="Explore"');
     expect(social).toContain('data-house-phone-dest="Create"');
     expect(social).toContain('data-house-phone-dest="Messages"');
     expect(social).toContain('data-house-phone-dest="Profile"');
+    expect(social.indexOf('data-house-phone-dest="Feed"')).toBeLessThan(
+      social.indexOf('data-house-phone-dest="Explore"'),
+    );
+    expect(social).not.toContain('data-house-phone-dest="Home"');
     expect(social).not.toContain("data-social-tab-bar");
     expect(social).not.toContain('data-social-tab-item="Create"');
     expect(social).not.toContain("data-app-header-workspace-pill");

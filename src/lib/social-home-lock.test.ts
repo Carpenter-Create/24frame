@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { SOCIAL_DESKTOP_NAV, SOCIAL_NAV } from "./nav";
+import { SOCIAL_PHONE_DESTS, SOCIAL_PHONE_FEED_LABEL } from "./house-phone-shell";
 import { SOCIAL_CATEGORY_LABELS } from "./social-categories";
 import {
   SOCIAL_DESKTOP_MEASURE,
@@ -327,6 +328,25 @@ describe("Social Home miss list v1 P0 lock", () => {
       "Messages",
       "Profile",
     ]);
+    expect(SOCIAL_PHONE_DESTS.map((item) => item.label)).toEqual([
+      "Feed",
+      "Explore",
+      "Create",
+      "Messages",
+      "Profile",
+    ]);
+    expect(SOCIAL_PHONE_DESTS.map((item) => item.href)).toEqual([
+      SOCIAL_ROUTES.home,
+      SOCIAL_ROUTES.explore,
+      SOCIAL_ROUTES.create,
+      SOCIAL_ROUTES.dms,
+      SOCIAL_ROUTES.profile,
+    ]);
+    expect(SOCIAL_PHONE_FEED_LABEL).toBe("Feed");
+    expect(SOCIAL_PHONE_DESTS.map((item) => item.label)).not.toContain("Home");
+    const feedItem = SOCIAL_PHONE_DESTS.find((item) => item.label === SOCIAL_PHONE_FEED_LABEL);
+    expect(feedItem?.href).toBe(SOCIAL_ROUTES.home);
+    expect(feedItem?.exact).toBe(true);
   });
 
   it("keeps Social nav prefetch on and destination pages parallel", () => {
