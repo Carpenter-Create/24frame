@@ -26,6 +26,7 @@ export function SettingsDrillRow({
   kind,
   readOnly = false,
   helper,
+  badge,
 }: {
   label: string;
   value?: string;
@@ -33,12 +34,20 @@ export function SettingsDrillRow({
   kind: string;
   readOnly?: boolean;
   helper?: string;
+  badge?: ReactNode;
 }) {
   const canOpen = Boolean(href) && !readOnly;
   const body = (
     <>
       <span className={SETTINGS_DRILL_COPY_CLASS}>
-        <span>{label}</span>
+        {badge ? (
+          <span className="flex min-w-0 flex-wrap items-center gap-[var(--space-2)]">
+            <span>{label}</span>
+            {badge}
+          </span>
+        ) : (
+          <span>{label}</span>
+        )}
         {value ? <span className={SETTINGS_DRILL_VALUE_CLASS}>{value}</span> : null}
         {helper ? <span className={SETTINGS_DRILL_VALUE_CLASS}>{helper}</span> : null}
       </span>

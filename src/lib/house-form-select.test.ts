@@ -17,7 +17,7 @@ import {
 } from "./house-page-select";
 
 const invite = readFileSync("src/components/settings/team-invite-form.tsx", "utf8");
-const entities = readFileSync("src/components/settings/legal-entities-section.tsx", "utf8");
+const entities = readFileSync("src/components/settings/legal-entity-editor.tsx", "utf8");
 const selectSrc = readFileSync("src/components/ui/select.tsx", "utf8");
 
 describe("house form Select SoT", () => {

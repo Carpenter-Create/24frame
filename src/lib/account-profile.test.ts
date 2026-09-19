@@ -27,6 +27,10 @@ const companyFormSrc = readFileSync(
   join(here, "../app/(app)/account/company-profile-form.tsx"),
   "utf8",
 );
+const companyEditorSrc = readFileSync(
+  join(here, "../components/settings/company-name-editor.tsx"),
+  "utf8",
+);
 const inputSrc = readFileSync(join(here, "../components/ui/input.tsx"), "utf8");
 const globalsSrc = readFileSync(join(here, "../app/globals.css"), "utf8");
 
@@ -40,6 +44,7 @@ describe("account profile copy", () => {
       "Name of the company aggregation workspace on this account.",
     );
     expect(COMPANY_PROFILE.href).toBe("/settings/organization");
+    expect(COMPANY_PROFILE.editHref).toBe("/settings/organization/company");
     expect(ACCOUNT_PROFILE.href).toBe(USER_MENU.profileHref);
     expect(ACCOUNT_PROFILE).not.toHaveProperty("subtitle");
     expect(ACCOUNT_PROFILE.uploadPhoto).toBe("Upload photo");
@@ -164,12 +169,13 @@ describe("account field 16px lock", () => {
     expect(formSrc).toContain("export function AccountNameForm");
     expect(formSrc).toContain("export function AccountPhotoField");
     expect(formSrc).toContain("data-account-name-form");
-    expect(companyFormSrc).toContain("<Input");
-    expect(companyFormSrc).not.toContain("ACCOUNT_FIELD_CLASS");
-    expect(companyFormSrc).toContain('#company-name")?.blur()');
+    expect(companyEditorSrc).toContain("<Input");
+    expect(companyEditorSrc).not.toContain("ACCOUNT_FIELD_CLASS");
+    expect(companyEditorSrc).toContain('#company-name")?.blur()');
+    expect(companyEditorSrc).toContain("DialogFooter");
     expect(companyFormSrc).toContain("<Dialog");
-    expect(companyFormSrc).toContain("DialogFooter");
     expect(companyFormSrc).toContain("data-company-edit");
+    expect(companyFormSrc).toContain("SettingsDrillRow");
     expect(companyFormSrc).toContain("COMPANY_PROFILE_VIEW_CLASS");
     expect(companyFormSrc).not.toContain("flex flex-col gap-[var(--space-4)]");
   });

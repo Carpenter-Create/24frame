@@ -46,6 +46,23 @@ describe("SettingsDrillRow", () => {
     expect(html).not.toContain("href=");
     expect(html).not.toContain("<a");
   });
+
+  it("keeps an optional badge on the label — Rights Holder default chip", () => {
+    const html = renderToStaticMarkup(
+      createElement(SettingsDrillRow, {
+        kind: "entity-ent-1",
+        label: "Acme LLC",
+        value: "LLC · Wyoming",
+        href: "/settings/organization/entities/ent-1",
+        badge: createElement("span", { "data-default-chip": "" }, "Default"),
+      }),
+    );
+    expect(html).toContain('data-settings-drill-row="entity-ent-1"');
+    expect(html).toContain("Acme LLC");
+    expect(html).toContain("LLC · Wyoming");
+    expect(html).toContain("data-default-chip");
+    expect(html).toContain("Default");
+  });
 });
 
 describe("SettingsEditPane", () => {

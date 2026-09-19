@@ -3,39 +3,28 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { SettingsDrillRow } from "@/components/settings/settings-drill";
+import { LegalEntityEditor } from "@/components/settings/legal-entity-editor";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Dialog } from "@/components/ui/dialog";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { StatusChip } from "@/components/layout/status-chip";
-import { Select } from "@/components/ui/select";
-import {
-  SETTINGS_DIALOG_FIELD_CLASS,
-  SETTINGS_DIALOG_FORM_CLASS,
-  SETTINGS_PANE_TITLE_CLASS,
-} from "@/lib/settings";
+import { cn } from "@/lib/cn";
+import { SETTINGS_DRILL_LIST_CLASS, SETTINGS_PANE_TITLE_CLASS } from "@/lib/settings";
 import {
   LEGAL_ENTITIES,
-  ENTITY_TYPES,
   ENTITY_LIST_ACTIONS_CLASS,
   ENTITY_LIST_CLASS,
-  ENTITY_LIST_FIELD_CLASS,
-  ENTITY_LIST_FIELD_LABEL_CLASS,
-  ENTITY_LIST_HEADER_CLASS,
+  ENTITY_LIST_ITEMS_CLASS,
+  ENTITY_LIST_META_CLASS,
   ENTITY_LIST_NAME_CLASS,
+  ENTITY_LIST_NAME_ROW_CLASS,
   ENTITY_LIST_ROW_CLASS,
   ENTITY_LIST_VALUE_CLASS,
-  entityTypeLabel,
-  entityJurisdictionLabel,
-  entityJurisdictionClass,
-  type EntityType,
+  entityEditHref,
+  entityMetaLine,
   type LegalEntityRow,
 } from "@/lib/legal-entities";
-import {
-  addLegalEntity,
-  updateLegalEntity,
-} from "@/app/(app)/settings/organization/actions";
 
 export function LegalEntitiesSection({
   orgId,
@@ -47,75 +36,25 @@ export function LegalEntitiesSection({
   entities: LegalEntityRow[];
 }) {
   const [mode, setMode] = useState<"add" | "edit" | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [name, setName] = useState("");
-  const [entityType, setEntityType] = useState<EntityType>("other");
-  const [jurisdiction, setJurisdiction] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
+  const [editing, setEditing] = useState<LegalEntityRow | null>(null);
   const [added, setAdded] = useState(false);
   const router = useRouter();
 
-  function resetDraft() {
-    setName("");
-    setEntityType("other");
-    setJurisdiction("");
-    setEditingId(null);
-  }
-
   function closeModal() {
     setMode(null);
-    setSaving(false);
-    setError("");
-    resetDraft();
+    setEditing(null);
   }
 
   function openAdd() {
-    resetDraft();
-    setError("");
     setAdded(false);
+    setEditing(null);
     setMode("add");
   }
 
   function openEdit(entity: LegalEntityRow) {
     setAdded(false);
-    setError("");
-    setEditingId(entity.id);
-    setName(entity.name);
-    setEntityType(entity.entityType);
-    setJurisdiction(entity.jurisdiction ?? "");
+    setEditing(entity);
     setMode("edit");
-  }
-
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (!canManage || !mode) return;
-    setSaving(true);
-    setError("");
-    setAdded(false);
-    const res =
-      mode === "edit" && editingId
-        ? await updateLegalEntity({
-            orgId,
-            entityId: editingId,
-            name,
-            entityType,
-            jurisdiction,
-          })
-        : await addLegalEntity({
-            orgId,
-            name,
-            entityType,
-            jurisdiction: jurisdiction || undefined,
-          });
-    if (res.error) {
-      setError(res.error);
-      setSaving(false);
-      return;
-    }
-    if (mode === "add") setAdded(true);
-    closeModal();
-    router.refresh();
   }
 
   return (
@@ -123,9 +62,24 @@ export function LegalEntitiesSection({
       <div className="flex items-center justify-between gap-[var(--space-4)]">
         <h2 className={SETTINGS_PANE_TITLE_CLASS}>{LEGAL_ENTITIES.title}</h2>
         {canManage ? (
-          <Button type="button" data-entity-add-cta="" onClick={openAdd}>
-            {LEGAL_ENTITIES.add}
-          </Button>
+          <>
+            <Button
+              type="button"
+              data-entity-add-cta=""
+              className="md:hidden"
+              onClick={() => router.push(LEGAL_ENTITIES.addHref)}
+            >
+              {LEGAL_ENTITIES.add}
+            </Button>
+            <Button
+              type="button"
+              data-entity-add-cta=""
+              className="hidden md:inline-flex"
+              onClick={openAdd}
+            >
+              {LEGAL_ENTITIES.add}
+            </Button>
+          </>
         ) : null}
       </div>
 
@@ -137,60 +91,61 @@ export function LegalEntitiesSection({
         <p className="t-body text-ink-2">{LEGAL_ENTITIES.empty}</p>
       ) : (
         <div data-entity-list="" className={ENTITY_LIST_CLASS}>
-          <div className={ENTITY_LIST_HEADER_CLASS} data-entity-list-head="">
-            <span>{LEGAL_ENTITIES.nameColumn}</span>
-            <span>{LEGAL_ENTITIES.typeColumn}</span>
-            <span>{LEGAL_ENTITIES.jurisdictionColumn}</span>
-            <span className={ENTITY_LIST_ACTIONS_CLASS}>{LEGAL_ENTITIES.actionsColumn}</span>
-          </div>
-          <ul className="flex flex-col divide-y divide-hairline border-t border-hairline">
+          <ul className={ENTITY_LIST_ITEMS_CLASS}>
             {entities.map((entity) => (
               <li
                 key={entity.id}
                 data-entity-id={entity.id}
-                className={ENTITY_LIST_ROW_CLASS}
+                className={canManage ? undefined : ENTITY_LIST_ROW_CLASS}
               >
-                <span data-entity-field="name" className={ENTITY_LIST_NAME_CLASS}>
-                  <span className={ENTITY_LIST_VALUE_CLASS}>{entity.name}</span>
-                  {entity.isDefault ? (
-                    <StatusChip label={LEGAL_ENTITIES.default} tone="neutral" />
-                  ) : null}
-                </span>
-                <span data-entity-field="type" className={ENTITY_LIST_FIELD_CLASS}>
-                  <span className={ENTITY_LIST_FIELD_LABEL_CLASS}>
-                    {LEGAL_ENTITIES.typeColumn}
-                  </span>
-                  <span className={ENTITY_LIST_VALUE_CLASS}>
-                    {entityTypeLabel(entity.entityType)}
-                  </span>
-                </span>
-                <span data-entity-field="jurisdiction" className={ENTITY_LIST_FIELD_CLASS}>
-                  <span className={ENTITY_LIST_FIELD_LABEL_CLASS}>
-                    {LEGAL_ENTITIES.jurisdictionColumn}
-                  </span>
-                  <span className={entityJurisdictionClass(entity.jurisdiction)}>
-                    {entityJurisdictionLabel(entity.jurisdiction)}
-                  </span>
-                </span>
-                <span data-entity-field="actions" className={ENTITY_LIST_ACTIONS_CLASS}>
-                  {canManage ? (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      data-entity-edit=""
-                      onClick={() => openEdit(entity)}
-                    >
-                      {LEGAL_ENTITIES.edit}
-                    </Button>
-                  ) : null}
-                </span>
+                {canManage ? (
+                  <div className={`md:hidden ${SETTINGS_DRILL_LIST_CLASS}`}>
+                    <SettingsDrillRow
+                      kind={`entity-${entity.id}`}
+                      label={entity.name}
+                      value={entityMetaLine(entity.entityType, entity.jurisdiction)}
+                      href={entityEditHref(entity.id)}
+                      badge={
+                        entity.isDefault ? (
+                          <StatusChip label={LEGAL_ENTITIES.default} tone="neutral" />
+                        ) : undefined
+                      }
+                    />
+                  </div>
+                ) : (
+                  <EntitySummary entity={entity} />
+                )}
+                {canManage ? (
+                  <div className={cn(ENTITY_LIST_ROW_CLASS, "max-md:hidden")}>
+                    <div data-entity-name-row="" className={ENTITY_LIST_NAME_ROW_CLASS}>
+                      <span data-entity-field="name" className={ENTITY_LIST_NAME_CLASS}>
+                        <span className={ENTITY_LIST_VALUE_CLASS}>{entity.name}</span>
+                        {entity.isDefault ? (
+                          <StatusChip label={LEGAL_ENTITIES.default} tone="neutral" />
+                        ) : null}
+                      </span>
+                      <span data-entity-field="actions" className={ENTITY_LIST_ACTIONS_CLASS}>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          data-entity-edit=""
+                          onClick={() => openEdit(entity)}
+                        >
+                          {LEGAL_ENTITIES.edit}
+                        </Button>
+                      </span>
+                    </div>
+                    <p data-entity-field="meta" className={ENTITY_LIST_META_CLASS}>
+                      {entityMetaLine(entity.entityType, entity.jurisdiction)}
+                    </p>
+                  </div>
+                ) : null}
               </li>
             ))}
           </ul>
         </div>
       )}
 
-      {error && !mode ? <InlineNotice tone="error">{error}</InlineNotice> : null}
       {added ? <InlineNotice>{LEGAL_ENTITIES.added}</InlineNotice> : null}
 
       {canManage ? (
@@ -200,68 +155,38 @@ export function LegalEntitiesSection({
           title={mode === "edit" ? LEGAL_ENTITIES.edit : LEGAL_ENTITIES.add}
           size="md"
         >
-          <form
-            onSubmit={onSubmit}
-            className={SETTINGS_DIALOG_FORM_CLASS}
-            data-entity-add-form={mode === "add" ? "" : undefined}
-            data-entity-edit-form={mode === "edit" ? "" : undefined}
-          >
-            <div className={SETTINGS_DIALOG_FIELD_CLASS}>
-              <Label htmlFor="entity-name">{LEGAL_ENTITIES.nameLabel}</Label>
-              <Input
-                id="entity-name"
-                name="name"
-                type="text"
-                autoComplete="off"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </div>
-            <div className={SETTINGS_DIALOG_FIELD_CLASS}>
-              <Label htmlFor="entity-type">{LEGAL_ENTITIES.typeLabel}</Label>
-              <Select
-                id="entity-type"
-                name="entityType"
-                value={entityType}
-                aria-label={LEGAL_ENTITIES.typeLabel}
-                options={ENTITY_TYPES.map((value) => ({
-                  value,
-                  label: entityTypeLabel(value),
-                }))}
-                onChange={(next) => setEntityType(next as EntityType)}
-              />
-            </div>
-            <div className={SETTINGS_DIALOG_FIELD_CLASS}>
-              <Label htmlFor="entity-jurisdiction">{LEGAL_ENTITIES.jurisdictionLabel}</Label>
-              <Input
-                id="entity-jurisdiction"
-                name="jurisdiction"
-                type="text"
-                autoComplete="off"
-                placeholder={LEGAL_ENTITIES.jurisdictionHint}
-                value={jurisdiction}
-                onChange={(e) => setJurisdiction(e.target.value)}
-              />
-            </div>
-            {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
-            <DialogFooter>
-              <Button type="button" variant="secondary" disabled={saving} onClick={closeModal}>
-                {LEGAL_ENTITIES.cancel}
-              </Button>
-              <Button type="submit" disabled={saving}>
-                {mode === "edit"
-                  ? saving
-                    ? LEGAL_ENTITIES.saving
-                    : LEGAL_ENTITIES.save
-                  : saving
-                    ? LEGAL_ENTITIES.adding
-                    : LEGAL_ENTITIES.add}
-              </Button>
-            </DialogFooter>
-          </form>
+          {mode ? (
+            <LegalEntityEditor
+              key={mode === "edit" ? editing?.id ?? "edit" : "add"}
+              orgId={orgId}
+              mode={mode}
+              entity={mode === "edit" ? editing ?? undefined : undefined}
+              chrome="dialog"
+              onClose={closeModal}
+              onSaved={() => {
+                if (mode === "add") setAdded(true);
+                closeModal();
+              }}
+            />
+          ) : null}
         </Dialog>
       ) : null}
     </div>
+  );
+}
+
+function EntitySummary({ entity }: { entity: LegalEntityRow }) {
+  return (
+    <>
+      <span data-entity-field="name" className={ENTITY_LIST_NAME_CLASS}>
+        <span className={ENTITY_LIST_VALUE_CLASS}>{entity.name}</span>
+        {entity.isDefault ? (
+          <StatusChip label={LEGAL_ENTITIES.default} tone="neutral" />
+        ) : null}
+      </span>
+      <p data-entity-field="meta" className={ENTITY_LIST_META_CLASS}>
+        {entityMetaLine(entity.entityType, entity.jurisdiction)}
+      </p>
+    </>
   );
 }

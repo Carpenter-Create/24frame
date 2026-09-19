@@ -133,6 +133,7 @@ export async function addLegalEntity(input: unknown): Promise<{ error?: string }
   if (error) return { error: error.message || LEGAL_ENTITIES.addFailed };
 
   revalidatePath("/settings/organization");
+  revalidatePath("/settings/organization", "layout");
   return {};
 }
 
@@ -160,6 +161,7 @@ export async function updateLegalEntity(input: unknown): Promise<{ error?: strin
   if (error) return { error: error.message || LEGAL_ENTITIES.updateFailed };
 
   revalidatePath("/settings/organization");
+  revalidatePath("/settings/organization", "layout");
   return {};
 }
 

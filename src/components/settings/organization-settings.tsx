@@ -14,6 +14,7 @@ import {
 } from "@/lib/settings";
 import type { OrgRole } from "@/lib/org-roles";
 import type { EntityScope, LegalEntityRow } from "@/lib/legal-entities";
+import { mapOrgLegalEntity } from "@/lib/legal-entities";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 import { CompanyProfileForm } from "@/app/(app)/account/company-profile-form";
@@ -70,15 +71,7 @@ export async function OrganizationSettings() {
       sentAt: row.created_at,
       entityScope: row.entity_scope,
     }));
-    entities = (entitiesRes.data ?? []).map((row) => ({
-      id: row.id,
-      name: row.name,
-      entityType: row.entity_type,
-      jurisdiction: row.jurisdiction,
-      isDefault: row.is_default,
-      status: row.status,
-      createdAt: row.created_at,
-    }));
+    entities = (entitiesRes.data ?? []).map(mapOrgLegalEntity);
   }
 
   return (
