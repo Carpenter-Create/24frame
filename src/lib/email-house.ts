@@ -36,8 +36,25 @@ export const EMAIL_LEGAL_URL = "https://24frame.co/legal";
 // Legal/footer stay tertiary.
 // Copyright (Adam lock 2026-09-19): product + parent. Year is the calendar
 // year at wrap/send — do not freeze a stale year in the house wrap.
-export function emailCopyright(year = new Date().getFullYear()): string {
+// Auth HTML twins cannot call JS. They store emailCopyrightPlaceholder();
+// applyEmailCopyright() is the sync helper. Hosted Auth magic_link is not
+// the send path — SES wrapHouseEmail is.
+export const EMAIL_COPYRIGHT_YEAR_TOKEN = "__EMAIL_YEAR__";
+
+export function emailCopyright(year: number | string = new Date().getFullYear()): string {
   return `© ${year} ${PRODUCT_NAME}, a division of ${PARENT_ENTITY}. All rights reserved.`;
+}
+
+export function emailCopyrightPlaceholder(): string {
+  return emailCopyright(EMAIL_COPYRIGHT_YEAR_TOKEN);
+}
+
+export function applyEmailCopyright(html: string, year = new Date().getFullYear()): string {
+  const placeholder = emailCopyrightPlaceholder();
+  if (!html.includes(placeholder)) {
+    throw new Error("Email HTML is missing the emailCopyright year placeholder");
+  }
+  return html.replaceAll(placeholder, emailCopyright(year));
 }
 export const EMAIL_ADDRESS = "3839 McKinney Ave, Suite 155 #2276, Dallas, TX 75204";
 export const EMAIL_GEIST_HREF =
