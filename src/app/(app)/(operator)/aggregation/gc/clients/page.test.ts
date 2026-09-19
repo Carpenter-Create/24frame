@@ -99,7 +99,7 @@ describe("GcClientsPage read bound", () => {
     ];
     const rpc = vi.fn(async (name: string) => {
       if (name === "gc_can") return { data: true, error: null };
-      if (name === "pending_house_grants") return { data: [], error: null };
+      if (name === "house_grants") return { data: [], error: null };
       return { data: seats, error: null };
     });
     vi.mocked(createClient).mockResolvedValue({ rpc } as never);
@@ -123,7 +123,7 @@ describe("GcClientsPage read bound", () => {
     expect(html).toContain("Grant account");
     expect(html).toContain("data-house-grant-form");
     expect(rpc).toHaveBeenCalledWith("gc_can", { p_uid: "staff-1", p_capability: "operate" });
-    expect(rpc).toHaveBeenCalledWith("pending_house_grants", { p_limit: UNPAGINATED_MAX + 1 });
+    expect(rpc).toHaveBeenCalledWith("house_grants", { p_limit: UNPAGINATED_MAX + 1 });
 
     const directorySrc = readFileSync(
       "src/app/(app)/(operator)/aggregation/gc/clients/clients-directory.tsx",
@@ -163,6 +163,53 @@ describe("GcClientsPage read bound", () => {
     expect(html).not.toContain(HOUSE_GRANT.title);
     expect(html).not.toContain("data-house-grant-form");
     expect(rpc).toHaveBeenCalledWith("gc_can", { p_uid: "staff-1", p_capability: "operate" });
-    expect(rpc).not.toHaveBeenCalledWith("pending_house_grants", expect.anything());
+    expect(rpc).not.toHaveBeenCalledWith("house_grants", expect.anything());
+  });
+
+  it("shows Invited and Accepted on house grants after send", async () => {
+    const grants = [
+      {
+        id: "g-pending",
+        email: "pending@test.example",
+        org_name: "Pending Films",
+        tier: "access",
+        status: "pending",
+        org_id: null,
+        expires_at: "2026-10-03T00:00:00Z",
+        created_at: "2026-09-19T00:00:00Z",
+        accepted_at: null,
+      },
+      {
+        id: "g-accepted",
+        email: "accepted@test.example",
+        org_name: "Accepted Films",
+        tier: "pro",
+        status: "accepted",
+        org_id: "33333333-3333-4333-8333-333333333333",
+        expires_at: "2026-10-03T00:00:00Z",
+        created_at: "2026-09-18T00:00:00Z",
+        accepted_at: "2026-09-19T12:00:00Z",
+      },
+    ];
+    const rpc = vi.fn(async (name: string) => {
+      if (name === "gc_can") return { data: true, error: null };
+      if (name === "house_grants") return { data: grants, error: null };
+      return { data: [], error: null };
+    });
+    vi.mocked(createClient).mockResolvedValue({ rpc } as never);
+
+    const html = renderToStaticMarkup(await GcClientsPage());
+    expect(html).toContain("pending@test.example");
+    expect(html).toContain("accepted@test.example");
+    expect(html).toContain('data-invite-status="invited"');
+    expect(html).toContain('data-invite-status="accepted"');
+    expect(html).toContain(HOUSE_GRANT.invited);
+    expect(html).toContain(HOUSE_GRANT.accepted);
+    expect(html).toContain("/aggregation/gc/clients/33333333-3333-4333-8333-333333333333");
+    expect(html).toContain(HOUSE_GRANT.revoke);
+    const acceptedStart = html.indexOf("accepted@test.example");
+    const acceptedRow = html.slice(acceptedStart, html.indexOf("</li>", acceptedStart));
+    expect(acceptedRow).not.toContain(HOUSE_GRANT.revoke);
+    expect(html).not.toContain(HOUSE_GRANT.empty);
   });
 });

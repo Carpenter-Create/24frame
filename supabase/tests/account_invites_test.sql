@@ -3,7 +3,7 @@
 -- Fail-closed: viewer cannot invite; non-staff cannot grant; email must match.
 
 begin;
-select plan(29);
+select plan(32);
 
 select set_config('t.org',          gen_random_uuid()::text, false);
 select set_config('t.org_b',        gen_random_uuid()::text, false);
@@ -220,6 +220,12 @@ select is(
   'pro',
   'house grant stores the tier');
 
+select is(
+  (select status::text from public.house_grants()
+    where id = current_setting('t.grant_id')::uuid),
+  'pending',
+  'pending house grant is listed as Invited-ready');
+
 select throws_ok(
   format(
     $$ select public.grant_house_account('owner@test.example', 'Nope Films', 'access', %L) $$,
@@ -282,6 +288,25 @@ select is(
     where s.org_id = current_setting('t.grant_org')::uuid),
   0,
   'comp does not invent a Stripe subscription');
+
+-- Accepted grant stays on the staff list (does not vanish).
+select set_config('request.jwt.claims',
+  json_build_object('sub', current_setting('t.gc_ops'), 'role', 'authenticated')::text, true);
+
+select is(
+  (select status::text from public.house_grants()
+    where id = current_setting('t.grant_id')::uuid),
+  'accepted',
+  'accepted house grant remains visible');
+
+select is(
+  (select org_id::text from public.house_grants()
+    where id = current_setting('t.grant_id')::uuid),
+  current_setting('t.grant_org'),
+  'accepted grant carries the new org');
+
+select set_config('request.jwt.claims',
+  json_build_object('sub', current_setting('t.grant_user'), 'role', 'authenticated')::text, true);
 
 -- After accept, the new account owner can invite their own team.
 select lives_ok(

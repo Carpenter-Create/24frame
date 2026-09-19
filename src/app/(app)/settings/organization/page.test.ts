@@ -82,6 +82,55 @@ describe("SettingsOrganizationPage", () => {
     expect(paneSrc).not.toContain("out of scope");
   });
 
+  it("shows Invited on pending and Accepted on members", async () => {
+    const rpc = vi.fn(async (name: string) => {
+      if (name === "member_can") return { data: true, error: null };
+      if (name === "org_team") {
+        return {
+          data: [
+            {
+              user_id: "u1",
+              email: "ada@example.com",
+              role: "account_owner",
+              status: "active",
+              joined_at: "2026-01-01T00:00:00Z",
+            },
+          ],
+          error: null,
+        };
+      }
+      if (name === "org_pending_invites") {
+        return {
+          data: [
+            {
+              id: "inv-1",
+              email: "pat@example.com",
+              role: "viewer",
+              expires_at: "2026-10-03T00:00:00Z",
+              created_at: "2026-09-19T00:00:00Z",
+            },
+          ],
+          error: null,
+        };
+      }
+      throw new Error(`unexpected rpc(${name})`);
+    });
+    vi.mocked(createClient).mockResolvedValue({ rpc } as never);
+    vi.mocked(getOrgContext).mockResolvedValue(ctx(true) as never);
+
+    const html = renderToStaticMarkup(await SettingsOrganizationPage());
+    expect(html).toContain("ada@example.com");
+    expect(html).toContain("pat@example.com");
+    expect(html).toContain('data-invite-status="accepted"');
+    expect(html).toContain('data-invite-status="invited"');
+    expect(html).toContain(ACCOUNT_INVITE.accepted);
+    expect(html).toContain(ACCOUNT_INVITE.invited);
+    expect(html).toContain(ACCOUNT_INVITE.revoke);
+    const memberStart = html.indexOf("ada@example.com");
+    const memberRow = html.slice(memberStart, html.indexOf("</li>", memberStart));
+    expect(memberRow).not.toContain(ACCOUNT_INVITE.revoke);
+  });
+
   it("houses Organization empty when there is no org", async () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx(false) as never);
     const html = renderToStaticMarkup(await SettingsOrganizationPage());

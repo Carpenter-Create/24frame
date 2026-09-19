@@ -584,14 +584,17 @@ revoke execute on function public.org_pending_invites(uuid, integer)
 grant execute on function public.org_pending_invites(uuid, integer)
   to authenticated;
 
-create or replace function public.pending_house_grants(p_limit integer default 500)
+create or replace function public.house_grants(p_limit integer default 500)
   returns table (
-    id         uuid,
-    email      text,
-    org_name   text,
-    tier       public.tier_enum,
-    expires_at timestamptz,
-    created_at timestamptz
+    id          uuid,
+    email       text,
+    org_name    text,
+    tier        public.tier_enum,
+    status      public.account_invite_status,
+    org_id      uuid,
+    expires_at  timestamptz,
+    created_at  timestamptz,
+    accepted_at timestamptz
   )
   language plpgsql security definer set search_path = public
 as $$
@@ -600,20 +603,23 @@ begin
   if not public.is_gc_staff(auth.uid()) then raise exception 'Not authorized'; end if;
 
   return query
-    select i.id, i.email, i.org_name, i.tier, i.expires_at, i.created_at
+    select i.id, i.email, i.org_name, i.tier, i.status, i.org_id,
+           i.expires_at, i.created_at, i.accepted_at
     from public.account_invites i
     where i.kind = 'house_grant'
-      and i.status = 'pending'
-      and i.expires_at > now()
-    order by i.created_at desc
+      and i.status in ('pending', 'accepted')
+      and (i.status = 'accepted' or i.expires_at > now())
+    order by
+      case when i.status = 'pending' then 0 else 1 end,
+      coalesce(i.accepted_at, i.created_at) desc
     limit least(greatest(coalesce(p_limit, 0), 0), 501);
 end;
 $$;
 
-revoke execute on function public.pending_house_grants(integer)
+revoke execute on function public.house_grants(integer)
   from public, anon;
-grant execute on function public.pending_house_grants(integer)
+grant execute on function public.house_grants(integer)
   to authenticated;
 
-comment on function public.pending_house_grants(integer) is
-  'Staff-only pending house grants. Not a platform user directory. Never returns token_hash.';
+comment on function public.house_grants(integer) is
+  'Staff grant history: pending (Invited) + accepted. Not a platform user directory. Never returns token_hash.';

@@ -29,8 +29,8 @@ Two kinds, one table:
 | House grant / withdraw | `is_gc_staff` AND `gc_can(operate)` — house owner + delivery ops. Legal / accountant cannot. UI hides Grant account unless operate. Actions return SoT `forbidden`, not raw SQL. |
 | Accept | Authenticated session whose email matches the invite (case-normalized). Wrong session sees `wrongEmail` + magic-link for the invited email. After accept, `setActiveOrg` writes `gc_active_org`. |
 | Peek | Knowledge of `token_hash` (public `/invite/accept`) |
-| Team roster | `member_can(view)` on that org |
-| Pending grants list | `is_gc_staff` |
+| Team roster | `member_can(view)` on that org. Members = Accepted. Pending rows = Invited. |
+| Grant history | `is_gc_staff` — `house_grants` lists pending (Invited) and accepted. Accepted orgs also land in the clients directory. |
 
 Viewers cannot invite. Client Settings never lists all platform users.
 
@@ -45,7 +45,7 @@ After a grant accept, that person is a normal account owner and can use Team inv
 
 ## Where staff comps live
 
-`/aggregation/gc/clients` — existing house Clients page, **Grant account** section composed next to the directory (not inside the list primitive). Not Settings. Not staff Home. Not a CRM.
+`/aggregation/gc/clients` — existing house Clients page, **Grant account** section composed next to the directory (not inside the list primitive). Not Settings. Not staff Home. Not a CRM. Pending grants show **Invited**; accepted grants stay on the grant list as **Accepted** and appear as a normal account in the clients directory.
 
 ## Defaults
 

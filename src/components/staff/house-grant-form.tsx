@@ -6,12 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InlineNotice } from "@/components/ui/inline-notice";
+import { StatusChip } from "@/components/layout/status-chip";
 import { formControlClass } from "@/lib/form-control";
 import {
   GRANT_TIER_LABELS,
   HOUSE_GRANT,
   HOUSE_GRANT_DEFAULT_TIER,
   grantTierLabel,
+  inviteStatusFromRow,
+  inviteStatusLabel,
   type GrantTier,
 } from "@/lib/account-invite";
 import {
@@ -24,13 +27,15 @@ export type HouseGrantRow = {
   email: string;
   orgName: string;
   tier: GrantTier;
+  status: "pending" | "accepted";
+  orgHref: string | null;
 };
 
 export function HouseGrantForm({
-  pending,
+  grants,
   canGrant,
 }: {
-  pending: HouseGrantRow[];
+  grants: HouseGrantRow[];
   canGrant: boolean;
 }) {
   const [email, setEmail] = useState("");
@@ -70,31 +75,50 @@ export function HouseGrantForm({
 
   return (
     <div data-house-grant="" className="flex flex-col gap-[var(--space-4)]">
-      {pending.length === 0 ? (
+      {grants.length === 0 ? (
         <p className="t-body text-ink-2">{HOUSE_GRANT.empty}</p>
       ) : (
         <ul className="flex flex-col gap-[var(--space-3)]">
-          {pending.map((row) => (
-            <li key={row.id} className="flex items-baseline justify-between gap-[var(--space-4)]">
-              <span className="t-body text-ink">
-                {row.email}
-                <span className="t-body-sm text-ink-3">
-                  {" "}
-                  · {row.orgName} · {grantTierLabel(row.tier)}
+          {grants.map((row) => {
+            const invited = row.status === "pending";
+            return (
+              <li
+                key={row.id}
+                data-invite-status={inviteStatusFromRow(row.status)}
+                className="flex items-baseline justify-between gap-[var(--space-4)]"
+              >
+                <span className="t-body text-ink">
+                  {row.email}
+                  <span className="t-body-sm text-ink-3">
+                    {" "}
+                    ·{" "}
+                    {row.orgHref ? (
+                      <a href={row.orgHref}>{row.orgName}</a>
+                    ) : (
+                      row.orgName
+                    )}{" "}
+                    · {grantTierLabel(row.tier)}
+                  </span>
                 </span>
-              </span>
-              {canGrant ? (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  disabled={revoking === row.id}
-                  onClick={() => onRevoke(row.id)}
-                >
-                  {revoking === row.id ? HOUSE_GRANT.revoking : HOUSE_GRANT.revoke}
-                </Button>
-              ) : null}
-            </li>
-          ))}
+                <span className="flex items-center gap-[var(--space-3)]">
+                  <StatusChip
+                    label={inviteStatusLabel(inviteStatusFromRow(row.status))}
+                    tone={invited ? "neutral" : "active"}
+                  />
+                  {canGrant && invited ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      disabled={revoking === row.id}
+                      onClick={() => onRevoke(row.id)}
+                    >
+                      {revoking === row.id ? HOUSE_GRANT.revoking : HOUSE_GRANT.revoke}
+                    </Button>
+                  ) : null}
+                </span>
+              </li>
+            );
+          })}
         </ul>
       )}
 

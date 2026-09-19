@@ -21,6 +21,7 @@ export type GrantTier = "access" | "pro" | "premium";
 //     UI hides Grant account unless gc_can(operate).
 //   Accept — session email must match the invite (case-normalized).
 //   After accept, set gc_active_org via setActiveOrg (existing cookie SoT).
+//   Sender always sees Invited (pending) or Accepted (member / grant row).
 //
 // Defaults: team role viewer (least seat). Grant tier access (least plan).
 // TTL 14 days. Stripe checkout for comps is deferred — the term row is
@@ -45,10 +46,28 @@ export const GRANT_TIER_LABELS: Record<GrantTier, string> = {
   premium: "Premium",
 };
 
+// Visible after send. Pending = Invited. Membership / accepted
+// grant row = Accepted. No status-less lists. No twin ghost rows.
+export const INVITE_STATUS = {
+  invited: "Invited",
+  accepted: "Accepted",
+} as const;
+
+export type InviteStatus = keyof typeof INVITE_STATUS;
+
+export function inviteStatusLabel(status: InviteStatus): string {
+  return INVITE_STATUS[status];
+}
+
+export function inviteStatusFromRow(status: "pending" | "accepted"): InviteStatus {
+  return status === "accepted" ? "accepted" : "invited";
+}
+
 export const ACCOUNT_INVITE = {
   team: "Team",
   teamEmpty: "No other people on this team.",
-  pending: "Pending",
+  invited: INVITE_STATUS.invited,
+  accepted: INVITE_STATUS.accepted,
   invite: "Invite",
   inviting: "Sending…",
   sent: "Invite sent.",
@@ -67,7 +86,9 @@ export const ACCOUNT_INVITE = {
 
 export const HOUSE_GRANT = {
   title: "Grant account",
-  empty: "No pending grants.",
+  empty: "No grants yet.",
+  invited: INVITE_STATUS.invited,
+  accepted: INVITE_STATUS.accepted,
   emailLabel: "Email",
   orgLabel: "Organization",
   tierLabel: "Plan",

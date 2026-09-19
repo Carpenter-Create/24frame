@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InlineNotice } from "@/components/ui/inline-notice";
+import { StatusChip } from "@/components/layout/status-chip";
 import { formControlClass } from "@/lib/form-control";
 import {
   ACCOUNT_INVITE,
@@ -80,18 +81,27 @@ export function TeamInviteForm({
       ) : (
         <ul className="flex flex-col gap-[var(--space-3)]">
           {members.map((member) => (
-            <li key={member.userId} className="flex items-baseline justify-between gap-[var(--space-4)]">
+            <li
+              key={member.userId}
+              data-invite-status="accepted"
+              className="flex items-baseline justify-between gap-[var(--space-4)]"
+            >
               <span className="t-body text-ink">{member.email}</span>
-              <span className="t-body-sm text-ink-3">{teamRoleLabel(member.role)}</span>
+              <span className="flex items-center gap-[var(--space-3)]">
+                <StatusChip label={ACCOUNT_INVITE.accepted} tone="active" />
+                <span className="t-body-sm text-ink-3">{teamRoleLabel(member.role)}</span>
+              </span>
             </li>
           ))}
           {pending.map((invite) => (
-            <li key={invite.id} className="flex items-baseline justify-between gap-[var(--space-4)]">
-              <span className="t-body text-ink-2">
-                {invite.email}
-                <span className="t-body-sm text-ink-3"> · {ACCOUNT_INVITE.pending}</span>
-              </span>
+            <li
+              key={invite.id}
+              data-invite-status="invited"
+              className="flex items-baseline justify-between gap-[var(--space-4)]"
+            >
+              <span className="t-body text-ink-2">{invite.email}</span>
               <span className="flex items-center gap-[var(--space-3)]">
+                <StatusChip label={ACCOUNT_INVITE.invited} tone="neutral" />
                 <span className="t-body-sm text-ink-3">{teamRoleLabel(invite.role)}</span>
                 {canInvite ? (
                   <Button

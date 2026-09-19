@@ -14,12 +14,15 @@ import {
   TEAM_INVITE_DEFAULT_ROLE,
   TEAM_INVITE_ROLES,
   acceptInviteSchema,
+  INVITE_STATUS,
   acceptedInviteOrgId,
   grantTierLabel,
   houseGrantSchema,
   inviteAcceptPath,
   inviteEmailSubject,
   inviteEmailsMatch,
+  inviteStatusFromRow,
+  inviteStatusLabel,
   teamInviteSchema,
   teamRoleLabel,
 } from "./account-invite";
@@ -33,6 +36,20 @@ describe("account invite SoT", () => {
     expect(TEAM_INVITE_DEFAULT_ROLE).toBe("viewer");
     expect(ACCOUNT_INVITE.team).toBe("Team");
     expect(ACCOUNT_INVITE.forbidden).toMatch(/account owner/i);
+    expect(ACCOUNT_INVITE.invited).toBe(INVITE_STATUS.invited);
+    expect(ACCOUNT_INVITE.accepted).toBe(INVITE_STATUS.accepted);
+    expect(inviteStatusLabel("invited")).toBe("Invited");
+    expect(inviteStatusLabel("accepted")).toBe("Accepted");
+    expect(inviteStatusFromRow("pending")).toBe("invited");
+    expect(inviteStatusFromRow("accepted")).toBe("accepted");
+    const teamForm = readFileSync("src/components/settings/team-invite-form.tsx", "utf8");
+    expect(teamForm).toContain("ACCOUNT_INVITE.invited");
+    expect(teamForm).toContain("ACCOUNT_INVITE.accepted");
+    expect(teamForm).toContain('data-invite-status="invited"');
+    expect(teamForm).toContain('data-invite-status="accepted"');
+    expect(teamForm).not.toContain("ACCOUNT_INVITE.pending");
+    expect(teamForm).toContain("canInvite ? (");
+    expect(teamForm).toContain("onRevoke(invite.id)");
   });
 
   it("keeps house grant on the existing tier enum", () => {
@@ -48,6 +65,18 @@ describe("account invite SoT", () => {
     const grantForm = readFileSync("src/components/staff/house-grant-form.tsx", "utf8");
     expect(grantForm).toContain("HOUSE_GRANT.revoking");
     expect(grantForm).not.toContain("revoking === row.id ? HOUSE_GRANT.granting");
+    expect(grantForm).toContain("inviteStatusFromRow(row.status)");
+    expect(grantForm).toContain("canGrant && invited");
+    expect(HOUSE_GRANT.invited).toBe(INVITE_STATUS.invited);
+    expect(HOUSE_GRANT.accepted).toBe(INVITE_STATUS.accepted);
+    expect(HOUSE_GRANT.empty).toBe("No grants yet.");
+    const grantSection = readFileSync(
+      "src/app/(app)/(operator)/aggregation/gc/clients/house-grant-section.tsx",
+      "utf8",
+    );
+    expect(grantSection).toContain('rpc("house_grants"');
+    expect(grantSection).toContain("clientOrgHref");
+    expect(grantSection).not.toContain("pending_house_grants");
   });
 
   it("matches invite emails case-insensitively and reads accept org_id", () => {
@@ -91,6 +120,9 @@ describe("account invite SoT", () => {
     expect(migration).toContain("invite_org_member");
     expect(migration).toContain("grant_house_account");
     expect(migration).toContain("accept_account_invite");
+    expect(migration).toContain("create or replace function public.house_grants");
+    expect(migration).toContain("i.status in ('pending', 'accepted')");
+    expect(migration).not.toContain("pending_house_grants");
     expect(migration).toContain("member_can(v_uid, p_org, 'manage_team')");
     expect(migration).toContain("gc_can(v_uid, 'operate')");
     expect(migration).not.toContain("invite_code");

@@ -3449,14 +3449,17 @@ export type Database = {
           tier: Database["public"]["Enums"]["tier_enum"] | null
         }[]
       }
-      pending_house_grants: {
+      house_grants: {
         Args: { p_limit?: number }
         Returns: {
+          accepted_at: string | null
           created_at: string
           email: string
           expires_at: string
           id: string
+          org_id: string | null
           org_name: string
+          status: Database["public"]["Enums"]["account_invite_status"]
           tier: Database["public"]["Enums"]["tier_enum"]
         }[]
       }
