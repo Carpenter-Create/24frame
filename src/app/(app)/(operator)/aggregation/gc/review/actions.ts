@@ -7,7 +7,9 @@ import { getAuthUser } from "@/lib/supabase/auth";
 import { generateToken, hashToken } from "@/lib/portal";
 import { sendOrgNotificationEmail } from "@/lib/email";
 import { NOTIFICATION_EMAIL } from "@/lib/notifications";
+import { QUEUE_HREF } from "@/lib/queue";
 import type { Database, Json } from "@/lib/supabase/database.types";
+import { titleOpsPath } from "@/lib/title-public-id";
 
 type Decision = Database["public"]["Enums"]["review_decision"];
 
@@ -63,7 +65,8 @@ export async function reviewTitle(
     }
   }
 
-  revalidatePath("/gc/review");
+  revalidatePath(QUEUE_HREF);
+  revalidatePath(titleOpsPath(titleId));
   return {};
 }
 
@@ -83,7 +86,8 @@ export async function linkTitleToWork(
   });
   if (error) return { error: error.message };
 
-  revalidatePath("/gc/review");
+  revalidatePath(QUEUE_HREF);
+  revalidatePath(titleOpsPath(titleId));
   return {};
 }
 
@@ -106,8 +110,8 @@ export async function createScreenerLink(input: { titleId: string }): Promise<{ 
   if (error) return { error: error.message };
 
   const base = process.env.PORTAL_BASE_URL?.replace(/\/+$/, "") ?? "";
-  revalidatePath("/gc/review");
-  revalidatePath(`/gc/titles/${input.titleId}`);
+  revalidatePath(QUEUE_HREF);
+  revalidatePath(titleOpsPath(input.titleId));
   return { url: `${base}/portal/${token}` };
 }
 
@@ -119,6 +123,6 @@ export async function revokeScreenerLink(input: { linkId: string }): Promise<{ e
   const { error } = await supabase.rpc("revoke_portal_link", { p_link_id: input.linkId });
   if (error) return { error: error.message };
 
-  revalidatePath("/gc/review");
+  revalidatePath(QUEUE_HREF);
   return {};
 }

@@ -2,11 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 
+import { AVAILS_HREF } from "@/lib/avails";
 import { sendOrgNotificationEmail } from "@/lib/email";
 import { submitProxyJob } from "@/lib/mediaconvert";
+import { QUEUE_HREF } from "@/lib/queue";
 import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/supabase/auth";
 import type { Json } from "@/lib/supabase/database.types";
+import { titleOpsPath } from "@/lib/title-public-id";
 import {
   TITLE_STATUS_OVERRIDE,
   titleStatusOverrideNotifyCopy,
@@ -43,7 +46,7 @@ export async function setReleaseDate(input: {
   });
   if (error) return { error: error.message };
 
-  revalidatePath(`/gc/titles/${input.titleId}`);
+  revalidatePath(titleOpsPath(input.titleId));
   return {};
 }
 
@@ -86,7 +89,7 @@ export async function attachLinkVendor(input: {
   });
   if (error) return { error: error.message };
 
-  revalidatePath(`/gc/titles/${input.titleId}`);
+  revalidatePath(titleOpsPath(input.titleId));
   return {};
 }
 
@@ -196,7 +199,7 @@ export async function retryTranscodeJob(input: {
     return { error: TRANSCODE_RETRY_RECORD_FAILED };
   }
 
-  revalidatePath(`/gc/titles/${input.titleId}`);
+  revalidatePath(titleOpsPath(input.titleId));
   return {};
 }
 
@@ -262,8 +265,8 @@ export async function setGcTitleStatus(input: {
     }
   }
 
-  revalidatePath(`/gc/titles/${input.titleId}`);
-  revalidatePath("/queue");
-  revalidatePath("/avails");
+  revalidatePath(titleOpsPath(input.titleId));
+  revalidatePath(QUEUE_HREF);
+  revalidatePath(AVAILS_HREF);
   return {};
 }

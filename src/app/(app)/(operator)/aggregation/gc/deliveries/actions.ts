@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { generateToken, hashToken } from "@/lib/portal";
 import { sendOrgNotificationEmail } from "@/lib/email";
+import { GC_DELIVERIES_HREF } from "@/lib/gc-deliveries";
 import type { Database, Json } from "@/lib/supabase/database.types";
 import { DELIVERY_STATUS_LABELS, NOTIFICATION_EMAIL } from "@/lib/notifications";
 
@@ -27,7 +28,7 @@ export async function createDelivery(input: {
     p_territory: input.territory,
   });
   if (error) return { error: error.message };
-  revalidatePath("/gc/deliveries");
+  revalidatePath(GC_DELIVERIES_HREF);
   return { id: data ?? undefined };
 }
 
@@ -54,7 +55,7 @@ export async function revokePortalSession(input: { sessionId: string }): Promise
   if (!user) return { error: "Not authenticated." };
   const { error } = await supabase.rpc("revoke_portal_session", { p_session_id: input.sessionId });
   if (error) return { error: error.message };
-  revalidatePath("/gc/deliveries");
+  revalidatePath(GC_DELIVERIES_HREF);
   return {};
 }
 
@@ -105,7 +106,7 @@ export async function setDeliveryStatus(
     console.error("[notifications] delivery_update create failed", e);
   }
 
-  revalidatePath("/gc/deliveries");
+  revalidatePath(GC_DELIVERIES_HREF);
   return {};
 }
 
@@ -127,7 +128,7 @@ export async function createPortalLink(input: {
   });
   if (error) return { error: error.message };
   const base = process.env.PORTAL_BASE_URL?.replace(/\/+$/, "") ?? "";
-  revalidatePath("/gc/deliveries");
+  revalidatePath(GC_DELIVERIES_HREF);
   return { url: `${base}/portal/${token}` };
 }
 
@@ -137,6 +138,6 @@ export async function revokePortalLink(input: { linkId: string }): Promise<{ err
   if (!user) return { error: "Not authenticated." };
   const { error } = await supabase.rpc("revoke_portal_link", { p_link_id: input.linkId });
   if (error) return { error: error.message };
-  revalidatePath("/gc/deliveries");
+  revalidatePath(GC_DELIVERIES_HREF);
   return {};
 }

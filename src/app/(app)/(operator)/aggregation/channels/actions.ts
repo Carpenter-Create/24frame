@@ -3,9 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { CHANNELS_HREF } from "@/lib/channel-card";
 import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { parseExportSpec } from "@/lib/export-spec";
+import { vendorEditHref, vendorProfileHref } from "@/lib/vendor-profile";
 
 const Input = z.object({
   id: z.string().uuid().optional(),
@@ -77,10 +79,10 @@ export async function saveVendor(raw: unknown): Promise<{ error?: string }> {
     return { error: error.message };
   }
 
-  revalidatePath("/channels");
+  revalidatePath(CHANNELS_HREF);
   if (v.id) {
-    revalidatePath(`/channels/${v.id}`);
-    revalidatePath(`/channels/${v.id}/edit`);
+    revalidatePath(vendorProfileHref(v.id));
+    revalidatePath(vendorEditHref(v.id));
   }
   return {};
 }
