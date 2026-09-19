@@ -8,6 +8,7 @@ import { CaretDown } from "@phosphor-icons/react";
 import { Close44 } from "@/components/chrome/house";
 import { AppearanceCheck } from "@/components/chrome/appearance-check";
 import { SegmentedTrack } from "@/components/ui/segmented-track";
+import { SEGMENTED_TRACK_PERSIST } from "@/lib/segmented-track";
 import { Input } from "@/components/ui/input";
 import {
   DASHBOARD_PERIOD_CHEVRON_CLASS,
@@ -164,6 +165,7 @@ function ReportsPeriodCluster({
     <div data-reports-period="" className={cn("min-w-0", REPORTS_RELATED_GAP_CLASS, "flex items-center")}>
       <SegmentedTrack
         activeIndex={REPORTS_PERIOD_PRESETS.findIndex((p) => p.grain === selectedGrain)}
+        persistKey={SEGMENTED_TRACK_PERSIST.reportsPeriod}
         trackClass={cn(HOUSE_SEGMENTED_TRACK_CLASS, "hidden md:flex")}
         thumbClass={HOUSE_SEGMENTED_THUMB_CLASS}
         data-reports-period-cluster=""

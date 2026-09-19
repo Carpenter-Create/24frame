@@ -119,6 +119,7 @@ describe("workspace switcher header control", () => {
     expect(html).toContain(WORKSPACE_SWITCHER_SEGMENTS_CLASS);
     expect(html).toContain("data-segmented-thumb");
     expect(html).toContain("data-segmented-item");
+    expect(html).toContain('data-segmented-persist="workspace-pills"');
     expect(WORKSPACE_SWITCHER_SEGMENTS_CLASS).toContain("bg-surface-muted");
     expect(WORKSPACE_SWITCHER_SEGMENTS_CLASS).toContain("rounded-full");
     expect(WORKSPACE_SWITCHER_SEGMENTS_CLASS).not.toContain("gap-[var(--space-2)]");
@@ -159,6 +160,8 @@ describe("workspace switcher header control", () => {
     expect(src).toContain("ArrowLeft");
     expect(src).toContain("workspaceSwitcherNextSegmentIndex");
     expect(src).toContain("SegmentedTrack");
+    expect(src).toContain("SEGMENTED_TRACK_PERSIST.workspace");
+    expect(src).toContain("setPending");
     expect(src).not.toContain('"Agg"');
     expect(src).not.toContain('"Edu"');
     expect(src).not.toContain("ellipsis");

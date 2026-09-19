@@ -6,6 +6,7 @@ import { DashboardRankedRows } from "@/components/dashboard/dashboard-ranked";
 import { DashboardViewAll, DashboardViewAlts } from "@/components/dashboard/dashboard-view-alts";
 import { DashboardTerritoryMap } from "@/components/dashboard/dashboard-territory-map";
 import { SegmentedTrack } from "@/components/ui/segmented-track";
+import { SEGMENTED_TRACK_PERSIST } from "@/lib/segmented-track";
 import {
   DASHBOARD_CARD_PAD_LIST,
   DASHBOARD_MODULE_CARD_CLASS,
@@ -113,6 +114,7 @@ export function ReportsTopPerforming({
         <div className={cn("flex min-w-0 flex-wrap items-center", DASHBOARD_RELATED_GAP_CLASS)}>
           <SegmentedTrack
             activeIndex={pills.indexOf(active)}
+            persistKey={SEGMENTED_TRACK_PERSIST.reportsRanked}
             trackClass={DASHBOARD_TOP_PILL_CLUSTER_CLASS}
             thumbClass={DASHBOARD_TOP_PILL_THUMB_CLASS}
             data-reports-top-pills=""

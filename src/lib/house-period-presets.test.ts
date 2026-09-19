@@ -24,6 +24,7 @@ describe("HousePeriodPresets craft", () => {
     expect(craft).not.toContain("flex-wrap");
     expect(src).toContain("HousePageSelect");
     expect(src).toContain("SegmentedTrack");
+    expect(src).toContain("SEGMENTED_TRACK_PERSIST.period");
     expect(src).toContain("HOUSE_SEGMENTED_ITEM_BASE_CLASS");
     expect(src).toContain("chipDataAttr");
     expect(src).not.toContain("chipAttrs");

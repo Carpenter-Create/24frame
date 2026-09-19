@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardBody } from "@/components/ui/card";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { SegmentedTrack } from "@/components/ui/segmented-track";
+import { SEGMENTED_TRACK_PERSIST } from "@/lib/segmented-track";
 import { MessageLink } from "@/app/(app)/aggregation/messages/message-link";
 import { cn } from "@/lib/cn";
 import {
@@ -61,6 +62,7 @@ export function ActivityInbox({
       <div data-activity-filters="" className={cn("flex flex-col pb-6", REPORTS_RELATED_GAP_CLASS)}>
         <SegmentedTrack
           activeIndex={(["open", "done"] as const).indexOf(status)}
+          persistKey={SEGMENTED_TRACK_PERSIST.activityStatus}
           trackClass={DASHBOARD_TOP_PILL_CLUSTER_CLASS}
           thumbClass={DASHBOARD_TOP_PILL_THUMB_CLASS}
           data-activity-status=""
@@ -86,6 +88,7 @@ export function ActivityInbox({
         </SegmentedTrack>
         <SegmentedTrack
           activeIndex={REPORTS_PERIOD_PRESETS.findIndex((p) => p.grain === period.kind)}
+          persistKey={SEGMENTED_TRACK_PERSIST.activityPeriod}
           trackClass={cn(HOUSE_SEGMENTED_TRACK_CLASS, "hidden md:flex")}
           thumbClass={HOUSE_SEGMENTED_THUMB_CLASS}
           data-activity-period=""

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { DashboardViewAll, DashboardViewAlts } from "@/components/dashboard/dashboard-view-alts";
 import { DashboardTerritoryMap } from "@/components/dashboard/dashboard-territory-map";
 import { SegmentedTrack } from "@/components/ui/segmented-track";
+import { SEGMENTED_TRACK_PERSIST } from "@/lib/segmented-track";
 import {
   DASHBOARD_CARD_PAD_LIST,
   DASHBOARD_SECTION_TITLE_CLASS,
@@ -440,6 +441,7 @@ export function DashboardTopPerforming({
         <div className={cn("flex min-w-0 flex-wrap items-center", DASHBOARD_RELATED_GAP_CLASS)}>
           <SegmentedTrack
             activeIndex={pillKeys.indexOf(pill)}
+            persistKey={SEGMENTED_TRACK_PERSIST.dashboardRanked}
             trackClass={DASHBOARD_TOP_PILL_CLUSTER_CLASS}
             thumbClass={DASHBOARD_TOP_PILL_THUMB_CLASS}
             data-dashboard-top-pills=""
