@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/cn";
 import { ArrowRight, CircleAlert, Clock, Send, Slash, type LucideIcon } from "lucide-react";
 
 import {
@@ -17,11 +18,15 @@ import { type AskGlobeeHistoryRow } from "@/lib/ask-globee-conversations";
 import { startAskGlobeeConversation } from "@/app/(app)/messages/ask-globee-actions";
 import { Input } from "@/components/ui/input";
 import {
+  ASK_AI_OVERLAY_PHONE_CLOCK_DOCK_CLASS,
+  ASK_AI_OVERLAY_PHONE_SCROLL_CLASS,
+} from "@/lib/ask-ai-overlay";
+import {
   ASK_GLOBEE_CLOCK_BUTTON_CLASS,
-  MOBILE_CHROME_CLOCK_DOCK_CLASS,
   MOBILE_CHROME_ICON_CLASS,
   MOBILE_CHROME_ICON_STROKE,
 } from "@/lib/mobile-chrome";
+import { useAskGlobeeChrome } from "./ask-globee-chrome";
 import { AskGlobeeHistoryPopover } from "./ask-globee-history";
 
 const CHIP_MARK_ICON: Record<AskGlobeeChipMark, LucideIcon> = {
@@ -35,7 +40,7 @@ const CHIP_MARK_ICON: Record<AskGlobeeChipMark, LucideIcon> = {
 // (flex-col-reverse), not a top-down empty header. Chip click fills, selects,
 // and sends the same prompt as free text. Submit persists the user turn,
 // then opens the thread on the current path. Quiet clock 16 opens past
-// conversations. Mobile 44 hit / --space-6 lead. Desktop size-4 at left-0.
+// conversations. Mobile 44 hit inside sheet pad. Desktop size-4 at left-0.
 // No plus. No HISTORY list. No invented titles. House 48 (--space-12).
 // Composer is 640x56 r28 pad 16. Thinking chrome stays on the thread.
 // Chips above the composer on every viewport. Drop "What do you need?".
@@ -49,7 +54,7 @@ export function AskGlobeeLanding({
   const [prompt, setPrompt] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [historyOpen, setHistoryOpen] = useState(false);
+  const { historyOpen, setHistoryOpen } = useAskGlobeeChrome();
   const selected = askGlobeeSelectedChip(prompt);
 
   const send = async (value: string) => {
@@ -73,7 +78,7 @@ export function AskGlobeeLanding({
       data-ask-globee-landing=""
       className="relative flex h-full min-h-0 flex-1 flex-col items-center p-[var(--space-12)] max-md:px-[var(--space-4)]"
     >
-      <div className={MOBILE_CHROME_CLOCK_DOCK_CLASS}>
+      <div className={ASK_AI_OVERLAY_PHONE_CLOCK_DOCK_CLASS}>
         <AskGlobeeHistoryPopover
           conversations={conversations}
           open={historyOpen}
@@ -92,7 +97,12 @@ export function AskGlobeeLanding({
         </AskGlobeeHistoryPopover>
       </div>
 
-      <div className="flex w-full min-h-0 flex-1 flex-col-reverse overflow-auto">
+      <div
+        className={cn(
+          "flex w-full min-h-0 flex-1 flex-col-reverse overflow-auto",
+          ASK_AI_OVERLAY_PHONE_SCROLL_CLASS,
+        )}
+      >
         <div className="flex w-full flex-col items-center gap-[var(--space-12)]">
         <h1 data-ask-globee-headline="" className="t-display text-center text-ink">
           {ASK_GLOBEE.headline}

@@ -8,6 +8,12 @@ import {
   ASK_AI_OVERLAY_BODY_CLASS,
   ASK_AI_OVERLAY_EXPAND_CLASS,
   ASK_AI_OVERLAY_MARK_CLASS,
+  ASK_AI_OVERLAY_PHONE_CLOCK_DOCK_CLASS,
+  ASK_AI_OVERLAY_PHONE_HISTORY_CLASS,
+  ASK_AI_OVERLAY_PHONE_HISTORY_COVER_CLASS,
+  ASK_AI_OVERLAY_PHONE_HISTORY_HOST_CLASS,
+  ASK_AI_OVERLAY_PHONE_HISTORY_LIST_CLASS,
+  ASK_AI_OVERLAY_PHONE_SCROLL_CLASS,
   ASK_AI_QUERY,
   ASK_AI_RETURN_STORAGE,
   askAiCloseHref,
@@ -65,6 +71,26 @@ describe("ask AI overlay URL", () => {
     expect(ASK_AI_OVERLAY_BODY_CLASS).toContain("[&_[data-ask-globee-landing]]:h-full");
     expect(ASK_AI_OVERLAY_BODY_CLASS).toContain("[&_[data-ask-globee-thread]]:h-full");
     expect(ASK_AI_OVERLAY_BODY_CLASS).not.toContain("overflow-auto");
+    expect(askAiOverlayPhoneClass(false)).toContain("overscroll-none");
+    expect(ASK_AI_OVERLAY_PHONE_SCROLL_CLASS).toContain("max-md:overflow-y-scroll");
+    expect(ASK_AI_OVERLAY_PHONE_SCROLL_CLASS).toContain("max-md:overscroll-contain");
+    expect(ASK_AI_OVERLAY_PHONE_SCROLL_CLASS).toContain("max-md:[touch-action:pan-y]");
+    expect(ASK_AI_OVERLAY_PHONE_SCROLL_CLASS).toContain(
+      "max-md:[-webkit-overflow-scrolling:touch]",
+    );
+    expect(ASK_AI_OVERLAY_PHONE_HISTORY_HOST_CLASS).toContain("max-md:flex");
+    expect(ASK_AI_OVERLAY_PHONE_HISTORY_HOST_CLASS).toContain("flex-1");
+    expect(ASK_AI_OVERLAY_PHONE_HISTORY_COVER_CLASS).toContain("max-md:absolute");
+    expect(ASK_AI_OVERLAY_PHONE_HISTORY_COVER_CLASS).toContain("max-md:inset-x-[var(--space-4)]");
+    expect(ASK_AI_OVERLAY_PHONE_HISTORY_COVER_CLASS).toContain("max-md:top-[44px]");
+    expect(ASK_AI_OVERLAY_PHONE_HISTORY_CLASS).toContain("max-md:w-full");
+    expect(ASK_AI_OVERLAY_PHONE_HISTORY_CLASS).toContain("max-md:max-w-none");
+    expect(ASK_AI_OVERLAY_PHONE_HISTORY_CLASS).toContain("max-md:rounded-none");
+    expect(ASK_AI_OVERLAY_PHONE_HISTORY_CLASS).toContain("max-md:border-0");
+    expect(ASK_AI_OVERLAY_PHONE_HISTORY_CLASS).not.toContain("w-[384px]");
+    expect(ASK_AI_OVERLAY_PHONE_HISTORY_LIST_CLASS).toContain("max-md:overflow-y-scroll");
+    expect(ASK_AI_OVERLAY_PHONE_CLOCK_DOCK_CLASS).toContain("max-md:left-[var(--space-4)]");
+    expect(ASK_AI_OVERLAY_PHONE_CLOCK_DOCK_CLASS).not.toContain("--content-inset");
   });
 
   it("reads open + thread from the current search and closes back to the same path", () => {
@@ -137,6 +163,10 @@ describe("ask AI overlay URL", () => {
     expect(closeAt).toBeGreaterThan(-1);
     expect(openAt).toBeLessThan(closeAt);
     expect(overlaySrc).toContain("data-ask-ai-overlay-phone");
+    expect(overlaySrc).toContain("data-ask-ai-overlay-phone-history");
+    expect(overlaySrc).toContain("AskGlobeeHistoryPanel");
+    expect(overlaySrc).toContain("ASK_AI_OVERLAY_PHONE_HISTORY_COVER_CLASS");
+    expect(overlaySrc).toContain("overscroll-none");
 
     const order: string[] = [];
     fireAskAiOpenThen(

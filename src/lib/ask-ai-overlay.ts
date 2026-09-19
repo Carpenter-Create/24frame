@@ -33,7 +33,7 @@ export const ASK_AI_OVERLAY_EXPANDED_CLASS =
   "flex h-[min(94dvh,calc(100dvh-var(--space-8)))] w-[min(96vw,80rem)] max-w-[80rem] flex-col overflow-hidden";
 
 export const ASK_AI_OVERLAY_PHONE_CLASS =
-  "flex w-full flex-col overflow-hidden border-0";
+  "flex w-full flex-col overflow-hidden overscroll-none border-0";
 
 /** Phone starts as a bottom sheet. Expand fills the viewport. Same overlay. */
 export const ASK_AI_OVERLAY_PHONE_COMPACT_CLASS =
@@ -48,7 +48,30 @@ export const ASK_AI_OVERLAY_EXPAND_CLASS =
 // Overlay body fills the window. Landing/thread own the scroll so empty
 // chat and history sit bottom-up (composer pinned, newest nearest it).
 export const ASK_AI_OVERLAY_BODY_CLASS =
-  "flex min-h-0 flex-1 flex-col overflow-hidden [&_[data-ask-globee-gate]]:h-full [&_[data-ask-globee-gate]]:min-h-0 [&_[data-ask-globee-landing]]:h-full [&_[data-ask-globee-landing]]:min-h-0 [&_[data-ask-globee-thread]]:h-full [&_[data-ask-globee-thread]]:min-h-0";
+  "relative flex min-h-0 flex-1 flex-col overflow-hidden [&_[data-ask-globee-gate]]:h-full [&_[data-ask-globee-gate]]:min-h-0 [&_[data-ask-globee-landing]]:h-full [&_[data-ask-globee-landing]]:min-h-0 [&_[data-ask-globee-thread]]:h-full [&_[data-ask-globee-thread]]:min-h-0";
+
+// iOS Safari: overflow-auto + flex-col-reverse is a dead touch port.
+// Phone scrollers force overflow-y-scroll, contain overscroll, and pan-y.
+export const ASK_AI_OVERLAY_PHONE_SCROLL_CLASS =
+  "max-md:overflow-y-scroll max-md:overscroll-contain max-md:[touch-action:pan-y] max-md:[-webkit-overflow-scrolling:touch]";
+
+/** Phone history fills the sheet body. Not the 384 nested popover card. */
+export const ASK_AI_OVERLAY_PHONE_HISTORY_HOST_CLASS =
+  "hidden min-h-0 flex-1 flex-col bg-surface max-md:flex";
+
+/** Landing: cover chips/composer, leave the 44 clock hit. Thread uses flex-1. */
+export const ASK_AI_OVERLAY_PHONE_HISTORY_COVER_CLASS =
+  "max-md:absolute max-md:inset-x-[var(--space-4)] max-md:bottom-[var(--space-4)] max-md:top-[44px] max-md:flex-none";
+
+export const ASK_AI_OVERLAY_PHONE_HISTORY_CLASS =
+  "max-md:h-full max-md:min-h-0 max-md:w-full max-md:max-w-none max-md:flex-1 max-md:overflow-hidden max-md:rounded-none max-md:border-0 max-md:p-0";
+
+export const ASK_AI_OVERLAY_PHONE_HISTORY_LIST_CLASS =
+  "flex flex-col gap-[var(--space-6)] max-md:min-h-0 max-md:flex-1 max-md:overflow-y-scroll max-md:overscroll-contain max-md:[touch-action:pan-y] max-md:[-webkit-overflow-scrolling:touch]";
+
+/** Phone clock sits in sheet pad. The retired /messages -24px dock clips off-screen. */
+export const ASK_AI_OVERLAY_PHONE_CLOCK_DOCK_CLASS =
+  "absolute top-0 left-0 max-md:left-[var(--space-4)]";
 
 export function askAiOverlayPhoneClass(expanded: boolean): string {
   return expanded ? ASK_AI_OVERLAY_PHONE_EXPANDED_CLASS : ASK_AI_OVERLAY_PHONE_COMPACT_CLASS;

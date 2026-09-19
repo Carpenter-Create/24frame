@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
+import { ASK_AI_OVERLAY_PHONE_CLOCK_DOCK_CLASS } from "./ask-ai-overlay";
 import {
   ASK_GLOBEE_CLOCK_BUTTON_CLASS,
   MOBILE_CHROME_CLOCK_DOCK_CLASS,
@@ -15,6 +16,7 @@ import {
   MOBILE_CHROME_LEAD_PAD_CLASS,
   MOBILE_CHROME_LEAD_PAD_PX,
   MOBILE_CHROME_MESSAGES_FRAME_PAD_PX,
+  MOBILE_CHROME_SHEET_PAD_PX,
   mobileChromeClockDockOffsetPx,
   mobileChromeGlyphCenterPx,
 } from "./mobile-chrome";
@@ -55,17 +57,18 @@ describe("mobile chrome clock lock", () => {
     expect(ASK_GLOBEE_CLOCK_BUTTON_CLASS).toContain("md:min-h-4");
     expect(ASK_GLOBEE_CLOCK_BUTTON_CLASS).toContain("md:min-w-4");
 
-    expect(mobileChromeClockDockOffsetPx()).toBe(-24);
-    expect(MOBILE_CHROME_CLOCK_DOCK_CLASS).toContain(
-      "max-md:left-[calc(var(--space-6)-var(--content-inset))]",
-    );
+    expect(MOBILE_CHROME_SHEET_PAD_PX).toBe(16);
+    expect(mobileChromeClockDockOffsetPx()).toBe(16);
+    expect(mobileChromeClockDockOffsetPx()).toBeGreaterThan(0);
+    expect(MOBILE_CHROME_CLOCK_DOCK_CLASS).toContain("max-md:left-[var(--space-4)]");
+    expect(MOBILE_CHROME_CLOCK_DOCK_CLASS).not.toContain("--content-inset");
+    expect(MOBILE_CHROME_CLOCK_DOCK_CLASS).not.toContain("calc(");
+    expect(ASK_AI_OVERLAY_PHONE_CLOCK_DOCK_CLASS).toBe(MOBILE_CHROME_CLOCK_DOCK_CLASS);
 
-    const hamburgerCenter = mobileChromeGlyphCenterPx(MOBILE_CHROME_LEAD_PAD_PX);
-    const clockCenter = mobileChromeGlyphCenterPx(
-      MOBILE_CHROME_MESSAGES_FRAME_PAD_PX + mobileChromeClockDockOffsetPx(),
-    );
-    expect(hamburgerCenter).toBe(46);
-    expect(clockCenter).toBe(hamburgerCenter);
+    const clockCenter = mobileChromeGlyphCenterPx(mobileChromeClockDockOffsetPx());
+    expect(mobileChromeGlyphCenterPx(MOBILE_CHROME_LEAD_PAD_PX)).toBe(46);
+    expect(clockCenter).toBe(38);
+    expect(clockCenter).toBeGreaterThan(mobileChromeClockDockOffsetPx());
   });
 
   it("is consumed by the Ask Globee clock, not dest chips or the thread", () => {
@@ -81,7 +84,8 @@ describe("mobile chrome clock lock", () => {
     expect(destsSrc).toContain("data-house-phone-dest-chips");
 
     expect(landingSrc).toContain("ASK_GLOBEE_CLOCK_BUTTON_CLASS");
-    expect(landingSrc).toContain("MOBILE_CHROME_CLOCK_DOCK_CLASS");
+    expect(landingSrc).toContain("ASK_AI_OVERLAY_PHONE_CLOCK_DOCK_CLASS");
+    expect(landingSrc).not.toContain("MOBILE_CHROME_CLOCK_DOCK_CLASS");
     expect(landingSrc).toContain("MOBILE_CHROME_ICON_CLASS");
     expect(landingSrc).toContain("MOBILE_CHROME_ICON_STROKE");
     expect(landingSrc).toContain("data-ask-globee-clock");

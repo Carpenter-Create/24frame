@@ -25,6 +25,8 @@ import {
   ASK_AI_OVERLAY_EXPAND_CLASS,
   ASK_AI_OVERLAY_EXPANDED_CLASS,
   ASK_AI_OVERLAY_MARK_CLASS,
+  ASK_AI_OVERLAY_PHONE_HISTORY_COVER_CLASS,
+  ASK_AI_OVERLAY_PHONE_HISTORY_HOST_CLASS,
   askAiOverlayPhoneClass,
   askAiCloseHref,
   askAiOverlayHref,
@@ -49,7 +51,8 @@ import { APP_SHEET_SCRIM_CLASS } from "@/lib/house-sheet";
 import { AccessUpgradeGate } from "@/components/messages/access-upgrade-gate";
 import { AskGlobeeLanding } from "@/components/messages/ask-globee-landing";
 import { AskGlobeeThread } from "@/components/messages/ask-globee-thread";
-import { AskAssistantChromeProvider } from "@/components/messages/ask-globee-chrome";
+import { AskGlobeeHistoryPanel } from "@/components/messages/ask-globee-history";
+import { AskAssistantChromeProvider, useAskGlobeeChrome } from "@/components/messages/ask-globee-chrome";
 import { Close44 } from "./house";
 import { HouseAiMark } from "./house-ai-mark";
 import { MessagesAppHeader } from "./messages-app-header";
@@ -246,26 +249,16 @@ function AskAiOverlayPanel() {
       }
       initialConversations={conversations}
     >
-      <div
-        data-ask-ai-overlay-body=""
-        className={ASK_AI_OVERLAY_BODY_CLASS}
-      >
-        {showThread ? (
-          <div data-ask-ai-overlay-thread-chrome="" className="shrink-0 px-[var(--space-4)] pt-[var(--space-2)]">
-            <MessagesAppHeader surface="ask-globee-thread" />
-          </div>
-        ) : null}
-        {showLanding ? <AskGlobeeLanding conversations={conversations} /> : null}
-        {showThread ? (
-          <AskGlobeeThread
-            initials={initials}
-            conversation={conversation}
-            messages={messages}
-            conversations={conversations}
-          />
-        ) : null}
-        {showGate ? <AccessUpgradeGate /> : null}
-      </div>
+      <AskAiOverlayBody
+        showThread={Boolean(showThread)}
+        showLanding={showLanding}
+        showGate={showGate}
+        conversations={conversations}
+        currentId={conversation?.id ?? null}
+        initials={initials}
+        conversation={conversation}
+        messages={messages}
+      />
     </AskAssistantChromeProvider>
   ) : null;
 
@@ -303,7 +296,7 @@ function AskAiOverlayPanel() {
       data-ask-ai-overlay=""
       data-ask-ai-overlay-phone=""
       data-ask-ai-expanded={expanded ? "true" : undefined}
-      className="fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end md:hidden"
+      className="fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end overscroll-none md:hidden"
     >
       <button
         type="button"
@@ -311,7 +304,7 @@ function AskAiOverlayPanel() {
         className={APP_SHEET_SCRIM_CLASS}
         onClick={closeAskAi}
       />
-      <div className={cn("relative z-10 bg-surface", askAiOverlayPhoneClass(expanded))}>
+      <div className={cn("relative z-10 pointer-events-auto bg-surface", askAiOverlayPhoneClass(expanded))}>
         {chrome}
         {body}
       </div>
@@ -340,6 +333,70 @@ function AskAiOverlayPanel() {
       </dialog>
       {phone && typeof document !== "undefined" ? createPortal(phone, document.body) : phone}
     </>
+  );
+}
+
+function AskAiOverlayBody({
+  showThread,
+  showLanding,
+  showGate,
+  conversations,
+  currentId,
+  initials,
+  conversation,
+  messages,
+}: {
+  showThread: boolean;
+  showLanding: boolean;
+  showGate: boolean;
+  conversations: AskGlobeeHistoryRow[];
+  currentId: string | null;
+  initials: string;
+  conversation: AskGlobeeHistoryRow | null;
+  messages: AskGlobeeStoredMessage[];
+}) {
+  const { historyOpen, setHistoryOpen } = useAskGlobeeChrome();
+
+  useEffect(() => {
+    setHistoryOpen(false);
+  }, [currentId, setHistoryOpen]);
+
+  return (
+    <div data-ask-ai-overlay-body="" className={ASK_AI_OVERLAY_BODY_CLASS}>
+      {showThread ? (
+        <div data-ask-ai-overlay-thread-chrome="" className="shrink-0 px-[var(--space-4)] pt-[var(--space-2)]">
+          <MessagesAppHeader surface="ask-globee-thread" />
+        </div>
+      ) : null}
+      <div
+        className={cn(
+          "flex min-h-0 flex-1 flex-col",
+          historyOpen && showThread ? "max-md:hidden" : null,
+        )}
+      >
+        {showLanding ? <AskGlobeeLanding conversations={conversations} /> : null}
+        {showThread && conversation ? (
+          <AskGlobeeThread
+            initials={initials}
+            conversation={conversation}
+            messages={messages}
+            conversations={conversations}
+          />
+        ) : null}
+        {showGate ? <AccessUpgradeGate /> : null}
+      </div>
+      {historyOpen ? (
+        <div
+          data-ask-ai-overlay-phone-history=""
+          className={cn(
+            ASK_AI_OVERLAY_PHONE_HISTORY_HOST_CLASS,
+            showLanding ? ASK_AI_OVERLAY_PHONE_HISTORY_COVER_CLASS : null,
+          )}
+        >
+          <AskGlobeeHistoryPanel conversations={conversations} currentId={currentId} />
+        </div>
+      ) : null}
+    </div>
   );
 }
 
