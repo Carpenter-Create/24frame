@@ -363,7 +363,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(empty).not.toContain("<img");
   });
 
-  it("lists Settings, Appearance — then Log out with the footer", () => {
+  it("lists Settings, Appearance — Get Help, then Log out with the footer", () => {
     const html = renderSheet();
     const group = html.slice(html.indexOf("data-sheet-group"));
     const settingsClass = attrClass(html, 'data-sheet-group-item="settings"');
@@ -379,7 +379,8 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(html).not.toContain("Workspace");
     expect(group).not.toContain("Profile");
     expect(group.indexOf("Settings")).toBeLessThan(group.indexOf("Appearance"));
-    expect(html.indexOf("Appearance")).toBeLessThan(html.indexOf("Log out"));
+    expect(group.indexOf("Appearance")).toBeLessThan(group.indexOf("Get Help"));
+    expect(html.indexOf("Get Help")).toBeLessThan(html.indexOf("Log out"));
     expect(html).not.toContain("24Frame AI");
     expect(html).not.toContain('data-sheet-group-item="workspace"');
     expect(html).not.toContain('data-sheet-group-item="profile"');
@@ -387,8 +388,16 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(html).not.toContain('data-sheet-group-item="askAssistant"');
     expect(html).toContain('data-sheet-group-item="appearance"');
     expect(html).not.toContain('data-sheet-group-item="agreements"');
-    expect(html).not.toContain('data-sheet-group-item="help"');
+    expect(html).toContain('data-sheet-group-item="help"');
+    expect(html).toContain("data-account-sheet-help-rule");
+    expect(html.indexOf('data-sheet-group-item="appearance"')).toBeLessThan(
+      html.indexOf("data-account-sheet-help-rule"),
+    );
+    expect(html.indexOf("data-account-sheet-help-rule")).toBeLessThan(
+      html.indexOf('data-sheet-group-item="help"'),
+    );
     expect(html).not.toContain('data-sheet-group-item="refer"');
+    expect(html).not.toContain('data-sheet-group-item="feedback"');
     expect(html).toContain('data-sheet-group-item="logOut"');
     expect(html).not.toContain(`href="${USER_MENU.profileHref}"`);
     expect(html).toContain('data-sheet-group-item="settings"');
@@ -399,7 +408,8 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(src).not.toContain('data-sheet-group-item="askAssistant"');
     expect(src).toContain("onClick={onClose}");
     expect(html).not.toContain(`href="${USER_MENU.agreementsHref}"`);
-    expect(html).not.toContain(`href="${USER_MENU.helpHref}"`);
+    expect(html).toContain(`href="${USER_MENU.helpHref}"`);
+    expect(html).not.toContain('href="/help/feedback"');
     expect(html).not.toContain(`href="${USER_MENU.referHref}"`);
     expect(html).not.toContain("/account/appearance");
     expect(html).not.toContain("/account/company");
@@ -501,7 +511,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(pinClass).not.toContain("gap-[var(--space-12)]");
     expect(attrClass(html, "data-account-sheet-surface")).toContain("pb-[var(--space-8)]");
     expect(attrClass(html, "data-account-sheet-surface")).not.toContain("pb-[var(--space-12)]");
-    const lastItem = html.indexOf('data-sheet-group-item="settings"');
+    const lastItem = html.indexOf('data-sheet-group-item="help"');
     const betweenLastItemAndLogout = html.slice(lastItem, logout);
     expect(betweenLastItemAndLogout).toContain("data-account-sheet-leftover");
     expect(betweenLastItemAndLogout).not.toContain("data-account-menu-leftover");
@@ -557,7 +567,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     const leftoverClass = attrClass(html, "data-account-sheet-leftover");
     const surfaceClass = attrClass(html, "data-account-sheet-surface");
     const pinClass = attrClass(html, "data-account-sheet-pin");
-    const lastItem = html.indexOf('data-sheet-group-item="appearance"');
+    const lastItem = html.indexOf('data-sheet-group-item="help"');
     const logout = html.indexOf('data-sheet-group-item="logOut"');
     const scroll = html.indexOf("data-account-sheet-scroll");
     const leftover = html.indexOf("data-account-sheet-leftover");
@@ -570,6 +580,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(pin).toBeGreaterThan(leftover);
     expect(html.slice(scroll, leftover)).toContain("Settings");
     expect(html.slice(scroll, leftover)).toContain("Appearance");
+    expect(html.slice(scroll, leftover)).toContain("Get Help");
     expect(html.slice(scroll, pin)).not.toContain("Log out");
     expect(html.slice(pin)).toContain("Log out");
     expect(betweenLastItemAndLogout).toContain("data-account-sheet-leftover");
@@ -820,7 +831,7 @@ describe("AccountMenuDropdown 629:795", () => {
     const scrollClass = attrClass(html, "data-account-sheet-scroll");
     const groupClass = attrClass(html, "data-sheet-group");
     const pinClass = attrClass(html, "data-account-sheet-pin");
-    const lastItem = html.indexOf('data-sheet-group-item="settings"');
+    const lastItem = html.indexOf('data-sheet-group-item="help"');
     const logout = html.indexOf('data-sheet-group-item="logOut"');
     const footerRule = html.indexOf("data-account-sheet-footer-rule");
     const footer = html.indexOf('data-account-sheet-footer=""');
@@ -890,7 +901,9 @@ describe("AccountMenuDropdown 629:795", () => {
     expect(html).toContain("Settings");
     expect(html).not.toContain("Appearance");
     expect(html).not.toContain("Agreements");
-    expect(html).not.toContain("Help");
+    expect(html).toContain("Get Help");
+    expect(html).toContain("data-account-sheet-help-rule");
+    expect(html).not.toContain("Give feedback");
     expect(html).not.toContain("Refer a friend");
     expect(html).toContain("Log out");
     expect(html).toContain(">v0.1.0<");

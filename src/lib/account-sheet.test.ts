@@ -42,11 +42,12 @@ describe("account sheet lock", () => {
   it("uses USER_MENU_ACTIONS on desktop and phone extras on the sheet", () => {
     expect(ACCOUNT_SHEET_ITEMS).toBe(USER_MENU_ACTIONS);
     expect(ACCOUNT_SHEET_PHONE_ITEMS).toBe(USER_MENU_PHONE_ACTIONS);
-    expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).toEqual(["settings"]);
-    expect(ACCOUNT_SHEET_ITEMS.map((item) => item.label)).toEqual(["Settings"]);
+    expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).toEqual(["settings", "help"]);
+    expect(ACCOUNT_SHEET_ITEMS.map((item) => item.label)).toEqual(["Settings", "Get Help"]);
     expect(ACCOUNT_SHEET_PHONE_ITEMS.map((item) => item.kind)).toEqual([
       "settings",
       "appearance",
+      "help",
     ]);
     expect(ACCOUNT_SHEET_ITEMS[0]?.kind).toBe("settings");
     expect(ACCOUNT_SHEET_ITEMS.map((item) => item.kind)).not.toContain("profile");
@@ -57,17 +58,21 @@ describe("account sheet lock", () => {
 
   it("wires only existing routes — Appearance is not a page", () => {
     const hrefs = ACCOUNT_SHEET_ITEMS.flatMap((item) => ("href" in item ? [item.href] : []));
-    expect(hrefs).toEqual([USER_MENU.settingsHref]);
+    expect(hrefs).toEqual([USER_MENU.settingsHref, USER_MENU.helpHref]);
     expect(USER_MENU).not.toHaveProperty("appearanceHref");
     expect(hrefs).not.toContain("/account/appearance");
     expect(ACCOUNT_SHEET_PHONE_ITEMS.flatMap((item) => ("href" in item ? [item.href] : []))).toEqual([
       USER_MENU.settingsHref,
+      USER_MENU.helpHref,
     ]);
     expect(USER_MENU).not.toHaveProperty("askAssistantHref");
     expect(hrefs).not.toContain("/account/company");
     expect(hrefs.join(" ")).not.toMatch(/notifications|phone|job/i);
     expect(hrefs).not.toContain("/settings/profile");
     expect(hrefs).toContain("/settings");
+    expect(hrefs).toContain("/help");
+    expect(hrefs).not.toContain("/help/feedback");
+    expect(hrefs).not.toContain("/account/feedback");
     expect(hrefs).not.toContain("/account/profile");
     expect(hrefs.join(" ")).not.toContain("globalcontent.co");
   });

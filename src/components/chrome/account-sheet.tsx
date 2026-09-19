@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Fragment,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -298,6 +299,12 @@ function AccountMenuPin({
   );
 }
 
+function accountMenuItemHref(item: UserMenuAction, pathname: string): string | null {
+  if (item.kind === "appearance") return null;
+  if (item.kind === "settings") return settingsLandHref(pathname);
+  return item.href;
+}
+
 function AccountMenuItems({
   pathname,
   onClose,
@@ -311,21 +318,37 @@ function AccountMenuItems({
 }) {
   return (
     <>
-      {items.map((item) => {
+      {items.map((item, index) => {
+        const previous = items[index - 1];
+        const helpRule =
+          item.kind === "help" && previous && previous.kind !== "help" ? (
+            <AppSheetHairline data-account-sheet-help-rule="" />
+          ) : null;
+
         if (item.kind === "appearance") {
-          return <AccountAppearanceRow key={item.kind} onClick={() => onAppearance?.()} />;
+          return (
+            <Fragment key={item.kind}>
+              {helpRule}
+              <AccountAppearanceRow onClick={() => onAppearance?.()} />
+            </Fragment>
+          );
         }
-        const href = settingsLandHref(pathname);
+
+        const href = accountMenuItemHref(item, pathname);
+        if (!href) return null;
+
         return (
-          <SheetGroupItem
-            key={item.kind}
-            item={item.kind}
-            href={href}
-            onClick={destinationClickClosesSheet(pathname, href) ? onClose : undefined}
-          >
-            {item.label}
-            <AccountRowChevron />
-          </SheetGroupItem>
+          <Fragment key={item.kind}>
+            {helpRule}
+            <SheetGroupItem
+              item={item.kind}
+              href={href}
+              onClick={destinationClickClosesSheet(pathname, href) ? onClose : undefined}
+            >
+              {item.label}
+              <AccountRowChevron />
+            </SheetGroupItem>
+          </Fragment>
         );
       })}
     </>
@@ -425,12 +448,13 @@ function AccountMenuBody({
   );
 }
 
-// Mobile 544:561 / 537:557 — avatar opens this sheet. Hamburger stays the nav sheet.
-// Quiet scrim; page stays under. Content hug (h-auto), slides up.
-// Same sheet craft — not a new mini language. Do not restyle to
-// the desktop leftover dropdown chrome (264 / rounded-12).
-// One top row: Identity 48 + Close/44. Hairline — phone items.
-// Mercury phone: Profile, Settings, Appearance.
+// Mobile 544:561 / 537:557 — Apple door. Avatar opens this
+// full-bleed sheet, not the 264 desktop popover. Hamburger stays
+// the nav sheet. Quiet scrim; page stays under. Content hug
+// (h-auto), slides up. Same sheet craft — not a new mini language.
+// Do not restyle to the desktop leftover dropdown chrome
+// (264 / rounded-12). One top row: Identity 48 + Close/44.
+// Hairline — phone items. Settings · Appearance — Get Help.
 // Appearance is the same-sheet drill-in. Desktop theme stays the
 // header sun/moon. 618:785 overlay is void. Closed
 // sheet stays 544:561 / 537:557.
@@ -479,7 +503,8 @@ export function MobileAccountMenu({
   );
 }
 
-// Desktop 629:795 — same items as mobile. 264. Height is
+// Desktop 629:795 — same destinations as mobile (Settings,
+// Get Help). 264. Height is
 // relative to the stack (h-auto hug). Leftover last-item →
 // Log out is 48 (house --space-12). The 48 adds to the stack.
 // Not 0. Not 134. No h-[Npx]. No min-h. No 522 / 570 / 672

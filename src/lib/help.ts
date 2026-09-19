@@ -1,8 +1,73 @@
-// /help — house empty page. Copy lives here, not in JSX.
-// Door only. Do not invent a help center, articles, or support product.
+// Get Help stack. Avatar-menu door + /help index. Copy lives here,
+// not in JSX.
+// Adam 2026-09-19: Get Help / Give feedback stay off Settings hub
+// chrome. Give feedback is /help/feedback — blank now, form later
+// on this same route. No help-center URL SoT and no support mailto
+// SoT — stub panes, not a support product. Do not invent articles,
+// a help desk, or /account/feedback.
+
+import { DASHBOARD_HREF } from "@/lib/dashboard-admin";
+import { SHEET_GROUP_CLASS, SHEET_GROUP_ITEM_CLASS } from "@/lib/house-sheet";
+import { USER_MENU } from "@/lib/user-menu";
 
 export const HELP = {
-  title: "Help",
-  href: "/help",
-  empty: "Help is empty.",
+  title: USER_MENU.help,
+  href: USER_MENU.helpHref,
+  back: "Back",
+  homeHref: DASHBOARD_HREF,
+  helper: "Help center, support, and feedback.",
+  center: "Help center",
+  centerHref: "/help/center",
+  centerEmpty: "Help center is empty.",
+  support: "Contact support",
+  supportHref: "/help/support",
+  supportEmpty: "Contact support is empty.",
+  feedback: "Give feedback",
+  feedbackHref: "/help/feedback",
+  feedbackHelper: "The form is coming.",
+  feedbackEmpty: "Feedback is empty.",
 } as const;
+
+export const HELP_ABSENT = [
+  "FAQ",
+  "support@",
+  "Phone",
+  "Job",
+  "articles",
+  "Help desk",
+] as const;
+
+export type HelpStackKind = "center" | "support" | "feedback";
+
+export type HelpStackItem = {
+  kind: HelpStackKind;
+  label: (typeof HELP)["center"] | (typeof HELP)["support"] | (typeof HELP)["feedback"];
+  href: (typeof HELP)["centerHref"] | (typeof HELP)["supportHref"] | (typeof HELP)["feedbackHref"];
+};
+
+export const HELP_STACK: readonly HelpStackItem[] = [
+  { kind: "center", label: HELP.center, href: HELP.centerHref },
+  { kind: "support", label: HELP.support, href: HELP.supportHref },
+  { kind: "feedback", label: HELP.feedback, href: HELP.feedbackHref },
+];
+
+export const HELP_PAGE_CLASS = "flex flex-col gap-[var(--space-12)]";
+export const HELP_SECTION_CLASS = "flex flex-col gap-[var(--space-6)]";
+export const HELP_STACK_CLASS = SHEET_GROUP_CLASS;
+export const HELP_ROW_CLASS = SHEET_GROUP_ITEM_CLASS;
+export const HELP_TITLE_CLASS = "t-section text-ink";
+export const HELP_HELPER_CLASS = "t-body-sm text-ink-3";
+
+export function isHelpPath(pathname: string): boolean {
+  return pathname === HELP.href || pathname.startsWith(`${HELP.href}/`);
+}
+
+export function helpHeaderBack(pathname: string | null | undefined): {
+  href: string;
+  label: string;
+} {
+  if (!pathname || pathname === HELP.href) {
+    return { href: HELP.homeHref, label: HELP.back };
+  }
+  return { href: HELP.href, label: HELP.title };
+}
