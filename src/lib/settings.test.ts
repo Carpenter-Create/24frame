@@ -343,7 +343,8 @@ describe("settings hub lock", () => {
     expect(SETTINGS_DRILL_ROW_CLASS).not.toContain("truncate");
     expect(SETTINGS_DRILL_VALUE_CLASS).not.toContain("truncate");
     const settingsSrc = readFileSync("src/lib/settings.ts", "utf8");
-    expect(settingsSrc).toContain("Shared SoT for Profile, Preferences, and Rights Holder");
+    expect(settingsSrc).toContain("Shared SoT for");
+    expect(settingsSrc).toContain("Rights Holder / Legal Entities");
     expect(settingsSrc).not.toContain("companyHref");
   });
 
