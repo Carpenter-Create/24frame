@@ -313,7 +313,9 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(bellSrc).toContain("HOUSE_HEADER_TRAILING_PHONE_CLASS");
     expect(bellSrc).toContain("HOUSE_HEADER_TRAILING_DESKTOP_CLASS");
     expect(bellSrc).toContain("HOUSE_PHONE_CHROME_ICON_WEIGHT");
-    expect(bellSrc).toContain("weight={HOUSE_PHONE_CHROME_ICON_WEIGHT}");
+    expect(bellSrc).toContain(
+      "weight={phone ? HOUSE_PHONE_CHROME_ICON_WEIGHT : PHOSPHOR_CHROME_IDLE_WEIGHT}",
+    );
     expect(searchSheetSrc).toContain("HOUSE_PHONE_CHROME_ICON_CLASS");
     expect(searchSheetSrc).toContain("HOUSE_PHONE_CHROME_ICON_WEIGHT");
     expect(accountSheetSrc).not.toContain("HOUSE_PHONE_CHROME_ICON_CLASS");
