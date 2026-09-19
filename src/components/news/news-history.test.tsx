@@ -23,8 +23,6 @@ import {
   NEWS_STICKY_PIN_CLASS,
 } from "@/lib/news-sticky";
 
-const NOW = new Date("2026-09-18T18:00:00.000Z");
-
 const VARIETY: NewsItem = {
   id: "n1",
   title: "Harbor Cut lands a festival slot",
@@ -52,7 +50,6 @@ describe("NewsHistory layout", () => {
     const html = renderToStaticMarkup(
       createElement(NewsHistory, {
         items: [VARIETY, DEADLINE],
-        now: NOW,
         selected: [],
       }),
     );
@@ -73,6 +70,13 @@ describe("NewsHistory layout", () => {
     expect(html).toContain(markupClass(DASHBOARD_NEWS_HISTORY_THUMB_CLASS));
     expect(html).toContain("data-news-outbound");
     expect(html).toContain("data-house-action-arrow");
+    expect(html).toContain("Variety");
+    expect(html).toContain('data-news-outlet=""');
+    expect(html).not.toContain("data-news-time");
+    expect(html).not.toMatch(/\b(\d+[mhd]|ago|Yesterday|Just now)\b/);
+    const historyOutlet = html.match(/data-news-outlet=""[^>]*>/)?.[0] ?? "";
+    expect(historyOutlet).toContain("text-ink-3");
+    expect(historyOutlet).not.toMatch(/rounded|border|bg-|px-|py-/);
     expect(html).toContain("text-accent");
     expect(html).not.toMatch(/\b(Read|Open|Visit)\b/);
     expect(html.indexOf("data-news-thumb")).toBeLessThan(html.indexOf("Harbor Cut lands a festival slot"));
@@ -146,7 +150,6 @@ describe("NewsHistory layout", () => {
     const html = renderToStaticMarkup(
       createElement(NewsHistory, {
         items: [VARIETY],
-        now: NOW,
         selected: [],
         heading: createElement(PageHeader, {
           title: NEWS_PAGE.title,
@@ -175,7 +178,6 @@ describe("NewsHistory layout", () => {
     const all = renderToStaticMarkup(
       createElement(NewsHistory, {
         items: [VARIETY, DEADLINE],
-        now: NOW,
         selected: [],
       }),
     );
@@ -190,7 +192,6 @@ describe("NewsHistory layout", () => {
     const one = renderToStaticMarkup(
       createElement(NewsHistory, {
         items: [VARIETY, DEADLINE],
-        now: NOW,
         selected: ["variety"],
       }),
     );
@@ -208,7 +209,6 @@ describe("NewsHistory layout", () => {
     const multi = renderToStaticMarkup(
       createElement(NewsHistory, {
         items: [VARIETY, DEADLINE],
-        now: NOW,
         selected: ["variety", "deadline"],
       }),
     );
@@ -220,7 +220,6 @@ describe("NewsHistory layout", () => {
     const empty = renderToStaticMarkup(
       createElement(NewsHistory, {
         items: [VARIETY, DEADLINE],
-        now: NOW,
         selected: ["joblo"],
       }),
     );
@@ -234,7 +233,7 @@ describe("NewsHistory layout", () => {
 describe("Home News rail stays stacked", () => {
   it("does not apply the history list + Sources filter to Home", () => {
     const html = renderToStaticMarkup(
-      createElement(NewsRail, { items: [VARIETY], now: NOW, viewAll: true }),
+      createElement(NewsRail, { items: [VARIETY], viewAll: true }),
     );
     expect(html).toContain('data-news-card-density="home"');
     expect(html).not.toContain("data-news-history-layout");

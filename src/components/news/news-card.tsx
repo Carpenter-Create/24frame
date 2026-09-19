@@ -1,20 +1,21 @@
 import { HouseActionArrow } from "@/components/chrome/house-action-arrow";
-import { DashboardHomeStatusPill } from "@/components/dashboard/dashboard-home";
 import {
   DASHBOARD_CARD_PAD,
   DASHBOARD_MODULE_CARD_CLASS,
   DASHBOARD_NEWS_HISTORY_COPY_CLASS,
   DASHBOARD_NEWS_HISTORY_ROW_CLASS,
   DASHBOARD_NEWS_HISTORY_THUMB_CLASS,
+  DASHBOARD_NEWS_OUTLET_CLASS,
   DASHBOARD_NEWS_THUMB_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
 } from "@/lib/dashboard-craft";
 import { cn } from "@/lib/cn";
 import { newsSourceLabel, type NewsItem } from "@/lib/news";
 import { newsCardImageUrl } from "@/lib/news-rss";
-import { socialRelativeTime } from "@/lib/social";
 
-// Link-out card: media plate · headline · source · relative time.
+// Link-out card: media plate · headline · muted outlet text.
+// No relative time (standing: never add 29m / 2h / 3d / ago).
+// No outlet chip / badge (Adam lock 2026-09-19).
 // Home: stacked image-top tile inside OverviewModule (Education cover SoT).
 // History: same Home stack on phone (full-bleed 16:9, flex-col);
 // md+ is the dense image-led row. Image leads; type is secondary.
@@ -22,11 +23,9 @@ import { socialRelativeTime } from "@/lib/social";
 
 export function NewsCard({
   item,
-  now,
   density = "history",
 }: {
   item: NewsItem;
-  now: Date;
   density?: "home" | "history";
 }) {
   const home = density === "home";
@@ -75,16 +74,9 @@ export function NewsCard({
             <span className="min-w-0 flex-1">{item.title}</span>
             <HouseActionArrow data-news-outbound="" />
           </p>
-          <div className={`flex flex-wrap items-center ${DASHBOARD_RELATED_GAP_CLASS}`}>
-            <DashboardHomeStatusPill label={newsSourceLabel(item.source)} />
-            <time
-              dateTime={item.published_at}
-              data-news-time=""
-              className="t-body-sm text-ink-3"
-            >
-              {socialRelativeTime(item.published_at, now.getTime())}
-            </time>
-          </div>
+          <p data-news-outlet="" className={DASHBOARD_NEWS_OUTLET_CLASS}>
+            {newsSourceLabel(item.source)}
+          </p>
         </div>
       </a>
     </li>

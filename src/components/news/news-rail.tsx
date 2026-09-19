@@ -27,14 +27,12 @@ import { OVERVIEW_MODULE_NEST_CLASS } from "@/lib/overview";
 
 export function NewsRail({
   items,
-  now,
   viewAll = false,
   history = false,
   empty = NEWS_PAGE.empty,
   testId = "news",
 }: {
   items: readonly NewsItem[];
-  now: Date;
   viewAll?: boolean;
   history?: boolean;
   empty?: string;
@@ -50,7 +48,7 @@ export function NewsRail({
         {items.length > 0 ? (
           <ul data-news-list="" className={DASHBOARD_NEWS_HISTORY_LIST_CLASS}>
             {items.map((item) => (
-              <NewsCard key={item.id} item={item} now={now} density="history" />
+              <NewsCard key={item.id} item={item} density="history" />
             ))}
           </ul>
         ) : (
@@ -75,7 +73,7 @@ export function NewsRail({
       {items.length > 0 ? (
         <ul data-news-list="" className={`flex flex-col ${OVERVIEW_MODULE_NEST_CLASS}`}>
           {items.map((item) => (
-            <NewsCard key={item.id} item={item} now={now} density="home" />
+            <NewsCard key={item.id} item={item} density="home" />
           ))}
         </ul>
       ) : null}

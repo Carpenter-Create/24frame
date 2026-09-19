@@ -70,6 +70,10 @@ describe("NewsPage", () => {
     expect(html).toContain("Harbor Cut lands a festival slot");
     expect(html).toContain("https://variety.com/harbor-cut");
     expect(html).toContain("Variety");
+    expect(html).toContain('data-news-outlet=""');
+    expect(html).not.toContain("data-news-time");
+    expect(html).not.toMatch(/\b(\d+[mhd]|ago|Yesterday|Just now)\b/);
+    expect(html).not.toContain("data-dashboard-status-pill");
     expect(html).toContain(DASHBOARD_NEWS_HISTORY_COLUMN_CLASS);
     expect(html).toContain("max-w-[840px]");
     expect(html).toContain(DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS);

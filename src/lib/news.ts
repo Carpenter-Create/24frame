@@ -17,6 +17,11 @@ import { NEWS_INGEST_FUNCTION, NEWS_INGEST_SCHEDULE } from "@/lib/news-aws";
 // Pill order (Adam lock 2026-09-19): All first, then outlets A–Z
 // case-insensitive by label. One SoT — NEWS_SOURCES is that sorted
 // list; NEWS_SOURCE_IDS is derived. Do not hard-code a second order.
+// Standing lock (Adam 2026-09-19): Industry news items never show
+// relative time / minute counts (no 29m, 2h, 3d, "ago", "Just now").
+// Row outlet is muted text only — no pill/badge/chip chrome. Home
+// module + /home/news share NewsCard — one SoT. Do not add a clock
+// or a lookalike chip back.
 
 export const NEWS_HOME_HREF = "/home";
 export const NEWS_HREF = "/home/news";

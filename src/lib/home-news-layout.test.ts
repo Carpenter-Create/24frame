@@ -178,7 +178,6 @@ describe("Home News layout + register lock", () => {
           published_at: "2026-09-17T12:00:00.000Z",
           image_url: "https://variety.com/thumbs/harbor.jpg",
         },
-        now: new Date("2026-09-18T18:00:00.000Z"),
         density: "history",
       }),
     );
@@ -193,6 +192,9 @@ describe("Home News layout + register lock", () => {
     expect(html).not.toContain("w-40");
     expect(html).toContain("data-news-outbound");
     expect(html).toContain("data-house-action-arrow");
+    expect(html).toContain('data-news-outlet=""');
+    expect(html).not.toContain("data-dashboard-status-pill");
+    expect(html).not.toContain("data-news-time");
     expect(html).not.toContain(DASHBOARD_LICENSING_THUMB_CLASS.replaceAll("&", "&amp;"));
     expect(DASHBOARD_NEWS_HISTORY_THUMB_CLASS.startsWith(DASHBOARD_NEWS_THUMB_CLASS)).toBe(true);
   });

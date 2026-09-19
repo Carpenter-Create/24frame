@@ -76,6 +76,17 @@ describe("News SoT", () => {
     expect(NEWS_SOURCES.every((source) => source.enabled)).toBe(true);
     expect(newsSourceLabel("variety")).toBe("Variety");
     expect(JSON.stringify(NEWS_PAGE)).not.toMatch(/summary|rewrite|republish/i);
+    const card = readFileSync("src/components/news/news-card.tsx", "utf8");
+    const rail = readFileSync("src/components/news/news-rail.tsx", "utf8");
+    const history = readFileSync("src/components/news/news-history.tsx", "utf8");
+    expect(card).not.toContain("socialRelativeTime");
+    expect(card).not.toContain("data-news-time");
+    expect(card).not.toContain("DashboardHomeStatusPill");
+    expect(card).not.toContain("data-dashboard-status-pill");
+    expect(card).toContain("DASHBOARD_NEWS_OUTLET_CLASS");
+    expect(card).not.toMatch(/\bago\b/);
+    expect(rail).not.toContain("socialRelativeTime");
+    expect(history).not.toContain("socialRelativeTime");
     expect(readFileSync("vercel.json", "utf8")).not.toContain("news-ingest");
     expect(readFileSync("docs/infra/news-aws-setup.md", "utf8")).toContain(NEWS_INGEST_FUNCTION);
     expect(readFileSync("docs/infra/news-aws-setup.md", "utf8")).toContain(NEWS_INGEST_SCHEDULE);
