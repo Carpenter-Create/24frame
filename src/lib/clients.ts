@@ -1,6 +1,6 @@
 import { aggregationPath } from "@/lib/workspace";
-import type { Database } from "@/lib/supabase/database.types";
 import { TIER_META, type Tier } from "@/lib/agreements";
+import { ORG_ROLE_LABELS, type OrgRole } from "@/lib/org-roles";
 import {
   CLIENTS_PAGE,
   CLIENT_DIRECTORY_FILTERS,
@@ -15,7 +15,8 @@ import {
 // Server/agreement directory logic. Client Components must import
 // clients-filter — this module pulls agreements (server-only).
 
-export type OrgRole = Database["public"]["Enums"]["org_role"];
+export type { OrgRole };
+export { ORG_ROLE_LABELS };
 export type { ClientDirectoryFilter, OrgStatus };
 export {
   CLIENTS_PAGE,
@@ -95,15 +96,6 @@ export function clientOrgFields(org: ClientOrg): { label: string; value: string 
   if (org.termEnds) fields.push({ label: CLIENT_PROFILE.termEnds, value: org.termEnds });
   return fields;
 }
-
-// Role vocabulary matches the capability names in member_can, spelled for reading.
-export const ORG_ROLE_LABELS: Record<OrgRole, string> = {
-  account_owner: "Account owner",
-  accountant: "Accountant",
-  legal: "Legal",
-  delivery_ops: "Delivery ops",
-  viewer: "Viewer",
-};
 
 const NO_VALUE = "—";
 

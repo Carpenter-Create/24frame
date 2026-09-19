@@ -12,9 +12,9 @@
 // Profile is account identity only (name / photo / sign-in email +
 // Save). Public / Social profile is Social-owned — edit it from
 // Social, not from a Settings door.
-// Organization holds the company profile (moved from Aggregation
-// settings). Org Team / invite / roles are out of scope this PR —
-// this section hosts Team next.
+// Organization holds the company profile and Team invite (same
+// account, existing org_role). House grant/comp is staff-only on
+// /gc/clients — never a customer Settings directory.
 // Preferences holds Appearance (same gc-theme SoT as the header
 // sun/moon) and the notification matrix. Leftover workspace prefs
 // may appear as optional subsections only — never as a You / Social /
@@ -65,6 +65,7 @@ export const SETTINGS = {
   manageCoursesHref: EDUCATION_MANAGE_HREF,
   organizationEmpty: "No organization on this account.",
   company: "Company",
+  team: "Team",
   agreements: USER_MENU.agreements,
   agreementsHref: USER_MENU.agreementsHref,
   agreementsEmpty: "No agreements on this account.",

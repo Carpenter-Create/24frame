@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { COMPANY_PROFILE } from "@/lib/account-profile";
+import { ACCOUNT_INVITE } from "@/lib/account-invite";
 import { SETTINGS } from "@/lib/settings";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
@@ -22,8 +23,9 @@ vi.mock("@/app/(app)/account/actions", () => ({
 
 function stubMemberCan(allowed: boolean) {
   const rpc = vi.fn(async (name: string) => {
-    if (name !== "member_can") throw new Error(`unexpected rpc(${name})`);
-    return { data: allowed, error: null };
+    if (name === "member_can") return { data: allowed, error: null };
+    if (name === "org_team" || name === "org_pending_invites") return { data: [], error: null };
+    throw new Error(`unexpected rpc(${name})`);
   });
   vi.mocked(createClient).mockResolvedValue({ rpc } as never);
   return rpc;
@@ -70,12 +72,14 @@ describe("SettingsOrganizationPage", () => {
     expect(html).toContain(COMPANY_PROFILE.save);
     expect(html).not.toContain(SETTINGS.manageCourses);
     expect(html).not.toContain("Add user");
-    expect(html).not.toContain("Invite");
-    expect(html).not.toContain("Team");
+    expect(html).toContain(SETTINGS.team);
+    expect(html).toContain("data-settings-section=\"team\"");
+    expect(html).toContain("data-team-invite-form");
+    expect(html).toContain(ACCOUNT_INVITE.invite);
     expect(paneSrc).toContain("CompanyProfileForm");
+    expect(paneSrc).toContain("TeamInviteForm");
     expect(paneSrc).toContain("member_can");
-    expect(paneSrc).toContain("out of scope");
-    expect(paneSrc).toContain("Team next");
+    expect(paneSrc).not.toContain("out of scope");
   });
 
   it("houses Organization empty when there is no org", async () => {

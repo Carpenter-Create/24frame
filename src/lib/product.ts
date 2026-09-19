@@ -6,8 +6,7 @@
 // (catalog), Social (creator profile, groups, posts, DMs), and
 // Education consume is /education. Staff CMS is /education/manage
 // under (operator). Ask 24Frame AI is the shell overlay, not /messages.
-// Org invite stays
-// Aggregation.
+// Team invite lives on Settings / Organization. House grant is staff-only.
 
 export const PRODUCT_NAME = "24Frame";
 export const ASSISTANT_NAME = "24Frame AI";

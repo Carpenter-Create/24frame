@@ -85,6 +85,9 @@ function stubClient() {
   });
   const rpc = vi.fn(async (name: string) => {
     if (name === "my_findings" || name === "my_deliveries") return { data: [], error: null };
+    if (name === "gc_client_directory" || name === "pending_house_grants") {
+      return { data: [], error: null };
+    }
     throw new Error(`unexpected rpc(${name})`);
   });
   vi.mocked(createClient).mockResolvedValue({ from, rpc } as never);

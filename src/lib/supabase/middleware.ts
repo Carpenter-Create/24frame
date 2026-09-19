@@ -40,6 +40,7 @@ export async function updateSession(request: NextRequest) {
   const isPublic =
     path.startsWith("/login") ||
     path.startsWith("/auth") ||
+    path.startsWith("/invite") ||       // email accept (token-gated; sign-in on the page)
     path.startsWith("/portal") ||       // account-less asset-access portal (token-gated)
     path.startsWith("/api/portal") ||   // portal route handlers (token/OTP/session gated in-handler)
     path.startsWith("/api/mobile") ||   // mobile sign-in mint/send (rate-limited in-handler)

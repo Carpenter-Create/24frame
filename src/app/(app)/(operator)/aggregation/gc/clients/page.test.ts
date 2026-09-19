@@ -63,37 +63,38 @@ describe("GcClientsPage read bound", () => {
   });
 
   it("renders organizations as the shared directory row without nested seats", async () => {
-    const rpc = vi.fn(async () => ({
-      data: [
-        {
-          user_id: "u1",
-          email: "jane@acmefilms.com",
-          org_id: "22222222-2222-4222-8222-222222222222",
-          organization: "Acme Films",
-          org_status: "active",
-          role: "account_owner",
-          joined_at: "2026-08-03T10:00:00Z",
-          last_sign_in: "2026-08-14T09:00:00Z",
-          tier: "pro",
-          term_expires_at: "2027-08-03T10:00:00Z",
-          subscription_status: "active",
-        },
-        {
-          user_id: "u2",
-          email: "sam@acmefilms.com",
-          org_id: "22222222-2222-4222-8222-222222222222",
-          organization: "Acme Films",
-          org_status: "active",
-          role: "viewer",
-          joined_at: "2026-08-03T10:00:00Z",
-          last_sign_in: "2026-08-14T09:00:00Z",
-          tier: "pro",
-          term_expires_at: "2027-08-03T10:00:00Z",
-          subscription_status: "active",
-        },
-      ],
-      error: null,
-    }));
+    const seats = [
+      {
+        user_id: "u1",
+        email: "jane@acmefilms.com",
+        org_id: "22222222-2222-4222-8222-222222222222",
+        organization: "Acme Films",
+        org_status: "active",
+        role: "account_owner",
+        joined_at: "2026-08-03T10:00:00Z",
+        last_sign_in: "2026-08-14T09:00:00Z",
+        tier: "pro",
+        term_expires_at: "2027-08-03T10:00:00Z",
+        subscription_status: "active",
+      },
+      {
+        user_id: "u2",
+        email: "sam@acmefilms.com",
+        org_id: "22222222-2222-4222-8222-222222222222",
+        organization: "Acme Films",
+        org_status: "active",
+        role: "viewer",
+        joined_at: "2026-08-03T10:00:00Z",
+        last_sign_in: "2026-08-14T09:00:00Z",
+        tier: "pro",
+        term_expires_at: "2027-08-03T10:00:00Z",
+        subscription_status: "active",
+      },
+    ];
+    const rpc = vi.fn(async (name: string) => {
+      if (name === "pending_house_grants") return { data: [], error: null };
+      return { data: seats, error: null };
+    });
     vi.mocked(createClient).mockResolvedValue({ rpc } as never);
 
     const html = renderToStaticMarkup(await GcClientsPage());
@@ -112,6 +113,9 @@ describe("GcClientsPage read bound", () => {
     expect(html).not.toContain("EMAIL");
     expect(html).not.toContain("ROLE");
     expect(html).not.toContain("LAST SEEN");
+    expect(html).toContain("Grant account");
+    expect(html).toContain("data-house-grant-form");
+    expect(rpc).toHaveBeenCalledWith("pending_house_grants", { p_limit: UNPAGINATED_MAX + 1 });
 
     const directorySrc = readFileSync(
       "src/app/(app)/(operator)/aggregation/gc/clients/clients-directory.tsx",

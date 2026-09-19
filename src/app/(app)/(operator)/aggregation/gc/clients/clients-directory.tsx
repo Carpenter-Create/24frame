@@ -1,7 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { InlineNotice } from "@/components/ui/inline-notice";
+import { Card, CardBody } from "@/components/ui/card";
 import { StaffDirectoryList } from "@/components/staff/staff-directory-list";
+import { HouseGrantForm } from "@/components/staff/house-grant-form";
 import { TitlesCatalogHeader } from "@/components/titles/titles-catalog";
+import { HOUSE_GRANT, type GrantTier } from "@/lib/account-invite";
 import {
   CLIENTS_PAGE,
   clientDirectorySecondary,
@@ -39,8 +42,18 @@ export async function GcClientsDirectory({
   // Probe one past the bound so truncation is VISIBLE rather than a short list
   // that looks complete (src/lib/list-bounds.ts). The bound is on seats, not
   // orgs — the RPC returns seats.
-  const { data } = await supabase.rpc("gc_client_directory", { p_limit: UNPAGINATED_MAX + 1 });
+  const [{ data }, grantsRes] = await Promise.all([
+    supabase.rpc("gc_client_directory", { p_limit: UNPAGINATED_MAX + 1 }),
+    supabase.rpc("pending_house_grants", { p_limit: UNPAGINATED_MAX + 1 }),
+  ]);
   const { rows: seats, truncated } = splitProbe(data as ClientDirectoryRow[] | null, UNPAGINATED_MAX);
+  const { rows: grantRows } = splitProbe(grantsRes.data ?? [], UNPAGINATED_MAX);
+  const pendingGrants = grantRows.map((row) => ({
+    id: row.id,
+    email: row.email,
+    orgName: row.org_name,
+    tier: row.tier as GrantTier,
+  }));
   const orgs = filterClientOrgs(toClientOrgs(seats), statusFilter);
   const rows = orgs.map((org) => ({
     id: org.orgId,
@@ -68,6 +81,15 @@ export async function GcClientsDirectory({
         countLabel={directoryCountLabel(rows.length, "client", "clients")}
         empty={<p className={STAFF_DIRECTORY_EMPTY_CLASS}>{CLIENTS_PAGE.empty}</p>}
       />
+
+      <section data-house-grant-section="" className="mt-[var(--space-12)] flex flex-col gap-[var(--space-4)]">
+        <h2 className="t-section text-ink">{HOUSE_GRANT.title}</h2>
+        <Card>
+          <CardBody>
+            <HouseGrantForm pending={pendingGrants} canGrant />
+          </CardBody>
+        </Card>
+      </section>
     </>
   );
 }
