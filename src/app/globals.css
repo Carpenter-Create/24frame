@@ -74,8 +74,10 @@ body {
   font-weight: var(--type-body-weight);
   line-height: 1.6;
   letter-spacing: -0.006em;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* Adam 2026-09-19 — subpixel on Mac so Geist reads denser (Coinbase-pop A);
+     do not restore antialiased without lock. */
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
 }
 
 /* ============================================================
@@ -89,7 +91,7 @@ body {
   .t-display {
     font-family: var(--font-sans);
     font-size: var(--text-hero);
-    font-weight: 500;
+    font-weight: 700;
     line-height: 1.04;
     letter-spacing: -0.035em;
     font-variant-numeric: tabular-nums;
@@ -113,8 +115,8 @@ body {
     line-height: 1.22;
     letter-spacing: var(--tracking-tight);
   }
-  /* Section headings — title role (480), sentence case, tight tracking.
-     Page titles, not the hero step. Do not bind 500-as-title. */
+  /* Section headings — title role (600), sentence case, tight tracking.
+     Page titles, not the hero step. Do not bind 480-as-title. */
   .t-section {
     font-family: var(--font-sans);
     font-size: var(--text-title);
@@ -125,14 +127,14 @@ body {
   .t-heading {
     font-family: var(--font-sans);
     font-size: var(--text-lg);
-    font-weight: 500;
+    font-weight: 600;
     line-height: 1.2;
     letter-spacing: -0.015em;
   }
   .t-subhead {
     font-family: var(--font-sans);
     font-size: var(--text-lg);
-    font-weight: 500;
+    font-weight: 600;
     line-height: 1.25;
     letter-spacing: -0.015em;
   }

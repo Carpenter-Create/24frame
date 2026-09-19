@@ -45,9 +45,9 @@
   --surface:       #ffffff;         /* elevated white */
   --surface-muted: #f4f4f6;         /* panel fill */
   --border:        #ecedf0;         /* hairline */
-  --text:          #14171a;         /* near-black ink */
-  --text-secondary:#5e646e;
-  --text-tertiary: #9aa0a9;
+  --text:          #0A0B0D;         /* near-black ink — Adam 2026-09-19 type pass A */
+  --text-secondary:#3D4450;
+  --text-tertiary: #6B7280;
   --body:          #2b2f36;         /* long-form prose */
   --elevation: 0 1px 2px rgb(16 18 26 / 0.06);
   /* Phone Mercury dock lift. Soft, restrained. Not glass. */
@@ -70,11 +70,11 @@
   --text-title:1.5rem;     /* 24 — .t-title / .page-title */
   --text-hero: 3rem;       /* 48 — .t-display / hero-value */
   --tracking-tight: -0.02em;
-  /* Role weights bind in globals .t-* (house-wide). Title 480 · body 420.
-     Do not override with font-normal (400-as-body) or font-medium (500-as-title).
-     No Dashboard-only token CSS. */
-  --type-title-weight: 480;
-  --type-body-weight: 420;
+  /* Role weights bind in globals .t-* (house-wide). Title 600 · body 500.
+     Adam 2026-09-19 type pass A. Do not override with font-normal
+     (400-as-body) or restore 480-as-title. No Dashboard-only token CSS. */
+  --type-title-weight: 600;
+  --type-body-weight: 500;
 
   /* --- Spacing (4px base) --- */
   --space-1: 0.25rem; --space-2: 0.5rem;  --space-3: 0.75rem; --space-4: 1rem;

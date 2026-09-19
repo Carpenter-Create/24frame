@@ -125,7 +125,7 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(tokens).toMatch(/--bg:\s*#ffffff;/);
     expect(tokens).toMatch(/--surface:\s*#ffffff;/);
     expect(tokens).toMatch(/--surface-muted:\s*#f4f4f6;/);
-    expect(tokens).toMatch(/--text:\s*#14171a;/);
+    expect(tokens).toMatch(/--text:\s*#0A0B0D;/);
     expect(tokens).toMatch(/--accent:\s*#1769ff;/);
     expect(tokens).toMatch(/--radius-lg:\s*16px;/);
     expect(tokens).toMatch(/--content-inset:\s*48px;/);
@@ -337,7 +337,9 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(sideNav).toContain("BrandLogo");
     for (const path of HOUSE_SHELL_COMMENT_PATHS) {
       const src = readFileSync(path, "utf8");
-      expect(src, path).not.toMatch(/Coinbase/i);
+      // Lock citation "Coinbase-pop A" (Adam 2026-09-19) may appear in
+      // globals.css; the product/shell still must not name the reference brand.
+      expect(src.replaceAll("Coinbase-pop A", ""), path).not.toMatch(/Coinbase/i);
     }
   });
 

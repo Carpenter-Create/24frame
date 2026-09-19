@@ -243,7 +243,7 @@ describe("AskGlobeeLanding", () => {
     expect(src).toContain('variant="bare"');
     expect(src).toContain("px-[var(--space-4)]");
     expect(src).toContain("items-center");
-    expect(tokens).toContain("--text-tertiary: #9aa0a9;");
+    expect(tokens).toContain("--text-tertiary: #6B7280;");
     expect(tokens).toContain("--accent: #1769ff;");
     expect(tokens).toContain("--surface-muted: #f4f4f6;");
   });
@@ -313,7 +313,7 @@ describe("AskGlobeeLanding", () => {
     );
     expect(src).toContain("<Input");
     expect(src).toContain('variant="bare"');
-    expect(tokens).toContain("--text-tertiary: #9aa0a9;");
+    expect(tokens).toContain("--text-tertiary: #6B7280;");
     expect(tokens).toContain("--accent: #1769ff;");
     expect(tokens).toContain("--surface-muted: #f4f4f6;");
     expect(src).toContain("<ArrowRight");
