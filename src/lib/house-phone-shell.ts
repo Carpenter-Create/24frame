@@ -14,8 +14,8 @@
 // floating pill, house surface fill, hairline, restrained
 // --elevation-float. No frost. No satellite FAB. No second
 // float. Active tab is a light surface-muted pill behind the glyph.
-// Inactive sit bare. Stroke is Regular at size-4 (bell box, not
-// Bold/Fill heavy). Active ink is accent on the chip; idle is ink-2.
+// Inactive sit bare. Stroke is Regular at size-6 / 24px (bell box,
+// not Bold/Fill heavy). Active ink is accent on the chip; idle is ink-2.
 // House tokens only. Hide on scroll-down / show on scroll-up via
 // social-tab-bar-scroll. Content pad stays when the bar hides.
 // Not a Meta skin. Not Mercury lavender.
@@ -40,7 +40,7 @@ import {
   overviewLeadSelected,
   type OverviewLeadPillId,
 } from "@/lib/overview";
-import { PHOSPHOR_CHROME_ICON_CLASS, type PhosphorIcon } from "@/lib/phosphor-icon";
+import type { PhosphorIcon } from "@/lib/phosphor-icon";
 import { SOCIAL_ROUTES } from "@/lib/social";
 import {
   WORKSPACE_AGGREGATION_LABEL,
@@ -109,12 +109,18 @@ export const HOUSE_PHONE_BOTTOM_NAV_ITEM_ON_CLASS = "text-accent";
 
 export const HOUSE_PHONE_BOTTOM_NAV_ITEM_OFF_CLASS = "text-ink-2";
 
-/** Soft light pill behind the selected glyph. House muted, not a brand fill. */
+/** Soft light pill behind the selected glyph. Scales with the 24px box. */
 export const HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS =
-  "flex h-10 min-w-12 items-center justify-center rounded-full bg-surface-muted";
+  "flex h-12 min-w-14 items-center justify-center rounded-full bg-surface-muted";
 
-/** Same size-4 box as the phone-top bell. Regular stroke, not Bold/Fill. */
-export const HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS = PHOSPHOR_CHROME_ICON_CLASS;
+/** Phone chrome glyphs — Mercury bottom bar + top trailing cluster. 24px box. */
+export const HOUSE_PHONE_CHROME_ICON_CLASS = "size-6 shrink-0";
+
+/** Phone 24px; desktop header keeps the 16px phosphor chrome box. */
+export const HOUSE_HEADER_TRAILING_ICON_CLASS = `${HOUSE_PHONE_CHROME_ICON_CLASS} md:size-4`;
+
+/** Same size-6 box as the phone-top AI/bell. Regular stroke, not Bold/Fill. */
+export const HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS = HOUSE_PHONE_CHROME_ICON_CLASS;
 
 export const HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT = "regular" satisfies IconWeight;
 
