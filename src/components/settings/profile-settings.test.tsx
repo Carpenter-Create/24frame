@@ -56,8 +56,17 @@ describe("ProfileSettings", () => {
     expect(src).toContain("settingsPaneTitle");
     expect(src).not.toContain("SETTINGS.title");
     expect(html).toContain(ACCOUNT_PROFILE.emailHint);
+    expect(html).toContain(ACCOUNT_PROFILE.emailLocked);
     expect(html).toContain("ada@example.com");
     expect(html).toContain(ACCOUNT_PROFILE.save);
+    expect(html).toContain('data-settings-profile-index=""');
+    expect(html).toContain('data-settings-drill-row="name"');
+    expect(html).toContain(ACCOUNT_PROFILE.emptyValue);
+    expect(html).toContain(`href="${SETTINGS.profileNameHref}"`);
+    expect(html).toContain('data-settings-drill-row="email"');
+    expect(html).toContain("data-settings-drill-readonly");
+    expect(html).toContain("md:hidden");
+    expect(html).toContain("hidden md:block");
     expect(html).not.toContain("Edit public profile");
     expect(html).not.toContain("/social/profile/edit");
     expect(html).not.toContain("data-settings-edit-public-profile");
@@ -68,6 +77,8 @@ describe("ProfileSettings", () => {
     expect(html).not.toContain("data-company-profile-form");
     expect(src).not.toContain("CompanyProfileForm");
     expect(src).toContain("AccountProfileForm");
+    expect(src).toContain("SettingsDrillRow");
+    expect(src).toContain("AccountPhotoField");
     for (const absent of SETTINGS_ABSENT) {
       expect(html).not.toContain(absent);
     }

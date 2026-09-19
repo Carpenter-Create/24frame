@@ -43,7 +43,11 @@ describe("account profile copy", () => {
     expect(ACCOUNT_PROFILE.href).toBe(USER_MENU.profileHref);
     expect(ACCOUNT_PROFILE).not.toHaveProperty("subtitle");
     expect(ACCOUNT_PROFILE.uploadPhoto).toBe("Upload photo");
+    expect(ACCOUNT_PROFILE.nameLabel).toBe("Name");
+    expect(ACCOUNT_PROFILE.nameHelper).toBe("Shown on this account.");
     expect(ACCOUNT_PROFILE.emailHint).toBe("Sign-in email. It cannot be changed here.");
+    expect(ACCOUNT_PROFILE.emailLocked).toBe("Cannot be changed here.");
+    expect(ACCOUNT_PROFILE.emptyValue).toBe("\u2014");
     const blob = `${ACCOUNT_PROFILE.uploadPhoto} ${COMPANY_PROFILE.subtitle}`;
     expect(blob).not.toMatch(/seamless|frictionless|elevate|amplify|unleash|supercharge/i);
   });
@@ -157,6 +161,9 @@ describe("account field 16px lock", () => {
     expect(formSrc).toContain("TEXT_ACTION_CLASS");
     expect(formSrc).toContain("uploadAccountPhoto");
     expect(formSrc).toContain('#account-name")?.blur()');
+    expect(formSrc).toContain("export function AccountNameForm");
+    expect(formSrc).toContain("export function AccountPhotoField");
+    expect(formSrc).toContain("data-account-name-form");
     expect(companyFormSrc).toContain("<Input");
     expect(companyFormSrc).not.toContain("ACCOUNT_FIELD_CLASS");
     expect(companyFormSrc).toContain('#company-name")?.blur()');

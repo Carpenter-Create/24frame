@@ -85,6 +85,21 @@ describe("SettingsPageLead", () => {
     expect(SETTINGS_PAGE_LEAD_BACK_CLASS).toBe("md:hidden");
   });
 
+  it("mounts an optional helper under the title for drill-in panes", () => {
+    const html = renderToStaticMarkup(
+      createElement(SettingsPageLead, {
+        title: "Theme",
+        pathname: SETTINGS.themeHref,
+        helper: SETTINGS.themeHelper,
+      }),
+    );
+    expect(html).toContain('data-settings-page-lead-helper=""');
+    expect(html).toContain(SETTINGS.themeHelper);
+    expect(html).toContain(`href="${SETTINGS.preferencesHref}"`);
+    expect(html).toContain("Preferences");
+    expect(html).toMatch(/<h1[^>]*>Theme<\/h1>/);
+  });
+
   it("is the one title-block SoT — hub and every pane mount it, chrome does not", () => {
     expect(hubSrc).toContain("SettingsPageLead");
     expect(hubSrc).toContain("SETTINGS.href");

@@ -1,9 +1,13 @@
 import { redirect } from "next/navigation";
 
+import { AccountPhotoField, AccountProfileForm } from "@/app/(app)/account/account-profile-form";
+import { SettingsDrillRow } from "@/components/settings/settings-drill";
 import { SettingsPageLead } from "@/components/settings/settings-page-lead";
 import { Card, CardBody } from "@/components/ui/card";
+import { ACCOUNT_PROFILE } from "@/lib/account-profile";
 import {
   SETTINGS,
+  SETTINGS_DRILL_LIST_CLASS,
   SETTINGS_PANE_CLASS,
   SETTINGS_SECTION_CLASS,
   settingsPaneTitle,
@@ -11,30 +15,55 @@ import {
 import { signedAvatarUrl } from "@/lib/s3-avatars";
 import { getOrgContext } from "@/lib/supabase/context";
 import { userMenuName } from "@/lib/user-menu";
-import { AccountProfileForm } from "@/app/(app)/account/account-profile-form";
 
 // Profile pane — account identity only (name / photo / sign-in email
 // + Save). Public / Social profile is Social-owned. Not a second
 // profile product. Company lives on Organization.
+// Mobile: Coinbase drill-in. Photo stays on the index. Name opens a
+// dedicated pane. Email is read-only — no fake drill-in.
+
+function profileNameValue(name: string): string {
+  return name.trim() ? name : ACCOUNT_PROFILE.emptyValue;
+}
+
 export async function ProfileSettings() {
   const ctx = await getOrgContext();
   if (!ctx) redirect("/login");
 
   const photoUrl = await signedAvatarUrl(ctx.user.id);
+  const name = userMenuName(ctx.user.name) ?? "";
 
   return (
     <div data-settings-page="" data-settings-hub="profile" className={SETTINGS_PANE_CLASS}>
       <section data-settings-section="profile" className={SETTINGS_SECTION_CLASS}>
         <SettingsPageLead title={settingsPaneTitle("profile")} pathname={SETTINGS.profileHref} />
-        <Card>
-          <CardBody>
-            <AccountProfileForm
-              name={userMenuName(ctx.user.name) ?? ""}
-              email={ctx.user.email}
-              photoUrl={photoUrl}
-            />
-          </CardBody>
-        </Card>
+        <div data-settings-profile-index="" className={`md:hidden ${SETTINGS_DRILL_LIST_CLASS}`}>
+          <AccountPhotoField photoUrl={photoUrl} />
+          <SettingsDrillRow
+            kind="name"
+            label={ACCOUNT_PROFILE.nameLabel}
+            value={profileNameValue(name)}
+            href={SETTINGS.profileNameHref}
+          />
+          <SettingsDrillRow
+            kind="email"
+            label={ACCOUNT_PROFILE.emailLabel}
+            value={ctx.user.email}
+            readOnly
+            helper={ACCOUNT_PROFILE.emailLocked}
+          />
+        </div>
+        <div className="hidden md:block">
+          <Card>
+            <CardBody>
+              <AccountProfileForm
+                name={name}
+                email={ctx.user.email}
+                photoUrl={photoUrl}
+              />
+            </CardBody>
+          </Card>
+        </div>
       </section>
     </div>
   );

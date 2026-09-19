@@ -69,6 +69,8 @@ describe("appearance copy", () => {
     expect(prefsSrc).toContain("applyDocumentThemePreference");
     expect(prefsSrc).toContain("APPEARANCE_FLYOUT_OPTIONS");
     expect(prefsSrc).toContain("useThemePreference");
+    expect(prefsSrc).toContain("AppearanceThemePicker");
+    expect(prefsSrc).toContain("AppearanceThemeRow");
     expect(prefsSrc).not.toContain("localStorage.setItem");
     expect(prefsSrc).not.toContain("THEME_STORAGE_KEY");
     expect(sheetSrc).toContain("applyDocumentThemePreference");
