@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { MOBILE_CHROME_LEAD_PAD_CLASS } from "./mobile-chrome";
@@ -11,26 +11,35 @@ import {
   SETTINGS_HUB_ORDER,
   SETTINGS_HEADER_BACK_CLASS,
   SETTINGS_HEADER_PAD_CLASS,
-  SETTINGS_LEGACY,
-  SETTINGS_LEGACY_REDIRECTS,
   SETTINGS_RAIL_ABSENT,
   SETTINGS_RAIL_ACTIVE_CLASS,
   SETTINGS_RAIL_CHEVRON_CLASS,
   SETTINGS_RAIL_ITEM_CLASS,
   SETTINGS_RAIL_PAD_CLASS,
   isSettingsPath,
-  parseSettingsSectionQuery,
   settingsHeaderBack,
   settingsHubNav,
   settingsHubSection,
   settingsLandHref,
-  settingsLegacyRedirect,
   settingsManageCoursesVisible,
-  settingsPathFromQuery,
   settingsRailActive,
   settingsSection,
   settingsSectionHref,
 } from "./settings";
+
+const RETIRED_SETTINGS_PATHS = [
+  "/settings/you",
+  "/settings/social",
+  "/settings/education",
+  "/settings/aggregation",
+] as const;
+
+const RETIRED_SETTINGS_PAGES = [
+  "src/app/(app)/settings/you/page.tsx",
+  "src/app/(app)/settings/social/page.tsx",
+  "src/app/(app)/settings/education/page.tsx",
+  "src/app/(app)/settings/aggregation/page.tsx",
+] as const;
 
 describe("settings hub lock", () => {
   it("titles the hub Settings and keeps Profile doors", () => {
@@ -44,7 +53,7 @@ describe("settings hub lock", () => {
     expect(SETTINGS.organizationHref).toBe("/settings/organization");
     expect(SETTINGS.preferences).toBe("Preferences");
     expect(SETTINGS.preferencesHref).toBe("/settings/preferences");
-    expect(SETTINGS.sectionQuery).toBe("section");
+    expect(SETTINGS).not.toHaveProperty("sectionQuery");
     expect(SETTINGS.agreements).toBe("Agreements");
     expect(SETTINGS.agreementsHref).toBe("/settings/agreements");
     expect(SETTINGS.agreementsEmpty).toBe("No agreements on this account.");
@@ -81,6 +90,9 @@ describe("settings hub lock", () => {
       "/settings/organization",
       "/settings/preferences",
     ]);
+    expect(settingsSectionHref("profile")).toBe("/settings/profile");
+    expect(settingsSectionHref("organization")).toBe("/settings/organization");
+    expect(settingsSectionHref("preferences")).toBe("/settings/preferences");
   });
 
   it("opens a hub section from the path — agreements / refer wash Profile", () => {
@@ -92,55 +104,25 @@ describe("settings hub lock", () => {
     expect(settingsHubSection("/settings/preferences")).toBe("preferences");
     expect(settingsSection("/settings/organization")).toBe("organization");
     expect(settingsSection("/settings/preferences")).toBe("preferences");
-    expect(settingsSection("/settings/you")).toBe("profile");
-    expect(settingsSection("/settings/aggregation")).toBe("organization");
-    expect(settingsSection("/settings/social")).toBe("preferences");
-    expect(settingsSection("/settings/education")).toBe("preferences");
     expect(settingsSection("")).toBe("profile");
     expect(settingsSection(null)).toBe("profile");
   });
 
-  it("maps ?section= aliases — legacy you/social/education/aggregation included", () => {
-    expect(parseSettingsSectionQuery("profile")).toBe("profile");
-    expect(parseSettingsSectionQuery("organization")).toBe("organization");
-    expect(parseSettingsSectionQuery("preferences")).toBe("preferences");
-    expect(parseSettingsSectionQuery("you")).toBe("profile");
-    expect(parseSettingsSectionQuery("social")).toBe("preferences");
-    expect(parseSettingsSectionQuery("education")).toBe("preferences");
-    expect(parseSettingsSectionQuery("aggregation")).toBe("organization");
-    expect(parseSettingsSectionQuery("")).toBeNull();
-    expect(parseSettingsSectionQuery("nope")).toBeNull();
-    expect(settingsPathFromQuery("you")).toBe("/settings/profile");
-    expect(settingsPathFromQuery("education")).toBe("/settings/preferences");
-    expect(settingsPathFromQuery("aggregation")).toBe("/settings/organization");
-    expect(settingsPathFromQuery("nope")).toBeNull();
-    expect(settingsSectionHref("profile")).toBe("/settings/profile");
-    expect(settingsSectionHref("organization")).toBe("/settings/organization");
-    expect(settingsSectionHref("preferences")).toBe("/settings/preferences");
-  });
-
-  it("permanently redirects retired workspace-spine paths", () => {
-    expect(SETTINGS_LEGACY.youHref).toBe("/settings/you");
-    expect(SETTINGS_LEGACY.socialHref).toBe("/settings/social");
-    expect(SETTINGS_LEGACY.educationHref).toBe("/settings/education");
-    expect(SETTINGS_LEGACY.aggregationHref).toBe("/settings/aggregation");
-    expect(SETTINGS_LEGACY_REDIRECTS).toEqual([
-      { source: "/settings/you", destination: "/settings/profile" },
-      { source: "/settings/social", destination: "/settings/preferences" },
-      { source: "/settings/education", destination: "/settings/preferences" },
-      { source: "/settings/aggregation", destination: "/settings/organization" },
-    ]);
-    expect(settingsLegacyRedirect("/settings/you")).toBe("/settings/profile");
-    expect(settingsLegacyRedirect("/settings/social")).toBe("/settings/preferences");
-    expect(settingsLegacyRedirect("/settings/education")).toBe("/settings/preferences");
-    expect(settingsLegacyRedirect("/settings/aggregation")).toBe("/settings/organization");
-    expect(settingsLegacyRedirect("/settings/profile")).toBeNull();
-
+  it("hard-cuts retired workspace-spine paths — no redirect table", () => {
+    const settingsSrc = readFileSync("src/lib/settings.ts", "utf8");
     const nextConfig = readFileSync("next.config.ts", "utf8");
-    for (const { source, destination } of SETTINGS_LEGACY_REDIRECTS) {
-      expect(nextConfig).toContain(`source: "${source}"`);
-      expect(nextConfig).toContain(`destination: "${destination}"`);
-      expect(nextConfig).toContain("permanent: true");
+    expect(settingsSrc).not.toContain("SETTINGS_LEGACY");
+    expect(settingsSrc).not.toContain("settingsLegacyRedirect");
+    expect(settingsSrc).not.toContain("permanentRedirect");
+    expect(settingsSrc).not.toContain("sectionQuery");
+    expect(settingsSrc).not.toContain("parseSettingsSectionQuery");
+    for (const path of RETIRED_SETTINGS_PATHS) {
+      expect(settingsSrc).not.toContain(`"${path}"`);
+      expect(nextConfig).not.toContain(`source: "${path}"`);
+    }
+    expect(nextConfig).not.toContain('source: "/settings"');
+    for (const page of RETIRED_SETTINGS_PAGES) {
+      expect(existsSync(page)).toBe(false);
     }
   });
 
@@ -192,8 +174,7 @@ describe("settings hub lock", () => {
     expect(isSettingsPath("/settings/profile")).toBe(true);
     expect(isSettingsPath("/settings/organization")).toBe(true);
     expect(isSettingsPath("/settings/preferences")).toBe(true);
-    expect(isSettingsPath("/settings/you")).toBe(true);
-    expect(isSettingsPath("/settings/education")).toBe(true);
+    expect(isSettingsPath("/settings/agreements")).toBe(true);
     expect(isSettingsPath("/")).toBe(false);
     expect(isSettingsPath("/titles")).toBe(false);
     expect(isSettingsPath("/help")).toBe(false);

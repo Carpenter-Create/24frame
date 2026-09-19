@@ -18,14 +18,13 @@
 // Preferences may hold leftover workspace prefs as optional
 // subsections only — never as top-level workspace product settings.
 //
-// Canonical paths:
+// Canonical paths only (hard-cut — no users yet, no redirects):
 //   /settings → hub (mobile list) / Profile pane (desktop)
 //   /settings/profile
 //   /settings/organization
 //   /settings/preferences
-// Query alias: /settings?section={profile|organization|preferences}
-// Legacy aliases: you→profile, aggregation→organization,
-// social|education→preferences. Permanent redirects in next.config.
+// Retired /settings/you|social|education|aggregation and ?section=
+// aliases are gone. Dead paths 404. Do not add a redirect table.
 //
 // Account menu Settings always opens the hub. settingsLandHref is
 // /settings from every workspace — no context land that swaps the
@@ -55,7 +54,6 @@ export const SETTINGS = {
   organizationHref: "/settings/organization",
   preferences: "Preferences",
   preferencesHref: "/settings/preferences",
-  sectionQuery: "section",
   manageCourses: "Manage courses",
   manageCoursesHref: "/education",
   editPublicProfile: "Edit public profile",
@@ -71,21 +69,6 @@ export const SETTINGS = {
   dashboard: "Home",
   dashboardHref: "/",
 } as const;
-
-/** Retired workspace-spine paths. Permanent redirect sources only. */
-export const SETTINGS_LEGACY = {
-  youHref: "/settings/you",
-  socialHref: "/settings/social",
-  educationHref: "/settings/education",
-  aggregationHref: "/settings/aggregation",
-} as const;
-
-export const SETTINGS_LEGACY_REDIRECTS = [
-  { source: SETTINGS_LEGACY.youHref, destination: SETTINGS.profileHref },
-  { source: SETTINGS_LEGACY.socialHref, destination: SETTINGS.preferencesHref },
-  { source: SETTINGS_LEGACY.educationHref, destination: SETTINGS.preferencesHref },
-  { source: SETTINGS_LEGACY.aggregationHref, destination: SETTINGS.organizationHref },
-] as const;
 
 export const SETTINGS_ABSENT = [
   "User Profile",
@@ -194,43 +177,12 @@ export const SETTINGS_RAIL_ABSENT = [
   "Home",
 ] as const;
 
-const SETTINGS_SECTION_ALIASES = {
-  profile: "profile",
-  organization: "organization",
-  preferences: "preferences",
-  you: "profile",
-  social: "preferences",
-  education: "preferences",
-  aggregation: "organization",
-} as const satisfies Record<string, SettingsHubSection>;
-
 export function isSettingsPath(pathname: string): boolean {
   return pathname === SETTINGS.href || pathname.startsWith(`${SETTINGS.href}/`);
 }
 
-export function parseSettingsSectionQuery(
-  value: string | null | undefined,
-): SettingsHubSection | null {
-  if (!value) return null;
-  if (value in SETTINGS_SECTION_ALIASES) {
-    return SETTINGS_SECTION_ALIASES[value as keyof typeof SETTINGS_SECTION_ALIASES];
-  }
-  return null;
-}
-
 export function settingsSectionHref(section: SettingsHubSection): string {
   return SETTINGS_HUB_HREFS[section];
-}
-
-export function settingsPathFromQuery(value: string | null | undefined): string | null {
-  const section = parseSettingsSectionQuery(value);
-  return section ? settingsSectionHref(section) : null;
-}
-
-export function settingsLegacyRedirect(pathname: string | null | undefined): string | null {
-  if (!pathname) return null;
-  const found = SETTINGS_LEGACY_REDIRECTS.find((row) => row.source === pathname);
-  return found ? found.destination : null;
 }
 
 /** Account-menu Settings door. Always the hub — never a workspace land. */
@@ -257,18 +209,12 @@ function pathSection(pathname: string): SettingsHubSection {
   if (
     pathname === SETTINGS.organizationHref
     || pathname.startsWith(`${SETTINGS.organizationHref}/`)
-    || pathname === SETTINGS_LEGACY.aggregationHref
-    || pathname.startsWith(`${SETTINGS_LEGACY.aggregationHref}/`)
   ) {
     return "organization";
   }
   if (
     pathname === SETTINGS.preferencesHref
     || pathname.startsWith(`${SETTINGS.preferencesHref}/`)
-    || pathname === SETTINGS_LEGACY.socialHref
-    || pathname.startsWith(`${SETTINGS_LEGACY.socialHref}/`)
-    || pathname === SETTINGS_LEGACY.educationHref
-    || pathname.startsWith(`${SETTINGS_LEGACY.educationHref}/`)
   ) {
     return "preferences";
   }

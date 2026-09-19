@@ -23,10 +23,6 @@ const settingsPages = [
   "src/app/(app)/settings/profile/page.tsx",
   "src/app/(app)/settings/organization/page.tsx",
   "src/app/(app)/settings/preferences/page.tsx",
-  "src/app/(app)/settings/you/page.tsx",
-  "src/app/(app)/settings/social/page.tsx",
-  "src/app/(app)/settings/education/page.tsx",
-  "src/app/(app)/settings/aggregation/page.tsx",
   "src/app/(app)/settings/agreements/page.tsx",
   "src/app/(app)/settings/refer/page.tsx",
 ] as const;

@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-import { SETTINGS, SETTINGS_LEGACY, settingsManageCoursesVisible } from "./settings";
+import { SETTINGS, settingsManageCoursesVisible } from "./settings";
 
 describe("settings hub isolation", () => {
   it("does not implement Education CMS inside Settings — staff door is a href only", () => {
@@ -36,6 +36,6 @@ describe("settings hub isolation", () => {
     expect(userMenu).not.toContain("/account/settings");
     expect(SETTINGS.href).toBe("/settings");
     expect(SETTINGS.profileHref).toBe("/settings/profile");
-    expect(SETTINGS_LEGACY.youHref).toBe("/settings/you");
+    expect(existsSync("src/app/(app)/settings/you/page.tsx")).toBe(false);
   });
 });
