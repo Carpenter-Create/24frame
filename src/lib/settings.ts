@@ -45,6 +45,7 @@
 // Desktop: section rail + pane. Mobile: list → push.
 // Spacing 8 / 16 / 24 / 48 (Mercury density). Design polish may follow.
 
+import { HOUSE_HEADER_TRAILING_HIT_CLASS } from "@/lib/house-lead-chrome";
 import { HOUSE_CARD_PAD, HOUSE_MODULE_CLASS } from "@/lib/house-shell";
 import { MOBILE_CHROME_LEAD_PAD_CLASS } from "@/lib/mobile-chrome";
 import { ASK_ASSISTANT } from "@/lib/product";
@@ -157,11 +158,15 @@ export const SETTINGS_PREF_BLOCK_CLASS =
   `${HOUSE_MODULE_CLASS} ${HOUSE_CARD_PAD} flex flex-col gap-[var(--space-3)]`;
 export const SETTINGS_PREF_TITLE_CLASS = "t-heading text-ink";
 
-// 623:785 — phone header left slot. Hub list back is Home. Pushed
-// section back is Settings (list). Hidden at md, where the rail stays.
+// Mobile Settings detail back = house SoT. AppShell mounts one
+// SettingsHeaderBack for every isSettingsPath — current panes and
+// any future /settings/* route. No per-page copy. Hub list back is
+// Home. Pushed pane back is Settings (href). Accent caret only; 16
+// hit matches trailing AI/bell; absolute so the 24 emblem stays put.
+// Hidden at md, where the rail stays.
 export const SETTINGS_HEADER_PAD_CLASS = MOBILE_CHROME_LEAD_PAD_CLASS;
 export const SETTINGS_HEADER_BACK_CLASS =
-  "flex items-center gap-[var(--space-2)] t-body md:hidden";
+  `${HOUSE_HEADER_TRAILING_HIT_CLASS} absolute left-[var(--space-2)] top-1/2 -translate-y-1/2 text-accent md:hidden`;
 
 export const SETTINGS_RAIL_ABSENT = [
   "Titles",

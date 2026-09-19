@@ -68,7 +68,9 @@ export const HOUSE_LEAD_STACK_CLASS = "sticky top-0 z-40 shrink-0";
 export const HOUSE_LEAD_PHONE_PAD_CLASS =
   `max-md:pl-[var(--space-6)] ${HOUSE_PHONE_TRAILING_GUTTER_CLASS}`;
 
-export const HOUSE_LEAD_CHROME_CLASS = `flex items-center justify-end gap-4 border-b border-hairline bg-surface/85 backdrop-blur ${HOUSE_LEAD_PHONE_PAD_CLASS} ${HOUSE_CHROME_GUTTER_X_CLASS}`;
+// relative: Settings phone back is absolute against this row so the
+// 24 emblem stays put.
+export const HOUSE_LEAD_CHROME_CLASS = `relative flex items-center justify-end gap-4 border-b border-hairline bg-surface/85 backdrop-blur ${HOUSE_LEAD_PHONE_PAD_CLASS} ${HOUSE_CHROME_GUTTER_X_CLASS}`;
 
 export const HOUSE_LEAD_LOGO_CLASS = "inline-flex shrink-0 items-center";
 

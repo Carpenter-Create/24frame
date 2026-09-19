@@ -12,9 +12,9 @@ import {
   settingsHeaderBack,
 } from "@/lib/settings";
 
-// Phone Settings left slot. Hub list → Home. Pushed section →
-// Settings list. 16 Phosphor caret-left Bold + 15 Regular, gap 8.
-// Hidden at md, where the rail stays.
+// Mobile Settings detail back = house SoT. AppShell mounts this
+// once for every isSettingsPath. Accent caret only — label is aria.
+// 16 Phosphor caret-left Bold. Absolute so the 24 emblem stays put.
 export function SettingsHeaderBack() {
   const back = settingsHeaderBack(usePathname());
 
@@ -22,13 +22,13 @@ export function SettingsHeaderBack() {
     <Link
       href={back.href}
       data-settings-header-back=""
+      aria-label={back.label}
       className={SETTINGS_HEADER_BACK_CLASS}
     >
       <CaretLeft
         className={SETTINGS_RAIL_CHEVRON_CLASS}
         weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
       />
-      {back.label}
     </Link>
   );
 }

@@ -10,7 +10,11 @@ vi.mock("next/navigation", () => ({
   usePathname: () => navigation.pathname,
 }));
 
-import { HOUSE_HEADER_TRAILING_AVATAR_CLASS } from "@/lib/house-lead-chrome";
+import {
+  HOUSE_HEADER_TRAILING_AVATAR_CLASS,
+  HOUSE_HEADER_TRAILING_HIT_CLASS,
+  HOUSE_LEAD_CHROME_CLASS,
+} from "@/lib/house-lead-chrome";
 import { MOBILE_CHROME_LEAD_PAD_CLASS } from "@/lib/mobile-chrome";
 import {
   SETTINGS,
@@ -38,27 +42,35 @@ const railSrc = readFileSync(
 );
 
 describe("SettingsHeaderBack", () => {
-  it("is 16 chevron-left + Home on the hub list", () => {
+  it("is a 16 accent caret to Home on the hub list — no visible label", () => {
     navigation.pathname = "/settings";
     const html = renderToStaticMarkup(<SettingsHeaderBack />);
     expect(html).toContain('data-settings-header-back=""');
     expect(html).toContain(`href="${SETTINGS.dashboardHref}"`);
-    expect(html).toContain(SETTINGS.dashboard);
+    expect(html).toContain(`aria-label="${SETTINGS.dashboard}"`);
+    expect(html).not.toMatch(/>Home</);
+    expect(html).not.toMatch(/>Settings</);
     expect(html).toContain(SETTINGS_HEADER_BACK_CLASS);
     expect(html).toContain(SETTINGS_RAIL_CHEVRON_CLASS);
     expect(html).not.toContain('stroke-width="1.33"');
     expect(html).not.toContain("lucide-chevron-left");
     expect(html).not.toContain("lucide-");
     expect(SETTINGS.dashboardHref).toBe("/aggregation/dashboard");
-    expect(SETTINGS_HEADER_BACK_CLASS).toContain("gap-[var(--space-2)]");
-    expect(SETTINGS_HEADER_BACK_CLASS).toContain("t-body");
+    expect(SETTINGS_HEADER_BACK_CLASS).toContain(HOUSE_HEADER_TRAILING_HIT_CLASS);
+    expect(SETTINGS_HEADER_BACK_CLASS).toContain("absolute");
+    expect(SETTINGS_HEADER_BACK_CLASS).toContain("text-accent");
+    expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("text-ink");
+    expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("t-body");
     expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("font-normal");
     expect(SETTINGS_HEADER_BACK_CLASS).toContain("md:hidden");
     expect(SETTINGS_HEADER_PAD_CLASS).toBe(MOBILE_CHROME_LEAD_PAD_CLASS);
     expect(SETTINGS_RAIL_CHEVRON_CLASS).toBe("size-4 shrink-0");
+    expect(HOUSE_LEAD_CHROME_CLASS).toContain("relative");
     expect(src).toContain("CaretLeft");
     expect(src).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
     expect(src).toContain("settingsHeaderBack");
+    expect(src).toContain("aria-label={back.label}");
+    expect(src).not.toContain("\n      {back.label}\n");
     expect(src).not.toContain("ChevronLeft");
     expect(src).not.toContain("lucide-react");
     expect(src).not.toContain("Menu");
@@ -69,12 +81,34 @@ describe("SettingsHeaderBack", () => {
     expect(src).not.toContain("Company");
   });
 
-  it("pushes back to Settings from a section pane", () => {
+  it("pushes back to Settings from a section pane — caret only", () => {
     navigation.pathname = "/settings/preferences";
     const html = renderToStaticMarkup(<SettingsHeaderBack />);
     expect(html).toContain(`href="${SETTINGS.href}"`);
-    expect(html).toContain(SETTINGS.title);
-    expect(html).not.toContain(`>${SETTINGS.dashboard}<`);
+    expect(html).toContain(`aria-label="${SETTINGS.title}"`);
+    expect(html).toContain("text-accent");
+    expect(html).not.toMatch(/>Settings</);
+    expect(html).not.toMatch(/>Home</);
+  });
+
+  it("inherits the same Settings hub href from every pushed pane", () => {
+    for (const pathname of [
+      "/settings/profile",
+      "/settings/organization",
+      "/settings/preferences",
+      "/settings/agreements",
+      "/settings/refer",
+      "/settings/security",
+      "/settings/team",
+      "/settings/future-pane",
+    ]) {
+      navigation.pathname = pathname;
+      const html = renderToStaticMarkup(<SettingsHeaderBack />);
+      expect(html).toContain(`href="${SETTINGS.href}"`);
+      expect(html).toContain(`aria-label="${SETTINGS.title}"`);
+      expect(html).toContain(SETTINGS_HEADER_BACK_CLASS);
+      expect(html).not.toMatch(/>Settings</);
+    }
   });
 
   it("stays house chrome — rail is the desktop nav, not a new IA", () => {
@@ -84,7 +118,10 @@ describe("SettingsHeaderBack", () => {
     expect(src).not.toContain("/settings/agreements");
     expect(src).not.toContain("/settings/refer");
     expect(src).not.toContain("Appearance");
+    expect(shellSrc).toContain("isSettingsPath");
+    expect(shellSrc).toContain("leadingNav={settingsPage ? <SettingsHeaderBack /> : undefined}");
     expect(shellSrc).toContain("<SettingsHeaderBack />");
+    expect(shellSrc).toContain("Mobile Settings detail back = house SoT");
     expect(
       readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../lib/house-lead-chrome.ts"), "utf8"),
     ).toContain("HOUSE_LEAD_PHONE_PAD_CLASS");
@@ -98,5 +135,18 @@ describe("SettingsHeaderBack", () => {
     expect(railSrc).toContain("SETTINGS_HUB_NAV");
     expect(railSrc).not.toContain("SettingsHeaderBack");
     expect(railSrc).not.toContain("623:785");
+    for (const path of [
+      "src/app/(app)/settings/page.tsx",
+      "src/app/(app)/settings/profile/page.tsx",
+      "src/app/(app)/settings/organization/page.tsx",
+      "src/app/(app)/settings/preferences/page.tsx",
+      "src/app/(app)/settings/agreements/page.tsx",
+      "src/app/(app)/settings/refer/page.tsx",
+    ]) {
+      const page = readFileSync(path, "utf8");
+      expect(page).not.toContain("SettingsHeaderBack");
+      expect(page).not.toContain("data-settings-header-back");
+      expect(page).not.toContain("CaretLeft");
+    }
   });
 });
