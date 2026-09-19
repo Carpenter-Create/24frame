@@ -38,11 +38,11 @@ describe("client NAV", () => {
   it("keeps Dashboard at /dashboard and never exposes operator routes", () => {
     const hrefs = NAV.map((item) => item.href);
     expect(hrefs).toEqual([
-      "/dashboard",
-      "/titles",
-      "/attention",
-      "/activity",
-      "/reports",
+      "/aggregation/dashboard",
+      "/aggregation/titles",
+      "/aggregation/attention",
+      "/aggregation/activity",
+      "/aggregation/reports",
     ]);
     expect(hrefs).not.toContain("?ai=1");
     expect(hrefs).not.toContain("/deliveries");
@@ -64,15 +64,19 @@ describe("client NAV", () => {
   it("marks Dashboard current on `/` and `/dashboard`, Reports on legacy activity paths", () => {
     expect(clientNavCurrent("/").label).toBe("Dashboard");
     expect(clientNavCurrent("/dashboard").label).toBe("Dashboard");
+    expect(clientNavCurrent("/aggregation/dashboard").label).toBe("Dashboard");
     expect(isClientNavActive("/", NAV[0])).toBe(true);
     expect(isClientNavActive("/dashboard", NAV[0])).toBe(true);
+    expect(isClientNavActive("/aggregation/dashboard", NAV[0])).toBe(true);
     expect(isClientNavActive("/titles", NAV[0])).toBe(false);
     expect(clientNavCurrent("/titles").label).toBe("Titles");
+    expect(clientNavCurrent("/aggregation/titles").label).toBe("Titles");
     expect(clientNavCurrent("/titles/abc").label).toBe("Titles");
     expect(clientNavCurrent("/attention").label).toBe("Recent activity");
     expect(clientNavCurrent("/catalog-health").label).toBe("Recent activity");
     expect(clientNavCurrent("/activity").label).toBe("Activity");
     expect(clientNavCurrent("/reports").label).toBe("Reports");
+    expect(clientNavCurrent("/aggregation/reports").label).toBe("Reports");
     expect(clientNavCurrent("/analytics").label).toBe("Reports");
     expect(clientNavCurrent("/earn").label).toBe("Reports");
     expect(clientNavCurrent("/earn/abc").label).toBe("Reports");
@@ -145,12 +149,12 @@ describe("Ask Globee nav mark", () => {
 describe("GC_NAV", () => {
   it("adds staff-only Licensing Status between Queue and Channels, with Clients last", () => {
     expect(GC_NAV.map((item) => ({ label: item.label, href: item.href }))).toEqual([
-      { label: "Queue", href: "/queue" },
-      { label: "Avails", href: "/avails" },
-      { label: "Licensing Status", href: "/gc/deliveries" },
-      { label: "Channels", href: "/channels" },
-      { label: "Finance", href: "/gc/finance" },
-      { label: "Clients", href: "/gc/clients" },
+      { label: "Queue", href: "/aggregation/queue" },
+      { label: "Avails", href: "/aggregation/avails" },
+      { label: "Licensing Status", href: "/aggregation/gc/deliveries" },
+      { label: "Channels", href: "/aggregation/channels" },
+      { label: "Finance", href: "/aggregation/gc/finance" },
+      { label: "Clients", href: "/aggregation/gc/clients" },
     ]);
   });
 
@@ -246,17 +250,17 @@ describe("mobileNavDestinations", () => {
     expect(mobileNavDestinations(false, "education").map((item) => item.href)).not.toContain("/news");
     expect(mobileNavDestinations(false, "education").map((item) => item.href)).not.toContain("/home/news");
     expect(EDUCATION_NAV.map((item) => ({ label: item.label, href: item.href }))).toEqual([
-      { label: "Education", href: "/social/courses" },
+      { label: "Education", href: "/education" },
     ]);
     expect(mobileNavDestinations(false, "education").map((item) => item.href)).toEqual([
-      "/social/courses",
+      "/education",
     ]);
     expect(mobileNavDestinations(false, "education").map((item) => item.href)).not.toContain(
-      "/education",
+      "/social/courses",
     );
     expect(mobileNavDestinations(true, "education").map((item) => item.href)).toEqual([
-      "/social/courses",
       "/education",
+      "/education/manage",
     ]);
     expect(mobileNavDestinations(true, "education").map((item) => item.label)).toEqual([
       "Education",
@@ -276,19 +280,19 @@ describe("mobileNavDestinations", () => {
       mobileNavDestinations(false, "aggregation").map((item) => item.href),
     );
     expect(railDestinations(false, "education").items.map((item) => item.href)).toEqual([
-      "/social/courses",
+      "/education",
     ]);
     expect(railDestinations(false, "education").staffItems).toEqual([]);
     expect(railDestinations(true, "education").items.map((item) => item.label)).toEqual([
       "Education",
     ]);
     expect(railDestinations(true, "education").staffItems.map((item) => item.href)).toEqual([
-      "/education",
+      "/education/manage",
     ]);
     expect(railDestinations(true, "education").staffItems.map((item) => item.label)).toEqual([
       "Manage courses",
     ]);
-    expect(EDUCATION_MANAGE_NAV.map((item) => item.href)).toEqual(["/education"]);
+    expect(EDUCATION_MANAGE_NAV.map((item) => item.href)).toEqual(["/education/manage"]);
     expect(railDestinations(true, "education").items.map((item) => item.href)).not.toEqual(
       railDestinations(false, "aggregation").items.map((item) => item.href),
     );
@@ -297,7 +301,7 @@ describe("mobileNavDestinations", () => {
     expect(EDUCATION_NAV.every((item) => item.family === "phosphor")).toBe(true);
     expect(EDUCATION_NAV.map((item) => item.icon)).toEqual([BookOpen]);
     expect(EDUCATION_MANAGE_NAV.map((item) => item.icon)).toEqual([BookOpen]);
-    expect(EDUCATION_NAV.map((item) => item.href)).not.toContain("/education");
+    expect(EDUCATION_NAV.map((item) => item.href)).not.toContain("/social/courses");
     expect(SOCIAL_NAV.map((item) => item.label)).toEqual([
       "Home",
       "Explore",
@@ -327,7 +331,7 @@ describe("mobileNavDestinations", () => {
     expect(isSocialTabActive("/social/explore", SOCIAL_NAV[0])).toBe(false);
     expect(railDestinations(true, "social").staffItems).toEqual([]);
     expect(railDestinations(true, "aggregation").staffItems.map((item) => item.href)).toContain(
-      "/queue",
+      "/aggregation/queue",
     );
   });
 });

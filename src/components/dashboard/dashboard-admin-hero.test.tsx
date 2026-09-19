@@ -205,7 +205,7 @@ describe("DashboardAdminHero", () => {
     const hero = readFileSync("src/components/dashboard/dashboard-admin-hero.tsx", "utf8");
     const chart = readFileSync("src/components/dashboard/dashboard-revenue-chart.tsx", "utf8");
     const controls = readFileSync("src/components/dashboard/dashboard-admin-controls.tsx", "utf8");
-    const page = readFileSync("src/app/(app)/dashboard/page.tsx", "utf8");
+    const page = readFileSync("src/app/(app)/aggregation/dashboard/page.tsx", "utf8");
     const craft = readFileSync("src/lib/dashboard-craft.ts", "utf8");
     for (const src of [hero, chart, controls, page]) {
       expect(src).not.toContain("recharts");

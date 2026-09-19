@@ -29,7 +29,7 @@ import { DELIVERY_STATUS_TRACK_STEPS, TITLE_STATUS_TRACK_STEPS } from "@/lib/sta
 describe("Avails staff surface", () => {
   it("is Team-nav only at /avails", () => {
     expect(AVAILS_PAGE.title).toBe("Avails");
-    expect(AVAILS_HREF).toBe("/avails");
+    expect(AVAILS_HREF).toBe("/aggregation/avails");
     expect(GC_NAV.find((item) => item.href === AVAILS_HREF)?.label).toBe(AVAILS_PAGE.title);
     expect(NAV.map((item) => item.href)).not.toContain(AVAILS_HREF);
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain(AVAILS_HREF);
@@ -40,9 +40,9 @@ describe("Avails staff surface", () => {
   });
 
   it("keeps the avails-grid-3 body under the operator gate and does not invent a list or matrix", () => {
-    expect(existsSync("src/app/(app)/(operator)/avails/page.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/(operator)/aggregation/avails/page.tsx")).toBe(true);
     expect(existsSync("src/app/(app)/avails/page.tsx")).toBe(false);
-    const page = readFileSync("src/app/(app)/(operator)/avails/page.tsx", "utf8");
+    const page = readFileSync("src/app/(app)/(operator)/aggregation/avails/page.tsx", "utf8");
     expect(page).toContain("AVAILS_PAGE.title");
     expect(page).toContain('eq("status", "live")');
     expect(page).toContain("AvailsGrid");
@@ -84,7 +84,7 @@ describe("avails-grid-3 miss list", () => {
   });
 
   it("G4: no progress track · live only · Team staff · quiet empty", () => {
-    const page = readFileSync("src/app/(app)/(operator)/avails/page.tsx", "utf8");
+    const page = readFileSync("src/app/(app)/(operator)/aggregation/avails/page.tsx", "utf8");
     expect(page).toContain('eq("status", "live")');
     expect(page).not.toContain("StatusProgressTrack");
     expect(STAFF_RAIL_EYEBROW).toBe("Team");
@@ -97,7 +97,7 @@ describe("avails-grid-3 miss list", () => {
   });
 
   it("G5: HOUSE LAW — no Avails-only card fork", () => {
-    const page = readFileSync("src/app/(app)/(operator)/avails/page.tsx", "utf8");
+    const page = readFileSync("src/app/(app)/(operator)/aggregation/avails/page.tsx", "utf8");
     const grid = readFileSync("src/components/avails/avails-grid.tsx", "utf8");
     expect(page).not.toContain("BannerCard");
     expect(page).not.toContain("TitlesCatalogListRow");
@@ -113,10 +113,10 @@ describe("avails-grid-3 miss list", () => {
 
 describe("Avails tile mapping", () => {
   it("maps live titles to staff detail with landscape stills only", () => {
-    expect(availsTitleHref("title-1")).toBe("/gc/titles/title-1");
+    expect(availsTitleHref("title-1")).toBe("/aggregation/gc/titles/title-1");
     expect(toAvailsTile({ id: "t1", title: "Craft film" }, "https://cdn/banner.jpg")).toEqual({
       id: "t1",
-      href: "/gc/titles/t1",
+      href: "/aggregation/gc/titles/t1",
       title: "Craft film",
       stillUrl: "https://cdn/banner.jpg",
     });

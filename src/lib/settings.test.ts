@@ -60,7 +60,7 @@ describe("settings hub lock", () => {
     expect(SETTINGS.refer).toBe("Refer a friend");
     expect(SETTINGS.referHref).toBe("/settings/refer");
     expect(SETTINGS.dashboard).toBe("Home");
-    expect(SETTINGS.dashboardHref).toBe("/");
+    expect(SETTINGS.dashboardHref).toBe("/aggregation/dashboard");
     expect(SETTINGS.company).toBe("Company");
     expect(SETTINGS).not.toHaveProperty("companyHref");
     expect(SETTINGS).not.toHaveProperty("youHref");
@@ -139,7 +139,7 @@ describe("settings hub lock", () => {
 
   it("keeps Manage courses staff-only and linked to /education", () => {
     expect(SETTINGS.manageCourses).toBe("Manage courses");
-    expect(SETTINGS.manageCoursesHref).toBe("/education");
+    expect(SETTINGS.manageCoursesHref).toBe("/education/manage");
     expect(settingsManageCoursesVisible(true)).toBe(true);
     expect(settingsManageCoursesVisible(false)).toBe(false);
     expect(SETTINGS_RAIL_ABSENT).toContain("Manage courses");

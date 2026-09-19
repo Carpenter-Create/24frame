@@ -35,8 +35,8 @@ describe("GC_LICENSING_STATUS copy", () => {
     expect(GC_LICENSING_STATUS.empty).toBe("No licensing status yet.");
     expect(GC_DELIVERIES_EMPTY.title).toBe(GC_LICENSING_STATUS.empty);
     expect(GC_DELIVERIES_EMPTY.actionLabel).toBe("View titles");
-    expect(GC_DELIVERIES_EMPTY.actionHref).toBe("/titles");
-    expect(GC_NAV.find((item) => item.href === "/gc/deliveries")?.label).toBe(
+    expect(GC_DELIVERIES_EMPTY.actionHref).toBe("/aggregation/titles");
+    expect(GC_NAV.find((item) => item.href === "/aggregation/gc/deliveries")?.label).toBe(
       GC_LICENSING_STATUS.title,
     );
   });
@@ -73,16 +73,16 @@ describe("staff licensing filters", () => {
       `?channel=${VENDOR_ID}`,
     );
     expect(gcLicensingHref("pending", VENDOR_ID, "finals")).toBe(
-      `/gc/deliveries?q=finals&status=pending&channel=${VENDOR_ID}`,
+      `/aggregation/gc/deliveries?q=finals&status=pending&channel=${VENDOR_ID}`,
     );
     expect(gcLicensingHref("pending", VENDOR_ID)).toBe(
-      `/gc/deliveries?status=pending&channel=${VENDOR_ID}`,
+      `/aggregation/gc/deliveries?status=pending&channel=${VENDOR_ID}`,
     );
     expect(parseGcLicensingChannelFilter(VENDOR_ID)).toBe(VENDOR_ID);
     expect(parseGcLicensingChannelFilter(undefined, VENDOR_ID)).toBe(VENDOR_ID);
     expect(parseGcLicensingChannelFilter("all", VENDOR_ID)).toBe(VENDOR_ID);
     expect(parseGcLicensingChannelFilter(undefined, undefined)).toBeNull();
-    expect(gcLicensingShowAllHref()).toBe("/gc/deliveries");
+    expect(gcLicensingShowAllHref()).toBe("/aggregation/gc/deliveries");
     expect(gcLicensingHasFilters("all", null)).toBe(false);
     expect(gcLicensingHasFilters("live", null)).toBe(true);
     expect(gcLicensingHasFilters("all", VENDOR_ID)).toBe(true);

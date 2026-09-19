@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 
-// Same local-mock pattern as src/app/(app)/titles/[id]/actions.test.ts and
+// Same local-mock pattern as src/app/(app)/aggregation/titles/[id]/actions.test.ts and
 // src/app/api/assets/complete/route.test.ts: the smallest fake that covers what this route
 // actually calls, built local to this file rather than shared test infra.
 vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: vi.fn() }));

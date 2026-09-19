@@ -240,7 +240,7 @@ describe("Social leaderboard", () => {
 describe("messages clash lock", () => {
   it("does not steal /messages for the leaderboard", () => {
     const page = readFileSync("src/app/(app)/social/leaderboard/page.tsx", "utf8");
-    const messages = readFileSync("src/app/(app)/messages/page.tsx", "utf8");
+    const messages = readFileSync("src/app/(app)/aggregation/messages/page.tsx", "utf8");
     expect(page).not.toContain('"/messages"');
     expect(page).not.toContain("rebuild_leaderboards");
     expect(messages).toContain("AskAiLegacyIntercept");

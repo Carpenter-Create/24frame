@@ -1,7 +1,8 @@
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-import { EDUCATION_ADMIN, EDUCATION_HREF } from "./education";
+import { EDUCATION_ADMIN, EDUCATION_HREF, EDUCATION_MANAGE_HREF } from "./education";
+import { WORKSPACE_REDIRECTS } from "./workspace-redirects";
 import { EDUCATION_MANAGE_NAV, EDUCATION_NAV, GC_NAV } from "./nav";
 
 const mediaMigration = readFileSync(
@@ -46,23 +47,23 @@ describe("education isolation", () => {
 
   it("puts staff Manage courses on Education workspace, not GC_NAV or member browse", () => {
     expect(EDUCATION_HREF).toBe("/education");
-    expect(EDUCATION_MANAGE_NAV.map((item) => item.href)).toEqual([EDUCATION_HREF]);
+    expect(EDUCATION_MANAGE_HREF).toBe("/education/manage");
+    expect(EDUCATION_MANAGE_NAV.map((item) => item.href)).toEqual([EDUCATION_MANAGE_HREF]);
     expect(EDUCATION_MANAGE_NAV.map((item) => item.label)).toEqual([EDUCATION_ADMIN.manage]);
     expect(GC_NAV.map((item) => item.href)).not.toContain(EDUCATION_HREF);
     expect(GC_NAV.map((item) => item.href)).not.toContain("/gc/education");
-    expect(EDUCATION_NAV.map((item) => item.href)).toEqual(["/social/courses"]);
-    expect(EDUCATION_NAV.map((item) => item.href)).not.toContain(EDUCATION_HREF);
-    expect(existsSync("src/app/(app)/(operator)/education/page.tsx")).toBe(true);
-    expect(existsSync("src/app/(app)/(operator)/education/[slug]/page.tsx")).toBe(true);
-    expect(existsSync("src/app/(app)/(operator)/gc/education/page.tsx")).toBe(false);
-    expect(existsSync("src/app/(app)/education/page.tsx")).toBe(false);
-    expect(existsSync("src/app/(app)/social/courses/new/page.tsx")).toBe(false);
+    expect(EDUCATION_NAV.map((item) => item.href)).toEqual([EDUCATION_HREF]);
+    expect(EDUCATION_NAV.map((item) => item.href)).not.toContain("/social/courses");
+    expect(existsSync("src/app/(app)/(operator)/education/manage/page.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/(operator)/education/manage/[slug]/page.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/(operator)/aggregation/gc/education/page.tsx")).toBe(false);
+    expect(existsSync("src/app/(app)/education/page.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/education/new/page.tsx")).toBe(false);
+    expect(WORKSPACE_REDIRECTS.some((row) => row.source === "/gc/education" && row.destination === EDUCATION_MANAGE_HREF)).toBe(true);
+    expect(WORKSPACE_REDIRECTS.some((row) => row.source === "/social/courses" && row.destination === EDUCATION_HREF)).toBe(true);
     const nextConfig = readFileSync("next.config.ts", "utf8");
-    expect(nextConfig).toContain('source: "/gc/education"');
-    expect(nextConfig).toContain('destination: "/education"');
-    expect(nextConfig).toContain('source: "/gc/education/:slug"');
-    expect(nextConfig).toContain('destination: "/education/:slug"');
-    expect(nextConfig).toContain("permanent: true");
+    expect(nextConfig).toContain("WORKSPACE_REDIRECTS");
+    expect(nextConfig).toContain("permanent");
   });
 
   it("keeps Education copy off SaaS and buy language", () => {
@@ -74,7 +75,7 @@ describe("education isolation", () => {
     expect(EDUCATION_ADMIN.paid).toBe("Paid");
     expect(blob).not.toContain("Welcome");
     expect(blob).not.toContain("New & For You");
-    const rail = readFileSync("src/app/(app)/(operator)/education/education-course-rail.tsx", "utf8");
+    const rail = readFileSync("src/app/(app)/(operator)/education/manage/education-course-rail.tsx", "utf8");
     expect(rail).toContain("NewCourseButton");
     expect(rail).toContain("data-education-course-name");
     expect(rail).not.toMatch(/Welcome|New & For You|\bHome\b/);
@@ -82,10 +83,10 @@ describe("education isolation", () => {
   });
 
   it("keeps product setup on staff admin and does not add a member checkout", () => {
-    const forms = readFileSync("src/app/(app)/(operator)/education/education-forms.tsx", "utf8");
-    const actions = readFileSync("src/app/(app)/(operator)/education/actions.ts", "utf8");
+    const forms = readFileSync("src/app/(app)/(operator)/education/manage/education-forms.tsx", "utf8");
+    const actions = readFileSync("src/app/(app)/(operator)/education/manage/actions.ts", "utf8");
     const consume = readFileSync("src/components/courses/course-consume.tsx", "utf8");
-    const list = readFileSync("src/app/(app)/social/courses/page.tsx", "utf8");
+    const list = readFileSync("src/app/(app)/education/page.tsx", "utf8");
     expect(forms).toContain("data-education-product");
     expect(forms).toContain("data-education-cover-dropzone");
     expect(forms).toContain('data-education-lesson-type="lesson"');
@@ -114,14 +115,14 @@ describe("education isolation", () => {
   it("does not let Education clients import other storage lanes", () => {
     const s3 = readFileSync("src/lib/s3-education.ts", "utf8");
     const mc = readFileSync("src/lib/education-mediaconvert.ts", "utf8");
-    const actions = readFileSync("src/app/(app)/(operator)/education/actions.ts", "utf8");
+    const actions = readFileSync("src/app/(app)/(operator)/education/manage/actions.ts", "utf8");
     expect(s3).not.toContain('from "@/lib/s3"');
     expect(s3).not.toContain('from "@/lib/s3-social-media"');
     expect(mc).not.toContain('from "@/lib/mediaconvert"');
     expect(actions).toContain("createAdminClient");
     expect(actions).toContain("gc_staff");
     expect(readFileSync("src/lib/education-admin.ts", "utf8")).toContain("encode_error");
-    expect(readFileSync("src/app/(app)/(operator)/education/[slug]/page.tsx", "utf8")).toContain(
+    expect(readFileSync("src/app/(app)/(operator)/education/manage/[slug]/page.tsx", "utf8")).toContain(
       "canStartEducationEncode",
     );
     expect(actions).not.toContain('from "@/lib/s3"');
@@ -139,8 +140,8 @@ describe("education isolation", () => {
   });
 
   it("uploads covers and lesson sources server-side so Saving… can clear without a browser S3 PUT", () => {
-    const forms = readFileSync("src/app/(app)/(operator)/education/education-forms.tsx", "utf8");
-    const actions = readFileSync("src/app/(app)/(operator)/education/actions.ts", "utf8");
+    const forms = readFileSync("src/app/(app)/(operator)/education/manage/education-forms.tsx", "utf8");
+    const actions = readFileSync("src/app/(app)/(operator)/education/manage/actions.ts", "utf8");
     const nextConfig = readFileSync("next.config.ts", "utf8");
     expect(forms).toContain("uploadEducationCover");
     expect(forms).toContain("uploadEducationLessonSource");

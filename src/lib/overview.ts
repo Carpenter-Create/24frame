@@ -10,6 +10,7 @@ import {
 } from "@/lib/dashboard-home";
 import { NEWS_HOME_CAP, NEWS_HREF, NEWS_LEGACY_HREF, NEWS_PAGE } from "@/lib/news";
 import { REPORTS_HREF, REPORTS_PERIOD_ALL } from "@/lib/reports";
+import { EDUCATION_HREF } from "@/lib/education";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { availableWorkspaceOptions, type WorkspaceMenuOption } from "@/lib/workspace-menu";
 import type { WorkspaceMode } from "@/lib/workspace";
@@ -117,7 +118,7 @@ export const OVERVIEW_PAGE = {
   socialEmpty: SOCIAL.home.chatsEmpty,
   socialHref: SOCIAL_ROUTES.dms,
   educationEmpty: SOCIAL.courses.empty,
-  educationHref: SOCIAL_ROUTES.courses,
+  educationHref: EDUCATION_HREF,
   news: NEWS_PAGE.title,
   newsEmpty: NEWS_PAGE.empty,
   newsHref: NEWS_HREF,

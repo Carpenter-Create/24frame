@@ -76,7 +76,7 @@ describe("HouseLeadSearch — one SoT for Social live and Education quiet", () =
     expect(quiet).toContain('data-house-lead-search-tone="quiet"');
     expect(quiet).toContain("data-education-header-search");
     expect(quiet).not.toContain("data-social-header-search");
-    expect(quiet).toContain('action="/education"');
+    expect(quiet).toContain('action="/education/orientation"');
     expect(quiet).toContain(EDUCATION_SEARCH.placeholder);
     expect(quiet).toContain('id="education-header-q"');
     expect(quiet).toContain('value="cut"');
@@ -87,7 +87,7 @@ describe("HouseLeadSearch — one SoT for Social live and Education quiet", () =
     const consume = renderToStaticMarkup(
       createElement(HouseLeadSearch, { tone: "quiet", inputId: "education-header-q-phone" }),
     );
-    expect(consume).toContain('action="/social/courses/orientation"');
+    expect(consume).toContain('action="/education/orientation"');
     expect(consume).toContain('id="education-header-q-phone"');
   });
 

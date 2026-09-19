@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs/config";
 
+import { WORKSPACE_REDIRECTS } from "./src/lib/workspace-redirects";
+
 // Artwork is served from CloudFront in production and from presigned S3 in local/preview
 // (see lib/asset-url). next/image will only optimise a remote source whose host is listed
 // here, so both paths need an entry or images silently fall back to unoptimised.
@@ -69,24 +71,7 @@ const nextConfig: NextConfig = {
   },
 
   async redirects() {
-    return [
-      { source: "/", destination: "/dashboard", permanent: true },
-      { source: "/analytics", destination: "/reports", permanent: true },
-      { source: "/analytics/:path*", destination: "/reports/:path*", permanent: true },
-      { source: "/earn", destination: "/reports", permanent: true },
-      { source: "/earn/:path*", destination: "/reports/:path*", permanent: true },
-      { source: "/finance", destination: "/reports", permanent: true },
-      { source: "/finance/:path*", destination: "/reports/:path*", permanent: true },
-      { source: "/gc/education", destination: "/education", permanent: true },
-      { source: "/gc/education/:slug", destination: "/education/:slug", permanent: true },
-      { source: "/catalog-health", destination: "/attention", permanent: true },
-      { source: "/catalog-health/:path*", destination: "/attention/:path*", permanent: true },
-      { source: "/deliveries", destination: "/titles", permanent: true },
-      { source: "/deliveries/:path*", destination: "/titles/:path*", permanent: true },
-      { source: "/vendors", destination: "/channels", permanent: true },
-      { source: "/vendors/:path*", destination: "/channels/:path*", permanent: true },
-      { source: "/news", destination: "/home/news", permanent: true },
-    ];
+    return [...WORKSPACE_REDIRECTS];
   },
 };
 

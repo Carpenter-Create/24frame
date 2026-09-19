@@ -5,16 +5,17 @@
 // accessible lanes.
 // Not a page. Not a route. Not an account-menu row. Miss-list
 // is Aggregation | Social | Education. Member Education land
-// is Route A /social/courses. Do not send members to /education
-// (staff CMS), /account/workspace, or /settings/workspace.
-// Staff Manage courses in Settings is a separate /education
-// door — not workspace land.
+// is /education. Staff CMS is /education/manage. Do not send
+// members to /education/manage, /account/workspace, or
+// /settings/workspace. Staff Manage courses in Settings is
+// that manage door — not workspace land.
 
 import { USER_MENU } from "@/lib/user-menu";
 import {
   WORKSPACE_AGGREGATION_LABEL,
   WORKSPACE_SOCIAL_LABEL,
 } from "@/lib/product";
+import { EDUCATION_HREF } from "@/lib/education";
 import { type WorkspaceMode, workspaceHome } from "@/lib/workspace";
 
 export const WORKSPACE_MENU = {
@@ -23,8 +24,8 @@ export const WORKSPACE_MENU = {
 
 export const WORKSPACE_EDUCATION_LABEL = "Education";
 
-/** Member Education destination. Route A — never staff CMS /education. */
-export const WORKSPACE_EDUCATION_HREF = "/social/courses";
+/** Member Education destination — never staff CMS /education/manage. */
+export const WORKSPACE_EDUCATION_HREF = EDUCATION_HREF;
 
 export type WorkspaceMenuCandidateId = "aggregation" | "social" | "education";
 

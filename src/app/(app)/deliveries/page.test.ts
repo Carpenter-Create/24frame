@@ -11,14 +11,14 @@ vi.mock("next/navigation", () => ({
 
 describe("client Deliveries redirect", () => {
   it("redirects /deliveries to /titles and does not render a browse page", () => {
-    expect(() => DeliveriesRedirectPage()).toThrow("REDIRECT:/titles");
+    expect(() => DeliveriesRedirectPage()).toThrow("REDIRECT:/aggregation/titles");
     const pageSrc = readFileSync("src/app/(app)/deliveries/page.tsx", "utf8");
     expect(pageSrc).toContain("redirect");
-    expect(pageSrc).toContain("/titles");
+    expect(pageSrc).toContain("TITLES_HREF");
     expect(pageSrc).not.toContain("data-deliveries-pipeline");
     expect(pageSrc).not.toContain("loadMyDeliveries");
     expect(pageSrc).not.toContain("/licensing");
-    const staff = readFileSync("src/app/(app)/(operator)/gc/deliveries/page.tsx", "utf8");
+    const staff = readFileSync("src/app/(app)/(operator)/aggregation/gc/deliveries/page.tsx", "utf8");
     expect(staff).toContain("GC_LICENSING_STATUS");
   });
 });

@@ -1,12 +1,17 @@
 import { z } from "zod";
 
+import { EDUCATION_MANAGE_SEGMENT, EDUCATION_ROOT } from "@/lib/workspace";
+
 // Education storage + staff admin contracts. Dedicated 24frame-education
 // source/output pair. Never 24frame-media, never title film, never
 // finance, never avatars. Staff writes are app-layer only.
-// Staff CMS lives at /education under (operator). Member discover stays
-// Route A /social/courses.
+// Member browse/consume is /education. Staff CMS is /education/manage
+// under (operator). Same prefix; role gates chrome. /social/courses
+// is a redirect source only. Slug `manage` is reserved.
 
-export const EDUCATION_HREF = "/education";
+export const EDUCATION_HREF = EDUCATION_ROOT;
+export const EDUCATION_MANAGE_HREF = `${EDUCATION_ROOT}/${EDUCATION_MANAGE_SEGMENT}`;
+export const EDUCATION_LEGACY_HREF = "/social/courses";
 
 export const EDUCATION_AWS_ENV = [
   "EDUCATION_AWS_REGION",
@@ -429,6 +434,8 @@ export function educationHlsContentType(assetPath: string): string {
   return "application/octet-stream";
 }
 
+export const EDUCATION_RESERVED_SLUGS = [EDUCATION_MANAGE_SEGMENT] as const;
+
 export function normalizeCourseSlug(raw: string): string | null {
   const slug = raw
     .trim()
@@ -437,6 +444,7 @@ export function normalizeCourseSlug(raw: string): string | null {
     .replace(/^-+|-+$/g, "");
   if (!slug || slug.length > EDUCATION_SLUG_MAX) return null;
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return null;
+  if ((EDUCATION_RESERVED_SLUGS as readonly string[]).includes(slug)) return null;
   return slug;
 }
 
@@ -546,6 +554,10 @@ export function mapMediaConvertJobStatus(status: string): CourseEncodeStatus | n
 
 export function educationCourseHref(slug: string): string {
   return `${EDUCATION_HREF}/${encodeURIComponent(slug)}`;
+}
+
+export function educationManageCourseHref(slug: string): string {
+  return `${EDUCATION_MANAGE_HREF}/${encodeURIComponent(slug)}`;
 }
 
 export const EDUCATION_PRODUCT_MODELS = ["free", "paid"] as const;

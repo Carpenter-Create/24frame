@@ -16,13 +16,14 @@ import {
   DASHBOARD_TOP_PILL_CLUSTER_CLASS,
 } from "@/lib/dashboard-craft";
 import type { DashboardRankedTitle } from "@/lib/dashboard-home";
+import { TITLES_HREF } from "@/lib/title-public-id";
 import {
   dashboardModuleMetaLine,
   rankedRowsFromCounts,
   rankedRowsFromTitles,
   type DashboardRegisterView,
 } from "@/lib/dashboard-register";
-import { REPORTS_PAGE, type ReportsCountRow } from "@/lib/reports";
+import { REPORTS_HREF, REPORTS_PAGE, type ReportsCountRow } from "@/lib/reports";
 import { cn } from "@/lib/cn";
 
 export const REPORTS_TOP_PILLS = ["titles", "platforms", "users"] as const;
@@ -40,19 +41,19 @@ const PANES: Record<
   titles: {
     label: REPORTS_PAGE.topTitles,
     empty: REPORTS_PAGE.topTitlesEmpty,
-    href: "/titles",
+    href: TITLES_HREF,
     testId: "titles",
   },
   platforms: {
     label: REPORTS_PAGE.platforms,
     empty: REPORTS_PAGE.platformsEmpty,
-    href: "/titles",
+    href: TITLES_HREF,
     testId: "platforms",
   },
   users: {
     label: REPORTS_PAGE.users,
     empty: REPORTS_PAGE.usersEmpty,
-    href: "/reports",
+    href: REPORTS_HREF,
     testId: "users",
   },
 };
@@ -191,7 +192,7 @@ export function ReportsTerritories({
           {real ? (
             <DashboardViewAlts modes={["map", "list", "bars"]} mode={view} onChange={setMode} />
           ) : null}
-          <DashboardViewAll href="/titles" />
+          <DashboardViewAll href={TITLES_HREF} />
         </div>
       </div>
       {real && view === "map" ? (

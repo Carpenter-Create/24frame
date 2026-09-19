@@ -1,12 +1,13 @@
 import { PRODUCT_NAME } from "@/lib/product";
+import { aggregationPath } from "@/lib/workspace";
 
-// Staff ops copy + client recipient copy. Ops write path stays /gc/finance.
-// Recipient read path is /reports (legacy /earn* and /finance* redirect there).
+// Staff ops copy + client recipient copy. Ops write path stays /aggregation/gc/finance.
+// Recipient read path is /aggregation/reports (legacy /earn* /finance* /reports redirect).
 // Official complementary-split lock: display client % and remainder only. Do
 // not invent a second fee field.
 
-export const FINANCE_HREF = "/gc/finance";
-export const FINANCE_CLIENT_HREF = "/reports";
+export const FINANCE_HREF = aggregationPath("gc/finance");
+export const FINANCE_CLIENT_HREF = aggregationPath("reports");
 
 export const FINANCE_WRITE_RPCS = [
   "create_finance_period",

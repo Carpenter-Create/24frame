@@ -12,7 +12,7 @@ describe("Aggregation lead title", () => {
 
     const hero = readFileSync("src/components/dashboard/dashboard-admin-hero.tsx", "utf8");
     const identity = readFileSync("src/components/dashboard/dashboard-home.tsx", "utf8");
-    const page = readFileSync("src/app/(app)/dashboard/page.tsx", "utf8");
+    const page = readFileSync("src/app/(app)/aggregation/dashboard/page.tsx", "utf8");
 
     expect(hero).toContain("AGGREGATION_LEAD_TITLE");
     expect(hero).not.toMatch(/data-dashboard-title-mobile=""[\s\S]*\{orgName\}/);

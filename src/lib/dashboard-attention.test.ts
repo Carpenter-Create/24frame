@@ -13,7 +13,7 @@ import {
 describe("dashboard Attention glance", () => {
   it("is a dated catalog-findings glance — not readiness buckets", () => {
     expect(DASHBOARD_ATTENTION.title).toBe("Attention");
-    expect(DASHBOARD_ATTENTION.viewAllHref).toBe("/attention");
+    expect(DASHBOARD_ATTENTION.viewAllHref).toBe("/aggregation/attention");
     expect(ATTENTION_HREF).toBe("/attention");
     expect(CATALOG_HEALTH_HREF).toBe("/catalog-health");
     expect(DASHBOARD_ATTENTION_CAP).toBe(5);

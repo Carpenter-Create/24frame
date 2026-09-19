@@ -9,6 +9,7 @@ import {
 } from "@/lib/dashboard-craft";
 import { dashboardJustInDate } from "@/lib/dashboard-home";
 import { REPORTS_PAGE } from "@/lib/reports";
+import { TITLES_HREF } from "@/lib/title-public-id";
 import {
   REPORTS_TABLE_CELL_CLASS,
   REPORTS_TABLE_CLASS,
@@ -31,7 +32,7 @@ export function ReportsDetailTable({
           <p className={DASHBOARD_SECTION_TITLE_CLASS}>{REPORTS_PAGE.detail}</p>
           {periodLabel ? <p className="t-body-sm text-ink-3">{periodLabel}</p> : null}
         </div>
-        <DashboardViewAll href="/titles" />
+        <DashboardViewAll href={TITLES_HREF} />
       </div>
       {rows.length === 0 ? (
         <p

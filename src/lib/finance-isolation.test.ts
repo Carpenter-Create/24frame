@@ -74,7 +74,7 @@ describe("mapping C — finance stays Aggregation", () => {
     expect(SOCIAL_NAV.map((item) => item.href)).not.toContain("/earn");
     expect(SOCIAL_NAV.map((item) => item.href)).not.toContain("/finance");
     expect(SOCIAL_NAV.map((item) => item.href)).not.toContain("/gc/finance");
-    expect(GC_NAV.map((item) => item.href)).toContain("/gc/finance");
+    expect(GC_NAV.map((item) => item.href)).toContain("/aggregation/gc/finance");
     expect(GC_NAV.map((item) => item.href)).not.toContain("/reports");
     expect(GC_NAV.map((item) => item.href)).not.toContain("/earn");
     expect(GC_NAV.map((item) => item.href)).not.toContain("/finance");
@@ -91,7 +91,7 @@ describe("mapping C — finance stays Aggregation", () => {
   });
 
   it("replaces the client Earn glance with a Reports pointer and keeps the staff stub off that purse", () => {
-    const home = readFileSync("src/app/(app)/dashboard/page.tsx", "utf8");
+    const home = readFileSync("src/app/(app)/aggregation/dashboard/page.tsx", "utf8");
     expect(home).toContain("DashboardFinanceGlance");
     expect(home).toContain("DashboardReportsCta");
     expect(home).not.toContain("DashboardClientFinanceGlance");
@@ -120,7 +120,7 @@ describe("mapping C — finance stays Aggregation", () => {
 
   it("builds ops and recipient math from one statement assembler", () => {
     const statement = readFileSync("src/lib/finance-statement.ts", "utf8");
-    const page = readFileSync("src/app/(app)/(operator)/gc/finance/[periodId]/page.tsx", "utf8");
+    const page = readFileSync("src/app/(app)/(operator)/aggregation/gc/finance/[periodId]/page.tsx", "utf8");
     expect(statement).toContain("assemblePeriodStatement");
     expect(statement).toContain("STATEMENT_TRANSPARENCY_LINES");
     expect(statement).toContain("postedOnly");
@@ -141,7 +141,7 @@ describe("mapping C — finance stays Aggregation", () => {
 
   it("defines a 24Frame statement output that keeps source input for later export", () => {
     const statement = readFileSync("src/lib/finance-statement.ts", "utf8");
-    const page = readFileSync("src/app/(app)/(operator)/gc/finance/[periodId]/page.tsx", "utf8");
+    const page = readFileSync("src/app/(app)/(operator)/aggregation/gc/finance/[periodId]/page.tsx", "utf8");
     expect(statement).toContain("toStatementOutput");
     expect(statement).toContain("STATEMENT_OUTPUT_FORMAT");
     expect(statement).toContain("24frame-statement-v1");
@@ -179,16 +179,9 @@ describe("mapping C — finance stays Aggregation", () => {
     expect(FINANCE_WRITE_RPCS).toContain("set_finance_period_threshold");
     expect(FINANCE_WRITE_RPCS).toContain("move_sales_lines_to_suspense");
     expect(FINANCE_WRITE_RPCS).toContain("assign_suspense_lines_to_period");
-    expect(FINANCE_CLIENT_HREF).toBe("/reports");
+    expect(FINANCE_CLIENT_HREF).toBe("/aggregation/reports");
     const nextConfig = readFileSync("next.config.ts", "utf8");
-    expect(nextConfig).toContain('source: "/"');
-    expect(nextConfig).toContain('destination: "/dashboard"');
-    expect(nextConfig).toContain('source: "/finance"');
-    expect(nextConfig).toContain('destination: "/reports"');
-    expect(nextConfig).toContain('source: "/finance/:path*"');
-    expect(nextConfig).toContain('destination: "/reports/:path*"');
-    expect(nextConfig).toContain('source: "/analytics"');
-    expect(nextConfig).toContain('source: "/earn"');
+    expect(nextConfig).toContain("WORKSPACE_REDIRECTS");
     expect(nextConfig).not.toContain('source: "/gc/finance"');
     expect(suspenseMigration).toContain("sales_lines SELECT must hide suspense from recipients");
     expect(suspenseMigration).toContain("do not invent a parallel suspense money table");

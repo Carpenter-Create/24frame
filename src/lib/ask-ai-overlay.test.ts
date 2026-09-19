@@ -125,7 +125,7 @@ describe("ask AI overlay URL", () => {
   it("intercepts leftover /messages onto the prior workspace path", () => {
     expect(legacyAskAiFallbackPath("aggregation")).toBe("/home");
     expect(legacyAskAiFallbackPath("social")).toBe("/social");
-    expect(legacyAskAiFallbackPath("education")).toBe("/social/courses");
+    expect(legacyAskAiFallbackPath("education")).toBe("/education");
     expect(legacyAskAiInterceptHref({})).toBe("/home?ai=1");
     expect(legacyAskAiInterceptHref({ returnPath: "/social", threadId: THREAD })).toBe(
       `/social?ai=${THREAD}`,

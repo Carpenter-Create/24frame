@@ -1,3 +1,4 @@
+import { aggregationPath } from "@/lib/workspace";
 import { isCanonicalUuid } from "@/lib/deliveries-browse";
 import type { RightsType } from "@/lib/rights";
 import { RIGHTS_META } from "@/lib/rights";
@@ -37,7 +38,7 @@ export const DELIVER_STEPPER = {
   download: "Download metadata sheet",
   done: "Done",
   doneHint: "Returns to Licensing Status",
-  listHref: "/gc/deliveries",
+  listHref: aggregationPath("gc/deliveries"),
   noVendors: "No active channels.",
   noGrants: "No active grants on this title.",
   noTitles: "Select at least one title to deliver.",
@@ -68,7 +69,7 @@ function uniqueTitleIds(ids: readonly string[]): string[] {
 export function deliverStepperHref(titleIds: readonly string[]): string {
   const ids = uniqueTitleIds(titleIds);
   if (ids.length === 0) return DELIVER_STEPPER.listHref;
-  return `/gc/deliveries/deliver?titles=${ids.join(",")}`;
+  return `${aggregationPath("gc/deliveries")}/deliver?titles=${ids.join(",")}`;
 }
 
 export function parseDeliverTitleIds(value: string | string[] | undefined): string[] {

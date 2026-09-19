@@ -165,7 +165,7 @@ describe("toClientOrgs", () => {
 describe("client directory profile helpers", () => {
   it("builds the org href, quiet secondary, and known info fields", () => {
     const [org] = toClientOrgs([row(), row({ user_id: "u2", email: "sam@acmefilms.com", role: "viewer" })]);
-    expect(clientOrgHref(org.orgId)).toBe(`/gc/clients/${org.orgId}`);
+    expect(clientOrgHref(org.orgId)).toBe(`/aggregation/gc/clients/${org.orgId}`);
     expect(clientDirectorySecondary(org)).toBe("2 people · Pro");
     expect(clientSeatSecondary(org.seats[0])).toBe("Account owner · Aug 14, 2026");
     expect(clientOrgFields(org)).toEqual([

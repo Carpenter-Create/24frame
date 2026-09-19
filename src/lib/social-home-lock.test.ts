@@ -48,7 +48,8 @@ describe("Social Home miss list v1 P0 lock", () => {
       "Profile",
     ]);
     expect(SOCIAL_NAV.map((item) => item.href)).not.toContain(SOCIAL_ROUTES.groups);
-    expect(SOCIAL_NAV.map((item) => item.href)).not.toContain(SOCIAL_ROUTES.courses);
+    expect(SOCIAL_NAV.map((item) => item.href)).not.toContain("/social/courses");
+    expect(SOCIAL_NAV.map((item) => item.href)).not.toContain("/education");
     expect(SOCIAL_NAV.map((item) => item.href)).not.toContain(SOCIAL_ROUTES.leaderboard);
   });
 

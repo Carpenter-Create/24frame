@@ -52,14 +52,14 @@ describe("workspace menu copy", () => {
       "Education",
     ]);
     expect(availableWorkspaceOptions().map((option) => option.href)).toEqual([
-      "/dashboard",
+      "/aggregation/dashboard",
       "/social",
-      "/social/courses",
+      "/education",
     ]);
-    expect(WORKSPACE_EDUCATION_HREF).toBe("/social/courses");
-    expect(WORKSPACE_EDUCATION_HREF).not.toBe("/education");
+    expect(WORKSPACE_EDUCATION_HREF).toBe("/education");
+    expect(WORKSPACE_EDUCATION_HREF).not.toBe("/social/courses");
     expect(WORKSPACE_EDUCATION_LABEL).toBe("Education");
-    expect(existsSync(join(here, "../app/(app)/education/page.tsx"))).toBe(false);
+    expect(existsSync(join(here, "../app/(app)/education/page.tsx"))).toBe(true);
     expect(existsSync(join(here, "../app/(app)/account/workspace/page.tsx"))).toBe(false);
     expect(existsSync(join(here, "../app/(app)/social/courses/lessons/[id]/page.tsx"))).toBe(
       false,

@@ -375,7 +375,7 @@ describe("messages clash lock", () => {
     const home = readFileSync("src/app/(app)/social/page.tsx", "utf8");
     const dms = readFileSync("src/app/(app)/social/dms/page.tsx", "utf8");
     const dmLoaders = readFileSync("src/lib/social-dms.ts", "utf8");
-    const messages = readFileSync("src/app/(app)/messages/page.tsx", "utf8");
+    const messages = readFileSync("src/app/(app)/aggregation/messages/page.tsx", "utf8");
     expect(home).not.toContain('"/messages"');
     expect(dms).toContain("loadDmInbox");
     expect(dmLoaders).toContain("get_dm_inbox");

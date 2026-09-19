@@ -256,12 +256,12 @@ describe("overviewModuleHeaderAction", () => {
       href: "/social/dms",
       label: "Social",
     });
-    expect(overviewModuleHeaderAction("Education", "/social/courses")).toEqual({
-      href: "/social/courses",
+    expect(overviewModuleHeaderAction("Education", "/education")).toEqual({
+      href: "/education",
       label: "Education",
     });
-    expect(overviewModuleHeaderAction("Needs you", "/attention")).toEqual({
-      href: "/attention",
+    expect(overviewModuleHeaderAction("Needs you", "/aggregation/attention")).toEqual({
+      href: "/aggregation/attention",
       label: "Needs you",
     });
     expect(overviewModuleHeaderAction(" Social ", "/social/dms", "social")).toEqual({

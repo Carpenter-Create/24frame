@@ -2,7 +2,8 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { PRODUCT_NAME } from "@/lib/product";
-import { SOCIAL, SOCIAL_ROUTES, socialCourseHref } from "@/lib/social";
+import { educationCourseHref } from "@/lib/education";
+import { SOCIAL } from "@/lib/social";
 import {
   COURSE_COVER_ASPECT_CLASS,
   COURSE_GLANCE_PLATE_CLASSES,
@@ -140,9 +141,8 @@ describe("placeholder outline", () => {
 
 describe("course routes and copy", () => {
   it("uses Education land copy on Route A and stays browse-only", () => {
-    expect(SOCIAL_ROUTES.courses).toBe("/social/courses");
-    expect(socialCourseHref("welcome-to-24frame")).toBe("/social/courses/welcome-to-24frame");
-    expect(courseHref("social-education")).toBe("/social/courses/social-education");
+    expect(educationCourseHref("welcome-to-24frame")).toBe("/education/welcome-to-24frame");
+    expect(courseHref("social-education")).toBe("/education/social-education");
     expect(SOCIAL.courses.title).toBe("Education");
     expect(SOCIAL.courses.subtitle).toBe(`Education in ${PRODUCT_NAME}.`);
     expect(SOCIAL.courses.subtitle).not.toContain("Social+Education");
@@ -162,8 +162,8 @@ describe("course routes and copy", () => {
 
 describe("course lock", () => {
   it("does not add a member publish path, deep-link, or entitlements table", () => {
-    const list = readFileSync("src/app/(app)/social/courses/page.tsx", "utf8");
-    const detail = readFileSync("src/app/(app)/social/courses/[slug]/page.tsx", "utf8");
+    const list = readFileSync("src/app/(app)/education/page.tsx", "utf8");
+    const detail = readFileSync("src/app/(app)/education/[slug]/page.tsx", "utf8");
     const consume = readFileSync("src/components/courses/course-consume.tsx", "utf8");
     const lib = readFileSync("src/lib/courses.ts", "utf8");
     const actions = readFileSync("src/app/(app)/social/actions.ts", "utf8");
@@ -245,10 +245,10 @@ describe("course lock", () => {
     expect(migration).toContain("has_entitlement must not exist in this slice");
     expect(migration).not.toContain("media_asset_id uuid");
     expect(migration).not.toMatch(/create table if not exists public\.lesson_progress/);
-    expect(() => readFileSync("src/app/(app)/social/courses/new/page.tsx")).toThrow();
+    expect(() => readFileSync("src/app/(app)/education/new/page.tsx")).toThrow();
     expect(() => readFileSync("src/app/(app)/education/page.tsx")).toThrow();
     expect(() =>
-      readFileSync("src/app/(app)/social/courses/lessons/[id]/page.tsx"),
+      readFileSync("src/app/(app)/education/lessons/[id]/page.tsx"),
     ).toThrow();
   });
 });

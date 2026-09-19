@@ -1,4 +1,5 @@
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
+import { aggregationPath } from "@/lib/workspace";
 
 // Findings copy + labels (§19 attention queue). Copy lives in lib/, not JSX.
 
@@ -10,7 +11,7 @@ export const FINDING_SEVERITY_LABEL: Record<"high" | "low", string> = {
 // Attention = the single client-side findings/health overview.
 // Former Catalog Health route `/catalog-health` redirects here.
 export const ATTENTION_TITLE = "Attention";
-export const ATTENTION_HREF = "/attention";
+export const ATTENTION_HREF = aggregationPath("attention");
 export const CATALOG_HEALTH_HREF = "/catalog-health";
 export const CATALOG_HEALTH_TITLE = ATTENTION_TITLE;
 export const CATALOG_HEALTH_SUBTITLE = "What needs your attention across your catalog.";
@@ -23,7 +24,7 @@ export function catalogHealthCountLabel(n: number): string {
 
 /** Findings resolve on the title — staff stay on the GC title path. */
 export function catalogHealthTitleHref(titleId: string, gcWide: boolean): string {
-  return gcWide ? `/gc/titles/${titleId}` : `/titles/${titleId}`;
+  return gcWide ? aggregationPath("gc/titles", titleId) : aggregationPath("titles", titleId);
 }
 
 // Home Do next lists finding + draft rows; Catalog Health owns the full queue.

@@ -1,5 +1,5 @@
 import type { DeliveryBrowseRow } from "@/lib/deliveries-browse";
-import { titleClientPath } from "@/lib/title-public-id";
+import { TITLES_HREF, titleClientPath } from "@/lib/title-public-id";
 import type { DeliveryStatus } from "@/lib/titles";
 import { catalogStillSrc } from "@/lib/titles-catalog";
 
@@ -10,7 +10,7 @@ import { catalogStillSrc } from "@/lib/titles-catalog";
 export const DASHBOARD_LICENSING = {
   title: "Licensing status",
   empty: "No submissions yet.",
-  viewAllHref: "/titles",
+  viewAllHref: TITLES_HREF,
 } as const;
 
 export const DASHBOARD_LICENSING_TITLE_CAP = 3;

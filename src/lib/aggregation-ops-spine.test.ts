@@ -53,9 +53,9 @@ describe("aggregation ops spine rematch", () => {
   });
 
   it("does not invent analytics, period, or create-delivery chrome on the three ops routes", () => {
-    const titles = src("src/app/(app)/titles/page.tsx");
+    const titles = src("src/app/(app)/aggregation/titles/page.tsx");
     const deliveries = src("src/app/(app)/deliveries/page.tsx");
-    const health = src("src/app/(app)/attention/page.tsx");
+    const health = src("src/app/(app)/aggregation/attention/page.tsx");
 
     for (const page of [titles, health]) {
       expect(page).not.toMatch(/\bDownload\b/);

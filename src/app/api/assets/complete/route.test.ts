@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 
-// Same mock shape as src/app/(app)/titles/[id]/actions.test.ts: the smallest fake that covers
+// Same mock shape as src/app/(app)/aggregation/titles/[id]/actions.test.ts: the smallest fake that covers
 // what this route actually calls — no shared test infra, per that file's own note that this
 // repo builds these local to the test rather than as shared fixtures.
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));

@@ -9,17 +9,20 @@ import {
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
 import type { DeliveryStatus } from "@/lib/titles";
 import { catalogReleaseYear, catalogStillSrc } from "@/lib/titles-catalog";
-import { publicCatalogId } from "@/lib/title-public-id";
+import { TITLES_HREF, publicCatalogId, titleOpsPath } from "@/lib/title-public-id";
+import { aggregationPath } from "@/lib/workspace";
 
 // Staff /gc/deliveries — staff-wide Licensing Status (all titles / all orgs).
 // Client nest copy stays on DASHBOARD_LICENSING. Href stays /gc/deliveries.
 // v2 list: Titles catalog parent + indented channel sub-rows. No fluff
 // subtitle. Deliver CTA is selection-gated. Avails-sourced title pool.
+export const GC_DELIVERIES_HREF = aggregationPath("gc/deliveries");
+
 export const GC_LICENSING_STATUS = {
   title: "Licensing Status",
   empty: "No licensing status yet.",
   actionLabel: "View titles",
-  actionHref: "/titles",
+  actionHref: TITLES_HREF,
   filterMiss: "No licensing status matches these filters.",
   searchMiss: (q: string) => `No titles match “${q}”.`,
   showAll: "Show all",
@@ -150,7 +153,7 @@ export function groupLicensingTitles(input: {
     groups.push({
       id: title.id,
       title: title.title,
-      href: `/gc/titles/${title.id}`,
+      href: titleOpsPath(title.id),
       stillUrl: catalogStillSrc(input.stills?.get(title.id) ?? null),
       year: catalogReleaseYear(title.release_date),
       publicId: publicCatalogId(title.catalog_id),
@@ -164,7 +167,7 @@ export function groupLicensingTitles(input: {
     groups.push({
       id: title.id,
       title: title.title,
-      href: `/gc/titles/${title.id}`,
+      href: titleOpsPath(title.id),
       stillUrl: catalogStillSrc(input.stills?.get(title.id) ?? null),
       year: catalogReleaseYear(title.release_date),
       publicId: publicCatalogId(title.catalog_id),
@@ -258,7 +261,7 @@ export function gcLicensingHref(
   vendor: string | null,
   q = "",
 ): string {
-  return `/gc/deliveries${buildGcLicensingQuery({ status, vendor, q })}`;
+  return `${GC_DELIVERIES_HREF}${buildGcLicensingQuery({ status, vendor, q })}`;
 }
 
 export function gcLicensingShowAllHref(): string {

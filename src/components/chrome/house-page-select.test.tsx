@@ -61,9 +61,9 @@ describe("HousePageSelect", () => {
       "src/components/dashboard/dashboard-admin-controls.tsx",
       "src/components/chrome/house-period-presets.tsx",
       "src/components/titles/titles-status-filter.tsx",
-      "src/app/(app)/(operator)/channels/channels-status-filter.tsx",
-      "src/app/(app)/(operator)/gc/deliveries/licensing-status-filter.tsx",
-      "src/app/(app)/(operator)/gc/clients/clients-status-filter.tsx",
+      "src/app/(app)/(operator)/aggregation/channels/channels-status-filter.tsx",
+      "src/app/(app)/(operator)/aggregation/gc/deliveries/licensing-status-filter.tsx",
+      "src/app/(app)/(operator)/aggregation/gc/clients/clients-status-filter.tsx",
     ] as const;
 
     for (const path of lenses) {

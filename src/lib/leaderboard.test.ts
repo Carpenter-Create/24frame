@@ -65,7 +65,7 @@ describe("leaderboard stay on materialized rows", () => {
     const page = readFileSync("src/app/(app)/social/leaderboard/page.tsx", "utf8");
     const lib = readFileSync("src/lib/leaderboard.ts", "utf8");
     const actions = readFileSync("src/app/(app)/social/actions.ts", "utf8");
-    const messages = readFileSync("src/app/(app)/messages/page.tsx", "utf8");
+    const messages = readFileSync("src/app/(app)/aggregation/messages/page.tsx", "utf8");
     expect(page).toContain("loadLeaderboardBoard");
     expect(page).toContain("leaderboardHref");
     expect(lib).toContain("SOCIAL_ROUTES.leaderboard");

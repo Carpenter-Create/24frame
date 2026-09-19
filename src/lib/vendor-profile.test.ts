@@ -78,7 +78,7 @@ describe("vendor licensed-title catalog SoT", () => {
 describe("vendor profile fields", () => {
   it("keeps edit on a dedicated route under the profile", () => {
     expect(vendorEditHref("11111111-1111-4111-8111-111111111111")).toBe(
-      "/channels/11111111-1111-4111-8111-111111111111/edit",
+      "/aggregation/channels/11111111-1111-4111-8111-111111111111/edit",
     );
   });
 

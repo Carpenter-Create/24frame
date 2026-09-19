@@ -42,7 +42,9 @@
 
 import { MOBILE_CHROME_LEAD_PAD_CLASS } from "@/lib/mobile-chrome";
 import { ASK_ASSISTANT } from "@/lib/product";
+import { EDUCATION_MANAGE_HREF } from "@/lib/education";
 import { SOCIAL_ROUTES } from "@/lib/social";
+import { DASHBOARD_HREF } from "@/lib/dashboard-admin";
 import { USER_MENU } from "@/lib/user-menu";
 
 export const SETTINGS = {
@@ -55,7 +57,7 @@ export const SETTINGS = {
   preferences: "Preferences",
   preferencesHref: "/settings/preferences",
   manageCourses: "Manage courses",
-  manageCoursesHref: "/education",
+  manageCoursesHref: EDUCATION_MANAGE_HREF,
   editPublicProfile: "Edit public profile",
   editPublicProfileHref: SOCIAL_ROUTES.profileEdit,
   organizationEmpty: "No organization on this account.",
@@ -67,7 +69,7 @@ export const SETTINGS = {
   refer: USER_MENU.refer,
   referHref: USER_MENU.referHref,
   dashboard: "Home",
-  dashboardHref: "/",
+  dashboardHref: DASHBOARD_HREF,
 } as const;
 
 export const SETTINGS_ABSENT = [

@@ -13,7 +13,7 @@ import {
   type CourseCardDensity,
   type CourseRow,
 } from "@/lib/courses";
-import { socialCourseHref } from "@/lib/social";
+import { educationCourseHref } from "@/lib/education";
 
 // Discover: 16:9 cover + title + quiet lesson meta.
 // Home glance: signed photo + below-cover title + progress.
@@ -42,7 +42,7 @@ export function CourseCard({
   return (
     <li data-course-card={course.slug} data-course-card-density={density}>
       <Link
-        href={socialCourseHref(course.slug)}
+        href={educationCourseHref(course.slug)}
         className={home ? "flex flex-col gap-[var(--space-2)]" : "flex flex-col gap-[var(--space-3)]"}
       >
         <CourseCover

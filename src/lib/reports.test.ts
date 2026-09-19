@@ -151,6 +151,7 @@ describe("reports period and scope", () => {
     expect(isLegacyReportsPath("/earn/p1")).toBe(true);
     expect(isLegacyReportsPath("/finance")).toBe(true);
     expect(isLegacyReportsPath("/gc/finance")).toBe(false);
-    expect(isLegacyReportsPath("/reports")).toBe(false);
+    expect(isLegacyReportsPath("/reports")).toBe(true);
+    expect(isLegacyReportsPath("/aggregation/reports")).toBe(false);
   });
 });

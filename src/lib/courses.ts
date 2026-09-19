@@ -1,5 +1,5 @@
-import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
-import type { CourseStatus } from "@/lib/education";
+import { SOCIAL } from "@/lib/social";
+import { educationCourseHref, type CourseStatus } from "@/lib/education";
 import type { createClient } from "@/lib/supabase/server";
 import { UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
 
@@ -134,7 +134,7 @@ export type CourseListResult = {
 };
 
 export function courseHref(slug: string): string {
-  return `${SOCIAL_ROUTES.courses}/${encodeURIComponent(slug)}`;
+  return educationCourseHref(slug);
 }
 
 // Mirrors has_course_access while member_tier_rank is the Pack 1 stub (0).

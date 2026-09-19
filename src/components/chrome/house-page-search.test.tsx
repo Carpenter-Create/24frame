@@ -19,16 +19,16 @@ import { TITLES_CATALOG } from "@/lib/titles-catalog";
 import { HousePageSearch } from "./house-page-search";
 
 const src = readFileSync("src/components/chrome/house-page-search.tsx", "utf8");
-const titles = readFileSync("src/app/(app)/titles/page.tsx", "utf8");
-const queue = readFileSync("src/app/(app)/(operator)/queue/page.tsx", "utf8");
-const deliveries = readFileSync("src/app/(app)/(operator)/gc/deliveries/page.tsx", "utf8");
+const titles = readFileSync("src/app/(app)/aggregation/titles/page.tsx", "utf8");
+const queue = readFileSync("src/app/(app)/(operator)/aggregation/queue/page.tsx", "utf8");
+const deliveries = readFileSync("src/app/(app)/(operator)/aggregation/gc/deliveries/page.tsx", "utf8");
 const messages = readFileSync("src/components/chrome/messages-app-header.tsx", "utf8");
 
 const PRODUCTION_PATHS = [
   "src/components/chrome/house-page-search.tsx",
-  "src/app/(app)/titles/page.tsx",
-  "src/app/(app)/(operator)/queue/page.tsx",
-  "src/app/(app)/(operator)/gc/deliveries/page.tsx",
+  "src/app/(app)/aggregation/titles/page.tsx",
+  "src/app/(app)/(operator)/aggregation/queue/page.tsx",
+  "src/app/(app)/(operator)/aggregation/gc/deliveries/page.tsx",
   "src/components/chrome/messages-app-header.tsx",
 ] as const;
 

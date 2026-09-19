@@ -17,8 +17,8 @@ describe("settings hub isolation", () => {
     expect(preferencesPage).not.toContain("@/lib/education-admin");
     expect(preferencesPage).not.toContain("(operator)/education");
     expect(pane).not.toContain("(operator)/education");
-    expect(existsSync("src/app/(app)/education/page.tsx")).toBe(false);
-    expect(existsSync("src/app/(app)/(operator)/education/page.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/education/page.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/(operator)/education/manage/page.tsx")).toBe(true);
   });
 
   it("never shows Manage courses to members", () => {

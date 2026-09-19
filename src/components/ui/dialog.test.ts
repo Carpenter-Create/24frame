@@ -11,7 +11,7 @@ import {
 
 const src = readFileSync("src/components/ui/dialog.tsx", "utf8");
 const titles = readFileSync(
-  "src/app/(app)/titles/[id]/title-lifecycle-controls.tsx",
+  "src/app/(app)/aggregation/titles/[id]/title-lifecycle-controls.tsx",
   "utf8",
 );
 const header = readFileSync("src/components/chrome/messages-app-header.tsx", "utf8");

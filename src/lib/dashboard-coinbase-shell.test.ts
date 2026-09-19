@@ -44,7 +44,7 @@ const sideNav = readFileSync("src/components/chrome/side-nav.tsx", "utf8");
 const search = readFileSync("src/components/chrome/house-page-search.tsx", "utf8");
 const housePageSelect = readFileSync("src/lib/house-page-select.ts", "utf8");
 const period = readFileSync("src/components/dashboard/dashboard-admin-controls.tsx", "utf8");
-const page = readFileSync("src/app/(app)/dashboard/page.tsx", "utf8");
+const page = readFileSync("src/app/(app)/aggregation/dashboard/page.tsx", "utf8");
 
 describe("Coinbase shell rematch — Adam miss list v1", () => {
   it("keeps the page canvas on house white and cards on shared 16 radius", () => {

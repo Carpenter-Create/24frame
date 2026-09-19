@@ -15,7 +15,7 @@ const glance = readFileSync("src/components/dashboard/dashboard-finance-glance.t
 const dashboard = readFileSync("src/components/finance/client-finance-dashboard.tsx", "utf8");
 const period = readFileSync("src/components/finance/client-period-dashboard.tsx", "utf8");
 const meters = readFileSync("src/components/finance/finance-meters.tsx", "utf8");
-const statementPage = readFileSync("src/app/(app)/reports/[periodId]/page.tsx", "utf8");
+const statementPage = readFileSync("src/app/(app)/aggregation/reports/[periodId]/page.tsx", "utf8");
 const switcher = readFileSync("src/lib/workspace-switcher.ts", "utf8");
 
 const clientSurfaces = [glance, dashboard, period, meters, statementPage];
@@ -55,7 +55,7 @@ describe("finance visual craft register", () => {
 
   it("keeps Reports on the client rail and Finance on STAFF ops", () => {
     const client = NAV.find((item) => item.href === "/reports");
-    const staff = GC_NAV.find((item) => item.href === "/gc/finance");
+    const staff = GC_NAV.find((item) => item.href === "/aggregation/gc/finance");
     expect(client?.label).toBe("Reports");
     expect(staff?.label).toBe("Finance");
     expect(client?.ariaLabel).toBe(FINANCE_CLIENT.navAria);
