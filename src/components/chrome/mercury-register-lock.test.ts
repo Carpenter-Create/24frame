@@ -7,8 +7,8 @@ import {
   PHOSPHOR_CHROME_ICON_CLASS,
 } from "@/lib/phosphor-icon";
 import {
-  SETTINGS_HEADER_BACK_CLASS,
   SETTINGS_HUB_NAV,
+  SETTINGS_PAGE_LEAD_BACK_CLASS,
   SETTINGS_RAIL_CHEVRON_CLASS,
 } from "@/lib/settings";
 import { HOUSE_RAIL_ITEM_CLASS } from "@/lib/house-shell";
@@ -69,11 +69,10 @@ describe("Adam Mercury register lock", () => {
     expect(SHEET_GROUP_CHEVRON_CLASS).toBe("size-4 shrink-0 text-ink-3");
     expect(SETTINGS_RAIL_CHEVRON_CLASS).toBe("size-4 shrink-0");
     expect(HOUSE_RAIL_ITEM_CLASS).toContain("t-body-sm");
-    expect(SETTINGS_HEADER_BACK_CLASS).toContain("md:hidden");
-    expect(SETTINGS_HEADER_BACK_CLASS).toContain("text-accent");
-    expect(SETTINGS_HEADER_BACK_CLASS).toContain("absolute");
-    expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("text-ink");
-    expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("t-body");
+    expect(SETTINGS_PAGE_LEAD_BACK_CLASS).toBe("md:hidden");
+    expect(SETTINGS_PAGE_LEAD_BACK_CLASS).not.toContain("absolute");
+    expect(SETTINGS_PAGE_LEAD_BACK_CLASS).not.toContain("text-ink");
+    expect(SETTINGS_PAGE_LEAD_BACK_CLASS).not.toContain("t-body");
     expect(RAIL_COLLAPSE_CHEVRON_ICON_CLASS).toBe("h-4 w-4");
     expect(src("src/components/chrome/account-sheet.tsx")).toContain(
       "className={SHEET_GROUP_CHEVRON_CLASS}",
@@ -81,8 +80,8 @@ describe("Adam Mercury register lock", () => {
     expect(src("src/components/chrome/account-sheet.tsx")).toContain(
       'className="size-4 shrink-0"',
     );
-    expect(src("src/components/chrome/settings-header-back.tsx")).toContain(
-      "className={SETTINGS_RAIL_CHEVRON_CLASS}",
+    expect(src("src/components/settings/settings-page-lead.tsx")).toContain(
+      "PageHeaderBackLink",
     );
   });
 
@@ -122,8 +121,8 @@ describe("Adam Mercury register lock", () => {
 
     const account = src("src/components/chrome/account-sheet.tsx");
     const settingsRail = src("src/components/chrome/settings-rail.tsx");
-    const settingsBack = src("src/components/chrome/settings-header-back.tsx");
-    for (const file of [account, settingsRail, settingsBack]) {
+    const settingsLead = src("src/components/settings/settings-page-lead.tsx");
+    for (const file of [account, settingsRail, settingsLead]) {
       expect(file).not.toContain("size-5");
       expect(file).not.toContain("size-6");
       expect(file).not.toContain("weight=\"fill\"");

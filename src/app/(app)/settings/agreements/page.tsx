@@ -1,4 +1,5 @@
 import { HouseEmpty } from "@/components/chrome/house";
+import { SettingsPageLead } from "@/components/settings/settings-page-lead";
 import { SETTINGS } from "@/lib/settings";
 
 // 600:881 — /settings/agreements only. House empty. Do not invent a
@@ -11,7 +12,11 @@ export default function SettingsAgreementsPage() {
         data-settings-section="agreements"
         className="flex flex-col gap-[var(--space-6)]"
       >
-        <h2 className="t-section text-ink">{SETTINGS.agreements}</h2>
+        <SettingsPageLead
+          title={SETTINGS.agreements}
+          pathname={SETTINGS.agreementsHref}
+          heading="h2"
+        />
         <HouseEmpty>{SETTINGS.agreementsEmpty}</HouseEmpty>
       </section>
     </div>

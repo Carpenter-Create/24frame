@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
 
+import { SettingsPageLead } from "@/components/settings/settings-page-lead";
 import { Card, CardBody } from "@/components/ui/card";
 import {
+  SETTINGS,
   SETTINGS_PANE_CLASS,
-  SETTINGS_PANE_TITLE_CLASS,
   SETTINGS_SECTION_CLASS,
   settingsPaneTitle,
 } from "@/lib/settings";
@@ -24,7 +25,7 @@ export async function ProfileSettings() {
   return (
     <div data-settings-page="" data-settings-hub="profile" className={SETTINGS_PANE_CLASS}>
       <section data-settings-section="profile" className={SETTINGS_SECTION_CLASS}>
-        <h1 className={SETTINGS_PANE_TITLE_CLASS}>{settingsPaneTitle("profile")}</h1>
+        <SettingsPageLead title={settingsPaneTitle("profile")} pathname={SETTINGS.profileHref} />
         <Card>
           <CardBody>
             <AccountProfileForm

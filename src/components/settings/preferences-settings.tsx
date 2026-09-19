@@ -3,10 +3,10 @@ import Link from "next/link";
 import { AppearancePreferences } from "@/components/settings/appearance-preferences";
 import { NotificationPreferences } from "@/components/settings/notification-preferences";
 import type { NotificationPrefs } from "@/lib/notification-prefs";
+import { SettingsPageLead } from "@/components/settings/settings-page-lead";
 import {
   SETTINGS,
   SETTINGS_PANE_CLASS,
-  SETTINGS_PANE_TITLE_CLASS,
   SETTINGS_QUIET_ROW_CLASS,
   SETTINGS_SECTION_CLASS,
   settingsManageCoursesVisible,
@@ -30,7 +30,10 @@ export function PreferencesSettings({
   return (
     <div data-settings-page="" data-settings-hub="preferences" className={SETTINGS_PANE_CLASS}>
       <section data-settings-section="preferences" className={SETTINGS_SECTION_CLASS}>
-        <h1 className={SETTINGS_PANE_TITLE_CLASS}>{settingsPaneTitle("preferences")}</h1>
+        <SettingsPageLead
+          title={settingsPaneTitle("preferences")}
+          pathname={SETTINGS.preferencesHref}
+        />
         <AppearancePreferences />
         <NotificationPreferences initialPrefs={prefs} />
         {showManage ? (
