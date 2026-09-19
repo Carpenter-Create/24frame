@@ -207,7 +207,8 @@ export function clientNavCurrent(pathname: string): NavItem {
 // Phone dest chips use this list (HousePhoneDestChips filters Ask AI so
 // chips cannot hop to Aggregation /messages). Staff already use the
 // operator set — do not leave them on a client-only row.
-// Social phone dests drop Home (workspace tab owns /social).
+// Social phone dests keep the feed pill (relabelled Feed on phone;
+// desktop rail keeps Home) so /social is reachable from the chip row.
 // Desktop rail drops Create. Activity stays an Aggregation rail
 // destination. Ask 24Frame AI is the same overlay as the header mark.
 export function mobileNavDestinations(

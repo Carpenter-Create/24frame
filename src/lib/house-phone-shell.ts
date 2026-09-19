@@ -144,10 +144,16 @@ export function housePhoneDestItemClass(active: boolean): string {
   }`;
 }
 
-/** Social phone dests drop Home — the workspace tab owns /social. */
-export const SOCIAL_PHONE_DESTS = mobileNavDestinations(false, "social").filter(
-  (item) => item.href !== SOCIAL_ROUTES.home,
-);
+/** Phone-only label for the Social feed dest. Desktop rail keeps "Home". */
+export const SOCIAL_PHONE_FEED_LABEL = "Feed";
+
+function relabelSocialFeed<T extends NavItem>(item: T): T {
+  if (item.href !== SOCIAL_ROUTES.home) return item;
+  return { ...item, label: SOCIAL_PHONE_FEED_LABEL };
+}
+
+/** Social phone dests keep Home as the leftmost pill, renamed to Feed. */
+export const SOCIAL_PHONE_DESTS = mobileNavDestinations(false, "social").map(relabelSocialFeed);
 
 export function housePhoneWorkspaceSelected(
   id: HousePhoneWorkspaceId,
@@ -184,11 +190,9 @@ export function housePhoneDestinations(
   isGcStaff: boolean,
   workspace: WorkspaceMode,
 ): NavItem[] {
-  return mobileNavDestinations(isGcStaff, workspace).filter((item) => {
-    if (isHouseAiNavItem(item)) return false;
-    if (workspace === "social" && item.href === SOCIAL_ROUTES.home) return false;
-    return true;
-  });
+  return mobileNavDestinations(isGcStaff, workspace)
+    .filter((item) => !isHouseAiNavItem(item))
+    .map((item) => (workspace === "social" ? relabelSocialFeed(item) : item));
 }
 
 export function housePhoneDestActive(
