@@ -7,6 +7,7 @@
 // Existing kinds stay light / dark / auto. Auto is System
 // default on every preference surface.
 
+import { SETTINGS_PREF_BLOCK_CLASS, SETTINGS_PREF_TITLE_CLASS } from "@/lib/settings";
 import { USER_MENU } from "@/lib/user-menu";
 import type { ThemePreference } from "@/lib/theme";
 
@@ -40,10 +41,12 @@ export const APPEARANCE_FLYOUT_OPTIONS = [
   { kind: "light", label: APPEARANCE.light },
 ] as const;
 
-export const APPEARANCE_SETTINGS_LIST_CLASS = "flex flex-col gap-[var(--space-2)]";
+export const APPEARANCE_SETTINGS_CARD_CLASS = SETTINGS_PREF_BLOCK_CLASS;
+export const APPEARANCE_SETTINGS_TITLE_CLASS = SETTINGS_PREF_TITLE_CLASS;
+export const APPEARANCE_SETTINGS_LIST_CLASS = "flex flex-col";
 export const APPEARANCE_SETTINGS_OPTION_CLASS =
-  "flex w-full items-center justify-between rounded-[var(--radius-sm)] px-[var(--space-2)] py-[var(--space-2)] text-left t-body text-ink hover:bg-surface-muted";
-export const APPEARANCE_SETTINGS_OPTION_ACTIVE_CLASS = "bg-surface-muted";
+  "flex w-full items-center justify-between rounded-[var(--radius-sm)] px-[var(--space-2)] py-[var(--space-3)] text-left t-body text-ink hover:bg-surface";
+export const APPEARANCE_SETTINGS_OPTION_ACTIVE_CLASS = "bg-surface";
 export const APPEARANCE_SETTINGS_COPY_CLASS = "flex min-w-0 flex-col gap-[var(--space-1)]";
 export const APPEARANCE_SETTINGS_HELPER_CLASS = "t-body-sm text-ink-3";
 

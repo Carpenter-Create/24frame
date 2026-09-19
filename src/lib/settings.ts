@@ -45,6 +45,7 @@
 // Desktop: section rail + pane. Mobile: list → push.
 // Spacing 8 / 16 / 24 / 48 (Mercury density). Design polish may follow.
 
+import { HOUSE_CARD_PAD, HOUSE_MODULE_CLASS } from "@/lib/house-shell";
 import { MOBILE_CHROME_LEAD_PAD_CLASS } from "@/lib/mobile-chrome";
 import { ASK_ASSISTANT } from "@/lib/product";
 import { EDUCATION_MANAGE_HREF } from "@/lib/education";
@@ -147,6 +148,13 @@ export const SETTINGS_PANE_CLASS = "flex flex-col gap-[var(--space-12)]";
 export const SETTINGS_SECTION_CLASS = "flex flex-col gap-[var(--space-6)]";
 export const SETTINGS_QUIET_ROW_CLASS =
   "flex items-center justify-between t-body leading-5 text-ink";
+
+// Preferences blocks — house muted module + pad 16. Same surface as
+// dashboard / directory modules. Not a new fill. Not card-surface
+// (white + hairline) — that is the Profile / Organization form frame.
+export const SETTINGS_PREF_BLOCK_CLASS =
+  `${HOUSE_MODULE_CLASS} ${HOUSE_CARD_PAD} flex flex-col gap-[var(--space-3)]`;
+export const SETTINGS_PREF_TITLE_CLASS = "t-heading text-ink";
 
 // 623:785 — phone header left slot. Hub list back is Home. Pushed
 // section back is Settings (list). Hidden at md, where the rail stays.
