@@ -448,6 +448,7 @@ describe("ingest OG images", () => {
           source: "joblo",
           published_at: "2026-09-17T12:00:00.000Z",
           image_url: floodWww,
+          topic: "film",
         },
       ],
       NOW,

@@ -59,6 +59,7 @@ function floodItem(image_url: string | null): NormalizedNewsItem {
     source: "joblo",
     published_at: "2026-09-17T12:00:00.000Z",
     image_url,
+    topic: "film",
   };
 }
 
