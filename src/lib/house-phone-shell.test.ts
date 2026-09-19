@@ -39,6 +39,7 @@ import {
   HOUSE_HEADER_TRAILING_DESKTOP_CLASS,
   HOUSE_HEADER_TRAILING_ICON_CLASS,
   HOUSE_HEADER_TRAILING_PHONE_CLASS,
+  HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS,
   HOUSE_PHONE_BOTTOM_NAV,
   HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS,
   HOUSE_PHONE_BOTTOM_NAV_CLASS,
@@ -269,32 +270,38 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(housePhoneWorkspaceSelected("aggregation", "/home", "aggregation")).toBe(false);
   });
 
-  it("locks one phone chrome size SoT at size-5 for bottom nav and header trailing", () => {
-    // Adam #448 pulled Mercury bar and header trailing onto one 20px
-    // SoT. Any mutation of HOUSE_PHONE_CHROME_ICON_CLASS to size-6
-    // fails both surfaces here — bottom nav render AND header trailing
-    // derived classes — and the "no fork" line below fails if a
-    // second size token is reintroduced in phoneShellSrc.
-    expect(HOUSE_PHONE_CHROME_ICON_CLASS).toBe("size-5 shrink-0");
-    expect(HOUSE_PHONE_CHROME_ICON_CLASS).not.toContain("size-6");
+  it("splits phone chrome size SoT — bottom nav size-6, header trailing size-4", () => {
+    // Adam #449 (live-glance authoritative lock): bottom Mercury bar
+    // keeps the 24px thumb-weight glyph, phone header trailing drops
+    // to the 16px desktop-chrome optical. Two size SoT tokens, one
+    // weight register, one idle ink. Mutating either constant to the
+    // other's value fails this suite on both surfaces below.
+    expect(HOUSE_PHONE_CHROME_ICON_CLASS).toBe("size-6 shrink-0");
     expect(HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS).toBe(HOUSE_PHONE_CHROME_ICON_CLASS);
     expect(HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS).not.toBe(PHOSPHOR_CHROME_ICON_CLASS);
     expect(PHOSPHOR_CHROME_ICON_CLASS).toBe("size-4 shrink-0");
     expect(HOUSE_PHONE_CHROME_ICON_WEIGHT).toBe("regular");
     expect(HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT).toBe(HOUSE_PHONE_CHROME_ICON_WEIGHT);
 
-    // Header trailing derives its phone size from the same SoT — no
-    // second size constant. Desktop still steps down to md:size-4.
+    // Header trailing rides its own 16px SoT. Value happens to match
+    // PHOSPHOR_CHROME_ICON_CLASS today (phone optical = desktop
+    // optical) but the constants stay distinct so future phone shifts
+    // touch only the phone token.
+    expect(HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS).toBe("size-4 shrink-0");
+    expect(HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS).not.toBe(HOUSE_PHONE_CHROME_ICON_CLASS);
+    expect(HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS).toBe(PHOSPHOR_CHROME_ICON_CLASS);
     expect(HOUSE_HEADER_TRAILING_ICON_CLASS).toBe(
-      `${HOUSE_PHONE_CHROME_ICON_CLASS} md:size-4`,
+      `${HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS} md:size-4`,
     );
-    expect(HOUSE_HEADER_TRAILING_ICON_CLASS).toBe("size-5 shrink-0 md:size-4");
+    expect(HOUSE_HEADER_TRAILING_ICON_CLASS).toBe("size-4 shrink-0 md:size-4");
     expect(HOUSE_HEADER_TRAILING_ICON_CLASS).not.toContain("size-6");
+    expect(HOUSE_HEADER_TRAILING_ICON_CLASS).not.toContain("size-5");
     expect(HOUSE_HEADER_TRAILING_PHONE_CLASS).toBe(
-      "size-5 shrink-0 md:size-4 md:hidden text-ink-2",
+      "size-4 shrink-0 md:size-4 md:hidden text-ink-2",
     );
     expect(HOUSE_HEADER_TRAILING_PHONE_CLASS).not.toContain("size-6");
-    expect(HOUSE_HEADER_TRAILING_PHONE_CLASS).toContain(HOUSE_PHONE_CHROME_ICON_CLASS);
+    expect(HOUSE_HEADER_TRAILING_PHONE_CLASS).not.toContain("size-5");
+    expect(HOUSE_HEADER_TRAILING_PHONE_CLASS).toContain(HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS);
     expect(HOUSE_HEADER_TRAILING_PHONE_CLASS).toContain(HOUSE_PHONE_CHROME_IDLE_INK_CLASS);
     expect(HOUSE_HEADER_TRAILING_DESKTOP_CLASS).toBe("size-4 shrink-0 hidden md:block");
     expect(HOUSE_HEADER_TRAILING_DESKTOP_CLASS).not.toContain(
@@ -304,16 +311,21 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(bottomNavSrc).toContain("HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS");
     expect(bottomNavSrc).toContain("HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT");
     expect(bottomNavSrc).not.toContain("PhosphorChromeIcon");
+    // Bottom nav must never adopt the header 16px token — enforce by
+    // name so a future refactor can't quietly collapse them.
+    expect(bottomNavSrc).not.toContain("HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS");
     expect(bottomNavSrc).not.toContain("size-5");
-    expect(bottomNavSrc).not.toContain("size-6");
-    // No fork — the shell source ships one phone chrome size literal.
-    // Any second "size-N shrink-0" token in phoneShellSrc trips this.
-    expect(phoneShellSrc).toContain('"size-5 shrink-0"');
+    expect(bottomNavSrc).not.toContain("size-4");
+    // Shell exports both size tokens as distinct literals; the size-5
+    // middle ground from #448 must not reappear.
+    expect(phoneShellSrc).toContain("HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS");
+    expect(phoneShellSrc).toContain('"size-6 shrink-0"');
+    expect(phoneShellSrc).toContain('"size-4 shrink-0"');
+    expect(phoneShellSrc).not.toContain('"size-5 shrink-0"');
     expect(phoneShellSrc.match(/"size-\d shrink-0"/g) ?? []).toEqual([
-      '"size-5 shrink-0"',
+      '"size-6 shrink-0"',
+      '"size-4 shrink-0"',
     ]);
-    expect(phoneShellSrc).not.toContain('"size-6 shrink-0"');
-    expect(phoneShellSrc).not.toContain("HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS");
     expect(phoneShellSrc).not.toContain("bold");
     expect(phoneShellSrc).not.toContain('"fill"');
     expect(bottomNavSrc).toContain("aria-label={tab.label}");
@@ -324,10 +336,11 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
       createElement(HousePhoneBottomNav, { workspace: "aggregation" }),
     );
     expect(html).toContain(HOUSE_PHONE_CHROME_ICON_CLASS);
-    // Bottom Mercury bar renders at 20px — mutation to size-6 fails.
-    expect(html).toContain("size-5");
-    expect(html).not.toContain("size-6");
+    expect(html).toContain("size-6");
+    // Bottom bar must not shrink to header sizes — mutation of
+    // HOUSE_PHONE_CHROME_ICON_CLASS to size-4 or size-5 fails here.
     expect(html).not.toContain("size-4");
+    expect(html).not.toContain("size-5");
     expect(html).not.toContain('weight="bold"');
     expect(html).not.toContain('weight="fill"');
     expect(bottomNavSrc).toContain("weight={HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT}");
@@ -338,7 +351,7 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(html).toContain('aria-label="Workspaces"');
   });
 
-  it("uses one 20px SoT for phone trailing chrome without ballooning the avatar", () => {
+  it("uses the 16px header-trailing SoT for phone AI + bell + search without ballooning the avatar", () => {
     expect(askHeaderSrc).toContain("HOUSE_HEADER_TRAILING_PHONE_CLASS");
     expect(askHeaderSrc).toContain("HOUSE_HEADER_TRAILING_DESKTOP_CLASS");
     expect(askHeaderSrc).toContain('register="stroke"');
@@ -349,16 +362,17 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(bellSrc).toContain(
       "weight={phone ? HOUSE_PHONE_CHROME_ICON_WEIGHT : PHOSPHOR_CHROME_IDLE_WEIGHT}",
     );
-    // Social header search rides the same 20px SoT as AI + bell — one
-    // token, not a fork (Adam #448 collapsed the two-token split).
-    expect(searchSheetSrc).toContain("HOUSE_PHONE_CHROME_ICON_CLASS");
-    expect(searchSheetSrc).not.toContain("HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS");
+    // Social header search rides the header trailing 16px SoT — same
+    // cluster as AI + bell — not the Mercury bar 24px SoT (Adam #449).
+    expect(searchSheetSrc).toContain("HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS");
+    expect(searchSheetSrc).not.toContain("HOUSE_PHONE_CHROME_ICON_CLASS");
     expect(searchSheetSrc).toContain("HOUSE_PHONE_CHROME_ICON_WEIGHT");
     // Phone search glyph rides the same idle-ink SoT — no ink drift
     // across AI / bell / search in the phone top trailing cluster.
     expect(searchSheetSrc).toContain("HOUSE_PHONE_CHROME_IDLE_INK_CLASS");
     expect(searchSheetSrc).not.toMatch(/\btext-ink-2\b/);
     expect(accountSheetSrc).not.toContain("HOUSE_PHONE_CHROME_ICON_CLASS");
+    expect(accountSheetSrc).not.toContain("HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS");
     expect(accountSheetSrc).not.toContain("HOUSE_HEADER_TRAILING_ICON_CLASS");
     expect(accountSheetSrc).not.toContain("HOUSE_HEADER_TRAILING_PHONE_CLASS");
     expect(HOUSE_THEME_TOGGLE_CLASS).toContain("size-8");
@@ -374,12 +388,12 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(trailing).toContain("data-activity-bell");
     expect(trailing).toContain(HOUSE_HEADER_TRAILING_PHONE_CLASS);
     expect(trailing).toContain(HOUSE_HEADER_TRAILING_DESKTOP_CLASS);
-    // Header trailing must render at 20px (size-5). Mutating the
-    // shared HOUSE_PHONE_CHROME_ICON_CLASS to size-6 fails this line
-    // AND the bottom-nav render assertion above. Desktop still steps
-    // down to 16px via md:size-4.
-    expect(trailing).toContain("size-5");
+    // Header trailing must render at 16px (size-4) — mutation to
+    // size-6 (the Mercury bar box) OR size-5 (the retired #448 middle
+    // ground) fails these lines. Desktop stays on md:size-4.
+    expect(trailing).toContain("size-4");
     expect(trailing).not.toContain("size-6");
+    expect(trailing).not.toContain("size-5");
     expect(trailing).toContain("md:size-4");
     expect(trailing).toContain('data-house-ai-mark-register="stroke"');
     expect(trailing).toContain('data-house-ai-mark-register="fill"');
@@ -430,10 +444,12 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(aggItem).toContain(HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS);
     expect(aggItem).toContain("h-12");
     expect(aggItem).toContain("min-w-14");
-    // Bottom Mercury bar glyph rides the shared 20px SoT (Adam #448) —
-    // mutation of HOUSE_PHONE_CHROME_ICON_CLASS to size-6 fails here.
-    expect(aggItem).toContain("size-5");
-    expect(aggItem).not.toContain("size-6");
+    // Bottom Mercury bar glyph stays on the 24px SoT (Adam #449) —
+    // mutation of HOUSE_PHONE_CHROME_ICON_CLASS to size-4 or size-5
+    // fails here.
+    expect(aggItem).toContain("size-6");
+    expect(aggItem).not.toContain("size-5");
+    expect(aggItem).not.toContain("size-4");
     expect(aggItem).toContain("data-house-phone-bottom-nav-item-active");
     expect(aggregation).toContain('data-house-phone-bottom-nav-item-active=""');
     const homeItem = aggregation.slice(

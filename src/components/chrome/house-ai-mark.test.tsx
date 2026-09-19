@@ -77,11 +77,13 @@ describe("HouseAiMark", () => {
     expect(html).toContain('fill="none"');
     expect(html).toContain('stroke="currentColor"');
     expect(html).toContain(`stroke-width="${HOUSE_AI_MARK_REGULAR_STROKE_WIDTH}"`);
-    // Phone chrome ships one 20px SoT — Adam #448 pulled Mercury bar
-    // and header trailing onto size-5 together. size-6 must not
-    // appear on the AI mark.
-    expect(html).toContain("size-5");
+    // Phone header trailing renders at 16px matching desktop chrome
+    // (Adam #449). The Mercury bar 24px lives on a separate SoT and
+    // the retired #448 size-5 middle ground must not reappear on the
+    // AI mark either.
+    expect(html).toContain("size-4");
     expect(html).not.toContain("size-6");
+    expect(html).not.toContain("size-5");
     expect(html).toContain("md:hidden");
     // Ink parity — phone AI stroke rides the bottom-bar idle ink so the
     // sparkles read at the same optical weight as the Mercury Regular
@@ -110,11 +112,12 @@ describe("HouseAiMark", () => {
     expect(header).toContain("data-house-ai-mark");
     expect(header).toContain(HOUSE_HEADER_TRAILING_PHONE_CLASS);
     expect(header).toContain(HOUSE_HEADER_TRAILING_DESKTOP_CLASS);
-    // Phone header trailing renders at 20px (size-5) — same shared
-    // SoT as the Mercury bar (Adam #448). size-6 is retired from
-    // phone chrome.
-    expect(header).toContain("size-5");
+    // Phone header trailing renders at 16px matching desktop chrome
+    // optical (Adam #449). Mercury bar 24px stays on its own SoT;
+    // the retired #448 size-5 must not reappear.
+    expect(header).toContain("size-4");
     expect(header).not.toContain("size-6");
+    expect(header).not.toContain("size-5");
     expect(header).toContain("md:size-4");
     expect(header).toContain('data-house-ai-mark-register="stroke"');
     expect(header).toContain('data-house-ai-mark-register="fill"');

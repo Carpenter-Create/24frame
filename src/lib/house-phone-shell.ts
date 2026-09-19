@@ -15,17 +15,21 @@
 // --elevation-float. No frost. No satellite FAB. No second
 // float. Active tab is a light surface-muted pill behind the glyph.
 // Inactive sit bare. Stroke is Regular for both the Mercury bar and
-// the phone-top AI/bell cluster — one weight register — and the glyph
-// box is one size SoT: size-5 / 20px (HOUSE_PHONE_CHROME_ICON_CLASS)
-// for the Mercury bar and the header trailing (AI + bell + phone
-// search). Adam #448 collapsed the two-token split back to one SoT
-// after #447 read: 24px towered over the emblem on the header and,
-// re-checked at the same pixel width, still read heavy on the Mercury
-// bar. 20px is the one register. Not Bold/Fill heavy. Active ink is
-// accent on the chip; idle is ink-2 on both the bar off state and
-// the top trailing (AI + bell + phone search) via
-// HOUSE_PHONE_CHROME_IDLE_INK_CLASS — Regular on ink-3 optically drifts
-// lighter than the same glyph on ink-2, which is what #442 left over.
+// the phone-top AI/bell cluster — one weight register — but the glyph
+// boxes are sized on separate SoT tokens after Adam's #449 authoritative
+// lock (glancing Production live): the Mercury bar sits at size-6 /
+// 24px (HOUSE_PHONE_CHROME_ICON_CLASS) so the workspace switch reads
+// at thumb weight, and the header trailing sits at size-4 / 16px
+// (HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS) matching desktop chrome
+// optical size — AI mark, notification bell, and Social header search
+// no longer tower over the emblem. #447 shipped size-6 shared, #448
+// briefly collapsed both to size-5; live-glance still read heavy so
+// the phone header dropped to desktop chrome size while the Mercury
+// bar held. Not Bold/Fill heavy. Active ink is accent on the chip;
+// idle is ink-2 on both the bar off state and the top trailing (AI +
+// bell + phone search) via HOUSE_PHONE_CHROME_IDLE_INK_CLASS —
+// Regular on ink-3 optically drifts lighter than the same glyph on
+// ink-2, which is what #442 left over.
 // House tokens only. Hide on scroll-down / show on scroll-up via
 // social-tab-bar-scroll. Content pad stays when the bar hides.
 // Not a Meta skin. Not Mercury lavender.
@@ -117,16 +121,25 @@ export const HOUSE_PHONE_BOTTOM_NAV_ITEM_CLASS =
 
 export const HOUSE_PHONE_BOTTOM_NAV_ITEM_ON_CLASS = "text-accent";
 
-/** One phone chrome glyph size — 20px box.
- *  Both the Mercury bottom bar and the phone header trailing cluster
- *  (AI mark + bell + phone search) render at this size, so the two
- *  Regular clusters read as one register optically. Adam #448 pulled
- *  the two clusters onto one SoT after #447 read too heavy on both:
- *  24px in the header towered over the emblem, and, re-checked at
- *  the same pixel width, still read heavy on the Mercury bar. Do not
- *  fork this token — size and weight/ink live together. Desktop
- *  header still overrides to md:size-4 via HOUSE_HEADER_TRAILING_ICON_CLASS. */
-export const HOUSE_PHONE_CHROME_ICON_CLASS = "size-5 shrink-0";
+/** Phone Mercury bottom bar glyph size — 24px box.
+ *  Bottom bar owns the workspace switch and sits at the base of the
+ *  screen, so its glyphs stay at thumb weight. The phone header
+ *  trailing cluster uses a separate size token
+ *  (HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS) so header shrink never
+ *  leaks into the Mercury bar (Adam #449 live-glance). */
+export const HOUSE_PHONE_CHROME_ICON_CLASS = "size-6 shrink-0";
+
+/** Phone header trailing glyph size — 16px box, matches desktop chrome.
+ *  AI mark + bell + phone search share this token. #447 shipped size-6
+ *  shared with the Mercury bar and read oversized next to the emblem.
+ *  #448 collapsed both to size-5 and Adam's live-glance still read a
+ *  bit big. #449 (this lock) drops the phone header to the same 16px
+ *  optical as desktop chrome (PHOSPHOR_CHROME_ICON_CLASS) — Mercury
+ *  bar held at size-6. Two size SoT tokens, one weight register, one
+ *  idle ink. Desktop header still resolves to md:size-4 via
+ *  HOUSE_HEADER_TRAILING_ICON_CLASS (phone and desktop coincide at
+ *  16px now; the md:size-4 override stays for future divergence). */
+export const HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS = "size-4 shrink-0";
 
 /** One phone chrome stroke register — bottom bar + top trailing. Not Bold/Fill. */
 export const HOUSE_PHONE_CHROME_ICON_WEIGHT = "regular" satisfies IconWeight;
@@ -140,23 +153,27 @@ export const HOUSE_PHONE_CHROME_IDLE_INK_CLASS = "text-ink-2";
 
 export const HOUSE_PHONE_BOTTOM_NAV_ITEM_OFF_CLASS = HOUSE_PHONE_CHROME_IDLE_INK_CLASS;
 
-/** Soft light pill behind the selected glyph. Scales with the 20px box. */
+/** Soft light pill behind the selected glyph. Scales with the 24px box. */
 export const HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS =
   "flex h-12 min-w-14 items-center justify-center rounded-full bg-surface-muted";
 
-/** Phone 20px; desktop header keeps the 16px phosphor chrome box. */
-export const HOUSE_HEADER_TRAILING_ICON_CLASS = `${HOUSE_PHONE_CHROME_ICON_CLASS} md:size-4`;
+/** Phone 16px; desktop header keeps the 16px phosphor chrome box. Phone
+ *  and desktop coincide today; the md:size-4 override stays so any
+ *  future phone divergence only touches HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS. */
+export const HOUSE_HEADER_TRAILING_ICON_CLASS = `${HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS} md:size-4`;
 
-/** Phone header trailing instance — Regular size-5 on bottom-bar idle ink.
+/** Phone header trailing instance — Regular size-4 on bottom-bar idle ink.
  *  Hidden from md+, so the ink override does not touch desktop text-ink-3. */
 export const HOUSE_HEADER_TRAILING_PHONE_CLASS = `${HOUSE_HEADER_TRAILING_ICON_CLASS} md:hidden ${HOUSE_PHONE_CHROME_IDLE_INK_CLASS}`;
 
 /** Desktop header trailing instance — 16px phosphor idle / filled AI. */
 export const HOUSE_HEADER_TRAILING_DESKTOP_CLASS = `${PHOSPHOR_CHROME_ICON_CLASS} hidden md:block`;
 
-/** Same 20px SoT as the phone header trailing (AI + bell + phone search).
- *  One size token, one weight, one idle ink — Adam #448 collapsed the
- *  short-lived split back to one register. Regular stroke, not Bold/Fill. */
+/** Bottom nav rides the shared size-6 SoT. Phone header trailing sits
+ *  on a separate size-4 SoT (HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS)
+ *  so the two clusters can move independently — the Mercury bar keeps
+ *  its thumb-weight 24px, the header trailing matches desktop chrome
+ *  at 16px (Adam #449). Regular stroke on both, never Bold/Fill. */
 export const HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS = HOUSE_PHONE_CHROME_ICON_CLASS;
 
 export const HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT = HOUSE_PHONE_CHROME_ICON_WEIGHT;

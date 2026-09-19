@@ -12,13 +12,15 @@ export const HOUSE_AI_MARK_VIEWBOX_SIZE = 146;
  *  Our mark strokes a diamond outline with `strokeLinejoin="round"` and
  *  the sparkle arms meet at a ~59° tip, so the outer arc softens the
  *  geometric point and a pure 16-optical stroke reads visibly thinner
- *  than a Phosphor Regular filled outline sitting at the same 24px box.
+ *  than a Phosphor Regular filled outline at the same pixel box.
  *  Bump to 20 on 256 (25% over Regular, still nowhere near Bold at 24)
  *  so the stroked sparkles land at Regular-optical parity with the
- *  Mercury bottom-bar glyphs — never Bold, never fill. #442 landed
- *  weight + register but held pure Regular here; Adam's Production
- *  hard-refresh (uploads/phone-header-ai-bell-fail.png) needs the
- *  compensating optical bump on top of the shared idle-ink change. */
+ *  Phosphor Regular bell sitting next to them — never Bold, never fill.
+ *  The ratio is size-independent, so the same 20/256 constant carries
+ *  Adam's target-size shifts: #447 rendered at the Mercury 24px box,
+ *  #449 dropped the phone header to the 16px desktop-chrome optical
+ *  and the bump still holds because it compensates for the geometric
+ *  tip softening rather than a specific pixel width. */
 export const HOUSE_AI_MARK_REGULAR_STROKE_WIDTH = (20 * HOUSE_AI_MARK_VIEWBOX_SIZE) / 256;
 
 export type HouseAiMarkRegister = "fill" | "stroke";

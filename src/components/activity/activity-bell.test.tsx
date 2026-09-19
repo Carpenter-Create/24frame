@@ -211,12 +211,14 @@ describe("ActivityBell", () => {
   it("matches #391 chrome idle weight on theme and the desktop bell", () => {
     expect(PHOSPHOR_CHROME_IDLE_WEIGHT).toBe("bold");
     expect(PHOSPHOR_CHROME_ICON_CLASS).toBe("size-4 shrink-0");
-    // Phone header trailing sits on the shared 20px SoT (Adam #448
-    // collapsed the short-lived split back onto one register — both
-    // Mercury bar and header trailing render at size-5). Mutation of
-    // the shared HOUSE_PHONE_CHROME_ICON_CLASS to size-6 fails here.
+    // Phone header trailing sits on the 16px SoT (Adam #449 dropped
+    // the header to desktop-chrome optical after live-glance —
+    // #447 shipped size-6, #448 tried size-5, still read heavy).
+    // Bottom Mercury bar stays on size-6 via HOUSE_PHONE_CHROME_ICON_CLASS.
+    // Mutation of HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS to size-6 or
+    // size-5 fails here.
     expect(HOUSE_HEADER_TRAILING_PHONE_CLASS).toBe(
-      "size-5 shrink-0 md:size-4 md:hidden text-ink-2",
+      "size-4 shrink-0 md:size-4 md:hidden text-ink-2",
     );
     // Phone bell rides bottom-bar idle ink; desktop bell stays on the
     // HOUSE_THEME_TOGGLE_CLASS text-ink-3 / hover:text-ink from #442.
