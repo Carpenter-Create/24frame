@@ -373,7 +373,14 @@ function AskAiOverlayChrome({
             <ArrowsOut className="size-4" weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
           )}
         </button>
-        <Close44 label={ASK_AI_OVERLAY.close} data-ask-ai-close="" onClick={closeAskAi} />
+        <Close44
+          label={ASK_AI_OVERLAY.close}
+          data-ask-ai-close=""
+          onClick={() => {
+            setHistoryOpen(false);
+            closeAskAi();
+          }}
+        />
       </div>
     </div>
   );
