@@ -177,7 +177,7 @@ export function AskGlobeeHistoryPopover({
   }, [open, onOpenChange]);
 
   return (
-    <div ref={rootRef} className="relative">
+    <div ref={rootRef} className={align === "end" ? undefined : "relative"}>
       {children}
       {open ? (
         <div

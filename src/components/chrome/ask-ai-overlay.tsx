@@ -257,6 +257,7 @@ function AskAiOverlayPanel() {
         expanded={expanded}
         closeAskAi={closeAskAi}
         toggleAskAiExpanded={toggleAskAiExpanded}
+        conversations={conversations}
       />
       <AskAiOverlayBody
         showThread={Boolean(showThread)}
@@ -335,16 +336,18 @@ function AskAiOverlayChrome({
   expanded,
   closeAskAi,
   toggleAskAiExpanded,
+  conversations,
 }: {
   showLanding: boolean;
   expanded: boolean;
   closeAskAi: () => void;
   toggleAskAiExpanded: () => void;
+  conversations: AskGlobeeHistoryRow[];
 }) {
-  const { conversations, historyOpen, setHistoryOpen } = useAskGlobeeChrome();
+  const { historyOpen, setHistoryOpen } = useAskGlobeeChrome();
 
   return (
-    <div data-ask-ai-overlay-chrome="" className={cn(DIALOG_HEADER_CLASS, "shrink-0")}>
+    <div data-ask-ai-overlay-chrome="" className={cn(DIALOG_HEADER_CLASS, "relative shrink-0")}>
       <div className="flex min-w-0 items-center gap-[var(--space-3)]">
         <HouseAiMark className={ASK_AI_OVERLAY_MARK_CLASS} />
         <h2 className="truncate t-heading text-ink">
@@ -423,7 +426,7 @@ function AskAiOverlayBody({
       <div
         className={cn(
           "flex min-h-0 flex-1 flex-col",
-          historyOpen && showThread ? "max-md:hidden" : null,
+          historyOpen ? "max-md:hidden" : null,
         )}
       >
         {showLanding ? <AskGlobeeLanding displayName={displayName} /> : null}
