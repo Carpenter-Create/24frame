@@ -12,8 +12,8 @@
 // glyph so that gap is optical, not 16-in-32 vs a 32 disk. Do not
 // cancel that hug with -mx — #452 stacked AI on the bell. Sun/moon
 // stays desktop-only. Ask 24Frame AI is shared immediately left of
-// the bell and opens the Mercury overlay. Avatar-sheet AI may stay
-// as a secondary door. Do not reintroduce a dest hamburger.
+// the bell and opens the Mercury overlay. Ask AI is header + Home
+// module only (#465). Do not reintroduce a dest hamburger.
 // Desktop md+ replaces the single-name+chevron trigger with a
 // sliding-pill cluster of available workspace names (Adam lock
 // 2026-09-17 “Try it”). Same house grammar as Top Performing:

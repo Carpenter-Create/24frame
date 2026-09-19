@@ -33,8 +33,8 @@ import { HouseLeadChrome } from "@/components/chrome/house-lead-chrome";
 import { HousePhoneAppShell } from "@/components/chrome/house-phone-app-shell";
 import { HousePhoneBottomNav } from "@/components/chrome/house-phone-bottom-nav";
 import { HousePhoneDestChips } from "@/components/chrome/house-phone-dest-chips";
-import { HousePhoneTopChrome } from "@/components/chrome/house-phone-top-chrome";
-import { SocialTopBar } from "@/components/social/social-top-bar";
+import { HouseLeadSearch } from "@/components/chrome/house-lead-search";
+import { UserMenu } from "@/components/chrome/user-menu";
 import {
   HOUSE_HEADER_TRAILING_DESKTOP_CLASS,
   HOUSE_HEADER_TRAILING_ICON_CLASS,
@@ -122,7 +122,7 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(aggregation).toContain("data-app-header-workspace-desktop");
 
     const top = renderToStaticMarkup(
-      createElement(HousePhoneTopChrome, {
+      createElement(HouseLeadChrome, {
         workspace: "social",
         accountMenu: createElement("div", { "data-user-menu-host": "" }),
       }),
@@ -742,7 +742,13 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
       createElement(
         HousePhoneAppShell,
         { workspace: "aggregation" },
-        createElement(SocialTopBar, { email: "ada@example.com" }),
+        createElement(HouseLeadChrome, {
+          workspace: "social",
+          logoVisible: "always",
+          search: createElement(HouseLeadSearch, { tone: "live" }),
+          trailingSearch: createElement(HouseLeadSearch, { tone: "live", presentation: "icon" }),
+          accountMenu: createElement(UserMenu, { email: "ada@example.com" }),
+        }),
       ),
     );
     expect(wrapped).toContain("data-house-phone-app-shell");

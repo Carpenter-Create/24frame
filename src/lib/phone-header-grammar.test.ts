@@ -10,8 +10,9 @@ vi.mock("next/navigation", () => ({
 }));
 
 import { HouseLeadChrome } from "@/components/chrome/house-lead-chrome";
+import { HouseLeadSearch } from "@/components/chrome/house-lead-search";
+import { UserMenu } from "@/components/chrome/user-menu";
 import { AccountSheet, AccountMenuDropdown } from "@/components/chrome/account-sheet";
-import { SocialTopBar } from "@/components/social/social-top-bar";
 import {
   HOUSE_HEADER_TRAILING_AVATAR_CLASS,
   HOUSE_HEADER_TRAILING_HIT_CLASS,
@@ -126,7 +127,13 @@ describe("phone header grammar A — trim trailing", () => {
     expect(education).not.toContain("data-mobile-nav-trigger");
 
     const social = renderToStaticMarkup(
-      createElement(SocialTopBar, { email: "ada@example.com", name: "Ada" }),
+      createElement(HouseLeadChrome, {
+        workspace: "social",
+        logoVisible: "always",
+        search: createElement(HouseLeadSearch, { tone: "live" }),
+        trailingSearch: createElement(HouseLeadSearch, { tone: "live", presentation: "icon" }),
+        accountMenu: createElement(UserMenu, { email: "ada@example.com", name: "Ada" }),
+      }),
     );
     expect(social).not.toContain("data-mobile-nav-trigger");
     expect(social.indexOf("data-social-header-search-icon")).toBeGreaterThan(

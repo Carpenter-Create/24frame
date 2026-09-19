@@ -29,9 +29,6 @@ vi.mock("@/app/(app)/aggregation/messages/ask-globee-actions", () => ({
     messages: [],
   })),
 }));
-vi.mock("./organization-switcher", () => ({
-  OrganizationSwitcher: () => createElement("div", { "data-org-switcher": "" }),
-}));
 vi.mock("./side-nav", () => ({
   SideNav: ({
     isGcStaff,
