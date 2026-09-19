@@ -195,11 +195,13 @@ describe("AskGlobeeLanding", () => {
 
     expect(tokens).toContain("--space-12: 3rem;");
     expect(src).toContain(
-      "relative flex min-h-[min(36rem,calc(100dvh-var(--header-height)-var(--content-inset)*2))] flex-col items-center p-[var(--space-12)]",
+      "relative flex h-full min-h-0 flex-1 flex-col items-center p-[var(--space-12)]",
     );
     expect(src).toContain(
-      "flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-12)]",
+      "flex w-full min-h-0 flex-1 flex-col-reverse overflow-auto",
     );
+    expect(src).not.toContain("justify-center gap-[var(--space-12)]");
+    expect(src).not.toContain("justify-end gap-[var(--space-12)]");
     expect(src).not.toContain("flex flex-col items-center gap-[var(--space-6)]");
     expect(html).not.toContain("t-body text-center text-ink-2");
     expect(html).not.toContain(ASK_GLOBEE.need);
@@ -209,10 +211,14 @@ describe("AskGlobeeLanding", () => {
     expect(src).toContain(
       "inline-flex items-center gap-[var(--space-2)] rounded-full border-0 bg-surface-muted px-[var(--space-4)] py-[var(--space-2)] t-body-sm text-ink",
     );
-    expect(src).toContain("md:order-2");
-    expect(src).toContain("md:order-3");
-    expect(src).toContain("md:contents");
+    expect(src).toContain("shrink-0");
+    expect(src).not.toContain("md:order-2");
+    expect(src).not.toContain("md:order-3");
+    expect(src).not.toContain("md:contents");
     expect(src.indexOf("data-ask-globee-try=")).toBeLessThan(
+      src.indexOf("data-ask-globee-composer="),
+    );
+    expect(src.indexOf("data-ask-globee-headline=")).toBeLessThan(
       src.indexOf("data-ask-globee-composer="),
     );
     expect(src).not.toContain("gap-[var(--space-8)]");
@@ -239,7 +245,8 @@ describe("AskGlobeeLanding", () => {
     expect(src).toContain("border-0 bg-surface-muted");
     expect(src).not.toContain("max-md:border-0");
     expect(src).not.toContain("max-md:bg-surface-muted");
-    expect(src).toContain("gap-[var(--space-4)] md:order-3");
+    expect(src).toContain("gap-[var(--space-4)]");
+    expect(src).not.toContain("md:order-3");
     expect(src).not.toContain("max-md:gap-[var(--space-4)]");
     expect(src).toContain("placeholder={ASK_GLOBEE.composerPlaceholderMobile}");
     expect(src).not.toContain("placeholder={ASK_GLOBEE.composerPlaceholder}");
@@ -306,7 +313,8 @@ describe("AskGlobeeLanding", () => {
     expect(src).not.toContain("fill-");
     expect(src).toContain("max-md:px-[var(--space-4)]");
     expect(src).toContain("max-md:w-full max-md:flex-col max-md:items-stretch");
-    expect(src).toContain("max-md:gap-[var(--space-12)]");
+    expect(src).toContain("flex-col-reverse overflow-auto");
+    expect(src).toContain("mt-[var(--space-12)] flex w-full shrink-0 justify-center");
     expect(src).toContain(
       "flex size-6 shrink-0 items-center justify-center rounded-full bg-accent text-accent-contrast",
     );

@@ -148,9 +148,9 @@ describe("AppShell header", () => {
     expect(html).toContain("data-theme-toggle");
     expect(html).toContain("Switch to dark mode");
     expect(html).not.toContain("Switch to light mode");
-    expect(html.indexOf("data-workspace-switcher")).toBeLessThan(html.indexOf("data-ask-assistant-header"));
-    expect(html.indexOf("data-ask-assistant-header")).toBeLessThan(html.indexOf("data-theme-toggle"));
-    expect(html.indexOf("data-theme-toggle")).toBeLessThan(html.indexOf("data-activity-bell"));
+    expect(html.indexOf("data-workspace-switcher")).toBeLessThan(html.indexOf("data-theme-toggle"));
+    expect(html.indexOf("data-theme-toggle")).toBeLessThan(html.indexOf("data-ask-assistant-header"));
+    expect(html.indexOf("data-ask-assistant-header")).toBeLessThan(html.indexOf("data-activity-bell"));
     expect(html.indexOf("data-activity-bell")).toBeLessThan(html.indexOf("data-user-menu-host"));
     expect(html).not.toContain("ThemeToggle");
     expect(shellSrc).not.toContain("ThemeToggle");
@@ -524,7 +524,9 @@ describe("AppShell /settings rail", () => {
     expect(html).not.toContain("Catalog Health");
     expect(html).not.toContain("Attention");
     expect(html).not.toContain("Recent activity");
-    expect(html).not.toContain("Ask 24Frame AI");
+    const rail = html.slice(html.indexOf("data-settings-rail"), html.indexOf("data-house-lead-stack"));
+    expect(rail).not.toContain("Ask 24Frame AI");
+    expect(html).toContain("data-ask-assistant-header");
     expect(html).not.toContain("data-side-nav-ask-ai");
     expect(html).not.toContain("data-mobile-nav-ask-ai");
     expect(html).not.toContain("Queue");

@@ -27,6 +27,8 @@ vi.mock("next/link", async () => {
   return { __esModule: true, default: MockLink };
 });
 
+import { BookOpen, FilmStrip, House, SquaresFour, Users } from "@phosphor-icons/react";
+
 import { HouseLeadChrome } from "@/components/chrome/house-lead-chrome";
 import { HousePhoneAppShell } from "@/components/chrome/house-phone-app-shell";
 import { HousePhoneBottomNav } from "@/components/chrome/house-phone-bottom-nav";
@@ -35,7 +37,13 @@ import { HousePhoneTopChrome } from "@/components/chrome/house-phone-top-chrome"
 import { SocialTopBar } from "@/components/social/social-top-bar";
 import {
   HOUSE_PHONE_BOTTOM_NAV,
+  HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS,
   HOUSE_PHONE_BOTTOM_NAV_CLASS,
+  HOUSE_PHONE_BOTTOM_NAV_HIDDEN_CLASS,
+  HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS,
+  HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT,
+  HOUSE_PHONE_BOTTOM_NAV_ITEM_OFF_CLASS,
+  HOUSE_PHONE_BOTTOM_NAV_ITEM_ON_CLASS,
   HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS,
   HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS,
   HOUSE_PHONE_DEST_CHIPS,
@@ -48,6 +56,7 @@ import {
   housePhoneWorkspaceSelected,
 } from "@/lib/house-phone-shell";
 import { ASK_GLOBEE } from "@/lib/ask-globee";
+import { PHOSPHOR_CHROME_ICON_CLASS } from "@/lib/phosphor-icon";
 import { SOCIAL_ROUTES } from "@/lib/social";
 import {
   APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS,
@@ -56,6 +65,9 @@ import {
 const leadSrc = readFileSync("src/components/chrome/house-lead-chrome.tsx", "utf8");
 const shellSrc = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
 const phoneShellSrc = readFileSync("src/lib/house-phone-shell.ts", "utf8");
+const bottomNavSrc = readFileSync("src/components/chrome/house-phone-bottom-nav.tsx", "utf8");
+const phoneAppShellSrc = readFileSync("src/components/chrome/house-phone-app-shell.tsx", "utf8");
+const tokensSrc = readFileSync("src/app/tokens.css", "utf8");
 
 function renderLead(workspace: "aggregation" | "social" | "education") {
   return renderToStaticMarkup(
@@ -122,14 +134,27 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
       expect(html).not.toContain("data-mobile-nav-trigger");
       expect(html).not.toContain("Open menu");
       expect(html).toContain("data-house-phone-dest-chips");
+      expect(html).toContain("data-ask-assistant-header");
+      expect(html).toContain("data-ask-ai-open");
+      expect(html).not.toContain('href="/messages"');
+      expect(html).not.toContain('href="/ai"');
       expect(html).toContain("data-activity-bell");
       expect(html).toContain("data-account-sheet-trigger");
       expect(html.indexOf("data-brand-emblem")).toBeLessThan(
+        html.indexOf("data-ask-assistant-header"),
+      );
+      expect(html.indexOf("data-ask-assistant-header")).toBeLessThan(
         html.indexOf("data-activity-bell"),
       );
       expect(html.indexOf("data-activity-bell")).toBeLessThan(
         html.indexOf("data-account-sheet-trigger"),
       );
+      const askToBell = html.slice(
+        html.indexOf("data-ask-assistant-header"),
+        html.indexOf("data-activity-bell"),
+      );
+      expect(askToBell).not.toContain("data-account-sheet-trigger");
+      expect(askToBell).not.toContain("data-social-header-search-icon");
     }
 
     const home = renderToStaticMarkup(
@@ -147,6 +172,9 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
       social.indexOf("data-app-header-trailing"),
     );
     expect(social.indexOf("data-social-header-search-icon")).toBeLessThan(
+      social.indexOf("data-ask-assistant-header"),
+    );
+    expect(social.indexOf("data-ask-assistant-header")).toBeLessThan(
       social.indexOf("data-activity-bell"),
     );
   });
@@ -170,14 +198,39 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
       "/dashboard",
       "/social/courses",
     ]);
+    expect(HOUSE_PHONE_WORKSPACE_TABS.map((tab) => tab.icon)).toEqual([
+      House,
+      Users,
+      FilmStrip,
+      BookOpen,
+    ]);
+    expect(HOUSE_PHONE_WORKSPACE_TABS.find((tab) => tab.id === "aggregation")?.icon).toBe(
+      FilmStrip,
+    );
+    expect(HOUSE_PHONE_WORKSPACE_TABS.find((tab) => tab.id === "aggregation")?.icon).not.toBe(
+      SquaresFour,
+    );
     expect(HOUSE_PHONE_BOTTOM_NAV.label).toBe("Workspaces");
     expect(HOUSE_PHONE_BOTTOM_NAV_CLASS).toContain("md:hidden");
     expect(HOUSE_PHONE_BOTTOM_NAV_CLASS).toContain("env(safe-area-inset-bottom)");
+    expect(HOUSE_PHONE_BOTTOM_NAV_CLASS).toContain("transition-transform");
     expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).toContain("rounded-[28px]");
     expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).toContain("border-hairline");
+    expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).toContain("bg-surface");
+    expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).toContain("shadow-[var(--elevation-float)]");
+    expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).not.toContain("backdrop-blur");
+    expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).not.toContain("bg-surface/");
+    expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).not.toMatch(/shadow-\[var\(--elevation\)\]/);
     expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).toContain("h-14");
+    expect(tokensSrc).toContain("--elevation-float:");
+    expect(bottomNavSrc).not.toContain("backdrop-blur");
+    expect(bottomNavSrc).not.toContain("fixed right-");
+    expect(HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS).not.toContain("blur");
+    expect(phoneShellSrc).toContain("not Nextdoor frost");
     expect(HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS).toContain("max-md:pb-");
     expect(phoneShellSrc).toContain("Option 2");
+    expect(phoneShellSrc).toContain("FilmStrip");
+    expect(phoneShellSrc).not.toContain("SquaresFour");
     expect(existsSync("src/components/social/social-mobile-tab-bar.tsx")).toBe(false);
 
     navigation.pathname = "/dashboard";
@@ -203,6 +256,96 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(housePhoneWorkspaceSelected("social", "/social/explore", "social")).toBe(true);
     expect(housePhoneWorkspaceSelected("education", "/social/courses", "education")).toBe(true);
     expect(housePhoneWorkspaceSelected("aggregation", "/home", "aggregation")).toBe(false);
+  });
+
+  it("keeps bottom workspace tabs glyph-only on a thin size-4 stroke", () => {
+    expect(HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS).toBe(PHOSPHOR_CHROME_ICON_CLASS);
+    expect(HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS).toBe("size-4 shrink-0");
+    expect(HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT).toBe("regular");
+    expect(bottomNavSrc).toContain("HOUSE_PHONE_BOTTOM_NAV_ICON_CLASS");
+    expect(bottomNavSrc).toContain("HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT");
+    expect(bottomNavSrc).not.toContain("PhosphorChromeIcon");
+    expect(bottomNavSrc).not.toContain("size-5");
+    expect(phoneShellSrc).not.toContain("size-5");
+    expect(phoneShellSrc).not.toContain("bold");
+    expect(phoneShellSrc).not.toContain('"fill"');
+    expect(bottomNavSrc).toContain("aria-label={tab.label}");
+    expect(bottomNavSrc).not.toContain("{tab.label}</span>");
+
+    navigation.pathname = "/dashboard";
+    const html = renderToStaticMarkup(
+      createElement(HousePhoneBottomNav, { workspace: "aggregation" }),
+    );
+    for (const label of ["Home", "Social", "Aggregation", "Education"]) {
+      expect(html).toContain(`aria-label="${label}"`);
+      expect(html).not.toContain(`>${label}<`);
+    }
+    expect(html).toContain('aria-label="Workspaces"');
+  });
+
+  it("puts a light house chip behind the active glyph only", () => {
+    expect(HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS).toContain("bg-surface-muted");
+    expect(HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS).toContain("rounded-full");
+    expect(HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS).not.toContain("rounded-[var(--radius)]");
+    expect(HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS).not.toContain("#");
+    expect(HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS).not.toContain("bg-accent");
+    expect(HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS).not.toContain("bg-ink");
+    expect(HOUSE_PHONE_BOTTOM_NAV_ITEM_ON_CLASS).toBe("text-accent");
+    expect(HOUSE_PHONE_BOTTOM_NAV_ITEM_OFF_CLASS).toBe("text-ink-2");
+    expect(bottomNavSrc).toContain("data-house-phone-bottom-nav-chip");
+    expect(bottomNavSrc).toContain("HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS");
+
+    navigation.pathname = "/dashboard";
+    const aggregation = renderToStaticMarkup(
+      createElement(HousePhoneBottomNav, { workspace: "aggregation" }),
+    );
+    expect(aggregation.match(/data-house-phone-bottom-nav-chip=/g)?.length).toBe(1);
+    const aggItem = aggregation.slice(
+      aggregation.indexOf('data-house-phone-bottom-nav-item="aggregation"'),
+      aggregation.indexOf('data-house-phone-bottom-nav-item="education"'),
+    );
+    expect(aggItem).toContain("data-house-phone-bottom-nav-chip");
+    expect(aggItem).toContain("data-house-phone-bottom-nav-item-active");
+    expect(aggregation).toContain('data-house-phone-bottom-nav-item-active=""');
+    const homeItem = aggregation.slice(
+      aggregation.indexOf('data-house-phone-bottom-nav-item="home"'),
+      aggregation.indexOf('data-house-phone-bottom-nav-item="social"'),
+    );
+    expect(homeItem).not.toContain("data-house-phone-bottom-nav-chip");
+    expect(homeItem).not.toContain("data-house-phone-bottom-nav-item-active");
+
+    navigation.pathname = "/home";
+    const home = renderToStaticMarkup(
+      createElement(HousePhoneBottomNav, { workspace: "aggregation" }),
+    );
+    expect(home.match(/data-house-phone-bottom-nav-chip=/g)?.length).toBe(1);
+    expect(home).toContain('data-house-phone-bottom-nav-item-active=""');
+    const homeActive = home.slice(
+      home.indexOf('data-house-phone-bottom-nav-item="home"'),
+      home.indexOf('data-house-phone-bottom-nav-item="social"'),
+    );
+    expect(homeActive).toContain("data-house-phone-bottom-nav-chip");
+  });
+
+  it("hides the shared phone bottom bar with social-tab-bar-scroll", () => {
+    expect(bottomNavSrc).toContain('from "@/lib/social-tab-bar-scroll"');
+    expect(bottomNavSrc).toContain("createSocialTabBarScrollTracker");
+    expect(bottomNavSrc).toContain("stepSocialTabBarScroll");
+    expect(bottomNavSrc).toContain("[data-house-lead-scroll]");
+    expect(bottomNavSrc).toContain("useHousePhoneBottomNavHidden(pathname)");
+    expect(bottomNavSrc).toContain("nav.path !== pathname");
+    expect(bottomNavSrc).toContain("}, [pathname]);");
+    expect(bottomNavSrc).toContain("data-house-phone-bottom-nav-hidden");
+    expect(phoneAppShellSrc).toContain("HousePhoneBottomNav");
+    expect(phoneAppShellSrc).toContain("social-tab-bar-scroll");
+    expect(HOUSE_PHONE_BOTTOM_NAV_HIDDEN_CLASS).toBe("pointer-events-none translate-y-full");
+    expect(HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS).toContain("env(safe-area-inset-bottom)");
+
+    const html = renderToStaticMarkup(
+      createElement(HousePhoneBottomNav, { workspace: "social" }),
+    );
+    expect(html).toContain("data-house-phone-bottom-nav");
+    expect(html).not.toContain("data-house-phone-bottom-nav-hidden");
   });
 
   it("wires real dest lists into one under-top chip row and keeps Ask off the chips", () => {

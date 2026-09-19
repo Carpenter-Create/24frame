@@ -6,15 +6,16 @@
 // under the top. Leading air (settings back ↔ emblem) is --space-3
 // (12). Not --space-1. Do not put overflow-hidden on the leading
 // row (#412).
-// Phone trailing: [search if needed] [bell] [avatar], with
-// --chrome-gutter so the avatar is not flush. Ask 24Frame AI and
-// sun/moon leave this cluster on max-md and live on the avatar
-// sheet. Do not reintroduce a dest hamburger.
+// Phone trailing: [search if needed] [24Frame AI] [bell] [avatar],
+// with --chrome-gutter so the avatar is not flush. Sun/moon stays
+// desktop-only. Ask 24Frame AI is shared immediately left of the
+// bell and opens the Mercury overlay. Avatar-sheet AI may stay as
+// a secondary door. Do not reintroduce a dest hamburger.
 // Desktop md+ replaces the single-name+chevron trigger with a
 // sliding-pill cluster of available workspace names (Adam lock
 // 2026-09-17 “Try it”). Same house grammar as Top Performing:
 // active ink fill, idle muted grey. Desktop trailing: pills, then
-// Ask, then sun/moon, then bell, then avatar. Social uses the same
+// sun/moon, then Ask, then bell, then avatar. Social uses the same
 // split. Phone keeps the compact name+menu — do not force three
 // labels.
 // No rail / header-lead #321 duplicate. Rail top-left stays the
@@ -207,9 +208,10 @@ export const WORKSPACE_SWITCHER_OPTION_CHECK_CLASS = "text-accent";
 export const APP_HEADER_TRAILING_CLUSTER_CLASS =
   "flex min-w-0 items-center gap-[var(--space-1)] md:gap-[var(--space-2)] max-md:shrink-0";
 
-// Ask + theme stay in the desktop trailing cluster. Phone hides
-// this wrap (`hidden`) so md+ `contents` keeps Ask · theme as
-// flex siblings of bell · avatar.
+// Theme stays in the desktop trailing cluster. Phone hides this
+// wrap (`hidden`) so md+ `contents` keeps theme as a flex sibling
+// of Ask · bell · avatar. Ask sits outside this wrap, immediately
+// left of the bell on every breakpoint.
 export const APP_HEADER_DESKTOP_TRAILING_CLASS = "hidden md:contents";
 
 export const APP_HEADER_EDUCATION_SEARCH_PHONE_CLASS = HOUSE_LEAD_UNDER_NAV_CLASS;

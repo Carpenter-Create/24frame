@@ -3,8 +3,11 @@ import { isAskGlobeeThreadId } from "@/lib/ask-globee";
 import { workspaceHome, type WorkspaceMode } from "@/lib/workspace";
 
 // Mercury Command overlay — 24Frame AI is never a workspace destination.
-// Open state lives on the current path as `?ai=1` (landing) or `?ai=<uuid>`
-// (thread). Back/close strips the param and leaves the underlying view.
+// Universal header access on every house chrome path. Open state lives
+// on the current path as `?ai=1` (landing) or `?ai=<uuid>` (thread).
+// Starts as a floating window/sheet; expand/collapse is overlay-scoped
+// (not a routed full page). Back/close strips the param and leaves
+// the underlying view.
 
 export const ASK_AI_QUERY = "ai";
 export const ASK_AI_OPEN_VALUE = "1";
@@ -30,7 +33,26 @@ export const ASK_AI_OVERLAY_EXPANDED_CLASS =
   "flex h-[min(94dvh,calc(100dvh-var(--space-8)))] w-[min(96vw,80rem)] max-w-[80rem] flex-col overflow-hidden";
 
 export const ASK_AI_OVERLAY_PHONE_CLASS =
-  "flex h-dvh w-full flex-col overflow-hidden rounded-none border-0";
+  "flex w-full flex-col overflow-hidden border-0";
+
+/** Phone starts as a bottom sheet. Expand fills the viewport. Same overlay. */
+export const ASK_AI_OVERLAY_PHONE_COMPACT_CLASS =
+  `${ASK_AI_OVERLAY_PHONE_CLASS} h-[min(36rem,70dvh)] rounded-t-[var(--radius-lg)]`;
+
+export const ASK_AI_OVERLAY_PHONE_EXPANDED_CLASS =
+  `${ASK_AI_OVERLAY_PHONE_CLASS} h-dvh rounded-none`;
+
+export const ASK_AI_OVERLAY_EXPAND_CLASS =
+  "flex size-[44px] items-center justify-center text-ink-3";
+
+// Overlay body fills the window. Landing/thread own the scroll so empty
+// chat and history sit bottom-up (composer pinned, newest nearest it).
+export const ASK_AI_OVERLAY_BODY_CLASS =
+  "flex min-h-0 flex-1 flex-col overflow-hidden [&_[data-ask-globee-gate]]:h-full [&_[data-ask-globee-gate]]:min-h-0 [&_[data-ask-globee-landing]]:h-full [&_[data-ask-globee-landing]]:min-h-0 [&_[data-ask-globee-thread]]:h-full [&_[data-ask-globee-thread]]:min-h-0";
+
+export function askAiOverlayPhoneClass(expanded: boolean): string {
+  return expanded ? ASK_AI_OVERLAY_PHONE_EXPANDED_CLASS : ASK_AI_OVERLAY_PHONE_COMPACT_CLASS;
+}
 
 export type AskAiOverlayState = {
   open: boolean;

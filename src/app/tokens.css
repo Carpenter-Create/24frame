@@ -50,6 +50,8 @@
   --text-tertiary: #9aa0a9;
   --body:          #2b2f36;         /* long-form prose */
   --elevation: 0 1px 2px rgb(16 18 26 / 0.06);
+  /* Phone Mercury dock lift. Soft, restrained. Not glass. */
+  --elevation-float: 0 4px 16px rgb(16 18 26 / 0.08), 0 1px 2px rgb(16 18 26 / 0.06);
 
   /* The dramatic dark band (portal / insights) — near-black charcoal, part of
      the greyscale ramp (not a colour). The accent stays reserved. */
@@ -136,6 +138,7 @@
   --text-tertiary: #6b7278;
   --body:          #c4c9d0;
   --elevation: 0 1px 2px rgb(0 0 0 / 0.4);
+  --elevation-float: 0 4px 16px rgb(0 0 0 / 0.45), 0 1px 2px rgb(0 0 0 / 0.4);
 
   /* On the dark page the band lifts (rather than going darker) so it still
      reads as a distinct full-bleed section. */

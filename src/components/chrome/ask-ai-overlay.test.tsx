@@ -37,9 +37,22 @@ vi.mock("@/app/(app)/messages/ask-globee-actions", () => ({
   deleteAskGlobeeConversation: vi.fn(),
 }));
 
-import { ASK_AI_OVERLAY, ASK_AI_OVERLAY_MARK_CLASS, askAiOverlayHref } from "@/lib/ask-ai-overlay";
+import {
+  ASK_AI_OVERLAY,
+  ASK_AI_OVERLAY_BODY_CLASS,
+  ASK_AI_OVERLAY_EXPAND_CLASS,
+  ASK_AI_OVERLAY_MARK_CLASS,
+  ASK_AI_OVERLAY_PHONE_COMPACT_CLASS,
+  ASK_AI_OVERLAY_PHONE_EXPANDED_CLASS,
+  askAiCloseHref,
+  askAiOverlayHref,
+  askAiOverlayPhoneClass,
+  fireAskAiOpenThen,
+} from "@/lib/ask-ai-overlay";
 import { ASK_GLOBEE } from "@/lib/ask-globee";
-import { AskAiOpenButton, AskAiOverlayProvider } from "./ask-ai-overlay";
+import { HouseLeadChrome } from "./house-lead-chrome";
+import { SocialTopBar } from "@/components/social/social-top-bar";
+import { AskAiOpenButton, AskAiOverlayProvider, useAskAiOverlay } from "./ask-ai-overlay";
 import { AskAssistantHeaderLink } from "./ask-assistant-header";
 
 function renderOverlay(child?: ReactNode) {
@@ -60,6 +73,63 @@ describe("AskAiOverlay", () => {
     expect(header).toContain("data-house-ai-mark");
     expect(header).not.toContain('href="/messages"');
     expect(header).not.toContain('href="/home');
+  });
+
+  it("header AI glyph calls overlay open on the current path — never a workspace land", () => {
+    const headerSrc = readFileSync(new URL("./ask-assistant-header.tsx", import.meta.url), "utf8");
+    const overlaySrc = readFileSync(new URL("./ask-ai-overlay.tsx", import.meta.url), "utf8");
+    const leadSrc = readFileSync(new URL("./house-lead-chrome.tsx", import.meta.url), "utf8");
+
+    expect(headerSrc).toContain("AskAiOpenButton");
+    expect(headerSrc).toContain("HouseAiMark");
+    expect(headerSrc).toContain("data-ask-assistant-header");
+    expect(headerSrc).not.toContain("next/link");
+    expect(headerSrc).not.toContain("useRouter");
+    expect(headerSrc).not.toMatch(/\bhref\b/);
+    expect(headerSrc).not.toContain("/messages");
+    expect(headerSrc).not.toContain("/dashboard");
+    expect(headerSrc).not.toContain("/ai");
+    expect(leadSrc).toContain("<AskAssistantHeaderLink />");
+    expect(leadSrc.indexOf("<AskAssistantHeaderLink")).toBeLessThan(leadSrc.indexOf("<ActivityBell"));
+    expect(overlaySrc).toContain("() => openAskAi(threadId)");
+    expect(overlaySrc).toContain("askAiOverlayHref(pathname, currentAskAiSearch(), threadId)");
+    expect(overlaySrc).toContain("router.push(href)");
+    expect(overlaySrc).not.toContain('router.push("/messages")');
+    expect(overlaySrc).not.toContain('router.push("/dashboard")');
+    expect(overlaySrc).not.toContain('router.push("/ai")');
+
+    navigation.pathname = "/social/explore";
+    navigation.search = "";
+    navigation.push.mockClear();
+    navigation.replace.mockClear();
+
+    let openAskAi: ((threadId?: string | null) => void) | undefined;
+    function BindHeaderOpen() {
+      openAskAi = useAskAiOverlay().openAskAi;
+      return createElement(AskAssistantHeaderLink);
+    }
+
+    const header = renderToStaticMarkup(
+      createElement(AskAiOverlayProvider, null, createElement(BindHeaderOpen)),
+    );
+    expect(header).toContain("data-ask-assistant-header");
+    expect(header).toContain('type="button"');
+    expect(header).toContain("data-ask-ai-open");
+    expect(header).toContain("data-house-ai-mark");
+    expect(header).not.toMatch(/href="/);
+    expect(openAskAi).toEqual(expect.any(Function));
+
+    fireAskAiOpenThen(() => openAskAi?.());
+
+    expect(navigation.push).toHaveBeenCalledTimes(1);
+    expect(navigation.push).toHaveBeenCalledWith("/social/explore?ai=1");
+    expect(navigation.replace).not.toHaveBeenCalled();
+    const pushed = navigation.push.mock.calls.map((call) => String(call[0]));
+    expect(pushed).toEqual(["/social/explore?ai=1"]);
+    for (const href of pushed) {
+      expect(href.startsWith("/social/explore?ai=")).toBe(true);
+      expect(href).not.toMatch(/^\/(messages|dashboard|ai|home)(?:\?|$)/);
+    }
   });
 
   it("opens from chrome, Home teaser, and phone sheet onto the same overlay — never /messages", () => {
@@ -123,6 +193,151 @@ describe("AskAiOverlay", () => {
     expect(closed).not.toContain(ASK_AI_OVERLAY.dialog);
     expect(closed).not.toContain("data-ask-ai-close");
     expect(closed).not.toContain("data-ask-ai-overlay-phone");
+  });
+
+  it("header AI is on every house chrome path and opens the same overlay window", () => {
+    const paths = [
+      { pathname: "/home", workspace: "aggregation" as const },
+      { pathname: "/social", workspace: "social" as const },
+      { pathname: "/dashboard", workspace: "aggregation" as const },
+      { pathname: "/social/courses", workspace: "education" as const },
+    ];
+
+    for (const { pathname, workspace } of paths) {
+      navigation.pathname = pathname;
+      navigation.search = "";
+      const html = renderToStaticMarkup(
+        createElement(
+          AskAiOverlayProvider,
+          null,
+          createElement(HouseLeadChrome, {
+            workspace,
+            accountMenu: createElement("div", { "data-user-menu-host": "" }),
+          }),
+        ),
+      );
+      expect(html).toContain("data-ask-assistant-header");
+      expect(html).toContain("data-ask-ai-open");
+      expect(html).toContain("data-activity-bell");
+      expect(html.indexOf("data-ask-assistant-header")).toBeLessThan(
+        html.indexOf("data-activity-bell"),
+      );
+    }
+
+    const social = renderToStaticMarkup(
+      createElement(
+        AskAiOverlayProvider,
+        null,
+        createElement(SocialTopBar, { email: "ada@example.com", name: "Ada" }),
+      ),
+    );
+    expect(social).toContain("data-ask-assistant-header");
+    expect(social).toContain("data-ask-ai-open");
+
+    const settings = renderToStaticMarkup(
+      createElement(HouseLeadChrome, {
+        workspace: "aggregation",
+        settingsPage: true,
+        accountMenu: createElement("div", { "data-user-menu-host": "" }),
+      }),
+    );
+    expect(settings).toContain("data-ask-assistant-header");
+  });
+
+  it("expand/collapse stays overlay-scoped and phone starts as a sheet", () => {
+    const overlaySrc = readFileSync(new URL("./ask-ai-overlay.tsx", import.meta.url), "utf8");
+    expect(overlaySrc).toContain("toggleAskAiExpanded");
+    expect(overlaySrc).toContain("setExpanded(false)");
+    expect(overlaySrc).toContain("askAiOverlayPhoneClass(expanded)");
+    expect(overlaySrc).toContain("ASK_AI_OVERLAY_EXPAND_CLASS");
+    expect(overlaySrc).not.toContain("hidden size-[44px]");
+    expect(overlaySrc).not.toContain('data-ask-ai-expanded="true"');
+    expect(ASK_AI_OVERLAY_EXPAND_CLASS).toContain("flex");
+    expect(ASK_AI_OVERLAY_EXPAND_CLASS).not.toContain("hidden");
+    expect(ASK_AI_OVERLAY_EXPAND_CLASS).not.toContain("md:flex");
+    expect(askAiOverlayPhoneClass(false)).toBe(ASK_AI_OVERLAY_PHONE_COMPACT_CLASS);
+    expect(askAiOverlayPhoneClass(true)).toBe(ASK_AI_OVERLAY_PHONE_EXPANDED_CLASS);
+    expect(ASK_AI_OVERLAY_PHONE_COMPACT_CLASS).toContain("70dvh");
+    expect(ASK_AI_OVERLAY_PHONE_EXPANDED_CLASS).toContain("h-dvh");
+
+    navigation.pathname = "/social/courses";
+    navigation.search = "ai=1";
+    navigation.push.mockClear();
+    navigation.replace.mockClear();
+
+    let closeAskAi: (() => void) | undefined;
+    let toggleAskAiExpanded: (() => void) | undefined;
+    function BindOverlayControls() {
+      const overlay = useAskAiOverlay();
+      closeAskAi = overlay.closeAskAi;
+      toggleAskAiExpanded = overlay.toggleAskAiExpanded;
+      return createElement(AskAssistantHeaderLink);
+    }
+
+    const open = renderToStaticMarkup(
+      createElement(AskAiOverlayProvider, null, createElement(BindOverlayControls)),
+    );
+    expect(open).toContain("data-ask-ai-overlay-phone");
+    expect(open).toContain("data-ask-ai-expand");
+    expect(open).toContain(ASK_AI_OVERLAY.expand);
+    expect(open).toContain(ASK_AI_OVERLAY_PHONE_COMPACT_CLASS);
+    expect(open).not.toContain('data-ask-ai-expanded="true"');
+    expect(open).toContain("data-ask-assistant-header");
+
+    toggleAskAiExpanded?.();
+    expect(navigation.push).not.toHaveBeenCalled();
+    expect(navigation.replace).not.toHaveBeenCalled();
+
+    closeAskAi?.();
+    expect(navigation.push).not.toHaveBeenCalled();
+    expect(navigation.replace).toHaveBeenCalledTimes(1);
+    expect(navigation.replace).toHaveBeenCalledWith("/social/courses");
+    expect(askAiCloseHref("/social/courses", "ai=1")).toBe("/social/courses");
+    expect(askAiCloseHref("/home", "ai=1")).toBe("/home");
+    expect(askAiOverlayHref("/dashboard")).toBe("/dashboard?ai=1");
+    expect(askAiOverlayHref("/social")).not.toContain("/messages");
+    expect(askAiOverlayHref("/social")).not.toContain("/ai");
+  });
+
+  it("anchors overlay chat bottom-up like Mercury, not a top-down empty header", () => {
+    const overlaySrc = readFileSync(new URL("./ask-ai-overlay.tsx", import.meta.url), "utf8");
+    const landingSrc = readFileSync(
+      new URL("../messages/ask-globee-landing.tsx", import.meta.url),
+      "utf8",
+    );
+    const threadSrc = readFileSync(
+      new URL("../messages/ask-globee-thread.tsx", import.meta.url),
+      "utf8",
+    );
+
+    expect(overlaySrc).toContain("ASK_AI_OVERLAY_BODY_CLASS");
+    expect(ASK_AI_OVERLAY_BODY_CLASS).toContain("overflow-hidden");
+    expect(ASK_AI_OVERLAY_BODY_CLASS).not.toContain("overflow-auto");
+    expect(landingSrc).toContain("flex-col-reverse");
+    expect(landingSrc).not.toContain("justify-center gap-[var(--space-12)]");
+    expect(landingSrc).not.toContain("justify-end gap-[var(--space-12)]");
+    expect(landingSrc.indexOf("data-ask-globee-try=")).toBeLessThan(
+      landingSrc.indexOf("data-ask-globee-composer="),
+    );
+    expect(threadSrc).toContain("flex-col-reverse");
+    expect(threadSrc).toContain("[...turns].reverse()");
+    expect(threadSrc).toContain("shrink-0");
+    expect(threadSrc.indexOf("data-ask-globee-conversation")).toBeLessThan(
+      threadSrc.indexOf("data-ask-globee-composer="),
+    );
+
+    navigation.pathname = "/home";
+    navigation.search = "ai=1";
+    const html = renderOverlay();
+    expect(html).toContain("data-ask-ai-overlay-body");
+    expect(html).toContain("data-ask-globee-landing");
+    expect(html).toContain("flex-col-reverse");
+    expect(html.indexOf("data-ask-globee-headline")).toBeLessThan(
+      html.indexOf("data-ask-globee-composer"),
+    );
+    expect(html.indexOf("data-ask-globee-try")).toBeLessThan(
+      html.indexOf("data-ask-globee-composer"),
+    );
   });
 
   it("keeps the live opener when search params suspend — children never remount under NOOP", () => {
