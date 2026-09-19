@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { HouseEmpty } from "@/components/chrome/house";
 import { Card, CardBody } from "@/components/ui/card";
 import { TeamInviteForm } from "@/components/settings/team-invite-form";
+import { LegalEntitiesSection } from "@/components/settings/legal-entities-section";
 import {
   SETTINGS,
   SETTINGS_PANE_CLASS,
@@ -11,13 +12,11 @@ import {
   settingsPaneTitle,
 } from "@/lib/settings";
 import type { OrgRole } from "@/lib/org-roles";
+import type { EntityScope, LegalEntityRow } from "@/lib/legal-entities";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 import { CompanyProfileForm } from "@/app/(app)/account/company-profile-form";
 
-// Organization pane — company profile + Team invite on the current account.
-// Pane title is Organization (#487). Company has no extra heading.
-// Team keeps a section label. Roles reuse org_role. Not a CMS.
 export async function OrganizationSettings() {
   const ctx = await getOrgContext();
   if (!ctx) redirect("/login");
@@ -32,12 +31,13 @@ export async function OrganizationSettings() {
     sentAt: string | null;
     acceptedAt: string;
   }[] = [];
-  let pending: { id: string; email: string; role: OrgRole; sentAt: string }[] = [];
+  let pending: { id: string; email: string; role: OrgRole; sentAt: string; entityScope: EntityScope }[] = [];
+  let entities: LegalEntityRow[] = [];
 
   if (ctx.activeOrg) {
     const supabase = await createClient();
     const orgId = ctx.activeOrg.id;
-    const [canEditRes, canInviteRes, teamRes, pendingRes] = await Promise.all([
+    const [canEditRes, canInviteRes, teamRes, pendingRes, entitiesRes] = await Promise.all([
       supabase.rpc("member_can", {
         p_uid: ctx.user.id,
         p_org: orgId,
@@ -50,12 +50,13 @@ export async function OrganizationSettings() {
       }),
       supabase.rpc("org_team", { p_org: orgId }),
       supabase.rpc("org_pending_invites", { p_org: orgId }),
+      supabase.rpc("org_legal_entities", { p_org: orgId }),
     ]);
     canEditCompany = canEditRes.data === true;
     canInvite = canInviteRes.data === true;
     members = (teamRes.data ?? []).map((row) => ({
       userId: row.user_id,
-      email: row.email ?? "—",
+      email: row.email ?? "\u2014",
       role: row.role,
       name: row.display_name,
       sentAt: row.invited_at,
@@ -66,6 +67,16 @@ export async function OrganizationSettings() {
       email: row.email,
       role: row.role,
       sentAt: row.created_at,
+      entityScope: row.entity_scope,
+    }));
+    entities = (entitiesRes.data ?? []).map((row) => ({
+      id: row.id,
+      name: row.name,
+      entityType: row.entity_type,
+      jurisdiction: row.jurisdiction,
+      isDefault: row.is_default,
+      status: row.status,
+      createdAt: row.created_at,
     }));
   }
 
@@ -90,6 +101,16 @@ export async function OrganizationSettings() {
               </Card>
             </section>
             <section
+              data-settings-section="entities"
+              className={SETTINGS_SECTION_CLASS}
+            >
+              <LegalEntitiesSection
+                orgId={ctx.activeOrg.id}
+                canManage={canEditCompany}
+                entities={entities}
+              />
+            </section>
+            <section
               data-settings-section="team"
               className={SETTINGS_SECTION_CLASS}
             >
@@ -98,6 +119,7 @@ export async function OrganizationSettings() {
                 canInvite={canInvite}
                 members={members}
                 pending={pending}
+                entities={entities}
               />
             </section>
           </>

@@ -26,6 +26,12 @@ import {
   toTeamListRows,
   type OrgRole,
 } from "@/lib/account-invite";
+import {
+  ENTITY_SCOPE,
+  entityScopeLabel,
+  type EntityScope,
+  type LegalEntityRow,
+} from "@/lib/legal-entities";
 import { inviteTeamMember, revokeTeamInvite } from "@/app/(app)/settings/organization/actions";
 
 export type TeamMemberRow = {
@@ -42,6 +48,7 @@ export type TeamPendingRow = {
   email: string;
   role: OrgRole;
   sentAt: string;
+  entityScope: EntityScope;
 };
 
 export function TeamInviteForm({
@@ -49,14 +56,18 @@ export function TeamInviteForm({
   canInvite,
   members,
   pending,
+  entities = [],
 }: {
   orgId: string;
   canInvite: boolean;
   members: TeamMemberRow[];
   pending: TeamPendingRow[];
+  entities?: LegalEntityRow[];
 }) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<OrgRole>(TEAM_INVITE_DEFAULT_ROLE);
+  const [entityScope, setEntityScope] = useState<EntityScope>("all");
+  const [selectedEntityIds, setSelectedEntityIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
@@ -67,6 +78,13 @@ export function TeamInviteForm({
 
   const visiblePending = pending.filter((row) => !hiddenIds.includes(row.id));
   const rows = toTeamListRows(members, visiblePending);
+  const showEntityScope = entities.length > 1;
+
+  function toggleEntity(id: string) {
+    setSelectedEntityIds((prev) =>
+      prev.includes(id) ? prev.filter((eid) => eid !== id) : [...prev, id],
+    );
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -74,7 +92,13 @@ export function TeamInviteForm({
     setSaving(true);
     setError("");
     setSent(false);
-    const res = await inviteTeamMember({ orgId, email, role });
+    const res = await inviteTeamMember({
+      orgId,
+      email,
+      role,
+      entityScope,
+      entityIds: entityScope === "selected" ? selectedEntityIds : undefined,
+    });
     if (res.error) {
       setError(res.error);
       setSaving(false);
@@ -82,6 +106,8 @@ export function TeamInviteForm({
     }
     setEmail("");
     setRole(TEAM_INVITE_DEFAULT_ROLE);
+    setEntityScope("all");
+    setSelectedEntityIds([]);
     setSaving(false);
     setSent(true);
     setInviteOpen(false);
@@ -145,6 +171,39 @@ export function TeamInviteForm({
               ))}
             </select>
           </div>
+          {showEntityScope ? (
+            <>
+              <div className="flex flex-col gap-[var(--space-2)]">
+                <Label htmlFor="team-invite-scope">{ENTITY_SCOPE.scopeLabel}</Label>
+                <select
+                  id="team-invite-scope"
+                  name="entityScope"
+                  className={formControlClass("box")}
+                  value={entityScope}
+                  onChange={(e) => setEntityScope(e.target.value as EntityScope)}
+                >
+                  <option value="all">{entityScopeLabel("all")}</option>
+                  <option value="selected">{entityScopeLabel("selected")}</option>
+                </select>
+                <p className="t-body-sm text-ink-3">{ENTITY_SCOPE.scopeHint}</p>
+              </div>
+              {entityScope === "selected" ? (
+                <fieldset className="flex flex-col gap-[var(--space-2)]" data-entity-picker="">
+                  <legend className="t-label text-ink-3">{ENTITY_SCOPE.entityPickerLabel}</legend>
+                  {entities.map((entity) => (
+                    <label key={entity.id} className="flex items-center gap-2 t-body-sm text-ink-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedEntityIds.includes(entity.id)}
+                        onChange={() => toggleEntity(entity.id)}
+                      />
+                      {entity.name}
+                    </label>
+                  ))}
+                </fieldset>
+              ) : null}
+            </>
+          ) : null}
           <Button type="submit" disabled={saving} className="self-start">
             {saving ? ACCOUNT_INVITE.inviting : ACCOUNT_INVITE.invite}
           </Button>

@@ -237,6 +237,8 @@ export const teamInviteSchema = z.object({
   orgId: z.string().uuid(),
   email: emailSchema,
   role: z.enum(TEAM_INVITE_ROLES),
+  entityScope: z.enum(["all", "selected"] as const).default("all"),
+  entityIds: z.array(z.string().uuid()).optional(),
 });
 
 export const houseGrantSchema = z.object({
