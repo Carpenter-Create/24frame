@@ -1,5 +1,5 @@
 -- ============================================================================
--- 20260919130000_security_events.sql
+-- 20260919140000_security_events.sql
 --
 -- INTENT: Durable security-event history for the Settings → Security page.
 -- Stores auth boundary events (sign-in, sign-out, failed sign-in) and
@@ -29,7 +29,7 @@ create type public.security_event_kind as enum (
 
 create table if not exists public.security_events (
   id             uuid primary key default gen_random_uuid(),
-  org_id         uuid not null references public.organizations(id) on delete restrict,
+  org_id         uuid references public.organizations(id) on delete restrict,
   actor_user_id  uuid,
   event_kind     public.security_event_kind not null,
   occurred_at    timestamptz not null default now(),
@@ -57,13 +57,15 @@ revoke all on public.security_events from public, anon;
 revoke update, delete on public.security_events from authenticated, service_role;
 
 -- Read: org members with view capability (same as audit_log pattern).
--- GC staff can see all orgs' events.
+-- GC staff can see all orgs' events. org_id nullable: failed sign-ins
+-- (anonymous — no user resolved) have org_id NULL and are GC-only,
+-- matching audit_log's nullable org_id pattern.
 drop policy if exists security_events_select on public.security_events;
 create policy security_events_select on public.security_events
   for select to authenticated
   using (
     public.is_gc_staff(auth.uid())
-    or public.member_can(auth.uid(), org_id, 'view')
+    or (org_id is not null and public.member_can(auth.uid(), org_id, 'view'))
   );
 
 -- Insert: only service_role (auth callbacks run as service-role).
