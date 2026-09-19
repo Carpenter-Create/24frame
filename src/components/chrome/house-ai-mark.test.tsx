@@ -77,14 +77,12 @@ describe("HouseAiMark", () => {
     expect(html).toContain('fill="none"');
     expect(html).toContain('stroke="currentColor"');
     expect(html).toContain(`stroke-width="${HOUSE_AI_MARK_REGULAR_STROKE_WIDTH}"`);
-    // Phone header trailing renders at 20px (Adam #450 authoritative
-    // lock — shared with the Mercury bar). Mutation to size-6 (pre-#450
-    // Mercury hold) or size-4 (#449 header target) fails here. The
-    // md:size-4 override on this phone class still contributes the
-    // literal "size-4" to the html string, so we assert size-5 present
-    // and size-6 absent rather than trying to exclude size-4 outright.
-    expect(html).toContain("size-5");
+    // Phone header trailing renders at 16px (Adam #451 authoritative
+    // lock — split from the Mercury bar's 24px). Mutation to size-6
+    // (Mercury hold) or size-5 (retired #448/#450 middle) fails here.
+    expect(html).toContain("size-4");
     expect(html).not.toContain("size-6");
+    expect(html).not.toContain("size-5");
     expect(html).toContain("md:hidden");
     // Ink parity — phone AI stroke rides the bottom-bar idle ink so the
     // sparkles read at the same optical weight as the Mercury Regular
@@ -113,12 +111,13 @@ describe("HouseAiMark", () => {
     expect(header).toContain("data-house-ai-mark");
     expect(header).toContain(HOUSE_HEADER_TRAILING_PHONE_CLASS);
     expect(header).toContain(HOUSE_HEADER_TRAILING_DESKTOP_CLASS);
-    // Phone header trailing renders at 20px (Adam #450). Desktop fill
-    // instance still contributes size-4 via
-    // HOUSE_HEADER_TRAILING_DESKTOP_CLASS — assert size-5 present,
-    // size-6 absent, and desktop md:size-4 override still wired.
-    expect(header).toContain("size-5");
+    // Phone header trailing renders at 16px (Adam #451). Both phone
+    // stroke and desktop fill instances land on size-4; the Mercury
+    // bar 24px lives on a separate SoT, and the retired size-5 must
+    // not reappear on the header.
+    expect(header).toContain("size-4");
     expect(header).not.toContain("size-6");
+    expect(header).not.toContain("size-5");
     expect(header).toContain("md:size-4");
     expect(header).toContain('data-house-ai-mark-register="stroke"');
     expect(header).toContain('data-house-ai-mark-register="fill"');
