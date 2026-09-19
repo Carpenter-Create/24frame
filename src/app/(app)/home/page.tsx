@@ -134,6 +134,7 @@ export default async function HomePage({
 
   return (
     <OverviewHome
+      displayName={ctx.user.name}
       revenueCents={revenueCents}
       period={period}
       socialUnread={overviewSocialUnreadTotal(inbox.rows)}

@@ -15,6 +15,7 @@ import { parseDashboardPeriod } from "@/lib/dashboard-admin";
 import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import { DASHBOARD_SECTION_TITLE_CLASS } from "@/lib/dashboard-craft";
 import { NEWS_HREF, NEWS_PAGE } from "@/lib/news";
+import { homeGreeting } from "@/lib/home-greeting";
 import {
   OVERVIEW_HREF,
   OVERVIEW_PHONE_MODULE_ORDER,
@@ -122,11 +123,37 @@ const COURSE: CourseRow = {
 };
 
 describe("OverviewHome", () => {
+  it("addresses the signed-in account by first name — never the Home label", () => {
+    const named = renderToStaticMarkup(
+      createElement(OverviewHome, homeProps({ displayName: "Ada Lovelace" })),
+    );
+    const given = renderToStaticMarkup(
+      createElement(
+        OverviewHome,
+        homeProps({ firstName: "Ada", displayName: "Ada Lovelace" }),
+      ),
+    );
+    const missing = renderToStaticMarkup(
+      createElement(OverviewHome, homeProps({ displayName: "ada@example.com" })),
+    );
+    expect(named).toMatch(/<h1 class="t-title text-ink">Hi, Ada<\/h1>/);
+    expect(given).toMatch(/<h1 class="t-title text-ink">Hi, Ada<\/h1>/);
+    expect(missing).toMatch(/<h1 class="t-title text-ink">Hi<\/h1>/);
+    expect(named).not.toMatch(/<h1 class="t-title text-ink">Home<\/h1>/);
+    expect(named).not.toContain("undefined");
+    expect(named).not.toContain("ada@");
+    expect(OVERVIEW_PAGE.title).toBe("Home");
+    const homeSrc = readFileSync(new URL("./overview-home.tsx", import.meta.url), "utf8");
+    expect(homeSrc).toContain("homeGreeting({ firstName, displayName })");
+    expect(homeSrc).not.toContain("title={OVERVIEW_PAGE.title}");
+  });
+
   it("renders locked modules with empty doors and 24Frame AI, not Globee", () => {
     const html = renderToStaticMarkup(createElement(OverviewHome, homeProps()));
     expect(html).toContain("data-overview");
-    expect(html).toContain(OVERVIEW_PAGE.title);
-    expect(html).toContain("Home");
+    expect(html).toContain(homeGreeting());
+    expect(html).toMatch(/<h1 class="t-title text-ink">Hi<\/h1>/);
+    expect(html).not.toMatch(/<h1 class="t-title text-ink">Home<\/h1>/);
     expect(html).not.toContain("Overview");
     expect(moduleOrder(html)).toEqual([...OVERVIEW_PHONE_MODULE_ORDER]);
     expect(html).not.toContain('data-overview-module="week"');

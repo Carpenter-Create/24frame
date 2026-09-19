@@ -43,7 +43,6 @@ const chartSrc = readFileSync("src/components/dashboard/dashboard-revenue-chart.
 function emptyHeroHtml() {
   return renderToStaticMarkup(
     createElement(DashboardAdminHero, {
-      orgName: "Acme",
       period: parseDashboardPeriod("all", now),
       options,
       hero: {
@@ -161,7 +160,6 @@ describe("Aggregation Dashboard density delta after #332", () => {
   it("shows the Sample banner when the fixture is on — never silent fake $", () => {
     const html = renderToStaticMarkup(
       createElement(DashboardAdminHero, {
-        orgName: "Acme",
         period: parseDashboardPeriod("all", now),
         options: [{ key: "all", label: "All time", group: "all" }],
         hero: {

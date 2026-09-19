@@ -1,8 +1,10 @@
+import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { loadDiscoverableCourses } from "@/lib/courses";
 import { NEWS_HREF, NEWS_PAGE } from "@/lib/news";
+import { homeGreeting } from "@/lib/home-greeting";
 import { OVERVIEW_PAGE } from "@/lib/overview";
 import { signedEducationCoverUrls } from "@/lib/s3-education";
 import { getOrgContext } from "@/lib/supabase/context";
@@ -57,9 +59,9 @@ vi.mock("@/lib/news-load", () => ({
   loadHomeNews: vi.fn(async () => []),
 }));
 
-function ctx() {
+function ctx(user: { name?: string | null } = {}) {
   return {
-    user: { id: "u1", email: "ada@example.com" },
+    user: { id: "u1", email: "ada@example.com", ...user },
     rows: [{ role: "account_owner", organizations: { id: "org-1", name: "Meridian", status: "active" } }],
     orgs: [{ id: "org-1", name: "Meridian" }],
     activeOrg: { id: "org-1", name: "Meridian", status: "active" },
@@ -79,8 +81,10 @@ describe("HomePage", () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
     const html = renderToStaticMarkup(await HomePage());
     expect(html).toContain("data-overview");
-    expect(html).toContain(OVERVIEW_PAGE.title);
-    expect(html).toContain("Home");
+    expect(html).toContain(homeGreeting());
+    expect(html).toMatch(/<h1 class="t-title text-ink">Hi<\/h1>/);
+    expect(html).not.toMatch(/<h1 class="t-title text-ink">Home<\/h1>/);
+    expect(html).not.toContain("ada@example.com");
     expect(html).not.toContain("Overview");
     expect(html).toContain(OVERVIEW_PAGE.needsYou);
     expect(html).toContain(OVERVIEW_PAGE.revenue);
@@ -112,6 +116,19 @@ describe("HomePage", () => {
       html.indexOf('data-overview-module="news"'),
     );
     expect(html).not.toContain("Globee");
+  });
+
+  it("greets the signed-in account by first name on the Home H1", async () => {
+    vi.mocked(getOrgContext).mockResolvedValue(ctx({ name: "Ada Lovelace" }) as never);
+    const html = renderToStaticMarkup(await HomePage());
+    expect(html).toContain(homeGreeting({ displayName: "Ada Lovelace" }));
+    expect(html).toMatch(/<h1 class="t-title text-ink">Hi, Ada<\/h1>/);
+    expect(html).not.toMatch(/<h1 class="t-title text-ink">Home<\/h1>/);
+    expect(html).not.toContain("undefined");
+    expect(OVERVIEW_PAGE.title).toBe("Home");
+    expect(readFileSync("src/app/(app)/home/page.tsx", "utf8")).toContain(
+      "displayName={ctx.user.name}",
+    );
   });
 
   it("applies the shared YTD period chip on Home", async () => {

@@ -39,7 +39,6 @@ const craftSrc = readFileSync("src/lib/dashboard-craft.ts", "utf8");
 function adminHero(compare: boolean) {
   return renderToStaticMarkup(
     createElement(DashboardAdminHero, {
-      orgName: "Acme",
       period: parseDashboardPeriod("all", now),
       options: [
         { key: "all", label: "All time", group: "all" },

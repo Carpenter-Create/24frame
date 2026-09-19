@@ -21,7 +21,6 @@ describe("DashboardAdminHero", () => {
   it("uses MetricCard stack and Top-works density without RL brand or export", () => {
     const html = renderToStaticMarkup(
       createElement(DashboardAdminHero, {
-        orgName: "Acme",
         period: parseDashboardPeriod("all", now),
         options: [
           { key: "all", label: "All time", group: "all" },
@@ -63,7 +62,8 @@ describe("DashboardAdminHero", () => {
     expect(html).toContain("data-dashboard-mobile-stack");
     expect(html).toContain("data-dashboard-title-mobile");
     expect(html).toContain("data-dashboard-title-desktop");
-    expect(html).toMatch(/data-dashboard-title-desktop=""[^>]*>Acme</);
+    expect(html).toMatch(/data-dashboard-title-desktop=""[^>]*>Aggregation</);
+    expect(html).not.toMatch(/data-dashboard-title-desktop=""[^>]*>Acme</);
     expect(html).not.toMatch(/data-dashboard-title-desktop=""[^>]*>All time</);
     expect(html).not.toContain("data-dashboard-period-kicker");
     expect(html).toContain(DASHBOARD_ADMIN.revenue);
@@ -72,7 +72,8 @@ describe("DashboardAdminHero", () => {
     expect(html).not.toContain("Recent account activity");
     expect(html).not.toContain("Licensing status");
     expect(html).not.toContain(">Attention<");
-    expect(html).toContain("Acme");
+    expect(html).toContain("Aggregation");
+    expect(html).not.toContain("Acme");
     expect(html).toContain("All time");
     expect(html).toContain("data-dashboard-period");
     expect(html).toContain("data-dashboard-period-menu");
@@ -93,7 +94,6 @@ describe("DashboardAdminHero", () => {
   it("labels fixture money when craft sample is on", () => {
     const html = renderToStaticMarkup(
       createElement(DashboardAdminHero, {
-        orgName: "Acme",
         period: parseDashboardPeriod("all", now),
         options: [{ key: "all", label: "All time", group: "all" }],
         hero: {

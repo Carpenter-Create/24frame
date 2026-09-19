@@ -360,12 +360,8 @@ describe("house type register", () => {
 });
 
 describe("client home type locks", () => {
-  it("makes snapshot numbers the one large moment — org name stays on the title step", () => {
-    const identity = renderToStaticMarkup(
-      createElement(DashboardOrgIdentity, {
-        name: "Acme",
-      }),
-    );
+  it("makes snapshot numbers the one large moment — Aggregation stays on the title step", () => {
+    const identity = renderToStaticMarkup(createElement(DashboardOrgIdentity));
     const snapshot = renderToStaticMarkup(
       createElement(DashboardSnapshot, {
         catalog: "2",
@@ -374,7 +370,8 @@ describe("client home type locks", () => {
       }),
     );
 
-    expect(identity).toMatch(/<h1 class="t-title text-ink">Acme<\/h1>/);
+    expect(identity).toMatch(/<h1 class="t-title text-ink">Aggregation<\/h1>/);
+    expect(identity).not.toContain("Acme");
     expect(identity).not.toContain("t-display");
     expect(identity).not.toContain("t-section");
     expect(identity).not.toMatch(/Active|Account owner|Registered/i);

@@ -90,6 +90,7 @@ export const OVERVIEW_MODULE_NEST_CLASS =
 export const OVERVIEW_RAIL_OFF_WIDTH = "0px";
 
 export const OVERVIEW_PAGE = {
+  /** Workspace pill / nav label. Page H1 is `homeGreeting`, not this string. */
   title: "Home",
   needsYou: "Needs you",
   thisWeek: "This week",
