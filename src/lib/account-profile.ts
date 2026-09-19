@@ -58,6 +58,9 @@ export const COMPANY_PROFILE = {
   invalidName: "Company name must be 200 characters or fewer.",
 } as const;
 
+/** Saved. notice auto-clears. Typing already clears immediately. */
+export const COMPANY_PROFILE_SAVED_MS = 2800;
+
 export const accountNameSchema = z
   .string()
   .max(ACCOUNT_NAME_MAX)

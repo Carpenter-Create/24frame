@@ -4,10 +4,13 @@ import {
   ENTITY_TYPE_LABELS,
   ENTITY_TYPES,
   ENTITY_SCOPE_LABELS,
+  ENTITY_LIST_HEADER_CLASS,
+  ENTITY_LIST_ROW_CLASS,
   LEGAL_ENTITIES,
   ENTITY_SCOPE,
   entityTypeLabel,
   entityScopeLabel,
+  entityJurisdictionLabel,
 } from "./legal-entities";
 
 describe("legal entities copy", () => {
@@ -37,6 +40,18 @@ describe("legal entities copy", () => {
     expect(LEGAL_ENTITIES.default).toBe("Default");
     expect(LEGAL_ENTITIES.forbidden).toContain("account owner");
     expect(LEGAL_ENTITIES.empty).toContain("No legal entities");
+    expect(LEGAL_ENTITIES.edit).toBe("Edit");
+    expect(LEGAL_ENTITIES.save).toBe("Save");
+    expect(LEGAL_ENTITIES.cancel).toBe("Cancel");
+    expect(LEGAL_ENTITIES.nameColumn).toBe("Name");
+    expect(LEGAL_ENTITIES.typeColumn).toBe("Type");
+    expect(LEGAL_ENTITIES.jurisdictionColumn).toBe("Jurisdiction");
+    expect(LEGAL_ENTITIES.updateFailed).toContain("update");
+    expect(entityJurisdictionLabel(null)).toBe(LEGAL_ENTITIES.emptyJurisdiction);
+    expect(entityJurisdictionLabel("  ")).toBe(LEGAL_ENTITIES.emptyJurisdiction);
+    expect(entityJurisdictionLabel("Delaware")).toBe("Delaware");
+    expect(ENTITY_LIST_HEADER_CLASS).toContain("t-label");
+    expect(ENTITY_LIST_ROW_CLASS).toContain("grid");
   });
 
   it("has scope selector copy", () => {

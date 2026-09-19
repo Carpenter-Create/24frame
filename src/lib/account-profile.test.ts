@@ -8,6 +8,7 @@ import {
   ACCOUNT_NAME_MAX,
   ACCOUNT_PROFILE,
   COMPANY_PROFILE,
+  COMPANY_PROFILE_SAVED_MS,
   accountNameSchema,
   authDisplayName,
   companySaveSchema,
@@ -159,5 +160,16 @@ describe("account field 16px lock", () => {
     expect(companyFormSrc).toContain("<Input");
     expect(companyFormSrc).not.toContain("ACCOUNT_FIELD_CLASS");
     expect(companyFormSrc).toContain('#company-name")?.blur()');
+  });
+});
+
+describe("company Saved notice", () => {
+  it("auto-clears after a short delay and on a new edit", () => {
+    expect(COMPANY_PROFILE.saved).toBe("Saved.");
+    expect(COMPANY_PROFILE_SAVED_MS).toBe(2800);
+    expect(companyFormSrc).toContain("COMPANY_PROFILE_SAVED_MS");
+    expect(companyFormSrc).toContain("setTimeout");
+    expect(companyFormSrc).toContain("clearTimeout");
+    expect(companyFormSrc).toContain("setSaved(false)");
   });
 });
