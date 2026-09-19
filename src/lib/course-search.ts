@@ -1,5 +1,5 @@
 import type { CourseOutlineModule } from "@/lib/courses";
-import { EDUCATION_HREF, EDUCATION_LEGACY_HREF, EDUCATION_MANAGE_HREF } from "@/lib/education";
+import { EDUCATION_HREF, EDUCATION_MANAGE_HREF } from "@/lib/education";
 
 // Quiet Education header search. Course + video only. Copy lives here,
 // not in JSX. Desktop mounts in the shared mid-lead slot with Social
@@ -22,10 +22,6 @@ export function educationSearchAction(pathname: string): string {
   }
   if (pathname === EDUCATION_HREF || pathname.startsWith(`${EDUCATION_HREF}/`)) {
     return pathname === EDUCATION_HREF ? EDUCATION_HREF : pathname;
-  }
-  if (pathname === EDUCATION_LEGACY_HREF || pathname.startsWith(`${EDUCATION_LEGACY_HREF}/`)) {
-    const rest = pathname.slice(EDUCATION_LEGACY_HREF.length);
-    return rest ? `${EDUCATION_HREF}${rest}` : EDUCATION_HREF;
   }
   return EDUCATION_HREF;
 }

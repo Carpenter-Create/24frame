@@ -2,7 +2,6 @@ import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { EDUCATION_ADMIN, EDUCATION_HREF, EDUCATION_MANAGE_HREF } from "./education";
-import { WORKSPACE_REDIRECTS } from "./workspace-redirects";
 import { EDUCATION_MANAGE_NAV, EDUCATION_NAV, GC_NAV } from "./nav";
 
 const mediaMigration = readFileSync(
@@ -59,11 +58,10 @@ describe("education isolation", () => {
     expect(existsSync("src/app/(app)/(operator)/aggregation/gc/education/page.tsx")).toBe(false);
     expect(existsSync("src/app/(app)/education/page.tsx")).toBe(true);
     expect(existsSync("src/app/(app)/education/new/page.tsx")).toBe(false);
-    expect(WORKSPACE_REDIRECTS.some((row) => row.source === "/gc/education" && row.destination === EDUCATION_MANAGE_HREF)).toBe(true);
-    expect(WORKSPACE_REDIRECTS.some((row) => row.source === "/social/courses" && row.destination === EDUCATION_HREF)).toBe(true);
+    expect(existsSync("src/lib/workspace-redirects.ts")).toBe(false);
     const nextConfig = readFileSync("next.config.ts", "utf8");
-    expect(nextConfig).toContain("WORKSPACE_REDIRECTS");
-    expect(readFileSync("src/lib/workspace-redirects.ts", "utf8")).toContain("permanent: true");
+    expect(nextConfig).not.toContain("WORKSPACE_REDIRECTS");
+    expect(nextConfig).not.toContain("async redirects");
   });
 
   it("keeps Education copy off SaaS and buy language", () => {

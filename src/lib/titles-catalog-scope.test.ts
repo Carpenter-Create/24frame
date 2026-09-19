@@ -14,7 +14,6 @@ function src(rel: string): string {
 
 const OTHER_PAGES = [
   "src/app/(app)/aggregation/dashboard/page.tsx",
-  "src/app/(app)/deliveries/page.tsx",
   "src/app/(app)/aggregation/attention/page.tsx",
   "src/app/(app)/aggregation/activity/page.tsx",
   "src/app/(app)/aggregation/messages/page.tsx",

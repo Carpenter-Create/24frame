@@ -213,8 +213,8 @@ describe("AskAiOverlay", () => {
     const paths = [
       { pathname: "/home", workspace: "aggregation" as const },
       { pathname: "/social", workspace: "social" as const },
-      { pathname: "/dashboard", workspace: "aggregation" as const },
-      { pathname: "/social/courses", workspace: "education" as const },
+      { pathname: "/aggregation/dashboard", workspace: "aggregation" as const },
+      { pathname: "/education", workspace: "education" as const },
     ];
 
     for (const { pathname, workspace } of paths) {
@@ -279,7 +279,7 @@ describe("AskAiOverlay", () => {
     expect(ASK_AI_OVERLAY_PHONE_COMPACT_CLASS).toContain("70dvh");
     expect(ASK_AI_OVERLAY_PHONE_EXPANDED_CLASS).toContain("h-dvh");
 
-    navigation.pathname = "/social/courses";
+    navigation.pathname = "/education";
     navigation.search = "ai=1";
     navigation.push.mockClear();
     navigation.replace.mockClear();
@@ -312,10 +312,10 @@ describe("AskAiOverlay", () => {
     closeAskAi?.();
     expect(navigation.push).not.toHaveBeenCalled();
     expect(navigation.replace).toHaveBeenCalledTimes(1);
-    expect(navigation.replace).toHaveBeenCalledWith("/social/courses");
-    expect(askAiCloseHref("/social/courses", "ai=1")).toBe("/social/courses");
+    expect(navigation.replace).toHaveBeenCalledWith("/education");
+    expect(askAiCloseHref("/education", "ai=1")).toBe("/education");
     expect(askAiCloseHref("/home", "ai=1")).toBe("/home");
-    expect(askAiOverlayHref("/dashboard")).toBe("/dashboard?ai=1");
+    expect(askAiOverlayHref("/aggregation/dashboard")).toBe("/aggregation/dashboard?ai=1");
     expect(askAiOverlayHref("/social")).not.toContain("/messages");
     expect(askAiOverlayHref("/social")).not.toContain("/ai");
   });

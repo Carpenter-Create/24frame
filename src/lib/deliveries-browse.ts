@@ -1,4 +1,4 @@
-// Pure helpers for the client /deliveries browse surface. URL parsing, row validation,
+// Pure helpers for the client Titles delivery browse surface. URL parsing, row validation,
 // filter, sort, status-chip tone, page-view copy, and query construction — unit-tested in
 // isolation. The page composes DataTable / HousePageSelect / EmptyState; this module never
 // touches React or Supabase. RPC rows are untrusted until validated.
@@ -345,7 +345,7 @@ export function sortDeliveries(
   });
 }
 
-/** Build /deliveries querystring; omits default status/sort for a clean canonical URL. */
+/** Build Titles querystring; omits default status/sort for a clean canonical URL. */
 export function buildDeliveriesQuery(opts: {
   status: DeliveryStatusFilter;
   sort: Sort;
@@ -372,7 +372,7 @@ export function deliveriesStatusHref(
     sort: currentSort,
     override: { status: nextStatus },
   });
-  return `/deliveries${q}`;
+  return `${TITLES_HREF}${q}`;
 }
 
 export function deliveriesSortHref(
@@ -388,7 +388,7 @@ export function deliveriesSortHref(
     sort: currentSort,
     override: { sort: next },
   });
-  return `/deliveries${q}`;
+  return `${TITLES_HREF}${q}`;
 }
 
 /** Filter-miss "Show all" destination while preserving the active sort. */

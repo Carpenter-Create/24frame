@@ -61,28 +61,21 @@ describe("client NAV", () => {
     expect(hrefs).not.toContain("/home");
   });
 
-  it("marks Dashboard current on `/` and `/dashboard`, Reports on legacy activity paths", () => {
+  it("marks Dashboard current on `/` and canonical Aggregation paths only", () => {
     expect(clientNavCurrent("/").label).toBe("Dashboard");
-    expect(clientNavCurrent("/dashboard").label).toBe("Dashboard");
     expect(clientNavCurrent("/aggregation/dashboard").label).toBe("Dashboard");
     expect(isClientNavActive("/", NAV[0])).toBe(true);
-    expect(isClientNavActive("/dashboard", NAV[0])).toBe(true);
+    expect(isClientNavActive("/dashboard", NAV[0])).toBe(false);
     expect(isClientNavActive("/aggregation/dashboard", NAV[0])).toBe(true);
     expect(isClientNavActive("/titles", NAV[0])).toBe(false);
-    expect(clientNavCurrent("/titles").label).toBe("Titles");
     expect(clientNavCurrent("/aggregation/titles").label).toBe("Titles");
-    expect(clientNavCurrent("/titles/abc").label).toBe("Titles");
-    expect(clientNavCurrent("/attention").label).toBe("Recent activity");
-    expect(clientNavCurrent("/catalog-health").label).toBe("Recent activity");
-    expect(clientNavCurrent("/activity").label).toBe("Activity");
-    expect(clientNavCurrent("/reports").label).toBe("Reports");
+    expect(clientNavCurrent("/aggregation/titles/abc").label).toBe("Titles");
+    expect(clientNavCurrent("/aggregation/attention").label).toBe("Recent activity");
+    expect(clientNavCurrent("/aggregation/activity").label).toBe("Activity");
     expect(clientNavCurrent("/aggregation/reports").label).toBe("Reports");
-    expect(clientNavCurrent("/analytics").label).toBe("Reports");
-    expect(clientNavCurrent("/earn").label).toBe("Reports");
-    expect(clientNavCurrent("/earn/abc").label).toBe("Reports");
-    expect(clientNavCurrent("/finance").label).toBe("Reports");
-    expect(clientNavCurrent("/finance/abc").label).toBe("Reports");
-    expect(clientNavCurrent("/messages").label).toBe("Dashboard");
+    expect(clientNavCurrent("/aggregation/reports/abc").label).toBe("Reports");
+    expect(clientNavCurrent("/titles").label).toBe("Dashboard");
+    expect(clientNavCurrent("/reports").label).toBe("Dashboard");
     expect(NAV.every((item) => !isHouseAiNavItem(item))).toBe(true);
     expect(clientNavCurrent("/queue").label).toBe("Dashboard");
   });

@@ -9,14 +9,17 @@
 //   Social       /social
 //   Education    /education
 // Home is Home-owned — never nest /home under /aggregation. /home/news
-// (and leftover /news) still uses Aggregation chrome so a Social cookie
-// cannot steal it. Not a fifth workspace.
+// still uses Aggregation chrome so a Social cookie cannot steal it.
+// Not a fifth workspace.
 //
 // Education: member browse/consume and staff CMS share the /education
 // prefix. Role gates chrome, not a parallel product. Member land is
 // /education. Staff CMS is /education/manage (collision at /education
 // and /education/[slug] forced that one documented staff subpath).
-// Legacy /social/courses is a redirect source only.
+//
+// Adam amend 2026-09-18: no leftover redirects. 24Frame has no users
+// yet. Hard-cut to these prefixes only. `/` is signed-in Aggregation
+// land (same home as /aggregation/dashboard), not a leftover hop.
 
 export const WORKSPACE_COOKIE = "24frame_workspace";
 
@@ -31,32 +34,6 @@ export const EDUCATION_ROOT = "/education";
 export const EDUCATION_MANAGE_SEGMENT = "manage";
 
 export const AGGREGATION_HOME_SEGMENT = "dashboard";
-
-/**
- * Former first-segment Aggregation destinations. Redirect sources only.
- * /home and /news stay Home-owned and are not in this list.
- */
-export const LEGACY_AGGREGATION_PREFIXES = [
-  "/dashboard",
-  "/overview",
-  "/titles",
-  "/attention",
-  "/activity",
-  "/deliveries",
-  "/catalog-health",
-  "/reports",
-  "/analytics",
-  "/earn",
-  "/finance",
-  "/messages",
-  "/queue",
-  "/avails",
-  "/vendors",
-  "/channels",
-  "/gc",
-] as const;
-
-export const LEGACY_EDUCATION_PREFIX = "/social/courses";
 
 export function aggregationPath(...segments: string[]): string {
   const parts = segments
@@ -78,21 +55,13 @@ export function workspaceHome(mode: WorkspaceMode): string {
   return aggregationPath(AGGREGATION_HOME_SEGMENT);
 }
 
-export function isLegacyEducationPath(pathname: string): boolean {
-  return pathname === LEGACY_EDUCATION_PREFIX || pathname.startsWith(`${LEGACY_EDUCATION_PREFIX}/`);
-}
-
 export function isEducationManagePath(pathname: string): boolean {
   const manage = `${EDUCATION_ROOT}/${EDUCATION_MANAGE_SEGMENT}`;
   return pathname === manage || pathname.startsWith(`${manage}/`);
 }
 
 export function isEducationPath(pathname: string): boolean {
-  return (
-    pathname === EDUCATION_ROOT ||
-    pathname.startsWith(`${EDUCATION_ROOT}/`) ||
-    isLegacyEducationPath(pathname)
-  );
+  return pathname === EDUCATION_ROOT || pathname.startsWith(`${EDUCATION_ROOT}/`);
 }
 
 export function isSocialPath(pathname: string): boolean {
@@ -101,35 +70,25 @@ export function isSocialPath(pathname: string): boolean {
 }
 
 export function isHomePath(pathname: string): boolean {
-  return (
-    pathname === HOME_ROOT ||
-    pathname.startsWith(`${HOME_ROOT}/`) ||
-    pathname === "/news" ||
-    pathname.startsWith("/news/")
-  );
-}
-
-export function isLegacyAggregationPath(pathname: string): boolean {
-  return LEGACY_AGGREGATION_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
-  );
+  return pathname === HOME_ROOT || pathname.startsWith(`${HOME_ROOT}/`);
 }
 
 export function isAggregationPath(pathname: string): boolean {
   if (pathname === "/" || pathname === AGGREGATION_ROOT || pathname.startsWith(`${AGGREGATION_ROOT}/`)) {
     return true;
   }
-  if (isHomePath(pathname)) return true;
-  return isLegacyAggregationPath(pathname);
+  return isHomePath(pathname);
 }
 
-/** True when pathname is the canonical href or its pre-prefix leftover. */
-export function isAggregationCanonicalOrLegacy(pathname: string, canonicalHref: string): boolean {
-  if (pathname === canonicalHref || pathname.startsWith(`${canonicalHref}/`)) return true;
-  if (canonicalHref === aggregationPath(AGGREGATION_HOME_SEGMENT) && pathname === "/") return true;
-  if (!canonicalHref.startsWith(`${AGGREGATION_ROOT}/`)) return false;
-  const rest = canonicalHref.slice(AGGREGATION_ROOT.length);
-  return pathname === rest || pathname.startsWith(`${rest}/`);
+export function isAggregationNavActive(
+  pathname: string,
+  canonicalHref: string,
+  exact = false,
+): boolean {
+  if (exact) {
+    return pathname === canonicalHref || pathname === "/";
+  }
+  return pathname === canonicalHref || pathname.startsWith(`${canonicalHref}/`);
 }
 
 export function resolveWorkspaceMode(pathname: string, cookie: WorkspaceMode): WorkspaceMode {

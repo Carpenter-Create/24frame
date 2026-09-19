@@ -69,7 +69,7 @@ describe("workspace switcher lock", () => {
     expect(USER_MENU).not.toHaveProperty("workspaceHref");
   });
 
-  it("lists only accessible lanes on Route A /social/courses", () => {
+  it("lists only accessible lanes on Route A /education", () => {
     expect(workspaceSwitcherOptions().map((option) => option.label)).toEqual([
       "Aggregation",
       "Social",

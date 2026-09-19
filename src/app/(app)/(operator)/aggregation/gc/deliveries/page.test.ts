@@ -119,12 +119,12 @@ describe("staff /gc/deliveries empty copy", () => {
     expect(link).not.toContain("inline-flex");
   });
 
-  it("does not restyle client /deliveries or team Channels", () => {
-    const clientDeliveries = readFileSync("src/app/(app)/deliveries/page.tsx", "utf8");
+  it("does not restyle client Titles or team Channels", () => {
+    const titles = readFileSync("src/app/(app)/aggregation/titles/page.tsx", "utf8");
     const channels = readFileSync("src/app/(app)/(operator)/aggregation/channels/page.tsx", "utf8");
 
-    expect(clientDeliveries).toContain("TITLES_HREF");
-    expect(clientDeliveries).not.toContain("EmptyState");
+    expect(titles).toContain("TITLES_CATALOG");
+    expect(titles).not.toContain("GC_LICENSING_STATUS");
     expect(channels).toContain("CHANNELS_PAGE");
     expect(pageSrc).not.toContain("EmptyState");
     expect(pageSrc).not.toContain("CHANNELS_PAGE");

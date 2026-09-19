@@ -1,4 +1,3 @@
-import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
@@ -53,9 +52,4 @@ describe("ChannelCard house IA", () => {
     expect(html).toContain("gap-[var(--space-6)]");
   });
 
-  it("keeps /vendors as a permanent redirect to /aggregation/channels", () => {
-    const src = readFileSync("src/lib/workspace-redirects.ts", "utf8");
-    expect(src).toContain('hop("/vendors", CHANNELS)');
-    expect(src).toContain('hop("/vendors/:path*", `${CHANNELS}/:path*`)');
-  });
 });

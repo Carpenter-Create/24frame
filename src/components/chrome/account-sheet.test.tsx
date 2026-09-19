@@ -441,7 +441,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
   });
 
   it("opens Settings on the universal hub from every workspace", () => {
-    for (const path of ["/", "/social", "/social/courses", "/help", "/settings/profile"]) {
+    for (const path of ["/", "/social", "/education", "/help", "/settings/profile"]) {
       const html = renderSheet("ada@example.com", null, null, path);
       expect(html).toContain('data-sheet-group-item="settings"');
       expect(html).toContain('href="/settings"');

@@ -35,14 +35,13 @@ import {
 import { ATTENTION_HREF } from "@/lib/findings";
 import { GC_DELIVERIES_HREF, GC_LICENSING_STATUS } from "@/lib/gc-deliveries";
 import { QUEUE_HREF } from "@/lib/queue";
-import { REPORTS_HREF, REPORTS_PAGE, isLegacyReportsPath } from "@/lib/reports";
+import { REPORTS_HREF, REPORTS_PAGE } from "@/lib/reports";
 import { SOCIAL_ROUTES } from "@/lib/social";
 import { TITLES_HREF } from "@/lib/title-public-id";
 import {
   aggregationPath,
-  isAggregationCanonicalOrLegacy,
+  isAggregationNavActive,
   isEducationManagePath,
-  isLegacyEducationPath,
   type WorkspaceMode,
 } from "@/lib/workspace";
 import { WORKSPACE_EDUCATION_LABEL } from "@/lib/workspace-menu";
@@ -194,22 +193,10 @@ export function isClientNavActive(pathname: string, item: NavItem): boolean {
   if (item.href === EDUCATION_HREF) {
     return (
       !isEducationManagePath(pathname) &&
-      (pathname === EDUCATION_HREF ||
-        pathname.startsWith(`${EDUCATION_HREF}/`) ||
-        isLegacyEducationPath(pathname))
+      (pathname === EDUCATION_HREF || pathname.startsWith(`${EDUCATION_HREF}/`))
     );
   }
-  if (item.href === REPORTS_HREF && isLegacyReportsPath(pathname)) return true;
-  if (
-    item.href === ATTENTION_HREF &&
-    (pathname === "/catalog-health" || pathname.startsWith("/catalog-health/"))
-  ) {
-    return true;
-  }
-  if (isAggregationCanonicalOrLegacy(pathname, item.href)) {
-    if (item.exact) {
-      return pathname === item.href || pathname === "/" || pathname === "/dashboard";
-    }
+  if (isAggregationNavActive(pathname, item.href, item.exact)) {
     return true;
   }
   return item.exact ? pathname === item.href : pathname.startsWith(item.href);

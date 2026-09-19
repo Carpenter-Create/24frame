@@ -18,10 +18,7 @@ describe("Education quiet search", () => {
     expect(educationSearchAction("/education")).toBe("/education");
     expect(educationSearchAction("/education/orientation")).toBe("/education/orientation");
     expect(educationSearchAction("/education/manage")).toBe("/education/manage");
-    expect(educationSearchAction("/social/courses")).toBe("/education");
-    expect(educationSearchAction("/social/courses/orientation")).toBe(
-      "/education/orientation",
-    );
+    expect(educationSearchAction("/social/explore")).toBe("/education");
     expect(parseEducationSearchQuery("  cut  ")).toBe("cut");
     expect(parseEducationSearchQuery(null)).toBe("");
   });

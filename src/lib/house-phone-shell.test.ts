@@ -250,7 +250,7 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(phoneShellSrc).not.toContain("SquaresFour");
     expect(existsSync("src/components/social/social-mobile-tab-bar.tsx")).toBe(false);
 
-    navigation.pathname = "/dashboard";
+    navigation.pathname = "/aggregation/dashboard";
     const html = renderToStaticMarkup(
       createElement(HousePhoneBottomNav, { workspace: "aggregation" }),
     );
@@ -268,10 +268,10 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(html.indexOf('data-house-phone-bottom-nav-item="social"')).toBeLessThan(
       html.indexOf('data-house-phone-bottom-nav-item="aggregation"'),
     );
-    expect(housePhoneWorkspaceSelected("aggregation", "/dashboard", "aggregation")).toBe(true);
+    expect(housePhoneWorkspaceSelected("aggregation", "/aggregation/dashboard", "aggregation")).toBe(true);
     expect(housePhoneWorkspaceSelected("home", "/home", "aggregation")).toBe(true);
     expect(housePhoneWorkspaceSelected("social", "/social/explore", "social")).toBe(true);
-    expect(housePhoneWorkspaceSelected("education", "/social/courses", "education")).toBe(true);
+    expect(housePhoneWorkspaceSelected("education", "/education", "education")).toBe(true);
     expect(housePhoneWorkspaceSelected("aggregation", "/home", "aggregation")).toBe(false);
   });
 
@@ -351,7 +351,7 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(bottomNavSrc).toContain("aria-label={tab.label}");
     expect(bottomNavSrc).not.toContain("{tab.label}</span>");
 
-    navigation.pathname = "/dashboard";
+    navigation.pathname = "/aggregation/dashboard";
     const html = renderToStaticMarkup(
       createElement(HousePhoneBottomNav, { workspace: "aggregation" }),
     );
@@ -463,7 +463,7 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(bottomNavSrc).toContain("data-house-phone-bottom-nav-chip");
     expect(bottomNavSrc).toContain("HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS");
 
-    navigation.pathname = "/dashboard";
+    navigation.pathname = "/aggregation/dashboard";
     const aggregation = renderToStaticMarkup(
       createElement(HousePhoneBottomNav, { workspace: "aggregation" }),
     );
@@ -599,7 +599,7 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(HOUSE_PHONE_DEST_ITEM_ON_CLASS).toContain("bg-ink");
     expect(HOUSE_PHONE_DEST_ITEM_OFF_CLASS).toContain("bg-surface-muted");
 
-    navigation.pathname = "/titles";
+    navigation.pathname = "/aggregation/titles";
     const aggregation = renderToStaticMarkup(
       createElement(HousePhoneDestChips, { workspace: "aggregation" }),
     );
@@ -611,7 +611,7 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(aggregation).not.toContain(ASK_GLOBEE.headline);
     expect(aggregation).not.toContain("data-mobile-nav-trigger");
 
-    navigation.pathname = "/queue";
+    navigation.pathname = "/aggregation/queue";
     const staff = renderToStaticMarkup(
       createElement(HousePhoneDestChips, { workspace: "aggregation", isGcStaff: true }),
     );
@@ -619,7 +619,7 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(staff).toContain('data-house-phone-dest="Channels"');
     expect(staff).not.toContain(ASK_GLOBEE.headline);
 
-    navigation.pathname = "/social/courses";
+    navigation.pathname = "/education";
     const education = renderToStaticMarkup(
       createElement(HousePhoneDestChips, { workspace: "education" }),
     );
@@ -720,7 +720,7 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect((social.match(/data-house-phone-bottom-nav=""/g) ?? []).length).toBe(1);
     expect((social.match(/data-house-phone-dest-chips=""/g) ?? []).length).toBe(1);
 
-    navigation.pathname = "/social/courses";
+    navigation.pathname = "/education";
     const education = renderToStaticMarkup(
       createElement(
         HousePhoneAppShell,

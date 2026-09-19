@@ -9,10 +9,8 @@ export const FINDING_SEVERITY_LABEL: Record<"high" | "low", string> = {
 };
 
 // Attention = the single client-side findings/health overview.
-// Former Catalog Health route `/catalog-health` redirects here.
 export const ATTENTION_TITLE = "Attention";
 export const ATTENTION_HREF = aggregationPath("attention");
-export const CATALOG_HEALTH_HREF = "/catalog-health";
 export const CATALOG_HEALTH_TITLE = ATTENTION_TITLE;
 export const CATALOG_HEALTH_SUBTITLE = "What needs your attention across your catalog.";
 export const CATALOG_HEALTH_EMPTY = "Nothing needs your attention right now.";

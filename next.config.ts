@@ -1,8 +1,6 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs/config";
 
-import { WORKSPACE_REDIRECTS } from "./src/lib/workspace-redirects";
-
 // Artwork is served from CloudFront in production and from presigned S3 in local/preview
 // (see lib/asset-url). next/image will only optimise a remote source whose host is listed
 // here, so both paths need an entry or images silently fall back to unoptimised.
@@ -68,10 +66,6 @@ const nextConfig: NextConfig = {
     // Match the cache to the signed-URL window (PORTAL.artworkTtlSeconds). No point
     // holding a derivative longer than its source URL stays valid.
     minimumCacheTTL: 3600,
-  },
-
-  async redirects() {
-    return [...WORKSPACE_REDIRECTS];
   },
 };
 

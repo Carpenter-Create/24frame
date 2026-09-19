@@ -241,18 +241,14 @@ describe("staff rail and neighboring locks", () => {
     expect([...NAV, ...GC_NAV].map((item) => item.label)).not.toContain("Ask 24Frame AI");
   });
 
-  it("does not restyle Ask Globee, client home, Access, /titles, or /deliveries", () => {
+  it("does not restyle Ask Globee, client home, Access, or /aggregation/titles", () => {
     const ask = readFileSync("src/components/messages/ask-globee-landing.tsx", "utf8");
-    const deliveries = readFileSync("src/app/(app)/deliveries/page.tsx", "utf8");
     const titles = readFileSync("src/app/(app)/aggregation/titles/page.tsx", "utf8");
     const nav = readFileSync("src/components/chrome/side-nav.tsx", "utf8");
     const home = readFileSync("src/app/(app)/aggregation/dashboard/page.tsx", "utf8");
 
     expect(ask).toContain("Overlay landing, Mercury-direct");
     expect(ask).toContain("rounded-[28px]");
-    expect(deliveries).toContain("TITLES_HREF");
-    expect(deliveries).not.toContain("EmptyState");
-    expect(deliveries).not.toContain("data-deliveries-pipeline");
     expect(titles).toContain("TITLES_CATALOG");
     expect(nav).toContain("Access rail");
     expect(home).toContain("GcClientsDirectory");

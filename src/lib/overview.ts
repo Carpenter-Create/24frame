@@ -8,7 +8,7 @@ import {
   type ClientHomeDoNextItem,
   type DashboardChangeRow,
 } from "@/lib/dashboard-home";
-import { NEWS_HOME_CAP, NEWS_HREF, NEWS_LEGACY_HREF, NEWS_PAGE } from "@/lib/news";
+import { NEWS_HOME_CAP, NEWS_HREF, NEWS_PAGE } from "@/lib/news";
 import { REPORTS_HREF, REPORTS_PERIOD_ALL } from "@/lib/reports";
 import { EDUCATION_HREF } from "@/lib/education";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
@@ -17,10 +17,10 @@ import type { WorkspaceMode } from "@/lib/workspace";
 
 // Account Home is the leftmost unify-lead pill. Not a fourth product.
 // Not Social Home (`/social` feed). Aggregation · Social · Education
-// stay the three workspace destinations. /overview redirects to /home.
-// /home/news is Home-owned 90-day history — same Home chrome, not a fifth
-// workspace and not an Aggregation / Social / Education destination.
-// /news permanently redirects there.
+// stay the three workspace destinations. /home/news is Home-owned
+// 90-day history — same Home chrome, not a fifth workspace and not
+// an Aggregation / Social / Education destination. No leftover
+// /overview or /news hops.
 // Home IA v2 (Adam 2026-09-18): no dest rail on /home — unify-lead
 // chrome. Same-day order rewrite: Net revenue first, then Social ·
 // Education · Needs you. Top performing is not on Home. News stays
@@ -32,7 +32,6 @@ import type { WorkspaceMode } from "@/lib/workspace";
 // the current path — never /messages or Aggregation land.
 
 export const OVERVIEW_HREF = "/home";
-export const OVERVIEW_LEGACY_HREF = "/overview";
 
 export const OVERVIEW_SOCIAL_DM_CAP = 5;
 export const OVERVIEW_EDUCATION_CAP = 3;
@@ -172,20 +171,20 @@ function isPrefixed(pathname: string, href: string): boolean {
 }
 
 export function isOverviewPath(pathname: string): boolean {
-  return isPrefixed(pathname, OVERVIEW_HREF) || isPrefixed(pathname, OVERVIEW_LEGACY_HREF);
+  return isPrefixed(pathname, OVERVIEW_HREF);
 }
 
-/** Home-owned /home/news history (and leftover /news). Not a workspace land. */
+/** Home-owned /home/news history. Not a workspace land. */
 export function isNewsHistoryPath(pathname: string): boolean {
-  return isPrefixed(pathname, NEWS_HREF) || isPrefixed(pathname, NEWS_LEGACY_HREF);
+  return isPrefixed(pathname, NEWS_HREF);
 }
 
 /** Exact Home land — not a Home child such as /home/news. */
 export function isHomeLandPath(pathname: string): boolean {
-  return pathname === OVERVIEW_HREF || pathname === OVERVIEW_LEGACY_HREF;
+  return pathname === OVERVIEW_HREF;
 }
 
-/** Home unify-lead chrome: /home, leftover /overview, and Home-owned news. */
+/** Home unify-lead chrome: /home and Home-owned news. */
 export function isHomeOwnedPath(pathname: string): boolean {
   return isOverviewPath(pathname) || isNewsHistoryPath(pathname);
 }

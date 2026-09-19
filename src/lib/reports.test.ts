@@ -8,7 +8,6 @@ import {
   countNamedRows,
   filterReportsUsers,
   isoInReportsPeriod,
-  isLegacyReportsPath,
   parseReportsPeriod,
   parseReportsUserId,
   parseReportsUserIds,
@@ -147,11 +146,6 @@ describe("reports period and scope", () => {
     expect(REPORTS_PAGE.empty).toBe("No report data for this period yet.");
     expect(REPORTS_PAGE.topTitles).toBe("Top titles");
     expect(REPORTS_PAGE.users).toBe("Top users");
-    expect(isLegacyReportsPath("/analytics")).toBe(true);
-    expect(isLegacyReportsPath("/earn/p1")).toBe(true);
-    expect(isLegacyReportsPath("/finance")).toBe(true);
-    expect(isLegacyReportsPath("/gc/finance")).toBe(false);
-    expect(isLegacyReportsPath("/reports")).toBe(true);
-    expect(isLegacyReportsPath("/aggregation/reports")).toBe(false);
+    expect(REPORTS_HREF).toBe("/aggregation/reports");
   });
 });

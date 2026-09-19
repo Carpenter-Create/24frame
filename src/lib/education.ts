@@ -6,12 +6,11 @@ import { EDUCATION_MANAGE_SEGMENT, EDUCATION_ROOT } from "@/lib/workspace";
 // source/output pair. Never 24frame-media, never title film, never
 // finance, never avatars. Staff writes are app-layer only.
 // Member browse/consume is /education. Staff CMS is /education/manage
-// under (operator). Same prefix; role gates chrome. /social/courses
-// is a redirect source only. Slug `manage` is reserved.
+// under (operator). Same prefix; role gates chrome. Slug `manage` is
+// reserved. No leftover /social/courses hop.
 
 export const EDUCATION_HREF = EDUCATION_ROOT;
 export const EDUCATION_MANAGE_HREF = `${EDUCATION_ROOT}/${EDUCATION_MANAGE_SEGMENT}`;
-export const EDUCATION_LEGACY_HREF = "/social/courses";
 
 export const EDUCATION_AWS_ENV = [
   "EDUCATION_AWS_REGION",

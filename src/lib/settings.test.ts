@@ -127,7 +127,7 @@ describe("settings hub lock", () => {
   });
 
   it("opens Settings on the universal hub from every workspace", () => {
-    expect(settingsLandHref("/social/courses")).toBe("/settings");
+    expect(settingsLandHref("/education")).toBe("/settings");
     expect(settingsLandHref("/social")).toBe("/settings");
     expect(settingsLandHref("/")).toBe("/settings");
     expect(settingsLandHref("/help")).toBe("/settings");

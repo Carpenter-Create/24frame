@@ -18,7 +18,7 @@ import {
 const here = dirname(fileURLToPath(import.meta.url));
 
 describe("workspace menu copy", () => {
-  it("lists Aggregation, Social, and Education on Route A /social/courses", () => {
+  it("lists Aggregation, Social, and Education on Route A /education", () => {
     expect(WORKSPACE_MENU.title).toBe("Workspace");
     expect(WORKSPACE_MENU.title).toBe(USER_MENU.workspace);
     expect(WORKSPACE_MENU).not.toHaveProperty("back");

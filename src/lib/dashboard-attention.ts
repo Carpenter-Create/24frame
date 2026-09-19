@@ -11,7 +11,6 @@ import { aggregationPath } from "@/lib/workspace";
 // Row = what + timestamp. Cap 5. View all → Attention. Not readiness buckets.
 
 export const ATTENTION_HREF = aggregationPath("attention");
-export const CATALOG_HEALTH_HREF = "/catalog-health";
 
 export const DASHBOARD_ATTENTION = {
   title: "Attention",

@@ -32,12 +32,12 @@ describe("workspace mode", () => {
     expect(resolveWorkspaceMode("/social", "aggregation")).toBe("social");
     expect(resolveWorkspaceMode("/social/dms/abc", "aggregation")).toBe("social");
     expect(resolveWorkspaceMode("/social/leaderboard", "aggregation")).toBe("social");
-    expect(resolveWorkspaceMode("/social/courses", "aggregation")).toBe("education");
+    expect(resolveWorkspaceMode("/social/courses", "aggregation")).toBe("social");
     expect(resolveWorkspaceMode("/social/courses/welcome-to-24frame", "aggregation")).toBe(
-      "education",
+      "social",
     );
-    expect(isEducationPath("/social/courses")).toBe(true);
-    expect(isEducationPath("/social/courses/welcome-to-24frame")).toBe(true);
+    expect(isEducationPath("/social/courses")).toBe(false);
+    expect(isEducationPath("/social/courses/welcome-to-24frame")).toBe(false);
     expect(isEducationPath("/education")).toBe(true);
     expect(isEducationPath("/education/welcome-to-24frame")).toBe(true);
     expect(isEducationPath("/education/manage")).toBe(true);
@@ -46,27 +46,20 @@ describe("workspace mode", () => {
     expect(isEducationPath("/social")).toBe(false);
     expect(resolveWorkspaceMode("/education", "aggregation")).toBe("education");
     expect(resolveWorkspaceMode("/education/welcome-to-24frame", "social")).toBe("education");
-    expect(isSocialPath("/social/courses")).toBe(false);
+    expect(isSocialPath("/social/courses")).toBe(true);
     expect(isSocialPath("/social")).toBe(true);
     expect(resolveWorkspaceMode("/aggregation/dashboard", "social")).toBe("aggregation");
     expect(resolveWorkspaceMode("/aggregation/reports", "social")).toBe("aggregation");
-    expect(resolveWorkspaceMode("/activity", "social")).toBe("aggregation");
-    expect(resolveWorkspaceMode("/news", "social")).toBe("aggregation");
-    expect(resolveWorkspaceMode("/news", "education")).toBe("aggregation");
-    expect(resolveWorkspaceMode("/news", "aggregation")).toBe("aggregation");
+    expect(resolveWorkspaceMode("/aggregation/activity", "social")).toBe("aggregation");
     expect(resolveWorkspaceMode("/home/news", "social")).toBe("aggregation");
     expect(resolveWorkspaceMode("/home/news", "education")).toBe("aggregation");
-    expect(resolveWorkspaceMode("/messages", "social")).toBe("aggregation");
-    expect(resolveWorkspaceMode("/titles/1", "social")).toBe("aggregation");
+    expect(resolveWorkspaceMode("/aggregation/messages", "social")).toBe("aggregation");
+    expect(resolveWorkspaceMode("/aggregation/titles/1", "social")).toBe("aggregation");
     expect(resolveWorkspaceMode("/", "social")).toBe("aggregation");
-    expect(resolveWorkspaceMode("/dashboard", "social")).toBe("aggregation");
     expect(resolveWorkspaceMode("/home", "social")).toBe("aggregation");
-    expect(resolveWorkspaceMode("/overview", "social")).toBe("aggregation");
-    expect(resolveWorkspaceMode("/reports", "social")).toBe("aggregation");
-    expect(resolveWorkspaceMode("/analytics", "social")).toBe("aggregation");
-    expect(resolveWorkspaceMode("/earn", "social")).toBe("aggregation");
-    expect(resolveWorkspaceMode("/earn/p1", "social")).toBe("aggregation");
-    expect(resolveWorkspaceMode("/finance", "social")).toBe("aggregation");
+    expect(resolveWorkspaceMode("/titles", "social")).toBe("social");
+    expect(resolveWorkspaceMode("/dashboard", "education")).toBe("education");
+    expect(resolveWorkspaceMode("/reports", "education")).toBe("education");
     expect(resolveWorkspaceMode("/settings/profile", "social")).toBe("social");
     expect(resolveWorkspaceMode("/settings/profile", "education")).toBe("education");
     expect(resolveWorkspaceMode("/help", "aggregation")).toBe("aggregation");

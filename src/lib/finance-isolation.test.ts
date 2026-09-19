@@ -181,7 +181,7 @@ describe("mapping C — finance stays Aggregation", () => {
     expect(FINANCE_WRITE_RPCS).toContain("assign_suspense_lines_to_period");
     expect(FINANCE_CLIENT_HREF).toBe("/aggregation/reports");
     const nextConfig = readFileSync("next.config.ts", "utf8");
-    expect(nextConfig).toContain("WORKSPACE_REDIRECTS");
+    expect(nextConfig).not.toContain("WORKSPACE_REDIRECTS");
     expect(nextConfig).not.toContain('source: "/gc/finance"');
     expect(suspenseMigration).toContain("sales_lines SELECT must hide suspense from recipients");
     expect(suspenseMigration).toContain("do not invent a parallel suspense money table");

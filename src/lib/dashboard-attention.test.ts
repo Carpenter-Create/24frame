@@ -4,7 +4,6 @@ import { describe, expect, it } from "vitest";
 import {
   ATTENTION_HREF,
   ATTENTION_KINDS,
-  CATALOG_HEALTH_HREF,
   DASHBOARD_ATTENTION,
   DASHBOARD_ATTENTION_CAP,
   buildAttentionGlance,
@@ -15,7 +14,6 @@ describe("dashboard Attention glance", () => {
     expect(DASHBOARD_ATTENTION.title).toBe("Attention");
     expect(DASHBOARD_ATTENTION.viewAllHref).toBe("/aggregation/attention");
     expect(ATTENTION_HREF).toBe("/aggregation/attention");
-    expect(CATALOG_HEALTH_HREF).toBe("/catalog-health");
     expect(DASHBOARD_ATTENTION_CAP).toBe(5);
     expect(ATTENTION_KINDS).toEqual(["catalog", "contract"]);
     expect(DASHBOARD_ATTENTION.empty).toBe("Nothing needs your attention right now.");

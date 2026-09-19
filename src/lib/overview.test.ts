@@ -4,12 +4,11 @@ import { describe, expect, it } from "vitest";
 import { ASSISTANT_NAME } from "@/lib/product";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { availableWorkspaceOptions } from "@/lib/workspace-menu";
-import { NEWS_HREF, NEWS_LEGACY_HREF, NEWS_PAGE } from "./news";
+import { NEWS_HREF, NEWS_PAGE } from "./news";
 import {
   OVERVIEW_AI_NEXT_CAP,
   OVERVIEW_EDUCATION_CAP,
   OVERVIEW_HREF,
-  OVERVIEW_LEGACY_HREF,
   OVERVIEW_MODULE_ORDER,
   OVERVIEW_HOME_COLUMN_GUTTER,
   OVERVIEW_HOME_LAYOUT_CLASS,
@@ -60,7 +59,6 @@ describe("Home lead pills", () => {
       "education",
     ]);
     expect(OVERVIEW_HREF).toBe("/home");
-    expect(OVERVIEW_LEGACY_HREF).toBe("/overview");
     expect(OVERVIEW_PAGE.title).toBe("Home");
     expect(OVERVIEW_HREF).not.toBe(SOCIAL_ROUTES.home);
     expect(OVERVIEW_PAGE.title).not.toBe(SOCIAL.workspace);
@@ -68,47 +66,39 @@ describe("Home lead pills", () => {
     expect(OVERVIEW_PAGE.aiNext).not.toBe("Globee");
   });
 
-  it("selects Home on /home and leftover /overview, and leaves workspace pills idle there", () => {
+  it("selects Home on /home and leaves workspace pills idle there", () => {
     expect(isOverviewPath("/home")).toBe(true);
     expect(isOverviewPath("/home/x")).toBe(true);
-    expect(isOverviewPath("/overview")).toBe(true);
-    expect(isOverviewPath("/overview/x")).toBe(true);
-    expect(isOverviewPath("/dashboard")).toBe(false);
+    expect(isOverviewPath("/overview")).toBe(false);
     expect(isOverviewPath("/social")).toBe(false);
-    expect(isOverviewPath(NEWS_LEGACY_HREF)).toBe(false);
+    expect(isOverviewPath("/news")).toBe(false);
     expect(isOverviewPath(NEWS_HREF)).toBe(true);
     expect(isHomeLandPath("/home")).toBe(true);
-    expect(isHomeLandPath("/overview")).toBe(true);
+    expect(isHomeLandPath("/overview")).toBe(false);
     expect(isHomeLandPath(NEWS_HREF)).toBe(false);
-    expect(isHomeLandPath(NEWS_LEGACY_HREF)).toBe(false);
     expect(overviewLeadSelected("home", "/home", "aggregation")).toBe(true);
-    expect(overviewLeadSelected("home", "/overview", "aggregation")).toBe(true);
+    expect(overviewLeadSelected("home", "/overview", "aggregation")).toBe(false);
     expect(overviewLeadSelected("aggregation", "/home", "aggregation")).toBe(false);
-    expect(overviewLeadSelected("aggregation", "/overview", "aggregation")).toBe(false);
-    expect(overviewLeadSelected("aggregation", "/dashboard", "aggregation")).toBe(true);
+    expect(overviewLeadSelected("aggregation", "/aggregation/dashboard", "aggregation")).toBe(true);
     expect(overviewLeadSelected("social", "/social", "social")).toBe(true);
     expect(overviewTriggerLabel("/home", "Social")).toBe("Home");
-    expect(overviewTriggerLabel("/overview", "Social")).toBe("Home");
     expect(overviewTriggerLabel("/social", "Social")).toBe("Social");
     expect(overviewLeadShouldNavigate("/home", "aggregation", { id: "aggregation" })).toBe(true);
-    expect(overviewLeadShouldNavigate("/overview", "aggregation", { id: "aggregation" })).toBe(
-      true,
-    );
     expect(overviewLeadShouldNavigate("/home", "aggregation", { id: "home" })).toBe(false);
-    expect(overviewLeadShouldNavigate("/dashboard", "aggregation", { id: "aggregation" })).toBe(
-      false,
-    );
+    expect(
+      overviewLeadShouldNavigate("/aggregation/dashboard", "aggregation", { id: "aggregation" }),
+    ).toBe(false);
   });
 
   it("keeps /home/news on Home chrome — Home pill still navigates to /home", () => {
     expect(NEWS_HREF).toBe("/home/news");
     expect(isNewsHistoryPath(NEWS_HREF)).toBe(true);
     expect(isNewsHistoryPath(`${NEWS_HREF}/x`)).toBe(true);
-    expect(isNewsHistoryPath(NEWS_LEGACY_HREF)).toBe(true);
+    expect(isNewsHistoryPath("/news")).toBe(false);
     expect(isNewsHistoryPath("/home")).toBe(false);
     expect(isHomeOwnedPath(NEWS_HREF)).toBe(true);
     expect(isHomeOwnedPath("/home")).toBe(true);
-    expect(isHomeOwnedPath("/dashboard")).toBe(false);
+    expect(isHomeOwnedPath("/aggregation/dashboard")).toBe(false);
     expect(isHomeOwnedPath("/social")).toBe(false);
     expect(overviewLeadSelected("home", NEWS_HREF, "aggregation")).toBe(true);
     expect(overviewLeadSelected("home", NEWS_HREF, "social")).toBe(true);
@@ -117,13 +107,11 @@ describe("Home lead pills", () => {
     expect(overviewLeadSelected("education", NEWS_HREF, "education")).toBe(false);
     expect(overviewTriggerLabel(NEWS_HREF, "Aggregation")).toBe("Home");
     expect(overviewLeadShouldNavigate(NEWS_HREF, "aggregation", { id: "home" })).toBe(true);
-    expect(overviewLeadShouldNavigate(NEWS_LEGACY_HREF, "aggregation", { id: "home" })).toBe(true);
     expect(overviewLeadShouldNavigate("/home", "aggregation", { id: "home" })).toBe(false);
     expect(overviewLeadShouldNavigate(NEWS_HREF, "aggregation", { id: "aggregation" })).toBe(true);
     expect(overviewLeadPills().map((pill) => pill.id)).not.toContain("news");
     expect(overviewLeadPills()[0]?.href).toBe(OVERVIEW_HREF);
     expect(overviewLeadPills().some((pill) => pill.href === NEWS_HREF)).toBe(false);
-    expect(overviewLeadPills().some((pill) => pill.href === NEWS_LEGACY_HREF)).toBe(false);
     const switcher = readFileSync("src/components/chrome/workspace-switcher.tsx", "utf8");
     expect(switcher).toContain("router.push(pill.href)");
     expect(switcher).toContain("overviewLeadShouldNavigate");
@@ -132,13 +120,13 @@ describe("Home lead pills", () => {
   it("hides dest rails on Home and keeps them on workspace routes", () => {
     expect(overviewHidesRail("/home")).toBe(true);
     expect(overviewHidesRail("/home/x")).toBe(true);
-    expect(overviewHidesRail("/overview")).toBe(true);
+    expect(overviewHidesRail("/overview")).toBe(false);
     expect(overviewHidesRail(NEWS_HREF)).toBe(true);
-    expect(overviewHidesRail(NEWS_LEGACY_HREF)).toBe(true);
-    expect(overviewHidesRail("/dashboard")).toBe(false);
+    expect(overviewHidesRail("/news")).toBe(false);
+    expect(overviewHidesRail("/aggregation/dashboard")).toBe(false);
     expect(overviewHidesRail("/social")).toBe(false);
-    expect(overviewHidesRail("/social/courses")).toBe(false);
-    expect(overviewHidesRail("/titles")).toBe(false);
+    expect(overviewHidesRail("/education")).toBe(false);
+    expect(overviewHidesRail("/aggregation/titles")).toBe(false);
     expect(overviewHidesRail("/settings")).toBe(false);
     expect(OVERVIEW_RAIL_OFF_WIDTH).toBe("0px");
   });

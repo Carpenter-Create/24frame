@@ -30,7 +30,6 @@ const AGGREGATION_PAGE_MODULES = [
   "@/app/(app)/aggregation/titles/page",
   "@/app/(app)/aggregation/messages/page",
   "@/app/(app)/aggregation/reports/page",
-  "@/app/(app)/deliveries/page",
 ] as const;
 
 describe("Social nav leftover split (shared shell vs Social-local)", () => {
@@ -90,7 +89,7 @@ describe("Social nav leftover split (shared shell vs Social-local)", () => {
     expect(isSocialPath("/social/profile/edit")).toBe(true);
     expect(isSocialPath("/titles")).toBe(false);
     expect(resolveWorkspaceMode("/social/profile/edit", "aggregation")).toBe("social");
-    expect(resolveWorkspaceMode("/messages", "social")).toBe("aggregation");
+    expect(resolveWorkspaceMode("/aggregation/messages", "social")).toBe("aggregation");
     expect(appShell).toContain("if (socialChrome)");
     expect(appShell).toContain("HouseLeadChrome");
   });

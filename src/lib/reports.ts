@@ -407,15 +407,3 @@ export function countNamedRows(
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 }
 
-export function isLegacyReportsPath(pathname: string): boolean {
-  return (
-    pathname === "/reports" ||
-    pathname.startsWith("/reports/") ||
-    pathname === "/analytics" ||
-    pathname.startsWith("/analytics/") ||
-    pathname === "/earn" ||
-    pathname.startsWith("/earn/") ||
-    pathname === "/finance" ||
-    pathname.startsWith("/finance/")
-  );
-}

@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 import { workspaceHome } from "@/lib/workspace";
 
-// Aggregation land is Dashboard under /aggregation. Bookmarks and leftover `/` hops follow.
+// Signed-in default land is Aggregation home. Not a leftover flat-path hop.
 export default function AggregationRootPage() {
   redirect(workspaceHome("aggregation"));
 }

@@ -58,8 +58,10 @@ describe("ask AI overlay URL", () => {
   it("opens on the current path — never an Aggregation AI land", () => {
     expect(askAiOverlayHref("/home")).toBe("/home?ai=1");
     expect(askAiOverlayHref("/social")).toBe("/social?ai=1");
-    expect(askAiOverlayHref("/social/courses")).toBe("/social/courses?ai=1");
-    expect(askAiOverlayHref("/dashboard", "period=this-year")).toBe("/dashboard?period=this-year&ai=1");
+    expect(askAiOverlayHref("/education")).toBe("/education?ai=1");
+    expect(askAiOverlayHref("/aggregation/dashboard", "period=this-year")).toBe(
+      "/aggregation/dashboard?period=this-year&ai=1",
+    );
     expect(askAiOverlayHref("/home", "", THREAD)).toBe(`/home?ai=${THREAD}`);
     expect(askAiOverlayHref("/home", "ai=1", THREAD)).toBe(`/home?ai=${THREAD}`);
     expect(askAiOverlayHref("/messages", "thread=" + THREAD, THREAD)).toBe(`/messages?ai=${THREAD}`);

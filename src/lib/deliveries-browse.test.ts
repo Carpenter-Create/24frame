@@ -220,9 +220,9 @@ describe("page-view helpers (consumed by /deliveries)", () => {
     expect(DELIVERIES_FILTER_MISS.description).toBe("Try another status, or clear the filter.");
     expect(DELIVERIES_FILTER_MISS.actionLabel).toBe("Show all");
     expect(deliveriesShowAllHref("live", { key: "title", dir: "asc" })).toBe(
-      "/deliveries?sort=title&dir=asc",
+      "/aggregation/titles?sort=title&dir=asc",
     );
-    expect(deliveriesShowAllHref("pending", DEFAULT_DELIVERY_SORT)).toBe("/deliveries");
+    expect(deliveriesShowAllHref("pending", DEFAULT_DELIVERY_SORT)).toBe("/aggregation/titles");
   });
 
   it("maps valid statuses to approved labels and tones", () => {
@@ -402,16 +402,16 @@ describe("buildDeliveriesQuery / hrefs", () => {
 
   it("preserves the other dimension when building filter/sort links", () => {
     expect(deliveriesStatusHref("live", { key: "title", dir: "asc" }, "all")).toBe(
-      "/deliveries?sort=title&dir=asc",
+      "/aggregation/titles?sort=title&dir=asc",
     );
     expect(deliveriesStatusHref("all", DEFAULT_DELIVERY_SORT, "pending")).toBe(
-      "/deliveries?status=pending",
+      "/aggregation/titles?status=pending",
     );
     expect(deliveriesSortHref("live", DEFAULT_DELIVERY_SORT, "title")).toBe(
-      "/deliveries?status=live&sort=title&dir=asc",
+      "/aggregation/titles?status=live&sort=title&dir=asc",
     );
     expect(deliveriesSortHref("live", DEFAULT_DELIVERY_SORT, "updated")).toBe(
-      "/deliveries?status=live&sort=updated&dir=asc",
+      "/aggregation/titles?status=live&sort=updated&dir=asc",
     );
   });
 });

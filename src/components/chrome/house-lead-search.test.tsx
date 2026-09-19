@@ -83,7 +83,7 @@ describe("HouseLeadSearch — one SoT for Social live and Education quiet", () =
     expect(quiet).toContain(HOUSE_LEAD_SEARCH_PILL_CLASS);
     expect(quiet).toContain(HOUSE_SEARCH_PILL_CLASS);
 
-    navigation.pathname = "/social/courses/orientation";
+    navigation.pathname = "/education/orientation";
     const consume = renderToStaticMarkup(
       createElement(HouseLeadSearch, { tone: "quiet", inputId: "education-header-q-phone" }),
     );
