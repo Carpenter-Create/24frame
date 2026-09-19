@@ -220,8 +220,8 @@ describe("workspace switcher lock", () => {
     expect(WORKSPACE_SWITCHER_SEGMENTS_CLASS).toContain("rounded-full");
     expect(WORKSPACE_SWITCHER_SEGMENTS_CLASS).toContain("bg-surface-muted");
     expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("rounded-full");
-    expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("px-[var(--space-3)]");
-    expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("py-[var(--space-1)]");
+    expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("px-[var(--space-4)]");
+    expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("py-[var(--space-2)]");
     expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("t-body-sm");
     expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("transition-colors");
     expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("motion-reduce:transition-none");

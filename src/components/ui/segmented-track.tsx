@@ -43,8 +43,6 @@ export function SegmentedTrack({
     setThumbStyle({
       left: activeRect.left - trackRect.left,
       width: activeRect.width,
-      top: activeRect.top - trackRect.top,
-      height: activeRect.height,
       opacity: 1,
     });
   }, [activeIndex]);
