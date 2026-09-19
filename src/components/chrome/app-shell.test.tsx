@@ -3,7 +3,13 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+import { ACCOUNT_PHOTO_HREF } from "@/lib/account-avatar";
+import {
+  rememberAccountChromeIdentity,
+  resetAccountChromeIdentityForTests,
+} from "@/lib/account-chrome-identity";
 
 const navigation = vi.hoisted(() => ({ pathname: "/" }));
 
@@ -75,6 +81,10 @@ import {
   RAIL_COLLAPSE_CHEVRON_ICON_WEIGHT,
   SIDEBAR_COLLAPSED_COOKIE,
 } from "@/lib/rail-collapse";
+
+afterEach(() => {
+  resetAccountChromeIdentityForTests();
+});
 
 const shellSrc = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "app-shell.tsx"), "utf8");
 const railCollapseSrc = readFileSync(
@@ -763,7 +773,8 @@ describe("AppShell rail-collapse chevron", () => {
     expect(pending).toContain("data-side-nav");
     expect(pending).not.toContain("data-social-rail");
 
-    expect(shellSrc).toContain("<ChromeCookieSync chrome={chrome} onCookies={applyChromeCookies} />");
+    expect(shellSrc).toContain("onCookies={applyChromeCookies}");
+    expect(shellSrc).toContain("onIdentity={applyChromeIdentity}");
     expect(shellSrc).toContain("if (cookiesApplied.current) return");
     expect(shellSrc).toContain("if (!collapseTouched.current)");
     expect(shellSrc).toContain("setCollapsed(next.defaultCollapsed)");
@@ -780,12 +791,34 @@ describe("AppShell rail-collapse chevron", () => {
     expect(syncBody).toContain("use(chrome)");
     expect(syncBody).toContain("data.defaultCollapsed");
     expect(syncBody).toContain("data.defaultWorkspace");
+    expect(syncBody).toContain("onIdentity");
+    expect(syncBody).toContain("data.email");
+    expect(syncBody).toContain("data.photoUrl");
     expect(syncBody).not.toContain("persistSidebarCollapsed");
     expect(syncBody).not.toContain("persistWorkspaceCookie");
     const appShellFn = shellSrc.slice(shellSrc.indexOf("export function AppShell"));
     const beforeSocial = appShellFn.slice(0, appShellFn.indexOf("if (socialChrome)"));
     expect(beforeSocial).not.toMatch(/\buse\(chrome\)/);
     expect(beforeSocial).toContain("cookieSync");
+  });
+
+  it("keeps the header photo when chrome is pending after a known session face", () => {
+    rememberAccountChromeIdentity({
+      email: "ada@example.com",
+      name: "Ada Lovelace",
+      photoUrl: ACCOUNT_PHOTO_HREF,
+    });
+    navigation.pathname = "/social";
+    const html = renderToStaticMarkup(
+      <AppShell chrome={new Promise(() => {})} messagesUnread={new Promise(() => {})}>
+        destination-page
+      </AppShell>,
+    );
+    expect(html).toContain(`data-photo="${ACCOUNT_PHOTO_HREF}"`);
+    expect(html).toContain('data-email="ada@example.com"');
+    expect(html).not.toContain('data-email=""');
+    expect(html).toContain("destination-page");
+    expect(html).toContain("data-social-workspace");
   });
 
   it("paints Social chrome and children before layout chrome resolves", () => {

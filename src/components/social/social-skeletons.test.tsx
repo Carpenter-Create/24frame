@@ -33,7 +33,10 @@ describe("Social loading skeletons", () => {
       expect(src).not.toContain("page-skeletons");
       expect(src).toContain("social-skeletons");
     }
-    expect(readFileSync("src/app/(app)/loading.tsx", "utf8")).toContain("DashboardSkeleton");
+    expect(existsSync("src/app/(app)/loading.tsx")).toBe(false);
+    expect(readFileSync("src/app/(app)/aggregation/dashboard/loading.tsx", "utf8")).toContain(
+      "DashboardSkeleton",
+    );
   });
 
   it("mirrors Social chrome footprints without invented copy", () => {
