@@ -170,7 +170,10 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(HOUSE_SEGMENTED_TRACK_CLASS).not.toContain("p-[");
     expect(HOUSE_SEGMENTED_THUMB_CLASS).toContain("inset-y-0");
     expect(HOUSE_SEGMENTED_THUMB_CLASS).toContain("transition-[left,width]");
+    expect(HOUSE_SEGMENTED_THUMB_CLASS).toContain("duration-[320ms]");
+    expect(HOUSE_SEGMENTED_THUMB_CLASS).toContain("ease-[cubic-bezier(0.22,1,0.36,1)]");
     expect(HOUSE_SEGMENTED_THUMB_CLASS).toContain("bg-accent");
+    expect(HOUSE_SEGMENTED_THUMB_CLASS).not.toContain("duration-200");
     expect(HOUSE_SEGMENTED_THUMB_CLASS).not.toContain("transition-opacity");
     expect(HOUSE_SEGMENTED_THUMB_CLASS).not.toContain("inset-1");
   });

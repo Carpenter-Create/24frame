@@ -18,6 +18,8 @@ describe("SegmentedTrack slide SoT", () => {
     expect(src).toContain("transition: \"none\"");
     expect(src).not.toContain("transition-opacity");
     expect(HOUSE_SEGMENTED_THUMB_CLASS).toContain("transition-[left,width]");
+    expect(HOUSE_SEGMENTED_THUMB_CLASS).toContain("duration-[320ms]");
+    expect(HOUSE_SEGMENTED_THUMB_CLASS).not.toContain("duration-200");
     expect(HOUSE_SEGMENTED_THUMB_CLASS).not.toContain("transition-opacity");
     expect(lib).toContain("SEGMENTED_TRACK_PERSIST");
     expect(lib).toContain("workspace-pills");
