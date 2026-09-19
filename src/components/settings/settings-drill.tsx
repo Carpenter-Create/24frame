@@ -85,7 +85,7 @@ export function SettingsEditPane({
   helper?: string;
   pathname: string;
   hub?: SettingsHubSection;
-  children: ReactNode;
+  children?: ReactNode;
 }) {
   return (
     <div
