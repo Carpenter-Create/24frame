@@ -15,11 +15,12 @@ export const ORG_ROLE_LABELS: Record<OrgRole, string> = {
 
 export const ORG_ROLE_DESCRIPTIONS: Record<OrgRole, string> = {
   account_owner:
-    "Full control: manages team, billing, settings, and all operations",
-  accountant: "Financial access: views revenue, tax, and banking details",
-  legal: "Legal access: views contracts, rights, and financial records",
-  delivery_ops: "Operations: manages titles, assets, and delivery workflows",
-  viewer: "Read-only: views the catalog and basic organization data",
+    "Full control: team, settings, billing, operations, tax and banking",
+  accountant: "Read all; write tax and banking only",
+  legal: "Read all; write nothing",
+  delivery_ops:
+    "Titles, assets, rights, and delivery; no finance, tax, billing, or team",
+  viewer: "Catalog read-only",
 };
 
 // Canonical capabilities from member_can(). One SoT for the
