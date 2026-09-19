@@ -82,6 +82,24 @@ describe("canonicalizeNewsImageUrl", () => {
     expect(canonicalizeNewsImageUrl(null)).toBeNull();
   });
 
+  it("collapses a doubled www.joblo.com host in the path", () => {
+    expect(canonicalizeNewsImageUrl("https://joblo.com/www.joblo.com/wp-content/x.jpg")).toBe(
+      "https://www.joblo.com/wp-content/x.jpg",
+    );
+    expect(canonicalizeNewsImageUrl("https://www.joblo.com/www.joblo.com/wp-content/x.jpg")).toBe(
+      "https://www.joblo.com/wp-content/x.jpg",
+    );
+    expect(
+      canonicalizeNewsImageUrl("https://www.joblo.com/www.joblo.com/www.joblo.com/wp-content/x.jpg"),
+    ).toBe("https://www.joblo.com/wp-content/x.jpg");
+    expect(canonicalizeNewsImageUrl("https://www.joblo.com/wp-content/x.jpg")).toBe(
+      "https://www.joblo.com/wp-content/x.jpg",
+    );
+    expect(canonicalizeNewsImageUrl("https://variety.com/www.joblo.com/thumbs/harbor.jpg")).toBe(
+      "https://variety.com/www.joblo.com/thumbs/harbor.jpg",
+    );
+  });
+
   it("prefers www when fetching a JoBlo article that canonicalizeNewsUrl stored as apex", () => {
     expect(newsOgFetchUrl("https://joblo.com/zach-cregger-the-flood-2001-influence")).toBe(
       "https://www.joblo.com/zach-cregger-the-flood-2001-influence",
@@ -182,6 +200,22 @@ describe("parseNewsFeed", () => {
     expect(items[0]?.image_url).toBe(
       "https://www.joblo.com/wp-content/uploads/2026/09/zach-cregger-the-flood-2001.jpg",
     );
+  });
+
+  it("collapses a doubled www host in a JoBlo RSS enclosure path", () => {
+    const xml = `<?xml version="1.0"?>
+<rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/">
+  <channel>
+    <item>
+      <title>Doubled host thumb</title>
+      <link>https://joblo.com/doubled-host-thumb</link>
+      <pubDate>Thu, 17 Sep 2026 12:00:00 GMT</pubDate>
+      <media:thumbnail url="https://joblo.com/www.joblo.com/wp-content/uploads/x.jpg" />
+    </item>
+  </channel>
+</rss>`;
+    const items = parseNewsFeed(xml, "joblo", NOW);
+    expect(items[0]?.image_url).toBe("https://www.joblo.com/wp-content/uploads/x.jpg");
   });
 });
 

@@ -59,6 +59,8 @@ export function newsOgFetchUrl(articleUrl: string): string {
   return preferJobloWwwHost(articleUrl);
 }
 
+const JOBLO_WWW_PATH_PREFIX = `/${JOBLO_WWW_HOST}`;
+
 function preferJobloWwwHost(url: string): string {
   let parsed: URL;
   try {
@@ -67,10 +69,23 @@ function preferJobloWwwHost(url: string): string {
     return url;
   }
   if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return url;
-  if (parsed.hostname.toLowerCase() !== JOBLO_APEX_HOST) return url;
+  const host = parsed.hostname.toLowerCase();
+  if (host !== JOBLO_APEX_HOST && host !== JOBLO_WWW_HOST) return url;
   parsed.protocol = "https:";
   parsed.hostname = JOBLO_WWW_HOST;
+  parsed.pathname = stripDuplicatedJobloWwwPath(parsed.pathname);
   return parsed.href;
+}
+
+/** Feed/path sometimes embeds www.joblo.com under the host → www.joblo.com/www.joblo.com/... 404s. */
+function stripDuplicatedJobloWwwPath(pathname: string): string {
+  let next = pathname;
+  while (true) {
+    const lower = next.toLowerCase();
+    if (lower === JOBLO_WWW_PATH_PREFIX) return "/";
+    if (!lower.startsWith(`${JOBLO_WWW_PATH_PREFIX}/`)) return next || "/";
+    next = next.slice(JOBLO_WWW_PATH_PREFIX.length) || "/";
+  }
 }
 
 /** Proven OG on the www Flood article. CoS backfill only — not inventing thumbs. */
