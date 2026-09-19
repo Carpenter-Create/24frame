@@ -320,6 +320,44 @@ describe("ingest OG images", () => {
       "https://www.joblo.com/wp-content/uploads/2026/09/zach-cregger-the-flood-2001.jpg",
     );
   });
+
+  it("does not null-downgrade a stored JoBlo www thumb when RSS and OG miss", async () => {
+    const persist = memoryNewsStore();
+    const floodWww =
+      "https://www.joblo.com/wp-content/uploads/2026/09/zach-cregger-the-flood-2001.jpg";
+    await persist.upsertItems(
+      [
+        {
+          title: "Flood influence",
+          url: "https://joblo.com/zach-cregger-the-flood-2001-influence",
+          canonical_url: "https://joblo.com/zach-cregger-the-flood-2001-influence",
+          source: "joblo",
+          published_at: "2026-09-17T12:00:00.000Z",
+          image_url: floodWww,
+        },
+      ],
+      NOW,
+    );
+    const floodFeed = `<?xml version="1.0"?>
+<rss version="2.0">
+  <channel>
+    <item>
+      <title>Flood influence</title>
+      <link>https://joblo.com/zach-cregger-the-flood-2001-influence</link>
+      <pubDate>Thu, 17 Sep 2026 12:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>`;
+    await ingestNewsFeeds({
+      persist,
+      now: NOW,
+      fetchXml: async (url: string) => (url === "https://www.joblo.com/feed/" ? floodFeed : EMPTY_FEED),
+      fetchOgHtml: async () => null,
+    });
+    const rows = await persist.queryFeed({ limit: 20, now: NOW });
+    expect(rows[0]?.url).toBe("https://joblo.com/zach-cregger-the-flood-2001-influence");
+    expect(rows[0]?.image_url).toBe(floodWww);
+  });
 });
 
 describe("fetchNewsArticleHtml", () => {

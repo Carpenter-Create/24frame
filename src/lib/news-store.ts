@@ -70,6 +70,21 @@ export type NewsStore = NewsPersist & {
   queryFeed: (input: { limit: number; now: Date }) => Promise<NewsItem[]>;
 };
 
+function normalizeNewsImageUrl(url: string | null | undefined): string | null {
+  const trimmed = url?.trim();
+  return trimmed ? trimmed : null;
+}
+
+/** Keep a stored thumb when a later ingest has no image. Never write null over a good URL. */
+export function mergeNewsImageUrl(
+  existing: string | null | undefined,
+  incoming: string | null | undefined,
+): string | null {
+  const next = normalizeNewsImageUrl(incoming);
+  if (next) return next;
+  return normalizeNewsImageUrl(existing);
+}
+
 function recordToItem(row: NewsItemRecord): NewsItem | null {
   if (!isNewsSourceId(row.source)) return null;
   return {
@@ -108,6 +123,7 @@ export function memoryNewsStore(seed: readonly NewsItem[] = []): NewsStore {
     async upsertItems(rows, now = new Date()) {
       const fetchedAt = now.toISOString();
       for (const row of rows) {
+        const prior = items.get(row.canonical_url);
         items.set(row.canonical_url, {
           pk: newsItemPk(row.canonical_url),
           sk: NEWS_ITEM_SK,
@@ -120,7 +136,7 @@ export function memoryNewsStore(seed: readonly NewsItem[] = []): NewsStore {
           source: row.source,
           source_name: newsSourceLabel(row.source),
           published_at: row.published_at,
-          image_url: row.image_url,
+          image_url: mergeNewsImageUrl(prior?.image_url, row.image_url),
           fetched_at: fetchedAt,
           ttl: newsItemTtlEpoch(row.published_at),
         });
@@ -164,6 +180,22 @@ function newsClient(env: NewsEnv): { table: string; doc: DynamoDBDocumentClient 
   return { table, doc: DynamoDBDocumentClient.from(client) };
 }
 
+async function existingNewsImageUrl(
+  doc: DynamoDBDocumentClient,
+  table: string,
+  canonicalUrl: string,
+): Promise<string | null> {
+  const { Item } = await doc.send(
+    new GetCommand({
+      TableName: table,
+      Key: { pk: newsItemPk(canonicalUrl), sk: NEWS_ITEM_SK },
+      ConsistentRead: true,
+    }),
+  );
+  if (!Item) return null;
+  return normalizeNewsImageUrl((Item as NewsItemRecord).image_url);
+}
+
 export function dynamoNewsStore(env: NewsEnv = process.env): NewsStore {
   if (!isNewsIngestConfigured(env) && !isNewsAwsConfigured(env)) {
     throw new Error("NEWS_AWS_REGION / NEWS_DDB_TABLE environment variables are not set");
@@ -175,8 +207,11 @@ export function dynamoNewsStore(env: NewsEnv = process.env): NewsStore {
       const { table, doc } = newsClient(env);
       const fetchedAt = now.toISOString();
       await Promise.all(
-        rows.map((row) =>
-          doc.send(
+        rows.map(async (row) => {
+          const existing = normalizeNewsImageUrl(row.image_url)
+            ? null
+            : await existingNewsImageUrl(doc, table, row.canonical_url);
+          await doc.send(
             new PutCommand({
               TableName: table,
               Item: {
@@ -191,13 +226,13 @@ export function dynamoNewsStore(env: NewsEnv = process.env): NewsStore {
                 source: row.source,
                 source_name: newsSourceLabel(row.source),
                 published_at: row.published_at,
-                image_url: row.image_url,
+                image_url: mergeNewsImageUrl(existing, row.image_url),
                 fetched_at: fetchedAt,
                 ttl: newsItemTtlEpoch(row.published_at),
               } satisfies NewsItemRecord,
             }),
-          ),
-        ),
+          );
+        }),
       );
       return rows.length;
     },
