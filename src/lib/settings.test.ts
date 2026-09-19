@@ -219,9 +219,21 @@ describe("settings hub lock", () => {
       href: "/settings",
       label: "Settings",
     });
+    expect(settingsHeaderBack("/settings/organization")).toEqual({
+      href: "/settings",
+      label: "Settings",
+    });
+    expect(settingsHeaderBack("/settings/agreements")).toEqual({
+      href: "/settings",
+      label: "Settings",
+    });
     expect(SETTINGS_HEADER_BACK_CLASS).toBe(
-      "flex items-center gap-[var(--space-2)] t-body md:hidden",
+      "flex items-center gap-[var(--space-2)] t-body text-accent md:hidden",
     );
+    expect(SETTINGS_HEADER_BACK_CLASS).toContain("text-accent");
+    expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("text-ink");
+    expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("text-ink-2");
+    expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("text-ink-3");
     expect(SETTINGS_HEADER_PAD_CLASS).toBe(MOBILE_CHROME_LEAD_PAD_CLASS);
     expect(SETTINGS_HEADER_PAD_CLASS).toBe("px-[var(--space-6)]");
     expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("t-body-sm");

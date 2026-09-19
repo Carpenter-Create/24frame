@@ -14,6 +14,7 @@ import {
 
 // Phone Settings left slot. Hub list → Home. Pushed section →
 // Settings list. 16 Phosphor caret-left Bold + 15 Regular, gap 8.
+// Color is SETTINGS_HEADER_BACK_CLASS (text-accent). No glyph override.
 // Hidden at md, where the rail stays.
 export function SettingsHeaderBack() {
   const back = settingsHeaderBack(usePathname());

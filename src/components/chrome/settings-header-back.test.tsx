@@ -52,6 +52,8 @@ describe("SettingsHeaderBack", () => {
     expect(SETTINGS.dashboardHref).toBe("/aggregation/dashboard");
     expect(SETTINGS_HEADER_BACK_CLASS).toContain("gap-[var(--space-2)]");
     expect(SETTINGS_HEADER_BACK_CLASS).toContain("t-body");
+    expect(SETTINGS_HEADER_BACK_CLASS).toContain("text-accent");
+    expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("text-ink");
     expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("font-normal");
     expect(SETTINGS_HEADER_BACK_CLASS).toContain("md:hidden");
     expect(SETTINGS_HEADER_PAD_CLASS).toBe(MOBILE_CHROME_LEAD_PAD_CLASS);
@@ -74,7 +76,24 @@ describe("SettingsHeaderBack", () => {
     const html = renderToStaticMarkup(<SettingsHeaderBack />);
     expect(html).toContain(`href="${SETTINGS.href}"`);
     expect(html).toContain(SETTINGS.title);
+    expect(html).toContain("text-accent");
     expect(html).not.toContain(`>${SETTINGS.dashboard}<`);
+  });
+
+  it("inherits the same Settings hub href from every pushed pane", () => {
+    for (const pathname of [
+      "/settings/profile",
+      "/settings/organization",
+      "/settings/preferences",
+      "/settings/agreements",
+      "/settings/refer",
+    ]) {
+      navigation.pathname = pathname;
+      const html = renderToStaticMarkup(<SettingsHeaderBack />);
+      expect(html).toContain(`href="${SETTINGS.href}"`);
+      expect(html).toContain(SETTINGS.title);
+      expect(html).toContain(SETTINGS_HEADER_BACK_CLASS);
+    }
   });
 
   it("stays house chrome — rail is the desktop nav, not a new IA", () => {

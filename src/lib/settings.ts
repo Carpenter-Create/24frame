@@ -159,9 +159,10 @@ export const SETTINGS_PREF_TITLE_CLASS = "t-heading text-ink";
 
 // 623:785 — phone header left slot. Hub list back is Home. Pushed
 // section back is Settings (list). Hidden at md, where the rail stays.
+// Adam lock: caret + label use house text-accent (link/selected), not ink.
 export const SETTINGS_HEADER_PAD_CLASS = MOBILE_CHROME_LEAD_PAD_CLASS;
 export const SETTINGS_HEADER_BACK_CLASS =
-  "flex items-center gap-[var(--space-2)] t-body md:hidden";
+  "flex items-center gap-[var(--space-2)] t-body text-accent md:hidden";
 
 export const SETTINGS_RAIL_ABSENT = [
   "Titles",

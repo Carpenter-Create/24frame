@@ -70,6 +70,8 @@ describe("Adam Mercury register lock", () => {
     expect(SETTINGS_RAIL_CHEVRON_CLASS).toBe("size-4 shrink-0");
     expect(HOUSE_RAIL_ITEM_CLASS).toContain("t-body-sm");
     expect(SETTINGS_HEADER_BACK_CLASS).toContain("md:hidden");
+    expect(SETTINGS_HEADER_BACK_CLASS).toContain("text-accent");
+    expect(SETTINGS_HEADER_BACK_CLASS).not.toContain("text-ink");
     expect(RAIL_COLLAPSE_CHEVRON_ICON_CLASS).toBe("h-4 w-4");
     expect(src("src/components/chrome/account-sheet.tsx")).toContain(
       "className={SHEET_GROUP_CHEVRON_CLASS}",
