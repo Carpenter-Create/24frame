@@ -10,7 +10,6 @@ import { TITLES_HREF } from "./title-public-id";
 import { QUEUE_HREF } from "./queue";
 import { AVAILS_HREF } from "./avails";
 import { CHANNELS_HREF } from "./channel-card";
-import { GC_DELIVERIES_HREF } from "./gc-deliveries";
 import { NEWS_HREF } from "./news";
 import { WORKSPACE_REDIRECTS } from "./workspace-redirects";
 import { aggregationPath, workspaceHome } from "./workspace";
