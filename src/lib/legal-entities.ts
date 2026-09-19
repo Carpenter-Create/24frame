@@ -62,6 +62,7 @@ export const LEGAL_ENTITIES = {
   nameColumn: "Name",
   typeColumn: "Type",
   jurisdictionColumn: "Jurisdiction",
+  actionsColumn: "Actions",
   emptyJurisdiction: "\u2014",
   nameRequired: "Entity name is required.",
   default: "Default",
@@ -75,7 +76,7 @@ export const LEGAL_ENTITIES = {
 // Name · Type · Jurisdiction · Actions. Values share primary ink.
 // Empty jurisdiction is a muted em dash. Not a data-grid library.
 export const ENTITY_LIST_GRID_CLASS =
-  "min-w-[36rem] grid grid-cols-[minmax(12rem,2fr)_minmax(8rem,1fr)_minmax(8rem,1fr)_auto] items-center gap-x-[var(--space-4)] px-0";
+  "min-w-[28rem] grid grid-cols-[minmax(8rem,1.2fr)_minmax(5.5rem,0.7fr)_minmax(6.5rem,1fr)_auto] items-center gap-x-[var(--space-3)] px-0";
 
 export const ENTITY_LIST_HEADER_CLASS =
   `${ENTITY_LIST_GRID_CLASS} py-[var(--space-3)] t-label text-ink-3`;

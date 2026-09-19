@@ -49,6 +49,7 @@ describe("LegalEntitiesSection table", () => {
     expect(html).toContain(LEGAL_ENTITIES.nameColumn);
     expect(html).toContain(LEGAL_ENTITIES.typeColumn);
     expect(html).toContain(LEGAL_ENTITIES.jurisdictionColumn);
+    expect(html).toContain(LEGAL_ENTITIES.actionsColumn);
     expect(html).toContain(LEGAL_ENTITIES.edit);
     expect(html).toContain("data-entity-edit");
     expect(html).toContain("Acme LLC");
@@ -84,6 +85,7 @@ describe("LegalEntitiesSection table", () => {
     expect(src).toContain("ENTITY_LIST_HEADER_CLASS");
     expect(src).toContain("ENTITY_LIST_ROW_CLASS");
     expect(src).toContain("ENTITY_LIST_VALUE_CLASS");
+    expect(src).toContain("LEGAL_ENTITIES.actionsColumn");
     expect(src).toContain("<Dialog");
     expect(src).toContain("DialogFooter");
     expect(src).not.toContain("flex flex-col gap-[var(--space-4)]");

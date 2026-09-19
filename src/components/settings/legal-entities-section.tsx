@@ -136,7 +136,7 @@ export function LegalEntitiesSection({
             <span>{LEGAL_ENTITIES.nameColumn}</span>
             <span>{LEGAL_ENTITIES.typeColumn}</span>
             <span>{LEGAL_ENTITIES.jurisdictionColumn}</span>
-            <span />
+            <span className="justify-self-end">{LEGAL_ENTITIES.actionsColumn}</span>
           </div>
           <ul className="flex flex-col divide-y divide-hairline border-t border-hairline">
             {entities.map((entity) => (

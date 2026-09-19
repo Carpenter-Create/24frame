@@ -218,6 +218,7 @@ describe("SettingsOrganizationPage", () => {
     expect(html).toContain(LEGAL_ENTITIES.nameColumn);
     expect(html).toContain(LEGAL_ENTITIES.typeColumn);
     expect(html).toContain(LEGAL_ENTITIES.jurisdictionColumn);
+    expect(html).toContain(LEGAL_ENTITIES.actionsColumn);
     expect(html).toContain(LEGAL_ENTITIES.edit);
     expect(html).toContain("data-entity-edit");
     expect(html).toContain("Acme LLC");
