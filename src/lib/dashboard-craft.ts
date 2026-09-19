@@ -166,9 +166,11 @@ export const DASHBOARD_NEWS_HISTORY_LIST_CLASS = `flex flex-col ${DASHBOARD_RELA
 export const DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS =
   `flex w-full flex-col ${DASHBOARD_SECTION_AIR_CLASS}`;
 
-// Header + chips + list sit in one centered reading column. 840 is
+// Title + chips + list sit in one centered reading column. 840 is
 // the house reading measure already used by Deliver. Phone stays
-// full canvas width (house gutters come from the shell).
+// full canvas width (house gutters come from the shell). The page
+// sticky wash is the canvas, not this column — do not wrap the pin
+// in 840 or the lead reads as a floating card.
 export const DASHBOARD_NEWS_HISTORY_COLUMN_CLASS = "mx-auto w-full max-w-[840px]";
 
 export const DASHBOARD_VIEW_ALT_CLUSTER_CLASS =

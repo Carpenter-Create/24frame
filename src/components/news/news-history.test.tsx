@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { NewsHistory } from "./news-history";
 import { NewsRail } from "./news-rail";
 import {
+  DASHBOARD_NEWS_HISTORY_COLUMN_CLASS,
   DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS,
   DASHBOARD_NEWS_HISTORY_LIST_CLASS,
   DASHBOARD_NEWS_HISTORY_THUMB_CLASS,
@@ -82,6 +83,20 @@ describe("NewsHistory layout", () => {
     expect(html).toContain('data-news-sticky-header="page"');
     expect(html).toContain(NEWS_STICKY_PIN_CLASS);
     expect(html).toContain(NEWS_STICKY_PAGE_SURFACE_CLASS);
+    expect(html).toContain("data-news-history-lead");
+    expect(html).toContain(DASHBOARD_NEWS_HISTORY_COLUMN_CLASS);
+    expect(html).toContain("max-w-[840px]");
+    const stickyOpen = html.match(/data-news-sticky-header="page"[^>]*>/)?.[0] ?? "";
+    expect(stickyOpen).toContain(NEWS_STICKY_PAGE_SURFACE_CLASS);
+    expect(stickyOpen).not.toContain("max-w-[840px]");
+    expect(stickyOpen).not.toContain("border");
+    expect(stickyOpen).not.toContain("rounded");
+    expect(html.indexOf("data-news-sticky-header")).toBeLessThan(
+      html.indexOf("data-news-history-lead"),
+    );
+    expect(html.indexOf("data-news-history-lead")).toBeLessThan(
+      html.indexOf("data-news-source-chips"),
+    );
     expect(html.split("data-news-sticky-header=").length - 1).toBe(1);
     expect(html.indexOf("data-news-sticky-header")).toBeLessThan(
       html.indexOf("data-news-source-chips"),

@@ -11,6 +11,14 @@
 // The Home grey panel is overflow-hidden by default — that clips
 // sticky. News overrides to overflow-visible so the pin can take
 // the aside / page scroller as its containing block.
+//
+// Page surface is chrome continuation — canvas wash + house air,
+// never a bordered / rounded card floating in the 840 column.
+// Vertical pad is house card py (--space-4). Top air rematches the
+// Home frame (space-8 / phone space-6) via -mt + pt so the wash
+// meets the lead chrome and the title does not jam to the pin.
+// Horizontal measure stays on DASHBOARD_NEWS_HISTORY_COLUMN_CLASS
+// inside the pin, so title + chips align with the feed.
 
 export type NewsStickySurface = "rail" | "page";
 
@@ -19,7 +27,8 @@ export const NEWS_STICKY_PIN_CLASS = "sticky top-0 z-10 shrink-0 backdrop-blur";
 export const NEWS_STICKY_RAIL_SURFACE_CLASS =
   "rounded-t-[var(--radius-lg)] bg-surface-muted/85";
 
-export const NEWS_STICKY_PAGE_SURFACE_CLASS = "bg-bg/85";
+export const NEWS_STICKY_PAGE_SURFACE_CLASS =
+  "bg-bg/85 -mt-[var(--space-8)] pt-[var(--space-8)] pb-[var(--space-4)] max-md:-mt-[var(--space-6)] max-md:pt-[var(--space-6)]";
 
 /** Lift overflow-hidden on the Home news panel so sticky can pin. */
 export const NEWS_STICKY_RAIL_PANEL_CLASS = "overflow-visible";

@@ -6,7 +6,8 @@ import {
 
 // One sticky section-header wrapper for Home Industry news and
 // /home/news. Surface token is the only fork — pin / z / blur stay
-// on newsStickyHeaderClass.
+// on newsStickyHeaderClass. Page pad / wash live on the page
+// surface token — do not add a border or 840 width here.
 
 export function NewsStickyHeader({
   surface,

@@ -161,7 +161,10 @@ describe("Home News layout + register lock", () => {
     expect(DASHBOARD_NEWS_HISTORY_LAYOUT_CLASS).not.toContain("lg:grid-cols-2");
     expect(DASHBOARD_NEWS_HISTORY_COLUMN_CLASS).toBe("mx-auto w-full max-w-[840px]");
     expect(DASHBOARD_NEWS_HISTORY_COLUMN_CLASS).not.toContain("1376");
-    expect(newsPage).toContain("DASHBOARD_NEWS_HISTORY_COLUMN_CLASS");
+    expect(readFileSync("src/components/news/news-history.tsx", "utf8")).toContain(
+      "DASHBOARD_NEWS_HISTORY_COLUMN_CLASS",
+    );
+    expect(newsPage).not.toContain("DASHBOARD_NEWS_HISTORY_COLUMN_CLASS");
   });
 
   it("uses Home card / full-width thumb grammar on /home/news phone; md+ keeps the history row thumb", () => {
