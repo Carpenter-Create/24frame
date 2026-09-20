@@ -58,9 +58,9 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).toContain("SocialStoriesRail");
     expect(home).toContain("SocialHomeComposer");
     expect(home).toContain("SocialHomeTopics");
-    expect(home.indexOf("SocialHomeComposer")).toBeLessThan(home.indexOf("SocialHomeTopics"));
-    expect(home.indexOf("SocialHomeTopics")).toBeLessThan(home.indexOf("SocialStoriesRail"));
-    expect(home.indexOf("SocialStoriesRail")).toBeLessThan(home.indexOf("SocialHomeTabs"));
+    expect(home.indexOf("<SocialHomeComposer")).toBeLessThan(home.indexOf("<SocialHomeTopics"));
+    expect(home.indexOf("<SocialHomeTopics")).toBeLessThan(home.indexOf("<SocialStoriesRail"));
+    expect(home.indexOf("<SocialStoriesRail")).toBeLessThan(home.indexOf("<SocialHomeTabs"));
     expect(home).toContain("SocialHomeTabs");
     expect(home).not.toContain("SocialProfileTabs");
     expect(home).not.toContain("creditsEmpty");
