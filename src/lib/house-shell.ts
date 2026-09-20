@@ -80,8 +80,9 @@ export const HOUSE_FILTER_OFF_CLASS = "bg-surface-muted text-ink";
 
 // Standalone selected pill — accent fill + white label/icon.
 // Same selected grammar as HOUSE_SEGMENTED_THUMB + HOUSE_SEGMENTED_ITEM_ON.
-// Phone dest chips and news source chips. Not HOUSE_FILTER_ON_CLASS
-// (ink) — that stays status / create-kind pills. Adam lock 2026-09-19.
+// News source chips. Phone dest chips use SegmentedTrack, not this
+// fill. Not HOUSE_FILTER_ON_CLASS (ink) — that stays status /
+// create-kind pills. Adam lock 2026-09-19.
 export const HOUSE_PILL_SELECTED_CLASS = "bg-accent text-white";
 
 // Standalone filter pill base — individual rounded pills with gap between.

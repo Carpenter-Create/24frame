@@ -166,6 +166,7 @@ describe("segmented track optimistic selection", () => {
     expect(SEGMENTED_ITEM_SELECTED_ATTR).toBe("data-segmented-selected");
     expect(SEGMENTED_TRACK_PERSIST.activityFamily).toBe("activity-family");
     expect(SEGMENTED_TRACK_PERSIST.period).toBe("house-period-presets");
+    expect(SEGMENTED_TRACK_PERSIST.phoneDest).toBe("phone-dest");
   });
 
   it("keeps pending visual index across remount until the route catches up", () => {

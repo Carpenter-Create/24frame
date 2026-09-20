@@ -16,6 +16,7 @@ const lib = readFileSync("src/lib/segmented-track.ts", "utf8");
 const CONSUMERS = [
   "src/components/chrome/workspace-switcher.tsx",
   "src/components/chrome/house-period-presets.tsx",
+  "src/components/chrome/house-phone-dest-chips.tsx",
   "src/components/activity/activity-family-chips.tsx",
   "src/components/dashboard/dashboard-ranked.tsx",
   "src/components/reports/reports-ranked.tsx",
@@ -67,7 +68,9 @@ describe("SegmentedTrack slide SoT", () => {
 
     for (const path of CONSUMERS) {
       const body = readFileSync(path, "utf8");
-      expect(body, path).toContain("persistKey={SEGMENTED_TRACK_PERSIST.");
+      expect(body, path).toMatch(
+        /persistKey=\{(?:SEGMENTED_TRACK_PERSIST\.|housePhoneDestPersistKey\()/,
+      );
       expect(body, path).toContain("({ selectedIndex })");
       expect(body, path).toContain("segmentedItemOn");
       expect(body, path).not.toContain("pendingIndex");

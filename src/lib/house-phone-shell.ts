@@ -40,10 +40,11 @@
 import { BookOpen, FilmStrip, House, Users, type IconWeight } from "@phosphor-icons/react";
 
 import {
-  HOUSE_CONTROL_PILL_CLASS,
-  HOUSE_FILTER_OFF_CLASS,
-  HOUSE_PILL_SELECTED_CLASS,
+  HOUSE_SEGMENTED_ITEM_BASE_CLASS,
+  HOUSE_SEGMENTED_ITEM_OFF_CLASS,
+  HOUSE_SEGMENTED_ITEM_ON_CLASS,
 } from "@/lib/house-shell";
+import { SEGMENTED_TRACK_PERSIST } from "@/lib/segmented-track";
 import {
   isClientNavActive,
   isHouseAiNavItem,
@@ -190,23 +191,26 @@ export const HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT = HOUSE_PHONE_CHROME_ICON_WEIGHT
 export const HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS =
   "max-md:pb-[calc(5.5rem+env(safe-area-inset-bottom))]";
 
+// Scroll host for the dest SegmentedTrack. No gap: selected is the
+// house thumb, not per-pill fill. Phone-only. Track / thumb / item
+// ink reuse HOUSE_SEGMENTED_* (same as desktop workspace pills).
 export const HOUSE_PHONE_DESTS_CLASS =
-  "flex w-full min-w-0 gap-[var(--space-2)] overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:hidden";
+  "flex w-full min-w-0 overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:hidden";
 
-// Coinbase register density (Adam 2026-09-19): a little taller than
-// the first dest-chip ship — min-h-9 + space-2 pad. Calm, not chunky.
-// Selected is accent fill + white label/icon (HOUSE_PILL_SELECTED_CLASS),
-// not ink. Idle stays muted track. One SoT; every workspace inherits.
-export const HOUSE_PHONE_DEST_ITEM_CLASS = `inline-flex min-h-9 shrink-0 items-center gap-[var(--space-1)] ${HOUSE_CONTROL_PILL_CLASS} px-[var(--space-3)] py-[var(--space-2)] t-body-sm`;
+export const HOUSE_PHONE_DEST_ITEM_CLASS = `inline-flex items-center gap-[var(--space-1)] ${HOUSE_SEGMENTED_ITEM_BASE_CLASS}`;
 
-export const HOUSE_PHONE_DEST_ITEM_ON_CLASS = `${HOUSE_PILL_SELECTED_CLASS} font-medium`;
+export const HOUSE_PHONE_DEST_ITEM_ON_CLASS = HOUSE_SEGMENTED_ITEM_ON_CLASS;
 
-export const HOUSE_PHONE_DEST_ITEM_OFF_CLASS = HOUSE_FILTER_OFF_CLASS;
+export const HOUSE_PHONE_DEST_ITEM_OFF_CLASS = HOUSE_SEGMENTED_ITEM_OFF_CLASS;
 
-export function housePhoneDestItemClass(active: boolean): string {
+export function housePhoneDestItemClass(selected: boolean): string {
   return `${HOUSE_PHONE_DEST_ITEM_CLASS} ${
-    active ? HOUSE_PHONE_DEST_ITEM_ON_CLASS : HOUSE_PHONE_DEST_ITEM_OFF_CLASS
+    selected ? HOUSE_PHONE_DEST_ITEM_ON_CLASS : HOUSE_PHONE_DEST_ITEM_OFF_CLASS
   }`;
+}
+
+export function housePhoneDestPersistKey(workspace: WorkspaceMode): string {
+  return `${SEGMENTED_TRACK_PERSIST.phoneDest}-${workspace}`;
 }
 
 /** Phone-only label for the Social feed dest. Desktop rail keeps "Home". */
@@ -273,6 +277,14 @@ export function housePhoneDestActive(
 ): boolean {
   if (workspace === "social") return isSocialTabActive(pathname, item);
   return isClientNavActive(pathname, item);
+}
+
+export function housePhoneDestActiveIndex(
+  pathname: string,
+  items: readonly NavItem[],
+  workspace: WorkspaceMode,
+): number {
+  return items.findIndex((item) => housePhoneDestActive(pathname, item, workspace));
 }
 
 export function housePhoneDestChipsLabel(workspace: WorkspaceMode): string {
