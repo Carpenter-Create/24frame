@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { existsSync, readFileSync } from "node:fs";
 
-import { HOUSE_CARD_PAD, HOUSE_MODULE_CLASS } from "./house-shell";
+import { HOUSE_CARD_PAD, HOUSE_MODULE_CLASS, HOUSE_SECTION_AIR_CLASS } from "./house-shell";
 import { NOTIFICATION_EMAIL } from "./notifications";
 import {
   NOTIFICATION_PREF_CHANNELS,
@@ -11,10 +11,8 @@ import {
   NOTIFICATION_PREF_EVENTS,
   NOTIFICATION_PREF_GROUPS,
   NOTIFICATION_PREF_HEAD_CLASS,
-  NOTIFICATION_PREF_LIST_CLASS,
   NOTIFICATION_PREF_MATRIX_CLASS,
   NOTIFICATION_PREF_ROW_CLASS,
-  NOTIFICATION_PREF_SECTION_CLASS,
   NOTIFICATION_PREF_SWITCH_OFF_CLASS,
   NOTIFICATION_PREF_SWITCH_ON_CLASS,
   NOTIFICATION_PREF_SWITCH_THUMB_CLASS,
@@ -32,7 +30,14 @@ import {
   parseNotificationPrefsRow,
   withNotificationPref,
 } from "./notification-prefs";
-import { SETTINGS_CONTENT_MEASURE_CLASS, SETTINGS_PREF_TITLE_CLASS } from "./settings";
+import {
+  SETTINGS_CONTENT_MEASURE_CLASS,
+  SETTINGS_GROUP_CLASS,
+  SETTINGS_GROUP_LABEL_CLASS,
+  SETTINGS_GROUP_LIST_CLASS,
+  SETTINGS_GROUP_STACK_CLASS,
+  SETTINGS_PREF_TITLE_CLASS,
+} from "./settings";
 
 describe("notification prefs SoT", () => {
   it("locks the 26 founder events in Aggregation / Social / Education / Account", () => {
@@ -100,23 +105,26 @@ describe("notification prefs SoT", () => {
     expect(row.prefs.title_returned.email).toBe(true);
   });
 
-  it("sections groups with hairline + air — one plate, not a card per group", () => {
-    expect(NOTIFICATION_PREF_WRAP_CLASS).toContain(HOUSE_MODULE_CLASS);
-    expect(NOTIFICATION_PREF_WRAP_CLASS).toContain(HOUSE_CARD_PAD);
+  it("uses house inset groups — one SETTINGS_GROUP stack per family, not a wrap sheet", () => {
     expect(NOTIFICATION_PREF_WRAP_CLASS).toContain(SETTINGS_CONTENT_MEASURE_CLASS);
+    expect(NOTIFICATION_PREF_WRAP_CLASS).toContain(HOUSE_SECTION_AIR_CLASS);
+    expect(NOTIFICATION_PREF_WRAP_CLASS).not.toContain(HOUSE_MODULE_CLASS);
+    expect(NOTIFICATION_PREF_WRAP_CLASS).not.toContain(HOUSE_CARD_PAD);
+    expect(NOTIFICATION_PREF_MATRIX_CLASS).toBe(`flex flex-col ${HOUSE_SECTION_AIR_CLASS}`);
+    expect(NOTIFICATION_PREF_MATRIX_CLASS).not.toContain("divide-y");
     expect(NOTIFICATION_PREF_HEAD_CLASS).toContain("grid-cols-[minmax(0,1fr)_auto_auto]");
+    expect(NOTIFICATION_PREF_HEAD_CLASS).toContain("items-center");
+    expect(NOTIFICATION_PREF_HEAD_CLASS).not.toContain("items-end");
     expect(NOTIFICATION_PREF_ROW_CLASS).toContain("grid-cols-[minmax(0,1fr)_auto_auto]");
-    expect(NOTIFICATION_PREF_SECTION_CLASS).not.toContain(HOUSE_MODULE_CLASS);
-    expect(NOTIFICATION_PREF_SECTION_CLASS).not.toContain(HOUSE_CARD_PAD);
-    expect(NOTIFICATION_PREF_SECTION_CLASS).toContain("py-[var(--space-8)]");
-    expect(NOTIFICATION_PREF_SECTION_CLASS).toContain("first:pt-0");
-    expect(NOTIFICATION_PREF_MATRIX_CLASS).toBe("flex flex-col divide-y divide-hairline");
+    expect(NOTIFICATION_PREF_ROW_CLASS).toContain("leading-5");
+    expect(NOTIFICATION_PREF_ROW_CLASS).toContain("py-[var(--space-3)]");
     expect(NOTIFICATION_PREF_TITLE_CLASS).toBe(SETTINGS_PREF_TITLE_CLASS);
-    expect(NOTIFICATION_PREF_HEAD_CLASS).toContain("items-end");
     expect(NOTIFICATION_PREF_CHANNEL_HEAD_CLASS).toBe("t-body-sm text-ink-3");
     expect(NOTIFICATION_PREF_CHANNEL_HEAD_CLASS).not.toContain("t-label");
-    expect(NOTIFICATION_PREF_LIST_CLASS).not.toContain("divide-y");
-    expect(NOTIFICATION_PREF_ROW_CLASS).toContain("py-[var(--space-3)]");
+    expect(SETTINGS_GROUP_CLASS).toContain(HOUSE_MODULE_CLASS);
+    expect(SETTINGS_GROUP_LIST_CLASS).toContain("divide-y divide-hairline");
+    expect(SETTINGS_GROUP_STACK_CLASS).toContain("gap-[var(--space-2)]");
+    expect(SETTINGS_GROUP_LABEL_CLASS).toBe("t-label text-ink-3");
     expect(NOTIFICATION_PREF_SWITCH_TRACK_CLASS).toContain("h-5");
     expect(NOTIFICATION_PREF_SWITCH_TRACK_CLASS).toContain("w-9");
     expect(NOTIFICATION_PREF_SWITCH_TRACK_CLASS).not.toContain("h-6");
@@ -129,7 +137,15 @@ describe("notification prefs SoT", () => {
     expect(NOTIFICATION_PREF_SWITCH_OFF_CLASS).toBe("bg-ink-3/40");
     const switchSrc = readFileSync("src/components/settings/notification-preferences.tsx", "utf8");
     expect(switchSrc).toContain("function PrefSwitch");
+    expect(switchSrc).toContain("function ChannelHead");
+    expect(switchSrc).not.toContain("function SectionHead");
     expect(switchSrc).toContain("NOTIFICATION_PREF_WRAP_CLASS");
+    expect(switchSrc).toContain("SETTINGS_GROUP_STACK_CLASS");
+    expect(switchSrc).toContain("SETTINGS_GROUP_LABEL_CLASS");
+    expect(switchSrc).toContain("SETTINGS_GROUP_CLASS");
+    expect(switchSrc).toContain("SETTINGS_GROUP_LIST_CLASS");
+    expect(switchSrc).not.toContain("NOTIFICATION_PREF_SECTION_CLASS");
+    expect(switchSrc).not.toContain("NOTIFICATION_PREF_LIST_CLASS");
     expect(switchSrc).not.toContain("from \"@/components/ui/switch\"");
     expect(existsSync("src/components/ui/switch.tsx")).toBe(false);
     expect(switchSrc).not.toContain("h-6 w-10");

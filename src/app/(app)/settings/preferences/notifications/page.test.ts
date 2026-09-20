@@ -8,7 +8,7 @@ import {
   NOTIFICATION_PREF_DEFAULTS,
   NOTIFICATION_PREFS,
 } from "@/lib/notification-prefs";
-import { SETTINGS } from "@/lib/settings";
+import { SETTINGS, SETTINGS_GROUP_CLASS, SETTINGS_GROUP_LABEL_CLASS } from "@/lib/settings";
 import { getOrgContext } from "@/lib/supabase/context";
 import SettingsPreferencesNotificationsPage from "./page";
 
@@ -52,6 +52,11 @@ describe("SettingsPreferencesNotificationsPage", () => {
     expect(html).toContain(NOTIFICATION_PREFS.helper);
     expect(html).toContain(`href="${SETTINGS.preferencesHref}"`);
     expect(html).toContain('data-settings-notification-matrix=""');
+    expect(html).toContain(SETTINGS_GROUP_CLASS);
+    expect(html).toContain(
+      `<h2 class="${SETTINGS_GROUP_LABEL_CLASS} px-[var(--space-4)]">${NOTIFICATION_PREFS.groups.aggregation}</h2>`,
+    );
+    expect(html.match(/data-settings-group=""/g)?.length).toBe(5);
     expect(html).toContain('data-settings-notification-switch="title_returned:in_app"');
     expect(html).not.toContain(SETTINGS.themeHelper);
     expect(html).not.toContain('data-settings-appearance=""');

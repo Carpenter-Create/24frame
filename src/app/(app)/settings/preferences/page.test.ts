@@ -9,12 +9,18 @@ import { HOUSE_MODULE_CLASS } from "@/lib/house-shell";
 import {
   NOTIFICATION_PREF_DEFAULTS,
   NOTIFICATION_PREF_EVENTS,
-  NOTIFICATION_PREF_SECTION_CLASS,
   NOTIFICATION_PREF_SWITCH_TRACK_CLASS,
   NOTIFICATION_PREF_WRAP_CLASS,
   NOTIFICATION_PREFS,
 } from "@/lib/notification-prefs";
-import { SETTINGS, SETTINGS_CONTENT_MEASURE_CLASS } from "@/lib/settings";
+import {
+  SETTINGS,
+  SETTINGS_CONTENT_MEASURE_CLASS,
+  SETTINGS_GROUP_CLASS,
+  SETTINGS_GROUP_LABEL_CLASS,
+  SETTINGS_GROUP_LIST_CLASS,
+  SETTINGS_GROUP_STACK_CLASS,
+} from "@/lib/settings";
 import { getOrgContext } from "@/lib/supabase/context";
 import SettingsPreferencesPage from "./page";
 
@@ -106,14 +112,26 @@ describe("SettingsPreferencesPage", () => {
     expect(html).toContain(APPEARANCE_SETTINGS_CARD_CLASS);
     expect(html).toContain(NOTIFICATION_PREF_WRAP_CLASS);
     expect(html).toContain('data-settings-notification-wrap=""');
-    expect(html).toContain(NOTIFICATION_PREF_SECTION_CLASS);
+    expect(NOTIFICATION_PREF_WRAP_CLASS).not.toContain(HOUSE_MODULE_CLASS);
+    expect(html).toContain(SETTINGS_GROUP_STACK_CLASS);
+    expect(html).toContain(SETTINGS_GROUP_LABEL_CLASS);
+    expect(html).toContain(SETTINGS_GROUP_CLASS);
+    expect(html).toContain(SETTINGS_GROUP_LIST_CLASS);
     expect(html).toContain(HOUSE_MODULE_CLASS);
-    expect(NOTIFICATION_PREF_SECTION_CLASS).not.toContain(HOUSE_MODULE_CLASS);
+    expect(html.match(/data-settings-group=""/g)?.length).toBe(5);
+    expect(html.match(/data-settings-notification-section="/g)?.length).toBe(5);
+    expect(html.match(/data-settings-notification-channel-head=""/g)?.length).toBe(5);
     expect(html).toContain("divide-y divide-hairline");
-    expect(html).toContain("py-[var(--space-8)]");
+    expect(html).not.toContain("py-[var(--space-8)]");
     expect(html).toContain(NOTIFICATION_PREF_SWITCH_TRACK_CLASS);
     expect(html).toContain("h-5 w-9");
     expect(html).not.toContain("h-6 w-10");
+    expect(html).toContain(
+      `<h2 class="${SETTINGS_GROUP_LABEL_CLASS} px-[var(--space-4)]">${NOTIFICATION_PREFS.groups.aggregation}</h2>`,
+    );
+    expect(html).toContain(
+      `<h2 class="${SETTINGS_GROUP_LABEL_CLASS} px-[var(--space-4)]">${NOTIFICATION_PREFS.groups.reporting}</h2>`,
+    );
     expect(html).toContain(`data-settings-notification-section="aggregation"`);
     expect(html).toContain(`data-settings-notification-section="reporting"`);
     expect(html).toContain(`data-settings-notification-switch="title_returned:in_app"`);

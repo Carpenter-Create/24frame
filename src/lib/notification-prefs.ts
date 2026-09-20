@@ -17,7 +17,7 @@
 
 import { z } from "zod";
 
-import { HOUSE_CARD_PAD, HOUSE_MODULE_CLASS, HOUSE_SECTION_AIR_CLASS } from "@/lib/house-shell";
+import { HOUSE_SECTION_AIR_CLASS } from "@/lib/house-shell";
 import type { NotificationKind } from "@/lib/notifications";
 import { SETTINGS_CONTENT_MEASURE_CLASS, SETTINGS_PREF_TITLE_CLASS } from "@/lib/settings";
 
@@ -226,21 +226,21 @@ export const NOTIFICATION_PREF_GROUPS: readonly {
   },
 ];
 
-// One soft plate around Notifications. Groups inside are titles +
-// hairline + air — not a muted card per group (Adam lock).
+// Discrete inset groups — one SETTINGS_GROUP stack per family
+// (Aggregation, Reporting, Social, Education, Account). Quiet
+// label above the plate. In-app / Email chrome lives inside
+// each plate, not on the group-title baseline. This wrap is
+// measure + air only. Do not restore a continuous sheet.
 export const NOTIFICATION_PREF_WRAP_CLASS =
-  `${HOUSE_MODULE_CLASS} ${HOUSE_CARD_PAD} ${SETTINGS_CONTENT_MEASURE_CLASS} flex flex-col ${HOUSE_SECTION_AIR_CLASS}`;
+  `${SETTINGS_CONTENT_MEASURE_CLASS} flex flex-col ${HOUSE_SECTION_AIR_CLASS}`;
 export const NOTIFICATION_PREF_INTRO_CLASS = "flex flex-col gap-[var(--space-2)]";
-export const NOTIFICATION_PREF_MATRIX_CLASS = "flex flex-col divide-y divide-hairline";
-export const NOTIFICATION_PREF_SECTION_CLASS =
-  "flex flex-col gap-[var(--space-3)] py-[var(--space-8)] first:pt-0 last:pb-0";
+export const NOTIFICATION_PREF_MATRIX_CLASS = `flex flex-col ${HOUSE_SECTION_AIR_CLASS}`;
 export const NOTIFICATION_PREF_TITLE_CLASS = SETTINGS_PREF_TITLE_CLASS;
 export const NOTIFICATION_PREF_HEAD_CLASS =
-  "grid grid-cols-[minmax(0,1fr)_auto_auto] items-end gap-[var(--space-4)]";
+  "grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-[var(--space-4)] py-[var(--space-2)]";
 export const NOTIFICATION_PREF_CHANNEL_HEAD_CLASS = "t-body-sm text-ink-3";
-export const NOTIFICATION_PREF_LIST_CLASS = "flex flex-col";
 export const NOTIFICATION_PREF_ROW_CLASS =
-  "grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-[var(--space-4)] py-[var(--space-3)] t-body text-ink";
+  "grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-[var(--space-4)] py-[var(--space-3)] t-body leading-5 text-ink";
 export const NOTIFICATION_PREF_CHANNEL_CLASS = "flex w-12 justify-center";
 // Compact house switch. Track 20×36, thumb 16. Off inset 2 → on
 // translate 36 − 16 − 2 = 18. Accent on. Off wash reads on the
