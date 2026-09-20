@@ -34,7 +34,9 @@ import {
   HOUSE_PERIOD_SELECTED_CLASS,
   HOUSE_RAIL_ACTIVE_CLASS,
   HOUSE_RAIL_IDLE_CLASS,
+  HOUSE_RAIL_ICON_CLASS,
   HOUSE_RAIL_ITEM_CLASS,
+  HOUSE_RAIL_LABEL_CLASS,
   HOUSE_RAIL_PANEL_CLASS,
   HOUSE_RAIL_TITLE_CLASS,
   HOUSE_RELATED_GAP_CLASS,
@@ -177,8 +179,13 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(HOUSE_RAIL_FLOAT_CLASS).toContain("left-[var(--chrome-gutter)]");
     expect(HOUSE_SEARCH_PILL_CLASS).toBe("rounded-full border-0 bg-surface-muted");
     expect(HOUSE_RAIL_ITEM_CLASS).toContain("rounded-full");
+    expect(HOUSE_RAIL_ITEM_CLASS).toContain("inline-flex");
+    expect(HOUSE_RAIL_ITEM_CLASS).toContain("w-full");
+    expect(HOUSE_RAIL_ITEM_CLASS).toContain("text-left");
     expect(HOUSE_RAIL_ITEM_CLASS).toContain("t-body leading-4");
     expect(HOUSE_RAIL_ITEM_CLASS).not.toContain("t-body-sm");
+    expect(HOUSE_RAIL_ICON_CLASS).toBe("flex size-5 shrink-0 items-center justify-center");
+    expect(HOUSE_RAIL_LABEL_CLASS).toBe("min-w-0 flex-1 truncate text-left");
     expect(HOUSE_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash text-accent");
     expect(HOUSE_RAIL_ACTIVE_CLASS).not.toMatch(/font-(?:normal|medium|semibold|bold)/);
     expect(HOUSE_RAIL_IDLE_CLASS).toBe("text-ink hover:bg-surface-muted");

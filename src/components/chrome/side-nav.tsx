@@ -5,7 +5,14 @@ import { usePathname, useRouter } from "next/navigation";
 import { useRef } from "react";
 import { SocialCreateSheet } from "@/components/social/social-create-sheet";
 import { railDestinations, isSocialCreateDest, STAFF_RAIL_EYEBROW, type NavItem } from "@/lib/nav";
-import { HOUSE_RAIL_ACTIVE_CLASS, HOUSE_RAIL_IDLE_CLASS, HOUSE_RAIL_ITEM_CLASS, HOUSE_RAIL_TITLE_CLASS } from "@/lib/house-shell";
+import {
+  HOUSE_RAIL_ACTIVE_CLASS,
+  HOUSE_RAIL_ICON_CLASS,
+  HOUSE_RAIL_IDLE_CLASS,
+  HOUSE_RAIL_ITEM_CLASS,
+  HOUSE_RAIL_LABEL_CLASS,
+  HOUSE_RAIL_TITLE_CLASS,
+} from "@/lib/house-shell";
 import { cn } from "@/lib/cn";
 import type { WorkspaceMode } from "@/lib/workspace";
 import { SocialIcon } from "@/components/social/social-icon";
@@ -54,16 +61,19 @@ export function SideNav({
       active ? HOUSE_RAIL_ACTIVE_CLASS : HOUSE_RAIL_IDLE_CLASS,
     );
     const glyph = social ? (
-      <SocialIcon
-        name={socialNavIconName(item.href)}
-        active={active}
-        size={SOCIAL_ICON_SIZE_NAV}
-        className="shrink-0"
-      />
+      <span data-side-nav-icon="" className={HOUSE_RAIL_ICON_CLASS}>
+        <SocialIcon
+          name={socialNavIconName(item.href)}
+          active={active}
+          size={SOCIAL_ICON_SIZE_NAV}
+        />
+      </span>
     ) : (
       <NavGlyph item={item} active={active} />
     );
-    const label = !collapsed ? <span className="flex-1 truncate">{item.label}</span> : null;
+    const label = !collapsed ? (
+      <span className={HOUSE_RAIL_LABEL_CLASS}>{item.label}</span>
+    ) : null;
     if (social && isSocialCreateDest(item)) {
       return (
         <SocialCreateSheet

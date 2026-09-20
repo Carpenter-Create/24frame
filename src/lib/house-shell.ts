@@ -62,7 +62,16 @@ export const HOUSE_HEADER_SEARCH_GAP_CLASS = "gap-[var(--space-4)]";
 export const HOUSE_RAIL_TITLE_CLASS = "px-2 pb-1 t-label text-ink-3";
 
 export const HOUSE_RAIL_ITEM_CLASS =
-  "relative flex items-center rounded-full t-body leading-4 t-rail transition-colors";
+  "relative inline-flex w-full items-center rounded-full text-left t-body leading-4 t-rail transition-colors";
+
+// Dest icon column + label start. Social glyphs are 20 (size-5);
+// Create Plus must share this box so "Create" lines up with Home ·
+// Explore · Messages · Profile. Button triggers use the same row
+// class as Links — not a filled CTA pill. Adam 2026-09-20.
+export const HOUSE_RAIL_ICON_CLASS =
+  "flex size-5 shrink-0 items-center justify-center";
+
+export const HOUSE_RAIL_LABEL_CLASS = "min-w-0 flex-1 truncate text-left";
 
 // Active = wash + accent. Idle inherits body 420. t-rail is tracking only
 // (A4). No font-normal (400). Differentiate by color only; do not bold
@@ -135,7 +144,7 @@ export const HOUSE_SEGMENTED_THUMB_CLASS =
   "pointer-events-none absolute inset-y-0 rounded-full bg-accent transition-[left,width] duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none";
 
 // Shared pill item box. Height is this pad + t-body-sm only — one SoT
-// for workspace / dest / news SegmentedTrack items and Topics. rail
+// for workspace / dest / news SegmentedTrack items and Topics rail
 // chips. Do not fork a shorter display chip.
 export const HOUSE_PILL_ITEM_CLASS =
   `inline-flex shrink-0 items-center whitespace-nowrap ${HOUSE_PILL_MEASURE_CLASS}`;
