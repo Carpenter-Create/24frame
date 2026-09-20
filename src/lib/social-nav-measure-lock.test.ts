@@ -65,7 +65,8 @@ describe("Social nav leftover split (shared shell vs Social-local)", () => {
     expect(socialLayout).toContain("export default function SocialLayout");
     expect(socialLayout).not.toContain("export default async function SocialLayout");
     expect(socialLayout).toContain("loadSocialSession()");
-    expect(socialLayout).toContain("return children");
+    expect(socialLayout).toContain("SocialProfileSaveHop");
+    expect(socialLayout).toContain("{children}");
     expect(appShell).not.toMatch(/key=\{pathname\}/);
   });
 

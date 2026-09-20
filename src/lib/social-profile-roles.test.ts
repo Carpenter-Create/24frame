@@ -332,9 +332,13 @@ describe("social profile roles", () => {
     expect(fieldSrc).toContain("onChange(toggleSocialProfileRole");
     expect(fieldSrc).not.toContain("createSocialProfile");
     expect(fieldSrc).not.toContain("await");
-    expect(editSrc).toContain('form.set("crafts"');
+    const saveSoT = readFileSync("src/lib/social-profile-edit.ts", "utf8");
+    expect(saveSoT).toContain('form.set("crafts"');
+    expect(saveSoT).toContain("parseSocialProfileRoles");
+    expect(editSrc).toContain("checkSocialProfileEditSave");
     expect(editSrc).toContain("onChange={setRoles}");
-    expect(editSrc).toMatch(/async function onDone[\s\S]*createSocialProfile/);
+    expect(editSrc).not.toContain("createSocialProfile");
+    expect(editSrc).toContain("persistSocialProfileEdit");
     expect(socialProfileRolesWrite.toString()).not.toMatch(/await|Promise|then/);
     expect(toggleSocialProfileRole.toString()).not.toMatch(/await|Promise|then/);
     expect(socialProfileRolesWrite(["actor", "producer"])).toEqual({

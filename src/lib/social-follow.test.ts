@@ -63,7 +63,7 @@ describe("social follow helpers", () => {
       src.indexOf("export function SocialLikeButton"),
     );
     expect(chunk).toContain("const result = await toggleSocialFollow");
-    expect(chunk).toContain("router.refresh()");
+    expect(chunk).not.toContain("router.refresh()");
     expect(chunk).toContain("setOverride");
     expect(chunk).toContain("pending");
     expect(chunk).toContain("FormError");

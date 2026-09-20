@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { cookies } from "next/headers";
 import { renderServerMarkup } from "@/lib/render-server-markup";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -8,6 +9,7 @@ import { signedAvatarUrl } from "@/lib/s3-avatars";
 import { signedSocialMediaByPostId, signedSocialMediaUrl } from "@/lib/s3-social-media";
 import { SOCIAL, SOCIAL_PROFILE_POSTS_PAGE } from "@/lib/social";
 import { ensureOwnSocialProfileResult } from "@/lib/social-profile";
+import { SOCIAL_PROFILE_OPTIMISTIC_COOKIE } from "@/lib/social-profile-edit";
 import SocialProfilePage from "./page";
 
 vi.mock("next/navigation", () => ({
@@ -15,6 +17,9 @@ vi.mock("next/navigation", () => ({
     throw new Error(`REDIRECT:${to}`);
   }),
   useRouter: () => ({ refresh: vi.fn() }),
+}));
+vi.mock("next/headers", () => ({
+  cookies: vi.fn(async () => ({ get: () => undefined })),
 }));
 vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
@@ -421,5 +426,25 @@ describe("Social profile public face", () => {
     expect(html).toContain("null value in column birth_date");
     expect(html).not.toContain("Ada Lovelace");
     expect(html).not.toContain("data-social-author-history");
+  });
+
+  it("paints a Save-hop cookie identity before the server row lands", async () => {
+    stubClient({ profile: ensured });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+    vi.mocked(cookies).mockResolvedValueOnce({
+      get: (name: string) =>
+        name === SOCIAL_PROFILE_OPTIMISTIC_COOKIE
+          ? {
+              value: encodeURIComponent(
+                JSON.stringify({ handle: "ada", displayName: "Ada Byron" }),
+              ),
+            }
+          : undefined,
+    } as never);
+
+    const html = await renderServerMarkup(await SocialProfilePage());
+    expect(html).toContain("Ada Byron");
+    expect(html).toContain("@ada");
+    expect(html).not.toContain("Ada Lovelace");
   });
 });

@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -503,7 +502,6 @@ export function SocialCreateCompose({
 export { SocialStoryCompose } from "./social-story-studio";
 
 export function SocialProfilePhotoForm() {
-  const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -529,7 +527,6 @@ export function SocialProfilePhotoForm() {
       setError(res.error);
       return;
     }
-    router.refresh();
   }
 
   return (
@@ -687,7 +684,6 @@ function SocialFollowButtonView({
   stretch: boolean;
   queryClient: ReturnType<typeof useAppQueryClient>;
 }) {
-  const router = useRouter();
   const [override, setOverride] = useState<boolean | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
@@ -738,7 +734,6 @@ function SocialFollowButtonView({
             return;
           }
           if (next) setConfirm(true);
-          router.refresh();
         }}
       >
         <input type="hidden" name="followee_id" value={followeeId} />

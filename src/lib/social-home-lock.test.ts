@@ -511,7 +511,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(create).not.toContain("PageHeader");
     expect(profile).not.toContain("PageHeader");
     expect(profile).not.toContain("AccountProfileForm");
-    expect(profile).toContain("SocialProfileIdentity");
+    expect(profile).toContain("SocialOwnProfileFace");
     expect(profile).toContain("SOCIAL.profile.edit");
     expect(profile).toContain("SOCIAL_ROUTES.profileEdit");
     expect(profile).not.toContain('href="#social-profile-edit"');
@@ -527,7 +527,10 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(profile).toContain("SocialProfileTabs");
     expect(profile).toContain("film-slate");
     expect(profile).toContain("creditsEmpty");
-    expect(profile).toContain("SocialWelcomeVideo");
+    expect(profile).toContain("SocialOwnProfileFace");
+    expect(readFileSync("src/components/social/social-own-profile.tsx", "utf8")).toContain(
+      "SocialWelcomeVideo",
+    );
     expect(SOCIAL_PROFILE_TABS).toEqual(["posts", "highlights", "credits"]);
     expect(SOCIAL.profile.creditsTab).toBe("Credits");
     expect(SOCIAL.profile.creditsEmpty).toBe("No credits yet");

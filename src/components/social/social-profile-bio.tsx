@@ -34,11 +34,13 @@ export function SocialProfileBioEditor({
   bio,
   onBack,
   onSaved,
+  onPersistError,
 }: {
   profileId?: string;
   bio: string;
   onBack?: () => void;
   onSaved?: (bio: string) => void;
+  onPersistError?: (error: string) => void;
 }) {
   const router = useRouter();
   const queryClient = useAppQueryClient();
@@ -46,27 +48,26 @@ export function SocialProfileBioEditor({
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
 
-  async function onDone() {
+  function onDone() {
+    if (pending) return;
     setError("");
-    setPending(true);
+    const next = normalizeBio(value) ?? "";
     const form = new FormData();
     form.set("bio", value);
-    const nextBio = normalizeBio(value) ?? "";
+    setPending(true);
     if (queryClient && profileId) {
-      applyOptimisticSocialProfilePatch(queryClient, profileId, { bio: nextBio || null });
+      applyOptimisticSocialProfilePatch(queryClient, profileId, { bio: next || null });
     }
-    const result = await updateSocialBio(form);
-    setPending(false);
-    if (result.error) {
+    if (onSaved) onSaved(next);
+    else router.push(SOCIAL_ROUTES.profileEdit);
+    void updateSocialBio(form).then((result) => {
+      if (!result.error) return;
       if (queryClient && profileId) invalidateSocialQueries(queryClient, { profileId });
       setError(result.error);
-      return;
-    }
-    if (onSaved) {
-      onSaved(normalizeBio(value) ?? "");
-      return;
-    }
-    router.push(SOCIAL_ROUTES.profileEdit);
+      onPersistError?.(result.error);
+    }).finally(() => {
+      setPending(false);
+    });
   }
 
   return (
