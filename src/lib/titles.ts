@@ -78,10 +78,11 @@ export const TITLE_DETAIL_SURFACE_CLASS = HOUSE_PHONE_CONTAIN_CLASS;
 export const TITLE_DETAIL_LEDGER_ROW_CLASS =
   `${HOUSE_PHONE_STACK_CLASS} gap-[var(--space-1)] px-5 py-3 md:flex-row md:items-start md:justify-between md:gap-4`;
 
-export const TITLE_DETAIL_LEDGER_COPY_CLASS = `${HOUSE_PHONE_STACK_CLASS} gap-0.5`;
+export const TITLE_DETAIL_LEDGER_COPY_CLASS =
+  `${HOUSE_PHONE_STACK_CLASS} gap-0.5 md:w-auto md:shrink-0`;
 
 export const TITLE_DETAIL_LEDGER_META_CLASS =
-  `${HOUSE_PHONE_WRAP_CLASS} t-body-sm text-ink-2 md:shrink-0 md:text-right`;
+  `${HOUSE_PHONE_WRAP_CLASS} t-body-sm text-ink-2 md:text-right`;
 
 export const TITLE_DETAIL_ASSET_FILE_CLASS =
   `${HOUSE_PHONE_WRAP_CLASS} t-body-sm text-ink-3`;
