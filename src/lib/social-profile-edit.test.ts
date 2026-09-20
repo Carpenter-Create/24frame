@@ -251,8 +251,9 @@ describe("Social profile optimistic Save SoT", () => {
       ok: false,
       error: SOCIAL.profile.imdbInvalid,
     });
-    expect(checkSocialProfileEditSave({ ...draft, firstName: "" }).error).toBe(
-      SOCIAL.profile.firstNameRequired,
-    );
+    const missingName = checkSocialProfileEditSave({ ...draft, firstName: "" });
+    expect(missingName.ok).toBe(false);
+    if (missingName.ok) return;
+    expect(missingName.error).toBe(SOCIAL.profile.firstNameRequired);
   });
 });

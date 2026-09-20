@@ -30,26 +30,61 @@ export function SocialOwnProfileFace({
   profileId,
   stats,
   actions,
-  ...server
+  handle,
+  displayName,
+  bio,
+  photoUrl,
+  welcomeVideoUrl,
+  crafts,
+  topics,
+  imdbUrl,
+  websiteUrl,
 }: OwnProfileFace) {
+  const server = {
+    handle,
+    displayName,
+    bio,
+    photoUrl,
+    welcomeVideoUrl,
+    crafts,
+    topics,
+    imdbUrl,
+    websiteUrl,
+  };
   const overlay = useSocialProfileOptimistic();
   const merged = mergeSocialProfileIdentity(server, overlay);
-  const bio = merged.bio.trim() ? merged.bio : fallbackBio;
+  const shownBio = merged.bio.trim() ? merged.bio : fallbackBio;
   useEffect(() => {
-    if (overlay && socialProfileOptimisticMatches(server, overlay)) {
+    if (
+      overlay &&
+      socialProfileOptimisticMatches(
+        {
+          handle,
+          displayName,
+          bio,
+          photoUrl,
+          welcomeVideoUrl,
+          crafts,
+          topics,
+          imdbUrl,
+          websiteUrl,
+        },
+        overlay,
+      )
+    ) {
       clearSocialProfileOptimistic();
     }
   }, [
     overlay,
-    server.handle,
-    server.displayName,
-    server.bio,
-    server.photoUrl,
-    server.welcomeVideoUrl,
-    server.imdbUrl,
-    server.websiteUrl,
-    server.crafts,
-    server.topics,
+    handle,
+    displayName,
+    bio,
+    photoUrl,
+    welcomeVideoUrl,
+    crafts,
+    topics,
+    imdbUrl,
+    websiteUrl,
   ]);
 
   return (
@@ -58,7 +93,7 @@ export function SocialOwnProfileFace({
         name={merged.displayName}
         handle={merged.handle}
         photoUrl={merged.photoUrl}
-        bio={bio}
+        bio={shownBio}
         roles={merged.crafts}
         topics={merged.topics}
         websiteUrl={merged.websiteUrl}
