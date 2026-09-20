@@ -5,11 +5,14 @@ import { NOTIFICATION_PREF_DEFAULTS, parseNotificationPrefsRow } from "@/lib/not
 import { SOCIAL } from "@/lib/social";
 import {
   FOLLOW_CONFIRM_MS,
+  filterSocialFollowsPeople,
+  followButtonLabel,
   followedConfirmCopy,
   isFollowUniqueViolation,
   newFollowerNoticeCopy,
   newFollowerSourceRefs,
   shouldNotifyNewFollower,
+  socialFollowsSearchMatches,
 } from "@/lib/social-follow";
 
 describe("social follow helpers", () => {
@@ -66,6 +69,9 @@ describe("social follow helpers", () => {
     expect(chunk).toContain("FormError");
     expect(chunk).toContain("disabled={pending}");
     expect(chunk).toContain("followedConfirmCopy");
+    expect(chunk).toContain("followButtonLabel");
+    expect(chunk).toContain("followsYou");
+    expect(chunk).toContain("SOCIAL_FOLLOW_COMPACT_IDLE_CLASS");
     expect(chunk).toContain("FOLLOW_CONFIRM_MS");
     expect(chunk).toContain("data-social-follow-toast");
     expect(chunk).toContain("InlineNotice");
@@ -78,13 +84,36 @@ describe("social follow helpers", () => {
     expect(chunk).not.toMatch(/await toggleSocialFollow\(formData\);\s*}/);
   });
 
-  it("keeps one follow button for public profile and Suggested people", () => {
+  it("labels Follow, Following, and Follow back from one helper", () => {
+    expect(followButtonLabel(false)).toBe(SOCIAL.follow.follow);
+    expect(followButtonLabel(true)).toBe(SOCIAL.follow.following);
+    expect(followButtonLabel(false, true)).toBe(SOCIAL.follow.followBack);
+    expect(followButtonLabel(true, true)).toBe(SOCIAL.follow.following);
+    expect(SOCIAL.follow.followBack).toBe("Follow back");
+  });
+
+  it("filters the follow list by handle or display name", () => {
+    const people = [
+      { handle: "sunflowerlane", display_name: "Kiya Shaferer" },
+      { handle: "gc.gramms", display_name: "Gcinita Gc Lukhele" },
+    ];
+    expect(socialFollowsSearchMatches(people[0]!, "sun")).toBe(true);
+    expect(socialFollowsSearchMatches(people[0]!, "kiya")).toBe(true);
+    expect(socialFollowsSearchMatches(people[0]!, "gc")).toBe(false);
+    expect(filterSocialFollowsPeople(people, "  GC  ").map((row) => row.handle)).toEqual(["gc.gramms"]);
+    expect(filterSocialFollowsPeople(people, "")).toHaveLength(2);
+  });
+
+  it("keeps one follow button for public profile, Suggested people, and the follow list", () => {
     const profile = readFileSync("src/app/(app)/social/u/[handle]/page.tsx", "utf8");
     const suggested = readFileSync("src/components/social/social-for-you.tsx", "utf8");
+    const list = readFileSync("src/components/social/social-follows-list.tsx", "utf8");
     expect(profile).toContain("<SocialFollowButton");
     expect(suggested).toContain("<SocialFollowButton");
+    expect(list).toContain("<SocialFollowButton");
     expect(profile).not.toContain("toggleSocialFollow");
     expect(suggested).not.toContain("toggleSocialFollow");
+    expect(list).not.toContain("toggleSocialFollow");
   });
 
   it("counts live follow rows instead of leftover follower_count", () => {

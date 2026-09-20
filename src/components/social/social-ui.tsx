@@ -21,6 +21,7 @@ import {
   socialGroupHref,
   socialMemberHref,
   socialPersonIdentity,
+  socialProfileFollowsHref,
   socialRelativeTime,
 } from "@/lib/social";
 import {
@@ -233,18 +234,26 @@ export function SocialProfileIdentity({
               ) : null}
               {stats ? (
                 <div data-social-profile-stats="" className="mt-2 flex flex-wrap gap-4 t-body-sm">
-                  <p>
+                  <p data-social-profile-stat="posts">
                     <span className="font-semibold text-ink">{formatSocialCount(stats.posts)}</span>{" "}
                     <span className="text-ink-2">{SOCIAL.profile.postsStat}</span>
                   </p>
-                  <p>
+                  <Link
+                    href={socialProfileFollowsHref(handle, "followers")}
+                    data-social-profile-stat="followers"
+                    className="min-w-0"
+                  >
                     <span className="font-semibold text-ink">{formatSocialCount(stats.followers)}</span>{" "}
                     <span className="text-ink-2">{SOCIAL.profile.followersStat}</span>
-                  </p>
-                  <p>
+                  </Link>
+                  <Link
+                    href={socialProfileFollowsHref(handle, "following")}
+                    data-social-profile-stat="following"
+                    className="min-w-0"
+                  >
                     <span className="font-semibold text-ink">{formatSocialCount(stats.following)}</span>{" "}
                     <span className="text-ink-2">{SOCIAL.profile.followingStat}</span>
-                  </p>
+                  </Link>
                 </div>
               ) : null}
               {rolesLine ? (

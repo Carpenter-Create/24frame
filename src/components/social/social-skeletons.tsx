@@ -122,6 +122,31 @@ export function SocialProfileSkeleton() {
   );
 }
 
+export function SocialFollowsSkeleton() {
+  return (
+    <div data-social-follows-skeleton="" className="flex min-w-0 flex-1 flex-col">
+      <Skeleton className="h-14 w-full" />
+      <div className="flex gap-4 px-4 py-3">
+        <Skeleton className="h-8 flex-1" />
+        <Skeleton className="h-8 flex-1" />
+      </div>
+      <div className="px-4 py-3">
+        <Skeleton className="h-10 w-full rounded-full" />
+      </div>
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="flex items-center gap-3 px-4 py-2.5">
+          <Skeleton className={SOCIAL_AVATAR_SM_CLASS} />
+          <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+            <Skeleton className="h-3.5 w-1/3" />
+            <Skeleton className="h-3 w-1/2" />
+          </div>
+          <Skeleton className="h-7 w-16 rounded-[8px]" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function SocialProfileEditSkeleton() {
   return (
     <div data-social-profile-edit-skeleton="" className={SOCIAL_PROFILE_EDIT_HOST_CLASS}>

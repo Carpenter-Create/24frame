@@ -6,6 +6,7 @@ import {
   SOCIAL_EXPLORE_PEOPLE_LIMIT,
   SOCIAL_EXPLORE_POSTS_LIMIT,
   SOCIAL_FOLLOWEES_LIMIT,
+  SOCIAL_FOLLOWS_LIST_LIMIT,
   SOCIAL_FOLLOWING_WALL_CURSOR_PARAM,
   SOCIAL_FOLLOWING_WALL_LIMIT,
   SOCIAL_FOR_YOU_PEOPLE_LIMIT,
@@ -22,6 +23,7 @@ import {
 describe("Social Home independent caps", () => {
   it("names followees, wall, stories, and Explore separately under PostgREST max_rows", () => {
     expect(SOCIAL_FOLLOWEES_LIMIT).toBe(UNPAGINATED_MAX);
+    expect(SOCIAL_FOLLOWS_LIST_LIMIT).toBe(UNPAGINATED_MAX);
     expect(SOCIAL_FOLLOWING_WALL_LIMIT).toBe(50);
     expect(SOCIAL_STORIES_RAIL_LIMIT).toBe(80);
     expect(SOCIAL_EXPLORE_PEOPLE_LIMIT).toBe(20);

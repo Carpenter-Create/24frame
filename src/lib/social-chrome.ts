@@ -194,6 +194,9 @@ export const SOCIAL_COMPOSER_MEDIA_CLASS =
 export const SOCIAL_FOLLOW_COMPACT_CLASS =
   "inline-flex items-center rounded-[8px] bg-accent px-[10px] py-[5px] text-[11px] font-semibold text-accent-contrast";
 
+export const SOCIAL_FOLLOW_COMPACT_IDLE_CLASS =
+  "inline-flex items-center rounded-[8px] border border-hairline bg-surface px-[10px] py-[5px] text-[11px] font-semibold text-ink";
+
 export const SOCIAL_FOR_YOU_CARD_CLASS =
   `${HOUSE_MODULE_CLASS} flex w-full flex-col gap-2 p-4`;
 

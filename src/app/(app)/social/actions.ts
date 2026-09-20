@@ -53,6 +53,7 @@ import {
   socialNameRequiredError,
   socialMediaRuleMessage,
   socialProfileHref,
+  socialProfileFollowsHref,
 } from "@/lib/social";
 import {
   isFollowUniqueViolation,
@@ -333,9 +334,15 @@ export async function toggleSocialFollow(formData: FormData): Promise<ActionResu
 
   revalidatePath(SOCIAL_ROUTES.home);
   revalidatePath(SOCIAL_ROUTES.profile);
-  if (profile.handle) revalidatePath(socialProfileHref(profile.handle));
+  if (profile.handle) {
+    revalidatePath(socialProfileHref(profile.handle));
+    revalidatePath(socialProfileFollowsHref(profile.handle));
+  }
   const handle = String(formData.get("handle") ?? "").trim();
-  if (handle) revalidatePath(socialProfileHref(handle));
+  if (handle) {
+    revalidatePath(socialProfileHref(handle));
+    revalidatePath(socialProfileFollowsHref(handle));
+  }
   return {};
 }
 
