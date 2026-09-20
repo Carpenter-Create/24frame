@@ -244,8 +244,8 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("md:size-[var(--header-control-size)]");
     expect(HOUSE_HEADER_TRAILING_AVATAR_CLASS).toContain("md:h-[var(--header-avatar-size)]");
     expect(leadSrc).toContain('style={{ minHeight: "var(--header-height)" }}');
-    expect(HOUSE_LEAD_CHROME_CLASS).toContain("max-md:h-auto");
-    expect(HOUSE_LEAD_CHROME_CLASS).toContain("md:h-[var(--header-height)]");
+    expect(HOUSE_LEAD_CHROME_CLASS).toContain("h-[var(--header-height)]");
+    expect(HOUSE_LEAD_CHROME_CLASS).not.toContain("max-md:h-auto");
   });
 
   it("evens phone trailing theme · AI · bell · avatar with one gap and no overlapping hits", () => {
@@ -398,7 +398,7 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(shell).toContain('logoVisible="always"');
     expect(shell).not.toContain('homeChrome ? "always" : "desktop"');
     expect(leadLib).toContain("Asset 8 emblem on every workspace");
-    expect(leadLib).toContain("Emblem owns the phone left alone");
+    expect(leadLib).toContain("Emblem owns the phone left next to the workspace trigger");
     expect(APP_HEADER_LEADING_CLASS).toContain("gap-[var(--space-3)]");
     expect(APP_HEADER_LEADING_CLASS).not.toMatch(/(?:^|\s)(?:max-md:)?overflow-hidden(?:\s|$)/);
 

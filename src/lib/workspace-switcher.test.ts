@@ -65,7 +65,7 @@ import {
   workspaceSwitcherTriggerClass,
 } from "./workspace-switcher";
 import { persistWorkspaceCookie, workspaceHome } from "./workspace";
-import { HOUSE_PHONE_WRAP_CLASS, housePhoneForbidsTruncate } from "./house-phone-stack";
+import { housePhoneForbidsTruncate } from "./house-phone-stack";
 
 describe("workspace switcher lock", () => {
   it("names the control Workspace and the quiet menu heading Workspaces", () => {
@@ -146,9 +146,11 @@ describe("workspace switcher lock", () => {
     expect(WORKSPACE_SWITCHER_MARK_CLASS).toContain("size-6");
     expect(WORKSPACE_SWITCHER_HEADER_CLASS).toContain("t-label");
     expect(WORKSPACE_SWITCHER_HEADER_CLASS).toContain("text-ink-3");
-    expect(WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS).toBe(HOUSE_PHONE_WRAP_CLASS);
+    expect(WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS).toBe("whitespace-nowrap");
     expect(housePhoneForbidsTruncate(WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS)).toBe(true);
     expect(WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS).not.toContain("truncate");
+    expect(WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS).not.toContain("break-words");
+    expect(WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS).not.toContain("whitespace-normal");
     expect(WORKSPACE_SWITCHER_PANEL_CLASS).toContain("fixed");
     expect(WORKSPACE_SWITCHER_PANEL_CLASS).toContain("z-50");
     expect(WORKSPACE_SWITCHER_PANEL_CLASS).toContain("shadow-none");
@@ -165,11 +167,14 @@ describe("workspace switcher lock", () => {
     expect(APP_HEADER_LEADING_CLASS).not.toContain("gap-[var(--space-1)]");
     expect(APP_HEADER_LEADING_CLASS).not.toMatch(/(?:^|\s)(?:max-md:)?overflow-hidden(?:\s|$)/);
     expect(APP_HEADER_LEADING_CLASS).toContain("overflow-visible");
-    expect(APP_HEADER_LEADING_CLASS).toContain("max-md:flex-col");
-    expect(APP_HEADER_LEADING_CLASS).toContain("max-md:items-start");
-    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).toBe("min-w-0 w-full overflow-visible md:hidden");
-    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).not.toContain("shrink-0");
+    expect(APP_HEADER_LEADING_CLASS).not.toContain("max-md:flex-col");
+    expect(APP_HEADER_LEADING_CLASS).not.toContain("max-md:items-start");
+    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).toBe("shrink-0 overflow-visible md:hidden");
+    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).not.toContain("w-full");
+    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).not.toContain("min-w-0");
     expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).not.toMatch(/overflow-hidden/);
+    expect(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS).toContain("shrink-0");
+    expect(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS).not.toContain("min-w-0");
     expect(WORKSPACE_SWITCHER_HOST_CLASS).toBe("relative min-w-0 overflow-visible");
     expect(WORKSPACE_SWITCHER_HOST_CLASS).not.toMatch(/overflow-hidden/);
     expect(APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS).toBe("hidden md:contents");

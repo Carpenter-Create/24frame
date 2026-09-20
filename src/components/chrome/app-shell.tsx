@@ -252,7 +252,7 @@ export function AppShell({
 
       {/* Full-width top + dest side nav — same HouseLeadChrome as Social.
           Phone IA A: Asset 8 emblem on every workspace + workspace
-          name/mark. Tap opens the workspace sheet. No hamburger.
+          word+chevron. Tap opens the workspace sheet. No hamburger.
           Local dests live in HousePhoneBottomNav. Home dests are Home
           + Industry news. Trailing is search (if needed) · theme ·
           24Frame AI · bell · avatar. Sun/moon is shared immediately
