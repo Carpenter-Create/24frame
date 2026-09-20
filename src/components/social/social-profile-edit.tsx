@@ -144,10 +144,13 @@ export function SocialProfileEditForm({
     if (result.error) {
       if (
         result.error === SOCIAL.profile.handleRequired ||
-        result.error === SOCIAL.profile.handleInvalid
+        result.error === SOCIAL.profile.handleInvalid ||
+        result.error === SOCIAL.profile.handleTaken
       ) {
         setHandleError(result.error);
-      } else setError(result.error);
+      } else {
+        setError(result.error);
+      }
       return;
     }
     router.push(SOCIAL_ROUTES.profile);

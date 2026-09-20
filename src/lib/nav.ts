@@ -69,7 +69,7 @@ export function isHouseAiNavItem(item: NavItem): item is HouseAiNavItem {
 }
 
 // GC's flat nav — only what exists or is v1-scoped. Settings stays deferred.
-// Activity is chrome-level /activity (bell). It is not an Aggregation
+// Notifications is chrome-level /activity (bell peek). It is not an Aggregation
 // rail row. Recent activity stays catalog findings (/attention).
 // Ask 24Frame AI is the shell overlay (`?ai=1`), never a workspace
 // destination and never an Aggregation rail row. Desktop entry is

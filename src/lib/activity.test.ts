@@ -13,6 +13,7 @@ import {
 import {
   ACTIVITY_BELL_OPEN_CAP,
   ACTIVITY_BELL_OPEN_DOT_CLASS,
+  ACTIVITY_BELL_POPOVER_CLASS,
   ACTIVITY_BELL_TRIGGER_CLASS,
   ACTIVITY_BELL_TRIGGER_OPEN_CLASS,
   ACTIVITY_FAMILIES,
@@ -220,9 +221,13 @@ describe("Activity bell cap", () => {
     expect(activityItemHref(OPEN_NEW)).toBe(ACTIVITY_HREF);
     expect(activityItemHref(OPEN_FOLLOW)).toBe("/social/u/ada");
     expect(activityRelativeTime("2026-09-18T11:00:00.000Z", NOW.getTime())).toBe("1h");
-    expect(ACTIVITY_PAGE.viewAll).toBe("View all activity");
+    expect(ACTIVITY_PAGE.title).toBe("Notifications");
+    expect(ACTIVITY_PAGE.bellLabel).toBe("Notifications");
+    expect(ACTIVITY_PAGE.navAria).toBe("Notifications");
+    expect(ACTIVITY_PAGE.viewAll).toBe("View all");
     expect(ACTIVITY_PAGE.dismiss).toBe("Mark done");
-    expect(ACTIVITY_PAGE.close).toBe("Close activity");
+    expect(ACTIVITY_PAGE.close).toBe("Close notifications");
+    expect(ACTIVITY_PAGE.bellEmpty).toBe(ACTIVITY_PAGE.empty);
     expect(ACTIVITY_PAGE).not.toHaveProperty("view");
     expect(ACTIVITY_PAGE).not.toHaveProperty("markAllDone");
     expect(ACTIVITY_BELL_TRIGGER_CLASS).toContain(HOUSE_HEADER_TRAILING_HIT_CLASS);
@@ -230,5 +235,7 @@ describe("Activity bell cap", () => {
     expect(ACTIVITY_BELL_TRIGGER_CLASS).toContain("rounded-full");
     expect(ACTIVITY_BELL_TRIGGER_OPEN_CLASS).toBe("bg-surface-muted");
     expect(ACTIVITY_BELL_OPEN_DOT_CLASS).toContain("bg-accent");
+    expect(ACTIVITY_BELL_POPOVER_CLASS).toContain("border-hairline");
+    expect(ACTIVITY_BELL_POPOVER_CLASS).toContain("bg-surface");
   });
 });

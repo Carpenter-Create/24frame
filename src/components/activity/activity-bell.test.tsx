@@ -9,6 +9,7 @@ vi.mock("next/navigation", () => ({
 
 import { ActivityBell } from "./activity-bell";
 import {
+  ACTIVITY_BELL_POPOVER_CLASS,
   ACTIVITY_BELL_TRIGGER_CLASS,
   ACTIVITY_HREF,
   ACTIVITY_PAGE,
@@ -30,16 +31,27 @@ const themeSrc = readFileSync("src/components/theme-toggle.tsx", "utf8");
 const askHeaderSrc = readFileSync("src/components/chrome/ask-assistant-header.tsx", "utf8");
 const houseAiMarkSrc = readFileSync("src/components/chrome/house-ai-mark.tsx", "utf8");
 
+const OPEN = {
+  id: "1",
+  title: "North Wind was returned",
+  body: "Chain of title is missing.",
+  kind: "title_rejected" as const,
+  created_at: "2026-09-12T12:00:00.000Z",
+  unread: true,
+};
+
 describe("ActivityBell", () => {
-  it("navigates to Activity with the unread badge and no peek surface", () => {
+  it("keeps a closed trigger with the unread badge and Notifications label", () => {
     const html = renderToStaticMarkup(
       createElement(ActivityBell, {
         unread: 3,
+        items: [OPEN],
       }),
     );
     expect(html).toContain("data-activity-bell");
     expect(html).toContain(`aria-label="${ACTIVITY_PAGE.bellLabel}"`);
-    expect(html).toContain(`href="${ACTIVITY_HREF}"`);
+    expect(ACTIVITY_PAGE.bellLabel).toBe("Notifications");
+    expect(html).not.toContain(`aria-label="Activity"`);
     expect(html).toContain("data-activity-bell-badge");
     expect(html).toContain("3");
     expect(html).toContain(ACTIVITY_BELL_TRIGGER_CLASS);
@@ -56,14 +68,44 @@ describe("ActivityBell", () => {
     expect(html).not.toContain("data-activity-status-chip");
     expect(html).not.toContain("Unread");
     expect(html).not.toContain("Resolved");
-    expect(bellSrc).toContain("<Link");
-    expect(bellSrc).toContain("ACTIVITY_HREF");
-    expect(bellSrc).not.toContain("createPortal");
-    expect(bellSrc).not.toContain("ActivityBellSheet");
-    expect(bellSrc).not.toContain("data-activity-bell-popover");
-    expect(bellSrc).not.toContain("data-activity-bell-sheet");
+  });
+
+  it("opens a peek popover and phone sheet with the last rows and View all", () => {
+    const html = renderToStaticMarkup(
+      createElement(ActivityBell, {
+        unread: 1,
+        items: [OPEN],
+        defaultOpen: true,
+      }),
+    );
+    expect(html).toContain("data-activity-bell-open");
+    expect(html).toContain("data-activity-bell-popover");
+    expect(html).toContain("data-activity-bell-sheet");
+    expect(html).toContain("data-activity-bell-view-all");
+    expect(html).toContain(`href="${ACTIVITY_HREF}"`);
+    expect(html).toContain(ACTIVITY_PAGE.viewAll);
+    expect(html).toContain(ACTIVITY_PAGE.title);
+    expect(html).toContain("North Wind was returned");
+    expect(html).toContain("data-activity-done");
+    expect(html).toContain(ACTIVITY_BELL_POPOVER_CLASS);
+    expect(html).not.toContain(">Activity<");
+    expect(html).not.toContain('aria-label="Activity"');
+    expect(bellSrc).toContain("createPortal");
+    expect(bellSrc).toContain("ActivityBellSheet");
+    expect(bellSrc).toContain("data-activity-bell-popover");
+    expect(bellSrc).toContain("data-activity-bell-sheet");
+    expect(bellSrc).toContain("ActivityFeedRow");
+    expect(bellSrc).toContain("closePeekOnRowNavigate");
+    expect(bellSrc).toContain('target.closest("[data-activity-done]")');
+    expect(bellSrc).toContain("onClick={(event) => closePeekOnRowNavigate(event, onClose)}");
+    expect(bellSrc).toContain("const [open, setOpen] = useState(defaultOpen)");
+    expect(bellSrc.match(/useState\(defaultOpen\)/g)).toHaveLength(1);
+    expect(bellSrc).toContain("open={open}");
+    expect(bellSrc).toContain("onOpenChange={setOpen}");
+    expect(bellSrc).toContain("fallbackItems");
+    expect(bellSrc).toContain("cache.items");
+    expect(bellSrc).not.toContain("items={[]}");
     expect(bellSrc).not.toContain("ACCOUNT_SHEET_HOST_CLASS");
-    expect(bellSrc).not.toContain("REPORTS_USER_PANEL_CLASS");
     expect(bellSrc).toContain("HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS");
     expect(bellSrc).toContain("hidden md:block");
   });
