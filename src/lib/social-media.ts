@@ -168,6 +168,14 @@ export function ownedMediaItems(
   return parsePostMedia(value).filter((item) => isOwnedSocialMediaKey(item.key, authorId, lane));
 }
 
+/** One current welcome-video key, or null. Reuses the posts media lane. */
+export function welcomeVideoKeyFromMedia(raw: unknown, userId: string): string | null {
+  const items = mediaItemsForInsert(raw, userId, "posts");
+  if (!items.ok || items.items.length !== 1) return null;
+  const only = items.items[0];
+  return only.kind === "video" ? only.key : null;
+}
+
 export function mediaItemsForInsert(
   raw: unknown,
   userId: string,

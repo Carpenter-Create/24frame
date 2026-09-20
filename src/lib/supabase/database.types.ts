@@ -560,6 +560,7 @@ export type Database = {
           timezone: string
           trust_state: Database["public"]["Enums"]["trust_state"]
           website_url: string | null
+          welcome_video_key: string | null
         }
         Insert: {
           app_role?: Database["public"]["Enums"]["app_role"]
@@ -596,6 +597,7 @@ export type Database = {
           timezone?: string
           trust_state?: Database["public"]["Enums"]["trust_state"]
           website_url?: string | null
+          welcome_video_key?: string | null
         }
         Update: {
           app_role?: Database["public"]["Enums"]["app_role"]
@@ -632,6 +634,7 @@ export type Database = {
           timezone?: string
           trust_state?: Database["public"]["Enums"]["trust_state"]
           website_url?: string | null
+          welcome_video_key?: string | null
         }
         Relationships: []
       }

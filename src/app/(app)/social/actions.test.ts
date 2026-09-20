@@ -9,6 +9,8 @@ import {
   createSocialPost,
   sendSocialDm,
   createSocialProfile,
+  clearSocialWelcomeVideo,
+  saveSocialWelcomeVideo,
   createSocialStory,
   openSocialDm,
   presignSocialMediaUpload,
@@ -141,6 +143,28 @@ describe("social actions", () => {
     blankLast.set("first_name", "Adam");
     blankLast.set("last_name", "");
     expect(await createSocialProfile(blankLast)).toEqual({ error: SOCIAL.profile.lastNameRequired });
+  });
+
+  it("saves and clears the welcome video pointer without deleting media", async () => {
+    const author = "11111111-1111-4111-8111-111111111111";
+    const object = "22222222-2222-4222-8222-222222222222";
+    vi.mocked(getAuthUser).mockResolvedValue({ id: author, email: "ada@example.com" } as never);
+    const { updates } = stub({
+      profile: { id: author, handle: "ada", display_name: "Ada Lovelace", status: "active" },
+    });
+    const form = new FormData();
+    form.set(
+      "media",
+      JSON.stringify([
+        { kind: "video", key: `posts/${author}/${object}.mp4`, contentType: "video/mp4" },
+      ]),
+    );
+    expect(await saveSocialWelcomeVideo(form)).toEqual({});
+    expect(await clearSocialWelcomeVideo()).toEqual({});
+    expect(updates).toEqual([
+      { table: "profiles", row: { welcome_video_key: `posts/${author}/${object}.mp4` } },
+      { table: "profiles", row: { welcome_video_key: null } },
+    ]);
   });
 
   it("rejects a blank handle after stripping @", async () => {

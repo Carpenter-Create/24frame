@@ -12,6 +12,9 @@ vi.mock("@/app/(app)/account/actions", () => ({
 }));
 vi.mock("@/app/(app)/social/actions", () => ({
   createSocialProfile: vi.fn(),
+  presignSocialMediaUpload: vi.fn(),
+  saveSocialWelcomeVideo: vi.fn(),
+  clearSocialWelcomeVideo: vi.fn(),
 }));
 
 describe("SocialProfileEditForm", () => {
@@ -52,6 +55,10 @@ describe("SocialProfileEditForm", () => {
     expect(html).toContain(SOCIAL.profile.links);
     expect(html).toContain(SOCIAL.profile.addLink);
     expect(html).toContain(SOCIAL.profile.editPicture);
+    expect(html).toContain("data-social-profile-edit-avatar-drop");
+    expect(html).toContain("data-social-profile-edit-welcome");
+    expect(html).toContain(SOCIAL.profile.welcomeAdd);
+    expect(html).not.toContain(SOCIAL.profile.welcomeRemove);
     expect(html).toContain("data-social-avatar");
     expect(html).toContain("AL");
     expect(html).not.toContain("<img");
@@ -93,6 +100,23 @@ describe("SocialProfileEditForm", () => {
     expect(html).toContain('value="Carpenter"');
     expect(html).toContain('src="https://s3.example/adam-face"');
     expect(html).not.toContain("AC");
+  });
+
+  it("shows replace and remove when a welcome video URL exists, and omits the public empty band", () => {
+    const html = renderToStaticMarkup(
+      <SocialProfileEditForm
+        handle="ada"
+        displayName="Ada Lovelace"
+        bio=""
+        photoUrl={null}
+        welcomeVideoUrl="https://s3.example/welcome.mp4"
+      />,
+    );
+    expect(html).toContain("data-social-profile-edit-welcome");
+    expect(html).toContain(SOCIAL.profile.welcomeReplace);
+    expect(html).toContain(SOCIAL.profile.welcomeRemove);
+    expect(html).toContain('src="https://s3.example/welcome.mp4"');
+    expect(html).not.toContain("data-social-welcome-video");
   });
 
   it("shows the empty-handle preview URL", () => {

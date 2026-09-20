@@ -25,6 +25,7 @@ vi.mock("@/lib/s3-avatars", () => ({
 vi.mock("@/lib/s3-social-media", () => ({
   signedSocialMediaItems: vi.fn().mockResolvedValue([]),
   signedSocialMediaByPostId: vi.fn().mockResolvedValue(new Map()),
+  signedSocialMediaUrl: vi.fn().mockResolvedValue(null),
 }));
 vi.mock("@/lib/social-profile", () => ({
   ensureOwnSocialProfile: vi.fn(),

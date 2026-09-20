@@ -10,6 +10,7 @@ import {
   parseSocialMediaLane,
   socialMediaObjectKey,
   validateMediaUpload,
+  welcomeVideoKeyFromMedia,
 } from "@/lib/social-media";
 import { presignSocialMediaPut } from "@/lib/s3-social-media";
 import { normalizeSocialCategory } from "@/lib/social-categories";
@@ -137,6 +138,30 @@ export async function createSocialProfile(formData: FormData): Promise<ActionRes
   revalidatePath(SOCIAL_ROUTES.profileBio);
   revalidatePath(SOCIAL_ROUTES.home);
   revalidatePath(socialProfileHref(handle));
+  return {};
+}
+
+export async function saveSocialWelcomeVideo(formData: FormData): Promise<ActionResult> {
+  const { user, supabase, profile, profileId } = await ownProfile();
+  if (!profileId) return { error: SOCIAL.cta.needProfile };
+  const key = welcomeVideoKeyFromMedia(formData.get("media"), user.id);
+  if (!key) return { error: SOCIAL.stories.mediaType };
+  const { error } = await supabase.from("profiles").update({ welcome_video_key: key }).eq("id", user.id);
+  if (error) return { error: error.message };
+  revalidatePath(SOCIAL_ROUTES.profile);
+  revalidatePath(SOCIAL_ROUTES.profileEdit);
+  if (profile?.handle) revalidatePath(socialProfileHref(profile.handle));
+  return {};
+}
+
+export async function clearSocialWelcomeVideo(): Promise<ActionResult> {
+  const { user, supabase, profile, profileId } = await ownProfile();
+  if (!profileId) return { error: SOCIAL.cta.needProfile };
+  const { error } = await supabase.from("profiles").update({ welcome_video_key: null }).eq("id", user.id);
+  if (error) return { error: error.message };
+  revalidatePath(SOCIAL_ROUTES.profile);
+  revalidatePath(SOCIAL_ROUTES.profileEdit);
+  if (profile?.handle) revalidatePath(socialProfileHref(profile.handle));
   return {};
 }
 

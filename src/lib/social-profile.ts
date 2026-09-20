@@ -63,7 +63,7 @@ export async function ensureOwnSocialProfileResult(
 ): Promise<EnsureOwnSocialProfileResult> {
   const { data: existing } = await supabase
     .from("profiles")
-    .select("id, handle, display_name, status, bio")
+    .select("id, handle, display_name, status, bio, welcome_video_key")
     .eq("id", user.id)
     .maybeSingle();
   if (existing) return { profile: existing, error: null };
@@ -124,7 +124,7 @@ async function insertOwnProfile(
   if (isProfileUniqueViolation(error)) {
     const { data: raced } = await supabase
       .from("profiles")
-      .select("id, handle, display_name, status, bio")
+      .select("id, handle, display_name, status, bio, welcome_video_key")
       .eq("id", userId)
       .maybeSingle();
     return { profile: null, raced: raced ?? null, unique: true, error: error.message };

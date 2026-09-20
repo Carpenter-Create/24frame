@@ -23,6 +23,7 @@ export type SocialProfileRow = {
   display_name: string;
   status: string;
   bio?: string | null;
+  welcome_video_key?: string | null;
 };
 
 export type SocialPostRow = {

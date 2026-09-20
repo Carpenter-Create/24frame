@@ -519,6 +519,10 @@ export const SOCIAL = {
     followersStat: "followers",
     followingStat: "following",
     ownFace: "Your public face. Edit anytime.",
+    welcomeVideo: "Welcome video",
+    welcomeAdd: "Add welcome video",
+    welcomeReplace: "Replace welcome video",
+    welcomeRemove: "Remove welcome video",
   },
   member: {
     title: "Member",

@@ -12,9 +12,10 @@ import {
   SocialProfileIdentity,
   socialAuthorPostCard,
 } from "@/components/social/social-ui";
+import { SocialWelcomeVideo } from "@/components/social/social-welcome-video";
 import { SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS, SOCIAL_PAGE_CLASS } from "@/lib/social-chrome";
 import { signedAvatarUrl, signedAvatarUrls } from "@/lib/s3-avatars";
-import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
+import { signedSocialMediaByPostId, signedSocialMediaUrl } from "@/lib/s3-social-media";
 import {
   parseProfileHandleParam,
   parseSocialProfileTab,
@@ -72,7 +73,7 @@ export default async function SocialPublicProfilePage({
   const { data: member } = handle
     ? await supabase
         .from("profiles")
-        .select("id, handle, display_name, status, bio")
+        .select("id, handle, display_name, status, bio, welcome_video_key")
         .eq("handle", handle)
         .maybeSingle()
     : { data: null };
@@ -103,7 +104,10 @@ export default async function SocialPublicProfilePage({
   }
 
   const isSelf = member.id === ctx.user.id;
-  const photoUrl = await signedAvatarUrl(member.id);
+  const [photoUrl, welcomeUrl] = await Promise.all([
+    signedAvatarUrl(member.id),
+    member.welcome_video_key ? signedSocialMediaUrl(member.welcome_video_key) : Promise.resolve(null),
+  ]);
   const liveStories = (await loadLiveStories(supabase, [member.id])).stories;
   const following = own && !isSelf ? await loadIsFollowing(supabase, ctx.user.id, member.id) : false;
   const history = await loadAuthorPosts(supabase, member.id);
@@ -158,6 +162,7 @@ export default async function SocialPublicProfilePage({
                 : undefined
           }
         />
+        {welcomeUrl ? <SocialWelcomeVideo src={welcomeUrl} /> : null}
         <SocialProfileTabs baseHref={profileHref} active={tab} />
         {tab === "credits" ? (
           <SocialEmpty

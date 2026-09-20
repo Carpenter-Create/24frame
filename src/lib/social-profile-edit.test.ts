@@ -116,8 +116,13 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(SOCIAL_PROFILE_EDIT_HANDLE_ERROR_CLASS).not.toContain("t-body-sm");
     expect(edit).toContain("<Input");
     expect(edit).toContain('variant="bare"');
-    expect(edit).toContain('id="social-edit-name"');
+    expect(edit).toContain('id="social-edit-first-name"');
+    expect(edit).toContain('id="social-edit-middle-name"');
+    expect(edit).toContain('id="social-edit-last-name"');
+    expect(edit).not.toContain('id="social-edit-name"');
     expect(edit).toContain('id="social-edit-handle"');
+    expect(edit).toContain("AccountAvatarCrop");
+    expect(edit).toContain("data-social-profile-edit-avatar-drop");
     expect(bio).toContain("<Textarea");
     expect(bio).toContain("data-social-bio-textarea");
     expect(edit).not.toContain("maximum-scale");

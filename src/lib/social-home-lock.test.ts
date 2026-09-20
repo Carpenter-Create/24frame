@@ -64,6 +64,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).toContain("SocialHomeTabs");
     expect(home).not.toContain("SocialProfileTabs");
     expect(home).not.toContain("creditsEmpty");
+    expect(home).not.toContain("SocialWelcomeVideo");
     expect(home).toContain("SocialForYouRail");
     expect(home).toContain("loadDiscoverableCourses");
     expect(home).toContain("latestDiscoverableCourse");
@@ -514,13 +515,16 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(profile).toContain("SocialProfileTabs");
     expect(profile).toContain("film-slate");
     expect(profile).toContain("creditsEmpty");
+    expect(profile).toContain("SocialWelcomeVideo");
     expect(SOCIAL_PROFILE_TABS).toEqual(["posts", "highlights", "credits"]);
     expect(SOCIAL.profile.creditsTab).toBe("Credits");
     expect(SOCIAL.profile.creditsEmpty).toBe("No credits yet");
     expect(icons).toContain('"film-slate"');
     expect(home).not.toContain("creditsEmpty");
+    expect(home).not.toContain("SocialWelcomeVideo");
     expect(publicProfile).not.toContain("PageHeader");
     expect(publicProfile).toContain("SocialProfileTabs");
+    expect(publicProfile).toContain("SocialWelcomeVideo");
     expect(publicProfile).toContain("film-slate");
     expect(publicProfile).toContain("creditsEmpty");
     expect(socialStories).not.toContain("PageHeader");

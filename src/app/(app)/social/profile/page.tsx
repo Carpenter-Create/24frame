@@ -14,9 +14,10 @@ import {
   SocialProfileIdentity,
   socialAuthorPostCard,
 } from "@/components/social/social-ui";
+import { SocialWelcomeVideo } from "@/components/social/social-welcome-video";
 import { SOCIAL_ACTION_CLASS, SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS, SOCIAL_PAGE_CLASS } from "@/lib/social-chrome";
 import { signedAvatarUrl, signedAvatarUrls } from "@/lib/s3-avatars";
-import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
+import { signedSocialMediaByPostId, signedSocialMediaUrl } from "@/lib/s3-social-media";
 import {
   parseSocialProfileTab,
   SOCIAL,
@@ -85,11 +86,12 @@ async function SocialProfileMain({
   const { profile } = await ensureOwnSocialProfileResult(supabase, ctx.user);
   if (!profile) return null;
 
-  const [photoUrl, liveStoriesPage, history, counts] = await Promise.all([
+  const [photoUrl, liveStoriesPage, history, counts, welcomeUrl] = await Promise.all([
     signedAvatarUrl(profile.id),
     loadLiveStories(supabase, [profile.id]),
     loadAuthorPosts(supabase, profile.id),
     loadProfileSocialCounts(supabase, profile.id),
+    profile.welcome_video_key ? signedSocialMediaUrl(profile.welcome_video_key) : Promise.resolve(null),
   ]);
   const liveStories = liveStoriesPage.stories;
   const [media, liked] = await Promise.all([
@@ -127,6 +129,7 @@ async function SocialProfileMain({
           </>
         )}
       />
+      {welcomeUrl ? <SocialWelcomeVideo src={welcomeUrl} /> : null}
       <SocialProfileTabs baseHref={SOCIAL_ROUTES.profile} active={tab} />
       {tab === "credits" ? (
         <SocialEmpty

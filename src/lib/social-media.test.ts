@@ -6,6 +6,7 @@ import {
   isOwnedSocialMediaKey,
   mediaItemsForInsert,
   ownedMediaItems,
+  welcomeVideoKeyFromMedia,
   parsePostMedia,
   socialMediaObjectKey,
   validateMediaUpload,
@@ -88,6 +89,22 @@ describe("posts.media persist shape", () => {
     });
     expect(ownedMediaItems([owned, foreign], USER)).toEqual([owned]);
     expect(ownedMediaItems([{ ...foreign, key: `stories/${OTHER}/${OBJECT}.jpg` }], USER, "stories")).toEqual([]);
+  });
+
+  it("accepts one owned video as the welcome pointer", () => {
+    const video = {
+      kind: "video" as const,
+      key: `posts/${USER}/${OBJECT}.mp4`,
+      contentType: "video/mp4" as const,
+    };
+    const image = {
+      kind: "image" as const,
+      key: `posts/${USER}/${OBJECT}.jpg`,
+      contentType: "image/jpeg" as const,
+    };
+    expect(welcomeVideoKeyFromMedia([video], USER)).toBe(video.key);
+    expect(welcomeVideoKeyFromMedia([image], USER)).toBeNull();
+    expect(welcomeVideoKeyFromMedia([video, image], USER)).toBeNull();
   });
 
   it("rejects title keys on insert even when the rest is valid", () => {

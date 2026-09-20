@@ -19,11 +19,17 @@ vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/s3-avatars", () => ({
   signedAvatarUrl: vi.fn().mockResolvedValue(null),
 }));
+vi.mock("@/lib/s3-social-media", () => ({
+  signedSocialMediaUrl: vi.fn().mockResolvedValue(null),
+}));
 vi.mock("@/lib/social-profile", () => ({
   ensureOwnSocialProfileResult: vi.fn(),
 }));
 vi.mock("@/app/(app)/social/actions", () => ({
   createSocialProfile: vi.fn(),
+  presignSocialMediaUpload: vi.fn(),
+  saveSocialWelcomeVideo: vi.fn(),
+  clearSocialWelcomeVideo: vi.fn(),
 }));
 vi.mock("@/app/(app)/account/actions", () => ({
   uploadAccountPhoto: vi.fn(),

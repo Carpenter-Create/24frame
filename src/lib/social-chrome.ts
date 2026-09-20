@@ -279,6 +279,9 @@ export const SOCIAL_PROFILE_BIO_DONE_CLASS =
 export const SOCIAL_PROFILE_EDIT_BODY_CLASS =
   "flex flex-col gap-6 px-4 pb-12 pt-6 md:p-6";
 
+export const SOCIAL_WELCOME_VIDEO_CLASS =
+  `overflow-hidden ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface`;
+
 export const SOCIAL_PROFILE_EDIT_PHOTO_CLASS =
   "flex flex-col items-center justify-center gap-4";
 

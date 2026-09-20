@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 import { signedAvatarUrl } from "@/lib/s3-avatars";
-import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
+import { signedSocialMediaByPostId, signedSocialMediaUrl } from "@/lib/s3-social-media";
 import { SOCIAL, SOCIAL_PROFILE_POSTS_PAGE } from "@/lib/social";
 import { ensureOwnSocialProfileResult } from "@/lib/social-profile";
 import SocialProfilePage from "./page";
@@ -25,6 +25,7 @@ vi.mock("@/lib/s3-avatars", () => ({
 vi.mock("@/lib/s3-social-media", () => ({
   signedSocialMediaItems: vi.fn().mockResolvedValue([]),
   signedSocialMediaByPostId: vi.fn().mockResolvedValue(new Map()),
+  signedSocialMediaUrl: vi.fn().mockResolvedValue(null),
 }));
 vi.mock("@/lib/social-profile", () => ({
   ensureOwnSocialProfileResult: vi.fn(),
@@ -114,6 +115,7 @@ describe("Social profile public face", () => {
     vi.clearAllMocks();
     vi.mocked(signedAvatarUrl).mockResolvedValue(null);
     vi.mocked(signedSocialMediaByPostId).mockResolvedValue(new Map());
+    vi.mocked(signedSocialMediaUrl).mockResolvedValue(null);
     vi.mocked(ensureOwnSocialProfileResult).mockResolvedValue({
       profile: ensured,
       error: null,
@@ -226,6 +228,24 @@ describe("Social profile public face", () => {
     expect(html).toContain('href="/social/profile/edit"');
     expect(html).not.toContain("id=\"social-profile-edit\"");
     expect(html).not.toContain("<summary");
+    expect(html).not.toContain("data-social-welcome-video");
+  });
+
+  it("renders the welcome video band only when a signed URL exists", async () => {
+    stubClient({
+      profile: { ...ensured, welcome_video_key: "posts/u1/welcome.mp4" },
+    });
+    vi.mocked(ensureOwnSocialProfileResult).mockResolvedValue({
+      profile: { ...ensured, welcome_video_key: "posts/u1/welcome.mp4" },
+      error: null,
+    });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+    vi.mocked(signedSocialMediaUrl).mockResolvedValue("https://s3.example/welcome.mp4");
+
+    const html = await renderServerMarkup(await SocialProfilePage());
+    expect(html).toContain("data-social-welcome-video");
+    expect(html).toContain('src="https://s3.example/welcome.mp4"');
+    expect(html.indexOf("data-social-welcome-video")).toBeLessThan(html.indexOf("data-social-profile-tabs") || html.length);
   });
 
   it("names the bound when author history is truncated", async () => {

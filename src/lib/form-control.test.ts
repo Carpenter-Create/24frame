@@ -107,7 +107,10 @@ describe("form-control SoT", () => {
 
   it("migrates Social Edit/Bio, Settings/account, composers, and search onto the primitive", () => {
     expect(socialEdit).toContain('variant="bare"');
-    expect(socialEdit).toContain('id="social-edit-name"');
+    expect(socialEdit).toContain('id="social-edit-first-name"');
+    expect(socialEdit).toContain('id="social-edit-middle-name"');
+    expect(socialEdit).toContain('id="social-edit-last-name"');
+    expect(socialEdit).not.toContain('id="social-edit-name"');
     expect(socialEdit).toContain('id="social-edit-handle"');
     expect(socialEdit).toContain("<Input");
     expect(socialEdit).toContain('type="file"');
