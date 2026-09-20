@@ -10,9 +10,13 @@ import {
   projectSegmentedThumbFlight,
   readSegmentedThumbCache,
   scheduleSegmentedThumbRestore,
+  SEGMENTED_ITEM_SELECTED_ATTR,
   SEGMENTED_TRACK_PERSIST,
+  segmentedItemOn,
+  segmentedItemSelectedProps,
   segmentedThumbNeedsRestore,
   segmentedThumbStyle,
+  segmentedTrackSelection,
   startSegmentedThumbFlight,
   writeSegmentedThumbCache,
 } from "./segmented-track";
@@ -139,5 +143,21 @@ describe("segmented thumb geometry", () => {
     const painted = readSegmentedThumbCache(SEGMENTED_TRACK_PERSIST.workspace, 5_080);
     expect(painted?.left).toBeGreaterThan(from.left);
     expect(painted?.left).toBeLessThan(to.left);
+  });
+});
+
+describe("segmented track optimistic selection", () => {
+  it("treats visualIndex as selected ink before the route family updates", () => {
+    const routeIndex = 0;
+    const visualIndex = 4;
+    expect(segmentedTrackSelection(visualIndex)).toEqual({ selectedIndex: 4 });
+    expect(segmentedItemOn(routeIndex, visualIndex)).toBe(false);
+    expect(segmentedItemOn(visualIndex, visualIndex)).toBe(true);
+    expect(segmentedItemSelectedProps(visualIndex, visualIndex)).toEqual({
+      "data-segmented-selected": "",
+    });
+    expect(segmentedItemSelectedProps(routeIndex, visualIndex)).toEqual({});
+    expect(SEGMENTED_ITEM_SELECTED_ATTR).toBe("data-segmented-selected");
+    expect(SEGMENTED_TRACK_PERSIST.activityFamily).toBe("activity-family");
   });
 });

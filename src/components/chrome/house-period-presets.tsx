@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { HousePageSelect } from "@/components/chrome/house-page-select";
 import { SegmentedTrack } from "@/components/ui/segmented-track";
 import { cn } from "@/lib/cn";
-import { SEGMENTED_TRACK_PERSIST } from "@/lib/segmented-track";
+import { SEGMENTED_TRACK_PERSIST, segmentedItemOn } from "@/lib/segmented-track";
 import {
   HOUSE_SEGMENTED_ITEM_BASE_CLASS,
   HOUSE_SEGMENTED_ITEM_OFF_CLASS,
@@ -64,25 +64,27 @@ export function HousePeriodPresets({
         thumbClass={HOUSE_SEGMENTED_THUMB_CLASS}
         data-house-period-presets-chips=""
       >
-        {items.map((item) => {
-          const on = item.key === value;
-          return (
-            <Link
-              key={item.key}
-              href={item.href}
-              aria-pressed={on}
-              data-segmented-item=""
-              data-house-period-presets-chip={item.key}
-              className={cn(
-                HOUSE_SEGMENTED_ITEM_BASE_CLASS,
-                on ? HOUSE_SEGMENTED_ITEM_ON_CLASS : HOUSE_SEGMENTED_ITEM_OFF_CLASS,
-              )}
-              {...(chipDataAttr ? { [chipDataAttr]: item.key } : {})}
-            >
-              {item.label}
-            </Link>
-          );
-        })}
+        {({ selectedIndex }) =>
+          items.map((item, index) => {
+            const on = segmentedItemOn(index, selectedIndex);
+            return (
+              <Link
+                key={item.key}
+                href={item.href}
+                aria-pressed={on}
+                data-segmented-item=""
+                data-house-period-presets-chip={item.key}
+                className={cn(
+                  HOUSE_SEGMENTED_ITEM_BASE_CLASS,
+                  on ? HOUSE_SEGMENTED_ITEM_ON_CLASS : HOUSE_SEGMENTED_ITEM_OFF_CLASS,
+                )}
+                {...(chipDataAttr ? { [chipDataAttr]: item.key } : {})}
+              >
+                {item.label}
+              </Link>
+            );
+          })
+        }
       </SegmentedTrack>
       <div
         data-house-period-presets-phone=""

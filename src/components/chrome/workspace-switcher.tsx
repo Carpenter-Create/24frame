@@ -14,7 +14,7 @@ import { CaretDown } from "@phosphor-icons/react";
 
 import { AppearanceCheck } from "./appearance-check";
 import { SegmentedTrack } from "@/components/ui/segmented-track";
-import { SEGMENTED_TRACK_PERSIST } from "@/lib/segmented-track";
+import { SEGMENTED_TRACK_PERSIST, segmentedItemOn } from "@/lib/segmented-track";
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import {
   overviewLeadActiveIndex,
@@ -99,16 +99,9 @@ function WorkspaceSwitcherPills({
   const pathname = usePathname();
   const pills = overviewLeadPills(options);
   const segmentRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const [pending, setPending] = useState<{
-    index: number;
-    pathname: string;
-  } | null>(null);
   const label = overviewTriggerLabel(pathname, workspaceSwitcherSegmentLabel(current));
   const canSwitch = pills.length > 1;
   const routeIndex = overviewLeadActiveIndex(pathname, current, pills);
-  const pendingIndex =
-    pending && pending.pathname === pathname ? pending.index : null;
-  const activeIndex = pendingIndex ?? routeIndex;
 
   function onSegmentKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>, index: number) {
     if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
@@ -137,7 +130,7 @@ function WorkspaceSwitcherPills({
 
   return (
     <SegmentedTrack
-      activeIndex={activeIndex}
+      activeIndex={routeIndex}
       persistKey={SEGMENTED_TRACK_PERSIST.workspace}
       trackClass={WORKSPACE_SWITCHER_SEGMENTS_CLASS}
       thumbClass={WORKSPACE_SWITCHER_SEGMENTS_THUMB_CLASS}
@@ -147,31 +140,32 @@ function WorkspaceSwitcherPills({
       role="tablist"
       aria-label={WORKSPACE_SWITCHER.label}
     >
-      {pills.map((pill, index) => {
-        const selected = index === activeIndex;
-        return (
-          <button
-            key={pill.id}
-            ref={(node) => {
-              segmentRefs.current[index] = node;
-            }}
-            type="button"
-            role="tab"
-            data-segmented-item=""
-            data-workspace-switcher-segment={pill.id}
-            aria-selected={selected}
-            tabIndex={workspaceSwitcherSegmentTabIndex(selected)}
-            className={workspaceSwitcherSegmentClass(selected)}
-            onClick={() => {
-              setPending({ index, pathname });
-              selectLeadPill(current, pill, options, router, pathname);
-            }}
-            onKeyDown={(event) => onSegmentKeyDown(event, index)}
-          >
-            {pill.label}
-          </button>
-        );
-      })}
+      {({ selectedIndex }) =>
+        pills.map((pill, index) => {
+          const selected = segmentedItemOn(index, selectedIndex);
+          return (
+            <button
+              key={pill.id}
+              ref={(node) => {
+                segmentRefs.current[index] = node;
+              }}
+              type="button"
+              role="tab"
+              data-segmented-item=""
+              data-workspace-switcher-segment={pill.id}
+              aria-selected={selected}
+              tabIndex={workspaceSwitcherSegmentTabIndex(selected)}
+              className={workspaceSwitcherSegmentClass(selected)}
+              onClick={() => {
+                selectLeadPill(current, pill, options, router, pathname);
+              }}
+              onKeyDown={(event) => onSegmentKeyDown(event, index)}
+            >
+              {pill.label}
+            </button>
+          );
+        })
+      }
     </SegmentedTrack>
   );
 }

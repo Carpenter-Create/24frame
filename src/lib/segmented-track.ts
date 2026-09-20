@@ -4,6 +4,11 @@
 // would otherwise snap. A module flight stores from/to + start time
 // so the next mount can paint the in-flight box and finish the glide
 // with the remaining duration.
+//
+// visualIndex is the SoT for BOTH the thumb and selected ink.
+// Click intent advances it immediately. Route `activeIndex` only
+// seeds the first paint and commits after navigation. Hosts must
+// not keep a local pendingIndex / pendingFamily fork.
 
 import {
   HOUSE_SEGMENTED_THUMB_DURATION_MS,
@@ -228,4 +233,32 @@ export function segmentedItemIndexFromEventTarget(
   if (!item || !track.contains(item)) return -1;
   const items = track.querySelectorAll("[data-segmented-item]");
   return Array.prototype.indexOf.call(items, item);
+}
+
+export type SegmentedTrackSelection = {
+  selectedIndex: number;
+};
+
+export const SEGMENTED_ITEM_SELECTED_ATTR = "data-segmented-selected";
+
+export function segmentedTrackSelection(
+  visualIndex: number,
+): SegmentedTrackSelection {
+  return { selectedIndex: visualIndex };
+}
+
+export function segmentedItemOn(
+  index: number,
+  selectedIndex: number,
+): boolean {
+  return index === selectedIndex;
+}
+
+export function segmentedItemSelectedProps(
+  index: number,
+  selectedIndex: number,
+): { "data-segmented-selected"?: "" } {
+  return segmentedItemOn(index, selectedIndex)
+    ? { "data-segmented-selected": "" }
+    : {};
 }

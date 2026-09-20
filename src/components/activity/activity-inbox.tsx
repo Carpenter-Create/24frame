@@ -5,32 +5,20 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardBody } from "@/components/ui/card";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { EmptyState } from "@/components/layout/empty-state";
-import { SegmentedTrack } from "@/components/ui/segmented-track";
-import { SEGMENTED_TRACK_PERSIST } from "@/lib/segmented-track";
 import { MessageLink } from "@/app/(app)/aggregation/messages/message-link";
 import { cn } from "@/lib/cn";
 import {
-  ACTIVITY_FAMILIES,
-  ACTIVITY_FAMILY_SCROLL_CLASS,
   ACTIVITY_PAGE,
   ACTIVITY_PREFS_HREF,
   activityEmptyCopy,
-  activityFamilyLabel,
-  activityHref,
   type ActivityFamily,
   type ActivityItem,
 } from "@/lib/activity";
 import { HOUSE_THEME_TOGGLE_CLASS } from "@/lib/house-lead-chrome";
 import { PHOSPHOR_CHROME_ICON_CLASS, PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
-import {
-  DASHBOARD_TOP_PILL_BUTTON_CLASS,
-  DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
-  DASHBOARD_TOP_PILL_BUTTON_ON_CLASS,
-  DASHBOARD_TOP_PILL_CLUSTER_CLASS,
-  DASHBOARD_TOP_PILL_THUMB_CLASS,
-} from "@/lib/dashboard-craft";
 import { NOTIFICATION_EMAIL, NOTIFICATION_KIND_LABEL } from "@/lib/notifications";
 import { REPORTS_RELATED_GAP_CLASS } from "@/lib/reports-craft";
+import { ActivityFamilyChips } from "./activity-family-chips";
 import { MarkDone } from "./mark-done";
 
 // Live uncleared-alert feed. Category chips only. X clears a row.
@@ -66,34 +54,7 @@ export function ActivityInbox({
       />
 
       <div data-activity-filters="" className={cn("flex flex-col pb-6", REPORTS_RELATED_GAP_CLASS)}>
-        <div data-activity-family-scroll="" className={ACTIVITY_FAMILY_SCROLL_CLASS}>
-          <SegmentedTrack
-            activeIndex={ACTIVITY_FAMILIES.indexOf(family)}
-            persistKey={SEGMENTED_TRACK_PERSIST.activityFamily}
-            trackClass={DASHBOARD_TOP_PILL_CLUSTER_CLASS}
-            thumbClass={DASHBOARD_TOP_PILL_THUMB_CLASS}
-            data-activity-family=""
-          >
-            {ACTIVITY_FAMILIES.map((key) => {
-              const on = family === key;
-              return (
-                <Link
-                  key={key}
-                  href={activityHref({ family: key })}
-                  aria-pressed={on}
-                  data-segmented-item=""
-                  data-activity-family-chip={key}
-                  className={cn(
-                    DASHBOARD_TOP_PILL_BUTTON_CLASS,
-                    on ? DASHBOARD_TOP_PILL_BUTTON_ON_CLASS : DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
-                  )}
-                >
-                  {activityFamilyLabel(key)}
-                </Link>
-              );
-            })}
-          </SegmentedTrack>
-        </div>
+        <ActivityFamilyChips family={family} />
       </div>
 
       {truncated ? (
