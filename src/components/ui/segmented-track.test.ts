@@ -4,6 +4,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import {
+  HOUSE_SEGMENTED_ITEM_BASE_CLASS,
   HOUSE_SEGMENTED_ITEM_ON_CLASS,
   HOUSE_SEGMENTED_THUMB_CLASS,
 } from "@/lib/house-shell";
@@ -59,6 +60,10 @@ describe("SegmentedTrack slide SoT", () => {
     expect(lib).toContain("fromRouteIndex");
     expect(lib).not.toContain("pendingIndex ?? routeIndex");
     expect(HOUSE_SEGMENTED_ITEM_ON_CLASS).toBe("text-white");
+    expect(HOUSE_SEGMENTED_ITEM_ON_CLASS).not.toMatch(/transition/);
+    expect(HOUSE_SEGMENTED_ITEM_BASE_CLASS).not.toMatch(/transition/);
+    expect(HOUSE_SEGMENTED_ITEM_BASE_CLASS).not.toContain("duration-[320ms]");
+    expect(HOUSE_SEGMENTED_THUMB_CLASS).toContain("duration-[320ms]");
 
     for (const path of CONSUMERS) {
       const body = readFileSync(path, "utf8");
