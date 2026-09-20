@@ -25,6 +25,7 @@ import {
   HOUSE_CARD_PAD,
   HOUSE_FILTER_OFF_CLASS,
   HOUSE_FILTER_ON_CLASS,
+  HOUSE_PILL_ITEM_CLASS,
   HOUSE_PILL_SELECTED_CLASS,
   HOUSE_MODULE_CLASS,
   HOUSE_PAGE_CANVAS_CLASS,
@@ -215,6 +216,10 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(DASHBOARD_SECTION_AIR_CLASS).toBe(HOUSE_SECTION_AIR_CLASS);
     expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).toBe(HOUSE_SEGMENTED_ITEM_ON_CLASS);
     expect(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS).toBe(HOUSE_SEGMENTED_ITEM_OFF_CLASS);
+    expect(HOUSE_SEGMENTED_ITEM_BASE_CLASS).toContain(HOUSE_PILL_ITEM_CLASS);
+    expect(HOUSE_PILL_ITEM_CLASS).toContain("py-[var(--space-2)]");
+    expect(HOUSE_PILL_ITEM_CLASS).toContain("t-body-sm");
+    expect(HOUSE_PILL_ITEM_CLASS).toContain("px-[var(--space-4)]");
     expect(DASHBOARD_TOP_PILL_BUTTON_CLASS).toBe(HOUSE_SEGMENTED_ITEM_BASE_CLASS);
     expect(HOUSE_SEGMENTED_ITEM_ON_CLASS).toBe("text-white");
     expect(HOUSE_SEGMENTED_ITEM_OFF_CLASS).toBe("text-ink-2");

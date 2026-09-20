@@ -20,7 +20,7 @@ import {
   SOCIAL_TOPIC_RAIL_CHIP_CLASS,
   SOCIAL_TOPIC_RAIL_CLASS,
 } from "@/lib/social-chrome";
-import { HOUSE_SCROLL_ROW_CLASS } from "@/lib/house-shell";
+import { HOUSE_SCROLL_ROW_CLASS, HOUSE_SEGMENTED_ITEM_BASE_CLASS } from "@/lib/house-shell";
 import { socialInterestTopics } from "@/lib/social-role-affinity";
 import { SOCIAL_ICON_SIZE_COMPOSER, SOCIAL_ICON_SIZE_STORY_PLUS } from "@/lib/social-icons";
 import { SOCIAL_MEDIA_ACCEPT } from "@/lib/social-media";
@@ -89,6 +89,10 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).toContain(SOCIAL_TOPIC_RAIL_CLASS);
     expect(html).toContain(SOCIAL_TOPIC_CHIP_ROW_CLASS);
     expect(html).toContain(SOCIAL_TOPIC_RAIL_CHIP_CLASS);
+    expect(SOCIAL_TOPIC_RAIL_CHIP_CLASS).toContain(HOUSE_SEGMENTED_ITEM_BASE_CLASS);
+    expect(html).toContain(HOUSE_SEGMENTED_ITEM_BASE_CLASS);
+    expect(html).not.toContain("text-[11px]");
+    expect(html).not.toContain("py-[5px]");
     expect(SOCIAL_TOPIC_RAIL_CLASS).toBe(HOUSE_SCROLL_ROW_CLASS);
     expect(SOCIAL_TOPIC_RAIL_CLASS).toContain("overflow-x-auto");
     expect(html.match(/overflow-x-auto/g)?.length).toBe(1);

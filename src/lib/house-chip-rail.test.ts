@@ -4,10 +4,11 @@ import { describe, expect, it } from "vitest";
 import { SOCIAL_CATEGORY_TOPICS } from "@/lib/social-categories";
 import {
   HOUSE_FILTER_OFF_CLASS,
-  HOUSE_FILTER_PILL_CLASS,
   HOUSE_FILTER_PILL_CLUSTER_CLASS,
+  HOUSE_PILL_ITEM_CLASS,
   HOUSE_RELATED_GAP_CLASS,
   HOUSE_SCROLL_ROW_CLASS,
+  HOUSE_SEGMENTED_ITEM_BASE_CLASS,
 } from "@/lib/house-shell";
 import {
   HOUSE_CHIP_RAIL_CHIP_CLASS,
@@ -52,17 +53,27 @@ describe("splitChipRailRows", () => {
 });
 
 describe("house chip rail tokens", () => {
-  it("aliases house scroll-row and filter pills — no local lookalike", () => {
+  it("uses the SegmentedTrack item box for chip height — no shorter display chip", () => {
     expect(HOUSE_CHIP_RAIL_CLASS).toBe(HOUSE_SCROLL_ROW_CLASS);
     expect(HOUSE_CHIP_RAIL_CLASS).toContain("overflow-x-auto");
     expect(HOUSE_CHIP_RAIL_STACK_CLASS).toContain("flex-col");
     expect(HOUSE_CHIP_RAIL_STACK_CLASS).toContain("w-max");
     expect(HOUSE_CHIP_RAIL_STACK_CLASS).toContain(HOUSE_RELATED_GAP_CLASS);
     expect(HOUSE_CHIP_RAIL_ROW_CLASS).toBe(HOUSE_FILTER_PILL_CLUSTER_CLASS);
-    expect(HOUSE_CHIP_RAIL_CHIP_CLASS).toContain(HOUSE_FILTER_PILL_CLASS);
-    expect(HOUSE_CHIP_RAIL_CHIP_CLASS).toContain(HOUSE_FILTER_OFF_CLASS);
+    expect(HOUSE_SEGMENTED_ITEM_BASE_CLASS).toContain(HOUSE_PILL_ITEM_CLASS);
+    expect(HOUSE_CHIP_RAIL_CHIP_CLASS).toContain(HOUSE_SEGMENTED_ITEM_BASE_CLASS);
+    expect(HOUSE_CHIP_RAIL_CHIP_CLASS).toBe(
+      `${HOUSE_SEGMENTED_ITEM_BASE_CLASS} ${HOUSE_FILTER_OFF_CLASS}`,
+    );
+    expect(HOUSE_CHIP_RAIL_CHIP_CLASS).toContain("py-[var(--space-2)]");
+    expect(HOUSE_CHIP_RAIL_CHIP_CLASS).toContain("t-body-sm");
+    expect(HOUSE_CHIP_RAIL_CHIP_CLASS).toContain("px-[var(--space-4)]");
     expect(HOUSE_CHIP_RAIL_CHIP_CLASS).toContain("whitespace-nowrap");
     expect(HOUSE_CHIP_RAIL_CHIP_CLASS).not.toContain("truncate");
+    expect(HOUSE_CHIP_RAIL_CHIP_CLASS).not.toContain("text-[11px]");
+    expect(HOUSE_CHIP_RAIL_CHIP_CLASS).not.toContain("py-[5px]");
+    expect(src).toContain("HOUSE_SEGMENTED_ITEM_BASE_CLASS");
+    expect(src).not.toContain("HOUSE_FILTER_PILL_CLASS");
     expect(HOUSE_CHIP_RAIL_CLASS).not.toContain("flex-wrap");
     expect(HOUSE_CHIP_RAIL_STACK_CLASS).not.toContain("flex-wrap");
     expect(HOUSE_CHIP_RAIL_ROW_CLASS).not.toContain("flex-wrap");

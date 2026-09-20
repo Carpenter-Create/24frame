@@ -129,8 +129,14 @@ export const HOUSE_SEGMENTED_TRACK_SCROLL_CLASS = `${HOUSE_SEGMENTED_TRACK_CLASS
 export const HOUSE_SEGMENTED_THUMB_CLASS =
   "pointer-events-none absolute inset-y-0 rounded-full bg-accent transition-[left,width] duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none";
 
+// Shared pill item box. Height is this pad + t-body-sm only — one SoT
+// for workspace / dest / news SegmentedTrack items and Topics. rail
+// chips. Do not fork a shorter display chip.
+export const HOUSE_PILL_ITEM_CLASS =
+  "inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-[var(--space-4)] py-[var(--space-2)] t-body-sm";
+
 export const HOUSE_SEGMENTED_ITEM_BASE_CLASS =
-  "relative z-10 shrink-0 cursor-pointer select-none whitespace-nowrap rounded-full px-[var(--space-4)] py-[var(--space-2)] t-body-sm";
+  `relative z-10 cursor-pointer select-none ${HOUSE_PILL_ITEM_CLASS}`;
 
 export const HOUSE_SEGMENTED_ITEM_ON_CLASS = "text-white";
 

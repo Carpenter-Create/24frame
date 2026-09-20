@@ -49,7 +49,7 @@ export function SocialHomeCenterSkeleton() {
             {Array.from({ length: 2 }).map((_, row) => (
               <div key={row} className={SOCIAL_TOPIC_CHIP_ROW_CLASS}>
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="h-8 w-24 shrink-0 rounded-full" />
+                  <Skeleton key={i} className="h-9 w-24 shrink-0 rounded-full" />
                 ))}
               </div>
             ))}

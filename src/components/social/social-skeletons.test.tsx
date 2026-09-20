@@ -59,7 +59,7 @@ describe("Social loading skeletons", () => {
     );
     expect(topicsSkeleton).toContain("overflow-x-auto");
     expect(topicsSkeleton).toContain("flex-col");
-    expect(topicsSkeleton.match(/h-8 w-24 shrink-0 rounded-full/g)?.length).toBe(8);
+    expect(topicsSkeleton.match(/h-9 w-24 shrink-0 rounded-full/g)?.length).toBe(8);
     expect(topicsSkeleton).not.toContain("flex-wrap");
     expect(home).toContain("data-social-stories-skeleton");
     expect(home).toContain("data-social-for-you-skeleton");
