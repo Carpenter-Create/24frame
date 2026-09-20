@@ -93,7 +93,6 @@ describe("ActivityBell", () => {
     expect(themeSrc).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
     expect(themeSrc).toContain("weight={PHOSPHOR_CHROME_IDLE_WEIGHT}");
     expect(bellSrc).toContain("PHOSPHOR_CHROME_IDLE_WEIGHT");
-    expect(bellSrc).toContain("weight={PHOSPHOR_CHROME_IDLE_WEIGHT}");
     expect(bellSrc).toContain("HOUSE_PHONE_CHROME_ICON_WEIGHT");
     expect(bellSrc).toContain(
       "weight={phone ? HOUSE_PHONE_CHROME_ICON_WEIGHT : PHOSPHOR_CHROME_IDLE_WEIGHT}",

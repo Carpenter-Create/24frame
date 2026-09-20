@@ -92,7 +92,7 @@ describe("ActivityInbox", () => {
     expect(html).toContain(`aria-label="${ACTIVITY_PAGE.prefs}"`);
     expect(html).toContain(HOUSE_THEME_TOGGLE_CLASS);
     expect(html).toContain(`href="${ACTIVITY_HREF}?family=social"`);
-    expect(html).toContain(`href="${ACTIVITY_HREF}?status=done&family=social"`);
+    expect(html).toContain(`href="${ACTIVITY_HREF}?status=done&amp;family=social"`);
     expect(ACTIVITY_PREFS_HREF).toBe("/settings/preferences/notifications");
     expect(PHOSPHOR_CHROME_IDLE_WEIGHT).toBe("bold");
   });
