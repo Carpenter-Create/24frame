@@ -18,9 +18,13 @@ import {
   SETTINGS_HUB_ORDER,
   SETTINGS_HEADER_PAD_CLASS,
   SETTINGS_PAGE_LEAD_BACK_CLASS,
+  SETTINGS_DIALOG_ERROR_CLASS,
   SETTINGS_DIALOG_FIELD_CLASS,
+  SETTINGS_DIALOG_FOOTER_CLASS,
   SETTINGS_DIALOG_FORM_CLASS,
+  SETTINGS_DIALOG_GROUP_CLASS,
   SETTINGS_DIALOG_HELP_CLASS,
+  SETTINGS_DIALOG_LABEL_CLASS,
   SETTINGS_DRILL_ACCENT_CLASS,
   SETTINGS_DRILL_CHEVRON_CLASS,
   SETTINGS_DRILL_ROW_CLASS,
@@ -382,6 +386,17 @@ describe("settings hub lock", () => {
     expect(SETTINGS_DIALOG_FORM_CLASS).not.toContain("space-4");
     expect(SETTINGS_DIALOG_FORM_CLASS).not.toContain("space-6");
     expect(SETTINGS_EDIT_HELPER_CLASS).toBe(SETTINGS_DIALOG_HELP_CLASS);
+    expect(SETTINGS_DIALOG_LABEL_CLASS).toBe(
+      "t-body-sm font-normal normal-case tracking-normal text-ink-3",
+    );
+    expect(SETTINGS_DIALOG_LABEL_CLASS).not.toContain("t-label");
+    expect(SETTINGS_DIALOG_LABEL_CLASS).not.toContain("uppercase");
+    expect(SETTINGS_DIALOG_ERROR_CLASS).toBe("t-body-sm text-ink-2");
+    expect(SETTINGS_DIALOG_ERROR_CLASS).not.toContain("bg-surface-muted");
+    expect(SETTINGS_DIALOG_ERROR_CLASS).not.toContain("border");
+    expect(SETTINGS_DIALOG_GROUP_CLASS).toContain(HOUSE_MODULE_CLASS);
+    expect(SETTINGS_DIALOG_GROUP_CLASS).toContain(HOUSE_CARD_PAD);
+    expect(SETTINGS_DIALOG_FOOTER_CLASS).toContain("max-md:flex-col-reverse");
     expect(SETTINGS_DRILL_ROW_CLASS).toContain("justify-between");
     expect(SETTINGS_DRILL_VALUE_CLASS).toBe("t-body-sm text-ink-3");
     expect(SETTINGS_DRILL_ROW_CLASS).not.toContain("#");

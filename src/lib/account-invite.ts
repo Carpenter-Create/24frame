@@ -101,9 +101,74 @@ export const ACCOUNT_INVITE = {
   signedOut: "Not authenticated.",
   invalidEmail: "Enter a valid email address.",
   invalidRole: "Choose a role.",
-  sendFailed: "Could not send the invite.",
-  revokeFailed: "Could not withdraw the invite.",
+  invalidScope: "Choose at least one entity.",
+  alreadyInvited: "That email already has an invite.",
+  alreadyMember: "That email already has a seat on this team.",
+  ownEmail: "You cannot invite your own email.",
+  sendFailed: "Couldn't send invite. Try again.",
+  revokeFailed: "Couldn't withdraw invite. Try again.",
 } as const;
+
+export type TeamInviteErrorKind = "send" | "revoke";
+
+// User-facing Team invite errors only. Actions and the modal both
+// run RPC / PostgREST failures through this. Never render schema
+// cache, function-missing, or Postgres strings.
+const TEAM_INVITE_USER_ERRORS = [
+  ACCOUNT_INVITE.forbidden,
+  ACCOUNT_INVITE.signedOut,
+  ACCOUNT_INVITE.invalidEmail,
+  ACCOUNT_INVITE.invalidRole,
+  ACCOUNT_INVITE.invalidScope,
+  ACCOUNT_INVITE.alreadyInvited,
+  ACCOUNT_INVITE.alreadyMember,
+  ACCOUNT_INVITE.ownEmail,
+  ACCOUNT_INVITE.sendFailed,
+  ACCOUNT_INVITE.revokeFailed,
+] as const;
+
+const TEAM_INVITE_RAW_INFRA =
+  /schema cache|could not find the function|could not find the table|PGRST\d+|postgrest|postgres|relation .+ does not exist|column .+ does not exist|function .+ does not exist|permission denied for|undefined function|invalid input syntax|jwt expired|failed to fetch|networkerror|42883|42P01|42703|42501/i;
+
+const TEAM_INVITE_ERROR_MATCHERS: ReadonlyArray<{
+  test: RegExp;
+  copy: (typeof TEAM_INVITE_USER_ERRORS)[number];
+}> = [
+  { test: /already pending/i, copy: ACCOUNT_INVITE.alreadyInvited },
+  { test: /already has a seat/i, copy: ACCOUNT_INVITE.alreadyMember },
+  { test: /own email/i, copy: ACCOUNT_INVITE.ownEmail },
+  { test: /not authorized/i, copy: ACCOUNT_INVITE.forbidden },
+  { test: /not authenticated/i, copy: ACCOUNT_INVITE.signedOut },
+  { test: /email is required|invalid email|valid email/i, copy: ACCOUNT_INVITE.invalidEmail },
+  { test: /role is required/i, copy: ACCOUNT_INVITE.invalidRole },
+  {
+    test: /at least one entity|does not belong to this rights holder/i,
+    copy: ACCOUNT_INVITE.invalidScope,
+  },
+];
+
+export function isTeamInviteUserError(message: string): boolean {
+  return (TEAM_INVITE_USER_ERRORS as readonly string[]).includes(message);
+}
+
+export function isRawInviteInfrastructureError(message: string): boolean {
+  return TEAM_INVITE_RAW_INFRA.test(message);
+}
+
+export function teamInviteUserError(
+  raw: string | null | undefined,
+  kind: TeamInviteErrorKind = "send",
+): string {
+  const fallback = kind === "revoke" ? ACCOUNT_INVITE.revokeFailed : ACCOUNT_INVITE.sendFailed;
+  const message = raw?.trim() ?? "";
+  if (!message) return fallback;
+  if (isTeamInviteUserError(message)) return message;
+  if (isRawInviteInfrastructureError(message)) return fallback;
+  for (const { test, copy } of TEAM_INVITE_ERROR_MATCHERS) {
+    if (test.test(message)) return copy;
+  }
+  return fallback;
+}
 
 export const HOUSE_GRANT = {
   title: "Grant account",

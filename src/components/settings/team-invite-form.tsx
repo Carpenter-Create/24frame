@@ -11,12 +11,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import {
+  SETTINGS_DIALOG_ERROR_CLASS,
   SETTINGS_DIALOG_FIELD_CLASS,
+  SETTINGS_DIALOG_FOOTER_CLASS,
   SETTINGS_DIALOG_FORM_CLASS,
+  SETTINGS_DIALOG_GROUP_CLASS,
+  SETTINGS_DIALOG_LABEL_CLASS,
   SETTINGS_DRILL_VALUE_CLASS,
   SETTINGS_SECTION_CLASS,
 } from "@/lib/settings";
@@ -24,9 +27,10 @@ import {
   ACCOUNT_INVITE,
   TEAM_INVITE_DEFAULT_ROLE,
   TEAM_INVITE_ROLES,
+  teamInviteUserError,
+  teamRoleLabel,
   teamRowLabel,
   teamRowMeta,
-  teamRoleLabel,
   toTeamListRows,
   type OrgRole,
 } from "@/lib/account-invite";
@@ -116,7 +120,7 @@ export function TeamInviteForm({
       entityIds: entityScope === "selected" ? selectedEntityIds : undefined,
     });
     if (res.error) {
-      setError(res.error);
+      setError(teamInviteUserError(res.error, "send"));
       setSaving(false);
       return;
     }
@@ -135,7 +139,7 @@ export function TeamInviteForm({
     setRevoking(id);
     setError("");
     const res = await revokeTeamInvite({ id });
-    if (res.error) setError(res.error);
+    if (res.error) setError(teamInviteUserError(res.error, "revoke"));
     else {
       setHiddenIds((current) => [...current, id]);
       router.refresh();
@@ -204,81 +208,105 @@ export function TeamInviteForm({
           onClose={closeInvite}
           title={ACCOUNT_INVITE.invite}
           size="md"
+          presentation="sheet"
         >
           <form
             onSubmit={onSubmit}
             className={SETTINGS_DIALOG_FORM_CLASS}
             data-team-invite-form=""
           >
-            <div className={SETTINGS_DIALOG_FIELD_CLASS}>
-              <Label htmlFor="team-invite-email">{ACCOUNT_INVITE.emailLabel}</Label>
-              <Input
-                id="team-invite-email"
-                name="email"
-                type="email"
-                autoComplete="off"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  setSent(false);
-                }}
-                required
-              />
+            <div className={SETTINGS_DIALOG_GROUP_CLASS} data-team-invite-fields="">
+              <div className={SETTINGS_DIALOG_FIELD_CLASS}>
+                <label htmlFor="team-invite-email" className={SETTINGS_DIALOG_LABEL_CLASS}>
+                  {ACCOUNT_INVITE.emailLabel}
+                </label>
+                <Input
+                  id="team-invite-email"
+                  name="email"
+                  type="email"
+                  autoComplete="off"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setSent(false);
+                  }}
+                  required
+                />
+              </div>
+              <div className={SETTINGS_DIALOG_FIELD_CLASS}>
+                <label htmlFor="team-invite-role" className={SETTINGS_DIALOG_LABEL_CLASS}>
+                  {ACCOUNT_INVITE.roleLabel}
+                </label>
+                <Select
+                  id="team-invite-role"
+                  name="role"
+                  value={role}
+                  aria-label={ACCOUNT_INVITE.roleLabel}
+                  options={TEAM_INVITE_ROLES.map((value) => ({
+                    value,
+                    label: teamRoleLabel(value),
+                  }))}
+                  onChange={(next) => setRole(next as OrgRole)}
+                />
+              </div>
+              {showEntityScope ? (
+                <>
+                  <div className={SETTINGS_DIALOG_FIELD_CLASS}>
+                    <label htmlFor="team-invite-scope" className={SETTINGS_DIALOG_LABEL_CLASS}>
+                      {ENTITY_SCOPE.scopeLabel}
+                    </label>
+                    <Select
+                      id="team-invite-scope"
+                      name="entityScope"
+                      value={entityScope}
+                      aria-label={ENTITY_SCOPE.scopeLabel}
+                      options={[
+                        { value: "all", label: entityScopeLabel("all") },
+                        { value: "selected", label: entityScopeLabel("selected") },
+                      ]}
+                      onChange={(next) => setEntityScope(next as EntityScope)}
+                    />
+                    <p className="t-body-sm text-ink-3">{ENTITY_SCOPE.scopeHint}</p>
+                  </div>
+                  {entityScope === "selected" ? (
+                    <fieldset className="flex flex-col gap-[var(--space-2)]" data-entity-picker="">
+                      <legend className={SETTINGS_DIALOG_LABEL_CLASS}>
+                        {ENTITY_SCOPE.entityPickerLabel}
+                      </legend>
+                      {entities.map((entity) => (
+                        <label
+                          key={entity.id}
+                          className="flex items-center gap-2 t-body-sm text-ink-2"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedEntityIds.includes(entity.id)}
+                            onChange={() => toggleEntity(entity.id)}
+                          />
+                          {entity.name}
+                        </label>
+                      ))}
+                    </fieldset>
+                  ) : null}
+                </>
+              ) : null}
             </div>
-            <div className={SETTINGS_DIALOG_FIELD_CLASS}>
-              <Label htmlFor="team-invite-role">{ACCOUNT_INVITE.roleLabel}</Label>
-              <Select
-                id="team-invite-role"
-                name="role"
-                value={role}
-                aria-label={ACCOUNT_INVITE.roleLabel}
-                options={TEAM_INVITE_ROLES.map((value) => ({
-                  value,
-                  label: teamRoleLabel(value),
-                }))}
-                onChange={(next) => setRole(next as OrgRole)}
-              />
-            </div>
-            {showEntityScope ? (
-              <>
-                <div className={SETTINGS_DIALOG_FIELD_CLASS}>
-                  <Label htmlFor="team-invite-scope">{ENTITY_SCOPE.scopeLabel}</Label>
-                  <Select
-                    id="team-invite-scope"
-                    name="entityScope"
-                    value={entityScope}
-                    aria-label={ENTITY_SCOPE.scopeLabel}
-                    options={[
-                      { value: "all", label: entityScopeLabel("all") },
-                      { value: "selected", label: entityScopeLabel("selected") },
-                    ]}
-                    onChange={(next) => setEntityScope(next as EntityScope)}
-                  />
-                  <p className="t-body-sm text-ink-3">{ENTITY_SCOPE.scopeHint}</p>
-                </div>
-                {entityScope === "selected" ? (
-                  <fieldset className="flex flex-col gap-[var(--space-2)]" data-entity-picker="">
-                    <legend className="t-label text-ink-3">{ENTITY_SCOPE.entityPickerLabel}</legend>
-                    {entities.map((entity) => (
-                      <label key={entity.id} className="flex items-center gap-2 t-body-sm text-ink-2">
-                        <input
-                          type="checkbox"
-                          checked={selectedEntityIds.includes(entity.id)}
-                          onChange={() => toggleEntity(entity.id)}
-                        />
-                        {entity.name}
-                      </label>
-                    ))}
-                  </fieldset>
-                ) : null}
-              </>
+            {error ? (
+              <p role="alert" data-team-invite-error="" className={SETTINGS_DIALOG_ERROR_CLASS}>
+                {error}
+              </p>
             ) : null}
-            {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
-            <DialogFooter>
-              <Button type="button" variant="secondary" disabled={saving} onClick={closeInvite}>
+            <DialogFooter className={SETTINGS_DIALOG_FOOTER_CLASS}>
+              <Button
+                type="button"
+                variant="secondary"
+                className="max-md:w-full"
+                disabled={saving}
+                onClick={closeInvite}
+              >
                 {ACCOUNT_INVITE.cancel}
               </Button>
-              <Button type="submit" disabled={saving}>
+              <Button type="submit" className="max-md:w-full" disabled={saving}>
                 {saving ? ACCOUNT_INVITE.inviting : ACCOUNT_INVITE.invite}
               </Button>
             </DialogFooter>
@@ -290,7 +318,11 @@ export function TeamInviteForm({
         <p className="t-body-sm text-ink-3">{ACCOUNT_INVITE.forbidden}</p>
       )}
 
-      {error && !inviteOpen ? <InlineNotice tone="error">{error}</InlineNotice> : null}
+      {error && !inviteOpen ? (
+        <p role="alert" data-team-invite-error="" className={SETTINGS_DIALOG_ERROR_CLASS}>
+          {error}
+        </p>
+      ) : null}
       {sent ? <InlineNotice>{ACCOUNT_INVITE.sent}</InlineNotice> : null}
     </div>
   );
