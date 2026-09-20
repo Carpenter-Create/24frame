@@ -1,5 +1,7 @@
-// ISO 3166-1 numeric ↔ alpha-2. Topology ids from countries-110m are numeric.
-// Keep this next to ISO_COUNTRIES — do not invent unofficial codes.
+// ISO 3166-1 numeric ↔ alpha-2. World-atlas 110m geometry ids are those
+// numeric codes as strings, often zero-padded ("036"). RL TerritoryMap
+// joins via NUMERIC_TO_ALPHA2. Same table, RL join name. Do not invent
+// unofficial codes. Kosovo / Somaliland / N. Cyprus have no ISO id.
 
 export const ISO_NUMERIC_BY_ALPHA2: Record<string, number> = {
   AD: 20, AE: 784, AF: 4, AG: 28, AI: 660, AL: 8, AM: 51, AO: 24, AQ: 10, AR: 32,
@@ -32,8 +34,15 @@ export const ISO_NUMERIC_BY_ALPHA2: Record<string, number> = {
   YT: 175, ZA: 710, ZM: 894, ZW: 716,
 };
 
-const ALPHA2_BY_NUMERIC = new Map(
-  Object.entries(ISO_NUMERIC_BY_ALPHA2).map(([code, numeric]) => [numeric, code]),
+// RL `src/lib/territory-codes.ts` / TerritoryMap NUMERIC_TO_ALPHA2.
+// Invert the official ISO numeric table. Pad + unpadded keys so
+// world-atlas "036" and numeric 36 both resolve to AU.
+export const NUMERIC_TO_ALPHA2: Record<string, string> = Object.fromEntries(
+  Object.entries(ISO_NUMERIC_BY_ALPHA2).flatMap(([code, numeric]) => {
+    const raw = String(numeric);
+    const padded = raw.padStart(3, "0");
+    return raw === padded ? [[raw, code]] : [[raw, code], [padded, code]];
+  }),
 );
 
 export function isoNumericForAlpha2(code: string): number | null {
@@ -42,8 +51,10 @@ export function isoNumericForAlpha2(code: string): number | null {
 }
 
 export function isoAlpha2FromNumeric(raw: string | number | null | undefined): string | null {
-  if (raw == null) return null;
+  if (raw == null || raw === "") return null;
+  const direct = NUMERIC_TO_ALPHA2[String(raw)];
+  if (direct) return direct;
   const numeric = typeof raw === "number" ? raw : Number(raw);
   if (!Number.isInteger(numeric)) return null;
-  return ALPHA2_BY_NUMERIC.get(numeric) ?? null;
+  return NUMERIC_TO_ALPHA2[String(numeric)] ?? null;
 }
