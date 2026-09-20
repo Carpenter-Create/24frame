@@ -47,7 +47,7 @@ export function SocialHomeComposer({
         data-social-composer-prompt=""
         className={SOCIAL_COMPOSER_FIELD_CLASS}
       >
-        {socialComposerPrompt(authorName)}
+        {socialComposerPrompt()}
       </Link>
       <label data-social-composer-media="" className={SOCIAL_COMPOSER_MEDIA_CLASS}>
         <input

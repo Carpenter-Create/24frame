@@ -225,7 +225,7 @@ export function socialFirstName(displayName: string | null | undefined): string 
   return displayName?.trim().split(/\s+/)[0] ?? "";
 }
 
-export function socialComposerPrompt(_displayName?: string | null): string {
+export function socialComposerPrompt(): string {
   return SOCIAL.home.composerPrompt;
 }
 

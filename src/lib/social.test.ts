@@ -245,9 +245,8 @@ describe("profile opt-in", () => {
     expect(socialProfileTabHref("/social/u/ada", "credits")).toBe("/social/u/ada?tab=credits");
     expect(socialProfileTabHref("/social/profile", "posts")).toBe("/social/profile");
     expect(socialProfileTabLabel("credits")).toBe("Credits");
-    expect(socialComposerPrompt("Ada Lovelace")).toBe("Write something");
-    expect(socialComposerPrompt("Ada Lovelace")).toBe(SOCIAL.home.composerPrompt);
-    expect(socialComposerPrompt(null)).toBe(SOCIAL.home.composerPrompt);
+    expect(socialComposerPrompt()).toBe("Write something");
+    expect(socialComposerPrompt()).toBe(SOCIAL.home.composerPrompt);
     expect(SOCIAL.home.composerPrompt).toBe("Write something");
     expect(SOCIAL.home.composerPromptNamed).toBe("Write something");
     expect(SOCIAL.forYou.topics).toBe("Topics.");
