@@ -27,6 +27,7 @@ import {
   SOCIAL,
   SOCIAL_PROFILE_TAB_PARAM,
   SOCIAL_ROUTES,
+  socialCreateHref,
   socialMemberHref,
   socialPersonLabel,
   socialProfileCanonicalUrl,
@@ -210,7 +211,10 @@ export default async function SocialPublicProfilePage({
             <SocialAuthorHistory
               truncated={history.truncated}
               emptyHint={SOCIAL.profile.postsEmptyHint}
-              emptyAction={{ href: SOCIAL_ROUTES.create, label: SOCIAL.profile.sharePost }}
+              emptyAction={{
+                href: isSelf ? socialCreateHref("media") : SOCIAL_ROUTES.create,
+                label: SOCIAL.profile.sharePost,
+              }}
               posts={history.posts.map((post) =>
                 socialAuthorPostCard({
                   post,

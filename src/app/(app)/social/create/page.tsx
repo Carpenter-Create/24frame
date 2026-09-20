@@ -6,6 +6,7 @@ import { SocialForYouSkeleton } from "@/components/social/social-skeletons";
 import { SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS } from "@/lib/social-chrome";
 import { signedAvatarUrl, signedAvatarUrls } from "@/lib/s3-avatars";
 import { parseSocialCreateKind, SOCIAL, socialPersonLabel } from "@/lib/social";
+import { parseSocialCreateMediaStep } from "@/lib/social-create-media";
 import { loadFolloweeIds, loadSuggestedPeople } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { requireSocialSession, type SocialSession } from "@/lib/social-session";
@@ -22,6 +23,7 @@ export default async function SocialCreatePage({
     searchParams ? searchParams : Promise.resolve({} as Record<string, string | string[] | undefined>),
   ]);
   const initialKind = parseSocialCreateKind(sp.kind);
+  const initialStep = parseSocialCreateMediaStep(sp.step);
   const { ctx, supabase } = session;
   const [profile, photoUrl] = await Promise.all([
     ensureOwnSocialProfile(supabase, ctx.user),
@@ -41,6 +43,7 @@ export default async function SocialCreatePage({
           authorHandle={profile?.handle ?? null}
           authorPhotoUrl={photoUrl}
           initialKind={initialKind}
+          initialStep={initialKind === "media" ? initialStep : null}
         />
       </div>
       <Suspense fallback={<SocialForYouSkeleton />}>

@@ -336,22 +336,22 @@ describe("profile opt-in", () => {
     expect(socialProfilePublicUrl("acarpcreate")).not.toContain("/social/u/");
     expect(socialProfilePublicUrl("AdamC")).not.toContain("/social/@");
     expect(socialProfilePublicPath("AdamC")).not.toContain("/social/");
-    expect(parseSocialCreateKind("photo")).toBe("photo");
+    expect(parseSocialCreateKind("photo")).toBe("media");
+    expect(parseSocialCreateKind("video")).toBe("media");
+    expect(parseSocialCreateKind("media")).toBe("media");
     expect(parseSocialCreateKind("clip")).toBeNull();
-    expect(socialCreateHref("video")).toBe("/social/create?kind=video");
+    expect(socialCreateHref("media")).toBe("/social/create?kind=media");
     expect(socialCreateHref("text")).toBe("/social/create?kind=text");
     expect(SOCIAL_ROUTES.createLive).toBe("/social/create/live");
     expect(SOCIAL.create.write).toBe("Write");
     expect(SOCIAL.create.goLive).toBe("Go live");
     expect(SOCIAL.create.close).toBe("Close");
     expect(SOCIAL.create.title).toBe("Create");
-    expect(socialCreateWellCopy("photo", false)).toEqual({
-      title: SOCIAL.create.dropEmpty,
-      hint: SOCIAL.create.dropEmptyHint,
-    });
-    expect(socialCreateWellCopy("photo", true)?.title).toBe(SOCIAL.create.dropPhoto);
-    expect(socialCreateWellCopy("video", false)?.title).toBe(SOCIAL.create.dropVideo);
+    expect(socialCreateWellCopy("media", false)).toBeNull();
+    expect(socialCreateWellCopy("media", true)).toBeNull();
     expect(socialCreateWellCopy("text", false)).toBeNull();
+    expect(SOCIAL.create.media).toBe("Media");
+    expect(SOCIAL.create.next).toBe("Next");
     expect(SOCIAL.create.photo).toBe("Photo");
     expect(SOCIAL.create.caption).toBe("Caption");
     expect(SOCIAL.create.originalQuality).toBe("Upload in original quality (up to 4K)");

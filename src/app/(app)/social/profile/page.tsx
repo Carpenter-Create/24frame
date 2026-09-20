@@ -24,6 +24,7 @@ import {
   SOCIAL,
   SOCIAL_PROFILE_TAB_PARAM,
   SOCIAL_ROUTES,
+  socialCreateHref,
   socialPersonLabel,
   socialRelativeTime,
   socialStoryHref,
@@ -179,7 +180,7 @@ async function SocialProfileMain({
             truncated={history.truncated}
             emptyHint={SOCIAL.profile.postsEmptyOwnHint}
             emptyAction={{ href: SOCIAL_ROUTES.profileEdit, label: SOCIAL.profile.completeIdentity }}
-            emptySecondary={{ href: SOCIAL_ROUTES.create, label: SOCIAL.profile.sharePost }}
+            emptySecondary={{ href: socialCreateHref("media"), label: SOCIAL.profile.sharePost }}
             posts={history.posts.map((post) =>
               socialAuthorPostCard({
                 post,

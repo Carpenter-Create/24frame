@@ -12,6 +12,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 
 import { Close44 } from "@/components/chrome/house";
+import { SocialCreateMediaTile } from "@/components/social/social-create-media";
 import { SocialIcon } from "@/components/social/social-icon";
 import {
   SOCIAL_CREATE_SHEET_HEAD_CLASS,
@@ -47,6 +48,10 @@ export function SocialCreateTile({
   tile: (typeof SOCIAL_CREATE_TILES)[number];
   onPick?: () => void;
 }) {
+  if (tile.id === "media") {
+    return <SocialCreateMediaTile tile={tile} />;
+  }
+
   return (
     <Link
       href={tile.href}

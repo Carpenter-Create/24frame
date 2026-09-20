@@ -16,7 +16,7 @@ import type { SocialPhosphorIconName } from "@/lib/social-icons";
 // (calm precision, no bounce).
 // Register: Coinbase institutional — modern trust, calm precision,
 // one Sporty Blue primary, sharp selected states, quiet helpers —
-// still social/creator/fun enough for Photo · Video · Write · Go live.
+// still social/creator/fun enough for Media · Write · Go live.
 // Light 24Frame + Social media spine. Not traditional institutional
 // (no bank / enterprise / gov chrome, no stiff corporate density).
 // Not Mercury-stiff. Not LinkedIn-grey. Not a cold fintech vault.
@@ -24,19 +24,14 @@ import type { SocialPhosphorIconName } from "@/lib/social-icons";
 // Not iMessage frost. Not iMessage’s vertical + attachment list.
 // One SoT for the sheet + tile primitive. Social-only door
 // (dock dest · desktop composer). Never in the house header.
+// Tiles: Media · Write · Go live. Media opens a mixed roll immediately.
 
 export const SOCIAL_CREATE_TILES = [
   {
-    id: "photo",
-    label: SOCIAL.create.photo,
-    href: socialCreateHref("photo"),
+    id: "media",
+    label: SOCIAL.create.media,
+    href: socialCreateHref("media"),
     icon: "image",
-  },
-  {
-    id: "video",
-    label: SOCIAL.create.video,
-    href: socialCreateHref("video"),
-    icon: "film-strip",
   },
   {
     id: "write",
@@ -83,9 +78,9 @@ export const SOCIAL_CREATE_SHEET_TITLE_CLASS =
 export const SOCIAL_CREATE_SHEET_SCRIM_CLASS =
   "absolute inset-0 bg-ink/40 app-sheet-scrim-fade";
 
-// Phone: 2×2. Wider: one equal row. Never truncate — labels wrap/stack.
+// One equal row. Never truncate — labels wrap/stack.
 export const SOCIAL_CREATE_TILES_CLASS =
-  "grid w-full grid-cols-2 gap-[var(--space-4)] min-[480px]:grid-cols-4";
+  "grid w-full grid-cols-3 gap-[var(--space-4)]";
 
 // Tile chrome stays quiet. Selected lives on the well — not a
 // full-tile enterprise hover card, not a Mercury dest chip.

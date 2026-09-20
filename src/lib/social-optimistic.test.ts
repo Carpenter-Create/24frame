@@ -132,6 +132,13 @@ describe("Social optimistic mutation SoT", () => {
       ok: false,
       error: SOCIAL.home.emptyPost,
     });
+    expect(
+      beginSocialPostPublish({
+        body: "",
+        mediaItems: [{ kind: "image", key: "posts/u1/a.jpg", contentType: "image/jpeg" }],
+        authorName: "Ada",
+      }).ok,
+    ).toBe(true);
     const started = beginSocialPostPublish({
       body: "hello",
       mediaItems: [{ kind: "image", key: "posts/u1/a.jpg", contentType: "image/jpeg" }],

@@ -85,5 +85,8 @@ describe("Social Create", () => {
     expect(html).not.toContain("data-social-lenses");
     expect(readFileSync("src/app/(app)/social/page.tsx", "utf8")).not.toContain("SocialCreateCompose");
     expect(readFileSync("src/app/(app)/social/page.tsx", "utf8")).not.toContain("SocialPostCompose");
+    const createSrc = readFileSync("src/app/(app)/social/create/page.tsx", "utf8");
+    expect(createSrc).toContain("parseSocialCreateMediaStep");
+    expect(createSrc).toContain("initialStep");
   });
 });
