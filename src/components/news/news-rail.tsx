@@ -12,8 +12,8 @@ import { OVERVIEW_MODULE_NEST_CLASS } from "@/lib/overview";
 // Home Industry news: same OverviewModule shell as Social/Education —
 // header (Industry news + View all) lives inside the grey panel. Articles nest like
 // Education course tiles (no second grey card). History shares
-// NewsCard: Home stack on phone, dense rows on md+. Source chips
-// live in NewsHistory under the H1.
+// NewsCard: Home stack on phone, dense rows on md+. Source filter
+// lives in NewsHistory under the H1.
 //
 // Trailing header CTA (Adam interrupt 2026-09-19): Industry news is
 // the one Home gray module that keeps the words "View all" — the
@@ -23,7 +23,7 @@ import { OVERVIEW_MODULE_NEST_CLASS } from "@/lib/overview";
 //
 // `stickyHeader` pins that same row while the rail list scrolls —
 // shared NewsStickyHeader, not a rail-only sticky fork. History
-// mode has no module header; /home/news pins title + chips instead.
+// mode has no module header; /home/news pins title + source track.
 
 export function NewsRail({
   items,

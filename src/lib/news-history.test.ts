@@ -5,16 +5,19 @@ import {
   NEWS_PAGE,
   NEWS_SOURCE_IDS,
   NEWS_SOURCE_PARAM,
+  NEWS_SOURCES,
+  NEWS_SOURCE_FILTER_SOURCES,
   NEWS_WINDOW_DAYS,
   NEWS_WINDOW_MS,
   canonicalizeNewsSourceFilter,
   filterNewsBySources,
   newsHistoryEmptyCopy,
   newsHistoryHref,
+  newsSourceFilterIndex,
   newsSourceFilterIsAll,
   newsSourceFilterLabel,
   parseNewsSourceFilter,
-  toggleNewsSourceFilter,
+  selectNewsSourceFilter,
   type NewsItem,
 } from "./news";
 
@@ -38,6 +41,7 @@ describe("news history source filter URL", () => {
     expect(parseNewsSourceFilter("not-a-source")).toEqual([]);
     expect(newsSourceFilterIsAll([])).toBe(true);
     expect(newsHistoryHref([])).toBe(NEWS_HREF);
+    expect(newsSourceFilterIndex([])).toBe(0);
     expect(NEWS_SOURCE_PARAM).toBe("source");
   });
 
@@ -46,27 +50,47 @@ describe("news history source filter URL", () => {
     expect(newsHistoryHref(["variety"])).toBe(`${NEWS_HREF}?source=variety`);
     expect(newsSourceFilterIsAll(["variety"])).toBe(false);
     expect(newsSourceFilterLabel(["variety"])).toBe("Variety");
-  });
-
-  it("parses multi via comma-separated or repeated params and canonicalizes order", () => {
-    expect(parseNewsSourceFilter("deadline,variety")).toEqual(["variety", "deadline"]);
-    expect(parseNewsSourceFilter(["deadline", "variety"])).toEqual(["variety", "deadline"]);
-    expect(parseNewsSourceFilter("variety,deadline,not-a-source")).toEqual([
-      "variety",
-      "deadline",
-    ]);
-    expect(newsHistoryHref(["deadline", "variety"])).toBe(
-      `${NEWS_HREF}?source=variety,deadline`,
+    expect(newsSourceFilterIndex(["variety"])).toBe(
+      NEWS_SOURCE_FILTER_SOURCES.findIndex((source) => source.id === "variety") + 1,
     );
-    expect(newsSourceFilterLabel(["variety", "deadline"])).toBe("Variety, Deadline");
   });
 
-  it("toggles All → one → multi → All", () => {
-    expect(toggleNewsSourceFilter([], "variety")).toEqual(["variety"]);
-    expect(toggleNewsSourceFilter(["variety"], "deadline")).toEqual(["variety", "deadline"]);
-    expect(toggleNewsSourceFilter(["variety", "deadline"], "variety")).toEqual(["deadline"]);
-    expect(toggleNewsSourceFilter(["deadline"], "deadline")).toEqual([]);
+  it("collapses legacy comma-multi or repeated params to the first A-Z id", () => {
+    // deadline before variety in the filter SoT. Fail-closed single-select:
+    // never keep two ids. Treat-as-All is not this lock.
+    expect(parseNewsSourceFilter("deadline,variety")).toEqual(["deadline"]);
+    expect(parseNewsSourceFilter(["deadline", "variety"])).toEqual(["deadline"]);
+    expect(parseNewsSourceFilter("variety,deadline,not-a-source")).toEqual(["deadline"]);
+    expect(newsHistoryHref(["deadline", "variety"])).toBe(`${NEWS_HREF}?source=deadline`);
+    expect(newsHistoryHref(["variety", "deadline"])).toBe(`${NEWS_HREF}?source=deadline`);
+    expect(newsSourceFilterLabel(["variety", "deadline"])).toBe("Deadline");
+    expect(canonicalizeNewsSourceFilter(["variety", "deadline"])).toEqual(["deadline"]);
+  });
+
+  it("selects All or one outlet exclusively", () => {
+    expect(selectNewsSourceFilter("all")).toEqual([]);
+    expect(selectNewsSourceFilter("variety")).toEqual(["variety"]);
+    expect(selectNewsSourceFilter("deadline")).toEqual(["deadline"]);
     expect(canonicalizeNewsSourceFilter([...NEWS_SOURCE_IDS])).toEqual([]);
+  });
+
+  it("lists filter outlets All first, then A-Z by label", () => {
+    expect(NEWS_SOURCE_FILTER_SOURCES.map((source) => source.label)).toEqual([
+      "Deadline",
+      "Film Threat",
+      "Filmmaker Magazine",
+      "Hollywood Reporter",
+      "IndieWire",
+      "JoBlo",
+      "MovieMaker",
+      "No Film School",
+      "Screen Daily",
+      "TVLine",
+      "Variety",
+    ]);
+    expect(NEWS_SOURCES.map((source) => source.id)).not.toEqual(
+      NEWS_SOURCE_FILTER_SOURCES.map((source) => source.id),
+    );
   });
 });
 
@@ -77,11 +101,10 @@ describe("news history source filter rows", () => {
     item("i", "indiewire"),
   ];
 
-  it("keeps every row for All and filters one / multi / empty", () => {
+  it("keeps every row for All and filters one exclusive outlet", () => {
     expect(filterNewsBySources(rows, []).map((row) => row.id)).toEqual(["v", "d", "i"]);
     expect(filterNewsBySources(rows, ["variety"]).map((row) => row.id)).toEqual(["v"]);
     expect(filterNewsBySources(rows, ["variety", "deadline"]).map((row) => row.id)).toEqual([
-      "v",
       "d",
     ]);
     expect(filterNewsBySources(rows, ["joblo"])).toEqual([]);

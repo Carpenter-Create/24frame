@@ -15,9 +15,14 @@ import {
   DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS,
   DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS,
   DASHBOARD_NEWS_SOURCE_CHIPS_CLASS,
+  DASHBOARD_TOP_PILL_BUTTON_CLASS,
+  DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
+  DASHBOARD_TOP_PILL_BUTTON_ON_CLASS,
+  DASHBOARD_TOP_PILL_CLUSTER_CLASS,
 } from "@/lib/dashboard-craft";
-import { HOUSE_FILTER_OFF_CLASS, HOUSE_FILTER_PILL_CLASS, HOUSE_PILL_SELECTED_CLASS } from "@/lib/house-shell";
-import { NEWS_PAGE, NEWS_SOURCES, type NewsItem } from "@/lib/news";
+import { HOUSE_SEGMENTED_ITEM_ON_CLASS } from "@/lib/house-shell";
+import { NEWS_PAGE, NEWS_SOURCE_FILTER_SOURCES, NEWS_SOURCES, type NewsItem } from "@/lib/news";
+import { SEGMENTED_TRACK_PERSIST } from "@/lib/segmented-track";
 import {
   NEWS_STICKY_PAGE_SURFACE_CLASS,
   NEWS_STICKY_PIN_CLASS,
@@ -48,7 +53,7 @@ function markupClass(value: string): string {
 }
 
 describe("NewsHistory layout", () => {
-  it("uses house chips under the title and a dense list — no Sources rail", () => {
+  it("uses house SegmentedTrack under the title and a dense list — no Sources rail", () => {
     const html = renderToStaticMarkup(
       createElement(NewsHistory, {
         items: [VARIETY, DEADLINE],
@@ -104,22 +109,30 @@ describe("NewsHistory layout", () => {
     expect(html).toContain(DASHBOARD_NEWS_SOURCE_CHIPS_CLASS);
     expect(html).toContain("overflow-x-auto");
     expect(html).toContain("no-scrollbar");
+    expect(html).toContain("data-news-source-track");
+    expect(html).toContain(`data-segmented-persist="${SEGMENTED_TRACK_PERSIST.newsSource}"`);
+    expect(html).toContain(DASHBOARD_TOP_PILL_CLUSTER_CLASS);
     expect(html).toContain(DASHBOARD_NEWS_SOURCE_CHIP_CLASS);
     expect(html).toContain(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS);
     expect(html).toContain(DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS);
-    expect(DASHBOARD_NEWS_SOURCE_CHIP_CLASS).toContain(HOUSE_FILTER_PILL_CLASS);
-    expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).toBe(HOUSE_PILL_SELECTED_CLASS);
-    expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).toBe("bg-accent text-white");
-    expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).not.toContain("bg-ink");
-    expect(DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS).toBe(HOUSE_FILTER_OFF_CLASS);
+    expect(DASHBOARD_NEWS_SOURCE_CHIP_CLASS).toBe(DASHBOARD_TOP_PILL_BUTTON_CLASS);
+    expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).toBe(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS);
+    expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).toBe(HOUSE_SEGMENTED_ITEM_ON_CLASS);
+    expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).not.toContain("bg-accent");
+    expect(DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS).toBe(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS);
     expect(html).toContain(NEWS_PAGE.sourcesAll);
     expect(html.indexOf('data-news-source-option="all"')).toBeLessThan(
-      html.indexOf('data-news-source-option="indiewire"'),
+      html.indexOf('data-news-source-option="deadline"'),
+    );
+    expect(html.indexOf('data-news-source-option="deadline"')).toBeLessThan(
+      html.indexOf('data-news-source-option="variety"'),
     );
     for (const source of NEWS_SOURCES) {
       expect(html).toContain(source.label);
     }
+    expect(NEWS_SOURCE_FILTER_SOURCES[0]?.label).toBe("Deadline");
     expect(html).toContain('href="/home/news?source=variety"');
+    expect(html).not.toMatch(/href="\/home\/news\?source=[^"]*,/);
     expect(html).not.toContain("data-news-sources-rail");
     expect(html).not.toContain("data-news-sources-phone");
     expect(html).not.toContain("data-news-sources-sheet");
@@ -158,7 +171,7 @@ describe("NewsHistory layout", () => {
     expect(html).not.toContain('data-news-sticky-header="rail"');
   });
 
-  it("filters All / one / multi and shows empty copy in the list column", () => {
+  it("filters All / one exclusive outlet and shows empty copy in the list column", () => {
     const all = renderToStaticMarkup(
       createElement(NewsHistory, {
         items: [VARIETY, DEADLINE],
@@ -183,8 +196,9 @@ describe("NewsHistory layout", () => {
     );
     expect(one).toContain("Harbor Cut lands a festival slot");
     expect(one).not.toContain("North Wind books a limited run");
-    expect(one).toContain('href="/home/news?source=variety,deadline"');
+    expect(one).toContain('href="/home/news?source=deadline"');
     expect(one).toContain('href="/home/news"');
+    expect(one).not.toMatch(/href="\/home\/news\?source=[^"]*,/);
     expect(one).toMatch(
       /data-news-source-option="variety"[^>]*aria-pressed="true"|aria-pressed="true"[^>]*data-news-source-option="variety"/,
     );
@@ -192,17 +206,21 @@ describe("NewsHistory layout", () => {
       /data-news-source-option="all"[^>]*aria-pressed="true"|aria-pressed="true"[^>]*data-news-source-option="all"/,
     );
 
-    const multi = renderToStaticMarkup(
+    const legacy = renderToStaticMarkup(
       createElement(NewsHistory, {
         items: [VARIETY, DEADLINE],
         now: NOW,
         selected: ["variety", "deadline"],
       }),
     );
-    expect(multi).toContain("Harbor Cut lands a festival slot");
-    expect(multi).toContain("North Wind books a limited run");
-    expect(multi).toContain('href="/home/news?source=variety"');
-    expect(multi).toContain('href="/home/news?source=deadline"');
+    expect(legacy).toContain("North Wind books a limited run");
+    expect(legacy).not.toContain("Harbor Cut lands a festival slot");
+    expect(legacy).toContain('href="/home/news?source=variety"');
+    expect(legacy).toContain('href="/home/news?source=deadline"');
+    expect(legacy).not.toMatch(/href="\/home\/news\?source=[^"]*,/);
+    expect(legacy).toMatch(
+      /data-news-source-option="deadline"[^>]*aria-pressed="true"|aria-pressed="true"[^>]*data-news-source-option="deadline"/,
+    );
 
     const empty = renderToStaticMarkup(
       createElement(NewsHistory, {
