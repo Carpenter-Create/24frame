@@ -516,13 +516,118 @@ describe("AppShell client mobile chrome", () => {
     navigation.pathname = "/activity";
     const leftover = renderShell("ask-globee-landing");
     expect(leftover).not.toContain("data-mobile-nav-trigger");
-    expect(leftover).toContain("data-house-phone-dest-chips");
+    expect(leftover).not.toContain("data-house-phone-dest-chips");
     expect(leftover).toContain("data-app-header");
     expect(leftover).not.toContain("data-header-search");
     expect(leftover).not.toContain("⌘K");
-    expect(leftover).toMatch(
-      /<aside class="[^"]*\bhidden\b[^"]*\bmd:flex\b[^"]*" data-app-rail=""/,
+    expect(leftover).not.toContain("data-app-rail");
+  });
+});
+
+describe("AppShell /activity account chrome", () => {
+  function renderActivity(defaultWorkspace: "aggregation" | "social" | "education" = "education") {
+    return renderToStaticMarkup(
+      <AppShell
+        email="ada@example.com"
+        name="Ada Lovelace"
+        orgs={[{ id: "org-1", name: "Acme" }]}
+        activeOrgId="org-1"
+        messagesUnread={Promise.resolve(0)}
+        defaultWorkspace={defaultWorkspace}
+      >
+        page
+      </AppShell>,
     );
+  }
+
+  it("keeps /activity on Get Help account chrome — zero left rail", () => {
+    for (const path of ["/activity", "/activity/x"] as const) {
+      navigation.pathname = path;
+      for (const workspace of ["aggregation", "social", "education"] as const) {
+        const html = renderActivity(workspace);
+        expect(html).toContain('data-activity-chrome=""');
+        expect(html).not.toContain("data-home-chrome");
+        expect(html).not.toContain("data-app-home-frame");
+        expect(html).not.toContain("<aside");
+        expect(html).not.toContain("data-app-rail");
+        expect(html).not.toContain("data-side-nav");
+        expect(html).not.toContain("data-settings-rail");
+        expect(html).not.toContain("data-settings-rail-nav");
+        expect(html).not.toContain("data-settings-rail-item");
+        expect(html).not.toContain("data-social-rail");
+        expect(html).not.toContain("data-social-workspace");
+        expect(html).not.toContain("data-education-workspace");
+        expect(html).not.toContain("data-education-header-search");
+        expect(html).not.toContain("data-house-phone-dest-chips");
+        expect(html).not.toContain("data-mobile-nav-trigger");
+        expect(html).not.toContain("Collapse sidebar");
+        expect(html).not.toContain("Expand sidebar");
+        expect(html).toContain("--sidebar-width:0px");
+        expect(html).toContain("data-workspace-switcher");
+        expect(html).toContain('data-workspace-switcher-segment="education"');
+        expect(html).toMatch(
+          /data-workspace-switcher-segment="education"[^>]*aria-selected="false"/,
+        );
+        expect(html).toMatch(/data-workspace-switcher-segment="home"[^>]*aria-selected="false"/);
+        expect(html).toMatch(
+          /data-workspace-switcher-segment="aggregation"[^>]*aria-selected="false"/,
+        );
+        expect(html).toMatch(/data-workspace-switcher-segment="social"[^>]*aria-selected="false"/);
+        expect(html).toMatch(
+          /data-workspace-switcher-segment="co-productions"[^>]*aria-selected="false"/,
+        );
+        expect(html).toContain("data-user-menu-host");
+        expect(html).toContain("data-house-lead-chrome");
+        expect(html).toContain("px-[var(--chrome-gutter)]");
+        expect(html).toContain("pb-24 pt-8");
+        expect(html).toContain("max-width:var(--page-max-width)");
+        expect(html).not.toContain("/aggregation/activity");
+      }
+    }
+    expect(shellSrc).toContain("isAccountChromeNoRailPath");
+    expect(shellSrc).toContain("homeChrome || accountChromeNoRail");
+    expect(shellSrc).toContain("{hideProductRail ? null : (");
+    expect(shellSrc).toContain("settingsPage ? (");
+    expect(shellSrc).toContain("<SettingsRail />");
+    expect(shellSrc).not.toContain("activityPage ? (\n              <SettingsRail");
+    expect(shellSrc).toContain("isActivityPath");
+    expect(shellSrc).toContain("hideProductRail");
+    expect(shellSrc).toContain("data-activity-chrome");
+    expect(shellSrc).not.toContain("/aggregation/activity");
+  });
+
+  it("matches Get Help left chrome exactly — no Settings twin rail", () => {
+    navigation.pathname = "/activity";
+    const activity = renderActivity("aggregation");
+    navigation.pathname = "/help";
+    const help = renderToStaticMarkup(
+      <AppShell
+        email="ada@example.com"
+        name="Ada Lovelace"
+        orgs={[{ id: "org-1", name: "Acme" }]}
+        activeOrgId="org-1"
+        messagesUnread={Promise.resolve(0)}
+        defaultWorkspace="aggregation"
+      >
+        page
+      </AppShell>,
+    );
+    const beforeMain = (html: string) => html.slice(0, html.indexOf("<main"));
+    const activityLead = beforeMain(activity);
+    const helpLead = beforeMain(help);
+    for (const chrome of [activityLead, helpLead]) {
+      expect(chrome).not.toContain("<aside");
+      expect(chrome).not.toContain("data-app-rail");
+      expect(chrome).not.toContain("data-settings-rail");
+      expect(chrome).not.toContain("data-settings-rail-nav");
+      expect(chrome).not.toContain("data-side-nav");
+      expect(chrome).not.toContain("Rights Holder");
+    }
+    expect(activityLead.includes("<aside")).toBe(helpLead.includes("<aside"));
+    expect(activity).toContain("px-[var(--chrome-gutter)]");
+    expect(help).toContain("px-[var(--chrome-gutter)]");
+    expect(activity).toContain("max-width:var(--page-max-width)");
+    expect(help).toContain("max-width:var(--page-max-width)");
   });
 });
 
@@ -550,6 +655,7 @@ describe("AppShell /help account chrome", () => {
         expect(html).toContain('data-help-chrome=""');
         expect(html).not.toContain("data-home-chrome");
         expect(html).not.toContain("data-app-home-frame");
+        expect(html).not.toContain("<aside");
         expect(html).not.toContain("data-app-rail");
         expect(html).not.toContain("data-side-nav");
         expect(html).not.toContain("data-settings-rail");
@@ -654,7 +760,7 @@ describe("AppShell /settings rail", () => {
   });
 
   it("keeps the Access rail on neighboring routes", () => {
-    for (const path of ["/", "/aggregation/titles", "/aggregation/attention", "/activity"]) {
+    for (const path of ["/", "/aggregation/titles", "/aggregation/attention"]) {
       navigation.pathname = path;
       const html = renderShell();
       expect(html).toContain("data-side-nav");

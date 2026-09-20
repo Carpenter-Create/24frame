@@ -202,6 +202,7 @@ describe("Home lead pills", () => {
     expect(overviewHidesRail("/settings")).toBe(false);
     expect(overviewHidesRail("/help")).toBe(false);
     expect(overviewHidesRail("/help/center")).toBe(false);
+    expect(overviewHidesRail("/activity")).toBe(false);
     expect(OVERVIEW_RAIL_OFF_WIDTH).toBe("0px");
   });
 

@@ -243,13 +243,17 @@ export function housePhoneShowsDestChips({
   homeChrome = false,
   settingsPage = false,
   helpPage = false,
+  activityPage = false,
 }: {
   workspace: WorkspaceMode;
   homeChrome?: boolean;
   settingsPage?: boolean;
   helpPage?: boolean;
+  activityPage?: boolean;
 }): boolean {
-  if (homeChrome || settingsPage || helpPage) return false;
+  // Activity and Get Help share accountChromeNoRail — dest chips
+  // stay off. Do not add a left rail or chip twin on those paths.
+  if (homeChrome || settingsPage || helpPage || activityPage) return false;
   return workspace === "social" || workspace === "aggregation" || workspace === "education";
 }
 

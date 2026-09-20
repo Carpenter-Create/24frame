@@ -8,11 +8,15 @@ vi.mock("next/navigation", () => ({
 }));
 
 import { ActivityInbox } from "./activity-inbox";
+import { PAGE_LEAD_STACK_CLASS } from "@/components/ui/page-header";
 import {
   ACTIVITY_FAMILIES,
   ACTIVITY_HREF,
+  ACTIVITY_LEAD_ROW_CLASS,
   ACTIVITY_PAGE,
+  ACTIVITY_PAGE_CLASS,
   ACTIVITY_PREFS_HREF,
+  ACTIVITY_SECTION_CLASS,
 } from "@/lib/activity";
 import { HOUSE_THEME_TOGGLE_CLASS } from "@/lib/house-lead-chrome";
 import { NOTIFICATION_PREFS } from "@/lib/notification-prefs";
@@ -40,6 +44,15 @@ describe("ActivityInbox", () => {
       }),
     );
     expect(html).toContain("data-activity-inbox");
+    expect(html).toContain(ACTIVITY_PAGE_CLASS);
+    expect(html).toContain(ACTIVITY_SECTION_CLASS);
+    expect(html).toContain('data-activity-page-lead=""');
+    expect(html).toContain(PAGE_LEAD_STACK_CLASS);
+    expect(html).toContain(ACTIVITY_LEAD_ROW_CLASS);
+    expect(html).toContain(ACTIVITY_PAGE.back);
+    expect(html).not.toContain("t-title");
+    expect(inboxSrc).not.toContain("PageHeader");
+    expect(inboxSrc).toContain("ActivityPageLead");
     expect(html).toContain('data-activity-family-chip="all"');
     expect(html).toContain('data-activity-family-chip="aggregation"');
     expect(html).toContain('data-activity-family-chip="reporting"');

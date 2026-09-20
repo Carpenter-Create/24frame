@@ -1,6 +1,14 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
+import { DASHBOARD_HREF } from "./dashboard-admin";
 import { HOUSE_HEADER_TRAILING_HIT_CLASS } from "@/lib/house-lead-chrome";
+import {
+  SETTINGS_EDIT_HELPER_CLASS,
+  SETTINGS_PANE_CLASS,
+  SETTINGS_PANE_TITLE_CLASS,
+  SETTINGS_SECTION_CLASS,
+} from "./settings";
 import {
   ACTIVITY_BELL_OPEN_CAP,
   ACTIVITY_BELL_OPEN_DOT_CLASS,
@@ -8,10 +16,15 @@ import {
   ACTIVITY_BELL_TRIGGER_OPEN_CLASS,
   ACTIVITY_FAMILIES,
   ACTIVITY_FAMILY_ALL,
+  ACTIVITY_HELPER_CLASS,
   ACTIVITY_HREF,
   ACTIVITY_KIND_ICON,
   ACTIVITY_PAGE,
+  ACTIVITY_PAGE_CLASS,
   ACTIVITY_PREFS_HREF,
+  ACTIVITY_SECTION_CLASS,
+  ACTIVITY_TITLE_CLASS,
+  activityHeaderBack,
   isActivityPath,
   activityBellItems,
   activityEmptyCopy,
@@ -94,6 +107,32 @@ describe("Activity chrome href", () => {
     expect(isActivityPath("/aggregation/activity")).toBe(false);
     expect(isActivityPath("/settings")).toBe(false);
     expect(isActivityPath("/help")).toBe(false);
+  });
+
+  it("reuses Settings / Get Help page-lead tokens and Back routing", () => {
+    expect(ACTIVITY_PAGE.back).toBe("Back");
+    expect(ACTIVITY_PAGE.homeHref).toBe(DASHBOARD_HREF);
+    expect(ACTIVITY_PAGE_CLASS).toBe(SETTINGS_PANE_CLASS);
+    expect(ACTIVITY_SECTION_CLASS).toBe(SETTINGS_SECTION_CLASS);
+    expect(ACTIVITY_TITLE_CLASS).toBe(SETTINGS_PANE_TITLE_CLASS);
+    expect(ACTIVITY_HELPER_CLASS).toBe(SETTINGS_EDIT_HELPER_CLASS);
+    expect(activityHeaderBack("/activity")).toEqual({
+      href: DASHBOARD_HREF,
+      label: ACTIVITY_PAGE.back,
+    });
+    expect(activityHeaderBack("/activity/x")).toEqual({
+      href: ACTIVITY_HREF,
+      label: ACTIVITY_PAGE.title,
+    });
+    expect(activityHeaderBack(null)).toEqual({
+      href: DASHBOARD_HREF,
+      label: ACTIVITY_PAGE.back,
+    });
+    const lead = readFileSync("src/components/activity/activity-page-lead.tsx", "utf8");
+    expect(lead).toContain("PAGE_LEAD_STACK_CLASS");
+    expect(lead).toContain("PageHeaderBackLink");
+    expect(lead).not.toMatch(/from ["']@\/components\/settings\/settings-page-lead["']/);
+    expect(lead).not.toMatch(/from ["']@\/components\/help\/help-page-lead["']/);
   });
 });
 
