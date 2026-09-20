@@ -19,6 +19,7 @@ describe("GET /api/social/media", () => {
     vi.mocked(getAuthUser).mockResolvedValue(null);
     const res = await GET(new Request(`http://local/api/social/media?key=${encodeURIComponent(KEY)}`));
     expect(res.status).toBe(401);
+    expect(res.headers.get("Cache-Control")).toBe("private, no-store");
     expect(signedSocialMediaUrl).not.toHaveBeenCalled();
   });
 
@@ -26,6 +27,7 @@ describe("GET /api/social/media", () => {
     vi.mocked(getAuthUser).mockResolvedValue({ id: UID, email: "ada@example.com" });
     const res = await GET(new Request("http://local/api/social/media?key=avatars/secret"));
     expect(res.status).toBe(400);
+    expect(res.headers.get("Cache-Control")).toBe("private, no-store");
     expect(signedSocialMediaUrl).not.toHaveBeenCalled();
   });
 
@@ -35,7 +37,7 @@ describe("GET /api/social/media", () => {
     const res = await GET(new Request(`http://local/api/social/media?key=${encodeURIComponent(KEY)}`));
     expect(res.status).toBe(302);
     expect(res.headers.get("Location")).toBe("https://media.example/signed");
-    expect(res.headers.get("Cache-Control")).toBe("private, no-store");
+    expect(res.headers.get("Cache-Control")).toBe("private, max-age=300");
     expect(signedSocialMediaUrl).toHaveBeenCalledWith(KEY);
   });
 });

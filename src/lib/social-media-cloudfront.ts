@@ -3,6 +3,8 @@ import "server-only";
 import { getSignedUrl } from "@aws-sdk/cloudfront-signer";
 
 import { SOCIAL_MEDIA_SIGNED_URL_TTL_SECONDS } from "@/lib/social-media";
+import { cachedSignedUrl } from "@/lib/signed-url-cache";
+import { stableExpiryDate, stableExpiryEpoch } from "@/lib/signing-window";
 
 // Isolated FrameMediaDelivery signer. Ideas from donor Slice 1 / #14
 // (distribution d364lvgeu9rmwn) and this repo's title Slice 1 URL shape.
@@ -33,6 +35,13 @@ export function signSocialMediaCloudfrontUrl(
   const privateKey = requireMediaEnv("MEDIA_CLOUDFRONT_PRIVATE_KEY");
   const key = storageKey.replace(/^\/+/, "");
   const url = `${domain}/${key}`;
-  const dateLessThan = new Date(Date.now() + ttlSeconds * 1000).toISOString();
-  return getSignedUrl({ url, keyPairId, privateKey, dateLessThan });
+  const boundary = stableExpiryEpoch(ttlSeconds);
+  return cachedSignedUrl(`media:${key}`, boundary, () =>
+    getSignedUrl({
+      url,
+      keyPairId,
+      privateKey,
+      dateLessThan: stableExpiryDate(ttlSeconds).toISOString(),
+    }),
+  );
 }

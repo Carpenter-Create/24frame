@@ -3,6 +3,16 @@ import { createElement, type ComponentProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("next/image", () => ({
+  default: ({
+    src,
+    className,
+  }: {
+    src: string;
+    className?: string;
+  }) => createElement("img", { src, className, alt: "" }),
+}));
+
 vi.mock("next/navigation", () => ({
   usePathname: () => "/home",
   useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn() }),
@@ -148,6 +158,8 @@ describe("OverviewHome", () => {
     expect(homeSrc).not.toContain("PageHeader");
     expect(homeSrc).not.toContain("hideHeader");
     expect(homeSrc).not.toContain("title={OVERVIEW_PAGE.title}");
+    expect(homeSrc).toContain("SocialMediaImage");
+    expect(homeSrc).not.toContain("<img");
     expect(pageSrc).toContain("homeGreeting({ displayName: ctx.user.name })");
     expect(pageSrc).toContain("homeGreetingDate(now, HOME_GREETING_TIME_ZONE)");
   });

@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
 
 import { signedSocialMediaUrl } from "@/lib/s3-social-media";
-import { isForbiddenMediaKey } from "@/lib/social-media";
+import { privateMaxAgeCacheControl } from "@/lib/signing-window";
+import { isForbiddenMediaKey, SOCIAL_MEDIA_SIGNED_URL_TTL_SECONDS } from "@/lib/social-media";
 import { getAuthUser } from "@/lib/supabase/auth";
 
 export const runtime = "nodejs";
 
 // Node signer for Edge Social reads. Session required. Forbidden /
-// title-asset keys stay closed.
+// title-asset keys stay closed. Successful 302 is private max-age
+// aligned to the signing window. Auth misses and bad keys stay no-store.
 
 export async function GET(request: Request) {
   const user = await getAuthUser();
@@ -35,6 +37,6 @@ export async function GET(request: Request) {
   }
 
   const response = NextResponse.redirect(url, 302);
-  response.headers.set("Cache-Control", "private, no-store");
+  response.headers.set("Cache-Control", privateMaxAgeCacheControl(SOCIAL_MEDIA_SIGNED_URL_TTL_SECONDS));
   return response;
 }

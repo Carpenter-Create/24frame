@@ -1,15 +1,19 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { AVATAR_SIGNED_URL_TTL_SECONDS } from "@/lib/account-avatar";
 import { signedAvatarUrl } from "@/lib/s3-avatars";
+import { privateMaxAgeCacheControl } from "@/lib/signing-window";
 import { getAuthUser } from "@/lib/supabase/auth";
 
 export const runtime = "nodejs";
 
 const userIdSchema = z.string().uuid();
 
-// Node signer for Edge Social reads. Session required. Re-signs on each
-// GET so the Edge HTML never holds a 5-minute S3 URL.
+// Node signer for Edge Social reads. Session required. Edge HTML holds
+// the same-origin href, never a 5-minute S3 URL. A successful 302 is
+// private max-age aligned to the signing window so the browser can reuse
+// the Location. Auth misses and empty faces stay no-store.
 
 export async function GET(
   _request: Request,
@@ -40,6 +44,6 @@ export async function GET(
   }
 
   const response = NextResponse.redirect(url, 302);
-  response.headers.set("Cache-Control", "private, no-store");
+  response.headers.set("Cache-Control", privateMaxAgeCacheControl(AVATAR_SIGNED_URL_TTL_SECONDS));
   return response;
 }

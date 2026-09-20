@@ -1,4 +1,5 @@
 import { SOCIAL_WELCOME_VIDEO_CLASS } from "@/lib/social-chrome";
+import { socialVideoDisplaySrc } from "@/lib/social-media-display";
 import { SOCIAL } from "@/lib/social";
 
 export function SocialWelcomeVideo({ src }: { src: string }) {
@@ -7,7 +8,7 @@ export function SocialWelcomeVideo({ src }: { src: string }) {
     <section data-social-welcome-video="" className={SOCIAL_WELCOME_VIDEO_CLASS}>
       <video
         data-social-welcome-video-player=""
-        src={src}
+        src={socialVideoDisplaySrc(src)}
         controls
         playsInline
         preload="metadata"

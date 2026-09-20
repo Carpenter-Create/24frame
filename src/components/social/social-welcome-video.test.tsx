@@ -9,7 +9,7 @@ describe("SocialWelcomeVideo", () => {
     const html = renderToStaticMarkup(<SocialWelcomeVideo src="https://s3.example/welcome.mp4" />);
     expect(html).toContain("data-social-welcome-video");
     expect(html).toContain("data-social-welcome-video-player");
-    expect(html).toContain('src="https://s3.example/welcome.mp4"');
+    expect(html).toContain('src="https://s3.example/welcome.mp4#t=0.1"');
     expect(html).toContain(SOCIAL_WELCOME_VIDEO_CLASS);
     expect(SOCIAL_WELCOME_VIDEO_CLASS).toContain("rounded-[var(--radius-lg)]");
     expect(renderToStaticMarkup(<SocialWelcomeVideo src="" />)).toBe("");

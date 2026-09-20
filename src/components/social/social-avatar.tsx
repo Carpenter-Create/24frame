@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 
+import { SocialMediaImage } from "@/components/social/social-media-image";
 import { cn } from "@/lib/cn";
 import { IDENTITY_AVATAR_CLASS } from "@/lib/house-sheet";
+import { socialAvatarImageSizes } from "@/lib/social-media-display";
 import {
   SOCIAL_AVATAR_LG_CLASS,
   SOCIAL_AVATAR_PROFILE_CLASS,
@@ -40,14 +42,18 @@ export function SocialAvatar({
       data-social-avatar-ring={ring ?? undefined}
       className={cn(
         box,
-        face ? "overflow-hidden" : null,
+        face ? "relative overflow-hidden" : null,
         ring ? "ring-2 ring-accent ring-offset-2 ring-offset-[var(--bg)]" : null,
         className,
       )}
     >
       {face ? (
-        // eslint-disable-next-line @next/next/no-img-element -- same-origin or short-lived signed GET; onError drops a miss
-        <img src={face} alt="" className="size-full object-cover" onError={() => setBrokenSrc(face)} />
+        <SocialMediaImage
+          src={face}
+          sizes={socialAvatarImageSizes(size)}
+          priority={size === "profile"}
+          onError={() => setBrokenSrc(face)}
+        />
       ) : (
         socialInitials(name)
       )}

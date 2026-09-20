@@ -270,7 +270,7 @@ describe("Social home", () => {
     const html = await renderHome();
     expect(html).toContain('data-social-post="p1"');
     expect(html).toContain("Ada Lovelace");
-    expect(html).toContain('src="https://s3.example/signed-avatar"');
+    expect(html).toContain("https%3A%2F%2Fs3.example%2Fsigned-avatar");
     expect(html).toContain("data-social-home-composer");
     expect(html).not.toContain("data-social-checklist");
     expect(html).not.toContain(SOCIAL.checklist.title);
@@ -305,7 +305,7 @@ describe("Social home", () => {
 
     const html = await renderHome();
     expect(html).toContain("data-social-post-image");
-    expect(html).toContain('src="https://cf.example/signed-image"');
+    expect(html).toContain("https%3A%2F%2Fcf.example%2Fsigned-image");
   });
 
   it("sends an unauthenticated visitor to login", async () => {

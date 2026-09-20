@@ -212,7 +212,7 @@ describe("Social profile public face", () => {
     vi.mocked(signedAvatarUrl).mockResolvedValue("https://s3.example/signed-avatar");
 
     const html = await renderServerMarkup(await SocialProfilePage());
-    expect(html).toContain('src="https://s3.example/signed-avatar"');
+    expect(html).toContain("https%3A%2F%2Fs3.example%2Fsigned-avatar");
     expect(html).toContain("Ada Lovelace");
     expect(html).not.toContain("AL");
     expect(html).not.toContain("data-social-profile-photo");
@@ -343,7 +343,7 @@ describe("Social profile public face", () => {
 
     const html = await renderServerMarkup(await SocialProfilePage());
     expect(html).toContain("data-social-welcome-video");
-    expect(html).toContain('src="https://s3.example/welcome.mp4"');
+    expect(html).toContain('src="https://s3.example/welcome.mp4#t=0.1"');
     expect(html.indexOf("data-social-welcome-video")).toBeLessThan(html.indexOf("data-social-profile-tabs") || html.length);
   });
 

@@ -20,6 +20,7 @@ describe("GET /api/social/avatar/[userId]", () => {
       params: Promise.resolve({ userId: UID }),
     });
     expect(res.status).toBe(401);
+    expect(res.headers.get("Cache-Control")).toBe("private, no-store");
     expect(signedAvatarUrl).not.toHaveBeenCalled();
   });
 
@@ -29,6 +30,7 @@ describe("GET /api/social/avatar/[userId]", () => {
       params: Promise.resolve({ userId: "nope" }),
     });
     expect(res.status).toBe(400);
+    expect(res.headers.get("Cache-Control")).toBe("private, no-store");
     expect(signedAvatarUrl).not.toHaveBeenCalled();
   });
 
@@ -40,7 +42,7 @@ describe("GET /api/social/avatar/[userId]", () => {
     });
     expect(res.status).toBe(302);
     expect(res.headers.get("Location")).toBe("https://s3.example/signed-avatar");
-    expect(res.headers.get("Cache-Control")).toBe("private, no-store");
+    expect(res.headers.get("Cache-Control")).toBe("private, max-age=300");
     expect(signedAvatarUrl).toHaveBeenCalledWith(UID);
   });
 });

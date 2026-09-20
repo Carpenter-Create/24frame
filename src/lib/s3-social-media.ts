@@ -17,6 +17,7 @@ import {
   isMediaCloudfrontConfigured,
   signSocialMediaCloudfrontUrl,
 } from "@/lib/social-media-cloudfront";
+import { privateMaxAgeCacheControl, stablePresignOptions } from "@/lib/signing-window";
 
 // Isolated 24frame-media S3 client. Ideas from donor #9 s3.ts + actions.ts.
 // Never import @/lib/s3 / @/lib/cloudfront / @/lib/mediaconvert.
@@ -99,9 +100,15 @@ export async function presignSocialMediaGet(key: string): Promise<string> {
     throw new Error("Media key is not allowed");
   }
   const { bucket, s3 } = mediaClient();
-  return getSignedUrl(s3, new GetObjectCommand({ Bucket: bucket, Key: key }), {
-    expiresIn: SOCIAL_MEDIA_SIGNED_URL_TTL_SECONDS,
-  });
+  return getSignedUrl(
+    s3,
+    new GetObjectCommand({
+      Bucket: bucket,
+      Key: key,
+      ResponseCacheControl: privateMaxAgeCacheControl(SOCIAL_MEDIA_SIGNED_URL_TTL_SECONDS),
+    }),
+    stablePresignOptions(SOCIAL_MEDIA_SIGNED_URL_TTL_SECONDS),
+  );
 }
 
 export async function signedSocialMediaUrl(key: string): Promise<string | null> {

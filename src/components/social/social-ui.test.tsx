@@ -1,8 +1,19 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("next/image", () => ({
+  default: ({
+    src,
+    className,
+  }: {
+    src: string;
+    className?: string;
+  }) => createElement("img", { src, className, alt: "" }),
+}));
 
 import { IDENTITY_AVATAR_CLASS } from "@/lib/house-sheet";
 import {
@@ -147,6 +158,11 @@ describe("SocialPostCard faces", () => {
     expect(uiSrc).not.toContain("24frame-media");
     expect(avatarSrc).not.toContain("signedAvatarUrl");
     expect(avatarSrc).toContain("onError");
+    expect(avatarSrc).toContain("SocialMediaImage");
+    expect(avatarSrc).not.toContain("<img");
+    expect(uiSrc).toContain("SocialMediaImage");
+    expect(uiSrc).not.toContain("<img");
+    expect(uiSrc).not.toContain("@next/next/no-img-element");
   });
 });
 
@@ -415,6 +431,6 @@ describe("SocialPostCard media", () => {
     expect(html).toContain('data-social-post-image=""');
     expect(html).toContain('src="https://cf.example/signed-image"');
     expect(html).toContain("data-social-post-video");
-    expect(html).toContain('src="https://cf.example/signed-video"');
+    expect(html).toContain('src="https://cf.example/signed-video#t=0.1"');
   });
 });

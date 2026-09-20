@@ -19,7 +19,7 @@ vi.mock("@aws-sdk/s3-request-presigner", () => ({
   getSignedUrl: mockGetSignedUrl,
 }));
 
-import { HeadObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { GetObjectCommand, HeadObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 
 import {
   hasAvatarObject,
@@ -78,12 +78,26 @@ describe("s3-avatars dedicated bucket", () => {
     mockGetSignedUrl.mockResolvedValueOnce("https://s3.example/signed-avatar");
     await expect(presignAvatarGet(UID)).resolves.toBe("https://s3.example/signed-avatar");
     expect(mockGetSignedUrl).toHaveBeenCalledTimes(1);
-    const [, , opts] = mockGetSignedUrl.mock.calls[0] as unknown as [
+    const [s3, cmd, opts] = mockGetSignedUrl.mock.calls[0] as unknown as [
       unknown,
-      unknown,
-      { expiresIn: number },
+      GetObjectCommand,
+      { expiresIn: number; signingDate: Date },
     ];
-    expect(opts.expiresIn).toBe(300);
+    expect(s3).toBeTruthy();
+    expect(cmd).toBeInstanceOf(GetObjectCommand);
+    expect(cmd.input.ResponseCacheControl).toBe("private, max-age=300");
+    expect(opts.expiresIn).toBe(600);
+    expect(opts.signingDate).toBeInstanceOf(Date);
+  });
+
+  it("reuses the same presign window inside one TTL so the browser can cache the face", async () => {
+    mockGetSignedUrl.mockResolvedValue("https://s3.example/signed-avatar");
+    await presignAvatarGet(UID);
+    await presignAvatarGet(UID);
+    const first = mockGetSignedUrl.mock.calls[0]?.[2] as { expiresIn: number; signingDate: Date };
+    const second = mockGetSignedUrl.mock.calls[1]?.[2] as { expiresIn: number; signingDate: Date };
+    expect(first.expiresIn).toBe(second.expiresIn);
+    expect(first.signingDate.getTime()).toBe(second.signingDate.getTime());
   });
 
   it("returns null when no object exists so the card stays empty", async () => {

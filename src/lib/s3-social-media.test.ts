@@ -106,8 +106,12 @@ describe("s3-social-media isolated lane", () => {
     mockGetSignedUrl.mockResolvedValueOnce("https://s3.example/get");
     await expect(presignSocialMediaGet(KEY)).resolves.toBe("https://s3.example/get");
     const getCmd = mockGetSignedUrl.mock.calls[1]?.[1] as GetObjectCommand;
+    const getOpts = mockGetSignedUrl.mock.calls[1]?.[2] as { expiresIn: number; signingDate: Date };
     expect(getCmd).toBeInstanceOf(GetObjectCommand);
     expect(getCmd.input.Bucket).toBe("test-media-source-bucket");
+    expect(getCmd.input.ResponseCacheControl).toBe("private, max-age=300");
+    expect(getOpts.expiresIn).toBe(600);
+    expect(getOpts.signingDate).toBeInstanceOf(Date);
   });
 
   it("refuses when the media source bucket is the title bucket", () => {

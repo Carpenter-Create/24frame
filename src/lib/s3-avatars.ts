@@ -8,6 +8,7 @@ import {
   avatarObjectKey,
   isAvatarContentType,
 } from "@/lib/account-avatar";
+import { privateMaxAgeCacheControl, stablePresignOptions } from "@/lib/signing-window";
 
 // Dedicated private avatars bucket. Same AWS account and credentials as
 // title assets (AWS_REGION / AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY).
@@ -71,9 +72,15 @@ export async function headAvatarObject(userId: string): Promise<boolean> {
 export async function presignAvatarGet(userId: string): Promise<string> {
   const key = avatarObjectKey(userId);
   const { bucket, s3 } = avatarsClient();
-  return getSignedUrl(s3, new GetObjectCommand({ Bucket: bucket, Key: key }), {
-    expiresIn: AVATAR_SIGNED_URL_TTL_SECONDS,
-  });
+  return getSignedUrl(
+    s3,
+    new GetObjectCommand({
+      Bucket: bucket,
+      Key: key,
+      ResponseCacheControl: privateMaxAgeCacheControl(AVATAR_SIGNED_URL_TTL_SECONDS),
+    }),
+    stablePresignOptions(AVATAR_SIGNED_URL_TTL_SECONDS),
+  );
 }
 
 /** True when the face object exists. Missing / unconfigured is false — never throw. */

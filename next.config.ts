@@ -1,21 +1,11 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs/config";
 
-// Artwork is served from CloudFront in production and from presigned S3 in local/preview
-// (see lib/asset-url). next/image will only optimise a remote source whose host is listed
-// here, so both paths need an entry or images silently fall back to unoptimised.
-//
-// The CloudFront host is read from env rather than hardcoded so this follows the
-// distribution; the literal is a fallback for builds where the var is absent.
-const cloudfrontHost = (() => {
-  const raw = process.env.CLOUDFRONT_DOMAIN;
-  if (!raw) return "delivery.globalcontent.co";
-  try {
-    return new URL(raw.startsWith("http") ? raw : `https://${raw}`).hostname;
-  } catch {
-    return "delivery.globalcontent.co";
-  }
-})();
+import { imageRemotePatterns } from "./src/lib/image-remote-hosts";
+
+// Artwork + Social faces/media are served from CloudFront in production and
+// from presigned S3 in local/preview. next/image only optimises hosts listed
+// here — title CF, FrameMediaDelivery, and the existing S3 addressing styles.
 
 const nextConfig: NextConfig = {
   // Next serves its dev origin as localhost; without this, hitting the app via
@@ -52,19 +42,12 @@ const nextConfig: NextConfig = {
   },
 
   images: {
-    remotePatterns: [
-      // Title assets + news thumbs (`news-thumbs/` on the same CF host).
-      // Cards today use raw <img>; keep the host allowlisted if they switch.
-      { protocol: "https", hostname: cloudfrontHost },
-      // Local/preview presigned S3. Both addressing styles, dev bucket only — the prod
-      // bucket is never served directly, it is CloudFront + OAC only.
-      { protocol: "https", hostname: "gc-content-assets-dev.s3.us-east-1.amazonaws.com" },
-      { protocol: "https", hostname: "s3.us-east-1.amazonaws.com" },
-    ],
-    // Artwork is photographic; AVIF first, WebP fallback.
+    remotePatterns: imageRemotePatterns(),
+    // Photographic artwork + Social stills; AVIF first, WebP fallback.
     formats: ["image/avif", "image/webp"],
-    // Match the cache to the signed-URL window (PORTAL.artworkTtlSeconds). No point
-    // holding a derivative longer than its source URL stays valid.
+    // Match the cache to the signed-URL window (PORTAL.artworkTtlSeconds).
+    // Social GET signatures now use the same stable window, so a derivative
+    // can be reused across navigations instead of re-fetching the original.
     minimumCacheTTL: 3600,
   },
 };
