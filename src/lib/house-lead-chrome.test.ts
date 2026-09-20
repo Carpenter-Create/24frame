@@ -393,7 +393,7 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
       );
     }
 
-    expect(shell).toContain("settingsPage || homeChrome ? undefined");
+    expect(shell).toContain("settingsPage || hideProductRail ? undefined");
     expect(shell).toContain("destChips=");
     expect(shell).toContain("<DestChipsSlot");
     expect(shell).not.toContain("<MobileNavSlot");
