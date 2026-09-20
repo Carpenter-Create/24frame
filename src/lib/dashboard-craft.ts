@@ -242,7 +242,8 @@ export const DASHBOARD_LEGEND_CLASS =
 
 export const DASHBOARD_CHOROPLETH_SWATCH_CLASS = "h-2 w-5 rounded-[var(--radius-sm)]";
 
-// Shared admin column (hero + Licensing / Top performing / activity).
+// Shared admin column (hero + Licensing / Top titles / Top platforms /
+// Top territories).
 // w-full: phone tiles fill the house page inset — same left+right as
 // the org title row. Do not add items-start; that collapses width.
 export const DASHBOARD_ADMIN_STACK_CLASS =

@@ -5,9 +5,8 @@ import Link from "next/link";
 
 import { DashboardViewAll, DashboardViewAlts } from "@/components/dashboard/dashboard-view-alts";
 import { DashboardTerritoryMap } from "@/components/dashboard/dashboard-territory-map";
-import { SegmentedTrack } from "@/components/ui/segmented-track";
-import { SEGMENTED_TRACK_PERSIST, segmentedItemOn } from "@/lib/segmented-track";
 import {
+  DASHBOARD_ADMIN_STACK_CLASS,
   DASHBOARD_CARD_PAD_LIST,
   DASHBOARD_SECTION_TITLE_CLASS,
   DASHBOARD_MODULE_CARD_CLASS,
@@ -16,19 +15,12 @@ import {
   DASHBOARD_RANKED_MARK_CLASS,
   DASHBOARD_RANKED_META_CLASS,
   DASHBOARD_RANKED_NAME_CLASS,
-  DASHBOARD_RANKED_PANE_CLASS,
   DASHBOARD_RANKED_SHARE_TRACK_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
   DASHBOARD_ROW_LIST_CLASS,
-  DASHBOARD_TOP_PILL_BUTTON_CLASS,
-  DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
-  DASHBOARD_TOP_PILL_BUTTON_ON_CLASS,
-  DASHBOARD_TOP_PILL_CLUSTER_CLASS,
-  DASHBOARD_TOP_PILL_THUMB_CLASS,
 } from "@/lib/dashboard-craft";
 import { DASHBOARD_HOME } from "@/lib/dashboard-home";
 import { TITLES_HREF } from "@/lib/title-public-id";
-import { preserveWindowScroll } from "@/lib/dashboard-scroll";
 import {
   DASHBOARD_LIST_DEFAULT_LIMIT,
   dashboardConcentrationLine,
@@ -43,7 +35,6 @@ import {
   splitDashboardTitle,
   type DashboardRankedRow,
   type DashboardRegisterView,
-  type DashboardTopPill,
 } from "@/lib/dashboard-register";
 import type { DashboardRankedTitle } from "@/lib/dashboard-home";
 import type { ReportsCountRow } from "@/lib/reports";
@@ -308,11 +299,13 @@ export function DashboardTopTitles({
   periodLabel,
   updated,
   quietEmpty = false,
+  defaultMode = "bars",
 }: {
   items: readonly DashboardRankedTitle[];
   periodLabel?: string | null;
   updated?: string | null;
   quietEmpty?: boolean;
+  defaultMode?: Exclude<DashboardRegisterView, "map">;
 }) {
   void quietEmpty;
   return (
@@ -323,7 +316,7 @@ export function DashboardTopTitles({
       testId="top-titles"
       viewAllHref={TITLES_HREF}
       modes={["list", "bars"]}
-      defaultMode="bars"
+      defaultMode={defaultMode}
       periodLabel={periodLabel}
       updated={updated}
       concentrate
@@ -331,50 +324,52 @@ export function DashboardTopTitles({
   );
 }
 
-const TOP_PERFORMING_PANES: Record<
-  DashboardTopPill,
-  {
-    label: string;
-    empty: string;
-    href: string;
-    testId: string;
-    modes: readonly DashboardRegisterView[];
-    defaultMode: DashboardRegisterView;
-    territory: boolean;
-    concentrate: boolean;
-  }
-> = {
-  titles: {
-    label: DASHBOARD_HOME.pillTitles,
-    empty: DASHBOARD_HOME.topTitlesEmpty,
-    href: TITLES_HREF,
-    testId: "top-titles",
-    modes: ["list", "bars"],
-    defaultMode: "list",
-    territory: false,
-    concentrate: true,
-  },
-  platforms: {
-    label: DASHBOARD_HOME.pillPlatforms,
-    empty: DASHBOARD_HOME.platformsEmpty,
-    href: TITLES_HREF,
-    testId: "platforms",
-    modes: ["list", "bars"],
-    defaultMode: "list",
-    territory: false,
-    concentrate: false,
-  },
-  territories: {
-    label: DASHBOARD_HOME.pillTerritories,
-    empty: DASHBOARD_HOME.territoriesEmpty,
-    href: TITLES_HREF,
-    testId: "territories",
-    modes: ["map", "list", "bars"],
-    defaultMode: "map",
-    territory: true,
-    concentrate: false,
-  },
-};
+export function DashboardTopPlatforms({
+  rows,
+  periodLabel,
+  updated,
+}: {
+  rows: readonly ReportsCountRow[];
+  periodLabel?: string | null;
+  updated?: string | null;
+}) {
+  return (
+    <DashboardRankedBars
+      label={DASHBOARD_HOME.topPlatforms}
+      empty={DASHBOARD_HOME.platformsEmpty}
+      rows={rows}
+      testId="platforms"
+      viewAllHref={TITLES_HREF}
+      periodLabel={periodLabel}
+      updated={updated}
+      defaultMode="list"
+    />
+  );
+}
+
+export function DashboardTopTerritories({
+  rows,
+  periodLabel,
+  updated,
+}: {
+  rows: readonly ReportsCountRow[];
+  periodLabel?: string | null;
+  updated?: string | null;
+}) {
+  return (
+    <DashboardRankedBars
+      label={DASHBOARD_HOME.topTerritories}
+      empty={DASHBOARD_HOME.territoriesEmpty}
+      rows={rows}
+      testId="territories"
+      viewAllHref={TITLES_HREF}
+      territory
+      periodLabel={periodLabel}
+      updated={updated}
+      defaultMode="map"
+    />
+  );
+}
 
 export function DashboardTopPerforming({
   titles,
@@ -382,119 +377,23 @@ export function DashboardTopPerforming({
   territories,
   periodLabel,
   updated,
-  defaultPill = "titles",
 }: {
   titles: readonly DashboardRankedTitle[];
   platforms: readonly ReportsCountRow[];
   territories: readonly ReportsCountRow[];
   periodLabel?: string | null;
   updated?: string | null;
-  defaultPill?: DashboardTopPill;
 }) {
-  const pillKeys = Object.keys(TOP_PERFORMING_PANES) as DashboardTopPill[];
-  const start = TOP_PERFORMING_PANES[defaultPill] ? defaultPill : "titles";
-  const [pill, setPill] = useState<DashboardTopPill>(start);
-  const pane = TOP_PERFORMING_PANES[pill];
-  const [mode, setMode] = useState<DashboardRegisterView>(pane.defaultMode);
-  const [showAll, setShowAll] = useState(false);
-  const view = pane.modes.includes(mode) ? mode : pane.defaultMode;
-  const meta = dashboardModuleMetaLine({ period: periodLabel, updated });
-  const rows =
-    pill === "titles"
-      ? rankedRowsFromTitles(titles)
-      : rankedRowsFromCounts(pill === "platforms" ? platforms : territories, pane.territory);
-
-  function selectPill(next: DashboardTopPill) {
-    if (next === pill) return;
-    preserveWindowScroll(() => {
-      setPill(next);
-      setMode(TOP_PERFORMING_PANES[next].defaultMode);
-      setShowAll(false);
-    });
-  }
-
   return (
-    <section
-      data-dashboard-top-performing=""
-      data-dashboard-module={pane.testId}
-      data-dashboard-ranked={pane.testId}
-      data-dashboard-view={view}
-      data-dashboard-top-pill-active={pill}
-      {...(pane.territory ? { "data-dashboard-territory": "" } : {})}
-      className={DASHBOARD_MODULE_CARD_CLASS}
-    >
-      <div
-        className={cn(
-          "flex flex-wrap items-start justify-between",
-          DASHBOARD_RELATED_GAP_CLASS,
-          DASHBOARD_CARD_PAD_LIST,
-        )}
-      >
-        <div className={cn("min-w-0", DASHBOARD_RELATED_GAP_CLASS, "flex flex-col")}>
-          <p className={DASHBOARD_SECTION_TITLE_CLASS}>{DASHBOARD_HOME.topPerforming}</p>
-          {meta ? (
-            <p data-dashboard-module-meta="" className="t-body-sm text-ink-3">
-              {meta}
-            </p>
-          ) : null}
-        </div>
-        <div className={cn("flex min-w-0 flex-wrap items-center", DASHBOARD_RELATED_GAP_CLASS)}>
-          <SegmentedTrack
-            activeIndex={pillKeys.indexOf(pill)}
-            persistKey={SEGMENTED_TRACK_PERSIST.dashboardRanked}
-            trackClass={DASHBOARD_TOP_PILL_CLUSTER_CLASS}
-            thumbClass={DASHBOARD_TOP_PILL_THUMB_CLASS}
-            data-dashboard-top-pills=""
-          >
-            {({ selectedIndex }) =>
-              pillKeys.map((id, index) => {
-                const on = segmentedItemOn(index, selectedIndex);
-                const item = TOP_PERFORMING_PANES[id];
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    aria-pressed={on}
-                    data-segmented-item=""
-                    data-dashboard-top-pill={id}
-                    data-dashboard-ranked={id === pill ? undefined : item.testId}
-                    {...(id === "territories" ? { "data-dashboard-territory": "" } : {})}
-                    className={cn(
-                      DASHBOARD_TOP_PILL_BUTTON_CLASS,
-                      on ? DASHBOARD_TOP_PILL_BUTTON_ON_CLASS : DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
-                    )}
-                    onClick={() => selectPill(id)}
-                  >
-                    {item.label}
-                  </button>
-                );
-              })
-            }
-          </SegmentedTrack>
-          <DashboardViewAlts
-            modes={pane.modes}
-            mode={view}
-            onChange={(next) => {
-              if (next === view) return;
-              preserveWindowScroll(() => {
-                setMode(next);
-              });
-            }}
-          />
-          <DashboardViewAll href={pane.href} />
-        </div>
-      </div>
-      <div data-dashboard-ranked-pane="" className={DASHBOARD_RANKED_PANE_CLASS}>
-        <DashboardRankedPane
-          rows={rows}
-          view={view}
-          empty={pane.empty}
-          territory={pane.territory}
-          showAll={showAll}
-          onToggleShowAll={() => setShowAll((open) => !open)}
-          concentrate={pane.concentrate}
-        />
-      </div>
-    </section>
+    <div data-dashboard-top-performing="" className={DASHBOARD_ADMIN_STACK_CLASS}>
+      <DashboardTopTitles
+        items={titles}
+        periodLabel={periodLabel}
+        updated={updated}
+        defaultMode="list"
+      />
+      <DashboardTopPlatforms rows={platforms} periodLabel={periodLabel} updated={updated} />
+      <DashboardTopTerritories rows={territories} periodLabel={periodLabel} updated={updated} />
+    </div>
   );
 }

@@ -140,8 +140,11 @@ describe("Coinbase shell rematch — Adam miss list v1", () => {
     expect(html).toContain("data-dashboard-top-performing");
     expect(html).toContain("data-dashboard-view-alts");
     expect(html).toContain("data-dashboard-view-all-arrow");
-    expect(html).toContain(DASHBOARD_HOME.topPerforming);
-    expect(html).toContain(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS);
+    expect(html).toContain(DASHBOARD_HOME.topTitles);
+    expect(html).toContain(DASHBOARD_HOME.topPlatforms);
+    expect(html).toContain(DASHBOARD_HOME.topTerritories);
+    expect(html).not.toContain(DASHBOARD_HOME.topPerforming);
+    expect(html).not.toContain("data-dashboard-top-pills");
     expect(list).toContain('data-dashboard-ranked-grammar="grade"');
     expect(list).toContain("data-dashboard-ranked-mark");
     expect(list).toContain(DASHBOARD_RANKED_MARK_CLASS);

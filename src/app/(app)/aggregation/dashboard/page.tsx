@@ -20,7 +20,11 @@ import {
   DashboardWhatChanged,
 } from "@/components/dashboard/dashboard-modules";
 import { DashboardLicensingStatus } from "@/components/dashboard/dashboard-licensing-status";
-import { DashboardRankedBars, DashboardTopPerforming } from "@/components/dashboard/dashboard-ranked";
+import {
+  DashboardTopPerforming,
+  DashboardTopPlatforms,
+  DashboardTopTerritories,
+} from "@/components/dashboard/dashboard-ranked";
 import {
   DASHBOARD_PLATFORM_LIMIT,
   DASHBOARD_TERRITORY_LIMIT,
@@ -54,7 +58,6 @@ import {
   type DashboardAuditEvent,
 } from "@/lib/dashboard-admin";
 import { ATTENTION_HREF } from "@/lib/dashboard-attention";
-import { TITLES_HREF } from "@/lib/title-public-id";
 import { buildLicensingStatus } from "@/lib/dashboard-licensing";
 import { titleArtworkUrls } from "@/lib/artwork";
 import {
@@ -365,21 +368,8 @@ export default async function DashboardPage({
           </>
         ) : (
           <div className={DASHBOARD_ADMIN_PAIR_CLASS}>
-            <DashboardRankedBars
-              label={DASHBOARD_HOME.platforms}
-              empty={DASHBOARD_HOME.platformsEmpty}
-              rows={livePlatforms}
-              testId="platforms"
-              viewAllHref={TITLES_HREF}
-            />
-            <DashboardRankedBars
-              label={DASHBOARD_HOME.territories}
-              empty={DASHBOARD_HOME.territoriesEmpty}
-              rows={liveTerritories}
-              testId="territories"
-              viewAllHref={TITLES_HREF}
-              territory
-            />
+            <DashboardTopPlatforms rows={livePlatforms} />
+            <DashboardTopTerritories rows={liveTerritories} />
           </div>
         )}
         {isAdmin ? null : (
