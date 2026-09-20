@@ -27,6 +27,7 @@ import {
   SETTINGS_DIALOG_LABEL_CLASS,
   SETTINGS_DRILL_ACCENT_CLASS,
   SETTINGS_DRILL_CHEVRON_CLASS,
+  SETTINGS_DRILL_LEADING_BODY_CLASS,
   SETTINGS_DRILL_ROW_CLASS,
   SETTINGS_DRILL_VALUE_CLASS,
   SETTINGS_GROUP_CLASS,
@@ -357,6 +358,9 @@ describe("settings hub lock", () => {
     expect(SETTINGS_DRILL_VALUE_CLASS).toBe("t-body-sm text-ink-3");
     expect(SETTINGS_DRILL_ROW_CLASS).not.toContain("truncate");
     expect(SETTINGS_DRILL_VALUE_CLASS).not.toContain("truncate");
+    expect(SETTINGS_DRILL_LEADING_BODY_CLASS).not.toContain("truncate");
+    expect(SETTINGS_DRILL_LEADING_BODY_CLASS).toContain("flex-col");
+    expect(SETTINGS_DRILL_LEADING_BODY_CLASS).toContain("md:flex-row");
     expect(SETTINGS_DRILL_ACCENT_CLASS).toBe("text-accent");
     expect(SETTINGS_DRILL_CHEVRON_CLASS).toContain(SETTINGS_RAIL_CHEVRON_CLASS);
     expect(SETTINGS_GROUP_CLASS).toContain(HOUSE_MODULE_CLASS);

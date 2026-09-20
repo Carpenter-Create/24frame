@@ -93,6 +93,29 @@ export function IdentityPhoto({
   );
 }
 
+// House identity circle — the one face disk. Header chrome, account
+// sheet, and Team person rows consume this. Do not fork a lookalike.
+export function IdentityAvatar({
+  avatarInitial,
+  photoUrl,
+  className,
+}: {
+  avatarInitial: string;
+  photoUrl?: string | null;
+  className?: string;
+}) {
+  const face = accountPhotoSrc(photoUrl);
+  return (
+    <div
+      data-identity-avatar=""
+      data-identity-photo={face ? "" : undefined}
+      className={cn(IDENTITY_AVATAR_CLASS, face ? "overflow-hidden" : null, className)}
+    >
+      <IdentityPhoto avatarInitial={avatarInitial} photoUrl={photoUrl} />
+    </div>
+  );
+}
+
 // 543:565 Identity block — 48 circle, name 15 Regular ink, email 13 tertiary.
 // Always render name and email. Real values only — no dashes, no pill well.
 export function IdentityBlock({
@@ -108,16 +131,9 @@ export function IdentityBlock({
   email: string;
   className?: string;
 }) {
-  const face = accountPhotoSrc(photoUrl);
   return (
     <div data-identity-block="" className={cn(IDENTITY_BLOCK_CLASS, className)}>
-      <div
-        data-identity-avatar=""
-        data-identity-photo={face ? "" : undefined}
-        className={cn(IDENTITY_AVATAR_CLASS, face ? "overflow-hidden" : null)}
-      >
-        <IdentityPhoto avatarInitial={avatarInitial} photoUrl={photoUrl} />
-      </div>
+      <IdentityAvatar avatarInitial={avatarInitial} photoUrl={photoUrl} />
       <div data-identity-who="" className="flex flex-col items-start gap-[var(--space-2)]">
         <p data-identity-name="" className={IDENTITY_NAME_CLASS}>
           {name}

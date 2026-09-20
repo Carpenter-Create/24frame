@@ -174,6 +174,10 @@ export const SETTINGS_DRILL_LIST_CLASS = "flex flex-col";
 export const SETTINGS_DRILL_ROW_CLASS =
   "flex w-full items-center justify-between gap-[var(--space-4)] py-[var(--space-3)] text-left t-body leading-5 text-ink";
 export const SETTINGS_DRILL_COPY_CLASS = "flex min-w-0 flex-col gap-[var(--space-1)]";
+// Person rows: avatar stays leading. Identity + trailing stack on
+// phone so the row never truncates. Desktop keeps identity · action.
+export const SETTINGS_DRILL_LEADING_BODY_CLASS =
+  "flex min-w-0 flex-1 flex-col items-start gap-[var(--space-2)] md:flex-row md:items-center md:justify-between md:gap-[var(--space-4)]";
 export const SETTINGS_DRILL_VALUE_CLASS = "t-body-sm text-ink-3";
 export const SETTINGS_DRILL_ACCENT_CLASS = "text-accent";
 export const SETTINGS_DRILL_CHEVRON_CLASS = `${SETTINGS_RAIL_CHEVRON_CLASS} text-ink-3`;

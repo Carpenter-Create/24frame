@@ -52,6 +52,43 @@ describe("TeamInviteForm ROLE select", () => {
     expect(html).not.toContain("schema cache");
   });
 
+  it("puts a house IdentityAvatar on person rows — not the Invite door", () => {
+    const html = renderToStaticMarkup(
+      <TeamInviteForm
+        orgId="org-1"
+        canInvite
+        members={[
+          {
+            userId: "u1",
+            email: "ada@example.com",
+            role: "account_owner",
+            name: "Ada Lovelace",
+            sentAt: "2026-01-01",
+            acceptedAt: "2026-01-02",
+            photoUrl: "https://s3.example/ada",
+          },
+        ]}
+        pending={[{ id: "inv-1", email: "pat@example.com", role: "viewer", sentAt: "2026-09-19", entityScope: "all" }]}
+      />,
+    );
+    const memberStart = html.indexOf("ada@example.com");
+    const memberRow = html.slice(html.lastIndexOf("<li", memberStart), html.indexOf("</li>", memberStart));
+    const pendingStart = html.indexOf("pat@example.com");
+    const pendingRow = html.slice(html.lastIndexOf("<li", pendingStart), html.indexOf("</li>", pendingStart));
+    const inviteStart = html.indexOf('data-settings-drill-row="team-invite"');
+    const inviteRow = html.slice(inviteStart, html.indexOf("</button>", inviteStart));
+
+    expect(memberRow).toContain("data-identity-avatar");
+    expect(memberRow).toContain("data-settings-drill-leading");
+    expect(memberRow).toContain('src="https://s3.example/ada"');
+    expect(memberRow).toContain("data-identity-photo");
+    expect(pendingRow).toContain("data-identity-avatar");
+    expect(pendingRow).toContain(">PA<");
+    expect(pendingRow).not.toContain("<img");
+    expect(inviteRow).not.toContain("data-identity-avatar");
+    expect(inviteRow).not.toContain("data-settings-drill-leading");
+  });
+
   it("does not keep a Team-Invite dark menu twin", () => {
     const src = readFileSync("src/components/settings/team-invite-form.tsx", "utf8");
     expect(src).toContain('import { Select } from "@/components/ui/select"');

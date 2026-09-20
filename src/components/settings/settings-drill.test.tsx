@@ -6,6 +6,7 @@ import { ACCOUNT_PROFILE } from "@/lib/account-profile";
 import {
   SETTINGS,
   SETTINGS_DRILL_ACCENT_CLASS,
+  SETTINGS_DRILL_LEADING_BODY_CLASS,
   SETTINGS_DRILL_ROW_CLASS,
   SETTINGS_DRILL_VALUE_CLASS,
   SETTINGS_EDIT_HELPER_CLASS,
@@ -84,6 +85,23 @@ describe("SettingsDrillRow", () => {
     expect(html).toContain("LLC · Wyoming");
     expect(html).toContain("data-default-chip");
     expect(html).toContain("Default");
+  });
+
+  it("keeps a leading slot far left — person rows, not Invite", () => {
+    const html = renderToStaticMarkup(
+      createElement(SettingsDrillRow, {
+        kind: "team-u1",
+        label: "Ada",
+        value: "Account owner · Accepted",
+        readOnly: true,
+        leading: createElement("span", { "data-identity-avatar": "" }, "AD"),
+      }),
+    );
+    expect(html).toContain("data-settings-drill-leading");
+    expect(html).toContain("data-identity-avatar");
+    expect(html).toContain(SETTINGS_DRILL_LEADING_BODY_CLASS);
+    expect(html.indexOf("data-settings-drill-leading")).toBeLessThan(html.indexOf("Ada"));
+    expect(html.indexOf("Ada")).toBeLessThan(html.indexOf("Account owner · Accepted"));
   });
 
   it("renders an accent action row for tucked Add / Invite", () => {

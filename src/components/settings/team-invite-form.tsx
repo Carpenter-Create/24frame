@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { IdentityAvatar } from "@/components/chrome/house";
 import {
   SettingsDrillRow,
   SettingsGroupList,
@@ -29,6 +30,7 @@ import {
   TEAM_INVITE_ROLES,
   teamInviteUserError,
   teamRoleLabel,
+  teamRowInitials,
   teamRowLabel,
   teamRowMeta,
   toTeamListRows,
@@ -49,6 +51,7 @@ export type TeamMemberRow = {
   name: string | null;
   sentAt: string | null;
   acceptedAt: string;
+  photoUrl?: string | null;
 };
 
 export type TeamPendingRow = {
@@ -167,6 +170,12 @@ export function TeamInviteForm({
                     label={name}
                     value={teamRowMeta(row)}
                     readOnly
+                    leading={
+                      <IdentityAvatar
+                        avatarInitial={teamRowInitials(row.name, row.email)}
+                        photoUrl={row.photoUrl}
+                      />
+                    }
                     trailing={
                       canInvite && row.withdrawId ? (
                         <button

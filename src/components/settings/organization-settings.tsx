@@ -14,6 +14,7 @@ import {
 import type { OrgRole } from "@/lib/org-roles";
 import type { EntityScope, LegalEntityRow } from "@/lib/legal-entities";
 import { mapOrgLegalEntity } from "@/lib/legal-entities";
+import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 import { CompanyProfileForm } from "@/app/(app)/account/company-profile-form";
@@ -31,6 +32,7 @@ export async function OrganizationSettings() {
     name: string | null;
     sentAt: string | null;
     acceptedAt: string;
+    photoUrl: string | null;
   }[] = [];
   let pending: { id: string; email: string; role: OrgRole; sentAt: string; entityScope: EntityScope }[] = [];
   let entities: LegalEntityRow[] = [];
@@ -55,13 +57,16 @@ export async function OrganizationSettings() {
     ]);
     canEditCompany = canEditRes.data === true;
     canInvite = canInviteRes.data === true;
-    members = (teamRes.data ?? []).map((row) => ({
+    const teamRows = teamRes.data ?? [];
+    const faces = await signedAvatarUrls(teamRows.map((row) => row.user_id));
+    members = teamRows.map((row) => ({
       userId: row.user_id,
       email: row.email ?? "\u2014",
       role: row.role,
       name: row.display_name,
       sentAt: row.invited_at,
       acceptedAt: row.joined_at,
+      photoUrl: faces.get(row.user_id) ?? null,
     }));
     pending = (pendingRes.data ?? []).map((row) => ({
       id: row.id,

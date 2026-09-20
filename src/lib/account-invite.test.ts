@@ -61,6 +61,11 @@ describe("account invite SoT", () => {
     expect(teamForm).toContain("onRevoke(row.withdrawId)");
     expect(teamForm).toContain('list="team"');
     expect(teamForm).toContain('cta="team-invite"');
+    expect(teamForm).toContain("IdentityAvatar");
+    expect(teamForm).toContain("teamRowInitials");
+    expect(teamForm).not.toContain("TEAM_LIST_AVATAR_CLASS");
+    expect(teamForm).not.toContain("SocialAvatar");
+    expect(teamForm).not.toContain("StaffDirectoryRow");
     expect(teamForm).not.toContain("data-team-list-head");
     expect(teamForm).not.toContain("TEAM_LIST_HEADER_CLASS");
     expect(teamForm).toContain("<Dialog");
@@ -93,6 +98,13 @@ describe("account invite SoT", () => {
     expect(list[0]?.acceptedAt).toBeNull();
     expect(list[1]?.status).toBe("accepted");
     expect(list[1]?.name).toBe("Ada");
+    expect(list[0]?.photoUrl).toBeNull();
+    expect(list[1]?.photoUrl).toBeNull();
+    const withFace = toTeamListRows(
+      [{ userId: "u1", email: "ada@example.com", role: "account_owner", name: "Ada", acceptedAt: "2026-01-02", photoUrl: "https://s3.example/ada" }],
+      [],
+    );
+    expect(withFace[0]?.photoUrl).toBe("https://s3.example/ada");
     expect(inviteDateLabel("2026-09-19T00:00:00Z")).toBe("Sep 19, 2026");
     expect(inviteDateLabel(null)).toBe("—");
     expect(inviteDateLabel("nope")).toBe("—");
