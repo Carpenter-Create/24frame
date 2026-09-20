@@ -1,9 +1,11 @@
 import { PAGE_LEAD_STACK_CLASS, PageHeaderBackLink } from "@/components/ui/page-header";
 import { HELP_HELPER_CLASS, HELP_TITLE_CLASS, helpHeaderBack } from "@/lib/help";
 
-// Get Help / pane title block. Same back · title · helper stack as
-// Settings (News ArrowLeft + page-lead air). Routing stays /help —
-// do not import SettingsPageLead or put this in Settings hub chrome.
+// Get Help / pane title block. Same PAGE_LEAD_STACK_CLASS back ·
+// title · helper air as Settings (News ArrowLeft + page-lead SoT).
+// Routing stays /help — do not import SettingsPageLead or put this
+// in Settings hub chrome. Back stays visible on desktop: Help has
+// no Settings rail.
 
 export function HelpPageLead({
   title,

@@ -1,17 +1,26 @@
 // Get Help stack. Avatar-menu door + /help index. Copy lives here,
 // not in JSX.
-// Adam 2026-09-19: Get Help / Give feedback stay off Settings hub
-// chrome. Light stack — same SettingsDrillRow grammar, not a
-// second Settings hub. Give feedback is /help/feedback — blank
-// now, form later on this same route. No help-center URL SoT and
-// no support mailto SoT — stub panes, not a support product. Do
-// not invent articles, a help desk, or /account/feedback.
+// Adam 2026-09-19: Get Help is chrome-level account surface — same
+// family as /activity and Settings. Route stays /help. Never nest
+// under /education/help. Account chrome: no workspace thumb, no
+// Education pill, no product rail (Education / TEAM / Manage
+// courses stay off). Get Help / Give feedback stay off Settings
+// hub chrome. Rows reuse the house Settings inset-group SoT
+// (SettingsGroupList + SettingsDrillRow) — not a second Settings
+// hub and not bare text on the canvas. Give feedback is
+// /help/feedback — blank now, form later on this same route. No
+// help-center URL SoT and no support mailto SoT — stub panes, not
+// a support product. Do not invent articles, a help desk, or
+// /account/feedback.
 
 import { DASHBOARD_HREF } from "@/lib/dashboard-admin";
 import {
-  SETTINGS_DRILL_LIST_CLASS,
   SETTINGS_DRILL_ROW_CLASS,
+  SETTINGS_EDIT_HELPER_CLASS,
+  SETTINGS_GROUP_CLASS,
   SETTINGS_PANE_CLASS,
+  SETTINGS_PANE_TITLE_CLASS,
+  SETTINGS_SECTION_CLASS,
 } from "@/lib/settings";
 import { USER_MENU } from "@/lib/user-menu";
 
@@ -57,11 +66,11 @@ export const HELP_STACK: readonly HelpStackItem[] = [
 ];
 
 export const HELP_PAGE_CLASS = SETTINGS_PANE_CLASS;
-export const HELP_SECTION_CLASS = "flex flex-col gap-[var(--space-6)]";
-export const HELP_STACK_CLASS = SETTINGS_DRILL_LIST_CLASS;
+export const HELP_SECTION_CLASS = SETTINGS_SECTION_CLASS;
+export const HELP_STACK_CLASS = SETTINGS_GROUP_CLASS;
 export const HELP_ROW_CLASS = SETTINGS_DRILL_ROW_CLASS;
-export const HELP_TITLE_CLASS = "t-section text-ink";
-export const HELP_HELPER_CLASS = "t-body-sm text-ink-3";
+export const HELP_TITLE_CLASS = SETTINGS_PANE_TITLE_CLASS;
+export const HELP_HELPER_CLASS = SETTINGS_EDIT_HELPER_CLASS;
 
 export function isHelpPath(pathname: string): boolean {
   return pathname === HELP.href || pathname.startsWith(`${HELP.href}/`);

@@ -2,7 +2,8 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
-import { HELP, HELP_ABSENT, HELP_STACK } from "@/lib/help";
+import { HELP, HELP_ABSENT, HELP_STACK, HELP_STACK_CLASS } from "@/lib/help";
+import { SETTINGS_GROUP_CLASS, SETTINGS_GROUP_LIST_CLASS } from "@/lib/settings";
 import HelpPage from "./page";
 
 describe("HelpPage", () => {
@@ -12,6 +13,10 @@ describe("HelpPage", () => {
     expect(html).toContain('data-help-section="index"');
     expect(html).toContain('data-help-page-lead=""');
     expect(html).toContain('data-help-stack=""');
+    expect(html).toContain("data-settings-group");
+    expect(html).toContain(HELP_STACK_CLASS);
+    expect(html).toContain(SETTINGS_GROUP_CLASS);
+    expect(html).toContain(SETTINGS_GROUP_LIST_CLASS);
     expect(html).toContain(HELP.title);
     expect(html).toContain(HELP.helper);
     expect(html).toContain(HELP.back);

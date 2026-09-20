@@ -99,6 +99,22 @@ describe("Home lead pills", () => {
     ).toBe(false);
   });
 
+  it("leaves every unify-lead pill idle on Get Help — cookie workspace is not selected", () => {
+    const pills = overviewLeadPills();
+    for (const path of ["/help", "/help/center", "/help/support", "/help/feedback"] as const) {
+      for (const workspace of ["aggregation", "social", "education"] as const) {
+        expect(overviewLeadSelected("home", path, workspace)).toBe(false);
+        expect(overviewLeadSelected("aggregation", path, workspace)).toBe(false);
+        expect(overviewLeadSelected("social", path, workspace)).toBe(false);
+        expect(overviewLeadSelected("education", path, workspace)).toBe(false);
+        expect(overviewLeadSelected("co-productions", path, workspace)).toBe(false);
+        expect(overviewLeadActiveIndex(path, workspace, pills)).toBe(-1);
+      }
+      expect(overviewLeadShouldNavigate(path, "education", { id: "education" })).toBe(true);
+      expect(overviewLeadShouldNavigate(path, "social", { id: "home" })).toBe(true);
+    }
+  });
+
   it("leaves every unify-lead pill idle on Activity — cookie workspace is not selected", () => {
     const pills = overviewLeadPills();
     for (const workspace of ["aggregation", "social", "education"] as const) {
@@ -184,6 +200,8 @@ describe("Home lead pills", () => {
     expect(overviewHidesRail("/education")).toBe(false);
     expect(overviewHidesRail("/aggregation/titles")).toBe(false);
     expect(overviewHidesRail("/settings")).toBe(false);
+    expect(overviewHidesRail("/help")).toBe(false);
+    expect(overviewHidesRail("/help/center")).toBe(false);
     expect(OVERVIEW_RAIL_OFF_WIDTH).toBe("0px");
   });
 

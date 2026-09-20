@@ -1,8 +1,16 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { DASHBOARD_HREF } from "./dashboard-admin";
-import { HELP, HELP_ABSENT, HELP_ROW_CLASS, HELP_STACK, HELP_STACK_CLASS, HELP_TITLE_CLASS, helpHeaderBack, isHelpPath } from "./help";
-import { SETTINGS_DRILL_LIST_CLASS, SETTINGS_DRILL_ROW_CLASS, SETTINGS_HUB_NAV, SETTINGS_PANE_TITLE_CLASS } from "./settings";
+import { HELP, HELP_ABSENT, HELP_HELPER_CLASS, HELP_ROW_CLASS, HELP_SECTION_CLASS, HELP_STACK, HELP_STACK_CLASS, HELP_TITLE_CLASS, helpHeaderBack, isHelpPath } from "./help";
+import {
+  SETTINGS_DRILL_ROW_CLASS,
+  SETTINGS_EDIT_HELPER_CLASS,
+  SETTINGS_GROUP_CLASS,
+  SETTINGS_HUB_NAV,
+  SETTINGS_PANE_TITLE_CLASS,
+  SETTINGS_SECTION_CLASS,
+} from "./settings";
 import { USER_MENU, USER_MENU_ACTIONS } from "./user-menu";
 
 describe("help stack lock", () => {
@@ -88,7 +96,23 @@ describe("help stack lock", () => {
     });
     expect(HELP.back).toBe("Back");
     expect(HELP_TITLE_CLASS).toBe(SETTINGS_PANE_TITLE_CLASS);
-    expect(HELP_STACK_CLASS).toBe(SETTINGS_DRILL_LIST_CLASS);
+    expect(HELP_STACK_CLASS).toBe(SETTINGS_GROUP_CLASS);
     expect(HELP_ROW_CLASS).toBe(SETTINGS_DRILL_ROW_CLASS);
+    expect(HELP_HELPER_CLASS).toBe(SETTINGS_EDIT_HELPER_CLASS);
+    expect(HELP_SECTION_CLASS).toBe(SETTINGS_SECTION_CLASS);
+    expect(isHelpPath("/education/help")).toBe(false);
+    expect(isHelpPath("/education")).toBe(false);
+  });
+
+  it("reuses the house Settings inset-group SoT — no lookalike stack", () => {
+    const stack = readFileSync("src/components/help/help-stack.tsx", "utf8");
+    const lead = readFileSync("src/components/help/help-page-lead.tsx", "utf8");
+    expect(stack).toContain("SettingsGroupList");
+    expect(stack).toContain("SettingsGroupRow");
+    expect(stack).toContain("SettingsDrillRow");
+    expect(stack).not.toContain("SETTINGS_DRILL_LIST_CLASS");
+    expect(lead).toContain("PAGE_LEAD_STACK_CLASS");
+    expect(lead).toContain("PageHeaderBackLink");
+    expect(lead).not.toContain("SettingsPageLead");
   });
 });

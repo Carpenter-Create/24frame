@@ -28,6 +28,7 @@ const LIVE_SOT_PAGES = [
   "src/app/(app)/settings/organization/entities/[entityId]/page.tsx",
   "src/app/(app)/settings/refer/page.tsx",
   "src/app/(app)/activity/page.tsx",
+  "src/app/(app)/help/page.tsx",
   "src/app/(app)/(operator)/aggregation/queue/page.tsx",
 ] as const;
 
@@ -44,6 +45,8 @@ describe("workspace hard-cut — old doors 404", () => {
     expect(existsSync("src/app/(app)/account/account-profile-form.tsx")).toBe(true);
     expect(existsSync("src/app/(app)/account/company-profile-form.tsx")).toBe(true);
     expect(existsSync("src/app/(app)/aggregation/messages/message-link.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/help/page.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/education/help/page.tsx")).toBe(false);
     expect(existsSync("src/app/(app)/aggregation/messages/ask-globee-actions.ts")).toBe(true);
     expect(
       existsSync("src/app/(app)/(operator)/aggregation/gc/review/review-controls.tsx"),
