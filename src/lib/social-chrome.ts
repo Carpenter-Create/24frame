@@ -216,23 +216,6 @@ export const SOCIAL_FEED_ROW_CLASS =
 export const SOCIAL_CREATE_CTA_CLASS =
   "inline-flex w-full items-center justify-center gap-2 rounded-[24px] bg-accent px-4 py-3 t-body font-semibold text-accent-contrast";
 
-// Floating pill — 160:964 visible / 160:1129 hidden on scroll-down.
-// Desktop left Aggregation rail is unchanged; pill is md:hidden.
-export const SOCIAL_TAB_BAR_CLASS =
-  "fixed inset-x-0 bottom-0 z-40 flex justify-center pb-[max(12px,env(safe-area-inset-bottom))] transition-transform duration-200 ease-out md:hidden";
-
-export const SOCIAL_TAB_PILL_CLASS =
-  "flex h-14 w-[min(358px,calc(100%-32px))] items-center rounded-[28px] border border-hairline bg-surface px-2";
-
-export const SOCIAL_TAB_PILL_HIDDEN_CLASS = "pointer-events-none translate-y-full";
-
-export const SOCIAL_TAB_BAR_ROW_CLASS = "flex h-12 w-full items-center";
-
-export const SOCIAL_TAB_ITEM_CLASS =
-  "flex h-full flex-1 items-center justify-center px-2 py-3";
-
-export const SOCIAL_TAB_BAR_MAIN_PAD_CLASS = "pb-20 md:pb-4";
-
 export const SOCIAL_HOME_TAB_CLASS =
   "flex flex-1 flex-col items-center gap-2.5 px-4 pt-3 t-body";
 

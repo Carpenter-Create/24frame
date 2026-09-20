@@ -63,6 +63,8 @@ type Org = { id: string; name: string };
 // Phone: the rail is gone (hidden + width tokens collapse). Local dests
 // live in HousePhoneBottomNav — client dests, or those plus staff dests
 // when isGcStaff. Workspace switch is the header sheet. No hamburger.
+// One return tree — Social is a flag, not a second shell. Workspace
+// hops keep chrome mounted so the sheet and dock do not freeze.
 // Desktop 1:2 rail is unchanged.
 // Social mounts the same RailCollapse + cookie + width-var path as
 // Aggregation · Education. Do not pin Social expanded or invent a
@@ -193,81 +195,18 @@ export function AppShell({
       ? ({ "--sidebar-width": RAIL_COLLAPSE_WIDTH_VAR } as React.CSSProperties)
       : undefined;
 
-  if (socialChrome) {
-    return (
-      <AskAiOverlayProvider>
-      <AskAssistantChromeProvider>
-        {cookieSync}
-        <HousePhoneAppShell
-          workspace="social"
-          isGcStaff={false}
-          data-social-workspace=""
-          style={collapseWidthStyle}
-        >
-          <HouseLeadChrome
-            workspace="social"
-            logoVisible="always"
-            search={<HouseLeadSearch tone="live" />}
-            trailingSearch={<HouseLeadSearch tone="live" presentation="icon" />}
-            activityUnread={messagesUnread}
-            activityItems={activityItems}
-            accountMenu={
-              <AccountMenuSlot
-                chrome={chrome}
-                email={identity.email}
-                name={identity.name}
-                photoUrl={identity.photoUrl}
-              />
-            }
-          />
-          <aside
-            className={cn(
-              HOUSE_RAIL_FLOAT_CLASS,
-              collapsed ? RAIL_WIDTH_CLASS : SOCIAL_RAIL_WIDTH_CLASS,
-              SOCIAL_RAIL_PANEL_CLASS,
-            )}
-            data-app-rail=""
-            data-social-rail=""
-          >
-            <RailCollapse collapsed={collapsed} onToggle={toggle} />
-            <div className={cn("flex min-h-0 flex-1 flex-col overflow-y-auto", collapsed ? "gap-2 px-1 pb-2" : "gap-3 p-4")}>
-              <SideNav
-                isGcStaff={false}
-                collapsed={collapsed}
-                workspace="social"
-              />
-            </div>
-          </aside>
-          <main
-            className={cn(
-              HOUSE_LEAD_SCROLL_CLASS,
-              phoneDestPad,
-              collapsed ? undefined : SOCIAL_RAIL_MAIN_OFFSET_CLASS,
-            )}
-            style={collapsed ? { marginLeft: "var(--sidebar-width)" } : undefined}
-            data-app-social-frame=""
-            data-house-lead-scroll=""
-          >
-            <div className={SOCIAL_DESKTOP_FRAME_PAD_CLASS}>
-              {children}
-            </div>
-          </main>
-        </HousePhoneAppShell>
-      </AskAssistantChromeProvider>
-      </AskAiOverlayProvider>
-    );
-  }
-
   return (
     <AskAiOverlayProvider>
     <AskAssistantChromeProvider>
     {cookieSync}
     <HousePhoneAppShell
+      chrome={chrome}
       workspace={workspace}
-      isGcStaff={isGcStaff}
-      homeOwned={homeOwned}
+      isGcStaff={socialChrome ? false : isGcStaff}
+      homeOwned={socialChrome ? false : homeOwned}
       accountChrome={accountChrome}
       coProductions={coProductions}
+      data-social-workspace={socialChrome ? "" : undefined}
       data-education-workspace={workspace === "education" && !helpPage && !activityPage ? "" : undefined}
       data-home-chrome={homeChrome ? "" : undefined}
       data-help-chrome={helpPage ? "" : undefined}
@@ -278,24 +217,33 @@ export function AppShell({
         <aside
           className={cn(
             HOUSE_RAIL_FLOAT_CLASS,
-            RAIL_WIDTH_CLASS,
-            HOUSE_RAIL_PANEL_CLASS,
+            socialChrome
+              ? collapsed
+                ? RAIL_WIDTH_CLASS
+                : SOCIAL_RAIL_WIDTH_CLASS
+              : RAIL_WIDTH_CLASS,
+            socialChrome ? SOCIAL_RAIL_PANEL_CLASS : HOUSE_RAIL_PANEL_CLASS,
           )}
           data-app-rail=""
+          data-social-rail={socialChrome ? "" : undefined}
           data-settings-rail={settingsPage ? "" : undefined}
         >
           {settingsPage ? null : <RailCollapse collapsed={collapsed} onToggle={toggle} />}
           <div
-            className={cn("flex-1 overflow-y-auto", settingsPage ? SETTINGS_RAIL_PAD_CLASS : "pt-1")}
+            className={cn(
+              socialChrome
+                ? cn("flex min-h-0 flex-1 flex-col overflow-y-auto", collapsed ? "gap-2 px-1 pb-2" : "gap-3 p-4")
+                : cn("flex-1 overflow-y-auto", settingsPage ? SETTINGS_RAIL_PAD_CLASS : "pt-1"),
+            )}
           >
             {settingsPage ? (
               <SettingsRail />
             ) : (
               <SideNavSlot
                 chrome={chrome}
-                isGcStaff={isGcStaff}
+                isGcStaff={socialChrome ? false : isGcStaff}
                 collapsed={collapsed}
-                workspace={workspace}
+                workspace={socialChrome ? "social" : workspace}
               />
             )}
           </div>
@@ -328,14 +276,21 @@ export function AppShell({
         settingsPage={settingsPage || helpPage || activityPage}
         logoVisible="always"
         search={
-          workspace === "education" && !settingsPage && !helpPage && !activityPage ? (
+          socialChrome ? (
+            <HouseLeadSearch tone="live" />
+          ) : workspace === "education" && !settingsPage && !helpPage && !activityPage ? (
             <Suspense fallback={null}>
               <HouseLeadSearch tone="quiet" />
             </Suspense>
           ) : undefined
         }
+        trailingSearch={
+          socialChrome ? <HouseLeadSearch tone="live" presentation="icon" /> : undefined
+        }
         underNav={
-          workspace === "education" && !settingsPage && !helpPage && !activityPage ? (
+          socialChrome
+            ? undefined
+            : workspace === "education" && !settingsPage && !helpPage && !activityPage ? (
             <Suspense fallback={null}>
               <HouseLeadSearch tone="quiet" inputId="education-header-q-phone" />
             </Suspense>
@@ -354,13 +309,22 @@ export function AppShell({
       />
 
       <main
-        className={cn(HOUSE_LEAD_SCROLL_CLASS, phoneDestPad)}
+        className={cn(
+          HOUSE_LEAD_SCROLL_CLASS,
+          phoneDestPad,
+          socialChrome && !collapsed ? SOCIAL_RAIL_MAIN_OFFSET_CLASS : undefined,
+        )}
+        data-app-social-frame={socialChrome ? "" : undefined}
         data-house-lead-scroll=""
-        style={{
-          marginLeft: "var(--sidebar-width)",
-        }}
+        style={
+          socialChrome && !collapsed
+            ? undefined
+            : { marginLeft: "var(--sidebar-width)" }
+        }
       >
-        {titlesBleed ? (
+        {socialChrome ? (
+          <div className={SOCIAL_DESKTOP_FRAME_PAD_CLASS}>{children}</div>
+        ) : titlesBleed ? (
           <div className="w-full pb-24 max-md:pb-0">{children}</div>
         ) : homePage ? (
           <div

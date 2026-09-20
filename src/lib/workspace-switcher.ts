@@ -29,8 +29,9 @@
 // so the avatar x does not shift. Do not invent Move / search.
 // Do not return the Social Messages icon to the top bar.
 //
-// Phone trigger: truncated current workspace name only. No
-// leading mark or circle. Quiet always-on chevron. Menu: quiet
+// Phone trigger: current workspace name/mark, stacked under the
+// emblem so the word is never ellipsized. Quiet always-on chevron.
+// Menu: quiet
 // Workspaces heading, then accessible rows with leading marks,
 // flush-left names, trailing Sporty Blue check on the current
 // lane (#320). No current-workspace identity header. No
@@ -48,15 +49,16 @@
 // Education quiet search stays Education-only: phone in a
 // full-width row under HouseLeadChrome, desktop in the shared
 // mid-lead slot (same Facebook-compact geometry as Social).
-// Persist with
-// persistWorkspaceCookie — do not invent
-// a second cookie. Do not invent /education, /account/workspace,
-// or /settings/workspace.
+// Persist with workspaceSwitcherPersistLane → persistWorkspaceCookie.
+// Do not invent a second cookie. Phone sheet unselected rows are
+// Link + prefetch; prefetchHrefList warms the four homes on mount.
+// Do not invent /education, /account/workspace, or /settings/workspace.
 
 import {
   HOUSE_LEAD_SEARCH_DESKTOP_CLASS,
   HOUSE_LEAD_UNDER_NAV_CLASS,
 } from "@/lib/house-lead-chrome";
+import { HOUSE_PHONE_WRAP_CLASS } from "@/lib/house-phone-stack";
 import {
   APP_SHEET_SCRIM_CLASS,
   APP_SHEET_SURFACE_CLASS,
@@ -75,11 +77,13 @@ import {
   type WorkspaceMenuOption,
   workspaceModeLabel,
 } from "@/lib/workspace-menu";
-import type { WorkspaceMode } from "@/lib/workspace";
+import type { OverviewLeadPillId } from "@/lib/overview";
+import { persistWorkspaceCookie, type WorkspaceMode } from "@/lib/workspace";
 
 export const WORKSPACE_SWITCHER = {
   label: USER_MENU.workspace,
   heading: "Workspaces",
+  close: "Close workspaces",
 } as const;
 
 export const WORKSPACE_SWITCHER_ABSENT = [
@@ -115,7 +119,7 @@ export const WORKSPACE_SWITCHER_TRIGGER_CLASS =
 export const WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS =
   `group flex min-w-0 items-center gap-[var(--space-2)] ${HOUSE_CONTROL_PILL_CLASS} border border-hairline bg-surface-muted px-[var(--space-2)] py-[var(--space-1)] t-body-sm font-medium text-ink`;
 
-export const WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS = "min-w-0 truncate";
+export const WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS = HOUSE_PHONE_WRAP_CLASS;
 
 export const WORKSPACE_SWITCHER_STATIC_CLASS =
   "flex min-w-0 items-center gap-[var(--space-2)] px-2 py-1 t-body-sm font-medium text-ink";
@@ -239,12 +243,13 @@ export const APP_HEADER_EDUCATION_SEARCH_PHONE_CLASS = HOUSE_LEAD_UNDER_NAV_CLAS
 export const APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS = HOUSE_LEAD_SEARCH_DESKTOP_CLASS;
 
 export const APP_HEADER_LEADING_CLASS =
-  "mr-auto flex min-w-0 flex-1 items-center gap-[var(--space-3)] md:gap-[var(--space-2)] overflow-visible";
+  "mr-auto flex min-w-0 flex-1 items-center gap-[var(--space-3)] max-md:flex-col max-md:items-start md:gap-[var(--space-2)] overflow-visible";
 
-// Phone pill yields (min-w-0 + truncate on the name) so it cannot
-// overlap the brand mark. Not shrink-0 — that was the crush.
-// overflow-visible: the open menu must not live under a clip.
-export const APP_HEADER_WORKSPACE_PILL_HOST_CLASS = "min-w-0 overflow-visible md:hidden";
+// Phone stacks emblem above the workspace name so the word can wrap.
+// Not shrink-0 — that was the crush. overflow-visible: the open
+// sheet must not live under a clip.
+export const APP_HEADER_WORKSPACE_PILL_HOST_CLASS =
+  "min-w-0 w-full overflow-visible md:hidden";
 
 export const WORKSPACE_SWITCHER_HOST_CLASS = "relative min-w-0 overflow-visible";
 
@@ -367,4 +372,17 @@ export function workspaceSwitcherTriggerMarkId(
 export function workspaceSwitcherLeadMarkLetter(id: PhoneWorkspaceSwitcherId): string {
   if (id === "home") return "H";
   return WORKSPACE_SWITCHER_MARK[id];
+}
+
+/** Persist the workspace cookie for a lane hop. Home and Co-Productions do not write.
+ *  Phone sheet Links call this on tap; desktop pills keep selectLeadPill. */
+export function workspaceSwitcherPersistLane(id: OverviewLeadPillId | PhoneWorkspaceSwitcherId): void {
+  if (id === "home" || id === "co-productions") return;
+  persistWorkspaceCookie(id);
+}
+
+export function phoneWorkspaceSwitcherPrefetchHrefs(
+  options: readonly WorkspaceMenuOption[] = availableWorkspaceOptions(),
+): string[] {
+  return phoneWorkspaceSwitcherPills(options).map((pill) => pill.href);
 }

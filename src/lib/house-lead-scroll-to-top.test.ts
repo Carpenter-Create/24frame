@@ -5,9 +5,24 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/home",
-  useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn() }),
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
   useSearchParams: () => new URLSearchParams(),
 }));
+vi.mock("next/link", async () => {
+  const React = await import("react");
+  function MockLink({
+    href,
+    children,
+    ...props
+  }: {
+    href: string;
+    children?: React.ReactNode;
+    prefetch?: boolean;
+  }) {
+    return React.createElement("a", { href, ...props }, children);
+  }
+  return { __esModule: true, default: MockLink, useLinkStatus: () => ({ pending: false }) };
+});
 
 import { HousePhoneAppShell } from "@/components/chrome/house-phone-app-shell";
 import {
@@ -45,7 +60,7 @@ describe("HouseLeadScrollToTop — iOS status-bar tap contract", () => {
     expect(HOUSE_LEAD_SCROLL_CLASS).toBe(
       "min-h-0 flex-1 overflow-y-auto overscroll-contain",
     );
-    expect(appShellSrc.match(/data-house-lead-scroll/g)?.length).toBe(2);
+    expect(appShellSrc.match(/data-house-lead-scroll/g)?.length).toBe(1);
     expect(HOUSE_LEAD_SCROLL_TO_TOP_SELECTOR).toBe("[data-house-lead-scroll]");
     expect(HOUSE_LEAD_SCROLL_TO_TOP.selector).toBe("[data-house-lead-scroll]");
   });

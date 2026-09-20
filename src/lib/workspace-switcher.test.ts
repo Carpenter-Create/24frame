@@ -10,7 +10,9 @@ import {
 } from "./dashboard-craft";
 import {
   phoneWorkspaceSwitcherPills,
+  phoneWorkspaceSwitcherPrefetchHrefs,
   workspaceSwitcherLeadMarkLetter,
+  workspaceSwitcherPersistLane,
   workspaceSwitcherTriggerMarkId,
   APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS,
   APP_HEADER_EDUCATION_SEARCH_PHONE_CLASS,
@@ -63,12 +65,14 @@ import {
   workspaceSwitcherTriggerClass,
 } from "./workspace-switcher";
 import { persistWorkspaceCookie, workspaceHome } from "./workspace";
+import { HOUSE_PHONE_WRAP_CLASS, housePhoneForbidsTruncate } from "./house-phone-stack";
 
 describe("workspace switcher lock", () => {
   it("names the control Workspace and the quiet menu heading Workspaces", () => {
     expect(WORKSPACE_SWITCHER.label).toBe("Workspace");
     expect(WORKSPACE_SWITCHER.label).toBe(USER_MENU.workspace);
     expect(WORKSPACE_SWITCHER.heading).toBe("Workspaces");
+    expect(WORKSPACE_SWITCHER.close).toBe("Close workspaces");
     expect(WORKSPACE_SWITCHER).not.toHaveProperty("settings");
     expect(USER_MENU).not.toHaveProperty("workspaceHref");
   });
@@ -142,7 +146,9 @@ describe("workspace switcher lock", () => {
     expect(WORKSPACE_SWITCHER_MARK_CLASS).toContain("size-6");
     expect(WORKSPACE_SWITCHER_HEADER_CLASS).toContain("t-label");
     expect(WORKSPACE_SWITCHER_HEADER_CLASS).toContain("text-ink-3");
-    expect(WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS).toContain("truncate");
+    expect(WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS).toBe(HOUSE_PHONE_WRAP_CLASS);
+    expect(housePhoneForbidsTruncate(WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS)).toBe(true);
+    expect(WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS).not.toContain("truncate");
     expect(WORKSPACE_SWITCHER_PANEL_CLASS).toContain("fixed");
     expect(WORKSPACE_SWITCHER_PANEL_CLASS).toContain("z-50");
     expect(WORKSPACE_SWITCHER_PANEL_CLASS).toContain("shadow-none");
@@ -159,7 +165,9 @@ describe("workspace switcher lock", () => {
     expect(APP_HEADER_LEADING_CLASS).not.toContain("gap-[var(--space-1)]");
     expect(APP_HEADER_LEADING_CLASS).not.toMatch(/(?:^|\s)(?:max-md:)?overflow-hidden(?:\s|$)/);
     expect(APP_HEADER_LEADING_CLASS).toContain("overflow-visible");
-    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).toBe("min-w-0 overflow-visible md:hidden");
+    expect(APP_HEADER_LEADING_CLASS).toContain("max-md:flex-col");
+    expect(APP_HEADER_LEADING_CLASS).toContain("max-md:items-start");
+    expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).toBe("min-w-0 w-full overflow-visible md:hidden");
     expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).not.toContain("shrink-0");
     expect(APP_HEADER_WORKSPACE_PILL_HOST_CLASS).not.toMatch(/overflow-hidden/);
     expect(WORKSPACE_SWITCHER_HOST_CLASS).toBe("relative min-w-0 overflow-visible");
@@ -233,10 +241,14 @@ describe("workspace switcher lock", () => {
     expect(workspaceSwitcherLeadMarkLetter("aggregation")).toBe("A");
     expect(workspaceSwitcherTriggerMarkId("/home", "aggregation")).toBe("home");
     expect(workspaceSwitcherTriggerMarkId("/social", "social")).toBe("social");
+    expect(phoneWorkspaceSwitcherPrefetchHrefs().map((href) => href)).toEqual(
+      phoneWorkspaceSwitcherPills().map((pill) => pill.href),
+    );
   });
 
   it("keeps the existing workspace cookie write — no second scheme", () => {
     expect(persistWorkspaceCookie.name).toBe("persistWorkspaceCookie");
+    expect(workspaceSwitcherPersistLane.name).toBe("workspaceSwitcherPersistLane");
     expect(workspaceHome("aggregation")).toBe("/aggregation/dashboard");
     expect(workspaceHome("social")).toBe("/social");
   });

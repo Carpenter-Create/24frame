@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+
+import {
+  HouseNavPendingProbe,
+  useHouseNavPending,
+} from "@/components/chrome/use-house-nav-pending";
+import { prefetchHrefList } from "@/lib/house-nav-pending";
 
 import { SocialCreateMenu } from "@/components/social/social-create-menu";
 import { cn } from "@/lib/cn";
@@ -23,6 +29,7 @@ import {
   housePhoneDestIsCreate,
   housePhoneDockDestinations,
   housePhoneDockLabel,
+  housePhonePrefetchDestHrefs,
   housePhoneShowsBottomDests,
 } from "@/lib/house-phone-shell";
 import {
@@ -82,6 +89,8 @@ export function HousePhoneBottomNav({
   coProductions?: boolean;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { activePath, markPending } = useHouseNavPending();
   const hidden = useHousePhoneBottomNavHidden(pathname);
   const visible = housePhoneShowsBottomDests({
     workspace,
@@ -91,6 +100,11 @@ export function HousePhoneBottomNav({
   });
   const items = housePhoneDockDestinations({ isGcStaff, workspace, homeOwned });
   const destWorkspace = homeOwned ? "aggregation" : workspace;
+
+  useEffect(() => {
+    if (!visible) return;
+    prefetchHrefList(router.prefetch, housePhonePrefetchDestHrefs(items));
+  }, [items, router, visible]);
 
   if (!visible) return null;
 
@@ -105,7 +119,7 @@ export function HousePhoneBottomNav({
       <div data-house-phone-bottom-nav-pill="" className={HOUSE_PHONE_BOTTOM_NAV_PILL_CLASS}>
         <div className={HOUSE_PHONE_BOTTOM_NAV_ROW_CLASS}>
           {items.map((item) => {
-            const active = housePhoneDestActive(pathname, item, destWorkspace);
+            const active = housePhoneDestActive(activePath, item, destWorkspace);
             const Glyph = housePhoneDestGlyph(item);
             const glyph = (
               <Glyph
@@ -164,8 +178,10 @@ export function HousePhoneBottomNav({
                 data-house-phone-bottom-nav-item={item.href}
                 data-house-phone-bottom-nav-item-active={active ? "" : undefined}
                 data-house-phone-dest={item.label}
+                onClick={(event) => markPending(item.href, event)}
                 className={destClass}
               >
+                <HouseNavPendingProbe href={item.href} onPending={markPending} />
                 {chip}
               </Link>
             );

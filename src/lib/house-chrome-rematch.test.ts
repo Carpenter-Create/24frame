@@ -5,9 +5,24 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/education",
-  useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn() }),
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
   useSearchParams: () => new URLSearchParams(),
 }));
+vi.mock("next/link", async () => {
+  const React = await import("react");
+  function MockLink({
+    href,
+    children,
+    ...props
+  }: {
+    href: string;
+    children?: React.ReactNode;
+    prefetch?: boolean;
+  }) {
+    return React.createElement("a", { href, ...props }, children);
+  }
+  return { __esModule: true, default: MockLink, useLinkStatus: () => ({ pending: false }) };
+});
 
 import { HouseLeadChrome } from "@/components/chrome/house-lead-chrome";
 import { HouseLeadSearch } from "@/components/chrome/house-lead-search";
@@ -234,7 +249,7 @@ describe("house chrome rematch miss list v1.1", () => {
   });
 
   it("uses one rounded register on Aggregation, Social, and Education", () => {
-    expect(shell.match(/HOUSE_RAIL_FLOAT_CLASS/g)?.length).toBe(3);
+    expect(shell.match(/HOUSE_RAIL_FLOAT_CLASS/g)?.length).toBe(2);
     expect(shell).not.toContain("fixed left-0 top-[calc(var(--header-height)+16px)]");
     expect(SOCIAL_RAIL_WIDTH_CLASS).toBe("w-[calc(200px-var(--chrome-gutter))]");
     expect(SOCIAL_FOR_YOU_CARD_CLASS).toContain(HOUSE_MODULE_CLASS);
@@ -274,7 +289,7 @@ describe("house chrome rematch miss list v1.1", () => {
     const railUi = readFileSync("src/components/chrome/rail-collapse.tsx", "utf8");
     expect(existsSync("src/components/social/social-rail-extras.tsx")).toBe(false);
     expect(existsSync("src/components/chrome/rail-collapse.tsx")).toBe(true);
-    expect(shell.match(/<RailCollapse collapsed=\{collapsed\} onToggle=\{toggle\} \/>/g)?.length).toBe(2);
+    expect(shell.match(/<RailCollapse collapsed=\{collapsed\} onToggle=\{toggle\} \/>/g)?.length).toBe(1);
     expect(shell).not.toContain("collapsed={false}");
     expect(shell).not.toContain("SocialRailCollapse");
     expect(shell).not.toContain("data-social-rail-collapse");
@@ -299,11 +314,11 @@ describe("house chrome rematch miss list v1.1", () => {
     );
     expect(socialAside.indexOf("<RailCollapse")).toBeLessThan(socialAside.indexOf("<SideNav"));
     expect(socialAside).toContain("collapsed={collapsed}");
-    expect(socialAside).toContain('workspace="social"');
+    expect(socialAside).toContain('workspace={socialChrome ? "social" : workspace}');
     expect(socialAside).not.toContain("SocialRailAccountChip");
     expect(socialAside).not.toContain("data-social-rail-account");
 
-    expect(shell).toContain('collapsed ? undefined : SOCIAL_RAIL_MAIN_OFFSET_CLASS');
+    expect(shell).toContain("socialChrome && !collapsed ? SOCIAL_RAIL_MAIN_OFFSET_CLASS");
     expect(shell).toContain('marginLeft: "var(--sidebar-width)"');
     expect(shell).toContain("data-social-workspace");
     expect(shell).toContain("<HouseLeadChrome");
@@ -328,7 +343,7 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(leadLib).not.toContain("md:px-[var(--content-inset)]");
     expect(lead).not.toContain("md:px-[var(--content-inset)]");
     expect(lead).not.toContain("md:pl-5");
-    expect(shell.match(/HOUSE_RAIL_FLOAT_CLASS/g)?.length).toBe(3);
+    expect(shell.match(/HOUSE_RAIL_FLOAT_CLASS/g)?.length).toBe(2);
     expect(shell).toContain("HOUSE_CANVAS_X_CLASS");
     expect(shell).toContain("HOUSE_HOME_RAIL_COLUMN_CLASS");
     expect(shell).not.toContain("data-app-messages-frame");

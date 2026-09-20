@@ -5,9 +5,24 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/education",
-  useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn() }),
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
   useSearchParams: () => new URLSearchParams(),
 }));
+vi.mock("next/link", async () => {
+  const React = await import("react");
+  function MockLink({
+    href,
+    children,
+    ...props
+  }: {
+    href: string;
+    children?: React.ReactNode;
+    prefetch?: boolean;
+  }) {
+    return React.createElement("a", { href, ...props }, children);
+  }
+  return { __esModule: true, default: MockLink, useLinkStatus: () => ({ pending: false }) };
+});
 
 import { HouseLeadChrome } from "@/components/chrome/house-lead-chrome";
 import { HouseLeadSearch } from "@/components/chrome/house-lead-search";
@@ -74,7 +89,7 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(existsSync("src/components/chrome/house-lead-chrome.tsx")).toBe(true);
     expect(existsSync("src/components/social/social-top-bar.tsx")).toBe(false);
     expect(shell).toContain("<HouseLeadChrome");
-    expect(shell.match(/<HouseLeadChrome/g)?.length).toBe(2);
+    expect(shell.match(/<HouseLeadChrome/g)?.length).toBe(1);
     expect(leadSrc).not.toContain("md:pl-5");
     expect(leadSrc).not.toContain("w-[420px]");
     expect(leadSrc).toContain("data-house-lead-chrome");
@@ -228,7 +243,9 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(HOUSE_LEAD_SEARCH_PILL_CLASS).toContain("md:h-[var(--header-search-height)]");
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("md:size-[var(--header-control-size)]");
     expect(HOUSE_HEADER_TRAILING_AVATAR_CLASS).toContain("md:h-[var(--header-avatar-size)]");
-    expect(leadSrc).toContain('style={{ height: "var(--header-height)" }}');
+    expect(leadSrc).toContain('style={{ minHeight: "var(--header-height)" }}');
+    expect(HOUSE_LEAD_CHROME_CLASS).toContain("max-md:h-auto");
+    expect(HOUSE_LEAD_CHROME_CLASS).toContain("md:h-[var(--header-height)]");
   });
 
   it("evens phone trailing theme · AI · bell · avatar with one gap and no overlapping hits", () => {
@@ -299,8 +316,8 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     );
     expect(shell).toContain("HOUSE_LEAD_SCROLL_CLASS");
     expect(shell).toContain("HousePhoneAppShell");
-    expect(shell.match(/HOUSE_LEAD_SCROLL_CLASS/g)?.length).toBe(3);
-    expect(shell.match(/data-house-lead-scroll/g)?.length).toBe(2);
+    expect(shell.match(/HOUSE_LEAD_SCROLL_CLASS/g)?.length).toBe(2);
+    expect(shell.match(/data-house-lead-scroll/g)?.length).toBe(1);
     expect(shell).not.toContain("min-h-dvh");
     expect(shell).not.toContain("min-h-[calc(100dvh-var(--header-height))]");
     expect(shell).not.toContain("minHeight: \"calc(100dvh - var(--header-height))\"");

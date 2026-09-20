@@ -15,9 +15,24 @@ const navigation = vi.hoisted(() => ({ pathname: "/" }));
 
 vi.mock("next/navigation", () => ({
   usePathname: () => navigation.pathname,
-  useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn() }),
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
   useSearchParams: () => new URLSearchParams(),
 }));
+vi.mock("next/link", async () => {
+  const React = await import("react");
+  function MockLink({
+    href,
+    children,
+    ...props
+  }: {
+    href: string;
+    children?: React.ReactNode;
+    prefetch?: boolean;
+  }) {
+    return React.createElement("a", { href, ...props }, children);
+  }
+  return { __esModule: true, default: MockLink, useLinkStatus: () => ({ pending: false }) };
+});
 vi.mock("@/app/(app)/aggregation/messages/ask-globee-actions", () => ({
   startAskGlobeeConversation: vi.fn(),
   appendAskGlobeeTurn: vi.fn(),
@@ -953,6 +968,32 @@ describe("AppShell rail-collapse chevron", () => {
     expect(staff).toContain('data-house-phone-dest="Queue"');
     expect(staff).toContain('data-house-phone-dest="Channels"');
     expect(staff).not.toContain('data-house-phone-dest="Ask 24Frame AI"');
+
+    const chromeStaff = renderToStaticMarkup(
+      <AppShell
+        chrome={fulfilledChrome({
+          email: "ada@example.com",
+          name: "Ada",
+          photoUrl: null,
+          orgs: [],
+          activeOrgId: null,
+          unread: Promise.resolve(0),
+          activityItems: Promise.resolve([]),
+          isGcStaff: true,
+          defaultCollapsed: false,
+          messagesSurface: "staff-inbox",
+          defaultWorkspace: "aggregation",
+        })}
+        messagesUnread={Promise.resolve(0)}
+      >
+        page
+      </AppShell>,
+    );
+    expect(chromeStaff).toContain('data-house-phone-dest="Queue"');
+    expect(chromeStaff).toContain('data-house-phone-dest="Channels"');
+    expect(chromeStaff).toContain("data-gc-staff");
+
+    expect(shellSrc).toContain("chrome={chrome}");
     expect(shellSrc).toContain("SideNavFromChrome");
     expect(shellSrc).toContain("isGcStaff={isGcStaff}");
     expect(shellSrc).toContain("ChromeCookieSync");
@@ -960,9 +1001,11 @@ describe("AppShell rail-collapse chevron", () => {
     expect(shellSrc).toContain("isGcStaff={data.isGcStaff}");
     expect(shellSrc).toContain("data.defaultCollapsed");
     expect(shellSrc).toContain("data.defaultWorkspace");
-    const appShellFn = shellSrc.slice(shellSrc.indexOf("export function AppShell"));
-    const beforeSocial = appShellFn.slice(0, appShellFn.indexOf("if (socialChrome)"));
-    expect(beforeSocial).not.toMatch(/\buse\(chrome\)/);
+    const appShellFn = shellSrc.slice(
+      shellSrc.indexOf("export function AppShell"),
+      shellSrc.indexOf("function AccountMenuSlot"),
+    );
+    expect(appShellFn).not.toMatch(/\buse\(chrome\)/);
   });
 
   it("applies resolved chrome cookies from a Suspense slot without persisting defaults", () => {
@@ -1000,10 +1043,15 @@ describe("AppShell rail-collapse chevron", () => {
     expect(syncBody).toContain("data.photoUrl");
     expect(syncBody).not.toContain("persistSidebarCollapsed");
     expect(syncBody).not.toContain("persistWorkspaceCookie");
-    const appShellFn = shellSrc.slice(shellSrc.indexOf("export function AppShell"));
-    const beforeSocial = appShellFn.slice(0, appShellFn.indexOf("if (socialChrome)"));
-    expect(beforeSocial).not.toMatch(/\buse\(chrome\)/);
-    expect(beforeSocial).toContain("cookieSync");
+    const appShellFn = shellSrc.slice(
+      shellSrc.indexOf("export function AppShell"),
+      shellSrc.indexOf("function AccountMenuSlot"),
+    );
+    expect(appShellFn).not.toMatch(/\buse\(chrome\)/);
+    expect(appShellFn).toContain("cookieSync");
+    expect(shellSrc).toContain("One return tree");
+    expect(appShellFn).not.toMatch(/if \(socialChrome\) \{\s*return/);
+    expect(appShellFn.match(/<HousePhoneAppShell/g)?.length).toBe(1);
   });
 
   it("keeps the header photo when chrome is pending after a known session face", () => {

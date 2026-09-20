@@ -7,7 +7,7 @@ const navigation = vi.hoisted(() => ({ pathname: "/dashboard" }));
 
 vi.mock("next/navigation", () => ({
   usePathname: () => navigation.pathname,
-  useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn() }),
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
   useSearchParams: () => new URLSearchParams(),
 }));
 
@@ -24,7 +24,7 @@ vi.mock("next/link", async () => {
   }) {
     return React.createElement("a", { href, ...props }, children);
   }
-  return { __esModule: true, default: MockLink };
+    return { __esModule: true, default: MockLink, useLinkStatus: () => ({ pending: false }) };
 });
 
 import { BookOpen, FilmStrip, House, SquaresFour, Users } from "@phosphor-icons/react";
@@ -59,6 +59,7 @@ import {
   housePhoneDestActiveIndex,
   housePhoneDestinations,
   housePhoneDockDestinations,
+  housePhonePrefetchDestHrefs,
   housePhoneShowsBottomDests,
   housePhoneWorkspaceSelected,
 } from "@/lib/house-phone-shell";
@@ -234,6 +235,17 @@ describe("phone app-shell IA A — dest dock + header workspace sheet", () => {
     expect(html).not.toContain('data-house-phone-bottom-nav-item="home"');
     expect(html).not.toContain('data-house-phone-bottom-nav-item="social"');
     expect(html).not.toContain("data-social-tab-bar");
+    expect(housePhonePrefetchDestHrefs(housePhoneDockDestinations({
+      isGcStaff: false,
+      workspace: "aggregation",
+    }))).toEqual(
+      housePhoneDockDestinations({ isGcStaff: false, workspace: "aggregation" }).map(
+        (item) => item.href,
+      ),
+    );
+    expect(bottomNavSrc).toContain("prefetchHrefList");
+    expect(bottomNavSrc).toContain("useHouseNavPending");
+    expect(bottomNavSrc).toContain("housePhonePrefetchDestHrefs");
     expect(housePhoneWorkspaceSelected("aggregation", "/aggregation/dashboard", "aggregation")).toBe(true);
     expect(housePhoneWorkspaceSelected("home", "/home", "aggregation")).toBe(true);
     expect(housePhoneWorkspaceSelected("social", "/social/explore", "social")).toBe(true);
@@ -491,7 +503,11 @@ describe("phone app-shell IA A — dest dock + header workspace sheet", () => {
 
   it("mounts one HousePhoneAppShell on every workspace and keeps Social off a second float", () => {
     expect(shellSrc).toContain("<HousePhoneAppShell");
-    expect(shellSrc.match(/<HousePhoneAppShell/g)?.length).toBe(2);
+    expect(shellSrc.match(/<HousePhoneAppShell/g)?.length).toBe(1);
+    expect(shellSrc).toContain("One return tree");
+    expect(shellSrc).toContain("chrome={chrome}");
+    expect(phoneAppShellSrc).toContain("PhoneDockFromChrome");
+    expect(phoneAppShellSrc).toContain("data.isGcStaff");
     expect(shellSrc).not.toContain("SocialMobileTabBar");
     expect(shellSrc).not.toContain("HousePhoneDestChips");
     expect(shellSrc).toContain("HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS");

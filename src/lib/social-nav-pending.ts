@@ -1,27 +1,17 @@
-import { SOCIAL_ROUTES } from "@/lib/social";
+import {
+  houseNavActivePath,
+  houseNavIgnorePendingClick,
+  houseNavPendingSettled,
+  type HouseNavClickLike,
+} from "@/lib/house-nav-pending";
 
-/** Modified / non-primary clicks are not same-document Social navigations. */
-export type SocialNavClickLike = {
-  altKey: boolean;
-  button: number;
-  ctrlKey: boolean;
-  metaKey: boolean;
-  shiftKey: boolean;
-};
+// Social rail aliases the house pending SoT. Do not fork a second
+// pending grammar for Social dests.
 
-export function socialNavIgnorePendingClick(event: SocialNavClickLike): boolean {
-  return event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0;
-}
+export type SocialNavClickLike = HouseNavClickLike;
 
-/** Treat an in-flight Social href as the current path so the destination lights immediately. */
-export function socialNavActivePath(pathname: string, pendingHref: string | null): string {
-  return pendingHref ?? pathname;
-}
+export const socialNavIgnorePendingClick = houseNavIgnorePendingClick;
 
-/** Clear pending once the App Router lands on that destination (or a child of it). */
-export function socialNavPendingSettled(pathname: string, pendingHref: string): boolean {
-  if (pendingHref === SOCIAL_ROUTES.home) {
-    return pathname === SOCIAL_ROUTES.home;
-  }
-  return pathname === pendingHref || pathname.startsWith(`${pendingHref}/`);
-}
+export const socialNavActivePath = houseNavActivePath;
+
+export const socialNavPendingSettled = houseNavPendingSettled;

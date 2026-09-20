@@ -1,4 +1,9 @@
+"use client";
+
+import { Suspense, use, type HTMLAttributes } from "react";
+
 import { cn } from "@/lib/cn";
+import type { AppShellChrome } from "@/lib/app-shell-chrome";
 import { HOUSE_LEAD_SHELL_CLASS } from "@/lib/house-lead-chrome";
 import { HOUSE_PAGE_CANVAS_CLASS } from "@/lib/house-shell";
 import type { WorkspaceMode } from "@/lib/workspace";
@@ -12,8 +17,10 @@ import { HousePhoneBottomNav } from "./house-phone-bottom-nav";
 // HouseLeadScrollToTop bridges the iOS status-bar tap to the nested
 // `[data-house-lead-scroll]` scroller so every workspace answers a
 // tap the same way (Adam 2026-09-19). Coarse-pointer devices only.
+// Staff dests resolve from chrome — layout never passes isGcStaff.
 
 export function HousePhoneAppShell({
+  chrome,
   workspace,
   isGcStaff = false,
   homeOwned = false,
@@ -23,7 +30,8 @@ export function HousePhoneAppShell({
   style,
   children,
   ...rest
-}: React.HTMLAttributes<HTMLDivElement> & {
+}: HTMLAttributes<HTMLDivElement> & {
+  chrome?: Promise<AppShellChrome>;
   workspace: WorkspaceMode;
   isGcStaff?: boolean;
   homeOwned?: boolean;
@@ -39,7 +47,8 @@ export function HousePhoneAppShell({
     >
       <HouseLeadScrollToTop />
       {children}
-      <HousePhoneBottomNav
+      <PhoneDockSlot
+        chrome={chrome}
         workspace={workspace}
         isGcStaff={isGcStaff}
         homeOwned={homeOwned}
@@ -47,5 +56,68 @@ export function HousePhoneAppShell({
         coProductions={coProductions}
       />
     </div>
+  );
+}
+
+function PhoneDockSlot({
+  chrome,
+  workspace,
+  isGcStaff,
+  homeOwned,
+  accountChrome,
+  coProductions,
+}: {
+  chrome?: Promise<AppShellChrome>;
+  workspace: WorkspaceMode;
+  isGcStaff: boolean;
+  homeOwned: boolean;
+  accountChrome: boolean;
+  coProductions: boolean;
+}) {
+  const dock = (
+    <HousePhoneBottomNav
+      workspace={workspace}
+      isGcStaff={isGcStaff}
+      homeOwned={homeOwned}
+      accountChrome={accountChrome}
+      coProductions={coProductions}
+    />
+  );
+  if (!chrome) return dock;
+  return (
+    <Suspense fallback={dock}>
+      <PhoneDockFromChrome
+        chrome={chrome}
+        workspace={workspace}
+        homeOwned={homeOwned}
+        accountChrome={accountChrome}
+        coProductions={coProductions}
+      />
+    </Suspense>
+  );
+}
+
+function PhoneDockFromChrome({
+  chrome,
+  workspace,
+  homeOwned,
+  accountChrome,
+  coProductions,
+}: {
+  chrome: Promise<AppShellChrome>;
+  workspace: WorkspaceMode;
+  homeOwned: boolean;
+  accountChrome: boolean;
+  coProductions: boolean;
+}) {
+  const data = use(chrome);
+  return (
+    <HousePhoneBottomNav
+      workspace={workspace}
+      isGcStaff={data.isGcStaff}
+      homeOwned={homeOwned}
+      accountChrome={accountChrome}
+      coProductions={coProductions}
+    />
   );
 }

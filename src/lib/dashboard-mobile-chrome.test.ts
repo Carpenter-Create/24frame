@@ -26,8 +26,23 @@ import { WorkspaceSwitcher } from "@/components/chrome/workspace-switcher";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/aggregation/dashboard",
-  useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn(), prefetch: vi.fn() }),
 }));
+vi.mock("next/link", async () => {
+  const React = await import("react");
+  function MockLink({
+    href,
+    children,
+    ...props
+  }: {
+    href: string;
+    children?: React.ReactNode;
+    prefetch?: boolean;
+  }) {
+    return React.createElement("a", { href, ...props }, children);
+  }
+  return { __esModule: true, default: MockLink, useLinkStatus: () => ({ pending: false }) };
+});
 
 const now = new Date("2026-09-16T12:00:00.000Z");
 const options = dashboardPeriodOptions(now, [
