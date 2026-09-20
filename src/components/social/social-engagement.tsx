@@ -13,6 +13,7 @@ import {
   beginSocialLikeEpoch,
   nextSocialLikeState,
   persistSocialLikeLatest,
+  rememberSocialLikeBaseline,
   runSocialOptimisticMutation,
   socialLikeEpochIsCurrent,
 } from "@/lib/social-optimistic";
@@ -246,19 +247,14 @@ export function SocialLikeButton({
     const previous = view;
     const next = nextSocialLikeState(previous);
     const epoch = beginSocialLikeEpoch(postId);
+    rememberSocialLikeBaseline(postId, previous);
     runSocialOptimisticMutation({
       apply: () => {
         applyOptimisticLike(postId, next);
         setError("");
         return previous;
       },
-      persist: () => {
-        const form = new FormData();
-        form.set("post_id", postId);
-        form.set("liked", previous.liked ? "1" : "0");
-        if (groupSlug) form.set("group_slug", groupSlug);
-        return persistSocialLikeLatest(postId, epoch, form);
-      },
+      persist: () => persistSocialLikeLatest(postId, epoch, next, { groupSlug }),
       rollback: (token) => {
         if (!socialLikeEpochIsCurrent(postId, epoch)) return;
         applyOptimisticLike(postId, token);
