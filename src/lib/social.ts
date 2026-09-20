@@ -454,6 +454,7 @@ export const SOCIAL = {
     title: "For you",
     people: "Suggested people",
     topics: "Topics.",
+    latestCourse: "Latest course",
   },
   profile: {
     title: "Profile",

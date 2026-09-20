@@ -69,6 +69,7 @@ describe("social copy lock", () => {
     expect(SOCIAL.home.composerPrompt).toBe("Write something");
     expect(SOCIAL.home.composerPromptNamed).toBe("Write something");
     expect(SOCIAL.forYou.topics).toBe("Topics.");
+    expect(SOCIAL.forYou.latestCourse).toBe("Latest course");
     expect(blob).not.toContain("What's on your mind");
     expect(blob).not.toContain("Topics for you");
     expect(SOCIAL.home.recentChats).toBe("Recent chats");
@@ -312,6 +313,7 @@ describe("profile opt-in", () => {
     expect(SOCIAL.home.composerPrompt).toBe("Write something");
     expect(SOCIAL.home.composerPromptNamed).toBe("Write something");
     expect(SOCIAL.forYou.topics).toBe("Topics.");
+    expect(SOCIAL.forYou.latestCourse).toBe("Latest course");
     expect(SOCIAL.profile.postsTab).toBe("Posts");
     expect(SOCIAL.profile.highlightsTab).toBe("Highlights");
     expect(SOCIAL.profile.creditsTab).toBe("Credits");

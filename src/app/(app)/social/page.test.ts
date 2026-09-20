@@ -33,6 +33,9 @@ vi.mock("@/lib/s3-social-media", () => ({
   signedSocialMediaItems: vi.fn().mockResolvedValue([]),
   signedSocialMediaByPostId: vi.fn().mockResolvedValue(new Map()),
 }));
+vi.mock("@/lib/s3-education", () => ({
+  signedEducationCoverUrls: vi.fn().mockResolvedValue(new Map()),
+}));
 vi.mock("@/lib/social-profile", () => ({
   ensureOwnSocialProfile: vi.fn(),
 }));
@@ -98,8 +101,23 @@ function stubClient({
   posts = [],
   follows = [],
   stories = [],
+  courses = [],
 }: {
   profile?: { id: string; handle: string; display_name: string; status: string; bio?: string | null } | null;
+  courses?: {
+    id: string;
+    slug: string;
+    title: string;
+    description: string | null;
+    cover_key: string | null;
+    is_flagship_free: boolean;
+    price_cents: number | null;
+    catalog_code: string;
+    status: string;
+    position: number;
+    instructor_id: string | null;
+    created_at: string;
+  }[];
   posts?: {
     id: string;
     body: string;
@@ -128,6 +146,7 @@ function stubClient({
     if (table === "follows") return chain(follows);
     if (table === "stories") return chain(stories);
     if (table === "story_views") return chain([]);
+    if (table === "courses") return chain(courses);
     throw new Error(`unexpected from(${table})`);
   });
   const rpc = vi.fn().mockResolvedValue({ data: [], error: null });
@@ -181,6 +200,8 @@ describe("Social home", () => {
     expect(html).toContain("data-social-stories");
     expect(html).toContain("data-social-following-empty");
     expect(html).toContain("data-social-for-you");
+    expect(html).not.toContain("data-social-latest-course");
+    expect(html).not.toContain(SOCIAL.forYou.latestCourse);
     expect(html).not.toContain("data-social-recent-chats");
     expect(html).not.toContain("data-social-chats-empty");
     expect(html).not.toContain(SOCIAL.home.recentChats);
@@ -330,6 +351,52 @@ describe("Social home", () => {
     expect(html).not.toContain(`data-social-post="${posts[SOCIAL_FOLLOWING_WALL_LIMIT]!.id}"`);
   });
 
+  it("shows Latest course from the Education catalog on the right rail", async () => {
+    stubClient({
+      profile: ensured,
+      courses: [
+        {
+          id: "c1",
+          slug: "catalog-basics",
+          title: "Catalog basics",
+          description: null,
+          cover_key: null,
+          is_flagship_free: true,
+          price_cents: null,
+          catalog_code: "EDU-1",
+          status: "published",
+          position: 2,
+          instructor_id: null,
+          created_at: "2026-09-01T12:00:00.000Z",
+        },
+        {
+          id: "c2",
+          slug: "rights-desk",
+          title: "Rights desk",
+          description: null,
+          cover_key: null,
+          is_flagship_free: true,
+          price_cents: null,
+          catalog_code: "EDU-2",
+          status: "published",
+          position: 1,
+          instructor_id: null,
+          created_at: "2026-09-18T12:00:00.000Z",
+        },
+      ],
+    });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const html = await renderHome();
+    expect(html).toContain("data-social-latest-course");
+    expect(html).toContain(SOCIAL.forYou.latestCourse);
+    expect(html).toContain("Rights desk");
+    expect(html).toContain("/education/rights-desk");
+    expect(html).toContain('data-course-card="rights-desk"');
+    expect(html).not.toContain("Catalog basics");
+    expect(html).not.toContain("data-social-for-you-topics");
+  });
+
   it("does not surface Recent chats on Home; Messages stay on /social/dms", async () => {
     const { rpc } = stubClient({ profile: ensured });
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
@@ -355,6 +422,7 @@ describe("Social home", () => {
     expect(html.split(SOCIAL.forYou.topics).length - 1).toBe(1);
     expect(html.indexOf("data-social-home-topics")).toBeLessThan(html.indexOf("data-social-for-you-lane"));
     expect(html).not.toContain("data-social-for-you-topics");
+    expect(html).not.toContain("data-social-latest-course");
     expect(html).toContain("Cinematography");
     expect(html).not.toContain("Education");
     expect(html).not.toContain("Riley Okonkwo");

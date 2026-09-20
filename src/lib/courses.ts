@@ -347,6 +347,24 @@ export async function loadDiscoverableCourses(
   return { courses: (data ?? []) as CourseRow[], failed: false };
 }
 
+/** Newest published course from the Education catalog. Same rows as loadDiscoverableCourses. */
+export function latestDiscoverableCourse(
+  courses: readonly CourseRow[],
+): CourseRow | null {
+  let latest: CourseRow | null = null;
+  for (const course of courses) {
+    if (course.status !== "published") continue;
+    if (
+      !latest ||
+      course.created_at > latest.created_at ||
+      (course.created_at === latest.created_at && course.id > latest.id)
+    ) {
+      latest = course;
+    }
+  }
+  return latest;
+}
+
 export async function loadCourseDetail(
   supabase: ServerClient,
   slug: string,

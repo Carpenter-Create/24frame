@@ -65,6 +65,9 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).not.toContain("SocialProfileTabs");
     expect(home).not.toContain("creditsEmpty");
     expect(home).toContain("SocialForYouRail");
+    expect(home).toContain("loadDiscoverableCourses");
+    expect(home).toContain("latestDiscoverableCourse");
+    expect(home).toContain("signedEducationCoverUrls");
     expect(home).not.toContain("SocialRecentChats");
     expect(home).not.toContain("SocialHomeRecentChatsSlot");
     expect(home).not.toContain("loadDmInbox");
@@ -81,6 +84,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(SOCIAL.home.composerPrompt).toBe("Write something");
     expect(SOCIAL.home.composerPromptNamed).toBe("Write something");
     expect(SOCIAL.forYou.topics).toBe("Topics.");
+    expect(SOCIAL.forYou.latestCourse).toBe("Latest course");
     expect(SOCIAL.checklist.photo).toBe("Add a profile photo");
     expect(SOCIAL.checklist.bio).toBe("Write a short bio");
     expect(SOCIAL.checklist.introduce).toBe("Introduce yourself");
@@ -174,6 +178,10 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(forYou).toContain("SocialOnboardingChecklist");
     expect(forYou).toContain("SocialPersonRow");
     expect(forYou).not.toContain("SocialAvatar");
+    expect(forYou).toContain("CourseCard");
+    expect(forYou).toContain("data-social-latest-course");
+    expect(forYou).toContain("SOCIAL.forYou.latestCourse");
+    expect(forYou).toContain('density="discover"');
     expect(forYou).not.toContain("data-social-for-you-topics");
     expect(forYou).not.toContain("SOCIAL.forYou.topics");
     expect(forYou).not.toContain("SocialHomeTopics");

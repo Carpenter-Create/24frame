@@ -24,6 +24,8 @@ import {
   type SocialCategoryLabel,
   type SocialCategoryTopic,
 } from "@/lib/social-categories";
+import { latestDiscoverableCourse, loadDiscoverableCourses } from "@/lib/courses";
+import { signedEducationCoverUrls } from "@/lib/s3-education";
 import { followingAuthorIds, socialChecklistItems } from "@/lib/social-home";
 import {
   SOCIAL_FOLLOWING_WALL_CURSOR_PARAM,
@@ -87,12 +89,17 @@ async function loadHomeProfile(session: SocialSession) {
 async function SocialHomeForYouSlot({ session }: { session: SocialSession }) {
   const { ctx, supabase } = session;
   const { profile, followees } = await loadHomeProfile(session);
-  const [suggested, facts, photoUrl] = await Promise.all([
+  const [suggested, facts, photoUrl, catalog] = await Promise.all([
     loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids]),
     profile ? loadOwnPostFacts(supabase, ctx.user.id) : Promise.resolve(null),
     profile ? signedAvatarUrl(ctx.user.id) : Promise.resolve(null),
+    loadDiscoverableCourses(supabase),
   ]);
-  const faces = suggested.length > 0 ? await signedAvatarUrls(suggested.map((person) => person.id)) : new Map();
+  const latestCourse = catalog.failed ? null : latestDiscoverableCourse(catalog.courses);
+  const [faces, courseCovers] = await Promise.all([
+    suggested.length > 0 ? signedAvatarUrls(suggested.map((person) => person.id)) : Promise.resolve(new Map()),
+    latestCourse ? signedEducationCoverUrls([latestCourse]) : Promise.resolve(new Map<string, string>()),
+  ]);
   const checklist = profile
     ? socialChecklistItems({
         hasPhoto: !!photoUrl,
@@ -102,7 +109,15 @@ async function SocialHomeForYouSlot({ session }: { session: SocialSession }) {
         hasStory: facts?.hasStory ?? false,
       })
     : [];
-  return <SocialForYouRail people={suggested} faces={faces} checklist={profile ? checklist : []} />;
+  return (
+    <SocialForYouRail
+      people={suggested}
+      faces={faces}
+      checklist={profile ? checklist : []}
+      latestCourse={latestCourse}
+      latestCourseCoverUrl={latestCourse ? courseCovers.get(latestCourse.id) ?? null : null}
+    />
+  );
 }
 
 async function SocialHomeCenter({
