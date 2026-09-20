@@ -59,7 +59,11 @@ import {
   HOUSE_RAIL_FLOAT_CLASS,
 } from "@/lib/house-shell";
 import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
-import { SOCIAL_PILL_ACTIVE_CLASS, SOCIAL_PILL_IDLE_CLASS } from "@/lib/social-chrome";
+import {
+  SOCIAL_PILL_ACTIVE_CLASS,
+  SOCIAL_PILL_IDLE_CLASS,
+  SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS,
+} from "@/lib/social-chrome";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
@@ -290,6 +294,8 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(leadSearch).not.toContain("rounded-[10px]");
     expect(existsSync("src/components/social/social-top-bar.tsx")).toBe(false);
     expect(socialChrome).toContain("HOUSE_FILTER_ON_CLASS");
+    expect(socialChrome).toContain("HOUSE_PILL_SELECTED_CLASS");
+    expect(SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS).toContain(HOUSE_PILL_SELECTED_CLASS);
     expect(SOCIAL_PILL_ACTIVE_CLASS).toBe(HOUSE_FILTER_ON_CLASS);
     expect(SOCIAL_PILL_IDLE_CLASS).toBe(HOUSE_FILTER_OFF_CLASS);
     expect(SOCIAL_PILL_ACTIVE_CLASS).not.toContain("bg-accent");

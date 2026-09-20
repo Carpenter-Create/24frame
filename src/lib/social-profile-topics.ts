@@ -9,6 +9,7 @@ import {
 // Home Topics. Do not merge with crafts / Professions.
 
 export const SOCIAL_PROFILE_TOPICS = SOCIAL_CATEGORY_TOPICS;
+export const SOCIAL_PROFILE_TOPICS_MAX = 8;
 
 function topicValues(raw: unknown): unknown[] {
   if (Array.isArray(raw)) return raw;
@@ -40,6 +41,10 @@ export function socialProfileTopicsWrite(raw: unknown): SocialCategoryTopic[] {
   return parseSocialProfileTopics(raw);
 }
 
+export function socialProfileTopicsAtMax(selected: readonly string[]): boolean {
+  return parseSocialProfileTopics(selected).length >= SOCIAL_PROFILE_TOPICS_MAX;
+}
+
 export function toggleSocialProfileTopic(
   selected: readonly string[],
   label: string,
@@ -48,6 +53,7 @@ export function toggleSocialProfileTopic(
   const topic = normalizeSocialCategory(label);
   if (!topic) return current;
   if (current.includes(topic)) return current.filter((item) => item !== topic);
+  if (current.length >= SOCIAL_PROFILE_TOPICS_MAX) return current;
   return [...current, topic];
 }
 

@@ -1,12 +1,12 @@
 // Social profile Professions bank (internal: roles_* / crafts).
 // Persist ordered slugs on profiles.crafts. primary_role stays the
 // first selected slug. UI label is Professions — not Topics, not
-// Category, not crafts. Public header joins labels with · . Omit
-// the line when empty. Edit max 5; public shows first 3 + quiet +N.
-// Not on SocialPersonRow.
+// Category, not crafts. Public header is a house-chip scroll rail
+// of every selected label in crafts order. Omit when empty. Edit
+// max 5. Not on SocialPersonRow.
 
 export const SOCIAL_PROFILE_ROLES_MAX = 5;
-export const SOCIAL_PROFILE_ROLES_PUBLIC_CAP = 3;
+export const SOCIAL_PROFILE_ROLES_COUNT = "{n} / {max}";
 
 export const SOCIAL_PROFILE_ROLE_GROUPS = [
   {
@@ -243,14 +243,37 @@ export function toggleSocialProfileRole(
   return [...current, slug];
 }
 
-export function socialProfileRolesLine(raw: unknown): string | null {
-  const slugs = parseSocialProfileRoles(raw);
-  if (slugs.length === 0) return null;
-  const labels = slugs.map((slug) => ROLE_BY_SLUG.get(slug)?.label ?? slug);
-  const shown = labels.slice(0, SOCIAL_PROFILE_ROLES_PUBLIC_CAP);
-  const extra = labels.length - shown.length;
-  const joined = shown.join(" · ");
-  return extra > 0 ? `${joined} +${extra}` : joined;
+export function moveSocialProfileRole(
+  selected: readonly string[],
+  fromId: string,
+  toId: string,
+): SocialProfileRoleSlug[] {
+  const current = parseSocialProfileRoles(selected);
+  const fromIndex = current.indexOf(fromId as SocialProfileRoleSlug);
+  const toIndex = current.indexOf(toId as SocialProfileRoleSlug);
+  if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) return current;
+  const next = [...current];
+  const [item] = next.splice(fromIndex, 1);
+  if (!item) return current;
+  next.splice(toIndex, 0, item);
+  return next;
+}
+
+export function socialProfileRolesCountLabel(count: number): string {
+  return SOCIAL_PROFILE_ROLES_COUNT.replace("{n}", String(count)).replace(
+    "{max}",
+    String(SOCIAL_PROFILE_ROLES_MAX),
+  );
+}
+
+export function socialProfileRoleChips(raw: unknown): {
+  slug: SocialProfileRoleSlug;
+  label: string;
+}[] {
+  return parseSocialProfileRoles(raw).map((slug) => ({
+    slug,
+    label: ROLE_BY_SLUG.get(slug)?.label ?? slug,
+  }));
 }
 
 export function filterSocialProfileRoleGroups(query: string) {

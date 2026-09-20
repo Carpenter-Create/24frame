@@ -23,6 +23,7 @@ import {
   HOUSE_FILTER_OFF_CLASS,
   HOUSE_FILTER_ON_CLASS,
   HOUSE_MODULE_CLASS,
+  HOUSE_PILL_SELECTED_CLASS,
   HOUSE_RAIL_PANEL_CLASS,
 } from "@/lib/house-shell";
 
@@ -232,8 +233,31 @@ export const SOCIAL_TAB_BAR_MAIN_PAD_CLASS = "pb-20 md:pb-4";
 export const SOCIAL_HOME_TAB_CLASS =
   "flex flex-1 flex-col items-center gap-2.5 px-4 pt-3 t-body";
 
-export const SOCIAL_TOPIC_CHIP_CLASS =
-  "inline-flex items-center rounded-full bg-surface px-[10px] py-[5px] text-[11px] font-medium text-ink";
+// Topic/Profession chip measure — one SoT. Display (Home / public
+// profile) stays surface fill. Edit select composes idle outline +
+// HOUSE_PILL_SELECTED_CLASS. Do not fork a third chip language.
+export const SOCIAL_TOPIC_CHIP_MEASURE_CLASS =
+  "inline-flex items-center rounded-full px-[10px] py-[5px] text-[11px] font-medium";
+
+export const SOCIAL_TOPIC_CHIP_CLASS = `${SOCIAL_TOPIC_CHIP_MEASURE_CLASS} bg-surface text-ink`;
+
+export const SOCIAL_TOPIC_CHIP_SELECT_IDLE_CLASS =
+  `${SOCIAL_TOPIC_CHIP_MEASURE_CLASS} max-w-full border border-hairline bg-surface text-ink`;
+
+export const SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS =
+  `${SOCIAL_TOPIC_CHIP_MEASURE_CLASS} max-w-full ${HOUSE_PILL_SELECTED_CLASS}`;
+
+export const SOCIAL_TOPIC_CHIP_BANK_CLASS = "flex flex-wrap gap-2";
+
+export function socialTopicChipSelectClass(selected: boolean): string {
+  return selected ? SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS : SOCIAL_TOPIC_CHIP_SELECT_IDLE_CLASS;
+}
+
+// Public Professions rail: same chip SoT, scroll instead of truncate.
+export const SOCIAL_PROFILE_ROLES_RAIL_CLASS =
+  "no-scrollbar mt-2 flex w-full min-w-0 gap-2 overflow-x-auto overscroll-x-contain";
+
+export const SOCIAL_TOPIC_CHIP_RAIL_CLASS = `${SOCIAL_TOPIC_CHIP_CLASS} shrink-0 whitespace-nowrap`;
 
 // Home Topics. aliases the house two-row chip rail. Not SegmentedTrack:
 // this is a bank of lenses, not a selected exclusive menu.
@@ -293,13 +317,13 @@ export const SOCIAL_PROFILE_BIO_DONE_CLASS =
   "flex shrink-0 items-center justify-center rounded-full bg-accent px-3 py-2 text-accent-contrast";
 
 export const SOCIAL_PROFILE_EDIT_BODY_CLASS =
-  "flex flex-col gap-6 px-4 pb-12 pt-6 md:p-6";
+  "flex flex-col gap-[var(--space-4)] px-4 pb-10 pt-5 md:p-5";
 
 export const SOCIAL_WELCOME_VIDEO_CLASS =
   `overflow-hidden ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface`;
 
 export const SOCIAL_PROFILE_EDIT_PHOTO_CLASS =
-  "flex flex-col items-center justify-center gap-4";
+  "flex flex-col items-center justify-center gap-[var(--space-3)]";
 
 export const SOCIAL_PROFILE_EDIT_AVATAR_CLASS =
   "relative flex size-[88px] shrink-0 items-center justify-center overflow-hidden rounded-full border border-hairline bg-surface-muted text-ink";
@@ -314,10 +338,14 @@ export const SOCIAL_PROFILE_EDIT_CARD_CLASS =
   `flex w-full flex-col overflow-hidden ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface px-4`;
 
 export const SOCIAL_PROFILE_EDIT_ROW_CLASS =
-  "flex w-full items-start gap-4 py-4";
+  "flex w-full items-start gap-3 py-3";
 
+export const SOCIAL_PROFILE_EDIT_SECTION_CLASS = "flex flex-col gap-3 py-3";
+
+// t-label is uppercase + 0.12em track. 88px wraps MIDDLE NAME.
+// One line, no mid-word ellipsis. 128px fits the tracked measure.
 export const SOCIAL_PROFILE_EDIT_LABEL_CLASS =
-  "w-[88px] shrink-0 pt-0.5 t-label text-ink-2 md:w-24";
+  "w-32 shrink-0 whitespace-nowrap pt-0.5 t-label text-ink-2";
 
 export const SOCIAL_PROFILE_EDIT_HANDLE_CLASS =
   "flex min-w-0 flex-1 items-center rounded-[12px] bg-surface-muted px-3 py-2.5 t-control";

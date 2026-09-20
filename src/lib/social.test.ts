@@ -84,9 +84,12 @@ describe("social copy lock", () => {
     expect(SOCIAL.profile.roles).toBe("Professions");
     expect(SOCIAL.profile.rolesSearch).toBe("Search professions");
     expect(SOCIAL.profile.rolesHint).toBe("Choose up to 5.");
+    expect(SOCIAL.profile.rolesCount).toBe("{n} / {max}");
     expect(SOCIAL.profile.topics).toBe("Topics");
     expect(SOCIAL.profile.topicsSearch).toBe("Search topics");
-    expect(SOCIAL.profile.topicsHint).toBe("Subjects you follow.");
+    expect(SOCIAL.profile.topicsHint).toBe("Choose up to 8.");
+    expect(SOCIAL.profile.topicsLimit).toBe("You can select up to 8 topics");
+    expect(SOCIAL.profile.rolesLimit).toBe("You can select up to 5 professions");
     expect(SOCIAL.profile.imdb).toBe("IMDb");
     expect(SOCIAL.profile.imdbInvalid).toBe("Enter an IMDb name URL or nm id.");
     expect(SOCIAL.dms.startCta).toBe("Start a conversation");

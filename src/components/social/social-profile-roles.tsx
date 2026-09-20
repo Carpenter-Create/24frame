@@ -2,17 +2,29 @@
 
 import { useState } from "react";
 
+import {
+  SocialProfileChipBank,
+  SocialProfileSelectChip,
+} from "@/components/social/social-profile-chip-select";
 import { Input } from "@/components/ui/input";
-import { SOCIAL_PROFILE_EDIT_LABEL_CLASS, SOCIAL_TOPIC_CHIP_CLASS } from "@/lib/social-chrome";
+import {
+  SOCIAL_PROFILE_EDIT_LABEL_CLASS,
+  SOCIAL_PROFILE_EDIT_SECTION_CLASS,
+  SOCIAL_TOPIC_CHIP_BANK_CLASS,
+} from "@/lib/social-chrome";
 import { SOCIAL } from "@/lib/social";
 import {
   SOCIAL_PROFILE_ROLES_MAX,
   filterSocialProfileRoleGroups,
+  moveSocialProfileRole,
   parseSocialProfileRoles,
   socialProfileRoleLabel,
+  socialProfileRolesCountLabel,
   toggleSocialProfileRole,
   type SocialProfileRoleSlug,
 } from "@/lib/social-profile-roles";
+
+const ROLE_DRAG_TYPE = "text/social-profile-role";
 
 export function SocialProfileRolesField({
   value,
@@ -25,27 +37,45 @@ export function SocialProfileRolesField({
   const selected = parseSocialProfileRoles(value);
   const atMax = selected.length >= SOCIAL_PROFILE_ROLES_MAX;
   const groups = filterSocialProfileRoleGroups(query);
+  const notice = atMax ? SOCIAL.profile.rolesLimit : SOCIAL.profile.rolesHint;
+
+  function toggle(slug: string) {
+    onChange(toggleSocialProfileRole(selected, slug));
+  }
+
+  function reorder(fromId: string, toId: string) {
+    onChange(moveSocialProfileRole(selected, fromId, toId));
+  }
 
   return (
-    <div data-social-profile-edit-roles="" className="flex flex-col gap-3 py-4">
+    <div data-social-profile-edit-roles="" className={SOCIAL_PROFILE_EDIT_SECTION_CLASS}>
       <div className="flex flex-col gap-2">
-        <p className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>{SOCIAL.profile.roles}</p>
+        <div className="flex items-baseline gap-2">
+          <p className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>{SOCIAL.profile.roles}</p>
+          <p data-social-profile-edit-roles-count="" className="pt-0.5 t-label text-ink-2">
+            {socialProfileRolesCountLabel(selected.length)}
+          </p>
+        </div>
         {selected.length > 0 ? (
-          <div data-social-profile-edit-roles-selected="" className="flex flex-wrap gap-2">
+          <div data-social-profile-edit-roles-selected="" className={SOCIAL_TOPIC_CHIP_BANK_CLASS}>
             {selected.map((slug) => (
-              <button
+              <SocialProfileSelectChip
                 key={slug}
-                type="button"
-                data-social-profile-role-chip={slug}
-                className={SOCIAL_TOPIC_CHIP_CLASS}
-                onClick={() => onChange(toggleSocialProfileRole(selected, slug))}
-              >
-                {socialProfileRoleLabel(slug)}
-              </button>
+                option={{ id: slug, label: socialProfileRoleLabel(slug) ?? slug }}
+                selected
+                chip
+                reorderable
+                dragType={ROLE_DRAG_TYPE}
+                dataPrefix="social-profile-role"
+                onToggle={toggle}
+                onReorder={reorder}
+              />
             ))}
           </div>
         ) : null}
-        <p className="t-label text-ink-2">{SOCIAL.profile.rolesHint}</p>
+        <p data-social-profile-edit-roles-notice="" className="t-label text-ink-2">
+          {notice}
+        </p>
       </div>
       <Input
         id="social-edit-roles-search"
@@ -55,34 +85,17 @@ export function SocialProfileRolesField({
         aria-label={SOCIAL.profile.rolesSearch}
         autoComplete="off"
       />
-      <div className="flex flex-col gap-4">
-        {groups.map((group) => (
-          <div key={group.id} data-social-profile-role-group={group.id} className="flex flex-col gap-1">
-            <p className="t-label text-ink-2">{group.label}</p>
-            {group.roles.map((role) => {
-              const checked = selected.includes(role.slug);
-              const blocked = atMax && !checked;
-              return (
-                <label
-                  key={role.slug}
-                  data-social-profile-role={role.slug}
-                  data-social-profile-role-selected={checked ? "" : undefined}
-                  className="flex w-full items-start gap-3 py-2"
-                >
-                  <input
-                    type="checkbox"
-                    className="mt-0.5 accent-ink"
-                    checked={checked}
-                    disabled={blocked}
-                    onChange={() => onChange(toggleSocialProfileRole(selected, role.slug))}
-                  />
-                  <span className="min-w-0 flex-1 break-words t-body-sm text-ink">{role.label}</span>
-                </label>
-              );
-            })}
-          </div>
-        ))}
-      </div>
+      <SocialProfileChipBank
+        groups={groups.map((group) => ({
+          id: group.id,
+          label: group.label,
+          options: group.roles.map((role) => ({ id: role.slug, label: role.label })),
+        }))}
+        selectedIds={selected}
+        blocked={atMax}
+        dataPrefix="social-profile-role"
+        onToggle={toggle}
+      />
     </div>
   );
 }

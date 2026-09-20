@@ -44,6 +44,7 @@ import {
   SOCIAL_PROFILE_EDIT_PHOTO_CLASS,
   SOCIAL_PROFILE_EDIT_PICTURE_CLASS,
   SOCIAL_PROFILE_EDIT_ROW_CLASS,
+  SOCIAL_PROFILE_EDIT_SECTION_CLASS,
   SOCIAL_PROFILE_EDIT_SHEET_CLASS,
 } from "@/lib/social-chrome";
 import { SOCIAL_ICON_SIZE_HEADER } from "@/lib/social-icons";
@@ -432,7 +433,7 @@ export function SocialProfileEditForm({
           </div>
           <div data-social-profile-edit-fields="" className={SOCIAL_PROFILE_EDIT_CARD_CLASS}>
             <div data-social-profile-edit-names="" className="flex flex-col">
-              <div className={`${SOCIAL_PROFILE_EDIT_ROW_CLASS} flex-col gap-2 md:flex-row`}>
+              <div className={cn(SOCIAL_PROFILE_EDIT_ROW_CLASS, "flex-col gap-2 md:flex-row md:gap-3")}>
                 <label htmlFor="social-edit-first-name" className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>
                   {SOCIAL.profile.firstName}
                 </label>
@@ -447,7 +448,7 @@ export function SocialProfileEditForm({
                 />
               </div>
               <div className="h-px bg-hairline" />
-              <div className={`${SOCIAL_PROFILE_EDIT_ROW_CLASS} flex-col gap-2 md:flex-row`}>
+              <div className={cn(SOCIAL_PROFILE_EDIT_ROW_CLASS, "flex-col gap-2 md:flex-row md:gap-3")}>
                 <label htmlFor="social-edit-middle-name" className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>
                   {SOCIAL.profile.middleName}
                 </label>
@@ -462,7 +463,7 @@ export function SocialProfileEditForm({
                 />
               </div>
               <div className="h-px bg-hairline" />
-              <div className={`${SOCIAL_PROFILE_EDIT_ROW_CLASS} flex-col gap-2 md:flex-row`}>
+              <div className={cn(SOCIAL_PROFILE_EDIT_ROW_CLASS, "flex-col gap-2 md:flex-row md:gap-3")}>
                 <label htmlFor="social-edit-last-name" className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>
                   {SOCIAL.profile.lastName}
                 </label>
@@ -478,8 +479,8 @@ export function SocialProfileEditForm({
               </div>
             </div>
             <div className="h-px bg-hairline" />
-            <div data-social-handle-field="" className="flex flex-col gap-2 py-4">
-              <div className="flex items-start gap-4">
+            <div data-social-handle-field="" className={SOCIAL_PROFILE_EDIT_SECTION_CLASS}>
+              <div className="flex items-start gap-3">
                 <label htmlFor="social-edit-handle" className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>
                   {SOCIAL.profile.username}
                 </label>
@@ -511,7 +512,7 @@ export function SocialProfileEditForm({
             <div className="h-px bg-hairline" />
             <SocialProfileTopicsField value={interestTopics} onChange={setInterestTopics} />
             <div className="h-px bg-hairline" />
-            <div data-social-profile-edit-imdb="" className={`${SOCIAL_PROFILE_EDIT_ROW_CLASS} flex-col gap-2 md:flex-row`}>
+            <div data-social-profile-edit-imdb="" className={cn(SOCIAL_PROFILE_EDIT_ROW_CLASS, "flex-col gap-2 md:flex-row md:gap-3")}>
               <label htmlFor="social-edit-imdb" className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>
                 {SOCIAL.profile.imdb}
               </label>
@@ -548,7 +549,7 @@ export function SocialProfileEditForm({
               </span>
             </button>
             <div className="h-px bg-hairline" />
-            <div data-social-profile-edit-links="" className="flex flex-col gap-2 py-4">
+            <div data-social-profile-edit-links="" className={SOCIAL_PROFILE_EDIT_SECTION_CLASS}>
               <span className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>{SOCIAL.profile.links}</span>
               <div className="flex min-w-0 flex-1 flex-col gap-2">
                 {linkDrafts.map((value, index) => (

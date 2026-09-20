@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
 import { SOCIAL, socialProfilePublicUrl } from "@/lib/social";
+import { SOCIAL_PROFILE_EDIT_LABEL_CLASS } from "@/lib/social-chrome";
 import { SocialProfileEditForm } from "./social-profile-edit";
 
 vi.mock("next/navigation", () => ({
@@ -36,6 +37,12 @@ describe("SocialProfileEditForm", () => {
     expect(html).toContain(SOCIAL.profile.lastName);
     expect(html).toContain('id="social-edit-first-name"');
     expect(html).toContain('id="social-edit-middle-name"');
+    expect(html).toContain(SOCIAL_PROFILE_EDIT_LABEL_CLASS);
+    expect(SOCIAL_PROFILE_EDIT_LABEL_CLASS).toContain("whitespace-nowrap");
+    expect(SOCIAL_PROFILE_EDIT_LABEL_CLASS).toContain("w-32");
+    expect(SOCIAL_PROFILE_EDIT_LABEL_CLASS).not.toContain("w-[88px]");
+    expect(SOCIAL_PROFILE_EDIT_LABEL_CLASS).not.toContain("truncate");
+    expect(html).not.toContain("type=\"checkbox\"");
     expect(html).toContain('id="social-edit-last-name"');
     expect(html).toContain("Ada");
     expect(html).toContain("Lovelace");
@@ -144,6 +151,8 @@ describe("SocialProfileEditForm", () => {
         crafts={["actor", "producer", "screenwriter"]}
       />,
     );
+    expect(html).toContain("data-social-profile-edit-roles-count");
+    expect(html).toContain("3 / 5");
     expect(html).toContain("data-social-profile-edit-roles-selected");
     expect(html).toContain('data-social-profile-role-chip="actor"');
     expect(html).toContain('data-social-profile-role-chip="producer"');
