@@ -162,6 +162,8 @@ describe("Social profile public face", () => {
     expect(html).not.toContain("data-social-for-you-skeleton");
     expect(html).toContain("mx-auto");
     expect(html).toContain("md:max-w-[892px]");
+    expect(html).not.toContain("max-w-[935px]");
+    expect(html).not.toContain("lg:max-w-[892px]");
     expect(html).toContain("data-social-share");
     expect(html).not.toContain("Education");
     expect(html).not.toContain("Reels");

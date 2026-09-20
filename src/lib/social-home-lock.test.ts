@@ -10,6 +10,7 @@ import {
   SOCIAL_FIGMA_PROFILE_BIO,
   SOCIAL_FIGMA_PROFILE_EDIT,
   SOCIAL_FIGMA_PROFILE_OWN,
+  SOCIAL_HOME_CENTER_CLASS,
   SOCIAL_PROFILE_CENTER_CLASS,
 } from "./social-chrome";
 import { SOCIAL_HOME_STACK_LOCK, SOCIAL_HOME_STACK_ORDER } from "./social-home";
@@ -658,5 +659,32 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).toContain("180:2004");
     expect(chrome).toContain("181:2184");
     expect(profile).not.toContain("Education");
+  });
+
+  it("locks the desktop profile column to the Home 892 measure (FB gutters + IG stack)", () => {
+    const publicProfile = readFileSync("src/app/(app)/social/u/[handle]/page.tsx", "utf8");
+    const ownFace = readFileSync("src/components/social/social-own-profile.tsx", "utf8");
+    expect(SOCIAL_DESKTOP_MEASURE.center).toBe(892);
+    expect(SOCIAL_PROFILE_CENTER_CLASS).toBe(
+      "mx-auto flex w-full min-w-0 flex-col gap-2 md:max-w-[892px]",
+    );
+    expect(SOCIAL_PROFILE_CENTER_CLASS).toContain(`md:max-w-[${SOCIAL_DESKTOP_MEASURE.center}px]`);
+    expect(SOCIAL_PROFILE_CENTER_CLASS).toContain("mx-auto");
+    expect(SOCIAL_PROFILE_CENTER_CLASS).not.toContain("flex-1");
+    expect(SOCIAL_PROFILE_CENTER_CLASS).not.toContain("lg:max-w");
+    expect(SOCIAL_PROFILE_CENTER_CLASS).not.toContain("935");
+    expect(SOCIAL_HOME_CENTER_CLASS).toContain("flex-1");
+    expect(SOCIAL_HOME_CENTER_CLASS).toContain("lg:max-w-[892px]");
+    expect(chrome).toContain("Instagram: one centered profile stack");
+    expect(chrome).toContain("Facebook: side air / gutters");
+    expect(profile).toContain("SOCIAL_PROFILE_CENTER_CLASS");
+    expect(profile).not.toContain("SOCIAL_HOME_LAYOUT_CLASS");
+    expect(profile).not.toContain("SOCIAL_HOME_CENTER_CLASS");
+    expect(publicProfile).toContain("SOCIAL_PROFILE_CENTER_CLASS");
+    expect(publicProfile).not.toContain("SOCIAL_HOME_LAYOUT_CLASS");
+    expect(publicProfile).not.toContain("SOCIAL_HOME_CENTER_CLASS");
+    expect(ownFace).toContain("SOCIAL_PROFILE_CENTER_CLASS");
+    expect(home).toContain("SOCIAL_HOME_CENTER_CLASS");
+    expect(home).not.toContain("SOCIAL_PROFILE_CENTER_CLASS");
   });
 });

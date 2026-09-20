@@ -81,8 +81,12 @@ export const SOCIAL_HOME_LAYOUT_CLASS = "flex items-start gap-[16px]";
 export const SOCIAL_HOME_CENTER_CLASS =
   "flex min-w-0 flex-1 flex-col gap-2 lg:max-w-[892px]";
 
-// Profile reuses the Home 892 center measure — not a 935 fork.
-// md+ focuses and centers so the stack breathes; phone stays full width.
+// Profile desktop column — FB/IG refs (Adam 2026-09-20).
+// Instagram: one centered profile stack. Facebook: side air / gutters,
+// contained — not edge-to-edge across the Social canvas.
+// Reuses Home center 892 (SOCIAL_DESKTOP_MEASURE.center). Not a 935 fork.
+// mx-auto is the gutter. No flex-1 (that stretch is Home + For You only).
+// md+ focuses; phone stays full width of the phone canvas.
 // Own + public profile only. No For You rail on these pages.
 export const SOCIAL_PROFILE_CENTER_CLASS =
   "mx-auto flex w-full min-w-0 flex-col gap-2 md:max-w-[892px]";

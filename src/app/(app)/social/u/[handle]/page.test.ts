@@ -186,6 +186,8 @@ describe("Social public profile", () => {
     expect(html).not.toContain("data-social-for-you");
     expect(html).toContain("mx-auto");
     expect(html).toContain("md:max-w-[892px]");
+    expect(html).not.toContain("max-w-[935px]");
+    expect(html).not.toContain("lg:max-w-[892px]");
     expect(html).not.toContain("Education");
     expect(html).not.toContain("data-social-open-dm");
     expect(html).not.toContain("data-social-profile-form");
