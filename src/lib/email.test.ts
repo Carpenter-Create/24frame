@@ -15,6 +15,7 @@ import {
   EMAIL_GEIST_HREF,
   EMAIL_HEADLINE_SIZE,
   EMAIL_INK,
+  EMAIL_LEGAL_URL,
   EMAIL_LOGO_DISPLAY,
   EMAIL_LOGO_URL,
   EMAIL_SITE_LABEL,
@@ -27,7 +28,7 @@ const AUTH_TEMPLATE = resolve(__dirname, "../../supabase/templates/magic_link.ht
 const AUTH_CONFIG = readFileSync(resolve(__dirname, "../../supabase/config.toml"), "utf8");
 
 function productResidue(html: string): string {
-  return html.replaceAll("Global Content Holdings LLC", "");
+  return html.replaceAll("Global Content Holdings LLC", "").replaceAll(EMAIL_LEGAL_URL, "");
 }
 
 function withoutAnchors(html: string): string {
@@ -214,7 +215,7 @@ describe("Auth magic-link template", () => {
     expect(html).not.toContain("Radically different film distribution.");
     expect(html).toContain("https://24frame.co");
     expect(html).toContain("24frame.co");
-    expect(html).toContain("https://24frame.co/legal");
+    expect(html).toContain(EMAIL_LEGAL_URL);
     expect(html).toContain(emailCopyrightPlaceholder());
     expect(html).not.toMatch(/© \d{4}/);
     expect(applyEmailCopyright(html)).toContain(emailCopyright());

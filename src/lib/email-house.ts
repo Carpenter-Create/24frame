@@ -31,7 +31,8 @@ export const EMAIL_BODY_LINE = 26;
 export const EMAIL_BUTTON_RADIUS = "8px";
 export const EMAIL_SITE_URL = "https://24frame.co";
 export const EMAIL_SITE_LABEL = "24frame.co";
-export const EMAIL_LEGAL_URL = "https://24frame.co/legal";
+// Legal (Adam 2026-09-20): parent-site legal page, not 24frame.co/legal.
+export const EMAIL_LEGAL_URL = "https://globalcontent.co/legal";
 // No slogan under the mark (Adam lock 2026-09-19). Empty until founder locks one.
 // Legal/footer stay tertiary.
 // Copyright (Adam lock 2026-09-19): product + parent. Year is the calendar
