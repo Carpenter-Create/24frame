@@ -27,6 +27,9 @@ describe("splitChipRailRows", () => {
     expect(splitChipRailRows([])).toEqual([]);
     expect(splitChipRailRows(["Acting"])).toEqual([["Acting"]]);
     expect(splitChipRailRows(["Acting", "Animation"])).toEqual([["Acting"], ["Animation"]]);
+    expect(splitChipRailRows(["Acting", "AI filmmaking", "Animation"], 1)).toEqual([
+      ["Acting", "AI filmmaking", "Animation"],
+    ]);
     const [top, bottom] = splitChipRailRows(SOCIAL_CATEGORY_TOPICS);
     expect(HOUSE_CHIP_RAIL_ROWS).toBe(2);
     expect(top).toEqual([

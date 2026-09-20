@@ -27,7 +27,7 @@ describe("ROLE_INTEREST_AFFINITY", () => {
     expect(ROLE_INTEREST_AFFINITY.actor.topics).toContain("Acting");
   });
 
-  it("reorders Topics. by selected interests first, then profession soft-bias", () => {
+  it("reorders Topics by selected interests first, then profession soft-bias", () => {
     expect(socialRoleAffinityTopics([])).toEqual([...SOCIAL_CATEGORY_TOPICS]);
     const professionOnly = socialRoleAffinityTopics(["art_director"]);
     expect(professionOnly[0]).toBe("Animation");

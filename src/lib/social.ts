@@ -514,7 +514,7 @@ export const SOCIAL = {
   forYou: {
     title: "For you",
     people: "Suggested people",
-    topics: "Topics.",
+    topics: "Topics",
     latestCourse: "Latest course",
   },
   profile: {

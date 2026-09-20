@@ -1,4 +1,5 @@
-// Two-row chip rail. Display chips, not an exclusive choice menu.
+// Chip rail. Default two rows; consumers may pass rows={1}.
+// Display chips, not an exclusive choice menu.
 // Host is HOUSE_SCROLL_ROW_CLASS. Chip height is HOUSE_SEGMENTED_ITEM_*
 // (same item box as header workspace / dest / news pills). Muted fill
 // is HOUSE_FILTER_OFF — not a shorter display chip. Lanes interleave

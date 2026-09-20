@@ -10,6 +10,7 @@ import {
   SOCIAL_FOR_YOU_RAIL_CLASS,
   SOCIAL_TOPIC_CHIP_ROW_CLASS,
   SOCIAL_TOPIC_RAIL_CLASS,
+  SOCIAL_TOPIC_RAIL_ROWS,
   SOCIAL_TOPIC_RAIL_STACK_CLASS,
   SOCIAL_HOME_CENTER_CLASS,
   SOCIAL_HOME_LAYOUT_CLASS,
@@ -46,9 +47,9 @@ export function SocialHomeCenterSkeleton() {
         <Skeleton className="h-4 w-16" />
         <div className={SOCIAL_TOPIC_RAIL_CLASS}>
           <div className={SOCIAL_TOPIC_RAIL_STACK_CLASS}>
-            {Array.from({ length: 2 }).map((_, row) => (
+            {Array.from({ length: SOCIAL_TOPIC_RAIL_ROWS }).map((_, row) => (
               <div key={row} className={SOCIAL_TOPIC_CHIP_ROW_CLASS}>
-                {Array.from({ length: 4 }).map((_, i) => (
+                {Array.from({ length: 8 }).map((_, i) => (
                   <Skeleton key={i} className="h-9 w-24 shrink-0 rounded-full" />
                 ))}
               </div>

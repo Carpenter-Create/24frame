@@ -5,8 +5,10 @@ import { describe, expect, it } from "vitest";
 
 import {
   HOUSE_RAIL_ACTIVE_CLASS,
+  HOUSE_RAIL_ICON_CLASS,
   HOUSE_RAIL_IDLE_CLASS,
   HOUSE_RAIL_ITEM_CLASS,
+  HOUSE_RAIL_LABEL_CLASS,
   HOUSE_RAIL_TITLE_CLASS,
 } from "@/lib/house-shell";
 import { NAV } from "@/lib/nav";
@@ -81,6 +83,23 @@ describe("SideNav Access rail", () => {
     expect(navSrc).toContain("data-social-rail-pending");
     expect(navSrc).not.toContain("prefetch={false}");
     expect(navSrc).not.toContain("four destinations");
+  });
+
+  it("keeps Social Create as a quiet dest row with the shared icon column", () => {
+    expect(navSrc).toContain("HOUSE_RAIL_ICON_CLASS");
+    expect(navSrc).toContain("HOUSE_RAIL_LABEL_CLASS");
+    expect(navSrc).toContain("data-side-nav-icon");
+    expect(navSrc).toContain("className={rowClass}");
+    expect(navSrc).toContain('data-social-create-sheet="dest"');
+    expect(navSrc).not.toContain("bg-accent ");
+    expect(navSrc).not.toContain("bg-accent\"");
+    expect(HOUSE_RAIL_ITEM_CLASS).toContain("inline-flex");
+    expect(HOUSE_RAIL_ITEM_CLASS).toContain("w-full");
+    expect(HOUSE_RAIL_ITEM_CLASS).toContain("text-left");
+    expect(HOUSE_RAIL_ITEM_CLASS).not.toMatch(/(?:^|[\s"])bg-accent(?:[\s"]|$)/);
+    expect(HOUSE_RAIL_ICON_CLASS).toBe("flex size-5 shrink-0 items-center justify-center");
+    expect(HOUSE_RAIL_LABEL_CLASS).toBe("min-w-0 flex-1 truncate text-left");
+    expect(HOUSE_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash text-accent");
   });
 
   it("marks the active item with a light-blue pill wash and Sporty Blue type", () => {

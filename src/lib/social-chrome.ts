@@ -36,7 +36,7 @@ export const SOCIAL_FIGMA_HOME_MOBILE_SCROLL = "160:1129";
 export const SOCIAL_FIGMA_HOME_DESKTOP_PRIOR = ["169:964", "169:1281", "164:1136", "164:1360"] as const;
 
 // Desktop Social Home measure. Recent chats column is retired; its 200 +
-// gutter 16 is reclaimed by the middle column (composer / Topics. / stories / wall).
+// gutter 16 is reclaimed by the middle column (composer / Topics / stories / wall).
 // dest 200 | gutter 16 | center 892 | gutter 16 | For you 300 | padR 16 = 1440.
 export const SOCIAL_DESKTOP_MEASURE = {
   dest: 200,
@@ -245,8 +245,12 @@ export const SOCIAL_PROFILE_ROLES_RAIL_CLASS =
 
 export const SOCIAL_TOPIC_CHIP_RAIL_CLASS = `${SOCIAL_TOPIC_CHIP_CLASS} shrink-0 whitespace-nowrap`;
 
-// Home Topics. aliases the house two-row chip rail. Not SegmentedTrack:
-// this is a bank of lenses, not a selected exclusive menu.
+// Home Topics aliases the house chip rail. Not SegmentedTrack: this is
+// a bank of lenses, not a selected exclusive menu.
+// Adam 2026-09-20: one horizontal chip row on desktop. Phone uses the
+// same one-row scroll rail (never truncate — scroll). House default
+// HOUSE_CHIP_RAIL_ROWS stays 2 for every other chip-rail consumer.
+export const SOCIAL_TOPIC_RAIL_ROWS = 1;
 export const SOCIAL_TOPIC_RAIL_CLASS = HOUSE_CHIP_RAIL_CLASS;
 export const SOCIAL_TOPIC_RAIL_STACK_CLASS = HOUSE_CHIP_RAIL_STACK_CLASS;
 export const SOCIAL_TOPIC_CHIP_ROW_CLASS = HOUSE_CHIP_RAIL_ROW_CLASS;

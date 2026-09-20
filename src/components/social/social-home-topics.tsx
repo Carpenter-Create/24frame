@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { HouseChipRail } from "@/components/chrome/house-chip-rail";
-import { SOCIAL_TOPIC_RAIL_CHIP_CLASS } from "@/lib/social-chrome";
+import { SOCIAL_TOPIC_RAIL_CHIP_CLASS, SOCIAL_TOPIC_RAIL_ROWS } from "@/lib/social-chrome";
 import { socialHomeLensHref } from "@/lib/social-categories";
 import { SOCIAL } from "@/lib/social";
 import { socialInterestTopics } from "@/lib/social-role-affinity";
@@ -21,6 +21,7 @@ export function SocialHomeTopics({
       <p className="t-body-sm font-semibold text-ink">{SOCIAL.forYou.topics}</p>
       <HouseChipRail
         data-social-home-topics-rail=""
+        rows={SOCIAL_TOPIC_RAIL_ROWS}
         items={labels}
         renderItem={(label) => (
           <Link
