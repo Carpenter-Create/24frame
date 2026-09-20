@@ -192,7 +192,7 @@ export function SegmentedTrack({
     const track = trackRef.current;
     if (!track || typeof ResizeObserver === "undefined") return undefined;
 
-    const remasure = () => {
+    const syncThumbBox = () => {
       if (!placedRef.current) return;
       const items = track.querySelectorAll<HTMLElement>("[data-segmented-item]");
       const index = visualIndexRef.current;
@@ -204,7 +204,7 @@ export function SegmentedTrack({
       setThumbStyle(thumbCss(next, true));
     };
 
-    const observer = new ResizeObserver(remeasure);
+    const observer = new ResizeObserver(syncThumbBox);
     observer.observe(track);
     return () => observer.disconnect();
   }, []);
