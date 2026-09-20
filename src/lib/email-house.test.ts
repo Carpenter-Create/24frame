@@ -38,7 +38,7 @@ const SPORTY_BLUE = "#1769FF";
 const LOGO_PNG = resolve(__dirname, "../../public/email-mark-v2.png");
 
 function productResidue(html: string): string {
-  return html.replaceAll("Global Content Holdings LLC", "");
+  return html.replaceAll("Global Content Holdings LLC", "").replaceAll(EMAIL_LEGAL_URL, "");
 }
 
 function assertFormatDetectionWellFormed(html: string) {
@@ -70,6 +70,7 @@ function assertHouseChrome(html: string) {
   expect(html).toContain(emailCopyright());
   expect(html).not.toContain("© 2026 Global Content Holdings LLC. All rights reserved.");
   expect(html).toContain(EMAIL_ADDRESS);
+  expect(EMAIL_LEGAL_URL).toBe("https://globalcontent.co/legal");
   expect(html).toContain(EMAIL_LEGAL_URL);
   expect(html).toContain(EMAIL_GEIST_HREF);
   expect(html).toContain("24Frame");
@@ -157,6 +158,7 @@ describe("Auth email HTML twins", () => {
 
   it("stores a year placeholder and syncs it from emailCopyright()", () => {
     const raw = readFileSync(resolve(templatesDir, "magic_link.html"), "utf8");
+    expect(raw).toContain(`href="${EMAIL_LEGAL_URL}"`);
     expect(raw).toContain(emailCopyrightPlaceholder());
     expect(raw).toContain(EMAIL_COPYRIGHT_YEAR_TOKEN);
     expect(raw).not.toMatch(/© \d{4}/);
