@@ -1,9 +1,9 @@
 // Shared top lead chrome for Aggregation · Social · Education · Home.
 // Phone: Asset 8 emblem on every workspace (logoVisible always).
 // IA A: emblem + current workspace word+chevron on the left. Tap
-// opens the workspace sheet. No letter mark in the pill. Emblem
-// owns the phone left next to the workspace trigger. No hamburger
-// — leading or trailing.
+// opens the workspace sheet. No letter mark in the pill.
+// Emblem owns the phone left next to the workspace trigger.
+// No hamburger — leading or trailing.
 // Destinations live in HousePhoneBottomNav (in-workspace only).
 // Emblem is a workspace-home link, not the rail.
 // Phone grammar IA A:

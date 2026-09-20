@@ -398,7 +398,7 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(shell).toContain('logoVisible="always"');
     expect(shell).not.toContain('homeChrome ? "always" : "desktop"');
     expect(leadLib).toContain("Asset 8 emblem on every workspace");
-    expect(leadLib).toContain("Emblem owns the phone left alone");
+    expect(leadLib).toContain("Emblem owns the phone left next to the workspace trigger");
     expect(APP_HEADER_LEADING_CLASS).toContain("gap-[var(--space-3)]");
     expect(APP_HEADER_LEADING_CLASS).not.toMatch(/(?:^|\s)(?:max-md:)?overflow-hidden(?:\s|$)/);
 
