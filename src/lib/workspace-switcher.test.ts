@@ -163,9 +163,14 @@ describe("workspace switcher lock", () => {
     expect(WORKSPACE_SWITCHER_HOST_CLASS).not.toMatch(/overflow-hidden/);
     expect(APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS).toBe("hidden md:contents");
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("shrink-0");
-    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("gap-[var(--space-2)]");
+    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toMatch(
+      /(?:^|\s)gap-\[var\(--space-3\)\](?:\s|$)/,
+    );
+    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("md:gap-[var(--space-2)]");
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).not.toContain("gap-[var(--space-1)]");
-    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).not.toContain("md:gap-");
+    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).not.toMatch(
+      /(?:^|\s)gap-\[var\(--space-2\)\](?:\s|$)/,
+    );
     expect(workspaceSwitcherTriggerClass("pill")).toBe(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS);
     expect(workspaceSwitcherTriggerClass("plain")).toBe(WORKSPACE_SWITCHER_TRIGGER_CLASS);
     expect(workspaceSwitcherPanelClass("pill")).toBe(WORKSPACE_SWITCHER_PILL_PANEL_CLASS);

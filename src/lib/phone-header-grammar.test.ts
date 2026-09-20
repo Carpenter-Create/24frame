@@ -165,8 +165,14 @@ describe("phone header grammar A — trim trailing", () => {
   });
 
   it("keeps phone trailing AI · bell · avatar on one gap without collapsing hits", () => {
-    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("gap-[var(--space-2)]");
+    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toMatch(
+      /(?:^|\s)gap-\[var\(--space-3\)\](?:\s|$)/,
+    );
+    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("md:gap-[var(--space-2)]");
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).not.toContain("gap-[var(--space-1)]");
+    expect(APP_HEADER_TRAILING_CLUSTER_CLASS).not.toMatch(
+      /(?:^|\s)gap-\[var\(--space-2\)\](?:\s|$)/,
+    );
     expect(HOUSE_THEME_TOGGLE_CLASS).toContain(HOUSE_HEADER_TRAILING_HIT_CLASS);
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).not.toMatch(/-m[xlr]-/);
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).not.toContain("p-[var(--space-2)]");
