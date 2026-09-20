@@ -242,12 +242,14 @@ export function housePhoneShowsDestChips({
   workspace,
   homeChrome = false,
   settingsPage = false,
+  helpPage = false,
 }: {
   workspace: WorkspaceMode;
   homeChrome?: boolean;
   settingsPage?: boolean;
+  helpPage?: boolean;
 }): boolean {
-  if (homeChrome || settingsPage) return false;
+  if (homeChrome || settingsPage || helpPage) return false;
   return workspace === "social" || workspace === "aggregation" || workspace === "education";
 }
 

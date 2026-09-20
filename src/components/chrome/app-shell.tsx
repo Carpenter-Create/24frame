@@ -30,6 +30,7 @@ import {
   HOUSE_RAIL_FLOAT_CLASS,
   HOUSE_RAIL_PANEL_CLASS,
 } from "@/lib/house-shell";
+import { isHelpPath } from "@/lib/help";
 import { isSettingsPath, SETTINGS_RAIL_PAD_CLASS } from "@/lib/settings";
 import {
   SOCIAL_DESKTOP_FRAME_PAD_CLASS,
@@ -147,7 +148,12 @@ export function AppShell({
   // the Education house measure — Adam 2026-09-18.
   const homePage = pathname === "/" || homeChrome;
   const settingsPage = isSettingsPath(pathname);
-  const socialChrome = workspace === "social" && !settingsPage && !homeChrome;
+  const helpPage = isHelpPath(pathname);
+  // Get Help is account chrome: hide the product rail (Education /
+  // Aggregation / Social dests) without taking Home frame chrome.
+  // Settings keeps its own rail. Activity still shows Access dests.
+  const hideProductRail = homeChrome || helpPage;
+  const socialChrome = workspace === "social" && !settingsPage && !homeChrome && !helpPage;
 
   useEffect(() => {
     migrateSidebarCollapsedCookie(collapsed);
@@ -162,7 +168,7 @@ export function AppShell({
     });
   };
 
-  const collapseWidthStyle = homeChrome
+  const collapseWidthStyle = hideProductRail
     ? ({
         "--sidebar-width": OVERVIEW_RAIL_OFF_WIDTH,
         "--sidebar-width-collapsed": OVERVIEW_RAIL_OFF_WIDTH,
@@ -251,11 +257,12 @@ export function AppShell({
     {cookieSync}
     <HousePhoneAppShell
       workspace={workspace}
-      data-education-workspace={workspace === "education" ? "" : undefined}
+      data-education-workspace={workspace === "education" && !helpPage ? "" : undefined}
       data-home-chrome={homeChrome ? "" : undefined}
+      data-help-chrome={helpPage ? "" : undefined}
       style={collapseWidthStyle}
     >
-      {homeChrome ? null : (
+      {hideProductRail ? null : (
         <aside
           className={cn(
             HOUSE_RAIL_FLOAT_CLASS,
@@ -307,22 +314,22 @@ export function AppShell({
           second phone switcher. Studio secondary rail stays HOLD. */}
       <HouseLeadChrome
         workspace={workspace}
-        settingsPage={settingsPage}
+        settingsPage={settingsPage || helpPage}
         logoVisible="always"
         destChips={
-          settingsPage || homeChrome ? undefined : (
+          settingsPage || hideProductRail ? undefined : (
             <DestChipsSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />
           )
         }
         search={
-          workspace === "education" && !settingsPage ? (
+          workspace === "education" && !settingsPage && !helpPage ? (
             <Suspense fallback={null}>
               <HouseLeadSearch tone="quiet" />
             </Suspense>
           ) : undefined
         }
         underNav={
-          workspace === "education" && !settingsPage ? (
+          workspace === "education" && !settingsPage && !helpPage ? (
             <Suspense fallback={null}>
               <HouseLeadSearch tone="quiet" inputId="education-header-q-phone" />
             </Suspense>

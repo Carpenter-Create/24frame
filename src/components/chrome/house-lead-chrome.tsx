@@ -55,6 +55,8 @@ export function HouseLeadChrome({
   accountMenu: React.ReactNode;
 }) {
   const social = workspace === "social";
+  // Settings and Get Help are account chrome — Education search
+  // stays off even if the cookie still says education.
   const education = workspace === "education" && !settingsPage;
 
   return (
