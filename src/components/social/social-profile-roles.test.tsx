@@ -2,11 +2,14 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { SOCIAL } from "@/lib/social";
-import { SOCIAL_TOPIC_CHIP_CLASS } from "@/lib/social-chrome";
+import {
+  SOCIAL_TOPIC_CHIP_BANK_CLASS,
+  SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS,
+} from "@/lib/social-chrome";
 import { SocialProfileRolesField } from "./social-profile-roles";
 
 describe("SocialProfileRolesField", () => {
-  it("renders Professions search, grouped bank, and selected house chips in order", () => {
+  it("renders Professions search, grouped pill bank, and selected house chips in order", () => {
     const html = renderToStaticMarkup(
       <SocialProfileRolesField value={["investor", "actor"]} onChange={() => undefined} />,
     );
@@ -14,6 +17,9 @@ describe("SocialProfileRolesField", () => {
     expect(html).toContain(SOCIAL.profile.roles);
     expect(html).toContain(SOCIAL.profile.rolesSearch);
     expect(html).toContain(SOCIAL.profile.rolesHint);
+    expect(html).toContain("data-social-profile-edit-roles-count");
+    expect(html).toContain("2 / 5");
+    expect(html).toContain("draggable");
     expect(html).toContain('id="social-edit-roles-search"');
     expect(html).toContain("data-social-profile-edit-roles-selected");
     expect(html).toContain('data-social-profile-role-chip="investor"');
@@ -21,7 +27,8 @@ describe("SocialProfileRolesField", () => {
     expect(html.indexOf('data-social-profile-role-chip="investor"')).toBeLessThan(
       html.indexOf('data-social-profile-role-chip="actor"'),
     );
-    expect(html).toContain(SOCIAL_TOPIC_CHIP_CLASS);
+    expect(html).toContain(SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS);
+    expect(html).toContain(SOCIAL_TOPIC_CHIP_BANK_CLASS);
     expect(html).toContain('data-social-profile-role-group="cast"');
     expect(html).toContain('data-social-profile-role-group="business_capital_rep"');
     expect(html).toContain('data-social-profile-role="actor"');
@@ -29,8 +36,11 @@ describe("SocialProfileRolesField", () => {
     expect(html).toContain("Actor");
     expect(html).not.toContain("Actress");
     expect(html).not.toContain("Category");
-    expect(html).toContain("break-words");
+    expect(html).toContain("whitespace-nowrap");
+    expect(html).toContain("t-body-sm");
+    expect(html).not.toContain("text-[11px]");
     expect(html).not.toContain("truncate");
+    expect(html).not.toContain("type=\"checkbox\"");
   });
 
   it("omits the selected-chip row when none are chosen", () => {
@@ -38,6 +48,24 @@ describe("SocialProfileRolesField", () => {
       <SocialProfileRolesField value={[]} onChange={() => undefined} />,
     );
     expect(html).toContain(SOCIAL.profile.roles);
+    expect(html).toContain("0 / 5");
     expect(html).not.toContain("data-social-profile-edit-roles-selected");
+    expect(html).not.toContain(SOCIAL.profile.rolesLimit);
+    expect(html).not.toContain("type=\"checkbox\"");
+  });
+
+  it("shows the professions cap notice at 5 and keeps house chips", () => {
+    const html = renderToStaticMarkup(
+      <SocialProfileRolesField
+        value={["actor", "producer", "director", "editor", "investor"]}
+        onChange={() => undefined}
+      />,
+    );
+    expect(html).toContain(SOCIAL.profile.rolesLimit);
+    expect(html).toContain("5 / 5");
+    expect(html).toContain("You can select up to 5 professions");
+    expect(html).not.toContain(SOCIAL.profile.rolesHint);
+    expect(html).toContain('data-social-profile-role-chip="investor"');
+    expect(html).toContain("disabled");
   });
 });

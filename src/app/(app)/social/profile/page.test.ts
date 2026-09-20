@@ -257,9 +257,13 @@ describe("Social profile public face", () => {
 
     const html = await renderServerMarkup(await SocialProfilePage());
     expect(html).toContain("data-social-profile-roles");
-    expect(html).toContain("Actor · Producer · Screenwriter +1");
+    expect(html).toContain('data-social-profile-role="actor"');
+    expect(html).toContain("Actor");
+    expect(html).toContain("Investor");
+    expect(html).not.toContain("Actor · Producer · Screenwriter +1");
     expect(html.indexOf("data-social-profile-handle")).toBeLessThan(html.indexOf("data-social-profile-name"));
-    expect(html.indexOf("@ada")).toBeLessThan(html.indexOf("Actor · Producer · Screenwriter +1"));
+    expect(html.indexOf("data-social-profile-roles")).toBeLessThan(html.indexOf("data-social-profile-stats"));
+    expect(html.indexOf("@ada")).toBeLessThan(html.indexOf("Actor"));
     expect(html).not.toContain("data-social-profile-mutuals");
     expect(html).not.toContain("Roles:");
     expect(html).not.toContain("Professions:");

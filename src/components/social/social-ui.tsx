@@ -11,7 +11,9 @@ import {
   SOCIAL_HIGHLIGHT_RING_CLASS,
   SOCIAL_PROFILE_GRID_CLASS,
   SOCIAL_PROFILE_TILE_CLASS,
+  SOCIAL_PROFILE_ROLES_RAIL_CLASS,
   SOCIAL_TOPIC_CHIP_CLASS,
+  SOCIAL_TOPIC_CHIP_RAIL_CLASS,
 } from "@/lib/social-chrome";
 import {
   displayHandle,
@@ -30,7 +32,7 @@ import {
   type SocialProfileMutuals,
 } from "@/lib/social-profile-mutuals";
 import { socialProfilePublicLinks } from "@/lib/social-profile-links";
-import { socialProfileRolesLine } from "@/lib/social-profile-roles";
+import { socialProfileRoleChips } from "@/lib/social-profile-roles";
 import { parseSocialProfileTopics } from "@/lib/social-profile-topics";
 import { SocialAvatar } from "./social-avatar";
 import { SocialLikeButton } from "./social-forms";
@@ -196,7 +198,7 @@ export function SocialProfileIdentity({
   children?: ReactNode;
 }) {
   const person = socialPersonIdentity({ handle, displayName: name });
-  const rolesLine = socialProfileRolesLine(roles ?? []);
+  const roleChips = socialProfileRoleChips(roles ?? []);
   const interestTopics = parseSocialProfileTopics(topics ?? []);
   const links = socialProfilePublicLinks({ websiteUrl, imdbUrl });
   const followedBy = mutuals
@@ -232,6 +234,19 @@ export function SocialProfileIdentity({
                   {person.name}
                 </p>
               ) : null}
+              {roleChips.length > 0 ? (
+                <div data-social-profile-roles="" className={SOCIAL_PROFILE_ROLES_RAIL_CLASS}>
+                  {roleChips.map((role) => (
+                    <span
+                      key={role.slug}
+                      data-social-profile-role={role.slug}
+                      className={SOCIAL_TOPIC_CHIP_RAIL_CLASS}
+                    >
+                      {role.label}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
               {stats ? (
                 <div data-social-profile-stats="" className="mt-2 flex flex-wrap gap-4 t-body-sm">
                   <p data-social-profile-stat="posts">
@@ -255,11 +270,6 @@ export function SocialProfileIdentity({
                     <span className="text-ink-2">{SOCIAL.profile.followingStat}</span>
                   </Link>
                 </div>
-              ) : null}
-              {rolesLine ? (
-                <p data-social-profile-roles="" className="mt-2 break-words t-body-sm text-ink-2">
-                  {rolesLine}
-                </p>
               ) : null}
               {interestTopics.length > 0 ? (
                 <div data-social-profile-topics="" className="mt-2 flex flex-wrap gap-2">

@@ -2,13 +2,15 @@ import { describe, expect, it } from "vitest";
 
 import {
   SOCIAL_PROFILE_ROLES,
+  SOCIAL_PROFILE_ROLES_COUNT,
   SOCIAL_PROFILE_ROLES_MAX,
-  SOCIAL_PROFILE_ROLES_PUBLIC_CAP,
   SOCIAL_PROFILE_ROLE_GROUPS,
   filterSocialProfileRoleGroups,
+  moveSocialProfileRole,
   parseSocialProfileRoles,
+  socialProfileRoleChips,
   socialProfileRoleLabel,
-  socialProfileRolesLine,
+  socialProfileRolesCountLabel,
   socialProfileRolesWrite,
   toggleSocialProfileRole,
 } from "./social-profile-roles";
@@ -25,7 +27,8 @@ describe("social profile roles", () => {
     expect(socialProfileRoleLabel("investor")).toBe("Investor");
     expect(socialProfileRoleLabel("previs")).toBe("PrefViz Artist");
     expect(SOCIAL_PROFILE_ROLES_MAX).toBe(5);
-    expect(SOCIAL_PROFILE_ROLES_PUBLIC_CAP).toBe(3);
+    expect(SOCIAL_PROFILE_ROLES_COUNT).toBe("{n} / {max}");
+    expect(socialProfileRolesCountLabel(3)).toBe("3 / 5");
     expect(
       SOCIAL_PROFILE_ROLE_GROUPS.map((group) => [
         group.id,
@@ -220,21 +223,28 @@ describe("social profile roles", () => {
     expect(toggleSocialProfileRole(["actor"], "nope")).toEqual(["actor"]);
   });
 
-  it("omits the public line when empty and caps at 3 +N", () => {
-    expect(socialProfileRolesLine([])).toBeNull();
-    expect(socialProfileRolesLine(["actor"])).toBe("Actor");
-    expect(socialProfileRolesLine(["actor", "producer", "screenwriter"])).toBe(
-      "Actor · Producer · Screenwriter",
-    );
-    expect(socialProfileRolesLine(["actor", "producer", "screenwriter", "investor", "director"])).toBe(
-      "Actor · Producer · Screenwriter +2",
-    );
-    expect(socialProfileRolesLine(["actor", "producer", "screenwriter", "investor", "director"])).not.toContain(
-      "Roles:",
-    );
-    expect(socialProfileRolesLine(["actor", "producer", "screenwriter", "investor", "director"])).not.toContain(
-      "Professions:",
-    );
+  it("lists every selected Profession in crafts order and moves by id", () => {
+    expect(socialProfileRoleChips([])).toEqual([]);
+    expect(socialProfileRoleChips(["actor"])).toEqual([{ slug: "actor", label: "Actor" }]);
+    expect(
+      socialProfileRoleChips(["actor", "producer", "screenwriter", "investor", "director"]),
+    ).toEqual([
+      { slug: "actor", label: "Actor" },
+      { slug: "producer", label: "Producer" },
+      { slug: "screenwriter", label: "Screenwriter" },
+      { slug: "investor", label: "Investor" },
+      { slug: "director", label: "Director" },
+    ]);
+    expect(moveSocialProfileRole(["actor", "producer", "director"], "director", "actor")).toEqual([
+      "director",
+      "actor",
+      "producer",
+    ]);
+    expect(moveSocialProfileRole(["actor", "producer"], "actor", "actor")).toEqual([
+      "actor",
+      "producer",
+    ]);
+    expect(moveSocialProfileRole(["actor"], "nope", "actor")).toEqual(["actor"]);
   });
 
   it("filters groups by label or slug and hides empty groups", () => {

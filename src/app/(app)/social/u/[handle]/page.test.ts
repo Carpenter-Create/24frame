@@ -200,7 +200,9 @@ describe("Social public profile", () => {
     });
     const html = await renderPublic();
     expect(html).toContain("data-social-profile-roles");
-    expect(html).toContain("Actor · Producer");
+    expect(html).toContain('data-social-profile-role="actor"');
+    expect(html).toContain("Actor");
+    expect(html).toContain("Producer");
     expect(html).not.toContain("Roles:");
     expect(html).not.toContain("Professions:");
     expect(html).not.toContain("Topics:");

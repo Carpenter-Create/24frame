@@ -84,12 +84,17 @@ export const HOUSE_FILTER_OFF_CLASS = "bg-surface-muted text-ink";
 // Exclusive choice menus are SegmentedTrack. Adam lock 2026-09-19.
 export const HOUSE_PILL_SELECTED_CLASS = "bg-accent text-white";
 
+// Fat pill measure — one SoT. Same padding + type as workspace /
+// header SegmentedTrack items. Width hugs the label; do not fork a
+// skinny tag. Segmented items add track/hit classes on top.
+export const HOUSE_PILL_MEASURE_CLASS =
+  "rounded-full px-[var(--space-4)] py-[var(--space-2)] t-body-sm";
+
 // Gapped HOUSE_FILTER_PILL_* is not for choice menus. Choice menus
 // use SegmentedTrack (HOUSE_SEGMENTED_* + SEGMENTED_TRACK_PERSIST).
 // These tokens stay for status / display chips only (Titles status
 // lens is HousePageSelect; catalogStatusPillClass stays a badge).
-export const HOUSE_FILTER_PILL_CLASS =
-  "rounded-full px-[var(--space-4)] py-[var(--space-2)] t-body-sm";
+export const HOUSE_FILTER_PILL_CLASS = HOUSE_PILL_MEASURE_CLASS;
 
 export const HOUSE_FILTER_PILL_CLUSTER_CLASS =
   "flex items-center gap-[var(--space-2)]";
@@ -133,7 +138,7 @@ export const HOUSE_SEGMENTED_THUMB_CLASS =
 // for workspace / dest / news SegmentedTrack items and Topics. rail
 // chips. Do not fork a shorter display chip.
 export const HOUSE_PILL_ITEM_CLASS =
-  "inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-[var(--space-4)] py-[var(--space-2)] t-body-sm";
+  `inline-flex shrink-0 items-center whitespace-nowrap ${HOUSE_PILL_MEASURE_CLASS}`;
 
 export const HOUSE_SEGMENTED_ITEM_BASE_CLASS =
   `relative z-10 cursor-pointer select-none ${HOUSE_PILL_ITEM_CLASS}`;
