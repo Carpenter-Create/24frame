@@ -42,6 +42,11 @@ import {
   socialMediaRuleMessage,
   socialProfileHref,
 } from "@/lib/social";
+import {
+  isFollowUniqueViolation,
+  newFollowerNoticeCopy,
+  newFollowerSourceRefs,
+} from "@/lib/social-follow";
 
 type ActionResult = { error?: string };
 
@@ -213,8 +218,8 @@ export async function updateSocialBio(formData: FormData): Promise<ActionResult>
 }
 
 export async function toggleSocialFollow(formData: FormData): Promise<ActionResult> {
-  const { user, supabase, profileId } = await ownProfile();
-  if (!profileId) return { error: SOCIAL.cta.needProfile };
+  const { user, supabase, profile } = await ownProfile();
+  if (!profile) return { error: SOCIAL.cta.needProfile };
 
   const followeeId = String(formData.get("followee_id") ?? "").trim();
   const following = String(formData.get("following") ?? "") === "1";
@@ -226,13 +231,27 @@ export async function toggleSocialFollow(formData: FormData): Promise<ActionResu
       .delete()
       .eq("follower_id", user.id)
       .eq("followee_id", followeeId);
-    if (error) return { error: error.message };
+    if (error) return { error: error.message || SOCIAL.follow.failed };
   } else {
     const { error } = await supabase.from("follows").insert(followInsertRow(user.id, followeeId));
-    if (error) return { error: error.message };
+    if (error && !isFollowUniqueViolation(error)) {
+      return { error: error.message || SOCIAL.follow.failed };
+    }
+    if (!error) {
+      const copy = newFollowerNoticeCopy(profile.handle);
+      // Follow already landed. Alert is best-effort until founder applies SQL.
+      await supabase.rpc("notify_new_follower", {
+        p_followee: followeeId,
+        p_title: copy.title,
+        p_body: copy.body,
+        p_source_refs: newFollowerSourceRefs({ actorId: user.id, handle: profile.handle }),
+      });
+    }
   }
 
   revalidatePath(SOCIAL_ROUTES.home);
+  revalidatePath(SOCIAL_ROUTES.profile);
+  if (profile.handle) revalidatePath(socialProfileHref(profile.handle));
   const handle = String(formData.get("handle") ?? "").trim();
   if (handle) revalidatePath(socialProfileHref(handle));
   return {};

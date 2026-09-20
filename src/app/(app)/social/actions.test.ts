@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
-import { likeInsertRow, postInsertRow, profileInsertRow, SOCIAL } from "@/lib/social";
+import { followInsertRow, likeInsertRow, postInsertRow, profileInsertRow, SOCIAL } from "@/lib/social";
+import { revalidatePath } from "next/cache";
 import {
   addSocialDmPeople,
   createSocialPost,
@@ -11,6 +12,7 @@ import {
   createSocialStory,
   openSocialDm,
   presignSocialMediaUpload,
+  toggleSocialFollow,
   toggleSocialLike,
   updateSocialBio,
 } from "./actions";
@@ -51,12 +53,16 @@ function stub({
 } = {}) {
   const inserts: { table: string; row: unknown }[] = [];
   const updates: { table: string; row: unknown }[] = [];
+  const deletes: { table: string }[] = [];
   let insertIndex = 0;
   const from = vi.fn((table: string) => {
     const chain: Record<string, unknown> = {};
     chain.select = vi.fn(() => chain);
     chain.eq = vi.fn(() => chain);
-    chain.delete = vi.fn(() => chain);
+    chain.delete = vi.fn(() => {
+      deletes.push({ table });
+      return chain;
+    });
     chain.maybeSingle = vi.fn(async () => ({ data: profile, error: null }));
     chain.insert = vi.fn(async (row: unknown) => {
       inserts.push({ table, row });
@@ -74,7 +80,7 @@ function stub({
   });
   const rpc = vi.fn(async () => ({ data: rpcData, error: rpcError }));
   vi.mocked(createClient).mockResolvedValue({ from, rpc } as never);
-  return { from, rpc, inserts, updates };
+  return { from, rpc, inserts, updates, deletes };
 }
 
 describe("social actions", () => {
@@ -454,5 +460,68 @@ describe("social actions", () => {
     const form = new FormData();
     form.set("bio", `a\n${"b".repeat(149)}`);
     expect(await updateSocialBio(form)).toEqual({ error: SOCIAL.profile.bioLimit });
+  });
+
+  it("inserts a follow, notifies the followee, and revalidates both profiles", async () => {
+    const { inserts, rpc } = stub({
+      profile: { id: "u1", handle: "ada", display_name: "Ada", status: "active" },
+    });
+    const form = new FormData();
+    form.set("followee_id", "u2");
+    form.set("handle", "joshua");
+    form.set("following", "0");
+    expect(await toggleSocialFollow(form)).toEqual({});
+    expect(inserts).toEqual([{ table: "follows", row: followInsertRow("u1", "u2") }]);
+    expect(rpc).toHaveBeenCalledWith("notify_new_follower", {
+      p_followee: "u2",
+      p_title: SOCIAL.follow.newFollowerTitle,
+      p_body: "@ada followed you",
+      p_source_refs: { actor_id: "u1", handle: "ada", path: "/social/u/ada" },
+    });
+    expect(revalidatePath).toHaveBeenCalledWith("/social");
+    expect(revalidatePath).toHaveBeenCalledWith("/social/profile");
+    expect(revalidatePath).toHaveBeenCalledWith("/social/u/ada");
+    expect(revalidatePath).toHaveBeenCalledWith("/social/u/joshua");
+  });
+
+  it("deletes a follow and does not notify", async () => {
+    const { inserts, deletes, rpc } = stub({
+      profile: { id: "u1", handle: "ada", display_name: "Ada", status: "active" },
+    });
+    const form = new FormData();
+    form.set("followee_id", "u2");
+    form.set("handle", "joshua");
+    form.set("following", "1");
+    expect(await toggleSocialFollow(form)).toEqual({});
+    expect(inserts).toEqual([]);
+    expect(deletes).toEqual([{ table: "follows" }]);
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("treats a unique follow insert as already following and skips notify", async () => {
+    const { rpc } = stub({
+      profile: { id: "u1", handle: "ada", display_name: "Ada", status: "active" },
+      insertError: { message: "duplicate key value", code: "23505" },
+    });
+    const form = new FormData();
+    form.set("followee_id", "u2");
+    form.set("handle", "joshua");
+    form.set("following", "0");
+    expect(await toggleSocialFollow(form)).toEqual({});
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("surfaces a follow insert failure instead of swallowing it", async () => {
+    const { rpc } = stub({
+      profile: { id: "u1", handle: "ada", display_name: "Ada", status: "active" },
+      insertError: { message: "new row violates row-level security", code: "42501" },
+    });
+    const form = new FormData();
+    form.set("followee_id", "u2");
+    form.set("following", "0");
+    expect(await toggleSocialFollow(form)).toEqual({
+      error: "new row violates row-level security",
+    });
+    expect(rpc).not.toHaveBeenCalled();
   });
 });

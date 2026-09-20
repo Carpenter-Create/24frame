@@ -56,6 +56,15 @@ const OPEN_OLD = {
   created_at: "2026-08-02T12:00:00.000Z",
   unread: true,
 };
+const OPEN_FOLLOW = {
+  id: "5",
+  title: "New follower",
+  body: "@ada followed you",
+  kind: "new_follower" as const,
+  created_at: "2026-09-18T11:30:00.000Z",
+  unread: true,
+  source_refs: { handle: "ada" },
+};
 const DONE_NEW = {
   id: "3",
   title: "Winter Light was returned",
@@ -74,6 +83,7 @@ const DONE_OLD = {
 };
 
 const FEED = [DONE_NEW, OPEN_NEW, OPEN_OLD, DONE_OLD];
+const FEED_WITH_FOLLOW = [...FEED, OPEN_FOLLOW];
 const NOW = new Date("2026-09-18T12:00:00.000Z");
 
 describe("Activity live feed — uncleared only", () => {
@@ -161,14 +171,18 @@ describe("Activity family chips", () => {
     expect(activityFamilyLabel("aggregation")).toBe("Aggregation");
     expect(activityFamilyForKind("title_rejected")).toBe("aggregation");
     expect(activityFamilyForKind("delivery_update")).toBe("aggregation");
+    expect(activityFamilyForKind("new_follower")).toBe("social");
     expect(ACTIVITY_PREFS_HREF).toBe("/settings/preferences/notifications");
   });
 
   it("filters the live feed by the selected prefs family", () => {
-    expect(filterActivityItems(FEED, "aggregation").map((row) => row.id)).toEqual(["1", "2"]);
-    expect(filterActivityItems(FEED, "social")).toEqual([]);
-    expect(filterActivityItems(FEED, "reporting")).toEqual([]);
-    expect(filterActivityItems(FEED, "all").every((row) => row.unread)).toBe(true);
+    expect(filterActivityItems(FEED_WITH_FOLLOW, "aggregation").map((row) => row.id)).toEqual([
+      "1",
+      "2",
+    ]);
+    expect(filterActivityItems(FEED_WITH_FOLLOW, "social").map((row) => row.id)).toEqual(["5"]);
+    expect(filterActivityItems(FEED_WITH_FOLLOW, "reporting")).toEqual([]);
+    expect(filterActivityItems(FEED_WITH_FOLLOW, "all").every((row) => row.unread)).toBe(true);
   });
 
   it("builds family hrefs without status or period chrome", () => {
@@ -201,8 +215,10 @@ describe("Activity bell cap", () => {
   it("maps house type icons and reuses Social relative time", () => {
     expect(activityKindIcon("title_rejected")).toBe("film-slate");
     expect(activityKindIcon("delivery_update")).toBe("paper-plane-tilt");
+    expect(activityKindIcon("new_follower")).toBe("user");
     expect(ACTIVITY_KIND_ICON.title_rejected).toBe("film-slate");
     expect(activityItemHref(OPEN_NEW)).toBe(ACTIVITY_HREF);
+    expect(activityItemHref(OPEN_FOLLOW)).toBe("/social/u/ada");
     expect(activityRelativeTime("2026-09-18T11:00:00.000Z", NOW.getTime())).toBe("1h");
     expect(ACTIVITY_PAGE.viewAll).toBe("View all activity");
     expect(ACTIVITY_PAGE.dismiss).toBe("Mark done");

@@ -2189,7 +2189,8 @@ export type Database = {
           created_by: string | null
           id: string
           kind: Database["public"]["Enums"]["notification_kind"]
-          org_id: string
+          org_id: string | null
+          recipient_user_id: string | null
           sender: Database["public"]["Enums"]["notification_sender"]
           source_refs: Json
           title: string
@@ -2200,7 +2201,8 @@ export type Database = {
           created_by?: string | null
           id?: string
           kind: Database["public"]["Enums"]["notification_kind"]
-          org_id: string
+          org_id?: string | null
+          recipient_user_id?: string | null
           sender?: Database["public"]["Enums"]["notification_sender"]
           source_refs: Json
           title: string
@@ -2211,7 +2213,8 @@ export type Database = {
           created_by?: string | null
           id?: string
           kind?: Database["public"]["Enums"]["notification_kind"]
-          org_id?: string
+          org_id?: string | null
+          recipient_user_id?: string | null
           sender?: Database["public"]["Enums"]["notification_sender"]
           source_refs?: Json
           title?: string
@@ -3555,13 +3558,22 @@ export type Database = {
           created_at: string
           id: string
           kind: Database["public"]["Enums"]["notification_kind"]
-          org_id: string
+          org_id: string | null
           source_refs: Json
           title: string
           unread: boolean
         }[]
       }
       my_unread_count: { Args: never; Returns: number }
+      notify_new_follower: {
+        Args: {
+          p_body: string
+          p_followee: string
+          p_source_refs: Json
+          p_title: string
+        }
+        Returns: string | null
+      }
       open_or_get_direct_conversation: {
         Args: { p_peer: string }
         Returns: string
@@ -3872,8 +3884,8 @@ export type Database = {
         | "closing"
       like_target: "post" | "comment"
       membership_status: "invited" | "active" | "removed"
-      notification_kind: "title_rejected" | "delivery_update"
-      notification_sender: "gc_support" | "globee"
+      notification_kind: "title_rejected" | "delivery_update" | "new_follower"
+      notification_sender: "gc_support" | "globee" | "member"
       org_role:
         | "account_owner"
         | "accountant"
@@ -4158,8 +4170,8 @@ export const Constants = {
       ],
       like_target: ["post", "comment"],
       membership_status: ["invited", "active", "removed"],
-      notification_kind: ["title_rejected", "delivery_update"],
-      notification_sender: ["gc_support", "globee"],
+      notification_kind: ["title_rejected", "delivery_update", "new_follower"],
+      notification_sender: ["gc_support", "globee", "member"],
       org_role: [
         "account_owner",
         "accountant",

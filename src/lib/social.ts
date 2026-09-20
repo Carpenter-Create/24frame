@@ -389,6 +389,8 @@ export const SOCIAL = {
   follow: {
     follow: "Follow",
     following: "Following",
+    newFollowerTitle: "New follower",
+    failed: "Could not update follow.",
   },
   forYou: {
     title: "For you",
