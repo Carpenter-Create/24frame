@@ -32,11 +32,17 @@ import {
 import { socialProfilePublicLinks } from "@/lib/social-profile-links";
 import { socialProfileRoleChips } from "@/lib/social-profile-roles";
 import { parseSocialProfileTopics } from "@/lib/social-profile-topics";
+import {
+  SOCIAL_POST_IMAGE_SIZES,
+  SOCIAL_PROFILE_TILE_IMAGE_SIZES,
+  socialVideoDisplaySrc,
+} from "@/lib/social-media-display";
 import { SocialAvatar } from "./social-avatar";
 import { SocialLikeButton } from "./social-engagement";
 import { SocialProfileStats } from "./social-profile-stats";
 import { SocialEmpty } from "./social-empty";
 import { SocialIcon } from "./social-icon";
+import { SocialMediaImage } from "./social-media-image";
 import { SocialProfileLinkRow } from "./social-profile-links";
 
 export { SocialAvatar } from "./social-avatar";
@@ -147,18 +153,17 @@ export function SocialPostMedia({ items }: { items: readonly SocialPostMediaItem
             data-social-post-video=""
             controls
             preload="metadata"
-            src={item.url}
+            src={socialVideoDisplaySrc(item.url)}
             className="h-[360px] w-full rounded-[8px] bg-surface-muted object-cover"
           />
         ) : (
-          // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the member media lane
-          <img
+          <div
             key={item.url}
             data-social-post-image=""
-            src={item.url}
-            alt=""
-            className="h-[360px] w-full rounded-[8px] bg-surface-muted object-cover"
-          />
+            className="relative h-[360px] w-full overflow-hidden rounded-[8px] bg-surface-muted"
+          >
+            <SocialMediaImage src={item.url} sizes={SOCIAL_POST_IMAGE_SIZES} />
+          </div>
         ),
       )}
     </div>
@@ -315,8 +320,7 @@ export function SocialHighlights({
           >
             <span className={SOCIAL_HIGHLIGHT_RING_CLASS}>
               {card.photoUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET
-                <img src={card.photoUrl} alt="" className="size-12 rounded-full object-cover" />
+                <SocialAvatar name={card.label} photoUrl={card.photoUrl} />
               ) : (
                 <span className="block size-12 rounded-full bg-surface-muted" />
               )}
@@ -383,17 +387,13 @@ export function SocialAuthorHistory({
                       <video
                         data-social-post-video=""
                         preload="metadata"
-                        src={first.url}
+                        src={socialVideoDisplaySrc(first.url)}
                         className="absolute inset-0 size-full object-cover"
                       />
                     ) : (
-                      // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET
-                      <img
-                        data-social-post-image=""
-                        src={first.url}
-                        alt=""
-                        className="absolute inset-0 size-full object-cover"
-                      />
+                      <div data-social-post-image="" className="absolute inset-0">
+                        <SocialMediaImage src={first.url} sizes={SOCIAL_PROFILE_TILE_IMAGE_SIZES} />
+                      </div>
                     )}
                     <p className="relative t-label font-medium uppercase tracking-[0.08em] text-ink-2">
                       {first.kind === "video" ? SOCIAL.home.videoKind : SOCIAL.home.photoKind}
@@ -523,18 +523,17 @@ export function SocialPostCard({ post }: { post: SocialPostCardModel }) {
                 data-social-post-video=""
                 controls
                 preload="metadata"
-                src={post.media[0].url}
+                src={socialVideoDisplaySrc(post.media[0].url)}
                 className="aspect-square w-full bg-surface-muted object-cover"
               />
-            ) : (
-              // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET
-              <img
+            ) : post.media[0]?.url ? (
+              <div
                 data-social-post-image=""
-                src={post.media[0]?.url}
-                alt=""
-                className="aspect-square w-full bg-surface-muted object-cover"
-              />
-            )}
+                className="relative aspect-square w-full bg-surface-muted"
+              >
+                <SocialMediaImage src={post.media[0].url} sizes={SOCIAL_POST_IMAGE_SIZES} />
+              </div>
+            ) : null}
           </div>
         ) : null}
         <div className="flex flex-col gap-1 px-3 pb-2.5 pt-2">

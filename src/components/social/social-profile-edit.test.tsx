@@ -1,5 +1,16 @@
+import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
+
+vi.mock("next/image", () => ({
+  default: ({
+    src,
+    className,
+  }: {
+    src: string;
+    className?: string;
+  }) => createElement("img", { src, className, alt: "" }),
+}));
 
 import { SOCIAL, socialProfilePublicUrl } from "@/lib/social";
 import { SOCIAL_PROFILE_EDIT_LABEL_CLASS } from "@/lib/social-chrome";

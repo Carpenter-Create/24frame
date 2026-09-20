@@ -37,7 +37,9 @@ import {
   overviewHref,
 } from "@/lib/overview";
 import { REPORTS_PERIOD_PRESETS, reportsPeriodPresetKey } from "@/lib/reports";
+import { SocialMediaImage } from "@/components/social/social-media-image";
 import { SOCIAL_AVATAR_32_CLASS } from "@/lib/social-chrome";
+import { SOCIAL_OVERVIEW_FACE_IMAGE_SIZES } from "@/lib/social-media-display";
 import type { SocialHomeChat } from "@/lib/social-home-chats";
 import { socialDmHref, socialInitials } from "@/lib/social";
 
@@ -152,11 +154,10 @@ export function OverviewHome({
                     key={chat.conversationId}
                     href={socialDmHref(chat.conversationId)}
                     data-overview-social-face={chat.conversationId}
-                    className={SOCIAL_AVATAR_32_CLASS}
+                    className={`${SOCIAL_AVATAR_32_CLASS} relative`}
                   >
                     {photo ? (
-                      // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the private avatars bucket
-                      <img src={photo} alt="" className="size-full object-cover" />
+                      <SocialMediaImage src={photo} sizes={SOCIAL_OVERVIEW_FACE_IMAGE_SIZES} />
                     ) : (
                       socialInitials(chat.label)
                     )}

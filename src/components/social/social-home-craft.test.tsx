@@ -1,5 +1,16 @@
+import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
+
+vi.mock("next/image", () => ({
+  default: ({
+    src,
+    className,
+  }: {
+    src: string;
+    className?: string;
+  }) => createElement("img", { src, className, alt: "" }),
+}));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),

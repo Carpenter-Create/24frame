@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { SocialAvatar } from "@/components/social/social-avatar";
 import { SocialIcon } from "@/components/social/social-icon";
+import { SocialMediaImage } from "@/components/social/social-media-image";
 import { cn } from "@/lib/cn";
 import {
   SOCIAL_HOME_STORY_CARD_CLASS,
@@ -17,6 +18,7 @@ import {
 } from "@/lib/social-chrome";
 import { SOCIAL_ICON_SIZE_STORY_PLUS } from "@/lib/social-icons";
 import type { SocialStoryRailCard } from "@/lib/social-feed";
+import { SOCIAL_STORY_CARD_IMAGE_SIZES } from "@/lib/social-media-display";
 import { SOCIAL, SOCIAL_ROUTES, socialInitials, socialPersonLabel, socialStoryHref } from "@/lib/social";
 
 function storyLabel(name: string): string {
@@ -90,8 +92,7 @@ function HomeTallStoriesRail({
             >
               <span data-social-story-media="" className="absolute inset-0 bg-surface-muted">
                 {photo ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the private avatars bucket
-                  <img src={photo} alt="" className="absolute inset-0 size-full object-cover" />
+                  <SocialMediaImage src={photo} sizes={SOCIAL_STORY_CARD_IMAGE_SIZES} />
                 ) : (
                   <span className="flex size-full items-center justify-center t-body font-semibold text-ink-2">
                     {socialInitials(name)}
@@ -197,10 +198,7 @@ export function SocialStoriesRail({
             >
               <div className={cn(cardClass, card.unseen ? "bg-accent" : "bg-hairline")}>
                 <div data-social-story-media="" className={mediaClass}>
-                  {photo ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the private avatars bucket
-                    <img src={photo} alt="" className="absolute inset-0 size-full object-cover" />
-                  ) : null}
+                  {photo ? <SocialMediaImage src={photo} sizes={SOCIAL_STORY_CARD_IMAGE_SIZES} /> : null}
                 </div>
               </div>
               <p className="w-full truncate text-center t-label font-medium text-ink">{storyLabel(name)}</p>

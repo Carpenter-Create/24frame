@@ -42,3 +42,23 @@ export function stableSigningDate(windowSeconds: number, now: number = Date.now(
   const nowSec = Math.floor(now / 1000);
   return new Date(Math.floor(nowSec / windowSeconds) * windowSeconds * 1000);
 }
+
+/**
+ * S3 presigner options that stay identical across `windowSeconds`.
+ * `expiresIn` is 2x the window so a late-window page still has a full window of life —
+ * same trade as `presignGetObject({ stableWindow: true })`.
+ */
+export function stablePresignOptions(
+  windowSeconds: number,
+  now: number = Date.now(),
+): { expiresIn: number; signingDate: Date } {
+  return {
+    expiresIn: windowSeconds * 2,
+    signingDate: stableSigningDate(windowSeconds, now),
+  };
+}
+
+/** Cache-Control on a signed S3 GET. Private — these URLs are capability-bearing. */
+export function privateMaxAgeCacheControl(maxAgeSeconds: number): string {
+  return `private, max-age=${maxAgeSeconds}`;
+}

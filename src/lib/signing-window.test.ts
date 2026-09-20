@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { stableExpiryEpoch, stableExpiryDate, stableSigningDate } from "./signing-window";
+import {
+  privateMaxAgeCacheControl,
+  stableExpiryEpoch,
+  stableExpiryDate,
+  stablePresignOptions,
+  stableSigningDate,
+} from "./signing-window";
 
 const HOUR = 3600;
 const at = (iso: string) => new Date(iso).getTime();
@@ -69,5 +75,20 @@ describe("stableSigningDate", () => {
   it("is never in the future — a signature dated ahead would be rejected", () => {
     const now = at("2026-08-05T14:23:11Z");
     expect(stableSigningDate(HOUR, now).getTime()).toBeLessThanOrEqual(now);
+  });
+});
+
+describe("stablePresignOptions", () => {
+  it("doubles expiresIn and pins signingDate so two calls in one window match", () => {
+    const now = at("2026-08-05T14:23:11Z");
+    const a = stablePresignOptions(HOUR, now);
+    const b = stablePresignOptions(HOUR, at("2026-08-05T14:59:59Z"));
+    expect(a.expiresIn).toBe(HOUR * 2);
+    expect(a.signingDate.getTime()).toBe(b.signingDate.getTime());
+    expect(a.signingDate.toISOString()).toBe("2026-08-05T14:00:00.000Z");
+  });
+
+  it("names a private GET cache header matching the signed TTL", () => {
+    expect(privateMaxAgeCacheControl(300)).toBe("private, max-age=300");
   });
 });
