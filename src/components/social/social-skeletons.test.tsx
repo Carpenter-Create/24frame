@@ -55,7 +55,7 @@ describe("Social loading skeletons", () => {
     );
     expect(home).toContain("data-social-stories-skeleton");
     expect(home).toContain("data-social-for-you-skeleton");
-    expect(home).toContain("data-social-recent-chats-skeleton");
+    expect(home).not.toContain("data-social-recent-chats-skeleton");
     expect(profile).toContain("data-social-profile-skeleton");
     expect(create).toContain("data-social-create-skeleton");
     expect(stories).toContain("data-social-stories-index-skeleton");

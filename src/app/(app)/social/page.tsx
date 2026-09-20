@@ -8,11 +8,9 @@ import { SocialForYouRail } from "@/components/social/social-for-you";
 import { SocialHomeComposer } from "@/components/social/social-home-composer";
 import { SocialHomeTabs } from "@/components/social/social-home-tabs";
 import { SocialHomeTopics } from "@/components/social/social-home-topics";
-import { SocialRecentChats } from "@/components/social/social-recent-chats";
 import {
   SocialForYouSkeleton,
   SocialHomeCenterSkeleton,
-  SocialRecentChatsSkeleton,
 } from "@/components/social/social-skeletons";
 import { SocialStoriesRail } from "@/components/social/social-stories-rail";
 import { SocialPostCard } from "@/components/social/social-ui";
@@ -26,16 +24,13 @@ import {
   type SocialCategoryLabel,
   type SocialCategoryTopic,
 } from "@/lib/social-categories";
-import { socialHomeChats } from "@/lib/social-home-chats";
 import { followingAuthorIds, socialChecklistItems } from "@/lib/social-home";
 import {
   SOCIAL_FOLLOWING_WALL_CURSOR_PARAM,
-  SOCIAL_HOME_CHATS_LIMIT,
   parseFollowingWallCursorParam,
   socialFollowingWallHref,
   type FollowingWallCursor,
 } from "@/lib/social-home-bounds";
-import { loadDmInbox, type DmInboxRow } from "@/lib/social-dms";
 import {
   groupStoryRail,
   loadFolloweeIds,
@@ -52,7 +47,7 @@ import {
   type SocialProfileRow,
   type SocialSuggestedPerson,
 } from "@/lib/social-feed";
-import { inboxPeerIds, parseSocialHomeLane, SOCIAL, SOCIAL_HOME_LANE_PARAM, SOCIAL_ROUTES, socialPersonLabel, type SocialHomeLane } from "@/lib/social";
+import { parseSocialHomeLane, SOCIAL, SOCIAL_HOME_LANE_PARAM, SOCIAL_ROUTES, socialPersonLabel, type SocialHomeLane } from "@/lib/social";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { requireSocialSession, type SocialSession } from "@/lib/social-session";
 
@@ -69,9 +64,6 @@ export default async function SocialHomePage({
 
   return (
     <div data-social-home="" className={SOCIAL_HOME_LAYOUT_CLASS}>
-      <Suspense fallback={<SocialRecentChatsSkeleton />}>
-        <SocialHomeRecentChatsSlot session={session} />
-      </Suspense>
       <Suspense fallback={<SocialHomeCenterSkeleton />}>
         <SocialHomeCenter session={session} category={category} cursor={cursor} lane={lane} topic={topic} />
       </Suspense>
@@ -90,29 +82,6 @@ async function loadHomeProfile(session: SocialSession) {
     loadFolloweeIds(session.supabase, session.ctx.user.id),
   ]);
   return { profile, followees };
-}
-
-async function SocialHomeRecentChatsSlot({ session }: { session: SocialSession }) {
-  const { ctx, supabase } = session;
-  const profile = await ensureOwnSocialProfile(supabase, ctx.user);
-  const inbox = profile
-    ? await loadDmInbox(supabase, { limit: SOCIAL_HOME_CHATS_LIMIT })
-    : { rows: [] as DmInboxRow[], truncated: false };
-  const peopleIds = [...new Set(inbox.rows.flatMap((row) => inboxPeerIds(row)))];
-  const [authors, faces] = await Promise.all([
-    loadProfilesByIds(supabase, peopleIds),
-    signedAvatarUrls(peopleIds),
-  ]);
-  const chats = socialHomeChats(
-    inbox.rows,
-    new Map(
-      [...authors.entries()].map(([id, author]) => [
-        id,
-        socialPersonLabel({ handle: author.handle, displayName: author.display_name }),
-      ]),
-    ),
-  );
-  return <SocialRecentChats chats={chats} faces={faces} />;
 }
 
 async function SocialHomeForYouSlot({ session }: { session: SocialSession }) {

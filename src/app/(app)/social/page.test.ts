@@ -7,11 +7,10 @@ import { createClient } from "@/lib/supabase/server";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
 import { ASK_GLOBEE } from "@/lib/ask-globee";
-import { SOCIAL } from "@/lib/social";
+import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import {
   SOCIAL_FOLLOWEES_LIMIT,
   SOCIAL_FOLLOWING_WALL_LIMIT,
-  SOCIAL_HOME_CHATS_LIMIT,
   SOCIAL_STORIES_RAIL_LIMIT,
   encodeFollowingWallCursor,
 } from "@/lib/social-home-bounds";
@@ -182,10 +181,9 @@ describe("Social home", () => {
     expect(html).toContain("data-social-stories");
     expect(html).toContain("data-social-following-empty");
     expect(html).toContain("data-social-for-you");
-    expect(html).toContain("data-social-recent-chats");
-    expect(html).toContain("data-social-chats-empty");
-    expect(html).toContain(SOCIAL.home.recentChats);
-    expect(html).toContain(SOCIAL.home.chatsEmpty);
+    expect(html).not.toContain("data-social-recent-chats");
+    expect(html).not.toContain("data-social-chats-empty");
+    expect(html).not.toContain(SOCIAL.home.recentChats);
     expect(html).toContain('data-social-icon="users"');
     expect(html).toContain('data-social-icon="image"');
     expect(html).toContain("Cinematography");
@@ -332,34 +330,18 @@ describe("Social home", () => {
     expect(html).not.toContain(`data-social-post="${posts[SOCIAL_FOLLOWING_WALL_LIMIT]!.id}"`);
   });
 
-  it("renders recent chats from the inbox preview and deep-links Messages", async () => {
+  it("does not surface Recent chats on Home; Messages stay on /social/dms", async () => {
     const { rpc } = stubClient({ profile: ensured });
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
-    rpc.mockResolvedValue({
-      data: [
-        {
-          conversation_id: "c1",
-          kind: "direct",
-          last_message_at: "2026-09-14T12:00:00.000Z",
-          muted: false,
-          participant_ids: ["u2"],
-          peer_id: "u2",
-          title: null,
-          unread_count: 0,
-        },
-      ],
-      error: null,
-    });
-    vi.mocked(signedAvatarUrls).mockResolvedValue(new Map());
 
     const html = await renderHome();
-    expect(rpc).toHaveBeenCalledWith("get_dm_inbox", { p_limit: SOCIAL_HOME_CHATS_LIMIT + 1 });
-    expect(html).toContain("data-social-recent-chats");
-    expect(html).toContain('data-social-chat-row="c1"');
-    expect(html).toContain("/social/dms/c1");
-    expect(html).toContain(SOCIAL.home.recentChats);
+    expect(rpc).not.toHaveBeenCalledWith("get_dm_inbox", expect.anything());
+    expect(html).not.toContain("data-social-recent-chats");
+    expect(html).not.toContain("data-social-chat-row");
+    expect(html).not.toContain(SOCIAL.home.recentChats);
     expect(html).not.toContain("data-social-chats-empty");
-    expect(html).not.toContain("Loved the reel");
+    expect(SOCIAL_ROUTES.dms).toBe("/social/dms");
+    expect(html).not.toContain('"/messages"');
   });
 
   it("opens For you as suggested people and locked topics, not an invented feed", async () => {

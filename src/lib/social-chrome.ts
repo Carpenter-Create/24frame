@@ -26,13 +26,13 @@ export const SOCIAL_FIGMA_HOME_MOBILE = "169:1519";
 export const SOCIAL_FIGMA_HOME_MOBILE_SCROLL = "160:1129";
 export const SOCIAL_FIGMA_HOME_DESKTOP_PRIOR = ["169:964", "169:1281", "164:1136", "164:1360"] as const;
 
-// Desktop Social Home measure — 176:1085 / 176:1346.
-// dest 200 | gutter 16 | chats 200 | gutter 16 | center 676 | gutter 16 | For you 300 | padR 16 = 1440.
+// Desktop Social Home measure. Recent chats column is retired; its 200 +
+// gutter 16 is reclaimed by the middle column (composer / Topics. / stories / wall).
+// dest 200 | gutter 16 | center 892 | gutter 16 | For you 300 | padR 16 = 1440.
 export const SOCIAL_DESKTOP_MEASURE = {
   dest: 200,
   gutter: 16,
-  chats: 200,
-  center: 676,
+  center: 892,
   right: 300,
   padR: 16,
 } as const;
@@ -62,7 +62,7 @@ export const SOCIAL_RAIL_WIDTH_CLASS = "w-[calc(200px-var(--chrome-gutter))]";
 export const SOCIAL_RAIL_MAIN_OFFSET_CLASS = "md:ml-[200px]";
 export const SOCIAL_RAIL_PANEL_CLASS = HOUSE_RAIL_PANEL_CLASS;
 export const SOCIAL_FOR_YOU_WIDTH_CLASS = "w-[300px]";
-export const SOCIAL_CENTER_WIDTH_CLASS = "w-full min-w-0 lg:max-w-[676px]";
+export const SOCIAL_CENTER_WIDTH_CLASS = "w-full min-w-0 lg:max-w-[892px]";
 export const SOCIAL_DESKTOP_FRAME_PAD_CLASS = "w-full px-[var(--chrome-gutter)] py-4";
 
 export const SOCIAL_PAGE_CLASS =
@@ -71,22 +71,7 @@ export const SOCIAL_PAGE_CLASS =
 export const SOCIAL_HOME_LAYOUT_CLASS = "flex items-start gap-[16px]";
 
 export const SOCIAL_HOME_CENTER_CLASS =
-  "flex min-w-0 flex-1 flex-col gap-2 lg:max-w-[676px]";
-
-export const SOCIAL_CHATS_COLUMN_CLASS =
-  "hidden w-[200px] shrink-0 flex-col lg:flex";
-
-export const SOCIAL_CHATS_PANEL_CLASS =
-  "flex w-full flex-col gap-2 rounded-[16px] border border-hairline bg-surface p-4";
-
-export const SOCIAL_CHAT_ROW_CLASS =
-  "flex h-16 items-center gap-2 rounded-[12px] px-2";
-
-export const SOCIAL_CHAT_ROW_MUTED_CLASS =
-  "flex h-16 items-center gap-2 rounded-[12px] bg-surface-muted px-2";
-
-export const SOCIAL_CHAT_EMPTY_CLASS =
-  "flex flex-col items-center justify-center gap-2 rounded-[12px] px-4 py-6";
+  "flex min-w-0 flex-1 flex-col gap-2 lg:max-w-[892px]";
 
 export const SOCIAL_AVATAR_32_CLASS =
   "flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted t-label font-medium text-ink-2";

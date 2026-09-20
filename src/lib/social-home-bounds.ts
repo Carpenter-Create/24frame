@@ -15,8 +15,8 @@ import {
  *                                created_at+id keyset (`after=`). Cap SOCIAL_FOLLOWING_WALL_LIMIT.
  *   stories rail               — live (expires_at > now), same author set. Cap SOCIAL_STORIES_RAIL_LIMIT.
  *   Explore search             — people (profiles) and posts, each its own cap.
- *   Home recent chats          — preview only. Cap SOCIAL_HOME_CHATS_LIMIT.
- *                                Full inbox stays on Messages.
+ *   Home recent chats          — retired from Social Home. Cap SOCIAL_HOME_CHATS_LIMIT
+ *                                remains for leftover preview helpers. Full inbox stays on Messages.
  *
  * Each loader probes limit+1 and splitProbe so a short page cannot look finished.
  * Following wall uses range(0, limit) after a keyset WHERE — never page-N OFFSET.
@@ -42,7 +42,7 @@ export const SOCIAL_EXPLORE_POSTS_LIMIT = 20;
 /** Home For you suggested people. Filtered from the Explore people probe. */
 export const SOCIAL_FOR_YOU_PEOPLE_LIMIT = 3;
 
-/** Home recent-chats preview. Full inbox stays on Messages. */
+/** Retired Social Home chats preview cap. Full inbox stays on Messages. */
 export const SOCIAL_HOME_CHATS_LIMIT = 4;
 
 export const SOCIAL_FOLLOWING_WALL_CURSOR_PARAM = "after";

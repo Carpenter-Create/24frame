@@ -65,8 +65,9 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).not.toContain("SocialProfileTabs");
     expect(home).not.toContain("creditsEmpty");
     expect(home).toContain("SocialForYouRail");
-    expect(home).toContain("SocialRecentChats");
-    expect(home).toContain("loadDmInbox");
+    expect(home).not.toContain("SocialRecentChats");
+    expect(home).not.toContain("SocialHomeRecentChatsSlot");
+    expect(home).not.toContain("loadDmInbox");
     expect(home).toContain("ensureOwnSocialProfile");
     expect(home).toContain("data-social-following-empty");
     expect(home).not.toContain("SocialLensRow");
@@ -143,7 +144,6 @@ describe("Social Home miss list v1 P0 lock", () => {
     const forYou = readFileSync("src/components/social/social-for-you.tsx", "utf8");
     const topics = readFileSync("src/components/social/social-home-topics.tsx", "utf8");
     const extras = readFileSync("src/components/social/social-rail-extras.tsx", "utf8");
-    const chats = readFileSync("src/components/social/social-recent-chats.tsx", "utf8");
     expect(rail).toContain("SOCIAL_ICON_SIZE_STORY_PLUS");
     expect(rail).toContain("SOCIAL_HOME_STORY_CARD_CLASS");
     expect(rail).toContain("data-social-stories-tall");
@@ -208,28 +208,25 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).toContain("164:1136");
     expect(chrome).toContain("164:1360");
     expect(chrome).toContain("dest: 200");
-    expect(chrome).toContain("chats: 200");
+    expect(chrome).not.toContain("chats: 200");
     expect(chrome).toContain("gutter: 16");
-    expect(chrome).toContain("center: 676");
+    expect(chrome).toContain("center: 892");
     expect(chrome).toContain("right: 300");
     expect(chrome).toContain("padR: 16");
     expect(chrome).toContain("w-[200px]");
     expect(chrome).toContain("md:ml-[200px]");
-    expect(chrome).toContain("lg:max-w-[676px]");
+    expect(chrome).toContain("lg:max-w-[892px]");
+    expect(chrome).not.toContain("lg:max-w-[676px]");
     expect(chrome).toContain("SOCIAL_RAIL_PANEL_CLASS");
-    expect(chrome).toContain("SOCIAL_CHATS_PANEL_CLASS");
     expect(chrome).toContain("rounded-[16px]");
-    expect(home).toContain("SocialRecentChats");
+    expect(home).not.toContain("SocialRecentChats");
+    expect(home).not.toContain("SocialHomeRecentChatsSlot");
+    expect(existsSync("src/components/social/social-recent-chats.tsx")).toBe(false);
+    expect(chrome).not.toContain("SOCIAL_CHATS_COLUMN_CLASS");
+    expect(chrome).not.toContain("SOCIAL_CHATS_PANEL_CLASS");
     expect(home).not.toContain('"/messages"');
-    expect(chats).toContain("SOCIAL_ROUTES.dms");
-    expect(chats).toContain("socialDmHref");
-    expect(chats).toContain("SOCIAL.home.chatsEmpty");
-    expect(chats).toContain("SOCIAL_AVATAR_32_CLASS");
-    expect(chats).toContain("SOCIAL_CHAT_ROW_CLASS");
     expect(chrome).toContain("size-8");
     expect(chrome).toContain("h-16");
-    expect(chats).not.toContain("/messages");
-    expect(chats).not.toContain("Loved");
     expect(shell).toContain("SOCIAL_RAIL_PANEL_CLASS");
     expect(shell).toContain("HOUSE_RAIL_FLOAT_CLASS");
     expect(chrome).not.toContain("Inter");
@@ -433,12 +430,12 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(SOCIAL_DESKTOP_MEASURE).toEqual({
       dest: 200,
       gutter: 16,
-      chats: 200,
-      center: 676,
+      center: 892,
       right: 300,
       padR: 16,
     });
-    expect(SOCIAL_DESKTOP_MEASURE.dest + SOCIAL_DESKTOP_MEASURE.gutter + SOCIAL_DESKTOP_MEASURE.chats + SOCIAL_DESKTOP_MEASURE.gutter + SOCIAL_DESKTOP_MEASURE.center + SOCIAL_DESKTOP_MEASURE.gutter + SOCIAL_DESKTOP_MEASURE.right + SOCIAL_DESKTOP_MEASURE.padR).toBe(1440);
+    expect(SOCIAL_DESKTOP_MEASURE).not.toHaveProperty("chats");
+    expect(SOCIAL_DESKTOP_MEASURE.dest + SOCIAL_DESKTOP_MEASURE.gutter + SOCIAL_DESKTOP_MEASURE.center + SOCIAL_DESKTOP_MEASURE.gutter + SOCIAL_DESKTOP_MEASURE.right + SOCIAL_DESKTOP_MEASURE.padR).toBe(1440);
     expect(SOCIAL.home.emptyQuiet).toBe("No posts yet");
     expect(SOCIAL.checklist).not.toHaveProperty("firstWinHint");
     expect(SOCIAL.forYou).not.toHaveProperty("native");
