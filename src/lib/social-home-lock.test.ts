@@ -335,6 +335,23 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(rail).toContain("SOCIAL_STORIES_CARD_CLASS");
     expect(rail).toContain("SOCIAL_STORIES_PLUS_WELL_CLASS");
     expect(rail).toContain("SOCIAL_HOME_STORY_NAME_CLASS");
+    expect(rail).toContain("SOCIAL_STORY_CREATE_LABEL_TYPE_CLASS");
+    expect(chrome).toMatch(
+      /export const SOCIAL_STORY_CREATE_LABEL_TYPE_CLASS =\s*"t-body-sm font-medium text-ink"/,
+    );
+    expect(chrome).toMatch(
+      /export const SOCIAL_HOME_STORY_CREATE_LABEL_CLASS =\s*`[^`]*\$\{SOCIAL_STORY_CREATE_LABEL_TYPE_CLASS\}[^`]*`/,
+    );
+    expect(chrome).not.toContain("SOCIAL_HOME_STORY_CREATE_INITIAL_CLASS");
+    expect(rail).toContain("function StoryCreatePlus");
+    expect(rail).toMatch(/function StoryCreatePlus\(\) \{[\s\S]*?name="plus"[\s\S]*?\}/);
+    expect(rail).not.toMatch(/function StoryCreatePlus\(\) \{[\s\S]*?\bactive\b/);
+    expect(chrome).toMatch(
+      /export const SOCIAL_HOME_STORY_PLUS_CLASS =\s*"[^"]*\bbg-accent\b[^"]*\btext-accent-contrast\b/,
+    );
+    expect(chrome).toMatch(
+      /export const SOCIAL_STORIES_PLUS_WELL_CLASS =\s*"[^"]*\bbg-accent\b[^"]*\btext-accent-contrast\b/,
+    );
     expect(chrome).toContain("h-[168px]");
     expect(chrome).toContain("h-[192px]");
     expect(chrome).toContain("h-[200px]");

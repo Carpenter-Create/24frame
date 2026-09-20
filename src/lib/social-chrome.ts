@@ -147,14 +147,21 @@ export const SOCIAL_HOME_STORY_CARD_CLASS =
 export const SOCIAL_HOME_STORY_CREATE_FACE_CLASS =
   "absolute inset-x-0 top-0 flex h-[114px] items-center justify-center overflow-hidden bg-surface-muted md:h-[120px]";
 
-export const SOCIAL_HOME_STORY_CREATE_INITIAL_CLASS =
-  "text-[32px] font-semibold text-ink-2/45 md:text-[40px]";
-
+// Accent circle + white plus glyph. Not a white-fill well (Plus fill
+// knockout reads as white disc / blue +). border-surface is the seam
+// ring only — not the well fill. Phone + desktop share this class.
 export const SOCIAL_HOME_STORY_PLUS_CLASS =
   "absolute left-1/2 top-[96px] z-10 flex size-9 -translate-x-1/2 items-center justify-center rounded-full border-[3px] border-surface bg-accent text-accent-contrast md:top-[100px] md:size-10";
 
+// Adam 2026-09-20 — Create Story is Social chrome, not an eyebrow.
+// t-label uppercase + 0.12em track stacked CREATE / STORY as a
+// leftover specialty face. Same token as Topics / Write something /
+// Create sheet tiles. One SoT for phone + desktop — no device fork.
+export const SOCIAL_STORY_CREATE_LABEL_TYPE_CLASS =
+  "t-body-sm font-medium text-ink";
+
 export const SOCIAL_HOME_STORY_CREATE_LABEL_CLASS =
-  "absolute inset-x-0 bottom-0 flex h-[78px] items-center justify-center bg-surface px-2 text-center t-label font-medium text-ink md:h-20";
+  `absolute inset-x-0 bottom-0 flex h-[78px] items-center justify-center bg-surface px-2 text-center ${SOCIAL_STORY_CREATE_LABEL_TYPE_CLASS} md:h-20`;
 
 export const SOCIAL_HOME_STORY_FACE_RING_CLASS =
   "absolute left-2 top-2 z-10 flex size-8 items-center justify-center overflow-hidden rounded-full border-2 bg-surface p-[2px] md:left-[9px] md:top-[9px] md:size-9";
@@ -174,6 +181,7 @@ export const SOCIAL_STORIES_FACE_CLASS =
 export const SOCIAL_STORIES_MEDIA_CLASS =
   "relative size-full overflow-hidden rounded-[13px] bg-surface-muted";
 
+// Same plus SoT as SOCIAL_HOME_STORY_PLUS_CLASS: accent well, white glyph.
 export const SOCIAL_STORIES_PLUS_WELL_CLASS =
   "flex size-9 items-center justify-center rounded-full bg-accent text-accent-contrast";
 

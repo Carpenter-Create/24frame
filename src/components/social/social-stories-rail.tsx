@@ -15,6 +15,7 @@ import {
   SOCIAL_STORIES_FACE_CLASS,
   SOCIAL_STORIES_MEDIA_CLASS,
   SOCIAL_STORIES_PLUS_WELL_CLASS,
+  SOCIAL_STORY_CREATE_LABEL_TYPE_CLASS,
 } from "@/lib/social-chrome";
 import { SOCIAL_ICON_SIZE_STORY_PLUS } from "@/lib/social-icons";
 import type { SocialStoryRailCard } from "@/lib/social-feed";
@@ -25,6 +26,20 @@ function storyLabel(name: string): string {
   const parts = name.trim().split(/\s+/);
   if (parts.length >= 2 && parts[1]?.[0]) return `${parts[0]} ${parts[1][0]}.`;
   return parts[0] ?? name;
+}
+
+// Adam 2026-09-20 — white plus glyph on the accent well.
+// SocialIcon active = Phosphor fill. Plus fill is a filled square with a
+// knockout +, so white currentColor on bg-accent reads as a white disc
+// with a blue +. Bold is the plus stroke. Do not pass active here.
+function StoryCreatePlus() {
+  return (
+    <SocialIcon
+      name="plus"
+      size={SOCIAL_ICON_SIZE_STORY_PLUS}
+      className="text-accent-contrast"
+    />
+  );
 }
 
 function HomeTallStoriesRail({
@@ -65,12 +80,7 @@ function HomeTallStoriesRail({
               />
             </span>
             <span className={SOCIAL_HOME_STORY_PLUS_CLASS}>
-              <SocialIcon
-                name="plus"
-                active
-                size={SOCIAL_ICON_SIZE_STORY_PLUS}
-                className="text-accent-contrast"
-              />
+              <StoryCreatePlus />
             </span>
             <span className={SOCIAL_HOME_STORY_CREATE_LABEL_CLASS}>{SOCIAL.stories.create}</span>
           </Link>
@@ -168,14 +178,11 @@ export function SocialStoriesRail({
             <div className={cn(cardClass, "bg-hairline")}>
               <div className={cn(faceClass, "bg-surface-muted")}>
                 <span className={SOCIAL_STORIES_PLUS_WELL_CLASS}>
-                  <SocialIcon
-                    name="plus"
-                    active
-                    size={SOCIAL_ICON_SIZE_STORY_PLUS}
-                    className="text-accent-contrast"
-                  />
+                  <StoryCreatePlus />
                 </span>
-                <p className="text-center t-label font-medium text-ink">{SOCIAL.stories.create}</p>
+                <p className={cn("text-center", SOCIAL_STORY_CREATE_LABEL_TYPE_CLASS)}>
+                  {SOCIAL.stories.create}
+                </p>
               </div>
             </div>
             <p className="t-label font-medium text-ink">{SOCIAL.stories.you}</p>
@@ -217,12 +224,7 @@ export function SocialStoriesRail({
             <span className="flex size-[68px] items-center justify-center rounded-full border-[3px] border-hairline">
               <span className="flex size-[58px] items-center justify-center rounded-full bg-surface-muted">
                 <span className={SOCIAL_STORIES_PLUS_WELL_CLASS}>
-                  <SocialIcon
-                    name="plus"
-                    active
-                    size={SOCIAL_ICON_SIZE_STORY_PLUS}
-                    className="text-accent-contrast"
-                  />
+                  <StoryCreatePlus />
                 </span>
               </span>
             </span>
