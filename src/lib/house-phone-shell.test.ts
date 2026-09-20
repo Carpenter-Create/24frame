@@ -303,6 +303,11 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(housePhoneWorkspaceSelected("aggregation", "/help", "aggregation")).toBe(false);
     expect(housePhoneWorkspaceSelected("home", "/help", "aggregation")).toBe(false);
     expect(housePhoneWorkspaceSelected("co-productions", "/help", "education")).toBe(false);
+    expect(housePhoneWorkspaceSelected("aggregation", "/activity", "aggregation")).toBe(false);
+    expect(housePhoneWorkspaceSelected("social", "/activity", "social")).toBe(false);
+    expect(housePhoneWorkspaceSelected("education", "/activity", "education")).toBe(false);
+    expect(housePhoneWorkspaceSelected("home", "/activity", "aggregation")).toBe(false);
+    expect(housePhoneWorkspaceSelected("co-productions", "/activity", "education")).toBe(false);
   });
 
   it("splits phone chrome size SoT — bottom nav size-6, header trailing size-4, no alias", () => {
@@ -573,6 +578,8 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(housePhoneShowsDestChips({ workspace: "aggregation", settingsPage: true })).toBe(false);
     expect(housePhoneShowsDestChips({ workspace: "education", helpPage: true })).toBe(false);
     expect(housePhoneShowsDestChips({ workspace: "social", helpPage: true })).toBe(false);
+    expect(housePhoneShowsDestChips({ workspace: "aggregation", activityPage: true })).toBe(false);
+    expect(housePhoneShowsDestChips({ workspace: "social", activityPage: true })).toBe(false);
 
     expect(housePhoneDestinations(false, "aggregation").map((item) => item.label)).toEqual([
       "Dashboard",

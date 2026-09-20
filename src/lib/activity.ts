@@ -1,3 +1,4 @@
+import { DASHBOARD_HREF } from "@/lib/dashboard-admin";
 import { HOUSE_THEME_TOGGLE_CLASS } from "@/lib/house-lead-chrome";
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
 import { NOTIFICATION_EMAIL, type NotificationKind } from "@/lib/notifications";
@@ -7,7 +8,13 @@ import {
   type NotificationPrefFamilyId,
 } from "@/lib/notification-prefs";
 import { PRODUCT_NAME } from "@/lib/product";
-import { SETTINGS } from "@/lib/settings";
+import {
+  SETTINGS,
+  SETTINGS_EDIT_HELPER_CLASS,
+  SETTINGS_PANE_CLASS,
+  SETTINGS_PANE_TITLE_CLASS,
+  SETTINGS_SECTION_CLASS,
+} from "@/lib/settings";
 import { socialRelativeTime } from "@/lib/social";
 
 // Activity is the live uncleared-alert feed. One feed: notifications.
@@ -19,7 +26,10 @@ import { socialRelativeTime } from "@/lib/social";
 //
 // Adam lock 2026-09-19: chrome-level /activity. Account alerts
 // span Aggregation · Reporting · Social · Education · Account.
-// Not an Aggregation destination. Bell is the door.
+// Not an Aggregation destination. Bell is the door. Same family as
+// Settings and Get Help (#539): account chrome, no workspace thumb,
+// no product rail, Settings-measure canvas, page-lead SoT. Do not
+// import SettingsPageLead or put this in Settings hub chrome.
 
 export const ACTIVITY_HREF = "/activity";
 export const ACTIVITY_PREFS_HREF = SETTINGS.notificationsHref;
@@ -37,6 +47,8 @@ export type ActivityFamily = (typeof ACTIVITY_FAMILIES)[number];
 export const ACTIVITY_PAGE = {
   title: "Activity",
   subtitle: `Account alerts from ${PRODUCT_NAME}.`,
+  back: "Back",
+  homeHref: DASHBOARD_HREF,
   all: "All",
   prefs: "Notification preferences",
   dismiss: "Mark done",
@@ -49,6 +61,15 @@ export const ACTIVITY_PAGE = {
   close: "Close activity",
   navAria: "Activity",
 } as const;
+
+export const ACTIVITY_PAGE_CLASS = SETTINGS_PANE_CLASS;
+export const ACTIVITY_SECTION_CLASS = SETTINGS_SECTION_CLASS;
+export const ACTIVITY_TITLE_CLASS = SETTINGS_PANE_TITLE_CLASS;
+export const ACTIVITY_HELPER_CLASS = SETTINGS_EDIT_HELPER_CLASS;
+// Phone stacks gear under the lead. Desktop keeps the prefs hit
+// trailing. Never truncate the title to hug the icon.
+export const ACTIVITY_LEAD_ROW_CLASS =
+  "flex flex-col gap-[var(--space-4)] md:flex-row md:items-start md:justify-between";
 
 // Family chips share house segmented SoT. Phone may scroll the row
 // so labels stay whole. Never ellipsis.
@@ -86,6 +107,16 @@ export function isActivityOpen(item: Pick<ActivityItem, "unread">): boolean {
 
 export function isActivityPath(pathname: string): boolean {
   return pathname === ACTIVITY_HREF || pathname.startsWith(`${ACTIVITY_HREF}/`);
+}
+
+export function activityHeaderBack(pathname: string | null | undefined): {
+  href: string;
+  label: string;
+} {
+  if (!pathname || pathname === ACTIVITY_HREF) {
+    return { href: ACTIVITY_PAGE.homeHref, label: ACTIVITY_PAGE.back };
+  }
+  return { href: ACTIVITY_HREF, label: ACTIVITY_PAGE.title };
 }
 
 export function parseActivityFamily(raw: string | string[] | undefined): ActivityFamily {

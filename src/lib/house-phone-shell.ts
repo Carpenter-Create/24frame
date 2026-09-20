@@ -243,13 +243,15 @@ export function housePhoneShowsDestChips({
   homeChrome = false,
   settingsPage = false,
   helpPage = false,
+  activityPage = false,
 }: {
   workspace: WorkspaceMode;
   homeChrome?: boolean;
   settingsPage?: boolean;
   helpPage?: boolean;
+  activityPage?: boolean;
 }): boolean {
-  if (homeChrome || settingsPage || helpPage) return false;
+  if (homeChrome || settingsPage || helpPage || activityPage) return false;
   return workspace === "social" || workspace === "aggregation" || workspace === "education";
 }
 

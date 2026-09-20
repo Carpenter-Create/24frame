@@ -13,7 +13,7 @@ import { RailCollapse } from "./rail-collapse";
 import { AskAssistantChromeProvider } from "@/components/messages/ask-globee-chrome";
 import { AskAiOverlayProvider } from "./ask-ai-overlay";
 import { cn } from "@/lib/cn";
-import type { ActivityItem } from "@/lib/activity";
+import { isActivityPath, type ActivityItem } from "@/lib/activity";
 import type { AppShellChrome } from "@/lib/app-shell-chrome";
 import type { MessagesSurface } from "@/lib/ask-globee";
 import {
@@ -149,11 +149,12 @@ export function AppShell({
   const homePage = pathname === "/" || homeChrome;
   const settingsPage = isSettingsPath(pathname);
   const helpPage = isHelpPath(pathname);
-  // Get Help is account chrome: hide the product rail (Education /
-  // Aggregation / Social dests) without taking Home frame chrome.
-  // Settings keeps its own rail. Activity still shows Access dests.
-  const hideProductRail = homeChrome || helpPage;
-  const socialChrome = workspace === "social" && !settingsPage && !homeChrome && !helpPage;
+  const activityPage = isActivityPath(pathname);
+  // Get Help and Activity are account chrome: hide the product rail
+  // (Education / Aggregation / Social dests) without taking Home
+  // frame chrome. Settings keeps its own rail.
+  const hideProductRail = homeChrome || helpPage || activityPage;
+  const socialChrome = workspace === "social" && !settingsPage && !hideProductRail;
 
   useEffect(() => {
     migrateSidebarCollapsedCookie(collapsed);
@@ -257,9 +258,10 @@ export function AppShell({
     {cookieSync}
     <HousePhoneAppShell
       workspace={workspace}
-      data-education-workspace={workspace === "education" && !helpPage ? "" : undefined}
+      data-education-workspace={workspace === "education" && !helpPage && !activityPage ? "" : undefined}
       data-home-chrome={homeChrome ? "" : undefined}
       data-help-chrome={helpPage ? "" : undefined}
+      data-activity-chrome={activityPage ? "" : undefined}
       style={collapseWidthStyle}
     >
       {hideProductRail ? null : (
@@ -314,7 +316,7 @@ export function AppShell({
           second phone switcher. Studio secondary rail stays HOLD. */}
       <HouseLeadChrome
         workspace={workspace}
-        settingsPage={settingsPage || helpPage}
+        settingsPage={settingsPage || helpPage || activityPage}
         logoVisible="always"
         destChips={
           settingsPage || hideProductRail ? undefined : (
@@ -322,14 +324,14 @@ export function AppShell({
           )
         }
         search={
-          workspace === "education" && !settingsPage && !helpPage ? (
+          workspace === "education" && !settingsPage && !helpPage && !activityPage ? (
             <Suspense fallback={null}>
               <HouseLeadSearch tone="quiet" />
             </Suspense>
           ) : undefined
         }
         underNav={
-          workspace === "education" && !settingsPage && !helpPage ? (
+          workspace === "education" && !settingsPage && !helpPage && !activityPage ? (
             <Suspense fallback={null}>
               <HouseLeadSearch tone="quiet" inputId="education-header-q-phone" />
             </Suspense>
