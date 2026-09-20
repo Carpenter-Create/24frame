@@ -39,15 +39,17 @@
 // lane (#320). No current-workspace identity header. No
 // Settings section — Settings stays on the avatar menu.
 //
-// Three workspaces only. Hide lanes the user/org lacks — no
-// dead / grey-lie pills. Single option → static label. Labels
-// stay Aggregation · Social · Education at every breakpoint —
+// Member lanes are Aggregation · Social · Education. Staff is a
+// fourth lane, visible only when isGcStaff — hide lanes the
+// user/org lacks; no dead / grey-lie pills. Single option →
+// static label. Labels stay full words at every breakpoint —
 // no Agg, Edu, or ellipsis-as-design. Tight width flexes the
 // trailing cluster (search yields); pills stay full words and
 // shrink-0. No All Accounts clone. No Referrals / billing.
 // Staff Manage courses lives on the Education workspace
-// (/education/manage), not Settings Preferences and not a
-// fourth lane. Education land is /education.
+// (/education/manage), not Settings Preferences and not this
+// Staff lane. Education land is /education. Staff land is
+// /aggregation/queue.
 // Education quiet search stays Education-only: phone in a
 // full-width row under HouseLeadChrome, desktop in the shared
 // mid-lead slot (same Facebook-compact geometry as Social).
@@ -107,6 +109,8 @@ export const WORKSPACE_SWITCHER_MARK = {
   aggregation: "A",
   social: "S",
   education: "E",
+  // T — distinct from Social S. Switcher label is Staff, not Team.
+  staff: "T",
 } as const satisfies Record<WorkspaceMode, string>;
 
 export type WorkspaceSwitcherTone = "plain" | "pill";

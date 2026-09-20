@@ -34,7 +34,8 @@ describe("Avails staff surface", () => {
     expect(NAV.map((item) => item.href)).not.toContain(AVAILS_HREF);
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain(AVAILS_HREF);
     expect(railDestinations(false).staffItems).toEqual([]);
-    expect(railDestinations(true).staffItems.map((item) => item.href)).toContain(AVAILS_HREF);
+    expect(railDestinations(true).staffItems).toEqual([]);
+    expect(railDestinations(true, "staff").items.map((item) => item.href)).toContain(AVAILS_HREF);
     expect(SETTINGS_RAIL_ABSENT).toContain(AVAILS_PAGE.title);
     expect(ACCOUNT_SHEET_ABSENT).toContain(AVAILS_PAGE.title);
   });

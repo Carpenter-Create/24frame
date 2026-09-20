@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   isEducationPath,
   isSocialPath,
+  isStaffPath,
   parseWorkspaceCookie,
   resolveWorkspaceMode,
   WORKSPACE_COOKIE,
@@ -12,19 +13,22 @@ import {
 } from "./workspace";
 
 describe("workspace mode", () => {
-  it("persists aggregation, social, or education in a cookie like the rail collapse", () => {
+  it("persists aggregation, social, education, or staff in a cookie like the rail collapse", () => {
     expect(WORKSPACE_COOKIE).toBe("24frame_workspace");
-    expect(WORKSPACE_MODES).toEqual(["aggregation", "social", "education"]);
+    expect(WORKSPACE_MODES).toEqual(["aggregation", "social", "education", "staff"]);
     expect(WORKSPACE_MODES).not.toContain("news");
     expect(parseWorkspaceCookie(undefined)).toBe("aggregation");
     expect(parseWorkspaceCookie("social")).toBe("social");
     expect(parseWorkspaceCookie("education")).toBe("education");
+    expect(parseWorkspaceCookie("staff")).toBe("staff");
     expect(parseWorkspaceCookie("nope")).toBe("aggregation");
     expect(workspaceCookieWrite("social")).toContain("24frame_workspace=social");
     expect(workspaceCookieWrite("education")).toContain("24frame_workspace=education");
+    expect(workspaceCookieWrite("staff")).toContain("24frame_workspace=staff");
     expect(workspaceHome("social")).toBe("/social");
     expect(workspaceHome("education")).toBe("/education");
     expect(workspaceHome("aggregation")).toBe("/aggregation/dashboard");
+    expect(workspaceHome("staff")).toBe("/aggregation/queue");
     expect(workspaceHome("education")).not.toBe("/social/courses");
   });
 
@@ -72,5 +76,38 @@ describe("workspace mode", () => {
     expect(resolveWorkspaceMode("/help", "education")).toBe("education");
     expect(resolveWorkspaceMode("/co-productions", "social")).toBe("social");
     expect(resolveWorkspaceMode("/co-productions", "education")).toBe("education");
+    expect(resolveWorkspaceMode("/activity", "staff")).toBe("staff");
+    expect(resolveWorkspaceMode("/settings", "staff")).toBe("staff");
+    expect(resolveWorkspaceMode("/help", "staff")).toBe("staff");
+    expect(resolveWorkspaceMode("/co-productions", "staff")).toBe("staff");
+  });
+
+  it("resolves operator paths to staff and keeps client Aggregation paths aggregation", () => {
+    expect(isStaffPath("/aggregation/queue")).toBe(true);
+    expect(isStaffPath("/aggregation/avails")).toBe(true);
+    expect(isStaffPath("/aggregation/channels")).toBe(true);
+    expect(isStaffPath("/aggregation/channels/new")).toBe(true);
+    expect(isStaffPath("/aggregation/gc/deliveries")).toBe(true);
+    expect(isStaffPath("/aggregation/gc/finance")).toBe(true);
+    expect(isStaffPath("/aggregation/gc/clients")).toBe(true);
+    expect(isStaffPath("/aggregation/gc/titles/abc")).toBe(true);
+    expect(isStaffPath("/aggregation/dashboard")).toBe(false);
+    expect(isStaffPath("/aggregation/titles")).toBe(false);
+    expect(isStaffPath("/aggregation/attention")).toBe(false);
+    expect(isStaffPath("/aggregation/reports")).toBe(false);
+    expect(isStaffPath("/home")).toBe(false);
+    expect(resolveWorkspaceMode("/aggregation/queue", "aggregation")).toBe("staff");
+    expect(resolveWorkspaceMode("/aggregation/avails", "social")).toBe("staff");
+    expect(resolveWorkspaceMode("/aggregation/gc/deliveries", "education")).toBe("staff");
+    expect(resolveWorkspaceMode("/aggregation/channels/abc/edit", "aggregation")).toBe("staff");
+    expect(resolveWorkspaceMode("/aggregation/gc/finance/p1", "aggregation")).toBe("staff");
+    expect(resolveWorkspaceMode("/aggregation/gc/clients/org", "social")).toBe("staff");
+    expect(resolveWorkspaceMode("/aggregation/dashboard", "staff")).toBe("aggregation");
+    expect(resolveWorkspaceMode("/aggregation/titles/1", "staff")).toBe("aggregation");
+    expect(resolveWorkspaceMode("/aggregation/attention", "staff")).toBe("aggregation");
+    expect(resolveWorkspaceMode("/aggregation/reports", "staff")).toBe("aggregation");
+    expect(resolveWorkspaceMode("/home", "staff")).toBe("aggregation");
+    expect(resolveWorkspaceMode("/home/news", "staff")).toBe("aggregation");
+    expect(resolveWorkspaceMode("/education/manage", "staff")).toBe("education");
   });
 });

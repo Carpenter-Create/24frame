@@ -61,8 +61,8 @@ type Org = { id: string; name: string };
 // state persists in a cookie (read by the (app) layout → `defaultCollapsed`, so there's no
 // flash) and, when collapsed, overrides `--sidebar-width` so the header + main follow.
 // Phone: the rail is gone (hidden + width tokens collapse). Local dests
-// live in HousePhoneBottomNav — client dests, or those plus staff dests
-// when isGcStaff. Workspace switch is the header sheet. No hamburger.
+// live in HousePhoneBottomNav — client dests on Aggregation, operator
+// dests on Staff. Workspace switch is the header sheet. No hamburger.
 // One return tree — Social is a flag, not a second shell. Workspace
 // hops keep chrome mounted so the sheet and dock do not freeze.
 // Desktop 1:2 rail is unchanged.
@@ -271,7 +271,9 @@ export function AppShell({
           leftover `/messages` path (retired — 404), and on mobile `/titles` (528:542).
           Phone avatar opens 544:561. Do not invent Move chrome or a
           second phone switcher. Studio secondary rail stays HOLD. */}
-      <HouseLeadChrome
+      <HouseLeadChromeSlot
+        chrome={chrome}
+        isGcStaff={isGcStaff}
         workspace={workspace}
         settingsPage={settingsPage || helpPage || activityPage}
         logoVisible="always"
@@ -419,6 +421,52 @@ function ChromeCookieSync({
     onIdentity,
   ]);
   return null;
+}
+
+function HouseLeadChromeSlot({
+  chrome,
+  isGcStaff,
+  ...props
+}: {
+  chrome?: Promise<AppShellChrome>;
+  isGcStaff: boolean;
+  workspace: WorkspaceMode;
+  settingsPage?: boolean;
+  logoVisible?: "always" | "desktop";
+  search?: React.ReactNode;
+  underNav?: React.ReactNode;
+  trailingSearch?: React.ReactNode;
+  activityUnread?: Promise<number> | number;
+  activityItems?: Promise<ActivityItem[]> | ActivityItem[];
+  accountMenu: React.ReactNode;
+}) {
+  if (!chrome) {
+    return <HouseLeadChrome isGcStaff={isGcStaff} {...props} />;
+  }
+  return (
+    <Suspense fallback={<HouseLeadChrome isGcStaff={isGcStaff} {...props} />}>
+      <HouseLeadChromeFromChrome chrome={chrome} {...props} />
+    </Suspense>
+  );
+}
+
+function HouseLeadChromeFromChrome({
+  chrome,
+  ...props
+}: {
+  chrome: Promise<AppShellChrome>;
+  workspace: WorkspaceMode;
+  settingsPage?: boolean;
+  logoVisible?: "always" | "desktop";
+  search?: React.ReactNode;
+  underNav?: React.ReactNode;
+  trailingSearch?: React.ReactNode;
+  activityUnread?: Promise<number> | number;
+  activityItems?: Promise<ActivityItem[]> | ActivityItem[];
+  accountMenu: React.ReactNode;
+}) {
+  const data = use(chrome);
+  return <HouseLeadChrome isGcStaff={data.isGcStaff} {...props} />;
 }
 
 function SideNavSlot({

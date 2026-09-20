@@ -153,12 +153,8 @@ describe("GC_NAV", () => {
     ]);
   });
 
-  it("keeps the full staff rail — client destinations then the operator set", () => {
-    expect([...NAV, ...GC_NAV].map((item) => item.label)).toEqual([
-      "Dashboard",
-      "Titles",
-      "Recent activity",
-      "Reports",
+  it("keeps operator dests on GC_NAV and never concatenates them under Aggregation", () => {
+    expect(GC_NAV.map((item) => item.label)).toEqual([
       "Queue",
       "Avails",
       "Licensing Status",
@@ -166,12 +162,13 @@ describe("GC_NAV", () => {
       "Finance",
       "Clients",
     ]);
-    expect([...NAV, ...GC_NAV].map((item) => item.label)).not.toContain("Ask 24Frame AI");
+    expect(GC_NAV.map((item) => item.label)).not.toContain("Ask 24Frame AI");
     expect(GC_NAV.map((item) => item.label)).not.toContain("Earn");
     expect(STAFF_RAIL_EYEBROW).toBe("Team");
     expect(STAFF_RAIL_EYEBROW).not.toBe("Staff");
     expect(STAFF_RAIL_EYEBROW).not.toBe("24Frame");
     expect(STAFF_RAIL_EYEBROW).not.toBe("24FRAME");
+    expect(navSrc).not.toContain("[...NAV, ...GC_NAV]");
   });
 
   it("does not include the client deliveries path", () => {
@@ -198,12 +195,20 @@ describe("mobileNavDestinations", () => {
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/home/news");
   });
 
-  it("gives staff the operator destinations plus the client destinations", () => {
+  it("keeps Aggregation on client dests even for GC staff — Staff mode is GC_NAV only", () => {
     expect(mobileNavDestinations(true).map((item) => item.label)).toEqual([
       "Dashboard",
       "Titles",
       "Recent activity",
       "Reports",
+    ]);
+    expect(mobileNavDestinations(true, "aggregation").map((item) => item.label)).toEqual([
+      "Dashboard",
+      "Titles",
+      "Recent activity",
+      "Reports",
+    ]);
+    expect(mobileNavDestinations(true, "staff").map((item) => item.label)).toEqual([
       "Queue",
       "Avails",
       "Licensing Status",
@@ -211,8 +216,42 @@ describe("mobileNavDestinations", () => {
       "Finance",
       "Clients",
     ]);
+    expect(mobileNavDestinations(false, "staff").map((item) => item.label)).toEqual([
+      "Dashboard",
+      "Titles",
+      "Recent activity",
+      "Reports",
+    ]);
+    expect(mobileNavDestinations(true, "aggregation").map((item) => item.label)).not.toContain(
+      "Queue",
+    );
+    expect(mobileNavDestinations(true, "staff").map((item) => item.label)).not.toContain(
+      "Dashboard",
+    );
     expect(mobileNavDestinations(true).map((item) => item.label)).not.toContain("Activity");
     expect(mobileNavDestinations(true).map((item) => item.label)).not.toContain("Ask 24Frame AI");
+    expect(railDestinations(true, "aggregation").staffItems).toEqual([]);
+    expect(railDestinations(true, "aggregation").items.map((item) => item.href)).toEqual([
+      "/aggregation/dashboard",
+      "/aggregation/titles",
+      "/aggregation/attention",
+      "/aggregation/reports",
+    ]);
+    expect(railDestinations(true, "staff").items.map((item) => item.href)).toEqual([
+      "/aggregation/queue",
+      "/aggregation/avails",
+      "/aggregation/gc/deliveries",
+      "/aggregation/channels",
+      "/aggregation/gc/finance",
+      "/aggregation/gc/clients",
+    ]);
+    expect(railDestinations(true, "staff").staffItems).toEqual([]);
+    expect(railDestinations(false, "staff").items.map((item) => item.label)).toEqual([
+      "Dashboard",
+      "Titles",
+      "Recent activity",
+      "Reports",
+    ]);
   });
 
   it("shows Social destinations only in Social mode — DMs are not /messages", () => {
@@ -332,7 +371,8 @@ describe("mobileNavDestinations", () => {
     expect(isSocialTabActive("/social/profile/edit/bio", SOCIAL_NAV[4])).toBe(true);
     expect(isSocialTabActive("/social/explore", SOCIAL_NAV[0])).toBe(false);
     expect(railDestinations(true, "social").staffItems).toEqual([]);
-    expect(railDestinations(true, "aggregation").staffItems.map((item) => item.href)).toContain(
+    expect(railDestinations(true, "aggregation").staffItems).toEqual([]);
+    expect(railDestinations(true, "staff").items.map((item) => item.href)).toContain(
       "/aggregation/queue",
     );
   });

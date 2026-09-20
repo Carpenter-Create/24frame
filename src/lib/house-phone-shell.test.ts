@@ -385,6 +385,7 @@ describe("phone app-shell IA A — dest dock + header workspace sheet", () => {
     expect(housePhoneShowsBottomDests({ workspace: "aggregation" })).toBe(true);
     expect(housePhoneShowsBottomDests({ workspace: "education" })).toBe(true);
     expect(housePhoneShowsBottomDests({ workspace: "social" })).toBe(true);
+    expect(housePhoneShowsBottomDests({ workspace: "staff" })).toBe(true);
     expect(housePhoneShowsBottomDests({ workspace: "aggregation", homeOwned: true })).toBe(true);
     expect(housePhoneShowsBottomDests({ workspace: "aggregation", accountChrome: true })).toBe(false);
     expect(housePhoneShowsBottomDests({ workspace: "education", accountChrome: true })).toBe(false);
@@ -401,6 +402,8 @@ describe("phone app-shell IA A — dest dock + header workspace sheet", () => {
       "Titles",
       "Recent activity",
       "Reports",
+    ]);
+    expect(housePhoneDestinations(true, "staff").map((item) => item.label)).toEqual([
       "Queue",
       "Avails",
       "Licensing Status",
@@ -408,6 +411,9 @@ describe("phone app-shell IA A — dest dock + header workspace sheet", () => {
       "Finance",
       "Clients",
     ]);
+    expect(housePhoneDestinations(true, "aggregation").map((item) => item.label)).not.toContain(
+      "Queue",
+    );
     expect(housePhoneDestinations(false, "aggregation").map((item) => item.label)).not.toContain(
       ASK_GLOBEE.headline,
     );
@@ -455,10 +461,17 @@ describe("phone app-shell IA A — dest dock + header workspace sheet", () => {
 
     navigation.pathname = "/aggregation/queue";
     const staff = renderToStaticMarkup(
-      createElement(HousePhoneBottomNav, { workspace: "aggregation", isGcStaff: true }),
+      createElement(HousePhoneBottomNav, { workspace: "staff", isGcStaff: true }),
     );
     expect(staff).toContain('data-house-phone-dest="Queue"');
     expect(staff).toContain('data-house-phone-dest="Channels"');
+    expect(staff).not.toContain('data-house-phone-dest="Dashboard"');
+
+    const staffOnAggregation = renderToStaticMarkup(
+      createElement(HousePhoneBottomNav, { workspace: "aggregation", isGcStaff: true }),
+    );
+    expect(staffOnAggregation).toContain('data-house-phone-dest="Dashboard"');
+    expect(staffOnAggregation).not.toContain('data-house-phone-dest="Queue"');
 
     navigation.pathname = "/education";
     const education = renderToStaticMarkup(

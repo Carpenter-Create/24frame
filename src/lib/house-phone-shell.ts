@@ -68,6 +68,7 @@ import {
 import {
   WORKSPACE_EDUCATION_HREF,
   WORKSPACE_EDUCATION_LABEL,
+  WORKSPACE_STAFF_LABEL,
 } from "@/lib/workspace-menu";
 import { workspaceHome, type WorkspaceMode } from "@/lib/workspace";
 
@@ -235,7 +236,12 @@ export function housePhoneShowsBottomDests({
 }): boolean {
   if (accountChrome || coProductions) return false;
   if (homeOwned) return true;
-  return workspace === "social" || workspace === "aggregation" || workspace === "education";
+  return (
+    workspace === "social" ||
+    workspace === "aggregation" ||
+    workspace === "education" ||
+    workspace === "staff"
+  );
 }
 
 export function housePhoneDestinations(
@@ -286,6 +292,7 @@ export function housePhoneDestActiveIndex(
 export function housePhoneDestChipsLabel(workspace: WorkspaceMode): string {
   if (workspace === "social") return WORKSPACE_SOCIAL_LABEL;
   if (workspace === "education") return WORKSPACE_EDUCATION_LABEL;
+  if (workspace === "staff") return WORKSPACE_STAFF_LABEL;
   return WORKSPACE_AGGREGATION_LABEL;
 }
 

@@ -225,12 +225,8 @@ describe("staff /channels card grid", () => {
 });
 
 describe("staff rail and neighboring locks", () => {
-  it("keeps the full staff rail", () => {
-    expect([...NAV, ...GC_NAV].map((item) => item.label)).toEqual([
-      "Dashboard",
-      "Titles",
-      "Recent activity",
-      "Reports",
+  it("keeps operator dests on GC_NAV, not concatenated under Aggregation", () => {
+    expect(GC_NAV.map((item) => item.label)).toEqual([
       "Queue",
       "Avails",
       "Licensing Status",
@@ -238,7 +234,13 @@ describe("staff rail and neighboring locks", () => {
       "Finance",
       "Clients",
     ]);
-    expect([...NAV, ...GC_NAV].map((item) => item.label)).not.toContain("Ask 24Frame AI");
+    expect(NAV.map((item) => item.label)).toEqual([
+      "Dashboard",
+      "Titles",
+      "Recent activity",
+      "Reports",
+    ]);
+    expect(GC_NAV.map((item) => item.label)).not.toContain("Ask 24Frame AI");
   });
 
   it("does not restyle Ask Globee, client home, Access, or /aggregation/titles", () => {

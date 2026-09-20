@@ -205,9 +205,11 @@ describe("AppShell header", () => {
     expect(shellSrc).not.toContain('homeChrome ? "always" : "desktop"');
     expect(leadSrc).toContain('logoVisible = "always"');
     expect(shellSrc).toContain("HouseLeadChrome");
+    expect(shellSrc).toContain("HouseLeadChromeSlot");
+    expect(shellSrc).toContain("isGcStaff={data.isGcStaff}");
     expect(leadSrc).toContain("WorkspaceSwitcher");
     expect(leadSrc).toContain('tone="pill"');
-    expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
+    expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} options={workspaceOptions} presentation="pills" />');
     expect(html).toContain("data-workspace-switcher");
     expect(html).toContain("data-house-lead-scroll");
     expect(html).toContain("h-dvh");
@@ -243,7 +245,7 @@ describe("AppShell header", () => {
     expect(shellSrc).not.toContain("OrganizationSwitcher");
     expect(leadSrc).toContain("HOUSE_LEAD_CHROME_CLASS");
     expect(leadSrc).toContain('tone="pill"');
-    expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
+    expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} options={workspaceOptions} presentation="pills" />');
 
     for (const path of ["/", "/aggregation/titles", "/aggregation/attention", "/activity"]) {
       navigation.pathname = path;
@@ -941,6 +943,36 @@ describe("AppShell rail-collapse chevron", () => {
     expect(pending).not.toContain("data-mobile-nav-trigger");
     expect(pending).toContain("data-house-phone-bottom-nav");
 
+    navigation.pathname = "/aggregation/dashboard";
+    const aggregationStaff = renderToStaticMarkup(
+      <AppShell
+        isGcStaff
+        chrome={fulfilledChrome({
+          email: "ada@example.com",
+          name: "Ada",
+          photoUrl: null,
+          orgs: [],
+          activeOrgId: null,
+          unread: Promise.resolve(0),
+          activityItems: Promise.resolve([]),
+          isGcStaff: true,
+          defaultCollapsed: false,
+          messagesSurface: "staff-inbox",
+          defaultWorkspace: "aggregation",
+        })}
+        messagesUnread={Promise.resolve(0)}
+      >
+        page
+      </AppShell>,
+    );
+    expect(aggregationStaff).toContain("data-gc-staff");
+    expect(aggregationStaff).toContain('data-email="ada@example.com"');
+    expect(aggregationStaff).toContain("page");
+    expect(aggregationStaff).toContain('data-house-phone-dest="Dashboard"');
+    expect(aggregationStaff).not.toContain('data-house-phone-dest="Queue"');
+    expect(aggregationStaff).not.toContain('data-house-phone-dest="Ask 24Frame AI"');
+
+    navigation.pathname = "/aggregation/queue";
     const staff = renderToStaticMarkup(
       <AppShell
         isGcStaff
@@ -963,10 +995,9 @@ describe("AppShell rail-collapse chevron", () => {
       </AppShell>,
     );
     expect(staff).toContain("data-gc-staff");
-    expect(staff).toContain('data-email="ada@example.com"');
-    expect(staff).toContain("page");
     expect(staff).toContain('data-house-phone-dest="Queue"');
     expect(staff).toContain('data-house-phone-dest="Channels"');
+    expect(staff).not.toContain('data-house-phone-dest="Dashboard"');
     expect(staff).not.toContain('data-house-phone-dest="Ask 24Frame AI"');
 
     const chromeStaff = renderToStaticMarkup(

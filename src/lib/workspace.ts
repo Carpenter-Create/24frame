@@ -1,7 +1,7 @@
-// One 24Frame account, three workspace destinations. Cookie persists the
-// last chosen mode the same way 24frame_sidebar_collapsed persists the
-// rail. Pathname still wins on destination routes so a /social bookmark
-// shows Social destinations even if the cookie still says aggregation.
+// One 24Frame account, workspace destinations persist in a cookie the
+// same way 24frame_sidebar_collapsed persists the rail. Pathname still
+// wins on destination routes so a /social bookmark shows Social
+// destinations even if the cookie still says aggregation.
 //
 // Adam lock 2026-09-18: workspace owns the first path segment.
 //   Home         /home
@@ -11,6 +11,13 @@
 // Home is Home-owned — never nest /home under /aggregation. /home/news
 // still uses Aggregation chrome so a Social cookie cannot steal it.
 // Not a fifth workspace.
+//
+// Adam lock 2026-09-20: Staff is its own workspace cookie mode — not a
+// Team block inside Aggregation. Chrome-first: operator URLs stay on
+// existing /aggregation/queue, avails, deliveries, channels, finance,
+// gc/clients paths. Those paths resolve to staff. Client Dashboard /
+// Titles / Attention / Reports stay aggregation. Do not migrate to
+// /staff/* in this slice. Staff is switcher-visible only for isGcStaff.
 //
 // Education: member browse/consume and staff CMS share the /education
 // prefix. Role gates chrome, not a parallel product. Member land is
@@ -37,9 +44,21 @@
 
 export const WORKSPACE_COOKIE = "24frame_workspace";
 
-export type WorkspaceMode = "aggregation" | "social" | "education";
+export type WorkspaceMode = "aggregation" | "social" | "education" | "staff";
 
-export const WORKSPACE_MODES = ["aggregation", "social", "education"] as const;
+export const WORKSPACE_MODES = ["aggregation", "social", "education", "staff"] as const;
+
+// Operator surfaces still live under /aggregation (chrome-first).
+// Prefixes match GC_NAV + the (operator) aggregation layout. Client
+// /aggregation/dashboard, titles, attention, reports stay aggregation.
+export const STAFF_PATH_PREFIXES = [
+  "/aggregation/queue",
+  "/aggregation/avails",
+  "/aggregation/channels",
+  "/aggregation/gc",
+] as const;
+
+export const STAFF_HOME_SEGMENT = "queue";
 
 export const AGGREGATION_ROOT = "/aggregation";
 export const HOME_ROOT = "/home";
@@ -60,12 +79,14 @@ export function aggregationPath(...segments: string[]): string {
 export function parseWorkspaceCookie(value: string | undefined | null): WorkspaceMode {
   if (value === "social") return "social";
   if (value === "education") return "education";
+  if (value === "staff") return "staff";
   return "aggregation";
 }
 
 export function workspaceHome(mode: WorkspaceMode): string {
   if (mode === "social") return SOCIAL_ROOT;
   if (mode === "education") return EDUCATION_ROOT;
+  if (mode === "staff") return aggregationPath(STAFF_HOME_SEGMENT);
   return aggregationPath(AGGREGATION_HOME_SEGMENT);
 }
 
@@ -87,7 +108,14 @@ export function isHomePath(pathname: string): boolean {
   return pathname === HOME_ROOT || pathname.startsWith(`${HOME_ROOT}/`);
 }
 
+export function isStaffPath(pathname: string): boolean {
+  return STAFF_PATH_PREFIXES.some(
+    (href) => pathname === href || pathname.startsWith(`${href}/`),
+  );
+}
+
 export function isAggregationPath(pathname: string): boolean {
+  if (isStaffPath(pathname)) return false;
   if (pathname === "/" || pathname === AGGREGATION_ROOT || pathname.startsWith(`${AGGREGATION_ROOT}/`)) {
     return true;
   }
@@ -108,6 +136,7 @@ export function isAggregationNavActive(
 export function resolveWorkspaceMode(pathname: string, cookie: WorkspaceMode): WorkspaceMode {
   if (isEducationPath(pathname)) return "education";
   if (isSocialPath(pathname)) return "social";
+  if (isStaffPath(pathname)) return "staff";
   if (isAggregationPath(pathname)) return "aggregation";
   return cookie;
 }
