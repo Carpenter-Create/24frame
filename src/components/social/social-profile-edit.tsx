@@ -551,7 +551,6 @@ export function SocialProfileEditForm({
                     <Input
                       variant="bare"
                       id={index === 0 ? "social-edit-link-0" : undefined}
-                      name="links"
                       value={value}
                       placeholder={SOCIAL.profile.linkPlaceholder}
                       onChange={(e) => {

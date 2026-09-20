@@ -259,6 +259,19 @@ describe("Social profile public face", () => {
     expect(withLinks).not.toContain(">https://instagram.com/ada<");
     expect(withLinks).toContain('aria-label="Instagram"');
     expect(withLinks).toContain('rel="noopener noreferrer"');
+
+    const unknownHost = renderToStaticMarkup(
+      <SocialProfileIdentity
+        name="Ada Lovelace"
+        handle="ada"
+        photoUrl={null}
+        websiteUrl="https://ada.example/press"
+      />,
+    );
+    expect(unknownHost).toContain('data-social-profile-link="website"');
+    expect(unknownHost).toContain('href="https://ada.example/press"');
+    expect(unknownHost).toContain('aria-label="Website"');
+    expect(unknownHost).not.toContain(">https://ada.example/press<");
     expect(uiSrc).toContain("socialProfileRolesLine");
     expect(
       uiSrc.slice(

@@ -152,6 +152,22 @@ describe("SocialProfileEditForm", () => {
     expect(html).not.toContain("Actress");
   });
 
+  it("loads persisted website_url links so they can be edited or removed", () => {
+    const html = renderToStaticMarkup(
+      <SocialProfileEditForm
+        handle="ada"
+        displayName="Ada Lovelace"
+        bio=""
+        photoUrl={null}
+        websiteUrl={JSON.stringify(["https://instagram.com/ada", "https://youtube.com/@ada"])}
+      />,
+    );
+    expect(html).toContain('value="https://instagram.com/ada"');
+    expect(html).toContain('value="https://youtube.com/@ada"');
+    expect(html).toContain("data-social-profile-edit-link-remove");
+    expect(html).toContain(SOCIAL.profile.addLink);
+  });
+
   it("shows the empty-handle preview URL", () => {
     const html = renderToStaticMarkup(
       <SocialProfileEditForm handle="" displayName="" bio="" photoUrl={null} />,

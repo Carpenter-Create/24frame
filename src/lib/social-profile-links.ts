@@ -30,15 +30,15 @@ export type SocialProfileLink = {
 };
 
 const PLATFORM_HOSTS: Record<Exclude<SocialLinkPlatform, "website">, readonly string[]> = {
-  instagram: ["instagram.com"],
+  instagram: ["instagram.com", "instagr.am"],
   youtube: ["youtube.com", "youtu.be", "m.youtube.com"],
-  facebook: ["facebook.com", "fb.com", "m.facebook.com"],
+  facebook: ["facebook.com", "fb.com", "fb.me", "m.facebook.com"],
   x: ["x.com", "twitter.com"],
   linkedin: ["linkedin.com"],
   tiktok: ["tiktok.com"],
   vimeo: ["vimeo.com"],
   imdb: ["imdb.com"],
-  threads: ["threads.net"],
+  threads: ["threads.net", "threads.com"],
 };
 
 export const SOCIAL_LINK_PLATFORM_LABEL: Record<SocialLinkPlatform, string> = {

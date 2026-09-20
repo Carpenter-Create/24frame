@@ -78,6 +78,22 @@ describe("Social profile edit page", () => {
     expect(html).not.toContain("Education");
   });
 
+  it("loads saved website_url values into the Links fields", async () => {
+    vi.mocked(ensureOwnSocialProfileResult).mockResolvedValue({
+      profile: {
+        ...ensured,
+        website_url: JSON.stringify(["https://instagram.com/ada", "https://youtube.com/@ada"]),
+      },
+      error: null,
+    });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+    const html = renderToStaticMarkup(await SocialProfileEditPage());
+    expect(html).toContain("data-social-profile-edit-links");
+    expect(html).toContain('value="https://instagram.com/ada"');
+    expect(html).toContain('value="https://youtube.com/@ada"');
+    expect(html).toContain("data-social-profile-edit-link-remove");
+  });
+
   it("redirects home when ensure has no profile", async () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
     vi.mocked(ensureOwnSocialProfileResult).mockResolvedValue({

@@ -199,6 +199,24 @@ describe("Social public profile", () => {
     expect(html).not.toContain("Roles:");
   });
 
+  it("renders Instagram as an icon, not a raw URL, and omits the links row when empty", async () => {
+    stubClient({
+      member: { ...ada, website_url: "https://instagram.com/ada" },
+    });
+    const html = await renderPublic();
+    expect(html).toContain("data-social-profile-links");
+    expect(html).toContain('data-social-profile-link="instagram"');
+    expect(html).toContain('href="https://instagram.com/ada"');
+    expect(html).toContain('aria-label="Instagram"');
+    expect(html).toContain('rel="noopener noreferrer"');
+    expect(html).not.toContain(">https://instagram.com/ada<");
+
+    stubClient({ member: ada });
+    const empty = await renderPublic();
+    expect(empty).not.toContain("data-social-profile-links");
+    expect(empty).not.toContain("data-social-profile-link");
+  });
+
   it("prints a quiet IMDb link when the member claim is set", async () => {
     stubClient({
       member: { ...ada, imdb_url: "https://www.imdb.com/name/nm0000158/" },

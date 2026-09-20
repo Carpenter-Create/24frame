@@ -21,8 +21,17 @@ describe("social profile links", () => {
     expect(parseSocialExternalUrl("javascript:alert(1)")).toBeNull();
     expect(parseSocialExternalUrl("notaurl")).toBeNull();
     expect(socialLinkPlatform("https://instagram.com/ada")).toBe("instagram");
+    expect(socialLinkPlatform("https://instagr.am/ada")).toBe("instagram");
     expect(socialLinkPlatform("https://youtu.be/abc")).toBe("youtube");
     expect(socialLinkPlatform("https://x.com/ada")).toBe("x");
+    expect(socialLinkPlatform("https://twitter.com/ada")).toBe("x");
+    expect(socialLinkPlatform("https://www.facebook.com/ada")).toBe("facebook");
+    expect(socialLinkPlatform("https://fb.me/ada")).toBe("facebook");
+    expect(socialLinkPlatform("https://www.linkedin.com/in/ada")).toBe("linkedin");
+    expect(socialLinkPlatform("https://www.tiktok.com/@ada")).toBe("tiktok");
+    expect(socialLinkPlatform("https://vimeo.com/123")).toBe("vimeo");
+    expect(socialLinkPlatform("https://www.threads.net/@ada")).toBe("threads");
+    expect(socialLinkPlatform("https://www.threads.com/@ada")).toBe("threads");
     expect(socialLinkPlatform("https://www.imdb.com/name/nm0000158/")).toBe("imdb");
     expect(socialLinkPlatform("https://ada.example")).toBe("website");
   });
@@ -80,5 +89,16 @@ describe("social profile links", () => {
     expect(doubled[0]?.platform).toBe("imdb");
     expect(doubled[0]?.label).toBe(SOCIAL.profile.imdb);
     expect(socialProfilePublicLinks({ websiteUrl: null, imdbUrl: null })).toEqual([]);
+
+    const unknown = socialProfilePublicLinks({
+      websiteUrl: "https://ada.example/press",
+    });
+    expect(unknown).toEqual([
+      {
+        url: "https://ada.example/press",
+        platform: "website",
+        label: "Website",
+      },
+    ]);
   });
 });
