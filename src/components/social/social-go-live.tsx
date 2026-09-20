@@ -112,6 +112,7 @@ export function SocialGoLive() {
   const clipUrlRef = useRef<string | null>(null);
   const liveRef = useRef(0);
   const aliveRef = useRef(true);
+  const attachPromiseRef = useRef<Promise<boolean> | null>(null);
 
   const [phase, setPhase] = useState<LivePhase>("preview");
   const [facing, setFacing] = useState<StoryStudioFacing>("user");
@@ -216,6 +217,26 @@ export function SocialGoLive() {
     return true;
   }
 
+  function ensurePreview(nextFacing: StoryStudioFacing = facing): Promise<boolean> {
+    if (streamRef.current) return Promise.resolve(true);
+    if (attachPromiseRef.current) return attachPromiseRef.current;
+    const live = liveRef.current;
+    const pending = attachPreview(nextFacing, live)
+      .then((ready) => ready && Boolean(streamRef.current))
+      .catch(() => {
+        if (storyStudioIsLive(liveRef.current, live)) {
+          releasePreview();
+          setError(SOCIAL.stories.permission);
+        }
+        return false;
+      })
+      .finally(() => {
+        if (attachPromiseRef.current === pending) attachPromiseRef.current = null;
+      });
+    attachPromiseRef.current = pending;
+    return pending;
+  }
+
   useEffect(() => {
     let cancelled = false;
     const live = nextStoryStudioLive(liveRef.current);
@@ -231,13 +252,7 @@ export function SocialGoLive() {
         return;
       }
       mimeRef.current = probed.mimeType;
-      try {
-        await attachPreview(facing, live);
-      } catch {
-        if (!storyStudioIsLive(liveRef.current, live) || cancelled) return;
-        releasePreview();
-        setError(SOCIAL.stories.permission);
-      }
+      await ensurePreview(facing);
     })();
     return () => {
       cancelled = true;
@@ -348,24 +363,17 @@ export function SocialGoLive() {
 
   function startRecording() {
     setError("");
-    const stream = streamRef.current;
-    if (stream) {
-      beginRecording(stream);
+    if (streamRef.current) {
+      beginRecording(streamRef.current);
       return;
     }
-    const live = liveRef.current;
-    void attachPreview(facing, live)
-      .then((ready) => {
-        if (!ready || !streamRef.current) {
-          setError(SOCIAL.stories.unavailable);
-          return;
-        }
-        beginRecording(streamRef.current);
-      })
-      .catch(() => {
-        if (!storyStudioIsLive(liveRef.current, live)) return;
-        setError(SOCIAL.stories.permission);
-      });
+    void ensurePreview().then((ready) => {
+      if (!ready || !streamRef.current) {
+        setError((current) => current || SOCIAL.stories.unavailable);
+        return;
+      }
+      beginRecording(streamRef.current);
+    });
   }
 
   function stopRecording() {
@@ -381,43 +389,33 @@ export function SocialGoLive() {
     setError("");
     setPhase("preview");
     if (streamRef.current) return;
-    const live = liveRef.current;
-    void attachPreview(facing, live).catch(() => {
-      if (!storyStudioIsLive(liveRef.current, live)) return;
-      setError(SOCIAL.stories.permission);
-    });
+    void ensurePreview();
   }
 
   async function postClip() {
     if (!clip || posting) return;
     setError("");
     setPosting(true);
-    try {
-      const uploaded = await uploadLiveVideo(clip.file);
-      if (!aliveRef.current) return;
-      if (uploaded.error || !uploaded.item) {
-        setPosting(false);
-        setError(uploaded.error ?? SOCIAL.home.uploadFailed);
-        return;
-      }
-      const form = new FormData();
-      form.set("body", body);
-      form.set("media", JSON.stringify([uploaded.item]));
-      ingestSpeechLearning({
-        text: body,
-        source: "typed",
-        workspace: "social",
-      });
-      const result = await createSocialPost(form);
-      if (!aliveRef.current) return;
-      if (result?.error) {
-        setPosting(false);
-        setError(result.error);
-      }
-    } catch {
-      if (!aliveRef.current) return;
+    const uploaded = await uploadLiveVideo(clip.file);
+    if (!aliveRef.current) return;
+    if (uploaded.error || !uploaded.item) {
       setPosting(false);
-      setError(SOCIAL.home.uploadFailed);
+      setError(uploaded.error ?? SOCIAL.home.uploadFailed);
+      return;
+    }
+    const form = new FormData();
+    form.set("body", body);
+    form.set("media", JSON.stringify([uploaded.item]));
+    ingestSpeechLearning({
+      text: body,
+      source: "typed",
+      workspace: "social",
+    });
+    const result = await createSocialPost(form);
+    if (!aliveRef.current) return;
+    if (result?.error) {
+      setPosting(false);
+      setError(result.error);
     }
   }
 
