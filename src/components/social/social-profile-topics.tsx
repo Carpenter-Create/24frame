@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { SOCIAL_PROFILE_EDIT_LABEL_CLASS, SOCIAL_TOPIC_CHIP_CLASS } from "@/lib/social-chrome";
 import { SOCIAL } from "@/lib/social";
+import { type SocialCategoryTopic } from "@/lib/social-categories";
 import {
   filterSocialProfileTopics,
   parseSocialProfileTopics,
@@ -16,7 +17,7 @@ export function SocialProfileTopicsField({
   onChange,
 }: {
   value: readonly string[];
-  onChange: (next: string[]) => void;
+  onChange: (next: SocialCategoryTopic[]) => void;
 }) {
   const [query, setQuery] = useState("");
   const selected = parseSocialProfileTopics(value);
