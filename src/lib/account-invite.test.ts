@@ -27,8 +27,10 @@ import {
   teamInviteBody,
   inviteStatusFromRow,
   inviteStatusLabel,
+  isRawInviteInfrastructureError,
   teamIdentityName,
   teamInviteSchema,
+  teamInviteUserError,
   teamRoleLabel,
   teamRowInitials,
   toTeamListRows,
@@ -61,11 +63,20 @@ describe("account invite SoT", () => {
     expect(teamForm).toContain("data-team-invite-cta");
     expect(teamForm).toContain("<Dialog");
     expect(teamForm).toContain("DialogFooter");
+    expect(teamForm).toContain('presentation="sheet"');
+    expect(teamForm).toContain("SETTINGS_DIALOG_LABEL_CLASS");
+    expect(teamForm).toContain("SETTINGS_DIALOG_GROUP_CLASS");
+    expect(teamForm).toContain("SETTINGS_DIALOG_ERROR_CLASS");
+    expect(teamForm).toContain("teamInviteUserError");
     expect(teamForm).toContain('import { Select } from "@/components/ui/select"');
     expect(teamForm).toContain('id="team-invite-role"');
     expect(teamForm).not.toContain("<select");
     expect(teamForm).not.toContain("flex flex-col gap-[var(--space-4)]");
+    expect(teamForm).not.toContain('tone="error"');
     expect(ACCOUNT_INVITE.cancel).toBe("Cancel");
+    expect(ACCOUNT_INVITE.sendFailed).toBe("Couldn't send invite. Try again.");
+    expect(ACCOUNT_INVITE.sendFailed).not.toContain("—");
+    expect(ACCOUNT_INVITE.alreadyInvited).toMatch(/already has an invite/i);
     expect(teamForm).toContain("router.refresh()");
     expect(teamForm).not.toMatch(/Withdrawn|Removed/);
     expect(teamIdentityName("  Ada  ")).toBe("Ada");
@@ -199,5 +210,33 @@ describe("account invite SoT", () => {
     expect(teamInviteAcceptBody(null, "Viewer")).toBe("");
     expect(teamRoleLabel("account_owner")).toBe("Account owner");
     expect(teamRoleLabel("delivery_ops")).toBe("Delivery ops");
+  });
+
+  it("maps Team invite RPC failures to human copy — never schema cache", () => {
+    const schemaCache =
+      "Could not find the function public.invite_org_member(p_email, p_entity_scope, p_org, p_role, p_token_hash) in the schema cache";
+    expect(isRawInviteInfrastructureError(schemaCache)).toBe(true);
+    expect(teamInviteUserError(schemaCache)).toBe(ACCOUNT_INVITE.sendFailed);
+    expect(teamInviteUserError(schemaCache)).not.toMatch(/schema cache|invite_org_member|PGRST/i);
+    expect(teamInviteUserError("An invite is already pending for that email")).toBe(
+      ACCOUNT_INVITE.alreadyInvited,
+    );
+    expect(teamInviteUserError("That email already has a seat on this team")).toBe(
+      ACCOUNT_INVITE.alreadyMember,
+    );
+    expect(teamInviteUserError("You cannot invite your own email")).toBe(ACCOUNT_INVITE.ownEmail);
+    expect(teamInviteUserError("Not authorized")).toBe(ACCOUNT_INVITE.forbidden);
+    expect(teamInviteUserError("Enter a valid email address.")).toBe(ACCOUNT_INVITE.invalidEmail);
+    expect(teamInviteUserError("PGRST202: function not found in schema cache", "revoke")).toBe(
+      ACCOUNT_INVITE.revokeFailed,
+    );
+    expect(teamInviteUserError("permission denied for function invite_org_member")).toBe(
+      ACCOUNT_INVITE.sendFailed,
+    );
+    expect(teamInviteUserError("something unexpected from the vendor")).toBe(
+      ACCOUNT_INVITE.sendFailed,
+    );
+    expect(teamInviteUserError("")).toBe(ACCOUNT_INVITE.sendFailed);
+    expect(teamInviteUserError(undefined, "revoke")).toBe(ACCOUNT_INVITE.revokeFailed);
   });
 });

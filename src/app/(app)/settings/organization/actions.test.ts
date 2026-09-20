@@ -103,7 +103,7 @@ describe("inviteTeamMember", () => {
     vi.mocked(createClient).mockResolvedValue({ rpc, from } as never);
     await expect(
       inviteTeamMember({ orgId: ORG, email: "a@b.co", role: "viewer" }),
-    ).resolves.toEqual({ error: "Could not send the invite." });
+    ).resolves.toEqual({ error: "Couldn't send invite. Try again." });
     expect(sendTeamInviteEmail).not.toHaveBeenCalled();
     expect(rpc).not.toHaveBeenCalledWith("invite_org_member", expect.anything());
   });
@@ -138,6 +138,44 @@ describe("inviteTeamMember", () => {
       "North Wind Pictures",
       "Account owner",
     );
+  });
+
+  it("maps schema-cache RPC failures to human copy", async () => {
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+    const rpc = vi.fn(async (name: string) => {
+      if (name === "member_can") return { data: true, error: null };
+      if (name === "invite_org_member") {
+        return {
+          data: null,
+          error: {
+            message:
+              "Could not find the function public.invite_org_member(p_email, p_entity_scope, p_org, p_role, p_token_hash) in the schema cache",
+          },
+        };
+      }
+      return { data: null, error: null };
+    });
+    vi.mocked(createClient).mockResolvedValue({ rpc } as never);
+    await expect(
+      inviteTeamMember({ orgId: ORG, email: "a@b.co", role: "viewer" }),
+    ).resolves.toEqual({ error: "Couldn't send invite. Try again." });
+    expect(sendTeamInviteEmail).not.toHaveBeenCalled();
+  });
+
+  it("maps an already-pending invite to human copy", async () => {
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+    const rpc = vi.fn(async (name: string) => {
+      if (name === "member_can") return { data: true, error: null };
+      if (name === "invite_org_member") {
+        return { data: null, error: { message: "An invite is already pending for that email" } };
+      }
+      return { data: null, error: null };
+    });
+    vi.mocked(createClient).mockResolvedValue({ rpc } as never);
+    await expect(
+      inviteTeamMember({ orgId: ORG, email: "a@b.co", role: "viewer" }),
+    ).resolves.toEqual({ error: "That email already has an invite." });
+    expect(sendTeamInviteEmail).not.toHaveBeenCalled();
   });
 });
 

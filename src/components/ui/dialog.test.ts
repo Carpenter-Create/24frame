@@ -6,6 +6,7 @@ import {
   DIALOG_FOOTER_CLASS,
   DIALOG_HEADER_CLASS,
   DIALOG_PANEL_CLASS,
+  DIALOG_SHEET_CLASS,
   DIALOG_SIZES,
 } from "./dialog";
 
@@ -32,6 +33,10 @@ describe("dialog confirm grammar", () => {
     expect(DIALOG_SIZES.sm).toBe("w-[min(92vw,22rem)]");
     expect(src).toContain("export function DialogFooter");
     expect(src).toContain("data-dialog-size");
+    expect(src).toContain("data-dialog-presentation");
+    expect(DIALOG_SHEET_CLASS).toContain("max-md:mt-auto");
+    expect(DIALOG_SHEET_CLASS).toContain("max-md:rounded-b-none");
+    expect(DIALOG_SHEET_CLASS).not.toContain("bg-ink");
   });
 
   it("puts confirm footers on DialogFooter + Button, not a Titles-only height hack", () => {
