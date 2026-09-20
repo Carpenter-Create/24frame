@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
 import { avatarObjectKey } from "@/lib/account-avatar";
 import { FORM_CONTROL_TEXT_CLASS } from "@/lib/form-control";
@@ -19,7 +19,20 @@ import {
   socialBioEnterSubmits,
   socialProfilePublicUrl,
 } from "@/lib/social";
-import { SOCIAL_PROFILE_EDIT_LOCK, socialProfileEditFace } from "@/lib/social-profile-edit";
+import {
+  SOCIAL_PROFILE_EDIT_LOCK,
+  applySocialProfileOptimistic,
+  checkSocialProfileEditSave,
+  clearSocialProfileOptimistic,
+  mergeSocialProfileIdentity,
+  readSocialProfileOptimistic,
+  socialProfileEditFace,
+  socialProfileEditFormData,
+  socialProfileEditSeed,
+  socialProfileOptimisticFail,
+  socialProfileOptimisticMatches,
+  socialProfileSaveFieldError,
+} from "@/lib/social-profile-edit";
 
 const edit = readFileSync("src/components/social/social-profile-edit.tsx", "utf8");
 const bio = readFileSync("src/components/social/social-profile-bio.tsx", "utf8");
@@ -64,9 +77,11 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(socialProfilePublicUrl("")).toBe("https://24frame.co/@");
     expect(edit).toContain("data-social-handle-url");
     expect(edit).toContain("data-social-handle-required");
-    expect(edit).toContain("socialHandleRequiredError");
-    expect(edit).toContain("normalizeHandle");
+    expect(edit).toContain("checkSocialProfileEditSave");
     expect(edit).toContain("handleInvalid");
+    const saveSoT = readFileSync("src/lib/social-profile-edit.ts", "utf8");
+    expect(saveSoT).toContain("socialHandleRequiredError");
+    expect(saveSoT).toContain("normalizeHandle");
     expect(edit).not.toContain("app.24frame.co");
   });
 
@@ -82,6 +97,7 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(bio).not.toContain("onKeyDown");
     expect(bio).not.toContain("preventDefault");
     expect(bio).toContain("normalizeBio(value)");
+    expect(bio.indexOf("onSaved(next)")).toBeLessThan(bio.indexOf("updateSocialBio(form)"));
     expect(bio).not.toContain("<form");
     expect(socialBioEnterSubmits()).toBe(false);
     expect(normalizeBio("Founder\nInvestor")).toBe("Founder\nInvestor");
@@ -99,7 +115,13 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(edit).toContain("SOCIAL.profile.editPicture");
     expect(edit).toContain("SOCIAL.profile.addLink");
     expect(edit).toContain("parseSocialWebsiteUrlField");
-    expect(edit).toContain('form.set("links"');
+    expect(edit).toContain("checkSocialProfileEditSave");
+    expect(edit).toContain("router.push(SOCIAL_ROUTES.profile)");
+    expect(edit).not.toContain("router.refresh()");
+    expect(edit.indexOf("router.push(SOCIAL_ROUTES.profile)")).toBeLessThan(
+      edit.indexOf("createSocialProfile(checked.form)"),
+    );
+    expect(readFileSync("src/lib/social-profile-edit.ts", "utf8")).toContain('form.set("links"');
     expect(edit).not.toContain("SOCIAL_ROUTES.profileBio}/link");
     expect(bioPage).toContain("SocialProfileBioEditor");
     expect(SOCIAL_ROUTES.profileEdit).toBe("/social/profile/edit");
@@ -125,10 +147,12 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(edit).toContain('id="social-edit-handle"');
     expect(edit).toContain("SocialProfileRolesField");
     expect(edit).toContain("SocialProfileTopicsField");
-    expect(edit).toContain('form.set("crafts"');
-    expect(edit).toContain('form.set("topics"');
+    expect(edit).toContain("checkSocialProfileEditSave");
     expect(edit).toContain('id="social-edit-imdb"');
-    expect(edit).toContain('form.set("imdb_url"');
+    const saveSoT = readFileSync("src/lib/social-profile-edit.ts", "utf8");
+    expect(saveSoT).toContain('form.set("crafts"');
+    expect(saveSoT).toContain('form.set("topics"');
+    expect(saveSoT).toContain('form.set("imdb_url"');
     expect(edit).toContain("AccountAvatarCrop");
     expect(edit).toContain("accountAvatarPickError");
     expect(edit).toContain("data-social-profile-edit-avatar-drop");
@@ -139,5 +163,96 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(edit).not.toContain("maximum-scale");
     expect(bio).not.toContain("maximum-scale");
     expect(layout).not.toContain("maximum-scale");
+    expect(readFileSync("src/app/(app)/social/profile/loading.tsx", "utf8")).toContain(
+      "SocialProfileOptimisticShell",
+    );
+  });
+});
+
+describe("Social profile optimistic Save SoT", () => {
+  afterEach(() => {
+    clearSocialProfileOptimistic();
+  });
+
+  const draft = {
+    username: "@ada",
+    firstName: "Ada",
+    middleName: "",
+    lastName: "Lovelace",
+    bio: "Writes engines.",
+    crafts: ["director"],
+    topics: ["Directors"],
+    imdbUrl: "nm1234567",
+    links: ["https://example.com"],
+    photoUrl: "blob:photo",
+    welcomeVideoUrl: null,
+  };
+
+  const server = {
+    handle: "ada",
+    displayName: "Ada Lovelace",
+    bio: "Writes engines.",
+    photoUrl: "https://s3.example/old",
+    welcomeVideoUrl: null,
+    crafts: ["director"],
+    topics: ["Directors"],
+    imdbUrl: "https://www.imdb.com/name/nm1234567/",
+    websiteUrl: "https://example.com/",
+  };
+
+  it("applies the draft immediately and classifies handle vs form errors", () => {
+    const checked = checkSocialProfileEditSave(draft);
+    expect(checked.ok).toBe(true);
+    if (!checked.ok) return;
+    expect(checked.snapshot.handle).toBe("ada");
+    expect(checked.snapshot.displayName).toBe("Ada Lovelace");
+    expect(checked.form.get("handle")).toBe("@ada");
+    expect(checked.form.get("crafts")).toBe(JSON.stringify(["director"]));
+    expect(checked.form.get("topics")).toBe(JSON.stringify(["Directors"]));
+    expect(socialProfileEditFormData(draft).get("imdb_url")).toBe("nm1234567");
+    expect(SOCIAL_PROFILE_EDIT_LOCK.optimisticSave).toBe(true);
+
+    applySocialProfileOptimistic(checked.snapshot);
+    expect(readSocialProfileOptimistic()?.displayName).toBe("Ada Lovelace");
+    const merged = mergeSocialProfileIdentity(
+      { ...server, displayName: "Old Name", photoUrl: "https://s3.example/old" },
+      checked.snapshot,
+    );
+    expect(merged.displayName).toBe("Ada Lovelace");
+    expect(merged.photoUrl).toBe("blob:photo");
+
+    expect(socialProfileSaveFieldError(SOCIAL.profile.handleTaken)).toBe("handle");
+    expect(socialProfileSaveFieldError(SOCIAL.profile.imdbInvalid)).toBe("form");
+    const failed = socialProfileOptimisticFail(checked.snapshot, SOCIAL.profile.handleTaken);
+    expect(failed.handleError).toBe(SOCIAL.profile.handleTaken);
+    expect(failed.error).toBe("");
+    applySocialProfileOptimistic(failed);
+    const seeded = socialProfileEditSeed({ ...server, displayName: "Old Name" });
+    expect(seeded.displayName).toBe("Ada Lovelace");
+    expect(seeded.handleError).toBe(SOCIAL.profile.handleTaken);
+    expect(
+      mergeSocialProfileIdentity({ ...server, displayName: "Old Name" }, failed).displayName,
+    ).toBe("Old Name");
+    expect(socialProfileOptimisticMatches(server, { ...checked.snapshot, photoUrl: server.photoUrl })).toBe(
+      true,
+    );
+    expect(socialProfileOptimisticMatches(server, checked.snapshot)).toBe(false);
+    clearSocialProfileOptimistic();
+    expect(readSocialProfileOptimistic()).toBeNull();
+  });
+
+  it("rejects empty handle and invalid IMDb before persist", () => {
+    expect(checkSocialProfileEditSave({ ...draft, username: "@" }).ok).toBe(false);
+    expect(checkSocialProfileEditSave({ ...draft, username: "@" })).toEqual({
+      ok: false,
+      handleError: SOCIAL.profile.handleRequired,
+    });
+    expect(checkSocialProfileEditSave({ ...draft, imdbUrl: "not-imdb" })).toEqual({
+      ok: false,
+      error: SOCIAL.profile.imdbInvalid,
+    });
+    expect(checkSocialProfileEditSave({ ...draft, firstName: "" }).error).toBe(
+      SOCIAL.profile.firstNameRequired,
+    );
   });
 });

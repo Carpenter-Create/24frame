@@ -9,13 +9,12 @@ import { SocialProfileTabs } from "@/components/social/social-profile-tabs";
 import { SocialQueryBound } from "@/components/social/social-query-bound";
 import { SocialShareButton } from "@/components/social/social-share-button";
 import { SocialForYouSkeleton, SocialProfileCenterSkeleton } from "@/components/social/social-skeletons";
+import { SocialOwnProfileFace } from "@/components/social/social-own-profile";
 import {
   SocialAuthorHistory,
   SocialHighlights,
-  SocialProfileIdentity,
   socialAuthorPostCard,
 } from "@/components/social/social-ui";
-import { SocialWelcomeVideo } from "@/components/social/social-welcome-video";
 import { SOCIAL_ACTION_CLASS, SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS, SOCIAL_PAGE_CLASS } from "@/lib/social-chrome";
 import { signedAvatarUrl, signedAvatarUrls } from "@/lib/s3-avatars";
 import { signedSocialMediaByPostId, signedSocialMediaUrl } from "@/lib/s3-social-media";
@@ -115,28 +114,29 @@ async function SocialProfileMain({
     <div className={SOCIAL_HOME_CENTER_CLASS}>
       <h1 className="sr-only">{SOCIAL.profile.title}</h1>
       <SocialQueryBound profile={profile} counts={counts} />
-      <SocialProfileIdentity
-        name={profile.display_name}
+      <SocialOwnProfileFace
         handle={profile.handle}
+        displayName={profile.display_name}
         photoUrl={photoUrl}
-        bio={profile.bio?.trim() ? profile.bio : SOCIAL.profile.ownFace}
-        roles={profile.crafts}
-        topics={profile.topics}
-        websiteUrl={profile.website_url}
-        imdbUrl={profile.imdb_url}
+        bio={profile.bio ?? ""}
+        fallbackBio={SOCIAL.profile.ownFace}
+        crafts={profile.crafts ?? []}
+        topics={profile.topics ?? []}
+        websiteUrl={profile.website_url ?? null}
+        imdbUrl={profile.imdb_url ?? null}
+        welcomeVideoUrl={welcomeUrl}
         ring={liveStories.length > 0 ? "live" : null}
         profileId={profile.id}
         stats={counts ?? undefined}
-        actions={() => (
+        actions={(view) => (
           <>
             <Link href={SOCIAL_ROUTES.profileEdit} className={`${SOCIAL_ACTION_CLASS} min-w-0 flex-1 text-center md:flex-none`}>
               {SOCIAL.profile.edit}
             </Link>
-            <SocialShareButton handle={profile.handle} stretch />
+            <SocialShareButton handle={view.handle} stretch />
           </>
         )}
       />
-      {welcomeUrl ? <SocialWelcomeVideo src={welcomeUrl} /> : null}
       <SocialProfileTabs baseHref={SOCIAL_ROUTES.profile} active={tab} />
       {tab === "credits" ? (
         <SocialEmpty

@@ -175,9 +175,10 @@ export async function createSocialProfile(formData: FormData): Promise<ActionRes
   await bustSocialProfileHotCache(user.id, [profile?.handle, handle]);
   revalidatePath(SOCIAL_ROUTES.profile);
   revalidatePath(SOCIAL_ROUTES.profileEdit);
-  revalidatePath(SOCIAL_ROUTES.profileBio);
-  revalidatePath(SOCIAL_ROUTES.home);
   revalidatePath(socialProfileHref(handle));
+  if (profile?.handle && profile.handle !== handle) {
+    revalidatePath(socialProfileHref(profile.handle));
+  }
   return {};
 }
 
@@ -300,8 +301,6 @@ export async function updateSocialBio(formData: FormData): Promise<ActionResult>
   await bustSocialProfileHotCache(profileId);
   revalidatePath(SOCIAL_ROUTES.profile);
   revalidatePath(SOCIAL_ROUTES.profileEdit);
-  revalidatePath(SOCIAL_ROUTES.profileBio);
-  revalidatePath(SOCIAL_ROUTES.home);
   return {};
 }
 

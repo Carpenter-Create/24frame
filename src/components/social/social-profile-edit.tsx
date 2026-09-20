@@ -55,9 +55,6 @@ import {
   bareHandle,
   composeSocialDisplayName,
   handleFieldValue,
-  normalizeHandle,
-  socialHandleRequiredError,
-  socialNameRequiredError,
   socialProfilePublicUrl,
   splitSocialDisplayName,
   stripHandleDecorators,
@@ -69,8 +66,17 @@ import {
 } from "@/lib/social-profile-links";
 import { parseSocialProfileRoles } from "@/lib/social-profile-roles";
 import { parseSocialProfileTopics } from "@/lib/social-profile-topics";
-import { socialProfileEditFace, type SocialProfileEditFace } from "@/lib/social-profile-edit";
 import { useAppQueryClient } from "@/components/query-provider";
+import {
+  applySocialProfileOptimistic,
+  checkSocialProfileEditSave,
+  patchSocialProfileOptimistic,
+  socialProfileEditFace,
+  socialProfileEditSeed,
+  socialProfileOptimisticFail,
+  socialProfilePersistNotice,
+  type SocialProfileEditFace,
+} from "@/lib/social-profile-edit";
 import {
   applyOptimisticSocialProfile,
   applyOptimisticSocialProfilePatch,
@@ -98,6 +104,7 @@ function EditHeader({
         type="button"
         data-social-profile-edit-done=""
         disabled={pending}
+        aria-busy={pending}
         onClick={done}
         className={SOCIAL_PROFILE_EDIT_DONE_CLASS}
       >
@@ -134,13 +141,24 @@ export function SocialProfileEditForm({
   const queryClient = useAppQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const welcomeRef = useRef<HTMLInputElement>(null);
-  const split = splitSocialDisplayName(displayName);
+  const seed = socialProfileEditSeed({
+    handle,
+    displayName,
+    bio,
+    photoUrl,
+    welcomeVideoUrl,
+    crafts,
+    topics,
+    imdbUrl: imdbUrl ?? "",
+    websiteUrl: websiteUrl ?? "",
+  });
+  const split = splitSocialDisplayName(seed.displayName);
   const [firstName, setFirstName] = useState(split.firstName);
   const [middleName, setMiddleName] = useState(split.middleName);
   const [lastName, setLastName] = useState(split.lastName);
-  const [username, setUsername] = useState(handleFieldValue(handle));
-  const [error, setError] = useState("");
-  const [handleError, setHandleError] = useState("");
+  const [username, setUsername] = useState(handleFieldValue(seed.handle));
+  const [error, setError] = useState(seed.error);
+  const [handleError, setHandleError] = useState(seed.handleError);
   const [pending, setPending] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [dropping, setDropping] = useState(false);
@@ -148,16 +166,17 @@ export function SocialProfileEditForm({
   const [cropPreview, setCropPreview] = useState<string | null>(null);
   const [cropSize, setCropSize] = useState<{ width: number; height: number } | null>(null);
   const [face, setFace] = useState<SocialProfileEditFace>("edit");
-  const [bioText, setBioText] = useState(bio);
-  const [roles, setRoles] = useState(() => parseSocialProfileRoles(crafts));
-  const [interestTopics, setInterestTopics] = useState(() => parseSocialProfileTopics(topics));
-  const [imdb, setImdb] = useState(imdbUrl ?? "");
+  const [bioText, setBioText] = useState(seed.bio);
+  const [roles, setRoles] = useState(() => parseSocialProfileRoles(seed.crafts));
+  const [interestTopics, setInterestTopics] = useState(() => parseSocialProfileTopics(seed.topics));
+  const [imdb, setImdb] = useState(seed.imdbUrl ?? "");
+  const [previewPhoto, setPreviewPhoto] = useState(seed.photoUrl);
+  const [welcomePreview, setWelcomePreview] = useState(seed.welcomeVideoUrl);
   const [linkDrafts, setLinkDrafts] = useState(() => {
-    const urls = parseSocialWebsiteUrlField(websiteUrl);
+    const urls = parseSocialWebsiteUrlField(seed.websiteUrl);
     return urls.length > 0 ? urls : [""];
   });
   const preview = socialProfilePublicUrl(bareHandle(username));
-  const required = socialHandleRequiredError(username);
 
   function applyHandle(raw: string) {
     setUsername(`@${stripHandleDecorators(raw)}`);
@@ -193,20 +212,26 @@ export function SocialProfileEditForm({
   }
 
   async function onCropConfirm(frame: AvatarCropFrame) {
-    if (!cropFile) return;
-    setUploading(true);
+    if (!cropFile || uploading) return;
     setError("");
     try {
       const cropped = await cropAvatarFile(cropFile, frame);
+      const blobUrl = URL.createObjectURL(cropped);
+      const previous = previewPhoto;
+      setPreviewPhoto(blobUrl);
+      patchSocialProfileOptimistic({ photoUrl: blobUrl });
+      clearCrop();
+      setUploading(true);
       const body = new FormData();
       body.set("photo", cropped);
       const res = await uploadAccountPhoto(body);
       if (res.error) {
+        setPreviewPhoto(previous);
+        patchSocialProfileOptimistic({ photoUrl: previous });
+        URL.revokeObjectURL(blobUrl);
         setError(res.error);
         return;
       }
-      clearCrop();
-      router.refresh();
     } catch (e) {
       setError(e instanceof Error && e.message ? e.message : ACCOUNT_PROFILE.photoFailed);
     } finally {
@@ -215,8 +240,12 @@ export function SocialProfileEditForm({
   }
 
   async function onWelcomePick(file: File | undefined) {
-    if (!file) return;
+    if (!file || uploading) return;
     setError("");
+    const previewUrl = URL.createObjectURL(file);
+    const previous = welcomePreview;
+    setWelcomePreview(previewUrl);
+    patchSocialProfileOptimistic({ welcomeVideoUrl: previewUrl });
     setUploading(true);
     const body = new FormData();
     body.set("content_type", file.type);
@@ -225,6 +254,9 @@ export function SocialProfileEditForm({
     const signed = await presignSocialMediaUpload(body);
     if (signed.error || !signed.url || !signed.key || !signed.kind || !signed.contentType) {
       setUploading(false);
+      setWelcomePreview(previous);
+      patchSocialProfileOptimistic({ welcomeVideoUrl: previous });
+      URL.revokeObjectURL(previewUrl);
       if (welcomeRef.current) welcomeRef.current.value = "";
       setError(signed.error ?? SOCIAL.home.uploadFailed);
       return;
@@ -236,6 +268,9 @@ export function SocialProfileEditForm({
     });
     if (!put.ok) {
       setUploading(false);
+      setWelcomePreview(previous);
+      patchSocialProfileOptimistic({ welcomeVideoUrl: previous });
+      URL.revokeObjectURL(previewUrl);
       if (welcomeRef.current) welcomeRef.current.value = "";
       setError(SOCIAL.home.uploadFailed);
       return;
@@ -249,69 +284,71 @@ export function SocialProfileEditForm({
     setUploading(false);
     if (welcomeRef.current) welcomeRef.current.value = "";
     if (result.error) {
+      setWelcomePreview(previous);
+      patchSocialProfileOptimistic({ welcomeVideoUrl: previous });
+      URL.revokeObjectURL(previewUrl);
       setError(result.error);
-      return;
     }
-    router.refresh();
   }
 
   async function onWelcomeRemove() {
+    if (uploading) return;
     setError("");
+    const previous = welcomePreview;
+    setWelcomePreview(null);
+    patchSocialProfileOptimistic({ welcomeVideoUrl: null });
     setUploading(true);
     const result = await clearSocialWelcomeVideo();
     setUploading(false);
     if (result.error) {
+      setWelcomePreview(previous);
+      patchSocialProfileOptimistic({ welcomeVideoUrl: previous });
       setError(result.error);
-      return;
     }
-    router.refresh();
   }
 
-  async function onDone() {
+  function onDone() {
+    if (pending) return;
     setError("");
-    if (required) {
-      setHandleError(required);
+    setHandleError("");
+    const checked = checkSocialProfileEditSave({
+      username,
+      firstName,
+      middleName,
+      lastName,
+      bio: bioText,
+      crafts: roles,
+      topics: interestTopics,
+      imdbUrl: imdb,
+      links: linkDrafts,
+      photoUrl: previewPhoto,
+      welcomeVideoUrl: welcomePreview,
+    });
+    if (!checked.ok) {
+      if (checked.handleError) setHandleError(checked.handleError);
+      if (checked.error) setError(checked.error);
       return;
     }
-    if (!normalizeHandle(username)) {
-      setHandleError(SOCIAL.profile.handleInvalid);
-      return;
-    }
-    const nameError = socialNameRequiredError(firstName, lastName);
-    if (nameError) {
-      setError(nameError);
-      return;
-    }
+    applySocialProfileOptimistic(checked.snapshot);
     setPending(true);
-    const form = new FormData();
-    form.set("handle", username);
-    form.set("first_name", firstName);
-    form.set("middle_name", middleName);
-    form.set("last_name", lastName);
-    form.set("display_name", composeSocialDisplayName(firstName, lastName, middleName));
-    form.set("crafts", JSON.stringify(roles));
-    form.set("topics", JSON.stringify(interestTopics));
-    form.set("imdb_url", imdb);
-    form.set("links", JSON.stringify(linkDrafts));
-    const nextHandle = normalizeHandle(username) ?? username;
-    const nextName = composeSocialDisplayName(firstName, lastName, middleName);
     if (queryClient && profileId) {
       applyOptimisticSocialProfile(queryClient, {
         id: profileId,
-        handle: nextHandle,
-        display_name: nextName,
+        handle: checked.snapshot.handle ?? username,
+        display_name: checked.snapshot.displayName ?? composeSocialDisplayName(firstName, lastName, middleName),
         status: "active",
-        bio: bioText,
-        crafts: roles,
-        topics: interestTopics,
-        imdb_url: imdb.trim() || null,
-        website_url: composeSocialWebsiteUrlField(linkDrafts.filter(Boolean)),
+        bio: checked.snapshot.bio ?? bioText,
+        crafts: [...(checked.snapshot.crafts ?? roles)],
+        topics: [...(checked.snapshot.topics ?? interestTopics)],
+        imdb_url: checked.snapshot.imdbUrl?.trim() || null,
+        website_url: checked.snapshot.websiteUrl ?? composeSocialWebsiteUrlField(linkDrafts.filter(Boolean)),
       });
     }
-    const result = await createSocialProfile(form);
-    setPending(false);
-    if (result.error) {
+    router.push(SOCIAL_ROUTES.profile);
+    void createSocialProfile(checked.form).then((result) => {
+      if (!result.error) return;
       if (queryClient && profileId) invalidateSocialQueries(queryClient, { profileId });
+      applySocialProfileOptimistic(socialProfileOptimisticFail(checked.snapshot, result.error));
       if (
         result.error === SOCIAL.profile.handleRequired ||
         result.error === SOCIAL.profile.handleInvalid ||
@@ -321,9 +358,15 @@ export function SocialProfileEditForm({
       } else {
         setError(result.error);
       }
-      return;
-    }
-    router.push(SOCIAL_ROUTES.profile);
+      router.replace(SOCIAL_ROUTES.profileEdit);
+    }).catch((cause) => {
+      const notice = socialProfilePersistNotice(cause, ACCOUNT_PROFILE.saveFailed);
+      applySocialProfileOptimistic(socialProfileOptimisticFail(checked.snapshot, notice));
+      setError(notice);
+      router.replace(SOCIAL_ROUTES.profileEdit);
+    }).finally(() => {
+      setPending(false);
+    });
   }
 
   if (face === "bio") {
@@ -334,10 +377,14 @@ export function SocialProfileEditForm({
         onBack={() => setFace(socialProfileEditFace(false))}
         onSaved={(next) => {
           setBioText(next);
+          patchSocialProfileOptimistic({ bio: next, error: "", handleError: "" });
           if (queryClient && profileId) {
             applyOptimisticSocialProfilePatch(queryClient, profileId, { bio: next || null });
           }
           setFace(socialProfileEditFace(false));
+        }}
+        onPersistError={(notice) => {
+          setError(notice);
         }}
       />
     );
@@ -391,7 +438,7 @@ export function SocialProfileEditForm({
                 >
                   <SocialAvatar
                     name={composeSocialDisplayName(firstName, lastName, middleName)}
-                    photoUrl={photoUrl}
+                    photoUrl={previewPhoto}
                     size="profile"
                     className="size-full"
                   />
@@ -422,9 +469,9 @@ export function SocialProfileEditForm({
           <div data-social-profile-edit-welcome="" className={SOCIAL_PROFILE_EDIT_CARD_CLASS}>
             <div className={`${SOCIAL_PROFILE_EDIT_ROW_CLASS} flex-col gap-2`}>
               <p className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>{SOCIAL.profile.welcomeVideo}</p>
-              {welcomeVideoUrl ? (
+              {welcomePreview ? (
                 <video
-                  src={welcomeVideoUrl}
+                  src={welcomePreview}
                   controls
                   playsInline
                   preload="metadata"
@@ -438,9 +485,9 @@ export function SocialProfileEditForm({
                   onClick={() => welcomeRef.current?.click()}
                   className={SOCIAL_PROFILE_EDIT_PICTURE_CLASS}
                 >
-                  {welcomeVideoUrl ? SOCIAL.profile.welcomeReplace : SOCIAL.profile.welcomeAdd}
+                  {welcomePreview ? SOCIAL.profile.welcomeReplace : SOCIAL.profile.welcomeAdd}
                 </button>
-                {welcomeVideoUrl ? (
+                {welcomePreview ? (
                   <button
                     type="button"
                     disabled={uploading}
