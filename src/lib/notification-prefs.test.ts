@@ -77,14 +77,20 @@ describe("notification prefs SoT", () => {
   it("maps live notification kinds onto the matrix rows", () => {
     expect(notificationPrefEventForKind("title_rejected")).toBe("title_returned");
     expect(notificationPrefEventForKind("delivery_update")).toBe("delivery_status");
+    expect(notificationPrefEventForKind("new_follower")).toBe("new_follower");
     expect(notificationPrefFamilyForKind("title_rejected")).toBe("aggregation");
     expect(notificationPrefFamilyForKind("delivery_update")).toBe("aggregation");
+    expect(notificationPrefFamilyForKind("new_follower")).toBe("social");
     expect(notificationPrefFamilyForEvent("reporting_ready")).toBe("reporting");
     expect(notificationPrefFamilyForEvent("dm_received")).toBe("social");
     expect(notificationPrefFamilyForEvent("course_available")).toBe("education");
     expect(notificationPrefFamilyForEvent("team_invite")).toBe("account");
     expect(NOTIFICATION_PREF_TITLE_STATUS_EVENT).toBe("title_status");
-    expect(Object.keys(NOTIFICATION_EMAIL)).toEqual(["title_rejected", "delivery_update"]);
+    expect(Object.keys(NOTIFICATION_EMAIL)).toEqual([
+      "title_rejected",
+      "delivery_update",
+      "new_follower",
+    ]);
   });
 
   it("reads a partial jsonb row as defaults plus the written cells", () => {

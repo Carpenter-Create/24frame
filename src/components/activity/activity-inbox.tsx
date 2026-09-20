@@ -15,12 +15,13 @@ import {
   ACTIVITY_PREFS_HREF,
   ACTIVITY_SECTION_CLASS,
   activityEmptyCopy,
+  activityItemHref,
   type ActivityFamily,
   type ActivityItem,
 } from "@/lib/activity";
 import { HOUSE_THEME_TOGGLE_CLASS } from "@/lib/house-lead-chrome";
 import { PHOSPHOR_CHROME_ICON_CLASS, PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
-import { NOTIFICATION_EMAIL, NOTIFICATION_KIND_LABEL } from "@/lib/notifications";
+import { NOTIFICATION_KIND_LABEL } from "@/lib/notifications";
 import { ActivityFamilyChips } from "./activity-family-chips";
 import { MarkDone } from "./mark-done";
 
@@ -76,8 +77,7 @@ export function ActivityInbox({
         ) : (
           <div className="flex flex-col gap-2">
             {items.map((item) => {
-              const refs = (item.source_refs ?? {}) as { title_id?: string };
-              const href = NOTIFICATION_EMAIL[item.kind].path({ titleId: refs.title_id });
+              const href = activityItemHref(item);
               return (
                 <Card key={item.id}>
                   <CardBody className={cn(item.unread && "border-l-2 border-accent")}>

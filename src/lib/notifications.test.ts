@@ -72,6 +72,28 @@ describe("NOTIFICATION_EMAIL.title_rejected.link (sender-facing API)", () => {
   });
 });
 
+describe("NOTIFICATION_EMAIL.new_follower.link", () => {
+  const { link, path, subject } = NOTIFICATION_EMAIL.new_follower;
+
+  it("pairs the follower profile with View profile for a valid handle", () => {
+    expect(link({ handle: "ada" })).toEqual({
+      cta: "View profile",
+      path: "/social/u/ada",
+    });
+    expect(path({ handle: "@Ada" })).toBe("/social/u/ada");
+  });
+
+  it("falls back to Activity when the handle is missing or unsafe", () => {
+    expect(link({})).toEqual({ cta: "View profile", path: ACTIVITY_HREF });
+    expect(link({ handle: "../admin" })).toEqual({ cta: "View profile", path: ACTIVITY_HREF });
+    expect(link({ handle: "ab" })).toEqual({ cta: "View profile", path: ACTIVITY_HREF });
+  });
+
+  it("keeps the New follower subject", () => {
+    expect(subject({ title: "unused" })).toBe("New follower");
+  });
+});
+
 describe("MESSAGES_SUBTITLE", () => {
   it("names 24Frame, not Global Content", () => {
     expect(MESSAGES_SUBTITLE).toBe("Updates from 24Frame.");

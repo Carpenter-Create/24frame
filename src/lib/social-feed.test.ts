@@ -18,6 +18,7 @@ import {
   loadFolloweeIds,
   loadFollowingPosts,
   loadLiveStories,
+  loadProfileSocialCounts,
   type SocialPostRow,
   type SocialStoryRow,
 } from "@/lib/social-feed";
@@ -109,6 +110,41 @@ function wallPost(i: number, createdAt = `2026-09-14T12:00:${String(i).padStart(
     media: [],
   };
 }
+
+describe("loadProfileSocialCounts", () => {
+  function countClient(counts: { followers: number; following: number; posts: number }) {
+    const from = vi.fn((table: string) => {
+      const chain: Record<string, unknown> = {};
+      let eqCol = "";
+      chain.select = vi.fn(() => chain);
+      chain.eq = vi.fn((col: string) => {
+        eqCol = col;
+        return chain;
+      });
+      chain.is = vi.fn(() => chain);
+      chain.then = (resolve: (value: unknown) => unknown) => {
+        let count = 0;
+        if (table === "follows" && eqCol === "followee_id") count = counts.followers;
+        if (table === "follows" && eqCol === "follower_id") count = counts.following;
+        if (table === "posts") count = counts.posts;
+        return Promise.resolve({ count, error: null }).then(resolve);
+      };
+      return chain;
+    });
+    return { from };
+  }
+
+  it("counts live follow edges for followers and following", async () => {
+    const client = countClient({ followers: 4, following: 1, posts: 3 });
+    await expect(loadProfileSocialCounts(client as never, "u1")).resolves.toEqual({
+      posts: 3,
+      followers: 4,
+      following: 1,
+    });
+    expect(client.from).toHaveBeenCalledWith("follows");
+    expect(client.from).toHaveBeenCalledWith("posts");
+  });
+});
 
 describe("loadFolloweeIds", () => {
   it("probes one past the followee cap and reports overflow", async () => {

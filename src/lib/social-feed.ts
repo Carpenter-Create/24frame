@@ -104,15 +104,20 @@ export type SocialProfileCounts = {
   following: number;
 };
 
+// Live follows rows are the count SoT. follows has no id column;
+// profiles.follower_count is leftover denormalized storage.
 export async function loadProfileSocialCounts(
   supabase: ServerClient,
   profileId: string,
 ): Promise<SocialProfileCounts> {
-  const [profile, following, posts] = await Promise.all([
-    supabase.from("profiles").select("follower_count").eq("id", profileId).maybeSingle(),
+  const [followers, following, posts] = await Promise.all([
     supabase
       .from("follows")
-      .select("id", { count: "exact", head: true })
+      .select("follower_id", { count: "exact", head: true })
+      .eq("followee_id", profileId),
+    supabase
+      .from("follows")
+      .select("followee_id", { count: "exact", head: true })
       .eq("follower_id", profileId),
     supabase
       .from("posts")
@@ -124,7 +129,7 @@ export async function loadProfileSocialCounts(
 
   return {
     posts: posts.count ?? 0,
-    followers: profile.data?.follower_count ?? 0,
+    followers: followers.count ?? 0,
     following: following.count ?? 0,
   };
 }

@@ -49,6 +49,7 @@ describe("social isolation lock", () => {
     expect(list).not.toContain("/education");
     expect(detail).not.toContain("/lessons/");
     expect(actions).toContain('from("follows")');
+    expect(actions).toContain('notify_new_follower');
     expect(actions).toContain('from("stories")');
     expect(actions).not.toContain("from(\"reels\")");
     expect(actions).toContain("ensureOwnSocialProfile");

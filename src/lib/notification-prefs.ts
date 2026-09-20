@@ -279,6 +279,7 @@ export function withNotificationPref(
 
 export function notificationPrefEventForKind(kind: NotificationKind): NotificationPrefEvent {
   if (kind === "delivery_update") return "delivery_status";
+  if (kind === "new_follower") return "new_follower";
   return "title_returned";
 }
 

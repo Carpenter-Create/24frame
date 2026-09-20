@@ -1,5 +1,6 @@
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
 import { PRODUCT_NAME } from "@/lib/product";
+import { normalizeHandle, socialProfileHref } from "@/lib/social";
 import { TITLES_HREF } from "@/lib/title-public-id";
 
 // Must stay equal to ACTIVITY_HREF. activity.ts imports this module,
@@ -8,14 +9,18 @@ const ACTIVITY_PATH = "/activity";
 
 // Notification copy + labels (§20 GC-Support in-app push). Copy in lib/, not JSX.
 
-export const NOTIFICATION_KIND_LABEL: Record<"title_rejected" | "delivery_update", string> = {
+export const NOTIFICATION_KIND_LABEL: Record<
+  "title_rejected" | "delivery_update" | "new_follower",
+  string
+> = {
   title_rejected: "Title returned",
   delivery_update: "Delivery update",
+  new_follower: "New follower",
 };
 
-export type NotificationLinkCtx = { titleId?: string };
+export type NotificationLinkCtx = { titleId?: string; handle?: string };
 
-export type NotificationKind = "title_rejected" | "delivery_update";
+export type NotificationKind = "title_rejected" | "delivery_update" | "new_follower";
 
 export type NotificationLink = { cta: string; path: string };
 
@@ -51,6 +56,14 @@ function titleRejectedLink(ctx: NotificationLinkCtx = {}): NotificationLink {
   };
 }
 
+function newFollowerLink(ctx: NotificationLinkCtx = {}): NotificationLink {
+  const handle = ctx.handle ? normalizeHandle(ctx.handle) : null;
+  return {
+    cta: "View profile",
+    path: handle ? socialProfileHref(handle) : ACTIVITY_PATH,
+  };
+}
+
 // Email copy for the GC-Support channel (draft — revise here). The email body reuses the
 // in-app notification body; `link` defines the per-kind CTA label and dashboard deep-link
 // as one paired result. Messages inbox uses `path` (delegates to `link`). There is no
@@ -65,6 +78,11 @@ export const NOTIFICATION_EMAIL: Record<NotificationKind, NotificationEmailCopy>
     subject: ({ title }) => `"${title}" — delivery update`,
     link: deliveryUpdateLink,
     path: (ctx = {}) => deliveryUpdateLink(ctx).path,
+  },
+  new_follower: {
+    subject: () => "New follower",
+    link: newFollowerLink,
+    path: (ctx = {}) => newFollowerLink(ctx).path,
   },
 };
 

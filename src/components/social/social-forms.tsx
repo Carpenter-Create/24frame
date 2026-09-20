@@ -583,31 +583,60 @@ export function SocialFollowButton({
   compact?: boolean;
   stretch?: boolean;
 }) {
+  const router = useRouter();
+  const [isFollowing, setIsFollowing] = useState(following);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    setIsFollowing(following);
+  }, [following]);
+
   return (
-    <form
-      data-social-follow=""
-      className={stretch ? "min-w-0 flex-1 md:flex-none" : undefined}
-      action={async (formData) => {
-        await toggleSocialFollow(formData);
-      }}
+    <div
+      className={
+        stretch ? "flex min-w-0 flex-1 flex-col gap-1 md:flex-none" : "flex flex-col gap-1"
+      }
     >
-      <input type="hidden" name="followee_id" value={followeeId} />
-      <input type="hidden" name="handle" value={handle} />
-      <input type="hidden" name="following" value={following ? "1" : "0"} />
-      <button
-        type="submit"
-        className={
-          compact
-            ? SOCIAL_FOLLOW_COMPACT_CLASS
-            : cn(
-                following ? SOCIAL_ACTION_SECONDARY_CLASS : SOCIAL_ACTION_CLASS,
-                stretch && "w-full",
-              )
-        }
+      <form
+        data-social-follow=""
+        className={stretch ? "min-w-0" : undefined}
+        action={async (formData) => {
+          const next = !isFollowing;
+          setPending(true);
+          setError("");
+          setIsFollowing(next);
+          const result = await toggleSocialFollow(formData);
+          setPending(false);
+          if (result.error) {
+            setIsFollowing(!next);
+            setError(result.error);
+            return;
+          }
+          router.refresh();
+        }}
       >
-        {following ? SOCIAL.follow.following : SOCIAL.follow.follow}
-      </button>
-    </form>
+        <input type="hidden" name="followee_id" value={followeeId} />
+        <input type="hidden" name="handle" value={handle} />
+        <input type="hidden" name="following" value={isFollowing ? "1" : "0"} />
+        <button
+          type="submit"
+          disabled={pending}
+          aria-busy={pending}
+          className={
+            compact
+              ? SOCIAL_FOLLOW_COMPACT_CLASS
+              : cn(
+                  isFollowing ? SOCIAL_ACTION_SECONDARY_CLASS : SOCIAL_ACTION_CLASS,
+                  stretch && "w-full",
+                )
+          }
+        >
+          {isFollowing ? SOCIAL.follow.following : SOCIAL.follow.follow}
+        </button>
+      </form>
+      {error ? <FormError error={error} /> : null}
+    </div>
   );
 }
 

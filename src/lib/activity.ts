@@ -94,16 +94,17 @@ export const ACTIVITY_BELL_OPEN_DOT_CLASS = "size-2 shrink-0 rounded-full bg-acc
 export const ACTIVITY_KIND_ICON = {
   title_rejected: "film-slate",
   delivery_update: "paper-plane-tilt",
-} as const satisfies Record<NotificationKind, "film-slate" | "paper-plane-tilt">;
+  new_follower: "user",
+} as const satisfies Record<NotificationKind, "film-slate" | "paper-plane-tilt" | "user">;
 
 export type ActivityItem = {
   id: string;
   title: string;
   body: string;
-  kind: "title_rejected" | "delivery_update";
+  kind: NotificationKind;
   created_at: string;
   unread: boolean;
-  source_refs?: { title_id?: string } | null;
+  source_refs?: { title_id?: string; handle?: string } | null;
 };
 
 export function isActivityOpen(item: Pick<ActivityItem, "unread">): boolean {
@@ -170,12 +171,17 @@ export function activityBellItems<T extends Pick<ActivityItem, "unread">>(
   return items.filter(isActivityOpen).slice(0, cap);
 }
 
-export function activityKindIcon(kind: NotificationKind): "film-slate" | "paper-plane-tilt" {
+export function activityKindIcon(
+  kind: NotificationKind,
+): "film-slate" | "paper-plane-tilt" | "user" {
   return ACTIVITY_KIND_ICON[kind];
 }
 
 export function activityItemHref(item: Pick<ActivityItem, "kind" | "source_refs">): string {
-  return NOTIFICATION_EMAIL[item.kind].path({ titleId: item.source_refs?.title_id });
+  return NOTIFICATION_EMAIL[item.kind].path({
+    titleId: item.source_refs?.title_id,
+    handle: item.source_refs?.handle,
+  });
 }
 
 export function activityRelativeTime(iso: string, now = Date.now()): string {
