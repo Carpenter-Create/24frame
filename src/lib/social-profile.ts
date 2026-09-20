@@ -12,6 +12,9 @@ import {
 
 type ServerClient = Awaited<ReturnType<typeof createClient>>;
 
+export const SOCIAL_PROFILE_COLUMNS =
+  "id, handle, display_name, status, bio, welcome_video_key, crafts";
+
 export type SocialEnsureUser = {
   id: string;
   email: string;
@@ -63,7 +66,7 @@ export async function ensureOwnSocialProfileResult(
 ): Promise<EnsureOwnSocialProfileResult> {
   const { data: existing } = await supabase
     .from("profiles")
-    .select("id, handle, display_name, status, bio, welcome_video_key")
+    .select(SOCIAL_PROFILE_COLUMNS)
     .eq("id", user.id)
     .maybeSingle();
   if (existing) return { profile: existing, error: null };
@@ -124,7 +127,7 @@ async function insertOwnProfile(
   if (isProfileUniqueViolation(error)) {
     const { data: raced } = await supabase
       .from("profiles")
-      .select("id, handle, display_name, status, bio, welcome_video_key")
+      .select(SOCIAL_PROFILE_COLUMNS)
       .eq("id", userId)
       .maybeSingle();
     return { profile: null, raced: raced ?? null, unique: true, error: error.message };

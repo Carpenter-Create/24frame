@@ -39,7 +39,7 @@ import {
   loadProfileSocialCounts,
   loadSuggestedPeople,
 } from "@/lib/social-feed";
-import { ensureOwnSocialProfile } from "@/lib/social-profile";
+import { SOCIAL_PROFILE_COLUMNS, ensureOwnSocialProfile } from "@/lib/social-profile";
 import { requireSocialSession } from "@/lib/social-session";
 
 export async function generateMetadata({
@@ -73,7 +73,7 @@ export default async function SocialPublicProfilePage({
   const { data: member } = handle
     ? await supabase
         .from("profiles")
-        .select("id, handle, display_name, status, bio, welcome_video_key")
+        .select(SOCIAL_PROFILE_COLUMNS)
         .eq("handle", handle)
         .maybeSingle()
     : { data: null };
@@ -142,6 +142,7 @@ export default async function SocialPublicProfilePage({
           handle={member.handle}
           photoUrl={photoUrl}
           bio={member.bio}
+          roles={member.crafts}
           ring={liveStories.length > 0 ? "live" : null}
           stats={counts}
           actions={

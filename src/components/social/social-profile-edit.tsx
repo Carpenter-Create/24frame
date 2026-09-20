@@ -14,6 +14,7 @@ import {
 import { AccountAvatarCrop } from "@/components/account/account-avatar-crop";
 import { SocialAvatar } from "@/components/social/social-avatar";
 import { SocialProfileBioEditor } from "@/components/social/social-profile-bio";
+import { SocialProfileRolesField } from "@/components/social/social-profile-roles";
 import { SocialIcon } from "@/components/social/social-icon";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { Input } from "@/components/ui/input";
@@ -52,6 +53,7 @@ import {
   splitSocialDisplayName,
   stripHandleDecorators,
 } from "@/lib/social";
+import { parseSocialProfileRoles } from "@/lib/social-profile-roles";
 import { socialProfileEditFace, type SocialProfileEditFace } from "@/lib/social-profile-edit";
 
 function EditHeader({
@@ -90,12 +92,14 @@ export function SocialProfileEditForm({
   bio,
   photoUrl,
   welcomeVideoUrl = null,
+  crafts = [],
 }: {
   handle: string;
   displayName: string;
   bio: string;
   photoUrl: string | null;
   welcomeVideoUrl?: string | null;
+  crafts?: readonly string[];
 }) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -115,6 +119,7 @@ export function SocialProfileEditForm({
   const [cropSize, setCropSize] = useState<{ width: number; height: number } | null>(null);
   const [face, setFace] = useState<SocialProfileEditFace>("edit");
   const [bioText, setBioText] = useState(bio);
+  const [roles, setRoles] = useState(() => parseSocialProfileRoles(crafts));
   const preview = socialProfilePublicUrl(bareHandle(username));
   const required = socialHandleRequiredError(username);
 
@@ -254,6 +259,7 @@ export function SocialProfileEditForm({
     form.set("middle_name", middleName);
     form.set("last_name", lastName);
     form.set("display_name", composeSocialDisplayName(firstName, lastName, middleName));
+    form.set("crafts", JSON.stringify(roles));
     const result = await createSocialProfile(form);
     setPending(false);
     if (result.error) {
@@ -469,6 +475,8 @@ export function SocialProfileEditForm({
                 {preview}
               </p>
             </div>
+            <div className="h-px bg-hairline" />
+            <SocialProfileRolesField value={roles} onChange={setRoles} />
             <div className="h-px bg-hairline" />
             <button
               type="button"

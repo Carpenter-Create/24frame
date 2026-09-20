@@ -23,6 +23,7 @@ import {
   socialPersonIdentity,
   socialRelativeTime,
 } from "@/lib/social";
+import { socialProfileRolesLine } from "@/lib/social-profile-roles";
 import { SocialAvatar } from "./social-avatar";
 import { SocialLikeButton } from "./social-forms";
 import { SocialEmpty } from "./social-empty";
@@ -159,6 +160,7 @@ export function SocialProfileIdentity({
   handle,
   photoUrl,
   bio,
+  roles,
   ring = null,
   photoAction,
   stats,
@@ -169,6 +171,7 @@ export function SocialProfileIdentity({
   handle: string;
   photoUrl?: string | null;
   bio?: string | null;
+  roles?: readonly string[] | null;
   ring?: "unseen" | "live" | null;
   photoAction?: ReactNode;
   stats?: { posts: number; followers: number; following: number };
@@ -177,6 +180,7 @@ export function SocialProfileIdentity({
 }) {
   const person = socialPersonIdentity({ handle, displayName: name });
   const title = person.name ?? person.handleLabel;
+  const rolesLine = socialProfileRolesLine(roles ?? []);
   const actionRow = actions ? (
     <div className="flex w-full items-center gap-2 md:w-auto">
       {actions()}
@@ -195,6 +199,11 @@ export function SocialProfileIdentity({
             <div className="min-w-0">
               <p className="text-[18px] font-semibold text-ink md:text-[22px]">{title}</p>
               <p className={cn(SOCIAL_HANDLE_PILL_CLASS, "mt-1")}>{person.handleLabel}</p>
+              {rolesLine ? (
+                <p data-social-profile-roles="" className="mt-1 break-words t-body-sm text-ink-2">
+                  {rolesLine}
+                </p>
+              ) : null}
             </div>
             {actionRow ? <div className="hidden shrink-0 md:flex">{actionRow}</div> : null}
           </div>

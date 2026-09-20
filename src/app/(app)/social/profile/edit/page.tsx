@@ -24,6 +24,7 @@ export default async function SocialProfileEditPage() {
       bio={profile.bio ?? ""}
       photoUrl={photoUrl}
       welcomeVideoUrl={welcomeVideoUrl}
+      crafts={profile.crafts ?? []}
     />
   );
 }

@@ -523,6 +523,9 @@ export const SOCIAL = {
     welcomeAdd: "Add welcome video",
     welcomeReplace: "Replace welcome video",
     welcomeRemove: "Remove welcome video",
+    roles: "Roles",
+    rolesSearch: "Search roles",
+    rolesHint: "Choose up to 5.",
   },
   member: {
     title: "Member",

@@ -17,6 +17,7 @@ import { normalizeSocialCategory } from "@/lib/social-categories";
 import { storyInsertRow, storyViewInsertRow } from "@/lib/social-stories";
 import { ensureOwnSocialProfile, isProfileUniqueViolation } from "@/lib/social-profile";
 import { handleTakenError, lookupHandleCollision } from "@/lib/social-handle-taken";
+import { socialProfileRolesWrite } from "@/lib/social-profile-roles";
 import { SOCIAL_DM_ADD_BATCH_LIMIT } from "@/lib/social-dm-bounds";
 import {
   followInsertRow,
@@ -100,10 +101,18 @@ export async function createSocialProfile(formData: FormData): Promise<ActionRes
     socialPublicDisplayName(profile?.display_name) ??
     "";
 
+  const roles = formData.has("crafts") ? socialProfileRolesWrite(formData.get("crafts")) : null;
+
   if (profile) {
     const { error } = await supabase
       .from("profiles")
-      .update({ handle, display_name: displayName })
+      .update({
+        handle,
+        display_name: displayName,
+        ...(roles
+          ? { crafts: roles.crafts, primary_role: roles.primary_role }
+          : {}),
+      })
       .eq("id", user.id);
     if (error) {
       if (isProfileUniqueViolation(error)) return { error: SOCIAL.profile.handleTaken };
@@ -121,7 +130,13 @@ export async function createSocialProfile(formData: FormData): Promise<ActionRes
       if (isProfileUniqueViolation(error)) {
         const { error: updateError } = await supabase
           .from("profiles")
-          .update({ handle, display_name: displayName })
+          .update({
+            handle,
+            display_name: displayName,
+            ...(roles
+              ? { crafts: roles.crafts, primary_role: roles.primary_role }
+              : {}),
+          })
           .eq("id", user.id);
         if (updateError) {
           if (isProfileUniqueViolation(updateError)) return { error: SOCIAL.profile.handleTaken };

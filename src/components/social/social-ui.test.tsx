@@ -170,6 +170,26 @@ describe("Social profile public face", () => {
     expect(uiSrc).not.toContain("socialShareHint");
     expect(identity).toContain("Writes engines.");
     expect(identity).toContain('src="https://s3.example/signed-avatar"');
+    expect(identity).not.toContain("data-social-profile-roles");
+
+    const withRoles = renderToStaticMarkup(
+      <SocialProfileIdentity
+        name="Ada Lovelace"
+        handle="ada"
+        photoUrl={null}
+        roles={["actor", "producer", "screenwriter", "investor"]}
+      />,
+    );
+    expect(withRoles).toContain("data-social-profile-roles");
+    expect(withRoles).toContain("Actor · Producer · Screenwriter +1");
+    expect(withRoles).not.toContain("Roles:");
+    expect(uiSrc).toContain("socialProfileRolesLine");
+    expect(
+      uiSrc.slice(
+        uiSrc.indexOf("export function SocialPersonRow"),
+        uiSrc.indexOf("export function SocialConversationFaces"),
+      ),
+    ).not.toContain("socialProfileRolesLine");
 
     const history = renderToStaticMarkup(
       <SocialAuthorHistory

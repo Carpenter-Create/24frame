@@ -29,6 +29,8 @@ vi.mock("@/lib/s3-social-media", () => ({
 }));
 vi.mock("@/lib/social-profile", () => ({
   ensureOwnSocialProfile: vi.fn(),
+  SOCIAL_PROFILE_COLUMNS:
+    "id, handle, display_name, status, bio, welcome_video_key, crafts",
 }));
 vi.mock("@/app/(app)/social/actions", () => ({
   toggleSocialFollow: vi.fn(),
@@ -78,6 +80,7 @@ type PublicProfile = {
   display_name: string;
   status: string;
   bio: string | null;
+  crafts?: string[] | null;
 };
 
 const ada: PublicProfile = {
@@ -180,6 +183,17 @@ describe("Social public profile", () => {
     expect(html).not.toContain("data-social-profile-form");
     expect(html).not.toContain("data-social-bio-form");
     expect(html).not.toContain("data-social-profile-photo");
+    expect(html).not.toContain("data-social-profile-roles");
+  });
+
+  it("prints the Roles line when crafts are set and omits a Roles prefix", async () => {
+    stubClient({
+      member: { ...ada, crafts: ["actor", "producer"] },
+    });
+    const html = await renderPublic();
+    expect(html).toContain("data-social-profile-roles");
+    expect(html).toContain("Actor · Producer");
+    expect(html).not.toContain("Roles:");
   });
 
   it("renders the same public profile for a bare handle param", async () => {

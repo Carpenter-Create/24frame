@@ -59,6 +59,11 @@ describe("SocialProfileEditForm", () => {
     expect(html).toContain("data-social-profile-edit-welcome");
     expect(html).toContain(SOCIAL.profile.welcomeAdd);
     expect(html).not.toContain(SOCIAL.profile.welcomeRemove);
+    expect(html).toContain("data-social-profile-edit-roles");
+    expect(html).toContain(SOCIAL.profile.roles);
+    expect(html).toContain(SOCIAL.profile.rolesSearch);
+    expect(html).toContain('id="social-edit-roles-search"');
+    expect(html).not.toContain("data-social-profile-edit-roles-selected");
     expect(html).toContain("data-social-avatar");
     expect(html).toContain("AL");
     expect(html).not.toContain("<img");
@@ -117,6 +122,27 @@ describe("SocialProfileEditForm", () => {
     expect(html).toContain(SOCIAL.profile.welcomeRemove);
     expect(html).toContain('src="https://s3.example/welcome.mp4"');
     expect(html).not.toContain("data-social-welcome-video");
+  });
+
+  it("shows selected Roles chips from persisted crafts and never a Category label", () => {
+    const html = renderToStaticMarkup(
+      <SocialProfileEditForm
+        handle="ada"
+        displayName="Ada Lovelace"
+        bio=""
+        photoUrl={null}
+        crafts={["actor", "producer", "screenwriter"]}
+      />,
+    );
+    expect(html).toContain("data-social-profile-edit-roles-selected");
+    expect(html).toContain('data-social-profile-role-chip="actor"');
+    expect(html).toContain('data-social-profile-role-chip="producer"');
+    expect(html).toContain('data-social-profile-role-chip="screenwriter"');
+    expect(html.indexOf('data-social-profile-role-chip="actor"')).toBeLessThan(
+      html.indexOf('data-social-profile-role-chip="producer"'),
+    );
+    expect(html).not.toContain("Category");
+    expect(html).not.toContain("Actress");
   });
 
   it("shows the empty-handle preview URL", () => {

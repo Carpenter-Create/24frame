@@ -86,6 +86,7 @@ function stubClient({
     status: string;
     bio?: string | null;
     welcome_video_key?: string | null;
+    crafts?: string[] | null;
   } | null;
   posts?: {
     id: string;
@@ -236,6 +237,24 @@ describe("Social profile public face", () => {
     expect(html).not.toContain("id=\"social-profile-edit\"");
     expect(html).not.toContain("<summary");
     expect(html).not.toContain("data-social-welcome-video");
+    expect(html).not.toContain("data-social-profile-roles");
+  });
+
+  it("prints the Roles line under the handle and omits it when crafts is empty", async () => {
+    stubClient({
+      profile: { ...ensured, crafts: ["actor", "producer", "screenwriter", "investor"] },
+    });
+    vi.mocked(ensureOwnSocialProfileResult).mockResolvedValue({
+      profile: { ...ensured, crafts: ["actor", "producer", "screenwriter", "investor"] },
+      error: null,
+    });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const html = await renderServerMarkup(await SocialProfilePage());
+    expect(html).toContain("data-social-profile-roles");
+    expect(html).toContain("Actor · Producer · Screenwriter +1");
+    expect(html.indexOf("@ada")).toBeLessThan(html.indexOf("Actor · Producer · Screenwriter +1"));
+    expect(html).not.toContain("Roles:");
   });
 
   it("renders the welcome video band only when a signed URL exists", async () => {

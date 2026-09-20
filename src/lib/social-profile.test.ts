@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { profileInsertRow, SOCIAL, suggestedHandleSeed } from "@/lib/social";
 import {
+  SOCIAL_PROFILE_COLUMNS,
   ensureOwnSocialProfile,
   ensureOwnSocialProfileResult,
   nextHandleCandidate,
@@ -51,6 +52,12 @@ function stubClient({
 }
 
 describe("ensureOwnSocialProfile", () => {
+  it("loads welcome video and crafts with the shared profile columns", () => {
+    expect(SOCIAL_PROFILE_COLUMNS).toBe(
+      "id, handle, display_name, status, bio, welcome_video_key, crafts",
+    );
+  });
+
   it("returns the existing self row and does not insert", async () => {
     const existing = profileRow();
     const { client, inserts, from } = stubClient({ existing });

@@ -145,6 +145,45 @@ describe("social actions", () => {
     expect(await createSocialProfile(blankLast)).toEqual({ error: SOCIAL.profile.lastNameRequired });
   });
 
+  it("persists ordered Role slugs on crafts and the first as primary_role", async () => {
+    const { updates } = stub({
+      profile: { id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" },
+    });
+    const form = new FormData();
+    form.set("handle", "@ada");
+    form.set("first_name", "Ada");
+    form.set("last_name", "Lovelace");
+    form.set("crafts", JSON.stringify(["actor", "producer", "nope", "screenwriter"]));
+    expect(await createSocialProfile(form)).toEqual({});
+    expect(updates).toEqual([
+      {
+        table: "profiles",
+        row: {
+          handle: "ada",
+          display_name: "Ada Lovelace",
+          crafts: ["actor", "producer", "screenwriter"],
+          primary_role: "actor",
+        },
+      },
+    ]);
+
+    const cleared = new FormData();
+    cleared.set("handle", "@ada");
+    cleared.set("first_name", "Ada");
+    cleared.set("last_name", "Lovelace");
+    cleared.set("crafts", "[]");
+    expect(await createSocialProfile(cleared)).toEqual({});
+    expect(updates[1]).toEqual({
+      table: "profiles",
+      row: {
+        handle: "ada",
+        display_name: "Ada Lovelace",
+        crafts: [],
+        primary_role: null,
+      },
+    });
+  });
+
   it("saves and clears the welcome video pointer without deleting media", async () => {
     const author = "11111111-1111-4111-8111-111111111111";
     const object = "22222222-2222-4222-8222-222222222222";

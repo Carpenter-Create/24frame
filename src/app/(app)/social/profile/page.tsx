@@ -118,6 +118,7 @@ async function SocialProfileMain({
         handle={profile.handle}
         photoUrl={photoUrl}
         bio={profile.bio?.trim() ? profile.bio : SOCIAL.profile.ownFace}
+        roles={profile.crafts}
         ring={liveStories.length > 0 ? "live" : null}
         stats={counts ?? undefined}
         actions={() => (

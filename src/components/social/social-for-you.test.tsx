@@ -32,4 +32,17 @@ describe("SocialForYouRail person identity", () => {
     expect(html).not.toContain("Member");
     expect(SOCIAL.member.title).toBe("Member");
   });
+
+  it("shows the signed profile photo on Suggested people when a URL exists", () => {
+    const html = renderToStaticMarkup(
+      <SocialForYouRail
+        people={[{ id: "u3", handle: "joshua", display_name: "Joshua A" }]}
+        faces={new Map([["u3", "https://s3.example/joshua-face"]])}
+      />,
+    );
+    expect(html).toContain("data-social-person-row");
+    expect(html).toContain('src="https://s3.example/joshua-face"');
+    expect(html).not.toContain("JA");
+    expect(html).not.toContain("Actor");
+  });
 });

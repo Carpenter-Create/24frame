@@ -24,6 +24,7 @@ export type SocialProfileRow = {
   status: string;
   bio?: string | null;
   welcome_video_key?: string | null;
+  crafts?: string[] | null;
 };
 
 export type SocialPostRow = {
