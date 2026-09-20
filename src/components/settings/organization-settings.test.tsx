@@ -11,6 +11,7 @@ describe("organization settings hosts Team", () => {
     expect(pane).toContain("data-settings-section=\"entities\"");
     expect(pane).toContain("TeamInviteForm");
     expect(pane).toContain("LegalEntitiesSection");
+    expect(pane).toContain("signedAvatarUrls");
     expect(pane).toContain("SETTINGS_CONTENT_MEASURE_CLASS");
     expect(pane).not.toContain("<Card>");
     expect(pane).not.toContain("CardBody");

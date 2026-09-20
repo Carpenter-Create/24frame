@@ -18,6 +18,7 @@ import {
   AppSheetSurface,
   Close44,
   HouseEmpty,
+  IdentityAvatar,
   IdentityBlock,
   SheetGroup,
   SheetGroupItem,
@@ -39,6 +40,7 @@ describe("house primitives", () => {
     const identity = renderToStaticMarkup(
       <IdentityBlock avatarInitial="A" name="" email="ada@example.com" />,
     );
+    const avatar = renderToStaticMarkup(<IdentityAvatar avatarInitial="AL" />);
     const group = renderToStaticMarkup(
       <SheetGroup label="ACCOUNT">
         <SheetGroupItem item="agreements" href="/settings/agreements">
@@ -60,6 +62,8 @@ describe("house primitives", () => {
     expect(action).toContain(TEXT_ACTION_CLASS);
     expect(action).toContain('href="/settings"');
     expect(identity).toContain("data-identity-avatar");
+    expect(avatar).toContain("data-identity-avatar");
+    expect(avatar).toContain(">AL<");
     expect(identity).toContain("data-identity-name");
     expect(identity).toContain("ada@example.com");
     expect(identity).toContain(">A<");
@@ -133,6 +137,8 @@ describe("house primitives", () => {
     expect(blank).not.toContain("<img");
     expect(houseSrc).toContain("accountPhotoSrc");
     expect(houseSrc).toContain("IdentityPhoto");
+    expect(houseSrc).toContain("IdentityAvatar");
+    expect(houseSrc).toContain("<IdentityAvatar");
     expect(houseSrc).toContain("onError");
     expect(houseSrc).not.toContain("signedAvatarUrl");
     expect(houseSrc).not.toContain("uploadAccountPhoto");

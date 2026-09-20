@@ -242,6 +242,7 @@ export type TeamListRow = {
   sentAt: string | null;
   acceptedAt: string | null;
   withdrawId: string | null;
+  photoUrl: string | null;
 };
 
 export function teamIdentityName(name: string | null | undefined): string | null {
@@ -260,6 +261,7 @@ export function toTeamListRows(
     name?: string | null;
     sentAt?: string | null;
     acceptedAt: string;
+    photoUrl?: string | null;
   }>,
   pending: ReadonlyArray<{
     id: string;
@@ -278,6 +280,7 @@ export function toTeamListRows(
       sentAt: invite.sentAt,
       acceptedAt: null,
       withdrawId: invite.id,
+      photoUrl: null,
     })),
     ...members.map((member) => ({
       key: member.userId,
@@ -288,6 +291,7 @@ export function toTeamListRows(
       sentAt: member.sentAt ?? null,
       acceptedAt: member.acceptedAt,
       withdrawId: null,
+      photoUrl: member.photoUrl ?? null,
     })),
   ];
 }

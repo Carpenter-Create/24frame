@@ -6,6 +6,7 @@ import { COMPANY_PROFILE } from "@/lib/account-profile";
 import { ACCOUNT_INVITE } from "@/lib/account-invite";
 import { LEGAL_ENTITIES } from "@/lib/legal-entities";
 import { SETTINGS, SETTINGS_CONTENT_MEASURE_CLASS } from "@/lib/settings";
+import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 import SettingsOrganizationPage from "./page";
@@ -21,6 +22,7 @@ vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 vi.mock("@/app/(app)/account/actions", () => ({
   saveCompanyName: vi.fn(),
 }));
+vi.mock("@/lib/s3-avatars", () => ({ signedAvatarUrls: vi.fn(async () => new Map()) }));
 
 function stubMemberCan(allowed: boolean) {
   const rpc = vi.fn(async (name: string) => {
@@ -164,6 +166,17 @@ describe("SettingsOrganizationPage", () => {
     const pendingRow = html.slice(html.lastIndexOf("<li", pendingStart), html.indexOf("</li>", pendingStart));
     expect(pendingRow).toContain(ACCOUNT_INVITE.revoke);
     expect(pendingRow).toContain(ACCOUNT_INVITE.invited);
+    expect(html).toContain("data-identity-avatar");
+    expect(html).toContain("data-settings-drill-leading");
+    expect(memberRow).toContain("data-identity-avatar");
+    expect(memberRow).toContain(">AD<");
+    expect(pendingRow).toContain("data-identity-avatar");
+    expect(pendingRow).toContain(">PA<");
+    const inviteStart = html.indexOf('data-settings-drill-row="team-invite"');
+    const inviteRow = html.slice(inviteStart, html.indexOf("</li>", inviteStart));
+    expect(inviteRow).not.toContain("data-identity-avatar");
+    expect(inviteRow).not.toContain("data-settings-drill-leading");
+    expect(signedAvatarUrls).toHaveBeenCalledWith(["u1"]);
   });
 
   it("houses Organization empty when there is no org", async () => {

@@ -9,6 +9,7 @@ import {
   SETTINGS_DRILL_ACCENT_CLASS,
   SETTINGS_DRILL_CHEVRON_CLASS,
   SETTINGS_DRILL_COPY_CLASS,
+  SETTINGS_DRILL_LEADING_BODY_CLASS,
   SETTINGS_DRILL_ROW_CLASS,
   SETTINGS_DRILL_VALUE_CLASS,
   SETTINGS_GROUP_CLASS,
@@ -24,6 +25,8 @@ import {
 // Light 24Frame register. One SoT for Profile, Preferences, Rights
 // Holder (company · legal entities · team), Settings index, and Get
 // Help. Do not fork a lookalike. Index: label · muted value · chevron.
+// Person rows may pass leading (house IdentityAvatar). Invite / Add
+// stay accent doors — no fake face. Phone stacks identity · action.
 // Action rows (Add / Invite) use accent and live inside the group.
 // Edit pane: page-lead back, title, helper, single control.
 
@@ -54,6 +57,7 @@ export function SettingsDrillRow({
   helper,
   badge,
   itemAttr,
+  leading,
   trailing,
   onClick,
   tone = "default",
@@ -67,6 +71,7 @@ export function SettingsDrillRow({
   helper?: string;
   badge?: ReactNode;
   itemAttr?: string;
+  leading?: ReactNode;
   trailing?: ReactNode;
   onClick?: () => void;
   tone?: "default" | "accent";
@@ -83,32 +88,47 @@ export function SettingsDrillRow({
     ...drillCtaProps(cta),
     ...(itemAttr ? { [itemAttr]: kind } : {}),
   };
-  const body = (
-    <>
-      <span className={SETTINGS_DRILL_COPY_CLASS}>
-        {badge ? (
-          <span className="flex min-w-0 flex-wrap items-center gap-[var(--space-2)]">
-            <span>{label}</span>
-            {badge}
-          </span>
-        ) : (
+  const copy = (
+    <span className={SETTINGS_DRILL_COPY_CLASS}>
+      {badge ? (
+        <span className="flex min-w-0 flex-wrap items-center gap-[var(--space-2)]">
           <span>{label}</span>
-        )}
-        {value ? <span className={SETTINGS_DRILL_VALUE_CLASS}>{value}</span> : null}
-        {helper ? <span className={SETTINGS_DRILL_VALUE_CLASS}>{helper}</span> : null}
-      </span>
-      {trailing || canOpen ? (
-        <span className="flex shrink-0 items-center gap-[var(--space-3)]">
-          {trailing}
-          {canOpen ? (
-            <CaretRight
-              className={SETTINGS_DRILL_CHEVRON_CLASS}
-              weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
-            />
-          ) : null}
+          {badge}
         </span>
-      ) : null}
+      ) : (
+        <span>{label}</span>
+      )}
+      {value ? <span className={SETTINGS_DRILL_VALUE_CLASS}>{value}</span> : null}
+      {helper ? <span className={SETTINGS_DRILL_VALUE_CLASS}>{helper}</span> : null}
+    </span>
+  );
+  const actions =
+    trailing || canOpen ? (
+      <span className="flex shrink-0 items-center gap-[var(--space-3)]">
+        {trailing}
+        {canOpen ? (
+          <CaretRight
+            className={SETTINGS_DRILL_CHEVRON_CLASS}
+            weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
+          />
+        ) : null}
+      </span>
+    ) : null;
+  const identity = (
+    <>
+      {copy}
+      {actions}
     </>
+  );
+  const body = leading ? (
+    <>
+      <span data-settings-drill-leading="" className="shrink-0">
+        {leading}
+      </span>
+      <span className={SETTINGS_DRILL_LEADING_BODY_CLASS}>{identity}</span>
+    </>
+  ) : (
+    identity
   );
 
   if (hasHref && hasClick && href) {
