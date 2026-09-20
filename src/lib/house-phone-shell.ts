@@ -1,59 +1,53 @@
-// Shared phone app-shell — Option 2 (Adam lock 2026-09-18, dest-chip amend).
-// One primitive for Home · Social · Aggregation · Education · Co-Productions.
-// Desktop header + desktop workspace switcher stay on HouseLeadChrome.
-// Phone top: emblem alone on the left. No workspace pill. No hamburger
-// (leading or trailing). Trailing is search (when needed) · theme ·
-// 24Frame AI · bell · avatar. Sun/moon is shared immediately left of
-// Ask on every breakpoint. One trail. No phone-only sun/moon twin.
+// Shared phone app-shell — IA A (Adam lock: dests in the dock).
+// One primitive for Home · Aggregation · Social · Education.
+// Desktop header + desktop workspace pills stay on HouseLeadChrome.
+// Phone header: emblem + current workspace name/mark. Tap opens a
+// calm house sheet — Home · Aggregation · Social · Education.
+// One tap open, one tap switch. No workspace item in the dock.
+// Avatar stays Settings / account — not a second workspace door.
+// Destinations live in the Mercury floating dock (in-workspace
+// only). Social dest order stays Feed · Profile · Explore ·
+// Create · Messages. Create is Social-only. Aggregation ·
+// Education · Home each keep their own dests. No under-top dest
+// chip rail. No peer workspace pill rail.
+// Phone OS dark is not the product theme. One house SoT.
+// Trailing is search (when needed) · theme · 24Frame AI · bell ·
+// avatar. Sun/moon is shared immediately left of Ask on every
+// breakpoint. One trail. No phone-only sun/moon twin.
 // Ask AI is header + Home module only (#465).
-// Destinations that used to live in the Agg/Edu hamburger (and Social’s
-// second float) live on one under-top HousePhoneDestChips row.
-// Home has no dest chip row. Desktop left rails stay.
-// Bottom bar owns workspace switching only. Glyphs only — no labels.
-// Aggregation is films (FilmStrip), not a grid. Craft is Elevated
-// Mercury (reference, not a pixel clone, not Nextdoor frost): one
-// floating pill, house surface fill, hairline, restrained
-// --elevation-float. No frost. No satellite FAB. No second
-// float. Active tab is a light surface-muted pill behind the glyph.
-// Inactive sit bare. Stroke is Regular for both the Mercury bar and
-// the phone-top AI/bell cluster — one weight register — but the glyph
-// boxes ride TWO independent size SoT tokens per Adam's #451
-// authoritative lock (2026-09-19, live-glance): the Mercury bar sits
-// at size-6 / 24px (HOUSE_PHONE_CHROME_ICON_CLASS) so the workspace
-// switch reads at thumb weight, and the header trailing sits at
-// size-4 / 16px (HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS) matching
-// desktop chrome optical — AI mark, notification bell, and Social
-// header search no longer tower over the emblem. Two literals, no
-// alias — header must NOT re-export the bottom-chrome class. Arc:
-// #447 shipped size-6 shared; #448 collapsed to size-5; #449 split
-// header size-4 / bar size-6; #450 briefly pulled both to size-5
-// and Adam bounced off it; #451 (this lock) restores the split with
-// an explicit no-alias rule. Not Bold/Fill heavy. Active ink is
-// accent on the chip; idle is ink-2 on both the bar off state and
-// the top trailing (AI + bell + phone search) via
-// HOUSE_PHONE_CHROME_IDLE_INK_CLASS — Regular on ink-3 optically
-// drifts lighter than the same glyph on ink-2, which is what #442
-// left over.
+// Craft is Elevated Mercury (reference, not a pixel clone, not
+// Nextdoor frost): one floating pill, house surface fill, hairline,
+// restrained --elevation-float. No frost. No satellite FAB. No
+// second float. Active dest is a light surface-muted pill behind
+// the glyph. Inactive sit bare. Stroke is Regular for both the
+// Mercury bar and the phone-top AI/bell cluster — one weight
+// register — but the glyph boxes ride TWO independent size SoT
+// tokens per Adam's #451 authoritative lock (2026-09-19,
+// live-glance): the Mercury bar sits at size-6 / 24px
+// (HOUSE_PHONE_CHROME_ICON_CLASS) so dests read at thumb weight,
+// and the header trailing sits at size-4 / 16px
+// (HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS) matching desktop chrome
+// optical. Two literals, no alias — header must NOT re-export the
+// bottom-chrome class. Not Bold/Fill heavy. Active ink is accent
+// on the chip; idle is ink-2 on both the bar off state and the top
+// trailing (AI + bell + phone search) via
+// HOUSE_PHONE_CHROME_IDLE_INK_CLASS.
 // House tokens only. Hide on scroll-down / show on scroll-up via
 // social-tab-bar-scroll. Content pad stays when the bar hides.
 // Not a Meta skin. Not Mercury lavender.
 
-import { BookOpen, FilmStrip, House, Users, type IconWeight } from "@phosphor-icons/react";
+import { BookOpen, FilmStrip, House, Newspaper, Users, type IconWeight } from "@phosphor-icons/react";
 
-import {
-  HOUSE_SEGMENTED_ITEM_BASE_CLASS,
-  HOUSE_SEGMENTED_ITEM_OFF_CLASS,
-  HOUSE_SEGMENTED_ITEM_ON_CLASS,
-} from "@/lib/house-shell";
-import { SEGMENTED_TRACK_PERSIST } from "@/lib/segmented-track";
 import {
   isClientNavActive,
   isHouseAiNavItem,
+  isPhosphorNavItem,
   isSocialTabActive,
   mobileNavDestinations,
   type NavItem,
+  type PhosphorNavItem,
 } from "@/lib/nav";
-import { CO_PRODUCTIONS_HREF, CO_PRODUCTIONS_ICON, CO_PRODUCTIONS_LABEL } from "@/lib/co-productions";
+import { NEWS_HREF, NEWS_PAGE } from "@/lib/news";
 import {
   OVERVIEW_HREF,
   OVERVIEW_PAGE,
@@ -72,7 +66,7 @@ import {
 } from "@/lib/workspace-menu";
 import { persistWorkspaceCookie, workspaceHome, type WorkspaceMode } from "@/lib/workspace";
 
-export type HousePhoneWorkspaceId = OverviewLeadPillId;
+export type HousePhoneWorkspaceId = Exclude<OverviewLeadPillId, "co-productions">;
 
 export type HousePhoneWorkspaceTab = {
   id: HousePhoneWorkspaceId;
@@ -84,16 +78,16 @@ export type HousePhoneWorkspaceTab = {
 export const HOUSE_PHONE_WORKSPACE_TABS = [
   { id: "home" as const, label: OVERVIEW_PAGE.title, href: OVERVIEW_HREF, icon: House },
   {
-    id: "social" as const,
-    label: WORKSPACE_SOCIAL_LABEL,
-    href: workspaceHome("social"),
-    icon: Users,
-  },
-  {
     id: "aggregation" as const,
     label: WORKSPACE_AGGREGATION_LABEL,
     href: workspaceHome("aggregation"),
     icon: FilmStrip,
+  },
+  {
+    id: "social" as const,
+    label: WORKSPACE_SOCIAL_LABEL,
+    href: workspaceHome("social"),
+    icon: Users,
   },
   {
     id: "education" as const,
@@ -101,16 +95,10 @@ export const HOUSE_PHONE_WORKSPACE_TABS = [
     href: WORKSPACE_EDUCATION_HREF,
     icon: BookOpen,
   },
-  {
-    id: "co-productions" as const,
-    label: CO_PRODUCTIONS_LABEL,
-    href: CO_PRODUCTIONS_HREF,
-    icon: CO_PRODUCTIONS_ICON,
-  },
 ] as const satisfies readonly HousePhoneWorkspaceTab[];
 
 export const HOUSE_PHONE_BOTTOM_NAV = {
-  label: "Workspaces",
+  label: "Destinations",
 } as const;
 
 export const HOUSE_PHONE_DEST_CHIPS = {
@@ -134,7 +122,7 @@ export const HOUSE_PHONE_BOTTOM_NAV_ITEM_CLASS =
 export const HOUSE_PHONE_BOTTOM_NAV_ITEM_ON_CLASS = "text-accent";
 
 /** Phone Mercury bottom bar glyph size — 24px box.
- *  Bottom bar owns the workspace switch and sits at the base of the
+ *  Bottom bar owns in-workspace dests and sits at the base of the
  *  screen, so its glyphs stay at thumb weight. The phone header
  *  trailing cluster uses a SEPARATE size literal
  *  (HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS) — never aliased to this
@@ -192,28 +180,6 @@ export const HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT = HOUSE_PHONE_CHROME_ICON_WEIGHT
 export const HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS =
   "max-md:pb-[calc(5.5rem+env(safe-area-inset-bottom))]";
 
-// Scroll host for the dest SegmentedTrack. No gap: selected is the
-// house thumb, not per-pill fill. Phone-only. Track / thumb / item
-// ink reuse HOUSE_SEGMENTED_* (same as desktop workspace pills).
-export const HOUSE_PHONE_DESTS_CLASS =
-  "flex w-full min-w-0 overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:hidden";
-
-export const HOUSE_PHONE_DEST_ITEM_CLASS = `inline-flex items-center gap-[var(--space-1)] ${HOUSE_SEGMENTED_ITEM_BASE_CLASS}`;
-
-export const HOUSE_PHONE_DEST_ITEM_ON_CLASS = HOUSE_SEGMENTED_ITEM_ON_CLASS;
-
-export const HOUSE_PHONE_DEST_ITEM_OFF_CLASS = HOUSE_SEGMENTED_ITEM_OFF_CLASS;
-
-export function housePhoneDestItemClass(selected: boolean): string {
-  return `${HOUSE_PHONE_DEST_ITEM_CLASS} ${
-    selected ? HOUSE_PHONE_DEST_ITEM_ON_CLASS : HOUSE_PHONE_DEST_ITEM_OFF_CLASS
-  }`;
-}
-
-export function housePhoneDestPersistKey(workspace: WorkspaceMode): string {
-  return `${SEGMENTED_TRACK_PERSIST.phoneDest}-${workspace}`;
-}
-
 /** Phone-only label for the Social feed dest. Desktop rail keeps "Home". */
 export const SOCIAL_PHONE_FEED_LABEL = "Feed";
 
@@ -222,8 +188,25 @@ function relabelSocialFeed<T extends NavItem>(item: T): T {
   return { ...item, label: SOCIAL_PHONE_FEED_LABEL };
 }
 
-/** Social phone dests keep Home as the leftmost pill, renamed to Feed. */
+/** Social phone dests keep Home as the leftmost dest, renamed to Feed. */
 export const SOCIAL_PHONE_DESTS = mobileNavDestinations(false, "social").map(relabelSocialFeed);
+
+/** Home-owned dests. Industry news is a Home child, not a workspace. */
+export const HOME_PHONE_DESTS = [
+  {
+    label: OVERVIEW_PAGE.title,
+    href: OVERVIEW_HREF,
+    family: "phosphor",
+    icon: House,
+    exact: true,
+  },
+  {
+    label: NEWS_PAGE.title,
+    href: NEWS_HREF,
+    family: "phosphor",
+    icon: Newspaper,
+  },
+] as const satisfies readonly PhosphorNavItem[];
 
 export function housePhoneWorkspaceSelected(
   id: HousePhoneWorkspaceId,
@@ -239,27 +222,39 @@ export function housePhoneWorkspaceHref(id: HousePhoneWorkspaceId): string {
 }
 
 export function persistHousePhoneWorkspace(id: HousePhoneWorkspaceId): void {
-  if (id === "home" || id === "co-productions") return;
+  if (id === "home") return;
   persistWorkspaceCookie(id);
 }
 
-export function housePhoneShowsDestChips({
+export function housePhoneShowsBottomDests({
   workspace,
-  homeChrome = false,
-  settingsPage = false,
-  helpPage = false,
-  activityPage = false,
+  homeOwned = false,
+  accountChrome = false,
+  coProductions = false,
 }: {
+  workspace: WorkspaceMode;
+  homeOwned?: boolean;
+  accountChrome?: boolean;
+  coProductions?: boolean;
+}): boolean {
+  if (accountChrome || coProductions) return false;
+  if (homeOwned) return true;
+  return workspace === "social" || workspace === "aggregation" || workspace === "education";
+}
+
+/** @deprecated IA A — dests live in the dock. Alias kept for one-rename callers. */
+export function housePhoneShowsDestChips(input: {
   workspace: WorkspaceMode;
   homeChrome?: boolean;
   settingsPage?: boolean;
   helpPage?: boolean;
   activityPage?: boolean;
 }): boolean {
-  // Activity and Get Help share accountChromeNoRail — dest chips
-  // stay off. Do not add a left rail or chip twin on those paths.
-  if (homeChrome || settingsPage || helpPage || activityPage) return false;
-  return workspace === "social" || workspace === "aggregation" || workspace === "education";
+  return housePhoneShowsBottomDests({
+    workspace: input.workspace,
+    homeOwned: input.homeChrome,
+    accountChrome: Boolean(input.settingsPage || input.helpPage || input.activityPage),
+  });
 }
 
 export function housePhoneDestinations(
@@ -269,6 +264,27 @@ export function housePhoneDestinations(
   return mobileNavDestinations(isGcStaff, workspace)
     .filter((item) => !isHouseAiNavItem(item))
     .map((item) => (workspace === "social" ? relabelSocialFeed(item) : item));
+}
+
+export function housePhoneDockDestinations({
+  isGcStaff,
+  workspace,
+  homeOwned = false,
+}: {
+  isGcStaff: boolean;
+  workspace: WorkspaceMode;
+  homeOwned?: boolean;
+}): NavItem[] {
+  if (homeOwned) return [...HOME_PHONE_DESTS];
+  return housePhoneDestinations(isGcStaff, workspace);
+}
+
+export function housePhoneDestGlyph(item: NavItem): PhosphorIcon {
+  return isPhosphorNavItem(item) ? item.icon : House;
+}
+
+export function housePhoneDestIsCreate(item: NavItem): boolean {
+  return item.href === SOCIAL_ROUTES.create;
 }
 
 export function housePhoneDestActive(
@@ -292,4 +308,15 @@ export function housePhoneDestChipsLabel(workspace: WorkspaceMode): string {
   if (workspace === "social") return WORKSPACE_SOCIAL_LABEL;
   if (workspace === "education") return WORKSPACE_EDUCATION_LABEL;
   return WORKSPACE_AGGREGATION_LABEL;
+}
+
+export function housePhoneDockLabel({
+  workspace,
+  homeOwned = false,
+}: {
+  workspace: WorkspaceMode;
+  homeOwned?: boolean;
+}): string {
+  if (homeOwned) return OVERVIEW_PAGE.title;
+  return housePhoneDestChipsLabel(workspace);
 }

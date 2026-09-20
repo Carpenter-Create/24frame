@@ -91,8 +91,8 @@ export const NAV: PhosphorNavItem[] = [
   },
 ];
 
-// Social workspace rail. Phone local dests are HousePhoneDestChips
-// under the top (Feed / Profile / Explore / Create / Messages).
+// Social workspace rail. Phone local dests live in HousePhoneBottomNav
+// (Feed / Profile / Explore / Create / Messages).
 // Desktop rail is Home / Profile / Explore / Messages — composer owns create.
 // Profile second (Adam 2026-09-19) — phone reach; avatar remains account menu.
 // Messages here is DMs — never /messages. Groups / Courses / Leaderboard
@@ -158,7 +158,7 @@ export const GC_NAV: PhosphorNavItem[] = [
 ];
 
 // Phone dest-chip copy leftover. Hamburger sheet is gone — dests live
-// on HousePhoneDestChips. Keep labels so account-sheet tests can still
+// in HousePhoneBottomNav. Keep labels so account-sheet tests can still
 // prove the avatar sheet is not a Menu overlay.
 export const MOBILE_NAV = {
   open: "Open menu",
@@ -202,8 +202,8 @@ export function clientNavCurrent(pathname: string): NavItem {
   return NAV.find((item) => isClientNavActive(pathname, item)) ?? NAV[0];
 }
 
-// Phone dest chips use this list (HousePhoneDestChips still filters
-// house-ai so a leftover overlay trigger cannot become a dest chip).
+// Phone dest dock uses this list (HousePhoneBottomNav still filters
+// house-ai so a leftover overlay trigger cannot become a dest).
 // Staff already use the operator set — do not leave them on a
 // client-only row. Social phone dests keep the feed pill (relabelled
 // Feed on phone; desktop rail keeps Home) so /social is reachable

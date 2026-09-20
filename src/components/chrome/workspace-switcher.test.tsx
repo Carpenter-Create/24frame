@@ -46,9 +46,10 @@ describe("workspace switcher header control", () => {
     expect(html).toContain(WORKSPACE_SWITCHER_CHEVRON_CLASS);
     expect(html).not.toContain('data-workspace-switcher-chevron-open');
     expect(html).not.toContain("/education");
-    expect(leadSrc).not.toContain('tone="pill"');
+    expect(leadSrc).toContain('tone="pill"');
     expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
-    expect(leadSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(1);
+    expect(leadSrc).toContain('presentation="sheet"');
+    expect(leadSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
     expect(shellSrc).not.toContain("data-workspace-switcher-rail");
     expect(shellSrc).not.toContain("data-workspace-switcher-lead");
     expect(leadSrc.indexOf("<WorkspaceSwitcher")).toBeLessThan(leadSrc.indexOf("{accountMenu}"));
@@ -61,6 +62,28 @@ describe("workspace switcher header control", () => {
     expect(src).toContain("createPortal");
     expect(src).toContain("workspaceSwitcherMenuStyle");
     expect(src).toContain("workspaceSwitcherChromeClearanceBottoms");
+  });
+
+  it("opens a phone sheet with Home · Aggregation · Social · Education only", () => {
+    const html = renderToStaticMarkup(
+      <WorkspaceSwitcher current="social" presentation="sheet" tone="pill" defaultOpen />,
+    );
+    expect(html).toContain("data-workspace-switcher-sheet");
+    expect(html).toContain('data-workspace-switcher-presentation="sheet"');
+    expect(html).toContain("data-workspace-switcher-sheet-scrim");
+    expect(html).toContain('data-workspace-switcher-option="home"');
+    expect(html).toContain('data-workspace-switcher-option="aggregation"');
+    expect(html).toContain('data-workspace-switcher-option="social"');
+    expect(html).toContain('data-workspace-switcher-option="education"');
+    expect(html).not.toContain('data-workspace-switcher-option="co-productions"');
+    expect(html.indexOf('data-workspace-switcher-option="home"')).toBeLessThan(
+      html.indexOf('data-workspace-switcher-option="aggregation"'),
+    );
+    expect(html.indexOf('data-workspace-switcher-option="aggregation"')).toBeLessThan(
+      html.indexOf('data-workspace-switcher-option="social"'),
+    );
+    expect(html).toContain('data-workspace-switcher-mark="social"');
+    expect(html).not.toContain("Settings");
   });
 
   it("opens a quiet Workspaces heading, then Aggregation / Social / Education", () => {
@@ -291,23 +314,23 @@ describe("workspace switcher header control", () => {
 });
 
 describe("workspace switcher placement", () => {
-  it("keeps desktop trailing switcher and drops the phone workspace pill", () => {
+  it("keeps desktop trailing pills and the phone workspace sheet trigger", () => {
     expect(shellSrc).not.toContain("data-workspace-switcher-rail");
     expect(shellSrc).not.toContain("data-workspace-switcher-lead");
     expect(leadSrc).toContain("data-brand-emblem");
     expect(leadSrc).toContain("data-app-header-trailing");
-    expect(leadSrc).not.toContain("data-app-header-workspace-pill");
+    expect(leadSrc).toContain("data-app-header-workspace-pill");
     expect(leadSrc).toContain("APP_HEADER_LEADING_CLASS");
     expect(leadSrc).toContain("APP_HEADER_TRAILING_CLUSTER_CLASS");
-    expect(leadSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(1);
+    expect(leadSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
     expect(shellSrc).toContain("<HouseLeadChrome");
-    expect(shellSrc).toContain("DestChipsSlot");
+    expect(shellSrc).not.toContain("DestChipsSlot");
     const leading = leadSrc.slice(
       leadSrc.indexOf("data-app-header-leading"),
       leadSrc.indexOf("data-app-header-trailing"),
     );
-    expect(leading).not.toContain('tone="pill"');
-    expect(leading).not.toContain("WorkspaceSwitcher");
+    expect(leading).toContain('tone="pill"');
+    expect(leading).toContain("WorkspaceSwitcher");
     const trailing = leadSrc.slice(
       leadSrc.indexOf("data-app-header-trailing"),
       leadSrc.indexOf("</header>"),
@@ -348,11 +371,11 @@ describe("workspace switcher placement", () => {
     );
     expect(existsSync("src/components/social/social-top-bar.tsx")).toBe(false);
     expect(leadSrc).toContain("HOUSE_LEAD_CHROME_CLASS");
-    expect(leadSrc).not.toContain("APP_HEADER_WORKSPACE_PILL_HOST_CLASS");
+    expect(leadSrc).toContain("APP_HEADER_WORKSPACE_PILL_HOST_CLASS");
   });
 
   it("keeps the phone lead free of overflow-hidden so the emblem is not crushed", () => {
-    expect(leadSrc).not.toContain("APP_HEADER_WORKSPACE_PILL_HOST_CLASS");
+    expect(leadSrc).toContain("APP_HEADER_WORKSPACE_PILL_HOST_CLASS");
     expect(leadSrc).toContain("APP_HEADER_LEADING_CLASS");
     expect(src).toContain("WORKSPACE_SWITCHER_HOST_CLASS");
     expect(leadSrc).toContain("<BrandLogo />");

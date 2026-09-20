@@ -55,14 +55,13 @@ describe("co-productions SoT", () => {
 
   it("keeps one Handshake SoT — no camera/film forks on chrome surfaces", () => {
     const phoneShell = readFileSync("src/lib/house-phone-shell.ts", "utf8");
-    expect(phoneShell).toContain("CO_PRODUCTIONS_ICON");
-    expect(phoneShell).toContain("icon: CO_PRODUCTIONS_ICON");
+    expect(phoneShell).not.toContain("CO_PRODUCTIONS_ICON");
     expect(phoneShell).not.toMatch(/from ["']@phosphor-icons\/react["'].*Handshake|Handshake.*from ["']@phosphor-icons\/react/);
     expect(phoneShell).not.toMatch(/\b(Camera|VideoCamera|FilmSlate|FilmReel|Clapperboard|HandshakeSimple)\b/);
 
     const forks = [
       "src/components/chrome/house-phone-bottom-nav.tsx",
-      "src/components/chrome/house-phone-dest-chips.tsx",
+      "src/components/chrome/house-phone-bottom-nav.tsx",
       "src/components/chrome/workspace-switcher.tsx",
       "src/lib/workspace-switcher.ts",
       "src/lib/overview.ts",

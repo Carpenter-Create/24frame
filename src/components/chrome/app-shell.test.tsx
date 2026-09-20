@@ -191,7 +191,7 @@ describe("AppShell header", () => {
     expect(leadSrc).toContain('logoVisible = "always"');
     expect(shellSrc).toContain("HouseLeadChrome");
     expect(leadSrc).toContain("WorkspaceSwitcher");
-    expect(leadSrc).not.toContain('tone="pill"');
+    expect(leadSrc).toContain('tone="pill"');
     expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
     expect(html).toContain("data-workspace-switcher");
     expect(html).toContain("data-house-lead-scroll");
@@ -199,9 +199,10 @@ describe("AppShell header", () => {
     expect(html).toContain("overflow-hidden");
     expect(html).toContain("overflow-y-auto");
     expect(html).toContain("Aggregation");
-    expect((html.match(/data-workspace-switcher=""/g) ?? []).length).toBe(1);
-    expect(html).not.toContain('data-workspace-switcher-tone="pill"');
+    expect((html.match(/data-workspace-switcher=""/g) ?? []).length).toBe(2);
+    expect(html).toContain('data-workspace-switcher-tone="pill"');
     expect(html).toContain('data-workspace-switcher-presentation="pills"');
+    expect(html).toContain('data-workspace-switcher-presentation="sheet"');
     expect(html).toContain("data-workspace-switcher-pills");
     expect(html).toContain('data-workspace-switcher-segment="home"');
     expect(html).toContain('data-workspace-switcher-segment="aggregation"');
@@ -214,11 +215,11 @@ describe("AppShell header", () => {
     expect(html.indexOf('data-workspace-switcher-segment="education"')).toBeLessThan(
       html.indexOf('data-workspace-switcher-segment="co-productions"'),
     );
-    expect(html).not.toContain("data-app-header-workspace-pill");
+    expect(html).toContain("data-app-header-workspace-pill");
     expect(html).not.toContain("data-workspace-switcher-rail");
     expect(html).not.toContain("data-workspace-switcher-lead");
     expect(html.indexOf("data-workspace-switcher")).toBeLessThan(html.indexOf("data-user-menu-host"));
-    expect(shellSrc).toContain("<DestChipsSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />");
+    expect(shellSrc).not.toContain("DestChipsSlot");
     expect(shellSrc).not.toContain("AccountOverlay");
     expect(shellSrc).not.toContain("AccountSheet");
   });
@@ -226,7 +227,7 @@ describe("AppShell header", () => {
   it("is avatar-only on every Access route — no org switcher", () => {
     expect(shellSrc).not.toContain("OrganizationSwitcher");
     expect(leadSrc).toContain("HOUSE_LEAD_CHROME_CLASS");
-    expect(leadSrc).not.toContain('tone="pill"');
+    expect(leadSrc).toContain('tone="pill"');
     expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
 
     for (const path of ["/", "/aggregation/titles", "/aggregation/attention", "/activity"]) {
@@ -484,15 +485,15 @@ describe("AppShell client mobile chrome", () => {
       /<aside class="[^"]*\bhidden\b[^"]*\bmd:flex\b[^"]*" data-app-rail=""/,
     );
     expect(html).not.toContain("data-mobile-nav-trigger");
-    expect(html).toContain("data-house-phone-dest-chips");
+    expect(html).toContain("data-house-phone-bottom-nav");
     expect(html).toContain('data-house-phone-dest="Dashboard"');
     expect(html).toContain("data-brand-emblem");
     expect(html).toContain("data-brand-logo");
     expect(html).toContain('data-brand-logo-mark="emblem"');
     expect(html.indexOf("data-brand-emblem")).toBeLessThan(
-      html.indexOf("data-house-phone-dest-chips"),
+      html.indexOf("data-house-phone-bottom-nav"),
     );
-    expect(html.indexOf("data-house-phone-dest-chips")).toBeGreaterThan(
+    expect(html.indexOf("data-house-phone-bottom-nav")).toBeGreaterThan(
       html.indexOf("data-app-header-trailing"),
     );
     expect(html).not.toMatch(/data-house-lead=""[^>]*\bhidden(?:\s|")/);
@@ -502,7 +503,7 @@ describe("AppShell client mobile chrome", () => {
     expect(html).not.toContain("data-social-mobile-pill");
     expect(html).not.toContain("data-social-create-fab");
     expect(shellSrc).toContain("HOUSE_RAIL_FLOAT_CLASS");
-    expect(shellSrc).toContain("<DestChipsSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />");
+    expect(shellSrc).not.toContain("DestChipsSlot");
     expect(shellSrc).not.toContain("GC_NAV");
     expect(shellSrc).not.toMatch(/key=\{pathname\}/);
 
@@ -771,7 +772,7 @@ describe("AppShell /settings rail", () => {
       expect(html).not.toContain("data-settings-rail");
       expect(html).not.toContain("data-settings-rail-nav");
       expect(html).not.toContain("data-mobile-nav-trigger");
-      expect(html).toContain("data-house-phone-dest-chips");
+      expect(html).toContain("data-house-phone-bottom-nav");
       expect(html).not.toContain("data-settings-header-back");
       expect(html).toContain("Collapse sidebar");
     }
@@ -905,7 +906,7 @@ describe("AppShell rail-collapse chevron", () => {
     expect(shellSrc).toContain("migrateSidebarCollapsedCookie");
     expect(shellSrc).not.toContain("gc_sidebar_collapsed");
     expect(shellSrc).toContain("defaultCollapsed");
-    expect(shellSrc).toContain("<DestChipsSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />");
+    expect(shellSrc).not.toContain("DestChipsSlot");
     expect(SIDEBAR_COLLAPSED_COOKIE).toBe("24frame_sidebar_collapsed");
     navigation.pathname = "/settings";
     expect(renderShell(undefined, undefined, true)).not.toContain("Expand sidebar");
@@ -923,10 +924,11 @@ describe("AppShell rail-collapse chevron", () => {
     expect(pending).toContain("data-side-nav");
     expect(pending).not.toContain("data-gc-staff");
     expect(pending).not.toContain("data-mobile-nav-trigger");
-    expect(pending).toContain("data-house-phone-dest-chips");
+    expect(pending).toContain("data-house-phone-bottom-nav");
 
     const staff = renderToStaticMarkup(
       <AppShell
+        isGcStaff
         chrome={fulfilledChrome({
           email: "ada@example.com",
           name: "Ada",
@@ -952,7 +954,7 @@ describe("AppShell rail-collapse chevron", () => {
     expect(staff).toContain('data-house-phone-dest="Channels"');
     expect(staff).not.toContain('data-house-phone-dest="Ask 24Frame AI"');
     expect(shellSrc).toContain("SideNavFromChrome");
-    expect(shellSrc).toContain("DestChipsFromChrome");
+    expect(shellSrc).toContain("isGcStaff={isGcStaff}");
     expect(shellSrc).toContain("ChromeCookieSync");
     expect(shellSrc).toContain("data.isGcStaff");
     expect(shellSrc).toContain("isGcStaff={data.isGcStaff}");
@@ -1036,7 +1038,7 @@ describe("AppShell rail-collapse chevron", () => {
     expect(html).toContain("data-workspace-switcher");
     expect(html).toContain("Social");
     expect(html).toContain("data-house-phone-bottom-nav");
-    expect(html).toContain("data-house-phone-dest-chips");
+    expect(html).toContain("data-house-phone-bottom-nav");
     expect(html).toContain('data-house-phone-dest="Create"');
     expect(html).not.toContain("data-social-tab-bar");
     expect(html).toContain("destination-page");
@@ -1063,7 +1065,7 @@ describe("AppShell rail-collapse chevron", () => {
     expect(html).not.toContain("data-social-mobile-dock");
     expect(html).not.toContain("data-social-tab-bar");
     expect(html).toContain("data-house-phone-bottom-nav");
-    expect(html).toContain("data-house-phone-dest-chips");
+    expect(html).toContain("data-house-phone-bottom-nav");
     expect(html).not.toContain("data-social-header-tray");
     expect(html).toContain(`data-rail-collapse="${RAIL_COLLAPSE_CHEVRON}"`);
     expect(html).toContain("Collapse sidebar");
@@ -1131,15 +1133,15 @@ describe("AppShell rail-collapse chevron", () => {
     );
     expect(html).toContain("data-app-header");
     expect(html).not.toContain("data-mobile-nav-trigger");
-    expect(html).toContain("data-house-phone-dest-chips");
+    expect(html).toContain("data-house-phone-bottom-nav");
     expect(html).toContain('data-house-phone-dest="Education"');
     expect(html).toContain("data-brand-emblem");
     expect(html).toContain("data-brand-logo");
     expect(html).toContain('data-brand-logo-mark="emblem"');
     expect(html.indexOf("data-brand-emblem")).toBeLessThan(
-      html.indexOf("data-house-phone-dest-chips"),
+      html.indexOf("data-house-phone-bottom-nav"),
     );
-    expect(html.indexOf("data-house-phone-dest-chips")).toBeGreaterThan(
+    expect(html.indexOf("data-house-phone-bottom-nav")).toBeGreaterThan(
       html.indexOf("data-app-header-trailing"),
     );
     expect(html).not.toMatch(/data-house-lead=""[^>]*\bhidden(?:\s|")/);

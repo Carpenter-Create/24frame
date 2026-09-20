@@ -6,7 +6,7 @@ import { HouseLeadScrollToTop } from "./house-lead-scroll-to-top";
 import { HousePhoneBottomNav } from "./house-phone-bottom-nav";
 
 // One phone shell primitive. Both Social and Access trees mount this
-// so workspace tabs cannot fork. Desktop is unchanged — the bottom
+// so dest docks cannot fork. Desktop is unchanged — the bottom
 // nav is md:hidden. Hide-on-scroll lives on HousePhoneBottomNav
 // (social-tab-bar-scroll) for every workspace that uses this shell.
 // HouseLeadScrollToTop bridges the iOS status-bar tap to the nested
@@ -15,12 +15,20 @@ import { HousePhoneBottomNav } from "./house-phone-bottom-nav";
 
 export function HousePhoneAppShell({
   workspace,
+  isGcStaff = false,
+  homeOwned = false,
+  accountChrome = false,
+  coProductions = false,
   className,
   style,
   children,
   ...rest
 }: React.HTMLAttributes<HTMLDivElement> & {
   workspace: WorkspaceMode;
+  isGcStaff?: boolean;
+  homeOwned?: boolean;
+  accountChrome?: boolean;
+  coProductions?: boolean;
 }) {
   return (
     <div
@@ -31,7 +39,13 @@ export function HousePhoneAppShell({
     >
       <HouseLeadScrollToTop />
       {children}
-      <HousePhoneBottomNav workspace={workspace} />
+      <HousePhoneBottomNav
+        workspace={workspace}
+        isGcStaff={isGcStaff}
+        homeOwned={homeOwned}
+        accountChrome={accountChrome}
+        coProductions={coProductions}
+      />
     </div>
   );
 }

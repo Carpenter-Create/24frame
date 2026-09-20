@@ -9,6 +9,9 @@ import {
   DASHBOARD_TOP_PILL_CLUSTER_CLASS,
 } from "./dashboard-craft";
 import {
+  phoneWorkspaceSwitcherPills,
+  workspaceSwitcherLeadMarkLetter,
+  workspaceSwitcherTriggerMarkId,
   APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS,
   APP_HEADER_EDUCATION_SEARCH_PHONE_CLASS,
   APP_HEADER_LEADING_CLASS,
@@ -150,7 +153,7 @@ describe("workspace switcher lock", () => {
     }
   });
 
-  it("reserves desktop trailing workspace pills — phone switching is the bottom bar", () => {
+  it("reserves desktop trailing workspace pills — phone switching is the header sheet", () => {
     expect(APP_HEADER_LEADING_CLASS).toContain("gap-[var(--space-3)]");
     expect(APP_HEADER_LEADING_CLASS).toContain("md:gap-[var(--space-2)]");
     expect(APP_HEADER_LEADING_CLASS).not.toContain("gap-[var(--space-1)]");
@@ -188,7 +191,7 @@ describe("workspace switcher lock", () => {
   });
 
   it("places the Workspaces menu below dest chips and Education search", () => {
-    expect(WORKSPACE_SWITCHER_CHROME_CLEARANCE_SELECTOR).toContain(
+    expect(WORKSPACE_SWITCHER_CHROME_CLEARANCE_SELECTOR).not.toContain(
       "data-house-phone-dest-chips-host",
     );
     expect(WORKSPACE_SWITCHER_CHROME_CLEARANCE_SELECTOR).toContain("data-house-under-nav");
@@ -211,6 +214,25 @@ describe("workspace switcher lock", () => {
         viewportWidth: 390,
       }),
     ).toEqual({ top: 104, right: 30 });
+  });
+
+  it("keeps the phone sheet on four workspaces and a Home mark", () => {
+    expect(phoneWorkspaceSwitcherPills().map((pill) => pill.id)).toEqual([
+      "home",
+      "aggregation",
+      "social",
+      "education",
+    ]);
+    expect(phoneWorkspaceSwitcherPills().map((pill) => pill.label)).toEqual([
+      "Home",
+      "Aggregation",
+      "Social",
+      "Education",
+    ]);
+    expect(workspaceSwitcherLeadMarkLetter("home")).toBe("H");
+    expect(workspaceSwitcherLeadMarkLetter("aggregation")).toBe("A");
+    expect(workspaceSwitcherTriggerMarkId("/home", "aggregation")).toBe("home");
+    expect(workspaceSwitcherTriggerMarkId("/social", "social")).toBe("social");
   });
 
   it("keeps the existing workspace cookie write — no second scheme", () => {

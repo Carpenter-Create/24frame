@@ -1,11 +1,12 @@
 // Mercury workspace switcher. Lives in lib/, not JSX.
-// Phone Option 2 dest-chip amend (Adam 2026-09-18): workspace
-// switching lives on HousePhoneBottomNav. Phone top has no
-// workspace pill. Emblem owns the left alone — no hamburger,
-// leading or trailing. Destinations live on HousePhoneDestChips
-// under the top. Leading air (settings back ↔ emblem) is --space-3
-// (12). Not --space-1. Do not put overflow-hidden on the leading
-// row (#412).
+// IA A (Adam): phone header shows the current workspace name/mark.
+// Tap opens a calm house sheet — Home · Aggregation · Social ·
+// Education. One tap open, one tap switch. Dock dests stay
+// in-workspace only. Avatar stays Settings / account.
+// Desktop md+ keeps the sliding-pill cluster. Do not redesign
+// desktop in this slice.
+// Leading air (settings back ↔ emblem) is --space-3 (12). Not
+// --space-1. Do not put overflow-hidden on the leading row (#412).
 // Phone trailing: [search if needed] [theme] [24Frame AI] [bell]
 // [avatar], with --chrome-gutter so the avatar is not flush.
 // Cluster gap is --space-2 on every breakpoint; phone
@@ -21,7 +22,7 @@
 // 2026-09-17 “Try it”). Same house grammar as Top Performing:
 // active ink fill, idle muted grey. Desktop trailing: pills, then
 // sun/moon, then Ask, then bell, then avatar. Social uses the same
-// split. Phone keeps the compact name+menu. Do not force three
+// split. Phone uses name/mark + sheet. Do not force three
 // labels.
 // No rail / header-lead #321 duplicate. Rail top-left stays the
 // static 24 brand. Social-only icons sit left of the Social slot
@@ -56,6 +57,10 @@ import {
   HOUSE_LEAD_SEARCH_DESKTOP_CLASS,
   HOUSE_LEAD_UNDER_NAV_CLASS,
 } from "@/lib/house-lead-chrome";
+import {
+  APP_SHEET_SCRIM_CLASS,
+  APP_SHEET_SURFACE_CLASS,
+} from "@/lib/house-sheet";
 import {
   HOUSE_CONTROL_PILL_CLASS,
   HOUSE_SEGMENTED_ITEM_BASE_CLASS,
@@ -101,7 +106,7 @@ export const WORKSPACE_SWITCHER_MARK = {
 
 export type WorkspaceSwitcherTone = "plain" | "pill";
 
-export type WorkspaceSwitcherPresentation = "menu" | "pills";
+export type WorkspaceSwitcherPresentation = "menu" | "pills" | "sheet";
 
 export const WORKSPACE_SWITCHER_TRIGGER_CLASS =
   `group flex min-w-0 items-center gap-[var(--space-2)] ${HOUSE_CONTROL_PILL_CLASS} px-2 py-1 t-body-sm font-medium text-ink transition-colors hover:bg-surface-muted`;
@@ -152,7 +157,14 @@ export const WORKSPACE_SWITCHER_PILL_CHEVRON_CLASS =
 export const WORKSPACE_SWITCHER_MENU_GAP_PX = 8;
 
 export const WORKSPACE_SWITCHER_CHROME_CLEARANCE_SELECTOR =
-  "[data-house-phone-dest-chips-host], [data-house-under-nav]";
+  "[data-house-under-nav]";
+
+export const WORKSPACE_SWITCHER_SHEET_HOST_CLASS =
+  "fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end md:hidden";
+
+export const WORKSPACE_SWITCHER_SHEET_SURFACE_CLASS = APP_SHEET_SURFACE_CLASS;
+
+export const WORKSPACE_SWITCHER_SHEET_SCRIM_CLASS = APP_SHEET_SCRIM_CLASS;
 
 export const WORKSPACE_SWITCHER_PANEL_SURFACE_CLASS =
   "flex min-w-[16rem] flex-col overflow-hidden rounded-[12px] border border-hairline bg-surface py-[var(--space-2)] shadow-none";
@@ -321,4 +333,38 @@ export function workspaceSwitcherNextSegmentIndex(
 ): number {
   if (count <= 0) return 0;
   return (index + direction + count) % count;
+}
+
+export type PhoneWorkspaceSwitcherId = "home" | WorkspaceMode;
+
+export type PhoneWorkspaceSwitcherPill = {
+  id: PhoneWorkspaceSwitcherId;
+  label: string;
+  href: string;
+};
+
+export function phoneWorkspaceSwitcherPills(
+  options: readonly WorkspaceMenuOption[] = availableWorkspaceOptions(),
+): PhoneWorkspaceSwitcherPill[] {
+  return [
+    { id: "home", label: "Home", href: "/home" },
+    ...options.map((option) => ({
+      id: option.mode,
+      label: option.label,
+      href: option.href,
+    })),
+  ];
+}
+
+export function workspaceSwitcherTriggerMarkId(
+  pathname: string,
+  current: WorkspaceMode,
+): PhoneWorkspaceSwitcherId {
+  if (pathname === "/home" || pathname.startsWith("/home/")) return "home";
+  return current;
+}
+
+export function workspaceSwitcherLeadMarkLetter(id: PhoneWorkspaceSwitcherId): string {
+  if (id === "home") return "H";
+  return WORKSPACE_SWITCHER_MARK[id];
 }

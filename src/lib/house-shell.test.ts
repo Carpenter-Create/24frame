@@ -329,9 +329,9 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(header).toContain(HOUSE_SEARCH_PILL_CLASS);
     expect(header).toContain("data-brand-emblem");
 
-    expect(destChips).toContain("HOUSE_SEGMENTED_ITEM_ON_CLASS");
-    expect(destChips).toContain("HOUSE_SEGMENTED_ITEM_OFF_CLASS");
-    expect(destChips).toContain("HOUSE_SEGMENTED_ITEM_BASE_CLASS");
+    expect(destChips).not.toContain("HOUSE_SEGMENTED_ITEM_ON_CLASS");
+    expect(destChips).not.toContain("HOUSE_SEGMENTED_ITEM_OFF_CLASS");
+    expect(destChips).not.toContain("HOUSE_SEGMENTED_ITEM_BASE_CLASS");
     expect(destChips).not.toContain("HOUSE_PILL_SELECTED_CLASS");
     expect(destChips).not.toContain("HOUSE_FILTER_ON_CLASS");
     expect(destChips).not.toContain("HOUSE_FILTER_OFF_CLASS");

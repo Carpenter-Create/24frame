@@ -5,7 +5,8 @@ import { NEWS_INGEST_FUNCTION, NEWS_INGEST_SCHEDULE } from "@/lib/news-aws";
 // Industry news — house SoT (Adam lock 2026-09-18).
 // Name: Industry news. Route stays /home/news. Home: latest 15 +
 // View all. /home/news: 90-day history.
-// Home-owned only — not a workspace pill, dest rail, or bottom-bar.
+// Home-owned only — not a workspace pill. Phone dock lists it as a
+// Home dest (IA A). Not Aggregation / Social / Education.
 // Link-out cards only. No leftover /news hop.
 // Allowlist verified 2026-09-18. Storage is AWS DynamoDB. Ingest is
 // Lambda + EventBridge. Not Supabase. Not Vercel cron. Copy lives here.

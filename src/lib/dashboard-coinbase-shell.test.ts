@@ -88,7 +88,8 @@ describe("Coinbase shell rematch — Adam miss list v1", () => {
     expect(HOUSE_SEARCH_PILL_CLASS).toBe("rounded-full border-0 bg-surface-muted");
     expect(search).not.toContain("bg-surface pl-8");
     expect(shell).not.toContain("SearchField");
-    expect(lead).not.toContain('tone="pill"');
+    expect(lead).toContain('presentation="sheet" tone="pill"');
+    expect(lead).toContain('presentation="pills"');
     expect(DASHBOARD_TITLE_DESKTOP_CLASS).toContain("t-title");
     expect(DASHBOARD_TITLE_DESKTOP_CLASS).toContain("text-ink");
     expect(DASHBOARD_TITLE_DESKTOP_CLASS).not.toContain("t-label");

@@ -16,7 +16,6 @@ const lib = readFileSync("src/lib/segmented-track.ts", "utf8");
 const CONSUMERS = [
   "src/components/chrome/workspace-switcher.tsx",
   "src/components/chrome/house-period-presets.tsx",
-  "src/components/chrome/house-phone-dest-chips.tsx",
   "src/components/activity/activity-family-chips.tsx",
   "src/components/reports/reports-ranked.tsx",
   "src/components/reports/reports-controls.tsx",

@@ -8,7 +8,6 @@ import { SideNav } from "./side-nav";
 import { SettingsRail } from "./settings-rail";
 import { HouseLeadChrome } from "./house-lead-chrome";
 import { HouseLeadSearch } from "./house-lead-search";
-import { HousePhoneDestChips } from "./house-phone-dest-chips";
 import { RailCollapse } from "./rail-collapse";
 import { AskAssistantChromeProvider } from "@/components/messages/ask-globee-chrome";
 import { AskAiOverlayProvider } from "./ask-ai-overlay";
@@ -24,7 +23,10 @@ import {
   persistSidebarCollapsed,
 } from "@/lib/rail-collapse";
 import { HOUSE_LEAD_SCROLL_CLASS } from "@/lib/house-lead-chrome";
-import { HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS } from "@/lib/house-phone-shell";
+import {
+  HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS,
+  housePhoneShowsBottomDests,
+} from "@/lib/house-phone-shell";
 import {
   HOUSE_CANVAS_X_CLASS,
   HOUSE_HOME_RAIL_COLUMN_CLASS,
@@ -39,7 +41,8 @@ import {
   SOCIAL_RAIL_PANEL_CLASS,
   SOCIAL_RAIL_WIDTH_CLASS,
 } from "@/lib/social-chrome";
-import { OVERVIEW_RAIL_OFF_WIDTH, overviewHidesRail } from "@/lib/overview";
+import { isCoProductionsPath } from "@/lib/co-productions";
+import { isHomeOwnedPath, OVERVIEW_RAIL_OFF_WIDTH, overviewHidesRail } from "@/lib/overview";
 import { QUEUE_HREF } from "@/lib/queue";
 import { TITLES_HREF } from "@/lib/title-public-id";
 import { resolveWorkspaceMode, type WorkspaceMode } from "@/lib/workspace";
@@ -58,9 +61,9 @@ type Org = { id: string; name: string };
 // state persists in a cookie (read by the (app) layout → `defaultCollapsed`, so there's no
 // flash) and, when collapsed, overrides `--sidebar-width` so the header + main follow.
 // Phone: the rail is gone (hidden + width tokens collapse). Local dests
-// that used to live in the hamburger live on HousePhoneDestChips under
-// the top — client dests, or those plus staff dests when isGcStaff. No
-// hamburger. Desktop 1:2 rail is unchanged.
+// live in HousePhoneBottomNav — client dests, or those plus staff dests
+// when isGcStaff. Workspace switch is the header sheet. No hamburger.
+// Desktop 1:2 rail is unchanged.
 // Social mounts the same RailCollapse + cookie + width-var path as
 // Aggregation · Education. Do not pin Social expanded or invent a
 // Social-only chevron. /settings paths: the Access destinations leave.
@@ -157,6 +160,16 @@ export function AppShell({
   const accountChromeNoRail = isAccountChromeNoRailPath(pathname);
   const hideProductRail = homeChrome || accountChromeNoRail;
   const socialChrome = workspace === "social" && !settingsPage && !hideProductRail;
+  const homeOwned = isHomeOwnedPath(pathname);
+  const coProductions = isCoProductionsPath(pathname);
+  const accountChrome = settingsPage || helpPage || activityPage;
+  const phoneDestDock = housePhoneShowsBottomDests({
+    workspace,
+    homeOwned,
+    accountChrome,
+    coProductions,
+  });
+  const phoneDestPad = phoneDestDock ? HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS : undefined;
 
   useEffect(() => {
     migrateSidebarCollapsedCookie(collapsed);
@@ -187,13 +200,13 @@ export function AppShell({
         {cookieSync}
         <HousePhoneAppShell
           workspace="social"
+          isGcStaff={false}
           data-social-workspace=""
           style={collapseWidthStyle}
         >
           <HouseLeadChrome
             workspace="social"
             logoVisible="always"
-            destChips={<HousePhoneDestChips workspace="social" />}
             search={<HouseLeadSearch tone="live" />}
             trailingSearch={<HouseLeadSearch tone="live" presentation="icon" />}
             activityUnread={messagesUnread}
@@ -228,7 +241,7 @@ export function AppShell({
           <main
             className={cn(
               HOUSE_LEAD_SCROLL_CLASS,
-              HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS,
+              phoneDestPad,
               collapsed ? undefined : SOCIAL_RAIL_MAIN_OFFSET_CLASS,
             )}
             style={collapsed ? { marginLeft: "var(--sidebar-width)" } : undefined}
@@ -251,6 +264,10 @@ export function AppShell({
     {cookieSync}
     <HousePhoneAppShell
       workspace={workspace}
+      isGcStaff={isGcStaff}
+      homeOwned={homeOwned}
+      accountChrome={accountChrome}
+      coProductions={coProductions}
       data-education-workspace={workspace === "education" && !helpPage && !activityPage ? "" : undefined}
       data-home-chrome={homeChrome ? "" : undefined}
       data-help-chrome={helpPage ? "" : undefined}
@@ -286,13 +303,10 @@ export function AppShell({
       )}
 
       {/* Full-width top + dest side nav — same HouseLeadChrome as Social.
-          Phone (Adam 2026-09-18 dest-chip amend): Asset 8 emblem on every workspace.
-          Emblem owns the left alone. No hamburger.
-          Local dests that used to live in the Agg/Edu hamburger live
-          on HousePhoneDestChips under the top. Home has no dest chip
-          row. Phone top has no workspace pill.
-          HousePhoneBottomNav switches Home · Social · Aggregation ·
-          Education. Trailing is search (if needed) · theme ·
+          Phone IA A: Asset 8 emblem on every workspace + workspace
+          name/mark. Tap opens the workspace sheet. No hamburger.
+          Local dests live in HousePhoneBottomNav. Home dests are Home
+          + Industry news. Trailing is search (if needed) · theme ·
           24Frame AI · bell · avatar. Sun/moon is shared immediately
           left of Ask on every breakpoint. One trail. No phone-only
           sun/moon twin. Ask AI is header + Home module only
@@ -304,8 +318,8 @@ export function AppShell({
           empty. Education mounts a quiet course/video search
           immediately right of the logo on desktop, same
           Facebook-compact slot as Social live search. Phone
-          Education search sits in a full-width row under the dest
-          chips — not in the top nav. Search also mounts on the Access
+          Education search sits in a full-width row under the header —
+          not in the top nav. Search also mounts on the Access
           leftover `/messages` path (retired — 404), and on mobile `/titles` (528:542).
           Phone avatar opens 544:561. Do not invent Move chrome or a
           second phone switcher. Studio secondary rail stays HOLD. */}
@@ -313,11 +327,6 @@ export function AppShell({
         workspace={workspace}
         settingsPage={settingsPage || helpPage || activityPage}
         logoVisible="always"
-        destChips={
-          settingsPage || hideProductRail ? undefined : (
-            <DestChipsSlot chrome={chrome} isGcStaff={isGcStaff} workspace={workspace} />
-          )
-        }
         search={
           workspace === "education" && !settingsPage && !helpPage && !activityPage ? (
             <Suspense fallback={null}>
@@ -345,7 +354,7 @@ export function AppShell({
       />
 
       <main
-        className={cn(HOUSE_LEAD_SCROLL_CLASS, HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS)}
+        className={cn(HOUSE_LEAD_SCROLL_CLASS, phoneDestPad)}
         data-house-lead-scroll=""
         style={{
           marginLeft: "var(--sidebar-width)",
@@ -506,30 +515,3 @@ function SideNavFromChrome({
   );
 }
 
-function DestChipsSlot({
-  chrome,
-  isGcStaff,
-  workspace,
-}: {
-  chrome?: Promise<AppShellChrome>;
-  isGcStaff: boolean;
-  workspace: WorkspaceMode;
-}) {
-  if (!chrome) return <HousePhoneDestChips isGcStaff={isGcStaff} workspace={workspace} />;
-  return (
-    <Suspense fallback={<HousePhoneDestChips isGcStaff={isGcStaff} workspace={workspace} />}>
-      <DestChipsFromChrome chrome={chrome} workspace={workspace} />
-    </Suspense>
-  );
-}
-
-function DestChipsFromChrome({
-  chrome,
-  workspace,
-}: {
-  chrome: Promise<AppShellChrome>;
-  workspace: WorkspaceMode;
-}) {
-  const data = use(chrome);
-  return <HousePhoneDestChips isGcStaff={data.isGcStaff} workspace={workspace} />;
-}

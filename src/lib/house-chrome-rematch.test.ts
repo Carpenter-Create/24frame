@@ -208,12 +208,12 @@ describe("house chrome rematch miss list v1.1", () => {
   });
 
   it("keeps one phone workspace switcher, Staff on Aggregation, one Sporty Blue pill", () => {
-    expect(lead.match(/<WorkspaceSwitcher/g)?.length).toBe(1);
+    expect(lead.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
     expect(shell).toContain("<HouseLeadChrome");
     expect(existsSync("src/components/social/social-top-bar.tsx")).toBe(false);
     expect(lead).toContain('presentation="pills"');
-    expect(lead).not.toContain('tone="pill"');
-    expect(lead).not.toContain("APP_HEADER_WORKSPACE_PILL_HOST_CLASS");
+    expect(lead).toContain('tone="pill"');
+    expect(lead).toContain("APP_HEADER_WORKSPACE_PILL_HOST_CLASS");
     expect(lead).toContain("APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS");
     expect(nav).toContain('if (workspace === "social") return { items: SOCIAL_DESKTOP_NAV, staffItems: [] }');
     expect(sideNav).toContain("staffItems");

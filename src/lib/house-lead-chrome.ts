@@ -1,18 +1,19 @@
 // Shared top lead chrome for Aggregation · Social · Education · Home.
 // Phone: Asset 8 emblem on every workspace (logoVisible always).
-// Emblem owns the phone left alone. No hamburger — leading or trailing.
-// Destinations live on HousePhoneDestChips under this stack.
+// IA A: emblem + current workspace name/mark on the left. Tap opens
+// the workspace sheet. Emblem owns the phone left alone next to the
+// workspace trigger. No hamburger — leading or trailing.
+// Destinations live in HousePhoneBottomNav (in-workspace only).
 // Emblem is a workspace-home link, not the rail.
-// Phone grammar Option 2 dest-chip amend (Adam 2026-09-18):
-//   Left: [emblem]
-//   Under-top: dest chips on Agg / Edu / Social. Home has none.
+// Phone grammar IA A:
+//   Left: [emblem] [workspace name/mark]
 //   Trailing: [search if needed] [theme] [24Frame AI] [bell] [avatar]
 //   Trailing rhythm: one --space-2 gap between distinct siblings.
 //   Phone icon hits hug the 16px glyph (HOUSE_HEADER_TRAILING_HIT_CLASS)
 //   without negative margin. #452 -mx collapsed AI onto the bell.
 //   Avatar stays 32.
-//   Bottom: HousePhoneBottomNav. Home · Social · Aggregation · Education
-// Phone top has no workspace pill. Bottom bar owns workspace switching.
+//   Bottom: HousePhoneBottomNav dests for the current workspace.
+// Phone header owns workspace switching. Dock dests stay local.
 // 24Frame AI sits immediately left of the notification bell on every
 // house chrome path (Home · Social · Aggregation · Education ·
 // Settings). The header control toggles the Mercury ?ai=1 overlay

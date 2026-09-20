@@ -341,7 +341,7 @@ describe("Social Home miss list v1 P0 lock", () => {
   it("drops the Social floating tab bar and keeps the Mercury floating dock gone", () => {
     const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
     expect(existsSync("src/components/social/social-top-bar.tsx")).toBe(false);
-    const dests = readFileSync("src/components/chrome/house-phone-dest-chips.tsx", "utf8");
+    const dests = readFileSync("src/components/chrome/house-phone-bottom-nav.tsx", "utf8");
     const storyViewer = readFileSync("src/app/(app)/social/stories/[id]/page.tsx", "utf8");
     expect(existsSync("src/components/social/social-mobile-dock.tsx")).toBe(false);
     expect(existsSync("src/components/social/social-mobile-tab-bar.tsx")).toBe(false);
@@ -349,7 +349,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(shell).not.toContain("SocialMobileDock");
     expect(shell).not.toContain("SocialMobileTabBar");
     expect(shell).not.toContain("SocialPhoneDests");
-    expect(shell).toContain("HousePhoneDestChips");
+    expect(shell).toContain("HousePhoneBottomNav");
     expect(shell).toContain("HousePhoneAppShell");
     expect(shell).not.toContain("data-social-mobile-pill");
     expect(shell).not.toContain("data-social-create-fab");
@@ -364,8 +364,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(leadSearch).toContain("SocialSearchSheet");
     expect(leadSearch).not.toContain("prefetch");
     expect(readFileSync("src/lib/nav.ts", "utf8")).not.toContain("SOCIAL_MOBILE_PILL");
-    expect(dests).toContain("data-house-phone-dest-chips");
-    expect(dests).toContain("housePhoneDestinations");
+    expect(dests).toContain("data-house-phone-bottom-nav");
+    expect(dests).toContain("housePhoneDockDestinations");
     expect(dests).toContain("prefetch");
     expect(dests).not.toContain("data-social-tab-bar");
     expect(dests).not.toContain("data-social-create-fab");
@@ -400,7 +400,7 @@ describe("Social Home miss list v1 P0 lock", () => {
 
   it("keeps Social nav prefetch on and destination pages parallel", () => {
     const sideNav = readFileSync("src/components/chrome/side-nav.tsx", "utf8");
-    const dests = readFileSync("src/components/chrome/house-phone-dest-chips.tsx", "utf8");
+    const dests = readFileSync("src/components/chrome/house-phone-bottom-nav.tsx", "utf8");
     expect(existsSync("src/app/(app)/social/loading.tsx")).toBe(true);
     expect(existsSync("src/app/(app)/social/profile/loading.tsx")).toBe(true);
     expect(existsSync("src/app/(app)/social/profile/edit/loading.tsx")).toBe(true);

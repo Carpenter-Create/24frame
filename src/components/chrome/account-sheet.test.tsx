@@ -54,7 +54,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const src = readFileSync(join(here, "account-sheet.tsx"), "utf8");
 const houseSrc = readFileSync(join(here, "house.tsx"), "utf8");
 const menuSrc = readFileSync(join(here, "user-menu.tsx"), "utf8");
-const destsSrc = readFileSync(join(here, "house-phone-dest-chips.tsx"), "utf8");
+const destsSrc = readFileSync(join(here, "house-phone-bottom-nav.tsx"), "utf8");
 const headerSrc = readFileSync(join(here, "messages-app-header.tsx"), "utf8");
 const landingSrc = readFileSync(join(here, "../messages/ask-globee-landing.tsx"), "utf8");
 const tokens = readFileSync(join(here, "../../app/tokens.css"), "utf8");
@@ -662,7 +662,7 @@ describe("AccountSheet 544:561 / 537:557", () => {
     expect(landingSrc).not.toContain("account-sheet");
     expect(landingSrc).not.toContain("AccountSheet");
     expect(landingSrc).not.toContain("544:561");
-    expect(destsSrc).toContain("data-house-phone-dest-chips");
+    expect(destsSrc).toContain("data-house-phone-bottom-nav");
     expect(destsSrc).not.toContain("data-mobile-nav-sheet");
     expect(destsSrc).not.toContain("AppSheetSurface");
     expect(destsSrc).not.toContain("Close44");
