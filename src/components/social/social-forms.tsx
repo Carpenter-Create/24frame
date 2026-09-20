@@ -429,31 +429,13 @@ export function SocialCreateCompose({
     };
   }, [kind, router, step]);
 
-  async function onPick(files: ArrayLike<File> | null) {
+  function onPick(files: ArrayLike<File> | null) {
     if (!files || files.length === 0 || kind !== "media") return;
-    const chosen = Array.from(files);
-    setPickedFiles(chosen);
+    if (fileRef.current) fileRef.current.value = "";
     setError("");
     setUploading(true);
-    const result = await uploadSocialMedia(files, media, originalQuality);
-    setUploading(false);
-    if (fileRef.current) fileRef.current.value = "";
-    if (result.error) {
-      setError(result.error);
-      return;
-    }
-    if (result.items) {
-      setPreviews((current) => {
-        const next = { ...current };
-        result.items!.forEach((item, index) => {
-          const file = chosen[index];
-          if (file) next[item.key] = URL.createObjectURL(file);
-        });
-        return next;
-      });
-      setMedia((current) => [...current, ...result.items!]);
-      setStep((current) => (current === "caption" ? current : "review"));
-    }
+    setPickedFiles(Array.from(files));
+    setStep((current) => (current === "caption" ? current : "review"));
   }
 
   if (kind === "media" && step === "pick") {
@@ -472,8 +454,20 @@ export function SocialCreateCompose({
           className="sr-only"
           data-social-create-media-input=""
           aria-label={SOCIAL.create.media}
-          onChange={(event) => void onPick(event.target.files)}
+          onChange={(event) => onPick(event.target.files)}
         />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <button type="button" className={TEXT_ACTION_CLASS} onClick={() => router.back()}>
+            {SOCIAL.create.close}
+          </button>
+          <button
+            type="button"
+            className={SOCIAL_ACTION_CLASS}
+            onClick={() => fileRef.current?.click()}
+          >
+            {SOCIAL.home.attach}
+          </button>
+        </div>
       </div>
     );
   }
