@@ -272,6 +272,39 @@ describe("Social profile public face", () => {
       withRoles.indexOf("data-social-profile-roles-more"),
     );
 
+    const adamDesktop = renderToStaticMarkup(
+      <SocialProfileIdentity
+        name="Adam Carpenter"
+        handle="adam"
+        photoUrl={null}
+        bio="Founder · Investor · Music Executive"
+        roles={[
+          "executive_producer",
+          "music_supervisor",
+          "composer",
+          "musician",
+          "music_director",
+        ]}
+      />,
+    );
+    expect(adamDesktop).toContain('data-social-profile-role="executive_producer"');
+    expect(adamDesktop).toContain('data-social-profile-role="music_supervisor"');
+    expect(adamDesktop).toContain('data-social-profile-role="composer"');
+    expect(adamDesktop).toContain("Executive Producer");
+    expect(adamDesktop).toContain("Music Supervisor");
+    expect(adamDesktop).toContain("Composer");
+    expect(adamDesktop).toContain("data-social-profile-roles-more");
+    expect(adamDesktop).toContain("+2");
+    expect(adamDesktop).not.toContain("Executive Producer · Music Supervisor · Composer +2");
+    expect(adamDesktop).not.toContain("Executive Producer · Music Supervisor");
+    expect(adamDesktop).toContain("Founder · Investor · Music Executive");
+    expect(adamDesktop.indexOf("Adam Carpenter")).toBeLessThan(
+      adamDesktop.indexOf("Founder · Investor · Music Executive"),
+    );
+    expect(adamDesktop.indexOf("Founder · Investor · Music Executive")).toBeLessThan(
+      adamDesktop.indexOf('data-social-profile-role="executive_producer"'),
+    );
+
     const withTopics = renderToStaticMarkup(
       <SocialProfileIdentity
         name="Ada Lovelace"
