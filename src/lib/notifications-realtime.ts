@@ -110,24 +110,50 @@ export function acceptLiveNotificationRow(
   };
 }
 
-export function mergeLiveActivityItems<T extends { id: string }>(
+type LiveStamp = { id: string; created_at?: string; unread?: boolean };
+
+function newestCreatedAt(rows: readonly LiveStamp[]): string | null {
+  let newest: string | null = null;
+  for (const row of rows) {
+    if (!row.created_at) continue;
+    if (!newest || row.created_at > newest) newest = row.created_at;
+  }
+  return newest;
+}
+
+// Peek seed is the last five open rows; seedCount is the full unread
+// total. A live row already absorbed into that total (older than the
+// peek newest, or already in the peek ids) is not an extra.
+export function isUnseenLiveRow(
+  row: LiveStamp,
+  seedIds: ReadonlySet<string>,
+  newestSeed: string | null,
+): boolean {
+  if (seedIds.has(row.id)) return false;
+  if (newestSeed && row.created_at && row.created_at <= newestSeed) return false;
+  return true;
+}
+
+export function mergeLiveActivityItems<T extends LiveStamp>(
   seed: readonly T[],
   live: readonly T[],
 ): T[] {
   const seedIds = new Set(seed.map((row) => row.id));
-  return [...live.filter((row) => !seedIds.has(row.id)), ...seed];
+  const newestSeed = newestCreatedAt(seed);
+  return [...live.filter((row) => isUnseenLiveRow(row, seedIds, newestSeed)), ...seed];
 }
 
 export function liveUnreadCount(
   seedCount: number,
-  seedItems: readonly { id: string }[],
-  liveItems: readonly { id: string; unread?: boolean }[],
+  seedItems: readonly LiveStamp[],
+  liveItems: readonly LiveStamp[],
 ): number {
-  const known = new Set(seedItems.map((row) => row.id));
+  const seedIds = new Set(seedItems.map((row) => row.id));
+  const newestSeed = newestCreatedAt(seedItems);
   let extra = 0;
   for (const row of liveItems) {
     if (row.unread === false) continue;
-    if (!known.has(row.id)) extra += 1;
+    if (isUnseenLiveRow(row, seedIds, newestSeed)) extra += 1;
   }
   return seedCount + extra;
 }

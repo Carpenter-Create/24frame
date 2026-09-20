@@ -204,6 +204,30 @@ describe("mergeLiveActivityItems", () => {
     expect(liveUnreadCount(3, seed, live)).toBe(4);
     expect(liveUnreadCount(0, [], [{ id: "2", unread: true }])).toBe(1);
   });
+
+  it("does not treat an older live row as an extra after the peek refreshed", () => {
+    const peek = [
+      { id: "c1", unread: true, created_at: "2026-09-20T17:00:00.000Z" },
+      { id: "c2", unread: true, created_at: "2026-09-20T16:50:00.000Z" },
+      { id: "c3", unread: true, created_at: "2026-09-20T16:40:00.000Z" },
+      { id: "c4", unread: true, created_at: "2026-09-20T16:30:00.000Z" },
+      { id: "c5", unread: true, created_at: "2026-09-20T16:20:00.000Z" },
+    ];
+    const absorbed = {
+      id: FOLLOW_ROW.id,
+      unread: true,
+      created_at: "2026-09-20T16:00:00.000Z",
+    };
+    expect(mergeLiveActivityItems(peek, [absorbed]).map((row) => row.id)).toEqual(
+      peek.map((row) => row.id),
+    );
+    expect(liveUnreadCount(6, peek, [absorbed])).toBe(6);
+    expect(
+      liveUnreadCount(5, peek, [
+        { id: "new", unread: true, created_at: "2026-09-20T17:10:00.000Z" },
+      ]),
+    ).toBe(6);
+  });
 });
 
 describe("Realtime hygiene", () => {
