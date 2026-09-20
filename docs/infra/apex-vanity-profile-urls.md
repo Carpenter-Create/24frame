@@ -1,14 +1,18 @@
 # Apex vanity profile URLs
 
-Adam lock: the public canonical is `https://24frame.co/@{handle}`. Preview and share strings already emit that from #267. The product host stays `app.24frame.co`. This repo does not move the dashboard off `app.` and does not take over marketing paths.
+Adam lock (2026-09-20 revert): the public canonical is `https://24frame.co/@{handle}` with stored display casing. Preview, share, and canonical metadata emit that. The product host stays `app.24frame.co`. This repo does not move the dashboard off `app.` and does not take over marketing paths.
 
-In-app destination: `/social/u/{handle}` (bare handle — a path segment starting with `@` is a Next.js parallel-route slot). This slice only rewrites `/@{handle}` to that route. Bare `/{handle}` is not mapped, so `/legal`, `/login`, and other apex pages stay untouched.
+In-app destination: `/social/u/{handle}` (bare handle — a path segment starting with `@` is a Next.js parallel-route slot). This slice rewrites `/@{handle}` to that route. Bare `/{handle}` is not mapped, so `/legal`, `/login`, and other apex pages stay untouched.
 
-Reserved vanity names (`admin`, `api`, `www`, `login`, `legal`, plus `auth` / `app` / `portal` / `social`) are not rewritten. Claiming rules for the handle field stay on main (#267) — this slice does not change them.
+Handle rules stay standing: length 3–30; `A–Z a–z 0–9 . _`; no leading/trailing `.`, no `..`; uniqueness and resolve are case-insensitive; URLs keep the stored casing.
+
+Reserved vanity names (`admin`, `api`, `www`, `login`, `legal`, plus `auth` / `app` / `portal` / `social`) are not rewritten.
 
 ## What this repo does
 
 - Middleware rewrite: `/@handle` → `/social/u/{handle}` (reserved names skipped). Leftover `/social/u/@handle` bookmarks rewrite to the same bare route. The URL bar can stay `24frame.co/@handle` when **this** Vercel project serves the request. Next.js `rewrites()` is not used — a config rewrite cannot honor the reserved list and would map `/@login` after middleware left it alone.
+- One-way 301: leftover `/social/@handle` bookmarks redirect to `/@handle` so old links do not die. Do not publish `/social/@handle`.
+- A casing miss on a matching handle soft-redirects to the stored `/@Handle`.
 - `/@handle` still requires a session (same as the in-app profile). It is not added to the public-path list.
 
 ## Manual steps (CoS / Adam) — founder-executed

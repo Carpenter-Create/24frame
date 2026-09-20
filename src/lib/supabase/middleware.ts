@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-import { socialProfileRewriteTarget } from "@/lib/social";
+import { socialProfileLegacyPublicRedirect, socialProfileRewriteTarget } from "@/lib/social";
 
 import type { Database } from "./database.types";
 
@@ -58,6 +58,16 @@ export async function updateSession(request: NextRequest) {
 }
 
 function applySocialVanityRewrite(request: NextRequest, response: NextResponse): NextResponse {
+  const legacy = socialProfileLegacyPublicRedirect(request.nextUrl.pathname);
+  if (legacy) {
+    const url = request.nextUrl.clone();
+    url.pathname = legacy;
+    const redirected = NextResponse.redirect(url, 301);
+    for (const cookie of response.cookies.getAll()) {
+      redirected.cookies.set(cookie);
+    }
+    return redirected;
+  }
   const internal = socialProfileRewriteTarget(request.nextUrl.pathname);
   if (!internal) return response;
   const url = request.nextUrl.clone();

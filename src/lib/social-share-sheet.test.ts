@@ -35,12 +35,18 @@ describe("Profile share sheet lock", () => {
 
   it("encodes the canonical apex URL into Sporty Blue QR payload and card label", () => {
     expect(socialSharePayload("Ada")).toEqual({
-      title: "@ada",
-      url: "https://24frame.co/@ada",
+      title: "@Ada",
+      url: "https://24frame.co/@Ada",
+    });
+    expect(socialSharePayload("AdamC")).toEqual({
+      title: "@AdamC",
+      url: "https://24frame.co/@AdamC",
     });
     expect(socialShareCardLabel("ada")).toBe("@ADA");
     expect(socialShareCardFilename("ada")).toBe(`${PRODUCT_NAME}-@ada.png`);
     expect(socialProfilePublicUrl("ada")).toBe("https://24frame.co/@ada");
+    expect(socialProfilePublicUrl("AdamC")).toBe("https://24frame.co/@AdamC");
+    expect(socialProfilePublicUrl("AdamC")).not.toContain("/social/@");
     const modules = socialProfileQrModules("https://24frame.co/@ada");
     expect(modules.length).toBeGreaterThan(20);
     expect(modules.some((row) => row.includes(true))).toBe(true);

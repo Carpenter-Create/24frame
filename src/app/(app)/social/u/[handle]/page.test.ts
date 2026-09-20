@@ -8,7 +8,7 @@ import { signedAvatarUrl } from "@/lib/s3-avatars";
 import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
 import { SOCIAL } from "@/lib/social";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
-import SocialPublicProfilePage from "./page";
+import SocialPublicProfilePage, { generateMetadata } from "./page";
 
 vi.mock("next/navigation", () => ({
   redirect: vi.fn((to: string) => {
@@ -260,6 +260,26 @@ describe("Social public profile", () => {
     expect(html).not.toContain("data-social-profile-photo");
   });
 
+  it("redirects a casing miss to the stored public URL", async () => {
+    stubClient({ member: { ...ada, handle: "AdamC" } });
+    await expect(renderPublic("adamc")).rejects.toThrow("REDIRECT:/@AdamC");
+  });
+
+  it("sets the public canonical to https://24frame.co/@handle", async () => {
+    await expect(generateMetadata({ params: Promise.resolve({ handle: "AdamC" }) })).resolves.toEqual({
+      alternates: { canonical: "https://24frame.co/@AdamC" },
+    });
+    await expect(generateMetadata({ params: Promise.resolve({ handle: "ab" }) })).resolves.toEqual({});
+  });
+
+  it("keeps the stored casing when the requested handle already matches", async () => {
+    stubClient({ member: { ...ada, handle: "AdamC" } });
+    const html = await renderPublic("AdamC");
+    expect(html).toContain("@AdamC");
+    expect(html).toContain('data-social-share-url="https://24frame.co/@AdamC"');
+    expect(html).not.toContain("/social/@");
+  });
+
   it("uses the same empty state for a missing handle or an RLS-null row", async () => {
     const { from } = stubClient({ member: null });
     const html = await renderPublic("@missing");
@@ -292,6 +312,9 @@ describe("Social public profile", () => {
     expect(src).toContain("signedAvatarUrl");
     expect(src).toContain("loadAuthorPosts");
     expect(src).toContain("SocialAuthorHistory");
+    expect(src).toContain("socialProfileCasingRedirect");
+    expect(src).toContain("generateMetadata");
+    expect(src).toContain("socialProfileCanonicalUrl");
     expect(src).not.toContain("putAvatarObject");
     expect(src).not.toContain("uploadAccountPhoto");
     expect(src).not.toContain("S3_AVATARS_BUCKET");

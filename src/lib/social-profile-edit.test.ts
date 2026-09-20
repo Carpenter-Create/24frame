@@ -65,6 +65,8 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(edit).toContain("data-social-handle-url");
     expect(edit).toContain("data-social-handle-required");
     expect(edit).toContain("socialHandleRequiredError");
+    expect(edit).toContain("normalizeHandle");
+    expect(edit).toContain("handleInvalid");
     expect(edit).not.toContain("app.24frame.co");
   });
 

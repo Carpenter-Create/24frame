@@ -16,10 +16,14 @@ import {
 import type { SocialMediaItem, SocialMediaLane, SocialMediaRuleError } from "@/lib/social-media";
 
 // Social workspace copy and input rules. Lives in lib/, not JSX.
-// Public share / preview URL is https://24frame.co/@{bareHandle}.
-// In-app navigation is /social/u/{bareHandle} (see socialProfileHref).
-// A path segment starting with @ is a Next.js App Router parallel-route
-// slot, so the in-app segment must stay bare. Display stays @handle.
+// Handle: 3–30, A–Z a–z 0–9 . _; no leading/trailing `.`, no `..`.
+// Store the typed casing. Uniqueness key is lower(handle) (citext).
+// Public share URL is https://24frame.co/@{storedCasing}.
+// In-app route is /social/u/{storedCasing} because an @ segment is a
+// Next.js App Router parallel-route slot. Middleware rewrites
+// /@{handle} onto that route. Lookup is case-insensitive;
+// a casing miss redirects to the stored public URL.
+// Leftover /social/@{handle} bookmarks 301 to /@{handle}.
 // Account faces reuse signedAvatarUrl. Post media uses 24frame-media
 // keys on posts.media. Title S3 / S3_BUCKET stay film-only.
 // Group DMs reuse Pack 4 conversations.kind=group. Gated community
@@ -51,37 +55,50 @@ export const SOCIAL_PROFILE_ORIGIN = "https://24frame.co";
 /** Author history page. Independent of Home following-wall / followee / story caps. */
 export const SOCIAL_PROFILE_POSTS_PAGE = LIST_PAGE;
 
-// Public profile URL (locked): https://24frame.co/@{bareHandle}
-// Example: https://24frame.co/@acarpcreate
-// Profile chrome prints one quiet host line under the handle
-// (24frame.co/@{bare}). Share copies the canonical https URL.
-// In-app route is /social/u/{bareHandle}. Persist the bare handle
-// in profiles.handle (no @). Display as @handle.
+// Public profile URL (locked): https://24frame.co/@{display}
+// Example: https://24frame.co/@AdamC — stored casing, not folded.
+// Uniqueness key is handleKey = lower(handle). citext unique already.
+// Share copies that canonical https URL.
+// In-app route is /social/u/{display} because an @ segment is a
+// Next.js parallel-route slot. Middleware rewrites /@{display}
+// (and leftover /social/u/@handle bookmarks) to the in-app route.
+// Leftover /social/@{display} bookmarks 301 to /@{display}.
+// Persist the typed handle in profiles.handle (no @). Display as @handle.
 // /social/members/{handle} redirects to the in-app route.
-
-export function bareHandle(raw: string): string {
-  return stripHandleDecorators(raw).trim().toLowerCase();
-}
 
 export function stripHandleDecorators(raw: string): string {
   return raw.replace(/@/g, "");
 }
 
+/** Typed handle with @ stripped. Preserves display casing. */
+export function handleDisplay(raw: string): string {
+  return stripHandleDecorators(raw).trim();
+}
+
+/** Case-insensitive uniqueness key. */
+export function handleKey(raw: string): string {
+  return handleDisplay(raw).toLowerCase();
+}
+
+export function bareHandle(raw: string): string {
+  return handleDisplay(raw);
+}
+
 export function displayHandle(handle: string): string {
-  const bare = bareHandle(handle);
-  return bare ? `@${bare}` : "";
+  const display = handleDisplay(handle);
+  return display ? `@${display}` : "";
 }
 
 export function handleFieldValue(handle: string): string {
-  return `@${bareHandle(handle)}`;
+  return `@${handleDisplay(handle)}`;
 }
 
 export function socialProfileHref(handle: string): string {
-  const bare = bareHandle(handle);
-  return bare ? `${SOCIAL_ROUTES.profileByHandle}/${bare}` : SOCIAL_ROUTES.profileByHandle;
+  const display = handleDisplay(handle);
+  return display ? `${SOCIAL_ROUTES.profileByHandle}/${display}` : SOCIAL_ROUTES.profileByHandle;
 }
 
-// Apex /@handle → in-app /social/u/{bareHandle}. Bare /legal and friends are
+// Apex /@handle → in-app /social/u/{display}. Bare /legal and friends are
 // not rewritten. Reserved names skip the vanity rewrite so they cannot collide
 // with marketing/infra paths if the apex host hits this project.
 export const SOCIAL_VANITY_RESERVED_HANDLES = [
@@ -96,12 +113,15 @@ export const SOCIAL_VANITY_RESERVED_HANDLES = [
   "social",
 ] as const;
 
+export function isReservedSocialHandle(raw: string): boolean {
+  return (SOCIAL_VANITY_RESERVED_HANDLES as readonly string[]).includes(handleKey(raw));
+}
+
 export function matchSocialVanityPath(pathname: string): string | null {
   if (!pathname.startsWith("/@")) return null;
   if (pathname.includes("/", 2)) return null;
   const handle = normalizeHandle(pathname.slice(2));
-  if (!handle) return null;
-  if ((SOCIAL_VANITY_RESERVED_HANDLES as readonly string[]).includes(handle)) return null;
+  if (!handle || isReservedSocialHandle(handle)) return null;
   return handle;
 }
 
@@ -131,9 +151,37 @@ export function socialProfileRewriteTarget(pathname: string): string | null {
   return handle ? socialProfileHref(handle) : null;
 }
 
+export function socialProfilePublicPath(handle: string): string {
+  const display = handleDisplay(handle);
+  return `/@${display}`;
+}
+
+// Retired public path from the /social/@handle lock. One-way 301 only.
+export function matchSocialPublicAtPath(pathname: string): string | null {
+  const prefix = `${SOCIAL_ROUTES.home}/`;
+  if (!pathname.startsWith(prefix)) return null;
+  let segment = pathname.slice(prefix.length);
+  try {
+    segment = decodeURIComponent(segment);
+  } catch {
+    // keep the raw segment
+  }
+  if (!segment.startsWith("@") || segment.includes("/")) return null;
+  return normalizeHandle(segment);
+}
+
+export function socialProfileLegacyPublicRedirect(pathname: string): string | null {
+  const handle = matchSocialPublicAtPath(pathname);
+  if (!handle || isReservedSocialHandle(handle)) return null;
+  return socialProfilePublicPath(handle);
+}
+
 export function socialProfilePublicUrl(handle: string): string {
-  const bare = bareHandle(handle);
-  return `${SOCIAL_PROFILE_ORIGIN}/@${bare}`;
+  return `${SOCIAL_PROFILE_ORIGIN}${socialProfilePublicPath(handle)}`;
+}
+
+export function socialProfileCanonicalUrl(handle: string): string {
+  return socialProfilePublicUrl(handle);
 }
 
 export function parseProfileHandleParam(raw: string): string | null {
@@ -166,8 +214,18 @@ export function socialStoryHref(id: string): string {
 }
 
 export function socialProfilePublicHost(handle: string): string {
-  const bare = bareHandle(handle);
-  return bare ? `24frame.co/@${bare}` : "24frame.co/@";
+  const display = handleDisplay(handle);
+  return display ? `24frame.co/@${display}` : "24frame.co/@";
+}
+
+export function socialProfileCasingRedirect(
+  requested: string | null,
+  storedHandle: string,
+): string | null {
+  if (!storedHandle) return null;
+  if (requested && requested === storedHandle) return null;
+  if (requested && handleKey(requested) !== handleKey(storedHandle)) return null;
+  return socialProfilePublicPath(storedHandle);
 }
 
 export const SOCIAL_CREATE_KIND_PARAM = "kind";
@@ -406,7 +464,7 @@ export const SOCIAL = {
     handle: "Handle",
     handlePlaceholder: "Set your handle",
     handleRequired: "Handle is required",
-    handleInvalid: "Enter a handle of 3–30 letters, numbers, or underscores.",
+    handleInvalid: "Enter a handle of 3–30 letters, numbers, periods, or underscores.",
     username: "Username",
     usernamePlaceholder: "username",
     displayName: "Display name",
@@ -588,25 +646,26 @@ export const GROUP_DESCRIPTION_MAX = 400;
 export const CONVERSATION_TITLE_MAX = 80;
 export const SOCIAL_MIN_AGE_YEARS = 13;
 
-const HANDLE_RE = /^[a-z0-9_]+$/;
+const HANDLE_RE = /^[A-Za-z0-9._]+$/;
 const SLUG_RE = /^[a-z0-9-]+$/;
 
 export function normalizeHandle(raw: string): string | null {
-  const handle = bareHandle(raw);
+  const handle = handleDisplay(raw);
   if (handle.length < HANDLE_MIN || handle.length > HANDLE_MAX) return null;
   if (!HANDLE_RE.test(handle)) return null;
+  if (handle.startsWith(".") || handle.endsWith(".") || handle.includes("..")) return null;
   return handle;
 }
 
 export function socialHandleRequiredError(raw: string): string | null {
-  return bareHandle(raw) ? null : SOCIAL.profile.handleRequired;
+  return handleDisplay(raw) ? null : SOCIAL.profile.handleRequired;
 }
 
 /** Bare unique-ish seed from the sign-in email local-part. Not a display name. */
 export function suggestedHandleSeed(email: string, userId: string): string {
   const local = (email.split("@")[0] ?? "").toLowerCase();
   const cleaned = local.replace(/[^a-z0-9_]/g, "").slice(0, HANDLE_MAX);
-  if (cleaned.length >= HANDLE_MIN && HANDLE_RE.test(cleaned)) return cleaned;
+  if (cleaned.length >= HANDLE_MIN && normalizeHandle(cleaned)) return cleaned;
   const fallback = `u${userId.replace(/-/g, "").slice(0, 12)}`;
   return fallback.slice(0, HANDLE_MAX);
 }

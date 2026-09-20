@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+
 import { SocialFollowButton } from "@/components/social/social-forms";
 import { SocialEmpty } from "@/components/social/social-empty";
 import { SocialForYouRail } from "@/components/social/social-for-you";
@@ -20,6 +23,9 @@ import {
   SOCIAL_ROUTES,
   socialMemberHref,
   socialPersonLabel,
+  socialProfileCanonicalUrl,
+  socialProfileCasingRedirect,
+  socialProfileTabHref,
   socialRelativeTime,
   socialStoryHref,
 } from "@/lib/social";
@@ -34,6 +40,17 @@ import {
 } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { requireSocialSession } from "@/lib/social-session";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ handle: string }>;
+}): Promise<Metadata> {
+  const { handle: raw } = await params;
+  const handle = parseProfileHandleParam(raw);
+  if (!handle) return {};
+  return { alternates: { canonical: socialProfileCanonicalUrl(handle) } };
+}
 
 export default async function SocialPublicProfilePage({
   params,
@@ -59,6 +76,13 @@ export default async function SocialPublicProfilePage({
         .eq("handle", handle)
         .maybeSingle()
     : { data: null };
+
+  if (member) {
+    const canonical = socialProfileCasingRedirect(handle, member.handle);
+    if (canonical) {
+      redirect(tab === "posts" ? canonical : socialProfileTabHref(canonical, tab));
+    }
+  }
 
   if (!member) {
     return (

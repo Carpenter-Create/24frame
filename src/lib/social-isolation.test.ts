@@ -169,18 +169,25 @@ describe("social isolation lock", () => {
     expect(insert).toContain("discoverable: true");
   });
 
-  it("rewrites apex /@handle to /social/u/{bare} and does not make vanity public", () => {
+  it("rewrites apex /@handle to /social/u/{display} and 301s leftover /social/@handle", () => {
     const social = readFileSync("src/lib/social.ts", "utf8");
     const middleware = readFileSync("src/lib/supabase/middleware.ts", "utf8");
     const nextConfig = readFileSync("next.config.ts", "utf8");
     expect(social).toContain("socialVanityInternalPath");
     expect(social).toContain("socialProfileRewriteTarget");
+    expect(social).toContain("socialProfileLegacyPublicRedirect");
+    expect(social).toContain("matchSocialPublicAtPath");
     expect(social).toContain("socialProfileHref");
     expect(social).toContain("SOCIAL_VANITY_RESERVED_HANDLES");
+    expect(social).toContain("https://24frame.co/@");
+    expect(social).toContain("socialProfileCanonicalUrl");
     expect(nextConfig).not.toContain('source: "/@:handle"');
     expect(nextConfig).not.toContain("/social/u/@:handle");
     expect(middleware).toContain("socialProfileRewriteTarget");
+    expect(middleware).toContain("socialProfileLegacyPublicRedirect");
     expect(middleware).toContain("NextResponse.rewrite");
+    expect(middleware).toContain("NextResponse.redirect");
+    expect(middleware).toContain("301");
     expect(middleware).not.toContain('path.startsWith("/@")');
   });
 });

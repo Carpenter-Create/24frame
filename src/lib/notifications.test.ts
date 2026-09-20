@@ -80,7 +80,7 @@ describe("NOTIFICATION_EMAIL.new_follower.link", () => {
       cta: "View profile",
       path: "/social/u/ada",
     });
-    expect(path({ handle: "@Ada" })).toBe("/social/u/ada");
+    expect(path({ handle: "@Ada" })).toBe("/social/u/Ada");
   });
 
   it("falls back to Activity when the handle is missing or unsafe", () => {

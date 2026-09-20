@@ -110,7 +110,7 @@ describe("social actions", () => {
     expect(updates).toEqual([
       {
         table: "profiles",
-        row: { handle: "ada_lovelace", display_name: "Ada Lovelace" },
+        row: { handle: "Ada_Lovelace", display_name: "Ada Lovelace" },
       },
     ]);
     expect(from).not.toHaveBeenCalledWith("organizations");
@@ -125,6 +125,30 @@ describe("social actions", () => {
     form.set("handle", "@@@");
     expect(await createSocialProfile(form)).toEqual({ error: SOCIAL.profile.handleRequired });
     expect(SOCIAL.profile.handleRequired).toBe("Handle is required");
+  });
+
+  it("rejects charset, length, and dotted-edge misses and persists typed casing", async () => {
+    stub({
+      profile: { id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" },
+    });
+    const invalid = new FormData();
+    invalid.set("handle", "Ada-C");
+    expect(await createSocialProfile(invalid)).toEqual({ error: SOCIAL.profile.handleInvalid });
+
+    const dotted = new FormData();
+    dotted.set("handle", ".AdamC");
+    expect(await createSocialProfile(dotted)).toEqual({ error: SOCIAL.profile.handleInvalid });
+
+    const { updates } = stub({
+      profile: { id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" },
+    });
+    const valid = new FormData();
+    valid.set("handle", "@AdamC");
+    valid.set("display_name", "Ada Lovelace");
+    expect(await createSocialProfile(valid)).toEqual({});
+    expect(updates).toEqual([
+      { table: "profiles", row: { handle: "AdamC", display_name: "Ada Lovelace" } },
+    ]);
   });
 
   it("rejects a blank handle when ensure cannot insert a row", async () => {
@@ -154,7 +178,7 @@ describe("social actions", () => {
       table: "profiles",
       row: profileInsertRow({
         userId: "u1",
-        handle: "ada_lovelace",
+        handle: "Ada_Lovelace",
         displayName: "Ada Lovelace",
       }),
     });

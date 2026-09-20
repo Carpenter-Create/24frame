@@ -190,7 +190,7 @@ Delete only the leftover nonce you own, locally.
 
 **When:** Changing `/@handle` routing, reserved vanity names, or `24frame.co` / GoDaddy DNS.
 
-Public canonical and handle preview are already locked on main (`https://24frame.co/@{handle}`; in-app `/social/u/{handle}`). A path segment starting with `@` is a Next.js parallel-route slot — do not put `@` in the in-app segment. This app rewrites `/@handle` in middleware to that in-app route only (reserved names skipped). Leftover `/social/u/@handle` bookmarks rewrite to the same bare route. It does not map bare `/{handle}` and does not serve marketing. Do not add a Next.js `rewrites()` `/@:handle` rule — it bypasses the reserved list.
+Public canonical and handle preview are locked (`https://24frame.co/@{handle}` with stored casing; in-app `/social/u/{handle}`). A path segment starting with `@` is a Next.js parallel-route slot — do not put `@` in the in-app segment. This app rewrites `/@handle` in middleware to that in-app route only (reserved names skipped). Leftover `/social/u/@handle` bookmarks rewrite to the same bare route. Leftover `/social/@handle` bookmarks 301 to `/@handle`. It does not map bare `/{handle}` and does not serve marketing. Do not add a Next.js `rewrites()` `/@:handle` rule — it bypasses the reserved list. Do not publish `/social/@handle`.
 
 Do not add `24frame.co` to Vercel project `24frame` without a marketing fallback: a Vercel domain is all-or-nothing and would take `/` and `/legal`. Prefer a rewrite on the existing marketing project. Exact steps: [`docs/infra/apex-vanity-profile-urls.md`](../infra/apex-vanity-profile-urls.md).
 
