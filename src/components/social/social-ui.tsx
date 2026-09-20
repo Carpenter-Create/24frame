@@ -224,45 +224,45 @@ export function SocialProfileIdentity({
     <div data-social-profile-identity="" className="flex flex-col gap-3">
       <div data-social-profile-head="" className={SOCIAL_PROFILE_HEAD_CLASS}>
         <SocialAvatar name={person.avatarName} photoUrl={photoUrl} ring={ring} size="profile" />
-        {stats ? <SocialProfileStats profileId={profileId} handle={handle} stats={stats} /> : null}
+        <div data-social-profile-copy="" className="min-w-0 flex-1">
+          <p
+            data-social-profile-handle=""
+            className="break-words text-[18px] font-semibold text-ink md:text-[22px]"
+          >
+            {person.handleLabel}
+          </p>
+          {person.name ? (
+            <p data-social-profile-name="" className="mt-1 break-words t-body-sm text-ink-2">
+              {person.name}
+            </p>
+          ) : null}
+        </div>
       </div>
-      <div data-social-profile-copy="" className="min-w-0">
-        <p
-          data-social-profile-handle=""
-          className="break-words text-[18px] font-semibold text-ink md:text-[22px]"
-        >
-          {person.handleLabel}
+      {stats ? <SocialProfileStats profileId={profileId} handle={handle} stats={stats} /> : null}
+      {rolesLine ? (
+        <p data-social-profile-roles="" className={SOCIAL_PROFILE_ROLES_LINE_CLASS}>
+          {rolesLine}
         </p>
-        {person.name ? (
-          <p data-social-profile-name="" className="mt-1 break-words t-body-sm text-ink-2">
-            {person.name}
-          </p>
-        ) : null}
-        {rolesLine ? (
-          <p data-social-profile-roles="" className={SOCIAL_PROFILE_ROLES_LINE_CLASS}>
-            {rolesLine}
-          </p>
-        ) : null}
-        {bio?.trim() ? (
-          <p data-social-profile-bio="" className="mt-2 t-body-sm text-ink whitespace-pre-wrap md:t-body">
-            {bio}
-          </p>
-        ) : null}
-        {interestTopics.length > 0 ? (
-          <div data-social-profile-topics="" className="mt-2 flex flex-wrap gap-2">
-            {interestTopics.map((topic) => (
-              <span
-                key={topic}
-                data-social-profile-topic={topic}
-                className={SOCIAL_TOPIC_CHIP_CLASS}
-              >
-                {topic}
-              </span>
-            ))}
-          </div>
-        ) : null}
-        <SocialProfileLinkRow links={links} />
-      </div>
+      ) : null}
+      {bio?.trim() ? (
+        <p data-social-profile-bio="" className="t-body-sm text-ink whitespace-pre-wrap md:t-body">
+          {bio}
+        </p>
+      ) : null}
+      {interestTopics.length > 0 ? (
+        <div data-social-profile-topics="" className="flex flex-wrap gap-2">
+          {interestTopics.map((topic) => (
+            <span
+              key={topic}
+              data-social-profile-topic={topic}
+              className={SOCIAL_TOPIC_CHIP_CLASS}
+            >
+              {topic}
+            </span>
+          ))}
+        </div>
+      ) : null}
+      <SocialProfileLinkRow links={links} />
       {actionRow}
       {followedBy ? (
         <div data-social-profile-mutuals="" className="flex min-w-0 items-center gap-2">

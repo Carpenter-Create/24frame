@@ -250,7 +250,7 @@ describe("Social profile public face", () => {
     expect(html).not.toContain("data-social-profile-topics");
   });
 
-  it("prints the Professions middot line under the name and omits it when crafts is empty", async () => {
+  it("prints the Professions middot line under the stats and omits it when crafts is empty", async () => {
     stubClient({
       profile: { ...ensured, crafts: ["actor", "producer", "screenwriter", "investor"] },
     });
@@ -266,8 +266,8 @@ describe("Social profile public face", () => {
     expect(html).not.toContain("Investor");
     expect(html).not.toContain('data-social-profile-role="actor"');
     expect(html.indexOf("data-social-profile-handle")).toBeLessThan(html.indexOf("data-social-profile-name"));
-    expect(html.indexOf("data-social-profile-stats")).toBeLessThan(html.indexOf("data-social-profile-name"));
-    expect(html.indexOf("data-social-profile-name")).toBeLessThan(html.indexOf("data-social-profile-roles"));
+    expect(html.indexOf("data-social-profile-name")).toBeLessThan(html.indexOf("data-social-profile-stats"));
+    expect(html.indexOf("data-social-profile-stats")).toBeLessThan(html.indexOf("data-social-profile-roles"));
     expect(html.indexOf("data-social-profile-roles")).toBeLessThan(html.indexOf("data-social-profile-bio"));
     expect(html.indexOf("@ada")).toBeLessThan(html.indexOf("Actor · Producer · Screenwriter +1"));
     expect(html).toContain("grid-cols-3");

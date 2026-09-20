@@ -242,6 +242,9 @@ describe("Social profile public face", () => {
     expect(withRoles.indexOf("data-social-profile-name")).toBeLessThan(
       withRoles.indexOf("data-social-profile-roles"),
     );
+    expect(withRoles.indexOf("data-social-profile-copy")).toBeLessThan(
+      withRoles.indexOf("data-social-profile-roles"),
+    );
     expect(withRoles.indexOf("Ada Lovelace")).toBeLessThan(
       withRoles.indexOf("Actor · Producer · Screenwriter +1"),
     );
@@ -298,10 +301,10 @@ describe("Social profile public face", () => {
     expect(withStats.indexOf("data-social-profile-head")).toBeLessThan(
       withStats.indexOf("data-social-profile-copy"),
     );
-    expect(withStats.indexOf("data-social-profile-stats")).toBeLessThan(
-      withStats.indexOf("data-social-profile-name"),
-    );
     expect(withStats.indexOf("data-social-profile-name")).toBeLessThan(
+      withStats.indexOf("data-social-profile-stats"),
+    );
+    expect(withStats.indexOf("data-social-profile-stats")).toBeLessThan(
       withStats.indexOf("data-social-profile-roles"),
     );
     expect(withStats.indexOf("data-social-profile-roles")).toBeLessThan(

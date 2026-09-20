@@ -106,14 +106,17 @@ export function SocialProfileCenterSkeleton() {
     <div className={SOCIAL_HOME_CENTER_CLASS}>
       <div className={SOCIAL_PROFILE_HEAD_CLASS}>
         <Skeleton className={SOCIAL_AVATAR_PROFILE_CLASS} />
-        <div className={SOCIAL_PROFILE_STATS_CLASS}>
-          <Skeleton className="h-10 w-12 justify-self-center" />
-          <Skeleton className="h-10 w-12 justify-self-center" />
-          <Skeleton className="h-10 w-12 justify-self-center" />
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <Skeleton className="h-6 w-40" />
+          <Skeleton className="h-3 w-2/3" />
         </div>
       </div>
+      <div className={SOCIAL_PROFILE_STATS_CLASS}>
+        <Skeleton className="h-10 w-12 justify-self-center" />
+        <Skeleton className="h-10 w-12 justify-self-center" />
+        <Skeleton className="h-10 w-12 justify-self-center" />
+      </div>
       <div className="flex min-w-0 flex-col gap-2">
-        <Skeleton className="h-6 w-40" />
         <Skeleton className="h-3 w-2/3" />
         <Skeleton className="h-3 w-full" />
       </div>

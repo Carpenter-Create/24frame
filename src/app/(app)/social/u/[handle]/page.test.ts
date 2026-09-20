@@ -202,7 +202,8 @@ describe("Social public profile", () => {
     expect(html).toContain("data-social-profile-roles");
     expect(html).toContain("Actor · Producer");
     expect(html).not.toContain('data-social-profile-role="actor"');
-    expect(html.indexOf("data-social-profile-name")).toBeLessThan(html.indexOf("data-social-profile-roles"));
+    expect(html.indexOf("data-social-profile-name")).toBeLessThan(html.indexOf("data-social-profile-stats"));
+    expect(html.indexOf("data-social-profile-stats")).toBeLessThan(html.indexOf("data-social-profile-roles"));
     expect(html.indexOf("data-social-profile-roles")).toBeLessThan(html.indexOf("data-social-profile-bio"));
     expect(html).not.toContain("Roles:");
     expect(html).not.toContain("Professions:");

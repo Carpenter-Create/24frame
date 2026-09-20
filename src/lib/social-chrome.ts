@@ -238,14 +238,13 @@ export function socialTopicChipSelectClass(selected: boolean): string {
   return selected ? SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS : SOCIAL_TOPIC_CHIP_SELECT_IDLE_CLASS;
 }
 
-// Public profile head — Adam 2026-09-20 IG lock: avatar left, 3-up
-// stats right (number over muted label). Avatar stays 72/88; stats
-// match that row height. Roles are a muted middot line under name
-// in the full-width copy stack — not a chip rail, not beside avatar.
-export const SOCIAL_PROFILE_HEAD_CLASS = "flex items-center gap-3 md:gap-4";
+// Public profile head — Adam 2026-09-20: avatar left, handle → name
+// only (no Roles in this row). 3-up stats sit under that row. Roles
+// are a muted middot line beneath stats — not under the name, not
+// beside avatar, not in bio. Avatar stays 72/88.
+export const SOCIAL_PROFILE_HEAD_CLASS = "flex items-start gap-3 md:gap-4";
 
-export const SOCIAL_PROFILE_STATS_CLASS =
-  "grid min-h-[72px] min-w-0 flex-1 grid-cols-3 md:min-h-[88px]";
+export const SOCIAL_PROFILE_STATS_CLASS = "grid min-w-0 w-full grid-cols-3";
 
 export const SOCIAL_PROFILE_STAT_CLASS =
   "flex min-w-0 flex-col items-center justify-center text-center";
