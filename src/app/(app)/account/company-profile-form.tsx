@@ -2,24 +2,21 @@
 
 import { useEffect, useState } from "react";
 
-import { SettingsDrillRow } from "@/components/settings/settings-drill";
+import { SettingsDrillRow, SettingsGroupList, SettingsGroupRow } from "@/components/settings/settings-drill";
 import { CompanyNameEditor } from "@/components/settings/company-name-editor";
-import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { cn } from "@/lib/cn";
 import {
   COMPANY_PROFILE,
-  COMPANY_PROFILE_COPY_CLASS,
   COMPANY_PROFILE_SAVED_MS,
-  COMPANY_PROFILE_VIEW_CLASS,
 } from "@/lib/account-profile";
-import { SETTINGS_DRILL_LIST_CLASS } from "@/lib/settings";
+import { SETTINGS_SECTION_CLASS } from "@/lib/settings";
 
 // organizations.name. member_can(manage_settings) is the write gate
 // (same function as RLS). Bind save to the org this form rendered.
-// Desktop: read-only row; Edit opens the house Dialog.
-// Mobile: Coinbase drill row → company edit pane.
+// One SettingsDrillRow in the house inset group. Desktop Dialog;
+// mobile Coinbase drill → company edit pane. Not a Card. Not an
+// Edit pill.
 export function CompanyProfileForm({
   orgId,
   name,
@@ -49,28 +46,20 @@ export function CompanyProfileForm({
   }
 
   return (
-    <div data-company-profile="">
-      {canEdit ? (
-        <div className={`md:hidden ${SETTINGS_DRILL_LIST_CLASS}`}>
+    <div data-company-profile="" className={SETTINGS_SECTION_CLASS}>
+      <SettingsGroupList>
+        <SettingsGroupRow>
           <SettingsDrillRow
             kind="company-name"
             label={COMPANY_PROFILE.nameLabel}
             value={name}
-            href={COMPANY_PROFILE.editHref}
+            href={canEdit ? COMPANY_PROFILE.editHref : undefined}
+            onClick={canEdit ? openEdit : undefined}
+            readOnly={!canEdit}
+            cta={canEdit ? "company-edit" : undefined}
           />
-        </div>
-      ) : null}
-      <div className={cn(COMPANY_PROFILE_VIEW_CLASS, canEdit && "max-md:hidden")}>
-        <div className={COMPANY_PROFILE_COPY_CLASS}>
-          <span className="t-label text-ink-3">{COMPANY_PROFILE.nameLabel}</span>
-          <span className="t-body text-ink">{name}</span>
-        </div>
-        {canEdit ? (
-          <Button type="button" variant="ghost" data-company-edit="" onClick={openEdit}>
-            {COMPANY_PROFILE.edit}
-          </Button>
-        ) : null}
-      </div>
+        </SettingsGroupRow>
+      </SettingsGroupList>
       {canEdit ? null : (
         <p className="t-body-sm text-ink-3">{COMPANY_PROFILE.forbidden}</p>
       )}

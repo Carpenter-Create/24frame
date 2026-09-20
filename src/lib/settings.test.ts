@@ -21,8 +21,14 @@ import {
   SETTINGS_DIALOG_FIELD_CLASS,
   SETTINGS_DIALOG_FORM_CLASS,
   SETTINGS_DIALOG_HELP_CLASS,
+  SETTINGS_DRILL_ACCENT_CLASS,
+  SETTINGS_DRILL_CHEVRON_CLASS,
   SETTINGS_DRILL_ROW_CLASS,
   SETTINGS_DRILL_VALUE_CLASS,
+  SETTINGS_GROUP_CLASS,
+  SETTINGS_GROUP_LABEL_CLASS,
+  SETTINGS_GROUP_LIST_CLASS,
+  SETTINGS_GROUP_STACK_CLASS,
   SETTINGS_EDIT_HELPER_CLASS,
   SETTINGS_INDEX_CARD_BODY_CLASS,
   SETTINGS_INDEX_CARD_CLASS,
@@ -347,10 +353,20 @@ describe("settings hub lock", () => {
     expect(SETTINGS_DRILL_VALUE_CLASS).toBe("t-body-sm text-ink-3");
     expect(SETTINGS_DRILL_ROW_CLASS).not.toContain("truncate");
     expect(SETTINGS_DRILL_VALUE_CLASS).not.toContain("truncate");
+    expect(SETTINGS_DRILL_ACCENT_CLASS).toBe("text-accent");
+    expect(SETTINGS_DRILL_CHEVRON_CLASS).toContain(SETTINGS_RAIL_CHEVRON_CLASS);
+    expect(SETTINGS_GROUP_CLASS).toContain(HOUSE_MODULE_CLASS);
+    expect(SETTINGS_GROUP_CLASS).not.toContain("card-surface");
+    expect(SETTINGS_GROUP_LABEL_CLASS).toBe(SETTINGS_SECTION_LABEL_CLASS);
+    expect(SETTINGS_GROUP_LABEL_CLASS).toBe("t-label text-ink-3");
+    expect(SETTINGS_GROUP_STACK_CLASS).toContain("gap-[var(--space-2)]");
+    expect(SETTINGS_GROUP_LIST_CLASS).toContain("divide-y");
     const settingsSrc = readFileSync("src/lib/settings.ts", "utf8");
     expect(settingsSrc).toContain("Shared SoT for");
     expect(settingsSrc).toContain("Rights Holder / Legal Entities");
     expect(settingsSrc).toContain("Get Help");
+    expect(settingsSrc).toContain("one SoT");
+    expect(settingsSrc).toContain("never header pills");
     expect(settingsSrc).not.toContain("companyHref");
     expect(SETTINGS_PANE_CLASS).toBe("flex flex-col gap-[var(--space-6)]");
     expect(SETTINGS_PANE_CLASS).not.toContain("space-12");

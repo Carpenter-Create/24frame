@@ -3,31 +3,30 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import {
+  SettingsDrillRow,
+  SettingsGroupList,
+  SettingsGroupRow,
+} from "@/components/settings/settings-drill";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { StatusChip } from "@/components/layout/status-chip";
 import {
   SETTINGS_DIALOG_FIELD_CLASS,
   SETTINGS_DIALOG_FORM_CLASS,
-  SETTINGS_SECTION_LABEL_CLASS,
+  SETTINGS_DRILL_VALUE_CLASS,
+  SETTINGS_SECTION_CLASS,
 } from "@/lib/settings";
 import {
   ACCOUNT_INVITE,
   TEAM_INVITE_DEFAULT_ROLE,
   TEAM_INVITE_ROLES,
-  TEAM_LIST_AVATAR_CLASS,
-  TEAM_LIST_HEADER_CLASS,
-  TEAM_LIST_ROW_CLASS,
-  TEAM_ROLE_PILL_CLASS,
-  inviteDateLabel,
-  inviteStatusLabel,
-  teamIdentityName,
+  teamRowLabel,
+  teamRowMeta,
   teamRoleLabel,
-  teamRowInitials,
   toTeamListRows,
   type OrgRole,
 } from "@/lib/account-invite";
@@ -145,15 +144,59 @@ export function TeamInviteForm({
   }
 
   return (
-    <div data-settings-team="" className="flex flex-col gap-[var(--space-6)]">
-      <div className="flex items-center justify-between gap-[var(--space-4)]">
-        <h2 className={SETTINGS_SECTION_LABEL_CLASS}>{ACCOUNT_INVITE.team}</h2>
+    <div data-settings-team="" className={SETTINGS_SECTION_CLASS}>
+      <SettingsGroupList label={ACCOUNT_INVITE.team} list="team">
+        {rows.length === 0 ? (
+          <SettingsGroupRow>
+            <div className="py-[var(--space-3)]">
+              <span className={SETTINGS_DRILL_VALUE_CLASS}>{ACCOUNT_INVITE.teamEmpty}</span>
+            </div>
+          </SettingsGroupRow>
+        ) : (
+          rows.map((row) => {
+            const name = teamRowLabel(row);
+            return (
+              <SettingsGroupRow key={row.key}>
+                <div data-invite-status={row.status}>
+                  <SettingsDrillRow
+                    kind={`team-${row.key}`}
+                    label={name}
+                    value={teamRowMeta(row)}
+                    readOnly
+                    trailing={
+                      canInvite && row.withdrawId ? (
+                        <button
+                          type="button"
+                          className="t-body-sm text-ink-2"
+                          disabled={revoking === row.withdrawId}
+                          onClick={() => {
+                            if (row.withdrawId) onRevoke(row.withdrawId);
+                          }}
+                        >
+                          {revoking === row.withdrawId
+                            ? ACCOUNT_INVITE.revoking
+                            : ACCOUNT_INVITE.revoke}
+                        </button>
+                      ) : null
+                    }
+                  />
+                </div>
+              </SettingsGroupRow>
+            );
+          })
+        )}
         {canInvite ? (
-          <Button type="button" data-team-invite-cta="" onClick={openInvite}>
-            {ACCOUNT_INVITE.invite}
-          </Button>
+          <SettingsGroupRow>
+            <SettingsDrillRow
+              kind="team-invite"
+              label={ACCOUNT_INVITE.invite}
+              onClick={openInvite}
+              tone="accent"
+              cta="team-invite"
+            />
+          </SettingsGroupRow>
         ) : null}
-      </div>
+      </SettingsGroupList>
 
       {canInvite ? (
         <Dialog
@@ -245,70 +288,6 @@ export function TeamInviteForm({
 
       {canInvite ? null : (
         <p className="t-body-sm text-ink-3">{ACCOUNT_INVITE.forbidden}</p>
-      )}
-
-      {rows.length === 0 ? (
-        <p className="t-body text-ink-2">{ACCOUNT_INVITE.teamEmpty}</p>
-      ) : (
-        <div data-team-list="" className="overflow-x-auto">
-          <div className={TEAM_LIST_HEADER_CLASS} data-team-list-head="">
-            <span>{ACCOUNT_INVITE.nameColumn}</span>
-            <span>{ACCOUNT_INVITE.roleLabel}</span>
-            <span>{ACCOUNT_INVITE.statusColumn}</span>
-            <span>{ACCOUNT_INVITE.sentColumn}</span>
-            <span>{ACCOUNT_INVITE.acceptedColumn}</span>
-            <span />
-          </div>
-          <ul className="flex flex-col divide-y divide-hairline border-t border-hairline">
-            {rows.map((row) => {
-              const name = teamIdentityName(row.name);
-              return (
-                <li
-                  key={row.key}
-                  data-invite-status={row.status}
-                  className={TEAM_LIST_ROW_CLASS}
-                >
-                  <span className="flex min-w-0 items-center gap-[var(--space-3)]">
-                    <span className={TEAM_LIST_AVATAR_CLASS} data-team-avatar="">
-                      {teamRowInitials(name, row.email)}
-                    </span>
-                    <span className="flex min-w-0 flex-col">
-                      <span className="t-body text-ink">{name ?? row.email}</span>
-                      {name ? (
-                        <span className="t-body-sm text-ink-3">{row.email}</span>
-                      ) : null}
-                    </span>
-                  </span>
-                  <span className={TEAM_ROLE_PILL_CLASS}>{teamRoleLabel(row.role)}</span>
-                  <StatusChip
-                    label={inviteStatusLabel(row.status)}
-                    tone={row.status === "accepted" ? "active" : "neutral"}
-                  />
-                  <span className="t-body-sm text-ink-3" data-invite-date="sent">
-                    {inviteDateLabel(row.sentAt)}
-                  </span>
-                  <span className="t-body-sm text-ink-3" data-invite-date="accepted">
-                    {inviteDateLabel(row.acceptedAt)}
-                  </span>
-                  <span className="justify-self-end">
-                    {canInvite && row.withdrawId ? (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        disabled={revoking === row.withdrawId}
-                        onClick={() => {
-                          if (row.withdrawId) onRevoke(row.withdrawId);
-                        }}
-                      >
-                        {revoking === row.withdrawId ? ACCOUNT_INVITE.revoking : ACCOUNT_INVITE.revoke}
-                      </Button>
-                    ) : null}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
       )}
 
       {error && !inviteOpen ? <InlineNotice tone="error">{error}</InlineNotice> : null}

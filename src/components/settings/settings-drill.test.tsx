@@ -5,11 +5,20 @@ import { describe, expect, it } from "vitest";
 import { ACCOUNT_PROFILE } from "@/lib/account-profile";
 import {
   SETTINGS,
+  SETTINGS_DRILL_ACCENT_CLASS,
   SETTINGS_DRILL_ROW_CLASS,
   SETTINGS_DRILL_VALUE_CLASS,
   SETTINGS_EDIT_HELPER_CLASS,
+  SETTINGS_GROUP_CLASS,
+  SETTINGS_GROUP_LABEL_CLASS,
 } from "@/lib/settings";
-import { SettingsDrillRow, SettingsEditPane } from "./settings-drill";
+import { LEGAL_ENTITIES } from "@/lib/legal-entities";
+import {
+  SettingsDrillRow,
+  SettingsEditPane,
+  SettingsGroupList,
+  SettingsGroupRow,
+} from "./settings-drill";
 
 describe("SettingsDrillRow", () => {
   it("renders a tappable label · value · chevron row", () => {
@@ -75,6 +84,50 @@ describe("SettingsDrillRow", () => {
     expect(html).toContain("LLC · Wyoming");
     expect(html).toContain("data-default-chip");
     expect(html).toContain("Default");
+  });
+
+  it("renders an accent action row for tucked Add / Invite", () => {
+    const html = renderToStaticMarkup(
+      createElement(SettingsDrillRow, {
+        kind: "entity-add",
+        label: LEGAL_ENTITIES.addRow,
+        href: LEGAL_ENTITIES.addHref,
+        tone: "accent",
+        cta: "entity-add",
+      }),
+    );
+    expect(html).toContain('data-settings-drill-row="entity-add"');
+    expect(html).toContain("data-entity-add-cta");
+    expect(html).toContain(LEGAL_ENTITIES.addRow);
+    expect(html).toContain(SETTINGS_DRILL_ACCENT_CLASS);
+    expect(html).toContain(`href="${LEGAL_ENTITIES.addHref}"`);
+  });
+});
+
+describe("SettingsGroupList", () => {
+  it("is a quiet label over an inset grouped list", () => {
+    const html = renderToStaticMarkup(
+      createElement(
+        SettingsGroupList,
+        { label: LEGAL_ENTITIES.title, list: "entity" },
+        createElement(
+          SettingsGroupRow,
+          null,
+          createElement(SettingsDrillRow, {
+            kind: "entity-add",
+            label: LEGAL_ENTITIES.addRow,
+            href: LEGAL_ENTITIES.addHref,
+            tone: "accent",
+          }),
+        ),
+      ),
+    );
+    expect(html).toContain("data-settings-group");
+    expect(html).toContain("data-entity-list");
+    expect(html).toContain(SETTINGS_GROUP_CLASS);
+    expect(html).toContain(SETTINGS_GROUP_LABEL_CLASS);
+    expect(html).toMatch(/<h2[^>]*>Legal Entities<\/h2>/);
+    expect(html).toContain(LEGAL_ENTITIES.addRow);
   });
 });
 

@@ -67,9 +67,10 @@ export const COMPANY_PROFILE = {
 /** Saved. notice auto-clears. Typing already clears immediately. */
 export const COMPANY_PROFILE_SAVED_MS = 2800;
 
-// Rights Holder company name. Desktop: read-only row in the house
-// Card; Edit opens the house Dialog. Mobile: Coinbase drill row →
-// /settings/organization/company pane. One SoT form body.
+// Rights Holder company name. One SettingsDrillRow in the house
+// inset group — label · value · chevron. Mobile drills to
+// /settings/organization/company. Desktop opens the house Dialog.
+// Not a Card. Not a header Edit pill. One SoT form body.
 export const COMPANY_PROFILE_VIEW_CLASS =
   "flex items-start justify-between gap-[var(--space-4)]";
 export const COMPANY_PROFILE_COPY_CLASS =

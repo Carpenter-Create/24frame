@@ -2,22 +2,48 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { CaretRight } from "@phosphor-icons/react/ssr";
 
+import { cn } from "@/lib/cn";
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import { SettingsPageLead } from "@/components/settings/settings-page-lead";
 import {
+  SETTINGS_DRILL_ACCENT_CLASS,
+  SETTINGS_DRILL_CHEVRON_CLASS,
   SETTINGS_DRILL_COPY_CLASS,
   SETTINGS_DRILL_ROW_CLASS,
   SETTINGS_DRILL_VALUE_CLASS,
+  SETTINGS_GROUP_CLASS,
+  SETTINGS_GROUP_LABEL_CLASS,
+  SETTINGS_GROUP_LIST_CLASS,
+  SETTINGS_GROUP_STACK_CLASS,
   SETTINGS_PANE_CLASS,
-  SETTINGS_RAIL_CHEVRON_CLASS,
   SETTINGS_SECTION_CLASS,
   type SettingsHubSection,
 } from "@/lib/settings";
 
-// House Settings drill-in — Coinbase index row + edit pane.
-// Light 24Frame register. Do not fork a lookalike in Rights Holder
-// or Legal Entities. Index: label · muted value · chevron. Edit pane:
-// page-lead back, title, helper, single control.
+// House Settings drill-in — Coinbase / Apple index row + edit pane.
+// Light 24Frame register. One SoT for Profile, Preferences, Rights
+// Holder (company · legal entities · team), Settings index, and Get
+// Help. Do not fork a lookalike. Index: label · muted value · chevron.
+// Action rows (Add / Invite) use accent and live inside the group.
+// Edit pane: page-lead back, title, helper, single control.
+
+export type SettingsDrillCta =
+  | "company-edit"
+  | "entity-add"
+  | "entity-edit"
+  | "team-invite";
+
+const DRILL_CTA_ATTR: Record<SettingsDrillCta, string> = {
+  "company-edit": "data-company-edit",
+  "entity-add": "data-entity-add-cta",
+  "entity-edit": "data-entity-edit",
+  "team-invite": "data-team-invite-cta",
+};
+
+function drillCtaProps(cta?: SettingsDrillCta): Record<string, string> {
+  if (!cta) return {};
+  return { [DRILL_CTA_ATTR[cta]]: "" };
+}
 
 export function SettingsDrillRow({
   label,
@@ -28,6 +54,10 @@ export function SettingsDrillRow({
   helper,
   badge,
   itemAttr,
+  trailing,
+  onClick,
+  tone = "default",
+  cta,
 }: {
   label: string;
   value?: string;
@@ -37,9 +67,22 @@ export function SettingsDrillRow({
   helper?: string;
   badge?: ReactNode;
   itemAttr?: string;
+  trailing?: ReactNode;
+  onClick?: () => void;
+  tone?: "default" | "accent";
+  cta?: SettingsDrillCta;
 }) {
-  const canOpen = Boolean(href) && !readOnly;
-  const extra = itemAttr ? { [itemAttr]: kind } : undefined;
+  const hasHref = Boolean(href) && !readOnly;
+  const hasClick = Boolean(onClick) && !readOnly;
+  const canOpen = hasHref || hasClick;
+  const rowClass = cn(
+    SETTINGS_DRILL_ROW_CLASS,
+    tone === "accent" && SETTINGS_DRILL_ACCENT_CLASS,
+  );
+  const marks = {
+    ...drillCtaProps(cta),
+    ...(itemAttr ? { [itemAttr]: kind } : {}),
+  };
   const body = (
     <>
       <span className={SETTINGS_DRILL_COPY_CLASS}>
@@ -54,25 +97,68 @@ export function SettingsDrillRow({
         {value ? <span className={SETTINGS_DRILL_VALUE_CLASS}>{value}</span> : null}
         {helper ? <span className={SETTINGS_DRILL_VALUE_CLASS}>{helper}</span> : null}
       </span>
-      {canOpen ? (
-        <CaretRight
-          className={SETTINGS_RAIL_CHEVRON_CLASS}
-          weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
-        />
+      {trailing || canOpen ? (
+        <span className="flex shrink-0 items-center gap-[var(--space-3)]">
+          {trailing}
+          {canOpen ? (
+            <CaretRight
+              className={SETTINGS_DRILL_CHEVRON_CLASS}
+              weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
+            />
+          ) : null}
+        </span>
       ) : null}
     </>
   );
 
-  if (canOpen && href) {
+  if (hasHref && hasClick && href) {
+    return (
+      <>
+        <Link
+          href={href}
+          data-settings-drill-row={kind}
+          className={cn(rowClass, "md:hidden")}
+          {...marks}
+        >
+          {body}
+        </Link>
+        <button
+          type="button"
+          data-settings-drill-row={kind}
+          className={cn(rowClass, "hidden md:flex")}
+          onClick={onClick}
+          {...marks}
+        >
+          {body}
+        </button>
+      </>
+    );
+  }
+
+  if (hasHref && href) {
     return (
       <Link
         href={href}
         data-settings-drill-row={kind}
-        {...extra}
-        className={SETTINGS_DRILL_ROW_CLASS}
+        className={rowClass}
+        {...marks}
       >
         {body}
       </Link>
+    );
+  }
+
+  if (hasClick) {
+    return (
+      <button
+        type="button"
+        data-settings-drill-row={kind}
+        className={rowClass}
+        onClick={onClick}
+        {...marks}
+      >
+        {body}
+      </button>
     );
   }
 
@@ -80,12 +166,42 @@ export function SettingsDrillRow({
     <div
       data-settings-drill-row={kind}
       data-settings-drill-readonly=""
-      {...extra}
-      className={SETTINGS_DRILL_ROW_CLASS}
+      className={rowClass}
+      {...marks}
     >
       {body}
     </div>
   );
+}
+
+export function SettingsGroupList({
+  label,
+  list,
+  children,
+}: {
+  label?: string;
+  list?: string;
+  children?: ReactNode;
+}) {
+  return (
+    <div className={SETTINGS_GROUP_STACK_CLASS}>
+      {label ? (
+        <h2 className={`${SETTINGS_GROUP_LABEL_CLASS} px-[var(--space-4)]`}>{label}</h2>
+      ) : null}
+      <div
+        data-settings-group=""
+        data-entity-list={list === "entity" ? "" : undefined}
+        data-team-list={list === "team" ? "" : undefined}
+        className={SETTINGS_GROUP_CLASS}
+      >
+        <ul className={SETTINGS_GROUP_LIST_CLASS}>{children}</ul>
+      </div>
+    </div>
+  );
+}
+
+export function SettingsGroupRow({ children }: { children?: ReactNode }) {
+  return <li>{children}</li>;
 }
 
 export function SettingsEditPane({
