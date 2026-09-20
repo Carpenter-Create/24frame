@@ -41,6 +41,7 @@ const inboxSrc = readFileSync("src/components/activity/activity-inbox.tsx", "utf
 const listSrc = readFileSync("src/components/activity/activity-inbox-list.tsx", "utf8");
 const chipsSrc = readFileSync("src/components/activity/activity-family-chips.tsx", "utf8");
 const markSrc = readFileSync("src/components/activity/mark-done.tsx", "utf8");
+const linkSrc = readFileSync("src/app/(app)/aggregation/messages/message-link.tsx", "utf8");
 
 describe("ActivityInbox", () => {
   it("renders prefs family chips only — no Open / Done or period chrome", () => {
@@ -114,6 +115,8 @@ describe("ActivityInbox", () => {
     expect(markSrc).toContain("<X");
     expect(markSrc).not.toContain("ACTIVITY_PAGE.done");
     expect(markSrc).toContain("retireLiveNotification");
+    expect(linkSrc).toContain("retireLiveNotification");
+    expect(linkSrc).toContain("markNotificationsRead");
     expect(listSrc).toContain("useOwnNotificationsRealtime");
     expect(listSrc).toContain("mergeLiveActivityItems");
     expect(listSrc).toContain("ActivityFeedRow");

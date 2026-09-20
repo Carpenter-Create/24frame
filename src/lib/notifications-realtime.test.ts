@@ -228,6 +228,19 @@ describe("mergeLiveActivityItems", () => {
       ]),
     ).toBe(6);
   });
+
+  it("does not inflate the badge when six live rows outrun the peek cap", () => {
+    const live = Array.from({ length: 6 }, (_, i) => ({
+      id: `live-${i}`,
+      unread: true,
+      created_at: `2026-09-20T18:0${i}:00.000Z`,
+    }));
+    const peek = [...live].reverse().slice(0, 5);
+    expect(liveUnreadCount(6, peek, live)).toBe(6);
+    expect(mergeLiveActivityItems(peek, live).map((row) => row.id)).toEqual(
+      peek.map((row) => row.id),
+    );
+  });
 });
 
 describe("Realtime hygiene", () => {
