@@ -136,7 +136,7 @@ describe("Activity chrome href", () => {
     const lead = readFileSync("src/components/activity/activity-page-lead.tsx", "utf8");
     expect(lead).toContain("PAGE_LEAD_STACK_CLASS");
     expect(lead).toContain("PageHeaderBackLink");
-    expect(lead).toContain("SettingsHubBackLink");
+    expect(lead).toContain("<SettingsHubBackLink");
     expect(lead).not.toContain('href="/aggregation"');
     expect(lead).not.toMatch(/from ["']@\/components\/settings\/settings-page-lead["']/);
     expect(lead).not.toMatch(/from ["']@\/components\/help\/help-page-lead["']/);

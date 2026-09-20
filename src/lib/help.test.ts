@@ -119,7 +119,7 @@ describe("help stack lock", () => {
     expect(stack).not.toContain("SETTINGS_DRILL_LIST_CLASS");
     expect(lead).toContain("PAGE_LEAD_STACK_CLASS");
     expect(lead).toContain("PageHeaderBackLink");
-    expect(lead).toContain("SettingsHubBackLink");
+    expect(lead).toContain("<SettingsHubBackLink");
     expect(lead).not.toContain('href="/aggregation"');
     expect(lead).not.toMatch(/from ["']@\/components\/settings\/settings-page-lead["']/);
   });
