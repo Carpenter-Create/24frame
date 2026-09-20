@@ -30,12 +30,14 @@ import {
   askAiOverlayPhoneClass,
   askAiCloseHref,
   askAiOverlayHref,
+  askAiChromeOpen,
   askAiStateFromHref,
   currentAskAiSearch,
   fireAskAiOpenThen,
   isAskAiDesktopViewport,
   readAskAiOverlay,
   rememberAskAiReturnPath,
+  toggleAskAiOverlay,
   type AskAiOverlayState,
 } from "@/lib/ask-ai-overlay";
 import { ASK_GLOBEE, canRenderAskGlobeeLanding, type MessagesSurface } from "@/lib/ask-globee";
@@ -72,6 +74,7 @@ type AskAiOverlayContextValue = {
   threadId: string | null;
   openAskAi: (threadId?: string | null) => void;
   closeAskAi: () => void;
+  toggleAskAi: (threadId?: string | null) => void;
   toggleAskAiExpanded: () => void;
 };
 
@@ -81,6 +84,7 @@ const AskAiOverlayContext = createContext<AskAiOverlayContextValue>({
   threadId: null,
   openAskAi: () => {},
   closeAskAi: () => {},
+  toggleAskAi: () => {},
   toggleAskAiExpanded: () => {},
 });
 
@@ -122,16 +126,28 @@ export function AskAiOverlayProvider({ children }: { children: ReactNode }) {
     setExpanded((current) => !current);
   }, []);
 
+  const open = askAiChromeOpen(optimistic);
+
+  const toggleAskAi = useCallback(
+    (threadId?: string | null) => {
+      // Live chrome open only. A sticky ref stays true after Back /
+      // in-shell navigation drops ?ai=1 and blocks reopen.
+      toggleAskAiOverlay(askAiChromeOpen(optimistic), openAskAi, closeAskAi, threadId);
+    },
+    [closeAskAi, openAskAi, optimistic],
+  );
+
   const value = useMemo(
     () => ({
-      open: Boolean(optimistic?.open),
+      open,
       expanded,
       threadId: optimistic?.threadId ?? null,
       openAskAi,
       closeAskAi,
+      toggleAskAi,
       toggleAskAiExpanded,
     }),
-    [closeAskAi, expanded, openAskAi, optimistic, toggleAskAiExpanded],
+    [closeAskAi, expanded, open, openAskAi, optimistic, toggleAskAi, toggleAskAiExpanded],
   );
 
   return (
@@ -440,27 +456,31 @@ function AskAiOverlayBody({
 
 type AskAiOpenButtonProps = ComponentProps<"button"> & {
   threadId?: string | null;
+  toggle?: boolean;
 } & {
   [key: `data-${string}`]: string | undefined;
 };
 
 export function AskAiOpenButton({
   threadId,
+  toggle = false,
   children,
   className,
   onClick,
   ...props
 }: AskAiOpenButtonProps) {
-  const { openAskAi } = useAskAiOverlay();
+  const { open, openAskAi, toggleAskAi } = useAskAiOverlay();
   return (
     <button
       {...props}
       type="button"
       data-ask-ai-open=""
+      data-ask-ai-toggle={toggle ? "" : undefined}
+      aria-pressed={toggle ? open : undefined}
       className={className}
       onClick={(event) => {
         fireAskAiOpenThen(
-          () => openAskAi(threadId),
+          () => (toggle ? toggleAskAi(threadId) : openAskAi(threadId)),
           () => onClick?.(event),
         );
       }}

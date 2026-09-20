@@ -28,6 +28,7 @@ import {
   HOUSE_HEADER_TRAILING_HIT_CLASS,
   HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS,
   HOUSE_HEADER_TRAILING_SLOT_CLASS,
+  HOUSE_ASK_AI_HEADER_CLASS,
   HOUSE_THEME_TOGGLE_CLASS,
 } from "@/lib/house-lead-chrome";
 import { HOUSE_HEADER_SEARCH_GAP_CLASS, HOUSE_SEARCH_PILL_CLASS } from "@/lib/house-shell";
@@ -203,25 +204,43 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(leadSrc).toContain("<ThemeToggle />");
     expect(leadSrc).toContain("<ActivityBell");
     expect(HOUSE_THEME_TOGGLE_CLASS).toContain(HOUSE_HEADER_TRAILING_HIT_CLASS);
-    expect(HOUSE_THEME_TOGGLE_CLASS).toContain("size-8");
-    expect(HOUSE_THEME_TOGGLE_CLASS).toContain("min-h-8");
-    expect(HOUSE_THEME_TOGGLE_CLASS).toContain("min-w-8");
+    expect(HOUSE_THEME_TOGGLE_CLASS).toContain("md:size-[var(--header-control-size)]");
+    expect(HOUSE_THEME_TOGGLE_CLASS).toContain("md:min-h-[var(--header-control-size)]");
+    expect(HOUSE_THEME_TOGGLE_CLASS).toContain("md:min-w-[var(--header-control-size)]");
     expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("size-[44px]");
     expect(HOUSE_THEME_TOGGLE_CLASS).toContain("rounded-full");
     expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("purple");
     expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("violet");
     expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("border-hairline");
+    expect(HOUSE_ASK_AI_HEADER_CLASS).toContain(HOUSE_THEME_TOGGLE_CLASS);
+    expect(HOUSE_ASK_AI_HEADER_CLASS).toContain("aria-pressed:text-ink");
+  });
+
+  it("locks desktop header height and the sizes that derive from it", () => {
+    const tokens = readFileSync("src/app/tokens.css", "utf8");
+    expect(tokens).toMatch(/--header-height:\s*80px;/);
+    expect(tokens).toMatch(/--header-avatar-size:\s*36px;/);
+    expect(tokens).toMatch(/--header-control-size:\s*36px;/);
+    expect(tokens).toMatch(/--header-search-height:\s*40px;/);
+    expect(tokens).toMatch(/max-width:\s*767px[\s\S]*--header-height:\s*56px;/);
+    expect(tokens).toMatch(/max-width:\s*767px[\s\S]*--header-avatar-size:\s*32px;/);
+    expect(HOUSE_LEAD_SEARCH_PILL_CLASS).toContain("md:h-[var(--header-search-height)]");
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("md:size-[var(--header-control-size)]");
+    expect(HOUSE_HEADER_TRAILING_AVATAR_CLASS).toContain("md:h-[var(--header-avatar-size)]");
+    expect(leadSrc).toContain('style={{ height: "var(--header-height)" }}');
   });
 
   it("evens phone trailing theme · AI · bell · avatar with one gap and no overlapping hits", () => {
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("size-4");
-    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("md:size-8");
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("md:size-[var(--header-control-size)]");
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).not.toMatch(/-m[xlr]-/);
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).not.toContain("p-[var(--space-2)]");
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).not.toContain("size-6");
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).not.toContain("size-5");
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).not.toContain("size-[44px]");
     expect(HOUSE_HEADER_TRAILING_AVATAR_CLASS).toContain("h-8 w-8");
+    expect(HOUSE_HEADER_TRAILING_AVATAR_CLASS).toContain("md:h-[var(--header-avatar-size)]");
+    expect(HOUSE_HEADER_TRAILING_AVATAR_CLASS).toContain("md:w-[var(--header-avatar-size)]");
     expect(HOUSE_HEADER_TRAILING_AVATAR_CLASS).not.toContain("p-[");
     expect(HOUSE_HEADER_TRAILING_AVATAR_CLASS).not.toContain("-mx-");
     expect(HOUSE_HEADER_TRAILING_AVATAR_CLASS).not.toContain("ml-");
