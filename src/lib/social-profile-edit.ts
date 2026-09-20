@@ -5,9 +5,11 @@
 // toward BIO_MAX as stored. Done is the Sporty Blue check only.
 // Edit picture reuses avatars/{userId}/avatar. Links edit in place.
 //
-// Save SoT: apply the draft to this overlay, leave Edit immediately,
-// persist in the background, roll back here on error. Professions /
-// Topics toggles stay local draft until that one write.
+// Save SoT: apply the draft to this overlay, paint the own face in the
+// already-mounted Social tree, leave Edit immediately, persist in the
+// background, roll back here on error. Memory + sessionStorage + a
+// short cookie keep the hop off the skeleton. Professions / Topics
+// toggles stay local draft until that one write.
 
 import { ACCOUNT_PROFILE } from "@/lib/account-profile";
 import {
@@ -45,9 +47,14 @@ export const SOCIAL_PROFILE_EDIT_LOCK = {
   // Bio from Edit is a same-tree face. Name/handle stay mounted.
   keepsDraftOnBio: true,
   optimisticSave: true,
+  saveHop: true,
   // Fetch persist — not a server action — so Done does not refresh the tree.
   saveHref: "/api/social/profile",
 } as const;
+
+export const SOCIAL_PROFILE_OPTIMISTIC_COOKIE = "24frame_social_profile_save";
+export const SOCIAL_PROFILE_OPTIMISTIC_STORAGE = "24frame_social_profile_save";
+export const SOCIAL_PROFILE_OPTIMISTIC_COOKIE_MAX_AGE = 60;
 
 export type SocialProfileEditFace = "edit" | "bio";
 
@@ -95,6 +102,18 @@ export type SocialProfileIdentityView = {
   websiteUrl: string | null;
 };
 
+export const SOCIAL_PROFILE_IDENTITY_EMPTY: SocialProfileIdentityView = {
+  handle: "",
+  displayName: "",
+  bio: "",
+  photoUrl: null,
+  welcomeVideoUrl: null,
+  crafts: [],
+  topics: [],
+  imdbUrl: null,
+  websiteUrl: null,
+};
+
 export type SocialProfileEditSaveCheck =
   | { ok: true; snapshot: SocialProfileOptimisticSnapshot; form: FormData }
   | { ok: false; error?: string; handleError?: string };
@@ -106,14 +125,121 @@ const HANDLE_FIELD_ERRORS = new Set<string>([
 ]);
 
 let overlay: SocialProfileOptimisticSnapshot | null = null;
+let hop = false;
 const listeners = new Set<() => void>();
 
 function emitSocialProfileOptimistic() {
   for (const listener of listeners) listener();
 }
 
+function isBlobUrl(value: string | null | undefined): boolean {
+  return typeof value === "string" && value.startsWith("blob:");
+}
+
+export function durableSocialProfileOptimistic(
+  next: SocialProfileOptimisticSnapshot,
+): SocialProfileOptimisticSnapshot {
+  const durable: SocialProfileOptimisticSnapshot = { ...next };
+  if (isBlobUrl(durable.photoUrl)) delete durable.photoUrl;
+  if (isBlobUrl(durable.welcomeVideoUrl)) delete durable.welcomeVideoUrl;
+  return durable;
+}
+
+function asSocialProfileOptimisticSnapshot(
+  parsed: unknown,
+): SocialProfileOptimisticSnapshot | null {
+  if (!parsed || typeof parsed !== "object") return null;
+  const next = parsed as SocialProfileOptimisticSnapshot;
+  if (typeof next.handle !== "string" && typeof next.displayName !== "string") return null;
+  return next;
+}
+
+export function parseSocialProfileOptimisticCookie(
+  value: string | undefined | null,
+): SocialProfileOptimisticSnapshot | null {
+  if (!value) return null;
+  const candidates = [value];
+  try {
+    const decoded = decodeURIComponent(value);
+    if (decoded !== value) candidates.unshift(decoded);
+  } catch {
+    // Cookie readers may already decode.
+  }
+  for (const candidate of candidates) {
+    try {
+      const snap = asSocialProfileOptimisticSnapshot(JSON.parse(candidate) as unknown);
+      if (snap && !snap.error && !snap.handleError) return snap;
+    } catch {
+      // Try the next encoding.
+    }
+  }
+  return null;
+}
+
+export function readSocialProfileOptimisticCookie(
+  get: (name: string) => string | undefined,
+): SocialProfileOptimisticSnapshot | null {
+  return parseSocialProfileOptimisticCookie(get(SOCIAL_PROFILE_OPTIMISTIC_COOKIE));
+}
+
+export function socialProfileOptimisticCookieWrite(next: SocialProfileOptimisticSnapshot): string {
+  const payload = encodeURIComponent(JSON.stringify(durableSocialProfileOptimistic(next)));
+  return `${SOCIAL_PROFILE_OPTIMISTIC_COOKIE}=${payload}; path=/social; max-age=${SOCIAL_PROFILE_OPTIMISTIC_COOKIE_MAX_AGE}; samesite=lax`;
+}
+
+export function socialProfileOptimisticCookieClear(): string {
+  return `${SOCIAL_PROFILE_OPTIMISTIC_COOKIE}=; path=/social; max-age=0; samesite=lax`;
+}
+
+function readDocumentOptimisticCookie(): string | undefined {
+  if (typeof document === "undefined") return undefined;
+  const prefix = `${SOCIAL_PROFILE_OPTIMISTIC_COOKIE}=`;
+  const part = document.cookie.split("; ").find((row) => row.startsWith(prefix));
+  return part?.slice(prefix.length);
+}
+
+function readStoredSocialProfileOptimistic(): SocialProfileOptimisticSnapshot | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(SOCIAL_PROFILE_OPTIMISTIC_STORAGE);
+    if (raw) {
+      const snap = asSocialProfileOptimisticSnapshot(JSON.parse(raw) as unknown);
+      if (snap) return snap;
+    }
+  } catch {
+    // Quota / private mode.
+  }
+  return parseSocialProfileOptimisticCookie(readDocumentOptimisticCookie());
+}
+
+function writeSocialProfileOptimisticBridge(next: SocialProfileOptimisticSnapshot | null) {
+  if (typeof window === "undefined") return;
+  try {
+    if (next) {
+      sessionStorage.setItem(
+        SOCIAL_PROFILE_OPTIMISTIC_STORAGE,
+        JSON.stringify(next.error || next.handleError ? next : durableSocialProfileOptimistic(next)),
+      );
+    } else {
+      sessionStorage.removeItem(SOCIAL_PROFILE_OPTIMISTIC_STORAGE);
+    }
+  } catch {
+    // Quota / private mode.
+  }
+  document.cookie =
+    next && !next.error && !next.handleError
+      ? socialProfileOptimisticCookieWrite(next)
+      : socialProfileOptimisticCookieClear();
+}
+
+overlay = readStoredSocialProfileOptimistic();
+
 export function readSocialProfileOptimistic(): SocialProfileOptimisticSnapshot | null {
   return overlay;
+}
+
+export function readSocialProfileSaveHop(): boolean {
+  return hop;
 }
 
 export function subscribeSocialProfileOptimistic(listener: () => void): () => void {
@@ -127,19 +253,40 @@ export function getSocialProfileOptimisticServerSnapshot(): SocialProfileOptimis
   return null;
 }
 
+export function getSocialProfileSaveHopServerSnapshot(): boolean {
+  return false;
+}
+
+export function socialProfileOptimisticPublic(
+  next: SocialProfileOptimisticSnapshot | null,
+): next is SocialProfileOptimisticSnapshot {
+  return Boolean(next && !next.error && !next.handleError && (next.handle || next.displayName));
+}
+
 export function applySocialProfileOptimistic(next: SocialProfileOptimisticSnapshot): void {
   overlay = next;
+  hop = socialProfileOptimisticPublic(next);
+  writeSocialProfileOptimisticBridge(next);
   emitSocialProfileOptimistic();
 }
 
 export function patchSocialProfileOptimistic(patch: Partial<SocialProfileOptimisticSnapshot>): void {
   overlay = { ...(overlay ?? {}), ...patch };
+  writeSocialProfileOptimisticBridge(overlay);
+  emitSocialProfileOptimistic();
+}
+
+export function releaseSocialProfileSaveHop(): void {
+  if (!hop) return;
+  hop = false;
   emitSocialProfileOptimistic();
 }
 
 export function clearSocialProfileOptimistic(): void {
-  if (!overlay) return;
+  if (!overlay && !hop) return;
   overlay = null;
+  hop = false;
+  writeSocialProfileOptimisticBridge(null);
   emitSocialProfileOptimistic();
 }
 

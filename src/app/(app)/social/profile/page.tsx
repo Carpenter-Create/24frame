@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { cookies } from "next/headers";
 import Link from "next/link";
 
 import { InlineNotice } from "@/components/ui/inline-notice";
@@ -37,6 +38,10 @@ import {
 } from "@/lib/social-feed";
 import { loadCachedProfileSocialCounts } from "@/lib/social-hot-reads";
 import { ensureOwnSocialProfileResult } from "@/lib/social-profile";
+import {
+  mergeSocialProfileIdentity,
+  readSocialProfileOptimisticCookie,
+} from "@/lib/social-profile-edit";
 import { requireSocialSession, type SocialSession } from "@/lib/social-session";
 
 export default async function SocialProfilePage({
@@ -86,13 +91,28 @@ async function SocialProfileMain({
   const { profile } = await ensureOwnSocialProfileResult(supabase, ctx.user);
   if (!profile) return null;
 
-  const [photoUrl, liveStoriesPage, history, counts, welcomeUrl] = await Promise.all([
+  const [photoUrl, liveStoriesPage, history, counts, welcomeUrl, jar] = await Promise.all([
     signedAvatarUrl(profile.id),
     loadLiveStories(supabase, [profile.id]),
     loadAuthorPosts(supabase, profile.id),
     loadCachedProfileSocialCounts(supabase, profile.id),
     profile.welcome_video_key ? signedSocialMediaUrl(profile.welcome_video_key) : Promise.resolve(null),
+    cookies(),
   ]);
+  const identity = mergeSocialProfileIdentity(
+    {
+      handle: profile.handle,
+      displayName: profile.display_name,
+      photoUrl,
+      bio: profile.bio ?? "",
+      crafts: profile.crafts ?? [],
+      topics: profile.topics ?? [],
+      websiteUrl: profile.website_url ?? null,
+      imdbUrl: profile.imdb_url ?? null,
+      welcomeVideoUrl: welcomeUrl,
+    },
+    readSocialProfileOptimisticCookie((name) => jar.get(name)?.value),
+  );
   const liveStories = liveStoriesPage.stories;
   const [media, liked] = await Promise.all([
     signedSocialMediaByPostId(history.posts),
@@ -115,16 +135,16 @@ async function SocialProfileMain({
       <h1 className="sr-only">{SOCIAL.profile.title}</h1>
       <SocialQueryBound profile={profile} counts={counts} />
       <SocialOwnProfileFace
-        handle={profile.handle}
-        displayName={profile.display_name}
-        photoUrl={photoUrl}
-        bio={profile.bio ?? ""}
+        handle={identity.handle}
+        displayName={identity.displayName}
+        photoUrl={identity.photoUrl}
+        bio={identity.bio}
         fallbackBio={SOCIAL.profile.ownFace}
-        crafts={profile.crafts ?? []}
-        topics={profile.topics ?? []}
-        websiteUrl={profile.website_url ?? null}
-        imdbUrl={profile.imdb_url ?? null}
-        welcomeVideoUrl={welcomeUrl}
+        crafts={identity.crafts}
+        topics={identity.topics}
+        websiteUrl={identity.websiteUrl}
+        imdbUrl={identity.imdbUrl}
+        welcomeVideoUrl={identity.welcomeVideoUrl}
         ring={liveStories.length > 0 ? "live" : null}
         profileId={profile.id}
         stats={counts ?? undefined}

@@ -21,17 +21,25 @@ import {
 } from "@/lib/social";
 import {
   SOCIAL_PROFILE_EDIT_LOCK,
+  SOCIAL_PROFILE_OPTIMISTIC_COOKIE,
   applySocialProfileOptimistic,
   checkSocialProfileEditSave,
   clearSocialProfileOptimistic,
+  durableSocialProfileOptimistic,
   mergeSocialProfileIdentity,
+  parseSocialProfileOptimisticCookie,
   persistSocialProfileEdit,
   readSocialProfileOptimistic,
+  readSocialProfileOptimisticCookie,
+  readSocialProfileSaveHop,
+  releaseSocialProfileSaveHop,
   socialProfileEditFace,
   socialProfileEditFormData,
   socialProfileEditSeed,
+  socialProfileOptimisticCookieWrite,
   socialProfileOptimisticFail,
   socialProfileOptimisticMatches,
+  socialProfileOptimisticPublic,
   socialProfileSaveFieldError,
 } from "@/lib/social-profile-edit";
 
@@ -119,6 +127,8 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(edit).toContain("checkSocialProfileEditSave");
     expect(edit).toContain("router.push(SOCIAL_ROUTES.profile)");
     expect(edit).not.toContain("router.refresh()");
+    expect(edit).toContain("flushSync");
+    expect(edit.indexOf("flushSync")).toBeLessThan(edit.indexOf("router.push(SOCIAL_ROUTES.profile)"));
     expect(edit.indexOf("router.push(SOCIAL_ROUTES.profile)")).toBeLessThan(
       edit.indexOf("persistSocialProfileEdit(checked.form)"),
     );
@@ -169,6 +179,12 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(readFileSync("src/app/(app)/social/profile/loading.tsx", "utf8")).toContain(
       "SocialProfileOptimisticShell",
     );
+    expect(readFileSync("src/app/(app)/social/profile/loading.tsx", "utf8")).toContain(
+      "readSocialProfileOptimisticCookie",
+    );
+    expect(readFileSync("src/app/(app)/social/layout.tsx", "utf8")).toContain("SocialProfileSaveHop");
+    expect(profile).toContain("readSocialProfileOptimisticCookie");
+    expect(profile).toContain("mergeSocialProfileIdentity");
   });
 });
 
@@ -215,8 +231,14 @@ describe("Social profile optimistic Save SoT", () => {
     expect(checked.form.get("topics")).toBe(JSON.stringify(["Directors"]));
     expect(socialProfileEditFormData(draft).get("imdb_url")).toBe("nm1234567");
     expect(SOCIAL_PROFILE_EDIT_LOCK.optimisticSave).toBe(true);
+    expect(SOCIAL_PROFILE_EDIT_LOCK.saveHop).toBe(true);
 
     applySocialProfileOptimistic(checked.snapshot);
+    expect(readSocialProfileOptimistic()?.displayName).toBe("Ada Lovelace");
+    expect(readSocialProfileSaveHop()).toBe(true);
+    expect(socialProfileOptimisticPublic(checked.snapshot)).toBe(true);
+    releaseSocialProfileSaveHop();
+    expect(readSocialProfileSaveHop()).toBe(false);
     expect(readSocialProfileOptimistic()?.displayName).toBe("Ada Lovelace");
     const merged = mergeSocialProfileIdentity(
       { ...server, displayName: "Old Name", photoUrl: "https://s3.example/old" },
@@ -277,5 +299,36 @@ describe("Social profile optimistic Save SoT", () => {
     );
     expect(await persistSocialProfileEdit(form)).toEqual({ error: SOCIAL.profile.handleTaken });
     vi.unstubAllGlobals();
+  });
+
+  it("bridges the Save hop on a cookie the loading SSR can paint", () => {
+    const checked = checkSocialProfileEditSave(draft);
+    expect(checked.ok).toBe(true);
+    if (!checked.ok) return;
+    const durable = durableSocialProfileOptimistic(checked.snapshot);
+    expect(durable.photoUrl).toBeUndefined();
+    expect(durable.displayName).toBe("Ada Lovelace");
+    const cookie = socialProfileOptimisticCookieWrite(checked.snapshot);
+    expect(cookie).toContain(`${SOCIAL_PROFILE_OPTIMISTIC_COOKIE}=`);
+    expect(cookie).toContain("path=/social");
+    expect(cookie).not.toContain("blob:");
+    const encoded = cookie.slice(
+      `${SOCIAL_PROFILE_OPTIMISTIC_COOKIE}=`.length,
+      cookie.indexOf(";"),
+    );
+    expect(parseSocialProfileOptimisticCookie(encoded)?.displayName).toBe("Ada Lovelace");
+    expect(
+      readSocialProfileOptimisticCookie((name) =>
+        name === SOCIAL_PROFILE_OPTIMISTIC_COOKIE ? encoded : undefined,
+      )?.handle,
+    ).toBe("ada");
+    expect(
+      parseSocialProfileOptimisticCookie(
+        encodeURIComponent(JSON.stringify({ ...checked.snapshot, error: SOCIAL.profile.handleTaken })),
+      ),
+    ).toBeNull();
+    applySocialProfileOptimistic(socialProfileOptimisticFail(checked.snapshot, SOCIAL.profile.handleTaken));
+    expect(readSocialProfileSaveHop()).toBe(false);
+    expect(socialProfileOptimisticPublic(readSocialProfileOptimistic())).toBe(false);
   });
 });

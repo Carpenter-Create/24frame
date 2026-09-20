@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { flushSync } from "react-dom";
 
 import { uploadAccountPhoto } from "@/app/(app)/account/actions";
 import {
@@ -329,8 +330,10 @@ export function SocialProfileEditForm({
       if (checked.error) setError(checked.error);
       return;
     }
-    applySocialProfileOptimistic(checked.snapshot);
-    setPending(true);
+    flushSync(() => {
+      applySocialProfileOptimistic(checked.snapshot);
+      setPending(true);
+    });
     if (queryClient && profileId) {
       applyOptimisticSocialProfile(queryClient, {
         id: profileId,
