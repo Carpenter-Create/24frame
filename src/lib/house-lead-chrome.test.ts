@@ -246,6 +246,8 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(leadSrc).toContain('style={{ minHeight: "var(--header-height)" }}');
     expect(HOUSE_LEAD_CHROME_CLASS).toContain("max-md:h-auto");
     expect(HOUSE_LEAD_CHROME_CLASS).toContain("md:h-[var(--header-height)]");
+    expect(HOUSE_LEAD_CHROME_CLASS).toContain("items-start");
+    expect(HOUSE_LEAD_CHROME_CLASS).toContain("md:items-center");
   });
 
   it("evens phone trailing theme · AI · bell · avatar with one gap and no overlapping hits", () => {

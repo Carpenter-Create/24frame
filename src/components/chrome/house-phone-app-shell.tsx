@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, use, type HTMLAttributes } from "react";
+import { Suspense, use, useEffect, useState, type HTMLAttributes } from "react";
 
 import { cn } from "@/lib/cn";
 import type { AppShellChrome } from "@/lib/app-shell-chrome";
@@ -59,6 +59,16 @@ export function HousePhoneAppShell({
   );
 }
 
+function peekChromeStaff(chrome?: Promise<AppShellChrome>): boolean | undefined {
+  if (!chrome) return undefined;
+  const tagged = chrome as Promise<AppShellChrome> & {
+    status?: string;
+    value?: AppShellChrome;
+  };
+  if (tagged.status === "fulfilled" && tagged.value) return tagged.value.isGcStaff;
+  return undefined;
+}
+
 function PhoneDockSlot({
   chrome,
   workspace,
@@ -74,50 +84,40 @@ function PhoneDockSlot({
   accountChrome: boolean;
   coProductions: boolean;
 }) {
-  const dock = (
-    <HousePhoneBottomNav
-      workspace={workspace}
-      isGcStaff={isGcStaff}
-      homeOwned={homeOwned}
-      accountChrome={accountChrome}
-      coProductions={coProductions}
-    />
-  );
-  if (!chrome) return dock;
+  const peeked = peekChromeStaff(chrome);
+  const [staff, setStaff] = useState(peeked ?? isGcStaff);
+  // One HousePhoneBottomNav stays mounted. A Suspense fallback dock
+  // remounted on chrome resolve and dropped hide-on-scroll / dest
+  // lighting / prefetch. Peek a fulfilled thenable so staff dests
+  // paint in the same pass (renderToStaticMarkup / cached chrome).
   return (
-    <Suspense fallback={dock}>
-      <PhoneDockFromChrome
-        chrome={chrome}
+    <>
+      {chrome ? (
+        <Suspense fallback={null}>
+          <PhoneDockFromChrome chrome={chrome} onStaff={setStaff} />
+        </Suspense>
+      ) : null}
+      <HousePhoneBottomNav
         workspace={workspace}
+        isGcStaff={peeked ?? (chrome ? staff : isGcStaff)}
         homeOwned={homeOwned}
         accountChrome={accountChrome}
         coProductions={coProductions}
       />
-    </Suspense>
+    </>
   );
 }
 
 function PhoneDockFromChrome({
   chrome,
-  workspace,
-  homeOwned,
-  accountChrome,
-  coProductions,
+  onStaff,
 }: {
   chrome: Promise<AppShellChrome>;
-  workspace: WorkspaceMode;
-  homeOwned: boolean;
-  accountChrome: boolean;
-  coProductions: boolean;
+  onStaff: (isGcStaff: boolean) => void;
 }) {
   const data = use(chrome);
-  return (
-    <HousePhoneBottomNav
-      workspace={workspace}
-      isGcStaff={data.isGcStaff}
-      homeOwned={homeOwned}
-      accountChrome={accountChrome}
-      coProductions={coProductions}
-    />
-  );
+  useEffect(() => {
+    onStaff(data.isGcStaff);
+  }, [data.isGcStaff, onStaff]);
+  return null;
 }

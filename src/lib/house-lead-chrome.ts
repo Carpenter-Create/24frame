@@ -73,7 +73,10 @@ export const HOUSE_LEAD_PHONE_PAD_CLASS =
 
 // relative: Settings phone back is absolute against this row so the
 // 24 emblem stays put.
-export const HOUSE_LEAD_CHROME_CLASS = `relative flex items-center justify-end gap-4 border-b border-hairline bg-surface/85 backdrop-blur max-md:h-auto md:h-[var(--header-height)] ${HOUSE_LEAD_PHONE_PAD_CLASS} ${HOUSE_CHROME_GUTTER_X_CLASS}`;
+// Phone stacks emblem above the workspace name, so the row grows.
+// items-start keeps theme · Ask · bell · avatar on the emblem row
+// instead of floating in the gap. md+ stays a single centered bar.
+export const HOUSE_LEAD_CHROME_CLASS = `relative flex items-start justify-end gap-4 border-b border-hairline bg-surface/85 backdrop-blur max-md:h-auto md:h-[var(--header-height)] md:items-center ${HOUSE_LEAD_PHONE_PAD_CLASS} ${HOUSE_CHROME_GUTTER_X_CLASS}`;
 
 export const HOUSE_LEAD_LOGO_CLASS = "inline-flex shrink-0 items-center";
 
