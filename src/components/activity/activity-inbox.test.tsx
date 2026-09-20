@@ -38,6 +38,7 @@ const OPEN = {
 };
 
 const inboxSrc = readFileSync("src/components/activity/activity-inbox.tsx", "utf8");
+const listSrc = readFileSync("src/components/activity/activity-inbox-list.tsx", "utf8");
 const chipsSrc = readFileSync("src/components/activity/activity-family-chips.tsx", "utf8");
 const markSrc = readFileSync("src/components/activity/mark-done.tsx", "utf8");
 
@@ -99,8 +100,10 @@ describe("ActivityInbox", () => {
     expect(inboxSrc).not.toContain("activityStatus");
     expect(inboxSrc).not.toContain("activityPeriod");
     expect(inboxSrc).not.toContain("data-activity-status");
-    expect(inboxSrc).toContain("ActivityFeedRow");
+    expect(inboxSrc).toContain("ActivityInboxList");
     expect(inboxSrc).toContain("ActivityFamilyChips");
+    expect(inboxSrc).not.toContain("useOwnNotificationsRealtime");
+    expect(inboxSrc).not.toContain("postgres_changes");
     expect(chipsSrc).toContain("SEGMENTED_TRACK_PERSIST.activityFamily");
     expect(chipsSrc).toContain("({ selectedIndex })");
     expect(chipsSrc).toContain("segmentedItemOn");
@@ -110,6 +113,13 @@ describe("ActivityInbox", () => {
     expect(chipsSrc).not.toContain(">Done<");
     expect(markSrc).toContain("<X");
     expect(markSrc).not.toContain("ACTIVITY_PAGE.done");
+    expect(markSrc).toContain("retireLiveNotification");
+    expect(listSrc).toContain("useOwnNotificationsRealtime");
+    expect(listSrc).toContain("mergeLiveActivityItems");
+    expect(listSrc).toContain("ActivityFeedRow");
+    expect(listSrc.match(/useOwnNotificationsRealtime\(/g)).toHaveLength(1);
+    expect(listSrc).not.toContain("postgres_changes");
+    expect(listSrc).not.toContain(".channel(");
   });
 
   it("puts a house gear on the header that opens Preferences Notifications", () => {

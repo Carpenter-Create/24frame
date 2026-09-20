@@ -6,6 +6,7 @@ import { X } from "@phosphor-icons/react";
 
 import { markNotificationsRead } from "@/app/(app)/aggregation/messages/actions";
 import { ACTIVITY_PAGE } from "@/lib/activity";
+import { retireLiveNotification } from "@/lib/notifications-realtime";
 import { PHOSPHOR_CHROME_ICON_CLASS, PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
 // X clears the row. Cleared items leave the live feed. One RPC.
@@ -21,6 +22,7 @@ export function MarkDone({ id }: { id: string }) {
       onClick={() =>
         start(async () => {
           await markNotificationsRead([id]);
+          retireLiveNotification(id);
           router.refresh();
         })
       }

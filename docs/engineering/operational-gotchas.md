@@ -196,6 +196,22 @@ Do not add `24frame.co` to Vercel project `24frame` without a marketing fallback
 
 ---
 
+## Trigger: Notifications Realtime (`new_follower` peek)
+
+**When:** Wiring in-app Social alerts to the header peek or `/activity` list.
+
+One helper: `src/lib/notifications-realtime.ts`. Filter is
+`recipient_user_id=eq.{auth.uid()}` — catalog kinds have a null
+recipient and do not match. Peek and list share that channel
+(ref-counted). Do not add a second `postgres_changes` listener on a
+surface. Do not send email from this path.
+
+Hosted Realtime is already on. If inserts do not appear live, Adam
+enables Realtime on `public.notifications` (one Dashboard click).
+Steps and founder SQL: [`docs/infra/notifications-realtime.md`](../infra/notifications-realtime.md).
+
+---
+
 ## Trigger: Social Home list reads (class 5)
 
 **When:** Changing Home following wall, stories rail, followee IN() set, or Explore search.

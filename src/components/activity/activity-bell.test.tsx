@@ -123,6 +123,12 @@ describe("ActivityBell", () => {
     expect(bellSrc).toContain("activityHref");
     expect(bellSrc).toContain("activityFamilyForWorkspace");
     expect(bellSrc).not.toContain("ACTIVITY_HREF");
+    expect(bellSrc).toContain("useOwnNotificationsRealtime");
+    expect(bellSrc.match(/useOwnNotificationsRealtime\(/g)).toHaveLength(1);
+    expect(bellSrc).toContain("mergeLiveActivityItems");
+    expect(bellSrc).toContain("activityBellItems");
+    expect(bellSrc).not.toContain("postgres_changes");
+    expect(bellSrc).not.toContain(".channel(");
   });
 
   it("deep-links View all to the matching Notifications family for the current workspace", () => {
