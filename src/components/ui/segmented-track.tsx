@@ -144,6 +144,7 @@ export function SegmentedTrack({
     }
 
     const next = measureSegmentedBox(track, active);
+    active.scrollIntoView({ block: "nearest", inline: "nearest" });
     const now = typeof performance === "undefined" ? 0 : performance.now();
     const apply = (box: SegmentedThumbBox, snap = false, durationMs?: number) => {
       lastBoxRef.current = box;
@@ -184,6 +185,26 @@ export function SegmentedTrack({
       cancelRestore?.();
     };
   }, [visualIndex, persistKey]);
+
+  useLayoutEffect(() => {
+    const track = trackRef.current;
+    if (!track || typeof ResizeObserver === "undefined") return undefined;
+
+    const syncThumbBox = () => {
+      if (!placedRef.current) return;
+      const items = track.querySelectorAll<HTMLElement>("[data-segmented-item]");
+      const active = items[visualIndex];
+      if (houseSegmentedThumbHidden(visualIndex) || !active) return;
+      const next = measureSegmentedBox(track, active);
+      if (!segmentedThumbNeedsRestore(lastBoxRef.current, next)) return;
+      lastBoxRef.current = next;
+      setThumbStyle(thumbCss(next, true));
+    };
+
+    const observer = new ResizeObserver(syncThumbBox);
+    observer.observe(track);
+    return () => observer.disconnect();
+  }, [visualIndex]);
 
   function handleClickCapture(event: ReactMouseEvent<HTMLDivElement>) {
     const track = trackRef.current;

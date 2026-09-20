@@ -13,6 +13,7 @@ import {
   DASHBOARD_CARD_PAD,
   DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS,
   DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS,
+  DASHBOARD_NEWS_SOURCE_TRACK_CLASS,
   DASHBOARD_PERIOD_OPTION_SELECTED_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
   DASHBOARD_SECTION_AIR_CLASS,
@@ -44,6 +45,7 @@ import {
   HOUSE_SEGMENTED_THUMB_DURATION_MS,
   HOUSE_SEGMENTED_THUMB_EASE,
   HOUSE_SEGMENTED_TRACK_CLASS,
+  HOUSE_SEGMENTED_TRACK_SCROLL_CLASS,
   houseSegmentedThumbHidden,
   HOUSE_CHROME_GUTTER,
   HOUSE_CHROME_GUTTER_X_CLASS,
@@ -184,6 +186,10 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(HOUSE_SEGMENTED_TRACK_CLASS).toContain("rounded-full");
     expect(HOUSE_SEGMENTED_TRACK_CLASS).toContain("bg-surface-muted");
     expect(HOUSE_SEGMENTED_TRACK_CLASS).not.toContain("p-[");
+    expect(HOUSE_SEGMENTED_TRACK_CLASS).not.toContain("w-max");
+    expect(HOUSE_SEGMENTED_TRACK_SCROLL_CLASS).toBe(
+      `${HOUSE_SEGMENTED_TRACK_CLASS} w-max min-w-full`,
+    );
     expect(HOUSE_SEGMENTED_THUMB_CLASS).toContain("inset-y-0");
     expect(HOUSE_SEGMENTED_THUMB_CLASS).toContain("transition-[left,width]");
     expect(HOUSE_SEGMENTED_THUMB_DURATION_MS).toBe(320);
@@ -228,6 +234,7 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).toBe("text-white");
     expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).not.toContain("bg-accent");
     expect(DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS).toBe(HOUSE_SEGMENTED_ITEM_OFF_CLASS);
+    expect(DASHBOARD_NEWS_SOURCE_TRACK_CLASS).toBe(HOUSE_SEGMENTED_TRACK_SCROLL_CLASS);
     expect(DASHBOARD_PERIOD_OPTION_SELECTED_CLASS).toBe(HOUSE_PERIOD_SELECTED_CLASS);
     expect(sideNav).toContain("HOUSE_RAIL_ACTIVE_CLASS");
     expect(sideNav).toContain("HOUSE_RAIL_IDLE_CLASS");

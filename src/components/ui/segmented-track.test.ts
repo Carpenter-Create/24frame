@@ -38,6 +38,8 @@ describe("SegmentedTrack slide SoT", () => {
     expect(src).toContain("remainingMs");
     expect(src).toContain("onClickCapture");
     expect(src).toContain("setVisualIndex");
+    expect(src).toContain("ResizeObserver");
+    expect(src).toContain("scrollIntoView");
     expect(src).toContain("data-segmented-persist");
     expect(src).toContain("transition: \"none\"");
     expect(src).toContain("houseSegmentedThumbHidden");
