@@ -119,6 +119,7 @@ async function SocialProfileMain({
         photoUrl={photoUrl}
         bio={profile.bio?.trim() ? profile.bio : SOCIAL.profile.ownFace}
         roles={profile.crafts}
+        imdbUrl={profile.imdb_url}
         ring={liveStories.length > 0 ? "live" : null}
         stats={counts ?? undefined}
         actions={() => (
@@ -175,8 +176,15 @@ async function SocialProfileMain({
 
 async function SocialProfileForYouSlot({ session }: { session: SocialSession }) {
   const { ctx, supabase } = session;
-  const followees = await loadFolloweeIds(supabase, ctx.user.id);
-  const suggested = await loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids]);
+  const [{ profile }, followees] = await Promise.all([
+    ensureOwnSocialProfileResult(supabase, ctx.user),
+    loadFolloweeIds(supabase, ctx.user.id),
+  ]);
+  const suggested = await loadSuggestedPeople(
+    supabase,
+    [ctx.user.id, ...followees.ids],
+    profile?.crafts ?? [],
+  );
   const faces =
     suggested.length > 0 ? await signedAvatarUrls(suggested.map((person) => person.id)) : new Map();
   return <SocialForYouRail people={suggested} faces={faces} />;

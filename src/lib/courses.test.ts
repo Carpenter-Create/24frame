@@ -191,6 +191,17 @@ describe("latestDiscoverableCourse", () => {
     expect(latestDiscoverableCourse([{ ...newer, status: "draft" }, older])?.id).toBe("c1");
     expect(latestDiscoverableCourse([])).toBeNull();
   });
+
+  it("prefers a Role-matching published course when crafts are set", () => {
+    const design = {
+      ...newer,
+      id: "c3",
+      title: "Animation for art directors",
+      created_at: "2026-09-02T12:00:00.000Z",
+    };
+    expect(latestDiscoverableCourse([older, newer, design], ["art_director"])?.id).toBe("c3");
+    expect(latestDiscoverableCourse([older, newer, design])?.id).toBe("c2");
+  });
 });
 
 describe("course lock", () => {

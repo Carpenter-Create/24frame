@@ -86,12 +86,13 @@ async function loadHomeProfile(session: SocialSession) {
 
 async function SocialHomeForYouSlot({ session }: { session: SocialSession }) {
   const { ctx, supabase } = session;
-  const { followees } = await loadHomeProfile(session);
+  const { profile, followees } = await loadHomeProfile(session);
+  const crafts = profile?.crafts ?? [];
   const [suggested, catalog] = await Promise.all([
-    loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids]),
+    loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids], crafts),
     loadDiscoverableCourses(supabase),
   ]);
-  const latestCourse = catalog.failed ? null : latestDiscoverableCourse(catalog.courses);
+  const latestCourse = catalog.failed ? null : latestDiscoverableCourse(catalog.courses, crafts);
   const [faces, courseCovers] = await Promise.all([
     suggested.length > 0 ? signedAvatarUrls(suggested.map((person) => person.id)) : Promise.resolve(new Map()),
     latestCourse ? signedEducationCoverUrls([latestCourse]) : Promise.resolve(new Map<string, string>()),
@@ -128,7 +129,7 @@ async function SocialHomeCenter({
       : Promise.resolve({ posts: [], truncated: false, nextCursor: null }),
     loadLiveStories(supabase, authorIds),
     lane === "for-you"
-      ? loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids])
+      ? loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids], profile?.crafts ?? [])
       : Promise.resolve([]),
   ]);
   const posts = wall.posts;
@@ -165,7 +166,7 @@ async function SocialHomeCenter({
       {profile ? (
         <SocialHomeComposer authorName={profile.display_name} authorPhotoUrl={photoUrl} />
       ) : null}
-      <SocialHomeTopics />
+      <SocialHomeTopics crafts={profile?.crafts ?? []} />
       <SocialStoriesRail
         cards={rail}
         authors={authors}

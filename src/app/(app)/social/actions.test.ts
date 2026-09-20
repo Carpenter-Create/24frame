@@ -184,6 +184,48 @@ describe("social actions", () => {
     });
   });
 
+  it("saves a normalized IMDb name URL and clears a blank claim", async () => {
+    const { updates } = stub({
+      profile: { id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" },
+    });
+    const form = new FormData();
+    form.set("handle", "@ada");
+    form.set("first_name", "Ada");
+    form.set("last_name", "Lovelace");
+    form.set("imdb_url", "https://www.imdb.com/name/nm0000158/?ref_=nv");
+    expect(await createSocialProfile(form)).toEqual({});
+    expect(updates[0]).toEqual({
+      table: "profiles",
+      row: {
+        handle: "ada",
+        display_name: "Ada Lovelace",
+        imdb_url: "https://www.imdb.com/name/nm0000158/",
+      },
+    });
+
+    const cleared = new FormData();
+    cleared.set("handle", "@ada");
+    cleared.set("first_name", "Ada");
+    cleared.set("last_name", "Lovelace");
+    cleared.set("imdb_url", "");
+    expect(await createSocialProfile(cleared)).toEqual({});
+    expect(updates[1]).toEqual({
+      table: "profiles",
+      row: {
+        handle: "ada",
+        display_name: "Ada Lovelace",
+        imdb_url: null,
+      },
+    });
+
+    const bad = new FormData();
+    bad.set("handle", "@ada");
+    bad.set("first_name", "Ada");
+    bad.set("last_name", "Lovelace");
+    bad.set("imdb_url", "https://www.imdb.com/title/tt0111161/");
+    expect(await createSocialProfile(bad)).toEqual({ error: SOCIAL.profile.imdbInvalid });
+  });
+
   it("saves and clears the welcome video pointer without deleting media", async () => {
     const author = "11111111-1111-4111-8111-111111111111";
     const object = "22222222-2222-4222-8222-222222222222";

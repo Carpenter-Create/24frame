@@ -50,8 +50,15 @@ export default async function SocialCreatePage({
 
 async function SocialCreateForYouSlot({ session }: { session: SocialSession }) {
   const { ctx, supabase } = session;
-  const followees = await loadFolloweeIds(supabase, ctx.user.id);
-  const suggested = await loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids]);
+  const [profile, followees] = await Promise.all([
+    ensureOwnSocialProfile(supabase, ctx.user),
+    loadFolloweeIds(supabase, ctx.user.id),
+  ]);
+  const suggested = await loadSuggestedPeople(
+    supabase,
+    [ctx.user.id, ...followees.ids],
+    profile?.crafts ?? [],
+  );
   const faces = suggested.length > 0 ? await signedAvatarUrls(suggested.map((person) => person.id)) : new Map();
   return <SocialForYouRail people={suggested} faces={faces} />;
 }

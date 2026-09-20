@@ -93,6 +93,7 @@ export function SocialProfileEditForm({
   photoUrl,
   welcomeVideoUrl = null,
   crafts = [],
+  imdbUrl = "",
 }: {
   handle: string;
   displayName: string;
@@ -100,6 +101,7 @@ export function SocialProfileEditForm({
   photoUrl: string | null;
   welcomeVideoUrl?: string | null;
   crafts?: readonly string[];
+  imdbUrl?: string | null;
 }) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -120,6 +122,7 @@ export function SocialProfileEditForm({
   const [face, setFace] = useState<SocialProfileEditFace>("edit");
   const [bioText, setBioText] = useState(bio);
   const [roles, setRoles] = useState(() => parseSocialProfileRoles(crafts));
+  const [imdb, setImdb] = useState(imdbUrl ?? "");
   const preview = socialProfilePublicUrl(bareHandle(username));
   const required = socialHandleRequiredError(username);
 
@@ -260,6 +263,7 @@ export function SocialProfileEditForm({
     form.set("last_name", lastName);
     form.set("display_name", composeSocialDisplayName(firstName, lastName, middleName));
     form.set("crafts", JSON.stringify(roles));
+    form.set("imdb_url", imdb);
     const result = await createSocialProfile(form);
     setPending(false);
     if (result.error) {
@@ -477,6 +481,25 @@ export function SocialProfileEditForm({
             </div>
             <div className="h-px bg-hairline" />
             <SocialProfileRolesField value={roles} onChange={setRoles} />
+            <div className="h-px bg-hairline" />
+            <div data-social-profile-edit-imdb="" className={`${SOCIAL_PROFILE_EDIT_ROW_CLASS} flex-col gap-2 md:flex-row`}>
+              <label htmlFor="social-edit-imdb" className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>
+                {SOCIAL.profile.imdb}
+              </label>
+              <div className="flex min-w-0 flex-1 flex-col gap-1">
+                <Input
+                  variant="bare"
+                  id="social-edit-imdb"
+                  name="imdb_url"
+                  value={imdb}
+                  placeholder={SOCIAL.profile.imdbPlaceholder}
+                  onChange={(e) => setImdb(e.target.value)}
+                  className="min-w-0 flex-1"
+                  autoComplete="url"
+                />
+                <p className="t-label text-ink-2">{SOCIAL.profile.imdbHint}</p>
+              </div>
+            </div>
             <div className="h-px bg-hairline" />
             <button
               type="button"

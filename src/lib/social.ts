@@ -526,6 +526,10 @@ export const SOCIAL = {
     roles: "Roles",
     rolesSearch: "Search roles",
     rolesHint: "Choose up to 5.",
+    imdb: "IMDb",
+    imdbPlaceholder: "imdb.com/name/nm… or nm########",
+    imdbInvalid: "Enter an IMDb name URL or nm id.",
+    imdbHint: "A public link to your IMDb name page.",
   },
   member: {
     title: "Member",

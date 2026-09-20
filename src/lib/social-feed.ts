@@ -13,6 +13,7 @@ import {
   type FollowingWallCursor,
 } from "@/lib/social-home-bounds";
 import { SOCIAL_PROFILE_POSTS_PAGE, socialPersonIdentity, socialProfileHref } from "@/lib/social";
+import { rankSocialSuggestedPeople, socialPostAffinityScore } from "@/lib/social-role-affinity";
 import { isStoryLive, storyRailUnseen } from "@/lib/social-stories";
 
 type ServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -25,6 +26,7 @@ export type SocialProfileRow = {
   bio?: string | null;
   welcome_video_key?: string | null;
   crafts?: string[] | null;
+  imdb_url?: string | null;
 };
 
 export type SocialPostRow = {
@@ -331,6 +333,7 @@ export type SocialExplorePage = {
 export async function loadExploreSearch(
   supabase: ServerClient,
   query: string,
+  viewerCrafts: readonly string[] = [],
 ): Promise<SocialExplorePage> {
   const needle = query.trim();
   if (!needle) {
@@ -340,13 +343,13 @@ export async function loadExploreSearch(
   const [{ data: people }, { data: posts }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("id, handle, display_name")
+      .select("id, handle, display_name, crafts")
       .eq("status", "active")
       .or(`handle.ilike.${like},display_name.ilike.${like}`)
       .range(...probeRange(SOCIAL_EXPLORE_PEOPLE_LIMIT)),
     supabase
       .from("posts")
-      .select("id, body, author_id")
+      .select("id, body, author_id, category")
       .eq("status", "active")
       .is("group_id", null)
       .ilike("body", like)
@@ -354,8 +357,17 @@ export async function loadExploreSearch(
   ]);
   const peoplePage = splitProbe(people, SOCIAL_EXPLORE_PEOPLE_LIMIT);
   const postsPage = splitProbe(posts, SOCIAL_EXPLORE_POSTS_LIMIT);
+  const rankedPeople = rankSocialSuggestedPeople(
+    peoplePage.rows.map((person) => ({ ...person, crafts: person.crafts ?? [] })),
+    viewerCrafts,
+  );
+  const rankedPosts = [...postsPage.rows].sort((a, b) => {
+    const delta = socialPostAffinityScore(b.category, viewerCrafts) - socialPostAffinityScore(a.category, viewerCrafts);
+    if (delta !== 0) return delta;
+    return a.id.localeCompare(b.id);
+  });
   const hits: SocialExploreHit[] = [];
-  for (const person of peoplePage.rows) {
+  for (const person of rankedPeople) {
     const identity = socialPersonIdentity({
       handle: person.handle,
       displayName: person.display_name,
@@ -370,7 +382,7 @@ export async function loadExploreSearch(
       displayName: person.display_name,
     });
   }
-  for (const post of postsPage.rows) {
+  for (const post of rankedPosts) {
     hits.push({
       kind: "post",
       id: post.id,
@@ -391,22 +403,23 @@ export type SocialSuggestedPerson = {
   id: string;
   handle: string;
   display_name: string;
+  crafts?: string[] | null;
 };
 
 export async function loadSuggestedPeople(
   supabase: ServerClient,
   excludeIds: readonly string[],
+  viewerCrafts: readonly string[] = [],
 ): Promise<SocialSuggestedPerson[]> {
   const { data } = await supabase
     .from("profiles")
-    .select("id, handle, display_name")
+    .select("id, handle, display_name, crafts")
     .eq("status", "active")
     .order("handle", { ascending: true })
     .range(...probeRange(SOCIAL_EXPLORE_PEOPLE_LIMIT));
   const blocked = new Set(excludeIds.filter(Boolean));
-  return (data ?? [])
-    .filter((row) => !blocked.has(row.id))
-    .slice(0, SOCIAL_FOR_YOU_PEOPLE_LIMIT);
+  const available = (data ?? []).filter((row) => !blocked.has(row.id));
+  return rankSocialSuggestedPeople(available, viewerCrafts).slice(0, SOCIAL_FOR_YOU_PEOPLE_LIMIT);
 }
 
 export async function loadProfilesByIds(

@@ -2,6 +2,8 @@ import { SOCIAL } from "@/lib/social";
 import { educationCourseHref, type CourseStatus } from "@/lib/education";
 import type { createClient } from "@/lib/supabase/server";
 import { UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
+import { parseSocialProfileRoles } from "@/lib/social-profile-roles";
+import { socialCourseAffinityScore } from "@/lib/social-role-affinity";
 
 // Course placeholders. Members browse and consume titles only.
 // Company / admin / service / migration seed publish. No member write.
@@ -347,22 +349,42 @@ export async function loadDiscoverableCourses(
   return { courses: (data ?? []) as CourseRow[], failed: false };
 }
 
-/** Newest published course from the Education catalog. Same rows as loadDiscoverableCourses. */
+function newerPublishedCourse(left: CourseRow, right: CourseRow): CourseRow {
+  if (
+    left.created_at > right.created_at ||
+    (left.created_at === right.created_at && left.id > right.id)
+  ) {
+    return left;
+  }
+  return right;
+}
+
+/** Newest published course from the Education catalog. Same rows as loadDiscoverableCourses.
+ * When viewer Roles exist, prefer a matching course; otherwise newest published. */
 export function latestDiscoverableCourse(
   courses: readonly CourseRow[],
+  viewerCrafts: readonly string[] = [],
 ): CourseRow | null {
-  let latest: CourseRow | null = null;
-  for (const course of courses) {
-    if (course.status !== "published") continue;
+  const published = courses.filter((course) => course.status === "published");
+  if (published.length === 0) return null;
+  const crafts = parseSocialProfileRoles(viewerCrafts);
+  if (crafts.length === 0) {
+    return published.reduce((latest, course) => newerPublishedCourse(latest, course));
+  }
+  let best: CourseRow | null = null;
+  let bestScore = -1;
+  for (const course of published) {
+    const score = socialCourseAffinityScore(course, crafts);
     if (
-      !latest ||
-      course.created_at > latest.created_at ||
-      (course.created_at === latest.created_at && course.id > latest.id)
+      !best ||
+      score > bestScore ||
+      (score === bestScore && newerPublishedCourse(best, course) === course)
     ) {
-      latest = course;
+      best = course;
+      bestScore = score;
     }
   }
-  return latest;
+  return best;
 }
 
 export async function loadCourseDetail(

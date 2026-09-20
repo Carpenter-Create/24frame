@@ -161,6 +161,7 @@ export function SocialProfileIdentity({
   photoUrl,
   bio,
   roles,
+  imdbUrl,
   ring = null,
   photoAction,
   stats,
@@ -172,6 +173,7 @@ export function SocialProfileIdentity({
   photoUrl?: string | null;
   bio?: string | null;
   roles?: readonly string[] | null;
+  imdbUrl?: string | null;
   ring?: "unseen" | "live" | null;
   photoAction?: ReactNode;
   stats?: { posts: number; followers: number; following: number };
@@ -203,6 +205,17 @@ export function SocialProfileIdentity({
                 <p data-social-profile-roles="" className="mt-1 break-words t-body-sm text-ink-2">
                   {rolesLine}
                 </p>
+              ) : null}
+              {imdbUrl ? (
+                <a
+                  data-social-profile-imdb=""
+                  href={imdbUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-1 t-label text-ink-2"
+                >
+                  {SOCIAL.profile.imdb}
+                </a>
               ) : null}
             </div>
             {actionRow ? <div className="hidden shrink-0 md:flex">{actionRow}</div> : null}

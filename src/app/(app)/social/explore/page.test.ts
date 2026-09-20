@@ -19,6 +19,15 @@ vi.mock("@/lib/s3-avatars", () => ({
   signedAvatarUrl: vi.fn().mockResolvedValue(null),
   signedAvatarUrls: vi.fn().mockResolvedValue(new Map()),
 }));
+vi.mock("@/lib/social-profile", () => ({
+  ensureOwnSocialProfile: vi.fn().mockResolvedValue({
+    id: "u1",
+    handle: "ada",
+    display_name: "Ada Lovelace",
+    status: "active",
+    crafts: [],
+  }),
+}));
 
 function ctx() {
   return {
@@ -44,6 +53,7 @@ function stub() {
   chain.order = vi.fn(self);
   chain.in = vi.fn(self);
   chain.range = vi.fn(async () => ({ data: [], error: null }));
+  chain.maybeSingle = vi.fn(async () => ({ data: null, error: null }));
   vi.mocked(createClient).mockResolvedValue({ from: vi.fn(() => chain) } as never);
 }
 

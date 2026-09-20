@@ -13,7 +13,7 @@ import {
 type ServerClient = Awaited<ReturnType<typeof createClient>>;
 
 export const SOCIAL_PROFILE_COLUMNS =
-  "id, handle, display_name, status, bio, welcome_video_key, crafts";
+  "id, handle, display_name, status, bio, welcome_video_key, crafts, imdb_url";
 
 export type SocialEnsureUser = {
   id: string;

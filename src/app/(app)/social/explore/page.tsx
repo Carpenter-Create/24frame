@@ -11,6 +11,7 @@ import { SocialPersonRow } from "@/components/social/social-ui";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { loadExploreSearch, loadFolloweeIds, loadSuggestedPeople } from "@/lib/social-feed";
+import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { requireSocialSession, type SocialSession } from "@/lib/social-session";
 
 export default async function SocialExplorePage({
@@ -51,8 +52,15 @@ export default async function SocialExplorePage({
 
 async function SocialExploreSuggested({ session }: { session: SocialSession }) {
   const { ctx, supabase } = session;
-  const followees = await loadFolloweeIds(supabase, ctx.user.id);
-  const suggested = await loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids]);
+  const [profile, followees] = await Promise.all([
+    ensureOwnSocialProfile(supabase, ctx.user),
+    loadFolloweeIds(supabase, ctx.user.id),
+  ]);
+  const suggested = await loadSuggestedPeople(
+    supabase,
+    [ctx.user.id, ...followees.ids],
+    profile?.crafts ?? [],
+  );
   const faces =
     suggested.length > 0 ? await signedAvatarUrls(suggested.map((person) => person.id)) : new Map();
 
@@ -72,7 +80,8 @@ async function SocialExploreSuggested({ session }: { session: SocialSession }) {
 }
 
 async function SocialExploreHits({ session, q }: { session: SocialSession; q: string }) {
-  const results = await loadExploreSearch(session.supabase, q);
+  const profile = await ensureOwnSocialProfile(session.supabase, session.ctx.user);
+  const results = await loadExploreSearch(session.supabase, q, profile?.crafts ?? []);
   const hits = results.hits;
   const personIds = hits.filter((hit) => hit.kind === "person").map((hit) => hit.id);
   const faces = personIds.length > 0 ? await signedAvatarUrls(personIds) : new Map();

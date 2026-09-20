@@ -87,6 +87,7 @@ function stubClient({
     bio?: string | null;
     welcome_video_key?: string | null;
     crafts?: string[] | null;
+    imdb_url?: string | null;
   } | null;
   posts?: {
     id: string;
@@ -255,6 +256,24 @@ describe("Social profile public face", () => {
     expect(html).toContain("Actor · Producer · Screenwriter +1");
     expect(html.indexOf("@ada")).toBeLessThan(html.indexOf("Actor · Producer · Screenwriter +1"));
     expect(html).not.toContain("Roles:");
+    expect(html).not.toContain("data-social-profile-imdb");
+  });
+
+  it("prints a quiet IMDb name link when the claim is set", async () => {
+    stubClient({
+      profile: { ...ensured, imdb_url: "https://www.imdb.com/name/nm0000158/" },
+    });
+    vi.mocked(ensureOwnSocialProfileResult).mockResolvedValue({
+      profile: { ...ensured, imdb_url: "https://www.imdb.com/name/nm0000158/" },
+      error: null,
+    });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const html = await renderServerMarkup(await SocialProfilePage());
+    expect(html).toContain("data-social-profile-imdb");
+    expect(html).toContain('href="https://www.imdb.com/name/nm0000158/"');
+    expect(html).toContain(SOCIAL.profile.imdb);
+    expect(html).not.toContain("Connect to scrape");
   });
 
   it("renders the welcome video band only when a signed URL exists", async () => {

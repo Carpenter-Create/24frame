@@ -30,7 +30,7 @@ vi.mock("@/lib/s3-social-media", () => ({
 vi.mock("@/lib/social-profile", () => ({
   ensureOwnSocialProfile: vi.fn(),
   SOCIAL_PROFILE_COLUMNS:
-    "id, handle, display_name, status, bio, welcome_video_key, crafts",
+    "id, handle, display_name, status, bio, welcome_video_key, crafts, imdb_url",
 }));
 vi.mock("@/app/(app)/social/actions", () => ({
   toggleSocialFollow: vi.fn(),
@@ -81,6 +81,7 @@ type PublicProfile = {
   status: string;
   bio: string | null;
   crafts?: string[] | null;
+  imdb_url?: string | null;
 };
 
 const ada: PublicProfile = {
@@ -184,6 +185,7 @@ describe("Social public profile", () => {
     expect(html).not.toContain("data-social-bio-form");
     expect(html).not.toContain("data-social-profile-photo");
     expect(html).not.toContain("data-social-profile-roles");
+    expect(html).not.toContain("data-social-profile-imdb");
   });
 
   it("prints the Roles line when crafts are set and omits a Roles prefix", async () => {
@@ -194,6 +196,16 @@ describe("Social public profile", () => {
     expect(html).toContain("data-social-profile-roles");
     expect(html).toContain("Actor · Producer");
     expect(html).not.toContain("Roles:");
+  });
+
+  it("prints a quiet IMDb link when the member claim is set", async () => {
+    stubClient({
+      member: { ...ada, imdb_url: "https://www.imdb.com/name/nm0000158/" },
+    });
+    const html = await renderPublic();
+    expect(html).toContain("data-social-profile-imdb");
+    expect(html).toContain('href="https://www.imdb.com/name/nm0000158/"');
+    expect(html).not.toContain("Connect to scrape");
   });
 
   it("renders the same public profile for a bare handle param", async () => {

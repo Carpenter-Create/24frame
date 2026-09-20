@@ -171,6 +171,7 @@ describe("Social profile public face", () => {
     expect(identity).toContain("Writes engines.");
     expect(identity).toContain('src="https://s3.example/signed-avatar"');
     expect(identity).not.toContain("data-social-profile-roles");
+    expect(identity).not.toContain("data-social-profile-imdb");
 
     const withRoles = renderToStaticMarkup(
       <SocialProfileIdentity
@@ -183,6 +184,18 @@ describe("Social profile public face", () => {
     expect(withRoles).toContain("data-social-profile-roles");
     expect(withRoles).toContain("Actor · Producer · Screenwriter +1");
     expect(withRoles).not.toContain("Roles:");
+
+    const withImdb = renderToStaticMarkup(
+      <SocialProfileIdentity
+        name="Ada Lovelace"
+        handle="ada"
+        photoUrl={null}
+        imdbUrl="https://www.imdb.com/name/nm0000158/"
+      />,
+    );
+    expect(withImdb).toContain("data-social-profile-imdb");
+    expect(withImdb).toContain('href="https://www.imdb.com/name/nm0000158/"');
+    expect(withImdb).toContain(SOCIAL.profile.imdb);
     expect(uiSrc).toContain("socialProfileRolesLine");
     expect(
       uiSrc.slice(

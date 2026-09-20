@@ -64,6 +64,10 @@ describe("SocialProfileEditForm", () => {
     expect(html).toContain(SOCIAL.profile.rolesSearch);
     expect(html).toContain('id="social-edit-roles-search"');
     expect(html).not.toContain("data-social-profile-edit-roles-selected");
+    expect(html).toContain("data-social-profile-edit-imdb");
+    expect(html).toContain(SOCIAL.profile.imdb);
+    expect(html).toContain('id="social-edit-imdb"');
+    expect(html).toContain("flex-col");
     expect(html).toContain("data-social-avatar");
     expect(html).toContain("AL");
     expect(html).not.toContain("<img");

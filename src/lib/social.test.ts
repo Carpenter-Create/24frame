@@ -79,6 +79,8 @@ describe("social copy lock", () => {
     expect(SOCIAL.profile.roles).toBe("Roles");
     expect(SOCIAL.profile.rolesSearch).toBe("Search roles");
     expect(SOCIAL.profile.rolesHint).toBe("Choose up to 5.");
+    expect(SOCIAL.profile.imdb).toBe("IMDb");
+    expect(SOCIAL.profile.imdbInvalid).toBe("Enter an IMDb name URL or nm id.");
     expect(SOCIAL.dms.startCta).toBe("Start a conversation");
     expect(splitSocialDisplayName("Ada Lovelace")).toEqual({
       firstName: "Ada",

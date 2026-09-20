@@ -121,7 +121,11 @@ export default async function SocialPublicProfilePage({
     : new Set<string>();
   const counts = await loadProfileSocialCounts(supabase, member.id);
   const followees = await loadFolloweeIds(supabase, ctx.user.id);
-  const suggested = await loadSuggestedPeople(supabase, [ctx.user.id, member.id, ...followees.ids]);
+  const suggested = await loadSuggestedPeople(
+    supabase,
+    [ctx.user.id, member.id, ...followees.ids],
+    own?.crafts ?? [],
+  );
   const faces = suggested.length > 0 ? await signedAvatarUrls(suggested.map((person) => person.id)) : new Map();
   const highlightCards = liveStories.map((story) => ({
     id: story.id,
@@ -143,6 +147,7 @@ export default async function SocialPublicProfilePage({
           photoUrl={photoUrl}
           bio={member.bio}
           roles={member.crafts}
+          imdbUrl={member.imdb_url}
           ring={liveStories.length > 0 ? "live" : null}
           stats={counts}
           actions={
