@@ -1,24 +1,22 @@
 import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
-vi.mock("@/lib/social-role-affinity", () => ({
-  socialInterestTopics: () => [],
-}));
-
-import { SOCIAL_CATEGORY_TOPICS } from "@/lib/social-categories";
+import { SOCIAL_CATEGORY_TOPICS, sortTopicsAlpha } from "@/lib/social-categories";
 import { SOCIAL_TOPIC_RAIL_ROWS } from "@/lib/social-chrome";
 import { SOCIAL } from "@/lib/social";
 import { SocialHomeTopics } from "./social-home-topics";
 
 const src = readFileSync("src/components/social/social-home-topics.tsx", "utf8");
 
-describe("SocialHomeTopics empty bank", () => {
-  it("omits the Topics shell when the serving bank is empty", () => {
-    expect(renderToStaticMarkup(<SocialHomeTopics />)).toBe("");
-    expect(renderToStaticMarkup(<SocialHomeTopics topics={["Acting"]} crafts={["actor"]} />)).toBe(
-      "",
-    );
+describe("SocialHomeTopics bank", () => {
+  it("renders the shared Topics bank in A-Z order on the one-row rail", () => {
+    const html = renderToStaticMarkup(<SocialHomeTopics />);
+    const chips = [...html.matchAll(/data-social-home-topic="([^"]+)"/g)].map((match) => match[1]);
+    expect(chips).toEqual([...SOCIAL_CATEGORY_TOPICS]);
+    expect(chips).toEqual(sortTopicsAlpha(chips));
+    expect(src).toContain("SOCIAL_CATEGORY_TOPICS");
+    expect(src).not.toContain("socialInterestTopics");
     expect(src).toContain("if (labels.length === 0) return null");
     expect(src).not.toContain("SOCIAL_FOR_YOU_CARD_CLASS");
     expect(src).not.toContain("flex-wrap");

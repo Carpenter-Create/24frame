@@ -2,18 +2,11 @@ import Link from "next/link";
 
 import { HouseChipRail } from "@/components/chrome/house-chip-rail";
 import { SOCIAL_TOPIC_RAIL_CHIP_CLASS, SOCIAL_TOPIC_RAIL_ROWS } from "@/lib/social-chrome";
-import { socialHomeLensHref } from "@/lib/social-categories";
+import { SOCIAL_CATEGORY_TOPICS, socialHomeLensHref } from "@/lib/social-categories";
 import { SOCIAL } from "@/lib/social";
-import { socialInterestTopics } from "@/lib/social-role-affinity";
 
-export function SocialHomeTopics({
-  topics = [],
-  crafts = [],
-}: {
-  topics?: readonly string[];
-  crafts?: readonly string[];
-}) {
-  const labels = socialInterestTopics({ topics, crafts });
+export function SocialHomeTopics() {
+  const labels = SOCIAL_CATEGORY_TOPICS;
   if (labels.length === 0) return null;
 
   return (

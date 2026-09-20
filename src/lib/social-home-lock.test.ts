@@ -120,12 +120,12 @@ describe("Social Home miss list v1 P0 lock", () => {
       "Animation",
       "Casting",
       "Cinematography",
-      "Music",
       "Content creator",
       "Directors",
       "Distribution",
       "Film Festivals",
       "Financing",
+      "Music",
       "Post-production",
       "Producers",
       "Screenwriting",
@@ -202,10 +202,11 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(topics).toContain("SOCIAL.forYou.topics");
     expect(topics).toContain("SOCIAL_TOPIC_RAIL_CHIP_CLASS");
     expect(topics).not.toContain("SOCIAL_FOR_YOU_CARD_CLASS");
-    expect(topics).toContain("socialInterestTopics");
+    expect(topics).toContain("SOCIAL_CATEGORY_TOPICS");
+    expect(topics).not.toContain("socialInterestTopics");
     expect(topics).toContain("if (labels.length === 0) return null");
-    expect(home).toContain("SocialHomeTopics topics=");
-    expect(home).toContain("crafts=");
+    expect(home).toContain("<SocialHomeTopics");
+    expect(home).not.toContain("SocialHomeTopics topics=");
     expect(topics).not.toContain("flex-wrap");
     expect(topics).not.toContain("truncate");
     expect(topics).toContain("SOCIAL_TOPIC_RAIL_ROWS");

@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { SOCIAL } from "@/lib/social";
-import { SOCIAL_CATEGORY_TOPICS } from "@/lib/social-categories";
+import { SOCIAL_CATEGORY_TOPICS, sortTopicsAlpha } from "@/lib/social-categories";
 import {
   SOCIAL_TOPIC_CHIP_BANK_CLASS,
   SOCIAL_TOPIC_CHIP_SELECT_IDLE_CLASS,
@@ -49,6 +49,11 @@ describe("SocialProfileTopicsField", () => {
     expect(html).not.toContain("data-social-profile-edit-topics-selected");
     expect(html).not.toContain(SOCIAL.profile.topicsLimit);
     expect(html).not.toContain("type=\"checkbox\"");
+    const chips = [...html.matchAll(/data-social-profile-topic-chip="([^"]+)"/g)].map(
+      (match) => match[1],
+    );
+    expect(chips).toEqual([...SOCIAL_CATEGORY_TOPICS]);
+    expect(chips).toEqual(sortTopicsAlpha(chips));
   });
 
   it("blocks a ninth Topics pick with the locked notice and keeps extras already saved", () => {

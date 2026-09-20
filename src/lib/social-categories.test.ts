@@ -7,10 +7,12 @@ import {
   SOCIAL_CATEGORY_TOPICS,
   socialCategorySlug,
   socialHomeLensHref,
+  sortTopicsAlpha,
 } from "./social-categories";
 
 describe("locked Social Home categories", () => {
-  it("keeps Adam's exact labels and order", () => {
+  it("keeps Adam's exact labels in locale-aware A-Z order", () => {
+    expect([...SOCIAL_CATEGORY_TOPICS]).toEqual(sortTopicsAlpha(SOCIAL_CATEGORY_TOPICS));
     expect(SOCIAL_CATEGORY_LABELS).toEqual([
       "All",
       "Acting",
@@ -18,16 +20,21 @@ describe("locked Social Home categories", () => {
       "Animation",
       "Casting",
       "Cinematography",
-      "Music",
       "Content creator",
       "Directors",
       "Distribution",
       "Film Festivals",
       "Financing",
+      "Music",
       "Post-production",
       "Producers",
       "Screenwriting",
       "Vertical micro dramas",
+    ]);
+    expect(sortTopicsAlpha(["Music", "acting", "AI filmmaking"])).toEqual([
+      "acting",
+      "AI filmmaking",
+      "Music",
     ]);
     expect(SOCIAL_CATEGORY_TOPICS).not.toContain("Cinematographers");
     expect(SOCIAL_CATEGORY_TOPICS).not.toContain("Composers");
