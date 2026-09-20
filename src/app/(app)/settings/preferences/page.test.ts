@@ -93,7 +93,9 @@ describe("SettingsPreferencesPage", () => {
     }
     expect(html).not.toContain("data-house-empty");
     expect(html).not.toContain("No preferences on this account.");
-    expect(html).not.toContain(SETTINGS.manageCourses);
+    expect(html).not.toContain("Manage courses");
+    expect(html).not.toContain("data-settings-manage-courses");
+    expect(html).not.toContain('href="/education/manage"');
     expect(html).not.toContain('href="/education"');
     expect(html).not.toContain("CreateCourseForm");
     expect(html).toContain(NOTIFICATION_PREFS.groups.aggregation);
@@ -118,20 +120,23 @@ describe("SettingsPreferencesPage", () => {
     expect(html).toContain(`data-settings-notification-switch="title_returned:email"`);
     expect(html).not.toContain("CreateCourseForm");
     expect(pageSrc).not.toContain("education-forms");
-    expect(paneSrc).toContain("SETTINGS.manageCourses");
+    expect(paneSrc).not.toContain("SETTINGS.manageCourses");
+    expect(paneSrc).not.toContain("data-settings-manage-courses");
+    expect(paneSrc).not.toContain("manageCoursesHref");
+    expect(paneSrc).not.toContain("settingsManageCoursesVisible");
     expect(paneSrc).toContain("AppearancePreferences");
     expect(paneSrc).toContain("AppearanceThemeRow");
     expect(paneSrc).toContain("NotificationPreferences");
     expect(paneSrc).toContain("SettingsDrillRow");
   });
 
-  it("shows staff Manage courses as a quiet row to /education", async () => {
+  it("never shows Manage courses on Preferences, including staff", async () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx(true) as never);
     const html = renderToStaticMarkup(await SettingsPreferencesPage());
-    expect(html).toContain(SETTINGS.manageCourses);
-    expect(html).toContain('data-settings-manage-courses=""');
-    expect(html).toContain(`href="${SETTINGS.manageCoursesHref}"`);
-    expect(html).toContain('href="/education/manage"');
+    expect(html).not.toContain("Manage courses");
+    expect(html).not.toContain("data-settings-manage-courses");
+    expect(html).not.toContain('href="/education/manage"');
+    expect(html).not.toContain('href="/education"');
     expect(html).not.toContain("/gc/education");
     expect(html).toContain('data-settings-notification-matrix=""');
     expect(html).not.toContain("data-house-empty");

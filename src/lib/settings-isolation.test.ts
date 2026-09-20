@@ -1,15 +1,21 @@
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-import { SETTINGS, settingsManageCoursesVisible } from "./settings";
+import { SETTINGS } from "./settings";
 
 describe("settings hub isolation", () => {
-  it("does not implement Education CMS inside Settings — staff door is a href only", () => {
+  it("does not host Manage courses or Education CMS in Settings Preferences", () => {
     const pane = readFileSync("src/components/settings/preferences-settings.tsx", "utf8");
     const preferencesPage = readFileSync("src/app/(app)/settings/preferences/page.tsx", "utf8");
-    expect(SETTINGS.manageCoursesHref).toBe("/education/manage");
-    expect(pane).toContain("SETTINGS.manageCoursesHref");
-    expect(pane).toContain("data-settings-manage-courses");
+    const settings = readFileSync("src/lib/settings.ts", "utf8");
+    expect(SETTINGS).not.toHaveProperty("manageCourses");
+    expect(SETTINGS).not.toHaveProperty("manageCoursesHref");
+    expect(settings).not.toContain("manageCourses");
+    expect(settings).not.toContain("settingsManageCoursesVisible");
+    expect(pane).not.toContain("SETTINGS.manageCoursesHref");
+    expect(pane).not.toContain("data-settings-manage-courses");
+    expect(pane).not.toContain("Manage courses");
+    expect(pane).not.toContain("/education/manage");
     expect(pane).not.toContain("education-forms");
     expect(pane).not.toContain("CreateCourseForm");
     expect(pane).not.toContain("/gc/education");
@@ -21,11 +27,12 @@ describe("settings hub isolation", () => {
     expect(existsSync("src/app/(app)/(operator)/education/manage/page.tsx")).toBe(true);
   });
 
-  it("never shows Manage courses to members", () => {
-    expect(settingsManageCoursesVisible(false)).toBe(false);
-    expect(settingsManageCoursesVisible(true)).toBe(true);
+  it("never shows Manage courses on Preferences", () => {
     const pane = readFileSync("src/components/settings/preferences-settings.tsx", "utf8");
-    expect(pane).toContain("settingsManageCoursesVisible(isGcStaff)");
+    expect(pane).not.toContain("settingsManageCoursesVisible");
+    expect(pane).not.toContain("isGcStaff");
+    expect(pane).not.toContain("Manage courses");
+    expect(pane).not.toContain("data-settings-manage-courses");
   });
 
   it("does not invent /account settings routes", () => {

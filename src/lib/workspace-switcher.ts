@@ -39,8 +39,9 @@
 // no Agg, Edu, or ellipsis-as-design. Tight width flexes the
 // trailing cluster (search yields); pills stay full words and
 // shrink-0. No All Accounts clone. No Referrals / billing.
-// Staff Manage courses stays a Settings door — not a fourth
-// lane. Education land is /education. Staff CMS is /education/manage.
+// Staff Manage courses lives on the Education workspace
+// (/education/manage), not Settings Preferences and not a
+// fourth lane. Education land is /education.
 // Education quiet search stays Education-only: phone in a
 // full-width row under HouseLeadChrome, desktop in the shared
 // mid-lead slot (same Facebook-compact geometry as Social).

@@ -7,8 +7,9 @@
 // is Aggregation | Social | Education. Member Education land
 // is /education. Staff CMS is /education/manage. Do not send
 // members to /education/manage, /account/workspace, or
-// /settings/workspace. Staff Manage courses in Settings is
-// that manage door — not workspace land.
+// /settings/workspace. Staff Manage courses is Education
+// workspace manage, not Settings Preferences and not
+// workspace land.
 
 import { USER_MENU } from "@/lib/user-menu";
 import {

@@ -2,8 +2,9 @@
 //
 // Universal Account/Settings hub — not owned by Aggregation / Social /
 // Education. Title Settings. One door from every workspace.
-// CMS is not inside Settings — staff Manage courses is a href out
-// under Preferences. Not a GC Staff admin surface.
+// CMS is not inside Settings. Staff Manage courses lives on the
+// Education workspace (/education/manage), not Preferences.
+// Not a GC Staff admin surface.
 //
 // Hub sections:
 //   Profile · Organization · Preferences
@@ -60,7 +61,6 @@
 import { HOUSE_CARD_PAD, HOUSE_MODULE_CLASS } from "@/lib/house-shell";
 import { MOBILE_CHROME_LEAD_PAD_CLASS } from "@/lib/mobile-chrome";
 import { ASK_ASSISTANT } from "@/lib/product";
-import { EDUCATION_MANAGE_HREF } from "@/lib/education";
 import { DASHBOARD_HREF } from "@/lib/dashboard-admin";
 import { USER_MENU } from "@/lib/user-menu";
 
@@ -73,8 +73,6 @@ export const SETTINGS = {
   organizationHref: "/settings/organization",
   preferences: "Preferences",
   preferencesHref: "/settings/preferences",
-  manageCourses: "Manage courses",
-  manageCoursesHref: EDUCATION_MANAGE_HREF,
   theme: "Theme",
   themeHref: "/settings/preferences/theme",
   themeHelper: "Choose Light, Dark, or System default.",
@@ -162,8 +160,6 @@ export const SETTINGS_PANE_TITLE_CLASS = "t-section text-ink";
 
 export const SETTINGS_PANE_CLASS = "flex flex-col gap-[var(--space-6)]";
 export const SETTINGS_SECTION_CLASS = "flex flex-col gap-[var(--space-6)]";
-export const SETTINGS_QUIET_ROW_CLASS =
-  "flex items-center justify-between t-body leading-5 text-ink";
 /** Quiet section label under a page title — not a second h1. */
 export const SETTINGS_SECTION_LABEL_CLASS = "t-label text-ink-3";
 
@@ -258,7 +254,7 @@ export const SETTINGS_RAIL_ABSENT = [
   "Aggregation",
   "Company",
   "Team",
-  SETTINGS.manageCourses,
+  "Manage courses",
   "Home",
 ] as const;
 
@@ -270,10 +266,6 @@ export function isSettingsPath(pathname: string): boolean {
 export function settingsLandHref(pathname?: string | null): string {
   void pathname;
   return SETTINGS.href;
-}
-
-export function settingsManageCoursesVisible(isGcStaff: boolean): boolean {
-  return isGcStaff === true;
 }
 
 /** Parent label for a Settings drill-in (`/settings/{section}/{field}`). */
