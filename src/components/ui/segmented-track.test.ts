@@ -18,7 +18,6 @@ const CONSUMERS = [
   "src/components/chrome/house-period-presets.tsx",
   "src/components/chrome/house-phone-dest-chips.tsx",
   "src/components/activity/activity-family-chips.tsx",
-  "src/components/dashboard/dashboard-ranked.tsx",
   "src/components/reports/reports-ranked.tsx",
   "src/components/reports/reports-controls.tsx",
 ] as const;
