@@ -41,7 +41,7 @@ describe("SocialForYouRail person identity", () => {
       />,
     );
     expect(html).toContain("data-social-person-row");
-    expect(html).toContain('src="https://s3.example/joshua-face"');
+    expect(html).toContain("https%3A%2F%2Fs3.example%2Fjoshua-face");
     expect(html).not.toContain("JA");
     expect(html).not.toContain("Actor");
   });

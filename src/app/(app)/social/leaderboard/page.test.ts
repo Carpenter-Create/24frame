@@ -224,7 +224,7 @@ describe("Social leaderboard", () => {
     );
 
     const html = await renderPage();
-    expect(html).toContain('src="https://s3.example/other-face"');
+    expect(html).toContain("https%3A%2F%2Fs3.example%2Fother-face");
     expect(html).toContain("Other");
     expect(html).toContain("Ada");
     expect(html).toContain(">A<");
