@@ -13,6 +13,13 @@ import {
   type FollowingWallCursor,
 } from "@/lib/social-home-bounds";
 import { SOCIAL_PROFILE_POSTS_PAGE, socialPersonIdentity, socialProfileHref } from "@/lib/social";
+import {
+  SOCIAL_MUTUALS_NAME_CAP,
+  SOCIAL_MUTUALS_PROBE,
+  emptySocialProfileMutuals,
+  socialMutualFromProfile,
+  type SocialProfileMutuals,
+} from "@/lib/social-profile-mutuals";
 import { rankSocialSuggestedPeople, socialPostAffinityScore } from "@/lib/social-role-affinity";
 import { isStoryLive, storyRailUnseen } from "@/lib/social-stories";
 
@@ -27,6 +34,7 @@ export type SocialProfileRow = {
   welcome_video_key?: string | null;
   crafts?: string[] | null;
   imdb_url?: string | null;
+  website_url?: string | null;
 };
 
 export type SocialPostRow = {
@@ -100,6 +108,43 @@ export async function loadIsFollowing(
     .eq("followee_id", followeeId)
     .maybeSingle();
   return !!data;
+}
+
+export async function loadProfileMutuals(
+  supabase: ServerClient,
+  viewerId: string,
+  profileId: string,
+): Promise<SocialProfileMutuals> {
+  if (!viewerId || viewerId === profileId) return emptySocialProfileMutuals();
+  const followees = await loadFolloweeIds(supabase, viewerId);
+  const candidate = followees.ids.filter((id) => id !== profileId);
+  if (candidate.length === 0) return emptySocialProfileMutuals();
+
+  const { data } = await supabase
+    .from("follows")
+    .select("follower_id")
+    .eq("followee_id", profileId)
+    .in("follower_id", candidate)
+    .order("created_at", { ascending: false })
+    .range(...probeRange(SOCIAL_MUTUALS_PROBE));
+  const { rows } = splitProbe(data, SOCIAL_MUTUALS_PROBE);
+  const overlapIds = [...new Set(rows.map((row) => row.follower_id))];
+  if (overlapIds.length === 0) return emptySocialProfileMutuals();
+
+  const shownIds = overlapIds.slice(0, SOCIAL_MUTUALS_NAME_CAP);
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, handle, display_name")
+    .in("id", shownIds);
+  const byId = new Map((profiles ?? []).map((row) => [row.id, row]));
+  const people = shownIds
+    .map((id) => {
+      const row = byId.get(id);
+      return row ? socialMutualFromProfile(row) : null;
+    })
+    .filter((row): row is NonNullable<typeof row> => !!row);
+  if (people.length === 0) return emptySocialProfileMutuals();
+  return { people, extra: Math.max(0, overlapIds.length - people.length) };
 }
 
 export type SocialProfileCounts = {

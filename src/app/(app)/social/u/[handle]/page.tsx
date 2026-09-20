@@ -36,6 +36,7 @@ import {
   loadIsFollowing,
   loadLikedPostIds,
   loadLiveStories,
+  loadProfileMutuals,
   loadProfileSocialCounts,
   loadSuggestedPeople,
 } from "@/lib/social-feed";
@@ -121,6 +122,11 @@ export default async function SocialPublicProfilePage({
     : new Set<string>();
   const counts = await loadProfileSocialCounts(supabase, member.id);
   const followees = await loadFolloweeIds(supabase, ctx.user.id);
+  const mutuals = isSelf ? null : await loadProfileMutuals(supabase, ctx.user.id, member.id);
+  const mutualFaces =
+    mutuals && mutuals.people.length > 0
+      ? await signedAvatarUrls(mutuals.people.map((person) => person.id))
+      : new Map();
   const suggested = await loadSuggestedPeople(
     supabase,
     [ctx.user.id, member.id, ...followees.ids],
@@ -147,9 +153,21 @@ export default async function SocialPublicProfilePage({
           photoUrl={photoUrl}
           bio={member.bio}
           roles={member.crafts}
+          websiteUrl={member.website_url}
           imdbUrl={member.imdb_url}
           ring={liveStories.length > 0 ? "live" : null}
           stats={counts}
+          mutuals={
+            mutuals && mutuals.people.length > 0
+              ? {
+                  people: mutuals.people.map((person) => ({
+                    ...person,
+                    photoUrl: mutualFaces.get(person.id) ?? null,
+                  })),
+                  extra: mutuals.extra,
+                }
+              : null
+          }
           actions={
             isSelf
               ? () => <SocialShareButton handle={member.handle} stretch />

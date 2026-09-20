@@ -8,7 +8,6 @@ import {
   SOCIAL_ACTION_CLASS,
   SOCIAL_ACTION_SECONDARY_CLASS,
   SOCIAL_FEED_ROW_CLASS,
-  SOCIAL_HANDLE_PILL_CLASS,
   SOCIAL_HIGHLIGHT_RING_CLASS,
   SOCIAL_PROFILE_GRID_CLASS,
   SOCIAL_PROFILE_TILE_CLASS,
@@ -23,11 +22,18 @@ import {
   socialPersonIdentity,
   socialRelativeTime,
 } from "@/lib/social";
+import {
+  socialFollowedByLine,
+  SOCIAL_MUTUALS_FACE_CAP,
+  type SocialProfileMutuals,
+} from "@/lib/social-profile-mutuals";
+import { socialProfilePublicLinks } from "@/lib/social-profile-links";
 import { socialProfileRolesLine } from "@/lib/social-profile-roles";
 import { SocialAvatar } from "./social-avatar";
 import { SocialLikeButton } from "./social-forms";
 import { SocialEmpty } from "./social-empty";
 import { SocialIcon } from "./social-icon";
+import { SocialProfileLinkRow } from "./social-profile-links";
 
 export { SocialAvatar } from "./social-avatar";
 
@@ -161,10 +167,12 @@ export function SocialProfileIdentity({
   photoUrl,
   bio,
   roles,
+  websiteUrl,
   imdbUrl,
   ring = null,
   photoAction,
   stats,
+  mutuals = null,
   actions,
   children,
 }: {
@@ -173,16 +181,24 @@ export function SocialProfileIdentity({
   photoUrl?: string | null;
   bio?: string | null;
   roles?: readonly string[] | null;
+  websiteUrl?: string | null;
   imdbUrl?: string | null;
   ring?: "unseen" | "live" | null;
   photoAction?: ReactNode;
   stats?: { posts: number; followers: number; following: number };
+  mutuals?: SocialProfileMutuals | null;
   actions?: () => ReactNode;
   children?: ReactNode;
 }) {
   const person = socialPersonIdentity({ handle, displayName: name });
-  const title = person.name ?? person.handleLabel;
   const rolesLine = socialProfileRolesLine(roles ?? []);
+  const links = socialProfilePublicLinks({ websiteUrl, imdbUrl });
+  const followedBy = mutuals
+    ? socialFollowedByLine(
+        mutuals.people.slice(0, SOCIAL_MUTUALS_FACE_CAP).map((peer) => peer.label),
+        mutuals.extra,
+      )
+    : null;
   const actionRow = actions ? (
     <div className="flex w-full items-center gap-2 md:w-auto">
       {actions()}
@@ -199,72 +215,66 @@ export function SocialProfileIdentity({
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
             <div className="min-w-0">
-              <p className="text-[18px] font-semibold text-ink md:text-[22px]">{title}</p>
-              <p className={cn(SOCIAL_HANDLE_PILL_CLASS, "mt-1")}>{person.handleLabel}</p>
-              {rolesLine ? (
-                <p data-social-profile-roles="" className="mt-1 break-words t-body-sm text-ink-2">
-                  {rolesLine}
+              <p
+                data-social-profile-handle=""
+                className="break-words text-[18px] font-semibold text-ink md:text-[22px]"
+              >
+                {person.handleLabel}
+              </p>
+              {person.name ? (
+                <p data-social-profile-name="" className="mt-1 break-words t-body-sm text-ink-2">
+                  {person.name}
                 </p>
               ) : null}
-              {imdbUrl ? (
-                <a
-                  data-social-profile-imdb=""
-                  href={imdbUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-1 t-label text-ink-2"
-                >
-                  {SOCIAL.profile.imdb}
-                </a>
+              {stats ? (
+                <div data-social-profile-stats="" className="mt-2 flex flex-wrap gap-4 t-body-sm">
+                  <p>
+                    <span className="font-semibold text-ink">{formatSocialCount(stats.posts)}</span>{" "}
+                    <span className="text-ink-2">{SOCIAL.profile.postsStat}</span>
+                  </p>
+                  <p>
+                    <span className="font-semibold text-ink">{formatSocialCount(stats.followers)}</span>{" "}
+                    <span className="text-ink-2">{SOCIAL.profile.followersStat}</span>
+                  </p>
+                  <p>
+                    <span className="font-semibold text-ink">{formatSocialCount(stats.following)}</span>{" "}
+                    <span className="text-ink-2">{SOCIAL.profile.followingStat}</span>
+                  </p>
+                </div>
+              ) : null}
+              {rolesLine ? (
+                <p data-social-profile-roles="" className="mt-2 break-words t-body-sm text-ink-2">
+                  {rolesLine}
+                </p>
               ) : null}
             </div>
             {actionRow ? <div className="hidden shrink-0 md:flex">{actionRow}</div> : null}
           </div>
-          {bio?.trim() ? (
-            <p data-social-profile-bio="" className="hidden t-body text-ink whitespace-pre-wrap md:block">
-              {bio}
-            </p>
-          ) : null}
-          {stats ? (
-            <div data-social-profile-stats="" className="hidden flex-wrap gap-5 t-body md:flex">
-              <p>
-                <span className="font-semibold text-ink">{formatSocialCount(stats.posts)}</span>{" "}
-                <span className="text-ink-2">{SOCIAL.profile.postsStat}</span>
-              </p>
-              <p>
-                <span className="font-semibold text-ink">{formatSocialCount(stats.followers)}</span>{" "}
-                <span className="text-ink-2">{SOCIAL.profile.followersStat}</span>
-              </p>
-              <p>
-                <span className="font-semibold text-ink">{formatSocialCount(stats.following)}</span>{" "}
-                <span className="text-ink-2">{SOCIAL.profile.followingStat}</span>
-              </p>
-            </div>
-          ) : null}
         </div>
       </div>
       {bio?.trim() ? (
-        <p data-social-profile-bio="" className="t-body-sm text-ink whitespace-pre-wrap md:hidden">
+        <p data-social-profile-bio="" className="t-body-sm text-ink whitespace-pre-wrap md:t-body">
           {bio}
         </p>
       ) : null}
-      {stats ? (
-        <div data-social-profile-stats="" className="flex flex-wrap gap-4 t-body-sm md:hidden">
-          <p>
-            <span className="font-semibold text-ink">{formatSocialCount(stats.posts)}</span>{" "}
-            <span className="text-ink-2">{SOCIAL.profile.postsStat}</span>
-          </p>
-          <p>
-            <span className="font-semibold text-ink">{formatSocialCount(stats.followers)}</span>{" "}
-            <span className="text-ink-2">{SOCIAL.profile.followersStat}</span>
-          </p>
-          <p>
-            <span className="font-semibold text-ink">{formatSocialCount(stats.following)}</span>{" "}
-            <span className="text-ink-2">{SOCIAL.profile.followingStat}</span>
-          </p>
+      <SocialProfileLinkRow links={links} />
+      {actionRow ? <div className="flex md:hidden">{actionRow}</div> : null}
+      {followedBy ? (
+        <div data-social-profile-mutuals="" className="flex min-w-0 items-center gap-2">
+          <div data-social-profile-mutuals-faces="" className="flex shrink-0">
+            {mutuals?.people.slice(0, SOCIAL_MUTUALS_FACE_CAP).map((peer, index) => (
+              <SocialAvatar
+                key={peer.id}
+                name={peer.label}
+                photoUrl={peer.photoUrl}
+                size="sm"
+                className={index === 0 ? undefined : "-ml-2"}
+              />
+            ))}
+          </div>
+          <p className="min-w-0 break-words t-body-sm text-ink-2">{followedBy}</p>
         </div>
       ) : null}
-      {actionRow ? <div className="flex md:hidden">{actionRow}</div> : null}
       {children}
     </div>
   );

@@ -88,7 +88,7 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(socialBioCount("Founder\nInvestor")).toBe(16);
   });
 
-  it("reuses the app-wide avatar SoT and does not invent a links editor", () => {
+  it("reuses the app-wide avatar SoT and edits links in place", () => {
     expect(avatarObjectKey("11111111-1111-4111-8111-111111111111")).toBe(
       "avatars/11111111-1111-4111-8111-111111111111/avatar",
     );
@@ -98,6 +98,8 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(edit).toContain("uploadAccountPhoto");
     expect(edit).toContain("SOCIAL.profile.editPicture");
     expect(edit).toContain("SOCIAL.profile.addLink");
+    expect(edit).toContain("parseSocialWebsiteUrlField");
+    expect(edit).toContain('form.set("links"');
     expect(edit).not.toContain("SOCIAL_ROUTES.profileBio}/link");
     expect(bioPage).toContain("SocialProfileBioEditor");
     expect(SOCIAL_ROUTES.profileEdit).toBe("/social/profile/edit");

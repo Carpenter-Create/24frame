@@ -88,6 +88,7 @@ function stubClient({
     welcome_video_key?: string | null;
     crafts?: string[] | null;
     imdb_url?: string | null;
+    website_url?: string | null;
   } | null;
   posts?: {
     id: string;
@@ -254,7 +255,9 @@ describe("Social profile public face", () => {
     const html = await renderServerMarkup(await SocialProfilePage());
     expect(html).toContain("data-social-profile-roles");
     expect(html).toContain("Actor · Producer · Screenwriter +1");
+    expect(html.indexOf("data-social-profile-handle")).toBeLessThan(html.indexOf("data-social-profile-name"));
     expect(html.indexOf("@ada")).toBeLessThan(html.indexOf("Actor · Producer · Screenwriter +1"));
+    expect(html).not.toContain("data-social-profile-mutuals");
     expect(html).not.toContain("Roles:");
     expect(html).not.toContain("data-social-profile-imdb");
   });
@@ -274,6 +277,24 @@ describe("Social profile public face", () => {
     expect(html).toContain('href="https://www.imdb.com/name/nm0000158/"');
     expect(html).toContain(SOCIAL.profile.imdb);
     expect(html).not.toContain("Connect to scrape");
+    expect(html).not.toContain(">https://www.imdb.com/name/nm0000158/<");
+  });
+
+  it("renders Instagram as an icon, not a raw URL, and omits the links row when empty", async () => {
+    stubClient({
+      profile: { ...ensured, website_url: "https://instagram.com/ada" },
+    });
+    vi.mocked(ensureOwnSocialProfileResult).mockResolvedValue({
+      profile: { ...ensured, website_url: "https://instagram.com/ada" },
+      error: null,
+    });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const html = await renderServerMarkup(await SocialProfilePage());
+    expect(html).toContain("data-social-profile-links");
+    expect(html).toContain('data-social-profile-link="instagram"');
+    expect(html).toContain('href="https://instagram.com/ada"');
+    expect(html).not.toContain(">https://instagram.com/ada<");
   });
 
   it("renders the welcome video band only when a signed URL exists", async () => {

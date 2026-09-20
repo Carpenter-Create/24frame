@@ -44,6 +44,7 @@ import {
 import { takeSocialHomeComposerMedia } from "@/lib/social-home-composer";
 import {
   displayHandle,
+  normalizeHandle,
   SOCIAL,
   SOCIAL_CREATE_KINDS,
   socialCreateWellCopy,
@@ -95,6 +96,11 @@ export function SocialProfileCreateForm({
         if (required) {
           setPending(false);
           setError(required);
+          return;
+        }
+        if (!normalizeHandle(String(formData.get("handle") ?? ""))) {
+          setPending(false);
+          setError(SOCIAL.profile.handleInvalid);
           return;
         }
         const result = await createSocialProfile(formData);

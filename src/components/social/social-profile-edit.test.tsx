@@ -54,6 +54,9 @@ describe("SocialProfileEditForm", () => {
     expect(html).not.toContain('href="/social/profile/edit/bio"');
     expect(html).toContain(SOCIAL.profile.links);
     expect(html).toContain(SOCIAL.profile.addLink);
+    expect(html).toContain("data-social-profile-edit-links");
+    expect(html).toContain('id="social-edit-link-0"');
+    expect(html).toContain(SOCIAL.profile.linkPlaceholder);
     expect(html).toContain(SOCIAL.profile.editPicture);
     expect(html).toContain("data-social-profile-edit-avatar-drop");
     expect(html).toContain("data-social-profile-edit-welcome");

@@ -54,7 +54,7 @@ function stubClient({
 describe("ensureOwnSocialProfile", () => {
   it("loads welcome video and crafts with the shared profile columns", () => {
     expect(SOCIAL_PROFILE_COLUMNS).toBe(
-      "id, handle, display_name, status, bio, welcome_video_key, crafts, imdb_url",
+      "id, handle, display_name, status, bio, welcome_video_key, crafts, imdb_url, website_url",
     );
   });
 

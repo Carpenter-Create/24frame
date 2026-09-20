@@ -26,6 +26,7 @@ export default async function SocialProfileEditPage() {
       welcomeVideoUrl={welcomeVideoUrl}
       crafts={profile.crafts ?? []}
       imdbUrl={profile.imdb_url ?? ""}
+      websiteUrl={profile.website_url ?? ""}
     />
   );
 }

@@ -147,7 +147,10 @@ export function matchDecoratedInAppProfilePath(pathname: string): string | null 
 }
 
 export function socialProfileRewriteTarget(pathname: string): string | null {
-  const handle = matchSocialVanityPath(pathname) ?? matchDecoratedInAppProfilePath(pathname);
+  const handle =
+    matchSocialPublicAtPath(pathname) ??
+    matchSocialVanityPath(pathname) ??
+    matchDecoratedInAppProfilePath(pathname);
   return handle ? socialProfileHref(handle) : null;
 }
 
@@ -487,6 +490,10 @@ export const SOCIAL = {
     editPicture: "Edit picture",
     links: "Links",
     addLink: "Add link",
+    removeLink: "Remove",
+    linkPlaceholder: "https://",
+    linkInvalid: "Enter a valid http or https URL.",
+    linkLimit: "You can add up to 8 links.",
     birthDate: "Date of birth",
     birthDateHint: "Required. You must be 13 or older.",
     submit: "Save handle",
@@ -530,6 +537,8 @@ export const SOCIAL = {
     imdbPlaceholder: "imdb.com/name/nm… or nm########",
     imdbInvalid: "Enter an IMDb name URL or nm id.",
     imdbHint: "A public link to your IMDb name page.",
+    followedBy: "Followed by",
+    followedByMore: "+{n} more",
   },
   member: {
     title: "Member",

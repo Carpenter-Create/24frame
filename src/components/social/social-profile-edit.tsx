@@ -53,6 +53,10 @@ import {
   splitSocialDisplayName,
   stripHandleDecorators,
 } from "@/lib/social";
+import {
+  SOCIAL_PROFILE_LINKS_MAX,
+  parseSocialWebsiteUrlField,
+} from "@/lib/social-profile-links";
 import { parseSocialProfileRoles } from "@/lib/social-profile-roles";
 import { socialProfileEditFace, type SocialProfileEditFace } from "@/lib/social-profile-edit";
 
@@ -94,6 +98,7 @@ export function SocialProfileEditForm({
   welcomeVideoUrl = null,
   crafts = [],
   imdbUrl = "",
+  websiteUrl = "",
 }: {
   handle: string;
   displayName: string;
@@ -102,6 +107,7 @@ export function SocialProfileEditForm({
   welcomeVideoUrl?: string | null;
   crafts?: readonly string[];
   imdbUrl?: string | null;
+  websiteUrl?: string | null;
 }) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -123,6 +129,10 @@ export function SocialProfileEditForm({
   const [bioText, setBioText] = useState(bio);
   const [roles, setRoles] = useState(() => parseSocialProfileRoles(crafts));
   const [imdb, setImdb] = useState(imdbUrl ?? "");
+  const [linkDrafts, setLinkDrafts] = useState(() => {
+    const urls = parseSocialWebsiteUrlField(websiteUrl);
+    return urls.length > 0 ? urls : [""];
+  });
   const preview = socialProfilePublicUrl(bareHandle(username));
   const required = socialHandleRequiredError(username);
 
@@ -264,6 +274,7 @@ export function SocialProfileEditForm({
     form.set("display_name", composeSocialDisplayName(firstName, lastName, middleName));
     form.set("crafts", JSON.stringify(roles));
     form.set("imdb_url", imdb);
+    form.set("links", JSON.stringify(linkDrafts));
     const result = await createSocialProfile(form);
     setPending(false);
     if (result.error) {
@@ -519,12 +530,51 @@ export function SocialProfileEditForm({
               </span>
             </button>
             <div className="h-px bg-hairline" />
-            <div data-social-profile-edit-links="" className={SOCIAL_PROFILE_EDIT_ROW_CLASS}>
+            <div data-social-profile-edit-links="" className="flex flex-col gap-2 py-4">
               <span className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>{SOCIAL.profile.links}</span>
-              <span className="flex min-w-0 flex-1 items-center gap-2">
-                <span className="min-w-0 flex-1 t-body-sm text-ink-2">{SOCIAL.profile.addLink}</span>
-                <SocialIcon name="caret-right" size={16} className="shrink-0 text-ink-2" />
-              </span>
+              <div className="flex min-w-0 flex-1 flex-col gap-2">
+                {linkDrafts.map((value, index) => (
+                  <div
+                    key={`social-edit-link-${index}`}
+                    className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center"
+                  >
+                    <Input
+                      variant="bare"
+                      id={index === 0 ? "social-edit-link-0" : undefined}
+                      name="links"
+                      value={value}
+                      placeholder={SOCIAL.profile.linkPlaceholder}
+                      onChange={(e) => {
+                        const next = [...linkDrafts];
+                        next[index] = e.target.value;
+                        setLinkDrafts(next);
+                      }}
+                      className="min-w-0 flex-1"
+                      autoComplete="url"
+                    />
+                    {linkDrafts.length > 1 ? (
+                      <button
+                        type="button"
+                        data-social-profile-edit-link-remove=""
+                        onClick={() => setLinkDrafts(linkDrafts.filter((_, i) => i !== index))}
+                        className="t-label text-ink-2"
+                      >
+                        {SOCIAL.profile.removeLink}
+                      </button>
+                    ) : null}
+                  </div>
+                ))}
+                {linkDrafts.length < SOCIAL_PROFILE_LINKS_MAX ? (
+                  <button
+                    type="button"
+                    data-social-profile-edit-link-add=""
+                    onClick={() => setLinkDrafts([...linkDrafts, ""])}
+                    className="self-start t-body-sm font-medium text-ink"
+                  >
+                    {SOCIAL.profile.addLink}
+                  </button>
+                ) : null}
+              </div>
             </div>
           </div>
           {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}

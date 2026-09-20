@@ -145,6 +145,39 @@ describe("social actions", () => {
     expect(await createSocialProfile(blankLast)).toEqual({ error: SOCIAL.profile.lastNameRequired });
   });
 
+  it("stores typed handle casing and rejects a leading period", async () => {
+    const { updates } = stub({
+      profile: { id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" },
+    });
+    const form = new FormData();
+    form.set("handle", "@AdamC");
+    form.set("first_name", "Adam");
+    form.set("last_name", "Carpenter");
+    expect(await createSocialProfile(form)).toEqual({});
+    expect(updates[0]).toEqual({
+      table: "profiles",
+      row: { handle: "AdamC", display_name: "Adam Carpenter" },
+    });
+
+    const dotted = new FormData();
+    dotted.set("handle", "@.AdamC");
+    dotted.set("first_name", "Adam");
+    dotted.set("last_name", "Carpenter");
+    expect(await createSocialProfile(dotted)).toEqual({ error: SOCIAL.profile.handleInvalid });
+  });
+
+  it("rejects a case-insensitive handle collision", async () => {
+    stub({
+      profile: { id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" },
+      updateError: { message: "duplicate key", code: "23505" },
+    });
+    const form = new FormData();
+    form.set("handle", "@OtherUser");
+    form.set("first_name", "Ada");
+    form.set("last_name", "Lovelace");
+    expect(await createSocialProfile(form)).toEqual({ error: SOCIAL.profile.handleTaken });
+  });
+
   it("persists ordered Role slugs on crafts and the first as primary_role", async () => {
     const { updates } = stub({
       profile: { id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" },
@@ -224,6 +257,63 @@ describe("social actions", () => {
     bad.set("last_name", "Lovelace");
     bad.set("imdb_url", "https://www.imdb.com/title/tt0111161/");
     expect(await createSocialProfile(bad)).toEqual({ error: SOCIAL.profile.imdbInvalid });
+  });
+
+  it("persists ordered external links on website_url and rejects a bad URL", async () => {
+    const { updates } = stub({
+      profile: { id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" },
+    });
+    const form = new FormData();
+    form.set("handle", "@ada");
+    form.set("first_name", "Ada");
+    form.set("last_name", "Lovelace");
+    form.set("links", JSON.stringify(["https://instagram.com/ada", "https://youtube.com/@ada"]));
+    expect(await createSocialProfile(form)).toEqual({});
+    expect(updates[0]).toEqual({
+      table: "profiles",
+      row: {
+        handle: "ada",
+        display_name: "Ada Lovelace",
+        website_url: JSON.stringify(["https://instagram.com/ada", "https://youtube.com/@ada"]),
+      },
+    });
+
+    const single = new FormData();
+    single.set("handle", "@ada");
+    single.set("first_name", "Ada");
+    single.set("last_name", "Lovelace");
+    single.set("links", JSON.stringify(["instagram.com/ada"]));
+    expect(await createSocialProfile(single)).toEqual({});
+    expect(updates[1]).toEqual({
+      table: "profiles",
+      row: {
+        handle: "ada",
+        display_name: "Ada Lovelace",
+        website_url: "https://instagram.com/ada",
+      },
+    });
+
+    const cleared = new FormData();
+    cleared.set("handle", "@ada");
+    cleared.set("first_name", "Ada");
+    cleared.set("last_name", "Lovelace");
+    cleared.set("links", JSON.stringify(["", ""]));
+    expect(await createSocialProfile(cleared)).toEqual({});
+    expect(updates[2]).toEqual({
+      table: "profiles",
+      row: {
+        handle: "ada",
+        display_name: "Ada Lovelace",
+        website_url: null,
+      },
+    });
+
+    const bad = new FormData();
+    bad.set("handle", "@ada");
+    bad.set("first_name", "Ada");
+    bad.set("last_name", "Lovelace");
+    bad.set("links", JSON.stringify(["not-a-url"]));
+    expect(await createSocialProfile(bad)).toEqual({ error: SOCIAL.profile.linkInvalid });
   });
 
   it("saves and clears the welcome video pointer without deleting media", async () => {

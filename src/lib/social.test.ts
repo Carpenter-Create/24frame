@@ -310,6 +310,9 @@ describe("profile opt-in", () => {
     expect(socialProfileCasingRedirect("ADAMC", "AdamC")).toBe("/@AdamC");
     expect(socialProfileCasingRedirect("AdamC", "AdamC")).toBeNull();
     expect(socialProfileCasingRedirect("ada", "AdamC")).toBeNull();
+    expect(SOCIAL.profile.handleTaken).toBe("That handle is already taken.");
+    expect(SOCIAL.profile.followedBy).toBe("Followed by");
+    expect(SOCIAL.profile.followedByMore).toBe("+{n} more");
     expect(SOCIAL_PROFILE_ORIGIN).toBe("https://24frame.co");
     expect(socialProfilePublicUrl("acarpcreate")).not.toContain("app.24frame.co");
     expect(socialProfilePublicUrl("acarpcreate")).not.toContain("/social/u/");
@@ -359,6 +362,8 @@ describe("profile opt-in", () => {
     expect(parseProfileHandleParam("AdamC")).toBe("AdamC");
     expect(parseProfileHandleParam("@ada")).toBe("ada");
     expect(parseProfileHandleParam("ada")).toBe("ada");
+    expect(parseProfileHandleParam("%40AdamC")).toBe("AdamC");
+    expect(parseProfileHandleParam("AdamC")).toBe("AdamC");
     expect(suggestedHandleSeed("Ada.Carp@example.com", "u1")).toBe("adacarp");
     expect(BIO_MAX).toBe(150);
     expect(socialBioEnterSubmits()).toBe(false);

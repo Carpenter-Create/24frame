@@ -30,7 +30,7 @@ vi.mock("@/lib/s3-social-media", () => ({
 vi.mock("@/lib/social-profile", () => ({
   ensureOwnSocialProfile: vi.fn(),
   SOCIAL_PROFILE_COLUMNS:
-    "id, handle, display_name, status, bio, welcome_video_key, crafts, imdb_url",
+    "id, handle, display_name, status, bio, welcome_video_key, crafts, imdb_url, website_url",
 }));
 vi.mock("@/app/(app)/social/actions", () => ({
   toggleSocialFollow: vi.fn(),
@@ -82,6 +82,7 @@ type PublicProfile = {
   bio: string | null;
   crafts?: string[] | null;
   imdb_url?: string | null;
+  website_url?: string | null;
 };
 
 const ada: PublicProfile = {
@@ -342,6 +343,7 @@ describe("Social public profile", () => {
     expect(src).toContain("socialProfileCasingRedirect");
     expect(src).toContain("generateMetadata");
     expect(src).toContain("socialProfileCanonicalUrl");
+    expect(src).toContain("loadProfileMutuals");
     expect(src).not.toContain("putAvatarObject");
     expect(src).not.toContain("uploadAccountPhoto");
     expect(src).not.toContain("S3_AVATARS_BUCKET");

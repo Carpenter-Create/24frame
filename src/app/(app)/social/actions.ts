@@ -18,6 +18,11 @@ import { storyInsertRow, storyViewInsertRow } from "@/lib/social-stories";
 import { ensureOwnSocialProfile, isProfileUniqueViolation } from "@/lib/social-profile";
 import { handleTakenError, lookupHandleCollision } from "@/lib/social-handle-taken";
 import { socialProfileRolesWrite } from "@/lib/social-profile-roles";
+import {
+  composeSocialWebsiteUrlField,
+  parseSocialProfileLinksWrite,
+  socialProfileLinkError,
+} from "@/lib/social-profile-links";
 import { parseSocialImdbInput } from "@/lib/social-imdb";
 import { SOCIAL_DM_ADD_BATCH_LIMIT } from "@/lib/social-dm-bounds";
 import {
@@ -107,6 +112,10 @@ export async function createSocialProfile(formData: FormData): Promise<ActionRes
     ? parseSocialImdbInput(String(formData.get("imdb_url") ?? ""))
     : null;
   if (imdb?.error) return { error: SOCIAL.profile.imdbInvalid };
+  const links = formData.has("links")
+    ? parseSocialProfileLinksWrite(String(formData.get("links") ?? ""))
+    : null;
+  if (links?.error) return { error: socialProfileLinkError(links.error) ?? SOCIAL.profile.linkInvalid };
 
   if (profile) {
     const { error } = await supabase
@@ -118,6 +127,7 @@ export async function createSocialProfile(formData: FormData): Promise<ActionRes
           ? { crafts: roles.crafts, primary_role: roles.primary_role }
           : {}),
         ...(imdb ? { imdb_url: imdb.url } : {}),
+        ...(links ? { website_url: composeSocialWebsiteUrlField(links.urls) } : {}),
       })
       .eq("id", user.id);
     if (error) {
@@ -143,6 +153,7 @@ export async function createSocialProfile(formData: FormData): Promise<ActionRes
               ? { crafts: roles.crafts, primary_role: roles.primary_role }
               : {}),
             ...(imdb ? { imdb_url: imdb.url } : {}),
+            ...(links ? { website_url: composeSocialWebsiteUrlField(links.urls) } : {}),
           })
           .eq("id", user.id);
         if (updateError) {
