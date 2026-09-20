@@ -29,6 +29,7 @@ import {
   SETTINGS_PANE_CLASS,
   SETTINGS_PANE_TITLE_CLASS,
   SETTINGS_SECTION_LABEL_CLASS,
+  SETTINGS_CONTENT_MEASURE_CLASS,
   SETTINGS_PREF_BLOCK_CLASS,
   SETTINGS_PREF_TITLE_CLASS,
   SETTINGS_RAIL_ABSENT,
@@ -377,6 +378,16 @@ describe("settings hub lock", () => {
     expect(SETTINGS_PREF_BLOCK_CLASS).not.toContain("card-surface");
     expect(SETTINGS_PREF_TITLE_CLASS).toBe("t-heading text-ink");
     expect(SETTINGS_PREF_TITLE_CLASS).not.toContain("t-section");
+  });
+
+  it("locks desktop Preferences to a constrained measure — not rail-to-edge rows", () => {
+    expect(SETTINGS_CONTENT_MEASURE_CLASS).toBe("w-full md:max-w-[40rem]");
+    expect(SETTINGS_CONTENT_MEASURE_CLASS).toContain("md:max-w-[40rem]");
+    expect(SETTINGS_CONTENT_MEASURE_CLASS).not.toContain("mx-auto");
+    expect(SETTINGS_PREF_BLOCK_CLASS).toContain(SETTINGS_CONTENT_MEASURE_CLASS);
+    const settingsSrc = readFileSync("src/lib/settings.ts", "utf8");
+    expect(settingsSrc).toContain("constrained measure");
+    expect(settingsSrc).toContain("not full-bleed rows");
   });
 
   it("locks the settings rail on 220 pad 16 and house workspace-rail SoT", () => {

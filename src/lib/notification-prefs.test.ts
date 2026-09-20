@@ -32,7 +32,7 @@ import {
   parseNotificationPrefsRow,
   withNotificationPref,
 } from "./notification-prefs";
-import { SETTINGS_PREF_TITLE_CLASS } from "./settings";
+import { SETTINGS_CONTENT_MEASURE_CLASS, SETTINGS_PREF_TITLE_CLASS } from "./settings";
 
 describe("notification prefs SoT", () => {
   it("locks the 26 founder events in Aggregation / Social / Education / Account", () => {
@@ -103,6 +103,9 @@ describe("notification prefs SoT", () => {
   it("sections groups with hairline + air — one plate, not a card per group", () => {
     expect(NOTIFICATION_PREF_WRAP_CLASS).toContain(HOUSE_MODULE_CLASS);
     expect(NOTIFICATION_PREF_WRAP_CLASS).toContain(HOUSE_CARD_PAD);
+    expect(NOTIFICATION_PREF_WRAP_CLASS).toContain(SETTINGS_CONTENT_MEASURE_CLASS);
+    expect(NOTIFICATION_PREF_HEAD_CLASS).toContain("grid-cols-[minmax(0,1fr)_auto_auto]");
+    expect(NOTIFICATION_PREF_ROW_CLASS).toContain("grid-cols-[minmax(0,1fr)_auto_auto]");
     expect(NOTIFICATION_PREF_SECTION_CLASS).not.toContain(HOUSE_MODULE_CLASS);
     expect(NOTIFICATION_PREF_SECTION_CLASS).not.toContain(HOUSE_CARD_PAD);
     expect(NOTIFICATION_PREF_SECTION_CLASS).toContain("py-[var(--space-8)]");

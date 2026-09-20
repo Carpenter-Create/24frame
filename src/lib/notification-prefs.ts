@@ -19,7 +19,7 @@ import { z } from "zod";
 
 import { HOUSE_CARD_PAD, HOUSE_MODULE_CLASS, HOUSE_SECTION_AIR_CLASS } from "@/lib/house-shell";
 import type { NotificationKind } from "@/lib/notifications";
-import { SETTINGS_PREF_TITLE_CLASS } from "@/lib/settings";
+import { SETTINGS_CONTENT_MEASURE_CLASS, SETTINGS_PREF_TITLE_CLASS } from "@/lib/settings";
 
 export const NOTIFICATION_PREF_EVENTS = [
   "title_returned",
@@ -229,7 +229,7 @@ export const NOTIFICATION_PREF_GROUPS: readonly {
 // One soft plate around Notifications. Groups inside are titles +
 // hairline + air — not a muted card per group (Adam lock).
 export const NOTIFICATION_PREF_WRAP_CLASS =
-  `${HOUSE_MODULE_CLASS} ${HOUSE_CARD_PAD} flex flex-col ${HOUSE_SECTION_AIR_CLASS}`;
+  `${HOUSE_MODULE_CLASS} ${HOUSE_CARD_PAD} ${SETTINGS_CONTENT_MEASURE_CLASS} flex flex-col ${HOUSE_SECTION_AIR_CLASS}`;
 export const NOTIFICATION_PREF_INTRO_CLASS = "flex flex-col gap-[var(--space-2)]";
 export const NOTIFICATION_PREF_MATRIX_CLASS = "flex flex-col divide-y divide-hairline";
 export const NOTIFICATION_PREF_SECTION_CLASS =

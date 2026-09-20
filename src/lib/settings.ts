@@ -19,7 +19,9 @@
 // sun/moon) and the notification matrix. Mobile Preferences is a
 // Coinbase drill-in: Theme and Notifications are rows; edit panes
 // live at /theme and /notifications. Desktop keeps the on-page
-// card and matrix. Leftover workspace prefs may appear as optional
+// card and matrix inside SETTINGS_CONTENT_MEASURE_CLASS — a
+// constrained measure, not full-bleed rows across the rail-to-edge
+// span. Leftover workspace prefs may appear as optional
 // subsections only — never as a You / Social / Education /
 // Aggregation spine.
 //
@@ -191,8 +193,11 @@ export const SETTINGS_EDIT_HELPER_CLASS = SETTINGS_DIALOG_HELP_CLASS;
 // Preferences Appearance — house muted module + pad 16. Same surface
 // as dashboard / directory modules. Not card-surface (Profile /
 // Organization form frame). Notification groups are not this card.
+// Desktop: readable settings column (~40rem). Phone stays full
+// content width — do not constrain the Coinbase drill-in stack.
+export const SETTINGS_CONTENT_MEASURE_CLASS = "w-full md:max-w-[40rem]";
 export const SETTINGS_PREF_BLOCK_CLASS =
-  `${HOUSE_MODULE_CLASS} ${HOUSE_CARD_PAD} flex flex-col gap-[var(--space-3)]`;
+  `${HOUSE_MODULE_CLASS} ${HOUSE_CARD_PAD} ${SETTINGS_CONTENT_MEASURE_CLASS} flex flex-col gap-[var(--space-3)]`;
 export const SETTINGS_PREF_TITLE_CLASS = "t-heading text-ink";
 
 // Mobile Settings page-lead back = News PageHeader ArrowLeft SoT.

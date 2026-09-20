@@ -10,13 +10,18 @@ import {
   APPEARANCE_FLYOUT_OPTIONS,
   APPEARANCE_OPTIONS,
   APPEARANCE_SETTINGS_CARD_CLASS,
+  APPEARANCE_SETTINGS_LIST_CLASS,
   APPEARANCE_SETTINGS_OPTION_ACTIVE_CLASS,
   APPEARANCE_SETTINGS_OPTION_CLASS,
   APPEARANCE_SETTINGS_TITLE_CLASS,
   appearancePreferenceLabel,
 } from "./appearance";
 import { HOUSE_MODULE_CLASS } from "./house-shell";
-import { SETTINGS_PREF_BLOCK_CLASS, SETTINGS_PREF_TITLE_CLASS } from "./settings";
+import {
+  SETTINGS_CONTENT_MEASURE_CLASS,
+  SETTINGS_PREF_BLOCK_CLASS,
+  SETTINGS_PREF_TITLE_CLASS,
+} from "./settings";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const prefsSrc = readFileSync(join(here, "../components/settings/appearance-preferences.tsx"), "utf8");
@@ -85,6 +90,11 @@ describe("appearance copy", () => {
     expect(APPEARANCE_SETTINGS_OPTION_ACTIVE_CLASS).toBe("bg-surface");
     expect(APPEARANCE_SETTINGS_OPTION_CLASS).toContain("hover:bg-surface");
     expect(APPEARANCE_SETTINGS_OPTION_CLASS).toContain("py-[var(--space-3)]");
+    expect(APPEARANCE_SETTINGS_OPTION_CLASS).toContain("justify-start");
+    expect(APPEARANCE_SETTINGS_OPTION_CLASS).toContain("gap-[var(--space-3)]");
+    expect(APPEARANCE_SETTINGS_OPTION_CLASS).not.toContain("justify-between");
+    expect(APPEARANCE_SETTINGS_CARD_CLASS).toContain(SETTINGS_CONTENT_MEASURE_CLASS);
+    expect(APPEARANCE_SETTINGS_LIST_CLASS).toContain(SETTINGS_CONTENT_MEASURE_CLASS);
     expect(prefsSrc).toContain("APPEARANCE_SETTINGS_CARD_CLASS");
     expect(prefsSrc).not.toContain("t-section");
   });
