@@ -15,6 +15,7 @@ import {
   DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS,
   DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS,
   DASHBOARD_NEWS_SOURCE_CHIPS_CLASS,
+  DASHBOARD_NEWS_SOURCE_TRACK_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_ON_CLASS,
@@ -107,8 +108,11 @@ describe("NewsHistory layout", () => {
       html.indexOf("data-news-history-main"),
     );
     expect(html).toContain(DASHBOARD_NEWS_SOURCE_CHIPS_CLASS);
+    expect(html).toContain(DASHBOARD_NEWS_SOURCE_TRACK_CLASS);
     expect(html).toContain("overflow-x-auto");
     expect(html).toContain("no-scrollbar");
+    expect(html).toContain("w-max");
+    expect(html).toContain("min-w-full");
     expect(html).toContain("data-news-source-track");
     expect(html).toContain(`data-segmented-persist="${SEGMENTED_TRACK_PERSIST.newsSource}"`);
     expect(html).toContain(DASHBOARD_TOP_PILL_CLUSTER_CLASS);

@@ -7,10 +7,10 @@ import { SegmentedTrack } from "@/components/ui/segmented-track";
 import { cn } from "@/lib/cn";
 import {
   DASHBOARD_NEWS_SOURCE_CHIPS_CLASS,
+  DASHBOARD_NEWS_SOURCE_TRACK_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_ON_CLASS,
-  DASHBOARD_TOP_PILL_CLUSTER_CLASS,
   DASHBOARD_TOP_PILL_THUMB_CLASS,
 } from "@/lib/dashboard-craft";
 import {
@@ -27,8 +27,9 @@ import { SEGMENTED_TRACK_PERSIST, segmentedItemOn } from "@/lib/segmented-track"
 // Sources lens for /home/news. House SegmentedTrack under the H1:
 // All first, then one segment per allowlisted outlet (A-Z). Exclusive
 // single-select: All, or one outlet. Selected ink follows visualIndex
-// (accent thumb + white label). Phone scrolls the row; never a
-// checkbox rail, gapped chip-fill, or a second bottom float.
+// (accent thumb + white label). The host scrolls; the track uses the
+// house scroll-row token so the muted pill covers every outlet.
+// Never a checkbox rail, gapped chip-fill, or a second bottom float.
 
 export function NewsSourceChips({
   selected,
@@ -55,7 +56,7 @@ export function NewsSourceChips({
       <SegmentedTrack
         activeIndex={newsSourceFilterIndex(selected)}
         persistKey={SEGMENTED_TRACK_PERSIST.newsSource}
-        trackClass={DASHBOARD_TOP_PILL_CLUSTER_CLASS}
+        trackClass={DASHBOARD_NEWS_SOURCE_TRACK_CLASS}
         thumbClass={DASHBOARD_TOP_PILL_THUMB_CLASS}
         data-news-source-track=""
       >

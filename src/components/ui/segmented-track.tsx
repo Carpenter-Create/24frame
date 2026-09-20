@@ -111,6 +111,8 @@ export function SegmentedTrack({
   const [visualIndex, setVisualIndex] = useState(() =>
     resolveSegmentedVisualIndex(persistKey, activeIndex),
   );
+  const visualIndexRef = useRef(visualIndex);
+  visualIndexRef.current = visualIndex;
 
   function commitVisualIndex(index: number) {
     setVisualIndex(commitSegmentedVisualIntent(persistKey, index, activeIndex));
@@ -144,6 +146,7 @@ export function SegmentedTrack({
     }
 
     const next = measureSegmentedBox(track, active);
+    active.scrollIntoView({ block: "nearest", inline: "nearest" });
     const now = typeof performance === "undefined" ? 0 : performance.now();
     const apply = (box: SegmentedThumbBox, snap = false, durationMs?: number) => {
       lastBoxRef.current = box;
@@ -184,6 +187,27 @@ export function SegmentedTrack({
       cancelRestore?.();
     };
   }, [visualIndex, persistKey]);
+
+  useLayoutEffect(() => {
+    const track = trackRef.current;
+    if (!track || typeof ResizeObserver === "undefined") return undefined;
+
+    const remasure = () => {
+      if (!placedRef.current) return;
+      const items = track.querySelectorAll<HTMLElement>("[data-segmented-item]");
+      const index = visualIndexRef.current;
+      const active = items[index];
+      if (houseSegmentedThumbHidden(index) || !active) return;
+      const next = measureSegmentedBox(track, active);
+      if (!segmentedThumbNeedsRestore(lastBoxRef.current, next)) return;
+      lastBoxRef.current = next;
+      setThumbStyle(thumbCss(next, true));
+    };
+
+    const observer = new ResizeObserver(remeasure);
+    observer.observe(track);
+    return () => observer.disconnect();
+  }, []);
 
   function handleClickCapture(event: ReactMouseEvent<HTMLDivElement>) {
     const track = trackRef.current;

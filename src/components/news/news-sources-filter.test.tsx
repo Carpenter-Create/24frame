@@ -8,11 +8,16 @@ import {
   DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS,
   DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS,
   DASHBOARD_NEWS_SOURCE_CHIPS_CLASS,
+  DASHBOARD_NEWS_SOURCE_TRACK_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_ON_CLASS,
   DASHBOARD_TOP_PILL_CLUSTER_CLASS,
 } from "@/lib/dashboard-craft";
+import {
+  HOUSE_SEGMENTED_TRACK_CLASS,
+  HOUSE_SEGMENTED_TRACK_SCROLL_CLASS,
+} from "@/lib/house-shell";
 import { NEWS_PAGE, NEWS_SOURCE_FILTER_SOURCES } from "@/lib/news";
 import { SEGMENTED_TRACK_PERSIST } from "@/lib/segmented-track";
 
@@ -26,6 +31,7 @@ describe("NewsSourceChips", () => {
     expect(html).toContain("data-news-source-chips");
     expect(html).toContain("data-news-source-track");
     expect(html).toContain(DASHBOARD_NEWS_SOURCE_CHIPS_CLASS);
+    expect(html).toContain(DASHBOARD_NEWS_SOURCE_TRACK_CLASS);
     expect(html).toContain(DASHBOARD_TOP_PILL_CLUSTER_CLASS);
     expect(html).toContain(DASHBOARD_TOP_PILL_BUTTON_CLASS);
     expect(html).toContain(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS);
@@ -76,5 +82,28 @@ describe("NewsSourceChips", () => {
     expect(html).not.toMatch(
       /data-news-source-option="all"[^>]*aria-pressed="true"|aria-pressed="true"[^>]*data-news-source-option="all"/,
     );
+  });
+
+  it("scroll host wraps a content-width house track so chips stay inside the muted pill", () => {
+    const html = renderToStaticMarkup(
+      createElement(NewsSourceChips, { selected: [], onSelect: () => undefined }),
+    );
+    expect(DASHBOARD_NEWS_SOURCE_TRACK_CLASS).toBe(HOUSE_SEGMENTED_TRACK_SCROLL_CLASS);
+    expect(HOUSE_SEGMENTED_TRACK_SCROLL_CLASS).toContain(HOUSE_SEGMENTED_TRACK_CLASS);
+    expect(HOUSE_SEGMENTED_TRACK_SCROLL_CLASS).toContain("w-max");
+    expect(HOUSE_SEGMENTED_TRACK_SCROLL_CLASS).toContain("min-w-full");
+    expect(HOUSE_SEGMENTED_TRACK_CLASS).not.toContain("w-max");
+    expect(DASHBOARD_NEWS_SOURCE_CHIPS_CLASS).toContain("overflow-x-auto");
+    expect(DASHBOARD_NEWS_SOURCE_CHIPS_CLASS).not.toContain("w-max");
+    expect(html).toContain(DASHBOARD_NEWS_SOURCE_CHIPS_CLASS);
+    expect(html).toContain(DASHBOARD_NEWS_SOURCE_TRACK_CLASS);
+    expect(html.indexOf("data-news-source-chips")).toBeLessThan(
+      html.indexOf("data-news-source-track"),
+    );
+    expect(src).toContain("className={DASHBOARD_NEWS_SOURCE_CHIPS_CLASS}");
+    expect(src).toContain("trackClass={DASHBOARD_NEWS_SOURCE_TRACK_CLASS}");
+    const optionCount = NEWS_SOURCE_FILTER_SOURCES.length + 1;
+    expect(optionCount).toBeGreaterThan(8);
+    expect(html.split("data-news-source-option=").length - 1).toBe(optionCount);
   });
 });

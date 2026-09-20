@@ -73,6 +73,12 @@ describe("segmented thumb geometry", () => {
     );
     expect(box).toEqual({ left: 80, width: 64 });
     expect(segmentedThumbStyle(box)).toEqual({ left: 80, width: 64, opacity: 1 });
+
+    const scrolled = measureSegmentedBox(
+      { getBoundingClientRect: () => ({ left: -240 }) },
+      { getBoundingClientRect: () => ({ left: 80, width: 96 }) },
+    );
+    expect(scrolled).toEqual({ left: 320, width: 96 });
   });
 
   it("restores only when the cached box is a different painted position", () => {

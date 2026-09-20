@@ -113,6 +113,12 @@ export const HOUSE_SEGMENTED_THUMB_EASE = [0.22, 1, 0.36, 1] as const;
 export const HOUSE_SEGMENTED_TRACK_CLASS =
   "relative flex shrink-0 items-center rounded-full bg-surface-muted";
 
+// Scroll-row track: at least the host width, grows with shrink-0 items
+// so bg-surface-muted covers every segment inside overflow-x-auto.
+// Short tracks keep HOUSE_SEGMENTED_TRACK_CLASS (workspace switcher,
+// period presets, phone dests). Do not fork a news-only lookalike.
+export const HOUSE_SEGMENTED_TRACK_SCROLL_CLASS = `${HOUSE_SEGMENTED_TRACK_CLASS} w-max min-w-full`;
+
 export const HOUSE_SEGMENTED_THUMB_CLASS =
   "pointer-events-none absolute inset-y-0 rounded-full bg-accent transition-[left,width] duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none";
 
