@@ -27,6 +27,7 @@ import {
   readSegmentedThumbFlight,
   resolveSegmentedVisualIndex,
   scheduleSegmentedThumbRestore,
+  scrollSegmentedItemIntoHost,
   segmentedItemIndexFromEventTarget,
   segmentedItemOn,
   segmentedThumbNeedsRestore,
@@ -144,7 +145,7 @@ export function SegmentedTrack({
     }
 
     const next = measureSegmentedBox(track, active);
-    active.scrollIntoView({ block: "nearest", inline: "nearest" });
+    scrollSegmentedItemIntoHost(active);
     const now = typeof performance === "undefined" ? 0 : performance.now();
     const apply = (box: SegmentedThumbBox, snap = false, durationMs?: number) => {
       lastBoxRef.current = box;

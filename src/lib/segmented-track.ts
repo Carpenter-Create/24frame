@@ -15,6 +15,12 @@
 // committed index (Settings -1, leave/return, settled hop)
 // yields to the route. No-op re-clicks do not write persist.
 // Hosts must not keep a local pendingIndex / pendingFamily fork.
+//
+// Overflow rows (news sources, phone dests, activity family) keep the
+// selected item inside the nearest overflow-x host by assigning
+// scrollLeft. Do not ask the item to bring itself into view — that
+// walks every ancestor, including main[data-house-lead-scroll] and
+// the iOS 1px window bridge, and inherits html scroll-behavior: smooth.
 
 import {
   HOUSE_SEGMENTED_THUMB_DURATION_MS,
@@ -309,6 +315,77 @@ export function scheduleSegmentedThumbRestore(
     caf(outer);
     if (inner) caf(inner);
   };
+}
+
+export type SegmentedOverflowNode = {
+  nodeName?: string;
+  parentElement: SegmentedOverflowNode | null;
+  scrollLeft: number;
+  scrollWidth: number;
+  clientWidth: number;
+  getBoundingClientRect(): { left: number; right: number };
+};
+
+function isDocumentScroller(node: SegmentedOverflowNode): boolean {
+  const name = node.nodeName?.toUpperCase();
+  return name === "HTML" || name === "BODY";
+}
+
+function readElementOverflowX(node: SegmentedOverflowNode): string {
+  if (typeof getComputedStyle === "undefined" || !("ownerDocument" in node)) {
+    return "";
+  }
+  return getComputedStyle(node as Element).overflowX;
+}
+
+export function nearestSegmentedOverflowHost(
+  start: SegmentedOverflowNode | null,
+  readOverflowX: (node: SegmentedOverflowNode) => string = readElementOverflowX,
+): SegmentedOverflowNode | null {
+  let node = start;
+  while (node) {
+    if (
+      !isDocumentScroller(node) &&
+      node.scrollWidth > node.clientWidth &&
+      (readOverflowX(node) === "auto" || readOverflowX(node) === "scroll")
+    ) {
+      return node;
+    }
+    node = node.parentElement;
+  }
+  return null;
+}
+
+export function segmentedHostScrollLeft(
+  host: {
+    scrollLeft: number;
+    getBoundingClientRect(): { left: number; right: number };
+  },
+  item: { getBoundingClientRect(): { left: number; right: number } },
+): number {
+  const hostRect = host.getBoundingClientRect();
+  const itemRect = item.getBoundingClientRect();
+  if (itemRect.left < hostRect.left) {
+    return host.scrollLeft + (itemRect.left - hostRect.left);
+  }
+  if (itemRect.right > hostRect.right) {
+    return host.scrollLeft + (itemRect.right - hostRect.right);
+  }
+  return host.scrollLeft;
+}
+
+export function scrollSegmentedItemIntoHost(
+  item: {
+    parentElement: SegmentedOverflowNode | null;
+    getBoundingClientRect(): { left: number; right: number };
+  },
+  readOverflowX: (node: SegmentedOverflowNode) => string = readElementOverflowX,
+): void {
+  const host = nearestSegmentedOverflowHost(item.parentElement, readOverflowX);
+  if (!host) return;
+  const next = segmentedHostScrollLeft(host, item);
+  if (next === host.scrollLeft) return;
+  host.scrollLeft = next;
 }
 
 export function segmentedItemIndexFromEventTarget(

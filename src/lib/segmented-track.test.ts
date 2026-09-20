@@ -16,6 +16,9 @@ import {
   readSegmentedVisualIndex,
   readSegmentedVisualPersist,
   resolveSegmentedVisualIndex,
+  nearestSegmentedOverflowHost,
+  scrollSegmentedItemIntoHost,
+  segmentedHostScrollLeft,
   segmentedItemOn,
   segmentedItemSelectedProps,
   segmentedThumbNeedsRestore,
@@ -155,6 +158,94 @@ describe("segmented thumb geometry", () => {
     const painted = readSegmentedThumbCache(SEGMENTED_TRACK_PERSIST.workspace, 5_080);
     expect(painted?.left).toBeGreaterThan(from.left);
     expect(painted?.left).toBeLessThan(to.left);
+  });
+});
+
+describe("segmented overflow host scroll", () => {
+  it("nudges only the overflow-x host and leaves ancestor scrollers still", () => {
+    expect(
+      segmentedHostScrollLeft(
+        { scrollLeft: 80, getBoundingClientRect: () => ({ left: 0, right: 200 }) },
+        { getBoundingClientRect: () => ({ left: 240, right: 320 }) },
+      ),
+    ).toBe(200);
+    expect(
+      segmentedHostScrollLeft(
+        { scrollLeft: 80, getBoundingClientRect: () => ({ left: 0, right: 200 }) },
+        { getBoundingClientRect: () => ({ left: -40, right: 40 }) },
+      ),
+    ).toBe(40);
+    expect(
+      segmentedHostScrollLeft(
+        { scrollLeft: 80, getBoundingClientRect: () => ({ left: 0, right: 200 }) },
+        { getBoundingClientRect: () => ({ left: 16, right: 96 }) },
+      ),
+    ).toBe(80);
+
+    const page = {
+      nodeName: "HTML",
+      parentElement: null,
+      scrollLeft: 0,
+      scrollWidth: 400,
+      clientWidth: 200,
+      getBoundingClientRect: () => ({ left: 0, right: 200 }),
+    };
+    const lead = {
+      nodeName: "MAIN",
+      parentElement: page,
+      scrollLeft: 0,
+      scrollWidth: 200,
+      clientWidth: 200,
+      getBoundingClientRect: () => ({ left: 0, right: 200 }),
+    };
+    const host = {
+      nodeName: "DIV",
+      parentElement: lead,
+      scrollLeft: 0,
+      scrollWidth: 800,
+      clientWidth: 200,
+      getBoundingClientRect: () => ({ left: 0, right: 200 }),
+    };
+    const item = {
+      parentElement: host,
+      getBoundingClientRect: () => ({ left: 240, right: 320 }),
+    };
+    const readOverflowX = (node: { nodeName?: string }) =>
+      node.nodeName === "DIV" || node.nodeName === "HTML" ? "auto" : "visible";
+
+    expect(nearestSegmentedOverflowHost(item.parentElement, readOverflowX)).toBe(host);
+
+    scrollSegmentedItemIntoHost(item, readOverflowX);
+    expect(host.scrollLeft).toBe(120);
+    expect(lead.scrollLeft).toBe(0);
+    expect(page.scrollLeft).toBe(0);
+  });
+
+  it("does not move a vertical-only ancestor or the document scroller", () => {
+    const page = {
+      nodeName: "HTML",
+      parentElement: null,
+      scrollLeft: 1,
+      scrollWidth: 400,
+      clientWidth: 200,
+      getBoundingClientRect: () => ({ left: 0, right: 200 }),
+    };
+    const lead = {
+      nodeName: "MAIN",
+      parentElement: page,
+      scrollLeft: 12,
+      scrollWidth: 200,
+      clientWidth: 200,
+      getBoundingClientRect: () => ({ left: 0, right: 200 }),
+    };
+    const item = {
+      parentElement: lead,
+      getBoundingClientRect: () => ({ left: 240, right: 320 }),
+    };
+
+    scrollSegmentedItemIntoHost(item, () => "auto");
+    expect(lead.scrollLeft).toBe(12);
+    expect(page.scrollLeft).toBe(1);
   });
 });
 
