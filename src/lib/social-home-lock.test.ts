@@ -391,7 +391,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(sideNav).toContain("useSocialNavPending");
     expect(dests).toContain("prefetch");
     expect(dests).toContain("housePhoneDestActive");
-    expect(home).toContain("loadOwnPostFacts");
+    expect(home).not.toContain("loadOwnPostFacts");
     expect(home).toContain("requireSocialSession");
     expect(home).toContain("Suspense");
     expect(home).toContain("Promise.all");

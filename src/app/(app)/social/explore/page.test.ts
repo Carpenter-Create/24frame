@@ -41,6 +41,8 @@ function stub() {
   chain.is = vi.fn(self);
   chain.or = vi.fn(self);
   chain.ilike = vi.fn(self);
+  chain.order = vi.fn(self);
+  chain.in = vi.fn(self);
   chain.range = vi.fn(async () => ({ data: [], error: null }));
   vi.mocked(createClient).mockResolvedValue({ from: vi.fn(() => chain) } as never);
 }
@@ -95,6 +97,8 @@ describe("Social Explore", () => {
       chain.is = vi.fn(self(chain));
       chain.or = vi.fn(self(chain));
       chain.ilike = vi.fn(self(chain));
+      chain.order = vi.fn(self(chain));
+      chain.in = vi.fn(self(chain));
     }
     peopleChain.range = vi.fn(async () => ({ data: people, error: null }));
     postsChain.range = vi.fn(async () => ({ data: [], error: null }));
