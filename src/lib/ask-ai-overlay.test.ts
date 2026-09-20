@@ -25,11 +25,13 @@ import {
   askAiOverlayHref,
   askAiOverlayPhoneClass,
   askAiStateFromHref,
+  askAiChromeOpen,
   fireAskAiOpenThen,
   isAskAiDesktopViewport,
   readAskAiOverlay,
   readAskAiReturnPath,
   rememberAskAiReturnPath,
+  toggleAskAiOverlay,
 } from "./ask-ai-overlay";
 
 const THREAD = "2f1c8b6a-4d3e-4a11-9c22-7b8e1d0a5f44";
@@ -137,6 +139,7 @@ describe("ask AI overlay URL", () => {
     expect(askAiOverlayHref("/home")).not.toContain("/messages");
     expect(askAiOverlayHref("/home")).not.toContain("/dashboard");
     expect(headerSrc).toContain("AskAiOpenButton");
+    expect(headerSrc).toContain("toggle");
     expect(headerSrc).not.toContain("next/link");
     expect(headerSrc).not.toMatch(/\bhref\b/);
     expect(headerSrc).not.toContain("/messages");
@@ -157,7 +160,7 @@ describe("ask AI overlay URL", () => {
     expect(overlaySrc).not.toMatch(/fallback=\{<AskAiOverlayContext\.Provider/);
     expect(overlaySrc).not.toMatch(/fallback=\{[^;]{0,120}\{children\}/);
 
-    const openAt = overlaySrc.indexOf("openAskAi(threadId)");
+    const openAt = overlaySrc.indexOf("toggle ? toggleAskAi(threadId) : openAskAi(threadId)");
     const closeAt = overlaySrc.indexOf("onClick?.(event)");
     expect(openAt).toBeGreaterThan(-1);
     expect(closeAt).toBeGreaterThan(-1);
@@ -183,6 +186,20 @@ describe("ask AI overlay URL", () => {
     );
     expect(order).toEqual(["/home?ai=1", "close"]);
     expect(askAiStateFromHref("/home?ai=1")).toEqual({ open: true, threadId: null });
+    const toggleOrder: string[] = [];
+    toggleAskAiOverlay(
+      false,
+      () => toggleOrder.push("open"),
+      () => toggleOrder.push("close"),
+    );
+    toggleAskAiOverlay(
+      true,
+      () => toggleOrder.push("open"),
+      () => toggleOrder.push("close"),
+    );
+    expect(toggleOrder).toEqual(["open", "close"]);
+    expect(askAiChromeOpen({ open: true, threadId: null })).toBe(true);
+    expect(askAiChromeOpen({ open: false, threadId: null })).toBe(false);
     expect(isAskAiDesktopViewport(() => ({ matches: false }))).toBe(false);
     expect(isAskAiDesktopViewport(() => ({ matches: true }))).toBe(true);
   });

@@ -101,8 +101,16 @@
 
   /* --- Dashboard shell proportions ---
      Ported from watershedportal's shell (proportions kept, vocabulary dropped —
-     see docs/known-divergences.md D2). GC had no equivalents, so these fill the gap. */
-  --header-height: 56px;
+     see docs/known-divergences.md D2). GC had no equivalents, so these fill the gap.
+     Desktop header: Coinbase top-nav row (Adam 2026-09-20). Literal
+     measure ~80-84px effective. 80 is the house lock. Avatar, control
+     hit, and search height derive from this bar so Social and every
+     workspace share one SoT. Phone keeps 56 so the #451 trail does
+     not grow empty air. */
+  --header-height: 80px;
+  --header-avatar-size: 36px;
+  --header-control-size: 36px;
+  --header-search-height: 40px;
   --sidebar-width: 220px;        /* Access rail — locked client `/` */
   --sidebar-width-collapsed: 60px;
   /* Access rail measure. Same 220 as --sidebar-width at tokens root.
@@ -133,6 +141,10 @@
     --sidebar-width: 0px;
     --sidebar-width-collapsed: 0px;
     --access-rail-width: 0px;
+    --header-height: 56px;
+    --header-avatar-size: 32px;
+    --header-control-size: 16px;
+    --header-search-height: 36px;
   }
 }
 

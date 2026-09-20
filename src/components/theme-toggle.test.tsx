@@ -25,9 +25,9 @@ describe("header theme toggle", () => {
     expect(html).toContain('data-theme-glyph="moon"');
     expect(html).not.toContain('data-theme-glyph="sun"');
     expect(html).toContain(HOUSE_THEME_TOGGLE_CLASS);
-    expect(html).toContain("size-8");
-    expect(html).toContain("min-h-8");
-    expect(html).toContain("min-w-8");
+    expect(html).toContain("md:size-[var(--header-control-size)]");
+    expect(html).toContain("md:min-h-[var(--header-control-size)]");
+    expect(html).toContain("md:min-w-[var(--header-control-size)]");
     expect(html).not.toContain("size-[44px]");
     expect(html).toContain(HOUSE_ICON_BUTTON_CLASS);
     expect(html).not.toContain("purple");

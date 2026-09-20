@@ -7,6 +7,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ComponentProps,
   type ReactNode,
@@ -30,12 +31,14 @@ import {
   askAiOverlayPhoneClass,
   askAiCloseHref,
   askAiOverlayHref,
+  askAiChromeOpen,
   askAiStateFromHref,
   currentAskAiSearch,
   fireAskAiOpenThen,
   isAskAiDesktopViewport,
   readAskAiOverlay,
   rememberAskAiReturnPath,
+  toggleAskAiOverlay,
   type AskAiOverlayState,
 } from "@/lib/ask-ai-overlay";
 import { ASK_GLOBEE, canRenderAskGlobeeLanding, type MessagesSurface } from "@/lib/ask-globee";
@@ -72,6 +75,7 @@ type AskAiOverlayContextValue = {
   threadId: string | null;
   openAskAi: (threadId?: string | null) => void;
   closeAskAi: () => void;
+  toggleAskAi: (threadId?: string | null) => void;
   toggleAskAiExpanded: () => void;
 };
 
@@ -81,6 +85,7 @@ const AskAiOverlayContext = createContext<AskAiOverlayContextValue>({
   threadId: null,
   openAskAi: () => {},
   closeAskAi: () => {},
+  toggleAskAi: () => {},
   toggleAskAiExpanded: () => {},
 });
 
@@ -101,8 +106,11 @@ export function AskAiOverlayProvider({ children }: { children: ReactNode }) {
     rememberAskAiReturnPath(pathname);
   }, [pathname]);
 
+  const openRef = useRef(false);
+
   const openAskAi = useCallback(
     (threadId?: string | null) => {
+      openRef.current = true;
       setExpanded(false);
       const href = askAiOverlayHref(pathname, currentAskAiSearch(), threadId);
       setOptimistic(askAiStateFromHref(href));
@@ -112,6 +120,7 @@ export function AskAiOverlayProvider({ children }: { children: ReactNode }) {
   );
 
   const closeAskAi = useCallback(() => {
+    openRef.current = false;
     setExpanded(false);
     setOptimistic({ open: false, threadId: null });
     router.replace(askAiCloseHref(pathname, currentAskAiSearch()));
@@ -122,16 +131,31 @@ export function AskAiOverlayProvider({ children }: { children: ReactNode }) {
     setExpanded((current) => !current);
   }, []);
 
+  const open = askAiChromeOpen(optimistic);
+
+  const toggleAskAi = useCallback(
+    (threadId?: string | null) => {
+      toggleAskAiOverlay(
+        openRef.current || askAiChromeOpen(optimistic),
+        openAskAi,
+        closeAskAi,
+        threadId,
+      );
+    },
+    [closeAskAi, openAskAi, optimistic],
+  );
+
   const value = useMemo(
     () => ({
-      open: Boolean(optimistic?.open),
+      open,
       expanded,
       threadId: optimistic?.threadId ?? null,
       openAskAi,
       closeAskAi,
+      toggleAskAi,
       toggleAskAiExpanded,
     }),
-    [closeAskAi, expanded, openAskAi, optimistic, toggleAskAiExpanded],
+    [closeAskAi, expanded, open, openAskAi, optimistic, toggleAskAi, toggleAskAiExpanded],
   );
 
   return (
@@ -440,27 +464,31 @@ function AskAiOverlayBody({
 
 type AskAiOpenButtonProps = ComponentProps<"button"> & {
   threadId?: string | null;
+  toggle?: boolean;
 } & {
   [key: `data-${string}`]: string | undefined;
 };
 
 export function AskAiOpenButton({
   threadId,
+  toggle = false,
   children,
   className,
   onClick,
   ...props
 }: AskAiOpenButtonProps) {
-  const { openAskAi } = useAskAiOverlay();
+  const { open, openAskAi, toggleAskAi } = useAskAiOverlay();
   return (
     <button
       {...props}
       type="button"
       data-ask-ai-open=""
+      data-ask-ai-toggle={toggle ? "" : undefined}
+      aria-pressed={toggle ? open : undefined}
       className={className}
       onClick={(event) => {
         fireAskAiOpenThen(
-          () => openAskAi(threadId),
+          () => (toggle ? toggleAskAi(threadId) : openAskAi(threadId)),
           () => onClick?.(event),
         );
       }}

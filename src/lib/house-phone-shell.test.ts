@@ -446,14 +446,15 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(accountSheetSrc).toContain("HOUSE_HEADER_TRAILING_AVATAR_CLASS");
     expect(accountSheetSrc).not.toContain("HOUSE_HEADER_TRAILING_HIT_CLASS");
     expect(HOUSE_THEME_TOGGLE_CLASS).toContain(HOUSE_HEADER_TRAILING_HIT_CLASS);
-    expect(HOUSE_THEME_TOGGLE_CLASS).toContain("size-8");
+    expect(HOUSE_THEME_TOGGLE_CLASS).toContain("md:size-[var(--header-control-size)]");
     expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("size-6");
     expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("size-5");
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("size-4");
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).not.toMatch(/-m[xlr]-/);
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).not.toContain("p-[var(--space-2)]");
-    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("md:size-8");
+    expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("md:size-[var(--header-control-size)]");
     expect(HOUSE_HEADER_TRAILING_AVATAR_CLASS).toContain("h-8 w-8");
+    expect(HOUSE_HEADER_TRAILING_AVATAR_CLASS).toContain("md:h-[var(--header-avatar-size)]");
     expect(HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS).toBe("contents md:hidden");
 
     const lead = renderLead("social");

@@ -8,6 +8,8 @@ import { isAskGlobeeThreadId } from "@/lib/ask-globee";
 // page; expand is a near-fullscreen overlay on the same surface.
 // Phone stays bottom-sheet ↔ expand. Never a routed `/messages` land.
 // Back/close strips the param and leaves the underlying view.
+// Header Ask AI is a toggle on that same window: closed opens, open
+// closes through the close path. Never a second instance.
 
 export const ASK_AI_QUERY = "ai";
 export const ASK_AI_OPEN_VALUE = "1";
@@ -226,6 +228,26 @@ export function fireAskAiOpenThen(
 ): void {
   openAskAi(threadId);
   then?.();
+}
+
+/** Header chrome lives outside useSearchParams. Optimistic, then the live query. */
+export function askAiChromeOpen(optimistic: AskAiOverlayState | null): boolean {
+  if (optimistic) return optimistic.open;
+  return readAskAiOverlay(currentAskAiSearch()).open;
+}
+
+/** Same overlay window. Open calls openAskAi; a second call uses closeAskAi. */
+export function toggleAskAiOverlay(
+  open: boolean,
+  openAskAi: (threadId?: string | null) => void,
+  closeAskAi: () => void,
+  threadId?: string | null,
+): void {
+  if (open) {
+    closeAskAi();
+    return;
+  }
+  openAskAi(threadId);
 }
 
 export function askAiStateFromHref(href: string): AskAiOverlayState {
