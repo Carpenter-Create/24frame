@@ -29,9 +29,10 @@ describe("Social Create menu intents", () => {
 
   it("keeps the menu Social-only and reuses MenuSurface", () => {
     const menu = readFileSync("src/components/social/social-create-menu.tsx", "utf8");
-    const dests = readFileSync("src/components/chrome/house-phone-dest-chips.tsx", "utf8");
+    const dests = readFileSync("src/components/chrome/house-phone-bottom-nav.tsx", "utf8");
     const composer = readFileSync("src/components/social/social-home-composer.tsx", "utf8");
     const header = readFileSync("src/components/chrome/house-lead-chrome.tsx", "utf8");
+    const sheet = readFileSync("src/components/chrome/workspace-switcher.tsx", "utf8");
     const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
     expect(menu).toContain("MenuSurfaceContent");
     expect(menu).toContain("MenuSurfaceItem");
@@ -39,10 +40,12 @@ describe("Social Create menu intents", () => {
     expect(menu).toContain('data-social-create-intent={intent.id}');
     expect(dests).toContain("SocialCreateMenu");
     expect(dests).toContain('data-social-create-menu="dest"');
+    expect(dests).toContain("housePhoneDestIsCreate");
     expect(composer).toContain("SocialCreateMenu");
     expect(composer).toContain("data-social-create-menu");
     expect(composer).toContain("hidden md:flex");
     expect(header).not.toContain("SocialCreateMenu");
+    expect(sheet).not.toContain("SocialCreateMenu");
     expect(shell).not.toContain("SocialCreateMenu");
     expect(menu).not.toMatch(/YouTube|Instagram|TikTok|Facebook|Meta/);
   });
