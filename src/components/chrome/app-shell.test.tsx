@@ -943,6 +943,16 @@ describe("AppShell rail-collapse chevron", () => {
     expect(pending).not.toContain("data-mobile-nav-trigger");
     expect(pending).toContain("data-house-phone-bottom-nav");
 
+    navigation.pathname = "/aggregation/queue";
+    const pendingStaff = renderToStaticMarkup(
+      <AppShell chrome={new Promise(() => {})} messagesUnread={new Promise(() => {})}>
+        page
+      </AppShell>,
+    );
+    expect(pendingStaff).toContain('data-house-phone-dest="Queue"');
+    expect(pendingStaff).toContain('data-house-phone-dest="Channels"');
+    expect(pendingStaff).not.toContain('data-house-phone-dest="Dashboard"');
+
     navigation.pathname = "/aggregation/dashboard";
     const aggregationStaff = renderToStaticMarkup(
       <AppShell

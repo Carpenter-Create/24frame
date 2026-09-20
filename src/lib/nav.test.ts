@@ -217,10 +217,12 @@ describe("mobileNavDestinations", () => {
       "Clients",
     ]);
     expect(mobileNavDestinations(false, "staff").map((item) => item.label)).toEqual([
-      "Dashboard",
-      "Titles",
-      "Recent activity",
-      "Reports",
+      "Queue",
+      "Avails",
+      "Licensing Status",
+      "Channels",
+      "Finance",
+      "Clients",
     ]);
     expect(mobileNavDestinations(true, "aggregation").map((item) => item.label)).not.toContain(
       "Queue",
@@ -247,10 +249,12 @@ describe("mobileNavDestinations", () => {
     ]);
     expect(railDestinations(true, "staff").staffItems).toEqual([]);
     expect(railDestinations(false, "staff").items.map((item) => item.label)).toEqual([
-      "Dashboard",
-      "Titles",
-      "Recent activity",
-      "Reports",
+      "Queue",
+      "Avails",
+      "Licensing Status",
+      "Channels",
+      "Finance",
+      "Clients",
     ]);
   });
 

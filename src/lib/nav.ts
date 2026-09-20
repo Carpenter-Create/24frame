@@ -145,8 +145,9 @@ export const EDUCATION_MANAGE_NAV: PhosphorNavItem[] = [
 export const STAFF_RAIL_EYEBROW = "Team";
 
 // Staff workspace operator surfaces. Rendered as primary rail items
-// when workspace is staff and isGcStaff is true. The (operator)
-// layout remains the authorization gate for these hrefs.
+// when workspace is staff. Do not gate dests on isGcStaff — chrome
+// can still be pending after the path already forced staff. The
+// (operator) layout remains the authorization gate for these hrefs.
 export const GC_NAV: PhosphorNavItem[] = [
   { label: "Queue", href: QUEUE_HREF, family: "phosphor", icon: Tray },
   { label: AVAILS_PAGE.title, href: AVAILS_HREF, family: "phosphor", icon: CheckCircle },
@@ -223,7 +224,7 @@ export function mobileNavDestinations(
   if (workspace === "education") {
     return isGcStaff ? [...EDUCATION_NAV, ...EDUCATION_MANAGE_NAV] : EDUCATION_NAV;
   }
-  if (workspace === "staff") return isGcStaff ? GC_NAV : NAV;
+  if (workspace === "staff") return GC_NAV;
   return NAV;
 }
 
@@ -236,7 +237,7 @@ export function railDestinations(
     return { items: EDUCATION_NAV, staffItems: isGcStaff ? EDUCATION_MANAGE_NAV : [] };
   }
   if (workspace === "staff") {
-    return { items: isGcStaff ? GC_NAV : NAV, staffItems: [] };
+    return { items: GC_NAV, staffItems: [] };
   }
   return { items: NAV, staffItems: [] };
 }
