@@ -45,7 +45,7 @@ import { isCoProductionsPath } from "@/lib/co-productions";
 import { isHomeOwnedPath, OVERVIEW_RAIL_OFF_WIDTH, overviewHidesRail } from "@/lib/overview";
 import { QUEUE_HREF } from "@/lib/queue";
 import { TITLES_HREF } from "@/lib/title-public-id";
-import { resolveWorkspaceMode, type WorkspaceMode } from "@/lib/workspace";
+import { clampWorkspaceMode, resolveWorkspaceMode, type WorkspaceMode } from "@/lib/workspace";
 import { HousePhoneAppShell } from "./house-phone-app-shell";
 import {
   rememberAccountChromeIdentity,
@@ -116,7 +116,10 @@ export function AppShell({
   const cookiesApplied = useRef(false);
   const collapseTouched = useRef(false);
   const pathname = usePathname();
-  const workspace = resolveWorkspaceMode(pathname, workspaceCookie);
+  const workspace = clampWorkspaceMode(
+    resolveWorkspaceMode(pathname, workspaceCookie),
+    isGcStaff,
+  );
   const applyChromeCookies = useCallback(
     (next: { defaultCollapsed: boolean; defaultWorkspace: WorkspaceMode }) => {
       if (cookiesApplied.current) return;

@@ -150,6 +150,15 @@ export function resolveWorkspaceMode(pathname: string, cookie: WorkspaceMode): W
   return cookie;
 }
 
+// Adam lock 2026-09-20: Staff is staff-only. A forged staff cookie or a
+// /staff/* bookmark must never paint Staff chrome for members. Path
+// resolve can still say staff; chrome callers clamp with isGcStaff.
+// (operator) / gc_staff remains the authorization bounce.
+export function clampWorkspaceMode(mode: WorkspaceMode, isGcStaff: boolean): WorkspaceMode {
+  if (mode === "staff" && !isGcStaff) return "aggregation";
+  return mode;
+}
+
 export function workspaceCookieWrite(mode: WorkspaceMode): string {
   return `${WORKSPACE_COOKIE}=${mode}; path=/; max-age=31536000; samesite=lax`;
 }

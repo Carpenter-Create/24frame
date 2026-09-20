@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  clampWorkspaceMode,
   isEducationPath,
   isSocialPath,
   isStaffPath,
@@ -127,5 +128,38 @@ describe("workspace mode", () => {
     expect(resolveWorkspaceMode("/home", "staff")).toBe("aggregation");
     expect(resolveWorkspaceMode("/home/news", "staff")).toBe("aggregation");
     expect(resolveWorkspaceMode("/education/manage", "staff")).toBe("education");
+  });
+
+  it("clamps a forged staff cookie so members never keep staff chrome", () => {
+    expect(clampWorkspaceMode("staff", false)).toBe("aggregation");
+    expect(clampWorkspaceMode("staff", true)).toBe("staff");
+    expect(clampWorkspaceMode("aggregation", false)).toBe("aggregation");
+    expect(clampWorkspaceMode("social", false)).toBe("social");
+    expect(clampWorkspaceMode("education", false)).toBe("education");
+    expect(clampWorkspaceMode("social", true)).toBe("social");
+    expect(
+      clampWorkspaceMode(resolveWorkspaceMode("/settings", "staff"), false),
+    ).toBe("aggregation");
+    expect(
+      clampWorkspaceMode(resolveWorkspaceMode("/activity", "staff"), false),
+    ).toBe("aggregation");
+    expect(
+      clampWorkspaceMode(resolveWorkspaceMode("/help", "staff"), false),
+    ).toBe("aggregation");
+    expect(
+      clampWorkspaceMode(resolveWorkspaceMode("/staff/queue", "aggregation"), false),
+    ).toBe("aggregation");
+    expect(
+      clampWorkspaceMode(resolveWorkspaceMode("/staff/queue", "staff"), false),
+    ).toBe("aggregation");
+    expect(
+      clampWorkspaceMode(resolveWorkspaceMode("/staff/queue", "staff"), true),
+    ).toBe("staff");
+    expect(
+      clampWorkspaceMode(resolveWorkspaceMode("/settings", "staff"), true),
+    ).toBe("staff");
+    expect(
+      clampWorkspaceMode(resolveWorkspaceMode("/aggregation/dashboard", "staff"), false),
+    ).toBe("aggregation");
   });
 });

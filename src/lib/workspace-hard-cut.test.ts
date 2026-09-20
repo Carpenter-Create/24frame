@@ -64,6 +64,20 @@ describe("workspace hard-cut — old doors 404", () => {
     ).toBe(true);
   });
 
+  it("keeps every /staff/* route behind the (operator) gc_staff bounce", () => {
+    const layout = readFileSync("src/app/(app)/(operator)/layout.tsx", "utf8");
+    expect(layout).toContain('.from("gc_staff")');
+    expect(layout).toContain('redirect("/login")');
+    expect(layout).toContain('redirect("/")');
+    expect(existsSync("src/app/(app)/(operator)/staff/queue/page.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/(operator)/staff/avails/page.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/(operator)/staff/channels/page.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/(operator)/staff/gc/deliveries/page.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/(operator)/staff/gc/finance/page.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/(operator)/staff/gc/clients/page.tsx")).toBe(true);
+    expect(existsSync("src/app/(app)/staff/queue/page.tsx")).toBe(false);
+  });
+
   it("keeps Next and Vercel off leftover workspace hops", () => {
     const nextConfig = readFileSync("next.config.ts", "utf8");
     const vercel = readFileSync("vercel.json", "utf8");
