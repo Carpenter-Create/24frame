@@ -22,6 +22,8 @@ describe("SocialHomeTopics empty bank", () => {
     expect(src).not.toContain("SOCIAL_FOR_YOU_CARD_CLASS");
     expect(src).not.toContain("flex-wrap");
     expect(src).not.toContain("No trending");
+    expect(src).toContain("HouseChipRail");
+    expect(src).not.toMatch(/Coinbase|Predict/i);
     expect(SOCIAL.forYou.topics).toBe("Topics.");
     expect(SOCIAL_CATEGORY_TOPICS.length).toBeGreaterThan(0);
   });

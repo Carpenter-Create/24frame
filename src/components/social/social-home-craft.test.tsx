@@ -78,16 +78,20 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).not.toContain("AC");
   });
 
-  it("renders Topics. as a horizontal house chip rail, not a wrapping card", () => {
+  it("renders Topics. as a two-row house chip rail, not a wrapping card", () => {
     const html = renderToStaticMarkup(<SocialHomeTopics />);
     expect(html).toContain("data-social-home-topics");
     expect(html).toContain("data-social-home-topics-rail");
+    expect(html).toContain("data-house-chip-rail");
+    expect(html).toContain('data-house-chip-rail-row="0"');
+    expect(html).toContain('data-house-chip-rail-row="1"');
     expect(html).toContain(SOCIAL.forYou.topics);
     expect(html).toContain(SOCIAL_TOPIC_RAIL_CLASS);
     expect(html).toContain(SOCIAL_TOPIC_CHIP_ROW_CLASS);
     expect(html).toContain(SOCIAL_TOPIC_RAIL_CHIP_CLASS);
     expect(SOCIAL_TOPIC_RAIL_CLASS).toBe(HOUSE_SCROLL_ROW_CLASS);
     expect(SOCIAL_TOPIC_RAIL_CLASS).toContain("overflow-x-auto");
+    expect(html.match(/overflow-x-auto/g)?.length).toBe(1);
     expect(SOCIAL_TOPIC_RAIL_CLASS).not.toContain("flex-wrap");
     expect(SOCIAL_TOPIC_CHIP_ROW_CLASS).not.toContain("flex-wrap");
     expect(html).not.toContain(SOCIAL_FOR_YOU_CARD_CLASS);
@@ -95,10 +99,19 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).toContain("Cinematography");
     expect(html).toContain("Vertical micro dramas");
     expect(html).not.toContain("Topics for you");
+    expect(html).not.toContain("Trending topics");
     expect(html).not.toContain("truncate");
     expect(html).not.toContain("data-social-for-you-topics");
     expect(SOCIAL.forYou.topics).toBe("Topics.");
     expect(socialInterestTopics({})).toHaveLength(15);
+    const top = html.slice(
+      html.indexOf('data-house-chip-rail-row="0"'),
+      html.indexOf('data-house-chip-rail-row="1"'),
+    );
+    const bottom = html.slice(html.indexOf('data-house-chip-rail-row="1"'));
+    expect(top).toContain("Acting");
+    expect(top).not.toContain("AI filmmaking");
+    expect(bottom).toContain("AI filmmaking");
   });
 
   it("renders tall FB-style story tiles with a plus well and unseen face rings", () => {
