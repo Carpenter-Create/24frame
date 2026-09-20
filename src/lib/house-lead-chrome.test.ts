@@ -203,6 +203,7 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(leadSrc).toContain("<AskAssistantHeaderLink />");
     expect(leadSrc).toContain("<ThemeToggle />");
     expect(leadSrc).toContain("<ActivityBell");
+    expect(leadSrc).toContain("workspace={workspace}");
     expect(HOUSE_THEME_TOGGLE_CLASS).toContain(HOUSE_HEADER_TRAILING_HIT_CLASS);
     expect(HOUSE_THEME_TOGGLE_CLASS).toContain("md:size-[var(--header-control-size)]");
     expect(HOUSE_THEME_TOGGLE_CLASS).toContain("md:min-h-[var(--header-control-size)]");

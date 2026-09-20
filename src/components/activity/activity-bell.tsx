@@ -3,6 +3,7 @@
 import { Suspense, use, useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Bell } from "@phosphor-icons/react";
 
 import { Close44 } from "@/components/chrome/house";
@@ -15,10 +16,12 @@ import {
   ACTIVITY_BELL_TRIGGER_CLASS,
   ACTIVITY_BELL_TRIGGER_OPEN_CLASS,
   ACTIVITY_BELL_VIEW_ALL_CLASS,
-  ACTIVITY_HREF,
   ACTIVITY_PAGE,
+  activityFamilyForWorkspace,
+  activityHref,
   type ActivityItem,
 } from "@/lib/activity";
+import type { WorkspaceMode } from "@/lib/workspace";
 import { HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS } from "@/lib/house-lead-chrome";
 import { APP_SHEET_HEAD_CLASS, APP_SHEET_SCRIM_CLASS } from "@/lib/house-sheet";
 import {
@@ -37,11 +40,13 @@ export function ActivityBell({
   unread = 0,
   items = [],
   defaultOpen = false,
+  workspace,
 }: {
   unread?: Promise<number> | number;
   items?: Promise<ActivityItem[]> | ActivityItem[];
   defaultOpen?: boolean;
   now?: number;
+  workspace?: WorkspaceMode;
 }) {
   // Open + last resolved rows live above Suspense so a click or
   // Mark Done refresh does not remount a closed / empty peek.
@@ -63,6 +68,7 @@ export function ActivityBell({
       items={fallbackItems}
       open={open}
       onOpenChange={setOpen}
+      workspace={workspace}
     />
   );
 
@@ -76,6 +82,7 @@ export function ActivityBell({
             open={open}
             onOpenChange={setOpen}
             onRemember={rememberPeek}
+            workspace={workspace}
           />
         </Suspense>
       );
@@ -88,6 +95,7 @@ export function ActivityBell({
           open={open}
           onOpenChange={setOpen}
           onRemember={rememberPeek}
+          workspace={workspace}
         />
       </Suspense>
     );
@@ -101,6 +109,7 @@ export function ActivityBell({
           open={open}
           onOpenChange={setOpen}
           onRemember={rememberPeek}
+          workspace={workspace}
         />
       </Suspense>
     );
@@ -111,6 +120,7 @@ export function ActivityBell({
       items={items}
       open={open}
       onOpenChange={setOpen}
+      workspace={workspace}
     />
   );
 }
@@ -131,12 +141,14 @@ function ActivityBellBoth({
   open,
   onOpenChange,
   onRemember,
+  workspace,
 }: {
   unread: Promise<number>;
   items: Promise<ActivityItem[]>;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onRemember: (count: number, rows: ActivityItem[]) => void;
+  workspace?: WorkspaceMode;
 }) {
   const count = use(unread);
   const rows = use(items);
@@ -147,6 +159,7 @@ function ActivityBellBoth({
       items={rows}
       open={open}
       onOpenChange={onOpenChange}
+      workspace={workspace}
     />
   );
 }
@@ -157,12 +170,14 @@ function ActivityBellUnread({
   open,
   onOpenChange,
   onRemember,
+  workspace,
 }: {
   unread: Promise<number>;
   items: ActivityItem[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onRemember: (count: number, rows: ActivityItem[]) => void;
+  workspace?: WorkspaceMode;
 }) {
   const count = use(unread);
   useRememberPeek(count, items, onRemember);
@@ -172,6 +187,7 @@ function ActivityBellUnread({
       items={items}
       open={open}
       onOpenChange={onOpenChange}
+      workspace={workspace}
     />
   );
 }
@@ -182,12 +198,14 @@ function ActivityBellItems({
   open,
   onOpenChange,
   onRemember,
+  workspace,
 }: {
   unread: number;
   items: Promise<ActivityItem[]>;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onRemember: (count: number, rows: ActivityItem[]) => void;
+  workspace?: WorkspaceMode;
 }) {
   const rows = use(items);
   useRememberPeek(unread, rows, onRemember);
@@ -197,6 +215,7 @@ function ActivityBellItems({
       items={rows}
       open={open}
       onOpenChange={onOpenChange}
+      workspace={workspace}
     />
   );
 }
@@ -206,11 +225,13 @@ function ActivityBellTriggers({
   items,
   open,
   onOpenChange,
+  workspace,
 }: {
   count: number;
   items: ActivityItem[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  workspace?: WorkspaceMode;
 }) {
   const panelId = useId();
   const desktopRef = useRef<HTMLDivElement>(null);
@@ -266,6 +287,7 @@ function ActivityBellTriggers({
             surface="popover"
             panelId={popoverId}
             onClose={() => onOpenChange(false)}
+            workspace={workspace}
           />
         ) : null}
       </div>
@@ -274,6 +296,7 @@ function ActivityBellTriggers({
           items={items}
           panelId={sheetId}
           onClose={() => onOpenChange(false)}
+          workspace={workspace}
         />
       ) : null}
     </>
@@ -336,10 +359,16 @@ function closePeekOnRowNavigate(
 function ActivityBellBody({
   items,
   onClose,
+  workspace,
 }: {
   items: ActivityItem[];
   onClose: () => void;
+  workspace?: WorkspaceMode;
 }) {
+  const pathname = usePathname();
+  const viewAllHref = activityHref({
+    family: activityFamilyForWorkspace(workspace, pathname),
+  });
   return (
     <>
       {items.length === 0 ? (
@@ -358,7 +387,7 @@ function ActivityBellBody({
         </div>
       )}
       <Link
-        href={ACTIVITY_HREF}
+        href={viewAllHref}
         data-activity-bell-view-all=""
         className={ACTIVITY_BELL_VIEW_ALL_CLASS}
         onClick={onClose}
@@ -374,11 +403,13 @@ function ActivityBellPeek({
   surface,
   panelId,
   onClose,
+  workspace,
 }: {
   items: ActivityItem[];
   surface: "popover" | "sheet";
   panelId: string;
   onClose: () => void;
+  workspace?: WorkspaceMode;
 }) {
   return (
     <div
@@ -388,7 +419,7 @@ function ActivityBellPeek({
       data-activity-bell-popover={surface === "popover" ? "" : undefined}
       className={surface === "popover" ? ACTIVITY_BELL_POPOVER_CLASS : undefined}
     >
-      <ActivityBellBody items={items} onClose={onClose} />
+      <ActivityBellBody items={items} onClose={onClose} workspace={workspace} />
     </div>
   );
 }
@@ -397,10 +428,12 @@ function ActivityBellSheet({
   items,
   panelId,
   onClose,
+  workspace,
 }: {
   items: ActivityItem[];
   panelId: string;
   onClose: () => void;
+  workspace?: WorkspaceMode;
 }) {
   const sheet = (
     <div data-activity-bell-sheet="" className={ACTIVITY_BELL_SHEET_HOST_CLASS}>
@@ -421,7 +454,13 @@ function ActivityBellSheet({
           <h2 className="min-w-0 flex-1 t-heading text-ink">{ACTIVITY_PAGE.title}</h2>
           <Close44 label={ACTIVITY_PAGE.close} onClick={onClose} />
         </div>
-        <ActivityBellPeek items={items} surface="sheet" panelId={panelId} onClose={onClose} />
+        <ActivityBellPeek
+          items={items}
+          surface="sheet"
+          panelId={panelId}
+          onClose={onClose}
+          workspace={workspace}
+        />
       </div>
     </div>
   );

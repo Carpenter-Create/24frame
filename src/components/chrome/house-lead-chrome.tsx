@@ -123,7 +123,7 @@ export function HouseLeadChrome({
           </div>
           <ThemeToggle />
           <AskAssistantHeaderLink />
-          <ActivityBell unread={activityUnread} items={activityItems} />
+          <ActivityBell unread={activityUnread} items={activityItems} workspace={workspace} />
           {accountMenu}
         </div>
       </header>

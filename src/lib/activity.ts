@@ -1,5 +1,6 @@
+import { isCoProductionsPath } from "@/lib/co-productions";
 import { HOUSE_THEME_TOGGLE_CLASS } from "@/lib/house-lead-chrome";
-import { APP_SHEET_SURFACE_CLASS } from "@/lib/house-sheet";
+import { APP_SHEET_SURFACE_CLASS, TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
 import { NOTIFICATION_EMAIL, type NotificationKind } from "@/lib/notifications";
 import {
@@ -17,7 +18,7 @@ import {
   SETTINGS_SECTION_CLASS,
 } from "@/lib/settings";
 import { socialRelativeTime } from "@/lib/social";
-import { HOME_ROOT } from "@/lib/workspace";
+import { HOME_ROOT, isHomePath, type WorkspaceMode } from "@/lib/workspace";
 
 // Notifications is the live uncleared-alert feed. One feed.
 // Default: uncleared only, newest first. X clears a row. Cleared
@@ -39,7 +40,11 @@ import { HOME_ROOT } from "@/lib/workspace";
 // referrer is in-app; Home /home only as cold-open fallback.
 // Never hard-link Aggregation.
 // Adam lock 2026-09-20 (supersedes bell → full page): header bell
-// opens a peek of the last five open rows. View all opens this page.
+// opens a peek of the last five open rows. View all opens this page
+// with the current workspace family already selected (`?family=` —
+// same SoT as the chips). Home and Co-Productions have no matching
+// chip and fall back to All. View all is the house text-action
+// (Sporty Blue), not muted ink.
 
 export const ACTIVITY_HREF = "/activity";
 export const ACTIVITY_PREFS_HREF = SETTINGS.notificationsHref;
@@ -101,7 +106,7 @@ export const ACTIVITY_BELL_SHEET_HOST_CLASS =
   "fixed inset-0 z-50 flex items-end md:hidden";
 export const ACTIVITY_BELL_SHEET_SURFACE_CLASS = APP_SHEET_SURFACE_CLASS;
 export const ACTIVITY_BELL_VIEW_ALL_CLASS =
-  "block border-t border-hairline px-[var(--space-4)] py-[var(--space-3)] t-body-sm text-ink";
+  `block border-t border-hairline px-[var(--space-4)] py-[var(--space-3)] ${TEXT_ACTION_CLASS}`;
 export const ACTIVITY_BELL_LIST_CLASS =
   "flex max-h-80 flex-col gap-2 overflow-y-auto px-[var(--space-3)] py-[var(--space-3)]";
 
@@ -146,6 +151,19 @@ export function parseActivityFamily(raw: string | string[] | undefined): Activit
     return value as ActivityFamily;
   }
   return ACTIVITY_FAMILY_ALL;
+}
+
+// Peek View all and the full-page chips share `?family=`. Workspace
+// lands that match a chip (Aggregation · Social · Education) select
+// it. Home, Co-Productions, Account chrome, and unknown names → All.
+export function activityFamilyForWorkspace(
+  workspace: WorkspaceMode | string | undefined,
+  pathname?: string | null,
+): ActivityFamily {
+  if (pathname && (isHomePath(pathname) || isCoProductionsPath(pathname))) {
+    return ACTIVITY_FAMILY_ALL;
+  }
+  return parseActivityFamily(workspace);
 }
 
 export function activityFamilyForKind(kind: NotificationKind): NotificationPrefFamilyId {
