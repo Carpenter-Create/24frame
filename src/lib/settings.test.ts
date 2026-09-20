@@ -386,9 +386,7 @@ describe("settings hub lock", () => {
     expect(SETTINGS_DIALOG_FORM_CLASS).not.toContain("space-4");
     expect(SETTINGS_DIALOG_FORM_CLASS).not.toContain("space-6");
     expect(SETTINGS_EDIT_HELPER_CLASS).toBe(SETTINGS_DIALOG_HELP_CLASS);
-    expect(SETTINGS_DIALOG_LABEL_CLASS).toBe(
-      "t-body-sm font-normal normal-case tracking-normal text-ink-3",
-    );
+    expect(SETTINGS_DIALOG_LABEL_CLASS).toBe("t-body-sm normal-case tracking-normal text-ink-3");
     expect(SETTINGS_DIALOG_LABEL_CLASS).not.toContain("t-label");
     expect(SETTINGS_DIALOG_LABEL_CLASS).not.toContain("uppercase");
     expect(SETTINGS_DIALOG_ERROR_CLASS).toBe("t-body-sm text-ink-2");
