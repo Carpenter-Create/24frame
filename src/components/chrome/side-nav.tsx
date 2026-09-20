@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useRef } from "react";
-import { railDestinations, STAFF_RAIL_EYEBROW, type NavItem } from "@/lib/nav";
+import { SocialCreateSheet } from "@/components/social/social-create-sheet";
+import { railDestinations, isSocialCreateDest, STAFF_RAIL_EYEBROW, type NavItem } from "@/lib/nav";
 import { HOUSE_RAIL_ACTIVE_CLASS, HOUSE_RAIL_IDLE_CLASS, HOUSE_RAIL_ITEM_CLASS, HOUSE_RAIL_TITLE_CLASS } from "@/lib/house-shell";
 import { cn } from "@/lib/cn";
 import type { WorkspaceMode } from "@/lib/workspace";
@@ -47,6 +48,42 @@ export function SideNav({
     badge: React.ReactNode = null,
   ) => {
     const active = item.exact ? pathForActive === item.href : pathForActive.startsWith(item.href);
+    const rowClass = cn(
+      HOUSE_RAIL_ITEM_CLASS,
+      collapsed ? "justify-center px-0 py-2" : "gap-2 px-2 py-2",
+      active ? HOUSE_RAIL_ACTIVE_CLASS : HOUSE_RAIL_IDLE_CLASS,
+    );
+    const glyph = social ? (
+      <SocialIcon
+        name={socialNavIconName(item.href)}
+        active={active}
+        size={SOCIAL_ICON_SIZE_NAV}
+        className="shrink-0"
+      />
+    ) : (
+      <NavGlyph item={item} active={active} />
+    );
+    const label = !collapsed ? <span className="flex-1 truncate">{item.label}</span> : null;
+    if (social && isSocialCreateDest(item)) {
+      return (
+        <SocialCreateSheet
+          key={item.href}
+          trigger={
+            <button
+              type="button"
+              title={collapsed ? item.label : undefined}
+              aria-label={item.ariaLabel ?? item.label}
+              aria-current={active ? "page" : undefined}
+              data-social-create-sheet="dest"
+              className={rowClass}
+            >
+              {glyph}
+              {label}
+            </button>
+          }
+        />
+      );
+    }
     return (
       <Link
         key={item.href}
@@ -56,8 +93,9 @@ export function SideNav({
         // render of EVERY destination on EVERY navigation — ~400 invocations
         // in one short session. Hovering warms the one destination you are
         // about to click. Deduped per href so re-hovering does not re-fire.
-        // Social: VIEWPORT prefetch on. Desktop rail is four destinations
-        // plus local loading.tsx — not the Aggregation dashboard skeleton.
+        // Social: VIEWPORT prefetch on. Desktop rail is the same five
+        // SOCIAL_NAV dests plus local loading.tsx — not the Aggregation
+        // dashboard skeleton. Create opens the equal-tile sheet.
         prefetch={social}
         onMouseEnter={social ? undefined : () => warm(item.href)}
         onFocus={social ? undefined : () => warm(item.href)}
@@ -65,24 +103,11 @@ export function SideNav({
         title={collapsed ? item.label : undefined}
         aria-label={item.ariaLabel ?? (collapsed ? item.label : undefined)}
         data-social-rail-pending={social && pendingHref === item.href ? "" : undefined}
-        className={cn(
-          HOUSE_RAIL_ITEM_CLASS,
-          collapsed ? "justify-center px-0 py-2" : "gap-2 px-2 py-2",
-          active ? HOUSE_RAIL_ACTIVE_CLASS : HOUSE_RAIL_IDLE_CLASS,
-        )}
+        className={rowClass}
       >
         {social ? <SocialNavPendingProbe href={item.href} onPending={markPending} /> : null}
-        {social ? (
-          <SocialIcon
-            name={socialNavIconName(item.href)}
-            active={active}
-            size={SOCIAL_ICON_SIZE_NAV}
-            className="shrink-0"
-          />
-        ) : (
-          <NavGlyph item={item} active={active} />
-        )}
-        {!collapsed ? <span className="flex-1 truncate">{item.label}</span> : null}
+        {glyph}
+        {label}
         {badge}
       </Link>
     );
