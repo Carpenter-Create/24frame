@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import "./globals.css";
 
+import { QueryProvider } from "@/components/query-provider";
 import { ThemeSync } from "@/components/theme-toggle";
 import { BRAND_ICON_SIZE, BRAND_ICON_SRC, BRAND_ICON_TYPE } from "@/lib/brand";
 import { AGGREGATION_WORKSPACE, PRODUCT_NAME } from "@/lib/product";
@@ -31,8 +32,10 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: NO_FLASH_THEME_SCRIPT }} />
       </head>
       <body className="flex min-h-full flex-col">
-        <ThemeSync />
-        {children}
+        <QueryProvider>
+          <ThemeSync />
+          {children}
+        </QueryProvider>
       </body>
     </html>
   );

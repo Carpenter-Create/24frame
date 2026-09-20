@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -75,6 +76,10 @@ import {
   toggleSocialLike,
   updateSocialBio,
 } from "@/app/(app)/social/actions";
+import { readSocialFollowState } from "@/app/(app)/social/query-actions";
+import { useAppQueryClient } from "@/components/query-provider";
+import { SOCIAL_QUERY_STALE_MS, socialFollowQueryKey } from "@/lib/social-cache-keys";
+import { applyOptimisticFollow } from "@/lib/social-query";
 
 function FormError({ error }: { error: string }) {
   if (!error) return null;
@@ -584,6 +589,7 @@ export function SocialFollowButton({
   followeeId,
   handle,
   following,
+  viewerId,
   followsYou = false,
   compact = false,
   stretch = false,
@@ -591,9 +597,95 @@ export function SocialFollowButton({
   followeeId: string;
   handle: string;
   following: boolean;
+  viewerId?: string;
   followsYou?: boolean;
   compact?: boolean;
   stretch?: boolean;
+}) {
+  const queryClient = useAppQueryClient();
+  if (!queryClient) {
+    return (
+      <SocialFollowButtonView
+        followeeId={followeeId}
+        handle={handle}
+        following={following}
+        viewerId={viewerId}
+        followsYou={followsYou}
+        compact={compact}
+        stretch={stretch}
+        queryClient={null}
+      />
+    );
+  }
+  return (
+    <SocialFollowButtonQuery
+      followeeId={followeeId}
+      handle={handle}
+      following={following}
+      viewerId={viewerId}
+      followsYou={followsYou}
+      compact={compact}
+      stretch={stretch}
+    />
+  );
+}
+
+function SocialFollowButtonQuery({
+  followeeId,
+  handle,
+  following,
+  viewerId,
+  followsYou,
+  compact,
+  stretch,
+}: {
+  followeeId: string;
+  handle: string;
+  following: boolean;
+  viewerId?: string;
+  followsYou: boolean;
+  compact: boolean;
+  stretch: boolean;
+}) {
+  const queryClient = useAppQueryClient();
+  const query = useQuery({
+    queryKey: socialFollowQueryKey(viewerId ?? "me", followeeId),
+    queryFn: () => readSocialFollowState(followeeId),
+    initialData: following,
+    staleTime: SOCIAL_QUERY_STALE_MS,
+  });
+  return (
+    <SocialFollowButtonView
+      followeeId={followeeId}
+      handle={handle}
+      following={query.data ?? following}
+      viewerId={viewerId}
+      followsYou={followsYou}
+      compact={compact}
+      stretch={stretch}
+      queryClient={queryClient}
+    />
+  );
+}
+
+function SocialFollowButtonView({
+  followeeId,
+  handle,
+  following,
+  viewerId,
+  followsYou,
+  compact,
+  stretch,
+  queryClient,
+}: {
+  followeeId: string;
+  handle: string;
+  following: boolean;
+  viewerId?: string;
+  followsYou: boolean;
+  compact: boolean;
+  stretch: boolean;
+  queryClient: ReturnType<typeof useAppQueryClient>;
 }) {
   const router = useRouter();
   const [override, setOverride] = useState<boolean | null>(null);
@@ -624,10 +716,24 @@ export function SocialFollowButton({
           setError("");
           setConfirm(false);
           setOverride(next);
+          if (queryClient && viewerId) {
+            applyOptimisticFollow(queryClient, {
+              viewerId,
+              targetId: followeeId,
+              following: next,
+            });
+          }
           const result = await toggleSocialFollow(formData);
           setPending(false);
           if (result.error) {
             setOverride(null);
+            if (queryClient && viewerId) {
+              applyOptimisticFollow(queryClient, {
+                viewerId,
+                targetId: followeeId,
+                following: !next,
+              });
+            }
             setError(result.error);
             return;
           }

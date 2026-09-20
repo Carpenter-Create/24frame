@@ -543,7 +543,10 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(readFileSync("src/app/(app)/social/u/[handle]/follows/page.tsx", "utf8")).toContain(
       "loadProfileFollowList",
     );
-    expect(card).toContain("socialProfileFollowsHref");
+    expect(card).toContain("SocialProfileStats");
+    expect(readFileSync("src/components/social/social-profile-stats.tsx", "utf8")).toContain(
+      "socialProfileFollowsHref",
+    );
     expect(socialStories).not.toContain("PageHeader");
     expect(SOCIAL_FIGMA_PROFILE_EDIT).toEqual(["180:206", "180:1946", "181:2184"]);
     expect(SOCIAL_FIGMA_PROFILE_BIO).toEqual(["180:2004", "180:2026"]);

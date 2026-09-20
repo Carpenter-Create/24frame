@@ -9,5 +9,5 @@ export default async function SocialProfileBioPage() {
   const { profile } = await ensureOwnSocialProfileResult(supabase, ctx.user);
   if (!profile) redirect(SOCIAL_ROUTES.profile);
 
-  return <SocialProfileBioEditor bio={profile.bio ?? ""} />;
+  return <SocialProfileBioEditor profileId={profile.id} bio={profile.bio ?? ""} />;
 }

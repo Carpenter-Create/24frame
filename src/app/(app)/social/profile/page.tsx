@@ -6,6 +6,7 @@ import { SocialProfileCreateForm } from "@/components/social/social-forms";
 import { SocialEmpty } from "@/components/social/social-empty";
 import { SocialForYouRail } from "@/components/social/social-for-you";
 import { SocialProfileTabs } from "@/components/social/social-profile-tabs";
+import { SocialQueryBound } from "@/components/social/social-query-bound";
 import { SocialShareButton } from "@/components/social/social-share-button";
 import { SocialForYouSkeleton, SocialProfileCenterSkeleton } from "@/components/social/social-skeletons";
 import {
@@ -33,9 +34,9 @@ import {
   loadFolloweeIds,
   loadLikedPostIds,
   loadLiveStories,
-  loadProfileSocialCounts,
   loadSuggestedPeople,
 } from "@/lib/social-feed";
+import { loadCachedProfileSocialCounts } from "@/lib/social-hot-reads";
 import { ensureOwnSocialProfileResult } from "@/lib/social-profile";
 import { requireSocialSession, type SocialSession } from "@/lib/social-session";
 
@@ -90,7 +91,7 @@ async function SocialProfileMain({
     signedAvatarUrl(profile.id),
     loadLiveStories(supabase, [profile.id]),
     loadAuthorPosts(supabase, profile.id),
-    loadProfileSocialCounts(supabase, profile.id),
+    loadCachedProfileSocialCounts(supabase, profile.id),
     profile.welcome_video_key ? signedSocialMediaUrl(profile.welcome_video_key) : Promise.resolve(null),
   ]);
   const liveStories = liveStoriesPage.stories;
@@ -113,6 +114,7 @@ async function SocialProfileMain({
   return (
     <div className={SOCIAL_HOME_CENTER_CLASS}>
       <h1 className="sr-only">{SOCIAL.profile.title}</h1>
+      <SocialQueryBound profile={profile} counts={counts} />
       <SocialProfileIdentity
         name={profile.display_name}
         handle={profile.handle}
@@ -123,6 +125,7 @@ async function SocialProfileMain({
         websiteUrl={profile.website_url}
         imdbUrl={profile.imdb_url}
         ring={liveStories.length > 0 ? "live" : null}
+        profileId={profile.id}
         stats={counts ?? undefined}
         actions={() => (
           <>

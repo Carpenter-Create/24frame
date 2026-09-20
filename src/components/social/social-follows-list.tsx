@@ -32,6 +32,7 @@ export function SocialFollowsList({
                 followeeId={person.id}
                 handle={person.handle}
                 following={person.following}
+                viewerId={viewerId}
                 followsYou={person.followsYou}
                 compact
               />

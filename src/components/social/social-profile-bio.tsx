@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { updateSocialBio } from "@/app/(app)/social/actions";
+import { useAppQueryClient } from "@/components/query-provider";
+import { applyOptimisticSocialProfilePatch, invalidateSocialQueries } from "@/lib/social-query";
 import { SocialIcon } from "@/components/social/social-icon";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,15 +30,18 @@ import {
 } from "@/lib/social";
 
 export function SocialProfileBioEditor({
+  profileId,
   bio,
   onBack,
   onSaved,
 }: {
+  profileId?: string;
   bio: string;
   onBack?: () => void;
   onSaved?: (bio: string) => void;
 }) {
   const router = useRouter();
+  const queryClient = useAppQueryClient();
   const [value, setValue] = useState(socialBioFieldValue(bio));
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
@@ -46,9 +51,14 @@ export function SocialProfileBioEditor({
     setPending(true);
     const form = new FormData();
     form.set("bio", value);
+    const nextBio = normalizeBio(value) ?? "";
+    if (queryClient && profileId) {
+      applyOptimisticSocialProfilePatch(queryClient, profileId, { bio: nextBio || null });
+    }
     const result = await updateSocialBio(form);
     setPending(false);
     if (result.error) {
+      if (queryClient && profileId) invalidateSocialQueries(queryClient, { profileId });
       setError(result.error);
       return;
     }

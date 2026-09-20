@@ -38,6 +38,9 @@ describe("hygiene docs (P3 / P2-9)", () => {
     expect(env).toContain("PORTAL_BASE_URL=");
     expect(env).toContain("S3_BUCKET=");
     expect(env).toContain("DASHBOARD_CRAFT_FIXTURE=");
+    expect(env).toContain("UPSTASH_REDIS_REST_URL=");
+    expect(env).toContain("UPSTASH_REDIS_REST_TOKEN=");
+    expect(env).not.toContain("NEXT_PUBLIC_UPSTASH");
     expect(env).not.toMatch(/^NEWS_S3_/m);
     expect(env).not.toContain("NEWS_S3_BUCKET=");
     const globals = readFileSync("src/app/globals.css", "utf8");

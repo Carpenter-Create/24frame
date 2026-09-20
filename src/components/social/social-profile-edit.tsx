@@ -64,11 +64,18 @@ import {
 } from "@/lib/social";
 import {
   SOCIAL_PROFILE_LINKS_MAX,
+  composeSocialWebsiteUrlField,
   parseSocialWebsiteUrlField,
 } from "@/lib/social-profile-links";
 import { parseSocialProfileRoles } from "@/lib/social-profile-roles";
 import { parseSocialProfileTopics } from "@/lib/social-profile-topics";
 import { socialProfileEditFace, type SocialProfileEditFace } from "@/lib/social-profile-edit";
+import { useAppQueryClient } from "@/components/query-provider";
+import {
+  applyOptimisticSocialProfile,
+  applyOptimisticSocialProfilePatch,
+  invalidateSocialQueries,
+} from "@/lib/social-query";
 
 function EditHeader({
   title,
@@ -101,6 +108,7 @@ function EditHeader({
 }
 
 export function SocialProfileEditForm({
+  profileId,
   handle,
   displayName,
   bio,
@@ -111,6 +119,7 @@ export function SocialProfileEditForm({
   imdbUrl = "",
   websiteUrl = "",
 }: {
+  profileId?: string;
   handle: string;
   displayName: string;
   bio: string;
@@ -122,6 +131,7 @@ export function SocialProfileEditForm({
   websiteUrl?: string | null;
 }) {
   const router = useRouter();
+  const queryClient = useAppQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const welcomeRef = useRef<HTMLInputElement>(null);
   const split = splitSocialDisplayName(displayName);
@@ -283,9 +293,25 @@ export function SocialProfileEditForm({
     form.set("topics", JSON.stringify(interestTopics));
     form.set("imdb_url", imdb);
     form.set("links", JSON.stringify(linkDrafts));
+    const nextHandle = normalizeHandle(username) ?? username;
+    const nextName = composeSocialDisplayName(firstName, lastName, middleName);
+    if (queryClient && profileId) {
+      applyOptimisticSocialProfile(queryClient, {
+        id: profileId,
+        handle: nextHandle,
+        display_name: nextName,
+        status: "active",
+        bio: bioText,
+        crafts: roles,
+        topics: interestTopics,
+        imdb_url: imdb.trim() || null,
+        website_url: composeSocialWebsiteUrlField(linkDrafts.filter(Boolean)),
+      });
+    }
     const result = await createSocialProfile(form);
     setPending(false);
     if (result.error) {
+      if (queryClient && profileId) invalidateSocialQueries(queryClient, { profileId });
       if (
         result.error === SOCIAL.profile.handleRequired ||
         result.error === SOCIAL.profile.handleInvalid ||
@@ -303,10 +329,14 @@ export function SocialProfileEditForm({
   if (face === "bio") {
     return (
       <SocialProfileBioEditor
+        profileId={profileId}
         bio={bioText}
         onBack={() => setFace(socialProfileEditFace(false))}
         onSaved={(next) => {
           setBioText(next);
+          if (queryClient && profileId) {
+            applyOptimisticSocialProfilePatch(queryClient, profileId, { bio: next || null });
+          }
           setFace(socialProfileEditFace(false));
         }}
       />
