@@ -52,6 +52,8 @@ describe("Social create kinds", () => {
     expect(src).not.toContain("HOUSE_FILTER_ON_CLASS");
     expect(src).not.toContain("HOUSE_FILTER_OFF_CLASS");
     expect(src).not.toContain("HOUSE_FILTER_PILL_CLUSTER");
+    expect(src).not.toContain("pendingIndex");
+    expect(src).not.toContain("pendingFamily");
     expect(src).not.toContain("flex flex-wrap gap-1.5");
   });
 });

@@ -21,6 +21,10 @@ const CONSUMERS = [
   "src/components/reports/reports-ranked.tsx",
   "src/components/reports/reports-controls.tsx",
   "src/components/news/news-sources-filter.tsx",
+] as const;
+
+const CHOICE_MENUS = [
+  ...CONSUMERS,
   "src/components/social/social-forms.tsx",
 ] as const;
 
@@ -91,7 +95,7 @@ describe("SegmentedTrack slide SoT", () => {
     expect(house).toContain("Exclusive choice menus are SegmentedTrack");
     expect(house).toContain("HOUSE_FILTER_PILL_CLUSTER_CLASS");
 
-    for (const path of CONSUMERS) {
+    for (const path of CHOICE_MENUS) {
       const body = readFileSync(path, "utf8");
       expect(body, path).not.toContain("HOUSE_FILTER_PILL_CLUSTER_CLASS");
       expect(body, path).toContain("SegmentedTrack");
