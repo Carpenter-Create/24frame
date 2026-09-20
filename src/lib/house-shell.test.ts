@@ -10,6 +10,7 @@ import { UserMenu } from "@/components/chrome/user-menu";
 import { PAGE_LEAD_STACK_CLASS, PageHeader } from "@/components/ui/page-header";
 import {
   DASHBOARD_CARD_PAD,
+  DASHBOARD_NEWS_SOURCE_CHIPS_CLASS,
   DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS,
   DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS,
   DASHBOARD_NEWS_SOURCE_TRACK_CLASS,
@@ -24,6 +25,7 @@ import {
   HOUSE_CARD_PAD,
   HOUSE_FILTER_OFF_CLASS,
   HOUSE_FILTER_ON_CLASS,
+  HOUSE_PILL_ITEM_CLASS,
   HOUSE_PILL_SELECTED_CLASS,
   HOUSE_MODULE_CLASS,
   HOUSE_PAGE_CANVAS_CLASS,
@@ -43,6 +45,7 @@ import {
   HOUSE_SEGMENTED_THUMB_CLASS,
   HOUSE_SEGMENTED_THUMB_DURATION_MS,
   HOUSE_SEGMENTED_THUMB_EASE,
+  HOUSE_SCROLL_ROW_CLASS,
   HOUSE_SEGMENTED_TRACK_CLASS,
   HOUSE_SEGMENTED_TRACK_SCROLL_CLASS,
   houseSegmentedThumbHidden,
@@ -186,6 +189,8 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(HOUSE_SEGMENTED_TRACK_CLASS).toContain("bg-surface-muted");
     expect(HOUSE_SEGMENTED_TRACK_CLASS).not.toContain("p-[");
     expect(HOUSE_SEGMENTED_TRACK_CLASS).not.toContain("w-max");
+    expect(HOUSE_SCROLL_ROW_CLASS).toBe("no-scrollbar w-full overflow-x-auto");
+    expect(HOUSE_SCROLL_ROW_CLASS).not.toContain("flex-wrap");
     expect(HOUSE_SEGMENTED_TRACK_SCROLL_CLASS).toBe(
       `${HOUSE_SEGMENTED_TRACK_CLASS} w-max min-w-full`,
     );
@@ -211,6 +216,10 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(DASHBOARD_SECTION_AIR_CLASS).toBe(HOUSE_SECTION_AIR_CLASS);
     expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).toBe(HOUSE_SEGMENTED_ITEM_ON_CLASS);
     expect(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS).toBe(HOUSE_SEGMENTED_ITEM_OFF_CLASS);
+    expect(HOUSE_SEGMENTED_ITEM_BASE_CLASS).toContain(HOUSE_PILL_ITEM_CLASS);
+    expect(HOUSE_PILL_ITEM_CLASS).toContain("py-[var(--space-2)]");
+    expect(HOUSE_PILL_ITEM_CLASS).toContain("t-body-sm");
+    expect(HOUSE_PILL_ITEM_CLASS).toContain("px-[var(--space-4)]");
     expect(DASHBOARD_TOP_PILL_BUTTON_CLASS).toBe(HOUSE_SEGMENTED_ITEM_BASE_CLASS);
     expect(HOUSE_SEGMENTED_ITEM_ON_CLASS).toBe("text-white");
     expect(HOUSE_SEGMENTED_ITEM_OFF_CLASS).toBe("text-ink-2");
@@ -233,6 +242,8 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).toBe("text-white");
     expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).not.toContain("bg-accent");
     expect(DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS).toBe(HOUSE_SEGMENTED_ITEM_OFF_CLASS);
+    expect(DASHBOARD_NEWS_SOURCE_CHIPS_CLASS).toBe(HOUSE_SCROLL_ROW_CLASS);
+    expect(readFileSync("src/lib/house-chip-rail.ts", "utf8")).toContain("HOUSE_SCROLL_ROW_CLASS");
     expect(DASHBOARD_NEWS_SOURCE_TRACK_CLASS).toBe(HOUSE_SEGMENTED_TRACK_SCROLL_CLASS);
     expect(DASHBOARD_PERIOD_OPTION_SELECTED_CLASS).toBe(HOUSE_PERIOD_SELECTED_CLASS);
     expect(sideNav).toContain("HOUSE_RAIL_ACTIVE_CLASS");

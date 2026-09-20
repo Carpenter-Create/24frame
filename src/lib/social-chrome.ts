@@ -14,6 +14,12 @@
 // house-shell. Feed / stories / create measured IA stays here.
 
 import {
+  HOUSE_CHIP_RAIL_CHIP_CLASS,
+  HOUSE_CHIP_RAIL_CLASS,
+  HOUSE_CHIP_RAIL_ROW_CLASS,
+  HOUSE_CHIP_RAIL_STACK_CLASS,
+} from "@/lib/house-chip-rail";
+import {
   HOUSE_FILTER_OFF_CLASS,
   HOUSE_FILTER_ON_CLASS,
   HOUSE_MODULE_CLASS,
@@ -228,6 +234,13 @@ export const SOCIAL_HOME_TAB_CLASS =
 
 export const SOCIAL_TOPIC_CHIP_CLASS =
   "inline-flex items-center rounded-full bg-surface px-[10px] py-[5px] text-[11px] font-medium text-ink";
+
+// Home Topics. aliases the house two-row chip rail. Not SegmentedTrack:
+// this is a bank of lenses, not a selected exclusive menu.
+export const SOCIAL_TOPIC_RAIL_CLASS = HOUSE_CHIP_RAIL_CLASS;
+export const SOCIAL_TOPIC_RAIL_STACK_CLASS = HOUSE_CHIP_RAIL_STACK_CLASS;
+export const SOCIAL_TOPIC_CHIP_ROW_CLASS = HOUSE_CHIP_RAIL_ROW_CLASS;
+export const SOCIAL_TOPIC_RAIL_CHIP_CLASS = HOUSE_CHIP_RAIL_CHIP_CLASS;
 
 export const SOCIAL_FIRST_WIN_CLASS =
   "flex flex-col items-center justify-center gap-2.5 rounded-[8px] border border-hairline bg-surface px-5 pb-4 pt-5 text-center";

@@ -22,6 +22,7 @@ import {
   HOUSE_SEGMENTED_ITEM_OFF_CLASS,
   HOUSE_SEGMENTED_ITEM_ON_CLASS,
   HOUSE_SEGMENTED_THUMB_CLASS,
+  HOUSE_SCROLL_ROW_CLASS,
   HOUSE_SEGMENTED_TRACK_CLASS,
   HOUSE_SEGMENTED_TRACK_SCROLL_CLASS,
 } from "@/lib/house-shell";
@@ -207,7 +208,7 @@ export const DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS = HOUSE_SEGMENTED_ITEM_OFF_CLAS
 // /home/news source lens: house SegmentedTrack SoT (All | one outlet).
 // Host scrolls; track is the house scroll-row token so the muted pill
 // covers every outlet. Thumb + ink stay DASHBOARD_TOP_PILL_*.
-export const DASHBOARD_NEWS_SOURCE_CHIPS_CLASS = "no-scrollbar w-full overflow-x-auto";
+export const DASHBOARD_NEWS_SOURCE_CHIPS_CLASS = HOUSE_SCROLL_ROW_CLASS;
 
 export const DASHBOARD_NEWS_SOURCE_TRACK_CLASS = HOUSE_SEGMENTED_TRACK_SCROLL_CLASS;
 

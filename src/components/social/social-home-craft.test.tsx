@@ -16,7 +16,12 @@ import {
   SOCIAL_EMPTY_ACTION_CLASS,
   SOCIAL_EMPTY_PANEL_CLASS,
   SOCIAL_STORIES_EMPTY_ACTION_CLASS,
+  SOCIAL_TOPIC_CHIP_ROW_CLASS,
+  SOCIAL_TOPIC_RAIL_CHIP_CLASS,
+  SOCIAL_TOPIC_RAIL_CLASS,
 } from "@/lib/social-chrome";
+import { HOUSE_SCROLL_ROW_CLASS, HOUSE_SEGMENTED_ITEM_BASE_CLASS } from "@/lib/house-shell";
+import { socialInterestTopics } from "@/lib/social-role-affinity";
 import { SOCIAL_ICON_SIZE_COMPOSER, SOCIAL_ICON_SIZE_STORY_PLUS } from "@/lib/social-icons";
 import { SOCIAL_MEDIA_ACCEPT } from "@/lib/social-media";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
@@ -73,19 +78,44 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).not.toContain("AC");
   });
 
-  it("renders Topics. as a wrapping chip row, never a truncated rail twin", () => {
+  it("renders Topics. as a two-row house chip rail, not a wrapping card", () => {
     const html = renderToStaticMarkup(<SocialHomeTopics />);
     expect(html).toContain("data-social-home-topics");
+    expect(html).toContain("data-social-home-topics-rail");
+    expect(html).toContain("data-house-chip-rail");
+    expect(html).toContain('data-house-chip-rail-row="0"');
+    expect(html).toContain('data-house-chip-rail-row="1"');
     expect(html).toContain(SOCIAL.forYou.topics);
-    expect(html).toContain(SOCIAL_FOR_YOU_CARD_CLASS);
-    expect(SOCIAL_FOR_YOU_CARD_CLASS).toContain("rounded-[var(--radius-lg)]");
-    expect(html).toContain("flex-wrap");
+    expect(html).toContain(SOCIAL_TOPIC_RAIL_CLASS);
+    expect(html).toContain(SOCIAL_TOPIC_CHIP_ROW_CLASS);
+    expect(html).toContain(SOCIAL_TOPIC_RAIL_CHIP_CLASS);
+    expect(SOCIAL_TOPIC_RAIL_CHIP_CLASS).toContain(HOUSE_SEGMENTED_ITEM_BASE_CLASS);
+    expect(html).toContain(HOUSE_SEGMENTED_ITEM_BASE_CLASS);
+    expect(html).not.toContain("text-[11px]");
+    expect(html).not.toContain("py-[5px]");
+    expect(SOCIAL_TOPIC_RAIL_CLASS).toBe(HOUSE_SCROLL_ROW_CLASS);
+    expect(SOCIAL_TOPIC_RAIL_CLASS).toContain("overflow-x-auto");
+    expect(html.match(/overflow-x-auto/g)?.length).toBe(1);
+    expect(SOCIAL_TOPIC_RAIL_CLASS).not.toContain("flex-wrap");
+    expect(SOCIAL_TOPIC_CHIP_ROW_CLASS).not.toContain("flex-wrap");
+    expect(html).not.toContain(SOCIAL_FOR_YOU_CARD_CLASS);
+    expect(html).not.toContain("flex-wrap");
     expect(html).toContain("Cinematography");
     expect(html).toContain("Vertical micro dramas");
     expect(html).not.toContain("Topics for you");
+    expect(html).not.toContain("Trending topics");
     expect(html).not.toContain("truncate");
     expect(html).not.toContain("data-social-for-you-topics");
     expect(SOCIAL.forYou.topics).toBe("Topics.");
+    expect(socialInterestTopics({})).toHaveLength(15);
+    const top = html.slice(
+      html.indexOf('data-house-chip-rail-row="0"'),
+      html.indexOf('data-house-chip-rail-row="1"'),
+    );
+    const bottom = html.slice(html.indexOf('data-house-chip-rail-row="1"'));
+    expect(top).toContain("Acting");
+    expect(top).not.toContain("AI filmmaking");
+    expect(bottom).toContain("AI filmmaking");
   });
 
   it("renders tall FB-style story tiles with a plus well and unseen face rings", () => {
