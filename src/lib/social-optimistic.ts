@@ -70,6 +70,7 @@ const likeListeners = new Set<() => void>();
 let posts: SocialOptimisticPost[] = [];
 const postListeners = new Set<() => void>();
 const likePersistTail = new Map<string, Promise<unknown>>();
+const likePersistKnown = new Map<string, boolean>();
 let postPublishBusy = false;
 
 function emitLikes() {
@@ -119,10 +120,19 @@ export function persistSocialLikeLatest(
   epoch: number,
   form: FormData,
 ): Promise<{ error?: string }> {
+  const queuedFrom = String(form.get("liked") ?? "") === "1";
   const prev = likePersistTail.get(postId) ?? Promise.resolve();
   const next = prev.then(async () => {
+    if (!likePersistKnown.has(postId)) likePersistKnown.set(postId, queuedFrom);
     if (!socialLikeEpochIsCurrent(postId, epoch)) return {};
-    return persistSocialLike(form);
+    const known = likePersistKnown.get(postId) === true;
+    const overlay = readOptimisticLike(postId);
+    const target = overlay?.liked ?? !queuedFrom;
+    if (target === known) return {};
+    form.set("liked", known ? "1" : "0");
+    const result = await persistSocialLike(form);
+    if (!result.error) likePersistKnown.set(postId, target);
+    return result;
   });
   likePersistTail.set(postId, next.catch(() => undefined));
   return next;
@@ -196,6 +206,7 @@ export function socialLikeEpochIsCurrent(postId: string, epoch: number): boolean
 
 export function clearOptimisticLike(postId: string): void {
   likeEpoch.delete(postId);
+  likePersistKnown.delete(postId);
   if (!likes.delete(postId)) return;
   emitLikes();
 }
@@ -345,6 +356,7 @@ export function resetSocialOptimisticForTests(): void {
   likes.clear();
   likeEpoch.clear();
   likePersistTail.clear();
+  likePersistKnown.clear();
   posts = [];
   postPublishBusy = false;
   emitLikes();

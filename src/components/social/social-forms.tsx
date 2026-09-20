@@ -100,6 +100,7 @@ function publishOptimisticPost({
   groupSlug,
   category,
   onLocalSuccess,
+  onLocalFailure,
   onNavigate,
   setError,
 }: {
@@ -113,6 +114,7 @@ function publishOptimisticPost({
   groupSlug?: string;
   category?: string;
   onLocalSuccess?: () => void;
+  onLocalFailure?: () => void;
   onNavigate?: () => void;
   setError: (error: string) => void;
 }) {
@@ -147,6 +149,7 @@ function publishOptimisticPost({
     rollback: () => {
       failOptimisticSocialPost(started.post.id, ACCOUNT_PROFILE.saveFailed);
       endSocialPostPublishBusy();
+      onLocalFailure?.();
     },
     onError: (error) => {
       failOptimisticSocialPost(started.post.id, error);
@@ -300,6 +303,11 @@ export function SocialPostCompose({
             setBody("");
             setMedia([]);
             setPreviews({});
+          },
+          onLocalFailure: () => {
+            setBody(body);
+            setMedia(media);
+            setPreviews(previews);
           },
           setError,
         });

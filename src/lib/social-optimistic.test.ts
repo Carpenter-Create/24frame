@@ -120,6 +120,25 @@ describe("Social optimistic mutation SoT", () => {
     expect(socialPostPublishBusy()).toBe(false);
   });
 
+  it("does not insert after a skipped unlike on an already-liked post", async () => {
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({}), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    applyOptimisticLike("p1", { liked: true, likeCount: 1 });
+    const unlikeEpoch = beginSocialLikeEpoch("p1");
+    applyOptimisticLike("p1", { liked: false, likeCount: 0 });
+    const unlike = new FormData();
+    unlike.set("post_id", "p1");
+    unlike.set("liked", "1");
+    applyOptimisticLike("p1", { liked: true, likeCount: 1 });
+    const likeEpoch = beginSocialLikeEpoch("p1");
+    const like = new FormData();
+    like.set("post_id", "p1");
+    like.set("liked", "0");
+    expect(await persistSocialLikeLatest("p1", unlikeEpoch, unlike)).toEqual({});
+    expect(await persistSocialLikeLatest("p1", likeEpoch, like)).toEqual({});
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it("starts a publish hop without waiting on the server and rejects an empty post", () => {
     expect(beginSocialPostPublish({ body: "   ", mediaItems: [], authorName: "Ada" })).toEqual({
       ok: false,
@@ -212,6 +231,7 @@ describe("Social optimistic mutation SoT", () => {
     expect(forms).toContain("function publishOptimisticPost");
     expect(forms).toContain("runSocialOptimisticMutation");
     expect(forms).toContain("persistSocialPost");
+    expect(forms).toContain("onLocalFailure");
     expect(likeChunk).toContain("runSocialOptimisticMutation");
     expect(likeChunk).toContain("persistSocialLikeLatest");
     expect(likeChunk).not.toContain("await toggleSocialLike");
