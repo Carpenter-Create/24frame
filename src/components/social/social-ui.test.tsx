@@ -178,6 +178,7 @@ describe("Social profile public face", () => {
     expect(identity).toContain("Writes engines.");
     expect(identity).toContain('src="https://s3.example/signed-avatar"');
     expect(identity).not.toContain("data-social-profile-roles");
+    expect(identity).not.toContain("data-social-profile-topics");
     expect(identity).not.toContain("data-social-profile-links");
     expect(identity).not.toContain("data-social-profile-imdb");
 
@@ -192,9 +193,26 @@ describe("Social profile public face", () => {
     expect(withRoles).toContain("data-social-profile-roles");
     expect(withRoles).toContain("Actor · Producer · Screenwriter +1");
     expect(withRoles).not.toContain("Roles:");
+    expect(withRoles).not.toContain("Professions:");
+    expect(withRoles).not.toContain("Topics:");
     expect(withRoles.indexOf("data-social-profile-handle")).toBeLessThan(
       withRoles.indexOf("data-social-profile-roles"),
     );
+
+    const withTopics = renderToStaticMarkup(
+      <SocialProfileIdentity
+        name="Ada Lovelace"
+        handle="ada"
+        photoUrl={null}
+        topics={["Acting", "Financing"]}
+      />,
+    );
+    expect(withTopics).toContain("data-social-profile-topics");
+    expect(withTopics).toContain('data-social-profile-topic="Acting"');
+    expect(withTopics).toContain("Acting");
+    expect(withTopics).toContain("Financing");
+    expect(withTopics).not.toContain("Actor");
+    expect(withTopics).not.toContain("Topics:");
 
     const withStats = renderToStaticMarkup(
       <SocialProfileIdentity

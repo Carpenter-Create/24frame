@@ -63,8 +63,11 @@ describe("SocialProfileEditForm", () => {
     expect(html).toContain(SOCIAL.profile.welcomeAdd);
     expect(html).not.toContain(SOCIAL.profile.welcomeRemove);
     expect(html).toContain("data-social-profile-edit-roles");
+    expect(html).toContain("data-social-profile-edit-topics");
     expect(html).toContain(SOCIAL.profile.roles);
+    expect(html).toContain(SOCIAL.profile.topics);
     expect(html).toContain(SOCIAL.profile.rolesSearch);
+    expect(html).toContain(SOCIAL.profile.topicsSearch);
     expect(html).toContain('id="social-edit-roles-search"');
     expect(html).not.toContain("data-social-profile-edit-roles-selected");
     expect(html).toContain("data-social-profile-edit-imdb");
@@ -131,7 +134,7 @@ describe("SocialProfileEditForm", () => {
     expect(html).not.toContain("data-social-welcome-video");
   });
 
-  it("shows selected Roles chips from persisted crafts and never a Category label", () => {
+  it("shows selected Professions chips from persisted crafts and never a Category label", () => {
     const html = renderToStaticMarkup(
       <SocialProfileEditForm
         handle="ada"

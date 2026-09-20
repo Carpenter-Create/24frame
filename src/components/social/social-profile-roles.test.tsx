@@ -6,7 +6,7 @@ import { SOCIAL_TOPIC_CHIP_CLASS } from "@/lib/social-chrome";
 import { SocialProfileRolesField } from "./social-profile-roles";
 
 describe("SocialProfileRolesField", () => {
-  it("renders Roles search, grouped bank, and selected house chips in order", () => {
+  it("renders Professions search, grouped bank, and selected house chips in order", () => {
     const html = renderToStaticMarkup(
       <SocialProfileRolesField value={["investor", "actor"]} onChange={() => undefined} />,
     );

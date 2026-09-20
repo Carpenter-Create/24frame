@@ -195,8 +195,9 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(topics).toContain("data-social-home-topics");
     expect(topics).toContain("SOCIAL.forYou.topics");
     expect(topics).toContain("SOCIAL_FOR_YOU_CARD_CLASS");
-    expect(topics).toContain("socialRoleAffinityTopics");
-    expect(home).toContain("SocialHomeTopics crafts=");
+    expect(topics).toContain("socialInterestTopics");
+    expect(home).toContain("SocialHomeTopics topics=");
+    expect(home).toContain("crafts=");
     expect(topics).toContain("flex-wrap");
     expect(topics).not.toContain("truncate");
     expect(chrome).not.toContain("rounded-[14px]");

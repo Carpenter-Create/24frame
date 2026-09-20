@@ -15,6 +15,7 @@ import { AccountAvatarCrop } from "@/components/account/account-avatar-crop";
 import { SocialAvatar } from "@/components/social/social-avatar";
 import { SocialProfileBioEditor } from "@/components/social/social-profile-bio";
 import { SocialProfileRolesField } from "@/components/social/social-profile-roles";
+import { SocialProfileTopicsField } from "@/components/social/social-profile-topics";
 import { SocialIcon } from "@/components/social/social-icon";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { Input } from "@/components/ui/input";
@@ -65,6 +66,7 @@ import {
   parseSocialWebsiteUrlField,
 } from "@/lib/social-profile-links";
 import { parseSocialProfileRoles } from "@/lib/social-profile-roles";
+import { parseSocialProfileTopics } from "@/lib/social-profile-topics";
 import { socialProfileEditFace, type SocialProfileEditFace } from "@/lib/social-profile-edit";
 
 function EditHeader({
@@ -104,6 +106,7 @@ export function SocialProfileEditForm({
   photoUrl,
   welcomeVideoUrl = null,
   crafts = [],
+  topics = [],
   imdbUrl = "",
   websiteUrl = "",
 }: {
@@ -113,6 +116,7 @@ export function SocialProfileEditForm({
   photoUrl: string | null;
   welcomeVideoUrl?: string | null;
   crafts?: readonly string[];
+  topics?: readonly string[];
   imdbUrl?: string | null;
   websiteUrl?: string | null;
 }) {
@@ -135,6 +139,7 @@ export function SocialProfileEditForm({
   const [face, setFace] = useState<SocialProfileEditFace>("edit");
   const [bioText, setBioText] = useState(bio);
   const [roles, setRoles] = useState(() => parseSocialProfileRoles(crafts));
+  const [interestTopics, setInterestTopics] = useState(() => parseSocialProfileTopics(topics));
   const [imdb, setImdb] = useState(imdbUrl ?? "");
   const [linkDrafts, setLinkDrafts] = useState(() => {
     const urls = parseSocialWebsiteUrlField(websiteUrl);
@@ -274,6 +279,7 @@ export function SocialProfileEditForm({
     form.set("last_name", lastName);
     form.set("display_name", composeSocialDisplayName(firstName, lastName, middleName));
     form.set("crafts", JSON.stringify(roles));
+    form.set("topics", JSON.stringify(interestTopics));
     form.set("imdb_url", imdb);
     form.set("links", JSON.stringify(linkDrafts));
     const result = await createSocialProfile(form);
@@ -502,6 +508,8 @@ export function SocialProfileEditForm({
             </div>
             <div className="h-px bg-hairline" />
             <SocialProfileRolesField value={roles} onChange={setRoles} />
+            <div className="h-px bg-hairline" />
+            <SocialProfileTopicsField value={interestTopics} onChange={setInterestTopics} />
             <div className="h-px bg-hairline" />
             <div data-social-profile-edit-imdb="" className={`${SOCIAL_PROFILE_EDIT_ROW_CLASS} flex-col gap-2 md:flex-row`}>
               <label htmlFor="social-edit-imdb" className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>

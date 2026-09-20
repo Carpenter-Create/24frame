@@ -558,6 +558,7 @@ export type Database = {
           primary_role: string | null
           status: Database["public"]["Enums"]["account_status"]
           timezone: string
+          topics: string[]
           trust_state: Database["public"]["Enums"]["trust_state"]
           website_url: string | null
           welcome_video_key: string | null
@@ -595,6 +596,7 @@ export type Database = {
           primary_role?: string | null
           status?: Database["public"]["Enums"]["account_status"]
           timezone?: string
+          topics?: string[]
           trust_state?: Database["public"]["Enums"]["trust_state"]
           website_url?: string | null
           welcome_video_key?: string | null
@@ -632,6 +634,7 @@ export type Database = {
           primary_role?: string | null
           status?: Database["public"]["Enums"]["account_status"]
           timezone?: string
+          topics?: string[]
           trust_state?: Database["public"]["Enums"]["trust_state"]
           website_url?: string | null
           welcome_video_key?: string | null

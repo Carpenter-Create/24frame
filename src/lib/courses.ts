@@ -2,7 +2,6 @@ import { SOCIAL } from "@/lib/social";
 import { educationCourseHref, type CourseStatus } from "@/lib/education";
 import type { createClient } from "@/lib/supabase/server";
 import { UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
-import { parseSocialProfileRoles } from "@/lib/social-profile-roles";
 import { socialCourseAffinityScore } from "@/lib/social-role-affinity";
 
 // Course placeholders. Members browse and consume titles only.
@@ -360,21 +359,17 @@ function newerPublishedCourse(left: CourseRow, right: CourseRow): CourseRow {
 }
 
 /** Newest published course from the Education catalog. Same rows as loadDiscoverableCourses.
- * When viewer Roles exist, prefer a matching course; otherwise newest published. */
+ * Topics are primary; Professions may soft-bias. Otherwise newest published. */
 export function latestDiscoverableCourse(
   courses: readonly CourseRow[],
-  viewerCrafts: readonly string[] = [],
+  viewer: { topics?: unknown; crafts?: unknown } | readonly string[] = [],
 ): CourseRow | null {
   const published = courses.filter((course) => course.status === "published");
   if (published.length === 0) return null;
-  const crafts = parseSocialProfileRoles(viewerCrafts);
-  if (crafts.length === 0) {
-    return published.reduce((latest, course) => newerPublishedCourse(latest, course));
-  }
   let best: CourseRow | null = null;
   let bestScore = -1;
   for (const course of published) {
-    const score = socialCourseAffinityScore(course, crafts);
+    const score = socialCourseAffinityScore(course, viewer);
     if (
       !best ||
       score > bestScore ||

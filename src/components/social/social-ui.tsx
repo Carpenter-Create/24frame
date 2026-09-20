@@ -11,6 +11,7 @@ import {
   SOCIAL_HIGHLIGHT_RING_CLASS,
   SOCIAL_PROFILE_GRID_CLASS,
   SOCIAL_PROFILE_TILE_CLASS,
+  SOCIAL_TOPIC_CHIP_CLASS,
 } from "@/lib/social-chrome";
 import {
   displayHandle,
@@ -29,6 +30,7 @@ import {
 } from "@/lib/social-profile-mutuals";
 import { socialProfilePublicLinks } from "@/lib/social-profile-links";
 import { socialProfileRolesLine } from "@/lib/social-profile-roles";
+import { parseSocialProfileTopics } from "@/lib/social-profile-topics";
 import { SocialAvatar } from "./social-avatar";
 import { SocialLikeButton } from "./social-forms";
 import { SocialEmpty } from "./social-empty";
@@ -167,6 +169,7 @@ export function SocialProfileIdentity({
   photoUrl,
   bio,
   roles,
+  topics,
   websiteUrl,
   imdbUrl,
   ring = null,
@@ -181,6 +184,7 @@ export function SocialProfileIdentity({
   photoUrl?: string | null;
   bio?: string | null;
   roles?: readonly string[] | null;
+  topics?: readonly string[] | null;
   websiteUrl?: string | null;
   imdbUrl?: string | null;
   ring?: "unseen" | "live" | null;
@@ -192,6 +196,7 @@ export function SocialProfileIdentity({
 }) {
   const person = socialPersonIdentity({ handle, displayName: name });
   const rolesLine = socialProfileRolesLine(roles ?? []);
+  const interestTopics = parseSocialProfileTopics(topics ?? []);
   const links = socialProfilePublicLinks({ websiteUrl, imdbUrl });
   const followedBy = mutuals
     ? socialFollowedByLine(
@@ -246,6 +251,19 @@ export function SocialProfileIdentity({
                 <p data-social-profile-roles="" className="mt-2 break-words t-body-sm text-ink-2">
                   {rolesLine}
                 </p>
+              ) : null}
+              {interestTopics.length > 0 ? (
+                <div data-social-profile-topics="" className="mt-2 flex flex-wrap gap-2">
+                  {interestTopics.map((topic) => (
+                    <span
+                      key={topic}
+                      data-social-profile-topic={topic}
+                      className={SOCIAL_TOPIC_CHIP_CLASS}
+                    >
+                      {topic}
+                    </span>
+                  ))}
+                </div>
               ) : null}
             </div>
             {actionRow ? <div className="hidden shrink-0 md:flex">{actionRow}</div> : null}

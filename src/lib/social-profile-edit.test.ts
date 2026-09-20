@@ -124,7 +124,9 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(edit).not.toContain('id="social-edit-name"');
     expect(edit).toContain('id="social-edit-handle"');
     expect(edit).toContain("SocialProfileRolesField");
+    expect(edit).toContain("SocialProfileTopicsField");
     expect(edit).toContain('form.set("crafts"');
+    expect(edit).toContain('form.set("topics"');
     expect(edit).toContain('id="social-edit-imdb"');
     expect(edit).toContain('form.set("imdb_url"');
     expect(edit).toContain("AccountAvatarCrop");

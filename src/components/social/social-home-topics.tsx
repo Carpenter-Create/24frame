@@ -6,15 +6,21 @@ import {
 } from "@/lib/social-chrome";
 import { socialHomeLensHref } from "@/lib/social-categories";
 import { SOCIAL } from "@/lib/social";
-import { socialRoleAffinityTopics } from "@/lib/social-role-affinity";
+import { socialInterestTopics } from "@/lib/social-role-affinity";
 
-export function SocialHomeTopics({ crafts = [] }: { crafts?: readonly string[] }) {
-  const topics = socialRoleAffinityTopics(crafts);
+export function SocialHomeTopics({
+  topics = [],
+  crafts = [],
+}: {
+  topics?: readonly string[];
+  crafts?: readonly string[];
+}) {
+  const labels = socialInterestTopics({ topics, crafts });
   return (
     <section data-social-home-topics="" className={SOCIAL_FOR_YOU_CARD_CLASS}>
       <p className="t-body-sm font-semibold text-ink">{SOCIAL.forYou.topics}</p>
       <div className="flex flex-wrap gap-2">
-        {topics.map((label) => (
+        {labels.map((label) => (
           <Link
             key={label}
             href={socialHomeLensHref(label, "All")}

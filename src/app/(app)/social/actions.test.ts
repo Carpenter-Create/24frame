@@ -178,7 +178,7 @@ describe("social actions", () => {
     expect(await createSocialProfile(form)).toEqual({ error: SOCIAL.profile.handleTaken });
   });
 
-  it("persists ordered Role slugs on crafts and the first as primary_role", async () => {
+  it("persists ordered Profession slugs on crafts and the first as primary_role", async () => {
     const { updates } = stub({
       profile: { id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" },
     });
@@ -213,6 +213,26 @@ describe("social actions", () => {
         display_name: "Ada Lovelace",
         crafts: [],
         primary_role: null,
+      },
+    });
+  });
+
+  it("persists selected Topics on profiles.topics, separate from crafts", async () => {
+    const { updates } = stub({
+      profile: { id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" },
+    });
+    const form = new FormData();
+    form.set("handle", "@ada");
+    form.set("first_name", "Ada");
+    form.set("last_name", "Lovelace");
+    form.set("topics", JSON.stringify(["Acting", "Financing", "actor"]));
+    expect(await createSocialProfile(form)).toEqual({});
+    expect(updates[0]).toEqual({
+      table: "profiles",
+      row: {
+        handle: "ada",
+        display_name: "Ada Lovelace",
+        topics: ["Acting", "Financing"],
       },
     });
   });

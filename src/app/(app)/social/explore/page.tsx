@@ -59,7 +59,7 @@ async function SocialExploreSuggested({ session }: { session: SocialSession }) {
   const suggested = await loadSuggestedPeople(
     supabase,
     [ctx.user.id, ...followees.ids],
-    profile?.crafts ?? [],
+    { topics: profile?.topics ?? [], crafts: profile?.crafts ?? [] },
   );
   const faces =
     suggested.length > 0 ? await signedAvatarUrls(suggested.map((person) => person.id)) : new Map();
@@ -81,7 +81,10 @@ async function SocialExploreSuggested({ session }: { session: SocialSession }) {
 
 async function SocialExploreHits({ session, q }: { session: SocialSession; q: string }) {
   const profile = await ensureOwnSocialProfile(session.supabase, session.ctx.user);
-  const results = await loadExploreSearch(session.supabase, q, profile?.crafts ?? []);
+  const results = await loadExploreSearch(session.supabase, q, {
+    topics: profile?.topics ?? [],
+    crafts: profile?.crafts ?? [],
+  });
   const hits = results.hits;
   const personIds = hits.filter((hit) => hit.kind === "person").map((hit) => hit.id);
   const faces = personIds.length > 0 ? await signedAvatarUrls(personIds) : new Map();

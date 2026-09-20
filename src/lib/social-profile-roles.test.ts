@@ -232,6 +232,9 @@ describe("social profile roles", () => {
     expect(socialProfileRolesLine(["actor", "producer", "screenwriter", "investor", "director"])).not.toContain(
       "Roles:",
     );
+    expect(socialProfileRolesLine(["actor", "producer", "screenwriter", "investor", "director"])).not.toContain(
+      "Professions:",
+    );
   });
 
   it("filters groups by label or slug and hides empty groups", () => {

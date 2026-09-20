@@ -119,6 +119,7 @@ async function SocialProfileMain({
         photoUrl={photoUrl}
         bio={profile.bio?.trim() ? profile.bio : SOCIAL.profile.ownFace}
         roles={profile.crafts}
+        topics={profile.topics}
         websiteUrl={profile.website_url}
         imdbUrl={profile.imdb_url}
         ring={liveStories.length > 0 ? "live" : null}
@@ -184,7 +185,7 @@ async function SocialProfileForYouSlot({ session }: { session: SocialSession }) 
   const suggested = await loadSuggestedPeople(
     supabase,
     [ctx.user.id, ...followees.ids],
-    profile?.crafts ?? [],
+    { topics: profile?.topics ?? [], crafts: profile?.crafts ?? [] },
   );
   const faces =
     suggested.length > 0 ? await signedAvatarUrls(suggested.map((person) => person.id)) : new Map();

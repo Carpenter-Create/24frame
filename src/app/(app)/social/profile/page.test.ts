@@ -87,6 +87,7 @@ function stubClient({
     bio?: string | null;
     welcome_video_key?: string | null;
     crafts?: string[] | null;
+    topics?: string[] | null;
     imdb_url?: string | null;
     website_url?: string | null;
   } | null;
@@ -241,9 +242,10 @@ describe("Social profile public face", () => {
     expect(html).not.toContain("<summary");
     expect(html).not.toContain("data-social-welcome-video");
     expect(html).not.toContain("data-social-profile-roles");
+    expect(html).not.toContain("data-social-profile-topics");
   });
 
-  it("prints the Roles line under the handle and omits it when crafts is empty", async () => {
+  it("prints the Professions line under the handle and omits it when crafts is empty", async () => {
     stubClient({
       profile: { ...ensured, crafts: ["actor", "producer", "screenwriter", "investor"] },
     });
@@ -260,7 +262,26 @@ describe("Social profile public face", () => {
     expect(html.indexOf("@ada")).toBeLessThan(html.indexOf("Actor · Producer · Screenwriter +1"));
     expect(html).not.toContain("data-social-profile-mutuals");
     expect(html).not.toContain("Roles:");
+    expect(html).not.toContain("Professions:");
     expect(html).not.toContain("data-social-profile-imdb");
+  });
+
+  it("prints selected Topics chips under identity and omits a Topics prefix", async () => {
+    stubClient({
+      profile: { ...ensured, topics: ["Acting", "Financing"] },
+    });
+    vi.mocked(ensureOwnSocialProfileResult).mockResolvedValue({
+      profile: { ...ensured, topics: ["Acting", "Financing"] },
+      error: null,
+    });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const html = await renderServerMarkup(await SocialProfilePage());
+    expect(html).toContain("data-social-profile-topics");
+    expect(html).toContain('data-social-profile-topic="Acting"');
+    expect(html).toContain("Acting");
+    expect(html).not.toContain("Topics:");
+    expect(html).not.toContain("Actor");
   });
 
   it("prints a quiet IMDb name link when the claim is set", async () => {

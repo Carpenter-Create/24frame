@@ -57,7 +57,7 @@ async function SocialCreateForYouSlot({ session }: { session: SocialSession }) {
   const suggested = await loadSuggestedPeople(
     supabase,
     [ctx.user.id, ...followees.ids],
-    profile?.crafts ?? [],
+    { topics: profile?.topics ?? [], crafts: profile?.crafts ?? [] },
   );
   const faces = suggested.length > 0 ? await signedAvatarUrls(suggested.map((person) => person.id)) : new Map();
   return <SocialForYouRail people={suggested} faces={faces} />;

@@ -6,9 +6,12 @@ import {
   rankSocialSuggestedPeople,
   socialCourseAffinityScore,
   socialPostAffinityScore,
+  socialInterestTopics,
   socialRoleAffinityTopics,
   socialRolePersonScore,
+  socialTopicPersonScore,
 } from "./social-role-affinity";
+import { SOCIAL_PROFILE_TOPICS } from "./social-profile-topics";
 import { SOCIAL_PROFILE_ROLES } from "./social-profile-roles";
 
 describe("ROLE_INTEREST_AFFINITY", () => {
@@ -21,13 +24,19 @@ describe("ROLE_INTEREST_AFFINITY", () => {
     expect(ROLE_INTEREST_AFFINITY.actor.topics).toContain("Acting");
   });
 
-  it("reorders Topics. by affinity and falls back to the locked default", () => {
+  it("reorders Topics. by selected interests first, then profession soft-bias", () => {
     expect(socialRoleAffinityTopics([])).toEqual([...SOCIAL_CATEGORY_TOPICS]);
-    const topics = socialRoleAffinityTopics(["art_director"]);
-    expect(topics[0]).toBe("Animation");
-    expect(topics[1]).toBe("Post-production");
-    expect(topics).toEqual([...new Set(topics)]);
-    expect(topics).toHaveLength(SOCIAL_CATEGORY_TOPICS.length);
+    const professionOnly = socialRoleAffinityTopics(["art_director"]);
+    expect(professionOnly[0]).toBe("Animation");
+    expect(professionOnly[1]).toBe("Post-production");
+    expect(professionOnly).toHaveLength(SOCIAL_CATEGORY_TOPICS.length);
+    const selected = socialInterestTopics({ topics: ["Financing"], crafts: ["art_director"] });
+    expect(selected[0]).toBe("Financing");
+    expect(selected[1]).toBe("Animation");
+    expect(selected[2]).toBe("Post-production");
+    expect(selected).toHaveLength(SOCIAL_CATEGORY_TOPICS.length);
+    expect(socialInterestTopics({})).toEqual([...SOCIAL_CATEGORY_TOPICS]);
+    expect(SOCIAL_PROFILE_TOPICS).not.toContain("Actor");
   });
 
   it("scores shared roles above neighbors and ranks suggested people without dropping anyone", () => {
@@ -48,6 +57,17 @@ describe("ROLE_INTEREST_AFFINITY", () => {
       "zoe",
       "ada",
     ]);
+    expect(socialTopicPersonScore(["Acting"], ["Acting", "Financing"])).toBeGreaterThan(
+      socialTopicPersonScore(["Acting"], ["Financing"]),
+    );
+    const byTopic = rankSocialSuggestedPeople(
+      [
+        { handle: "zoe", crafts: ["art_director"], topics: ["Financing"] },
+        { handle: "ada", crafts: ["investor"], topics: ["Acting"] },
+      ],
+      { topics: ["Acting"], crafts: ["art_director"] },
+    );
+    expect(byTopic.map((row) => row.handle)).toEqual(["ada", "zoe"]);
   });
 
   it("soft-boosts matching courses and post topics without inventing a match", () => {
@@ -72,5 +92,7 @@ describe("ROLE_INTEREST_AFFINITY", () => {
     expect(socialCourseAffinityScore(other, [])).toBe(0);
     expect(socialPostAffinityScore("Animation", ["art_director"])).toBe(1);
     expect(socialPostAffinityScore("Financing", ["art_director"])).toBe(0);
+    expect(socialPostAffinityScore("Financing", { topics: ["Financing"], crafts: ["art_director"] })).toBe(2);
+    expect(socialPostAffinityScore("Animation", { topics: ["Financing"], crafts: ["art_director"] })).toBe(1);
   });
 });

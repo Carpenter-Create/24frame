@@ -192,14 +192,26 @@ describe("latestDiscoverableCourse", () => {
     expect(latestDiscoverableCourse([])).toBeNull();
   });
 
-  it("prefers a Role-matching published course when crafts are set", () => {
+  it("prefers a Topic-matching published course, with Professions as a soft bias", () => {
     const design = {
       ...newer,
       id: "c3",
       title: "Animation for art directors",
       created_at: "2026-09-02T12:00:00.000Z",
     };
+    const finance = {
+      ...newer,
+      id: "c4",
+      title: "Financing the slate",
+      created_at: "2026-09-01T12:00:00.000Z",
+    };
     expect(latestDiscoverableCourse([older, newer, design], ["art_director"])?.id).toBe("c3");
+    expect(
+      latestDiscoverableCourse([older, newer, design, finance], {
+        topics: ["Financing"],
+        crafts: ["art_director"],
+      })?.id,
+    ).toBe("c4");
     expect(latestDiscoverableCourse([older, newer, design])?.id).toBe("c2");
   });
 });

@@ -18,6 +18,7 @@ import { storyInsertRow, storyViewInsertRow } from "@/lib/social-stories";
 import { ensureOwnSocialProfile, isProfileUniqueViolation } from "@/lib/social-profile";
 import { handleTakenError, lookupHandleCollision } from "@/lib/social-handle-taken";
 import { socialProfileRolesWrite } from "@/lib/social-profile-roles";
+import { socialProfileTopicsWrite } from "@/lib/social-profile-topics";
 import {
   composeSocialWebsiteUrlField,
   parseSocialProfileLinksWrite,
@@ -108,6 +109,7 @@ export async function createSocialProfile(formData: FormData): Promise<ActionRes
     "";
 
   const roles = formData.has("crafts") ? socialProfileRolesWrite(formData.get("crafts")) : null;
+  const topics = formData.has("topics") ? socialProfileTopicsWrite(formData.get("topics")) : null;
   const imdb = formData.has("imdb_url")
     ? parseSocialImdbInput(String(formData.get("imdb_url") ?? ""))
     : null;
@@ -126,6 +128,7 @@ export async function createSocialProfile(formData: FormData): Promise<ActionRes
         ...(roles
           ? { crafts: roles.crafts, primary_role: roles.primary_role }
           : {}),
+        ...(topics ? { topics } : {}),
         ...(imdb ? { imdb_url: imdb.url } : {}),
         ...(links ? { website_url: composeSocialWebsiteUrlField(links.urls) } : {}),
       })
@@ -152,6 +155,7 @@ export async function createSocialProfile(formData: FormData): Promise<ActionRes
             ...(roles
               ? { crafts: roles.crafts, primary_role: roles.primary_role }
               : {}),
+            ...(topics ? { topics } : {}),
             ...(imdb ? { imdb_url: imdb.url } : {}),
             ...(links ? { website_url: composeSocialWebsiteUrlField(links.urls) } : {}),
           })

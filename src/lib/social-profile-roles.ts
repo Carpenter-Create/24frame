@@ -1,8 +1,9 @@
-// Social profile Roles bank. Persist ordered slugs on profiles.crafts
-// (identity-spine text[]). primary_role stays the first selected slug
-// for the existing index. UI label is Roles — not Category, not crafts.
-// Public header joins labels with · . Omit the line when empty.
-// Edit max 5; public shows first 3 + quiet +N. Not on SocialPersonRow.
+// Social profile Professions bank (internal: roles_* / crafts).
+// Persist ordered slugs on profiles.crafts. primary_role stays the
+// first selected slug. UI label is Professions — not Topics, not
+// Category, not crafts. Public header joins labels with · . Omit
+// the line when empty. Edit max 5; public shows first 3 + quiet +N.
+// Not on SocialPersonRow.
 
 export const SOCIAL_PROFILE_ROLES_MAX = 5;
 export const SOCIAL_PROFILE_ROLES_PUBLIC_CAP = 3;

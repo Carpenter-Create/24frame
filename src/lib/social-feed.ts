@@ -33,6 +33,7 @@ export type SocialProfileRow = {
   bio?: string | null;
   welcome_video_key?: string | null;
   crafts?: string[] | null;
+  topics?: string[] | null;
   imdb_url?: string | null;
   website_url?: string | null;
 };
@@ -378,7 +379,7 @@ export type SocialExplorePage = {
 export async function loadExploreSearch(
   supabase: ServerClient,
   query: string,
-  viewerCrafts: readonly string[] = [],
+  viewer: { topics?: unknown; crafts?: unknown } | readonly string[] = [],
 ): Promise<SocialExplorePage> {
   const needle = query.trim();
   if (!needle) {
@@ -388,7 +389,7 @@ export async function loadExploreSearch(
   const [{ data: people }, { data: posts }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("id, handle, display_name, crafts")
+      .select("id, handle, display_name, crafts, topics")
       .eq("status", "active")
       .or(`handle.ilike.${like},display_name.ilike.${like}`)
       .range(...probeRange(SOCIAL_EXPLORE_PEOPLE_LIMIT)),
@@ -403,11 +404,15 @@ export async function loadExploreSearch(
   const peoplePage = splitProbe(people, SOCIAL_EXPLORE_PEOPLE_LIMIT);
   const postsPage = splitProbe(posts, SOCIAL_EXPLORE_POSTS_LIMIT);
   const rankedPeople = rankSocialSuggestedPeople(
-    peoplePage.rows.map((person) => ({ ...person, crafts: person.crafts ?? [] })),
-    viewerCrafts,
+    peoplePage.rows.map((person) => ({
+      ...person,
+      crafts: person.crafts ?? [],
+      topics: person.topics ?? [],
+    })),
+    viewer,
   );
   const rankedPosts = [...postsPage.rows].sort((a, b) => {
-    const delta = socialPostAffinityScore(b.category, viewerCrafts) - socialPostAffinityScore(a.category, viewerCrafts);
+    const delta = socialPostAffinityScore(b.category, viewer) - socialPostAffinityScore(a.category, viewer);
     if (delta !== 0) return delta;
     return a.id.localeCompare(b.id);
   });
@@ -449,22 +454,23 @@ export type SocialSuggestedPerson = {
   handle: string;
   display_name: string;
   crafts?: string[] | null;
+  topics?: string[] | null;
 };
 
 export async function loadSuggestedPeople(
   supabase: ServerClient,
   excludeIds: readonly string[],
-  viewerCrafts: readonly string[] = [],
+  viewer: { topics?: unknown; crafts?: unknown } | readonly string[] = [],
 ): Promise<SocialSuggestedPerson[]> {
   const { data } = await supabase
     .from("profiles")
-    .select("id, handle, display_name, crafts")
+    .select("id, handle, display_name, crafts, topics")
     .eq("status", "active")
     .order("handle", { ascending: true })
     .range(...probeRange(SOCIAL_EXPLORE_PEOPLE_LIMIT));
   const blocked = new Set(excludeIds.filter(Boolean));
   const available = (data ?? []).filter((row) => !blocked.has(row.id));
-  return rankSocialSuggestedPeople(available, viewerCrafts).slice(0, SOCIAL_FOR_YOU_PEOPLE_LIMIT);
+  return rankSocialSuggestedPeople(available, viewer).slice(0, SOCIAL_FOR_YOU_PEOPLE_LIMIT);
 }
 
 export async function loadProfilesByIds(

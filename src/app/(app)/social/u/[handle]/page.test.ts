@@ -30,7 +30,7 @@ vi.mock("@/lib/s3-social-media", () => ({
 vi.mock("@/lib/social-profile", () => ({
   ensureOwnSocialProfile: vi.fn(),
   SOCIAL_PROFILE_COLUMNS:
-    "id, handle, display_name, status, bio, welcome_video_key, crafts, imdb_url, website_url",
+    "id, handle, display_name, status, bio, welcome_video_key, crafts, topics, imdb_url, website_url",
 }));
 vi.mock("@/app/(app)/social/actions", () => ({
   toggleSocialFollow: vi.fn(),
@@ -81,6 +81,7 @@ type PublicProfile = {
   status: string;
   bio: string | null;
   crafts?: string[] | null;
+  topics?: string[] | null;
   imdb_url?: string | null;
   website_url?: string | null;
 };
@@ -186,10 +187,11 @@ describe("Social public profile", () => {
     expect(html).not.toContain("data-social-bio-form");
     expect(html).not.toContain("data-social-profile-photo");
     expect(html).not.toContain("data-social-profile-roles");
+    expect(html).not.toContain("data-social-profile-topics");
     expect(html).not.toContain("data-social-profile-imdb");
   });
 
-  it("prints the Roles line when crafts are set and omits a Roles prefix", async () => {
+  it("prints the Professions line when crafts are set and omits a Professions prefix", async () => {
     stubClient({
       member: { ...ada, crafts: ["actor", "producer"] },
     });
@@ -197,6 +199,20 @@ describe("Social public profile", () => {
     expect(html).toContain("data-social-profile-roles");
     expect(html).toContain("Actor · Producer");
     expect(html).not.toContain("Roles:");
+    expect(html).not.toContain("Professions:");
+    expect(html).not.toContain("Topics:");
+  });
+
+  it("prints selected Topics chips and never a Topics prefix", async () => {
+    stubClient({
+      member: { ...ada, topics: ["Acting", "Financing"] },
+    });
+    const html = await renderPublic();
+    expect(html).toContain("data-social-profile-topics");
+    expect(html).toContain('data-social-profile-topic="Acting"');
+    expect(html).toContain("Acting");
+    expect(html).not.toContain("Topics:");
+    expect(html).not.toContain("Actor");
   });
 
   it("renders Instagram as an icon, not a raw URL, and omits the links row when empty", async () => {
