@@ -18,6 +18,8 @@ import {
   SOCIAL_PROFILE_EDIT_HOST_CLASS,
   SOCIAL_PROFILE_EDIT_SHEET_CLASS,
   SOCIAL_PROFILE_GRID_CLASS,
+  SOCIAL_PROFILE_HEAD_CLASS,
+  SOCIAL_PROFILE_STATS_CLASS,
   SOCIAL_PROFILE_TILE_CLASS,
   SOCIAL_STORY_CARD_CLASS,
   SOCIAL_STORY_VIEWER_CLASS,
@@ -102,17 +104,18 @@ export function SocialHomeSkeleton() {
 export function SocialProfileCenterSkeleton() {
   return (
     <div className={SOCIAL_HOME_CENTER_CLASS}>
-      <div className="flex items-start gap-3 md:gap-4">
+      <div className={SOCIAL_PROFILE_HEAD_CLASS}>
         <Skeleton className={SOCIAL_AVATAR_PROFILE_CLASS} />
-        <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <Skeleton className="h-6 w-40" />
-          <Skeleton className="h-7 w-24 rounded-[8px]" />
-          <Skeleton className="h-3 w-2/3" />
+        <div className={SOCIAL_PROFILE_STATS_CLASS}>
+          <Skeleton className="h-10 w-12 justify-self-center" />
+          <Skeleton className="h-10 w-12 justify-self-center" />
+          <Skeleton className="h-10 w-12 justify-self-center" />
         </div>
       </div>
-      <div className="flex gap-4">
-        <Skeleton className="h-8 w-16" />
-        <Skeleton className="h-8 w-20" />
+      <div className="flex min-w-0 flex-col gap-2">
+        <Skeleton className="h-6 w-40" />
+        <Skeleton className="h-3 w-2/3" />
+        <Skeleton className="h-3 w-full" />
       </div>
       <div className={SOCIAL_PROFILE_GRID_CLASS}>
         {Array.from({ length: 6 }).map((_, i) => (

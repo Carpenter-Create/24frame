@@ -4,7 +4,9 @@ import { describe, expect, it } from "vitest";
 import {
   SOCIAL_PROFILE_ROLES,
   SOCIAL_PROFILE_ROLES_COUNT,
+  SOCIAL_PROFILE_ROLES_DISPLAY_CAP,
   SOCIAL_PROFILE_ROLES_MAX,
+  SOCIAL_PROFILE_ROLES_SEP,
   SOCIAL_PROFILE_ROLE_GROUPS,
   SOCIAL_PROFILE_ROLE_SLUG_ALIASES,
   canonicalSocialProfileRoleSlug,
@@ -14,6 +16,7 @@ import {
   socialProfileRoleChips,
   socialProfileRoleLabel,
   socialProfileRolesCountLabel,
+  socialProfileRolesLine,
   socialProfileRolesWrite,
   toggleSocialProfileRole,
 } from "./social-profile-roles";
@@ -45,6 +48,8 @@ describe("social profile roles", () => {
     expect(labels.join(" ")).not.toContain("PrefViz");
     expect(slugs).not.toContain("previs");
     expect(SOCIAL_PROFILE_ROLES_MAX).toBe(5);
+    expect(SOCIAL_PROFILE_ROLES_DISPLAY_CAP).toBe(3);
+    expect(SOCIAL_PROFILE_ROLES_SEP).toBe(" · ");
     expect(SOCIAL_PROFILE_ROLES_COUNT).toBe("{n} / {max}");
     expect(socialProfileRolesCountLabel(3)).toBe("3 / 5");
     expect(
@@ -278,6 +283,28 @@ describe("social profile roles", () => {
     expect(toggleSocialProfileRole(["actor"], "nope")).toEqual(["actor"]);
   });
 
+  it("prints a muted middot line in crafts order, caps display at 3 +N, and omits when empty", () => {
+    expect(socialProfileRolesLine([])).toBeNull();
+    expect(socialProfileRolesLine(null)).toBeNull();
+    expect(socialProfileRolesLine(["actor"])).toBe("Actor");
+    expect(socialProfileRolesLine(["actor", "producer"])).toBe("Actor · Producer");
+    expect(socialProfileRolesLine(["actor", "producer", "screenwriter"])).toBe(
+      "Actor · Producer · Screenwriter",
+    );
+    expect(socialProfileRolesLine(["actor", "producer", "screenwriter", "investor"])).toBe(
+      "Actor · Producer · Screenwriter +1",
+    );
+    expect(
+      socialProfileRolesLine(["actor", "producer", "screenwriter", "investor", "director"]),
+    ).toBe("Actor · Producer · Screenwriter +2");
+    expect(socialProfileRolesLine(["investor", "actor", "producer"])).toBe(
+      "Investor · Actor · Producer",
+    );
+    expect(socialProfileRolesLine(["screenwriter", "investor"])).not.toBe(
+      "Investor · Screenwriter",
+    );
+  });
+
   it("lists every selected Profession in crafts order and moves by id", () => {
     expect(socialProfileRoleChips([])).toEqual([]);
     expect(socialProfileRoleChips(["actor"])).toEqual([{ slug: "actor", label: "Actor" }]);
@@ -322,6 +349,17 @@ describe("social profile roles", () => {
     const affinitySrc = readFileSync("src/lib/social-role-affinity.ts", "utf8");
     const fieldSrc = readFileSync("src/components/social/social-profile-roles.tsx", "utf8");
     const editSrc = readFileSync("src/components/social/social-profile-edit.tsx", "utf8");
+    const chromeSrc = readFileSync("src/lib/social-chrome.ts", "utf8");
+    const identitySrc = readFileSync("src/components/social/social-ui.tsx", "utf8");
+    expect(rolesSrc).toContain("socialProfileRolesLine");
+    expect(rolesSrc).toContain("SOCIAL_PROFILE_ROLES_DISPLAY_CAP");
+    expect(chromeSrc).toContain("SOCIAL_PROFILE_HEAD_CLASS");
+    expect(chromeSrc).toContain("SOCIAL_PROFILE_STATS_CLASS");
+    expect(chromeSrc).toContain("SOCIAL_PROFILE_ROLES_LINE_CLASS");
+    expect(chromeSrc).not.toContain("SOCIAL_PROFILE_ROLES_RAIL_CLASS");
+    expect(identitySrc).toContain("socialProfileRolesLine");
+    expect(identitySrc).toContain("data-social-profile-head");
+    expect(identitySrc).not.toContain("SOCIAL_PROFILE_ROLES_RAIL_CLASS");
     expect(rolesSrc.match(/export const SOCIAL_PROFILE_ROLE_GROUPS/g)).toEqual([
       "export const SOCIAL_PROFILE_ROLE_GROUPS",
     ]);

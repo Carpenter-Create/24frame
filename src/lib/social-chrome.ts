@@ -26,7 +26,6 @@ import {
   HOUSE_PILL_ITEM_CLASS,
   HOUSE_PILL_SELECTED_CLASS,
   HOUSE_RAIL_PANEL_CLASS,
-  HOUSE_SCROLL_ROW_CLASS,
 } from "@/lib/house-shell";
 
 export const SOCIAL_FIGMA_HOME = "176:1085";
@@ -239,11 +238,23 @@ export function socialTopicChipSelectClass(selected: boolean): string {
   return selected ? SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS : SOCIAL_TOPIC_CHIP_SELECT_IDLE_CLASS;
 }
 
-// Public Professions rail: same chip SoT, scroll instead of truncate.
-export const SOCIAL_PROFILE_ROLES_RAIL_CLASS =
-  `${HOUSE_SCROLL_ROW_CLASS} mt-2 flex min-w-0 gap-2 overscroll-x-contain`;
+// Public profile head — Adam 2026-09-20 IG lock: avatar left, 3-up
+// stats right (number over muted label). Avatar stays 72/88; stats
+// match that row height. Roles are a muted middot line under name
+// in the full-width copy stack — not a chip rail, not beside avatar.
+export const SOCIAL_PROFILE_HEAD_CLASS = "flex items-center gap-3 md:gap-4";
 
-export const SOCIAL_TOPIC_CHIP_RAIL_CLASS = `${SOCIAL_TOPIC_CHIP_CLASS} shrink-0 whitespace-nowrap`;
+export const SOCIAL_PROFILE_STATS_CLASS =
+  "grid min-h-[72px] min-w-0 flex-1 grid-cols-3 md:min-h-[88px]";
+
+export const SOCIAL_PROFILE_STAT_CLASS =
+  "flex min-w-0 flex-col items-center justify-center text-center";
+
+export const SOCIAL_PROFILE_STAT_VALUE_CLASS = "font-semibold text-ink";
+
+export const SOCIAL_PROFILE_STAT_LABEL_CLASS = "t-body-sm text-ink-2";
+
+export const SOCIAL_PROFILE_ROLES_LINE_CLASS = "mt-1 break-words t-body-sm text-ink-2";
 
 // Home Topics aliases the house chip rail. Not SegmentedTrack: this is
 // a bank of lenses, not a selected exclusive menu.

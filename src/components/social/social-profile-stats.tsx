@@ -6,6 +6,12 @@ import { useQuery } from "@tanstack/react-query";
 import { readSocialCounts } from "@/app/(app)/social/query-actions";
 import { useAppQueryClient } from "@/components/query-provider";
 import { SOCIAL_QUERY_STALE_MS, socialCountsQueryKey } from "@/lib/social-cache-keys";
+import {
+  SOCIAL_PROFILE_STAT_CLASS,
+  SOCIAL_PROFILE_STAT_LABEL_CLASS,
+  SOCIAL_PROFILE_STAT_VALUE_CLASS,
+  SOCIAL_PROFILE_STATS_CLASS,
+} from "@/lib/social-chrome";
 import { formatSocialCount, SOCIAL, socialProfileFollowsHref } from "@/lib/social";
 import type { SocialProfileCounts } from "@/lib/social-feed";
 
@@ -51,26 +57,26 @@ function SocialProfileStatsView({
   stats: SocialProfileCounts;
 }) {
   return (
-    <div data-social-profile-stats="" className="mt-2 flex flex-wrap gap-4 t-body-sm">
-      <p data-social-profile-stat="posts">
-        <span className="font-semibold text-ink">{formatSocialCount(stats.posts)}</span>{" "}
-        <span className="text-ink-2">{SOCIAL.profile.postsStat}</span>
+    <div data-social-profile-stats="" className={SOCIAL_PROFILE_STATS_CLASS}>
+      <p data-social-profile-stat="posts" className={SOCIAL_PROFILE_STAT_CLASS}>
+        <span className={SOCIAL_PROFILE_STAT_VALUE_CLASS}>{formatSocialCount(stats.posts)}</span>
+        <span className={SOCIAL_PROFILE_STAT_LABEL_CLASS}>{SOCIAL.profile.postsStat}</span>
       </p>
       <Link
         href={socialProfileFollowsHref(handle, "followers")}
         data-social-profile-stat="followers"
-        className="min-w-0"
+        className={SOCIAL_PROFILE_STAT_CLASS}
       >
-        <span className="font-semibold text-ink">{formatSocialCount(stats.followers)}</span>{" "}
-        <span className="text-ink-2">{SOCIAL.profile.followersStat}</span>
+        <span className={SOCIAL_PROFILE_STAT_VALUE_CLASS}>{formatSocialCount(stats.followers)}</span>
+        <span className={SOCIAL_PROFILE_STAT_LABEL_CLASS}>{SOCIAL.profile.followersStat}</span>
       </Link>
       <Link
         href={socialProfileFollowsHref(handle, "following")}
         data-social-profile-stat="following"
-        className="min-w-0"
+        className={SOCIAL_PROFILE_STAT_CLASS}
       >
-        <span className="font-semibold text-ink">{formatSocialCount(stats.following)}</span>{" "}
-        <span className="text-ink-2">{SOCIAL.profile.followingStat}</span>
+        <span className={SOCIAL_PROFILE_STAT_VALUE_CLASS}>{formatSocialCount(stats.following)}</span>
+        <span className={SOCIAL_PROFILE_STAT_LABEL_CLASS}>{SOCIAL.profile.followingStat}</span>
       </Link>
     </div>
   );
