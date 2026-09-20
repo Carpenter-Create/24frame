@@ -179,8 +179,7 @@ export const SETTINGS_DRILL_VALUE_CLASS = "t-body-sm text-ink-3";
 // a muted dump box. Grouped fields sit on the house muted module.
 export const SETTINGS_DIALOG_FORM_CLASS = "flex flex-col gap-[var(--space-3)]";
 export const SETTINGS_DIALOG_FIELD_CLASS = "flex flex-col gap-[var(--space-2)]";
-export const SETTINGS_DIALOG_LABEL_CLASS =
-  "t-body-sm font-normal normal-case tracking-normal text-ink-3";
+export const SETTINGS_DIALOG_LABEL_CLASS = "t-body-sm normal-case tracking-normal text-ink-3";
 export const SETTINGS_DIALOG_ERROR_CLASS = "t-body-sm text-ink-2";
 export const SETTINGS_DIALOG_GROUP_CLASS =
   `${HOUSE_MODULE_CLASS} ${HOUSE_CARD_PAD} flex flex-col gap-[var(--space-4)]`;
