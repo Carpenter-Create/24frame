@@ -233,7 +233,12 @@ export const DASHBOARD_MAP_PAD_CLASS = "p-[var(--space-6)]";
 export const DASHBOARD_LEGEND_CLASS =
   "flex items-center gap-[var(--space-2)] t-label text-ink-3";
 
-export const DASHBOARD_CHOROPLETH_SWATCH_CLASS = "h-2 w-5 rounded-[var(--radius-sm)]";
+// RL TerritoryMap legend: `flex gap-0.5` + `h-2 w-5 rounded-sm` adjacent
+// swatches (scale.slice(1)). House --radius-sm is 6px and reads as pills.
+// Tailwind rounded-sm (2px) is the continuous LOW→HIGH bar.
+export const DASHBOARD_CHOROPLETH_LEGEND_BAR_CLASS = "flex gap-0.5";
+
+export const DASHBOARD_CHOROPLETH_SWATCH_CLASS = "h-2 w-5 rounded-sm";
 
 // Shared admin column (hero + Licensing / Top titles / Top platforms /
 // Top territories).

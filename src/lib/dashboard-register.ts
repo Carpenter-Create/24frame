@@ -207,20 +207,47 @@ export function dashboardTerritoryCountLabel(count: number): string {
   return count === 1 ? "1 territory" : `${count} territories`;
 }
 
-export function dashboardRowForNumeric(
-  byNumeric: ReadonlyMap<number, DashboardRankedRow>,
+const SKIP_MAP_CODES = new Set(["UNKNOWN", "WORLD", "WW"]);
+
+/** Ranked rows keyed by ISO alpha-2. RL TerritoryMap joins geo.id → NUMERIC_TO_ALPHA2 → this map. */
+export function dashboardRowsByAlpha2(
+  rows: readonly DashboardRankedRow[],
+): Map<string, DashboardRankedRow> {
+  const map = new Map<string, DashboardRankedRow>();
+  for (const row of rows) {
+    if (!row.code || SKIP_MAP_CODES.has(row.code)) continue;
+    map.set(row.code, row);
+  }
+  return map;
+}
+
+/**
+ * RL TerritoryMap join: topology numeric id → NUMERIC_TO_ALPHA2 → alpha-2 row.
+ * Name fallback uses the same official / alias resolver, not a second table.
+ */
+export function dashboardRowForTopologyId(
+  byCode: ReadonlyMap<string, DashboardRankedRow>,
   rawId: string | number | null | undefined,
+  name?: string | null,
 ): DashboardRankedRow | null {
   const code = isoAlpha2FromNumeric(rawId);
-  if (!code) {
-    const numeric = typeof rawId === "number" ? rawId : Number(rawId);
-    if (!Number.isInteger(numeric)) return null;
-    return byNumeric.get(numeric) ?? null;
+  if (code) {
+    const row = byCode.get(code);
+    if (row) return row;
   }
-  const numeric = isoNumericForAlpha2(code);
-  if (numeric == null) return null;
-  return byNumeric.get(numeric) ?? null;
+  if (!name) return null;
+  const ref = resolveTerritoryRef(name);
+  return ref.code ? byCode.get(ref.code) ?? null : null;
 }
+
+/** Sample ranked rows for map join + legend tests. Codes and names both resolve. */
+export const DASHBOARD_TERRITORY_MAP_SAMPLE: ReportsCountRow[] = [
+  { name: "US", count: 14 },
+  { name: "United Kingdom", count: 9 },
+  { name: "CA", count: 6 },
+  { name: "Germany", count: 4 },
+  { name: "Australia", count: 3 },
+];
 
 export function isDashboardRegisterView(value: string): value is DashboardRegisterView {
   return (DASHBOARD_REGISTER_VIEWS as readonly string[]).includes(value);

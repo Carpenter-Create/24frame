@@ -15,14 +15,17 @@ import {
   DASHBOARD_MAP_WIDTH,
   dashboardChoroplethFill,
   dashboardChoroplethHoverFill,
-  dashboardRowForNumeric,
+  dashboardRowForTopologyId,
+  dashboardRowsByAlpha2,
   dashboardShareLabel,
   dashboardTerritoryCountLabel,
   rankedTotal,
   type DashboardRankedRow,
 } from "@/lib/dashboard-register";
+import { isoAlpha2FromNumeric } from "@/lib/iso3166-numeric";
 import {
   DASHBOARD_CARD_PAD_LIST,
+  DASHBOARD_CHOROPLETH_LEGEND_BAR_CLASS,
   DASHBOARD_CHOROPLETH_SWATCH_CLASS,
   DASHBOARD_LEGEND_CLASS,
   DASHBOARD_MAP_FRAME_CLASS,
@@ -32,10 +35,11 @@ import {
 import { cn } from "@/lib/cn";
 
 // RL Overview SoT: Carpenter-Create/royalogic
-// `src/components/overview/TerritoryMap.tsx` — map/list/bars + choropleth +
-// legend + view alts. This file is the map plot. House rematch only:
-// Geist · Sporty Blue discrete scale · hairline. No RL brand fill. No `geojson`
-// module. Mercator 700×340 / scale 120 / center [0, 30] matches live RL.
+// `src/components/overview/TerritoryMap.tsx`. Map/list/bars + choropleth +
+// legend + view alts. This file is the map plot. Ported: NUMERIC_TO_ALPHA2
+// join, Mercator 700x340 / scale 120 / center [0, 30], legend gap-0.5
+// rounded-sm swatches, hairline strokes. House rematch only: Geist ·
+// Sporty Blue discrete scale. No RL brand fill. d3-geo path, not a map kit.
 type CountryFeature = {
   type: "Feature";
   id?: string | number;
@@ -50,6 +54,7 @@ type CountryCollection = {
 
 type TerritoryPath = {
   id: string;
+  code: string;
   d: string;
   row: DashboardRankedRow | null;
   fill: string;
@@ -80,15 +85,7 @@ export function DashboardTerritoryMap({
     key: string;
   } | null>(null);
   const total = rankedTotal(rows);
-  const byNumeric = useMemo(() => {
-    const map = new Map<number, DashboardRankedRow>();
-    for (const row of rows) {
-      if (row.numeric == null) continue;
-      if (row.code === "UNKNOWN" || row.code === "WORLD") continue;
-      map.set(row.numeric, row);
-    }
-    return map;
-  }, [rows]);
+  const byCode = useMemo(() => dashboardRowsByAlpha2(rows), [rows]);
   const max = Math.max(0, ...rows.map((row) => row.count));
 
   const countries = useMemo(() => {
@@ -97,18 +94,20 @@ export function DashboardTerritoryMap({
       if (numeric === ANTARCTICA) return [];
       const d = path(entry as never);
       if (!d) return [];
-      const row = dashboardRowForNumeric(byNumeric, entry.id);
+      const row = dashboardRowForTopologyId(byCode, entry.id, entry.properties?.name);
       const amount = row?.count ?? 0;
+      const code = row?.code ?? isoAlpha2FromNumeric(entry.id) ?? String(entry.id ?? "");
       return [
         {
           id: String(entry.id ?? entry.properties?.name ?? d.slice(0, 12)),
+          code,
           d,
           row,
           fill: dashboardChoroplethFill(amount, max),
         },
       ];
     });
-  }, [byNumeric, max]);
+  }, [byCode, max]);
 
   return (
     <div
@@ -137,10 +136,11 @@ export function DashboardTerritoryMap({
                 <path
                   key={item.id}
                   d={item.d}
-                  data-dashboard-territory-country={item.row?.code ?? item.id}
+                  data-dashboard-territory-country={item.code}
+                  data-dashboard-territory-filled={amount > 0 ? "" : undefined}
                   fill={fill}
                   stroke="var(--border)"
-                  strokeWidth={0.3}
+                  strokeWidth={0.5}
                   style={{ cursor: amount > 0 ? "pointer" : "default" }}
                   onPointerEnter={(event) => {
                     if (!item.row || amount <= 0) return;
@@ -197,7 +197,11 @@ export function DashboardTerritoryMap({
       >
         <p data-dashboard-territory-legend="" className={DASHBOARD_LEGEND_CLASS}>
           <span>{DASHBOARD_HOME.legendLow}</span>
-          <span aria-hidden className="flex gap-0.5">
+          <span
+            aria-hidden
+            data-dashboard-territory-legend-bar=""
+            className={DASHBOARD_CHOROPLETH_LEGEND_BAR_CLASS}
+          >
             {DASHBOARD_CHOROPLETH_SCALE.slice(1).map((color) => (
               <span
                 key={color}

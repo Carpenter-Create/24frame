@@ -11,8 +11,12 @@ import {
   DashboardTopTerritories,
   DashboardTopTitles,
 } from "@/components/dashboard/dashboard-ranked";
+import { DashboardTerritoryMap } from "@/components/dashboard/dashboard-territory-map";
 import { DashboardViewAll, DashboardViewAlts } from "@/components/dashboard/dashboard-view-alts";
+import { ReportsTerritories } from "@/components/reports/reports-ranked";
 import {
+  DASHBOARD_CHOROPLETH_LEGEND_BAR_CLASS,
+  DASHBOARD_CHOROPLETH_SWATCH_CLASS,
   DASHBOARD_MAP_FRAME_CLASS,
   DASHBOARD_MAP_PAD_CLASS,
   DASHBOARD_RANKED_PANE_CLASS,
@@ -33,12 +37,15 @@ import {
   DASHBOARD_MAP_HEIGHT,
   DASHBOARD_MAP_SCALE,
   DASHBOARD_MAP_WIDTH,
+  DASHBOARD_TERRITORY_MAP_SAMPLE,
   dashboardChoroplethFill,
   dashboardChoroplethIndex,
   dashboardConcentration,
   dashboardConcentrationLine,
   dashboardListLimitLabel,
   dashboardModuleMetaLine,
+  dashboardRowForTopologyId,
+  dashboardRowsByAlpha2,
   dashboardShareLabel,
   dashboardShowTopLabel,
   dashboardTerritoryCountLabel,
@@ -46,7 +53,7 @@ import {
   resolveTerritoryRef,
   splitDashboardTitle,
 } from "@/lib/dashboard-register";
-import { isoAlpha2FromNumeric, isoNumericForAlpha2 } from "@/lib/iso3166-numeric";
+import { isoAlpha2FromNumeric, isoNumericForAlpha2, NUMERIC_TO_ALPHA2 } from "@/lib/iso3166-numeric";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
@@ -59,6 +66,11 @@ describe("dashboard register helpers", () => {
     expect(isoNumericForAlpha2("US")).toBe(840);
     expect(isoAlpha2FromNumeric(840)).toBe("US");
     expect(isoAlpha2FromNumeric("826")).toBe("GB");
+    expect(NUMERIC_TO_ALPHA2["840"]).toBe("US");
+    expect(NUMERIC_TO_ALPHA2["036"]).toBe("AU");
+    expect(NUMERIC_TO_ALPHA2["36"]).toBe("AU");
+    expect(isoAlpha2FromNumeric("036")).toBe("AU");
+    expect(isoAlpha2FromNumeric("036")).toBe(isoAlpha2FromNumeric(36));
     const rows = rankedRowsFromCounts(
       [
         { name: "US", count: 14 },
@@ -140,8 +152,17 @@ describe("dashboard register chrome", () => {
     expect(mapSrc).toContain("DASHBOARD_MAP_SCALE");
     expect(mapSrc).toContain("DASHBOARD_MAP_CENTER");
     expect(mapSrc).toContain("data-dashboard-territory-swatch");
+    expect(mapSrc).toContain("data-dashboard-territory-legend-bar");
+    expect(mapSrc).toContain("data-dashboard-territory-filled");
+    expect(mapSrc).toContain("dashboardRowForTopologyId");
+    expect(mapSrc).toContain("dashboardRowsByAlpha2");
     expect(mapSrc).toContain("data-dashboard-territory-scale");
     expect(mapSrc).toContain("DASHBOARD_MAP_PAD_CLASS");
+    expect(mapSrc).not.toMatch(/from ["']react-simple-maps["']/);
+    expect(mapSrc).not.toContain("rounded-[var(--radius-sm)]");
+    expect(DASHBOARD_CHOROPLETH_LEGEND_BAR_CLASS).toBe("flex gap-0.5");
+    expect(DASHBOARD_CHOROPLETH_SWATCH_CLASS).toBe("h-2 w-5 rounded-sm");
+    expect(DASHBOARD_CHOROPLETH_SWATCH_CLASS).not.toContain("--radius-sm");
     expect(mapSrc).not.toContain("p-[var(--space-4)]");
     expect(mapSrc).not.toContain("geoGraticule10");
     expect(mapSrc).not.toContain("geoNaturalEarth1");
@@ -462,6 +483,7 @@ describe("dashboard register chrome", () => {
     expect(territories).toContain('data-dashboard-territory-scale="overview"');
     expect(territories).toContain("0 territories");
     expect(territories).toContain("data-dashboard-territory-swatch");
+    expect(territories).toContain("data-dashboard-territory-legend-bar");
     expect(territories).toContain(DASHBOARD_HOME.legendLow);
     expect(territories).toContain(DASHBOARD_HOME.legendHigh);
   });
@@ -513,5 +535,75 @@ describe("dashboard register chrome", () => {
     expect(territories).toContain(">T01<");
     expect(territories).toContain(">T10<");
     expect(territories).not.toContain(">T11<");
+  });
+});
+
+describe("dashboard territory map rematch", () => {
+  function countryFill(html: string, code: string): string | null {
+    const match = html.match(
+      new RegExp(`data-dashboard-territory-country="${code}"[^>]*fill="([^"]+)"`),
+    );
+    return match?.[1] ?? null;
+  }
+
+  it("joins sample ranked rows onto filled paths and a continuous LOW HIGH legend", () => {
+    const ranked = rankedRowsFromCounts(DASHBOARD_TERRITORY_MAP_SAMPLE, true);
+    expect(ranked.map((row) => row.code)).toEqual(["US", "GB", "CA", "DE", "AU"]);
+    const byCode = dashboardRowsByAlpha2(ranked);
+    expect(dashboardRowForTopologyId(byCode, "840")?.code).toBe("US");
+    expect(dashboardRowForTopologyId(byCode, "036")?.code).toBe("AU");
+    expect(dashboardRowForTopologyId(byCode, 36)?.code).toBe("AU");
+    expect(dashboardRowForTopologyId(byCode, null, "United States of America")?.code).toBe("US");
+    expect(dashboardRowForTopologyId(byCode, "010")).toBeNull();
+
+    const html = renderToStaticMarkup(createElement(DashboardTerritoryMap, { rows: ranked }));
+    expect(html).toContain('data-dashboard-territory-scale="overview"');
+    expect(html).toContain("5 territories");
+    expect(html).toContain("data-dashboard-territory-legend-bar");
+    expect(html).toContain(DASHBOARD_CHOROPLETH_LEGEND_BAR_CLASS);
+    expect(html).toContain(DASHBOARD_CHOROPLETH_SWATCH_CLASS);
+    expect(html.split("data-dashboard-territory-swatch").length - 1).toBe(5);
+    expect(html).not.toContain("rounded-[var(--radius-sm)]");
+    expect(html).toContain(DASHBOARD_HOME.legendLow);
+    expect(html).toContain(DASHBOARD_HOME.legendHigh);
+
+    for (const code of ["US", "GB", "CA", "DE", "AU"] as const) {
+      const fill = countryFill(html, code);
+      expect(fill, code).toBeTruthy();
+      expect(fill, code).toContain("var(--accent)");
+      expect(fill, code).toMatch(/color-mix/);
+      expect(fill, code).not.toBe("var(--surface-muted)");
+      expect(html).toContain(`data-dashboard-territory-country="${code}"`);
+    }
+    expect(html.split("data-dashboard-territory-filled").length - 1).toBe(5);
+    expect(countryFill(html, "FR")).toBe("var(--surface-muted)");
+  });
+
+  it("keeps one DashboardTerritoryMap SoT for Top territories and Reports Territories", () => {
+    const top = renderToStaticMarkup(
+      createElement(DashboardTopTerritories, { rows: DASHBOARD_TERRITORY_MAP_SAMPLE }),
+    );
+    const reports = renderToStaticMarkup(
+      createElement(ReportsTerritories, { rows: DASHBOARD_TERRITORY_MAP_SAMPLE }),
+    );
+    for (const html of [top, reports]) {
+      expect(html).toContain("data-dashboard-territory-map");
+      expect(html).toContain('data-dashboard-territory-country="US"');
+      expect(html).toContain("data-dashboard-territory-filled");
+      expect(html).toContain("data-dashboard-territory-legend-bar");
+      expect(html).toContain("5 territories");
+      expect(countryFill(html, "US")).toContain("var(--accent)");
+    }
+    const rankedSrc = readFileSync("src/components/dashboard/dashboard-ranked.tsx", "utf8");
+    const reportsSrc = readFileSync("src/components/reports/reports-ranked.tsx", "utf8");
+    const altsSrc = readFileSync("src/components/dashboard/dashboard-view-alts.tsx", "utf8");
+    expect(rankedSrc).toContain("DashboardTerritoryMap");
+    expect(reportsSrc).toContain("DashboardTerritoryMap");
+    expect(rankedSrc).not.toContain("react-simple-maps");
+    expect(reportsSrc).not.toContain("react-simple-maps");
+    expect(altsSrc).toContain("Globe");
+    expect(altsSrc).toContain("List");
+    expect(altsSrc).toContain("ChartBar");
+    expect(altsSrc).not.toContain("BarChart3");
   });
 });
