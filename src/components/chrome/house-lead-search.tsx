@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { MagnifyingGlass } from "@phosphor-icons/react";
 
+import { HouseVoiceMic } from "@/components/chrome/house-voice-mic";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/cn";
 import {
@@ -11,10 +13,12 @@ import {
   parseEducationSearchQuery,
 } from "@/lib/course-search";
 import { SocialSearchSheet } from "@/components/social/social-search-sheet";
+import { HOUSE_VOICE_FOCUS_HOST_CLASS } from "@/lib/form-control";
 import { HOUSE_LEAD_SEARCH_PILL_CLASS } from "@/lib/house-lead-chrome";
 import { HOUSE_SEARCH_PILL_CLASS } from "@/lib/house-shell";
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
+import { ingestSpeechLearning } from "@/lib/speech-learning";
 
 // One mid-lead search SoT for Social live Explore and Education quiet
 // courses/videos. Slot into HouseLeadChrome search / underNav /
@@ -148,15 +152,31 @@ function HouseLeadSearchField({
   autoFocus?: boolean;
   className?: string;
 }) {
+  const workspace = tone === "live" ? "social" : "education";
+  const [value, setValue] = useState(defaultValue ?? "");
+
   return (
     <form
       data-house-lead-search-field=""
       data-house-lead-search-tone={tone}
+      data-house-voice-host=""
       data-social-header-search={tone === "live" ? "" : undefined}
       data-education-header-search={tone === "quiet" ? "" : undefined}
       action={action}
       method="get"
-      className={cn(HOUSE_LEAD_SEARCH_PILL_CLASS, HOUSE_SEARCH_PILL_CLASS, className)}
+      className={cn(
+        HOUSE_LEAD_SEARCH_PILL_CLASS,
+        HOUSE_SEARCH_PILL_CLASS,
+        HOUSE_VOICE_FOCUS_HOST_CLASS,
+        className,
+      )}
+      onSubmit={() => {
+        ingestSpeechLearning({
+          text: value,
+          source: "typed",
+          workspace,
+        });
+      }}
     >
       <MagnifyingGlass
         className="size-4 shrink-0 text-ink-3"
@@ -170,10 +190,17 @@ function HouseLeadSearchField({
         variant="bare"
         id={inputId}
         name="q"
-        defaultValue={defaultValue}
+        value={value}
+        onChange={(event) => setValue(event.target.value)}
         placeholder={placeholder}
         autoFocus={autoFocus}
         className="h-full min-w-0 flex-1 placeholder:text-ink-3"
+      />
+      <HouseVoiceMic
+        surface="search"
+        workspace={workspace}
+        getValue={() => value}
+        onValue={setValue}
       />
     </form>
   );

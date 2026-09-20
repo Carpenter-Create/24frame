@@ -17,7 +17,8 @@
 // account, existing org_role). House grant/comp is staff-only on
 // /gc/clients — never a customer Settings directory.
 // Preferences holds Appearance (same gc-theme SoT as the header
-// sun/moon) and the notification matrix. Mobile Preferences is a
+// sun/moon), the speech-learning opt-out, and the notification
+// matrix. Mobile Preferences is a
 // Coinbase drill-in: Theme and Notifications are rows; edit panes
 // live at /theme and /notifications. Desktop keeps the on-page
 // card and matrix inside SETTINGS_CONTENT_MEASURE_CLASS — a

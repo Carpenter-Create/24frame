@@ -23,6 +23,17 @@ export const FORM_CONTROL_BOX_CLASS =
 export const FORM_CONTROL_BARE_CLASS =
   `min-w-0 bg-transparent text-ink caret-ink accent-ink ${FORM_CONTROL_FOCUS_CLASS} focus:border-transparent placeholder:text-ink-3`;
 
+// Search + dictate hosts share FORM_CONTROL_FOCUS_CLASS. focus-within
+// keeps the pill/field chrome calm when the circular mic is focused.
+export const HOUSE_VOICE_FOCUS_HOST_CLASS =
+  `${FORM_CONTROL_FOCUS_CLASS} focus-within:border-hairline focus-within:outline-none focus-within:ring-0`;
+
+export const HOUSE_VOICE_FIELD_HOST_CLASS = `flex items-start gap-2 rounded-[var(--radius-sm)] border border-hairline bg-surface px-3 py-2 ${HOUSE_VOICE_FOCUS_HOST_CLASS}`;
+
+export const HOUSE_VOICE_MIC_CLASS = `flex size-7 shrink-0 items-center justify-center rounded-full text-ink-2 ${FORM_CONTROL_FOCUS_CLASS}`;
+
+export const HOUSE_VOICE_MIC_LISTENING_CLASS = "bg-surface-muted text-ink";
+
 export type FormControlVariant = "box" | "bare";
 
 export function formControlClass(

@@ -33,6 +33,9 @@ describe("settings hub isolation", () => {
     expect(pane).not.toContain("isGcStaff");
     expect(pane).not.toContain("Manage courses");
     expect(pane).not.toContain("data-settings-manage-courses");
+    expect(pane).toContain("SpeechLearningPreference");
+    expect(existsSync("src/app/(app)/settings/preferences/speech/page.tsx")).toBe(false);
+    expect(existsSync("src/app/(app)/settings/social/page.tsx")).toBe(false);
   });
 
   it("does not invent /account settings routes", () => {

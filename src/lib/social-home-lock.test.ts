@@ -167,8 +167,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).toContain('icon="users"');
     expect(home).toContain("SocialHomeTabs");
     expect(composer).toContain("data-social-home-composer");
-    expect(composer).toContain("data-social-composer-media");
-    expect(composer).toContain("SOCIAL_MEDIA_ACCEPT");
+    expect(composer).toContain("data-social-create-menu");
+    expect(composer).toContain("SocialCreateMenu");
     expect(composer).toContain('socialCreateHref("text")');
     expect(composer).toContain("socialComposerPrompt(authorName)");
     expect(composer).toContain("SocialAvatar");
@@ -178,6 +178,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(composer).not.toContain("What's on your mind");
     expect(composer).toContain("text-ink-2");
     expect(composer).not.toContain("text-accent");
+    expect(composer).not.toContain("data-social-composer-media");
+    expect(composer).not.toContain("SOCIAL_MEDIA_ACCEPT");
     expect(composer).not.toContain("data-social-composer-action");
     expect(composer).not.toContain("ACTIONS");
     expect(shell).not.toContain("SocialRailAccountChip");

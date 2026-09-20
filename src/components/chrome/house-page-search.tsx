@@ -8,15 +8,21 @@
 // they share this pill contract but keep workspace-specific GET / phone
 // treatments (SocialIcon vs Phosphor, explore vs courses action).
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { MagnifyingGlass } from "@phosphor-icons/react";
 
+import { HouseVoiceMic } from "@/components/chrome/house-voice-mic";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/cn";
+import { HOUSE_VOICE_FOCUS_HOST_CLASS } from "@/lib/form-control";
 import { HOUSE_LEAD_SEARCH_PILL_CLASS } from "@/lib/house-lead-chrome";
 import { HOUSE_SEARCH_PILL_CLASS } from "@/lib/house-shell";
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
+import {
+  ingestSpeechLearning,
+  speechLearningWorkspaceFromPath,
+} from "@/lib/speech-learning";
 
 export function HousePageSearch({
   placeholder,
@@ -34,6 +40,8 @@ export function HousePageSearch({
   const generatedId = useId();
   const fieldId = inputId ?? generatedId;
   const [value, setValue] = useState(params.get("q") ?? "");
+  const workspace = speechLearningWorkspaceFromPath(pathname);
+  const skipTypedIngest = useRef(true);
 
   useEffect(() => {
     const id = setTimeout(() => {
@@ -43,6 +51,15 @@ export function HousePageSearch({
       else sp.delete("q");
       const qs = sp.toString();
       router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+      if (skipTypedIngest.current) {
+        skipTypedIngest.current = false;
+      } else {
+        ingestSpeechLearning({
+          text: trimmed,
+          source: "typed",
+          workspace,
+        });
+      }
     }, 250);
     return () => clearTimeout(id);
     // Only re-run when the typed value changes.
@@ -52,9 +69,14 @@ export function HousePageSearch({
   return (
     <form
       data-house-page-search=""
+      data-house-voice-host=""
       role="search"
       onSubmit={(event) => event.preventDefault()}
-      className={cn(HOUSE_LEAD_SEARCH_PILL_CLASS, HOUSE_SEARCH_PILL_CLASS)}
+      className={cn(
+        HOUSE_LEAD_SEARCH_PILL_CLASS,
+        HOUSE_SEARCH_PILL_CLASS,
+        HOUSE_VOICE_FOCUS_HOST_CLASS,
+      )}
     >
       <MagnifyingGlass
         className="size-4 shrink-0 text-ink-3"
@@ -72,6 +94,12 @@ export function HousePageSearch({
         onChange={(event) => setValue(event.target.value)}
         placeholder={placeholder}
         className="h-full min-w-0 flex-1 placeholder:text-ink-3"
+      />
+      <HouseVoiceMic
+        surface="search"
+        workspace={workspace}
+        getValue={() => value}
+        onValue={setValue}
       />
       {hint ? (
         <span
