@@ -74,8 +74,10 @@ describe("Aggregation chrome Phosphor lock + Design miss list", () => {
   });
 
   it("leaves Social interiors on Social V1 SocialIcon; SOCIAL_NAV dests are house Phosphor", () => {
-    expect(socialComposer).toContain("SocialIcon");
+    expect(socialComposer).toContain("SocialCreateSheet");
+    expect(socialComposer).not.toContain("SocialIcon");
     expect(socialComposer).not.toContain('from "lucide-react"');
+    expect(readFileSync("src/components/social/social-create-sheet.tsx", "utf8")).toContain("SocialIcon");
     expect(leadSearch).toContain("MagnifyingGlass");
     expect(leadSearch).not.toContain('from "lucide-react"');
     expect(leadSearch).not.toContain("SocialIcon");

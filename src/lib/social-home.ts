@@ -4,6 +4,14 @@ import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 // Home following wall + Skool-style onboarding. Photo reuses the
 // account face at /settings/profile. Do not add a second upload.
 
+// Adam 2026-09-20 lock_airy_topics_under_cut_phone_composer
+// One Home column on both devices: desktop create entry → Stories →
+// Topics → wall. Topics filter the following wall, not Stories.
+// Phone hides the composer via SOCIAL_COMPOSER_CLASS — same JSX, no
+// second layout, no second Photo · Video · Write · Go live strip.
+export const SOCIAL_HOME_STACK_LOCK = "lock_airy_topics_under_cut_phone_composer" as const;
+export const SOCIAL_HOME_STACK_ORDER = ["composer", "stories", "topics", "wall"] as const;
+
 export const SOCIAL_CHECKLIST_IDS = [
   "photo",
   "bio",

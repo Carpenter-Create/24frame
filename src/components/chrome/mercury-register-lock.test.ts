@@ -139,7 +139,10 @@ describe("Adam Mercury register lock", () => {
     expect(nav).toContain('family: "phosphor"');
     // Social interiors stay on Social Figma V1 SocialIcon. House lead
     // search is shared chrome — Phosphor, not a Social interior fork.
-    expect(src("src/components/social/social-home-composer.tsx")).toContain("SocialIcon");
+    // Desktop composer is airy avatar+prompt; Create sheet holds the glyphs.
+    expect(src("src/components/social/social-home-composer.tsx")).toContain("SocialCreateSheet");
+    expect(src("src/components/social/social-home-composer.tsx")).not.toContain("SocialIcon");
+    expect(src("src/components/social/social-create-sheet.tsx")).toContain("SocialIcon");
     expect(src("src/components/chrome/house-lead-search.tsx")).toContain("MagnifyingGlass");
     expect(src("src/components/chrome/house-lead-search.tsx")).not.toContain("lucide-react");
     expect(src("src/components/chrome/house-lead-search.tsx")).not.toContain("SocialIcon");

@@ -25,7 +25,7 @@ import {
 } from "@/lib/social-categories";
 import { latestDiscoverableCourse, loadDiscoverableCourses } from "@/lib/courses";
 import { signedEducationCoverUrls } from "@/lib/s3-education";
-import { followingAuthorIds } from "@/lib/social-home";
+import { followingAuthorIds, SOCIAL_HOME_STACK_LOCK } from "@/lib/social-home";
 import {
   SOCIAL_FOLLOWING_WALL_CURSOR_PARAM,
   parseFollowingWallCursorParam,
@@ -163,13 +163,14 @@ async function SocialHomeCenter({
   const photoUrl = faces.get(ctx.user.id) ?? null;
 
   return (
-    <div className={SOCIAL_HOME_CENTER_CLASS}>
-      <h1 className="sr-only">{SOCIAL.home.title}</h1>
-      <p className="sr-only">{SOCIAL.home.subtitle}</p>
+    <div data-social-home-stack={SOCIAL_HOME_STACK_LOCK} className={SOCIAL_HOME_CENTER_CLASS}>
+      <div className="sr-only">
+        <h1>{SOCIAL.home.title}</h1>
+        <p>{SOCIAL.home.subtitle}</p>
+      </div>
       {profile ? (
         <SocialHomeComposer authorName={profile.display_name} authorPhotoUrl={photoUrl} />
       ) : null}
-      <SocialHomeTopics />
       <SocialStoriesRail
         cards={rail}
         authors={authors}
@@ -183,6 +184,7 @@ async function SocialHomeCenter({
           {SOCIAL.home.truncatedStories}
         </InlineNotice>
       ) : null}
+      <SocialHomeTopics />
       {followees.truncated ? (
         <InlineNotice tone="info" data-social-followees-truncated="">
           {SOCIAL.home.truncatedFollowees}

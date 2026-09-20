@@ -23,7 +23,7 @@ import type { SocialPhosphorIconName } from "@/lib/social-icons";
 // Not loud IG/FB. Not a Pinterest skin. Not an X FAB flyout.
 // Not iMessage frost. Not iMessage’s vertical + attachment list.
 // One SoT for the sheet + tile primitive. Social-only door
-// (dock dest · composer plus). Never in the house header.
+// (dock dest · desktop composer). Never in the house header.
 
 export const SOCIAL_CREATE_TILES = [
   {

@@ -52,14 +52,16 @@ describe("Social loading skeletons", () => {
     const follows = renderToStaticMarkup(<SocialFollowsSkeleton />);
 
     expect(home).toContain("data-social-home-skeleton");
+    expect(home).toContain('data-social-home-stack="lock_airy_topics_under_cut_phone_composer"');
+    expect(home).toContain("data-social-home-composer-skeleton");
     expect(home).toContain("data-social-home-topics-skeleton");
-    expect(home.indexOf("data-social-home-topics-skeleton")).toBeLessThan(
+    expect(home.indexOf("data-social-home-composer-skeleton")).toBeLessThan(
       home.indexOf("data-social-stories-skeleton"),
     );
-    const topicsSkeleton = home.slice(
+    expect(home.indexOf("data-social-stories-skeleton")).toBeLessThan(
       home.indexOf("data-social-home-topics-skeleton"),
-      home.indexOf("data-social-stories-skeleton"),
     );
+    const topicsSkeleton = home.slice(home.indexOf("data-social-home-topics-skeleton"));
     expect(topicsSkeleton).toContain("overflow-x-auto");
     expect(topicsSkeleton).toContain("flex-col");
     expect(topicsSkeleton.match(/h-9 w-24 shrink-0 rounded-full/g)?.length).toBe(8);

@@ -1,18 +1,13 @@
 "use client";
 
-import Link from "next/link";
-
 import { SocialAvatar } from "@/components/social/social-avatar";
 import { SocialCreateSheet } from "@/components/social/social-create-sheet";
-import { SocialIcon } from "@/components/social/social-icon";
-import {
-  SOCIAL_COMPOSER_CLASS,
-  SOCIAL_COMPOSER_FIELD_CLASS,
-  SOCIAL_COMPOSER_MEDIA_CLASS,
-} from "@/lib/social-chrome";
-import { SOCIAL_ICON_SIZE_COMPOSER } from "@/lib/social-icons";
-import { SOCIAL, socialComposerPrompt, socialCreateHref } from "@/lib/social";
+import { SOCIAL_COMPOSER_CLASS, SOCIAL_COMPOSER_FIELD_CLASS } from "@/lib/social-chrome";
+import { SOCIAL, socialComposerPrompt } from "@/lib/social";
 
+// Desktop-only airy create entry. Avatar + prompt sit on the canvas —
+// no boxed liner. The row opens the Create sheet SoT (Photo · Video ·
+// Write · Go live). Phone Create is the dock dest + sheet only.
 export function SocialHomeComposer({
   authorName,
   authorPhotoUrl,
@@ -21,29 +16,21 @@ export function SocialHomeComposer({
   authorPhotoUrl?: string | null;
 }) {
   return (
-    <div data-social-home-composer="" className={SOCIAL_COMPOSER_CLASS}>
-      <SocialAvatar name={authorName} photoUrl={authorPhotoUrl} size="sm" />
-      <Link
-        href={socialCreateHref("text")}
-        data-social-composer-prompt=""
-        className={SOCIAL_COMPOSER_FIELD_CLASS}
-      >
-        {socialComposerPrompt(authorName)}
-      </Link>
-      <div className="hidden md:flex">
-        <SocialCreateSheet
-          trigger={
-            <button
-              type="button"
-              data-social-create-sheet="composer"
-              aria-label={SOCIAL.create.title}
-              className={SOCIAL_COMPOSER_MEDIA_CLASS}
-            >
-              <SocialIcon name="plus" size={SOCIAL_ICON_SIZE_COMPOSER} className="text-ink-2" />
-            </button>
-          }
-        />
-      </div>
-    </div>
+    <SocialCreateSheet
+      trigger={
+        <button
+          type="button"
+          data-social-home-composer=""
+          data-social-create-sheet="composer"
+          aria-label={SOCIAL.create.title}
+          className={SOCIAL_COMPOSER_CLASS}
+        >
+          <SocialAvatar name={authorName} photoUrl={authorPhotoUrl} size="sm" />
+          <span data-social-composer-prompt="" className={`${SOCIAL_COMPOSER_FIELD_CLASS} text-ink-2`}>
+            {socialComposerPrompt(authorName)}
+          </span>
+        </button>
+      }
+    />
   );
 }

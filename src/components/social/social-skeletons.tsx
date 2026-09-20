@@ -22,6 +22,7 @@ import {
   SOCIAL_STORY_CARD_CLASS,
   SOCIAL_STORY_VIEWER_CLASS,
 } from "@/lib/social-chrome";
+import { SOCIAL_HOME_STACK_LOCK } from "@/lib/social-home";
 
 export function SocialForYouSkeleton() {
   return (
@@ -37,12 +38,12 @@ export function SocialForYouSkeleton() {
 
 export function SocialHomeCenterSkeleton() {
   return (
-    <div className={SOCIAL_HOME_CENTER_CLASS}>
-      <div className={SOCIAL_COMPOSER_CLASS}>
+    <div data-social-home-stack={SOCIAL_HOME_STACK_LOCK} className={SOCIAL_HOME_CENTER_CLASS}>
+      <div data-social-home-composer-skeleton="" className={SOCIAL_COMPOSER_CLASS}>
         <Skeleton className={SOCIAL_AVATAR_SM_CLASS} />
         <Skeleton className="h-9 min-w-0 flex-1" />
-        <Skeleton className="size-9 shrink-0" />
       </div>
+      <SocialStoriesRailSkeleton tall />
       <div data-social-home-topics-skeleton="" className="flex min-w-0 flex-col gap-2">
         <Skeleton className="h-4 w-16" />
         <div className={SOCIAL_TOPIC_RAIL_CLASS}>
@@ -57,7 +58,6 @@ export function SocialHomeCenterSkeleton() {
           </div>
         </div>
       </div>
-      <SocialStoriesRailSkeleton tall />
       {Array.from({ length: 3 }).map((_, i) => (
         <div key={i} className={SOCIAL_FEED_ROW_CLASS}>
           <div className="flex gap-2">
