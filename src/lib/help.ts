@@ -12,8 +12,11 @@
 // help-center URL SoT and no support mailto SoT — stub panes, not
 // a support product. Do not invent articles, a help desk, or
 // /account/feedback.
+// Index Back consumes SettingsHubBackLink — history when the
+// referrer is in-app; Home /home only as cold-open fallback.
+// Never hard-link Aggregation.
 
-import { DASHBOARD_HREF } from "@/lib/dashboard-admin";
+import { HOME_ROOT } from "@/lib/workspace";
 import {
   SETTINGS_DRILL_ROW_CLASS,
   SETTINGS_EDIT_HELPER_CLASS,
@@ -28,7 +31,7 @@ export const HELP = {
   title: USER_MENU.help,
   href: USER_MENU.helpHref,
   back: "Back",
-  homeHref: DASHBOARD_HREF,
+  homeHref: HOME_ROOT,
   helper: "Help center, support, and feedback.",
   center: "Help center",
   centerHref: "/help/center",
