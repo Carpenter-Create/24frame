@@ -200,6 +200,7 @@ export function AppShell({
     <AskAssistantChromeProvider>
     {cookieSync}
     <HousePhoneAppShell
+      chrome={chrome}
       workspace={workspace}
       isGcStaff={socialChrome ? false : isGcStaff}
       homeOwned={socialChrome ? false : homeOwned}

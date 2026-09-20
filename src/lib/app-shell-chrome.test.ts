@@ -126,6 +126,8 @@ describe("Social nav no longer waits on the (app) layout waterfall", () => {
     expect(layoutSrc).not.toMatch(/await getActiveOrgTier/);
     expect(layoutSrc).not.toMatch(/key=\{pathname\}/);
     expect(layoutSrc).not.toMatch(/key=\{ctx/);
+    expect(layoutSrc).not.toContain("isGcStaff=");
+    expect(layoutSrc).toContain("chrome={chrome}");
   });
 
   it("still signs the chrome face from the session user, off the page slot", () => {

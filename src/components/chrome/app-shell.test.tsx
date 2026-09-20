@@ -968,6 +968,32 @@ describe("AppShell rail-collapse chevron", () => {
     expect(staff).toContain('data-house-phone-dest="Queue"');
     expect(staff).toContain('data-house-phone-dest="Channels"');
     expect(staff).not.toContain('data-house-phone-dest="Ask 24Frame AI"');
+
+    const chromeStaff = renderToStaticMarkup(
+      <AppShell
+        chrome={fulfilledChrome({
+          email: "ada@example.com",
+          name: "Ada",
+          photoUrl: null,
+          orgs: [],
+          activeOrgId: null,
+          unread: Promise.resolve(0),
+          activityItems: Promise.resolve([]),
+          isGcStaff: true,
+          defaultCollapsed: false,
+          messagesSurface: "staff-inbox",
+          defaultWorkspace: "aggregation",
+        })}
+        messagesUnread={Promise.resolve(0)}
+      >
+        page
+      </AppShell>,
+    );
+    expect(chromeStaff).toContain('data-house-phone-dest="Queue"');
+    expect(chromeStaff).toContain('data-house-phone-dest="Channels"');
+    expect(chromeStaff).toContain("data-gc-staff");
+
+    expect(shellSrc).toContain("chrome={chrome}");
     expect(shellSrc).toContain("SideNavFromChrome");
     expect(shellSrc).toContain("isGcStaff={isGcStaff}");
     expect(shellSrc).toContain("ChromeCookieSync");

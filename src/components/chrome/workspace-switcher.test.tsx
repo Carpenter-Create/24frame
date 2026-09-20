@@ -87,6 +87,9 @@ describe("workspace switcher header control", () => {
     expect(html).toContain("data-workspace-switcher-sheet");
     expect(html).toContain('data-workspace-switcher-presentation="sheet"');
     expect(html).toContain("data-workspace-switcher-sheet-scrim");
+    expect(html).toContain(`aria-label="${WORKSPACE_SWITCHER.close}"`);
+    expect(src).toContain("WORKSPACE_SWITCHER.close");
+    expect(src).not.toContain('aria-label="Close workspaces"');
     expect(html).toContain('data-workspace-switcher-option="home"');
     expect(html).toContain('data-workspace-switcher-option="aggregation"');
     expect(html).toContain('data-workspace-switcher-option="social"');

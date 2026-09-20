@@ -368,7 +368,7 @@ export function WorkspaceSwitcher({
       >
         <button
           type="button"
-          aria-label="Close workspaces"
+          aria-label={WORKSPACE_SWITCHER.close}
           data-workspace-switcher-sheet-scrim=""
           className={WORKSPACE_SWITCHER_SHEET_SCRIM_CLASS}
           onClick={() => setOpen(false)}

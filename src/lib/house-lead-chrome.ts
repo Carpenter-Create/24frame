@@ -6,7 +6,7 @@
 // Destinations live in HousePhoneBottomNav (in-workspace only).
 // Emblem is a workspace-home link, not the rail.
 // Phone grammar IA A:
-//   Left: [emblem] [workspace name/mark]
+//   Left stacks: [emblem] then [workspace name/mark] — no truncate.
 //   Trailing: [search if needed] [theme] [24Frame AI] [bell] [avatar]
 //   Trailing rhythm: one --space-2 gap between distinct siblings.
 //   Phone icon hits hug the 16px glyph (HOUSE_HEADER_TRAILING_HIT_CLASS)
@@ -73,7 +73,7 @@ export const HOUSE_LEAD_PHONE_PAD_CLASS =
 
 // relative: Settings phone back is absolute against this row so the
 // 24 emblem stays put.
-export const HOUSE_LEAD_CHROME_CLASS = `relative flex items-center justify-end gap-4 border-b border-hairline bg-surface/85 backdrop-blur ${HOUSE_LEAD_PHONE_PAD_CLASS} ${HOUSE_CHROME_GUTTER_X_CLASS}`;
+export const HOUSE_LEAD_CHROME_CLASS = `relative flex items-center justify-end gap-4 border-b border-hairline bg-surface/85 backdrop-blur max-md:h-auto md:h-[var(--header-height)] ${HOUSE_LEAD_PHONE_PAD_CLASS} ${HOUSE_CHROME_GUTTER_X_CLASS}`;
 
 export const HOUSE_LEAD_LOGO_CLASS = "inline-flex shrink-0 items-center";
 

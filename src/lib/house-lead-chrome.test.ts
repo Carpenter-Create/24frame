@@ -243,7 +243,9 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(HOUSE_LEAD_SEARCH_PILL_CLASS).toContain("md:h-[var(--header-search-height)]");
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("md:size-[var(--header-control-size)]");
     expect(HOUSE_HEADER_TRAILING_AVATAR_CLASS).toContain("md:h-[var(--header-avatar-size)]");
-    expect(leadSrc).toContain('style={{ height: "var(--header-height)" }}');
+    expect(leadSrc).toContain('style={{ minHeight: "var(--header-height)" }}');
+    expect(HOUSE_LEAD_CHROME_CLASS).toContain("max-md:h-auto");
+    expect(HOUSE_LEAD_CHROME_CLASS).toContain("md:h-[var(--header-height)]");
   });
 
   it("evens phone trailing theme · AI · bell · avatar with one gap and no overlapping hits", () => {

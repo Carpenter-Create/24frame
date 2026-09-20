@@ -66,7 +66,7 @@ export function HouseLeadChrome({
         data-house-full-width-top=""
         data-social-top-bar={social ? "" : undefined}
         className={HOUSE_LEAD_CHROME_CLASS}
-        style={{ height: "var(--header-height)" }}
+        style={{ minHeight: "var(--header-height)" }}
       >
         <div data-app-header-leading="" className={APP_HEADER_LEADING_CLASS}>
           {leadingNav}
