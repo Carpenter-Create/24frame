@@ -320,6 +320,7 @@ export function segmentedItemIndexFromEventTarget(
   }
   const item = target.closest("[data-segmented-item]");
   if (!item || !track.contains(item)) return -1;
+  if (segmentedItemHoldsVisualIntent(item)) return -1;
   const items = track.querySelectorAll("[data-segmented-item]");
   return Array.prototype.indexOf.call(items, item);
 }
@@ -329,6 +330,13 @@ export type SegmentedTrackSelection = {
 };
 
 export const SEGMENTED_ITEM_SELECTED_ATTR = "data-segmented-selected";
+export const SEGMENTED_ITEM_HOLD_ATTR = "data-segmented-hold";
+
+export function segmentedItemHoldsVisualIntent(
+  item: { hasAttribute(name: string): boolean } | null | undefined,
+): boolean {
+  return item?.hasAttribute(SEGMENTED_ITEM_HOLD_ATTR) === true;
+}
 
 export function segmentedTrackSelection(
   visualIndex: number,

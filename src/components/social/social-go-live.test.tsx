@@ -18,6 +18,10 @@ describe("Social Go live recorder", () => {
     expect(src).toContain("presignSocialMediaUpload");
     expect(src).toContain('lane", "posts"');
     expect(src).toContain("goLiveReachedCap");
+    expect(src).toContain("goLiveFitsByteCap(used + event.data.size");
+    expect(src).toContain("new MediaRecorder(stream, { mimeType: probed.raw })");
+    expect(src).toContain("aliveRef");
+    expect(src).toContain("releaseCamera");
     expect(src).toContain("SOCIAL_GO_LIVE_MAX_MS");
     expect(src).toContain("HouseVoiceMic");
     expect(src).toContain('surface="dictate"');

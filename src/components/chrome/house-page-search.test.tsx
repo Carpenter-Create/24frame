@@ -60,6 +60,7 @@ describe("HousePageSearch", () => {
     expect(src).toContain("HOUSE_LEAD_SEARCH_PILL_CLASS");
     expect(src).toContain("HOUSE_SEARCH_PILL_CLASS");
     expect(src).toContain("<Input");
+    expect(src).toContain("skipTypedIngest.current = true");
     expect(src).not.toContain("lucide-react");
     expect(src).not.toContain('from "lucide-react"');
     expect(src).not.toContain("strokeWidth");

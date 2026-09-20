@@ -71,15 +71,25 @@ async function uploadLiveVideo(file: File): Promise<{ item?: SocialMediaItem; er
   body.set("content_type", file.type);
   body.set("byte_length", String(file.size));
   body.set("lane", "posts");
-  const signed = await presignSocialMediaUpload(body);
+  let signed: Awaited<ReturnType<typeof presignSocialMediaUpload>>;
+  try {
+    signed = await presignSocialMediaUpload(body);
+  } catch {
+    return { error: SOCIAL.home.uploadFailed };
+  }
   if (signed.error || !signed.url || !signed.key || !signed.kind || !signed.contentType) {
     return { error: signed.error ?? SOCIAL.home.uploadFailed };
   }
-  const put = await fetch(signed.url, {
-    method: "PUT",
-    headers: { "Content-Type": signed.contentType },
-    body: file,
-  });
+  let put: Response;
+  try {
+    put = await fetch(signed.url, {
+      method: "PUT",
+      headers: { "Content-Type": signed.contentType },
+      body: file,
+    });
+  } catch {
+    return { error: SOCIAL.home.uploadFailed };
+  }
   if (!put.ok) return { error: SOCIAL.home.uploadFailed };
   return {
     item: {
@@ -101,6 +111,7 @@ export function SocialGoLive() {
   const recordingRef = useRef(false);
   const clipUrlRef = useRef<string | null>(null);
   const liveRef = useRef(0);
+  const aliveRef = useRef(true);
 
   const [phase, setPhase] = useState<LivePhase>("preview");
   const [facing, setFacing] = useState<StoryStudioFacing>("user");
@@ -146,8 +157,15 @@ export function SocialGoLive() {
     setClip(null);
   }
 
+  function releaseCamera() {
+    stopStream(streamRef.current);
+    streamRef.current = null;
+    if (videoRef.current) videoRef.current.srcObject = null;
+  }
+
   useEffect(() => {
     return () => {
+      aliveRef.current = false;
       releasePreview();
       if (clipUrlRef.current) URL.revokeObjectURL(clipUrlRef.current);
     };
@@ -258,12 +276,11 @@ export function SocialGoLive() {
     }, 250);
   }
 
-  function startRecording() {
-    const stream = streamRef.current;
+  function beginRecording(stream: MediaStream) {
     const probed = probeStoryRecorderMimeType(
       typeof MediaRecorder !== "undefined" ? MediaRecorder.isTypeSupported.bind(MediaRecorder) : undefined,
     );
-    if (!stream || !probed) {
+    if (!probed) {
       setError(SOCIAL.stories.unavailable);
       return;
     }
@@ -275,14 +292,27 @@ export function SocialGoLive() {
       recorder = new MediaRecorder(stream, goLiveRecorderOptions(probed.raw));
     } catch {
       try {
-        recorder = new MediaRecorder(stream);
+        recorder = new MediaRecorder(stream, { mimeType: probed.raw });
       } catch {
-        setError(SOCIAL.stories.unavailable);
-        return;
+        try {
+          recorder = new MediaRecorder(stream);
+        } catch {
+          setError(SOCIAL.stories.unavailable);
+          return;
+        }
       }
     }
     recorder.ondataavailable = (event) => {
-      if (event.data.size > 0) chunksRef.current.push(event.data);
+      if (event.data.size <= 0) return;
+      const used = chunksRef.current.reduce(
+        (sum, part) => sum + (part instanceof Blob ? part.size : 0),
+        0,
+      );
+      if (!goLiveFitsByteCap(used + event.data.size, SOCIAL_VIDEO_MAX_BYTES)) {
+        if (recordingRef.current) stopRecording();
+        return;
+      }
+      chunksRef.current.push(event.data);
     };
     recorder.onstop = () => {
       if (!storyStudioIsLive(liveRef.current, live)) return;
@@ -306,6 +336,7 @@ export function SocialGoLive() {
       const url = URL.createObjectURL(file);
       clipUrlRef.current = url;
       setClip({ file, url, contentType });
+      releaseCamera();
       setPhase("review");
     };
     recorder.start(1000);
@@ -313,6 +344,28 @@ export function SocialGoLive() {
     recordingRef.current = true;
     startClock();
     setPhase("recording");
+  }
+
+  function startRecording() {
+    setError("");
+    const stream = streamRef.current;
+    if (stream) {
+      beginRecording(stream);
+      return;
+    }
+    const live = liveRef.current;
+    void attachPreview(facing, live)
+      .then((ready) => {
+        if (!ready || !streamRef.current) {
+          setError(SOCIAL.stories.unavailable);
+          return;
+        }
+        beginRecording(streamRef.current);
+      })
+      .catch(() => {
+        if (!storyStudioIsLive(liveRef.current, live)) return;
+        setError(SOCIAL.stories.permission);
+      });
   }
 
   function stopRecording() {
@@ -339,24 +392,32 @@ export function SocialGoLive() {
     if (!clip || posting) return;
     setError("");
     setPosting(true);
-    const uploaded = await uploadLiveVideo(clip.file);
-    if (uploaded.error || !uploaded.item) {
+    try {
+      const uploaded = await uploadLiveVideo(clip.file);
+      if (!aliveRef.current) return;
+      if (uploaded.error || !uploaded.item) {
+        setPosting(false);
+        setError(uploaded.error ?? SOCIAL.home.uploadFailed);
+        return;
+      }
+      const form = new FormData();
+      form.set("body", body);
+      form.set("media", JSON.stringify([uploaded.item]));
+      ingestSpeechLearning({
+        text: body,
+        source: "typed",
+        workspace: "social",
+      });
+      const result = await createSocialPost(form);
+      if (!aliveRef.current) return;
+      if (result?.error) {
+        setPosting(false);
+        setError(result.error);
+      }
+    } catch {
+      if (!aliveRef.current) return;
       setPosting(false);
-      setError(uploaded.error ?? SOCIAL.home.uploadFailed);
-      return;
-    }
-    const form = new FormData();
-    form.set("body", body);
-    form.set("media", JSON.stringify([uploaded.item]));
-    ingestSpeechLearning({
-      text: body,
-      source: "typed",
-      workspace: "social",
-    });
-    const result = await createSocialPost(form);
-    if (result?.error) {
-      setPosting(false);
-      setError(result.error);
+      setError(SOCIAL.home.uploadFailed);
     }
   }
 
@@ -385,7 +446,11 @@ export function SocialGoLive() {
           <Link
             href={SOCIAL_ROUTES.create}
             aria-label={SOCIAL.stories.close}
+            aria-disabled={posting || undefined}
             className={SOCIAL_STORY_STUDIO_ICON_CLASS}
+            onClick={(event) => {
+              if (posting) event.preventDefault();
+            }}
           >
             <SocialIcon name="x" size={SOCIAL_ICON_SIZE_STORY_STUDIO} />
           </Link>

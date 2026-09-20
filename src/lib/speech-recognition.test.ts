@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   applySpeechTranscript,
   speechRecognitionCtor,
+  speechRecognitionErrorEndsSession,
   speechRecognitionSupported,
   transcriptsFromSpeechEvent,
 } from "./speech-recognition";
@@ -47,5 +48,12 @@ describe("speech recognition SoT", () => {
     expect(applySpeechTranscript("What's on", "your mind", "append")).toBe("What's on your mind");
     expect(applySpeechTranscript("", "  hello  ", "append")).toBe("hello");
     expect(applySpeechTranscript("keep", "   ", "replace")).toBe("keep");
+  });
+
+  it("keeps continuous listening armed on idle recognition errors", () => {
+    expect(speechRecognitionErrorEndsSession("no-speech")).toBe(false);
+    expect(speechRecognitionErrorEndsSession("aborted")).toBe(false);
+    expect(speechRecognitionErrorEndsSession("not-allowed")).toBe(true);
+    expect(speechRecognitionErrorEndsSession("network")).toBe(true);
   });
 });

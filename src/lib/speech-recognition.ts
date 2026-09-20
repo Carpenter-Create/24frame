@@ -73,3 +73,8 @@ export function applySpeechTranscript(
   const prefix = current.trimEnd();
   return prefix ? `${prefix} ${next}` : next;
 }
+
+// no-speech / aborted are idle — keep continuous listening armed.
+export function speechRecognitionErrorEndsSession(error?: string): boolean {
+  return error !== "no-speech" && error !== "aborted";
+}

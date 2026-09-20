@@ -35,11 +35,13 @@ export function SpeechLearningPreference() {
             enabled ? "bg-accent text-accent-contrast" : "bg-surface-muted text-ink-2",
           )}
           onClick={() => {
+            let storage: typeof localStorage | null = null;
             try {
-              writeSpeechLearningEnabled(!enabled, localStorage);
+              storage = localStorage;
             } catch {
-              // Preference still flips if storage is unavailable on the next read.
+              storage = null;
             }
+            writeSpeechLearningEnabled(!enabled, storage);
           }}
         >
           {enabled ? SPEECH_LEARNING.on : SPEECH_LEARNING.off}

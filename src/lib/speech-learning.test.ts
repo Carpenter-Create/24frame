@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 
 import {
+  clearSpeechLearningSession,
   ingestSpeechLearning,
   onSpeechLearningIngest,
   parseSpeechLearningEnabled,
@@ -13,7 +14,7 @@ import {
 
 describe("speech learning", () => {
   afterEach(() => {
-    // Drain listeners registered in this file.
+    clearSpeechLearningSession();
   });
 
   it("defaults learning ON and treats missing storage as opt-out available", () => {
@@ -33,6 +34,23 @@ describe("speech learning", () => {
     });
     expect(store.get(SPEECH_LEARNING.storageKey)).toBe("off");
     expect(SPEECH_LEARNING.settingsLabel).toBe("Learn from typed and dictated text");
+  });
+
+  it("honors an in-memory opt-out when storage writes fail", () => {
+    writeSpeechLearningEnabled(false, {
+      getItem: () => {
+        throw new Error("denied");
+      },
+      setItem: () => {
+        throw new Error("quota");
+      },
+    });
+    expect(readSpeechLearningEnabled({ getItem: () => null, setItem: () => undefined })).toBe(
+      false,
+    );
+    expect(
+      ingestSpeechLearning({ text: "keep learning off", source: "typed", workspace: "home" }),
+    ).toBeNull();
   });
 
   it("ingests transcript + workspace + optional locale and tags voice|typed", () => {

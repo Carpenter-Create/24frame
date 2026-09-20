@@ -99,7 +99,10 @@ export function HousePageSearch({
         surface="search"
         workspace={workspace}
         getValue={() => value}
-        onValue={setValue}
+        onValue={(next) => {
+          skipTypedIngest.current = true;
+          setValue(next);
+        }}
       />
       {hint ? (
         <span

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { MagnifyingGlass } from "@phosphor-icons/react";
 
@@ -154,6 +154,7 @@ function HouseLeadSearchField({
 }) {
   const workspace = tone === "live" ? "social" : "education";
   const [value, setValue] = useState(defaultValue ?? "");
+  const lastVoiceRef = useRef("");
 
   return (
     <form
@@ -171,6 +172,7 @@ function HouseLeadSearchField({
         className,
       )}
       onSubmit={() => {
+        if (value.trim() === lastVoiceRef.current.trim()) return;
         ingestSpeechLearning({
           text: value,
           source: "typed",
@@ -200,7 +202,10 @@ function HouseLeadSearchField({
         surface="search"
         workspace={workspace}
         getValue={() => value}
-        onValue={setValue}
+        onValue={(next) => {
+          lastVoiceRef.current = next;
+          setValue(next);
+        }}
       />
     </form>
   );

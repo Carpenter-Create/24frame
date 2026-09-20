@@ -20,6 +20,7 @@ import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import {
   applySpeechTranscript,
   speechRecognitionCtor,
+  speechRecognitionErrorEndsSession,
   speechRecognitionSupported,
   transcriptsFromSpeechEvent,
   type SpeechRecognitionLike,
@@ -67,6 +68,7 @@ export function HouseVoiceMic({
   const listeningRef = useRef(false);
   const recRef = useRef<SpeechRecognitionLike | null>(null);
   const baselineRef = useRef("");
+  const spokenRef = useRef("");
   const localeRef = useRef(locale);
 
   useEffect(() => {
@@ -95,16 +97,23 @@ export function HouseVoiceMic({
   const mode = houseVoiceTranscriptMode(surface);
   const label = listening ? HOUSE_VOICE.listening : houseVoiceLabel(surface);
 
-  function stop() {
-    listeningRef.current = false;
-    setListening(false);
-    const rec = recRef.current;
+  function detach(rec: SpeechRecognitionLike | null) {
     if (!rec) return;
+    rec.onresult = null;
+    rec.onerror = null;
+    rec.onend = null;
     try {
       rec.stop();
     } catch {
       // already stopped
     }
+    if (recRef.current === rec) recRef.current = null;
+  }
+
+  function stop() {
+    listeningRef.current = false;
+    setListening(false);
+    detach(recRef.current);
   }
 
   function start() {
@@ -116,12 +125,18 @@ export function HouseVoiceMic({
     rec.interimResults = true;
     rec.lang = localeRef.current || (typeof navigator !== "undefined" ? navigator.language : "en-US");
     baselineRef.current = getValue();
+    spokenRef.current = "";
     rec.onresult = (event) => {
       const { finals, interim } = transcriptsFromSpeechEvent(event);
       for (const spoken of finals) {
-        const next = applySpeechTranscript(baselineRef.current, spoken, mode);
-        baselineRef.current = next;
-        onValue(next);
+        if (mode === "replace") {
+          spokenRef.current = applySpeechTranscript(spokenRef.current, spoken, "append");
+          onValue(applySpeechTranscript(baselineRef.current, spokenRef.current, "replace"));
+        } else {
+          const next = applySpeechTranscript(baselineRef.current, spoken, "append");
+          baselineRef.current = next;
+          onValue(next);
+        }
         ingestSpeechLearning({
           text: spoken,
           source: "voice",
@@ -130,16 +145,22 @@ export function HouseVoiceMic({
         });
       }
       if (interim) {
-        onValue(applySpeechTranscript(baselineRef.current, interim, mode));
+        const spoken =
+          mode === "replace"
+            ? applySpeechTranscript(spokenRef.current, interim, "append")
+            : interim;
+        onValue(applySpeechTranscript(baselineRef.current, spoken, mode));
       }
     };
-    rec.onerror = () => {
+    rec.onerror = (event) => {
+      if (!speechRecognitionErrorEndsSession(event.error)) return;
       listeningRef.current = false;
       setListening(false);
+      if (recRef.current === rec) recRef.current = null;
     };
     rec.onend = () => {
-      if (!listeningRef.current) {
-        recRef.current = null;
+      if (recRef.current !== rec || !listeningRef.current) {
+        if (recRef.current === rec) recRef.current = null;
         return;
       }
       try {
@@ -147,7 +168,7 @@ export function HouseVoiceMic({
       } catch {
         listeningRef.current = false;
         setListening(false);
-        recRef.current = null;
+        if (recRef.current === rec) recRef.current = null;
       }
     };
     recRef.current = rec;

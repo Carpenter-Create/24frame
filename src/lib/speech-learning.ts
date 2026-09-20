@@ -44,7 +44,10 @@ export function serializeSpeechLearningEnabled(enabled: boolean): "on" | "off" {
   return enabled ? "on" : "off";
 }
 
+let speechLearningSessionEnabled: boolean | undefined;
+
 export function readSpeechLearningEnabled(storage?: SpeechLearningStorage | null): boolean {
+  if (speechLearningSessionEnabled !== undefined) return speechLearningSessionEnabled;
   try {
     return parseSpeechLearningEnabled(storage?.getItem(SPEECH_LEARNING_STORAGE_KEY) ?? null);
   } catch {
@@ -56,14 +59,19 @@ export function writeSpeechLearningEnabled(
   enabled: boolean,
   storage?: SpeechLearningStorage | null,
 ): void {
+  speechLearningSessionEnabled = enabled;
   try {
     storage?.setItem(SPEECH_LEARNING_STORAGE_KEY, serializeSpeechLearningEnabled(enabled));
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new Event(SPEECH_LEARNING_EVENT));
-    }
   } catch {
-    // Storage may be unavailable — session still honors the in-memory toggle.
+    // Storage may be unavailable — session override still wins.
   }
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event(SPEECH_LEARNING_EVENT));
+  }
+}
+
+export function clearSpeechLearningSession(): void {
+  speechLearningSessionEnabled = undefined;
 }
 
 export function subscribeSpeechLearning(onStoreChange: () => void): () => void {

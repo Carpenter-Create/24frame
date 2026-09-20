@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
@@ -5,6 +6,8 @@ import { describe, expect, it } from "vitest";
 import { HouseVoiceMic } from "./house-voice-mic";
 import { FORM_CONTROL_FOCUS_CLASS, HOUSE_VOICE_MIC_CLASS } from "@/lib/form-control";
 import { HOUSE_VOICE } from "@/lib/house-voice";
+
+const src = readFileSync("src/components/chrome/house-voice-mic.tsx", "utf8");
 
 describe("HouseVoiceMic graceful fallback", () => {
   it("hides the circular mic when SpeechRecognition is unsupported", () => {
@@ -53,5 +56,12 @@ describe("HouseVoiceMic graceful fallback", () => {
     );
     expect(html).toContain('data-house-voice-mic="dictate"');
     expect(html).toContain(HOUSE_VOICE.dictate);
+  });
+
+  it("does not restart a closed-over recognizer after error or a newer start", () => {
+    expect(src).toContain("recRef.current !== rec");
+    expect(src).toContain("recRef.current === rec");
+    expect(src).toContain("speechRecognitionErrorEndsSession");
+    expect(src).toContain("spokenRef");
   });
 });
