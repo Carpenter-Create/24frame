@@ -39,7 +39,7 @@ describe("aggregation revalidatePath SoT (P1-3)", () => {
         expect(src, `${file} still has ${stale}`).not.toContain(stale);
       }
     }
-    expect(ACTIVITY_HREF).toBe("/aggregation/activity");
+    expect(ACTIVITY_HREF).toBe("/activity");
     expect(CHANNELS_HREF).toBe("/aggregation/channels");
     expect(GC_DELIVERIES_HREF).toBe("/aggregation/gc/deliveries");
     expect(QUEUE_HREF).toBe("/aggregation/queue");

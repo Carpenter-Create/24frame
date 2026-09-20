@@ -13,6 +13,7 @@ import { REPORTS_HREF, REPORTS_PERIOD_ALL } from "@/lib/reports";
 import { CO_PRODUCTIONS_HREF, CO_PRODUCTIONS_LABEL, isCoProductionsPath } from "@/lib/co-productions";
 import { EDUCATION_HREF } from "@/lib/education";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
+import { isActivityPath } from "@/lib/activity";
 import { isSettingsPath } from "@/lib/settings";
 import { availableWorkspaceOptions, type WorkspaceMenuOption } from "@/lib/workspace-menu";
 import type { WorkspaceMode } from "@/lib/workspace";
@@ -218,10 +219,10 @@ export function overviewLeadSelected(
   pathname: string,
   workspace: WorkspaceMode,
 ): boolean {
-  // Settings is a universal hub — not Home, not Co-Productions, and
-  // not a workspace land. /settings/* must not light any lead pill.
-  // The workspace cookie stays; leaving Settings returns to that land.
-  if (isSettingsPath(pathname)) return false;
+  // Settings and Activity are chrome/account surfaces — not Home,
+  // not Co-Productions, and not a workspace land. Those paths must
+  // not light any lead pill. The workspace cookie stays.
+  if (isSettingsPath(pathname) || isActivityPath(pathname)) return false;
   if (isCoProductionsPath(pathname)) return pillId === "co-productions";
   if (pillId === "co-productions") return false;
   const onHome = isHomeOwnedPath(pathname);

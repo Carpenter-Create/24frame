@@ -9,7 +9,6 @@ import {
 import { PRODUCT_NAME } from "@/lib/product";
 import { SETTINGS } from "@/lib/settings";
 import { socialRelativeTime } from "@/lib/social";
-import { aggregationPath } from "@/lib/workspace";
 
 // Activity is the live uncleared-alert feed. One feed: notifications.
 // Default: uncleared only, newest first. X clears a row. Cleared
@@ -17,8 +16,12 @@ import { aggregationPath } from "@/lib/workspace";
 // chips are the only filter (prefs families). Not Messages. Not Ask
 // 24Frame AI. Not /attention catalog findings. Bell navigates here.
 // Copy lives here, not JSX.
+//
+// Adam lock 2026-09-19: chrome-level /activity. Account alerts
+// span Aggregation · Reporting · Social · Education · Account.
+// Not an Aggregation destination. Bell is the door.
 
-export const ACTIVITY_HREF = aggregationPath("activity");
+export const ACTIVITY_HREF = "/activity";
 export const ACTIVITY_PREFS_HREF = SETTINGS.notificationsHref;
 export const ACTIVITY_BELL_OPEN_CAP = 5;
 
@@ -79,6 +82,10 @@ export type ActivityItem = {
 
 export function isActivityOpen(item: Pick<ActivityItem, "unread">): boolean {
   return item.unread;
+}
+
+export function isActivityPath(pathname: string): boolean {
+  return pathname === ACTIVITY_HREF || pathname.startsWith(`${ACTIVITY_HREF}/`);
 }
 
 export function parseActivityFamily(raw: string | string[] | undefined): ActivityFamily {

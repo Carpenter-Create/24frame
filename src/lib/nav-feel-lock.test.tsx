@@ -24,7 +24,6 @@ const EDUCATION_LOADING = [
 
 const AGGREGATION_CHILD_LOADING = [
   "src/app/(app)/aggregation/titles/loading.tsx",
-  "src/app/(app)/aggregation/activity/loading.tsx",
   "src/app/(app)/aggregation/reports/loading.tsx",
   "src/app/(app)/aggregation/attention/loading.tsx",
 ] as const;
@@ -52,6 +51,11 @@ describe("nav feel — parent loading cannot paint the dashboard skeleton", () =
       const src = readFileSync(path, "utf8");
       expect(src).not.toContain("DashboardSkeleton");
     }
+    expect(existsSync("src/app/(app)/activity/loading.tsx")).toBe(true);
+    expect(readFileSync("src/app/(app)/activity/loading.tsx", "utf8")).not.toContain(
+      "DashboardSkeleton",
+    );
+    expect(existsSync("src/app/(app)/aggregation/activity/loading.tsx")).toBe(false);
     expect(existsSync("src/app/(app)/aggregation/dashboard/loading.tsx")).toBe(true);
     expect(readFileSync("src/app/(app)/aggregation/dashboard/loading.tsx", "utf8")).toContain(
       "DashboardSkeleton",

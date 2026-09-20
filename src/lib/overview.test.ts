@@ -99,6 +99,20 @@ describe("Home lead pills", () => {
     ).toBe(false);
   });
 
+  it("leaves every unify-lead pill idle on Activity — cookie workspace is not selected", () => {
+    const pills = overviewLeadPills();
+    for (const workspace of ["aggregation", "social", "education"] as const) {
+      expect(overviewLeadSelected("home", "/activity", workspace)).toBe(false);
+      expect(overviewLeadSelected("aggregation", "/activity", workspace)).toBe(false);
+      expect(overviewLeadSelected("social", "/activity", workspace)).toBe(false);
+      expect(overviewLeadSelected("education", "/activity", workspace)).toBe(false);
+      expect(overviewLeadSelected("co-productions", "/activity", workspace)).toBe(false);
+      expect(overviewLeadActiveIndex("/activity", workspace, pills)).toBe(-1);
+    }
+    expect(overviewLeadShouldNavigate("/activity", "aggregation", { id: "aggregation" })).toBe(true);
+    expect(overviewLeadShouldNavigate("/activity", "social", { id: "home" })).toBe(true);
+  });
+
   it("leaves every unify-lead pill idle on Settings — cookie workspace is not selected", () => {
     const paths = [
       "/settings",

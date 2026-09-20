@@ -1,9 +1,10 @@
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
 import { PRODUCT_NAME } from "@/lib/product";
 import { TITLES_HREF } from "@/lib/title-public-id";
-import { aggregationPath } from "@/lib/workspace";
 
-const ACTIVITY_PATH = aggregationPath("activity");
+// Must stay equal to ACTIVITY_HREF. activity.ts imports this module,
+// so this file cannot import that SoT. notifications.test locks them.
+const ACTIVITY_PATH = "/activity";
 
 // Notification copy + labels (§20 GC-Support in-app push). Copy in lib/, not JSX.
 

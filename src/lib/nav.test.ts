@@ -5,7 +5,6 @@ import {
   FilmSlate,
   PaperPlaneTilt,
   Pulse,
-  Bell,
   SquaresFour,
   ChartBar,
   Storefront,
@@ -41,9 +40,10 @@ describe("client NAV", () => {
       "/aggregation/dashboard",
       "/aggregation/titles",
       "/aggregation/attention",
-      "/aggregation/activity",
       "/aggregation/reports",
     ]);
+    expect(hrefs).not.toContain("/activity");
+    expect(hrefs).not.toContain("/aggregation/activity");
     expect(hrefs).not.toContain("?ai=1");
     expect(hrefs).not.toContain("/deliveries");
     expect(hrefs).not.toContain("/catalog-health");
@@ -71,7 +71,9 @@ describe("client NAV", () => {
     expect(clientNavCurrent("/aggregation/titles").label).toBe("Titles");
     expect(clientNavCurrent("/aggregation/titles/abc").label).toBe("Titles");
     expect(clientNavCurrent("/aggregation/attention").label).toBe("Recent activity");
-    expect(clientNavCurrent("/aggregation/activity").label).toBe("Activity");
+    expect(clientNavCurrent("/activity").label).toBe("Dashboard");
+    expect(clientNavCurrent("/aggregation/activity").label).toBe("Dashboard");
+    expect(NAV.map((item) => item.label)).not.toContain("Activity");
     expect(clientNavCurrent("/aggregation/reports").label).toBe("Reports");
     expect(clientNavCurrent("/aggregation/reports/abc").label).toBe("Reports");
     expect(clientNavCurrent("/titles").label).toBe("Dashboard");
@@ -106,7 +108,6 @@ describe("client NAV", () => {
       SquaresFour,
       FilmSlate,
       Pulse,
-      Bell,
       ChartBar,
     ]);
     expect(GC_NAV.map((item) => item.icon)).toEqual([
@@ -156,7 +157,6 @@ describe("GC_NAV", () => {
       "Dashboard",
       "Titles",
       "Recent activity",
-      "Activity",
       "Reports",
       "Queue",
       "Avails",
@@ -184,9 +184,9 @@ describe("mobileNavDestinations", () => {
       "Dashboard",
       "Titles",
       "Recent activity",
-      "Activity",
       "Reports",
     ]);
+    expect(mobileNavDestinations(false).map((item) => item.label)).not.toContain("Activity");
     expect(mobileNavDestinations(false).map((item) => item.label)).not.toContain("Ask 24Frame AI");
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/queue");
     expect(mobileNavDestinations(false).map((item) => item.href)).not.toContain("/avails");
@@ -202,7 +202,6 @@ describe("mobileNavDestinations", () => {
       "Dashboard",
       "Titles",
       "Recent activity",
-      "Activity",
       "Reports",
       "Queue",
       "Avails",
@@ -211,6 +210,7 @@ describe("mobileNavDestinations", () => {
       "Finance",
       "Clients",
     ]);
+    expect(mobileNavDestinations(true).map((item) => item.label)).not.toContain("Activity");
     expect(mobileNavDestinations(true).map((item) => item.label)).not.toContain("Ask 24Frame AI");
   });
 

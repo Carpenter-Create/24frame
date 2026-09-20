@@ -20,17 +20,18 @@ describe("aggregation ops spine rematch", () => {
       "Dashboard",
       "Titles",
       "Recent activity",
-      "Activity",
       "Reports",
     ]);
+    expect(NAV.map((item) => item.label)).not.toContain("Activity");
     expect(NAV.map((item) => item.label)).not.toContain("Ask 24Frame AI");
     expect(NAV.map((item) => item.href)).toEqual([
       "/aggregation/dashboard",
       "/aggregation/titles",
       "/aggregation/attention",
-      "/aggregation/activity",
       "/aggregation/reports",
     ]);
+    expect(NAV.map((item) => item.href)).not.toContain("/activity");
+    expect(NAV.map((item) => item.href)).not.toContain("/aggregation/activity");
     expect(NAV.map((item) => item.href)).not.toContain("?ai=1");
     expect(NAV.map((item) => item.href)).not.toContain("/deliveries");
     expect(NAV.map((item) => item.href)).not.toContain("/catalog-health");

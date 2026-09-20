@@ -25,6 +25,9 @@
 // Adam lock 2026-09-19: Co-Productions is /co-productions — Home-pattern
 // lead land, not a workspace cookie mode. Do not add it to WorkspaceMode
 // or WORKSPACE_MODES.
+//
+// Adam lock 2026-09-19: Activity is chrome-level /activity. Cookie
+// wins (same as /settings and /help). Do not treat it as Aggregation.
 
 export const WORKSPACE_COOKIE = "24frame_workspace";
 

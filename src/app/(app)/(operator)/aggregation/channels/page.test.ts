@@ -230,7 +230,6 @@ describe("staff rail and neighboring locks", () => {
       "Dashboard",
       "Titles",
       "Recent activity",
-      "Activity",
       "Reports",
       "Queue",
       "Avails",

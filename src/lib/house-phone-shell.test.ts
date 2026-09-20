@@ -570,14 +570,12 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
       "Dashboard",
       "Titles",
       "Recent activity",
-      "Activity",
       "Reports",
     ]);
     expect(housePhoneDestinations(true, "aggregation").map((item) => item.label)).toEqual([
       "Dashboard",
       "Titles",
       "Recent activity",
-      "Activity",
       "Reports",
       "Queue",
       "Avails",
@@ -586,6 +584,9 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
       "Finance",
       "Clients",
     ]);
+    expect(housePhoneDestinations(false, "aggregation").map((item) => item.label)).not.toContain(
+      "Activity",
+    );
     expect(housePhoneDestinations(false, "aggregation").map((item) => item.label)).not.toContain(
       ASK_GLOBEE.headline,
     );

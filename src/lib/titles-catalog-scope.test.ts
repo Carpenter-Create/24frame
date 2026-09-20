@@ -15,7 +15,7 @@ function src(rel: string): string {
 const OTHER_PAGES = [
   "src/app/(app)/aggregation/dashboard/page.tsx",
   "src/app/(app)/aggregation/attention/page.tsx",
-  "src/app/(app)/aggregation/activity/page.tsx",
+  "src/app/(app)/activity/page.tsx",
   "src/app/(app)/(operator)/aggregation/gc/titles/[id]/page.tsx",
   "src/app/(app)/aggregation/titles/[id]/page.tsx",
   "src/components/dashboard/dashboard-home.tsx",
@@ -133,7 +133,9 @@ describe("titles catalog scope", () => {
     expect(NAV.filter((item) => item.href === "/aggregation/titles")).toHaveLength(1);
     expect(NAV.some((item) => /draft/i.test(item.label))).toBe(false);
     expect(NAV.find((item) => item.href === "/aggregation/attention")?.label).toBe("Recent activity");
-    expect(NAV.find((item) => item.href === "/aggregation/activity")?.label).toBe("Activity");
+    expect(NAV.find((item) => item.href === "/activity")).toBeUndefined();
+    expect(NAV.find((item) => item.href === "/aggregation/activity")).toBeUndefined();
+    expect(NAV.some((item) => item.label === "Activity")).toBe(false);
     expect(NAV.find((item) => item.href === "/deliveries")).toBeUndefined();
     expect(GC_NAV.some((item) => item.href === "/aggregation/titles")).toBe(false);
   });
