@@ -14,7 +14,8 @@ describe("Social Go live recorder", () => {
     expect(src).toContain("data-social-go-live");
     expect(src).toContain("data-social-go-live-timer");
     expect(src).toContain("MediaRecorder");
-    expect(src).toContain("createSocialPost");
+    expect(src).toContain("persistSocialPost");
+    expect(src).toContain("runSocialOptimisticMutation");
     expect(src).toContain("presignSocialMediaUpload");
     expect(src).toContain('lane", "posts"');
     expect(src).toContain("goLiveReachedCap");
@@ -25,7 +26,8 @@ describe("Social Go live recorder", () => {
     expect(src).toContain("ensurePreview");
     expect((src.match(/liveRef\.current = nextStoryStudioLive/g) ?? []).length).toBe(1);
     expect(src).toContain("releaseCamera");
-    expect(src).not.toMatch(/createSocialPost\(form\);[\s\S]{0,120}catch/);
+    expect(src).not.toContain("await createSocialPost");
+    expect(src).not.toMatch(/persistSocialPost\(started.form\);[\s\S]{0,120}catch/);
     expect(src).toContain("SOCIAL_GO_LIVE_MAX_MS");
     expect(src).toContain("HouseVoiceMic");
     expect(src).toContain('surface="dictate"');

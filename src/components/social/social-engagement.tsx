@@ -4,9 +4,18 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { toggleSocialFollow, toggleSocialLike } from "@/app/(app)/social/light-actions";
+import { toggleSocialFollow } from "@/app/(app)/social/light-actions";
 import { readSocialFollowState } from "@/app/(app)/social/query-actions";
 import { useAppQueryClient } from "@/components/query-provider";
+import { useSocialLike } from "@/components/social/use-social-optimistic";
+import {
+  applyOptimisticLike,
+  beginSocialLikeEpoch,
+  nextSocialLikeState,
+  persistSocialLike,
+  runSocialOptimisticMutation,
+  socialLikeEpochIsCurrent,
+} from "@/lib/social-optimistic";
 import { SOCIAL_QUERY_STALE_MS, socialFollowQueryKey } from "@/lib/social-cache-keys";
 import { applyOptimisticFollow } from "@/lib/social-query";
 import {
@@ -229,31 +238,74 @@ export function SocialLikeButton({
   disabled?: boolean;
   icon?: boolean;
 }) {
+  const view = useSocialLike(postId, { liked, likeCount });
+  const [error, setError] = useState("");
+
+  function onToggle() {
+    if (disabled) return;
+    const previous = view;
+    const next = nextSocialLikeState(previous);
+    const epoch = beginSocialLikeEpoch(postId);
+    runSocialOptimisticMutation({
+      apply: () => {
+        applyOptimisticLike(postId, next);
+        setError("");
+        return previous;
+      },
+      persist: () => {
+        const form = new FormData();
+        form.set("post_id", postId);
+        form.set("liked", previous.liked ? "1" : "0");
+        if (groupSlug) form.set("group_slug", groupSlug);
+        return persistSocialLike(form);
+      },
+      rollback: (token) => {
+        if (!socialLikeEpochIsCurrent(postId, epoch)) return;
+        applyOptimisticLike(postId, token);
+      },
+      onError: (notice) => {
+        if (!socialLikeEpochIsCurrent(postId, epoch)) return;
+        setError(notice);
+      },
+    });
+  }
+
   return (
-    <form
-      action={async (formData) => {
-        await toggleSocialLike(formData);
-      }}
-      className="inline"
-    >
-      <input type="hidden" name="post_id" value={postId} />
-      <input type="hidden" name="liked" value={liked ? "1" : "0"} />
-      {groupSlug ? <input type="hidden" name="group_slug" value={groupSlug} /> : null}
+    <span className="inline">
       <button
-        type="submit"
+        type="button"
         disabled={disabled}
         data-social-like=""
-        aria-label={liked ? SOCIAL.post.unlike : SOCIAL.post.like}
+        aria-label={view.liked ? SOCIAL.post.unlike : SOCIAL.post.like}
         className={icon ? "text-ink" : "t-body-sm text-ink-2"}
+        onClick={onToggle}
       >
         {icon ? (
-          <SocialIcon name="heart" active={liked} size={22} />
+          <SocialIcon name="heart" active={view.liked} size={22} />
         ) : (
           <>
-            {likeCount} {SOCIAL.post.likes}
+            {view.likeCount} {SOCIAL.post.likes}
           </>
         )}
       </button>
-    </form>
+      {error ? <FormError error={error} /> : null}
+    </span>
+  );
+}
+
+export function SocialLikeCount({
+  postId,
+  liked,
+  likeCount,
+}: {
+  postId: string;
+  liked: boolean;
+  likeCount: number;
+}) {
+  const view = useSocialLike(postId, { liked, likeCount });
+  return (
+    <p className="t-body-sm font-semibold text-ink">
+      {view.likeCount} {SOCIAL.post.likes}
+    </p>
   );
 }

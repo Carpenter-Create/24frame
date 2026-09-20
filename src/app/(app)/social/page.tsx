@@ -12,7 +12,7 @@ import {
   SocialHomeCenterSkeleton,
 } from "@/components/social/social-skeletons";
 import { SocialStoriesRail } from "@/components/social/social-stories-rail";
-import { SocialPostCard } from "@/components/social/social-ui";
+import { SocialOptimisticFeed } from "@/components/social/social-optimistic-feed";
 import { SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS, SOCIAL_PILL_ACTIVE_CLASS, SOCIAL_PILL_CLASS } from "@/lib/social-chrome";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
@@ -263,54 +263,48 @@ function SocialHomeFollowingWall({
           ) : null}
         </div>
       ) : null}
-      {posts.length === 0 ? (
-        <div data-social-following-empty="" className="flex flex-col gap-3">
-          <div data-social-empty-lenses="" className="hidden md:block">
-            <span className={`${SOCIAL_PILL_CLASS} ${SOCIAL_PILL_ACTIVE_CLASS}`}>{SOCIAL_CATEGORY_ALL}</span>
-          </div>
-          <div className="md:hidden">
-            <SocialEmpty
-              icon="users"
-              title={SOCIAL.home.empty}
-              hint={SOCIAL.home.emptyHint}
-              action={{ href: SOCIAL_ROUTES.explore, label: SOCIAL.home.goExplore }}
-            />
-          </div>
-          <div className="hidden md:block">
-            <SocialEmpty icon="image" title={SOCIAL.home.emptyQuiet} />
-          </div>
-        </div>
-      ) : (
-        <div data-social-feed="" className="flex flex-col gap-2">
-          {posts.map((post) => {
-            const author = authors.get(post.author_id);
-            const group = post.group_id ? groups.get(post.group_id) : null;
-            return (
-              <SocialPostCard
-                key={post.id}
-                post={{
-                  id: post.id,
-                  body: post.body,
-                  likeCount: post.like_count,
-                  liked: liked.has(post.id),
-                  createdAt: post.created_at,
-                  authorId: post.author_id,
-                  authorHandle: author?.handle ?? null,
-                  authorName: socialPersonLabel({
-                    handle: author?.handle ?? "",
-                    displayName: author?.display_name,
-                  }),
-                  authorPhotoUrl: faces.get(post.author_id) ?? null,
-                  groupSlug: group?.slug ?? null,
-                  groupName: group?.name ?? null,
-                  canLike: !!profile,
-                  media: media.get(post.id) ?? [],
-                }}
+      <SocialOptimisticFeed
+        posts={posts.map((post) => {
+          const author = authors.get(post.author_id);
+          const group = post.group_id ? groups.get(post.group_id) : null;
+          return {
+            id: post.id,
+            body: post.body,
+            likeCount: post.like_count,
+            liked: liked.has(post.id),
+            createdAt: post.created_at,
+            authorId: post.author_id,
+            authorHandle: author?.handle ?? null,
+            authorName: socialPersonLabel({
+              handle: author?.handle ?? "",
+              displayName: author?.display_name,
+            }),
+            authorPhotoUrl: faces.get(post.author_id) ?? null,
+            groupSlug: group?.slug ?? null,
+            groupName: group?.name ?? null,
+            canLike: !!profile,
+            media: media.get(post.id) ?? [],
+          };
+        })}
+        empty={
+          <div data-social-following-empty="" className="flex flex-col gap-3">
+            <div data-social-empty-lenses="" className="hidden md:block">
+              <span className={`${SOCIAL_PILL_CLASS} ${SOCIAL_PILL_ACTIVE_CLASS}`}>{SOCIAL_CATEGORY_ALL}</span>
+            </div>
+            <div className="md:hidden">
+              <SocialEmpty
+                icon="users"
+                title={SOCIAL.home.empty}
+                hint={SOCIAL.home.emptyHint}
+                action={{ href: SOCIAL_ROUTES.explore, label: SOCIAL.home.goExplore }}
               />
-            );
-          })}
-        </div>
-      )}
+            </div>
+            <div className="hidden md:block">
+              <SocialEmpty icon="image" title={SOCIAL.home.emptyQuiet} />
+            </div>
+          </div>
+        }
+      />
     </>
   );
 }

@@ -1,7 +1,7 @@
 import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { SocialJoinGroupButton, SocialPostCompose } from "@/components/social/social-forms";
-import { SocialPostCard } from "@/components/social/social-ui";
+import { SocialOptimisticFeed } from "@/components/social/social-optimistic-feed";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
 import { SOCIAL, SOCIAL_ROUTES, socialPersonLabel } from "@/lib/social";
@@ -75,36 +75,31 @@ export default async function SocialGroupPage({
       ) : profile ? (
         <HouseEmpty>{SOCIAL.group.membersOnly}</HouseEmpty>
       ) : null}
-      {posts.length === 0 ? (
-        <HouseEmpty>{SOCIAL.group.empty}</HouseEmpty>
-      ) : (
-        posts.map((post) => {
+      <SocialOptimisticFeed
+        groupSlug={group.slug}
+        posts={posts.map((post) => {
           const author = authors.get(post.author_id);
-          return (
-            <SocialPostCard
-              key={post.id}
-              post={{
-                id: post.id,
-                body: post.body,
-                likeCount: post.like_count,
-                liked: liked.has(post.id),
-                createdAt: post.created_at,
-                authorId: post.author_id,
-                authorHandle: author?.handle ?? null,
-                authorName: socialPersonLabel({
-                  handle: author?.handle ?? "",
-                  displayName: author?.display_name,
-                }),
-                authorPhotoUrl: faces.get(post.author_id) ?? null,
-                groupSlug: group.slug,
-                groupName: group.name,
-                canLike: !!profile,
-                media: media.get(post.id) ?? [],
-              }}
-            />
-          );
-        })
-      )}
+          return {
+            id: post.id,
+            body: post.body,
+            likeCount: post.like_count,
+            liked: liked.has(post.id),
+            createdAt: post.created_at,
+            authorId: post.author_id,
+            authorHandle: author?.handle ?? null,
+            authorName: socialPersonLabel({
+              handle: author?.handle ?? "",
+              displayName: author?.display_name,
+            }),
+            authorPhotoUrl: faces.get(post.author_id) ?? null,
+            groupSlug: group.slug,
+            groupName: group.name,
+            canLike: !!profile,
+            media: media.get(post.id) ?? [],
+          };
+        })}
+        empty={<HouseEmpty>{SOCIAL.group.empty}</HouseEmpty>}
+      />
     </div>
   );
 }
