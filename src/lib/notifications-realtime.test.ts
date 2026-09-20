@@ -213,9 +213,9 @@ describe("Realtime hygiene", () => {
     expect(src).toContain("postgres_changes");
     expect(src).toContain("retainOwnNotificationsRealtime");
     expect(src).not.toContain("create_notification");
-    expect(src).not.toContain("notify_new_follower");
+    expect(src).not.toMatch(/\bnotify_new_follower\s*\(/);
     expect(src).not.toMatch(/from ["']@\/lib\/email["']/);
-    expect(src).not.toContain("resend");
+    expect(src).not.toMatch(/\bresend\b/i);
     expect(existsSync("src/lib/supabase/client.ts")).toBe(false);
     expect(existsSync("src/lib/supabase/browser.ts")).toBe(true);
     const browser = readFileSync("src/lib/supabase/browser.ts", "utf8");

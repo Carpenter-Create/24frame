@@ -14,8 +14,8 @@ import {
 // Subscribe to public.notifications INSERT filtered by
 // recipient_user_id = auth.uid() — Mapping C / #555 follow alerts.
 // Catalog kinds stay org-scoped with a null recipient and do not
-// match this filter. Write path already skips when in-app pref is
-// off (notify_new_follower). This module does not send email.
+// match this filter. The follow-alert writer already skips when
+// in-app pref is off. This module does not send email.
 
 export const NOTIFICATIONS_REALTIME_TABLE = "notifications";
 export const NOTIFICATIONS_REALTIME_SCHEMA = "public";

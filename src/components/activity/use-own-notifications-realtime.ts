@@ -26,7 +26,7 @@ export function useOwnNotificationsRealtime(): ActivityItem[] {
       const userId = data.session?.user.id;
       if (!userId) return;
       release = retainOwnNotificationsRealtime(
-        client as NotificationsRealtimeClient,
+        client as unknown as NotificationsRealtimeClient,
         userId,
         (items) => {
           setLive([...items]);
