@@ -6,6 +6,7 @@
 // with the remaining duration.
 //
 // visualIndex is the SoT for BOTH the thumb and selected ink.
+// Ink snaps (ITEM_ON has no color transition). Only the thumb eases 320ms.
 // Click intent advances it immediately. Route hops that remount
 // the track (Home `?period=` Suspense, workspace Social fork)
 // would otherwise reset ink to the stale route while the thumb

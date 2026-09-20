@@ -229,8 +229,9 @@ describe("workspace switcher lock", () => {
     expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("px-[var(--space-4)]");
     expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("py-[var(--space-2)]");
     expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("t-body-sm");
-    expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("transition-colors");
-    expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("motion-reduce:transition-none");
+    expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).not.toContain("transition-colors");
+    expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).not.toMatch(/transition/);
+    expect(WORKSPACE_SWITCHER_SEGMENT_ON_CLASS).not.toMatch(/transition/);
     expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toBe(DASHBOARD_TOP_PILL_BUTTON_CLASS);
     expect(WORKSPACE_SWITCHER_SEGMENT_ON_CLASS).toBe(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS);
     expect(WORKSPACE_SWITCHER_SEGMENT_OFF_CLASS).toBe(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS);

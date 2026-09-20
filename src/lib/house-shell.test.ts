@@ -16,6 +16,7 @@ import {
   DASHBOARD_PERIOD_OPTION_SELECTED_CLASS,
   DASHBOARD_RELATED_GAP_CLASS,
   DASHBOARD_SECTION_AIR_CLASS,
+  DASHBOARD_TOP_PILL_BUTTON_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_ON_CLASS,
 } from "@/lib/dashboard-craft";
@@ -36,6 +37,7 @@ import {
   HOUSE_HEADER_SEARCH_GAP_CLASS,
   HOUSE_SEARCH_PILL_CLASS,
   HOUSE_SECTION_AIR_CLASS,
+  HOUSE_SEGMENTED_ITEM_BASE_CLASS,
   HOUSE_SEGMENTED_ITEM_OFF_CLASS,
   HOUSE_SEGMENTED_ITEM_ON_CLASS,
   HOUSE_SEGMENTED_THUMB_CLASS,
@@ -200,8 +202,16 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(DASHBOARD_SECTION_AIR_CLASS).toBe(HOUSE_SECTION_AIR_CLASS);
     expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).toBe(HOUSE_SEGMENTED_ITEM_ON_CLASS);
     expect(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS).toBe(HOUSE_SEGMENTED_ITEM_OFF_CLASS);
+    expect(DASHBOARD_TOP_PILL_BUTTON_CLASS).toBe(HOUSE_SEGMENTED_ITEM_BASE_CLASS);
     expect(HOUSE_SEGMENTED_ITEM_ON_CLASS).toBe("text-white");
     expect(HOUSE_SEGMENTED_ITEM_OFF_CLASS).toBe("text-ink-2");
+    // Selected ink snaps with visualIndex. Color-easing BASE with the
+    // thumb duration paints ink-2 on accent for the whole 320ms glide.
+    expect(HOUSE_SEGMENTED_ITEM_BASE_CLASS).not.toMatch(/transition/);
+    expect(HOUSE_SEGMENTED_ITEM_ON_CLASS).not.toMatch(/transition/);
+    expect(`${HOUSE_SEGMENTED_ITEM_BASE_CLASS} ${HOUSE_SEGMENTED_ITEM_ON_CLASS}`).not.toContain(
+      "transition-colors",
+    );
     expect(houseSegmentedThumbHidden(-1)).toBe(true);
     expect(houseSegmentedThumbHidden(0)).toBe(false);
     expect(readFileSync("src/lib/house-shell.ts", "utf8")).toMatch(

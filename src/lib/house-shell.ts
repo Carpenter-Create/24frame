@@ -100,7 +100,9 @@ export const HOUSE_PERIOD_SELECTED_CLASS = "bg-surface-muted";
 // reaches the full pill radius when the first or last segment is selected.
 // Slide is left/width, not opacity: 320ms ease into rest. Remount
 // persistence lives in SegmentedTrack. Selected ink (ITEM_ON / ITEM_OFF)
-// follows the same visualIndex as the thumb. Do not fork a second
+// follows the same visualIndex as the thumb and snaps — never
+// transition-colors. Color-easing ON from ink-2 → white paints dark
+// type on the accent thumb for the whole glide. Do not fork a second
 // workspace chrome or a host-local pending selection.
 export const HOUSE_SEGMENTED_THUMB_DURATION_MS = 320;
 
@@ -113,11 +115,12 @@ export const HOUSE_SEGMENTED_THUMB_CLASS =
   "pointer-events-none absolute inset-y-0 rounded-full bg-accent transition-[left,width] duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none";
 
 export const HOUSE_SEGMENTED_ITEM_BASE_CLASS =
-  "relative z-10 shrink-0 cursor-pointer select-none whitespace-nowrap rounded-full px-[var(--space-4)] py-[var(--space-2)] t-body-sm transition-colors duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none";
+  "relative z-10 shrink-0 cursor-pointer select-none whitespace-nowrap rounded-full px-[var(--space-4)] py-[var(--space-2)] t-body-sm";
 
 export const HOUSE_SEGMENTED_ITEM_ON_CLASS = "text-white";
 
-// Idle = muted secondary; active = white on accent thumb.
+// Idle = muted secondary; active = white on accent thumb. Snap both
+// ways — leaving may snap; never reintroduce dark-on-blue on ON.
 export const HOUSE_SEGMENTED_ITEM_OFF_CLASS = "text-ink-2";
 
 /** Hide the accent thumb when no segment is selected (activeIndex < 0). */
