@@ -70,6 +70,7 @@ const likeListeners = new Set<() => void>();
 let posts: SocialOptimisticPost[] = [];
 const postListeners = new Set<() => void>();
 const likePersistTail = new Map<string, Promise<unknown>>();
+const likePersisted = new Map<string, SocialOptimisticLike>();
 let postPublishBusy = false;
 
 function emitLikes() {
@@ -114,15 +115,28 @@ export function persistSocialLike(form: FormData): Promise<{ error?: string }> {
   return persistSocialMutation(SOCIAL_OPTIMISTIC_LOCK.likeHref, form);
 }
 
+export function rememberSocialLikeBaseline(postId: string, baseline: SocialOptimisticLike): void {
+  if (!likePersisted.has(postId)) likePersisted.set(postId, { ...baseline });
+}
+
 export function persistSocialLikeLatest(
   postId: string,
   epoch: number,
-  form: FormData,
+  desired: SocialOptimisticLike,
+  extras: { groupSlug?: string } = {},
 ): Promise<{ error?: string }> {
   const prev = likePersistTail.get(postId) ?? Promise.resolve();
   const next = prev.then(async () => {
     if (!socialLikeEpochIsCurrent(postId, epoch)) return {};
-    return persistSocialLike(form);
+    const from = likePersisted.get(postId);
+    if (!from || from.liked === desired.liked) return {};
+    const form = new FormData();
+    form.set("post_id", postId);
+    form.set("liked", from.liked ? "1" : "0");
+    if (extras.groupSlug) form.set("group_slug", extras.groupSlug);
+    const result = await persistSocialLike(form);
+    if (!result.error) likePersisted.set(postId, { ...desired });
+    return result;
   });
   likePersistTail.set(postId, next.catch(() => undefined));
   return next;
@@ -196,6 +210,7 @@ export function socialLikeEpochIsCurrent(postId: string, epoch: number): boolean
 
 export function clearOptimisticLike(postId: string): void {
   likeEpoch.delete(postId);
+  likePersisted.delete(postId);
   if (!likes.delete(postId)) return;
   emitLikes();
 }
@@ -345,6 +360,7 @@ export function resetSocialOptimisticForTests(): void {
   likes.clear();
   likeEpoch.clear();
   likePersistTail.clear();
+  likePersisted.clear();
   posts = [];
   postPublishBusy = false;
   emitLikes();

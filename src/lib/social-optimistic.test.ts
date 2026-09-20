@@ -11,6 +11,7 @@ import {
   beginSocialPostPublishBusy,
   endSocialPostPublishBusy,
   persistSocialLikeLatest,
+  rememberSocialLikeBaseline,
   socialPostPublishBusy,
   clearOptimisticLike,
   failOptimisticSocialPost,
@@ -107,12 +108,18 @@ describe("Social optimistic mutation SoT", () => {
     expect(socialLikeEpochIsCurrent("p1", second)).toBe(true);
     const fetchMock = vi.fn(async () => new Response(JSON.stringify({}), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
-    const form = new FormData();
-    form.set("post_id", "p1");
-    expect(await persistSocialLikeLatest("p1", first, form)).toEqual({});
+    const liked = { liked: true, likeCount: 1 };
+    const unliked = { liked: false, likeCount: 0 };
+    rememberSocialLikeBaseline("p1", liked);
+    expect(await persistSocialLikeLatest("p1", first, unliked)).toEqual({});
     expect(fetchMock).not.toHaveBeenCalled();
-    expect(await persistSocialLikeLatest("p1", second, form)).toEqual({});
+    expect(await persistSocialLikeLatest("p1", second, liked)).toEqual({});
+    expect(fetchMock).not.toHaveBeenCalled();
+    const unlikeEpoch = beginSocialLikeEpoch("p1");
+    expect(await persistSocialLikeLatest("p1", unlikeEpoch, unliked)).toEqual({});
     expect(fetchMock).toHaveBeenCalledTimes(1);
+    const request = fetchMock.mock.calls[0] as unknown as [string, { body: FormData }];
+    expect(request[1].body.get("liked")).toBe("1");
     expect(beginSocialPostPublishBusy()).toBe(true);
     expect(socialPostPublishBusy()).toBe(true);
     expect(beginSocialPostPublishBusy()).toBe(false);
@@ -214,7 +221,10 @@ describe("Social optimistic mutation SoT", () => {
     expect(forms).toContain("persistSocialPost");
     expect(likeChunk).toContain("runSocialOptimisticMutation");
     expect(likeChunk).toContain("persistSocialLikeLatest");
+    expect(likeChunk).toContain("rememberSocialLikeBaseline");
+    expect(sot).toContain("from.liked === desired.liked");
     expect(likeChunk).not.toContain("await toggleSocialLike");
+    expect(forms).toContain("onRestore");
     expect(likeChunk).not.toContain("router.refresh()");
     expect(createChunk).toContain("publishOptimisticPost");
     expect(createChunk).toContain("router.push(SOCIAL_ROUTES.home)");
