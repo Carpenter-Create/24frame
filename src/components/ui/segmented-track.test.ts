@@ -21,6 +21,7 @@ const CONSUMERS = [
   "src/components/reports/reports-ranked.tsx",
   "src/components/reports/reports-controls.tsx",
   "src/components/news/news-sources-filter.tsx",
+  "src/components/social/social-forms.tsx",
 ] as const;
 
 describe("SegmentedTrack slide SoT", () => {
@@ -82,6 +83,19 @@ describe("SegmentedTrack slide SoT", () => {
     expect(inbox).toContain("ActivityFamilyChips");
     expect(inbox).not.toContain("SegmentedTrack");
     expect(inbox).not.toContain("pendingFamily");
+  });
+
+  it("keeps exclusive choice menus off gapped HOUSE_FILTER_PILL_CLUSTER", () => {
+    const house = readFileSync("src/lib/house-shell.ts", "utf8");
+    expect(house).toContain("Gapped HOUSE_FILTER_PILL_* is not for choice menus");
+    expect(house).toContain("Exclusive choice menus are SegmentedTrack");
+    expect(house).toContain("HOUSE_FILTER_PILL_CLUSTER_CLASS");
+
+    for (const path of CONSUMERS) {
+      const body = readFileSync(path, "utf8");
+      expect(body, path).not.toContain("HOUSE_FILTER_PILL_CLUSTER_CLASS");
+      expect(body, path).toContain("SegmentedTrack");
+    }
   });
 
   it("stamps data-segmented-selected on the visual item before the route commits", () => {

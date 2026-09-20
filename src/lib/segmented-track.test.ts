@@ -168,6 +168,7 @@ describe("segmented track optimistic selection", () => {
     expect(SEGMENTED_TRACK_PERSIST.period).toBe("house-period-presets");
     expect(SEGMENTED_TRACK_PERSIST.phoneDest).toBe("phone-dest");
     expect(SEGMENTED_TRACK_PERSIST.newsSource).toBe("news-source");
+    expect(SEGMENTED_TRACK_PERSIST.socialCreateKind).toBe("social-create-kind");
   });
 
   it("keeps pending visual index across remount until the route catches up", () => {

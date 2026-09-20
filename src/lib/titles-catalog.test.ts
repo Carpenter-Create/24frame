@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { HOUSE_FILTER_ON_CLASS, HOUSE_FILTER_PILL_CLASS } from "@/lib/house-shell";
@@ -155,6 +156,13 @@ describe("catalog status filter", () => {
     expect(catalogStatusFilterLabel("all")).toBe("All");
     expect(catalogStatusFilterLabel("in_review")).toBe("In review");
     expect(catalogStatusFilterLabel("takedown_requested")).toBe("Takedown requested");
+    const catalog = readFileSync("src/lib/titles-catalog.ts", "utf8");
+    const filter = readFileSync("src/components/titles/titles-status-filter.tsx", "utf8");
+    expect(catalog).toContain("Exclusive choice menus use SegmentedTrack");
+    expect(filter).toContain("HousePageSelect");
+    expect(filter).not.toContain("titlesFilterPillClass");
+    expect(filter).not.toContain("TITLES_FILTER_DESKTOP_CLUSTER_CLASS");
+    expect(filter).not.toContain("HOUSE_FILTER_PILL_CLUSTER");
   });
 
   it("uses product-true labels and does not invent Upcoming or In progress", () => {
