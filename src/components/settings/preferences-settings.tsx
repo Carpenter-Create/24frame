@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import {
   AppearancePreferences,
   AppearanceThemeRow,
@@ -14,16 +12,14 @@ import {
   SETTINGS_CONTENT_MEASURE_CLASS,
   SETTINGS_DRILL_LIST_CLASS,
   SETTINGS_PANE_CLASS,
-  SETTINGS_QUIET_ROW_CLASS,
   SETTINGS_SECTION_CLASS,
-  settingsManageCoursesVisible,
   settingsPaneTitle,
 } from "@/lib/settings";
 
 // Preferences pane — Appearance (gc-theme SoT) + notification
 // matrix. Never a You / Social / Education / Aggregation spine.
-// Education staff get a quiet Manage courses row linking out to
-// /education. Members never see it. Not a CMS. Not GC Staff admin.
+// Manage courses is Education workspace (/education/manage), not
+// a Preferences row. Not a CMS. Not GC Staff admin.
 //
 // Mobile: Coinbase drill-in. Theme and Notifications are one-row
 // summaries. Instant switches stay on the Notifications pane.
@@ -32,14 +28,10 @@ import {
 // full-bleed rows.
 
 export function PreferencesSettings({
-  isGcStaff = false,
   prefs,
 }: {
-  isGcStaff?: boolean;
   prefs: NotificationPrefs;
 }) {
-  const showManage = settingsManageCoursesVisible(isGcStaff);
-
   return (
     <div data-settings-page="" data-settings-hub="preferences" className={SETTINGS_PANE_CLASS}>
       <section data-settings-section="preferences" className={SETTINGS_SECTION_CLASS}>
@@ -62,15 +54,6 @@ export function PreferencesSettings({
           <AppearancePreferences />
           <NotificationPreferences initialPrefs={prefs} />
         </div>
-        {showManage ? (
-          <Link
-            href={SETTINGS.manageCoursesHref}
-            data-settings-manage-courses=""
-            className={SETTINGS_QUIET_ROW_CLASS}
-          >
-            {SETTINGS.manageCourses}
-          </Link>
-        ) : null}
       </section>
     </div>
   );

@@ -52,7 +52,6 @@ import {
   settingsHubNav,
   settingsHubSection,
   settingsLandHref,
-  settingsManageCoursesVisible,
   settingsPaneTitle,
   settingsRailActive,
 } from "./settings";
@@ -179,11 +178,12 @@ describe("settings hub lock", () => {
     expect(settingsLandHref()).toBe(USER_MENU.settingsHref);
   });
 
-  it("keeps Manage courses staff-only and linked to /education", () => {
-    expect(SETTINGS.manageCourses).toBe("Manage courses");
-    expect(SETTINGS.manageCoursesHref).toBe("/education/manage");
-    expect(settingsManageCoursesVisible(true)).toBe(true);
-    expect(settingsManageCoursesVisible(false)).toBe(false);
+  it("does not host Manage courses on Settings Preferences", () => {
+    expect(SETTINGS).not.toHaveProperty("manageCourses");
+    expect(SETTINGS).not.toHaveProperty("manageCoursesHref");
+    const settingsSrc = readFileSync("src/lib/settings.ts", "utf8");
+    expect(settingsSrc).not.toContain("manageCourses");
+    expect(settingsSrc).not.toContain("settingsManageCoursesVisible");
     expect(SETTINGS_RAIL_ABSENT).toContain("Manage courses");
   });
 

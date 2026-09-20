@@ -75,7 +75,7 @@ describe("SettingsOrganizationPage", () => {
     expect(html).toContain("data-settings-group");
     expect(html).toContain("Acme");
     expect(html).toContain(COMPANY_PROFILE.editHref);
-    expect(html).not.toContain(SETTINGS.manageCourses);
+    expect(html).not.toContain("Manage courses");
     expect(html).not.toContain("Add user");
     expect(html).toContain(SETTINGS.team);
     expect(html).toContain("data-settings-section=\"team\"");

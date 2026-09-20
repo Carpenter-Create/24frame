@@ -42,7 +42,7 @@ describe("SettingsRail", () => {
     }
     expect(html).toContain(HOUSE_RAIL_ITEM_CLASS);
     expect(html).not.toContain("Home");
-    expect(html).not.toContain(SETTINGS.manageCourses);
+    expect(html).not.toContain("Manage courses");
     expect(html).not.toContain('href="/education"');
     expect(html).toContain('aria-current="page"');
     expect(html).toContain(HOUSE_RAIL_ACTIVE_CLASS);
