@@ -144,10 +144,16 @@ export function resolveSegmentedVisualIndex(
   routeIndex: number,
 ): number {
   if (persistKey == null) return routeIndex;
-  // None selected (Settings) is a settled leave. Drop every hop so a
-  // later Home/period remount cannot restore abandoned ink.
+  // Settings (workspace pills) is a settled leave — drop every hop so
+  // a later Home/period remount cannot restore abandoned ink. Other
+  // tracks (phone dest on Groups / Leaderboard) hide their own thumb
+  // without wiping sibling persist.
   if (routeIndex < 0) {
-    visualIndexes.clear();
+    if (persistKey === SEGMENTED_TRACK_PERSIST.workspace) {
+      visualIndexes.clear();
+    } else {
+      visualIndexes.delete(persistKey);
+    }
     return routeIndex;
   }
   const pending = visualIndexes.get(persistKey);

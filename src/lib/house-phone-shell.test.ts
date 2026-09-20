@@ -681,6 +681,8 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(housePhoneDestPersistKey("education")).toBe("phone-dest-education");
     expect(SEGMENTED_TRACK_PERSIST.phoneDest).toBe("phone-dest");
     expect(housePhoneDestActiveIndex("/social/explore", housePhoneDestinations(false, "social"), "social")).toBe(2);
+    expect(housePhoneDestActiveIndex("/social/groups", housePhoneDestinations(false, "social"), "social")).toBe(-1);
+    expect(housePhoneDestActiveIndex("/social/leaderboard", housePhoneDestinations(false, "social"), "social")).toBe(-1);
     expect(phoneShellSrc).not.toContain("HOUSE_PILL_SELECTED_CLASS");
     expect(phoneShellSrc).not.toContain("HOUSE_FILTER_OFF_CLASS");
 

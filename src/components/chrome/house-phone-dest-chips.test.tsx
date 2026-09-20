@@ -125,4 +125,16 @@ describe("HousePhoneDestChips SegmentedTrack SoT", () => {
     expect(education).toContain(HOUSE_SEGMENTED_TRACK_CLASS);
     expect(education).toContain('data-house-phone-dest="Education"');
   });
+
+  it("idles dest ink when the path is not a dest", () => {
+    navigation.pathname = SOCIAL_ROUTES.groups;
+    const groups = renderToStaticMarkup(
+      createElement(HousePhoneDestChips, { workspace: "social" }),
+    );
+    expect(groups).toContain("data-house-phone-dest-chips");
+    expect(groups).toContain(`data-segmented-persist="${housePhoneDestPersistKey("social")}"`);
+    expect(groups).toContain('data-house-phone-dest="Feed"');
+    expect(groups).not.toContain("data-segmented-selected");
+    expect(groups).not.toContain(HOUSE_SEGMENTED_ITEM_ON_CLASS);
+  });
 });

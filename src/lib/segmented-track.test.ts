@@ -25,6 +25,7 @@ import {
   writeSegmentedThumbCache,
   writeSegmentedVisualIndex,
 } from "./segmented-track";
+import { housePhoneDestPersistKey } from "./house-phone-shell";
 import { overviewLeadActiveIndex, overviewLeadPills } from "./overview";
 
 afterEach(() => {
@@ -209,6 +210,20 @@ describe("segmented track optimistic selection", () => {
     ).toBe(-1);
     expect(readSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.workspace)).toBeUndefined();
     expect(readSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period)).toBeUndefined();
+  });
+
+  it("hides unmatched dest thumb without clearing sibling track persist", () => {
+    const destKey = housePhoneDestPersistKey("social");
+    writeSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.workspace, 2, 1);
+    writeSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period, 1, 0);
+    writeSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.reportsRanked, 3, 0);
+    writeSegmentedVisualIndex(destKey, 2, 0);
+
+    expect(resolveSegmentedVisualIndex(destKey, -1)).toBe(-1);
+    expect(readSegmentedVisualIndex(destKey)).toBeUndefined();
+    expect(readSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.workspace)).toBe(2);
+    expect(readSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period)).toBe(1);
+    expect(readSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.reportsRanked)).toBe(3);
   });
 
   it("does not persist a no-op re-click of the committed segment", () => {
