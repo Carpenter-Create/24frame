@@ -18,6 +18,14 @@ describe("SocialHandleField", () => {
     expect(html).toContain("https://24frame.co/@acarpcreate");
     expect(html).not.toContain("app.24frame.co");
     expect(html).not.toContain("/social/u/");
+    expect(html).not.toContain("/social/@");
+
+    const cased = renderToStaticMarkup(
+      <SocialHandleField id="social-handle" name="handle" defaultHandle="AdamC" />,
+    );
+    expect(cased).toContain('value="@AdamC"');
+    expect(cased).toContain("https://24frame.co/@AdamC");
+    expect(cased).not.toContain("/social/@");
   });
 
   it("keeps @ in an empty field and always shows the live URL preview", () => {
@@ -39,6 +47,7 @@ describe("SocialHandleField", () => {
     expect(form).toContain("socialHandleRequiredError");
     expect(form).toContain("SocialHandleField");
     expect(actions).toContain("socialHandleRequiredError");
+    expect(actions).toContain("normalizeHandle");
     expect(actions).toContain("profileInsertRow");
   });
 });

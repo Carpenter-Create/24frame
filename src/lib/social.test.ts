@@ -6,7 +6,9 @@ import { PRODUCT_NAME, SOCIAL_WORKSPACE } from "@/lib/product";
 import {
   conversationRoomLabel,
   displayHandle,
+  handleDisplay,
   handleFieldValue,
+  handleKey,
   inboxPeerIds,
   isEligibleBirthDate,
   likeInsertRow,
@@ -34,8 +36,12 @@ import {
   socialPublicDisplayName,
   socialMediaRuleMessage,
   formatSocialCount,
+  socialProfileCanonicalUrl,
+  socialProfileCasingRedirect,
   socialProfileHref,
+  socialProfileLegacyPublicRedirect,
   socialProfilePublicHost,
+  socialProfilePublicPath,
   socialProfilePublicUrl,
   socialProfileRewriteTarget,
   socialProfileTabHref,
@@ -190,7 +196,18 @@ describe("profile opt-in", () => {
 
   it("rejects short handles and under-13 birth dates", () => {
     expect(normalizeHandle("ab")).toBeNull();
-    expect(normalizeHandle("Ada_Lovelace")).toBe("ada_lovelace");
+    expect(normalizeHandle("Ada_Lovelace")).toBe("Ada_Lovelace");
+    expect(normalizeHandle("AdamC")).toBe("AdamC");
+    expect(normalizeHandle("Ada.Lovelace")).toBe("Ada.Lovelace");
+    expect(normalizeHandle(".Ada")).toBeNull();
+    expect(normalizeHandle("Ada.")).toBeNull();
+    expect(normalizeHandle("Ada..C")).toBeNull();
+    expect(normalizeHandle("Ada-C")).toBeNull();
+    expect(normalizeHandle("A".repeat(30))).toBe("A".repeat(30));
+    expect(normalizeHandle("A".repeat(31))).toBeNull();
+    expect(handleKey("AdamC")).toBe("adamc");
+    expect(handleKey("AdamC")).toBe(handleKey("adamc"));
+    expect(handleDisplay("@AdamC")).toBe("AdamC");
     expect(isEligibleBirthDate("2014-01-01", new Date("2026-09-12T00:00:00.000Z"))).toBe(false);
     expect(isEligibleBirthDate("2013-09-12", new Date("2026-09-12T00:00:00.000Z"))).toBe(true);
     expect(socialInitials("Ada Lovelace")).toBe("AL");
@@ -223,32 +240,44 @@ describe("profile opt-in", () => {
 
   it("strips @ from handle input and keeps the house profile URL stable", () => {
     expect(stripHandleDecorators("@@acarpcreate")).toBe("acarpcreate");
-    expect(normalizeHandle("@Ada_Lovelace")).toBe("ada_lovelace");
+    expect(normalizeHandle("@Ada_Lovelace")).toBe("Ada_Lovelace");
     expect(normalizeHandle("@@acarpcreate")).toBe("acarpcreate");
-    expect(displayHandle("ada")).toBe("@ada");
-    expect(handleFieldValue("acarpcreate")).toBe("@acarpcreate");
+    expect(displayHandle("Ada")).toBe("@Ada");
+    expect(handleFieldValue("AdamC")).toBe("@AdamC");
     expect(handleFieldValue("")).toBe("@");
     expect(socialHandleRequiredError("")).toBe(SOCIAL.profile.handleRequired);
     expect(socialHandleRequiredError("@")).toBe(SOCIAL.profile.handleRequired);
     expect(socialHandleRequiredError("@@@")).toBe(SOCIAL.profile.handleRequired);
     expect(socialHandleRequiredError("@ada")).toBeNull();
-    expect(socialProfileHref("Ada")).toBe("/social/u/ada");
+    expect(SOCIAL.profile.handleInvalid).toBe(
+      "Enter a handle of 3–30 letters, numbers, periods, or underscores.",
+    );
+    expect(socialProfileHref("Ada")).toBe("/social/u/Ada");
     expect(socialProfileHref("@acarpcreate")).toBe("/social/u/acarpcreate");
     expect(socialProfileHref("Ada")).not.toMatch(/\/social\/u\/@/);
     expect(socialProfileHref("@acarpcreate")).not.toMatch(/\/social\/u\/@/);
     const hrefSrc = readFileSync("src/lib/social.ts", "utf8");
-    expect(hrefSrc).toContain("${SOCIAL_ROUTES.profileByHandle}/${bare}");
-    expect(hrefSrc).not.toContain("${SOCIAL_ROUTES.profileByHandle}/@${bare}");
+    expect(hrefSrc).toContain("${SOCIAL_ROUTES.profileByHandle}/${display}");
+    expect(hrefSrc).not.toContain("${SOCIAL_ROUTES.profileByHandle}/@${display}");
     expect(socialProfilePublicUrl("acarpcreate")).toBe("https://24frame.co/@acarpcreate");
     expect(socialProfilePublicHost("acarpcreate")).toBe("24frame.co/@acarpcreate");
     expect(formatSocialCount(24)).toBe("24");
     expect(formatSocialCount(1200)).toBe("1.2k");
     expect(formatSocialCount(318)).toBe("318");
     expect(socialProfilePublicUrl("")).toBe("https://24frame.co/@");
-    expect(socialProfilePublicUrl("@Ada")).toBe("https://24frame.co/@ada");
+    expect(socialProfilePublicUrl("@Ada")).toBe("https://24frame.co/@Ada");
+    expect(socialProfilePublicUrl("AdamC")).toBe("https://24frame.co/@AdamC");
+    expect(socialProfilePublicPath("AdamC")).toBe("/@AdamC");
+    expect(socialProfileCanonicalUrl("AdamC")).toBe("https://24frame.co/@AdamC");
+    expect(socialProfileCasingRedirect("adamc", "AdamC")).toBe("/@AdamC");
+    expect(socialProfileCasingRedirect("ADAMC", "AdamC")).toBe("/@AdamC");
+    expect(socialProfileCasingRedirect("AdamC", "AdamC")).toBeNull();
+    expect(socialProfileCasingRedirect("ada", "AdamC")).toBeNull();
     expect(SOCIAL_PROFILE_ORIGIN).toBe("https://24frame.co");
     expect(socialProfilePublicUrl("acarpcreate")).not.toContain("app.24frame.co");
     expect(socialProfilePublicUrl("acarpcreate")).not.toContain("/social/u/");
+    expect(socialProfilePublicUrl("AdamC")).not.toContain("/social/@");
+    expect(socialProfilePublicPath("AdamC")).not.toContain("/social/");
     expect(parseSocialCreateKind("photo")).toBe("photo");
     expect(parseSocialCreateKind("clip")).toBeNull();
     expect(socialCreateHref("video")).toBe("/social/create?kind=video");
@@ -277,7 +306,8 @@ describe("profile opt-in", () => {
     expect(SOCIAL.profile.highlightsTab).toBe("Highlights");
     expect(SOCIAL.profile.creditsTab).toBe("Credits");
     expect(SOCIAL.profile.creditsEmpty).toBe("No credits yet");
-    expect(parseProfileHandleParam("%40ada")).toBe("ada");
+    expect(parseProfileHandleParam("%40AdamC")).toBe("AdamC");
+    expect(parseProfileHandleParam("AdamC")).toBe("AdamC");
     expect(parseProfileHandleParam("@ada")).toBe("ada");
     expect(parseProfileHandleParam("ada")).toBe("ada");
     expect(suggestedHandleSeed("Ada.Carp@example.com", "u1")).toBe("adacarp");
@@ -293,9 +323,10 @@ describe("profile opt-in", () => {
     expect(normalizeBio("hello\n")).toBe("hello");
   });
 
-  it("rewrites only /@handle to the in-app /social/u/{bare} profile", () => {
+  it("rewrites only /@handle to the in-app /social/u/{display} profile", () => {
     expect(socialVanityInternalPath("/@ada")).toBe("/social/u/ada");
-    expect(socialVanityInternalPath("/@Ada_Lovelace")).toBe("/social/u/ada_lovelace");
+    expect(socialVanityInternalPath("/@Ada_Lovelace")).toBe("/social/u/Ada_Lovelace");
+    expect(socialVanityInternalPath("/@AdamC")).toBe("/social/u/AdamC");
     expect(socialVanityInternalPath("/@ada")).not.toMatch(/\/social\/u\/@/);
     expect(socialVanityInternalPath("/@ada/extra")).toBeNull();
     expect(socialVanityInternalPath("/legal")).toBeNull();
@@ -310,8 +341,9 @@ describe("profile opt-in", () => {
     expect(socialVanityInternalPath("/@www")).toBeNull();
   });
 
-  it("rewrites leftover /social/u/@handle bookmarks to the bare in-app route", () => {
+  it("rewrites leftover /social/u/@handle bookmarks and 301s /social/@handle to /@handle", () => {
     expect(socialProfileRewriteTarget("/@ada")).toBe("/social/u/ada");
+    expect(socialProfileRewriteTarget("/@AdamC")).toBe("/social/u/AdamC");
     expect(socialProfileRewriteTarget("/social/u/@ada")).toBe("/social/u/ada");
     expect(socialProfileRewriteTarget("/social/u/%40ada")).toBe("/social/u/ada");
     expect(socialProfileRewriteTarget("/social/u/@acarpcreate")).toBe("/social/u/acarpcreate");
@@ -319,7 +351,14 @@ describe("profile opt-in", () => {
     expect(socialProfileRewriteTarget("/social/u/@ada/extra")).toBeNull();
     expect(socialProfileRewriteTarget("/social/u/@login")).toBe("/social/u/login");
     expect(socialProfileRewriteTarget("/@login")).toBeNull();
+    expect(socialProfileRewriteTarget("/social/@ada")).toBeNull();
     expect(socialProfileRewriteTarget("/social/u/@ada")).not.toMatch(/\/social\/u\/@/);
+    expect(socialProfileLegacyPublicRedirect("/social/@ada")).toBe("/@ada");
+    expect(socialProfileLegacyPublicRedirect("/social/@AdamC")).toBe("/@AdamC");
+    expect(socialProfileLegacyPublicRedirect("/social/%40AdamC")).toBe("/@AdamC");
+    expect(socialProfileLegacyPublicRedirect("/@ada")).toBeNull();
+    expect(socialProfileLegacyPublicRedirect("/social/@login")).toBeNull();
+    expect(socialProfileLegacyPublicRedirect("/social/@ada/extra")).toBeNull();
   });
 });
 

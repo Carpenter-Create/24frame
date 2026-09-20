@@ -51,6 +51,19 @@ describe("SocialProfileEditForm", () => {
     expect(html).toContain("t-control");
     expect(html).not.toMatch(/id="social-edit-name"[^>]*t-body-sm/);
     expect(html).not.toMatch(/id="social-edit-handle"[^>]*t-body-sm/);
+    expect(html).not.toContain("/social/@");
+
+    const cased = renderToStaticMarkup(
+      <SocialProfileEditForm
+        handle="AdamC"
+        displayName="Ada Lovelace"
+        bio=""
+        photoUrl={null}
+      />,
+    );
+    expect(cased).toContain('value="AdamC"');
+    expect(cased).toContain("https://24frame.co/@AdamC");
+    expect(cased).not.toContain("/social/@");
   });
 
   it("shows the empty-handle preview URL", () => {

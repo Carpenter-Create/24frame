@@ -35,6 +35,7 @@ import {
   SOCIAL_ROUTES,
   bareHandle,
   handleFieldValue,
+  normalizeHandle,
   socialHandleRequiredError,
   socialProfilePublicUrl,
   stripHandleDecorators,
@@ -130,6 +131,10 @@ export function SocialProfileEditForm({
       setHandleError(required);
       return;
     }
+    if (!normalizeHandle(username)) {
+      setHandleError(SOCIAL.profile.handleInvalid);
+      return;
+    }
     setPending(true);
     const form = new FormData();
     form.set("handle", username);
@@ -137,8 +142,12 @@ export function SocialProfileEditForm({
     const result = await createSocialProfile(form);
     setPending(false);
     if (result.error) {
-      if (result.error === SOCIAL.profile.handleRequired) setHandleError(result.error);
-      else setError(result.error);
+      if (
+        result.error === SOCIAL.profile.handleRequired ||
+        result.error === SOCIAL.profile.handleInvalid
+      ) {
+        setHandleError(result.error);
+      } else setError(result.error);
       return;
     }
     router.push(SOCIAL_ROUTES.profile);
