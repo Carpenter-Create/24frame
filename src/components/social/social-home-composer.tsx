@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 import { SocialAvatar } from "@/components/social/social-avatar";
-import { SocialCreateMenu } from "@/components/social/social-create-menu";
+import { SocialCreateSheet } from "@/components/social/social-create-sheet";
 import { SocialIcon } from "@/components/social/social-icon";
 import {
   SOCIAL_COMPOSER_CLASS,
@@ -31,11 +31,11 @@ export function SocialHomeComposer({
         {socialComposerPrompt(authorName)}
       </Link>
       <div className="hidden md:flex">
-        <SocialCreateMenu
+        <SocialCreateSheet
           trigger={
             <button
               type="button"
-              data-social-create-menu=""
+              data-social-create-sheet="composer"
               aria-label={SOCIAL.create.title}
               className={SOCIAL_COMPOSER_MEDIA_CLASS}
             >

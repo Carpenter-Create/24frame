@@ -13,47 +13,40 @@ vi.mock("next/navigation", () => ({
 }));
 
 import { SocialCreateCompose } from "./social-forms";
-import {
-  HOUSE_FILTER_ON_CLASS,
-  HOUSE_SEGMENTED_ITEM_OFF_CLASS,
-  HOUSE_SEGMENTED_ITEM_ON_CLASS,
-  HOUSE_SEGMENTED_TRACK_CLASS,
-} from "@/lib/house-shell";
 import { SEGMENTED_TRACK_PERSIST } from "@/lib/segmented-track";
 import { SOCIAL } from "@/lib/social";
 
 const src = readFileSync("src/components/social/social-forms.tsx", "utf8");
 
 describe("Social create kinds", () => {
-  it("mounts Photo | Video | Text on house SegmentedTrack, not gapped filter pills", () => {
-    const html = renderToStaticMarkup(
+  it("enters the chosen mode directly — no second chooser on the compose form", () => {
+    const write = renderToStaticMarkup(
       createElement(SocialCreateCompose, { authorName: "Ada Lovelace" }),
     );
-    expect(html).toContain("data-social-create-kinds");
-    expect(html).toContain('data-segmented-persist="social-create-kind"');
-    expect(html).toContain("data-segmented-thumb");
-    expect(html).toContain('data-social-create-kind="photo"');
-    expect(html).toContain('data-social-create-kind="video"');
-    expect(html).toContain('data-social-create-kind="text"');
-    expect(html).toContain(SOCIAL.create.photo);
-    expect(html).toContain(SOCIAL.create.video);
-    expect(html).toContain(SOCIAL.create.text);
-    expect(html).toContain(HOUSE_SEGMENTED_TRACK_CLASS);
-    expect(html).toContain(HOUSE_SEGMENTED_ITEM_ON_CLASS);
-    expect(html).toContain(HOUSE_SEGMENTED_ITEM_OFF_CLASS);
-    expect(html).toContain("data-segmented-selected");
-    expect(html).not.toContain(HOUSE_FILTER_ON_CLASS);
-    expect(SEGMENTED_TRACK_PERSIST.socialCreateKind).toBe("social-create-kind");
+    expect(write).toContain("data-social-create-form");
+    expect(write).toContain('data-social-create-kind="text"');
+    expect(write).toContain("data-social-create-author");
+    expect(write).not.toContain("data-social-create-kinds");
+    expect(write).not.toContain("data-social-create-well");
+    expect(write).not.toContain(SOCIAL.create.photo);
+    expect(write).not.toContain(SOCIAL.create.video);
+    expect(write).not.toContain(SOCIAL.create.goLive);
 
-    expect(src).toContain("SegmentedTrack");
-    expect(src).toContain("persistKey={SEGMENTED_TRACK_PERSIST.socialCreateKind}");
-    expect(src).toContain("({ selectedIndex })");
-    expect(src).toContain("segmentedItemOn");
-    expect(src).not.toContain("HOUSE_FILTER_ON_CLASS");
-    expect(src).not.toContain("HOUSE_FILTER_OFF_CLASS");
-    expect(src).not.toContain("HOUSE_FILTER_PILL_CLUSTER");
-    expect(src).not.toContain("pendingIndex");
-    expect(src).not.toContain("pendingFamily");
-    expect(src).not.toContain("flex flex-wrap gap-1.5");
+    const photo = renderToStaticMarkup(
+      createElement(SocialCreateCompose, {
+        authorName: "Ada Lovelace",
+        initialKind: "photo",
+      }),
+    );
+    expect(photo).toContain('data-social-create-kind="photo"');
+    expect(photo).toContain("data-social-create-well");
+    expect(photo).toContain(SOCIAL.create.dropEmpty);
+    expect(photo).not.toContain("data-social-create-kinds");
+
+    expect(src).not.toContain("SegmentedTrack");
+    expect(src).not.toContain("data-social-create-kinds");
+    expect(src).not.toContain("SOCIAL_CREATE_KINDS.map");
+    expect(src).not.toContain("setKind");
+    expect("socialCreateKind" in SEGMENTED_TRACK_PERSIST).toBe(false);
   });
 });
