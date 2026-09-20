@@ -35,7 +35,7 @@ import { SOCIAL } from "@/lib/social";
 import {
   SOCIAL_AVATAR_PROFILE_CLASS,
   SOCIAL_PROFILE_HEAD_CLASS,
-  SOCIAL_PROFILE_ROLES_LINE_CLASS,
+  SOCIAL_PROFILE_ROLES_PILL_CLASS,
   SOCIAL_PROFILE_STAT_CLASS,
   SOCIAL_PROFILE_STATS_CLASS,
 } from "@/lib/social-chrome";
@@ -196,11 +196,13 @@ describe("Social profile public face", () => {
     expect(uiSrc).not.toContain("actions?: () => ReactNode");
     expect(uiSrc).not.toContain("{actions()}");
     expect(identity).toContain("data-social-profile-identity");
-    expect(identity).toContain("data-social-profile-handle");
+    expect(identity).toContain("data-social-profile-head");
+    expect(identity).toContain("data-social-profile-face");
     expect(identity).toContain("data-social-profile-name");
     expect(identity).toContain("Ada Lovelace");
-    expect(identity).toContain("@ada");
-    expect(identity.indexOf("data-social-profile-handle")).toBeLessThan(
+    expect(identity).not.toContain("data-social-profile-handle");
+    expect(identity).not.toContain("@ada");
+    expect(identity.indexOf("data-social-profile-head")).toBeLessThan(
       identity.indexOf("data-social-profile-name"),
     );
     expect(identity).not.toContain("data-social-profile-stats");
@@ -212,6 +214,9 @@ describe("Social profile public face", () => {
     expect(identity).not.toContain("data-social-share-hint");
     expect(uiSrc).not.toContain("socialProfilePublicHost");
     expect(uiSrc).not.toContain("socialShareHint");
+    expect(uiSrc).toContain("data-social-profile-head");
+    expect(uiSrc).toContain("SOCIAL_PROFILE_HEAD_CLASS");
+    expect(uiSrc).not.toContain("data-social-profile-handle");
     expect(identity).toContain("Writes engines.");
     expect(identity).toContain('src="https://s3.example/signed-avatar"');
     expect(identity).not.toContain("data-social-profile-roles");
@@ -228,25 +233,34 @@ describe("Social profile public face", () => {
       />,
     );
     expect(withRoles).toContain("data-social-profile-roles");
+    expect(withRoles).toContain('data-social-profile-role="actor"');
+    expect(withRoles).not.toContain('data-social-profile-role="investor"');
+    expect(withRoles).toContain("Actor");
+    expect(withRoles).toContain("Producer");
+    expect(withRoles).toContain("Screenwriter");
     expect(withRoles).toContain("Actor · Producer · Screenwriter +1");
+    expect(withRoles).toContain("data-social-profile-roles-more");
+    expect(withRoles).toContain("+1");
     expect(withRoles).not.toContain("Investor");
     expect(withRoles).not.toContain("Roles:");
     expect(withRoles).not.toContain("Professions:");
     expect(withRoles).not.toContain("Topics:");
-    expect(withRoles).toContain(SOCIAL_PROFILE_ROLES_LINE_CLASS);
-    expect(withRoles).not.toContain("overflow-x-auto");
-    expect(withRoles).not.toContain("whitespace-nowrap");
-    expect(withRoles).not.toContain("data-social-profile-role=");
+    expect(withRoles).toContain(SOCIAL_PROFILE_ROLES_PILL_CLASS);
+    expect(withRoles).toContain("bg-surface-muted");
+    expect(withRoles).toContain("rounded-full");
+    expect(withRoles).toContain("t-body-sm");
+    expect(withRoles).toContain("py-[var(--space-2)]");
     expect(withRoles).not.toContain("text-[11px]");
     expect(withRoles).not.toContain("truncate");
+    expect(withRoles).not.toContain("overflow-x-auto");
     expect(withRoles.indexOf("data-social-profile-name")).toBeLessThan(
-      withRoles.indexOf("data-social-profile-roles"),
-    );
-    expect(withRoles.indexOf("data-social-profile-copy")).toBeLessThan(
       withRoles.indexOf("data-social-profile-roles"),
     );
     expect(withRoles.indexOf("Ada Lovelace")).toBeLessThan(
       withRoles.indexOf("Actor · Producer · Screenwriter +1"),
+    );
+    expect(withRoles.indexOf('data-social-profile-role="actor"')).toBeLessThan(
+      withRoles.indexOf('data-social-profile-role="screenwriter"'),
     );
 
     const withTopics = renderToStaticMarkup(
@@ -276,7 +290,6 @@ describe("Social profile public face", () => {
       />,
     );
     expect(withStats).toContain("data-social-profile-head");
-    expect(withStats).toContain("data-social-profile-copy");
     expect(withStats).toContain(SOCIAL_PROFILE_HEAD_CLASS);
     expect(withStats).toContain(SOCIAL_AVATAR_PROFILE_CLASS);
     expect(withStats).toContain("size-[72px]");
@@ -298,13 +311,20 @@ describe("Social profile public face", () => {
       withStats.indexOf('data-social-profile-stat="followers"'),
     );
     expect(postsStat.indexOf(">12<")).toBeLessThan(postsStat.indexOf(`>${SOCIAL.profile.postsStat}<`));
-    expect(withStats.indexOf("data-social-profile-head")).toBeLessThan(
-      withStats.indexOf("data-social-profile-copy"),
+    const head = withStats.slice(
+      withStats.indexOf("data-social-profile-head"),
+      withStats.indexOf("data-social-profile-name"),
+    );
+    expect(head).toContain("data-social-avatar");
+    expect(head).toContain("data-social-profile-stats");
+    expect(head).not.toContain("data-social-profile-handle");
+    expect(head).not.toContain("data-social-profile-name");
+    expect(head).not.toContain("data-social-profile-roles");
+    expect(head).not.toContain("@ada");
+    expect(withStats.indexOf("data-social-profile-stats")).toBeLessThan(
+      withStats.indexOf("data-social-profile-name"),
     );
     expect(withStats.indexOf("data-social-profile-name")).toBeLessThan(
-      withStats.indexOf("data-social-profile-stats"),
-    );
-    expect(withStats.indexOf("data-social-profile-stats")).toBeLessThan(
       withStats.indexOf("data-social-profile-roles"),
     );
     expect(withStats.indexOf("data-social-profile-roles")).toBeLessThan(
@@ -315,6 +335,7 @@ describe("Social profile public face", () => {
     );
     expect(withStats).toContain("Actor");
     expect(withStats).not.toContain("flex-wrap gap-4");
+    expect(withStats).not.toContain("data-social-profile-copy");
 
     const withMutuals = renderToStaticMarkup(
       <SocialProfileIdentity
@@ -376,12 +397,19 @@ describe("Social profile public face", () => {
     expect(unknownHost).toContain('aria-label="Website"');
     expect(unknownHost).not.toContain(">https://ada.example/press<");
     expect(uiSrc).toContain("socialProfileRolesLine");
+    expect(uiSrc).toContain("socialProfileRolesFace");
     expect(
       uiSrc.slice(
         uiSrc.indexOf("export function SocialPersonRow"),
         uiSrc.indexOf("export function SocialConversationFaces"),
       ),
     ).not.toContain("socialProfileRolesLine");
+    expect(
+      uiSrc.slice(
+        uiSrc.indexOf("export function SocialPersonRow"),
+        uiSrc.indexOf("export function SocialConversationFaces"),
+      ),
+    ).not.toContain("socialProfileRolesFace");
 
     const history = renderToStaticMarkup(
       <SocialAuthorHistory

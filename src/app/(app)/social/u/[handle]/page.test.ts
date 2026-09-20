@@ -194,16 +194,25 @@ describe("Social public profile", () => {
     expect(html).not.toContain("data-social-profile-imdb");
   });
 
-  it("prints the Professions line when crafts are set and omits a Professions prefix", async () => {
+  it("prints the Professions gray pill when crafts are set and omits a Professions prefix", async () => {
     stubClient({
       member: { ...ada, crafts: ["actor", "producer"] },
     });
     const html = await renderPublic();
     expect(html).toContain("data-social-profile-roles");
+    expect(html).toContain('data-social-profile-role="actor"');
+    expect(html).toContain("Actor");
+    expect(html).toContain("Producer");
     expect(html).toContain("Actor · Producer");
-    expect(html).not.toContain('data-social-profile-role="actor"');
-    expect(html.indexOf("data-social-profile-name")).toBeLessThan(html.indexOf("data-social-profile-stats"));
-    expect(html.indexOf("data-social-profile-stats")).toBeLessThan(html.indexOf("data-social-profile-roles"));
+    expect(html).toContain("bg-surface-muted");
+    expect(html).not.toContain("data-social-profile-roles-more");
+    expect(html).not.toContain("data-social-profile-handle");
+    const head = html.slice(html.indexOf("data-social-profile-head"), html.indexOf("data-social-profile-name"));
+    expect(head).toContain("data-social-avatar");
+    expect(head).toContain("data-social-profile-stats");
+    expect(head).not.toContain("@ada");
+    expect(html.indexOf("data-social-profile-stats")).toBeLessThan(html.indexOf("data-social-profile-name"));
+    expect(html.indexOf("data-social-profile-name")).toBeLessThan(html.indexOf("data-social-profile-roles"));
     expect(html.indexOf("data-social-profile-roles")).toBeLessThan(html.indexOf("data-social-profile-bio"));
     expect(html).not.toContain("Roles:");
     expect(html).not.toContain("Professions:");

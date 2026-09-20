@@ -11,6 +11,7 @@ import {
   SOCIAL_PROFILE_STAT_LABEL_CLASS,
   SOCIAL_PROFILE_STAT_VALUE_CLASS,
   SOCIAL_PROFILE_STATS_CLASS,
+  SOCIAL_PROFILE_STATS_GRID_CLASS,
 } from "@/lib/social-chrome";
 import { formatSocialCount, SOCIAL, socialProfileFollowsHref } from "@/lib/social";
 import type { SocialProfileCounts } from "@/lib/social-feed";
@@ -58,26 +59,28 @@ function SocialProfileStatsView({
 }) {
   return (
     <div data-social-profile-stats="" className={SOCIAL_PROFILE_STATS_CLASS}>
-      <p data-social-profile-stat="posts" className={SOCIAL_PROFILE_STAT_CLASS}>
-        <span className={SOCIAL_PROFILE_STAT_VALUE_CLASS}>{formatSocialCount(stats.posts)}</span>
-        <span className={SOCIAL_PROFILE_STAT_LABEL_CLASS}>{SOCIAL.profile.postsStat}</span>
-      </p>
-      <Link
-        href={socialProfileFollowsHref(handle, "followers")}
-        data-social-profile-stat="followers"
-        className={SOCIAL_PROFILE_STAT_CLASS}
-      >
-        <span className={SOCIAL_PROFILE_STAT_VALUE_CLASS}>{formatSocialCount(stats.followers)}</span>
-        <span className={SOCIAL_PROFILE_STAT_LABEL_CLASS}>{SOCIAL.profile.followersStat}</span>
-      </Link>
-      <Link
-        href={socialProfileFollowsHref(handle, "following")}
-        data-social-profile-stat="following"
-        className={SOCIAL_PROFILE_STAT_CLASS}
-      >
-        <span className={SOCIAL_PROFILE_STAT_VALUE_CLASS}>{formatSocialCount(stats.following)}</span>
-        <span className={SOCIAL_PROFILE_STAT_LABEL_CLASS}>{SOCIAL.profile.followingStat}</span>
-      </Link>
+      <div className={SOCIAL_PROFILE_STATS_GRID_CLASS}>
+        <p data-social-profile-stat="posts" className={SOCIAL_PROFILE_STAT_CLASS}>
+          <span className={SOCIAL_PROFILE_STAT_VALUE_CLASS}>{formatSocialCount(stats.posts)}</span>
+          <span className={SOCIAL_PROFILE_STAT_LABEL_CLASS}>{SOCIAL.profile.postsStat}</span>
+        </p>
+        <Link
+          href={socialProfileFollowsHref(handle, "followers")}
+          data-social-profile-stat="followers"
+          className={SOCIAL_PROFILE_STAT_CLASS}
+        >
+          <span className={SOCIAL_PROFILE_STAT_VALUE_CLASS}>{formatSocialCount(stats.followers)}</span>
+          <span className={SOCIAL_PROFILE_STAT_LABEL_CLASS}>{SOCIAL.profile.followersStat}</span>
+        </Link>
+        <Link
+          href={socialProfileFollowsHref(handle, "following")}
+          data-social-profile-stat="following"
+          className={SOCIAL_PROFILE_STAT_CLASS}
+        >
+          <span className={SOCIAL_PROFILE_STAT_VALUE_CLASS}>{formatSocialCount(stats.following)}</span>
+          <span className={SOCIAL_PROFILE_STAT_LABEL_CLASS}>{SOCIAL.profile.followingStat}</span>
+        </Link>
+      </div>
     </div>
   );
 }
