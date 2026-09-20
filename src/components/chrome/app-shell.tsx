@@ -61,8 +61,8 @@ type Org = { id: string; name: string };
 // state persists in a cookie (read by the (app) layout → `defaultCollapsed`, so there's no
 // flash) and, when collapsed, overrides `--sidebar-width` so the header + main follow.
 // Phone: the rail is gone (hidden + width tokens collapse). Local dests
-// live in HousePhoneBottomNav — client NAV on Aggregation, GC_NAV on
-// Staff. Workspace switch is the header sheet. No hamburger.
+// live in HousePhoneBottomNav — client dests on Aggregation, operator
+// dests on Staff. Workspace switch is the header sheet. No hamburger.
 // One return tree — Social is a flag, not a second shell. Workspace
 // hops keep chrome mounted so the sheet and dock do not freeze.
 // Desktop 1:2 rail is unchanged.
@@ -445,18 +445,16 @@ function HouseLeadChromeSlot({
   }
   return (
     <Suspense fallback={<HouseLeadChrome isGcStaff={isGcStaff} {...props} />}>
-      <HouseLeadChromeFromChrome chrome={chrome} isGcStaff={isGcStaff} {...props} />
+      <HouseLeadChromeFromChrome chrome={chrome} {...props} />
     </Suspense>
   );
 }
 
 function HouseLeadChromeFromChrome({
   chrome,
-  isGcStaff,
   ...props
 }: {
   chrome: Promise<AppShellChrome>;
-  isGcStaff: boolean;
   workspace: WorkspaceMode;
   settingsPage?: boolean;
   logoVisible?: "always" | "desktop";
