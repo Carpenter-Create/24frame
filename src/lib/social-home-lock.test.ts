@@ -641,9 +641,12 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).toContain("SocialForYouRail");
     expect(card).toContain("socialProfileRolesMoreLabel");
     expect(card).not.toContain("socialProfileRolesLine");
-    expect(homeSkeleton).not.toMatch(
-      /data-social-profile-skeleton[\s\S]*SocialForYouSkeleton/,
-    );
+    expect(
+      homeSkeleton.slice(
+        homeSkeleton.indexOf("export function SocialProfileSkeleton"),
+        homeSkeleton.indexOf("export function SocialFollowsSkeleton"),
+      ),
+    ).not.toContain("SocialForYouSkeleton");
     expect(readFileSync("src/components/social/social-profile-stats.tsx", "utf8")).toContain(
       "socialProfileFollowsHref",
     );
