@@ -1,7 +1,12 @@
 import Link from "next/link";
 
 import { Card, CardBody } from "@/components/ui/card";
-import { FINDING_SEVERITY_LABEL } from "@/lib/findings";
+import {
+  FINDING_MESSAGE_CLASS,
+  FINDING_ROW_CLASS,
+  FINDING_SEVERITY_CLASS,
+  FINDING_SEVERITY_LABEL,
+} from "@/lib/findings";
 
 // Shared findings render. One entity's open findings as message + severity-label rows.
 // Used in-context on both title-detail pages and (via FindingRows) in the Catalog Health
@@ -20,8 +25,8 @@ export function FindingRows({
       {findings.map((f) => {
         const inner = (
           <>
-            <span className="text-ink-2">{f.message}</span>
-            <span className="shrink-0 t-label text-ink-3">
+            <span className={FINDING_MESSAGE_CLASS}>{f.message}</span>
+            <span className={FINDING_SEVERITY_CLASS}>
               {FINDING_SEVERITY_LABEL[f.severity as "high" | "low"] ?? f.severity}
             </span>
           </>
@@ -29,11 +34,11 @@ export function FindingRows({
         return (
           <li key={f.id}>
             {href ? (
-              <Link href={href} className="flex items-center justify-between gap-3 t-body-sm">
+              <Link href={href} className={FINDING_ROW_CLASS}>
                 {inner}
               </Link>
             ) : (
-              <div className="flex items-center justify-between gap-3 t-body-sm">{inner}</div>
+              <div className={FINDING_ROW_CLASS}>{inner}</div>
             )}
           </li>
         );

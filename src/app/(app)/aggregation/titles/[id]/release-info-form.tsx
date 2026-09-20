@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InlineNotice } from "@/components/ui/inline-notice";
+import { HOUSE_PHONE_WRAP_CLASS } from "@/lib/house-phone-stack";
 import { PRODUCT_NAME } from "@/lib/product";
 import { RELEASE_TYPE_LABEL, formatReleaseDate, type ReleaseType } from "@/lib/releases";
+import { TITLE_DETAIL_INLINE_LEDGER_ROW_CLASS } from "@/lib/titles";
 import { setTitleReleaseInfo } from "./actions";
 
 // Client-owned release info on the title detail: release type + (re-release only)
@@ -77,19 +79,21 @@ export function ReleaseInfoForm({
             </button>
           ) : null}
         </div>
-        <div className="flex items-baseline justify-between gap-4 t-body-sm">
+        <div className={TITLE_DETAIL_INLINE_LEDGER_ROW_CLASS}>
           <span className="text-ink-3">Type</span>
-          <span className="text-ink-2">{RELEASE_TYPE_LABEL[releaseType]}</span>
+          <span className={`${HOUSE_PHONE_WRAP_CLASS} text-ink-2`}>{RELEASE_TYPE_LABEL[releaseType]}</span>
         </div>
         {releaseType === "re_release" ? (
-          <div className="flex items-baseline justify-between gap-4 t-body-sm">
+          <div className={TITLE_DETAIL_INLINE_LEDGER_ROW_CLASS}>
             <span className="text-ink-3">Original release</span>
-            <span className="text-ink-2">{formatReleaseDate(originalReleaseDate)}</span>
+            <span className={`${HOUSE_PHONE_WRAP_CLASS} text-ink-2`}>
+              {formatReleaseDate(originalReleaseDate)}
+            </span>
           </div>
         ) : null}
-        <div className="flex items-baseline justify-between gap-4 t-body-sm">
+        <div className={TITLE_DETAIL_INLINE_LEDGER_ROW_CLASS}>
           <span className="text-ink-3">Release date</span>
-          <span className="text-ink-2">
+          <span className={`${HOUSE_PHONE_WRAP_CLASS} text-ink-2`}>
             {releaseDate ? formatReleaseDate(releaseDate) : `Set by ${PRODUCT_NAME}`}
           </span>
         </div>

@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import {
+  HOUSE_PHONE_CONTAIN_CLASS,
   HOUSE_PHONE_GOSPEL,
   HOUSE_PHONE_GOSPEL_LOCKED,
   HOUSE_PHONE_STACK_CLASS,
@@ -20,8 +21,13 @@ describe("house phone stack gospel 2026-09-19", () => {
     expect(HOUSE_PHONE_STACK_CLASS).toContain("flex-col");
     expect(HOUSE_PHONE_STACK_CLASS).toContain("w-full");
     expect(HOUSE_PHONE_STACK_CLASS).toContain("items-stretch");
+    expect(HOUSE_PHONE_CONTAIN_CLASS).toContain("min-w-0");
+    expect(HOUSE_PHONE_CONTAIN_CLASS).toContain("max-w-full");
+    expect(HOUSE_PHONE_CONTAIN_CLASS).toContain("overflow-x-clip");
+    expect(HOUSE_PHONE_CONTAIN_CLASS).not.toContain("overflow-x-auto");
     expect(housePhoneForbidsTruncate(HOUSE_PHONE_WRAP_CLASS)).toBe(true);
     expect(housePhoneForbidsTruncate(HOUSE_PHONE_STACK_CLASS)).toBe(true);
+    expect(housePhoneForbidsTruncate(HOUSE_PHONE_CONTAIN_CLASS)).toBe(true);
     expect(housePhoneForbidsTruncate("t-body truncate")).toBe(false);
     expect(HOUSE_PHONE_TRUNCATE_ABSENT).toContain("truncate");
     expect(HOUSE_PHONE_TRUNCATE_ABSENT).toContain("overflow-x-auto");

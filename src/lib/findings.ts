@@ -1,3 +1,7 @@
+import {
+  HOUSE_PHONE_STACK_CLASS,
+  HOUSE_PHONE_WRAP_CLASS,
+} from "@/lib/house-phone-stack";
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
 import { aggregationPath } from "@/lib/workspace";
 
@@ -7,6 +11,14 @@ export const FINDING_SEVERITY_LABEL: Record<"high" | "low", string> = {
   high: "Required",
   low: "Recommended",
 };
+
+export const FINDING_ROW_CLASS =
+  `${HOUSE_PHONE_STACK_CLASS} gap-1 t-body-sm md:flex-row md:items-center md:justify-between md:gap-3`;
+
+export const FINDING_MESSAGE_CLASS = `${HOUSE_PHONE_WRAP_CLASS} text-ink-2`;
+
+export const FINDING_SEVERITY_CLASS =
+  `${HOUSE_PHONE_WRAP_CLASS} t-label text-ink-3 md:shrink-0`;
 
 // Attention = the single client-side findings/health overview.
 export const ATTENTION_TITLE = "Attention";
