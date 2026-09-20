@@ -219,7 +219,7 @@ describe("ActivityBell", () => {
     expect(html).toContain(`data-activity-bell-popover="" class="${ACTIVITY_BELL_POPOVER_CLASS}"`);
     expect(html).toContain(ACTIVITY_PAGE.title);
     expect(html).toContain(ACTIVITY_PAGE.close);
-    expect(html).toContain(ACTIVITY_PAGE.bellEmpty);
+    expect(html).toContain("data-activity-bell-empty");
     expect(html).toContain(ACTIVITY_PAGE.viewAll);
     expect(html).toContain("hidden md:block");
     expect(html).toContain("md:hidden");
