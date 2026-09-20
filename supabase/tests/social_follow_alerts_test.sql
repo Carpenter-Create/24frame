@@ -3,7 +3,7 @@
 -- Catalog notifications stay org-scoped. Pref off skips the insert.
 
 begin;
-select plan(18);
+select plan(20);
 
 select set_config('t.follower', gen_random_uuid()::text, false);
 select set_config('t.followee', gen_random_uuid()::text, false);
@@ -52,13 +52,15 @@ select lives_ok(
 
 select is(
   (select public.notify_new_follower(
-    current_setting('t.followee')::uuid,
-    'New follower',
-    '@adamfollow followed you',
-    '{"handle":"adamfollow","path":"/social/u/adamfollow"}'::jsonb
+    current_setting('t.followee')::uuid
   ) is not null),
   true,
   'notify_new_follower inserts for the followee when pref is missing (default on)');
+
+select is(
+  public.notify_new_follower(current_setting('t.followee')::uuid),
+  null,
+  'notify_new_follower rejects a repeat call for the same follow edge');
 
 select is(
   (select count(*) from public.my_notifications()
@@ -81,6 +83,19 @@ select is(
     where kind = 'new_follower')::int,
   1,
   'followee sees the new_follower alert');
+
+select ok(
+  exists (
+    select 1
+    from public.my_notifications()
+    where kind = 'new_follower'
+      and title = 'New follower'
+      and body = '@adamfollow followed you'
+      and source_refs->>'handle' = 'adamfollow'
+      and source_refs->>'path' = '/social/u/adamfollow'
+      and source_refs->>'actor_id' = current_setting('t.follower')
+  ),
+  'new_follower copy and source_refs come from the follower profile');
 
 select is(public.my_unread_count(), 1, 'followee unread count includes new_follower');
 
@@ -106,10 +121,7 @@ select set_config('request.jwt.claims',
 
 select is(
   public.notify_new_follower(
-    current_setting('t.followee')::uuid,
-    'New follower',
-    '@strangerf followed you',
-    '{}'::jsonb
+    current_setting('t.followee')::uuid
   ),
   null,
   'notify_new_follower no-ops without a follow row');
@@ -129,10 +141,7 @@ select set_config('request.jwt.claims',
 
 select is(
   public.notify_new_follower(
-    current_setting('t.followee')::uuid,
-    'New follower',
-    '@adamfollow followed you',
-    '{}'::jsonb
+    current_setting('t.followee')::uuid
   ),
   null,
   'notify_new_follower skips when new_follower in-app is off');

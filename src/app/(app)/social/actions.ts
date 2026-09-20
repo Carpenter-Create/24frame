@@ -42,11 +42,7 @@ import {
   socialMediaRuleMessage,
   socialProfileHref,
 } from "@/lib/social";
-import {
-  isFollowUniqueViolation,
-  newFollowerNoticeCopy,
-  newFollowerSourceRefs,
-} from "@/lib/social-follow";
+import { isFollowUniqueViolation } from "@/lib/social-follow";
 
 type ActionResult = { error?: string };
 
@@ -238,13 +234,10 @@ export async function toggleSocialFollow(formData: FormData): Promise<ActionResu
       return { error: error.message || SOCIAL.follow.failed };
     }
     if (!error) {
-      const copy = newFollowerNoticeCopy(profile.handle);
       // Follow already landed. Alert is best-effort until founder applies SQL.
+      // Copy and source_refs are composed inside notify_new_follower.
       await supabase.rpc("notify_new_follower", {
         p_followee: followeeId,
-        p_title: copy.title,
-        p_body: copy.body,
-        p_source_refs: newFollowerSourceRefs({ actorId: user.id, handle: profile.handle }),
       });
     }
   }

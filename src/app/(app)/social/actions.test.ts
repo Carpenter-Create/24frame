@@ -474,9 +474,6 @@ describe("social actions", () => {
     expect(inserts).toEqual([{ table: "follows", row: followInsertRow("u1", "u2") }]);
     expect(rpc).toHaveBeenCalledWith("notify_new_follower", {
       p_followee: "u2",
-      p_title: SOCIAL.follow.newFollowerTitle,
-      p_body: "@ada followed you",
-      p_source_refs: { actor_id: "u1", handle: "ada", path: "/social/u/ada" },
     });
     expect(revalidatePath).toHaveBeenCalledWith("/social");
     expect(revalidatePath).toHaveBeenCalledWith("/social/profile");

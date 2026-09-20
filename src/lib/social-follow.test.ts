@@ -31,6 +31,20 @@ describe("social follow helpers", () => {
     ).toBe(false);
   });
 
+  it("composes follower-alert copy in SQL and rejects a repeat call", () => {
+    const src = readFileSync("supabase/migrations/20260920140100_social_follow_alerts.sql", "utf8");
+    const chunk = src.slice(src.indexOf("create or replace function public.notify_new_follower"));
+    expect(chunk).toContain("notify_new_follower(p_followee uuid)");
+    expect(chunk).toContain("from public.profiles");
+    expect(chunk).toContain("'New follower'");
+    expect(chunk).toContain("followed you");
+    expect(src).toContain("notifications_new_follower_once");
+    expect(chunk).not.toContain("p_title");
+    expect(chunk).not.toContain("p_body");
+    expect(chunk).not.toContain("p_source_refs");
+    expect(chunk).toContain("n.created_by = v_me");
+  });
+
   it("names the actor with a handle and links to the follower profile", () => {
     expect(newFollowerNoticeCopy("ada")).toEqual({
       title: SOCIAL.follow.newFollowerTitle,

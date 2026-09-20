@@ -3567,10 +3567,7 @@ export type Database = {
       my_unread_count: { Args: never; Returns: number }
       notify_new_follower: {
         Args: {
-          p_body: string
           p_followee: string
-          p_source_refs: Json
-          p_title: string
         }
         Returns: string | null
       }

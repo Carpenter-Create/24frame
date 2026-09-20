@@ -10,8 +10,10 @@
 --
 -- ACCESS PATH:
 --   follows SELECT — active follower + followee (no is_gc_staff).
---   notify_new_follower — security definer; caller must already hold the
---     follow row. Prefs read bypass RLS (own-only table).
+--   notify_new_follower(p_followee) — security definer; caller must already
+--     hold the follow row. Title, body, and source_refs are composed from
+--     the caller profile (not arguments). One new_follower row per
+--     follower/followee. Prefs read bypass RLS (own-only table).
 --   my_notifications / my_unread_count / mark_notifications_read —
 --     catalog kinds stay member_can(org); new_follower is recipient only.
 --   notifications.org_id nullable for social kinds only. Mapping C:
@@ -25,9 +27,10 @@
 -- CREATE OR REPLACE FUNCTION, GRANT/REVOKE. Forward-only.
 -- CoS applies after merge + founder yes. Prod SQL apply needed after merge.
 -- ROLLBACK: restore follows_select to follower/followee = auth.uid();
---   drop notify_new_follower; restore my_* / mark from
---   20260914310000 / 20260720000700; drop recipient_user_id and
---   notifications_kind_scope; set org_id NOT NULL after backfill.
+--   drop notify_new_follower; drop notifications_new_follower_once;
+--   restore my_* / mark from 20260914310000 / 20260720000700;
+--   drop recipient_user_id and notifications_kind_scope;
+--   set org_id NOT NULL after backfill.
 -- ============================================================================
 
 -- ----------------------------------------------------------------------------
@@ -53,6 +56,10 @@ alter table public.notifications
 create index if not exists notifications_recipient_created_idx
   on public.notifications (recipient_user_id, created_at desc)
   where recipient_user_id is not null;
+
+create unique index if not exists notifications_new_follower_once
+  on public.notifications (recipient_user_id, created_by)
+  where kind = 'new_follower';
 
 alter table public.notifications
   drop constraint if exists notifications_kind_scope;
@@ -214,12 +221,7 @@ grant execute on function public.mark_notifications_read(uuid[]) to authenticate
 -- ----------------------------------------------------------------------------
 -- 4. Notify followee after a real follow insert. Pref default = in-app on.
 -- ----------------------------------------------------------------------------
-create or replace function public.notify_new_follower(
-  p_followee uuid,
-  p_title text,
-  p_body text,
-  p_source_refs jsonb
-)
+create or replace function public.notify_new_follower(p_followee uuid)
   returns uuid
   language plpgsql
   security definer
@@ -229,13 +231,11 @@ declare
   v_id uuid;
   v_me uuid;
   v_in_app boolean;
+  v_handle text;
 begin
   v_me := auth.uid();
   if v_me is null then raise exception 'Not authenticated'; end if;
   if p_followee is null or p_followee = v_me then
-    return null;
-  end if;
-  if coalesce(btrim(p_title), '') = '' or coalesce(btrim(p_body), '') = '' then
     return null;
   end if;
   if not exists (
@@ -251,6 +251,24 @@ begin
     return null;
   end if;
 
+  select lower(btrim(replace(handle, '@', '')))
+    into v_handle
+  from public.profiles
+  where id = v_me;
+  if v_handle is null or v_handle = '' then
+    return null;
+  end if;
+
+  if exists (
+    select 1
+    from public.notifications n
+    where n.kind = 'new_follower'
+      and n.recipient_user_id = p_followee
+      and n.created_by = v_me
+  ) then
+    return null;
+  end if;
+
   select coalesce((prefs -> 'new_follower' ->> 'in_app')::boolean, true)
     into v_in_app
   from public.user_notification_preferences
@@ -262,36 +280,45 @@ begin
     return null;
   end if;
 
-  insert into public.notifications (
-    org_id,
-    kind,
-    sender,
-    title,
-    body,
-    source_refs,
-    created_by,
-    recipient_user_id
-  )
-  values (
-    null,
-    'new_follower',
-    'member',
-    p_title,
-    p_body,
-    coalesce(p_source_refs, '{}'::jsonb),
-    v_me,
-    p_followee
-  )
-  returning id into v_id;
+  begin
+    insert into public.notifications (
+      org_id,
+      kind,
+      sender,
+      title,
+      body,
+      source_refs,
+      created_by,
+      recipient_user_id
+    )
+    values (
+      null,
+      'new_follower',
+      'member',
+      'New follower',
+      '@' || v_handle || ' followed you',
+      jsonb_build_object(
+        'actor_id', v_me,
+        'handle', v_handle,
+        'path', '/social/u/' || v_handle
+      ),
+      v_me,
+      p_followee
+    )
+    returning id into v_id;
+  exception
+    when unique_violation then
+      return null;
+  end;
   return v_id;
 end;
 $$;
 
-revoke execute on function public.notify_new_follower(uuid, text, text, jsonb) from public, anon;
-grant execute on function public.notify_new_follower(uuid, text, text, jsonb) to authenticated;
+revoke execute on function public.notify_new_follower(uuid) from public, anon;
+grant execute on function public.notify_new_follower(uuid) to authenticated;
 
-comment on function public.notify_new_follower(uuid, text, text, jsonb) is
-  'Recipient-targeted new_follower alert. Requires an existing follow row. Honors in-app pref (default on).';
+comment on function public.notify_new_follower(uuid) is
+  'Recipient-targeted new_follower alert. Requires an existing follow row. Composes title/body/source_refs from the caller profile. One alert per follower/followee. Honors in-app pref (default on).';
 
 -- ----------------------------------------------------------------------------
 -- 5. Apply-time proofs
@@ -328,8 +355,19 @@ begin
     raise exception 'notifications_kind_scope must pin new_follower to recipient_user_id';
   end if;
 
-  if to_regprocedure('public.notify_new_follower(uuid, text, text, jsonb)') is null then
+  if to_regprocedure('public.notify_new_follower(uuid)') is null then
     raise exception 'notify_new_follower missing after create';
+  end if;
+  if to_regprocedure('public.notify_new_follower(uuid, text, text, jsonb)') is not null then
+    raise exception 'notify_new_follower must not take caller-supplied copy';
+  end if;
+  if not exists (
+    select 1
+    from pg_indexes
+    where schemaname = 'public'
+      and indexname = 'notifications_new_follower_once'
+  ) then
+    raise exception 'notifications_new_follower_once missing';
   end if;
 
   raise notice 'social follow alerts applied; live follows counts; recipient new_follower';
