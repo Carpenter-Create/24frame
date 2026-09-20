@@ -4,6 +4,7 @@ import {
   isForbiddenMediaBucket,
   isForbiddenMediaKey,
   isOwnedSocialMediaKey,
+  isSocialMediaObjectKey,
   mediaItemsForInsert,
   ownedMediaItems,
   welcomeVideoKeyFromMedia,
@@ -30,6 +31,9 @@ describe("social media keys", () => {
     );
     expect(isOwnedSocialMediaKey(`stories/${USER}/${OBJECT}.jpg`, USER, "stories")).toBe(true);
     expect(isOwnedSocialMediaKey(`stories/${USER}/${OBJECT}.jpg`, USER)).toBe(false);
+    expect(isSocialMediaObjectKey(`posts/${USER}/${OBJECT}.jpg`)).toBe(true);
+    expect(isSocialMediaObjectKey(`stories/${USER}/${OBJECT}.mp4`)).toBe(true);
+    expect(isSocialMediaObjectKey(`misc/${USER}/${OBJECT}.jpg`)).toBe(false);
   });
 
   it("rejects title-bucket keys, traversal, and avatar prefixes", () => {

@@ -29,6 +29,13 @@ describe("GET /api/social/media", () => {
     expect(signedSocialMediaUrl).not.toHaveBeenCalled();
   });
 
+  it("is 400 for a key that is not a posts/ or stories/ object", async () => {
+    vi.mocked(getAuthUser).mockResolvedValue({ id: UID, email: "ada@example.com" });
+    const res = await GET(new Request("http://local/api/social/media?key=misc/leftover.bin"));
+    expect(res.status).toBe(400);
+    expect(signedSocialMediaUrl).not.toHaveBeenCalled();
+  });
+
   it("302s a freshly signed GET for an authenticated reader", async () => {
     vi.mocked(getAuthUser).mockResolvedValue({ id: UID, email: "ada@example.com" });
     vi.mocked(signedSocialMediaUrl).mockResolvedValue("https://media.example/signed");

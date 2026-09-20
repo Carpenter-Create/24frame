@@ -54,3 +54,20 @@ export function SocialAvatar({
     </div>
   );
 }
+
+export function SocialHighlightFace({ photoUrl }: { photoUrl?: string | null }) {
+  const [brokenSrc, setBrokenSrc] = useState<string | null>(null);
+  const face = photoUrl && brokenSrc !== photoUrl ? photoUrl : null;
+  if (!face) {
+    return <span className="block size-12 rounded-full bg-surface-muted" />;
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element -- same-origin GET; onError drops a miss
+    <img
+      src={face}
+      alt=""
+      className="size-12 rounded-full object-cover"
+      onError={() => setBrokenSrc(face)}
+    />
+  );
+}

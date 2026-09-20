@@ -32,7 +32,7 @@ import {
 import { socialProfilePublicLinks } from "@/lib/social-profile-links";
 import { socialProfileRoleChips } from "@/lib/social-profile-roles";
 import { parseSocialProfileTopics } from "@/lib/social-profile-topics";
-import { SocialAvatar } from "./social-avatar";
+import { SocialAvatar, SocialHighlightFace } from "./social-avatar";
 import { SocialLikeButton } from "./social-engagement";
 import { SocialProfileStats } from "./social-profile-stats";
 import { SocialEmpty } from "./social-empty";
@@ -314,12 +314,7 @@ export function SocialHighlights({
             className="flex w-14 shrink-0 flex-col items-center gap-1"
           >
             <span className={SOCIAL_HIGHLIGHT_RING_CLASS}>
-              {card.photoUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET
-                <img src={card.photoUrl} alt="" className="size-12 rounded-full object-cover" />
-              ) : (
-                <span className="block size-12 rounded-full bg-surface-muted" />
-              )}
+              <SocialHighlightFace photoUrl={card.photoUrl} />
             </span>
             <span className="w-full truncate text-center t-label text-ink">{card.label}</span>
           </Link>

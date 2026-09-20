@@ -134,6 +134,14 @@ export function socialMediaObjectKey(
   return `${lane}/${user.data}/${object.data}.${EXT_BY_TYPE[contentType]}`;
 }
 
+const SOCIAL_MEDIA_OBJECT_KEY_RE =
+  /^(posts|stories)\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})\.(jpg|jpeg|png|webp|gif|mp4|mov|webm)$/i;
+
+export function isSocialMediaObjectKey(key: string): boolean {
+  if (isForbiddenMediaKey(key)) return false;
+  return SOCIAL_MEDIA_OBJECT_KEY_RE.test(key);
+}
+
 export function isOwnedSocialMediaKey(
   key: string,
   userId: string,
@@ -142,9 +150,7 @@ export function isOwnedSocialMediaKey(
   if (isForbiddenMediaKey(key)) return false;
   const user = uuidSchema.safeParse(userId);
   if (!user.success) return false;
-  const match = key.match(
-    /^(posts|stories)\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})\.(jpg|jpeg|png|webp|gif|mp4|mov|webm)$/i,
-  );
+  const match = key.match(SOCIAL_MEDIA_OBJECT_KEY_RE);
   return !!match && match[1] === lane && match[2] === user.data;
 }
 
