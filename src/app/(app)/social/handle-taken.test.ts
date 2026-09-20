@@ -95,7 +95,7 @@ describe("createSocialProfile handle uniqueness", () => {
     expect(updates).toEqual([
       {
         table: "profiles",
-        row: { handle: "ada", display_name: "Ada Lovelace" },
+        row: { handle: "ADA", display_name: "Ada Lovelace" },
       },
     ]);
   });
