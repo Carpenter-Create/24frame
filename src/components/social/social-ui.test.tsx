@@ -178,6 +178,7 @@ describe("Social profile public face", () => {
     expect(identity).toContain("Writes engines.");
     expect(identity).toContain('src="https://s3.example/signed-avatar"');
     expect(identity).not.toContain("data-social-profile-roles");
+    expect(identity).not.toContain("data-social-profile-links");
     expect(identity).not.toContain("data-social-profile-imdb");
 
     const withRoles = renderToStaticMarkup(
@@ -257,6 +258,7 @@ describe("Social profile public face", () => {
     expect(withLinks).toContain('href="https://instagram.com/ada"');
     expect(withLinks).not.toContain(">https://instagram.com/ada<");
     expect(withLinks).toContain('aria-label="Instagram"');
+    expect(withLinks).toContain('rel="noopener noreferrer"');
     expect(uiSrc).toContain("socialProfileRolesLine");
     expect(
       uiSrc.slice(

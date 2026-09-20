@@ -141,6 +141,7 @@ describe("Social profile public face", () => {
     expect(html).toContain("https://24frame.co/@ada");
     expect(html).toContain('data-social-share-url="https://24frame.co/@ada"');
     expect(html).not.toContain("data-social-profile-url");
+    expect(html).not.toContain("data-social-profile-links");
     expect(html).not.toContain(">24frame.co/@ada<");
     expect(html).not.toContain("Copies ");
     expect(html).not.toContain("data-social-share-hint");
@@ -295,6 +296,8 @@ describe("Social profile public face", () => {
     expect(html).toContain('data-social-profile-link="instagram"');
     expect(html).toContain('href="https://instagram.com/ada"');
     expect(html).not.toContain(">https://instagram.com/ada<");
+    expect(html).toContain('aria-label="Instagram"');
+    expect(html).toContain('rel="noopener noreferrer"');
   });
 
   it("renders the welcome video band only when a signed URL exists", async () => {
