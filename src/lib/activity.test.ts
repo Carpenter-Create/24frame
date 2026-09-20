@@ -82,7 +82,8 @@ const DONE_OLD = {
   unread: false,
 };
 
-const FEED = [DONE_NEW, OPEN_NEW, OPEN_OLD, DONE_OLD, OPEN_FOLLOW];
+const FEED = [DONE_NEW, OPEN_NEW, OPEN_OLD, DONE_OLD];
+const FEED_WITH_FOLLOW = [...FEED, OPEN_FOLLOW];
 const NOW = new Date("2026-09-18T12:00:00.000Z");
 
 describe("Activity live feed — uncleared only", () => {
@@ -175,10 +176,13 @@ describe("Activity family chips", () => {
   });
 
   it("filters the live feed by the selected prefs family", () => {
-    expect(filterActivityItems(FEED, "aggregation").map((row) => row.id)).toEqual(["1", "2"]);
-    expect(filterActivityItems(FEED, "social").map((row) => row.id)).toEqual(["5"]);
-    expect(filterActivityItems(FEED, "reporting")).toEqual([]);
-    expect(filterActivityItems(FEED, "all").every((row) => row.unread)).toBe(true);
+    expect(filterActivityItems(FEED_WITH_FOLLOW, "aggregation").map((row) => row.id)).toEqual([
+      "1",
+      "2",
+    ]);
+    expect(filterActivityItems(FEED_WITH_FOLLOW, "social").map((row) => row.id)).toEqual(["5"]);
+    expect(filterActivityItems(FEED_WITH_FOLLOW, "reporting")).toEqual([]);
+    expect(filterActivityItems(FEED_WITH_FOLLOW, "all").every((row) => row.unread)).toBe(true);
   });
 
   it("builds family hrefs without status or period chrome", () => {

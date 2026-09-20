@@ -584,13 +584,10 @@ export function SocialFollowButton({
   stretch?: boolean;
 }) {
   const router = useRouter();
-  const [isFollowing, setIsFollowing] = useState(following);
+  const [override, setOverride] = useState<boolean | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    setIsFollowing(following);
-  }, [following]);
+  const isFollowing = override ?? following;
 
   return (
     <div
@@ -605,11 +602,11 @@ export function SocialFollowButton({
           const next = !isFollowing;
           setPending(true);
           setError("");
-          setIsFollowing(next);
+          setOverride(next);
           const result = await toggleSocialFollow(formData);
           setPending(false);
           if (result.error) {
-            setIsFollowing(!next);
+            setOverride(null);
             setError(result.error);
             return;
           }

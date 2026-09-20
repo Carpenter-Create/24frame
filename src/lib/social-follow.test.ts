@@ -52,7 +52,7 @@ describe("social follow helpers", () => {
     );
     expect(chunk).toContain("const result = await toggleSocialFollow");
     expect(chunk).toContain("router.refresh()");
-    expect(chunk).toContain("setIsFollowing");
+    expect(chunk).toContain("setOverride");
     expect(chunk).toContain("pending");
     expect(chunk).toContain("FormError");
     expect(chunk).toContain("disabled={pending}");
