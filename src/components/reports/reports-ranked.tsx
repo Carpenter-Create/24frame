@@ -6,7 +6,7 @@ import { DashboardRankedRows } from "@/components/dashboard/dashboard-ranked";
 import { DashboardViewAll, DashboardViewAlts } from "@/components/dashboard/dashboard-view-alts";
 import { DashboardTerritoryMap } from "@/components/dashboard/dashboard-territory-map";
 import { SegmentedTrack } from "@/components/ui/segmented-track";
-import { SEGMENTED_TRACK_PERSIST } from "@/lib/segmented-track";
+import { SEGMENTED_TRACK_PERSIST, segmentedItemOn } from "@/lib/segmented-track";
 import {
   DASHBOARD_CARD_PAD_LIST,
   DASHBOARD_MODULE_CARD_CLASS,
@@ -119,26 +119,28 @@ export function ReportsTopPerforming({
             thumbClass={DASHBOARD_TOP_PILL_THUMB_CLASS}
             data-reports-top-pills=""
           >
-            {pills.map((id) => {
-              const on = id === active;
-              const item = PANES[id];
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  aria-pressed={on}
-                  data-segmented-item=""
-                  data-reports-top-pill={id}
-                  className={cn(
-                    DASHBOARD_TOP_PILL_BUTTON_CLASS,
-                    on ? DASHBOARD_TOP_PILL_BUTTON_ON_CLASS : DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
-                  )}
-                  onClick={() => setPill(id)}
-                >
-                  {item.label}
-                </button>
-              );
-            })}
+            {({ selectedIndex }) =>
+              pills.map((id, index) => {
+                const on = segmentedItemOn(index, selectedIndex);
+                const item = PANES[id];
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    aria-pressed={on}
+                    data-segmented-item=""
+                    data-reports-top-pill={id}
+                    className={cn(
+                      DASHBOARD_TOP_PILL_BUTTON_CLASS,
+                      on ? DASHBOARD_TOP_PILL_BUTTON_ON_CLASS : DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
+                    )}
+                    onClick={() => setPill(id)}
+                  >
+                    {item.label}
+                  </button>
+                );
+              })
+            }
           </SegmentedTrack>
           <DashboardViewAlts
             modes={["list", "bars"]}

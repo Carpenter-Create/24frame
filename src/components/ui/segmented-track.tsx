@@ -1,11 +1,16 @@
 "use client";
 
 import {
+  Children,
+  Fragment,
+  cloneElement,
+  isValidElement,
   useLayoutEffect,
   useRef,
   useState,
   type CSSProperties,
   type MouseEvent as ReactMouseEvent,
+  type ReactElement,
   type ReactNode,
 } from "react";
 
@@ -16,24 +21,66 @@ import {
   houseSegmentedThumbHidden,
 } from "@/lib/house-shell";
 import {
+  commitSegmentedVisualIntent,
   measureSegmentedBox,
   projectSegmentedThumbFlight,
   readSegmentedThumbFlight,
+  resolveSegmentedVisualIndex,
   scheduleSegmentedThumbRestore,
   segmentedItemIndexFromEventTarget,
+  segmentedItemOn,
   segmentedThumbNeedsRestore,
   segmentedThumbStyle,
+  segmentedTrackSelection,
   startSegmentedThumbFlight,
   type SegmentedThumbBox,
+  type SegmentedTrackSelection,
 } from "@/lib/segmented-track";
 
+export type { SegmentedTrackSelection };
+
 export interface SegmentedTrackProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, "className"> {
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "className" | "children"> {
   activeIndex: number;
   persistKey?: string;
   trackClass?: string;
   thumbClass?: string;
-  children: ReactNode;
+  children: (selection: SegmentedTrackSelection) => ReactNode;
+}
+
+function isSegmentedItem(node: ReactNode): node is ReactElement<{
+  "data-segmented-item"?: unknown;
+  "data-segmented-selected"?: "";
+}> {
+  return (
+    isValidElement(node) &&
+    (node.props as { "data-segmented-item"?: unknown })["data-segmented-item"] !==
+      undefined
+  );
+}
+
+export function stampSegmentedSelected(
+  children: ReactNode,
+  selectedIndex: number,
+): ReactNode {
+  let itemIndex = 0;
+
+  function mapNode(node: ReactNode): ReactNode {
+    if (isValidElement(node) && node.type === Fragment) {
+      const nested = (node.props as { children?: ReactNode }).children;
+      return cloneElement(node, undefined, Children.map(nested, mapNode));
+    }
+    if (!isSegmentedItem(node)) return node;
+    const index = itemIndex;
+    itemIndex += 1;
+    return cloneElement(node, {
+      "data-segmented-selected": segmentedItemOn(index, selectedIndex)
+        ? ""
+        : undefined,
+    });
+  }
+
+  return Children.map(children, mapNode);
 }
 
 function thumbCss(
@@ -61,7 +108,13 @@ export function SegmentedTrack({
   const placedRef = useRef(false);
   const routeIndexRef = useRef(activeIndex);
   const lastBoxRef = useRef<SegmentedThumbBox | undefined>(undefined);
-  const [visualIndex, setVisualIndex] = useState(activeIndex);
+  const [visualIndex, setVisualIndex] = useState(() =>
+    resolveSegmentedVisualIndex(persistKey, activeIndex),
+  );
+
+  function commitVisualIndex(index: number) {
+    setVisualIndex(commitSegmentedVisualIntent(persistKey, index, activeIndex));
+  }
   const [thumbStyle, setThumbStyle] = useState<CSSProperties>(() => {
     if (houseSegmentedThumbHidden(activeIndex) || !persistKey) return { opacity: 0 };
     const flight = readSegmentedThumbFlight(persistKey);
@@ -76,8 +129,8 @@ export function SegmentedTrack({
   useLayoutEffect(() => {
     if (routeIndexRef.current === activeIndex) return;
     routeIndexRef.current = activeIndex;
-    setVisualIndex(activeIndex);
-  }, [activeIndex]);
+    setVisualIndex(resolveSegmentedVisualIndex(persistKey, activeIndex));
+  }, [activeIndex, persistKey]);
 
   useLayoutEffect(() => {
     const track = trackRef.current;
@@ -136,10 +189,12 @@ export function SegmentedTrack({
     const track = trackRef.current;
     if (track) {
       const index = segmentedItemIndexFromEventTarget(track, event.target);
-      if (index >= 0) setVisualIndex(index);
+      if (index >= 0) commitVisualIndex(index);
     }
     onClickCapture?.(event);
   }
+
+  const selection = segmentedTrackSelection(visualIndex);
 
   return (
     <div
@@ -155,7 +210,7 @@ export function SegmentedTrack({
         style={thumbStyle}
         aria-hidden="true"
       />
-      {children}
+      {stampSegmentedSelected(children(selection), selection.selectedIndex)}
     </div>
   );
 }

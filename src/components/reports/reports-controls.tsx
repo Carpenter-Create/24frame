@@ -8,7 +8,7 @@ import { CaretDown } from "@phosphor-icons/react";
 import { Close44 } from "@/components/chrome/house";
 import { AppearanceCheck } from "@/components/chrome/appearance-check";
 import { SegmentedTrack } from "@/components/ui/segmented-track";
-import { SEGMENTED_TRACK_PERSIST } from "@/lib/segmented-track";
+import { SEGMENTED_TRACK_PERSIST, segmentedItemOn } from "@/lib/segmented-track";
 import { Input } from "@/components/ui/input";
 import {
   DASHBOARD_PERIOD_CHEVRON_CLASS,
@@ -170,35 +170,39 @@ function ReportsPeriodCluster({
         thumbClass={HOUSE_SEGMENTED_THUMB_CLASS}
         data-reports-period-cluster=""
       >
-        {REPORTS_PERIOD_PRESETS.map((preset) => {
-          const on = selectedGrain === preset.grain;
-          const option = options.find((row) => row.group === preset.grain);
-          const key = option?.key ?? preset.grain;
-          return (
-            <button
-              key={preset.grain}
-              type="button"
-              data-segmented-item=""
-              data-reports-period-chip={preset.grain}
-              aria-pressed={on}
-              className={cn(
-                HOUSE_SEGMENTED_ITEM_BASE_CLASS,
-                on ? HOUSE_SEGMENTED_ITEM_ON_CLASS : HOUSE_SEGMENTED_ITEM_OFF_CLASS,
-              )}
-              onClick={() => onPick(key)}
+        {({ selectedIndex }) => (
+          <>
+            {REPORTS_PERIOD_PRESETS.map((preset, index) => {
+              const on = segmentedItemOn(index, selectedIndex);
+              const option = options.find((row) => row.group === preset.grain);
+              const key = option?.key ?? preset.grain;
+              return (
+                <button
+                  key={preset.grain}
+                  type="button"
+                  data-segmented-item=""
+                  data-reports-period-chip={preset.grain}
+                  aria-pressed={on}
+                  className={cn(
+                    HOUSE_SEGMENTED_ITEM_BASE_CLASS,
+                    on ? HOUSE_SEGMENTED_ITEM_ON_CLASS : HOUSE_SEGMENTED_ITEM_OFF_CLASS,
+                  )}
+                  onClick={() => onPick(key)}
+                >
+                  {preset.label}
+                </button>
+              );
+            })}
+            <span
+              data-reports-period-custom=""
+              data-reports-period-stub=""
+              title={REPORTS_PAGE.customStub}
+              className={cn(HOUSE_SEGMENTED_ITEM_BASE_CLASS, REPORTS_PERIOD_CHIP_STUB_CLASS)}
             >
-              {preset.label}
-            </button>
-          );
-        })}
-        <span
-          data-reports-period-custom=""
-          data-reports-period-stub=""
-          title={REPORTS_PAGE.customStub}
-          className={cn(HOUSE_SEGMENTED_ITEM_BASE_CLASS, REPORTS_PERIOD_CHIP_STUB_CLASS)}
-        >
-          {REPORTS_PAGE.custom}
-        </span>
+              {REPORTS_PAGE.custom}
+            </span>
+          </>
+        )}
       </SegmentedTrack>
       <button
         type="button"

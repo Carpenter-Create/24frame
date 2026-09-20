@@ -28,6 +28,7 @@ const OPEN = {
 };
 
 const inboxSrc = readFileSync("src/components/activity/activity-inbox.tsx", "utf8");
+const chipsSrc = readFileSync("src/components/activity/activity-family-chips.tsx", "utf8");
 const markSrc = readFileSync("src/components/activity/mark-done.tsx", "utf8");
 
 describe("ActivityInbox", () => {
@@ -76,6 +77,14 @@ describe("ActivityInbox", () => {
     expect(inboxSrc).not.toContain("activityStatus");
     expect(inboxSrc).not.toContain("activityPeriod");
     expect(inboxSrc).not.toContain("data-activity-status");
+    expect(inboxSrc).toContain("ActivityFamilyChips");
+    expect(chipsSrc).toContain("SEGMENTED_TRACK_PERSIST.activityFamily");
+    expect(chipsSrc).toContain("({ selectedIndex })");
+    expect(chipsSrc).toContain("segmentedItemOn");
+    expect(chipsSrc).not.toContain("pendingFamily");
+    expect(chipsSrc).not.toContain("activityStatus");
+    expect(chipsSrc).not.toContain(">Open<");
+    expect(chipsSrc).not.toContain(">Done<");
     expect(markSrc).toContain("<X");
     expect(markSrc).not.toContain("ACTIVITY_PAGE.done");
   });

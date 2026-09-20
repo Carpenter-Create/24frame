@@ -4,6 +4,16 @@
 // would otherwise snap. A module flight stores from/to + start time
 // so the next mount can paint the in-flight box and finish the glide
 // with the remaining duration.
+//
+// visualIndex is the SoT for BOTH the thumb and selected ink.
+// Click intent advances it immediately. Route hops that remount
+// the track (Home `?period=` Suspense, workspace Social fork)
+// would otherwise reset ink to the stale route while the thumb
+// flight continues. Persist remembers the route index at click
+// and only wins while that stale route is still showing. A new
+// committed index (Settings -1, leave/return, settled hop)
+// yields to the route. No-op re-clicks do not write persist.
+// Hosts must not keep a local pendingIndex / pendingFamily fork.
 
 import {
   HOUSE_SEGMENTED_THUMB_DURATION_MS,
@@ -39,7 +49,13 @@ export const SEGMENTED_TRACK_PERSIST = {
   reportsRanked: "reports-top-pills",
 } as const;
 
+export type SegmentedVisualPersist = {
+  visualIndex: number;
+  fromRouteIndex: number;
+};
+
 const thumbFlights = new Map<string, SegmentedThumbFlight>();
+const visualIndexes = new Map<string, SegmentedVisualPersist>();
 
 export function readSegmentedThumbFlight(
   persistKey: string,
@@ -82,9 +98,84 @@ export function writeSegmentedThumbCache(
 export function clearSegmentedThumbCache(persistKey?: string): void {
   if (persistKey) {
     thumbFlights.delete(persistKey);
+    visualIndexes.delete(persistKey);
     return;
   }
   thumbFlights.clear();
+  visualIndexes.clear();
+}
+
+export function readSegmentedVisualIndex(
+  persistKey: string,
+): number | undefined {
+  return visualIndexes.get(persistKey)?.visualIndex;
+}
+
+export function readSegmentedVisualPersist(
+  persistKey: string,
+): SegmentedVisualPersist | undefined {
+  return visualIndexes.get(persistKey);
+}
+
+export function writeSegmentedVisualIndex(
+  persistKey: string,
+  visualIndex: number,
+  fromRouteIndex: number,
+): void {
+  if (!Number.isInteger(visualIndex) || !Number.isInteger(fromRouteIndex)) {
+    return;
+  }
+  visualIndexes.set(persistKey, { visualIndex, fromRouteIndex });
+}
+
+export function clearSegmentedVisualIndex(persistKey?: string): void {
+  if (persistKey) {
+    visualIndexes.delete(persistKey);
+    return;
+  }
+  visualIndexes.clear();
+}
+
+/** Persist wins only while the stale click-time route is still showing. */
+export function resolveSegmentedVisualIndex(
+  persistKey: string | undefined,
+  routeIndex: number,
+): number {
+  if (persistKey == null) return routeIndex;
+  // None selected (Settings) is a settled leave. Drop every hop so a
+  // later Home/period remount cannot restore abandoned ink.
+  if (routeIndex < 0) {
+    visualIndexes.clear();
+    return routeIndex;
+  }
+  const pending = visualIndexes.get(persistKey);
+  if (pending == null) return routeIndex;
+  if (pending.visualIndex === routeIndex) {
+    visualIndexes.delete(persistKey);
+    return routeIndex;
+  }
+  if (pending.fromRouteIndex === routeIndex) {
+    return pending.visualIndex;
+  }
+  visualIndexes.delete(persistKey);
+  return routeIndex;
+}
+
+/** Click intent. Re-clicking the committed segment clears persist. */
+export function commitSegmentedVisualIntent(
+  persistKey: string | undefined,
+  intentIndex: number,
+  routeIndex: number,
+): number {
+  if (!Number.isInteger(intentIndex)) return routeIndex;
+  if (intentIndex === routeIndex) {
+    if (persistKey) visualIndexes.delete(persistKey);
+    return routeIndex;
+  }
+  if (persistKey) {
+    writeSegmentedVisualIndex(persistKey, intentIndex, routeIndex);
+  }
+  return intentIndex;
 }
 
 export function isUsableSegmentedThumbBox(box: SegmentedThumbBox): boolean {
@@ -228,4 +319,32 @@ export function segmentedItemIndexFromEventTarget(
   if (!item || !track.contains(item)) return -1;
   const items = track.querySelectorAll("[data-segmented-item]");
   return Array.prototype.indexOf.call(items, item);
+}
+
+export type SegmentedTrackSelection = {
+  selectedIndex: number;
+};
+
+export const SEGMENTED_ITEM_SELECTED_ATTR = "data-segmented-selected";
+
+export function segmentedTrackSelection(
+  visualIndex: number,
+): SegmentedTrackSelection {
+  return { selectedIndex: visualIndex };
+}
+
+export function segmentedItemOn(
+  index: number,
+  selectedIndex: number,
+): boolean {
+  return index === selectedIndex;
+}
+
+export function segmentedItemSelectedProps(
+  index: number,
+  selectedIndex: number,
+): { "data-segmented-selected"?: "" } {
+  return segmentedItemOn(index, selectedIndex)
+    ? { "data-segmented-selected": "" }
+    : {};
 }

@@ -10,12 +10,22 @@ import {
   projectSegmentedThumbFlight,
   readSegmentedThumbCache,
   scheduleSegmentedThumbRestore,
+  SEGMENTED_ITEM_SELECTED_ATTR,
   SEGMENTED_TRACK_PERSIST,
+  commitSegmentedVisualIntent,
+  readSegmentedVisualIndex,
+  readSegmentedVisualPersist,
+  resolveSegmentedVisualIndex,
+  segmentedItemOn,
+  segmentedItemSelectedProps,
   segmentedThumbNeedsRestore,
   segmentedThumbStyle,
+  segmentedTrackSelection,
   startSegmentedThumbFlight,
   writeSegmentedThumbCache,
+  writeSegmentedVisualIndex,
 } from "./segmented-track";
+import { overviewLeadActiveIndex, overviewLeadPills } from "./overview";
 
 afterEach(() => {
   clearSegmentedThumbCache();
@@ -139,5 +149,83 @@ describe("segmented thumb geometry", () => {
     const painted = readSegmentedThumbCache(SEGMENTED_TRACK_PERSIST.workspace, 5_080);
     expect(painted?.left).toBeGreaterThan(from.left);
     expect(painted?.left).toBeLessThan(to.left);
+  });
+});
+
+describe("segmented track optimistic selection", () => {
+  it("treats visualIndex as selected ink before the route family updates", () => {
+    const routeIndex = 0;
+    const visualIndex = 4;
+    expect(segmentedTrackSelection(visualIndex)).toEqual({ selectedIndex: 4 });
+    expect(segmentedItemOn(routeIndex, visualIndex)).toBe(false);
+    expect(segmentedItemOn(visualIndex, visualIndex)).toBe(true);
+    expect(segmentedItemSelectedProps(visualIndex, visualIndex)).toEqual({
+      "data-segmented-selected": "",
+    });
+    expect(segmentedItemSelectedProps(routeIndex, visualIndex)).toEqual({});
+    expect(SEGMENTED_ITEM_SELECTED_ATTR).toBe("data-segmented-selected");
+    expect(SEGMENTED_TRACK_PERSIST.activityFamily).toBe("activity-family");
+    expect(SEGMENTED_TRACK_PERSIST.period).toBe("house-period-presets");
+  });
+
+  it("keeps pending visual index across remount until the route catches up", () => {
+    writeSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period, 1, 0);
+    expect(readSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period)).toBe(1);
+    expect(readSegmentedVisualPersist(SEGMENTED_TRACK_PERSIST.period)).toEqual({
+      visualIndex: 1,
+      fromRouteIndex: 0,
+    });
+    expect(resolveSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period, 0)).toBe(1);
+    expect(readSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period)).toBe(1);
+    expect(resolveSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period, 1)).toBe(1);
+    expect(readSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period)).toBeUndefined();
+    expect(resolveSegmentedVisualIndex(undefined, 2)).toBe(2);
+  });
+
+  it("lets a new committed route win after settle, including Settings and leave", () => {
+    writeSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period, 1, 0);
+    expect(resolveSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period, 4)).toBe(4);
+    expect(readSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period)).toBeUndefined();
+
+    writeSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period, 1, 0);
+    const settingsIndex = overviewLeadActiveIndex(
+      "/settings/preferences",
+      "aggregation",
+      overviewLeadPills(),
+    );
+    expect(settingsIndex).toBe(-1);
+    expect(
+      resolveSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.workspace, settingsIndex),
+    ).toBe(-1);
+    expect(readSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.workspace)).toBeUndefined();
+    expect(readSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period)).toBeUndefined();
+    expect(resolveSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period, 0)).toBe(0);
+
+    writeSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.workspace, 2, 1);
+    writeSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period, 1, 0);
+    expect(
+      resolveSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.workspace, settingsIndex),
+    ).toBe(-1);
+    expect(readSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.workspace)).toBeUndefined();
+    expect(readSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period)).toBeUndefined();
+  });
+
+  it("does not persist a no-op re-click of the committed segment", () => {
+    expect(
+      commitSegmentedVisualIntent(SEGMENTED_TRACK_PERSIST.workspace, 1, 1),
+    ).toBe(1);
+    expect(readSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.workspace)).toBeUndefined();
+
+    expect(
+      commitSegmentedVisualIntent(SEGMENTED_TRACK_PERSIST.workspace, 2, 1),
+    ).toBe(2);
+    expect(readSegmentedVisualPersist(SEGMENTED_TRACK_PERSIST.workspace)).toEqual({
+      visualIndex: 2,
+      fromRouteIndex: 1,
+    });
+    expect(
+      commitSegmentedVisualIntent(SEGMENTED_TRACK_PERSIST.workspace, 1, 1),
+    ).toBe(1);
+    expect(readSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.workspace)).toBeUndefined();
   });
 });

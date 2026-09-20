@@ -6,7 +6,7 @@ import Link from "next/link";
 import { DashboardViewAll, DashboardViewAlts } from "@/components/dashboard/dashboard-view-alts";
 import { DashboardTerritoryMap } from "@/components/dashboard/dashboard-territory-map";
 import { SegmentedTrack } from "@/components/ui/segmented-track";
-import { SEGMENTED_TRACK_PERSIST } from "@/lib/segmented-track";
+import { SEGMENTED_TRACK_PERSIST, segmentedItemOn } from "@/lib/segmented-track";
 import {
   DASHBOARD_CARD_PAD_LIST,
   DASHBOARD_SECTION_TITLE_CLASS,
@@ -446,28 +446,30 @@ export function DashboardTopPerforming({
             thumbClass={DASHBOARD_TOP_PILL_THUMB_CLASS}
             data-dashboard-top-pills=""
           >
-            {pillKeys.map((id) => {
-              const on = id === pill;
-              const item = TOP_PERFORMING_PANES[id];
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  aria-pressed={on}
-                  data-segmented-item=""
-                  data-dashboard-top-pill={id}
-                  data-dashboard-ranked={id === pill ? undefined : item.testId}
-                  {...(id === "territories" ? { "data-dashboard-territory": "" } : {})}
-                  className={cn(
-                    DASHBOARD_TOP_PILL_BUTTON_CLASS,
-                    on ? DASHBOARD_TOP_PILL_BUTTON_ON_CLASS : DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
-                  )}
-                  onClick={() => selectPill(id)}
-                >
-                  {item.label}
-                </button>
-              );
-            })}
+            {({ selectedIndex }) =>
+              pillKeys.map((id, index) => {
+                const on = segmentedItemOn(index, selectedIndex);
+                const item = TOP_PERFORMING_PANES[id];
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    aria-pressed={on}
+                    data-segmented-item=""
+                    data-dashboard-top-pill={id}
+                    data-dashboard-ranked={id === pill ? undefined : item.testId}
+                    {...(id === "territories" ? { "data-dashboard-territory": "" } : {})}
+                    className={cn(
+                      DASHBOARD_TOP_PILL_BUTTON_CLASS,
+                      on ? DASHBOARD_TOP_PILL_BUTTON_ON_CLASS : DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
+                    )}
+                    onClick={() => selectPill(id)}
+                  >
+                    {item.label}
+                  </button>
+                );
+              })
+            }
           </SegmentedTrack>
           <DashboardViewAlts
             modes={pane.modes}
