@@ -4,7 +4,7 @@ import { SocialJoinGroupButton, SocialPostCompose } from "@/components/social/so
 import { SocialPostCard } from "@/components/social/social-ui";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
-import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
+import { SOCIAL, SOCIAL_ROUTES, socialPersonLabel } from "@/lib/social";
 import {
   loadLikedPostIds,
   loadProfilesByIds,
@@ -91,7 +91,10 @@ export default async function SocialGroupPage({
                 createdAt: post.created_at,
                 authorId: post.author_id,
                 authorHandle: author?.handle ?? null,
-                authorName: author?.display_name ?? "Member",
+                authorName: socialPersonLabel({
+                  handle: author?.handle ?? "",
+                  displayName: author?.display_name,
+                }),
                 authorPhotoUrl: faces.get(post.author_id) ?? null,
                 groupSlug: group.slug,
                 groupName: group.name,

@@ -9,6 +9,7 @@ import {
   SocialAuthorHistory,
   SocialAvatar,
   SocialConversationFaces,
+  SocialPersonRow,
   SocialPostCard,
   SocialProfileIdentity,
 } from "./social-ui";
@@ -35,6 +36,29 @@ describe("SocialAvatar", () => {
     expect(html).toContain("AL");
     expect(html).not.toContain("<img");
     expect(html).not.toContain("overflow-hidden");
+  });
+});
+
+describe("SocialPersonRow", () => {
+  it("prints handle above a real name and never prints Member", () => {
+    const named = renderToStaticMarkup(
+      <SocialPersonRow handle="joshua" displayName="Joshua A" photoUrl={null} href="/social/u/joshua" />,
+    );
+    expect(named).toContain("data-social-person-row");
+    expect(named).toContain("data-social-person-handle");
+    expect(named).toContain("@joshua");
+    expect(named).toContain("Joshua A");
+    expect(named.indexOf("@joshua")).toBeLessThan(named.indexOf("Joshua A"));
+    expect(named).toContain('href="/social/u/joshua"');
+    expect(named).not.toContain("truncate");
+
+    const sentinel = renderToStaticMarkup(
+      <SocialPersonRow handle="joshua" displayName="Member" photoUrl={null} />,
+    );
+    expect(sentinel).toContain("@joshua");
+    expect(sentinel).not.toContain("Member");
+    expect(sentinel).not.toContain("data-social-person-name");
+    expect(uiSrc).toContain("socialPersonIdentity");
   });
 });
 

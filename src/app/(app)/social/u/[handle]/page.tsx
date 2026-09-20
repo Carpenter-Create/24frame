@@ -19,6 +19,7 @@ import {
   SOCIAL_PROFILE_TAB_PARAM,
   SOCIAL_ROUTES,
   socialMemberHref,
+  socialPersonLabel,
   socialRelativeTime,
   socialStoryHref,
 } from "@/lib/social";
@@ -105,7 +106,9 @@ export default async function SocialPublicProfilePage({
   return (
     <div data-social-member="" className={SOCIAL_HOME_LAYOUT_CLASS}>
       <div className={SOCIAL_HOME_CENTER_CLASS}>
-        <h1 className="sr-only">{member.display_name}</h1>
+        <h1 className="sr-only">
+          {socialPersonLabel({ handle: member.handle, displayName: member.display_name })}
+        </h1>
         <SocialProfileIdentity
           name={member.display_name}
           handle={member.handle}
@@ -151,7 +154,10 @@ export default async function SocialPublicProfilePage({
                 socialAuthorPostCard({
                   post,
                   authorHandle: member.handle,
-                  authorName: member.display_name,
+                  authorName: socialPersonLabel({
+                    handle: member.handle,
+                    displayName: member.display_name,
+                  }),
                   authorPhotoUrl: photoUrl,
                   liked: liked.has(post.id),
                   canLike: !!own,

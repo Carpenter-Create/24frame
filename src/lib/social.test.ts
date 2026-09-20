@@ -30,6 +30,8 @@ import {
   socialHandleRequiredError,
   socialHomeLaneHref,
   socialInitials,
+  socialPersonIdentity,
+  socialPublicDisplayName,
   socialMediaRuleMessage,
   formatSocialCount,
   socialProfileHref,
@@ -192,6 +194,28 @@ describe("profile opt-in", () => {
     expect(isEligibleBirthDate("2014-01-01", new Date("2026-09-12T00:00:00.000Z"))).toBe(false);
     expect(isEligibleBirthDate("2013-09-12", new Date("2026-09-12T00:00:00.000Z"))).toBe(true);
     expect(socialInitials("Ada Lovelace")).toBe("AL");
+  });
+
+  it("treats Member as an empty person name and keeps handle primary", () => {
+    expect(SOCIAL.member.title).toBe("Member");
+    expect(SOCIAL.profile.defaultDisplayName).toBe("Member");
+    expect(socialPublicDisplayName("Ada Lovelace")).toBe("Ada Lovelace");
+    expect(socialPublicDisplayName("Member")).toBeNull();
+    expect(socialPublicDisplayName("  Member  ")).toBeNull();
+    expect(socialPublicDisplayName("")).toBeNull();
+    const named = socialPersonIdentity({ handle: "joshua", displayName: "Joshua A" });
+    expect(named.handleLabel).toBe("@joshua");
+    expect(named.name).toBe("Joshua A");
+    expect(named.label).toBe("Joshua A");
+    const sentinel = socialPersonIdentity({ handle: "joshua", displayName: "Member" });
+    expect(sentinel.handleLabel).toBe("@joshua");
+    expect(sentinel.name).toBeNull();
+    expect(sentinel.label).toBe("joshua");
+    expect(sentinel.avatarName).toBe("joshua");
+    expect(JSON.stringify(sentinel)).not.toContain("Member");
+    const sameAsHandle = socialPersonIdentity({ handle: "joshua", displayName: "joshua" });
+    expect(sameAsHandle.name).toBeNull();
+    expect(sameAsHandle.label).toBe("joshua");
   });
 
   it("strips @ from handle input and keeps the house profile URL stable", () => {

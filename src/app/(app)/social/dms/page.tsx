@@ -7,7 +7,7 @@ import { InlineNotice } from "@/components/ui/inline-notice";
 import { SocialDmsRowsSkeleton } from "@/components/social/social-skeletons";
 import { SocialConversationFaces } from "@/components/social/social-ui";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
-import { conversationRoomLabel, inboxPeerIds, SOCIAL, socialDmHref } from "@/lib/social";
+import { conversationRoomLabel, inboxPeerIds, SOCIAL, socialDmHref, socialPersonLabel } from "@/lib/social";
 import { loadDmInbox } from "@/lib/social-dms";
 import { loadProfilesByIds } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
@@ -53,7 +53,10 @@ async function SocialDmsInbox({ session }: { session: SocialSession }) {
               const peer = peers.get(id);
               return {
                 id,
-                name: peer?.display_name ?? "Member",
+                name: socialPersonLabel({
+                  handle: peer?.handle ?? "",
+                  displayName: peer?.display_name,
+                }),
                 photoUrl: faces.get(id) ?? null,
               };
             });

@@ -95,11 +95,13 @@ describe("ensureOwnSocialProfile", () => {
       email: "acarpcreate@example.com",
       name: null,
     });
-    expect(row?.display_name).toBe(SOCIAL.profile.defaultDisplayName);
+    expect(row?.display_name).toBe("");
+    expect(row?.display_name).not.toBe(SOCIAL.profile.defaultDisplayName);
     expect(inserts[0]).toMatchObject({
       handle: "acarpcreate",
-      display_name: SOCIAL.profile.defaultDisplayName,
+      display_name: "",
     });
+    expect(inserts[0]).not.toMatchObject({ display_name: "Member" });
   });
 
   it("retries a collided handle and still only inserts for the session user", async () => {

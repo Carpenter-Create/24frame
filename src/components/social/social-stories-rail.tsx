@@ -18,7 +18,7 @@ import {
 } from "@/lib/social-chrome";
 import { SOCIAL_ICON_SIZE_STORY_PLUS } from "@/lib/social-icons";
 import type { SocialStoryRailCard } from "@/lib/social-feed";
-import { SOCIAL, SOCIAL_ROUTES, socialFirstName, socialInitials, socialStoryHref } from "@/lib/social";
+import { SOCIAL, SOCIAL_ROUTES, socialFirstName, socialInitials, socialPersonLabel, socialStoryHref } from "@/lib/social";
 
 function storyLabel(name: string): string {
   const parts = name.trim().split(/\s+/);
@@ -84,7 +84,10 @@ function HomeTallStoriesRail({
         ) : null}
         {cards.map((card) => {
           const author = authors.get(card.authorId);
-          const name = author?.display_name ?? "Member";
+          const name = socialPersonLabel({
+            handle: author?.handle ?? "",
+            displayName: author?.display_name,
+          });
           const photo = faces.get(card.authorId);
           return (
             <Link
@@ -190,7 +193,10 @@ export function SocialStoriesRail({
         ) : null}
         {cards.map((card) => {
           const author = authors.get(card.authorId);
-          const name = author?.display_name ?? "Member";
+          const name = socialPersonLabel({
+            handle: author?.handle ?? "",
+            displayName: author?.display_name,
+          });
           const photo = faces.get(card.authorId);
           return (
             <Link
@@ -238,7 +244,10 @@ export function SocialStoriesRail({
         ) : null}
         {cards.map((card) => {
           const author = authors.get(card.authorId);
-          const name = author?.display_name ?? "Member";
+          const name = socialPersonLabel({
+            handle: author?.handle ?? "",
+            displayName: author?.display_name,
+          });
           const photo = faces.get(card.authorId);
           return (
             <Link
