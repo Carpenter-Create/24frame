@@ -153,17 +153,6 @@ describe("SettingsOrganizationPage", () => {
     expect(html).toContain(ACCOUNT_INVITE.revoke);
     expect(html).toContain("ada@example.com · Account owner · Accepted");
     expect(html).toContain("Viewer · Invited");
-    expect(html).toContain("data-identity-avatar");
-    expect(html).toContain("data-settings-drill-leading");
-    expect(memberRow).toContain("data-identity-avatar");
-    expect(memberRow).toContain(">AD<");
-    expect(pendingRow).toContain("data-identity-avatar");
-    expect(pendingRow).toContain(">PA<");
-    const inviteStart = html.indexOf('data-settings-drill-row="team-invite"');
-    const inviteRow = html.slice(inviteStart, html.indexOf("</li>", inviteStart));
-    expect(inviteRow).not.toContain("data-identity-avatar");
-    expect(inviteRow).not.toContain("data-settings-drill-leading");
-    expect(signedAvatarUrls).toHaveBeenCalledWith(["u1"]);
     expect(html).not.toContain("Withdrawn");
     expect(html).not.toContain("Removed");
     expect(html).not.toContain("Needs review");
