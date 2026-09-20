@@ -36,7 +36,7 @@ const ICONS: Record<SocialLinkPlatform, Icon> = {
 export function SocialProfileLinkRow({ links }: { links: readonly SocialProfileLink[] }) {
   if (links.length === 0) return null;
   return (
-    <div data-social-profile-links="" className="mt-2 flex flex-wrap items-center gap-3">
+    <div data-social-profile-links="" className="flex flex-wrap items-center gap-2">
       {links.map((link) => {
         const Icon = ICONS[link.platform];
         return (

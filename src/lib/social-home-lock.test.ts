@@ -617,6 +617,13 @@ describe("Social Home miss list v1 P0 lock", () => {
       "loadProfileFollowList",
     );
     expect(card).toContain("SocialProfileStats");
+    expect(card).toContain("data-social-profile-head");
+    expect(card).toContain("socialProfileRolesFace");
+    expect(card).not.toContain("data-social-profile-handle");
+    expect(chrome).toContain("SOCIAL_PROFILE_HEAD_CLASS");
+    expect(chrome).toContain("SOCIAL_PROFILE_ROLES_PILL_CLASS");
+    expect(chrome).toContain("HOUSE_PILL_MEASURE_CLASS");
+    expect(chrome).toContain("HOUSE_FILTER_OFF_CLASS");
     expect(readFileSync("src/components/social/social-profile-stats.tsx", "utf8")).toContain(
       "socialProfileFollowsHref",
     );

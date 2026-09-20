@@ -24,6 +24,7 @@ import {
   HOUSE_FILTER_ON_CLASS,
   HOUSE_MODULE_CLASS,
   HOUSE_PILL_ITEM_CLASS,
+  HOUSE_PILL_MEASURE_CLASS,
   HOUSE_PILL_SELECTED_CLASS,
   HOUSE_RAIL_PANEL_CLASS,
 } from "@/lib/house-shell";
@@ -247,22 +248,35 @@ export function socialTopicChipSelectClass(selected: boolean): string {
   return selected ? SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS : SOCIAL_TOPIC_CHIP_SELECT_IDLE_CLASS;
 }
 
-// Public profile head — Adam 2026-09-20: avatar left, handle → name
-// only (no Roles in this row). 3-up stats sit under that row. Roles
-// are a muted middot line beneath stats — not under the name, not
-// beside avatar, not in bio. Avatar stays 72/88.
-export const SOCIAL_PROFILE_HEAD_CLASS = "flex items-start gap-3 md:gap-4";
+// Public profile head — IG geometry, house chrome. One SoT for own
+// /social/profile and public /social/u/[handle]. Avatar | 3-up stats
+// on one row; name · roles pill · bio · links · actions stack below.
+// Handle stays in chrome, never beside the avatar. Avatar stays 72/88.
+export const SOCIAL_PROFILE_IDENTITY_CLASS = "flex flex-col gap-2";
 
-export const SOCIAL_PROFILE_STATS_CLASS = "grid min-w-0 w-full grid-cols-3";
+export const SOCIAL_PROFILE_HEAD_CLASS = "flex items-center gap-4";
+
+export const SOCIAL_PROFILE_STATS_CLASS = "flex min-w-0 flex-1 items-center";
+
+export const SOCIAL_PROFILE_STATS_GRID_CLASS = "grid w-full grid-cols-3";
 
 export const SOCIAL_PROFILE_STAT_CLASS =
   "flex min-w-0 flex-col items-center justify-center text-center";
 
-export const SOCIAL_PROFILE_STAT_VALUE_CLASS = "font-semibold text-ink";
+export const SOCIAL_PROFILE_STAT_VALUE_CLASS = "t-body font-semibold tabular-nums text-ink";
 
 export const SOCIAL_PROFILE_STAT_LABEL_CLASS = "t-body-sm text-ink-2";
 
-export const SOCIAL_PROFILE_ROLES_LINE_CLASS = "mt-1 break-words t-body-sm text-ink-2";
+export const SOCIAL_PROFILE_FACE_CLASS = "flex flex-col items-start gap-1";
+
+export const SOCIAL_PROFILE_NAME_CLASS = "break-words t-body font-semibold text-ink";
+
+export const SOCIAL_PROFILE_BIO_CLASS = "break-words t-body-sm text-ink whitespace-pre-wrap";
+
+// Public Professions: one compact house gray pill, middot ~3 +N.
+// Omit when empty. Not a scroll rail. Not beside the avatar.
+export const SOCIAL_PROFILE_ROLES_PILL_CLASS =
+  `inline-flex w-fit max-w-full flex-wrap items-center ${HOUSE_PILL_MEASURE_CLASS} ${HOUSE_FILTER_OFF_CLASS}`;
 
 // Home Topics aliases the house chip rail. Not SegmentedTrack: this is
 // a bank of lenses, not a selected exclusive menu.

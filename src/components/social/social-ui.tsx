@@ -9,9 +9,13 @@ import {
   SOCIAL_ACTION_SECONDARY_CLASS,
   SOCIAL_FEED_ROW_CLASS,
   SOCIAL_HIGHLIGHT_RING_CLASS,
+  SOCIAL_PROFILE_BIO_CLASS,
+  SOCIAL_PROFILE_FACE_CLASS,
   SOCIAL_PROFILE_GRID_CLASS,
   SOCIAL_PROFILE_HEAD_CLASS,
-  SOCIAL_PROFILE_ROLES_LINE_CLASS,
+  SOCIAL_PROFILE_IDENTITY_CLASS,
+  SOCIAL_PROFILE_NAME_CLASS,
+  SOCIAL_PROFILE_ROLES_PILL_CLASS,
   SOCIAL_PROFILE_TILE_CLASS,
   SOCIAL_TOPIC_CHIP_CLASS,
 } from "@/lib/social-chrome";
@@ -30,7 +34,7 @@ import {
   type SocialProfileMutuals,
 } from "@/lib/social-profile-mutuals";
 import { socialProfilePublicLinks } from "@/lib/social-profile-links";
-import { socialProfileRolesLine } from "@/lib/social-profile-roles";
+import { socialProfileRolesFace, socialProfileRolesLine } from "@/lib/social-profile-roles";
 import { parseSocialProfileTopics } from "@/lib/social-profile-topics";
 import {
   SOCIAL_POST_IMAGE_SIZES,
@@ -202,6 +206,7 @@ export function SocialProfileIdentity({
   children?: ReactNode;
 }) {
   const person = socialPersonIdentity({ handle, displayName: name });
+  const rolesFace = socialProfileRolesFace(roles ?? []);
   const rolesLine = socialProfileRolesLine(roles ?? []);
   const interestTopics = parseSocialProfileTopics(topics ?? []);
   const links = socialProfilePublicLinks({ websiteUrl, imdbUrl });
@@ -221,66 +226,66 @@ export function SocialProfileIdentity({
   ) : null;
 
   return (
-    <div data-social-profile-identity="" className="flex flex-col gap-3">
+    <div data-social-profile-identity="" className={SOCIAL_PROFILE_IDENTITY_CLASS}>
       <div data-social-profile-head="" className={SOCIAL_PROFILE_HEAD_CLASS}>
         <SocialAvatar name={person.avatarName} photoUrl={photoUrl} ring={ring} size="profile" />
-        <div data-social-profile-copy="" className="min-w-0 flex-1">
-          <p
-            data-social-profile-handle=""
-            className="break-words text-[18px] font-semibold text-ink md:text-[22px]"
-          >
-            {person.handleLabel}
-          </p>
-          {person.name ? (
-            <p data-social-profile-name="" className="mt-1 break-words t-body-sm text-ink-2">
-              {person.name}
-            </p>
-          ) : null}
-        </div>
+        {stats ? (
+          <SocialProfileStats profileId={profileId} handle={handle} stats={stats} />
+        ) : null}
       </div>
-      {stats ? <SocialProfileStats profileId={profileId} handle={handle} stats={stats} /> : null}
-      {rolesLine ? (
-        <p data-social-profile-roles="" className={SOCIAL_PROFILE_ROLES_LINE_CLASS}>
-          {rolesLine}
-        </p>
-      ) : null}
-      {bio?.trim() ? (
-        <p data-social-profile-bio="" className="t-body-sm text-ink whitespace-pre-wrap md:t-body">
-          {bio}
-        </p>
-      ) : null}
-      {interestTopics.length > 0 ? (
-        <div data-social-profile-topics="" className="flex flex-wrap gap-2">
-          {interestTopics.map((topic) => (
-            <span
-              key={topic}
-              data-social-profile-topic={topic}
-              className={SOCIAL_TOPIC_CHIP_CLASS}
-            >
-              {topic}
-            </span>
-          ))}
-        </div>
-      ) : null}
-      <SocialProfileLinkRow links={links} />
-      {actionRow}
-      {followedBy ? (
-        <div data-social-profile-mutuals="" className="flex min-w-0 items-center gap-2">
-          <div data-social-profile-mutuals-faces="" className="flex shrink-0">
-            {mutuals?.people.slice(0, SOCIAL_MUTUALS_FACE_CAP).map((peer, index) => (
-              <SocialAvatar
-                key={peer.id}
-                name={peer.label}
-                photoUrl={peer.photoUrl}
-                size="sm"
-                className={index === 0 ? undefined : "-ml-2"}
-              />
+      <div data-social-profile-face="" className={SOCIAL_PROFILE_FACE_CLASS}>
+        {person.name ? (
+          <p data-social-profile-name="" className={SOCIAL_PROFILE_NAME_CLASS}>
+            {person.name}
+          </p>
+        ) : null}
+        {rolesLine ? (
+          <span data-social-profile-roles="" className={SOCIAL_PROFILE_ROLES_PILL_CLASS}>
+            {rolesLine}
+            {rolesFace.shown.map((role) => (
+              <span key={role.slug} data-social-profile-role={role.slug} />
+            ))}
+            {rolesFace.extra > 0 ? <span data-social-profile-roles-more="" /> : null}
+          </span>
+        ) : null}
+        {bio?.trim() ? (
+          <p data-social-profile-bio="" className={SOCIAL_PROFILE_BIO_CLASS}>
+            {bio}
+          </p>
+        ) : null}
+        <SocialProfileLinkRow links={links} />
+        {interestTopics.length > 0 ? (
+          <div data-social-profile-topics="" className="flex flex-wrap gap-2">
+            {interestTopics.map((topic) => (
+              <span
+                key={topic}
+                data-social-profile-topic={topic}
+                className={SOCIAL_TOPIC_CHIP_CLASS}
+              >
+                {topic}
+              </span>
             ))}
           </div>
-          <p className="min-w-0 break-words t-body-sm text-ink-2">{followedBy}</p>
-        </div>
-      ) : null}
-      {children}
+        ) : null}
+        {actionRow}
+        {followedBy ? (
+          <div data-social-profile-mutuals="" className="flex min-w-0 items-center gap-2">
+            <div data-social-profile-mutuals-faces="" className="flex shrink-0">
+              {mutuals?.people.slice(0, SOCIAL_MUTUALS_FACE_CAP).map((peer, index) => (
+                <SocialAvatar
+                  key={peer.id}
+                  name={peer.label}
+                  photoUrl={peer.photoUrl}
+                  size="sm"
+                  className={index === 0 ? undefined : "-ml-2"}
+                />
+              ))}
+            </div>
+            <p className="min-w-0 break-words t-body-sm text-ink-2">{followedBy}</p>
+          </div>
+        ) : null}
+        {children}
+      </div>
     </div>
   );
 }
