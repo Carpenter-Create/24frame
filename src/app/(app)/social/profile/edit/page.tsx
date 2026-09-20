@@ -19,6 +19,7 @@ export default async function SocialProfileEditPage() {
 
   return (
     <SocialProfileEditForm
+      profileId={profile.id}
       handle={profile.handle}
       displayName={profile.display_name}
       bio={profile.bio ?? ""}

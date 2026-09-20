@@ -2,6 +2,30 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 describe("social isolation lock", () => {
+  it("keeps one Query provider and server-only Redis", () => {
+    const layout = readFileSync("src/app/layout.tsx", "utf8");
+    const provider = readFileSync("src/components/query-provider.tsx", "utf8");
+    const keys = readFileSync("src/lib/social-cache-keys.ts", "utf8");
+    const redis = readFileSync("src/lib/social-hot-cache.ts", "utf8");
+    const forms = readFileSync("src/components/social/social-forms.tsx", "utf8");
+    const env = readFileSync(".env.example", "utf8");
+    expect(layout).toContain("QueryProvider");
+    expect(provider).toContain("createAppQueryClient");
+    expect(provider).toContain("useState(createAppQueryClient)");
+    expect(keys).toContain("social:profile:");
+    expect(keys).toContain("social:counts:");
+    expect(keys).toContain("social:follow:");
+    expect(redis).toContain('import "server-only"');
+    expect(redis).toContain("UPSTASH_REDIS_REST_URL");
+    expect(redis).toContain("UPSTASH_REDIS_REST_TOKEN");
+    expect(redis).not.toContain("NEXT_PUBLIC_UPSTASH");
+    expect(forms).not.toContain("@upstash/redis");
+    expect(forms).not.toContain("UPSTASH_REDIS_REST_TOKEN");
+    expect(env).toContain("UPSTASH_REDIS_REST_URL=");
+    expect(env).toContain("UPSTASH_REDIS_REST_TOKEN=");
+    expect(env).not.toContain("NEXT_PUBLIC_UPSTASH");
+  });
+
   it("does not add person-scoped tables to the B3 catalog harness", () => {
     const b3 = readFileSync("scripts/security/b3-cross-org-isolation.mjs", "utf8");
     expect(b3).toContain("Cross-org isolation");
@@ -50,6 +74,8 @@ describe("social isolation lock", () => {
     expect(detail).not.toContain("/lessons/");
     expect(actions).toContain('from("follows")');
     expect(actions).toContain('notify_new_follower');
+    expect(actions).toContain("bustSocialFollowHotCache");
+    expect(actions).toContain("bustSocialProfileHotCache");
     expect(actions).toContain('from("stories")');
     expect(actions).not.toContain("from(\"reels\")");
     expect(actions).toContain("ensureOwnSocialProfile");
@@ -158,13 +184,15 @@ describe("social isolation lock", () => {
       "utf8",
     );
     const page = readFileSync("src/app/(app)/social/u/[handle]/page.tsx", "utf8");
+    const hotReads = readFileSync("src/lib/social-hot-reads.ts", "utf8");
     const insert = readFileSync("src/lib/social.ts", "utf8");
     expect(migration).toContain("or status = 'active'");
     expect(migration).toContain("or discoverable = true");
     expect(migration).toMatch(/create policy profiles_select[\s\S]*status = 'active'/);
     expect(migration).not.toMatch(/create policy profiles_select[\s\S]*status <> 'active'/);
     expect(migration).not.toContain("createAdminClient");
-    expect(page).toContain('.eq("handle", handle)');
+    expect(hotReads).toContain('.eq("handle", handle)');
+    expect(page).toContain("loadCachedSocialProfileByHandle");
     expect(page).not.toContain("createAdminClient");
     expect(insert).toContain("discoverable: true");
   });

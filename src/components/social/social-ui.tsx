@@ -17,13 +17,11 @@ import {
 } from "@/lib/social-chrome";
 import {
   displayHandle,
-  formatSocialCount,
   SOCIAL,
   SOCIAL_ROUTES,
   socialGroupHref,
   socialMemberHref,
   socialPersonIdentity,
-  socialProfileFollowsHref,
   socialRelativeTime,
 } from "@/lib/social";
 import {
@@ -36,6 +34,7 @@ import { socialProfileRoleChips } from "@/lib/social-profile-roles";
 import { parseSocialProfileTopics } from "@/lib/social-profile-topics";
 import { SocialAvatar } from "./social-avatar";
 import { SocialLikeButton } from "./social-forms";
+import { SocialProfileStats } from "./social-profile-stats";
 import { SocialEmpty } from "./social-empty";
 import { SocialIcon } from "./social-icon";
 import { SocialProfileLinkRow } from "./social-profile-links";
@@ -177,6 +176,7 @@ export function SocialProfileIdentity({
   imdbUrl,
   ring = null,
   photoAction,
+  profileId,
   stats,
   mutuals = null,
   actions,
@@ -192,6 +192,7 @@ export function SocialProfileIdentity({
   imdbUrl?: string | null;
   ring?: "unseen" | "live" | null;
   photoAction?: ReactNode;
+  profileId?: string;
   stats?: { posts: number; followers: number; following: number };
   mutuals?: SocialProfileMutuals | null;
   actions?: () => ReactNode;
@@ -248,28 +249,7 @@ export function SocialProfileIdentity({
                 </div>
               ) : null}
               {stats ? (
-                <div data-social-profile-stats="" className="mt-2 flex flex-wrap gap-4 t-body-sm">
-                  <p data-social-profile-stat="posts">
-                    <span className="font-semibold text-ink">{formatSocialCount(stats.posts)}</span>{" "}
-                    <span className="text-ink-2">{SOCIAL.profile.postsStat}</span>
-                  </p>
-                  <Link
-                    href={socialProfileFollowsHref(handle, "followers")}
-                    data-social-profile-stat="followers"
-                    className="min-w-0"
-                  >
-                    <span className="font-semibold text-ink">{formatSocialCount(stats.followers)}</span>{" "}
-                    <span className="text-ink-2">{SOCIAL.profile.followersStat}</span>
-                  </Link>
-                  <Link
-                    href={socialProfileFollowsHref(handle, "following")}
-                    data-social-profile-stat="following"
-                    className="min-w-0"
-                  >
-                    <span className="font-semibold text-ink">{formatSocialCount(stats.following)}</span>{" "}
-                    <span className="text-ink-2">{SOCIAL.profile.followingStat}</span>
-                  </Link>
-                </div>
+                <SocialProfileStats profileId={profileId} handle={handle} stats={stats} />
               ) : null}
               {interestTopics.length > 0 ? (
                 <div data-social-profile-topics="" className="mt-2 flex flex-wrap gap-2">

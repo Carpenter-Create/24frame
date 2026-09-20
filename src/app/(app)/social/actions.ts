@@ -60,6 +60,7 @@ import {
   newFollowerNoticeCopy,
   newFollowerSourceRefs,
 } from "@/lib/social-follow";
+import { bustSocialFollowHotCache, bustSocialProfileHotCache } from "@/lib/social-hot-cache";
 
 type ActionResult = { error?: string };
 
@@ -171,6 +172,7 @@ export async function createSocialProfile(formData: FormData): Promise<ActionRes
     }
   }
 
+  await bustSocialProfileHotCache(user.id, [profile?.handle, handle]);
   revalidatePath(SOCIAL_ROUTES.profile);
   revalidatePath(SOCIAL_ROUTES.profileEdit);
   revalidatePath(SOCIAL_ROUTES.profileBio);
@@ -186,6 +188,7 @@ export async function saveSocialWelcomeVideo(formData: FormData): Promise<Action
   if (!key) return { error: SOCIAL.stories.mediaType };
   const { error } = await supabase.from("profiles").update({ welcome_video_key: key }).eq("id", user.id);
   if (error) return { error: error.message };
+  await bustSocialProfileHotCache(user.id, [profile?.handle]);
   revalidatePath(SOCIAL_ROUTES.profile);
   revalidatePath(SOCIAL_ROUTES.profileEdit);
   if (profile?.handle) revalidatePath(socialProfileHref(profile.handle));
@@ -197,6 +200,7 @@ export async function clearSocialWelcomeVideo(): Promise<ActionResult> {
   if (!profileId) return { error: SOCIAL.cta.needProfile };
   const { error } = await supabase.from("profiles").update({ welcome_video_key: null }).eq("id", user.id);
   if (error) return { error: error.message };
+  await bustSocialProfileHotCache(user.id, [profile?.handle]);
   revalidatePath(SOCIAL_ROUTES.profile);
   revalidatePath(SOCIAL_ROUTES.profileEdit);
   if (profile?.handle) revalidatePath(socialProfileHref(profile.handle));
@@ -293,6 +297,7 @@ export async function updateSocialBio(formData: FormData): Promise<ActionResult>
   const { error } = await supabase.from("profiles").update({ bio: bio || null }).eq("id", profileId);
   if (error) return { error: error.message };
 
+  await bustSocialProfileHotCache(profileId);
   revalidatePath(SOCIAL_ROUTES.profile);
   revalidatePath(SOCIAL_ROUTES.profileEdit);
   revalidatePath(SOCIAL_ROUTES.profileBio);
@@ -332,6 +337,7 @@ export async function toggleSocialFollow(formData: FormData): Promise<ActionResu
     }
   }
 
+  await bustSocialFollowHotCache(user.id, followeeId);
   revalidatePath(SOCIAL_ROUTES.home);
   revalidatePath(SOCIAL_ROUTES.profile);
   if (profile.handle) {

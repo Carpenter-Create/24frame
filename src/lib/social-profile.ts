@@ -1,5 +1,7 @@
 import type { createClient } from "@/lib/supabase/server";
+import { socialProfileCacheKey, socialProfileHandleCacheKey } from "@/lib/social-cache-keys";
 import type { SocialProfileRow } from "@/lib/social-feed";
+import { socialHotSet, withSocialHotCache } from "@/lib/social-hot-cache";
 import {
   HANDLE_MAX,
   HANDLE_MIN,
@@ -42,6 +44,12 @@ export function isProfileUniqueViolation(error: { message: string; code?: string
   return error.code === "23505" || error.message.toLowerCase().includes("duplicate");
 }
 
+async function rememberOwnProfile(profile: SocialProfileRow): Promise<SocialProfileRow> {
+  await socialHotSet(socialProfileCacheKey(profile.id), profile);
+  if (profile.handle) await socialHotSet(socialProfileHandleCacheKey(profile.handle), profile);
+  return profile;
+}
+
 function rowFromInsert(userId: string, handle: string, displayName: string): SocialProfileRow {
   return {
     id: userId,
@@ -64,11 +72,14 @@ export async function ensureOwnSocialProfileResult(
   supabase: ServerClient,
   user: SocialEnsureUser,
 ): Promise<EnsureOwnSocialProfileResult> {
-  const { data: existing } = await supabase
-    .from("profiles")
-    .select(SOCIAL_PROFILE_COLUMNS)
-    .eq("id", user.id)
-    .maybeSingle();
+  const existing = await withSocialHotCache(socialProfileCacheKey(user.id), async () => {
+    const { data } = await supabase
+      .from("profiles")
+      .select(SOCIAL_PROFILE_COLUMNS)
+      .eq("id", user.id)
+      .maybeSingle();
+    return data ?? null;
+  });
   if (existing) return { profile: existing, error: null };
 
   // Handle is identity. Do not invent a human name (Member, email local-part).
@@ -78,16 +89,16 @@ export async function ensureOwnSocialProfileResult(
 
   for (let attempt = 0; attempt < 8; attempt += 1) {
     const inserted = await insertOwnProfile(supabase, user.id, handle, displayName);
-    if (inserted.profile) return inserted;
-    if (inserted.raced) return { profile: inserted.raced, error: null };
+    if (inserted.profile) return { profile: await rememberOwnProfile(inserted.profile), error: null };
+    if (inserted.raced) return { profile: await rememberOwnProfile(inserted.raced), error: null };
     if (inserted.unique) {
       handle = nextHandleCandidate(seed, user.id, attempt);
       continue;
     }
 
     const retried = await insertOwnProfile(supabase, user.id, handle, displayName);
-    if (retried.profile) return retried;
-    if (retried.raced) return { profile: retried.raced, error: null };
+    if (retried.profile) return { profile: await rememberOwnProfile(retried.profile), error: null };
+    if (retried.raced) return { profile: await rememberOwnProfile(retried.raced), error: null };
     if (retried.unique) {
       handle = nextHandleCandidate(seed, user.id, attempt);
       continue;

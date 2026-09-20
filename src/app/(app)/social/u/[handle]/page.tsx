@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { SocialFollowButton } from "@/components/social/social-forms";
+import { SocialQueryBound } from "@/components/social/social-query-bound";
 import { SocialEmpty } from "@/components/social/social-empty";
 import { SocialForYouRail } from "@/components/social/social-for-you";
 import { SocialProfileTabs } from "@/components/social/social-profile-tabs";
@@ -33,14 +34,13 @@ import {
 import {
   loadAuthorPosts,
   loadFolloweeIds,
-  loadIsFollowing,
   loadLikedPostIds,
   loadLiveStories,
   loadProfileMutuals,
-  loadProfileSocialCounts,
   loadSuggestedPeople,
 } from "@/lib/social-feed";
-import { SOCIAL_PROFILE_COLUMNS, ensureOwnSocialProfile } from "@/lib/social-profile";
+import { loadCachedIsFollowing, loadCachedProfileSocialCounts, loadCachedSocialProfileByHandle } from "@/lib/social-hot-reads";
+import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { requireSocialSession } from "@/lib/social-session";
 
 export async function generateMetadata({
@@ -71,13 +71,7 @@ export default async function SocialPublicProfilePage({
   const tab = parseSocialProfileTab(sp[SOCIAL_PROFILE_TAB_PARAM]);
   const own = await ensureOwnSocialProfile(supabase, ctx.user);
   // Null is a missing handle or an RLS-hidden row — same empty state.
-  const { data: member } = handle
-    ? await supabase
-        .from("profiles")
-        .select(SOCIAL_PROFILE_COLUMNS)
-        .eq("handle", handle)
-        .maybeSingle()
-    : { data: null };
+  const member = handle ? await loadCachedSocialProfileByHandle(supabase, handle) : null;
 
   if (member) {
     const canonical = socialProfileCasingRedirect(handle, member.handle);
@@ -110,7 +104,7 @@ export default async function SocialPublicProfilePage({
     member.welcome_video_key ? signedSocialMediaUrl(member.welcome_video_key) : Promise.resolve(null),
   ]);
   const liveStories = (await loadLiveStories(supabase, [member.id])).stories;
-  const following = own && !isSelf ? await loadIsFollowing(supabase, ctx.user.id, member.id) : false;
+  const following = own && !isSelf ? await loadCachedIsFollowing(supabase, ctx.user.id, member.id) : false;
   const history = await loadAuthorPosts(supabase, member.id);
   const media = await signedSocialMediaByPostId(history.posts);
   const liked = own
@@ -120,7 +114,7 @@ export default async function SocialPublicProfilePage({
         history.posts.map((post) => post.id),
       )
     : new Set<string>();
-  const counts = await loadProfileSocialCounts(supabase, member.id);
+  const counts = await loadCachedProfileSocialCounts(supabase, member.id);
   const followees = await loadFolloweeIds(supabase, ctx.user.id);
   const mutuals = isSelf ? null : await loadProfileMutuals(supabase, ctx.user.id, member.id);
   const mutualFaces =
@@ -147,6 +141,11 @@ export default async function SocialPublicProfilePage({
         <h1 className="sr-only">
           {socialPersonLabel({ handle: member.handle, displayName: member.display_name })}
         </h1>
+        <SocialQueryBound
+          profile={member}
+          counts={counts}
+          follow={own && !isSelf ? { viewerId: ctx.user.id, targetId: member.id, following } : null}
+        />
         <SocialProfileIdentity
           name={member.display_name}
           handle={member.handle}
@@ -157,6 +156,7 @@ export default async function SocialPublicProfilePage({
           websiteUrl={member.website_url}
           imdbUrl={member.imdb_url}
           ring={liveStories.length > 0 ? "live" : null}
+          profileId={member.id}
           stats={counts}
           mutuals={
             mutuals && mutuals.people.length > 0
@@ -179,6 +179,7 @@ export default async function SocialPublicProfilePage({
                         followeeId={member.id}
                         handle={member.handle}
                         following={following}
+                        viewerId={ctx.user.id}
                         stretch
                       />
                       <SocialShareButton handle={member.handle} stretch />

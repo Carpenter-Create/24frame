@@ -24,10 +24,10 @@ import {
   SOCIAL_PROFILE_EDIT_BACK_CLASS,
   SOCIAL_PROFILE_EDIT_HEADER_CLASS,
 } from "@/lib/social-chrome";
-import { loadProfileFollowList, loadProfileSocialCounts } from "@/lib/social-feed";
+import { loadProfileFollowList } from "@/lib/social-feed";
 import { filterSocialFollowsPeople } from "@/lib/social-follow";
+import { loadCachedProfileSocialCounts, loadCachedSocialProfileByHandle } from "@/lib/social-hot-reads";
 import { SOCIAL_ICON_SIZE_HEADER } from "@/lib/social-icons";
-import { SOCIAL_PROFILE_COLUMNS } from "@/lib/social-profile";
 import { requireSocialSession } from "@/lib/social-session";
 
 export default async function SocialFollowsPage({
@@ -47,9 +47,7 @@ export default async function SocialFollowsPage({
   const tab = parseSocialFollowsTab(sp[SOCIAL_PROFILE_TAB_PARAM]);
   const query = parseSocialFollowsQuery(sp[SOCIAL_FOLLOWS_SEARCH_PARAM]);
 
-  const { data: member } = handle
-    ? await supabase.from("profiles").select(SOCIAL_PROFILE_COLUMNS).eq("handle", handle).maybeSingle()
-    : { data: null };
+  const member = handle ? await loadCachedSocialProfileByHandle(supabase, handle) : null;
 
   if (member) {
     const canonical = socialProfileFollowsCasingRedirect(handle, member.handle, tab, query);
@@ -78,7 +76,7 @@ export default async function SocialFollowsPage({
   const backHref = isSelf ? SOCIAL_ROUTES.profile : socialMemberHref(member.handle);
   const [page, counts] = await Promise.all([
     loadProfileFollowList(supabase, member.id, tab, ctx.user.id),
-    loadProfileSocialCounts(supabase, member.id),
+    loadCachedProfileSocialCounts(supabase, member.id),
   ]);
   const people = filterSocialFollowsPeople(page.people, query);
   const faces = people.length > 0 ? await signedAvatarUrls(people.map((person) => person.id)) : new Map();
