@@ -55,6 +55,9 @@
   --text-title: var(--text-title);
   --text-hero: var(--text-hero);
   --tracking-tight: var(--tracking-tight);
+  --tracking-title: var(--tracking-title);
+  --tracking-display: var(--tracking-display);
+  --tracking-rail: var(--tracking-rail);
 }
 
 html {
@@ -92,9 +95,10 @@ body {
     font-family: var(--font-sans);
     font-size: var(--text-hero);
     font-weight: 600;
-    line-height: 1.04;
-    letter-spacing: -0.035em;
+    line-height: 1.05;
+    letter-spacing: var(--tracking-display);
     font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1, "kern" 1;
   }
   @media (max-width: 767px) {
     .t-display {
@@ -105,38 +109,38 @@ body {
     font-family: var(--font-sans);
     font-size: var(--text-title);
     font-weight: var(--type-title-weight);
-    line-height: 1.15;
-    letter-spacing: var(--tracking-tight);
+    line-height: 1.1;
+    letter-spacing: var(--tracking-title);
   }
   .t-statement {
     font-family: var(--font-sans);
     font-size: var(--text-title);
     font-weight: var(--type-title-weight);
-    line-height: 1.22;
-    letter-spacing: var(--tracking-tight);
+    line-height: 1.1;
+    letter-spacing: var(--tracking-title);
   }
-  /* Section headings — title role (480), sentence case, tight tracking.
+  /* Section headings — title role (480), sentence case, title tracking.
      Page titles, not the hero step. Do not bind A/A2 interim 600-as-title. */
   .t-section {
     font-family: var(--font-sans);
     font-size: var(--text-title);
     font-weight: var(--type-title-weight);
-    line-height: 1.15;
-    letter-spacing: var(--tracking-tight);
+    line-height: 1.1;
+    letter-spacing: var(--tracking-title);
   }
   .t-heading {
     font-family: var(--font-sans);
     font-size: var(--text-lg);
     font-weight: 500;
     line-height: 1.2;
-    letter-spacing: -0.015em;
+    letter-spacing: var(--tracking-tight);
   }
   .t-subhead {
     font-family: var(--font-sans);
     font-size: var(--text-lg);
     font-weight: 500;
     line-height: 1.25;
-    letter-spacing: -0.015em;
+    letter-spacing: var(--tracking-tight);
   }
   .t-lead {
     font-family: var(--font-sans);
@@ -184,7 +188,12 @@ body {
     letter-spacing: -0.01em;
   }
   .t-display.t-data {
-    letter-spacing: -0.035em;
+    letter-spacing: var(--tracking-display);
+  }
+  /* Rail labels (Access + Settings). Tracking only. Weight stays
+     --type-body-weight 420 via .t-body. Do not invent a second rail weight. */
+  .t-rail {
+    letter-spacing: var(--tracking-rail);
   }
   /* House card: hairline, 16 corner, no shadow. Page canvas is white.
      Grey #F4F4F6 modules use --surface-muted when a module is needed. */
