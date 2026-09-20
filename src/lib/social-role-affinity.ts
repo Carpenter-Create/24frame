@@ -8,6 +8,7 @@ import {
 } from "@/lib/social-categories";
 import {
   SOCIAL_PROFILE_ROLE_GROUPS,
+  isSocialProfileRoleSlug,
   parseSocialProfileRoles,
   socialProfileRoleLabel,
   type SocialProfileRoleSlug,
@@ -31,37 +32,38 @@ export type SocialRoleAffinity = {
   neighbors: readonly SocialProfileRoleSlug[];
 };
 
-const GROUP_TOPICS: Record<string, readonly SocialCategoryTopic[]> = {
-  cast: ["Acting", "Casting", "Content creator"],
-  writing: ["Screenwriting", "Content creator"],
-  directing: ["Directors", "AI filmmaking"],
-  producing: ["Producers", "Film Festivals", "Distribution"],
+type SocialProfileRoleGroupId = (typeof SOCIAL_PROFILE_ROLE_GROUPS)[number]["id"];
+
+// Soft-bias only. Keys must match the professions SoT — not a second bank.
+const GROUP_TOPICS = {
+  actor: ["Acting", "Casting", "Content creator"],
+  writer: ["Screenwriting", "Content creator"],
+  director: ["Directors", "AI filmmaking"],
+  producer: ["Producers", "Film Festivals", "Distribution"],
   camera: ["Cinematography"],
   editorial: ["Post-production"],
-  design: ["Post-production", "Animation"],
-  sound_music: ["Music", "Post-production"],
-  vfx_animation: ["Animation", "Post-production", "AI filmmaking"],
-  production_ops: ["Producers", "Film Festivals"],
+  art: ["Animation", "Post-production"],
+  sound: ["Music", "Post-production"],
+  visual_effects: ["Animation", "Post-production", "AI filmmaking"],
+  production: ["Producers", "Film Festivals"],
   casting: ["Casting", "Acting"],
-  business_capital_rep: ["Financing", "Distribution", "Film Festivals"],
-  adjacent: ["Content creator", "Vertical micro dramas"],
-};
+  digital: ["Content creator", "Vertical micro dramas"],
+  business: ["Financing", "Distribution", "Film Festivals"],
+} as const satisfies Record<SocialProfileRoleGroupId, readonly SocialCategoryTopic[]>;
 
 const ROLE_TOPIC_OVERRIDES: Partial<Record<SocialProfileRoleSlug, readonly SocialCategoryTopic[]>> = {
   investor: ["Financing", "Distribution", "Film Festivals"],
-  financier: ["Financing", "Distribution"],
   art_director: ["Animation", "Post-production"],
   production_designer: ["Post-production", "Animation"],
   creator: ["Content creator", "Vertical micro dramas"],
-  journalist: ["Screenwriting", "Content creator"],
 };
 
 const ROLE_NEIGHBOR_OVERRIDES: Partial<
   Record<SocialProfileRoleSlug, readonly SocialProfileRoleSlug[]>
 > = {
-  art_director: ["production_designer", "set_decorator", "prop_master"],
+  art_director: ["production_designer", "set_decorator", "property_master"],
   production_designer: ["art_director", "set_decorator", "costume_designer"],
-  investor: ["financier", "studio_executive", "distributor", "producer"],
+  investor: ["executive", "producer"],
 };
 
 function uniqueTopics(topics: readonly SocialCategoryTopic[]): SocialCategoryTopic[] {
@@ -97,12 +99,16 @@ export const ROLE_INTEREST_AFFINITY: Record<SocialProfileRoleSlug, SocialRoleAff
     }),
   ) as unknown as Record<SocialProfileRoleSlug, SocialRoleAffinity>;
 
+function roleAffinity(slug: string): SocialRoleAffinity | undefined {
+  return isSocialProfileRoleSlug(slug) ? ROLE_INTEREST_AFFINITY[slug] : undefined;
+}
+
 export function socialRolePreferredTopics(raw: unknown): SocialCategoryTopic[] {
   const crafts = parseSocialProfileRoles(raw);
   const preferred: SocialCategoryTopic[] = [];
   const seen = new Set<SocialCategoryTopic>();
   for (const slug of crafts) {
-    for (const topic of ROLE_INTEREST_AFFINITY[slug]?.topics ?? []) {
+    for (const topic of roleAffinity(slug)?.topics ?? []) {
       if (seen.has(topic)) continue;
       seen.add(topic);
       preferred.push(topic);
@@ -145,12 +151,12 @@ export function socialTopicPersonScore(viewerTopics: unknown, otherTopics: unkno
   return score;
 }
 
-export function socialRoleNeighborSet(raw: unknown): Set<SocialProfileRoleSlug> {
+export function socialRoleNeighborSet(raw: unknown): Set<string> {
   const crafts = parseSocialProfileRoles(raw);
-  const neighbors = new Set<SocialProfileRoleSlug>();
+  const neighbors = new Set<string>();
   for (const slug of crafts) {
     neighbors.add(slug);
-    for (const next of ROLE_INTEREST_AFFINITY[slug]?.neighbors ?? []) neighbors.add(next);
+    for (const next of roleAffinity(slug)?.neighbors ?? []) neighbors.add(next);
   }
   return neighbors;
 }
@@ -215,7 +221,7 @@ export function socialCourseAffinityScore(
     if (haystack.includes(topic.toLowerCase())) score += 3;
   }
   for (const slug of crafts) {
-    const label = socialProfileRoleLabel(slug)?.toLowerCase();
+    const label = socialProfileRoleLabel(slug).toLowerCase();
     if (label && haystack.includes(label)) score += 2;
     if (haystack.includes(slug.replaceAll("_", " "))) score += 1;
   }

@@ -1,79 +1,91 @@
-// Social profile Professions bank (internal: roles_* / crafts).
-// Persist ordered slugs on profiles.crafts. primary_role stays the
-// first selected slug. UI label is Professions — not Topics, not
-// Category, not crafts. Public header is a house-chip scroll rail
-// of every selected label in crafts order. Omit when empty. Edit
-// max 5. Not on SocialPersonRow.
+// Social profile Professions bank — one SoT (internal: roles_* / crafts).
+// Official IMDbPro profession labels plus Writer credit-style
+// compounds (Category: Attribute). House department groups, not an
+// IMDb help-page category clone. Persist ordered slugs on
+// profiles.crafts. primary_role stays the first selected slug.
+// UI label is Professions — not Topics, not Category, not crafts.
+// Public header is a house-chip scroll rail of every selected
+// label in crafts order. Omit when empty. Edit max 5. Select and
+// write stay sync. Not on SocialPersonRow. Investor is a Business add.
 
 export const SOCIAL_PROFILE_ROLES_MAX = 5;
 export const SOCIAL_PROFILE_ROLES_COUNT = "{n} / {max}";
 
 export const SOCIAL_PROFILE_ROLE_GROUPS = [
   {
-    id: "cast",
-    label: "Cast",
+    id: "actor",
+    label: "Actor",
     roles: [
       { slug: "actor", label: "Actor" },
+      { slug: "actress", label: "Actress" },
       { slug: "voice_actor", label: "Voice Actor" },
-      { slug: "host", label: "Host / Presenter" },
-      { slug: "comedian", label: "Comedian" },
       { slug: "stunt_performer", label: "Stunt Performer" },
-      { slug: "background", label: "Background / Extra" },
-      { slug: "model", label: "Model" },
-      { slug: "dancer", label: "Dancer" },
-      { slug: "musician", label: "Musician / Performing Artist" },
+      { slug: "choreographer", label: "Choreographer" },
     ],
   },
   {
-    id: "writing",
-    label: "Writing",
+    id: "writer",
+    label: "Writer",
     roles: [
+      { slug: "writer", label: "Writer" },
       { slug: "screenwriter", label: "Screenwriter" },
-      { slug: "tv_writer", label: "TV Writer" },
-      { slug: "playwright", label: "Playwright" },
+      { slug: "head_writer", label: "Head Writer" },
       { slug: "story_editor", label: "Story Editor" },
-      { slug: "script_consultant", label: "Script Consultant" },
-      { slug: "showrunner", label: "Showrunner" },
-      { slug: "author", label: "Author / Novelist" },
-      { slug: "journalist", label: "Journalist / Critic" },
+      { slug: "executive_story_editor", label: "Executive Story Editor" },
+      { slug: "staff_writer", label: "Staff Writer" },
+      { slug: "script_writer", label: "Script Writer" },
+      { slug: "supervising_writer", label: "Supervising Writer" },
+      { slug: "creator", label: "Creator" },
+      { slug: "dramaturge", label: "Dramaturge" },
+      { slug: "script_editor", label: "Script Editor" },
+      { slug: "story_coordinator", label: "Story Coordinator" },
+      { slug: "writer_written_by", label: "Writer: Written by" },
+      { slug: "writer_screenplay", label: "Writer: Screenplay" },
+      { slug: "writer_story", label: "Writer: Story" },
+      { slug: "writer_teleplay", label: "Writer: Teleplay" },
+      { slug: "writer_screen_story", label: "Writer: Screen Story" },
     ],
   },
   {
-    id: "directing",
-    label: "Directing",
+    id: "director",
+    label: "Director",
     roles: [
       { slug: "director", label: "Director" },
+      { slug: "supervising_director", label: "Supervising Director" },
+      { slug: "executive_director", label: "Executive Director" },
       { slug: "second_unit_director", label: "Second Unit Director" },
       { slug: "assistant_director", label: "Assistant Director" },
       { slug: "script_supervisor", label: "Script Supervisor" },
     ],
   },
   {
-    id: "producing",
-    label: "Producing",
+    id: "producer",
+    label: "Producer",
     roles: [
       { slug: "producer", label: "Producer" },
       { slug: "executive_producer", label: "Executive Producer" },
-      { slug: "co_executive_producer", label: "Co-Executive Producer" },
-      { slug: "co_producer", label: "Co-Producer" },
+      { slug: "coordinating_producer", label: "Coordinating Producer" },
       { slug: "line_producer", label: "Line Producer" },
       { slug: "supervising_producer", label: "Supervising Producer" },
       { slug: "associate_producer", label: "Associate Producer" },
-      { slug: "segment_producer", label: "Segment / Field / Story Producer" },
-      { slug: "consulting_producer", label: "Consulting Producer" },
-      { slug: "creative_producer", label: "Creative Producer" },
+      { slug: "field_producer", label: "Field Producer" },
+      { slug: "story_producer", label: "Story Producer" },
+      { slug: "development_producer", label: "Development Producer" },
+      { slug: "post_production_producer", label: "Post Production Producer" },
+      { slug: "showrunner", label: "Showrunner" },
     ],
   },
   {
     id: "camera",
     label: "Camera",
     roles: [
-      { slug: "cinematographer", label: "Cinematographer / DP" },
+      { slug: "cinematographer", label: "Cinematographer" },
+      { slug: "director_of_photography", label: "Director of Photography" },
       { slug: "camera_operator", label: "Camera Operator" },
-      { slug: "steadicam", label: "Steadicam" },
+      { slug: "steadicam_operator", label: "Steadicam Operator" },
       { slug: "gaffer", label: "Gaffer" },
-      { slug: "key_grip", label: "Key Grip" },
-      { slug: "dit", label: "DIT" },
+      { slug: "grip", label: "Grip" },
+      { slug: "first_assistant_camera", label: "First Assistant Camera" },
     ],
   },
   {
@@ -81,61 +93,74 @@ export const SOCIAL_PROFILE_ROLE_GROUPS = [
     label: "Editorial",
     roles: [
       { slug: "editor", label: "Editor" },
+      { slug: "supervising_editor", label: "Supervising Editor" },
       { slug: "assistant_editor", label: "Assistant Editor" },
-      { slug: "post_producer", label: "Post Producer / Supervisor" },
+      { slug: "post_producer", label: "Post Producer" },
+      { slug: "post_production_supervisor", label: "Post-Production Supervisor" },
       { slug: "colorist", label: "Colorist" },
-      { slug: "vfx_editor", label: "VFX Editor" },
+      { slug: "digital_colorist", label: "Digital Colorist" },
     ],
   },
   {
-    id: "design",
-    label: "Design",
+    id: "art",
+    label: "Art",
     roles: [
       { slug: "production_designer", label: "Production Designer" },
       { slug: "art_director", label: "Art Director" },
+      { slug: "creative_director", label: "Creative Director" },
+      { slug: "storyboard_artist", label: "Storyboard Artist" },
+      { slug: "set_designer", label: "Set Designer" },
       { slug: "set_decorator", label: "Set Decorator" },
-      { slug: "prop_master", label: "Prop Master" },
+      { slug: "property_master", label: "Property Master" },
       { slug: "costume_designer", label: "Costume Designer" },
-      { slug: "wardrobe", label: "Wardrobe" },
+      { slug: "costume_supervisor", label: "Costume Supervisor" },
       { slug: "makeup_artist", label: "Makeup Artist" },
-      { slug: "hair_stylist", label: "Hair Stylist" },
-      { slug: "sfx_makeup", label: "Special Effects Makeup" },
+      { slug: "hairdresser", label: "Hairdresser" },
+      { slug: "hair_and_makeup_artist", label: "Hair and Makeup Artist" },
     ],
   },
   {
-    id: "sound_music",
+    id: "sound",
     label: "Sound & music",
     roles: [
-      { slug: "sound_designer", label: "Sound Designer" },
-      { slug: "production_sound", label: "Production Sound Mixer" },
+      { slug: "sound_mixer", label: "Sound Mixer" },
       { slug: "boom_operator", label: "Boom Operator" },
-      { slug: "re_recording_mixer", label: "Re-recording Mixer" },
+      { slug: "re_recording_mixer", label: "Re-Recording Mixer" },
+      { slug: "sound_editor", label: "Sound Editor" },
+      { slug: "sound_supervisor", label: "Sound Supervisor" },
       { slug: "composer", label: "Composer" },
+      { slug: "music_director", label: "Music Director" },
+      { slug: "musician", label: "Musician" },
       { slug: "music_supervisor", label: "Music Supervisor" },
-      { slug: "soundtrack_artist", label: "Soundtrack Artist" },
+      { slug: "soundtrack", label: "Soundtrack" },
+      { slug: "music_artist", label: "Music Artist" },
     ],
   },
   {
-    id: "vfx_animation",
-    label: "VFX & animation",
+    id: "visual_effects",
+    label: "Visual effects",
     roles: [
-      { slug: "vfx_supervisor", label: "VFX Supervisor / Artist" },
+      { slug: "visual_effects_supervisor", label: "Visual Effects Supervisor" },
+      { slug: "visual_effects_artist", label: "Visual Effects Artist" },
+      { slug: "visual_effects_editor", label: "Visual Effects Editor" },
+      { slug: "motion_graphics_artist", label: "Motion Graphics Artist" },
       { slug: "animator", label: "Animator" },
-      { slug: "motion_designer", label: "Motion Designer" },
-      { slug: "special_effects", label: "Special Effects Technician" },
-      { slug: "previs", label: "PrefViz Artist" },
+      { slug: "animation_director", label: "Animation Director" },
+      { slug: "special_effects_technician", label: "Special Effects Technician" },
+      { slug: "special_effects_supervisor", label: "Special Effects Supervisor" },
     ],
   },
   {
-    id: "production_ops",
+    id: "production",
     label: "Production",
     roles: [
-      { slug: "location_manager", label: "Location Manager" },
-      { slug: "production_manager", label: "Production Manager / UPM" },
       { slug: "production_coordinator", label: "Production Coordinator" },
       { slug: "production_assistant", label: "Production Assistant" },
-      { slug: "cast_coordinator", label: "Cast Coordinator" },
+      { slug: "production_manager", label: "Production Manager" },
+      { slug: "location_manager", label: "Location Manager" },
       { slug: "intimacy_coordinator", label: "Intimacy Coordinator" },
+      { slug: "script_consultant", label: "Script Consultant" },
+      { slug: "talent_coordinator", label: "Talent Coordinator" },
     ],
   },
   {
@@ -147,39 +172,56 @@ export const SOCIAL_PROFILE_ROLE_GROUPS = [
     ],
   },
   {
-    id: "business_capital_rep",
-    label: "Business",
+    id: "digital",
+    label: "Digital",
     roles: [
-      { slug: "investor", label: "Investor" },
-      { slug: "financier", label: "Financier / Fund Manager" },
-      { slug: "studio_executive", label: "Executive / Studio Executive" },
-      { slug: "distributor", label: "Distributor" },
-      { slug: "sales_agent", label: "Sales Agent" },
-      { slug: "agent", label: "Agent" },
-      { slug: "manager", label: "Manager" },
-      { slug: "lawyer", label: "Lawyer / Entertainment Attorney" },
-      { slug: "business_affairs", label: "Business Affairs" },
-      { slug: "publicist", label: "Publicist / Publicity" },
-      { slug: "marketing", label: "Marketing / Distribution Marketing" },
-      { slug: "accountant", label: "Accountant / Production Accountant" },
+      { slug: "digital_creator", label: "Digital Creator" },
+      { slug: "influencer", label: "Influencer" },
+      { slug: "podcaster", label: "Podcaster" },
     ],
   },
   {
-    id: "adjacent",
-    label: "Adjacent",
+    id: "business",
+    label: "Business",
     roles: [
-      { slug: "creator", label: "Creator / Influencer" },
-      { slug: "educator", label: "Educator / Instructor" },
-      { slug: "student", label: "Student" },
-      { slug: "consultant", label: "Consultant" },
-      { slug: "recruiter", label: "Recruiter / Talent Scout" },
-      { slug: "other", label: "Other" },
+      { slug: "executive", label: "Executive" },
+      { slug: "lawyer", label: "Lawyer" },
+      { slug: "attorney", label: "Attorney" },
+      { slug: "publicist", label: "Publicist" },
+      { slug: "talent_agent", label: "Talent Agent" },
+      { slug: "manager", label: "Manager" },
+      { slug: "accountant", label: "Accountant" },
+      { slug: "production_accountant", label: "Production Accountant" },
+      { slug: "investor", label: "Investor" },
     ],
   },
 ] as const;
 
 export type SocialProfileRoleSlug =
   (typeof SOCIAL_PROFILE_ROLE_GROUPS)[number]["roles"][number]["slug"];
+
+// Old crafts slugs → official bank slugs. Unmapped leftovers stay
+// on the profile and render via socialProfileRoleLabel.
+export const SOCIAL_PROFILE_ROLE_SLUG_ALIASES = {
+  steadicam: "steadicam_operator",
+  soundtrack_artist: "soundtrack",
+  vfx_supervisor: "visual_effects_supervisor",
+  vfx_editor: "visual_effects_editor",
+  agent: "talent_agent",
+  studio_executive: "executive",
+  production_sound: "sound_mixer",
+  prop_master: "property_master",
+  hair_stylist: "hairdresser",
+  special_effects: "special_effects_technician",
+  motion_designer: "motion_graphics_artist",
+  tv_writer: "writer",
+  segment_producer: "field_producer",
+  sfx_makeup: "makeup_artist",
+  wardrobe: "costume_supervisor",
+  previs: "storyboard_artist",
+  cast_coordinator: "talent_coordinator",
+  key_grip: "grip",
+} as const satisfies Record<string, SocialProfileRoleSlug>;
 
 export const SOCIAL_PROFILE_ROLES = SOCIAL_PROFILE_ROLE_GROUPS.flatMap((group) =>
   group.roles.map((role) => ({ ...role, groupId: group.id })),
@@ -189,12 +231,33 @@ const ROLE_BY_SLUG = new Map<string, (typeof SOCIAL_PROFILE_ROLES)[number]>(
   SOCIAL_PROFILE_ROLES.map((role) => [role.slug, role]),
 );
 
+const ROLE_ALIAS_BY_SLUG = new Map<string, SocialProfileRoleSlug>(
+  Object.entries(SOCIAL_PROFILE_ROLE_SLUG_ALIASES),
+);
+
 export function isSocialProfileRoleSlug(value: string): value is SocialProfileRoleSlug {
   return ROLE_BY_SLUG.has(value);
 }
 
-export function socialProfileRoleLabel(slug: string): string | null {
-  return ROLE_BY_SLUG.get(slug)?.label ?? null;
+export function canonicalSocialProfileRoleSlug(value: string): string {
+  return ROLE_ALIAS_BY_SLUG.get(value) ?? value;
+}
+
+function titleCaseRolePart(part: string): string {
+  if (part.toLowerCase() === "dit") return "DIT";
+  if (!part) return part;
+  return part.charAt(0).toUpperCase() + part.slice(1);
+}
+
+export function socialProfileRoleLabel(slug: string): string {
+  const canonical = canonicalSocialProfileRoleSlug(slug);
+  const known = ROLE_BY_SLUG.get(canonical) ?? ROLE_BY_SLUG.get(slug);
+  if (known) return known.label;
+  return slug
+    .split(/[_-]+/)
+    .filter(Boolean)
+    .map(titleCaseRolePart)
+    .join(" ");
 }
 
 function roleValues(raw: unknown): unknown[] {
@@ -210,13 +273,13 @@ function roleValues(raw: unknown): unknown[] {
   }
 }
 
-export function parseSocialProfileRoles(raw: unknown): SocialProfileRoleSlug[] {
-  const seen = new Set<SocialProfileRoleSlug>();
-  const slugs: SocialProfileRoleSlug[] = [];
+export function parseSocialProfileRoles(raw: unknown): string[] {
+  const seen = new Set<string>();
+  const slugs: string[] = [];
   for (const value of roleValues(raw)) {
     if (typeof value !== "string") continue;
-    const slug = value.trim();
-    if (!isSocialProfileRoleSlug(slug) || seen.has(slug)) continue;
+    const slug = canonicalSocialProfileRoleSlug(value.trim());
+    if (!slug || seen.has(slug)) continue;
     seen.add(slug);
     slugs.push(slug);
     if (slugs.length === SOCIAL_PROFILE_ROLES_MAX) break;
@@ -225,32 +288,32 @@ export function parseSocialProfileRoles(raw: unknown): SocialProfileRoleSlug[] {
 }
 
 export function socialProfileRolesWrite(raw: unknown): {
-  crafts: SocialProfileRoleSlug[];
-  primary_role: SocialProfileRoleSlug | null;
+  crafts: string[];
+  primary_role: string | null;
 } {
   const crafts = parseSocialProfileRoles(raw);
   return { crafts, primary_role: crafts[0] ?? null };
 }
 
-export function toggleSocialProfileRole(
-  selected: readonly string[],
-  slug: string,
-): SocialProfileRoleSlug[] {
+export function toggleSocialProfileRole(selected: readonly string[], slug: string): string[] {
   const current = parseSocialProfileRoles(selected);
-  if (!isSocialProfileRoleSlug(slug)) return current;
-  if (current.includes(slug)) return current.filter((item) => item !== slug);
+  const canonical = canonicalSocialProfileRoleSlug(slug);
+  if (current.includes(canonical)) return current.filter((item) => item !== canonical);
   if (current.length >= SOCIAL_PROFILE_ROLES_MAX) return current;
-  return [...current, slug];
+  if (!isSocialProfileRoleSlug(canonical)) return current;
+  return [...current, canonical];
 }
 
 export function moveSocialProfileRole(
   selected: readonly string[],
   fromId: string,
   toId: string,
-): SocialProfileRoleSlug[] {
+): string[] {
   const current = parseSocialProfileRoles(selected);
-  const fromIndex = current.indexOf(fromId as SocialProfileRoleSlug);
-  const toIndex = current.indexOf(toId as SocialProfileRoleSlug);
+  const fromSlug = canonicalSocialProfileRoleSlug(fromId);
+  const toSlug = canonicalSocialProfileRoleSlug(toId);
+  const fromIndex = current.indexOf(fromSlug);
+  const toIndex = current.indexOf(toSlug);
   if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) return current;
   const next = [...current];
   const [item] = next.splice(fromIndex, 1);
@@ -267,12 +330,12 @@ export function socialProfileRolesCountLabel(count: number): string {
 }
 
 export function socialProfileRoleChips(raw: unknown): {
-  slug: SocialProfileRoleSlug;
+  slug: string;
   label: string;
 }[] {
   return parseSocialProfileRoles(raw).map((slug) => ({
     slug,
-    label: ROLE_BY_SLUG.get(slug)?.label ?? slug,
+    label: socialProfileRoleLabel(slug),
   }));
 }
 

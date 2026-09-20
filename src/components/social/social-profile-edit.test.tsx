@@ -161,7 +161,8 @@ describe("SocialProfileEditForm", () => {
       html.indexOf('data-social-profile-role-chip="producer"'),
     );
     expect(html).not.toContain("Category");
-    expect(html).not.toContain("Actress");
+    expect(html).toContain("Actress");
+    expect(html).toContain("Writer: Screenplay");
   });
 
   it("loads persisted website_url links so they can be edited or removed", () => {
