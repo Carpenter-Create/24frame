@@ -72,10 +72,15 @@ describe("SideNav Access rail", () => {
     expect(navSrc).toContain("prefetch={social}");
     expect(navSrc).toContain("Aggregation: VIEWPORT prefetch off, HOVER prefetch on");
     expect(navSrc).toContain("Social: VIEWPORT prefetch on");
+    expect(navSrc).toContain("same five");
+    expect(navSrc).toContain("SocialCreateSheet");
+    expect(navSrc).toContain("isSocialCreateDest");
+    expect(navSrc).toContain('data-social-create-sheet="dest"');
     expect(navSrc).toContain("useSocialNavPending");
     expect(navSrc).toContain("SocialNavPendingProbe");
     expect(navSrc).toContain("data-social-rail-pending");
     expect(navSrc).not.toContain("prefetch={false}");
+    expect(navSrc).not.toContain("four destinations");
   });
 
   it("marks the active item with a light-blue pill wash and Sporty Blue type", () => {

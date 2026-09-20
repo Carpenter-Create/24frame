@@ -6,9 +6,12 @@
 // One tap open, one tap switch. No workspace item in the dock.
 // Avatar stays Settings / account — not a second workspace door.
 // Destinations live in the Mercury floating dock (in-workspace
-// only). Social dest order stays Feed · Profile · Explore ·
-// Create · Messages. Create is Social-only. Aggregation ·
-// Education · Home each keep their own dests. Dock hops use the
+// only). Social dest order is Home · Explore · Create ·
+// Messages · Profile (Adam lock 2026-09-20) — same SOCIAL_NAV
+// SoT as the desktop Social rail. Create sits center and opens
+// the equal-tile sheet. Home keeps the Home label; no Feed fork.
+// Create is Social-only. Aggregation · Education · Home each
+// keep their own dests. Dock hops use the
 // house pending / prefetch SoT — prefetchHrefList on mount,
 // optimistic dest light on tap. No under-top dest chip rail. No
 // peer workspace pill rail.
@@ -44,6 +47,7 @@ import {
   isClientNavActive,
   isHouseAiNavItem,
   isPhosphorNavItem,
+  isSocialCreateDest,
   isSocialTabActive,
   mobileNavDestinations,
   type NavItem,
@@ -57,7 +61,6 @@ import {
   type OverviewLeadPillId,
 } from "@/lib/overview";
 import { PHOSPHOR_CHROME_ICON_CLASS, type PhosphorIcon } from "@/lib/phosphor-icon";
-import { SOCIAL_ROUTES } from "@/lib/social";
 import {
   WORKSPACE_AGGREGATION_LABEL,
   WORKSPACE_SOCIAL_LABEL,
@@ -182,16 +185,8 @@ export const HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT = HOUSE_PHONE_CHROME_ICON_WEIGHT
 export const HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS =
   "max-md:pb-[calc(5.5rem+env(safe-area-inset-bottom))]";
 
-/** Phone-only label for the Social feed dest. Desktop rail keeps "Home". */
-export const SOCIAL_PHONE_FEED_LABEL = "Feed";
-
-function relabelSocialFeed<T extends NavItem>(item: T): T {
-  if (item.href !== SOCIAL_ROUTES.home) return item;
-  return { ...item, label: SOCIAL_PHONE_FEED_LABEL };
-}
-
-/** Social phone dests keep Home as the leftmost dest, renamed to Feed. */
-export const SOCIAL_PHONE_DESTS = mobileNavDestinations(false, "social").map(relabelSocialFeed);
+/** Social phone dests are SOCIAL_NAV — Home · Explore · Create · Messages · Profile. */
+export const SOCIAL_PHONE_DESTS = mobileNavDestinations(false, "social");
 
 /** Home-owned dests. Industry news is a Home child, not a workspace. */
 export const HOME_PHONE_DESTS = [
@@ -247,9 +242,7 @@ export function housePhoneDestinations(
   isGcStaff: boolean,
   workspace: WorkspaceMode,
 ): NavItem[] {
-  return mobileNavDestinations(isGcStaff, workspace)
-    .filter((item) => !isHouseAiNavItem(item))
-    .map((item) => (workspace === "social" ? relabelSocialFeed(item) : item));
+  return mobileNavDestinations(isGcStaff, workspace).filter((item) => !isHouseAiNavItem(item));
 }
 
 export function housePhoneDockDestinations({
@@ -270,7 +263,7 @@ export function housePhoneDestGlyph(item: NavItem): PhosphorIcon {
 }
 
 export function housePhoneDestIsCreate(item: NavItem): boolean {
-  return item.href === SOCIAL_ROUTES.create;
+  return isSocialCreateDest(item);
 }
 
 export function housePhoneDestActive(

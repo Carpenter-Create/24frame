@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { SOCIAL_DESKTOP_NAV, SOCIAL_NAV } from "./nav";
-import { SOCIAL_PHONE_DESTS, SOCIAL_PHONE_FEED_LABEL } from "./house-phone-shell";
+import { SOCIAL_PHONE_DESTS } from "./house-phone-shell";
 import { SOCIAL_CATEGORY_LABELS } from "./social-categories";
 import {
   SOCIAL_DESKTOP_MEASURE,
@@ -29,23 +29,25 @@ describe("Social Home miss list v1 P0 lock", () => {
   it("keeps the five Social jobs and parks Groups / Courses / Leaderboard", () => {
     expect(SOCIAL_NAV.map((item) => item.label)).toEqual([
       "Home",
-      "Profile",
       "Explore",
       "Create",
       "Messages",
+      "Profile",
     ]);
     expect(SOCIAL_NAV.map((item) => item.href)).toEqual([
       SOCIAL_ROUTES.home,
-      SOCIAL_ROUTES.profile,
       SOCIAL_ROUTES.explore,
       SOCIAL_ROUTES.create,
       SOCIAL_ROUTES.dms,
+      SOCIAL_ROUTES.profile,
     ]);
+    expect(SOCIAL_DESKTOP_NAV).toBe(SOCIAL_NAV);
     expect(SOCIAL_DESKTOP_NAV.map((item) => item.label)).toEqual([
       "Home",
-      "Profile",
       "Explore",
+      "Create",
       "Messages",
+      "Profile",
     ]);
     expect(SOCIAL_NAV.map((item) => item.href)).not.toContain(SOCIAL_ROUTES.groups);
     expect(SOCIAL_NAV.map((item) => item.href)).not.toContain("/social/courses");
@@ -286,9 +288,10 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(shell).not.toContain("SOCIAL_RAIL.workspace");
     expect(SOCIAL_DESKTOP_NAV.map((item) => item.label)).toEqual([
       "Home",
-      "Profile",
       "Explore",
+      "Create",
       "Messages",
+      "Profile",
     ]);
     expect(rail).toContain("data-social-stories-mobile");
     expect(chrome).toContain("129:215");
@@ -374,30 +377,29 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(dests).not.toContain("data-social-mobile-pill");
     expect(SOCIAL_NAV.map((item) => item.label)).toEqual([
       "Home",
-      "Profile",
       "Explore",
       "Create",
       "Messages",
+      "Profile",
     ]);
+    expect(SOCIAL_PHONE_DESTS).toEqual(SOCIAL_NAV);
     expect(SOCIAL_PHONE_DESTS.map((item) => item.label)).toEqual([
-      "Feed",
-      "Profile",
+      "Home",
       "Explore",
       "Create",
       "Messages",
+      "Profile",
     ]);
     expect(SOCIAL_PHONE_DESTS.map((item) => item.href)).toEqual([
       SOCIAL_ROUTES.home,
-      SOCIAL_ROUTES.profile,
       SOCIAL_ROUTES.explore,
       SOCIAL_ROUTES.create,
       SOCIAL_ROUTES.dms,
+      SOCIAL_ROUTES.profile,
     ]);
-    expect(SOCIAL_PHONE_FEED_LABEL).toBe("Feed");
-    expect(SOCIAL_PHONE_DESTS.map((item) => item.label)).not.toContain("Home");
-    const feedItem = SOCIAL_PHONE_DESTS.find((item) => item.label === SOCIAL_PHONE_FEED_LABEL);
-    expect(feedItem?.href).toBe(SOCIAL_ROUTES.home);
-    expect(feedItem?.exact).toBe(true);
+    const homeItem = SOCIAL_PHONE_DESTS.find((item) => item.label === "Home");
+    expect(homeItem?.href).toBe(SOCIAL_ROUTES.home);
+    expect(homeItem?.exact).toBe(true);
   });
 
   it("keeps Social nav prefetch on and destination pages parallel", () => {

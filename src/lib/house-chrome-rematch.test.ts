@@ -230,7 +230,7 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(lead).toContain('tone="pill"');
     expect(lead).toContain("APP_HEADER_WORKSPACE_PILL_HOST_CLASS");
     expect(lead).toContain("APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS");
-    expect(nav).toContain('if (workspace === "social") return { items: SOCIAL_DESKTOP_NAV, staffItems: [] }');
+    expect(nav).toContain('if (workspace === "social") return { items: SOCIAL_NAV, staffItems: [] }');
     expect(sideNav).toContain("staffItems");
     expect(HOUSE_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash text-accent");
     expect(HOUSE_FILTER_ON_CLASS).toBe("bg-ink text-surface");

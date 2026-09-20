@@ -24,6 +24,7 @@ import {
   isClientNavActive,
   isHouseAiNavItem,
   isPhosphorNavItem,
+  isSocialCreateDest,
   isSocialTabActive,
   EDUCATION_MANAGE_NAV,
   EDUCATION_NAV,
@@ -217,17 +218,17 @@ describe("mobileNavDestinations", () => {
   it("shows Social destinations only in Social mode — DMs are not /messages", () => {
     expect(mobileNavDestinations(false, "social").map((item) => item.href)).toEqual([
       "/social",
-      "/social/profile",
       "/social/explore",
       "/social/create",
       "/social/dms",
+      "/social/profile",
     ]);
     expect(mobileNavDestinations(true, "social").map((item) => item.href)).toEqual([
       "/social",
-      "/social/profile",
       "/social/explore",
       "/social/create",
       "/social/dms",
+      "/social/profile",
     ]);
     expect(mobileNavDestinations(true, "social").map((item) => item.href)).not.toContain("/messages");
     expect(mobileNavDestinations(true, "social").map((item) => item.href)).not.toContain("/queue");
@@ -297,31 +298,38 @@ describe("mobileNavDestinations", () => {
     expect(EDUCATION_NAV.map((item) => item.href)).not.toContain("/social/courses");
     expect(SOCIAL_NAV.map((item) => item.label)).toEqual([
       "Home",
-      "Profile",
       "Explore",
       "Create",
       "Messages",
+      "Profile",
     ]);
+    expect(SOCIAL_NAV[2]?.label).toBe("Create");
+    expect(isSocialCreateDest(SOCIAL_NAV[2]!)).toBe(true);
+    expect(SOCIAL_NAV.filter(isSocialCreateDest)).toHaveLength(1);
+    expect(SOCIAL_DESKTOP_NAV).toBe(SOCIAL_NAV);
     expect(SOCIAL_DESKTOP_NAV.map((item) => item.label)).toEqual([
       "Home",
-      "Profile",
       "Explore",
+      "Create",
       "Messages",
+      "Profile",
     ]);
+    expect(railDestinations(false, "social").items).toBe(SOCIAL_NAV);
     expect(railDestinations(false, "social").items.map((item) => item.label)).toEqual([
       "Home",
-      "Profile",
       "Explore",
+      "Create",
       "Messages",
+      "Profile",
     ]);
     expect(navSrc).not.toContain("SOCIAL_MOBILE_PILL");
     expect(isSocialTabActive("/social", SOCIAL_NAV[0])).toBe(true);
     expect(isSocialTabActive("/social/stories", SOCIAL_NAV[0])).toBe(true);
-    expect(isSocialTabActive("/social/create", SOCIAL_NAV[3])).toBe(true);
-    expect(isSocialTabActive("/social/create/live", SOCIAL_NAV[3])).toBe(true);
-    expect(isSocialTabActive("/social/u/maya", SOCIAL_NAV[1])).toBe(true);
-    expect(isSocialTabActive("/social/profile/edit", SOCIAL_NAV[1])).toBe(true);
-    expect(isSocialTabActive("/social/profile/edit/bio", SOCIAL_NAV[1])).toBe(true);
+    expect(isSocialTabActive("/social/create", SOCIAL_NAV[2])).toBe(true);
+    expect(isSocialTabActive("/social/create/live", SOCIAL_NAV[2])).toBe(true);
+    expect(isSocialTabActive("/social/u/maya", SOCIAL_NAV[4])).toBe(true);
+    expect(isSocialTabActive("/social/profile/edit", SOCIAL_NAV[4])).toBe(true);
+    expect(isSocialTabActive("/social/profile/edit/bio", SOCIAL_NAV[4])).toBe(true);
     expect(isSocialTabActive("/social/explore", SOCIAL_NAV[0])).toBe(false);
     expect(railDestinations(true, "social").staffItems).toEqual([]);
     expect(railDestinations(true, "aggregation").staffItems.map((item) => item.href)).toContain(

@@ -91,27 +91,30 @@ export const NAV: PhosphorNavItem[] = [
   },
 ];
 
-// Social workspace rail. Phone local dests live in HousePhoneBottomNav
-// (Feed / Profile / Explore / Create / Messages).
-// Desktop rail is Home / Profile / Explore / Messages — composer owns create.
-// Profile second (Adam 2026-09-19) — phone reach; avatar remains account menu.
-// Messages here is DMs — never /messages. Groups / Courses / Leaderboard
-// stay parked off this rail. Education land is house chrome + an
-// Education rail on Route A — not Aggregation destinations, not STAFF,
-// not Social feed chrome. Phosphor house glyphs only; no Education-only
-// icon family. SOCIAL_NAV uses the same Phosphor family as Aggregation.
+// Social workspace dests. One SoT for the phone dock and the desktop
+// rail (Adam lock 2026-09-20): Home · Explore · Create · Messages ·
+// Profile. Create sits center (IG-style). Profile last. Avatar stays
+// the account / Settings door — not Social Profile. Messages here is
+// DMs — never /messages. Groups / Courses / Leaderboard stay parked
+// off this rail. Education land is house chrome + an Education rail
+// on Route A — not Aggregation destinations, not STAFF, not Social
+// feed chrome. Phosphor house glyphs only; no Education-only icon
+// family. SOCIAL_NAV uses the same Phosphor family as Aggregation.
 // Social interiors stay SocialIcon (Social Figma V1).
 export const SOCIAL_NAV: PhosphorNavItem[] = [
   { label: "Home", href: SOCIAL_ROUTES.home, family: "phosphor", icon: House, exact: true },
-  { label: "Profile", href: SOCIAL_ROUTES.profile, family: "phosphor", icon: User },
   { label: "Explore", href: SOCIAL_ROUTES.explore, family: "phosphor", icon: Compass },
   { label: "Create", href: SOCIAL_ROUTES.create, family: "phosphor", icon: Plus },
   { label: "Messages", href: SOCIAL_ROUTES.dms, family: "phosphor", icon: ChatCircle },
+  { label: "Profile", href: SOCIAL_ROUTES.profile, family: "phosphor", icon: User },
 ];
 
-export const SOCIAL_DESKTOP_NAV: PhosphorNavItem[] = SOCIAL_NAV.filter(
-  (item) => item.href !== SOCIAL_ROUTES.create,
-);
+// Same five as SOCIAL_NAV — no Create-stripped desktop fork.
+export const SOCIAL_DESKTOP_NAV: PhosphorNavItem[] = SOCIAL_NAV;
+
+export function isSocialCreateDest(item: Pick<NavItem, "href">): boolean {
+  return item.href === SOCIAL_ROUTES.create;
+}
 
 // Member Education rail. Browse is /education.
 // Staff CMS is /education/manage (operator-gated) via EDUCATION_MANAGE_NAV —
@@ -205,10 +208,10 @@ export function clientNavCurrent(pathname: string): NavItem {
 // Phone dest dock uses this list (HousePhoneBottomNav still filters
 // house-ai so a leftover overlay trigger cannot become a dest).
 // Staff already use the operator set — do not leave them on a
-// client-only row. Social phone dests keep the feed pill (relabelled
-// Feed on phone; desktop rail keeps Home) so /social is reachable
-// from the chip row. Desktop rail drops Create. Activity is the
-// header bell, not a dest chip. Ask 24Frame AI is header + overlay.
+// client-only row. Social phone dests and the desktop Social rail
+// both read SOCIAL_NAV — Home keeps the Home label; Create stays
+// center and opens the equal-tile sheet. Activity is the header
+// bell, not a dest. Ask 24Frame AI is header + overlay.
 export function mobileNavDestinations(
   isGcStaff: boolean,
   workspace: WorkspaceMode = "aggregation",
@@ -224,7 +227,7 @@ export function railDestinations(
   isGcStaff: boolean,
   workspace: WorkspaceMode = "aggregation",
 ): { items: NavItem[]; staffItems: NavItem[] } {
-  if (workspace === "social") return { items: SOCIAL_DESKTOP_NAV, staffItems: [] };
+  if (workspace === "social") return { items: SOCIAL_NAV, staffItems: [] };
   if (workspace === "education") {
     return { items: EDUCATION_NAV, staffItems: isGcStaff ? EDUCATION_MANAGE_NAV : [] };
   }

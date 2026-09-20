@@ -88,6 +88,7 @@ describe("Social Create sheet SoT", () => {
     expect(SOCIAL_CREATE_SHEET_SCRIM_CLASS).not.toContain("bg-ink/80");
 
     const dests = readFileSync("src/components/chrome/house-phone-bottom-nav.tsx", "utf8");
+    const rail = readFileSync("src/components/chrome/side-nav.tsx", "utf8");
     const composer = readFileSync("src/components/social/social-home-composer.tsx", "utf8");
     const header = readFileSync("src/components/chrome/house-lead-chrome.tsx", "utf8");
     const switcher = readFileSync("src/components/chrome/workspace-switcher.tsx", "utf8");
@@ -97,6 +98,10 @@ describe("Social Create sheet SoT", () => {
     expect(dests).toContain('data-social-create-sheet="dest"');
     expect(dests).toContain("housePhoneDestIsCreate");
     expect(dests).not.toContain("SocialCreateMenu");
+    expect(rail).toContain("SocialCreateSheet");
+    expect(rail).toContain('data-social-create-sheet="dest"');
+    expect(rail).toContain("isSocialCreateDest");
+    expect(rail).not.toContain("SocialCreateMenu");
     expect(composer).toContain("SocialCreateSheet");
     expect(composer).toContain('data-social-create-sheet="composer"');
     expect(composer).not.toContain("SocialCreateMenu");
