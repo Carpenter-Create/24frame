@@ -16,14 +16,22 @@ describe("social isolation lock", () => {
     expect(keys).toContain("social:counts:");
     expect(keys).toContain("social:follow:");
     expect(redis).toContain('import "server-only"');
+    expect(redis).toContain("KV_REST_API_URL");
+    expect(redis).toContain("KV_REST_API_TOKEN");
     expect(redis).toContain("UPSTASH_REDIS_REST_URL");
     expect(redis).toContain("UPSTASH_REDIS_REST_TOKEN");
+    expect(redis).toContain("firstPresent(process.env.KV_REST_API_URL, process.env.UPSTASH_REDIS_REST_URL)");
     expect(redis).not.toContain("NEXT_PUBLIC_UPSTASH");
+    expect(redis).not.toContain("NEXT_PUBLIC_KV");
     expect(forms).not.toContain("@upstash/redis");
     expect(forms).not.toContain("UPSTASH_REDIS_REST_TOKEN");
+    expect(forms).not.toContain("KV_REST_API_TOKEN");
+    expect(env).toContain("KV_REST_API_URL=");
+    expect(env).toContain("KV_REST_API_TOKEN=");
     expect(env).toContain("UPSTASH_REDIS_REST_URL=");
     expect(env).toContain("UPSTASH_REDIS_REST_TOKEN=");
     expect(env).not.toContain("NEXT_PUBLIC_UPSTASH");
+    expect(env).not.toContain("NEXT_PUBLIC_KV");
   });
 
   it("does not add person-scoped tables to the B3 catalog harness", () => {
