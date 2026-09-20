@@ -312,6 +312,7 @@ describe("loadExploreSearch", () => {
     expect(page.hits[0]).toMatchObject({
       kind: "post",
       title: "hello 0",
+      authorId: "u1",
     });
   });
 });

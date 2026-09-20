@@ -104,6 +104,7 @@ describe("HouseLeadSearch — one SoT for Social live and Education quiet", () =
     expect(icon).not.toContain("data-house-lead-search-field");
     expect(icon).not.toContain("data-social-search-sheet");
     expect(icon).not.toContain(`href="${SOCIAL_ROUTES.explore}"`);
+    expect(icon).toContain('href="/social/search?intent=people"');
   });
 
   it("reuses house pill tokens and does not absorb Titles SearchField", () => {

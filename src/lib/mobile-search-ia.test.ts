@@ -220,7 +220,8 @@ describe("mobile search IA — Education under-nav + Social icon sheet", () => {
     expect(empty).toContain("data-social-search-recent-empty");
     expect(empty).not.toContain("data-social-search-recent-row");
 
-    expect(searchSrc).toContain("SocialSearchSheet");
+    expect(searchSrc).toContain("socialSearchHref");
+    expect(searchSrc).not.toContain("SocialSearchSheet");
     expect(searchSrc).not.toContain("prefetch");
   });
 });

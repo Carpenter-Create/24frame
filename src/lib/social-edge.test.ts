@@ -64,6 +64,7 @@ describe("Social Edge vs Node runtime lock", () => {
     expect(publicProfile).toContain("socialMediaProxiesByPostId");
     expect(publicProfile).toContain("loadCachedSocialProfileByHandle");
     expect(search).toContain("socialAvatarFaces");
+    expect(explore).toContain("socialMediaProxiesByPostId");
     expect(explore).not.toContain("socialAvatarFaces");
     expect(follows).toContain("socialAvatarFaces");
     expect(SOCIAL_EDGE_RUNTIME).toBe("edge");

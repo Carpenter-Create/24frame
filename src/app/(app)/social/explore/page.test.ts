@@ -1,3 +1,4 @@
+import { createElement } from "react";
 import { readFileSync } from "node:fs";
 import { renderServerMarkup } from "@/lib/render-server-markup";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -8,6 +9,15 @@ import { SOCIAL } from "@/lib/social";
 import { SOCIAL_EXPLORE_POSTS_LIMIT } from "@/lib/social-home-bounds";
 import SocialExplorePage from "./page";
 
+vi.mock("next/image", () => ({
+  default: ({
+    src,
+    className,
+  }: {
+    src: string;
+    className?: string;
+  }) => createElement("img", { src, className, alt: "" }),
+}));
 vi.mock("next/navigation", () => ({
   redirect: vi.fn((to: string) => {
     throw new Error(`REDIRECT:${to}`);
@@ -128,5 +138,51 @@ describe("Social Explore", () => {
     expect(html).toContain("Clip 0");
     expect(html).not.toContain(`Clip ${SOCIAL_EXPLORE_POSTS_LIMIT}`);
     expect(html).not.toContain("data-social-for-you-people");
+  });
+
+  it("renders a media grid from post stills and clips, not people rows", async () => {
+    const author = "11111111-1111-4111-8111-111111111111";
+    const object = "22222222-2222-4222-8222-222222222222";
+    const posts = [
+      {
+        id: "m1",
+        body: "Night still",
+        author_id: author,
+        media: [
+          {
+            kind: "image",
+            key: `posts/${author}/${object}.jpg`,
+            contentType: "image/jpeg",
+          },
+        ],
+      },
+    ];
+    const postsChain: Record<string, unknown> = {};
+    const self = () => postsChain;
+    postsChain.select = vi.fn(self);
+    postsChain.eq = vi.fn(self);
+    postsChain.is = vi.fn(self);
+    postsChain.or = vi.fn(self);
+    postsChain.ilike = vi.fn(self);
+    postsChain.order = vi.fn(self);
+    postsChain.in = vi.fn(self);
+    postsChain.range = vi.fn(async () => ({ data: posts, error: null }));
+    vi.mocked(createClient).mockResolvedValue({
+      from: vi.fn((table: string) => {
+        if (table === "profiles") throw new Error("Explore must not search people");
+        return postsChain;
+      }),
+    } as never);
+
+    const html = await renderServerMarkup(
+      await SocialExplorePage({ searchParams: Promise.resolve({}) }),
+    );
+    expect(html).toContain("data-social-explore-grid");
+    expect(html).toContain("data-social-explore-tile");
+    expect(html).toContain("data-social-explore-image");
+    expect(html).toContain("Night still");
+    expect(html).toContain(SOCIAL.home.photoKind);
+    expect(html).not.toContain("data-social-for-you-people");
+    expect(html).not.toContain("data-social-person-row");
   });
 });

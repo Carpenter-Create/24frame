@@ -436,6 +436,8 @@ export type SocialExploreHit = {
   title: string;
   subtitle: string | null;
   href: string;
+  authorId: string;
+  media: unknown;
 };
 
 export type SocialExplorePage = {
@@ -468,7 +470,13 @@ function rankExplorePosts<T extends { id: string; category?: string | null }>(
 }
 
 function explorePostHits(
-  rows: readonly { id: string; body: string | null; category?: string | null }[],
+  rows: readonly {
+    id: string;
+    body: string | null;
+    author_id: string;
+    media?: unknown;
+    category?: string | null;
+  }[],
   viewer: { topics?: unknown; crafts?: unknown } | readonly string[],
 ): SocialExploreHit[] {
   return rankExplorePosts(rows, viewer).map((post) => ({
@@ -477,6 +485,8 @@ function explorePostHits(
     title: post.body?.trim() || "Post",
     subtitle: null,
     href: SOCIAL_ROUTES.explore,
+    authorId: post.author_id,
+    media: post.media ?? [],
   }));
 }
 
@@ -492,7 +502,7 @@ export async function loadExploreSearch(
   const like = `%${needle.replace(/[%_]/g, "")}%`;
   const { data: posts } = await supabase
     .from("posts")
-    .select("id, body, author_id, category")
+    .select("id, body, author_id, category, media")
     .eq("status", "active")
     .is("group_id", null)
     .ilike("body", like)
@@ -510,7 +520,7 @@ export async function loadExploreMedia(
 ): Promise<SocialExplorePage> {
   const { data: posts } = await supabase
     .from("posts")
-    .select("id, body, author_id, category")
+    .select("id, body, author_id, category, media")
     .eq("status", "active")
     .is("group_id", null)
     .order("created_at", { ascending: false })

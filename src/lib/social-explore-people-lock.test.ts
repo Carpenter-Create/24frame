@@ -26,6 +26,9 @@ describe("Explore vs people discovery lock (Adam 2026-09-20)", () => {
     expect(explore).toContain("loadExploreMedia");
     expect(explore).toContain("loadExploreSearch");
     expect(explore).toContain("data-social-explore-trending");
+    expect(explore).toContain("data-social-explore-grid");
+    expect(explore).toContain("socialMediaProxiesByPostId");
+    expect(explore).toContain("SOCIAL_PROFILE_GRID_CLASS");
     expect(explore).not.toContain("SocialSuggestedPeople");
     expect(explore).not.toContain("loadSuggestedPeople");
     expect(explore).not.toContain("loadPeopleSearch");
@@ -48,8 +51,10 @@ describe("Explore vs people discovery lock (Adam 2026-09-20)", () => {
     expect(search).toContain(SOCIAL_SEARCH_INTENT_PARAM);
     expect(search).toContain(SOCIAL_SEARCH_PEOPLE_INTENT);
     expect(leadSearch).toContain(`action ?? (live ? SOCIAL_ROUTES.search`);
+    expect(leadSearch).toContain("socialSearchHref({ intent: \"people\" })");
     expect(leadSearch).toContain("SOCIAL_SEARCH_PEOPLE_INTENT");
     expect(leadSearch).not.toContain("SOCIAL_ROUTES.explore");
+    expect(leadSearch).not.toContain("SocialSearchSheet");
     expect(existsSync("src/app/(app)/social/search/page.tsx")).toBe(true);
   });
 
