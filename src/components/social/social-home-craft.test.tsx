@@ -33,7 +33,7 @@ import {
   SOCIAL_TOPIC_RAIL_ROWS,
 } from "@/lib/social-chrome";
 import { HOUSE_SCROLL_ROW_CLASS, HOUSE_SEGMENTED_ITEM_BASE_CLASS } from "@/lib/house-shell";
-import { socialInterestTopics } from "@/lib/social-role-affinity";
+import { SOCIAL_CATEGORY_TOPICS, sortTopicsAlpha } from "@/lib/social-categories";
 import { SOCIAL_ICON_SIZE_COMPOSER, SOCIAL_ICON_SIZE_STORY_PLUS } from "@/lib/social-icons";
 import { SOCIAL_MEDIA_ACCEPT } from "@/lib/social-media";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
@@ -121,8 +121,11 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).not.toContain("data-social-for-you-topics");
     expect(SOCIAL.forYou.topics).toBe("Topics");
     expect(SOCIAL_TOPIC_RAIL_ROWS).toBe(1);
-    expect(socialInterestTopics({})).toHaveLength(15);
+    expect(SOCIAL_CATEGORY_TOPICS).toHaveLength(15);
     const row = html.slice(html.indexOf('data-house-chip-rail-row="0"'));
+    const chips = [...row.matchAll(/data-social-home-topic="([^"]+)"/g)].map((match) => match[1]);
+    expect(chips).toEqual([...SOCIAL_CATEGORY_TOPICS]);
+    expect(chips).toEqual(sortTopicsAlpha(chips));
     expect(row).toContain("Acting");
     expect(row).toContain("AI filmmaking");
   });

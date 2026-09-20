@@ -1,6 +1,8 @@
 // Two banks: Topics (industry interests) are primary serving.
 // Professions (crafts / roles_*) may soft-bias only. Not ML.
-// Empty Topics keep the locked Topics order, then profession bias.
+// Serving order (posts / people / courses) may lead with selected
+// interests, then profession bias, then the locked A-Z bank.
+// Pill surfaces consume SOCIAL_CATEGORY_TOPICS — never this reorder.
 
 import {
   SOCIAL_CATEGORY_TOPICS,

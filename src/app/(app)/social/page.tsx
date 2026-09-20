@@ -169,7 +169,7 @@ async function SocialHomeCenter({
       {profile ? (
         <SocialHomeComposer authorName={profile.display_name} authorPhotoUrl={photoUrl} />
       ) : null}
-      <SocialHomeTopics topics={profile?.topics ?? []} crafts={profile?.crafts ?? []} />
+      <SocialHomeTopics />
       <SocialStoriesRail
         cards={rail}
         authors={authors}

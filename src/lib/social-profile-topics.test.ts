@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { SOCIAL_CATEGORY_TOPICS } from "@/lib/social-categories";
+import { SOCIAL_CATEGORY_TOPICS, sortTopicsAlpha } from "@/lib/social-categories";
 import {
   SOCIAL_PROFILE_TOPICS,
   SOCIAL_PROFILE_TOPICS_MAX,
@@ -14,6 +14,7 @@ import {
 describe("social profile topics", () => {
   it("is the locked Topics bank, not the Professions bank", () => {
     expect(SOCIAL_PROFILE_TOPICS).toEqual([...SOCIAL_CATEGORY_TOPICS]);
+    expect([...SOCIAL_PROFILE_TOPICS]).toEqual(sortTopicsAlpha(SOCIAL_PROFILE_TOPICS));
     expect(SOCIAL_PROFILE_TOPICS).toContain("Acting");
     expect(SOCIAL_PROFILE_TOPICS).toContain("Cinematography");
     expect(SOCIAL_PROFILE_TOPICS).toContain("Financing");
@@ -38,7 +39,8 @@ describe("social profile topics", () => {
     expect(toggleSocialProfileTopic(["Acting", "Financing"], "Acting")).toEqual(["Financing"]);
     expect(toggleSocialProfileTopic(["Acting"], "Actor")).toEqual(["Acting"]);
     expect(filterSocialProfileTopics("cine")).toEqual(["Cinematography"]);
-    expect(filterSocialProfileTopics("")).toHaveLength(SOCIAL_CATEGORY_TOPICS.length);
+    expect(filterSocialProfileTopics("")).toEqual([...SOCIAL_CATEGORY_TOPICS]);
+    expect(filterSocialProfileTopics("")).toEqual(sortTopicsAlpha(SOCIAL_PROFILE_TOPICS));
   });
 
   it("caps a new Topics pick at 8 and keeps extras already saved", () => {
