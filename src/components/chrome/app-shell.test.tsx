@@ -1033,7 +1033,7 @@ describe("AppShell rail-collapse chevron", () => {
     expect(shellSrc).toContain("data.defaultCollapsed");
     expect(shellSrc).toContain("data.defaultWorkspace");
     expect(shellSrc).toContain("clampWorkspaceMode");
-    expect(shellSrc).toContain("resolveWorkspaceMode(pathname, workspaceCookie)");
+    expect(shellSrc).toContain("clampWorkspaceMode(workspaceCookie, isGcStaff)");
     const appShellFn = shellSrc.slice(
       shellSrc.indexOf("export function AppShell"),
       shellSrc.indexOf("function AccountMenuSlot"),
