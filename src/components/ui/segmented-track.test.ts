@@ -20,6 +20,7 @@ const CONSUMERS = [
   "src/components/activity/activity-family-chips.tsx",
   "src/components/reports/reports-ranked.tsx",
   "src/components/reports/reports-controls.tsx",
+  "src/components/news/news-sources-filter.tsx",
 ] as const;
 
 describe("SegmentedTrack slide SoT", () => {

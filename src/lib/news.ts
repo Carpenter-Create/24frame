@@ -9,10 +9,10 @@ import { NEWS_INGEST_FUNCTION, NEWS_INGEST_SCHEDULE } from "@/lib/news-aws";
 // Link-out cards only. No leftover /news hop.
 // Allowlist verified 2026-09-18. Storage is AWS DynamoDB. Ingest is
 // Lambda + EventBridge. Not Supabase. Not Vercel cron. Copy lives here.
-// History filter URL: ?source=<id>,<id> (comma-separated allowlist ids,
-// NEWS_SOURCE_IDS order). Repeated ?source=a&source=b is accepted.
-// Absent / empty / all / only-invalid = All sources. Canonical write
-// is one comma-separated `source` param so refresh/share keep the lens.
+// History filter URL: exclusive single-select. Absent / empty / all /
+// only-invalid = All outlets. One allowlist id when filtered. Writes
+// never join comma-multi. Legacy ?source=a,b or repeated params
+// collapse to the first A-Z allowlist id (filter SoT). All-ids = All.
 
 export const NEWS_HOME_HREF = "/home";
 export const NEWS_HREF = "/home/news";
@@ -156,6 +156,16 @@ const SOURCE_BY_ID = new Map<NewsSourceId, NewsSource>(
   NEWS_SOURCES.map((source) => [source.id, source]),
 );
 
+function compareNewsSourceLabel(a: NewsSource, b: NewsSource): number {
+  return a.label.localeCompare(b.label, "en", { sensitivity: "base" });
+}
+
+// Filter lens SoT: All first in the UI, then outlets A-Z by label.
+// URL canonical order follows this list. Ingest keep NEWS_SOURCES order.
+export const NEWS_SOURCE_FILTER_SOURCES = [...NEWS_SOURCES].sort(compareNewsSourceLabel);
+
+export const NEWS_SOURCE_FILTER_IDS = NEWS_SOURCE_FILTER_SOURCES.map((source) => source.id);
+
 export type NewsItem = {
   id: string;
   title: string;
@@ -249,13 +259,14 @@ function rawNewsSourceParts(raw: string | string[] | null | undefined): string[]
   return (Array.isArray(raw) ? raw : [raw]).flatMap(splitNewsSourceParam);
 }
 
-/** Canonical selected sources. Empty means All. */
+/** Canonical selected sources. Empty means All. At most one id. */
 export function canonicalizeNewsSourceFilter(
   selected: readonly string[],
 ): NewsSourceId[] {
-  const unique = NEWS_SOURCE_IDS.filter((id) => selected.includes(id));
-  if (unique.length === NEWS_SOURCE_IDS.length) return [];
-  return [...unique];
+  const unique = NEWS_SOURCE_FILTER_IDS.filter((id) => selected.includes(id));
+  if (unique.length === 0 || unique.length === NEWS_SOURCE_IDS.length) return [];
+  const first = unique[0];
+  return first ? [first] : [];
 }
 
 export function parseNewsSourceFilter(
@@ -274,20 +285,22 @@ export function newsSourceFilterIsAll(selected: readonly string[]): boolean {
 
 export function newsHistoryHref(selected: readonly string[] = []): string {
   const canonical = canonicalizeNewsSourceFilter(selected);
-  if (canonical.length === 0) return NEWS_HREF;
-  return `${NEWS_HREF}?${NEWS_SOURCE_PARAM}=${canonical.join(",")}`;
+  const id = canonical[0];
+  if (!id) return NEWS_HREF;
+  return `${NEWS_HREF}?${NEWS_SOURCE_PARAM}=${id}`;
 }
 
-export function toggleNewsSourceFilter(
-  selected: readonly NewsSourceId[],
-  id: NewsSourceId,
+export function selectNewsSourceFilter(
+  id: NewsSourceId | typeof NEWS_SOURCE_ALL,
 ): NewsSourceId[] {
-  if (newsSourceFilterIsAll(selected)) return [id];
-  const current = canonicalizeNewsSourceFilter(selected);
-  const next = current.includes(id)
-    ? current.filter((source) => source !== id)
-    : [...current, id];
-  return canonicalizeNewsSourceFilter(next);
+  return canonicalizeNewsSourceFilter(id === NEWS_SOURCE_ALL ? [] : [id]);
+}
+
+export function newsSourceFilterIndex(selected: readonly string[]): number {
+  const id = canonicalizeNewsSourceFilter(selected)[0];
+  if (!id) return 0;
+  const idx = NEWS_SOURCE_FILTER_IDS.indexOf(id);
+  return idx < 0 ? 0 : idx + 1;
 }
 
 export function filterNewsBySources<T extends Pick<NewsItem, "source">>(
@@ -300,13 +313,8 @@ export function filterNewsBySources<T extends Pick<NewsItem, "source">>(
 }
 
 export function newsSourceFilterLabel(selected: readonly NewsSourceId[]): string {
-  const canonical = canonicalizeNewsSourceFilter(selected);
-  if (canonical.length === 0) return NEWS_PAGE.sourcesAll;
-  if (canonical.length === 1) {
-    const id = canonical[0];
-    return id ? newsSourceLabel(id) : NEWS_PAGE.sourcesAll;
-  }
-  return canonical.map((id) => newsSourceLabel(id)).join(", ");
+  const id = canonicalizeNewsSourceFilter(selected)[0];
+  return id ? newsSourceLabel(id) : NEWS_PAGE.sourcesAll;
 }
 
 export function newsHistoryEmptyCopy(
