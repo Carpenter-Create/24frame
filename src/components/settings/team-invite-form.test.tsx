@@ -26,6 +26,10 @@ describe("TeamInviteForm ROLE select", () => {
     expect(html).toContain(ACCOUNT_INVITE.roleLabel);
     expect(html).toContain(ACCOUNT_INVITE.cancel);
     expect(html).toContain(ACCOUNT_INVITE.invite);
+    expect(html).toContain('data-settings-drill-row="team-invite"');
+    expect(html).toContain("data-team-invite-cta");
+    expect(html).toContain("data-settings-group");
+    expect(html).not.toContain("data-team-list-head");
     expect(html).toContain(HOUSE_FORM_SELECT_TRIGGER_CLASS);
     expect(html).not.toContain("<select");
     expect(html).not.toContain("bg-ink text-surface");

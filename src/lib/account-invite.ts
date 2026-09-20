@@ -279,6 +279,19 @@ export function teamRoleLabel(role: OrgRole): string {
   return ORG_ROLE_LABELS[role];
 }
 
+export function teamRowLabel(row: Pick<TeamListRow, "name" | "email">): string {
+  return teamIdentityName(row.name) ?? row.email;
+}
+
+export function teamRowMeta(row: Pick<TeamListRow, "name" | "email" | "role" | "status">): string {
+  const bits = [
+    teamIdentityName(row.name) ? row.email : null,
+    teamRoleLabel(row.role),
+    inviteStatusLabel(row.status),
+  ].filter((value): value is string => Boolean(value));
+  return bits.join(" · ");
+}
+
 export function grantTierLabel(tier: GrantTier): string {
   return GRANT_TIER_LABELS[tier];
 }

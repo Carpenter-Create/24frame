@@ -167,15 +167,31 @@ export const SETTINGS_QUIET_ROW_CLASS =
 /** Quiet section label under a page title — not a second h1. */
 export const SETTINGS_SECTION_LABEL_CLASS = "t-label text-ink-3";
 
-// Coinbase drill-in grammar — label · muted value · chevron. Whole
-// row tappable. Read-only rows drop the chevron. Shared SoT for
+// Coinbase / Apple Settings grammar — one SoT. Shared SoT for
 // Settings index, Profile, Preferences, Rights Holder / Legal Entities,
 // and Get Help. Do not fork a lookalike row.
+// Row: label · muted secondary · chevron. Whole row tappable.
+// Read-only rows drop the chevron. Inset group: quiet label above,
+// rows on one muted house surface. Add / Invite are trailing rows
+// inside the group — never header pills. Light 24Frame register.
 export const SETTINGS_DRILL_LIST_CLASS = "flex flex-col";
 export const SETTINGS_DRILL_ROW_CLASS =
   "flex w-full items-center justify-between gap-[var(--space-4)] py-[var(--space-3)] text-left t-body leading-5 text-ink";
 export const SETTINGS_DRILL_COPY_CLASS = "flex min-w-0 flex-col gap-[var(--space-1)]";
 export const SETTINGS_DRILL_VALUE_CLASS = "t-body-sm text-ink-3";
+export const SETTINGS_DRILL_ACCENT_CLASS = "text-accent";
+export const SETTINGS_DRILL_CHEVRON_CLASS = `${SETTINGS_RAIL_CHEVRON_CLASS} text-ink-3`;
+
+// House equivalent of an inset grouped list. Quiet label sits above;
+// rows live in one muted rounded surface. Not card-surface, not a
+// titled Card with a header pill.
+export const SETTINGS_GROUP_STACK_CLASS = "flex flex-col gap-[var(--space-2)]";
+/** Same quiet label as SETTINGS_SECTION_LABEL_CLASS — no twin. */
+export const SETTINGS_GROUP_LABEL_CLASS = SETTINGS_SECTION_LABEL_CLASS;
+export const SETTINGS_GROUP_CLASS =
+  `${HOUSE_MODULE_CLASS} overflow-hidden px-[var(--space-4)]`;
+export const SETTINGS_GROUP_LIST_CLASS =
+  "flex list-none flex-col divide-y divide-hairline";
 
 // RH index cards stay on desktop. Phone drops the frame so the
 // grouped list is the surface — not a website card stack.

@@ -31,6 +31,8 @@ import {
   teamInviteSchema,
   teamRoleLabel,
   teamRowInitials,
+  teamRowLabel,
+  teamRowMeta,
   toTeamListRows,
 } from "./account-invite";
 
@@ -50,15 +52,15 @@ describe("account invite SoT", () => {
     expect(inviteStatusFromRow("pending")).toBe("invited");
     expect(inviteStatusFromRow("accepted")).toBe("accepted");
     const teamForm = readFileSync("src/components/settings/team-invite-form.tsx", "utf8");
-    expect(teamForm).toContain("inviteStatusLabel(row.status)");
+    expect(teamForm).toContain("teamRowMeta(row)");
     expect(teamForm).toContain("data-invite-status={row.status}");
     expect(teamForm).not.toContain("ACCOUNT_INVITE.pending");
     expect(teamForm).toContain("canInvite && row.withdrawId");
     expect(teamForm).toContain("onRevoke(row.withdrawId)");
-    expect(teamForm).toContain("inviteDateLabel");
-    expect(teamForm).toContain("data-invite-date");
-    expect(teamForm).toContain("data-team-list");
-    expect(teamForm).toContain("data-team-invite-cta");
+    expect(teamForm).toContain('list="team"');
+    expect(teamForm).toContain('cta="team-invite"');
+    expect(teamForm).not.toContain("data-team-list-head");
+    expect(teamForm).not.toContain("TEAM_LIST_HEADER_CLASS");
     expect(teamForm).toContain("<Dialog");
     expect(teamForm).toContain("DialogFooter");
     expect(teamForm).toContain('import { Select } from "@/components/ui/select"');
@@ -83,6 +85,10 @@ describe("account invite SoT", () => {
     expect(inviteDateLabel("2026-09-19T00:00:00Z")).toBe("Sep 19, 2026");
     expect(inviteDateLabel(null)).toBe("—");
     expect(inviteDateLabel("nope")).toBe("—");
+    expect(teamRowLabel(list[1]!)).toBe("Ada");
+    expect(teamRowLabel(list[0]!)).toBe("pat@example.com");
+    expect(teamRowMeta(list[1]!)).toBe("ada@example.com · Account owner · Accepted");
+    expect(teamRowMeta(list[0]!)).toBe("Viewer · Invited");
   });
 
   it("keeps house grant on the existing tier enum", () => {

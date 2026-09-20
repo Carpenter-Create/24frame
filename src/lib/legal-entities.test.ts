@@ -53,6 +53,7 @@ describe("legal entities copy", () => {
   it("has management copy and Coinbase drill-in hrefs", () => {
     expect(LEGAL_ENTITIES.title).toBe("Legal Entities");
     expect(LEGAL_ENTITIES.add).toBe("Add entity");
+    expect(LEGAL_ENTITIES.addRow).toBe("Add legal entity");
     expect(LEGAL_ENTITIES.editTitle).toBe("Legal entity");
     expect(LEGAL_ENTITIES.helper).toContain("jurisdiction");
     expect(LEGAL_ENTITIES.addHelper).toContain("new legal entity");
@@ -128,7 +129,7 @@ describe("legal entity list craft — compact meta + mobile drill-in", () => {
     expect(ENTITY_LIST_NAME_CLASS).toContain("min-w-0");
     expect(ENTITY_LIST_ACTIONS_CLASS).toBe("shrink-0");
     const src = readFileSync("src/lib/legal-entities.ts", "utf8");
-    expect(src).toContain("Coinbase mobile Settings");
+    expect(src).toContain("SettingsDrillRow");
     expect(src).toContain("Type · Jurisdiction");
     expect(src).not.toContain("ENTITY_LIST_GRID_CLASS");
     expect(src).not.toContain("ENTITY_LIST_HEADER_CLASS");

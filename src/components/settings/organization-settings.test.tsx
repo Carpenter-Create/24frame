@@ -11,14 +11,10 @@ describe("organization settings hosts Team", () => {
     expect(pane).toContain("data-settings-section=\"entities\"");
     expect(pane).toContain("TeamInviteForm");
     expect(pane).toContain("LegalEntitiesSection");
-    expect(pane).toContain("<Card className={SETTINGS_INDEX_CARD_CLASS}>");
-    expect(pane).toContain("CardBody");
-    const companyCard = pane.indexOf("data-settings-section=\"company\"");
-    const entitiesCard = pane.indexOf("data-settings-section=\"entities\"");
-    const teamCard = pane.indexOf("data-settings-section=\"team\"");
-    expect(pane.slice(companyCard, entitiesCard)).toContain("<Card className={SETTINGS_INDEX_CARD_CLASS}>");
-    expect(pane.slice(entitiesCard, teamCard)).toContain("<Card className={SETTINGS_INDEX_CARD_CLASS}>");
-    expect(pane.slice(teamCard)).toContain("<Card className={SETTINGS_INDEX_CARD_CLASS}>");
+    expect(pane).toContain("SETTINGS_CONTENT_MEASURE_CLASS");
+    expect(pane).not.toContain("<Card>");
+    expect(pane).not.toContain("CardBody");
+    expect(pane).not.toContain("card-surface");
     expect(SETTINGS.team).toBe("Team");
     expect(settings).toContain("Team invite");
     expect(settings).toContain("/gc/clients");

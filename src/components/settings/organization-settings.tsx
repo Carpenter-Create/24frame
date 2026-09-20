@@ -4,13 +4,9 @@ import { HouseEmpty } from "@/components/chrome/house";
 import { SettingsPageLead } from "@/components/settings/settings-page-lead";
 import { LegalEntitiesSection } from "@/components/settings/legal-entities-section";
 import { TeamInviteForm } from "@/components/settings/team-invite-form";
-import { Card, CardBody } from "@/components/ui/card";
-import { COMPANY_PROFILE_CARD_BODY_CLASS } from "@/lib/account-profile";
-import { cn } from "@/lib/cn";
 import {
   SETTINGS,
-  SETTINGS_INDEX_CARD_BODY_CLASS,
-  SETTINGS_INDEX_CARD_CLASS,
+  SETTINGS_CONTENT_MEASURE_CLASS,
   SETTINGS_PANE_CLASS,
   SETTINGS_SECTION_CLASS,
   settingsPaneTitle,
@@ -79,56 +75,38 @@ export async function OrganizationSettings() {
 
   return (
     <div data-settings-page="" data-settings-hub="organization" className={SETTINGS_PANE_CLASS}>
-      <section data-settings-section="organization" className={SETTINGS_SECTION_CLASS}>
+      <section
+        data-settings-section="organization"
+        className={`${SETTINGS_SECTION_CLASS} ${SETTINGS_CONTENT_MEASURE_CLASS}`}
+      >
         <SettingsPageLead
           title={settingsPaneTitle("organization")}
           pathname={SETTINGS.organizationHref}
         />
         {ctx.activeOrg ? (
           <>
-            <section
-              data-settings-section="company"
-              className={SETTINGS_SECTION_CLASS}
-            >
-              <Card className={SETTINGS_INDEX_CARD_CLASS}>
-                <CardBody className={cn(COMPANY_PROFILE_CARD_BODY_CLASS, SETTINGS_INDEX_CARD_BODY_CLASS)}>
-                  <CompanyProfileForm
-                    orgId={ctx.activeOrg.id}
-                    name={ctx.activeOrg.name}
-                    canEdit={canEditCompany}
-                  />
-                </CardBody>
-              </Card>
+            <section data-settings-section="company">
+              <CompanyProfileForm
+                orgId={ctx.activeOrg.id}
+                name={ctx.activeOrg.name}
+                canEdit={canEditCompany}
+              />
             </section>
-            <section
-              data-settings-section="entities"
-              className={SETTINGS_SECTION_CLASS}
-            >
-              <Card className={SETTINGS_INDEX_CARD_CLASS}>
-                <CardBody className={SETTINGS_INDEX_CARD_BODY_CLASS}>
-                  <LegalEntitiesSection
-                    orgId={ctx.activeOrg.id}
-                    canManage={canEditCompany}
-                    entities={entities}
-                  />
-                </CardBody>
-              </Card>
+            <section data-settings-section="entities">
+              <LegalEntitiesSection
+                orgId={ctx.activeOrg.id}
+                canManage={canEditCompany}
+                entities={entities}
+              />
             </section>
-            <section
-              data-settings-section="team"
-              className={SETTINGS_SECTION_CLASS}
-            >
-              <Card className={SETTINGS_INDEX_CARD_CLASS}>
-                <CardBody className={SETTINGS_INDEX_CARD_BODY_CLASS}>
-                  <TeamInviteForm
-                    orgId={ctx.activeOrg.id}
-                    canInvite={canInvite}
-                    members={members}
-                    pending={pending}
-                    entities={entities}
-                  />
-                </CardBody>
-              </Card>
+            <section data-settings-section="team">
+              <TeamInviteForm
+                orgId={ctx.activeOrg.id}
+                canInvite={canInvite}
+                members={members}
+                pending={pending}
+                entities={entities}
+              />
             </section>
           </>
         ) : (

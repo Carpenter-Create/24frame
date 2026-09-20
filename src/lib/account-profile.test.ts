@@ -174,10 +174,11 @@ describe("account field 16px lock", () => {
     expect(companyEditorSrc).toContain('#company-name")?.blur()');
     expect(companyEditorSrc).toContain("DialogFooter");
     expect(companyFormSrc).toContain("<Dialog");
-    expect(companyFormSrc).toContain("data-company-edit");
     expect(companyFormSrc).toContain("SettingsDrillRow");
-    expect(companyFormSrc).toContain("COMPANY_PROFILE_VIEW_CLASS");
-    expect(companyFormSrc).not.toContain("flex flex-col gap-[var(--space-4)]");
+    expect(companyFormSrc).toContain("SettingsGroupList");
+    expect(companyFormSrc).toContain("company-edit");
+    expect(companyFormSrc).not.toContain("COMPANY_PROFILE_VIEW_CLASS");
+    expect(companyFormSrc).not.toContain("<Button");
   });
 });
 

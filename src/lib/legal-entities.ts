@@ -53,6 +53,7 @@ export const LEGAL_ENTITIES = {
   title: "Legal Entities",
   empty: "No legal entities yet.",
   add: "Add entity",
+  addRow: "Add legal entity",
   adding: "Adding...",
   added: "Entity added.",
   edit: "Edit",
@@ -86,14 +87,13 @@ export function entityEditHref(id: string): string {
   return `${ENTITY_EDIT_HREF_BASE}/${id}`;
 }
 
-// One SoT for Rights Holder Legal Entities.
-// Adam 2026-09-19 Coinbase mobile Settings: index is summary only —
-// name (+ DEFAULT) · muted `Type · Jurisdiction` · CaretRight.
-// Whole row drills in. Add entity drills to an add pane. Not a
-// modal on mobile. Not a tall TYPE / JURISDICTION mini-form. Not
-// a trailing Edit orphan under meta.
-// Desktop: card + modal for now (same compact meta, name-row Edit).
-// Phone never truncates. Card chrome: “Legal Entities” + Add entity.
+// One SoT for Rights Holder Legal Entities — SettingsDrillRow +
+// SettingsGroupList. Adam 2026-09-19 lock: inset grouped list,
+// single-row items, Add tucked as a trailing row. Index is summary
+// only — name (+ DEFAULT) · muted `Type · Jurisdiction` · chevron.
+// Whole row tappable. Add legal entity → existing add drill-in
+// (mobile) / Dialog (desktop). Not a header pill. Not a Card.
+// Not a tall TYPE / JURISDICTION mini-form. Phone never truncates.
 export const ENTITY_LIST_CLASS = "w-full";
 
 export const ENTITY_LIST_ITEMS_CLASS =
