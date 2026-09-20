@@ -174,22 +174,20 @@ export default async function SocialPublicProfilePage({
               : null
           }
           actions={
-            isSelf
-              ? () => <SocialShareButton handle={member.handle} stretch />
-              : own
-                ? () => (
-                    <>
-                      <SocialFollowButton
-                        followeeId={member.id}
-                        handle={member.handle}
-                        following={following}
-                        viewerId={ctx.user.id}
-                        stretch
-                      />
-                      <SocialShareButton handle={member.handle} stretch />
-                    </>
-                  )
-                : undefined
+            isSelf ? (
+              <SocialShareButton handle={member.handle} stretch />
+            ) : own ? (
+              <>
+                <SocialFollowButton
+                  followeeId={member.id}
+                  handle={member.handle}
+                  following={following}
+                  viewerId={ctx.user.id}
+                  stretch
+                />
+                <SocialShareButton handle={member.handle} stretch />
+              </>
+            ) : undefined
           }
         />
         {welcomeUrl ? <SocialWelcomeVideo src={welcomeUrl} /> : null}
