@@ -5,7 +5,7 @@ import { getOrgContext } from "@/lib/supabase/context";
 import { loadOwnNotificationPrefs } from "@/app/(app)/settings/preferences/actions";
 
 // Preferences door. Appearance + notification matrix.
-// Manage courses is Education workspace, not Settings.
+// Course management is Education workspace, not Settings.
 
 export default async function SettingsPreferencesPage() {
   const ctx = await getOrgContext();

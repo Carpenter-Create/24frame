@@ -18,8 +18,8 @@ import {
 
 // Preferences pane — Appearance (gc-theme SoT) + notification
 // matrix. Never a You / Social / Education / Aggregation spine.
-// Manage courses is Education workspace (/education/manage), not
-// a Preferences row. Not a CMS. Not GC Staff admin.
+// Course management lives on the Education operator workspace,
+// not a Preferences row. Not a CMS. Not GC Staff admin.
 //
 // Mobile: Coinbase drill-in. Theme and Notifications are one-row
 // summaries. Instant switches stay on the Notifications pane.
