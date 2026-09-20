@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { avatarObjectKey } from "@/lib/account-avatar";
 import { FORM_CONTROL_TEXT_CLASS } from "@/lib/form-control";
@@ -25,6 +25,7 @@ import {
   checkSocialProfileEditSave,
   clearSocialProfileOptimistic,
   mergeSocialProfileIdentity,
+  persistSocialProfileEdit,
   readSocialProfileOptimistic,
   socialProfileEditFace,
   socialProfileEditFormData,
@@ -119,8 +120,10 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(edit).toContain("router.push(SOCIAL_ROUTES.profile)");
     expect(edit).not.toContain("router.refresh()");
     expect(edit.indexOf("router.push(SOCIAL_ROUTES.profile)")).toBeLessThan(
-      edit.indexOf("createSocialProfile(checked.form)"),
+      edit.indexOf("persistSocialProfileEdit(checked.form)"),
     );
+    expect(edit).not.toContain("createSocialProfile");
+    expect(edit).toContain("persistSocialProfileEdit");
     expect(readFileSync("src/lib/social-profile-edit.ts", "utf8")).toContain('form.set("links"');
     expect(edit).not.toContain("SOCIAL_ROUTES.profileBio}/link");
     expect(bioPage).toContain("SocialProfileBioEditor");
@@ -172,6 +175,7 @@ describe("Social Profile Edit profile + Bio lock", () => {
 describe("Social profile optimistic Save SoT", () => {
   afterEach(() => {
     clearSocialProfileOptimistic();
+    vi.unstubAllGlobals();
   });
 
   const draft = {
@@ -255,5 +259,23 @@ describe("Social profile optimistic Save SoT", () => {
     expect(missingName.ok).toBe(false);
     if (missingName.ok) return;
     expect(missingName.error).toBe(SOCIAL.profile.firstNameRequired);
+  });
+
+  it("persists over fetch so Done does not refresh the tree", async () => {
+    expect(SOCIAL_PROFILE_EDIT_LOCK.saveHref).toBe("/api/social/profile");
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({}), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const form = socialProfileEditFormData(draft);
+    expect(await persistSocialProfileEdit(form)).toEqual({});
+    expect(fetchMock).toHaveBeenCalledWith("/api/social/profile", {
+      method: "POST",
+      body: form,
+      cache: "no-store",
+    });
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ error: SOCIAL.profile.handleTaken }), { status: 400 }),
+    );
+    expect(await persistSocialProfileEdit(form)).toEqual({ error: SOCIAL.profile.handleTaken });
+    vi.unstubAllGlobals();
   });
 });

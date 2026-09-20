@@ -9,6 +9,7 @@
 // persist in the background, roll back here on error. Professions /
 // Topics toggles stay local draft until that one write.
 
+import { ACCOUNT_PROFILE } from "@/lib/account-profile";
 import {
   BIO_MAX,
   SOCIAL,
@@ -44,6 +45,8 @@ export const SOCIAL_PROFILE_EDIT_LOCK = {
   // Bio from Edit is a same-tree face. Name/handle stay mounted.
   keepsDraftOnBio: true,
   optimisticSave: true,
+  // Fetch persist — not a server action — so Done does not refresh the tree.
+  saveHref: "/api/social/profile",
 } as const;
 
 export type SocialProfileEditFace = "edit" | "bio";
@@ -160,6 +163,18 @@ export function socialProfileOptimisticFail(
     error: handleError ? "" : error,
     handleError,
   };
+}
+
+export async function persistSocialProfileEdit(form: FormData): Promise<{ error?: string }> {
+  const res = await fetch(SOCIAL_PROFILE_EDIT_LOCK.saveHref, {
+    method: "POST",
+    body: form,
+    cache: "no-store",
+  });
+  const body = (await res.json().catch(() => null)) as { error?: string } | null;
+  const error = typeof body?.error === "string" ? body.error.trim() : "";
+  if (!res.ok || error) return { error: error || ACCOUNT_PROFILE.saveFailed };
+  return {};
 }
 
 export function socialProfileEditFormData(draft: SocialProfileEditSaveDraft): FormData {

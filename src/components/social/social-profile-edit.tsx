@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { uploadAccountPhoto } from "@/app/(app)/account/actions";
 import {
   clearSocialWelcomeVideo,
-  createSocialProfile,
   presignSocialMediaUpload,
   saveSocialWelcomeVideo,
 } from "@/app/(app)/social/actions";
@@ -71,6 +70,7 @@ import {
   applySocialProfileOptimistic,
   checkSocialProfileEditSave,
   patchSocialProfileOptimistic,
+  persistSocialProfileEdit,
   socialProfileEditFace,
   socialProfileEditSeed,
   socialProfileOptimisticFail,
@@ -345,7 +345,7 @@ export function SocialProfileEditForm({
       });
     }
     router.push(SOCIAL_ROUTES.profile);
-    void createSocialProfile(checked.form).then((result) => {
+    void persistSocialProfileEdit(checked.form).then((result) => {
       if (!result.error) return;
       if (queryClient && profileId) invalidateSocialQueries(queryClient, { profileId });
       applySocialProfileOptimistic(socialProfileOptimisticFail(checked.snapshot, result.error));
