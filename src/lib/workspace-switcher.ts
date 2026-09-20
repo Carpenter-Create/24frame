@@ -1,10 +1,11 @@
 // Mercury workspace switcher. Lives in lib/, not JSX.
-// IA A (Adam): phone header shows the current workspace name/mark.
-// Tap opens a calm house sheet — Home · Aggregation · Social ·
-// Education. One tap open, one tap switch. Dock dests stay
-// in-workspace only. Avatar stays Settings / account.
-// Desktop md+ keeps the sliding-pill cluster. Do not redesign
-// desktop in this slice.
+// IA A (Adam): phone header shows the current workspace word +
+// chevron only — no letter mark / circular emblem in the pill
+// (2026-09-20 glance). Tap opens a calm house sheet — Home ·
+// Aggregation · Social · Education. One tap open, one tap switch.
+// Dock dests stay in-workspace only. Avatar stays Settings /
+// account. Desktop md+ keeps the sliding-pill cluster. Do not
+// redesign desktop in this slice.
 // Leading air (settings back ↔ emblem) is --space-3 (12). Not
 // --space-1. Do not put overflow-hidden on the leading row (#412).
 // Phone trailing: [search if needed] [theme] [24Frame AI] [bell]
@@ -22,16 +23,17 @@
 // 2026-09-17 “Try it”). Same house grammar as Top Performing:
 // active ink fill, idle muted grey. Desktop trailing: pills, then
 // sun/moon, then Ask, then bell, then avatar. Social uses the same
-// split. Phone uses name/mark + sheet. Do not force three
+// split. Phone uses word+chevron + sheet. Do not force three
 // labels.
 // No rail / header-lead #321 duplicate. Rail top-left stays the
 // static 24 brand. Social-only icons sit left of the Social slot
 // so the avatar x does not shift. Do not invent Move / search.
 // Do not return the Social Messages icon to the top bar.
 //
-// Phone trigger: current workspace name/mark, stacked under the
-// emblem so the word is never ellipsized. Quiet always-on chevron.
-// Menu: quiet
+// Phone trigger: current workspace name + quiet always-on chevron,
+// inline with brand and trailing utilities. No letter avatar.
+// Never truncate the word; never wrap the pill. Shorten chrome
+// (drop the mark) before stacking the header. Menu: quiet
 // Workspaces heading, then accessible rows with leading marks,
 // flush-left names, trailing Sporty Blue check on the current
 // lane (#320). No current-workspace identity header. No
@@ -58,7 +60,6 @@ import {
   HOUSE_LEAD_SEARCH_DESKTOP_CLASS,
   HOUSE_LEAD_UNDER_NAV_CLASS,
 } from "@/lib/house-lead-chrome";
-import { HOUSE_PHONE_WRAP_CLASS } from "@/lib/house-phone-stack";
 import {
   APP_SHEET_SCRIM_CLASS,
   APP_SHEET_SURFACE_CLASS,
@@ -116,16 +117,18 @@ export const WORKSPACE_SWITCHER_TRIGGER_CLASS =
   `group flex min-w-0 items-center gap-[var(--space-2)] ${HOUSE_CONTROL_PILL_CLASS} px-2 py-1 t-body-sm font-medium text-ink transition-colors hover:bg-surface-muted`;
 
 // Phone leading pill — house tokens. Hairline + muted fill. Compact pad.
+// shrink-0: the word + chevron keep their natural width. Do not
+// min-w-0 the trigger — that was the squeeze next to utilities.
 export const WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS =
-  `group flex min-w-0 items-center gap-[var(--space-2)] ${HOUSE_CONTROL_PILL_CLASS} border border-hairline bg-surface-muted px-[var(--space-2)] py-[var(--space-1)] t-body-sm font-medium text-ink`;
+  `group flex shrink-0 items-center gap-[var(--space-2)] ${HOUSE_CONTROL_PILL_CLASS} border border-hairline bg-surface-muted px-[var(--space-2)] py-[var(--space-1)] t-body-sm font-medium text-ink`;
 
-export const WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS = HOUSE_PHONE_WRAP_CLASS;
+export const WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS = "whitespace-nowrap";
 
 export const WORKSPACE_SWITCHER_STATIC_CLASS =
   "flex min-w-0 items-center gap-[var(--space-2)] px-2 py-1 t-body-sm font-medium text-ink";
 
 export const WORKSPACE_SWITCHER_PILL_STATIC_CLASS =
-  `flex min-w-0 items-center gap-[var(--space-2)] ${HOUSE_CONTROL_PILL_CLASS} border border-hairline bg-surface-muted px-[var(--space-2)] py-[var(--space-1)] t-body-sm font-medium text-ink`;
+  `flex shrink-0 items-center gap-[var(--space-2)] ${HOUSE_CONTROL_PILL_CLASS} border border-hairline bg-surface-muted px-[var(--space-2)] py-[var(--space-1)] t-body-sm font-medium text-ink`;
 
 // Desktop md+ segmented track — one continuous muted bar with a
 // sliding dark thumb. Same grammar as Top Performing pills.
@@ -243,13 +246,13 @@ export const APP_HEADER_EDUCATION_SEARCH_PHONE_CLASS = HOUSE_LEAD_UNDER_NAV_CLAS
 export const APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS = HOUSE_LEAD_SEARCH_DESKTOP_CLASS;
 
 export const APP_HEADER_LEADING_CLASS =
-  "mr-auto flex min-w-0 flex-1 items-center gap-[var(--space-3)] max-md:flex-col max-md:items-start md:gap-[var(--space-2)] overflow-visible";
+  "mr-auto flex min-w-0 flex-1 items-center gap-[var(--space-3)] md:gap-[var(--space-2)] overflow-visible";
 
-// Phone stacks emblem above the workspace name so the word can wrap.
-// Not shrink-0 — that was the crush. overflow-visible: the open
-// sheet must not live under a clip.
+// Phone pill sits inline with the 24 emblem and trailing utilities.
+// shrink-0 keeps the word; do not w-full / wrap the name. overflow-
+// visible: the open sheet must not live under a clip.
 export const APP_HEADER_WORKSPACE_PILL_HOST_CLASS =
-  "min-w-0 w-full overflow-visible md:hidden";
+  "shrink-0 overflow-visible md:hidden";
 
 export const WORKSPACE_SWITCHER_HOST_CLASS = "relative min-w-0 overflow-visible";
 

@@ -75,9 +75,29 @@ describe("workspace switcher header control", () => {
     const triggerSrc = src.slice(triggerAt, src.indexOf("</button>", triggerAt));
     expect(triggerSrc).toContain("data-workspace-switcher-current");
     expect(triggerSrc).not.toContain("WorkspaceMark");
+    expect(triggerSrc).not.toContain("WorkspaceLeadMark");
+    expect(triggerSrc).not.toContain("data-workspace-switcher-mark");
     expect(src).toContain("createPortal");
     expect(src).toContain("workspaceSwitcherMenuStyle");
     expect(src).toContain("workspaceSwitcherChromeClearanceBottoms");
+  });
+
+  it("keeps the phone sheet trigger as word + chevron — no letter mark", () => {
+    const html = renderToStaticMarkup(
+      <WorkspaceSwitcher current="social" presentation="sheet" tone="pill" />,
+    );
+    expect(html).toContain('data-workspace-switcher-tone="pill"');
+    expect(html).toContain('data-workspace-switcher-presentation="sheet"');
+    expect(html).toContain("Social");
+    expect(html).toContain("data-workspace-switcher-chevron");
+    expect(html).not.toContain("data-workspace-switcher-mark");
+    const triggerAt = html.indexOf("data-workspace-switcher-trigger");
+    const trigger = html.slice(triggerAt, html.indexOf("</button>", triggerAt));
+    expect(trigger).toContain("Social");
+    expect(trigger).toContain("data-workspace-switcher-current");
+    expect(trigger).toContain("data-workspace-switcher-chevron");
+    expect(trigger).not.toContain("data-workspace-switcher-mark");
+    expect(src).not.toContain("triggerMarkId");
   });
 
   it("opens a phone sheet with Home · Aggregation · Social · Education only", () => {
@@ -102,6 +122,14 @@ describe("workspace switcher header control", () => {
       html.indexOf('data-workspace-switcher-option="social"'),
     );
     expect(html).toContain('data-workspace-switcher-mark="social"');
+    const triggerAt = html.indexOf("data-workspace-switcher-trigger");
+    const trigger = html.slice(triggerAt, html.indexOf("</button>", triggerAt));
+    expect(trigger).toContain("Social");
+    expect(trigger).toContain("data-workspace-switcher-current");
+    expect(trigger).toContain("data-workspace-switcher-chevron");
+    expect(trigger).not.toContain("data-workspace-switcher-mark");
+    expect(src).not.toContain("triggerMarkId");
+    expect(src).not.toContain("WorkspaceLeadMark id={triggerMarkId}");
     expect(html).not.toContain("Settings");
     expect(html).toContain('href="/home"');
     expect(html).toContain('href="/aggregation/dashboard"');

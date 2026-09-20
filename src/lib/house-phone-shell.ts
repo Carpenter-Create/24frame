@@ -1,7 +1,7 @@
 // Shared phone app-shell — IA A (Adam lock: dests in the dock).
 // One primitive for Home · Aggregation · Social · Education.
 // Desktop header + desktop workspace pills stay on HouseLeadChrome.
-// Phone header: emblem + current workspace name/mark. Tap opens a
+// Phone header: emblem + current workspace word+chevron. Tap opens a
 // calm house sheet — Home · Aggregation · Social · Education.
 // One tap open, one tap switch. No workspace item in the dock.
 // Avatar stays Settings / account — not a second workspace door.

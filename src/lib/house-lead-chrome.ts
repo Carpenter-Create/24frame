@@ -1,12 +1,13 @@
 // Shared top lead chrome for Aggregation · Social · Education · Home.
 // Phone: Asset 8 emblem on every workspace (logoVisible always).
-// IA A: emblem + current workspace name/mark on the left. Tap opens
-// the workspace sheet. Emblem owns the phone left alone next to the
-// workspace trigger. No hamburger — leading or trailing.
+// IA A: emblem + current workspace word+chevron on the left. Tap
+// opens the workspace sheet. No letter mark in the pill. Emblem
+// owns the phone left next to the workspace trigger. No hamburger
+// — leading or trailing.
 // Destinations live in HousePhoneBottomNav (in-workspace only).
 // Emblem is a workspace-home link, not the rail.
 // Phone grammar IA A:
-//   Left stacks: [emblem] then [workspace name/mark] — no truncate.
+//   Left inline: [emblem] [workspace word ▾] — no mark, no truncate.
 //   Trailing: [search if needed] [theme] [24Frame AI] [bell] [avatar]
 //   Trailing rhythm: one --space-2 gap between distinct siblings.
 //   Phone icon hits hug the 16px glyph (HOUSE_HEADER_TRAILING_HIT_CLASS)
@@ -73,7 +74,7 @@ export const HOUSE_LEAD_PHONE_PAD_CLASS =
 
 // relative: Settings phone back is absolute against this row so the
 // 24 emblem stays put.
-export const HOUSE_LEAD_CHROME_CLASS = `relative flex items-center justify-end gap-4 border-b border-hairline bg-surface/85 backdrop-blur max-md:h-auto md:h-[var(--header-height)] ${HOUSE_LEAD_PHONE_PAD_CLASS} ${HOUSE_CHROME_GUTTER_X_CLASS}`;
+export const HOUSE_LEAD_CHROME_CLASS = `relative flex items-center justify-end gap-4 border-b border-hairline bg-surface/85 backdrop-blur h-[var(--header-height)] ${HOUSE_LEAD_PHONE_PAD_CLASS} ${HOUSE_CHROME_GUTTER_X_CLASS}`;
 
 export const HOUSE_LEAD_LOGO_CLASS = "inline-flex shrink-0 items-center";
 

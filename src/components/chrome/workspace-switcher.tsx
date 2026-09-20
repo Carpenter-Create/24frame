@@ -69,7 +69,6 @@ import {
   workspaceSwitcherStaticClass,
   workspaceSwitcherTriggerClass,
   workspaceSwitcherPersistLane,
-  workspaceSwitcherTriggerMarkId,
 } from "@/lib/workspace-switcher";
 
 function WorkspaceLeadMark({ id }: { id: OverviewLeadPillId }) {
@@ -212,7 +211,6 @@ export function WorkspaceSwitcher({
       : overviewLeadPills(options);
   const chromePath = presentation === "sheet" ? activePath : pathname;
   const label = overviewTriggerLabel(chromePath, workspaceModeLabel(current));
-  const triggerMarkId = workspaceSwitcherTriggerMarkId(chromePath, current);
   const canSwitch = pills.length > 1;
 
   useEffect(() => {
@@ -409,7 +407,6 @@ export function WorkspaceSwitcher({
         onClick={() => setOpen((next) => !next)}
         className={workspaceSwitcherTriggerClass(tone)}
       >
-        {presentation === "sheet" ? <WorkspaceLeadMark id={triggerMarkId} /> : null}
         <span data-workspace-switcher-current="" className={WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS}>
           {label}
         </span>
