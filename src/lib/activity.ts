@@ -1,6 +1,10 @@
 import { isCoProductionsPath } from "@/lib/co-productions";
 import { HOUSE_THEME_TOGGLE_CLASS } from "@/lib/house-lead-chrome";
-import { APP_SHEET_SURFACE_CLASS, TEXT_ACTION_CLASS } from "@/lib/house-sheet";
+import {
+  APP_SHEET_HOST_CLASS,
+  APP_SHEET_SURFACE_CLASS,
+  TEXT_ACTION_CLASS,
+} from "@/lib/house-sheet";
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
 import { NOTIFICATION_EMAIL, type NotificationKind } from "@/lib/notifications";
 import {
@@ -100,10 +104,12 @@ export const ACTIVITY_BELL_TRIGGER_CLASS =
 export const ACTIVITY_BELL_TRIGGER_OPEN_CLASS = "bg-surface-muted";
 export const ACTIVITY_BELL_OPEN_DOT_CLASS = "size-2 shrink-0 rounded-full bg-accent";
 // Desktop peek reuses the house panel already used by Reports scope.
-// Phone peek is the house app-sheet surface. Do not fork a third panel.
+// Phone peek is the house app-sheet — same host + surface as the
+// avatar account sheet. Adam 2026-09-20: rise from the bottom,
+// full-width. Do not fork a third panel. md:hidden keeps desktop
+// on the anchored popover.
 export const ACTIVITY_BELL_POPOVER_CLASS = REPORTS_USER_PANEL_CLASS;
-export const ACTIVITY_BELL_SHEET_HOST_CLASS =
-  "fixed inset-0 z-50 flex items-end md:hidden";
+export const ACTIVITY_BELL_SHEET_HOST_CLASS = `${APP_SHEET_HOST_CLASS} md:hidden`;
 export const ACTIVITY_BELL_SHEET_SURFACE_CLASS = APP_SHEET_SURFACE_CLASS;
 export const ACTIVITY_BELL_VIEW_ALL_CLASS =
   `block border-t border-hairline px-[var(--space-4)] py-[var(--space-3)] ${TEXT_ACTION_CLASS}`;

@@ -4,7 +4,13 @@ import { describe, expect, it } from "vitest";
 import { DASHBOARD_HREF } from "./dashboard-admin";
 import { HOME_ROOT } from "./workspace";
 import { HOUSE_HEADER_TRAILING_HIT_CLASS } from "@/lib/house-lead-chrome";
-import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
+import {
+  APP_SHEET_HOST_CLASS,
+  APP_SHEET_RISE_CLASS,
+  APP_SHEET_SURFACE_CLASS,
+  TEXT_ACTION_CLASS,
+} from "@/lib/house-sheet";
+import { ACCOUNT_SHEET_HOST_CLASS, ACCOUNT_SHEET_SURFACE_CLASS } from "@/lib/account-sheet";
 import {
   SETTINGS_EDIT_HELPER_CLASS,
   SETTINGS_PANE_CLASS,
@@ -15,6 +21,8 @@ import {
   ACTIVITY_BELL_OPEN_CAP,
   ACTIVITY_BELL_OPEN_DOT_CLASS,
   ACTIVITY_BELL_POPOVER_CLASS,
+  ACTIVITY_BELL_SHEET_HOST_CLASS,
+  ACTIVITY_BELL_SHEET_SURFACE_CLASS,
   ACTIVITY_BELL_TRIGGER_CLASS,
   ACTIVITY_BELL_TRIGGER_OPEN_CLASS,
   ACTIVITY_BELL_VIEW_ALL_CLASS,
@@ -267,6 +275,19 @@ describe("Activity bell cap", () => {
     expect(ACTIVITY_BELL_OPEN_DOT_CLASS).toContain("bg-accent");
     expect(ACTIVITY_BELL_POPOVER_CLASS).toContain("border-hairline");
     expect(ACTIVITY_BELL_POPOVER_CLASS).toContain("bg-surface");
+    expect(ACTIVITY_BELL_SHEET_HOST_CLASS).toBe(`${APP_SHEET_HOST_CLASS} md:hidden`);
+    expect(ACTIVITY_BELL_SHEET_HOST_CLASS).toContain(ACCOUNT_SHEET_HOST_CLASS);
+    expect(ACTIVITY_BELL_SHEET_HOST_CLASS).toContain("flex-col");
+    expect(ACTIVITY_BELL_SHEET_HOST_CLASS).toContain("justify-end");
+    expect(ACTIVITY_BELL_SHEET_HOST_CLASS).toContain("w-full");
+    expect(ACTIVITY_BELL_SHEET_HOST_CLASS).toContain("h-dvh");
+    expect(ACTIVITY_BELL_SHEET_HOST_CLASS.split(" ")).not.toContain("items-end");
+    expect(ACTIVITY_BELL_SHEET_HOST_CLASS).not.toMatch(/\bflex items-end\b/);
+    expect(ACTIVITY_BELL_SHEET_SURFACE_CLASS).toBe(APP_SHEET_SURFACE_CLASS);
+    expect(ACTIVITY_BELL_SHEET_SURFACE_CLASS).toContain("w-full");
+    expect(ACTIVITY_BELL_SHEET_SURFACE_CLASS).toContain(APP_SHEET_RISE_CLASS);
+    expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain("w-full");
+    expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain(APP_SHEET_RISE_CLASS);
     expect(ACTIVITY_BELL_VIEW_ALL_CLASS).toContain(TEXT_ACTION_CLASS);
     expect(ACTIVITY_BELL_VIEW_ALL_CLASS).toContain("text-accent");
     expect(ACTIVITY_BELL_VIEW_ALL_CLASS).not.toMatch(/\btext-ink\b/);

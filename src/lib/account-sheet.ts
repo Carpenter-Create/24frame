@@ -38,6 +38,7 @@
 // bottom 24. Labels stay one source.
 
 import { accountPhotoSrc } from "@/lib/account-avatar";
+import { APP_SHEET_HOST_CLASS } from "@/lib/house-sheet";
 import { ASK_ASSISTANT, ASSISTANT_NAME } from "@/lib/product";
 import {
   USER_MENU_ACTIONS,
@@ -84,8 +85,7 @@ export const ACCOUNT_SHEET_PHONE_ITEMS = USER_MENU_PHONE_ACTIONS;
 // is the overflow ceiling — not a forced 90% floor. Leftover
 // above Log out is 24 house air, shrink-0. Identity 48 + Close/44
 // one row. Desktop 629:795 hug does not use this surface.
-export const ACCOUNT_SHEET_HOST_CLASS =
-  "fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end";
+export const ACCOUNT_SHEET_HOST_CLASS = APP_SHEET_HOST_CLASS;
 
 export const ACCOUNT_SHEET_SURFACE_CLASS =
   "account-sheet-surface relative z-10 flex h-auto max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-[16px] bg-surface px-[var(--space-6)] pb-[var(--space-8)] pt-[calc(4px+var(--space-8))] app-sheet-rise";

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { USER_MENU, USER_MENU_ACTIONS, USER_MENU_PHONE_ACTIONS } from "@/lib/user-menu";
+import { APP_SHEET_HOST_CLASS, APP_SHEET_RISE_CLASS } from "@/lib/house-sheet";
 import { ASSISTANT_NAME } from "@/lib/product";
 import * as accountSheet from "./account-sheet";
 import {
@@ -87,9 +88,15 @@ describe("account sheet lock", () => {
   });
 
   it("locks the 544:561 / 537:557 surface: 32 clear under the bar, 32 bottom, sides 24", () => {
+    expect(ACCOUNT_SHEET_HOST_CLASS).toBe(APP_SHEET_HOST_CLASS);
     expect(ACCOUNT_SHEET_HOST_CLASS).toContain("justify-end");
+    expect(ACCOUNT_SHEET_HOST_CLASS).toContain("flex-col");
+    expect(ACCOUNT_SHEET_HOST_CLASS).toContain("w-full");
+    expect(ACCOUNT_SHEET_HOST_CLASS.split(" ")).not.toContain("items-end");
     expect(ACCOUNT_SHEET_HOST_CLASS).not.toContain("md:flex-row");
     expect(ACCOUNT_SHEET_HOST_CLASS).not.toContain("md:items-end");
+    expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain("w-full");
+    expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain(APP_SHEET_RISE_CLASS);
     expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain("h-auto");
     expect(ACCOUNT_SHEET_SURFACE_CLASS).toContain("max-h-[90dvh]");
     expect(ACCOUNT_SHEET_SURFACE_CLASS.split(" ")).not.toContain("h-[90dvh]");
