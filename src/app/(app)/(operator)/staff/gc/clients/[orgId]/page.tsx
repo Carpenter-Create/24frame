@@ -9,6 +9,9 @@ import {
   StaffDirectoryList,
   StaffDirectorySection,
 } from "@/components/staff/staff-directory-list";
+import { startAggregationViewAs } from "@/app/(app)/aggregation/view-as-actions";
+import { AGGREGATION_VIEW_AS } from "@/lib/aggregation-impersonation";
+import { Button } from "@/components/ui/button";
 import {
   CLIENTS_PAGE,
   GC_CLIENTS_HREF,
@@ -52,6 +55,12 @@ export default async function ClientOrgProfilePage({
         title={org.organization}
         subtitle={clientDirectorySecondary(org)}
         backLink={{ href: GC_CLIENTS_HREF, label: CLIENTS_PAGE.title }}
+        actions={
+          <form action={startAggregationViewAs}>
+            <input type="hidden" name="orgId" value={org.orgId} />
+            <Button type="submit">{AGGREGATION_VIEW_AS.start}</Button>
+          </form>
+        }
       />
 
       <div data-client-profile="" className={STAFF_DIRECTORY_STACK_CLASS}>
