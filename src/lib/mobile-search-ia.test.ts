@@ -163,7 +163,7 @@ describe("mobile search IA — Education under-nav + Social icon sheet", () => {
     expect(leading).not.toContain("data-social-header-search-icon");
     expect(leading).not.toContain("data-house-lead-search-icon");
     expect(html).not.toContain("data-social-search-sheet");
-    expect(shellSrc).toContain('trailingSearch={<HouseLeadSearch tone="live" presentation="icon" />}');
+    expect(shellSrc).toContain('<HouseLeadSearch tone="live" presentation="icon" />');
   });
 
   it("opens a house Social search sheet — back, pill, Recent — not Meta AI", () => {

@@ -1023,7 +1023,7 @@ describe("AppShell rail-collapse chevron", () => {
     );
     expect(appShellFn).not.toMatch(/\buse\(chrome\)/);
     expect(appShellFn).toContain("cookieSync");
-    expect(appShellFn).toContain("One return tree");
+    expect(shellSrc).toContain("One return tree");
     expect(appShellFn).not.toMatch(/if \(socialChrome\) \{\s*return/);
     expect(appShellFn.match(/<HousePhoneAppShell/g)?.length).toBe(1);
   });

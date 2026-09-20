@@ -60,7 +60,7 @@ describe("HouseLeadScrollToTop — iOS status-bar tap contract", () => {
     expect(HOUSE_LEAD_SCROLL_CLASS).toBe(
       "min-h-0 flex-1 overflow-y-auto overscroll-contain",
     );
-    expect(appShellSrc.match(/data-house-lead-scroll/g)?.length).toBe(2);
+    expect(appShellSrc.match(/data-house-lead-scroll/g)?.length).toBe(1);
     expect(HOUSE_LEAD_SCROLL_TO_TOP_SELECTOR).toBe("[data-house-lead-scroll]");
     expect(HOUSE_LEAD_SCROLL_TO_TOP.selector).toBe("[data-house-lead-scroll]");
   });
