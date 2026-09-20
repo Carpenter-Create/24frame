@@ -25,6 +25,11 @@ export const HOUSE_FORM_SELECT_CHEVRON_CLASS = HOUSE_PAGE_SELECT_CHEVRON_CLASS;
 export const HOUSE_FORM_SELECT_PANEL_CLASS =
   "absolute left-0 right-0 top-full z-50 mt-[var(--space-2)] flex max-h-80 flex-col overflow-y-auto rounded-[12px] border border-hairline bg-surface py-[var(--space-2)] shadow-none";
 
+// Phone sheet sits on the viewport floor — `top-full` paints later
+// Role rows off-screen. Sheet ancestor flips the Listbox up.
+export const HOUSE_FORM_SELECT_SHEET_PHONE_MENU_CLASS =
+  "max-md:[&_[data-house-form-select-menu]]:top-auto max-md:[&_[data-house-form-select-menu]]:bottom-full max-md:[&_[data-house-form-select-menu]]:mt-0 max-md:[&_[data-house-form-select-menu]]:mb-[var(--space-2)]";
+
 export const HOUSE_FORM_SELECT_OPTION_HOVER_CLASS =
   "hover:bg-surface-muted focus-visible:bg-surface-muted focus-visible:outline-none";
 

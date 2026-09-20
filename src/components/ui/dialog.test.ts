@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
+import { HOUSE_FORM_SELECT_SHEET_PHONE_MENU_CLASS } from "@/lib/house-form-select";
+
 import {
   DIALOG_BODY_CLASS,
   DIALOG_FOOTER_CLASS,
@@ -36,6 +38,7 @@ describe("dialog confirm grammar", () => {
     expect(src).toContain("data-dialog-presentation");
     expect(DIALOG_SHEET_CLASS).toContain("max-md:mt-auto");
     expect(DIALOG_SHEET_CLASS).toContain("max-md:rounded-b-none");
+    expect(DIALOG_SHEET_CLASS).toContain(HOUSE_FORM_SELECT_SHEET_PHONE_MENU_CLASS);
     expect(DIALOG_SHEET_CLASS).not.toContain("bg-ink");
   });
 

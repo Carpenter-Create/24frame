@@ -7,6 +7,7 @@ import {
   HOUSE_FORM_SELECT_OPTION_CHECK_CLASS,
   HOUSE_FORM_SELECT_OPTION_HOVER_CLASS,
   HOUSE_FORM_SELECT_PANEL_CLASS,
+  HOUSE_FORM_SELECT_SHEET_PHONE_MENU_CLASS,
   HOUSE_FORM_SELECT_TRIGGER_CLASS,
   houseFormSelectOptionClass,
 } from "./house-form-select";
@@ -19,6 +20,7 @@ import {
 const invite = readFileSync("src/components/settings/team-invite-form.tsx", "utf8");
 const entities = readFileSync("src/components/settings/legal-entity-editor.tsx", "utf8");
 const selectSrc = readFileSync("src/components/ui/select.tsx", "utf8");
+const dialogSrc = readFileSync("src/components/ui/dialog.tsx", "utf8");
 
 describe("house form Select SoT", () => {
   it("keeps the closed field on the house input box", () => {
@@ -33,8 +35,12 @@ describe("house form Select SoT", () => {
     expect(HOUSE_FORM_SELECT_PANEL_CLASS).toContain("bg-surface");
     expect(HOUSE_FORM_SELECT_PANEL_CLASS).toContain("border-hairline");
     expect(HOUSE_FORM_SELECT_PANEL_CLASS).toContain("shadow-none");
+    expect(HOUSE_FORM_SELECT_PANEL_CLASS).toContain("top-full");
     expect(HOUSE_FORM_SELECT_PANEL_CLASS).not.toContain("bg-ink");
     expect(HOUSE_FORM_SELECT_PANEL_CLASS).not.toContain("text-surface");
+    expect(HOUSE_FORM_SELECT_SHEET_PHONE_MENU_CLASS).toContain("bottom-full");
+    expect(HOUSE_FORM_SELECT_SHEET_PHONE_MENU_CLASS).toContain("top-auto");
+    expect(HOUSE_FORM_SELECT_SHEET_PHONE_MENU_CLASS).not.toContain("top-full");
     expect(HOUSE_PAGE_SELECT_PANEL_CLASS).toContain("bg-surface");
     expect(HOUSE_PAGE_SELECT_PANEL_CLASS).not.toContain("bg-ink");
     expect(houseFormSelectOptionClass(false)).toContain("text-ink");
@@ -49,6 +55,7 @@ describe("house form Select SoT", () => {
     expect(selectSrc).toContain("AppearanceCheck");
     expect(selectSrc).not.toContain("createPortal");
     expect(selectSrc).not.toContain("<select");
+    expect(dialogSrc).toContain("HOUSE_FORM_SELECT_SHEET_PHONE_MENU_CLASS");
     expect(invite).toContain('import { Select } from "@/components/ui/select"');
     expect(invite).toContain('id="team-invite-role"');
     expect(invite).not.toContain("<select");

@@ -3,6 +3,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { X } from "@phosphor-icons/react";
 
+import { HOUSE_FORM_SELECT_SHEET_PHONE_MENU_CLASS } from "@/lib/house-form-select";
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
 import { cn } from "@/lib/cn";
@@ -35,8 +36,10 @@ export const DIALOG_SIZES = {
 
 // Soft bottom sheet on phone. Desktop stays the centered card.
 // Invite uses this. Do not fork a Team-Invite overlay.
-export const DIALOG_SHEET_CLASS =
-  "max-md:mx-0 max-md:mb-0 max-md:mt-auto max-md:w-full max-md:max-w-none max-md:rounded-b-none max-md:border-x-0 max-md:border-b-0 max-md:pb-[env(safe-area-inset-bottom)]";
+export const DIALOG_SHEET_CLASS = cn(
+  "max-md:mx-0 max-md:mb-0 max-md:mt-auto max-md:w-full max-md:max-w-none max-md:rounded-b-none max-md:border-x-0 max-md:border-b-0 max-md:pb-[env(safe-area-inset-bottom)]",
+  HOUSE_FORM_SELECT_SHEET_PHONE_MENU_CLASS,
+);
 
 export function DialogFooter({
   className,
