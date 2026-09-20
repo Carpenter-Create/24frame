@@ -23,6 +23,7 @@ describe("Social Go live recorder", () => {
     expect(src).toContain("aliveRef");
     expect(src).toContain("attachPromiseRef");
     expect(src).toContain("ensurePreview");
+    expect((src.match(/liveRef\.current = nextStoryStudioLive/g) ?? []).length).toBe(1);
     expect(src).toContain("releaseCamera");
     expect(src).not.toMatch(/createSocialPost\(form\);[\s\S]{0,120}catch/);
     expect(src).toContain("SOCIAL_GO_LIVE_MAX_MS");

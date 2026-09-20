@@ -239,8 +239,6 @@ export function SocialGoLive() {
 
   useEffect(() => {
     let cancelled = false;
-    const live = nextStoryStudioLive(liveRef.current);
-    liveRef.current = live;
     void (async () => {
       await Promise.resolve();
       if (cancelled) return;
