@@ -81,8 +81,10 @@ export type TitlesCatalogStaffCols = {
   findings?: number;
 };
 
-// Standalone house filter pill on desktop. Phone is the compact period trigger —
-// not a wrapping ALL-CAPS chip wall.
+// Dead desktop filter-pill tokens. Live Titles status lens is
+// HousePageSelect (Dashboard All time SoT), not a gapped pill row.
+// Exclusive choice menus use SegmentedTrack. Do not wire these back
+// into a choice menu. Status badges stay on catalogStatusPillClass.
 export const TITLES_FILTER_PILL_CLASS = HOUSE_FILTER_PILL_CLASS;
 export const TITLES_FILTER_PILL_ON_CLASS = HOUSE_FILTER_ON_CLASS;
 export const TITLES_FILTER_PILL_OFF_CLASS = HOUSE_FILTER_OFF_CLASS;

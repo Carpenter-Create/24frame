@@ -6,13 +6,21 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SegmentedTrack } from "@/components/ui/segmented-track";
 import { Textarea } from "@/components/ui/textarea";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { uploadAccountPhoto } from "@/app/(app)/account/actions";
 import { ACCOUNT_PROFILE } from "@/lib/account-profile";
 import { AVATAR_ACCEPT, AVATAR_MAX_BYTES, isAvatarContentType } from "@/lib/account-avatar";
-import { HOUSE_FILTER_OFF_CLASS, HOUSE_FILTER_ON_CLASS } from "@/lib/house-shell";
+import {
+  HOUSE_SEGMENTED_ITEM_BASE_CLASS,
+  HOUSE_SEGMENTED_ITEM_OFF_CLASS,
+  HOUSE_SEGMENTED_ITEM_ON_CLASS,
+  HOUSE_SEGMENTED_THUMB_CLASS,
+  HOUSE_SEGMENTED_TRACK_CLASS,
+} from "@/lib/house-shell";
 import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
+import { SEGMENTED_TRACK_PERSIST, segmentedItemOn } from "@/lib/segmented-track";
 import {
   SOCIAL_ACTION_CLASS,
   SOCIAL_ACTION_SECONDARY_CLASS,
@@ -37,9 +45,11 @@ import { takeSocialHomeComposerMedia } from "@/lib/social-home-composer";
 import {
   displayHandle,
   SOCIAL,
+  SOCIAL_CREATE_KINDS,
   socialCreateWellCopy,
   socialHandleRequiredError,
   socialInitials,
+  type SocialCreateKind,
 } from "@/lib/social";
 import { cn } from "@/lib/cn";
 import { SocialHandleField } from "./social-handle-field";
@@ -109,8 +119,6 @@ export function SocialProfileCreateForm({
     </form>
   );
 }
-
-type ComposeKind = "text" | "photo" | "video";
 
 async function uploadSocialMedia(
   files: ArrayLike<File> | null,
@@ -253,6 +261,12 @@ const CREATE_KIND_ICONS = {
   text: "text-t",
 } as const;
 
+const CREATE_KIND_LABELS = {
+  photo: SOCIAL.create.photo,
+  video: SOCIAL.create.video,
+  text: SOCIAL.create.text,
+} as const;
+
 export function SocialCreateCompose({
   authorName = SOCIAL.home.you,
   authorHandle = null,
@@ -262,13 +276,13 @@ export function SocialCreateCompose({
   authorName?: string;
   authorHandle?: string | null;
   authorPhotoUrl?: string | null;
-  initialKind?: ComposeKind | null;
+  initialKind?: SocialCreateKind | null;
 }) {
   const [homeMedia] = useState(takeSocialHomeComposerMedia);
   const ingestHomeMedia = homeMedia.length > 0 && (initialKind ?? "photo") !== "text";
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(ingestHomeMedia);
-  const [kind, setKind] = useState<ComposeKind>(initialKind ?? "photo");
+  const [kind, setKind] = useState<SocialCreateKind>(initialKind ?? "photo");
   const [body, setBody] = useState("");
   const [media, setMedia] = useState<SocialMediaItem[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -338,31 +352,44 @@ export function SocialCreateCompose({
           ) : null}
         </span>
       </div>
-      <div className="flex flex-wrap gap-1.5 md:gap-2" data-social-create-kinds="">
-        {(["photo", "video", "text"] as const).map((value) => {
-          const active = kind === value;
-          return (
-            <button
-              key={value}
-              type="button"
-              data-social-create-kind={value}
-              data-social-create-kind-active={active ? "" : undefined}
-              className={cn(
-                SOCIAL_CREATE_KIND_CLASS,
-                active ? HOUSE_FILTER_ON_CLASS : HOUSE_FILTER_OFF_CLASS,
-              )}
-              onClick={() => setKind(value)}
-            >
-              <SocialIcon
-                name={CREATE_KIND_ICONS[value]}
-                size={16}
-                className={active ? "text-surface" : "text-ink-2"}
-              />
-              {value === "text" ? SOCIAL.create.text : value === "photo" ? SOCIAL.create.photo : SOCIAL.create.video}
-            </button>
-          );
-        })}
-      </div>
+      <SegmentedTrack
+        activeIndex={SOCIAL_CREATE_KINDS.indexOf(kind)}
+        persistKey={SEGMENTED_TRACK_PERSIST.socialCreateKind}
+        trackClass={HOUSE_SEGMENTED_TRACK_CLASS}
+        thumbClass={HOUSE_SEGMENTED_THUMB_CLASS}
+        data-social-create-kinds=""
+      >
+        {({ selectedIndex }) =>
+          SOCIAL_CREATE_KINDS.map((value, index) => {
+            const on = segmentedItemOn(index, selectedIndex);
+            return (
+              <button
+                key={value}
+                type="button"
+                data-segmented-item=""
+                data-social-create-kind={value}
+                data-social-create-kind-active={on ? "" : undefined}
+                aria-pressed={on}
+                className={cn(
+                  HOUSE_SEGMENTED_ITEM_BASE_CLASS,
+                  SOCIAL_CREATE_KIND_CLASS,
+                  on ? HOUSE_SEGMENTED_ITEM_ON_CLASS : HOUSE_SEGMENTED_ITEM_OFF_CLASS,
+                )}
+                onClick={() => setKind(value)}
+              >
+                <SocialIcon
+                  name={CREATE_KIND_ICONS[value]}
+                  size={16}
+                  className={
+                    on ? HOUSE_SEGMENTED_ITEM_ON_CLASS : HOUSE_SEGMENTED_ITEM_OFF_CLASS
+                  }
+                />
+                {CREATE_KIND_LABELS[value]}
+              </button>
+            );
+          })
+        }
+      </SegmentedTrack>
       {well ? (
         <button
           type="button"

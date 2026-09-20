@@ -193,8 +193,8 @@ export const SOCIAL_STORY_CARET_CLASS =
   "absolute top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-surface-muted text-ink-2";
 
 // Home composer compact — 160:482 / 160:741 / 160:964 / 160:1129.
-// Single row: avatar | field (text) | media icon. Photo|Video|Text pills gone
-// on this surface only. Create keeps its kind pills.
+// Single row: avatar | field (text) | media icon. Photo|Video|Text
+// choice lives on Create as SegmentedTrack, not Home composer pills.
 export const SOCIAL_COMPOSER_CLASS =
   "flex h-16 items-center gap-3 rounded-[16px] border border-hairline bg-surface px-3 py-3 md:px-4";
 
@@ -362,8 +362,10 @@ export const SOCIAL_CREATE_CARD_CLASS =
 export const SOCIAL_CREATE_WELL_CLASS =
   "flex h-[220px] w-full flex-col items-center justify-center gap-2 rounded-[8px] border border-dashed border-hairline bg-surface-muted px-4 py-7 text-center md:h-[320px] md:gap-2.5 md:px-6 md:py-10";
 
+// Icon + label row inside the house segmented item. Radius, pad,
+// type, and selected ink come from HOUSE_SEGMENTED_ITEM_*.
 export const SOCIAL_CREATE_KIND_CLASS =
-  "inline-flex items-center gap-[5px] rounded-full px-3 py-[7px] text-[12px] md:gap-1.5 md:px-[14px] md:py-2 md:text-[13px]";
+  "inline-flex items-center gap-[5px] md:gap-1.5";
 
 export const SOCIAL_CREATE_AVATAR_CLASS =
   "flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted text-[12px] font-semibold text-ink-2 md:size-10 md:text-[14px]";

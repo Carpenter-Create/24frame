@@ -174,6 +174,10 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(HOUSE_RAIL_IDLE_CLASS).not.toContain("font-normal");
     expect(HOUSE_FILTER_ON_CLASS).toBe("bg-ink text-surface");
     expect(HOUSE_FILTER_OFF_CLASS).toBe("bg-surface-muted text-ink");
+    const houseShell = readFileSync("src/lib/house-shell.ts", "utf8");
+    expect(houseShell).toContain("Gapped HOUSE_FILTER_PILL_* is not for choice menus");
+    expect(houseShell).toContain("Exclusive choice menus are SegmentedTrack");
+    expect(houseShell).toContain("HOUSE_FILTER_ON_CLASS (ink) is status / display chips only");
     expect(HOUSE_PILL_SELECTED_CLASS).toBe("bg-accent text-white");
     expect(HOUSE_PILL_SELECTED_CLASS).not.toContain("bg-ink");
     expect(HOUSE_PERIOD_SELECTED_CLASS).toBe("bg-surface-muted");

@@ -9,8 +9,9 @@
 // Period is chrome, not H1. Dominant read stays the $.
 // Page title is black sentence-case. Section titles are t-heading ink.
 // View-alt selected is Sporty Blue glyph weight, not a filled chip.
-// Status / kind filter selected is ink. Dest chips and news source
-// lens are house SegmentedTrack, not HOUSE_PILL_SELECTED_CLASS fill.
+// Status badges stay ink. Exclusive choice menus (dest chips, news
+// source lens, create kinds) are house SegmentedTrack, not gapped
+// HOUSE_FILTER_PILL fill.
 
 import {
   HOUSE_CARD_PAD,
