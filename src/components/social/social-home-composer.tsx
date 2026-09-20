@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { SocialAvatar } from "@/components/social/social-avatar";
 import { SocialIcon } from "@/components/social/social-icon";
 import {
-  SOCIAL_AVATAR_SM_CLASS,
   SOCIAL_COMPOSER_CLASS,
   SOCIAL_COMPOSER_FIELD_CLASS,
   SOCIAL_COMPOSER_MEDIA_CLASS,
@@ -16,12 +16,7 @@ import {
 } from "@/lib/social-home-composer";
 import { SOCIAL_ICON_SIZE_COMPOSER } from "@/lib/social-icons";
 import { SOCIAL_MEDIA_ACCEPT } from "@/lib/social-media";
-import {
-  SOCIAL,
-  socialComposerPrompt,
-  socialCreateHref,
-  socialInitials,
-} from "@/lib/social";
+import { SOCIAL, socialComposerPrompt, socialCreateHref } from "@/lib/social";
 
 export function SocialHomeComposer({
   authorName,
@@ -34,14 +29,7 @@ export function SocialHomeComposer({
 
   return (
     <div data-social-home-composer="" className={SOCIAL_COMPOSER_CLASS}>
-      <span className={SOCIAL_AVATAR_SM_CLASS}>
-        {authorPhotoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the private avatars bucket
-          <img src={authorPhotoUrl} alt="" className="size-full object-cover" />
-        ) : (
-          socialInitials(authorName)
-        )}
-      </span>
+      <SocialAvatar name={authorName} photoUrl={authorPhotoUrl} size="sm" />
       <Link
         href={socialCreateHref("text")}
         data-social-composer-prompt=""

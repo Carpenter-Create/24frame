@@ -94,6 +94,7 @@ describe("social actions", () => {
     const form = new FormData();
     form.set("handle", "@Ada_Lovelace");
     form.set("first_name", "Ada");
+    form.set("middle_name", "");
     form.set("last_name", "Lovelace");
 
     const result = await createSocialProfile(form);
@@ -116,6 +117,30 @@ describe("social actions", () => {
     ]);
     expect(from).not.toHaveBeenCalledWith("organizations");
     expect(from).not.toHaveBeenCalledWith("memberships");
+  });
+
+  it("composes First + Middle + Last onto display_name and rejects a blank last name", async () => {
+    const { updates } = stub({
+      profile: { id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" },
+    });
+    const form = new FormData();
+    form.set("handle", "@adam");
+    form.set("first_name", "Adam");
+    form.set("middle_name", "James");
+    form.set("last_name", "Carpenter");
+    expect(await createSocialProfile(form)).toEqual({});
+    expect(updates).toEqual([
+      {
+        table: "profiles",
+        row: { handle: "adam", display_name: "Adam James Carpenter" },
+      },
+    ]);
+
+    const blankLast = new FormData();
+    blankLast.set("handle", "@adam");
+    blankLast.set("first_name", "Adam");
+    blankLast.set("last_name", "");
+    expect(await createSocialProfile(blankLast)).toEqual({ error: SOCIAL.profile.lastNameRequired });
   });
 
   it("rejects a blank handle after stripping @", async () => {

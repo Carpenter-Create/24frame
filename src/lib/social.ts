@@ -471,7 +471,10 @@ export const SOCIAL = {
     displayName: "Display name",
     name: "Name",
     firstName: "First name",
+    middleName: "Middle name",
     lastName: "Last name",
+    firstNameRequired: "First name is required",
+    lastNameRequired: "Last name is required",
     // Sentinel for existing rows only. Never seed on create. Never render as a person name.
     defaultDisplayName: "Member",
     bio: "Bio",
@@ -491,7 +494,8 @@ export const SOCIAL = {
     created: "Profile created.",
     postsEmpty: "No posts yet.",
     postsEmptyHint: "When they share stills, clips, or notes, they will land here.",
-    postsEmptyOwnHint: "Share a still, clip, or note — your grid starts here.",
+    postsEmptyOwnHint: "Add a photo, your name, and a short bio — or share a first still, clip, or note.",
+    completeIdentity: "Edit profile",
     sharePost: "Share a post",
     postsTruncated: `Showing the latest ${LIST_PAGE} posts.`,
     uploadPhoto: "Upload photo",
@@ -509,6 +513,8 @@ export const SOCIAL = {
     highlightsEmptyHint: "Live stories appear here for 24 hours.",
     creditsTab: "Credits",
     creditsEmpty: "No credits yet",
+    creditsEmptyHint: "Credits are the titles and roles attached to your name.",
+    creditsEmptyOwnHint: "Add the titles and roles you want attached to your name.",
     postsStat: "posts",
     followersStat: "followers",
     followingStat: "following",
@@ -686,18 +692,38 @@ export function normalizeDisplayName(raw: string): string | null {
   return name;
 }
 
-// Social edit shows First / Last. Persist the composed display_name so
-// Settings/account and public person rows stay on one name SoT.
-export function splitSocialDisplayName(raw: string): { firstName: string; lastName: string } {
+// Social edit shows First / Middle / Last. Persist the composed
+// display_name so Settings/account and public person rows stay on one
+// name SoT. No parallel first/middle/last columns.
+export function splitSocialDisplayName(raw: string): {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+} {
   const name = (raw ?? "").trim().replace(/\s+/g, " ");
-  if (!name) return { firstName: "", lastName: "" };
-  const space = name.indexOf(" ");
-  if (space < 0) return { firstName: name, lastName: "" };
-  return { firstName: name.slice(0, space), lastName: name.slice(space + 1) };
+  if (!name) return { firstName: "", middleName: "", lastName: "" };
+  const parts = name.split(" ");
+  if (parts.length === 1) return { firstName: parts[0], middleName: "", lastName: "" };
+  if (parts.length === 2) return { firstName: parts[0], middleName: "", lastName: parts[1] };
+  return {
+    firstName: parts[0],
+    middleName: parts.slice(1, -1).join(" "),
+    lastName: parts[parts.length - 1],
+  };
 }
 
-export function composeSocialDisplayName(firstName: string, lastName: string): string {
-  return [firstName.trim(), lastName.trim()].filter(Boolean).join(" ");
+export function composeSocialDisplayName(
+  firstName: string,
+  lastName: string,
+  middleName = "",
+): string {
+  return [firstName.trim(), middleName.trim(), lastName.trim()].filter(Boolean).join(" ");
+}
+
+export function socialNameRequiredError(firstName: string, lastName: string): string | null {
+  if (!firstName.trim()) return SOCIAL.profile.firstNameRequired;
+  if (!lastName.trim()) return SOCIAL.profile.lastNameRequired;
+  return null;
 }
 
 /** Legacy DB sentinel. Not a human name. SOCIAL.member.title may reuse this word as route chrome. */
@@ -856,8 +882,9 @@ export function isEligibleBirthDate(iso: string, today = new Date()): boolean {
 export function socialInitials(displayName: string): string {
   const parts = displayName.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "?";
-  if (parts.length === 1) return parts[0].slice(0, 1).toUpperCase();
-  return `${parts[0].slice(0, 1)}${parts[1].slice(0, 1)}`.toUpperCase();
+  const first = parts[0].slice(0, 1);
+  const last = parts.length > 1 ? parts[parts.length - 1].slice(0, 1) : "";
+  return `${first}${last}`.toUpperCase();
 }
 
 export function socialCopyHasProductName(text: string): boolean {

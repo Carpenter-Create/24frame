@@ -41,6 +41,7 @@ import {
   socialDmHref,
   socialGroupHref,
   socialHandleRequiredError,
+  socialNameRequiredError,
   socialMediaRuleMessage,
   socialProfileHref,
 } from "@/lib/social";
@@ -80,10 +81,18 @@ export async function createSocialProfile(formData: FormData): Promise<ActionRes
   if (taken) return { error: taken };
 
   const profile = await ensureOwnSocialProfile(supabase, user);
-  const composed = composeSocialDisplayName(
-    String(formData.get("first_name") ?? ""),
-    String(formData.get("last_name") ?? ""),
-  );
+  const firstName = String(formData.get("first_name") ?? "");
+  const middleName = String(formData.get("middle_name") ?? "");
+  const lastName = String(formData.get("last_name") ?? "");
+  const hasNameParts =
+    Boolean(firstName || middleName || lastName) ||
+    formData.has("first_name") ||
+    formData.has("last_name");
+  if (hasNameParts) {
+    const nameError = socialNameRequiredError(firstName, lastName);
+    if (nameError) return { error: nameError };
+  }
+  const composed = composeSocialDisplayName(firstName, lastName, middleName);
   const displayName =
     normalizeDisplayName(composed) ??
     normalizeDisplayName(String(formData.get("display_name") ?? "")) ??

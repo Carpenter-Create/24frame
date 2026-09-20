@@ -151,6 +151,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(existsSync("src/components/social/social-rail-extras.tsx")).toBe(false);
     expect(rail).toContain("SOCIAL_ICON_SIZE_STORY_PLUS");
     expect(rail).toContain("SOCIAL_HOME_STORY_CARD_CLASS");
+    expect(rail).toContain("SocialAvatar");
+    expect(rail).toContain("createPhotoUrl");
     expect(rail).toContain("data-social-stories-tall");
     expect(rail).toContain("data-social-story-media");
     expect(rail).toContain("bg-accent");
@@ -168,6 +170,9 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(composer).toContain("SOCIAL_MEDIA_ACCEPT");
     expect(composer).toContain('socialCreateHref("text")');
     expect(composer).toContain("socialComposerPrompt(authorName)");
+    expect(composer).toContain("SocialAvatar");
+    expect(composer).toContain("authorPhotoUrl");
+    expect(composer).not.toContain("socialInitials");
     expect(composer).not.toContain("md:hidden");
     expect(composer).not.toContain("What's on your mind");
     expect(composer).toContain("text-ink-2");
@@ -188,8 +193,15 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(forYou).not.toContain("SocialHomeTopics");
     expect(topics).toContain("data-social-home-topics");
     expect(topics).toContain("SOCIAL.forYou.topics");
+    expect(topics).toContain("SOCIAL_FOR_YOU_CARD_CLASS");
     expect(topics).toContain("flex-wrap");
     expect(topics).not.toContain("truncate");
+    expect(chrome).not.toContain("rounded-[14px]");
+    expect(chrome).toContain("SOCIAL_COMPOSER_CLASS");
+    expect(chrome).toContain("SOCIAL_EMPTY_PANEL_CLASS");
+    expect(chrome).toContain("SOCIAL_FEED_ROW_CLASS");
+    expect(chrome).toContain("SOCIAL_HOME_STORY_CARD_CLASS");
+    expect(chrome).toContain("SOCIAL_FOR_YOU_CARD_CLASS");
     expect(forYou).not.toContain("SOCIAL.forYou.native");
     expect(forYou).not.toContain("Social-native");
     expect(forYou).not.toContain("education");

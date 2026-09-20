@@ -157,7 +157,7 @@ export const SOCIAL_HOME_STORY_NAME_CLASS =
   "absolute inset-x-0 bottom-0 flex h-10 items-center bg-band/55 px-2 t-label font-medium text-band-ink md:h-12 md:px-2.5";
 
 export const SOCIAL_STORIES_CARD_CLASS =
-  "flex h-[168px] w-[112px] shrink-0 items-center justify-center rounded-[16px] p-[3px]";
+  `flex h-[168px] w-[112px] shrink-0 items-center justify-center ${SOCIAL_SURFACE_RADIUS_CLASS} p-[3px]`;
 
 export const SOCIAL_STORIES_FACE_CLASS =
   "flex size-full flex-col items-center justify-center gap-[var(--space-2)] rounded-[13px] px-[var(--space-2)] py-[var(--space-4)]";
@@ -224,7 +224,7 @@ export const SOCIAL_HOME_TAB_CLASS =
   "flex flex-1 flex-col items-center gap-2.5 px-4 pt-3 t-body";
 
 export const SOCIAL_TOPIC_CHIP_CLASS =
-  "inline-flex items-center rounded-[14px] bg-surface px-[10px] py-[5px] text-[11px] font-medium text-ink";
+  "inline-flex items-center rounded-full bg-surface px-[10px] py-[5px] text-[11px] font-medium text-ink";
 
 export const SOCIAL_FIRST_WIN_CLASS =
   "flex flex-col items-center justify-center gap-2.5 rounded-[8px] border border-hairline bg-surface px-5 pb-4 pt-5 text-center";

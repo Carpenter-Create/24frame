@@ -53,9 +53,24 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).not.toContain(SOCIAL.create.photo);
     expect(html).not.toContain(SOCIAL.create.video);
     expect(html).not.toContain(`>${SOCIAL.create.text}<`);
+    expect(html).toContain("data-social-avatar");
+    expect(html).toContain("AC");
+    expect(html).not.toContain("<img");
     expect(SOCIAL_COMPOSER_CLASS).toContain("h-16");
     expect(SOCIAL_COMPOSER_CLASS).toContain("rounded-[var(--radius-lg)]");
     expect(SOCIAL_COMPOSER_FIELD_CLASS).not.toContain("bg-surface-muted");
+  });
+
+  it("shows the composer author photo when a signed URL exists", () => {
+    const html = renderToStaticMarkup(
+      <SocialHomeComposer
+        authorName="Adam Carpenter"
+        authorPhotoUrl="https://s3.example/adam-face"
+      />,
+    );
+    expect(html).toContain("data-social-avatar");
+    expect(html).toContain('src="https://s3.example/adam-face"');
+    expect(html).not.toContain("AC");
   });
 
   it("renders Topics. as a wrapping chip row, never a truncated rail twin", () => {
@@ -63,6 +78,7 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).toContain("data-social-home-topics");
     expect(html).toContain(SOCIAL.forYou.topics);
     expect(html).toContain(SOCIAL_FOR_YOU_CARD_CLASS);
+    expect(SOCIAL_FOR_YOU_CARD_CLASS).toContain("rounded-[var(--radius-lg)]");
     expect(html).toContain("flex-wrap");
     expect(html).toContain("Cinematography");
     expect(html).toContain("Vertical micro dramas");
@@ -104,6 +120,7 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).toContain("data-social-story-unseen");
     expect(html).toContain("data-social-story-media");
     expect(html).toContain('src="https://s3.example/signed-avatar"');
+    expect(html).toContain("data-social-avatar");
     expect(html).toContain("Maya C.");
     expect(html).toContain("w-[108px]");
     expect(html).toContain("h-[192px]");
@@ -236,10 +253,28 @@ describe("Social Stories craft (Figma 138:163 / 138:889 / 138:943)", () => {
     expect(html).toContain("h-[192px]");
     expect(html).toContain(`width="${SOCIAL_ICON_SIZE_STORY_PLUS}"`);
     expect(html).toContain(SOCIAL.stories.create);
-    expect(html).toContain("A");
-    expect(html).toContain("text-ink-2/45");
+    expect(html).toContain("data-social-avatar");
+    expect(html).toContain("AC");
+    expect(html).not.toContain("<img");
     expect(html).not.toContain(SOCIAL.stories.yourStory);
     expect(html).not.toContain("w-[68px]");
+  });
+
+  it("shows the story create face photo when a signed URL exists", () => {
+    const html = renderToStaticMarkup(
+      <SocialStoriesRail
+        canCreate
+        createName="Adam Carpenter"
+        createPhotoUrl="https://s3.example/adam-face"
+        authors={authors}
+        faces={faces}
+        cards={[]}
+      />,
+    );
+    expect(html).toContain("data-social-story-create");
+    expect(html).toContain("data-social-avatar");
+    expect(html).toContain('src="https://s3.example/adam-face"');
+    expect(html).not.toContain("AC");
   });
 
   it("renders the Stories empty panel with image 40 and a rounded-full Create a story CTA", () => {

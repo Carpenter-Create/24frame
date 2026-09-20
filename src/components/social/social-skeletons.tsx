@@ -43,7 +43,7 @@ export function SocialHomeCenterSkeleton() {
         <Skeleton className="h-4 w-16" />
         <div className="flex flex-wrap gap-2">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-6 w-20 rounded-[14px]" />
+            <Skeleton key={i} className="h-6 w-20 rounded-full" />
           ))}
         </div>
       </div>

@@ -30,6 +30,7 @@ import {
   socialCreateHref,
   socialCreateWellCopy,
   socialHandleRequiredError,
+  socialNameRequiredError,
   socialHomeLaneHref,
   socialInitials,
   composeSocialDisplayName,
@@ -73,12 +74,26 @@ describe("social copy lock", () => {
     expect(SOCIAL.forYou.topics).toBe("Topics.");
     expect(SOCIAL.forYou.latestCourse).toBe("Latest course");
     expect(SOCIAL.profile.firstName).toBe("First name");
+    expect(SOCIAL.profile.middleName).toBe("Middle name");
     expect(SOCIAL.profile.lastName).toBe("Last name");
     expect(SOCIAL.dms.startCta).toBe("Start a conversation");
-    expect(splitSocialDisplayName("Ada Lovelace")).toEqual({ firstName: "Ada", lastName: "Lovelace" });
-    expect(splitSocialDisplayName("Ada")).toEqual({ firstName: "Ada", lastName: "" });
+    expect(splitSocialDisplayName("Ada Lovelace")).toEqual({
+      firstName: "Ada",
+      middleName: "",
+      lastName: "Lovelace",
+    });
+    expect(splitSocialDisplayName("Ada")).toEqual({ firstName: "Ada", middleName: "", lastName: "" });
+    expect(splitSocialDisplayName("Adam James Carpenter")).toEqual({
+      firstName: "Adam",
+      middleName: "James",
+      lastName: "Carpenter",
+    });
     expect(composeSocialDisplayName("Ada", "Lovelace")).toBe("Ada Lovelace");
+    expect(composeSocialDisplayName("Adam", "Carpenter", "James")).toBe("Adam James Carpenter");
     expect(composeSocialDisplayName("Ada", "")).toBe("Ada");
+    expect(socialNameRequiredError("", "Carpenter")).toBe(SOCIAL.profile.firstNameRequired);
+    expect(socialNameRequiredError("Adam", "")).toBe(SOCIAL.profile.lastNameRequired);
+    expect(socialNameRequiredError("Adam", "Carpenter")).toBeNull();
     expect(blob).not.toContain("What's on your mind");
     expect(blob).not.toContain("Topics for you");
     expect(SOCIAL.home.recentChats).toBe("Recent chats");
@@ -226,6 +241,8 @@ describe("profile opt-in", () => {
     expect(isEligibleBirthDate("2014-01-01", new Date("2026-09-12T00:00:00.000Z"))).toBe(false);
     expect(isEligibleBirthDate("2013-09-12", new Date("2026-09-12T00:00:00.000Z"))).toBe(true);
     expect(socialInitials("Ada Lovelace")).toBe("AL");
+    expect(socialInitials("Adam James Carpenter")).toBe("AC");
+    expect(socialInitials("Ada")).toBe("A");
   });
 
   it("treats Member as an empty person name and keeps handle primary", () => {
@@ -327,6 +344,12 @@ describe("profile opt-in", () => {
     expect(SOCIAL.profile.highlightsTab).toBe("Highlights");
     expect(SOCIAL.profile.creditsTab).toBe("Credits");
     expect(SOCIAL.profile.creditsEmpty).toBe("No credits yet");
+    expect(SOCIAL.profile.creditsEmptyHint).toBe("Credits are the titles and roles attached to your name.");
+    expect(SOCIAL.profile.creditsEmptyOwnHint).toBe(
+      "Add the titles and roles you want attached to your name.",
+    );
+    expect(SOCIAL.profile.completeIdentity).toBe("Edit profile");
+    expect(parseProfileHandleParam("%40ada")).toBe("ada");
     expect(parseProfileHandleParam("%40AdamC")).toBe("AdamC");
     expect(parseProfileHandleParam("AdamC")).toBe("AdamC");
     expect(parseProfileHandleParam("@ada")).toBe("ada");

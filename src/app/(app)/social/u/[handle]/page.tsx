@@ -160,7 +160,11 @@ export default async function SocialPublicProfilePage({
         />
         <SocialProfileTabs baseHref={profileHref} active={tab} />
         {tab === "credits" ? (
-          <SocialEmpty icon="film-slate" title={SOCIAL.profile.creditsEmpty} />
+          <SocialEmpty
+            icon="film-slate"
+            title={SOCIAL.profile.creditsEmpty}
+            hint={SOCIAL.profile.creditsEmptyHint}
+          />
         ) : tab === "highlights" ? (
           highlightCards.length > 0 ? (
             <SocialHighlights cards={highlightCards} />

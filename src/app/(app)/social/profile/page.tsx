@@ -129,7 +129,11 @@ async function SocialProfileMain({
       />
       <SocialProfileTabs baseHref={SOCIAL_ROUTES.profile} active={tab} />
       {tab === "credits" ? (
-        <SocialEmpty icon="film-slate" title={SOCIAL.profile.creditsEmpty} />
+        <SocialEmpty
+          icon="film-slate"
+          title={SOCIAL.profile.creditsEmpty}
+          hint={SOCIAL.profile.creditsEmptyOwnHint}
+        />
       ) : tab === "highlights" ? (
         highlightCards.length > 0 ? (
           <SocialHighlights cards={highlightCards} />
@@ -142,7 +146,8 @@ async function SocialProfileMain({
           <SocialAuthorHistory
             truncated={history.truncated}
             emptyHint={SOCIAL.profile.postsEmptyOwnHint}
-            emptyAction={{ href: SOCIAL_ROUTES.create, label: SOCIAL.profile.sharePost }}
+            emptyAction={{ href: SOCIAL_ROUTES.profileEdit, label: SOCIAL.profile.completeIdentity }}
+            emptySecondary={{ href: SOCIAL_ROUTES.create, label: SOCIAL.profile.sharePost }}
             posts={history.posts.map((post) =>
               socialAuthorPostCard({
                 post,

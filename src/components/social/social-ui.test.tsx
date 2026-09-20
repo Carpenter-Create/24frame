@@ -17,6 +17,7 @@ import { SOCIAL } from "@/lib/social";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const uiSrc = readFileSync(join(here, "social-ui.tsx"), "utf8");
+const avatarSrc = readFileSync(join(here, "social-avatar.tsx"), "utf8");
 
 describe("SocialAvatar", () => {
   it("renders a signed photo URL as an img on the house identity circle", () => {
@@ -133,7 +134,9 @@ describe("SocialPostCard faces", () => {
   });
 
   it("reuses signed account faces and does not add a second upload", () => {
-    expect(uiSrc).toContain("IDENTITY_AVATAR_CLASS");
+    expect(uiSrc).toContain('from "./social-avatar"');
+    expect(avatarSrc).toContain("IDENTITY_AVATAR_CLASS");
+    expect(avatarSrc).toContain("photoUrl");
     expect(uiSrc).toContain("photoUrl");
     expect(uiSrc).not.toContain("signedAvatarUrl");
     expect(uiSrc).not.toContain("putAvatarObject");
@@ -141,6 +144,7 @@ describe("SocialPostCard faces", () => {
     expect(uiSrc).not.toContain("type=\"file\"");
     expect(uiSrc).not.toContain("S3_BUCKET");
     expect(uiSrc).not.toContain("24frame-media");
+    expect(avatarSrc).not.toContain("signedAvatarUrl");
   });
 });
 

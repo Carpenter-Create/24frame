@@ -1,13 +1,12 @@
 import Link from "next/link";
 
+import { SocialAvatar } from "@/components/social/social-avatar";
 import { SocialIcon } from "@/components/social/social-icon";
 import { cn } from "@/lib/cn";
 import {
   SOCIAL_HOME_STORY_CARD_CLASS,
   SOCIAL_HOME_STORY_CREATE_FACE_CLASS,
-  SOCIAL_HOME_STORY_CREATE_INITIAL_CLASS,
   SOCIAL_HOME_STORY_CREATE_LABEL_CLASS,
-  SOCIAL_HOME_STORY_FACE_CLASS,
   SOCIAL_HOME_STORY_FACE_RING_CLASS,
   SOCIAL_HOME_STORY_NAME_CLASS,
   SOCIAL_HOME_STORY_PLUS_CLASS,
@@ -18,17 +17,12 @@ import {
 } from "@/lib/social-chrome";
 import { SOCIAL_ICON_SIZE_STORY_PLUS } from "@/lib/social-icons";
 import type { SocialStoryRailCard } from "@/lib/social-feed";
-import { SOCIAL, SOCIAL_ROUTES, socialFirstName, socialInitials, socialPersonLabel, socialStoryHref } from "@/lib/social";
+import { SOCIAL, SOCIAL_ROUTES, socialInitials, socialPersonLabel, socialStoryHref } from "@/lib/social";
 
 function storyLabel(name: string): string {
   const parts = name.trim().split(/\s+/);
   if (parts.length >= 2 && parts[1]?.[0]) return `${parts[0]} ${parts[1][0]}.`;
   return parts[0] ?? name;
-}
-
-function createStoryInitial(name: string | null | undefined): string {
-  const letter = socialFirstName(name ?? SOCIAL.home.you)[0];
-  return letter ? letter.toUpperCase() : socialInitials(name ?? SOCIAL.home.you);
 }
 
 function HomeTallStoriesRail({
@@ -62,14 +56,11 @@ function HomeTallStoriesRail({
             className={SOCIAL_HOME_STORY_CARD_CLASS}
           >
             <span className={SOCIAL_HOME_STORY_CREATE_FACE_CLASS}>
-              {createPhotoUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the private avatars bucket
-                <img src={createPhotoUrl} alt="" className="absolute inset-0 size-full object-cover opacity-40" />
-              ) : (
-                <span className={SOCIAL_HOME_STORY_CREATE_INITIAL_CLASS}>
-                  {createStoryInitial(createName)}
-                </span>
-              )}
+              <SocialAvatar
+                name={createName ?? SOCIAL.home.you}
+                photoUrl={createPhotoUrl}
+                size="lg"
+              />
             </span>
             <span className={SOCIAL_HOME_STORY_PLUS_CLASS}>
               <SocialIcon
@@ -113,14 +104,12 @@ function HomeTallStoriesRail({
                   card.unseen ? "border-accent" : "border-hairline",
                 )}
               >
-                <span className={SOCIAL_HOME_STORY_FACE_CLASS}>
-                  {photo ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET
-                    <img src={photo} alt="" className="size-full object-cover" />
-                  ) : (
-                    socialInitials(name)
-                  )}
-                </span>
+                <SocialAvatar
+                  name={name}
+                  photoUrl={photo ?? null}
+                  size="sm"
+                  className="size-full"
+                />
               </span>
               <span className={SOCIAL_HOME_STORY_NAME_CLASS}>{storyLabel(name)}</span>
             </Link>
@@ -263,13 +252,8 @@ export function SocialStoriesRail({
                   card.unseen ? "border-accent" : "border-hairline",
                 )}
               >
-                <span className="relative flex size-[58px] items-center justify-center overflow-hidden rounded-full bg-surface-muted t-body-sm font-semibold text-ink">
-                  {photo ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET
-                    <img src={photo} alt="" className="absolute inset-0 size-full object-cover" />
-                  ) : (
-                    socialInitials(name)
-                  )}
+                <span className="relative flex size-[58px] items-center justify-center overflow-hidden rounded-full bg-surface-muted">
+                  <SocialAvatar name={name} photoUrl={photo ?? null} size="sm" className="size-full" />
                 </span>
               </span>
               <p className="w-full truncate text-center text-[10px] font-medium text-ink">{storyLabel(name)}</p>

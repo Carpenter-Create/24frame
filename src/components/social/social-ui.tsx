@@ -4,13 +4,9 @@ import Link from "next/link";
 import { TextAction } from "@/components/chrome/house";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { cn } from "@/lib/cn";
-import { IDENTITY_AVATAR_CLASS } from "@/lib/house-sheet";
 import {
   SOCIAL_ACTION_CLASS,
   SOCIAL_ACTION_SECONDARY_CLASS,
-  SOCIAL_AVATAR_LG_CLASS,
-  SOCIAL_AVATAR_PROFILE_CLASS,
-  SOCIAL_AVATAR_SM_CLASS,
   SOCIAL_FEED_ROW_CLASS,
   SOCIAL_HANDLE_PILL_CLASS,
   SOCIAL_HIGHLIGHT_RING_CLASS,
@@ -24,58 +20,21 @@ import {
   SOCIAL_ROUTES,
   socialGroupHref,
   socialMemberHref,
-  socialInitials,
   socialPersonIdentity,
   socialRelativeTime,
 } from "@/lib/social";
+import { SocialAvatar } from "./social-avatar";
 import { SocialLikeButton } from "./social-forms";
 import { SocialEmpty } from "./social-empty";
 import { SocialIcon } from "./social-icon";
+
+export { SocialAvatar } from "./social-avatar";
 
 export function SocialNeedProfile() {
   return (
     <div data-social-need-profile="" className="flex flex-col gap-[var(--space-2)]">
       <SocialEmpty icon="user" title={SOCIAL.cta.needProfile} />
       <TextAction href={SOCIAL_ROUTES.profile}>{SOCIAL.cta.profileHrefLabel}</TextAction>
-    </div>
-  );
-}
-
-export function SocialAvatar({
-  name,
-  photoUrl,
-  ring = null,
-  size = "md",
-}: {
-  name: string;
-  photoUrl?: string | null;
-  ring?: "unseen" | "live" | null;
-  size?: "sm" | "md" | "lg" | "profile";
-}) {
-  const box =
-    size === "lg"
-      ? SOCIAL_AVATAR_LG_CLASS
-      : size === "profile"
-        ? SOCIAL_AVATAR_PROFILE_CLASS
-        : size === "sm"
-          ? SOCIAL_AVATAR_SM_CLASS
-          : IDENTITY_AVATAR_CLASS;
-  return (
-    <div
-      data-social-avatar=""
-      data-social-avatar-ring={ring ?? undefined}
-      className={cn(
-        box,
-        photoUrl ? "overflow-hidden" : null,
-        ring ? "ring-2 ring-accent ring-offset-2 ring-offset-[var(--bg)]" : null,
-      )}
-    >
-      {photoUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the private avatars bucket
-        <img src={photoUrl} alt="" className="size-full object-cover" />
-      ) : (
-        socialInitials(name)
-      )}
     </div>
   );
 }
@@ -334,11 +293,13 @@ export function SocialAuthorHistory({
   truncated,
   emptyHint,
   emptyAction,
+  emptySecondary,
 }: {
   posts: readonly SocialPostCardModel[];
   truncated: boolean;
   emptyHint?: string;
   emptyAction?: { href: string; label: string };
+  emptySecondary?: { href: string; label: string };
 }) {
   const mediaPosts = posts.filter((post) => post.media.length > 0);
   const textPosts = posts.filter((post) => post.media.length === 0);
@@ -351,6 +312,7 @@ export function SocialAuthorHistory({
             title={SOCIAL.profile.postsEmpty}
             hint={emptyHint ?? SOCIAL.profile.postsEmptyHint}
             action={emptyAction}
+            secondary={emptySecondary}
           />
         </div>
       ) : (

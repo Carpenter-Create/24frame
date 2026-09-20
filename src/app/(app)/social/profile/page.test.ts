@@ -217,6 +217,7 @@ describe("Social profile public face", () => {
     expect(html).toContain(SOCIAL.profile.postsEmpty);
     expect(html).toContain(SOCIAL.profile.postsEmptyOwnHint);
     expect(html).toContain(SOCIAL.profile.sharePost);
+    expect(html).toContain(SOCIAL.profile.completeIdentity);
     expect(html).not.toContain("data-social-author-posts");
     expect(html).not.toContain("data-social-author-truncated");
     expect(html).not.toContain("Sets");
@@ -269,6 +270,7 @@ describe("Social profile public face", () => {
     expect(html).toContain('data-social-profile-tab-active=""');
     expect(html).toContain('data-social-icon="film-slate"');
     expect(html).toContain(SOCIAL.profile.creditsEmpty);
+    expect(html).toContain(SOCIAL.profile.creditsEmptyOwnHint);
     expect(html).not.toContain("First engine note");
     expect(html).not.toContain("data-social-author-history");
     expect(html).not.toContain(SOCIAL.profile.highlightsEmpty);

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { uploadAccountPhoto } from "@/app/(app)/account/actions";
 import { createSocialProfile } from "@/app/(app)/social/actions";
+import { SocialAvatar } from "@/components/social/social-avatar";
 import { SocialProfileBioEditor } from "@/components/social/social-profile-bio";
 import { SocialIcon } from "@/components/social/social-icon";
 import { InlineNotice } from "@/components/ui/inline-notice";
@@ -38,6 +39,7 @@ import {
   handleFieldValue,
   normalizeHandle,
   socialHandleRequiredError,
+  socialNameRequiredError,
   socialProfilePublicUrl,
   splitSocialDisplayName,
   stripHandleDecorators,
@@ -89,6 +91,7 @@ export function SocialProfileEditForm({
   const fileRef = useRef<HTMLInputElement>(null);
   const split = splitSocialDisplayName(displayName);
   const [firstName, setFirstName] = useState(split.firstName);
+  const [middleName, setMiddleName] = useState(split.middleName);
   const [lastName, setLastName] = useState(split.lastName);
   const [username, setUsername] = useState(handleFieldValue(handle));
   const [error, setError] = useState("");
@@ -139,12 +142,18 @@ export function SocialProfileEditForm({
       setHandleError(SOCIAL.profile.handleInvalid);
       return;
     }
+    const nameError = socialNameRequiredError(firstName, lastName);
+    if (nameError) {
+      setError(nameError);
+      return;
+    }
     setPending(true);
     const form = new FormData();
     form.set("handle", username);
     form.set("first_name", firstName);
+    form.set("middle_name", middleName);
     form.set("last_name", lastName);
-    form.set("display_name", composeSocialDisplayName(firstName, lastName));
+    form.set("display_name", composeSocialDisplayName(firstName, lastName, middleName));
     const result = await createSocialProfile(form);
     setPending(false);
     if (result.error) {
@@ -193,12 +202,12 @@ export function SocialProfileEditForm({
               className={SOCIAL_PROFILE_EDIT_AVATAR_CLASS}
               aria-label={SOCIAL.profile.editPicture}
             >
-              {photoUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the private avatars bucket
-                <img src={photoUrl} alt="" className="size-full object-cover" />
-              ) : (
-                <SocialIcon name="camera" size={28} className="text-ink-2" />
-              )}
+              <SocialAvatar
+                name={composeSocialDisplayName(firstName, lastName, middleName)}
+                photoUrl={photoUrl}
+                size="profile"
+                className="size-full"
+              />
             </button>
             <button
               type="button"
@@ -230,6 +239,21 @@ export function SocialProfileEditForm({
                   autoComplete="given-name"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
+                  className="min-w-0 flex-1"
+                />
+              </div>
+              <div className="h-px bg-hairline" />
+              <div className={`${SOCIAL_PROFILE_EDIT_ROW_CLASS} flex-col gap-2 md:flex-row`}>
+                <label htmlFor="social-edit-middle-name" className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>
+                  {SOCIAL.profile.middleName}
+                </label>
+                <Input
+                  variant="bare"
+                  id="social-edit-middle-name"
+                  name="middle_name"
+                  autoComplete="additional-name"
+                  value={middleName}
+                  onChange={(e) => setMiddleName(e.target.value)}
                   className="min-w-0 flex-1"
                 />
               </div>

@@ -15,7 +15,7 @@ vi.mock("@/app/(app)/social/actions", () => ({
 }));
 
 describe("SocialProfileEditForm", () => {
-  it("renders First name, Last name, Username @ field, live URL, Bio row, and Add link", () => {
+  it("renders First, Middle, Last name, Username @ field, live URL, Bio row, and Add link", () => {
     const html = renderToStaticMarkup(
       <SocialProfileEditForm
         handle="ada"
@@ -29,8 +29,10 @@ describe("SocialProfileEditForm", () => {
     expect(html).toContain(SOCIAL.profile.done);
     expect(html).toContain("data-social-profile-edit-names");
     expect(html).toContain(SOCIAL.profile.firstName);
+    expect(html).toContain(SOCIAL.profile.middleName);
     expect(html).toContain(SOCIAL.profile.lastName);
     expect(html).toContain('id="social-edit-first-name"');
+    expect(html).toContain('id="social-edit-middle-name"');
     expect(html).toContain('id="social-edit-last-name"');
     expect(html).toContain("Ada");
     expect(html).toContain("Lovelace");
@@ -50,13 +52,16 @@ describe("SocialProfileEditForm", () => {
     expect(html).toContain(SOCIAL.profile.links);
     expect(html).toContain(SOCIAL.profile.addLink);
     expect(html).toContain(SOCIAL.profile.editPicture);
-    expect(html).toContain('data-social-icon="camera"');
+    expect(html).toContain("data-social-avatar");
+    expect(html).toContain("AL");
+    expect(html).not.toContain("<img");
     expect(html).toContain('data-social-icon="caret-left"');
     expect(html).not.toContain("Education");
     expect(html).not.toContain("Reels");
     expect(html).not.toContain("#1769ff");
     expect(html).toContain("t-control");
     expect(html).not.toMatch(/id="social-edit-first-name"[^>]*t-body-sm/);
+    expect(html).not.toMatch(/id="social-edit-middle-name"[^>]*t-body-sm/);
     expect(html).not.toMatch(/id="social-edit-last-name"[^>]*t-body-sm/);
     expect(html).not.toMatch(/id="social-edit-handle"[^>]*t-body-sm/);
     expect(html).not.toContain("/social/@");
@@ -72,6 +77,22 @@ describe("SocialProfileEditForm", () => {
     expect(cased).toContain('value="AdamC"');
     expect(cased).toContain("https://24frame.co/@AdamC");
     expect(cased).not.toContain("/social/@");
+  });
+
+  it("splits a three-part display name into First / Middle / Last", () => {
+    const html = renderToStaticMarkup(
+      <SocialProfileEditForm
+        handle="adam"
+        displayName="Adam James Carpenter"
+        bio=""
+        photoUrl="https://s3.example/adam-face"
+      />,
+    );
+    expect(html).toContain('value="Adam"');
+    expect(html).toContain('value="James"');
+    expect(html).toContain('value="Carpenter"');
+    expect(html).toContain('src="https://s3.example/adam-face"');
+    expect(html).not.toContain("AC");
   });
 
   it("shows the empty-handle preview URL", () => {
