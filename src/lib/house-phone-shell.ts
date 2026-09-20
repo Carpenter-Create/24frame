@@ -4,7 +4,7 @@
 // Phone top: emblem alone on the left. No workspace pill. No hamburger
 // (leading or trailing). Trailing is search (when needed) · theme ·
 // 24Frame AI · bell · avatar. Sun/moon is shared immediately left of
-// Ask on every breakpoint. One trail. No phone-only ThemeToggle twin.
+// Ask on every breakpoint. One trail. No phone-only sun/moon twin.
 // Ask AI is header + Home module only (#465).
 // Destinations that used to live in the Agg/Edu hamburger (and Social’s
 // second float) live on one under-top HousePhoneDestChips row.

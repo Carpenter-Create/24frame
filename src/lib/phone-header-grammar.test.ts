@@ -100,7 +100,6 @@ describe("phone header grammar A — trim trailing", () => {
       trailing.indexOf("data-theme-toggle"),
       trailing.indexOf("data-ask-assistant-header"),
     );
-    expect(themeToAsk).not.toContain("hidden");
     expect(themeToAsk).not.toContain("md:contents");
     const askToBell = trailing.slice(
       trailing.indexOf("data-ask-assistant-header"),

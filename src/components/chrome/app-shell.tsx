@@ -305,7 +305,7 @@ export function AppShell({
           Education. Trailing is search (if needed) · theme ·
           24Frame AI · bell · avatar. Sun/moon is shared immediately
           left of Ask on every breakpoint. One trail. No phone-only
-          ThemeToggle twin. Ask AI is header + Home module only
+          sun/moon twin. Ask AI is header + Home module only
           (#465). Emblem links workspace
           home; it does not open the rail. Desktop keeps switcher ·
           theme · Ask · bell · avatar. Brand sits on the full-width top, not a

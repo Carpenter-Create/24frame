@@ -19,7 +19,7 @@
 // workspace hop. Expand/collapse stays overlay-scoped. Close strips
 // ?ai=1 and leaves the current path. Ask AI is header + Home module
 // only (#465). Sun/moon is shared immediately left of Ask on every
-// breakpoint. One trail. No phone-only ThemeToggle twin.
+// breakpoint. One trail. No phone-only sun/moon twin.
 // Desktop md+ keeps switcher · theme · Ask · bell · avatar. The Ask
 // control is shared so phone and desktop do not fork a second mark.
 // Social live explore search and Education quiet courses/videos
