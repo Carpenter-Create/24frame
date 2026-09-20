@@ -213,7 +213,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).toContain("center: 892");
     expect(chrome).toContain("right: 300");
     expect(chrome).toContain("padR: 16");
-    expect(chrome).toContain("w-[200px]");
+    expect(chrome).toContain("w-[calc(200px-var(--chrome-gutter))]");
     expect(chrome).toContain("md:ml-[200px]");
     expect(chrome).toContain("lg:max-w-[892px]");
     expect(chrome).not.toContain("lg:max-w-[676px]");
