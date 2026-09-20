@@ -226,7 +226,9 @@ export async function presignSocialMediaUpload(formData: FormData): Promise<{
   }
 }
 
-export async function createSocialPost(formData: FormData): Promise<ActionResult> {
+export async function writeSocialPost(
+  formData: FormData,
+): Promise<ActionResult & { groupId?: string | null }> {
   const { user, supabase, profileId } = await ownProfile();
   if (!profileId) return { error: SOCIAL.cta.needProfile };
 
@@ -247,7 +249,13 @@ export async function createSocialPost(formData: FormData): Promise<ActionResult
   revalidatePath(SOCIAL_ROUTES.home);
   revalidatePath(SOCIAL_ROUTES.create);
   if (slug) revalidatePath(socialGroupHref(slug));
-  if (!groupId) redirect(SOCIAL_ROUTES.home);
+  return { groupId };
+}
+
+export async function createSocialPost(formData: FormData): Promise<ActionResult> {
+  const result = await writeSocialPost(formData);
+  if (result.error) return result;
+  if (!result.groupId) redirect(SOCIAL_ROUTES.home);
   return {};
 }
 

@@ -33,7 +33,7 @@ import { socialProfilePublicLinks } from "@/lib/social-profile-links";
 import { socialProfileRoleChips } from "@/lib/social-profile-roles";
 import { parseSocialProfileTopics } from "@/lib/social-profile-topics";
 import { SocialAvatar } from "./social-avatar";
-import { SocialLikeButton } from "./social-engagement";
+import { SocialLikeButton, SocialLikeCount } from "./social-engagement";
 import { SocialProfileStats } from "./social-profile-stats";
 import { SocialEmpty } from "./social-empty";
 import { SocialIcon } from "./social-icon";
@@ -553,9 +553,7 @@ export function SocialPostCard({ post }: { post: SocialPostCardModel }) {
             <SocialIcon name="chat-circle" size={22} />
             <SocialIcon name="paper-plane-tilt" size={22} />
           </div>
-          <p className="t-body-sm font-semibold text-ink">
-            {post.likeCount} {SOCIAL.post.likes}
-          </p>
+          <SocialLikeCount postId={post.id} liked={post.liked} likeCount={post.likeCount} />
           {post.body ? (
             <p className="t-body-sm text-ink">
               <span className="font-semibold">{handle} </span>

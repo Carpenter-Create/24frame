@@ -2,14 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { HouseVoiceMic } from "@/components/chrome/house-voice-mic";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  createSocialPost,
-  presignSocialMediaUpload,
-} from "@/app/(app)/social/actions";
+import { presignSocialMediaUpload } from "@/app/(app)/social/actions";
 import { HOUSE_VOICE_FIELD_HOST_CLASS } from "@/lib/form-control";
 import {
   SOCIAL_ACTION_CLASS,
@@ -39,7 +37,15 @@ import {
   goLiveRemainingMs,
   SOCIAL_GO_LIVE_MAX_MS,
 } from "@/lib/social-go-live";
+import { ACCOUNT_PROFILE } from "@/lib/account-profile";
 import { SOCIAL, SOCIAL_ROUTES, socialCreateHref } from "@/lib/social";
+import {
+  applyOptimisticSocialPost,
+  beginSocialPostPublish,
+  failOptimisticSocialPost,
+  persistSocialPost,
+  runSocialOptimisticMutation,
+} from "@/lib/social-optimistic";
 import {
   ingestSpeechLearning,
 } from "@/lib/speech-learning";
@@ -101,6 +107,7 @@ async function uploadLiveVideo(file: File): Promise<{ item?: SocialMediaItem; er
 }
 
 export function SocialGoLive() {
+  const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -401,20 +408,40 @@ export function SocialGoLive() {
       setError(uploaded.error ?? SOCIAL.home.uploadFailed);
       return;
     }
-    const form = new FormData();
-    form.set("body", body);
-    form.set("media", JSON.stringify([uploaded.item]));
     ingestSpeechLearning({
       text: body,
       source: "typed",
       workspace: "social",
     });
-    const result = await createSocialPost(form);
-    if (!aliveRef.current) return;
-    if (result?.error) {
+    const started = beginSocialPostPublish({
+      body,
+      mediaItems: [uploaded.item],
+      mediaPreview: [{ kind: "video", url: clip.url }],
+      authorName: SOCIAL.home.you,
+    });
+    if (!started.ok) {
       setPosting(false);
-      setError(result.error);
+      setError(started.error);
+      return;
     }
+    runSocialOptimisticMutation({
+      apply: () => {
+        applyOptimisticSocialPost(started.post);
+        clipUrlRef.current = null;
+        setError("");
+        router.push(SOCIAL_ROUTES.home);
+        return started.post.id;
+      },
+      persist: () => persistSocialPost(started.form),
+      rollback: () => failOptimisticSocialPost(started.post.id, ACCOUNT_PROFILE.saveFailed),
+      onError: (notice) => {
+        failOptimisticSocialPost(started.post.id, notice);
+        if (aliveRef.current) {
+          setPosting(false);
+          setError(notice);
+        }
+      },
+    });
   }
 
   const mirrored = storyStudioMirrorsPreview(facing);

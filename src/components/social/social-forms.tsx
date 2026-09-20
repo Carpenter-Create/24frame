@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,10 +48,20 @@ import {
   normalizeHandle,
   SOCIAL,
   SOCIAL_CREATE_KINDS,
+  SOCIAL_ROUTES,
   socialCreateWellCopy,
   socialHandleRequiredError,
   type SocialCreateKind,
 } from "@/lib/social";
+import {
+  applyOptimisticSocialPost,
+  beginSocialPostPublish,
+  beginSocialPostPublishBusy,
+  endSocialPostPublishBusy,
+  failOptimisticSocialPost,
+  persistSocialPost,
+  runSocialOptimisticMutation,
+} from "@/lib/social-optimistic";
 import { cn } from "@/lib/cn";
 import { SocialAvatar } from "./social-avatar";
 import { SocialHandleField } from "./social-handle-field";
@@ -58,7 +69,6 @@ import { SocialIcon } from "./social-icon";
 import {
   addSocialDmPeople,
   createSocialGroup,
-  createSocialPost,
   createSocialProfile,
   joinSocialGroup,
   openSocialDm,
@@ -68,11 +78,84 @@ import {
   updateSocialBio,
 } from "@/app/(app)/social/actions";
 
-export { SocialFollowButton, SocialLikeButton } from "./social-engagement";
+export { SocialFollowButton, SocialLikeButton, SocialLikeCount } from "./social-engagement";
 
 function FormError({ error }: { error: string }) {
   if (!error) return null;
   return <InlineNotice tone="error">{error}</InlineNotice>;
+}
+
+function persistKeys(media: SocialMediaItem[]) {
+  return media.map(({ kind, key, contentType }) => ({ kind, key, contentType }));
+}
+
+function publishOptimisticPost({
+  body,
+  media,
+  previews,
+  authorName,
+  authorHandle,
+  authorPhotoUrl,
+  groupId,
+  groupSlug,
+  category,
+  onLocalSuccess,
+  onNavigate,
+  setError,
+}: {
+  body: string;
+  media: SocialMediaItem[];
+  previews?: Readonly<Record<string, string>>;
+  authorName: string;
+  authorHandle?: string | null;
+  authorPhotoUrl?: string | null;
+  groupId?: string;
+  groupSlug?: string;
+  category?: string;
+  onLocalSuccess?: () => void;
+  onNavigate?: () => void;
+  setError: (error: string) => void;
+}) {
+  const started = beginSocialPostPublish({
+    body,
+    mediaItems: persistKeys(media),
+    mediaPreview: media.flatMap((item) => {
+      const url = previews?.[item.key];
+      return url ? [{ kind: item.kind, url }] : [];
+    }),
+    authorName,
+    authorHandle,
+    authorPhotoUrl,
+    groupId,
+    groupSlug,
+    category,
+  });
+  if (!started.ok) {
+    setError(started.error);
+    return;
+  }
+  if (!beginSocialPostPublishBusy()) return;
+  runSocialOptimisticMutation({
+    apply: () => {
+      applyOptimisticSocialPost(started.post);
+      setError("");
+      onLocalSuccess?.();
+      onNavigate?.();
+      return started.post.id;
+    },
+    persist: () => persistSocialPost(started.form),
+    rollback: () => {
+      failOptimisticSocialPost(started.post.id, ACCOUNT_PROFILE.saveFailed);
+      endSocialPostPublishBusy();
+    },
+    onError: (error) => {
+      failOptimisticSocialPost(started.post.id, error);
+      endSocialPostPublishBusy();
+    },
+    onSuccess: () => {
+      endSocialPostPublishBusy();
+    },
+  });
 }
 
 export function SocialProfileCreateForm({
@@ -172,10 +255,12 @@ export function SocialPostCompose({
   const [uploading, setUploading] = useState(false);
   const [body, setBody] = useState("");
   const [media, setMedia] = useState<SocialMediaItem[]>([]);
+  const [previews, setPreviews] = useState<Record<string, string>>({});
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function onPick(files: ArrayLike<File> | null) {
     if (!files || files.length === 0) return;
+    const chosen = Array.from(files);
     setError("");
     setUploading(true);
     const result = await uploadSocialMedia(files, media, SOCIAL_MEDIA_MAX_ITEMS, "posts");
@@ -185,23 +270,39 @@ export function SocialPostCompose({
       setError(result.error);
       return;
     }
-    if (result.items) setMedia((current) => [...current, ...result.items!]);
+    if (result.items) {
+      setPreviews((current) => {
+        const next = { ...current };
+        result.items!.forEach((item, index) => {
+          const file = chosen[index];
+          if (file) next[item.key] = URL.createObjectURL(file);
+        });
+        return next;
+      });
+      setMedia((current) => [...current, ...result.items!]);
+    }
   }
 
   return (
     <form
       data-social-post-form=""
       className="flex flex-col gap-[var(--space-3)]"
-      action={async (formData) => {
-        setError("");
-        formData.set("media", JSON.stringify(media));
-        const result = await createSocialPost(formData);
-        if (result.error) {
-          setError(result.error);
-          return;
-        }
-        setBody("");
-        setMedia([]);
+      onSubmit={(event) => {
+        event.preventDefault();
+        publishOptimisticPost({
+          body,
+          media,
+          previews,
+          authorName: SOCIAL.home.you,
+          groupId,
+          groupSlug,
+          onLocalSuccess: () => {
+            setBody("");
+            setMedia([]);
+            setPreviews({});
+          },
+          setError,
+        });
       }}
     >
       {groupId ? <input type="hidden" name="group_id" value={groupId} /> : null}
@@ -284,6 +385,7 @@ export function SocialCreateCompose({
   authorPhotoUrl?: string | null;
   initialKind?: SocialCreateKind | null;
 }) {
+  const router = useRouter();
   const [homeMedia] = useState(takeSocialHomeComposerMedia);
   const ingestHomeMedia = homeMedia.length > 0 && (initialKind ?? "photo") !== "text";
   const [error, setError] = useState("");
@@ -291,6 +393,7 @@ export function SocialCreateCompose({
   const [kind, setKind] = useState<SocialCreateKind>(initialKind ?? "photo");
   const [body, setBody] = useState("");
   const [media, setMedia] = useState<SocialMediaItem[]>([]);
+  const [previews, setPreviews] = useState<Record<string, string>>({});
   const fileRef = useRef<HTMLInputElement>(null);
   const accept =
     kind === "photo"
@@ -310,7 +413,17 @@ export function SocialCreateCompose({
         setError(result.error);
         return;
       }
-      if (result.items) setMedia(result.items);
+      if (result.items) {
+        setPreviews((current) => {
+          const next = { ...current };
+          result.items!.forEach((item, index) => {
+            const file = homeMedia[index];
+            if (file) next[item.key] = URL.createObjectURL(file);
+          });
+          return next;
+        });
+        setMedia(result.items);
+      }
     });
     return () => {
       cancelled = true;
@@ -319,6 +432,7 @@ export function SocialCreateCompose({
 
   async function onPick(files: ArrayLike<File> | null) {
     if (!files || files.length === 0 || kind === "text") return;
+    const chosen = Array.from(files);
     setError("");
     setUploading(true);
     const result = await uploadSocialMedia(files, media, SOCIAL_MEDIA_MAX_ITEMS, "posts");
@@ -328,23 +442,42 @@ export function SocialCreateCompose({
       setError(result.error);
       return;
     }
-    if (result.items) setMedia((current) => [...current, ...result.items!]);
+    if (result.items) {
+      setPreviews((current) => {
+        const next = { ...current };
+        result.items!.forEach((item, index) => {
+          const file = chosen[index];
+          if (file) next[item.key] = URL.createObjectURL(file);
+        });
+        return next;
+      });
+      setMedia((current) => [...current, ...result.items!]);
+    }
   }
 
   return (
     <form
       data-social-create-form=""
       className={SOCIAL_CREATE_CARD_CLASS}
-      action={async (formData) => {
-        setError("");
-        formData.set("media", JSON.stringify(media));
+      onSubmit={(event) => {
+        event.preventDefault();
         ingestSpeechLearning({
           text: body,
           source: "typed",
           workspace: "social",
         });
-        const result = await createSocialPost(formData);
-        if (result?.error) setError(result.error);
+        publishOptimisticPost({
+          body,
+          media,
+          previews,
+          authorName,
+          authorHandle,
+          authorPhotoUrl,
+          onNavigate: () => {
+            router.push(SOCIAL_ROUTES.home);
+          },
+          setError,
+        });
       }}
     >
       <div className="flex items-center gap-3" data-social-create-author="">

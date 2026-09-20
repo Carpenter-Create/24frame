@@ -93,6 +93,17 @@ describe("social isolation lock", () => {
     expect(actions).toContain('from("stories")');
     expect(actions).not.toContain("from(\"reels\")");
     expect(actions).toContain("ensureOwnSocialProfile");
+    expect(actions).toContain("export async function writeSocialPost");
+    expect(actions).toContain("createSocialPost");
+    const likeApi = readFileSync("src/app/api/social/like/route.ts", "utf8");
+    const postApi = readFileSync("src/app/api/social/post/route.ts", "utf8");
+    expect(likeApi).toContain("toggleSocialLike");
+    expect(likeApi).toContain('from "@/app/(app)/social/light-actions"');
+    expect(postApi).toContain("writeSocialPost");
+    expect(likeApi).not.toContain("@/lib/supabase/admin");
+    expect(postApi).not.toContain("@/lib/supabase/admin");
+    expect(likeApi).not.toContain("SERVICE_ROLE");
+    expect(postApi).not.toContain("SERVICE_ROLE");
     const editPage = readFileSync("src/app/(app)/social/profile/edit/page.tsx", "utf8");
     const bioPage = readFileSync("src/app/(app)/social/profile/edit/bio/page.tsx", "utf8");
     expect(editPage).toContain('from "@/lib/social-session"');
