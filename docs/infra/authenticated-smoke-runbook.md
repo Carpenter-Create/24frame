@@ -108,9 +108,9 @@ Use the Access client mailbox. Magic-link only. No live card.
 
 | | |
 | --- | --- |
-| **Path** | `/aggregation/activity` (retired `/deliveries` 404s) |
+| **Path** | `/activity` (retired `/deliveries` 404s) |
 | **Role** | client Access |
-| **Action** | Open `/deliveries` first — expect 404, no hop. Then open `/aggregation/activity`. |
+| **Action** | Open `/deliveries` first — expect 404, no hop. Then open `/activity`. |
 | **Expected** | Retired door 404s. Live path heading **Activity** loads without an error page. Empty list is Pass. Client licensing nest stays on Dashboard — there is no client `/deliveries` land. |
 | **Fail** | Redirect from `/deliveries`, error page, unexpected hop, or a blank/broken render. |
 
@@ -131,7 +131,7 @@ Use the Access client mailbox. Magic-link only. No live card.
 | **Path** | `/messages` and `/aggregation/messages` |
 | **Role** | client Access |
 | **Action** | Open `/messages`, then `/aggregation/messages`. |
-| **Expected** | Each path 404s. No hop to Activity or the Ask-AI overlay. Live notification log is `/aggregation/activity`. Ask 24Frame AI opens from the header / Home module (`?ai=`). |
+| **Expected** | Each path 404s. No hop to Activity or the Ask-AI overlay. Live notification log is `/activity`. Ask 24Frame AI opens from the header / Home module (`?ai=`). |
 | **Fail** | Redirect, overlay intercept, or a rendered Messages / AI land. |
 
 ### 9. Agreements list

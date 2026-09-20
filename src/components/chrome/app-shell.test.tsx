@@ -229,7 +229,7 @@ describe("AppShell header", () => {
     expect(leadSrc).not.toContain('tone="pill"');
     expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
 
-    for (const path of ["/", "/aggregation/titles", "/aggregation/attention", "/aggregation/activity"]) {
+    for (const path of ["/", "/aggregation/titles", "/aggregation/attention", "/activity"]) {
       navigation.pathname = path;
       const html = renderShell();
       expect(html).not.toContain("data-org-switcher");
@@ -387,7 +387,7 @@ describe("AppShell Access rail and home frame", () => {
     expect(queue).not.toContain("data-app-messages-frame");
     expect(queue).not.toContain("pb-24 pt-8");
 
-    navigation.pathname = "/aggregation/activity";
+    navigation.pathname = "/activity";
     const activity = renderShell();
     expect(activity).toContain("px-[var(--chrome-gutter)]");
     expect(activity).toContain("pb-24 pt-8");
@@ -440,7 +440,7 @@ describe("AppShell Access rail and home frame", () => {
     expect(shellSrc).not.toContain("MessagesHeaderSlot");
     expect(shellSrc).not.toContain("messagesPage");
 
-    navigation.pathname = "/aggregation/activity";
+    navigation.pathname = "/activity";
     const activity = renderShell("ask-globee-landing");
     expect(activity).not.toContain("data-app-messages-frame");
     expect(activity).not.toContain("data-header-search");
@@ -512,8 +512,8 @@ describe("AppShell client mobile chrome", () => {
     expect(layoutSrc).not.toMatch(/key=\{ctx/);
   });
 
-  it("keeps mobile chrome on Aggregation activity — Search stays off the page header", () => {
-    navigation.pathname = "/aggregation/activity";
+  it("keeps mobile chrome on Activity — Search stays off the page header", () => {
+    navigation.pathname = "/activity";
     const leftover = renderShell("ask-globee-landing");
     expect(leftover).not.toContain("data-mobile-nav-trigger");
     expect(leftover).toContain("data-house-phone-dest-chips");
@@ -590,7 +590,7 @@ describe("AppShell /settings rail", () => {
   });
 
   it("keeps the Access rail on neighboring routes", () => {
-    for (const path of ["/", "/aggregation/titles", "/aggregation/attention", "/aggregation/activity", "/help"]) {
+    for (const path of ["/", "/aggregation/titles", "/aggregation/attention", "/activity", "/help"]) {
       navigation.pathname = path;
       const html = renderShell();
       expect(html).toContain("data-side-nav");

@@ -10,7 +10,6 @@ import {
   Pulse,
   ChartBar,
   Wallet,
-  Bell,
   Tray,
   CheckCircle,
   Storefront,
@@ -19,7 +18,6 @@ import {
 } from "@phosphor-icons/react";
 
 import type { PhosphorIcon } from "@/lib/phosphor-icon";
-import { ACTIVITY_HREF, ACTIVITY_PAGE } from "@/lib/activity";
 import { AVAILS_HREF, AVAILS_PAGE } from "@/lib/avails";
 import { FINANCE_HREF, FINANCE_PAGE } from "@/lib/finance";
 import { CHANNELS_HREF } from "@/lib/channel-card";
@@ -71,10 +69,11 @@ export function isHouseAiNavItem(item: NavItem): item is HouseAiNavItem {
 }
 
 // GC's flat nav — only what exists or is v1-scoped. Settings stays deferred.
-// Activity is the account-alert log (/activity). Recent activity stays
-// catalog findings (/attention). Ask 24Frame AI is the shell overlay
-// (`?ai=1`), never a workspace destination and never an Aggregation
-// rail row. Desktop entry is the header HouseAiMark only.
+// Activity is chrome-level /activity (bell). It is not an Aggregation
+// rail row. Recent activity stays catalog findings (/attention).
+// Ask 24Frame AI is the shell overlay (`?ai=1`), never a workspace
+// destination and never an Aggregation rail row. Desktop entry is
+// the header HouseAiMark only.
 // Reports is the one client activity door. Staff ops stays on GC_NAV
 // at /gc/finance. Glyphs: Figma 75:5 / 75:2 / 61:2 Phosphor Bold idle,
 // Fill active. Overlay chrome still uses the house sparkle cluster
@@ -83,13 +82,6 @@ export const NAV: PhosphorNavItem[] = [
   { label: "Dashboard", href: DASHBOARD_HREF, family: "phosphor", icon: SquaresFour, exact: true },
   { label: "Titles", href: TITLES_HREF, family: "phosphor", icon: FilmSlate },
   { label: "Recent activity", href: ATTENTION_HREF, family: "phosphor", icon: Pulse },
-  {
-    label: ACTIVITY_PAGE.title,
-    href: ACTIVITY_HREF,
-    family: "phosphor",
-    icon: Bell,
-    ariaLabel: ACTIVITY_PAGE.navAria,
-  },
   {
     label: REPORTS_PAGE.title,
     href: REPORTS_HREF,
@@ -215,8 +207,8 @@ export function clientNavCurrent(pathname: string): NavItem {
 // Staff already use the operator set — do not leave them on a
 // client-only row. Social phone dests keep the feed pill (relabelled
 // Feed on phone; desktop rail keeps Home) so /social is reachable
-// from the chip row. Desktop rail drops Create. Activity stays an
-// Aggregation rail destination. Ask 24Frame AI is header + overlay.
+// from the chip row. Desktop rail drops Create. Activity is the
+// header bell, not a dest chip. Ask 24Frame AI is header + overlay.
 export function mobileNavDestinations(
   isGcStaff: boolean,
   workspace: WorkspaceMode = "aggregation",

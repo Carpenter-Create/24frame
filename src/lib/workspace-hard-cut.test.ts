@@ -12,6 +12,7 @@ const RETIRED_DOOR_PAGES = [
   "src/app/(app)/account/company/page.tsx",
   "src/app/(app)/refer/page.tsx",
   "src/app/(app)/aggregation/messages/page.tsx",
+  "src/app/(app)/aggregation/activity/page.tsx",
   "src/app/(app)/aggregation/messages/ask-ai-legacy-intercept.tsx",
   "src/app/(app)/(operator)/aggregation/gc/page.tsx",
   "src/app/(app)/(operator)/aggregation/gc/findings/page.tsx",
@@ -26,7 +27,7 @@ const LIVE_SOT_PAGES = [
   "src/app/(app)/settings/organization/entities/new/page.tsx",
   "src/app/(app)/settings/organization/entities/[entityId]/page.tsx",
   "src/app/(app)/settings/refer/page.tsx",
-  "src/app/(app)/aggregation/activity/page.tsx",
+  "src/app/(app)/activity/page.tsx",
   "src/app/(app)/(operator)/aggregation/queue/page.tsx",
 ] as const;
 
@@ -58,5 +59,9 @@ describe("workspace hard-cut — old doors 404", () => {
     expect(vercel).not.toContain('"/refer"');
     expect(vercel).not.toContain('"/messages"');
     expect(vercel).not.toContain('"/aggregation/messages"');
+    expect(nextConfig).not.toContain("/aggregation/activity");
+    expect(vercel).not.toContain("/aggregation/activity");
+    expect(nextConfig).not.toContain('"/activity"');
+    expect(vercel).not.toContain('"/activity"');
   });
 });

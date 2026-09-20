@@ -12,6 +12,7 @@ import {
   ACTIVITY_KIND_ICON,
   ACTIVITY_PAGE,
   ACTIVITY_PREFS_HREF,
+  isActivityPath,
   activityBellItems,
   activityEmptyCopy,
   activityFamilyForKind,
@@ -84,6 +85,18 @@ describe("Activity live feed — uncleared only", () => {
   });
 });
 
+describe("Activity chrome href", () => {
+  it("keeps one chrome-level SoT and does not nest under Aggregation", () => {
+    expect(ACTIVITY_HREF).toBe("/activity");
+    expect(ACTIVITY_HREF).not.toContain("/aggregation/");
+    expect(isActivityPath("/activity")).toBe(true);
+    expect(isActivityPath("/activity/x")).toBe(true);
+    expect(isActivityPath("/aggregation/activity")).toBe(false);
+    expect(isActivityPath("/settings")).toBe(false);
+    expect(isActivityPath("/help")).toBe(false);
+  });
+});
+
 describe("Activity family chips", () => {
   it("reuses prefs families and defaults to All", () => {
     expect(ACTIVITY_FAMILIES).toEqual([
@@ -143,7 +156,7 @@ describe("Activity bell cap", () => {
     expect(activityKindIcon("title_rejected")).toBe("film-slate");
     expect(activityKindIcon("delivery_update")).toBe("paper-plane-tilt");
     expect(ACTIVITY_KIND_ICON.title_rejected).toBe("film-slate");
-    expect(activityItemHref(OPEN_NEW)).toBe("/aggregation/activity");
+    expect(activityItemHref(OPEN_NEW)).toBe(ACTIVITY_HREF);
     expect(activityRelativeTime("2026-09-18T11:00:00.000Z", NOW.getTime())).toBe("1h");
     expect(ACTIVITY_PAGE.viewAll).toBe("View all activity");
     expect(ACTIVITY_PAGE.dismiss).toBe("Mark done");

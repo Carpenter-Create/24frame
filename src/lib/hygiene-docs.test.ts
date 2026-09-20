@@ -17,7 +17,8 @@ describe("hygiene docs (P3 / P2-9)", () => {
   it("smoke runbook uses first-segment IA", () => {
     const runbook = readFileSync("docs/infra/authenticated-smoke-runbook.md", "utf8");
     expect(runbook).toContain("/aggregation/titles");
-    expect(runbook).toContain("/aggregation/activity");
+    expect(runbook).toContain("/activity");
+    expect(runbook).not.toContain("/aggregation/activity");
     expect(runbook).toContain("/aggregation/attention");
     expect(runbook).toContain("/aggregation/queue");
     expect(runbook).toContain("/aggregation/gc/deliveries");

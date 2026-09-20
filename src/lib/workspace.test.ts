@@ -50,6 +50,9 @@ describe("workspace mode", () => {
     expect(isSocialPath("/social")).toBe(true);
     expect(resolveWorkspaceMode("/aggregation/dashboard", "social")).toBe("aggregation");
     expect(resolveWorkspaceMode("/aggregation/reports", "social")).toBe("aggregation");
+    expect(resolveWorkspaceMode("/activity", "social")).toBe("social");
+    expect(resolveWorkspaceMode("/activity", "education")).toBe("education");
+    expect(resolveWorkspaceMode("/activity", "aggregation")).toBe("aggregation");
     expect(resolveWorkspaceMode("/aggregation/activity", "social")).toBe("aggregation");
     expect(resolveWorkspaceMode("/home/news", "social")).toBe("aggregation");
     expect(resolveWorkspaceMode("/home/news", "education")).toBe("aggregation");
