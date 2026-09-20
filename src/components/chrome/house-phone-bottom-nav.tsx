@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { SocialCreateMenu } from "@/components/social/social-create-menu";
 import { cn } from "@/lib/cn";
 import {
   HOUSE_PHONE_BOTTOM_NAV,
@@ -112,6 +113,46 @@ export function HousePhoneBottomNav({
                 weight={HOUSE_PHONE_BOTTOM_NAV_ICON_WEIGHT}
               />
             );
+            const chip = active ? (
+              <span
+                data-house-phone-bottom-nav-chip=""
+                className={HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS}
+              >
+                {glyph}
+              </span>
+            ) : (
+              glyph
+            );
+            const destClass = cn(
+              HOUSE_PHONE_BOTTOM_NAV_ITEM_CLASS,
+              active
+                ? HOUSE_PHONE_BOTTOM_NAV_ITEM_ON_CLASS
+                : HOUSE_PHONE_BOTTOM_NAV_ITEM_OFF_CLASS,
+            );
+            if (housePhoneDestIsCreate(item)) {
+              return (
+                <SocialCreateMenu
+                  key={item.href}
+                  align="center"
+                  trigger={
+                    <button
+                      type="button"
+                      aria-label={item.label}
+                      aria-current={active ? "page" : undefined}
+                      tabIndex={hidden ? -1 : undefined}
+                      data-house-phone-bottom-nav-item={item.href}
+                      data-house-phone-bottom-nav-item-active={active ? "" : undefined}
+                      data-house-phone-dest={item.label}
+                      data-house-phone-dest-create=""
+                      data-social-create-menu="dest"
+                      className={destClass}
+                    >
+                      {chip}
+                    </button>
+                  }
+                />
+              );
+            }
             return (
               <Link
                 key={item.href}
@@ -123,24 +164,9 @@ export function HousePhoneBottomNav({
                 data-house-phone-bottom-nav-item={item.href}
                 data-house-phone-bottom-nav-item-active={active ? "" : undefined}
                 data-house-phone-dest={item.label}
-                data-house-phone-dest-create={housePhoneDestIsCreate(item) ? "" : undefined}
-                className={cn(
-                  HOUSE_PHONE_BOTTOM_NAV_ITEM_CLASS,
-                  active
-                    ? HOUSE_PHONE_BOTTOM_NAV_ITEM_ON_CLASS
-                    : HOUSE_PHONE_BOTTOM_NAV_ITEM_OFF_CLASS,
-                )}
+                className={destClass}
               >
-                {active ? (
-                  <span
-                    data-house-phone-bottom-nav-chip=""
-                    className={HOUSE_PHONE_BOTTOM_NAV_CHIP_CLASS}
-                  >
-                    {glyph}
-                  </span>
-                ) : (
-                  glyph
-                )}
+                {chip}
               </Link>
             );
           })}

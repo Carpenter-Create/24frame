@@ -64,6 +64,7 @@ describe("SegmentedTrack slide SoT", () => {
     expect(lib).toContain("visualIndex is the SoT");
     expect(lib).toContain("resolveSegmentedVisualIndex");
     expect(lib).toContain("commitSegmentedVisualIntent");
+    expect(lib).toContain("segmentedItemHoldsVisualIntent");
     expect(lib).toContain("fromRouteIndex");
     expect(lib).not.toContain("pendingIndex ?? routeIndex");
     expect(HOUSE_SEGMENTED_ITEM_ON_CLASS).toBe("text-white");

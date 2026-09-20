@@ -42,7 +42,10 @@ import {
   type SocialMediaItem,
   type SocialMediaLane,
 } from "@/lib/social-media";
+import { HouseVoiceMic } from "@/components/chrome/house-voice-mic";
+import { HOUSE_VOICE_FIELD_HOST_CLASS } from "@/lib/form-control";
 import { takeSocialHomeComposerMedia } from "@/lib/social-home-composer";
+import { ingestSpeechLearning } from "@/lib/speech-learning";
 import {
   FOLLOW_CONFIRM_MS,
   followButtonLabel,
@@ -348,6 +351,11 @@ export function SocialCreateCompose({
       action={async (formData) => {
         setError("");
         formData.set("media", JSON.stringify(media));
+        ingestSpeechLearning({
+          text: body,
+          source: "typed",
+          workspace: "social",
+        });
         const result = await createSocialPost(formData);
         if (result?.error) setError(result.error);
       }}
@@ -461,15 +469,24 @@ export function SocialCreateCompose({
         <label className="t-label font-medium text-ink-2 md:t-body-sm" htmlFor="social-create-body">
           {SOCIAL.create.caption}
         </label>
-        <Textarea
-          id="social-create-body"
-          name="body"
-          rows={3}
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          placeholder={SOCIAL.home.captionPlaceholder}
-          className="h-20 rounded-[8px] px-3 py-3 placeholder:text-ink-2 md:h-24 md:px-[14px]"
-        />
+        <div data-social-create-dictate="" data-house-voice-host="" className={HOUSE_VOICE_FIELD_HOST_CLASS}>
+          <Textarea
+            variant="bare"
+            id="social-create-body"
+            name="body"
+            rows={3}
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            placeholder={SOCIAL.home.captionPlaceholder}
+            className="h-20 min-w-0 flex-1 px-0 py-1 placeholder:text-ink-2 md:h-24"
+          />
+          <HouseVoiceMic
+            surface="dictate"
+            workspace="social"
+            getValue={() => body}
+            onValue={setBody}
+          />
+        </div>
       </div>
       <div className="sr-only">
         <Label htmlFor="social-create-category">{SOCIAL.home.topic}</Label>

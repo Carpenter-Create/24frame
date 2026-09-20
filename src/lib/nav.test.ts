@@ -318,6 +318,7 @@ describe("mobileNavDestinations", () => {
     expect(isSocialTabActive("/social", SOCIAL_NAV[0])).toBe(true);
     expect(isSocialTabActive("/social/stories", SOCIAL_NAV[0])).toBe(true);
     expect(isSocialTabActive("/social/create", SOCIAL_NAV[3])).toBe(true);
+    expect(isSocialTabActive("/social/create/live", SOCIAL_NAV[3])).toBe(true);
     expect(isSocialTabActive("/social/u/maya", SOCIAL_NAV[1])).toBe(true);
     expect(isSocialTabActive("/social/profile/edit", SOCIAL_NAV[1])).toBe(true);
     expect(isSocialTabActive("/social/profile/edit/bio", SOCIAL_NAV[1])).toBe(true);

@@ -16,6 +16,8 @@ import {
   readSegmentedVisualIndex,
   readSegmentedVisualPersist,
   resolveSegmentedVisualIndex,
+  SEGMENTED_ITEM_HOLD_ATTR,
+  segmentedItemHoldsVisualIntent,
   segmentedItemOn,
   segmentedItemSelectedProps,
   segmentedThumbNeedsRestore,
@@ -175,6 +177,22 @@ describe("segmented track optimistic selection", () => {
     expect(SEGMENTED_TRACK_PERSIST.phoneDest).toBe("phone-dest");
     expect(SEGMENTED_TRACK_PERSIST.newsSource).toBe("news-source");
     expect(SEGMENTED_TRACK_PERSIST.socialCreateKind).toBe("social-create-kind");
+    expect(SEGMENTED_ITEM_HOLD_ATTR).toBe("data-segmented-hold");
+  });
+
+  it("does not treat a hold item click as a pending route", () => {
+    expect(SEGMENTED_ITEM_HOLD_ATTR).toBe("data-segmented-hold");
+    expect(
+      segmentedItemHoldsVisualIntent({
+        hasAttribute: (name) => name === SEGMENTED_ITEM_HOLD_ATTR,
+      }),
+    ).toBe(true);
+    expect(
+      segmentedItemHoldsVisualIntent({
+        hasAttribute: () => false,
+      }),
+    ).toBe(false);
+    expect(segmentedItemHoldsVisualIntent(null)).toBe(false);
   });
 
   it("keeps pending visual index across remount until the route catches up", () => {

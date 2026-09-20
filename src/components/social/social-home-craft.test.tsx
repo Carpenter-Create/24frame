@@ -35,13 +35,13 @@ const authors = new Map([["u2", { display_name: "Maya Chen", handle: "maya" }]])
 const faces = new Map([["u2", "https://s3.example/signed-avatar"]]);
 
 describe("Social Home craft (Figma 160:482 / 160:964)", () => {
-  it("renders the compact composer as avatar | field | media, no Photo|Video|Text pills", () => {
+  it("renders the compact composer as avatar | field | desktop Create door", () => {
     const html = renderToStaticMarkup(
       <SocialHomeComposer authorName="Adam Carpenter" />,
     );
     expect(html).toContain("data-social-home-composer");
     expect(html).toContain("data-social-composer-prompt");
-    expect(html).toContain("data-social-composer-media");
+    expect(html).toContain("data-social-create-menu");
     expect(html).toContain(SOCIAL_COMPOSER_CLASS);
     expect(html).toContain(SOCIAL_COMPOSER_FIELD_CLASS);
     expect(html).toContain(SOCIAL_COMPOSER_MEDIA_CLASS);
@@ -49,14 +49,14 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).toContain("Write something");
     expect(html).not.toContain("What&#x27;s on your mind");
     expect(html.split("Write something").length - 1).toBe(1);
-    expect(html).toContain(SOCIAL.home.attach);
-    expect(html).toContain(`accept="${SOCIAL_MEDIA_ACCEPT}"`);
-    expect(html).toContain('data-social-icon="image"');
+    expect(html).toContain(SOCIAL.create.title);
+    expect(html).toContain('data-social-icon="plus"');
     expect(html).toContain(`width="${SOCIAL_ICON_SIZE_COMPOSER}"`);
     expect(html).toContain("text-ink-2");
+    expect(html).not.toContain("data-social-composer-media");
     expect(html).not.toContain("data-social-composer-action");
-    expect(html).not.toContain(SOCIAL.create.photo);
-    expect(html).not.toContain(SOCIAL.create.video);
+    expect(html).not.toContain(SOCIAL.home.attach);
+    expect(html).not.toContain(`accept="${SOCIAL_MEDIA_ACCEPT}"`);
     expect(html).not.toContain(`>${SOCIAL.create.text}<`);
     expect(html).toContain("data-social-avatar");
     expect(html).toContain("AC");

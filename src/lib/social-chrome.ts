@@ -189,8 +189,9 @@ export const SOCIAL_STORY_CARET_CLASS =
   "absolute top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-surface-muted text-ink-2";
 
 // Home composer compact — 160:482 / 160:741 / 160:964 / 160:1129.
-// Single row: avatar | field (text) | media icon. Photo|Video|Text
-// choice lives on Create as SegmentedTrack, not Home composer pills.
+// Single row: avatar | field (Write) | desktop Create door. Photo ·
+// Video · Write · Go live live on that Social-only menu, not Home
+// composer pills. Phone Create is the dest chip.
 export const SOCIAL_COMPOSER_CLASS =
   `flex h-16 items-center gap-3 ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface px-3 py-3 md:px-4`;
 

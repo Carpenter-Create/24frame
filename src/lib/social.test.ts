@@ -333,6 +333,9 @@ describe("profile opt-in", () => {
     expect(parseSocialCreateKind("clip")).toBeNull();
     expect(socialCreateHref("video")).toBe("/social/create?kind=video");
     expect(socialCreateHref("text")).toBe("/social/create?kind=text");
+    expect(SOCIAL_ROUTES.createLive).toBe("/social/create/live");
+    expect(SOCIAL.create.write).toBe("Write");
+    expect(SOCIAL.create.goLive).toBe("Go live");
     expect(socialCreateWellCopy("photo", false)).toEqual({
       title: SOCIAL.create.dropEmpty,
       hint: SOCIAL.create.dropEmptyHint,

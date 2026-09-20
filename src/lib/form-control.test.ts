@@ -7,6 +7,8 @@ import {
   FORM_CONTROL_BOX_CLASS,
   FORM_CONTROL_FOCUS_CLASS,
   FORM_CONTROL_TEXT_CLASS,
+  HOUSE_VOICE_FOCUS_HOST_CLASS,
+  HOUSE_VOICE_MIC_CLASS,
   formControlClass,
 } from "./form-control";
 
@@ -87,6 +89,17 @@ describe("form-control SoT", () => {
     expect(FORM_CONTROL_BOX_CLASS).not.toContain("focus:ring-accent");
     expect(globals).toContain(":focus-visible:not(input):not(textarea):not(select)");
     expect(globals).not.toMatch(/(?:^|\n):focus-visible\s*\{/);
+    expect(HOUSE_VOICE_FOCUS_HOST_CLASS).toContain(FORM_CONTROL_FOCUS_CLASS);
+    expect(HOUSE_VOICE_FOCUS_HOST_CLASS).toContain("focus-within:ring-0");
+    expect(HOUSE_VOICE_FOCUS_HOST_CLASS).not.toContain("focus-within:ring-2");
+    expect(HOUSE_VOICE_MIC_CLASS).toContain("rounded-full");
+    expect(HOUSE_VOICE_MIC_CLASS).toContain(FORM_CONTROL_FOCUS_CLASS);
+    expect(houseLeadSearch).toContain("HOUSE_VOICE_FOCUS_HOST_CLASS");
+    expect(housePageSearch).toContain("HOUSE_VOICE_FOCUS_HOST_CLASS");
+    expect(socialForms).toContain("HOUSE_VOICE_FIELD_HOST_CLASS");
+    expect(houseLeadSearch).not.toContain("focus:ring-accent");
+    expect(housePageSearch).not.toContain("focus:ring-2");
+    expect(socialForms).not.toContain("focus:ring-accent");
   });
 
   it("puts Input and Textarea on the shared class so future fields inherit", () => {
