@@ -147,6 +147,9 @@ export const SOCIAL_HOME_STORY_CARD_CLASS =
 export const SOCIAL_HOME_STORY_CREATE_FACE_CLASS =
   "absolute inset-x-0 top-0 flex h-[114px] items-center justify-center overflow-hidden bg-surface-muted md:h-[120px]";
 
+// Accent circle + white plus glyph. Not a white-fill well (Plus fill
+// knockout reads as white disc / blue +). border-surface is the seam
+// ring only — not the well fill. Phone + desktop share this class.
 export const SOCIAL_HOME_STORY_PLUS_CLASS =
   "absolute left-1/2 top-[96px] z-10 flex size-9 -translate-x-1/2 items-center justify-center rounded-full border-[3px] border-surface bg-accent text-accent-contrast md:top-[100px] md:size-10";
 
@@ -178,6 +181,7 @@ export const SOCIAL_STORIES_FACE_CLASS =
 export const SOCIAL_STORIES_MEDIA_CLASS =
   "relative size-full overflow-hidden rounded-[13px] bg-surface-muted";
 
+// Same plus SoT as SOCIAL_HOME_STORY_PLUS_CLASS: accent well, white glyph.
 export const SOCIAL_STORIES_PLUS_WELL_CLASS =
   "flex size-9 items-center justify-center rounded-full bg-accent text-accent-contrast";
 

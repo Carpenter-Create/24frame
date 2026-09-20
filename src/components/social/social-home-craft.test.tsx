@@ -27,7 +27,9 @@ import {
   SOCIAL_EMPTY_ACTION_CLASS,
   SOCIAL_EMPTY_PANEL_CLASS,
   SOCIAL_HOME_STORY_CREATE_LABEL_CLASS,
+  SOCIAL_HOME_STORY_PLUS_CLASS,
   SOCIAL_STORIES_EMPTY_ACTION_CLASS,
+  SOCIAL_STORIES_PLUS_WELL_CLASS,
   SOCIAL_STORY_CREATE_LABEL_TYPE_CLASS,
   SOCIAL_TOPIC_CHIP_ROW_CLASS,
   SOCIAL_TOPIC_RAIL_CHIP_CLASS,
@@ -189,6 +191,35 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(SOCIAL_HOME_STORY_CREATE_LABEL_CLASS).not.toContain("tracking-");
     expect(SOCIAL_STORY_CREATE_LABEL_TYPE_CLASS).not.toContain("t-label");
     expect(SOCIAL_STORY_CREATE_LABEL_TYPE_CLASS).not.toContain("uppercase");
+  });
+
+  it("paints Create Story plus as a white glyph on the accent well, not a fill knockout", () => {
+    const home = renderToStaticMarkup(
+      <SocialStoriesRail canCreate authors={authors} faces={faces} cards={[]} />,
+    );
+    const stories = renderToStaticMarkup(
+      <SocialStoriesRail
+        canCreate
+        surface="stories"
+        authors={authors}
+        faces={faces}
+        cards={[]}
+      />,
+    );
+    expect(home).toContain(SOCIAL_HOME_STORY_PLUS_CLASS);
+    expect(home).toContain('data-social-icon="plus"');
+    expect(home).toContain("text-accent-contrast");
+    expect(home).not.toContain("data-social-icon-active");
+    expect(stories).toContain(SOCIAL_STORIES_PLUS_WELL_CLASS);
+    expect(stories).toContain('data-social-icon="plus"');
+    expect(stories).not.toContain("data-social-icon-active");
+    expect(SOCIAL_HOME_STORY_PLUS_CLASS).toContain("bg-accent");
+    expect(SOCIAL_HOME_STORY_PLUS_CLASS).toContain("text-accent-contrast");
+    expect(SOCIAL_HOME_STORY_PLUS_CLASS).not.toContain("bg-surface ");
+    expect(SOCIAL_HOME_STORY_PLUS_CLASS).not.toContain("bg-surface-muted");
+    expect(SOCIAL_STORIES_PLUS_WELL_CLASS).toContain("bg-accent");
+    expect(SOCIAL_STORIES_PLUS_WELL_CLASS).toContain("text-accent-contrast");
+    expect(SOCIAL_STORIES_PLUS_WELL_CLASS).not.toContain("bg-surface");
   });
 
   it("uses Phosphor users, 8px empty panel, and Sporty Blue empty CTA", () => {
