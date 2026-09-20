@@ -83,30 +83,39 @@ describe("house type roles", () => {
     // Adam 2026-09-19 Coinbase-pop A3 — title 480 · body 420 (pre-A delta).
     // Display 600 · heading/subhead 500 stay from A2. A/A2 600/500 were
     // interim body/title SoT — ban them here.
+    // Pass A4: title tracking -0.028em / leading 1.1; display -0.042em /
+    // leading 1.05 + tnum/kern; heading/subhead -0.02em. Geist stays.
     expect(tokens).toMatch(/--type-title-weight:\s*480;/);
     expect(tokens).toMatch(/--type-body-weight:\s*420;/);
     expect(tokens).not.toMatch(/--type-title-weight:\s*600;/);
     expect(tokens).not.toMatch(/--type-body-weight:\s*500;/);
     expect(tokens).not.toMatch(/--type-body-weight:\s*400;/);
     expect(tokens).toMatch(/--tracking-tight:\s*-0\.02em;/);
+    expect(tokens).toMatch(/--tracking-title:\s*-0\.028em;/);
+    expect(tokens).toMatch(/--tracking-display:\s*-0\.042em;/);
+    expect(tokens).toMatch(/--tracking-rail:\s*-0\.01em;/);
 
     expect(globals).toMatch(
-      /\.t-display\s*\{[\s\S]*?font-size:\s*var\(--text-hero\)[\s\S]*?font-weight:\s*600[\s\S]*?line-height:\s*1\.04[\s\S]*?letter-spacing:\s*-0\.035em[\s\S]*?font-variant-numeric:\s*tabular-nums/,
+      /\.t-display\s*\{[\s\S]*?font-size:\s*var\(--text-hero\)[\s\S]*?font-weight:\s*600[\s\S]*?line-height:\s*1\.05[\s\S]*?letter-spacing:\s*var\(--tracking-display\)[\s\S]*?font-variant-numeric:\s*tabular-nums[\s\S]*?font-feature-settings:\s*"tnum" 1, "kern" 1/,
     );
     expect(globals).toMatch(
-      /\.t-title\s*\{[\s\S]*?font-weight:\s*var\(--type-title-weight\)[\s\S]*?line-height:\s*1\.15[\s\S]*?letter-spacing:\s*var\(--tracking-tight\)/,
+      /\.t-title\s*\{[\s\S]*?font-weight:\s*var\(--type-title-weight\)[\s\S]*?line-height:\s*1\.1[\s\S]*?letter-spacing:\s*var\(--tracking-title\)/,
     );
     expect(globals).toMatch(
-      /\.t-section\s*\{[\s\S]*?font-weight:\s*var\(--type-title-weight\)/,
+      /\.t-section\s*\{[\s\S]*?font-weight:\s*var\(--type-title-weight\)[\s\S]*?line-height:\s*1\.1[\s\S]*?letter-spacing:\s*var\(--tracking-title\)/,
     );
     expect(globals).toMatch(
-      /\.t-statement\s*\{[\s\S]*?font-weight:\s*var\(--type-title-weight\)/,
+      /\.t-statement\s*\{[\s\S]*?font-weight:\s*var\(--type-title-weight\)[\s\S]*?line-height:\s*1\.1[\s\S]*?letter-spacing:\s*var\(--tracking-title\)/,
     );
     expect(globals).toMatch(
       /\.t-label\s*\{[\s\S]*?font-weight:\s*600[\s\S]*?letter-spacing:\s*0\.12em[\s\S]*?text-transform:\s*uppercase/,
     );
-    expect(globals).toMatch(/\.t-heading\s*\{[\s\S]*?font-weight:\s*500/);
-    expect(globals).toMatch(/\.t-subhead\s*\{[\s\S]*?font-weight:\s*500/);
+    expect(globals).toMatch(
+      /\.t-heading\s*\{[\s\S]*?font-weight:\s*500[\s\S]*?letter-spacing:\s*var\(--tracking-tight\)/,
+    );
+    expect(globals).toMatch(
+      /\.t-subhead\s*\{[\s\S]*?font-weight:\s*500[\s\S]*?letter-spacing:\s*var\(--tracking-tight\)/,
+    );
     expect(globals).toMatch(/\.t-body\s*\{[\s\S]*?font-weight:\s*var\(--type-body-weight\)/);
     expect(globals).toMatch(/\.t-body-sm\s*\{[\s\S]*?font-weight:\s*var\(--type-body-weight\)/);
     expect(globals).toMatch(/\.t-lead\s*\{[\s\S]*?font-weight:\s*var\(--type-body-weight\)/);
@@ -114,7 +123,13 @@ describe("house type roles", () => {
       /^body\s*\{[\s\S]*?font-weight:\s*var\(--type-body-weight\)/m,
     );
     expect(globals).toMatch(/\.t-data\s*\{[\s\S]*?font-variant-numeric:\s*tabular-nums/);
-    expect(globals).toMatch(/\.t-display\.t-data\s*\{[\s\S]*?letter-spacing:\s*-0\.035em/);
+    expect(globals).toMatch(
+      /\.t-display\.t-data\s*\{[\s\S]*?letter-spacing:\s*var\(--tracking-display\)/,
+    );
+    expect(globals).toMatch(
+      /\.t-rail\s*\{[\s\S]*?letter-spacing:\s*var\(--tracking-rail\)/,
+    );
+    expect(globals).not.toMatch(/\.t-rail\s*\{[^}]*font-weight:/);
     expect(globals).toMatch(
       /@media \(max-width: 767px\)\s*\{\s*\.t-display\s*\{[\s\S]*?font-size:\s*var\(--text-title\)/,
     );
@@ -128,6 +143,7 @@ describe("house type roles", () => {
     expect(globals).not.toMatch(/\.t-body\s*\{[^}]*font-weight:\s*400/);
     expect(globals).not.toMatch(/\.t-body-sm\s*\{[^}]*font-weight:\s*400/);
     expect(globals).not.toMatch(/\.t-lead\s*\{[^}]*font-weight:\s*400/);
+    expect(globals).not.toMatch(/font-variation-settings/);
   });
 
   it("locks light-mode ink and body subpixel smoothing (Coinbase-pop A)", () => {
@@ -154,8 +170,11 @@ describe("house type roles", () => {
 
   it("sizes the rail to house body 420 — not t-body-sm + idle font-normal", () => {
     // Coinbase-pop A2 size + A3 weight: rail is 15px t-body, inherits 420.
+    // A4: t-rail tracking only. Do not invent a second rail weight.
     expect(HOUSE_RAIL_ITEM_CLASS).toMatch(/(?:^|[\s"])t-body(?:[\s"]|$)/);
+    expect(HOUSE_RAIL_ITEM_CLASS).toMatch(/(?:^|[\s"])t-rail(?:[\s"]|$)/);
     expect(HOUSE_RAIL_ITEM_CLASS).not.toContain("t-body-sm");
+    expect(HOUSE_RAIL_ITEM_CLASS).not.toMatch(/font-(?:normal|medium|semibold|bold)/);
     expect(HOUSE_RAIL_IDLE_CLASS).not.toContain("font-normal");
     expect(HOUSE_RAIL_ACTIVE_CLASS).toBe("bg-accent-wash text-accent");
     expect(HOUSE_RAIL_ACTIVE_CLASS).not.toMatch(/font-(?:normal|medium|semibold|bold)/);
