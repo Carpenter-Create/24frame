@@ -1,4 +1,3 @@
-import { DASHBOARD_HREF } from "@/lib/dashboard-admin";
 import { HOUSE_THEME_TOGGLE_CLASS } from "@/lib/house-lead-chrome";
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
 import { NOTIFICATION_EMAIL, type NotificationKind } from "@/lib/notifications";
@@ -16,6 +15,7 @@ import {
   SETTINGS_SECTION_CLASS,
 } from "@/lib/settings";
 import { socialRelativeTime } from "@/lib/social";
+import { HOME_ROOT } from "@/lib/workspace";
 
 // Activity is the live uncleared-alert feed. One feed: notifications.
 // Default: uncleared only, newest first. X clears a row. Cleared
@@ -32,6 +32,9 @@ import { socialRelativeTime } from "@/lib/social";
 // rail, no Settings-style account rail, no twin rail. Settings-
 // measure canvas and page-lead SoT stay. Do not import
 // SettingsPageLead or put this in Settings hub chrome.
+// Hub Back consumes SettingsHubBackLink — history when the
+// referrer is in-app; Home /home only as cold-open fallback.
+// Never hard-link Aggregation.
 
 export const ACTIVITY_HREF = "/activity";
 export const ACTIVITY_PREFS_HREF = SETTINGS.notificationsHref;
@@ -50,7 +53,7 @@ export const ACTIVITY_PAGE = {
   title: "Activity",
   subtitle: `Account alerts from ${PRODUCT_NAME}.`,
   back: "Back",
-  homeHref: DASHBOARD_HREF,
+  homeHref: HOME_ROOT,
   all: "All",
   prefs: "Notification preferences",
   dismiss: "Mark done",

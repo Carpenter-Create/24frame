@@ -10,9 +10,20 @@ import {
   settingsHubHasInAppReferrer,
 } from "@/lib/settings";
 
-// Hub Back — account chrome from any surface. Prefer in-app history;
-// dashboard land only when referrer is missing or off-origin.
-export function SettingsHubBackLink({ className }: { className?: string }) {
+// Account-chrome Back — Settings hub lock #515/#520. Prefer in-app
+// history; fallback href only when referrer is missing or off-origin.
+// Activity and Get Help consume this same leaf. Do not fork a
+// lookalike click helper per surface. Callers pass their own
+// fallback href (Home for Activity / Help; Settings keeps dashboard).
+export function SettingsHubBackLink({
+  className,
+  href,
+  label,
+}: {
+  className?: string;
+  href?: string;
+  label?: string;
+}) {
   const router = useRouter();
   const back = settingsHeaderBack(SETTINGS.href);
 
@@ -29,8 +40,8 @@ export function SettingsHubBackLink({ className }: { className?: string }) {
 
   return (
     <PageHeaderBackLink
-      href={back.href}
-      label={back.label}
+      href={href ?? back.href}
+      label={label ?? back.label}
       className={className}
       onClick={onClick}
     />

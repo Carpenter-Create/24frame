@@ -1,6 +1,10 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ back: vi.fn(), push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
+}));
 
 import { HELP, HELP_ABSENT, HELP_STACK, HELP_STACK_CLASS } from "@/lib/help";
 import { SETTINGS_GROUP_CLASS, SETTINGS_GROUP_LIST_CLASS } from "@/lib/settings";
@@ -21,6 +25,8 @@ describe("HelpPage", () => {
     expect(html).toContain(HELP.helper);
     expect(html).toContain(HELP.back);
     expect(html).toContain(`href="${HELP.homeHref}"`);
+    expect(html).not.toContain('href="/aggregation');
+    expect(html).not.toContain(">Home<");
     for (const item of HELP_STACK) {
       expect(html).toContain(`data-help-stack-item="${item.kind}"`);
       expect(html).toContain(item.label);

@@ -4,7 +4,13 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ replace: vi.fn(), refresh: vi.fn(), prefetch: vi.fn(), push: vi.fn() }),
+  useRouter: () => ({
+    back: vi.fn(),
+    replace: vi.fn(),
+    refresh: vi.fn(),
+    prefetch: vi.fn(),
+    push: vi.fn(),
+  }),
 }));
 
 import { ActivityInbox } from "./activity-inbox";
@@ -50,6 +56,9 @@ describe("ActivityInbox", () => {
     expect(html).toContain(PAGE_LEAD_STACK_CLASS);
     expect(html).toContain(ACTIVITY_LEAD_ROW_CLASS);
     expect(html).toContain(ACTIVITY_PAGE.back);
+    expect(html).toContain(`href="${ACTIVITY_PAGE.homeHref}"`);
+    expect(html).not.toContain('href="/aggregation');
+    expect(html).not.toContain(">Home<");
     expect(html).not.toContain("t-title");
     expect(inboxSrc).not.toContain("PageHeader");
     expect(inboxSrc).toContain("ActivityPageLead");

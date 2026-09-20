@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { DASHBOARD_HREF } from "./dashboard-admin";
+import { HOME_ROOT } from "./workspace";
 import { HELP, HELP_ABSENT, HELP_HELPER_CLASS, HELP_ROW_CLASS, HELP_SECTION_CLASS, HELP_STACK, HELP_STACK_CLASS, HELP_TITLE_CLASS, helpHeaderBack, isHelpPath } from "./help";
 import {
   SETTINGS_DRILL_ROW_CLASS,
@@ -79,9 +80,14 @@ describe("help stack lock", () => {
     expect(isHelpPath("/help/feedback")).toBe(true);
     expect(isHelpPath("/settings")).toBe(false);
     expect(helpHeaderBack("/help")).toEqual({
-      href: DASHBOARD_HREF,
+      href: HOME_ROOT,
       label: HELP.back,
     });
+    expect(helpHeaderBack("/help").label).not.toBe("Home");
+    expect(helpHeaderBack("/help").label).not.toBe("Aggregation");
+    expect(HELP.homeHref).toBe(HOME_ROOT);
+    expect(HELP.homeHref).not.toBe(DASHBOARD_HREF);
+    expect(HELP.homeHref).not.toContain("/aggregation");
     expect(helpHeaderBack("/help/feedback")).toEqual({
       href: HELP.href,
       label: HELP.title,
@@ -91,7 +97,7 @@ describe("help stack lock", () => {
       label: HELP.title,
     });
     expect(helpHeaderBack(null)).toEqual({
-      href: DASHBOARD_HREF,
+      href: HOME_ROOT,
       label: HELP.back,
     });
     expect(HELP.back).toBe("Back");
@@ -113,6 +119,8 @@ describe("help stack lock", () => {
     expect(stack).not.toContain("SETTINGS_DRILL_LIST_CLASS");
     expect(lead).toContain("PAGE_LEAD_STACK_CLASS");
     expect(lead).toContain("PageHeaderBackLink");
+    expect(lead).toContain("SettingsHubBackLink");
+    expect(lead).not.toContain('href="/aggregation"');
     expect(lead).not.toMatch(/from ["']@\/components\/settings\/settings-page-lead["']/);
   });
 });

@@ -10,9 +10,10 @@ import {
 
 // Settings title block — one SoT for hub + every pane. Keeps the
 // custom t-section h1 and mounts News PageHeader ArrowLeft above it.
-// Hub uses SettingsHubBackLink (Back + history). Panes stay Link to
-// the parent (Settings, or the section for a drill-in). Drill-in
-// panes pass helper. Do not hand-roll a twin back link per page.
+// Hub uses SettingsHubBackLink (Back + history). Activity and Get
+// Help consume that same leaf. Panes stay Link to the parent
+// (Settings, or the section for a drill-in). Drill-in panes pass
+// helper. Do not hand-roll a twin back link per page.
 export function SettingsPageLead({
   title,
   pathname,
