@@ -309,7 +309,7 @@ describe("OverviewHome", () => {
     expect(periodChipPressed(html, "ytd")).toBe(false);
   });
 
-  it("keeps phone Net revenue period on HousePageSelect — never a two-line wrap", () => {
+  it("keeps phone Revenue period on HousePageSelect, never a two-line wrap", () => {
     const html = renderToStaticMarkup(createElement(OverviewHome, homeProps()));
     const homeSrc = readFileSync(new URL("./overview-home.tsx", import.meta.url), "utf8");
     const periodAt = html.indexOf("data-overview-revenue-period");

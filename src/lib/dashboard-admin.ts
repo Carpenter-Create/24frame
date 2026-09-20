@@ -16,7 +16,7 @@ import { aggregationPath } from "@/lib/workspace";
 export const DASHBOARD_HREF = aggregationPath("dashboard");
 
 export const DASHBOARD_ADMIN = {
-  revenue: "Net revenue",
+  revenue: "Revenue",
   // Killed from the hero metric slot after #332 Mac FAIL — tests lock absence.
   revenueEmpty: "No revenue for this period.",
   chartEmpty: "No closed statement for this period.",

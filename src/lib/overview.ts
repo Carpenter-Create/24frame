@@ -26,7 +26,7 @@ import type { WorkspaceMode } from "@/lib/workspace";
 // history — same Home chrome, not a workspace and not an Aggregation /
 // Social / Education destination. No leftover /overview or /news hops.
 // Home IA v2 (Adam 2026-09-18): no dest rail on /home — unify-lead
-// chrome. Same-day order rewrite: Net revenue first, then Social ·
+// chrome. Same-day order rewrite: Revenue first, then Social ·
 // Education · Needs you. Top performing is not on Home. News stays
 // the Home rail (/home/news is View-all). Rails return in
 // Aggregation · Social · Education. Copy lives here, not JSX.
@@ -43,7 +43,7 @@ export const OVERVIEW_AI_NEXT_CAP = 3;
 export const OVERVIEW_NEWS_CAP = NEWS_HOME_CAP;
 export const OVERVIEW_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
-/** Home modules after the 2026-09-18 order rewrite. Net revenue first. */
+/** Home modules after the 2026-09-18 order rewrite. Revenue first. */
 export const OVERVIEW_MODULE_ORDER = [
   "revenue",
   "social",

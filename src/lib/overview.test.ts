@@ -228,7 +228,7 @@ describe("Home lead pills", () => {
 });
 
 describe("Home module caps", () => {
-  it("locks Net revenue first, then Social · Education · Needs you", () => {
+  it("locks Revenue first, then Social · Education · Needs you", () => {
     expect(OVERVIEW_MODULE_ORDER).toEqual([
       "revenue",
       "social",
@@ -358,7 +358,7 @@ describe("overviewModuleHeaderAction", () => {
       overviewModuleHeaderAction("24Frame AI", "?ai=1", "Ask 24Frame AI"),
     ).toEqual({ href: "?ai=1", label: "Ask 24Frame AI" });
     expect(
-      overviewModuleHeaderAction("Net revenue", "/reports", "Aggregation"),
+      overviewModuleHeaderAction("Revenue", "/reports", "Aggregation"),
     ).toEqual({ href: "/reports", label: "Aggregation" });
     expect(overviewModuleHeaderAction(NEWS_PAGE.title, NEWS_HREF, "View all")).toEqual({
       href: NEWS_HREF,

@@ -117,7 +117,7 @@ describe("Dashboard top-row height pair (Net | Recent activity)", () => {
     expect(DASHBOARD_ADMIN_OVERVIEW_CLASS).toContain("items-start");
     expect(DASHBOARD_ADMIN_OVERVIEW_CLASS.split(/\s+/)).not.toContain("md:items-stretch");
     expect(htmlHasUnprefixedItemsStretch(DASHBOARD_ADMIN_OVERVIEW_CLASS)).toBe(false);
-    expect(DASHBOARD_ADMIN.revenue).toBe("Net revenue");
+    expect(DASHBOARD_ADMIN.revenue).toBe("Revenue");
   });
 });
 

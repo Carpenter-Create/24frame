@@ -3,7 +3,7 @@
 // House standard for in-page filter/select menus.
 // Dashboard All time (period) is the SoT — quiet trigger, desktop menu,
 // phone bottom sheet, trailing Sporty Blue AppearanceCheck. Do not invent
-// a second select grammar for Titles, Home Net revenue, or other filters.
+// a second select grammar for Titles, Home Revenue, or other filters.
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";

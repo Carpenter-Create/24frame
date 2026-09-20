@@ -6,7 +6,7 @@ import { ISO_COUNTRIES } from "@/lib/territories";
 import type { ReportsCountRow } from "@/lib/reports";
 
 // Company-admin `/dashboard` register rematches RL Overview
-// (`HeadlineStats` → taller Net revenue left, Recent activity glance
+// (`HeadlineStats` → taller Revenue left, Recent activity glance
 // right — account announcements, not findings — Licensing status
 // full-width nested title→endpoint, `TopWorksCard` → Top titles,
 // `TerritoryMap` → Territories map/list/bars). One feed only. House
