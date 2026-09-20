@@ -10,25 +10,40 @@ import {
 
 // Upstash Redis REST — server-only. Missing env (local / CI) is a no-op
 // fall-through to Supabase. Never NEXT_PUBLIC_. Never import from client.
+//
+// Adam's Vercel Marketplace store injects KV_* (preferred) and may also
+// inject the classic UPSTASH_REDIS_REST_* pair. KV_URL is redis:// — not REST.
 
 type RedisEnv = { url: string; token: string };
 
-function readRedisEnv(): RedisEnv | null {
-  const url = process.env.UPSTASH_REDIS_REST_URL?.trim();
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
-  if (!url || !token) return null;
+function firstPresent(...values: Array<string | undefined>): string | null {
+  for (const value of values) {
+    const trimmed = value?.trim();
+    if (trimmed) return trimmed;
+  }
+  return null;
+}
+
+function isRedisRestUrl(value: string): boolean {
+  return value.startsWith("https://") || value.startsWith("http://");
+}
+
+export function readSocialHotCacheEnv(): RedisEnv | null {
+  const url = firstPresent(process.env.KV_REST_API_URL, process.env.UPSTASH_REDIS_REST_URL);
+  const token = firstPresent(process.env.KV_REST_API_TOKEN, process.env.UPSTASH_REDIS_REST_TOKEN);
+  if (!url || !token || !isRedisRestUrl(url)) return null;
   return { url, token };
 }
 
 export function isSocialHotCacheConfigured(): boolean {
-  return readRedisEnv() !== null;
+  return readSocialHotCacheEnv() !== null;
 }
 
 let cached: Redis | null | undefined;
 
 export function socialHotCache(): Redis | null {
   if (cached !== undefined) return cached;
-  const env = readRedisEnv();
+  const env = readSocialHotCacheEnv();
   cached = env ? new Redis(env) : null;
   return cached;
 }
