@@ -216,6 +216,9 @@ describe("profile opt-in", () => {
     const sameAsHandle = socialPersonIdentity({ handle: "joshua", displayName: "joshua" });
     expect(sameAsHandle.name).toBeNull();
     expect(sameAsHandle.label).toBe("joshua");
+    const casedName = socialPersonIdentity({ handle: "other", displayName: "Other" });
+    expect(casedName.name).toBe("Other");
+    expect(casedName.label).toBe("Other");
   });
 
   it("strips @ from handle input and keeps the house profile URL stable", () => {

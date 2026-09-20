@@ -650,14 +650,14 @@ export function socialPersonIdentity(input: {
   const handle = bareHandle(input.handle);
   const handleLabel = displayHandle(handle);
   const publicName = socialPublicDisplayName(input.displayName);
-  const name = publicName && publicName.toLowerCase() !== handle ? publicName : null;
-  const avatarName = name ?? handle;
+  // Omit the name line only when it is the bare handle (no invented second line).
+  const name = publicName && publicName !== handle ? publicName : null;
   return {
     handle,
     handleLabel,
     name,
-    avatarName,
-    label: name ?? handle,
+    avatarName: publicName ?? handle,
+    label: publicName ?? handle,
   };
 }
 
