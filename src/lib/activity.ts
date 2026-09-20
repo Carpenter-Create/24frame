@@ -7,22 +7,16 @@ import {
   type NotificationPrefFamilyId,
 } from "@/lib/notification-prefs";
 import { PRODUCT_NAME } from "@/lib/product";
-import {
-  REPORTS_PERIOD_ALL,
-  isoInReportsPeriod,
-  parseReportsPeriod,
-  type ReportsPeriod,
-} from "@/lib/reports";
 import { SETTINGS } from "@/lib/settings";
 import { socialRelativeTime } from "@/lib/social";
 import { aggregationPath } from "@/lib/workspace";
 
-// Activity is the durable account-alert log. One feed: notifications.
-// Open = unread. Done = read. Complete = Done = read — one state.
-// Not Messages. Not Ask 24Frame AI. Not /attention catalog findings.
-// Bell navigates here (phone + desktop). Category chips are the prefs
-// families. Row body links to the item. X marks done. No View / Done
-// / Mark all. Copy lives here, not JSX.
+// Activity is the live uncleared-alert feed. One feed: notifications.
+// Default: uncleared only, newest first. X clears a row. Cleared
+// items leave this feed. No Open / Done / Cleared control. Category
+// chips are the only filter (prefs families). Not Messages. Not Ask
+// 24Frame AI. Not /attention catalog findings. Bell navigates here.
+// Copy lives here, not JSX.
 
 export const ACTIVITY_HREF = aggregationPath("activity");
 export const ACTIVITY_PREFS_HREF = SETTINGS.notificationsHref;
@@ -40,14 +34,12 @@ export type ActivityFamily = (typeof ACTIVITY_FAMILIES)[number];
 export const ACTIVITY_PAGE = {
   title: "Activity",
   subtitle: `Account alerts from ${PRODUCT_NAME}.`,
-  open: "Open",
-  done: "Done",
   all: "All",
   prefs: "Notification preferences",
   dismiss: "Mark done",
+  empty: "You're all caught up.",
+  emptyHint: "New alerts will show here.",
   viewAll: "View all activity",
-  emptyOpen: "Nothing open.",
-  emptyDone: "Nothing done yet.",
   truncated: `Showing the first ${UNPAGINATED_MAX} alerts. More exist — this list is not complete.`,
   bellLabel: "Activity",
   bellEmpty: "Nothing open.",
@@ -75,8 +67,6 @@ export const ACTIVITY_KIND_ICON = {
   delivery_update: "paper-plane-tilt",
 } as const satisfies Record<NotificationKind, "film-slate" | "paper-plane-tilt">;
 
-export type ActivityStatus = "open" | "done";
-
 export type ActivityItem = {
   id: string;
   title: string;
@@ -89,11 +79,6 @@ export type ActivityItem = {
 
 export function isActivityOpen(item: Pick<ActivityItem, "unread">): boolean {
   return item.unread;
-}
-
-export function parseActivityStatus(raw: string | string[] | undefined): ActivityStatus {
-  const value = typeof raw === "string" ? raw : undefined;
-  return value === "done" ? "done" : "open";
 }
 
 export function parseActivityFamily(raw: string | string[] | undefined): ActivityFamily {
@@ -113,16 +98,8 @@ export function activityFamilyLabel(family: ActivityFamily): string {
   return NOTIFICATION_PREFS.groups[family];
 }
 
-export function activityHref(input: {
-  status?: ActivityStatus;
-  period?: string | null;
-  family?: ActivityFamily;
-}): string {
+export function activityHref(input: { family?: ActivityFamily } = {}): string {
   const params = new URLSearchParams();
-  if (input.status === "done") params.set("status", "done");
-  if (input.period && input.period !== REPORTS_PERIOD_ALL) {
-    params.set("period", input.period);
-  }
   if (input.family && input.family !== ACTIVITY_FAMILY_ALL) {
     params.set("family", input.family);
   }
@@ -130,18 +107,12 @@ export function activityHref(input: {
   return query ? `${ACTIVITY_HREF}?${query}` : ACTIVITY_HREF;
 }
 
-export function filterActivityItems<
-  T extends Pick<ActivityItem, "unread" | "created_at" | "kind">,
->(
+export function filterActivityItems<T extends Pick<ActivityItem, "unread" | "kind">>(
   items: readonly T[],
-  status: ActivityStatus,
-  period: ReportsPeriod,
   family: ActivityFamily = ACTIVITY_FAMILY_ALL,
 ): T[] {
-  const open = status === "open";
   return items.filter((item) => {
-    if (isActivityOpen(item) !== open) return false;
-    if (!isoInReportsPeriod(item.created_at, period)) return false;
+    if (!isActivityOpen(item)) return false;
     if (family !== ACTIVITY_FAMILY_ALL && activityFamilyForKind(item.kind) !== family) {
       return false;
     }
@@ -168,13 +139,6 @@ export function activityRelativeTime(iso: string, now = Date.now()): string {
   return socialRelativeTime(iso, now);
 }
 
-export function activityEmptyCopy(status: ActivityStatus): string {
-  return status === "done" ? ACTIVITY_PAGE.emptyDone : ACTIVITY_PAGE.emptyOpen;
-}
-
-export function parseActivityPeriod(
-  raw: string | string[] | undefined,
-  now: Date,
-): ReportsPeriod {
-  return parseReportsPeriod(raw, now);
+export function activityEmptyCopy(): string {
+  return ACTIVITY_PAGE.empty;
 }

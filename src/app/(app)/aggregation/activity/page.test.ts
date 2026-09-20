@@ -78,7 +78,7 @@ describe("ActivityPage", () => {
     vi.clearAllMocks();
   });
 
-  it("defaults to the Open inbox, newest first, and hides Done", async () => {
+  it("defaults to the live uncleared feed and hides cleared rows", async () => {
     stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
@@ -86,50 +86,50 @@ describe("ActivityPage", () => {
     expect(html).toContain("data-activity-inbox");
     expect(html).toContain(ACTIVITY_PAGE.title);
     expect(html).toContain(ACTIVITY_PAGE.subtitle);
-    expect(html).toContain('data-activity-status-chip="open"');
-    expect(html).toContain('data-activity-status-chip="done"');
-    expect(html).toContain('data-activity-period-chip="ytd"');
-    expect(html).toContain('data-activity-period-chip="year"');
-    expect(html).toContain('data-activity-period-chip="quarter"');
-    expect(html).toContain('data-activity-period-chip="month"');
     expect(html).toContain('data-activity-family-chip="all"');
     expect(html).toContain('data-activity-family-chip="social"');
     expect(html).toContain("data-activity-prefs");
     expect(html).toContain('href="/settings/preferences/notifications"');
     expect(html).toContain("North Wind was returned");
     expect(html).not.toContain("Harbor Cut delivery update");
-    expect(html).toContain(ACTIVITY_PAGE.done);
+    expect(html).not.toContain("data-activity-status-chip");
+    expect(html).not.toContain("data-activity-period-chip");
+    expect(html).not.toContain(">Open<");
+    expect(html).not.toContain(">Done<");
+    expect(html).not.toContain("Cleared");
     expect(html).not.toContain("Mark as read");
     expect(html).not.toContain("data-ask-globee-landing");
     expect(html).not.toContain("data-messages-inbox");
   });
 
-  it("shows Done history when status=done", async () => {
+  it("ignores a leftover status=done query and stays on the live feed", async () => {
     stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
     const html = await renderPage({ status: "done" });
-    expect(html).toContain("Harbor Cut delivery update");
-    expect(html).not.toContain("North Wind was returned");
+    expect(html).toContain("North Wind was returned");
+    expect(html).not.toContain("Harbor Cut delivery update");
+    expect(html).not.toContain("data-activity-status-chip");
   });
 
-  it("filters Open by a prefs family chip", async () => {
+  it("filters the live feed by a prefs family chip", async () => {
     stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
     const html = await renderPage({ family: "social" });
-    expect(html).toContain(ACTIVITY_PAGE.emptyOpen);
+    expect(html).toContain(ACTIVITY_PAGE.empty);
+    expect(html).toContain("data-activity-empty");
     expect(html).not.toContain("North Wind was returned");
     expect(html).toContain('data-activity-family-chip="social"');
   });
 
-  it("filters Open by a Reports period chip", async () => {
+  it("does not offer period chrome on the live hub", async () => {
     stubClient();
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
     const html = await renderPage({ period: "2026-08" });
-    expect(html).toContain(ACTIVITY_PAGE.emptyOpen);
-    expect(html).not.toContain("North Wind was returned");
+    expect(html).toContain("North Wind was returned");
+    expect(html).not.toContain("data-activity-period-chip");
   });
 
   it("keeps staff without a client org on Activity", async () => {
@@ -138,7 +138,8 @@ describe("ActivityPage", () => {
 
     const html = await renderPage();
     expect(html).toContain("data-activity-inbox");
-    expect(html).toContain(ACTIVITY_PAGE.emptyOpen);
+    expect(html).toContain(ACTIVITY_PAGE.empty);
+    expect(html).toContain("data-activity-empty");
     expect(rpc).toHaveBeenCalledWith("my_notifications", { p_limit: UNPAGINATED_MAX + 1 });
   });
 

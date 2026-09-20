@@ -23,10 +23,7 @@ import {
   filterActivityItems,
   isActivityOpen,
   parseActivityFamily,
-  parseActivityPeriod,
-  parseActivityStatus,
 } from "./activity";
-import { parseReportsPeriod } from "./reports";
 
 const OPEN_NEW = {
   id: "1",
@@ -64,79 +61,26 @@ const DONE_OLD = {
 const FEED = [DONE_NEW, OPEN_NEW, OPEN_OLD, DONE_OLD];
 const NOW = new Date("2026-09-18T12:00:00.000Z");
 
-describe("Activity inbox — Open / Done is one read state", () => {
-  it("treats unread as Open and read as Done", () => {
+describe("Activity live feed — uncleared only", () => {
+  it("keeps unread items and drops cleared ones from the default feed", () => {
     expect(isActivityOpen(OPEN_NEW)).toBe(true);
     expect(isActivityOpen(DONE_NEW)).toBe(false);
-    expect(parseActivityStatus(undefined)).toBe("open");
-    expect(parseActivityStatus("open")).toBe("open");
-    expect(parseActivityStatus("done")).toBe("done");
-    expect(parseActivityStatus(["done"])).toBe("open");
-    expect(parseActivityStatus("nope")).toBe("open");
-  });
-
-  it("defaults to the Open inbox and leaves Done in history", () => {
-    const all = parseReportsPeriod("all", NOW);
-    expect(filterActivityItems(FEED, "open", all).map((row) => row.id)).toEqual(["1", "2"]);
-    expect(filterActivityItems(FEED, "done", all).map((row) => row.id)).toEqual(["3", "4"]);
-    expect(filterActivityItems(FEED, "open", all).every((row) => row.unread)).toBe(true);
-    expect(filterActivityItems(FEED, "done", all).every((row) => !row.unread)).toBe(true);
-    expect(activityEmptyCopy("open")).toBe(ACTIVITY_PAGE.emptyOpen);
-    expect(activityEmptyCopy("done")).toBe(ACTIVITY_PAGE.emptyDone);
+    expect(filterActivityItems(FEED).map((row) => row.id)).toEqual(["1", "2"]);
+    expect(filterActivityItems(FEED).every((row) => row.unread)).toBe(true);
+    expect(activityEmptyCopy()).toBe(ACTIVITY_PAGE.empty);
+    expect(ACTIVITY_PAGE.empty).toBe("You're all caught up.");
+    expect(ACTIVITY_PAGE.emptyHint).toBe("New alerts will show here.");
+    expect(ACTIVITY_PAGE).not.toHaveProperty("open");
+    expect(ACTIVITY_PAGE).not.toHaveProperty("done");
+    expect(ACTIVITY_PAGE).not.toHaveProperty("emptyOpen");
+    expect(ACTIVITY_PAGE).not.toHaveProperty("emptyDone");
   });
 
   it("keeps newest→oldest order from the feed primitive", () => {
-    const all = parseReportsPeriod("all", NOW);
-    expect(filterActivityItems(FEED, "open", all).map((row) => row.created_at)).toEqual([
+    expect(filterActivityItems(FEED).map((row) => row.created_at)).toEqual([
       "2026-09-12T12:00:00.000Z",
       "2026-08-02T12:00:00.000Z",
     ]);
-  });
-});
-
-describe("Activity period chips", () => {
-  it("reuses Reports YTD / year / quarter / month", () => {
-    expect(parseActivityPeriod("ytd", NOW)).toMatchObject({ kind: "ytd", year: 2026 });
-    expect(parseActivityPeriod("year", NOW)).toMatchObject({ kind: "year", year: 2026 });
-    expect(parseActivityPeriod("quarter", NOW)).toMatchObject({
-      kind: "quarter",
-      year: 2026,
-      quarter: 3,
-    });
-    expect(parseActivityPeriod("month", NOW)).toMatchObject({
-      kind: "month",
-      year: 2026,
-      month: 9,
-    });
-    expect(parseActivityPeriod(undefined, NOW).kind).toBe("all");
-  });
-
-  it("filters Open and Done by the selected period", () => {
-    const september = parseReportsPeriod("2026-09", NOW);
-    expect(filterActivityItems(FEED, "open", september).map((row) => row.id)).toEqual(["1"]);
-    expect(filterActivityItems(FEED, "done", september).map((row) => row.id)).toEqual(["3"]);
-    expect(filterActivityItems(FEED, "open", parseReportsPeriod("ytd", NOW)).map((row) => row.id)).toEqual(
-      ["1", "2"],
-    );
-    expect(filterActivityItems(FEED, "done", parseReportsPeriod("ytd", NOW)).map((row) => row.id)).toEqual(
-      ["3"],
-    );
-  });
-
-  it("builds status + period hrefs without inventing a second feed", () => {
-    expect(activityHref({})).toBe(ACTIVITY_HREF);
-    expect(activityHref({ status: "open" })).toBe(ACTIVITY_HREF);
-    expect(activityHref({ status: "done" })).toBe(`${ACTIVITY_HREF}?status=done`);
-    expect(activityHref({ status: "open", period: "ytd" })).toBe(`${ACTIVITY_HREF}?period=ytd`);
-    expect(activityHref({ status: "done", period: "2026-09" })).toBe(
-      `${ACTIVITY_HREF}?status=done&period=2026-09`,
-    );
-    expect(activityHref({ period: "all" })).toBe(ACTIVITY_HREF);
-    expect(activityHref({ family: "all" })).toBe(ACTIVITY_HREF);
-    expect(activityHref({ family: "social" })).toBe(`${ACTIVITY_HREF}?family=social`);
-    expect(activityHref({ status: "done", period: "ytd", family: "reporting" })).toBe(
-      `${ACTIVITY_HREF}?status=done&period=ytd&family=reporting`,
-    );
   });
 });
 
@@ -161,23 +105,24 @@ describe("Activity family chips", () => {
     expect(ACTIVITY_PREFS_HREF).toBe("/settings/preferences/notifications");
   });
 
-  it("filters Open by the selected prefs family", () => {
-    const all = parseReportsPeriod("all", NOW);
-    expect(filterActivityItems(FEED, "open", all, "aggregation").map((row) => row.id)).toEqual([
-      "1",
-      "2",
-    ]);
-    expect(filterActivityItems(FEED, "open", all, "social")).toEqual([]);
-    expect(filterActivityItems(FEED, "open", all, "reporting")).toEqual([]);
-    expect(filterActivityItems(FEED, "done", all, "aggregation").map((row) => row.id)).toEqual([
-      "3",
-      "4",
-    ]);
+  it("filters the live feed by the selected prefs family", () => {
+    expect(filterActivityItems(FEED, "aggregation").map((row) => row.id)).toEqual(["1", "2"]);
+    expect(filterActivityItems(FEED, "social")).toEqual([]);
+    expect(filterActivityItems(FEED, "reporting")).toEqual([]);
+    expect(filterActivityItems(FEED, "all").every((row) => row.unread)).toBe(true);
+  });
+
+  it("builds family hrefs without status or period chrome", () => {
+    expect(activityHref()).toBe(ACTIVITY_HREF);
+    expect(activityHref({})).toBe(ACTIVITY_HREF);
+    expect(activityHref({ family: "all" })).toBe(ACTIVITY_HREF);
+    expect(activityHref({ family: "social" })).toBe(`${ACTIVITY_HREF}?family=social`);
+    expect(activityHref({ family: "reporting" })).toBe(`${ACTIVITY_HREF}?family=reporting`);
   });
 });
 
 describe("Activity bell cap", () => {
-  it("caps the popover at the last 5 open items", () => {
+  it("caps the last 5 open items", () => {
     expect(ACTIVITY_BELL_OPEN_CAP).toBe(5);
     const open = Array.from({ length: 8 }, (_, i) => ({
       id: String(i),
