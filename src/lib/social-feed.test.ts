@@ -8,6 +8,7 @@ import {
   SOCIAL_EXPLORE_POSTS_LIMIT,
   SOCIAL_FOLLOWEES_LIMIT,
   SOCIAL_FOLLOWING_WALL_LIMIT,
+  SOCIAL_FOR_YOU_PEOPLE_LIMIT,
   SOCIAL_STORIES_RAIL_LIMIT,
   encodeFollowingWallCursor,
   followingWallKeysetOrFilter,
@@ -19,6 +20,7 @@ import {
   loadFollowingPosts,
   loadLiveStories,
   loadProfileSocialCounts,
+  loadSuggestedPeople,
   type SocialPostRow,
   type SocialStoryRow,
 } from "@/lib/social-feed";
@@ -94,6 +96,8 @@ function feedChain(result: unknown) {
   c.gt = vi.fn(self);
   c.or = vi.fn(self);
   c.ilike = vi.fn(self);
+  c.not = vi.fn(self);
+  c.overlaps = vi.fn(self);
   c.order = vi.fn(self);
   c.range = vi.fn(async () => ({ data: result, error: null }));
   return c;
@@ -281,6 +285,66 @@ describe("loadExploreSearch", () => {
     });
     expect(page.hits[0]?.title).not.toBe("Member");
     expect(page.hits[0]?.subtitle).not.toBe("Member");
+  });
+});
+
+describe("loadSuggestedPeople", () => {
+  it("probes topic overlap after excluding followees, not the leftover alphabetical page", async () => {
+    const rows = [
+      { id: "z1", handle: "zoe", display_name: "Zoe", crafts: [], topics: ["Acting"] },
+      { id: "z2", handle: "zuko", display_name: "Zuko", crafts: ["art_director"], topics: ["Acting"] },
+    ];
+    const chain = feedChain(rows);
+    const suggested = await loadSuggestedPeople(
+      { from: vi.fn(() => chain) } as never,
+      ["viewer", "ada"],
+      { topics: ["Acting"], crafts: ["art_director"] },
+    );
+    expect(chain.not).toHaveBeenCalledWith("id", "in", "(viewer,ada)");
+    expect(chain.overlaps).toHaveBeenCalledWith("topics", ["Acting"]);
+    expect(chain.overlaps).not.toHaveBeenCalledWith("crafts", expect.anything());
+    expect(chain.order).toHaveBeenCalledWith("handle", { ascending: true });
+    expect(chain.range).toHaveBeenCalledWith(...probeRange(SOCIAL_EXPLORE_PEOPLE_LIMIT));
+    expect(suggested.map((row) => row.handle)).toEqual(["zuko", "zoe"]);
+    expect(suggested).toHaveLength(2);
+  });
+
+  it("uses profession overlap only when Topics are empty", async () => {
+    const chain = feedChain([
+      { id: "z1", handle: "zoe", display_name: "Zoe", crafts: ["art_director"], topics: [] },
+    ]);
+    const suggested = await loadSuggestedPeople(
+      { from: vi.fn(() => chain) } as never,
+      ["viewer"],
+      { topics: [], crafts: ["art_director"] },
+    );
+    expect(chain.overlaps).toHaveBeenCalledWith("crafts", ["art_director"]);
+    expect(chain.overlaps).not.toHaveBeenCalledWith("topics", expect.anything());
+    expect(suggested.map((row) => row.handle)).toEqual(["zoe"]);
+  });
+
+  it("keeps the alphabetical probe when both banks are empty", async () => {
+    const chain = feedChain([{ id: "a1", handle: "ada", display_name: "Ada", crafts: [], topics: [] }]);
+    const suggested = await loadSuggestedPeople({ from: vi.fn(() => chain) } as never, ["viewer"], {});
+    expect(chain.overlaps).not.toHaveBeenCalled();
+    expect(chain.not).toHaveBeenCalledWith("id", "in", "(viewer)");
+    expect(suggested.map((row) => row.handle)).toEqual(["ada"]);
+  });
+
+  it("returns the For you cap from the ranked overlap page", async () => {
+    const rows = Array.from({ length: SOCIAL_EXPLORE_PEOPLE_LIMIT }, (_, i) => ({
+      id: `p${i}`,
+      handle: `h${String(i).padStart(2, "0")}`,
+      display_name: `N${i}`,
+      crafts: [],
+      topics: ["Acting"],
+    }));
+    const suggested = await loadSuggestedPeople(
+      { from: vi.fn(() => feedChain(rows)) } as never,
+      ["viewer"],
+      { topics: ["Acting"] },
+    );
+    expect(suggested).toHaveLength(SOCIAL_FOR_YOU_PEOPLE_LIMIT);
   });
 });
 

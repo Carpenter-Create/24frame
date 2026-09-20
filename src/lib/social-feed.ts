@@ -20,7 +20,9 @@ import {
   socialMutualFromProfile,
   type SocialProfileMutuals,
 } from "@/lib/social-profile-mutuals";
-import { rankSocialSuggestedPeople, socialPostAffinityScore } from "@/lib/social-role-affinity";
+import { parseSocialProfileRoles } from "@/lib/social-profile-roles";
+import { parseSocialProfileTopics } from "@/lib/social-profile-topics";
+import { rankSocialSuggestedPeople, socialInterestInput, socialPostAffinityScore } from "@/lib/social-role-affinity";
 import { isStoryLive, storyRailUnseen } from "@/lib/social-stories";
 
 type ServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -462,14 +464,24 @@ export async function loadSuggestedPeople(
   excludeIds: readonly string[],
   viewer: { topics?: unknown; crafts?: unknown } | readonly string[] = [],
 ): Promise<SocialSuggestedPerson[]> {
-  const { data } = await supabase
+  const interest = socialInterestInput(viewer);
+  const topics = parseSocialProfileTopics(interest.topics);
+  const crafts = parseSocialProfileRoles(interest.crafts);
+  const blocked = [...new Set(excludeIds.filter(Boolean))];
+  let query = supabase
     .from("profiles")
     .select("id, handle, display_name, crafts, topics")
-    .eq("status", "active")
+    .eq("status", "active");
+  if (blocked.length > 0) query = query.not("id", "in", `(${blocked.join(",")})`);
+  // Topics-primary eligibility. Professions soft-bias ranking only.
+  // Exclude followees before the probe so they cannot consume the page.
+  if (topics.length > 0) query = query.overlaps("topics", topics);
+  else if (crafts.length > 0) query = query.overlaps("crafts", crafts);
+  const { data } = await query
     .order("handle", { ascending: true })
     .range(...probeRange(SOCIAL_EXPLORE_PEOPLE_LIMIT));
-  const blocked = new Set(excludeIds.filter(Boolean));
-  const available = (data ?? []).filter((row) => !blocked.has(row.id));
+  const blockedSet = new Set(blocked);
+  const available = (data ?? []).filter((row) => !blockedSet.has(row.id));
   return rankSocialSuggestedPeople(available, viewer).slice(0, SOCIAL_FOR_YOU_PEOPLE_LIMIT);
 }
 

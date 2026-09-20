@@ -77,6 +77,8 @@ function chain(result: unknown) {
   c.gt = vi.fn(self);
   c.or = vi.fn(self);
   c.ilike = vi.fn(self);
+  c.not = vi.fn(self);
+  c.overlaps = vi.fn(self);
   c.order = vi.fn(self);
   c.range = vi.fn(async () => ({ data: result, error: null }));
   c.maybeSingle = vi.fn(async () => ({

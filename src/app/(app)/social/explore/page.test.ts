@@ -50,6 +50,8 @@ function stub() {
   chain.is = vi.fn(self);
   chain.or = vi.fn(self);
   chain.ilike = vi.fn(self);
+  chain.not = vi.fn(self);
+  chain.overlaps = vi.fn(self);
   chain.order = vi.fn(self);
   chain.in = vi.fn(self);
   chain.range = vi.fn(async () => ({ data: [], error: null }));
@@ -107,6 +109,8 @@ describe("Social Explore", () => {
       chain.is = vi.fn(self(chain));
       chain.or = vi.fn(self(chain));
       chain.ilike = vi.fn(self(chain));
+      chain.not = vi.fn(self(chain));
+      chain.overlaps = vi.fn(self(chain));
       chain.order = vi.fn(self(chain));
       chain.in = vi.fn(self(chain));
     }
