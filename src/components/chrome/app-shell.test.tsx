@@ -540,7 +540,7 @@ describe("AppShell /activity account chrome", () => {
     );
   }
 
-  it("keeps /activity on account chrome — no Aggregation pill, no product rail", () => {
+  it("keeps /activity on Get Help account chrome — zero left rail", () => {
     for (const path of ["/activity", "/activity/x"] as const) {
       navigation.pathname = path;
       for (const workspace of ["aggregation", "social", "education"] as const) {
@@ -548,9 +548,12 @@ describe("AppShell /activity account chrome", () => {
         expect(html).toContain('data-activity-chrome=""');
         expect(html).not.toContain("data-home-chrome");
         expect(html).not.toContain("data-app-home-frame");
+        expect(html).not.toContain("<aside");
         expect(html).not.toContain("data-app-rail");
         expect(html).not.toContain("data-side-nav");
         expect(html).not.toContain("data-settings-rail");
+        expect(html).not.toContain("data-settings-rail-nav");
+        expect(html).not.toContain("data-settings-rail-item");
         expect(html).not.toContain("data-social-rail");
         expect(html).not.toContain("data-social-workspace");
         expect(html).not.toContain("data-education-workspace");
@@ -581,10 +584,50 @@ describe("AppShell /activity account chrome", () => {
         expect(html).not.toContain("/aggregation/activity");
       }
     }
+    expect(shellSrc).toContain("isAccountChromeNoRailPath");
+    expect(shellSrc).toContain("homeChrome || accountChromeNoRail");
+    expect(shellSrc).toContain("{hideProductRail ? null : (");
+    expect(shellSrc).toContain("settingsPage ? (");
+    expect(shellSrc).toContain("<SettingsRail />");
+    expect(shellSrc).not.toContain("activityPage ? (\n              <SettingsRail");
     expect(shellSrc).toContain("isActivityPath");
     expect(shellSrc).toContain("hideProductRail");
     expect(shellSrc).toContain("data-activity-chrome");
     expect(shellSrc).not.toContain("/aggregation/activity");
+  });
+
+  it("matches Get Help left chrome exactly — no Settings twin rail", () => {
+    navigation.pathname = "/activity";
+    const activity = renderActivity("aggregation");
+    navigation.pathname = "/help";
+    const help = renderToStaticMarkup(
+      <AppShell
+        email="ada@example.com"
+        name="Ada Lovelace"
+        orgs={[{ id: "org-1", name: "Acme" }]}
+        activeOrgId="org-1"
+        messagesUnread={Promise.resolve(0)}
+        defaultWorkspace="aggregation"
+      >
+        page
+      </AppShell>,
+    );
+    const beforeMain = (html: string) => html.slice(0, html.indexOf("<main"));
+    const activityLead = beforeMain(activity);
+    const helpLead = beforeMain(help);
+    for (const chrome of [activityLead, helpLead]) {
+      expect(chrome).not.toContain("<aside");
+      expect(chrome).not.toContain("data-app-rail");
+      expect(chrome).not.toContain("data-settings-rail");
+      expect(chrome).not.toContain("data-settings-rail-nav");
+      expect(chrome).not.toContain("data-side-nav");
+      expect(chrome).not.toContain("Rights Holder");
+    }
+    expect(activityLead.includes("<aside")).toBe(helpLead.includes("<aside"));
+    expect(activity).toContain("px-[var(--chrome-gutter)]");
+    expect(help).toContain("px-[var(--chrome-gutter)]");
+    expect(activity).toContain("max-width:var(--page-max-width)");
+    expect(help).toContain("max-width:var(--page-max-width)");
   });
 });
 
@@ -612,6 +655,7 @@ describe("AppShell /help account chrome", () => {
         expect(html).toContain('data-help-chrome=""');
         expect(html).not.toContain("data-home-chrome");
         expect(html).not.toContain("data-app-home-frame");
+        expect(html).not.toContain("<aside");
         expect(html).not.toContain("data-app-rail");
         expect(html).not.toContain("data-side-nav");
         expect(html).not.toContain("data-settings-rail");

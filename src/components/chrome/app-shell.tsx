@@ -13,6 +13,7 @@ import { RailCollapse } from "./rail-collapse";
 import { AskAssistantChromeProvider } from "@/components/messages/ask-globee-chrome";
 import { AskAiOverlayProvider } from "./ask-ai-overlay";
 import { cn } from "@/lib/cn";
+import { isAccountChromeNoRailPath } from "@/lib/account-chrome";
 import { isActivityPath, type ActivityItem } from "@/lib/activity";
 import type { AppShellChrome } from "@/lib/app-shell-chrome";
 import type { MessagesSurface } from "@/lib/ask-globee";
@@ -150,10 +151,12 @@ export function AppShell({
   const settingsPage = isSettingsPath(pathname);
   const helpPage = isHelpPath(pathname);
   const activityPage = isActivityPath(pathname);
-  // Get Help and Activity are account chrome: hide the product rail
-  // (Education / Aggregation / Social dests) without taking Home
-  // frame chrome. Settings keeps its own rail.
-  const hideProductRail = homeChrome || helpPage || activityPage;
+  // Adam lock 2026-09-20: Get Help and Activity share one no-rail
+  // account chrome — header + content column only. No Aggregation
+  // rail, no Settings rail, no twin. Settings keeps its own 220
+  // rail. Home / Co-Productions still hide via overviewHidesRail.
+  const accountChromeNoRail = isAccountChromeNoRailPath(pathname);
+  const hideProductRail = homeChrome || accountChromeNoRail;
   const socialChrome = workspace === "social" && !settingsPage && !hideProductRail;
 
   useEffect(() => {

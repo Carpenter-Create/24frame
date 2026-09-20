@@ -26,10 +26,12 @@ import { socialRelativeTime } from "@/lib/social";
 //
 // Adam lock 2026-09-19: chrome-level /activity. Account alerts
 // span Aggregation · Reporting · Social · Education · Account.
-// Not an Aggregation destination. Bell is the door. Same family as
-// Settings and Get Help (#539): account chrome, no workspace thumb,
-// no product rail, Settings-measure canvas, page-lead SoT. Do not
-// import SettingsPageLead or put this in Settings hub chrome.
+// Not an Aggregation destination. Bell is the door.
+// Adam lock 2026-09-20: match Get Help account chrome exactly —
+// header + content column only. No left side menu. No Aggregation
+// rail, no Settings-style account rail, no twin rail. Settings-
+// measure canvas and page-lead SoT stay. Do not import
+// SettingsPageLead or put this in Settings hub chrome.
 
 export const ACTIVITY_HREF = "/activity";
 export const ACTIVITY_PREFS_HREF = SETTINGS.notificationsHref;

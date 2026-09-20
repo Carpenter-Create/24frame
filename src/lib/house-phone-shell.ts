@@ -251,6 +251,8 @@ export function housePhoneShowsDestChips({
   helpPage?: boolean;
   activityPage?: boolean;
 }): boolean {
+  // Activity and Get Help share accountChromeNoRail — dest chips
+  // stay off. Do not add a left rail or chip twin on those paths.
   if (homeChrome || settingsPage || helpPage || activityPage) return false;
   return workspace === "social" || workspace === "aggregation" || workspace === "education";
 }
