@@ -16,7 +16,6 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 import {
-  AGGREGATION_VIEW_AS,
   AGGREGATION_VIEW_AS_AUDIT,
   AGGREGATION_VIEW_AS_COOKIE,
 } from "@/lib/aggregation-impersonation";
@@ -59,9 +58,7 @@ describe("startAggregationViewAs gate", () => {
       user: { id: "u1", email: "client@example.com" },
       isGcStaff: false,
     } as never);
-    await expect(startAggregationViewAs(form(ORG_ID))).resolves.toEqual({
-      error: AGGREGATION_VIEW_AS.forbidden,
-    });
+    await expect(startAggregationViewAs(form(ORG_ID))).resolves.toBeUndefined();
     expect(createClient).not.toHaveBeenCalled();
     expect(createAdminClient).not.toHaveBeenCalled();
     expect(set).not.toHaveBeenCalled();
@@ -70,9 +67,7 @@ describe("startAggregationViewAs gate", () => {
 
   it("refuses a signed-out caller", async () => {
     vi.mocked(getOrgContext).mockResolvedValue(null);
-    await expect(startAggregationViewAs(form(ORG_ID))).resolves.toEqual({
-      error: AGGREGATION_VIEW_AS.signedOut,
-    });
+    await expect(startAggregationViewAs(form(ORG_ID))).resolves.toBeUndefined();
     expect(set).not.toHaveBeenCalled();
   });
 
@@ -87,9 +82,7 @@ describe("startAggregationViewAs gate", () => {
         }),
       }),
     } as never);
-    await expect(startAggregationViewAs(form(ORG_ID))).resolves.toEqual({
-      error: AGGREGATION_VIEW_AS.missingOrg,
-    });
+    await expect(startAggregationViewAs(form(ORG_ID))).resolves.toBeUndefined();
     expect(createAdminClient).not.toHaveBeenCalled();
     expect(set).not.toHaveBeenCalled();
   });
@@ -144,9 +137,7 @@ describe("startAggregationViewAs gate", () => {
     } as never);
     insert.mockResolvedValue({ error: { message: "denied" } });
 
-    await expect(startAggregationViewAs(form(ORG_ID))).resolves.toEqual({
-      error: AGGREGATION_VIEW_AS.auditFailed,
-    });
+    await expect(startAggregationViewAs(form(ORG_ID))).resolves.toBeUndefined();
     expect(set).not.toHaveBeenCalled();
     expect(redirect).not.toHaveBeenCalled();
   });
@@ -173,9 +164,7 @@ describe("stopAggregationViewAs exit", () => {
       isGcStaff: false,
       aggregationViewAs: { orgId: ORG_ID, orgName: "Acme Films" },
     } as never);
-    await expect(stopAggregationViewAs()).resolves.toEqual({
-      error: AGGREGATION_VIEW_AS.forbidden,
-    });
+    await expect(stopAggregationViewAs()).resolves.toBeUndefined();
     expect(set).not.toHaveBeenCalled();
     expect(createAdminClient).not.toHaveBeenCalled();
   });

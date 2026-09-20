@@ -4,7 +4,6 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import {
-  AGGREGATION_VIEW_AS,
   AGGREGATION_VIEW_AS_COOKIE,
   aggregationViewAsAuditRow,
   aggregationViewAsCookieOptions,
@@ -26,15 +25,13 @@ async function writeViewAsAudit(input: {
   return admin.from("audit_log").insert(aggregationViewAsAuditRow(input));
 }
 
-export async function startAggregationViewAs(
-  formData: FormData,
-): Promise<{ error?: string }> {
+export async function startAggregationViewAs(formData: FormData): Promise<void> {
   const ctx = await getOrgContext();
-  if (!ctx) return { error: AGGREGATION_VIEW_AS.signedOut };
-  if (!ctx.isGcStaff) return { error: AGGREGATION_VIEW_AS.forbidden };
+  if (!ctx) return;
+  if (!ctx.isGcStaff) return;
 
   const orgId = parseAggregationViewAsOrgId(String(formData.get("orgId") ?? ""));
-  if (!orgId) return { error: AGGREGATION_VIEW_AS.missingOrg };
+  if (!orgId) return;
 
   const supabase = await createClient();
   const { data: org } = await supabase
@@ -42,7 +39,7 @@ export async function startAggregationViewAs(
     .select("id, name, status")
     .eq("id", orgId)
     .maybeSingle();
-  if (!org) return { error: AGGREGATION_VIEW_AS.missingOrg };
+  if (!org) return;
 
   const { error } = await writeViewAsAudit({
     actorId: ctx.user.id,
@@ -52,17 +49,17 @@ export async function startAggregationViewAs(
   });
   if (error) {
     console.error("[aggregation-view-as] start audit failed");
-    return { error: AGGREGATION_VIEW_AS.auditFailed };
+    return;
   }
 
   (await cookies()).set(AGGREGATION_VIEW_AS_COOKIE, org.id, aggregationViewAsCookieOptions());
   redirect(DASHBOARD_HREF);
 }
 
-export async function stopAggregationViewAs(): Promise<{ error?: string }> {
+export async function stopAggregationViewAs(): Promise<void> {
   const ctx = await getOrgContext();
-  if (!ctx) return { error: AGGREGATION_VIEW_AS.signedOut };
-  if (!ctx.isGcStaff) return { error: AGGREGATION_VIEW_AS.forbidden };
+  if (!ctx) return;
+  if (!ctx.isGcStaff) return;
 
   const jar = await cookies();
   const orgId =
