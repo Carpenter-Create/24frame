@@ -28,7 +28,7 @@ import {
 const here = dirname(fileURLToPath(import.meta.url));
 const houseSrc = readFileSync(join(here, "house.tsx"), "utf8");
 const accountSrc = readFileSync(join(here, "account-sheet.tsx"), "utf8");
-const destsSrc = readFileSync(join(here, "house-phone-dest-chips.tsx"), "utf8");
+const destsSrc = readFileSync(join(here, "house-phone-bottom-nav.tsx"), "utf8");
 const headerSrc = readFileSync(join(here, "messages-app-header.tsx"), "utf8");
 
 describe("house primitives", () => {

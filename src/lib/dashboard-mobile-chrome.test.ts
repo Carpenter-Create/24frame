@@ -65,11 +65,11 @@ describe("Aggregation Dashboard mobile chrome — emblem left, dest chips under 
     expect(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS).toContain("text-ink");
     expect(WORKSPACE_SWITCHER_PILL_TRIGGER_CLASS).not.toMatch(/green|emerald|#00|#12|#1[Bb]|#1769FF/);
     expect(leadSrc).toContain("data-app-header-leading");
-    expect(leadSrc).not.toContain("data-app-header-workspace-pill");
+    expect(leadSrc).toContain("data-app-header-workspace-pill");
     expect(leadSrc).toContain("APP_HEADER_LEADING_CLASS");
-    expect(leadSrc).not.toContain('tone="pill"');
+    expect(leadSrc).toContain('tone="pill"');
     expect(shellSrc).not.toContain("MobileNavSlot");
-    expect(shellSrc).toContain("DestChipsSlot");
+    expect(shellSrc).not.toContain("DestChipsSlot");
     expect(shellSrc).toContain("<HouseLeadChrome");
     const header = leadSrc.slice(
       leadSrc.indexOf("data-app-header="),
@@ -83,14 +83,14 @@ describe("Aggregation Dashboard mobile chrome — emblem left, dest chips under 
       header.indexOf("data-app-header-trailing"),
     );
     expect(leading).toContain("{leadingNav}");
-    expect(leading).not.toContain("data-app-header-workspace-pill");
-    expect(leading).not.toContain("WorkspaceSwitcher");
+    expect(leading).toContain("data-app-header-workspace-pill");
+    expect(leading).toContain("WorkspaceSwitcher");
     expect(leading).not.toContain("{accountMenu}");
     expect(leading).not.toContain("{trailingNav}");
     expect(shellSrc).not.toContain("afterLead=");
     expect(shellSrc).not.toContain("MessagesHeaderSlot");
     expect(shellSrc).toContain("AskAiOverlayProvider");
-    expect(shellSrc).toContain("destChips=");
+    expect(shellSrc).not.toContain("destChips=");
     expect(shellSrc).not.toContain("trailingNav=");
   });
 

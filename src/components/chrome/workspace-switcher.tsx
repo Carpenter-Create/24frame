@@ -23,6 +23,7 @@ import {
   overviewLeadShouldNavigate,
   overviewTriggerLabel,
   type OverviewLeadPill,
+  type OverviewLeadPillId,
 } from "@/lib/overview";
 import { persistWorkspaceCookie, workspaceHome, type WorkspaceMode } from "@/lib/workspace";
 import {
@@ -41,12 +42,16 @@ import {
   WORKSPACE_SWITCHER_SEGMENT_LABEL_CLASS,
   WORKSPACE_SWITCHER_SEGMENTS_CLASS,
   WORKSPACE_SWITCHER_SEGMENTS_THUMB_CLASS,
+  WORKSPACE_SWITCHER_SHEET_HOST_CLASS,
+  WORKSPACE_SWITCHER_SHEET_SCRIM_CLASS,
+  WORKSPACE_SWITCHER_SHEET_SURFACE_CLASS,
   WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS,
   type WorkspaceSwitcherPresentation,
   type WorkspaceSwitcherTone,
+  phoneWorkspaceSwitcherPills,
   workspaceSwitcherChevronClass,
   workspaceSwitcherChromeClearanceBottoms,
-  workspaceSwitcherMarkLetter,
+  workspaceSwitcherLeadMarkLetter,
   workspaceSwitcherMenuStyle,
   workspaceSwitcherNextSegmentIndex,
   workspaceSwitcherOptionClass,
@@ -56,23 +61,25 @@ import {
   workspaceSwitcherSegmentTabIndex,
   workspaceSwitcherStaticClass,
   workspaceSwitcherTriggerClass,
+  workspaceSwitcherTriggerMarkId,
 } from "@/lib/workspace-switcher";
 
-function WorkspaceMark({ mode }: { mode: WorkspaceMode }) {
+function WorkspaceLeadMark({ id }: { id: OverviewLeadPillId }) {
+  const letter = id === "co-productions" ? "" : workspaceSwitcherLeadMarkLetter(id);
   return (
     <span
-      data-workspace-switcher-mark={mode}
+      data-workspace-switcher-mark={id}
       className={WORKSPACE_SWITCHER_MARK_CLASS}
       aria-hidden="true"
     >
-      {workspaceSwitcherMarkLetter(mode)}
+      {letter}
     </span>
   );
 }
 
 function selectLeadPill(
   current: WorkspaceMode,
-  pill: OverviewLeadPill,
+  pill: Pick<OverviewLeadPill, "id" | "href">,
   options: readonly WorkspaceMenuOption[],
   router: ReturnType<typeof useRouter>,
   pathname: string,
@@ -190,8 +197,12 @@ export function WorkspaceSwitcher({
   const panelRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(defaultOpen);
   const [panelStyle, setPanelStyle] = useState<CSSProperties>({});
-  const pills = overviewLeadPills(options);
+  const pills =
+    presentation === "sheet"
+      ? phoneWorkspaceSwitcherPills(options)
+      : overviewLeadPills(options);
   const label = overviewTriggerLabel(pathname, workspaceModeLabel(current));
+  const triggerMarkId = workspaceSwitcherTriggerMarkId(pathname, current);
   const canSwitch = pills.length > 1;
 
   useLayoutEffect(() => {
@@ -257,13 +268,8 @@ export function WorkspaceSwitcher({
     );
   }
 
-  const panel = (
-    <div
-      ref={panelRef}
-      data-workspace-switcher-popover=""
-      className={workspaceSwitcherPanelClass(tone)}
-      style={panelStyle}
-    >
+  const optionRows = (
+    <>
       <div data-workspace-switcher-header="" className={WORKSPACE_SWITCHER_HEADER_CLASS}>
         {WORKSPACE_SWITCHER.heading}
       </div>
@@ -287,15 +293,7 @@ export function WorkspaceSwitcher({
                 setOpen(false);
               }}
             >
-              {pill.id === "home" || pill.id === "co-productions" ? (
-                <span
-                  data-workspace-switcher-mark={pill.id}
-                  className={WORKSPACE_SWITCHER_MARK_CLASS}
-                  aria-hidden="true"
-                />
-              ) : (
-                <WorkspaceMark mode={pill.id} />
-              )}
+              <WorkspaceLeadMark id={pill.id} />
               <span
                 data-workspace-switcher-option-label=""
                 className={WORKSPACE_SWITCHER_OPTION_LABEL_CLASS}
@@ -316,14 +314,48 @@ export function WorkspaceSwitcher({
           );
         })}
       </div>
-    </div>
+    </>
   );
+
+  const panel =
+    presentation === "sheet" ? (
+      <div
+        ref={panelRef}
+        data-workspace-switcher-sheet=""
+        data-workspace-switcher-presentation="sheet"
+        className={WORKSPACE_SWITCHER_SHEET_HOST_CLASS}
+      >
+        <button
+          type="button"
+          aria-label="Close workspaces"
+          data-workspace-switcher-sheet-scrim=""
+          className={WORKSPACE_SWITCHER_SHEET_SCRIM_CLASS}
+          onClick={() => setOpen(false)}
+        />
+        <div
+          data-workspace-switcher-popover=""
+          className={`relative z-10 ${WORKSPACE_SWITCHER_SHEET_SURFACE_CLASS}`}
+        >
+          {optionRows}
+        </div>
+      </div>
+    ) : (
+      <div
+        ref={panelRef}
+        data-workspace-switcher-popover=""
+        className={workspaceSwitcherPanelClass(tone)}
+        style={panelStyle}
+      >
+        {optionRows}
+      </div>
+    );
 
   return (
     <div
       ref={hostRef}
       data-workspace-switcher=""
       data-workspace-switcher-tone={tone}
+      data-workspace-switcher-presentation={presentation}
       className={WORKSPACE_SWITCHER_HOST_CLASS}
     >
       <button
@@ -336,6 +368,7 @@ export function WorkspaceSwitcher({
         onClick={() => setOpen((next) => !next)}
         className={workspaceSwitcherTriggerClass(tone)}
       >
+        {presentation === "sheet" ? <WorkspaceLeadMark id={triggerMarkId} /> : null}
         <span data-workspace-switcher-current="" className={WORKSPACE_SWITCHER_TRIGGER_NAME_CLASS}>
           {label}
         </span>

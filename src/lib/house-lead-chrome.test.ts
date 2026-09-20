@@ -199,7 +199,7 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
       expect(html).not.toContain('stroke-width="1.33"');
       expect(html).toContain('data-house-ai-mark-register="stroke"');
     }
-    expect(leadSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(1);
+    expect(leadSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
     expect(leadSrc).toContain("<AskAssistantHeaderLink />");
     expect(leadSrc).toContain("<ThemeToggle />");
     expect(leadSrc).toContain("<ActivityBell");
@@ -323,7 +323,7 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
       /(?:^|\s)gap-\[var\(--space-2\)\](?:\s|$)/,
     );
     expect(APP_HEADER_TRAILING_CLUSTER_CLASS).toContain("max-md:shrink-0");
-    expect(leadSrc).not.toContain("APP_HEADER_WORKSPACE_PILL_HOST_CLASS");
+    expect(leadSrc).toContain("APP_HEADER_WORKSPACE_PILL_HOST_CLASS");
     expect(APP_HEADER_LEADING_CLASS).not.toMatch(/(?:^|\s)(?:max-md:)?overflow-hidden(?:\s|$)/);
     expect(APP_HEADER_LEADING_CLASS).toContain("overflow-visible");
     expect(APP_HEADER_LEADING_CLASS).toContain("gap-[var(--space-3)]");
@@ -336,7 +336,7 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
       expect(html).toContain("/brand/24frame-emblem.svg");
       expect(html).toContain("/brand/24frame-logo-light.svg");
       expect(html).toContain("md:hidden");
-      expect(html).not.toContain("data-app-header-workspace-pill");
+      expect(html).toContain("data-app-header-workspace-pill");
       expect(html.indexOf("data-brand-emblem")).toBeLessThan(
         html.indexOf("data-app-header-trailing"),
       );
@@ -413,18 +413,16 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
       );
     }
 
-    expect(shell).toContain("settingsPage || hideProductRail ? undefined");
-    expect(shell).toContain("destChips=");
-    expect(shell).toContain("<DestChipsSlot");
+    expect(shell).not.toContain("destChips=");
+    expect(shell).not.toContain("<DestChipsSlot");
     expect(shell).not.toContain("<MobileNavSlot");
     expect(existsSync("src/components/social/social-top-bar.tsx")).toBe(false);
   });
 
-  it("keeps dest chips above Education search and the Workspaces menu above both", () => {
+  it("keeps Education search under the header without a dest-chip rail", () => {
     const html = renderToStaticMarkup(
       createElement(HouseLeadChrome, {
         workspace: "education",
-        destChips: createElement("nav", { "data-house-phone-dest-chips": "" }),
         underNav: createElement(HouseLeadSearch, {
           tone: "quiet",
           inputId: "education-header-q-phone",
@@ -432,12 +430,12 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
         accountMenu: createElement("div", { "data-user-menu-host": "" }),
       }),
     );
-    expect(html.indexOf("data-house-phone-dest-chips-host")).toBeGreaterThan(-1);
+    expect(html).not.toContain("data-house-phone-dest-chips-host");
     expect(html.indexOf("data-house-under-nav")).toBeGreaterThan(
-      html.indexOf("data-house-phone-dest-chips-host"),
+      html.indexOf("</header>"),
     );
     expect(html.indexOf("data-education-header-search")).toBeGreaterThan(
-      html.indexOf("data-house-phone-dest-chips-host"),
+      html.indexOf("</header>"),
     );
     expect(HOUSE_LEAD_STACK_CLASS).toContain("z-40");
     expect(readFileSync("src/components/chrome/workspace-switcher.tsx", "utf8")).toContain(

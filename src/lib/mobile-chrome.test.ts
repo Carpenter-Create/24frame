@@ -25,7 +25,7 @@ const tokens = readFileSync(join(here, "../app/tokens.css"), "utf8");
 const shellSrc = readFileSync(join(here, "../components/chrome/app-shell.tsx"), "utf8");
 const overlaySrc = readFileSync(join(here, "../components/chrome/ask-ai-overlay.tsx"), "utf8");
 const leadLibSrc = readFileSync(join(here, "house-lead-chrome.ts"), "utf8");
-const destsSrc = readFileSync(join(here, "../components/chrome/house-phone-dest-chips.tsx"), "utf8");
+const destsSrc = readFileSync(join(here, "../components/chrome/house-phone-bottom-nav.tsx"), "utf8");
 const landingSrc = readFileSync(join(here, "../components/messages/ask-globee-landing.tsx"), "utf8");
 const historySrc = readFileSync(join(here, "../components/messages/ask-globee-history.tsx"), "utf8");
 const threadSrc = readFileSync(join(here, "../components/messages/ask-globee-thread.tsx"), "utf8");
@@ -80,7 +80,7 @@ describe("mobile chrome clock lock", () => {
 
     expect(destsSrc).not.toContain("MOBILE_CHROME_HAMBURGER_BUTTON_CLASS");
     expect(destsSrc).not.toContain("data-mobile-nav-trigger");
-    expect(destsSrc).toContain("data-house-phone-dest-chips");
+    expect(destsSrc).toContain("data-house-phone-bottom-nav");
 
     expect(landingSrc).not.toContain("ASK_GLOBEE_CLOCK_BUTTON_CLASS");
     expect(landingSrc).not.toContain("MOBILE_CHROME_CLOCK_DOCK_CLASS");

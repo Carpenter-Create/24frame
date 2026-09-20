@@ -131,7 +131,7 @@ describe("ask AI overlay URL", () => {
     const sheetSrc = readFileSync(new URL("../components/chrome/account-sheet.tsx", import.meta.url), "utf8");
     const sideNavSrc = readFileSync(new URL("../components/chrome/side-nav.tsx", import.meta.url), "utf8");
     const destChipsSrc = readFileSync(
-      new URL("../components/chrome/house-phone-dest-chips.tsx", import.meta.url),
+      new URL("../components/chrome/house-phone-bottom-nav.tsx", import.meta.url),
       "utf8",
     );
 
@@ -151,7 +151,7 @@ describe("ask AI overlay URL", () => {
     expect(sheetSrc).not.toContain('data-sheet-group-item="askAssistant"');
     expect(sideNavSrc).not.toContain("AskAiOpenButton");
     expect(sideNavSrc).not.toContain("data-side-nav-ask-ai");
-    expect(destChipsSrc).toContain("housePhoneDestinations");
+    expect(destChipsSrc).toContain("housePhoneDockDestinations");
     expect(destChipsSrc).not.toContain("AskAiOpenButton");
     expect(destChipsSrc).not.toContain("/messages");
 

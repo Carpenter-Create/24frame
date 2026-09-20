@@ -115,7 +115,7 @@ describe("Adam Mercury register lock", () => {
     expect(src("src/components/chrome/rail-collapse.tsx")).toContain("CaretDoubleRight");
     expect(src("src/components/chrome/app-shell.tsx")).toContain("<RailCollapse");
     expect(src("src/components/chrome/account-sheet.tsx")).toContain("SignOut");
-    expect(src("src/components/chrome/house-phone-dest-chips.tsx")).toContain("NavGlyph");
+    expect(src("src/components/chrome/house-phone-bottom-nav.tsx")).toContain("housePhoneDestGlyph");
   });
 
   it("does not escalate Mercury past current — 16 Bold idle, no Social bleed", () => {

@@ -9,7 +9,7 @@ const collapse = readFileSync("src/components/chrome/rail-collapse.tsx", "utf8")
 const shell = readFileSync("src/components/chrome/app-shell.tsx", "utf8");
 const account = readFileSync("src/components/chrome/account-sheet.tsx", "utf8");
 const house = readFileSync("src/components/chrome/house.tsx", "utf8");
-const dests = readFileSync("src/components/chrome/house-phone-dest-chips.tsx", "utf8");
+const dests = readFileSync("src/components/chrome/house-phone-bottom-nav.tsx", "utf8");
 const messages = readFileSync("src/components/chrome/messages-app-header.tsx", "utf8");
 const socialComposer = readFileSync("src/components/social/social-home-composer.tsx", "utf8");
 const leadSearch = readFileSync("src/components/chrome/house-lead-search.tsx", "utf8");
@@ -56,8 +56,7 @@ describe("Aggregation chrome Phosphor lock + Design miss list", () => {
     expect(house).not.toContain("lucide-react");
     expect(house).not.toContain("strokeWidth={1.33}");
 
-    expect(dests).toContain("NavGlyph");
-    expect(dests).toContain("SocialIcon");
+    expect(dests).toContain("housePhoneDestGlyph");
     expect(dests).not.toContain("lucide-react");
     expect(dests).not.toContain("import { Menu }");
     expect(dests).not.toContain("import { List }");
