@@ -12,9 +12,10 @@ import {
   SocialProfileIdentity,
   socialAuthorPostCard,
 } from "@/components/social/social-ui";
+import { SocialWelcomeVideo } from "@/components/social/social-welcome-video";
 import { SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS, SOCIAL_PAGE_CLASS } from "@/lib/social-chrome";
 import { signedAvatarUrl, signedAvatarUrls } from "@/lib/s3-avatars";
-import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
+import { signedSocialMediaByPostId, signedSocialMediaUrl } from "@/lib/s3-social-media";
 import {
   parseProfileHandleParam,
   parseSocialProfileTab,
@@ -35,10 +36,11 @@ import {
   loadIsFollowing,
   loadLikedPostIds,
   loadLiveStories,
+  loadProfileMutuals,
   loadProfileSocialCounts,
   loadSuggestedPeople,
 } from "@/lib/social-feed";
-import { ensureOwnSocialProfile } from "@/lib/social-profile";
+import { SOCIAL_PROFILE_COLUMNS, ensureOwnSocialProfile } from "@/lib/social-profile";
 import { requireSocialSession } from "@/lib/social-session";
 
 export async function generateMetadata({
@@ -72,7 +74,7 @@ export default async function SocialPublicProfilePage({
   const { data: member } = handle
     ? await supabase
         .from("profiles")
-        .select("id, handle, display_name, status, bio")
+        .select(SOCIAL_PROFILE_COLUMNS)
         .eq("handle", handle)
         .maybeSingle()
     : { data: null };
@@ -103,7 +105,10 @@ export default async function SocialPublicProfilePage({
   }
 
   const isSelf = member.id === ctx.user.id;
-  const photoUrl = await signedAvatarUrl(member.id);
+  const [photoUrl, welcomeUrl] = await Promise.all([
+    signedAvatarUrl(member.id),
+    member.welcome_video_key ? signedSocialMediaUrl(member.welcome_video_key) : Promise.resolve(null),
+  ]);
   const liveStories = (await loadLiveStories(supabase, [member.id])).stories;
   const following = own && !isSelf ? await loadIsFollowing(supabase, ctx.user.id, member.id) : false;
   const history = await loadAuthorPosts(supabase, member.id);
@@ -117,7 +122,16 @@ export default async function SocialPublicProfilePage({
     : new Set<string>();
   const counts = await loadProfileSocialCounts(supabase, member.id);
   const followees = await loadFolloweeIds(supabase, ctx.user.id);
-  const suggested = await loadSuggestedPeople(supabase, [ctx.user.id, member.id, ...followees.ids]);
+  const mutuals = isSelf ? null : await loadProfileMutuals(supabase, ctx.user.id, member.id);
+  const mutualFaces =
+    mutuals && mutuals.people.length > 0
+      ? await signedAvatarUrls(mutuals.people.map((person) => person.id))
+      : new Map();
+  const suggested = await loadSuggestedPeople(
+    supabase,
+    [ctx.user.id, member.id, ...followees.ids],
+    { topics: own?.topics ?? [], crafts: own?.crafts ?? [] },
+  );
   const faces = suggested.length > 0 ? await signedAvatarUrls(suggested.map((person) => person.id)) : new Map();
   const highlightCards = liveStories.map((story) => ({
     id: story.id,
@@ -138,8 +152,23 @@ export default async function SocialPublicProfilePage({
           handle={member.handle}
           photoUrl={photoUrl}
           bio={member.bio}
+          roles={member.crafts}
+          topics={member.topics}
+          websiteUrl={member.website_url}
+          imdbUrl={member.imdb_url}
           ring={liveStories.length > 0 ? "live" : null}
           stats={counts}
+          mutuals={
+            mutuals && mutuals.people.length > 0
+              ? {
+                  people: mutuals.people.map((person) => ({
+                    ...person,
+                    photoUrl: mutualFaces.get(person.id) ?? null,
+                  })),
+                  extra: mutuals.extra,
+                }
+              : null
+          }
           actions={
             isSelf
               ? () => <SocialShareButton handle={member.handle} stretch />
@@ -158,9 +187,14 @@ export default async function SocialPublicProfilePage({
                 : undefined
           }
         />
+        {welcomeUrl ? <SocialWelcomeVideo src={welcomeUrl} /> : null}
         <SocialProfileTabs baseHref={profileHref} active={tab} />
         {tab === "credits" ? (
-          <SocialEmpty icon="film-slate" title={SOCIAL.profile.creditsEmpty} />
+          <SocialEmpty
+            icon="film-slate"
+            title={SOCIAL.profile.creditsEmpty}
+            hint={SOCIAL.profile.creditsEmptyHint}
+          />
         ) : tab === "highlights" ? (
           highlightCards.length > 0 ? (
             <SocialHighlights cards={highlightCards} />

@@ -6,8 +6,6 @@ import {
   SOCIAL_CREATE_CARD_CLASS,
   SOCIAL_CREATE_WELL_CLASS,
   SOCIAL_FEED_ROW_CLASS,
-  SOCIAL_CHATS_COLUMN_CLASS,
-  SOCIAL_CHATS_PANEL_CLASS,
   SOCIAL_FOR_YOU_CARD_CLASS,
   SOCIAL_FOR_YOU_RAIL_CLASS,
   SOCIAL_HOME_CENTER_CLASS,
@@ -33,18 +31,6 @@ export function SocialForYouSkeleton() {
   );
 }
 
-export function SocialRecentChatsSkeleton() {
-  return (
-    <aside data-social-recent-chats-skeleton="" className={SOCIAL_CHATS_COLUMN_CLASS}>
-      <div className={SOCIAL_CHATS_PANEL_CLASS}>
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-16 w-full rounded-[12px]" />
-        <Skeleton className="h-16 w-full rounded-[12px]" />
-      </div>
-    </aside>
-  );
-}
-
 export function SocialHomeCenterSkeleton() {
   return (
     <div className={SOCIAL_HOME_CENTER_CLASS}>
@@ -52,6 +38,14 @@ export function SocialHomeCenterSkeleton() {
         <Skeleton className={SOCIAL_AVATAR_SM_CLASS} />
         <Skeleton className="h-9 min-w-0 flex-1" />
         <Skeleton className="size-9 shrink-0" />
+      </div>
+      <div data-social-home-topics-skeleton="" className={SOCIAL_FOR_YOU_CARD_CLASS}>
+        <Skeleton className="h-4 w-16" />
+        <div className="flex flex-wrap gap-2">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-6 w-20 rounded-full" />
+          ))}
+        </div>
       </div>
       <SocialStoriesRailSkeleton tall />
       {Array.from({ length: 3 }).map((_, i) => (
@@ -89,7 +83,6 @@ function SocialStoriesRailSkeleton({
 export function SocialHomeSkeleton() {
   return (
     <div data-social-home-skeleton="" className={SOCIAL_HOME_LAYOUT_CLASS}>
-      <SocialRecentChatsSkeleton />
       <SocialHomeCenterSkeleton />
       <SocialForYouSkeleton />
     </div>

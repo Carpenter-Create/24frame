@@ -13,6 +13,14 @@ import {
   type FollowingWallCursor,
 } from "@/lib/social-home-bounds";
 import { SOCIAL_PROFILE_POSTS_PAGE, socialPersonIdentity, socialProfileHref } from "@/lib/social";
+import {
+  SOCIAL_MUTUALS_NAME_CAP,
+  SOCIAL_MUTUALS_PROBE,
+  emptySocialProfileMutuals,
+  socialMutualFromProfile,
+  type SocialProfileMutuals,
+} from "@/lib/social-profile-mutuals";
+import { rankSocialSuggestedPeople, socialPostAffinityScore } from "@/lib/social-role-affinity";
 import { isStoryLive, storyRailUnseen } from "@/lib/social-stories";
 
 type ServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -23,6 +31,11 @@ export type SocialProfileRow = {
   display_name: string;
   status: string;
   bio?: string | null;
+  welcome_video_key?: string | null;
+  crafts?: string[] | null;
+  topics?: string[] | null;
+  imdb_url?: string | null;
+  website_url?: string | null;
 };
 
 export type SocialPostRow = {
@@ -96,6 +109,43 @@ export async function loadIsFollowing(
     .eq("followee_id", followeeId)
     .maybeSingle();
   return !!data;
+}
+
+export async function loadProfileMutuals(
+  supabase: ServerClient,
+  viewerId: string,
+  profileId: string,
+): Promise<SocialProfileMutuals> {
+  if (!viewerId || viewerId === profileId) return emptySocialProfileMutuals();
+  const followees = await loadFolloweeIds(supabase, viewerId);
+  const candidate = followees.ids.filter((id) => id !== profileId);
+  if (candidate.length === 0) return emptySocialProfileMutuals();
+
+  const { data } = await supabase
+    .from("follows")
+    .select("follower_id")
+    .eq("followee_id", profileId)
+    .in("follower_id", candidate)
+    .order("created_at", { ascending: false })
+    .range(...probeRange(SOCIAL_MUTUALS_PROBE));
+  const { rows } = splitProbe(data, SOCIAL_MUTUALS_PROBE);
+  const overlapIds = [...new Set(rows.map((row) => row.follower_id))];
+  if (overlapIds.length === 0) return emptySocialProfileMutuals();
+
+  const shownIds = overlapIds.slice(0, SOCIAL_MUTUALS_NAME_CAP);
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, handle, display_name")
+    .in("id", shownIds);
+  const byId = new Map((profiles ?? []).map((row) => [row.id, row]));
+  const people = shownIds
+    .map((id) => {
+      const row = byId.get(id);
+      return row ? socialMutualFromProfile(row) : null;
+    })
+    .filter((row): row is NonNullable<typeof row> => !!row);
+  if (people.length === 0) return emptySocialProfileMutuals();
+  return { people, extra: Math.max(0, overlapIds.length - people.length) };
 }
 
 export type SocialProfileCounts = {
@@ -329,6 +379,7 @@ export type SocialExplorePage = {
 export async function loadExploreSearch(
   supabase: ServerClient,
   query: string,
+  viewer: { topics?: unknown; crafts?: unknown } | readonly string[] = [],
 ): Promise<SocialExplorePage> {
   const needle = query.trim();
   if (!needle) {
@@ -338,13 +389,13 @@ export async function loadExploreSearch(
   const [{ data: people }, { data: posts }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("id, handle, display_name")
+      .select("id, handle, display_name, crafts, topics")
       .eq("status", "active")
       .or(`handle.ilike.${like},display_name.ilike.${like}`)
       .range(...probeRange(SOCIAL_EXPLORE_PEOPLE_LIMIT)),
     supabase
       .from("posts")
-      .select("id, body, author_id")
+      .select("id, body, author_id, category")
       .eq("status", "active")
       .is("group_id", null)
       .ilike("body", like)
@@ -352,8 +403,21 @@ export async function loadExploreSearch(
   ]);
   const peoplePage = splitProbe(people, SOCIAL_EXPLORE_PEOPLE_LIMIT);
   const postsPage = splitProbe(posts, SOCIAL_EXPLORE_POSTS_LIMIT);
+  const rankedPeople = rankSocialSuggestedPeople(
+    peoplePage.rows.map((person) => ({
+      ...person,
+      crafts: person.crafts ?? [],
+      topics: person.topics ?? [],
+    })),
+    viewer,
+  );
+  const rankedPosts = [...postsPage.rows].sort((a, b) => {
+    const delta = socialPostAffinityScore(b.category, viewer) - socialPostAffinityScore(a.category, viewer);
+    if (delta !== 0) return delta;
+    return a.id.localeCompare(b.id);
+  });
   const hits: SocialExploreHit[] = [];
-  for (const person of peoplePage.rows) {
+  for (const person of rankedPeople) {
     const identity = socialPersonIdentity({
       handle: person.handle,
       displayName: person.display_name,
@@ -368,7 +432,7 @@ export async function loadExploreSearch(
       displayName: person.display_name,
     });
   }
-  for (const post of postsPage.rows) {
+  for (const post of rankedPosts) {
     hits.push({
       kind: "post",
       id: post.id,
@@ -389,22 +453,24 @@ export type SocialSuggestedPerson = {
   id: string;
   handle: string;
   display_name: string;
+  crafts?: string[] | null;
+  topics?: string[] | null;
 };
 
 export async function loadSuggestedPeople(
   supabase: ServerClient,
   excludeIds: readonly string[],
+  viewer: { topics?: unknown; crafts?: unknown } | readonly string[] = [],
 ): Promise<SocialSuggestedPerson[]> {
   const { data } = await supabase
     .from("profiles")
-    .select("id, handle, display_name")
+    .select("id, handle, display_name, crafts, topics")
     .eq("status", "active")
     .order("handle", { ascending: true })
     .range(...probeRange(SOCIAL_EXPLORE_PEOPLE_LIMIT));
   const blocked = new Set(excludeIds.filter(Boolean));
-  return (data ?? [])
-    .filter((row) => !blocked.has(row.id))
-    .slice(0, SOCIAL_FOR_YOU_PEOPLE_LIMIT);
+  const available = (data ?? []).filter((row) => !blocked.has(row.id));
+  return rankSocialSuggestedPeople(available, viewer).slice(0, SOCIAL_FOR_YOU_PEOPLE_LIMIT);
 }
 
 export async function loadProfilesByIds(

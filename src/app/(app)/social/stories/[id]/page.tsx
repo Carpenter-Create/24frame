@@ -63,7 +63,10 @@ export default async function SocialStoryPage({
   const [authorStoriesPage, railPage, suggested] = await Promise.all([
     loadLiveStories(supabase, [story.author_id]),
     loadLiveStories(supabase, authorIds),
-    loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids]),
+    loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids], {
+      topics: profile?.topics ?? [],
+      crafts: profile?.crafts ?? [],
+    }),
   ]);
   const sequence = [...authorStoriesPage.stories].sort(
     (a, b) => Date.parse(a.created_at) - Date.parse(b.created_at) || a.id.localeCompare(b.id),

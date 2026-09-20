@@ -22,6 +22,7 @@ import { SOCIAL_MEDIA_ACCEPT } from "@/lib/social-media";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { SocialEmpty, SocialStoriesEmpty } from "./social-empty";
 import { SocialHomeComposer } from "./social-home-composer";
+import { SocialHomeTopics } from "./social-home-topics";
 import { SocialOnboardingChecklist } from "./social-checklist";
 import { SocialStoriesRail } from "./social-stories-rail";
 
@@ -40,8 +41,9 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).toContain(SOCIAL_COMPOSER_FIELD_CLASS);
     expect(html).toContain(SOCIAL_COMPOSER_MEDIA_CLASS);
     expect(html).toContain("/social/create?kind=text");
-    expect(html).toContain("What&#x27;s on your mind Adam?");
-    expect(html).toContain("What&#x27;s on your mind?");
+    expect(html).toContain("Write something");
+    expect(html).not.toContain("What&#x27;s on your mind");
+    expect(html.split("Write something").length - 1).toBe(1);
     expect(html).toContain(SOCIAL.home.attach);
     expect(html).toContain(`accept="${SOCIAL_MEDIA_ACCEPT}"`);
     expect(html).toContain('data-social-icon="image"');
@@ -51,9 +53,39 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).not.toContain(SOCIAL.create.photo);
     expect(html).not.toContain(SOCIAL.create.video);
     expect(html).not.toContain(`>${SOCIAL.create.text}<`);
+    expect(html).toContain("data-social-avatar");
+    expect(html).toContain("AC");
+    expect(html).not.toContain("<img");
     expect(SOCIAL_COMPOSER_CLASS).toContain("h-16");
-    expect(SOCIAL_COMPOSER_CLASS).toContain("rounded-[16px]");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("rounded-[var(--radius-lg)]");
     expect(SOCIAL_COMPOSER_FIELD_CLASS).not.toContain("bg-surface-muted");
+  });
+
+  it("shows the composer author photo when a signed URL exists", () => {
+    const html = renderToStaticMarkup(
+      <SocialHomeComposer
+        authorName="Adam Carpenter"
+        authorPhotoUrl="https://s3.example/adam-face"
+      />,
+    );
+    expect(html).toContain("data-social-avatar");
+    expect(html).toContain('src="https://s3.example/adam-face"');
+    expect(html).not.toContain("AC");
+  });
+
+  it("renders Topics. as a wrapping chip row, never a truncated rail twin", () => {
+    const html = renderToStaticMarkup(<SocialHomeTopics />);
+    expect(html).toContain("data-social-home-topics");
+    expect(html).toContain(SOCIAL.forYou.topics);
+    expect(html).toContain(SOCIAL_FOR_YOU_CARD_CLASS);
+    expect(SOCIAL_FOR_YOU_CARD_CLASS).toContain("rounded-[var(--radius-lg)]");
+    expect(html).toContain("flex-wrap");
+    expect(html).toContain("Cinematography");
+    expect(html).toContain("Vertical micro dramas");
+    expect(html).not.toContain("Topics for you");
+    expect(html).not.toContain("truncate");
+    expect(html).not.toContain("data-social-for-you-topics");
+    expect(SOCIAL.forYou.topics).toBe("Topics.");
   });
 
   it("renders tall FB-style story tiles with a plus well and unseen face rings", () => {
@@ -88,12 +120,13 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).toContain("data-social-story-unseen");
     expect(html).toContain("data-social-story-media");
     expect(html).toContain('src="https://s3.example/signed-avatar"');
+    expect(html).toContain("data-social-avatar");
     expect(html).toContain("Maya C.");
     expect(html).toContain("w-[108px]");
     expect(html).toContain("h-[192px]");
     expect(html).toContain("md:w-[112px]");
     expect(html).toContain("md:h-[200px]");
-    expect(html).toContain("rounded-[16px]");
+    expect(html).toContain("rounded-[var(--radius-lg)]");
     expect(html).toContain("bg-accent");
     expect(html).toContain("bg-band/55");
     expect(html).toContain("md:h-[120px]");
@@ -120,7 +153,7 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).toContain(SOCIAL.home.goExplore);
     expect(html).toContain(SOCIAL_EMPTY_PANEL_CLASS);
     expect(html).toContain(SOCIAL_EMPTY_ACTION_CLASS);
-    expect(SOCIAL_EMPTY_PANEL_CLASS).toContain("rounded-[8px]");
+    expect(SOCIAL_EMPTY_PANEL_CLASS).toContain("rounded-[var(--radius-lg)]");
     expect(SOCIAL_EMPTY_ACTION_CLASS).toContain("bg-accent");
   });
 
@@ -220,10 +253,28 @@ describe("Social Stories craft (Figma 138:163 / 138:889 / 138:943)", () => {
     expect(html).toContain("h-[192px]");
     expect(html).toContain(`width="${SOCIAL_ICON_SIZE_STORY_PLUS}"`);
     expect(html).toContain(SOCIAL.stories.create);
-    expect(html).toContain("A");
-    expect(html).toContain("text-ink-2/45");
+    expect(html).toContain("data-social-avatar");
+    expect(html).toContain("AC");
+    expect(html).not.toContain("<img");
     expect(html).not.toContain(SOCIAL.stories.yourStory);
     expect(html).not.toContain("w-[68px]");
+  });
+
+  it("shows the story create face photo when a signed URL exists", () => {
+    const html = renderToStaticMarkup(
+      <SocialStoriesRail
+        canCreate
+        createName="Adam Carpenter"
+        createPhotoUrl="https://s3.example/adam-face"
+        authors={authors}
+        faces={faces}
+        cards={[]}
+      />,
+    );
+    expect(html).toContain("data-social-story-create");
+    expect(html).toContain("data-social-avatar");
+    expect(html).toContain('src="https://s3.example/adam-face"');
+    expect(html).not.toContain("AC");
   });
 
   it("renders the Stories empty panel with image 40 and a rounded-full Create a story CTA", () => {

@@ -48,6 +48,10 @@ describe("account profile copy", () => {
     expect(ACCOUNT_PROFILE.href).toBe(USER_MENU.profileHref);
     expect(ACCOUNT_PROFILE).not.toHaveProperty("subtitle");
     expect(ACCOUNT_PROFILE.uploadPhoto).toBe("Upload photo");
+    expect(ACCOUNT_PROFILE.cropTitle).toBe("Reposition");
+    expect(ACCOUNT_PROFILE.cropSave).toBe("Save photo");
+    expect(ACCOUNT_PROFILE.dropPhoto).toBe("Drop a photo");
+    expect(ACCOUNT_PROFILE.photoType).toBe("Use a JPEG, PNG, or WebP photo.");
     expect(ACCOUNT_PROFILE.nameLabel).toBe("Name");
     expect(ACCOUNT_PROFILE.nameHelper).toBe("Shown on this account.");
     expect(ACCOUNT_PROFILE.emailHint).toBe("Sign-in email. It cannot be changed here.");
@@ -168,6 +172,9 @@ describe("account field 16px lock", () => {
     expect(formSrc).toContain('#account-name")?.blur()');
     expect(formSrc).toContain("export function AccountNameForm");
     expect(formSrc).toContain("export function AccountPhotoField");
+    expect(formSrc).toContain("AccountAvatarCrop");
+    expect(formSrc).toContain("accountAvatarPickError");
+    expect(formSrc).toContain("data-account-photo-drop");
     expect(formSrc).toContain("data-account-name-form");
     expect(companyEditorSrc).toContain("<Input");
     expect(companyEditorSrc).not.toContain("ACCOUNT_FIELD_CLASS");

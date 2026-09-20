@@ -17,6 +17,7 @@ import { SOCIAL } from "@/lib/social";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const uiSrc = readFileSync(join(here, "social-ui.tsx"), "utf8");
+const avatarSrc = readFileSync(join(here, "social-avatar.tsx"), "utf8");
 
 describe("SocialAvatar", () => {
   it("renders a signed photo URL as an img on the house identity circle", () => {
@@ -133,7 +134,9 @@ describe("SocialPostCard faces", () => {
   });
 
   it("reuses signed account faces and does not add a second upload", () => {
-    expect(uiSrc).toContain("IDENTITY_AVATAR_CLASS");
+    expect(uiSrc).toContain('from "./social-avatar"');
+    expect(avatarSrc).toContain("IDENTITY_AVATAR_CLASS");
+    expect(avatarSrc).toContain("photoUrl");
     expect(uiSrc).toContain("photoUrl");
     expect(uiSrc).not.toContain("signedAvatarUrl");
     expect(uiSrc).not.toContain("putAvatarObject");
@@ -141,6 +144,7 @@ describe("SocialPostCard faces", () => {
     expect(uiSrc).not.toContain("type=\"file\"");
     expect(uiSrc).not.toContain("S3_BUCKET");
     expect(uiSrc).not.toContain("24frame-media");
+    expect(avatarSrc).not.toContain("signedAvatarUrl");
   });
 });
 
@@ -155,8 +159,15 @@ describe("Social profile public face", () => {
       />,
     );
     expect(identity).toContain("data-social-profile-identity");
+    expect(identity).toContain("data-social-profile-handle");
+    expect(identity).toContain("data-social-profile-name");
     expect(identity).toContain("Ada Lovelace");
     expect(identity).toContain("@ada");
+    expect(identity.indexOf("data-social-profile-handle")).toBeLessThan(
+      identity.indexOf("data-social-profile-name"),
+    );
+    expect(identity).not.toContain("data-social-profile-stats");
+    expect(identity).not.toContain("data-social-profile-mutuals");
     expect(identity).not.toContain("data-social-profile-url");
     expect(identity).not.toContain("24frame.co/@ada");
     expect(identity).not.toContain("https://24frame.co/@ada");
@@ -166,6 +177,126 @@ describe("Social profile public face", () => {
     expect(uiSrc).not.toContain("socialShareHint");
     expect(identity).toContain("Writes engines.");
     expect(identity).toContain('src="https://s3.example/signed-avatar"');
+    expect(identity).not.toContain("data-social-profile-roles");
+    expect(identity).not.toContain("data-social-profile-topics");
+    expect(identity).not.toContain("data-social-profile-links");
+    expect(identity).not.toContain("data-social-profile-imdb");
+
+    const withRoles = renderToStaticMarkup(
+      <SocialProfileIdentity
+        name="Ada Lovelace"
+        handle="ada"
+        photoUrl={null}
+        roles={["actor", "producer", "screenwriter", "investor"]}
+      />,
+    );
+    expect(withRoles).toContain("data-social-profile-roles");
+    expect(withRoles).toContain("Actor · Producer · Screenwriter +1");
+    expect(withRoles).not.toContain("Roles:");
+    expect(withRoles).not.toContain("Professions:");
+    expect(withRoles).not.toContain("Topics:");
+    expect(withRoles.indexOf("data-social-profile-handle")).toBeLessThan(
+      withRoles.indexOf("data-social-profile-roles"),
+    );
+
+    const withTopics = renderToStaticMarkup(
+      <SocialProfileIdentity
+        name="Ada Lovelace"
+        handle="ada"
+        photoUrl={null}
+        topics={["Acting", "Financing"]}
+      />,
+    );
+    expect(withTopics).toContain("data-social-profile-topics");
+    expect(withTopics).toContain('data-social-profile-topic="Acting"');
+    expect(withTopics).toContain("Acting");
+    expect(withTopics).toContain("Financing");
+    expect(withTopics).not.toContain("Actor");
+    expect(withTopics).not.toContain("Topics:");
+
+    const withStats = renderToStaticMarkup(
+      <SocialProfileIdentity
+        name="Ada Lovelace"
+        handle="ada"
+        photoUrl={null}
+        stats={{ posts: 12, followers: 4, following: 7 }}
+        roles={["actor"]}
+      />,
+    );
+    expect(withStats).toContain("data-social-profile-stats");
+    expect(withStats.indexOf("data-social-profile-name")).toBeLessThan(
+      withStats.indexOf("data-social-profile-stats"),
+    );
+    expect(withStats.indexOf("data-social-profile-stats")).toBeLessThan(
+      withStats.indexOf("data-social-profile-roles"),
+    );
+
+    const withMutuals = renderToStaticMarkup(
+      <SocialProfileIdentity
+        name="Ada Lovelace"
+        handle="ada"
+        photoUrl={null}
+        mutuals={{
+          people: [
+            { id: "u3", handle: "carol", displayName: "Carol King", label: "Carol King" },
+            { id: "u4", handle: "dan", displayName: "Dan", label: "Dan" },
+          ],
+          extra: 3,
+        }}
+      />,
+    );
+    expect(withMutuals).toContain("data-social-profile-mutuals");
+    expect(withMutuals).toContain("Followed by Carol King, Dan +3 more");
+    expect(withMutuals).not.toContain("data-social-profile-bio");
+
+    const withImdb = renderToStaticMarkup(
+      <SocialProfileIdentity
+        name="Ada Lovelace"
+        handle="ada"
+        photoUrl={null}
+        imdbUrl="https://www.imdb.com/name/nm0000158/"
+      />,
+    );
+    expect(withImdb).toContain("data-social-profile-imdb");
+    expect(withImdb).toContain('data-social-profile-link="imdb"');
+    expect(withImdb).toContain('href="https://www.imdb.com/name/nm0000158/"');
+    expect(withImdb).toContain(SOCIAL.profile.imdb);
+    expect(withImdb).not.toContain(">https://www.imdb.com/name/nm0000158/<");
+
+    const withLinks = renderToStaticMarkup(
+      <SocialProfileIdentity
+        name="Ada Lovelace"
+        handle="ada"
+        photoUrl={null}
+        websiteUrl="https://instagram.com/ada"
+      />,
+    );
+    expect(withLinks).toContain("data-social-profile-links");
+    expect(withLinks).toContain('data-social-profile-link="instagram"');
+    expect(withLinks).toContain('href="https://instagram.com/ada"');
+    expect(withLinks).not.toContain(">https://instagram.com/ada<");
+    expect(withLinks).toContain('aria-label="Instagram"');
+    expect(withLinks).toContain('rel="noopener noreferrer"');
+
+    const unknownHost = renderToStaticMarkup(
+      <SocialProfileIdentity
+        name="Ada Lovelace"
+        handle="ada"
+        photoUrl={null}
+        websiteUrl="https://ada.example/press"
+      />,
+    );
+    expect(unknownHost).toContain('data-social-profile-link="website"');
+    expect(unknownHost).toContain('href="https://ada.example/press"');
+    expect(unknownHost).toContain('aria-label="Website"');
+    expect(unknownHost).not.toContain(">https://ada.example/press<");
+    expect(uiSrc).toContain("socialProfileRolesLine");
+    expect(
+      uiSrc.slice(
+        uiSrc.indexOf("export function SocialPersonRow"),
+        uiSrc.indexOf("export function SocialConversationFaces"),
+      ),
+    ).not.toContain("socialProfileRolesLine");
 
     const history = renderToStaticMarkup(
       <SocialAuthorHistory

@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 import { signedAvatarUrl } from "@/lib/s3-avatars";
-import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
+import { signedSocialMediaByPostId, signedSocialMediaUrl } from "@/lib/s3-social-media";
 import { SOCIAL, SOCIAL_PROFILE_POSTS_PAGE } from "@/lib/social";
 import { ensureOwnSocialProfileResult } from "@/lib/social-profile";
 import SocialProfilePage from "./page";
@@ -25,6 +25,7 @@ vi.mock("@/lib/s3-avatars", () => ({
 vi.mock("@/lib/s3-social-media", () => ({
   signedSocialMediaItems: vi.fn().mockResolvedValue([]),
   signedSocialMediaByPostId: vi.fn().mockResolvedValue(new Map()),
+  signedSocialMediaUrl: vi.fn().mockResolvedValue(null),
 }));
 vi.mock("@/lib/social-profile", () => ({
   ensureOwnSocialProfileResult: vi.fn(),
@@ -78,7 +79,18 @@ function stubClient({
   profile = null,
   posts = [],
 }: {
-  profile?: { id: string; handle: string; display_name: string; status: string; bio?: string | null } | null;
+  profile?: {
+    id: string;
+    handle: string;
+    display_name: string;
+    status: string;
+    bio?: string | null;
+    welcome_video_key?: string | null;
+    crafts?: string[] | null;
+    topics?: string[] | null;
+    imdb_url?: string | null;
+    website_url?: string | null;
+  } | null;
   posts?: {
     id: string;
     body: string;
@@ -114,6 +126,7 @@ describe("Social profile public face", () => {
     vi.clearAllMocks();
     vi.mocked(signedAvatarUrl).mockResolvedValue(null);
     vi.mocked(signedSocialMediaByPostId).mockResolvedValue(new Map());
+    vi.mocked(signedSocialMediaUrl).mockResolvedValue(null);
     vi.mocked(ensureOwnSocialProfileResult).mockResolvedValue({
       profile: ensured,
       error: null,
@@ -129,6 +142,7 @@ describe("Social profile public face", () => {
     expect(html).toContain("https://24frame.co/@ada");
     expect(html).toContain('data-social-share-url="https://24frame.co/@ada"');
     expect(html).not.toContain("data-social-profile-url");
+    expect(html).not.toContain("data-social-profile-links");
     expect(html).not.toContain(">24frame.co/@ada<");
     expect(html).not.toContain("Copies ");
     expect(html).not.toContain("data-social-share-hint");
@@ -217,6 +231,7 @@ describe("Social profile public face", () => {
     expect(html).toContain(SOCIAL.profile.postsEmpty);
     expect(html).toContain(SOCIAL.profile.postsEmptyOwnHint);
     expect(html).toContain(SOCIAL.profile.sharePost);
+    expect(html).toContain(SOCIAL.profile.completeIdentity);
     expect(html).not.toContain("data-social-author-posts");
     expect(html).not.toContain("data-social-author-truncated");
     expect(html).not.toContain("Sets");
@@ -225,6 +240,102 @@ describe("Social profile public face", () => {
     expect(html).toContain('href="/social/profile/edit"');
     expect(html).not.toContain("id=\"social-profile-edit\"");
     expect(html).not.toContain("<summary");
+    expect(html).not.toContain("data-social-welcome-video");
+    expect(html).not.toContain("data-social-profile-roles");
+    expect(html).not.toContain("data-social-profile-topics");
+  });
+
+  it("prints the Professions line under the handle and omits it when crafts is empty", async () => {
+    stubClient({
+      profile: { ...ensured, crafts: ["actor", "producer", "screenwriter", "investor"] },
+    });
+    vi.mocked(ensureOwnSocialProfileResult).mockResolvedValue({
+      profile: { ...ensured, crafts: ["actor", "producer", "screenwriter", "investor"] },
+      error: null,
+    });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const html = await renderServerMarkup(await SocialProfilePage());
+    expect(html).toContain("data-social-profile-roles");
+    expect(html).toContain("Actor · Producer · Screenwriter +1");
+    expect(html.indexOf("data-social-profile-handle")).toBeLessThan(html.indexOf("data-social-profile-name"));
+    expect(html.indexOf("@ada")).toBeLessThan(html.indexOf("Actor · Producer · Screenwriter +1"));
+    expect(html).not.toContain("data-social-profile-mutuals");
+    expect(html).not.toContain("Roles:");
+    expect(html).not.toContain("Professions:");
+    expect(html).not.toContain("data-social-profile-imdb");
+  });
+
+  it("prints selected Topics chips under identity and omits a Topics prefix", async () => {
+    stubClient({
+      profile: { ...ensured, topics: ["Acting", "Financing"] },
+    });
+    vi.mocked(ensureOwnSocialProfileResult).mockResolvedValue({
+      profile: { ...ensured, topics: ["Acting", "Financing"] },
+      error: null,
+    });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const html = await renderServerMarkup(await SocialProfilePage());
+    expect(html).toContain("data-social-profile-topics");
+    expect(html).toContain('data-social-profile-topic="Acting"');
+    expect(html).toContain("Acting");
+    expect(html).not.toContain("Topics:");
+    expect(html).not.toContain("Actor");
+  });
+
+  it("prints a quiet IMDb name link when the claim is set", async () => {
+    stubClient({
+      profile: { ...ensured, imdb_url: "https://www.imdb.com/name/nm0000158/" },
+    });
+    vi.mocked(ensureOwnSocialProfileResult).mockResolvedValue({
+      profile: { ...ensured, imdb_url: "https://www.imdb.com/name/nm0000158/" },
+      error: null,
+    });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const html = await renderServerMarkup(await SocialProfilePage());
+    expect(html).toContain("data-social-profile-imdb");
+    expect(html).toContain('href="https://www.imdb.com/name/nm0000158/"');
+    expect(html).toContain(SOCIAL.profile.imdb);
+    expect(html).not.toContain("Connect to scrape");
+    expect(html).not.toContain(">https://www.imdb.com/name/nm0000158/<");
+  });
+
+  it("renders Instagram as an icon, not a raw URL, and omits the links row when empty", async () => {
+    stubClient({
+      profile: { ...ensured, website_url: "https://instagram.com/ada" },
+    });
+    vi.mocked(ensureOwnSocialProfileResult).mockResolvedValue({
+      profile: { ...ensured, website_url: "https://instagram.com/ada" },
+      error: null,
+    });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const html = await renderServerMarkup(await SocialProfilePage());
+    expect(html).toContain("data-social-profile-links");
+    expect(html).toContain('data-social-profile-link="instagram"');
+    expect(html).toContain('href="https://instagram.com/ada"');
+    expect(html).not.toContain(">https://instagram.com/ada<");
+    expect(html).toContain('aria-label="Instagram"');
+    expect(html).toContain('rel="noopener noreferrer"');
+  });
+
+  it("renders the welcome video band only when a signed URL exists", async () => {
+    stubClient({
+      profile: { ...ensured, welcome_video_key: "posts/u1/welcome.mp4" },
+    });
+    vi.mocked(ensureOwnSocialProfileResult).mockResolvedValue({
+      profile: { ...ensured, welcome_video_key: "posts/u1/welcome.mp4" },
+      error: null,
+    });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+    vi.mocked(signedSocialMediaUrl).mockResolvedValue("https://s3.example/welcome.mp4");
+
+    const html = await renderServerMarkup(await SocialProfilePage());
+    expect(html).toContain("data-social-welcome-video");
+    expect(html).toContain('src="https://s3.example/welcome.mp4"');
+    expect(html.indexOf("data-social-welcome-video")).toBeLessThan(html.indexOf("data-social-profile-tabs") || html.length);
   });
 
   it("names the bound when author history is truncated", async () => {
@@ -269,6 +380,7 @@ describe("Social profile public face", () => {
     expect(html).toContain('data-social-profile-tab-active=""');
     expect(html).toContain('data-social-icon="film-slate"');
     expect(html).toContain(SOCIAL.profile.creditsEmpty);
+    expect(html).toContain(SOCIAL.profile.creditsEmptyOwnHint);
     expect(html).not.toContain("First engine note");
     expect(html).not.toContain("data-social-author-history");
     expect(html).not.toContain(SOCIAL.profile.highlightsEmpty);

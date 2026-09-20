@@ -30,10 +30,13 @@ import {
   socialCreateHref,
   socialCreateWellCopy,
   socialHandleRequiredError,
+  socialNameRequiredError,
   socialHomeLaneHref,
   socialInitials,
+  composeSocialDisplayName,
   socialPersonIdentity,
   socialPublicDisplayName,
+  splitSocialDisplayName,
   socialMediaRuleMessage,
   formatSocialCount,
   socialProfileCanonicalUrl,
@@ -66,6 +69,41 @@ describe("social copy lock", () => {
     expect(SOCIAL.home.subtitle).toContain("follow");
     expect(SOCIAL.home.subtitle).toContain(PRODUCT_NAME);
     expect(SOCIAL.home.emptyQuiet).toBe("No posts yet");
+    expect(SOCIAL.home.composerPrompt).toBe("Write something");
+    expect(SOCIAL.home.composerPromptNamed).toBe("Write something");
+    expect(SOCIAL.forYou.topics).toBe("Topics.");
+    expect(SOCIAL.forYou.latestCourse).toBe("Latest course");
+    expect(SOCIAL.profile.firstName).toBe("First name");
+    expect(SOCIAL.profile.middleName).toBe("Middle name");
+    expect(SOCIAL.profile.lastName).toBe("Last name");
+    expect(SOCIAL.profile.roles).toBe("Professions");
+    expect(SOCIAL.profile.rolesSearch).toBe("Search professions");
+    expect(SOCIAL.profile.rolesHint).toBe("Choose up to 5.");
+    expect(SOCIAL.profile.topics).toBe("Topics");
+    expect(SOCIAL.profile.topicsSearch).toBe("Search topics");
+    expect(SOCIAL.profile.topicsHint).toBe("Subjects you follow.");
+    expect(SOCIAL.profile.imdb).toBe("IMDb");
+    expect(SOCIAL.profile.imdbInvalid).toBe("Enter an IMDb name URL or nm id.");
+    expect(SOCIAL.dms.startCta).toBe("Start a conversation");
+    expect(splitSocialDisplayName("Ada Lovelace")).toEqual({
+      firstName: "Ada",
+      middleName: "",
+      lastName: "Lovelace",
+    });
+    expect(splitSocialDisplayName("Ada")).toEqual({ firstName: "Ada", middleName: "", lastName: "" });
+    expect(splitSocialDisplayName("Adam James Carpenter")).toEqual({
+      firstName: "Adam",
+      middleName: "James",
+      lastName: "Carpenter",
+    });
+    expect(composeSocialDisplayName("Ada", "Lovelace")).toBe("Ada Lovelace");
+    expect(composeSocialDisplayName("Adam", "Carpenter", "James")).toBe("Adam James Carpenter");
+    expect(composeSocialDisplayName("Ada", "")).toBe("Ada");
+    expect(socialNameRequiredError("", "Carpenter")).toBe(SOCIAL.profile.firstNameRequired);
+    expect(socialNameRequiredError("Adam", "")).toBe(SOCIAL.profile.lastNameRequired);
+    expect(socialNameRequiredError("Adam", "Carpenter")).toBeNull();
+    expect(blob).not.toContain("What's on your mind");
+    expect(blob).not.toContain("Topics for you");
     expect(SOCIAL.home.recentChats).toBe("Recent chats");
     expect(SOCIAL.home.chatsEmpty).toBe("No messages yet");
     expect(blob).not.toContain("Social-native");
@@ -211,6 +249,8 @@ describe("profile opt-in", () => {
     expect(isEligibleBirthDate("2014-01-01", new Date("2026-09-12T00:00:00.000Z"))).toBe(false);
     expect(isEligibleBirthDate("2013-09-12", new Date("2026-09-12T00:00:00.000Z"))).toBe(true);
     expect(socialInitials("Ada Lovelace")).toBe("AL");
+    expect(socialInitials("Adam James Carpenter")).toBe("AC");
+    expect(socialInitials("Ada")).toBe("A");
   });
 
   it("treats Member as an empty person name and keeps handle primary", () => {
@@ -273,6 +313,9 @@ describe("profile opt-in", () => {
     expect(socialProfileCasingRedirect("ADAMC", "AdamC")).toBe("/@AdamC");
     expect(socialProfileCasingRedirect("AdamC", "AdamC")).toBeNull();
     expect(socialProfileCasingRedirect("ada", "AdamC")).toBeNull();
+    expect(SOCIAL.profile.handleTaken).toBe("That handle is already taken.");
+    expect(SOCIAL.profile.followedBy).toBe("Followed by");
+    expect(SOCIAL.profile.followedByMore).toBe("+{n} more");
     expect(SOCIAL_PROFILE_ORIGIN).toBe("https://24frame.co");
     expect(socialProfilePublicUrl("acarpcreate")).not.toContain("app.24frame.co");
     expect(socialProfilePublicUrl("acarpcreate")).not.toContain("/social/u/");
@@ -301,15 +344,29 @@ describe("profile opt-in", () => {
     expect(socialProfileTabHref("/social/u/ada", "credits")).toBe("/social/u/ada?tab=credits");
     expect(socialProfileTabHref("/social/profile", "posts")).toBe("/social/profile");
     expect(socialProfileTabLabel("credits")).toBe("Credits");
-    expect(socialComposerPrompt("Ada Lovelace")).toBe("What's on your mind Ada?");
+    expect(socialComposerPrompt("Ada Lovelace")).toBe("Write something");
+    expect(socialComposerPrompt(null)).toBe("Write something");
+    expect(socialComposerPrompt("")).toBe("Write something");
+    expect(SOCIAL.home.composerPrompt).toBe("Write something");
+    expect(SOCIAL.home.composerPromptNamed).toBe("Write something");
+    expect(SOCIAL.forYou.topics).toBe("Topics.");
+    expect(SOCIAL.forYou.latestCourse).toBe("Latest course");
     expect(SOCIAL.profile.postsTab).toBe("Posts");
     expect(SOCIAL.profile.highlightsTab).toBe("Highlights");
     expect(SOCIAL.profile.creditsTab).toBe("Credits");
     expect(SOCIAL.profile.creditsEmpty).toBe("No credits yet");
+    expect(SOCIAL.profile.creditsEmptyHint).toBe("Credits are the titles and roles attached to your name.");
+    expect(SOCIAL.profile.creditsEmptyOwnHint).toBe(
+      "Add the titles and roles you want attached to your name.",
+    );
+    expect(SOCIAL.profile.completeIdentity).toBe("Edit profile");
+    expect(parseProfileHandleParam("%40ada")).toBe("ada");
     expect(parseProfileHandleParam("%40AdamC")).toBe("AdamC");
     expect(parseProfileHandleParam("AdamC")).toBe("AdamC");
     expect(parseProfileHandleParam("@ada")).toBe("ada");
     expect(parseProfileHandleParam("ada")).toBe("ada");
+    expect(parseProfileHandleParam("%40AdamC")).toBe("AdamC");
+    expect(parseProfileHandleParam("AdamC")).toBe("AdamC");
     expect(suggestedHandleSeed("Ada.Carp@example.com", "u1")).toBe("adacarp");
     expect(BIO_MAX).toBe(150);
     expect(socialBioEnterSubmits()).toBe(false);

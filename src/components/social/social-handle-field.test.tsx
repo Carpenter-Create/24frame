@@ -45,6 +45,7 @@ describe("SocialHandleField", () => {
     const form = readFileSync("src/components/social/social-forms.tsx", "utf8");
     const actions = readFileSync("src/app/(app)/social/actions.ts", "utf8");
     expect(form).toContain("socialHandleRequiredError");
+    expect(form).toContain("normalizeHandle");
     expect(form).toContain("SocialHandleField");
     expect(actions).toContain("socialHandleRequiredError");
     expect(actions).toContain("normalizeHandle");

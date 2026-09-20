@@ -15,6 +15,19 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
+vi.mock("@/lib/s3-avatars", () => ({
+  signedAvatarUrl: vi.fn().mockResolvedValue(null),
+  signedAvatarUrls: vi.fn().mockResolvedValue(new Map()),
+}));
+vi.mock("@/lib/social-profile", () => ({
+  ensureOwnSocialProfile: vi.fn().mockResolvedValue({
+    id: "u1",
+    handle: "ada",
+    display_name: "Ada Lovelace",
+    status: "active",
+    crafts: [],
+  }),
+}));
 
 function ctx() {
   return {
@@ -37,7 +50,10 @@ function stub() {
   chain.is = vi.fn(self);
   chain.or = vi.fn(self);
   chain.ilike = vi.fn(self);
+  chain.order = vi.fn(self);
+  chain.in = vi.fn(self);
   chain.range = vi.fn(async () => ({ data: [], error: null }));
+  chain.maybeSingle = vi.fn(async () => ({ data: null, error: null }));
   vi.mocked(createClient).mockResolvedValue({ from: vi.fn(() => chain) } as never);
 }
 
@@ -91,6 +107,8 @@ describe("Social Explore", () => {
       chain.is = vi.fn(self(chain));
       chain.or = vi.fn(self(chain));
       chain.ilike = vi.fn(self(chain));
+      chain.order = vi.fn(self(chain));
+      chain.in = vi.fn(self(chain));
     }
     peopleChain.range = vi.fn(async () => ({ data: people, error: null }));
     postsChain.range = vi.fn(async () => ({ data: [], error: null }));

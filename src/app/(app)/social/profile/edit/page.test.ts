@@ -19,11 +19,17 @@ vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/s3-avatars", () => ({
   signedAvatarUrl: vi.fn().mockResolvedValue(null),
 }));
+vi.mock("@/lib/s3-social-media", () => ({
+  signedSocialMediaUrl: vi.fn().mockResolvedValue(null),
+}));
 vi.mock("@/lib/social-profile", () => ({
   ensureOwnSocialProfileResult: vi.fn(),
 }));
 vi.mock("@/app/(app)/social/actions", () => ({
   createSocialProfile: vi.fn(),
+  presignSocialMediaUpload: vi.fn(),
+  saveSocialWelcomeVideo: vi.fn(),
+  clearSocialWelcomeVideo: vi.fn(),
 }));
 vi.mock("@/app/(app)/account/actions", () => ({
   uploadAccountPhoto: vi.fn(),
@@ -70,6 +76,22 @@ describe("Social profile edit page", () => {
     expect(html).toContain("https://24frame.co/@ada");
     expect(html).toContain(SOCIAL.profile.addLink);
     expect(html).not.toContain("Education");
+  });
+
+  it("loads saved website_url values into the Links fields", async () => {
+    vi.mocked(ensureOwnSocialProfileResult).mockResolvedValue({
+      profile: {
+        ...ensured,
+        website_url: JSON.stringify(["https://instagram.com/ada", "https://youtube.com/@ada"]),
+      },
+      error: null,
+    });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+    const html = renderToStaticMarkup(await SocialProfileEditPage());
+    expect(html).toContain("data-social-profile-edit-links");
+    expect(html).toContain('value="https://instagram.com/ada"');
+    expect(html).toContain('value="https://youtube.com/@ada"');
+    expect(html).toContain("data-social-profile-edit-link-remove");
   });
 
   it("redirects home when ensure has no profile", async () => {

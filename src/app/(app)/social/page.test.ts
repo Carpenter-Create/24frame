@@ -7,11 +7,10 @@ import { createClient } from "@/lib/supabase/server";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
 import { ASK_GLOBEE } from "@/lib/ask-globee";
-import { SOCIAL } from "@/lib/social";
+import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import {
   SOCIAL_FOLLOWEES_LIMIT,
   SOCIAL_FOLLOWING_WALL_LIMIT,
-  SOCIAL_HOME_CHATS_LIMIT,
   SOCIAL_STORIES_RAIL_LIMIT,
   encodeFollowingWallCursor,
 } from "@/lib/social-home-bounds";
@@ -33,6 +32,9 @@ vi.mock("@/lib/s3-avatars", () => ({
 vi.mock("@/lib/s3-social-media", () => ({
   signedSocialMediaItems: vi.fn().mockResolvedValue([]),
   signedSocialMediaByPostId: vi.fn().mockResolvedValue(new Map()),
+}));
+vi.mock("@/lib/s3-education", () => ({
+  signedEducationCoverUrls: vi.fn().mockResolvedValue(new Map()),
 }));
 vi.mock("@/lib/social-profile", () => ({
   ensureOwnSocialProfile: vi.fn(),
@@ -99,8 +101,23 @@ function stubClient({
   posts = [],
   follows = [],
   stories = [],
+  courses = [],
 }: {
   profile?: { id: string; handle: string; display_name: string; status: string; bio?: string | null } | null;
+  courses?: {
+    id: string;
+    slug: string;
+    title: string;
+    description: string | null;
+    cover_key: string | null;
+    is_flagship_free: boolean;
+    price_cents: number | null;
+    catalog_code: string;
+    status: string;
+    position: number;
+    instructor_id: string | null;
+    created_at: string;
+  }[];
   posts?: {
     id: string;
     body: string;
@@ -129,6 +146,7 @@ function stubClient({
     if (table === "follows") return chain(follows);
     if (table === "stories") return chain(stories);
     if (table === "story_views") return chain([]);
+    if (table === "courses") return chain(courses);
     throw new Error(`unexpected from(${table})`);
   });
   const rpc = vi.fn().mockResolvedValue({ data: [], error: null });
@@ -166,7 +184,15 @@ describe("Social home", () => {
     expect(html).toContain("/social/create?kind=text");
     expect(html).toContain(SOCIAL.home.attach);
     expect(html).not.toContain("data-social-composer-action");
-    expect(html.indexOf("data-social-home-composer")).toBeLessThan(html.indexOf("data-social-stories"));
+    expect(html.indexOf("data-social-home-composer")).toBeLessThan(html.indexOf("data-social-home-topics"));
+    expect(html.indexOf("data-social-home-topics")).toBeLessThan(html.indexOf("data-social-stories"));
+    expect(html.indexOf("data-social-stories")).toBeLessThan(html.indexOf("data-social-home-tabs"));
+    expect(html).toContain(SOCIAL.forYou.topics);
+    expect(html.split(SOCIAL.forYou.topics).length - 1).toBe(1);
+    expect(html).toContain("Write something");
+    expect(html).not.toContain("What's on your mind");
+    expect(html).not.toContain("Topics for you");
+    expect(html).not.toContain("data-social-for-you-topics");
     expect(html).toContain("data-social-stories-tall");
     expect(html).toContain("data-social-home-tabs");
     expect(html).toContain(SOCIAL.home.followingTab);
@@ -174,20 +200,20 @@ describe("Social home", () => {
     expect(html).toContain("data-social-stories");
     expect(html).toContain("data-social-following-empty");
     expect(html).toContain("data-social-for-you");
-    expect(html).toContain("data-social-recent-chats");
-    expect(html).toContain("data-social-chats-empty");
-    expect(html).toContain(SOCIAL.home.recentChats);
-    expect(html).toContain(SOCIAL.home.chatsEmpty);
+    expect(html).not.toContain("data-social-latest-course");
+    expect(html).not.toContain(SOCIAL.forYou.latestCourse);
+    expect(html).not.toContain("data-social-recent-chats");
+    expect(html).not.toContain("data-social-chats-empty");
+    expect(html).not.toContain(SOCIAL.home.recentChats);
     expect(html).toContain('data-social-icon="users"');
     expect(html).toContain('data-social-icon="image"');
     expect(html).toContain("Cinematography");
     expect(html).toContain("Music");
     expect(html).not.toContain("data-social-first-win");
-    expect(html).toContain("data-social-checklist");
-    expect(html).toContain("data-social-home-setup");
-    expect(html).toContain("data-social-checklist-dismiss");
-    expect(html).toContain(SOCIAL.checklist.title);
-    expect(html).toContain(SOCIAL.checklist.firstPost);
+    expect(html).not.toContain("data-social-checklist");
+    expect(html).not.toContain("data-social-home-setup");
+    expect(html).not.toContain(SOCIAL.checklist.title);
+    expect(html).toContain("data-social-for-you");
     expect(html).toContain(SOCIAL.home.emptyQuiet);
     expect(html).toContain(SOCIAL.home.emptyHint);
     expect(html).not.toContain("One clear next step");
@@ -205,7 +231,7 @@ describe("Social home", () => {
     expect(html).not.toContain(ASK_GLOBEE.headline);
   });
 
-  it("shows the checklist once the ensure path has a profile", async () => {
+  it("omits Finish setting up from Home once a profile exists", async () => {
     const { from } = stubClient({ profile: ensured });
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
@@ -215,7 +241,9 @@ describe("Social home", () => {
     expect(html).toContain("data-social-home-composer");
     expect(html).toContain("data-social-story-create");
     expect(html).not.toContain("data-social-first-win");
-    expect(html).toContain("data-social-checklist");
+    expect(html).not.toContain("data-social-checklist");
+    expect(html).not.toContain("data-social-home-setup");
+    expect(html).not.toContain(SOCIAL.checklist.title);
     expect(html).not.toContain("data-social-need-profile");
     expect(html).not.toContain("data-social-post-form");
   });
@@ -244,8 +272,8 @@ describe("Social home", () => {
     expect(html).toContain("Ada Lovelace");
     expect(html).toContain('src="https://s3.example/signed-avatar"');
     expect(html).toContain("data-social-home-composer");
-    expect(html).toContain("data-social-checklist");
-    expect(html).toContain(SOCIAL.checklist.title);
+    expect(html).not.toContain("data-social-checklist");
+    expect(html).not.toContain(SOCIAL.checklist.title);
     expect(html).not.toContain("AL");
     expect(html).not.toContain("data-social-avatar-ring");
   });
@@ -324,34 +352,64 @@ describe("Social home", () => {
     expect(html).not.toContain(`data-social-post="${posts[SOCIAL_FOLLOWING_WALL_LIMIT]!.id}"`);
   });
 
-  it("renders recent chats from the inbox preview and deep-links Messages", async () => {
-    const { rpc } = stubClient({ profile: ensured });
-    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
-    rpc.mockResolvedValue({
-      data: [
+  it("shows Latest course from the Education catalog on the right rail", async () => {
+    stubClient({
+      profile: ensured,
+      courses: [
         {
-          conversation_id: "c1",
-          kind: "direct",
-          last_message_at: "2026-09-14T12:00:00.000Z",
-          muted: false,
-          participant_ids: ["u2"],
-          peer_id: "u2",
-          title: null,
-          unread_count: 0,
+          id: "c1",
+          slug: "catalog-basics",
+          title: "Catalog basics",
+          description: null,
+          cover_key: null,
+          is_flagship_free: true,
+          price_cents: null,
+          catalog_code: "EDU-1",
+          status: "published",
+          position: 2,
+          instructor_id: null,
+          created_at: "2026-09-01T12:00:00.000Z",
+        },
+        {
+          id: "c2",
+          slug: "rights-desk",
+          title: "Rights desk",
+          description: null,
+          cover_key: null,
+          is_flagship_free: true,
+          price_cents: null,
+          catalog_code: "EDU-2",
+          status: "published",
+          position: 1,
+          instructor_id: null,
+          created_at: "2026-09-18T12:00:00.000Z",
         },
       ],
-      error: null,
     });
-    vi.mocked(signedAvatarUrls).mockResolvedValue(new Map());
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
     const html = await renderHome();
-    expect(rpc).toHaveBeenCalledWith("get_dm_inbox", { p_limit: SOCIAL_HOME_CHATS_LIMIT + 1 });
-    expect(html).toContain("data-social-recent-chats");
-    expect(html).toContain('data-social-chat-row="c1"');
-    expect(html).toContain("/social/dms/c1");
-    expect(html).toContain(SOCIAL.home.recentChats);
+    expect(html).toContain("data-social-latest-course");
+    expect(html).toContain(SOCIAL.forYou.latestCourse);
+    expect(html).toContain("Rights desk");
+    expect(html).toContain("/education/rights-desk");
+    expect(html).toContain('data-course-card="rights-desk"');
+    expect(html).not.toContain("Catalog basics");
+    expect(html).not.toContain("data-social-for-you-topics");
+  });
+
+  it("does not surface Recent chats on Home; Messages stay on /social/dms", async () => {
+    const { rpc } = stubClient({ profile: ensured });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const html = await renderHome();
+    expect(rpc).not.toHaveBeenCalledWith("get_dm_inbox", expect.anything());
+    expect(html).not.toContain("data-social-recent-chats");
+    expect(html).not.toContain("data-social-chat-row");
+    expect(html).not.toContain(SOCIAL.home.recentChats);
     expect(html).not.toContain("data-social-chats-empty");
-    expect(html).not.toContain("Loved the reel");
+    expect(SOCIAL_ROUTES.dms).toBe("/social/dms");
+    expect(html).not.toContain('"/messages"');
   });
 
   it("opens For you as suggested people and locked topics, not an invented feed", async () => {
@@ -362,6 +420,10 @@ describe("Social home", () => {
     expect(html).not.toContain("data-social-home-setup");
     expect(html).toContain(SOCIAL.forYou.people);
     expect(html).toContain(SOCIAL.forYou.topics);
+    expect(html.split(SOCIAL.forYou.topics).length - 1).toBe(1);
+    expect(html.indexOf("data-social-home-topics")).toBeLessThan(html.indexOf("data-social-for-you-lane"));
+    expect(html).not.toContain("data-social-for-you-topics");
+    expect(html).not.toContain("data-social-latest-course");
     expect(html).toContain("Cinematography");
     expect(html).not.toContain("Education");
     expect(html).not.toContain("Riley Okonkwo");

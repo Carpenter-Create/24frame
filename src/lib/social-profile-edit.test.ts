@@ -88,7 +88,7 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(socialBioCount("Founder\nInvestor")).toBe(16);
   });
 
-  it("reuses the app-wide avatar SoT and does not invent a links editor", () => {
+  it("reuses the app-wide avatar SoT and edits links in place", () => {
     expect(avatarObjectKey("11111111-1111-4111-8111-111111111111")).toBe(
       "avatars/11111111-1111-4111-8111-111111111111/avatar",
     );
@@ -98,6 +98,8 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(edit).toContain("uploadAccountPhoto");
     expect(edit).toContain("SOCIAL.profile.editPicture");
     expect(edit).toContain("SOCIAL.profile.addLink");
+    expect(edit).toContain("parseSocialWebsiteUrlField");
+    expect(edit).toContain('form.set("links"');
     expect(edit).not.toContain("SOCIAL_ROUTES.profileBio}/link");
     expect(bioPage).toContain("SocialProfileBioEditor");
     expect(SOCIAL_ROUTES.profileEdit).toBe("/social/profile/edit");
@@ -116,8 +118,22 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(SOCIAL_PROFILE_EDIT_HANDLE_ERROR_CLASS).not.toContain("t-body-sm");
     expect(edit).toContain("<Input");
     expect(edit).toContain('variant="bare"');
-    expect(edit).toContain('id="social-edit-name"');
+    expect(edit).toContain('id="social-edit-first-name"');
+    expect(edit).toContain('id="social-edit-middle-name"');
+    expect(edit).toContain('id="social-edit-last-name"');
+    expect(edit).not.toContain('id="social-edit-name"');
     expect(edit).toContain('id="social-edit-handle"');
+    expect(edit).toContain("SocialProfileRolesField");
+    expect(edit).toContain("SocialProfileTopicsField");
+    expect(edit).toContain('form.set("crafts"');
+    expect(edit).toContain('form.set("topics"');
+    expect(edit).toContain('id="social-edit-imdb"');
+    expect(edit).toContain('form.set("imdb_url"');
+    expect(edit).toContain("AccountAvatarCrop");
+    expect(edit).toContain("accountAvatarPickError");
+    expect(edit).toContain("data-social-profile-edit-avatar-drop");
+    expect(edit).toContain("SOCIAL_PROFILE_EDIT_AVATAR_DROPPING_CLASS");
+    expect(edit).toContain("data-dropping");
     expect(bio).toContain("<Textarea");
     expect(bio).toContain("data-social-bio-textarea");
     expect(edit).not.toContain("maximum-scale");

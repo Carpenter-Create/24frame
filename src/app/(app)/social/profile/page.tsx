@@ -14,9 +14,10 @@ import {
   SocialProfileIdentity,
   socialAuthorPostCard,
 } from "@/components/social/social-ui";
+import { SocialWelcomeVideo } from "@/components/social/social-welcome-video";
 import { SOCIAL_ACTION_CLASS, SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS, SOCIAL_PAGE_CLASS } from "@/lib/social-chrome";
 import { signedAvatarUrl, signedAvatarUrls } from "@/lib/s3-avatars";
-import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
+import { signedSocialMediaByPostId, signedSocialMediaUrl } from "@/lib/s3-social-media";
 import {
   parseSocialProfileTab,
   SOCIAL,
@@ -85,11 +86,12 @@ async function SocialProfileMain({
   const { profile } = await ensureOwnSocialProfileResult(supabase, ctx.user);
   if (!profile) return null;
 
-  const [photoUrl, liveStoriesPage, history, counts] = await Promise.all([
+  const [photoUrl, liveStoriesPage, history, counts, welcomeUrl] = await Promise.all([
     signedAvatarUrl(profile.id),
     loadLiveStories(supabase, [profile.id]),
     loadAuthorPosts(supabase, profile.id),
     loadProfileSocialCounts(supabase, profile.id),
+    profile.welcome_video_key ? signedSocialMediaUrl(profile.welcome_video_key) : Promise.resolve(null),
   ]);
   const liveStories = liveStoriesPage.stories;
   const [media, liked] = await Promise.all([
@@ -116,6 +118,10 @@ async function SocialProfileMain({
         handle={profile.handle}
         photoUrl={photoUrl}
         bio={profile.bio?.trim() ? profile.bio : SOCIAL.profile.ownFace}
+        roles={profile.crafts}
+        topics={profile.topics}
+        websiteUrl={profile.website_url}
+        imdbUrl={profile.imdb_url}
         ring={liveStories.length > 0 ? "live" : null}
         stats={counts ?? undefined}
         actions={() => (
@@ -127,9 +133,14 @@ async function SocialProfileMain({
           </>
         )}
       />
+      {welcomeUrl ? <SocialWelcomeVideo src={welcomeUrl} /> : null}
       <SocialProfileTabs baseHref={SOCIAL_ROUTES.profile} active={tab} />
       {tab === "credits" ? (
-        <SocialEmpty icon="film-slate" title={SOCIAL.profile.creditsEmpty} />
+        <SocialEmpty
+          icon="film-slate"
+          title={SOCIAL.profile.creditsEmpty}
+          hint={SOCIAL.profile.creditsEmptyOwnHint}
+        />
       ) : tab === "highlights" ? (
         highlightCards.length > 0 ? (
           <SocialHighlights cards={highlightCards} />
@@ -142,7 +153,8 @@ async function SocialProfileMain({
           <SocialAuthorHistory
             truncated={history.truncated}
             emptyHint={SOCIAL.profile.postsEmptyOwnHint}
-            emptyAction={{ href: SOCIAL_ROUTES.create, label: SOCIAL.profile.sharePost }}
+            emptyAction={{ href: SOCIAL_ROUTES.profileEdit, label: SOCIAL.profile.completeIdentity }}
+            emptySecondary={{ href: SOCIAL_ROUTES.create, label: SOCIAL.profile.sharePost }}
             posts={history.posts.map((post) =>
               socialAuthorPostCard({
                 post,
@@ -166,8 +178,15 @@ async function SocialProfileMain({
 
 async function SocialProfileForYouSlot({ session }: { session: SocialSession }) {
   const { ctx, supabase } = session;
-  const followees = await loadFolloweeIds(supabase, ctx.user.id);
-  const suggested = await loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids]);
+  const [{ profile }, followees] = await Promise.all([
+    ensureOwnSocialProfileResult(supabase, ctx.user),
+    loadFolloweeIds(supabase, ctx.user.id),
+  ]);
+  const suggested = await loadSuggestedPeople(
+    supabase,
+    [ctx.user.id, ...followees.ids],
+    { topics: profile?.topics ?? [], crafts: profile?.crafts ?? [] },
+  );
   const faces =
     suggested.length > 0 ? await signedAvatarUrls(suggested.map((person) => person.id)) : new Map();
   return <SocialForYouRail people={suggested} faces={faces} />;

@@ -17,11 +17,13 @@ import {
   courseLessonDurationLabel,
   courseOutlineMeta,
   firstOutlineLesson,
+  latestDiscoverableCourse,
   lessonInOutline,
   outlineForDisplay,
   visibleCourseLessons,
   type CourseLessonRow,
   type CourseModuleRow,
+  type CourseRow,
 } from "./courses";
 
 const moduleOne: CourseModuleRow = {
@@ -157,6 +159,60 @@ describe("course routes and copy", () => {
     expect(SOCIAL.courses.denied).not.toMatch(/LOCKED|Buy|price/i);
     expect(JSON.stringify(SOCIAL.courses)).not.toMatch(/—/);
     expect(JSON.stringify(SOCIAL.courses)).not.toContain("Courses");
+  });
+});
+
+describe("latestDiscoverableCourse", () => {
+  const older: CourseRow = {
+    id: "c1",
+    slug: "catalog-basics",
+    title: "Catalog basics",
+    description: null,
+    cover_key: null,
+    is_flagship_free: true,
+    price_cents: null,
+    catalog_code: "EDU-1",
+    status: "published",
+    position: 2,
+    instructor_id: null,
+    created_at: "2026-09-01T12:00:00.000Z",
+  };
+  const newer: CourseRow = {
+    ...older,
+    id: "c2",
+    slug: "rights-desk",
+    title: "Rights desk",
+    position: 1,
+    created_at: "2026-09-18T12:00:00.000Z",
+  };
+
+  it("picks the newest published course, not catalog position", () => {
+    expect(latestDiscoverableCourse([older, newer])?.id).toBe("c2");
+    expect(latestDiscoverableCourse([{ ...newer, status: "draft" }, older])?.id).toBe("c1");
+    expect(latestDiscoverableCourse([])).toBeNull();
+  });
+
+  it("prefers a Topic-matching published course, with Professions as a soft bias", () => {
+    const design = {
+      ...newer,
+      id: "c3",
+      title: "Animation for art directors",
+      created_at: "2026-09-02T12:00:00.000Z",
+    };
+    const finance = {
+      ...newer,
+      id: "c4",
+      title: "Financing the slate",
+      created_at: "2026-09-01T12:00:00.000Z",
+    };
+    expect(latestDiscoverableCourse([older, newer, design], ["art_director"])?.id).toBe("c3");
+    expect(
+      latestDiscoverableCourse([older, newer, design, finance], {
+        topics: ["Financing"],
+        crafts: ["art_director"],
+      })?.id,
+    ).toBe("c4");
+    expect(latestDiscoverableCourse([older, newer, design])?.id).toBe("c2");
   });
 });
 

@@ -174,6 +174,7 @@ describe("social isolation lock", () => {
     const middleware = readFileSync("src/lib/supabase/middleware.ts", "utf8");
     const nextConfig = readFileSync("next.config.ts", "utf8");
     expect(social).toContain("socialVanityInternalPath");
+    expect(social).toContain("matchSocialPublicAtPath");
     expect(social).toContain("socialProfileRewriteTarget");
     expect(social).toContain("socialProfileLegacyPublicRedirect");
     expect(social).toContain("matchSocialPublicAtPath");
@@ -189,5 +190,6 @@ describe("social isolation lock", () => {
     expect(middleware).toContain("NextResponse.redirect");
     expect(middleware).toContain("301");
     expect(middleware).not.toContain('path.startsWith("/@")');
+    expect(middleware).not.toContain("status: 301");
   });
 });

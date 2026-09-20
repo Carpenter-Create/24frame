@@ -285,7 +285,7 @@ export function socialFirstName(displayName: string | null | undefined): string 
 
 export function socialComposerPrompt(displayName: string | null | undefined): string {
   const first = socialFirstName(displayName);
-  return first ? `${SOCIAL.home.composerPromptNamed} ${first}?` : SOCIAL.home.composerPrompt;
+  return first ? SOCIAL.home.composerPromptNamed : SOCIAL.home.composerPrompt;
 }
 
 export function formatSocialCount(n: number): string {
@@ -323,8 +323,8 @@ export const SOCIAL = {
     recentChats: "Recent chats",
     chatsEmpty: "No messages yet",
     goExplore: "Explore creators",
-    composerPrompt: "What's on your mind?",
-    composerPromptNamed: "What's on your mind",
+    composerPrompt: "Write something",
+    composerPromptNamed: "Write something",
     followingTab: "Following",
     forYouTab: "For you",
     compose: "Write a post",
@@ -453,7 +453,8 @@ export const SOCIAL = {
   forYou: {
     title: "For you",
     people: "Suggested people",
-    topics: "Topics for you",
+    topics: "Topics.",
+    latestCourse: "Latest course",
   },
   profile: {
     title: "Profile",
@@ -469,6 +470,11 @@ export const SOCIAL = {
     usernamePlaceholder: "username",
     displayName: "Display name",
     name: "Name",
+    firstName: "First name",
+    middleName: "Middle name",
+    lastName: "Last name",
+    firstNameRequired: "First name is required",
+    lastNameRequired: "Last name is required",
     // Sentinel for existing rows only. Never seed on create. Never render as a person name.
     defaultDisplayName: "Member",
     bio: "Bio",
@@ -481,6 +487,10 @@ export const SOCIAL = {
     editPicture: "Edit picture",
     links: "Links",
     addLink: "Add link",
+    removeLink: "Remove",
+    linkPlaceholder: "https://",
+    linkInvalid: "Enter a valid http or https URL.",
+    linkLimit: "You can add up to 8 links.",
     birthDate: "Date of birth",
     birthDateHint: "Required. You must be 13 or older.",
     submit: "Save handle",
@@ -488,7 +498,8 @@ export const SOCIAL = {
     created: "Profile created.",
     postsEmpty: "No posts yet.",
     postsEmptyHint: "When they share stills, clips, or notes, they will land here.",
-    postsEmptyOwnHint: "Share a still, clip, or note — your grid starts here.",
+    postsEmptyOwnHint: "Add a photo, your name, and a short bio — or share a first still, clip, or note.",
+    completeIdentity: "Edit profile",
     sharePost: "Share a post",
     postsTruncated: `Showing the latest ${LIST_PAGE} posts.`,
     uploadPhoto: "Upload photo",
@@ -506,10 +517,28 @@ export const SOCIAL = {
     highlightsEmptyHint: "Live stories appear here for 24 hours.",
     creditsTab: "Credits",
     creditsEmpty: "No credits yet",
+    creditsEmptyHint: "Credits are the titles and roles attached to your name.",
+    creditsEmptyOwnHint: "Add the titles and roles you want attached to your name.",
     postsStat: "posts",
     followersStat: "followers",
     followingStat: "following",
     ownFace: "Your public face. Edit anytime.",
+    welcomeVideo: "Welcome video",
+    welcomeAdd: "Add welcome video",
+    welcomeReplace: "Replace welcome video",
+    welcomeRemove: "Remove welcome video",
+    roles: "Professions",
+    rolesSearch: "Search professions",
+    rolesHint: "Choose up to 5.",
+    topics: "Topics",
+    topicsSearch: "Search topics",
+    topicsHint: "Subjects you follow.",
+    imdb: "IMDb",
+    imdbPlaceholder: "imdb.com/name/nm… or nm########",
+    imdbInvalid: "Enter an IMDb name URL or nm id.",
+    imdbHint: "A public link to your IMDb name page.",
+    followedBy: "Followed by",
+    followedByMore: "+{n} more",
   },
   member: {
     title: "Member",
@@ -561,6 +590,7 @@ export const SOCIAL = {
     title: "Messages",
     subtitle: `One-to-one and group conversations in ${PRODUCT_NAME}.`,
     empty: "No conversations yet.",
+    startCta: "Start a conversation",
     thread: "Conversation",
     compose: "Write a message",
     submit: "Send",
@@ -680,6 +710,40 @@ export function normalizeDisplayName(raw: string): string | null {
   const name = raw.trim().replace(/\s+/g, " ");
   if (name.length === 0 || name.length > DISPLAY_NAME_MAX) return null;
   return name;
+}
+
+// Social edit shows First / Middle / Last. Persist the composed
+// display_name so Settings/account and public person rows stay on one
+// name SoT. No parallel first/middle/last columns.
+export function splitSocialDisplayName(raw: string): {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+} {
+  const name = (raw ?? "").trim().replace(/\s+/g, " ");
+  if (!name) return { firstName: "", middleName: "", lastName: "" };
+  const parts = name.split(" ");
+  if (parts.length === 1) return { firstName: parts[0], middleName: "", lastName: "" };
+  if (parts.length === 2) return { firstName: parts[0], middleName: "", lastName: parts[1] };
+  return {
+    firstName: parts[0],
+    middleName: parts.slice(1, -1).join(" "),
+    lastName: parts[parts.length - 1],
+  };
+}
+
+export function composeSocialDisplayName(
+  firstName: string,
+  lastName: string,
+  middleName = "",
+): string {
+  return [firstName.trim(), middleName.trim(), lastName.trim()].filter(Boolean).join(" ");
+}
+
+export function socialNameRequiredError(firstName: string, lastName: string): string | null {
+  if (!firstName.trim()) return SOCIAL.profile.firstNameRequired;
+  if (!lastName.trim()) return SOCIAL.profile.lastNameRequired;
+  return null;
 }
 
 /** Legacy DB sentinel. Not a human name. SOCIAL.member.title may reuse this word as route chrome. */
@@ -838,8 +902,9 @@ export function isEligibleBirthDate(iso: string, today = new Date()): boolean {
 export function socialInitials(displayName: string): string {
   const parts = displayName.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "?";
-  if (parts.length === 1) return parts[0].slice(0, 1).toUpperCase();
-  return `${parts[0].slice(0, 1)}${parts[1].slice(0, 1)}`.toUpperCase();
+  const first = parts[0].slice(0, 1);
+  const last = parts.length > 1 ? parts[parts.length - 1].slice(0, 1) : "";
+  return `${first}${last}`.toUpperCase();
 }
 
 export function socialCopyHasProductName(text: string): boolean {

@@ -5,10 +5,13 @@ import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { Input } from "@/components/ui/input";
+import { SocialSuggestedPeople } from "@/components/social/social-for-you";
 import { SocialExploreResultsSkeleton } from "@/components/social/social-skeletons";
 import { SocialPersonRow } from "@/components/social/social-ui";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
-import { loadExploreSearch } from "@/lib/social-feed";
+import { signedAvatarUrls } from "@/lib/s3-avatars";
+import { loadExploreSearch, loadFolloweeIds, loadSuggestedPeople } from "@/lib/social-feed";
+import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { requireSocialSession, type SocialSession } from "@/lib/social-session";
 
 export default async function SocialExplorePage({
@@ -39,17 +42,52 @@ export default async function SocialExplorePage({
           <SocialExploreHits session={session} q={q} />
         </Suspense>
       ) : (
-        <div data-social-explore-trending="">
-          <HouseEmpty>{SOCIAL.explore.empty}</HouseEmpty>
-        </div>
+        <Suspense fallback={null}>
+          <SocialExploreSuggested session={session} />
+        </Suspense>
       )}
     </div>
   );
 }
 
+async function SocialExploreSuggested({ session }: { session: SocialSession }) {
+  const { ctx, supabase } = session;
+  const [profile, followees] = await Promise.all([
+    ensureOwnSocialProfile(supabase, ctx.user),
+    loadFolloweeIds(supabase, ctx.user.id),
+  ]);
+  const suggested = await loadSuggestedPeople(
+    supabase,
+    [ctx.user.id, ...followees.ids],
+    { topics: profile?.topics ?? [], crafts: profile?.crafts ?? [] },
+  );
+  const faces =
+    suggested.length > 0 ? await signedAvatarUrls(suggested.map((person) => person.id)) : new Map();
+
+  if (suggested.length === 0) {
+    return (
+      <div data-social-explore-trending="">
+        <HouseEmpty>{SOCIAL.explore.empty}</HouseEmpty>
+      </div>
+    );
+  }
+
+  return (
+    <div data-social-explore-trending="" data-social-explore-suggested="" className="flex flex-col gap-3">
+      <SocialSuggestedPeople people={suggested} faces={faces} />
+    </div>
+  );
+}
+
 async function SocialExploreHits({ session, q }: { session: SocialSession; q: string }) {
-  const results = await loadExploreSearch(session.supabase, q);
+  const profile = await ensureOwnSocialProfile(session.supabase, session.ctx.user);
+  const results = await loadExploreSearch(session.supabase, q, {
+    topics: profile?.topics ?? [],
+    crafts: profile?.crafts ?? [],
+  });
   const hits = results.hits;
+  const personIds = hits.filter((hit) => hit.kind === "person").map((hit) => hit.id);
+  const faces = personIds.length > 0 ? await signedAvatarUrls(personIds) : new Map();
 
   if (hits.length === 0) {
     return <HouseEmpty>{SOCIAL.explore.noResults}</HouseEmpty>;
@@ -69,6 +107,7 @@ async function SocialExploreHits({ session, q }: { session: SocialSession; q: st
               <SocialPersonRow
                 handle={hit.handle}
                 displayName={hit.displayName}
+                photoUrl={faces.get(hit.id)}
                 href={hit.href}
               />
             ) : (

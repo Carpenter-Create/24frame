@@ -2,21 +2,19 @@ import { Suspense } from "react";
 
 import { TextAction } from "@/components/chrome/house";
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { SocialOnboardingChecklist } from "@/components/social/social-checklist";
 import { SocialEmpty } from "@/components/social/social-empty";
 import { SocialForYouRail } from "@/components/social/social-for-you";
 import { SocialHomeComposer } from "@/components/social/social-home-composer";
 import { SocialHomeTabs } from "@/components/social/social-home-tabs";
-import { SocialRecentChats } from "@/components/social/social-recent-chats";
+import { SocialHomeTopics } from "@/components/social/social-home-topics";
 import {
   SocialForYouSkeleton,
   SocialHomeCenterSkeleton,
-  SocialRecentChatsSkeleton,
 } from "@/components/social/social-skeletons";
 import { SocialStoriesRail } from "@/components/social/social-stories-rail";
 import { SocialPostCard } from "@/components/social/social-ui";
 import { SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS, SOCIAL_PILL_ACTIVE_CLASS, SOCIAL_PILL_CLASS } from "@/lib/social-chrome";
-import { signedAvatarUrl, signedAvatarUrls } from "@/lib/s3-avatars";
+import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
 import {
   parseSocialCategoryParam,
@@ -25,16 +23,15 @@ import {
   type SocialCategoryLabel,
   type SocialCategoryTopic,
 } from "@/lib/social-categories";
-import { socialHomeChats } from "@/lib/social-home-chats";
-import { followingAuthorIds, socialChecklistItems } from "@/lib/social-home";
+import { latestDiscoverableCourse, loadDiscoverableCourses } from "@/lib/courses";
+import { signedEducationCoverUrls } from "@/lib/s3-education";
+import { followingAuthorIds } from "@/lib/social-home";
 import {
   SOCIAL_FOLLOWING_WALL_CURSOR_PARAM,
-  SOCIAL_HOME_CHATS_LIMIT,
   parseFollowingWallCursorParam,
   socialFollowingWallHref,
   type FollowingWallCursor,
 } from "@/lib/social-home-bounds";
-import { loadDmInbox, type DmInboxRow } from "@/lib/social-dms";
 import {
   groupStoryRail,
   loadFolloweeIds,
@@ -42,7 +39,6 @@ import {
   loadGroupsByIds,
   loadLikedPostIds,
   loadLiveStories,
-  loadOwnPostFacts,
   loadProfilesByIds,
   loadSuggestedPeople,
   loadViewedStoryIds,
@@ -51,7 +47,7 @@ import {
   type SocialProfileRow,
   type SocialSuggestedPerson,
 } from "@/lib/social-feed";
-import { inboxPeerIds, parseSocialHomeLane, SOCIAL, SOCIAL_HOME_LANE_PARAM, SOCIAL_ROUTES, socialPersonLabel, type SocialHomeLane } from "@/lib/social";
+import { parseSocialHomeLane, SOCIAL, SOCIAL_HOME_LANE_PARAM, SOCIAL_ROUTES, socialPersonLabel, type SocialHomeLane } from "@/lib/social";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { requireSocialSession, type SocialSession } from "@/lib/social-session";
 
@@ -68,9 +64,6 @@ export default async function SocialHomePage({
 
   return (
     <div data-social-home="" className={SOCIAL_HOME_LAYOUT_CLASS}>
-      <Suspense fallback={<SocialRecentChatsSkeleton />}>
-        <SocialHomeRecentChatsSlot session={session} />
-      </Suspense>
       <Suspense fallback={<SocialHomeCenterSkeleton />}>
         <SocialHomeCenter session={session} category={category} cursor={cursor} lane={lane} topic={topic} />
       </Suspense>
@@ -91,48 +84,27 @@ async function loadHomeProfile(session: SocialSession) {
   return { profile, followees };
 }
 
-async function SocialHomeRecentChatsSlot({ session }: { session: SocialSession }) {
-  const { ctx, supabase } = session;
-  const profile = await ensureOwnSocialProfile(supabase, ctx.user);
-  const inbox = profile
-    ? await loadDmInbox(supabase, { limit: SOCIAL_HOME_CHATS_LIMIT })
-    : { rows: [] as DmInboxRow[], truncated: false };
-  const peopleIds = [...new Set(inbox.rows.flatMap((row) => inboxPeerIds(row)))];
-  const [authors, faces] = await Promise.all([
-    loadProfilesByIds(supabase, peopleIds),
-    signedAvatarUrls(peopleIds),
-  ]);
-  const chats = socialHomeChats(
-    inbox.rows,
-    new Map(
-      [...authors.entries()].map(([id, author]) => [
-        id,
-        socialPersonLabel({ handle: author.handle, displayName: author.display_name }),
-      ]),
-    ),
-  );
-  return <SocialRecentChats chats={chats} faces={faces} />;
-}
-
 async function SocialHomeForYouSlot({ session }: { session: SocialSession }) {
   const { ctx, supabase } = session;
   const { profile, followees } = await loadHomeProfile(session);
-  const [suggested, facts, photoUrl] = await Promise.all([
-    loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids]),
-    profile ? loadOwnPostFacts(supabase, ctx.user.id) : Promise.resolve(null),
-    profile ? signedAvatarUrl(ctx.user.id) : Promise.resolve(null),
+  const interest = { topics: profile?.topics ?? [], crafts: profile?.crafts ?? [] };
+  const [suggested, catalog] = await Promise.all([
+    loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids], interest),
+    loadDiscoverableCourses(supabase),
   ]);
-  const faces = suggested.length > 0 ? await signedAvatarUrls(suggested.map((person) => person.id)) : new Map();
-  const checklist = profile
-    ? socialChecklistItems({
-        hasPhoto: !!photoUrl,
-        hasBio: !!profile.bio?.trim(),
-        hasIntro: facts?.hasIntro ?? false,
-        hasPost: facts?.hasPost ?? false,
-        hasStory: facts?.hasStory ?? false,
-      })
-    : [];
-  return <SocialForYouRail people={suggested} faces={faces} checklist={profile ? checklist : []} />;
+  const latestCourse = catalog.failed ? null : latestDiscoverableCourse(catalog.courses, interest);
+  const [faces, courseCovers] = await Promise.all([
+    suggested.length > 0 ? signedAvatarUrls(suggested.map((person) => person.id)) : Promise.resolve(new Map()),
+    latestCourse ? signedEducationCoverUrls([latestCourse]) : Promise.resolve(new Map<string, string>()),
+  ]);
+  return (
+    <SocialForYouRail
+      people={suggested}
+      faces={faces}
+      latestCourse={latestCourse}
+      latestCourseCoverUrl={latestCourse ? courseCovers.get(latestCourse.id) ?? null : null}
+    />
+  );
 }
 
 async function SocialHomeCenter({
@@ -151,15 +123,17 @@ async function SocialHomeCenter({
   const { ctx, supabase } = session;
   const { profile, followees } = await loadHomeProfile(session);
   const authorIds = followingAuthorIds(ctx.user.id, followees.ids);
-  const [wall, storiesPage, suggested, facts] = await Promise.all([
+  const [wall, storiesPage, suggested] = await Promise.all([
     profile
       ? loadFollowingPosts(supabase, authorIds, { category, cursor })
       : Promise.resolve({ posts: [], truncated: false, nextCursor: null }),
     loadLiveStories(supabase, authorIds),
     lane === "for-you"
-      ? loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids])
+      ? loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids], {
+          topics: profile?.topics ?? [],
+          crafts: profile?.crafts ?? [],
+        })
       : Promise.resolve([]),
-    profile ? loadOwnPostFacts(supabase, ctx.user.id) : Promise.resolve(null),
   ]);
   const posts = wall.posts;
   const stories = storiesPage.stories;
@@ -187,15 +161,6 @@ async function SocialHomeCenter({
   ]);
   const rail = groupStoryRail(stories, viewed);
   const photoUrl = faces.get(ctx.user.id) ?? null;
-  const checklist = profile
-    ? socialChecklistItems({
-        hasPhoto: !!photoUrl,
-        hasBio: !!profile.bio?.trim(),
-        hasIntro: facts?.hasIntro ?? false,
-        hasPost: facts?.hasPost ?? false,
-        hasStory: facts?.hasStory ?? false,
-      })
-    : [];
 
   return (
     <div className={SOCIAL_HOME_CENTER_CLASS}>
@@ -204,6 +169,7 @@ async function SocialHomeCenter({
       {profile ? (
         <SocialHomeComposer authorName={profile.display_name} authorPhotoUrl={photoUrl} />
       ) : null}
+      <SocialHomeTopics topics={profile?.topics ?? []} crafts={profile?.crafts ?? []} />
       <SocialStoriesRail
         cards={rail}
         authors={authors}
@@ -221,11 +187,6 @@ async function SocialHomeCenter({
         <InlineNotice tone="info" data-social-followees-truncated="">
           {SOCIAL.home.truncatedFollowees}
         </InlineNotice>
-      ) : null}
-      {lane === "following" && profile ? (
-        <div data-social-home-setup="" className="lg:hidden">
-          <SocialOnboardingChecklist items={checklist} />
-        </div>
       ) : null}
       <SocialHomeTabs active={lane} />
       {lane === "for-you" ? (
@@ -320,7 +281,7 @@ function SocialHomeFollowingWall({
           </div>
         </div>
       ) : (
-        <div data-social-feed="" className="flex flex-col">
+        <div data-social-feed="" className="flex flex-col gap-2">
           {posts.map((post) => {
             const author = authors.get(post.author_id);
             const group = post.group_id ? groups.get(post.group_id) : null;

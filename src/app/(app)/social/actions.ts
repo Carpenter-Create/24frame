@@ -10,12 +10,21 @@ import {
   parseSocialMediaLane,
   socialMediaObjectKey,
   validateMediaUpload,
+  welcomeVideoKeyFromMedia,
 } from "@/lib/social-media";
 import { presignSocialMediaPut } from "@/lib/s3-social-media";
 import { normalizeSocialCategory } from "@/lib/social-categories";
 import { storyInsertRow, storyViewInsertRow } from "@/lib/social-stories";
 import { ensureOwnSocialProfile, isProfileUniqueViolation } from "@/lib/social-profile";
 import { handleTakenError, lookupHandleCollision } from "@/lib/social-handle-taken";
+import { socialProfileRolesWrite } from "@/lib/social-profile-roles";
+import { socialProfileTopicsWrite } from "@/lib/social-profile-topics";
+import {
+  composeSocialWebsiteUrlField,
+  parseSocialProfileLinksWrite,
+  socialProfileLinkError,
+} from "@/lib/social-profile-links";
+import { parseSocialImdbInput } from "@/lib/social-imdb";
 import { SOCIAL_DM_ADD_BATCH_LIMIT } from "@/lib/social-dm-bounds";
 import {
   followInsertRow,
@@ -23,6 +32,7 @@ import {
   likeInsertRow,
   messageInsertRow,
   normalizeBio,
+  composeSocialDisplayName,
   normalizeDisplayName,
   normalizeGroupDescription,
   normalizeGroupName,
@@ -40,6 +50,7 @@ import {
   socialDmHref,
   socialGroupHref,
   socialHandleRequiredError,
+  socialNameRequiredError,
   socialMediaRuleMessage,
   socialProfileHref,
 } from "@/lib/social";
@@ -79,15 +90,48 @@ export async function createSocialProfile(formData: FormData): Promise<ActionRes
   if (taken) return { error: taken };
 
   const profile = await ensureOwnSocialProfile(supabase, user);
+  const firstName = String(formData.get("first_name") ?? "");
+  const middleName = String(formData.get("middle_name") ?? "");
+  const lastName = String(formData.get("last_name") ?? "");
+  const hasNameParts =
+    Boolean(firstName || middleName || lastName) ||
+    formData.has("first_name") ||
+    formData.has("last_name");
+  if (hasNameParts) {
+    const nameError = socialNameRequiredError(firstName, lastName);
+    if (nameError) return { error: nameError };
+  }
+  const composed = composeSocialDisplayName(firstName, lastName, middleName);
   const displayName =
+    normalizeDisplayName(composed) ??
     normalizeDisplayName(String(formData.get("display_name") ?? "")) ??
     socialPublicDisplayName(profile?.display_name) ??
     "";
 
+  const roles = formData.has("crafts") ? socialProfileRolesWrite(formData.get("crafts")) : null;
+  const topics = formData.has("topics") ? socialProfileTopicsWrite(formData.get("topics")) : null;
+  const imdb = formData.has("imdb_url")
+    ? parseSocialImdbInput(String(formData.get("imdb_url") ?? ""))
+    : null;
+  if (imdb?.error) return { error: SOCIAL.profile.imdbInvalid };
+  const links = formData.has("links")
+    ? parseSocialProfileLinksWrite(String(formData.get("links") ?? ""))
+    : null;
+  if (links?.error) return { error: socialProfileLinkError(links.error) ?? SOCIAL.profile.linkInvalid };
+
   if (profile) {
     const { error } = await supabase
       .from("profiles")
-      .update({ handle, display_name: displayName })
+      .update({
+        handle,
+        display_name: displayName,
+        ...(roles
+          ? { crafts: roles.crafts, primary_role: roles.primary_role }
+          : {}),
+        ...(topics ? { topics } : {}),
+        ...(imdb ? { imdb_url: imdb.url } : {}),
+        ...(links ? { website_url: composeSocialWebsiteUrlField(links.urls) } : {}),
+      })
       .eq("id", user.id);
     if (error) {
       if (isProfileUniqueViolation(error)) return { error: SOCIAL.profile.handleTaken };
@@ -105,7 +149,16 @@ export async function createSocialProfile(formData: FormData): Promise<ActionRes
       if (isProfileUniqueViolation(error)) {
         const { error: updateError } = await supabase
           .from("profiles")
-          .update({ handle, display_name: displayName })
+          .update({
+            handle,
+            display_name: displayName,
+            ...(roles
+              ? { crafts: roles.crafts, primary_role: roles.primary_role }
+              : {}),
+            ...(topics ? { topics } : {}),
+            ...(imdb ? { imdb_url: imdb.url } : {}),
+            ...(links ? { website_url: composeSocialWebsiteUrlField(links.urls) } : {}),
+          })
           .eq("id", user.id);
         if (updateError) {
           if (isProfileUniqueViolation(updateError)) return { error: SOCIAL.profile.handleTaken };
@@ -122,6 +175,30 @@ export async function createSocialProfile(formData: FormData): Promise<ActionRes
   revalidatePath(SOCIAL_ROUTES.profileBio);
   revalidatePath(SOCIAL_ROUTES.home);
   revalidatePath(socialProfileHref(handle));
+  return {};
+}
+
+export async function saveSocialWelcomeVideo(formData: FormData): Promise<ActionResult> {
+  const { user, supabase, profile, profileId } = await ownProfile();
+  if (!profileId) return { error: SOCIAL.cta.needProfile };
+  const key = welcomeVideoKeyFromMedia(formData.get("media"), user.id);
+  if (!key) return { error: SOCIAL.stories.mediaType };
+  const { error } = await supabase.from("profiles").update({ welcome_video_key: key }).eq("id", user.id);
+  if (error) return { error: error.message };
+  revalidatePath(SOCIAL_ROUTES.profile);
+  revalidatePath(SOCIAL_ROUTES.profileEdit);
+  if (profile?.handle) revalidatePath(socialProfileHref(profile.handle));
+  return {};
+}
+
+export async function clearSocialWelcomeVideo(): Promise<ActionResult> {
+  const { user, supabase, profile, profileId } = await ownProfile();
+  if (!profileId) return { error: SOCIAL.cta.needProfile };
+  const { error } = await supabase.from("profiles").update({ welcome_video_key: null }).eq("id", user.id);
+  if (error) return { error: error.message };
+  revalidatePath(SOCIAL_ROUTES.profile);
+  revalidatePath(SOCIAL_ROUTES.profileEdit);
+  if (profile?.handle) revalidatePath(socialProfileHref(profile.handle));
   return {};
 }
 

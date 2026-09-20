@@ -4,18 +4,14 @@ import Link from "next/link";
 import { TextAction } from "@/components/chrome/house";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { cn } from "@/lib/cn";
-import { IDENTITY_AVATAR_CLASS } from "@/lib/house-sheet";
 import {
   SOCIAL_ACTION_CLASS,
   SOCIAL_ACTION_SECONDARY_CLASS,
-  SOCIAL_AVATAR_LG_CLASS,
-  SOCIAL_AVATAR_PROFILE_CLASS,
-  SOCIAL_AVATAR_SM_CLASS,
   SOCIAL_FEED_ROW_CLASS,
-  SOCIAL_HANDLE_PILL_CLASS,
   SOCIAL_HIGHLIGHT_RING_CLASS,
   SOCIAL_PROFILE_GRID_CLASS,
   SOCIAL_PROFILE_TILE_CLASS,
+  SOCIAL_TOPIC_CHIP_CLASS,
 } from "@/lib/social-chrome";
 import {
   displayHandle,
@@ -24,58 +20,30 @@ import {
   SOCIAL_ROUTES,
   socialGroupHref,
   socialMemberHref,
-  socialInitials,
   socialPersonIdentity,
   socialRelativeTime,
 } from "@/lib/social";
+import {
+  socialFollowedByLine,
+  SOCIAL_MUTUALS_FACE_CAP,
+  type SocialProfileMutuals,
+} from "@/lib/social-profile-mutuals";
+import { socialProfilePublicLinks } from "@/lib/social-profile-links";
+import { socialProfileRolesLine } from "@/lib/social-profile-roles";
+import { parseSocialProfileTopics } from "@/lib/social-profile-topics";
+import { SocialAvatar } from "./social-avatar";
 import { SocialLikeButton } from "./social-forms";
 import { SocialEmpty } from "./social-empty";
 import { SocialIcon } from "./social-icon";
+import { SocialProfileLinkRow } from "./social-profile-links";
+
+export { SocialAvatar } from "./social-avatar";
 
 export function SocialNeedProfile() {
   return (
     <div data-social-need-profile="" className="flex flex-col gap-[var(--space-2)]">
       <SocialEmpty icon="user" title={SOCIAL.cta.needProfile} />
       <TextAction href={SOCIAL_ROUTES.profile}>{SOCIAL.cta.profileHrefLabel}</TextAction>
-    </div>
-  );
-}
-
-export function SocialAvatar({
-  name,
-  photoUrl,
-  ring = null,
-  size = "md",
-}: {
-  name: string;
-  photoUrl?: string | null;
-  ring?: "unseen" | "live" | null;
-  size?: "sm" | "md" | "lg" | "profile";
-}) {
-  const box =
-    size === "lg"
-      ? SOCIAL_AVATAR_LG_CLASS
-      : size === "profile"
-        ? SOCIAL_AVATAR_PROFILE_CLASS
-        : size === "sm"
-          ? SOCIAL_AVATAR_SM_CLASS
-          : IDENTITY_AVATAR_CLASS;
-  return (
-    <div
-      data-social-avatar=""
-      data-social-avatar-ring={ring ?? undefined}
-      className={cn(
-        box,
-        photoUrl ? "overflow-hidden" : null,
-        ring ? "ring-2 ring-accent ring-offset-2 ring-offset-[var(--bg)]" : null,
-      )}
-    >
-      {photoUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the private avatars bucket
-        <img src={photoUrl} alt="" className="size-full object-cover" />
-      ) : (
-        socialInitials(name)
-      )}
     </div>
   );
 }
@@ -200,9 +168,14 @@ export function SocialProfileIdentity({
   handle,
   photoUrl,
   bio,
+  roles,
+  topics,
+  websiteUrl,
+  imdbUrl,
   ring = null,
   photoAction,
   stats,
+  mutuals = null,
   actions,
   children,
 }: {
@@ -210,14 +183,27 @@ export function SocialProfileIdentity({
   handle: string;
   photoUrl?: string | null;
   bio?: string | null;
+  roles?: readonly string[] | null;
+  topics?: readonly string[] | null;
+  websiteUrl?: string | null;
+  imdbUrl?: string | null;
   ring?: "unseen" | "live" | null;
   photoAction?: ReactNode;
   stats?: { posts: number; followers: number; following: number };
+  mutuals?: SocialProfileMutuals | null;
   actions?: () => ReactNode;
   children?: ReactNode;
 }) {
   const person = socialPersonIdentity({ handle, displayName: name });
-  const title = person.name ?? person.handleLabel;
+  const rolesLine = socialProfileRolesLine(roles ?? []);
+  const interestTopics = parseSocialProfileTopics(topics ?? []);
+  const links = socialProfilePublicLinks({ websiteUrl, imdbUrl });
+  const followedBy = mutuals
+    ? socialFollowedByLine(
+        mutuals.people.slice(0, SOCIAL_MUTUALS_FACE_CAP).map((peer) => peer.label),
+        mutuals.extra,
+      )
+    : null;
   const actionRow = actions ? (
     <div className="flex w-full items-center gap-2 md:w-auto">
       {actions()}
@@ -234,56 +220,79 @@ export function SocialProfileIdentity({
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
             <div className="min-w-0">
-              <p className="text-[18px] font-semibold text-ink md:text-[22px]">{title}</p>
-              <p className={cn(SOCIAL_HANDLE_PILL_CLASS, "mt-1")}>{person.handleLabel}</p>
+              <p
+                data-social-profile-handle=""
+                className="break-words text-[18px] font-semibold text-ink md:text-[22px]"
+              >
+                {person.handleLabel}
+              </p>
+              {person.name ? (
+                <p data-social-profile-name="" className="mt-1 break-words t-body-sm text-ink-2">
+                  {person.name}
+                </p>
+              ) : null}
+              {stats ? (
+                <div data-social-profile-stats="" className="mt-2 flex flex-wrap gap-4 t-body-sm">
+                  <p>
+                    <span className="font-semibold text-ink">{formatSocialCount(stats.posts)}</span>{" "}
+                    <span className="text-ink-2">{SOCIAL.profile.postsStat}</span>
+                  </p>
+                  <p>
+                    <span className="font-semibold text-ink">{formatSocialCount(stats.followers)}</span>{" "}
+                    <span className="text-ink-2">{SOCIAL.profile.followersStat}</span>
+                  </p>
+                  <p>
+                    <span className="font-semibold text-ink">{formatSocialCount(stats.following)}</span>{" "}
+                    <span className="text-ink-2">{SOCIAL.profile.followingStat}</span>
+                  </p>
+                </div>
+              ) : null}
+              {rolesLine ? (
+                <p data-social-profile-roles="" className="mt-2 break-words t-body-sm text-ink-2">
+                  {rolesLine}
+                </p>
+              ) : null}
+              {interestTopics.length > 0 ? (
+                <div data-social-profile-topics="" className="mt-2 flex flex-wrap gap-2">
+                  {interestTopics.map((topic) => (
+                    <span
+                      key={topic}
+                      data-social-profile-topic={topic}
+                      className={SOCIAL_TOPIC_CHIP_CLASS}
+                    >
+                      {topic}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
             </div>
             {actionRow ? <div className="hidden shrink-0 md:flex">{actionRow}</div> : null}
           </div>
-          {bio?.trim() ? (
-            <p data-social-profile-bio="" className="hidden t-body text-ink whitespace-pre-wrap md:block">
-              {bio}
-            </p>
-          ) : null}
-          {stats ? (
-            <div data-social-profile-stats="" className="hidden flex-wrap gap-5 t-body md:flex">
-              <p>
-                <span className="font-semibold text-ink">{formatSocialCount(stats.posts)}</span>{" "}
-                <span className="text-ink-2">{SOCIAL.profile.postsStat}</span>
-              </p>
-              <p>
-                <span className="font-semibold text-ink">{formatSocialCount(stats.followers)}</span>{" "}
-                <span className="text-ink-2">{SOCIAL.profile.followersStat}</span>
-              </p>
-              <p>
-                <span className="font-semibold text-ink">{formatSocialCount(stats.following)}</span>{" "}
-                <span className="text-ink-2">{SOCIAL.profile.followingStat}</span>
-              </p>
-            </div>
-          ) : null}
         </div>
       </div>
       {bio?.trim() ? (
-        <p data-social-profile-bio="" className="t-body-sm text-ink whitespace-pre-wrap md:hidden">
+        <p data-social-profile-bio="" className="t-body-sm text-ink whitespace-pre-wrap md:t-body">
           {bio}
         </p>
       ) : null}
-      {stats ? (
-        <div data-social-profile-stats="" className="flex flex-wrap gap-4 t-body-sm md:hidden">
-          <p>
-            <span className="font-semibold text-ink">{formatSocialCount(stats.posts)}</span>{" "}
-            <span className="text-ink-2">{SOCIAL.profile.postsStat}</span>
-          </p>
-          <p>
-            <span className="font-semibold text-ink">{formatSocialCount(stats.followers)}</span>{" "}
-            <span className="text-ink-2">{SOCIAL.profile.followersStat}</span>
-          </p>
-          <p>
-            <span className="font-semibold text-ink">{formatSocialCount(stats.following)}</span>{" "}
-            <span className="text-ink-2">{SOCIAL.profile.followingStat}</span>
-          </p>
+      <SocialProfileLinkRow links={links} />
+      {actionRow ? <div className="flex md:hidden">{actionRow}</div> : null}
+      {followedBy ? (
+        <div data-social-profile-mutuals="" className="flex min-w-0 items-center gap-2">
+          <div data-social-profile-mutuals-faces="" className="flex shrink-0">
+            {mutuals?.people.slice(0, SOCIAL_MUTUALS_FACE_CAP).map((peer, index) => (
+              <SocialAvatar
+                key={peer.id}
+                name={peer.label}
+                photoUrl={peer.photoUrl}
+                size="sm"
+                className={index === 0 ? undefined : "-ml-2"}
+              />
+            ))}
+          </div>
+          <p className="min-w-0 break-words t-body-sm text-ink-2">{followedBy}</p>
         </div>
       ) : null}
-      {actionRow ? <div className="flex md:hidden">{actionRow}</div> : null}
       {children}
     </div>
   );
@@ -334,11 +343,13 @@ export function SocialAuthorHistory({
   truncated,
   emptyHint,
   emptyAction,
+  emptySecondary,
 }: {
   posts: readonly SocialPostCardModel[];
   truncated: boolean;
   emptyHint?: string;
   emptyAction?: { href: string; label: string };
+  emptySecondary?: { href: string; label: string };
 }) {
   const mediaPosts = posts.filter((post) => post.media.length > 0);
   const textPosts = posts.filter((post) => post.media.length === 0);
@@ -351,6 +362,7 @@ export function SocialAuthorHistory({
             title={SOCIAL.profile.postsEmpty}
             hint={emptyHint ?? SOCIAL.profile.postsEmptyHint}
             action={emptyAction}
+            secondary={emptySecondary}
           />
         </div>
       ) : (

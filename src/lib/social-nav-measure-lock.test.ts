@@ -98,7 +98,7 @@ describe("Social nav leftover split (shared shell vs Social-local)", () => {
     expect(socialSession).toContain("Promise.all([getOrgContext(), createClient()])");
     expect(socialHome).toContain("requireSocialSession");
     expect(socialHome).toContain("<Suspense");
-    expect(socialHome).toContain("SocialHomeRecentChatsSlot");
+    expect(socialHome).not.toContain("SocialHomeRecentChatsSlot");
     expect(socialHome).toContain("SocialHomeForYouSlot");
     expect(socialExplore).toContain("requireSocialSession");
     expect(socialExplore).toContain("<Suspense");

@@ -44,14 +44,15 @@ import {
 import { takeSocialHomeComposerMedia } from "@/lib/social-home-composer";
 import {
   displayHandle,
+  normalizeHandle,
   SOCIAL,
   SOCIAL_CREATE_KINDS,
   socialCreateWellCopy,
   socialHandleRequiredError,
-  socialInitials,
   type SocialCreateKind,
 } from "@/lib/social";
 import { cn } from "@/lib/cn";
+import { SocialAvatar } from "./social-avatar";
 import { SocialHandleField } from "./social-handle-field";
 import { SocialIcon } from "./social-icon";
 import {
@@ -95,6 +96,11 @@ export function SocialProfileCreateForm({
         if (required) {
           setPending(false);
           setError(required);
+          return;
+        }
+        if (!normalizeHandle(String(formData.get("handle") ?? ""))) {
+          setPending(false);
+          setError(SOCIAL.profile.handleInvalid);
           return;
         }
         const result = await createSocialProfile(formData);
@@ -337,14 +343,12 @@ export function SocialCreateCompose({
       }}
     >
       <div className="flex items-center gap-3" data-social-create-author="">
-        <span className={SOCIAL_CREATE_AVATAR_CLASS}>
-          {authorPhotoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the private avatars bucket
-            <img src={authorPhotoUrl} alt="" className="size-full object-cover" />
-          ) : (
-            socialInitials(authorName)
-          )}
-        </span>
+        <SocialAvatar
+          name={authorName}
+          photoUrl={authorPhotoUrl}
+          size="sm"
+          className={SOCIAL_CREATE_AVATAR_CLASS}
+        />
         <span className="min-w-0">
           <span className="block truncate t-body-sm font-semibold text-ink md:t-body">{authorName}</span>
           {authorHandle ? (

@@ -3,7 +3,7 @@
 // Sole entry is the primary Edit profile control. Share stays the sheet.
 // Bio Enter/Return inserts a newline (Adam amend). Soft newlines count
 // toward BIO_MAX as stored. Done is the Sporty Blue check only.
-// Edit picture reuses avatars/{userId}/avatar. Links stay Add link.
+// Edit picture reuses avatars/{userId}/avatar. Links edit in place.
 
 import { BIO_MAX, SOCIAL, SOCIAL_ROUTES, socialBioEnterSubmits } from "@/lib/social";
 

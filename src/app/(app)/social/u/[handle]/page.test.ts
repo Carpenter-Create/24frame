@@ -25,9 +25,12 @@ vi.mock("@/lib/s3-avatars", () => ({
 vi.mock("@/lib/s3-social-media", () => ({
   signedSocialMediaItems: vi.fn().mockResolvedValue([]),
   signedSocialMediaByPostId: vi.fn().mockResolvedValue(new Map()),
+  signedSocialMediaUrl: vi.fn().mockResolvedValue(null),
 }));
 vi.mock("@/lib/social-profile", () => ({
   ensureOwnSocialProfile: vi.fn(),
+  SOCIAL_PROFILE_COLUMNS:
+    "id, handle, display_name, status, bio, welcome_video_key, crafts, topics, imdb_url, website_url",
 }));
 vi.mock("@/app/(app)/social/actions", () => ({
   toggleSocialFollow: vi.fn(),
@@ -77,6 +80,10 @@ type PublicProfile = {
   display_name: string;
   status: string;
   bio: string | null;
+  crafts?: string[] | null;
+  topics?: string[] | null;
+  imdb_url?: string | null;
+  website_url?: string | null;
 };
 
 const ada: PublicProfile = {
@@ -179,6 +186,61 @@ describe("Social public profile", () => {
     expect(html).not.toContain("data-social-profile-form");
     expect(html).not.toContain("data-social-bio-form");
     expect(html).not.toContain("data-social-profile-photo");
+    expect(html).not.toContain("data-social-profile-roles");
+    expect(html).not.toContain("data-social-profile-topics");
+    expect(html).not.toContain("data-social-profile-imdb");
+  });
+
+  it("prints the Professions line when crafts are set and omits a Professions prefix", async () => {
+    stubClient({
+      member: { ...ada, crafts: ["actor", "producer"] },
+    });
+    const html = await renderPublic();
+    expect(html).toContain("data-social-profile-roles");
+    expect(html).toContain("Actor · Producer");
+    expect(html).not.toContain("Roles:");
+    expect(html).not.toContain("Professions:");
+    expect(html).not.toContain("Topics:");
+  });
+
+  it("prints selected Topics chips and never a Topics prefix", async () => {
+    stubClient({
+      member: { ...ada, topics: ["Acting", "Financing"] },
+    });
+    const html = await renderPublic();
+    expect(html).toContain("data-social-profile-topics");
+    expect(html).toContain('data-social-profile-topic="Acting"');
+    expect(html).toContain("Acting");
+    expect(html).not.toContain("Topics:");
+    expect(html).not.toContain("Actor");
+  });
+
+  it("renders Instagram as an icon, not a raw URL, and omits the links row when empty", async () => {
+    stubClient({
+      member: { ...ada, website_url: "https://instagram.com/ada" },
+    });
+    const html = await renderPublic();
+    expect(html).toContain("data-social-profile-links");
+    expect(html).toContain('data-social-profile-link="instagram"');
+    expect(html).toContain('href="https://instagram.com/ada"');
+    expect(html).toContain('aria-label="Instagram"');
+    expect(html).toContain('rel="noopener noreferrer"');
+    expect(html).not.toContain(">https://instagram.com/ada<");
+
+    stubClient({ member: ada });
+    const empty = await renderPublic();
+    expect(empty).not.toContain("data-social-profile-links");
+    expect(empty).not.toContain("data-social-profile-link");
+  });
+
+  it("prints a quiet IMDb link when the member claim is set", async () => {
+    stubClient({
+      member: { ...ada, imdb_url: "https://www.imdb.com/name/nm0000158/" },
+    });
+    const html = await renderPublic();
+    expect(html).toContain("data-social-profile-imdb");
+    expect(html).toContain('href="https://www.imdb.com/name/nm0000158/"');
+    expect(html).not.toContain("Connect to scrape");
   });
 
   it("renders the same public profile for a bare handle param", async () => {
@@ -315,6 +377,7 @@ describe("Social public profile", () => {
     expect(src).toContain("socialProfileCasingRedirect");
     expect(src).toContain("generateMetadata");
     expect(src).toContain("socialProfileCanonicalUrl");
+    expect(src).toContain("loadProfileMutuals");
     expect(src).not.toContain("putAvatarObject");
     expect(src).not.toContain("uploadAccountPhoto");
     expect(src).not.toContain("S3_AVATARS_BUCKET");

@@ -1,13 +1,13 @@
 import { Suspense } from "react";
 import Link from "next/link";
 
-import { HouseEmpty } from "@/components/chrome/house";
+import { HouseEmpty, TextAction } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { SocialDmsRowsSkeleton } from "@/components/social/social-skeletons";
 import { SocialConversationFaces } from "@/components/social/social-ui";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
-import { conversationRoomLabel, inboxPeerIds, SOCIAL, socialDmHref, socialPersonLabel } from "@/lib/social";
+import { conversationRoomLabel, inboxPeerIds, SOCIAL, SOCIAL_ROUTES, socialDmHref, socialPersonLabel } from "@/lib/social";
 import { loadDmInbox } from "@/lib/social-dms";
 import { loadProfilesByIds } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
@@ -45,7 +45,14 @@ async function SocialDmsInbox({ session }: { session: SocialSession }) {
           {SOCIAL.dms.truncatedInbox}
         </InlineNotice>
       ) : null}
-      {profile && rows.length === 0 ? <HouseEmpty>{SOCIAL.dms.empty}</HouseEmpty> : null}
+      {profile && rows.length === 0 ? (
+        <div data-social-dms-empty="" className="flex flex-col gap-3">
+          <HouseEmpty>{SOCIAL.dms.empty}</HouseEmpty>
+          <TextAction href={SOCIAL_ROUTES.explore} data-social-dms-start="">
+            {SOCIAL.dms.startCta}
+          </TextAction>
+        </div>
+      ) : null}
       <ul className="flex flex-col">
         {rows.map((row) => {
           const others = inboxPeerIds(row)

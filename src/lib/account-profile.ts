@@ -22,6 +22,8 @@ export const ACCOUNT_NAME_MAX = 200;
 export const ACCOUNT_PHOTO_CIRCLE_CLASS =
   "size-12 shrink-0 overflow-hidden rounded-full bg-surface-muted";
 
+export const ACCOUNT_PHOTO_DROPPING_CLASS = "border border-accent bg-accent-wash";
+
 export const ACCOUNT_PROFILE = {
   title: "Profile",
   href: USER_MENU.profileHref,
@@ -38,6 +40,10 @@ export const ACCOUNT_PROFILE = {
   photoTooLarge: "Photo must be 2 MB or smaller.",
   photoType: "Use a JPEG, PNG, or WebP photo.",
   photoFailed: "Could not upload photo.",
+  cropTitle: "Reposition",
+  cropSave: "Save photo",
+  cropCancel: "Cancel",
+  dropPhoto: "Drop a photo",
   save: "Save",
   saving: "Saving…",
   saved: "Saved.",

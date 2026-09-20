@@ -115,6 +115,26 @@ describe("social DMs", () => {
     expect(html).not.toContain("data-social-dms-truncated");
   });
 
+  it("keeps a quiet Start a conversation CTA on an empty inbox", async () => {
+    const from = vi.fn((table: string) => {
+      if (table === "profiles") {
+        return chain([{ id: "u1", handle: "ada", display_name: "Ada Lovelace", status: "active" }]);
+      }
+      throw new Error(`unexpected from(${table})`);
+    });
+    vi.mocked(createClient).mockResolvedValue({
+      from,
+      rpc: vi.fn(async () => ({ data: [], error: null })),
+    } as never);
+
+    const html = await renderServerMarkup(await SocialDmsPage());
+    expect(html).toContain("data-social-dms-empty");
+    expect(html).toContain(SOCIAL.dms.empty);
+    expect(html).toContain("data-social-dms-start");
+    expect(html).toContain(SOCIAL.dms.startCta);
+    expect(html).toContain('href="/social/explore"');
+  });
+
   it("names the inbox bound when the probe row comes back", async () => {
     const rpc = vi.fn(async () => ({
       data: Array.from({ length: 51 }, (_, i) => ({

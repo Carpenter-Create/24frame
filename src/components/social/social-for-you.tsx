@@ -1,81 +1,86 @@
-import Link from "next/link";
-
-import { SocialOnboardingChecklist } from "@/components/social/social-checklist";
+import { CourseCard } from "@/components/courses/course-card";
 import { SocialFollowButton } from "@/components/social/social-forms";
 import { SocialPersonRow } from "@/components/social/social-ui";
 import {
   SOCIAL_FOR_YOU_CARD_CLASS,
   SOCIAL_FOR_YOU_RAIL_CLASS,
-  SOCIAL_TOPIC_CHIP_CLASS,
 } from "@/lib/social-chrome";
-import { SOCIAL_CATEGORY_TOPICS, socialHomeLensHref } from "@/lib/social-categories";
+import type { CourseRow } from "@/lib/courses";
 import { SOCIAL, socialMemberHref } from "@/lib/social";
-import { socialChecklistIncomplete, type SocialChecklistItem } from "@/lib/social-home";
 import type { SocialSuggestedPerson } from "@/lib/social-feed";
+
+export function SocialSuggestedPeople({
+  people,
+  faces,
+}: {
+  people: readonly SocialSuggestedPerson[];
+  faces: ReadonlyMap<string, string | null>;
+}) {
+  if (people.length === 0) return null;
+  return (
+    <div data-social-for-you-people="" className={SOCIAL_FOR_YOU_CARD_CLASS}>
+      <p className="t-body-sm font-semibold text-ink">{SOCIAL.forYou.people}</p>
+      {people.map((person) => (
+        <div
+          key={person.id}
+          data-social-for-you-person={person.id}
+          className="flex items-center justify-between gap-[10px]"
+        >
+          <SocialPersonRow
+            handle={person.handle}
+            displayName={person.display_name}
+            photoUrl={faces.get(person.id)}
+            href={socialMemberHref(person.handle)}
+          />
+          <SocialFollowButton
+            followeeId={person.id}
+            handle={person.handle}
+            following={false}
+            compact
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export function SocialForYouRail({
   people,
   faces,
   layout = "rail",
-  checklist = [],
+  latestCourse = null,
+  latestCourseCoverUrl = null,
 }: {
   people: readonly SocialSuggestedPerson[];
   faces: ReadonlyMap<string, string | null>;
   layout?: "rail" | "lane";
-  checklist?: readonly SocialChecklistItem[];
+  latestCourse?: CourseRow | null;
+  latestCourseCoverUrl?: string | null;
 }) {
-  const showChecklist = layout === "rail" && socialChecklistIncomplete(checklist);
-
   return (
     <aside
       data-social-for-you=""
       data-social-for-you-layout={layout}
       className={layout === "lane" ? "flex w-full flex-col gap-3" : SOCIAL_FOR_YOU_RAIL_CLASS}
     >
-      {showChecklist ? <SocialOnboardingChecklist items={checklist} tone="nested" /> : null}
-      <div className="flex items-center justify-between">
-        <p className="t-body-sm font-medium text-ink-2">{SOCIAL.forYou.title}</p>
-      </div>
-      {people.length > 0 ? (
-        <div data-social-for-you-people="" className={SOCIAL_FOR_YOU_CARD_CLASS}>
-          <p className="t-body-sm font-semibold text-ink">{SOCIAL.forYou.people}</p>
-          {people.map((person) => (
-            <div
-              key={person.id}
-              data-social-for-you-person={person.id}
-              className="flex items-center justify-between gap-[10px]"
-            >
-              <SocialPersonRow
-                handle={person.handle}
-                displayName={person.display_name}
-                photoUrl={faces.get(person.id)}
-                href={socialMemberHref(person.handle)}
-              />
-              <SocialFollowButton
-                followeeId={person.id}
-                handle={person.handle}
-                following={false}
-                compact
-              />
-            </div>
-          ))}
+      {layout === "rail" ? (
+        <div className="flex items-center justify-between">
+          <p className="t-body-sm font-medium text-ink-2">{SOCIAL.forYou.title}</p>
         </div>
       ) : null}
-      <div data-social-for-you-topics="" className={SOCIAL_FOR_YOU_CARD_CLASS}>
-        <p className="t-body-sm font-semibold text-ink">{SOCIAL.forYou.topics}</p>
-        <div className="flex flex-wrap gap-2">
-          {SOCIAL_CATEGORY_TOPICS.map((label) => (
-            <Link
-              key={label}
-              href={socialHomeLensHref(label, "All")}
-              data-social-for-you-topic={label}
-              className={SOCIAL_TOPIC_CHIP_CLASS}
-            >
-              {label}
-            </Link>
-          ))}
+      <SocialSuggestedPeople people={people} faces={faces} />
+      {layout === "rail" && latestCourse ? (
+        <div data-social-latest-course="" className={SOCIAL_FOR_YOU_CARD_CLASS}>
+          <p className="t-body-sm font-semibold text-ink">{SOCIAL.forYou.latestCourse}</p>
+          <ul className="flex min-w-0 flex-col">
+            <CourseCard
+              course={latestCourse}
+              coverUrl={latestCourseCoverUrl}
+              density="discover"
+            />
+          </ul>
         </div>
-      </div>
+      ) : null}
     </aside>
   );
 }
