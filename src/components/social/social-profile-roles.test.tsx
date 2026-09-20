@@ -30,7 +30,6 @@ describe("SocialProfileRolesField", () => {
     expect(html).toContain(SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS);
     expect(html).toContain(SOCIAL_TOPIC_CHIP_BANK_CLASS);
     expect(html).toContain('data-social-profile-role-group="actor"');
-    expect(html).toContain('data-social-profile-role-group="actress"');
     expect(html).toContain('data-social-profile-role-group="writer"');
     expect(html).toContain('data-social-profile-role-group="business"');
     expect(html).toContain('data-social-profile-role="actor"');

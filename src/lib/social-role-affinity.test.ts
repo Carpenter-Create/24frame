@@ -15,8 +15,11 @@ import { SOCIAL_PROFILE_TOPICS } from "./social-profile-topics";
 import { SOCIAL_PROFILE_ROLES } from "./social-profile-roles";
 
 describe("ROLE_INTEREST_AFFINITY", () => {
-  it("covers every role slug and keeps Art Director / Investor on design and capital topics", () => {
+  it("covers every role slug from the professions SoT and keeps Art Director / Investor on design and capital topics", () => {
     expect(Object.keys(ROLE_INTEREST_AFFINITY)).toHaveLength(SOCIAL_PROFILE_ROLES.length);
+    expect(Object.keys(ROLE_INTEREST_AFFINITY).sort()).toEqual(
+      SOCIAL_PROFILE_ROLES.map((role) => role.slug).sort(),
+    );
     expect(ROLE_INTEREST_AFFINITY.art_director.topics).toEqual(["Animation", "Post-production"]);
     expect(ROLE_INTEREST_AFFINITY.art_director.neighbors).toContain("production_designer");
     expect(ROLE_INTEREST_AFFINITY.investor.topics[0]).toBe("Financing");

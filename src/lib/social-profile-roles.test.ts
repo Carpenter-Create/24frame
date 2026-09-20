@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -23,7 +24,7 @@ describe("social profile roles", () => {
     const labels = SOCIAL_PROFILE_ROLES.map((role) => role.label);
     expect(new Set(slugs).size).toBe(slugs.length);
     expect(slugs).toHaveLength(105);
-    expect(SOCIAL_PROFILE_ROLE_GROUPS).toHaveLength(49);
+    expect(SOCIAL_PROFILE_ROLE_GROUPS).toHaveLength(13);
     expect(socialProfileRoleLabel("actor")).toBe("Actor");
     expect(socialProfileRoleLabel("actress")).toBe("Actress");
     expect(socialProfileRoleLabel("writer")).toBe("Writer");
@@ -52,9 +53,16 @@ describe("social profile roles", () => {
         group.roles.map((role) => `${role.slug} — ${role.label}`),
       ]),
     ).toEqual([
-      ["actor", ["actor — Actor"]],
-      ["actress", ["actress — Actress"]],
-      ["voice_actor", ["voice_actor — Voice Actor"]],
+      [
+        "actor",
+        [
+          "actor — Actor",
+          "actress — Actress",
+          "voice_actor — Voice Actor",
+          "stunt_performer — Stunt Performer",
+          "choreographer — Choreographer",
+        ],
+      ],
       [
         "writer",
         [
@@ -83,13 +91,9 @@ describe("social profile roles", () => {
           "director — Director",
           "supervising_director — Supervising Director",
           "executive_director — Executive Director",
-        ],
-      ],
-      [
-        "second_unit_or_ad",
-        [
           "second_unit_director — Second Unit Director",
           "assistant_director — Assistant Director",
+          "script_supervisor — Script Supervisor",
         ],
       ],
       [
@@ -105,19 +109,14 @@ describe("social profile roles", () => {
           "story_producer — Story Producer",
           "development_producer — Development Producer",
           "post_production_producer — Post Production Producer",
+          "showrunner — Showrunner",
         ],
       ],
-      ["showrunner", ["showrunner — Showrunner"]],
       [
-        "cinematographer",
+        "camera",
         [
           "cinematographer — Cinematographer",
           "director_of_photography — Director of Photography",
-        ],
-      ],
-      [
-        "camera_electrical",
-        [
           "camera_operator — Camera Operator",
           "steadicam_operator — Steadicam Operator",
           "gaffer — Gaffer",
@@ -125,39 +124,35 @@ describe("social profile roles", () => {
           "first_assistant_camera — First Assistant Camera",
         ],
       ],
-      ["editor", ["editor — Editor", "supervising_editor — Supervising Editor"]],
       [
         "editorial",
         [
+          "editor — Editor",
+          "supervising_editor — Supervising Editor",
           "assistant_editor — Assistant Editor",
           "post_producer — Post Producer",
           "post_production_supervisor — Post-Production Supervisor",
+          "colorist — Colorist",
+          "digital_colorist — Digital Colorist",
         ],
       ],
-      ["color", ["colorist — Colorist", "digital_colorist — Digital Colorist"]],
       [
-        "art_director",
-        ["art_director — Art Director", "creative_director — Creative Director"],
-      ],
-      ["production_designer", ["production_designer — Production Designer"]],
-      [
-        "art_department",
-        ["storyboard_artist — Storyboard Artist", "set_designer — Set Designer"],
-      ],
-      ["set_decorator", ["set_decorator — Set Decorator"]],
-      [
-        "costume",
-        ["costume_designer — Costume Designer", "costume_supervisor — Costume Supervisor"],
-      ],
-      [
-        "makeup",
+        "art",
         [
+          "production_designer — Production Designer",
+          "art_director — Art Director",
+          "creative_director — Creative Director",
+          "storyboard_artist — Storyboard Artist",
+          "set_designer — Set Designer",
+          "set_decorator — Set Decorator",
+          "property_master — Property Master",
+          "costume_designer — Costume Designer",
+          "costume_supervisor — Costume Supervisor",
           "makeup_artist — Makeup Artist",
           "hairdresser — Hairdresser",
           "hair_and_makeup_artist — Hair and Makeup Artist",
         ],
       ],
-      ["property_master", ["property_master — Property Master"]],
       [
         "sound",
         [
@@ -166,12 +161,14 @@ describe("social profile roles", () => {
           "re_recording_mixer — Re-Recording Mixer",
           "sound_editor — Sound Editor",
           "sound_supervisor — Sound Supervisor",
+          "composer — Composer",
+          "music_director — Music Director",
+          "musician — Musician",
+          "music_supervisor — Music Supervisor",
+          "soundtrack — Soundtrack",
+          "music_artist — Music Artist",
         ],
       ],
-      ["composer", ["composer — Composer", "music_director — Music Director"]],
-      ["music_department", ["musician — Musician"]],
-      ["music_supervisor", ["music_supervisor — Music Supervisor"]],
-      ["soundtrack", ["soundtrack — Soundtrack"]],
       [
         "visual_effects",
         [
@@ -179,49 +176,47 @@ describe("social profile roles", () => {
           "visual_effects_artist — Visual Effects Artist",
           "visual_effects_editor — Visual Effects Editor",
           "motion_graphics_artist — Motion Graphics Artist",
-        ],
-      ],
-      ["animation", ["animator — Animator", "animation_director — Animation Director"]],
-      [
-        "special_effects",
-        [
+          "animator — Animator",
+          "animation_director — Animation Director",
           "special_effects_technician — Special Effects Technician",
           "special_effects_supervisor — Special Effects Supervisor",
         ],
       ],
-      ["stunts", ["stunt_performer — Stunt Performer"]],
-      ["casting_director", ["casting_director — Casting Director"]],
-      ["casting_department", ["casting_associate — Casting Associate"]],
       [
-        "production_department",
+        "production",
         [
           "production_coordinator — Production Coordinator",
           "production_assistant — Production Assistant",
+          "production_manager — Production Manager",
+          "location_manager — Location Manager",
+          "intimacy_coordinator — Intimacy Coordinator",
+          "script_consultant — Script Consultant",
+          "talent_coordinator — Talent Coordinator",
         ],
       ],
-      ["production_manager", ["production_manager — Production Manager"]],
-      ["location", ["location_manager — Location Manager"]],
-      ["intimacy", ["intimacy_coordinator — Intimacy Coordinator"]],
-      ["script_supervisor", ["script_supervisor — Script Supervisor"]],
-      ["script_continuity", ["script_consultant — Script Consultant"]],
-      ["choreography", ["choreographer — Choreographer"]],
+      ["casting", ["casting_director — Casting Director", "casting_associate — Casting Associate"]],
       [
-        "digital_creator",
-        ["digital_creator — Digital Creator", "influencer — Influencer"],
+        "digital",
+        [
+          "digital_creator — Digital Creator",
+          "influencer — Influencer",
+          "podcaster — Podcaster",
+        ],
       ],
-      ["podcaster", ["podcaster — Podcaster"]],
-      ["music_artist", ["music_artist — Music Artist"]],
-      ["additional_crew", ["talent_coordinator — Talent Coordinator"]],
-      ["executive", ["executive — Executive"]],
-      ["legal", ["lawyer — Lawyer", "attorney — Attorney"]],
-      ["publicity", ["publicist — Publicist"]],
-      ["talent_agent", ["talent_agent — Talent Agent"]],
-      ["manager", ["manager — Manager"]],
       [
-        "accountant",
-        ["accountant — Accountant", "production_accountant — Production Accountant"],
+        "business",
+        [
+          "executive — Executive",
+          "lawyer — Lawyer",
+          "attorney — Attorney",
+          "publicist — Publicist",
+          "talent_agent — Talent Agent",
+          "manager — Manager",
+          "accountant — Accountant",
+          "production_accountant — Production Accountant",
+          "investor — Investor",
+        ],
       ],
-      ["business", ["investor — Investor"]],
     ]);
   });
 
@@ -312,14 +307,39 @@ describe("social profile roles", () => {
     expect(hits.map((group) => group.id)).toEqual(["business"]);
     expect(hits[0]?.roles.map((role) => role.slug)).toEqual(["investor"]);
     expect(filterSocialProfileRoleGroups("cast").map((group) => group.id)).toEqual([
-      "casting_director",
-      "casting_department",
-      "podcaster",
+      "casting",
+      "digital",
     ]);
     expect(filterSocialProfileRoleGroups("screenplay").map((group) => group.id)).toEqual(["writer"]);
     expect(
       filterSocialProfileRoleGroups("screenplay")[0]?.roles.map((role) => role.slug),
     ).toEqual(["writer_screenplay"]);
     expect(filterSocialProfileRoleGroups("zzzz")).toEqual([]);
+  });
+
+  it("keeps one professions SoT and a sync select/write path", () => {
+    const rolesSrc = readFileSync("src/lib/social-profile-roles.ts", "utf8");
+    const affinitySrc = readFileSync("src/lib/social-role-affinity.ts", "utf8");
+    const fieldSrc = readFileSync("src/components/social/social-profile-roles.tsx", "utf8");
+    const editSrc = readFileSync("src/components/social/social-profile-edit.tsx", "utf8");
+    expect(rolesSrc.match(/export const SOCIAL_PROFILE_ROLE_GROUPS/g)).toEqual([
+      "export const SOCIAL_PROFILE_ROLE_GROUPS",
+    ]);
+    expect(affinitySrc).toContain("SOCIAL_PROFILE_ROLE_GROUPS");
+    expect(affinitySrc).toContain("satisfies Record<SocialProfileRoleGroupId");
+    expect(affinitySrc).not.toContain('slug: "actor"');
+    expect(fieldSrc).toContain("toggleSocialProfileRole");
+    expect(fieldSrc).toContain("onChange(toggleSocialProfileRole");
+    expect(fieldSrc).not.toContain("createSocialProfile");
+    expect(fieldSrc).not.toContain("await");
+    expect(editSrc).toContain('form.set("crafts"');
+    expect(editSrc).toContain("onChange={setRoles}");
+    expect(editSrc).toMatch(/async function onDone[\s\S]*createSocialProfile/);
+    expect(socialProfileRolesWrite.toString()).not.toMatch(/await|Promise|then/);
+    expect(toggleSocialProfileRole.toString()).not.toMatch(/await|Promise|then/);
+    expect(socialProfileRolesWrite(["actor", "producer"])).toEqual({
+      crafts: ["actor", "producer"],
+      primary_role: "actor",
+    });
   });
 });

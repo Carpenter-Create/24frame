@@ -32,57 +32,24 @@ export type SocialRoleAffinity = {
   neighbors: readonly SocialProfileRoleSlug[];
 };
 
-const GROUP_TOPICS: Record<string, readonly SocialCategoryTopic[]> = {
+type SocialProfileRoleGroupId = (typeof SOCIAL_PROFILE_ROLE_GROUPS)[number]["id"];
+
+// Soft-bias only. Keys must match the professions SoT — not a second bank.
+const GROUP_TOPICS = {
   actor: ["Acting", "Casting", "Content creator"],
-  actress: ["Acting", "Casting", "Content creator"],
-  voice_actor: ["Acting", "Casting", "Content creator"],
   writer: ["Screenwriting", "Content creator"],
   director: ["Directors", "AI filmmaking"],
-  second_unit_or_ad: ["Directors", "AI filmmaking"],
   producer: ["Producers", "Film Festivals", "Distribution"],
-  showrunner: ["Producers", "Screenwriting"],
-  cinematographer: ["Cinematography"],
-  camera_electrical: ["Cinematography"],
-  editor: ["Post-production"],
+  camera: ["Cinematography"],
   editorial: ["Post-production"],
-  color: ["Post-production"],
-  art_director: ["Animation", "Post-production"],
-  production_designer: ["Post-production", "Animation"],
-  art_department: ["Post-production", "Animation"],
-  set_decorator: ["Post-production", "Animation"],
-  costume: ["Post-production"],
-  makeup: ["Post-production"],
-  property_master: ["Post-production"],
+  art: ["Animation", "Post-production"],
   sound: ["Music", "Post-production"],
-  composer: ["Music"],
-  music_department: ["Music"],
-  music_supervisor: ["Music"],
-  soundtrack: ["Music"],
   visual_effects: ["Animation", "Post-production", "AI filmmaking"],
-  animation: ["Animation", "Post-production", "AI filmmaking"],
-  special_effects: ["Animation", "Post-production"],
-  stunts: ["Acting", "Casting"],
-  casting_director: ["Casting", "Acting"],
-  casting_department: ["Casting", "Acting"],
-  production_department: ["Producers", "Film Festivals"],
-  production_manager: ["Producers", "Film Festivals"],
-  location: ["Producers", "Film Festivals"],
-  intimacy: ["Acting", "Casting"],
-  script_supervisor: ["Directors", "Screenwriting"],
-  script_continuity: ["Screenwriting"],
-  choreography: ["Acting", "Content creator"],
-  digital_creator: ["Content creator", "Vertical micro dramas"],
-  podcaster: ["Content creator"],
-  music_artist: ["Music", "Content creator"],
-  additional_crew: ["Producers", "Casting"],
-  executive: ["Financing", "Distribution", "Film Festivals"],
-  legal: ["Financing", "Distribution"],
-  publicity: ["Distribution", "Content creator"],
-  talent_agent: ["Casting", "Acting"],
-  manager: ["Casting", "Acting"],
-  accountant: ["Financing"],
+  production: ["Producers", "Film Festivals"],
+  casting: ["Casting", "Acting"],
+  digital: ["Content creator", "Vertical micro dramas"],
   business: ["Financing", "Distribution", "Film Festivals"],
-};
+} as const satisfies Record<SocialProfileRoleGroupId, readonly SocialCategoryTopic[]>;
 
 const ROLE_TOPIC_OVERRIDES: Partial<Record<SocialProfileRoleSlug, readonly SocialCategoryTopic[]>> = {
   investor: ["Financing", "Distribution", "Film Festivals"],
