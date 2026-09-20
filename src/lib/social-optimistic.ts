@@ -4,6 +4,7 @@
 // apply/await/refresh loops or a second persist helper.
 
 import { ACCOUNT_PROFILE } from "@/lib/account-profile";
+import { SOCIAL_CATEGORY_ALL } from "@/lib/social-categories";
 import { normalizePostBody, SOCIAL } from "@/lib/social";
 
 export const SOCIAL_OPTIMISTIC_LOCK = {
@@ -31,6 +32,7 @@ export type SocialOptimisticPost = {
   authorPhotoUrl: string | null;
   groupSlug: string | null;
   groupName: string | null;
+  category?: string | null;
   media: readonly SocialOptimisticPostMedia[];
   error?: string;
 };
@@ -67,6 +69,8 @@ const likeListeners = new Set<() => void>();
 
 let posts: SocialOptimisticPost[] = [];
 const postListeners = new Set<() => void>();
+const likePersistTail = new Map<string, Promise<unknown>>();
+let postPublishBusy = false;
 
 function emitLikes() {
   for (const listener of likeListeners) listener();
@@ -110,8 +114,36 @@ export function persistSocialLike(form: FormData): Promise<{ error?: string }> {
   return persistSocialMutation(SOCIAL_OPTIMISTIC_LOCK.likeHref, form);
 }
 
+export function persistSocialLikeLatest(
+  postId: string,
+  epoch: number,
+  form: FormData,
+): Promise<{ error?: string }> {
+  const prev = likePersistTail.get(postId) ?? Promise.resolve();
+  const next = prev.then(async () => {
+    if (!socialLikeEpochIsCurrent(postId, epoch)) return {};
+    return persistSocialLike(form);
+  });
+  likePersistTail.set(postId, next.catch(() => undefined));
+  return next;
+}
+
 export function persistSocialPost(form: FormData): Promise<{ error?: string }> {
   return persistSocialMutation(SOCIAL_OPTIMISTIC_LOCK.postHref, form);
+}
+
+export function socialPostPublishBusy(): boolean {
+  return postPublishBusy;
+}
+
+export function beginSocialPostPublishBusy(): boolean {
+  if (postPublishBusy) return false;
+  postPublishBusy = true;
+  return true;
+}
+
+export function endSocialPostPublishBusy(): void {
+  postPublishBusy = false;
 }
 
 export function runSocialOptimisticMutation<T>(input: SocialOptimisticRun<T>): void {
@@ -204,16 +236,25 @@ export function subscribeOptimisticSocialPosts(listener: () => void): () => void
 export function socialOptimisticPostsFor(
   groupSlug: string | null | undefined,
   pending: readonly SocialOptimisticPost[] = posts,
+  topic?: string | null,
 ): SocialOptimisticPost[] {
   const slug = groupSlug ?? null;
-  return pending.filter((row) => (row.groupSlug ?? null) === slug);
+  return pending.filter((row) => {
+    if ((row.groupSlug ?? null) !== slug) return false;
+    if (topic && topic !== SOCIAL_CATEGORY_ALL && (row.category ?? "") !== topic) return false;
+    return true;
+  });
 }
 
 export function socialOptimisticPostMatches(
   server: { body: string | null; authorHandle?: string | null },
   pending: SocialOptimisticPost,
 ): boolean {
-  return (server.body ?? "") === (pending.body ?? "") && (server.authorHandle ?? "") === (pending.authorHandle ?? "");
+  if ((server.body ?? "") !== (pending.body ?? "")) return false;
+  if (pending.authorHandle && server.authorHandle && pending.authorHandle !== server.authorHandle) {
+    return false;
+  }
+  return true;
 }
 
 export function socialOptimisticPostCard(post: SocialOptimisticPost): {
@@ -290,6 +331,7 @@ export function beginSocialPostPublish(draft: SocialPostPublishDraft): SocialPos
     authorPhotoUrl: draft.authorPhotoUrl ?? null,
     groupSlug: draft.groupSlug ?? null,
     groupName: draft.groupName ?? null,
+    category: draft.category || null,
     media: (draft.mediaPreview ?? []).filter((item) => item.url),
   };
   return { ok: true, form, post };
@@ -302,7 +344,9 @@ export function getSocialOptimisticServerSnapshot(): null {
 export function resetSocialOptimisticForTests(): void {
   likes.clear();
   likeEpoch.clear();
+  likePersistTail.clear();
   posts = [];
+  postPublishBusy = false;
   emitLikes();
   emitPosts();
 }

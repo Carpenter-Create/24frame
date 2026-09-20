@@ -56,6 +56,8 @@ import {
 import {
   applyOptimisticSocialPost,
   beginSocialPostPublish,
+  beginSocialPostPublishBusy,
+  endSocialPostPublishBusy,
   failOptimisticSocialPost,
   persistSocialPost,
   runSocialOptimisticMutation,
@@ -132,6 +134,7 @@ function publishOptimisticPost({
     setError(started.error);
     return;
   }
+  if (!beginSocialPostPublishBusy()) return;
   runSocialOptimisticMutation({
     apply: () => {
       applyOptimisticSocialPost(started.post);
@@ -141,8 +144,17 @@ function publishOptimisticPost({
       return started.post.id;
     },
     persist: () => persistSocialPost(started.form),
-    rollback: () => failOptimisticSocialPost(started.post.id, ACCOUNT_PROFILE.saveFailed),
-    onError: (error) => failOptimisticSocialPost(started.post.id, error),
+    rollback: () => {
+      failOptimisticSocialPost(started.post.id, ACCOUNT_PROFILE.saveFailed);
+      endSocialPostPublishBusy();
+    },
+    onError: (error) => {
+      failOptimisticSocialPost(started.post.id, error);
+      endSocialPostPublishBusy();
+    },
+    onSuccess: () => {
+      endSocialPostPublishBusy();
+    },
   });
 }
 

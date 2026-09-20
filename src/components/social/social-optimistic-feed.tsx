@@ -13,23 +13,33 @@ import {
 export function SocialOptimisticFeed({
   posts,
   groupSlug = null,
+  topic = null,
   empty = null,
 }: {
   posts: SocialPostCardModel[];
   groupSlug?: string | null;
+  topic?: string | null;
   empty?: ReactNode;
 }) {
-  const pending = useSocialOptimisticPosts(groupSlug);
+  const pending = useSocialOptimisticPosts(groupSlug, topic);
   const merged = mergeSocialOptimisticPosts(posts, pending);
   const error = socialOptimisticNotice(pending);
-  if (merged.length === 0) return empty;
+  const notice = error ? (
+    <InlineNotice tone="error" data-social-optimistic-error="">
+      {error}
+    </InlineNotice>
+  ) : null;
+  if (merged.length === 0) {
+    return (
+      <>
+        {notice}
+        {empty}
+      </>
+    );
+  }
   return (
     <div data-social-feed="" className="flex flex-col gap-2">
-      {error ? (
-        <InlineNotice tone="error" data-social-optimistic-error="">
-          {error}
-        </InlineNotice>
-      ) : null}
+      {notice}
       {merged.map((post) => (
         <SocialPostCard key={post.id} post={post} />
       ))}

@@ -12,7 +12,7 @@ import {
   applyOptimisticLike,
   beginSocialLikeEpoch,
   nextSocialLikeState,
-  persistSocialLike,
+  persistSocialLikeLatest,
   runSocialOptimisticMutation,
   socialLikeEpochIsCurrent,
 } from "@/lib/social-optimistic";
@@ -257,7 +257,7 @@ export function SocialLikeButton({
         form.set("post_id", postId);
         form.set("liked", previous.liked ? "1" : "0");
         if (groupSlug) form.set("group_slug", groupSlug);
-        return persistSocialLike(form);
+        return persistSocialLikeLatest(postId, epoch, form);
       },
       rollback: (token) => {
         if (!socialLikeEpochIsCurrent(postId, epoch)) return;

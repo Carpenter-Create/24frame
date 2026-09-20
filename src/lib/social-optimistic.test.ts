@@ -8,6 +8,10 @@ import {
   applyOptimisticSocialPost,
   beginSocialLikeEpoch,
   beginSocialPostPublish,
+  beginSocialPostPublishBusy,
+  endSocialPostPublishBusy,
+  persistSocialLikeLatest,
+  socialPostPublishBusy,
   clearOptimisticLike,
   failOptimisticSocialPost,
   mergeSocialLike,
@@ -26,6 +30,7 @@ import {
   socialOptimisticPersistNotice,
   socialOptimisticPostCard,
   socialOptimisticPostMatches,
+  socialOptimisticPostsFor,
 } from "@/lib/social-optimistic";
 
 describe("Social optimistic mutation SoT", () => {
@@ -95,11 +100,24 @@ describe("Social optimistic mutation SoT", () => {
     });
   });
 
-  it("ignores a stale like rollback after a newer tap", () => {
+  it("ignores a stale like rollback after a newer tap", async () => {
     const first = beginSocialLikeEpoch("p1");
     const second = beginSocialLikeEpoch("p1");
     expect(socialLikeEpochIsCurrent("p1", first)).toBe(false);
     expect(socialLikeEpochIsCurrent("p1", second)).toBe(true);
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({}), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const form = new FormData();
+    form.set("post_id", "p1");
+    expect(await persistSocialLikeLatest("p1", first, form)).toEqual({});
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(await persistSocialLikeLatest("p1", second, form)).toEqual({});
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(beginSocialPostPublishBusy()).toBe(true);
+    expect(socialPostPublishBusy()).toBe(true);
+    expect(beginSocialPostPublishBusy()).toBe(false);
+    endSocialPostPublishBusy();
+    expect(socialPostPublishBusy()).toBe(false);
   });
 
   it("starts a publish hop without waiting on the server and rejects an empty post", () => {
@@ -131,11 +149,16 @@ describe("Social optimistic mutation SoT", () => {
     expect(
       socialOptimisticPostMatches({ body: "hello", authorHandle: "ada" }, started.post),
     ).toBe(true);
+    expect(
+      socialOptimisticPostMatches({ body: "hello", authorHandle: "ada" }, { ...started.post, authorHandle: null }),
+    ).toBe(true);
+    expect(socialOptimisticPostsFor(null, readOptimisticSocialPosts(), "Acting")).toEqual([]);
     failOptimisticSocialPost(started.post.id, ACCOUNT_PROFILE.saveFailed);
     expect(socialOptimisticNotice(readOptimisticSocialPosts())).toBe(ACCOUNT_PROFILE.saveFailed);
     expect(
       mergeSocialOptimisticPosts([{ id: "old", body: "earlier", authorHandle: "ada" }], readOptimisticSocialPosts()),
     ).toHaveLength(1);
+    expect(socialOptimisticNotice(readOptimisticSocialPosts())).toBe(ACCOUNT_PROFILE.saveFailed);
   });
 
   it("persists like and post over fetch so the tree does not refresh", async () => {
@@ -190,7 +213,7 @@ describe("Social optimistic mutation SoT", () => {
     expect(forms).toContain("runSocialOptimisticMutation");
     expect(forms).toContain("persistSocialPost");
     expect(likeChunk).toContain("runSocialOptimisticMutation");
-    expect(likeChunk).toContain("persistSocialLike");
+    expect(likeChunk).toContain("persistSocialLikeLatest");
     expect(likeChunk).not.toContain("await toggleSocialLike");
     expect(likeChunk).not.toContain("router.refresh()");
     expect(createChunk).toContain("publishOptimisticPost");
@@ -204,6 +227,10 @@ describe("Social optimistic mutation SoT", () => {
       goLivePublish.indexOf("persistSocialPost"),
     );
     expect(goLive).not.toContain("await createSocialPost");
+    expect(goLive).toContain("clipUrlRef.current = null");
+    const feed = readFileSync("src/components/social/social-optimistic-feed.tsx", "utf8");
+    expect(feed).toContain("data-social-optimistic-error");
+    expect(feed.indexOf("notice")).toBeLessThan(feed.indexOf("if (merged.length === 0)"));
     expect(followChunk).toContain("const result = await toggleSocialFollow");
     expect(followChunk).toContain("followedConfirmCopy");
     expect(followChunk).not.toContain("router.refresh()");

@@ -27,13 +27,16 @@ export function useSocialLikeView(postId: string, liked: boolean, likeCount: num
   return useSocialLike(postId, { liked, likeCount });
 }
 
-export function useSocialOptimisticPosts(groupSlug?: string | null): readonly SocialOptimisticPost[] {
+export function useSocialOptimisticPosts(
+  groupSlug?: string | null,
+  topic?: string | null,
+): readonly SocialOptimisticPost[] {
   const pending = useSyncExternalStore(
     subscribeOptimisticSocialPosts,
     readOptimisticSocialPosts,
     (): readonly SocialOptimisticPost[] => [],
   );
-  return socialOptimisticPostsFor(groupSlug, pending);
+  return socialOptimisticPostsFor(groupSlug, pending, topic);
 }
 
 export { mergeSocialLike };

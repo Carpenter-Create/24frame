@@ -427,6 +427,7 @@ export function SocialGoLive() {
     runSocialOptimisticMutation({
       apply: () => {
         applyOptimisticSocialPost(started.post);
+        clipUrlRef.current = null;
         setError("");
         router.push(SOCIAL_ROUTES.home);
         return started.post.id;

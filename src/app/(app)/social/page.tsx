@@ -264,6 +264,7 @@ function SocialHomeFollowingWall({
         </div>
       ) : null}
       <SocialOptimisticFeed
+        topic={topic}
         posts={posts.map((post) => {
           const author = authors.get(post.author_id);
           const group = post.group_id ? groups.get(post.group_id) : null;
