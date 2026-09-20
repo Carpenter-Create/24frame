@@ -41,8 +41,16 @@ export const APP_SHEET_MOTION_EASING = "ease-out";
 export const APP_SHEET_RISE_CLASS = "app-sheet-rise";
 export const APP_SHEET_SCRIM_FADE_CLASS = "app-sheet-scrim-fade";
 
+// Phone host — column + justify-end so the surface rises full-width
+// from the bottom. Default flex is row; items-end on a row host
+// hugs content and pins a card to the start. Account, workspace,
+// and the notifications bell consume this. md:hidden is a caller
+// concern when a desktop peek stays on screen.
+export const APP_SHEET_HOST_CLASS =
+  "fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end";
+
 export const APP_SHEET_SURFACE_CLASS =
-  "flex flex-col gap-[var(--space-6)] rounded-t-[16px] bg-surface px-[var(--space-4)] pb-[var(--space-12)] pt-[var(--space-6)] app-sheet-rise";
+  "flex w-full flex-col gap-[var(--space-6)] rounded-t-[16px] bg-surface px-[var(--space-4)] pb-[var(--space-12)] pt-[var(--space-6)] app-sheet-rise";
 
 export const APP_SHEET_HEAD_CLASS = "flex h-[44px] shrink-0 items-center";
 

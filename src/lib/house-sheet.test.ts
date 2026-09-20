@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import {
   APP_SHEET_HAIRLINE_CLASS,
   APP_SHEET_HEAD_CLASS,
+  APP_SHEET_HOST_CLASS,
   APP_SHEET_MOTION_DURATION_MS,
   APP_SHEET_MOTION_EASING,
   APP_SHEET_RISE_CLASS,
@@ -79,6 +80,15 @@ describe("house sheet lock", () => {
   });
 
   it("locks app-sheet chrome to 543:576 — r16, pad 16/24/48, quiet scrim", () => {
+    expect(APP_SHEET_HOST_CLASS).toBe(
+      "fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end",
+    );
+    expect(APP_SHEET_HOST_CLASS).toContain("flex-col");
+    expect(APP_SHEET_HOST_CLASS).toContain("justify-end");
+    expect(APP_SHEET_HOST_CLASS).toContain("h-dvh");
+    expect(APP_SHEET_HOST_CLASS).toContain("w-full");
+    expect(APP_SHEET_HOST_CLASS.split(" ")).not.toContain("items-end");
+    expect(APP_SHEET_SURFACE_CLASS).toContain("w-full");
     expect(APP_SHEET_SURFACE_CLASS).toContain("rounded-t-[16px]");
     expect(APP_SHEET_SURFACE_CLASS).toContain("px-[var(--space-4)]");
     expect(APP_SHEET_SURFACE_CLASS).toContain("pt-[var(--space-6)]");

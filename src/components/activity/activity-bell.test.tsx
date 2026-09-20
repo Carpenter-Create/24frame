@@ -13,13 +13,16 @@ vi.mock("next/navigation", () => ({
 import { ActivityBell } from "./activity-bell";
 import {
   ACTIVITY_BELL_POPOVER_CLASS,
+  ACTIVITY_BELL_SHEET_HOST_CLASS,
+  ACTIVITY_BELL_SHEET_SURFACE_CLASS,
   ACTIVITY_BELL_TRIGGER_CLASS,
   ACTIVITY_BELL_VIEW_ALL_CLASS,
   ACTIVITY_HREF,
   ACTIVITY_PAGE,
   activityHref,
 } from "@/lib/activity";
-import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
+import { ACCOUNT_SHEET_HOST_CLASS } from "@/lib/account-sheet";
+import { APP_SHEET_HOST_CLASS, APP_SHEET_SCRIM_CLASS, TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import {
   HOUSE_HEADER_TRAILING_HIT_CLASS,
   HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS,
@@ -100,6 +103,9 @@ describe("ActivityBell", () => {
     expect(html).toContain("North Wind was returned");
     expect(html).toContain("data-activity-done");
     expect(html).toContain(ACTIVITY_BELL_POPOVER_CLASS);
+    expect(html).toContain(ACTIVITY_BELL_SHEET_HOST_CLASS);
+    expect(html).toContain(ACTIVITY_BELL_SHEET_SURFACE_CLASS);
+    expect(html).toContain(APP_SHEET_SCRIM_CLASS);
     expect(html).not.toContain(">Activity<");
     expect(html).not.toContain('aria-label="Activity"');
     expect(bellSrc).toContain("createPortal");
@@ -118,6 +124,8 @@ describe("ActivityBell", () => {
     expect(bellSrc).toContain("cache.items");
     expect(bellSrc).not.toContain("items={[]}");
     expect(bellSrc).not.toContain("ACCOUNT_SHEET_HOST_CLASS");
+    expect(bellSrc).toContain("ACTIVITY_BELL_SHEET_HOST_CLASS");
+    expect(bellSrc).toContain("ACTIVITY_BELL_SHEET_SURFACE_CLASS");
     expect(bellSrc).toContain("HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS");
     expect(bellSrc).toContain("hidden md:block");
     expect(bellSrc).toContain("activityHref");
@@ -188,6 +196,33 @@ describe("ActivityBell", () => {
     );
     expect(home).not.toContain("family=aggregation");
     nav.pathname = "/aggregation/dashboard";
+  });
+
+  it("opens the phone sheet on the house app-sheet host — not a content-hug card", () => {
+    const html = renderToStaticMarkup(
+      createElement(ActivityBell, {
+        unread: 0,
+        items: [],
+        defaultOpen: true,
+      }),
+    );
+    expect(ACTIVITY_BELL_SHEET_HOST_CLASS).toBe(`${APP_SHEET_HOST_CLASS} md:hidden`);
+    expect(ACTIVITY_BELL_SHEET_HOST_CLASS).toContain(ACCOUNT_SHEET_HOST_CLASS);
+    expect(ACTIVITY_BELL_SHEET_HOST_CLASS).toContain("flex-col");
+    expect(ACTIVITY_BELL_SHEET_HOST_CLASS).toContain("justify-end");
+    expect(ACTIVITY_BELL_SHEET_HOST_CLASS).toContain("w-full");
+    expect(ACTIVITY_BELL_SHEET_HOST_CLASS.split(" ")).not.toContain("items-end");
+    expect(ACTIVITY_BELL_SHEET_SURFACE_CLASS).toContain("w-full");
+    expect(html).toContain(`data-activity-bell-sheet="" class="${ACTIVITY_BELL_SHEET_HOST_CLASS}"`);
+    expect(html).toContain(ACTIVITY_BELL_SHEET_SURFACE_CLASS);
+    expect(html).toContain(ACTIVITY_BELL_POPOVER_CLASS);
+    expect(html).toContain(`data-activity-bell-popover="" class="${ACTIVITY_BELL_POPOVER_CLASS}"`);
+    expect(html).toContain(ACTIVITY_PAGE.title);
+    expect(html).toContain(ACTIVITY_PAGE.close);
+    expect(html).toContain("data-activity-bell-empty");
+    expect(html).toContain(ACTIVITY_PAGE.viewAll);
+    expect(html).toContain("hidden md:block");
+    expect(html).toContain("md:hidden");
   });
 
   it("matches #391 chrome idle weight on theme and the desktop bell", () => {
