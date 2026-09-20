@@ -3,7 +3,6 @@
 // Playback is Auto (adaptive). Do not add a quality Settings maze.
 
 export const SOCIAL_MUX_PROVIDER = "mux" as const;
-export const SOCIAL_MUX_ENV = ["MUX_TOKEN_ID", "MUX_TOKEN_SECRET"] as const;
 export const SOCIAL_MUX_DEFAULT_RESOLUTION = "1080p" as const;
 export const SOCIAL_MUX_ORIGINAL_RESOLUTION = "2160p" as const;
 export const SOCIAL_MUX_4K_MIN_EDGE = 2160;

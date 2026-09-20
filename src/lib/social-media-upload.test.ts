@@ -10,7 +10,7 @@ describe("social post media upload SoT", () => {
     expect(src).toContain("createSocialMuxUpload");
     expect(src).toContain("finalizeSocialMuxUpload");
     expect(src).toContain("presignSocialMediaUpload");
-    expect(src).toContain('intent: options.intent ?? "video"');
+    expect(src).toContain('body.set("intent", options.intent ?? "video")');
     expect(src).toContain("original_quality");
     expect(src).toContain("probeSocialVideoPixels");
     expect(src).not.toContain("NEXT_PUBLIC_MUX");

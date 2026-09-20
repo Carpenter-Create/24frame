@@ -6,13 +6,13 @@ import {
   isSocialMuxId,
   parseSocialMuxIntent,
   SOCIAL_MUX_DEFAULT_RESOLUTION,
-  SOCIAL_MUX_ENV,
   SOCIAL_MUX_IMAGE_HOST,
   SOCIAL_MUX_ORIGINAL_RESOLUTION,
   socialMuxAssetSettings,
   socialMuxPlaybackUrl,
   socialMuxThumbnailUrl,
 } from "./social-mux";
+import { SOCIAL_MUX_ENV } from "./social-mux-server";
 
 describe("social Mux encode locks", () => {
   it("defaults Video to 1080p basic and Go live to 1080p plus", () => {
@@ -86,6 +86,6 @@ describe("social Mux encode locks", () => {
     expect(server).not.toContain("NEXT_PUBLIC_");
     expect(server).toContain("video_quality");
     expect(server).toContain("max_resolution_tier");
-    expect(server).toContain('playback_policies": ["public"]');
+    expect(server).toContain('playback_policies: ["public"]');
   });
 });

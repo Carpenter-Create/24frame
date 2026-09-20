@@ -1,12 +1,13 @@
 import "server-only";
 
 import {
-  SOCIAL_MUX_ENV,
   isSocialMuxId,
   socialMuxAssetSettings,
   type SocialMuxAssetSettings,
   type SocialMuxIntent,
 } from "@/lib/social-mux";
+
+export const SOCIAL_MUX_ENV = ["MUX_TOKEN_ID", "MUX_TOKEN_SECRET"] as const;
 
 // Server-only Mux Video client for Social. Token secret never leaves this
 // module. Do not import from client components, Edge Social reads, or
