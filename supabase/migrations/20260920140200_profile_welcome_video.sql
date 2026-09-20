@@ -1,5 +1,5 @@
 -- ============================================================================
--- 20260920140000_profile_welcome_video.sql
+-- 20260920140200_profile_welcome_video.sql
 --
 -- INTENT: One current welcome-video pointer on profiles. Public profile
 -- renders the band only when this key is set. Replacing updates the
