@@ -7,6 +7,7 @@ import { SocialEmpty } from "@/components/social/social-empty";
 import { SocialForYouRail } from "@/components/social/social-for-you";
 import { SocialHomeComposer } from "@/components/social/social-home-composer";
 import { SocialHomeTabs } from "@/components/social/social-home-tabs";
+import { SocialHomeTopics } from "@/components/social/social-home-topics";
 import { SocialRecentChats } from "@/components/social/social-recent-chats";
 import {
   SocialForYouSkeleton,
@@ -204,6 +205,7 @@ async function SocialHomeCenter({
       {profile ? (
         <SocialHomeComposer authorName={profile.display_name} authorPhotoUrl={photoUrl} />
       ) : null}
+      <SocialHomeTopics />
       <SocialStoriesRail
         cards={rail}
         authors={authors}

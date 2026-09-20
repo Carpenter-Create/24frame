@@ -66,6 +66,11 @@ describe("social copy lock", () => {
     expect(SOCIAL.home.subtitle).toContain("follow");
     expect(SOCIAL.home.subtitle).toContain(PRODUCT_NAME);
     expect(SOCIAL.home.emptyQuiet).toBe("No posts yet");
+    expect(SOCIAL.home.composerPrompt).toBe("Write something");
+    expect(SOCIAL.home.composerPromptNamed).toBe("Write something");
+    expect(SOCIAL.forYou.topics).toBe("Topics.");
+    expect(blob).not.toContain("What's on your mind");
+    expect(blob).not.toContain("Topics for you");
     expect(SOCIAL.home.recentChats).toBe("Recent chats");
     expect(SOCIAL.home.chatsEmpty).toBe("No messages yet");
     expect(blob).not.toContain("Social-native");
@@ -301,7 +306,12 @@ describe("profile opt-in", () => {
     expect(socialProfileTabHref("/social/u/ada", "credits")).toBe("/social/u/ada?tab=credits");
     expect(socialProfileTabHref("/social/profile", "posts")).toBe("/social/profile");
     expect(socialProfileTabLabel("credits")).toBe("Credits");
-    expect(socialComposerPrompt("Ada Lovelace")).toBe("What's on your mind Ada?");
+    expect(socialComposerPrompt("Ada Lovelace")).toBe("Write something");
+    expect(socialComposerPrompt(null)).toBe("Write something");
+    expect(socialComposerPrompt("")).toBe("Write something");
+    expect(SOCIAL.home.composerPrompt).toBe("Write something");
+    expect(SOCIAL.home.composerPromptNamed).toBe("Write something");
+    expect(SOCIAL.forYou.topics).toBe("Topics.");
     expect(SOCIAL.profile.postsTab).toBe("Posts");
     expect(SOCIAL.profile.highlightsTab).toBe("Highlights");
     expect(SOCIAL.profile.creditsTab).toBe("Credits");

@@ -166,7 +166,15 @@ describe("Social home", () => {
     expect(html).toContain("/social/create?kind=text");
     expect(html).toContain(SOCIAL.home.attach);
     expect(html).not.toContain("data-social-composer-action");
-    expect(html.indexOf("data-social-home-composer")).toBeLessThan(html.indexOf("data-social-stories"));
+    expect(html.indexOf("data-social-home-composer")).toBeLessThan(html.indexOf("data-social-home-topics"));
+    expect(html.indexOf("data-social-home-topics")).toBeLessThan(html.indexOf("data-social-stories"));
+    expect(html.indexOf("data-social-stories")).toBeLessThan(html.indexOf("data-social-home-tabs"));
+    expect(html).toContain(SOCIAL.forYou.topics);
+    expect(html.split(SOCIAL.forYou.topics).length - 1).toBe(1);
+    expect(html).toContain("Write something");
+    expect(html).not.toContain("What's on your mind");
+    expect(html).not.toContain("Topics for you");
+    expect(html).not.toContain("data-social-for-you-topics");
     expect(html).toContain("data-social-stories-tall");
     expect(html).toContain("data-social-home-tabs");
     expect(html).toContain(SOCIAL.home.followingTab);
@@ -362,6 +370,9 @@ describe("Social home", () => {
     expect(html).not.toContain("data-social-home-setup");
     expect(html).toContain(SOCIAL.forYou.people);
     expect(html).toContain(SOCIAL.forYou.topics);
+    expect(html.split(SOCIAL.forYou.topics).length - 1).toBe(1);
+    expect(html.indexOf("data-social-home-topics")).toBeLessThan(html.indexOf("data-social-for-you-lane"));
+    expect(html).not.toContain("data-social-for-you-topics");
     expect(html).toContain("Cinematography");
     expect(html).not.toContain("Education");
     expect(html).not.toContain("Riley Okonkwo");
