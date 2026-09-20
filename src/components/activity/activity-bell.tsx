@@ -43,76 +43,136 @@ export function ActivityBell({
   defaultOpen?: boolean;
   now?: number;
 }) {
+  // Open lives above Suspense so a click during the promise fallback
+  // does not remount a closed trigger when rows resolve.
+  const [open, setOpen] = useState(defaultOpen);
+
   if (isPromise(unread)) {
     if (isPromise(items)) {
       return (
-        <Suspense fallback={<ActivityBellTriggers count={0} items={[]} />}>
-          <ActivityBellBoth unread={unread} items={items} defaultOpen={defaultOpen} />
+        <Suspense
+          fallback={<ActivityBellTriggers count={0} items={[]} open={open} onOpenChange={setOpen} />}
+        >
+          <ActivityBellBoth
+            unread={unread}
+            items={items}
+            open={open}
+            onOpenChange={setOpen}
+          />
         </Suspense>
       );
     }
     return (
-      <Suspense fallback={<ActivityBellTriggers count={0} items={[]} />}>
-        <ActivityBellUnread unread={unread} items={items} defaultOpen={defaultOpen} />
+      <Suspense
+        fallback={<ActivityBellTriggers count={0} items={[]} open={open} onOpenChange={setOpen} />}
+      >
+        <ActivityBellUnread
+          unread={unread}
+          items={items}
+          open={open}
+          onOpenChange={setOpen}
+        />
       </Suspense>
     );
   }
   if (isPromise(items)) {
     return (
-      <Suspense fallback={<ActivityBellTriggers count={0} items={[]} />}>
-        <ActivityBellItems unread={unread} items={items} defaultOpen={defaultOpen} />
+      <Suspense
+        fallback={<ActivityBellTriggers count={0} items={[]} open={open} onOpenChange={setOpen} />}
+      >
+        <ActivityBellItems
+          unread={unread}
+          items={items}
+          open={open}
+          onOpenChange={setOpen}
+        />
       </Suspense>
     );
   }
-  return <ActivityBellTriggers count={unread} items={items} defaultOpen={defaultOpen} />;
+  return (
+    <ActivityBellTriggers
+      count={unread}
+      items={items}
+      open={open}
+      onOpenChange={setOpen}
+    />
+  );
 }
 
 function ActivityBellBoth({
   unread,
   items,
-  defaultOpen,
+  open,
+  onOpenChange,
 }: {
   unread: Promise<number>;
   items: Promise<ActivityItem[]>;
-  defaultOpen?: boolean;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) {
-  return <ActivityBellTriggers count={use(unread)} items={use(items)} defaultOpen={defaultOpen} />;
+  return (
+    <ActivityBellTriggers
+      count={use(unread)}
+      items={use(items)}
+      open={open}
+      onOpenChange={onOpenChange}
+    />
+  );
 }
 
 function ActivityBellUnread({
   unread,
   items,
-  defaultOpen,
+  open,
+  onOpenChange,
 }: {
   unread: Promise<number>;
   items: ActivityItem[];
-  defaultOpen?: boolean;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) {
-  return <ActivityBellTriggers count={use(unread)} items={items} defaultOpen={defaultOpen} />;
+  return (
+    <ActivityBellTriggers
+      count={use(unread)}
+      items={items}
+      open={open}
+      onOpenChange={onOpenChange}
+    />
+  );
 }
 
 function ActivityBellItems({
   unread,
   items,
-  defaultOpen,
+  open,
+  onOpenChange,
 }: {
   unread: number;
   items: Promise<ActivityItem[]>;
-  defaultOpen?: boolean;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) {
-  return <ActivityBellTriggers count={unread} items={use(items)} defaultOpen={defaultOpen} />;
+  return (
+    <ActivityBellTriggers
+      count={unread}
+      items={use(items)}
+      open={open}
+      onOpenChange={onOpenChange}
+    />
+  );
 }
 
 function ActivityBellTriggers({
   count,
   items,
-  defaultOpen = false,
+  open,
+  onOpenChange,
 }: {
   count: number;
   items: ActivityItem[];
-  defaultOpen?: boolean;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
   const panelId = useId();
   const desktopRef = useRef<HTMLDivElement>(null);
   const popoverId = `${panelId}-popover`;
@@ -121,14 +181,14 @@ function ActivityBellTriggers({
   useEffect(() => {
     if (!open) return undefined;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape") onOpenChange(false);
     };
     const onPointer = (event: MouseEvent) => {
       const host = desktopRef.current;
       if (!host || host.contains(event.target as Node)) return;
       const sheet = document.querySelector("[data-activity-bell-sheet]");
       if (sheet?.contains(event.target as Node)) return;
-      setOpen(false);
+      onOpenChange(false);
     };
     document.addEventListener("keydown", onKey);
     document.addEventListener("mousedown", onPointer);
@@ -136,7 +196,7 @@ function ActivityBellTriggers({
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("mousedown", onPointer);
     };
-  }, [open]);
+  }, [open, onOpenChange]);
 
   return (
     <>
@@ -146,7 +206,7 @@ function ActivityBellTriggers({
           register="phone"
           open={open}
           panelId={sheetId}
-          onToggle={() => setOpen((next) => !next)}
+          onToggle={() => onOpenChange(!open)}
         />
       </div>
       <div
@@ -159,19 +219,23 @@ function ActivityBellTriggers({
           register="desktop"
           open={open}
           panelId={popoverId}
-          onToggle={() => setOpen((next) => !next)}
+          onToggle={() => onOpenChange(!open)}
         />
         {open ? (
           <ActivityBellPeek
             items={items}
             surface="popover"
             panelId={popoverId}
-            onClose={() => setOpen(false)}
+            onClose={() => onOpenChange(false)}
           />
         ) : null}
       </div>
       {open ? (
-        <ActivityBellSheet items={items} panelId={sheetId} onClose={() => setOpen(false)} />
+        <ActivityBellSheet
+          items={items}
+          panelId={sheetId}
+          onClose={() => onOpenChange(false)}
+        />
       ) : null}
     </>
   );
@@ -219,6 +283,17 @@ function ActivityBellTrigger({
   );
 }
 
+function closePeekOnRowNavigate(
+  event: { target: EventTarget | null },
+  onClose: () => void,
+) {
+  const target = event.target;
+  if (!(target instanceof Element)) return;
+  // X marks done — stay in the peek. Row links leave it.
+  if (target.closest("[data-activity-done]")) return;
+  if (target.closest("a")) onClose();
+}
+
 function ActivityBellBody({
   items,
   onClose,
@@ -233,7 +308,11 @@ function ActivityBellBody({
           {ACTIVITY_PAGE.bellEmpty}
         </p>
       ) : (
-        <div data-activity-bell-list="" className={ACTIVITY_BELL_LIST_CLASS}>
+        <div
+          data-activity-bell-list=""
+          className={ACTIVITY_BELL_LIST_CLASS}
+          onClick={(event) => closePeekOnRowNavigate(event, onClose)}
+        >
           {items.map((item) => (
             <ActivityFeedRow key={item.id} item={item} />
           ))}

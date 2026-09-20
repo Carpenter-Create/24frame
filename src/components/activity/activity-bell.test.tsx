@@ -95,6 +95,12 @@ describe("ActivityBell", () => {
     expect(bellSrc).toContain("data-activity-bell-popover");
     expect(bellSrc).toContain("data-activity-bell-sheet");
     expect(bellSrc).toContain("ActivityFeedRow");
+    expect(bellSrc).toContain("closePeekOnRowNavigate");
+    expect(bellSrc).toContain('target.closest("[data-activity-done]")');
+    expect(bellSrc).toContain("onClick={(event) => closePeekOnRowNavigate(event, onClose)}");
+    expect(bellSrc).toContain("const [open, setOpen] = useState(defaultOpen)");
+    expect(bellSrc.match(/useState\(defaultOpen\)/g)).toHaveLength(1);
+    expect(bellSrc).toContain("open={open} onOpenChange={setOpen}");
     expect(bellSrc).not.toContain("ACCOUNT_SHEET_HOST_CLASS");
     expect(bellSrc).toContain("HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS");
     expect(bellSrc).toContain("hidden md:block");
