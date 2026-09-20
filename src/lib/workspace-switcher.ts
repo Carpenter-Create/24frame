@@ -383,9 +383,12 @@ export function workspaceSwitcherLeadMarkLetter(id: PhoneWorkspaceSwitcherId): s
 
 /** Persist the workspace cookie for a lane hop. Home and Co-Productions do not write.
  *  Phone sheet Links call this on tap; desktop pills keep selectLeadPill. */
-export function workspaceSwitcherPersistLane(id: OverviewLeadPillId | PhoneWorkspaceSwitcherId): void {
+export function workspaceSwitcherPersistLane(
+  id: OverviewLeadPillId | PhoneWorkspaceSwitcherId,
+  isGcStaff?: boolean,
+): void {
   if (id === "home" || id === "co-productions") return;
-  persistWorkspaceCookie(id);
+  persistWorkspaceCookie(id, isGcStaff);
 }
 
 export function phoneWorkspaceSwitcherPrefetchHrefs(

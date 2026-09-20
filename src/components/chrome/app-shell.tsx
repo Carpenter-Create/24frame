@@ -109,22 +109,31 @@ export function AppShell({
   children: React.ReactNode;
 }) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
-  const [workspaceCookie, setWorkspaceCookie] = useState(defaultWorkspace);
+  const [workspaceCookie, setWorkspaceCookie] = useState(() =>
+    clampWorkspaceMode(defaultWorkspace, isGcStaff),
+  );
   const [identity, setIdentity] = useState(() =>
     stickyAccountChromeIdentity({ email, name, photoUrl }),
   );
   const cookiesApplied = useRef(false);
   const collapseTouched = useRef(false);
   const pathname = usePathname();
-  const workspace = resolveWorkspaceMode(pathname, workspaceCookie);
+  const workspace = resolveWorkspaceMode(
+    pathname,
+    clampWorkspaceMode(workspaceCookie, isGcStaff),
+  );
   const applyChromeCookies = useCallback(
-    (next: { defaultCollapsed: boolean; defaultWorkspace: WorkspaceMode }) => {
+    (next: {
+      defaultCollapsed: boolean;
+      defaultWorkspace: WorkspaceMode;
+      isGcStaff: boolean;
+    }) => {
       if (cookiesApplied.current) return;
       cookiesApplied.current = true;
       if (!collapseTouched.current) {
         setCollapsed(next.defaultCollapsed);
       }
-      setWorkspaceCookie(next.defaultWorkspace);
+      setWorkspaceCookie(clampWorkspaceMode(next.defaultWorkspace, next.isGcStaff));
     },
     [],
   );
@@ -397,7 +406,11 @@ function ChromeCookieSync({
   onIdentity,
 }: {
   chrome: Promise<AppShellChrome>;
-  onCookies: (next: { defaultCollapsed: boolean; defaultWorkspace: WorkspaceMode }) => void;
+  onCookies: (next: {
+    defaultCollapsed: boolean;
+    defaultWorkspace: WorkspaceMode;
+    isGcStaff: boolean;
+  }) => void;
   onIdentity: (next: AccountChromeIdentity) => void;
 }) {
   const data = use(chrome);
@@ -405,6 +418,7 @@ function ChromeCookieSync({
     onCookies({
       defaultCollapsed: data.defaultCollapsed,
       defaultWorkspace: data.defaultWorkspace,
+      isGcStaff: data.isGcStaff,
     });
     onIdentity({
       email: data.email,
@@ -414,6 +428,7 @@ function ChromeCookieSync({
   }, [
     data.defaultCollapsed,
     data.defaultWorkspace,
+    data.isGcStaff,
     data.email,
     data.name,
     data.photoUrl,

@@ -22,6 +22,12 @@
 // switcher-visible only for isGcStaff. Members never see Staff /
 // Team / Ops / GC_NAV. A forged staff cookie is clamped off.
 //
+// Adam hard lock 2026-09-20: Staff never appears for members.
+// resolveWorkspaceMode can still return "staff" from a forged cookie on
+// cookie-deferred paths (/settings, /help, /activity). clampWorkspaceMode
+// is the chrome SoT — staff without isGcStaff becomes aggregation.
+// persistWorkspaceCookie("staff") no-ops unless isGcStaff.
+//
 // Education: member browse/consume and staff CMS share the /education
 // prefix. Role gates chrome, not a parallel product. Member land is
 // /education. Staff CMS is /education/manage (collision at /education
@@ -155,7 +161,11 @@ export function resolveWorkspaceMode(pathname: string, cookie: WorkspaceMode): W
 // /staff/* bookmark must never paint Staff chrome for members. Path
 // resolve can still say staff; chrome callers clamp with isGcStaff.
 // (operator) / gc_staff remains the authorization bounce.
-export function clampWorkspaceMode(mode: WorkspaceMode, isGcStaff: boolean): WorkspaceMode {
+// Chrome SoT: staff without isGcStaff is never the active workspace.
+export function clampWorkspaceMode(
+  mode: WorkspaceMode,
+  isGcStaff: boolean | undefined,
+): WorkspaceMode {
   if (mode === "staff" && !isGcStaff) return "aggregation";
   return mode;
 }
@@ -164,6 +174,7 @@ export function workspaceCookieWrite(mode: WorkspaceMode): string {
   return `${WORKSPACE_COOKIE}=${mode}; path=/; max-age=31536000; samesite=lax`;
 }
 
-export function persistWorkspaceCookie(mode: WorkspaceMode): void {
+export function persistWorkspaceCookie(mode: WorkspaceMode, isGcStaff?: boolean): void {
+  if (clampWorkspaceMode(mode, isGcStaff) !== mode) return;
   document.cookie = workspaceCookieWrite(mode);
 }

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { USER_MENU } from "./user-menu";
 import { availableWorkspaceOptions, WORKSPACE_EDUCATION_HREF } from "./workspace-menu";
@@ -280,6 +280,20 @@ describe("workspace switcher lock", () => {
     expect(workspaceHome("aggregation")).toBe("/aggregation/dashboard");
     expect(workspaceHome("social")).toBe("/social");
     expect(workspaceHome("staff")).toBe("/staff/queue");
+    const writes: string[] = [];
+    vi.stubGlobal("document", {
+      get cookie() {
+        return writes.at(-1) ?? "";
+      },
+      set cookie(value: string) {
+        writes.push(value);
+      },
+    });
+    workspaceSwitcherPersistLane("staff");
+    expect(writes).toEqual([]);
+    workspaceSwitcherPersistLane("staff", true);
+    expect(writes.at(-1)).toContain("24frame_workspace=staff");
+    vi.unstubAllGlobals();
   });
 
   it("uses segmented track grammar for desktop sliding pills", () => {

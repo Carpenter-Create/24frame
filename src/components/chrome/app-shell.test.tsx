@@ -1041,6 +1041,52 @@ describe("AppShell rail-collapse chevron", () => {
     expect(appShellFn).not.toMatch(/\buse\(chrome\)/);
   });
 
+  it("never paints Staff chrome for a member with a forged staff cookie", () => {
+    const memberChrome = {
+      email: "ada@example.com",
+      name: "Ada",
+      photoUrl: null,
+      orgs: [],
+      activeOrgId: null,
+      unread: Promise.resolve(0),
+      activityItems: Promise.resolve([]),
+      isGcStaff: false,
+      defaultCollapsed: false,
+      messagesSurface: "access-gate" as const,
+      defaultWorkspace: "staff" as const,
+    };
+
+    for (const pathname of ["/settings", "/help", "/home"]) {
+      navigation.pathname = pathname;
+      const html = renderToStaticMarkup(
+        <AppShell
+          defaultWorkspace="staff"
+          chrome={fulfilledChrome(memberChrome)}
+          messagesUnread={Promise.resolve(0)}
+        >
+          page
+        </AppShell>,
+      );
+      expect(html, pathname).not.toContain(">Staff<");
+      expect(html, pathname).not.toContain('data-workspace-switcher-segment="staff"');
+      expect(html, pathname).not.toContain('data-workspace-switcher-option="staff"');
+      expect(html, pathname).not.toContain('data-house-phone-dest="Queue"');
+    }
+
+    navigation.pathname = "/settings";
+    const propOnly = renderToStaticMarkup(
+      <AppShell defaultWorkspace="staff" messagesUnread={Promise.resolve(0)}>
+        page
+      </AppShell>,
+    );
+    expect(propOnly).not.toContain(">Staff<");
+    expect(propOnly).toContain("Aggregation");
+
+    expect(shellSrc).toContain("clampWorkspaceMode");
+    expect(shellSrc).toContain("clampWorkspaceMode(defaultWorkspace, isGcStaff)");
+    expect(shellSrc).toContain("clampWorkspaceMode(workspaceCookie, isGcStaff)");
+  });
+
   it("applies resolved chrome cookies from a Suspense slot without persisting defaults", () => {
     navigation.pathname = "/";
     const pending = renderToStaticMarkup(
@@ -1058,7 +1104,7 @@ describe("AppShell rail-collapse chevron", () => {
     expect(shellSrc).toContain("if (cookiesApplied.current) return");
     expect(shellSrc).toContain("if (!collapseTouched.current)");
     expect(shellSrc).toContain("setCollapsed(next.defaultCollapsed)");
-    expect(shellSrc).toContain("setWorkspaceCookie(next.defaultWorkspace)");
+    expect(shellSrc).toContain("setWorkspaceCookie(clampWorkspaceMode(next.defaultWorkspace, next.isGcStaff))");
     expect(shellSrc).toContain("collapseTouched.current = true");
     const applyFn = shellSrc.slice(
       shellSrc.indexOf("const applyChromeCookies"),

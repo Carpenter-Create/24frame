@@ -36,7 +36,7 @@ import {
   createSocialTabBarScrollTracker,
   stepSocialTabBarScroll,
 } from "@/lib/social-tab-bar-scroll";
-import type { WorkspaceMode } from "@/lib/workspace";
+import { clampWorkspaceMode, type WorkspaceMode } from "@/lib/workspace";
 
 // Prior Social float: hide on scroll-down, show on scroll-up.
 // G9 page scroll lives on main (`[data-house-lead-scroll]`), not window.
@@ -76,7 +76,7 @@ function useHousePhoneBottomNavHidden(pathname: string) {
 }
 
 export function HousePhoneBottomNav({
-  workspace,
+  workspace: requestedWorkspace,
   isGcStaff = false,
   homeOwned = false,
   accountChrome = false,
@@ -88,6 +88,7 @@ export function HousePhoneBottomNav({
   accountChrome?: boolean;
   coProductions?: boolean;
 }) {
+  const workspace = clampWorkspaceMode(requestedWorkspace, isGcStaff);
   const pathname = usePathname();
   const router = useRouter();
   const { activePath, markPending } = useHouseNavPending();

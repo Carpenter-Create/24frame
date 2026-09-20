@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   clampWorkspaceMode,
@@ -6,6 +6,7 @@ import {
   isSocialPath,
   isStaffPath,
   parseWorkspaceCookie,
+  persistWorkspaceCookie,
   resolveWorkspaceMode,
   STAFF_PATH_PREFIXES,
   WORKSPACE_COOKIE,
@@ -130,36 +131,60 @@ describe("workspace mode", () => {
     expect(resolveWorkspaceMode("/education/manage", "staff")).toBe("education");
   });
 
-  it("clamps a forged staff cookie so members never keep staff chrome", () => {
+  it("clamps staff to aggregation unless isGcStaff — members never get staff chrome", () => {
     expect(clampWorkspaceMode("staff", false)).toBe("aggregation");
+    expect(clampWorkspaceMode("staff", undefined)).toBe("aggregation");
     expect(clampWorkspaceMode("staff", true)).toBe("staff");
     expect(clampWorkspaceMode("aggregation", false)).toBe("aggregation");
     expect(clampWorkspaceMode("social", false)).toBe("social");
     expect(clampWorkspaceMode("education", false)).toBe("education");
     expect(clampWorkspaceMode("social", true)).toBe("social");
-    expect(
-      clampWorkspaceMode(resolveWorkspaceMode("/settings", "staff"), false),
-    ).toBe("aggregation");
-    expect(
-      clampWorkspaceMode(resolveWorkspaceMode("/activity", "staff"), false),
-    ).toBe("aggregation");
-    expect(
-      clampWorkspaceMode(resolveWorkspaceMode("/help", "staff"), false),
-    ).toBe("aggregation");
-    expect(
-      clampWorkspaceMode(resolveWorkspaceMode("/staff/queue", "aggregation"), false),
-    ).toBe("aggregation");
-    expect(
-      clampWorkspaceMode(resolveWorkspaceMode("/staff/queue", "staff"), false),
-    ).toBe("aggregation");
-    expect(
-      clampWorkspaceMode(resolveWorkspaceMode("/staff/queue", "staff"), true),
-    ).toBe("staff");
-    expect(
-      clampWorkspaceMode(resolveWorkspaceMode("/settings", "staff"), true),
-    ).toBe("staff");
-    expect(
-      clampWorkspaceMode(resolveWorkspaceMode("/aggregation/dashboard", "staff"), false),
-    ).toBe("aggregation");
+    expect(clampWorkspaceMode("aggregation", true)).toBe("aggregation");
+    expect(clampWorkspaceMode(resolveWorkspaceMode("/settings", "staff"), false)).toBe(
+      "aggregation",
+    );
+    expect(clampWorkspaceMode(resolveWorkspaceMode("/help", "staff"), false)).toBe("aggregation");
+    expect(clampWorkspaceMode(resolveWorkspaceMode("/activity", "staff"), false)).toBe(
+      "aggregation",
+    );
+    expect(clampWorkspaceMode(resolveWorkspaceMode("/home", "staff"), false)).toBe("aggregation");
+    expect(clampWorkspaceMode(resolveWorkspaceMode("/settings", "staff"), true)).toBe("staff");
+    expect(clampWorkspaceMode(resolveWorkspaceMode("/staff/queue", "aggregation"), false)).toBe(
+      "aggregation",
+    );
+    expect(clampWorkspaceMode(resolveWorkspaceMode("/staff/queue", "staff"), false)).toBe(
+      "aggregation",
+    );
+    expect(clampWorkspaceMode(resolveWorkspaceMode("/staff/queue", "aggregation"), true)).toBe(
+      "staff",
+    );
+    expect(clampWorkspaceMode(resolveWorkspaceMode("/staff/queue", "staff"), true)).toBe("staff");
+    expect(clampWorkspaceMode(resolveWorkspaceMode("/aggregation/dashboard", "staff"), false)).toBe(
+      "aggregation",
+    );
+    expect(clampWorkspaceMode(resolveWorkspaceMode("/aggregation/queue", "staff"), false)).not.toBe(
+      "staff",
+    );
+  });
+
+  it("refuses to persist a staff cookie unless isGcStaff", () => {
+    const writes: string[] = [];
+    vi.stubGlobal("document", {
+      get cookie() {
+        return writes.at(-1) ?? "";
+      },
+      set cookie(value: string) {
+        writes.push(value);
+      },
+    });
+    persistWorkspaceCookie("staff");
+    persistWorkspaceCookie("staff", false);
+    persistWorkspaceCookie("staff", undefined);
+    expect(writes).toEqual([]);
+    persistWorkspaceCookie("social");
+    expect(writes.at(-1)).toContain("24frame_workspace=social");
+    persistWorkspaceCookie("staff", true);
+    expect(writes.at(-1)).toContain("24frame_workspace=staff");
+    vi.unstubAllGlobals();
   });
 });

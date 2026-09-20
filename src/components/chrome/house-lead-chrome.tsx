@@ -17,7 +17,7 @@ import {
   HOUSE_LEAD_UNDER_NAV_CLASS,
 } from "@/lib/house-lead-chrome";
 import { PRODUCT_NAME } from "@/lib/product";
-import { workspaceHome, type WorkspaceMode } from "@/lib/workspace";
+import { clampWorkspaceMode, workspaceHome, type WorkspaceMode } from "@/lib/workspace";
 import { availableWorkspaceOptions } from "@/lib/workspace-menu";
 import {
   APP_HEADER_LEADING_CLASS,
@@ -27,7 +27,7 @@ import {
 } from "@/lib/workspace-switcher";
 
 export function HouseLeadChrome({
-  workspace,
+  workspace: requestedWorkspace,
   isGcStaff = false,
   settingsPage = false,
   logoVisible = "always",
@@ -55,6 +55,7 @@ export function HouseLeadChrome({
   activityItems?: Promise<ActivityItem[]> | ActivityItem[];
   accountMenu: React.ReactNode;
 }) {
+  const workspace = clampWorkspaceMode(requestedWorkspace, isGcStaff);
   const workspaceOptions = availableWorkspaceOptions({ isGcStaff });
   const social = workspace === "social";
   // Settings, Get Help, and Activity are account chrome —
@@ -106,7 +107,7 @@ export function HouseLeadChrome({
             data-app-header-workspace-pill=""
             className={APP_HEADER_WORKSPACE_PILL_HOST_CLASS}
           >
-            <WorkspaceSwitcher current={workspace} options={workspaceOptions} presentation="sheet" tone="pill" />
+            <WorkspaceSwitcher current={workspace} options={workspaceOptions} isGcStaff={isGcStaff} presentation="sheet" tone="pill" />
           </div>
           {afterLead}
         </div>
@@ -128,7 +129,7 @@ export function HouseLeadChrome({
             data-app-header-workspace-desktop=""
             className={APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS}
           >
-            <WorkspaceSwitcher current={workspace} options={workspaceOptions} presentation="pills" />
+            <WorkspaceSwitcher current={workspace} options={workspaceOptions} isGcStaff={isGcStaff} presentation="pills" />
           </div>
           <ThemeToggle />
           <AskAssistantHeaderLink />
