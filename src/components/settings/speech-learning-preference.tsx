@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 import { cn } from "@/lib/cn";
 import {
@@ -8,21 +8,19 @@ import {
   APPEARANCE_SETTINGS_TITLE_CLASS,
 } from "@/lib/appearance";
 import {
-  readSpeechLearningEnabled,
   SPEECH_LEARNING,
+  speechLearningServerSnapshot,
+  speechLearningSnapshot,
+  subscribeSpeechLearning,
   writeSpeechLearningEnabled,
 } from "@/lib/speech-learning";
 
 export function SpeechLearningPreference() {
-  const [enabled, setEnabled] = useState(SPEECH_LEARNING.defaultEnabled);
-
-  useEffect(() => {
-    try {
-      setEnabled(readSpeechLearningEnabled(localStorage));
-    } catch {
-      setEnabled(SPEECH_LEARNING.defaultEnabled);
-    }
-  }, []);
+  const enabled = useSyncExternalStore(
+    subscribeSpeechLearning,
+    speechLearningSnapshot,
+    speechLearningServerSnapshot,
+  );
 
   return (
     <section data-settings-speech-learning="" className={APPEARANCE_SETTINGS_CARD_CLASS}>
@@ -37,12 +35,10 @@ export function SpeechLearningPreference() {
             enabled ? "bg-accent text-accent-contrast" : "bg-surface-muted text-ink-2",
           )}
           onClick={() => {
-            const next = !enabled;
-            setEnabled(next);
             try {
-              writeSpeechLearningEnabled(next, localStorage);
+              writeSpeechLearningEnabled(!enabled, localStorage);
             } catch {
-              // Preference still flips for the session.
+              // Preference still flips if storage is unavailable on the next read.
             }
           }}
         >

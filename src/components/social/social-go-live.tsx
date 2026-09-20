@@ -199,21 +199,31 @@ export function SocialGoLive() {
   }
 
   useEffect(() => {
-    const probed = probeStoryRecorderMimeType(
-      typeof MediaRecorder !== "undefined" ? MediaRecorder.isTypeSupported.bind(MediaRecorder) : undefined,
-    );
-    if (!probed || typeof MediaRecorder === "undefined") {
-      setError(SOCIAL.stories.unavailable);
-      return;
-    }
-    mimeRef.current = probed.mimeType;
+    let cancelled = false;
     const live = nextStoryStudioLive(liveRef.current);
     liveRef.current = live;
-    void attachPreview(facing, live).catch(() => {
-      if (!storyStudioIsLive(liveRef.current, live)) return;
-      releasePreview();
-      setError(SOCIAL.stories.permission);
-    });
+    void (async () => {
+      await Promise.resolve();
+      if (cancelled) return;
+      const probed = probeStoryRecorderMimeType(
+        typeof MediaRecorder !== "undefined" ? MediaRecorder.isTypeSupported.bind(MediaRecorder) : undefined,
+      );
+      if (!probed || typeof MediaRecorder === "undefined") {
+        setError(SOCIAL.stories.unavailable);
+        return;
+      }
+      mimeRef.current = probed.mimeType;
+      try {
+        await attachPreview(facing, live);
+      } catch {
+        if (!storyStudioIsLive(liveRef.current, live) || cancelled) return;
+        releasePreview();
+        setError(SOCIAL.stories.permission);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
     // Open camera once on mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

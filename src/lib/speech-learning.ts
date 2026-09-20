@@ -6,6 +6,7 @@ import type { WorkspaceMode } from "@/lib/workspace";
 // and the ingest hook only.
 
 export const SPEECH_LEARNING_STORAGE_KEY = "gc-speech-learning";
+export const SPEECH_LEARNING_EVENT = "gc-speech-learning";
 
 export const SPEECH_LEARNING_SOURCES = ["voice", "typed"] as const;
 export type SpeechLearningSource = (typeof SPEECH_LEARNING_SOURCES)[number];
@@ -57,9 +58,30 @@ export function writeSpeechLearningEnabled(
 ): void {
   try {
     storage?.setItem(SPEECH_LEARNING_STORAGE_KEY, serializeSpeechLearningEnabled(enabled));
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event(SPEECH_LEARNING_EVENT));
+    }
   } catch {
     // Storage may be unavailable — session still honors the in-memory toggle.
   }
+}
+
+export function subscribeSpeechLearning(onStoreChange: () => void): () => void {
+  if (typeof window === "undefined") return () => undefined;
+  window.addEventListener("storage", onStoreChange);
+  window.addEventListener(SPEECH_LEARNING_EVENT, onStoreChange);
+  return () => {
+    window.removeEventListener("storage", onStoreChange);
+    window.removeEventListener(SPEECH_LEARNING_EVENT, onStoreChange);
+  };
+}
+
+export function speechLearningSnapshot(): boolean {
+  return readSpeechLearningEnabled(speechLearningBrowserStorage());
+}
+
+export function speechLearningServerSnapshot(): boolean {
+  return SPEECH_LEARNING.defaultEnabled;
 }
 
 type SpeechLearningListener = (event: SpeechLearningIngest) => void;

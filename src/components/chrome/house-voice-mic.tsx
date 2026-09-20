@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Microphone } from "@phosphor-icons/react";
 
 import { cn } from "@/lib/cn";
@@ -29,6 +29,18 @@ import {
   type SpeechLearningWorkspace,
 } from "@/lib/speech-learning";
 
+function subscribeSpeechRecognition() {
+  return () => undefined;
+}
+
+function speechRecognitionSnapshot() {
+  return speechRecognitionSupported();
+}
+
+function speechRecognitionServerSnapshot() {
+  return false;
+}
+
 export function HouseVoiceMic({
   surface,
   workspace,
@@ -39,13 +51,18 @@ export function HouseVoiceMic({
 }: {
   surface: HouseVoiceSurface;
   workspace: SpeechLearningWorkspace;
-  /** Test override. Omit to probe on mount and hide when missing. */
+  /** Test override. Omit to probe on the client and hide when missing. */
   supported?: boolean;
   locale?: string;
   getValue: () => string;
   onValue: (next: string) => void;
 }) {
-  const [available, setAvailable] = useState(supported ?? false);
+  const probed = useSyncExternalStore(
+    subscribeSpeechRecognition,
+    speechRecognitionSnapshot,
+    speechRecognitionServerSnapshot,
+  );
+  const available = supported ?? probed;
   const [listening, setListening] = useState(false);
   const listeningRef = useRef(false);
   const recRef = useRef<SpeechRecognitionLike | null>(null);
@@ -55,14 +72,6 @@ export function HouseVoiceMic({
   useEffect(() => {
     localeRef.current = locale;
   }, [locale]);
-
-  useEffect(() => {
-    if (supported != null) {
-      setAvailable(supported);
-      return;
-    }
-    setAvailable(speechRecognitionSupported());
-  }, [supported]);
 
   useEffect(() => {
     return () => {
@@ -100,10 +109,7 @@ export function HouseVoiceMic({
 
   function start() {
     const Ctor = speechRecognitionCtor();
-    if (!Ctor) {
-      setAvailable(false);
-      return;
-    }
+    if (!Ctor) return;
     stop();
     const rec = new Ctor();
     rec.continuous = true;
