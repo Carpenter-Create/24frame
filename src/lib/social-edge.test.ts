@@ -90,6 +90,10 @@ describe("Social Edge vs Node runtime lock", () => {
     expect(light).toContain("toggleSocialLike");
     expect(avatarApi).toContain("signedAvatarUrl");
     expect(mediaApi).toContain("signedSocialMediaUrl");
+    expect(avatarApi).toContain("privateMaxAgeCacheControl");
+    expect(mediaApi).toContain("privateMaxAgeCacheControl");
+    expect(photoApi).toContain("private, no-store");
+    expect(photoApi).not.toContain("privateMaxAgeCacheControl");
     expect(SOCIAL_NODE_RUNTIME).toBe("nodejs");
   });
 });

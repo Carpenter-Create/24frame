@@ -41,4 +41,12 @@ describe("SocialMediaImage", () => {
     expect(gif).toContain("data-unoptimized");
     expect(still).not.toContain("data-unoptimized");
   });
+
+  it("leaves same-origin Social signer routes unoptimised so the browser sends cookies", () => {
+    const proxy = renderToStaticMarkup(
+      <SocialMediaImage src="/api/social/avatar/11111111-1111-4111-8111-111111111111" sizes="48px" />,
+    );
+    expect(proxy).toContain("data-unoptimized");
+    expect(proxy).toContain('src="/api/social/avatar/11111111-1111-4111-8111-111111111111"');
+  });
 });

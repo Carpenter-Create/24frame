@@ -1,3 +1,5 @@
+import { SOCIAL_AVATAR_ROUTE, SOCIAL_MEDIA_ROUTE } from "@/lib/social-edge";
+
 // Display-only Social media helpers. Signing stays in s3-avatars /
 // s3-social-media. No upload or recorder changes.
 
@@ -20,6 +22,16 @@ export function isAnimatedRasterSrc(src: string): boolean {
   } catch {
     return /\.gif(?:$|[?#])/i.test(src);
   }
+}
+
+/**
+ * Edge Social reads pass same-origin signer routes, not S3 URLs.
+ * next/image's optimiser fetches without the session cookie, so those
+ * srcs stay unoptimised — the browser follows the 302 with cookies.
+ */
+export function isSessionGatedSocialSrc(src: string): boolean {
+  const path = src.split("#")[0]?.split("?")[0] ?? "";
+  return path === SOCIAL_MEDIA_ROUTE || path.startsWith(`${SOCIAL_AVATAR_ROUTE}/`);
 }
 
 /**

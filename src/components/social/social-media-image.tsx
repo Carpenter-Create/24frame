@@ -4,7 +4,7 @@ import Image from "next/image";
 import type { SyntheticEvent } from "react";
 
 import { cn } from "@/lib/cn";
-import { isAnimatedRasterSrc } from "@/lib/social-media-display";
+import { isAnimatedRasterSrc, isSessionGatedSocialSrc } from "@/lib/social-media-display";
 
 // Social raster SoT. Artwork stays title catalog. Chrome faces stay
 // IdentityPhoto (same-origin /api/account/photo). Fill + object-cover
@@ -33,7 +33,7 @@ export function SocialMediaImage({
       sizes={sizes}
       className={cn("object-cover", className)}
       priority={priority}
-      unoptimized={isAnimatedRasterSrc(src)}
+      unoptimized={isAnimatedRasterSrc(src) || isSessionGatedSocialSrc(src)}
       onError={onError}
     />
   );
