@@ -10,10 +10,10 @@ import {
   SOCIAL_FEED_ROW_CLASS,
   SOCIAL_HIGHLIGHT_RING_CLASS,
   SOCIAL_PROFILE_GRID_CLASS,
+  SOCIAL_PROFILE_HEAD_CLASS,
+  SOCIAL_PROFILE_ROLES_LINE_CLASS,
   SOCIAL_PROFILE_TILE_CLASS,
-  SOCIAL_PROFILE_ROLES_RAIL_CLASS,
   SOCIAL_TOPIC_CHIP_CLASS,
-  SOCIAL_TOPIC_CHIP_RAIL_CLASS,
 } from "@/lib/social-chrome";
 import {
   displayHandle,
@@ -30,7 +30,7 @@ import {
   type SocialProfileMutuals,
 } from "@/lib/social-profile-mutuals";
 import { socialProfilePublicLinks } from "@/lib/social-profile-links";
-import { socialProfileRoleChips } from "@/lib/social-profile-roles";
+import { socialProfileRolesLine } from "@/lib/social-profile-roles";
 import { parseSocialProfileTopics } from "@/lib/social-profile-topics";
 import {
   SOCIAL_POST_IMAGE_SIZES,
@@ -202,7 +202,7 @@ export function SocialProfileIdentity({
   children?: ReactNode;
 }) {
   const person = socialPersonIdentity({ handle, displayName: name });
-  const roleChips = socialProfileRoleChips(roles ?? []);
+  const rolesLine = socialProfileRolesLine(roles ?? []);
   const interestTopics = parseSocialProfileTopics(topics ?? []);
   const links = socialProfilePublicLinks({ websiteUrl, imdbUrl });
   const followedBy = mutuals
@@ -212,73 +212,58 @@ export function SocialProfileIdentity({
       )
     : null;
   const actionRow = actions ? (
-    <div className="flex w-full items-center gap-2 md:w-auto">
+    <div className="flex w-full items-center gap-2">
       {actions}
       {photoAction}
     </div>
   ) : photoAction ? (
-    <div className="flex w-full items-center gap-2 md:w-auto">{photoAction}</div>
+    <div className="flex w-full items-center gap-2">{photoAction}</div>
   ) : null;
 
   return (
     <div data-social-profile-identity="" className="flex flex-col gap-3">
-      <div className="flex items-start gap-3 md:gap-4">
+      <div data-social-profile-head="" className={SOCIAL_PROFILE_HEAD_CLASS}>
         <SocialAvatar name={person.avatarName} photoUrl={photoUrl} ring={ring} size="profile" />
-        <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-            <div className="min-w-0">
-              <p
-                data-social-profile-handle=""
-                className="break-words text-[18px] font-semibold text-ink md:text-[22px]"
-              >
-                {person.handleLabel}
-              </p>
-              {person.name ? (
-                <p data-social-profile-name="" className="mt-1 break-words t-body-sm text-ink-2">
-                  {person.name}
-                </p>
-              ) : null}
-              {roleChips.length > 0 ? (
-                <div data-social-profile-roles="" className={SOCIAL_PROFILE_ROLES_RAIL_CLASS}>
-                  {roleChips.map((role) => (
-                    <span
-                      key={role.slug}
-                      data-social-profile-role={role.slug}
-                      className={SOCIAL_TOPIC_CHIP_RAIL_CLASS}
-                    >
-                      {role.label}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-              {stats ? (
-                <SocialProfileStats profileId={profileId} handle={handle} stats={stats} />
-              ) : null}
-              {interestTopics.length > 0 ? (
-                <div data-social-profile-topics="" className="mt-2 flex flex-wrap gap-2">
-                  {interestTopics.map((topic) => (
-                    <span
-                      key={topic}
-                      data-social-profile-topic={topic}
-                      className={SOCIAL_TOPIC_CHIP_CLASS}
-                    >
-                      {topic}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-            {actionRow ? <div className="hidden shrink-0 md:flex">{actionRow}</div> : null}
-          </div>
+        <div data-social-profile-copy="" className="min-w-0 flex-1">
+          <p
+            data-social-profile-handle=""
+            className="break-words text-[18px] font-semibold text-ink md:text-[22px]"
+          >
+            {person.handleLabel}
+          </p>
+          {person.name ? (
+            <p data-social-profile-name="" className="mt-1 break-words t-body-sm text-ink-2">
+              {person.name}
+            </p>
+          ) : null}
         </div>
       </div>
+      {stats ? <SocialProfileStats profileId={profileId} handle={handle} stats={stats} /> : null}
+      {rolesLine ? (
+        <p data-social-profile-roles="" className={SOCIAL_PROFILE_ROLES_LINE_CLASS}>
+          {rolesLine}
+        </p>
+      ) : null}
       {bio?.trim() ? (
         <p data-social-profile-bio="" className="t-body-sm text-ink whitespace-pre-wrap md:t-body">
           {bio}
         </p>
       ) : null}
+      {interestTopics.length > 0 ? (
+        <div data-social-profile-topics="" className="flex flex-wrap gap-2">
+          {interestTopics.map((topic) => (
+            <span
+              key={topic}
+              data-social-profile-topic={topic}
+              className={SOCIAL_TOPIC_CHIP_CLASS}
+            >
+              {topic}
+            </span>
+          ))}
+        </div>
+      ) : null}
       <SocialProfileLinkRow links={links} />
-      {actionRow ? <div className="flex md:hidden">{actionRow}</div> : null}
+      {actionRow}
       {followedBy ? (
         <div data-social-profile-mutuals="" className="flex min-w-0 items-center gap-2">
           <div data-social-profile-mutuals-faces="" className="flex shrink-0">

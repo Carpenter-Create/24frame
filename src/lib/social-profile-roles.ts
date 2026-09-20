@@ -4,11 +4,13 @@
 // IMDb help-page category clone. Persist ordered slugs on
 // profiles.crafts. primary_role stays the first selected slug.
 // UI label is Professions — not Topics, not Category, not crafts.
-// Public header is a house-chip scroll rail of every selected
-// label in crafts order. Omit when empty. Edit max 5. Select and
+// Public header is one muted middot line (Role · Role · Role),
+// display cap 3 then +N. Omit when empty. Edit max 5. Select and
 // write stay sync. Not on SocialPersonRow. Investor is a Business add.
 
 export const SOCIAL_PROFILE_ROLES_MAX = 5;
+export const SOCIAL_PROFILE_ROLES_DISPLAY_CAP = 3;
+export const SOCIAL_PROFILE_ROLES_SEP = " · ";
 export const SOCIAL_PROFILE_ROLES_COUNT = "{n} / {max}";
 
 export const SOCIAL_PROFILE_ROLE_GROUPS = [
@@ -337,6 +339,15 @@ export function socialProfileRoleChips(raw: unknown): {
     slug,
     label: socialProfileRoleLabel(slug),
   }));
+}
+
+export function socialProfileRolesLine(raw: unknown): string | null {
+  const chips = socialProfileRoleChips(raw);
+  if (chips.length === 0) return null;
+  const shown = chips.slice(0, SOCIAL_PROFILE_ROLES_DISPLAY_CAP);
+  const extra = chips.length - shown.length;
+  const line = shown.map((chip) => chip.label).join(SOCIAL_PROFILE_ROLES_SEP);
+  return extra > 0 ? `${line} +${extra}` : line;
 }
 
 export function filterSocialProfileRoleGroups(query: string) {
