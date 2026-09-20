@@ -15,6 +15,12 @@ export const HOUSE_PHONE_WRAP_CLASS =
 export const HOUSE_PHONE_STACK_CLASS =
   "flex min-w-0 w-full flex-col items-stretch";
 
+// Surface containment for a phone column. Clip sideways overflow;
+// do not scroll it. Pair with STACK / WRAP on children. Not a
+// second app shell.
+export const HOUSE_PHONE_CONTAIN_CLASS =
+  "min-w-0 max-w-full overflow-x-clip";
+
 export const HOUSE_PHONE_TRUNCATE_ABSENT = [
   "truncate",
   "ellipsis",

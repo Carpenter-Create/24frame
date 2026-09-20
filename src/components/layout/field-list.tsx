@@ -1,8 +1,15 @@
 import { cn } from "@/lib/cn";
+import {
+  FIELD_LIST_CLASS,
+  FIELD_LIST_LABEL_CLASS,
+  FIELD_LIST_ROW_CLASS,
+  FIELD_LIST_VALUE_CLASS,
+} from "@/lib/field-list";
 
-// Canonical label/value ledger (Metadata register). Frameless — meant to sit inside a
-// Card (which supplies the surface/border), directly after the CardHeader, so its
-// hairline row dividers run full-width. Right-aligned values.
+// Canonical label/value ledger (Metadata register). Frameless: sits inside a
+// Card (which supplies the surface/border), directly after the CardHeader, so
+// its hairline row dividers run full-width. Phone stacks label above value.
+// Desktop keeps the right-aligned ledger.
 export function FieldList({
   items,
   className,
@@ -11,11 +18,11 @@ export function FieldList({
   className?: string;
 }) {
   return (
-    <dl className={cn("divide-y divide-hairline", className)}>
+    <dl className={cn(FIELD_LIST_CLASS, className)} data-field-list="">
       {items.map((it, i) => (
-        <div key={i} className="flex items-baseline justify-between gap-6 px-5 py-3">
-          <dt className="shrink-0 t-body-sm text-ink-3">{it.label}</dt>
-          <dd className="t-body-sm text-ink text-right">{it.value}</dd>
+        <div key={i} className={FIELD_LIST_ROW_CLASS} data-field-list-row="">
+          <dt className={FIELD_LIST_LABEL_CLASS}>{it.label}</dt>
+          <dd className={FIELD_LIST_VALUE_CLASS}>{it.value}</dd>
         </div>
       ))}
     </dl>

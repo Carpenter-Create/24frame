@@ -6,6 +6,10 @@ import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import { Artwork } from "./artwork";
 import { StatusProgressTrack } from "@/components/ui/status-progress-track";
 import { cn } from "@/lib/cn";
+import {
+  HOUSE_PHONE_CONTAIN_CLASS,
+  HOUSE_PHONE_WRAP_CLASS,
+} from "@/lib/house-phone-stack";
 
 // Title-detail hero in the house shell: leading art, title / lifecycle
 // track / quiet meta to the right, primary action under the meta. Landscape banner
@@ -41,7 +45,10 @@ export function TitleHero({
   const artShape = bannerUrl ? "landscape" : posterUrl ? "square" : "landscape";
 
   return (
-    <section className="flex flex-col gap-[var(--space-4)]" data-title-hero="">
+    <section
+      className={`${HOUSE_PHONE_CONTAIN_CLASS} flex flex-col gap-[var(--space-4)]`}
+      data-title-hero=""
+    >
       <Link
         href={backHref}
         className="inline-flex w-fit items-center gap-1 t-body-sm text-ink-2 transition-colors hover:text-ink"
@@ -51,7 +58,7 @@ export function TitleHero({
       </Link>
 
       <div
-        className="flex flex-col gap-[var(--space-4)] md:flex-row md:items-start"
+        className={`${HOUSE_PHONE_CONTAIN_CLASS} flex flex-col gap-[var(--space-4)] md:flex-row md:items-start`}
         data-title-hero-band=""
       >
         <div
@@ -89,7 +96,9 @@ export function TitleHero({
           data-title-hero-meta=""
         >
           <div className="flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[var(--space-2)]">
-            <h1 className="t-title leading-tight text-ink">{title}</h1>
+            <h1 className={`${HOUSE_PHONE_WRAP_CLASS} t-title leading-tight text-ink`}>
+              {title}
+            </h1>
             <StatusProgressTrack
               pipeline="title"
               status={status}
@@ -98,13 +107,16 @@ export function TitleHero({
             />
           </div>
           {meta.length > 0 ? (
-            <p className="t-body-sm text-ink-3" data-title-hero-facts="">
+            <p
+              className={`${HOUSE_PHONE_WRAP_CLASS} t-body-sm text-ink-3`}
+              data-title-hero-facts=""
+            >
               {meta.join(" · ")}
             </p>
           ) : null}
           {action || secondary || overflow ? (
             <div
-              className="flex flex-wrap items-center gap-[var(--space-2)]"
+              className="flex min-w-0 flex-wrap items-center gap-[var(--space-2)]"
               data-title-hero-actions=""
             >
               {action}

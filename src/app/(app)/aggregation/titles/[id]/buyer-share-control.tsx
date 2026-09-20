@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { PRODUCT_NAME } from "@/lib/product";
+import { TITLE_DETAIL_FORM_ROW_CLASS } from "@/lib/titles";
 import { createBuyerScreenerLink, revokeBuyerScreenerLink } from "./actions";
 
 export type BuyerLink = {
@@ -122,13 +123,13 @@ export function BuyerShareControl({
             return (
               <div key={link.linkId} className="rounded-[var(--radius-sm)] border border-hairline p-3">
                 <p className="t-body-sm font-medium text-ink">{displayName}</p>
-                <div className="mt-1.5 flex items-center gap-2">
+                <div className={`mt-1.5 ${TITLE_DETAIL_FORM_ROW_CLASS}`}>
                   <Input
                     readOnly
                     value={link.url}
                     aria-label={`Screener share link for ${displayName}`}
                     onFocus={(e) => e.currentTarget.select()}
-                    className="min-w-0 flex-1 truncate px-2 py-1 text-ink-2"
+                    className="min-w-0 w-full max-w-full flex-1 px-2 py-1 text-ink-2"
                   />
                   <Button type="button" onClick={() => copy(link.linkId, link.url)} className="shrink-0">
                     {copiedId === link.linkId ? "Copied" : "Copy"}
@@ -179,13 +180,13 @@ export function BuyerShareControl({
         className="flex flex-col gap-1.5"
       >
         <Label htmlFor="buyer-name">Buyer</Label>
-        <div className="flex items-center gap-2">
+        <div className={TITLE_DETAIL_FORM_ROW_CLASS}>
           <Input
             id="buyer-name"
             value={recipient}
             onChange={(e) => setRecipient(e.target.value)}
             placeholder="Buyer's name"
-            className="max-w-xs"
+            className="min-w-0 w-full max-w-full md:max-w-xs"
           />
           <Button type="submit" disabled={busy || !recipient.trim()} className="shrink-0">
             {busy ? "Creating…" : "Create share link"}

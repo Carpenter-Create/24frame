@@ -1,9 +1,17 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  HOUSE_PHONE_STACK_CLASS,
+  HOUSE_PHONE_WRAP_CLASS,
+  housePhoneForbidsTruncate,
+} from "./house-phone-stack";
+import {
   CATALOG_HEALTH_EMPTY,
   CATALOG_HEALTH_SUBTITLE,
   CATALOG_HEALTH_TITLE,
+  FINDING_MESSAGE_CLASS,
+  FINDING_ROW_CLASS,
+  FINDING_SEVERITY_CLASS,
   FINDING_SEVERITY_LABEL,
   catalogHealthCountLabel,
   catalogHealthTitleHref,
@@ -30,5 +38,13 @@ describe("catalog health findings helpers", () => {
     expect(catalogHealthTitleHref("title-acme", false)).toBe("/aggregation/titles/title-acme");
     expect(catalogHealthTitleHref("title-acme", true)).toBe("/aggregation/gc/titles/title-acme");
     expect(catalogHealthTitleHref("title-acme", false)).not.toContain("/metadata");
+  });
+
+  it("phone-stacks finding rows and wraps the message", () => {
+    expect(FINDING_ROW_CLASS).toContain(HOUSE_PHONE_STACK_CLASS);
+    expect(FINDING_ROW_CLASS).toContain("md:flex-row");
+    expect(FINDING_MESSAGE_CLASS).toContain(HOUSE_PHONE_WRAP_CLASS);
+    expect(FINDING_SEVERITY_CLASS).toContain(HOUSE_PHONE_WRAP_CLASS);
+    expect(housePhoneForbidsTruncate(FINDING_ROW_CLASS)).toBe(true);
   });
 });

@@ -27,7 +27,18 @@ import { SubmitButton } from "./submit-button";
 import { TitleLifecycleControls } from "./title-lifecycle-controls";
 import { ATTENTION_HREF } from "@/lib/findings";
 import { TITLES_HREF } from "@/lib/title-public-id";
-import { titleDisplayStatus, DELIVERY_STATUS_ROW_LABELS, TITLE_DETAIL, type TitleStatus } from "@/lib/titles";
+import {
+  DELIVERY_STATUS_ROW_LABELS,
+  TITLE_DETAIL,
+  TITLE_DETAIL_ASSET_FILE_CLASS,
+  TITLE_DETAIL_LEDGER_COPY_CLASS,
+  TITLE_DETAIL_LEDGER_META_CLASS,
+  TITLE_DETAIL_LEDGER_ROW_CLASS,
+  TITLE_DETAIL_SURFACE_CLASS,
+  titleDisplayStatus,
+  type TitleStatus,
+} from "@/lib/titles";
+import { HOUSE_PHONE_WRAP_CLASS } from "@/lib/house-phone-stack";
 import { titleLifecycleFlags } from "@/lib/titles-lifecycle";
 import { TITLE_DELIVERIES_TRUNCATED } from "@/lib/deliveries-browse";
 import { DETAIL_LIST, rangeFor } from "@/lib/list-bounds";
@@ -87,7 +98,10 @@ function TitleDetailSection({
   children: React.ReactNode;
 }) {
   return (
-    <section className="flex flex-col gap-[var(--space-4)]" data-title-detail-section="">
+    <section
+      className={`${TITLE_DETAIL_SURFACE_CLASS} flex flex-col gap-[var(--space-4)]`}
+      data-title-detail-section=""
+    >
       <h2 className="t-heading text-ink" data-title-detail-section-title="">
         {title}
       </h2>
@@ -299,7 +313,7 @@ export default async function TitleDetailPage({ params }: { params: Promise<{ id
   const showDeliveries = titleDlv.length > 0;
 
   return (
-    <>
+    <section className={TITLE_DETAIL_SURFACE_CLASS} data-title-detail="">
       <TitleHero
         title={title.title}
         backHref={TITLES_HREF}
@@ -324,7 +338,7 @@ export default async function TitleDetailPage({ params }: { params: Promise<{ id
 
       <nav
         aria-label={TITLE_DETAIL.relatedLabel}
-        className="mt-[var(--space-4)] flex flex-wrap gap-[var(--space-4)]"
+        className="mt-[var(--space-4)] flex min-w-0 flex-wrap gap-[var(--space-4)]"
         data-title-ops-links=""
       >
         <Link href={TITLES_HREF} className="t-body-sm text-accent">
@@ -335,7 +349,7 @@ export default async function TitleDetailPage({ params }: { params: Promise<{ id
         </Link>
       </nav>
 
-      <div className="mt-[var(--space-6)] flex flex-col gap-[var(--space-6)] border-t border-hairline pt-[var(--space-6)]">
+      <div className={`${TITLE_DETAIL_SURFACE_CLASS} mt-[var(--space-6)] flex flex-col gap-[var(--space-6)] border-t border-hairline pt-[var(--space-6)]`}>
         {/* Attention — surfaced only when there's something to act on */}
         {titleDeliveries.truncated ? (
           <InlineNotice tone="info" data-my-list-truncated="title-deliveries">
@@ -360,7 +374,7 @@ export default async function TitleDetailPage({ params }: { params: Promise<{ id
         ) : null}
         {synopsis ? (
           <TitleDetailSection title={TITLE_DETAIL.sectionSynopsis}>
-            <p className="t-body text-ink-2">{synopsis}</p>
+            <p className={`${HOUSE_PHONE_WRAP_CLASS} t-body text-ink-2`}>{synopsis}</p>
           </TitleDetailSection>
         ) : null}
 
@@ -423,7 +437,7 @@ export default async function TitleDetailPage({ params }: { params: Promise<{ id
                       <AssetDownloadButton assetId={a.id} kind={a.kind} />
                       <div className="flex min-w-0 flex-col px-0.5">
                         <span className="t-label text-ink-2">{ASSET_KIND_LABELS[a.kind]}</span>
-                        <span className="truncate t-body-sm text-ink-3">
+                        <span className={TITLE_DETAIL_ASSET_FILE_CLASS}>
                           {a.original_filename ? `${a.original_filename} · ` : ""}
                           {formatBytes(a.bytes)}
                         </span>
@@ -464,12 +478,16 @@ export default async function TitleDetailPage({ params }: { params: Promise<{ id
               ) : (
                 <div className="divide-y divide-hairline">
                   {list.map((g) => (
-                    <div key={g.id} className="flex items-start justify-between gap-4 px-5 py-3">
-                      <div className="flex flex-col gap-0.5">
-                        <span className="t-body-sm font-medium text-ink">{RIGHTS_META[g.rights_type].label}</span>
-                        <span className="t-body-sm text-ink-3">{g.exclusive ? "Exclusive" : "Non-exclusive"}</span>
+                    <div key={g.id} className={TITLE_DETAIL_LEDGER_ROW_CLASS}>
+                      <div className={TITLE_DETAIL_LEDGER_COPY_CLASS}>
+                        <span className={`${HOUSE_PHONE_WRAP_CLASS} t-body-sm font-medium text-ink`}>
+                          {RIGHTS_META[g.rights_type].label}
+                        </span>
+                        <span className={`${HOUSE_PHONE_WRAP_CLASS} t-body-sm text-ink-3`}>
+                          {g.exclusive ? "Exclusive" : "Non-exclusive"}
+                        </span>
                       </div>
-                      <span className="shrink-0 t-body-sm text-ink-2">
+                      <span className={TITLE_DETAIL_LEDGER_META_CLASS}>
                         {describeTerritory(g.territory_mode, g.territories)}
                       </span>
                     </div>
@@ -485,11 +503,11 @@ export default async function TitleDetailPage({ params }: { params: Promise<{ id
             <Card>
               <div className="divide-y divide-hairline">
                 {titleDlv.map((d) => (
-                  <div key={d.delivery_id} className="flex items-center justify-between gap-4 px-5 py-3">
-                    <span className="t-body-sm text-ink-2">
+                  <div key={d.delivery_id} className={TITLE_DETAIL_LEDGER_ROW_CLASS}>
+                    <span className={`${HOUSE_PHONE_WRAP_CLASS} t-body-sm text-ink-2`}>
                       {d.vendor_name} · {d.territory}
                     </span>
-                    <span className="shrink-0 t-body-sm font-medium text-ink">
+                    <span className={`${HOUSE_PHONE_WRAP_CLASS} t-body-sm font-medium text-ink md:shrink-0 md:text-right`}>
                       {DELIVERY_STATUS_ROW_LABELS[d.status]}
                     </span>
                   </div>
@@ -499,6 +517,6 @@ export default async function TitleDetailPage({ params }: { params: Promise<{ id
           </TitleDetailSection>
         ) : null}
       </div>
-    </>
+    </section>
   );
 }
