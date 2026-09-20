@@ -298,6 +298,34 @@ describe("social actions", () => {
     expect(from).not.toHaveBeenCalledWith("conversation_participants");
   });
 
+  it("adds a person when the typed handle only differs by case", async () => {
+    const from = vi.fn((table: string) => {
+      const chain = {
+        select: vi.fn(() => chain),
+        eq: vi.fn(() => chain),
+        in: vi.fn(() => chain),
+        maybeSingle: vi.fn(async () => ({ data: { id: "u1" }, error: null })),
+        then: (resolve: (value: unknown) => unknown) =>
+          Promise.resolve({
+            data: table === "profiles" ? [{ id: "u3", handle: "AdamC" }] : { id: "u1" },
+            error: null,
+          }).then(resolve),
+      };
+      return chain;
+    });
+    const rpc = vi.fn(async () => ({ data: "conv-1", error: null }));
+    vi.mocked(createClient).mockResolvedValue({ from, rpc } as never);
+
+    const form = new FormData();
+    form.set("conversation_id", "conv-1");
+    form.set("handles", "adamc");
+    expect(await addSocialDmPeople(form)).toEqual({});
+    expect(rpc).toHaveBeenCalledWith("add_conversation_participants", {
+      p_conversation: "conv-1",
+      p_peers: ["u3"],
+    });
+  });
+
   it("refuses an oversized add-people batch before the RPC", async () => {
     const rpc = vi.fn();
     const from = vi.fn((table: string) => {

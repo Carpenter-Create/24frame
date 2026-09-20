@@ -19,6 +19,7 @@ import { SOCIAL_DM_ADD_BATCH_LIMIT } from "@/lib/social-dm-bounds";
 import {
   followInsertRow,
   groupInsertRow,
+  handleKey,
   likeInsertRow,
   messageInsertRow,
   normalizeBio,
@@ -412,8 +413,8 @@ export async function addSocialDmPeople(formData: FormData): Promise<ActionResul
   const found = peers ?? [];
   if (found.length === 0) return { error: SOCIAL.dms.addMissing };
 
-  const foundHandles = new Set(found.map((peer) => peer.handle));
-  if (handles.some((handle) => !foundHandles.has(handle))) {
+  const foundHandles = new Set(found.map((peer) => handleKey(peer.handle)));
+  if (handles.some((handle) => !foundHandles.has(handleKey(handle)))) {
     return { error: SOCIAL.dms.addMissing };
   }
 
