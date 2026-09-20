@@ -19,7 +19,6 @@ import {
 import { PRODUCT_NAME } from "@/lib/product";
 import { workspaceHome, type WorkspaceMode } from "@/lib/workspace";
 import {
-  APP_HEADER_DESKTOP_TRAILING_CLASS,
   APP_HEADER_LEADING_CLASS,
   APP_HEADER_TRAILING_CLUSTER_CLASS,
   APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS,
@@ -122,12 +121,7 @@ export function HouseLeadChrome({
           >
             <WorkspaceSwitcher current={workspace} presentation="pills" />
           </div>
-          <div
-            data-app-header-desktop-trailing=""
-            className={APP_HEADER_DESKTOP_TRAILING_CLASS}
-          >
-            <ThemeToggle />
-          </div>
+          <ThemeToggle />
           <AskAssistantHeaderLink />
           <ActivityBell unread={activityUnread} items={activityItems} />
           {accountMenu}
