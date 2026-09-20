@@ -63,7 +63,7 @@ describe("workspace switcher header control", () => {
     expect(html).not.toContain('data-workspace-switcher-chevron-open');
     expect(html).not.toContain("/education");
     expect(leadSrc).toContain('tone="pill"');
-    expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
+    expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} options={workspaceOptions} presentation="pills" />');
     expect(leadSrc).toContain('presentation="sheet"');
     expect(leadSrc.match(/<WorkspaceSwitcher/g)?.length).toBe(2);
     expect(shellSrc).not.toContain("data-workspace-switcher-rail");
@@ -228,6 +228,7 @@ describe("workspace switcher header control", () => {
     expect(html).toContain("Social");
     expect(html).toContain("Education");
     expect(html).toContain("Co-Productions");
+    expect(html).not.toContain('data-workspace-switcher-segment="staff"');
     expect(html).not.toMatch(/>\s*Agg\s*</);
     expect(html).not.toMatch(/>\s*Edu\s*</);
     expect(html).toContain('role="tablist"');
@@ -264,6 +265,24 @@ describe("workspace switcher header control", () => {
     for (const absent of WORKSPACE_SWITCHER_ABSENT) {
       expect(html).not.toContain(absent);
     }
+  });
+
+  it("shows Staff in the switcher only when the GC-staff options are passed", () => {
+    const staffOptions = availableWorkspaceOptions({ isGcStaff: true });
+    const memberHtml = renderToStaticMarkup(
+      <WorkspaceSwitcher current="aggregation" presentation="pills" />,
+    );
+    const staffHtml = renderToStaticMarkup(
+      <WorkspaceSwitcher current="staff" options={staffOptions} presentation="pills" />,
+    );
+    expect(memberHtml).not.toContain('data-workspace-switcher-segment="staff"');
+    expect(staffHtml).toContain('data-workspace-switcher-segment="staff"');
+    expect(staffHtml).toContain("Staff");
+    expect(staffHtml).not.toContain("Team");
+    expect(staffHtml).not.toContain("Ops");
+    expect(staffOptions.map((option) => option.mode)).toContain("staff");
+    expect(leadSrc).toContain("availableWorkspaceOptions({ isGcStaff })");
+    expect(leadSrc).toContain("isGcStaff = false");
   });
 
   it("keeps Home leftmost when only one workspace lane is reachable", () => {

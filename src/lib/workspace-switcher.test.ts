@@ -88,6 +88,12 @@ describe("workspace switcher lock", () => {
       "/social",
       "/education",
     ]);
+    expect(workspaceSwitcherOptions(availableWorkspaceOptions({ isGcStaff: true })).map(
+      (option) => option.label,
+    )).toEqual(["Aggregation", "Social", "Education", "Staff"]);
+    expect(workspaceSwitcherOptions(availableWorkspaceOptions({ isGcStaff: true })).map(
+      (option) => option.href,
+    )).toEqual(["/aggregation/dashboard", "/social", "/education", "/aggregation/queue"]);
     expect(availableWorkspaceOptions().map((option) => option.href)).toEqual(
       workspaceSwitcherOptions().map((option) => option.href),
     );
@@ -142,7 +148,13 @@ describe("workspace switcher lock", () => {
     expect(workspaceSwitcherMarkLetter("aggregation")).toBe("A");
     expect(workspaceSwitcherMarkLetter("social")).toBe("S");
     expect(workspaceSwitcherMarkLetter("education")).toBe("E");
-    expect(WORKSPACE_SWITCHER_MARK).toEqual({ aggregation: "A", social: "S", education: "E" });
+    expect(workspaceSwitcherMarkLetter("staff")).toBe("T");
+    expect(WORKSPACE_SWITCHER_MARK).toEqual({
+      aggregation: "A",
+      social: "S",
+      education: "E",
+      staff: "T",
+    });
     expect(WORKSPACE_SWITCHER_MARK_CLASS).toContain("size-6");
     expect(WORKSPACE_SWITCHER_HEADER_CLASS).toContain("t-label");
     expect(WORKSPACE_SWITCHER_HEADER_CLASS).toContain("text-ink-3");
@@ -242,6 +254,17 @@ describe("workspace switcher lock", () => {
       "Social",
       "Education",
     ]);
+    expect(phoneWorkspaceSwitcherPills().map((pill) => pill.id)).not.toContain("staff");
+    expect(
+      phoneWorkspaceSwitcherPills(availableWorkspaceOptions({ isGcStaff: true })).map(
+        (pill) => pill.id,
+      ),
+    ).toEqual(["home", "aggregation", "social", "education", "staff"]);
+    expect(
+      phoneWorkspaceSwitcherPills(availableWorkspaceOptions({ isGcStaff: true })).map(
+        (pill) => pill.label,
+      ),
+    ).toEqual(["Home", "Aggregation", "Social", "Education", "Staff"]);
     expect(workspaceSwitcherLeadMarkLetter("home")).toBe("H");
     expect(workspaceSwitcherLeadMarkLetter("aggregation")).toBe("A");
     expect(workspaceSwitcherTriggerMarkId("/home", "aggregation")).toBe("home");
@@ -256,6 +279,7 @@ describe("workspace switcher lock", () => {
     expect(workspaceSwitcherPersistLane.name).toBe("workspaceSwitcherPersistLane");
     expect(workspaceHome("aggregation")).toBe("/aggregation/dashboard");
     expect(workspaceHome("social")).toBe("/social");
+    expect(workspaceHome("staff")).toBe("/aggregation/queue");
   });
 
   it("uses segmented track grammar for desktop sliding pills", () => {
@@ -299,6 +323,8 @@ describe("workspace switcher lock", () => {
     expect(workspaceSwitcherSegmentLabel("aggregation")).toBe("Aggregation");
     expect(workspaceSwitcherSegmentLabel("social")).toBe("Social");
     expect(workspaceSwitcherSegmentLabel("education")).toBe("Education");
+    expect(workspaceSwitcherSegmentLabel("staff")).toBe("Staff");
+    expect(workspaceSwitcherSegmentLabel("staff")).not.toBe("Team");
     expect(WORKSPACE_SWITCHER_SHORT_LABELS).toEqual(["Agg", "Edu"]);
     expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("whitespace-nowrap");
     expect(WORKSPACE_SWITCHER_SEGMENT_CLASS).toContain("shrink-0");

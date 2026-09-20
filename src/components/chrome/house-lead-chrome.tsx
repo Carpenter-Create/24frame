@@ -18,6 +18,7 @@ import {
 } from "@/lib/house-lead-chrome";
 import { PRODUCT_NAME } from "@/lib/product";
 import { workspaceHome, type WorkspaceMode } from "@/lib/workspace";
+import { availableWorkspaceOptions } from "@/lib/workspace-menu";
 import {
   APP_HEADER_LEADING_CLASS,
   APP_HEADER_TRAILING_CLUSTER_CLASS,
@@ -27,6 +28,7 @@ import {
 
 export function HouseLeadChrome({
   workspace,
+  isGcStaff = false,
   settingsPage = false,
   logoVisible = "always",
   leadingNav,
@@ -40,6 +42,7 @@ export function HouseLeadChrome({
   accountMenu,
 }: {
   workspace: WorkspaceMode;
+  isGcStaff?: boolean;
   settingsPage?: boolean;
   logoVisible?: "always" | "desktop";
   leadingNav?: React.ReactNode;
@@ -52,6 +55,7 @@ export function HouseLeadChrome({
   activityItems?: Promise<ActivityItem[]> | ActivityItem[];
   accountMenu: React.ReactNode;
 }) {
+  const workspaceOptions = availableWorkspaceOptions({ isGcStaff });
   const social = workspace === "social";
   // Settings, Get Help, and Activity are account chrome —
   // Education search stays off even if the cookie still says
@@ -102,7 +106,7 @@ export function HouseLeadChrome({
             data-app-header-workspace-pill=""
             className={APP_HEADER_WORKSPACE_PILL_HOST_CLASS}
           >
-            <WorkspaceSwitcher current={workspace} presentation="sheet" tone="pill" />
+            <WorkspaceSwitcher current={workspace} options={workspaceOptions} presentation="sheet" tone="pill" />
           </div>
           {afterLead}
         </div>
@@ -124,7 +128,7 @@ export function HouseLeadChrome({
             data-app-header-workspace-desktop=""
             className={APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS}
           >
-            <WorkspaceSwitcher current={workspace} presentation="pills" />
+            <WorkspaceSwitcher current={workspace} options={workspaceOptions} presentation="pills" />
           </div>
           <ThemeToggle />
           <AskAssistantHeaderLink />

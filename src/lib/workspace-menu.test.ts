@@ -56,6 +56,22 @@ describe("workspace menu copy", () => {
       "/social",
       "/education",
     ]);
+    expect(availableWorkspaceOptions().map((option) => option.mode)).not.toContain("staff");
+    expect(availableWorkspaceOptions({ isGcStaff: true }).map((option) => option.label)).toEqual([
+      "Aggregation",
+      "Social",
+      "Education",
+      "Staff",
+    ]);
+    expect(availableWorkspaceOptions({ isGcStaff: true }).map((option) => option.href)).toEqual([
+      "/aggregation/dashboard",
+      "/social",
+      "/education",
+      "/aggregation/queue",
+    ]);
+    expect(availableWorkspaceOptions({ isGcStaff: false }).map((option) => option.mode)).not.toContain(
+      "staff",
+    );
     expect(WORKSPACE_EDUCATION_HREF).toBe("/education");
     expect(WORKSPACE_EDUCATION_HREF).not.toBe("/social/courses");
     expect(WORKSPACE_EDUCATION_LABEL).toBe("Education");
@@ -68,5 +84,8 @@ describe("workspace menu copy", () => {
     expect(workspaceModeLabel("aggregation")).toBe("Aggregation");
     expect(workspaceModeLabel("social")).toBe("Social");
     expect(workspaceModeLabel("education")).toBe("Education");
+    expect(workspaceModeLabel("staff")).toBe("Staff");
+    expect(workspaceModeLabel("staff")).not.toBe("Team");
+    expect(workspaceModeLabel("staff")).not.toBe("Ops");
   });
 });

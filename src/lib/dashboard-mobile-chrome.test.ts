@@ -128,7 +128,7 @@ describe("Aggregation Dashboard mobile chrome — emblem left, dest chips under 
       leadSrc.indexOf("</header>"),
     );
     expect(trailing).toContain("data-app-header-workspace-desktop");
-    expect(trailing).toContain("<WorkspaceSwitcher current={workspace} presentation=\"pills\" />");
+    expect(trailing).toContain("<WorkspaceSwitcher current={workspace} options={workspaceOptions} presentation=\"pills\" />");
     expect(trailing).not.toContain('tone="pill"');
     expect(trailing).toContain("{accountMenu}");
     expect(trailing).toContain("{trailingSearch");

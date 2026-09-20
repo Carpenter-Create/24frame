@@ -140,11 +140,13 @@ export const EDUCATION_MANAGE_NAV: PhosphorNavItem[] = [
   },
 ];
 
-// Staff-block rail eyebrow. Same isGcStaff gate. Not a 24Frame product wordmark.
+// Education manage-block rail eyebrow. Not the Staff workspace label.
+// Aggregation never renders this block. Not a 24Frame product wordmark.
 export const STAFF_RAIL_EYEBROW = "Team";
 
-// Staff-only operator surfaces. Rendered by SideNav only when isGcStaff is true;
-// the (operator) layout remains the authorization gate for these hrefs.
+// Staff workspace operator surfaces. Rendered as primary rail items
+// when workspace is staff and isGcStaff is true. The (operator)
+// layout remains the authorization gate for these hrefs.
 export const GC_NAV: PhosphorNavItem[] = [
   { label: "Queue", href: QUEUE_HREF, family: "phosphor", icon: Tray },
   { label: AVAILS_PAGE.title, href: AVAILS_HREF, family: "phosphor", icon: CheckCircle },
@@ -207,11 +209,12 @@ export function clientNavCurrent(pathname: string): NavItem {
 
 // Phone dest dock uses this list (HousePhoneBottomNav still filters
 // house-ai so a leftover overlay trigger cannot become a dest).
-// Staff already use the operator set — do not leave them on a
-// client-only row. Social phone dests and the desktop Social rail
-// both read SOCIAL_NAV — Home keeps the Home label; Create stays
-// center and opens the equal-tile sheet. Activity is the header
-// bell, not a dest. Ask 24Frame AI is header + overlay.
+// Adam 2026-09-20: Aggregation dock is client NAV only — never
+// concatenate GC_NAV. Staff workspace dock is GC_NAV only.
+// Social phone dests and the desktop Social rail both read
+// SOCIAL_NAV — Home keeps the Home label; Create stays center
+// and opens the equal-tile sheet. Activity is the header bell,
+// not a dest. Ask 24Frame AI is header + overlay.
 export function mobileNavDestinations(
   isGcStaff: boolean,
   workspace: WorkspaceMode = "aggregation",
@@ -220,7 +223,8 @@ export function mobileNavDestinations(
   if (workspace === "education") {
     return isGcStaff ? [...EDUCATION_NAV, ...EDUCATION_MANAGE_NAV] : EDUCATION_NAV;
   }
-  return isGcStaff ? [...NAV, ...GC_NAV] : NAV;
+  if (workspace === "staff") return isGcStaff ? GC_NAV : NAV;
+  return NAV;
 }
 
 export function railDestinations(
@@ -231,5 +235,8 @@ export function railDestinations(
   if (workspace === "education") {
     return { items: EDUCATION_NAV, staffItems: isGcStaff ? EDUCATION_MANAGE_NAV : [] };
   }
-  return { items: NAV, staffItems: isGcStaff ? GC_NAV : [] };
+  if (workspace === "staff") {
+    return { items: isGcStaff ? GC_NAV : NAV, staffItems: [] };
+  }
+  return { items: NAV, staffItems: [] };
 }

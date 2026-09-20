@@ -205,9 +205,11 @@ describe("AppShell header", () => {
     expect(shellSrc).not.toContain('homeChrome ? "always" : "desktop"');
     expect(leadSrc).toContain('logoVisible = "always"');
     expect(shellSrc).toContain("HouseLeadChrome");
+    expect(shellSrc).toContain("HouseLeadChromeSlot");
+    expect(shellSrc).toContain("isGcStaff={data.isGcStaff}");
     expect(leadSrc).toContain("WorkspaceSwitcher");
     expect(leadSrc).toContain('tone="pill"');
-    expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
+    expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} options={workspaceOptions} presentation="pills" />');
     expect(html).toContain("data-workspace-switcher");
     expect(html).toContain("data-house-lead-scroll");
     expect(html).toContain("h-dvh");
@@ -243,7 +245,7 @@ describe("AppShell header", () => {
     expect(shellSrc).not.toContain("OrganizationSwitcher");
     expect(leadSrc).toContain("HOUSE_LEAD_CHROME_CLASS");
     expect(leadSrc).toContain('tone="pill"');
-    expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
+    expect(leadSrc).toContain('<WorkspaceSwitcher current={workspace} options={workspaceOptions} presentation="pills" />');
 
     for (const path of ["/", "/aggregation/titles", "/aggregation/attention", "/activity"]) {
       navigation.pathname = path;

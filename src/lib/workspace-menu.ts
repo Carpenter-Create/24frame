@@ -3,13 +3,15 @@
 // left of the avatar — not the rail. Trailing cluster is
 // switcher + avatar. One switcher. Popover lists only
 // accessible lanes.
-// Not a page. Not a route. Not an account-menu row. Miss-list
-// is Aggregation | Social | Education. Member Education land
-// is /education. Staff CMS is /education/manage. Do not send
-// members to /education/manage, /account/workspace, or
+// Not a page. Not a route. Not an account-menu row. Member
+// miss-list is Aggregation | Social | Education. Staff is a
+// fourth lane, visible only when isGcStaff. Member Education
+// land is /education. Staff CMS is /education/manage. Do not
+// send members to /education/manage, /account/workspace, or
 // /settings/workspace. Staff Manage courses is Education
 // workspace manage, not Settings Preferences and not
-// workspace land.
+// workspace land. Staff workspace land is the first GC_NAV
+// href (/aggregation/queue) — no new /staff dashboard.
 
 import { USER_MENU } from "@/lib/user-menu";
 import {
@@ -24,6 +26,9 @@ export const WORKSPACE_MENU = {
 } as const;
 
 export const WORKSPACE_EDUCATION_LABEL = "Education";
+
+/** Adam 2026-09-20 — Staff workspace label. Not Team. Not Ops. */
+export const WORKSPACE_STAFF_LABEL = "Staff";
 
 /** Member Education destination — never staff CMS /education/manage. */
 export const WORKSPACE_EDUCATION_HREF = EDUCATION_HREF;
@@ -53,7 +58,9 @@ export function workspaceCandidateAccessible(id: WorkspaceMenuCandidateId): bool
   return true;
 }
 
-export function availableWorkspaceOptions(): readonly WorkspaceMenuOption[] {
+export function availableWorkspaceOptions(
+  input: { isGcStaff?: boolean } = {},
+): readonly WorkspaceMenuOption[] {
   const options: WorkspaceMenuOption[] = [];
   for (const candidate of WORKSPACE_MENU_CANDIDATES) {
     if (!workspaceCandidateAccessible(candidate.id)) continue;
@@ -71,11 +78,19 @@ export function availableWorkspaceOptions(): readonly WorkspaceMenuOption[] {
       href: workspaceHome(candidate.id),
     });
   }
+  if (input.isGcStaff) {
+    options.push({
+      mode: "staff",
+      label: WORKSPACE_STAFF_LABEL,
+      href: workspaceHome("staff"),
+    });
+  }
   return options;
 }
 
 export function workspaceModeLabel(mode: WorkspaceMode): string {
   if (mode === "social") return WORKSPACE_SOCIAL_LABEL;
   if (mode === "education") return WORKSPACE_EDUCATION_LABEL;
+  if (mode === "staff") return WORKSPACE_STAFF_LABEL;
   return WORKSPACE_AGGREGATION_LABEL;
 }

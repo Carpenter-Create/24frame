@@ -274,7 +274,7 @@ describe("MessagesAppHeader", () => {
     expect((src.match(/<DotsThree/g) ?? []).length).toBe(1);
     expect(shell).not.toContain("MessagesThreadOverflow");
     expect(lead).toContain('presentation="sheet" tone="pill"');
-    expect(lead).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
+    expect(lead).toContain('<WorkspaceSwitcher current={workspace} options={workspaceOptions} presentation="pills" />');
     expect(leadLib).toContain("justify-end gap-4");
     expect(leadLib).toContain("HOUSE_LEAD_PHONE_PAD_CLASS");
     expect(leadLib).toContain("HOUSE_PHONE_TRAILING_GUTTER_CLASS");
@@ -350,7 +350,7 @@ describe("MessagesAppHeader", () => {
     expect(lead).toContain("HOUSE_LEAD_CHROME_CLASS");
     expect(lead).toContain("APP_HEADER_LEADING_CLASS");
     expect(lead).toContain('presentation="sheet" tone="pill"');
-    expect(lead).toContain('<WorkspaceSwitcher current={workspace} presentation="pills" />');
+    expect(lead).toContain('<WorkspaceSwitcher current={workspace} options={workspaceOptions} presentation="pills" />');
     expect(shell.indexOf("<MessagesAppHeader")).toBeLessThan(shell.indexOf("<UserMenu"));
     expect(tokens).toMatch(/--space-4:\s*1rem;/);
     expect(userMenu).not.toContain("data-ask-globee-title-cluster");

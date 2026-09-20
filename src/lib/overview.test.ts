@@ -66,6 +66,9 @@ describe("Home lead pills", () => {
       "social",
       "education",
     ]);
+    expect(
+      overviewLeadPills(availableWorkspaceOptions({ isGcStaff: true })).map((pill) => pill.id),
+    ).toEqual(["home", "aggregation", "social", "education", "staff", "co-productions"]);
     expect(OVERVIEW_HREF).toBe("/home");
     expect(OVERVIEW_PAGE.title).toBe("Home");
     expect(OVERVIEW_HREF).not.toBe(SOCIAL_ROUTES.home);
