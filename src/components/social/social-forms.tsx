@@ -334,7 +334,7 @@ export function SocialPostCompose({
         <button
           type="button"
           className={TEXT_ACTION_CLASS}
-          disabled={uploading || media.length >= SOCIAL_MEDIA_MAX_ITEMS}
+          disabled={media.length >= SOCIAL_MEDIA_MAX_ITEMS || uploading}
           onClick={() => fileRef.current?.click()}
         >
           {uploading ? SOCIAL.home.attaching : SOCIAL.home.attach}
