@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, use, useEffect, useId, useRef, useState } from "react";
+import { Suspense, use, useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Bell } from "@phosphor-icons/react";
@@ -43,48 +43,64 @@ export function ActivityBell({
   defaultOpen?: boolean;
   now?: number;
 }) {
-  // Open lives above Suspense so a click during the promise fallback
-  // does not remount a closed trigger when rows resolve.
+  // Open + last resolved rows live above Suspense so a click or
+  // Mark Done refresh does not remount a closed / empty peek.
   const [open, setOpen] = useState(defaultOpen);
+  const [cache, setCache] = useState<{ count: number; items: ActivityItem[] }>({
+    count: 0,
+    items: [],
+  });
+  const rememberPeek = useCallback((count: number, rows: ActivityItem[]) => {
+    setCache((prev) =>
+      prev.count === count && prev.items === rows ? prev : { count, items: rows },
+    );
+  }, []);
+  const fallbackCount = isPromise(unread) ? cache.count : unread;
+  const fallbackItems = isPromise(items) ? cache.items : items;
+  const fallback = (
+    <ActivityBellTriggers
+      count={fallbackCount}
+      items={fallbackItems}
+      open={open}
+      onOpenChange={setOpen}
+    />
+  );
 
   if (isPromise(unread)) {
     if (isPromise(items)) {
       return (
-        <Suspense
-          fallback={<ActivityBellTriggers count={0} items={[]} open={open} onOpenChange={setOpen} />}
-        >
+        <Suspense fallback={fallback}>
           <ActivityBellBoth
             unread={unread}
             items={items}
             open={open}
             onOpenChange={setOpen}
+            onRemember={rememberPeek}
           />
         </Suspense>
       );
     }
     return (
-      <Suspense
-        fallback={<ActivityBellTriggers count={0} items={[]} open={open} onOpenChange={setOpen} />}
-      >
+      <Suspense fallback={fallback}>
         <ActivityBellUnread
           unread={unread}
           items={items}
           open={open}
           onOpenChange={setOpen}
+          onRemember={rememberPeek}
         />
       </Suspense>
     );
   }
   if (isPromise(items)) {
     return (
-      <Suspense
-        fallback={<ActivityBellTriggers count={0} items={[]} open={open} onOpenChange={setOpen} />}
-      >
+      <Suspense fallback={fallback}>
         <ActivityBellItems
           unread={unread}
           items={items}
           open={open}
           onOpenChange={setOpen}
+          onRemember={rememberPeek}
         />
       </Suspense>
     );
@@ -99,21 +115,36 @@ export function ActivityBell({
   );
 }
 
+function useRememberPeek(
+  count: number,
+  rows: ActivityItem[],
+  onRemember: (count: number, rows: ActivityItem[]) => void,
+) {
+  useEffect(() => {
+    onRemember(count, rows);
+  }, [count, rows, onRemember]);
+}
+
 function ActivityBellBoth({
   unread,
   items,
   open,
   onOpenChange,
+  onRemember,
 }: {
   unread: Promise<number>;
   items: Promise<ActivityItem[]>;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onRemember: (count: number, rows: ActivityItem[]) => void;
 }) {
+  const count = use(unread);
+  const rows = use(items);
+  useRememberPeek(count, rows, onRemember);
   return (
     <ActivityBellTriggers
-      count={use(unread)}
-      items={use(items)}
+      count={count}
+      items={rows}
       open={open}
       onOpenChange={onOpenChange}
     />
@@ -125,15 +156,19 @@ function ActivityBellUnread({
   items,
   open,
   onOpenChange,
+  onRemember,
 }: {
   unread: Promise<number>;
   items: ActivityItem[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onRemember: (count: number, rows: ActivityItem[]) => void;
 }) {
+  const count = use(unread);
+  useRememberPeek(count, items, onRemember);
   return (
     <ActivityBellTriggers
-      count={use(unread)}
+      count={count}
       items={items}
       open={open}
       onOpenChange={onOpenChange}
@@ -146,16 +181,20 @@ function ActivityBellItems({
   items,
   open,
   onOpenChange,
+  onRemember,
 }: {
   unread: number;
   items: Promise<ActivityItem[]>;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onRemember: (count: number, rows: ActivityItem[]) => void;
 }) {
+  const rows = use(items);
+  useRememberPeek(unread, rows, onRemember);
   return (
     <ActivityBellTriggers
       count={unread}
-      items={use(items)}
+      items={rows}
       open={open}
       onOpenChange={onOpenChange}
     />
