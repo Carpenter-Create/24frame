@@ -57,7 +57,7 @@ describe("social follow helpers", () => {
   });
 
   it("flips Follow immediately, then toasts on persist — both required", () => {
-    const src = readFileSync("src/components/social/social-forms.tsx", "utf8");
+    const src = readFileSync("src/components/social/social-engagement.tsx", "utf8");
     const chunk = src.slice(
       src.indexOf("export function SocialFollowButton"),
       src.indexOf("export function SocialLikeButton"),

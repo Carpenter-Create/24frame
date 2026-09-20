@@ -33,7 +33,7 @@ import { socialProfilePublicLinks } from "@/lib/social-profile-links";
 import { socialProfileRoleChips } from "@/lib/social-profile-roles";
 import { parseSocialProfileTopics } from "@/lib/social-profile-topics";
 import { SocialAvatar } from "./social-avatar";
-import { SocialLikeButton } from "./social-forms";
+import { SocialLikeButton } from "./social-engagement";
 import { SocialProfileStats } from "./social-profile-stats";
 import { SocialEmpty } from "./social-empty";
 import { SocialIcon } from "./social-icon";

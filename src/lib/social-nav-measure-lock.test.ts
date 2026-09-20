@@ -53,7 +53,8 @@ describe("Social nav leftover split (shared shell vs Social-local)", () => {
     expect(appLayout).not.toMatch(/await hasAvatarObject/);
     expect(appLayout).not.toMatch(/await getActiveOrgTier/);
     expect(chrome).toContain("cache(async");
-    expect(chrome).toContain("hasAvatarObject(ctx.user.id)");
+    expect(chrome).not.toContain("hasAvatarObject");
+    expect(chrome).toContain("photoUrl: ACCOUNT_PHOTO_HREF");
     expect(chrome).toContain("getActiveOrgTier");
     expect(appShell).toContain("HouseLeadChrome");
     expect(appShell).not.toContain("SocialTopBarFromChrome");

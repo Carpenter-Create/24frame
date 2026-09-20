@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getOrgContext } from "@/lib/supabase/context";
 import { getActiveOrgTier } from "@/lib/org-tier";
-import { hasAvatarObject } from "@/lib/s3-avatars";
 import {
   appShellActivityItems,
   appShellUnread,
@@ -21,7 +20,6 @@ vi.mock("next/headers", () => ({
 }));
 vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
 vi.mock("@/lib/org-tier", () => ({ getActiveOrgTier: vi.fn(async () => null) }));
-vi.mock("@/lib/s3-avatars", () => ({ hasAvatarObject: vi.fn(async () => false) }));
 vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(async () => ({
     rpc: vi.fn(async () => ({ data: [], error: null })),
@@ -95,17 +93,15 @@ describe("App access gates (moved off the layout body)", () => {
 describe("app shell chrome load", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("loads the face and org-tier together after access, and exposes unread as a promise", async () => {
+  it("loads the same-origin face and org-tier after access, and exposes unread as a promise", async () => {
     vi.mocked(getOrgContext).mockResolvedValue(
       ctx({ isGcStaff: false, orgStatus: "active" }) as never,
     );
-    vi.mocked(hasAvatarObject).mockResolvedValue(true);
     const chrome = await loadAppShellChrome();
     expect(chrome.email).toBe("someone@example.com");
     expect(chrome.name).toBe("Ada");
     expect(chrome.photoUrl).toBe("/api/account/photo");
     expect(getActiveOrgTier).toHaveBeenCalledWith("org-1");
-    expect(hasAvatarObject).toHaveBeenCalledWith("u1");
     await expect(appShellUnread(Promise.resolve(chrome))).resolves.toBe(0);
     await expect(appShellActivityItems(Promise.resolve(chrome))).resolves.toEqual([]);
   });
@@ -128,12 +124,13 @@ describe("Social nav no longer waits on the (app) layout waterfall", () => {
     expect(layoutSrc).not.toMatch(/key=\{ctx/);
   });
 
-  it("still signs the chrome face from the session user, off the page slot", () => {
-    expect(chromeSrc).toContain("hasAvatarObject(ctx.user.id)");
+  it("keeps the chrome face on the same-origin photo route, off the page slot", () => {
+    expect(chromeSrc).toContain("photoUrl: ACCOUNT_PHOTO_HREF");
     expect(chromeSrc).toContain("ACCOUNT_PHOTO_HREF");
     expect(chromeSrc).toContain("name: ctx.user.name");
     expect(chromeSrc).toContain("email: ctx.user.email");
-    expect(chromeSrc).toContain("Promise.all");
+    expect(chromeSrc).not.toContain("hasAvatarObject");
+    expect(chromeSrc).not.toContain("@/lib/s3-avatars");
     expect(chromeSrc).not.toContain("signedAvatarUrl");
     expect(chromeSrc).not.toContain("putAvatarObject");
     expect(chromeSrc).not.toContain("display_name");

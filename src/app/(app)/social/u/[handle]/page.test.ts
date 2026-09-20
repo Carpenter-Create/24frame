@@ -372,11 +372,12 @@ describe("Social public profile", () => {
     vi.mocked(signedAvatarUrl).mockResolvedValue("https://s3.example/signed-avatar");
 
     const html = await renderPublic();
-    expect(html).toContain('src="https://s3.example/signed-avatar"');
+    expect(html).toContain('src="/api/social/avatar/u2"');
     expect(html).toContain('data-social-post="p9"');
 
     const src = readFileSync("src/app/(app)/social/u/[handle]/page.tsx", "utf8");
-    expect(src).toContain("signedAvatarUrl");
+    expect(src).toContain("socialAvatarHref");
+    expect(src).toContain("export const runtime = SOCIAL_EDGE_RUNTIME");
     expect(src).toContain("loadAuthorPosts");
     expect(src).toContain("SocialAuthorHistory");
     expect(src).toContain("socialProfileCasingRedirect");

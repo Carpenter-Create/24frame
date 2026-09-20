@@ -1,4 +1,4 @@
-import { SocialFollowButton } from "@/components/social/social-forms";
+import { SocialFollowButton } from "@/components/social/social-engagement";
 import { SocialPersonRow } from "@/components/social/social-ui";
 import { socialMemberHref } from "@/lib/social";
 import type { SocialFollowsListPerson } from "@/lib/social-feed";

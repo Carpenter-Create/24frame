@@ -9,10 +9,12 @@ import { SocialSuggestedPeople } from "@/components/social/social-for-you";
 import { SocialExploreResultsSkeleton } from "@/components/social/social-skeletons";
 import { SocialPersonRow } from "@/components/social/social-ui";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
-import { signedAvatarUrls } from "@/lib/s3-avatars";
+import { SOCIAL_EDGE_RUNTIME, socialAvatarFaces } from "@/lib/social-edge";
 import { loadExploreSearch, loadFolloweeIds, loadSuggestedPeople } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { requireSocialSession, type SocialSession } from "@/lib/social-session";
+
+export const runtime = SOCIAL_EDGE_RUNTIME;
 
 export default async function SocialExplorePage({
   searchParams,
@@ -61,8 +63,7 @@ async function SocialExploreSuggested({ session }: { session: SocialSession }) {
     [ctx.user.id, ...followees.ids],
     { topics: profile?.topics ?? [], crafts: profile?.crafts ?? [] },
   );
-  const faces =
-    suggested.length > 0 ? await signedAvatarUrls(suggested.map((person) => person.id)) : new Map();
+  const faces = suggested.length > 0 ? socialAvatarFaces(suggested.map((person) => person.id)) : new Map();
 
   if (suggested.length === 0) {
     return (
@@ -87,7 +88,7 @@ async function SocialExploreHits({ session, q }: { session: SocialSession; q: st
   });
   const hits = results.hits;
   const personIds = hits.filter((hit) => hit.kind === "person").map((hit) => hit.id);
-  const faces = personIds.length > 0 ? await signedAvatarUrls(personIds) : new Map();
+  const faces = personIds.length > 0 ? socialAvatarFaces(personIds) : new Map();
 
   if (hits.length === 0) {
     return <HouseEmpty>{SOCIAL.explore.noResults}</HouseEmpty>;

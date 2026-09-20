@@ -27,9 +27,7 @@ import {
 import { parseSocialImdbInput } from "@/lib/social-imdb";
 import { SOCIAL_DM_ADD_BATCH_LIMIT } from "@/lib/social-dm-bounds";
 import {
-  followInsertRow,
   groupInsertRow,
-  likeInsertRow,
   messageInsertRow,
   normalizeBio,
   composeSocialDisplayName,
@@ -53,14 +51,10 @@ import {
   socialNameRequiredError,
   socialMediaRuleMessage,
   socialProfileHref,
-  socialProfileFollowsHref,
 } from "@/lib/social";
-import {
-  isFollowUniqueViolation,
-  newFollowerNoticeCopy,
-  newFollowerSourceRefs,
-} from "@/lib/social-follow";
-import { bustSocialFollowHotCache, bustSocialProfileHotCache } from "@/lib/social-hot-cache";
+import { bustSocialProfileHotCache } from "@/lib/social-hot-cache";
+
+export { toggleSocialFollow, toggleSocialLike } from "./light-actions";
 
 type ActionResult = { error?: string };
 
@@ -301,83 +295,6 @@ export async function updateSocialBio(formData: FormData): Promise<ActionResult>
   await bustSocialProfileHotCache(profileId);
   revalidatePath(SOCIAL_ROUTES.profile);
   revalidatePath(SOCIAL_ROUTES.profileEdit);
-  return {};
-}
-
-export async function toggleSocialFollow(formData: FormData): Promise<ActionResult> {
-  const { user, supabase, profile } = await ownProfile();
-  if (!profile) return { error: SOCIAL.cta.needProfile };
-
-  const followeeId = String(formData.get("followee_id") ?? "").trim();
-  const following = String(formData.get("following") ?? "") === "1";
-  if (!followeeId || followeeId === user.id) return { error: SOCIAL.member.missing };
-
-  if (following) {
-    const { error } = await supabase
-      .from("follows")
-      .delete()
-      .eq("follower_id", user.id)
-      .eq("followee_id", followeeId);
-    if (error) return { error: error.message || SOCIAL.follow.failed };
-  } else {
-    const { error } = await supabase.from("follows").insert(followInsertRow(user.id, followeeId));
-    if (error && !isFollowUniqueViolation(error)) {
-      return { error: error.message || SOCIAL.follow.failed };
-    }
-    if (!error) {
-      const copy = newFollowerNoticeCopy(profile.handle);
-      // Follow already landed. Alert is best-effort until founder applies SQL.
-      await supabase.rpc("notify_new_follower", {
-        p_followee: followeeId,
-        p_title: copy.title,
-        p_body: copy.body,
-        p_source_refs: newFollowerSourceRefs({ actorId: user.id, handle: profile.handle }),
-      });
-    }
-  }
-
-  await bustSocialFollowHotCache(user.id, followeeId);
-  revalidatePath(SOCIAL_ROUTES.home);
-  revalidatePath(SOCIAL_ROUTES.profile);
-  if (profile.handle) {
-    revalidatePath(socialProfileHref(profile.handle));
-    revalidatePath(socialProfileFollowsHref(profile.handle));
-  }
-  const handle = String(formData.get("handle") ?? "").trim();
-  if (handle) {
-    revalidatePath(socialProfileHref(handle));
-    revalidatePath(socialProfileFollowsHref(handle));
-  }
-  return {};
-}
-
-export async function toggleSocialLike(formData: FormData): Promise<ActionResult> {
-  const { user, supabase, profileId } = await ownProfile();
-  if (!profileId) return { error: SOCIAL.cta.needProfile };
-
-  const postId = String(formData.get("post_id") ?? "").trim();
-  const liked = String(formData.get("liked") ?? "") === "1";
-  if (!postId) return { error: "Missing post." };
-
-  if (liked) {
-    const { error } = await supabase
-      .from("likes")
-      .delete()
-      .eq("user_id", user.id)
-      .eq("target_type", "post")
-      .eq("target_id", postId);
-    if (error) return { error: error.message };
-  } else {
-    const { error } = await supabase.from("likes").insert(likeInsertRow(user.id, postId));
-    if (error) return { error: error.message };
-  }
-
-  revalidatePath(SOCIAL_ROUTES.home);
-  const slug = String(formData.get("group_slug") ?? "").trim();
-  if (slug) {
-    revalidatePath(socialGroupHref(slug));
-    revalidatePath(`${socialGroupHref(slug)}/posts/${postId}`);
-  }
   return {};
 }
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,13 +22,10 @@ import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import { SEGMENTED_TRACK_PERSIST, segmentedItemOn } from "@/lib/segmented-track";
 import {
   SOCIAL_ACTION_CLASS,
-  SOCIAL_ACTION_SECONDARY_CLASS,
   SOCIAL_CREATE_AVATAR_CLASS,
   SOCIAL_CREATE_CARD_CLASS,
   SOCIAL_CREATE_KIND_CLASS,
   SOCIAL_CREATE_WELL_CLASS,
-  SOCIAL_FOLLOW_COMPACT_CLASS,
-  SOCIAL_FOLLOW_COMPACT_IDLE_CLASS,
   SOCIAL_PILL_CLASS,
   SOCIAL_PILL_IDLE_CLASS,
 } from "@/lib/social-chrome";
@@ -46,11 +42,6 @@ import { HouseVoiceMic } from "@/components/chrome/house-voice-mic";
 import { HOUSE_VOICE_FIELD_HOST_CLASS } from "@/lib/form-control";
 import { takeSocialHomeComposerMedia } from "@/lib/social-home-composer";
 import { ingestSpeechLearning } from "@/lib/speech-learning";
-import {
-  FOLLOW_CONFIRM_MS,
-  followButtonLabel,
-  followedConfirmCopy,
-} from "@/lib/social-follow";
 import {
   displayHandle,
   normalizeHandle,
@@ -74,14 +65,10 @@ import {
   presignSocialMediaUpload,
   sendSocialDm,
   setSocialDmTitle,
-  toggleSocialFollow,
-  toggleSocialLike,
   updateSocialBio,
 } from "@/app/(app)/social/actions";
-import { readSocialFollowState } from "@/app/(app)/social/query-actions";
-import { useAppQueryClient } from "@/components/query-provider";
-import { SOCIAL_QUERY_STALE_MS, socialFollowQueryKey } from "@/lib/social-cache-keys";
-import { applyOptimisticFollow } from "@/lib/social-query";
+
+export { SocialFollowButton, SocialLikeButton } from "./social-engagement";
 
 function FormError({ error }: { error: string }) {
   if (!error) return null;
@@ -595,235 +582,6 @@ export function SocialBioForm({ bio }: { bio: string }) {
       <Button type="submit" variant="secondary">
         {SOCIAL.profile.bioSubmit}
       </Button>
-    </form>
-  );
-}
-
-export function SocialFollowButton({
-  followeeId,
-  handle,
-  following,
-  viewerId,
-  followsYou = false,
-  compact = false,
-  stretch = false,
-}: {
-  followeeId: string;
-  handle: string;
-  following: boolean;
-  viewerId?: string;
-  followsYou?: boolean;
-  compact?: boolean;
-  stretch?: boolean;
-}) {
-  const queryClient = useAppQueryClient();
-  if (!queryClient) {
-    return (
-      <SocialFollowButtonView
-        followeeId={followeeId}
-        handle={handle}
-        following={following}
-        viewerId={viewerId}
-        followsYou={followsYou}
-        compact={compact}
-        stretch={stretch}
-        queryClient={null}
-      />
-    );
-  }
-  return (
-    <SocialFollowButtonQuery
-      followeeId={followeeId}
-      handle={handle}
-      following={following}
-      viewerId={viewerId}
-      followsYou={followsYou}
-      compact={compact}
-      stretch={stretch}
-    />
-  );
-}
-
-function SocialFollowButtonQuery({
-  followeeId,
-  handle,
-  following,
-  viewerId,
-  followsYou,
-  compact,
-  stretch,
-}: {
-  followeeId: string;
-  handle: string;
-  following: boolean;
-  viewerId?: string;
-  followsYou: boolean;
-  compact: boolean;
-  stretch: boolean;
-}) {
-  const queryClient = useAppQueryClient();
-  const query = useQuery({
-    queryKey: socialFollowQueryKey(viewerId ?? "me", followeeId),
-    queryFn: () => readSocialFollowState(followeeId),
-    initialData: following,
-    staleTime: SOCIAL_QUERY_STALE_MS,
-  });
-  return (
-    <SocialFollowButtonView
-      followeeId={followeeId}
-      handle={handle}
-      following={query.data ?? following}
-      viewerId={viewerId}
-      followsYou={followsYou}
-      compact={compact}
-      stretch={stretch}
-      queryClient={queryClient}
-    />
-  );
-}
-
-function SocialFollowButtonView({
-  followeeId,
-  handle,
-  following,
-  viewerId,
-  followsYou,
-  compact,
-  stretch,
-  queryClient,
-}: {
-  followeeId: string;
-  handle: string;
-  following: boolean;
-  viewerId?: string;
-  followsYou: boolean;
-  compact: boolean;
-  stretch: boolean;
-  queryClient: ReturnType<typeof useAppQueryClient>;
-}) {
-  const [override, setOverride] = useState<boolean | null>(null);
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState("");
-  const [confirm, setConfirm] = useState(false);
-  const isFollowing = override ?? following;
-
-  // Adam lock: optimistic Following on click; InlineNotice toast only after persist.
-  useEffect(() => {
-    if (!confirm) return;
-    const id = window.setTimeout(() => setConfirm(false), FOLLOW_CONFIRM_MS);
-    return () => window.clearTimeout(id);
-  }, [confirm]);
-
-  return (
-    <div
-      className={
-        stretch ? "flex min-w-0 flex-1 flex-col gap-1 md:flex-none" : "flex flex-col gap-1"
-      }
-    >
-      <form
-        data-social-follow=""
-        className={stretch ? "min-w-0" : undefined}
-        action={async (formData) => {
-          const next = !isFollowing;
-          setPending(true);
-          setError("");
-          setConfirm(false);
-          setOverride(next);
-          if (queryClient && viewerId) {
-            applyOptimisticFollow(queryClient, {
-              viewerId,
-              targetId: followeeId,
-              following: next,
-            });
-          }
-          const result = await toggleSocialFollow(formData);
-          setPending(false);
-          if (result.error) {
-            setOverride(null);
-            if (queryClient && viewerId) {
-              applyOptimisticFollow(queryClient, {
-                viewerId,
-                targetId: followeeId,
-                following: !next,
-              });
-            }
-            setError(result.error);
-            return;
-          }
-          if (next) setConfirm(true);
-        }}
-      >
-        <input type="hidden" name="followee_id" value={followeeId} />
-        <input type="hidden" name="handle" value={handle} />
-        <input type="hidden" name="following" value={isFollowing ? "1" : "0"} />
-        <button
-          type="submit"
-          disabled={pending}
-          aria-busy={pending}
-          className={
-            compact
-              ? isFollowing
-                ? SOCIAL_FOLLOW_COMPACT_IDLE_CLASS
-                : SOCIAL_FOLLOW_COMPACT_CLASS
-              : cn(
-                  isFollowing ? SOCIAL_ACTION_SECONDARY_CLASS : SOCIAL_ACTION_CLASS,
-                  stretch && "w-full",
-                )
-          }
-        >
-          {followButtonLabel(isFollowing, followsYou)}
-        </button>
-      </form>
-      {error ? <FormError error={error} /> : null}
-      {confirm ? (
-        <InlineNotice data-social-follow-toast="" aria-live="polite">
-          {followedConfirmCopy(handle)}
-        </InlineNotice>
-      ) : null}
-    </div>
-  );
-}
-
-export function SocialLikeButton({
-  postId,
-  liked,
-  likeCount,
-  groupSlug,
-  disabled,
-  icon = false,
-}: {
-  postId: string;
-  liked: boolean;
-  likeCount: number;
-  groupSlug?: string;
-  disabled?: boolean;
-  icon?: boolean;
-}) {
-  return (
-    <form
-      action={async (formData) => {
-        await toggleSocialLike(formData);
-      }}
-      className="inline"
-    >
-      <input type="hidden" name="post_id" value={postId} />
-      <input type="hidden" name="liked" value={liked ? "1" : "0"} />
-      {groupSlug ? <input type="hidden" name="group_slug" value={groupSlug} /> : null}
-      <button
-        type="submit"
-        disabled={disabled}
-        data-social-like=""
-        aria-label={liked ? SOCIAL.post.unlike : SOCIAL.post.like}
-        className={icon ? "text-ink" : "t-body-sm text-ink-2"}
-      >
-        {icon ? (
-          <SocialIcon name="heart" active={liked} size={22} />
-        ) : (
-          <>
-            {likeCount} {SOCIAL.post.likes}
-          </>
-        )}
-      </button>
     </form>
   );
 }

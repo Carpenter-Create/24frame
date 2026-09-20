@@ -1,7 +1,10 @@
 import { SocialStoryCompose } from "@/components/social/social-forms";
 import { SOCIAL } from "@/lib/social";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
+import { SOCIAL_NODE_RUNTIME } from "@/lib/social-edge";
 import { requireSocialSession } from "@/lib/social-session";
+
+export const runtime = SOCIAL_NODE_RUNTIME;
 
 export default async function SocialStoryCreatePage() {
   const { ctx, supabase } = await requireSocialSession();

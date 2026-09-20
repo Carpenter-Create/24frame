@@ -9,7 +9,6 @@ import { resolveMessagesSurface, type MessagesSurface } from "@/lib/ask-globee";
 import { loadActivityBellItems } from "@/lib/my-lists";
 import { getActiveOrgTier } from "@/lib/org-tier";
 import { readSidebarCollapsed } from "@/lib/rail-collapse";
-import { hasAvatarObject } from "@/lib/s3-avatars";
 import { createClient } from "@/lib/supabase/server";
 import { getOrgContext, type OrgContext } from "@/lib/supabase/context";
 import { parseWorkspaceCookie, WORKSPACE_COOKIE, type WorkspaceMode } from "@/lib/workspace";
@@ -41,19 +40,16 @@ export async function enforceAppAccess(): Promise<OrgContext> {
 }
 
 // Identity + Aggregation-only chrome. Not awaited in the layout body.
-// Photo HEAD and org-tier ran serially after getOrgContext and blocked
-// every Social tab click; they stay here, off the page slot.
+// Face is the same-origin photo route; IdentityPhoto onError drops a miss.
+// No S3 HEAD here — that import would pin Social Edge reads to Node.
 export const loadAppShellChrome = cache(async (): Promise<AppShellChrome> => {
   const ctx = await enforceAppAccess();
   const jar = await cookies();
-  const [hasPhoto, tier] = await Promise.all([
-    hasAvatarObject(ctx.user.id),
-    ctx.activeOrg ? getActiveOrgTier(ctx.activeOrg.id) : Promise.resolve(null),
-  ]);
+  const tier = ctx.activeOrg ? await getActiveOrgTier(ctx.activeOrg.id) : null;
   return {
     email: ctx.user.email,
     name: ctx.user.name,
-    photoUrl: hasPhoto ? ACCOUNT_PHOTO_HREF : null,
+    photoUrl: ACCOUNT_PHOTO_HREF,
     orgs: ctx.orgs,
     activeOrgId: ctx.activeOrg?.id ?? null,
     unread: ctx.unread,

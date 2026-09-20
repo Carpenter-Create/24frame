@@ -42,7 +42,10 @@ import {
   mergeSocialProfileIdentity,
   readSocialProfileOptimisticCookie,
 } from "@/lib/social-profile-edit";
+import { SOCIAL_NODE_RUNTIME } from "@/lib/social-edge";
 import { requireSocialSession, type SocialSession } from "@/lib/social-session";
+
+export const runtime = SOCIAL_NODE_RUNTIME;
 
 export default async function SocialProfilePage({
   searchParams,
