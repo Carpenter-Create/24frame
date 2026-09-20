@@ -147,10 +147,7 @@ export function matchDecoratedInAppProfilePath(pathname: string): string | null 
 }
 
 export function socialProfileRewriteTarget(pathname: string): string | null {
-  const handle =
-    matchSocialPublicAtPath(pathname) ??
-    matchSocialVanityPath(pathname) ??
-    matchDecoratedInAppProfilePath(pathname);
+  const handle = matchSocialVanityPath(pathname) ?? matchDecoratedInAppProfilePath(pathname);
   return handle ? socialProfileHref(handle) : null;
 }
 
