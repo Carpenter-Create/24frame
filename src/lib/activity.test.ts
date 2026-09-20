@@ -6,17 +6,23 @@ import {
   ACTIVITY_BELL_OPEN_DOT_CLASS,
   ACTIVITY_BELL_TRIGGER_CLASS,
   ACTIVITY_BELL_TRIGGER_OPEN_CLASS,
+  ACTIVITY_FAMILIES,
+  ACTIVITY_FAMILY_ALL,
   ACTIVITY_HREF,
   ACTIVITY_KIND_ICON,
   ACTIVITY_PAGE,
+  ACTIVITY_PREFS_HREF,
   activityBellItems,
   activityEmptyCopy,
+  activityFamilyForKind,
+  activityFamilyLabel,
   activityHref,
   activityItemHref,
   activityKindIcon,
   activityRelativeTime,
   filterActivityItems,
   isActivityOpen,
+  parseActivityFamily,
   parseActivityPeriod,
   parseActivityStatus,
 } from "./activity";
@@ -126,6 +132,47 @@ describe("Activity period chips", () => {
       `${ACTIVITY_HREF}?status=done&period=2026-09`,
     );
     expect(activityHref({ period: "all" })).toBe(ACTIVITY_HREF);
+    expect(activityHref({ family: "all" })).toBe(ACTIVITY_HREF);
+    expect(activityHref({ family: "social" })).toBe(`${ACTIVITY_HREF}?family=social`);
+    expect(activityHref({ status: "done", period: "ytd", family: "reporting" })).toBe(
+      `${ACTIVITY_HREF}?status=done&period=ytd&family=reporting`,
+    );
+  });
+});
+
+describe("Activity family chips", () => {
+  it("reuses prefs families and defaults to All", () => {
+    expect(ACTIVITY_FAMILIES).toEqual([
+      "all",
+      "aggregation",
+      "reporting",
+      "social",
+      "education",
+      "account",
+    ]);
+    expect(parseActivityFamily(undefined)).toBe(ACTIVITY_FAMILY_ALL);
+    expect(parseActivityFamily("social")).toBe("social");
+    expect(parseActivityFamily(["social"])).toBe("all");
+    expect(parseActivityFamily("nope")).toBe("all");
+    expect(activityFamilyLabel("all")).toBe(ACTIVITY_PAGE.all);
+    expect(activityFamilyLabel("aggregation")).toBe("Aggregation");
+    expect(activityFamilyForKind("title_rejected")).toBe("aggregation");
+    expect(activityFamilyForKind("delivery_update")).toBe("aggregation");
+    expect(ACTIVITY_PREFS_HREF).toBe("/settings/preferences/notifications");
+  });
+
+  it("filters Open by the selected prefs family", () => {
+    const all = parseReportsPeriod("all", NOW);
+    expect(filterActivityItems(FEED, "open", all, "aggregation").map((row) => row.id)).toEqual([
+      "1",
+      "2",
+    ]);
+    expect(filterActivityItems(FEED, "open", all, "social")).toEqual([]);
+    expect(filterActivityItems(FEED, "open", all, "reporting")).toEqual([]);
+    expect(filterActivityItems(FEED, "done", all, "aggregation").map((row) => row.id)).toEqual([
+      "3",
+      "4",
+    ]);
   });
 });
 

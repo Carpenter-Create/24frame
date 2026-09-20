@@ -33,6 +33,7 @@ export const SEGMENTED_TRACK_PERSIST = {
   period: "house-period-presets",
   activityStatus: "activity-status",
   activityPeriod: "activity-period",
+  activityFamily: "activity-family",
   reportsPeriod: "reports-period",
   dashboardRanked: "dashboard-top-pills",
   reportsRanked: "reports-top-pills",

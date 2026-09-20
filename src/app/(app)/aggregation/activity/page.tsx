@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { ActivityInbox } from "@/components/activity/activity-inbox";
 import {
   filterActivityItems,
+  parseActivityFamily,
   parseActivityPeriod,
   parseActivityStatus,
   type ActivityItem,
@@ -25,16 +26,18 @@ export default async function ActivityPage({
   const now = new Date();
   const status = parseActivityStatus(sp.status);
   const period = parseActivityPeriod(sp.period, now);
+  const family = parseActivityFamily(sp.family);
 
   const supabase = await createClient();
   const loaded = await loadMyNotifications(supabase);
-  const items = filterActivityItems(loaded.rows as ActivityItem[], status, period);
+  const items = filterActivityItems(loaded.rows as ActivityItem[], status, period, family);
 
   return (
     <ActivityInbox
       items={items}
       status={status}
       period={period}
+      family={family}
       now={now}
       truncated={loaded.truncated}
     />

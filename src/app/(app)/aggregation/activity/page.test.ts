@@ -92,6 +92,10 @@ describe("ActivityPage", () => {
     expect(html).toContain('data-activity-period-chip="year"');
     expect(html).toContain('data-activity-period-chip="quarter"');
     expect(html).toContain('data-activity-period-chip="month"');
+    expect(html).toContain('data-activity-family-chip="all"');
+    expect(html).toContain('data-activity-family-chip="social"');
+    expect(html).toContain("data-activity-prefs");
+    expect(html).toContain('href="/settings/preferences/notifications"');
     expect(html).toContain("North Wind was returned");
     expect(html).not.toContain("Harbor Cut delivery update");
     expect(html).toContain(ACTIVITY_PAGE.done);
@@ -107,6 +111,16 @@ describe("ActivityPage", () => {
     const html = await renderPage({ status: "done" });
     expect(html).toContain("Harbor Cut delivery update");
     expect(html).not.toContain("North Wind was returned");
+  });
+
+  it("filters Open by a prefs family chip", async () => {
+    stubClient();
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const html = await renderPage({ family: "social" });
+    expect(html).toContain(ACTIVITY_PAGE.emptyOpen);
+    expect(html).not.toContain("North Wind was returned");
+    expect(html).toContain('data-activity-family-chip="social"');
   });
 
   it("filters Open by a Reports period chip", async () => {

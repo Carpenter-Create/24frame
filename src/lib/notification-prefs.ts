@@ -282,6 +282,30 @@ export function notificationPrefEventForKind(kind: NotificationKind): Notificati
   return "title_returned";
 }
 
+export type NotificationPrefFamilyId = keyof typeof NOTIFICATION_PREFS.groups;
+
+const NOTIFICATION_PREF_EVENT_FAMILY = (() => {
+  const map = {} as Record<NotificationPrefEvent, NotificationPrefFamilyId>;
+  for (const group of NOTIFICATION_PREF_GROUPS) {
+    for (const section of group.sections) {
+      for (const event of section.events) {
+        map[event] = section.id as NotificationPrefFamilyId;
+      }
+    }
+  }
+  return map;
+})();
+
+export function notificationPrefFamilyForEvent(
+  event: NotificationPrefEvent,
+): NotificationPrefFamilyId {
+  return NOTIFICATION_PREF_EVENT_FAMILY[event];
+}
+
+export function notificationPrefFamilyForKind(kind: NotificationKind): NotificationPrefFamilyId {
+  return notificationPrefFamilyForEvent(notificationPrefEventForKind(kind));
+}
+
 export const NOTIFICATION_PREF_TITLE_STATUS_EVENT = "title_status" satisfies NotificationPrefEvent;
 
 function isRecord(value: unknown): value is Record<string, unknown> {

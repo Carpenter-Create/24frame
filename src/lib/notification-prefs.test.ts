@@ -25,6 +25,8 @@ import {
   NOTIFICATION_PREFS,
   isNotificationChannelOn,
   notificationPrefEventForKind,
+  notificationPrefFamilyForEvent,
+  notificationPrefFamilyForKind,
   notificationPrefWriteSchema,
   notificationPrefsToRow,
   parseNotificationPrefsRow,
@@ -75,6 +77,12 @@ describe("notification prefs SoT", () => {
   it("maps live notification kinds onto the matrix rows", () => {
     expect(notificationPrefEventForKind("title_rejected")).toBe("title_returned");
     expect(notificationPrefEventForKind("delivery_update")).toBe("delivery_status");
+    expect(notificationPrefFamilyForKind("title_rejected")).toBe("aggregation");
+    expect(notificationPrefFamilyForKind("delivery_update")).toBe("aggregation");
+    expect(notificationPrefFamilyForEvent("reporting_ready")).toBe("reporting");
+    expect(notificationPrefFamilyForEvent("dm_received")).toBe("social");
+    expect(notificationPrefFamilyForEvent("course_available")).toBe("education");
+    expect(notificationPrefFamilyForEvent("team_invite")).toBe("account");
     expect(NOTIFICATION_PREF_TITLE_STATUS_EVENT).toBe("title_status");
     expect(Object.keys(NOTIFICATION_EMAIL)).toEqual(["title_rejected", "delivery_update"]);
   });

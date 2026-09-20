@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Gear } from "@phosphor-icons/react/ssr";
 
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardBody } from "@/components/ui/card";
@@ -8,12 +9,19 @@ import { SEGMENTED_TRACK_PERSIST } from "@/lib/segmented-track";
 import { MessageLink } from "@/app/(app)/aggregation/messages/message-link";
 import { cn } from "@/lib/cn";
 import {
+  ACTIVITY_FAMILIES,
+  ACTIVITY_FAMILY_SCROLL_CLASS,
   ACTIVITY_PAGE,
+  ACTIVITY_PREFS_HREF,
   activityEmptyCopy,
+  activityFamilyLabel,
   activityHref,
+  type ActivityFamily,
   type ActivityItem,
   type ActivityStatus,
 } from "@/lib/activity";
+import { HOUSE_THEME_TOGGLE_CLASS } from "@/lib/house-lead-chrome";
+import { PHOSPHOR_CHROME_ICON_CLASS, PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import {
   DASHBOARD_TOP_PILL_BUTTON_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
@@ -40,24 +48,43 @@ import {
 import { MarkDone } from "./mark-done";
 
 // Durable account-alert log. One notifications feed. Open inbox is
-// unread; Done is read history. Reports pills for status + period.
+// unread; Done is read history. Prefs family chips + Reports period.
+// Gear is the only settings door: existing Preferences Notifications.
 
 export function ActivityInbox({
   items,
   status,
   period,
+  family,
   now,
   truncated = false,
 }: {
   items: ActivityItem[];
   status: ActivityStatus;
   period: ReportsPeriod;
+  family: ActivityFamily;
   now: Date;
   truncated?: boolean;
 }) {
   return (
     <div data-activity-inbox="">
-      <PageHeader title={ACTIVITY_PAGE.title} subtitle={ACTIVITY_PAGE.subtitle} />
+      <PageHeader
+        title={ACTIVITY_PAGE.title}
+        subtitle={ACTIVITY_PAGE.subtitle}
+        actions={
+          <Link
+            href={ACTIVITY_PREFS_HREF}
+            aria-label={ACTIVITY_PAGE.prefs}
+            data-activity-prefs=""
+            className={HOUSE_THEME_TOGGLE_CLASS}
+          >
+            <Gear
+              className={PHOSPHOR_CHROME_ICON_CLASS}
+              weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
+            />
+          </Link>
+        }
+      />
 
       <div data-activity-filters="" className={cn("flex flex-col pb-6", REPORTS_RELATED_GAP_CLASS)}>
         <SegmentedTrack
@@ -72,7 +99,7 @@ export function ActivityInbox({
             return (
               <Link
                 key={key}
-                href={activityHref({ status: key, period: period.key })}
+                href={activityHref({ status: key, period: period.key, family })}
                 aria-pressed={on}
                 data-segmented-item=""
                 data-activity-status-chip={key}
@@ -86,6 +113,34 @@ export function ActivityInbox({
             );
           })}
         </SegmentedTrack>
+        <div data-activity-family-scroll="" className={ACTIVITY_FAMILY_SCROLL_CLASS}>
+          <SegmentedTrack
+            activeIndex={ACTIVITY_FAMILIES.indexOf(family)}
+            persistKey={SEGMENTED_TRACK_PERSIST.activityFamily}
+            trackClass={DASHBOARD_TOP_PILL_CLUSTER_CLASS}
+            thumbClass={DASHBOARD_TOP_PILL_THUMB_CLASS}
+            data-activity-family=""
+          >
+            {ACTIVITY_FAMILIES.map((key) => {
+              const on = family === key;
+              return (
+                <Link
+                  key={key}
+                  href={activityHref({ status, period: period.key, family: key })}
+                  aria-pressed={on}
+                  data-segmented-item=""
+                  data-activity-family-chip={key}
+                  className={cn(
+                    DASHBOARD_TOP_PILL_BUTTON_CLASS,
+                    on ? DASHBOARD_TOP_PILL_BUTTON_ON_CLASS : DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
+                  )}
+                >
+                  {activityFamilyLabel(key)}
+                </Link>
+              );
+            })}
+          </SegmentedTrack>
+        </div>
         <SegmentedTrack
           activeIndex={REPORTS_PERIOD_PRESETS.findIndex((p) => p.grain === period.kind)}
           persistKey={SEGMENTED_TRACK_PERSIST.activityPeriod}
@@ -99,7 +154,7 @@ export function ActivityInbox({
             return (
               <Link
                 key={preset.grain}
-                href={activityHref({ status, period: key })}
+                href={activityHref({ status, period: key, family })}
                 aria-pressed={on}
                 data-segmented-item=""
                 data-activity-period-chip={preset.grain}

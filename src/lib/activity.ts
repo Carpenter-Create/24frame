@@ -1,6 +1,11 @@
 import { HOUSE_THEME_TOGGLE_CLASS } from "@/lib/house-lead-chrome";
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
 import { NOTIFICATION_EMAIL, type NotificationKind } from "@/lib/notifications";
+import {
+  NOTIFICATION_PREFS,
+  notificationPrefFamilyForKind,
+  type NotificationPrefFamilyId,
+} from "@/lib/notification-prefs";
 import { PRODUCT_NAME } from "@/lib/product";
 import {
   REPORTS_PERIOD_ALL,
@@ -8,24 +13,37 @@ import {
   parseReportsPeriod,
   type ReportsPeriod,
 } from "@/lib/reports";
+import { SETTINGS } from "@/lib/settings";
 import { socialRelativeTime } from "@/lib/social";
 import { aggregationPath } from "@/lib/workspace";
 
 // Activity is the durable account-alert log. One feed: notifications.
 // Open = unread. Done = read. Complete = Done = read — one state.
 // Not Messages. Not Ask 24Frame AI. Not /attention catalog findings.
-// Desktop popover / phone house sheet is Open only — no All / Unread /
-// Resolved tabs. Row body links to the item. X marks done. No View /
-// Done / Mark all. Copy lives here, not JSX.
+// Bell navigates here (phone + desktop). Category chips are the prefs
+// families. Row body links to the item. X marks done. No View / Done
+// / Mark all. Copy lives here, not JSX.
 
 export const ACTIVITY_HREF = aggregationPath("activity");
+export const ACTIVITY_PREFS_HREF = SETTINGS.notificationsHref;
 export const ACTIVITY_BELL_OPEN_CAP = 5;
+
+export const ACTIVITY_FAMILY_ALL = "all" as const;
+
+export const ACTIVITY_FAMILIES = [
+  ACTIVITY_FAMILY_ALL,
+  ...(Object.keys(NOTIFICATION_PREFS.groups) as NotificationPrefFamilyId[]),
+] as const;
+
+export type ActivityFamily = (typeof ACTIVITY_FAMILIES)[number];
 
 export const ACTIVITY_PAGE = {
   title: "Activity",
   subtitle: `Account alerts from ${PRODUCT_NAME}.`,
   open: "Open",
   done: "Done",
+  all: "All",
+  prefs: "Notification preferences",
   dismiss: "Mark done",
   viewAll: "View all activity",
   emptyOpen: "Nothing open.",
@@ -36,6 +54,10 @@ export const ACTIVITY_PAGE = {
   close: "Close activity",
   navAria: "Activity",
 } as const;
+
+// Family chips share house segmented SoT. Phone may scroll the row
+// so labels stay whole. Never ellipsis.
+export const ACTIVITY_FAMILY_SCROLL_CLASS = "no-scrollbar overflow-x-auto";
 
 // House circular icon hit + soft ghost wash on hover / open.
 // Phone hug lives on HOUSE_HEADER_TRAILING_HIT_CLASS (via theme
@@ -74,28 +96,56 @@ export function parseActivityStatus(raw: string | string[] | undefined): Activit
   return value === "done" ? "done" : "open";
 }
 
+export function parseActivityFamily(raw: string | string[] | undefined): ActivityFamily {
+  const value = typeof raw === "string" ? raw : undefined;
+  if (value && value !== ACTIVITY_FAMILY_ALL && value in NOTIFICATION_PREFS.groups) {
+    return value as ActivityFamily;
+  }
+  return ACTIVITY_FAMILY_ALL;
+}
+
+export function activityFamilyForKind(kind: NotificationKind): NotificationPrefFamilyId {
+  return notificationPrefFamilyForKind(kind);
+}
+
+export function activityFamilyLabel(family: ActivityFamily): string {
+  if (family === ACTIVITY_FAMILY_ALL) return ACTIVITY_PAGE.all;
+  return NOTIFICATION_PREFS.groups[family];
+}
+
 export function activityHref(input: {
   status?: ActivityStatus;
   period?: string | null;
+  family?: ActivityFamily;
 }): string {
   const params = new URLSearchParams();
   if (input.status === "done") params.set("status", "done");
   if (input.period && input.period !== REPORTS_PERIOD_ALL) {
     params.set("period", input.period);
   }
+  if (input.family && input.family !== ACTIVITY_FAMILY_ALL) {
+    params.set("family", input.family);
+  }
   const query = params.toString();
   return query ? `${ACTIVITY_HREF}?${query}` : ACTIVITY_HREF;
 }
 
-export function filterActivityItems<T extends Pick<ActivityItem, "unread" | "created_at">>(
+export function filterActivityItems<
+  T extends Pick<ActivityItem, "unread" | "created_at" | "kind">,
+>(
   items: readonly T[],
   status: ActivityStatus,
   period: ReportsPeriod,
+  family: ActivityFamily = ACTIVITY_FAMILY_ALL,
 ): T[] {
   const open = status === "open";
   return items.filter((item) => {
     if (isActivityOpen(item) !== open) return false;
-    return isoInReportsPeriod(item.created_at, period);
+    if (!isoInReportsPeriod(item.created_at, period)) return false;
+    if (family !== ACTIVITY_FAMILY_ALL && activityFamilyForKind(item.kind) !== family) {
+      return false;
+    }
+    return true;
   });
 }
 
