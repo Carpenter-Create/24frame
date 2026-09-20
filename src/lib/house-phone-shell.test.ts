@@ -531,6 +531,7 @@ describe("phone app-shell IA A — dest dock + header workspace sheet", () => {
     expect(shellSrc).toContain("chrome={chrome}");
     expect(phoneAppShellSrc).toContain("PhoneDockFromChrome");
     expect(phoneAppShellSrc).toContain("data.isGcStaff");
+    expect(phoneAppShellSrc).toContain("clampWorkspaceMode");
     expect(shellSrc).not.toContain("SocialMobileTabBar");
     expect(shellSrc).not.toContain("HousePhoneDestChips");
     expect(shellSrc).toContain("HOUSE_PHONE_BOTTOM_NAV_PAD_CLASS");

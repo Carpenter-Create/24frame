@@ -19,7 +19,8 @@
 // /staff/*. Client Dashboard / Titles / Attention / Reports stay
 // /aggregation/*. Old aggregation queue/avails/channels/gc doors 404 —
 // no leftover redirect SoT, no dual nav hrefs. Staff is
-// switcher-visible only for isGcStaff.
+// switcher-visible only for isGcStaff. Members never see Staff /
+// Team / Ops / GC_NAV. A forged staff cookie is clamped off.
 //
 // Education: member browse/consume and staff CMS share the /education
 // prefix. Role gates chrome, not a parallel product. Member land is

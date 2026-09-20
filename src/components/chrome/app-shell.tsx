@@ -116,10 +116,7 @@ export function AppShell({
   const cookiesApplied = useRef(false);
   const collapseTouched = useRef(false);
   const pathname = usePathname();
-  const workspace = clampWorkspaceMode(
-    resolveWorkspaceMode(pathname, workspaceCookie),
-    isGcStaff,
-  );
+  const workspace = resolveWorkspaceMode(pathname, workspaceCookie);
   const applyChromeCookies = useCallback(
     (next: { defaultCollapsed: boolean; defaultWorkspace: WorkspaceMode }) => {
       if (cookiesApplied.current) return;
@@ -444,10 +441,24 @@ function HouseLeadChromeSlot({
   accountMenu: React.ReactNode;
 }) {
   if (!chrome) {
-    return <HouseLeadChrome isGcStaff={isGcStaff} {...props} />;
+    return (
+      <HouseLeadChrome
+        isGcStaff={isGcStaff}
+        {...props}
+        workspace={clampWorkspaceMode(props.workspace, isGcStaff)}
+      />
+    );
   }
   return (
-    <Suspense fallback={<HouseLeadChrome isGcStaff={isGcStaff} {...props} />}>
+    <Suspense
+      fallback={
+        <HouseLeadChrome
+          isGcStaff={isGcStaff}
+          {...props}
+          workspace={clampWorkspaceMode(props.workspace, isGcStaff)}
+        />
+      }
+    >
       <HouseLeadChromeFromChrome chrome={chrome} {...props} />
     </Suspense>
   );
@@ -469,7 +480,13 @@ function HouseLeadChromeFromChrome({
   accountMenu: React.ReactNode;
 }) {
   const data = use(chrome);
-  return <HouseLeadChrome isGcStaff={data.isGcStaff} {...props} />;
+  return (
+    <HouseLeadChrome
+      isGcStaff={data.isGcStaff}
+      {...props}
+      workspace={clampWorkspaceMode(props.workspace, data.isGcStaff)}
+    />
+  );
 }
 
 function SideNavSlot({
@@ -488,7 +505,7 @@ function SideNavSlot({
       <SideNav
         isGcStaff={isGcStaff}
         collapsed={collapsed}
-        workspace={workspace}
+        workspace={clampWorkspaceMode(workspace, isGcStaff)}
       />
     );
   }
@@ -498,7 +515,7 @@ function SideNavSlot({
         <SideNav
           isGcStaff={isGcStaff}
           collapsed={collapsed}
-          workspace={workspace}
+          workspace={clampWorkspaceMode(workspace, isGcStaff)}
         />
       }
     >
@@ -525,7 +542,7 @@ function SideNavFromChrome({
     <SideNav
       isGcStaff={data.isGcStaff}
       collapsed={collapsed}
-      workspace={workspace}
+      workspace={clampWorkspaceMode(workspace, data.isGcStaff)}
     />
   );
 }
