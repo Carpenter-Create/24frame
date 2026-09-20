@@ -7,7 +7,6 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
   type ComponentProps,
   type ReactNode,
@@ -106,11 +105,8 @@ export function AskAiOverlayProvider({ children }: { children: ReactNode }) {
     rememberAskAiReturnPath(pathname);
   }, [pathname]);
 
-  const openRef = useRef(false);
-
   const openAskAi = useCallback(
     (threadId?: string | null) => {
-      openRef.current = true;
       setExpanded(false);
       const href = askAiOverlayHref(pathname, currentAskAiSearch(), threadId);
       setOptimistic(askAiStateFromHref(href));
@@ -120,7 +116,6 @@ export function AskAiOverlayProvider({ children }: { children: ReactNode }) {
   );
 
   const closeAskAi = useCallback(() => {
-    openRef.current = false;
     setExpanded(false);
     setOptimistic({ open: false, threadId: null });
     router.replace(askAiCloseHref(pathname, currentAskAiSearch()));
@@ -135,12 +130,9 @@ export function AskAiOverlayProvider({ children }: { children: ReactNode }) {
 
   const toggleAskAi = useCallback(
     (threadId?: string | null) => {
-      toggleAskAiOverlay(
-        openRef.current || askAiChromeOpen(optimistic),
-        openAskAi,
-        closeAskAi,
-        threadId,
-      );
+      // Live chrome open only. A sticky ref stays true after Back /
+      // in-shell navigation drops ?ai=1 and blocks reopen.
+      toggleAskAiOverlay(askAiChromeOpen(optimistic), openAskAi, closeAskAi, threadId);
     },
     [closeAskAi, openAskAi, optimistic],
   );

@@ -82,6 +82,7 @@ import {
   askAiOverlayHref,
   askAiOverlayPhoneClass,
   fireAskAiOpenThen,
+  toggleAskAiOverlay,
 } from "@/lib/ask-ai-overlay";
 import { ASK_GLOBEE } from "@/lib/ask-globee";
 import { HouseLeadChrome } from "./house-lead-chrome";
@@ -189,8 +190,13 @@ describe("AskAiOverlay", () => {
     navigation.replace.mockClear();
 
     let toggleAskAi: ((threadId?: string | null) => void) | undefined;
+    let openAskAi: ((threadId?: string | null) => void) | undefined;
+    let closeAskAi: (() => void) | undefined;
     function BindHeaderToggle() {
-      toggleAskAi = useAskAiOverlay().toggleAskAi;
+      const overlay = useAskAiOverlay();
+      toggleAskAi = overlay.toggleAskAi;
+      openAskAi = overlay.openAskAi;
+      closeAskAi = overlay.closeAskAi;
       return createElement(AskAssistantHeaderLink);
     }
 
@@ -208,10 +214,18 @@ describe("AskAiOverlay", () => {
     expect(navigation.push).toHaveBeenCalledWith("/home?ai=1");
     expect(navigation.replace).not.toHaveBeenCalled();
 
-    toggleAskAi?.();
+    toggleAskAiOverlay(true, (id) => openAskAi?.(id), () => closeAskAi?.());
     expect(navigation.push).toHaveBeenCalledTimes(1);
     expect(navigation.replace).toHaveBeenCalledTimes(1);
     expect(navigation.replace).toHaveBeenCalledWith("/home");
+
+    navigation.search = "";
+    renderToStaticMarkup(
+      createElement(AskAiOverlayProvider, null, createElement(BindHeaderToggle)),
+    );
+    toggleAskAi?.();
+    expect(navigation.push).toHaveBeenCalledTimes(2);
+    expect(navigation.push).toHaveBeenLastCalledWith("/home?ai=1");
 
     navigation.search = "ai=1";
     const open = renderToStaticMarkup(
@@ -224,7 +238,8 @@ describe("AskAiOverlay", () => {
 
     const overlaySrc = readFileSync(new URL("./ask-ai-overlay.tsx", import.meta.url), "utf8");
     expect(overlaySrc).toContain("aria-pressed={toggle ? open : undefined}");
-    expect(overlaySrc).toContain("toggleAskAiOverlay");
+    expect(overlaySrc).toContain("toggleAskAiOverlay(askAiChromeOpen(optimistic)");
+    expect(overlaySrc).not.toContain("openRef");
   });
 
   it("opens from chrome, Home teaser, and phone sheet onto the same overlay — never /messages", () => {

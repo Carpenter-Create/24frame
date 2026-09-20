@@ -200,6 +200,9 @@ describe("ask AI overlay URL", () => {
     expect(toggleOrder).toEqual(["open", "close"]);
     expect(askAiChromeOpen({ open: true, threadId: null })).toBe(true);
     expect(askAiChromeOpen({ open: false, threadId: null })).toBe(false);
+    expect(askAiChromeOpen(null)).toBe(false);
+    toggleAskAiOverlay(false, () => toggleOrder.push("reopen"), () => toggleOrder.push("stale-close"));
+    expect(toggleOrder).toEqual(["open", "close", "reopen"]);
     expect(isAskAiDesktopViewport(() => ({ matches: false }))).toBe(false);
     expect(isAskAiDesktopViewport(() => ({ matches: true }))).toBe(true);
   });
