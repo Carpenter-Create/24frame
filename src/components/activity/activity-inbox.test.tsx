@@ -99,6 +99,7 @@ describe("ActivityInbox", () => {
     expect(inboxSrc).not.toContain("activityStatus");
     expect(inboxSrc).not.toContain("activityPeriod");
     expect(inboxSrc).not.toContain("data-activity-status");
+    expect(inboxSrc).toContain("ActivityFeedRow");
     expect(inboxSrc).toContain("ActivityFamilyChips");
     expect(chipsSrc).toContain("SEGMENTED_TRACK_PERSIST.activityFamily");
     expect(chipsSrc).toContain("({ selectedIndex })");

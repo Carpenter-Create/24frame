@@ -7,14 +7,21 @@ import { cn } from "@/lib/cn";
 
 export const FORM_CONTROL_TEXT_CLASS = "t-control";
 
+// Calm house focus for every search / text field. Hairline ink —
+// never Sporty Blue, never a thick accent ring. Buttons and links
+// keep the global :focus-visible accent in globals.css.
+// One primitive: box + bare both consume this. No per-surface fork.
+export const FORM_CONTROL_FOCUS_CLASS =
+  "outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0";
+
 export const FORM_CONTROL_BOX_CLASS =
-  "w-full rounded-[var(--radius-sm)] border border-hairline bg-surface px-3 py-2 text-ink outline-none transition-colors placeholder:text-ink-3 focus:border-accent";
+  `w-full rounded-[var(--radius-sm)] border border-hairline bg-surface px-3 py-2 text-ink ${FORM_CONTROL_FOCUS_CLASS} transition-colors placeholder:text-ink-3 focus:border-ink-3`;
 
 // House search / in-pill fields. Caret is ink — never Sporty Blue
-// (browser default / accent-color). No accent focus ring or thick
-// blue rectangle. Box fields keep focus:border-accent.
+// (browser default / accent-color). Focus is the same calm SoT;
+// the pill is the chrome, so the field itself stays borderless.
 export const FORM_CONTROL_BARE_CLASS =
-  "min-w-0 bg-transparent text-ink caret-ink accent-ink outline-none ring-0 focus:border-transparent focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 placeholder:text-ink-3";
+  `min-w-0 bg-transparent text-ink caret-ink accent-ink ${FORM_CONTROL_FOCUS_CLASS} focus:border-transparent placeholder:text-ink-3`;
 
 export type FormControlVariant = "box" | "bare";
 

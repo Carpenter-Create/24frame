@@ -24,7 +24,8 @@ describe("house form Select SoT", () => {
   it("keeps the closed field on the house input box", () => {
     expect(HOUSE_FORM_SELECT_TRIGGER_CLASS).toContain(FORM_CONTROL_TEXT_CLASS);
     expect(HOUSE_FORM_SELECT_TRIGGER_CLASS).toContain(FORM_CONTROL_BOX_CLASS);
-    expect(HOUSE_FORM_SELECT_TRIGGER_CLASS).toContain("focus:border-accent");
+    expect(HOUSE_FORM_SELECT_TRIGGER_CLASS).toContain("focus:border-ink-3");
+    expect(HOUSE_FORM_SELECT_TRIGGER_CLASS).not.toContain("focus:border-accent");
     expect(HOUSE_FORM_SELECT_TRIGGER_CLASS).not.toContain("bg-ink");
     expect(HOUSE_FORM_SELECT_CHEVRON_CLASS).toBe(HOUSE_PAGE_SELECT_CHEVRON_CLASS);
   });

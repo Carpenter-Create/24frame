@@ -15,6 +15,7 @@ import { presignSocialMediaPut } from "@/lib/s3-social-media";
 import { normalizeSocialCategory } from "@/lib/social-categories";
 import { storyInsertRow, storyViewInsertRow } from "@/lib/social-stories";
 import { ensureOwnSocialProfile, isProfileUniqueViolation } from "@/lib/social-profile";
+import { handleTakenError, lookupHandleCollision } from "@/lib/social-handle-taken";
 import { SOCIAL_DM_ADD_BATCH_LIMIT } from "@/lib/social-dm-bounds";
 import {
   followInsertRow,
@@ -72,6 +73,10 @@ export async function createSocialProfile(formData: FormData): Promise<ActionRes
   if (required) return { error: required };
   const handle = normalizeHandle(raw);
   if (!handle) return { error: SOCIAL.profile.handleInvalid };
+
+  const collision = await lookupHandleCollision(supabase, handle);
+  const taken = handleTakenError({ ownerId: user.id, collisionId: collision?.id ?? null });
+  if (taken) return { error: taken };
 
   const profile = await ensureOwnSocialProfile(supabase, user);
   const displayName =

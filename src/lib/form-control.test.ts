@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
   FORM_CONTROL_BARE_CLASS,
   FORM_CONTROL_BOX_CLASS,
+  FORM_CONTROL_FOCUS_CLASS,
   FORM_CONTROL_TEXT_CLASS,
   formControlClass,
 } from "./form-control";
@@ -71,12 +72,21 @@ describe("form-control SoT", () => {
     expect(FORM_CONTROL_BARE_CLASS).not.toContain("t-body");
     expect(FORM_CONTROL_BARE_CLASS).toContain("caret-ink");
     expect(FORM_CONTROL_BARE_CLASS).toContain("accent-ink");
-    expect(FORM_CONTROL_BARE_CLASS).toContain("focus:outline-none");
-    expect(FORM_CONTROL_BARE_CLASS).toContain("focus:ring-0");
+    expect(FORM_CONTROL_FOCUS_CLASS).toContain("focus:outline-none");
+    expect(FORM_CONTROL_FOCUS_CLASS).toContain("focus:ring-0");
+    expect(FORM_CONTROL_FOCUS_CLASS).toContain("focus-visible:outline-none");
+    expect(FORM_CONTROL_FOCUS_CLASS).toContain("focus-visible:ring-0");
+    expect(FORM_CONTROL_FOCUS_CLASS).not.toContain("accent");
+    expect(FORM_CONTROL_BOX_CLASS).toContain(FORM_CONTROL_FOCUS_CLASS);
+    expect(FORM_CONTROL_BARE_CLASS).toContain(FORM_CONTROL_FOCUS_CLASS);
     expect(FORM_CONTROL_BARE_CLASS).not.toContain("caret-accent");
     expect(FORM_CONTROL_BARE_CLASS).not.toContain("focus:border-accent");
     expect(FORM_CONTROL_BARE_CLASS).not.toContain("focus:ring-accent");
-    expect(FORM_CONTROL_BOX_CLASS).toContain("focus:border-accent");
+    expect(FORM_CONTROL_BOX_CLASS).toContain("focus:border-ink-3");
+    expect(FORM_CONTROL_BOX_CLASS).not.toContain("focus:border-accent");
+    expect(FORM_CONTROL_BOX_CLASS).not.toContain("focus:ring-accent");
+    expect(globals).toContain(":focus-visible:not(input):not(textarea):not(select)");
+    expect(globals).not.toMatch(/(?:^|\n):focus-visible\s*\{/);
   });
 
   it("puts Input and Textarea on the shared class so future fields inherit", () => {

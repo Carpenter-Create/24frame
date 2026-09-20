@@ -59,7 +59,7 @@ export async function loadMyNotifications(
   return splitProbe(data as MyNotificationRow[] | null, limit);
 }
 
-/** Last five open alerts for the header bell. Same feed as /activity. */
+/** Last five open alerts for the header bell peek. Same feed as /activity. */
 export async function loadActivityBellItems(
   supabase: ServerClient,
 ): Promise<MyNotificationRow[]> {

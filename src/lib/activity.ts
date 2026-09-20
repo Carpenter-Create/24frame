@@ -1,4 +1,5 @@
 import { HOUSE_THEME_TOGGLE_CLASS } from "@/lib/house-lead-chrome";
+import { APP_SHEET_SURFACE_CLASS } from "@/lib/house-sheet";
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
 import { NOTIFICATION_EMAIL, type NotificationKind } from "@/lib/notifications";
 import {
@@ -7,6 +8,7 @@ import {
   type NotificationPrefFamilyId,
 } from "@/lib/notification-prefs";
 import { PRODUCT_NAME } from "@/lib/product";
+import { REPORTS_USER_PANEL_CLASS } from "@/lib/reports-craft";
 import {
   SETTINGS,
   SETTINGS_EDIT_HELPER_CLASS,
@@ -17,12 +19,13 @@ import {
 import { socialRelativeTime } from "@/lib/social";
 import { HOME_ROOT } from "@/lib/workspace";
 
-// Activity is the live uncleared-alert feed. One feed: notifications.
+// Notifications is the live uncleared-alert feed. One feed.
 // Default: uncleared only, newest first. X clears a row. Cleared
 // items leave this feed. No Open / Done / Cleared control. Category
 // chips are the only filter (prefs families). Not Messages. Not Ask
-// 24Frame AI. Not /attention catalog findings. Bell navigates here.
-// Copy lives here, not JSX.
+// 24Frame AI. Not /attention catalog findings. Copy lives here,
+// not JSX. User-facing chrome is Notifications — never Activity.
+// Route stays /activity (one door).
 //
 // Adam lock 2026-09-19: chrome-level /activity. Account alerts
 // span Aggregation · Reporting · Social · Education · Account.
@@ -35,6 +38,8 @@ import { HOME_ROOT } from "@/lib/workspace";
 // Hub Back consumes SettingsHubBackLink — history when the
 // referrer is in-app; Home /home only as cold-open fallback.
 // Never hard-link Aggregation.
+// Adam lock 2026-09-20 (supersedes bell → full page): header bell
+// opens a peek of the last five open rows. View all opens this page.
 
 export const ACTIVITY_HREF = "/activity";
 export const ACTIVITY_PREFS_HREF = SETTINGS.notificationsHref;
@@ -50,7 +55,7 @@ export const ACTIVITY_FAMILIES = [
 export type ActivityFamily = (typeof ACTIVITY_FAMILIES)[number];
 
 export const ACTIVITY_PAGE = {
-  title: "Activity",
+  title: "Notifications",
   subtitle: `Account alerts from ${PRODUCT_NAME}.`,
   back: "Back",
   homeHref: HOME_ROOT,
@@ -59,12 +64,12 @@ export const ACTIVITY_PAGE = {
   dismiss: "Mark done",
   empty: "You're all caught up.",
   emptyHint: "New alerts will show here.",
-  viewAll: "View all activity",
+  viewAll: "View all",
   truncated: `Showing the first ${UNPAGINATED_MAX} alerts. More exist — this list is not complete.`,
-  bellLabel: "Activity",
-  bellEmpty: "Nothing open.",
-  close: "Close activity",
-  navAria: "Activity",
+  bellLabel: "Notifications",
+  bellEmpty: "You're all caught up.",
+  close: "Close notifications",
+  navAria: "Notifications",
 } as const;
 
 export const ACTIVITY_PAGE_CLASS = SETTINGS_PANE_CLASS;
@@ -89,6 +94,16 @@ export const ACTIVITY_BELL_TRIGGER_CLASS =
   `${HOUSE_THEME_TOGGLE_CLASS} relative hover:bg-surface-muted`;
 export const ACTIVITY_BELL_TRIGGER_OPEN_CLASS = "bg-surface-muted";
 export const ACTIVITY_BELL_OPEN_DOT_CLASS = "size-2 shrink-0 rounded-full bg-accent";
+// Desktop peek reuses the house panel already used by Reports scope.
+// Phone peek is the house app-sheet surface. Do not fork a third panel.
+export const ACTIVITY_BELL_POPOVER_CLASS = REPORTS_USER_PANEL_CLASS;
+export const ACTIVITY_BELL_SHEET_HOST_CLASS =
+  "fixed inset-0 z-50 flex items-end md:hidden";
+export const ACTIVITY_BELL_SHEET_SURFACE_CLASS = APP_SHEET_SURFACE_CLASS;
+export const ACTIVITY_BELL_VIEW_ALL_CLASS =
+  "block border-t border-hairline px-[var(--space-4)] py-[var(--space-3)] t-body-sm text-ink";
+export const ACTIVITY_BELL_LIST_CLASS =
+  "flex max-h-80 flex-col gap-2 overflow-y-auto px-[var(--space-3)] py-[var(--space-3)]";
 
 // House nouns — Titles FilmSlate, Deliveries PaperPlaneTilt.
 export const ACTIVITY_KIND_ICON = {
