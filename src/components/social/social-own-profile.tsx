@@ -51,6 +51,7 @@ function SocialProfileOptimisticIdentity({
           topics={view.topics}
           websiteUrl={view.websiteUrl}
           imdbUrl={view.imdbUrl}
+          stats={{ posts: 0, followers: 0, following: 0 }}
         />
         {view.welcomeVideoUrl ? <SocialWelcomeVideo src={view.welcomeVideoUrl} /> : null}
       </div>
