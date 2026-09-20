@@ -75,14 +75,11 @@ describe("Social Create", () => {
     expect(html).toContain("data-social-create");
     expect(html).toContain(SOCIAL.create.title);
     expect(html).toContain("data-social-create-form");
-    expect(html).toContain(SOCIAL.create.text);
-    expect(html).toContain(SOCIAL.create.photo);
-    expect(html).toContain(SOCIAL.create.video);
-    expect(html).toContain(SOCIAL.create.dropEmpty);
+    expect(html).toContain('data-social-create-kind="text"');
+    expect(html).toContain("data-social-create-author");
+    expect(html).not.toContain("data-social-create-kinds");
+    expect(html).not.toContain("data-social-create-well");
     expect(html).toContain("data-social-for-you");
-    expect(html).toContain('data-social-icon="image"');
-    expect(html).toContain('data-social-icon="film-strip"');
-    expect(html).toContain('data-social-icon="text-t"');
     expect(html).not.toContain("Riley Okonkwo");
     expect(html).not.toContain("MicroDramaPilot");
     expect(html).not.toContain("data-social-lenses");

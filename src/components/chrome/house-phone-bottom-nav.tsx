@@ -10,7 +10,7 @@ import {
 } from "@/components/chrome/use-house-nav-pending";
 import { prefetchHrefList } from "@/lib/house-nav-pending";
 
-import { SocialCreateMenu } from "@/components/social/social-create-menu";
+import { SocialCreateSheet } from "@/components/social/social-create-sheet";
 import { cn } from "@/lib/cn";
 import {
   HOUSE_PHONE_BOTTOM_NAV,
@@ -145,9 +145,8 @@ export function HousePhoneBottomNav({
             );
             if (housePhoneDestIsCreate(item)) {
               return (
-                <SocialCreateMenu
+                <SocialCreateSheet
                   key={item.href}
-                  align="center"
                   trigger={
                     <button
                       type="button"
@@ -158,7 +157,7 @@ export function HousePhoneBottomNav({
                       data-house-phone-bottom-nav-item-active={active ? "" : undefined}
                       data-house-phone-dest={item.label}
                       data-house-phone-dest-create=""
-                      data-social-create-menu="dest"
+                      data-social-create-sheet="dest"
                       className={destClass}
                     >
                       {chip}

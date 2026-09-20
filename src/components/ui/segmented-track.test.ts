@@ -22,10 +22,7 @@ const CONSUMERS = [
   "src/components/news/news-sources-filter.tsx",
 ] as const;
 
-const CHOICE_MENUS = [
-  ...CONSUMERS,
-  "src/components/social/social-forms.tsx",
-] as const;
+const CHOICE_MENUS = CONSUMERS;
 
 describe("SegmentedTrack slide SoT", () => {
   it("slides left/width, restores a cached box across remount, and commits the click before the route", () => {

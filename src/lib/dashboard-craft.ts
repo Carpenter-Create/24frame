@@ -10,8 +10,8 @@
 // Page title is black sentence-case. Section titles are t-heading ink.
 // View-alt selected is Sporty Blue glyph weight, not a filled chip.
 // Status badges stay ink. Exclusive choice menus (dest chips, news
-// source lens, create kinds) are house SegmentedTrack, not gapped
-// HOUSE_FILTER_PILL fill.
+// source lens) are house SegmentedTrack, not gapped HOUSE_FILTER_PILL
+// fill. Social create kinds live on the Create sheet tiles.
 
 import {
   HOUSE_CARD_PAD,

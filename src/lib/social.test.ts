@@ -336,6 +336,8 @@ describe("profile opt-in", () => {
     expect(SOCIAL_ROUTES.createLive).toBe("/social/create/live");
     expect(SOCIAL.create.write).toBe("Write");
     expect(SOCIAL.create.goLive).toBe("Go live");
+    expect(SOCIAL.create.close).toBe("Close");
+    expect(SOCIAL.create.title).toBe("Create");
     expect(socialCreateWellCopy("photo", false)).toEqual({
       title: SOCIAL.create.dropEmpty,
       hint: SOCIAL.create.dropEmptyHint,

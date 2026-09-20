@@ -167,8 +167,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).toContain('icon="users"');
     expect(home).toContain("SocialHomeTabs");
     expect(composer).toContain("data-social-home-composer");
-    expect(composer).toContain("data-social-create-menu");
-    expect(composer).toContain("SocialCreateMenu");
+    expect(composer).toContain("data-social-create-sheet");
+    expect(composer).toContain("SocialCreateSheet");
     expect(composer).toContain('socialCreateHref("text")');
     expect(composer).toContain("socialComposerPrompt(authorName)");
     expect(composer).toContain("SocialAvatar");

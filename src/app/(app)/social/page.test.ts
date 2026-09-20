@@ -179,7 +179,7 @@ describe("Social home", () => {
     expect(html).toContain(SOCIAL.home.title);
     expect(html).toContain("24Frame");
     expect(html).toContain("data-social-home-composer");
-    expect(html).toContain("data-social-create-menu");
+    expect(html).toContain("data-social-create-sheet");
     expect(html).toContain('data-social-icon="plus"');
     expect(html).toContain("/social/create?kind=text");
     expect(html).toContain(SOCIAL.create.title);

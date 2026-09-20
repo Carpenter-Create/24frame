@@ -41,7 +41,7 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     );
     expect(html).toContain("data-social-home-composer");
     expect(html).toContain("data-social-composer-prompt");
-    expect(html).toContain("data-social-create-menu");
+    expect(html).toContain("data-social-create-sheet");
     expect(html).toContain(SOCIAL_COMPOSER_CLASS);
     expect(html).toContain(SOCIAL_COMPOSER_FIELD_CLASS);
     expect(html).toContain(SOCIAL_COMPOSER_MEDIA_CLASS);
