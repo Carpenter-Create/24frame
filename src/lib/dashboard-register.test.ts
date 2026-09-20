@@ -7,6 +7,8 @@ import {
   DashboardRankedBars,
   DashboardRankedRows,
   DashboardTopPerforming,
+  DashboardTopPlatforms,
+  DashboardTopTerritories,
   DashboardTopTitles,
 } from "@/components/dashboard/dashboard-ranked";
 import { DashboardViewAll, DashboardViewAlts } from "@/components/dashboard/dashboard-view-alts";
@@ -224,8 +226,33 @@ describe("dashboard register chrome", () => {
     expect(territories).not.toContain("Top territories");
   });
 
-  it("owns Top performing in one section — Titles list default, Territories map", () => {
+  it("renders Top titles, Top platforms, and Top territories as stacked modules", () => {
     const titles = renderToStaticMarkup(
+      createElement(DashboardTopTitles, {
+        items: [
+          {
+            id: "t1",
+            title: "Winter Light",
+            status: "live",
+            created_at: "2026-09-02T00:00:00.000Z",
+            count: 3,
+          },
+        ],
+        periodLabel: "All time",
+        defaultMode: "list",
+      }),
+    );
+    const platforms = renderToStaticMarkup(
+      createElement(DashboardTopPlatforms, {
+        rows: [{ name: "Window A", count: 4 }],
+      }),
+    );
+    const territories = renderToStaticMarkup(
+      createElement(DashboardTopTerritories, {
+        rows: [{ name: "US", count: 4 }],
+      }),
+    );
+    const stack = renderToStaticMarkup(
       createElement(DashboardTopPerforming, {
         titles: [
           {
@@ -241,55 +268,35 @@ describe("dashboard register chrome", () => {
         periodLabel: "All time",
       }),
     );
-    const platforms = renderToStaticMarkup(
-      createElement(DashboardTopPerforming, {
-        titles: [],
-        platforms: [{ name: "Window A", count: 4 }],
-        territories: [{ name: "US", count: 4 }],
-        defaultPill: "platforms",
-      }),
-    );
-    const territories = renderToStaticMarkup(
-      createElement(DashboardTopPerforming, {
-        titles: [],
-        platforms: [{ name: "Window A", count: 4 }],
-        territories: [{ name: "US", count: 4 }],
-        defaultPill: "territories",
-      }),
-    );
-    expect(DASHBOARD_HOME.topPerforming).toBe("Top performing");
-    expect(DASHBOARD_HOME.pillTitles).toBe("Titles");
-    expect(DASHBOARD_HOME.pillPlatforms).toBe("Platforms");
-    expect(DASHBOARD_HOME.pillTerritories).toBe("Territories");
-    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).toBe("text-white");
-    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).not.toContain("text-accent");
-    expect(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS).toBe("text-ink-2");
-    expect(DASHBOARD_TOP_PILL_BUTTON_CLASS).toContain("rounded-full");
-    expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).toContain("rounded-full");
-    expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).toContain("bg-surface-muted");
-    expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).not.toContain("divide-x");
-    expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).not.toContain("border-hairline");
+    expect(DASHBOARD_HOME.topTitles).toBe("Top titles");
+    expect(DASHBOARD_HOME.topPlatforms).toBe("Top platforms");
+    expect(DASHBOARD_HOME.topTerritories).toBe("Top territories");
+    expect(DASHBOARD_HOME.platforms).toBe("Top platforms");
     expect(DASHBOARD_SECTION_TITLE_CLASS).toBe("t-heading text-ink");
     expect(DASHBOARD_SECTION_TITLE_CLASS).not.toContain("t-label");
     expect(DASHBOARD_SECTION_TITLE_CLASS).not.toContain("text-ink-3");
-    for (const html of [titles, platforms, territories]) {
-      expect(html).toContain("data-dashboard-top-performing");
-      expect(html).toContain(DASHBOARD_HOME.topPerforming);
-      expect(html).toContain(`t-heading text-ink">${DASHBOARD_HOME.topPerforming}`);
-      expect(html).not.toContain(`t-label text-ink-3">${DASHBOARD_HOME.topPerforming}`);
-      expect(html).toContain('data-dashboard-top-pill="titles"');
-      expect(html).toContain('data-dashboard-top-pill="platforms"');
-      expect(html).toContain('data-dashboard-top-pill="territories"');
-      expect(html).toContain(DASHBOARD_TOP_PILL_CLUSTER_CLASS);
-      expect(html).toContain(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS);
-      expect(html).toContain(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS);
-      expect(html).toContain("text-accent");
-      expect(html).not.toContain("bg-foreground");
-      expect(html).not.toContain("text-background");
-      expect(html).not.toContain("Top works");
-      expect(html).not.toContain("Top titles");
-      expect(html).not.toContain("Top platforms");
-    }
+    expect(stack).toContain("data-dashboard-top-performing");
+    expect(stack).not.toContain("data-dashboard-top-pills");
+    expect(stack).not.toContain("data-dashboard-top-pill=");
+    expect(stack).not.toContain("data-dashboard-top-pill-active");
+    expect(stack).not.toContain(DASHBOARD_HOME.topPerforming);
+    expect(stack).toContain(`t-heading text-ink">${DASHBOARD_HOME.topTitles}`);
+    expect(stack).toContain(`t-heading text-ink">${DASHBOARD_HOME.topPlatforms}`);
+    expect(stack).toContain(`t-heading text-ink">${DASHBOARD_HOME.topTerritories}`);
+    expect(stack).toContain('data-dashboard-module="top-titles"');
+    expect(stack).toContain('data-dashboard-ranked="platforms"');
+    expect(stack).toContain('data-dashboard-ranked="territories"');
+    expect(stack.indexOf('data-dashboard-module="top-titles"')).toBeLessThan(
+      stack.indexOf('data-dashboard-ranked="platforms"'),
+    );
+    expect(stack.indexOf('data-dashboard-ranked="platforms"')).toBeLessThan(
+      stack.indexOf('data-dashboard-ranked="territories"'),
+    );
+    expect(stack).toContain("Winter Light");
+    expect(stack).toContain("Window A");
+    expect(stack).toContain("data-dashboard-territory-map");
+    expect(stack).not.toContain("Top works");
+    expect(titles).toContain(`t-heading text-ink">${DASHBOARD_HOME.topTitles}`);
     expect(titles).toContain('data-dashboard-view="list"');
     expect(titles).toContain('data-dashboard-ranked-grammar="grade"');
     expect(titles).toContain("data-dashboard-ranked-mark");
@@ -302,10 +309,13 @@ describe("dashboard register chrome", () => {
     expect(titles).toContain("data-dashboard-view-all-arrow");
     expect(titles).toContain('href="/aggregation/titles"');
     expect(titles).not.toContain("Window A");
+    expect(platforms).toContain(`t-heading text-ink">${DASHBOARD_HOME.topPlatforms}`);
     expect(platforms).toContain('data-dashboard-view="list"');
     expect(platforms).toContain("Window A");
     expect(platforms).toContain('data-dashboard-ranked-grammar="grade"');
     expect(platforms).toContain('href="/aggregation/titles"');
+    expect(platforms).not.toContain('data-dashboard-view-alt="map"');
+    expect(territories).toContain(`t-heading text-ink">${DASHBOARD_HOME.topTerritories}`);
     expect(territories).toContain('data-dashboard-view="map"');
     expect(territories).toContain("data-dashboard-territory-map");
     expect(territories).toContain('data-dashboard-territory-scale="overview"');
@@ -314,6 +324,14 @@ describe("dashboard register chrome", () => {
     expect(territories).toContain('data-dashboard-view-alt="map"');
     expect(territories).toContain('data-dashboard-view-alt="list"');
     expect(territories).toContain('data-dashboard-view-alt="bars"');
+    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).toBe("text-white");
+    expect(DASHBOARD_TOP_PILL_BUTTON_ON_CLASS).not.toContain("text-accent");
+    expect(DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS).toBe("text-ink-2");
+    expect(DASHBOARD_TOP_PILL_BUTTON_CLASS).toContain("rounded-full");
+    expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).toContain("rounded-full");
+    expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).toContain("bg-surface-muted");
+    expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).not.toContain("divide-x");
+    expect(DASHBOARD_TOP_PILL_CLUSTER_CLASS).not.toContain("border-hairline");
     expect(DASHBOARD_RANKED_PANE_MIN_HEIGHT_CLASS).toBe(
       "min-h-[calc(340px+2*var(--space-6))]",
     );
@@ -323,35 +341,21 @@ describe("dashboard register chrome", () => {
     expect(DASHBOARD_RANKED_PANE_CLASS).toContain(DASHBOARD_RANKED_PANE_MIN_HEIGHT_CLASS);
     expect(DASHBOARD_MAP_FRAME_CLASS).toContain("min-h-[340px]");
     expect(DASHBOARD_MAP_PAD_CLASS).toBe("p-[var(--space-6)]");
-    for (const html of [titles, platforms, territories]) {
-      expect(html).toContain("data-dashboard-ranked-pane");
-      expect(html).toContain(DASHBOARD_RANKED_PANE_CLASS);
-      expect(html).toContain("[overflow-anchor:none]");
-      expect(html).toContain(DASHBOARD_RANKED_PANE_MIN_HEIGHT_CLASS);
-      expect(html).toMatch(/type="button"[^>]*data-dashboard-top-pill="titles"/);
-      expect(html).toMatch(/type="button"[^>]*data-dashboard-top-pill="platforms"/);
-      expect(html).toMatch(/type="button"[^>]*data-dashboard-top-pill="territories"/);
-      expect(html).not.toMatch(/<a[^>]*data-dashboard-top-pill=/);
-      expect(html).not.toMatch(/data-dashboard-top-pill="[^"]+"[^>]*href=/);
-    }
   });
 
-  it("preserves window scroll when Top performing pills leave the Territories map", () => {
+  it("does not multiplex Titles, Platforms, and Territories behind one pill row", () => {
     const src = readFileSync("src/components/dashboard/dashboard-ranked.tsx", "utf8");
-    const helper = readFileSync("src/lib/dashboard-scroll.ts", "utf8");
-    const css = readFileSync("src/app/globals.css", "utf8");
-    expect(src).toContain("preserveWindowScroll");
-    expect(src).toMatch(/function selectPill[\s\S]*preserveWindowScroll\(\(\) => \{/);
-    expect(src).toMatch(/type="button"[\s\S]*data-dashboard-top-pill=\{id\}/);
-    expect(src).not.toContain("scrollIntoView");
-    expect(src).not.toMatch(
-      /function selectPill\([^)]*\) \{\s*setPill\(next\);\s*setMode\(TOP_PERFORMING_PANES\[next\]\.defaultMode\);/,
-    );
-    expect(helper).toContain("document.documentElement");
-    expect(helper).toContain("root.style.scrollBehavior");
-    expect(helper).toContain("DASHBOARD_SCROLL_SWAP_BEHAVIOR");
-    expect(helper).toContain("requestAnimationFrame");
-    expect(css).toMatch(/html \{\s*height: 100%;\s*scroll-behavior: smooth;/);
+    expect(src).not.toContain("TOP_PERFORMING_PANES");
+    expect(src).not.toContain("selectPill");
+    expect(src).not.toContain("data-dashboard-top-pills");
+    expect(src).not.toContain("data-dashboard-top-pill");
+    expect(src).not.toContain("SEGMENTED_TRACK_PERSIST");
+    expect(src).not.toContain("preserveWindowScroll");
+    expect(src).toContain("export function DashboardTopTitles");
+    expect(src).toContain("export function DashboardTopPlatforms");
+    expect(src).toContain("export function DashboardTopTerritories");
+    expect(src).toContain('defaultMode="list"');
+    expect(src).toContain('defaultMode="map"');
   });
 
   it("gives Top titles list/bars and Territories map/list/bars — 24Frame nouns only", () => {

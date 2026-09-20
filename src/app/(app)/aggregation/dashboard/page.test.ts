@@ -201,29 +201,32 @@ function expectCompanyAdminStructuralDelta(html: string) {
   expect(html).toContain('data-dashboard-module="recent-activity"');
   expect(html).toContain(DASHBOARD_ADMIN.activity);
   expect(html).toContain("data-dashboard-top-performing");
-  expect(html).toContain(DASHBOARD_HOME.topPerforming);
-  expect(html).toContain('data-dashboard-top-pill="titles"');
-  expect(html).toContain('data-dashboard-top-pill="platforms"');
-  expect(html).toContain('data-dashboard-top-pill="territories"');
+  expect(html).toContain(DASHBOARD_HOME.topTitles);
+  expect(html).toContain(DASHBOARD_HOME.topPlatforms);
+  expect(html).toContain(DASHBOARD_HOME.topTerritories);
+  expect(html).not.toContain(DASHBOARD_HOME.topPerforming);
+  expect(html).not.toContain("data-dashboard-top-pills");
+  expect(html).not.toContain('data-dashboard-top-pill="titles"');
+  expect(html).not.toContain('data-dashboard-top-pill="platforms"');
+  expect(html).not.toContain('data-dashboard-top-pill="territories"');
   expect(html).toContain('data-dashboard-module="top-titles"');
   expect(html).toContain("data-dashboard-view-alts");
   expect(html).toContain("data-dashboard-view-all");
   expect(html).toContain("data-dashboard-view-all-arrow");
   expect(html).toContain('data-dashboard-view-alt="list"');
   expect(html).toContain('data-dashboard-view-alt="bars"');
-  expect(html).not.toContain('data-dashboard-view-alt="map"');
+  expect(html).toContain('data-dashboard-view-alt="map"');
   expect(html).toContain('data-dashboard-ranked="platforms"');
   expect(html).toContain("data-dashboard-territory");
   expect(html).toContain('data-dashboard-ranked="territories"');
+  expect(html).toContain("data-dashboard-territory-map");
   expect(html).not.toContain("lg:grid-cols-2");
-  expect(html.indexOf('data-dashboard-top-pill="titles"')).toBeLessThan(
-    html.indexOf('data-dashboard-top-pill="platforms"'),
+  expect(html.indexOf('data-dashboard-module="top-titles"')).toBeLessThan(
+    html.indexOf('data-dashboard-ranked="platforms"'),
   );
-  expect(html.indexOf('data-dashboard-top-pill="platforms"')).toBeLessThan(
-    html.indexOf('data-dashboard-top-pill="territories"'),
+  expect(html.indexOf('data-dashboard-ranked="platforms"')).toBeLessThan(
+    html.indexOf('data-dashboard-ranked="territories"'),
   );
-  expect(html).not.toContain("Top territories");
-  expect(html).toContain(DASHBOARD_HOME.pillTerritories);
   expect(html).toContain(DASHBOARD_HOME.topTitlesEmpty);
   expect(html).toContain("data-dashboard-ranked-empty");
   expect(html).not.toContain("data-dashboard-reports-cta");
@@ -786,13 +789,13 @@ describe("company admin Overview hero", () => {
     );
     expect(html.split('data-dashboard-module="recent-activity"').length - 1).toBe(1);
     expect(html.indexOf("data-dashboard-top-performing")).toBeLessThan(
-      html.indexOf('data-dashboard-top-pill="titles"'),
+      html.indexOf('data-dashboard-module="top-titles"'),
     );
-    expect(html.indexOf('data-dashboard-top-pill="titles"')).toBeLessThan(
-      html.indexOf('data-dashboard-top-pill="platforms"'),
+    expect(html.indexOf('data-dashboard-module="top-titles"')).toBeLessThan(
+      html.indexOf('data-dashboard-ranked="platforms"'),
     );
-    expect(html.indexOf('data-dashboard-top-pill="platforms"')).toBeLessThan(
-      html.indexOf('data-dashboard-top-pill="territories"'),
+    expect(html.indexOf('data-dashboard-ranked="platforms"')).toBeLessThan(
+      html.indexOf('data-dashboard-ranked="territories"'),
     );
     expect(html).toContain("data-dashboard-mobile-stack");
     expect(html).toContain("data-dashboard-title-mobile");
@@ -883,7 +886,10 @@ describe("company admin Overview hero", () => {
     expect(html).toContain("data-dashboard-licensing-empty");
     expect(html).not.toContain("Sample licensing");
     expect(html).toContain("data-dashboard-top-performing");
-    expect(html).toContain(DASHBOARD_HOME.topPerforming);
+    expect(html).toContain(DASHBOARD_HOME.topTitles);
+    expect(html).toContain(DASHBOARD_HOME.topPlatforms);
+    expect(html).toContain(DASHBOARD_HOME.topTerritories);
+    expect(html).not.toContain(DASHBOARD_HOME.topPerforming);
     expectNoCatalogVelocityStrip(html);
     expect(html).not.toContain(DASHBOARD_ADMIN.chartEmpty);
     expect(html).not.toContain(DASHBOARD_HOME.platformsEmpty);

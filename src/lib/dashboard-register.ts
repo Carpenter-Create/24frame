@@ -9,7 +9,7 @@ import type { ReportsCountRow } from "@/lib/reports";
 // (`HeadlineStats` → taller Revenue left, Recent activity glance
 // right — account announcements, not findings — Licensing status
 // full-width nested title→endpoint, `TopWorksCard` → Top titles,
-// `TerritoryMap` → Territories map/list/bars). One feed only. House
+// `TerritoryMap` → Top territories map/list/bars). One feed only. House
 // tokens only — Geist · Sporty Blue · hairline. 24Frame nouns only. No
 // Top works / sources / contributors / Exports. Coinbase quieter than
 // RL flourish.
@@ -17,10 +17,6 @@ import type { ReportsCountRow } from "@/lib/reports";
 export const DASHBOARD_REGISTER_VIEWS = ["map", "list", "bars"] as const;
 
 export type DashboardRegisterView = (typeof DASHBOARD_REGISTER_VIEWS)[number];
-
-export const DASHBOARD_TOP_PILLS = ["titles", "platforms", "territories"] as const;
-
-export type DashboardTopPill = (typeof DASHBOARD_TOP_PILLS)[number];
 
 /** RL TerritoryMap LIST_DEFAULT_LIMIT. */
 export const DASHBOARD_LIST_DEFAULT_LIMIT = 10;

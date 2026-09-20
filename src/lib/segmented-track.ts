@@ -46,7 +46,6 @@ export const SEGMENTED_TRACK_PERSIST = {
   activityPeriod: "activity-period",
   activityFamily: "activity-family",
   reportsPeriod: "reports-period",
-  dashboardRanked: "dashboard-top-pills",
   reportsRanked: "reports-top-pills",
   phoneDest: "phone-dest",
 } as const;

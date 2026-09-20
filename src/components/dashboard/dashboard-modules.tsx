@@ -88,7 +88,12 @@ export function DashboardTitleRows({ items }: { items: readonly ClientHomeJustIn
   );
 }
 
-export { DashboardTopPerforming, DashboardTopTitles } from "@/components/dashboard/dashboard-ranked";
+export {
+  DashboardTopPerforming,
+  DashboardTopPlatforms,
+  DashboardTopTerritories,
+  DashboardTopTitles,
+} from "@/components/dashboard/dashboard-ranked";
 
 export function DashboardDeliveriesAction({ rows }: { rows: readonly DashboardDeliveryRow[] }) {
   return (

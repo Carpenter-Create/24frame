@@ -28,6 +28,8 @@ export const DASHBOARD_HOME = {
   pillTerritories: "Territories",
   topTitles: "Top titles",
   topTitlesEmpty: "No title activity this month yet.",
+  topPlatforms: "Top platforms",
+  topTerritories: "Top territories",
   viewAll: "View all",
   viewList: "List",
   viewBars: "Bars",
