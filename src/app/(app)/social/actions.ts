@@ -60,7 +60,7 @@ import {
   newFollowerNoticeCopy,
   newFollowerSourceRefs,
 } from "@/lib/social-follow";
-import { bustSocialFollowHotCache, bustSocialProfileHotCache } from "@/lib/social-hot-cache";
+import { bustSocialCountsHotCache, bustSocialFollowHotCache, bustSocialProfileHotCache } from "@/lib/social-hot-cache";
 
 type ActionResult = { error?: string };
 
@@ -250,6 +250,8 @@ export async function createSocialPost(formData: FormData): Promise<ActionResult
   );
   if (error) return { error: error.message };
 
+  if (!groupId) await bustSocialCountsHotCache(user.id);
+
   const slug = String(formData.get("group_slug") ?? "").trim();
   revalidatePath(SOCIAL_ROUTES.home);
   revalidatePath(SOCIAL_ROUTES.create);
@@ -288,7 +290,7 @@ export async function markSocialStoryViewed(storyId: string): Promise<void> {
 }
 
 export async function updateSocialBio(formData: FormData): Promise<ActionResult> {
-  const { supabase, profileId } = await ownProfile();
+  const { supabase, profile, profileId } = await ownProfile();
   if (!profileId) return { error: SOCIAL.cta.needProfile };
 
   const bio = normalizeBio(String(formData.get("bio") ?? ""));
@@ -297,7 +299,7 @@ export async function updateSocialBio(formData: FormData): Promise<ActionResult>
   const { error } = await supabase.from("profiles").update({ bio: bio || null }).eq("id", profileId);
   if (error) return { error: error.message };
 
-  await bustSocialProfileHotCache(profileId);
+  await bustSocialProfileHotCache(profileId, [profile?.handle]);
   revalidatePath(SOCIAL_ROUTES.profile);
   revalidatePath(SOCIAL_ROUTES.profileEdit);
   revalidatePath(SOCIAL_ROUTES.profileBio);

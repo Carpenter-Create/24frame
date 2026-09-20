@@ -12,9 +12,11 @@ import type { SocialSuggestedPerson } from "@/lib/social-feed";
 export function SocialSuggestedPeople({
   people,
   faces,
+  viewerId,
 }: {
   people: readonly SocialSuggestedPerson[];
   faces: ReadonlyMap<string, string | null>;
+  viewerId: string;
 }) {
   if (people.length === 0) return null;
   return (
@@ -36,6 +38,7 @@ export function SocialSuggestedPeople({
             followeeId={person.id}
             handle={person.handle}
             following={false}
+            viewerId={viewerId}
             compact
           />
         </div>
@@ -47,12 +50,14 @@ export function SocialSuggestedPeople({
 export function SocialForYouRail({
   people,
   faces,
+  viewerId,
   layout = "rail",
   latestCourse = null,
   latestCourseCoverUrl = null,
 }: {
   people: readonly SocialSuggestedPerson[];
   faces: ReadonlyMap<string, string | null>;
+  viewerId: string;
   layout?: "rail" | "lane";
   latestCourse?: CourseRow | null;
   latestCourseCoverUrl?: string | null;
@@ -68,7 +73,7 @@ export function SocialForYouRail({
           <p className="t-body-sm font-medium text-ink-2">{SOCIAL.forYou.title}</p>
         </div>
       ) : null}
-      <SocialSuggestedPeople people={people} faces={faces} />
+      <SocialSuggestedPeople people={people} faces={faces} viewerId={viewerId} />
       {layout === "rail" && latestCourse ? (
         <div data-social-latest-course="" className={SOCIAL_FOR_YOU_CARD_CLASS}>
           <p className="t-body-sm font-semibold text-ink">{SOCIAL.forYou.latestCourse}</p>

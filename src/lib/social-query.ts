@@ -42,6 +42,18 @@ export function applyOptimisticSocialProfilePatch(
   );
 }
 
+export function applyOptimisticPostCreate(
+  queryClient: QueryClient,
+  profileId: string,
+  delta = 1,
+): void {
+  queryClient.setQueryData(
+    socialCountsQueryKey(profileId),
+    (old: SocialProfileCounts | undefined) =>
+      old ? { ...old, posts: Math.max(0, old.posts + delta) } : old,
+  );
+}
+
 export function applyOptimisticFollow(
   queryClient: QueryClient,
   input: { viewerId: string; targetId: string; following: boolean },

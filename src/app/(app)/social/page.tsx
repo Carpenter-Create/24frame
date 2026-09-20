@@ -101,6 +101,7 @@ async function SocialHomeForYouSlot({ session }: { session: SocialSession }) {
     <SocialForYouRail
       people={suggested}
       faces={faces}
+      viewerId={ctx.user.id}
       latestCourse={latestCourse}
       latestCourseCoverUrl={latestCourse ? courseCovers.get(latestCourse.id) ?? null : null}
     />
@@ -190,7 +191,7 @@ async function SocialHomeCenter({
       ) : null}
       <SocialHomeTabs active={lane} />
       {lane === "for-you" ? (
-        <SocialHomeForYouLane suggested={suggested} faces={faces} />
+        <SocialHomeForYouLane suggested={suggested} faces={faces} viewerId={ctx.user.id} />
       ) : (
         <SocialHomeFollowingWall
           wall={wall}
@@ -211,9 +212,11 @@ async function SocialHomeCenter({
 function SocialHomeForYouLane({
   suggested,
   faces,
+  viewerId,
 }: {
   suggested: SocialSuggestedPerson[];
   faces: ReadonlyMap<string, string | null>;
+  viewerId: string;
 }) {
   return (
     <div data-social-for-you-lane="" className="flex flex-col gap-3">
@@ -225,7 +228,7 @@ function SocialHomeForYouLane({
           action={{ href: SOCIAL_ROUTES.explore, label: SOCIAL.home.goExplore }}
         />
       ) : null}
-      <SocialForYouRail people={suggested} faces={faces} layout="lane" />
+      <SocialForYouRail people={suggested} faces={faces} viewerId={viewerId} layout="lane" />
     </div>
   );
 }

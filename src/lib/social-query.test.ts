@@ -8,6 +8,7 @@ import {
 } from "@/lib/social-cache-keys";
 import {
   applyOptimisticFollow,
+  applyOptimisticPostCreate,
   applyOptimisticSocialProfile,
   applyOptimisticSocialProfilePatch,
   invalidateSocialQueries,
@@ -54,6 +55,19 @@ describe("social query cache helpers", () => {
       posts: 3,
       followers: 4,
       following: 1,
+    });
+
+    applyOptimisticPostCreate(client, "u1");
+    expect(client.getQueryData(socialCountsQueryKey("u1"))).toEqual({
+      posts: 2,
+      followers: 0,
+      following: 2,
+    });
+    applyOptimisticPostCreate(client, "u1", -1);
+    expect(client.getQueryData(socialCountsQueryKey("u1"))).toEqual({
+      posts: 1,
+      followers: 0,
+      following: 2,
     });
   });
 

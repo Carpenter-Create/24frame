@@ -31,6 +31,7 @@ export default async function SocialCreatePage({
       <div className={SOCIAL_HOME_CENTER_CLASS}>
         <h1 className="sr-only">{SOCIAL.create.title}</h1>
         <SocialCreateCompose
+          authorId={ctx.user.id}
           authorName={
             profile
               ? socialPersonLabel({ handle: profile.handle, displayName: profile.display_name })
@@ -60,5 +61,5 @@ async function SocialCreateForYouSlot({ session }: { session: SocialSession }) {
     { topics: profile?.topics ?? [], crafts: profile?.crafts ?? [] },
   );
   const faces = suggested.length > 0 ? await signedAvatarUrls(suggested.map((person) => person.id)) : new Map();
-  return <SocialForYouRail people={suggested} faces={faces} />;
+  return <SocialForYouRail people={suggested} faces={faces} viewerId={ctx.user.id} />;
 }

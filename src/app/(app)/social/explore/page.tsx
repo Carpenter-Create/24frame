@@ -74,7 +74,7 @@ async function SocialExploreSuggested({ session }: { session: SocialSession }) {
 
   return (
     <div data-social-explore-trending="" data-social-explore-suggested="" className="flex flex-col gap-3">
-      <SocialSuggestedPeople people={suggested} faces={faces} />
+      <SocialSuggestedPeople people={suggested} faces={faces} viewerId={ctx.user.id} />
     </div>
   );
 }

@@ -192,5 +192,5 @@ async function SocialProfileForYouSlot({ session }: { session: SocialSession }) 
   );
   const faces =
     suggested.length > 0 ? await signedAvatarUrls(suggested.map((person) => person.id)) : new Map();
-  return <SocialForYouRail people={suggested} faces={faces} />;
+  return <SocialForYouRail people={suggested} faces={faces} viewerId={ctx.user.id} />;
 }

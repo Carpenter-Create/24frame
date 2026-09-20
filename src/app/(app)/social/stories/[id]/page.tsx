@@ -128,7 +128,7 @@ export default async function SocialStoryPage({
           canReply={!!profile && story.author_id !== ctx.user.id}
         />
       </div>
-      <SocialForYouRail people={suggested} faces={faces} />
+      <SocialForYouRail people={suggested} faces={faces} viewerId={ctx.user.id} />
     </div>
   );
 }

@@ -26,6 +26,7 @@ vi.mock("@upstash/redis", () => ({
 }));
 
 import {
+  bustSocialCountsHotCache,
   bustSocialFollowHotCache,
   bustSocialProfileHotCache,
   isSocialHotCacheConfigured,
@@ -93,6 +94,9 @@ describe("social hot cache", () => {
     redisState.store.set("social:follow:v:t", true);
     redisState.store.set("social:counts:v", { followers: 1 });
     redisState.store.set("social:counts:t", { followers: 2 });
+    redisState.store.set("social:counts:u1", { posts: 3 });
+    await bustSocialCountsHotCache("u1");
+    expect(redisState.store.has("social:counts:u1")).toBe(false);
     await bustSocialFollowHotCache("v", "t");
     expect(redisState.store.has("social:follow:v:t")).toBe(false);
     expect(redisState.store.has("social:counts:v")).toBe(false);

@@ -76,6 +76,8 @@ describe("social isolation lock", () => {
     expect(actions).toContain('notify_new_follower');
     expect(actions).toContain("bustSocialFollowHotCache");
     expect(actions).toContain("bustSocialProfileHotCache");
+    expect(actions).toContain("bustSocialCountsHotCache");
+    expect(actions).toContain("bustSocialProfileHotCache(profileId, [profile?.handle])");
     expect(actions).toContain('from("stories")');
     expect(actions).not.toContain("from(\"reels\")");
     expect(actions).toContain("ensureOwnSocialProfile");

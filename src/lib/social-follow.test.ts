@@ -110,6 +110,7 @@ describe("social follow helpers", () => {
     const list = readFileSync("src/components/social/social-follows-list.tsx", "utf8");
     expect(profile).toContain("<SocialFollowButton");
     expect(suggested).toContain("<SocialFollowButton");
+    expect(suggested).toContain("viewerId={viewerId}");
     expect(list).toContain("<SocialFollowButton");
     expect(profile).not.toContain("toggleSocialFollow");
     expect(suggested).not.toContain("toggleSocialFollow");

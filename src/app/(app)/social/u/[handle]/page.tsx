@@ -227,7 +227,7 @@ export default async function SocialPublicProfilePage({
           </>
         )}
       </div>
-      <SocialForYouRail people={suggested} faces={faces} />
+      <SocialForYouRail people={suggested} faces={faces} viewerId={ctx.user.id} />
     </div>
   );
 }

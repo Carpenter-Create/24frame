@@ -79,7 +79,7 @@ import {
 import { readSocialFollowState } from "@/app/(app)/social/query-actions";
 import { useAppQueryClient } from "@/components/query-provider";
 import { SOCIAL_QUERY_STALE_MS, socialFollowQueryKey } from "@/lib/social-cache-keys";
-import { applyOptimisticFollow } from "@/lib/social-query";
+import { applyOptimisticFollow, applyOptimisticPostCreate } from "@/lib/social-query";
 
 function FormError({ error }: { error: string }) {
   if (!error) return null;
@@ -285,11 +285,13 @@ const CREATE_KIND_LABELS = {
 } as const;
 
 export function SocialCreateCompose({
+  authorId,
   authorName = SOCIAL.home.you,
   authorHandle = null,
   authorPhotoUrl = null,
   initialKind = null,
 }: {
+  authorId?: string;
   authorName?: string;
   authorHandle?: string | null;
   authorPhotoUrl?: string | null;
@@ -310,6 +312,7 @@ export function SocialCreateCompose({
         ? SOCIAL_VIDEO_CONTENT_TYPES.join(",")
         : SOCIAL_MEDIA_ACCEPT;
   const well = socialCreateWellCopy(kind, media.length > 0);
+  const queryClient = useAppQueryClient();
 
   useEffect(() => {
     if (!ingestHomeMedia) return;
@@ -349,8 +352,12 @@ export function SocialCreateCompose({
       action={async (formData) => {
         setError("");
         formData.set("media", JSON.stringify(media));
+        if (queryClient && authorId) applyOptimisticPostCreate(queryClient, authorId);
         const result = await createSocialPost(formData);
-        if (result?.error) setError(result.error);
+        if (result?.error) {
+          if (queryClient && authorId) applyOptimisticPostCreate(queryClient, authorId, -1);
+          setError(result.error);
+        }
       }}
     >
       <div className="flex items-center gap-3" data-social-create-author="">

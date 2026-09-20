@@ -17,6 +17,7 @@ describe("SocialForYouRail person identity", () => {
           { id: "u3", handle: "maya", display_name: "Maya Chen" },
         ]}
         faces={new Map()}
+        viewerId="u1"
       />,
     );
     expect(html).toContain(SOCIAL.forYou.people);
@@ -38,6 +39,7 @@ describe("SocialForYouRail person identity", () => {
       <SocialForYouRail
         people={[{ id: "u3", handle: "joshua", display_name: "Joshua A" }]}
         faces={new Map([["u3", "https://s3.example/joshua-face"]])}
+        viewerId="u1"
       />,
     );
     expect(html).toContain("data-social-person-row");
