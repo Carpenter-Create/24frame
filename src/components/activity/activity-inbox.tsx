@@ -1,19 +1,27 @@
 import Link from "next/link";
+import { Gear } from "@phosphor-icons/react/ssr";
 
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardBody } from "@/components/ui/card";
 import { InlineNotice } from "@/components/ui/inline-notice";
+import { EmptyState } from "@/components/layout/empty-state";
 import { SegmentedTrack } from "@/components/ui/segmented-track";
 import { SEGMENTED_TRACK_PERSIST } from "@/lib/segmented-track";
 import { MessageLink } from "@/app/(app)/aggregation/messages/message-link";
 import { cn } from "@/lib/cn";
 import {
+  ACTIVITY_FAMILIES,
+  ACTIVITY_FAMILY_SCROLL_CLASS,
   ACTIVITY_PAGE,
+  ACTIVITY_PREFS_HREF,
   activityEmptyCopy,
+  activityFamilyLabel,
   activityHref,
+  type ActivityFamily,
   type ActivityItem,
-  type ActivityStatus,
 } from "@/lib/activity";
+import { HOUSE_THEME_TOGGLE_CLASS } from "@/lib/house-lead-chrome";
+import { PHOSPHOR_CHROME_ICON_CLASS, PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import {
   DASHBOARD_TOP_PILL_BUTTON_CLASS,
   DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
@@ -21,98 +29,71 @@ import {
   DASHBOARD_TOP_PILL_CLUSTER_CLASS,
   DASHBOARD_TOP_PILL_THUMB_CLASS,
 } from "@/lib/dashboard-craft";
-import {
-  HOUSE_SEGMENTED_ITEM_BASE_CLASS,
-  HOUSE_SEGMENTED_ITEM_OFF_CLASS,
-  HOUSE_SEGMENTED_ITEM_ON_CLASS,
-  HOUSE_SEGMENTED_TRACK_CLASS,
-  HOUSE_SEGMENTED_THUMB_CLASS,
-} from "@/lib/house-shell";
 import { NOTIFICATION_EMAIL, NOTIFICATION_KIND_LABEL } from "@/lib/notifications";
-import {
-  REPORTS_PERIOD_PRESETS,
-  reportsPeriodPresetKey,
-  type ReportsPeriod,
-} from "@/lib/reports";
-import {
-  REPORTS_RELATED_GAP_CLASS,
-} from "@/lib/reports-craft";
+import { REPORTS_RELATED_GAP_CLASS } from "@/lib/reports-craft";
 import { MarkDone } from "./mark-done";
 
-// Durable account-alert log. One notifications feed. Open inbox is
-// unread; Done is read history. Reports pills for status + period.
+// Live uncleared-alert feed. Category chips only. X clears a row.
+// Gear is the only settings door: existing Preferences Notifications.
 
 export function ActivityInbox({
   items,
-  status,
-  period,
-  now,
+  family,
   truncated = false,
 }: {
   items: ActivityItem[];
-  status: ActivityStatus;
-  period: ReportsPeriod;
-  now: Date;
+  family: ActivityFamily;
   truncated?: boolean;
 }) {
   return (
     <div data-activity-inbox="">
-      <PageHeader title={ACTIVITY_PAGE.title} subtitle={ACTIVITY_PAGE.subtitle} />
+      <PageHeader
+        title={ACTIVITY_PAGE.title}
+        subtitle={ACTIVITY_PAGE.subtitle}
+        actions={
+          <Link
+            href={ACTIVITY_PREFS_HREF}
+            aria-label={ACTIVITY_PAGE.prefs}
+            data-activity-prefs=""
+            className={HOUSE_THEME_TOGGLE_CLASS}
+          >
+            <Gear
+              className={PHOSPHOR_CHROME_ICON_CLASS}
+              weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
+            />
+          </Link>
+        }
+      />
 
       <div data-activity-filters="" className={cn("flex flex-col pb-6", REPORTS_RELATED_GAP_CLASS)}>
-        <SegmentedTrack
-          activeIndex={(["open", "done"] as const).indexOf(status)}
-          persistKey={SEGMENTED_TRACK_PERSIST.activityStatus}
-          trackClass={DASHBOARD_TOP_PILL_CLUSTER_CLASS}
-          thumbClass={DASHBOARD_TOP_PILL_THUMB_CLASS}
-          data-activity-status=""
-        >
-          {(["open", "done"] as const).map((key) => {
-            const on = status === key;
-            return (
-              <Link
-                key={key}
-                href={activityHref({ status: key, period: period.key })}
-                aria-pressed={on}
-                data-segmented-item=""
-                data-activity-status-chip={key}
-                className={cn(
-                  DASHBOARD_TOP_PILL_BUTTON_CLASS,
-                  on ? DASHBOARD_TOP_PILL_BUTTON_ON_CLASS : DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
-                )}
-              >
-                {ACTIVITY_PAGE[key]}
-              </Link>
-            );
-          })}
-        </SegmentedTrack>
-        <SegmentedTrack
-          activeIndex={REPORTS_PERIOD_PRESETS.findIndex((p) => p.grain === period.kind)}
-          persistKey={SEGMENTED_TRACK_PERSIST.activityPeriod}
-          trackClass={cn(HOUSE_SEGMENTED_TRACK_CLASS, "hidden md:flex")}
-          thumbClass={HOUSE_SEGMENTED_THUMB_CLASS}
-          data-activity-period=""
-        >
-          {REPORTS_PERIOD_PRESETS.map((preset) => {
-            const on = period.kind === preset.grain;
-            const key = reportsPeriodPresetKey(preset.grain, now);
-            return (
-              <Link
-                key={preset.grain}
-                href={activityHref({ status, period: key })}
-                aria-pressed={on}
-                data-segmented-item=""
-                data-activity-period-chip={preset.grain}
-                className={cn(
-                  HOUSE_SEGMENTED_ITEM_BASE_CLASS,
-                  on ? HOUSE_SEGMENTED_ITEM_ON_CLASS : HOUSE_SEGMENTED_ITEM_OFF_CLASS,
-                )}
-              >
-                {preset.label}
-              </Link>
-            );
-          })}
-        </SegmentedTrack>
+        <div data-activity-family-scroll="" className={ACTIVITY_FAMILY_SCROLL_CLASS}>
+          <SegmentedTrack
+            activeIndex={ACTIVITY_FAMILIES.indexOf(family)}
+            persistKey={SEGMENTED_TRACK_PERSIST.activityFamily}
+            trackClass={DASHBOARD_TOP_PILL_CLUSTER_CLASS}
+            thumbClass={DASHBOARD_TOP_PILL_THUMB_CLASS}
+            data-activity-family=""
+          >
+            {ACTIVITY_FAMILIES.map((key) => {
+              const on = family === key;
+              return (
+                <Link
+                  key={key}
+                  href={activityHref({ family: key })}
+                  aria-pressed={on}
+                  data-segmented-item=""
+                  data-activity-family-chip={key}
+                  className={cn(
+                    DASHBOARD_TOP_PILL_BUTTON_CLASS,
+                    on ? DASHBOARD_TOP_PILL_BUTTON_ON_CLASS : DASHBOARD_TOP_PILL_BUTTON_OFF_CLASS,
+                  )}
+                >
+                  {activityFamilyLabel(key)}
+                </Link>
+              );
+            })}
+          </SegmentedTrack>
+        </div>
       </div>
 
       {truncated ? (
@@ -122,11 +103,9 @@ export function ActivityInbox({
       ) : null}
 
       {items.length === 0 ? (
-        <Card>
-          <CardBody>
-            <p className="t-body-sm text-ink-3">{activityEmptyCopy(status)}</p>
-          </CardBody>
-        </Card>
+        <div data-activity-empty="">
+          <EmptyState title={activityEmptyCopy()} description={ACTIVITY_PAGE.emptyHint} />
+        </div>
       ) : (
         <div className="flex flex-col gap-2">
           {items.map((item) => {
@@ -144,12 +123,12 @@ export function ActivityInbox({
                     >
                       {item.title}
                     </MessageLink>
-                    <div className="flex shrink-0 flex-col items-end gap-1">
+                    <div className="flex shrink-0 items-center gap-2">
                       <span className="t-label text-ink-3">
                         {NOTIFICATION_KIND_LABEL[item.kind]} ·{" "}
                         {new Date(item.created_at).toLocaleDateString()}
                       </span>
-                      {item.unread ? <MarkDone id={item.id} /> : null}
+                      <MarkDone id={item.id} />
                     </div>
                   </div>
                   <MessageLink

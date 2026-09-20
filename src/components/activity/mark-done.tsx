@@ -2,11 +2,13 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { X } from "@phosphor-icons/react";
 
 import { markNotificationsRead } from "@/app/(app)/aggregation/messages/actions";
 import { ACTIVITY_PAGE } from "@/lib/activity";
+import { PHOSPHOR_CHROME_ICON_CLASS, PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 
-// Complete = Done = read. One RPC, one state.
+// X clears the row. Cleared items leave the live feed. One RPC.
 export function MarkDone({ id }: { id: string }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -14,6 +16,7 @@ export function MarkDone({ id }: { id: string }) {
     <button
       type="button"
       data-activity-done=""
+      aria-label={ACTIVITY_PAGE.dismiss}
       disabled={pending}
       onClick={() =>
         start(async () => {
@@ -21,9 +24,9 @@ export function MarkDone({ id }: { id: string }) {
           router.refresh();
         })
       }
-      className="shrink-0 t-label text-ink-3 underline-offset-2 transition-colors hover:text-ink-2 hover:underline disabled:opacity-50"
+      className="shrink-0 text-ink-3 hover:text-ink-2 disabled:opacity-50"
     >
-      {ACTIVITY_PAGE.done}
+      <X className={PHOSPHOR_CHROME_ICON_CLASS} weight={PHOSPHOR_CHROME_IDLE_WEIGHT} />
     </button>
   );
 }

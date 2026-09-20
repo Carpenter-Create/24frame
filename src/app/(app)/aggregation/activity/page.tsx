@@ -3,16 +3,14 @@ import { redirect } from "next/navigation";
 import { ActivityInbox } from "@/components/activity/activity-inbox";
 import {
   filterActivityItems,
-  parseActivityPeriod,
-  parseActivityStatus,
+  parseActivityFamily,
   type ActivityItem,
 } from "@/lib/activity";
 import { loadMyNotifications } from "@/lib/my-lists";
 import { createClient } from "@/lib/supabase/server";
 import { getOrgContext } from "@/lib/supabase/context";
 
-// Durable account-alert log. Notifications feed only.
-// Default: Open, newest→oldest. Done stays in history.
+// Live uncleared-alert feed. Newest first. Category chips only.
 export default async function ActivityPage({
   searchParams = Promise.resolve({}),
 }: {
@@ -22,20 +20,16 @@ export default async function ActivityPage({
   if (!ctx) redirect("/login");
 
   const sp = await searchParams;
-  const now = new Date();
-  const status = parseActivityStatus(sp.status);
-  const period = parseActivityPeriod(sp.period, now);
+  const family = parseActivityFamily(sp.family);
 
   const supabase = await createClient();
   const loaded = await loadMyNotifications(supabase);
-  const items = filterActivityItems(loaded.rows as ActivityItem[], status, period);
+  const items = filterActivityItems(loaded.rows as ActivityItem[], family);
 
   return (
     <ActivityInbox
       items={items}
-      status={status}
-      period={period}
-      now={now}
+      family={family}
       truncated={loaded.truncated}
     />
   );
