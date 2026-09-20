@@ -6,8 +6,24 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/",
-  useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn() }),
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
 }));
+
+vi.mock("next/link", async () => {
+  const React = await import("react");
+  function MockLink({
+    href,
+    children,
+    ...props
+  }: {
+    href: string;
+    children?: React.ReactNode;
+    prefetch?: boolean;
+  }) {
+    return React.createElement("a", { href, ...props }, children);
+  }
+  return { __esModule: true, default: MockLink, useLinkStatus: () => ({ pending: false }) };
+});
 
 import { availableWorkspaceOptions } from "@/lib/workspace-menu";
 import {
@@ -84,6 +100,15 @@ describe("workspace switcher header control", () => {
     );
     expect(html).toContain('data-workspace-switcher-mark="social"');
     expect(html).not.toContain("Settings");
+    expect(html).toContain('href="/home"');
+    expect(html).toContain('href="/aggregation/dashboard"');
+    expect(html).toContain('href="/education"');
+    expect(src).toContain("prefetchHrefList");
+    expect(src).toContain("phoneWorkspaceSwitcherPrefetchHrefs");
+    expect(src).toContain("useHouseNavPending");
+    expect(src).toContain("<Link");
+    expect(src).not.toContain("persistWorkspaceCookie");
+    expect(src).toContain("workspaceSwitcherPersistLane");
   });
 
   it("opens a quiet Workspaces heading, then Aggregation / Social / Education", () => {
@@ -131,7 +156,7 @@ describe("workspace switcher header control", () => {
     expect(src).not.toContain("workspaceSwitcherRole");
     expect(src).not.toContain("workspaceSwitcherShowsSettings");
     expect(src).not.toContain("workspaceSwitcherSettingsHref");
-    expect(src).toContain("persistWorkspaceCookie");
+    expect(src).toContain("workspaceSwitcherPersistLane");
     expect(src).toContain("workspaceHome(option.mode)");
     expect(src).toContain("availableWorkspaceOptions");
     expect(src).toContain("mousedown");
@@ -185,7 +210,7 @@ describe("workspace switcher header control", () => {
     expect(html).not.toContain("data-workspace-switcher-mark");
     expect(html).not.toContain("/education");
     expect(html).not.toContain("/account/workspace");
-    expect(src).toContain("persistWorkspaceCookie");
+    expect(src).toContain("workspaceSwitcherPersistLane");
     expect(src).toContain("workspaceHome(option.mode)");
     expect(src).toContain("availableWorkspaceOptions");
     expect(src).toContain("workspaceSwitcherSegmentLabel");

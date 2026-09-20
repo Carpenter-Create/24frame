@@ -8,8 +8,10 @@
 // Destinations live in the Mercury floating dock (in-workspace
 // only). Social dest order stays Feed · Profile · Explore ·
 // Create · Messages. Create is Social-only. Aggregation ·
-// Education · Home each keep their own dests. No under-top dest
-// chip rail. No peer workspace pill rail.
+// Education · Home each keep their own dests. Dock hops use the
+// house pending / prefetch SoT — prefetchHrefList on mount,
+// optimistic dest light on tap. No under-top dest chip rail. No
+// peer workspace pill rail.
 // Phone OS dark is not the product theme. One house SoT.
 // Trailing is search (when needed) · theme · 24Frame AI · bell ·
 // avatar. Sun/moon is shared immediately left of Ask on every
@@ -64,7 +66,7 @@ import {
   WORKSPACE_EDUCATION_HREF,
   WORKSPACE_EDUCATION_LABEL,
 } from "@/lib/workspace-menu";
-import { persistWorkspaceCookie, workspaceHome, type WorkspaceMode } from "@/lib/workspace";
+import { workspaceHome, type WorkspaceMode } from "@/lib/workspace";
 
 export type HousePhoneWorkspaceId = Exclude<OverviewLeadPillId, "co-productions">;
 
@@ -221,9 +223,8 @@ export function housePhoneWorkspaceHref(id: HousePhoneWorkspaceId): string {
   return tab?.href ?? OVERVIEW_HREF;
 }
 
-export function persistHousePhoneWorkspace(id: HousePhoneWorkspaceId): void {
-  if (id === "home") return;
-  persistWorkspaceCookie(id);
+export function housePhonePrefetchDestHrefs(items: readonly NavItem[]): string[] {
+  return items.map((item) => item.href);
 }
 
 export function housePhoneShowsBottomDests({
@@ -240,21 +241,6 @@ export function housePhoneShowsBottomDests({
   if (accountChrome || coProductions) return false;
   if (homeOwned) return true;
   return workspace === "social" || workspace === "aggregation" || workspace === "education";
-}
-
-/** @deprecated IA A — dests live in the dock. Alias kept for one-rename callers. */
-export function housePhoneShowsDestChips(input: {
-  workspace: WorkspaceMode;
-  homeChrome?: boolean;
-  settingsPage?: boolean;
-  helpPage?: boolean;
-  activityPage?: boolean;
-}): boolean {
-  return housePhoneShowsBottomDests({
-    workspace: input.workspace,
-    homeOwned: input.homeChrome,
-    accountChrome: Boolean(input.settingsPage || input.helpPage || input.activityPage),
-  });
 }
 
 export function housePhoneDestinations(

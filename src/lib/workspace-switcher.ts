@@ -48,10 +48,10 @@
 // Education quiet search stays Education-only: phone in a
 // full-width row under HouseLeadChrome, desktop in the shared
 // mid-lead slot (same Facebook-compact geometry as Social).
-// Persist with
-// persistWorkspaceCookie — do not invent
-// a second cookie. Do not invent /education, /account/workspace,
-// or /settings/workspace.
+// Persist with workspaceSwitcherPersistLane → persistWorkspaceCookie.
+// Do not invent a second cookie. Phone sheet unselected rows are
+// Link + prefetch; prefetchHrefList warms the four homes on mount.
+// Do not invent /education, /account/workspace, or /settings/workspace.
 
 import {
   HOUSE_LEAD_SEARCH_DESKTOP_CLASS,
@@ -75,7 +75,8 @@ import {
   type WorkspaceMenuOption,
   workspaceModeLabel,
 } from "@/lib/workspace-menu";
-import type { WorkspaceMode } from "@/lib/workspace";
+import type { OverviewLeadPillId } from "@/lib/overview";
+import { persistWorkspaceCookie, type WorkspaceMode } from "@/lib/workspace";
 
 export const WORKSPACE_SWITCHER = {
   label: USER_MENU.workspace,
@@ -367,4 +368,17 @@ export function workspaceSwitcherTriggerMarkId(
 export function workspaceSwitcherLeadMarkLetter(id: PhoneWorkspaceSwitcherId): string {
   if (id === "home") return "H";
   return WORKSPACE_SWITCHER_MARK[id];
+}
+
+/** Persist the workspace cookie for a lane hop. Home and Co-Productions do not write.
+ *  Phone sheet Links call this on tap; desktop pills keep selectLeadPill. */
+export function workspaceSwitcherPersistLane(id: OverviewLeadPillId | PhoneWorkspaceSwitcherId): void {
+  if (id === "home" || id === "co-productions") return;
+  persistWorkspaceCookie(id);
+}
+
+export function phoneWorkspaceSwitcherPrefetchHrefs(
+  options: readonly WorkspaceMenuOption[] = availableWorkspaceOptions(),
+): string[] {
+  return phoneWorkspaceSwitcherPills(options).map((pill) => pill.href);
 }

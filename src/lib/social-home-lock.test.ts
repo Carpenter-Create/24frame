@@ -417,7 +417,18 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(sideNav).toContain("prefetch={social}");
     expect(sideNav).toContain("useSocialNavPending");
     expect(dests).toContain("prefetch");
+    expect(dests).toContain("prefetchHrefList");
+    expect(dests).toContain("useHouseNavPending");
     expect(dests).toContain("housePhoneDestActive");
+    expect(chrome).not.toContain("SOCIAL_TAB_BAR_CLASS");
+    expect(chrome).not.toContain("SOCIAL_TAB_PILL");
+    expect(chrome).not.toContain("SOCIAL_TAB_ITEM_CLASS");
+    expect(readFileSync("src/components/social/use-social-nav-pending.ts", "utf8")).toContain(
+      "useHouseNavPending as useSocialNavPending",
+    );
+    expect(readFileSync("src/lib/social-nav-pending.ts", "utf8")).toContain(
+      "export const socialNavActivePath = houseNavActivePath",
+    );
     expect(home).not.toContain("loadOwnPostFacts");
     expect(home).toContain("requireSocialSession");
     expect(home).toContain("Suspense");

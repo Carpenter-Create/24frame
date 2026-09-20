@@ -9,6 +9,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 import { createPortal } from "react-dom";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { CaretDown } from "@phosphor-icons/react";
 
@@ -25,7 +26,12 @@ import {
   type OverviewLeadPill,
   type OverviewLeadPillId,
 } from "@/lib/overview";
-import { persistWorkspaceCookie, workspaceHome, type WorkspaceMode } from "@/lib/workspace";
+import { workspaceHome, type WorkspaceMode } from "@/lib/workspace";
+import { prefetchHrefList } from "@/lib/house-nav-pending";
+import {
+  HouseNavPendingProbe,
+  useHouseNavPending,
+} from "@/components/chrome/use-house-nav-pending";
 import {
   availableWorkspaceOptions,
   type WorkspaceMenuOption,
@@ -49,6 +55,7 @@ import {
   type WorkspaceSwitcherPresentation,
   type WorkspaceSwitcherTone,
   phoneWorkspaceSwitcherPills,
+  phoneWorkspaceSwitcherPrefetchHrefs,
   workspaceSwitcherChevronClass,
   workspaceSwitcherChromeClearanceBottoms,
   workspaceSwitcherLeadMarkLetter,
@@ -61,6 +68,7 @@ import {
   workspaceSwitcherSegmentTabIndex,
   workspaceSwitcherStaticClass,
   workspaceSwitcherTriggerClass,
+  workspaceSwitcherPersistLane,
   workspaceSwitcherTriggerMarkId,
 } from "@/lib/workspace-switcher";
 
@@ -91,7 +99,7 @@ function selectLeadPill(
   }
   const option = options.find((row) => row.mode === pill.id);
   if (!option) return;
-  persistWorkspaceCookie(option.mode);
+  workspaceSwitcherPersistLane(option.mode);
   router.push(workspaceHome(option.mode));
 }
 
@@ -192,6 +200,7 @@ export function WorkspaceSwitcher({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const { activePath, markPending } = useHouseNavPending();
   const hostRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -201,9 +210,15 @@ export function WorkspaceSwitcher({
     presentation === "sheet"
       ? phoneWorkspaceSwitcherPills(options)
       : overviewLeadPills(options);
-  const label = overviewTriggerLabel(pathname, workspaceModeLabel(current));
-  const triggerMarkId = workspaceSwitcherTriggerMarkId(pathname, current);
+  const chromePath = presentation === "sheet" ? activePath : pathname;
+  const label = overviewTriggerLabel(chromePath, workspaceModeLabel(current));
+  const triggerMarkId = workspaceSwitcherTriggerMarkId(chromePath, current);
   const canSwitch = pills.length > 1;
+
+  useEffect(() => {
+    if (presentation !== "sheet") return;
+    prefetchHrefList(router.prefetch, phoneWorkspaceSwitcherPrefetchHrefs(options));
+  }, [options, presentation, router]);
 
   useLayoutEffect(() => {
     if (!open) return undefined;
@@ -279,20 +294,9 @@ export function WorkspaceSwitcher({
         className="flex flex-col"
       >
         {pills.map((pill) => {
-          const selected = overviewLeadSelected(pill.id, pathname, current);
-          return (
-            <button
-              key={pill.id}
-              type="button"
-              role="option"
-              data-workspace-switcher-option={pill.id}
-              aria-selected={selected}
-              className={workspaceSwitcherOptionClass(selected)}
-              onClick={() => {
-                selectLeadPill(current, pill, options, router, pathname);
-                setOpen(false);
-              }}
-            >
+          const selected = overviewLeadSelected(pill.id, chromePath, current);
+          const optionBody = (
+            <>
               <WorkspaceLeadMark id={pill.id} />
               <span
                 data-workspace-switcher-option-label=""
@@ -310,6 +314,43 @@ export function WorkspaceSwitcher({
                   className={WORKSPACE_SWITCHER_OPTION_CHECK_CLASS}
                 />
               </span>
+            </>
+          );
+          if (presentation === "sheet" && !selected) {
+            return (
+              <Link
+                key={pill.id}
+                href={pill.href}
+                prefetch
+                role="option"
+                data-workspace-switcher-option={pill.id}
+                aria-selected={false}
+                className={workspaceSwitcherOptionClass(false)}
+                onClick={(event) => {
+                  workspaceSwitcherPersistLane(pill.id);
+                  markPending(pill.href, event);
+                  setOpen(false);
+                }}
+              >
+                <HouseNavPendingProbe href={pill.href} onPending={markPending} />
+                {optionBody}
+              </Link>
+            );
+          }
+          return (
+            <button
+              key={pill.id}
+              type="button"
+              role="option"
+              data-workspace-switcher-option={pill.id}
+              aria-selected={selected}
+              className={workspaceSwitcherOptionClass(selected)}
+              onClick={() => {
+                selectLeadPill(current, pill, options, router, pathname);
+                setOpen(false);
+              }}
+            >
+              {optionBody}
             </button>
           );
         })}

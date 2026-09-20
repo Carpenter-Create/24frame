@@ -10,7 +10,9 @@ import {
 } from "./dashboard-craft";
 import {
   phoneWorkspaceSwitcherPills,
+  phoneWorkspaceSwitcherPrefetchHrefs,
   workspaceSwitcherLeadMarkLetter,
+  workspaceSwitcherPersistLane,
   workspaceSwitcherTriggerMarkId,
   APP_HEADER_EDUCATION_SEARCH_DESKTOP_CLASS,
   APP_HEADER_EDUCATION_SEARCH_PHONE_CLASS,
@@ -233,10 +235,14 @@ describe("workspace switcher lock", () => {
     expect(workspaceSwitcherLeadMarkLetter("aggregation")).toBe("A");
     expect(workspaceSwitcherTriggerMarkId("/home", "aggregation")).toBe("home");
     expect(workspaceSwitcherTriggerMarkId("/social", "social")).toBe("social");
+    expect(phoneWorkspaceSwitcherPrefetchHrefs().map((href) => href)).toEqual(
+      phoneWorkspaceSwitcherPills().map((pill) => pill.href),
+    );
   });
 
   it("keeps the existing workspace cookie write — no second scheme", () => {
     expect(persistWorkspaceCookie.name).toBe("persistWorkspaceCookie");
+    expect(workspaceSwitcherPersistLane.name).toBe("workspaceSwitcherPersistLane");
     expect(workspaceHome("aggregation")).toBe("/aggregation/dashboard");
     expect(workspaceHome("social")).toBe("/social");
   });

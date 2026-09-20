@@ -91,7 +91,8 @@ describe("Social nav leftover split (shared shell vs Social-local)", () => {
     expect(isSocialPath("/titles")).toBe(false);
     expect(resolveWorkspaceMode("/social/profile/edit", "aggregation")).toBe("social");
     expect(resolveWorkspaceMode("/aggregation/messages", "social")).toBe("aggregation");
-    expect(appShell).toContain("if (socialChrome)");
+    expect(appShell).toContain("socialChrome");
+    expect(appShell).toContain("One return tree");
     expect(appShell).toContain("HouseLeadChrome");
   });
 
