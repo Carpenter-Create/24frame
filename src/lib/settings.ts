@@ -218,9 +218,9 @@ export const SETTINGS_EDIT_HELPER_CLASS = SETTINGS_DIALOG_HELP_CLASS;
 // Preferences Appearance — house muted module + pad 16. Same surface
 // as dashboard / directory modules. Not card-surface (Profile /
 // Organization form frame). Notification groups are not this card.
-// Desktop: readable settings column (~40rem). Phone stays full
+// Desktop: readable settings column (~48rem). Phone stays full
 // content width — do not constrain the Coinbase drill-in stack.
-export const SETTINGS_CONTENT_MEASURE_CLASS = "w-full md:max-w-[40rem]";
+export const SETTINGS_CONTENT_MEASURE_CLASS = "w-full md:max-w-[48rem]";
 export const SETTINGS_PREF_BLOCK_CLASS =
   `${HOUSE_MODULE_CLASS} ${HOUSE_CARD_PAD} ${SETTINGS_CONTENT_MEASURE_CLASS} flex flex-col gap-[var(--space-3)]`;
 export const SETTINGS_PREF_TITLE_CLASS = "t-heading text-ink";

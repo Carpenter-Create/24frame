@@ -414,13 +414,17 @@ describe("settings hub lock", () => {
   });
 
   it("locks desktop Preferences to a constrained measure — not rail-to-edge rows", () => {
-    expect(SETTINGS_CONTENT_MEASURE_CLASS).toBe("w-full md:max-w-[40rem]");
-    expect(SETTINGS_CONTENT_MEASURE_CLASS).toContain("md:max-w-[40rem]");
+    expect(SETTINGS_CONTENT_MEASURE_CLASS).toBe("w-full md:max-w-[48rem]");
+    expect(SETTINGS_CONTENT_MEASURE_CLASS).toContain("md:max-w-[48rem]");
+    expect(SETTINGS_CONTENT_MEASURE_CLASS).not.toContain("40rem");
     expect(SETTINGS_CONTENT_MEASURE_CLASS).not.toContain("mx-auto");
     expect(SETTINGS_PREF_BLOCK_CLASS).toContain(SETTINGS_CONTENT_MEASURE_CLASS);
     const settingsSrc = readFileSync("src/lib/settings.ts", "utf8");
     expect(settingsSrc).toContain("constrained measure");
     expect(settingsSrc).toContain("not full-bleed rows");
+    expect(settingsSrc).toContain("~48rem");
+    expect(settingsSrc).not.toContain("~40rem");
+    expect(settingsSrc).not.toContain("md:max-w-[40rem]");
   });
 
   it("locks the settings rail on 220 pad 16 and house workspace-rail SoT", () => {
