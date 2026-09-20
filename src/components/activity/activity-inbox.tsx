@@ -3,7 +3,6 @@ import { Gear } from "@phosphor-icons/react/ssr";
 
 import { ActivityPageLead } from "@/components/activity/activity-page-lead";
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { EmptyState } from "@/components/layout/empty-state";
 import {
   ACTIVITY_HREF,
   ACTIVITY_LEAD_ROW_CLASS,
@@ -11,14 +10,13 @@ import {
   ACTIVITY_PAGE_CLASS,
   ACTIVITY_PREFS_HREF,
   ACTIVITY_SECTION_CLASS,
-  activityEmptyCopy,
   type ActivityFamily,
   type ActivityItem,
 } from "@/lib/activity";
 import { HOUSE_THEME_TOGGLE_CLASS } from "@/lib/house-lead-chrome";
 import { PHOSPHOR_CHROME_ICON_CLASS, PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
 import { ActivityFamilyChips } from "./activity-family-chips";
-import { ActivityFeedRow } from "./activity-feed-row";
+import { ActivityInboxList } from "./activity-inbox-list";
 
 // Live uncleared-alert feed. Category chips only. X clears a row.
 // Gear is the only settings door: existing Preferences Notifications.
@@ -65,17 +63,7 @@ export function ActivityInbox({
           </InlineNotice>
         ) : null}
 
-        {items.length === 0 ? (
-          <div data-activity-empty="">
-            <EmptyState title={activityEmptyCopy()} description={ACTIVITY_PAGE.emptyHint} />
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {items.map((item) => (
-              <ActivityFeedRow key={item.id} item={item} />
-            ))}
-          </div>
-        )}
+        <ActivityInboxList items={items} family={family} />
       </section>
     </div>
   );

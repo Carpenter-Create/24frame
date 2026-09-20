@@ -8,6 +8,7 @@ import { Bell } from "@phosphor-icons/react";
 
 import { Close44 } from "@/components/chrome/house";
 import { ActivityFeedRow } from "@/components/activity/activity-feed-row";
+import { useOwnNotificationsRealtime } from "@/components/activity/use-own-notifications-realtime";
 import {
   ACTIVITY_BELL_LIST_CLASS,
   ACTIVITY_BELL_POPOVER_CLASS,
@@ -17,10 +18,15 @@ import {
   ACTIVITY_BELL_TRIGGER_OPEN_CLASS,
   ACTIVITY_BELL_VIEW_ALL_CLASS,
   ACTIVITY_PAGE,
+  activityBellItems,
   activityFamilyForWorkspace,
   activityHref,
   type ActivityItem,
 } from "@/lib/activity";
+import {
+  liveUnreadCount,
+  mergeLiveActivityItems,
+} from "@/lib/notifications-realtime";
 import type { WorkspaceMode } from "@/lib/workspace";
 import { HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS } from "@/lib/house-lead-chrome";
 import { APP_SHEET_HEAD_CLASS, APP_SHEET_SCRIM_CLASS } from "@/lib/house-sheet";
@@ -51,6 +57,7 @@ export function ActivityBell({
   // Open + last resolved rows live above Suspense so a click or
   // Mark Done refresh does not remount a closed / empty peek.
   const [open, setOpen] = useState(defaultOpen);
+  const live = useOwnNotificationsRealtime();
   const [cache, setCache] = useState<{ count: number; items: ActivityItem[] }>({
     count: 0,
     items: [],
@@ -66,6 +73,7 @@ export function ActivityBell({
     <ActivityBellTriggers
       count={fallbackCount}
       items={fallbackItems}
+      live={live}
       open={open}
       onOpenChange={setOpen}
       workspace={workspace}
@@ -79,6 +87,7 @@ export function ActivityBell({
           <ActivityBellBoth
             unread={unread}
             items={items}
+            live={live}
             open={open}
             onOpenChange={setOpen}
             onRemember={rememberPeek}
@@ -92,6 +101,7 @@ export function ActivityBell({
         <ActivityBellUnread
           unread={unread}
           items={items}
+          live={live}
           open={open}
           onOpenChange={setOpen}
           onRemember={rememberPeek}
@@ -106,6 +116,7 @@ export function ActivityBell({
         <ActivityBellItems
           unread={unread}
           items={items}
+          live={live}
           open={open}
           onOpenChange={setOpen}
           onRemember={rememberPeek}
@@ -118,6 +129,7 @@ export function ActivityBell({
     <ActivityBellTriggers
       count={unread}
       items={items}
+      live={live}
       open={open}
       onOpenChange={setOpen}
       workspace={workspace}
@@ -138,6 +150,7 @@ function useRememberPeek(
 function ActivityBellBoth({
   unread,
   items,
+  live,
   open,
   onOpenChange,
   onRemember,
@@ -145,6 +158,7 @@ function ActivityBellBoth({
 }: {
   unread: Promise<number>;
   items: Promise<ActivityItem[]>;
+  live: ActivityItem[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onRemember: (count: number, rows: ActivityItem[]) => void;
@@ -157,6 +171,7 @@ function ActivityBellBoth({
     <ActivityBellTriggers
       count={count}
       items={rows}
+      live={live}
       open={open}
       onOpenChange={onOpenChange}
       workspace={workspace}
@@ -167,6 +182,7 @@ function ActivityBellBoth({
 function ActivityBellUnread({
   unread,
   items,
+  live,
   open,
   onOpenChange,
   onRemember,
@@ -174,6 +190,7 @@ function ActivityBellUnread({
 }: {
   unread: Promise<number>;
   items: ActivityItem[];
+  live: ActivityItem[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onRemember: (count: number, rows: ActivityItem[]) => void;
@@ -185,6 +202,7 @@ function ActivityBellUnread({
     <ActivityBellTriggers
       count={count}
       items={items}
+      live={live}
       open={open}
       onOpenChange={onOpenChange}
       workspace={workspace}
@@ -195,6 +213,7 @@ function ActivityBellUnread({
 function ActivityBellItems({
   unread,
   items,
+  live,
   open,
   onOpenChange,
   onRemember,
@@ -202,6 +221,7 @@ function ActivityBellItems({
 }: {
   unread: number;
   items: Promise<ActivityItem[]>;
+  live: ActivityItem[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onRemember: (count: number, rows: ActivityItem[]) => void;
@@ -213,6 +233,7 @@ function ActivityBellItems({
     <ActivityBellTriggers
       count={unread}
       items={rows}
+      live={live}
       open={open}
       onOpenChange={onOpenChange}
       workspace={workspace}
@@ -223,16 +244,20 @@ function ActivityBellItems({
 function ActivityBellTriggers({
   count,
   items,
+  live,
   open,
   onOpenChange,
   workspace,
 }: {
   count: number;
   items: ActivityItem[];
+  live: ActivityItem[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   workspace?: WorkspaceMode;
 }) {
+  const mergedItems = activityBellItems(mergeLiveActivityItems(items, live));
+  const mergedCount = liveUnreadCount(count, items, live);
   const panelId = useId();
   const desktopRef = useRef<HTMLDivElement>(null);
   const popoverId = `${panelId}-popover`;
@@ -262,7 +287,7 @@ function ActivityBellTriggers({
     <>
       <div data-activity-bell-phone="" className={HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS}>
         <ActivityBellTrigger
-          count={count}
+          count={mergedCount}
           register="phone"
           open={open}
           panelId={sheetId}
@@ -275,7 +300,7 @@ function ActivityBellTriggers({
         className="relative hidden md:block"
       >
         <ActivityBellTrigger
-          count={count}
+          count={mergedCount}
           register="desktop"
           open={open}
           panelId={popoverId}
@@ -283,7 +308,7 @@ function ActivityBellTriggers({
         />
         {open ? (
           <ActivityBellPeek
-            items={items}
+            items={mergedItems}
             surface="popover"
             panelId={popoverId}
             onClose={() => onOpenChange(false)}
@@ -293,7 +318,7 @@ function ActivityBellTriggers({
       </div>
       {open ? (
         <ActivityBellSheet
-          items={items}
+          items={mergedItems}
           panelId={sheetId}
           onClose={() => onOpenChange(false)}
           workspace={workspace}

@@ -5,7 +5,8 @@ import { COMPANY_PROFILE } from "./account-profile";
 import { SETTINGS } from "./settings";
 
 // P1-8 / P1-9 / P1-10 / P1-11 — unused layout seven gone; doctrine
-// constants point at live SoT. Browser supabase/client.ts deleted.
+// constants point at live SoT. Generic supabase/client.ts stays
+// deleted. browser.ts is the Realtime-only factory.
 
 const UNUSED_LAYOUT = [
   "src/components/layout/data-table.tsx",
@@ -35,6 +36,7 @@ describe("unused layout and doctrine constants (P1-8–11)", () => {
       expect(existsSync(path), path).toBe(true);
     }
     expect(existsSync("src/lib/supabase/client.ts")).toBe(false);
+    expect(existsSync("src/lib/supabase/browser.ts")).toBe(true);
     expect(existsSync("src/lib/supabase/server.ts")).toBe(true);
     expect(existsSync("src/lib/supabase/admin.ts")).toBe(true);
   });

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 
+import { retireLiveNotification } from "@/lib/notifications-realtime";
+
 import { markNotificationsRead } from "./actions";
 
 // A message link that marks the notification read on click, then navigates to where the
@@ -35,6 +37,7 @@ export function MessageLink({
         e.preventDefault();
         start(async () => {
           await markNotificationsRead([id]);
+          retireLiveNotification(id);
           router.push(href);
         });
       }}
