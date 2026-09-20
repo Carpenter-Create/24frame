@@ -16,11 +16,14 @@ import { SocialIcon } from "@/components/social/social-icon";
 import {
   SOCIAL_CREATE_SHEET_HEAD_CLASS,
   SOCIAL_CREATE_SHEET_HOST_CLASS,
+  SOCIAL_CREATE_SHEET_PRESENTATION,
   SOCIAL_CREATE_SHEET_SCRIM_CLASS,
   SOCIAL_CREATE_SHEET_SURFACE_CLASS,
   SOCIAL_CREATE_SHEET_TITLE_CLASS,
   SOCIAL_CREATE_TILE_CLASS,
+  SOCIAL_CREATE_TILE_ICON_CLASS,
   SOCIAL_CREATE_TILE_LABEL_CLASS,
+  SOCIAL_CREATE_TILE_WELL_CLASS,
   SOCIAL_CREATE_TILES,
   SOCIAL_CREATE_TILES_CLASS,
   type SocialCreateTileId,
@@ -28,12 +31,14 @@ import {
 import { SOCIAL_ICON_SIZE_CREATE_TILE } from "@/lib/social-icons";
 import { SOCIAL } from "@/lib/social";
 
-type CreateTrigger = ReactElement<{
+type CreateTriggerProps = {
   onClick?: (event: MouseEvent<HTMLElement>) => void;
   "aria-haspopup"?: string;
   "aria-expanded"?: boolean;
   "aria-controls"?: string;
-}>;
+};
+
+type CreateTrigger = ReactElement<CreateTriggerProps & Record<string, unknown>>;
 
 export function SocialCreateTile({
   tile,
@@ -49,11 +54,13 @@ export function SocialCreateTile({
       className={SOCIAL_CREATE_TILE_CLASS}
       onClick={onPick}
     >
-      <SocialIcon
-        name={tile.icon}
-        size={SOCIAL_ICON_SIZE_CREATE_TILE}
-        className="text-ink"
-      />
+      <span data-social-create-tile-well="" className={SOCIAL_CREATE_TILE_WELL_CLASS}>
+        <SocialIcon
+          name={tile.icon}
+          size={SOCIAL_ICON_SIZE_CREATE_TILE}
+          className={SOCIAL_CREATE_TILE_ICON_CLASS}
+        />
+      </span>
       <span className={SOCIAL_CREATE_TILE_LABEL_CLASS}>{tile.label}</span>
     </Link>
   );
@@ -118,6 +125,7 @@ export function SocialCreateSheet({
   const sheet = open ? (
     <div
       data-social-create-sheet=""
+      data-social-create-sheet-presentation={SOCIAL_CREATE_SHEET_PRESENTATION}
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}

@@ -35,6 +35,7 @@ describe("SocialCreateSheet", () => {
       }),
     );
     expect(html).toContain("data-social-create-sheet");
+    expect(html).toContain('data-social-create-sheet-presentation="imessage-new-message"');
     expect(html).toContain("data-social-create-tiles");
     expect(html).toContain('role="dialog"');
     expect(html).toContain(SOCIAL.create.title);
@@ -55,11 +56,16 @@ describe("SocialCreateSheet", () => {
     expect(html).toContain('data-social-icon="film-strip"');
     expect(html).toContain('data-social-icon="text-t"');
     expect(html).toContain('data-social-icon="camera"');
+    expect(html).toContain("data-social-create-tile-well");
     expect(html).toContain(`width="${SOCIAL_ICON_SIZE_CREATE_TILE}"`);
     expect(html).not.toContain("Drop a still");
     expect(html).not.toContain("in-app recorder");
     expect(html).not.toContain("data-social-create-fab");
     expect(html).not.toContain("MenuSurface");
+    expect(html).not.toContain("backdrop-blur");
+    expect(html).not.toContain("Photos");
+    expect(html).not.toContain("Camera");
+    expect(html).not.toContain("Attachment");
   });
 
   it("renders the tile primitive without a lookalike fork", () => {
