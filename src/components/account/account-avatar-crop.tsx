@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -29,14 +29,11 @@ export function AccountAvatarCrop({
   onConfirm: (frame: AvatarCropFrame) => void;
   pending?: boolean;
 }) {
-  const start = defaultAvatarCropFrame(imageWidth, imageHeight, AVATAR_CROP_VIEW_SIZE);
-  const [frame, setFrame] = useState<AvatarCropFrame>(start);
+  const [frame, setFrame] = useState<AvatarCropFrame>(() =>
+    defaultAvatarCropFrame(imageWidth, imageHeight, AVATAR_CROP_VIEW_SIZE),
+  );
   const drag = useRef<{ x: number; y: number; origin: AvatarCropFrame } | null>(null);
   const draw = avatarCoverDrawSize(imageWidth, imageHeight, AVATAR_CROP_VIEW_SIZE, frame.scale);
-
-  useEffect(() => {
-    setFrame(defaultAvatarCropFrame(imageWidth, imageHeight, AVATAR_CROP_VIEW_SIZE));
-  }, [imageWidth, imageHeight, previewUrl]);
 
   function moveTo(next: AvatarCropFrame) {
     const size = avatarCoverDrawSize(imageWidth, imageHeight, AVATAR_CROP_VIEW_SIZE, next.scale);

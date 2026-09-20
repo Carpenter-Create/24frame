@@ -297,6 +297,7 @@ export function SocialProfileEditForm({
           <div data-social-profile-edit-photo="" className={SOCIAL_PROFILE_EDIT_PHOTO_CLASS}>
             {cropFile && cropPreview && cropSize ? (
               <AccountAvatarCrop
+                key={cropPreview}
                 previewUrl={cropPreview}
                 imageWidth={cropSize.width}
                 imageHeight={cropSize.height}

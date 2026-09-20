@@ -79,7 +79,14 @@ function stubClient({
   profile = null,
   posts = [],
 }: {
-  profile?: { id: string; handle: string; display_name: string; status: string; bio?: string | null } | null;
+  profile?: {
+    id: string;
+    handle: string;
+    display_name: string;
+    status: string;
+    bio?: string | null;
+    welcome_video_key?: string | null;
+  } | null;
   posts?: {
     id: string;
     body: string;

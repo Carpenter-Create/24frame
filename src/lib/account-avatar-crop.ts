@@ -66,8 +66,8 @@ export function avatarCropSourceRect(
   const clamped = clampAvatarCropOffset(frame.offsetX, frame.offsetY, draw.width, draw.height, viewSize);
   const scale = draw.width / imageWidth;
   return {
-    sx: -clamped.offsetX / scale,
-    sy: -clamped.offsetY / scale,
+    sx: -clamped.offsetX / scale + 0,
+    sy: -clamped.offsetY / scale + 0,
     sw: viewSize / scale,
     sh: viewSize / scale,
   };
