@@ -16,8 +16,11 @@
 import {
   HOUSE_FILTER_OFF_CLASS,
   HOUSE_FILTER_ON_CLASS,
+  HOUSE_FILTER_PILL_CLASS,
+  HOUSE_FILTER_PILL_CLUSTER_CLASS,
   HOUSE_MODULE_CLASS,
   HOUSE_RAIL_PANEL_CLASS,
+  HOUSE_SCROLL_ROW_CLASS,
 } from "@/lib/house-shell";
 
 export const SOCIAL_FIGMA_HOME = "176:1085";
@@ -225,6 +228,12 @@ export const SOCIAL_HOME_TAB_CLASS =
 
 export const SOCIAL_TOPIC_CHIP_CLASS =
   "inline-flex items-center rounded-full bg-surface px-[10px] py-[5px] text-[11px] font-medium text-ink";
+
+// Home Topics. rail — house scroll-row + gapped display chips.
+// Not SegmentedTrack: this is a bank of lenses, not a selected exclusive menu.
+export const SOCIAL_TOPIC_RAIL_CLASS = HOUSE_SCROLL_ROW_CLASS;
+export const SOCIAL_TOPIC_CHIP_ROW_CLASS = `${HOUSE_FILTER_PILL_CLUSTER_CLASS} w-max`;
+export const SOCIAL_TOPIC_RAIL_CHIP_CLASS = `${HOUSE_FILTER_PILL_CLASS} ${HOUSE_FILTER_OFF_CLASS} shrink-0 whitespace-nowrap`;
 
 export const SOCIAL_FIRST_WIN_CLASS =
   "flex flex-col items-center justify-center gap-2.5 rounded-[8px] border border-hairline bg-surface px-5 pb-4 pt-5 text-center";

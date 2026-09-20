@@ -10,6 +10,7 @@ import { UserMenu } from "@/components/chrome/user-menu";
 import { PAGE_LEAD_STACK_CLASS, PageHeader } from "@/components/ui/page-header";
 import {
   DASHBOARD_CARD_PAD,
+  DASHBOARD_NEWS_SOURCE_CHIPS_CLASS,
   DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS,
   DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS,
   DASHBOARD_NEWS_SOURCE_TRACK_CLASS,
@@ -43,6 +44,7 @@ import {
   HOUSE_SEGMENTED_THUMB_CLASS,
   HOUSE_SEGMENTED_THUMB_DURATION_MS,
   HOUSE_SEGMENTED_THUMB_EASE,
+  HOUSE_SCROLL_ROW_CLASS,
   HOUSE_SEGMENTED_TRACK_CLASS,
   HOUSE_SEGMENTED_TRACK_SCROLL_CLASS,
   houseSegmentedThumbHidden,
@@ -186,6 +188,8 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(HOUSE_SEGMENTED_TRACK_CLASS).toContain("bg-surface-muted");
     expect(HOUSE_SEGMENTED_TRACK_CLASS).not.toContain("p-[");
     expect(HOUSE_SEGMENTED_TRACK_CLASS).not.toContain("w-max");
+    expect(HOUSE_SCROLL_ROW_CLASS).toBe("no-scrollbar w-full overflow-x-auto");
+    expect(HOUSE_SCROLL_ROW_CLASS).not.toContain("flex-wrap");
     expect(HOUSE_SEGMENTED_TRACK_SCROLL_CLASS).toBe(
       `${HOUSE_SEGMENTED_TRACK_CLASS} w-max min-w-full`,
     );
@@ -233,6 +237,7 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).toBe("text-white");
     expect(DASHBOARD_NEWS_SOURCE_CHIP_ON_CLASS).not.toContain("bg-accent");
     expect(DASHBOARD_NEWS_SOURCE_CHIP_OFF_CLASS).toBe(HOUSE_SEGMENTED_ITEM_OFF_CLASS);
+    expect(DASHBOARD_NEWS_SOURCE_CHIPS_CLASS).toBe(HOUSE_SCROLL_ROW_CLASS);
     expect(DASHBOARD_NEWS_SOURCE_TRACK_CLASS).toBe(HOUSE_SEGMENTED_TRACK_SCROLL_CLASS);
     expect(DASHBOARD_PERIOD_OPTION_SELECTED_CLASS).toBe(HOUSE_PERIOD_SELECTED_CLASS);
     expect(sideNav).toContain("HOUSE_RAIL_ACTIVE_CLASS");

@@ -53,6 +53,12 @@ describe("Social loading skeletons", () => {
     expect(home.indexOf("data-social-home-topics-skeleton")).toBeLessThan(
       home.indexOf("data-social-stories-skeleton"),
     );
+    const topicsSkeleton = home.slice(
+      home.indexOf("data-social-home-topics-skeleton"),
+      home.indexOf("data-social-stories-skeleton"),
+    );
+    expect(topicsSkeleton).toContain("overflow-x-auto");
+    expect(topicsSkeleton).not.toContain("flex-wrap");
     expect(home).toContain("data-social-stories-skeleton");
     expect(home).toContain("data-social-for-you-skeleton");
     expect(home).not.toContain("data-social-recent-chats-skeleton");

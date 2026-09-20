@@ -8,6 +8,8 @@ import {
   SOCIAL_FEED_ROW_CLASS,
   SOCIAL_FOR_YOU_CARD_CLASS,
   SOCIAL_FOR_YOU_RAIL_CLASS,
+  SOCIAL_TOPIC_CHIP_ROW_CLASS,
+  SOCIAL_TOPIC_RAIL_CLASS,
   SOCIAL_HOME_CENTER_CLASS,
   SOCIAL_HOME_LAYOUT_CLASS,
   SOCIAL_HOME_STORY_CARD_CLASS,
@@ -39,12 +41,14 @@ export function SocialHomeCenterSkeleton() {
         <Skeleton className="h-9 min-w-0 flex-1" />
         <Skeleton className="size-9 shrink-0" />
       </div>
-      <div data-social-home-topics-skeleton="" className={SOCIAL_FOR_YOU_CARD_CLASS}>
+      <div data-social-home-topics-skeleton="" className="flex min-w-0 flex-col gap-2">
         <Skeleton className="h-4 w-16" />
-        <div className="flex flex-wrap gap-2">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-6 w-20 rounded-full" />
-          ))}
+        <div className={SOCIAL_TOPIC_RAIL_CLASS}>
+          <div className={SOCIAL_TOPIC_CHIP_ROW_CLASS}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-8 w-24 shrink-0 rounded-full" />
+            ))}
+          </div>
         </div>
       </div>
       <SocialStoriesRailSkeleton tall />
