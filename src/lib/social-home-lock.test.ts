@@ -334,6 +334,14 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(rail).toContain("SOCIAL_STORIES_CARD_CLASS");
     expect(rail).toContain("SOCIAL_STORIES_PLUS_WELL_CLASS");
     expect(rail).toContain("SOCIAL_HOME_STORY_NAME_CLASS");
+    expect(rail).toContain("SOCIAL_STORY_CREATE_LABEL_TYPE_CLASS");
+    expect(chrome).toMatch(
+      /export const SOCIAL_STORY_CREATE_LABEL_TYPE_CLASS =\s*"t-body-sm font-medium text-ink"/,
+    );
+    expect(chrome).toMatch(
+      /export const SOCIAL_HOME_STORY_CREATE_LABEL_CLASS =\s*`[^`]*\$\{SOCIAL_STORY_CREATE_LABEL_TYPE_CLASS\}[^`]*`/,
+    );
+    expect(chrome).not.toContain("SOCIAL_HOME_STORY_CREATE_INITIAL_CLASS");
     expect(chrome).toContain("h-[168px]");
     expect(chrome).toContain("h-[192px]");
     expect(chrome).toContain("h-[200px]");

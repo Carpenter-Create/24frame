@@ -15,6 +15,7 @@ import {
   SOCIAL_STORIES_FACE_CLASS,
   SOCIAL_STORIES_MEDIA_CLASS,
   SOCIAL_STORIES_PLUS_WELL_CLASS,
+  SOCIAL_STORY_CREATE_LABEL_TYPE_CLASS,
 } from "@/lib/social-chrome";
 import { SOCIAL_ICON_SIZE_STORY_PLUS } from "@/lib/social-icons";
 import type { SocialStoryRailCard } from "@/lib/social-feed";
@@ -175,7 +176,9 @@ export function SocialStoriesRail({
                     className="text-accent-contrast"
                   />
                 </span>
-                <p className="text-center t-label font-medium text-ink">{SOCIAL.stories.create}</p>
+                <p className={cn("text-center", SOCIAL_STORY_CREATE_LABEL_TYPE_CLASS)}>
+                  {SOCIAL.stories.create}
+                </p>
               </div>
             </div>
             <p className="t-label font-medium text-ink">{SOCIAL.stories.you}</p>
