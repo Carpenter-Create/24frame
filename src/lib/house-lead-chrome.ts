@@ -6,19 +6,20 @@
 // Phone grammar Option 2 dest-chip amend (Adam 2026-09-18):
 //   Left: [emblem]
 //   Under-top: dest chips on Agg / Edu / Social. Home has none.
-//   Trailing: [search if needed] [24Frame AI] [bell] [avatar]
+//   Trailing: [search if needed] [theme] [24Frame AI] [bell] [avatar]
 //   Trailing rhythm: one --space-2 gap between distinct siblings.
 //   Phone icon hits hug the 16px glyph (HOUSE_HEADER_TRAILING_HIT_CLASS)
-//   without negative margin — #452 -mx collapsed AI onto the bell.
+//   without negative margin. #452 -mx collapsed AI onto the bell.
 //   Avatar stays 32.
-//   Bottom: HousePhoneBottomNav — Home · Social · Aggregation · Education
+//   Bottom: HousePhoneBottomNav. Home · Social · Aggregation · Education
 // Phone top has no workspace pill. Bottom bar owns workspace switching.
 // 24Frame AI sits immediately left of the notification bell on every
 // house chrome path (Home · Social · Aggregation · Education ·
-// Settings). It opens the Mercury ?ai=1 overlay window — never a
+// Settings). It opens the Mercury ?ai=1 overlay window, never a
 // workspace hop. Expand/collapse stays overlay-scoped. Close strips
 // ?ai=1 and leaves the current path. Ask AI is header + Home module
-// only (#465). Sun/moon stays desktop-only (hidden on phone).
+// only (#465). Sun/moon is shared immediately left of Ask on every
+// breakpoint. One trail. No phone-only ThemeToggle twin.
 // Desktop md+ keeps switcher · theme · Ask · bell · avatar. The Ask
 // control is shared so phone and desktop do not fork a second mark.
 // Social live explore search and Education quiet courses/videos
@@ -89,7 +90,7 @@ export const HOUSE_LEAD_SEARCH_PILL_CLASS =
 // Equal CSS gap was not equal air when 16px glyphs sat in size-8
 // hits beside a 32px avatar. Phone hit hugs the 16px glyph so
 // APP_HEADER_TRAILING_CLUSTER_CLASS phone --space-3 / desktop --space-2
-// is edge-to-edge AI · bell · avatar. Do not cancel padding with -mx:
+// is edge-to-edge theme · AI · bell · avatar. Do not cancel padding with -mx:
 // that pulled adjacent hits to zero flex width and stacked the glyphs.
 // Do not add phone padding that overflows a size-4 box — same overlap.
 // Desktop stays the 32 circle. Glyph size is unchanged (size-4
@@ -98,15 +99,15 @@ export const HOUSE_LEAD_SEARCH_PILL_CLASS =
 export const HOUSE_HEADER_TRAILING_HIT_CLASS =
   `flex size-4 min-h-4 min-w-4 shrink-0 items-center justify-center overflow-visible ${HOUSE_ICON_BUTTON_CLASS} md:size-8 md:min-h-8 md:min-w-8`;
 
-// Phone wrappers stay contents so Ask · bell · search are flex
-// siblings of the avatar and share the cluster gap. They are not
-// a collapse device — hits must occupy their size-4 box.
+// Phone wrappers stay contents so theme · Ask · bell · search are
+// flex siblings of the avatar and share the cluster gap. They are
+// not a collapse device. Hits must occupy their size-4 box.
 export const HOUSE_HEADER_TRAILING_SLOT_CLASS = "contents";
 
 export const HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS = "contents md:hidden";
 
-// Avatar disk is the 32 visual. No extra pad — the shared cluster
-// gap is the only air to AI / bell / search.
+// Avatar disk is the 32 visual. No extra pad. The shared cluster
+// gap is the only air to theme / AI / bell / search.
 export const HOUSE_HEADER_TRAILING_AVATAR_CLASS =
   "flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-muted t-body-sm font-medium text-ink-2";
 

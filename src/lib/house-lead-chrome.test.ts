@@ -213,7 +213,7 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(HOUSE_THEME_TOGGLE_CLASS).not.toContain("border-hairline");
   });
 
-  it("evens phone trailing AI · bell · avatar with one gap and no overlapping hits", () => {
+  it("evens phone trailing theme · AI · bell · avatar with one gap and no overlapping hits", () => {
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("size-4");
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).toContain("md:size-8");
     expect(HOUSE_HEADER_TRAILING_HIT_CLASS).not.toMatch(/-m[xlr]-/);

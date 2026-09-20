@@ -302,11 +302,13 @@ export function AppShell({
           on HousePhoneDestChips under the top. Home has no dest chip
           row. Phone top has no workspace pill.
           HousePhoneBottomNav switches Home · Social · Aggregation ·
-          Education. Trailing is search (if needed) · 24Frame AI ·
-          bell · avatar. Theme stays desktop-only. Ask AI is header
-          + Home module only (#465). Emblem links workspace
-          home; it does not open the rail. Desktop keeps Ask · theme ·
-          switcher + avatar. Brand sits on the full-width top, not a
+          Education. Trailing is search (if needed) · theme ·
+          24Frame AI · bell · avatar. Sun/moon is shared immediately
+          left of Ask on every breakpoint. One trail. No phone-only
+          ThemeToggle twin. Ask AI is header + Home module only
+          (#465). Emblem links workspace
+          home; it does not open the rail. Desktop keeps switcher ·
+          theme · Ask · bell · avatar. Brand sits on the full-width top, not a
           second rail chrome. Period stays on the Dashboard org row.
           No org switcher on any route. Aggregation mid-lead stays
           empty. Education mounts a quiet course/video search

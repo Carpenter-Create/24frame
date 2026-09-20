@@ -254,7 +254,7 @@ describe("UserMenu actions", () => {
 });
 
 describe("UserMenu Mercury quiet craft", () => {
-  it("keeps the desktop header toggle in HouseLeadChrome — phone hides that wrap", () => {
+  it("keeps the header theme toggle in HouseLeadChrome on every breakpoint", () => {
     const shellSrc = readFileSync(join(here, "app-shell.tsx"), "utf8");
     const leadSrc = readFileSync(join(here, "house-lead-chrome.tsx"), "utf8");
     expect(shellSrc).not.toContain("ThemeToggle");
@@ -264,7 +264,10 @@ describe("UserMenu Mercury quiet craft", () => {
     expect(menuSrc).not.toContain("ThemeGlyph");
     expect(leadSrc).toContain("ThemeToggle");
     expect(leadSrc).toContain("<ThemeToggle />");
-    expect(leadSrc).toContain("data-app-header-desktop-trailing");
-    expect(leadSrc).toContain("APP_HEADER_DESKTOP_TRAILING_CLASS");
+    expect(leadSrc).not.toContain("data-app-header-desktop-trailing");
+    expect(leadSrc).not.toContain("APP_HEADER_DESKTOP_TRAILING_CLASS");
+    expect(leadSrc.indexOf("<ThemeToggle />")).toBeLessThan(
+      leadSrc.indexOf("<AskAssistantHeaderLink"),
+    );
   });
 });
