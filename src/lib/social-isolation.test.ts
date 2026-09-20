@@ -233,6 +233,23 @@ describe("social isolation lock", () => {
     expect(insert).toContain("discoverable: true");
   });
 
+  it("does not act-as a client on Social — view-as stays Aggregation-only", () => {
+    const actions = readFileSync("src/app/(app)/social/actions.ts", "utf8");
+    const layout = readFileSync("src/app/(app)/social/layout.tsx", "utf8");
+    const session = readFileSync("src/lib/social-session.ts", "utf8");
+    const dms = readFileSync("src/app/(app)/social/dms/page.tsx", "utf8");
+    const profile = readFileSync("src/app/(app)/social/profile/page.tsx", "utf8");
+    for (const src of [actions, layout, session, dms, profile]) {
+      expect(src).not.toContain("startAggregationViewAs");
+      expect(src).not.toContain("stopAggregationViewAs");
+      expect(src).not.toContain("24frame_aggregation_view_as");
+      expect(src).not.toContain("AggregationViewAsBanner");
+    }
+    const cookie = readFileSync("src/lib/aggregation-impersonation.ts", "utf8");
+    expect(cookie).toContain('AGGREGATION_VIEW_AS_COOKIE_PATH = AGGREGATION_ROOT');
+    expect(cookie).toContain("isSocialPath(pathname)");
+  });
+
   it("rewrites apex /@handle to /social/u/{display} and 301s leftover /social/@handle", () => {
     const social = readFileSync("src/lib/social.ts", "utf8");
     const middleware = readFileSync("src/lib/supabase/middleware.ts", "utf8");

@@ -7,8 +7,12 @@ vi.mock("next/navigation", () => ({
   },
 }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
+vi.mock("@/app/(app)/aggregation/view-as-actions", () => ({
+  startAggregationViewAs: vi.fn(),
+}));
 
 import { createClient } from "@/lib/supabase/server";
+import { AGGREGATION_VIEW_AS } from "@/lib/aggregation-impersonation";
 import { CLIENT_PROFILE, CLIENTS_PAGE } from "@/lib/clients";
 
 import ClientOrgProfilePage from "./page";
@@ -62,6 +66,10 @@ describe("client org profile", () => {
     expect(html).not.toContain("EMAIL");
     expect(html).not.toContain("ROLE");
     expect(html).not.toContain("LAST SEEN");
+    expect(html).toContain(AGGREGATION_VIEW_AS.start);
+    expect(html).toContain(`name="orgId"`);
+    expect(html).toContain(ORG_ID);
+    expect(html).not.toContain("/social");
   });
 
   it("404s when the org is not in the directory read", async () => {

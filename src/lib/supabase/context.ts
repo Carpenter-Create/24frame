@@ -2,6 +2,13 @@ import "server-only";
 import { cache } from "react";
 import { cookies } from "next/headers";
 
+import {
+  AGGREGATION_VIEW_AS_COOKIE,
+  applyAggregationViewAs,
+  parseAggregationViewAsOrgId,
+  type AggregationViewAs,
+} from "@/lib/aggregation-impersonation";
+
 import { createClient } from "./server";
 import { getAuthUser, type AuthUser } from "./auth";
 import type { Database } from "./database.types";
@@ -20,6 +27,8 @@ export type OrgContext = {
   /** account_owner or delivery_ops on the active org. */
   canOperate: boolean;
   isGcStaff: boolean;
+  /** Staff Aggregation view-as. Null on Social / Staff / members. */
+  aggregationViewAs: AggregationViewAs | null;
   /** NOT awaited — see the note in getOrgContext. Unwrap with use() inside Suspense. */
   unread: Promise<number>;
 };
@@ -74,15 +83,33 @@ export const getOrgContext = cache(async (): Promise<OrgContext | null> => {
   const cookieOrg = cookieStore.get("gc_active_org")?.value ?? null;
   const activeRow = rows.find((m) => m.organizations.id === cookieOrg) ?? rows[0] ?? null;
   const activeRole = activeRow?.role ?? null;
+  const isGcStaff = !!gcStaffRes.data;
 
-  return {
-    user,
-    rows,
-    orgs: rows.map((m) => ({ id: m.organizations.id, name: m.organizations.name })),
-    activeOrg: activeRow?.organizations ?? null,
-    activeRole,
-    canOperate: activeRole === "account_owner" || activeRole === "delivery_ops",
-    isGcStaff: !!gcStaffRes.data,
-    unread,
-  };
+  // Cookie path is /aggregation. Social / Staff / Home never send it.
+  const viewAsOrgId = isGcStaff
+    ? parseAggregationViewAsOrgId(cookieStore.get(AGGREGATION_VIEW_AS_COOKIE)?.value)
+    : null;
+  const viewAsOrg = viewAsOrgId
+    ? (
+        await supabase
+          .from("organizations")
+          .select("id, name, status")
+          .eq("id", viewAsOrgId)
+          .maybeSingle()
+      ).data
+    : null;
+
+  return applyAggregationViewAs(
+    {
+      user,
+      rows,
+      orgs: rows.map((m) => ({ id: m.organizations.id, name: m.organizations.name })),
+      activeOrg: activeRow?.organizations ?? null,
+      activeRole,
+      canOperate: activeRole === "account_owner" || activeRole === "delivery_ops",
+      isGcStaff,
+      unread,
+    },
+    viewAsOrg,
+  );
 });
