@@ -15,7 +15,7 @@ import { SOCIAL_HOME_STACK_LOCK, SOCIAL_HOME_STACK_ORDER } from "./social-home";
 import { SOCIAL, SOCIAL_PROFILE_TABS, SOCIAL_ROUTES } from "./social";
 
 const home = readFileSync("src/app/(app)/social/page.tsx", "utf8");
-const stack = readFileSync("src/components/social/social-home-stack.tsx", "utf8");
+const homeSkeleton = readFileSync("src/components/social/social-skeletons.tsx", "utf8");
 const explore = readFileSync("src/app/(app)/social/explore/page.tsx", "utf8");
 const create = readFileSync("src/app/(app)/social/create/page.tsx", "utf8");
 const stories = readFileSync("src/app/(app)/social/stories/page.tsx", "utf8");
@@ -63,16 +63,19 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).toContain("SocialStoriesRail");
     expect(home).toContain("SocialHomeComposer");
     expect(home).toContain("SocialHomeTopics");
-    expect(home).toContain("SocialHomeStack");
+    expect(home).toContain("data-social-home-stack={SOCIAL_HOME_STACK_LOCK}");
+    expect(homeSkeleton).toContain("data-social-home-stack={SOCIAL_HOME_STACK_LOCK}");
     expect(SOCIAL_HOME_STACK_LOCK).toBe("lock_airy_topics_under_cut_phone_composer");
     expect(SOCIAL_HOME_STACK_ORDER).toEqual(["composer", "stories", "topics", "wall"]);
-    const stackRender = stack.slice(stack.indexOf("return ("));
-    expect(stackRender.indexOf("{composer}")).toBeLessThan(stackRender.indexOf("{stories}"));
-    expect(stackRender.indexOf("{stories}")).toBeLessThan(stackRender.indexOf("{topics}"));
-    expect(stackRender.indexOf("{topics}")).toBeLessThan(stackRender.indexOf("{wall}"));
     expect(home.indexOf("<SocialHomeComposer")).toBeLessThan(home.indexOf("<SocialStoriesRail"));
     expect(home.indexOf("<SocialStoriesRail")).toBeLessThan(home.indexOf("<SocialHomeTopics"));
     expect(home.indexOf("<SocialHomeTopics")).toBeLessThan(home.indexOf("<SocialHomeTabs"));
+    expect(homeSkeleton.indexOf("data-social-home-composer-skeleton")).toBeLessThan(
+      homeSkeleton.indexOf("SocialStoriesRailSkeleton"),
+    );
+    expect(homeSkeleton.indexOf("SocialStoriesRailSkeleton")).toBeLessThan(
+      homeSkeleton.indexOf("data-social-home-topics-skeleton"),
+    );
     expect(home).toContain("SocialHomeTabs");
     expect(home).not.toContain("SocialProfileTabs");
     expect(home).not.toContain("creditsEmpty");

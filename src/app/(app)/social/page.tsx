@@ -5,7 +5,6 @@ import { InlineNotice } from "@/components/ui/inline-notice";
 import { SocialEmpty } from "@/components/social/social-empty";
 import { SocialForYouRail } from "@/components/social/social-for-you";
 import { SocialHomeComposer } from "@/components/social/social-home-composer";
-import { SocialHomeStack } from "@/components/social/social-home-stack";
 import { SocialHomeTabs } from "@/components/social/social-home-tabs";
 import { SocialHomeTopics } from "@/components/social/social-home-topics";
 import {
@@ -26,7 +25,7 @@ import {
 } from "@/lib/social-categories";
 import { latestDiscoverableCourse, loadDiscoverableCourses } from "@/lib/courses";
 import { signedEducationCoverUrls } from "@/lib/s3-education";
-import { followingAuthorIds } from "@/lib/social-home";
+import { followingAuthorIds, SOCIAL_HOME_STACK_LOCK } from "@/lib/social-home";
 import {
   SOCIAL_FOLLOWING_WALL_CURSOR_PARAM,
   parseFollowingWallCursorParam,
@@ -164,59 +163,49 @@ async function SocialHomeCenter({
   const photoUrl = faces.get(ctx.user.id) ?? null;
 
   return (
-    <div className={SOCIAL_HOME_CENTER_CLASS}>
-      <h1 className="sr-only">{SOCIAL.home.title}</h1>
-      <p className="sr-only">{SOCIAL.home.subtitle}</p>
-      <SocialHomeStack
-        composer={
-          profile ? (
-            <SocialHomeComposer authorName={profile.display_name} authorPhotoUrl={photoUrl} />
-          ) : null
-        }
-        stories={
-          <>
-            <SocialStoriesRail
-              cards={rail}
-              authors={authors}
-              faces={faces}
-              canCreate={!!profile}
-              createName={profile?.display_name}
-              createPhotoUrl={photoUrl}
-            />
-            {storiesPage.truncated ? (
-              <InlineNotice tone="info" data-social-stories-truncated="">
-                {SOCIAL.home.truncatedStories}
-              </InlineNotice>
-            ) : null}
-          </>
-        }
-        topics={<SocialHomeTopics />}
-        wall={
-          <>
-            {followees.truncated ? (
-              <InlineNotice tone="info" data-social-followees-truncated="">
-                {SOCIAL.home.truncatedFollowees}
-              </InlineNotice>
-            ) : null}
-            <SocialHomeTabs active={lane} />
-            {lane === "for-you" ? (
-              <SocialHomeForYouLane suggested={suggested} faces={faces} />
-            ) : (
-              <SocialHomeFollowingWall
-                wall={wall}
-                posts={posts}
-                authors={authors}
-                faces={faces}
-                groups={groups}
-                liked={liked}
-                media={media}
-                profile={profile}
-                topic={topic}
-              />
-            )}
-          </>
-        }
+    <div data-social-home-stack={SOCIAL_HOME_STACK_LOCK} className={SOCIAL_HOME_CENTER_CLASS}>
+      <div className="sr-only">
+        <h1>{SOCIAL.home.title}</h1>
+        <p>{SOCIAL.home.subtitle}</p>
+      </div>
+      {profile ? (
+        <SocialHomeComposer authorName={profile.display_name} authorPhotoUrl={photoUrl} />
+      ) : null}
+      <SocialStoriesRail
+        cards={rail}
+        authors={authors}
+        faces={faces}
+        canCreate={!!profile}
+        createName={profile?.display_name}
+        createPhotoUrl={photoUrl}
       />
+      {storiesPage.truncated ? (
+        <InlineNotice tone="info" data-social-stories-truncated="">
+          {SOCIAL.home.truncatedStories}
+        </InlineNotice>
+      ) : null}
+      <SocialHomeTopics />
+      {followees.truncated ? (
+        <InlineNotice tone="info" data-social-followees-truncated="">
+          {SOCIAL.home.truncatedFollowees}
+        </InlineNotice>
+      ) : null}
+      <SocialHomeTabs active={lane} />
+      {lane === "for-you" ? (
+        <SocialHomeForYouLane suggested={suggested} faces={faces} />
+      ) : (
+        <SocialHomeFollowingWall
+          wall={wall}
+          posts={posts}
+          authors={authors}
+          faces={faces}
+          groups={groups}
+          liked={liked}
+          media={media}
+          profile={profile}
+          topic={topic}
+        />
+      )}
     </div>
   );
 }
