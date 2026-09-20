@@ -228,4 +228,22 @@ describe("segmented track optimistic selection", () => {
     ).toBe(1);
     expect(readSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.workspace)).toBeUndefined();
   });
+
+  it("keeps the latest click ink when an earlier hop commits first", () => {
+    expect(
+      commitSegmentedVisualIntent(SEGMENTED_TRACK_PERSIST.period, 1, 0),
+    ).toBe(1);
+    expect(
+      commitSegmentedVisualIntent(SEGMENTED_TRACK_PERSIST.period, 4, 0),
+    ).toBe(4);
+    expect(readSegmentedVisualPersist(SEGMENTED_TRACK_PERSIST.period)).toEqual({
+      visualIndex: 4,
+      fromRouteIndex: 0,
+      viaRouteIndexes: [1],
+    });
+    expect(resolveSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period, 1)).toBe(4);
+    expect(readSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period)).toBe(4);
+    expect(resolveSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period, 4)).toBe(4);
+    expect(readSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period)).toBeUndefined();
+  });
 });

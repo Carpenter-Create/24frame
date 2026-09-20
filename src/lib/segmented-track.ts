@@ -10,10 +10,11 @@
 // the track (Home `?period=` Suspense, workspace Social fork)
 // would otherwise reset ink to the stale route while the thumb
 // flight continues. Persist remembers the route index at click
-// and only wins while that stale route is still showing. A new
-// committed index (Settings -1, leave/return, settled hop)
-// yields to the route. No-op re-clicks do not write persist.
-// Hosts must not keep a local pendingIndex / pendingFamily fork.
+// and only wins while that stale route — or an intermediate hop
+// from a later click — is still showing. A new committed index
+// (Settings -1, leave/return, settled hop) yields to the route.
+// No-op re-clicks do not write persist. Hosts must not keep a
+// local pendingIndex / pendingFamily fork.
 
 import {
   HOUSE_SEGMENTED_THUMB_DURATION_MS,
@@ -52,6 +53,7 @@ export const SEGMENTED_TRACK_PERSIST = {
 export type SegmentedVisualPersist = {
   visualIndex: number;
   fromRouteIndex: number;
+  viaRouteIndexes?: number[];
 };
 
 const thumbFlights = new Map<string, SegmentedThumbFlight>();
@@ -121,11 +123,23 @@ export function writeSegmentedVisualIndex(
   persistKey: string,
   visualIndex: number,
   fromRouteIndex: number,
+  viaRouteIndexes?: readonly number[],
 ): void {
   if (!Number.isInteger(visualIndex) || !Number.isInteger(fromRouteIndex)) {
     return;
   }
-  visualIndexes.set(persistKey, { visualIndex, fromRouteIndex });
+  if (
+    viaRouteIndexes != null &&
+    viaRouteIndexes.some((index) => !Number.isInteger(index))
+  ) {
+    return;
+  }
+  visualIndexes.set(
+    persistKey,
+    viaRouteIndexes && viaRouteIndexes.length > 0
+      ? { visualIndex, fromRouteIndex, viaRouteIndexes: [...viaRouteIndexes] }
+      : { visualIndex, fromRouteIndex },
+  );
 }
 
 export function clearSegmentedVisualIndex(persistKey?: string): void {
@@ -136,7 +150,7 @@ export function clearSegmentedVisualIndex(persistKey?: string): void {
   visualIndexes.clear();
 }
 
-/** Persist wins only while the stale click-time route is still showing. */
+/** Persist wins while the click-time route or an intermediate hop is showing. */
 export function resolveSegmentedVisualIndex(
   persistKey: string | undefined,
   routeIndex: number,
@@ -154,7 +168,10 @@ export function resolveSegmentedVisualIndex(
     visualIndexes.delete(persistKey);
     return routeIndex;
   }
-  if (pending.fromRouteIndex === routeIndex) {
+  if (
+    pending.fromRouteIndex === routeIndex ||
+    pending.viaRouteIndexes?.includes(routeIndex)
+  ) {
     return pending.visualIndex;
   }
   visualIndexes.delete(persistKey);
@@ -173,9 +190,30 @@ export function commitSegmentedVisualIntent(
     return routeIndex;
   }
   if (persistKey) {
-    writeSegmentedVisualIndex(persistKey, intentIndex, routeIndex);
+    const existing = visualIndexes.get(persistKey);
+    const fromRouteIndex = existing?.fromRouteIndex ?? routeIndex;
+    writeSegmentedVisualIndex(
+      persistKey,
+      intentIndex,
+      fromRouteIndex,
+      hopViaRouteIndexes(existing, intentIndex, fromRouteIndex),
+    );
   }
   return intentIndex;
+}
+
+function hopViaRouteIndexes(
+  existing: SegmentedVisualPersist | undefined,
+  intentIndex: number,
+  fromRouteIndex: number,
+): number[] | undefined {
+  if (existing == null) return undefined;
+  const via = new Set(existing.viaRouteIndexes);
+  via.add(existing.visualIndex);
+  via.delete(fromRouteIndex);
+  via.delete(intentIndex);
+  if (via.size === 0) return undefined;
+  return [...via];
 }
 
 export function isUsableSegmentedThumbBox(box: SegmentedThumbBox): boolean {
