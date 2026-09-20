@@ -14,6 +14,7 @@ import {
   SOCIAL_TOPIC_RAIL_STACK_CLASS,
   SOCIAL_HOME_CENTER_CLASS,
   SOCIAL_HOME_LAYOUT_CLASS,
+  SOCIAL_PROFILE_CENTER_CLASS,
   SOCIAL_HOME_STORY_CARD_CLASS,
   SOCIAL_PROFILE_EDIT_HOST_CLASS,
   SOCIAL_PROFILE_EDIT_SHEET_CLASS,
@@ -106,7 +107,7 @@ export function SocialHomeSkeleton() {
 
 export function SocialProfileCenterSkeleton() {
   return (
-    <div className={SOCIAL_HOME_CENTER_CLASS}>
+    <div className={SOCIAL_PROFILE_CENTER_CLASS}>
       <div className={SOCIAL_PROFILE_IDENTITY_CLASS}>
         <div className={SOCIAL_PROFILE_HEAD_CLASS}>
           <Skeleton className={SOCIAL_AVATAR_PROFILE_CLASS} />
@@ -120,8 +121,8 @@ export function SocialProfileCenterSkeleton() {
         </div>
         <div className={SOCIAL_PROFILE_FACE_CLASS}>
           <Skeleton className="h-4 w-32" />
-          <Skeleton className="h-7 w-48 rounded-full" />
           <Skeleton className="h-3 w-2/3" />
+          <Skeleton className="h-7 w-24 rounded-full" />
         </div>
       </div>
       <div className="flex gap-2">
@@ -139,9 +140,8 @@ export function SocialProfileCenterSkeleton() {
 
 export function SocialProfileSkeleton() {
   return (
-    <div data-social-profile-skeleton="" className={SOCIAL_HOME_LAYOUT_CLASS}>
+    <div data-social-profile-skeleton="">
       <SocialProfileCenterSkeleton />
-      <SocialForYouSkeleton />
     </div>
   );
 }

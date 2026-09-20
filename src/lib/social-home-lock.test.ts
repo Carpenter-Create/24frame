@@ -10,6 +10,7 @@ import {
   SOCIAL_FIGMA_PROFILE_BIO,
   SOCIAL_FIGMA_PROFILE_EDIT,
   SOCIAL_FIGMA_PROFILE_OWN,
+  SOCIAL_PROFILE_CENTER_CLASS,
 } from "./social-chrome";
 import { SOCIAL_HOME_STACK_LOCK, SOCIAL_HOME_STACK_ORDER } from "./social-home";
 import { SOCIAL, SOCIAL_PROFILE_TABS, SOCIAL_ROUTES } from "./social";
@@ -621,9 +622,28 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(card).toContain("socialProfileRolesFace");
     expect(card).not.toContain("data-social-profile-handle");
     expect(chrome).toContain("SOCIAL_PROFILE_HEAD_CLASS");
-    expect(chrome).toContain("SOCIAL_PROFILE_ROLES_PILL_CLASS");
-    expect(chrome).toContain("HOUSE_PILL_MEASURE_CLASS");
+    expect(chrome).toContain("SOCIAL_PROFILE_ROLES_ROW_CLASS");
+    expect(chrome).toContain("SOCIAL_PROFILE_ROLE_PILL_CLASS");
+    expect(chrome).toContain("SOCIAL_PROFILE_CENTER_CLASS");
+    expect(chrome).toContain("HOUSE_PILL_ITEM_CLASS");
     expect(chrome).toContain("HOUSE_FILTER_OFF_CLASS");
+    expect(SOCIAL_PROFILE_CENTER_CLASS).toContain(`md:max-w-[${SOCIAL_DESKTOP_MEASURE.center}px]`);
+    expect(SOCIAL_PROFILE_CENTER_CLASS).toContain("mx-auto");
+    expect(SOCIAL_PROFILE_CENTER_CLASS).toContain("w-full");
+    expect(profile).toContain("SOCIAL_PROFILE_CENTER_CLASS");
+    expect(publicProfile).toContain("SOCIAL_PROFILE_CENTER_CLASS");
+    expect(profile).not.toContain("SocialForYouRail");
+    expect(profile).not.toContain("SocialProfileForYouSlot");
+    expect(profile).not.toContain("SocialForYouSkeleton");
+    expect(profile).not.toContain("loadSuggestedPeople");
+    expect(publicProfile).not.toContain("SocialForYouRail");
+    expect(publicProfile).not.toContain("loadSuggestedPeople");
+    expect(home).toContain("SocialForYouRail");
+    expect(card).toContain("socialProfileRolesMoreLabel");
+    expect(card).not.toContain("socialProfileRolesLine");
+    expect(homeSkeleton).not.toMatch(
+      /data-social-profile-skeleton[\s\S]*SocialForYouSkeleton/,
+    );
     expect(readFileSync("src/components/social/social-profile-stats.tsx", "utf8")).toContain(
       "socialProfileFollowsHref",
     );

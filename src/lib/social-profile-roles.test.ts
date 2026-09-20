@@ -7,7 +7,6 @@ import {
   SOCIAL_PROFILE_ROLES_DISPLAY_CAP,
   SOCIAL_PROFILE_ROLES_FACE,
   SOCIAL_PROFILE_ROLES_MAX,
-  SOCIAL_PROFILE_ROLES_SEP,
   SOCIAL_PROFILE_ROLE_GROUPS,
   SOCIAL_PROFILE_ROLE_SLUG_ALIASES,
   canonicalSocialProfileRoleSlug,
@@ -18,8 +17,7 @@ import {
   socialProfileRoleLabel,
   socialProfileRolesCountLabel,
   socialProfileRolesFace,
-  socialProfileRolesFaceLine,
-  socialProfileRolesLine,
+  socialProfileRolesMoreLabel,
   socialProfileRolesWrite,
   toggleSocialProfileRole,
 } from "./social-profile-roles";
@@ -53,7 +51,6 @@ describe("social profile roles", () => {
     expect(SOCIAL_PROFILE_ROLES_MAX).toBe(5);
     expect(SOCIAL_PROFILE_ROLES_DISPLAY_CAP).toBe(3);
     expect(SOCIAL_PROFILE_ROLES_FACE).toBe(SOCIAL_PROFILE_ROLES_DISPLAY_CAP);
-    expect(SOCIAL_PROFILE_ROLES_SEP).toBe(" · ");
     expect(SOCIAL_PROFILE_ROLES_COUNT).toBe("{n} / {max}");
     expect(socialProfileRolesCountLabel(3)).toBe("3 / 5");
     expect(
@@ -287,26 +284,58 @@ describe("social profile roles", () => {
     expect(toggleSocialProfileRole(["actor"], "nope")).toEqual(["actor"]);
   });
 
-  it("prints a muted middot line in crafts order, caps display at 3 +N, and omits when empty", () => {
-    expect(socialProfileRolesLine([])).toBeNull();
-    expect(socialProfileRolesLine(null)).toBeNull();
-    expect(socialProfileRolesLine(["actor"])).toBe("Actor");
-    expect(socialProfileRolesLine(["actor", "producer"])).toBe("Actor · Producer");
-    expect(socialProfileRolesLine(["actor", "producer", "screenwriter"])).toBe(
-      "Actor · Producer · Screenwriter",
-    );
-    expect(socialProfileRolesLine(["actor", "producer", "screenwriter", "investor"])).toBe(
-      "Actor · Producer · Screenwriter +1",
-    );
+  it("caps display pills at 3 +N in crafts order and omits when empty", () => {
+    expect(socialProfileRolesFace([])).toEqual({ shown: [], extra: 0 });
+    expect(socialProfileRolesFace(null)).toEqual({ shown: [], extra: 0 });
+    expect(socialProfileRolesFace(["actor"])).toEqual({
+      shown: [{ slug: "actor", label: "Actor" }],
+      extra: 0,
+    });
+    expect(socialProfileRolesFace(["actor", "producer"])).toEqual({
+      shown: [
+        { slug: "actor", label: "Actor" },
+        { slug: "producer", label: "Producer" },
+      ],
+      extra: 0,
+    });
+    expect(socialProfileRolesFace(["actor", "producer", "screenwriter"])).toEqual({
+      shown: [
+        { slug: "actor", label: "Actor" },
+        { slug: "producer", label: "Producer" },
+        { slug: "screenwriter", label: "Screenwriter" },
+      ],
+      extra: 0,
+    });
+    expect(socialProfileRolesFace(["actor", "producer", "screenwriter", "investor"])).toEqual({
+      shown: [
+        { slug: "actor", label: "Actor" },
+        { slug: "producer", label: "Producer" },
+        { slug: "screenwriter", label: "Screenwriter" },
+      ],
+      extra: 1,
+    });
     expect(
-      socialProfileRolesLine(["actor", "producer", "screenwriter", "investor", "director"]),
-    ).toBe("Actor · Producer · Screenwriter +2");
-    expect(socialProfileRolesLine(["investor", "actor", "producer"])).toBe(
-      "Investor · Actor · Producer",
-    );
-    expect(socialProfileRolesLine(["screenwriter", "investor"])).not.toBe(
-      "Investor · Screenwriter",
-    );
+      socialProfileRolesFace(["actor", "producer", "screenwriter", "investor", "director"]),
+    ).toEqual({
+      shown: [
+        { slug: "actor", label: "Actor" },
+        { slug: "producer", label: "Producer" },
+        { slug: "screenwriter", label: "Screenwriter" },
+      ],
+      extra: 2,
+    });
+    expect(socialProfileRolesFace(["investor", "actor", "producer"]).shown.map((role) => role.slug)).toEqual([
+      "investor",
+      "actor",
+      "producer",
+    ]);
+    expect(socialProfileRolesFace(["screenwriter", "investor"]).shown.map((role) => role.slug)).not.toEqual([
+      "investor",
+      "screenwriter",
+    ]);
+    expect(socialProfileRolesMoreLabel(0)).toBe("");
+    expect(socialProfileRolesMoreLabel(1)).toBe("+1");
+    expect(socialProfileRolesMoreLabel(2)).toBe("+2");
   });
 
   it("lists every selected Profession in crafts order and moves by id", () => {
@@ -320,21 +349,6 @@ describe("social profile roles", () => {
       ],
       extra: 0,
     });
-    expect(
-      socialProfileRolesFace(["actor", "producer", "screenwriter", "investor"]),
-    ).toEqual({
-      shown: [
-        { slug: "actor", label: "Actor" },
-        { slug: "producer", label: "Producer" },
-        { slug: "screenwriter", label: "Screenwriter" },
-      ],
-      extra: 1,
-    });
-    expect(socialProfileRolesFaceLine([])).toBeNull();
-    expect(socialProfileRolesFaceLine(["actor", "producer"])).toBe("Actor · Producer");
-    expect(socialProfileRolesFaceLine(["actor", "producer", "screenwriter", "investor"])).toBe(
-      "Actor · Producer · Screenwriter +1",
-    );
     expect(
       socialProfileRoleChips(["actor", "producer", "screenwriter", "investor", "director"]),
     ).toEqual([
@@ -378,14 +392,22 @@ describe("social profile roles", () => {
     const editSrc = readFileSync("src/components/social/social-profile-edit.tsx", "utf8");
     const chromeSrc = readFileSync("src/lib/social-chrome.ts", "utf8");
     const identitySrc = readFileSync("src/components/social/social-ui.tsx", "utf8");
-    expect(rolesSrc).toContain("socialProfileRolesLine");
+    expect(rolesSrc).toContain("socialProfileRolesFace");
+    expect(rolesSrc).toContain("socialProfileRolesMoreLabel");
+    expect(rolesSrc).not.toContain("socialProfileRolesLine");
+    expect(rolesSrc).not.toContain("SOCIAL_PROFILE_ROLES_SEP");
     expect(rolesSrc).toContain("SOCIAL_PROFILE_ROLES_DISPLAY_CAP");
     expect(chromeSrc).toContain("SOCIAL_PROFILE_HEAD_CLASS");
     expect(chromeSrc).toContain("SOCIAL_PROFILE_STATS_CLASS");
-    expect(chromeSrc).toContain("SOCIAL_PROFILE_ROLES_PILL_CLASS");
+    expect(chromeSrc).toContain("SOCIAL_PROFILE_ROLES_ROW_CLASS");
+    expect(chromeSrc).toContain("SOCIAL_PROFILE_ROLE_PILL_CLASS");
+    expect(chromeSrc).toContain("SOCIAL_PROFILE_CENTER_CLASS");
     expect(chromeSrc).not.toContain("SOCIAL_PROFILE_ROLES_RAIL_CLASS");
     expect(chromeSrc).not.toContain("SOCIAL_PROFILE_ROLES_LINE_CLASS");
-    expect(identitySrc).toContain("socialProfileRolesLine");
+    expect(chromeSrc).not.toContain("SOCIAL_PROFILE_ROLES_PILL_CLASS");
+    expect(identitySrc).toContain("socialProfileRolesFace");
+    expect(identitySrc).toContain("socialProfileRolesMoreLabel");
+    expect(identitySrc).not.toContain("socialProfileRolesLine");
     expect(identitySrc).toContain("data-social-profile-head");
     expect(identitySrc).not.toContain("SOCIAL_PROFILE_ROLES_RAIL_CLASS");
     expect(rolesSrc.match(/export const SOCIAL_PROFILE_ROLE_GROUPS/g)).toEqual([

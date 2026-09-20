@@ -5,19 +5,18 @@ import Link from "next/link";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { SocialProfileCreateForm } from "@/components/social/social-forms";
 import { SocialEmpty } from "@/components/social/social-empty";
-import { SocialForYouRail } from "@/components/social/social-for-you";
 import { SocialProfileTabs } from "@/components/social/social-profile-tabs";
 import { SocialQueryBound } from "@/components/social/social-query-bound";
 import { SocialShareButton } from "@/components/social/social-share-button";
-import { SocialForYouSkeleton, SocialProfileCenterSkeleton } from "@/components/social/social-skeletons";
+import { SocialProfileCenterSkeleton } from "@/components/social/social-skeletons";
 import { SocialOwnProfileFace } from "@/components/social/social-own-profile";
 import {
   SocialAuthorHistory,
   SocialHighlights,
   socialAuthorPostCard,
 } from "@/components/social/social-ui";
-import { SOCIAL_ACTION_CLASS, SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS, SOCIAL_PAGE_CLASS } from "@/lib/social-chrome";
-import { signedAvatarUrl, signedAvatarUrls } from "@/lib/s3-avatars";
+import { SOCIAL_ACTION_CLASS, SOCIAL_PAGE_CLASS, SOCIAL_PROFILE_CENTER_CLASS } from "@/lib/social-chrome";
+import { signedAvatarUrl } from "@/lib/s3-avatars";
 import { signedSocialMediaByPostId, signedSocialMediaUrl } from "@/lib/s3-social-media";
 import {
   parseSocialProfileTab,
@@ -32,10 +31,8 @@ import {
 } from "@/lib/social";
 import {
   loadAuthorPosts,
-  loadFolloweeIds,
   loadLikedPostIds,
   loadLiveStories,
-  loadSuggestedPeople,
 } from "@/lib/social-feed";
 import { loadCachedProfileSocialCounts } from "@/lib/social-hot-reads";
 import { ensureOwnSocialProfileResult } from "@/lib/social-profile";
@@ -72,12 +69,9 @@ export default async function SocialProfilePage({
   }
 
   return (
-    <div data-social-profile="" className={SOCIAL_HOME_LAYOUT_CLASS}>
+    <div data-social-profile="" className={SOCIAL_PROFILE_CENTER_CLASS}>
       <Suspense fallback={<SocialProfileCenterSkeleton />}>
         <SocialProfileMain session={session} tab={tab} />
-      </Suspense>
-      <Suspense fallback={<SocialForYouSkeleton />}>
-        <SocialProfileForYouSlot session={session} />
       </Suspense>
     </div>
   );
@@ -134,7 +128,7 @@ async function SocialProfileMain({
   }));
 
   return (
-    <div className={SOCIAL_HOME_CENTER_CLASS}>
+    <>
       <h1 className="sr-only">{SOCIAL.profile.title}</h1>
       <SocialQueryBound profile={profile} counts={counts} />
       <SocialOwnProfileFace
@@ -198,22 +192,6 @@ async function SocialProfileMain({
           />
         </>
       )}
-    </div>
+    </>
   );
-}
-
-async function SocialProfileForYouSlot({ session }: { session: SocialSession }) {
-  const { ctx, supabase } = session;
-  const [{ profile }, followees] = await Promise.all([
-    ensureOwnSocialProfileResult(supabase, ctx.user),
-    loadFolloweeIds(supabase, ctx.user.id),
-  ]);
-  const suggested = await loadSuggestedPeople(
-    supabase,
-    [ctx.user.id, ...followees.ids],
-    { topics: profile?.topics ?? [], crafts: profile?.crafts ?? [] },
-  );
-  const faces =
-    suggested.length > 0 ? await signedAvatarUrls(suggested.map((person) => person.id)) : new Map();
-  return <SocialForYouRail people={suggested} faces={faces} />;
 }

@@ -24,7 +24,6 @@ import {
   HOUSE_FILTER_ON_CLASS,
   HOUSE_MODULE_CLASS,
   HOUSE_PILL_ITEM_CLASS,
-  HOUSE_PILL_MEASURE_CLASS,
   HOUSE_PILL_SELECTED_CLASS,
   HOUSE_RAIL_PANEL_CLASS,
 } from "@/lib/house-shell";
@@ -81,6 +80,12 @@ export const SOCIAL_HOME_LAYOUT_CLASS = "flex items-start gap-[16px]";
 
 export const SOCIAL_HOME_CENTER_CLASS =
   "flex min-w-0 flex-1 flex-col gap-2 lg:max-w-[892px]";
+
+// Profile reuses the Home 892 center measure — not a 935 fork.
+// md+ focuses and centers so the stack breathes; phone stays full width.
+// Own + public profile only. No For You rail on these pages.
+export const SOCIAL_PROFILE_CENTER_CLASS =
+  "mx-auto flex w-full min-w-0 flex-col gap-2 md:max-w-[892px]";
 
 export const SOCIAL_AVATAR_32_CLASS =
   "flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted t-label font-medium text-ink-2";
@@ -250,7 +255,7 @@ export function socialTopicChipSelectClass(selected: boolean): string {
 
 // Public profile head — IG geometry, house chrome. One SoT for own
 // /social/profile and public /social/u/[handle]. Avatar | 3-up stats
-// on one row; name · roles pill · bio · links · actions stack below.
+// on one row; name · bio · Role pills · links · actions stack below.
 // Handle stays in chrome, never beside the avatar. Avatar stays 72/88.
 export const SOCIAL_PROFILE_IDENTITY_CLASS = "flex flex-col gap-2";
 
@@ -273,10 +278,13 @@ export const SOCIAL_PROFILE_NAME_CLASS = "break-words t-body font-semibold text-
 
 export const SOCIAL_PROFILE_BIO_CLASS = "break-words t-body-sm text-ink whitespace-pre-wrap";
 
-// Public Professions: one compact house gray pill, middot ~3 +N.
-// Omit when empty. Not a scroll rail. Not beside the avatar.
-export const SOCIAL_PROFILE_ROLES_PILL_CLASS =
-  `inline-flex w-fit max-w-full flex-wrap items-center ${HOUSE_PILL_MEASURE_CLASS} ${HOUSE_FILTER_OFF_CLASS}`;
+// Public Professions: wrap row of house gray pills, first ~3 then +N.
+// Each Role is its own muted HOUSE_PILL. Omit the row when empty.
+export const SOCIAL_PROFILE_ROLES_ROW_CLASS =
+  "flex max-w-full flex-wrap items-center gap-[var(--space-2)]";
+
+export const SOCIAL_PROFILE_ROLE_PILL_CLASS =
+  `w-fit ${HOUSE_PILL_ITEM_CLASS} ${HOUSE_FILTER_OFF_CLASS}`;
 
 // Home Topics aliases the house chip rail. Not SegmentedTrack: this is
 // a bank of lenses, not a selected exclusive menu.
