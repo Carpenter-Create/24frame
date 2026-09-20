@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { createElement, type ComponentProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/home",
@@ -30,6 +30,11 @@ import {
   HOUSE_SEGMENTED_ITEM_BASE_CLASS,
   HOUSE_SEGMENTED_TRACK_CLASS,
 } from "@/lib/house-shell";
+import {
+  SEGMENTED_TRACK_PERSIST,
+  clearSegmentedThumbCache,
+  writeSegmentedVisualIndex,
+} from "@/lib/segmented-track";
 import {
   REPORTS_PAGE,
   REPORTS_PERIOD_PRESETS,
@@ -127,6 +132,10 @@ const COURSE: CourseRow = {
 };
 
 describe("OverviewHome", () => {
+  afterEach(() => {
+    clearSegmentedThumbCache();
+  });
+
   it("does not paint the greeting — Home page is the chrome SoT", () => {
     const html = renderToStaticMarkup(createElement(OverviewHome, homeProps()));
     expect(html).not.toMatch(/<h1 class="t-title text-ink">/);
@@ -279,6 +288,14 @@ describe("OverviewHome", () => {
     expect(html).toContain(REPORTS_PAGE.month);
     expect(html).not.toContain("MTD");
     expect(html).not.toContain("Top performing");
+  });
+
+  it("keeps Home YTD white ink across Suspense remount before the route commits", () => {
+    writeSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period, 1);
+    const html = renderToStaticMarkup(createElement(OverviewHome, homeProps()));
+    expect(periodChipPressed(html, "ytd")).toBe(true);
+    expect(periodChipPressed(html, "all")).toBe(false);
+    expect(html).toContain('data-segmented-persist="house-period-presets"');
   });
 
   it("keeps phone Net revenue period on HousePageSelect — never a two-line wrap", () => {

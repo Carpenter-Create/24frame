@@ -24,6 +24,7 @@ import {
   measureSegmentedBox,
   projectSegmentedThumbFlight,
   readSegmentedThumbFlight,
+  resolveSegmentedVisualIndex,
   scheduleSegmentedThumbRestore,
   segmentedItemIndexFromEventTarget,
   segmentedItemOn,
@@ -31,6 +32,7 @@ import {
   segmentedThumbStyle,
   segmentedTrackSelection,
   startSegmentedThumbFlight,
+  writeSegmentedVisualIndex,
   type SegmentedThumbBox,
   type SegmentedTrackSelection,
 } from "@/lib/segmented-track";
@@ -106,7 +108,14 @@ export function SegmentedTrack({
   const placedRef = useRef(false);
   const routeIndexRef = useRef(activeIndex);
   const lastBoxRef = useRef<SegmentedThumbBox | undefined>(undefined);
-  const [visualIndex, setVisualIndex] = useState(activeIndex);
+  const [visualIndex, setVisualIndex] = useState(() =>
+    resolveSegmentedVisualIndex(persistKey, activeIndex),
+  );
+
+  function commitVisualIndex(index: number) {
+    if (persistKey) writeSegmentedVisualIndex(persistKey, index);
+    setVisualIndex(index);
+  }
   const [thumbStyle, setThumbStyle] = useState<CSSProperties>(() => {
     if (houseSegmentedThumbHidden(activeIndex) || !persistKey) return { opacity: 0 };
     const flight = readSegmentedThumbFlight(persistKey);
@@ -121,8 +130,8 @@ export function SegmentedTrack({
   useLayoutEffect(() => {
     if (routeIndexRef.current === activeIndex) return;
     routeIndexRef.current = activeIndex;
-    setVisualIndex(activeIndex);
-  }, [activeIndex]);
+    setVisualIndex(resolveSegmentedVisualIndex(persistKey, activeIndex));
+  }, [activeIndex, persistKey]);
 
   useLayoutEffect(() => {
     const track = trackRef.current;
@@ -181,7 +190,7 @@ export function SegmentedTrack({
     const track = trackRef.current;
     if (track) {
       const index = segmentedItemIndexFromEventTarget(track, event.target);
-      if (index >= 0) setVisualIndex(index);
+      if (index >= 0) commitVisualIndex(index);
     }
     onClickCapture?.(event);
   }

@@ -12,6 +12,8 @@ import {
   scheduleSegmentedThumbRestore,
   SEGMENTED_ITEM_SELECTED_ATTR,
   SEGMENTED_TRACK_PERSIST,
+  readSegmentedVisualIndex,
+  resolveSegmentedVisualIndex,
   segmentedItemOn,
   segmentedItemSelectedProps,
   segmentedThumbNeedsRestore,
@@ -19,6 +21,7 @@ import {
   segmentedTrackSelection,
   startSegmentedThumbFlight,
   writeSegmentedThumbCache,
+  writeSegmentedVisualIndex,
 } from "./segmented-track";
 
 afterEach(() => {
@@ -159,5 +162,16 @@ describe("segmented track optimistic selection", () => {
     expect(segmentedItemSelectedProps(routeIndex, visualIndex)).toEqual({});
     expect(SEGMENTED_ITEM_SELECTED_ATTR).toBe("data-segmented-selected");
     expect(SEGMENTED_TRACK_PERSIST.activityFamily).toBe("activity-family");
+    expect(SEGMENTED_TRACK_PERSIST.period).toBe("house-period-presets");
+  });
+
+  it("keeps pending visual index across remount until the route catches up", () => {
+    writeSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period, 1);
+    expect(readSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period)).toBe(1);
+    expect(resolveSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period, 0)).toBe(1);
+    expect(readSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period)).toBe(1);
+    expect(resolveSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period, 1)).toBe(1);
+    expect(readSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period)).toBeUndefined();
+    expect(resolveSegmentedVisualIndex(undefined, 2)).toBe(2);
   });
 });

@@ -6,9 +6,13 @@
 // with the remaining duration.
 //
 // visualIndex is the SoT for BOTH the thumb and selected ink.
-// Click intent advances it immediately. Route `activeIndex` only
-// seeds the first paint and commits after navigation. Hosts must
-// not keep a local pendingIndex / pendingFamily fork.
+// Click intent advances it immediately. Route hops that remount
+// the track (Home `?period=` Suspense, workspace Social fork)
+// would otherwise reset ink to the stale route while the thumb
+// flight continues. A module visual-index persist survives that
+// remount. Route `activeIndex` only seeds the first paint and
+// commits after navigation. Hosts must not keep a local
+// pendingIndex / pendingFamily fork.
 
 import {
   HOUSE_SEGMENTED_THUMB_DURATION_MS,
@@ -45,6 +49,7 @@ export const SEGMENTED_TRACK_PERSIST = {
 } as const;
 
 const thumbFlights = new Map<string, SegmentedThumbFlight>();
+const visualIndexes = new Map<string, number>();
 
 export function readSegmentedThumbFlight(
   persistKey: string,
@@ -87,9 +92,48 @@ export function writeSegmentedThumbCache(
 export function clearSegmentedThumbCache(persistKey?: string): void {
   if (persistKey) {
     thumbFlights.delete(persistKey);
+    visualIndexes.delete(persistKey);
     return;
   }
   thumbFlights.clear();
+  visualIndexes.clear();
+}
+
+export function readSegmentedVisualIndex(
+  persistKey: string,
+): number | undefined {
+  return visualIndexes.get(persistKey);
+}
+
+export function writeSegmentedVisualIndex(
+  persistKey: string,
+  index: number,
+): void {
+  if (!Number.isInteger(index)) return;
+  visualIndexes.set(persistKey, index);
+}
+
+export function clearSegmentedVisualIndex(persistKey?: string): void {
+  if (persistKey) {
+    visualIndexes.delete(persistKey);
+    return;
+  }
+  visualIndexes.clear();
+}
+
+/** Persist wins until the route index catches up. */
+export function resolveSegmentedVisualIndex(
+  persistKey: string | undefined,
+  routeIndex: number,
+): number {
+  if (persistKey == null) return routeIndex;
+  const pending = visualIndexes.get(persistKey);
+  if (pending == null) return routeIndex;
+  if (pending === routeIndex) {
+    visualIndexes.delete(persistKey);
+    return routeIndex;
+  }
+  return pending;
 }
 
 export function isUsableSegmentedThumbBox(box: SegmentedThumbBox): boolean {

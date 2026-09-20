@@ -49,8 +49,12 @@ describe("SegmentedTrack slide SoT", () => {
     expect(src).toContain("segmentedTrackSelection(visualIndex)");
     expect(src).toContain("stampSegmentedSelected");
     expect(src).toContain("children(selection)");
-    expect(src).toContain("setVisualIndex(index)");
+    expect(src).toContain("commitVisualIndex(index)");
+    expect(src).toContain("resolveSegmentedVisualIndex");
+    expect(src).toContain("writeSegmentedVisualIndex");
     expect(lib).toContain("visualIndex is the SoT");
+    expect(lib).toContain("resolveSegmentedVisualIndex");
+    expect(lib).toContain("writeSegmentedVisualIndex");
     expect(lib).not.toContain("pendingIndex ?? routeIndex");
     expect(HOUSE_SEGMENTED_ITEM_ON_CLASS).toBe("text-white");
 
