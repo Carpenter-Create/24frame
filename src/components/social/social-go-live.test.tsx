@@ -16,8 +16,8 @@ describe("Social Go live recorder", () => {
     expect(src).toContain("MediaRecorder");
     expect(src).toContain("persistSocialPost");
     expect(src).toContain("runSocialOptimisticMutation");
-    expect(src).toContain("presignSocialMediaUpload");
-    expect(src).toContain('lane", "posts"');
+    expect(src).toContain("uploadSocialPostMedia");
+    expect(src).toContain('intent: "live"');
     expect(src).toContain("goLiveReachedCap");
     expect(src).toContain("goLiveFitsByteCap(used + event.data.size");
     expect(src).toContain("new MediaRecorder(stream, { mimeType: probed.raw })");
@@ -31,7 +31,7 @@ describe("Social Go live recorder", () => {
     expect(src).toContain("SOCIAL_GO_LIVE_MAX_MS");
     expect(src).toContain("HouseVoiceMic");
     expect(src).toContain('surface="dictate"');
-    expect(src).not.toContain("Mux");
+    expect(src).not.toContain("LiveStream");
     expect(src).not.toContain("IVS");
     expect(src).not.toContain("WebRTC");
     expect(SOCIAL_GO_LIVE_MAX_MS).toBe(600_000);

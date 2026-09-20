@@ -1,7 +1,9 @@
 import {
+  isSocialMuxMediaItem,
   ownedMediaItems,
   type SocialMediaLane,
 } from "@/lib/social-media";
+import { socialMuxThumbnailUrl } from "@/lib/social-mux";
 
 // Auth-light Social reads can run on Vercel Edge. AWS signing cannot.
 // Same-origin Node routes re-sign avatars/media so the Edge HTML does
@@ -29,6 +31,7 @@ export type SocialEdgeMediaItem = {
   kind: "image" | "video";
   url: string;
   contentType: string;
+  playbackId?: string;
 };
 
 export function socialMediaProxies(
@@ -36,11 +39,20 @@ export function socialMediaProxies(
   authorId: string,
   lane: SocialMediaLane = "posts",
 ): SocialEdgeMediaItem[] {
-  return ownedMediaItems(media, authorId, lane).map((item) => ({
-    kind: item.kind,
-    url: socialMediaHref(item.key),
-    contentType: item.contentType,
-  }));
+  return ownedMediaItems(media, authorId, lane).map((item) =>
+    isSocialMuxMediaItem(item)
+      ? {
+          kind: item.kind,
+          url: socialMuxThumbnailUrl(item.playbackId),
+          contentType: item.contentType,
+          playbackId: item.playbackId,
+        }
+      : {
+          kind: item.kind,
+          url: socialMediaHref(item.key),
+          contentType: item.contentType,
+        },
+  );
 }
 
 export function socialMediaProxiesByPostId(

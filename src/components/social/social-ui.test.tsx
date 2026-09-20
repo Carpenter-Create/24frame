@@ -15,6 +15,13 @@ vi.mock("next/image", () => ({
   }) => createElement("img", { src, className, alt: "" }),
 }));
 
+vi.mock("next/dynamic", () => ({
+  default: () =>
+    function MuxPlayerStub() {
+      return null;
+    },
+}));
+
 import { IDENTITY_AVATAR_CLASS } from "@/lib/house-sheet";
 import {
   SocialAuthorHistory,
@@ -161,6 +168,7 @@ describe("SocialPostCard faces", () => {
     expect(avatarSrc).toContain("SocialMediaImage");
     expect(avatarSrc).not.toContain("<img");
     expect(uiSrc).toContain("SocialMediaImage");
+    expect(uiSrc).toContain("SocialFeedVideo");
     expect(uiSrc).not.toContain("<img");
     expect(uiSrc).not.toContain("@next/next/no-img-element");
   });
@@ -437,5 +445,27 @@ describe("SocialPostCard media", () => {
     expect(html).toContain('src="https://cf.example/signed-image"');
     expect(html).toContain("data-social-post-video");
     expect(html).toContain('src="https://cf.example/signed-video#t=0.1"');
+
+    const mux = renderToStaticMarkup(
+      <SocialPostCard
+        post={{
+          id: "p2",
+          body: "clip",
+          likeCount: 0,
+          liked: false,
+          createdAt: "2026-09-12T14:00:00.000Z",
+          authorId: "u1",
+          authorHandle: "ada",
+          authorName: "Ada Lovelace",
+          authorPhotoUrl: null,
+          groupSlug: null,
+          groupName: null,
+          canLike: false,
+          media: [{ kind: "video", url: "", playbackId: "uNbxnGLKJ00yfbijDO8COxT" }],
+        }}
+      />,
+    );
+    expect(mux).toContain('data-social-mux-player="uNbxnGLKJ00yfbijDO8COxT"');
+    expect(uiSrc).toContain("SocialFeedVideo");
   });
 });

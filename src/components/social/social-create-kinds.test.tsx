@@ -42,6 +42,18 @@ describe("Social create kinds", () => {
     expect(photo).toContain("data-social-create-well");
     expect(photo).toContain(SOCIAL.create.dropEmpty);
     expect(photo).not.toContain("data-social-create-kinds");
+    expect(photo).not.toContain("data-social-create-original-quality");
+
+    const video = renderToStaticMarkup(
+      createElement(SocialCreateCompose, {
+        authorName: "Ada Lovelace",
+        initialKind: "video",
+      }),
+    );
+    expect(video).toContain('data-social-create-kind="video"');
+    expect(video).toContain("data-social-create-original-quality");
+    expect(video).toContain(SOCIAL.create.originalQuality);
+    expect(video).not.toMatch(/type="checkbox"[^>]*checked/);
 
     expect(src).not.toContain("SegmentedTrack");
     expect(src).not.toContain("data-social-create-kinds");

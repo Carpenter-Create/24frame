@@ -13,6 +13,8 @@ import {
   saveSocialWelcomeVideo,
   createSocialStory,
   openSocialDm,
+  createSocialMuxUpload,
+  finalizeSocialMuxUpload,
   presignSocialMediaUpload,
   updateSocialBio,
 } from "./actions";
@@ -22,7 +24,21 @@ vi.mock("@/lib/s3-social-media", () => ({
   presignSocialMediaPut: vi.fn(),
 }));
 
+vi.mock("@/lib/social-mux-server", () => ({
+  createSocialMuxDirectUpload: vi.fn(),
+  finalizeSocialMuxDirectUpload: vi.fn(),
+  socialMuxSettingsFromUploadInput: vi.fn(() => ({
+    intent: "video",
+    settings: { videoQuality: "basic", maxResolutionTier: "1080p" },
+  })),
+}));
+
 import { presignSocialMediaPut } from "@/lib/s3-social-media";
+import {
+  createSocialMuxDirectUpload,
+  finalizeSocialMuxDirectUpload,
+  socialMuxSettingsFromUploadInput,
+} from "@/lib/social-mux-server";
 
 vi.mock("next/navigation", () => ({
   redirect: vi.fn((to: string) => {
@@ -705,6 +721,72 @@ describe("social actions", () => {
       contentType: "video/mp4",
     });
     expect(presignSocialMediaPut).toHaveBeenCalledWith(`stories/${author}/${object}.mp4`, "video/mp4");
+  });
+
+  it("creates a Mux direct upload for Social Video and finalizes the playback id", async () => {
+    const author = "11111111-1111-4111-8111-111111111111";
+    const object = "22222222-2222-4222-8222-222222222222";
+    vi.mocked(getAuthUser).mockResolvedValue({ id: author, email: "ada@example.com" } as never);
+    stub({ profile: { id: author } });
+    vi.spyOn(crypto, "randomUUID").mockReturnValue(object);
+    vi.mocked(createSocialMuxDirectUpload).mockResolvedValue({
+      uploadId: "zd01Pe2bNpYhxbrwYABgFE",
+      url: "https://storage.googleapis.com/mux-upload",
+    });
+    const start = new FormData();
+    start.set("content_type", "video/mp4");
+    start.set("byte_length", "1200");
+    start.set("intent", "video");
+    start.set("original_quality", "1");
+    start.set("source_width", "3840");
+    start.set("source_height", "2160");
+    expect(await createSocialMuxUpload(start)).toEqual({
+      key: `posts/${author}/${object}.mp4`,
+      url: "https://storage.googleapis.com/mux-upload",
+      uploadId: "zd01Pe2bNpYhxbrwYABgFE",
+      kind: "video",
+      contentType: "video/mp4",
+    });
+    expect(socialMuxSettingsFromUploadInput).toHaveBeenCalledWith({
+      intent: "video",
+      originalQuality: true,
+      width: 3840,
+      height: 2160,
+    });
+    expect(presignSocialMediaPut).not.toHaveBeenCalled();
+
+    vi.mocked(finalizeSocialMuxDirectUpload).mockResolvedValue({
+      uploadId: "zd01Pe2bNpYhxbrwYABgFE",
+      assetId: "SqQnqz6s5MBuXGvJaUWdXu",
+      playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+    });
+    const finish = new FormData();
+    finish.set("upload_id", "zd01Pe2bNpYhxbrwYABgFE");
+    finish.set("key", `posts/${author}/${object}.mp4`);
+    finish.set("content_type", "video/mp4");
+    expect(await finalizeSocialMuxUpload(finish)).toEqual({
+      item: {
+        kind: "video",
+        key: `posts/${author}/${object}.mp4`,
+        contentType: "video/mp4",
+        provider: "mux",
+        playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+        uploadId: "zd01Pe2bNpYhxbrwYABgFE",
+        assetId: "SqQnqz6s5MBuXGvJaUWdXu",
+      },
+    });
+  });
+
+  it("does not open a Mux upload on the stories lane", async () => {
+    const author = "11111111-1111-4111-8111-111111111111";
+    vi.mocked(getAuthUser).mockResolvedValue({ id: author, email: "ada@example.com" } as never);
+    stub({ profile: { id: author } });
+    const form = new FormData();
+    form.set("content_type", "video/mp4");
+    form.set("byte_length", "1200");
+    form.set("lane", "stories");
+    expect(await createSocialMuxUpload(form)).toEqual({ error: SOCIAL.home.mediaType });
+    expect(createSocialMuxDirectUpload).not.toHaveBeenCalled();
   });
 
   it("stores bio newlines and counts them toward 150", async () => {

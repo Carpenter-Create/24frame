@@ -399,6 +399,7 @@ export const SOCIAL = {
     mediaForbidden: "That file cannot be attached.",
     mediaLimit: "Attach up to four photos or videos.",
     uploadFailed: "The file could not be stored.",
+    videoPreparing: "That video is still preparing.",
     topic: "Topic",
     truncatedWall: `Showing the latest ${SOCIAL_FOLLOWING_WALL_LIMIT} posts. More exist — this list is not complete.`,
     olderPosts: "Older posts",
@@ -442,6 +443,7 @@ export const SOCIAL = {
     dropPhotoHint: "or choose from library · stills up to 20MB",
     dropVideo: "Drop video here",
     dropVideoHint: "or choose from library",
+    originalQuality: "Upload in original quality (up to 4K)",
   },
   stories: {
     create: "Create story",

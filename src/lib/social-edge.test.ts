@@ -43,6 +43,31 @@ describe("Social Edge media proxies", () => {
     ]);
     expect(byPost.get("p1")).toEqual(items);
   });
+
+  it("exposes Mux playback ids on Edge profile without the S3 proxy", () => {
+    const key = `posts/${AUTHOR}/${OBJECT}.mp4`;
+    const items = socialMediaProxies(
+      [
+        {
+          kind: "video",
+          key,
+          contentType: "video/mp4",
+          provider: "mux",
+          playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+        },
+      ],
+      AUTHOR,
+    );
+    expect(items).toEqual([
+      {
+        kind: "video",
+        url: "https://image.mux.com/uNbxnGLKJ00yfbijDO8COxT/thumbnail.webp",
+        contentType: "video/mp4",
+        playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+      },
+    ]);
+    expect(items[0]?.url).not.toContain(SOCIAL_MEDIA_ROUTE);
+  });
 });
 
 describe("Social Edge vs Node runtime lock", () => {
@@ -55,9 +80,11 @@ describe("Social Edge vs Node runtime lock", () => {
       expect(src).toContain('export const runtime = "edge"');
       expect(src).not.toContain("@/lib/s3-avatars");
       expect(src).not.toContain("@/lib/s3-social-media");
+      expect(src).not.toContain("@/lib/social-mux-server");
       expect(src).not.toContain("signedAvatarUrl");
       expect(src).not.toContain("signedSocialMedia");
       expect(src).not.toContain("@aws-sdk");
+      expect(src).not.toContain("MUX_TOKEN_SECRET");
     }
     expect(publicProfile).toContain("socialAvatarHref");
     expect(publicProfile).toContain("socialMediaProxiesByPostId");

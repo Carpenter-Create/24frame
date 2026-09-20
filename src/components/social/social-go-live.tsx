@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { HouseVoiceMic } from "@/components/chrome/house-voice-mic";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { Textarea } from "@/components/ui/textarea";
-import { presignSocialMediaUpload } from "@/app/(app)/social/actions";
+import { uploadSocialPostMedia } from "@/lib/social-media-upload";
 import { HOUSE_VOICE_FIELD_HOST_CLASS } from "@/lib/form-control";
 import {
   SOCIAL_ACTION_CLASS,
@@ -73,37 +73,11 @@ function stopStream(stream: MediaStream | null) {
 }
 
 async function uploadLiveVideo(file: File): Promise<{ item?: SocialMediaItem; error?: string }> {
-  const body = new FormData();
-  body.set("content_type", file.type);
-  body.set("byte_length", String(file.size));
-  body.set("lane", "posts");
-  let signed: Awaited<ReturnType<typeof presignSocialMediaUpload>>;
-  try {
-    signed = await presignSocialMediaUpload(body);
-  } catch {
-    return { error: SOCIAL.home.uploadFailed };
+  const result = await uploadSocialPostMedia([file], [], 1, "posts", { intent: "live" });
+  if (result.error || !result.items?.[0]) {
+    return { error: result.error ?? SOCIAL.home.uploadFailed };
   }
-  if (signed.error || !signed.url || !signed.key || !signed.kind || !signed.contentType) {
-    return { error: signed.error ?? SOCIAL.home.uploadFailed };
-  }
-  let put: Response;
-  try {
-    put = await fetch(signed.url, {
-      method: "PUT",
-      headers: { "Content-Type": signed.contentType },
-      body: file,
-    });
-  } catch {
-    return { error: SOCIAL.home.uploadFailed };
-  }
-  if (!put.ok) return { error: SOCIAL.home.uploadFailed };
-  return {
-    item: {
-      kind: "video",
-      key: signed.key,
-      contentType: signed.contentType as SocialVideoContentType,
-    },
-  };
+  return { item: result.items[0] };
 }
 
 export function SocialGoLive() {
@@ -416,7 +390,13 @@ export function SocialGoLive() {
     const started = beginSocialPostPublish({
       body,
       mediaItems: [uploaded.item],
-      mediaPreview: [{ kind: "video", url: clip.url }],
+      mediaPreview: [
+        {
+          kind: "video",
+          url: clip.url,
+          ...(uploaded.item.playbackId ? { playbackId: uploaded.item.playbackId } : {}),
+        },
+      ],
       authorName: SOCIAL.home.you,
     });
     if (!started.ok) {

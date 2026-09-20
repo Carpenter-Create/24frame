@@ -20,6 +20,7 @@ export type SocialOptimisticLike = {
 export type SocialOptimisticPostMedia = {
   kind: "image" | "video";
   url: string;
+  playbackId?: string;
 };
 
 export type SocialOptimisticPost = {
@@ -47,7 +48,15 @@ export type SocialOptimisticRun<T> = {
 
 export type SocialPostPublishDraft = {
   body: string;
-  mediaItems: readonly { kind: string; key: string; contentType: string }[];
+  mediaItems: readonly {
+    kind: string;
+    key: string;
+    contentType: string;
+    provider?: string;
+    playbackId?: string;
+    uploadId?: string;
+    assetId?: string;
+  }[];
   mediaPreview?: readonly SocialOptimisticPostMedia[];
   authorId?: string;
   authorHandle?: string | null;
@@ -330,6 +339,14 @@ export function beginSocialPostPublish(draft: SocialPostPublishDraft): SocialPos
       kind: item.kind,
       key: item.key,
       contentType: item.contentType,
+      ...(item.provider === "mux" && item.playbackId
+        ? {
+            provider: "mux",
+            playbackId: item.playbackId,
+            ...(item.uploadId ? { uploadId: item.uploadId } : {}),
+            ...(item.assetId ? { assetId: item.assetId } : {}),
+          }
+        : {}),
     }))),
   );
   if (draft.groupId) form.set("group_id", draft.groupId);
@@ -347,7 +364,13 @@ export function beginSocialPostPublish(draft: SocialPostPublishDraft): SocialPos
     groupSlug: draft.groupSlug ?? null,
     groupName: draft.groupName ?? null,
     category: draft.category || null,
-    media: (draft.mediaPreview ?? []).filter((item) => item.url),
+    media: (draft.mediaPreview ?? [])
+      .filter((item) => item.url || item.playbackId)
+      .map((item) => ({
+        kind: item.kind,
+        url: item.url,
+        ...(item.playbackId ? { playbackId: item.playbackId } : {}),
+      })),
   };
   return { ok: true, form, post };
 }

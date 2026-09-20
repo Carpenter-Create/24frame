@@ -27,8 +27,8 @@ import {
   SOCIAL_MEDIA_MAX_ITEMS,
   SOCIAL_VIDEO_CONTENT_TYPES,
   type SocialMediaItem,
-  type SocialMediaLane,
 } from "@/lib/social-media";
+import { uploadSocialPostMedia } from "@/lib/social-media-upload";
 import { HouseVoiceMic } from "@/components/chrome/house-voice-mic";
 import { HOUSE_VOICE_FIELD_HOST_CLASS } from "@/lib/form-control";
 import { takeSocialHomeComposerMedia } from "@/lib/social-home-composer";
@@ -61,7 +61,6 @@ import {
   createSocialProfile,
   joinSocialGroup,
   openSocialDm,
-  presignSocialMediaUpload,
   sendSocialDm,
   setSocialDmTitle,
   updateSocialBio,
@@ -75,7 +74,19 @@ function FormError({ error }: { error: string }) {
 }
 
 function persistKeys(media: SocialMediaItem[]) {
-  return media.map(({ kind, key, contentType }) => ({ kind, key, contentType }));
+  return media.map((item) => ({
+    kind: item.kind,
+    key: item.key,
+    contentType: item.contentType,
+    ...(item.provider === "mux" && item.playbackId
+      ? {
+          provider: "mux" as const,
+          playbackId: item.playbackId,
+          ...(item.uploadId ? { uploadId: item.uploadId } : {}),
+          ...(item.assetId ? { assetId: item.assetId } : {}),
+        }
+      : {}),
+  }));
 }
 
 function publishOptimisticPost({
@@ -111,8 +122,15 @@ function publishOptimisticPost({
     body,
     mediaItems: persistKeys(media),
     mediaPreview: media.flatMap((item) => {
-      const url = previews?.[item.key];
-      return url ? [{ kind: item.kind, url }] : [];
+      const url = previews?.[item.key] ?? "";
+      if (!url && !item.playbackId) return [];
+      return [
+        {
+          kind: item.kind,
+          url,
+          ...(item.playbackId ? { playbackId: item.playbackId } : {}),
+        },
+      ];
     }),
     authorName,
     authorHandle,
@@ -206,36 +224,12 @@ export function SocialProfileCreateForm({
 async function uploadSocialMedia(
   files: ArrayLike<File> | null,
   current: SocialMediaItem[],
-  max: number,
-  lane: SocialMediaLane,
-): Promise<{ items?: SocialMediaItem[]; error?: string }> {
-  if (!files || files.length === 0) return {};
-  const remaining = max - current.length;
-  if (remaining <= 0) return { error: SOCIAL.home.mediaLimit };
-  const chosen = Array.from(files).slice(0, remaining);
-  const next: SocialMediaItem[] = [];
-  for (const file of chosen) {
-    const body = new FormData();
-    body.set("content_type", file.type);
-    body.set("byte_length", String(file.size));
-    body.set("lane", lane);
-    const signed = await presignSocialMediaUpload(body);
-    if (signed.error || !signed.url || !signed.key || !signed.kind || !signed.contentType) {
-      return { error: signed.error ?? SOCIAL.home.uploadFailed };
-    }
-    const put = await fetch(signed.url, {
-      method: "PUT",
-      headers: { "Content-Type": signed.contentType },
-      body: file,
-    });
-    if (!put.ok) return { error: SOCIAL.home.uploadFailed };
-    next.push({
-      kind: signed.kind as SocialMediaItem["kind"],
-      key: signed.key,
-      contentType: signed.contentType as SocialMediaItem["contentType"],
-    });
-  }
-  return { items: next };
+  originalQuality = false,
+) {
+  return uploadSocialPostMedia(files, current, SOCIAL_MEDIA_MAX_ITEMS, "posts", {
+    intent: "video",
+    originalQuality,
+  });
 }
 
 export function SocialPostCompose({
@@ -257,7 +251,7 @@ export function SocialPostCompose({
     const chosen = Array.from(files);
     setError("");
     setUploading(true);
-    const result = await uploadSocialMedia(files, media, SOCIAL_MEDIA_MAX_ITEMS, "posts");
+    const result = await uploadSocialMedia(files, media);
     setUploading(false);
     if (fileRef.current) fileRef.current.value = "";
     if (result.error) {
@@ -382,6 +376,7 @@ export function SocialCreateCompose({
   const [body, setBody] = useState("");
   const [media, setMedia] = useState<SocialMediaItem[]>([]);
   const [previews, setPreviews] = useState<Record<string, string>>({});
+  const [originalQuality, setOriginalQuality] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const accept =
     kind === "photo"
@@ -394,7 +389,7 @@ export function SocialCreateCompose({
   useEffect(() => {
     if (!ingestHomeMedia) return;
     let cancelled = false;
-    void uploadSocialMedia(homeMedia, [], SOCIAL_MEDIA_MAX_ITEMS, "posts").then((result) => {
+    void uploadSocialMedia(homeMedia, [], originalQuality).then((result) => {
       if (cancelled) return;
       setUploading(false);
       if (result.error) {
@@ -416,14 +411,14 @@ export function SocialCreateCompose({
     return () => {
       cancelled = true;
     };
-  }, [homeMedia, ingestHomeMedia]);
+  }, [homeMedia, ingestHomeMedia, originalQuality]);
 
   async function onPick(files: ArrayLike<File> | null) {
     if (!files || files.length === 0 || kind === "text") return;
     const chosen = Array.from(files);
     setError("");
     setUploading(true);
-    const result = await uploadSocialMedia(files, media, SOCIAL_MEDIA_MAX_ITEMS, "posts");
+    const result = await uploadSocialMedia(files, media, originalQuality);
     setUploading(false);
     if (fileRef.current) fileRef.current.value = "";
     if (result.error) {
@@ -506,8 +501,22 @@ export function SocialCreateCompose({
           <span className="t-body-sm font-semibold text-ink md:t-body">
             {uploading ? SOCIAL.home.attaching : well.title}
           </span>
-          <span className="t-label text-ink-2 md:t-body-sm">{well.hint}</span>
+          <span className="t-label text-ink-2 md:t-body-sm">{well.hint}          </span>
         </button>
+      ) : null}
+      {kind === "video" ? (
+        <label
+          data-social-create-original-quality=""
+          className="flex items-start gap-2 t-body-sm text-ink"
+        >
+          <input
+            type="checkbox"
+            className="mt-0.5"
+            checked={originalQuality}
+            onChange={(event) => setOriginalQuality(event.target.checked)}
+          />
+          <span>{SOCIAL.create.originalQuality}</span>
+        </label>
       ) : null}
       {kind === "text" ? null : (
         <input

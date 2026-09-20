@@ -234,3 +234,15 @@ Residual, not a pretend-mp4 path:
 - Empty `blob.type` on some Safari versions — persist the probed house type.
 - A Chrome-recorded webm story may not play in Safari’s viewer. This slice does not remux and does not use AWS IVS / Chime / Elemental.
 
+---
+
+## Trigger: Social Mux Video
+
+**When:** Changing Social Video / Go live upload or feed/profile playback.
+
+`MUX_TOKEN_ID` + `MUX_TOKEN_SECRET` are already on Vercel 24frame
+(Production / Preview / Development). Server-only — never `NEXT_PUBLIC_`.
+One SoT: `src/lib/social-mux.ts` (locks) + `src/lib/social-mux-server.ts`
+(API). Stories, welcome video, Education, and title film stay off Mux.
+Auth and cron were not touched. Detail: [`docs/infra/social-mux.md`](../infra/social-mux.md).
+

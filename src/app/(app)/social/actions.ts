@@ -6,13 +6,23 @@ import { redirect } from "next/navigation";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 import {
+  isOwnedSocialMediaKey,
+  isSocialMediaContentType,
   mediaItemsForInsert,
   parseSocialMediaLane,
+  socialMediaKindFor,
   socialMediaObjectKey,
   validateMediaUpload,
   welcomeVideoKeyFromMedia,
+  type SocialMediaItem,
 } from "@/lib/social-media";
 import { presignSocialMediaPut } from "@/lib/s3-social-media";
+import { isSocialMuxId, SOCIAL_MUX_PROVIDER } from "@/lib/social-mux";
+import {
+  createSocialMuxDirectUpload,
+  finalizeSocialMuxDirectUpload,
+  socialMuxSettingsFromUploadInput,
+} from "@/lib/social-mux-server";
 import { normalizeSocialCategory } from "@/lib/social-categories";
 import { storyInsertRow, storyViewInsertRow } from "@/lib/social-stories";
 import { ensureOwnSocialProfile, isProfileUniqueViolation } from "@/lib/social-profile";
@@ -223,6 +233,86 @@ export async function presignSocialMediaUpload(formData: FormData): Promise<{
     return { key, url, kind: checked.kind, contentType: checked.contentType };
   } catch {
     return { error: SOCIAL.home.uploadFailed };
+  }
+}
+
+export async function createSocialMuxUpload(formData: FormData): Promise<{
+  error?: string;
+  key?: string;
+  url?: string;
+  uploadId?: string;
+  kind?: string;
+  contentType?: string;
+}> {
+  const { user, profileId } = await ownProfile();
+  if (!profileId) return { error: SOCIAL.cta.needProfile };
+
+  const lane = parseSocialMediaLane(String(formData.get("lane") ?? ""));
+  if (lane !== "posts") return { error: SOCIAL.home.mediaType };
+  const checked = validateMediaUpload({
+    contentType: String(formData.get("content_type") ?? ""),
+    byteLength: Number(formData.get("byte_length") ?? 0),
+    lane,
+  });
+  if (!checked.ok) return { error: socialMediaRuleMessage(checked.error, lane) };
+  if (checked.kind !== "video") return { error: SOCIAL.home.mediaType };
+
+  const objectId = crypto.randomUUID();
+  const key = socialMediaObjectKey(user.id, objectId, checked.contentType, lane);
+  const { settings } = socialMuxSettingsFromUploadInput({
+    intent: String(formData.get("intent") ?? ""),
+    originalQuality: String(formData.get("original_quality") ?? "") === "1",
+    width: Number(formData.get("source_width") ?? 0),
+    height: Number(formData.get("source_height") ?? 0),
+  });
+  try {
+    const upload = await createSocialMuxDirectUpload({
+      settings,
+      passthrough: `${user.id}:${objectId}`,
+    });
+    return {
+      key,
+      url: upload.url,
+      uploadId: upload.uploadId,
+      kind: checked.kind,
+      contentType: checked.contentType,
+    };
+  } catch {
+    return { error: SOCIAL.home.uploadFailed };
+  }
+}
+
+export async function finalizeSocialMuxUpload(formData: FormData): Promise<{
+  error?: string;
+  item?: SocialMediaItem;
+}> {
+  const { user, profileId } = await ownProfile();
+  if (!profileId) return { error: SOCIAL.cta.needProfile };
+
+  const uploadId = String(formData.get("upload_id") ?? "").trim();
+  const key = String(formData.get("key") ?? "").trim();
+  const contentType = String(formData.get("content_type") ?? "").trim();
+  if (!isSocialMuxId(uploadId) || !isOwnedSocialMediaKey(key, user.id, "posts")) {
+    return { error: SOCIAL.home.mediaForbidden };
+  }
+  if (!isSocialMediaContentType(contentType) || socialMediaKindFor(contentType) !== "video") {
+    return { error: SOCIAL.home.mediaType };
+  }
+  try {
+    const ready = await finalizeSocialMuxDirectUpload(uploadId);
+    return {
+      item: {
+        kind: "video",
+        key,
+        contentType,
+        provider: SOCIAL_MUX_PROVIDER,
+        playbackId: ready.playbackId,
+        uploadId: ready.uploadId,
+        assetId: ready.assetId,
+      },
+    };
+  } catch {
+    return { error: SOCIAL.home.videoPreparing };
   }
 }
 
