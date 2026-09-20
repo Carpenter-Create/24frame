@@ -6,16 +6,13 @@ import { SOCIAL_CATEGORY_TOPICS, socialHomeLensHref } from "@/lib/social-categor
 import { SOCIAL } from "@/lib/social";
 
 export function SocialHomeTopics() {
-  const labels = SOCIAL_CATEGORY_TOPICS;
-  if (labels.length === 0) return null;
-
   return (
     <section data-social-home-topics="" className="flex min-w-0 flex-col gap-2">
       <p className="t-body-sm font-semibold text-ink">{SOCIAL.forYou.topics}</p>
       <HouseChipRail
         data-social-home-topics-rail=""
         rows={SOCIAL_TOPIC_RAIL_ROWS}
-        items={labels}
+        items={SOCIAL_CATEGORY_TOPICS}
         renderItem={(label) => (
           <Link
             key={label}

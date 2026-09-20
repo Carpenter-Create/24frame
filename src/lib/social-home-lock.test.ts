@@ -204,7 +204,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(topics).not.toContain("SOCIAL_FOR_YOU_CARD_CLASS");
     expect(topics).toContain("SOCIAL_CATEGORY_TOPICS");
     expect(topics).not.toContain("socialInterestTopics");
-    expect(topics).toContain("if (labels.length === 0) return null");
+    expect(topics).not.toContain("if (labels.length === 0) return null");
     expect(home).toContain("<SocialHomeTopics");
     expect(home).not.toContain("SocialHomeTopics topics=");
     expect(topics).not.toContain("flex-wrap");

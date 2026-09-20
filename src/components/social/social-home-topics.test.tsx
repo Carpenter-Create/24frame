@@ -17,7 +17,7 @@ describe("SocialHomeTopics bank", () => {
     expect(chips).toEqual(sortTopicsAlpha(chips));
     expect(src).toContain("SOCIAL_CATEGORY_TOPICS");
     expect(src).not.toContain("socialInterestTopics");
-    expect(src).toContain("if (labels.length === 0) return null");
+    expect(src).not.toContain("if (labels.length === 0) return null");
     expect(src).not.toContain("SOCIAL_FOR_YOU_CARD_CLASS");
     expect(src).not.toContain("flex-wrap");
     expect(src).not.toContain("No trending");

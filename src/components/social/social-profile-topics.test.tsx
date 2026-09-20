@@ -49,7 +49,7 @@ describe("SocialProfileTopicsField", () => {
     expect(html).not.toContain("data-social-profile-edit-topics-selected");
     expect(html).not.toContain(SOCIAL.profile.topicsLimit);
     expect(html).not.toContain("type=\"checkbox\"");
-    const chips = [...html.matchAll(/data-social-profile-topic-chip="([^"]+)"/g)].map(
+    const chips = [...html.matchAll(/data-social-profile-topic="([^"]+)"/g)].map(
       (match) => match[1],
     );
     expect(chips).toEqual([...SOCIAL_CATEGORY_TOPICS]);
