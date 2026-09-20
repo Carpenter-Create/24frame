@@ -459,7 +459,7 @@ describe("phone app-shell IA A — dest dock + header workspace sheet", () => {
     expect(aggregation).not.toContain('data-house-phone-dest="Queue"');
     expect(aggregation).not.toContain(ASK_GLOBEE.headline);
 
-    navigation.pathname = "/aggregation/queue";
+    navigation.pathname = "/staff/queue";
     const staff = renderToStaticMarkup(
       createElement(HousePhoneBottomNav, { workspace: "staff", isGcStaff: true }),
     );

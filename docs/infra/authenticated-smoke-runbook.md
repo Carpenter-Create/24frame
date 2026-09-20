@@ -184,9 +184,9 @@ Use the staff mailbox. Do not use this session for check 16.
 
 | | |
 | --- | --- |
-| **Path** | `/aggregation/queue` (retired `/queue` 404s) |
+| **Path** | `/staff/queue` (retired `/queue` and `/aggregation/queue` 404s) |
 | **Role** | `gc_staff` |
-| **Action** | Open `/queue` first — expect 404, no hop. Then open `/aggregation/queue`. |
+| **Action** | Open `/queue` and `/aggregation/queue` first — expect 404, no hop. Then open `/staff/queue`. |
 | **Expected** | Retired door 404s. Live path heading **Queue** loads without an error page. Empty sections are Pass. |
 | **Fail** | Redirect from `/queue`, error page, redirect to `/` or `/login`, or a blank/broken render. |
 
@@ -194,9 +194,9 @@ Use the staff mailbox. Do not use this session for check 16.
 
 | | |
 | --- | --- |
-| **Path** | `/aggregation/gc/deliveries` (retired `/gc/deliveries` 404s) |
+| **Path** | `/staff/gc/deliveries` (retired `/gc/deliveries` and `/aggregation/gc/deliveries` 404s) |
 | **Role** | `gc_staff` |
-| **Action** | Open `/gc/deliveries` first — expect 404, no hop. Then open `/aggregation/gc/deliveries`. Load only. Do not create deliveries, generate portal links, or export. |
+| **Action** | Open `/gc/deliveries` and `/aggregation/gc/deliveries` first — expect 404, no hop. Then open `/staff/gc/deliveries`. Load only. Do not create deliveries, generate portal links, or export. |
 | **Expected** | Retired door 404s. Live path heading **Licensing Status** loads without an error page. Empty list is Pass. |
 | **Fail** | Redirect from `/gc/deliveries`, error page, redirect to `/` or `/login`, or a blank/broken render. |
 
@@ -204,9 +204,9 @@ Use the staff mailbox. Do not use this session for check 16.
 
 | | |
 | --- | --- |
-| **Path** | `/aggregation/channels` (retired `/vendors` 404s) |
+| **Path** | `/staff/channels` (retired `/vendors` and `/aggregation/channels` 404s) |
 | **Role** | `gc_staff` |
-| **Action** | Open `/vendors` first — expect 404, no hop. Then open `/aggregation/channels`. Load only. Do not create or edit channels. Do not record channel names in the repository. |
+| **Action** | Open `/vendors` and `/aggregation/channels` first — expect 404, no hop. Then open `/staff/channels`. Load only. Do not create or edit channels. Do not record channel names in the repository. |
 | **Expected** | Retired door 404s. Live path heading **Channels** loads without an error page. Empty list is Pass. Schema table stays `vendors`. |
 | **Fail** | Redirect from `/vendors`, error page, redirect to `/` or `/login`, or a blank/broken render. |
 
@@ -214,7 +214,7 @@ Use the staff mailbox. Do not use this session for check 16.
 
 | | |
 | --- | --- |
-| **Path** | `/aggregation/queue`, `/aggregation/gc/deliveries`, `/aggregation/channels` |
+| **Path** | `/staff/queue`, `/staff/gc/deliveries`, `/staff/channels` |
 | **Role** | unauthenticated-or-client (not `gc_staff`) |
 | **Action** | Sign out of the staff session first, or use a separate browser profile. From a **logged-out** session and/or the **Access client** session, open each operator path above. Do **not** use a staff session for this check. |
 | **Expected** | Each path is refused: logged-out → redirect to `/login`; client session → redirect to `/` (or not found). The operator page heading must not render. |

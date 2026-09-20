@@ -76,7 +76,7 @@ import {
 } from "@/lib/dashboard-fixture";
 import { UNPAGINATED_MAX, rangeFor } from "@/lib/list-bounds";
 import { loadMyDeliveries, loadMyFindings } from "@/lib/my-lists";
-import { GcClientsDirectory } from "@/app/(app)/(operator)/aggregation/gc/clients/clients-directory";
+import { GcClientsDirectory } from "@/app/(app)/(operator)/staff/gc/clients/clients-directory";
 import { HouseEmpty, TextAction } from "@/components/chrome/house";
 import { AGGREGATION_EMPTY } from "@/lib/aggregation-empty";
 import { DASHBOARD_SEEN_COOKIE, afterLastVisit, parseDashboardSeen } from "@/lib/dashboard-visit";

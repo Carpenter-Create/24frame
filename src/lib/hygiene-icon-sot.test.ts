@@ -28,7 +28,7 @@ describe("one icon SoT (P2-2 rematch)", () => {
       "src/components/layout/title-hero.tsx",
       "src/components/dashboard/dashboard-home.tsx",
       "src/components/dashboard/dashboard-licensing-status.tsx",
-      "src/app/(app)/(operator)/aggregation/channels/page.tsx",
+      "src/app/(app)/(operator)/staff/channels/page.tsx",
     ];
     for (const path of rscGlyphFiles) {
       const src = readFileSync(path, "utf8");

@@ -125,7 +125,7 @@ describe("G6 Avails stay Approved-derived", () => {
     const dir = dirname(fileURLToPath(import.meta.url));
     const helper = readFileSync(join(dir, "title-status-override.ts"), "utf8");
     const availsPage = readFileSync(
-      join(dir, "../app/(app)/(operator)/aggregation/avails/page.tsx"),
+      join(dir, "../app/(app)/(operator)/staff/avails/page.tsx"),
       "utf8",
     );
     expect(helper).not.toContain("/avails");

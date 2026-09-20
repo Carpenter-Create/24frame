@@ -72,8 +72,8 @@ describe("staff queue helpers", () => {
     expect(QUEUE_PAGE.empty).toBe("Nothing waiting.");
     expect(QUEUE_PAGE).not.toHaveProperty("licensingStatus");
     expect(QUEUE_PAGE).not.toHaveProperty("licensingStatusHref");
-    expect(GC_NAV.find((item) => item.href === "/aggregation/queue")?.label).toBe("Queue");
-    expect(GC_NAV.find((item) => item.href === "/aggregation/gc/deliveries")?.label).toBe("Licensing Status");
+    expect(GC_NAV.find((item) => item.href === "/staff/queue")?.label).toBe("Queue");
+    expect(GC_NAV.find((item) => item.href === "/staff/gc/deliveries")?.label).toBe("Licensing Status");
     expect(queueOrgName("Meridian")).toBe("Meridian");
     expect(queueOrgName("")).toBe("—");
   });

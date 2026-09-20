@@ -10,13 +10,13 @@ import { UNPAGINATED_MAX } from "@/lib/list-bounds";
 import type { DeliveryStatus } from "@/lib/titles";
 import { catalogReleaseYear, catalogStillSrc } from "@/lib/titles-catalog";
 import { TITLES_HREF, publicCatalogId, titleOpsPath } from "@/lib/title-public-id";
-import { aggregationPath } from "@/lib/workspace";
+import { staffPath } from "@/lib/workspace";
 
-// Staff /gc/deliveries — staff-wide Licensing Status (all titles / all orgs).
-// Client nest copy stays on DASHBOARD_LICENSING. Href stays /gc/deliveries.
+// Staff /staff/gc/deliveries — staff-wide Licensing Status (all titles / all orgs).
+// Client nest copy stays on DASHBOARD_LICENSING. Href stays /staff/gc/deliveries.
 // v2 list: Titles catalog parent + indented channel sub-rows. No fluff
 // subtitle. Deliver CTA is selection-gated. Avails-sourced title pool.
-export const GC_DELIVERIES_HREF = aggregationPath("gc/deliveries");
+export const GC_DELIVERIES_HREF = staffPath("gc/deliveries");
 
 export const GC_LICENSING_STATUS = {
   title: "Licensing Status",

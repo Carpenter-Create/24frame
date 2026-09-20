@@ -1,4 +1,4 @@
-import { aggregationPath } from "@/lib/workspace";
+import { staffPath } from "@/lib/workspace";
 import { TIER_META, type Tier } from "@/lib/agreements";
 import { ORG_ROLE_LABELS, type OrgRole } from "@/lib/org-roles";
 import {
@@ -72,7 +72,7 @@ export const CLIENT_PROFILE = {
   termEnds: "Term ends",
 } as const;
 
-export const GC_CLIENTS_HREF = aggregationPath("gc/clients");
+export const GC_CLIENTS_HREF = staffPath("gc/clients");
 
 export function clientOrgHref(orgId: string): string {
   return `${GC_CLIENTS_HREF}/${orgId}`;

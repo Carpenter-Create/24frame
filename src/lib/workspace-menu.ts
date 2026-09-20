@@ -11,7 +11,7 @@
 // /settings/workspace. Staff Manage courses is Education
 // workspace manage, not Settings Preferences and not
 // workspace land. Staff workspace land is the first GC_NAV
-// href (/aggregation/queue) — no new /staff dashboard.
+// href (/staff/queue) — no new Staff dashboard page.
 
 import { USER_MENU } from "@/lib/user-menu";
 import {

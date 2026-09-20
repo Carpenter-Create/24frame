@@ -126,7 +126,7 @@ describe("GcClientsPage read bound", () => {
     expect(rpc).toHaveBeenCalledWith("house_grants", { p_limit: UNPAGINATED_MAX + 1 });
 
     const directorySrc = readFileSync(
-      "src/app/(app)/(operator)/aggregation/gc/clients/clients-directory.tsx",
+      "src/app/(app)/(operator)/staff/gc/clients/clients-directory.tsx",
       "utf8",
     );
     expect(directorySrc).toContain("StaffDirectoryList");
@@ -141,7 +141,7 @@ describe("GcClientsPage read bound", () => {
     expect(directorySrc).not.toContain("<table");
     expect(directorySrc).not.toContain("Card");
     expect(directorySrc).not.toContain("HouseGrantForm");
-    expect(readFileSync("src/app/(app)/(operator)/aggregation/gc/clients/page.tsx", "utf8")).toContain(
+    expect(readFileSync("src/app/(app)/(operator)/staff/gc/clients/page.tsx", "utf8")).toContain(
       "HouseGrantSection",
     );
     expect(html).toContain("data-titles-catalog-header-row");
@@ -205,7 +205,7 @@ describe("GcClientsPage read bound", () => {
     expect(html).toContain('data-invite-status="accepted"');
     expect(html).toContain(HOUSE_GRANT.invited);
     expect(html).toContain(HOUSE_GRANT.accepted);
-    expect(html).toContain("/aggregation/gc/clients/33333333-3333-4333-8333-333333333333");
+    expect(html).toContain("/staff/gc/clients/33333333-3333-4333-8333-333333333333");
     expect(html).toContain(HOUSE_GRANT.revoke);
     expect(html).toContain("Sep 17, 2026");
     expect(html).toContain("Sep 19, 2026");

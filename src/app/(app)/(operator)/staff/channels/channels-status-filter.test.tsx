@@ -47,7 +47,7 @@ describe("ChannelsStatusFilter", () => {
 
   it("stays on the Dashboard All time select grammar", () => {
     const src = readFileSync(
-      "src/app/(app)/(operator)/aggregation/channels/channels-status-filter.tsx",
+      "src/app/(app)/(operator)/staff/channels/channels-status-filter.tsx",
       "utf8",
     );
     expect(src).toContain("HousePageSelect");

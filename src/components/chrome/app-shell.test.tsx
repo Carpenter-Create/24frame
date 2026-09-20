@@ -402,7 +402,7 @@ describe("AppShell Access rail and home frame", () => {
     expect(titles).not.toContain("Search titles...");
     expect(titles).not.toContain("⌘K");
 
-    navigation.pathname = "/aggregation/queue";
+    navigation.pathname = "/staff/queue";
     const queue = renderShell();
     expect(queue).toContain("w-full pb-24");
     expect(queue).not.toContain("data-app-home-frame");
@@ -972,7 +972,7 @@ describe("AppShell rail-collapse chevron", () => {
     expect(aggregationStaff).not.toContain('data-house-phone-dest="Queue"');
     expect(aggregationStaff).not.toContain('data-house-phone-dest="Ask 24Frame AI"');
 
-    navigation.pathname = "/aggregation/queue";
+    navigation.pathname = "/staff/queue";
     const staff = renderToStaticMarkup(
       <AppShell
         isGcStaff

@@ -1,11 +1,11 @@
 import { HOUSE_MODULE_CLASS, HOUSE_SECTION_AIR_CLASS } from "@/lib/house-shell";
-import { aggregationPath } from "@/lib/workspace";
+import { staffPath } from "@/lib/workspace";
 
 // Team Channels card + detail — Filmhub IA (plate · tags · name · meta;
 // story + meta rail) on house Aggregation tokens. White page, grey plates,
 // hairline cards. No Filmhub dark, purple, or orange map.
 
-export const CHANNELS_HREF = aggregationPath("channels");
+export const CHANNELS_HREF = staffPath("channels");
 
 export const CHANNEL_CARD_CLASS =
   "flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border border-hairline bg-surface p-[var(--space-4)] shadow-none transition-colors hover:bg-surface-muted/60";

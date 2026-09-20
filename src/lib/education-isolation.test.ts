@@ -56,6 +56,7 @@ describe("education isolation", () => {
     expect(existsSync("src/app/(app)/(operator)/education/manage/page.tsx")).toBe(true);
     expect(existsSync("src/app/(app)/(operator)/education/manage/[slug]/page.tsx")).toBe(true);
     expect(existsSync("src/app/(app)/(operator)/aggregation/gc/education/page.tsx")).toBe(false);
+    expect(existsSync("src/app/(app)/(operator)/staff/gc/education/page.tsx")).toBe(false);
     expect(existsSync("src/app/(app)/education/page.tsx")).toBe(true);
     expect(existsSync("src/app/(app)/education/new/page.tsx")).toBe(false);
     expect(existsSync("src/lib/workspace-redirects.ts")).toBe(false);

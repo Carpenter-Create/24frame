@@ -20,9 +20,12 @@ describe("hygiene docs (P3 / P2-9)", () => {
     expect(runbook).toContain("/activity");
     expect(runbook).not.toContain("/aggregation/activity");
     expect(runbook).toContain("/aggregation/attention");
-    expect(runbook).toContain("/aggregation/queue");
-    expect(runbook).toContain("/aggregation/gc/deliveries");
-    expect(runbook).toContain("/aggregation/channels");
+    expect(runbook).toContain("/staff/queue");
+    expect(runbook).toContain("/staff/gc/deliveries");
+    expect(runbook).toContain("/staff/channels");
+    expect(runbook).toContain("retired `/queue` and `/aggregation/queue` 404s");
+    expect(runbook).toContain("retired `/gc/deliveries` and `/aggregation/gc/deliveries` 404s");
+    expect(runbook).toContain("retired `/vendors` and `/aggregation/channels` 404s");
     expect(runbook).toContain("/settings/agreements");
     expect(runbook).not.toMatch(/\|\s+\*\*Path\*\*\s+\|\s+`\/titles`\s+\|/);
     expect(runbook).not.toMatch(/\|\s+\*\*Path\*\*\s+\|\s+`\/queue`\s+\|/);

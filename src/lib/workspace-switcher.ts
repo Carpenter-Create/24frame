@@ -49,7 +49,7 @@
 // Staff Manage courses lives on the Education workspace
 // (/education/manage), not Settings Preferences and not this
 // Staff lane. Education land is /education. Staff land is
-// /aggregation/queue.
+// /staff/queue.
 // Education quiet search stays Education-only: phone in a
 // full-width row under HouseLeadChrome, desktop in the shared
 // mid-lead slot (same Facebook-compact geometry as Social).

@@ -101,10 +101,10 @@ describe("channel detail", () => {
     expect(html).not.toContain("Curation");
     expect(html).not.toContain("How to watch");
     expect(html).not.toContain("Deal Types");
-    expect(readFileSync("src/app/(app)/(operator)/aggregation/channels/[id]/page.tsx", "utf8")).not.toContain(
+    expect(readFileSync("src/app/(app)/(operator)/staff/channels/[id]/page.tsx", "utf8")).not.toContain(
       "VendorForm",
     );
-    expect(readFileSync("src/app/(app)/(operator)/aggregation/channels/[id]/page.tsx", "utf8")).not.toContain(
+    expect(readFileSync("src/app/(app)/(operator)/staff/channels/[id]/page.tsx", "utf8")).not.toContain(
       "StaffDirectoryRow",
     );
   });

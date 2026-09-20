@@ -138,7 +138,7 @@ describe("account invite SoT", () => {
     expect(HOUSE_GRANT.accepted).toBe(INVITE_STATUS.accepted);
     expect(HOUSE_GRANT.empty).toBe("No grants yet.");
     const grantSection = readFileSync(
-      "src/app/(app)/(operator)/aggregation/gc/clients/house-grant-section.tsx",
+      "src/app/(app)/(operator)/staff/gc/clients/house-grant-section.tsx",
       "utf8",
     );
     expect(grantSection).toContain('rpc("house_grants"');

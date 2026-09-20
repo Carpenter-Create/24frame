@@ -16,7 +16,7 @@ const OTHER_PAGES = [
   "src/app/(app)/aggregation/dashboard/page.tsx",
   "src/app/(app)/aggregation/attention/page.tsx",
   "src/app/(app)/activity/page.tsx",
-  "src/app/(app)/(operator)/aggregation/gc/titles/[id]/page.tsx",
+  "src/app/(app)/(operator)/staff/gc/titles/[id]/page.tsx",
   "src/app/(app)/aggregation/titles/[id]/page.tsx",
   "src/components/dashboard/dashboard-home.tsx",
   "src/components/ui/card.tsx",
@@ -43,8 +43,8 @@ describe("titles catalog scope", () => {
     const landing = src("src/components/messages/ask-globee-landing.tsx");
     const messagesHeader = src("src/components/chrome/messages-app-header.tsx");
     const titleDetail = src("src/app/(app)/aggregation/titles/[id]/page.tsx");
-    const queue = src("src/app/(app)/(operator)/aggregation/queue/page.tsx");
-    const deliveries = src("src/app/(app)/(operator)/aggregation/gc/deliveries/page.tsx");
+    const queue = src("src/app/(app)/(operator)/staff/queue/page.tsx");
+    const deliveries = src("src/app/(app)/(operator)/staff/gc/deliveries/page.tsx");
 
     expect(catalogPage).toContain("HousePageSearch");
     expect(catalogPage).toContain("TITLES_CATALOG.searchPlaceholder");
@@ -154,11 +154,11 @@ describe("titles catalog scope", () => {
     expect(skeletons).not.toContain("h-8 w-24 md:hidden");
     expect(src("src/app/(app)/aggregation/titles/loading.tsx")).toContain("CatalogSkeleton");
     expect(src("src/app/(app)/aggregation/titles/[id]/loading.tsx")).toContain("TitleDetailSkeleton");
-    expect(src("src/app/(app)/(operator)/aggregation/queue/loading.tsx")).toContain("CatalogSkeleton");
+    expect(src("src/app/(app)/(operator)/staff/queue/loading.tsx")).toContain("CatalogSkeleton");
   });
 
   it("absorbs staff /queue into the Titles catalog list — no Card lookalike", () => {
-    const queue = src("src/app/(app)/(operator)/aggregation/queue/page.tsx");
+    const queue = src("src/app/(app)/(operator)/staff/queue/page.tsx");
     const catalog = src("src/components/titles/titles-catalog.tsx");
     expect(queue).toContain("@/components/titles/titles-catalog");
     expect(queue).toContain("@/lib/titles-catalog");
@@ -173,7 +173,7 @@ describe("titles catalog scope", () => {
     expect(catalog).toContain("TitlesCatalogStaffCols");
     expect(catalog).toContain("data-titles-catalog-submitter");
     expect(catalog).toContain("data-titles-catalog-submitted");
-    expect(GC_NAV.find((item) => item.href === "/aggregation/queue")?.label).toBe("Queue");
+    expect(GC_NAV.find((item) => item.href === "/staff/queue")?.label).toBe("Queue");
   });
 
   it("keeps house-shell language in titles comments — no reference-brand word", () => {

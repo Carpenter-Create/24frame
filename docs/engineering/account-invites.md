@@ -55,7 +55,7 @@ After a grant accept, that person is a normal account owner and can use Team inv
 
 ## Where staff comps live
 
-`/aggregation/gc/clients` — existing house Clients page, **Grant account** section composed next to the directory (not inside the list primitive). Not Settings. Not staff Home. Not a CRM. Pending grants show **Invited**; accepted grants stay on the grant list as **Accepted** and appear as a normal account in the clients directory.
+`/staff/gc/clients` — existing house Clients page, **Grant account** section composed next to the directory (not inside the list primitive). Not Settings. Not staff Home. Not a CRM. Pending grants show **Invited**; accepted grants stay on the grant list as **Accepted** and appear as a normal account in the clients directory.
 
 ## Defaults
 
