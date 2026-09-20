@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { SocialFollowButton } from "@/components/social/social-forms";
+import { SocialFollowButton } from "@/components/social/social-engagement";
 import { SocialQueryBound } from "@/components/social/social-query-bound";
 import { SocialEmpty } from "@/components/social/social-empty";
 import { SocialForYouRail } from "@/components/social/social-for-you";
@@ -15,8 +15,12 @@ import {
 } from "@/components/social/social-ui";
 import { SocialWelcomeVideo } from "@/components/social/social-welcome-video";
 import { SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS, SOCIAL_PAGE_CLASS } from "@/lib/social-chrome";
-import { signedAvatarUrl, signedAvatarUrls } from "@/lib/s3-avatars";
-import { signedSocialMediaByPostId, signedSocialMediaUrl } from "@/lib/s3-social-media";
+import {
+  socialAvatarFaces,
+  socialAvatarHref,
+  socialMediaHref,
+  socialMediaProxiesByPostId,
+} from "@/lib/social-edge";
 import {
   parseProfileHandleParam,
   parseSocialProfileTab,
@@ -42,6 +46,8 @@ import {
 import { loadCachedIsFollowing, loadCachedProfileSocialCounts, loadCachedSocialProfileByHandle } from "@/lib/social-hot-reads";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { requireSocialSession } from "@/lib/social-session";
+
+export const runtime = "edge";
 
 export async function generateMetadata({
   params,
@@ -99,14 +105,12 @@ export default async function SocialPublicProfilePage({
   }
 
   const isSelf = member.id === ctx.user.id;
-  const [photoUrl, welcomeUrl] = await Promise.all([
-    signedAvatarUrl(member.id),
-    member.welcome_video_key ? signedSocialMediaUrl(member.welcome_video_key) : Promise.resolve(null),
-  ]);
+  const photoUrl = socialAvatarHref(member.id);
+  const welcomeUrl = member.welcome_video_key ? socialMediaHref(member.welcome_video_key) : null;
   const liveStories = (await loadLiveStories(supabase, [member.id])).stories;
   const following = own && !isSelf ? await loadCachedIsFollowing(supabase, ctx.user.id, member.id) : false;
   const history = await loadAuthorPosts(supabase, member.id);
-  const media = await signedSocialMediaByPostId(history.posts);
+  const media = socialMediaProxiesByPostId(history.posts);
   const liked = own
     ? await loadLikedPostIds(
         supabase,
@@ -119,14 +123,14 @@ export default async function SocialPublicProfilePage({
   const mutuals = isSelf ? null : await loadProfileMutuals(supabase, ctx.user.id, member.id);
   const mutualFaces =
     mutuals && mutuals.people.length > 0
-      ? await signedAvatarUrls(mutuals.people.map((person) => person.id))
+      ? socialAvatarFaces(mutuals.people.map((person) => person.id))
       : new Map();
   const suggested = await loadSuggestedPeople(
     supabase,
     [ctx.user.id, member.id, ...followees.ids],
     { topics: own?.topics ?? [], crafts: own?.crafts ?? [] },
   );
-  const faces = suggested.length > 0 ? await signedAvatarUrls(suggested.map((person) => person.id)) : new Map();
+  const faces = suggested.length > 0 ? socialAvatarFaces(suggested.map((person) => person.id)) : new Map();
   const highlightCards = liveStories.map((story) => ({
     id: story.id,
     href: socialStoryHref(story.id),

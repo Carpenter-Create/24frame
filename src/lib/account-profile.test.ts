@@ -143,8 +143,8 @@ describe("account name persist read-after-write", () => {
     expect(pageSrc).toContain("ctx.user.name");
     const chromeSrc = readFileSync(join(here, "app-shell-chrome.ts"), "utf8");
     expect(chromeSrc).toContain("name: ctx.user.name");
-    expect(chromeSrc).toContain("photoUrl: hasPhoto ? ACCOUNT_PHOTO_HREF : null");
-    expect(chromeSrc).toContain("hasAvatarObject(ctx.user.id)");
+    expect(chromeSrc).toContain("photoUrl: ACCOUNT_PHOTO_HREF");
+    expect(chromeSrc).not.toContain("hasAvatarObject");
     expect(chromeSrc).toContain("ACCOUNT_PHOTO_HREF");
     expect(layoutSrc).toContain("loadAppShellChrome()");
     expect(layoutSrc).not.toContain("signedAvatarUrl");

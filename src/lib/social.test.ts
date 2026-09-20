@@ -488,12 +488,16 @@ describe("social writes stay on the live spine", () => {
 
   it("does not invent a cousin catalog feed table or cascade-delete memberships", () => {
     const actions = readFileSync("src/app/(app)/social/actions.ts", "utf8");
+    const light = readFileSync("src/app/(app)/social/light-actions.ts", "utf8");
     const pages = readFileSync("src/app/(app)/social/page.tsx", "utf8");
     const board = readFileSync("src/app/(app)/social/leaderboard/page.tsx", "utf8");
     expect(actions).toContain('from("profiles")');
     expect(actions).toContain('from("posts")');
     expect(actions).toContain("presignSocialMediaPut");
-    expect(actions).toContain('from("likes")');
+    expect(light).toContain('from("likes")');
+    expect(light).toContain("export async function toggleSocialFollow");
+    expect(light).toContain("export async function toggleSocialLike");
+    expect(actions).not.toContain("toggleSocialFollow");
     expect(actions).not.toContain("from \"@/lib/s3\"");
     expect(actions).not.toContain("from \"@/lib/cloudfront\"");
     expect(actions).not.toContain("from \"@/lib/mediaconvert\"");
@@ -542,10 +546,9 @@ describe("social writes stay on the live spine", () => {
   });
 
   it("reuses signed account faces and does not add a second upload or title bucket", () => {
-    const surfaces = [
+    const nodeSurfaces = [
       "src/app/(app)/social/page.tsx",
       "src/app/(app)/social/profile/page.tsx",
-      "src/app/(app)/social/u/[handle]/page.tsx",
       "src/app/(app)/social/dms/page.tsx",
       "src/app/(app)/social/dms/[id]/page.tsx",
       "src/app/(app)/social/leaderboard/page.tsx",
@@ -553,7 +556,7 @@ describe("social writes stay on the live spine", () => {
       "src/app/(app)/social/groups/[slug]/posts/[postId]/page.tsx",
       "src/app/(app)/social/stories/[id]/page.tsx",
     ];
-    for (const file of surfaces) {
+    for (const file of nodeSurfaces) {
       const src = readFileSync(file, "utf8");
       expect(src).toMatch(/signedAvatarUrls?/);
       expect(src).not.toContain("putAvatarObject");
@@ -565,10 +568,19 @@ describe("social writes stay on the live spine", () => {
       expect(src).not.toContain("@/lib/cloudfront");
       expect(src).not.toContain("@/lib/mediaconvert");
     }
+    const publicProfile = readFileSync("src/app/(app)/social/u/[handle]/page.tsx", "utf8");
+    expect(publicProfile).toContain("socialAvatarHref");
+    expect(publicProfile).toContain("socialMediaProxiesByPostId");
+    expect(publicProfile).not.toContain("putAvatarObject");
+    expect(publicProfile).not.toContain("uploadAccountPhoto");
+    expect(publicProfile).not.toContain("S3_BUCKET");
+    expect(publicProfile).not.toContain("S3_AVATARS_BUCKET");
+    expect(publicProfile).not.toContain("@/lib/s3\"");
+    expect(publicProfile).not.toContain("@/lib/cloudfront");
+    expect(publicProfile).not.toContain("@/lib/mediaconvert");
     const feed = [
       "src/app/(app)/social/page.tsx",
       "src/app/(app)/social/profile/page.tsx",
-      "src/app/(app)/social/u/[handle]/page.tsx",
       "src/app/(app)/social/groups/[slug]/page.tsx",
       "src/app/(app)/social/groups/[slug]/posts/[postId]/page.tsx",
       "src/app/(app)/social/stories/[id]/page.tsx",

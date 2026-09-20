@@ -14,10 +14,9 @@ import {
   createSocialStory,
   openSocialDm,
   presignSocialMediaUpload,
-  toggleSocialFollow,
-  toggleSocialLike,
   updateSocialBio,
 } from "./actions";
+import { toggleSocialFollow, toggleSocialLike } from "./light-actions";
 
 vi.mock("@/lib/s3-social-media", () => ({
   presignSocialMediaPut: vi.fn(),

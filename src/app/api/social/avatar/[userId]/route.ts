@@ -1,14 +1,20 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 
 import { signedAvatarUrl } from "@/lib/s3-avatars";
 import { getAuthUser } from "@/lib/supabase/auth";
 
 export const runtime = "nodejs";
 
-// Chrome face GET. Mapping C: sign avatars/{user-id}/avatar for the session
-// user only. Re-sign on every request so the client shell never holds a
-// 5-minute S3 URL. 404 when empty — chrome falls back to the initial.
-export async function GET() {
+const userIdSchema = z.string().uuid();
+
+// Node signer for Edge Social reads. Session required. Re-signs on each
+// GET so the Edge HTML never holds a 5-minute S3 URL.
+
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ userId: string }> },
+) {
   const user = await getAuthUser();
   if (!user) {
     return new NextResponse(null, {
@@ -17,7 +23,15 @@ export async function GET() {
     });
   }
 
-  const url = await signedAvatarUrl(user.id);
+  const { userId } = await params;
+  if (!userIdSchema.safeParse(userId).success) {
+    return new NextResponse(null, {
+      status: 400,
+      headers: { "Cache-Control": "private, no-store" },
+    });
+  }
+
+  const url = await signedAvatarUrl(userId);
   if (!url) {
     return new NextResponse(null, {
       status: 404,

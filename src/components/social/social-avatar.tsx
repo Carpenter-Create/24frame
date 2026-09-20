@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+
 import { cn } from "@/lib/cn";
 import { IDENTITY_AVATAR_CLASS } from "@/lib/house-sheet";
 import {
@@ -20,6 +24,8 @@ export function SocialAvatar({
   size?: "sm" | "md" | "lg" | "profile";
   className?: string;
 }) {
+  const [brokenSrc, setBrokenSrc] = useState<string | null>(null);
+  const face = photoUrl && brokenSrc !== photoUrl ? photoUrl : null;
   const box =
     size === "lg"
       ? SOCIAL_AVATAR_LG_CLASS
@@ -34,14 +40,14 @@ export function SocialAvatar({
       data-social-avatar-ring={ring ?? undefined}
       className={cn(
         box,
-        photoUrl ? "overflow-hidden" : null,
+        face ? "overflow-hidden" : null,
         ring ? "ring-2 ring-accent ring-offset-2 ring-offset-[var(--bg)]" : null,
         className,
       )}
     >
-      {photoUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element -- short-lived signed GET from the private avatars bucket
-        <img src={photoUrl} alt="" className="size-full object-cover" />
+      {face ? (
+        // eslint-disable-next-line @next/next/no-img-element -- same-origin or short-lived signed GET; onError drops a miss
+        <img src={face} alt="" className="size-full object-cover" onError={() => setBrokenSrc(face)} />
       ) : (
         socialInitials(name)
       )}

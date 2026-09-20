@@ -7,7 +7,7 @@ import { SocialFollowsList } from "@/components/social/social-follows-list";
 import { SocialFollowsTabs } from "@/components/social/social-follows-tabs";
 import { SocialIcon } from "@/components/social/social-icon";
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { signedAvatarUrls } from "@/lib/s3-avatars";
+import { socialAvatarFaces } from "@/lib/social-edge";
 import {
   displayHandle,
   parseProfileHandleParam,
@@ -29,6 +29,8 @@ import { filterSocialFollowsPeople } from "@/lib/social-follow";
 import { loadCachedProfileSocialCounts, loadCachedSocialProfileByHandle } from "@/lib/social-hot-reads";
 import { SOCIAL_ICON_SIZE_HEADER } from "@/lib/social-icons";
 import { requireSocialSession } from "@/lib/social-session";
+
+export const runtime = "edge";
 
 export default async function SocialFollowsPage({
   params,
@@ -79,7 +81,7 @@ export default async function SocialFollowsPage({
     loadCachedProfileSocialCounts(supabase, member.id),
   ]);
   const people = filterSocialFollowsPeople(page.people, query);
-  const faces = people.length > 0 ? await signedAvatarUrls(people.map((person) => person.id)) : new Map();
+  const faces = people.length > 0 ? socialAvatarFaces(people.map((person) => person.id)) : new Map();
   const emptyTitle = query
     ? SOCIAL.profile.followsSearchEmpty
     : tab === "following"

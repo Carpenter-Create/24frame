@@ -4,6 +4,8 @@ import { createSocialProfile } from "@/app/(app)/social/actions";
 import { ACCOUNT_PROFILE } from "@/lib/account-profile";
 import { getAuthUser } from "@/lib/supabase/auth";
 
+export const runtime = "nodejs";
+
 // Background persist for Social Edit Done. Fetch — not a server action —
 // so the own face is not refreshed while the write is in flight.
 

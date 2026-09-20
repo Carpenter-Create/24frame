@@ -1,5 +1,5 @@
 import { CourseCard } from "@/components/courses/course-card";
-import { SocialFollowButton } from "@/components/social/social-forms";
+import { SocialFollowButton } from "@/components/social/social-engagement";
 import { SocialPersonRow } from "@/components/social/social-ui";
 import {
   SOCIAL_FOR_YOU_CARD_CLASS,

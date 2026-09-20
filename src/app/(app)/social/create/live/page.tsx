@@ -3,6 +3,8 @@ import { SOCIAL } from "@/lib/social";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { requireSocialSession } from "@/lib/social-session";
 
+export const runtime = "nodejs";
+
 export default async function SocialGoLivePage() {
   const { ctx, supabase } = await requireSocialSession();
   await ensureOwnSocialProfile(supabase, ctx.user);

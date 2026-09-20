@@ -80,9 +80,15 @@ describe("social isolation lock", () => {
     expect(actions).not.toContain("from(\"courses\")");
     expect(list).not.toContain("/education");
     expect(detail).not.toContain("/lessons/");
-    expect(actions).toContain('from("follows")');
-    expect(actions).toContain('notify_new_follower');
-    expect(actions).toContain("bustSocialFollowHotCache");
+    const light = readFileSync("src/app/(app)/social/light-actions.ts", "utf8");
+    expect(light).toContain("export async function toggleSocialFollow");
+    expect(light).toContain("export async function toggleSocialLike");
+    expect(actions).not.toContain("toggleSocialFollow");
+    expect(light).toContain('from("follows")');
+    expect(light).toContain("notify_new_follower");
+    expect(light).toContain("bustSocialFollowHotCache");
+    expect(light).not.toContain("@/lib/s3-social-media");
+    expect(light).not.toContain("presignSocialMedia");
     expect(actions).toContain("bustSocialProfileHotCache");
     expect(actions).toContain('from("stories")');
     expect(actions).not.toContain("from(\"reels\")");

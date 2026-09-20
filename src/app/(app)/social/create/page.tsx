@@ -10,6 +10,8 @@ import { loadFolloweeIds, loadSuggestedPeople } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { requireSocialSession, type SocialSession } from "@/lib/social-session";
 
+export const runtime = "nodejs";
+
 export default async function SocialCreatePage({
   searchParams,
 }: {

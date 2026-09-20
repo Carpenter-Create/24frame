@@ -6,6 +6,8 @@ import { ensureOwnSocialProfileResult } from "@/lib/social-profile";
 import { requireSocialSession } from "@/lib/social-session";
 import { redirect } from "next/navigation";
 
+export const runtime = "nodejs";
+
 export default async function SocialProfileEditPage() {
   const { ctx, supabase } = await requireSocialSession();
   const [{ profile }, photoUrl] = await Promise.all([

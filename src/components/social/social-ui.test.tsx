@@ -146,6 +146,7 @@ describe("SocialPostCard faces", () => {
     expect(uiSrc).not.toContain("S3_BUCKET");
     expect(uiSrc).not.toContain("24frame-media");
     expect(avatarSrc).not.toContain("signedAvatarUrl");
+    expect(avatarSrc).toContain("onError");
   });
 });
 

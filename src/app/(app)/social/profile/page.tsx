@@ -44,6 +44,8 @@ import {
 } from "@/lib/social-profile-edit";
 import { requireSocialSession, type SocialSession } from "@/lib/social-session";
 
+export const runtime = "nodejs";
+
 export default async function SocialProfilePage({
   searchParams,
 }: {

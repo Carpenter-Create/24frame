@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
 
-import { signedAvatarUrl } from "@/lib/s3-avatars";
+import { signedSocialMediaUrl } from "@/lib/s3-social-media";
+import { isForbiddenMediaKey } from "@/lib/social-media";
 import { getAuthUser } from "@/lib/supabase/auth";
 
 export const runtime = "nodejs";
 
-// Chrome face GET. Mapping C: sign avatars/{user-id}/avatar for the session
-// user only. Re-sign on every request so the client shell never holds a
-// 5-minute S3 URL. 404 when empty — chrome falls back to the initial.
-export async function GET() {
+// Node signer for Edge Social reads. Session required. Forbidden /
+// title-asset keys stay closed.
+
+export async function GET(request: Request) {
   const user = await getAuthUser();
   if (!user) {
     return new NextResponse(null, {
@@ -17,7 +18,15 @@ export async function GET() {
     });
   }
 
-  const url = await signedAvatarUrl(user.id);
+  const key = new URL(request.url).searchParams.get("key")?.trim() ?? "";
+  if (!key || isForbiddenMediaKey(key)) {
+    return new NextResponse(null, {
+      status: 400,
+      headers: { "Cache-Control": "private, no-store" },
+    });
+  }
+
+  const url = await signedSocialMediaUrl(key);
   if (!url) {
     return new NextResponse(null, {
       status: 404,
