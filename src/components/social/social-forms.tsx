@@ -101,6 +101,7 @@ function publishOptimisticPost({
   category,
   onLocalSuccess,
   onNavigate,
+  onRestore,
   setError,
 }: {
   body: string;
@@ -114,6 +115,7 @@ function publishOptimisticPost({
   category?: string;
   onLocalSuccess?: () => void;
   onNavigate?: () => void;
+  onRestore?: () => void;
   setError: (error: string) => void;
 }) {
   const started = beginSocialPostPublish({
@@ -147,10 +149,13 @@ function publishOptimisticPost({
     rollback: () => {
       failOptimisticSocialPost(started.post.id, ACCOUNT_PROFILE.saveFailed);
       endSocialPostPublishBusy();
+      onRestore?.();
     },
     onError: (error) => {
       failOptimisticSocialPost(started.post.id, error);
       endSocialPostPublishBusy();
+      onRestore?.();
+      setError(error);
     },
     onSuccess: () => {
       endSocialPostPublishBusy();
@@ -289,6 +294,7 @@ export function SocialPostCompose({
       className="flex flex-col gap-[var(--space-3)]"
       onSubmit={(event) => {
         event.preventDefault();
+        const draft = { body, media, previews };
         publishOptimisticPost({
           body,
           media,
@@ -300,6 +306,11 @@ export function SocialPostCompose({
             setBody("");
             setMedia([]);
             setPreviews({});
+          },
+          onRestore: () => {
+            setBody(draft.body);
+            setMedia(draft.media);
+            setPreviews(draft.previews);
           },
           setError,
         });
