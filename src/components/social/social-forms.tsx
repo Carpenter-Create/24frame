@@ -43,6 +43,10 @@ import {
 } from "@/lib/social-media";
 import { takeSocialHomeComposerMedia } from "@/lib/social-home-composer";
 import {
+  FOLLOW_CONFIRM_MS,
+  followedConfirmCopy,
+} from "@/lib/social-follow";
+import {
   displayHandle,
   normalizeHandle,
   SOCIAL,
@@ -591,7 +595,15 @@ export function SocialFollowButton({
   const [override, setOverride] = useState<boolean | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
+  const [confirm, setConfirm] = useState(false);
   const isFollowing = override ?? following;
+
+  // Adam lock: optimistic Following on click; InlineNotice toast only after persist.
+  useEffect(() => {
+    if (!confirm) return;
+    const id = window.setTimeout(() => setConfirm(false), FOLLOW_CONFIRM_MS);
+    return () => window.clearTimeout(id);
+  }, [confirm]);
 
   return (
     <div
@@ -606,6 +618,7 @@ export function SocialFollowButton({
           const next = !isFollowing;
           setPending(true);
           setError("");
+          setConfirm(false);
           setOverride(next);
           const result = await toggleSocialFollow(formData);
           setPending(false);
@@ -614,6 +627,7 @@ export function SocialFollowButton({
             setError(result.error);
             return;
           }
+          if (next) setConfirm(true);
           router.refresh();
         }}
       >
@@ -637,6 +651,11 @@ export function SocialFollowButton({
         </button>
       </form>
       {error ? <FormError error={error} /> : null}
+      {confirm ? (
+        <InlineNotice data-social-follow-toast="" aria-live="polite">
+          {followedConfirmCopy(handle)}
+        </InlineNotice>
+      ) : null}
     </div>
   );
 }
