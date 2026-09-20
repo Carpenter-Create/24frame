@@ -16,7 +16,6 @@ import {
 import { SocialWelcomeVideo } from "@/components/social/social-welcome-video";
 import { SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS, SOCIAL_PAGE_CLASS } from "@/lib/social-chrome";
 import {
-  SOCIAL_EDGE_RUNTIME,
   socialAvatarFaces,
   socialAvatarHref,
   socialMediaHref,
@@ -48,7 +47,7 @@ import { loadCachedIsFollowing, loadCachedProfileSocialCounts, loadCachedSocialP
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { requireSocialSession } from "@/lib/social-session";
 
-export const runtime = SOCIAL_EDGE_RUNTIME;
+export const runtime = "edge";
 
 export async function generateMetadata({
   params,

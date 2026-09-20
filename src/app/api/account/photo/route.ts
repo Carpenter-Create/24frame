@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 
 import { signedAvatarUrl } from "@/lib/s3-avatars";
-import { SOCIAL_NODE_RUNTIME } from "@/lib/social-edge";
 import { getAuthUser } from "@/lib/supabase/auth";
 
-export const runtime = SOCIAL_NODE_RUNTIME;
+export const runtime = "nodejs";
 
 // Chrome face GET. Mapping C: sign avatars/{user-id}/avatar for the session
 // user only. Re-sign on every request so the client shell never holds a

@@ -2,10 +2,9 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { signedAvatarUrl } from "@/lib/s3-avatars";
-import { SOCIAL_NODE_RUNTIME } from "@/lib/social-edge";
 import { getAuthUser } from "@/lib/supabase/auth";
 
-export const runtime = SOCIAL_NODE_RUNTIME;
+export const runtime = "nodejs";
 
 const userIdSchema = z.string().uuid();
 

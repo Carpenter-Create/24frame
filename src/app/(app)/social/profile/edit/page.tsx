@@ -3,11 +3,10 @@ import { signedAvatarUrl } from "@/lib/s3-avatars";
 import { signedSocialMediaUrl } from "@/lib/s3-social-media";
 import { SOCIAL_ROUTES } from "@/lib/social";
 import { ensureOwnSocialProfileResult } from "@/lib/social-profile";
-import { SOCIAL_NODE_RUNTIME } from "@/lib/social-edge";
 import { requireSocialSession } from "@/lib/social-session";
 import { redirect } from "next/navigation";
 
-export const runtime = SOCIAL_NODE_RUNTIME;
+export const runtime = "nodejs";
 
 export default async function SocialProfileEditPage() {
   const { ctx, supabase } = await requireSocialSession();

@@ -81,7 +81,9 @@ describe("social isolation lock", () => {
     expect(list).not.toContain("/education");
     expect(detail).not.toContain("/lessons/");
     const light = readFileSync("src/app/(app)/social/light-actions.ts", "utf8");
-    expect(actions).toContain('export { toggleSocialFollow, toggleSocialLike } from "./light-actions"');
+    expect(light).toContain("export async function toggleSocialFollow");
+    expect(light).toContain("export async function toggleSocialLike");
+    expect(actions).not.toContain("toggleSocialFollow");
     expect(light).toContain('from("follows")');
     expect(light).toContain("notify_new_follower");
     expect(light).toContain("bustSocialFollowHotCache");

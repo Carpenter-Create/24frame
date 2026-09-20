@@ -7,7 +7,7 @@ import { SocialFollowsList } from "@/components/social/social-follows-list";
 import { SocialFollowsTabs } from "@/components/social/social-follows-tabs";
 import { SocialIcon } from "@/components/social/social-icon";
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { SOCIAL_EDGE_RUNTIME, socialAvatarFaces } from "@/lib/social-edge";
+import { socialAvatarFaces } from "@/lib/social-edge";
 import {
   displayHandle,
   parseProfileHandleParam,
@@ -30,7 +30,7 @@ import { loadCachedProfileSocialCounts, loadCachedSocialProfileByHandle } from "
 import { SOCIAL_ICON_SIZE_HEADER } from "@/lib/social-icons";
 import { requireSocialSession } from "@/lib/social-session";
 
-export const runtime = SOCIAL_EDGE_RUNTIME;
+export const runtime = "edge";
 
 export default async function SocialFollowsPage({
   params,

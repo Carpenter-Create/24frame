@@ -377,7 +377,7 @@ describe("Social public profile", () => {
 
     const src = readFileSync("src/app/(app)/social/u/[handle]/page.tsx", "utf8");
     expect(src).toContain("socialAvatarHref");
-    expect(src).toContain("export const runtime = SOCIAL_EDGE_RUNTIME");
+    expect(src).toContain('export const runtime = "edge"');
     expect(src).toContain("loadAuthorPosts");
     expect(src).toContain("SocialAuthorHistory");
     expect(src).toContain("socialProfileCasingRedirect");

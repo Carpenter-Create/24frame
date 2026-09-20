@@ -8,10 +8,9 @@ import { signedAvatarUrl, signedAvatarUrls } from "@/lib/s3-avatars";
 import { parseSocialCreateKind, SOCIAL, socialPersonLabel } from "@/lib/social";
 import { loadFolloweeIds, loadSuggestedPeople } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
-import { SOCIAL_NODE_RUNTIME } from "@/lib/social-edge";
 import { requireSocialSession, type SocialSession } from "@/lib/social-session";
 
-export const runtime = SOCIAL_NODE_RUNTIME;
+export const runtime = "nodejs";
 
 export default async function SocialCreatePage({
   searchParams,

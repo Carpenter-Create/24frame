@@ -2,10 +2,9 @@ import { NextResponse } from "next/server";
 
 import { createSocialProfile } from "@/app/(app)/social/actions";
 import { ACCOUNT_PROFILE } from "@/lib/account-profile";
-import { SOCIAL_NODE_RUNTIME } from "@/lib/social-edge";
 import { getAuthUser } from "@/lib/supabase/auth";
 
-export const runtime = SOCIAL_NODE_RUNTIME;
+export const runtime = "nodejs";
 
 // Background persist for Social Edit Done. Fetch — not a server action —
 // so the own face is not refreshed while the write is in flight.

@@ -54,8 +54,6 @@ import {
 } from "@/lib/social";
 import { bustSocialProfileHotCache } from "@/lib/social-hot-cache";
 
-export { toggleSocialFollow, toggleSocialLike } from "./light-actions";
-
 type ActionResult = { error?: string };
 
 async function requireUser() {

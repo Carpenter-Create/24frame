@@ -495,7 +495,9 @@ describe("social writes stay on the live spine", () => {
     expect(actions).toContain('from("posts")');
     expect(actions).toContain("presignSocialMediaPut");
     expect(light).toContain('from("likes")');
-    expect(actions).toContain('export { toggleSocialFollow, toggleSocialLike } from "./light-actions"');
+    expect(light).toContain("export async function toggleSocialFollow");
+    expect(light).toContain("export async function toggleSocialLike");
+    expect(actions).not.toContain("toggleSocialFollow");
     expect(actions).not.toContain("from \"@/lib/s3\"");
     expect(actions).not.toContain("from \"@/lib/cloudfront\"");
     expect(actions).not.toContain("from \"@/lib/mediaconvert\"");

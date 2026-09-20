@@ -52,7 +52,7 @@ describe("Social Edge vs Node runtime lock", () => {
     const follows = readFileSync("src/app/(app)/social/u/[handle]/follows/page.tsx", "utf8");
     const members = readFileSync("src/app/(app)/social/members/[handle]/page.tsx", "utf8");
     for (const src of [publicProfile, explore, follows, members]) {
-      expect(src).toContain(`export const runtime = SOCIAL_EDGE_RUNTIME`);
+      expect(src).toContain('export const runtime = "edge"');
       expect(src).not.toContain("@/lib/s3-avatars");
       expect(src).not.toContain("@/lib/s3-social-media");
       expect(src).not.toContain("signedAvatarUrl");
@@ -80,7 +80,7 @@ describe("Social Edge vs Node runtime lock", () => {
     const actions = readFileSync("src/app/(app)/social/actions.ts", "utf8");
     const light = readFileSync("src/app/(app)/social/light-actions.ts", "utf8");
     for (const src of [own, edit, create, live, storyNew, profileApi, avatarApi, mediaApi, photoApi]) {
-      expect(src).toContain(`export const runtime = SOCIAL_NODE_RUNTIME`);
+      expect(src).toContain('export const runtime = "nodejs"');
     }
     expect(actions).toContain("presignSocialMediaPut");
     expect(actions).toContain("@/lib/s3-social-media");

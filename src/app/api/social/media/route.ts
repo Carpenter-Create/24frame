@@ -2,10 +2,9 @@ import { NextResponse } from "next/server";
 
 import { signedSocialMediaUrl } from "@/lib/s3-social-media";
 import { isForbiddenMediaKey } from "@/lib/social-media";
-import { SOCIAL_NODE_RUNTIME } from "@/lib/social-edge";
 import { getAuthUser } from "@/lib/supabase/auth";
 
-export const runtime = SOCIAL_NODE_RUNTIME;
+export const runtime = "nodejs";
 
 // Node signer for Edge Social reads. Session required. Forbidden /
 // title-asset keys stay closed.

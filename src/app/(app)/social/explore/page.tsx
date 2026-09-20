@@ -9,12 +9,12 @@ import { SocialSuggestedPeople } from "@/components/social/social-for-you";
 import { SocialExploreResultsSkeleton } from "@/components/social/social-skeletons";
 import { SocialPersonRow } from "@/components/social/social-ui";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
-import { SOCIAL_EDGE_RUNTIME, socialAvatarFaces } from "@/lib/social-edge";
+import { socialAvatarFaces } from "@/lib/social-edge";
 import { loadExploreSearch, loadFolloweeIds, loadSuggestedPeople } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { requireSocialSession, type SocialSession } from "@/lib/social-session";
 
-export const runtime = SOCIAL_EDGE_RUNTIME;
+export const runtime = "edge";
 
 export default async function SocialExplorePage({
   searchParams,
