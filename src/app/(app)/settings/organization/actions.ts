@@ -10,6 +10,7 @@ import {
   resolveTeamInviteOrgName,
   revokeInviteSchema,
   teamInviteSchema,
+  teamInviteUserError,
   teamRoleLabel,
 } from "@/lib/account-invite";
 import { LEGAL_ENTITIES } from "@/lib/legal-entities";
@@ -71,7 +72,12 @@ export async function inviteTeamMember(input: unknown): Promise<{ error?: string
     p_entity_scope: parsed.data.entityScope ?? "all",
     p_entity_ids: parsed.data.entityScope === "selected" ? parsed.data.entityIds : undefined,
   });
-  if (error || !inviteId) return { error: error?.message || ACCOUNT_INVITE.sendFailed };
+  if (error || !inviteId) {
+    if (error?.message) {
+      console.error("[account-invite] invite_org_member failed", error.message);
+    }
+    return { error: teamInviteUserError(error?.message, "send") };
+  }
 
   const hdrs = await headers();
   try {
@@ -103,7 +109,10 @@ export async function revokeTeamInvite(input: unknown): Promise<{ error?: string
 
   const supabase = await createClient();
   const { error } = await supabase.rpc("revoke_account_invite", { p_id: parsed.data.id });
-  if (error) return { error: error.message || ACCOUNT_INVITE.revokeFailed };
+  if (error) {
+    console.error("[account-invite] revoke_account_invite failed", error.message);
+    return { error: teamInviteUserError(error.message, "revoke") };
+  }
 
   revalidatePath("/settings/organization");
   return {};

@@ -33,6 +33,11 @@ export const DIALOG_SIZES = {
   xl: "w-[min(94vw,56rem)]",
 } as const;
 
+// Soft bottom sheet on phone. Desktop stays the centered card.
+// Invite uses this. Do not fork a Team-Invite overlay.
+export const DIALOG_SHEET_CLASS =
+  "max-md:mx-0 max-md:mb-0 max-md:mt-auto max-md:w-full max-md:max-w-none max-md:rounded-b-none max-md:border-x-0 max-md:border-b-0 max-md:pb-[env(safe-area-inset-bottom)]";
+
 export function DialogFooter({
   className,
   ...props
@@ -45,12 +50,14 @@ export function Dialog({
   onClose,
   title,
   size = "md",
+  presentation = "dialog",
   children,
 }: {
   open: boolean;
   onClose: () => void;
   title: string;
   size?: keyof typeof DIALOG_SIZES;
+  presentation?: "dialog" | "sheet";
   children: ReactNode;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -70,7 +77,12 @@ export function Dialog({
         if (e.target === ref.current) onClose(); // click on the backdrop (the dialog element itself)
       }}
       data-dialog-size={size}
-      className={cn(DIALOG_PANEL_CLASS, DIALOG_SIZES[size])}
+      data-dialog-presentation={presentation}
+      className={cn(
+        DIALOG_PANEL_CLASS,
+        DIALOG_SIZES[size],
+        presentation === "sheet" && DIALOG_SHEET_CLASS,
+      )}
     >
       <div className={DIALOG_HEADER_CLASS}>
         <h2 className="t-body font-medium text-ink">{title}</h2>
