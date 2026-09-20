@@ -217,7 +217,7 @@ export function AppShell({
             data-social-rail=""
           >
             <RailCollapse collapsed={collapsed} onToggle={toggle} />
-            <div className={cn("min-h-0 flex-1 overflow-y-auto", collapsed ? "px-1 pb-2" : "p-4")}>
+            <div className={cn("flex min-h-0 flex-1 flex-col overflow-y-auto", collapsed ? "gap-2 px-1 pb-2" : "gap-3 p-4")}>
               <SideNav
                 isGcStaff={false}
                 collapsed={collapsed}
