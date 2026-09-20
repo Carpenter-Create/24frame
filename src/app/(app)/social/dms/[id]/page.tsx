@@ -9,7 +9,7 @@ import {
   parseDmThreadCursorParam,
   socialDmThreadHref,
 } from "@/lib/social-dm-bounds";
-import { conversationRoomLabel, displayHandle, SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
+import { conversationRoomLabel, displayHandle, SOCIAL, SOCIAL_ROUTES, socialPersonLabel } from "@/lib/social";
 import { loadDmParticipants, loadDmThreadMessages } from "@/lib/social-dms";
 import { loadProfilesByIds } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
@@ -71,7 +71,7 @@ export default async function SocialDmThreadPage({
     .filter((person): person is NonNullable<typeof person> => !!person);
   const title = conversationRoomLabel(
     conversation.title,
-    others.map((person) => person.display_name),
+    others.map((person) => socialPersonLabel({ handle: person.handle, displayName: person.display_name })),
   );
   const subtitle =
     others.length === 1
@@ -122,7 +122,10 @@ export default async function SocialDmThreadPage({
       <ol className="flex flex-col gap-[var(--space-4)]">
         {messages.map((message) => {
           const sender = message.sender_id ? people.get(message.sender_id) : null;
-          const name = sender?.display_name ?? "Member";
+          const name = socialPersonLabel({
+            handle: sender?.handle ?? "",
+            displayName: sender?.display_name,
+          });
           return (
             <li key={message.id} className="flex gap-[var(--space-3)]">
               <SocialAvatar

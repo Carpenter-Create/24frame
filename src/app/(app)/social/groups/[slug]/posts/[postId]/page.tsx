@@ -6,7 +6,7 @@ import { SocialLikeButton } from "@/components/social/social-forms";
 import { SocialAvatar, SocialPostMedia } from "@/components/social/social-ui";
 import { signedAvatarUrl } from "@/lib/s3-avatars";
 import { signedSocialMediaItems } from "@/lib/s3-social-media";
-import { SOCIAL, socialGroupHref, socialMemberHref } from "@/lib/social";
+import { SOCIAL, socialGroupHref, socialMemberHref, socialPersonLabel } from "@/lib/social";
 import { loadLikedPostIds } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { requireSocialSession } from "@/lib/social-session";
@@ -58,13 +58,19 @@ export default async function SocialPostPage({
       />
       <article className="flex flex-col gap-[var(--space-4)]">
         <div className="flex items-center gap-[var(--space-3)]">
-          <SocialAvatar name={author?.display_name ?? "Member"} photoUrl={photoUrl} />
+          <SocialAvatar
+            name={socialPersonLabel({
+              handle: author?.handle ?? "",
+              displayName: author?.display_name,
+            })}
+            photoUrl={photoUrl}
+          />
           {author ? (
             <Link href={socialMemberHref(author.handle)} className="t-body font-medium text-ink">
-              {author.display_name}
+              {socialPersonLabel({ handle: author.handle, displayName: author.display_name })}
             </Link>
           ) : (
-            <p className="t-body font-medium text-ink">Member</p>
+            <p className="t-body font-medium text-ink">{socialPersonLabel({ handle: "" })}</p>
           )}
         </div>
         {post.body ? <p className="t-body text-ink whitespace-pre-wrap">{post.body}</p> : null}

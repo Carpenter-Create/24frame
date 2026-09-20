@@ -7,7 +7,7 @@ import { signedAvatarUrl, signedAvatarUrls } from "@/lib/s3-avatars";
 import { signedSocialMediaItems } from "@/lib/s3-social-media";
 import { followingAuthorIds } from "@/lib/social-home";
 import { isStoryLive } from "@/lib/social-stories";
-import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
+import { SOCIAL, SOCIAL_ROUTES, socialPersonLabel } from "@/lib/social";
 import {
   groupStoryRail,
   loadFolloweeIds,
@@ -94,7 +94,10 @@ export default async function SocialStoryPage({
   ]);
   const rail = groupStoryRail(railPage.stories, viewed);
   const author = authors.get(story.author_id);
-  const name = author?.display_name ?? "Member";
+  const name = socialPersonLabel({
+    handle: author?.handle ?? "",
+    displayName: author?.display_name,
+  });
 
   return (
     <div data-social-story={story.id} className={SOCIAL_HOME_LAYOUT_CLASS}>

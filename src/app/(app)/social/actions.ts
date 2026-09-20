@@ -35,6 +35,7 @@ import {
   quietDmAddError,
   SOCIAL,
   SOCIAL_ROUTES,
+  socialPublicDisplayName,
   socialDmHref,
   socialGroupHref,
   socialHandleRequiredError,
@@ -70,8 +71,8 @@ export async function createSocialProfile(formData: FormData): Promise<ActionRes
   const profile = await ensureOwnSocialProfile(supabase, user);
   const displayName =
     normalizeDisplayName(String(formData.get("display_name") ?? "")) ??
-    profile?.display_name ??
-    SOCIAL.profile.defaultDisplayName;
+    socialPublicDisplayName(profile?.display_name) ??
+    "";
 
   if (profile) {
     const { error } = await supabase

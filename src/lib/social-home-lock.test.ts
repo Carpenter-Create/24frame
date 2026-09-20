@@ -162,6 +162,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(extras).not.toContain("data-social-rail-create");
     expect(extras).toContain("data-social-rail-account");
     expect(forYou).toContain("SocialOnboardingChecklist");
+    expect(forYou).toContain("SocialPersonRow");
+    expect(forYou).not.toContain("SocialAvatar");
     expect(forYou).not.toContain("SOCIAL.forYou.native");
     expect(forYou).not.toContain("Social-native");
     expect(forYou).not.toContain("education");
@@ -403,6 +405,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).not.toContain("firstWinHint");
     expect(home).toContain("data-social-home-setup");
     expect(forYou).toContain("SocialOnboardingChecklist");
+    expect(forYou).toContain("SocialPersonRow");
     expect(forYou).toContain('tone="nested"');
     expect(forYou).toContain("layout === \"rail\"");
     expect(checklist).toContain("data-social-checklist-dismiss");

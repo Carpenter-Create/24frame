@@ -5,7 +5,7 @@ import { SocialForYouRail } from "@/components/social/social-for-you";
 import { SocialForYouSkeleton } from "@/components/social/social-skeletons";
 import { SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS } from "@/lib/social-chrome";
 import { signedAvatarUrl, signedAvatarUrls } from "@/lib/s3-avatars";
-import { parseSocialCreateKind, SOCIAL } from "@/lib/social";
+import { parseSocialCreateKind, SOCIAL, socialPersonLabel } from "@/lib/social";
 import { loadFolloweeIds, loadSuggestedPeople } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { requireSocialSession, type SocialSession } from "@/lib/social-session";
@@ -31,7 +31,11 @@ export default async function SocialCreatePage({
       <div className={SOCIAL_HOME_CENTER_CLASS}>
         <h1 className="sr-only">{SOCIAL.create.title}</h1>
         <SocialCreateCompose
-          authorName={profile?.display_name ?? SOCIAL.home.you}
+          authorName={
+            profile
+              ? socialPersonLabel({ handle: profile.handle, displayName: profile.display_name })
+              : SOCIAL.home.you
+          }
           authorHandle={profile?.handle ?? null}
           authorPhotoUrl={photoUrl}
           initialKind={initialKind}

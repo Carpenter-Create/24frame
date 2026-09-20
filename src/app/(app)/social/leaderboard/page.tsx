@@ -11,7 +11,7 @@ import {
   loadLeaderboardBoard,
 } from "@/lib/leaderboard";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
-import { SOCIAL } from "@/lib/social";
+import { SOCIAL, socialPersonLabel } from "@/lib/social";
 import { requireSocialSession } from "@/lib/social-session";
 
 export default async function SocialLeaderboardPage({
@@ -68,7 +68,10 @@ export default async function SocialLeaderboardPage({
               <LeaderboardRow
                 rank={board.you.rank}
                 points={board.you.points}
-                name={board.profiles.get(board.you.user_id)?.display_name ?? "Member"}
+                name={socialPersonLabel({
+                  handle: board.profiles.get(board.you.user_id)?.handle ?? "",
+                  displayName: board.profiles.get(board.you.user_id)?.display_name,
+                })}
                 photoUrl={faces.get(board.you.user_id) ?? null}
                 you
               />
@@ -87,7 +90,10 @@ export default async function SocialLeaderboardPage({
                     <LeaderboardRow
                       rank={row.rank}
                       points={row.points}
-                      name={board.profiles.get(row.user_id)?.display_name ?? "Member"}
+                      name={socialPersonLabel({
+                        handle: board.profiles.get(row.user_id)?.handle ?? "",
+                        displayName: board.profiles.get(row.user_id)?.display_name,
+                      })}
                       photoUrl={faces.get(row.user_id) ?? null}
                       you={row.user_id === ctx.user.id}
                     />

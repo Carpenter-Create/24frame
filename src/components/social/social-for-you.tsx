@@ -2,14 +2,14 @@ import Link from "next/link";
 
 import { SocialOnboardingChecklist } from "@/components/social/social-checklist";
 import { SocialFollowButton } from "@/components/social/social-forms";
-import { SocialAvatar } from "@/components/social/social-ui";
+import { SocialPersonRow } from "@/components/social/social-ui";
 import {
   SOCIAL_FOR_YOU_CARD_CLASS,
   SOCIAL_FOR_YOU_RAIL_CLASS,
   SOCIAL_TOPIC_CHIP_CLASS,
 } from "@/lib/social-chrome";
 import { SOCIAL_CATEGORY_TOPICS, socialHomeLensHref } from "@/lib/social-categories";
-import { displayHandle, SOCIAL, socialMemberHref } from "@/lib/social";
+import { SOCIAL, socialMemberHref } from "@/lib/social";
 import { socialChecklistIncomplete, type SocialChecklistItem } from "@/lib/social-home";
 import type { SocialSuggestedPerson } from "@/lib/social-feed";
 
@@ -45,24 +45,12 @@ export function SocialForYouRail({
               data-social-for-you-person={person.id}
               className="flex items-center justify-between gap-[10px]"
             >
-              <Link
+              <SocialPersonRow
+                handle={person.handle}
+                displayName={person.display_name}
+                photoUrl={faces.get(person.id)}
                 href={socialMemberHref(person.handle)}
-                className="flex min-w-0 items-center gap-[10px]"
-              >
-                <SocialAvatar
-                  name={person.display_name}
-                  photoUrl={faces.get(person.id)}
-                  size="sm"
-                />
-                <span className="min-w-0">
-                  <span className="block truncate text-[12px] font-semibold text-ink">
-                    {person.display_name}
-                  </span>
-                  <span className="block truncate text-[11px] text-ink-2">
-                    {displayHandle(person.handle)}
-                  </span>
-                </span>
-              </Link>
+              />
               <SocialFollowButton
                 followeeId={person.id}
                 handle={person.handle}

@@ -97,7 +97,7 @@ describe("social actions", () => {
         row: profileInsertRow({
           userId: "u1",
           handle: "ada",
-          displayName: "Member",
+          displayName: "",
         }),
       },
     ]);
@@ -168,7 +168,7 @@ describe("social actions", () => {
         row: profileInsertRow({
           userId: "u1",
           handle: "ada",
-          displayName: "Member",
+          displayName: "",
         }),
       },
       {
@@ -194,7 +194,7 @@ describe("social actions", () => {
       row: profileInsertRow({
         userId: author,
         handle: "ada",
-        displayName: "Member",
+        displayName: "",
       }),
     });
     expect(inserts[1]).toMatchObject({

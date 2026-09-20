@@ -12,7 +12,7 @@ import {
   encodeFollowingWallCursor,
   type FollowingWallCursor,
 } from "@/lib/social-home-bounds";
-import { displayHandle, SOCIAL_PROFILE_POSTS_PAGE, socialProfileHref } from "@/lib/social";
+import { SOCIAL_PROFILE_POSTS_PAGE, socialPersonIdentity, socialProfileHref } from "@/lib/social";
 import { isStoryLive, storyRailUnseen } from "@/lib/social-stories";
 
 type ServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -310,6 +310,8 @@ export type SocialExploreHit = {
   title: string;
   subtitle: string | null;
   href: string;
+  handle?: string;
+  displayName?: string;
 };
 
 export type SocialExplorePage = {
@@ -347,12 +349,18 @@ export async function loadExploreSearch(
   const postsPage = splitProbe(posts, SOCIAL_EXPLORE_POSTS_LIMIT);
   const hits: SocialExploreHit[] = [];
   for (const person of peoplePage.rows) {
+    const identity = socialPersonIdentity({
+      handle: person.handle,
+      displayName: person.display_name,
+    });
     hits.push({
       kind: "person",
       id: person.id,
-      title: person.display_name,
-      subtitle: displayHandle(person.handle),
+      title: identity.handleLabel,
+      subtitle: identity.name,
       href: socialProfileHref(person.handle),
+      handle: person.handle,
+      displayName: person.display_name,
     });
   }
   for (const post of postsPage.rows) {

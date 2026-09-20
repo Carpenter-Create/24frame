@@ -22,6 +22,7 @@ import {
   SOCIAL,
   SOCIAL_PROFILE_TAB_PARAM,
   SOCIAL_ROUTES,
+  socialPersonLabel,
   socialRelativeTime,
   socialStoryHref,
   type SocialProfileTab,
@@ -146,7 +147,10 @@ async function SocialProfileMain({
               socialAuthorPostCard({
                 post,
                 authorHandle: profile.handle,
-                authorName: profile.display_name,
+                authorName: socialPersonLabel({
+                  handle: profile.handle,
+                  displayName: profile.display_name,
+                }),
                 authorPhotoUrl: photoUrl,
                 liked: liked.has(post.id),
                 canLike: true,

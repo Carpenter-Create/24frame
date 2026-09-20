@@ -409,6 +409,7 @@ export const SOCIAL = {
     usernamePlaceholder: "username",
     displayName: "Display name",
     name: "Name",
+    // Sentinel for existing rows only. Never seed on create. Never render as a person name.
     defaultDisplayName: "Member",
     bio: "Bio",
     bioLabel: "BIO",
@@ -618,6 +619,53 @@ export function normalizeDisplayName(raw: string): string | null {
   const name = raw.trim().replace(/\s+/g, " ");
   if (name.length === 0 || name.length > DISPLAY_NAME_MAX) return null;
   return name;
+}
+
+/** Legacy DB sentinel. Not a human name. SOCIAL.member.title may reuse this word as route chrome. */
+export function isSocialPlaceholderDisplayName(raw: string | null | undefined): boolean {
+  return (raw ?? "").trim() === SOCIAL.profile.defaultDisplayName;
+}
+
+/** Human display name, or null when empty / the Member sentinel. */
+export function socialPublicDisplayName(raw: string | null | undefined): string | null {
+  const name = normalizeDisplayName(raw ?? "");
+  if (!name || isSocialPlaceholderDisplayName(name)) return null;
+  return name;
+}
+
+export type SocialPersonIdentity = {
+  handle: string;
+  handleLabel: string;
+  name: string | null;
+  avatarName: string;
+  label: string;
+};
+
+// Compact person identity. Handle is primary. Display name is optional and never invented.
+// Empty string on create. Existing "Member" rows read as no name.
+export function socialPersonIdentity(input: {
+  handle: string;
+  displayName?: string | null;
+}): SocialPersonIdentity {
+  const handle = bareHandle(input.handle);
+  const handleLabel = displayHandle(handle);
+  const publicName = socialPublicDisplayName(input.displayName);
+  // Omit the name line only when it is the bare handle (no invented second line).
+  const name = publicName && publicName !== handle ? publicName : null;
+  return {
+    handle,
+    handleLabel,
+    name,
+    avatarName: publicName ?? handle,
+    label: publicName ?? handle,
+  };
+}
+
+export function socialPersonLabel(input: {
+  handle: string;
+  displayName?: string | null;
+}): string {
+  return socialPersonIdentity(input).label;
 }
 
 export function normalizePostBody(raw: string): string | null {

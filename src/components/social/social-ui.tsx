@@ -25,6 +25,7 @@ import {
   socialGroupHref,
   socialMemberHref,
   socialInitials,
+  socialPersonIdentity,
   socialRelativeTime,
 } from "@/lib/social";
 import { SocialLikeButton } from "./social-forms";
@@ -79,6 +80,47 @@ export function SocialAvatar({
   );
 }
 
+export function SocialPersonRow({
+  handle,
+  displayName,
+  photoUrl,
+  href,
+  size = "sm",
+}: {
+  handle: string;
+  displayName?: string | null;
+  photoUrl?: string | null;
+  href?: string;
+  size?: "sm" | "md";
+}) {
+  const person = socialPersonIdentity({ handle, displayName });
+  const stack = (
+    <>
+      <SocialAvatar name={person.avatarName} photoUrl={photoUrl} size={size} />
+      <span className="min-w-0">
+        <span data-social-person-handle="" className="block break-words text-[12px] font-semibold text-ink">
+          {person.handleLabel}
+        </span>
+        {person.name ? (
+          <span data-social-person-name="" className="block break-words text-[11px] text-ink-2">
+            {person.name}
+          </span>
+        ) : null}
+      </span>
+    </>
+  );
+  const className = "flex min-w-0 items-center gap-[10px]";
+  return href ? (
+    <Link href={href} data-social-person-row="" className={className}>
+      {stack}
+    </Link>
+  ) : (
+    <span data-social-person-row="" className={className}>
+      {stack}
+    </span>
+  );
+}
+
 export function SocialConversationFaces({
   people,
 }: {
@@ -86,7 +128,7 @@ export function SocialConversationFaces({
 }) {
   if (people.length <= 1) {
     const only = people[0];
-    return <SocialAvatar name={only?.name ?? "Member"} photoUrl={only?.photoUrl} />;
+    return <SocialAvatar name={only?.name || "?"} photoUrl={only?.photoUrl} />;
   }
 
   const shown = people.slice(0, 2);
@@ -174,6 +216,8 @@ export function SocialProfileIdentity({
   actions?: () => ReactNode;
   children?: ReactNode;
 }) {
+  const person = socialPersonIdentity({ handle, displayName: name });
+  const title = person.name ?? person.handleLabel;
   const actionRow = actions ? (
     <div className="flex w-full items-center gap-2 md:w-auto">
       {actions()}
@@ -186,12 +230,12 @@ export function SocialProfileIdentity({
   return (
     <div data-social-profile-identity="" className="flex flex-col gap-3">
       <div className="flex items-start gap-3 md:gap-4">
-        <SocialAvatar name={name} photoUrl={photoUrl} ring={ring} size="profile" />
+        <SocialAvatar name={person.avatarName} photoUrl={photoUrl} ring={ring} size="profile" />
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
             <div className="min-w-0">
-              <p className="text-[18px] font-semibold text-ink md:text-[22px]">{name}</p>
-              <p className={cn(SOCIAL_HANDLE_PILL_CLASS, "mt-1")}>{displayHandle(handle)}</p>
+              <p className="text-[18px] font-semibold text-ink md:text-[22px]">{title}</p>
+              <p className={cn(SOCIAL_HANDLE_PILL_CLASS, "mt-1")}>{person.handleLabel}</p>
             </div>
             {actionRow ? <div className="hidden shrink-0 md:flex">{actionRow}</div> : null}
           </div>

@@ -223,6 +223,28 @@ describe("loadExploreSearch", () => {
     expect(page.truncated).toBe(true);
     expect(page.hits.filter((hit) => hit.kind === "person")).toHaveLength(SOCIAL_EXPLORE_PEOPLE_LIMIT);
     expect(page.hits.filter((hit) => hit.kind === "post")).toHaveLength(SOCIAL_EXPLORE_POSTS_LIMIT);
+    expect(page.hits[0]).toMatchObject({
+      kind: "person",
+      title: "@h0",
+      subtitle: "N0",
+      handle: "h0",
+      displayName: "N0",
+    });
+  });
+
+  it("omits the Member sentinel from person identity", async () => {
+    const peopleChain = feedChain([{ id: "p1", handle: "joshua", display_name: "Member" }]);
+    const postsChain = feedChain([]);
+    const from = vi.fn((table: string) => (table === "profiles" ? peopleChain : postsChain));
+    const page = await loadExploreSearch({ from } as never, "josh");
+    expect(page.hits[0]).toMatchObject({
+      kind: "person",
+      title: "@joshua",
+      subtitle: null,
+      handle: "joshua",
+    });
+    expect(page.hits[0]?.title).not.toBe("Member");
+    expect(page.hits[0]?.subtitle).not.toBe("Member");
   });
 });
 

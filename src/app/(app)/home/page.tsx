@@ -39,7 +39,7 @@ import { signedEducationCoverUrls } from "@/lib/s3-education";
 import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { loadProfilesByIds } from "@/lib/social-feed";
 import { socialHomeChats } from "@/lib/social-home-chats";
-import { inboxPeerIds } from "@/lib/social";
+import { inboxPeerIds, socialPersonLabel } from "@/lib/social";
 import { loadDmInbox } from "@/lib/social-dms";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { createClient } from "@/lib/supabase/server";
@@ -155,7 +155,12 @@ export async function HomeOverview({
   const namedChats = overviewSocialChats(
     socialHomeChats(
       inbox.rows,
-      new Map([...authors.entries()].map(([id, author]) => [id, author.display_name])),
+      new Map(
+        [...authors.entries()].map(([id, author]) => [
+          id,
+          socialPersonLabel({ handle: author.handle, displayName: author.display_name }),
+        ]),
+      ),
     ),
   );
 

@@ -68,7 +68,8 @@ export async function ensureOwnSocialProfileResult(
     .maybeSingle();
   if (existing) return { profile: existing, error: null };
 
-  const displayName = normalizeDisplayName(user.name ?? "") ?? SOCIAL.profile.defaultDisplayName;
+  // Handle is identity. Do not invent a human name (Member, email local-part).
+  const displayName = normalizeDisplayName(user.name ?? "") ?? "";
   const seed = suggestedHandleSeed(user.email, user.id);
   let handle = seed;
 

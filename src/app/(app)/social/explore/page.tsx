@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { Input } from "@/components/ui/input";
 import { SocialExploreResultsSkeleton } from "@/components/social/social-skeletons";
+import { SocialPersonRow } from "@/components/social/social-ui";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { loadExploreSearch } from "@/lib/social-feed";
 import { requireSocialSession, type SocialSession } from "@/lib/social-session";
@@ -64,10 +65,18 @@ async function SocialExploreHits({ session, q }: { session: SocialSession; q: st
       <ul data-social-explore-results="" className="flex flex-col gap-[var(--space-3)]">
         {hits.map((hit) => (
           <li key={`${hit.kind}-${hit.id}`}>
-            <Link href={hit.href} className="flex flex-col gap-1">
-              <span className="t-body font-medium text-ink">{hit.title}</span>
-              {hit.subtitle ? <span className="t-body-sm text-ink-3">{hit.subtitle}</span> : null}
-            </Link>
+            {hit.kind === "person" && hit.handle ? (
+              <SocialPersonRow
+                handle={hit.handle}
+                displayName={hit.displayName}
+                href={hit.href}
+              />
+            ) : (
+              <Link href={hit.href} className="flex flex-col gap-1">
+                <span className="t-body font-medium text-ink">{hit.title}</span>
+                {hit.subtitle ? <span className="t-body-sm text-ink-3">{hit.subtitle}</span> : null}
+              </Link>
+            )}
           </li>
         ))}
       </ul>

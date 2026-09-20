@@ -23,7 +23,7 @@ export function socialHomeChats(
 ): SocialHomeChat[] {
   return rows.map((row) => {
     const peerIds = inboxPeerIds(row);
-    const names = peerIds.map((id) => namesById.get(id) ?? "Member");
+    const names = peerIds.map((id) => namesById.get(id) ?? "");
     return {
       conversationId: row.conversation_id,
       label: conversationRoomLabel(row.title, names),

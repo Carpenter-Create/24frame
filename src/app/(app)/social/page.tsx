@@ -51,7 +51,7 @@ import {
   type SocialProfileRow,
   type SocialSuggestedPerson,
 } from "@/lib/social-feed";
-import { inboxPeerIds, parseSocialHomeLane, SOCIAL, SOCIAL_HOME_LANE_PARAM, SOCIAL_ROUTES, type SocialHomeLane } from "@/lib/social";
+import { inboxPeerIds, parseSocialHomeLane, SOCIAL, SOCIAL_HOME_LANE_PARAM, SOCIAL_ROUTES, socialPersonLabel, type SocialHomeLane } from "@/lib/social";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { requireSocialSession, type SocialSession } from "@/lib/social-session";
 
@@ -104,7 +104,12 @@ async function SocialHomeRecentChatsSlot({ session }: { session: SocialSession }
   ]);
   const chats = socialHomeChats(
     inbox.rows,
-    new Map([...authors.entries()].map(([id, author]) => [id, author.display_name])),
+    new Map(
+      [...authors.entries()].map(([id, author]) => [
+        id,
+        socialPersonLabel({ handle: author.handle, displayName: author.display_name }),
+      ]),
+    ),
   );
   return <SocialRecentChats chats={chats} faces={faces} />;
 }
@@ -330,7 +335,10 @@ function SocialHomeFollowingWall({
                   createdAt: post.created_at,
                   authorId: post.author_id,
                   authorHandle: author?.handle ?? null,
-                  authorName: author?.display_name ?? "Member",
+                  authorName: socialPersonLabel({
+                    handle: author?.handle ?? "",
+                    displayName: author?.display_name,
+                  }),
                   authorPhotoUrl: faces.get(post.author_id) ?? null,
                   groupSlug: group?.slug ?? null,
                   groupName: group?.name ?? null,
