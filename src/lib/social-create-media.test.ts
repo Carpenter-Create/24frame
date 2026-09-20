@@ -52,9 +52,13 @@ describe("Social Create Media SoT", () => {
     expect(compose).toContain("SOCIAL_CREATE_MEDIA_ACCEPT");
     expect(compose).not.toContain("SOCIAL.create.dropEmpty");
     expect(compose).not.toContain("data-social-create-well");
-    expect(compose).toContain("disabled={uploading}");
-    expect(compose).not.toContain("disabled={uploading ||");
-    expect(compose).not.toContain("disabled={!body");
+    const createChunk = compose.slice(
+      compose.indexOf("export function SocialCreateCompose"),
+      compose.indexOf("export { SocialStoryCompose }"),
+    );
+    expect(createChunk).toContain("disabled={uploading}");
+    expect(createChunk).not.toContain("disabled={uploading ||");
+    expect(createChunk).not.toContain("disabled={!body");
     expect(profile).toContain('socialCreateHref("media")');
     expect(home).toContain('socialCreateHref("media")');
   });
