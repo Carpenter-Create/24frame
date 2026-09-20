@@ -216,6 +216,10 @@ describe("Social home", () => {
     expect(html).toContain("data-social-for-you");
     expect(html).toContain(SOCIAL.home.emptyQuiet);
     expect(html).toContain(SOCIAL.home.emptyHint);
+    expect(html).toContain(SOCIAL.home.findPeople);
+    expect(html).toContain("/social/search?intent=people");
+    expect(html).not.toContain("Explore creators");
+    expect(html).not.toContain('href="/social/explore"');
     expect(html).not.toContain("One clear next step");
     expect(html).not.toContain("Social-native");
     expect(html).not.toContain("Loved the reel");

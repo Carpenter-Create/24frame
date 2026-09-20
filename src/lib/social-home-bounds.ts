@@ -15,7 +15,8 @@ import {
  *   posts following wall       — active, group_id is null, author_id IN (self+followees).
  *                                created_at+id keyset (`after=`). Cap SOCIAL_FOLLOWING_WALL_LIMIT.
  *   stories rail               — live (expires_at > now), same author set. Cap SOCIAL_STORIES_RAIL_LIMIT.
- *   Explore search             — people (profiles) and posts, each its own cap.
+ *   Explore search             — posts / media only. Cap SOCIAL_EXPLORE_POSTS_LIMIT.
+ *   People search              — header Search people intent. Cap SOCIAL_EXPLORE_PEOPLE_LIMIT.
  *   Home recent chats          — retired from Social Home. Cap SOCIAL_HOME_CHATS_LIMIT
  *                                remains for leftover preview helpers. Full inbox stays on Messages.
  *
@@ -37,13 +38,13 @@ export const SOCIAL_FOLLOWING_WALL_LIMIT = 50;
 /** Live stories on the Home rail. Independent of the wall page. */
 export const SOCIAL_STORIES_RAIL_LIMIT = 80;
 
-/** Explore people hits. Independent of Explore posts. */
+/** People-search hits (header Search). Independent of Explore posts. */
 export const SOCIAL_EXPLORE_PEOPLE_LIMIT = 20;
 
-/** Explore post hits. Independent of Explore people. */
+/** Explore post / media hits. Independent of people search. */
 export const SOCIAL_EXPLORE_POSTS_LIMIT = 20;
 
-/** Home For you suggested people. Filtered from the Explore people probe. */
+/** Home For you + Search suggested people. Filtered from the people probe. */
 export const SOCIAL_FOR_YOU_PEOPLE_LIMIT = 3;
 
 /** Retired Social Home chats preview cap. Full inbox stays on Messages. */

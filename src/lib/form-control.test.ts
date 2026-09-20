@@ -148,6 +148,8 @@ describe("form-control SoT", () => {
     expect(socialForms).not.toContain("<textarea");
     expect(socialExplore).toContain("<Input");
     expect(socialExplore).toContain('id="social-explore-q"');
+    expect(readFileSync("src/app/(app)/social/search/page.tsx", "utf8")).toContain("<Input");
+    expect(readFileSync("src/app/(app)/social/search/page.tsx", "utf8")).toContain('id="social-search-q"');
     expect(houseLeadSearch).toContain("<Input");
     expect(houseLeadSearch).toContain("social-header-q");
     expect(houseLeadSearch).toContain("id={inputId}");

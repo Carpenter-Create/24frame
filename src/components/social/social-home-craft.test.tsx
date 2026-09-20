@@ -39,7 +39,7 @@ import { HOUSE_SCROLL_ROW_CLASS, HOUSE_SEGMENTED_ITEM_BASE_CLASS } from "@/lib/h
 import { SOCIAL_CATEGORY_TOPICS, sortTopicsAlpha } from "@/lib/social-categories";
 import { SOCIAL_ICON_SIZE_STORY_PLUS } from "@/lib/social-icons";
 import { SOCIAL_MEDIA_ACCEPT } from "@/lib/social-media";
-import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
+import { SOCIAL, SOCIAL_ROUTES, socialSearchHref } from "@/lib/social";
 import { SocialEmpty, SocialStoriesEmpty } from "./social-empty";
 import { SocialHomeComposer } from "./social-home-composer";
 import { SocialHomeTopics } from "./social-home-topics";
@@ -232,14 +232,15 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
         icon="users"
         title={SOCIAL.home.empty}
         hint={SOCIAL.home.emptyHint}
-        action={{ href: SOCIAL_ROUTES.explore, label: SOCIAL.home.goExplore }}
+        action={{ href: socialSearchHref({ intent: "people" }), label: SOCIAL.home.findPeople }}
       />,
     );
     expect(html).toContain('data-social-icon="users"');
     expect(html).toContain('width="40"');
     expect(html).toContain('height="40"');
     expect(html).toContain(SOCIAL.home.empty);
-    expect(html).toContain(SOCIAL.home.goExplore);
+    expect(html).toContain(SOCIAL.home.findPeople);
+    expect(html).toContain("/social/search?intent=people");
     expect(html).toContain(SOCIAL_EMPTY_PANEL_CLASS);
     expect(html).toContain(SOCIAL_EMPTY_ACTION_CLASS);
     expect(SOCIAL_EMPTY_PANEL_CLASS).toContain("rounded-[var(--radius-lg)]");

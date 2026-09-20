@@ -138,7 +138,8 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(social).toContain(HOUSE_LEAD_SEARCH_PILL_CLASS);
     expect(social).toContain(HOUSE_SEARCH_PILL_CLASS);
     expect(social).toContain(SOCIAL.explore.searchSocial);
-    expect(social).toContain('action="/social/explore"');
+    expect(social).toContain('action="/social/search"');
+    expect(social).toContain('value="people"');
     expect(social).not.toContain("w-[420px]");
     expect(social.indexOf("data-house-lead-search")).toBeLessThan(
       social.indexOf("data-app-header-trailing"),

@@ -408,7 +408,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(shell).not.toContain("data-social-header-tray");
     const leadSearch = readFileSync("src/components/chrome/house-lead-search.tsx", "utf8");
     expect(leadSearch).toContain("data-social-header-search");
-    expect(leadSearch).toContain("SocialSearchSheet");
+    expect(leadSearch).toContain("socialSearchHref");
+    expect(leadSearch).not.toContain("SocialSearchSheet");
     expect(leadSearch).not.toContain("prefetch");
     expect(readFileSync("src/lib/nav.ts", "utf8")).not.toContain("SOCIAL_MOBILE_PILL");
     expect(dests).toContain("data-house-phone-bottom-nav");
@@ -518,7 +519,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(create).not.toContain("data-social-for-you-topics");
     expect(profile).not.toContain("data-social-for-you-topics");
     expect(stories).not.toContain("data-social-for-you-topics");
-    expect(explore).toContain("SocialSuggestedPeople");
+    expect(explore).not.toContain("SocialSuggestedPeople");
+    expect(readFileSync("src/app/(app)/social/search/page.tsx", "utf8")).toContain("SocialSuggestedPeople");
     expect(messages).toContain("SOCIAL.dms.startCta");
     expect(SOCIAL_DESKTOP_MEASURE).toEqual({
       dest: 200,

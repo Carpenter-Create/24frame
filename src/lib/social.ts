@@ -36,6 +36,7 @@ import type { SocialMediaItem, SocialMediaLane, SocialMediaRuleError } from "@/l
 export const SOCIAL_ROUTES = {
   home: "/social",
   explore: "/social/explore",
+  search: "/social/search",
   create: "/social/create",
   createLive: "/social/create/live",
   stories: "/social/stories",
@@ -50,6 +51,31 @@ export const SOCIAL_ROUTES = {
   leaderboard: "/social/leaderboard",
   dms: "/social/dms",
 } as const;
+
+/** Header Search people discovery. Not a dock tab. Not Explore. */
+export const SOCIAL_SEARCH_INTENT_PARAM = "intent";
+export const SOCIAL_SEARCH_PEOPLE_INTENT = "people";
+export type SocialSearchIntent = typeof SOCIAL_SEARCH_PEOPLE_INTENT;
+
+export function parseSocialSearchIntent(
+  raw: string | string[] | undefined,
+): SocialSearchIntent {
+  const value = (Array.isArray(raw) ? raw[0] : raw)?.trim();
+  return value === SOCIAL_SEARCH_PEOPLE_INTENT
+    ? SOCIAL_SEARCH_PEOPLE_INTENT
+    : SOCIAL_SEARCH_PEOPLE_INTENT;
+}
+
+export function socialSearchHref(opts?: {
+  q?: string;
+  intent?: SocialSearchIntent;
+}): string {
+  const params = new URLSearchParams();
+  params.set(SOCIAL_SEARCH_INTENT_PARAM, opts?.intent ?? SOCIAL_SEARCH_PEOPLE_INTENT);
+  const q = opts?.q?.trim();
+  if (q) params.set("q", q);
+  return `${SOCIAL_ROUTES.search}?${params.toString()}`;
+}
 
 /** Apex origin for the public profile URL preview and share string. */
 export const SOCIAL_PROFILE_ORIGIN = "https://24frame.co";
@@ -368,11 +394,11 @@ export const SOCIAL = {
     title: "Home",
     subtitle: `Posts from people you follow in ${PRODUCT_NAME}.`,
     empty: "No posts from people you follow yet",
-    emptyHint: "Explore to find creators and start your following wall.",
+    emptyHint: "Search for people to follow and start your following wall.",
     emptyQuiet: "No posts yet",
     recentChats: "Recent chats",
     chatsEmpty: "No messages yet",
-    goExplore: "Explore creators",
+    findPeople: "Find people",
     composerPrompt: "Write something",
     composerPromptNamed: "Write something",
     followingTab: "Following",
@@ -411,14 +437,23 @@ export const SOCIAL = {
     subtitle: `Find what is moving in ${PRODUCT_NAME}.`,
     search: "Search",
     searchSocial: "Search Social",
-    searchPlaceholder: "Search people and posts",
+    searchPlaceholder: "Search posts",
     searchBack: "Back",
     recent: "Recent",
     recentEmpty: "No recent searches.",
     clearRecent: "Clear",
-    empty: "No trending topics yet.",
-    noResults: "No matching people or posts.",
-    truncated: `Showing the first ${SOCIAL_EXPLORE_PEOPLE_LIMIT} matching people and the first ${SOCIAL_EXPLORE_POSTS_LIMIT} matching posts. More exist — this list is not complete.`,
+    empty: "No posts to explore yet.",
+    noResults: "No matching posts.",
+    truncated: `Showing the first ${SOCIAL_EXPLORE_POSTS_LIMIT} matching posts. More exist — this list is not complete.`,
+  },
+  search: {
+    title: "Search",
+    subtitle: `Find people in ${PRODUCT_NAME}.`,
+    people: "People",
+    searchPlaceholder: "Search people",
+    empty: "No people to suggest yet.",
+    noResults: "No matching people.",
+    truncated: `Showing the first ${SOCIAL_EXPLORE_PEOPLE_LIMIT} matching people. More exist — this list is not complete.`,
   },
   create: {
     title: "Create",

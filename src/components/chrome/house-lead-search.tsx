@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { MagnifyingGlass } from "@phosphor-icons/react";
 
@@ -12,21 +13,32 @@ import {
   educationSearchAction,
   parseEducationSearchQuery,
 } from "@/lib/course-search";
-import { SocialSearchSheet } from "@/components/social/social-search-sheet";
 import { HOUSE_VOICE_FOCUS_HOST_CLASS } from "@/lib/form-control";
-import { HOUSE_LEAD_SEARCH_PILL_CLASS } from "@/lib/house-lead-chrome";
+import { HOUSE_HEADER_TRAILING_HIT_CLASS, HOUSE_LEAD_SEARCH_PILL_CLASS } from "@/lib/house-lead-chrome";
+import {
+  HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS,
+  HOUSE_PHONE_CHROME_ICON_WEIGHT,
+  HOUSE_PHONE_CHROME_IDLE_INK_CLASS,
+} from "@/lib/house-phone-shell";
 import { HOUSE_SEARCH_PILL_CLASS } from "@/lib/house-shell";
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
-import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
+import {
+  SOCIAL,
+  SOCIAL_ROUTES,
+  SOCIAL_SEARCH_INTENT_PARAM,
+  SOCIAL_SEARCH_PEOPLE_INTENT,
+  socialSearchHref,
+} from "@/lib/social";
 import { ingestSpeechLearning } from "@/lib/speech-learning";
 
-// One mid-lead search SoT for Social live Explore and Education quiet
-// courses/videos. Slot into HouseLeadChrome search / underNav /
+// One mid-lead search SoT for Social live people search and Education
+// quiet courses/videos. Slot into HouseLeadChrome search / underNav /
 // trailingSearch. Geometry is HOUSE_LEAD_SEARCH_PILL_CLASS +
 // HOUSE_SEARCH_PILL_CLASS — same tokens the Titles catalog search
 // reuses. Do not fork the pill. Do not import the catalog search
-// control. Aggregation keeps no top search. Phone Social icon opens
-// the dedicated sheet — do not Link the icon to Explore.
+// control. Aggregation keeps no top search. Phone Social 🔍 opens
+// Search with people intent (suggested people + search). Live Social
+// field submits there too. Do not Link the icon to Explore.
 
 export type HouseLeadSearchTone = "live" | "quiet";
 export type HouseLeadSearchPresentation = "field" | "icon";
@@ -52,25 +64,30 @@ export function HouseLeadSearch({
 }) {
   const live = tone === "live";
   const resolvedPlaceholder =
-    placeholder ?? (live ? SOCIAL.explore.searchSocial : EDUCATION_SEARCH.placeholder);
+    placeholder ?? (live ? SOCIAL.search.searchPlaceholder : EDUCATION_SEARCH.placeholder);
   const resolvedLabel = label ?? (live ? SOCIAL.explore.searchSocial : EDUCATION_SEARCH.label);
-  const resolvedAction = action ?? (live ? SOCIAL_ROUTES.explore : undefined);
+  const resolvedAction = action ?? (live ? SOCIAL_ROUTES.search : undefined);
   const resolvedInputId = inputId ?? (live ? "social-header-q" : "education-header-q");
 
   if (presentation === "icon") {
     return (
-      <SocialSearchSheet
-        field={
-          <HouseLeadSearchField
-            tone="live"
-            action={resolvedAction ?? SOCIAL_ROUTES.explore}
-            placeholder={resolvedPlaceholder}
-            label={resolvedLabel}
-            inputId="social-search-sheet-q"
-            autoFocus
-          />
-        }
-      />
+      <Link
+        href={socialSearchHref({ intent: "people" })}
+        aria-label={resolvedLabel}
+        data-house-lead-search-icon=""
+        data-social-header-search-icon=""
+        className={cn(
+          HOUSE_HEADER_TRAILING_HIT_CLASS,
+          HOUSE_PHONE_CHROME_IDLE_INK_CLASS,
+          "md:hidden",
+        )}
+      >
+        <MagnifyingGlass
+          className={HOUSE_HEADER_TRAILING_PHONE_ICON_CLASS}
+          weight={HOUSE_PHONE_CHROME_ICON_WEIGHT}
+          aria-hidden
+        />
+      </Link>
     );
   }
 
@@ -90,7 +107,7 @@ export function HouseLeadSearch({
   return (
     <HouseLeadSearchField
       tone="live"
-      action={resolvedAction ?? SOCIAL_ROUTES.explore}
+      action={resolvedAction ?? SOCIAL_ROUTES.search}
       placeholder={resolvedPlaceholder}
       label={resolvedLabel}
       inputId={resolvedInputId}
@@ -185,6 +202,9 @@ function HouseLeadSearchField({
         weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
         aria-hidden
       />
+      {tone === "live" ? (
+        <input type="hidden" name={SOCIAL_SEARCH_INTENT_PARAM} value={SOCIAL_SEARCH_PEOPLE_INTENT} />
+      ) : null}
       <label className="sr-only" htmlFor={inputId}>
         {label}
       </label>

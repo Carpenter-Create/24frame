@@ -26,6 +26,7 @@ import {
   SOCIAL_BANNED_PRODUCT_NAMES,
   SOCIAL_PROFILE_ORIGIN,
   SOCIAL_ROUTES,
+  socialSearchHref,
   socialComposerPrompt,
   socialCreateHref,
   socialCreateWellCopy,
@@ -123,6 +124,12 @@ describe("social copy lock", () => {
     expect(JSON.stringify(SOCIAL.explore)).not.toContain("Meta AI");
     expect(JSON.stringify(SOCIAL.explore)).not.toContain("Search with Meta AI");
     expect(SOCIAL_ROUTES.explore).toBe("/social/explore");
+    expect(SOCIAL_ROUTES.search).toBe("/social/search");
+    expect(socialSearchHref({ intent: "people" })).toBe("/social/search?intent=people");
+    expect(SOCIAL.search.searchPlaceholder).toBe("Search people");
+    expect(SOCIAL.explore.searchPlaceholder).toBe("Search posts");
+    expect(SOCIAL.home.findPeople).toBe("Find people");
+    expect(SOCIAL.home.emptyHint).not.toMatch(/Explore/i);
     expect(SOCIAL_ROUTES.create).toBe("/social/create");
       expect(SOCIAL_ROUTES.stories).toBe("/social/stories");
       expect(SOCIAL_ROUTES.storiesNew).toBe("/social/stories/new");
