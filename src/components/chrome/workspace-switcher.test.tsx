@@ -273,9 +273,19 @@ describe("workspace switcher header control", () => {
       <WorkspaceSwitcher current="aggregation" presentation="pills" />,
     );
     const staffHtml = renderToStaticMarkup(
-      <WorkspaceSwitcher current="staff" options={staffOptions} presentation="pills" />,
+      <WorkspaceSwitcher
+        current="staff"
+        isGcStaff
+        options={staffOptions}
+        presentation="pills"
+      />,
+    );
+    const forgedStaffCurrent = renderToStaticMarkup(
+      <WorkspaceSwitcher current="staff" presentation="pills" />,
     );
     expect(memberHtml).not.toContain('data-workspace-switcher-segment="staff"');
+    expect(forgedStaffCurrent).not.toContain(">Staff<");
+    expect(forgedStaffCurrent).toContain("Aggregation");
     expect(staffHtml).toContain('data-workspace-switcher-segment="staff"');
     expect(staffHtml).toContain("Staff");
     expect(staffHtml).not.toContain("Team");

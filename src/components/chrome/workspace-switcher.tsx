@@ -26,7 +26,7 @@ import {
   type OverviewLeadPill,
   type OverviewLeadPillId,
 } from "@/lib/overview";
-import { workspaceHome, type WorkspaceMode } from "@/lib/workspace";
+import { clampWorkspaceMode, workspaceHome, type WorkspaceMode } from "@/lib/workspace";
 import { prefetchHrefList } from "@/lib/house-nav-pending";
 import {
   HouseNavPendingProbe,
@@ -90,6 +90,7 @@ function selectLeadPill(
   options: readonly WorkspaceMenuOption[],
   router: ReturnType<typeof useRouter>,
   pathname: string,
+  isGcStaff?: boolean,
 ) {
   if (!overviewLeadShouldNavigate(pathname, current, pill)) return;
   if (pill.id === "home" || pill.id === "co-productions") {
@@ -98,16 +99,18 @@ function selectLeadPill(
   }
   const option = options.find((row) => row.mode === pill.id);
   if (!option) return;
-  workspaceSwitcherPersistLane(option.mode);
+  workspaceSwitcherPersistLane(option.mode, isGcStaff);
   router.push(workspaceHome(option.mode));
 }
 
 function WorkspaceSwitcherPills({
   current,
   options,
+  isGcStaff = false,
 }: {
   current: WorkspaceMode;
   options: readonly WorkspaceMenuOption[];
+  isGcStaff?: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -171,7 +174,7 @@ function WorkspaceSwitcherPills({
               tabIndex={workspaceSwitcherSegmentTabIndex(selected)}
               className={workspaceSwitcherSegmentClass(selected)}
               onClick={() => {
-                selectLeadPill(current, pill, options, router, pathname);
+                selectLeadPill(current, pill, options, router, pathname, isGcStaff);
               }}
               onKeyDown={(event) => onSegmentKeyDown(event, index)}
             >
@@ -185,18 +188,22 @@ function WorkspaceSwitcherPills({
 }
 
 export function WorkspaceSwitcher({
-  current,
+  current: requestedCurrent,
+  isGcStaff = false,
   options = availableWorkspaceOptions(),
   defaultOpen = false,
   tone = "plain",
   presentation = "menu",
 }: {
   current: WorkspaceMode;
+  isGcStaff?: boolean;
   options?: readonly WorkspaceMenuOption[];
   defaultOpen?: boolean;
   tone?: WorkspaceSwitcherTone;
   presentation?: WorkspaceSwitcherPresentation;
 }) {
+  const staffGate = isGcStaff || options.some((option) => option.mode === "staff");
+  const current = clampWorkspaceMode(requestedCurrent, staffGate);
   const router = useRouter();
   const pathname = usePathname();
   const { activePath, markPending } = useHouseNavPending();
@@ -264,7 +271,7 @@ export function WorkspaceSwitcher({
   if (options.length === 0) return null;
 
   if (presentation === "pills") {
-    return <WorkspaceSwitcherPills current={current} options={options} />;
+    return <WorkspaceSwitcherPills current={current} options={options} isGcStaff={staffGate} />;
   }
 
   if (!canSwitch) {
@@ -325,7 +332,7 @@ export function WorkspaceSwitcher({
                 aria-selected={false}
                 className={workspaceSwitcherOptionClass(false)}
                 onClick={(event) => {
-                  workspaceSwitcherPersistLane(pill.id);
+                  workspaceSwitcherPersistLane(pill.id, staffGate);
                   markPending(pill.href, event);
                   setOpen(false);
                 }}
@@ -344,7 +351,7 @@ export function WorkspaceSwitcher({
               aria-selected={selected}
               className={workspaceSwitcherOptionClass(selected)}
               onClick={() => {
-                selectLeadPill(current, pill, options, router, pathname);
+                selectLeadPill(current, pill, options, router, pathname, staffGate);
                 setOpen(false);
               }}
             >

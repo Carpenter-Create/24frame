@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createClient } from "@/lib/supabase/server";
@@ -50,6 +51,12 @@ describe("OperatorLayout gc_staff gate", () => {
   it("still bounces a non-staff user to /", async () => {
     stubClient(null);
     await expect(OperatorLayout({ children: "queue" })).rejects.toThrow("REDIRECT:/");
+  });
+
+  it("keeps the gc_staff bounce as the operator URL security boundary", () => {
+    const src = readFileSync(new URL("./layout.tsx", import.meta.url), "utf8");
+    expect(src).toContain("if (!staff) redirect(\"/\")");
+    expect(src).toContain(".from(\"gc_staff\")");
   });
 
   it("sends an unauthenticated visitor to login without querying", async () => {

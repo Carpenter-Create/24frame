@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { cookies } from "next/headers";
 import { getOrgContext } from "@/lib/supabase/context";
 import { getActiveOrgTier } from "@/lib/org-tier";
 import {
@@ -105,6 +106,33 @@ describe("app shell chrome load", () => {
     await expect(appShellUnread(Promise.resolve(chrome))).resolves.toBe(0);
     await expect(appShellActivityItems(Promise.resolve(chrome))).resolves.toEqual([]);
   });
+
+  it("does not seed a staff workspace cookie for members", async () => {
+    vi.mocked(getOrgContext).mockResolvedValue(
+      ctx({ isGcStaff: false, orgStatus: "active" }) as never,
+    );
+    vi.mocked(cookies).mockResolvedValue({
+      get: (name: string) =>
+        name === "24frame_workspace" ? { value: "staff" } : undefined,
+    } as never);
+    const chrome = await loadAppShellChrome();
+    expect(chrome.isGcStaff).toBe(false);
+    expect(chrome.defaultWorkspace).toBe("aggregation");
+    expect(chrome.defaultWorkspace).not.toBe("staff");
+  });
+
+  it("keeps a staff workspace cookie for GC staff", async () => {
+    vi.mocked(getOrgContext).mockResolvedValue(
+      ctx({ isGcStaff: true, orgStatus: "active" }) as never,
+    );
+    vi.mocked(cookies).mockResolvedValue({
+      get: (name: string) =>
+        name === "24frame_workspace" ? { value: "staff" } : undefined,
+    } as never);
+    const chrome = await loadAppShellChrome();
+    expect(chrome.isGcStaff).toBe(true);
+    expect(chrome.defaultWorkspace).toBe("staff");
+  });
 });
 
 describe("Social nav no longer waits on the (app) layout waterfall", () => {
@@ -131,6 +159,8 @@ describe("Social nav no longer waits on the (app) layout waterfall", () => {
     expect(chromeSrc).toContain("ACCOUNT_PHOTO_HREF");
     expect(chromeSrc).toContain("name: ctx.user.name");
     expect(chromeSrc).toContain("email: ctx.user.email");
+    expect(chromeSrc).toContain("clampWorkspaceMode");
+    expect(chromeSrc).toContain("ctx.isGcStaff");
     expect(chromeSrc).not.toContain("hasAvatarObject");
     expect(chromeSrc).not.toContain("@/lib/s3-avatars");
     expect(chromeSrc).not.toContain("signedAvatarUrl");

@@ -14,7 +14,7 @@ import {
   HOUSE_RAIL_TITLE_CLASS,
 } from "@/lib/house-shell";
 import { cn } from "@/lib/cn";
-import type { WorkspaceMode } from "@/lib/workspace";
+import { clampWorkspaceMode, type WorkspaceMode } from "@/lib/workspace";
 import { SocialIcon } from "@/components/social/social-icon";
 import {
   SocialNavPendingProbe,
@@ -31,12 +31,13 @@ import { NavGlyph } from "./nav-glyph";
 export function SideNav({
   isGcStaff = false,
   collapsed = false,
-  workspace = "aggregation",
+  workspace: requestedWorkspace = "aggregation",
 }: {
   isGcStaff?: boolean;
   collapsed?: boolean;
   workspace?: WorkspaceMode;
 }) {
+  const workspace = clampWorkspaceMode(requestedWorkspace, isGcStaff);
   const pathname = usePathname();
   const social = workspace === "social";
   const { activePath, markPending, pendingHref } = useSocialNavPending();

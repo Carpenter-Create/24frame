@@ -72,6 +72,13 @@ describe("workspace menu copy", () => {
     expect(availableWorkspaceOptions({ isGcStaff: false }).map((option) => option.mode)).not.toContain(
       "staff",
     );
+    expect(availableWorkspaceOptions({ isGcStaff: undefined }).map((option) => option.mode)).not.toContain(
+      "staff",
+    );
+    expect(availableWorkspaceOptions().some((option) => option.mode === "staff")).toBe(false);
+    expect(availableWorkspaceOptions({ isGcStaff: false }).some((option) => option.label === "Staff")).toBe(
+      false,
+    );
     expect(WORKSPACE_EDUCATION_HREF).toBe("/education");
     expect(WORKSPACE_EDUCATION_HREF).not.toBe("/social/courses");
     expect(WORKSPACE_EDUCATION_LABEL).toBe("Education");
