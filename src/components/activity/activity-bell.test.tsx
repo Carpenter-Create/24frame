@@ -3,7 +3,10 @@ import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
+const nav = vi.hoisted(() => ({ pathname: "/aggregation/dashboard" }));
+
 vi.mock("next/navigation", () => ({
+  usePathname: () => nav.pathname,
   useRouter: () => ({ replace: vi.fn(), refresh: vi.fn(), prefetch: vi.fn(), push: vi.fn() }),
 }));
 
@@ -11,9 +14,12 @@ import { ActivityBell } from "./activity-bell";
 import {
   ACTIVITY_BELL_POPOVER_CLASS,
   ACTIVITY_BELL_TRIGGER_CLASS,
+  ACTIVITY_BELL_VIEW_ALL_CLASS,
   ACTIVITY_HREF,
   ACTIVITY_PAGE,
+  activityHref,
 } from "@/lib/activity";
+import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import {
   HOUSE_HEADER_TRAILING_HIT_CLASS,
   HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS,
@@ -82,8 +88,14 @@ describe("ActivityBell", () => {
     expect(html).toContain("data-activity-bell-popover");
     expect(html).toContain("data-activity-bell-sheet");
     expect(html).toContain("data-activity-bell-view-all");
-    expect(html).toContain(`href="${ACTIVITY_HREF}"`);
+    expect(html).toContain(
+      `data-activity-bell-view-all="" class="${ACTIVITY_BELL_VIEW_ALL_CLASS}" href="${ACTIVITY_HREF}"`,
+    );
     expect(html).toContain(ACTIVITY_PAGE.viewAll);
+    expect(html).toContain(ACTIVITY_BELL_VIEW_ALL_CLASS);
+    expect(ACTIVITY_BELL_VIEW_ALL_CLASS).toContain(TEXT_ACTION_CLASS);
+    expect(ACTIVITY_BELL_VIEW_ALL_CLASS).toContain("text-accent");
+    expect(ACTIVITY_BELL_VIEW_ALL_CLASS).not.toMatch(/\btext-ink\b/);
     expect(html).toContain(ACTIVITY_PAGE.title);
     expect(html).toContain("North Wind was returned");
     expect(html).toContain("data-activity-done");
@@ -108,6 +120,68 @@ describe("ActivityBell", () => {
     expect(bellSrc).not.toContain("ACCOUNT_SHEET_HOST_CLASS");
     expect(bellSrc).toContain("HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS");
     expect(bellSrc).toContain("hidden md:block");
+    expect(bellSrc).toContain("activityHref");
+    expect(bellSrc).toContain("activityFamilyForWorkspace");
+    expect(bellSrc).not.toContain("ACTIVITY_HREF");
+  });
+
+  it("deep-links View all to the matching Notifications family for the current workspace", () => {
+    nav.pathname = "/social";
+    const social = renderToStaticMarkup(
+      createElement(ActivityBell, {
+        unread: 1,
+        items: [OPEN],
+        defaultOpen: true,
+        workspace: "social",
+      }),
+    );
+    expect(social).toContain(
+      `data-activity-bell-view-all="" class="${ACTIVITY_BELL_VIEW_ALL_CLASS}" href="${activityHref({ family: "social" })}"`,
+    );
+    expect(social).not.toContain(
+      `data-activity-bell-view-all="" class="${ACTIVITY_BELL_VIEW_ALL_CLASS}" href="${ACTIVITY_HREF}"`,
+    );
+
+    nav.pathname = "/aggregation/dashboard";
+    const aggregation = renderToStaticMarkup(
+      createElement(ActivityBell, {
+        unread: 1,
+        items: [OPEN],
+        defaultOpen: true,
+        workspace: "aggregation",
+      }),
+    );
+    expect(aggregation).toContain(
+      `data-activity-bell-view-all="" class="${ACTIVITY_BELL_VIEW_ALL_CLASS}" href="${activityHref({ family: "aggregation" })}"`,
+    );
+
+    nav.pathname = "/education";
+    const education = renderToStaticMarkup(
+      createElement(ActivityBell, {
+        unread: 1,
+        items: [OPEN],
+        defaultOpen: true,
+        workspace: "education",
+      }),
+    );
+    expect(education).toContain(
+      `data-activity-bell-view-all="" class="${ACTIVITY_BELL_VIEW_ALL_CLASS}" href="${activityHref({ family: "education" })}"`,
+    );
+
+    nav.pathname = "/home";
+    const home = renderToStaticMarkup(
+      createElement(ActivityBell, {
+        unread: 1,
+        items: [OPEN],
+        defaultOpen: true,
+        workspace: "aggregation",
+      }),
+    );
+    expect(home).toContain(
+      `data-activity-bell-view-all="" class="${ACTIVITY_BELL_VIEW_ALL_CLASS}" href="${ACTIVITY_HREF}"`,
+    );
+    expect(home).not.toContain("family=aggregation");
+    nav.pathname = "/aggregation/dashboard";
   });
 
   it("matches #391 chrome idle weight on theme and the desktop bell", () => {

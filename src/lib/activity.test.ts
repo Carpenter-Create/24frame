@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { DASHBOARD_HREF } from "./dashboard-admin";
 import { HOME_ROOT } from "./workspace";
 import { HOUSE_HEADER_TRAILING_HIT_CLASS } from "@/lib/house-lead-chrome";
+import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import {
   SETTINGS_EDIT_HELPER_CLASS,
   SETTINGS_PANE_CLASS,
@@ -16,6 +17,7 @@ import {
   ACTIVITY_BELL_POPOVER_CLASS,
   ACTIVITY_BELL_TRIGGER_CLASS,
   ACTIVITY_BELL_TRIGGER_OPEN_CLASS,
+  ACTIVITY_BELL_VIEW_ALL_CLASS,
   ACTIVITY_FAMILIES,
   ACTIVITY_FAMILY_ALL,
   ACTIVITY_HELPER_CLASS,
@@ -26,6 +28,7 @@ import {
   ACTIVITY_PREFS_HREF,
   ACTIVITY_SECTION_CLASS,
   ACTIVITY_TITLE_CLASS,
+  activityFamilyForWorkspace,
   activityHeaderBack,
   isActivityPath,
   activityBellItems,
@@ -193,6 +196,33 @@ describe("Activity family chips", () => {
     expect(activityHref({ family: "social" })).toBe(`${ACTIVITY_HREF}?family=social`);
     expect(activityHref({ family: "reporting" })).toBe(`${ACTIVITY_HREF}?family=reporting`);
   });
+
+  it("maps the current workspace land onto the matching family chip, else All", () => {
+    expect(activityFamilyForWorkspace("social")).toBe("social");
+    expect(activityFamilyForWorkspace("aggregation")).toBe("aggregation");
+    expect(activityFamilyForWorkspace("education")).toBe("education");
+    expect(activityFamilyForWorkspace("social", "/social")).toBe("social");
+    expect(activityFamilyForWorkspace("aggregation", "/aggregation/dashboard")).toBe(
+      "aggregation",
+    );
+    expect(activityFamilyForWorkspace("education", "/education")).toBe("education");
+    expect(activityFamilyForWorkspace("social", "/settings")).toBe("social");
+    expect(activityFamilyForWorkspace("education", "/help")).toBe("education");
+    expect(activityFamilyForWorkspace("aggregation", "/activity")).toBe("aggregation");
+    expect(activityFamilyForWorkspace("aggregation", "/home")).toBe(ACTIVITY_FAMILY_ALL);
+    expect(activityFamilyForWorkspace("social", "/home")).toBe(ACTIVITY_FAMILY_ALL);
+    expect(activityFamilyForWorkspace("education", "/home/news")).toBe(ACTIVITY_FAMILY_ALL);
+    expect(activityFamilyForWorkspace("social", "/co-productions")).toBe(ACTIVITY_FAMILY_ALL);
+    expect(activityFamilyForWorkspace("home")).toBe(ACTIVITY_FAMILY_ALL);
+    expect(activityFamilyForWorkspace("nope")).toBe(ACTIVITY_FAMILY_ALL);
+    expect(activityFamilyForWorkspace(undefined)).toBe(ACTIVITY_FAMILY_ALL);
+    expect(activityHref({ family: activityFamilyForWorkspace("social") })).toBe(
+      `${ACTIVITY_HREF}?family=social`,
+    );
+    expect(activityHref({ family: activityFamilyForWorkspace("aggregation", "/home") })).toBe(
+      ACTIVITY_HREF,
+    );
+  });
 });
 
 describe("Activity bell cap", () => {
@@ -237,5 +267,8 @@ describe("Activity bell cap", () => {
     expect(ACTIVITY_BELL_OPEN_DOT_CLASS).toContain("bg-accent");
     expect(ACTIVITY_BELL_POPOVER_CLASS).toContain("border-hairline");
     expect(ACTIVITY_BELL_POPOVER_CLASS).toContain("bg-surface");
+    expect(ACTIVITY_BELL_VIEW_ALL_CLASS).toContain(TEXT_ACTION_CLASS);
+    expect(ACTIVITY_BELL_VIEW_ALL_CLASS).toContain("text-accent");
+    expect(ACTIVITY_BELL_VIEW_ALL_CLASS).not.toMatch(/\btext-ink\b/);
   });
 });
