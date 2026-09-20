@@ -117,7 +117,7 @@ describe("ActivityPage", () => {
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
     const html = await renderPage({ family: "social" });
-    expect(html).toContain(ACTIVITY_PAGE.empty);
+    expect(html).toContain("You&#x27;re all caught up.");
     expect(html).toContain("data-activity-empty");
     expect(html).not.toContain("North Wind was returned");
     expect(html).toContain('data-activity-family-chip="social"');
@@ -138,7 +138,7 @@ describe("ActivityPage", () => {
 
     const html = await renderPage();
     expect(html).toContain("data-activity-inbox");
-    expect(html).toContain(ACTIVITY_PAGE.empty);
+    expect(html).toContain("You&#x27;re all caught up.");
     expect(html).toContain("data-activity-empty");
     expect(rpc).toHaveBeenCalledWith("my_notifications", { p_limit: UNPAGINATED_MAX + 1 });
   });

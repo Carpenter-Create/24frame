@@ -105,7 +105,7 @@ describe("ActivityInbox", () => {
       }),
     );
     expect(html).toContain("data-activity-empty");
-    expect(html).toContain(ACTIVITY_PAGE.empty);
+    expect(html).toContain("You&#x27;re all caught up.");
     expect(html).toContain(ACTIVITY_PAGE.emptyHint);
     expect(html).not.toContain("Nothing open.");
     expect(html).not.toContain("Nothing done yet.");
