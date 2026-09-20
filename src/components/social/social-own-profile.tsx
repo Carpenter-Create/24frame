@@ -29,7 +29,7 @@ type OwnProfileFace = SocialProfileIdentityView & {
   ring?: "unseen" | "live" | null;
   profileId?: string;
   stats?: { posts: number; followers: number; following: number };
-  actions?: (view: SocialProfileIdentityView) => ReactNode;
+  actions?: ReactNode;
 };
 
 function SocialProfileOptimisticIdentity({
@@ -138,7 +138,7 @@ export function SocialOwnProfileFace({
         ring={ring}
         profileId={profileId}
         stats={stats}
-        actions={actions ? () => actions(merged) : undefined}
+        actions={actions}
       />
       {merged.welcomeVideoUrl ? <SocialWelcomeVideo src={merged.welcomeVideoUrl} /> : null}
     </>

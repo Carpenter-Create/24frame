@@ -200,7 +200,7 @@ export function SocialProfileIdentity({
   profileId?: string;
   stats?: { posts: number; followers: number; following: number };
   mutuals?: SocialProfileMutuals | null;
-  actions?: () => ReactNode;
+  actions?: ReactNode;
   children?: ReactNode;
 }) {
   const person = socialPersonIdentity({ handle, displayName: name });
@@ -215,7 +215,7 @@ export function SocialProfileIdentity({
     : null;
   const actionRow = actions ? (
     <div className="flex w-full items-center gap-2 md:w-auto">
-      {actions()}
+      {actions}
       {photoAction}
     </div>
   ) : photoAction ? (

@@ -174,8 +174,13 @@ describe("Social profile public face", () => {
         handle="ada"
         photoUrl="https://s3.example/signed-avatar"
         bio="Writes engines."
+        actions={<button type="button">Edit profile</button>}
       />,
     );
+    expect(identity).toContain("Edit profile");
+    expect(uiSrc).toContain("actions?: ReactNode");
+    expect(uiSrc).not.toContain("actions?: () => ReactNode");
+    expect(uiSrc).not.toContain("{actions()}");
     expect(identity).toContain("data-social-profile-identity");
     expect(identity).toContain("data-social-profile-handle");
     expect(identity).toContain("data-social-profile-name");

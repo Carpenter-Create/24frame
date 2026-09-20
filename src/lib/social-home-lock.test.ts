@@ -529,6 +529,17 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(profile).toContain("SocialOwnProfileFace");
     expect(profile).toContain("SOCIAL.profile.edit");
     expect(profile).toContain("SOCIAL_ROUTES.profileEdit");
+    const ownProfile = readFileSync("src/components/social/social-own-profile.tsx", "utf8");
+    expect(profile).not.toContain("actions={(view)");
+    expect(profile).not.toContain("actions={() =>");
+    expect(ownProfile).toContain("actions?: ReactNode");
+    expect(ownProfile).not.toContain("(view: SocialProfileIdentityView) => ReactNode");
+    expect(ownProfile).not.toContain("() => actions(merged)");
+    expect(card).toContain("actions?: ReactNode");
+    expect(card).not.toContain("actions?: () => ReactNode");
+    expect(card).not.toContain("{actions()}");
+    expect(publicProfile).not.toContain("? () => <SocialShareButton");
+    expect(publicProfile).not.toContain("? () => (");
     expect(profile).not.toContain('href="#social-profile-edit"');
     expect(profile).not.toContain("<details");
     expect(profile).not.toContain("<summary");

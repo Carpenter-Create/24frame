@@ -150,14 +150,14 @@ async function SocialProfileMain({
         ring={liveStories.length > 0 ? "live" : null}
         profileId={profile.id}
         stats={counts ?? undefined}
-        actions={(view) => (
+        actions={
           <>
             <Link href={SOCIAL_ROUTES.profileEdit} className={`${SOCIAL_ACTION_CLASS} min-w-0 flex-1 text-center md:flex-none`}>
               {SOCIAL.profile.edit}
             </Link>
-            <SocialShareButton handle={view.handle} stretch />
+            <SocialShareButton handle={identity.handle} stretch />
           </>
-        )}
+        }
       />
       <SocialProfileTabs baseHref={SOCIAL_ROUTES.profile} active={tab} />
       {tab === "credits" ? (
