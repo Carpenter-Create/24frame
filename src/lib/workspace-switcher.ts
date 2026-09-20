@@ -214,12 +214,11 @@ export const WORKSPACE_SWITCHER_OPTION_CHECK_GUTTER_CLASS = "size-4 shrink-0";
 
 export const WORKSPACE_SWITCHER_OPTION_CHECK_CLASS = "text-accent";
 
-// One gap token on every breakpoint. Phone optical evenness comes
-// from HOUSE_HEADER_TRAILING_HIT_CLASS hugging the 16px glyphs in
-// the flex flow — no negative horizontal margin. Do not fork a
-// tighter phone gap to "fix" AI↔bell. Desktop md+ stays --space-2.
+// Adam 2026-09-19 phone glance: space-2 still optically tight AI↔bell;
+// phone space-3 / desktop space-2. Still no negative margins; still no
+// glyph resize.
 export const APP_HEADER_TRAILING_CLUSTER_CLASS =
-  "flex min-w-0 items-center gap-[var(--space-2)] max-md:shrink-0";
+  "flex min-w-0 items-center gap-[var(--space-3)] md:gap-[var(--space-2)] max-md:shrink-0";
 
 // Theme stays in the desktop trailing cluster. Phone hides this
 // wrap (`hidden`) so md+ `contents` keeps theme as a flex sibling
