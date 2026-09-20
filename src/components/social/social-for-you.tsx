@@ -3,12 +3,7 @@ import Link from "next/link";
 import { SocialOnboardingChecklist } from "@/components/social/social-checklist";
 import { SocialFollowButton } from "@/components/social/social-forms";
 import { SocialAvatar } from "@/components/social/social-ui";
-import {
-  SOCIAL_FOR_YOU_CARD_CLASS,
-  SOCIAL_FOR_YOU_RAIL_CLASS,
-  SOCIAL_TOPIC_CHIP_CLASS,
-} from "@/lib/social-chrome";
-import { SOCIAL_CATEGORY_TOPICS, socialHomeLensHref } from "@/lib/social-categories";
+import { SOCIAL_FOR_YOU_CARD_CLASS, SOCIAL_FOR_YOU_RAIL_CLASS } from "@/lib/social-chrome";
 import { displayHandle, SOCIAL, socialMemberHref } from "@/lib/social";
 import { socialChecklistIncomplete, type SocialChecklistItem } from "@/lib/social-home";
 import type { SocialSuggestedPerson } from "@/lib/social-feed";
@@ -73,21 +68,6 @@ export function SocialForYouRail({
           ))}
         </div>
       ) : null}
-      <div data-social-for-you-topics="" className={SOCIAL_FOR_YOU_CARD_CLASS}>
-        <p className="t-body-sm font-semibold text-ink">{SOCIAL.forYou.topics}</p>
-        <div className="flex flex-wrap gap-2">
-          {SOCIAL_CATEGORY_TOPICS.map((label) => (
-            <Link
-              key={label}
-              href={socialHomeLensHref(label, "All")}
-              data-social-for-you-topic={label}
-              className={SOCIAL_TOPIC_CHIP_CLASS}
-            >
-              {label}
-            </Link>
-          ))}
-        </div>
-      </div>
     </aside>
   );
 }

@@ -245,7 +245,12 @@ describe("profile opt-in", () => {
     expect(socialProfileTabHref("/social/u/ada", "credits")).toBe("/social/u/ada?tab=credits");
     expect(socialProfileTabHref("/social/profile", "posts")).toBe("/social/profile");
     expect(socialProfileTabLabel("credits")).toBe("Credits");
-    expect(socialComposerPrompt("Ada Lovelace")).toBe("What's on your mind Ada?");
+    expect(socialComposerPrompt("Ada Lovelace")).toBe("Write something");
+    expect(socialComposerPrompt("Ada Lovelace")).toBe(SOCIAL.home.composerPrompt);
+    expect(socialComposerPrompt(null)).toBe(SOCIAL.home.composerPrompt);
+    expect(SOCIAL.home.composerPrompt).toBe("Write something");
+    expect(SOCIAL.home.composerPromptNamed).toBe("Write something");
+    expect(SOCIAL.forYou.topics).toBe("Topics.");
     expect(SOCIAL.profile.postsTab).toBe("Posts");
     expect(SOCIAL.profile.highlightsTab).toBe("Highlights");
     expect(SOCIAL.profile.creditsTab).toBe("Credits");
@@ -360,6 +365,7 @@ describe("social writes stay on the live spine", () => {
     expect(pages).not.toContain("SocialPostCompose");
     expect(pages).toContain("SocialHomeTabs");
     expect(pages).toContain("SocialHomeComposer");
+    expect(pages).toContain("SocialTopics");
     expect(pages).not.toContain("SocialLensRow");
     expect(pages).toContain("SocialStoriesRail");
     expect(pages).not.toContain("from(\"titles\")");

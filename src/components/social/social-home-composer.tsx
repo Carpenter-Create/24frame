@@ -47,8 +47,7 @@ export function SocialHomeComposer({
         data-social-composer-prompt=""
         className={SOCIAL_COMPOSER_FIELD_CLASS}
       >
-        <span className="md:hidden">{SOCIAL.home.composerPrompt}</span>
-        <span className="hidden md:inline">{socialComposerPrompt(authorName)}</span>
+        {socialComposerPrompt(authorName)}
       </Link>
       <label data-social-composer-media="" className={SOCIAL_COMPOSER_MEDIA_CLASS}>
         <input

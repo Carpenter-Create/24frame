@@ -49,6 +49,10 @@ describe("Social loading skeletons", () => {
     const dms = renderToStaticMarkup(<SocialDmsSkeleton />);
 
     expect(home).toContain("data-social-home-skeleton");
+    expect(home).toContain("data-social-home-topics-skeleton");
+    expect(home.indexOf("data-social-home-topics-skeleton")).toBeLessThan(
+      home.indexOf("data-social-stories-skeleton"),
+    );
     expect(home).toContain("data-social-stories-skeleton");
     expect(home).toContain("data-social-for-you-skeleton");
     expect(home).toContain("data-social-recent-chats-skeleton");

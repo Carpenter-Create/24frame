@@ -57,7 +57,12 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).toContain("loadFollowingPosts");
     expect(home).toContain("SocialStoriesRail");
     expect(home).toContain("SocialHomeComposer");
-    expect(home.indexOf("SocialHomeComposer")).toBeLessThan(home.indexOf("SocialStoriesRail"));
+    expect(home).toContain("SocialTopics");
+    expect(home.indexOf("<SocialHomeComposer")).toBeLessThan(home.indexOf("<SocialTopics"));
+    expect(home.indexOf("<SocialTopics")).toBeLessThan(home.indexOf("<SocialStoriesRail"));
+    expect(SOCIAL.home.composerPrompt).toBe("Write something");
+    expect(SOCIAL.home.composerPromptNamed).toBe("Write something");
+    expect(SOCIAL.forYou.topics).toBe("Topics.");
     expect(home).toContain("SocialHomeTabs");
     expect(home).not.toContain("SocialProfileTabs");
     expect(home).not.toContain("creditsEmpty");
@@ -155,6 +160,9 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(composer).toContain("data-social-composer-media");
     expect(composer).toContain("SOCIAL_MEDIA_ACCEPT");
     expect(composer).toContain('socialCreateHref("text")');
+    expect(composer).toContain("socialComposerPrompt");
+    expect(composer).not.toContain("md:hidden");
+    expect(composer).not.toContain("hidden md:inline");
     expect(composer).toContain("text-ink-2");
     expect(composer).not.toContain("text-accent");
     expect(composer).not.toContain("data-social-composer-action");
@@ -162,6 +170,9 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(extras).not.toContain("data-social-rail-create");
     expect(extras).toContain("data-social-rail-account");
     expect(forYou).toContain("SocialOnboardingChecklist");
+    expect(forYou).not.toContain("SOCIAL.forYou.topics");
+    expect(forYou).not.toContain("data-social-for-you-topics");
+    expect(forYou).not.toContain("SOCIAL_CATEGORY_TOPICS");
     expect(forYou).not.toContain("SOCIAL.forYou.native");
     expect(forYou).not.toContain("Social-native");
     expect(forYou).not.toContain("education");
@@ -405,6 +416,9 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(forYou).toContain("SocialOnboardingChecklist");
     expect(forYou).toContain('tone="nested"');
     expect(forYou).toContain("layout === \"rail\"");
+    expect(forYou).not.toContain("data-social-for-you-topics");
+    expect(forYou).not.toContain("SOCIAL.forYou.topics");
+    expect(home).toContain("SocialTopics");
     expect(checklist).toContain("data-social-checklist-dismiss");
     expect(checklist).toContain("SOCIAL.checklist.dismiss");
     expect(checklist).toContain("SOCIAL_CHECKLIST_TRACK_NESTED_CLASS");

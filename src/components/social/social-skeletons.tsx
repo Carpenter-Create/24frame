@@ -53,6 +53,14 @@ export function SocialHomeCenterSkeleton() {
         <Skeleton className="h-9 min-w-0 flex-1" />
         <Skeleton className="size-9 shrink-0" />
       </div>
+      <div data-social-home-topics-skeleton="" className={SOCIAL_FOR_YOU_CARD_CLASS}>
+        <Skeleton className="h-4 w-16" />
+        <div className="flex flex-wrap gap-2">
+          <Skeleton className="h-6 w-20 rounded-[14px]" />
+          <Skeleton className="h-6 w-24 rounded-[14px]" />
+          <Skeleton className="h-6 w-16 rounded-[14px]" />
+        </div>
+      </div>
       <SocialStoriesRailSkeleton tall />
       {Array.from({ length: 3 }).map((_, i) => (
         <div key={i} className={SOCIAL_FEED_ROW_CLASS}>

@@ -225,9 +225,8 @@ export function socialFirstName(displayName: string | null | undefined): string 
   return displayName?.trim().split(/\s+/)[0] ?? "";
 }
 
-export function socialComposerPrompt(displayName: string | null | undefined): string {
-  const first = socialFirstName(displayName);
-  return first ? `${SOCIAL.home.composerPromptNamed} ${first}?` : SOCIAL.home.composerPrompt;
+export function socialComposerPrompt(_displayName?: string | null): string {
+  return SOCIAL.home.composerPrompt;
 }
 
 export function formatSocialCount(n: number): string {
@@ -265,8 +264,8 @@ export const SOCIAL = {
     recentChats: "Recent chats",
     chatsEmpty: "No messages yet",
     goExplore: "Explore creators",
-    composerPrompt: "What's on your mind?",
-    composerPromptNamed: "What's on your mind",
+    composerPrompt: "Write something",
+    composerPromptNamed: "Write something",
     followingTab: "Following",
     forYouTab: "For you",
     compose: "Write a post",
@@ -393,7 +392,7 @@ export const SOCIAL = {
   forYou: {
     title: "For you",
     people: "Suggested people",
-    topics: "Topics for you",
+    topics: "Topics.",
   },
   profile: {
     title: "Profile",

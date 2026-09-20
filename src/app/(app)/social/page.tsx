@@ -14,6 +14,7 @@ import {
   SocialRecentChatsSkeleton,
 } from "@/components/social/social-skeletons";
 import { SocialStoriesRail } from "@/components/social/social-stories-rail";
+import { SocialTopics } from "@/components/social/social-topics";
 import { SocialPostCard } from "@/components/social/social-ui";
 import { SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS, SOCIAL_PILL_ACTIVE_CLASS, SOCIAL_PILL_CLASS } from "@/lib/social-chrome";
 import { signedAvatarUrl, signedAvatarUrls } from "@/lib/s3-avatars";
@@ -199,6 +200,7 @@ async function SocialHomeCenter({
       {profile ? (
         <SocialHomeComposer authorName={profile.display_name} authorPhotoUrl={photoUrl} />
       ) : null}
+      <SocialTopics />
       <SocialStoriesRail
         cards={rail}
         authors={authors}

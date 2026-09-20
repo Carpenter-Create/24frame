@@ -24,6 +24,7 @@ import { SocialEmpty, SocialStoriesEmpty } from "./social-empty";
 import { SocialHomeComposer } from "./social-home-composer";
 import { SocialOnboardingChecklist } from "./social-checklist";
 import { SocialStoriesRail } from "./social-stories-rail";
+import { SocialTopics } from "./social-topics";
 
 const authors = new Map([["u2", { display_name: "Maya Chen", handle: "maya" }]]);
 const faces = new Map([["u2", "https://s3.example/signed-avatar"]]);
@@ -40,8 +41,9 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).toContain(SOCIAL_COMPOSER_FIELD_CLASS);
     expect(html).toContain(SOCIAL_COMPOSER_MEDIA_CLASS);
     expect(html).toContain("/social/create?kind=text");
-    expect(html).toContain("What&#x27;s on your mind Adam?");
-    expect(html).toContain("What&#x27;s on your mind?");
+    expect(html).toContain(SOCIAL.home.composerPrompt);
+    expect(html).not.toContain("What&#x27;s on your mind");
+    expect(html).not.toContain("What&#x27;s on your mind Adam?");
     expect(html).toContain(SOCIAL.home.attach);
     expect(html).toContain(`accept="${SOCIAL_MEDIA_ACCEPT}"`);
     expect(html).toContain('data-social-icon="image"');
@@ -54,6 +56,19 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(SOCIAL_COMPOSER_CLASS).toContain("h-16");
     expect(SOCIAL_COMPOSER_CLASS).toContain("rounded-[16px]");
     expect(SOCIAL_COMPOSER_FIELD_CLASS).not.toContain("bg-surface-muted");
+  });
+
+  it("renders Topics. chips in one home block, wrapping without truncate", () => {
+    const html = renderToStaticMarkup(<SocialTopics />);
+    expect(html).toContain("data-social-home-topics");
+    expect(html).toContain(SOCIAL.forYou.topics);
+    expect(html).not.toContain("Topics for you");
+    expect(html).toContain(SOCIAL_FOR_YOU_CARD_CLASS);
+    expect(html).toContain("flex-wrap");
+    expect(html).not.toContain("truncate");
+    expect(html).toContain("Cinematography");
+    expect(html).toContain("Music");
+    expect(html).not.toContain("Education");
   });
 
   it("renders tall FB-style story tiles with a plus well and unseen face rings", () => {
