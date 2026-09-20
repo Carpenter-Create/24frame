@@ -5,14 +5,17 @@ import { SOCIAL_DESKTOP_NAV, SOCIAL_NAV } from "./nav";
 import { SOCIAL_PHONE_DESTS } from "./house-phone-shell";
 import { SOCIAL_CATEGORY_LABELS } from "./social-categories";
 import {
+  SOCIAL_COMPOSER_CLASS,
   SOCIAL_DESKTOP_MEASURE,
   SOCIAL_FIGMA_PROFILE_BIO,
   SOCIAL_FIGMA_PROFILE_EDIT,
   SOCIAL_FIGMA_PROFILE_OWN,
 } from "./social-chrome";
+import { SOCIAL_HOME_STACK_LOCK, SOCIAL_HOME_STACK_ORDER } from "./social-home";
 import { SOCIAL, SOCIAL_PROFILE_TABS, SOCIAL_ROUTES } from "./social";
 
 const home = readFileSync("src/app/(app)/social/page.tsx", "utf8");
+const stack = readFileSync("src/components/social/social-home-stack.tsx", "utf8");
 const explore = readFileSync("src/app/(app)/social/explore/page.tsx", "utf8");
 const create = readFileSync("src/app/(app)/social/create/page.tsx", "utf8");
 const stories = readFileSync("src/app/(app)/social/stories/page.tsx", "utf8");
@@ -60,9 +63,16 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).toContain("SocialStoriesRail");
     expect(home).toContain("SocialHomeComposer");
     expect(home).toContain("SocialHomeTopics");
-    expect(home.indexOf("<SocialHomeComposer")).toBeLessThan(home.indexOf("<SocialHomeTopics"));
-    expect(home.indexOf("<SocialHomeTopics")).toBeLessThan(home.indexOf("<SocialStoriesRail"));
-    expect(home.indexOf("<SocialStoriesRail")).toBeLessThan(home.indexOf("<SocialHomeTabs"));
+    expect(home).toContain("SocialHomeStack");
+    expect(SOCIAL_HOME_STACK_LOCK).toBe("lock_airy_topics_under_cut_phone_composer");
+    expect(SOCIAL_HOME_STACK_ORDER).toEqual(["composer", "stories", "topics", "wall"]);
+    const stackRender = stack.slice(stack.indexOf("return ("));
+    expect(stackRender.indexOf("{composer}")).toBeLessThan(stackRender.indexOf("{stories}"));
+    expect(stackRender.indexOf("{stories}")).toBeLessThan(stackRender.indexOf("{topics}"));
+    expect(stackRender.indexOf("{topics}")).toBeLessThan(stackRender.indexOf("{wall}"));
+    expect(home.indexOf("<SocialHomeComposer")).toBeLessThan(home.indexOf("<SocialStoriesRail"));
+    expect(home.indexOf("<SocialStoriesRail")).toBeLessThan(home.indexOf("<SocialHomeTopics"));
+    expect(home.indexOf("<SocialHomeTopics")).toBeLessThan(home.indexOf("<SocialHomeTabs"));
     expect(home).toContain("SocialHomeTabs");
     expect(home).not.toContain("SocialProfileTabs");
     expect(home).not.toContain("creditsEmpty");
@@ -171,7 +181,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(composer).toContain("data-social-home-composer");
     expect(composer).toContain("data-social-create-sheet");
     expect(composer).toContain("SocialCreateSheet");
-    expect(composer).toContain('socialCreateHref("text")');
+    expect(composer).not.toContain("socialCreateHref");
     expect(composer).toContain("socialComposerPrompt(authorName)");
     expect(composer).toContain("SocialAvatar");
     expect(composer).toContain("authorPhotoUrl");
@@ -184,6 +194,15 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(composer).not.toContain("SOCIAL_MEDIA_ACCEPT");
     expect(composer).not.toContain("data-social-composer-action");
     expect(composer).not.toContain("ACTIONS");
+    expect(composer).not.toContain("SocialIcon");
+    expect(composer).not.toContain("plus");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("hidden md:flex");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("h-16");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("border-none");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("bg-transparent");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("border-hairline");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("bg-surface");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("rounded-[var(--radius-lg)]");
     expect(shell).not.toContain("SocialRailAccountChip");
     expect(shell).not.toContain("data-social-rail-account");
     expect(forYou).not.toContain("SocialOnboardingChecklist");

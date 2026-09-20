@@ -5,6 +5,7 @@ import { InlineNotice } from "@/components/ui/inline-notice";
 import { SocialEmpty } from "@/components/social/social-empty";
 import { SocialForYouRail } from "@/components/social/social-for-you";
 import { SocialHomeComposer } from "@/components/social/social-home-composer";
+import { SocialHomeStack } from "@/components/social/social-home-stack";
 import { SocialHomeTabs } from "@/components/social/social-home-tabs";
 import { SocialHomeTopics } from "@/components/social/social-home-topics";
 import {
@@ -166,44 +167,56 @@ async function SocialHomeCenter({
     <div className={SOCIAL_HOME_CENTER_CLASS}>
       <h1 className="sr-only">{SOCIAL.home.title}</h1>
       <p className="sr-only">{SOCIAL.home.subtitle}</p>
-      {profile ? (
-        <SocialHomeComposer authorName={profile.display_name} authorPhotoUrl={photoUrl} />
-      ) : null}
-      <SocialHomeTopics />
-      <SocialStoriesRail
-        cards={rail}
-        authors={authors}
-        faces={faces}
-        canCreate={!!profile}
-        createName={profile?.display_name}
-        createPhotoUrl={photoUrl}
+      <SocialHomeStack
+        composer={
+          profile ? (
+            <SocialHomeComposer authorName={profile.display_name} authorPhotoUrl={photoUrl} />
+          ) : null
+        }
+        stories={
+          <>
+            <SocialStoriesRail
+              cards={rail}
+              authors={authors}
+              faces={faces}
+              canCreate={!!profile}
+              createName={profile?.display_name}
+              createPhotoUrl={photoUrl}
+            />
+            {storiesPage.truncated ? (
+              <InlineNotice tone="info" data-social-stories-truncated="">
+                {SOCIAL.home.truncatedStories}
+              </InlineNotice>
+            ) : null}
+          </>
+        }
+        topics={<SocialHomeTopics />}
+        wall={
+          <>
+            {followees.truncated ? (
+              <InlineNotice tone="info" data-social-followees-truncated="">
+                {SOCIAL.home.truncatedFollowees}
+              </InlineNotice>
+            ) : null}
+            <SocialHomeTabs active={lane} />
+            {lane === "for-you" ? (
+              <SocialHomeForYouLane suggested={suggested} faces={faces} />
+            ) : (
+              <SocialHomeFollowingWall
+                wall={wall}
+                posts={posts}
+                authors={authors}
+                faces={faces}
+                groups={groups}
+                liked={liked}
+                media={media}
+                profile={profile}
+                topic={topic}
+              />
+            )}
+          </>
+        }
       />
-      {storiesPage.truncated ? (
-        <InlineNotice tone="info" data-social-stories-truncated="">
-          {SOCIAL.home.truncatedStories}
-        </InlineNotice>
-      ) : null}
-      {followees.truncated ? (
-        <InlineNotice tone="info" data-social-followees-truncated="">
-          {SOCIAL.home.truncatedFollowees}
-        </InlineNotice>
-      ) : null}
-      <SocialHomeTabs active={lane} />
-      {lane === "for-you" ? (
-        <SocialHomeForYouLane suggested={suggested} faces={faces} />
-      ) : (
-        <SocialHomeFollowingWall
-          wall={wall}
-          posts={posts}
-          authors={authors}
-          faces={faces}
-          groups={groups}
-          liked={liked}
-          media={media}
-          profile={profile}
-          topic={topic}
-        />
-      )}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 // Social measured chrome. Tokens only — no hex.
 // Desktop Home Circle-primary: Figma 176:1085 / 176:1346.
 // Prior desktop: 169:964 / 169:1281 (164:1136 / 164:1360 still in place).
-// Mobile Home: Figma 169:1519 setup after Stories, before Following wall.
+// Mobile Home: Figma 169:1519 Stories then Topics then Following wall.
 // Pill hide stays 160:1129.
 // Profile ship: Figma 129:215 / 129:415 / 129:615.
 // Profile share sheet: Figma 155:194 / 155:372.
@@ -36,7 +36,7 @@ export const SOCIAL_FIGMA_HOME_MOBILE_SCROLL = "160:1129";
 export const SOCIAL_FIGMA_HOME_DESKTOP_PRIOR = ["169:964", "169:1281", "164:1136", "164:1360"] as const;
 
 // Desktop Social Home measure. Recent chats column is retired; its 200 +
-// gutter 16 is reclaimed by the middle column (composer / Topics / stories / wall).
+// gutter 16 is reclaimed by the middle column (composer / stories / Topics / wall).
 // dest 200 | gutter 16 | center 892 | gutter 16 | For you 300 | padR 16 = 1440.
 export const SOCIAL_DESKTOP_MEASURE = {
   dest: 200,
@@ -188,13 +188,14 @@ export const SOCIAL_STORY_PROGRESS_BAR_CLASS = "h-[3px] flex-1 rounded-full";
 export const SOCIAL_STORY_CARET_CLASS =
   "absolute top-1/2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-surface-muted text-ink-2";
 
-// Home composer compact — 160:482 / 160:741 / 160:964 / 160:1129.
-// Single row: avatar | field (Write) | desktop Create door. Photo ·
-// Video · Write · Go live live on the Social Create sheet, not Home
-// composer pills and not a second chooser on the compose form.
-// Phone Create is the dock dest.
+// Home composer — airy FB register. Adam 2026-09-20
+// lock_airy_topics_under_cut_phone_composer. Avatar + prompt on the
+// canvas, no gray liner / boxed form. Desktop only (`hidden md:flex`).
+// The row opens the Create sheet SoT. Phone Create is the dock dest.
+// Photo · Video · Write · Go live stay on that sheet — never a second
+// chooser strip on Home.
 export const SOCIAL_COMPOSER_CLASS =
-  `flex h-16 items-center gap-3 ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface px-3 py-3 md:px-4`;
+  "hidden md:flex h-16 w-full items-center gap-3 border-none bg-transparent p-0 text-left";
 
 export const SOCIAL_COMPOSER_FIELD_CLASS =
   "flex h-9 min-w-0 flex-1 items-center t-body text-ink-2";

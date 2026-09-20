@@ -23,7 +23,6 @@ import {
   SOCIAL_COMPOSER_CLASS,
   SOCIAL_FOR_YOU_CARD_CLASS,
   SOCIAL_COMPOSER_FIELD_CLASS,
-  SOCIAL_COMPOSER_MEDIA_CLASS,
   SOCIAL_EMPTY_ACTION_CLASS,
   SOCIAL_EMPTY_PANEL_CLASS,
   SOCIAL_STORIES_EMPTY_ACTION_CLASS,
@@ -34,7 +33,7 @@ import {
 } from "@/lib/social-chrome";
 import { HOUSE_SCROLL_ROW_CLASS, HOUSE_SEGMENTED_ITEM_BASE_CLASS } from "@/lib/house-shell";
 import { SOCIAL_CATEGORY_TOPICS, sortTopicsAlpha } from "@/lib/social-categories";
-import { SOCIAL_ICON_SIZE_COMPOSER, SOCIAL_ICON_SIZE_STORY_PLUS } from "@/lib/social-icons";
+import { SOCIAL_ICON_SIZE_STORY_PLUS } from "@/lib/social-icons";
 import { SOCIAL_MEDIA_ACCEPT } from "@/lib/social-media";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import { SocialEmpty, SocialStoriesEmpty } from "./social-empty";
@@ -47,23 +46,21 @@ const authors = new Map([["u2", { display_name: "Maya Chen", handle: "maya" }]])
 const faces = new Map([["u2", "https://s3.example/signed-avatar"]]);
 
 describe("Social Home craft (Figma 160:482 / 160:964)", () => {
-  it("renders the compact composer as avatar | field | desktop Create door", () => {
+  it("renders the airy desktop composer as avatar + prompt that opens Create", () => {
     const html = renderToStaticMarkup(
       <SocialHomeComposer authorName="Adam Carpenter" />,
     );
     expect(html).toContain("data-social-home-composer");
     expect(html).toContain("data-social-composer-prompt");
-    expect(html).toContain("data-social-create-sheet");
+    expect(html).toContain('data-social-create-sheet="composer"');
     expect(html).toContain(SOCIAL_COMPOSER_CLASS);
     expect(html).toContain(SOCIAL_COMPOSER_FIELD_CLASS);
-    expect(html).toContain(SOCIAL_COMPOSER_MEDIA_CLASS);
-    expect(html).toContain("/social/create?kind=text");
+    expect(html).not.toContain("/social/create?kind=text");
     expect(html).toContain("Write something");
     expect(html).not.toContain("What&#x27;s on your mind");
     expect(html.split("Write something").length - 1).toBe(1);
     expect(html).toContain(SOCIAL.create.title);
-    expect(html).toContain('data-social-icon="plus"');
-    expect(html).toContain(`width="${SOCIAL_ICON_SIZE_COMPOSER}"`);
+    expect(html).not.toContain('data-social-icon="plus"');
     expect(html).toContain("text-ink-2");
     expect(html).not.toContain("data-social-composer-media");
     expect(html).not.toContain("data-social-composer-action");
@@ -73,8 +70,12 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).toContain("data-social-avatar");
     expect(html).toContain("AC");
     expect(html).not.toContain("<img");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("hidden md:flex");
     expect(SOCIAL_COMPOSER_CLASS).toContain("h-16");
-    expect(SOCIAL_COMPOSER_CLASS).toContain("rounded-[var(--radius-lg)]");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("border-none");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("bg-transparent");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("border-hairline");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("rounded-[var(--radius-lg)]");
     expect(SOCIAL_COMPOSER_FIELD_CLASS).not.toContain("bg-surface-muted");
   });
 

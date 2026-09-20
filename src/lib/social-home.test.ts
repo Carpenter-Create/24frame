@@ -2,8 +2,25 @@ import { describe, expect, it } from "vitest";
 
 import { SETTINGS } from "./settings";
 import { SOCIAL, SOCIAL_ROUTES } from "./social";
-import { followingAuthorIds, socialChecklistIncomplete, socialChecklistItems } from "./social-home";
+import {
+  followingAuthorIds,
+  SOCIAL_HOME_STACK_LOCK,
+  SOCIAL_HOME_STACK_ORDER,
+  socialChecklistIncomplete,
+  socialChecklistItems,
+} from "./social-home";
+import { SOCIAL_COMPOSER_CLASS } from "./social-chrome";
 import { isStoryLive, storyExpiresAt, storyInsertRow, storyRailUnseen } from "./social-stories";
+
+describe("Social Home stack lock", () => {
+  it("locks desktop composer → Stories → Topics → wall, and hides the composer on phone", () => {
+    expect(SOCIAL_HOME_STACK_LOCK).toBe("lock_airy_topics_under_cut_phone_composer");
+    expect(SOCIAL_HOME_STACK_ORDER).toEqual(["composer", "stories", "topics", "wall"]);
+    expect(SOCIAL_COMPOSER_CLASS).toContain("hidden md:flex");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("border-hairline");
+    expect(SOCIAL_COMPOSER_CLASS).not.toContain("bg-surface");
+  });
+});
 
 describe("following wall authors", () => {
   it("includes self and unique followees", () => {
