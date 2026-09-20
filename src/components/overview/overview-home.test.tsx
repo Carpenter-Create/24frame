@@ -33,6 +33,7 @@ import {
 import {
   SEGMENTED_TRACK_PERSIST,
   clearSegmentedThumbCache,
+  resolveSegmentedVisualIndex,
   writeSegmentedVisualIndex,
 } from "@/lib/segmented-track";
 import {
@@ -291,11 +292,21 @@ describe("OverviewHome", () => {
   });
 
   it("keeps Home YTD white ink across Suspense remount before the route commits", () => {
-    writeSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period, 1);
+    writeSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period, 1, 0);
     const html = renderToStaticMarkup(createElement(OverviewHome, homeProps()));
     expect(periodChipPressed(html, "ytd")).toBe(true);
     expect(periodChipPressed(html, "all")).toBe(false);
     expect(html).toContain('data-segmented-persist="house-period-presets"');
+  });
+
+  it("does not restore YTD ink after Settings commits a none-selected route", () => {
+    writeSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period, 1, 0);
+    expect(
+      resolveSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.workspace, -1),
+    ).toBe(-1);
+    const html = renderToStaticMarkup(createElement(OverviewHome, homeProps()));
+    expect(periodChipPressed(html, "all")).toBe(true);
+    expect(periodChipPressed(html, "ytd")).toBe(false);
   });
 
   it("keeps phone Net revenue period on HousePageSelect — never a two-line wrap", () => {

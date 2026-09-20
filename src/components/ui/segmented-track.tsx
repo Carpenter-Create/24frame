@@ -21,6 +21,7 @@ import {
   houseSegmentedThumbHidden,
 } from "@/lib/house-shell";
 import {
+  commitSegmentedVisualIntent,
   measureSegmentedBox,
   projectSegmentedThumbFlight,
   readSegmentedThumbFlight,
@@ -32,7 +33,6 @@ import {
   segmentedThumbStyle,
   segmentedTrackSelection,
   startSegmentedThumbFlight,
-  writeSegmentedVisualIndex,
   type SegmentedThumbBox,
   type SegmentedTrackSelection,
 } from "@/lib/segmented-track";
@@ -113,8 +113,7 @@ export function SegmentedTrack({
   );
 
   function commitVisualIndex(index: number) {
-    if (persistKey) writeSegmentedVisualIndex(persistKey, index);
-    setVisualIndex(index);
+    setVisualIndex(commitSegmentedVisualIntent(persistKey, index, activeIndex));
   }
   const [thumbStyle, setThumbStyle] = useState<CSSProperties>(() => {
     if (houseSegmentedThumbHidden(activeIndex) || !persistKey) return { opacity: 0 };

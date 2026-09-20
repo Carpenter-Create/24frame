@@ -19,6 +19,7 @@ import { REPORTS_PAGE, REPORTS_PERIOD_PRESETS } from "@/lib/reports";
 import {
   SEGMENTED_TRACK_PERSIST,
   clearSegmentedThumbCache,
+  resolveSegmentedVisualIndex,
   writeSegmentedVisualIndex,
 } from "@/lib/segmented-track";
 
@@ -68,7 +69,7 @@ describe("HousePeriodPresets", () => {
   });
 
   it("keeps YTD ON ink across remount while the route is still All time", () => {
-    writeSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period, 1);
+    writeSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period, 1, 0);
     const html = renderToStaticMarkup(
       createElement(HousePeriodPresets, {
         value: "all",
@@ -89,5 +90,26 @@ describe("HousePeriodPresets", () => {
     expect(all?.[0]).toContain(HOUSE_SEGMENTED_ITEM_OFF_CLASS);
     expect(all?.[0]).toContain('aria-pressed="false"');
     expect(SEGMENTED_TRACK_PERSIST.period).toBe("house-period-presets");
+  });
+
+  it("yields to All time after a later committed route abandons the YTD hop", () => {
+    writeSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period, 1, 0);
+    expect(resolveSegmentedVisualIndex(SEGMENTED_TRACK_PERSIST.period, 4)).toBe(4);
+    const html = renderToStaticMarkup(
+      createElement(HousePeriodPresets, {
+        value: "all",
+        items: ITEMS,
+        ariaLabel: "Period",
+        chipDataAttr: "data-overview-revenue-period-chip",
+      }),
+    );
+    const all = html.match(
+      /<a[^>]*data-overview-revenue-period-chip="all"[^>]*>/,
+    );
+    const ytd = html.match(
+      /<a[^>]*data-overview-revenue-period-chip="ytd"[^>]*>/,
+    );
+    expect(all?.[0]).toContain(HOUSE_SEGMENTED_ITEM_ON_CLASS);
+    expect(ytd?.[0]).toContain(HOUSE_SEGMENTED_ITEM_OFF_CLASS);
   });
 });
