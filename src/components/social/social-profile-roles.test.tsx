@@ -36,7 +36,9 @@ describe("SocialProfileRolesField", () => {
     expect(html).toContain("Actor");
     expect(html).not.toContain("Actress");
     expect(html).not.toContain("Category");
-    expect(html).toContain("break-words");
+    expect(html).toContain("whitespace-nowrap");
+    expect(html).toContain("t-body-sm");
+    expect(html).not.toContain("text-[11px]");
     expect(html).not.toContain("truncate");
     expect(html).not.toContain("type=\"checkbox\"");
   });

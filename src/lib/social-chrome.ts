@@ -23,8 +23,10 @@ import {
   HOUSE_FILTER_OFF_CLASS,
   HOUSE_FILTER_ON_CLASS,
   HOUSE_MODULE_CLASS,
+  HOUSE_PILL_ITEM_CLASS,
   HOUSE_PILL_SELECTED_CLASS,
   HOUSE_RAIL_PANEL_CLASS,
+  HOUSE_SCROLL_ROW_CLASS,
 } from "@/lib/house-shell";
 
 export const SOCIAL_FIGMA_HOME = "176:1085";
@@ -233,11 +235,10 @@ export const SOCIAL_TAB_BAR_MAIN_PAD_CLASS = "pb-20 md:pb-4";
 export const SOCIAL_HOME_TAB_CLASS =
   "flex flex-1 flex-col items-center gap-2.5 px-4 pt-3 t-body";
 
-// Topic/Profession chip measure — one SoT. Display (Home / public
-// profile) stays surface fill. Edit select composes idle outline +
-// HOUSE_PILL_SELECTED_CLASS. Do not fork a third chip language.
-export const SOCIAL_TOPIC_CHIP_MEASURE_CLASS =
-  "inline-flex items-center rounded-full px-[10px] py-[5px] text-[11px] font-medium";
+// Topic/Profession chip measure — house fat pill SoT (same height as
+// SegmentedTrack). Width hugs the label. Display stays surface fill.
+// Edit select composes idle outline + HOUSE_PILL_SELECTED_CLASS.
+export const SOCIAL_TOPIC_CHIP_MEASURE_CLASS = `w-fit ${HOUSE_PILL_ITEM_CLASS}`;
 
 export const SOCIAL_TOPIC_CHIP_CLASS = `${SOCIAL_TOPIC_CHIP_MEASURE_CLASS} bg-surface text-ink`;
 
@@ -255,7 +256,7 @@ export function socialTopicChipSelectClass(selected: boolean): string {
 
 // Public Professions rail: same chip SoT, scroll instead of truncate.
 export const SOCIAL_PROFILE_ROLES_RAIL_CLASS =
-  "no-scrollbar mt-2 flex w-full min-w-0 gap-2 overflow-x-auto overscroll-x-contain";
+  `${HOUSE_SCROLL_ROW_CLASS} mt-2 flex min-w-0 gap-2 overscroll-x-contain`;
 
 export const SOCIAL_TOPIC_CHIP_RAIL_CLASS = `${SOCIAL_TOPIC_CHIP_CLASS} shrink-0 whitespace-nowrap`;
 

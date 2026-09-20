@@ -30,7 +30,9 @@ describe("SocialProfileTopicsField", () => {
     expect(html).toContain(SOCIAL_TOPIC_CHIP_BANK_CLASS);
     expect(html).toContain(SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS);
     expect(html).toContain(SOCIAL_TOPIC_CHIP_SELECT_IDLE_CLASS);
-    expect(html).toContain("break-words");
+    expect(html).toContain("whitespace-nowrap");
+    expect(html).toContain("t-body-sm");
+    expect(html).not.toContain("text-[11px]");
     expect(html).not.toContain("truncate");
     expect(html).not.toContain("type=\"checkbox\"");
     expect(html).not.toContain("Professions");

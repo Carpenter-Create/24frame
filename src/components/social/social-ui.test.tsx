@@ -14,6 +14,7 @@ import {
   SocialProfileIdentity,
 } from "./social-ui";
 import { SOCIAL } from "@/lib/social";
+import { SOCIAL_TOPIC_CHIP_RAIL_CLASS } from "@/lib/social-chrome";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const uiSrc = readFileSync(join(here, "social-ui.tsx"), "utf8");
@@ -204,6 +205,10 @@ describe("Social profile public face", () => {
     expect(withRoles).not.toContain("Topics:");
     expect(withRoles).toContain("overflow-x-auto");
     expect(withRoles).toContain("whitespace-nowrap");
+    expect(withRoles).toContain(SOCIAL_TOPIC_CHIP_RAIL_CLASS);
+    expect(withRoles).toContain("t-body-sm");
+    expect(withRoles).toContain("py-[var(--space-2)]");
+    expect(withRoles).not.toContain("text-[11px]");
     expect(withRoles).not.toContain("truncate");
     expect(withRoles.indexOf("data-social-profile-handle")).toBeLessThan(
       withRoles.indexOf("data-social-profile-roles"),

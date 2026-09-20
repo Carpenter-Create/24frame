@@ -25,7 +25,9 @@ import {
   HOUSE_CARD_PAD,
   HOUSE_FILTER_OFF_CLASS,
   HOUSE_FILTER_ON_CLASS,
+  HOUSE_FILTER_PILL_CLASS,
   HOUSE_PILL_ITEM_CLASS,
+  HOUSE_PILL_MEASURE_CLASS,
   HOUSE_PILL_SELECTED_CLASS,
   HOUSE_MODULE_CLASS,
   HOUSE_PAGE_CANVAS_CLASS,
@@ -62,6 +64,7 @@ import { TEXT_ACTION_CLASS } from "@/lib/house-sheet";
 import {
   SOCIAL_PILL_ACTIVE_CLASS,
   SOCIAL_PILL_IDLE_CLASS,
+  SOCIAL_TOPIC_CHIP_MEASURE_CLASS,
   SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS,
 } from "@/lib/social-chrome";
 
@@ -188,6 +191,15 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(houseShell).toContain("HOUSE_FILTER_ON_CLASS (ink) is status / display chips only");
     expect(HOUSE_PILL_SELECTED_CLASS).toBe("bg-accent text-white");
     expect(HOUSE_PILL_SELECTED_CLASS).not.toContain("bg-ink");
+    expect(HOUSE_PILL_MEASURE_CLASS).toBe(
+      "rounded-full px-[var(--space-4)] py-[var(--space-2)] t-body-sm",
+    );
+    expect(HOUSE_FILTER_PILL_CLASS).toBe(HOUSE_PILL_MEASURE_CLASS);
+    expect(HOUSE_PILL_ITEM_CLASS).toContain(HOUSE_PILL_MEASURE_CLASS);
+    expect(HOUSE_SEGMENTED_ITEM_BASE_CLASS).toContain(HOUSE_PILL_ITEM_CLASS);
+    expect(HOUSE_SEGMENTED_ITEM_BASE_CLASS).toContain(HOUSE_PILL_MEASURE_CLASS);
+    expect(HOUSE_PILL_MEASURE_CLASS).not.toContain("text-[11px]");
+    expect(HOUSE_PILL_MEASURE_CLASS).not.toContain("py-[5px]");
     expect(HOUSE_PERIOD_SELECTED_CLASS).toBe("bg-surface-muted");
     expect(HOUSE_SEGMENTED_TRACK_CLASS).toContain("rounded-full");
     expect(HOUSE_SEGMENTED_TRACK_CLASS).toContain("bg-surface-muted");
@@ -296,6 +308,10 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(socialChrome).toContain("HOUSE_FILTER_ON_CLASS");
     expect(socialChrome).toContain("HOUSE_PILL_SELECTED_CLASS");
     expect(SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS).toContain(HOUSE_PILL_SELECTED_CLASS);
+    expect(SOCIAL_TOPIC_CHIP_MEASURE_CLASS).toContain(HOUSE_PILL_ITEM_CLASS);
+    expect(SOCIAL_TOPIC_CHIP_MEASURE_CLASS).toContain(HOUSE_PILL_MEASURE_CLASS);
+    expect(SOCIAL_TOPIC_CHIP_MEASURE_CLASS).not.toContain("text-[11px]");
+    expect(SOCIAL_TOPIC_CHIP_MEASURE_CLASS).not.toContain("py-[5px]");
     expect(SOCIAL_PILL_ACTIVE_CLASS).toBe(HOUSE_FILTER_ON_CLASS);
     expect(SOCIAL_PILL_IDLE_CLASS).toBe(HOUSE_FILTER_OFF_CLASS);
     expect(SOCIAL_PILL_ACTIVE_CLASS).not.toContain("bg-accent");

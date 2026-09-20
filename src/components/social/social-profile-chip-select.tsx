@@ -89,7 +89,7 @@ export function SocialProfileSelectChip({
         onToggle(option.id);
       }}
     >
-      <span className="min-w-0 break-words">{option.label}</span>
+      <span className="min-w-0">{option.label}</span>
       {selected ? <SocialIcon name="x" size={10} className="shrink-0" /> : null}
     </button>
   );
