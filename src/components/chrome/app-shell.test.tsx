@@ -1055,7 +1055,7 @@ describe("AppShell rail-collapse chevron", () => {
     expect(html).toContain("data-social-header-search");
     expect(html).not.toContain("data-social-rail-create");
     expect(html).not.toContain("Destinations");
-    expect(html).toContain("data-social-rail-account");
+    expect(html).not.toContain("data-social-rail-account");
     expect(html).toContain("Ada Lovelace");
     expect(html).toContain('data-house-phone-dest="Create"');
     expect(html).not.toContain("data-social-mobile-pill");
@@ -1086,7 +1086,7 @@ describe("AppShell rail-collapse chevron", () => {
     const html = renderShell(undefined, "Ada Lovelace", true);
     expect(html).toContain("data-social-workspace");
     expect(html).toContain("data-social-rail");
-    expect(html).toContain("data-social-rail-account");
+    expect(html).not.toContain("data-social-rail-account");
     expect(html).toContain("data-collapsed");
     expect(html).toContain("Expand sidebar");
     expect(html).toContain(`data-rail-collapse="${RAIL_COLLAPSE_CHEVRON}"`);
@@ -1094,7 +1094,6 @@ describe("AppShell rail-collapse chevron", () => {
     expect(html).toContain("--sidebar-width:var(--sidebar-width-collapsed)");
     expect(html).toContain("margin-left:var(--sidebar-width)");
     expect(html).not.toContain("md:ml-[200px]");
-    expect(html).toContain('aria-label="Ada Lovelace"');
     expect(html).toContain("data-app-social-frame");
     expect(html).toContain("data-house-phone-bottom-nav");
     expect(html).not.toContain("data-social-tab-bar");

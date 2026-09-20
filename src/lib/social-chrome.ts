@@ -201,9 +201,6 @@ export const SOCIAL_FEED_ROW_CLASS =
 export const SOCIAL_CREATE_CTA_CLASS =
   "inline-flex w-full items-center justify-center gap-2 rounded-[24px] bg-accent px-4 py-3 t-body font-semibold text-accent-contrast";
 
-export const SOCIAL_ACCOUNT_CHIP_CLASS =
-  `${HOUSE_MODULE_CLASS} flex w-full items-center gap-2.5 border border-hairline p-2.5`;
-
 // Floating pill — 160:964 visible / 160:1129 hidden on scroll-down.
 // Desktop left Aggregation rail is unchanged; pill is md:hidden.
 export const SOCIAL_TAB_BAR_CLASS =

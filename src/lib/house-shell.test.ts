@@ -4,7 +4,6 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
 import { EducationCourseRail } from "@/app/(app)/(operator)/education/manage/education-course-rail";
-import { SocialRailAccountChip } from "@/components/social/social-rail-extras";
 import { HouseLeadChrome } from "@/components/chrome/house-lead-chrome";
 import { HouseLeadSearch } from "@/components/chrome/house-lead-search";
 import { UserMenu } from "@/components/chrome/user-menu";
@@ -296,19 +295,6 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(header).toContain("data-social-header-search");
     expect(header).toContain(HOUSE_SEARCH_PILL_CLASS);
     expect(header).toContain("data-brand-emblem");
-
-    const chip = renderToStaticMarkup(createElement(SocialRailAccountChip, { name: "Ada Lovelace" }));
-    expect(chip).toContain("t-body-sm");
-    expect(chip).toContain("Ada Lovelace");
-    expect(chip).not.toContain("text-[12px]");
-
-    const collapsedChip = renderToStaticMarkup(
-      createElement(SocialRailAccountChip, { name: "Ada Lovelace", collapsed: true }),
-    );
-    expect(collapsedChip).toContain("data-social-rail-account");
-    expect(collapsedChip).toContain('aria-label="Ada Lovelace"');
-    expect(collapsedChip).toContain("justify-center");
-    expect(collapsedChip).not.toContain("truncate t-body-sm");
 
     expect(destChips).toContain("HOUSE_SEGMENTED_ITEM_ON_CLASS");
     expect(destChips).toContain("HOUSE_SEGMENTED_ITEM_OFF_CLASS");

@@ -49,7 +49,6 @@ import {
   stickyAccountChromeIdentity,
   type AccountChromeIdentity,
 } from "@/lib/account-chrome-identity";
-import { SocialRailAccountChip } from "@/components/social/social-rail-extras";
 
 type Org = { id: string; name: string };
 
@@ -218,20 +217,11 @@ export function AppShell({
             data-social-rail=""
           >
             <RailCollapse collapsed={collapsed} onToggle={toggle} />
-            <div className={cn("flex min-h-0 flex-1 flex-col", collapsed ? "gap-2 px-1 pb-2" : "gap-3 p-4")}>
-              <div className="min-h-0 overflow-y-auto">
-                <SideNav
-                  isGcStaff={false}
-                  collapsed={collapsed}
-                  workspace="social"
-                />
-              </div>
-              <div className="min-h-0 flex-1" />
-              <SocialRailAccountChipSlot
-                chrome={chrome}
-                name={identity.name}
-                photoUrl={identity.photoUrl}
+            <div className={cn("min-h-0 flex-1 overflow-y-auto", collapsed ? "px-1 pb-2" : "p-4")}>
+              <SideNav
+                isGcStaff={false}
                 collapsed={collapsed}
+                workspace="social"
               />
             </div>
           </aside>
@@ -388,46 +378,6 @@ export function AppShell({
     </AskAssistantChromeProvider>
     </AskAiOverlayProvider>
   );
-}
-
-function SocialRailAccountChipSlot({
-  chrome,
-  name,
-  photoUrl,
-  collapsed,
-}: {
-  chrome?: Promise<AppShellChrome>;
-  name?: string | null;
-  photoUrl?: string | null;
-  collapsed: boolean;
-}) {
-  const face = stickyAccountChromeIdentity({ name, photoUrl });
-  if (!chrome) {
-    return <SocialRailAccountChip name={face.name} photoUrl={face.photoUrl} collapsed={collapsed} />;
-  }
-  return (
-    <Suspense
-      fallback={<SocialRailAccountChip name={face.name} photoUrl={face.photoUrl} collapsed={collapsed} />}
-    >
-      <SocialRailAccountChipFromChrome chrome={chrome} collapsed={collapsed} />
-    </Suspense>
-  );
-}
-
-function SocialRailAccountChipFromChrome({
-  chrome,
-  collapsed,
-}: {
-  chrome: Promise<AppShellChrome>;
-  collapsed: boolean;
-}) {
-  const data = use(chrome);
-  rememberAccountChromeIdentity({
-    email: data.email,
-    name: data.name,
-    photoUrl: data.photoUrl,
-  });
-  return <SocialRailAccountChip name={data.name} photoUrl={data.photoUrl} collapsed={collapsed} />;
 }
 
 function AccountMenuSlot({

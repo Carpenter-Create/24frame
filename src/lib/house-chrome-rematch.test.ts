@@ -30,7 +30,6 @@ import {
 import { EDUCATION_SEARCH } from "@/lib/course-search";
 import { SOCIAL_DESKTOP_NAV } from "@/lib/nav";
 import {
-  SOCIAL_ACCOUNT_CHIP_CLASS,
   SOCIAL_FOR_YOU_CARD_CLASS,
   SOCIAL_RAIL_WIDTH_CLASS,
 } from "@/lib/social-chrome";
@@ -238,7 +237,6 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(shell.match(/HOUSE_RAIL_FLOAT_CLASS/g)?.length).toBe(3);
     expect(shell).not.toContain("fixed left-0 top-[calc(var(--header-height)+16px)]");
     expect(SOCIAL_RAIL_WIDTH_CLASS).toBe("w-[calc(200px-var(--chrome-gutter))]");
-    expect(SOCIAL_ACCOUNT_CHIP_CLASS).toContain(HOUSE_MODULE_CLASS);
     expect(SOCIAL_FOR_YOU_CARD_CLASS).toContain(HOUSE_MODULE_CLASS);
     expect(HOUSE_RAIL_ITEM_CLASS).toContain("rounded-full");
     expect(switcher).toContain("HOUSE_CONTROL_PILL_CLASS");
@@ -274,8 +272,7 @@ describe("house chrome rematch miss list v1.1", () => {
 
   it("locks Social onto the shared rail-collapse SoT (G1–G5)", () => {
     const railUi = readFileSync("src/components/chrome/rail-collapse.tsx", "utf8");
-    const extras = readFileSync("src/components/social/social-rail-extras.tsx", "utf8");
-
+    expect(existsSync("src/components/social/social-rail-extras.tsx")).toBe(false);
     expect(existsSync("src/components/chrome/rail-collapse.tsx")).toBe(true);
     expect(shell.match(/<RailCollapse collapsed=\{collapsed\} onToggle=\{toggle\} \/>/g)?.length).toBe(2);
     expect(shell).not.toContain("collapsed={false}");
@@ -303,8 +300,8 @@ describe("house chrome rematch miss list v1.1", () => {
     expect(socialAside.indexOf("<RailCollapse")).toBeLessThan(socialAside.indexOf("<SideNav"));
     expect(socialAside).toContain("collapsed={collapsed}");
     expect(socialAside).toContain('workspace="social"');
-    expect(extras).toContain("collapsed?: boolean");
-    expect(extras).toContain("collapsed && \"justify-center p-2\"");
+    expect(socialAside).not.toContain("SocialRailAccountChip");
+    expect(socialAside).not.toContain("data-social-rail-account");
 
     expect(shell).toContain('collapsed ? undefined : SOCIAL_RAIL_MAIN_OFFSET_CLASS');
     expect(shell).toContain('marginLeft: "var(--sidebar-width)"');

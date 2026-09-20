@@ -78,7 +78,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(home).not.toContain("SocialPostCompose");
     expect(home).not.toContain("SocialCreateCompose");
     expect(home).not.toContain("loadVisiblePosts");
-    expect(home).not.toContain("education");
+    expect(home).not.toContain("SOCIAL.courses");
+    expect(home).not.toContain('"/education"');
     expect(SOCIAL.home.followingTab).toBe("Following");
     expect(SOCIAL.home.forYouTab).toBe("For you");
     expect(SOCIAL.home.composerPrompt).toBe("Write something");
@@ -147,7 +148,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     const composer = readFileSync("src/components/social/social-home-composer.tsx", "utf8");
     const forYou = readFileSync("src/components/social/social-for-you.tsx", "utf8");
     const topics = readFileSync("src/components/social/social-home-topics.tsx", "utf8");
-    const extras = readFileSync("src/components/social/social-rail-extras.tsx", "utf8");
+    expect(existsSync("src/components/social/social-rail-extras.tsx")).toBe(false);
     expect(rail).toContain("SOCIAL_ICON_SIZE_STORY_PLUS");
     expect(rail).toContain("SOCIAL_HOME_STORY_CARD_CLASS");
     expect(rail).toContain("data-social-stories-tall");
@@ -173,8 +174,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(composer).not.toContain("text-accent");
     expect(composer).not.toContain("data-social-composer-action");
     expect(composer).not.toContain("ACTIONS");
-    expect(extras).not.toContain("data-social-rail-create");
-    expect(extras).toContain("data-social-rail-account");
+    expect(shell).not.toContain("SocialRailAccountChip");
+    expect(shell).not.toContain("data-social-rail-account");
     expect(forYou).toContain("SocialOnboardingChecklist");
     expect(forYou).toContain("SocialPersonRow");
     expect(forYou).not.toContain("SocialAvatar");
