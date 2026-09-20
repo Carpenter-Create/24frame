@@ -69,7 +69,7 @@ export function SocialProfileTopicsField({
         autoComplete="off"
       />
       <SocialProfileChipBank
-        groups={[{ id: "topics", options: topics }]}
+        groups={[{ id: "topics", options: topics.map((topic) => ({ id: topic, label: topic })) }]}
         selectedIds={selected}
         blocked={atMax}
         dataPrefix="social-profile-topic"
