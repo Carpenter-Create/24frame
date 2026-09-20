@@ -106,7 +106,7 @@ export const DASHBOARD_MOBILE_BREAKPOINT_CLASS = "max-md";
 export const DASHBOARD_ADMIN_CHROME_CLASS =
   "flex flex-row items-center justify-between gap-[var(--space-2)] md:flex-row md:items-start md:justify-between md:gap-[var(--space-6)]";
 
-// Desktop: taller Net revenue left (3) · Recent activity glance right (2).
+// Desktop: taller Revenue left (3) · Recent activity glance right (2).
 // One height pair — lg stretch + shared cell/card h-full. Phone (`< md`)
 // stacks Revenue then Recent activity and stretches to the content column.
 // items-start on a max-md flex-col is the cross-axis (width) and

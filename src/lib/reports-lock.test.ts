@@ -206,6 +206,8 @@ describe("Aggregation Reports miss list v1.1", () => {
       }),
     );
     expect(html).toContain("$0.00");
+    expect(REPORTS_PAGE.revenue).toBe(DASHBOARD_ADMIN.revenue);
+    expect(REPORTS_PAGE.series).toBe(DASHBOARD_ADMIN.revenue);
     expect(html).toContain(REPORTS_PAGE.revenue);
     expect(html).toContain("data-reports-composition");
     expect(html).toContain("data-reports-series");

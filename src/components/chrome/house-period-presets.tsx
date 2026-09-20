@@ -3,8 +3,8 @@
 // Shared period-preset chrome. Desktop: house SegmentedTrack SoT.
 // Selected ink follows track visualIndex (persists across Home
 // `?period=` Suspense remounts). Phone: HousePageSelect (Dashboard
-// All time SoT). Never a wrapping chip row. Home Net revenue uses
-// this — do not invent a second grammar or a local pending fork.
+// All time SoT). Never a wrapping chip row. Home Revenue uses
+// this. Do not invent a second grammar or a local pending fork.
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";

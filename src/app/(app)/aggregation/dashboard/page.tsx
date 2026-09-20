@@ -83,7 +83,7 @@ import { buildClientFinanceDashboard } from "@/lib/finance-dashboard";
 import { loadRecipientDashboard } from "@/lib/finance-recipient-load";
 
 // Company-admin `/dashboard` rematches Overview analytics structure inside
-// house tokens: unlabeled period chrome, taller Net revenue $ + scrub |
+// house tokens: unlabeled period chrome, taller Revenue $ + scrub |
 // Recent activity glance (account announcements — title status updates,
 // performance report available, Title added / Delivery updated; never
 // findings), then Licensing status full-width (nested

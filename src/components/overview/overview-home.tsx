@@ -41,9 +41,9 @@ import { SOCIAL_AVATAR_32_CLASS } from "@/lib/social-chrome";
 import type { SocialHomeChat } from "@/lib/social-home-chats";
 import { socialDmHref, socialInitials } from "@/lib/social";
 
-// Home IA v2 order rewrite — Net revenue first. News is the right
+// Home IA v2 order rewrite. Revenue first. News is the right
 // rail on desktop and the last full-width stack on phone (after AI).
-// This-week pulse stays with Net revenue. Social stays avatars-only.
+// This-week pulse stays with Revenue. Social stays avatars-only.
 // Period presets share HousePeriodPresets (Reports chips on md+;
 // HousePageSelect on phone). Never a wrapping Home chip fork.
 // Top performing is not on Home.

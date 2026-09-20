@@ -22,7 +22,7 @@ import {
 } from "@/lib/overview";
 
 // Shared Home module shell — Social · Education · Industry news · Needs you · AI.
-// Net revenue uses the dashboard panel + house period chips, not this shell.
+// Revenue uses the dashboard panel + house period chips, not this shell.
 // Header chrome lives inside the grey panel. Do not float a title on page white.
 // Trailing header CTA is a glyph-only HouseActionArrow (Adam
 // 2026-09-19). The destination label survives as the arrow's
@@ -32,7 +32,7 @@ import {
 // Industry news is the one Home exception (Adam interrupt 2026-09-19):
 // NewsRail passes `trailingText` so the module keeps the "View all"
 // words in the trailing slot — text TextAction, not the glyph. Every
-// other Home gray module (Net revenue · Social · Education · Ask
+// other Home gray module (Revenue · Social · Education · Ask
 // 24Frame AI · Needs you) trails with the arrow. Global TextAction
 // and DashboardViewAll are untouched.
 //

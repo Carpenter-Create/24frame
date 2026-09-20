@@ -1,7 +1,7 @@
 // House standard for in-page filter/select menus.
 // SoT: Dashboard All time (period) — quiet trigger, desktop menu, phone bottom sheet,
 // trailing Sporty Blue check, flush-left labels. Hairline + air; no drop shadow.
-// Consumers: Dashboard period, Home Net revenue (phone), Titles / Channels /
+// Consumers: Dashboard period, Home Revenue (phone), Titles / Channels /
 // Licensing / Clients status lenses. Do not invent a second grammar —
 // never a StatusFilter chip fork or a wrapping Home period row.
 
