@@ -47,7 +47,7 @@ import {
   type SocialProfileRow,
   type SocialSuggestedPerson,
 } from "@/lib/social-feed";
-import { parseSocialHomeLane, SOCIAL, SOCIAL_HOME_LANE_PARAM, SOCIAL_ROUTES, socialPersonLabel, type SocialHomeLane } from "@/lib/social";
+import { parseSocialHomeLane, SOCIAL, SOCIAL_HOME_LANE_PARAM, socialPersonLabel, socialSearchHref, type SocialHomeLane } from "@/lib/social";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
 import { requireSocialSession, type SocialSession } from "@/lib/social-session";
 
@@ -222,7 +222,7 @@ function SocialHomeForYouLane({
           icon="users"
           title={SOCIAL.forYou.people}
           hint={SOCIAL.home.emptyHint}
-          action={{ href: SOCIAL_ROUTES.explore, label: SOCIAL.home.goExplore }}
+          action={{ href: socialSearchHref({ intent: "people" }), label: SOCIAL.home.findPeople }}
         />
       ) : null}
       <SocialForYouRail people={suggested} faces={faces} layout="lane" />
@@ -297,7 +297,7 @@ function SocialHomeFollowingWall({
                 icon="users"
                 title={SOCIAL.home.empty}
                 hint={SOCIAL.home.emptyHint}
-                action={{ href: SOCIAL_ROUTES.explore, label: SOCIAL.home.goExplore }}
+                action={{ href: socialSearchHref({ intent: "people" }), label: SOCIAL.home.findPeople }}
               />
             </div>
             <div className="hidden md:block">

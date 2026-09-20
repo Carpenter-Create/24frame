@@ -197,7 +197,8 @@ describe("mobile search IA — Education under-nav + Social icon sheet", () => {
     expect(open).toContain("Publisher");
     expect(open).toContain('href="/social/u/ada"');
     expect(open).toContain('id="social-search-sheet-q"');
-    expect(open).toContain(`action="${SOCIAL_ROUTES.explore}"`);
+    expect(open).toContain(`action="${SOCIAL_ROUTES.search}"`);
+    expect(open).toContain('value="people"');
     expect(open).toContain(HOUSE_LEAD_SEARCH_PILL_CLASS);
     expect(open).toContain(HOUSE_SEARCH_PILL_CLASS);
     expect(open).toContain(SOCIAL_SEARCH_SHEET_HOST_CLASS);

@@ -56,7 +56,7 @@ describe("HouseLeadSearch — one SoT for Social live and Education quiet", () =
     expect(shell).toContain("HouseLeadSearch");
   });
 
-  it("G2 keeps live Explore submit empty and quiet Education bound to the current q", () => {
+  it("G2 keeps live people Search submit empty and quiet Education bound to the current q", () => {
     navigation.pathname = "/education/orientation";
     navigation.query = "cut";
 
@@ -64,7 +64,10 @@ describe("HouseLeadSearch — one SoT for Social live and Education quiet", () =
     expect(live).toContain('data-house-lead-search-tone="live"');
     expect(live).toContain("data-social-header-search");
     expect(live).not.toContain("data-education-header-search");
-    expect(live).toContain(`action="${SOCIAL_ROUTES.explore}"`);
+    expect(live).toContain(`action="${SOCIAL_ROUTES.search}"`);
+    expect(live).toContain('name="intent"');
+    expect(live).toContain('value="people"');
+    expect(live).toContain(SOCIAL.search.searchPlaceholder);
     expect(live).toContain(SOCIAL.explore.searchSocial);
     expect(live).toContain('id="social-header-q"');
     expect(live).not.toContain('value="cut"');

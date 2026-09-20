@@ -55,7 +55,7 @@ export function probeRange(limit: number, offset = 0): [number, number] {
 /**
  * Social Home (class 5) does not share these catalog numbers. Named paths and
  * independent caps live in `src/lib/social-home-bounds.ts`: followees, following
- * wall (created_at+id keyset), stories rail, Explore people, Explore posts.
+ * wall (created_at+id keyset), stories rail, people search, Explore posts.
  * Each path probes limit+1. Do not route Home through page-N OFFSET.
  */
 

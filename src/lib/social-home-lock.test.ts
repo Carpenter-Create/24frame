@@ -478,7 +478,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(create).not.toContain("data-social-for-you-topics");
     expect(profile).not.toContain("data-social-for-you-topics");
     expect(stories).not.toContain("data-social-for-you-topics");
-    expect(explore).toContain("SocialSuggestedPeople");
+    expect(explore).not.toContain("SocialSuggestedPeople");
+    expect(readFileSync("src/app/(app)/social/search/page.tsx", "utf8")).toContain("SocialSuggestedPeople");
     expect(messages).toContain("SOCIAL.dms.startCta");
     expect(SOCIAL_DESKTOP_MEASURE).toEqual({
       dest: 200,

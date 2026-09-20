@@ -15,7 +15,9 @@ import {
 } from "@/lib/social-home-bounds";
 import {
   loadAuthorPosts,
+  loadExploreMedia,
   loadExploreSearch,
+  loadPeopleSearch,
   loadFolloweeIds,
   loadFollowingPosts,
   loadLiveStories,
@@ -291,50 +293,78 @@ describe("loadLiveStories", () => {
 });
 
 describe("loadExploreSearch", () => {
-  it("probes people and posts independently", async () => {
-    const people = Array.from({ length: SOCIAL_EXPLORE_PEOPLE_LIMIT + 1 }, (_, i) => ({
-      id: `p${i}`,
-      handle: `h${i}`,
-      display_name: `N${i}`,
-    }));
+  it("probes posts only and does not read profiles", async () => {
     const posts = Array.from({ length: SOCIAL_EXPLORE_POSTS_LIMIT + 1 }, (_, i) => ({
       id: `x${i}`,
       body: `hello ${i}`,
       author_id: "u1",
     }));
-    const peopleChain = feedChain(people);
     const postsChain = feedChain(posts);
-    const from = vi.fn((table: string) => (table === "profiles" ? peopleChain : postsChain));
+    const from = vi.fn((table: string) => {
+      if (table === "profiles") throw new Error("Explore search must not read people");
+      return postsChain;
+    });
     const page = await loadExploreSearch({ from } as never, "ada");
-    expect(peopleChain.range).toHaveBeenCalledWith(...probeRange(SOCIAL_EXPLORE_PEOPLE_LIMIT));
     expect(postsChain.range).toHaveBeenCalledWith(...probeRange(SOCIAL_EXPLORE_POSTS_LIMIT));
-    expect(page.peopleTruncated).toBe(true);
-    expect(page.postsTruncated).toBe(true);
     expect(page.truncated).toBe(true);
-    expect(page.hits.filter((hit) => hit.kind === "person")).toHaveLength(SOCIAL_EXPLORE_PEOPLE_LIMIT);
-    expect(page.hits.filter((hit) => hit.kind === "post")).toHaveLength(SOCIAL_EXPLORE_POSTS_LIMIT);
+    expect(page.hits).toHaveLength(SOCIAL_EXPLORE_POSTS_LIMIT);
+    expect(page.hits.every((hit) => hit.kind === "post")).toBe(true);
     expect(page.hits[0]).toMatchObject({
-      kind: "person",
-      title: "@h0",
-      subtitle: "N0",
+      kind: "post",
+      title: "hello 0",
+    });
+  });
+});
+
+describe("loadExploreMedia", () => {
+  it("probes recent public posts without a people rail", async () => {
+    const posts = Array.from({ length: SOCIAL_EXPLORE_POSTS_LIMIT + 1 }, (_, i) => ({
+      id: `m${i}`,
+      body: `clip ${i}`,
+      author_id: "u1",
+    }));
+    const postsChain = feedChain(posts);
+    const from = vi.fn((table: string) => {
+      if (table === "profiles") throw new Error("Explore media must not read people");
+      return postsChain;
+    });
+    const page = await loadExploreMedia({ from } as never);
+    expect(postsChain.range).toHaveBeenCalledWith(...probeRange(SOCIAL_EXPLORE_POSTS_LIMIT));
+    expect(page.hits).toHaveLength(SOCIAL_EXPLORE_POSTS_LIMIT);
+    expect(page.truncated).toBe(true);
+  });
+});
+
+describe("loadPeopleSearch", () => {
+  it("probes people independently of Explore posts", async () => {
+    const people = Array.from({ length: SOCIAL_EXPLORE_PEOPLE_LIMIT + 1 }, (_, i) => ({
+      id: `p${i}`,
+      handle: `h${i}`,
+      display_name: `N${i}`,
+    }));
+    const peopleChain = feedChain(people);
+    const from = vi.fn((table: string) => {
+      if (table === "posts") throw new Error("People search must not read posts");
+      return peopleChain;
+    });
+    const page = await loadPeopleSearch({ from } as never, "ada");
+    expect(peopleChain.range).toHaveBeenCalledWith(...probeRange(SOCIAL_EXPLORE_PEOPLE_LIMIT));
+    expect(page.truncated).toBe(true);
+    expect(page.people).toHaveLength(SOCIAL_EXPLORE_PEOPLE_LIMIT);
+    expect(page.people[0]).toMatchObject({
       handle: "h0",
-      displayName: "N0",
+      display_name: "N0",
     });
   });
 
-  it("omits the Member sentinel from person identity", async () => {
+  it("omits the Member sentinel from person identity ranking input", async () => {
     const peopleChain = feedChain([{ id: "p1", handle: "joshua", display_name: "Member" }]);
-    const postsChain = feedChain([]);
-    const from = vi.fn((table: string) => (table === "profiles" ? peopleChain : postsChain));
-    const page = await loadExploreSearch({ from } as never, "josh");
-    expect(page.hits[0]).toMatchObject({
-      kind: "person",
-      title: "@joshua",
-      subtitle: null,
+    const from = vi.fn(() => peopleChain);
+    const page = await loadPeopleSearch({ from } as never, "josh");
+    expect(page.people[0]).toMatchObject({
       handle: "joshua",
+      display_name: "Member",
     });
-    expect(page.hits[0]?.title).not.toBe("Member");
-    expect(page.hits[0]?.subtitle).not.toBe("Member");
   });
 });
 
@@ -355,15 +385,21 @@ describe("class 5 Social Home access lock", () => {
     );
     const explore = src.slice(
       src.indexOf("export async function loadExploreSearch"),
-      src.indexOf("export type SocialSuggestedPerson"),
+      src.indexOf("export async function loadPeopleSearch"),
+    );
+    const peopleSearch = src.slice(
+      src.indexOf("export async function loadPeopleSearch"),
+      src.indexOf("export async function loadSuggestedPeople"),
     );
     expect(followees).toContain("probeRange(SOCIAL_FOLLOWEES_LIMIT)");
     expect(wall).toContain("probeRange(SOCIAL_FOLLOWING_WALL_LIMIT)");
     expect(wall).toContain("followingWallKeysetOrFilter");
     expect(stories).toContain("probeRange(SOCIAL_STORIES_RAIL_LIMIT)");
-    expect(explore).toContain("probeRange(SOCIAL_EXPLORE_PEOPLE_LIMIT)");
     expect(explore).toContain("probeRange(SOCIAL_EXPLORE_POSTS_LIMIT)");
-    for (const chunk of [followees, wall, stories, explore]) {
+    expect(explore).not.toContain("probeRange(SOCIAL_EXPLORE_PEOPLE_LIMIT)");
+    expect(peopleSearch).toContain("probeRange(SOCIAL_EXPLORE_PEOPLE_LIMIT)");
+    expect(peopleSearch).not.toContain("probeRange(SOCIAL_EXPLORE_POSTS_LIMIT)");
+    for (const chunk of [followees, wall, stories, explore, peopleSearch]) {
       expect(chunk).toContain("splitProbe");
       expect(chunk).not.toContain("rangeFor");
       expect(chunk).not.toMatch(/offset/i);

@@ -17,16 +17,22 @@ import { HOUSE_VOICE_FOCUS_HOST_CLASS } from "@/lib/form-control";
 import { HOUSE_LEAD_SEARCH_PILL_CLASS } from "@/lib/house-lead-chrome";
 import { HOUSE_SEARCH_PILL_CLASS } from "@/lib/house-shell";
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
-import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
+import {
+  SOCIAL,
+  SOCIAL_ROUTES,
+  SOCIAL_SEARCH_INTENT_PARAM,
+  SOCIAL_SEARCH_PEOPLE_INTENT,
+} from "@/lib/social";
 import { ingestSpeechLearning } from "@/lib/speech-learning";
 
-// One mid-lead search SoT for Social live Explore and Education quiet
-// courses/videos. Slot into HouseLeadChrome search / underNav /
+// One mid-lead search SoT for Social live people search and Education
+// quiet courses/videos. Slot into HouseLeadChrome search / underNav /
 // trailingSearch. Geometry is HOUSE_LEAD_SEARCH_PILL_CLASS +
 // HOUSE_SEARCH_PILL_CLASS — same tokens the Titles catalog search
 // reuses. Do not fork the pill. Do not import the catalog search
 // control. Aggregation keeps no top search. Phone Social icon opens
-// the dedicated sheet — do not Link the icon to Explore.
+// the dedicated sheet — do not Link the icon to Explore. Live Social
+// submits to Search with people intent, not Explore.
 
 export type HouseLeadSearchTone = "live" | "quiet";
 export type HouseLeadSearchPresentation = "field" | "icon";
@@ -52,9 +58,9 @@ export function HouseLeadSearch({
 }) {
   const live = tone === "live";
   const resolvedPlaceholder =
-    placeholder ?? (live ? SOCIAL.explore.searchSocial : EDUCATION_SEARCH.placeholder);
+    placeholder ?? (live ? SOCIAL.search.searchPlaceholder : EDUCATION_SEARCH.placeholder);
   const resolvedLabel = label ?? (live ? SOCIAL.explore.searchSocial : EDUCATION_SEARCH.label);
-  const resolvedAction = action ?? (live ? SOCIAL_ROUTES.explore : undefined);
+  const resolvedAction = action ?? (live ? SOCIAL_ROUTES.search : undefined);
   const resolvedInputId = inputId ?? (live ? "social-header-q" : "education-header-q");
 
   if (presentation === "icon") {
@@ -63,7 +69,7 @@ export function HouseLeadSearch({
         field={
           <HouseLeadSearchField
             tone="live"
-            action={resolvedAction ?? SOCIAL_ROUTES.explore}
+            action={resolvedAction ?? SOCIAL_ROUTES.search}
             placeholder={resolvedPlaceholder}
             label={resolvedLabel}
             inputId="social-search-sheet-q"
@@ -90,7 +96,7 @@ export function HouseLeadSearch({
   return (
     <HouseLeadSearchField
       tone="live"
-      action={resolvedAction ?? SOCIAL_ROUTES.explore}
+      action={resolvedAction ?? SOCIAL_ROUTES.search}
       placeholder={resolvedPlaceholder}
       label={resolvedLabel}
       inputId={resolvedInputId}
@@ -185,6 +191,9 @@ function HouseLeadSearchField({
         weight={PHOSPHOR_CHROME_IDLE_WEIGHT}
         aria-hidden
       />
+      {tone === "live" ? (
+        <input type="hidden" name={SOCIAL_SEARCH_INTENT_PARAM} value={SOCIAL_SEARCH_PEOPLE_INTENT} />
+      ) : null}
       <label className="sr-only" htmlFor={inputId}>
         {label}
       </label>

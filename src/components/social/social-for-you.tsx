@@ -12,14 +12,16 @@ import type { SocialSuggestedPerson } from "@/lib/social-feed";
 export function SocialSuggestedPeople({
   people,
   faces,
+  title = SOCIAL.forYou.people,
 }: {
   people: readonly SocialSuggestedPerson[];
   faces: ReadonlyMap<string, string | null>;
+  title?: string;
 }) {
   if (people.length === 0) return null;
   return (
     <div data-social-for-you-people="" className={SOCIAL_FOR_YOU_CARD_CLASS}>
-      <p className="t-body-sm font-semibold text-ink">{SOCIAL.forYou.people}</p>
+      <p className="t-body-sm font-semibold text-ink">{title}</p>
       {people.map((person) => (
         <div
           key={person.id}

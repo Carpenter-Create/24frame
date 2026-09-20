@@ -15,8 +15,7 @@ import {
 } from "@/lib/social-home-bounds";
 import {
   SOCIAL_PROFILE_POSTS_PAGE,
-  socialPersonIdentity,
-  socialProfileHref,
+  SOCIAL_ROUTES,
   type SocialFollowsTab,
 } from "@/lib/social";
 import {
@@ -432,94 +431,17 @@ export async function loadOwnPostFacts(
 }
 
 export type SocialExploreHit = {
-  kind: "person" | "post";
+  kind: "post";
   id: string;
   title: string;
   subtitle: string | null;
   href: string;
-  handle?: string;
-  displayName?: string;
 };
 
 export type SocialExplorePage = {
   hits: SocialExploreHit[];
   truncated: boolean;
-  peopleTruncated: boolean;
-  postsTruncated: boolean;
 };
-
-export async function loadExploreSearch(
-  supabase: ServerClient,
-  query: string,
-  viewer: { topics?: unknown; crafts?: unknown } | readonly string[] = [],
-): Promise<SocialExplorePage> {
-  const needle = query.trim();
-  if (!needle) {
-    return { hits: [], truncated: false, peopleTruncated: false, postsTruncated: false };
-  }
-  const like = `%${needle.replace(/[%_]/g, "")}%`;
-  const [{ data: people }, { data: posts }] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("id, handle, display_name, crafts, topics")
-      .eq("status", "active")
-      .or(`handle.ilike.${like},display_name.ilike.${like}`)
-      .range(...probeRange(SOCIAL_EXPLORE_PEOPLE_LIMIT)),
-    supabase
-      .from("posts")
-      .select("id, body, author_id, category")
-      .eq("status", "active")
-      .is("group_id", null)
-      .ilike("body", like)
-      .range(...probeRange(SOCIAL_EXPLORE_POSTS_LIMIT)),
-  ]);
-  const peoplePage = splitProbe(people, SOCIAL_EXPLORE_PEOPLE_LIMIT);
-  const postsPage = splitProbe(posts, SOCIAL_EXPLORE_POSTS_LIMIT);
-  const rankedPeople = rankSocialSuggestedPeople(
-    peoplePage.rows.map((person) => ({
-      ...person,
-      crafts: person.crafts ?? [],
-      topics: person.topics ?? [],
-    })),
-    viewer,
-  );
-  const rankedPosts = [...postsPage.rows].sort((a, b) => {
-    const delta = socialPostAffinityScore(b.category, viewer) - socialPostAffinityScore(a.category, viewer);
-    if (delta !== 0) return delta;
-    return a.id.localeCompare(b.id);
-  });
-  const hits: SocialExploreHit[] = [];
-  for (const person of rankedPeople) {
-    const identity = socialPersonIdentity({
-      handle: person.handle,
-      displayName: person.display_name,
-    });
-    hits.push({
-      kind: "person",
-      id: person.id,
-      title: identity.handleLabel,
-      subtitle: identity.name,
-      href: socialProfileHref(person.handle),
-      handle: person.handle,
-      displayName: person.display_name,
-    });
-  }
-  for (const post of rankedPosts) {
-    hits.push({
-      kind: "post",
-      id: post.id,
-      title: post.body?.trim() || "Post",
-      subtitle: null,
-      href: "/social/explore",
-    });
-  }
-  return {
-    hits,
-    peopleTruncated: peoplePage.truncated,
-    postsTruncated: postsPage.truncated,
-    truncated: peoplePage.truncated || postsPage.truncated,
-  };
-}
 
 export type SocialSuggestedPerson = {
   id: string;
@@ -528,6 +450,107 @@ export type SocialSuggestedPerson = {
   crafts?: string[] | null;
   topics?: string[] | null;
 };
+
+export type SocialPeopleSearchPage = {
+  people: SocialSuggestedPerson[];
+  truncated: boolean;
+};
+
+function rankExplorePosts<T extends { id: string; category?: string | null }>(
+  rows: readonly T[],
+  viewer: { topics?: unknown; crafts?: unknown } | readonly string[],
+): T[] {
+  return [...rows].sort((a, b) => {
+    const delta = socialPostAffinityScore(b.category, viewer) - socialPostAffinityScore(a.category, viewer);
+    if (delta !== 0) return delta;
+    return a.id.localeCompare(b.id);
+  });
+}
+
+function explorePostHits(
+  rows: readonly { id: string; body: string | null; category?: string | null }[],
+  viewer: { topics?: unknown; crafts?: unknown } | readonly string[],
+): SocialExploreHit[] {
+  return rankExplorePosts(rows, viewer).map((post) => ({
+    kind: "post" as const,
+    id: post.id,
+    title: post.body?.trim() || "Post",
+    subtitle: null,
+    href: SOCIAL_ROUTES.explore,
+  }));
+}
+
+export async function loadExploreSearch(
+  supabase: ServerClient,
+  query: string,
+  viewer: { topics?: unknown; crafts?: unknown } | readonly string[] = [],
+): Promise<SocialExplorePage> {
+  const needle = query.trim();
+  if (!needle) {
+    return { hits: [], truncated: false };
+  }
+  const like = `%${needle.replace(/[%_]/g, "")}%`;
+  const { data: posts } = await supabase
+    .from("posts")
+    .select("id, body, author_id, category")
+    .eq("status", "active")
+    .is("group_id", null)
+    .ilike("body", like)
+    .range(...probeRange(SOCIAL_EXPLORE_POSTS_LIMIT));
+  const postsPage = splitProbe(posts, SOCIAL_EXPLORE_POSTS_LIMIT);
+  return {
+    hits: explorePostHits(postsPage.rows, viewer),
+    truncated: postsPage.truncated,
+  };
+}
+
+export async function loadExploreMedia(
+  supabase: ServerClient,
+  viewer: { topics?: unknown; crafts?: unknown } | readonly string[] = [],
+): Promise<SocialExplorePage> {
+  const { data: posts } = await supabase
+    .from("posts")
+    .select("id, body, author_id, category")
+    .eq("status", "active")
+    .is("group_id", null)
+    .order("created_at", { ascending: false })
+    .range(...probeRange(SOCIAL_EXPLORE_POSTS_LIMIT));
+  const postsPage = splitProbe(posts, SOCIAL_EXPLORE_POSTS_LIMIT);
+  return {
+    hits: explorePostHits(postsPage.rows, viewer),
+    truncated: postsPage.truncated,
+  };
+}
+
+export async function loadPeopleSearch(
+  supabase: ServerClient,
+  query: string,
+  viewer: { topics?: unknown; crafts?: unknown } | readonly string[] = [],
+): Promise<SocialPeopleSearchPage> {
+  const needle = query.trim();
+  if (!needle) {
+    return { people: [], truncated: false };
+  }
+  const like = `%${needle.replace(/[%_]/g, "")}%`;
+  const { data: people } = await supabase
+    .from("profiles")
+    .select("id, handle, display_name, crafts, topics")
+    .eq("status", "active")
+    .or(`handle.ilike.${like},display_name.ilike.${like}`)
+    .range(...probeRange(SOCIAL_EXPLORE_PEOPLE_LIMIT));
+  const peoplePage = splitProbe(people, SOCIAL_EXPLORE_PEOPLE_LIMIT);
+  return {
+    people: rankSocialSuggestedPeople(
+      peoplePage.rows.map((person) => ({
+        ...person,
+        crafts: person.crafts ?? [],
+        topics: person.topics ?? [],
+      })),
+      viewer,
+    ),
+    truncated: peoplePage.truncated,
+  };
+}
 
 export async function loadSuggestedPeople(
   supabase: ServerClient,
