@@ -94,9 +94,9 @@ export const HOUSE_LEAD_SEARCH_PILL_CLASS =
 // is edge-to-edge theme · AI · bell · avatar. Do not cancel padding with -mx:
 // that pulled adjacent hits to zero flex width and stacked the glyphs.
 // Do not add phone padding that overflows a size-4 box — same overlap.
-// Desktop hits follow --header-control-size (Coinbase 80 bar,
-// Adam 2026-09-20). Glyph size stays size-4 (#451). Circular quiet,
-// no muted wash, no hairline box.
+// Desktop hits follow --header-control-size (reference desktop
+// header height, Adam 2026-09-20). Glyph size stays size-4 (#451).
+// Circular quiet, no muted wash, no hairline box.
 export const HOUSE_HEADER_TRAILING_HIT_CLASS =
   `flex size-4 min-h-4 min-w-4 shrink-0 items-center justify-center overflow-visible ${HOUSE_ICON_BUTTON_CLASS} md:size-[var(--header-control-size)] md:min-h-[var(--header-control-size)] md:min-w-[var(--header-control-size)]`;
 
@@ -108,8 +108,9 @@ export const HOUSE_HEADER_TRAILING_SLOT_CLASS = "contents";
 export const HOUSE_HEADER_TRAILING_PHONE_SLOT_CLASS = "contents md:hidden";
 
 // Phone avatar stays the 32 disk (#451 trail). Desktop follows
-// --header-avatar-size on the Coinbase 80 bar. No extra pad. The
-// shared cluster gap is the only air to theme / AI / bell / search.
+// --header-avatar-size on the reference desktop header. No extra
+// pad. The shared cluster gap is the only air to theme / AI /
+// bell / search.
 export const HOUSE_HEADER_TRAILING_AVATAR_CLASS =
   "flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-muted t-body-sm font-medium text-ink-2 md:h-[var(--header-avatar-size)] md:w-[var(--header-avatar-size)]";
 

@@ -216,7 +216,7 @@ describe("house lead chrome — unify-lead-now G1–G9", () => {
     expect(HOUSE_ASK_AI_HEADER_CLASS).toContain("aria-pressed:text-ink");
   });
 
-  it("locks Coinbase desktop header height and the sizes that derive from it", () => {
+  it("locks desktop header height and the sizes that derive from it", () => {
     const tokens = readFileSync("src/app/tokens.css", "utf8");
     expect(tokens).toMatch(/--header-height:\s*80px;/);
     expect(tokens).toMatch(/--header-avatar-size:\s*36px;/);
