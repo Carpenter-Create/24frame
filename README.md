@@ -14,6 +14,7 @@ This is **not** the public site (`globalcontent-web`, separate repo).
 - Expo iOS app — `@24frame/mobile` in `apps/mobile` (same 24Frame product: Aggregation / Social+Education)
 - Supabase (Postgres + Auth + RLS)
 - AWS S3 / CloudFront / MediaConvert
+- Mux Video (Social Video + Go live playback)
 - Stripe (money in) · Trolley (money out, later)
 - TypeScript strict · Vitest · pnpm
 

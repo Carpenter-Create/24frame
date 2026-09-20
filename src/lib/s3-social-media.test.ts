@@ -145,6 +145,30 @@ describe("s3-social-media isolated lane", () => {
     expect(mockGetSignedUrl).not.toHaveBeenCalled();
   });
 
+  it("returns Mux playback ids without signing an S3 object", async () => {
+    const items = await signedSocialMediaItems(
+      [
+        {
+          kind: "video",
+          key: `posts/${USER}/${OBJECT}.mp4`,
+          contentType: "video/mp4",
+          provider: "mux",
+          playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+        },
+      ],
+      USER,
+    );
+    expect(items).toEqual([
+      {
+        kind: "video",
+        url: "https://image.mux.com/uNbxnGLKJ00yfbijDO8COxT/thumbnail.webp",
+        contentType: "video/mp4",
+        playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+      },
+    ]);
+    expect(mockGetSignedUrl).not.toHaveBeenCalled();
+  });
+
   it("signs stored posts.media keys for display", async () => {
     mockGetSignedUrl.mockResolvedValue("https://s3.example/signed-image");
     const items = await signedSocialMediaItems(

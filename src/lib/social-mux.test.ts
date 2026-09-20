@@ -1,0 +1,91 @@
+import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+
+import {
+  isSocialMux4kSource,
+  isSocialMuxId,
+  parseSocialMuxIntent,
+  SOCIAL_MUX_DEFAULT_RESOLUTION,
+  SOCIAL_MUX_ENV,
+  SOCIAL_MUX_IMAGE_HOST,
+  SOCIAL_MUX_ORIGINAL_RESOLUTION,
+  socialMuxAssetSettings,
+  socialMuxPlaybackUrl,
+  socialMuxThumbnailUrl,
+} from "./social-mux";
+
+describe("social Mux encode locks", () => {
+  it("defaults Video to 1080p basic and Go live to 1080p plus", () => {
+    expect(socialMuxAssetSettings({ intent: "video" })).toEqual({
+      videoQuality: "basic",
+      maxResolutionTier: SOCIAL_MUX_DEFAULT_RESOLUTION,
+    });
+    expect(socialMuxAssetSettings({ intent: "live", originalQuality: true, width: 3840, height: 2160 })).toEqual({
+      videoQuality: "plus",
+      maxResolutionTier: SOCIAL_MUX_DEFAULT_RESOLUTION,
+    });
+    expect(parseSocialMuxIntent("live")).toBe("live");
+    expect(parseSocialMuxIntent("video")).toBe("video");
+  });
+
+  it("raises 2160p only when the 4K toggle is on and the source is 4K", () => {
+    expect(isSocialMux4kSource(3840, 2160)).toBe(true);
+    expect(isSocialMux4kSource(1920, 1080)).toBe(false);
+    expect(
+      socialMuxAssetSettings({
+        intent: "video",
+        originalQuality: true,
+        width: 3840,
+        height: 2160,
+      }),
+    ).toEqual({
+      videoQuality: "basic",
+      maxResolutionTier: SOCIAL_MUX_ORIGINAL_RESOLUTION,
+    });
+    expect(
+      socialMuxAssetSettings({
+        intent: "video",
+        originalQuality: true,
+        width: 1920,
+        height: 1080,
+      }),
+    ).toEqual({
+      videoQuality: "basic",
+      maxResolutionTier: SOCIAL_MUX_DEFAULT_RESOLUTION,
+    });
+    expect(
+      socialMuxAssetSettings({
+        intent: "video",
+        originalQuality: false,
+        width: 3840,
+        height: 2160,
+      }),
+    ).toEqual({
+      videoQuality: "basic",
+      maxResolutionTier: SOCIAL_MUX_DEFAULT_RESOLUTION,
+    });
+  });
+
+  it("builds public playback and thumbnail URLs from a playback id", () => {
+    expect(isSocialMuxId("uNbxnGLKJ00yfbijDO8COxTOyVKT01xpxW")).toBe(true);
+    expect(isSocialMuxId("short")).toBe(false);
+    expect(socialMuxPlaybackUrl("abc12345")).toBe("https://stream.mux.com/abc12345.m3u8");
+    expect(socialMuxThumbnailUrl("abc12345")).toBe(`https://${SOCIAL_MUX_IMAGE_HOST}/abc12345/thumbnail.webp`);
+  });
+
+  it("keeps token names server-only and out of the client SoT", () => {
+    const sot = readFileSync("src/lib/social-mux.ts", "utf8");
+    const server = readFileSync("src/lib/social-mux-server.ts", "utf8");
+    expect(SOCIAL_MUX_ENV).toEqual(["MUX_TOKEN_ID", "MUX_TOKEN_SECRET"]);
+    expect(sot).not.toContain("process.env");
+    expect(sot).not.toContain("MUX_TOKEN_SECRET");
+    expect(sot).not.toContain("NEXT_PUBLIC_MUX");
+    expect(server).toContain('import "server-only"');
+    expect(server).toContain("MUX_TOKEN_ID");
+    expect(server).toContain("MUX_TOKEN_SECRET");
+    expect(server).not.toContain("NEXT_PUBLIC_");
+    expect(server).toContain("video_quality");
+    expect(server).toContain("max_resolution_tier");
+    expect(server).toContain('playback_policies": ["public"]');
+  });
+});

@@ -32,6 +32,9 @@ describe("social isolation lock", () => {
     expect(env).toContain("UPSTASH_REDIS_REST_TOKEN=");
     expect(env).not.toContain("NEXT_PUBLIC_UPSTASH");
     expect(env).not.toContain("NEXT_PUBLIC_KV");
+    expect(env).toContain("MUX_TOKEN_ID=");
+    expect(env).toContain("MUX_TOKEN_SECRET=");
+    expect(env).not.toContain("NEXT_PUBLIC_MUX");
   });
 
   it("does not add person-scoped tables to the B3 catalog harness", () => {
@@ -95,6 +98,14 @@ describe("social isolation lock", () => {
     expect(actions).toContain("ensureOwnSocialProfile");
     expect(actions).toContain("export async function writeSocialPost");
     expect(actions).toContain("createSocialPost");
+    expect(actions).toContain("createSocialMuxUpload");
+    expect(actions).toContain("finalizeSocialMuxUpload");
+    expect(actions).toContain("@/lib/social-mux-server");
+    expect(actions).not.toContain("NEXT_PUBLIC_MUX");
+    const muxServer = readFileSync("src/lib/social-mux-server.ts", "utf8");
+    expect(muxServer).toContain('import "server-only"');
+    expect(muxServer).not.toContain("NEXT_PUBLIC_");
+    expect(light).not.toContain("social-mux-server");
     const likeApi = readFileSync("src/app/api/social/like/route.ts", "utf8");
     const postApi = readFileSync("src/app/api/social/post/route.ts", "utf8");
     expect(likeApi).toContain("toggleSocialLike");

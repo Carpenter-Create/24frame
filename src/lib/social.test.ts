@@ -347,6 +347,8 @@ describe("profile opt-in", () => {
     expect(socialCreateWellCopy("text", false)).toBeNull();
     expect(SOCIAL.create.photo).toBe("Photo");
     expect(SOCIAL.create.caption).toBe("Caption");
+    expect(SOCIAL.create.originalQuality).toBe("Upload in original quality (up to 4K)");
+    expect(SOCIAL.home.videoPreparing).toBe("That video is still preparing.");
     expect(parseSocialHomeLane("for-you")).toBe("for-you");
     expect(socialHomeLaneHref("following")).toBe("/social");
     expect(SOCIAL_PROFILE_TABS).toEqual(["posts", "highlights", "credits"]);
@@ -597,7 +599,8 @@ describe("social writes stay on the live spine", () => {
     expect(pub).toContain("loadAuthorPosts");
     expect(pub).toContain("SocialAuthorHistory");
     const forms = readFileSync("src/components/social/social-forms.tsx", "utf8");
-    expect(forms).toContain("presignSocialMediaUpload");
+    expect(forms).toContain("uploadSocialPostMedia");
+    expect(forms).toContain("originalQuality");
     expect(forms).toContain("uploadAccountPhoto");
     expect(forms).toContain("type=\"file\"");
     expect(forms).not.toContain("putAvatarObject");

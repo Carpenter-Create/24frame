@@ -436,3 +436,5 @@ export const SOCIAL_STORY_REC_PILL_CLASS =
 
 export const SOCIAL_STORY_POSTED_CLASS =
   "flex w-full max-w-[326px] flex-col items-center gap-4 rounded-[16px] border border-hairline bg-surface px-6 py-8 text-center";
+
+export const SOCIAL_MUX_PLAYER_CLASS = "social-mux-player block h-full w-full overflow-hidden bg-surface-muted";

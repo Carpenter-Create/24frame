@@ -1,7 +1,10 @@
 import { z } from "zod";
 
+import { isSocialMuxId, SOCIAL_MUX_PROVIDER } from "@/lib/social-mux";
+
 // Member post media rules. Keys live in posts.media (Pack 2 jsonb).
-// Objects go to 24frame-media-source-prod. Never title film keys,
+// Stills go to 24frame-media-source-prod. Social Video + Go live store
+// Mux playback ids on the same author-bound key. Never title film keys,
 // never S3_BUCKET / gc-content-assets, never avatars/.
 // Stories stay on the 24frame-media-* stories lane; create is video-only.
 // Copy for these codes lives in SOCIAL.home / SOCIAL.stories.
@@ -52,6 +55,10 @@ export type SocialMediaItem = {
   kind: SocialMediaKind;
   key: string;
   contentType: SocialMediaContentType;
+  provider?: typeof SOCIAL_MUX_PROVIDER;
+  playbackId?: string;
+  uploadId?: string;
+  assetId?: string;
 };
 
 export const SOCIAL_MEDIA_ACCEPT = SOCIAL_MEDIA_CONTENT_TYPES.join(",");
@@ -75,11 +82,24 @@ const EXT_BY_TYPE: Record<SocialMediaContentType, string> = {
   "video/webm": "webm",
 };
 
+const muxIdSchema = z.string().refine(isSocialMuxId);
+
 const itemSchema = z.object({
   kind: z.enum(["image", "video"]),
   key: z.string().min(1).max(200),
   contentType: z.enum(SOCIAL_MEDIA_CONTENT_TYPES),
+  provider: z.literal(SOCIAL_MUX_PROVIDER).optional(),
+  playbackId: muxIdSchema.optional(),
+  uploadId: muxIdSchema.optional(),
+  assetId: muxIdSchema.optional(),
 });
+
+export function isSocialMuxMediaItem(item: SocialMediaItem): item is SocialMediaItem & {
+  provider: typeof SOCIAL_MUX_PROVIDER;
+  playbackId: string;
+} {
+  return item.kind === "video" && item.provider === SOCIAL_MUX_PROVIDER && !!item.playbackId && isSocialMuxId(item.playbackId);
+}
 
 export function isSocialMediaContentType(value: string): value is SocialMediaContentType {
   return (SOCIAL_MEDIA_CONTENT_TYPES as readonly string[]).includes(value);
@@ -156,6 +176,7 @@ export function parsePostMedia(value: unknown): SocialMediaItem[] {
     if (!parsed.success) continue;
     if (isForbiddenMediaKey(parsed.data.key)) continue;
     if (socialMediaKindFor(parsed.data.contentType) !== parsed.data.kind) continue;
+    if (parsed.data.provider === SOCIAL_MUX_PROVIDER && !isSocialMuxMediaItem(parsed.data)) continue;
     items.push(parsed.data);
   }
   return items;
@@ -206,6 +227,14 @@ export function mediaItemsForInsert(
     }
     if (socialMediaKindFor(item.data.contentType) !== item.data.kind) {
       return { ok: false, error: "invalid" };
+    }
+    if (item.data.provider === SOCIAL_MUX_PROVIDER) {
+      if (item.data.kind !== "video" || !isSocialMuxMediaItem(item.data)) {
+        return { ok: false, error: "invalid" };
+      }
+      if (lane === "stories") {
+        return { ok: false, error: "type" };
+      }
     }
     // Stories create is video-only. Posts still accept stills.
     if (lane === "stories" && item.data.kind !== "video") {

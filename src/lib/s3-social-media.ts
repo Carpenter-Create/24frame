@@ -6,6 +6,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import {
   isForbiddenMediaBucket,
   isForbiddenMediaKey,
+  isSocialMuxMediaItem,
   ownedMediaItems,
   SOCIAL_MEDIA_PUT_TTL_SECONDS,
   SOCIAL_MEDIA_SIGNED_URL_TTL_SECONDS,
@@ -13,6 +14,7 @@ import {
   type SocialMediaKind,
   type SocialMediaLane,
 } from "@/lib/social-media";
+import { socialMuxThumbnailUrl } from "@/lib/social-mux";
 import {
   isMediaCloudfrontConfigured,
   signSocialMediaCloudfrontUrl,
@@ -127,6 +129,7 @@ export type SignedSocialMedia = {
   kind: SocialMediaKind;
   url: string;
   contentType: SocialMediaContentType;
+  playbackId?: string;
 };
 
 export async function signedSocialMediaItems(
@@ -137,6 +140,14 @@ export async function signedSocialMediaItems(
   const items = ownedMediaItems(media, authorId, lane);
   const signed = await Promise.all(
     items.map(async (item) => {
+      if (isSocialMuxMediaItem(item)) {
+        return {
+          kind: item.kind,
+          url: socialMuxThumbnailUrl(item.playbackId),
+          contentType: item.contentType,
+          playbackId: item.playbackId,
+        };
+      }
       const url = await signedSocialMediaUrl(item.key);
       return url ? { kind: item.kind, url, contentType: item.contentType } : null;
     }),

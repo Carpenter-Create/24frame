@@ -35,9 +35,9 @@ import { parseSocialProfileTopics } from "@/lib/social-profile-topics";
 import {
   SOCIAL_POST_IMAGE_SIZES,
   SOCIAL_PROFILE_TILE_IMAGE_SIZES,
-  socialVideoDisplaySrc,
 } from "@/lib/social-media-display";
 import { SocialAvatar } from "./social-avatar";
+import { SocialFeedVideo } from "./social-feed-video";
 import { SocialLikeButton, SocialLikeCount } from "./social-engagement";
 import { SocialProfileStats } from "./social-profile-stats";
 import { SocialEmpty } from "./social-empty";
@@ -123,6 +123,7 @@ export function SocialConversationFaces({
 export type SocialPostMediaItem = {
   kind: "image" | "video";
   url: string;
+  playbackId?: string;
 };
 
 export type SocialPostCardModel = {
@@ -148,12 +149,9 @@ export function SocialPostMedia({ items }: { items: readonly SocialPostMediaItem
     <div data-social-post-media="" className="flex flex-col gap-2">
       {items.map((item) =>
         item.kind === "video" ? (
-          <video
-            key={item.url}
-            data-social-post-video=""
-            controls
-            preload="metadata"
-            src={socialVideoDisplaySrc(item.url)}
+          <SocialFeedVideo
+            key={item.playbackId ?? item.url}
+            item={item}
             className="h-[360px] w-full rounded-[8px] bg-surface-muted object-cover"
           />
         ) : (
@@ -384,10 +382,8 @@ export function SocialAuthorHistory({
                     className={SOCIAL_PROFILE_TILE_CLASS}
                   >
                     {first.kind === "video" ? (
-                      <video
-                        data-social-post-video=""
-                        preload="metadata"
-                        src={socialVideoDisplaySrc(first.url)}
+                      <SocialFeedVideo
+                        item={first}
                         className="absolute inset-0 size-full object-cover"
                       />
                     ) : (
@@ -519,11 +515,8 @@ export function SocialPostCard({ post }: { post: SocialPostCardModel }) {
         {media ? (
           <div data-social-post-media="" className="-mx-0">
             {post.media[0]?.kind === "video" ? (
-              <video
-                data-social-post-video=""
-                controls
-                preload="metadata"
-                src={socialVideoDisplaySrc(post.media[0].url)}
+              <SocialFeedVideo
+                item={post.media[0]}
                 className="aspect-square w-full bg-surface-muted object-cover"
               />
             ) : post.media[0]?.url ? (

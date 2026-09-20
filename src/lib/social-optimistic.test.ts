@@ -143,6 +143,28 @@ describe("Social optimistic mutation SoT", () => {
     if (!started.ok) return;
     expect(started.form.get("body")).toBe("hello");
     expect(started.form.get("media")).toContain("posts/u1/a.jpg");
+    const muxed = beginSocialPostPublish({
+      body: "",
+      mediaItems: [
+        {
+          kind: "video",
+          key: "posts/u1/a.mp4",
+          contentType: "video/mp4",
+          provider: "mux",
+          playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+          uploadId: "zd01Pe2bNpYhxbrwYABgFE",
+          assetId: "SqQnqz6s5MBuXGvJaUWdXu",
+        },
+      ],
+      mediaPreview: [{ kind: "video", url: "", playbackId: "uNbxnGLKJ00yfbijDO8COxT" }],
+      authorName: "Ada Lovelace",
+    });
+    expect(muxed.ok).toBe(true);
+    if (muxed.ok) {
+      expect(muxed.form.get("media")).toContain("uNbxnGLKJ00yfbijDO8COxT");
+      expect(muxed.form.get("media")).toContain('"provider":"mux"');
+      expect(muxed.post.media).toEqual([{ kind: "video", url: "", playbackId: "uNbxnGLKJ00yfbijDO8COxT" }]);
+    }
     expect(started.post.body).toBe("hello");
     expect(started.post.authorHandle).toBe("ada");
     expect(started.post.media).toEqual([{ kind: "image", url: "blob:photo" }]);

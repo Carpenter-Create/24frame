@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
   // 127.0.0.1 is treated as cross-origin and dev resources (incl. client hydration)
   // are blocked — the widget/hydration then silently fails. Allow both in dev.
   allowedDevOrigins: ["127.0.0.1"],
+  transpilePackages: ["@mux/mux-player", "@mux/mux-player-react"],
 
   experimental: {
     // Next 16 defaults staleTimes.dynamic to 0, so a page you visited ten seconds ago is

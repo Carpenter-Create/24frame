@@ -217,4 +217,28 @@ describe("posts.media persist shape", () => {
       kind: "video",
     });
   });
+
+  it("keeps Mux playback ids on owned post video keys and rejects stories Mux", () => {
+    const video = {
+      kind: "video" as const,
+      key: `posts/${USER}/${OBJECT}.mp4`,
+      contentType: "video/mp4" as const,
+      provider: "mux" as const,
+      playbackId: "uNbxnGLKJ00yfbijDO8COxT",
+      uploadId: "zd01Pe2bNpYhxbrwYABgFE",
+      assetId: "SqQnqz6s5MBuXGvJaUWdXu",
+    };
+    expect(mediaItemsForInsert([video], USER)).toEqual({ ok: true, items: [video] });
+    expect(parsePostMedia([video, { ...video, playbackId: "short" }])).toEqual([video]);
+    expect(
+      mediaItemsForInsert(
+        [{ ...video, key: `stories/${USER}/${OBJECT}.mp4` }],
+        USER,
+        "stories",
+      ),
+    ).toEqual({ ok: false, error: "type" });
+    expect(
+      mediaItemsForInsert([{ ...video, provider: "mux", playbackId: undefined }], USER),
+    ).toEqual({ ok: false, error: "invalid" });
+  });
 });
