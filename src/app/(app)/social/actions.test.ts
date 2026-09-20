@@ -186,7 +186,7 @@ describe("social actions", () => {
     form.set("handle", "@ada");
     form.set("first_name", "Ada");
     form.set("last_name", "Lovelace");
-    form.set("crafts", JSON.stringify(["actor", "producer", "nope", "screenwriter"]));
+    form.set("crafts", JSON.stringify(["actor", "steadicam", "host", "screenwriter"]));
     expect(await createSocialProfile(form)).toEqual({});
     expect(updates).toEqual([
       {
@@ -194,7 +194,7 @@ describe("social actions", () => {
         row: {
           handle: "ada",
           display_name: "Ada Lovelace",
-          crafts: ["actor", "producer", "screenwriter"],
+          crafts: ["actor", "steadicam_operator", "host", "screenwriter"],
           primary_role: "actor",
         },
       },

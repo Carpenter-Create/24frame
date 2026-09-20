@@ -20,7 +20,7 @@ describe("ROLE_INTEREST_AFFINITY", () => {
     expect(ROLE_INTEREST_AFFINITY.art_director.topics).toEqual(["Animation", "Post-production"]);
     expect(ROLE_INTEREST_AFFINITY.art_director.neighbors).toContain("production_designer");
     expect(ROLE_INTEREST_AFFINITY.investor.topics[0]).toBe("Financing");
-    expect(ROLE_INTEREST_AFFINITY.investor.neighbors).toContain("financier");
+    expect(ROLE_INTEREST_AFFINITY.investor.neighbors).toContain("executive");
     expect(ROLE_INTEREST_AFFINITY.actor.topics).toContain("Acting");
   });
 

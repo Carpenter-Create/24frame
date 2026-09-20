@@ -21,7 +21,6 @@ import {
   socialProfileRoleLabel,
   socialProfileRolesCountLabel,
   toggleSocialProfileRole,
-  type SocialProfileRoleSlug,
 } from "@/lib/social-profile-roles";
 
 const ROLE_DRAG_TYPE = "text/social-profile-role";
@@ -31,7 +30,7 @@ export function SocialProfileRolesField({
   onChange,
 }: {
   value: readonly string[];
-  onChange: (next: SocialProfileRoleSlug[]) => void;
+  onChange: (next: string[]) => void;
 }) {
   const [query, setQuery] = useState("");
   const selected = parseSocialProfileRoles(value);
@@ -61,7 +60,7 @@ export function SocialProfileRolesField({
             {selected.map((slug) => (
               <SocialProfileSelectChip
                 key={slug}
-                option={{ id: slug, label: socialProfileRoleLabel(slug) ?? slug }}
+                option={{ id: slug, label: socialProfileRoleLabel(slug) }}
                 selected
                 chip
                 reorderable
