@@ -57,14 +57,25 @@ import {
   HOUSE_PHONE_DEST_ITEM_CLASS,
   HOUSE_PHONE_DEST_ITEM_OFF_CLASS,
   HOUSE_PHONE_DEST_ITEM_ON_CLASS,
+  HOUSE_PHONE_DESTS_CLASS,
   HOUSE_PHONE_WORKSPACE_TABS,
   SOCIAL_PHONE_DESTS,
+  housePhoneDestActiveIndex,
   housePhoneDestItemClass,
+  housePhoneDestPersistKey,
   housePhoneDestinations,
   housePhoneShowsDestChips,
   housePhoneWorkspaceSelected,
 } from "@/lib/house-phone-shell";
 import { ASK_GLOBEE } from "@/lib/ask-globee";
+import {
+  HOUSE_SEGMENTED_ITEM_BASE_CLASS,
+  HOUSE_SEGMENTED_ITEM_OFF_CLASS,
+  HOUSE_SEGMENTED_ITEM_ON_CLASS,
+  HOUSE_SEGMENTED_THUMB_CLASS,
+  HOUSE_SEGMENTED_TRACK_CLASS,
+} from "@/lib/house-shell";
+import { SEGMENTED_TRACK_PERSIST } from "@/lib/segmented-track";
 import {
   HOUSE_HEADER_TRAILING_AVATAR_CLASS,
   HOUSE_HEADER_TRAILING_HIT_CLASS,
@@ -646,20 +657,32 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
       SOCIAL_ROUTES.dms,
     ]);
     expect(HOUSE_PHONE_DEST_CHIPS.label).toBe("Destinations");
-    expect(HOUSE_PHONE_DEST_ITEM_ON_CLASS).toContain("bg-accent");
-    expect(HOUSE_PHONE_DEST_ITEM_ON_CLASS).toContain("text-white");
+    expect(HOUSE_PHONE_DESTS_CLASS).toContain("overflow-x-auto");
+    expect(HOUSE_PHONE_DESTS_CLASS).toContain("md:hidden");
+    expect(HOUSE_PHONE_DESTS_CLASS).not.toMatch(/gap-/);
+    expect(HOUSE_PHONE_DEST_ITEM_CLASS).toContain(HOUSE_SEGMENTED_ITEM_BASE_CLASS);
+    expect(HOUSE_PHONE_DEST_ITEM_CLASS).toContain("inline-flex");
+    expect(HOUSE_PHONE_DEST_ITEM_CLASS).not.toContain("min-h-9");
+    expect(HOUSE_PHONE_DEST_ITEM_ON_CLASS).toBe(HOUSE_SEGMENTED_ITEM_ON_CLASS);
+    expect(HOUSE_PHONE_DEST_ITEM_ON_CLASS).toBe("text-white");
+    expect(HOUSE_PHONE_DEST_ITEM_ON_CLASS).not.toContain("bg-accent");
     expect(HOUSE_PHONE_DEST_ITEM_ON_CLASS).not.toContain("bg-ink");
-    expect(HOUSE_PHONE_DEST_ITEM_ON_CLASS).not.toContain("bg-black");
-    expect(HOUSE_PHONE_DEST_ITEM_OFF_CLASS).toContain("bg-surface-muted");
-    expect(HOUSE_PHONE_DEST_ITEM_CLASS).toContain("min-h-9");
-    expect(HOUSE_PHONE_DEST_ITEM_CLASS).toContain("py-[var(--space-2)]");
-    expect(HOUSE_PHONE_DEST_ITEM_CLASS).not.toContain("py-[var(--space-1)]");
-    expect(housePhoneDestItemClass(true)).toContain("bg-accent");
+    expect(HOUSE_PHONE_DEST_ITEM_OFF_CLASS).toBe(HOUSE_SEGMENTED_ITEM_OFF_CLASS);
+    expect(HOUSE_PHONE_DEST_ITEM_OFF_CLASS).not.toContain("bg-surface-muted");
+    expect(housePhoneDestItemClass(true)).toBe(
+      `${HOUSE_PHONE_DEST_ITEM_CLASS} ${HOUSE_SEGMENTED_ITEM_ON_CLASS}`,
+    );
     expect(housePhoneDestItemClass(true)).toContain("text-white");
-    expect(housePhoneDestItemClass(true)).toContain("min-h-9");
-    expect(housePhoneDestItemClass(true)).not.toContain("bg-ink");
-    expect(housePhoneDestItemClass(false)).toContain("bg-surface-muted");
+    expect(housePhoneDestItemClass(true)).not.toContain("bg-accent");
+    expect(housePhoneDestItemClass(false)).toContain(HOUSE_SEGMENTED_ITEM_OFF_CLASS);
     expect(housePhoneDestItemClass(false)).not.toContain("bg-accent");
+    expect(housePhoneDestPersistKey("social")).toBe("phone-dest-social");
+    expect(housePhoneDestPersistKey("aggregation")).toBe("phone-dest-aggregation");
+    expect(housePhoneDestPersistKey("education")).toBe("phone-dest-education");
+    expect(SEGMENTED_TRACK_PERSIST.phoneDest).toBe("phone-dest");
+    expect(housePhoneDestActiveIndex("/social/explore", housePhoneDestinations(false, "social"), "social")).toBe(2);
+    expect(phoneShellSrc).not.toContain("HOUSE_PILL_SELECTED_CLASS");
+    expect(phoneShellSrc).not.toContain("HOUSE_FILTER_OFF_CLASS");
 
     navigation.pathname = "/aggregation/titles";
     const aggregation = renderToStaticMarkup(
@@ -715,9 +738,13 @@ describe("phone app-shell Option 2 — workspace bottom bar", () => {
     expect(socialFeed).not.toMatch(
       /<a[^>]+href="\/social\/explore"[^>]*aria-current="page"/,
     );
-    expect(socialFeed).toContain("bg-accent");
+    expect(socialFeed).toContain("data-segmented-item");
+    expect(socialFeed).toContain("data-segmented-thumb");
+    expect(socialFeed).toContain('data-segmented-persist="phone-dest-social"');
+    expect(socialFeed).toContain(HOUSE_SEGMENTED_TRACK_CLASS);
+    expect(socialFeed).toContain(HOUSE_SEGMENTED_THUMB_CLASS);
     expect(socialFeed).toContain("text-white");
-    expect(socialFeed).toContain("min-h-9");
+    expect(socialFeed).not.toContain("min-h-9");
     expect(socialFeed).not.toContain("bg-ink");
     expect(socialFeed).not.toContain("bg-black");
 

@@ -299,11 +299,13 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(collapsedChip).toContain("justify-center");
     expect(collapsedChip).not.toContain("truncate t-body-sm");
 
-    expect(destChips).toContain("HOUSE_PILL_SELECTED_CLASS");
+    expect(destChips).toContain("HOUSE_SEGMENTED_ITEM_ON_CLASS");
+    expect(destChips).toContain("HOUSE_SEGMENTED_ITEM_OFF_CLASS");
+    expect(destChips).toContain("HOUSE_SEGMENTED_ITEM_BASE_CLASS");
+    expect(destChips).not.toContain("HOUSE_PILL_SELECTED_CLASS");
     expect(destChips).not.toContain("HOUSE_FILTER_ON_CLASS");
-    expect(destChips).toContain("HOUSE_FILTER_OFF_CLASS");
-    expect(destChips).toContain("min-h-9");
-    expect(destChips).toContain("py-[var(--space-2)]");
+    expect(destChips).not.toContain("HOUSE_FILTER_OFF_CLASS");
+    expect(destChips).not.toContain("min-h-9");
     expect(HOUSE_PILL_SELECTED_CLASS).toBe("bg-accent text-white");
     expect(HOUSE_PILL_SELECTED_CLASS).toBe(`bg-accent ${HOUSE_SEGMENTED_ITEM_ON_CLASS}`);
     expect(HOUSE_PILL_SELECTED_CLASS).not.toContain("bg-ink");
