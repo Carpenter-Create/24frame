@@ -534,7 +534,7 @@ export function SocialGoLive() {
           <div className="absolute inset-x-4 top-16 z-20">
             <InlineNotice tone="error">
               {error}{" "}
-              <Link href={socialCreateHref("video")} className="underline">
+              <Link href={socialCreateHref("media")} className="underline">
                 {SOCIAL.create.liveUseVideo}
               </Link>
             </InlineNotice>

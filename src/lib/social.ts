@@ -305,13 +305,14 @@ export function socialProfileCasingRedirect(
 }
 
 export const SOCIAL_CREATE_KIND_PARAM = "kind";
-export const SOCIAL_CREATE_KINDS = ["photo", "video", "text"] as const;
+export const SOCIAL_CREATE_KINDS = ["media", "text"] as const;
 export type SocialCreateKind = (typeof SOCIAL_CREATE_KINDS)[number];
 
 export function parseSocialCreateKind(raw: string | string[] | undefined | null): SocialCreateKind | null {
   const value = Array.isArray(raw) ? raw[0] : raw;
   if (!value) return null;
-  return (SOCIAL_CREATE_KINDS as readonly string[]).includes(value) ? (value as SocialCreateKind) : null;
+  if (value === "photo" || value === "video" || value === "media") return "media";
+  return value === "text" ? "text" : null;
 }
 
 export function socialCreateHref(kind?: SocialCreateKind | null): string {
@@ -460,9 +461,11 @@ export const SOCIAL = {
     subtitle: "Write a post, or add a photo or video.",
     text: "Text",
     write: "Write",
+    media: "Media",
     photo: "Photo",
     video: "Video",
     goLive: "Go live",
+    next: "Next",
     close: "Close",
     liveTitle: "Go live",
     liveHint: "Record up to 10 minutes, then post as a video.",
@@ -763,16 +766,12 @@ export const SOCIAL = {
 
 export function socialCreateWellCopy(
   kind: SocialCreateKind,
-  attached: boolean,
+  _attached: boolean,
 ): { title: string; hint: string } | null {
-  if (kind === "text") return null;
-  if (kind === "video") {
-    return { title: SOCIAL.create.dropVideo, hint: SOCIAL.create.dropVideoHint };
-  }
-  if (attached) {
-    return { title: SOCIAL.create.dropPhoto, hint: SOCIAL.create.dropPhotoHint };
-  }
-  return { title: SOCIAL.create.dropEmpty, hint: SOCIAL.create.dropEmptyHint };
+  // Media never uses the empty attach well — pick happens before this screen.
+  void _attached;
+  if (kind === "text" || kind === "media") return null;
+  return null;
 }
 
 export const HANDLE_MIN = 3;

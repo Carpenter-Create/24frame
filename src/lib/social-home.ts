@@ -1,5 +1,5 @@
 import { SETTINGS } from "@/lib/settings";
-import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
+import { SOCIAL, SOCIAL_ROUTES, socialCreateHref } from "@/lib/social";
 
 // Home following wall + Skool-style onboarding. Photo reuses the
 // account face at /settings/profile. Do not add a second upload.
@@ -62,7 +62,7 @@ export function socialChecklistItems(input: {
     {
       id: "firstPost",
       label: SOCIAL.checklist.firstPost,
-      href: SOCIAL_ROUTES.create,
+      href: socialCreateHref("media"),
       cta: SOCIAL.checklist.firstPostCta,
       done: input.hasPost,
     },

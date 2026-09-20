@@ -48,6 +48,7 @@ describe("onboarding checklist", () => {
     expect(items[0]?.href).toBe(SETTINGS.profileHref);
     expect(items[1]?.href).toBe(SOCIAL_ROUTES.profileBio);
     expect(items[2]?.href).toBe(SOCIAL_ROUTES.create);
+    expect(items[3]?.href).toBe("/social/create?kind=media");
     expect(items[4]?.href).toBe(SOCIAL_ROUTES.storiesNew);
     expect(items[1]?.done).toBe(true);
     expect(items[4]?.done).toBe(true);

@@ -8,11 +8,11 @@ import {
 } from "./social-home-composer";
 
 describe("Social Home compact composer media handoff", () => {
-  it("maps stills to photo Create and clips to video Create", () => {
-    expect(socialCreateKindFromMediaFile({ type: "image/jpeg" })).toBe("photo");
-    expect(socialCreateKindFromMediaFile({ type: "video/mp4" })).toBe("video");
+  it("maps stills and clips onto one Media Create intent", () => {
+    expect(socialCreateKindFromMediaFile({ type: "image/jpeg" })).toBe("media");
+    expect(socialCreateKindFromMediaFile({ type: "video/mp4" })).toBe("media");
     expect(socialCreateKindFromMediaFile({ type: "application/pdf" })).toBeNull();
-    expect(socialCreateKindFromMediaFiles([{ type: "image/png" }])).toBe("photo");
+    expect(socialCreateKindFromMediaFiles([{ type: "image/png" }])).toBe("media");
     expect(socialCreateKindFromMediaFiles([])).toBeNull();
   });
 

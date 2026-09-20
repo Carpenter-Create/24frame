@@ -9,12 +9,15 @@ vi.mock("next/navigation", () => ({
     replace: vi.fn(),
     refresh: vi.fn(),
     prefetch: vi.fn(),
+    back: vi.fn(),
   }),
 }));
 
 import { SocialCreateCompose } from "./social-forms";
 import { SEGMENTED_TRACK_PERSIST } from "@/lib/segmented-track";
 import { SOCIAL } from "@/lib/social";
+import { SOCIAL_CREATE_MEDIA_ACCEPT } from "@/lib/social-create-media";
+import { stashSocialHomeComposerMedia } from "@/lib/social-home-composer";
 
 const src = readFileSync("src/components/social/social-forms.tsx", "utf8");
 
@@ -28,32 +31,62 @@ describe("Social create kinds", () => {
     expect(write).toContain("data-social-create-author");
     expect(write).not.toContain("data-social-create-kinds");
     expect(write).not.toContain("data-social-create-well");
-    expect(write).not.toContain(SOCIAL.create.photo);
-    expect(write).not.toContain(SOCIAL.create.video);
+    expect(write).not.toContain(SOCIAL.create.media);
     expect(write).not.toContain(SOCIAL.create.goLive);
 
-    const photo = renderToStaticMarkup(
+    const pick = renderToStaticMarkup(
       createElement(SocialCreateCompose, {
         authorName: "Ada Lovelace",
-        initialKind: "photo",
+        initialKind: "media",
       }),
     );
-    expect(photo).toContain('data-social-create-kind="photo"');
-    expect(photo).toContain("data-social-create-well");
-    expect(photo).toContain(SOCIAL.create.dropEmpty);
-    expect(photo).not.toContain("data-social-create-kinds");
-    expect(photo).not.toContain("data-social-create-original-quality");
+    expect(pick).toContain('data-social-create-kind="media"');
+    expect(pick).toContain('data-social-create-media-step="pick"');
+    expect(pick).toContain(`accept="${SOCIAL_CREATE_MEDIA_ACCEPT}"`);
+    expect(pick).toContain("data-social-create-media-input");
+    expect(pick).not.toContain("data-social-create-well");
+    expect(pick).not.toContain(SOCIAL.create.dropEmpty);
+    expect(pick).not.toContain(SOCIAL.create.caption);
+    expect(pick).not.toContain(SOCIAL.home.submit);
+    expect(pick).not.toContain("data-social-create-kinds");
 
-    const video = renderToStaticMarkup(
+    stashSocialHomeComposerMedia([
+      new File(["still"], "still.jpg", { type: "image/jpeg" }),
+    ]);
+    const review = renderToStaticMarkup(
       createElement(SocialCreateCompose, {
         authorName: "Ada Lovelace",
-        initialKind: "video",
+        initialKind: "media",
       }),
     );
-    expect(video).toContain('data-social-create-kind="video"');
-    expect(video).toContain("data-social-create-original-quality");
-    expect(video).toContain(SOCIAL.create.originalQuality);
-    expect(video).not.toMatch(/type="checkbox"[^>]*checked/);
+    expect(review).toContain('data-social-create-media-step="review"');
+    expect(review).toContain("data-social-create-media-next");
+    expect(review).toContain(SOCIAL.create.next);
+    expect(review).toContain(SOCIAL.home.photoKind);
+    expect(review).not.toContain(SOCIAL.create.caption);
+    expect(review).not.toContain(SOCIAL.home.submit);
+    expect(review).not.toContain(SOCIAL.create.dropEmpty);
+    expect(review).not.toContain("data-social-create-well");
+
+    stashSocialHomeComposerMedia([
+      new File(["clip"], "clip.mp4", { type: "video/mp4" }),
+    ]);
+    const caption = renderToStaticMarkup(
+      createElement(SocialCreateCompose, {
+        authorName: "Ada Lovelace",
+        initialKind: "media",
+        initialStep: "caption",
+      }),
+    );
+    expect(caption).toContain('data-social-create-kind="media"');
+    expect(caption).toContain('data-social-create-media-step="caption"');
+    expect(caption).toContain(SOCIAL.create.caption);
+    expect(caption).toContain(SOCIAL.home.submit);
+    expect(caption).toContain(SOCIAL.home.captionPlaceholder);
+    expect(caption).not.toContain("required");
+    expect(caption).not.toContain(SOCIAL.create.dropEmpty);
+    expect(caption).not.toContain("data-social-create-well");
+    expect(caption).not.toContain("data-social-create-media-next");
 
     expect(src).not.toContain("SegmentedTrack");
     expect(src).not.toContain("data-social-create-kinds");

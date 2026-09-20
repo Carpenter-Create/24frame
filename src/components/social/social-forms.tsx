@@ -16,21 +16,24 @@ import {
   SOCIAL_ACTION_CLASS,
   SOCIAL_CREATE_AVATAR_CLASS,
   SOCIAL_CREATE_CARD_CLASS,
-  SOCIAL_CREATE_WELL_CLASS,
   SOCIAL_PILL_CLASS,
   SOCIAL_PILL_IDLE_CLASS,
 } from "@/lib/social-chrome";
 import { SOCIAL_CATEGORY_TOPICS } from "@/lib/social-categories";
 import {
-  SOCIAL_IMAGE_CONTENT_TYPES,
   SOCIAL_MEDIA_ACCEPT,
   SOCIAL_MEDIA_MAX_ITEMS,
-  SOCIAL_VIDEO_CONTENT_TYPES,
+  socialMediaKindFor,
   type SocialMediaItem,
 } from "@/lib/social-media";
 import { uploadSocialPostMedia } from "@/lib/social-media-upload";
 import { HouseVoiceMic } from "@/components/chrome/house-voice-mic";
 import { HOUSE_VOICE_FIELD_HOST_CLASS } from "@/lib/form-control";
+import {
+  SOCIAL_CREATE_MEDIA_ACCEPT,
+  socialCreateMediaStepAfterPick,
+  type SocialCreateMediaStep,
+} from "@/lib/social-create-media";
 import { takeSocialHomeComposerMedia } from "@/lib/social-home-composer";
 import { ingestSpeechLearning } from "@/lib/speech-learning";
 import {
@@ -38,7 +41,6 @@ import {
   normalizeHandle,
   SOCIAL,
   SOCIAL_ROUTES,
-  socialCreateWellCopy,
   socialHandleRequiredError,
   type SocialCreateKind,
 } from "@/lib/social";
@@ -361,35 +363,36 @@ export function SocialCreateCompose({
   authorHandle = null,
   authorPhotoUrl = null,
   initialKind = null,
+  initialStep = null,
 }: {
   authorName?: string;
   authorHandle?: string | null;
   authorPhotoUrl?: string | null;
   initialKind?: SocialCreateKind | null;
+  initialStep?: SocialCreateMediaStep | null;
 }) {
   const router = useRouter();
-  const [homeMedia] = useState(takeSocialHomeComposerMedia);
+  const [pickedFiles, setPickedFiles] = useState(takeSocialHomeComposerMedia);
   const kind: SocialCreateKind = initialKind ?? "text";
-  const ingestHomeMedia = homeMedia.length > 0 && kind !== "text";
+  const ingestPicked = pickedFiles.length > 0 && kind === "media";
+  const [step, setStep] = useState<SocialCreateMediaStep>(() =>
+    kind === "media" ? socialCreateMediaStepAfterPick(pickedFiles, initialStep) : "caption",
+  );
   const [error, setError] = useState("");
-  const [uploading, setUploading] = useState(ingestHomeMedia);
+  const [uploading, setUploading] = useState(ingestPicked);
   const [body, setBody] = useState("");
   const [media, setMedia] = useState<SocialMediaItem[]>([]);
   const [previews, setPreviews] = useState<Record<string, string>>({});
   const [originalQuality, setOriginalQuality] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
-  const accept =
-    kind === "photo"
-      ? SOCIAL_IMAGE_CONTENT_TYPES.join(",")
-      : kind === "video"
-        ? SOCIAL_VIDEO_CONTENT_TYPES.join(",")
-        : SOCIAL_MEDIA_ACCEPT;
-  const well = socialCreateWellCopy(kind, media.length > 0);
+  const hasVideo =
+    pickedFiles.some((file) => socialMediaKindFor(file.type) === "video") ||
+    media.some((item) => item.kind === "video");
 
   useEffect(() => {
-    if (!ingestHomeMedia) return;
+    if (!ingestPicked) return;
     let cancelled = false;
-    void uploadSocialMedia(homeMedia, [], originalQuality).then((result) => {
+    void uploadSocialMedia(pickedFiles, [], originalQuality).then((result) => {
       if (cancelled) return;
       setUploading(false);
       if (result.error) {
@@ -400,7 +403,7 @@ export function SocialCreateCompose({
         setPreviews((current) => {
           const next = { ...current };
           result.items!.forEach((item, index) => {
-            const file = homeMedia[index];
+            const file = pickedFiles[index];
             if (file) next[item.key] = URL.createObjectURL(file);
           });
           return next;
@@ -411,11 +414,25 @@ export function SocialCreateCompose({
     return () => {
       cancelled = true;
     };
-  }, [homeMedia, ingestHomeMedia, originalQuality]);
+  }, [pickedFiles, ingestPicked, originalQuality]);
+
+  useEffect(() => {
+    if (kind !== "media" || step !== "pick") return undefined;
+    const input = fileRef.current;
+    input?.click();
+    function onCancel() {
+      router.back();
+    }
+    input?.addEventListener("cancel", onCancel);
+    return () => {
+      input?.removeEventListener("cancel", onCancel);
+    };
+  }, [kind, router, step]);
 
   async function onPick(files: ArrayLike<File> | null) {
-    if (!files || files.length === 0 || kind === "text") return;
+    if (!files || files.length === 0 || kind !== "media") return;
     const chosen = Array.from(files);
+    setPickedFiles(chosen);
     setError("");
     setUploading(true);
     const result = await uploadSocialMedia(files, media, originalQuality);
@@ -435,13 +452,78 @@ export function SocialCreateCompose({
         return next;
       });
       setMedia((current) => [...current, ...result.items!]);
+      setStep((current) => (current === "caption" ? current : "review"));
     }
+  }
+
+  if (kind === "media" && step === "pick") {
+    return (
+      <div
+        data-social-create-form=""
+        data-social-create-kind="media"
+        data-social-create-media-step="pick"
+        className={SOCIAL_CREATE_CARD_CLASS}
+      >
+        <input
+          ref={fileRef}
+          type="file"
+          accept={SOCIAL_CREATE_MEDIA_ACCEPT}
+          multiple
+          className="sr-only"
+          data-social-create-media-input=""
+          aria-label={SOCIAL.create.media}
+          onChange={(event) => void onPick(event.target.files)}
+        />
+      </div>
+    );
+  }
+
+  if (kind === "media" && step === "review") {
+    const rows =
+      media.length > 0
+        ? media.map((item) => ({
+            key: item.key,
+            label: item.kind === "video" ? SOCIAL.home.videoKind : SOCIAL.home.photoKind,
+          }))
+        : pickedFiles.map((file, index) => ({
+            key: `${file.name}-${index}`,
+            label:
+              socialMediaKindFor(file.type) === "video" ? SOCIAL.home.videoKind : SOCIAL.home.photoKind,
+          }));
+    return (
+      <div
+        data-social-create-form=""
+        data-social-create-kind="media"
+        data-social-create-media-step="review"
+        className={SOCIAL_CREATE_CARD_CLASS}
+      >
+        <ul data-social-post-attachments="" className="flex flex-col gap-1">
+          {rows.map((row) => (
+            <li key={row.key} className="t-body-sm text-ink-2">
+              {row.label}
+            </li>
+          ))}
+        </ul>
+        <div className="flex justify-end">
+          <button
+            type="button"
+            data-social-create-media-next=""
+            className={SOCIAL_ACTION_CLASS}
+            onClick={() => setStep("caption")}
+          >
+            {SOCIAL.create.next}
+          </button>
+        </div>
+        <FormError error={error} />
+      </div>
+    );
   }
 
   return (
     <form
       data-social-create-form=""
       data-social-create-kind={kind}
+      data-social-create-media-step={kind === "media" ? "caption" : undefined}
       className={SOCIAL_CREATE_CARD_CLASS}
       onSubmit={(event) => {
         event.preventDefault();
@@ -478,33 +560,7 @@ export function SocialCreateCompose({
           ) : null}
         </span>
       </div>
-      {well ? (
-        <button
-          type="button"
-          data-social-create-well=""
-          disabled={uploading || media.length >= SOCIAL_MEDIA_MAX_ITEMS}
-          onClick={() => fileRef.current?.click()}
-          onDragOver={(event) => {
-            event.preventDefault();
-          }}
-          onDrop={(event) => {
-            event.preventDefault();
-            void onPick(event.dataTransfer.files);
-          }}
-          className={SOCIAL_CREATE_WELL_CLASS}
-        >
-          <SocialIcon
-            name={kind === "video" ? "film-strip" : "image"}
-            size={40}
-            className="text-ink-2"
-          />
-          <span className="t-body-sm font-semibold text-ink md:t-body">
-            {uploading ? SOCIAL.home.attaching : well.title}
-          </span>
-          <span className="t-label text-ink-2 md:t-body-sm">{well.hint}          </span>
-        </button>
-      ) : null}
-      {kind === "video" ? (
+      {kind === "media" && hasVideo ? (
         <label
           data-social-create-original-quality=""
           className="flex items-start gap-2 t-body-sm text-ink"
@@ -518,17 +574,6 @@ export function SocialCreateCompose({
           <span>{SOCIAL.create.originalQuality}</span>
         </label>
       ) : null}
-      {kind === "text" ? null : (
-        <input
-          ref={fileRef}
-          type="file"
-          accept={accept}
-          multiple
-          className="sr-only"
-          aria-label={SOCIAL.home.attach}
-          onChange={(e) => void onPick(e.target.files)}
-        />
-      )}
       {media.length > 0 ? (
         <ul data-social-post-attachments="" className="flex flex-col gap-1">
           {media.map((item) => (

@@ -236,6 +236,7 @@ describe("Social profile public face", () => {
     expect(html).toContain(SOCIAL.profile.postsEmpty);
     expect(html).toContain(SOCIAL.profile.postsEmptyOwnHint);
     expect(html).toContain(SOCIAL.profile.sharePost);
+    expect(html).toContain("/social/create?kind=media");
     expect(html).toContain(SOCIAL.profile.completeIdentity);
     expect(html).not.toContain("data-social-author-posts");
     expect(html).not.toContain("data-social-author-truncated");
