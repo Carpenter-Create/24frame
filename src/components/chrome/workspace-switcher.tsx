@@ -202,7 +202,8 @@ export function WorkspaceSwitcher({
   tone?: WorkspaceSwitcherTone;
   presentation?: WorkspaceSwitcherPresentation;
 }) {
-  const current = clampWorkspaceMode(requestedCurrent, isGcStaff);
+  const staffGate = isGcStaff || options.some((option) => option.mode === "staff");
+  const current = clampWorkspaceMode(requestedCurrent, staffGate);
   const router = useRouter();
   const pathname = usePathname();
   const { activePath, markPending } = useHouseNavPending();
@@ -270,7 +271,7 @@ export function WorkspaceSwitcher({
   if (options.length === 0) return null;
 
   if (presentation === "pills") {
-    return <WorkspaceSwitcherPills current={current} options={options} isGcStaff={isGcStaff} />;
+    return <WorkspaceSwitcherPills current={current} options={options} isGcStaff={staffGate} />;
   }
 
   if (!canSwitch) {
@@ -331,7 +332,7 @@ export function WorkspaceSwitcher({
                 aria-selected={false}
                 className={workspaceSwitcherOptionClass(false)}
                 onClick={(event) => {
-                  workspaceSwitcherPersistLane(pill.id, isGcStaff);
+                  workspaceSwitcherPersistLane(pill.id, staffGate);
                   markPending(pill.href, event);
                   setOpen(false);
                 }}
@@ -350,7 +351,7 @@ export function WorkspaceSwitcher({
               aria-selected={selected}
               className={workspaceSwitcherOptionClass(selected)}
               onClick={() => {
-                selectLeadPill(current, pill, options, router, pathname, isGcStaff);
+                selectLeadPill(current, pill, options, router, pathname, staffGate);
                 setOpen(false);
               }}
             >

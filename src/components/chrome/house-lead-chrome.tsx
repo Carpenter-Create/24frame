@@ -107,7 +107,7 @@ export function HouseLeadChrome({
             data-app-header-workspace-pill=""
             className={APP_HEADER_WORKSPACE_PILL_HOST_CLASS}
           >
-            <WorkspaceSwitcher current={workspace} options={workspaceOptions} isGcStaff={isGcStaff} presentation="sheet" tone="pill" />
+            <WorkspaceSwitcher current={workspace} options={workspaceOptions} presentation="sheet" tone="pill" />
           </div>
           {afterLead}
         </div>
@@ -129,7 +129,7 @@ export function HouseLeadChrome({
             data-app-header-workspace-desktop=""
             className={APP_HEADER_WORKSPACE_DESKTOP_HOST_CLASS}
           >
-            <WorkspaceSwitcher current={workspace} options={workspaceOptions} isGcStaff={isGcStaff} presentation="pills" />
+            <WorkspaceSwitcher current={workspace} options={workspaceOptions} presentation="pills" />
           </div>
           <ThemeToggle />
           <AskAssistantHeaderLink />
