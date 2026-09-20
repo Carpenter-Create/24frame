@@ -11,6 +11,7 @@ import {
  *
  * ACCESS PATH + CARDINALITY (independent caps; do not share PostgREST max_rows):
  *   follows by follower_id     — followee IN() set for Home. Cap SOCIAL_FOLLOWEES_LIMIT.
+ *   profile followers/following — live follows for one profile. Cap SOCIAL_FOLLOWS_LIST_LIMIT.
  *   posts following wall       — active, group_id is null, author_id IN (self+followees).
  *                                created_at+id keyset (`after=`). Cap SOCIAL_FOLLOWING_WALL_LIMIT.
  *   stories rail               — live (expires_at > now), same author set. Cap SOCIAL_STORIES_RAIL_LIMIT.
@@ -26,6 +27,9 @@ import {
 
 /** Followee IDs for the Home IN() set. Missing authors hide their posts and stories. */
 export const SOCIAL_FOLLOWEES_LIMIT = UNPAGINATED_MAX;
+
+/** Followers / following list on a public profile. Independent of the Home IN() set. */
+export const SOCIAL_FOLLOWS_LIST_LIMIT = UNPAGINATED_MAX;
 
 /** Home following wall page. Keyset on (created_at desc, id desc). */
 export const SOCIAL_FOLLOWING_WALL_LIMIT = 50;

@@ -7,6 +7,7 @@ import {
   SOCIAL_EXPLORE_PEOPLE_LIMIT,
   SOCIAL_EXPLORE_POSTS_LIMIT,
   SOCIAL_FOLLOWEES_LIMIT,
+  SOCIAL_FOLLOWS_LIST_LIMIT,
   SOCIAL_FOLLOWING_WALL_LIMIT,
   SOCIAL_STORIES_RAIL_LIMIT,
   encodeFollowingWallCursor,
@@ -18,6 +19,7 @@ import {
   loadFolloweeIds,
   loadFollowingPosts,
   loadLiveStories,
+  loadProfileFollowList,
   loadProfileSocialCounts,
   type SocialPostRow,
   type SocialStoryRow,
@@ -96,6 +98,8 @@ function feedChain(result: unknown) {
   c.ilike = vi.fn(self);
   c.order = vi.fn(self);
   c.range = vi.fn(async () => ({ data: result, error: null }));
+  c.then = (resolve: (value: unknown) => unknown) =>
+    Promise.resolve({ data: result, error: null }).then(resolve);
   return c;
 }
 
@@ -166,6 +170,56 @@ describe("loadFolloweeIds", () => {
     const page = await loadFolloweeIds({ from: vi.fn(() => feedChain(rows)) } as never, "u1");
     expect(page.ids).toHaveLength(SOCIAL_FOLLOWEES_LIMIT);
     expect(page.truncated).toBe(false);
+  });
+});
+
+describe("loadProfileFollowList", () => {
+  it("loads followers in recency order and names viewer follow edges", async () => {
+    const follows = [
+      { follower_id: "u3", followee_id: "u2", created_at: "2026-09-20T12:00:00.000Z" },
+      { follower_id: "u4", followee_id: "u2", created_at: "2026-09-19T12:00:00.000Z" },
+    ];
+    const profiles = [
+      { id: "u3", handle: "carol", display_name: "Carol King", status: "active" },
+      { id: "u4", handle: "dan", display_name: "Dan", status: "active" },
+    ];
+    const from = vi.fn((table: string) => {
+      if (table === "follows") {
+        const chain = feedChain(follows);
+        chain.in = vi.fn((col: string) => {
+          if (col === "followee_id") return feedChain([{ followee_id: "u3" }]);
+          return feedChain([{ follower_id: "u4" }]);
+        });
+        return chain;
+      }
+      return feedChain(profiles);
+    });
+
+    const page = await loadProfileFollowList({ from } as never, "u2", "followers", "u1");
+    expect(from).toHaveBeenCalledWith("follows");
+    expect(from).toHaveBeenCalledWith("profiles");
+    expect(page.truncated).toBe(false);
+    expect(page.people).toEqual([
+      { id: "u3", handle: "carol", display_name: "Carol King", following: true, followsYou: false },
+      { id: "u4", handle: "dan", display_name: "Dan", following: false, followsYou: true },
+    ]);
+  });
+
+  it("loads following and probes one past the named cap", async () => {
+    const rows = Array.from({ length: SOCIAL_FOLLOWS_LIST_LIMIT + 1 }, (_, i) => ({
+      follower_id: "u2",
+      followee_id: `f${i}`,
+      created_at: "2026-09-20T12:00:00.000Z",
+    }));
+    const chain = feedChain(rows);
+    const from = vi.fn((table: string) => (table === "follows" ? chain : feedChain([])));
+    const page = await loadProfileFollowList({ from } as never, "u2", "following", "u1");
+    expect(chain.eq).toHaveBeenCalledWith("follower_id", "u2");
+    expect(chain.order).toHaveBeenCalledWith("created_at", { ascending: false });
+    expect(chain.order).toHaveBeenCalledWith("followee_id", { ascending: true });
+    expect(chain.range).toHaveBeenCalledWith(...probeRange(SOCIAL_FOLLOWS_LIST_LIMIT));
+    expect(page.people).toHaveLength(0);
+    expect(page.truncated).toBe(true);
   });
 });
 

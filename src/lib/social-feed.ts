@@ -5,6 +5,7 @@ import {
   SOCIAL_EXPLORE_PEOPLE_LIMIT,
   SOCIAL_EXPLORE_POSTS_LIMIT,
   SOCIAL_FOLLOWEES_LIMIT,
+  SOCIAL_FOLLOWS_LIST_LIMIT,
   SOCIAL_FOLLOWING_WALL_LIMIT,
   SOCIAL_FOR_YOU_PEOPLE_LIMIT,
   SOCIAL_STORIES_RAIL_LIMIT,
@@ -12,7 +13,12 @@ import {
   encodeFollowingWallCursor,
   type FollowingWallCursor,
 } from "@/lib/social-home-bounds";
-import { SOCIAL_PROFILE_POSTS_PAGE, socialPersonIdentity, socialProfileHref } from "@/lib/social";
+import {
+  SOCIAL_PROFILE_POSTS_PAGE,
+  socialPersonIdentity,
+  socialProfileHref,
+  type SocialFollowsTab,
+} from "@/lib/social";
 import {
   SOCIAL_MUTUALS_NAME_CAP,
   SOCIAL_MUTUALS_PROBE,
@@ -182,6 +188,72 @@ export async function loadProfileSocialCounts(
     followers: followers.count ?? 0,
     following: following.count ?? 0,
   };
+}
+
+export type SocialFollowsListPerson = {
+  id: string;
+  handle: string;
+  display_name: string;
+  following: boolean;
+  followsYou: boolean;
+};
+
+export type SocialFollowsListPage = {
+  people: SocialFollowsListPerson[];
+  truncated: boolean;
+};
+
+/**
+ * Public followers or following for one profile. Live follows rows are the
+ * graph SoT. Probe so a cap cannot look finished. Viewer follow edges are a
+ * second, named read so Follow / Follow back / Following stay honest.
+ */
+export async function loadProfileFollowList(
+  supabase: ServerClient,
+  profileId: string,
+  tab: SocialFollowsTab,
+  viewerId: string,
+): Promise<SocialFollowsListPage> {
+  const personCol = tab === "followers" ? "follower_id" : "followee_id";
+  const profileCol = tab === "followers" ? "followee_id" : "follower_id";
+  const { data } = await supabase
+    .from("follows")
+    .select("follower_id, followee_id, created_at")
+    .eq(profileCol, profileId)
+    .order("created_at", { ascending: false })
+    .order(personCol, { ascending: true })
+    .range(...probeRange(SOCIAL_FOLLOWS_LIST_LIMIT));
+  const { rows, truncated } = splitProbe(data, SOCIAL_FOLLOWS_LIST_LIMIT);
+  const ids = [...new Set(rows.map((row) => (tab === "followers" ? row.follower_id : row.followee_id)))];
+  if (ids.length === 0) return { people: [], truncated };
+
+  const otherIds = ids.filter((id) => id !== viewerId);
+  const [{ data: profiles }, followingPage, followerPage] = await Promise.all([
+    supabase.from("profiles").select("id, handle, display_name, status").eq("status", "active").in("id", ids),
+    otherIds.length > 0
+      ? supabase.from("follows").select("followee_id").eq("follower_id", viewerId).in("followee_id", otherIds)
+      : Promise.resolve({ data: [] as { followee_id: string }[] }),
+    otherIds.length > 0
+      ? supabase.from("follows").select("follower_id").eq("followee_id", viewerId).in("follower_id", otherIds)
+      : Promise.resolve({ data: [] as { follower_id: string }[] }),
+  ]);
+  const byId = new Map((profiles ?? []).map((row) => [row.id, row]));
+  const followingIds = new Set((followingPage.data ?? []).map((row) => row.followee_id));
+  const followerIds = new Set((followerPage.data ?? []).map((row) => row.follower_id));
+  const people = ids
+    .map((id) => {
+      const row = byId.get(id);
+      if (!row) return null;
+      return {
+        id: row.id,
+        handle: row.handle,
+        display_name: row.display_name,
+        following: followingIds.has(row.id),
+        followsYou: followerIds.has(row.id),
+      };
+    })
+    .filter((row): row is SocialFollowsListPerson => !!row);
+  return { people, truncated };
 }
 
 export type SocialFollowingWallPage = {

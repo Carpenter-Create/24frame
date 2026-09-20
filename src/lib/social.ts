@@ -10,6 +10,7 @@ import {
   SOCIAL_EXPLORE_PEOPLE_LIMIT,
   SOCIAL_EXPLORE_POSTS_LIMIT,
   SOCIAL_FOLLOWEES_LIMIT,
+  SOCIAL_FOLLOWS_LIST_LIMIT,
   SOCIAL_FOLLOWING_WALL_LIMIT,
   SOCIAL_STORIES_RAIL_LIMIT,
 } from "@/lib/social-home-bounds";
@@ -194,6 +195,54 @@ export function parseProfileHandleParam(raw: string): string | null {
 
 export function socialMemberHref(handle: string): string {
   return socialProfileHref(handle);
+}
+
+export const SOCIAL_FOLLOWS_TABS = ["followers", "following"] as const;
+export type SocialFollowsTab = (typeof SOCIAL_FOLLOWS_TABS)[number];
+export const SOCIAL_FOLLOWS_SEARCH_PARAM = "q";
+
+export function parseSocialFollowsTab(raw: string | string[] | undefined | null): SocialFollowsTab {
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return value === "following" ? "following" : "followers";
+}
+
+export function parseSocialFollowsQuery(raw: string | string[] | undefined | null): string {
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return value?.trim() ?? "";
+}
+
+export function socialProfileFollowsHref(
+  handle: string,
+  tab: SocialFollowsTab = "followers",
+  query?: string | null,
+): string {
+  const base = `${socialProfileHref(handle)}/follows`;
+  const params = new URLSearchParams();
+  if (tab === "following") params.set(SOCIAL_PROFILE_TAB_PARAM, tab);
+  const q = query?.trim();
+  if (q) params.set(SOCIAL_FOLLOWS_SEARCH_PARAM, q);
+  const qs = params.toString();
+  return qs ? `${base}?${qs}` : base;
+}
+
+export function socialProfileFollowsCasingRedirect(
+  requested: string | null,
+  storedHandle: string,
+  tab: SocialFollowsTab,
+  query?: string | null,
+): string | null {
+  if (!storedHandle) return null;
+  if (requested && requested === storedHandle) return null;
+  if (requested && handleKey(requested) !== handleKey(storedHandle)) return null;
+  return socialProfileFollowsHref(storedHandle, tab, query);
+}
+
+export function socialFollowsTabLabel(tab: SocialFollowsTab, count?: number): string {
+  if (count == null) {
+    return tab === "following" ? SOCIAL.profile.followingTab : SOCIAL.profile.followersTab;
+  }
+  const word = tab === "following" ? SOCIAL.profile.followingStat : SOCIAL.profile.followersStat;
+  return `${formatSocialCount(count)} ${word}`;
 }
 
 export function socialGroupHref(slug: string): string {
@@ -447,6 +496,7 @@ export const SOCIAL = {
   follow: {
     follow: "Follow",
     following: "Following",
+    followBack: "Follow back",
     newFollowerTitle: "New follower",
     failed: "Could not update follow.",
   },
@@ -522,6 +572,16 @@ export const SOCIAL = {
     postsStat: "posts",
     followersStat: "followers",
     followingStat: "following",
+    followersTab: "Followers",
+    followingTab: "Following",
+    followsSearch: "Search username or display name",
+    followersEmpty: "No followers yet.",
+    followersEmptyHint: "When people follow this profile, they will appear here.",
+    followingEmpty: "Not following anyone yet.",
+    followingEmptyHint: "Accounts they follow will appear here.",
+    followsSearchEmpty: "No people match.",
+    followsSearchEmptyHint: "Try another username or display name.",
+    followsTruncated: `Showing the first ${SOCIAL_FOLLOWS_LIST_LIMIT} people. More exist — this list is not complete.`,
     ownFace: "Your public face. Edit anytime.",
     welcomeVideo: "Welcome video",
     welcomeAdd: "Add welcome video",

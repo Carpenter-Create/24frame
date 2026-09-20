@@ -170,6 +170,9 @@ describe("Social public profile", () => {
     expect(html).toContain("data-social-follow");
     expect(html).toContain("data-social-share");
     expect(html).toContain("data-social-profile-tabs");
+    expect(html).toContain('data-social-profile-stat="followers"');
+    expect(html).toContain('href="/social/u/ada/follows"');
+    expect(html).toContain('href="/social/u/ada/follows?tab=following"');
     expect(html).toContain(SOCIAL.profile.postsTab);
     expect(html).toContain(SOCIAL.profile.highlightsTab);
     expect(html).toContain(SOCIAL.profile.creditsTab);

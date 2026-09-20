@@ -41,6 +41,11 @@ import {
   formatSocialCount,
   socialProfileCanonicalUrl,
   socialProfileCasingRedirect,
+  socialProfileFollowsCasingRedirect,
+  socialProfileFollowsHref,
+  socialFollowsTabLabel,
+  parseSocialFollowsQuery,
+  parseSocialFollowsTab,
   socialProfileHref,
   socialProfileLegacyPublicRedirect,
   socialProfilePublicHost,
@@ -344,6 +349,26 @@ describe("profile opt-in", () => {
     expect(socialProfileTabHref("/social/u/ada", "credits")).toBe("/social/u/ada?tab=credits");
     expect(socialProfileTabHref("/social/profile", "posts")).toBe("/social/profile");
     expect(socialProfileTabLabel("credits")).toBe("Credits");
+    expect(parseSocialFollowsTab("following")).toBe("following");
+    expect(parseSocialFollowsTab("reels")).toBe("followers");
+    expect(parseSocialFollowsQuery("  Ada  ")).toBe("Ada");
+    expect(socialProfileFollowsHref("Ada")).toBe("/social/u/Ada/follows");
+    expect(socialProfileFollowsHref("Ada", "following")).toBe("/social/u/Ada/follows?tab=following");
+    expect(socialProfileFollowsHref("Ada", "followers", "sun")).toBe("/social/u/Ada/follows?q=sun");
+    expect(socialProfileFollowsHref("Ada", "following", "sun")).toBe(
+      "/social/u/Ada/follows?tab=following&q=sun",
+    );
+    expect(socialProfileFollowsHref("Ada")).not.toMatch(/\/social\/u\/@/);
+    expect(socialProfileFollowsCasingRedirect("adamc", "AdamC", "following", "sun")).toBe(
+      "/social/u/AdamC/follows?tab=following&q=sun",
+    );
+    expect(socialProfileFollowsCasingRedirect("AdamC", "AdamC", "followers")).toBeNull();
+    expect(socialProfileFollowsCasingRedirect("ada", "AdamC", "followers")).toBeNull();
+    expect(socialFollowsTabLabel("followers", 4)).toBe("4 followers");
+    expect(socialFollowsTabLabel("following", 7)).toBe("7 following");
+    expect(socialFollowsTabLabel("followers")).toBe(SOCIAL.profile.followersTab);
+    expect(SOCIAL.profile.followsSearch).toBe("Search username or display name");
+    expect(SOCIAL.follow.followBack).toBe("Follow back");
     expect(socialComposerPrompt("Ada Lovelace")).toBe("Write something");
     expect(socialComposerPrompt(null)).toBe("Write something");
     expect(socialComposerPrompt("")).toBe("Write something");

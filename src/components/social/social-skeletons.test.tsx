@@ -6,6 +6,7 @@ import {
   SocialCreateSkeleton,
   SocialDmsSkeleton,
   SocialExploreSkeleton,
+  SocialFollowsSkeleton,
   SocialHomeSkeleton,
   SocialProfileSkeleton,
   SocialStoriesSkeleton,
@@ -22,6 +23,7 @@ const LOADING = [
   "src/app/(app)/social/dms/loading.tsx",
   "src/app/(app)/social/profile/edit/loading.tsx",
   "src/app/(app)/social/profile/edit/bio/loading.tsx",
+  "src/app/(app)/social/u/[handle]/follows/loading.tsx",
 ] as const;
 
 describe("Social loading skeletons", () => {
@@ -47,6 +49,7 @@ describe("Social loading skeletons", () => {
     const viewer = renderToStaticMarkup(<SocialStoryViewerSkeleton />);
     const explore = renderToStaticMarkup(<SocialExploreSkeleton />);
     const dms = renderToStaticMarkup(<SocialDmsSkeleton />);
+    const follows = renderToStaticMarkup(<SocialFollowsSkeleton />);
 
     expect(home).toContain("data-social-home-skeleton");
     expect(home).toContain("data-social-home-topics-skeleton");
@@ -63,8 +66,9 @@ describe("Social loading skeletons", () => {
     expect(explore).toContain("data-social-explore-skeleton");
     expect(explore).toContain("data-social-explore-results-skeleton");
     expect(dms).toContain("data-social-dms-skeleton");
+    expect(follows).toContain("data-social-follows-skeleton");
 
-    for (const html of [home, profile, create, stories, viewer, explore, dms]) {
+    for (const html of [home, profile, create, stories, viewer, explore, dms, follows]) {
       expect(html).not.toContain("Education");
       expect(html).not.toContain("Riley");
       expect(html).not.toContain("Dashboard");

@@ -29,6 +29,7 @@ import {
   SOCIAL_CREATE_KIND_CLASS,
   SOCIAL_CREATE_WELL_CLASS,
   SOCIAL_FOLLOW_COMPACT_CLASS,
+  SOCIAL_FOLLOW_COMPACT_IDLE_CLASS,
   SOCIAL_PILL_CLASS,
   SOCIAL_PILL_IDLE_CLASS,
 } from "@/lib/social-chrome";
@@ -44,6 +45,7 @@ import {
 import { takeSocialHomeComposerMedia } from "@/lib/social-home-composer";
 import {
   FOLLOW_CONFIRM_MS,
+  followButtonLabel,
   followedConfirmCopy,
 } from "@/lib/social-follow";
 import {
@@ -582,12 +584,14 @@ export function SocialFollowButton({
   followeeId,
   handle,
   following,
+  followsYou = false,
   compact = false,
   stretch = false,
 }: {
   followeeId: string;
   handle: string;
   following: boolean;
+  followsYou?: boolean;
   compact?: boolean;
   stretch?: boolean;
 }) {
@@ -640,14 +644,16 @@ export function SocialFollowButton({
           aria-busy={pending}
           className={
             compact
-              ? SOCIAL_FOLLOW_COMPACT_CLASS
+              ? isFollowing
+                ? SOCIAL_FOLLOW_COMPACT_IDLE_CLASS
+                : SOCIAL_FOLLOW_COMPACT_CLASS
               : cn(
                   isFollowing ? SOCIAL_ACTION_SECONDARY_CLASS : SOCIAL_ACTION_CLASS,
                   stretch && "w-full",
                 )
           }
         >
-          {isFollowing ? SOCIAL.follow.following : SOCIAL.follow.follow}
+          {followButtonLabel(isFollowing, followsYou)}
         </button>
       </form>
       {error ? <FormError error={error} /> : null}

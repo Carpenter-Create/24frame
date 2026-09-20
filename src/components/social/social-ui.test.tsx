@@ -224,6 +224,12 @@ describe("Social profile public face", () => {
       />,
     );
     expect(withStats).toContain("data-social-profile-stats");
+    expect(withStats).toContain('data-social-profile-stat="posts"');
+    expect(withStats).toContain('data-social-profile-stat="followers"');
+    expect(withStats).toContain('data-social-profile-stat="following"');
+    expect(withStats).toContain('href="/social/u/ada/follows"');
+    expect(withStats).toContain('href="/social/u/ada/follows?tab=following"');
+    expect(withStats).not.toContain("/social/u/ada/follows?tab=followers");
     expect(withStats.indexOf("data-social-profile-name")).toBeLessThan(
       withStats.indexOf("data-social-profile-stats"),
     );

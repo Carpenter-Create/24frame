@@ -746,7 +746,9 @@ describe("social actions", () => {
     expect(revalidatePath).toHaveBeenCalledWith("/social");
     expect(revalidatePath).toHaveBeenCalledWith("/social/profile");
     expect(revalidatePath).toHaveBeenCalledWith("/social/u/ada");
+    expect(revalidatePath).toHaveBeenCalledWith("/social/u/ada/follows");
     expect(revalidatePath).toHaveBeenCalledWith("/social/u/joshua");
+    expect(revalidatePath).toHaveBeenCalledWith("/social/u/joshua/follows");
   });
 
   it("deletes a follow and does not notify", async () => {
