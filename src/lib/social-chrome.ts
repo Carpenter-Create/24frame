@@ -286,7 +286,10 @@ export const SOCIAL_PROFILE_EDIT_PHOTO_CLASS =
   "flex flex-col items-center justify-center gap-4";
 
 export const SOCIAL_PROFILE_EDIT_AVATAR_CLASS =
-  "flex size-[88px] shrink-0 items-center justify-center overflow-hidden rounded-full border border-hairline bg-surface-muted text-ink";
+  "relative flex size-[88px] shrink-0 items-center justify-center overflow-hidden rounded-full border border-hairline bg-surface-muted text-ink";
+
+export const SOCIAL_PROFILE_EDIT_AVATAR_DROPPING_CLASS =
+  "border-accent bg-accent-wash";
 
 export const SOCIAL_PROFILE_EDIT_PICTURE_CLASS =
   "t-body-sm font-medium text-accent";

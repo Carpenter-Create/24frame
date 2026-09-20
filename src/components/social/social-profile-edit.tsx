@@ -19,11 +19,18 @@ import { SocialIcon } from "@/components/social/social-icon";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { Input } from "@/components/ui/input";
 import { ACCOUNT_PROFILE } from "@/lib/account-profile";
-import { cropAvatarFile, type AvatarCropFrame } from "@/lib/account-avatar-crop";
-import { AVATAR_ACCEPT, AVATAR_MAX_BYTES, isAvatarContentType } from "@/lib/account-avatar";
+import {
+  accountAvatarPickError,
+  cropAvatarFile,
+  readAccountAvatarCropPreview,
+  type AvatarCropFrame,
+} from "@/lib/account-avatar-crop";
+import { AVATAR_ACCEPT } from "@/lib/account-avatar";
+import { cn } from "@/lib/cn";
 import { SOCIAL_VIDEO_CONTENT_TYPES } from "@/lib/social-media";
 import {
   SOCIAL_PROFILE_EDIT_AVATAR_CLASS,
+  SOCIAL_PROFILE_EDIT_AVATAR_DROPPING_CLASS,
   SOCIAL_PROFILE_EDIT_BACK_CLASS,
   SOCIAL_PROFILE_EDIT_BODY_CLASS,
   SOCIAL_PROFILE_EDIT_CARD_CLASS,
@@ -150,29 +157,23 @@ export function SocialProfileEditForm({
   }
 
   function beginCrop(file: File | undefined) {
+    const pickError = accountAvatarPickError(file);
     if (!file) return;
     setError("");
-    if (!isAvatarContentType(file.type)) {
-      setError(ACCOUNT_PROFILE.photoType);
+    if (pickError) {
+      setError(pickError);
       return;
     }
-    if (file.size > AVATAR_MAX_BYTES) {
-      setError(ACCOUNT_PROFILE.photoTooLarge);
-      return;
-    }
-    const url = URL.createObjectURL(file);
-    const image = new window.Image();
-    image.onload = () => {
-      if (cropPreview) URL.revokeObjectURL(cropPreview);
-      setCropFile(file);
-      setCropPreview(url);
-      setCropSize({ width: image.naturalWidth, height: image.naturalHeight });
-    };
-    image.onerror = () => {
-      URL.revokeObjectURL(url);
-      setError(ACCOUNT_PROFILE.photoType);
-    };
-    image.src = url;
+    void readAccountAvatarCropPreview(file)
+      .then((next) => {
+        if (cropPreview) URL.revokeObjectURL(cropPreview);
+        setCropFile(file);
+        setCropPreview(next.url);
+        setCropSize({ width: next.width, height: next.height });
+      })
+      .catch((cause) => {
+        setError(cause instanceof Error && cause.message ? cause.message : ACCOUNT_PROFILE.photoType);
+      });
   }
 
   async function onCropConfirm(frame: AvatarCropFrame) {
@@ -332,11 +333,16 @@ export function SocialProfileEditForm({
                   type="button"
                   disabled={uploading}
                   data-social-profile-edit-avatar-drop=""
-                  aria-label={SOCIAL.profile.editPicture}
-                  className={SOCIAL_PROFILE_EDIT_AVATAR_CLASS}
+                  data-dropping={dropping ? "" : undefined}
+                  aria-label={dropping ? ACCOUNT_PROFILE.dropPhoto : SOCIAL.profile.editPicture}
+                  className={cn(
+                    SOCIAL_PROFILE_EDIT_AVATAR_CLASS,
+                    dropping ? SOCIAL_PROFILE_EDIT_AVATAR_DROPPING_CLASS : null,
+                  )}
                   onClick={() => fileRef.current?.click()}
                   onDragOver={(event) => {
                     event.preventDefault();
+                    event.dataTransfer.dropEffect = "copy";
                     setDropping(true);
                   }}
                   onDragLeave={() => setDropping(false)}
@@ -359,7 +365,11 @@ export function SocialProfileEditForm({
                   onClick={() => fileRef.current?.click()}
                   className={SOCIAL_PROFILE_EDIT_PICTURE_CLASS}
                 >
-                  {dropping ? ACCOUNT_PROFILE.dropPhoto : uploading ? SOCIAL.profile.uploadingPhoto : SOCIAL.profile.editPicture}
+                  {dropping
+                    ? ACCOUNT_PROFILE.dropPhoto
+                    : uploading
+                      ? SOCIAL.profile.uploadingPhoto
+                      : SOCIAL.profile.editPicture}
                 </button>
               </>
             )}

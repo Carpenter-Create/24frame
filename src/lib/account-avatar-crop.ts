@@ -1,7 +1,8 @@
 // Square face crop for the account photo SoT. Output replaces
 // avatars/{userId}/avatar via uploadAccountPhoto. No Social-only fork.
 
-import { AVATAR_MAX_BYTES } from "@/lib/account-avatar";
+import { ACCOUNT_PROFILE } from "@/lib/account-profile";
+import { AVATAR_MAX_BYTES, isAvatarContentType } from "@/lib/account-avatar";
 
 export const AVATAR_CROP_OUTPUT_SIZE = 512;
 export const AVATAR_CROP_MIN_SCALE = 1;
@@ -16,6 +17,30 @@ export type AvatarCropFrame = {
   offsetX: number;
   offsetY: number;
 };
+
+export function accountAvatarPickError(file: File | undefined): string | null {
+  if (!file) return null;
+  if (!isAvatarContentType(file.type)) return ACCOUNT_PROFILE.photoType;
+  if (file.size > AVATAR_MAX_BYTES) return ACCOUNT_PROFILE.photoTooLarge;
+  return null;
+}
+
+export function readAccountAvatarCropPreview(
+  file: File,
+): Promise<{ url: string; width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const image = new window.Image();
+    image.onload = () => {
+      resolve({ url, width: image.naturalWidth, height: image.naturalHeight });
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error(ACCOUNT_PROFILE.photoType));
+    };
+    image.src = url;
+  });
+}
 
 export function avatarCoverDrawSize(
   imageWidth: number,

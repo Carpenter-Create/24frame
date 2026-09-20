@@ -128,7 +128,10 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(edit).toContain('id="social-edit-imdb"');
     expect(edit).toContain('form.set("imdb_url"');
     expect(edit).toContain("AccountAvatarCrop");
+    expect(edit).toContain("accountAvatarPickError");
     expect(edit).toContain("data-social-profile-edit-avatar-drop");
+    expect(edit).toContain("SOCIAL_PROFILE_EDIT_AVATAR_DROPPING_CLASS");
+    expect(edit).toContain("data-dropping");
     expect(bio).toContain("<Textarea");
     expect(bio).toContain("data-social-bio-textarea");
     expect(edit).not.toContain("maximum-scale");

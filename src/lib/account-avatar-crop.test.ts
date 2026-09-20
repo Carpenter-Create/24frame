@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 
+import { ACCOUNT_PROFILE } from "./account-profile";
 import {
   AVATAR_CROP_MAX_SCALE,
   AVATAR_CROP_MIN_SCALE,
+  accountAvatarPickError,
   avatarCoverDrawSize,
   avatarCropSourceRect,
   clampAvatarCropOffset,
@@ -41,5 +43,20 @@ describe("account avatar crop", () => {
     });
     expect(AVATAR_CROP_MIN_SCALE).toBe(1);
     expect(AVATAR_CROP_MAX_SCALE).toBe(3);
+  });
+
+  it("rejects a non-image or oversized pick before crop", () => {
+    expect(accountAvatarPickError(undefined)).toBeNull();
+    expect(
+      accountAvatarPickError(new File(["x"], "note.txt", { type: "text/plain" })),
+    ).toBe(ACCOUNT_PROFILE.photoType);
+    expect(
+      accountAvatarPickError(new File(["x"], "face.jpg", { type: "image/jpeg" })),
+    ).toBeNull();
+    expect(
+      accountAvatarPickError({ type: "image/jpeg", size: 2 * 1024 * 1024 + 1 } as File),
+    ).toBe(ACCOUNT_PROFILE.photoTooLarge);
+    expect(ACCOUNT_PROFILE.cropTitle).toBe("Reposition");
+    expect(ACCOUNT_PROFILE.dropPhoto).toBe("Drop a photo");
   });
 });
