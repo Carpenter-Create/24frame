@@ -15,6 +15,10 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
+vi.mock("@/lib/s3-avatars", () => ({
+  signedAvatarUrl: vi.fn().mockResolvedValue(null),
+  signedAvatarUrls: vi.fn().mockResolvedValue(new Map()),
+}));
 
 function ctx() {
   return {

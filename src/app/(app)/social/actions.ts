@@ -23,6 +23,7 @@ import {
   likeInsertRow,
   messageInsertRow,
   normalizeBio,
+  composeSocialDisplayName,
   normalizeDisplayName,
   normalizeGroupDescription,
   normalizeGroupName,
@@ -79,7 +80,12 @@ export async function createSocialProfile(formData: FormData): Promise<ActionRes
   if (taken) return { error: taken };
 
   const profile = await ensureOwnSocialProfile(supabase, user);
+  const composed = composeSocialDisplayName(
+    String(formData.get("first_name") ?? ""),
+    String(formData.get("last_name") ?? ""),
+  );
   const displayName =
+    normalizeDisplayName(composed) ??
     normalizeDisplayName(String(formData.get("display_name") ?? "")) ??
     socialPublicDisplayName(profile?.display_name) ??
     "";

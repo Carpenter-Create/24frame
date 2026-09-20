@@ -210,11 +210,10 @@ describe("Social home", () => {
     expect(html).toContain("Cinematography");
     expect(html).toContain("Music");
     expect(html).not.toContain("data-social-first-win");
-    expect(html).toContain("data-social-checklist");
-    expect(html).toContain("data-social-home-setup");
-    expect(html).toContain("data-social-checklist-dismiss");
-    expect(html).toContain(SOCIAL.checklist.title);
-    expect(html).toContain(SOCIAL.checklist.firstPost);
+    expect(html).not.toContain("data-social-checklist");
+    expect(html).not.toContain("data-social-home-setup");
+    expect(html).not.toContain(SOCIAL.checklist.title);
+    expect(html).toContain("data-social-for-you");
     expect(html).toContain(SOCIAL.home.emptyQuiet);
     expect(html).toContain(SOCIAL.home.emptyHint);
     expect(html).not.toContain("One clear next step");
@@ -232,7 +231,7 @@ describe("Social home", () => {
     expect(html).not.toContain(ASK_GLOBEE.headline);
   });
 
-  it("shows the checklist once the ensure path has a profile", async () => {
+  it("omits Finish setting up from Home once a profile exists", async () => {
     const { from } = stubClient({ profile: ensured });
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
 
@@ -242,7 +241,9 @@ describe("Social home", () => {
     expect(html).toContain("data-social-home-composer");
     expect(html).toContain("data-social-story-create");
     expect(html).not.toContain("data-social-first-win");
-    expect(html).toContain("data-social-checklist");
+    expect(html).not.toContain("data-social-checklist");
+    expect(html).not.toContain("data-social-home-setup");
+    expect(html).not.toContain(SOCIAL.checklist.title);
     expect(html).not.toContain("data-social-need-profile");
     expect(html).not.toContain("data-social-post-form");
   });
@@ -271,8 +272,8 @@ describe("Social home", () => {
     expect(html).toContain("Ada Lovelace");
     expect(html).toContain('src="https://s3.example/signed-avatar"');
     expect(html).toContain("data-social-home-composer");
-    expect(html).toContain("data-social-checklist");
-    expect(html).toContain(SOCIAL.checklist.title);
+    expect(html).not.toContain("data-social-checklist");
+    expect(html).not.toContain(SOCIAL.checklist.title);
     expect(html).not.toContain("AL");
     expect(html).not.toContain("data-social-avatar-ring");
   });

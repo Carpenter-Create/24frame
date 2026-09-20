@@ -34,10 +34,12 @@ import {
   SOCIAL,
   SOCIAL_ROUTES,
   bareHandle,
+  composeSocialDisplayName,
   handleFieldValue,
   normalizeHandle,
   socialHandleRequiredError,
   socialProfilePublicUrl,
+  splitSocialDisplayName,
   stripHandleDecorators,
 } from "@/lib/social";
 import { socialProfileEditFace, type SocialProfileEditFace } from "@/lib/social-profile-edit";
@@ -85,7 +87,9 @@ export function SocialProfileEditForm({
 }) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
-  const [name, setName] = useState(displayName);
+  const split = splitSocialDisplayName(displayName);
+  const [firstName, setFirstName] = useState(split.firstName);
+  const [lastName, setLastName] = useState(split.lastName);
   const [username, setUsername] = useState(handleFieldValue(handle));
   const [error, setError] = useState("");
   const [handleError, setHandleError] = useState("");
@@ -138,7 +142,9 @@ export function SocialProfileEditForm({
     setPending(true);
     const form = new FormData();
     form.set("handle", username);
-    form.set("display_name", name);
+    form.set("first_name", firstName);
+    form.set("last_name", lastName);
+    form.set("display_name", composeSocialDisplayName(firstName, lastName));
     const result = await createSocialProfile(form);
     setPending(false);
     if (result.error) {
@@ -212,19 +218,36 @@ export function SocialProfileEditForm({
             />
           </div>
           <div data-social-profile-edit-fields="" className={SOCIAL_PROFILE_EDIT_CARD_CLASS}>
-            <div className={SOCIAL_PROFILE_EDIT_ROW_CLASS}>
-              <label htmlFor="social-edit-name" className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>
-                {SOCIAL.profile.name}
-              </label>
-              <Input
-                variant="bare"
-                id="social-edit-name"
-                name="display_name"
-                autoComplete="nickname"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="flex-1"
-              />
+            <div data-social-profile-edit-names="" className="flex flex-col">
+              <div className={`${SOCIAL_PROFILE_EDIT_ROW_CLASS} flex-col gap-2 md:flex-row`}>
+                <label htmlFor="social-edit-first-name" className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>
+                  {SOCIAL.profile.firstName}
+                </label>
+                <Input
+                  variant="bare"
+                  id="social-edit-first-name"
+                  name="first_name"
+                  autoComplete="given-name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className="min-w-0 flex-1"
+                />
+              </div>
+              <div className="h-px bg-hairline" />
+              <div className={`${SOCIAL_PROFILE_EDIT_ROW_CLASS} flex-col gap-2 md:flex-row`}>
+                <label htmlFor="social-edit-last-name" className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>
+                  {SOCIAL.profile.lastName}
+                </label>
+                <Input
+                  variant="bare"
+                  id="social-edit-last-name"
+                  name="last_name"
+                  autoComplete="family-name"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="min-w-0 flex-1"
+                />
+              </div>
             </div>
             <div className="h-px bg-hairline" />
             <div data-social-handle-field="" className="flex flex-col gap-2 py-4">

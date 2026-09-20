@@ -15,7 +15,7 @@ vi.mock("@/app/(app)/social/actions", () => ({
 }));
 
 describe("SocialProfileEditForm", () => {
-  it("renders Name, Username @ field, live URL, Bio row, and Add link", () => {
+  it("renders First name, Last name, Username @ field, live URL, Bio row, and Add link", () => {
     const html = renderToStaticMarkup(
       <SocialProfileEditForm
         handle="ada"
@@ -27,8 +27,15 @@ describe("SocialProfileEditForm", () => {
     expect(html).toContain("data-social-profile-edit");
     expect(html).toContain(SOCIAL.profile.edit);
     expect(html).toContain(SOCIAL.profile.done);
-    expect(html).toContain(SOCIAL.profile.name);
-    expect(html).toContain("Ada Lovelace");
+    expect(html).toContain("data-social-profile-edit-names");
+    expect(html).toContain(SOCIAL.profile.firstName);
+    expect(html).toContain(SOCIAL.profile.lastName);
+    expect(html).toContain('id="social-edit-first-name"');
+    expect(html).toContain('id="social-edit-last-name"');
+    expect(html).toContain("Ada");
+    expect(html).toContain("Lovelace");
+    expect(html).not.toContain('id="social-edit-name"');
+    expect(html).toContain("flex-col");
     expect(html).toContain(SOCIAL.profile.username);
     expect(html).toContain("data-social-handle-field");
     expect(html).toContain('value="ada"');
@@ -49,7 +56,8 @@ describe("SocialProfileEditForm", () => {
     expect(html).not.toContain("Reels");
     expect(html).not.toContain("#1769ff");
     expect(html).toContain("t-control");
-    expect(html).not.toMatch(/id="social-edit-name"[^>]*t-body-sm/);
+    expect(html).not.toMatch(/id="social-edit-first-name"[^>]*t-body-sm/);
+    expect(html).not.toMatch(/id="social-edit-last-name"[^>]*t-body-sm/);
     expect(html).not.toMatch(/id="social-edit-handle"[^>]*t-body-sm/);
     expect(html).not.toContain("/social/@");
 

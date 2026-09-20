@@ -470,6 +470,8 @@ export const SOCIAL = {
     usernamePlaceholder: "username",
     displayName: "Display name",
     name: "Name",
+    firstName: "First name",
+    lastName: "Last name",
     // Sentinel for existing rows only. Never seed on create. Never render as a person name.
     defaultDisplayName: "Member",
     bio: "Bio",
@@ -562,6 +564,7 @@ export const SOCIAL = {
     title: "Messages",
     subtitle: `One-to-one and group conversations in ${PRODUCT_NAME}.`,
     empty: "No conversations yet.",
+    startCta: "Start a conversation",
     thread: "Conversation",
     compose: "Write a message",
     submit: "Send",
@@ -681,6 +684,20 @@ export function normalizeDisplayName(raw: string): string | null {
   const name = raw.trim().replace(/\s+/g, " ");
   if (name.length === 0 || name.length > DISPLAY_NAME_MAX) return null;
   return name;
+}
+
+// Social edit shows First / Last. Persist the composed display_name so
+// Settings/account and public person rows stay on one name SoT.
+export function splitSocialDisplayName(raw: string): { firstName: string; lastName: string } {
+  const name = (raw ?? "").trim().replace(/\s+/g, " ");
+  if (!name) return { firstName: "", lastName: "" };
+  const space = name.indexOf(" ");
+  if (space < 0) return { firstName: name, lastName: "" };
+  return { firstName: name.slice(0, space), lastName: name.slice(space + 1) };
+}
+
+export function composeSocialDisplayName(firstName: string, lastName: string): string {
+  return [firstName.trim(), lastName.trim()].filter(Boolean).join(" ");
 }
 
 /** Legacy DB sentinel. Not a human name. SOCIAL.member.title may reuse this word as route chrome. */

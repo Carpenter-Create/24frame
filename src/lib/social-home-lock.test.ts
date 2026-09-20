@@ -176,7 +176,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(composer).not.toContain("ACTIONS");
     expect(shell).not.toContain("SocialRailAccountChip");
     expect(shell).not.toContain("data-social-rail-account");
-    expect(forYou).toContain("SocialOnboardingChecklist");
+    expect(forYou).not.toContain("SocialOnboardingChecklist");
     expect(forYou).toContain("SocialPersonRow");
     expect(forYou).not.toContain("SocialAvatar");
     expect(forYou).toContain("CourseCard");
@@ -246,11 +246,11 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).toContain("SOCIAL_COMPOSER_MEDIA_CLASS");
     expect(chrome).not.toContain("SOCIAL_COMPOSER_ACTION_CLASS");
     expect(home).not.toContain("SocialFirstWin");
-    expect(home).toContain("checklist={profile ? checklist : []}");
-    expect(home).toContain("data-social-home-setup");
-    expect(home).toContain("lg:hidden");
-    expect(home.indexOf("<SocialStoriesRail")).toBeLessThan(home.indexOf("data-social-home-setup"));
-    expect(home.indexOf("data-social-home-setup")).toBeLessThan(home.indexOf("<SocialHomeTabs"));
+    expect(home).not.toContain("checklist={");
+    expect(home).not.toContain("data-social-home-setup");
+    expect(home).not.toContain("SocialOnboardingChecklist");
+    expect(home).not.toContain("socialChecklistItems");
+    expect(home.indexOf("<SocialStoriesRail")).toBeLessThan(home.indexOf("<SocialHomeTabs"));
     expect(home).toContain("SOCIAL.home.emptyQuiet");
     expect(home).toContain("md:hidden");
     expect(home).toContain("data-social-empty-lenses");
@@ -419,23 +419,25 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(shell).toContain("Do not use() this at the AppShell top");
   });
 
-  it("puts Finish setting up on the desktop For you rail and mobile first feed card on 176:1346 / 169:1519", () => {
+  it("omits Finish setting up from Home and keeps Suggested people + Latest course on the rail", () => {
     const forYou = readFileSync("src/components/social/social-for-you.tsx", "utf8");
-    const checklist = readFileSync("src/components/social/social-checklist.tsx", "utf8");
     expect(chrome).toContain('SOCIAL_FIGMA_HOME_EMPTY = "176:1346"');
     expect(chrome).toContain('SOCIAL_FIGMA_HOME_MOBILE = "169:1519"');
+    expect(chrome).toContain("SOCIAL_SURFACE_RADIUS_CLASS");
+    expect(chrome).toContain("rounded-[var(--radius-lg)]");
     expect(home).not.toContain("SocialFirstWin");
     expect(home).not.toContain("firstWinHint");
-    expect(home).toContain("data-social-home-setup");
-    expect(forYou).toContain("SocialOnboardingChecklist");
+    expect(home).not.toContain("data-social-home-setup");
+    expect(home).not.toContain("SocialOnboardingChecklist");
+    expect(forYou).not.toContain("SocialOnboardingChecklist");
     expect(forYou).toContain("SocialPersonRow");
-    expect(forYou).toContain('tone="nested"');
+    expect(forYou).toContain("SocialSuggestedPeople");
     expect(forYou).toContain("layout === \"rail\"");
-    expect(checklist).toContain("data-social-checklist-dismiss");
-    expect(checklist).toContain("SOCIAL.checklist.dismiss");
-    expect(checklist).toContain("SOCIAL_CHECKLIST_TRACK_NESTED_CLASS");
-    expect(chrome).toContain("SOCIAL_CHECKLIST_TRACK_NESTED_CLASS");
-    expect(chrome).toContain("SOCIAL_CHECKLIST_TRACK_CLASS");
+    expect(create).not.toContain("data-social-for-you-topics");
+    expect(profile).not.toContain("data-social-for-you-topics");
+    expect(stories).not.toContain("data-social-for-you-topics");
+    expect(explore).toContain("SocialSuggestedPeople");
+    expect(messages).toContain("SOCIAL.dms.startCta");
     expect(SOCIAL_DESKTOP_MEASURE).toEqual({
       dest: 200,
       gutter: 16,

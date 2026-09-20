@@ -32,8 +32,10 @@ import {
   socialHandleRequiredError,
   socialHomeLaneHref,
   socialInitials,
+  composeSocialDisplayName,
   socialPersonIdentity,
   socialPublicDisplayName,
+  splitSocialDisplayName,
   socialMediaRuleMessage,
   formatSocialCount,
   socialProfileCanonicalUrl,
@@ -70,6 +72,13 @@ describe("social copy lock", () => {
     expect(SOCIAL.home.composerPromptNamed).toBe("Write something");
     expect(SOCIAL.forYou.topics).toBe("Topics.");
     expect(SOCIAL.forYou.latestCourse).toBe("Latest course");
+    expect(SOCIAL.profile.firstName).toBe("First name");
+    expect(SOCIAL.profile.lastName).toBe("Last name");
+    expect(SOCIAL.dms.startCta).toBe("Start a conversation");
+    expect(splitSocialDisplayName("Ada Lovelace")).toEqual({ firstName: "Ada", lastName: "Lovelace" });
+    expect(splitSocialDisplayName("Ada")).toEqual({ firstName: "Ada", lastName: "" });
+    expect(composeSocialDisplayName("Ada", "Lovelace")).toBe("Ada Lovelace");
+    expect(composeSocialDisplayName("Ada", "")).toBe("Ada");
     expect(blob).not.toContain("What's on your mind");
     expect(blob).not.toContain("Topics for you");
     expect(SOCIAL.home.recentChats).toBe("Recent chats");

@@ -76,8 +76,10 @@ export const SOCIAL_HOME_CENTER_CLASS =
 export const SOCIAL_AVATAR_32_CLASS =
   "flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted t-label font-medium text-ink-2";
 
+export const SOCIAL_SURFACE_RADIUS_CLASS = "rounded-[var(--radius-lg)]";
+
 export const SOCIAL_FOR_YOU_RAIL_CLASS =
-  "hidden w-[300px] shrink-0 flex-col gap-4 rounded-[16px] border border-hairline bg-surface p-4 lg:flex";
+  `hidden w-[300px] shrink-0 flex-col gap-4 ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface p-4 lg:flex`;
 
 export const SOCIAL_CARD_CLASS =
   "flex flex-col gap-[var(--space-3)] rounded-[8px] border border-hairline bg-surface p-[var(--space-4)]";
@@ -86,7 +88,7 @@ export const SOCIAL_CARD_MUTED_CLASS =
   "flex flex-col gap-[var(--space-3)] rounded-[8px] bg-surface-muted p-[var(--space-4)]";
 
 export const SOCIAL_EMPTY_PANEL_CLASS =
-  "flex flex-col items-center justify-center gap-[var(--space-4)] rounded-[8px] bg-surface-muted px-[var(--space-6)] py-[var(--space-12)] text-center";
+  `flex flex-col items-center justify-center gap-[var(--space-4)] ${SOCIAL_SURFACE_RADIUS_CLASS} bg-surface-muted px-[var(--space-6)] py-[var(--space-12)] text-center`;
 
 export const SOCIAL_EMPTY_ACTION_CLASS =
   "inline-flex items-center justify-center rounded-[8px] bg-accent px-[var(--space-4)] py-[10px] t-body-sm font-medium text-accent-contrast";
@@ -131,7 +133,7 @@ export const SOCIAL_STORY_MEDIA_CLASS =
 
 // Home tall FB-style cards — 160:482 / 160:964. Circular rings superseded.
 export const SOCIAL_HOME_STORY_CARD_CLASS =
-  "relative h-[192px] w-[108px] shrink-0 overflow-hidden rounded-[16px] border border-hairline bg-surface md:h-[200px] md:w-[112px]";
+  `relative h-[192px] w-[108px] shrink-0 overflow-hidden ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface md:h-[200px] md:w-[112px]`;
 
 export const SOCIAL_HOME_STORY_CREATE_FACE_CLASS =
   "absolute inset-x-0 top-0 flex h-[114px] items-center justify-center overflow-hidden bg-surface-muted md:h-[120px]";
@@ -181,7 +183,7 @@ export const SOCIAL_STORY_CARET_CLASS =
 // Single row: avatar | field (text) | media icon. Photo|Video|Text
 // choice lives on Create as SegmentedTrack, not Home composer pills.
 export const SOCIAL_COMPOSER_CLASS =
-  "flex h-16 items-center gap-3 rounded-[16px] border border-hairline bg-surface px-3 py-3 md:px-4";
+  `flex h-16 items-center gap-3 ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface px-3 py-3 md:px-4`;
 
 export const SOCIAL_COMPOSER_FIELD_CLASS =
   "flex h-9 min-w-0 flex-1 items-center t-body text-ink-2";
@@ -196,7 +198,7 @@ export const SOCIAL_FOR_YOU_CARD_CLASS =
   `${HOUSE_MODULE_CLASS} flex w-full flex-col gap-2 p-4`;
 
 export const SOCIAL_FEED_ROW_CLASS =
-  "flex flex-col gap-2 border-b border-hairline bg-surface p-3";
+  `flex flex-col gap-2 ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface p-3`;
 
 export const SOCIAL_CREATE_CTA_CLASS =
   "inline-flex w-full items-center justify-center gap-2 rounded-[24px] bg-accent px-4 py-3 t-body font-semibold text-accent-contrast";
@@ -287,7 +289,7 @@ export const SOCIAL_PROFILE_EDIT_PICTURE_CLASS =
   "t-body-sm font-medium text-accent";
 
 export const SOCIAL_PROFILE_EDIT_CARD_CLASS =
-  "flex w-full flex-col overflow-hidden rounded-[16px] border border-hairline bg-surface px-4";
+  `flex w-full flex-col overflow-hidden ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface px-4`;
 
 export const SOCIAL_PROFILE_EDIT_ROW_CLASS =
   "flex w-full items-start gap-4 py-4";

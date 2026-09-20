@@ -93,7 +93,8 @@ describe("social actions", () => {
     const { inserts, updates, from } = stub();
     const form = new FormData();
     form.set("handle", "@Ada_Lovelace");
-    form.set("display_name", "Ada Lovelace");
+    form.set("first_name", "Ada");
+    form.set("last_name", "Lovelace");
 
     const result = await createSocialProfile(form);
     expect(result).toEqual({});

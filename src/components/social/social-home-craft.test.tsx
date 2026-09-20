@@ -54,7 +54,7 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).not.toContain(SOCIAL.create.video);
     expect(html).not.toContain(`>${SOCIAL.create.text}<`);
     expect(SOCIAL_COMPOSER_CLASS).toContain("h-16");
-    expect(SOCIAL_COMPOSER_CLASS).toContain("rounded-[16px]");
+    expect(SOCIAL_COMPOSER_CLASS).toContain("rounded-[var(--radius-lg)]");
     expect(SOCIAL_COMPOSER_FIELD_CLASS).not.toContain("bg-surface-muted");
   });
 
@@ -109,7 +109,7 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).toContain("h-[192px]");
     expect(html).toContain("md:w-[112px]");
     expect(html).toContain("md:h-[200px]");
-    expect(html).toContain("rounded-[16px]");
+    expect(html).toContain("rounded-[var(--radius-lg)]");
     expect(html).toContain("bg-accent");
     expect(html).toContain("bg-band/55");
     expect(html).toContain("md:h-[120px]");
@@ -136,7 +136,7 @@ describe("Social Home craft (Figma 160:482 / 160:964)", () => {
     expect(html).toContain(SOCIAL.home.goExplore);
     expect(html).toContain(SOCIAL_EMPTY_PANEL_CLASS);
     expect(html).toContain(SOCIAL_EMPTY_ACTION_CLASS);
-    expect(SOCIAL_EMPTY_PANEL_CLASS).toContain("rounded-[8px]");
+    expect(SOCIAL_EMPTY_PANEL_CLASS).toContain("rounded-[var(--radius-lg)]");
     expect(SOCIAL_EMPTY_ACTION_CLASS).toContain("bg-accent");
   });
 

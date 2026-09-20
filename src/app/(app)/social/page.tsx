@@ -2,7 +2,6 @@ import { Suspense } from "react";
 
 import { TextAction } from "@/components/chrome/house";
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { SocialOnboardingChecklist } from "@/components/social/social-checklist";
 import { SocialEmpty } from "@/components/social/social-empty";
 import { SocialForYouRail } from "@/components/social/social-for-you";
 import { SocialHomeComposer } from "@/components/social/social-home-composer";
@@ -15,7 +14,7 @@ import {
 import { SocialStoriesRail } from "@/components/social/social-stories-rail";
 import { SocialPostCard } from "@/components/social/social-ui";
 import { SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS, SOCIAL_PILL_ACTIVE_CLASS, SOCIAL_PILL_CLASS } from "@/lib/social-chrome";
-import { signedAvatarUrl, signedAvatarUrls } from "@/lib/s3-avatars";
+import { signedAvatarUrls } from "@/lib/s3-avatars";
 import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
 import {
   parseSocialCategoryParam,
@@ -26,7 +25,7 @@ import {
 } from "@/lib/social-categories";
 import { latestDiscoverableCourse, loadDiscoverableCourses } from "@/lib/courses";
 import { signedEducationCoverUrls } from "@/lib/s3-education";
-import { followingAuthorIds, socialChecklistItems } from "@/lib/social-home";
+import { followingAuthorIds } from "@/lib/social-home";
 import {
   SOCIAL_FOLLOWING_WALL_CURSOR_PARAM,
   parseFollowingWallCursorParam,
@@ -40,7 +39,6 @@ import {
   loadGroupsByIds,
   loadLikedPostIds,
   loadLiveStories,
-  loadOwnPostFacts,
   loadProfilesByIds,
   loadSuggestedPeople,
   loadViewedStoryIds,
@@ -88,11 +86,9 @@ async function loadHomeProfile(session: SocialSession) {
 
 async function SocialHomeForYouSlot({ session }: { session: SocialSession }) {
   const { ctx, supabase } = session;
-  const { profile, followees } = await loadHomeProfile(session);
-  const [suggested, facts, photoUrl, catalog] = await Promise.all([
+  const { followees } = await loadHomeProfile(session);
+  const [suggested, catalog] = await Promise.all([
     loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids]),
-    profile ? loadOwnPostFacts(supabase, ctx.user.id) : Promise.resolve(null),
-    profile ? signedAvatarUrl(ctx.user.id) : Promise.resolve(null),
     loadDiscoverableCourses(supabase),
   ]);
   const latestCourse = catalog.failed ? null : latestDiscoverableCourse(catalog.courses);
@@ -100,20 +96,10 @@ async function SocialHomeForYouSlot({ session }: { session: SocialSession }) {
     suggested.length > 0 ? signedAvatarUrls(suggested.map((person) => person.id)) : Promise.resolve(new Map()),
     latestCourse ? signedEducationCoverUrls([latestCourse]) : Promise.resolve(new Map<string, string>()),
   ]);
-  const checklist = profile
-    ? socialChecklistItems({
-        hasPhoto: !!photoUrl,
-        hasBio: !!profile.bio?.trim(),
-        hasIntro: facts?.hasIntro ?? false,
-        hasPost: facts?.hasPost ?? false,
-        hasStory: facts?.hasStory ?? false,
-      })
-    : [];
   return (
     <SocialForYouRail
       people={suggested}
       faces={faces}
-      checklist={profile ? checklist : []}
       latestCourse={latestCourse}
       latestCourseCoverUrl={latestCourse ? courseCovers.get(latestCourse.id) ?? null : null}
     />
@@ -136,7 +122,7 @@ async function SocialHomeCenter({
   const { ctx, supabase } = session;
   const { profile, followees } = await loadHomeProfile(session);
   const authorIds = followingAuthorIds(ctx.user.id, followees.ids);
-  const [wall, storiesPage, suggested, facts] = await Promise.all([
+  const [wall, storiesPage, suggested] = await Promise.all([
     profile
       ? loadFollowingPosts(supabase, authorIds, { category, cursor })
       : Promise.resolve({ posts: [], truncated: false, nextCursor: null }),
@@ -144,7 +130,6 @@ async function SocialHomeCenter({
     lane === "for-you"
       ? loadSuggestedPeople(supabase, [ctx.user.id, ...followees.ids])
       : Promise.resolve([]),
-    profile ? loadOwnPostFacts(supabase, ctx.user.id) : Promise.resolve(null),
   ]);
   const posts = wall.posts;
   const stories = storiesPage.stories;
@@ -172,15 +157,6 @@ async function SocialHomeCenter({
   ]);
   const rail = groupStoryRail(stories, viewed);
   const photoUrl = faces.get(ctx.user.id) ?? null;
-  const checklist = profile
-    ? socialChecklistItems({
-        hasPhoto: !!photoUrl,
-        hasBio: !!profile.bio?.trim(),
-        hasIntro: facts?.hasIntro ?? false,
-        hasPost: facts?.hasPost ?? false,
-        hasStory: facts?.hasStory ?? false,
-      })
-    : [];
 
   return (
     <div className={SOCIAL_HOME_CENTER_CLASS}>
@@ -207,11 +183,6 @@ async function SocialHomeCenter({
         <InlineNotice tone="info" data-social-followees-truncated="">
           {SOCIAL.home.truncatedFollowees}
         </InlineNotice>
-      ) : null}
-      {lane === "following" && profile ? (
-        <div data-social-home-setup="" className="lg:hidden">
-          <SocialOnboardingChecklist items={checklist} />
-        </div>
       ) : null}
       <SocialHomeTabs active={lane} />
       {lane === "for-you" ? (
@@ -306,7 +277,7 @@ function SocialHomeFollowingWall({
           </div>
         </div>
       ) : (
-        <div data-social-feed="" className="flex flex-col">
+        <div data-social-feed="" className="flex flex-col gap-2">
           {posts.map((post) => {
             const author = authors.get(post.author_id);
             const group = post.group_id ? groups.get(post.group_id) : null;
