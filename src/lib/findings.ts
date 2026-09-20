@@ -3,7 +3,7 @@ import {
   HOUSE_PHONE_WRAP_CLASS,
 } from "@/lib/house-phone-stack";
 import { UNPAGINATED_MAX } from "@/lib/list-bounds";
-import { aggregationPath } from "@/lib/workspace";
+import { aggregationPath, staffPath } from "@/lib/workspace";
 
 // Findings copy + labels (§19 attention queue). Copy lives in lib/, not JSX.
 
@@ -34,7 +34,7 @@ export function catalogHealthCountLabel(n: number): string {
 
 /** Findings resolve on the title — staff stay on the GC title path. */
 export function catalogHealthTitleHref(titleId: string, gcWide: boolean): string {
-  return gcWide ? aggregationPath("gc/titles", titleId) : aggregationPath("titles", titleId);
+  return gcWide ? staffPath("gc/titles", titleId) : aggregationPath("titles", titleId);
 }
 
 // Home Do next lists finding + draft rows; Catalog Health owns the full queue.

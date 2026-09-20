@@ -10,7 +10,7 @@ describe("safeAuthCallbackNext (P0-1)", () => {
     expect(safeAuthCallbackNext("")).toBe("/home");
     expect(safeAuthCallbackNext("/")).toBe("/home");
     expect(safeAuthCallbackNext("/?ai=1")).toBe("/home?ai=1");
-    expect(safeAuthCallbackNext("/aggregation/queue")).toBe("/aggregation/queue");
+    expect(safeAuthCallbackNext("/staff/queue")).toBe("/staff/queue");
     expect(safeAuthCallbackNext("/home?ai=1")).toBe("/home?ai=1");
     expect(safeAuthCallbackNext("/settings/profile")).toBe("/settings/profile");
   });

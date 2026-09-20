@@ -150,7 +150,7 @@ describe("recipients cannot see or write suspense", () => {
     const detail = readFileSync("src/app/(app)/aggregation/reports/[periodId]/page.tsx", "utf8");
     const exp = readFileSync("src/app/(app)/aggregation/reports/[periodId]/export/route.ts", "utf8");
     const load = readFileSync("src/lib/finance-recipient-load.ts", "utf8");
-    const staffList = readFileSync("src/app/(app)/(operator)/aggregation/gc/finance/page.tsx", "utf8");
+    const staffList = readFileSync("src/app/(app)/(operator)/staff/gc/finance/page.tsx", "utf8");
     for (const src of [list, detail, exp]) {
       expect(src).not.toMatch(/suspense/i);
       expect(src).not.toContain("move_sales_lines_to_suspense");

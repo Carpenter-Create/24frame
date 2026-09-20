@@ -8,16 +8,19 @@
 //   Aggregation  /aggregation
 //   Social       /social
 //   Education    /education
+//   Staff        /staff
 // Home is Home-owned — never nest /home under /aggregation. /home/news
 // still uses Aggregation chrome so a Social cookie cannot steal it.
 // Not a fifth workspace.
 //
 // Adam lock 2026-09-20: Staff is its own workspace cookie mode — not a
-// Team block inside Aggregation. Chrome-first: operator URLs stay on
-// existing /aggregation/queue, avails, deliveries, channels, finance,
-// gc/clients paths. Those paths resolve to staff. Client Dashboard /
-// Titles / Attention / Reports stay aggregation. Do not migrate to
-// /staff/* in this slice. Staff is switcher-visible only for isGcStaff.
+// Team block inside Aggregation. Chrome-first (#582) kept operator
+// URLs under /aggregation/…; B path cut hard-cuts those surfaces to
+// /staff/*. Client Dashboard / Titles / Attention / Reports stay
+// /aggregation/*. Old aggregation queue/avails/channels/gc doors 404 —
+// no leftover redirect SoT, no dual nav hrefs. Staff is
+// switcher-visible only for isGcStaff. Members never see Staff /
+// Team / Ops / GC_NAV. A forged staff cookie is clamped off.
 //
 // Education: member browse/consume and staff CMS share the /education
 // prefix. Role gates chrome, not a parallel product. Member land is
@@ -48,16 +51,10 @@ export type WorkspaceMode = "aggregation" | "social" | "education" | "staff";
 
 export const WORKSPACE_MODES = ["aggregation", "social", "education", "staff"] as const;
 
-// Operator surfaces still live under /aggregation (chrome-first).
-// Prefixes match GC_NAV + the (operator) aggregation layout. Client
-// /aggregation/dashboard, titles, attention, reports stay aggregation.
-export const STAFF_PATH_PREFIXES = [
-  "/aggregation/queue",
-  "/aggregation/avails",
-  "/aggregation/channels",
-  "/aggregation/gc",
-] as const;
-
+// Operator surfaces live under /staff. Prefixes match GC_NAV + the
+// (operator) staff layout. Client /aggregation/dashboard, titles,
+// attention, reports stay aggregation.
+export const STAFF_ROOT = "/staff";
 export const STAFF_HOME_SEGMENT = "queue";
 
 export const AGGREGATION_ROOT = "/aggregation";
@@ -76,6 +73,21 @@ export function aggregationPath(...segments: string[]): string {
   return parts.length === 0 ? AGGREGATION_ROOT : `${AGGREGATION_ROOT}/${parts.join("/")}`;
 }
 
+export function staffPath(...segments: string[]): string {
+  const parts = segments
+    .flatMap((segment) => segment.split("/"))
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0 && part !== "staff");
+  return parts.length === 0 ? STAFF_ROOT : `${STAFF_ROOT}/${parts.join("/")}`;
+}
+
+export const STAFF_PATH_PREFIXES = [
+  staffPath("queue"),
+  staffPath("avails"),
+  staffPath("channels"),
+  staffPath("gc"),
+] as const;
+
 export function parseWorkspaceCookie(value: string | undefined | null): WorkspaceMode {
   if (value === "social") return "social";
   if (value === "education") return "education";
@@ -86,7 +98,7 @@ export function parseWorkspaceCookie(value: string | undefined | null): Workspac
 export function workspaceHome(mode: WorkspaceMode): string {
   if (mode === "social") return SOCIAL_ROOT;
   if (mode === "education") return EDUCATION_ROOT;
-  if (mode === "staff") return aggregationPath(STAFF_HOME_SEGMENT);
+  if (mode === "staff") return staffPath(STAFF_HOME_SEGMENT);
   return aggregationPath(AGGREGATION_HOME_SEGMENT);
 }
 
@@ -109,9 +121,7 @@ export function isHomePath(pathname: string): boolean {
 }
 
 export function isStaffPath(pathname: string): boolean {
-  return STAFF_PATH_PREFIXES.some(
-    (href) => pathname === href || pathname.startsWith(`${href}/`),
-  );
+  return pathname === STAFF_ROOT || pathname.startsWith(`${STAFF_ROOT}/`);
 }
 
 export function isAggregationPath(pathname: string): boolean {
@@ -139,6 +149,15 @@ export function resolveWorkspaceMode(pathname: string, cookie: WorkspaceMode): W
   if (isStaffPath(pathname)) return "staff";
   if (isAggregationPath(pathname)) return "aggregation";
   return cookie;
+}
+
+// Adam lock 2026-09-20: Staff is staff-only. A forged staff cookie or a
+// /staff/* bookmark must never paint Staff chrome for members. Path
+// resolve can still say staff; chrome callers clamp with isGcStaff.
+// (operator) / gc_staff remains the authorization bounce.
+export function clampWorkspaceMode(mode: WorkspaceMode, isGcStaff: boolean): WorkspaceMode {
+  if (mode === "staff" && !isGcStaff) return "aggregation";
+  return mode;
 }
 
 export function workspaceCookieWrite(mode: WorkspaceMode): string {

@@ -14,10 +14,10 @@ import { titleOpsPath } from "./title-public-id";
 const ACTION_FILES = [
   "src/app/(app)/aggregation/messages/ask-globee-actions.ts",
   "src/app/(app)/aggregation/messages/actions.ts",
-  "src/app/(app)/(operator)/aggregation/channels/actions.ts",
-  "src/app/(app)/(operator)/aggregation/gc/deliveries/actions.ts",
-  "src/app/(app)/(operator)/aggregation/gc/review/actions.ts",
-  "src/app/(app)/(operator)/aggregation/gc/titles/[id]/actions.ts",
+  "src/app/(app)/(operator)/staff/channels/actions.ts",
+  "src/app/(app)/(operator)/staff/gc/deliveries/actions.ts",
+  "src/app/(app)/(operator)/staff/gc/review/actions.ts",
+  "src/app/(app)/(operator)/staff/gc/titles/[id]/actions.ts",
 ] as const;
 
 const STALE_REVALIDATE = [
@@ -40,11 +40,11 @@ describe("aggregation revalidatePath SoT (P1-3)", () => {
       }
     }
     expect(ACTIVITY_HREF).toBe("/activity");
-    expect(CHANNELS_HREF).toBe("/aggregation/channels");
-    expect(GC_DELIVERIES_HREF).toBe("/aggregation/gc/deliveries");
-    expect(QUEUE_HREF).toBe("/aggregation/queue");
-    expect(AVAILS_HREF).toBe("/aggregation/avails");
-    expect(titleOpsPath("t1")).toBe("/aggregation/gc/titles/t1");
+    expect(CHANNELS_HREF).toBe("/staff/channels");
+    expect(GC_DELIVERIES_HREF).toBe("/staff/gc/deliveries");
+    expect(QUEUE_HREF).toBe("/staff/queue");
+    expect(AVAILS_HREF).toBe("/staff/avails");
+    expect(titleOpsPath("t1")).toBe("/staff/gc/titles/t1");
     expect(readFileSync(ACTION_FILES[0], "utf8")).toContain('revalidatePath("/", "layout")');
     expect(readFileSync(ACTION_FILES[1], "utf8")).toContain("ACTIVITY_HREF");
     expect(readFileSync(ACTION_FILES[2], "utf8")).toContain("CHANNELS_HREF");

@@ -8,7 +8,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 const pageSrc = readFileSync(
-  "src/app/(app)/(operator)/aggregation/gc/deliveries/deliver/page.tsx",
+  "src/app/(app)/(operator)/staff/gc/deliveries/deliver/page.tsx",
   "utf8",
 );
 

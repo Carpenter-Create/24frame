@@ -35,7 +35,7 @@ describe("LicensingVendorFilter", () => {
 
   it("does not invent a second select grammar", () => {
     const src = readFileSync(
-      "src/app/(app)/(operator)/aggregation/gc/deliveries/licensing-vendor-filter.tsx",
+      "src/app/(app)/(operator)/staff/gc/deliveries/licensing-vendor-filter.tsx",
       "utf8",
     );
     expect(src).toContain("HousePageSelect");

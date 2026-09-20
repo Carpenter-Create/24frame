@@ -36,7 +36,7 @@ describe("catalog health findings helpers", () => {
 
   it("opens the title so the finding is fixed on the title, not a fake queue action", () => {
     expect(catalogHealthTitleHref("title-acme", false)).toBe("/aggregation/titles/title-acme");
-    expect(catalogHealthTitleHref("title-acme", true)).toBe("/aggregation/gc/titles/title-acme");
+    expect(catalogHealthTitleHref("title-acme", true)).toBe("/staff/gc/titles/title-acme");
     expect(catalogHealthTitleHref("title-acme", false)).not.toContain("/metadata");
   });
 

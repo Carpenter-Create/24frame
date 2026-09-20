@@ -67,7 +67,7 @@ describe("workspace menu copy", () => {
       "/aggregation/dashboard",
       "/social",
       "/education",
-      "/aggregation/queue",
+      "/staff/queue",
     ]);
     expect(availableWorkspaceOptions({ isGcStaff: false }).map((option) => option.mode)).not.toContain(
       "staff",

@@ -22,7 +22,7 @@ describe("CHANNELS_PAGE lock copy", () => {
     expect(CHANNELS_PAGE.filterMiss).toBe("No channels match this filter.");
     expect(CHANNELS_PAGE).not.toHaveProperty("emptySupport");
     expect(CHANNELS_PAGE.addChannel).toBe("Add channel");
-    expect(CHANNELS_PAGE.addHref).toBe("/aggregation/channels/new");
+    expect(CHANNELS_PAGE.addHref).toBe("/staff/channels/new");
     expect(CHANNELS_PAGE.statusFilterLabel).toBe("Filter by status");
     expect(JSON.stringify(CHANNELS_PAGE)).not.toContain("GC distribution partners.");
     expect(JSON.stringify(CHANNELS_PAGE)).not.toContain("Add your first partner.");
@@ -101,7 +101,7 @@ describe("channel directory rows", () => {
   it("builds the channel href, meta, and real tags only", () => {
     const row = asVendorDirectoryRow(real);
     if (!row) throw new Error("expected row");
-    expect(vendorDirectoryHref(row)).toBe(`/aggregation/channels/${real.id}`);
+    expect(vendorDirectoryHref(row)).toBe(`/staff/channels/${real.id}`);
     expect(vendorDirectoryMeta(row)).toBe("Portal upload");
     expect(
       vendorDirectoryMeta({

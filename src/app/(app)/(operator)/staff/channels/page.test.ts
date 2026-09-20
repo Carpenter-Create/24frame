@@ -55,7 +55,7 @@ async function renderChannels(rows: VendorRow[] | null = []) {
   return renderToStaticMarkup(await GcChannelsPage());
 }
 
-const pageSrc = readFileSync("src/app/(app)/(operator)/aggregation/channels/page.tsx", "utf8");
+const pageSrc = readFileSync("src/app/(app)/(operator)/staff/channels/page.tsx", "utf8");
 
 describe("staff /channels card grid", () => {
   beforeEach(() => vi.clearAllMocks());
@@ -256,13 +256,13 @@ describe("staff rail and neighboring locks", () => {
     expect(home).toContain("GcClientsDirectory");
     expect(pageSrc).not.toContain("ask-globee");
     expect(pageSrc).not.toContain("TITLES_CATALOG");
-    expect(readFileSync("src/app/(app)/(operator)/aggregation/channels/new/page.tsx", "utf8")).toContain(
+    expect(readFileSync("src/app/(app)/(operator)/staff/channels/new/page.tsx", "utf8")).toContain(
       "VendorForm",
     );
-    expect(readFileSync("src/app/(app)/(operator)/aggregation/channels/[id]/edit/page.tsx", "utf8")).toContain(
+    expect(readFileSync("src/app/(app)/(operator)/staff/channels/[id]/edit/page.tsx", "utf8")).toContain(
       "VendorForm",
     );
-    expect(readFileSync("src/app/(app)/(operator)/aggregation/channels/[id]/page.tsx", "utf8")).not.toContain(
+    expect(readFileSync("src/app/(app)/(operator)/staff/channels/[id]/page.tsx", "utf8")).not.toContain(
       "VendorForm",
     );
   });

@@ -155,5 +155,7 @@ describe("Social nav no longer waits on the (app) layout waterfall", () => {
     expect(shellSrc).toContain("data.defaultCollapsed");
     expect(shellSrc).toContain("data.defaultWorkspace");
     expect(shellSrc).toContain("Do not use() this at the AppShell top");
+    expect(chromeSrc).toContain("clampWorkspaceMode");
+    expect(shellSrc).toContain("clampWorkspaceMode");
   });
 });

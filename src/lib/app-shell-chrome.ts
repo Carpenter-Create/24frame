@@ -11,7 +11,12 @@ import { getActiveOrgTier } from "@/lib/org-tier";
 import { readSidebarCollapsed } from "@/lib/rail-collapse";
 import { createClient } from "@/lib/supabase/server";
 import { getOrgContext, type OrgContext } from "@/lib/supabase/context";
-import { parseWorkspaceCookie, WORKSPACE_COOKIE, type WorkspaceMode } from "@/lib/workspace";
+import {
+  clampWorkspaceMode,
+  parseWorkspaceCookie,
+  WORKSPACE_COOKIE,
+  type WorkspaceMode,
+} from "@/lib/workspace";
 
 export type AppShellChrome = {
   email: string;
@@ -65,7 +70,10 @@ export const loadAppShellChrome = cache(async (): Promise<AppShellChrome> => {
       hasActiveOrg: !!ctx.activeOrg,
       tier,
     }),
-    defaultWorkspace: parseWorkspaceCookie(jar.get(WORKSPACE_COOKIE)?.value),
+    defaultWorkspace: clampWorkspaceMode(
+      parseWorkspaceCookie(jar.get(WORKSPACE_COOKIE)?.value),
+      ctx.isGcStaff,
+    ),
   };
 });
 

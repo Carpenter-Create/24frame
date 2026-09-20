@@ -6,7 +6,7 @@ import { cn } from "@/lib/cn";
 import type { AppShellChrome } from "@/lib/app-shell-chrome";
 import { HOUSE_LEAD_SHELL_CLASS } from "@/lib/house-lead-chrome";
 import { HOUSE_PAGE_CANVAS_CLASS } from "@/lib/house-shell";
-import type { WorkspaceMode } from "@/lib/workspace";
+import { clampWorkspaceMode, type WorkspaceMode } from "@/lib/workspace";
 import { HouseLeadScrollToTop } from "./house-lead-scroll-to-top";
 import { HousePhoneBottomNav } from "./house-phone-bottom-nav";
 
@@ -76,7 +76,7 @@ function PhoneDockSlot({
 }) {
   const dock = (
     <HousePhoneBottomNav
-      workspace={workspace}
+      workspace={clampWorkspaceMode(workspace, isGcStaff)}
       isGcStaff={isGcStaff}
       homeOwned={homeOwned}
       accountChrome={accountChrome}
@@ -113,7 +113,7 @@ function PhoneDockFromChrome({
   const data = use(chrome);
   return (
     <HousePhoneBottomNav
-      workspace={workspace}
+      workspace={clampWorkspaceMode(workspace, data.isGcStaff)}
       isGcStaff={data.isGcStaff}
       homeOwned={homeOwned}
       accountChrome={accountChrome}

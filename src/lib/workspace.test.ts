@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  clampWorkspaceMode,
   isEducationPath,
   isSocialPath,
   isStaffPath,
   parseWorkspaceCookie,
   resolveWorkspaceMode,
+  STAFF_PATH_PREFIXES,
   WORKSPACE_COOKIE,
   WORKSPACE_MODES,
   workspaceCookieWrite,
@@ -28,7 +30,7 @@ describe("workspace mode", () => {
     expect(workspaceHome("social")).toBe("/social");
     expect(workspaceHome("education")).toBe("/education");
     expect(workspaceHome("aggregation")).toBe("/aggregation/dashboard");
-    expect(workspaceHome("staff")).toBe("/aggregation/queue");
+    expect(workspaceHome("staff")).toBe("/staff/queue");
     expect(workspaceHome("education")).not.toBe("/social/courses");
   });
 
@@ -83,25 +85,42 @@ describe("workspace mode", () => {
   });
 
   it("resolves operator paths to staff and keeps client Aggregation paths aggregation", () => {
-    expect(isStaffPath("/aggregation/queue")).toBe(true);
-    expect(isStaffPath("/aggregation/avails")).toBe(true);
-    expect(isStaffPath("/aggregation/channels")).toBe(true);
-    expect(isStaffPath("/aggregation/channels/new")).toBe(true);
-    expect(isStaffPath("/aggregation/gc/deliveries")).toBe(true);
-    expect(isStaffPath("/aggregation/gc/finance")).toBe(true);
-    expect(isStaffPath("/aggregation/gc/clients")).toBe(true);
-    expect(isStaffPath("/aggregation/gc/titles/abc")).toBe(true);
+    expect(isStaffPath("/staff/queue")).toBe(true);
+    expect(isStaffPath("/staff/avails")).toBe(true);
+    expect(isStaffPath("/staff/channels")).toBe(true);
+    expect(isStaffPath("/staff/channels/new")).toBe(true);
+    expect(isStaffPath("/staff/gc/deliveries")).toBe(true);
+    expect(isStaffPath("/staff/gc/finance")).toBe(true);
+    expect(isStaffPath("/staff/gc/clients")).toBe(true);
+    expect(isStaffPath("/staff/gc/titles/abc")).toBe(true);
     expect(isStaffPath("/aggregation/dashboard")).toBe(false);
     expect(isStaffPath("/aggregation/titles")).toBe(false);
     expect(isStaffPath("/aggregation/attention")).toBe(false);
     expect(isStaffPath("/aggregation/reports")).toBe(false);
+    expect(isStaffPath("/aggregation/queue")).toBe(false);
+    expect(isStaffPath("/aggregation/avails")).toBe(false);
+    expect(isStaffPath("/aggregation/channels")).toBe(false);
+    expect(isStaffPath("/aggregation/gc/deliveries")).toBe(false);
+    expect(isStaffPath("/aggregation/gc/finance")).toBe(false);
+    expect(isStaffPath("/aggregation/gc/clients")).toBe(false);
     expect(isStaffPath("/home")).toBe(false);
-    expect(resolveWorkspaceMode("/aggregation/queue", "aggregation")).toBe("staff");
-    expect(resolveWorkspaceMode("/aggregation/avails", "social")).toBe("staff");
-    expect(resolveWorkspaceMode("/aggregation/gc/deliveries", "education")).toBe("staff");
-    expect(resolveWorkspaceMode("/aggregation/channels/abc/edit", "aggregation")).toBe("staff");
-    expect(resolveWorkspaceMode("/aggregation/gc/finance/p1", "aggregation")).toBe("staff");
-    expect(resolveWorkspaceMode("/aggregation/gc/clients/org", "social")).toBe("staff");
+    expect(STAFF_PATH_PREFIXES).toEqual([
+      "/staff/queue",
+      "/staff/avails",
+      "/staff/channels",
+      "/staff/gc",
+    ]);
+    expect(STAFF_PATH_PREFIXES.every((href) => href.startsWith("/staff/"))).toBe(true);
+    expect(STAFF_PATH_PREFIXES.some((href) => href.startsWith("/aggregation/"))).toBe(false);
+    expect(resolveWorkspaceMode("/aggregation/queue", "staff")).toBe("aggregation");
+    expect(resolveWorkspaceMode("/aggregation/avails", "staff")).toBe("aggregation");
+    expect(resolveWorkspaceMode("/aggregation/gc/deliveries", "staff")).toBe("aggregation");
+    expect(resolveWorkspaceMode("/staff/queue", "aggregation")).toBe("staff");
+    expect(resolveWorkspaceMode("/staff/avails", "social")).toBe("staff");
+    expect(resolveWorkspaceMode("/staff/gc/deliveries", "education")).toBe("staff");
+    expect(resolveWorkspaceMode("/staff/channels/abc/edit", "aggregation")).toBe("staff");
+    expect(resolveWorkspaceMode("/staff/gc/finance/p1", "aggregation")).toBe("staff");
+    expect(resolveWorkspaceMode("/staff/gc/clients/org", "social")).toBe("staff");
     expect(resolveWorkspaceMode("/aggregation/dashboard", "staff")).toBe("aggregation");
     expect(resolveWorkspaceMode("/aggregation/titles/1", "staff")).toBe("aggregation");
     expect(resolveWorkspaceMode("/aggregation/attention", "staff")).toBe("aggregation");
@@ -109,5 +128,38 @@ describe("workspace mode", () => {
     expect(resolveWorkspaceMode("/home", "staff")).toBe("aggregation");
     expect(resolveWorkspaceMode("/home/news", "staff")).toBe("aggregation");
     expect(resolveWorkspaceMode("/education/manage", "staff")).toBe("education");
+  });
+
+  it("clamps a forged staff cookie so members never keep staff chrome", () => {
+    expect(clampWorkspaceMode("staff", false)).toBe("aggregation");
+    expect(clampWorkspaceMode("staff", true)).toBe("staff");
+    expect(clampWorkspaceMode("aggregation", false)).toBe("aggregation");
+    expect(clampWorkspaceMode("social", false)).toBe("social");
+    expect(clampWorkspaceMode("education", false)).toBe("education");
+    expect(clampWorkspaceMode("social", true)).toBe("social");
+    expect(
+      clampWorkspaceMode(resolveWorkspaceMode("/settings", "staff"), false),
+    ).toBe("aggregation");
+    expect(
+      clampWorkspaceMode(resolveWorkspaceMode("/activity", "staff"), false),
+    ).toBe("aggregation");
+    expect(
+      clampWorkspaceMode(resolveWorkspaceMode("/help", "staff"), false),
+    ).toBe("aggregation");
+    expect(
+      clampWorkspaceMode(resolveWorkspaceMode("/staff/queue", "aggregation"), false),
+    ).toBe("aggregation");
+    expect(
+      clampWorkspaceMode(resolveWorkspaceMode("/staff/queue", "staff"), false),
+    ).toBe("aggregation");
+    expect(
+      clampWorkspaceMode(resolveWorkspaceMode("/staff/queue", "staff"), true),
+    ).toBe("staff");
+    expect(
+      clampWorkspaceMode(resolveWorkspaceMode("/settings", "staff"), true),
+    ).toBe("staff");
+    expect(
+      clampWorkspaceMode(resolveWorkspaceMode("/aggregation/dashboard", "staff"), false),
+    ).toBe("aggregation");
   });
 });

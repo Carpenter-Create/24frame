@@ -74,7 +74,7 @@ describe("mapping C — finance stays Aggregation", () => {
     expect(SOCIAL_NAV.map((item) => item.href)).not.toContain("/earn");
     expect(SOCIAL_NAV.map((item) => item.href)).not.toContain("/finance");
     expect(SOCIAL_NAV.map((item) => item.href)).not.toContain("/gc/finance");
-    expect(GC_NAV.map((item) => item.href)).toContain("/aggregation/gc/finance");
+    expect(GC_NAV.map((item) => item.href)).toContain("/staff/gc/finance");
     expect(GC_NAV.map((item) => item.href)).not.toContain("/reports");
     expect(GC_NAV.map((item) => item.href)).not.toContain("/earn");
     expect(GC_NAV.map((item) => item.href)).not.toContain("/finance");
@@ -120,7 +120,7 @@ describe("mapping C — finance stays Aggregation", () => {
 
   it("builds ops and recipient math from one statement assembler", () => {
     const statement = readFileSync("src/lib/finance-statement.ts", "utf8");
-    const page = readFileSync("src/app/(app)/(operator)/aggregation/gc/finance/[periodId]/page.tsx", "utf8");
+    const page = readFileSync("src/app/(app)/(operator)/staff/gc/finance/[periodId]/page.tsx", "utf8");
     expect(statement).toContain("assemblePeriodStatement");
     expect(statement).toContain("STATEMENT_TRANSPARENCY_LINES");
     expect(statement).toContain("postedOnly");
@@ -141,7 +141,7 @@ describe("mapping C — finance stays Aggregation", () => {
 
   it("defines a 24Frame statement output that keeps source input for later export", () => {
     const statement = readFileSync("src/lib/finance-statement.ts", "utf8");
-    const page = readFileSync("src/app/(app)/(operator)/aggregation/gc/finance/[periodId]/page.tsx", "utf8");
+    const page = readFileSync("src/app/(app)/(operator)/staff/gc/finance/[periodId]/page.tsx", "utf8");
     expect(statement).toContain("toStatementOutput");
     expect(statement).toContain("STATEMENT_OUTPUT_FORMAT");
     expect(statement).toContain("24frame-statement-v1");

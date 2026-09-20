@@ -104,10 +104,10 @@ describe("auth callback failure logging", () => {
     mockAuth();
 
     const res = await GET(
-      new Request(`https://app.test/auth/callback?code=${CODE}&next=/aggregation/queue`),
+      new Request(`https://app.test/auth/callback?code=${CODE}&next=/staff/queue`),
     );
 
-    expect(res.headers.get("location")).toBe("https://app.test/aggregation/queue");
+    expect(res.headers.get("location")).toBe("https://app.test/staff/queue");
     expect(errorSpy).not.toHaveBeenCalled();
     expect(ensureOwnSocialProfile).toHaveBeenCalledWith(
       expect.anything(),

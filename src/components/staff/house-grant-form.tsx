@@ -23,7 +23,7 @@ import {
 import {
   grantHouseAccount,
   revokeHouseGrant,
-} from "@/app/(app)/(operator)/aggregation/gc/clients/grant-actions";
+} from "@/app/(app)/(operator)/staff/gc/clients/grant-actions";
 
 export type HouseGrantRow = {
   id: string;

@@ -3,7 +3,7 @@ import {
   TITLES_ROW_NAME_CLASS,
   catalogStillSrc,
 } from "@/lib/titles-catalog";
-import { aggregationPath } from "@/lib/workspace";
+import { staffPath } from "@/lib/workspace";
 
 // Staff /avails. Adam lock avails-grid-3 (B): 3-wide landscape tile grid
 // on desktop, 1-wide stack of the same tile on phone. Shared Titles
@@ -11,7 +11,7 @@ import { aggregationPath } from "@/lib/workspace";
 // StatusProgressTrack, no territory matrix. Titles with status = live
 // (Approved) only.
 
-export const AVAILS_HREF = aggregationPath("avails");
+export const AVAILS_HREF = staffPath("avails");
 
 export const AVAILS_PAGE = {
   title: "Avails",
@@ -41,7 +41,7 @@ export type AvailsTile = {
 };
 
 export function availsTitleHref(titleId: string): string {
-  return aggregationPath("gc/titles", titleId);
+  return staffPath("gc/titles", titleId);
 }
 
 export function toAvailsTile(

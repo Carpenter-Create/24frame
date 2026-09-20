@@ -144,13 +144,20 @@ describe("Ask Globee nav mark", () => {
 describe("GC_NAV", () => {
   it("adds staff-only Licensing Status between Queue and Channels, with Clients last", () => {
     expect(GC_NAV.map((item) => ({ label: item.label, href: item.href }))).toEqual([
-      { label: "Queue", href: "/aggregation/queue" },
-      { label: "Avails", href: "/aggregation/avails" },
-      { label: "Licensing Status", href: "/aggregation/gc/deliveries" },
-      { label: "Channels", href: "/aggregation/channels" },
-      { label: "Finance", href: "/aggregation/gc/finance" },
-      { label: "Clients", href: "/aggregation/gc/clients" },
+      { label: "Queue", href: "/staff/queue" },
+      { label: "Avails", href: "/staff/avails" },
+      { label: "Licensing Status", href: "/staff/gc/deliveries" },
+      { label: "Channels", href: "/staff/channels" },
+      { label: "Finance", href: "/staff/gc/finance" },
+      { label: "Clients", href: "/staff/gc/clients" },
     ]);
+    expect(GC_NAV.map((item) => item.href).every((href) => href.startsWith("/staff/"))).toBe(true);
+    expect(GC_NAV.map((item) => item.href)).not.toContain("/aggregation/queue");
+    expect(GC_NAV.map((item) => item.href)).not.toContain("/aggregation/avails");
+    expect(GC_NAV.map((item) => item.href)).not.toContain("/aggregation/gc/deliveries");
+    expect(GC_NAV.map((item) => item.href)).not.toContain("/aggregation/channels");
+    expect(GC_NAV.map((item) => item.href)).not.toContain("/aggregation/gc/finance");
+    expect(GC_NAV.map((item) => item.href)).not.toContain("/aggregation/gc/clients");
   });
 
   it("keeps operator dests on GC_NAV and never concatenates them under Aggregation", () => {
@@ -238,12 +245,12 @@ describe("mobileNavDestinations", () => {
       "/aggregation/reports",
     ]);
     expect(railDestinations(true, "staff").items.map((item) => item.href)).toEqual([
-      "/aggregation/queue",
-      "/aggregation/avails",
-      "/aggregation/gc/deliveries",
-      "/aggregation/channels",
-      "/aggregation/gc/finance",
-      "/aggregation/gc/clients",
+      "/staff/queue",
+      "/staff/avails",
+      "/staff/gc/deliveries",
+      "/staff/channels",
+      "/staff/gc/finance",
+      "/staff/gc/clients",
     ]);
     expect(railDestinations(true, "staff").staffItems).toEqual([]);
     expect(railDestinations(false, "staff").items.map((item) => item.label)).toEqual([
@@ -373,7 +380,7 @@ describe("mobileNavDestinations", () => {
     expect(railDestinations(true, "social").staffItems).toEqual([]);
     expect(railDestinations(true, "aggregation").staffItems).toEqual([]);
     expect(railDestinations(true, "staff").items.map((item) => item.href)).toContain(
-      "/aggregation/queue",
+      "/staff/queue",
     );
   });
 });

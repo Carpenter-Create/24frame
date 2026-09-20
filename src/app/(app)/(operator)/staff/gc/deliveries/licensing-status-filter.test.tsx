@@ -20,7 +20,7 @@ describe("LicensingStatusFilter", () => {
       }),
     );
     const src = readFileSync(
-      "src/app/(app)/(operator)/aggregation/gc/deliveries/licensing-status-filter.tsx",
+      "src/app/(app)/(operator)/staff/gc/deliveries/licensing-status-filter.tsx",
       "utf8",
     );
     expect(html).toContain("data-house-page-select");

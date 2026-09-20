@@ -74,7 +74,7 @@ async function renderEmptyDeliveries(
   );
 }
 
-const pageSrc = readFileSync("src/app/(app)/(operator)/aggregation/gc/deliveries/page.tsx", "utf8");
+const pageSrc = readFileSync("src/app/(app)/(operator)/staff/gc/deliveries/page.tsx", "utf8");
 const companionsSrc = readFileSync("src/lib/gc-deliveries-companions.ts", "utf8");
 const viewTitlesClass = "t-body-sm text-accent transition-colors hover:underline";
 
@@ -121,7 +121,7 @@ describe("staff /gc/deliveries empty copy", () => {
 
   it("does not restyle client Titles or team Channels", () => {
     const titles = readFileSync("src/app/(app)/aggregation/titles/page.tsx", "utf8");
-    const channels = readFileSync("src/app/(app)/(operator)/aggregation/channels/page.tsx", "utf8");
+    const channels = readFileSync("src/app/(app)/(operator)/staff/channels/page.tsx", "utf8");
 
     expect(titles).toContain("TITLES_CATALOG");
     expect(titles).not.toContain("GC_LICENSING_STATUS");
@@ -200,7 +200,7 @@ describe("staff /gc/deliveries licensing filters and craft", () => {
     const html = await renderEmptyDeliveries({ status: "rejected" });
     expect(html).toContain(GC_LICENSING_STATUS.filterMiss);
     expect(html).toContain(GC_LICENSING_STATUS.showAll);
-    expect(html).toContain('href="/aggregation/gc/deliveries"');
+    expect(html).toContain('href="/staff/gc/deliveries"');
     expect(html).not.toContain("No licensing status yet.");
   });
 

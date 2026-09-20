@@ -1,12 +1,12 @@
 import { PRODUCT_NAME } from "@/lib/product";
-import { aggregationPath } from "@/lib/workspace";
+import { aggregationPath, staffPath } from "@/lib/workspace";
 
-// Staff ops copy + client recipient copy. Ops write path stays /aggregation/gc/finance.
+// Staff ops copy + client recipient copy. Ops write path stays /staff/gc/finance.
 // Recipient read path is /aggregation/reports. Retired /earn* /finance* /reports 404.
 // Official complementary-split lock: display client % and remainder only. Do
 // not invent a second fee field.
 
-export const FINANCE_HREF = aggregationPath("gc/finance");
+export const FINANCE_HREF = staffPath("gc/finance");
 export const FINANCE_CLIENT_HREF = aggregationPath("reports");
 
 export const FINANCE_WRITE_RPCS = [

@@ -34,9 +34,9 @@ import { REPORTS_HREF, REPORTS_PAGE } from "@/lib/reports";
 import { SOCIAL_ROUTES } from "@/lib/social";
 import { TITLES_HREF } from "@/lib/title-public-id";
 import {
-  aggregationPath,
   isAggregationNavActive,
   isEducationManagePath,
+  staffPath,
   type WorkspaceMode,
 } from "@/lib/workspace";
 import { WORKSPACE_EDUCATION_LABEL } from "@/lib/workspace-menu";
@@ -75,7 +75,7 @@ export function isHouseAiNavItem(item: NavItem): item is HouseAiNavItem {
 // destination and never an Aggregation rail row. Desktop entry is
 // the header HouseAiMark only.
 // Reports is the one client activity door. Staff ops stays on GC_NAV
-// at /gc/finance. Glyphs: Figma 75:5 / 75:2 / 61:2 Phosphor Bold idle,
+// at /staff/gc/finance. Glyphs: Figma 75:5 / 75:2 / 61:2 Phosphor Bold idle,
 // Fill active. Overlay chrome still uses the house sparkle cluster
 // (HouseAiMark), not a Phosphor catalog glyph.
 export const NAV: PhosphorNavItem[] = [
@@ -159,7 +159,7 @@ export const GC_NAV: PhosphorNavItem[] = [
     icon: Wallet,
     ariaLabel: FINANCE_PAGE.navAria,
   },
-  { label: "Clients", href: aggregationPath("gc/clients"), family: "phosphor", icon: Users },
+  { label: "Clients", href: staffPath("gc/clients"), family: "phosphor", icon: Users },
 ];
 
 // Phone dest-chip copy leftover. Hamburger sheet is gone — dests live

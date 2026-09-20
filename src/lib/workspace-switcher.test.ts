@@ -93,7 +93,7 @@ describe("workspace switcher lock", () => {
     )).toEqual(["Aggregation", "Social", "Education", "Staff"]);
     expect(workspaceSwitcherOptions(availableWorkspaceOptions({ isGcStaff: true })).map(
       (option) => option.href,
-    )).toEqual(["/aggregation/dashboard", "/social", "/education", "/aggregation/queue"]);
+    )).toEqual(["/aggregation/dashboard", "/social", "/education", "/staff/queue"]);
     expect(availableWorkspaceOptions().map((option) => option.href)).toEqual(
       workspaceSwitcherOptions().map((option) => option.href),
     );
@@ -279,7 +279,7 @@ describe("workspace switcher lock", () => {
     expect(workspaceSwitcherPersistLane.name).toBe("workspaceSwitcherPersistLane");
     expect(workspaceHome("aggregation")).toBe("/aggregation/dashboard");
     expect(workspaceHome("social")).toBe("/social");
-    expect(workspaceHome("staff")).toBe("/aggregation/queue");
+    expect(workspaceHome("staff")).toBe("/staff/queue");
   });
 
   it("uses segmented track grammar for desktop sliding pills", () => {

@@ -1,4 +1,4 @@
-import { aggregationPath } from "@/lib/workspace";
+import { aggregationPath, staffPath } from "@/lib/workspace";
 
 // Client Aggregation catalog ID. Same titles.catalog_no as ops `GC-#######`,
 // different public prefix. UUID stays the primary key and never belongs in a
@@ -47,7 +47,7 @@ export function titleClientPath(
 }
 
 export function titleOpsPath(titleId: string, extra = ""): string {
-  return `${aggregationPath("gc/titles", titleId)}${extra}`;
+  return `${staffPath("gc/titles", titleId)}${extra}`;
 }
 
 export function isCanonicalTitleSlug(

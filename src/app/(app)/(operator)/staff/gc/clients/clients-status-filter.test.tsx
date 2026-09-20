@@ -16,7 +16,7 @@ describe("ClientsStatusFilter", () => {
       createElement(ClientsStatusFilter, { status: "active", defaultOpen: true }),
     );
     const src = readFileSync(
-      "src/app/(app)/(operator)/aggregation/gc/clients/clients-status-filter.tsx",
+      "src/app/(app)/(operator)/staff/gc/clients/clients-status-filter.tsx",
       "utf8",
     );
     expect(html).toContain("data-house-page-select");
