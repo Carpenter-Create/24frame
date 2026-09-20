@@ -69,9 +69,9 @@
   --text-lg:   1.0625rem;  /* 17 — .t-heading / .t-lead */
   --text-title:1.5rem;     /* 24 — .t-title / .page-title */
   --text-hero: 3rem;       /* 48 — .t-display / hero-value */
-  /* Tracking roles (Pass A4 optical densify). Geist reads lighter than
-     Coinbase Sans at the same CSS weight; close the gap here, not with
-     a face swap or a return to A/A2 over-bold. Body stays looser
+  /* Tracking roles (Pass A4 optical densify). Geist reads optically
+     lighter at the same CSS weight; close the gap here, not with a
+     face swap or a return to A/A2 over-bold. Body stays looser
      (element -0.006em). Do not use --tracking-title on body. */
   --tracking-tight: -0.02em;     /* heading / subhead */
   --tracking-title: -0.028em;    /* title / section / statement */
