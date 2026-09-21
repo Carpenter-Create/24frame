@@ -295,11 +295,12 @@ export function socialTopicChipSelectClass(selected: boolean): string {
 // /social/profile and public /social/u/[handle]. Head row is avatar |
 // (display name → posts/followers/following stacked). Name is never
 // full-width above the avatar (that read as randomly floating). Stats
-// sit directly under the name in the right column, still max-w-xs so
-// the 3-up stays optically close — no stretch void across the 892
-// column. Bio · Role pills · links · actions stay full-width below
-// the head row. Dedicated house-token air before Edit / Share (or
-// Follow / Share). Handle stays in chrome. Name wraps; never truncate.
+// left-pack under the name in the right column — content-sized 3-up,
+// not a w-full stretch across the meta column. Each cell stays
+// number-above-label; the group shares the name's left edge. Bio ·
+// Role pills · links · actions stay full-width below the head row.
+// Dedicated house-token air before Edit / Share (or Follow / Share).
+// Handle stays in chrome. Name wraps; never truncate.
 export const SOCIAL_PROFILE_IDENTITY_CLASS = "flex flex-col gap-2";
 
 export const SOCIAL_PROFILE_HEAD_CLASS = "flex items-center gap-4";
@@ -309,13 +310,13 @@ export const SOCIAL_PROFILE_HEAD_CLASS = "flex items-center gap-4";
 export const SOCIAL_PROFILE_META_CLASS =
   "flex min-w-0 flex-1 flex-col justify-center gap-1";
 
-export const SOCIAL_PROFILE_STATS_CLASS =
-  "flex min-w-0 max-w-xs flex-1 items-center";
+export const SOCIAL_PROFILE_STATS_CLASS = "flex w-fit min-w-0 items-center";
 
-export const SOCIAL_PROFILE_STATS_GRID_CLASS = "grid w-full grid-cols-3";
+export const SOCIAL_PROFILE_STATS_GRID_CLASS =
+  "inline-flex items-start gap-x-[var(--space-4)]";
 
 export const SOCIAL_PROFILE_STAT_CLASS =
-  "flex min-w-0 flex-col items-center justify-center text-center";
+  "flex min-w-0 flex-col items-center justify-center py-[var(--space-1)] text-center";
 
 export const SOCIAL_PROFILE_STAT_VALUE_CLASS = "t-body font-semibold tabular-nums text-ink";
 

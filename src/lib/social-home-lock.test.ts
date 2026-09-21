@@ -686,7 +686,12 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).not.toContain("h-[140px]");
     expect(chrome).toContain("HOUSE_PILL_ITEM_CLASS");
     expect(chrome).toContain("HOUSE_FILTER_OFF_CLASS");
-    expect(chrome).toContain("max-w-xs");
+    expect(chrome).toContain("SOCIAL_PROFILE_STATS_CLASS");
+    expect(chrome).toContain("SOCIAL_PROFILE_STATS_GRID_CLASS");
+    expect(chrome).toContain("w-fit");
+    expect(chrome).toContain("inline-flex items-start gap-x-[var(--space-4)]");
+    expect(chrome).not.toContain("max-w-xs");
+    expect(chrome).not.toContain("grid w-full grid-cols-3");
     expect(chrome).toContain("items-center");
     expect(empty).toContain("SocialProfilePostsEmpty");
     expect(empty).toContain("SOCIAL_PROFILE_POSTS_EMPTY_CLASS");

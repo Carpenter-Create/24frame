@@ -116,9 +116,9 @@ export function SocialProfileCenterSkeleton() {
             <Skeleton className="h-4 w-32" />
             <div className={SOCIAL_PROFILE_STATS_CLASS}>
               <div className={SOCIAL_PROFILE_STATS_GRID_CLASS}>
-                <Skeleton className="mx-auto h-8 w-10" />
-                <Skeleton className="mx-auto h-8 w-10" />
-                <Skeleton className="mx-auto h-8 w-10" />
+                <Skeleton className="h-8 w-10" />
+                <Skeleton className="h-8 w-10" />
+                <Skeleton className="h-8 w-10" />
               </div>
             </div>
           </div>

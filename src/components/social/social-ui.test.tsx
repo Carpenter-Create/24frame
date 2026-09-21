@@ -49,6 +49,7 @@ import {
   SOCIAL_PROFILE_ROLES_ROW_CLASS,
   SOCIAL_PROFILE_STAT_CLASS,
   SOCIAL_PROFILE_STATS_CLASS,
+  SOCIAL_PROFILE_STATS_GRID_CLASS,
   SOCIAL_PROFILE_TILE_CLASS,
 } from "@/lib/social-chrome";
 
@@ -426,12 +427,17 @@ describe("Social profile public face", () => {
     expect(withStats).not.toContain("size-24");
     expect(withStats).toContain("data-social-profile-stats");
     expect(withStats).toContain(SOCIAL_PROFILE_STATS_CLASS);
-    expect(SOCIAL_PROFILE_STATS_CLASS).toContain("max-w-xs");
-    expect(SOCIAL_PROFILE_STATS_CLASS).toContain("flex-1");
-    expect(SOCIAL_PROFILE_STATS_CLASS).toContain("items-center");
-    expect(SOCIAL_PROFILE_STATS_CLASS).not.toBe("flex min-w-0 flex-1 items-center");
-    expect(withStats).not.toContain("flex min-w-0 flex-1 items-center");
-    expect(withStats).toContain("grid-cols-3");
+    expect(withStats).toContain(SOCIAL_PROFILE_STATS_GRID_CLASS);
+    expect(SOCIAL_PROFILE_STATS_CLASS).toContain("w-fit");
+    expect(SOCIAL_PROFILE_STATS_CLASS).not.toContain("flex-1");
+    expect(SOCIAL_PROFILE_STATS_CLASS).not.toContain("w-full");
+    expect(SOCIAL_PROFILE_STATS_CLASS).not.toContain("max-w-xs");
+    expect(SOCIAL_PROFILE_STATS_GRID_CLASS).toContain("inline-flex");
+    expect(SOCIAL_PROFILE_STATS_GRID_CLASS).toContain("gap-x-[var(--space-4)]");
+    expect(SOCIAL_PROFILE_STATS_GRID_CLASS).not.toContain("w-full");
+    expect(SOCIAL_PROFILE_STATS_GRID_CLASS).not.toContain("grid-cols-3");
+    expect(withStats).not.toContain("grid w-full grid-cols-3");
+    expect(withStats).not.toContain("flex min-w-0 max-w-xs flex-1 items-center");
     expect(withStats).toContain(SOCIAL_PROFILE_STAT_CLASS);
     expect(withStats).toContain("flex-col");
     expect(withStats).toContain('data-social-profile-stat="posts"');
