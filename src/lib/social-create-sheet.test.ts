@@ -15,7 +15,12 @@ import {
   SOCIAL_CREATE_TILES_CLASS,
   socialCreateTile,
 } from "./social-create-sheet";
-import { APP_SHEET_SURFACE_CLASS } from "./house-sheet";
+import {
+  APP_SHEET_HOST_CLASS,
+  APP_SHEET_MODAL_PROMOTE_HOST,
+  APP_SHEET_MODAL_PROMOTE_SURFACE,
+  APP_SHEET_SURFACE_CLASS,
+} from "./house-sheet";
 
 describe("Social Create sheet SoT", () => {
   it("locks Media · Write · Go live onto existing compose paths", () => {
@@ -39,20 +44,36 @@ describe("Social Create sheet SoT", () => {
     expect(SOCIAL_ROUTES.createLive).toBe("/social/create/live");
   });
 
-  it("rises over a dimmed feed like iMessage New Message, with equal tiles inside", () => {
-    expect(SOCIAL_CREATE_SHEET_PRESENTATION).toBe("imessage-new-message");
+  it("phone: rises as a bottom sheet; desktop (md+): centered modal card — Adam lock 2026-09-21", () => {
+    expect(SOCIAL_CREATE_SHEET_PRESENTATION).toBe("responsive");
+
+    // Phone: bottom sheet (justify-end, full-width surface)
     expect(SOCIAL_CREATE_SHEET_HOST_CLASS).toContain("justify-end");
-    expect(SOCIAL_CREATE_SHEET_HOST_CLASS).not.toContain("md:items-center");
-    expect(SOCIAL_CREATE_SHEET_HOST_CLASS).not.toContain("md:justify-center");
+    expect(SOCIAL_CREATE_SHEET_HOST_CLASS).toContain(APP_SHEET_HOST_CLASS);
+
+    // Desktop: centered modal card (md: items-center + justify-center)
+    expect(SOCIAL_CREATE_SHEET_HOST_CLASS).toContain("md:items-center");
+    expect(SOCIAL_CREATE_SHEET_HOST_CLASS).toContain("md:justify-center");
+    expect(SOCIAL_CREATE_SHEET_HOST_CLASS).toContain(APP_SHEET_MODAL_PROMOTE_HOST);
+
+    // Surface: phone stays full-width bottom sheet; desktop bounded card
     expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain(APP_SHEET_SURFACE_CLASS);
     expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain("app-sheet-rise");
     expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain("bg-surface");
     expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain("w-full");
     expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).not.toContain("backdrop-blur");
-    expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).not.toContain("md:w-[min(28rem");
+    expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain(APP_SHEET_MODAL_PROMOTE_SURFACE);
+    expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain("md:w-auto");
+    expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain("md:max-w-[min(92vw,28rem)]");
+    expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain("md:rounded-b-[16px]");
+    expect(SOCIAL_CREATE_SHEET_SURFACE_CLASS).toContain("md:shadow-[var(--elevation)]");
+
+    // Scrim: opaque wash, no frost
     expect(SOCIAL_CREATE_SHEET_SCRIM_CLASS).toContain("bg-ink/40");
     expect(SOCIAL_CREATE_SHEET_SCRIM_CLASS).toContain("app-sheet-scrim-fade");
     expect(SOCIAL_CREATE_SHEET_SCRIM_CLASS).not.toContain("backdrop-blur");
+
+    // Tiles: equal 3-col grid, never truncated
     expect(SOCIAL_CREATE_TILES_CLASS).toContain("grid-cols-3");
     expect(SOCIAL_CREATE_TILES_CLASS).not.toContain("grid-cols-2");
     expect(SOCIAL_CREATE_TILES_CLASS).not.toContain("min-[480px]:grid-cols-4");
