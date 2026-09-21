@@ -39,9 +39,11 @@ describe("lookupHandleCollision", () => {
   });
 
   it("wires the taken error onto the profile save path and the handle field", () => {
+    expect(actionSrc).toContain("socialHandleInputError");
     expect(actionSrc).toContain("lookupHandleCollision");
     expect(actionSrc).toContain("handleTakenError");
     expect(editSrc).toContain("SOCIAL.profile.handleTaken");
+    expect(editSrc).toContain("socialHandleDisplayError");
     expect(editSrc).toContain("setHandleError(result.error)");
   });
 });

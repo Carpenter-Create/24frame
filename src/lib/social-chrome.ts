@@ -480,6 +480,8 @@ export const SOCIAL_PROFILE_EDIT_SECTION_CLASS = "flex flex-col gap-3 py-3";
 // House type SoT — Settings/drill-in labels, not t-label ALL-CAPS
 // + 0.12em track. One line, no mid-word ellipsis. 128px still
 // fits sentence-case field names in the label column.
+export const SOCIAL_HANDLE_FIELD_LABEL_CLASS = SETTINGS_DIALOG_LABEL_CLASS;
+
 export const SOCIAL_PROFILE_EDIT_LABEL_CLASS =
   `w-32 shrink-0 whitespace-nowrap pt-0.5 ${SETTINGS_DIALOG_LABEL_CLASS}`;
 export const SOCIAL_PROFILE_EDIT_HELP_CLASS = SETTINGS_DIALOG_HELP_CLASS;

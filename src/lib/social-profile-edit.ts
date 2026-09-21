@@ -20,9 +20,8 @@ import {
   SOCIAL_ROUTES,
   bareHandle,
   composeSocialDisplayName,
-  normalizeHandle,
   socialBioEnterSubmits,
-  socialHandleRequiredError,
+  socialHandleInputError,
   socialNameRequiredError,
 } from "@/lib/social";
 import { parseSocialImdbInput } from "@/lib/social-imdb";
@@ -343,9 +342,8 @@ export function socialProfileEditFormData(draft: SocialProfileEditSaveDraft): Fo
 }
 
 export function checkSocialProfileEditSave(draft: SocialProfileEditSaveDraft): SocialProfileEditSaveCheck {
-  const required = socialHandleRequiredError(draft.username);
-  if (required) return { ok: false, handleError: required };
-  if (!normalizeHandle(draft.username)) return { ok: false, handleError: SOCIAL.profile.handleInvalid };
+  const handleError = socialHandleInputError(draft.username);
+  if (handleError) return { ok: false, handleError };
   const nameError = socialNameRequiredError(draft.firstName, draft.lastName);
   if (nameError) return { ok: false, error: nameError };
   const imdb = parseSocialImdbInput(draft.imdbUrl);

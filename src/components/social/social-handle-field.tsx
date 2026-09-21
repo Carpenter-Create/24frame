@@ -3,7 +3,6 @@
 import { useLayoutEffect, useRef, useState } from "react";
 
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   bareHandle,
   handleFieldValue,
@@ -11,6 +10,7 @@ import {
   socialProfilePublicUrl,
   stripHandleDecorators,
 } from "@/lib/social";
+import { SOCIAL_HANDLE_FIELD_LABEL_CLASS } from "@/lib/social-chrome";
 
 function clampCaretAfterAt(el: HTMLInputElement) {
   const start = el.selectionStart ?? 1;
@@ -24,16 +24,20 @@ export function SocialHandleField({
   id,
   name,
   defaultHandle = "",
+  onValueChange,
 }: {
   id: string;
   name: string;
   defaultHandle?: string;
+  onValueChange?: (value: string) => void;
 }) {
   const [value, setValue] = useState(handleFieldValue(defaultHandle));
   const inputRef = useRef<HTMLInputElement>(null);
 
   function applyRaw(raw: string) {
-    setValue(`@${stripHandleDecorators(raw)}`);
+    const next = `@${stripHandleDecorators(raw)}`;
+    setValue(next);
+    onValueChange?.(next);
   }
 
   useLayoutEffect(() => {
@@ -43,7 +47,9 @@ export function SocialHandleField({
 
   return (
     <div className="flex flex-col gap-1" data-social-handle-field="">
-      <Label htmlFor={id}>{SOCIAL.profile.handle}</Label>
+      <label htmlFor={id} className={SOCIAL_HANDLE_FIELD_LABEL_CLASS}>
+        {SOCIAL.profile.handle}
+      </label>
       <Input
         ref={inputRef}
         id={id}

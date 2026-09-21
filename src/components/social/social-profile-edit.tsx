@@ -58,6 +58,7 @@ import {
   bareHandle,
   composeSocialDisplayName,
   handleFieldValue,
+  socialHandleDisplayError,
   splitSocialDisplayName,
   stripHandleDecorators,
 } from "@/lib/social";
@@ -591,7 +592,7 @@ export function SocialProfileEditForm({
               </div>
               {handleError ? (
                 <p data-social-handle-required="" className={SOCIAL_PROFILE_EDIT_ERROR_CLASS}>
-                  {handleError}
+                  {socialHandleDisplayError(username, handleError)}
                 </p>
               ) : null}
             </div>

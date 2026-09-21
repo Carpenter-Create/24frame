@@ -38,10 +38,10 @@ import { takeSocialHomeComposerMedia } from "@/lib/social-home-composer";
 import { ingestSpeechLearning } from "@/lib/speech-learning";
 import {
   displayHandle,
-  normalizeHandle,
   SOCIAL,
   SOCIAL_ROUTES,
-  socialHandleRequiredError,
+  socialHandleDisplayError,
+  socialHandleInputError,
   type SocialCreateKind,
 } from "@/lib/social";
 import {
@@ -189,15 +189,11 @@ export function SocialProfileCreateForm({
       action={async (formData) => {
         setPending(true);
         setError("");
-        const required = socialHandleRequiredError(String(formData.get("handle") ?? ""));
-        if (required) {
+        const handle = String(formData.get("handle") ?? "");
+        const formatError = socialHandleInputError(handle);
+        if (formatError) {
           setPending(false);
-          setError(required);
-          return;
-        }
-        if (!normalizeHandle(String(formData.get("handle") ?? ""))) {
-          setPending(false);
-          setError(SOCIAL.profile.handleInvalid);
+          setError(formatError);
           return;
         }
         const result = await createSocialProfile(formData);
@@ -205,7 +201,14 @@ export function SocialProfileCreateForm({
         if (result.error) setError(result.error);
       }}
     >
-      <SocialHandleField id="social-handle" name="handle" defaultHandle={handle} />
+      <SocialHandleField
+        id="social-handle"
+        name="handle"
+        defaultHandle={handle}
+        onValueChange={(next) => {
+          setError((prev) => socialHandleDisplayError(next, prev));
+        }}
+      />
       <div className="flex flex-col gap-1">
         <Label htmlFor="social-display-name">{SOCIAL.profile.displayName}</Label>
         <Input
