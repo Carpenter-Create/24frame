@@ -102,6 +102,8 @@ describe("s3-social-media isolated lane", () => {
     expect(putCmd.input.Bucket).toBe("test-media-source-bucket");
     expect(putCmd.input.Bucket).not.toBe(process.env.S3_BUCKET);
     expect(putCmd.input.Key).toBe(KEY);
+    expect(putCmd.input.ContentType).toBe("image/jpeg");
+    expect(putCmd.input.CacheControl).toBeUndefined();
 
     mockGetSignedUrl.mockResolvedValueOnce("https://s3.example/get");
     await expect(presignSocialMediaGet(KEY)).resolves.toBe("https://s3.example/get");

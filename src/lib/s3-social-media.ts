@@ -85,13 +85,15 @@ export async function presignSocialMediaPut(
     throw new Error("Media key is not allowed");
   }
   const { bucket, s3 } = mediaClient();
+  // Browser PUT only sends Content-Type. Do not sign Cache-Control —
+  // a signed extra header 403s the PUT (stills, Stories, welcome).
+  // GET ResponseCacheControl / CloudFront signing stay on the read path.
   return getSignedUrl(
     s3,
     new PutObjectCommand({
       Bucket: bucket,
       Key: key,
       ContentType: contentType,
-      CacheControl: "private, max-age=300",
     }),
     { expiresIn: SOCIAL_MEDIA_PUT_TTL_SECONDS },
   );

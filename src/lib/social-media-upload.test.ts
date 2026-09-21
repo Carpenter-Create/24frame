@@ -22,4 +22,23 @@ describe("social post media upload SoT", () => {
     expect(studio).not.toContain("createSocialMuxUpload");
     expect(studio).not.toContain("uploadSocialPostMedia");
   });
+
+  it("PUTs stills, Stories, and welcome with Content-Type only — no Cache-Control", () => {
+    const stills = readFileSync("src/lib/social-media-upload.ts", "utf8");
+    const stories = readFileSync("src/components/social/social-story-studio.tsx", "utf8");
+    const welcome = readFileSync("src/components/social/social-profile-edit.tsx", "utf8");
+    const presign = readFileSync("src/lib/s3-social-media.ts", "utf8");
+    for (const src of [stills, stories, welcome]) {
+      expect(src).toContain('headers: { "Content-Type": signed.contentType }');
+      expect(src).not.toContain("Cache-Control");
+    }
+    const putFn = presign.slice(
+      presign.indexOf("export async function presignSocialMediaPut"),
+      presign.indexOf("export async function presignSocialMediaGet"),
+    );
+    expect(putFn).toContain("new PutObjectCommand");
+    expect(putFn).toContain("ContentType: contentType");
+    expect(putFn).not.toContain("CacheControl:");
+    expect(presign).toContain("ResponseCacheControl: privateMaxAgeCacheControl");
+  });
 });
