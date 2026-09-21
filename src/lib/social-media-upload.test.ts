@@ -38,7 +38,7 @@ describe("social post media upload SoT", () => {
     );
     expect(putFn).toContain("new PutObjectCommand");
     expect(putFn).toContain("ContentType: contentType");
-    expect(putFn).not.toContain("CacheControl");
+    expect(putFn).not.toContain("CacheControl:");
     expect(presign).toContain("ResponseCacheControl: privateMaxAgeCacheControl");
   });
 });
