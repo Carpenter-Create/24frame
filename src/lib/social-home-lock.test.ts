@@ -7,6 +7,8 @@ import { SOCIAL_CATEGORY_LABELS } from "./social-categories";
 import {
   SOCIAL_COMPOSER_CLASS,
   SOCIAL_DESKTOP_MEASURE,
+  SOCIAL_FEED_GUTTER_CLASS,
+  SOCIAL_FEED_ROW_CLASS,
   SOCIAL_FIGMA_PROFILE_BIO,
   SOCIAL_FIGMA_PROFILE_EDIT,
   SOCIAL_FIGMA_PROFILE_OWN,
@@ -247,6 +249,10 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).toContain("SOCIAL_EMPTY_PANEL_CLASS");
     expect(chrome).toContain("SOCIAL_FEED_ROW_CLASS");
     expect(chrome).toContain("SOCIAL_FEED_GUTTER_CLASS");
+    expect(SOCIAL_FEED_GUTTER_CLASS).toBe("flex flex-col gap-[var(--space-2)] bg-surface-muted");
+    expect(SOCIAL_FEED_GUTTER_CLASS).not.toContain("bg-bg");
+    expect(SOCIAL_FEED_ROW_CLASS).toMatch(/(?:^|\s)bg-surface(?:\s|$)/);
+    expect(SOCIAL_FEED_ROW_CLASS).not.toContain("bg-surface-muted");
     expect(chrome).toContain("SOCIAL_HOME_STORY_CARD_CLASS");
     expect(chrome).toContain("SOCIAL_FOR_YOU_CARD_CLASS");
     expect(forYou).not.toContain("SOCIAL.forYou.native");

@@ -237,11 +237,12 @@ export const SOCIAL_FOR_YOU_CARD_CLASS =
 export const SOCIAL_FEED_ROW_CLASS =
   `flex flex-col gap-2 ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface p-3`;
 
-// Facebook gray gutter — canvas band between surface posts.
-// ~8px house space-2, full bleed on phone. Stack gap only — never
+// Facebook gray gutter — muted canvas between surface posts.
+// Light --bg and --surface are both white; surface-muted (#f4f4f6)
+// is the visible band. ~8px house space-2. Stack gap only — never
 // per-card margin that doubles the band.
 export const SOCIAL_FEED_GUTTER_CLASS =
-  "flex flex-col gap-[var(--space-2)] bg-bg";
+  "flex flex-col gap-[var(--space-2)] bg-surface-muted";
 
 export const SOCIAL_CREATE_CTA_CLASS =
   "inline-flex w-full items-center justify-center gap-2 rounded-[24px] bg-accent px-4 py-3 t-body font-semibold text-accent-contrast";
