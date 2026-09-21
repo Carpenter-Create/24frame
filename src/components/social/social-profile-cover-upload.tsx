@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 import { presignSocialMediaUpload, saveSocialProfileCover } from "@/app/(app)/social/actions";
 import { SocialIcon } from "@/components/social/social-icon";
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { SOCIAL_PROFILE_COVER_ACCEPT } from "@/lib/social-profile-cover";
+import { SOCIAL_PROFILE_COVER_ACCEPT, SOCIAL_PROFILE_COVER_LOCK_A } from "@/lib/social-profile-cover";
 import { SOCIAL_PROFILE_COVER_EDIT_CLASS } from "@/lib/social-chrome";
 import { SOCIAL } from "@/lib/social";
 import { socialMediaKindFor } from "@/lib/social-media";
@@ -85,11 +85,18 @@ export function SocialProfileCoverUpload({
         disabled={uploading}
         aria-busy={uploading}
         aria-label={SOCIAL.profile.editCover}
+        title={SOCIAL.profile.coverDims}
         className={SOCIAL_PROFILE_COVER_EDIT_CLASS}
         onClick={() => fileRef.current?.click()}
       >
         <SocialIcon name="pencil-simple" size={SOCIAL_ICON_SIZE_HEADER} />
       </button>
+      <span
+        data-social-profile-cover-dims=""
+        className="absolute bottom-2 right-3 z-10 rounded bg-surface/80 px-2 py-0.5 text-[length:var(--text-xs)] font-medium text-ink-2"
+      >
+        {SOCIAL_PROFILE_COVER_LOCK_A.masterWidth} × {SOCIAL_PROFILE_COVER_LOCK_A.masterHeight} px
+      </span>
       <input
         ref={fileRef}
         type="file"

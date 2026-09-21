@@ -617,6 +617,7 @@ export const SOCIAL = {
     takePhoto: "Take photo",
     removePicture: "Remove current picture",
     editCover: "Edit cover",
+    coverDims: "1784 × 446 px (LinkedIn header)",
     links: "Links",
     linksAdd: "Add",
     linksMore: "{first} +{n}",
