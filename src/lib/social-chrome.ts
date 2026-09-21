@@ -292,7 +292,7 @@ export const SOCIAL_PROFILE_BIO_CLASS = "break-words t-body-sm text-ink whitespa
 
 // Public Professions: one-row house chip rail (same primitive as Topics).
 // Phone: nowrap + overflow-x auto + no-scrollbar. Desktop: same one-row
-// scroll — ~3 +N house pills fit; do not wrap to a second row.
+// scroll — every selected Role as its own chip; do not wrap, do not +N.
 // Each Role is its own muted HOUSE_PILL. Omit the rail when empty.
 export const SOCIAL_PROFILE_ROLES_RAIL_ROWS = 1;
 export const SOCIAL_PROFILE_ROLES_ROW_CLASS = HOUSE_CHIP_RAIL_CLASS;

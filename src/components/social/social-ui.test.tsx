@@ -241,15 +241,15 @@ describe("Social profile public face", () => {
     expect(withRoles).toContain('data-social-profile-role="actor"');
     expect(withRoles).toContain('data-social-profile-role="producer"');
     expect(withRoles).toContain('data-social-profile-role="screenwriter"');
-    expect(withRoles).not.toContain('data-social-profile-role="investor"');
+    expect(withRoles).toContain('data-social-profile-role="investor"');
     expect(withRoles).toContain("Actor");
     expect(withRoles).toContain("Producer");
     expect(withRoles).toContain("Screenwriter");
+    expect(withRoles).toContain("Investor");
     expect(withRoles).not.toContain("Actor · Producer");
     expect(withRoles).not.toContain(" · ");
-    expect(withRoles).toContain("data-social-profile-roles-more");
-    expect(withRoles).toContain("+1");
-    expect(withRoles).not.toContain("Investor");
+    expect(withRoles).not.toContain("data-social-profile-roles-more");
+    expect(withRoles).not.toContain("+1");
     expect(withRoles).not.toContain("Roles:");
     expect(withRoles).not.toContain("Professions:");
     expect(withRoles).not.toContain("Topics:");
@@ -282,7 +282,7 @@ describe("Social profile public face", () => {
       withRoles.indexOf('data-social-profile-role="screenwriter"'),
     );
     expect(withRoles.indexOf('data-social-profile-role="screenwriter"')).toBeLessThan(
-      withRoles.indexOf("data-social-profile-roles-more"),
+      withRoles.indexOf('data-social-profile-role="investor"'),
     );
 
     const adamDesktop = renderToStaticMarkup(
@@ -303,11 +303,15 @@ describe("Social profile public face", () => {
     expect(adamDesktop).toContain('data-social-profile-role="executive_producer"');
     expect(adamDesktop).toContain('data-social-profile-role="music_supervisor"');
     expect(adamDesktop).toContain('data-social-profile-role="composer"');
+    expect(adamDesktop).toContain('data-social-profile-role="musician"');
+    expect(adamDesktop).toContain('data-social-profile-role="music_director"');
     expect(adamDesktop).toContain("Executive Producer");
     expect(adamDesktop).toContain("Music Supervisor");
     expect(adamDesktop).toContain("Composer");
-    expect(adamDesktop).toContain("data-social-profile-roles-more");
-    expect(adamDesktop).toContain("+2");
+    expect(adamDesktop).toContain("Musician");
+    expect(adamDesktop).toContain("Music Director");
+    expect(adamDesktop).not.toContain("data-social-profile-roles-more");
+    expect(adamDesktop).not.toContain("+2");
     expect(adamDesktop).not.toContain("Executive Producer · Music Supervisor · Composer +2");
     expect(adamDesktop).not.toContain("Executive Producer · Music Supervisor");
     expect(adamDesktop).toContain("Founder · Investor · Music Executive");
@@ -319,7 +323,7 @@ describe("Social profile public face", () => {
     );
     const adamRoles = adamDesktop.slice(
       adamDesktop.indexOf("data-social-profile-roles"),
-      adamDesktop.indexOf("data-social-profile-roles-more") + 280,
+      adamDesktop.indexOf('data-social-profile-role="music_director"') + 280,
     );
     expect(adamRoles).toContain("data-house-chip-rail");
     expect(adamRoles).toContain('data-house-chip-rail-row="0"');
@@ -330,7 +334,10 @@ describe("Social profile public face", () => {
     expect(adamRoles).toContain("Executive Producer");
     expect(adamRoles).toContain("Music Supervisor");
     expect(adamRoles).toContain("Composer");
-    expect(adamRoles).toContain("+2");
+    expect(adamRoles).toContain("Musician");
+    expect(adamRoles).toContain("Music Director");
+    expect(adamRoles).not.toContain("+2");
+    expect(adamRoles).not.toContain("data-social-profile-roles-more");
 
     const withTopics = renderToStaticMarkup(
       <SocialProfileIdentity
@@ -476,6 +483,8 @@ describe("Social profile public face", () => {
     expect(uiSrc).toContain("socialProfileRolesRailItems");
     expect(uiSrc).toContain("HouseChipRail");
     expect(uiSrc).toContain("SOCIAL_PROFILE_ROLES_RAIL_ROWS");
+    expect(uiSrc).not.toContain("data-social-profile-roles-more");
+    expect(uiSrc).not.toContain('item.kind === "more"');
     expect(
       uiSrc.slice(
         uiSrc.indexOf("export function SocialPersonRow"),

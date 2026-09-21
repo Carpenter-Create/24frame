@@ -276,24 +276,25 @@ describe("Social profile public face", () => {
     expect(html).toContain('data-social-profile-role="actor"');
     expect(html).toContain('data-social-profile-role="producer"');
     expect(html).toContain('data-social-profile-role="screenwriter"');
+    expect(html).toContain('data-social-profile-role="investor"');
     expect(html).toContain("Actor");
+    expect(html).toContain("Investor");
     expect(html).not.toContain("Actor · Producer");
     expect(html).not.toContain("Actor · Producer · Screenwriter +1");
-    expect(html).toContain("data-social-profile-roles-more");
-    expect(html).toContain("+1");
+    expect(html).not.toContain("data-social-profile-roles-more");
+    expect(html).not.toContain("+1");
     expect(html).toContain("bg-surface-muted");
     expect(html).toContain("data-house-chip-rail");
     expect(html).toContain('data-house-chip-rail-row="0"');
     expect(html).not.toContain('data-house-chip-rail-row="1"');
     const roles = html.slice(
       html.indexOf("data-social-profile-roles"),
-      html.indexOf("data-social-profile-roles-more") + 80,
+      html.indexOf('data-social-profile-role="investor"') + 80,
     );
     expect(roles).toContain("overflow-x-auto");
     expect(roles).toContain("no-scrollbar");
     expect(roles).not.toContain("flex-wrap");
     expect(html).toContain("grid-cols-3");
-    expect(html).not.toContain("Investor");
     expect(html).not.toContain("data-social-profile-handle");
     const head = html.slice(html.indexOf("data-social-profile-head"), html.indexOf("data-social-profile-name"));
     expect(head).toContain("data-social-avatar");

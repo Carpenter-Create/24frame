@@ -250,25 +250,15 @@ export function SocialProfileIdentity({
             data-social-profile-roles=""
             rows={SOCIAL_PROFILE_ROLES_RAIL_ROWS}
             items={roleRailItems}
-            renderItem={(item) =>
-              item.kind === "more" ? (
-                <span
-                  key="more"
-                  data-social-profile-roles-more=""
-                  className={SOCIAL_PROFILE_ROLE_PILL_CLASS}
-                >
-                  {item.label}
-                </span>
-              ) : (
-                <span
-                  key={item.slug}
-                  data-social-profile-role={item.slug}
-                  className={SOCIAL_PROFILE_ROLE_PILL_CLASS}
-                >
-                  {item.label}
-                </span>
-              )
-            }
+            renderItem={(item) => (
+              <span
+                key={item.slug}
+                data-social-profile-role={item.slug}
+                className={SOCIAL_PROFILE_ROLE_PILL_CLASS}
+              >
+                {item.label}
+              </span>
+            )}
           />
         ) : null}
         <SocialProfileLinkRow links={links} />
