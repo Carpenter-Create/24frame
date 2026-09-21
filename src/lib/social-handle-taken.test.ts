@@ -5,6 +5,7 @@ import { SOCIAL } from "@/lib/social";
 import { handleTakenError, lookupHandleCollision } from "./social-handle-taken";
 
 const editSrc = readFileSync("src/components/social/social-profile-edit.tsx", "utf8");
+const handleFaceSrc = readFileSync("src/components/social/social-profile-handle-edit.tsx", "utf8");
 const actionSrc = readFileSync("src/app/(app)/social/actions.ts", "utf8");
 
 describe("handleTakenError", () => {
@@ -43,7 +44,7 @@ describe("lookupHandleCollision", () => {
     expect(actionSrc).toContain("lookupHandleCollision");
     expect(actionSrc).toContain("handleTakenError");
     expect(editSrc).toContain("SOCIAL.profile.handleTaken");
-    expect(editSrc).toContain("socialHandleDisplayError");
     expect(editSrc).toContain("setHandleError(result.error)");
+    expect(handleFaceSrc).toContain("socialHandleDisplayError");
   });
 });

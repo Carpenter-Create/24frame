@@ -33,6 +33,7 @@ vi.mock("@/app/(app)/social/actions", () => ({
 }));
 vi.mock("@/app/(app)/account/actions", () => ({
   uploadAccountPhoto: vi.fn(),
+  removeAccountPhoto: vi.fn(),
 }));
 
 function ctx() {

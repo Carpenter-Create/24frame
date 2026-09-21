@@ -40,6 +40,7 @@ export const ACCOUNT_PROFILE = {
   photoTooLarge: "Photo must be 2 MB or smaller.",
   photoType: "Use a JPEG, PNG, or WebP photo.",
   photoFailed: "Could not upload photo.",
+  photoRemoveFailed: "Could not remove photo.",
   cropTitle: "Reposition",
   cropSave: "Save photo",
   cropCancel: "Cancel",

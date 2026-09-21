@@ -104,6 +104,8 @@ describe("one face across chrome, Settings, and Social", () => {
     expect(socialFormsSrc).not.toContain("avatarObjectKey");
     expect(socialFormsSrc).not.toContain("S3_MEDIA");
     expect(uploadSrc).toContain("putAvatarObject(ctx.user.id");
+    expect(uploadSrc).toContain("deleteAvatarObject(ctx.user.id");
+    expect(uploadSrc).toContain("removeAccountPhoto");
     expect(uploadSrc).toContain('revalidatePath("/", "layout")');
     expect(photoRouteSrc).toContain("signedAvatarUrl(user.id)");
     expect(photoRouteSrc).toContain("private, no-store");

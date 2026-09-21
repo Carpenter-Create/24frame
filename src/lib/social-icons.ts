@@ -34,6 +34,7 @@ export const SOCIAL_PHOSPHOR_ICONS = [
   "camera-rotate",
   "pencil-simple",
   "check-circle",
+  "trash",
 ] as const;
 
 export type SocialPhosphorIconName = (typeof SOCIAL_PHOSPHOR_ICONS)[number];

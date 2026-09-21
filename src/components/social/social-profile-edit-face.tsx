@@ -23,7 +23,7 @@ export function SocialProfileEditFace({
   done,
   children,
 }: {
-  face: "roles" | "topics" | "imdb" | "links" | "bio";
+  face: "name" | "handle" | "roles" | "topics" | "imdb" | "links" | "bio";
   title: string;
   onBack?: () => void;
   backHref?: string;

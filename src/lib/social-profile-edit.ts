@@ -8,10 +8,11 @@
 // Save SoT: apply the draft to this overlay, paint the own face in the
 // already-mounted Social tree, leave Edit immediately, persist in the
 // background, roll back here on error. Memory + sessionStorage + a
-// short cookie keep the hop off the skeleton. Index is identity
-// (photo / name / handle) plus Settings drill-in rows. Professions
-// and Topics share one chip-select face. IMDb, Links, and Bio are
-// their own faces. Selecting stays local draft until that one write.
+// short cookie keep the hop off the skeleton. Index is photo + Settings
+// drill-in rows only — nothing typed on the index. Name and Username
+// drill inward. Avatar opens the house app-sheet. Professions and
+// Topics share one chip-select face. IMDb, Links, and Bio are their
+// own faces. Selecting stays local draft until that one write.
 
 import { ACCOUNT_PROFILE } from "@/lib/account-profile";
 import { persistSocialMutation } from "@/lib/social-optimistic";
@@ -21,6 +22,7 @@ import {
   SOCIAL_ROUTES,
   bareHandle,
   composeSocialDisplayName,
+  displayHandle,
   socialBioEnterSubmits,
   socialHandleInputError,
   socialNameRequiredError,
@@ -42,6 +44,10 @@ export const SOCIAL_PROFILE_EDIT_LOCK = {
   emptyPreview: "https://24frame.co/@",
   profileUrlOnEditFace: false,
   handleBareField: true,
+  indexDrillOnly: true,
+  nameDrillIn: true,
+  handleDrillIn: true,
+  avatarSheet: true,
   professionsDrillIn: true,
   topicsDrillIn: true,
   imdbDrillIn: true,
@@ -52,7 +58,7 @@ export const SOCIAL_PROFILE_EDIT_LOCK = {
   editHref: SOCIAL_ROUTES.profileEdit,
   bioHref: SOCIAL_ROUTES.profileBio,
   enterSubmits: socialBioEnterSubmits(),
-  // Bio from Edit is a same-tree face. Name/handle stay mounted.
+  // Name, Username, and Bio from Edit are same-tree faces.
   keepsDraftOnBio: true,
   optimisticSave: true,
   saveHop: true,
@@ -64,7 +70,15 @@ export const SOCIAL_PROFILE_OPTIMISTIC_COOKIE = "24frame_social_profile_save";
 export const SOCIAL_PROFILE_OPTIMISTIC_STORAGE = "24frame_social_profile_save";
 export const SOCIAL_PROFILE_OPTIMISTIC_COOKIE_MAX_AGE = 60;
 
-export type SocialProfileEditFace = "edit" | "bio" | "roles" | "topics" | "imdb" | "links";
+export type SocialProfileEditFace =
+  | "edit"
+  | "name"
+  | "handle"
+  | "bio"
+  | "roles"
+  | "topics"
+  | "imdb"
+  | "links";
 
 export function socialProfileEditFace(
   next: SocialProfileEditFace | boolean,
@@ -77,6 +91,15 @@ export function socialProfileEditFace(
 export function socialProfileBioRowSummary(bio: string): string {
   const text = bio.trim();
   return text || SOCIAL.profile.bioAdd;
+}
+
+export function socialProfileNameRowSummary(displayName: string): string {
+  const text = displayName.trim();
+  return text || SOCIAL.profile.nameAdd;
+}
+
+export function socialProfileHandleRowSummary(handle: string): string {
+  return displayHandle(handle) || SOCIAL.profile.usernameAdd;
 }
 
 export type SocialProfileEditSaveDraft = {

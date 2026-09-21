@@ -36,6 +36,8 @@ import {
   releaseSocialProfileSaveHop,
   socialProfileBioRowSummary,
   socialProfileEditFace,
+  socialProfileHandleRowSummary,
+  socialProfileNameRowSummary,
   socialProfileEditFormData,
   socialProfileEditSeed,
   socialProfileOptimisticCookieWrite,
@@ -67,8 +69,12 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(profile).not.toContain("Education");
     expect(edit).toContain("data-social-profile-edit");
     expect(edit).toContain(SOCIAL.profile.username);
+    expect(edit).toContain("data-social-profile-edit-name-open");
+    expect(edit).toContain("data-social-profile-edit-handle-open");
     expect(edit).not.toContain("socialProfilePublicUrl");
     expect(edit).toContain("uploadAccountPhoto");
+    expect(edit).toContain("removeAccountPhoto");
+    expect(edit).toContain("SocialProfileAvatarSheet");
     expect(edit).toContain("data-social-profile-edit-links-open");
     expect(edit).toContain("SocialProfileBioEditor");
     expect(edit).toContain("data-social-profile-edit-bio-open");
@@ -81,14 +87,22 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(socialProfileEditFace("topics")).toBe("topics");
     expect(socialProfileEditFace("imdb")).toBe("imdb");
     expect(socialProfileEditFace("links")).toBe("links");
+    expect(socialProfileEditFace("name")).toBe("name");
+    expect(socialProfileEditFace("handle")).toBe("handle");
     expect(SOCIAL_PROFILE_EDIT_LOCK.profileUrlOnEditFace).toBe(false);
     expect(SOCIAL_PROFILE_EDIT_LOCK.handleBareField).toBe(true);
+    expect(SOCIAL_PROFILE_EDIT_LOCK.indexDrillOnly).toBe(true);
+    expect(SOCIAL_PROFILE_EDIT_LOCK.nameDrillIn).toBe(true);
+    expect(SOCIAL_PROFILE_EDIT_LOCK.handleDrillIn).toBe(true);
+    expect(SOCIAL_PROFILE_EDIT_LOCK.avatarSheet).toBe(true);
     expect(SOCIAL_PROFILE_EDIT_LOCK.professionsDrillIn).toBe(true);
     expect(SOCIAL_PROFILE_EDIT_LOCK.topicsDrillIn).toBe(true);
     expect(SOCIAL_PROFILE_EDIT_LOCK.imdbDrillIn).toBe(true);
     expect(SOCIAL_PROFILE_EDIT_LOCK.linksDrillIn).toBe(true);
     expect(edit).toContain("SettingsDrillRow");
-    expect(edit).toContain("SocialHandleField");
+    expect(edit).toContain("SocialProfileNameEditor");
+    expect(edit).toContain("SocialProfileHandleEditor");
+    expect(edit).not.toContain("SocialHandleField");
     expect(edit).toContain("SocialProfileRolesEditor");
     expect(edit).toContain("SocialProfileTopicsEditor");
     expect(edit).toContain("SocialProfileImdbEditor");
@@ -97,10 +111,16 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(edit).toContain('socialProfileEditFace("topics")');
     expect(edit).toContain('socialProfileEditFace("imdb")');
     expect(edit).toContain('socialProfileEditFace("links")');
+    expect(edit).toContain('socialProfileEditFace("name")');
+    expect(edit).toContain('socialProfileEditFace("handle")');
     expect(edit).not.toContain("SocialProfileRolesField");
     expect(edit).not.toContain("SocialProfileTopicsField");
     expect(socialProfileBioRowSummary("")).toBe(SOCIAL.profile.bioAdd);
     expect(socialProfileBioRowSummary("Writes engines.")).toBe("Writes engines.");
+    expect(socialProfileNameRowSummary("")).toBe(SOCIAL.profile.nameAdd);
+    expect(socialProfileNameRowSummary("Ada Lovelace")).toBe("Ada Lovelace");
+    expect(socialProfileHandleRowSummary("")).toBe(SOCIAL.profile.usernameAdd);
+    expect(socialProfileHandleRowSummary("ada")).toBe("@ada");
     expect(edit).not.toContain("Instagram");
     expect(edit).not.toContain("Reels");
   });
@@ -118,9 +138,11 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(edit).toContain("checkSocialProfileEditSave");
     expect(edit).toContain("handleInvalid");
     const saveSoT = readFileSync("src/lib/social-profile-edit.ts", "utf8");
+    const handleFace = readFileSync("src/components/social/social-profile-handle-edit.tsx", "utf8");
     expect(saveSoT).toContain("socialHandleInputError");
     expect(saveSoT).not.toContain("socialHandleDisplayError");
-    expect(edit).toContain("socialHandleDisplayError");
+    expect(handleFace).toContain("socialHandleDisplayError");
+    expect(handleFace).toContain("socialHandleInputError");
     const forms = readFileSync("src/components/social/social-forms.tsx", "utf8");
     expect(forms).toContain("socialHandleDisplayError(next, prev)");
     expect(edit).not.toContain("app.24frame.co");
@@ -185,13 +207,18 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(SOCIAL_PROFILE_EDIT_HANDLE_CLASS).not.toContain("t-body-sm");
     expect(SOCIAL_PROFILE_EDIT_HANDLE_ERROR_CLASS).toContain(FORM_CONTROL_TEXT_CLASS);
     expect(SOCIAL_PROFILE_EDIT_HANDLE_ERROR_CLASS).not.toContain("t-body-sm");
-    expect(edit).toContain("<Input");
-    expect(edit).toContain('variant="bare"');
-    expect(edit).toContain('id="social-edit-first-name"');
-    expect(edit).toContain('id="social-edit-middle-name"');
-    expect(edit).toContain('id="social-edit-last-name"');
-    expect(edit).not.toContain('id="social-edit-name"');
-    expect(edit).toContain('id="social-edit-handle"');
+    const nameFace = readFileSync("src/components/social/social-profile-name.tsx", "utf8");
+    const handleFace = readFileSync("src/components/social/social-profile-handle-edit.tsx", "utf8");
+    expect(nameFace).toContain("<Input");
+    expect(nameFace).toContain('variant="bare"');
+    expect(nameFace).toContain('id="social-edit-first-name"');
+    expect(nameFace).toContain('id="social-edit-middle-name"');
+    expect(nameFace).toContain('id="social-edit-last-name"');
+    expect(nameFace).not.toContain('id="social-edit-name"');
+    expect(handleFace).toContain('id="social-edit-handle"');
+    expect(edit).not.toContain("<Input");
+    expect(edit).not.toContain('id="social-edit-first-name"');
+    expect(edit).not.toContain('id="social-edit-handle"');
     expect(edit).toContain("SocialProfileRolesEditor");
     expect(edit).toContain("SocialProfileTopicsEditor");
     expect(edit).toContain("checkSocialProfileEditSave");

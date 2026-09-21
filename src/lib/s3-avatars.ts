@@ -1,6 +1,12 @@
 import "server-only";
 
-import { GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  HeadObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import {
@@ -54,6 +60,12 @@ export async function putAvatarObject(
       CacheControl: "private, max-age=300",
     }),
   );
+}
+
+export async function deleteAvatarObject(userId: string): Promise<void> {
+  const key = avatarObjectKey(userId);
+  const { bucket, s3 } = avatarsClient();
+  await s3.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));
 }
 
 export async function headAvatarObject(userId: string): Promise<boolean> {

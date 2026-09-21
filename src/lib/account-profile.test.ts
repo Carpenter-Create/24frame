@@ -52,6 +52,7 @@ describe("account profile copy", () => {
     expect(ACCOUNT_PROFILE.cropSave).toBe("Save photo");
     expect(ACCOUNT_PROFILE.dropPhoto).toBe("Drop a photo");
     expect(ACCOUNT_PROFILE.photoType).toBe("Use a JPEG, PNG, or WebP photo.");
+    expect(ACCOUNT_PROFILE.photoRemoveFailed).toBe("Could not remove photo.");
     expect(ACCOUNT_PROFILE.nameLabel).toBe("Name");
     expect(ACCOUNT_PROFILE.nameHelper).toBe("Shown on this account.");
     expect(ACCOUNT_PROFILE.emailHint).toBe("Sign-in email. It cannot be changed here.");

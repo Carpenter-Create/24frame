@@ -488,6 +488,20 @@ export const SOCIAL_PROFILE_EDIT_AVATAR_DROPPING_CLASS =
 export const SOCIAL_PROFILE_EDIT_PICTURE_CLASS =
   "t-body-sm font-medium text-accent";
 
+export const SOCIAL_PROFILE_AVATAR_SHEET_HANDLE_CLASS =
+  "mx-auto mb-1 h-1 w-10 shrink-0 touch-none rounded-full bg-ink-3/40";
+
+export const SOCIAL_PROFILE_AVATAR_SHEET_HANDLE_HIT_CLASS =
+  "flex w-full cursor-grab justify-center py-2 touch-none";
+
+export const SOCIAL_PROFILE_AVATAR_SHEET_LIST_CLASS = "flex w-full flex-col";
+
+export const SOCIAL_PROFILE_AVATAR_SHEET_ROW_CLASS =
+  "flex w-full items-center gap-3 py-3 text-left t-body text-ink";
+
+export const SOCIAL_PROFILE_AVATAR_SHEET_DANGER_CLASS =
+  "flex w-full items-center gap-3 py-3 text-left t-body text-[#c4564a]";
+
 export const SOCIAL_PROFILE_EDIT_CARD_CLASS =
   `flex w-full flex-col overflow-hidden ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface px-4`;
 
