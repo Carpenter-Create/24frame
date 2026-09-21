@@ -127,6 +127,8 @@ describe("house speed lock — no RSA on Social Home / Home critical path", () =
     expect(provider).toContain("touchScreenStore");
     expect(provider).toContain("houseShouldKeepAlive");
     expect(provider).toContain("houseRememberScroll");
+    expect(provider).toContain("captureLeadScroll");
+    expect(provider).toContain("captureLeadScroll(screenKey)");
     expect(loading).toContain("data-house-rsc-fallback");
   });
 
@@ -142,6 +144,9 @@ describe("house speed lock — no RSA on Social Home / Home critical path", () =
     expect(actions).toContain("signedSocialMediaByPostId");
     expect(home).toContain("socialFollowingWallView");
     expect(face).toContain("socialProfileQueryKey");
-    expect(face).toContain("query.data");
+    expect(face).toContain("socialProfileFaceFromRow");
+    expect(face).not.toContain("row?.bio ?? props.bio");
+    expect(actions).toContain("canLike: !!viewer");
+    expect(actions).not.toContain("canLike: true");
   });
 });

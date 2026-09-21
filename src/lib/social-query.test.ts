@@ -11,6 +11,7 @@ import {
   applyOptimisticSocialProfile,
   applyOptimisticSocialProfilePatch,
   invalidateSocialQueries,
+  socialProfileFaceFromRow,
 } from "@/lib/social-query";
 
 describe("social query cache helpers", () => {
@@ -66,6 +67,28 @@ describe("social query cache helpers", () => {
     expect(client.getQueryState(socialProfileQueryKey("u1"))?.isInvalidated).toBe(true);
     expect(client.getQueryState(socialCountsQueryKey("u1"))?.isInvalidated).toBe(true);
     expect(client.getQueryState(socialFollowQueryKey("u1", "u2"))?.isInvalidated).toBe(true);
+  });
+
+  it("maps a Query profile row without restoring cleared face fields", () => {
+    const face = socialProfileFaceFromRow({
+      id: "u1",
+      handle: "ada",
+      display_name: "Ada",
+      status: "active",
+      bio: null,
+      cover_key: null,
+      welcome_video_key: null,
+      crafts: [],
+      topics: [],
+      imdb_url: null,
+      website_url: null,
+    });
+    expect(face.bio).toBe("");
+    expect(face.coverUrl).toBeNull();
+    expect(face.welcomeVideoUrl).toBeNull();
+    expect(face.imdbUrl).toBeNull();
+    expect(face.websiteUrl).toBeNull();
+    expect(face.photoUrl).toBe("/api/social/avatar/u1");
   });
 
   it("uses the shared 45s Social staleTime", () => {

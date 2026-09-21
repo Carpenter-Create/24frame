@@ -78,6 +78,11 @@ function nextScreenStore(store: ScreenStore, key: string, node: ReactNode): Scre
   return { order, nodes };
 }
 
+function captureLeadScroll(key: string): void {
+  const scroller = document.querySelector(`[${HOUSE_CLIENT_SHELL.scrollAttr}]`);
+  if (scroller instanceof HTMLElement) houseRememberScroll(key, scroller.scrollTop);
+}
+
 function touchScreenStore(store: ScreenStore, key: string): ScreenStore {
   if (!(key in store.nodes) || store.order[0] === key) return store;
   const order = houseTouchOrder(store.order, key);
@@ -122,6 +127,7 @@ export function HousePathProvider({ children }: { children: ReactNode }) {
         const parsedDest = parseHouseHref(dest);
         const next = housePathFromLocation(parsedDest.pathname, parsedDest.search);
         if (next === href) return true;
+        captureLeadScroll(screenKey);
         window.history.pushState({ houseClient: true }, "", next);
         setOwnedHref(next);
         return true;
@@ -132,11 +138,12 @@ export function HousePathProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const onPop = () => {
+      captureLeadScroll(screenKey);
       setOwnedHref(`${window.location.pathname}${window.location.search}`);
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
-  }, []);
+  }, [screenKey]);
 
   useEffect(() => {
     const onClick = (event: globalThis.MouseEvent) => {
@@ -156,13 +163,14 @@ export function HousePathProvider({ children }: { children: ReactNode }) {
       } catch {
         return;
       }
+      if (houseHrefKey(dest) !== screenKey) captureLeadScroll(screenKey);
       if (!api.navigateOwned(dest, event)) return;
       event.preventDefault();
       event.stopPropagation();
     };
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
-  }, [api]);
+  }, [api, screenKey]);
 
   return <HouseClientContext.Provider value={api}>{children}</HouseClientContext.Provider>;
 }
@@ -205,7 +213,6 @@ export function HouseScreenCache({ children }: { children: ReactNode }) {
     }
     const from = previousKey.current;
     if (from && from !== activeKey) {
-      houseRememberScroll(from, scroller.scrollTop);
       scroller.scrollTop = houseReadScroll(activeKey);
     }
     previousKey.current = activeKey;

@@ -43,7 +43,10 @@ export async function readSocialFollowingWall(input: {
 }): Promise<SocialFollowingWallView | null> {
   const session = await loadSocialSession();
   if (!session) return null;
-  const followees = await loadCachedFolloweeIds(session.supabase, session.ctx.user.id);
+  const [followees, viewer] = await Promise.all([
+    loadCachedFolloweeIds(session.supabase, session.ctx.user.id),
+    loadCachedSocialProfileById(session.supabase, session.ctx.user.id),
+  ]);
   const topic = parseSocialCategoryParam(input.topic);
   const category = topic === SOCIAL_CATEGORY_ALL ? null : topic;
   const wall = await loadCachedFollowingPosts(
@@ -70,6 +73,6 @@ export async function readSocialFollowingWall(input: {
     groups,
     liked,
     media: signedSocialMediaByPostId(wall.posts),
-    canLike: true,
+    canLike: !!viewer,
   });
 }
