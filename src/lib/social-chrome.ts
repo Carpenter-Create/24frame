@@ -237,6 +237,12 @@ export const SOCIAL_FOR_YOU_CARD_CLASS =
 export const SOCIAL_FEED_ROW_CLASS =
   `flex flex-col gap-2 ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface p-3`;
 
+// Facebook gray gutter — canvas band between surface posts.
+// ~8px house space-2, full bleed on phone. Stack gap only — never
+// per-card margin that doubles the band.
+export const SOCIAL_FEED_GUTTER_CLASS =
+  "flex flex-col gap-[var(--space-2)] bg-bg";
+
 export const SOCIAL_CREATE_CTA_CLASS =
   "inline-flex w-full items-center justify-center gap-2 rounded-[24px] bg-accent px-4 py-3 t-body font-semibold text-accent-contrast";
 
@@ -328,10 +334,13 @@ export const SOCIAL_PROFILE_TAB_CLASS =
   "flex shrink-0 flex-col items-center gap-2 whitespace-nowrap px-4 py-2.5 t-body md:gap-2 md:px-4";
 
 export const SOCIAL_PROFILE_GRID_CLASS =
-  "grid grid-cols-3 gap-1.5 md:gap-2";
+  "grid grid-cols-3 gap-px";
 
 export const SOCIAL_PROFILE_TILE_CLASS =
-  "relative flex h-[140px] flex-col justify-between overflow-hidden rounded-[8px] bg-surface-muted p-2.5 md:h-[220px] md:p-[var(--space-4)]";
+  "relative aspect-square w-full overflow-hidden bg-surface-muted";
+
+export const SOCIAL_PROFILE_PLAY_CLASS =
+  "pointer-events-none absolute right-1.5 top-1.5 z-10 text-band-ink";
 
 export const SOCIAL_HIGHLIGHT_RING_CLASS =
   "rounded-full border-2 border-accent p-[2px]";
@@ -494,4 +503,5 @@ export const SOCIAL_STORY_REC_PILL_CLASS =
 export const SOCIAL_STORY_POSTED_CLASS =
   "flex w-full max-w-[326px] flex-col items-center gap-4 rounded-[16px] border border-hairline bg-surface px-6 py-8 text-center";
 
-export const SOCIAL_MUX_PLAYER_CLASS = "social-mux-player block h-full w-full overflow-hidden bg-surface-muted";
+export const SOCIAL_MUX_PLAYER_CLASS =
+  "social-mux-player block size-full overflow-hidden bg-surface-muted object-cover";

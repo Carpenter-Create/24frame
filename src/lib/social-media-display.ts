@@ -43,3 +43,54 @@ export function socialVideoDisplaySrc(src: string): string {
   return `${src}#t=0.1`;
 }
 
+export type SocialMediaOrientation = "portrait" | "landscape";
+
+export type SocialMediaFrameInput = {
+  kind?: "image" | "video";
+  orientation?: SocialMediaOrientation | null;
+  width?: number | null;
+  height?: number | null;
+  aspect?: number | null;
+};
+
+function socialMediaAspectRatio(input: SocialMediaFrameInput): number | null {
+  if (input.aspect != null && Number.isFinite(input.aspect) && input.aspect > 0) {
+    return input.aspect;
+  }
+  const width = input.width;
+  const height = input.height;
+  if (
+    width == null ||
+    height == null ||
+    !Number.isFinite(width) ||
+    !Number.isFinite(height) ||
+    width <= 0 ||
+    height <= 0
+  ) {
+    return null;
+  }
+  return width / height;
+}
+
+/** Portrait → 4:5. Landscape → 16:9. Prefer real w/h when present. */
+export function socialMediaOrientation(
+  input: SocialMediaOrientation | SocialMediaFrameInput = {},
+): SocialMediaOrientation {
+  if (input === "portrait" || input === "landscape") return input;
+  if (input.orientation === "portrait" || input.orientation === "landscape") {
+    return input.orientation;
+  }
+  const ratio = socialMediaAspectRatio(input);
+  if (ratio != null) return ratio < 1 ? "portrait" : "landscape";
+  return input.kind === "image" ? "portrait" : "landscape";
+}
+
+/** Feed media frame SoT. Stills, Mux poster, Mux player, native video. */
+export function socialMediaFrameClass(
+  orientation: SocialMediaOrientation | SocialMediaFrameInput,
+): string {
+  return socialMediaOrientation(orientation) === "portrait"
+    ? "aspect-[4/5] w-full object-cover"
+    : "aspect-video w-full object-cover";
+}
+

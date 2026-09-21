@@ -40,6 +40,8 @@ describe("SocialFeedVideo", () => {
   it("does not add a quality Settings maze", () => {
     const player = readFileSync("src/components/social/social-mux-player.tsx", "utf8");
     expect(player).toContain("streamType=\"on-demand\"");
+    expect(player).toContain("objectFit: \"cover\"");
+    expect(player).toContain("aspectRatio: \"auto\"");
     expect(player).not.toContain("maxResolution");
     expect(player).not.toContain("minResolution");
     expect(player).not.toContain("renditionOrder");

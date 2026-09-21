@@ -178,6 +178,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(rail).toContain("w-[112px]");
     expect(rail).not.toContain("size-10");
     expect(card).toContain("SOCIAL_FEED_ROW_CLASS");
+    expect(card).toContain("SOCIAL_FEED_GUTTER_CLASS");
+    expect(card).toContain("socialMediaFrameClass");
     expect(card.slice(card.indexOf("export function SocialPostCard")).indexOf("SocialAvatar")).toBeLessThan(
       card.slice(card.indexOf("export function SocialPostCard")).indexOf("SocialPostMedia"),
     );
@@ -244,6 +246,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).toContain("SOCIAL_COMPOSER_CLASS");
     expect(chrome).toContain("SOCIAL_EMPTY_PANEL_CLASS");
     expect(chrome).toContain("SOCIAL_FEED_ROW_CLASS");
+    expect(chrome).toContain("SOCIAL_FEED_GUTTER_CLASS");
     expect(chrome).toContain("SOCIAL_HOME_STORY_CARD_CLASS");
     expect(chrome).toContain("SOCIAL_FOR_YOU_CARD_CLASS");
     expect(forYou).not.toContain("SOCIAL.forYou.native");
@@ -630,6 +633,10 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).toContain("SOCIAL_PROFILE_ROLE_PILL_CLASS");
     expect(chrome).toContain("SOCIAL_PROFILE_CENTER_CLASS");
     expect(chrome).toContain("SOCIAL_PROFILE_POSTS_EMPTY_CLASS");
+    expect(chrome).toContain("SOCIAL_PROFILE_PLAY_CLASS");
+    expect(chrome).toContain("aspect-square w-full");
+    expect(chrome).toContain("grid-cols-3 gap-px");
+    expect(chrome).not.toContain("h-[140px]");
     expect(chrome).toContain("HOUSE_PILL_ITEM_CLASS");
     expect(chrome).toContain("HOUSE_FILTER_OFF_CLASS");
     expect(chrome).toContain("max-w-xs");

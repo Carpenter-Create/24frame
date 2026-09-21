@@ -4,11 +4,17 @@ import { HouseEmpty } from "@/components/chrome/house";
 import { PageHeader } from "@/components/ui/page-header";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { Input } from "@/components/ui/input";
+import { SocialIcon } from "@/components/social/social-icon";
 import { SocialMediaImage } from "@/components/social/social-media-image";
 import { SocialExploreResultsSkeleton } from "@/components/social/social-skeletons";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
-import { SOCIAL_PROFILE_GRID_CLASS, SOCIAL_PROFILE_TILE_CLASS } from "@/lib/social-chrome";
+import {
+  SOCIAL_PROFILE_GRID_CLASS,
+  SOCIAL_PROFILE_PLAY_CLASS,
+  SOCIAL_PROFILE_TILE_CLASS,
+} from "@/lib/social-chrome";
 import { socialMediaProxiesByPostId } from "@/lib/social-edge";
+import { SOCIAL_ICON_SIZE_PROFILE_PLAY } from "@/lib/social-icons";
 import { SOCIAL_PROFILE_TILE_IMAGE_SIZES, socialVideoDisplaySrc } from "@/lib/social-media-display";
 import { loadExploreMedia, loadExploreSearch, type SocialExploreHit } from "@/lib/social-feed";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
@@ -148,11 +154,10 @@ function SocialExploreMediaTile({
           <SocialMediaImage src={first.url} sizes={SOCIAL_PROFILE_TILE_IMAGE_SIZES} />
         </div>
       )}
-      <p className="relative t-label font-medium uppercase tracking-[0.08em] text-ink-2">
-        {first.kind === "video" ? SOCIAL.home.videoKind : SOCIAL.home.photoKind}
-      </p>
-      {hit.title && hit.title !== "Post" ? (
-        <p className="relative t-body-sm text-ink">{hit.title}</p>
+      {first.kind === "video" ? (
+        <span data-social-profile-play="" className={SOCIAL_PROFILE_PLAY_CLASS}>
+          <SocialIcon name="play" size={SOCIAL_ICON_SIZE_PROFILE_PLAY} active />
+        </span>
       ) : null}
     </article>
   );

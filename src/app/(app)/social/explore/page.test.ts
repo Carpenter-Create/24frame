@@ -180,8 +180,10 @@ describe("Social Explore", () => {
     expect(html).toContain("data-social-explore-grid");
     expect(html).toContain("data-social-explore-tile");
     expect(html).toContain("data-social-explore-image");
-    expect(html).toContain("Night still");
-    expect(html).toContain(SOCIAL.home.photoKind);
+    expect(html).toContain("aspect-square");
+    expect(html).not.toContain("Night still");
+    expect(html).not.toContain(SOCIAL.home.photoKind);
+    expect(html).not.toContain("data-social-profile-play");
     expect(html).not.toContain("data-social-for-you-people");
     expect(html).not.toContain("data-social-person-row");
   });

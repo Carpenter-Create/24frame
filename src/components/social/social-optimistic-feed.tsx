@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { SocialPostCard, type SocialPostCardModel } from "@/components/social/social-ui";
 import { useSocialOptimisticPosts } from "@/components/social/use-social-optimistic";
+import { SOCIAL_FEED_GUTTER_CLASS } from "@/lib/social-chrome";
 import {
   mergeSocialOptimisticPosts,
   socialOptimisticNotice,
@@ -38,7 +39,7 @@ export function SocialOptimisticFeed({
     );
   }
   return (
-    <div data-social-feed="" className="flex flex-col gap-2">
+    <div data-social-feed="" className={SOCIAL_FEED_GUTTER_CLASS}>
       {notice}
       {merged.map((post) => (
         <SocialPostCard key={post.id} post={post} />
