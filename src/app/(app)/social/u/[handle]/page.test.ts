@@ -234,9 +234,11 @@ describe("Social public profile", () => {
     expect(head).toContain("data-social-profile-meta");
     expect(head).toContain("data-social-profile-name");
     expect(head).toContain("data-social-profile-stats");
-    expect(head).toContain("max-w-xs");
-    expect(head).toContain("items-center");
-    expect(head).not.toContain("flex min-w-0 flex-1 items-center");
+    expect(head).toContain("w-fit");
+    expect(head).toContain("inline-flex");
+    expect(head).not.toContain("max-w-xs");
+    expect(head).not.toContain("grid w-full grid-cols-3");
+    expect(head).not.toContain("flex min-w-0 max-w-xs flex-1 items-center");
     expect(head).not.toContain("@ada");
     expect(head.indexOf("data-social-profile-name")).toBeLessThan(head.indexOf("data-social-profile-stats"));
     expect(html.indexOf("data-social-profile-name")).toBeLessThan(html.indexOf("data-social-profile-stats"));
