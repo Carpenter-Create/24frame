@@ -15,10 +15,13 @@ import {
   readAccountAvatarCropPreview,
 } from "@/lib/account-avatar-crop";
 import { SOCIAL } from "@/lib/social";
-import { SOCIAL_COVER_BYTES_ROUTE } from "@/lib/social-edge";
 import {
+  type CoverBytes,
   coverFailureCopy,
+  coverNoticeText,
   coverPreviewIsLocal,
+  loadLocalCoverFile,
+  loadOwnCoverFile,
 } from "@/lib/social-profile-cover-load";
 import {
   COVER_CROP_MAX_BYTES,
@@ -47,24 +50,6 @@ import { patchSocialProfileOptimistic } from "@/lib/social-profile-edit";
 
 type CoverMode = "idle" | "menu" | "reposition";
 
-async function fileFromResponse(response: Response): Promise<File> {
-  if (!response.ok) throw new Error(SOCIAL.profile.coverCropFailed);
-  const blob = await response.blob();
-  const type = blob.type.startsWith("image/") ? blob.type : "image/jpeg";
-  return new File([blob], "cover-source", { type });
-}
-
-/** Same-origin owner bytes. redirect:error so a CDN 302 is never followed. */
-async function fileFromOwnCover(): Promise<File> {
-  const response = await fetch(SOCIAL_COVER_BYTES_ROUTE, { redirect: "error" });
-  return fileFromResponse(response);
-}
-
-async function fileFromLocalPreview(url: string): Promise<File> {
-  const response = await fetch(url);
-  return fileFromResponse(response);
-}
-
 export function SocialProfileCoverUpload({
   coverUrl,
   onPreview,
@@ -76,6 +61,7 @@ export function SocialProfileCoverUpload({
   const menuRef = useRef<HTMLDivElement>(null);
   const ownedPreview = useRef<string | null>(null);
   const loadGen = useRef(0);
+  const coverBytes = useRef<Promise<CoverBytes> | null>(null);
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
   const [mode, setMode] = useState<CoverMode>("idle");
@@ -156,6 +142,7 @@ export function SocialProfileCoverUpload({
 
   function cancelReposition() {
     loadGen.current += 1;
+    coverBytes.current = null;
     clearReposition();
     setUploading(false);
     setError("");
@@ -170,13 +157,28 @@ export function SocialProfileCoverUpload({
   function beginReposition() {
     const url = coverUrl?.trim();
     if (!url || uploading) return;
-    loadGen.current += 1;
+    const gen = (loadGen.current += 1);
     setError("");
     setRepositionFile(null);
     setRepositionSize(null);
     setPanOffset({ x: 0, y: 0 });
     rememberPreview(url, false);
     setMode("reposition");
+    if (coverPreviewIsLocal(url)) {
+      coverBytes.current = null;
+      return;
+    }
+    const pending = loadOwnCoverFile(SOCIAL.profile.coverCropFailed);
+    coverBytes.current = pending;
+    void pending.then((loaded) => {
+      if (loadGen.current !== gen) return;
+      if (loaded.file) {
+        setRepositionFile(loaded.file);
+        return;
+      }
+      coverBytes.current = null;
+      setError(loaded.notice);
+    });
   }
 
   async function removeCover() {
@@ -188,7 +190,7 @@ export function SocialProfileCoverUpload({
       onPreview?.(null);
       const result = await clearSocialProfileCover();
       if (result.error) {
-        setError(result.error);
+        setError(coverNoticeText(result.error, SOCIAL.profile.coverCropFailed));
       }
     } catch {
       setError(SOCIAL.profile.coverCropFailed);
@@ -254,7 +256,14 @@ export function SocialProfileCoverUpload({
       if (!file) {
         const url = coverUrl?.trim() || repositionPreview;
         if (!url) throw new Error(SOCIAL.profile.coverCropFailed);
-        file = coverPreviewIsLocal(url) ? await fileFromLocalPreview(url) : await fileFromOwnCover();
+        const loaded = coverPreviewIsLocal(url)
+          ? await loadLocalCoverFile(url, SOCIAL.profile.coverCropFailed)
+          : await (coverBytes.current ?? loadOwnCoverFile(SOCIAL.profile.coverCropFailed));
+        if (!loaded.file) {
+          coverBytes.current = null;
+          throw new Error(loaded.notice);
+        }
+        file = loaded.file;
       }
       let size = repositionSize;
       if (!size) {
@@ -293,7 +302,7 @@ export function SocialProfileCoverUpload({
         onPreview?.(null);
         patchSocialProfileOptimistic({ coverUrl: null });
         URL.revokeObjectURL(previewUrl);
-        setError(signed.error ?? SOCIAL.home.uploadFailed);
+        setError(coverNoticeText(signed.error, SOCIAL.home.uploadFailed));
         return;
       }
 
@@ -326,7 +335,7 @@ export function SocialProfileCoverUpload({
         onPreview?.(null);
         patchSocialProfileOptimistic({ coverUrl: null });
         URL.revokeObjectURL(previewUrl);
-        setError(result.error);
+        setError(coverNoticeText(result.error, SOCIAL.home.uploadFailed));
       } else {
         clearReposition();
         setMode("idle");

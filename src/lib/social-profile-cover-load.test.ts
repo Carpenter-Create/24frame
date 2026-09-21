@@ -1,8 +1,17 @@
-import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { describe, expect, it, vi } from "vitest";
 
 import { SOCIAL_COVER_BYTES_ROUTE } from "@/lib/social-edge";
 
-import { coverFailureCopy, coverPreviewIsLocal } from "./social-profile-cover-load";
+import {
+  COVER_BYTES_FETCH,
+  coverFailureCopy,
+  coverLoadNotice,
+  coverNoticeText,
+  coverPreviewIsLocal,
+  loadLocalCoverFile,
+  loadOwnCoverFile,
+} from "./social-profile-cover-load";
 
 describe("cover reposition load", () => {
   it("treats only blob and data URLs as locally readable", () => {
@@ -14,14 +23,93 @@ describe("cover reposition load", () => {
   });
 
   it("never surfaces Failed to fetch", () => {
-    expect(coverFailureCopy(new TypeError("Failed to fetch"), "Could not crop cover photo.")).toBe(
-      "Could not crop cover photo.",
-    );
-    expect(coverFailureCopy(new Error("Failed to fetch"), "Could not crop cover photo.")).toBe(
-      "Could not crop cover photo.",
-    );
-    expect(coverFailureCopy(new Error("Photo must be 10 MB or smaller."), "Could not crop cover photo.")).toBe(
+    const fallback = "Could not crop cover photo.";
+    expect(coverFailureCopy(new TypeError("Failed to fetch"), fallback)).toBe(fallback);
+    expect(coverFailureCopy(new Error("Failed to fetch"), fallback)).toBe(fallback);
+    expect(coverFailureCopy(new Error("fetch failed"), fallback)).toBe(fallback);
+    expect(coverFailureCopy(new Error("Photo must be 10 MB or smaller."), fallback)).toBe(
       "Photo must be 10 MB or smaller.",
     );
+    expect(coverFailureCopy(new TypeError("Failed to fetch"), "Failed to fetch")).not.toMatch(
+      /failed to fetch|fetch failed/i,
+    );
+    expect(coverNoticeText("Failed to fetch", fallback)).toBe(fallback);
+    expect(coverNoticeText("fetch failed", fallback)).toBe(fallback);
+    expect(coverNoticeText(fallback, "Failed to fetch")).toBe(fallback);
+  });
+
+  it("maps status and redirect failures to friendly copy", () => {
+    const fallback = "Could not crop cover photo.";
+    const notices = [
+      coverLoadNotice({ thrown: new TypeError("Failed to fetch") }, fallback),
+      coverLoadNotice({ thrown: new Error("fetch failed") }, fallback),
+      coverLoadNotice({ status: 401 }, fallback),
+      coverLoadNotice({ status: 404 }, fallback),
+      coverLoadNotice({ status: 500 }, fallback),
+      coverLoadNotice({ status: 302, redirected: true }, fallback),
+      coverLoadNotice({ status: 0, type: "opaqueredirect" }, fallback),
+    ];
+    for (const notice of notices) {
+      expect(notice).toBe(fallback);
+      expect(notice).not.toMatch(/failed to fetch|fetch failed/i);
+    }
+    expect(coverLoadNotice({ status: 200 }, fallback)).toBeNull();
+  });
+
+  it("reads owner cover status and does not follow a CDN redirect", async () => {
+    const fallback = "Could not crop cover photo.";
+    const fetchImpl = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      expect(String(input)).toBe(SOCIAL_COVER_BYTES_ROUTE);
+      expect(init).toEqual(COVER_BYTES_FETCH);
+      return new Response(null, {
+        status: 302,
+        headers: { Location: "https://cdn.example/cover.jpg" },
+      });
+    });
+    const redirected = await loadOwnCoverFile(fallback, fetchImpl);
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(redirected).toEqual({ file: null, notice: fallback });
+
+    for (const status of [401, 404, 500]) {
+      const once = vi.fn(async () => new Response(null, { status }));
+      const loaded = await loadOwnCoverFile(fallback, once);
+      expect(once).toHaveBeenCalledTimes(1);
+      expect(loaded).toEqual({ file: null, notice: fallback });
+    }
+
+    const thrown = vi.fn(async () => {
+      throw new TypeError("Failed to fetch");
+    });
+    expect(await loadOwnCoverFile(fallback, thrown)).toEqual({ file: null, notice: fallback });
+
+    const ok = vi.fn(
+      async () => new Response(new Uint8Array([9, 8, 7]), { headers: { "Content-Type": "image/jpeg" } }),
+    );
+    const bytes = await loadOwnCoverFile(fallback, ok);
+    expect(bytes.notice).toBeNull();
+    expect(bytes.file?.type).toBe("image/jpeg");
+    expect(bytes.file?.size).toBe(3);
+  });
+
+  it("does not fetch a CDN or media-proxy URL for local bytes", async () => {
+    const fallback = "Could not crop cover photo.";
+    const spy = vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("Failed to fetch"));
+    try {
+      const remote = await loadLocalCoverFile("https://cdn.example/cover.jpg", fallback);
+      const proxy = await loadLocalCoverFile("/api/social/media?key=posts%2Fa%2Fb.jpg", fallback);
+      expect(spy).not.toHaveBeenCalled();
+      expect(remote).toEqual({ file: null, notice: fallback });
+      expect(proxy).toEqual({ file: null, notice: fallback });
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it("keeps the byte fetch on manual redirect in the load module", () => {
+    const src = readFileSync("src/lib/social-profile-cover-load.ts", "utf8");
+    expect(src).toContain('redirect: "manual"');
+    expect(src).toContain('credentials: "include"');
+    expect(src).not.toContain('redirect: "error"');
+    expect(COVER_BYTES_FETCH.redirect).toBe("manual");
   });
 });

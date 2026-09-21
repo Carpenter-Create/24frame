@@ -91,5 +91,14 @@ describe("GET /api/social/cover", () => {
     expect(src).toContain("readSocialMediaObject");
     expect(src).not.toContain("redirect");
     expect(src).not.toContain("signedSocialMediaUrl");
+    expect(src).toContain('select("cover_key")');
+  });
+
+  it("is session-gated like other app routes and is not name-blocked", () => {
+    const middleware = readFileSync("src/lib/supabase/middleware.ts", "utf8");
+    const matcher = readFileSync("src/middleware.ts", "utf8");
+    expect(middleware).not.toContain("/api/social/cover");
+    expect(matcher).not.toContain("/api/social/cover");
+    expect(middleware).toContain("if (!user && !isPublic)");
   });
 });

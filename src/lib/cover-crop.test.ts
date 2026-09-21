@@ -209,12 +209,17 @@ describe("cover upload component (FB-exact)", () => {
     expect(upload).toContain("fileRef.current?.click()");
     expect(reposition).not.toContain("fileRef");
     expect(reposition).not.toContain("fetch(");
+    expect(reposition).toContain("loadOwnCoverFile");
     expect(reposition).toContain("rememberPreview");
     expect(reposition).toContain('setMode("reposition")');
-    expect(src).toContain("fileFromOwnCover");
-    expect(src).toContain('redirect: "error"');
+    expect(src).not.toContain("fileFromOwnCover");
+    expect(src).not.toContain('redirect: "error"');
+    expect(src).not.toContain("/api/social/media");
     expect(src).not.toContain("coverFileFromUrl");
     expect(src).toContain("coverFailureCopy");
+    expect(src).toContain("coverNoticeText");
+    expect(src).not.toContain("setError(result.error)");
+    expect(src).not.toContain("setError(signed.error");
   });
 
   it("clears file input on cancel", () => {
