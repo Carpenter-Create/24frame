@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { SOCIAL } from "@/lib/social";
 import {
+  SOCIAL_PROFILE_LINKS_FACE_MAX,
   SOCIAL_PROFILE_LINKS_MAX,
   composeSocialWebsiteUrlField,
   parseSocialExternalUrl,
@@ -9,6 +10,9 @@ import {
   parseSocialWebsiteUrlField,
   socialLinkPlatform,
   socialProfileLinkError,
+  socialProfileLinkFaceLabel,
+  socialProfileLinksFace,
+  socialProfileLinksMoreLabel,
   socialProfilePublicLinks,
 } from "@/lib/social-profile-links";
 
@@ -71,13 +75,15 @@ describe("social profile links", () => {
     expect(parseSocialProfileLinksWrite(overflow)).toEqual({ urls: [], error: "limit" });
   });
 
-  it("merges IMDb into the public icon row and does not double it", () => {
+  it("merges IMDb into the public list and does not double it", () => {
     const links = socialProfilePublicLinks({
       websiteUrl: "https://instagram.com/ada",
       imdbUrl: "https://www.imdb.com/name/nm0000158/",
     });
     expect(links.map((link) => link.platform)).toEqual(["instagram", "imdb"]);
     expect(links[0]?.url).toBe("https://instagram.com/ada");
+    expect(links[0]?.label).toBe("instagram.com/ada");
+    expect(links[1]?.label).toBe("imdb.com/name/nm0000158");
     expect(links.some((link) => link.url.includes("instagram.com"))).toBe(true);
     expect(links.every((link) => link.url.startsWith("http"))).toBe(true);
 
@@ -87,7 +93,8 @@ describe("social profile links", () => {
     });
     expect(doubled).toHaveLength(1);
     expect(doubled[0]?.platform).toBe("imdb");
-    expect(doubled[0]?.label).toBe(SOCIAL.profile.imdb);
+    expect(doubled[0]?.label).toBe("imdb.com/name/nm0000158");
+    expect(doubled[0]?.label).not.toBe(SOCIAL.profile.imdb);
     expect(socialProfilePublicLinks({ websiteUrl: null, imdbUrl: null })).toEqual([]);
 
     const unknown = socialProfilePublicLinks({
@@ -97,8 +104,41 @@ describe("social profile links", () => {
       {
         url: "https://ada.example/press",
         platform: "website",
-        label: "Website",
+        label: "website",
       },
     ]);
+  });
+
+  it("derives face labels from host and path, never a scheme URL", () => {
+    expect(socialProfileLinkFaceLabel("https://instagram.com/ada")).toBe("instagram.com/ada");
+    expect(socialProfileLinkFaceLabel("https://www.youtube.com/@ada")).toBe("youtube.com/@ada");
+    expect(socialProfileLinkFaceLabel("https://x.com/ada")).toBe("x.com/ada");
+    expect(socialProfileLinkFaceLabel("https://www.imdb.com/name/nm0000158/")).toBe(
+      "imdb.com/name/nm0000158",
+    );
+    expect(socialProfileLinkFaceLabel("https://ada.example/press")).toBe("website");
+    expect(socialProfileLinkFaceLabel("https://ada.example")).toBe("website");
+  });
+
+  it("caps the face at two links and labels overflow as +N", () => {
+    expect(SOCIAL_PROFILE_LINKS_FACE_MAX).toBe(2);
+    const three = socialProfilePublicLinks({
+      urls: [
+        "https://instagram.com/ada",
+        "https://youtube.com/@ada",
+        "https://x.com/ada",
+      ],
+    });
+    expect(socialProfileLinksFace(three)).toEqual({
+      face: three.slice(0, 2),
+      overflow: 1,
+    });
+    expect(socialProfileLinksMoreLabel(1)).toBe("+1");
+    expect(socialProfileLinksMoreLabel(3)).toBe("+3");
+    expect(socialProfileLinksFace(three.slice(0, 2))).toEqual({
+      face: three.slice(0, 2),
+      overflow: 0,
+    });
+    expect(socialProfileLinksFace([])).toEqual({ face: [], overflow: 0 });
   });
 });

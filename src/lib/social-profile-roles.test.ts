@@ -390,6 +390,9 @@ describe("social profile roles", () => {
     expect(chromeSrc).toContain("SOCIAL_PROFILE_HEAD_CLASS");
     expect(chromeSrc).toContain("SOCIAL_PROFILE_META_CLASS");
     expect(chromeSrc).toContain("SOCIAL_PROFILE_ACTIONS_CLASS");
+    expect(chromeSrc).toContain("SOCIAL_PROFILE_LINKS_CLASS");
+    expect(chromeSrc).toContain("SOCIAL_PROFILE_LINK_CLASS");
+    expect(chromeSrc).toContain("SOCIAL_PROFILE_LINKS_MORE_CLASS");
     expect(chromeSrc).toContain("SOCIAL_PROFILE_STATS_CLASS");
     expect(chromeSrc).toContain("SOCIAL_PROFILE_STATS_GRID_CLASS");
     expect(chromeSrc).toContain("SOCIAL_PROFILE_ROLES_ROW_CLASS");

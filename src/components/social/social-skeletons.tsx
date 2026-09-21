@@ -22,6 +22,7 @@ import {
   SOCIAL_PROFILE_ACTIONS_CLASS,
   SOCIAL_PROFILE_FACE_CLASS,
   SOCIAL_PROFILE_HEAD_CLASS,
+  SOCIAL_PROFILE_LINKS_CLASS,
   SOCIAL_PROFILE_IDENTITY_CLASS,
   SOCIAL_PROFILE_META_CLASS,
   SOCIAL_PROFILE_STATS_CLASS,
@@ -126,6 +127,9 @@ export function SocialProfileCenterSkeleton() {
         <div className={SOCIAL_PROFILE_FACE_CLASS}>
           <Skeleton className="h-3 w-2/3" />
           <Skeleton className="h-7 w-24 rounded-full" />
+          <div data-social-profile-links-skeleton="" className={SOCIAL_PROFILE_LINKS_CLASS}>
+            <Skeleton className="h-3 w-40" />
+          </div>
           <div className={SOCIAL_PROFILE_ACTIONS_CLASS}>
             <Skeleton className="h-8 w-28 rounded-[8px]" />
             <Skeleton className="h-8 w-20 rounded-[8px]" />

@@ -70,6 +70,14 @@ describe("Social loading skeletons", () => {
     expect(home).toContain("data-social-for-you-skeleton");
     expect(home).not.toContain("data-social-recent-chats-skeleton");
     expect(profile).toContain("data-social-profile-skeleton");
+    expect(profile).toContain("data-social-profile-links-skeleton");
+    expect(profile.indexOf("data-social-profile-links-skeleton")).toBeGreaterThan(
+      profile.indexOf("rounded-full"),
+    );
+    expect(profile.indexOf("data-social-profile-links-skeleton")).toBeLessThan(
+      profile.indexOf("mt-[var(--space-3)]"),
+    );
+    expect(profile).not.toContain("size-6");
     expect(profile).toContain("mt-[var(--space-3)]");
     expect(profile).toContain("mx-auto");
     expect(profile).toContain("md:max-w-[892px]");

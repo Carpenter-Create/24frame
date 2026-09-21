@@ -298,7 +298,8 @@ export function socialTopicChipSelectClass(selected: boolean): string {
 // left-pack under the name in the right column — content-sized 3-up,
 // not a w-full stretch across the meta column. Each cell stays
 // number-above-label; the group shares the name's left edge. Bio ·
-// Role pills · links · actions stay full-width below the head row.
+// Role pills · muted text links · actions stay full-width below the
+// head row (Adam lock A 2026-09-20 — not a glyph row).
 // Dedicated house-token air before Edit / Share (or Follow / Share).
 // Handle stays in chrome. Name wraps; never truncate.
 export const SOCIAL_PROFILE_IDENTITY_CLASS = "flex flex-col gap-2";
@@ -332,6 +333,13 @@ export const SOCIAL_PROFILE_ACTIONS_CLASS =
   "mt-[var(--space-3)] flex w-full items-center gap-2";
 
 export const SOCIAL_PROFILE_BIO_CLASS = "break-words t-body-sm text-ink whitespace-pre-wrap";
+
+// Adam lock A 2026-09-20: calm muted type. Not chips, not
+// brand-colored glyphs. Phone stacks — never truncate. Same class for
+// own + public. Max 2 face links; +N is the overflow control.
+export const SOCIAL_PROFILE_LINKS_CLASS = "flex min-w-0 flex-col items-start gap-1";
+export const SOCIAL_PROFILE_LINK_CLASS = "min-w-0 break-words t-body-sm text-ink-2 hover:text-ink";
+export const SOCIAL_PROFILE_LINKS_MORE_CLASS = "t-body-sm text-ink-2 hover:text-ink";
 
 // Public Professions: one-row house chip rail (same primitive as Topics).
 // Phone: nowrap + overflow-x auto + no-scrollbar. Desktop: same one-row
