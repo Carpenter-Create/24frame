@@ -129,6 +129,11 @@ describe("house speed lock — no RSA on Social Home / Home critical path", () =
     expect(provider).toContain("houseRememberScroll");
     expect(provider).toContain("captureLeadScroll");
     expect(provider).toContain("captureLeadScroll(screenKey)");
+    expect(provider).toContain("<Suspense");
+    expect(provider).toContain("HousePathSearchBound");
+    expect(provider).toContain("useSearchParams");
+    const cache = provider.slice(provider.indexOf("export function HouseScreenCache"));
+    expect(cache).not.toContain("useSearchParams");
     expect(loading).toContain("data-house-rsc-fallback");
   });
 

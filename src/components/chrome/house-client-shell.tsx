@@ -3,6 +3,7 @@
 import {
   createContext,
   isValidElement,
+  Suspense,
   useContext,
   useEffect,
   useMemo,
@@ -36,6 +37,9 @@ type HouseClientApi = {
   search: string;
   href: string;
   screenKey: string;
+  nextPathname: string;
+  nextSearch: string;
+  nextKey: string;
   hasScreen: (href: string) => boolean;
   navigateOwned: (href: string, event?: HouseNavClickLike) => boolean;
 };
@@ -93,12 +97,38 @@ function touchScreenStore(store: ScreenStore, key: string): ScreenStore {
   return { order, nodes };
 }
 
+// useSearchParams must stay in this gated child. Always-mounted chrome
+// and static Settings RSC (agreements, theme, refer, …) prerender
+// through the empty-search fallback. Do not call the hook from
+// HouseScreenCache or AppShell.
 export function HousePathProvider({ children }: { children: ReactNode }) {
-  const nextPath = usePathname();
+  return (
+    <Suspense fallback={<HousePathProviderCore nextSearch="">{children}</HousePathProviderCore>}>
+      <HousePathSearchBound>{children}</HousePathSearchBound>
+    </Suspense>
+  );
+}
+
+function HousePathSearchBound({ children }: { children: ReactNode }) {
   const nextSearchParams = useSearchParams();
   const nextSearch = nextSearchParams.toString();
-  const nextSearchPrefixed = nextSearch ? `?${nextSearch}` : "";
-  const nextHref = housePathFromLocation(nextPath, nextSearchPrefixed);
+  return (
+    <HousePathProviderCore nextSearch={nextSearch ? `?${nextSearch}` : ""}>
+      {children}
+    </HousePathProviderCore>
+  );
+}
+
+function HousePathProviderCore({
+  children,
+  nextSearch,
+}: {
+  children: ReactNode;
+  nextSearch: string;
+}) {
+  const nextPath = usePathname();
+  const nextHref = housePathFromLocation(nextPath, nextSearch);
+  const nextKey = houseScreenKey(nextPath, nextSearch);
   const [ownedHref, setOwnedHref] = useState<string | null>(null);
   const [seenNextHref, setSeenNextHref] = useState(nextHref);
 
@@ -120,6 +150,9 @@ export function HousePathProvider({ children }: { children: ReactNode }) {
       search: parsed.search,
       href,
       screenKey,
+      nextPathname: nextPath,
+      nextSearch,
+      nextKey,
       hasScreen: (dest: string) => houseShouldClientNavigate(dest, housePaintedKeys()),
       navigateOwned: (dest: string, event?: HouseNavClickLike) => {
         if (event && houseNavIgnorePendingClick(event)) return false;
@@ -133,7 +166,7 @@ export function HousePathProvider({ children }: { children: ReactNode }) {
         return true;
       },
     }),
-    [href, parsed.pathname, parsed.search, screenKey, setOwnedHref],
+    [href, nextKey, nextPath, nextSearch, parsed.pathname, parsed.search, screenKey],
   );
 
   useEffect(() => {
@@ -176,12 +209,10 @@ export function HousePathProvider({ children }: { children: ReactNode }) {
 }
 
 export function HouseScreenCache({ children }: { children: ReactNode }) {
-  const nextPath = usePathname();
-  const nextSearchParams = useSearchParams();
-  const nextSearch = nextSearchParams.toString();
-  const nextSearchPrefixed = nextSearch ? `?${nextSearch}` : "";
-  const nextKey = houseScreenKey(nextPath, nextSearchPrefixed);
+  const fallbackPath = usePathname();
   const house = useHouseClient();
+  const nextPath = house?.nextPathname ?? fallbackPath;
+  const nextKey = house?.nextKey ?? houseScreenKey(nextPath, house?.nextSearch ?? "");
   const [store, setStore] = useState<ScreenStore>(EMPTY_STORE);
   const previousKey = useRef<string | null>(null);
   const fallback = isHouseRscFallback(children);
