@@ -303,7 +303,9 @@ describe("Social profile public face", () => {
     expect(roles).toContain("overflow-x-auto");
     expect(roles).toContain("no-scrollbar");
     expect(roles).not.toContain("flex-wrap");
-    expect(html).toContain("grid-cols-3");
+    expect(html).toContain("w-fit");
+    expect(html).toContain("inline-flex");
+    expect(html).not.toContain("grid w-full grid-cols-3");
     expect(html).not.toContain("data-social-profile-handle");
     const head = html.slice(html.indexOf("data-social-profile-head"), html.indexOf("data-social-profile-face"));
     expect(head).toContain("data-social-avatar");
