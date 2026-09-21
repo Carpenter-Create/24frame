@@ -658,7 +658,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(publicProfile).not.toContain("SocialForYouRail");
     expect(publicProfile).not.toContain("loadSuggestedPeople");
     expect(home).toContain("SocialForYouRail");
-    expect(card).toContain("socialProfileRolesMoreLabel");
+    expect(card).toContain("socialProfileRolesRailItems");
     expect(card).not.toContain("socialProfileRolesLine");
     expect(
       homeSkeleton.slice(

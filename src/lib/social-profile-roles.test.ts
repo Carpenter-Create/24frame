@@ -435,8 +435,8 @@ describe("social profile roles", () => {
     expect(identitySrc).toContain("data-social-profile-head");
     expect(identitySrc).not.toContain("SOCIAL_PROFILE_ROLES_RAIL_CLASS");
     const rolesBlock = identitySrc.slice(
-      identitySrc.indexOf("roleRailItems.length"),
-      identitySrc.indexOf("SocialProfileLinkRow"),
+      identitySrc.indexOf("<HouseChipRail"),
+      identitySrc.indexOf("<SocialProfileLinkRow"),
     );
     expect(rolesBlock).toContain("HouseChipRail");
     expect(rolesBlock).toContain("data-social-profile-roles");

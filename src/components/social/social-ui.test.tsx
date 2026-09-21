@@ -319,7 +319,7 @@ describe("Social profile public face", () => {
     );
     const adamRoles = adamDesktop.slice(
       adamDesktop.indexOf("data-social-profile-roles"),
-      adamDesktop.indexOf("data-social-profile-roles-more") + 80,
+      adamDesktop.indexOf("data-social-profile-roles-more") + 280,
     );
     expect(adamRoles).toContain("data-house-chip-rail");
     expect(adamRoles).toContain('data-house-chip-rail-row="0"');
