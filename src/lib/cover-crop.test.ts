@@ -218,6 +218,24 @@ describe("cover upload component (FB-exact)", () => {
     expect(src).not.toContain("coverFileFromUrl");
     expect(src).toContain("coverFailureCopy");
     expect(src).toContain("coverNoticeText");
+    const pick = src.slice(src.indexOf("function onFilePick"), src.indexOf("function computeCropFrame"));
+    const armed = pick.indexOf("setRepositionFile(picked)");
+    expect(armed).toBeGreaterThan(-1);
+    expect(pick.indexOf('setMode("reposition")', armed)).toBeGreaterThan(armed);
+    expect(pick.indexOf('setMode("reposition")', armed)).toBeLessThan(
+      pick.indexOf("readAccountAvatarCropPreview"),
+    );
+    expect(pick).toContain("coverFilePickOpensReposition");
+    expect(src).toContain("dismissCoverEdit");
+    expect(src).toContain("releasePointerCapture");
+    expect(src).toContain("fileRef.current?.blur()");
+    expect(src).toContain('attributeFilter: ["hidden"]');
+    const repositionUi = src.slice(src.indexOf("{isReposition ? ("), src.indexOf("{!isReposition ? ("));
+    expect(repositionUi).toContain("coverCancel");
+    expect(repositionUi).toContain("coverSaveChanges");
+    expect(repositionUi.indexOf("data-social-cover-reposition-bar")).toBeGreaterThan(
+      repositionUi.indexOf("z-0"),
+    );
     expect(src).not.toContain("setError(result.error)");
     expect(src).not.toContain("setError(signed.error");
   });

@@ -11,6 +11,11 @@ export const COVER_BYTES_FETCH = {
 
 const RAW_FETCH = /failed to fetch|fetch failed/i;
 
+/** Any picked file opens reposition chrome before decode or persist. */
+export function coverFilePickOpensReposition(file: File | undefined, uploading: boolean): boolean {
+  return Boolean(file) && !uploading;
+}
+
 /** Local previews can be read in the browser. Proxy and CDN hrefs cannot. */
 export function coverPreviewIsLocal(url: string): boolean {
   return url.startsWith("blob:") || url.startsWith("data:");

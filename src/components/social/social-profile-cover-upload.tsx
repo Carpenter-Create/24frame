@@ -14,10 +14,12 @@ import {
   cropRectFile,
   readAccountAvatarCropPreview,
 } from "@/lib/account-avatar-crop";
+import { HOUSE_CLIENT_SHELL } from "@/lib/house-client-shell";
 import { SOCIAL } from "@/lib/social";
 import {
   type CoverBytes,
   coverFailureCopy,
+  coverFilePickOpensReposition,
   coverNoticeText,
   coverPreviewIsLocal,
   loadLocalCoverFile,
@@ -57,11 +59,15 @@ export function SocialProfileCoverUpload({
   coverUrl?: string | null;
   onPreview?: (url: string | null) => void;
 }) {
+  const rootRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const ownedPreview = useRef<string | null>(null);
   const loadGen = useRef(0);
   const coverBytes = useRef<Promise<CoverBytes> | null>(null);
+  const saveBlocked = useRef(false);
+  const captureEl = useRef<HTMLElement | null>(null);
+  const captureId = useRef<number | null>(null);
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
   const [mode, setMode] = useState<CoverMode>("idle");
@@ -109,8 +115,10 @@ export function SocialProfileCoverUpload({
   }, [mode]);
 
   useEffect(() => {
+    const input = fileRef.current;
     return () => {
       loadGen.current += 1;
+      input?.blur();
       const prev = ownedPreview.current;
       if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
     };
@@ -131,32 +139,69 @@ export function SocialProfileCoverUpload({
     [releaseOwnedPreview],
   );
 
-  function clearReposition() {
+  const releasePointer = useCallback(() => {
+    const el = captureEl.current;
+    const id = captureId.current;
+    captureEl.current = null;
+    captureId.current = null;
+    dragRef.current = null;
+    if (!el || id == null) return;
+    try {
+      if (el.hasPointerCapture(id)) el.releasePointerCapture(id);
+    } catch {
+      // The pointer already ended.
+    }
+  }, []);
+
+  const clearReposition = useCallback(() => {
     releaseOwnedPreview();
     setRepositionFile(null);
     setRepositionPreview(null);
     setRepositionSize(null);
     setPanOffset({ x: 0, y: 0 });
     if (fileRef.current) fileRef.current.value = "";
-  }
+  }, [releaseOwnedPreview]);
 
-  function cancelReposition() {
+  const dismissCoverEdit = useCallback(() => {
     loadGen.current += 1;
     coverBytes.current = null;
+    saveBlocked.current = false;
+    releasePointer();
+    fileRef.current?.blur();
     clearReposition();
     setUploading(false);
     setError("");
     setMode("idle");
+  }, [clearReposition, releasePointer]);
+
+  function cancelReposition() {
+    dismissCoverEdit();
   }
+
+  useEffect(() => {
+    const node = rootRef.current;
+    const screen = node?.closest(`[${HOUSE_CLIENT_SHELL.screenAttr}]`);
+    if (!(screen instanceof HTMLElement)) return undefined;
+    const onHide = () => {
+      if (!screen.hasAttribute("hidden")) return;
+      dismissCoverEdit();
+    };
+    const observer = new MutationObserver(onHide);
+    observer.observe(screen, { attributes: true, attributeFilter: ["hidden"] });
+    onHide();
+    return () => observer.disconnect();
+  }, [dismissCoverEdit]);
 
   function beginUpload() {
     setMode("idle");
+    if (fileRef.current) fileRef.current.value = "";
     fileRef.current?.click();
   }
 
   function beginReposition() {
     const url = coverUrl?.trim();
     if (!url || uploading) return;
+    saveBlocked.current = false;
     const gen = (loadGen.current += 1);
     setError("");
     setRepositionFile(null);
@@ -200,23 +245,38 @@ export function SocialProfileCoverUpload({
   }
 
   function onFilePick(file: File | undefined) {
-    if (!file || uploading) return;
+    if (!coverFilePickOpensReposition(file, uploading) || !file) return;
+    const picked = file;
+    fileRef.current?.blur();
     setError("");
-    const kind = socialMediaKindFor(file.type);
-    if (kind !== "image") {
+    setPanOffset({ x: 0, y: 0 });
+    setRepositionSize(null);
+    if (socialMediaKindFor(picked.type) !== "image") {
+      saveBlocked.current = true;
+      coverBytes.current = null;
+      setRepositionFile(null);
+      setMode("reposition");
       setError(SOCIAL.home.mediaType);
       return;
     }
-    void readAccountAvatarCropPreview(file)
+    saveBlocked.current = false;
+    const gen = (loadGen.current += 1);
+    coverBytes.current = null;
+    releaseOwnedPreview();
+    setRepositionPreview(null);
+    setRepositionFile(picked);
+    setMode("reposition");
+    void readAccountAvatarCropPreview(picked)
       .then((next) => {
-        clearReposition();
-        setRepositionFile(file);
+        if (loadGen.current !== gen) {
+          URL.revokeObjectURL(next.url);
+          return;
+        }
         rememberPreview(next.url, true);
         setRepositionSize({ width: next.width, height: next.height });
-        setPanOffset({ x: 0, y: 0 });
-        setMode("reposition");
       })
       .catch(() => {
+        if (loadGen.current !== gen) return;
         setError(SOCIAL.home.mediaType);
       });
   }
@@ -247,6 +307,10 @@ export function SocialProfileCoverUpload({
 
   async function onSaveReposition() {
     if (uploading) return;
+    if (saveBlocked.current) {
+      setError(SOCIAL.home.mediaType);
+      return;
+    }
     setError("");
     setUploading(true);
     let previewUrl: string | null = null;
@@ -359,7 +423,10 @@ export function SocialProfileCoverUpload({
 
   function onPointerDown(e: React.PointerEvent) {
     if (mode !== "reposition") return;
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    const el = e.currentTarget as HTMLElement;
+    el.setPointerCapture(e.pointerId);
+    captureEl.current = el;
+    captureId.current = e.pointerId;
     dragRef.current = {
       startX: e.clientX,
       startY: e.clientY,
@@ -377,25 +444,53 @@ export function SocialProfileCoverUpload({
   }
 
   function onPointerUp() {
-    dragRef.current = null;
+    releasePointer();
   }
 
   const isReposition = mode === "reposition";
   const showPreview = isReposition && repositionPreview;
 
   return (
-    <>
+    <div ref={rootRef} className="contents">
       {/* --- Reposition mode: bar + hint + draggable preview inside the cover band --- */}
       {isReposition ? (
         <>
+          <div className={SOCIAL_PROFILE_COVER_DRAG_HINT_CLASS}>
+            <span className="flex items-center gap-2 rounded-[8px] bg-ink/60 px-3 py-1.5 t-body-sm font-medium text-band-ink">
+              {SOCIAL.profile.coverDragHint}
+            </span>
+          </div>
+          {showPreview ? (
+            // eslint-disable-next-line @next/next/no-img-element -- local blob for reposition preview
+            <img
+              src={repositionPreview}
+              alt=""
+              draggable={false}
+              className="absolute inset-0 z-0 size-full cursor-grab touch-none select-none object-cover opacity-70 active:cursor-grabbing"
+              style={{
+                objectPosition: `calc(50% + ${panOffset.x}px) calc(50% + ${panOffset.y}px)`,
+              }}
+              onPointerDown={onPointerDown}
+              onPointerMove={onPointerMove}
+              onPointerUp={onPointerUp}
+              onPointerCancel={onPointerUp}
+              onLoad={(event) => {
+                const image = event.currentTarget;
+                if (image.naturalWidth > 0 && image.naturalHeight > 0) {
+                  setRepositionSize({ width: image.naturalWidth, height: image.naturalHeight });
+                }
+              }}
+              onError={() => setError(SOCIAL.profile.coverCropFailed)}
+            />
+          ) : null}
           <div
             data-social-cover-reposition-bar=""
             className={SOCIAL_PROFILE_COVER_REPOSITION_BAR_CLASS}
           >
-            <p className="t-body-sm text-band-ink/80">
+            <p className="min-w-0 flex-1 t-body-sm text-band-ink/80">
               {SOCIAL.profile.coverPublicNote}
             </p>
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-2">
               <button
                 type="button"
                 disabled={uploading}
@@ -416,34 +511,6 @@ export function SocialProfileCoverUpload({
               </button>
             </div>
           </div>
-          <div className={SOCIAL_PROFILE_COVER_DRAG_HINT_CLASS}>
-            <span className="flex items-center gap-2 rounded-[8px] bg-ink/60 px-3 py-1.5 t-body-sm font-medium text-band-ink">
-              {SOCIAL.profile.coverDragHint}
-            </span>
-          </div>
-          {showPreview ? (
-            // eslint-disable-next-line @next/next/no-img-element -- local blob for reposition preview
-            <img
-              src={repositionPreview}
-              alt=""
-              draggable={false}
-              className="absolute inset-0 size-full cursor-grab touch-none select-none object-cover opacity-70 active:cursor-grabbing"
-              style={{
-                objectPosition: `calc(50% + ${panOffset.x}px) calc(50% + ${panOffset.y}px)`,
-              }}
-              onPointerDown={onPointerDown}
-              onPointerMove={onPointerMove}
-              onPointerUp={onPointerUp}
-              onPointerCancel={onPointerUp}
-              onLoad={(event) => {
-                const image = event.currentTarget;
-                if (image.naturalWidth > 0 && image.naturalHeight > 0) {
-                  setRepositionSize({ width: image.naturalWidth, height: image.naturalHeight });
-                }
-              }}
-              onError={() => setError(SOCIAL.profile.coverCropFailed)}
-            />
-          ) : null}
         </>
       ) : null}
 
@@ -540,13 +607,17 @@ export function SocialProfileCoverUpload({
         className="sr-only"
         aria-hidden
         tabIndex={-1}
-        onChange={(e) => onFilePick(e.target.files?.[0])}
+        onChange={(e) => {
+          const picked = e.target.files?.[0];
+          e.target.value = "";
+          onFilePick(picked);
+        }}
       />
       {error ? (
         <div className="absolute inset-x-3 bottom-12 z-30" aria-live="polite">
           <InlineNotice tone="error">{error}</InlineNotice>
         </div>
       ) : null}
-    </>
+    </div>
   );
 }

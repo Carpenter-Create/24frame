@@ -8,7 +8,9 @@ import FollowsLoading from "@/app/(app)/social/u/[handle]/follows/loading";
 import {
   HOUSE_CLIENT_SHELL,
   houseCanIngest,
+  houseFocusBelongsToInactiveScreen,
   houseHrefKey,
+  houseNavHop,
   housePaintedKeys,
   houseReadScroll,
   houseReconcileOwnedHref,
@@ -80,6 +82,16 @@ describe("house client shell SoT", () => {
     expect(houseShouldClientNavigate("/social", housePaintedKeys())).toBe(true);
     resetHousePaintedForTests();
     expect(houseShouldClientNavigate("/social", housePaintedKeys())).toBe(false);
+  });
+
+  it("does not swallow a profile return when Next is stuck on that pathname", () => {
+    expect(houseNavHop({ cached: true, ownedIsDest: false, nextIsDest: true })).toBe("owned");
+    expect(houseNavHop({ cached: true, ownedIsDest: true, nextIsDest: true })).toBe("stay");
+    expect(houseNavHop({ cached: false, ownedIsDest: false, nextIsDest: true })).toBe("refresh-next");
+    expect(houseNavHop({ cached: false, ownedIsDest: false, nextIsDest: false })).toBe("next");
+    expect(houseFocusBelongsToInactiveScreen(true, true)).toBe(true);
+    expect(houseFocusBelongsToInactiveScreen(false, true)).toBe(false);
+    expect(houseFocusBelongsToInactiveScreen(true, false)).toBe(false);
   });
 
   it("client-navigates only when the dest is owned and already mounted", () => {

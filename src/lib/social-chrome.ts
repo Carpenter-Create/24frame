@@ -338,7 +338,7 @@ export const SOCIAL_PROFILE_COVER_MENU_ITEM_CLASS =
   "flex w-full items-center gap-3 px-3 py-2 text-left t-body-sm text-ink hover:bg-surface-muted";
 
 export const SOCIAL_PROFILE_COVER_REPOSITION_BAR_CLASS =
-  "absolute inset-x-0 top-0 z-20 flex h-10 items-center justify-between bg-ink/70 px-3";
+  "absolute inset-x-0 top-0 z-30 flex h-10 items-center justify-between bg-ink/70 px-3";
 
 export const SOCIAL_PROFILE_COVER_DRAG_HINT_CLASS =
   "pointer-events-none absolute inset-0 z-10 flex items-center justify-center";

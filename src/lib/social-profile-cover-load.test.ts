@@ -6,6 +6,7 @@ import { SOCIAL_COVER_BYTES_ROUTE } from "@/lib/social-edge";
 import {
   COVER_BYTES_FETCH,
   coverFailureCopy,
+  coverFilePickOpensReposition,
   coverLoadNotice,
   coverNoticeText,
   coverPreviewIsLocal,
@@ -14,6 +15,13 @@ import {
 } from "./social-profile-cover-load";
 
 describe("cover reposition load", () => {
+  it("opens reposition chrome for any picked file before decode", () => {
+    const file = new File([new Uint8Array([1])], "cover.jpg", { type: "image/jpeg" });
+    expect(coverFilePickOpensReposition(file, false)).toBe(true);
+    expect(coverFilePickOpensReposition(file, true)).toBe(false);
+    expect(coverFilePickOpensReposition(undefined, false)).toBe(false);
+  });
+
   it("treats only blob and data URLs as locally readable", () => {
     expect(coverPreviewIsLocal("blob:http://local/abc")).toBe(true);
     expect(coverPreviewIsLocal("data:image/jpeg;base64,aaa")).toBe(true);
