@@ -187,8 +187,8 @@ describe("social isolation lock", () => {
     expect(actions).toContain("mediaItemsForInsert(formData.get(\"media\"), user.id)");
     expect(actions).toContain("mediaItemsForInsert(formData.get(\"media\"), user.id, \"stories\")");
     const sign = readFileSync("src/lib/s3-social-media.ts", "utf8");
-    expect(sign).toContain("ownedMediaItems(media, authorId, lane)");
-    expect(sign).toContain("signedSocialMediaItems(post.media, post.author_id)");
+    expect(sign).toContain("socialMediaProxies(media, authorId, lane)");
+    expect(sign).toContain("socialMediaProxiesByPostId(posts)");
   });
 
   it("caps DM fan-out and names inbox/thread honesty bounds", () => {

@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 
+import { HouseLink } from "@/components/chrome/house-link";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { SocialProfileCreateForm } from "@/components/social/social-forms";
 import { SocialEmpty } from "@/components/social/social-empty";
@@ -17,8 +17,12 @@ import {
   socialAuthorPostCard,
 } from "@/components/social/social-ui";
 import { SOCIAL_ACTION_CLASS, SOCIAL_PAGE_CLASS, SOCIAL_PROFILE_CENTER_CLASS } from "@/lib/social-chrome";
-import { signedAvatarUrl, signedAvatarUrls } from "@/lib/s3-avatars";
-import { signedSocialMediaByPostId, signedSocialMediaUrl } from "@/lib/s3-social-media";
+import {
+  signedAvatarUrls,
+  signedSocialMediaByPostId,
+  socialAvatarHref,
+  socialMediaHref,
+} from "@/lib/social-edge";
 import {
   isLegacySocialProfilePostsTab,
   parseSocialProfileTab,
@@ -114,11 +118,11 @@ async function SocialProfileMain({
       : Promise.resolve(null);
   const [photoUrl, coverUrl, liveStoriesPage, counts, welcomeUrl, jar, commentsPage, filtered] =
     await Promise.all([
-      signedAvatarUrl(profile.id),
-      profile.cover_key ? signedSocialMediaUrl(profile.cover_key) : Promise.resolve(null),
+      Promise.resolve(socialAvatarHref(profile.id)),
+      Promise.resolve(profile.cover_key ? socialMediaHref(profile.cover_key) : null),
       loadLiveStories(supabase, [profile.id]),
       loadCachedProfileSocialCounts(supabase, profile.id),
-      profile.welcome_video_key ? signedSocialMediaUrl(profile.welcome_video_key) : Promise.resolve(null),
+      Promise.resolve(profile.welcome_video_key ? socialMediaHref(profile.welcome_video_key) : null),
       cookies(),
       activityComments,
       activityPosts,
@@ -192,9 +196,9 @@ async function SocialProfileMain({
         stats={counts ?? undefined}
         actions={
           <>
-            <Link href={SOCIAL_ROUTES.profileEdit} className={`${SOCIAL_ACTION_CLASS} min-w-0 flex-1 text-center md:flex-none`}>
+            <HouseLink href={SOCIAL_ROUTES.profileEdit} className={`${SOCIAL_ACTION_CLASS} min-w-0 flex-1 text-center md:flex-none`}>
               {SOCIAL.profile.edit}
-            </Link>
+            </HouseLink>
             <SocialShareButton handle={identity.handle} stretch />
           </>
         }

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { HouseLink } from "./house-link";
 
 import { ActivityBell } from "@/components/activity/activity-bell";
 import { BrandLogo } from "./brand-logo";
@@ -84,7 +84,7 @@ export function HouseLeadChrome({
               HOUSE_LEAD_SLOT_CLASS,
             )}
           >
-            <Link
+            <HouseLink
               href={workspaceHome(workspace)}
               prefetch={social ? true : undefined}
               aria-label={PRODUCT_NAME}
@@ -92,7 +92,7 @@ export function HouseLeadChrome({
               className={HOUSE_LEAD_LOGO_CLASS}
             >
               <BrandLogo />
-            </Link>
+            </HouseLink>
             {search ? (
               <div
                 data-house-lead-search=""

@@ -1,17 +1,22 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, type ReactNode } from "react";
 
+import { readSocialProfile } from "@/app/(app)/social/query-actions";
 import { SocialProfileAvatarEdit } from "@/components/social/social-profile-avatar-edit";
 import { SocialProfileCoverUpload } from "@/components/social/social-profile-cover-upload";
 import { SocialProfileIdentity } from "@/components/social/social-ui";
 import { SocialWelcomeVideo } from "@/components/social/social-welcome-video";
+import { useAppQueryClient } from "@/components/query-provider";
 import {
   useSocialProfileOptimistic,
   useSocialProfileSaveHop,
 } from "@/components/social/use-social-profile-optimistic";
 import { HOUSE_PAGE_CANVAS_CLASS } from "@/lib/house-shell";
+import { SOCIAL_QUERY_STALE_MS, socialProfileQueryKey } from "@/lib/social-cache-keys";
 import { SOCIAL_PROFILE_CENTER_CLASS } from "@/lib/social-chrome";
+import { socialProfileFaceFromRow } from "@/lib/social-query";
 import {
   SOCIAL_PROFILE_IDENTITY_EMPTY,
   clearSocialProfileOptimistic,
@@ -56,7 +61,27 @@ function SocialProfileOptimisticIdentity({
   );
 }
 
-export function SocialOwnProfileFace({
+export function SocialOwnProfileFace(props: OwnProfileFace) {
+  const client = useAppQueryClient();
+  if (!props.profileId || !client) {
+    return <SocialOwnProfileFaceView {...props} />;
+  }
+  return <SocialOwnProfileFaceQuery {...props} profileId={props.profileId} />;
+}
+
+function SocialOwnProfileFaceQuery(props: OwnProfileFace & { profileId: string }) {
+  const query = useQuery({
+    queryKey: socialProfileQueryKey(props.profileId),
+    queryFn: () => readSocialProfile(props.profileId),
+    staleTime: SOCIAL_QUERY_STALE_MS,
+  });
+  const row = query.data;
+  if (!row) return <SocialOwnProfileFaceView {...props} />;
+  const face = socialProfileFaceFromRow(row);
+  return <SocialOwnProfileFaceView {...props} {...face} />;
+}
+
+function SocialOwnProfileFaceView({
   fallbackBio = "",
   ring = null,
   profileId,

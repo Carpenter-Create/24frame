@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 
 import { AppShell } from "@/components/chrome/app-shell";
+import { HousePathProvider } from "@/components/chrome/house-client-shell";
 import {
   appShellActivityItems,
   appShellUnread,
@@ -28,13 +29,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <Suspense fallback={null}>
         <AppAccessGate />
       </Suspense>
-      <AppShell
-        chrome={chrome}
-        messagesUnread={appShellUnread(chrome)}
-        activityItems={appShellActivityItems(chrome)}
-      >
-        {children}
-      </AppShell>
+      <HousePathProvider>
+        <AppShell
+          chrome={chrome}
+          messagesUnread={appShellUnread(chrome)}
+          activityItems={appShellActivityItems(chrome)}
+        >
+          {children}
+        </AppShell>
+      </HousePathProvider>
     </>
   );
 }

@@ -869,7 +869,7 @@ describe("social actions", () => {
     expect(await updateSocialBio(form)).toEqual({ error: SOCIAL.profile.bioLimit });
   });
 
-  it("inserts a follow, notifies the followee, and revalidates both profiles", async () => {
+  it("inserts a follow, notifies the followee, and does not rewrite Home", async () => {
     const { inserts, rpc } = stub({
       profile: { id: "u1", handle: "ada", display_name: "Ada", status: "active" },
     });
@@ -885,12 +885,7 @@ describe("social actions", () => {
       p_body: "@ada followed you",
       p_source_refs: { actor_id: "u1", handle: "ada", path: "/social/u/ada" },
     });
-    expect(revalidatePath).toHaveBeenCalledWith("/social");
-    expect(revalidatePath).toHaveBeenCalledWith("/social/profile");
-    expect(revalidatePath).toHaveBeenCalledWith("/social/u/ada");
-    expect(revalidatePath).toHaveBeenCalledWith("/social/u/ada/follows");
-    expect(revalidatePath).toHaveBeenCalledWith("/social/u/joshua");
-    expect(revalidatePath).toHaveBeenCalledWith("/social/u/joshua/follows");
+    expect(revalidatePath).not.toHaveBeenCalled();
   });
 
   it("deletes a follow and does not notify", async () => {

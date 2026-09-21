@@ -14,6 +14,7 @@ import {
   avatarObjectKey,
   isAvatarContentType,
 } from "@/lib/account-avatar";
+import { socialAvatarFaces } from "@/lib/social-edge";
 import { privateMaxAgeCacheControl, stablePresignOptions } from "@/lib/signing-window";
 
 // Dedicated private avatars bucket. Same AWS account and credentials as
@@ -114,13 +115,15 @@ export async function signedAvatarUrl(userId: string): Promise<string | null> {
   }
 }
 
-/** Mapping C: sign by `profiles.id` = `auth.users.id`. Missing stays null. */
+/**
+ * Display SoT for lists / feeds / Home / Aggregation faces.
+ * Resolves to the session-gated edge proxy — no HEAD, no RSA.
+ * Privileged short-lived GETs stay on signedAvatarUrl / presignAvatarGet
+ * (avatar API, account photo hop).
+ */
 export async function signedAvatarUrls(
   userIds: readonly string[],
 ): Promise<Map<string, string | null>> {
-  const unique = [...new Set(userIds.filter(Boolean))];
-  const entries = await Promise.all(
-    unique.map(async (userId) => [userId, await signedAvatarUrl(userId)] as const),
-  );
-  return new Map(entries);
+  const faces = socialAvatarFaces(userIds);
+  return new Map([...faces.entries()]);
 }

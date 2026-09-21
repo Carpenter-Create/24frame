@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { HouseLink } from "@/components/chrome/house-link";
 
 import { cn } from "@/lib/cn";
 import { SOCIAL_PROFILE_TAB_CLASS } from "@/lib/social-chrome";
@@ -21,7 +21,7 @@ export function SocialProfileTabs({
       <div className="overflow-x-auto">
         <div className="flex w-max items-start">
           {SOCIAL_PROFILE_TABS.map((tab) => (
-            <Link
+            <HouseLink
               key={tab}
               href={socialProfileTabHref(baseHref, tab)}
               data-social-profile-tab={tab}
@@ -33,7 +33,7 @@ export function SocialProfileTabs({
             >
               {socialProfileTabLabel(tab)}
               <span className={cn("h-0.5 w-full", active === tab ? "bg-accent" : "bg-transparent")} />
-            </Link>
+            </HouseLink>
           ))}
         </div>
       </div>

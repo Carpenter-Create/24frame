@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Link from "next/link";
+import { HouseLink } from "./house-link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { MagnifyingGlass } from "@phosphor-icons/react";
 
@@ -71,7 +71,7 @@ export function HouseLeadSearch({
 
   if (presentation === "icon") {
     return (
-      <Link
+      <HouseLink
         href={socialSearchHref({ intent: "people" })}
         aria-label={resolvedLabel}
         data-house-lead-search-icon=""
@@ -87,7 +87,7 @@ export function HouseLeadSearch({
           weight={HOUSE_PHONE_CHROME_ICON_WEIGHT}
           aria-hidden
         />
-      </Link>
+      </HouseLink>
     );
   }
 

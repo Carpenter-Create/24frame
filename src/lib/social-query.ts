@@ -3,8 +3,10 @@ import type { QueryClient } from "@tanstack/react-query";
 import {
   socialCountsQueryKey,
   socialFollowQueryKey,
+  socialFollowingWallQueryKey,
   socialProfileQueryKey,
 } from "@/lib/social-cache-keys";
+import { socialAvatarHref, socialMediaHref } from "@/lib/social-edge";
 import type { SocialProfileCounts } from "@/lib/social-feed";
 import type { SocialProfileRow } from "@/lib/social-feed";
 
@@ -22,6 +24,36 @@ export type SocialProfileQueryRow = Pick<
   | "imdb_url"
   | "website_url"
 >;
+
+export type SocialProfileFaceView = {
+  handle: string;
+  displayName: string;
+  bio: string;
+  photoUrl: string;
+  coverUrl: string | null;
+  welcomeVideoUrl: string | null;
+  crafts: string[];
+  topics: string[];
+  imdbUrl: string | null;
+  websiteUrl: string | null;
+};
+
+// Query row is SoT after boot. Cleared keys stay cleared — do not fall
+// back to the first RSC face props.
+export function socialProfileFaceFromRow(row: SocialProfileQueryRow): SocialProfileFaceView {
+  return {
+    handle: row.handle,
+    displayName: row.display_name,
+    bio: row.bio ?? "",
+    photoUrl: socialAvatarHref(row.id),
+    coverUrl: row.cover_key ? socialMediaHref(row.cover_key) : null,
+    welcomeVideoUrl: row.welcome_video_key ? socialMediaHref(row.welcome_video_key) : null,
+    crafts: row.crafts ?? [],
+    topics: row.topics ?? [],
+    imdbUrl: row.imdb_url ?? null,
+    websiteUrl: row.website_url ?? null,
+  };
+}
 
 // Optimistic Save / Follow: call these against the one App QueryClient.
 // Do not fork a second cache. Local button override stays compatible.
@@ -62,6 +94,7 @@ export function applyOptimisticFollow(
         ? { ...old, following: Math.max(0, old.following + (input.following ? 1 : -1)) }
         : old,
   );
+  void queryClient.invalidateQueries({ queryKey: ["social", "following-wall", input.viewerId] });
 }
 
 export function invalidateSocialQueries(
@@ -76,5 +109,6 @@ export function invalidateSocialQueries(
     void queryClient.invalidateQueries({ queryKey: socialFollowQueryKey(input.viewerId, input.targetId) });
     void queryClient.invalidateQueries({ queryKey: socialCountsQueryKey(input.viewerId) });
     void queryClient.invalidateQueries({ queryKey: socialCountsQueryKey(input.targetId) });
+    void queryClient.invalidateQueries({ queryKey: socialFollowingWallQueryKey(input.viewerId) });
   }
 }

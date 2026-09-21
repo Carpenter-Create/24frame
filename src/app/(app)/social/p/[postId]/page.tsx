@@ -3,8 +3,7 @@ import { SocialCommentThread } from "@/components/social/social-comment-thread";
 import { SocialPostBack } from "@/components/social/social-post-back";
 import { SocialPostCard } from "@/components/social/social-ui";
 import { PAGE_LEAD_STACK_CLASS } from "@/components/ui/page-header";
-import { signedAvatarUrl } from "@/lib/s3-avatars";
-import { signedSocialMediaItems } from "@/lib/s3-social-media";
+import { socialAvatarHref, socialMediaProxies } from "@/lib/social-edge";
 import { SOCIAL, socialPersonLabel } from "@/lib/social";
 import { SOCIAL_FEED_GUTTER_CLASS, SOCIAL_PAGE_CLASS } from "@/lib/social-chrome";
 import {
@@ -43,8 +42,8 @@ export default async function SocialPostPage({
     loadProfilesByIds(supabase, [post.author_id]),
     post.group_id ? loadGroupsByIds(supabase, [post.group_id]) : Promise.resolve(new Map()),
     profile ? loadLikedPostIds(supabase, ctx.user.id, [post.id]) : Promise.resolve(new Set<string>()),
-    signedAvatarUrl(post.author_id),
-    signedSocialMediaItems(post.media, post.author_id),
+    Promise.resolve(socialAvatarHref(post.author_id)),
+    Promise.resolve(socialMediaProxies(post.media, post.author_id)),
   ]);
   const author = authors.get(post.author_id);
   const group = post.group_id ? groups.get(post.group_id) : null;

@@ -63,7 +63,7 @@ import {
   socialMediaRuleMessage,
   socialProfileHref,
 } from "@/lib/social";
-import { bustSocialProfileHotCache } from "@/lib/social-hot-cache";
+import { bustSocialFeedHotCache, bustSocialProfileHotCache } from "@/lib/social-hot-cache";
 
 type ActionResult = { error?: string };
 
@@ -349,6 +349,7 @@ export async function writeSocialPost(
   );
   if (error) return { error: error.message };
 
+  await bustSocialFeedHotCache(user.id);
   const slug = String(formData.get("group_slug") ?? "").trim();
   revalidatePath(SOCIAL_ROUTES.home);
   revalidatePath(SOCIAL_ROUTES.create);

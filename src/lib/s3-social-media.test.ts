@@ -171,8 +171,7 @@ describe("s3-social-media isolated lane", () => {
     expect(mockGetSignedUrl).not.toHaveBeenCalled();
   });
 
-  it("signs stored posts.media keys for display", async () => {
-    mockGetSignedUrl.mockResolvedValue("https://s3.example/signed-image");
+  it("maps stored posts.media keys to the edge proxy for display", async () => {
     const items = await signedSocialMediaItems(
       [
         { kind: "image", key: KEY, contentType: "image/jpeg" },
@@ -181,8 +180,13 @@ describe("s3-social-media isolated lane", () => {
       USER,
     );
     expect(items).toEqual([
-      { kind: "image", url: "https://s3.example/signed-image", contentType: "image/jpeg" },
+      {
+        kind: "image",
+        url: `/api/social/media?key=${encodeURIComponent(KEY)}`,
+        contentType: "image/jpeg",
+      },
     ]);
+    expect(mockGetSignedUrl).not.toHaveBeenCalled();
   });
 
   it("does not sign another author's stored media key", async () => {

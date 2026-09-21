@@ -1,5 +1,9 @@
 import { SocialCreateSkeleton } from "@/components/social/social-skeletons";
 
 export default function Loading() {
-  return <SocialCreateSkeleton />;
+  return (
+    <div data-house-rsc-fallback="">
+      <SocialCreateSkeleton />
+    </div>
+  );
 }

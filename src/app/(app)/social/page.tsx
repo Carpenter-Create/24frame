@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 
-import { TextAction } from "@/components/chrome/house";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { SocialEmpty } from "@/components/social/social-empty";
 import { SocialForYouRail } from "@/components/social/social-for-you";
@@ -12,10 +11,10 @@ import {
   SocialHomeCenterSkeleton,
 } from "@/components/social/social-skeletons";
 import { SocialStoriesRail } from "@/components/social/social-stories-rail";
-import { SocialOptimisticFeed } from "@/components/social/social-optimistic-feed";
 import { SOCIAL_HOME_CENTER_CLASS, SOCIAL_HOME_LAYOUT_CLASS, SOCIAL_PILL_ACTIVE_CLASS, SOCIAL_PILL_CLASS } from "@/lib/social-chrome";
-import { signedAvatarUrls } from "@/lib/s3-avatars";
-import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
+import { signedAvatarUrls, signedSocialMediaByPostId } from "@/lib/social-edge";
+import { socialFollowingWallView } from "@/lib/social-following-wall";
+import { SocialFollowingWallBound } from "@/components/social/social-following-wall-bound";
 import {
   parseSocialCategoryParam,
   SOCIAL_CATEGORY_ALL,
@@ -28,27 +27,23 @@ import { signedEducationCoverUrls } from "@/lib/s3-education";
 import { followingAuthorIds, SOCIAL_HOME_STACK_LOCK } from "@/lib/social-home";
 import {
   SOCIAL_FOLLOWING_WALL_CURSOR_PARAM,
+  encodeFollowingWallCursor,
   parseFollowingWallCursorParam,
-  socialFollowingWallHref,
   type FollowingWallCursor,
 } from "@/lib/social-home-bounds";
 import {
   groupStoryRail,
-  loadFolloweeIds,
-  loadFollowingPosts,
   loadGroupsByIds,
   loadLikedPostIds,
   loadLiveStories,
   loadProfilesByIds,
   loadSuggestedPeople,
   loadViewedStoryIds,
-  type SocialFollowingWallPage,
-  type SocialPostRow,
-  type SocialProfileRow,
   type SocialSuggestedPerson,
 } from "@/lib/social-feed";
-import { parseSocialHomeLane, SOCIAL, SOCIAL_HOME_LANE_PARAM, socialPersonLabel, socialSearchHref, type SocialHomeLane } from "@/lib/social";
+import { parseSocialHomeLane, SOCIAL, SOCIAL_HOME_LANE_PARAM, socialSearchHref, type SocialHomeLane } from "@/lib/social";
 import { ensureOwnSocialProfile } from "@/lib/social-profile";
+import { loadCachedFolloweeIds, loadCachedFollowingPosts } from "@/lib/social-hot-reads";
 import { requireSocialSession, type SocialSession } from "@/lib/social-session";
 
 export default async function SocialHomePage({
@@ -79,7 +74,7 @@ export default async function SocialHomePage({
 async function loadHomeProfile(session: SocialSession) {
   const [profile, followees] = await Promise.all([
     ensureOwnSocialProfile(session.supabase, session.ctx.user),
-    loadFolloweeIds(session.supabase, session.ctx.user.id),
+    loadCachedFolloweeIds(session.supabase, session.ctx.user.id),
   ]);
   return { profile, followees };
 }
@@ -125,7 +120,7 @@ async function SocialHomeCenter({
   const authorIds = followingAuthorIds(ctx.user.id, followees.ids);
   const [wall, storiesPage, suggested] = await Promise.all([
     profile
-      ? loadFollowingPosts(supabase, authorIds, { category, cursor })
+      ? loadCachedFollowingPosts(supabase, ctx.user.id, authorIds, { category, cursor })
       : Promise.resolve({ posts: [], truncated: false, nextCursor: null }),
     loadLiveStories(supabase, authorIds),
     lane === "for-you"
@@ -194,16 +189,41 @@ async function SocialHomeCenter({
       {lane === "for-you" ? (
         <SocialHomeForYouLane suggested={suggested} faces={faces} />
       ) : (
-        <SocialHomeFollowingWall
-          wall={wall}
-          posts={posts}
-          authors={authors}
-          faces={faces}
-          groups={groups}
-          liked={liked}
-          media={media}
-          profile={profile}
+        <SocialFollowingWallBound
+          viewerId={ctx.user.id}
           topic={topic}
+          cursor={
+            cursor
+              ? encodeFollowingWallCursor({ created_at: cursor.createdAt, id: cursor.id })
+              : null
+          }
+          wall={socialFollowingWallView({
+            wall,
+            authors,
+            faces,
+            groups,
+            liked,
+            media,
+            canLike: !!profile,
+          })}
+          empty={
+            <div data-social-following-empty="" className="flex flex-col gap-3">
+              <div data-social-empty-lenses="" className="hidden md:block">
+                <span className={`${SOCIAL_PILL_CLASS} ${SOCIAL_PILL_ACTIVE_CLASS}`}>{SOCIAL_CATEGORY_ALL}</span>
+              </div>
+              <div className="md:hidden">
+                <SocialEmpty
+                  icon="users"
+                  title={SOCIAL.home.empty}
+                  hint={SOCIAL.home.emptyHint}
+                  action={{ href: socialSearchHref({ intent: "people" }), label: SOCIAL.home.findPeople }}
+                />
+              </div>
+              <div className="hidden md:block">
+                <SocialEmpty icon="image" title={SOCIAL.home.emptyQuiet} />
+              </div>
+            </div>
+          }
         />
       )}
     </div>
@@ -232,83 +252,3 @@ function SocialHomeForYouLane({
   );
 }
 
-function SocialHomeFollowingWall({
-  wall,
-  posts,
-  authors,
-  faces,
-  groups,
-  liked,
-  media,
-  profile,
-  topic,
-}: {
-  wall: SocialFollowingWallPage;
-  posts: SocialPostRow[];
-  authors: Map<string, SocialProfileRow>;
-  faces: ReadonlyMap<string, string | null>;
-  groups: Map<string, { slug: string; name: string }>;
-  liked: Set<string>;
-  media: Awaited<ReturnType<typeof signedSocialMediaByPostId>>;
-  profile: SocialProfileRow | null;
-  topic: SocialCategoryLabel;
-}) {
-  return (
-    <>
-      {wall.truncated ? (
-        <div data-social-wall-truncated="" className="flex flex-col gap-[var(--space-3)]">
-          <InlineNotice tone="info">{SOCIAL.home.truncatedWall}</InlineNotice>
-          {wall.nextCursor ? (
-            <TextAction href={socialFollowingWallHref({ topic, after: wall.nextCursor })} data-social-wall-older="">
-              {SOCIAL.home.olderPosts}
-            </TextAction>
-          ) : null}
-        </div>
-      ) : null}
-      <SocialOptimisticFeed
-        topic={topic}
-        posts={posts.map((post) => {
-          const author = authors.get(post.author_id);
-          const group = post.group_id ? groups.get(post.group_id) : null;
-          return {
-            id: post.id,
-            body: post.body,
-            likeCount: post.like_count,
-            commentCount: post.comment_count,
-            liked: liked.has(post.id),
-            createdAt: post.created_at,
-            authorId: post.author_id,
-            authorHandle: author?.handle ?? null,
-            authorName: socialPersonLabel({
-              handle: author?.handle ?? "",
-              displayName: author?.display_name,
-            }),
-            authorPhotoUrl: faces.get(post.author_id) ?? null,
-            groupSlug: group?.slug ?? null,
-            groupName: group?.name ?? null,
-            canLike: !!profile,
-            media: media.get(post.id) ?? [],
-          };
-        })}
-        empty={
-          <div data-social-following-empty="" className="flex flex-col gap-3">
-            <div data-social-empty-lenses="" className="hidden md:block">
-              <span className={`${SOCIAL_PILL_CLASS} ${SOCIAL_PILL_ACTIVE_CLASS}`}>{SOCIAL_CATEGORY_ALL}</span>
-            </div>
-            <div className="md:hidden">
-              <SocialEmpty
-                icon="users"
-                title={SOCIAL.home.empty}
-                hint={SOCIAL.home.emptyHint}
-                action={{ href: socialSearchHref({ intent: "people" }), label: SOCIAL.home.findPeople }}
-              />
-            </div>
-            <div className="hidden md:block">
-              <SocialEmpty icon="image" title={SOCIAL.home.emptyQuiet} />
-            </div>
-          </div>
-        }
-      />
-    </>
-  );
-}

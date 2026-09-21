@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { HouseLink } from "./house-link";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/cn";
@@ -34,7 +34,7 @@ export function SettingsRail() {
       {SETTINGS_HUB_NAV.map((item) => {
         const active = settingsRailActive(item.kind, section);
         return (
-          <Link
+          <HouseLink
             key={item.kind}
             href={item.href}
             data-settings-rail-item={item.kind}
@@ -46,7 +46,7 @@ export function SettingsRail() {
             )}
           >
             {item.label}
-          </Link>
+          </HouseLink>
         );
       })}
     </nav>

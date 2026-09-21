@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
 import { readSocialCounts } from "@/app/(app)/social/query-actions";
+import { HouseLink } from "@/components/chrome/house-link";
 import { useAppQueryClient } from "@/components/query-provider";
 import { SOCIAL_QUERY_STALE_MS, socialCountsQueryKey } from "@/lib/social-cache-keys";
 import {
@@ -64,22 +64,22 @@ function SocialProfileStatsView({
           <span className={SOCIAL_PROFILE_STAT_VALUE_CLASS}>{formatSocialCount(stats.posts)}</span>
           <span className={SOCIAL_PROFILE_STAT_LABEL_CLASS}>{SOCIAL.profile.postsStat}</span>
         </p>
-        <Link
+        <HouseLink
           href={socialProfileFollowsHref(handle, "followers")}
           data-social-profile-stat="followers"
           className={SOCIAL_PROFILE_STAT_CLASS}
         >
           <span className={SOCIAL_PROFILE_STAT_VALUE_CLASS}>{formatSocialCount(stats.followers)}</span>
           <span className={SOCIAL_PROFILE_STAT_LABEL_CLASS}>{SOCIAL.profile.followersStat}</span>
-        </Link>
-        <Link
+        </HouseLink>
+        <HouseLink
           href={socialProfileFollowsHref(handle, "following")}
           data-social-profile-stat="following"
           className={SOCIAL_PROFILE_STAT_CLASS}
         >
           <span className={SOCIAL_PROFILE_STAT_VALUE_CLASS}>{formatSocialCount(stats.following)}</span>
           <span className={SOCIAL_PROFILE_STAT_LABEL_CLASS}>{SOCIAL.profile.followingStat}</span>
-        </Link>
+        </HouseLink>
       </div>
     </div>
   );

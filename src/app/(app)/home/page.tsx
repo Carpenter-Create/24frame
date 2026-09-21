@@ -36,7 +36,7 @@ import {
   overviewWeekSince,
 } from "@/lib/overview";
 import { signedEducationCoverUrls } from "@/lib/s3-education";
-import { signedAvatarUrls } from "@/lib/s3-avatars";
+import { signedAvatarUrls } from "@/lib/social-edge";
 import { loadProfilesByIds } from "@/lib/social-feed";
 import { socialHomeChats } from "@/lib/social-home-chats";
 import { inboxPeerIds, socialPersonLabel } from "@/lib/social";

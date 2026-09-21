@@ -131,23 +131,14 @@ describe("s3-avatars dedicated bucket", () => {
     expect(mockGetSignedUrl).not.toHaveBeenCalled();
   });
 
-  it("deduplicates ids and signs missing objects as null in parallel", async () => {
+  it("maps ids to the edge proxy without HEAD or RSA", async () => {
     const other = "22222222-2222-4222-8222-222222222222";
-    mockSend.mockImplementation(async (cmd: { input?: { Key?: string } }) => {
-      if (cmd.input?.Key === `avatars/${other}/avatar`) return {};
-      throw Object.assign(new Error("NotFound"), {
-        name: "NotFound",
-        $metadata: { httpStatusCode: 404 },
-      });
-    });
-    mockGetSignedUrl.mockResolvedValue("https://s3.example/other-face");
-
     const faces = await signedAvatarUrls([UID, other, UID, ""]);
     expect(faces.size).toBe(2);
-    expect(faces.get(UID)).toBeNull();
-    expect(faces.get(other)).toBe("https://s3.example/other-face");
-    expect(mockSend).toHaveBeenCalledTimes(2);
-    expect(mockGetSignedUrl).toHaveBeenCalledTimes(1);
+    expect(faces.get(UID)).toBe(`/api/social/avatar/${UID}`);
+    expect(faces.get(other)).toBe(`/api/social/avatar/${other}`);
+    expect(mockSend).not.toHaveBeenCalled();
+    expect(mockGetSignedUrl).not.toHaveBeenCalled();
   });
 
   it("returns an empty map when no ids are passed", async () => {

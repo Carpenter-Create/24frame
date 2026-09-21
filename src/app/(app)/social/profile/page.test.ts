@@ -5,8 +5,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
-import { signedAvatarUrl } from "@/lib/s3-avatars";
-import { signedSocialMediaByPostId, signedSocialMediaUrl } from "@/lib/s3-social-media";
+import {
+  signedAvatarUrls,
+  signedSocialMediaByPostId,
+  socialAvatarHref,
+  socialMediaHref,
+} from "@/lib/social-edge";
 import { SOCIAL, SOCIAL_PROFILE_POSTS_PAGE } from "@/lib/social";
 import { ensureOwnSocialProfileResult } from "@/lib/social-profile";
 import { SOCIAL_PROFILE_OPTIMISTIC_COOKIE } from "@/lib/social-profile-edit";
@@ -23,15 +27,16 @@ vi.mock("next/headers", () => ({
 }));
 vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
-vi.mock("@/lib/s3-avatars", () => ({
-  signedAvatarUrl: vi.fn().mockResolvedValue(null),
-  signedAvatarUrls: vi.fn().mockResolvedValue(new Map()),
-}));
-vi.mock("@/lib/s3-social-media", () => ({
-  signedSocialMediaItems: vi.fn().mockResolvedValue([]),
-  signedSocialMediaByPostId: vi.fn().mockResolvedValue(new Map()),
-  signedSocialMediaUrl: vi.fn().mockResolvedValue(null),
-}));
+vi.mock("@/lib/social-edge", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/social-edge")>();
+  return {
+    ...actual,
+    signedAvatarUrls: vi.fn((ids: readonly string[]) => actual.signedAvatarUrls(ids)),
+    signedSocialMediaByPostId: vi.fn((posts) => actual.signedSocialMediaByPostId(posts)),
+    socialAvatarHref: vi.fn((id: string) => actual.socialAvatarHref(id)),
+    socialMediaHref: vi.fn((key: string) => actual.socialMediaHref(key)),
+  };
+});
 vi.mock("@/lib/social-profile", () => ({
   ensureOwnSocialProfileResult: vi.fn(),
 }));
@@ -130,9 +135,12 @@ const ensured = {
 describe("Social profile public face", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(signedAvatarUrl).mockResolvedValue(null);
-    vi.mocked(signedSocialMediaByPostId).mockResolvedValue(new Map());
-    vi.mocked(signedSocialMediaUrl).mockResolvedValue(null);
+    vi.mocked(signedAvatarUrls).mockReturnValue(new Map());
+    vi.mocked(signedSocialMediaByPostId).mockReturnValue(new Map());
+    vi.mocked(socialAvatarHref).mockImplementation((id: string) => `/api/social/avatar/${id}`);
+    vi.mocked(socialMediaHref).mockImplementation(
+      (key: string) => `/api/social/media?key=${encodeURIComponent(key)}`,
+    );
     vi.mocked(ensureOwnSocialProfileResult).mockResolvedValue({
       profile: ensured,
       error: null,
@@ -217,13 +225,13 @@ describe("Social profile public face", () => {
     expect(html).toContain("data-social-profile-cover");
     expect(html).toContain("data-social-profile-cover-edit");
     expect(html).toContain("data-social-profile-avatar-edit");
-    expect(html).toContain("AL");
+    expect(html).toContain("/api/social/avatar/u1");
   });
 
   it("renders the signed account face and uploads through Settings", async () => {
     stubClient({ profile: ensured });
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
-    vi.mocked(signedAvatarUrl).mockResolvedValue("https://s3.example/signed-avatar");
+    vi.mocked(socialAvatarHref).mockReturnValue("https://s3.example/signed-avatar");
 
     const html = await renderServerMarkup(await SocialProfilePage());
     expect(html).toContain("https%3A%2F%2Fs3.example%2Fsigned-avatar");
@@ -233,7 +241,7 @@ describe("Social profile public face", () => {
     expect(html).not.toContain("data-social-profile-form");
 
     const src = readFileSync("src/app/(app)/social/profile/page.tsx", "utf8");
-    expect(src).toContain("signedAvatarUrl");
+    expect(src).toContain("socialAvatarHref");
     expect(src).not.toContain("SocialProfilePhotoForm");
     expect(src).toContain("loadAuthorActivityPosts");
     expect(src).not.toContain("SocialAuthorHistory");
@@ -395,7 +403,7 @@ describe("Social profile public face", () => {
       error: null,
     });
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
-    vi.mocked(signedSocialMediaUrl).mockResolvedValue("https://s3.example/welcome.mp4");
+    vi.mocked(socialMediaHref).mockReturnValue("https://s3.example/welcome.mp4");
 
     const html = await renderServerMarkup(await SocialProfilePage());
     expect(html).toContain("data-social-welcome-video");

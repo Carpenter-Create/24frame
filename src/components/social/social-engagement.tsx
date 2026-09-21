@@ -4,17 +4,21 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { toggleSocialFollow } from "@/app/(app)/social/light-actions";
 import { readSocialFollowState } from "@/app/(app)/social/query-actions";
 import { useAppQueryClient } from "@/components/query-provider";
 import { useSocialLike } from "@/components/social/use-social-optimistic";
 import {
   applyOptimisticLike,
+  beginSocialFollowEpoch,
   beginSocialLikeEpoch,
   nextSocialLikeState,
+  persistSocialFollowLatest,
   persistSocialLikeLatest,
+  rememberSocialFollowBaseline,
   rememberSocialLikeBaseline,
   runSocialOptimisticMutation,
+  socialFollowEpochIsCurrent,
+  socialFollowPersistKey,
   socialLikeEpochIsCurrent,
 } from "@/lib/social-optimistic";
 import { SOCIAL_QUERY_STALE_MS, socialFollowQueryKey } from "@/lib/social-cache-keys";
@@ -143,7 +147,6 @@ function SocialFollowButtonView({
   queryClient: ReturnType<typeof useAppQueryClient>;
 }) {
   const [override, setOverride] = useState<boolean | null>(null);
-  const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const [confirm, setConfirm] = useState(false);
   const isFollowing = override ?? following;
@@ -164,34 +167,48 @@ function SocialFollowButtonView({
       <form
         data-social-follow=""
         className={stretch ? "min-w-0" : undefined}
-        action={async (formData) => {
+        onSubmit={(event) => {
+          event.preventDefault();
           const next = !isFollowing;
-          setPending(true);
-          setError("");
-          setConfirm(false);
-          setOverride(next);
-          if (queryClient && viewerId) {
-            applyOptimisticFollow(queryClient, {
-              viewerId,
-              targetId: followeeId,
-              following: next,
-            });
-          }
-          const result = await toggleSocialFollow(formData);
-          setPending(false);
-          if (result.error) {
-            setOverride(null);
-            if (queryClient && viewerId) {
-              applyOptimisticFollow(queryClient, {
-                viewerId,
-                targetId: followeeId,
-                following: !next,
-              });
-            }
-            setError(result.error);
-            return;
-          }
-          if (next) setConfirm(true);
+          const key = socialFollowPersistKey(viewerId ?? "me", followeeId);
+          rememberSocialFollowBaseline(key, isFollowing);
+          const epoch = beginSocialFollowEpoch(key);
+          runSocialOptimisticMutation({
+            apply: () => {
+              setError("");
+              setConfirm(false);
+              setOverride(next);
+              if (queryClient && viewerId) {
+                applyOptimisticFollow(queryClient, {
+                  viewerId,
+                  targetId: followeeId,
+                  following: next,
+                });
+              }
+              return isFollowing;
+            },
+            persist: () =>
+              persistSocialFollowLatest(key, epoch, next, { followeeId, handle }),
+            rollback: (previous) => {
+              if (!socialFollowEpochIsCurrent(key, epoch)) return;
+              setOverride(previous);
+              if (queryClient && viewerId) {
+                applyOptimisticFollow(queryClient, {
+                  viewerId,
+                  targetId: followeeId,
+                  following: previous,
+                });
+              }
+            },
+            onError: (notice) => {
+              if (!socialFollowEpochIsCurrent(key, epoch)) return;
+              setError(notice);
+            },
+            onSuccess: () => {
+              if (!socialFollowEpochIsCurrent(key, epoch)) return;
+              if (next) setConfirm(true);
+            },
+          });
         }}
       >
         <input type="hidden" name="followee_id" value={followeeId} />
@@ -199,8 +216,6 @@ function SocialFollowButtonView({
         <input type="hidden" name="following" value={isFollowing ? "1" : "0"} />
         <button
           type="submit"
-          disabled={pending}
-          aria-busy={pending}
           className={
             compact
               ? isFollowing

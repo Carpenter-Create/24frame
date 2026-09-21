@@ -137,7 +137,7 @@ describe("workspace switcher header control", () => {
     expect(src).toContain("prefetchHrefList");
     expect(src).toContain("phoneWorkspaceSwitcherPrefetchHrefs");
     expect(src).toContain("useHouseNavPending");
-    expect(src).toContain("<Link");
+    expect(src).toContain("<HouseLink");
     expect(src).not.toContain("persistWorkspaceCookie");
     expect(src).toContain("workspaceSwitcherPersistLane");
   });

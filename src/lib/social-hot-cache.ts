@@ -4,6 +4,7 @@ import { Redis } from "@upstash/redis";
 
 import {
   SOCIAL_HOT_TTL_SECONDS,
+  socialFeedInvalidateKeys,
   socialFollowInvalidateKeys,
   socialProfileInvalidateKeys,
 } from "@/lib/social-cache-keys";
@@ -109,4 +110,8 @@ export async function bustSocialProfileHotCache(
 
 export async function bustSocialFollowHotCache(viewerId: string, targetId: string): Promise<void> {
   await socialHotDel(socialFollowInvalidateKeys(viewerId, targetId));
+}
+
+export async function bustSocialFeedHotCache(viewerId: string): Promise<void> {
+  await socialHotDel(socialFeedInvalidateKeys(viewerId));
 }

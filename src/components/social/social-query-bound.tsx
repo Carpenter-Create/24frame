@@ -22,8 +22,8 @@ export type SocialQueryFollowSeed = {
   following: boolean;
 };
 
-// Registers own/public profile, counts, and follow-state in the one Query cache.
-// Renders nothing. Pages still paint from the server payload (Redis → Supabase).
+// Seeds the one Query cache for profile / counts / follow. Own-profile
+// face, stats, and Follow read those keys after boot.
 
 export function SocialQueryBound({
   profile,

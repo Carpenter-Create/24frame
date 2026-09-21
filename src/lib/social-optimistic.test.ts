@@ -10,7 +10,9 @@ import {
   beginSocialPostPublish,
   beginSocialPostPublishBusy,
   endSocialPostPublishBusy,
+  persistSocialFollowLatest,
   persistSocialLikeLatest,
+  rememberSocialFollowBaseline,
   rememberSocialLikeBaseline,
   socialPostPublishBusy,
   clearOptimisticLike,
@@ -26,6 +28,9 @@ import {
   resetSocialOptimisticForTests,
   runSocialOptimisticMutation,
   SOCIAL_OPTIMISTIC_LOCK,
+  beginSocialFollowEpoch,
+  socialFollowEpochIsCurrent,
+  socialFollowPersistKey,
   socialLikeEpochIsCurrent,
   socialOptimisticNotice,
   socialOptimisticPersistNotice,
@@ -125,6 +130,28 @@ describe("Social optimistic mutation SoT", () => {
     expect(beginSocialPostPublishBusy()).toBe(false);
     endSocialPostPublishBusy();
     expect(socialPostPublishBusy()).toBe(false);
+  });
+
+  it("ignores a stale follow persist after a newer tap", async () => {
+    const key = socialFollowPersistKey("u1", "u2");
+    const first = beginSocialFollowEpoch(key);
+    const second = beginSocialFollowEpoch(key);
+    expect(socialFollowEpochIsCurrent(key, first)).toBe(false);
+    expect(socialFollowEpochIsCurrent(key, second)).toBe(true);
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({}), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    rememberSocialFollowBaseline(key, false);
+    expect(
+      await persistSocialFollowLatest(key, first, true, { followeeId: "u2", handle: "ada" }),
+    ).toEqual({});
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(
+      await persistSocialFollowLatest(key, second, true, { followeeId: "u2", handle: "ada" }),
+    ).toEqual({});
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const request = fetchMock.mock.calls[0] as unknown as [string, { body: FormData }];
+    expect(request[1].body.get("following")).toBe("0");
+    expect(request[1].body.get("followee_id")).toBe("u2");
   });
 
   it("starts a publish hop without waiting on the server and rejects an empty post", () => {
@@ -272,7 +299,10 @@ describe("Social optimistic mutation SoT", () => {
     expect(feed).toContain("SOCIAL_FEED_GUTTER_CLASS");
     expect(feed).not.toContain("className=\"flex flex-col gap-2\"");
     expect(feed.indexOf("notice")).toBeLessThan(feed.indexOf("if (merged.length === 0)"));
-    expect(followChunk).toContain("const result = await toggleSocialFollow");
+    expect(followChunk).toContain("persistSocialFollowLatest");
+    expect(followChunk).toContain("beginSocialFollowEpoch");
+    expect(followChunk).toContain("runSocialOptimisticMutation");
+    expect(followChunk).not.toContain("toggleSocialFollow");
     expect(followChunk).toContain("followedConfirmCopy");
     expect(followChunk).not.toContain("router.refresh()");
     expect(roles).toContain("onChange(");

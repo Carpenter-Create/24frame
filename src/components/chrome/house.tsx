@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ComponentProps, type ReactNode } from "react";
-import Link from "next/link";
+import { HouseLink } from "./house-link";
 import { X } from "@phosphor-icons/react";
 
 import { PHOSPHOR_CHROME_IDLE_WEIGHT } from "@/lib/phosphor-icon";
@@ -48,11 +48,11 @@ export function TextAction({
   children,
   className,
   ...props
-}: ComponentProps<typeof Link>) {
+}: ComponentProps<typeof HouseLink>) {
   return (
-    <Link href={href} className={cn(TEXT_ACTION_CLASS, className)} {...props}>
+    <HouseLink href={href} className={cn(TEXT_ACTION_CLASS, className)} {...props}>
       {children}
-    </Link>
+    </HouseLink>
   );
 }
 
@@ -185,7 +185,7 @@ export function SheetGroupItem({
 }) {
   if (href) {
     return (
-      <Link
+      <HouseLink
         href={href}
         onClick={onClick}
         data-sheet-group-item={item}
@@ -193,7 +193,7 @@ export function SheetGroupItem({
         aria-label={label}
       >
         {children}
-      </Link>
+      </HouseLink>
     );
   }
   if (onClick) {

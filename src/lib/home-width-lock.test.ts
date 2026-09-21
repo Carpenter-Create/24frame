@@ -56,12 +56,12 @@ describe("Home width lock", () => {
       "w-full md:ml-[var(--content-inset)] md:mr-[var(--chrome-gutter)] md:w-[calc(100%-var(--content-inset)-var(--chrome-gutter))]",
     );
     expect(HOUSE_HOME_RAIL_COLUMN_CLASS).not.toContain("--access-rail-width");
-    const homeStart = shell.indexOf(") : homePage ? (");
-    const homeBranch = shell.slice(homeStart, shell.indexOf(") : (", homeStart + 1));
-    expect(homeBranch).toContain("HOUSE_HOME_RAIL_COLUMN_CLASS");
-    expect(homeBranch).not.toContain("page-max-width");
-    expect(homeBranch).not.toContain("mx-auto");
-    expect(homeBranch).not.toContain("1080");
+    const homeArm = shell.slice(shell.indexOf(": homePage"), shell.indexOf(": cn(\"mx-auto"));
+    expect(homeArm).toContain("HOUSE_HOME_RAIL_COLUMN_CLASS");
+    expect(homeArm).not.toContain("page-max-width");
+    expect(homeArm).not.toContain("mx-auto");
+    expect(homeArm).not.toContain("1080");
+    expect(shell.match(/<HouseScreenCache>/g)?.length).toBe(1);
     expect(shell).toContain("data-home-chrome");
     expect(shell).toContain("overviewHidesRail");
     expect(shell).toContain('const homePage = pathname === "/" || homeChrome');

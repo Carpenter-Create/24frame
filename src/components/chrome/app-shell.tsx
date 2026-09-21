@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, use, useCallback, useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
+import { HouseScreenCache, useHousePathname } from "./house-client-shell";
 
 import { UserMenu } from "./user-menu";
 import { SideNav } from "./side-nav";
@@ -117,7 +117,7 @@ export function AppShell({
   );
   const cookiesApplied = useRef(false);
   const collapseTouched = useRef(false);
-  const pathname = usePathname();
+  const pathname = useHousePathname();
   const workspace = resolveWorkspaceMode(
     pathname,
     clampWorkspaceMode(workspaceCookie, isGcStaff),
@@ -333,30 +333,30 @@ export function AppShell({
             : { marginLeft: "var(--sidebar-width)" }
         }
       >
-        {socialChrome ? (
-          <div className={SOCIAL_DESKTOP_FRAME_PAD_CLASS}>{children}</div>
-        ) : titlesBleed ? (
-          <div className="w-full pb-24 max-md:pb-0">{children}</div>
-        ) : homePage ? (
-          <div
-            className={cn(
-              "py-[var(--space-8)] max-md:px-[var(--space-6)] max-md:pb-0 max-md:pt-[var(--space-6)]",
-              homeChrome
-                ? HOUSE_HOME_RAIL_COLUMN_CLASS
-                : cn("w-full", HOUSE_CANVAS_X_CLASS),
-            )}
-            data-app-home-frame=""
-          >
-            {children}
-          </div>
-        ) : (
-          <div
-            className={cn("mx-auto w-full pb-24 pt-8 max-md:pb-0", HOUSE_CANVAS_X_CLASS)}
-            style={{ maxWidth: "var(--page-max-width)" }}
-          >
-            {children}
-          </div>
-        )}
+        <div
+          className={
+            socialChrome
+              ? SOCIAL_DESKTOP_FRAME_PAD_CLASS
+              : titlesBleed
+                ? "w-full pb-24 max-md:pb-0"
+                : homePage
+                  ? cn(
+                      "py-[var(--space-8)] max-md:px-[var(--space-6)] max-md:pb-0 max-md:pt-[var(--space-6)]",
+                      homeChrome
+                        ? HOUSE_HOME_RAIL_COLUMN_CLASS
+                        : cn("w-full", HOUSE_CANVAS_X_CLASS),
+                    )
+                  : cn("mx-auto w-full pb-24 pt-8 max-md:pb-0", HOUSE_CANVAS_X_CLASS)
+          }
+          data-app-home-frame={homePage ? "" : undefined}
+          style={
+            socialChrome || titlesBleed || homePage
+              ? undefined
+              : { maxWidth: "var(--page-max-width)" }
+          }
+        >
+          <HouseScreenCache>{children}</HouseScreenCache>
+        </div>
       </main>
     </HousePhoneAppShell>
     </AskAssistantChromeProvider>

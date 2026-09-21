@@ -63,7 +63,7 @@ describe("Social Home miss list v1 P0 lock", () => {
   });
 
   it("keeps Home on the following wall with stories, composer, and Following | For you tabs", () => {
-    expect(home).toContain("loadFollowingPosts");
+    expect(home).toContain("loadCachedFollowingPosts");
     expect(home).toContain("SocialStoriesRail");
     expect(home).toContain("SocialHomeComposer");
     expect(home).toContain("SocialHomeTopics");

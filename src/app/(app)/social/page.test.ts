@@ -4,8 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
-import { signedAvatarUrls } from "@/lib/s3-avatars";
-import { signedSocialMediaByPostId } from "@/lib/s3-social-media";
+import { signedAvatarUrls, signedSocialMediaByPostId } from "@/lib/social-edge";
 import { ASK_GLOBEE } from "@/lib/ask-globee";
 import { SOCIAL, SOCIAL_ROUTES } from "@/lib/social";
 import {
@@ -25,14 +24,14 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
-vi.mock("@/lib/s3-avatars", () => ({
-  signedAvatarUrl: vi.fn().mockResolvedValue(null),
-  signedAvatarUrls: vi.fn().mockResolvedValue(new Map()),
-}));
-vi.mock("@/lib/s3-social-media", () => ({
-  signedSocialMediaItems: vi.fn().mockResolvedValue([]),
-  signedSocialMediaByPostId: vi.fn().mockResolvedValue(new Map()),
-}));
+vi.mock("@/lib/social-edge", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/social-edge")>();
+  return {
+    ...actual,
+    signedAvatarUrls: vi.fn(() => new Map()),
+    signedSocialMediaByPostId: vi.fn(() => new Map()),
+  };
+});
 vi.mock("@/lib/s3-education", () => ({
   signedEducationCoverUrls: vi.fn().mockResolvedValue(new Map()),
 }));
@@ -165,8 +164,8 @@ const ensured = {
 describe("Social home", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(signedAvatarUrls).mockResolvedValue(new Map());
-    vi.mocked(signedSocialMediaByPostId).mockResolvedValue(new Map());
+    vi.mocked(signedAvatarUrls).mockReturnValue(new Map());
+    vi.mocked(signedSocialMediaByPostId).mockReturnValue(new Map());
     vi.mocked(ensureOwnSocialProfile).mockResolvedValue(ensured);
   });
 
@@ -281,7 +280,7 @@ describe("Social home", () => {
       ],
     });
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
-    vi.mocked(signedAvatarUrls).mockResolvedValue(
+    vi.mocked(signedAvatarUrls).mockReturnValue(
       new Map([["u1", "https://s3.example/signed-avatar"]]),
     );
 
@@ -312,7 +311,7 @@ describe("Social home", () => {
       ],
     });
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
-    vi.mocked(signedSocialMediaByPostId).mockResolvedValue(
+    vi.mocked(signedSocialMediaByPostId).mockReturnValue(
       new Map([
         [
           "p1",
