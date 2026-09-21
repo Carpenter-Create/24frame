@@ -207,6 +207,8 @@ describe("Social home", () => {
     expect(html).not.toContain(SOCIAL.home.recentChats);
     expect(html).toContain('data-social-icon="users"');
     expect(html).toContain('data-social-icon="image"');
+    expect(html).toMatch(/data-social-home-topic="All"[^>]*data-social-home-topic-active=""/);
+    expect(html).toContain('data-social-home-topic="Acting"');
     expect(html).toContain("Cinematography");
     expect(html).toContain("Music");
     expect(html).not.toContain("data-social-first-win");
@@ -233,6 +235,18 @@ describe("Social home", () => {
     expect(html).not.toContain("data-social-post-form");
     expect(html).not.toContain("Globee");
     expect(html).not.toContain(ASK_GLOBEE.headline);
+  });
+
+  it("selects the Topics rail chip from the topic search param", async () => {
+    stubClient({ profile: ensured });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx({ hasOrg: false }) as never);
+
+    const music = await renderHome({ topic: "music" });
+    expect(music).toMatch(/data-social-home-topic="Music"[^>]*data-social-home-topic-active=""/);
+    expect(music).not.toMatch(/data-social-home-topic="All"[^>]*data-social-home-topic-active=""/);
+
+    const unknown = await renderHome({ topic: "cousins" });
+    expect(unknown).toMatch(/data-social-home-topic="All"[^>]*data-social-home-topic-active=""/);
   });
 
   it("omits Finish setting up from Home once a profile exists", async () => {

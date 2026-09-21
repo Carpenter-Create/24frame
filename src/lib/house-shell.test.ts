@@ -69,6 +69,9 @@ import {
   SOCIAL_PROFILE_ROLE_PILL_CLASS,
   SOCIAL_TOPIC_CHIP_MEASURE_CLASS,
   SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS,
+  SOCIAL_TOPIC_RAIL_CHIP_CLASS,
+  SOCIAL_TOPIC_RAIL_CHIP_SELECTED_CLASS,
+  socialTopicRailChipClass,
 } from "@/lib/social-chrome";
 
 vi.mock("next/navigation", () => ({
@@ -316,6 +319,13 @@ describe("house shell rematch — Aggregation · Social · Education", () => {
     expect(socialChrome).toContain("HOUSE_FILTER_ON_CLASS");
     expect(socialChrome).toContain("HOUSE_PILL_SELECTED_CLASS");
     expect(SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS).toContain(HOUSE_PILL_SELECTED_CLASS);
+    expect(SOCIAL_TOPIC_RAIL_CHIP_SELECTED_CLASS).toBe(
+      `${HOUSE_SEGMENTED_ITEM_BASE_CLASS} ${HOUSE_PILL_SELECTED_CLASS}`,
+    );
+    expect(SOCIAL_TOPIC_RAIL_CHIP_SELECTED_CLASS).toContain(HOUSE_PILL_SELECTED_CLASS);
+    expect(SOCIAL_TOPIC_RAIL_CHIP_SELECTED_CLASS).not.toContain("bg-ink");
+    expect(socialTopicRailChipClass(true)).toBe(SOCIAL_TOPIC_RAIL_CHIP_SELECTED_CLASS);
+    expect(socialTopicRailChipClass(false)).toBe(SOCIAL_TOPIC_RAIL_CHIP_CLASS);
     expect(SOCIAL_TOPIC_CHIP_MEASURE_CLASS).toContain(HOUSE_PILL_ITEM_CLASS);
     expect(SOCIAL_TOPIC_CHIP_MEASURE_CLASS).toContain(HOUSE_PILL_MEASURE_CLASS);
     expect(SOCIAL_TOPIC_CHIP_MEASURE_CLASS).not.toContain("text-[11px]");

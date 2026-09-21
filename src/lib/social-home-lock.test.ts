@@ -236,12 +236,13 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(topics).toContain("data-social-home-topics-rail");
     expect(topics).toContain("HouseChipRail");
     expect(topics).toContain("SOCIAL.forYou.topics");
-    expect(topics).toContain("SOCIAL_TOPIC_RAIL_CHIP_CLASS");
+    expect(topics).toContain("socialTopicRailChipClass");
+    expect(topics).toContain("SOCIAL_CATEGORY_LABELS");
     expect(topics).not.toContain("SOCIAL_FOR_YOU_CARD_CLASS");
-    expect(topics).toContain("SOCIAL_CATEGORY_TOPICS");
     expect(topics).not.toContain("socialInterestTopics");
     expect(topics).not.toContain("if (labels.length === 0) return null");
     expect(home).toContain("<SocialHomeTopics");
+    expect(home).toContain("<SocialHomeTopics active={topic}");
     expect(home).not.toContain("SocialHomeTopics topics=");
     expect(topics).not.toContain("flex-wrap");
     expect(topics).not.toContain("truncate");
@@ -252,6 +253,9 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(chrome).toContain("HOUSE_CHIP_RAIL_STACK_CLASS");
     expect(chrome).toContain("HOUSE_CHIP_RAIL_ROW_CLASS");
     expect(chrome).toContain("HOUSE_CHIP_RAIL_CHIP_CLASS");
+    expect(chrome).toContain("SOCIAL_TOPIC_RAIL_CHIP_SELECTED_CLASS");
+    expect(chrome).toContain("HOUSE_PILL_SELECTED_CLASS");
+    expect(chrome).toContain("socialTopicRailChipClass");
     expect(chrome).not.toContain("rounded-[14px]");
     expect(chrome).toContain("SOCIAL_COMPOSER_CLASS");
     expect(chrome).toContain("SOCIAL_EMPTY_PANEL_CLASS");
