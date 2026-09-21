@@ -58,7 +58,7 @@ export function SocialCommentTrigger({
           <SocialIcon name="chat-circle" size={22} />
         ) : (
           <>
-            {count} {SOCIAL.post.comments}
+            {count > 0 ? `${count} ${SOCIAL.post.comments}` : SOCIAL.post.viewComments}
           </>
         )}
       </button>

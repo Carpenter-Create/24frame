@@ -401,123 +401,74 @@ export function socialAuthorPostCard(input: {
 }
 
 export function SocialPostCard({ post }: { post: SocialPostCardModel }) {
+  // 24Frame blend (Adam 2026-09-20): one card at every breakpoint.
+  // Header (avatar · name · muted time) → media? → icons → likes → caption → quiet comments.
+  // Forbidden: FB reaction pile, labeled action bar, bottom timestamp, share count.
   const media = post.media.length > 0;
   const handle = post.authorHandle ? displayHandle(post.authorHandle).slice(1) : post.authorName;
+  const thread = {
+    id: post.id,
+    commentCount: post.commentCount,
+    groupSlug: post.groupSlug,
+    canComment: post.canLike,
+  };
   return (
-    <article data-social-post={post.id}>
-      <div className={cn(SOCIAL_FEED_ROW_CLASS, "hidden md:flex")}>
-        <div className="flex items-center gap-2.5">
-          <SocialAvatar name={post.authorName} photoUrl={post.authorPhotoUrl} size="sm" />
-          <div className="min-w-0">
-            {post.authorHandle ? (
-              <Link href={socialMemberHref(post.authorHandle)} className="t-body-sm font-semibold text-ink">
-                {post.authorName}
-              </Link>
-            ) : (
-              <p className="t-body-sm font-semibold text-ink">{post.authorName}</p>
-            )}
-            <p className="t-label text-ink-2">
-              {socialRelativeTime(post.createdAt)}
-              {post.groupSlug && post.groupName ? (
-                <>
-                  {" · "}
-                  <Link href={socialGroupHref(post.groupSlug)} className="text-ink-2">
-                    {post.groupName}
-                  </Link>
-                </>
-              ) : (
-                <> · {SOCIAL.follow.following}</>
-              )}
-            </p>
-          </div>
-        </div>
-        {media ? <SocialPostMedia items={post.media} /> : null}
-        {post.body ? <p className="t-body text-ink whitespace-pre-wrap">{post.body}</p> : null}
-        <div className="flex items-center gap-2 t-label text-ink-2">
-          {media ? (
-            <span className="font-medium text-ink-3">
-              {post.media[0]?.kind === "video" ? SOCIAL.home.videoKind : SOCIAL.home.photoKind}
-            </span>
+    <article data-social-post={post.id} className={SOCIAL_FEED_ROW_CLASS}>
+      <div className="flex min-w-0 items-center gap-2.5">
+        <SocialAvatar name={post.authorName} photoUrl={post.authorPhotoUrl} size="sm" />
+        <div className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
+          {post.authorHandle ? (
+            <Link
+              href={socialMemberHref(post.authorHandle)}
+              className="min-w-0 break-words t-body-sm font-semibold text-ink"
+            >
+              {post.authorName}
+            </Link>
           ) : (
-            <span className="font-medium text-ink-3">{SOCIAL.create.text}</span>
+            <span className="min-w-0 break-words t-body-sm font-semibold text-ink">{post.authorName}</span>
           )}
+          <time dateTime={post.createdAt} data-social-post-time="" className="t-label text-ink-2">
+            {socialRelativeTime(post.createdAt)}
+          </time>
+          {post.groupSlug && post.groupName ? (
+            <>
+              <span className="t-label text-ink-2" aria-hidden>
+                ·
+              </span>
+              <Link href={socialGroupHref(post.groupSlug)} className="min-w-0 break-words t-label text-ink-2">
+                {post.groupName}
+              </Link>
+            </>
+          ) : null}
+        </div>
+      </div>
+      {media ? <SocialPostMedia items={post.media} /> : null}
+      <div className="flex flex-col gap-1">
+        <div data-social-post-actions="" className="flex items-center gap-3.5">
           {post.canLike ? (
             <SocialLikeButton
               postId={post.id}
               liked={post.liked}
               likeCount={post.likeCount}
               groupSlug={post.groupSlug ?? undefined}
-            />
-          ) : (
-            <p>
-              {post.likeCount} {SOCIAL.post.likes}
-            </p>
-          )}
-          <SocialCommentTrigger
-            post={{
-              id: post.id,
-              commentCount: post.commentCount,
-              groupSlug: post.groupSlug,
-              canComment: post.canLike,
-            }}
-          />
-        </div>
-      </div>
-      <div data-social-post-mobile="" className="flex flex-col bg-surface md:hidden">
-        <div className="flex items-center gap-2 px-3 py-2">
-          <SocialAvatar name={post.authorName} photoUrl={post.authorPhotoUrl} size="sm" />
-          {post.authorHandle ? (
-            <Link href={socialMemberHref(post.authorHandle)} className="t-body-sm font-semibold text-ink">
-              {handle}
-            </Link>
-          ) : (
-            <p className="t-body-sm font-semibold text-ink">{handle}</p>
-          )}
-        </div>
-        {media ? <SocialPostMedia items={post.media} /> : null}
-        <div className="flex flex-col gap-1 px-3 pb-2.5 pt-2">
-          <div className="flex items-center gap-3.5">
-            {post.canLike ? (
-              <SocialLikeButton
-                postId={post.id}
-                liked={post.liked}
-                likeCount={post.likeCount}
-                groupSlug={post.groupSlug ?? undefined}
-                icon
-              />
-            ) : (
-              <SocialIcon name="heart" size={22} />
-            )}
-            <SocialCommentTrigger
-              post={{
-                id: post.id,
-                commentCount: post.commentCount,
-                groupSlug: post.groupSlug,
-                canComment: post.canLike,
-              }}
               icon
             />
+          ) : (
+            <SocialIcon name="heart" size={22} />
+          )}
+          <SocialCommentTrigger post={thread} icon />
+          <span data-social-post-share="" className="text-ink">
             <SocialIcon name="paper-plane-tilt" size={22} />
-          </div>
-          <SocialLikeCount postId={post.id} liked={post.liked} likeCount={post.likeCount} />
-          {post.body ? (
-            <p className="t-body-sm text-ink">
-              <span className="font-semibold">{handle} </span>
-              {post.body}
-            </p>
-          ) : null}
-          <SocialCommentTrigger
-            post={{
-              id: post.id,
-              commentCount: post.commentCount,
-              groupSlug: post.groupSlug,
-              canComment: post.canLike,
-            }}
-          />
-          <p className="text-[10px] font-medium uppercase tracking-[0.04em] text-ink-3">
-            {socialRelativeTime(post.createdAt)}
-          </p>
+          </span>
         </div>
+        <SocialLikeCount postId={post.id} liked={post.liked} likeCount={post.likeCount} />
+        {post.body ? (
+          <p data-social-post-caption="" className="t-body-sm text-ink whitespace-pre-wrap break-words">
+            <span className="font-semibold">{handle} </span>
+            {post.body}
+          </p>
+        ) : null}
+        <SocialCommentTrigger post={thread} />
       </div>
     </article>
   );

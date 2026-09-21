@@ -156,7 +156,15 @@ describe("Social Home miss list v1 P0 lock", () => {
       rail.indexOf("cards.map"),
     );
     expect(card).toContain("ring?:");
-    expect(card.slice(card.indexOf("export function SocialPostCard"))).not.toContain("ring=");
+    const postCard = card.slice(card.indexOf("export function SocialPostCard"));
+    expect(postCard).not.toContain("ring=");
+    expect(postCard).not.toContain("hidden md:flex");
+    expect(postCard).not.toContain("md:hidden");
+    expect(postCard).not.toContain("data-social-post-mobile");
+    expect(postCard).not.toContain("text-[10px]");
+    expect(postCard).toContain("data-social-post-time");
+    expect(postCard).toContain("SocialLikeCount");
+    expect(postCard).toContain("SocialCommentTrigger");
     expect(pkg).toContain('"next": "16.3.5"');
     expect(existsSync("src/components/social/social-mobile-dock.tsx")).toBe(false);
     expect(home).not.toContain("Reels");

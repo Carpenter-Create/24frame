@@ -12,12 +12,23 @@ describe("SocialCommentTrigger", () => {
       />,
     );
     expect(html).toContain("data-social-comment-open");
-    expect(html).toContain(`0 ${SOCIAL.post.comments}`);
+    expect(html).toContain(SOCIAL.post.viewComments);
+    expect(html).not.toContain(`0 ${SOCIAL.post.comments}`);
     expect(html).not.toContain("data-social-comment-thread");
     expect(html).not.toContain("data-social-comment-composer");
   });
 
-  it("renders the icon face for the mobile rail", () => {
+  it("names the count when comments already exist", () => {
+    const html = renderToStaticMarkup(
+      <SocialCommentTrigger
+        post={{ id: "p1", commentCount: 3, groupSlug: null, canComment: true }}
+      />,
+    );
+    expect(html).toContain(`3 ${SOCIAL.post.comments}`);
+    expect(html).not.toContain(SOCIAL.post.viewComments);
+  });
+
+  it("renders the icon face for the action row", () => {
     const html = renderToStaticMarkup(
       <SocialCommentTrigger
         post={{ id: "p1", commentCount: 2, canComment: true }}
