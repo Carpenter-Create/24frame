@@ -46,4 +46,10 @@ describe("SocialFeedVideo", () => {
     expect(player).not.toContain("minResolution");
     expect(player).not.toContain("renditionOrder");
   });
+
+  it("keeps a missing Mux poster on the house muted canvas, not Mux blue", () => {
+    const css = readFileSync("src/app/globals.css", "utf8");
+    expect(css).toContain("--media-background-color: var(--surface-muted)");
+    expect(css).toContain("--media-object-fit: cover");
+  });
 });

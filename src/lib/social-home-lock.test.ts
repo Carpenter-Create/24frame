@@ -256,6 +256,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(SOCIAL_FEED_GUTTER_CLASS).not.toContain("bg-bg");
     expect(SOCIAL_FEED_ROW_CLASS).toMatch(/(?:^|\s)bg-surface(?:\s|$)/);
     expect(SOCIAL_FEED_ROW_CLASS).not.toContain("bg-surface-muted");
+    expect(SOCIAL_FEED_ROW_CLASS).not.toMatch(/(?:^|\s)(?:m[ytb]|my)-/);
     expect(chrome).toContain("SOCIAL_HOME_STORY_CARD_CLASS");
     expect(chrome).toContain("SOCIAL_FOR_YOU_CARD_CLASS");
     expect(forYou).not.toContain("SOCIAL.forYou.native");
