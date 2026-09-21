@@ -10,6 +10,10 @@
 // / more chip — overflow scrolls. Omit when empty.
 // Edit max 5. Select and write stay sync. Not on SocialPersonRow.
 // Investor is a Business add. Bio middots stay the author's copy.
+// Edit face is one Settings drill-in row. Selecting stays on the
+// existing professions chip-bank page.
+
+import { SOCIAL } from "@/lib/social";
 
 export const SOCIAL_PROFILE_ROLES_MAX = 5;
 export const SOCIAL_PROFILE_ROLES_COUNT = "{n} / {max}";
@@ -330,6 +334,20 @@ export function socialProfileRolesCountLabel(count: number): string {
     "{max}",
     String(SOCIAL_PROFILE_ROLES_MAX),
   );
+}
+
+export function socialProfileRolesSelectedLabel(count: number): string {
+  return SOCIAL.profile.rolesSelected.replace("{n}", String(count));
+}
+
+export function socialProfileRolesRowSummary(raw: unknown): string {
+  const slugs = parseSocialProfileRoles(raw);
+  if (slugs.length === 0) return SOCIAL.profile.rolesAdd;
+  const first = socialProfileRoleLabel(slugs[0] ?? "");
+  if (slugs.length === 1) return first;
+  return SOCIAL.profile.rolesMore
+    .replace("{first}", first)
+    .replace("{n}", String(slugs.length - 1));
 }
 
 export function socialProfileRoleChips(raw: unknown): {

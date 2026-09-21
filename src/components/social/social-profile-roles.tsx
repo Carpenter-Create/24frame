@@ -6,12 +6,19 @@ import {
   SocialProfileChipBank,
   SocialProfileSelectChip,
 } from "@/components/social/social-profile-chip-select";
+import { SocialIcon } from "@/components/social/social-icon";
 import { Input } from "@/components/ui/input";
 import {
+  SOCIAL_PROFILE_EDIT_BACK_CLASS,
+  SOCIAL_PROFILE_EDIT_BODY_CLASS,
+  SOCIAL_PROFILE_EDIT_HEADER_CLASS,
+  SOCIAL_PROFILE_EDIT_HOST_CLASS,
   SOCIAL_PROFILE_EDIT_LABEL_CLASS,
   SOCIAL_PROFILE_EDIT_SECTION_CLASS,
+  SOCIAL_PROFILE_EDIT_SHEET_CLASS,
   SOCIAL_TOPIC_CHIP_BANK_CLASS,
 } from "@/lib/social-chrome";
+import { SOCIAL_ICON_SIZE_HEADER } from "@/lib/social-icons";
 import { SOCIAL } from "@/lib/social";
 import {
   SOCIAL_PROFILE_ROLES_MAX,
@@ -95,6 +102,41 @@ export function SocialProfileRolesField({
         dataPrefix="social-profile-role"
         onToggle={toggle}
       />
+    </div>
+  );
+}
+
+export function SocialProfileRolesEditor({
+  value,
+  onChange,
+  onBack,
+}: {
+  value: readonly string[];
+  onChange: (next: string[]) => void;
+  onBack: () => void;
+}) {
+  return (
+    <div data-social-profile-roles="" className={SOCIAL_PROFILE_EDIT_HOST_CLASS}>
+      <div className={SOCIAL_PROFILE_EDIT_SHEET_CLASS}>
+        <header data-social-profile-roles-header="" className={SOCIAL_PROFILE_EDIT_HEADER_CLASS}>
+          <button
+            type="button"
+            data-social-profile-roles-back=""
+            onClick={onBack}
+            className={SOCIAL_PROFILE_EDIT_BACK_CLASS}
+            aria-label={SOCIAL.profile.back}
+          >
+            <SocialIcon name="caret-left" size={SOCIAL_ICON_SIZE_HEADER} />
+          </button>
+          <h1 className="min-w-0 flex-1 text-center text-[17px] font-semibold text-ink">
+            {SOCIAL.profile.roles}
+          </h1>
+          <span className="size-9 shrink-0" aria-hidden />
+        </header>
+        <div className={SOCIAL_PROFILE_EDIT_BODY_CLASS}>
+          <SocialProfileRolesField value={value} onChange={onChange} />
+        </div>
+      </div>
     </div>
   );
 }

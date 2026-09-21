@@ -29,6 +29,11 @@ import {
   HOUSE_SCROLL_ROW_CLASS,
   HOUSE_SEGMENTED_ITEM_BASE_CLASS,
 } from "@/lib/house-shell";
+import {
+  SETTINGS_DIALOG_ERROR_CLASS,
+  SETTINGS_DIALOG_HELP_CLASS,
+  SETTINGS_DIALOG_LABEL_CLASS,
+} from "@/lib/settings";
 
 export const SOCIAL_FIGMA_HOME = "176:1085";
 export const SOCIAL_FIGMA_HOME_EMPTY = "176:1346";
@@ -448,10 +453,13 @@ export const SOCIAL_PROFILE_EDIT_ROW_CLASS =
 
 export const SOCIAL_PROFILE_EDIT_SECTION_CLASS = "flex flex-col gap-3 py-3";
 
-// t-label is uppercase + 0.12em track. 88px wraps MIDDLE NAME.
-// One line, no mid-word ellipsis. 128px fits the tracked measure.
+// House type SoT — Settings/drill-in labels, not t-label ALL-CAPS
+// + 0.12em track. One line, no mid-word ellipsis. 128px still
+// fits sentence-case field names in the label column.
 export const SOCIAL_PROFILE_EDIT_LABEL_CLASS =
-  "w-32 shrink-0 whitespace-nowrap pt-0.5 t-label text-ink-2";
+  `w-32 shrink-0 whitespace-nowrap pt-0.5 ${SETTINGS_DIALOG_LABEL_CLASS}`;
+export const SOCIAL_PROFILE_EDIT_HELP_CLASS = SETTINGS_DIALOG_HELP_CLASS;
+export const SOCIAL_PROFILE_EDIT_ERROR_CLASS = SETTINGS_DIALOG_ERROR_CLASS;
 
 export const SOCIAL_PROFILE_EDIT_HANDLE_CLASS =
   "flex min-w-0 flex-1 items-center rounded-[12px] bg-surface-muted px-3 py-2.5 t-control";

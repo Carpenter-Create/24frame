@@ -65,7 +65,7 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(profile).not.toContain("Education");
     expect(edit).toContain("data-social-profile-edit");
     expect(edit).toContain(SOCIAL.profile.username);
-    expect(edit).toContain("socialProfilePublicUrl");
+    expect(edit).not.toContain("socialProfilePublicUrl");
     expect(edit).toContain("uploadAccountPhoto");
     expect(edit).toContain("data-social-profile-edit-links");
     expect(edit).toContain("SocialProfileBioEditor");
@@ -75,6 +75,13 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(SOCIAL_PROFILE_EDIT_LOCK.keepsDraftOnBio).toBe(true);
     expect(socialProfileEditFace(true)).toBe("bio");
     expect(socialProfileEditFace(false)).toBe("edit");
+    expect(socialProfileEditFace("roles")).toBe("roles");
+    expect(SOCIAL_PROFILE_EDIT_LOCK.profileUrlOnEditFace).toBe(false);
+    expect(SOCIAL_PROFILE_EDIT_LOCK.professionsDrillIn).toBe(true);
+    expect(edit).toContain("SettingsDrillRow");
+    expect(edit).toContain("SocialProfileRolesEditor");
+    expect(edit).toContain('socialProfileEditFace("roles")');
+    expect(edit).not.toContain("SocialProfileRolesField");
     expect(edit).not.toContain("Instagram");
     expect(edit).not.toContain("Reels");
   });
@@ -83,8 +90,9 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(SOCIAL.profile.handleRequired).toBe("Handle is required");
     expect(SOCIAL_PROFILE_EDIT_LOCK.handleRequired).toBe("Handle is required");
     expect(SOCIAL_PROFILE_EDIT_LOCK.emptyPreview).toBe("https://24frame.co/@");
+    expect(SOCIAL_PROFILE_EDIT_LOCK.profileUrlOnEditFace).toBe(false);
     expect(socialProfilePublicUrl("")).toBe("https://24frame.co/@");
-    expect(edit).toContain("data-social-handle-url");
+    expect(edit).not.toContain("data-social-handle-url");
     expect(edit).toContain("data-social-handle-required");
     expect(edit).toContain("checkSocialProfileEditSave");
     expect(edit).toContain("handleInvalid");
@@ -158,7 +166,7 @@ describe("Social Profile Edit profile + Bio lock", () => {
     expect(edit).toContain('id="social-edit-last-name"');
     expect(edit).not.toContain('id="social-edit-name"');
     expect(edit).toContain('id="social-edit-handle"');
-    expect(edit).toContain("SocialProfileRolesField");
+    expect(edit).toContain("SocialProfileRolesEditor");
     expect(edit).toContain("SocialProfileTopicsField");
     expect(edit).toContain("checkSocialProfileEditSave");
     expect(edit).toContain('id="social-edit-imdb"');

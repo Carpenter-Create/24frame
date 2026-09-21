@@ -8,8 +8,9 @@
 // Save SoT: apply the draft to this overlay, paint the own face in the
 // already-mounted Social tree, leave Edit immediately, persist in the
 // background, roll back here on error. Memory + sessionStorage + a
-// short cookie keep the hop off the skeleton. Professions / Topics
-// toggles stay local draft until that one write.
+// short cookie keep the hop off the skeleton. Professions is a
+// Settings drill-in row; selecting stays on the existing chip-bank
+// face. Topics toggles stay local draft until that one write.
 
 import { ACCOUNT_PROFILE } from "@/lib/account-profile";
 import { persistSocialMutation } from "@/lib/social-optimistic";
@@ -39,6 +40,8 @@ export const SOCIAL_PROFILE_EDIT_LOCK = {
   username: SOCIAL.profile.username,
   handleRequired: SOCIAL.profile.handleRequired,
   emptyPreview: "https://24frame.co/@",
+  profileUrlOnEditFace: false,
+  professionsDrillIn: true,
   bioMax: BIO_MAX,
   bioPrivacy: SOCIAL.profile.bioPrivacy,
   addLink: SOCIAL.profile.addLink,
@@ -57,10 +60,14 @@ export const SOCIAL_PROFILE_OPTIMISTIC_COOKIE = "24frame_social_profile_save";
 export const SOCIAL_PROFILE_OPTIMISTIC_STORAGE = "24frame_social_profile_save";
 export const SOCIAL_PROFILE_OPTIMISTIC_COOKIE_MAX_AGE = 60;
 
-export type SocialProfileEditFace = "edit" | "bio";
+export type SocialProfileEditFace = "edit" | "bio" | "roles";
 
-export function socialProfileEditFace(openBio: boolean): SocialProfileEditFace {
-  return openBio ? "bio" : "edit";
+export function socialProfileEditFace(
+  next: SocialProfileEditFace | boolean,
+): SocialProfileEditFace {
+  if (next === true) return "bio";
+  if (next === false) return "edit";
+  return next;
 }
 
 export type SocialProfileEditSaveDraft = {

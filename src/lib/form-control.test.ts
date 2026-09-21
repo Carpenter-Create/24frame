@@ -125,7 +125,7 @@ describe("form-control SoT", () => {
     expect(socialEdit).toContain('id="social-edit-last-name"');
     expect(socialEdit).not.toContain('id="social-edit-name"');
     expect(socialEdit).toContain('id="social-edit-handle"');
-    expect(socialEdit).toContain("SocialProfileRolesField");
+    expect(socialEdit).toContain("SocialProfileRolesEditor");
     expect(socialEdit).toContain("SocialProfileTopicsField");
     expect(socialEdit).toContain('id="social-edit-imdb"');
     expect(socialEdit).toContain("<Input");

@@ -89,6 +89,9 @@ describe("social copy lock", () => {
     expect(SOCIAL.profile.rolesSearch).toBe("Search professions");
     expect(SOCIAL.profile.rolesHint).toBe("Choose up to 5.");
     expect(SOCIAL.profile.rolesCount).toBe("{n} / {max}");
+    expect(SOCIAL.profile.rolesAdd).toBe("Add");
+    expect(SOCIAL.profile.rolesSelected).toBe("{n} selected");
+    expect(SOCIAL.profile.rolesMore).toBe("{first} +{n}");
     expect(SOCIAL.profile.topics).toBe("Topics");
     expect(SOCIAL.profile.topicsSearch).toBe("Search topics");
     expect(SOCIAL.profile.topicsHint).toBe("Choose up to 8.");
