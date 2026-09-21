@@ -210,7 +210,16 @@ describe("Social public profile", () => {
     expect(html).toContain("Producer");
     expect(html).not.toContain("Actor · Producer");
     expect(html).toContain("bg-surface-muted");
-    expect(html).toContain("flex-wrap");
+    expect(html).toContain("data-house-chip-rail");
+    expect(html).toContain('data-house-chip-rail-row="0"');
+    expect(html).not.toContain('data-house-chip-rail-row="1"');
+    const roles = html.slice(
+      html.indexOf("data-social-profile-roles"),
+      html.indexOf('data-social-profile-role="producer"') + 80,
+    );
+    expect(roles).toContain("overflow-x-auto");
+    expect(roles).toContain("no-scrollbar");
+    expect(roles).not.toContain("flex-wrap");
     expect(html).not.toContain("data-social-profile-roles-more");
     expect(html).not.toContain("data-social-profile-handle");
     const head = html.slice(html.indexOf("data-social-profile-head"), html.indexOf("data-social-profile-name"));

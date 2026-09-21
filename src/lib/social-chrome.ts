@@ -290,10 +290,12 @@ export const SOCIAL_PROFILE_NAME_CLASS = "break-words t-body font-semibold text-
 
 export const SOCIAL_PROFILE_BIO_CLASS = "break-words t-body-sm text-ink whitespace-pre-wrap";
 
-// Public Professions: wrap row of house gray pills, first ~3 then +N.
-// Each Role is its own muted HOUSE_PILL. Omit the row when empty.
-export const SOCIAL_PROFILE_ROLES_ROW_CLASS =
-  "flex max-w-full flex-wrap items-center gap-[var(--space-2)]";
+// Public Professions: one-row house chip rail (same primitive as Topics).
+// Phone: nowrap + overflow-x auto + no-scrollbar. Desktop: same one-row
+// scroll — ~3 +N house pills fit; do not wrap to a second row.
+// Each Role is its own muted HOUSE_PILL. Omit the rail when empty.
+export const SOCIAL_PROFILE_ROLES_RAIL_ROWS = 1;
+export const SOCIAL_PROFILE_ROLES_ROW_CLASS = HOUSE_CHIP_RAIL_CLASS;
 
 export const SOCIAL_PROFILE_ROLE_PILL_CLASS =
   `w-fit ${HOUSE_PILL_ITEM_CLASS} ${HOUSE_FILTER_OFF_CLASS}`;

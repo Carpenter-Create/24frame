@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 
+import { HouseChipRail } from "@/components/chrome/house-chip-rail";
 import { TextAction } from "@/components/chrome/house";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { cn } from "@/lib/cn";
@@ -16,7 +17,7 @@ import {
   SOCIAL_PROFILE_IDENTITY_CLASS,
   SOCIAL_PROFILE_NAME_CLASS,
   SOCIAL_PROFILE_ROLE_PILL_CLASS,
-  SOCIAL_PROFILE_ROLES_ROW_CLASS,
+  SOCIAL_PROFILE_ROLES_RAIL_ROWS,
   SOCIAL_PROFILE_TILE_CLASS,
   SOCIAL_TOPIC_CHIP_CLASS,
 } from "@/lib/social-chrome";
@@ -35,7 +36,7 @@ import {
   type SocialProfileMutuals,
 } from "@/lib/social-profile-mutuals";
 import { socialProfilePublicLinks } from "@/lib/social-profile-links";
-import { socialProfileRolesFace, socialProfileRolesMoreLabel } from "@/lib/social-profile-roles";
+import { socialProfileRolesRailItems } from "@/lib/social-profile-roles";
 import { parseSocialProfileTopics } from "@/lib/social-profile-topics";
 import {
   SOCIAL_POST_IMAGE_SIZES,
@@ -207,7 +208,7 @@ export function SocialProfileIdentity({
   children?: ReactNode;
 }) {
   const person = socialPersonIdentity({ handle, displayName: name });
-  const rolesFace = socialProfileRolesFace(roles ?? []);
+  const roleRailItems = socialProfileRolesRailItems(roles ?? []);
   const interestTopics = parseSocialProfileTopics(topics ?? []);
   const links = socialProfilePublicLinks({ websiteUrl, imdbUrl });
   const followedBy = mutuals
@@ -244,23 +245,31 @@ export function SocialProfileIdentity({
             {bio}
           </p>
         ) : null}
-        {rolesFace.shown.length > 0 ? (
-          <div data-social-profile-roles="" className={SOCIAL_PROFILE_ROLES_ROW_CLASS}>
-            {rolesFace.shown.map((role) => (
-              <span
-                key={role.slug}
-                data-social-profile-role={role.slug}
-                className={SOCIAL_PROFILE_ROLE_PILL_CLASS}
-              >
-                {role.label}
-              </span>
-            ))}
-            {rolesFace.extra > 0 ? (
-              <span data-social-profile-roles-more="" className={SOCIAL_PROFILE_ROLE_PILL_CLASS}>
-                {socialProfileRolesMoreLabel(rolesFace.extra)}
-              </span>
-            ) : null}
-          </div>
+        {roleRailItems.length > 0 ? (
+          <HouseChipRail
+            data-social-profile-roles=""
+            rows={SOCIAL_PROFILE_ROLES_RAIL_ROWS}
+            items={roleRailItems}
+            renderItem={(item) =>
+              item.kind === "more" ? (
+                <span
+                  key="more"
+                  data-social-profile-roles-more=""
+                  className={SOCIAL_PROFILE_ROLE_PILL_CLASS}
+                >
+                  {item.label}
+                </span>
+              ) : (
+                <span
+                  key={item.slug}
+                  data-social-profile-role={item.slug}
+                  className={SOCIAL_PROFILE_ROLE_PILL_CLASS}
+                >
+                  {item.label}
+                </span>
+              )
+            }
+          />
         ) : null}
         <SocialProfileLinkRow links={links} />
         {interestTopics.length > 0 ? (

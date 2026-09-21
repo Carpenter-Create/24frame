@@ -620,13 +620,16 @@ describe("Social Home miss list v1 P0 lock", () => {
     );
     expect(card).toContain("SocialProfileStats");
     expect(card).toContain("data-social-profile-head");
-    expect(card).toContain("socialProfileRolesFace");
+    expect(card).toContain("socialProfileRolesRailItems");
+    expect(card).toContain("HouseChipRail");
     expect(card).toContain("SocialProfilePostsEmpty");
     expect(card).not.toContain("emptySecondary");
     expect(card).not.toContain("emptyHint");
     expect(card).not.toContain("data-social-profile-handle");
     expect(chrome).toContain("SOCIAL_PROFILE_HEAD_CLASS");
     expect(chrome).toContain("SOCIAL_PROFILE_ROLES_ROW_CLASS");
+    expect(chrome).toContain("SOCIAL_PROFILE_ROLES_RAIL_ROWS");
+    expect(chrome).toContain("HOUSE_CHIP_RAIL_CLASS");
     expect(chrome).toContain("SOCIAL_PROFILE_ROLE_PILL_CLASS");
     expect(chrome).toContain("SOCIAL_PROFILE_CENTER_CLASS");
     expect(chrome).toContain("SOCIAL_PROFILE_POSTS_EMPTY_CLASS");
@@ -655,7 +658,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(publicProfile).not.toContain("SocialForYouRail");
     expect(publicProfile).not.toContain("loadSuggestedPeople");
     expect(home).toContain("SocialForYouRail");
-    expect(card).toContain("socialProfileRolesMoreLabel");
+    expect(card).toContain("socialProfileRolesRailItems");
     expect(card).not.toContain("socialProfileRolesLine");
     expect(
       homeSkeleton.slice(

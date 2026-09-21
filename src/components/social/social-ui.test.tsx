@@ -22,6 +22,7 @@ vi.mock("next/dynamic", () => ({
     },
 }));
 
+import { HOUSE_CHIP_RAIL_CLASS } from "@/lib/house-chip-rail";
 import { IDENTITY_AVATAR_CLASS } from "@/lib/house-sheet";
 import {
   SocialAuthorHistory,
@@ -38,6 +39,7 @@ import {
   SOCIAL_PROFILE_HEAD_CLASS,
   SOCIAL_PROFILE_POSTS_EMPTY_CLASS,
   SOCIAL_PROFILE_ROLE_PILL_CLASS,
+  SOCIAL_PROFILE_ROLES_RAIL_ROWS,
   SOCIAL_PROFILE_ROLES_ROW_CLASS,
   SOCIAL_PROFILE_STAT_CLASS,
   SOCIAL_PROFILE_STATS_CLASS,
@@ -253,14 +255,23 @@ describe("Social profile public face", () => {
     expect(withRoles).not.toContain("Topics:");
     expect(withRoles).toContain(SOCIAL_PROFILE_ROLES_ROW_CLASS);
     expect(withRoles).toContain(SOCIAL_PROFILE_ROLE_PILL_CLASS);
-    expect(withRoles).toContain("flex-wrap");
+    expect(SOCIAL_PROFILE_ROLES_RAIL_ROWS).toBe(1);
+    expect(SOCIAL_PROFILE_ROLES_ROW_CLASS).toBe(HOUSE_CHIP_RAIL_CLASS);
+    expect(SOCIAL_PROFILE_ROLES_ROW_CLASS).toContain("overflow-x-auto");
+    expect(SOCIAL_PROFILE_ROLES_ROW_CLASS).toContain("no-scrollbar");
+    expect(SOCIAL_PROFILE_ROLES_ROW_CLASS).not.toContain("flex-wrap");
+    expect(withRoles).toContain("data-house-chip-rail");
+    expect(withRoles).toContain('data-house-chip-rail-row="0"');
+    expect(withRoles).not.toContain('data-house-chip-rail-row="1"');
+    expect(withRoles).toContain("overflow-x-auto");
+    expect(withRoles).toContain("no-scrollbar");
+    expect(withRoles).not.toContain("flex-wrap");
     expect(withRoles).toContain("bg-surface-muted");
     expect(withRoles).toContain("rounded-full");
     expect(withRoles).toContain("t-body-sm");
     expect(withRoles).toContain("py-[var(--space-2)]");
     expect(withRoles).not.toContain("text-[11px]");
     expect(withRoles).not.toContain("truncate");
-    expect(withRoles).not.toContain("overflow-x-auto");
     expect(withRoles.indexOf("data-social-profile-name")).toBeLessThan(
       withRoles.indexOf("data-social-profile-roles"),
     );
@@ -306,6 +317,20 @@ describe("Social profile public face", () => {
     expect(adamDesktop.indexOf("Founder · Investor · Music Executive")).toBeLessThan(
       adamDesktop.indexOf('data-social-profile-role="executive_producer"'),
     );
+    const adamRoles = adamDesktop.slice(
+      adamDesktop.indexOf("data-social-profile-roles"),
+      adamDesktop.indexOf("data-social-profile-roles-more") + 280,
+    );
+    expect(adamRoles).toContain("data-house-chip-rail");
+    expect(adamRoles).toContain('data-house-chip-rail-row="0"');
+    expect(adamRoles).not.toContain('data-house-chip-rail-row="1"');
+    expect(adamRoles).toContain("overflow-x-auto");
+    expect(adamRoles).toContain("no-scrollbar");
+    expect(adamRoles).not.toContain("flex-wrap");
+    expect(adamRoles).toContain("Executive Producer");
+    expect(adamRoles).toContain("Music Supervisor");
+    expect(adamRoles).toContain("Composer");
+    expect(adamRoles).toContain("+2");
 
     const withTopics = renderToStaticMarkup(
       <SocialProfileIdentity
@@ -448,14 +473,15 @@ describe("Social profile public face", () => {
     expect(unknownHost).toContain('aria-label="Website"');
     expect(unknownHost).not.toContain(">https://ada.example/press<");
     expect(uiSrc).not.toContain("socialProfileRolesLine");
-    expect(uiSrc).toContain("socialProfileRolesFace");
-    expect(uiSrc).toContain("socialProfileRolesMoreLabel");
+    expect(uiSrc).toContain("socialProfileRolesRailItems");
+    expect(uiSrc).toContain("HouseChipRail");
+    expect(uiSrc).toContain("SOCIAL_PROFILE_ROLES_RAIL_ROWS");
     expect(
       uiSrc.slice(
         uiSrc.indexOf("export function SocialPersonRow"),
         uiSrc.indexOf("export function SocialConversationFaces"),
       ),
-    ).not.toContain("socialProfileRolesFace");
+    ).not.toContain("socialProfileRolesRailItems");
 
     const history = renderToStaticMarkup(
       <SocialAuthorHistory
