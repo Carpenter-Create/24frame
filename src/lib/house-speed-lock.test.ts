@@ -125,7 +125,7 @@ describe("house speed lock — no RSA on Social Home / Home critical path", () =
     expect(provider).toContain("HOUSE_CLIENT_SHELL.rscFallbackAttr");
     expect(provider).toContain("houseReconcileOwnedHref");
     expect(provider).toContain("touchScreenStore");
-    expect(provider).toContain("houseShouldKeepAlive");
+    expect(provider).toContain("houseCanIngest");
     expect(provider).toContain("houseRememberScroll");
     expect(provider).toContain("captureLeadScroll");
     expect(provider).toContain("captureLeadScroll(screenKey)");

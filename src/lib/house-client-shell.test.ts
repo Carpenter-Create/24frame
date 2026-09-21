@@ -3,12 +3,14 @@ import { describe, expect, it } from "vitest";
 
 import {
   HOUSE_CLIENT_SHELL,
+  houseCanIngest,
   houseHrefKey,
   housePaintedKeys,
   houseReadScroll,
   houseReconcileOwnedHref,
   houseRememberPainted,
   houseRememberScroll,
+  houseResolveDisplay,
   houseScreenKey,
   houseShouldClientNavigate,
   houseShouldKeepAlive,
@@ -110,5 +112,122 @@ describe("house client shell SoT", () => {
     expect(isValidElement(fallback)).toBe(true);
     expect(isHouseRscFallback(fallback)).toBe(true);
     expect(isHouseRscFallback(createElement("div", null, "Home"))).toBe(false);
+  });
+});
+
+describe("houseCanIngest — stable-ingest guard", () => {
+  it("blocks ingest when children are stale (pathname-flip render)", () => {
+    expect(
+      houseCanIngest("/social/profile", "/social/profile", "/social/profile", false, false, true),
+    ).toBe(false);
+    expect(
+      houseCanIngest("/social/explore", "/social/explore", "/social/explore", false, false, true),
+    ).toBe(false);
+  });
+
+  it("allows ingest once children are fresh (RSC slot has swapped)", () => {
+    expect(
+      houseCanIngest("/social/profile", "/social/profile", "/social/profile", false, false, false),
+    ).toBe(true);
+  });
+
+  it("blocks ingest when children is an RSC fallback", () => {
+    expect(
+      houseCanIngest("/social/profile", "/social/profile", "/social/profile", true, false, false),
+    ).toBe(false);
+  });
+
+  it("blocks ingest when the key is already in the store", () => {
+    expect(
+      houseCanIngest("/social/profile", "/social/profile", "/social/profile", false, true, false),
+    ).toBe(false);
+  });
+
+  it("blocks ingest when activeKey differs from nextKey (warm hop while Next lags)", () => {
+    expect(
+      houseCanIngest("/social", "/social/profile", "/social", false, false, false),
+    ).toBe(false);
+  });
+
+  it("blocks ingest for non-keepalive dests", () => {
+    expect(
+      houseCanIngest("/social/create/live", "/social/create/live", "/social/create/live", false, false, false),
+    ).toBe(false);
+  });
+});
+
+describe("houseResolveDisplay — cold-nav display", () => {
+  const storeHas = (keys: string[]) => (k: string) => keys.includes(k);
+
+  it("shows the cached screen when activeKey is known", () => {
+    const result = houseResolveDisplay("/social", true, false, null, storeHas(["/social"]));
+    expect(result).toEqual({ displayKey: "/social", showIngress: false });
+  });
+
+  it("shows ingress (skeleton) when children is an RSC fallback", () => {
+    const result = houseResolveDisplay("/social/profile", false, true, "/social", storeHas(["/social"]));
+    expect(result).toEqual({ displayKey: null, showIngress: true });
+  });
+
+  it("keeps the previous cached screen when children is stale (not fallback, not known)", () => {
+    const result = houseResolveDisplay("/social/profile", false, false, "/social", storeHas(["/social"]));
+    expect(result).toEqual({ displayKey: "/social", showIngress: false });
+  });
+
+  it("returns null displayKey when no previous screen is cached", () => {
+    const result = houseResolveDisplay("/social/profile", false, false, null, storeHas([]));
+    expect(result).toEqual({ displayKey: null, showIngress: false });
+  });
+
+  it("returns null displayKey when previous screen has been evicted", () => {
+    const result = houseResolveDisplay("/social/profile", false, false, "/social", storeHas([]));
+    expect(result).toEqual({ displayKey: null, showIngress: false });
+  });
+});
+
+describe("cold-nav poison prevention (integration)", () => {
+  it("cold nav must NOT mark the dest painted when children are stale", () => {
+    resetHousePaintedForTests();
+    houseRememberPainted("/social");
+
+    const nextKey = "/social/profile";
+    const canIngest = houseCanIngest(nextKey, nextKey, nextKey, false, false, true);
+    expect(canIngest).toBe(false);
+
+    expect(housePaintedKeys()).not.toContain("/social/profile");
+    expect(housePaintedKeys()).toContain("/social");
+  });
+
+  it("after children refresh, ingest is allowed and housePaintedKeys includes the new key", () => {
+    resetHousePaintedForTests();
+    const nextKey = "/social/profile";
+    const canIngest = houseCanIngest(nextKey, nextKey, nextKey, false, false, false);
+    expect(canIngest).toBe(true);
+
+    houseRememberPainted(nextKey);
+    expect(housePaintedKeys()).toContain("/social/profile");
+  });
+
+  it("fallback children never get remembered as painted", () => {
+    resetHousePaintedForTests();
+    const canIngest = houseCanIngest(
+      "/social/profile",
+      "/social/profile",
+      "/social/profile",
+      true,
+      false,
+      false,
+    );
+    expect(canIngest).toBe(false);
+    expect(housePaintedKeys()).not.toContain("/social/profile");
+  });
+
+  it("warm hop still client-navigates only when key is painted", () => {
+    resetHousePaintedForTests();
+    houseRememberPainted("/social");
+    houseRememberPainted("/social/explore");
+
+    expect(houseShouldClientNavigate("/social/explore", housePaintedKeys())).toBe(true);
+    expect(houseShouldClientNavigate("/social/profile", housePaintedKeys())).toBe(false);
   });
 });

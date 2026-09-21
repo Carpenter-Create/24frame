@@ -176,3 +176,53 @@ export function resetHousePaintedForTests(): void {
   paintedScreens.clear();
   houseScroll.clear();
 }
+
+/**
+ * Stable-ingest guard. Returns true only when it is safe to capture
+ * live `children` into the keep-alive store under `nextKey`.
+ *
+ * On a cold Next soft-nav the pathname flips before the RSC slot
+ * swaps, so `children` is still the *previous* screen's tree.
+ * Ingesting that stale tree under the new key poisons the cache.
+ *
+ * `childrenStale` is true when the current children reference matches
+ * a snapshot taken at the moment nextKey last changed — i.e. children
+ * has not been refreshed since the key flip.
+ */
+export function houseCanIngest(
+  nextKey: string,
+  activeKey: string,
+  nextPath: string,
+  fallback: boolean,
+  storeHasKey: boolean,
+  childrenStale: boolean,
+): boolean {
+  if (fallback) return false;
+  if (storeHasKey) return false;
+  if (!houseShouldKeepAlive(nextPath)) return false;
+  if (activeKey !== nextKey) return false;
+  if (childrenStale) return false;
+  return true;
+}
+
+/**
+ * Resolves which cached screen to display and whether to paint
+ * ingress (live RSC / loading skeleton).
+ *
+ * When activeKey is not in the store:
+ *  - Fallback children (RSC skeleton) → show as ingress.
+ *  - Non-fallback children (may be stale) → keep the most recent
+ *    cached screen (`storeLeadKey`) visible; never paint stale content.
+ */
+export function houseResolveDisplay(
+  activeKey: string,
+  known: boolean,
+  fallback: boolean,
+  storeLeadKey: string | null,
+  storeHasKey: (key: string) => boolean,
+): { displayKey: string | null; showIngress: boolean } {
+  if (known) return { displayKey: activeKey, showIngress: false };
+  if (fallback) return { displayKey: null, showIngress: true };
+  const prev = storeLeadKey && storeHasKey(storeLeadKey) ? storeLeadKey : null;
+  return { displayKey: prev, showIngress: false };
+}

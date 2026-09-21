@@ -16,6 +16,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 
 import {
   HOUSE_CLIENT_SHELL,
+  houseCanIngest,
   houseForgetUnlisted,
   houseHrefKey,
   housePaintedKeys,
@@ -24,9 +25,9 @@ import {
   houseReconcileOwnedHref,
   houseRememberPainted,
   houseRememberScroll,
+  houseResolveDisplay,
   houseScreenKey,
   houseShouldClientNavigate,
-  houseShouldKeepAlive,
   houseTouchOrder,
   parseHouseHref,
 } from "@/lib/house-client-shell";
@@ -214,12 +215,41 @@ export function HouseScreenCache({ children }: { children: ReactNode }) {
   const nextPath = house?.nextPathname ?? fallbackPath;
   const nextKey = house?.nextKey ?? houseScreenKey(nextPath, house?.nextSearch ?? "");
   const [store, setStore] = useState<ScreenStore>(EMPTY_STORE);
-  const previousKey = useRef<string | null>(null);
+  const scrollRef = useRef<string | null>(null);
   const fallback = isHouseRscFallback(children);
   const activeKey = house?.screenKey ?? nextKey;
 
+  // --- Stale-children guard (state-only, no refs during render) ---
+  // On a cold soft-nav, pathname flips before the RSC slot swaps.
+  // `staleGuard` snapshots children at the moment nextKey changes so
+  // we can detect when children still belongs to the *previous* screen.
+  const [staleGuard, setStaleGuard] = useState<{
+    key: string;
+    snapshot: ReactNode;
+  } | null>(null);
+
+  if (staleGuard === null) {
+    setStaleGuard({ key: nextKey, snapshot: null });
+  } else if (staleGuard.key !== nextKey) {
+    setStaleGuard({ key: nextKey, snapshot: children });
+  }
+
+  const childrenStale =
+    staleGuard !== null &&
+    staleGuard.key === nextKey &&
+    staleGuard.snapshot !== null &&
+    children === staleGuard.snapshot;
+
   let nextStore = store;
-  if (!fallback && houseShouldKeepAlive(nextPath) && !(nextKey in store.nodes)) {
+  const canIngest = houseCanIngest(
+    nextKey,
+    activeKey,
+    nextPath,
+    fallback,
+    nextKey in store.nodes,
+    childrenStale,
+  );
+  if (canIngest) {
     nextStore = nextScreenStore(store, nextKey, children);
   }
   if (activeKey in nextStore.nodes) {
@@ -232,21 +262,27 @@ export function HouseScreenCache({ children }: { children: ReactNode }) {
   }
 
   const known = activeKey in nextStore.nodes;
-  // Unknown dest: paint the live RSC (or its loading.tsx). Known dest: the
-  // mounted tree wins — never overwrite a warm screen with a skeleton.
-  const ingress = known ? null : children;
+  const { displayKey, showIngress } = houseResolveDisplay(
+    activeKey,
+    known,
+    fallback,
+    nextStore.order[0] ?? null,
+    (k) => k in nextStore.nodes,
+  );
+
+  const ingress = showIngress ? children : null;
 
   useEffect(() => {
     const scroller = document.querySelector(`[${HOUSE_CLIENT_SHELL.scrollAttr}]`);
     if (!(scroller instanceof HTMLElement)) {
-      previousKey.current = activeKey;
+      scrollRef.current = activeKey;
       return;
     }
-    const from = previousKey.current;
+    const from = scrollRef.current;
     if (from && from !== activeKey) {
       scroller.scrollTop = houseReadScroll(activeKey);
     }
-    previousKey.current = activeKey;
+    scrollRef.current = activeKey;
   }, [activeKey]);
 
   return (
@@ -254,10 +290,10 @@ export function HouseScreenCache({ children }: { children: ReactNode }) {
       {nextStore.order.map((key) => (
         <div
           key={key}
-          hidden={key !== activeKey}
-          inert={key !== activeKey ? true : undefined}
+          hidden={key !== displayKey}
+          inert={key !== displayKey ? true : undefined}
           {...{ [HOUSE_CLIENT_SHELL.screenAttr]: key }}
-          {...(key === activeKey ? { [HOUSE_CLIENT_SHELL.screenActiveAttr]: "" } : {})}
+          {...(key === displayKey ? { [HOUSE_CLIENT_SHELL.screenActiveAttr]: "" } : {})}
         >
           {nextStore.nodes[key]}
         </div>
