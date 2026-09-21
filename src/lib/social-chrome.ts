@@ -328,6 +328,24 @@ export const SOCIAL_PROFILE_COVER_IMAGE_CLASS = "absolute inset-0 size-full obje
 export const SOCIAL_PROFILE_COVER_EDIT_CLASS =
   "absolute right-3 top-3 z-10 flex size-9 items-center justify-center rounded-full border border-hairline bg-surface/90 text-ink";
 
+export const SOCIAL_PROFILE_COVER_PILL_CLASS =
+  "flex items-center gap-1.5 rounded-[8px] border border-hairline bg-surface/90 px-3 py-[6px] t-body-sm font-medium text-ink";
+
+export const SOCIAL_PROFILE_COVER_MENU_CLASS =
+  "absolute right-0 top-[calc(100%+4px)] z-20 flex min-w-[200px] flex-col rounded-[8px] border border-hairline bg-surface py-1";
+
+export const SOCIAL_PROFILE_COVER_MENU_ITEM_CLASS =
+  "flex w-full items-center gap-3 px-3 py-2 text-left t-body-sm text-ink hover:bg-surface-muted";
+
+export const SOCIAL_PROFILE_COVER_REPOSITION_BAR_CLASS =
+  "absolute inset-x-0 top-0 z-20 flex h-10 items-center justify-between bg-ink/70 px-3";
+
+export const SOCIAL_PROFILE_COVER_DRAG_HINT_CLASS =
+  "absolute inset-0 z-10 flex items-center justify-center";
+
+export const SOCIAL_PROFILE_COVER_REPOSITION_CLASS =
+  "relative w-full h-[112px] shrink-0 overflow-hidden md:h-[224px] cursor-grab active:cursor-grabbing";
+
 export const SOCIAL_PROFILE_COVER_STACK_CLASS = "flex flex-col";
 
 export const SOCIAL_PROFILE_HEAD_OVERLAP_CLASS =

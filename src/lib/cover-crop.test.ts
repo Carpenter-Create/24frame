@@ -99,27 +99,82 @@ describe("cover crop constants", () => {
   });
 });
 
-describe("cover crop copy", () => {
-  it("has the crop editor copy strings", () => {
-    expect(SOCIAL.profile.coverCropTitle).toBe("Reposition cover");
-    expect(SOCIAL.profile.coverCropSave).toBe("Save");
-    expect(SOCIAL.profile.coverCropCancel).toBe("Cancel");
-    expect(SOCIAL.profile.coverCropTarget).toContain("1784");
-    expect(SOCIAL.profile.coverCropTarget).toContain("446");
+describe("cover FB-exact copy", () => {
+  it("has the exact FB cover edit copy strings", () => {
+    expect(SOCIAL.profile.editCover).toBe("Edit cover photo");
+    expect(SOCIAL.profile.addCover).toBe("Add cover photo");
+    expect(SOCIAL.profile.coverChoose).toBe("Choose cover photo");
+    expect(SOCIAL.profile.coverUpload).toBe("Upload photo");
+    expect(SOCIAL.profile.coverReposition).toBe("Reposition");
+    expect(SOCIAL.profile.coverRemove).toBe("Remove");
+    expect(SOCIAL.profile.coverDragHint).toBe(
+      "Drag or use arrow keys to reposition image",
+    );
+    expect(SOCIAL.profile.coverPublicNote).toBe("Your cover photo is public.");
+    expect(SOCIAL.profile.coverSaveChanges).toBe("Save changes");
+    expect(SOCIAL.profile.coverCancel).toBe("Cancel");
     expect(SOCIAL.profile.coverCropFailed).toBeTruthy();
   });
 });
 
-describe("cover upload component", () => {
-  it("uses the crop editor and shows visible errors", () => {
-    const src = readFileSync(
-      "src/components/social/social-profile-cover-upload.tsx",
-      "utf8",
-    );
-    expect(src).toContain("SocialCoverCropEditor");
-    expect(src).toContain("beginCrop");
-    expect(src).toContain("onCropConfirm");
-    expect(src).toContain("clearCrop");
+describe("cover upload component (FB-exact)", () => {
+  const src = readFileSync(
+    "src/components/social/social-profile-cover-upload.tsx",
+    "utf8",
+  );
+
+  it("uses FB-style pill with camera icon + label on cover", () => {
+    expect(src).toContain("SOCIAL_PROFILE_COVER_PILL_CLASS");
+    expect(src).toContain('name="camera"');
+    expect(src).toContain("editCover");
+    expect(src).toContain("addCover");
+  });
+
+  it("has a menu with all four FB items: Choose / Upload / Reposition / Remove", () => {
+    expect(src).toContain("coverChoose");
+    expect(src).toContain("coverUpload");
+    expect(src).toContain("coverReposition");
+    expect(src).toContain("coverRemove");
+    expect(src).toContain("SOCIAL_PROFILE_COVER_MENU_CLASS");
+    expect(src).toContain("SOCIAL_PROFILE_COVER_MENU_ITEM_CLASS");
+  });
+
+  it("has menu icons matching FB: image, upload-simple, image, trash", () => {
+    expect(src).toContain('name="image"');
+    expect(src).toContain('name="upload-simple"');
+    expect(src).toContain('name="trash"');
+  });
+
+  it("has reposition mode with Cancel + Save changes bar", () => {
+    expect(src).toContain("SOCIAL_PROFILE_COVER_REPOSITION_BAR_CLASS");
+    expect(src).toContain("coverCancel");
+    expect(src).toContain("coverSaveChanges");
+    expect(src).toContain("cancelReposition");
+    expect(src).toContain("onSaveReposition");
+  });
+
+  it("shows FB drag hint text centered on dimmed cover", () => {
+    expect(src).toContain("SOCIAL_PROFILE_COVER_DRAG_HINT_CLASS");
+    expect(src).toContain("coverDragHint");
+    expect(src).toContain("opacity-70");
+    expect(src).toContain("cursor-grab");
+  });
+
+  it("shows public note in reposition bar", () => {
+    expect(src).toContain("coverPublicNote");
+  });
+
+  it("errors are visible (not sr-only)", () => {
+    const errorBlock = src.slice(src.lastIndexOf("aria-live"));
+    expect(errorBlock).not.toContain("sr-only");
+  });
+
+  it("supports Remove action via clearSocialProfileCover", () => {
+    expect(src).toContain("clearSocialProfileCover");
+    expect(src).toContain("removeCover");
+  });
+
+  it("crops to 1784×446 via presign → PUT → saveSocialProfileCover", () => {
     expect(src).toContain("cropRectFile");
     expect(src).toContain("presignSocialMediaUpload");
     expect(src).toContain('body.set("lane", "posts")');
@@ -127,47 +182,64 @@ describe("cover upload component", () => {
     expect(src).not.toContain("Mux");
   });
 
-  it("errors are not sr-only", () => {
-    const src = readFileSync(
-      "src/components/social/social-profile-cover-upload.tsx",
-      "utf8",
-    );
-    const errorDiv = src.slice(src.lastIndexOf("aria-live"));
-    expect(errorDiv).not.toContain("sr-only");
+  it("supports drag-to-reposition with pointer events", () => {
+    expect(src).toContain("onPointerDown");
+    expect(src).toContain("onPointerMove");
+    expect(src).toContain("onPointerUp");
+    expect(src).toContain("panOffset");
   });
 
-  it("has Save and Cancel controls via the editor", () => {
-    const editorSrc = readFileSync(
-      "src/components/social/social-cover-crop-editor.tsx",
-      "utf8",
-    );
-    expect(editorSrc).toContain("coverCropSave");
-    expect(editorSrc).toContain("coverCropCancel");
-    expect(editorSrc).toContain("coverCropTitle");
-    expect(editorSrc).toContain("coverCropTarget");
-    expect(editorSrc).toContain("rectCoverDrawSize");
-    expect(editorSrc).toContain("clampRectCropOffset");
-    expect(editorSrc).toContain("COVER_CROP_VIEW_WIDTH");
-    expect(editorSrc).toContain("COVER_CROP_VIEW_HEIGHT");
-  });
-
-  it("clears file input on cancel via clearCrop", () => {
-    const src = readFileSync(
-      "src/components/social/social-profile-cover-upload.tsx",
-      "utf8",
-    );
-    expect(src).toContain("clearCrop");
+  it("clears file input on cancel", () => {
+    expect(src).toContain("clearReposition");
     expect(src).toContain('fileRef.current.value = ""');
-    expect(src).toContain("onCancel={clearCrop}");
+    expect(src).toContain("cancelReposition");
   });
 
   it("revokes blob preview after server save", () => {
-    const src = readFileSync(
-      "src/components/social/social-profile-cover-upload.tsx",
+    expect(src).toContain("URL.revokeObjectURL(previewUrl)");
+    const revokeCount = (
+      src.match(/URL\.revokeObjectURL\(previewUrl\)/g) ?? []
+    ).length;
+    expect(revokeCount).toBeGreaterThanOrEqual(3);
+  });
+});
+
+describe("cover banner architecture", () => {
+  it("uses SocialProfileCoverBlock for own-profile (menu escapes overflow)", () => {
+    const ui = readFileSync("src/components/social/social-ui.tsx", "utf8");
+    expect(ui).toContain("SocialProfileCoverBlock");
+    const banner = readFileSync(
+      "src/components/social/social-profile-banner.tsx",
       "utf8",
     );
-    expect(src).toContain("URL.revokeObjectURL(previewUrl)");
-    const revokeCount = (src.match(/URL\.revokeObjectURL\(previewUrl\)/g) ?? []).length;
-    expect(revokeCount).toBeGreaterThanOrEqual(3);
+    expect(banner).toContain("SocialProfileCoverBlock");
+    expect(banner).toContain("data-social-profile-cover-block");
+  });
+});
+
+describe("cover chrome tokens", () => {
+  it("has the FB-style chrome classes in social-chrome", () => {
+    const chrome = readFileSync("src/lib/social-chrome.ts", "utf8");
+    expect(chrome).toContain("SOCIAL_PROFILE_COVER_PILL_CLASS");
+    expect(chrome).toContain("SOCIAL_PROFILE_COVER_MENU_CLASS");
+    expect(chrome).toContain("SOCIAL_PROFILE_COVER_MENU_ITEM_CLASS");
+    expect(chrome).toContain("SOCIAL_PROFILE_COVER_REPOSITION_BAR_CLASS");
+    expect(chrome).toContain("SOCIAL_PROFILE_COVER_DRAG_HINT_CLASS");
+  });
+
+  it("menu drops below the pill (top, not bottom)", () => {
+    const chrome = readFileSync("src/lib/social-chrome.ts", "utf8");
+    const idx = chrome.indexOf("SOCIAL_PROFILE_COVER_MENU_CLASS =");
+    const menuDef = chrome.slice(idx, chrome.indexOf(";", idx));
+    expect(menuDef).toContain("top-[calc(100%+4px)]");
+    expect(menuDef).not.toContain("bottom-[");
+  });
+});
+
+describe("clearSocialProfileCover action", () => {
+  it("exists in the actions file and sets cover_key to null", () => {
+    const actions = readFileSync("src/app/(app)/social/actions.ts", "utf8");
+    expect(actions).toContain("clearSocialProfileCover");
+    expect(actions).toContain("cover_key: null");
   });
 });

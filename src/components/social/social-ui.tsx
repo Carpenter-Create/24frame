@@ -58,7 +58,7 @@ import { SocialEmpty, SocialProfilePostsEmpty } from "./social-empty";
 import { SocialIcon } from "./social-icon";
 import { SocialMediaImage } from "./social-media-image";
 import { SocialProfileLinkRow } from "./social-profile-links";
-import { SocialProfileBanner } from "./social-profile-banner";
+import { SocialProfileBanner, SocialProfileCoverBlock } from "./social-profile-banner";
 
 export { SocialAvatar } from "./social-avatar";
 
@@ -261,7 +261,11 @@ export function SocialProfileIdentity({
   return (
     <div data-social-profile-identity="" className={SOCIAL_PROFILE_IDENTITY_CLASS}>
       <div data-social-profile-cover-stack="" className={SOCIAL_PROFILE_COVER_STACK_CLASS}>
-        <SocialProfileBanner coverUrl={coverUrl} coverEdit={coverEdit} />
+        {coverEdit ? (
+          <SocialProfileCoverBlock coverUrl={coverUrl} coverEdit={coverEdit} />
+        ) : (
+          <SocialProfileBanner coverUrl={coverUrl} />
+        )}
         <div data-social-profile-head="" className={SOCIAL_PROFILE_HEAD_OVERLAP_CLASS}>
           <div className={SOCIAL_PROFILE_HEAD_CLASS}>
             <div className="relative shrink-0">

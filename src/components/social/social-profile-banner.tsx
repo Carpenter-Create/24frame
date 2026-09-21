@@ -35,3 +35,32 @@ export function SocialProfileBanner({
     </div>
   );
 }
+
+export function SocialProfileCoverBlock({
+  coverUrl,
+  coverEdit,
+}: {
+  coverUrl?: string | null;
+  coverEdit?: ReactNode;
+}) {
+  const photo = coverUrl?.trim() ? coverUrl : null;
+  return (
+    <div data-social-profile-cover-block="" className="relative">
+      <div
+        data-social-profile-cover=""
+        data-social-profile-cover-empty={photo ? undefined : ""}
+        className={cn(SOCIAL_PROFILE_COVER_CLASS, !photo ? SOCIAL_PROFILE_COVER_EMPTY_CLASS : "bg-surface-muted")}
+      >
+        {photo ? (
+          <SocialMediaImage
+            src={photo}
+            sizes={SOCIAL_PROFILE_COVER_IMAGE_SIZES}
+            priority
+            className={SOCIAL_PROFILE_COVER_IMAGE_CLASS}
+          />
+        ) : null}
+      </div>
+      {coverEdit}
+    </div>
+  );
+}
