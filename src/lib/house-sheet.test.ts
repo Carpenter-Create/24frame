@@ -146,8 +146,11 @@ describe("house sheet lock", () => {
     expect(APP_SHEET_MODAL_PROMOTE_HOST).not.toContain("justify-end");
 
     expect(APP_SHEET_MODAL_PROMOTE_SURFACE).toContain("md:w-auto");
+    expect(APP_SHEET_MODAL_PROMOTE_SURFACE).toContain("md:min-w-[22rem]");
     expect(APP_SHEET_MODAL_PROMOTE_SURFACE).toContain("md:max-w-[min(92vw,28rem)]");
     expect(APP_SHEET_MODAL_PROMOTE_SURFACE).toContain("md:rounded-b-[16px]");
+    expect(APP_SHEET_MODAL_PROMOTE_SURFACE).toContain("md:border");
+    expect(APP_SHEET_MODAL_PROMOTE_SURFACE).toContain("md:border-hairline");
     expect(APP_SHEET_MODAL_PROMOTE_SURFACE).toContain("md:shadow-[var(--elevation)]");
     expect(APP_SHEET_MODAL_PROMOTE_SURFACE).not.toContain("backdrop-blur");
     expect(APP_SHEET_MODAL_PROMOTE_SURFACE).not.toContain("frost");
