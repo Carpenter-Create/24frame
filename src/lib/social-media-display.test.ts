@@ -4,6 +4,8 @@ import {
   isAnimatedRasterSrc,
   isSessionGatedSocialSrc,
   socialAvatarImageSizes,
+  socialMediaFrameClass,
+  socialMediaOrientation,
   socialVideoDisplaySrc,
 } from "./social-media-display";
 
@@ -35,5 +37,23 @@ describe("social media display", () => {
     expect(isSessionGatedSocialSrc("/api/social/media?key=posts/u/x.mp4#t=0.1")).toBe(true);
     expect(isSessionGatedSocialSrc("https://cf.example/posts/u/x.jpg")).toBe(false);
     expect(isSessionGatedSocialSrc("/api/account/photo")).toBe(false);
+  });
+
+  it("frames portrait 4:5 and landscape 16:9 from orientation, ratio, or kind default", () => {
+    expect(socialMediaOrientation("portrait")).toBe("portrait");
+    expect(socialMediaOrientation("landscape")).toBe("landscape");
+    expect(socialMediaOrientation({ orientation: "portrait" })).toBe("portrait");
+    expect(socialMediaOrientation({ width: 1080, height: 1350 })).toBe("portrait");
+    expect(socialMediaOrientation({ width: 1920, height: 1080 })).toBe("landscape");
+    expect(socialMediaOrientation({ aspect: 0.8 })).toBe("portrait");
+    expect(socialMediaOrientation({ aspect: 16 / 9 })).toBe("landscape");
+    expect(socialMediaOrientation({ kind: "image" })).toBe("portrait");
+    expect(socialMediaOrientation({ kind: "video" })).toBe("landscape");
+    expect(socialMediaFrameClass("portrait")).toBe("aspect-[4/5] w-full object-cover");
+    expect(socialMediaFrameClass("landscape")).toBe("aspect-video w-full object-cover");
+    expect(socialMediaFrameClass({ kind: "image" })).toContain("aspect-[4/5]");
+    expect(socialMediaFrameClass({ kind: "video" })).toContain("aspect-video");
+    expect(socialMediaFrameClass({ kind: "video" })).not.toContain("aspect-square");
+    expect(socialMediaFrameClass({ kind: "image" })).not.toContain("aspect-square");
   });
 });

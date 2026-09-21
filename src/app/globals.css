@@ -280,4 +280,14 @@ body {
 
 .social-mux-player {
   --media-accent-color: var(--accent);
+  --media-object-fit: cover;
+  --media-object-position: center;
+}
+
+.social-mux-player mux-player {
+  display: block;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: unset;
+  object-fit: cover;
 }

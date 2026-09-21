@@ -269,6 +269,8 @@ describe("Social optimistic mutation SoT", () => {
     expect(goLive).toContain("clipUrlRef.current = null");
     const feed = readFileSync("src/components/social/social-optimistic-feed.tsx", "utf8");
     expect(feed).toContain("data-social-optimistic-error");
+    expect(feed).toContain("SOCIAL_FEED_GUTTER_CLASS");
+    expect(feed).not.toContain("className=\"flex flex-col gap-2\"");
     expect(feed.indexOf("notice")).toBeLessThan(feed.indexOf("if (merged.length === 0)"));
     expect(followChunk).toContain("const result = await toggleSocialFollow");
     expect(followChunk).toContain("followedConfirmCopy");

@@ -8,6 +8,7 @@ import { cn } from "@/lib/cn";
 import {
   SOCIAL_ACTION_CLASS,
   SOCIAL_ACTION_SECONDARY_CLASS,
+  SOCIAL_FEED_GUTTER_CLASS,
   SOCIAL_FEED_ROW_CLASS,
   SOCIAL_HIGHLIGHT_RING_CLASS,
   SOCIAL_PROFILE_BIO_CLASS,
@@ -16,6 +17,7 @@ import {
   SOCIAL_PROFILE_HEAD_CLASS,
   SOCIAL_PROFILE_IDENTITY_CLASS,
   SOCIAL_PROFILE_NAME_CLASS,
+  SOCIAL_PROFILE_PLAY_CLASS,
   SOCIAL_PROFILE_ROLE_PILL_CLASS,
   SOCIAL_PROFILE_ROLES_RAIL_ROWS,
   SOCIAL_PROFILE_TILE_CLASS,
@@ -38,9 +40,12 @@ import {
 import { socialProfilePublicLinks } from "@/lib/social-profile-links";
 import { socialProfileRolesRailItems } from "@/lib/social-profile-roles";
 import { parseSocialProfileTopics } from "@/lib/social-profile-topics";
+import { SOCIAL_ICON_SIZE_PROFILE_PLAY } from "@/lib/social-icons";
 import {
   SOCIAL_POST_IMAGE_SIZES,
   SOCIAL_PROFILE_TILE_IMAGE_SIZES,
+  socialMediaFrameClass,
+  type SocialMediaOrientation,
 } from "@/lib/social-media-display";
 import { SocialAvatar } from "./social-avatar";
 import { SocialFeedVideo } from "./social-feed-video";
@@ -130,6 +135,10 @@ export type SocialPostMediaItem = {
   kind: "image" | "video";
   url: string;
   playbackId?: string;
+  orientation?: SocialMediaOrientation;
+  width?: number;
+  height?: number;
+  aspect?: number;
 };
 
 export type SocialPostCardModel = {
@@ -153,24 +162,37 @@ export function SocialPostMedia({ items }: { items: readonly SocialPostMediaItem
   if (items.length === 0) return null;
   return (
     <div data-social-post-media="" className="flex flex-col gap-2">
-      {items.map((item) =>
-        item.kind === "video" ? (
-          <SocialFeedVideo
-            key={item.playbackId ?? item.url}
-            item={item}
-            className="h-[360px] w-full rounded-[8px] bg-surface-muted object-cover"
-          />
-        ) : (
-          <div
-            key={item.url}
-            data-social-post-image=""
-            className="relative h-[360px] w-full overflow-hidden rounded-[8px] bg-surface-muted"
-          >
-            <SocialMediaImage src={item.url} sizes={SOCIAL_POST_IMAGE_SIZES} />
-          </div>
-        ),
-      )}
+      {items.map((item) => (
+        <SocialPostMediaFrame key={item.playbackId ?? item.url} item={item} />
+      ))}
     </div>
+  );
+}
+
+function SocialPostMediaFrame({ item }: { item: SocialPostMediaItem }) {
+  const frame = cn(
+    socialMediaFrameClass(item),
+    "relative overflow-hidden bg-surface-muted md:rounded-[8px]",
+  );
+  if (item.kind === "video") {
+    return (
+      <div className={frame}>
+        <SocialFeedVideo item={item} className="absolute inset-0 size-full object-cover" />
+      </div>
+    );
+  }
+  return (
+    <div data-social-post-image="" className={frame}>
+      <SocialMediaImage src={item.url} sizes={SOCIAL_POST_IMAGE_SIZES} />
+    </div>
+  );
+}
+
+function SocialProfileVideoGlyph() {
+  return (
+    <span data-social-profile-play="" className={SOCIAL_PROFILE_PLAY_CLASS}>
+      <SocialIcon name="play" size={SOCIAL_ICON_SIZE_PROFILE_PLAY} active />
+    </span>
   );
 }
 
@@ -349,11 +371,11 @@ export function SocialAuthorHistory({
   const mediaPosts = posts.filter((post) => post.media.length > 0);
   const textPosts = posts.filter((post) => post.media.length === 0);
   return (
-    <div data-social-author-history="" className="flex flex-col gap-[var(--space-4)]">
+    <div data-social-author-history="" className="flex flex-col">
       {posts.length === 0 ? (
         <SocialProfilePostsEmpty action={emptyAction} />
       ) : (
-        <div data-social-author-posts="" className="flex flex-col gap-[var(--space-4)]">
+        <div data-social-author-posts="" className={SOCIAL_FEED_GUTTER_CLASS}>
           {mediaPosts.length > 0 ? (
             <div
               data-social-profile-grid=""
@@ -361,6 +383,7 @@ export function SocialAuthorHistory({
             >
               {mediaPosts.map((post) => {
                 const first = post.media[0];
+                if (!first) return null;
                 return (
                   <article
                     key={post.id}
@@ -377,12 +400,7 @@ export function SocialAuthorHistory({
                         <SocialMediaImage src={first.url} sizes={SOCIAL_PROFILE_TILE_IMAGE_SIZES} />
                       </div>
                     )}
-                    <p className="relative t-label font-medium uppercase tracking-[0.08em] text-ink-2">
-                      {first.kind === "video" ? SOCIAL.home.videoKind : SOCIAL.home.photoKind}
-                    </p>
-                    {post.body ? (
-                      <p className="relative line-clamp-2 t-body-sm text-ink">{post.body}</p>
-                    ) : null}
+                    {first.kind === "video" ? <SocialProfileVideoGlyph /> : null}
                   </article>
                 );
               })}
@@ -498,23 +516,7 @@ export function SocialPostCard({ post }: { post: SocialPostCardModel }) {
             <p className="t-body-sm font-semibold text-ink">{handle}</p>
           )}
         </div>
-        {media ? (
-          <div data-social-post-media="" className="-mx-0">
-            {post.media[0]?.kind === "video" ? (
-              <SocialFeedVideo
-                item={post.media[0]}
-                className="aspect-square w-full bg-surface-muted object-cover"
-              />
-            ) : post.media[0]?.url ? (
-              <div
-                data-social-post-image=""
-                className="relative aspect-square w-full bg-surface-muted"
-              >
-                <SocialMediaImage src={post.media[0].url} sizes={SOCIAL_POST_IMAGE_SIZES} />
-              </div>
-            ) : null}
-          </div>
-        ) : null}
+        {media ? <SocialPostMedia items={post.media} /> : null}
         <div className="flex flex-col gap-1 px-3 pb-2.5 pt-2">
           <div className="flex items-center gap-3.5">
             {post.canLike ? (

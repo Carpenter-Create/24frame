@@ -36,13 +36,18 @@ import { SOCIAL } from "@/lib/social";
 import {
   SOCIAL_AVATAR_PROFILE_CLASS,
   SOCIAL_EMPTY_PANEL_CLASS,
+  SOCIAL_FEED_GUTTER_CLASS,
+  SOCIAL_FEED_ROW_CLASS,
+  SOCIAL_PROFILE_GRID_CLASS,
   SOCIAL_PROFILE_HEAD_CLASS,
+  SOCIAL_PROFILE_PLAY_CLASS,
   SOCIAL_PROFILE_POSTS_EMPTY_CLASS,
   SOCIAL_PROFILE_ROLE_PILL_CLASS,
   SOCIAL_PROFILE_ROLES_RAIL_ROWS,
   SOCIAL_PROFILE_ROLES_ROW_CLASS,
   SOCIAL_PROFILE_STAT_CLASS,
   SOCIAL_PROFILE_STATS_CLASS,
+  SOCIAL_PROFILE_TILE_CLASS,
 } from "@/lib/social-chrome";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -133,6 +138,11 @@ describe("SocialPostCard faces", () => {
     expect(html).toContain('src="https://s3.example/signed-avatar"');
     expect(html).toContain("Ada Lovelace");
     expect(html).toContain('href="/social/u/ada"');
+    expect(html).toContain("bg-surface");
+    expect(html).toContain("data-social-post-mobile");
+    expect(html).toContain("flex flex-col bg-surface md:hidden");
+    expect(SOCIAL_FEED_ROW_CLASS).toMatch(/(?:^|\s)bg-surface(?:\s|$)/);
+    expect(SOCIAL_FEED_ROW_CLASS).not.toContain("bg-surface-muted");
     expect(html).not.toContain("/social/u/@");
     expect(html).not.toContain("AL");
     expect(html).not.toContain("data-social-avatar-ring");
@@ -516,8 +526,81 @@ describe("Social profile public face", () => {
     );
     expect(history).toContain("data-social-author-history");
     expect(history).toContain("data-social-author-posts");
+    expect(history).toContain(SOCIAL_FEED_GUTTER_CLASS);
+    expect(SOCIAL_FEED_GUTTER_CLASS).toBe("flex flex-col gap-[var(--space-2)] bg-surface-muted");
+    expect(SOCIAL_FEED_GUTTER_CLASS).not.toContain("bg-bg");
+    expect(history).toContain("flex flex-col bg-surface md:hidden");
+    expect(history).toContain("border border-hairline bg-surface");
+    expect(SOCIAL_FEED_ROW_CLASS).toMatch(/(?:^|\s)bg-surface(?:\s|$)/);
+    expect(SOCIAL_FEED_ROW_CLASS).not.toContain("bg-surface-muted");
+    expect(uiSrc).toContain('className="flex flex-col bg-surface md:hidden"');
     expect(history).toContain('data-social-post="p1"');
     expect(history).toContain("hello");
+    expect(history).not.toContain("data-social-profile-grid");
+  });
+
+  it("keeps media posts on the IG square grid and text cards below with FB gutters", () => {
+    const html = renderToStaticMarkup(
+      <SocialAuthorHistory
+        truncated={false}
+        posts={[
+          {
+            id: "clip",
+            body: "Mux smoke",
+            likeCount: 0,
+            liked: false,
+            createdAt: "2026-09-20T12:00:00.000Z",
+            authorId: "u1",
+            authorHandle: "ada",
+            authorName: "Ada Lovelace",
+            authorPhotoUrl: null,
+            groupSlug: null,
+            groupName: null,
+            canLike: false,
+            media: [{ kind: "video", url: "", playbackId: "uNbxnGLKJ00yfbijDO8COxT" }],
+          },
+          {
+            id: "note",
+            body: "First caption post test",
+            likeCount: 0,
+            liked: false,
+            createdAt: "2026-09-20T12:01:00.000Z",
+            authorId: "u1",
+            authorHandle: "ada",
+            authorName: "Ada Lovelace",
+            authorPhotoUrl: null,
+            groupSlug: null,
+            groupName: null,
+            canLike: false,
+            media: [],
+          },
+        ]}
+      />,
+    );
+    expect(html).toContain("data-social-profile-grid");
+    expect(html).toContain(SOCIAL_PROFILE_GRID_CLASS);
+    expect(html).toContain(SOCIAL_PROFILE_TILE_CLASS);
+    expect(html).toContain("aspect-square");
+    expect(html).toContain("grid-cols-3");
+    expect(html).toContain("gap-px");
+    expect(html).toContain("data-social-profile-play");
+    expect(html).toContain(SOCIAL_PROFILE_PLAY_CLASS);
+    expect(html).toContain('data-social-icon="play"');
+    expect(html).toContain(SOCIAL_FEED_GUTTER_CLASS);
+    expect(html).toContain('data-social-post="note"');
+    expect(html).toContain("First caption post test");
+    const grid = html.slice(
+      html.indexOf("data-social-profile-grid"),
+      html.indexOf('data-social-post="note"'),
+    );
+    expect(grid).toContain('data-social-post="clip"');
+    expect(grid).not.toContain("Mux smoke");
+    expect(grid).not.toContain(SOCIAL.home.videoKind);
+    expect(grid).not.toContain("line-clamp-2");
+    expect(SOCIAL_PROFILE_TILE_CLASS).toContain("aspect-square");
+    expect(SOCIAL_PROFILE_TILE_CLASS).not.toContain("h-[140px]");
+    expect(SOCIAL_PROFILE_TILE_CLASS).not.toContain("p-2.5");
+    expect(SOCIAL_PROFILE_GRID_CLASS).not.toContain("gap-1.5");
   });
 
   it("shows an honest empty state and names the bound when truncated", () => {
@@ -555,6 +638,86 @@ describe("Social profile public face", () => {
 });
 
 describe("SocialPostCard media", () => {
+  it("keeps feed media on the 4:5 / 16:9 frame SoT, never aspect-square", () => {
+    const still = renderToStaticMarkup(
+      <SocialPostCard
+        post={{
+          id: "p1",
+          body: "hello",
+          likeCount: 0,
+          liked: false,
+          createdAt: "2026-09-12T14:00:00.000Z",
+          authorId: "u1",
+          authorHandle: "ada",
+          authorName: "Ada Lovelace",
+          authorPhotoUrl: null,
+          groupSlug: null,
+          groupName: null,
+          canLike: false,
+          media: [{ kind: "image", url: "https://cf.example/signed-image" }],
+        }}
+      />,
+    );
+    expect(still).toContain("aspect-[4/5]");
+    expect(still).toContain("object-cover");
+    expect(still).not.toContain("aspect-square");
+
+    const clip = renderToStaticMarkup(
+      <SocialPostCard
+        post={{
+          id: "p2",
+          body: "clip",
+          likeCount: 0,
+          liked: false,
+          createdAt: "2026-09-12T14:00:00.000Z",
+          authorId: "u1",
+          authorHandle: "ada",
+          authorName: "Ada Lovelace",
+          authorPhotoUrl: null,
+          groupSlug: null,
+          groupName: null,
+          canLike: false,
+          media: [{ kind: "video", url: "", playbackId: "uNbxnGLKJ00yfbijDO8COxT" }],
+        }}
+      />,
+    );
+    expect(clip).toContain("aspect-video");
+    expect(clip).toContain("object-cover");
+    expect(clip).not.toContain("aspect-square");
+
+    const portrait = renderToStaticMarkup(
+      <SocialPostCard
+        post={{
+          id: "p3",
+          body: "tall",
+          likeCount: 0,
+          liked: false,
+          createdAt: "2026-09-12T14:00:00.000Z",
+          authorId: "u1",
+          authorHandle: "ada",
+          authorName: "Ada Lovelace",
+          authorPhotoUrl: null,
+          groupSlug: null,
+          groupName: null,
+          canLike: false,
+          media: [{ kind: "video", url: "", playbackId: "uNbxnGLKJ00yfbijDO8COxT", width: 1080, height: 1350 }],
+        }}
+      />,
+    );
+    expect(portrait).toContain("aspect-[4/5]");
+    expect(portrait).not.toContain("aspect-square");
+
+    const postCard = uiSrc.slice(uiSrc.indexOf("export function SocialPostCard"));
+    const postMedia = uiSrc.slice(
+      uiSrc.indexOf("export function SocialPostMedia"),
+      uiSrc.indexOf("export function SocialProfileIdentity"),
+    );
+    expect(postCard).not.toContain("aspect-square");
+    expect(postMedia).not.toContain("aspect-square");
+    expect(postMedia).toContain("socialMediaFrameClass");
+    expect(postCard).toContain("<SocialPostMedia items={post.media} />");
+  });
+
   it("leads hairline rows with author, then media and copy", () => {
     const html = renderToStaticMarkup(
       <SocialPostCard

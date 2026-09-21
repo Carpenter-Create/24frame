@@ -31,7 +31,8 @@ export function SocialMuxPlayer({
         playsInline
         preload="metadata"
         poster={poster}
-        className="size-full"
+        className="size-full object-cover"
+        style={{ aspectRatio: "auto", width: "100%", height: "100%", objectFit: "cover" }}
       />
     </div>
   );
