@@ -26,6 +26,9 @@ import {
   SOCIAL_BANNED_PRODUCT_NAMES,
   SOCIAL_PROFILE_ORIGIN,
   SOCIAL_ROUTES,
+  socialGroupPostHref,
+  socialPostHref,
+  socialRelativeTime,
   socialSearchHref,
   socialComposerPrompt,
   socialCreateHref,
@@ -183,6 +186,9 @@ describe("social copy lock", () => {
     expect(SOCIAL.dms.subtitle).toContain(PRODUCT_NAME);
     expect(SOCIAL.dms.addPeople).toBe("Add people");
     expect(SOCIAL_ROUTES.dms).toBe("/social/dms");
+    expect(SOCIAL_ROUTES.post).toBe("/social/p");
+    expect(socialPostHref("p1")).toBe("/social/p/p1");
+    expect(socialGroupPostHref("crew", "p1")).toBe("/social/groups/crew/posts/p1");
     expect(SOCIAL_ROUTES.leaderboard).toBe("/social/leaderboard");
     expect(SOCIAL_ROUTES).not.toHaveProperty("courses");
     expect(SOCIAL_ROUTES.home).toBe("/social");
@@ -606,7 +612,7 @@ describe("social writes stay on the live spine", () => {
       "src/app/(app)/social/dms/[id]/page.tsx",
       "src/app/(app)/social/leaderboard/page.tsx",
       "src/app/(app)/social/groups/[slug]/page.tsx",
-      "src/app/(app)/social/groups/[slug]/posts/[postId]/page.tsx",
+      "src/app/(app)/social/p/[postId]/page.tsx",
       "src/app/(app)/social/stories/[id]/page.tsx",
     ];
     for (const file of nodeSurfaces) {
@@ -635,12 +641,15 @@ describe("social writes stay on the live spine", () => {
       "src/app/(app)/social/page.tsx",
       "src/app/(app)/social/profile/page.tsx",
       "src/app/(app)/social/groups/[slug]/page.tsx",
-      "src/app/(app)/social/groups/[slug]/posts/[postId]/page.tsx",
+      "src/app/(app)/social/p/[postId]/page.tsx",
       "src/app/(app)/social/stories/[id]/page.tsx",
     ];
     for (const file of feed) {
       expect(readFileSync(file, "utf8")).toMatch(/signedSocialMedia/);
     }
+    const groupPost = readFileSync("src/app/(app)/social/groups/[slug]/posts/[postId]/page.tsx", "utf8");
+    expect(groupPost).toContain("redirect(socialPostHref(post.id))");
+    expect(groupPost).not.toContain("signedSocialMedia");
     const own = readFileSync("src/app/(app)/social/profile/page.tsx", "utf8");
     const pub = readFileSync("src/app/(app)/social/u/[handle]/page.tsx", "utf8");
     expect(own).toContain("loadAuthorActivityPosts");
@@ -661,5 +670,20 @@ describe("social writes stay on the live spine", () => {
     expect(forms).not.toContain("S3_AVATARS_BUCKET");
     expect(forms).not.toContain("from \"@/lib/s3\"");
     expect(forms).not.toContain("from \"@/lib/cloudfront\"");
+  });
+});
+
+describe("feed post craft lock 2026-09-21", () => {
+  it("keeps compact lowercase relative time and a unique post URL", () => {
+    const now = Date.parse("2026-09-21T12:00:00.000Z");
+    expect(socialRelativeTime("2026-09-21T11:59:30.000Z", now)).toBe("Just now");
+    expect(socialRelativeTime("2026-09-21T11:50:00.000Z", now)).toBe("10m");
+    expect(socialRelativeTime("2026-09-21T02:00:00.000Z", now)).toBe("10h");
+    expect(socialRelativeTime("2026-09-20T12:00:00.000Z", now)).toBe("Yesterday");
+    expect(socialRelativeTime("2026-09-18T12:00:00.000Z", now)).toBe("3d");
+    expect(socialPostHref("abc")).toBe("/social/p/abc");
+    expect(SOCIAL.post.likesTitle).toBe("Likes");
+    expect(SOCIAL.post.likesEmpty).toBe("No likes yet.");
+    expect(SOCIAL_ROUTES.post).toBe("/social/p");
   });
 });

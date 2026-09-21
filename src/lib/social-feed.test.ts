@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 
 import { LIST_PAGE, probeRange } from "@/lib/list-bounds";
-import { SOCIAL_PROFILE_POSTS_PAGE } from "@/lib/social";
+import { SOCIAL_LIKERS_PAGE, SOCIAL_PROFILE_POSTS_PAGE } from "@/lib/social";
 import {
   SOCIAL_EXPLORE_PEOPLE_LIMIT,
   SOCIAL_EXPLORE_POSTS_LIMIT,
@@ -22,6 +22,8 @@ import {
   loadFolloweeIds,
   loadFollowingPosts,
   loadLiveStories,
+  loadPostLikers,
+  loadVisiblePost,
   loadProfileFollowList,
   loadProfileSocialCounts,
   type SocialPostRow,
@@ -444,6 +446,33 @@ describe("class 5 Social Home access lock", () => {
       expect(chunk).not.toMatch(/offset/i);
     }
     expect(src).not.toMatch(/get_dm_inbox|fan-out|direct_messages/i);
+  });
+});
+
+describe("loadVisiblePost + loadPostLikers", () => {
+  it("reads one active post and probes likers newest first", async () => {
+    const row = post("p1");
+    const maybeSingle = vi.fn(async () => ({ data: row, error: null }));
+    const statusEq = vi.fn(() => ({ maybeSingle }));
+    const idEq = vi.fn(() => ({ eq: statusEq }));
+    const postSelect = vi.fn(() => ({ eq: idEq }));
+    const range = vi.fn(async () => ({
+      data: [{ user_id: "u2" }, { user_id: "u3" }],
+      error: null,
+    }));
+    const orderUser = vi.fn(() => ({ range }));
+    const orderCreated = vi.fn(() => ({ order: orderUser }));
+    const targetEq = vi.fn(() => ({ order: orderCreated }));
+    const typeEq = vi.fn(() => ({ eq: targetEq }));
+    const likeSelect = vi.fn(() => ({ eq: typeEq }));
+    const from = vi.fn((table: string) =>
+      table === "posts" ? { select: postSelect } : { select: likeSelect },
+    );
+    await expect(loadVisiblePost({ from } as never, "p1")).resolves.toEqual(row);
+    const likers = await loadPostLikers({ from } as never, "p1");
+    expect(likeSelect).toHaveBeenCalledWith("user_id");
+    expect(range).toHaveBeenCalledWith(...probeRange(SOCIAL_LIKERS_PAGE));
+    expect(likers).toEqual({ userIds: ["u2", "u3"], truncated: false });
   });
 });
 

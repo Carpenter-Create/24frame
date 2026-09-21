@@ -32,8 +32,9 @@ import {
   SocialPostCard,
   SocialProfileIdentity,
 } from "./social-ui";
-import { SOCIAL, socialRelativeTime } from "@/lib/social";
+import { SOCIAL, socialPostHref, socialRelativeTime } from "@/lib/social";
 import {
+  SOCIAL_POST_TIME_CLASS,
   SOCIAL_AVATAR_PROFILE_CLASS,
   SOCIAL_EMPTY_PANEL_CLASS,
   SOCIAL_FEED_GUTTER_CLASS,
@@ -814,7 +815,7 @@ describe("SocialPostCard media", () => {
     expect(postCard).not.toContain("aspect-square");
     expect(postMedia).not.toContain("aspect-square");
     expect(postMedia).toContain("socialMediaFrameClass");
-    expect(postCard).toContain("<SocialPostMedia items={post.media} />");
+    expect(postCard).toContain("<SocialPostMedia items={post.media} href={permalink ? href : undefined} />");
   });
 
   it("leads hairline rows with author, then media and copy", () => {
@@ -929,7 +930,11 @@ describe("SocialPostCard 24Frame blend", () => {
     expect(html).toContain(SOCIAL_FEED_ROW_CLASS);
     expect(html).toContain('data-social-post-time=""');
     expect(html).toContain(socialRelativeTime(createdAt));
-    expect(html).toContain("t-label text-ink-2");
+    expect(html).toContain(SOCIAL_POST_TIME_CLASS);
+    expect(html).not.toMatch(/data-social-post-time=""[^>]*\bt-label\b/);
+    expect(html).toContain(`href="${socialPostHref("p1")}"`);
+    expect(html).toContain(`data-social-post-href="${socialPostHref("p1")}"`);
+    expect(html).toContain("data-social-like-count");
     expect(html).toContain('data-social-post-actions=""');
     expect(html).toContain('data-social-icon="heart"');
     expect(html).toContain('data-social-icon="chat-circle"');
@@ -999,6 +1004,9 @@ describe("SocialPostCard 24Frame blend", () => {
     const postCard = uiSrc.slice(uiSrc.indexOf("export function SocialPostCard"));
     expect(postCard).toContain("SOCIAL_FEED_ROW_CLASS");
     expect(postCard).toContain("data-social-post-time");
+    expect(postCard).toContain("SOCIAL_POST_TIME_CLASS");
+    expect(postCard).not.toContain("data-social-post-time=\"\" className=\"t-label");
+    expect(postCard).toContain("socialPostHref");
     expect(postCard).toContain("SocialLikeButton");
     expect(postCard).toContain("SocialLikeCount");
     expect(postCard).toContain("SocialCommentTrigger");

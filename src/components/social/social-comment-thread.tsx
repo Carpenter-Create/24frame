@@ -81,12 +81,14 @@ export function SocialCommentThread({
   canComment,
   commentCount,
   onClose,
+  variant = "sheet",
 }: {
   postId: string;
   groupSlug?: string | null;
   canComment: boolean;
   commentCount: number;
-  onClose: () => void;
+  onClose?: () => void;
+  variant?: "sheet" | "page";
 }) {
   const titleId = useId();
   const [comments, setComments] = useState<SocialCommentCard[]>([]);
@@ -96,6 +98,7 @@ export function SocialCommentThread({
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
+    if (variant !== "sheet" || !onClose) return undefined;
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };
@@ -106,7 +109,7 @@ export function SocialCommentThread({
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = previous;
     };
-  }, [onClose]);
+  }, [onClose, variant]);
 
   useEffect(() => {
     let cancelled = false;
@@ -219,6 +222,80 @@ export function SocialCommentThread({
     });
   }
 
+  const list = (
+    <div className={variant === "page" ? "flex flex-col gap-3" : "flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 pb-2"}>
+      {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
+      {loading ? null : comments.length === 0 ? (
+        <p data-social-comment-empty="" className="py-8 text-center t-body-sm text-ink-2">
+          {SOCIAL.post.commentEmpty}
+        </p>
+      ) : (
+        comments.map((comment) => (
+          <article key={comment.id} data-social-comment={comment.id} className="flex flex-col gap-1">
+            <div className="flex items-start gap-2">
+              <SocialAvatar name={comment.authorName} photoUrl={comment.authorPhotoUrl} size="sm" />
+              <div className="min-w-0 flex-1">
+                <p className="t-body-sm text-ink">
+                  {comment.authorHandle ? (
+                    <Link href={socialMemberHref(comment.authorHandle)} className="font-semibold">
+                      {comment.authorName}
+                    </Link>
+                  ) : (
+                    <span className="font-semibold">{comment.authorName}</span>
+                  )}{" "}
+                  <span className="whitespace-pre-wrap break-words">{comment.body}</span>
+                </p>
+                <p className="t-label text-ink-3">{socialRelativeTime(comment.created_at)}</p>
+              </div>
+              {comment.canDelete ? (
+                <button
+                  type="button"
+                  data-social-comment-delete=""
+                  className={TEXT_ACTION_CLASS}
+                  onClick={() => onDelete(comment)}
+                >
+                  {SOCIAL.post.commentDelete}
+                </button>
+              ) : null}
+            </div>
+          </article>
+        ))
+      )}
+    </div>
+  );
+  const composer = canComment ? (
+    <form data-social-comment-composer="" className={SOCIAL_COMMENT_COMPOSER_CLASS} onSubmit={onSubmit}>
+      <Textarea
+        id="social-comment-body"
+        name="body"
+        value={body}
+        maxLength={COMMENT_BODY_MAX}
+        rows={2}
+        variant="bare"
+        placeholder={SOCIAL.post.commentPlaceholder}
+        className="min-h-9 min-w-0 flex-1 resize-none px-0 py-1"
+        onChange={(event) => setBody(event.target.value)}
+      />
+      <button type="submit" disabled={pending || !body.trim()} className={cn(SOCIAL_ACTION_CLASS, "shrink-0")}>
+        {SOCIAL.post.commentSubmit}
+      </button>
+    </form>
+  ) : (
+    <p className="px-4 py-3 t-body-sm text-ink-2">{SOCIAL.cta.needProfile}</p>
+  );
+
+  if (variant === "page") {
+    return (
+      <div data-social-comment-thread="" data-social-comment-page="" className="flex flex-col gap-3">
+        <h2 id={titleId} className="t-body font-medium text-ink">
+          {SOCIAL.post.commentsTitle}
+        </h2>
+        {list}
+        {composer}
+      </div>
+    );
+  }
+
   return (
     <div data-social-comment-thread="" className={SOCIAL_COMMENT_SHEET_HOST_CLASS} role="dialog" aria-modal="true" aria-labelledby={titleId}>
       <button type="button" className={SOCIAL_COMMENT_SHEET_SCRIM_CLASS} aria-label={SOCIAL.create.close} onClick={onClose} />
@@ -230,65 +307,8 @@ export function SocialCommentThread({
           </h2>
           <span className="size-11" />
         </div>
-        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 pb-2">
-          {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
-          {loading ? null : comments.length === 0 ? (
-            <p data-social-comment-empty="" className="py-8 text-center t-body-sm text-ink-2">
-              {SOCIAL.post.commentEmpty}
-            </p>
-          ) : (
-            comments.map((comment) => (
-              <article key={comment.id} data-social-comment={comment.id} className="flex flex-col gap-1">
-                <div className="flex items-start gap-2">
-                  <SocialAvatar name={comment.authorName} photoUrl={comment.authorPhotoUrl} size="sm" />
-                  <div className="min-w-0 flex-1">
-                    <p className="t-body-sm text-ink">
-                      {comment.authorHandle ? (
-                        <Link href={socialMemberHref(comment.authorHandle)} className="font-semibold">
-                          {comment.authorName}
-                        </Link>
-                      ) : (
-                        <span className="font-semibold">{comment.authorName}</span>
-                      )}{" "}
-                      <span className="whitespace-pre-wrap break-words">{comment.body}</span>
-                    </p>
-                    <p className="t-label text-ink-3">{socialRelativeTime(comment.created_at)}</p>
-                  </div>
-                  {comment.canDelete ? (
-                    <button
-                      type="button"
-                      data-social-comment-delete=""
-                      className={TEXT_ACTION_CLASS}
-                      onClick={() => onDelete(comment)}
-                    >
-                      {SOCIAL.post.commentDelete}
-                    </button>
-                  ) : null}
-                </div>
-              </article>
-            ))
-          )}
-        </div>
-        {canComment ? (
-          <form data-social-comment-composer="" className={SOCIAL_COMMENT_COMPOSER_CLASS} onSubmit={onSubmit}>
-            <Textarea
-              id="social-comment-body"
-              name="body"
-              value={body}
-              maxLength={COMMENT_BODY_MAX}
-              rows={2}
-              variant="bare"
-              placeholder={SOCIAL.post.commentPlaceholder}
-              className="min-h-9 min-w-0 flex-1 resize-none px-0 py-1"
-              onChange={(event) => setBody(event.target.value)}
-            />
-            <button type="submit" disabled={pending || !body.trim()} className={cn(SOCIAL_ACTION_CLASS, "shrink-0")}>
-              {SOCIAL.post.commentSubmit}
-            </button>
-          </form>
-        ) : (
-          <p className="px-4 py-3 t-body-sm text-ink-2">{SOCIAL.cta.needProfile}</p>
-        )}
+        {list}
+        {composer}
       </div>
     </div>
   );

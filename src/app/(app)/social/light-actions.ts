@@ -12,6 +12,8 @@ import {
   SOCIAL,
   SOCIAL_ROUTES,
   socialGroupHref,
+  socialGroupPostHref,
+  socialPostHref,
   socialProfileFollowsHref,
   socialProfileHref,
 } from "@/lib/social";
@@ -109,10 +111,11 @@ export async function toggleSocialLike(formData: FormData): Promise<ActionResult
   }
 
   revalidatePath(SOCIAL_ROUTES.home);
+  revalidatePath(socialPostHref(postId));
   const slug = String(formData.get("group_slug") ?? "").trim();
   if (slug) {
     revalidatePath(socialGroupHref(slug));
-    revalidatePath(`${socialGroupHref(slug)}/posts/${postId}`);
+    revalidatePath(socialGroupPostHref(slug, postId));
   }
   return {};
 }
@@ -138,10 +141,11 @@ export async function createSocialComment(formData: FormData): Promise<CommentAc
 
   revalidatePath(SOCIAL_ROUTES.home);
   revalidatePath(SOCIAL_ROUTES.profile);
+  revalidatePath(socialPostHref(postId));
   const slug = String(formData.get("group_slug") ?? "").trim();
   if (slug) {
     revalidatePath(socialGroupHref(slug));
-    revalidatePath(`${socialGroupHref(slug)}/posts/${postId}`);
+    revalidatePath(socialGroupPostHref(slug, postId));
   }
   return { id: data.id, created_at: data.created_at };
 }
