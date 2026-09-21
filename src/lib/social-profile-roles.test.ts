@@ -18,6 +18,7 @@ import {
   socialProfileRolesCountLabel,
   socialProfileRolesFace,
   socialProfileRolesMoreLabel,
+  socialProfileRolesRailItems,
   socialProfileRolesWrite,
   toggleSocialProfileRole,
 } from "./social-profile-roles";
@@ -336,6 +337,25 @@ describe("social profile roles", () => {
     expect(socialProfileRolesMoreLabel(0)).toBe("");
     expect(socialProfileRolesMoreLabel(1)).toBe("+1");
     expect(socialProfileRolesMoreLabel(2)).toBe("+2");
+    expect(socialProfileRolesRailItems([])).toEqual([]);
+    expect(socialProfileRolesRailItems(["actor", "producer"])).toEqual([
+      { kind: "role", slug: "actor", label: "Actor" },
+      { kind: "role", slug: "producer", label: "Producer" },
+    ]);
+    expect(
+      socialProfileRolesRailItems([
+        "executive_producer",
+        "music_supervisor",
+        "composer",
+        "musician",
+        "music_director",
+      ]),
+    ).toEqual([
+      { kind: "role", slug: "executive_producer", label: "Executive Producer" },
+      { kind: "role", slug: "music_supervisor", label: "Music Supervisor" },
+      { kind: "role", slug: "composer", label: "Composer" },
+      { kind: "more", label: "+2" },
+    ]);
   });
 
   it("lists every selected Profession in crafts order and moves by id", () => {
@@ -394,22 +414,33 @@ describe("social profile roles", () => {
     const identitySrc = readFileSync("src/components/social/social-ui.tsx", "utf8");
     expect(rolesSrc).toContain("socialProfileRolesFace");
     expect(rolesSrc).toContain("socialProfileRolesMoreLabel");
+    expect(rolesSrc).toContain("socialProfileRolesRailItems");
     expect(rolesSrc).not.toContain("socialProfileRolesLine");
     expect(rolesSrc).not.toContain("SOCIAL_PROFILE_ROLES_SEP");
     expect(rolesSrc).toContain("SOCIAL_PROFILE_ROLES_DISPLAY_CAP");
     expect(chromeSrc).toContain("SOCIAL_PROFILE_HEAD_CLASS");
     expect(chromeSrc).toContain("SOCIAL_PROFILE_STATS_CLASS");
     expect(chromeSrc).toContain("SOCIAL_PROFILE_ROLES_ROW_CLASS");
+    expect(chromeSrc).toContain("SOCIAL_PROFILE_ROLES_RAIL_ROWS");
     expect(chromeSrc).toContain("SOCIAL_PROFILE_ROLE_PILL_CLASS");
     expect(chromeSrc).toContain("SOCIAL_PROFILE_CENTER_CLASS");
+    expect(chromeSrc).toContain("HOUSE_CHIP_RAIL_CLASS");
     expect(chromeSrc).not.toContain("SOCIAL_PROFILE_ROLES_RAIL_CLASS");
     expect(chromeSrc).not.toContain("SOCIAL_PROFILE_ROLES_LINE_CLASS");
     expect(chromeSrc).not.toContain("SOCIAL_PROFILE_ROLES_PILL_CLASS");
-    expect(identitySrc).toContain("socialProfileRolesFace");
-    expect(identitySrc).toContain("socialProfileRolesMoreLabel");
+    expect(identitySrc).toContain("socialProfileRolesRailItems");
+    expect(identitySrc).toContain("HouseChipRail");
+    expect(identitySrc).toContain("SOCIAL_PROFILE_ROLES_RAIL_ROWS");
     expect(identitySrc).not.toContain("socialProfileRolesLine");
     expect(identitySrc).toContain("data-social-profile-head");
     expect(identitySrc).not.toContain("SOCIAL_PROFILE_ROLES_RAIL_CLASS");
+    const rolesBlock = identitySrc.slice(
+      identitySrc.indexOf("roleRailItems.length"),
+      identitySrc.indexOf("SocialProfileLinkRow"),
+    );
+    expect(rolesBlock).toContain("HouseChipRail");
+    expect(rolesBlock).toContain("data-social-profile-roles");
+    expect(rolesBlock).not.toContain("flex-wrap");
     expect(rolesSrc.match(/export const SOCIAL_PROFILE_ROLE_GROUPS/g)).toEqual([
       "export const SOCIAL_PROFILE_ROLE_GROUPS",
     ]);

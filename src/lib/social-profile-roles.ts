@@ -4,8 +4,10 @@
 // IMDb help-page category clone. Persist ordered slugs on
 // profiles.crafts. primary_role stays the first selected slug.
 // UI label is Professions — not Topics, not Category, not crafts.
-// Public header is one wrap row of house gray pills: first ~3 Roles
-// as their own chips, then one muted +N pill. Omit when empty.
+// Public header is one house chip-rail row of gray pills: first ~3
+// Roles as their own chips, then one muted +N pill. Phone scrolls
+// sideways (Topics SoT). Desktop uses the same one-row rail — ~3 +N
+// match that density. Omit when empty.
 // Edit max 5. Select and write stay sync. Not on SocialPersonRow.
 // Investor is a Business add. Bio middots stay the author's copy.
 
@@ -358,6 +360,24 @@ export function socialProfileRolesFace(raw: unknown): {
 
 export function socialProfileRolesMoreLabel(extra: number): string {
   return extra > 0 ? `+${extra}` : "";
+}
+
+export type SocialProfileRolesRailItem =
+  | { kind: "role"; slug: string; label: string }
+  | { kind: "more"; label: string };
+
+export function socialProfileRolesRailItems(raw: unknown): SocialProfileRolesRailItem[] {
+  const { shown, extra } = socialProfileRolesFace(raw);
+  if (shown.length === 0) return [];
+  const items: SocialProfileRolesRailItem[] = shown.map((role) => ({
+    kind: "role",
+    slug: role.slug,
+    label: role.label,
+  }));
+  if (extra > 0) {
+    items.push({ kind: "more", label: socialProfileRolesMoreLabel(extra) });
+  }
+  return items;
 }
 
 export function filterSocialProfileRoleGroups(query: string) {

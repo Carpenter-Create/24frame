@@ -282,7 +282,16 @@ describe("Social profile public face", () => {
     expect(html).toContain("data-social-profile-roles-more");
     expect(html).toContain("+1");
     expect(html).toContain("bg-surface-muted");
-    expect(html).toContain("flex-wrap");
+    expect(html).toContain("data-house-chip-rail");
+    expect(html).toContain('data-house-chip-rail-row="0"');
+    expect(html).not.toContain('data-house-chip-rail-row="1"');
+    const roles = html.slice(
+      html.indexOf("data-social-profile-roles"),
+      html.indexOf("data-social-profile-roles-more") + 80,
+    );
+    expect(roles).toContain("overflow-x-auto");
+    expect(roles).toContain("no-scrollbar");
+    expect(roles).not.toContain("flex-wrap");
     expect(html).toContain("grid-cols-3");
     expect(html).not.toContain("Investor");
     expect(html).not.toContain("data-social-profile-handle");
