@@ -334,7 +334,7 @@ export const SOCIAL_PROFILE_ACTIONS_CLASS =
 
 export const SOCIAL_PROFILE_BIO_CLASS = "break-words t-body-sm text-ink whitespace-pre-wrap";
 
-// Adam lock A 2026-09-20: Coinbase-calm muted type. Not chips, not
+// Adam lock A 2026-09-20: calm muted type. Not chips, not
 // brand-colored glyphs. Phone stacks — never truncate. Same class for
 // own + public. Max 2 face links; +N is the overflow control.
 export const SOCIAL_PROFILE_LINKS_CLASS = "flex min-w-0 flex-col items-start gap-1";
