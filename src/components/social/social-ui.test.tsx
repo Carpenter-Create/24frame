@@ -136,10 +136,11 @@ describe("SocialPostCard faces", () => {
     expect(html).toContain('src="https://s3.example/signed-avatar"');
     expect(html).toContain("Ada Lovelace");
     expect(html).toContain('href="/social/u/ada"');
-    expect(html).toContain(SOCIAL_FEED_ROW_CLASS);
     expect(html).toContain("bg-surface");
     expect(html).toContain("data-social-post-mobile");
-    expect(SOCIAL_FEED_ROW_CLASS).toContain("bg-surface");
+    expect(html).toContain("flex flex-col bg-surface md:hidden");
+    expect(SOCIAL_FEED_ROW_CLASS).toMatch(/(?:^|\s)bg-surface(?:\s|$)/);
+    expect(SOCIAL_FEED_ROW_CLASS).not.toContain("bg-surface-muted");
     expect(html).not.toContain("/social/u/@");
     expect(html).not.toContain("AL");
     expect(html).not.toContain("data-social-avatar-ring");
@@ -493,7 +494,8 @@ describe("Social profile public face", () => {
     expect(history).toContain(SOCIAL_FEED_GUTTER_CLASS);
     expect(SOCIAL_FEED_GUTTER_CLASS).toBe("flex flex-col gap-[var(--space-2)] bg-surface-muted");
     expect(SOCIAL_FEED_GUTTER_CLASS).not.toContain("bg-bg");
-    expect(history).toContain(SOCIAL_FEED_ROW_CLASS);
+    expect(history).toContain("flex flex-col bg-surface md:hidden");
+    expect(history).toContain("border border-hairline bg-surface");
     expect(SOCIAL_FEED_ROW_CLASS).toMatch(/(?:^|\s)bg-surface(?:\s|$)/);
     expect(SOCIAL_FEED_ROW_CLASS).not.toContain("bg-surface-muted");
     expect(uiSrc).toContain('className="flex flex-col bg-surface md:hidden"');
