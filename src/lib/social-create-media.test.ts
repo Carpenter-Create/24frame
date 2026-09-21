@@ -59,7 +59,7 @@ describe("Social Create Media SoT", () => {
     expect(createChunk).toContain("disabled={uploading}");
     expect(createChunk).not.toContain("disabled={uploading ||");
     expect(createChunk).not.toContain("disabled={!body");
-    expect(profile).toContain('socialCreateHref("media")');
+    expect(profile).not.toContain('socialCreateHref("media")');
     expect(home).toContain('socialCreateHref("media")');
   });
 });

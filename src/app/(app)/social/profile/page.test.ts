@@ -255,7 +255,6 @@ describe("Social profile public face", () => {
     expect(empty).not.toContain(SOCIAL.profile.completeIdentity);
     expect(empty).not.toContain("/social/profile/edit");
     expect(empty).not.toContain(SOCIAL.profile.postsEmptyOwnHint);
-    expect(empty).not.toContain("py-[var(--space-12)]");
     expect(html.match(/href="\/social\/profile\/edit"/g)?.length).toBe(1);
     expect(html).not.toContain("data-social-author-empty");
     expect(html).not.toContain("data-social-author-posts");

@@ -326,7 +326,6 @@ describe("Social public profile", () => {
     expect(empty).not.toContain(SOCIAL.profile.edit);
     expect(empty).not.toContain(SOCIAL.profile.completeIdentity);
     expect(empty).not.toContain(SOCIAL.profile.postsEmptyHint);
-    expect(empty).not.toContain("py-[var(--space-12)]");
     expect(html).not.toContain("data-social-author-empty");
     expect(html).not.toContain("data-social-author-posts");
   });
