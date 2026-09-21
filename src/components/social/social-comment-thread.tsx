@@ -44,24 +44,24 @@ export function SocialCommentTrigger({
 }) {
   const [open, setOpen] = useState(false);
   const count = useSocialCommentCount(post.id, post.commentCount ?? 0);
+  // Adam lock 2026-09-20: trail is left muted "N comments" only when N > 0.
+  // Icon always opens the thread. N === 0 has no trail text.
+  const showTrail = !icon && count > 0;
 
   return (
     <>
-      <button
-        type="button"
-        data-social-comment-open=""
-        aria-label={SOCIAL.post.commentsTitle}
-        className={icon ? "text-ink" : "t-body-sm text-ink-2"}
-        onClick={() => setOpen(true)}
-      >
-        {icon ? (
-          <SocialIcon name="chat-circle" size={22} />
-        ) : (
-          <>
-            {count > 0 ? `${count} ${SOCIAL.post.comments}` : SOCIAL.post.viewComments}
-          </>
-        )}
-      </button>
+      {icon || showTrail ? (
+        <button
+          type="button"
+          data-social-comment-open=""
+          {...(showTrail ? { "data-social-comment-trail": "" } : {})}
+          aria-label={SOCIAL.post.commentsTitle}
+          className={icon ? "text-ink" : "self-start text-left t-body-sm text-ink-2"}
+          onClick={() => setOpen(true)}
+        >
+          {icon ? <SocialIcon name="chat-circle" size={22} /> : `${count} ${SOCIAL.post.comments}`}
+        </button>
+      ) : null}
       {open ? (
         <SocialCommentThread
           postId={post.id}

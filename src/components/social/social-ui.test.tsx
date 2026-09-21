@@ -622,7 +622,8 @@ describe("Social profile public face", () => {
     expect(html).not.toContain(SOCIAL.home.photoKind);
     expect(html).toContain('data-social-post="note"');
     expect(html).toContain("First caption post test");
-    expect(html).toContain(SOCIAL.post.viewComments);
+    expect(html).not.toContain("View comments");
+    expect(html).not.toContain("data-social-comment-trail");
     expect(html.indexOf('data-social-post="clip"')).toBeLessThan(html.indexOf('data-social-post="note"'));
   });
 
@@ -864,12 +865,14 @@ describe("SocialPostCard 24Frame blend", () => {
     expect(html).toContain("ada");
     expect(html).toContain("hello");
     expect(html).toContain(`2 ${SOCIAL.post.comments}`);
+    expect(html).toContain("data-social-comment-trail");
+    expect(html).toContain("self-start text-left");
     expect(html.indexOf("Ada Lovelace")).toBeLessThan(html.indexOf("data-social-post-time"));
     expect(html.indexOf("data-social-post-time")).toBeLessThan(html.indexOf("data-social-post-media"));
     expect(html.indexOf("data-social-post-media")).toBeLessThan(html.indexOf("data-social-post-actions"));
     expect(html.indexOf("data-social-post-actions")).toBeLessThan(html.indexOf(`4 ${SOCIAL.post.likes}`));
     expect(html.indexOf(`4 ${SOCIAL.post.likes}`)).toBeLessThan(html.indexOf("data-social-post-caption"));
-    expect(html.indexOf("data-social-post-caption")).toBeLessThan(html.indexOf(`2 ${SOCIAL.post.comments}`));
+    expect(html.indexOf("data-social-post-caption")).toBeLessThan(html.indexOf("data-social-comment-trail"));
     expect(html).not.toContain("data-social-post-mobile");
     expect(html).not.toContain("hidden md:flex");
     expect(html).not.toContain("md:hidden");
@@ -881,7 +884,7 @@ describe("SocialPostCard 24Frame blend", () => {
     expect(html).not.toContain("truncate");
   });
 
-  it("keeps the same stack for text-only posts and offers View comments when quiet", () => {
+  it("keeps the same stack for text-only posts and hides the trail when N is 0", () => {
     const html = renderToStaticMarkup(
       <SocialPostCard post={cardPost({ commentCount: 0, media: [] })} />,
     );
@@ -889,9 +892,32 @@ describe("SocialPostCard 24Frame blend", () => {
     expect(html.indexOf("data-social-post-time")).toBeLessThan(html.indexOf("data-social-post-actions"));
     expect(html.indexOf("data-social-post-actions")).toBeLessThan(html.indexOf(`4 ${SOCIAL.post.likes}`));
     expect(html.indexOf(`4 ${SOCIAL.post.likes}`)).toBeLessThan(html.indexOf("data-social-post-caption"));
-    expect(html.indexOf("data-social-post-caption")).toBeLessThan(html.indexOf(SOCIAL.post.viewComments));
+    expect(html).toContain('data-social-icon="chat-circle"');
+    expect(html.match(/data-social-comment-open/g)?.length).toBe(1);
+    expect(html).not.toContain("data-social-comment-trail");
+    expect(html).not.toContain("View comments");
+    expect(html).not.toContain(`0 ${SOCIAL.post.comments}`);
     expect(html).toContain("hello");
     expect(html).not.toContain(SOCIAL.create.text);
+  });
+
+  it("shows a left muted N comments trail only when N > 0", () => {
+    const quiet = renderToStaticMarkup(<SocialPostCard post={cardPost({ commentCount: 0 })} />);
+    expect(quiet.match(/data-social-comment-open/g)?.length).toBe(1);
+    expect(quiet).not.toContain("data-social-comment-trail");
+    expect(quiet).not.toContain("View comments");
+    expect(quiet).not.toContain(`0 ${SOCIAL.post.comments}`);
+
+    const active = renderToStaticMarkup(<SocialPostCard post={cardPost({ commentCount: 3 })} />);
+    expect(active).toContain("data-social-comment-trail");
+    expect(active).toContain("self-start text-left t-body-sm text-ink-2");
+    expect(active).toContain(`3 ${SOCIAL.post.comments}`);
+    expect(active.match(/data-social-comment-open/g)?.length).toBe(2);
+    expect(active.indexOf("data-social-post-caption")).toBeLessThan(
+      active.indexOf("data-social-comment-trail"),
+    );
+    expect(active).not.toContain("View comments");
+    expect(active).not.toContain("text-center");
   });
 
   it("does not fork desktop meta-row chrome in source", () => {
@@ -903,6 +929,8 @@ describe("SocialPostCard 24Frame blend", () => {
     expect(postCard).toContain("SocialCommentTrigger");
     expect(postCard).toContain("paper-plane-tilt");
     expect(postCard.split("<SocialCommentTrigger").length - 1).toBe(2);
+    expect(postCard).not.toContain("viewComments");
+    expect(postCard).not.toContain("View comments");
     expect(postCard).not.toContain("hidden md:flex");
     expect(postCard).not.toContain("md:hidden");
     expect(postCard).not.toContain("data-social-post-mobile");
