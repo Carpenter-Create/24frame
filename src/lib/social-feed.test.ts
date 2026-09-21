@@ -67,7 +67,8 @@ describe("loadAuthorActivityComments", () => {
     const commentRange = vi.fn(async () => ({ data: comments, error: null }));
     const commentOrderId = vi.fn(() => ({ range: commentRange }));
     const commentOrder = vi.fn(() => ({ order: commentOrderId }));
-    const commentEq = vi.fn(() => ({ order: commentOrder }));
+    const commentLive = vi.fn(() => ({ order: commentOrder }));
+    const commentEq = vi.fn(() => ({ is: commentLive }));
     const commentSelect = vi.fn(() => ({ eq: commentEq }));
     const postIn = vi.fn(async () => ({ data: posts, error: null }));
     const postStatus = vi.fn(() => ({ in: postIn }));
@@ -79,6 +80,7 @@ describe("loadAuthorActivityComments", () => {
     expect(from).toHaveBeenCalledWith("comments");
     expect(commentSelect).toHaveBeenCalledWith("id, post_id, author_id, body, created_at");
     expect(commentEq).toHaveBeenCalledWith("author_id", "u1");
+    expect(commentLive).toHaveBeenCalledWith("deleted_at", null);
     expect(commentOrder).toHaveBeenCalledWith("created_at", { ascending: false });
     expect(page.items).toEqual([{ comment: comments[0], post: posts[0] }]);
     expect(page.truncated).toBe(false);

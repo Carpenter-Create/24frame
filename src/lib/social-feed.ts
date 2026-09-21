@@ -628,7 +628,7 @@ export type SocialCommentsPage = {
   truncated: boolean;
 };
 
-/** Oldest-first thread. RLS hides soft-deleted rows and invisible posts. */
+/** Oldest-first thread. App + RLS hide soft-deleted rows. */
 export async function loadPostComments(
   supabase: ServerClient,
   postId: string,
@@ -637,6 +637,7 @@ export async function loadPostComments(
     .from("comments")
     .select("id, post_id, author_id, body, created_at")
     .eq("post_id", postId)
+    .is("deleted_at", null)
     .order("created_at", { ascending: true })
     .order("id", { ascending: true })
     .range(...probeRange(SOCIAL_PROFILE_POSTS_PAGE));
@@ -666,6 +667,7 @@ export async function loadAuthorActivityComments(
     .from("comments")
     .select("id, post_id, author_id, body, created_at")
     .eq("author_id", authorId)
+    .is("deleted_at", null)
     .order("created_at", { ascending: false })
     .order("id", { ascending: false })
     .range(...probeRange(SOCIAL_PROFILE_POSTS_PAGE));

@@ -7,7 +7,7 @@
 -- via is_gc_staff. Comment likes stay out of this slice.
 
 begin;
-select plan(29);
+select plan(30);
 
 select set_config('t.org',      gen_random_uuid()::text, false);
 select set_config('t.owner',    gen_random_uuid()::text, false);
@@ -184,13 +184,16 @@ select throws_ok(
   'comment fields are not client-writable',
   'author cannot edit comment body');
 
-select throws_ok(
+select lives_ok(
   format($sql$
     delete from public.comments
      where id = %L
   $sql$, current_setting('t.own_comment')),
-  '42501',
-  null,
+  'foreign delete is a no-op under RLS, not 42501');
+select is(
+  (select count(*) from public.comments
+    where id = current_setting('t.own_comment')::uuid)::int,
+  1,
   'commenter cannot delete someone else''s comment');
 
 -- ---- soft-delete own comment decrements count and hides the row ------------
@@ -206,11 +209,14 @@ select is(
     where id = current_setting('t.post')::uuid)::int,
   1,
   'soft-delete decrements comment_count');
+select set_config('request.jwt.claims',
+  json_build_object('sub', current_setting('t.author'), 'role', 'authenticated')::text,
+  true);
 select is(
   (select count(*) from public.comments
     where post_id = current_setting('t.post')::uuid)::int,
   1,
-  'soft-deleted comments are not selectable');
+  'soft-deleted comments are not selectable by others');
 
 -- ---- hard-delete own remaining comment -------------------------------------
 select set_config('request.jwt.claims',
@@ -230,6 +236,8 @@ select is(
   'hard-delete decrements comment_count');
 
 -- ---- privileged comment_count stays protected ------------------------------
+select set_config('app.refreshing_post_comment_count', '', true);
+select set_config('app.refreshing_post_like_count', '', true);
 select throws_ok(
   format($sql$
     update public.posts

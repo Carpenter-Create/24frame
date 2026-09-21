@@ -175,6 +175,8 @@ begin
     where id = target;
   end if;
 
+  perform set_config('app.refreshing_post_comment_count', '', true);
+
   if tg_op = 'DELETE' then
     return old;
   end if;
@@ -210,11 +212,14 @@ drop policy if exists comments_select_visible on public.comments;
 create policy comments_select_visible on public.comments
   for select to authenticated
   using (
-    deleted_at is null
-    and exists (
+    exists (
       select 1
       from public.posts p
       where p.id = comments.post_id
+    )
+    and (
+      deleted_at is null
+      or author_id = (select auth.uid())
     )
   );
 
