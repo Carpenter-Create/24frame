@@ -5,6 +5,7 @@ import {
   SOCIAL_ACTION_SECONDARY_CLASS,
   SOCIAL_EMPTY_ACTION_CLASS,
   SOCIAL_EMPTY_PANEL_CLASS,
+  SOCIAL_PROFILE_POSTS_EMPTY_CLASS,
   SOCIAL_STORIES_EMPTY_ACTION_CLASS,
 } from "@/lib/social-chrome";
 import { SOCIAL_ICON_SIZE_EMPTY, type SocialPhosphorIconName } from "@/lib/social-icons";
@@ -53,6 +54,23 @@ export function SocialEmpty({
         </div>
       ) : null}
       {children}
+    </div>
+  );
+}
+
+export function SocialProfilePostsEmpty({
+  action,
+}: {
+  action?: { href: string; label: string };
+}) {
+  return (
+    <div data-social-author-empty="" data-social-empty="" className={SOCIAL_PROFILE_POSTS_EMPTY_CLASS}>
+      <p className="t-body-sm text-ink-2">{SOCIAL.profile.postsEmpty}</p>
+      {action ? (
+        <Link href={action.href} className={SOCIAL_EMPTY_ACTION_CLASS}>
+          {action.label}
+        </Link>
+      ) : null}
     </div>
   );
 }

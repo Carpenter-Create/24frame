@@ -239,10 +239,15 @@ describe("Social profile public face", () => {
     const html = await renderServerMarkup(await SocialProfilePage());
     expect(html).toContain("data-social-author-empty");
     expect(html).toContain(SOCIAL.profile.postsEmpty);
-    expect(html).toContain(SOCIAL.profile.postsEmptyOwnHint);
     expect(html).toContain(SOCIAL.profile.sharePost);
     expect(html).toContain("/social/create?kind=media");
-    expect(html).toContain(SOCIAL.profile.completeIdentity);
+    const empty = html.slice(html.indexOf("data-social-author-empty"));
+    expect(empty).not.toContain(SOCIAL.profile.edit);
+    expect(empty).not.toContain(SOCIAL.profile.completeIdentity);
+    expect(empty).not.toContain("/social/profile/edit");
+    expect(empty).not.toContain(SOCIAL.profile.postsEmptyOwnHint);
+    expect(empty).not.toContain("py-[var(--space-12)]");
+    expect(html.match(/href="\/social\/profile\/edit"/g)?.length).toBe(1);
     expect(html).not.toContain("data-social-author-posts");
     expect(html).not.toContain("data-social-author-truncated");
     expect(html).not.toContain("Sets");
@@ -284,6 +289,9 @@ describe("Social profile public face", () => {
     const head = html.slice(html.indexOf("data-social-profile-head"), html.indexOf("data-social-profile-name"));
     expect(head).toContain("data-social-avatar");
     expect(head).toContain("data-social-profile-stats");
+    expect(head).toContain("max-w-xs");
+    expect(head).toContain("items-center");
+    expect(head).not.toContain("flex min-w-0 flex-1 items-center");
     expect(head).not.toContain("@ada");
     expect(html.indexOf("data-social-profile-stats")).toBeLessThan(html.indexOf("data-social-profile-name"));
     expect(html.indexOf("data-social-profile-name")).toBeLessThan(html.indexOf("data-social-profile-bio"));
