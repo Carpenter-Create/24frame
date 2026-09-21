@@ -19,9 +19,10 @@ vi.mock("@aws-sdk/s3-request-presigner", () => ({
   getSignedUrl: mockGetSignedUrl,
 }));
 
-import { GetObjectCommand, HeadObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, GetObjectCommand, HeadObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 
 import {
+  deleteAvatarObject,
   hasAvatarObject,
   headAvatarObject,
   presignAvatarGet,
@@ -61,6 +62,16 @@ describe("s3-avatars dedicated bucket", () => {
       /dedicated bucket/,
     );
     expect(mockSend).not.toHaveBeenCalled();
+  });
+
+  it("DELETEs the same avatars/{uid}/avatar key on the dedicated bucket", async () => {
+    mockSend.mockResolvedValueOnce({});
+    await deleteAvatarObject(UID);
+    expect(mockSend).toHaveBeenCalledTimes(1);
+    const cmd = mockSend.mock.calls[0]?.[0] as DeleteObjectCommand;
+    expect(cmd).toBeInstanceOf(DeleteObjectCommand);
+    expect(cmd.input.Bucket).toBe("test-avatars-bucket");
+    expect(cmd.input.Key).toBe(KEY);
   });
 
   it("HEADs the avatars bucket only — missing key is empty, not an invented photo", async () => {

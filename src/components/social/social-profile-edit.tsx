@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { flushSync } from "react-dom";
 
-import { uploadAccountPhoto } from "@/app/(app)/account/actions";
+import { removeAccountPhoto, uploadAccountPhoto } from "@/app/(app)/account/actions";
 import {
   clearSocialWelcomeVideo,
   presignSocialMediaUpload,
@@ -14,15 +14,16 @@ import {
 import { AccountAvatarCrop } from "@/components/account/account-avatar-crop";
 import { SocialAvatar } from "@/components/social/social-avatar";
 import { SettingsDrillRow } from "@/components/settings/settings-drill";
-import { SocialHandleField } from "@/components/social/social-handle-field";
+import { SocialProfileAvatarSheet } from "@/components/social/social-profile-avatar-sheet";
 import { SocialProfileBioEditor } from "@/components/social/social-profile-bio";
+import { SocialProfileHandleEditor } from "@/components/social/social-profile-handle-edit";
 import { SocialProfileImdbEditor } from "@/components/social/social-profile-imdb";
 import { SocialProfileLinksEditor } from "@/components/social/social-profile-links-edit";
+import { SocialProfileNameEditor } from "@/components/social/social-profile-name";
 import { SocialProfileRolesEditor } from "@/components/social/social-profile-roles";
 import { SocialProfileTopicsEditor } from "@/components/social/social-profile-topics";
 import { SocialIcon } from "@/components/social/social-icon";
 import { InlineNotice } from "@/components/ui/inline-notice";
-import { Input } from "@/components/ui/input";
 import { ACCOUNT_PROFILE } from "@/lib/account-profile";
 import {
   accountAvatarPickError,
@@ -30,7 +31,6 @@ import {
   readAccountAvatarCropPreview,
   type AvatarCropFrame,
 } from "@/lib/account-avatar-crop";
-import { AVATAR_ACCEPT } from "@/lib/account-avatar";
 import { cn } from "@/lib/cn";
 import { SOCIAL_VIDEO_CONTENT_TYPES } from "@/lib/social-media";
 import {
@@ -54,7 +54,6 @@ import {
   SOCIAL_ROUTES,
   composeSocialDisplayName,
   handleFieldValue,
-  socialHandleDisplayError,
   splitSocialDisplayName,
 } from "@/lib/social";
 import { socialProfileImdbRowSummary } from "@/lib/social-imdb";
@@ -74,6 +73,8 @@ import {
   socialProfileBioRowSummary,
   socialProfileEditFace,
   socialProfileEditSeed,
+  socialProfileHandleRowSummary,
+  socialProfileNameRowSummary,
   socialProfileOptimisticFail,
   socialProfilePersistNotice,
   type SocialProfileEditFace,
@@ -140,7 +141,6 @@ export function SocialProfileEditForm({
 }) {
   const router = useRouter();
   const queryClient = useAppQueryClient();
-  const fileRef = useRef<HTMLInputElement>(null);
   const welcomeRef = useRef<HTMLInputElement>(null);
   const seed = socialProfileEditSeed({
     handle,
@@ -167,6 +167,7 @@ export function SocialProfileEditForm({
   const [cropFile, setCropFile] = useState<File | null>(null);
   const [cropPreview, setCropPreview] = useState<string | null>(null);
   const [cropSize, setCropSize] = useState<{ width: number; height: number } | null>(null);
+  const [avatarSheet, setAvatarSheet] = useState(false);
   const [face, setFace] = useState<SocialProfileEditFace>("edit");
   const [bioText, setBioText] = useState(seed.bio);
   const [roles, setRoles] = useState(() => parseSocialProfileRoles(seed.crafts));
@@ -178,17 +179,11 @@ export function SocialProfileEditForm({
     const urls = parseSocialWebsiteUrlField(seed.websiteUrl);
     return urls.length > 0 ? urls : [""];
   });
-  function applyHandle(raw: string) {
-    setUsername(handleFieldValue(raw));
-    setHandleError("");
-  }
-
   function clearCrop() {
     if (cropPreview) URL.revokeObjectURL(cropPreview);
     setCropFile(null);
     setCropPreview(null);
     setCropSize(null);
-    if (fileRef.current) fileRef.current.value = "";
   }
 
   function beginCrop(file: File | undefined) {
@@ -236,6 +231,22 @@ export function SocialProfileEditForm({
       setError(e instanceof Error && e.message ? e.message : ACCOUNT_PROFILE.photoFailed);
     } finally {
       setUploading(false);
+    }
+  }
+
+  async function onPhotoRemove() {
+    if (uploading) return;
+    setError("");
+    const previous = previewPhoto;
+    setPreviewPhoto(null);
+    patchSocialProfileOptimistic({ photoUrl: null });
+    setUploading(true);
+    const result = await removeAccountPhoto();
+    setUploading(false);
+    if (result.error) {
+      setPreviewPhoto(previous);
+      patchSocialProfileOptimistic({ photoUrl: previous });
+      setError(result.error);
     }
   }
 
@@ -325,8 +336,17 @@ export function SocialProfileEditForm({
       welcomeVideoUrl: welcomePreview,
     });
     if (!checked.ok) {
-      if (checked.handleError) setHandleError(checked.handleError);
+      if (checked.handleError) {
+        setHandleError(checked.handleError);
+        setFace(socialProfileEditFace("handle"));
+      }
       if (checked.error) setError(checked.error);
+      if (
+        checked.error === SOCIAL.profile.firstNameRequired ||
+        checked.error === SOCIAL.profile.lastNameRequired
+      ) {
+        setFace(socialProfileEditFace("name"));
+      }
       return;
     }
     flushSync(() => {
@@ -357,6 +377,7 @@ export function SocialProfileEditForm({
         result.error === SOCIAL.profile.handleTaken
       ) {
         setHandleError(result.error);
+        setFace(socialProfileEditFace("handle"));
       } else {
         setError(result.error);
       }
@@ -369,6 +390,37 @@ export function SocialProfileEditForm({
     }).finally(() => {
       setPending(false);
     });
+  }
+
+  if (face === "name") {
+    return (
+      <SocialProfileNameEditor
+        firstName={firstName}
+        middleName={middleName}
+        lastName={lastName}
+        onSave={(next) => {
+          setFirstName(next.firstName);
+          setMiddleName(next.middleName);
+          setLastName(next.lastName);
+          setError("");
+        }}
+        onBack={() => setFace(socialProfileEditFace(false))}
+      />
+    );
+  }
+
+  if (face === "handle") {
+    return (
+      <SocialProfileHandleEditor
+        value={username}
+        error={handleError}
+        onSave={(next) => {
+          setUsername(next);
+          setHandleError("");
+        }}
+        onBack={() => setFace(socialProfileEditFace(false))}
+      />
+    );
   }
 
   if (face === "roles") {
@@ -465,7 +517,7 @@ export function SocialProfileEditForm({
                     SOCIAL_PROFILE_EDIT_AVATAR_CLASS,
                     dropping ? SOCIAL_PROFILE_EDIT_AVATAR_DROPPING_CLASS : null,
                   )}
-                  onClick={() => fileRef.current?.click()}
+                  onClick={() => setAvatarSheet(true)}
                   onDragOver={(event) => {
                     event.preventDefault();
                     event.dataTransfer.dropEffect = "copy";
@@ -488,7 +540,7 @@ export function SocialProfileEditForm({
                 <button
                   type="button"
                   disabled={uploading}
-                  onClick={() => fileRef.current?.click()}
+                  onClick={() => setAvatarSheet(true)}
                   className={SOCIAL_PROFILE_EDIT_PICTURE_CLASS}
                 >
                   {dropping
@@ -499,14 +551,6 @@ export function SocialProfileEditForm({
                 </button>
               </>
             )}
-            <input
-              ref={fileRef}
-              type="file"
-              accept={AVATAR_ACCEPT}
-              className="sr-only"
-              aria-label={SOCIAL.profile.editPicture}
-              onChange={(e) => beginCrop(e.target.files?.[0])}
-            />
           </div>
           <div data-social-profile-edit-welcome="" className={SOCIAL_PROFILE_EDIT_CARD_CLASS}>
             <div className={`${SOCIAL_PROFILE_EDIT_ROW_CLASS} flex-col gap-2`}>
@@ -551,61 +595,22 @@ export function SocialProfileEditForm({
             </div>
           </div>
           <div data-social-profile-edit-fields="" className={SOCIAL_PROFILE_EDIT_CARD_CLASS}>
-            <div data-social-profile-edit-names="" className="flex flex-col">
-              <div className={cn(SOCIAL_PROFILE_EDIT_ROW_CLASS, "flex-col gap-2 md:flex-row md:gap-3")}>
-                <label htmlFor="social-edit-first-name" className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>
-                  {SOCIAL.profile.firstName}
-                </label>
-                <Input
-                  variant="bare"
-                  id="social-edit-first-name"
-                  name="first_name"
-                  autoComplete="given-name"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className="min-w-0 flex-1"
-                />
-              </div>
-              <div className="h-px bg-hairline" />
-              <div className={cn(SOCIAL_PROFILE_EDIT_ROW_CLASS, "flex-col gap-2 md:flex-row md:gap-3")}>
-                <label htmlFor="social-edit-middle-name" className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>
-                  {SOCIAL.profile.middleName}
-                </label>
-                <Input
-                  variant="bare"
-                  id="social-edit-middle-name"
-                  name="middle_name"
-                  autoComplete="additional-name"
-                  value={middleName}
-                  onChange={(e) => setMiddleName(e.target.value)}
-                  className="min-w-0 flex-1"
-                />
-              </div>
-              <div className="h-px bg-hairline" />
-              <div className={cn(SOCIAL_PROFILE_EDIT_ROW_CLASS, "flex-col gap-2 md:flex-row md:gap-3")}>
-                <label htmlFor="social-edit-last-name" className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>
-                  {SOCIAL.profile.lastName}
-                </label>
-                <Input
-                  variant="bare"
-                  id="social-edit-last-name"
-                  name="last_name"
-                  autoComplete="family-name"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  className="min-w-0 flex-1"
-                />
-              </div>
-            </div>
+            <SettingsDrillRow
+              kind="name"
+              label={SOCIAL.profile.name}
+              value={socialProfileNameRowSummary(
+                composeSocialDisplayName(firstName, lastName, middleName),
+              )}
+              itemAttr="data-social-profile-edit-name-open"
+              onClick={() => setFace(socialProfileEditFace("name"))}
+            />
             <div className="h-px bg-hairline" />
-            <SocialHandleField
-              id="social-edit-handle"
-              name="handle"
-              value={username}
-              onValueChange={applyHandle}
-              appearance="edit"
-              showPreviewUrl={false}
-              error={handleError ? socialHandleDisplayError(username, handleError) : ""}
+            <SettingsDrillRow
+              kind="handle"
+              label={SOCIAL.profile.username}
+              value={socialProfileHandleRowSummary(username)}
+              itemAttr="data-social-profile-edit-handle-open"
+              onClick={() => setFace(socialProfileEditFace("handle"))}
             />
             <div className="h-px bg-hairline" />
             <SettingsDrillRow
@@ -651,6 +656,14 @@ export function SocialProfileEditForm({
           {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
         </div>
       </div>
+      <SocialProfileAvatarSheet
+        open={avatarSheet}
+        hasPhoto={Boolean(previewPhoto)}
+        pending={uploading}
+        onClose={() => setAvatarSheet(false)}
+        onPick={beginCrop}
+        onRemove={() => void onPhotoRemove()}
+      />
     </div>
   );
 }

@@ -20,6 +20,8 @@ const accountForm = readFileSync("src/app/(app)/account/account-profile-form.tsx
 const companyForm = readFileSync("src/app/(app)/account/company-profile-form.tsx", "utf8");
 const companyEditor = readFileSync("src/components/settings/company-name-editor.tsx", "utf8");
 const socialEdit = readFileSync("src/components/social/social-profile-edit.tsx", "utf8");
+const socialEditName = readFileSync("src/components/social/social-profile-name.tsx", "utf8");
+const socialEditHandle = readFileSync("src/components/social/social-profile-handle-edit.tsx", "utf8");
 const socialBio = readFileSync("src/components/social/social-profile-bio.tsx", "utf8");
 const socialForms = readFileSync("src/components/social/social-forms.tsx", "utf8");
 const socialExplore = readFileSync("src/app/(app)/social/explore/page.tsx", "utf8");
@@ -119,17 +121,21 @@ describe("form-control SoT", () => {
   });
 
   it("migrates Social Edit/Bio, Settings/account, composers, and search onto the primitive", () => {
-    expect(socialEdit).toContain('variant="bare"');
-    expect(socialEdit).toContain('id="social-edit-first-name"');
-    expect(socialEdit).toContain('id="social-edit-middle-name"');
-    expect(socialEdit).toContain('id="social-edit-last-name"');
-    expect(socialEdit).not.toContain('id="social-edit-name"');
-    expect(socialEdit).toContain('id="social-edit-handle"');
+    expect(socialEditName).toContain('variant="bare"');
+    expect(socialEditName).toContain('id="social-edit-first-name"');
+    expect(socialEditName).toContain('id="social-edit-middle-name"');
+    expect(socialEditName).toContain('id="social-edit-last-name"');
+    expect(socialEditName).not.toContain('id="social-edit-name"');
+    expect(socialEditHandle).toContain('id="social-edit-handle"');
+    expect(socialEditHandle).toContain("SocialHandleField");
+    expect(socialEdit).not.toContain('id="social-edit-first-name"');
+    expect(socialEdit).not.toContain('id="social-edit-handle"');
     expect(socialEdit).toContain("SocialProfileRolesEditor");
     expect(socialEdit).toContain("SocialProfileTopicsEditor");
     expect(socialEdit).toContain("SocialProfileImdbEditor");
-    expect(socialEdit).toContain("SocialHandleField");
-    expect(socialEdit).toContain("<Input");
+    expect(socialEdit).toContain("SocialProfileNameEditor");
+    expect(socialEdit).toContain("SocialProfileHandleEditor");
+    expect(socialEditName).toContain("<Input");
     expect(socialEdit).toContain('type="file"');
     expect(socialBio).toContain("<Textarea");
     expect(socialBio).toContain('variant="bare"');

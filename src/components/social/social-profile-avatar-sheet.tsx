@@ -1,0 +1,163 @@
+"use client";
+
+import { useEffect, useId, useRef, type PointerEvent } from "react";
+import { createPortal } from "react-dom";
+
+import { SocialIcon } from "@/components/social/social-icon";
+import { AppSheetSurface } from "@/components/chrome/house";
+import { AVATAR_ACCEPT } from "@/lib/account-avatar";
+import { APP_SHEET_HOST_CLASS, APP_SHEET_SCRIM_CLASS } from "@/lib/house-sheet";
+import {
+  SOCIAL_PROFILE_AVATAR_SHEET_DANGER_CLASS,
+  SOCIAL_PROFILE_AVATAR_SHEET_HANDLE_CLASS,
+  SOCIAL_PROFILE_AVATAR_SHEET_HANDLE_HIT_CLASS,
+  SOCIAL_PROFILE_AVATAR_SHEET_LIST_CLASS,
+  SOCIAL_PROFILE_AVATAR_SHEET_ROW_CLASS,
+} from "@/lib/social-chrome";
+import { SOCIAL } from "@/lib/social";
+import { SOCIAL_ICON_SIZE_HEADER } from "@/lib/social-icons";
+
+const DISMISS_DRAG_PX = 64;
+
+export function SocialProfileAvatarSheet({
+  open,
+  hasPhoto,
+  pending = false,
+  onClose,
+  onPick,
+  onRemove,
+}: {
+  open: boolean;
+  hasPhoto: boolean;
+  pending?: boolean;
+  onClose: () => void;
+  onPick: (file: File | undefined) => void;
+  onRemove: () => void;
+}) {
+  const titleId = useId();
+  const libraryRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const dragStartY = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previous;
+    };
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  function pickFrom(input: HTMLInputElement | null) {
+    if (pending) return;
+    input?.click();
+  }
+
+  function onFile(file: File | undefined) {
+    onClose();
+    onPick(file);
+  }
+
+  function onHandlePointerDown(event: PointerEvent<HTMLDivElement>) {
+    dragStartY.current = event.clientY;
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function onHandlePointerUp(event: PointerEvent<HTMLDivElement>) {
+    const start = dragStartY.current;
+    dragStartY.current = null;
+    if (start != null && event.clientY - start >= DISMISS_DRAG_PX) onClose();
+  }
+
+  const sheet = (
+    <div data-social-profile-avatar-sheet="" className={APP_SHEET_HOST_CLASS}>
+      <button
+        type="button"
+        aria-label={SOCIAL.create.close}
+        className={APP_SHEET_SCRIM_CLASS}
+        onClick={onClose}
+      />
+      <AppSheetSurface
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className="gap-2 pt-3"
+      >
+        <div
+          data-social-profile-avatar-sheet-handle=""
+          className={SOCIAL_PROFILE_AVATAR_SHEET_HANDLE_HIT_CLASS}
+          onPointerDown={onHandlePointerDown}
+          onPointerUp={onHandlePointerUp}
+        >
+          <span className={SOCIAL_PROFILE_AVATAR_SHEET_HANDLE_CLASS} />
+        </div>
+        <h2 id={titleId} className="sr-only">
+          {SOCIAL.profile.editPicture}
+        </h2>
+        <div data-social-profile-avatar-sheet-list="" className={SOCIAL_PROFILE_AVATAR_SHEET_LIST_CLASS}>
+          <button
+            type="button"
+            data-social-profile-avatar-library=""
+            disabled={pending}
+            className={SOCIAL_PROFILE_AVATAR_SHEET_ROW_CLASS}
+            onClick={() => pickFrom(libraryRef.current)}
+          >
+            <SocialIcon name="image" size={SOCIAL_ICON_SIZE_HEADER} />
+            {SOCIAL.profile.chooseFromLibrary}
+          </button>
+          <button
+            type="button"
+            data-social-profile-avatar-camera=""
+            disabled={pending}
+            className={SOCIAL_PROFILE_AVATAR_SHEET_ROW_CLASS}
+            onClick={() => pickFrom(cameraRef.current)}
+          >
+            <SocialIcon name="camera" size={SOCIAL_ICON_SIZE_HEADER} />
+            {SOCIAL.profile.takePhoto}
+          </button>
+          {hasPhoto ? (
+            <button
+              type="button"
+              data-social-profile-avatar-remove=""
+              disabled={pending}
+              className={SOCIAL_PROFILE_AVATAR_SHEET_DANGER_CLASS}
+              onClick={() => {
+                onClose();
+                onRemove();
+              }}
+            >
+              <SocialIcon name="trash" size={SOCIAL_ICON_SIZE_HEADER} />
+              {SOCIAL.profile.removePicture}
+            </button>
+          ) : null}
+        </div>
+        <input
+          ref={libraryRef}
+          type="file"
+          accept={AVATAR_ACCEPT}
+          className="sr-only"
+          aria-label={SOCIAL.profile.chooseFromLibrary}
+          onChange={(e) => onFile(e.target.files?.[0])}
+        />
+        <input
+          ref={cameraRef}
+          type="file"
+          accept={AVATAR_ACCEPT}
+          capture="user"
+          className="sr-only"
+          aria-label={SOCIAL.profile.takePhoto}
+          onChange={(e) => onFile(e.target.files?.[0])}
+        />
+      </AppSheetSurface>
+    </div>
+  );
+
+  return typeof document !== "undefined" ? createPortal(sheet, document.body) : sheet;
+}

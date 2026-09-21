@@ -9,7 +9,7 @@ import {
   companySaveSchema,
 } from "@/lib/account-profile";
 import { AVATAR_MAX_BYTES, isAvatarContentType } from "@/lib/account-avatar";
-import { putAvatarObject } from "@/lib/s3-avatars";
+import { deleteAvatarObject, putAvatarObject } from "@/lib/s3-avatars";
 import { getOrgContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 
@@ -61,6 +61,29 @@ export async function uploadAccountPhoto(formData: FormData): Promise<{ error?: 
     await putAvatarObject(ctx.user.id, body, file.type);
   } catch (e) {
     return { error: e instanceof Error && e.message ? e.message : ACCOUNT_PROFILE.photoFailed };
+  }
+
+  revalidatePath("/settings");
+  revalidatePath("/settings/profile");
+  revalidatePath("/social");
+  revalidatePath("/social/profile");
+  revalidatePath("/");
+  revalidatePath("/", "layout");
+  return {};
+}
+
+// Inverse of uploadAccountPhoto — same avatars/{userId}/avatar key.
+// Missing object is success. No SQL.
+export async function removeAccountPhoto(): Promise<{ error?: string }> {
+  const ctx = await getOrgContext();
+  if (!ctx) return { error: ACCOUNT_PROFILE.signedOut };
+
+  try {
+    await deleteAvatarObject(ctx.user.id);
+  } catch (e) {
+    return {
+      error: e instanceof Error && e.message ? e.message : ACCOUNT_PROFILE.photoRemoveFailed,
+    };
   }
 
   revalidatePath("/settings");

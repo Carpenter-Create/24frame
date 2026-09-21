@@ -3,16 +3,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
-vi.mock("@/lib/s3-avatars", () => ({ putAvatarObject: vi.fn() }));
+vi.mock("@/lib/s3-avatars", () => ({ putAvatarObject: vi.fn(), deleteAvatarObject: vi.fn() }));
 
 import { createClient } from "@/lib/supabase/server";
 import { getOrgContext } from "@/lib/supabase/context";
 import { revalidatePath } from "next/cache";
-import { putAvatarObject } from "@/lib/s3-avatars";
+import { deleteAvatarObject, putAvatarObject } from "@/lib/s3-avatars";
 
 import { ACCOUNT_NAME_MAX, ACCOUNT_PROFILE, COMPANY_PROFILE } from "@/lib/account-profile";
 import { AVATAR_MAX_BYTES } from "@/lib/account-avatar";
-import { saveAccountName, saveCompanyName, uploadAccountPhoto } from "./actions";
+import { removeAccountPhoto, saveAccountName, saveCompanyName, uploadAccountPhoto } from "./actions";
 
 const USER = { id: "u1", email: "ada@example.com", name: "Ada" };
 const ORG_ID = "11111111-1111-4111-8111-111111111111";
@@ -188,6 +188,30 @@ describe("uploadAccountPhoto", () => {
       error: ACCOUNT_PROFILE.signedOut,
     });
     expect(putAvatarObject).not.toHaveBeenCalled();
+  });
+});
+
+describe("removeAccountPhoto", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+    vi.mocked(deleteAvatarObject).mockResolvedValue(undefined);
+  });
+
+  it("DELETEs the session user's face and does not touch email", async () => {
+    await expect(removeAccountPhoto()).resolves.toEqual({});
+    expect(deleteAvatarObject).toHaveBeenCalledTimes(1);
+    expect(deleteAvatarObject).toHaveBeenCalledWith(USER.id);
+    expect(revalidatePath).toHaveBeenCalledWith("/social/profile");
+    expect(revalidatePath).toHaveBeenCalledWith("/", "layout");
+  });
+
+  it("does not write when there is no session", async () => {
+    vi.mocked(getOrgContext).mockResolvedValue(null as never);
+    await expect(removeAccountPhoto()).resolves.toEqual({
+      error: ACCOUNT_PROFILE.signedOut,
+    });
+    expect(deleteAvatarObject).not.toHaveBeenCalled();
   });
 });
 

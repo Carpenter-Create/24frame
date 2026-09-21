@@ -198,9 +198,15 @@ describe("social copy lock", () => {
     expect(SOCIAL_ROUTES.profileEdit).toBe("/social/profile/edit");
     expect(SOCIAL_ROUTES.profileBio).toBe("/social/profile/edit/bio");
     expect(SOCIAL.profile.username).toBe("Username");
+    expect(SOCIAL.profile.usernameAdd).toBe("Add");
+    expect(SOCIAL.profile.name).toBe("Name");
+    expect(SOCIAL.profile.nameAdd).toBe("Add");
     expect(SOCIAL.profile.bioPrivacy).toBe("Your bio shows on your public profile.");
     expect(SOCIAL.profile.addLink).toBe("Add link");
     expect(SOCIAL.profile.editPicture).toBe("Edit picture");
+    expect(SOCIAL.profile.chooseFromLibrary).toBe("Choose from library");
+    expect(SOCIAL.profile.takePhoto).toBe("Take photo");
+    expect(SOCIAL.profile.removePicture).toBe("Remove current picture");
     expect(SOCIAL.profile.postsEmpty).toBe("No posts yet.");
     expect(SOCIAL.profile.postsTruncated).toContain("200");
     expect(SOCIAL.home.truncatedWall).toContain("50");
