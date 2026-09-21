@@ -89,6 +89,7 @@ export type SocialProfileOptimisticSnapshot = {
   displayName?: string;
   bio?: string;
   photoUrl?: string | null;
+  coverUrl?: string | null;
   welcomeVideoUrl?: string | null;
   crafts?: readonly string[];
   topics?: readonly string[];
@@ -103,6 +104,7 @@ export type SocialProfileIdentityView = {
   displayName: string;
   bio: string;
   photoUrl: string | null;
+  coverUrl: string | null;
   welcomeVideoUrl: string | null;
   crafts: readonly string[];
   topics: readonly string[];
@@ -115,6 +117,7 @@ export const SOCIAL_PROFILE_IDENTITY_EMPTY: SocialProfileIdentityView = {
   displayName: "",
   bio: "",
   photoUrl: null,
+  coverUrl: null,
   welcomeVideoUrl: null,
   crafts: [],
   topics: [],
@@ -149,6 +152,7 @@ export function durableSocialProfileOptimistic(
 ): SocialProfileOptimisticSnapshot {
   const durable: SocialProfileOptimisticSnapshot = { ...next };
   if (isBlobUrl(durable.photoUrl)) delete durable.photoUrl;
+  if (isBlobUrl(durable.coverUrl)) delete durable.coverUrl;
   if (isBlobUrl(durable.welcomeVideoUrl)) delete durable.welcomeVideoUrl;
   return durable;
 }
@@ -376,6 +380,7 @@ export function mergeSocialProfileIdentity(
     return {
       ...server,
       photoUrl: next && next.photoUrl !== undefined ? next.photoUrl : server.photoUrl,
+      coverUrl: next && next.coverUrl !== undefined ? next.coverUrl : server.coverUrl,
       welcomeVideoUrl:
         next && next.welcomeVideoUrl !== undefined ? next.welcomeVideoUrl : server.welcomeVideoUrl,
     };
@@ -385,6 +390,7 @@ export function mergeSocialProfileIdentity(
     displayName: next.displayName ?? server.displayName,
     bio: next.bio !== undefined ? next.bio : server.bio,
     photoUrl: next.photoUrl !== undefined ? next.photoUrl : server.photoUrl,
+    coverUrl: next.coverUrl !== undefined ? next.coverUrl : server.coverUrl,
     welcomeVideoUrl: next.welcomeVideoUrl !== undefined ? next.welcomeVideoUrl : server.welcomeVideoUrl,
     crafts: next.crafts ?? server.crafts,
     topics: next.topics ?? server.topics,
@@ -412,6 +418,7 @@ export function socialProfileOptimisticMatches(
     return false;
   }
   if (next.photoUrl !== undefined && next.photoUrl !== server.photoUrl) return false;
+  if (next.coverUrl !== undefined && next.coverUrl !== server.coverUrl) return false;
   if (next.welcomeVideoUrl !== undefined && next.welcomeVideoUrl !== server.welcomeVideoUrl) {
     return false;
   }
@@ -430,6 +437,7 @@ export function socialProfileEditSeed<T extends SocialProfileIdentityView>(serve
     displayName: next.displayName ?? server.displayName,
     bio: next.bio !== undefined ? next.bio : server.bio,
     photoUrl: next.photoUrl !== undefined ? next.photoUrl : server.photoUrl,
+    coverUrl: next.coverUrl !== undefined ? next.coverUrl : server.coverUrl,
     welcomeVideoUrl: next.welcomeVideoUrl !== undefined ? next.welcomeVideoUrl : server.welcomeVideoUrl,
     crafts: next.crafts ?? server.crafts,
     topics: next.topics ?? server.topics,

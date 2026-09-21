@@ -30,7 +30,7 @@ vi.mock("@/lib/s3-social-media", () => ({
 vi.mock("@/lib/social-profile", () => ({
   ensureOwnSocialProfile: vi.fn(),
   SOCIAL_PROFILE_COLUMNS:
-    "id, handle, display_name, status, bio, welcome_video_key, crafts, topics, imdb_url, website_url",
+    "id, handle, display_name, status, bio, welcome_video_key, cover_key, crafts, topics, imdb_url, website_url",
 }));
 vi.mock("@/app/(app)/social/actions", () => ({
   toggleSocialFollow: vi.fn(),
@@ -162,6 +162,9 @@ describe("Social public profile", () => {
     const html = await renderPublic();
     expect(html).toContain("data-social-member");
     expect(html).toContain("data-social-profile-identity");
+    expect(html).toContain("data-social-profile-cover");
+    expect(html).not.toContain("data-social-profile-cover-edit");
+    expect(html).not.toContain("data-social-profile-avatar-edit");
     expect(html).toContain("Ada Lovelace");
     expect(html).toContain("@ada");
     expect(html).toContain("Writes engines.");

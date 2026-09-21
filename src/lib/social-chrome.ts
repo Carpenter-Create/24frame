@@ -296,6 +296,30 @@ export function socialTopicChipSelectClass(selected: boolean): string {
   return selected ? SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS : SOCIAL_TOPIC_CHIP_SELECT_IDLE_CLASS;
 }
 
+// Profile cover — Lock A. Full 892 column width; 4:1 band. Mobile 112px,
+// desktop 224px. Empty = accent wash. Avatar hangs ~40% below the banner
+// bottom (see social-profile-cover.ts). Owner pencil on banner only.
+export const SOCIAL_PROFILE_COVER_CLASS =
+  "relative w-full h-[112px] shrink-0 overflow-hidden md:h-[224px]";
+
+export const SOCIAL_PROFILE_COVER_EMPTY_CLASS = "bg-accent-wash";
+
+export const SOCIAL_PROFILE_COVER_IMAGE_CLASS = "absolute inset-0 size-full object-cover";
+
+export const SOCIAL_PROFILE_COVER_EDIT_CLASS =
+  "absolute right-3 top-3 z-10 flex size-9 items-center justify-center rounded-full border border-hairline bg-surface/90 text-ink";
+
+export const SOCIAL_PROFILE_COVER_STACK_CLASS = "flex flex-col";
+
+export const SOCIAL_PROFILE_HEAD_OVERLAP_CLASS =
+  "relative z-10 -mt-[29px] md:-mt-[35px]";
+
+export const SOCIAL_PROFILE_AVATAR_ON_COVER_CLASS =
+  "border-2 border-surface";
+
+export const SOCIAL_PROFILE_AVATAR_EDIT_CLASS =
+  "absolute bottom-0 right-0 z-10 flex size-8 items-center justify-center rounded-full border border-hairline bg-surface text-ink";
+
 // Public profile head — IG geometry, house chrome. One SoT for own
 // /social/profile and public /social/u/[handle]. Head row is avatar |
 // (display name → posts/followers/following stacked). Name is never

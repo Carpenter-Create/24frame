@@ -221,6 +221,7 @@ describe("Social profile optimistic Save SoT", () => {
     displayName: "Ada Lovelace",
     bio: "Writes engines.",
     photoUrl: "https://s3.example/old",
+    coverUrl: null,
     welcomeVideoUrl: null,
     crafts: ["director"],
     topics: ["Directors"],

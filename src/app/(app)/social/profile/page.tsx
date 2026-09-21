@@ -112,9 +112,10 @@ async function SocialProfileMain({
     tab === "activity" && activity !== "comments"
       ? loadAuthorActivityPosts(supabase, profile.id, activity)
       : Promise.resolve(null);
-  const [photoUrl, liveStoriesPage, counts, welcomeUrl, jar, commentsPage, filtered] =
+  const [photoUrl, coverUrl, liveStoriesPage, counts, welcomeUrl, jar, commentsPage, filtered] =
     await Promise.all([
       signedAvatarUrl(profile.id),
+      profile.cover_key ? signedSocialMediaUrl(profile.cover_key) : Promise.resolve(null),
       loadLiveStories(supabase, [profile.id]),
       loadCachedProfileSocialCounts(supabase, profile.id),
       profile.welcome_video_key ? signedSocialMediaUrl(profile.welcome_video_key) : Promise.resolve(null),
@@ -127,6 +128,7 @@ async function SocialProfileMain({
       handle: profile.handle,
       displayName: profile.display_name,
       photoUrl,
+      coverUrl,
       bio: profile.bio ?? "",
       crafts: profile.crafts ?? [],
       topics: profile.topics ?? [],
@@ -177,6 +179,7 @@ async function SocialProfileMain({
         handle={identity.handle}
         displayName={identity.displayName}
         photoUrl={identity.photoUrl}
+        coverUrl={identity.coverUrl}
         bio={identity.bio}
         fallbackBio={SOCIAL.profile.ownFace}
         crafts={identity.crafts}

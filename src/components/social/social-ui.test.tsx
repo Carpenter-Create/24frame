@@ -217,6 +217,11 @@ describe("Social profile public face", () => {
     expect(uiSrc).not.toContain("actions?: () => ReactNode");
     expect(uiSrc).not.toContain("{actions()}");
     expect(identity).toContain("data-social-profile-identity");
+    expect(identity).toContain("data-social-profile-cover");
+    expect(identity).toContain("data-social-profile-cover-empty");
+    expect(identity.indexOf("data-social-profile-cover")).toBeLessThan(
+      identity.indexOf("data-social-profile-head"),
+    );
     expect(identity).toContain("data-social-profile-head");
     expect(identity).toContain("data-social-profile-face");
     expect(identity).toContain("data-social-profile-name");
@@ -230,6 +235,9 @@ describe("Social profile public face", () => {
       identity.indexOf("data-social-profile-head"),
       identity.indexOf("data-social-profile-face"),
     );
+    expect(identityHead).toContain("-mt-[29px]");
+    expect(identityHead).toContain("md:-mt-[35px]");
+    expect(identityHead).toContain("border-2 border-surface");
     expect(identityHead).toContain("data-social-avatar");
     expect(identityHead).toContain("data-social-profile-meta");
     expect(identityHead).toContain("data-social-profile-name");
@@ -244,6 +252,9 @@ describe("Social profile public face", () => {
     expect(uiSrc).not.toContain("socialProfilePublicHost");
     expect(uiSrc).not.toContain("socialShareHint");
     expect(uiSrc).toContain("data-social-profile-head");
+    expect(uiSrc).toContain("SocialProfileBanner");
+    expect(uiSrc).toContain("SOCIAL_PROFILE_COVER_STACK_CLASS");
+    expect(uiSrc).toContain("SOCIAL_PROFILE_HEAD_OVERLAP_CLASS");
     expect(uiSrc).toContain("SOCIAL_PROFILE_HEAD_CLASS");
     expect(uiSrc).toContain("SOCIAL_PROFILE_META_CLASS");
     expect(uiSrc).toContain("SOCIAL_PROFILE_ACTIONS_CLASS");

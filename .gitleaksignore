@@ -30,3 +30,6 @@ e3441ece37d7a769865f5371268b011d8bfc6da9:scripts/security/l7-chain-of-title-gate
 691a9f005dbc890ce556bcb619059589fe672344:src/lib/ask-ai-overlay.ts:generic-api-key:12
 67407167fa2ed8fd330f257ccf7344cdd6f3d6bb:src/lib/ask-ai-overlay.ts:generic-api-key:12
 
+# Unmerged social branch — `linkedInWidth` / `linkedInHeight` dimension lock names, not credentials.
+7daab7ce433e5a5ba6c7e18241683ccbcfe75c31:src/lib/social-profile-cover.ts:linkedin-client-id:34
+

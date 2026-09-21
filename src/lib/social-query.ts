@@ -16,6 +16,7 @@ export type SocialProfileQueryRow = Pick<
   | "status"
   | "bio"
   | "welcome_video_key"
+  | "cover_key"
   | "crafts"
   | "topics"
   | "imdb_url"

@@ -70,6 +70,9 @@ describe("Social loading skeletons", () => {
     expect(home).toContain("data-social-for-you-skeleton");
     expect(home).not.toContain("data-social-recent-chats-skeleton");
     expect(profile).toContain("data-social-profile-skeleton");
+    expect(profile).toContain("h-[112px]");
+    expect(profile).toContain("md:h-[224px]");
+    expect(profile).toContain("bg-accent-wash");
     expect(profile).toContain("data-social-profile-links-skeleton");
     expect(profile.indexOf("data-social-profile-links-skeleton")).toBeGreaterThan(
       profile.indexOf("rounded-full"),

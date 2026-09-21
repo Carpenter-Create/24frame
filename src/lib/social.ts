@@ -601,6 +601,7 @@ export const SOCIAL = {
     done: "Done",
     back: "Back",
     editPicture: "Edit picture",
+    editCover: "Edit cover",
     links: "Links",
     addLink: "Add link",
     removeLink: "Remove",

@@ -6,6 +6,7 @@ import {
   isOwnedSocialMediaKey,
   mediaItemsForInsert,
   ownedMediaItems,
+  profileCoverKeyFromMedia,
   welcomeVideoKeyFromMedia,
   parsePostMedia,
   socialMediaObjectKey,
@@ -105,6 +106,22 @@ describe("posts.media persist shape", () => {
     expect(welcomeVideoKeyFromMedia([video], USER)).toBe(video.key);
     expect(welcomeVideoKeyFromMedia([image], USER)).toBeNull();
     expect(welcomeVideoKeyFromMedia([video, image], USER)).toBeNull();
+  });
+
+  it("accepts one owned still as the profile cover pointer", () => {
+    const video = {
+      kind: "video" as const,
+      key: `posts/${USER}/${OBJECT}.mp4`,
+      contentType: "video/mp4" as const,
+    };
+    const image = {
+      kind: "image" as const,
+      key: `posts/${USER}/${OBJECT}.jpg`,
+      contentType: "image/jpeg" as const,
+    };
+    expect(profileCoverKeyFromMedia([image], USER)).toBe(image.key);
+    expect(profileCoverKeyFromMedia([video], USER)).toBeNull();
+    expect(profileCoverKeyFromMedia([image, video], USER)).toBeNull();
   });
 
   it("rejects title keys on insert even when the rest is valid", () => {

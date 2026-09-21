@@ -32,6 +32,7 @@ export const SOCIAL_PHOSPHOR_ICONS = [
   "text-t",
   "upload-simple",
   "camera-rotate",
+  "pencil-simple",
   "check-circle",
 ] as const;
 

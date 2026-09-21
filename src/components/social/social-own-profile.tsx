@@ -2,6 +2,8 @@
 
 import { useEffect, type ReactNode } from "react";
 
+import { SocialProfileAvatarEdit } from "@/components/social/social-profile-avatar-edit";
+import { SocialProfileCoverUpload } from "@/components/social/social-profile-cover-upload";
 import { SocialProfileIdentity } from "@/components/social/social-ui";
 import { SocialWelcomeVideo } from "@/components/social/social-welcome-video";
 import {
@@ -42,6 +44,7 @@ function SocialProfileOptimisticIdentity({
           name={view.displayName}
           handle={view.handle}
           photoUrl={view.photoUrl}
+          coverUrl={view.coverUrl}
           bio={view.bio.trim() ? view.bio : undefined}
           roles={view.crafts}
           topics={view.topics}
@@ -63,6 +66,7 @@ export function SocialOwnProfileFace({
   displayName,
   bio,
   photoUrl,
+  coverUrl,
   welcomeVideoUrl,
   crafts,
   topics,
@@ -74,6 +78,7 @@ export function SocialOwnProfileFace({
     displayName,
     bio,
     photoUrl,
+    coverUrl,
     welcomeVideoUrl,
     crafts,
     topics,
@@ -95,6 +100,7 @@ export function SocialOwnProfileFace({
           displayName,
           bio,
           photoUrl,
+          coverUrl,
           welcomeVideoUrl,
           crafts,
           topics,
@@ -112,6 +118,7 @@ export function SocialOwnProfileFace({
     displayName,
     bio,
     photoUrl,
+    coverUrl,
     welcomeVideoUrl,
     crafts,
     topics,
@@ -125,6 +132,9 @@ export function SocialOwnProfileFace({
         name={merged.displayName}
         handle={merged.handle}
         photoUrl={merged.photoUrl}
+        coverUrl={merged.coverUrl}
+        coverEdit={<SocialProfileCoverUpload />}
+        photoAction={<SocialProfileAvatarEdit />}
         bio={shownBio}
         roles={merged.crafts}
         topics={merged.topics}
