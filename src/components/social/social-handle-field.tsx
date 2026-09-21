@@ -1,91 +1,126 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/cn";
 import {
-  bareHandle,
   handleFieldValue,
   SOCIAL,
+  socialHandleDisplayError,
   socialProfilePublicUrl,
   stripHandleDecorators,
 } from "@/lib/social";
-import { SOCIAL_HANDLE_FIELD_LABEL_CLASS } from "@/lib/social-chrome";
+import {
+  SOCIAL_HANDLE_FIELD_CLASS,
+  SOCIAL_HANDLE_FIELD_LABEL_CLASS,
+  SOCIAL_HANDLE_PREFIX_CLASS,
+  SOCIAL_PROFILE_EDIT_ERROR_CLASS,
+  SOCIAL_PROFILE_EDIT_HANDLE_CLASS,
+  SOCIAL_PROFILE_EDIT_HANDLE_ERROR_CLASS,
+  SOCIAL_PROFILE_EDIT_LABEL_CLASS,
+  SOCIAL_PROFILE_EDIT_SECTION_CLASS,
+} from "@/lib/social-chrome";
 
-function clampCaretAfterAt(el: HTMLInputElement) {
-  const start = el.selectionStart ?? 1;
-  const end = el.selectionEnd ?? 1;
-  if (start < 1 || end < 1) {
-    el.setSelectionRange(Math.max(1, start), Math.max(1, end));
-  }
+function applyHandleRaw(raw: string): string {
+  return handleFieldValue(stripHandleDecorators(raw));
 }
 
 export function SocialHandleField({
   id,
   name,
   defaultHandle = "",
+  value: controlledValue,
   onValueChange,
+  label,
+  showPreviewUrl = true,
+  appearance = "claim",
+  error = "",
+  placeholder,
 }: {
   id: string;
-  name: string;
+  name?: string;
   defaultHandle?: string;
+  value?: string;
   onValueChange?: (value: string) => void;
+  label?: string;
+  showPreviewUrl?: boolean;
+  appearance?: "claim" | "edit";
+  error?: string;
+  placeholder?: string;
 }) {
-  const [value, setValue] = useState(handleFieldValue(defaultHandle));
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [draft, setDraft] = useState(handleFieldValue(defaultHandle));
+  const value = handleFieldValue(controlledValue ?? draft);
+  const fieldLabel = label ?? (appearance === "edit" ? SOCIAL.profile.username : SOCIAL.profile.handle);
+  const fieldPlaceholder =
+    placeholder ??
+    (appearance === "edit" ? SOCIAL.profile.usernamePlaceholder : SOCIAL.profile.handlePlaceholder);
+  const notice = error ? socialHandleDisplayError(value, error) : "";
 
   function applyRaw(raw: string) {
-    const next = `@${stripHandleDecorators(raw)}`;
-    setValue(next);
+    const next = applyHandleRaw(raw);
+    if (controlledValue === undefined) setDraft(next);
     onValueChange?.(next);
   }
 
-  useLayoutEffect(() => {
-    const el = inputRef.current;
-    if (el && document.activeElement === el) clampCaretAfterAt(el);
-  }, [value]);
+  const hostClass =
+    appearance === "edit"
+      ? notice
+        ? SOCIAL_PROFILE_EDIT_HANDLE_ERROR_CLASS
+        : SOCIAL_PROFILE_EDIT_HANDLE_CLASS
+      : SOCIAL_HANDLE_FIELD_CLASS;
 
-  return (
-    <div className="flex flex-col gap-1" data-social-handle-field="">
-      <label htmlFor={id} className={SOCIAL_HANDLE_FIELD_LABEL_CLASS}>
-        {SOCIAL.profile.handle}
-      </label>
+  const field = (
+    <div data-social-handle-input="" className={hostClass}>
+      <span data-social-handle-prefix="" aria-hidden="true" className={SOCIAL_HANDLE_PREFIX_CLASS}>
+        @
+      </span>
       <Input
-        ref={inputRef}
+        variant="bare"
         id={id}
         name={name}
         autoComplete="username"
         value={value}
-        placeholder={SOCIAL.profile.handlePlaceholder}
+        placeholder={fieldPlaceholder}
         onChange={(e) => applyRaw(e.target.value)}
-        onFocus={(e) => clampCaretAfterAt(e.currentTarget)}
-        onClick={(e) => clampCaretAfterAt(e.currentTarget)}
-        onSelect={(e) => clampCaretAfterAt(e.currentTarget)}
-        onKeyDown={(e) => {
-          const el = e.currentTarget;
-          const start = el.selectionStart ?? 0;
-          const end = el.selectionEnd ?? 0;
-          if (e.key === "Backspace" && start <= 1 && end <= 1) {
-            e.preventDefault();
-            clampCaretAfterAt(el);
-          }
-          if (e.key === "ArrowLeft" && start <= 1) {
-            e.preventDefault();
-            clampCaretAfterAt(el);
-          }
-          if (e.key === "Home") {
-            e.preventDefault();
-            el.setSelectionRange(1, 1);
-          }
-        }}
         onPaste={(e) => {
           e.preventDefault();
           applyRaw(e.clipboardData.getData("text"));
         }}
+        className={cn("flex-1", appearance === "edit" ? "placeholder:text-ink-2" : null)}
       />
-      <p data-social-handle-url="" className="t-body-sm text-ink-3">
-        {socialProfilePublicUrl(bareHandle(value))}
-      </p>
+    </div>
+  );
+
+  if (appearance === "edit") {
+    return (
+      <div data-social-handle-field="" className={SOCIAL_PROFILE_EDIT_SECTION_CLASS}>
+        <div className="flex items-start gap-3">
+          <label htmlFor={id} className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>
+            {fieldLabel}
+          </label>
+          {field}
+        </div>
+        {notice ? (
+          <p data-social-handle-required="" className={SOCIAL_PROFILE_EDIT_ERROR_CLASS}>
+            {notice}
+          </p>
+        ) : null}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-1" data-social-handle-field="">
+      <label htmlFor={id} className={SOCIAL_HANDLE_FIELD_LABEL_CLASS}>
+        {fieldLabel}
+      </label>
+      {field}
+      {showPreviewUrl ? (
+        <p data-social-handle-url="" className="t-body-sm text-ink-3">
+          {socialProfilePublicUrl(value)}
+        </p>
+      ) : null}
     </div>
   );
 }

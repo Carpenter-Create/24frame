@@ -13,6 +13,7 @@ import {
   socialProfileLinkFaceLabel,
   socialProfileLinksFace,
   socialProfileLinksMoreLabel,
+  socialProfileLinksRowSummary,
   socialProfilePublicLinks,
 } from "@/lib/social-profile-links";
 
@@ -140,5 +141,14 @@ describe("social profile links", () => {
       overflow: 0,
     });
     expect(socialProfileLinksFace([])).toEqual({ face: [], overflow: 0 });
+  });
+
+  it("summarizes the Edit Profile Links drill row", () => {
+    expect(socialProfileLinksRowSummary([])).toBe(SOCIAL.profile.linksAdd);
+    expect(socialProfileLinksRowSummary([""])).toBe(SOCIAL.profile.linksAdd);
+    expect(socialProfileLinksRowSummary(["https://instagram.com/ada"])).toBe("instagram.com/ada");
+    expect(
+      socialProfileLinksRowSummary(["https://instagram.com/ada", "https://youtube.com/@ada"]),
+    ).toBe("instagram.com/ada +1");
   });
 });

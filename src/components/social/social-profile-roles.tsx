@@ -2,23 +2,8 @@
 
 import { useState } from "react";
 
-import {
-  SocialProfileChipBank,
-  SocialProfileSelectChip,
-} from "@/components/social/social-profile-chip-select";
-import { SocialIcon } from "@/components/social/social-icon";
-import { Input } from "@/components/ui/input";
-import {
-  SOCIAL_PROFILE_EDIT_BACK_CLASS,
-  SOCIAL_PROFILE_EDIT_BODY_CLASS,
-  SOCIAL_PROFILE_EDIT_HEADER_CLASS,
-  SOCIAL_PROFILE_EDIT_HOST_CLASS,
-  SOCIAL_PROFILE_EDIT_LABEL_CLASS,
-  SOCIAL_PROFILE_EDIT_SECTION_CLASS,
-  SOCIAL_PROFILE_EDIT_SHEET_CLASS,
-  SOCIAL_TOPIC_CHIP_BANK_CLASS,
-} from "@/lib/social-chrome";
-import { SOCIAL_ICON_SIZE_HEADER } from "@/lib/social-icons";
+import { SocialProfileEditFace } from "@/components/social/social-profile-edit-face";
+import { SocialProfileChipSelectFace } from "@/components/social/social-profile-chip-select";
 import { SOCIAL } from "@/lib/social";
 import {
   SOCIAL_PROFILE_ROLES_MAX,
@@ -54,55 +39,30 @@ export function SocialProfileRolesField({
   }
 
   return (
-    <div data-social-profile-edit-roles="" className={SOCIAL_PROFILE_EDIT_SECTION_CLASS}>
-      <div className="flex flex-col gap-2">
-        <div className="flex items-baseline gap-2">
-          <p className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>{SOCIAL.profile.roles}</p>
-          <p data-social-profile-edit-roles-count="" className="pt-0.5 t-label text-ink-2">
-            {socialProfileRolesCountLabel(selected.length)}
-          </p>
-        </div>
-        {selected.length > 0 ? (
-          <div data-social-profile-edit-roles-selected="" className={SOCIAL_TOPIC_CHIP_BANK_CLASS}>
-            {selected.map((slug) => (
-              <SocialProfileSelectChip
-                key={slug}
-                option={{ id: slug, label: socialProfileRoleLabel(slug) }}
-                selected
-                chip
-                reorderable
-                dragType={ROLE_DRAG_TYPE}
-                dataPrefix="social-profile-role"
-                onToggle={toggle}
-                onReorder={reorder}
-              />
-            ))}
-          </div>
-        ) : null}
-        <p data-social-profile-edit-roles-notice="" className="t-label text-ink-2">
-          {notice}
-        </p>
-      </div>
-      <Input
-        id="social-edit-roles-search"
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder={SOCIAL.profile.rolesSearch}
-        aria-label={SOCIAL.profile.rolesSearch}
-        autoComplete="off"
-      />
-      <SocialProfileChipBank
-        groups={groups.map((group) => ({
-          id: group.id,
-          label: group.label,
-          options: group.roles.map((role) => ({ id: role.slug, label: role.label })),
-        }))}
-        selectedIds={selected}
-        blocked={atMax}
-        dataPrefix="social-profile-role"
-        onToggle={toggle}
-      />
-    </div>
+    <SocialProfileChipSelectFace
+      selected={selected.map((slug) => ({ id: slug, label: socialProfileRoleLabel(slug) }))}
+      countLabel={socialProfileRolesCountLabel(selected.length)}
+      helper={notice}
+      searchId="social-edit-roles-search"
+      searchValue={query}
+      searchPlaceholder={SOCIAL.profile.rolesSearch}
+      groups={groups.map((group) => ({
+        id: group.id,
+        label: group.label,
+        options: group.roles.map((role) => ({ id: role.slug, label: role.label })),
+      }))}
+      blocked={atMax}
+      dataPrefix="social-profile-role"
+      hostAttr="data-social-profile-edit-roles"
+      selectedAttr="data-social-profile-edit-roles-selected"
+      countAttr="data-social-profile-edit-roles-count"
+      noticeAttr="data-social-profile-edit-roles-notice"
+      reorderable
+      dragType={ROLE_DRAG_TYPE}
+      onSearch={setQuery}
+      onToggle={toggle}
+      onReorder={reorder}
+    />
   );
 }
 
@@ -116,27 +76,8 @@ export function SocialProfileRolesEditor({
   onBack: () => void;
 }) {
   return (
-    <div data-social-profile-roles="" className={SOCIAL_PROFILE_EDIT_HOST_CLASS}>
-      <div className={SOCIAL_PROFILE_EDIT_SHEET_CLASS}>
-        <header data-social-profile-roles-header="" className={SOCIAL_PROFILE_EDIT_HEADER_CLASS}>
-          <button
-            type="button"
-            data-social-profile-roles-back=""
-            onClick={onBack}
-            className={SOCIAL_PROFILE_EDIT_BACK_CLASS}
-            aria-label={SOCIAL.profile.back}
-          >
-            <SocialIcon name="caret-left" size={SOCIAL_ICON_SIZE_HEADER} />
-          </button>
-          <h1 className="min-w-0 flex-1 text-center text-[17px] font-semibold text-ink">
-            {SOCIAL.profile.roles}
-          </h1>
-          <span className="size-9 shrink-0" aria-hidden />
-        </header>
-        <div className={SOCIAL_PROFILE_EDIT_BODY_CLASS}>
-          <SocialProfileRolesField value={value} onChange={onChange} />
-        </div>
-      </div>
-    </div>
+    <SocialProfileEditFace face="roles" title={SOCIAL.profile.roles} onBack={onBack}>
+      <SocialProfileRolesField value={value} onChange={onChange} />
+    </SocialProfileEditFace>
   );
 }

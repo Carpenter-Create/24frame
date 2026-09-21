@@ -1,25 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { updateSocialBio } from "@/app/(app)/social/actions";
 import { useAppQueryClient } from "@/components/query-provider";
 import { applyOptimisticSocialProfilePatch, invalidateSocialQueries } from "@/lib/social-query";
-import { SocialIcon } from "@/components/social/social-icon";
+import { SocialProfileEditFace } from "@/components/social/social-profile-edit-face";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  SOCIAL_PROFILE_BIO_CARD_CLASS,
-  SOCIAL_PROFILE_BIO_DONE_CLASS,
-  SOCIAL_PROFILE_EDIT_BACK_CLASS,
-  SOCIAL_PROFILE_EDIT_BODY_CLASS,
-  SOCIAL_PROFILE_EDIT_HEADER_CLASS,
-  SOCIAL_PROFILE_EDIT_HOST_CLASS,
-  SOCIAL_PROFILE_EDIT_SHEET_CLASS,
-} from "@/lib/social-chrome";
-import { SOCIAL_ICON_SIZE_HEADER } from "@/lib/social-icons";
+import { SOCIAL_PROFILE_BIO_CARD_CLASS } from "@/lib/social-chrome";
 import {
   BIO_MAX,
   SOCIAL,
@@ -71,68 +61,41 @@ export function SocialProfileBioEditor({
   }
 
   return (
-    <div data-social-profile-bio="" className={SOCIAL_PROFILE_EDIT_HOST_CLASS}>
-      <div className={SOCIAL_PROFILE_EDIT_SHEET_CLASS}>
-        <header data-social-profile-bio-header="" className={SOCIAL_PROFILE_EDIT_HEADER_CLASS}>
-          {onBack ? (
-            <button
-              type="button"
-              data-social-profile-bio-back=""
-              onClick={onBack}
-              className={SOCIAL_PROFILE_EDIT_BACK_CLASS}
-              aria-label={SOCIAL.profile.back}
-            >
-              <SocialIcon name="caret-left" size={SOCIAL_ICON_SIZE_HEADER} />
-            </button>
-          ) : (
-            <Link
-              href={SOCIAL_ROUTES.profileEdit}
-              className={SOCIAL_PROFILE_EDIT_BACK_CLASS}
-              aria-label={SOCIAL.profile.back}
-            >
-              <SocialIcon name="caret-left" size={SOCIAL_ICON_SIZE_HEADER} />
-            </Link>
-          )}
-          <h1 className="min-w-0 flex-1 text-center text-[17px] font-semibold text-ink">
-            {SOCIAL.profile.bio}
-          </h1>
-          <button
-            type="button"
-            data-social-bio-done=""
-            disabled={pending}
-            onClick={() => void onDone()}
-            className={SOCIAL_PROFILE_BIO_DONE_CLASS}
-            aria-label={SOCIAL.profile.done}
-          >
-            <SocialIcon name="check" size={18} />
-          </button>
-        </header>
-        <div className={SOCIAL_PROFILE_EDIT_BODY_CLASS}>
-          <div data-social-bio-form="" className={SOCIAL_PROFILE_BIO_CARD_CLASS}>
-            <div className="flex items-center justify-between">
-              <p className="t-label font-semibold tracking-[0.05em] text-ink-2">{SOCIAL.profile.bioLabel}</p>
-              <p data-social-bio-count="" className="t-label text-ink-2">
-                {socialBioCounterLabel(value)}
-              </p>
-            </div>
-            <Textarea
-              variant="bare"
-              id="social-bio"
-              name="bio"
-              data-social-bio-textarea=""
-              rows={6}
-              maxLength={BIO_MAX}
-              value={value}
-              onChange={(e) => setValue(socialBioFieldValue(e.target.value))}
-              className="min-h-[120px] resize-none leading-[22px]"
-            />
-          </div>
-          <p data-social-bio-privacy="" className="t-body-sm text-ink-2">
-            {SOCIAL.profile.bioPrivacy}
+    <SocialProfileEditFace
+      face="bio"
+      title={SOCIAL.profile.bio}
+      onBack={onBack}
+      backHref={SOCIAL_ROUTES.profileEdit}
+      done={{
+        attr: "data-social-bio-done",
+        onClick: () => void onDone(),
+        pending,
+        icon: true,
+      }}
+    >
+      <div data-social-bio-form="" className={SOCIAL_PROFILE_BIO_CARD_CLASS}>
+        <div className="flex items-center justify-between">
+          <p className="t-label font-semibold tracking-[0.05em] text-ink-2">{SOCIAL.profile.bioLabel}</p>
+          <p data-social-bio-count="" className="t-label text-ink-2">
+            {socialBioCounterLabel(value)}
           </p>
-          {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
         </div>
+        <Textarea
+          variant="bare"
+          id="social-bio"
+          name="bio"
+          data-social-bio-textarea=""
+          rows={6}
+          maxLength={BIO_MAX}
+          value={value}
+          onChange={(e) => setValue(socialBioFieldValue(e.target.value))}
+          className="min-h-[120px] resize-none leading-[22px]"
+        />
       </div>
-    </div>
+      <p data-social-bio-privacy="" className="t-body-sm text-ink-2">
+        {SOCIAL.profile.bioPrivacy}
+      </p>
+      {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
+    </SocialProfileEditFace>
   );
 }

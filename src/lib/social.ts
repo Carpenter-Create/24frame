@@ -117,8 +117,9 @@ export function displayHandle(handle: string): string {
   return display ? `@${display}` : "";
 }
 
+/** Typed field value — bare handle. `@` is chrome, never part of the value. */
 export function handleFieldValue(handle: string): string {
-  return `@${handleDisplay(handle)}`;
+  return handleDisplay(handle);
 }
 
 export function socialProfileHref(handle: string): string {
@@ -594,6 +595,7 @@ export const SOCIAL = {
     // Sentinel for existing rows only. Never seed on create. Never render as a person name.
     defaultDisplayName: "Member",
     bio: "Bio",
+    bioAdd: "Add",
     bioLabel: "BIO",
     bioSubmit: "Save bio",
     bioPrivacy: "Your bio shows on your public profile.",
@@ -603,6 +605,8 @@ export const SOCIAL = {
     editPicture: "Edit picture",
     editCover: "Edit cover",
     links: "Links",
+    linksAdd: "Add",
+    linksMore: "{first} +{n}",
     addLink: "Add link",
     removeLink: "Remove",
     linkPlaceholder: "https://",
@@ -679,7 +683,10 @@ export const SOCIAL = {
     topicsSearch: "Search topics",
     topicsHint: "Choose up to 8.",
     topicsLimit: "You can select up to 8 topics",
+    topicsAdd: "Add",
+    topicsMore: "{first} +{n}",
     imdb: "IMDb",
+    imdbAdd: "Add",
     imdbPlaceholder: "imdb.com/name/nm… or nm########",
     imdbInvalid: "Enter an IMDb name URL or nm id.",
     imdbHint: "A public link to your IMDb name page.",

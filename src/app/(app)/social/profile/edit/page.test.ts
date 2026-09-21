@@ -77,7 +77,11 @@ describe("Social profile edit page", () => {
     expect(html).toContain(SOCIAL.profile.roles);
     expect(html).toContain(SOCIAL.profile.rolesAdd);
     expect(html).toContain("data-social-profile-edit-roles-open");
-    expect(html).toContain(SOCIAL.profile.addLink);
+    expect(html).toContain("data-social-profile-edit-topics-open");
+    expect(html).toContain("data-social-profile-edit-imdb-open");
+    expect(html).toContain("data-social-profile-edit-links-open");
+    expect(html).toContain(SOCIAL.profile.linksAdd);
+    expect(html).not.toContain(SOCIAL.profile.addLink);
     expect(html).not.toContain("Education");
   });
 
@@ -91,10 +95,10 @@ describe("Social profile edit page", () => {
     });
     vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
     const html = renderToStaticMarkup(await SocialProfileEditPage());
-    expect(html).toContain("data-social-profile-edit-links");
-    expect(html).toContain('value="https://instagram.com/ada"');
-    expect(html).toContain('value="https://youtube.com/@ada"');
-    expect(html).toContain("data-social-profile-edit-link-remove");
+    expect(html).toContain("data-social-profile-edit-links-open");
+    expect(html).toContain("instagram.com/ada +1");
+    expect(html).not.toContain('value="https://instagram.com/ada"');
+    expect(html).not.toContain("data-social-profile-edit-link-remove");
   });
 
   it("redirects home when ensure has no profile", async () => {

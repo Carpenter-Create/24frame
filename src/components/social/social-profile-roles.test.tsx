@@ -1,8 +1,11 @@
+import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { SOCIAL } from "@/lib/social";
 import {
+  SOCIAL_PROFILE_CHIP_FACE_CLASS,
+  SOCIAL_PROFILE_CHIP_GROUP_LABEL_CLASS,
   SOCIAL_TOPIC_CHIP_BANK_CLASS,
   SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS,
 } from "@/lib/social-chrome";
@@ -14,7 +17,8 @@ describe("SocialProfileRolesField", () => {
       <SocialProfileRolesField value={["investor", "actor"]} onChange={() => undefined} />,
     );
     expect(html).toContain("data-social-profile-edit-roles");
-    expect(html).toContain(SOCIAL.profile.roles);
+    expect(html).toContain("data-social-profile-chip-face");
+    expect(html).toContain(SOCIAL_PROFILE_CHIP_FACE_CLASS);
     expect(html).toContain(SOCIAL.profile.rolesSearch);
     expect(html).toContain(SOCIAL.profile.rolesHint);
     expect(html).toContain("data-social-profile-edit-roles-count");
@@ -29,6 +33,7 @@ describe("SocialProfileRolesField", () => {
     );
     expect(html).toContain(SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS);
     expect(html).toContain(SOCIAL_TOPIC_CHIP_BANK_CLASS);
+    expect(html).toContain(SOCIAL_PROFILE_CHIP_GROUP_LABEL_CLASS);
     expect(html).toContain('data-social-profile-role-group="actor"');
     expect(html).toContain('data-social-profile-role-group="writer"');
     expect(html).toContain('data-social-profile-role-group="business"');
@@ -39,6 +44,8 @@ describe("SocialProfileRolesField", () => {
     expect(html).toContain("Writer: Screenplay");
     expect(html).toContain("Writer: Story");
     expect(html).not.toContain("Category");
+    expect(html).not.toContain("t-label");
+    expect(html).not.toContain("uppercase");
     expect(html).toContain("whitespace-nowrap");
     expect(html).toContain("t-body-sm");
     expect(html).not.toContain("text-[11px]");
@@ -50,7 +57,6 @@ describe("SocialProfileRolesField", () => {
     const html = renderToStaticMarkup(
       <SocialProfileRolesField value={[]} onChange={() => undefined} />,
     );
-    expect(html).toContain(SOCIAL.profile.roles);
     expect(html).toContain("0 / 5");
     expect(html).not.toContain("data-social-profile-edit-roles-selected");
     expect(html).not.toContain(SOCIAL.profile.rolesLimit);
@@ -83,10 +89,22 @@ describe("SocialProfileRolesField", () => {
     expect(html).toContain("data-social-profile-roles");
     expect(html).toContain("data-social-profile-roles-back");
     expect(html).toContain("data-social-profile-edit-roles");
+    expect(html).toContain(SOCIAL.profile.roles);
     expect(html).toContain(SOCIAL.profile.rolesSearch);
     expect(html).toContain('id="social-edit-roles-search"');
     expect(html).toContain("data-social-profile-edit-roles-selected");
     expect(html).toContain('data-social-profile-role-group="writer"');
     expect(html).toContain('data-social-icon="caret-left"');
+  });
+
+  it("shares the chip-select face SoT with Topics", () => {
+    const rolesSrc = readFileSync("src/components/social/social-profile-roles.tsx", "utf8");
+    const topicsSrc = readFileSync("src/components/social/social-profile-topics.tsx", "utf8");
+    const faceSrc = readFileSync("src/components/social/social-profile-chip-select.tsx", "utf8");
+    expect(rolesSrc).toContain("SocialProfileChipSelectFace");
+    expect(topicsSrc).toContain("SocialProfileChipSelectFace");
+    expect(faceSrc).toContain("export function SocialProfileChipSelectFace");
+    expect(faceSrc).toContain("SOCIAL_PROFILE_CHIP_FACE_CLASS");
+    expect(faceSrc).not.toContain("t-label");
   });
 });

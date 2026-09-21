@@ -533,7 +533,9 @@ describe("Social profile public face", () => {
 
     const html = await renderServerMarkup(await SocialProfilePage());
     expect(html).toContain("data-social-handle-field");
-    expect(html).toContain('value="@"');
+    expect(html).toContain("data-social-handle-prefix");
+    expect(html).toContain('value=""');
+    expect(html).not.toContain('value="@"');
     expect(html).toContain("data-social-handle-url");
     expect(html).toContain("https://24frame.co/@");
     expect(html).toContain(SOCIAL.profile.handlePlaceholder);

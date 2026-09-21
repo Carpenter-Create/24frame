@@ -3,14 +3,15 @@
 // Sole entry is the primary Edit profile control. Share stays the sheet.
 // Bio Enter/Return inserts a newline (Adam amend). Soft newlines count
 // toward BIO_MAX as stored. Done is the Sporty Blue check only.
-// Edit picture reuses avatars/{userId}/avatar. Links edit in place.
+// Edit picture reuses avatars/{userId}/avatar.
 //
 // Save SoT: apply the draft to this overlay, paint the own face in the
 // already-mounted Social tree, leave Edit immediately, persist in the
 // background, roll back here on error. Memory + sessionStorage + a
-// short cookie keep the hop off the skeleton. Professions is a
-// Settings drill-in row; selecting stays on the existing chip-bank
-// face. Topics toggles stay local draft until that one write.
+// short cookie keep the hop off the skeleton. Index is identity
+// (photo / name / handle) plus Settings drill-in rows. Professions
+// and Topics share one chip-select face. IMDb, Links, and Bio are
+// their own faces. Selecting stays local draft until that one write.
 
 import { ACCOUNT_PROFILE } from "@/lib/account-profile";
 import { persistSocialMutation } from "@/lib/social-optimistic";
@@ -40,7 +41,11 @@ export const SOCIAL_PROFILE_EDIT_LOCK = {
   handleRequired: SOCIAL.profile.handleRequired,
   emptyPreview: "https://24frame.co/@",
   profileUrlOnEditFace: false,
+  handleBareField: true,
   professionsDrillIn: true,
+  topicsDrillIn: true,
+  imdbDrillIn: true,
+  linksDrillIn: true,
   bioMax: BIO_MAX,
   bioPrivacy: SOCIAL.profile.bioPrivacy,
   addLink: SOCIAL.profile.addLink,
@@ -59,7 +64,7 @@ export const SOCIAL_PROFILE_OPTIMISTIC_COOKIE = "24frame_social_profile_save";
 export const SOCIAL_PROFILE_OPTIMISTIC_STORAGE = "24frame_social_profile_save";
 export const SOCIAL_PROFILE_OPTIMISTIC_COOKIE_MAX_AGE = 60;
 
-export type SocialProfileEditFace = "edit" | "bio" | "roles";
+export type SocialProfileEditFace = "edit" | "bio" | "roles" | "topics" | "imdb" | "links";
 
 export function socialProfileEditFace(
   next: SocialProfileEditFace | boolean,
@@ -67,6 +72,11 @@ export function socialProfileEditFace(
   if (next === true) return "bio";
   if (next === false) return "edit";
   return next;
+}
+
+export function socialProfileBioRowSummary(bio: string): string {
+  const text = bio.trim();
+  return text || SOCIAL.profile.bioAdd;
 }
 
 export type SocialProfileEditSaveDraft = {
