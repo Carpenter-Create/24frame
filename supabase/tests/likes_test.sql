@@ -250,8 +250,8 @@ select set_config('request.jwt.claims',
 select is(
   (select count(*) from public.likes
     where target_id = current_setting('t.post')::uuid)::int,
-  1,
-  'SELECT returns own like rows only');
+  2,
+  'SELECT returns likes on a visible post');
 
 select set_config('request.jwt.claims',
   json_build_object('sub', current_setting('t.liker'), 'role', 'authenticated')::text,

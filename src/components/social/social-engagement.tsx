@@ -33,6 +33,7 @@ import {
 import { SOCIAL } from "@/lib/social";
 import { cn } from "@/lib/cn";
 import { SocialIcon } from "./social-icon";
+import { SocialLikesSheet } from "./social-likes-sheet";
 
 function FormError({ error }: { error: string }) {
   if (!error) return null;
@@ -299,9 +300,21 @@ export function SocialLikeCount({
   likeCount: number;
 }) {
   const view = useSocialLike(postId, { liked, likeCount });
+  const [open, setOpen] = useState(false);
   return (
-    <p className="t-body-sm font-semibold text-ink">
-      {view.likeCount} {SOCIAL.post.likes}
-    </p>
+    <>
+      <button
+        type="button"
+        data-social-like-count=""
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        aria-label={SOCIAL.post.likesTitle}
+        className="self-start text-left t-body-sm font-semibold text-ink"
+        onClick={() => setOpen(true)}
+      >
+        {view.likeCount} {SOCIAL.post.likes}
+      </button>
+      <SocialLikesSheet postId={postId} open={open} onClose={() => setOpen(false)} />
+    </>
   );
 }

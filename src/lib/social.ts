@@ -50,6 +50,7 @@ export const SOCIAL_ROUTES = {
   groupsNew: "/social/groups/new",
   leaderboard: "/social/leaderboard",
   dms: "/social/dms",
+  post: "/social/p",
 } as const;
 
 /** Header Search people discovery. Not a dock tab. Not Explore. */
@@ -82,6 +83,9 @@ export const SOCIAL_PROFILE_ORIGIN = "https://24frame.co";
 
 /** Author history page. Independent of Home following-wall / followee / story caps. */
 export const SOCIAL_PROFILE_POSTS_PAGE = LIST_PAGE;
+
+/** Who-liked sheet. Independent of the following wall. */
+export const SOCIAL_LIKERS_PAGE = LIST_PAGE;
 
 // Public profile URL (locked): https://24frame.co/@{display}
 // Example: https://24frame.co/@AdamC — stored casing, not folded.
@@ -277,7 +281,11 @@ export function socialGroupHref(slug: string): string {
   return `${SOCIAL_ROUTES.groups}/${encodeURIComponent(slug)}`;
 }
 
-export function socialPostHref(slug: string, postId: string): string {
+export function socialPostHref(postId: string): string {
+  return `${SOCIAL_ROUTES.post}/${encodeURIComponent(postId)}`;
+}
+
+export function socialGroupPostHref(slug: string, postId: string): string {
   return `${socialGroupHref(slug)}/posts/${encodeURIComponent(postId)}`;
 }
 
@@ -737,6 +745,9 @@ export const SOCIAL = {
     like: "Like",
     unlike: "Unlike",
     likes: "likes",
+    likesTitle: "Likes",
+    likesEmpty: "No likes yet.",
+    likesTruncated: `Showing the latest ${LIST_PAGE} likes.`,
     comments: "comments",
     comment: "Comment",
     commentsTitle: "Comments",

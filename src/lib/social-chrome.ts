@@ -245,6 +245,11 @@ export const SOCIAL_FOR_YOU_CARD_CLASS =
 export const SOCIAL_FEED_ROW_CLASS =
   `flex flex-col gap-2 ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface p-3`;
 
+// Founder lock 2026-09-21: muted FB `15h` register. Never `t-label`
+// (uppercase + 0.12em track turns `10h` into `10 H`).
+export const SOCIAL_POST_TIME_CLASS =
+  "text-[length:var(--text-xs)] font-normal leading-none tracking-normal text-ink-2";
+
 // Facebook gray gutter — muted canvas frames every surface post.
 // Light --bg and --surface are both white; surface-muted (#f4f4f6)
 // is the visible band. ~8px house space-2. Stack gap between cards

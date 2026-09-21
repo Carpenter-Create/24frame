@@ -14,6 +14,7 @@ import {
   type FollowingWallCursor,
 } from "@/lib/social-home-bounds";
 import {
+  SOCIAL_LIKERS_PAGE,
   SOCIAL_PROFILE_POSTS_PAGE,
   SOCIAL_ROUTES,
   type SocialFollowsTab,
@@ -622,6 +623,40 @@ export async function loadLikedPostIds(
     .eq("target_type", "post")
     .in("target_id", postIds);
   return new Set((data ?? []).map((row) => row.target_id));
+}
+
+export async function loadVisiblePost(
+  supabase: ServerClient,
+  postId: string,
+): Promise<SocialPostRow | null> {
+  const { data } = await supabase
+    .from("posts")
+    .select(SOCIAL_POST_FEED_SELECT)
+    .eq("id", postId)
+    .eq("status", "active")
+    .maybeSingle();
+  return data;
+}
+
+export type SocialLikersPage = {
+  userIds: string[];
+  truncated: boolean;
+};
+
+export async function loadPostLikers(
+  supabase: ServerClient,
+  postId: string,
+): Promise<SocialLikersPage> {
+  const { data } = await supabase
+    .from("likes")
+    .select("user_id")
+    .eq("target_type", "post")
+    .eq("target_id", postId)
+    .order("created_at", { ascending: false })
+    .order("user_id", { ascending: true })
+    .range(...probeRange(SOCIAL_LIKERS_PAGE));
+  const { rows, truncated } = splitProbe(data, SOCIAL_LIKERS_PAGE);
+  return { userIds: rows.map((row) => row.user_id), truncated };
 }
 
 export type SocialCommentsPage = {

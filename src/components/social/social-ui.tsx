@@ -10,6 +10,7 @@ import {
   SOCIAL_ACTION_SECONDARY_CLASS,
   SOCIAL_FEED_GUTTER_CLASS,
   SOCIAL_FEED_ROW_CLASS,
+  SOCIAL_POST_TIME_CLASS,
   SOCIAL_HIGHLIGHT_RING_CLASS,
   SOCIAL_PROFILE_ACTIONS_CLASS,
   SOCIAL_PROFILE_AVATAR_ON_COVER_CLASS,
@@ -32,6 +33,7 @@ import {
   socialGroupHref,
   socialMemberHref,
   socialPersonIdentity,
+  socialPostHref,
   socialRelativeTime,
 } from "@/lib/social";
 import {
@@ -160,18 +162,24 @@ export type SocialPostCardModel = {
   media: SocialPostMediaItem[];
 };
 
-export function SocialPostMedia({ items }: { items: readonly SocialPostMediaItem[] }) {
+export function SocialPostMedia({
+  items,
+  href,
+}: {
+  items: readonly SocialPostMediaItem[];
+  href?: string;
+}) {
   if (items.length === 0) return null;
   return (
     <div data-social-post-media="" className="flex flex-col gap-2">
       {items.map((item) => (
-        <SocialPostMediaFrame key={item.playbackId ?? item.url} item={item} />
+        <SocialPostMediaFrame key={item.playbackId ?? item.url} item={item} href={href} />
       ))}
     </div>
   );
 }
 
-function SocialPostMediaFrame({ item }: { item: SocialPostMediaItem }) {
+function SocialPostMediaFrame({ item, href }: { item: SocialPostMediaItem; href?: string }) {
   const frame = cn(
     socialMediaFrameClass(item),
     "relative overflow-hidden bg-surface-muted md:rounded-[8px]",
@@ -183,10 +191,17 @@ function SocialPostMediaFrame({ item }: { item: SocialPostMediaItem }) {
       </div>
     );
   }
-  return (
+  const image = (
     <div data-social-post-image="" className={frame}>
       <SocialMediaImage src={item.url} sizes={SOCIAL_POST_IMAGE_SIZES} />
     </div>
+  );
+  return href ? (
+    <Link href={href} className="block">
+      {image}
+    </Link>
+  ) : (
+    image
   );
 }
 
@@ -425,20 +440,42 @@ export function socialAuthorPostCard(input: {
   };
 }
 
-export function SocialPostCard({ post }: { post: SocialPostCardModel }) {
+export function SocialPostCard({
+  post,
+  permalink = true,
+}: {
+  post: SocialPostCardModel;
+  permalink?: boolean;
+}) {
   // 24Frame blend (Adam 2026-09-20): one card at every breakpoint.
   // Header (avatar · name · muted time) → media? → icons → likes → caption → N comments when N > 0.
   // Forbidden: FB reaction pile, labeled action bar, bottom timestamp, share count.
   const media = post.media.length > 0;
   const handle = post.authorHandle ? displayHandle(post.authorHandle).slice(1) : post.authorName;
+  const href = socialPostHref(post.id);
   const thread = {
     id: post.id,
     commentCount: post.commentCount,
     groupSlug: post.groupSlug,
     canComment: post.canLike,
   };
+  const time = (
+    <time dateTime={post.createdAt} data-social-post-time="" className={SOCIAL_POST_TIME_CLASS}>
+      {socialRelativeTime(post.createdAt)}
+    </time>
+  );
+  const caption = post.body ? (
+    <>
+      <span className="font-semibold">{handle} </span>
+      {post.body}
+    </>
+  ) : null;
   return (
-    <article data-social-post={post.id} className={SOCIAL_FEED_ROW_CLASS}>
+    <article
+      data-social-post={post.id}
+      data-social-post-href={permalink ? href : undefined}
+      className={SOCIAL_FEED_ROW_CLASS}
+    >
       <div className="flex min-w-0 items-center gap-2.5">
         <SocialAvatar name={post.authorName} photoUrl={post.authorPhotoUrl} size="sm" />
         <div className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
@@ -452,9 +489,13 @@ export function SocialPostCard({ post }: { post: SocialPostCardModel }) {
           ) : (
             <span className="min-w-0 break-words t-body-sm font-semibold text-ink">{post.authorName}</span>
           )}
-          <time dateTime={post.createdAt} data-social-post-time="" className="t-label text-ink-2">
-            {socialRelativeTime(post.createdAt)}
-          </time>
+          {permalink ? (
+            <Link href={href} className={SOCIAL_POST_TIME_CLASS}>
+              {time}
+            </Link>
+          ) : (
+            time
+          )}
           {post.groupSlug && post.groupName ? (
             <>
               <span className="t-label text-ink-2" aria-hidden>
@@ -467,7 +508,7 @@ export function SocialPostCard({ post }: { post: SocialPostCardModel }) {
           ) : null}
         </div>
       </div>
-      {media ? <SocialPostMedia items={post.media} /> : null}
+      {media ? <SocialPostMedia items={post.media} href={permalink ? href : undefined} /> : null}
       <div className="flex flex-col gap-1">
         <div data-social-post-actions="" className="flex items-center gap-3.5">
           {post.canLike ? (
@@ -487,11 +528,20 @@ export function SocialPostCard({ post }: { post: SocialPostCardModel }) {
           </span>
         </div>
         <SocialLikeCount postId={post.id} liked={post.liked} likeCount={post.likeCount} />
-        {post.body ? (
-          <p data-social-post-caption="" className="t-body-sm text-ink whitespace-pre-wrap break-words">
-            <span className="font-semibold">{handle} </span>
-            {post.body}
-          </p>
+        {caption ? (
+          permalink ? (
+            <Link
+              href={href}
+              data-social-post-caption=""
+              className="t-body-sm text-ink whitespace-pre-wrap break-words"
+            >
+              {caption}
+            </Link>
+          ) : (
+            <p data-social-post-caption="" className="t-body-sm text-ink whitespace-pre-wrap break-words">
+              {caption}
+            </p>
+          )
         ) : null}
         <SocialCommentTrigger post={thread} />
       </div>
