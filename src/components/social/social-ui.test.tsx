@@ -39,7 +39,9 @@ import {
   SOCIAL_FEED_GUTTER_CLASS,
   SOCIAL_FEED_ROW_CLASS,
   SOCIAL_PROFILE_GRID_CLASS,
+  SOCIAL_PROFILE_ACTIONS_CLASS,
   SOCIAL_PROFILE_HEAD_CLASS,
+  SOCIAL_PROFILE_NAME_CLASS,
   SOCIAL_PROFILE_POSTS_EMPTY_CLASS,
   SOCIAL_PROFILE_ROLE_PILL_CLASS,
   SOCIAL_PROFILE_ROLES_RAIL_ROWS,
@@ -217,8 +219,8 @@ describe("Social profile public face", () => {
     expect(identity).toContain("Ada Lovelace");
     expect(identity).not.toContain("data-social-profile-handle");
     expect(identity).not.toContain("@ada");
-    expect(identity.indexOf("data-social-profile-head")).toBeLessThan(
-      identity.indexOf("data-social-profile-name"),
+    expect(identity.indexOf("data-social-profile-name")).toBeLessThan(
+      identity.indexOf("data-social-profile-head"),
     );
     expect(identity).not.toContain("data-social-profile-stats");
     expect(identity).not.toContain("data-social-profile-mutuals");
@@ -231,6 +233,20 @@ describe("Social profile public face", () => {
     expect(uiSrc).not.toContain("socialShareHint");
     expect(uiSrc).toContain("data-social-profile-head");
     expect(uiSrc).toContain("SOCIAL_PROFILE_HEAD_CLASS");
+    expect(uiSrc).toContain("SOCIAL_PROFILE_ACTIONS_CLASS");
+    const identityMarkup = uiSrc.slice(
+      uiSrc.indexOf("data-social-profile-identity"),
+      uiSrc.indexOf("export function SocialHighlights"),
+    );
+    expect(identityMarkup.indexOf("data-social-profile-name")).toBeLessThan(
+      identityMarkup.indexOf("data-social-profile-head"),
+    );
+    expect(identityMarkup.indexOf("data-social-profile-head")).toBeLessThan(
+      identityMarkup.indexOf("data-social-profile-face"),
+    );
+    expect(identityMarkup.indexOf("HouseChipRail")).toBeLessThan(
+      identityMarkup.indexOf("{actionRow}"),
+    );
     expect(uiSrc).not.toContain("data-social-profile-handle");
     expect(identity).toContain("Writes engines.");
     expect(identity).toContain('src="https://s3.example/signed-avatar"');
@@ -406,7 +422,7 @@ describe("Social profile public face", () => {
     expect(postsStat.indexOf(">12<")).toBeLessThan(postsStat.indexOf(`>${SOCIAL.profile.postsStat}<`));
     const head = withStats.slice(
       withStats.indexOf("data-social-profile-head"),
-      withStats.indexOf("data-social-profile-name"),
+      withStats.indexOf("data-social-profile-face"),
     );
     expect(head).toContain("data-social-avatar");
     expect(head).toContain("data-social-profile-stats");
@@ -414,18 +430,28 @@ describe("Social profile public face", () => {
     expect(head).not.toContain("data-social-profile-name");
     expect(head).not.toContain("data-social-profile-roles");
     expect(head).not.toContain("@ada");
-    expect(withStats.indexOf("data-social-profile-stats")).toBeLessThan(
-      withStats.indexOf("data-social-profile-name"),
-    );
     expect(withStats.indexOf("data-social-profile-name")).toBeLessThan(
+      withStats.indexOf("data-social-profile-stats"),
+    );
+    expect(withStats.indexOf("data-social-profile-stats")).toBeLessThan(
       withStats.indexOf("data-social-profile-bio"),
     );
     expect(withStats.indexOf("data-social-profile-bio")).toBeLessThan(
       withStats.indexOf("data-social-profile-roles"),
     );
     expect(withStats.indexOf("data-social-profile-roles")).toBeLessThan(
+      withStats.indexOf("data-social-profile-actions"),
+    );
+    expect(withStats.indexOf("data-social-profile-actions")).toBeLessThan(
       withStats.indexOf("Edit profile"),
     );
+    expect(withStats).toContain(SOCIAL_PROFILE_ACTIONS_CLASS);
+    expect(SOCIAL_PROFILE_ACTIONS_CLASS).toContain("mt-[var(--space-3)]");
+    expect(SOCIAL_PROFILE_ACTIONS_CLASS).not.toContain("mt-[12px]");
+    expect(SOCIAL_PROFILE_ACTIONS_CLASS).not.toContain("mt-[16px]");
+    expect(SOCIAL_PROFILE_NAME_CLASS).toContain("break-words");
+    expect(SOCIAL_PROFILE_NAME_CLASS).not.toContain("truncate");
+    expect(withStats).not.toContain("truncate");
     expect(withStats).toContain("Actor");
     expect(withStats).not.toContain("flex-wrap gap-4");
     expect(withStats).not.toContain("data-social-profile-copy");
