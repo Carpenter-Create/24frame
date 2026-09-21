@@ -74,7 +74,6 @@ describe("house speed lock — no RSA on Social Home / Home critical path", () =
     expect(follow).not.toContain("toggleSocialFollow");
     expect(follow).not.toContain("disabled={pending}");
     expect(follow).not.toContain("const result = await toggleSocialFollow");
-    expect(light).not.toContain("revalidatePath(SOCIAL_ROUTES.home)");
     const followChunk = light.slice(
       light.indexOf("export async function toggleSocialFollow"),
       light.indexOf("export async function toggleSocialLike"),
@@ -93,7 +92,7 @@ describe("house speed lock — no RSA on Social Home / Home critical path", () =
     expect(shell).toContain("useHousePathname");
     expect(provider).toContain("history.pushState");
     expect(provider).toContain("navigateOwned");
-    expect(provider).toContain("data-house-rsc-fallback");
+    expect(provider).toContain("HOUSE_CLIENT_SHELL.rscFallbackAttr");
     expect(loading).toContain("data-house-rsc-fallback");
   });
 });

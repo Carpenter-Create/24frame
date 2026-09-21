@@ -24,16 +24,14 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
-vi.mock("@/lib/social-edge", () => ({
-  signedAvatarUrls: vi.fn(() => new Map()),
-  signedSocialMediaByPostId: vi.fn(() => new Map()),
-  socialAvatarHref: (id: string) => `/api/social/avatar/${id}`,
-  socialMediaHref: (key: string) => `/api/social/media?key=${encodeURIComponent(key)}`,
-  socialAvatarFaces: (ids: readonly string[]) =>
-    new Map(ids.filter(Boolean).map((id) => [id, `/api/social/avatar/${id}`])),
-  socialMediaProxies: () => [],
-  socialMediaProxiesByPostId: () => new Map(),
-}));
+vi.mock("@/lib/social-edge", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/social-edge")>();
+  return {
+    ...actual,
+    signedAvatarUrls: vi.fn(() => new Map()),
+    signedSocialMediaByPostId: vi.fn(() => new Map()),
+  };
+});
 vi.mock("@/lib/s3-education", () => ({
   signedEducationCoverUrls: vi.fn().mockResolvedValue(new Map()),
 }));

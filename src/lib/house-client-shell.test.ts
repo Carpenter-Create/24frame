@@ -4,10 +4,13 @@ import { describe, expect, it } from "vitest";
 import {
   HOUSE_CLIENT_SHELL,
   houseHrefKey,
+  housePaintedKeys,
+  houseRememberPainted,
   houseScreenKey,
   houseShouldClientNavigate,
   houseWorkspaceLandKey,
   isHouseClientOwnedPath,
+  resetHousePaintedForTests,
 } from "@/lib/house-client-shell";
 import { isHouseRscFallback } from "@/components/chrome/house-client-shell";
 import { SOCIAL_ROUTES } from "@/lib/social";
@@ -33,6 +36,16 @@ describe("house client shell SoT", () => {
     expect(houseWorkspaceLandKey("/social/u/ada")).toBe("/social");
     expect(houseWorkspaceLandKey("/home/news")).toBe("/home");
     expect(HOUSE_CLIENT_SHELL.cacheCap).toBeGreaterThanOrEqual(6);
+  });
+
+  it("remembers painted screens for warm client hops", () => {
+    resetHousePaintedForTests();
+    houseRememberPainted("/social");
+    houseRememberPainted("/social/explore");
+    expect(housePaintedKeys()[0]).toBe("/social/explore");
+    expect(houseShouldClientNavigate("/social", housePaintedKeys())).toBe(true);
+    resetHousePaintedForTests();
+    expect(houseShouldClientNavigate("/social", housePaintedKeys())).toBe(false);
   });
 
   it("client-navigates only when the dest is owned and already mounted", () => {

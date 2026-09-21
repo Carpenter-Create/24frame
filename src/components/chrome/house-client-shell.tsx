@@ -3,12 +3,9 @@
 import {
   createContext,
   isValidElement,
-  useCallback,
   useContext,
   useEffect,
-  useLayoutEffect,
   useMemo,
-  useRef,
   useState,
   type MouseEvent,
   type ReactNode,
@@ -17,8 +14,11 @@ import { usePathname, useSearchParams } from "next/navigation";
 
 import {
   HOUSE_CLIENT_SHELL,
+  houseForgetUnlisted,
   houseHrefKey,
+  housePaintedKeys,
   housePathFromLocation,
+  houseRememberPainted,
   houseScreenKey,
   houseShouldClientNavigate,
   parseHouseHref,
@@ -31,10 +31,15 @@ type HouseClientApi = {
   href: string;
   screenKey: string;
   hasScreen: (href: string) => boolean;
-  rememberScreen: (key: string, node: ReactNode) => void;
-  syncScreens: (keys: readonly string[]) => void;
   navigateOwned: (href: string, event?: HouseNavClickLike) => boolean;
 };
+
+type ScreenStore = {
+  order: string[];
+  nodes: Record<string, ReactNode>;
+};
+
+const EMPTY_STORE: ScreenStore = { order: [], nodes: {} };
 
 const HouseClientContext = createContext<HouseClientApi | null>(null);
 
@@ -57,9 +62,17 @@ export function isHouseRscFallback(node: ReactNode): boolean {
   return isHouseRscFallback(props.children);
 }
 
-function rememberLru(order: string[], key: string, cap: number): string[] {
-  const next = [key, ...order.filter((item) => item !== key)];
-  return next.slice(0, cap);
+function nextScreenStore(store: ScreenStore, key: string, node: ReactNode): ScreenStore {
+  if (store.nodes[key] === node && store.order[0] === key) return store;
+  const order = [key, ...store.order.filter((item) => item !== key)].slice(
+    0,
+    HOUSE_CLIENT_SHELL.cacheCap,
+  );
+  const nodes: Record<string, ReactNode> = { [key]: node };
+  for (const item of order) {
+    if (item !== key && item in store.nodes) nodes[item] = store.nodes[item];
+  }
+  return { order, nodes };
 }
 
 export function HousePathProvider({ children }: { children: ReactNode }) {
@@ -69,47 +82,35 @@ export function HousePathProvider({ children }: { children: ReactNode }) {
   const nextSearchPrefixed = nextSearch ? `?${nextSearch}` : "";
   const nextHref = housePathFromLocation(nextPath, nextSearchPrefixed);
   const [ownedHref, setOwnedHref] = useState<string | null>(null);
-  const keysRef = useRef(new Set<string>());
-  const [, bump] = useState(0);
+
+  if (ownedHref && houseHrefKey(ownedHref) === houseHrefKey(nextHref)) {
+    setOwnedHref(null);
+  }
 
   const href = ownedHref ?? nextHref;
   const parsed = parseHouseHref(href);
   const screenKey = houseScreenKey(parsed.pathname, parsed.search);
 
-  const hasScreen = useCallback((dest: string) => keysRef.current.has(houseHrefKey(dest)), []);
-
-  const rememberScreen = useCallback((key: string, _node: ReactNode) => {
-    if (keysRef.current.has(key)) return;
-    keysRef.current.add(key);
-    bump((n) => n + 1);
-  }, []);
-
-  const syncScreens = useCallback((keys: readonly string[]) => {
-    keysRef.current = new Set(keys);
-    bump((n) => n + 1);
-  }, []);
-
-  const navigateOwned = useCallback(
-    (dest: string, event?: HouseNavClickLike) => {
-      if (event && houseNavIgnorePendingClick(event)) return false;
-      if (!houseShouldClientNavigate(dest, keysRef.current)) return false;
-      const { pathname, search } = parseHouseHref(dest);
-      const next = housePathFromLocation(pathname, search);
-      if (next === href) return true;
-      window.history.pushState({ houseClient: true }, "", next);
-      setOwnedHref(next);
-      return true;
-    },
-    [href],
+  const api = useMemo<HouseClientApi>(
+    () => ({
+      pathname: parsed.pathname,
+      search: parsed.search,
+      href,
+      screenKey,
+      hasScreen: (dest: string) => houseShouldClientNavigate(dest, housePaintedKeys()),
+      navigateOwned: (dest: string, event?: HouseNavClickLike) => {
+        if (event && houseNavIgnorePendingClick(event)) return false;
+        if (!houseShouldClientNavigate(dest, housePaintedKeys())) return false;
+        const parsedDest = parseHouseHref(dest);
+        const next = housePathFromLocation(parsedDest.pathname, parsedDest.search);
+        if (next === href) return true;
+        window.history.pushState({ houseClient: true }, "", next);
+        setOwnedHref(next);
+        return true;
+      },
+    }),
+    [href, parsed.pathname, parsed.search, screenKey, setOwnedHref],
   );
-  const navigateOwnedRef = useRef(navigateOwned);
-  navigateOwnedRef.current = navigateOwned;
-
-  useEffect(() => {
-    if (ownedHref && houseHrefKey(ownedHref) === houseHrefKey(nextHref)) {
-      setOwnedHref(null);
-    }
-  }, [nextHref, ownedHref]);
 
   useEffect(() => {
     const onPop = () => {
@@ -137,27 +138,13 @@ export function HousePathProvider({ children }: { children: ReactNode }) {
       } catch {
         return;
       }
-      if (!navigateOwnedRef.current(dest, event)) return;
+      if (!api.navigateOwned(dest, event)) return;
       event.preventDefault();
       event.stopPropagation();
     };
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
-  }, []);
-
-  const api = useMemo<HouseClientApi>(
-    () => ({
-      pathname: parsed.pathname,
-      search: parsed.search,
-      href,
-      screenKey,
-      hasScreen,
-      rememberScreen,
-      syncScreens,
-      navigateOwned,
-    }),
-    [hasScreen, href, navigateOwned, parsed.pathname, parsed.search, rememberScreen, screenKey, syncScreens],
-  );
+  }, [api]);
 
   return <HouseClientContext.Provider value={api}>{children}</HouseClientContext.Provider>;
 }
@@ -169,32 +156,29 @@ export function HouseScreenCache({ children }: { children: ReactNode }) {
   const nextSearchPrefixed = nextSearch ? `?${nextSearch}` : "";
   const nextKey = houseScreenKey(nextPath, nextSearchPrefixed);
   const house = useHouseClient();
-  const cacheRef = useRef(new Map<string, ReactNode>());
-  const orderRef = useRef<string[]>([]);
-  const [, bump] = useState(0);
+  const [store, setStore] = useState<ScreenStore>(EMPTY_STORE);
   const fallback = isHouseRscFallback(children);
   const activeKey = house?.screenKey ?? nextKey;
 
-  useLayoutEffect(() => {
-    if (fallback) return;
-    cacheRef.current.set(nextKey, children);
-    orderRef.current = rememberLru(orderRef.current, nextKey, HOUSE_CLIENT_SHELL.cacheCap);
-    house?.rememberScreen(nextKey, children);
-    const stale = [...cacheRef.current.keys()].filter((key) => !orderRef.current.includes(key));
-    for (const key of stale) cacheRef.current.delete(key);
-    house?.syncScreens(orderRef.current);
-    bump((n) => n + 1);
-  }, [children, fallback, house, nextKey]);
+  let nextStore = store;
+  if (!fallback && !(nextKey in store.nodes)) {
+    const remembered = nextScreenStore(store, nextKey, children);
+    if (remembered !== store) {
+      nextStore = remembered;
+      setStore(remembered);
+      houseRememberPainted(nextKey);
+      houseForgetUnlisted(remembered.order);
+    }
+  }
 
-  const entries = [...cacheRef.current.entries()];
-  const known = cacheRef.current.has(activeKey);
+  const known = activeKey in nextStore.nodes;
   // Unknown dest: paint the live RSC (or its loading.tsx). Known dest: the
   // mounted tree wins — never overwrite a warm screen with a skeleton.
   const ingress = known ? null : children;
 
   return (
     <>
-      {entries.map(([key, node]) => (
+      {nextStore.order.map((key) => (
         <div
           key={key}
           hidden={key !== activeKey}
@@ -202,7 +186,7 @@ export function HouseScreenCache({ children }: { children: ReactNode }) {
           {...{ [HOUSE_CLIENT_SHELL.screenAttr]: key }}
           {...(key === activeKey ? { [HOUSE_CLIENT_SHELL.screenActiveAttr]: "" } : {})}
         >
-          {node}
+          {nextStore.nodes[key]}
         </div>
       ))}
       {ingress}

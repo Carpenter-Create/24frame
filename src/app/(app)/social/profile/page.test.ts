@@ -27,12 +27,16 @@ vi.mock("next/headers", () => ({
 }));
 vi.mock("@/lib/supabase/context", () => ({ getOrgContext: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
-vi.mock("@/lib/social-edge", () => ({
-  signedAvatarUrls: vi.fn(() => new Map()),
-  signedSocialMediaByPostId: vi.fn(() => new Map()),
-  socialAvatarHref: vi.fn((id: string) => `/api/social/avatar/${id}`),
-  socialMediaHref: vi.fn((key: string) => `/api/social/media?key=${encodeURIComponent(key)}`),
-}));
+vi.mock("@/lib/social-edge", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/social-edge")>();
+  return {
+    ...actual,
+    signedAvatarUrls: vi.fn((ids: readonly string[]) => actual.signedAvatarUrls(ids)),
+    signedSocialMediaByPostId: vi.fn((posts) => actual.signedSocialMediaByPostId(posts)),
+    socialAvatarHref: vi.fn((id: string) => actual.socialAvatarHref(id)),
+    socialMediaHref: vi.fn((key: string) => actual.socialMediaHref(key)),
+  };
+});
 vi.mock("@/lib/social-profile", () => ({
   ensureOwnSocialProfileResult: vi.fn(),
 }));
@@ -221,7 +225,7 @@ describe("Social profile public face", () => {
     expect(html).toContain("data-social-profile-cover");
     expect(html).toContain("data-social-profile-cover-edit");
     expect(html).toContain("data-social-profile-avatar-edit");
-    expect(html).toContain("AL");
+    expect(html).toContain("/api/social/avatar/u1");
   });
 
   it("renders the signed account face and uploads through Settings", async () => {

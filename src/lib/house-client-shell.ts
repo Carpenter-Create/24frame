@@ -90,3 +90,30 @@ export function houseShouldClientNavigate(
   if (!isHouseClientOwnedPath(parseHouseHref(dest).pathname)) return false;
   return new Set(cachedKeys).has(houseHrefKey(dest));
 }
+
+const paintedScreens = new Set<string>();
+
+export function houseRememberPainted(key: string): string[] {
+  const next = [key, ...[...paintedScreens].filter((item) => item !== key)].slice(
+    0,
+    HOUSE_CLIENT_SHELL.cacheCap,
+  );
+  paintedScreens.clear();
+  for (const item of next) paintedScreens.add(item);
+  return next;
+}
+
+export function houseForgetUnlisted(keys: readonly string[]): void {
+  const keep = new Set(keys);
+  for (const key of [...paintedScreens]) {
+    if (!keep.has(key)) paintedScreens.delete(key);
+  }
+}
+
+export function housePaintedKeys(): string[] {
+  return [...paintedScreens];
+}
+
+export function resetHousePaintedForTests(): void {
+  paintedScreens.clear();
+}

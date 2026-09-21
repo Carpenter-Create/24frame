@@ -297,13 +297,13 @@ describe("AppShell Home chrome", () => {
     expect(shellSrc).toContain("overviewHidesRail");
     expect(shellSrc).toContain("OVERVIEW_RAIL_OFF_WIDTH");
     expect(shellSrc).toContain("data-home-chrome");
-    const homeStart = shellSrc.indexOf(") : homePage ? (");
-    const homeBranch = shellSrc.slice(homeStart, shellSrc.indexOf(") : (", homeStart + 1));
-    expect(homeBranch).not.toContain("mx-auto");
-    expect(homeBranch).not.toContain("page-max-width");
-    expect(homeBranch).toContain("HOUSE_HOME_RAIL_COLUMN_CLASS");
-    expect(homeBranch).toContain("HOUSE_CANVAS_X_CLASS");
-    expect(homeBranch).toContain("data-app-home-frame");
+    const homeArm = shellSrc.slice(shellSrc.indexOf(": homePage"), shellSrc.indexOf(": cn(\"mx-auto"));
+    expect(homeArm).not.toContain("mx-auto");
+    expect(homeArm).not.toContain("page-max-width");
+    expect(homeArm).toContain("HOUSE_HOME_RAIL_COLUMN_CLASS");
+    expect(homeArm).toContain("HOUSE_CANVAS_X_CLASS");
+    expect(shellSrc).toContain("data-app-home-frame");
+    expect(shellSrc.match(/<HouseScreenCache>/g)?.length).toBe(1);
 
     for (const path of ["/aggregation/dashboard", "/social", "/education"]) {
       navigation.pathname = path;

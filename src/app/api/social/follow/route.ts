@@ -5,7 +5,7 @@ import { ACCOUNT_PROFILE } from "@/lib/account-profile";
 import { getAuthUser } from "@/lib/supabase/auth";
 
 // Background persist for Follow. Fetch — not a server action —
-// so the chip does not wait on a router refresh or Home revalidatePath.
+// so the chip does not wait on a router refresh or a Home RSC rewrite.
 
 export async function POST(request: Request) {
   const user = await getAuthUser();

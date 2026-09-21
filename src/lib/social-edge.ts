@@ -1,6 +1,7 @@
 import {
   isSocialMuxMediaItem,
   ownedMediaItems,
+  type SocialMediaContentType,
   type SocialMediaLane,
 } from "@/lib/social-media";
 import { socialMuxThumbnailUrl } from "@/lib/social-mux";
@@ -35,7 +36,7 @@ export function signedAvatarUrls(userIds: readonly string[]): Map<string, string
 export type SocialEdgeMediaItem = {
   kind: "image" | "video";
   url: string;
-  contentType: string;
+  contentType: SocialMediaContentType;
   playbackId?: string;
 };
 
