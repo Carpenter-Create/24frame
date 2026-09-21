@@ -727,7 +727,6 @@ export const SOCIAL = {
     unlike: "Unlike",
     likes: "likes",
     comments: "comments",
-    viewComments: "View comments",
     comment: "Comment",
     commentsTitle: "Comments",
     commentPlaceholder: "Write a comment…",

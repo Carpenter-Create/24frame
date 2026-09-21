@@ -410,7 +410,7 @@ export function socialAuthorPostCard(input: {
 
 export function SocialPostCard({ post }: { post: SocialPostCardModel }) {
   // 24Frame blend (Adam 2026-09-20): one card at every breakpoint.
-  // Header (avatar · name · muted time) → media? → icons → likes → caption → quiet comments.
+  // Header (avatar · name · muted time) → media? → icons → likes → caption → N comments when N > 0.
   // Forbidden: FB reaction pile, labeled action bar, bottom timestamp, share count.
   const media = post.media.length > 0;
   const handle = post.authorHandle ? displayHandle(post.authorHandle).slice(1) : post.authorName;
