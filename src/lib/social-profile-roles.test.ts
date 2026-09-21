@@ -445,7 +445,8 @@ describe("social profile roles", () => {
     expect(fieldSrc).toContain("toggleSocialProfileRole");
     expect(fieldSrc).toContain("onChange(toggleSocialProfileRole");
     expect(fieldSrc).toContain("SocialProfileRolesEditor");
-    expect(fieldSrc).toContain("data-social-profile-roles-back");
+    expect(fieldSrc).toContain("SocialProfileChipSelectFace");
+    expect(fieldSrc).toContain("SocialProfileEditFace");
     expect(fieldSrc).not.toContain("createSocialProfile");
     expect(fieldSrc).not.toContain("await");
     const saveSoT = readFileSync("src/lib/social-profile-edit.ts", "utf8");

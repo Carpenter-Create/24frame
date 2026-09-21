@@ -1,3 +1,4 @@
+import { SOCIAL } from "@/lib/social";
 import {
   SOCIAL_CATEGORY_TOPICS,
   normalizeSocialCategory,
@@ -10,6 +11,7 @@ import {
 
 export const SOCIAL_PROFILE_TOPICS = SOCIAL_CATEGORY_TOPICS;
 export const SOCIAL_PROFILE_TOPICS_MAX = 8;
+export const SOCIAL_PROFILE_TOPICS_COUNT = "{n} / {max}";
 
 function topicValues(raw: unknown): unknown[] {
   if (Array.isArray(raw)) return raw;
@@ -61,4 +63,33 @@ export function filterSocialProfileTopics(query: string): SocialCategoryTopic[] 
   const needle = query.trim().toLowerCase();
   if (!needle) return [...SOCIAL_PROFILE_TOPICS];
   return SOCIAL_PROFILE_TOPICS.filter((topic) => topic.toLowerCase().includes(needle));
+}
+
+export function socialProfileTopicsCountLabel(count: number): string {
+  return SOCIAL_PROFILE_TOPICS_COUNT.replace("{n}", String(count)).replace(
+    "{max}",
+    String(SOCIAL_PROFILE_TOPICS_MAX),
+  );
+}
+
+export function socialProfileTopicsRowSummary(raw: unknown): string {
+  const topics = parseSocialProfileTopics(raw);
+  if (topics.length === 0) return SOCIAL.profile.topicsAdd;
+  const first = topics[0] ?? "";
+  if (topics.length === 1) return first;
+  return SOCIAL.profile.topicsMore
+    .replace("{first}", first)
+    .replace("{n}", String(topics.length - 1));
+}
+
+export function filterSocialProfileTopicGroups(query: string): {
+  id: string;
+  options: { id: SocialCategoryTopic; label: SocialCategoryTopic }[];
+}[] {
+  return [
+    {
+      id: "topics",
+      options: filterSocialProfileTopics(query).map((topic) => ({ id: topic, label: topic })),
+    },
+  ];
 }

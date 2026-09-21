@@ -29,6 +29,7 @@ import {
   HOUSE_SCROLL_ROW_CLASS,
   HOUSE_SEGMENTED_ITEM_BASE_CLASS,
 } from "@/lib/house-shell";
+import { HOUSE_VOICE_FOCUS_HOST_CLASS } from "@/lib/form-control";
 import {
   SETTINGS_DIALOG_ERROR_CLASS,
   SETTINGS_DIALOG_HELP_CLASS,
@@ -292,6 +293,19 @@ export const SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS =
 
 export const SOCIAL_TOPIC_CHIP_BANK_CLASS = "flex flex-wrap gap-2";
 
+// Shared Professions / Topics select face. Selected band + count →
+// helper → search → grouped banks with section air. Sentence-case
+// group labels — never t-label ALL-CAPS. Roles and Topics consume
+// this grammar; do not fork a lookalike.
+export const SOCIAL_PROFILE_CHIP_FACE_CLASS = "flex flex-col gap-[var(--space-6)]";
+export const SOCIAL_PROFILE_CHIP_BAND_CLASS = "flex flex-col gap-[var(--space-3)]";
+export const SOCIAL_PROFILE_CHIP_COUNT_CLASS = "t-body-sm text-ink-2";
+export const SOCIAL_PROFILE_CHIP_HELP_CLASS = SETTINGS_DIALOG_HELP_CLASS;
+export const SOCIAL_PROFILE_CHIP_GROUPS_CLASS = "flex flex-col gap-[var(--space-6)]";
+export const SOCIAL_PROFILE_CHIP_GROUP_CLASS = "flex flex-col gap-[var(--space-3)]";
+export const SOCIAL_PROFILE_CHIP_GROUP_LABEL_CLASS =
+  "t-body-sm font-medium normal-case tracking-normal text-ink-2";
+
 export function socialTopicChipSelectClass(selected: boolean): string {
   return selected ? SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS : SOCIAL_TOPIC_CHIP_SELECT_IDLE_CLASS;
 }
@@ -481,6 +495,9 @@ export const SOCIAL_PROFILE_EDIT_SECTION_CLASS = "flex flex-col gap-3 py-3";
 // + 0.12em track. One line, no mid-word ellipsis. 128px still
 // fits sentence-case field names in the label column.
 export const SOCIAL_HANDLE_FIELD_LABEL_CLASS = SETTINGS_DIALOG_LABEL_CLASS;
+export const SOCIAL_HANDLE_PREFIX_CLASS = "shrink-0 select-none font-medium text-ink-2";
+export const SOCIAL_HANDLE_FIELD_CLASS =
+  `flex w-full items-center rounded-[var(--radius-sm)] border border-hairline bg-surface px-3 py-2 ${HOUSE_VOICE_FOCUS_HOST_CLASS}`;
 
 export const SOCIAL_PROFILE_EDIT_LABEL_CLASS =
   `w-32 shrink-0 whitespace-nowrap pt-0.5 ${SETTINGS_DIALOG_LABEL_CLASS}`;

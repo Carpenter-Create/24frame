@@ -1,3 +1,5 @@
+import { SOCIAL } from "@/lib/social";
+
 // IMDb Phase 1: claim a person URL / nm id. No scrape, no licensed import.
 
 export const SOCIAL_IMDB_NAME_HOST = "https://www.imdb.com/name";
@@ -27,4 +29,11 @@ export function parseSocialImdbInput(raw: string): {
   const nameId = socialImdbNameId(text);
   if (!nameId) return { nameId: null, url: null, error: "invalid" };
   return { nameId, url: socialImdbNameUrl(nameId), error: null };
+}
+
+export function socialProfileImdbRowSummary(raw: string): string {
+  const parsed = parseSocialImdbInput(raw);
+  if (parsed.nameId) return parsed.nameId;
+  const text = raw.trim();
+  return text || SOCIAL.profile.imdbAdd;
 }

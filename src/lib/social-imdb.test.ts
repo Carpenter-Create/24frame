@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { parseSocialImdbInput, socialImdbNameId, socialImdbNameUrl } from "./social-imdb";
+import { SOCIAL } from "@/lib/social";
+import {
+  parseSocialImdbInput,
+  socialImdbNameId,
+  socialImdbNameUrl,
+  socialProfileImdbRowSummary,
+} from "./social-imdb";
 
 describe("social IMDb Phase 1", () => {
   it("normalizes name URLs and nm ids to the canonical name page", () => {
@@ -22,5 +28,11 @@ describe("social IMDb Phase 1", () => {
     expect(parseSocialImdbInput("https://www.imdb.com/title/tt0111161/").error).toBe("invalid");
     expect(parseSocialImdbInput("not-imdb").error).toBe("invalid");
     expect(socialImdbNameId("")).toBeNull();
+  });
+
+  it("summarizes the Edit Profile IMDb drill row from a name id", () => {
+    expect(socialProfileImdbRowSummary("")).toBe(SOCIAL.profile.imdbAdd);
+    expect(socialProfileImdbRowSummary("nm0000158")).toBe("nm0000158");
+    expect(socialProfileImdbRowSummary("https://www.imdb.com/name/nm0000158/")).toBe("nm0000158");
   });
 });

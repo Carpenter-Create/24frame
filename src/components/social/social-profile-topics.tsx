@@ -2,22 +2,15 @@
 
 import { useState } from "react";
 
-import {
-  SocialProfileChipBank,
-  SocialProfileSelectChip,
-} from "@/components/social/social-profile-chip-select";
-import { Input } from "@/components/ui/input";
-import {
-  SOCIAL_PROFILE_EDIT_LABEL_CLASS,
-  SOCIAL_PROFILE_EDIT_SECTION_CLASS,
-  SOCIAL_TOPIC_CHIP_BANK_CLASS,
-} from "@/lib/social-chrome";
+import { SocialProfileEditFace } from "@/components/social/social-profile-edit-face";
+import { SocialProfileChipSelectFace } from "@/components/social/social-profile-chip-select";
 import { SOCIAL } from "@/lib/social";
 import { type SocialCategoryTopic } from "@/lib/social-categories";
 import {
-  filterSocialProfileTopics,
+  filterSocialProfileTopicGroups,
   parseSocialProfileTopics,
   socialProfileTopicsAtMax,
+  socialProfileTopicsCountLabel,
   toggleSocialProfileTopic,
 } from "@/lib/social-profile-topics";
 
@@ -31,7 +24,7 @@ export function SocialProfileTopicsField({
   const [query, setQuery] = useState("");
   const selected = parseSocialProfileTopics(value);
   const atMax = socialProfileTopicsAtMax(selected);
-  const topics = filterSocialProfileTopics(query);
+  const groups = filterSocialProfileTopicGroups(query);
   const notice = atMax ? SOCIAL.profile.topicsLimit : SOCIAL.profile.topicsHint;
 
   function toggle(label: string) {
@@ -39,42 +32,38 @@ export function SocialProfileTopicsField({
   }
 
   return (
-    <div data-social-profile-edit-topics="" className={SOCIAL_PROFILE_EDIT_SECTION_CLASS}>
-      <div className="flex flex-col gap-2">
-        <p className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>{SOCIAL.profile.topics}</p>
-        {selected.length > 0 ? (
-          <div data-social-profile-edit-topics-selected="" className={SOCIAL_TOPIC_CHIP_BANK_CLASS}>
-            {selected.map((topic) => (
-              <SocialProfileSelectChip
-                key={topic}
-                option={{ id: topic, label: topic }}
-                selected
-                chip
-                dataPrefix="social-profile-topic"
-                onToggle={toggle}
-              />
-            ))}
-          </div>
-        ) : null}
-        <p data-social-profile-edit-topics-notice="" className="t-label text-ink-2">
-          {notice}
-        </p>
-      </div>
-      <Input
-        id="social-edit-topics-search"
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder={SOCIAL.profile.topicsSearch}
-        aria-label={SOCIAL.profile.topicsSearch}
-        autoComplete="off"
-      />
-      <SocialProfileChipBank
-        groups={[{ id: "topics", options: topics.map((topic) => ({ id: topic, label: topic })) }]}
-        selectedIds={selected}
-        blocked={atMax}
-        dataPrefix="social-profile-topic"
-        onToggle={toggle}
-      />
-    </div>
+    <SocialProfileChipSelectFace
+      selected={selected.map((topic) => ({ id: topic, label: topic }))}
+      countLabel={socialProfileTopicsCountLabel(selected.length)}
+      helper={notice}
+      searchId="social-edit-topics-search"
+      searchValue={query}
+      searchPlaceholder={SOCIAL.profile.topicsSearch}
+      groups={groups}
+      blocked={atMax}
+      dataPrefix="social-profile-topic"
+      hostAttr="data-social-profile-edit-topics"
+      selectedAttr="data-social-profile-edit-topics-selected"
+      countAttr="data-social-profile-edit-topics-count"
+      noticeAttr="data-social-profile-edit-topics-notice"
+      onSearch={setQuery}
+      onToggle={toggle}
+    />
+  );
+}
+
+export function SocialProfileTopicsEditor({
+  value,
+  onChange,
+  onBack,
+}: {
+  value: readonly string[];
+  onChange: (next: SocialCategoryTopic[]) => void;
+  onBack: () => void;
+}) {
+  return (
+    <SocialProfileEditFace face="topics" title={SOCIAL.profile.topics} onBack={onBack}>
+      <SocialProfileTopicsField value={value} onChange={onChange} />
+    </SocialProfileEditFace>
   );
 }

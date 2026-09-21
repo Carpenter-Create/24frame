@@ -4,9 +4,12 @@ import { SOCIAL_CATEGORY_TOPICS, sortTopicsAlpha } from "@/lib/social-categories
 import {
   SOCIAL_PROFILE_TOPICS,
   SOCIAL_PROFILE_TOPICS_MAX,
+  filterSocialProfileTopicGroups,
   filterSocialProfileTopics,
   parseSocialProfileTopics,
   socialProfileTopicsAtMax,
+  socialProfileTopicsCountLabel,
+  socialProfileTopicsRowSummary,
   socialProfileTopicsWrite,
   toggleSocialProfileTopic,
 } from "./social-profile-topics";
@@ -53,5 +56,15 @@ describe("social profile topics", () => {
     expect(socialProfileTopicsWrite(over)).toEqual([...over]);
     expect(toggleSocialProfileTopic(atCap, over[8]!)).toEqual([...atCap]);
     expect(toggleSocialProfileTopic(over, over[0]!)).toEqual(over.slice(1));
+  });
+
+  it("summarizes the Topics drill row and count with the professions grammar", () => {
+    expect(socialProfileTopicsRowSummary([])).toBe("Add");
+    expect(socialProfileTopicsRowSummary(["Acting"])).toBe("Acting");
+    expect(socialProfileTopicsRowSummary(["Acting", "Financing", "Music"])).toBe("Acting +2");
+    expect(socialProfileTopicsCountLabel(3)).toBe("3 / 8");
+    expect(filterSocialProfileTopicGroups("cine")).toEqual([
+      { id: "topics", options: [{ id: "Cinematography", label: "Cinematography" }] },
+    ]);
   });
 });

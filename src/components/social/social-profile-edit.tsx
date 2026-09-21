@@ -14,9 +14,12 @@ import {
 import { AccountAvatarCrop } from "@/components/account/account-avatar-crop";
 import { SocialAvatar } from "@/components/social/social-avatar";
 import { SettingsDrillRow } from "@/components/settings/settings-drill";
+import { SocialHandleField } from "@/components/social/social-handle-field";
 import { SocialProfileBioEditor } from "@/components/social/social-profile-bio";
+import { SocialProfileImdbEditor } from "@/components/social/social-profile-imdb";
+import { SocialProfileLinksEditor } from "@/components/social/social-profile-links-edit";
 import { SocialProfileRolesEditor } from "@/components/social/social-profile-roles";
-import { SocialProfileTopicsField } from "@/components/social/social-profile-topics";
+import { SocialProfileTopicsEditor } from "@/components/social/social-profile-topics";
 import { SocialIcon } from "@/components/social/social-icon";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { Input } from "@/components/ui/input";
@@ -37,44 +40,38 @@ import {
   SOCIAL_PROFILE_EDIT_BODY_CLASS,
   SOCIAL_PROFILE_EDIT_CARD_CLASS,
   SOCIAL_PROFILE_EDIT_DONE_CLASS,
-  SOCIAL_PROFILE_EDIT_ERROR_CLASS,
-  SOCIAL_PROFILE_EDIT_HANDLE_CLASS,
-  SOCIAL_PROFILE_EDIT_HANDLE_ERROR_CLASS,
   SOCIAL_PROFILE_EDIT_HEADER_CLASS,
-  SOCIAL_PROFILE_EDIT_HELP_CLASS,
   SOCIAL_PROFILE_EDIT_HOST_CLASS,
   SOCIAL_PROFILE_EDIT_LABEL_CLASS,
   SOCIAL_PROFILE_EDIT_PHOTO_CLASS,
   SOCIAL_PROFILE_EDIT_PICTURE_CLASS,
   SOCIAL_PROFILE_EDIT_ROW_CLASS,
-  SOCIAL_PROFILE_EDIT_SECTION_CLASS,
   SOCIAL_PROFILE_EDIT_SHEET_CLASS,
 } from "@/lib/social-chrome";
 import { SOCIAL_ICON_SIZE_HEADER } from "@/lib/social-icons";
 import {
-  BIO_MAX,
   SOCIAL,
   SOCIAL_ROUTES,
-  bareHandle,
   composeSocialDisplayName,
   handleFieldValue,
   socialHandleDisplayError,
   splitSocialDisplayName,
-  stripHandleDecorators,
 } from "@/lib/social";
+import { socialProfileImdbRowSummary } from "@/lib/social-imdb";
 import {
-  SOCIAL_PROFILE_LINKS_MAX,
   composeSocialWebsiteUrlField,
   parseSocialWebsiteUrlField,
+  socialProfileLinksRowSummary,
 } from "@/lib/social-profile-links";
 import { parseSocialProfileRoles, socialProfileRolesRowSummary } from "@/lib/social-profile-roles";
-import { parseSocialProfileTopics } from "@/lib/social-profile-topics";
+import { parseSocialProfileTopics, socialProfileTopicsRowSummary } from "@/lib/social-profile-topics";
 import { useAppQueryClient } from "@/components/query-provider";
 import {
   applySocialProfileOptimistic,
   checkSocialProfileEditSave,
   patchSocialProfileOptimistic,
   persistSocialProfileEdit,
+  socialProfileBioRowSummary,
   socialProfileEditFace,
   socialProfileEditSeed,
   socialProfileOptimisticFail,
@@ -182,7 +179,7 @@ export function SocialProfileEditForm({
     return urls.length > 0 ? urls : [""];
   });
   function applyHandle(raw: string) {
-    setUsername(`@${stripHandleDecorators(raw)}`);
+    setUsername(handleFieldValue(raw));
     setHandleError("");
   }
 
@@ -384,6 +381,36 @@ export function SocialProfileEditForm({
     );
   }
 
+  if (face === "topics") {
+    return (
+      <SocialProfileTopicsEditor
+        value={interestTopics}
+        onChange={setInterestTopics}
+        onBack={() => setFace(socialProfileEditFace(false))}
+      />
+    );
+  }
+
+  if (face === "imdb") {
+    return (
+      <SocialProfileImdbEditor
+        value={imdb}
+        onChange={setImdb}
+        onBack={() => setFace(socialProfileEditFace(false))}
+      />
+    );
+  }
+
+  if (face === "links") {
+    return (
+      <SocialProfileLinksEditor
+        value={linkDrafts}
+        onChange={setLinkDrafts}
+        onBack={() => setFace(socialProfileEditFace(false))}
+      />
+    );
+  }
+
   if (face === "bio") {
     return (
       <SocialProfileBioEditor
@@ -571,31 +598,15 @@ export function SocialProfileEditForm({
               </div>
             </div>
             <div className="h-px bg-hairline" />
-            <div data-social-handle-field="" className={SOCIAL_PROFILE_EDIT_SECTION_CLASS}>
-              <div className="flex items-start gap-3">
-                <label htmlFor="social-edit-handle" className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>
-                  {SOCIAL.profile.username}
-                </label>
-                <div className={handleError ? SOCIAL_PROFILE_EDIT_HANDLE_ERROR_CLASS : SOCIAL_PROFILE_EDIT_HANDLE_CLASS}>
-                  <span className="font-medium text-ink-2">@</span>
-                  <Input
-                    variant="bare"
-                    id="social-edit-handle"
-                    name="handle"
-                    autoComplete="username"
-                    value={bareHandle(username)}
-                    placeholder={SOCIAL.profile.usernamePlaceholder}
-                    onChange={(e) => applyHandle(e.target.value)}
-                    className="flex-1 placeholder:text-ink-2"
-                  />
-                </div>
-              </div>
-              {handleError ? (
-                <p data-social-handle-required="" className={SOCIAL_PROFILE_EDIT_ERROR_CLASS}>
-                  {socialHandleDisplayError(username, handleError)}
-                </p>
-              ) : null}
-            </div>
+            <SocialHandleField
+              id="social-edit-handle"
+              name="handle"
+              value={username}
+              onValueChange={applyHandle}
+              appearance="edit"
+              showPreviewUrl={false}
+              error={handleError ? socialHandleDisplayError(username, handleError) : ""}
+            />
             <div className="h-px bg-hairline" />
             <SettingsDrillRow
               kind="roles"
@@ -605,90 +616,37 @@ export function SocialProfileEditForm({
               onClick={() => setFace(socialProfileEditFace("roles"))}
             />
             <div className="h-px bg-hairline" />
-            <SocialProfileTopicsField value={interestTopics} onChange={setInterestTopics} />
+            <SettingsDrillRow
+              kind="topics"
+              label={SOCIAL.profile.topics}
+              value={socialProfileTopicsRowSummary(interestTopics)}
+              itemAttr="data-social-profile-edit-topics-open"
+              onClick={() => setFace(socialProfileEditFace("topics"))}
+            />
             <div className="h-px bg-hairline" />
-            <div data-social-profile-edit-imdb="" className={cn(SOCIAL_PROFILE_EDIT_ROW_CLASS, "flex-col gap-2 md:flex-row md:gap-3")}>
-              <label htmlFor="social-edit-imdb" className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>
-                {SOCIAL.profile.imdb}
-              </label>
-              <div className="flex min-w-0 flex-1 flex-col gap-1">
-                <Input
-                  variant="bare"
-                  id="social-edit-imdb"
-                  name="imdb_url"
-                  value={imdb}
-                  placeholder={SOCIAL.profile.imdbPlaceholder}
-                  onChange={(e) => setImdb(e.target.value)}
-                  className="min-w-0 flex-1"
-                  autoComplete="url"
-                />
-                <p className={SOCIAL_PROFILE_EDIT_HELP_CLASS}>{SOCIAL.profile.imdbHint}</p>
-              </div>
-            </div>
+            <SettingsDrillRow
+              kind="imdb"
+              label={SOCIAL.profile.imdb}
+              value={socialProfileImdbRowSummary(imdb)}
+              itemAttr="data-social-profile-edit-imdb-open"
+              onClick={() => setFace(socialProfileEditFace("imdb"))}
+            />
             <div className="h-px bg-hairline" />
-            <button
-              type="button"
-              data-social-profile-edit-bio-open=""
+            <SettingsDrillRow
+              kind="links"
+              label={SOCIAL.profile.links}
+              value={socialProfileLinksRowSummary(linkDrafts)}
+              itemAttr="data-social-profile-edit-links-open"
+              onClick={() => setFace(socialProfileEditFace("links"))}
+            />
+            <div className="h-px bg-hairline" />
+            <SettingsDrillRow
+              kind="bio"
+              label={SOCIAL.profile.bio}
+              value={socialProfileBioRowSummary(bioText)}
+              itemAttr="data-social-profile-edit-bio-open"
               onClick={() => setFace(socialProfileEditFace(true))}
-              className={`${SOCIAL_PROFILE_EDIT_ROW_CLASS} text-left`}
-            >
-              <span className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>{SOCIAL.profile.bio}</span>
-              <span className="flex min-w-0 flex-1 items-start gap-2">
-                <span
-                  data-social-profile-edit-bio=""
-                  className="min-w-0 flex-1 whitespace-pre-wrap t-body-sm text-ink"
-                >
-                  {bioText.trim() ? bioText.slice(0, BIO_MAX) : ""}
-                </span>
-                <SocialIcon name="caret-right" size={16} className="mt-0.5 shrink-0 text-ink-2" />
-              </span>
-            </button>
-            <div className="h-px bg-hairline" />
-            <div data-social-profile-edit-links="" className={SOCIAL_PROFILE_EDIT_SECTION_CLASS}>
-              <span className={SOCIAL_PROFILE_EDIT_LABEL_CLASS}>{SOCIAL.profile.links}</span>
-              <div className="flex min-w-0 flex-1 flex-col gap-2">
-                {linkDrafts.map((value, index) => (
-                  <div
-                    key={`social-edit-link-${index}`}
-                    className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center"
-                  >
-                    <Input
-                      variant="bare"
-                      id={index === 0 ? "social-edit-link-0" : undefined}
-                      value={value}
-                      placeholder={SOCIAL.profile.linkPlaceholder}
-                      onChange={(e) => {
-                        const next = [...linkDrafts];
-                        next[index] = e.target.value;
-                        setLinkDrafts(next);
-                      }}
-                      className="min-w-0 flex-1"
-                      autoComplete="url"
-                    />
-                    {linkDrafts.length > 1 ? (
-                      <button
-                        type="button"
-                        data-social-profile-edit-link-remove=""
-                        onClick={() => setLinkDrafts(linkDrafts.filter((_, i) => i !== index))}
-                        className="t-label text-ink-2"
-                      >
-                        {SOCIAL.profile.removeLink}
-                      </button>
-                    ) : null}
-                  </div>
-                ))}
-                {linkDrafts.length < SOCIAL_PROFILE_LINKS_MAX ? (
-                  <button
-                    type="button"
-                    data-social-profile-edit-link-add=""
-                    onClick={() => setLinkDrafts([...linkDrafts, ""])}
-                    className="self-start t-body-sm font-medium text-ink"
-                  >
-                    {SOCIAL.profile.addLink}
-                  </button>
-                ) : null}
-              </div>
-            </div>
+            />
           </div>
           {error ? <InlineNotice tone="error">{error}</InlineNotice> : null}
         </div>

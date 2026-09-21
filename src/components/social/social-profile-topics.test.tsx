@@ -4,12 +4,13 @@ import { describe, expect, it } from "vitest";
 import { SOCIAL } from "@/lib/social";
 import { SOCIAL_CATEGORY_TOPICS, sortTopicsAlpha } from "@/lib/social-categories";
 import {
+  SOCIAL_PROFILE_CHIP_FACE_CLASS,
   SOCIAL_TOPIC_CHIP_BANK_CLASS,
   SOCIAL_TOPIC_CHIP_SELECT_IDLE_CLASS,
   SOCIAL_TOPIC_CHIP_SELECT_ON_CLASS,
 } from "@/lib/social-chrome";
 import { SOCIAL_PROFILE_TOPICS_MAX } from "@/lib/social-profile-topics";
-import { SocialProfileTopicsField } from "./social-profile-topics";
+import { SocialProfileTopicsEditor, SocialProfileTopicsField } from "./social-profile-topics";
 
 describe("SocialProfileTopicsField", () => {
   it("renders Topics search and selected house chips, never Professions slugs or checkboxes", () => {
@@ -17,10 +18,12 @@ describe("SocialProfileTopicsField", () => {
       <SocialProfileTopicsField value={["Acting", "Financing"]} onChange={() => undefined} />,
     );
     expect(html).toContain("data-social-profile-edit-topics");
-    expect(html).toContain(SOCIAL.profile.topics);
-    expect(SOCIAL.profile.topics).toBe("Topics");
+    expect(html).toContain("data-social-profile-chip-face");
+    expect(html).toContain(SOCIAL_PROFILE_CHIP_FACE_CLASS);
     expect(html).toContain(SOCIAL.profile.topicsSearch);
     expect(html).toContain(SOCIAL.profile.topicsHint);
+    expect(html).toContain("data-social-profile-edit-topics-count");
+    expect(html).toContain("2 / 8");
     expect(html).toContain('id="social-edit-topics-search"');
     expect(html).toContain('aria-label="Search topics"');
     expect(html).toContain("data-social-profile-edit-topics-selected");
@@ -38,14 +41,15 @@ describe("SocialProfileTopicsField", () => {
     expect(html).not.toContain("Professions");
     expect(html).not.toContain("Actor");
     expect(html).not.toContain(SOCIAL.profile.roles);
+    expect(html).not.toContain("t-label");
   });
 
   it("omits selected chips when empty", () => {
     const html = renderToStaticMarkup(
       <SocialProfileTopicsField value={[]} onChange={() => undefined} />,
     );
-    expect(html).toContain(SOCIAL.profile.topics);
     expect(html).toContain(SOCIAL.profile.topicsHint);
+    expect(html).toContain("0 / 8");
     expect(html).not.toContain("data-social-profile-edit-topics-selected");
     expect(html).not.toContain(SOCIAL.profile.topicsLimit);
     expect(html).not.toContain("type=\"checkbox\"");
@@ -64,6 +68,7 @@ describe("SocialProfileTopicsField", () => {
     );
     expect(capped).toContain(SOCIAL.profile.topicsLimit);
     expect(capped).toContain("You can select up to 8 topics");
+    expect(capped).toContain("8 / 8");
     expect(capped).not.toContain(SOCIAL.profile.topicsHint);
     expect(capped).toContain("disabled");
     expect(capped).toContain('data-social-profile-topic-chip="Acting"');
@@ -73,5 +78,23 @@ describe("SocialProfileTopicsField", () => {
     );
     expect(kept).toContain(`data-social-profile-topic-chip="${over[8]}"`);
     expect(kept).toContain(SOCIAL.profile.topicsLimit);
+  });
+
+  it("opens Topics on the shared chip-select face with a back affordance", () => {
+    const html = renderToStaticMarkup(
+      <SocialProfileTopicsEditor
+        value={["Acting"]}
+        onChange={() => undefined}
+        onBack={() => undefined}
+      />,
+    );
+    expect(html).toContain("data-social-profile-topics");
+    expect(html).toContain("data-social-profile-topics-back");
+    expect(html).toContain("data-social-profile-chip-face");
+    expect(html).toContain(SOCIAL.profile.topics);
+    expect(html).toContain(SOCIAL.profile.topicsSearch);
+    expect(html).toContain('id="social-edit-topics-search"');
+    expect(html).toContain("data-social-profile-edit-topics-selected");
+    expect(html).toContain('data-social-icon="caret-left"');
   });
 });

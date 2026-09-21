@@ -223,3 +223,16 @@ export function socialProfileLinkError(code: string | null): string | null {
   if (code === "limit") return SOCIAL.profile.linkLimit;
   return null;
 }
+
+export function socialProfileLinksRowSummary(raw: readonly string[]): string {
+  const urls = uniqueUrls(raw.map((url) => parseSocialExternalUrl(url)));
+  if (urls.length === 0) {
+    const draft = raw.map((item) => item.trim()).find(Boolean);
+    return draft || SOCIAL.profile.linksAdd;
+  }
+  const first = socialProfileLinkFaceLabel(urls[0] ?? "");
+  if (urls.length === 1) return first;
+  return SOCIAL.profile.linksMore
+    .replace("{first}", first)
+    .replace("{n}", String(urls.length - 1));
+}

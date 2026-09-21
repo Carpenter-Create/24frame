@@ -15,7 +15,10 @@ vi.mock("next/image", () => ({
 import { SETTINGS_DIALOG_LABEL_CLASS, SETTINGS_DRILL_ROW_CLASS } from "@/lib/settings";
 import { SOCIAL } from "@/lib/social";
 import { SOCIAL_PROFILE_EDIT_LABEL_CLASS } from "@/lib/social-chrome";
+import { socialProfileImdbRowSummary } from "@/lib/social-imdb";
+import { socialProfileLinksRowSummary } from "@/lib/social-profile-links";
 import { socialProfileRolesRowSummary } from "@/lib/social-profile-roles";
+import { socialProfileTopicsRowSummary } from "@/lib/social-profile-topics";
 import { SocialProfileEditForm } from "./social-profile-edit";
 
 vi.mock("next/navigation", () => ({
@@ -32,7 +35,7 @@ vi.mock("@/app/(app)/social/actions", () => ({
 }));
 
 describe("SocialProfileEditForm", () => {
-  it("renders First, Middle, Last name, Username @ field, Bio row, and Add link", () => {
+  it("renders identity plus drill rows for Professions, Topics, IMDb, Links, and Bio", () => {
     const html = renderToStaticMarkup(
       <SocialProfileEditForm
         handle="ada"
@@ -66,42 +69,48 @@ describe("SocialProfileEditForm", () => {
     expect(html).toContain("flex-col");
     expect(html).toContain(SOCIAL.profile.username);
     expect(html).toContain("data-social-handle-field");
+    expect(html).toContain("data-social-handle-prefix");
     expect(html).toContain('value="ada"');
+    expect(html).not.toContain('value="@ada"');
     expect(html).not.toContain("data-social-handle-url");
     expect(html).not.toContain("https://24frame.co/@ada");
     expect(html).not.toContain("https://24frame.co/@");
     expect(html).toContain("Writes engines.");
     expect(html).toContain("Second line.");
-    expect(html).toContain("whitespace-pre-wrap");
     expect(html).toContain("data-social-profile-edit-bio-open");
     expect(html).not.toContain('href="/social/profile/edit/bio"');
     expect(html).toContain(SOCIAL.profile.links);
-    expect(html).toContain(SOCIAL.profile.addLink);
-    expect(html).toContain("data-social-profile-edit-links");
-    expect(html).toContain('id="social-edit-link-0"');
-    expect(html).toContain(SOCIAL.profile.linkPlaceholder);
+    expect(html).toContain("data-social-profile-edit-links-open");
+    expect(html).toContain(socialProfileLinksRowSummary([]));
+    expect(html).not.toContain(SOCIAL.profile.addLink);
+    expect(html).not.toContain('id="social-edit-link-0"');
     expect(html).toContain(SOCIAL.profile.editPicture);
     expect(html).toContain("data-social-profile-edit-avatar-drop");
     expect(html).toContain("data-social-profile-edit-welcome");
     expect(html).toContain(SOCIAL.profile.welcomeAdd);
     expect(html).not.toContain(SOCIAL.profile.welcomeRemove);
     expect(html).toContain("data-social-profile-edit-roles-open");
-    expect(html).toContain("data-social-profile-edit-topics");
+    expect(html).toContain("data-social-profile-edit-topics-open");
+    expect(html).toContain("data-social-profile-edit-imdb-open");
     expect(html).toContain(SOCIAL.profile.roles);
     expect(html).toContain(SOCIAL.profile.topics);
     expect(html).toContain(SOCIAL.profile.rolesAdd);
     expect(html).toContain(socialProfileRolesRowSummary([]));
+    expect(html).toContain(socialProfileTopicsRowSummary([]));
     expect(html).toContain(SETTINGS_DRILL_ROW_CLASS);
-    expect(html).toContain(SOCIAL.profile.topicsSearch);
+    expect(html).not.toContain(SOCIAL.profile.topicsSearch);
     expect(html).not.toContain(SOCIAL.profile.rolesSearch);
     expect(html).not.toContain('id="social-edit-roles-search"');
+    expect(html).not.toContain('id="social-edit-topics-search"');
     expect(html).not.toContain("data-social-profile-edit-roles-selected");
     expect(html).not.toContain("data-social-profile-edit-roles-count");
+    expect(html).not.toContain("data-social-profile-edit-topics-selected");
+    expect(html).not.toContain("data-social-profile-chip-face");
     expect(html).not.toContain(SOCIAL.profile.rolesHint);
     expect(html).not.toContain(SOCIAL.profile.rolesLimit);
-    expect(html).toContain("data-social-profile-edit-imdb");
+    expect(html).not.toContain('id="social-edit-imdb"');
     expect(html).toContain(SOCIAL.profile.imdb);
-    expect(html).toContain('id="social-edit-imdb"');
+    expect(html).toContain(socialProfileImdbRowSummary(""));
     expect(html).toContain("flex-col");
     expect(html).toContain("data-social-avatar");
     expect(html).toContain("AL");
@@ -126,6 +135,7 @@ describe("SocialProfileEditForm", () => {
       />,
     );
     expect(cased).toContain('value="AdamC"');
+    expect(cased).not.toContain('value="@AdamC"');
     expect(cased).not.toContain("https://24frame.co/@AdamC");
     expect(cased).not.toContain("/social/@");
   });
@@ -189,20 +199,36 @@ describe("SocialProfileEditForm", () => {
     expect(html).not.toContain("Writer: Screenplay");
   });
 
-  it("loads persisted website_url links so they can be edited or removed", () => {
+  it("shows Topics, IMDb, and Links as drill rows, not inline fields", () => {
     const html = renderToStaticMarkup(
       <SocialProfileEditForm
         handle="ada"
         displayName="Ada Lovelace"
         bio=""
         photoUrl={null}
+        topics={["Acting", "Financing"]}
+        imdbUrl="nm0000158"
         websiteUrl={JSON.stringify(["https://instagram.com/ada", "https://youtube.com/@ada"])}
       />,
     );
-    expect(html).toContain('value="https://instagram.com/ada"');
-    expect(html).toContain('value="https://youtube.com/@ada"');
-    expect(html).toContain("data-social-profile-edit-link-remove");
-    expect(html).toContain(SOCIAL.profile.addLink);
+    expect(html).toContain("data-social-profile-edit-topics-open");
+    expect(html).toContain(socialProfileTopicsRowSummary(["Acting", "Financing"]));
+    expect(html).toContain("Acting +1");
+    expect(html).not.toContain("data-social-profile-edit-topics-selected");
+    expect(html).not.toContain('id="social-edit-topics-search"');
+    expect(html).toContain("data-social-profile-edit-imdb-open");
+    expect(html).toContain(socialProfileImdbRowSummary("nm0000158"));
+    expect(html).toContain("nm0000158");
+    expect(html).not.toContain('id="social-edit-imdb"');
+    expect(html).not.toContain(SOCIAL.profile.imdbHint);
+    expect(html).toContain("data-social-profile-edit-links-open");
+    expect(html).toContain(socialProfileLinksRowSummary([
+      "https://instagram.com/ada",
+      "https://youtube.com/@ada",
+    ]));
+    expect(html).toContain("instagram.com/ada +1");
+    expect(html).not.toContain('value="https://instagram.com/ada"');
+    expect(html).not.toContain("data-social-profile-edit-link-remove");
   });
 
   it("keeps Username and omits a derived Profile URL on the Edit face", () => {
@@ -211,6 +237,7 @@ describe("SocialProfileEditForm", () => {
     );
     expect(html).toContain(`placeholder="${SOCIAL.profile.usernamePlaceholder}"`);
     expect(html).toContain(SOCIAL.profile.username);
+    expect(html).toContain("data-social-handle-prefix");
     expect(html).not.toContain("https://24frame.co/@");
     expect(html).not.toContain("data-social-handle-url");
   });

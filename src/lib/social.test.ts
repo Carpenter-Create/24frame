@@ -98,8 +98,14 @@ describe("social copy lock", () => {
     expect(SOCIAL.profile.topicsSearch).toBe("Search topics");
     expect(SOCIAL.profile.topicsHint).toBe("Choose up to 8.");
     expect(SOCIAL.profile.topicsLimit).toBe("You can select up to 8 topics");
+    expect(SOCIAL.profile.topicsAdd).toBe("Add");
+    expect(SOCIAL.profile.topicsMore).toBe("{first} +{n}");
     expect(SOCIAL.profile.rolesLimit).toBe("You can select up to 5 professions");
     expect(SOCIAL.profile.imdb).toBe("IMDb");
+    expect(SOCIAL.profile.imdbAdd).toBe("Add");
+    expect(SOCIAL.profile.linksAdd).toBe("Add");
+    expect(SOCIAL.profile.linksMore).toBe("{first} +{n}");
+    expect(SOCIAL.profile.bioAdd).toBe("Add");
     expect(SOCIAL.profile.imdbInvalid).toBe("Enter an IMDb name URL or nm id.");
     expect(SOCIAL.dms.startCta).toBe("Start a conversation");
     expect(splitSocialDisplayName("Ada Lovelace")).toEqual({
@@ -306,8 +312,10 @@ describe("profile opt-in", () => {
     expect(normalizeHandle("@Ada_Lovelace")).toBe("Ada_Lovelace");
     expect(normalizeHandle("@@acarpcreate")).toBe("acarpcreate");
     expect(displayHandle("Ada")).toBe("@Ada");
-    expect(handleFieldValue("AdamC")).toBe("@AdamC");
-    expect(handleFieldValue("")).toBe("@");
+    expect(handleFieldValue("AdamC")).toBe("AdamC");
+    expect(handleFieldValue("@AdamC")).toBe("AdamC");
+    expect(handleFieldValue("")).toBe("");
+    expect(handleFieldValue("@")).toBe("");
     expect(socialHandleRequiredError("")).toBe(SOCIAL.profile.handleRequired);
     expect(socialHandleRequiredError("@")).toBe(SOCIAL.profile.handleRequired);
     expect(socialHandleRequiredError("@@@")).toBe(SOCIAL.profile.handleRequired);
