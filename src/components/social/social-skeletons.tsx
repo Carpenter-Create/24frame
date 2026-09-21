@@ -5,6 +5,7 @@ import {
   SOCIAL_COMPOSER_CLASS,
   SOCIAL_CREATE_CARD_CLASS,
   SOCIAL_CREATE_WELL_CLASS,
+  SOCIAL_FEED_GUTTER_CLASS,
   SOCIAL_FEED_ROW_CLASS,
   SOCIAL_FOR_YOU_CARD_CLASS,
   SOCIAL_FOR_YOU_RAIL_CLASS,
@@ -19,12 +20,10 @@ import {
   SOCIAL_PROFILE_EDIT_HOST_CLASS,
   SOCIAL_PROFILE_EDIT_SHEET_CLASS,
   SOCIAL_PROFILE_FACE_CLASS,
-  SOCIAL_PROFILE_GRID_CLASS,
   SOCIAL_PROFILE_HEAD_CLASS,
   SOCIAL_PROFILE_IDENTITY_CLASS,
   SOCIAL_PROFILE_STATS_CLASS,
   SOCIAL_PROFILE_STATS_GRID_CLASS,
-  SOCIAL_PROFILE_TILE_CLASS,
   SOCIAL_STORY_CARD_CLASS,
   SOCIAL_STORY_VIEWER_CLASS,
 } from "@/lib/social-chrome";
@@ -129,9 +128,18 @@ export function SocialProfileCenterSkeleton() {
         <Skeleton className="h-8 w-28 rounded-[8px]" />
         <Skeleton className="h-8 w-20 rounded-[8px]" />
       </div>
-      <div className={SOCIAL_PROFILE_GRID_CLASS}>
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className={SOCIAL_PROFILE_TILE_CLASS} />
+      <div className={SOCIAL_FEED_GUTTER_CLASS}>
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className={SOCIAL_FEED_ROW_CLASS}>
+            <div className="flex gap-2">
+              <Skeleton className={SOCIAL_AVATAR_SM_CLASS} />
+              <div className="flex min-w-0 flex-1 flex-col gap-2">
+                <Skeleton className="h-3.5 w-1/3" />
+                <Skeleton className="h-3 w-2/3" />
+              </div>
+            </div>
+            <Skeleton className="h-40 w-full rounded-[8px]" />
+          </div>
         ))}
       </div>
     </div>

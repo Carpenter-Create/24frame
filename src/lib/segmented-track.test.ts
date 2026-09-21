@@ -176,6 +176,7 @@ describe("segmented track optimistic selection", () => {
     expect(SEGMENTED_TRACK_PERSIST.period).toBe("house-period-presets");
     expect(SEGMENTED_TRACK_PERSIST.phoneDest).toBe("phone-dest");
     expect(SEGMENTED_TRACK_PERSIST.newsSource).toBe("news-source");
+    expect(SEGMENTED_TRACK_PERSIST.socialActivity).toBe("social-activity");
     expect("socialCreateKind" in SEGMENTED_TRACK_PERSIST).toBe(false);
     expect(SEGMENTED_ITEM_HOLD_ATTR).toBe("data-segmented-hold");
   });

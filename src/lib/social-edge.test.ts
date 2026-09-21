@@ -118,6 +118,7 @@ describe("Social Edge vs Node runtime lock", () => {
     expect(light).not.toContain("@aws-sdk");
     expect(light).toContain("toggleSocialFollow");
     expect(light).toContain("toggleSocialLike");
+    expect(light).toContain("createSocialComment");
     expect(avatarApi).toContain("signedAvatarUrl");
     expect(mediaApi).toContain("signedSocialMediaUrl");
     expect(avatarApi).toContain("privateMaxAgeCacheControl");

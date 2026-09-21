@@ -10,6 +10,7 @@ import { normalizePostBody, SOCIAL } from "@/lib/social";
 export const SOCIAL_OPTIMISTIC_LOCK = {
   likeHref: "/api/social/like",
   postHref: "/api/social/post",
+  commentHref: "/api/social/comment",
 } as const;
 
 export type SocialOptimisticLike = {
@@ -75,6 +76,8 @@ export type SocialPostPublishStart =
 const likes = new Map<string, SocialOptimisticLike>();
 const likeEpoch = new Map<string, number>();
 const likeListeners = new Set<() => void>();
+const commentCounts = new Map<string, number>();
+const commentCountListeners = new Set<() => void>();
 
 let posts: SocialOptimisticPost[] = [];
 const postListeners = new Set<() => void>();
@@ -88,6 +91,10 @@ function emitLikes() {
 
 function emitPosts() {
   for (const listener of postListeners) listener();
+}
+
+function emitCommentCounts() {
+  for (const listener of commentCountListeners) listener();
 }
 
 export function nextSocialLikeState(current: SocialOptimisticLike): SocialOptimisticLike {
@@ -153,6 +160,55 @@ export function persistSocialLikeLatest(
 
 export function persistSocialPost(form: FormData): Promise<{ error?: string }> {
   return persistSocialMutation(SOCIAL_OPTIMISTIC_LOCK.postHref, form);
+}
+
+export async function persistSocialComment(
+  form: FormData,
+): Promise<{ error?: string; id?: string; created_at?: string }> {
+  const res = await fetch(SOCIAL_OPTIMISTIC_LOCK.commentHref, {
+    method: "POST",
+    body: form,
+    cache: "no-store",
+  });
+  const json = (await res.json().catch(() => null)) as {
+    error?: string;
+    id?: string;
+    created_at?: string;
+  } | null;
+  const error = typeof json?.error === "string" ? json.error.trim() : "";
+  if (!res.ok || error) return { error: error || SOCIAL.post.commentFailed };
+  return {
+    id: typeof json?.id === "string" ? json.id : undefined,
+    created_at: typeof json?.created_at === "string" ? json.created_at : undefined,
+  };
+}
+
+export async function persistSocialCommentDelete(form: FormData): Promise<{ error?: string }> {
+  const res = await fetch(SOCIAL_OPTIMISTIC_LOCK.commentHref, {
+    method: "DELETE",
+    body: form,
+    cache: "no-store",
+  });
+  const json = (await res.json().catch(() => null)) as { error?: string } | null;
+  const error = typeof json?.error === "string" ? json.error.trim() : "";
+  if (!res.ok || error) return { error: error || SOCIAL.post.commentDeleteFailed };
+  return {};
+}
+
+export function applyOptimisticCommentCount(postId: string, commentCount: number): void {
+  commentCounts.set(postId, Math.max(0, commentCount));
+  emitCommentCounts();
+}
+
+export function readOptimisticCommentCount(postId: string): number | null {
+  return commentCounts.has(postId) ? (commentCounts.get(postId) ?? 0) : null;
+}
+
+export function subscribeOptimisticCommentCounts(listener: () => void): () => void {
+  commentCountListeners.add(listener);
+  return () => {
+    commentCountListeners.delete(listener);
+  };
 }
 
 export function socialPostPublishBusy(): boolean {
@@ -285,6 +341,7 @@ export function socialOptimisticPostCard(post: SocialOptimisticPost): {
   id: string;
   body: string | null;
   likeCount: number;
+  commentCount?: number;
   liked: boolean;
   createdAt: string;
   authorId: string;
@@ -384,8 +441,10 @@ export function resetSocialOptimisticForTests(): void {
   likeEpoch.clear();
   likePersistTail.clear();
   likePersisted.clear();
+  commentCounts.clear();
   posts = [];
   postPublishBusy = false;
   emitLikes();
   emitPosts();
+  emitCommentCounts();
 }

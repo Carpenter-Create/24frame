@@ -123,6 +123,7 @@ function stubClient({
     if (table === "likes") return chain([]);
     if (table === "follows") return chain([]);
     if (table === "stories") return chain([]);
+    if (table === "comments") return chain([]);
     throw new Error(`unexpected from(${table})`);
   });
   vi.mocked(createClient).mockResolvedValue({ from } as never);
@@ -389,6 +390,21 @@ describe("Social public profile", () => {
     expect(html).toContain(SOCIAL.member.missing);
     expect(html).not.toContain("data-social-author-history");
     expect(from).not.toHaveBeenCalledWith("posts");
+  });
+
+  it("renders Activity on the public profile with Comments empty, not Posts grid", async () => {
+    stubClient();
+    const html = renderToStaticMarkup(
+      await SocialPublicProfilePage({
+        params: Promise.resolve({ handle: "@ada" }),
+        searchParams: Promise.resolve({ tab: "activity", activity: "comments" }),
+      }),
+    );
+    expect(html).toContain('data-social-profile-tab="activity"');
+    expect(html).toContain("data-social-activity");
+    expect(html).toContain(SOCIAL.profile.activityCommentsEmpty);
+    expect(html).not.toContain("data-social-author-history");
+    expect(html).not.toContain("data-social-profile-grid");
   });
 
   it("signs the account face and reuses Home post cards", async () => {

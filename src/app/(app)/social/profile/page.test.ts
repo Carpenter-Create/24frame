@@ -112,6 +112,7 @@ function stubClient({
     if (table === "likes") return chain([]);
     if (table === "follows") return chain([]);
     if (table === "stories") return chain([]);
+    if (table === "comments") return chain([]);
     throw new Error(`unexpected from(${table})`);
   });
   vi.mocked(createClient).mockResolvedValue({ from } as never);
@@ -401,6 +402,25 @@ describe("Social profile public face", () => {
     expect(html).toContain(SOCIAL.profile.postsTruncated);
     expect(html).toContain('data-social-post="p0"');
     expect(html).not.toContain(`data-social-post="p${SOCIAL_PROFILE_POSTS_PAGE}"`);
+  });
+
+  it("renders Activity pills and a calm Comments empty — not a bare list", async () => {
+    stubClient({ profile: ensured });
+    vi.mocked(getOrgContext).mockResolvedValue(ctx() as never);
+
+    const html = await renderServerMarkup(
+      await SocialProfilePage({
+        searchParams: Promise.resolve({ tab: "activity", activity: "comments" }),
+      }),
+    );
+    expect(html).toContain('data-social-profile-tab="activity"');
+    expect(html).toContain("data-social-activity");
+    expect(html).toContain("data-social-activity-pills");
+    expect(html).toContain('data-social-activity-pill="comments"');
+    expect(html).toContain(SOCIAL.profile.activityCommentsEmpty);
+    expect(html).not.toContain("data-social-author-history");
+    expect(html).not.toContain("Boost");
+    expect(html).not.toContain("Impressions");
   });
 
   it("shows the locked Credits blank empty state and no invented credits", async () => {

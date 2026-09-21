@@ -10,13 +10,14 @@ import { SocialQueryBound } from "@/components/social/social-query-bound";
 import { SocialShareButton } from "@/components/social/social-share-button";
 import { SocialProfileCenterSkeleton } from "@/components/social/social-skeletons";
 import { SocialOwnProfileFace } from "@/components/social/social-own-profile";
+import { SocialActivityHistory } from "@/components/social/social-activity-history";
 import {
   SocialAuthorHistory,
   SocialHighlights,
   socialAuthorPostCard,
 } from "@/components/social/social-ui";
 import { SOCIAL_ACTION_CLASS, SOCIAL_PAGE_CLASS, SOCIAL_PROFILE_CENTER_CLASS } from "@/lib/social-chrome";
-import { signedAvatarUrl } from "@/lib/s3-avatars";
+import { signedAvatarUrl, signedAvatarUrls } from "@/lib/s3-avatars";
 import { signedSocialMediaByPostId, signedSocialMediaUrl } from "@/lib/s3-social-media";
 import {
   parseSocialProfileTab,
@@ -30,9 +31,17 @@ import {
   type SocialProfileTab,
 } from "@/lib/social";
 import {
+  parseSocialActivityPill,
+  SOCIAL_ACTIVITY_PILL_PARAM,
+  type SocialActivityPill,
+} from "@/lib/social-activity";
+import {
+  loadAuthorActivityComments,
+  loadAuthorActivityPosts,
   loadAuthorPosts,
   loadLikedPostIds,
   loadLiveStories,
+  loadProfilesByIds,
 } from "@/lib/social-feed";
 import { loadCachedProfileSocialCounts } from "@/lib/social-hot-reads";
 import { ensureOwnSocialProfileResult } from "@/lib/social-profile";
@@ -54,6 +63,7 @@ export default async function SocialProfilePage({
     searchParams ? searchParams : Promise.resolve({} as Record<string, string | string[] | undefined>),
   ]);
   const tab = parseSocialProfileTab(sp[SOCIAL_PROFILE_TAB_PARAM]);
+  const activity = parseSocialActivityPill(sp[SOCIAL_ACTIVITY_PILL_PARAM]);
   const { profile, error: ensureError } = await ensureOwnSocialProfileResult(session.supabase, session.ctx.user);
 
   if (!profile) {
@@ -71,7 +81,7 @@ export default async function SocialProfilePage({
   return (
     <div data-social-profile="" className={SOCIAL_PROFILE_CENTER_CLASS}>
       <Suspense fallback={<SocialProfileCenterSkeleton />}>
-        <SocialProfileMain session={session} tab={tab} />
+        <SocialProfileMain session={session} tab={tab} activity={activity} />
       </Suspense>
     </div>
   );
@@ -80,22 +90,35 @@ export default async function SocialProfilePage({
 async function SocialProfileMain({
   session,
   tab,
+  activity,
 }: {
   session: SocialSession;
   tab: SocialProfileTab;
+  activity: SocialActivityPill;
 }) {
   const { ctx, supabase } = session;
   const { profile } = await ensureOwnSocialProfileResult(supabase, ctx.user);
   if (!profile) return null;
 
-  const [photoUrl, liveStoriesPage, history, counts, welcomeUrl, jar] = await Promise.all([
-    signedAvatarUrl(profile.id),
-    loadLiveStories(supabase, [profile.id]),
-    loadAuthorPosts(supabase, profile.id),
-    loadCachedProfileSocialCounts(supabase, profile.id),
-    profile.welcome_video_key ? signedSocialMediaUrl(profile.welcome_video_key) : Promise.resolve(null),
-    cookies(),
-  ]);
+  const activityComments =
+    tab === "activity" && activity === "comments"
+      ? loadAuthorActivityComments(supabase, profile.id)
+      : Promise.resolve({ items: [], truncated: false });
+  const activityPosts =
+    tab === "activity" && activity !== "comments"
+      ? loadAuthorActivityPosts(supabase, profile.id, activity)
+      : Promise.resolve(null);
+  const [photoUrl, liveStoriesPage, history, counts, welcomeUrl, jar, commentsPage, filtered] =
+    await Promise.all([
+      signedAvatarUrl(profile.id),
+      loadLiveStories(supabase, [profile.id]),
+      loadAuthorPosts(supabase, profile.id),
+      loadCachedProfileSocialCounts(supabase, profile.id),
+      profile.welcome_video_key ? signedSocialMediaUrl(profile.welcome_video_key) : Promise.resolve(null),
+      cookies(),
+      activityComments,
+      activityPosts,
+    ]);
   const identity = mergeSocialProfileIdentity(
     {
       handle: profile.handle,
@@ -111,13 +134,31 @@ async function SocialProfileMain({
     readSocialProfileOptimisticCookie((name) => jar.get(name)?.value),
   );
   const liveStories = liveStoriesPage.stories;
-  const [media, liked] = await Promise.all([
-    signedSocialMediaByPostId(history.posts),
+  const commentParentPosts = commentsPage.items.map((item) => item.post);
+  const activityFeedPosts = filtered?.posts ?? [];
+  const cardPosts =
+    tab === "activity" && activity === "comments"
+      ? commentParentPosts
+      : tab === "activity"
+        ? activityFeedPosts
+        : history.posts;
+  const parentAuthors =
+    tab === "activity" && activity === "comments"
+      ? await loadProfilesByIds(
+          supabase,
+          [...new Set(commentParentPosts.map((post) => post.author_id))],
+        )
+      : new Map();
+  const [media, liked, parentFaces] = await Promise.all([
+    signedSocialMediaByPostId(cardPosts),
     loadLikedPostIds(
       supabase,
       ctx.user.id,
-      history.posts.map((post) => post.id),
+      cardPosts.map((post) => post.id),
     ),
+    tab === "activity" && activity === "comments"
+      ? signedAvatarUrls([...parentAuthors.keys()])
+      : Promise.resolve(new Map<string, string | null>()),
   ]);
 
   const highlightCards = liveStories.map((story) => ({
@@ -167,28 +208,65 @@ async function SocialProfileMain({
         ) : (
           <SocialEmpty icon="image" title={SOCIAL.profile.highlightsEmpty} hint={SOCIAL.profile.highlightsEmptyHint} />
         )
-      ) : (
-        <>
-          <SocialHighlights cards={highlightCards} />
-          <SocialAuthorHistory
-            truncated={history.truncated}
-            emptyAction={{ href: socialCreateHref("media"), label: SOCIAL.profile.sharePost }}
-            posts={history.posts.map((post) =>
-              socialAuthorPostCard({
-                post,
-                authorHandle: profile.handle,
-                authorName: socialPersonLabel({
-                  handle: profile.handle,
-                  displayName: profile.display_name,
-                }),
-                authorPhotoUrl: photoUrl,
-                liked: liked.has(post.id),
-                canLike: true,
-                media: media.get(post.id) ?? [],
+      ) : tab === "activity" ? (
+        <SocialActivityHistory
+          baseHref={SOCIAL_ROUTES.profile}
+          pill={activity}
+          truncated={activity === "comments" ? commentsPage.truncated : (filtered?.truncated ?? false)}
+          posts={activityFeedPosts.map((post) =>
+            socialAuthorPostCard({
+              post,
+              authorHandle: profile.handle,
+              authorName: socialPersonLabel({
+                handle: profile.handle,
+                displayName: profile.display_name,
               }),
-            )}
-          />
-        </>
+              authorPhotoUrl: photoUrl,
+              liked: liked.has(post.id),
+              canLike: true,
+              media: media.get(post.id) ?? [],
+            }),
+          )}
+          comments={commentsPage.items.map((item) => {
+            const author = parentAuthors.get(item.post.author_id);
+            return {
+              commentId: item.comment.id,
+              body: item.comment.body,
+              commentedAt: item.comment.created_at,
+              post: socialAuthorPostCard({
+                post: item.post,
+                authorHandle: author?.handle ?? profile.handle,
+                authorName: socialPersonLabel({
+                  handle: author?.handle ?? profile.handle,
+                  displayName: author?.display_name ?? profile.display_name,
+                }),
+                authorPhotoUrl: parentFaces.get(item.post.author_id) ?? photoUrl,
+                liked: liked.has(item.post.id),
+                canLike: true,
+                media: media.get(item.post.id) ?? [],
+              }),
+            };
+          })}
+        />
+      ) : (
+        <SocialAuthorHistory
+          truncated={history.truncated}
+          emptyAction={{ href: socialCreateHref("media"), label: SOCIAL.profile.sharePost }}
+          posts={history.posts.map((post) =>
+            socialAuthorPostCard({
+              post,
+              authorHandle: profile.handle,
+              authorName: socialPersonLabel({
+                handle: profile.handle,
+                displayName: profile.display_name,
+              }),
+              authorPhotoUrl: photoUrl,
+              liked: liked.has(post.id),
+              canLike: true,
+              media: media.get(post.id) ?? [],
+            }),
+          )}
+        />
       )}
     </>
   );

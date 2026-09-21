@@ -49,6 +49,7 @@ export const SEGMENTED_TRACK_PERSIST = {
   reportsRanked: "reports-top-pills",
   phoneDest: "phone-dest",
   newsSource: "news-source",
+  socialActivity: "social-activity",
 } as const;
 
 export type SegmentedVisualPersist = {

@@ -333,12 +333,12 @@ export function socialHomeLaneHref(lane: SocialHomeLane): string {
 }
 
 export const SOCIAL_PROFILE_TAB_PARAM = "tab";
-export const SOCIAL_PROFILE_TABS = ["posts", "highlights", "credits"] as const;
+export const SOCIAL_PROFILE_TABS = ["posts", "highlights", "credits", "activity"] as const;
 export type SocialProfileTab = (typeof SOCIAL_PROFILE_TABS)[number];
 
 export function parseSocialProfileTab(raw: string | string[] | undefined | null): SocialProfileTab {
   const value = Array.isArray(raw) ? raw[0] : raw;
-  return value === "highlights" || value === "credits" ? value : "posts";
+  return value === "highlights" || value === "credits" || value === "activity" ? value : "posts";
 }
 
 export function socialProfileTabHref(base: string, tab: SocialProfileTab): string {
@@ -351,6 +351,8 @@ export function socialProfileTabLabel(tab: SocialProfileTab): string {
       return SOCIAL.profile.highlightsTab;
     case "credits":
       return SOCIAL.profile.creditsTab;
+    case "activity":
+      return SOCIAL.profile.activityTab;
     default:
       return SOCIAL.profile.postsTab;
   }
@@ -613,6 +615,20 @@ export const SOCIAL = {
     shareClose: "Close",
     shareCopied: "Copied",
     postsTab: "Posts",
+    activityTab: "Activity",
+    activityPosts: "Posts",
+    activityComments: "Comments",
+    activityImages: "Images",
+    activityVideos: "Videos",
+    activityPostsEmpty: "No posts yet.",
+    activityPostsEmptyHint: "Posts from this profile appear here as a feed.",
+    activityCommentsEmpty: "No comments yet.",
+    activityCommentsEmptyHint: "Comments they leave on posts will appear here.",
+    activityImagesEmpty: "No images yet.",
+    activityImagesEmptyHint: "Image posts from this profile appear here.",
+    activityVideosEmpty: "No videos yet.",
+    activityVideosEmptyHint: "Video posts from this profile appear here.",
+    activityCommented: "Commented",
     highlightsTab: "Highlights",
     highlightsEmpty: "No highlights yet.",
     highlightsEmptyHint: "Live stories appear here for 24 hours.",
@@ -699,6 +715,16 @@ export const SOCIAL = {
     unlike: "Unlike",
     likes: "likes",
     comments: "comments",
+    comment: "Comment",
+    commentsTitle: "Comments",
+    commentPlaceholder: "Write a comment…",
+    commentEmpty: "No comments yet.",
+    commentSubmit: "Post",
+    commentMissing: "Write a comment.",
+    commentTooLong: "That comment is too long.",
+    commentFailed: "Could not post that comment.",
+    commentDelete: "Remove",
+    commentDeleteFailed: "Could not remove that comment.",
   },
   dms: {
     title: "Messages",
@@ -759,7 +785,7 @@ export const SOCIAL = {
     playerEmpty: "No lesson is ready to play.",
   },
   cta: {
-    needProfile: "Create a creator profile to post, like, or message.",
+    needProfile: "Create a creator profile to post, like, comment, or message.",
     profileHrefLabel: "Create a creator profile",
   },
 } as const;

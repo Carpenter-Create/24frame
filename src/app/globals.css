@@ -280,6 +280,7 @@ body {
 
 .social-mux-player {
   --media-accent-color: var(--accent);
+  --media-background-color: var(--surface-muted);
   --media-object-fit: cover;
   --media-object-position: center;
 }

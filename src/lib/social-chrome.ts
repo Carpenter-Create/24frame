@@ -26,6 +26,7 @@ import {
   HOUSE_PILL_ITEM_CLASS,
   HOUSE_PILL_SELECTED_CLASS,
   HOUSE_RAIL_PANEL_CLASS,
+  HOUSE_SCROLL_ROW_CLASS,
 } from "@/lib/house-shell";
 
 export const SOCIAL_FIGMA_HOME = "176:1085";
@@ -237,12 +238,32 @@ export const SOCIAL_FOR_YOU_CARD_CLASS =
 export const SOCIAL_FEED_ROW_CLASS =
   `flex flex-col gap-2 ${SOCIAL_SURFACE_RADIUS_CLASS} border border-hairline bg-surface p-3`;
 
-// Facebook gray gutter — muted canvas between surface posts.
+// Facebook gray gutter — muted canvas frames every surface post.
 // Light --bg and --surface are both white; surface-muted (#f4f4f6)
-// is the visible band. ~8px house space-2. Stack gap only — never
-// per-card margin that doubles the band.
+// is the visible band. ~8px house space-2. Stack gap between cards
+// plus py so the first and last cards are framed — never per-card
+// margin that doubles the band.
 export const SOCIAL_FEED_GUTTER_CLASS =
-  "flex flex-col gap-[var(--space-2)] bg-surface-muted";
+  "flex flex-col gap-[var(--space-2)] bg-surface-muted py-[var(--space-2)]";
+
+// Comment thread — house app-sheet rise. Same host/scrim as Create.
+// Composer stays at the bottom. Do not fork a second sheet grammar.
+export const SOCIAL_COMMENT_SHEET_HOST_CLASS =
+  "fixed inset-0 z-50 flex h-dvh w-full flex-col justify-end";
+
+export const SOCIAL_COMMENT_SHEET_SURFACE_CLASS =
+  "relative z-10 flex max-h-[90dvh] w-full flex-col rounded-t-[16px] bg-surface app-sheet-rise md:mx-auto md:max-w-[480px] md:rounded-[16px] md:border md:border-hairline";
+
+export const SOCIAL_COMMENT_SHEET_SCRIM_CLASS =
+  "absolute inset-0 bg-ink/40 app-sheet-scrim-fade";
+
+export const SOCIAL_COMMENT_COMPOSER_CLASS =
+  "flex items-end gap-2 border-t border-hairline bg-surface px-4 py-3";
+
+export const SOCIAL_ACTIVITY_PILLS_CLASS = HOUSE_SCROLL_ROW_CLASS;
+
+export const SOCIAL_ACTIVITY_COMMENT_SNIPPET_CLASS =
+  "break-words whitespace-pre-wrap t-body-sm text-ink";
 
 export const SOCIAL_CREATE_CTA_CLASS =
   "inline-flex w-full items-center justify-center gap-2 rounded-[24px] bg-accent px-4 py-3 t-body font-semibold text-accent-contrast";
