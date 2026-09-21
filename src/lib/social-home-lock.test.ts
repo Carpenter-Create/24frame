@@ -648,6 +648,8 @@ describe("Social Home miss list v1 P0 lock", () => {
     );
     expect(card).toContain("SocialProfileStats");
     expect(card).toContain("data-social-profile-head");
+    expect(card).toContain("data-social-profile-meta");
+    expect(card).toContain("SOCIAL_PROFILE_META_CLASS");
     expect(card).toContain("data-social-profile-actions");
     expect(card).toContain("SOCIAL_PROFILE_ACTIONS_CLASS");
     expect(card).toContain("socialProfileRolesRailItems");
@@ -657,6 +659,7 @@ describe("Social Home miss list v1 P0 lock", () => {
     expect(card).not.toContain("emptyHint");
     expect(card).not.toContain("data-social-profile-handle");
     expect(chrome).toContain("SOCIAL_PROFILE_HEAD_CLASS");
+    expect(chrome).toContain("SOCIAL_PROFILE_META_CLASS");
     expect(chrome).toContain("SOCIAL_PROFILE_ACTIONS_CLASS");
     expect(chrome).toContain("SOCIAL_PROFILE_ROLES_ROW_CLASS");
     expect(chrome).toContain("SOCIAL_PROFILE_ROLES_RAIL_ROWS");
@@ -713,8 +716,14 @@ describe("Social Home miss list v1 P0 lock", () => {
       homeSkeleton.indexOf("export function SocialProfileCenterSkeleton"),
       homeSkeleton.indexOf("export function SocialProfileSkeleton"),
     );
+    expect(profileCenterSkeleton.indexOf("SOCIAL_PROFILE_HEAD_CLASS")).toBeLessThan(
+      profileCenterSkeleton.indexOf("SOCIAL_PROFILE_META_CLASS"),
+    );
+    expect(profileCenterSkeleton.indexOf("SOCIAL_PROFILE_META_CLASS")).toBeLessThan(
+      profileCenterSkeleton.indexOf("h-4 w-32"),
+    );
     expect(profileCenterSkeleton.indexOf("h-4 w-32")).toBeLessThan(
-      profileCenterSkeleton.indexOf("SOCIAL_PROFILE_HEAD_CLASS"),
+      profileCenterSkeleton.indexOf("SOCIAL_PROFILE_STATS_CLASS"),
     );
     expect(profileCenterSkeleton.indexOf("SOCIAL_PROFILE_HEAD_CLASS")).toBeLessThan(
       profileCenterSkeleton.indexOf("SOCIAL_PROFILE_ACTIONS_CLASS"),

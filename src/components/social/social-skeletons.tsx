@@ -23,6 +23,7 @@ import {
   SOCIAL_PROFILE_FACE_CLASS,
   SOCIAL_PROFILE_HEAD_CLASS,
   SOCIAL_PROFILE_IDENTITY_CLASS,
+  SOCIAL_PROFILE_META_CLASS,
   SOCIAL_PROFILE_STATS_CLASS,
   SOCIAL_PROFILE_STATS_GRID_CLASS,
   SOCIAL_STORY_CARD_CLASS,
@@ -109,14 +110,16 @@ export function SocialProfileCenterSkeleton() {
   return (
     <div className={SOCIAL_PROFILE_CENTER_CLASS}>
       <div className={SOCIAL_PROFILE_IDENTITY_CLASS}>
-        <Skeleton className="h-4 w-32" />
         <div className={SOCIAL_PROFILE_HEAD_CLASS}>
           <Skeleton className={SOCIAL_AVATAR_PROFILE_CLASS} />
-          <div className={SOCIAL_PROFILE_STATS_CLASS}>
-            <div className={SOCIAL_PROFILE_STATS_GRID_CLASS}>
-              <Skeleton className="mx-auto h-8 w-10" />
-              <Skeleton className="mx-auto h-8 w-10" />
-              <Skeleton className="mx-auto h-8 w-10" />
+          <div className={SOCIAL_PROFILE_META_CLASS}>
+            <Skeleton className="h-4 w-32" />
+            <div className={SOCIAL_PROFILE_STATS_CLASS}>
+              <div className={SOCIAL_PROFILE_STATS_GRID_CLASS}>
+                <Skeleton className="mx-auto h-8 w-10" />
+                <Skeleton className="mx-auto h-8 w-10" />
+                <Skeleton className="mx-auto h-8 w-10" />
+              </div>
             </div>
           </div>
         </div>

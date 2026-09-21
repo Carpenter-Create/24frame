@@ -41,6 +41,7 @@ import {
   SOCIAL_PROFILE_GRID_CLASS,
   SOCIAL_PROFILE_ACTIONS_CLASS,
   SOCIAL_PROFILE_HEAD_CLASS,
+  SOCIAL_PROFILE_META_CLASS,
   SOCIAL_PROFILE_NAME_CLASS,
   SOCIAL_PROFILE_POSTS_EMPTY_CLASS,
   SOCIAL_PROFILE_ROLE_PILL_CLASS,
@@ -221,9 +222,17 @@ describe("Social profile public face", () => {
     expect(identity).toContain("Ada Lovelace");
     expect(identity).not.toContain("data-social-profile-handle");
     expect(identity).not.toContain("@ada");
-    expect(identity.indexOf("data-social-profile-name")).toBeLessThan(
-      identity.indexOf("data-social-profile-head"),
+    expect(identity.indexOf("data-social-profile-head")).toBeLessThan(
+      identity.indexOf("data-social-profile-name"),
     );
+    const identityHead = identity.slice(
+      identity.indexOf("data-social-profile-head"),
+      identity.indexOf("data-social-profile-face"),
+    );
+    expect(identityHead).toContain("data-social-avatar");
+    expect(identityHead).toContain("data-social-profile-meta");
+    expect(identityHead).toContain("data-social-profile-name");
+    expect(identityHead).toContain("Ada Lovelace");
     expect(identity).not.toContain("data-social-profile-stats");
     expect(identity).not.toContain("data-social-profile-mutuals");
     expect(identity).not.toContain("data-social-profile-url");
@@ -235,16 +244,26 @@ describe("Social profile public face", () => {
     expect(uiSrc).not.toContain("socialShareHint");
     expect(uiSrc).toContain("data-social-profile-head");
     expect(uiSrc).toContain("SOCIAL_PROFILE_HEAD_CLASS");
+    expect(uiSrc).toContain("SOCIAL_PROFILE_META_CLASS");
     expect(uiSrc).toContain("SOCIAL_PROFILE_ACTIONS_CLASS");
     const identityMarkup = uiSrc.slice(
       uiSrc.indexOf("data-social-profile-identity"),
       uiSrc.indexOf("export function SocialHighlights"),
     );
+    expect(identityMarkup.indexOf("data-social-profile-head")).toBeLessThan(
+      identityMarkup.indexOf("data-social-profile-meta"),
+    );
+    expect(identityMarkup.indexOf("data-social-profile-meta")).toBeLessThan(
+      identityMarkup.indexOf("data-social-profile-name"),
+    );
     expect(identityMarkup.indexOf("data-social-profile-name")).toBeLessThan(
-      identityMarkup.indexOf("data-social-profile-head"),
+      identityMarkup.indexOf("SocialProfileStats"),
     );
     expect(identityMarkup.indexOf("data-social-profile-head")).toBeLessThan(
       identityMarkup.indexOf("data-social-profile-face"),
+    );
+    expect(identityMarkup.indexOf("data-social-profile-face")).toBeLessThan(
+      identityMarkup.indexOf("data-social-profile-bio"),
     );
     expect(identityMarkup.indexOf("HouseChipRail")).toBeLessThan(
       identityMarkup.indexOf("{actionRow}"),
@@ -395,8 +414,12 @@ describe("Social profile public face", () => {
     );
     expect(withStats).toContain("data-social-profile-head");
     expect(withStats).toContain(SOCIAL_PROFILE_HEAD_CLASS);
+    expect(withStats).toContain(SOCIAL_PROFILE_META_CLASS);
     expect(SOCIAL_PROFILE_HEAD_CLASS).toContain("items-center");
     expect(SOCIAL_PROFILE_HEAD_CLASS).not.toContain("items-start");
+    expect(SOCIAL_PROFILE_META_CLASS).toContain("flex-col");
+    expect(SOCIAL_PROFILE_META_CLASS).toContain("min-w-0");
+    expect(SOCIAL_PROFILE_META_CLASS).not.toContain("truncate");
     expect(withStats).toContain(SOCIAL_AVATAR_PROFILE_CLASS);
     expect(withStats).toContain("size-[72px]");
     expect(withStats).toContain("md:size-[88px]");
@@ -427,11 +450,20 @@ describe("Social profile public face", () => {
       withStats.indexOf("data-social-profile-face"),
     );
     expect(head).toContain("data-social-avatar");
+    expect(head).toContain("data-social-profile-meta");
+    expect(head).toContain("data-social-profile-name");
     expect(head).toContain("data-social-profile-stats");
     expect(head).not.toContain("data-social-profile-handle");
-    expect(head).not.toContain("data-social-profile-name");
     expect(head).not.toContain("data-social-profile-roles");
+    expect(head).not.toContain("data-social-profile-bio");
     expect(head).not.toContain("@ada");
+    const meta = head.slice(head.indexOf("data-social-profile-meta"));
+    expect(meta.indexOf("data-social-profile-name")).toBeLessThan(
+      meta.indexOf("data-social-profile-stats"),
+    );
+    expect(head.indexOf("data-social-avatar")).toBeLessThan(
+      head.indexOf("data-social-profile-meta"),
+    );
     expect(withStats.indexOf("data-social-profile-name")).toBeLessThan(
       withStats.indexOf("data-social-profile-stats"),
     );
